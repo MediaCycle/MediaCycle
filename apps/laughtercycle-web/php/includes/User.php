@@ -497,7 +497,7 @@ class UserLogin implements Page {
 		return '<a href="index.php?title=login&do=createuser">Create new User</a>';
 	}
 	static public function logoutLink() {
-		return '<a href="index.php?action=user&do=logout">Logout</a>';
+		return '<a href="index.php?action=user&do=logout">log out</a>';
 	}
 	static public function loginForm() {
 		global $gUser;
@@ -570,8 +570,6 @@ class UserLogin implements Page {
 		$out .= "<div id=\"logout\">\n";
 		$out .= self::logoutLink();
 		$out .= "</div>\n";
-		$out .= "<br/>\n";
-		$out .= "<br/>\n";
 
 		return $out;
 	}

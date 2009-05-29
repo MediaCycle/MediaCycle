@@ -1,0 +1,55 @@
+/* 
+    Document   : skin
+    Created on : 29-mai-2009, 16:02:30
+    Author     : Alexis Moinet
+    Description:
+        Purpose of the stylesheet follows.
+*/
+
+/* 
+   TODO customize this sample style
+   Syntax recommendation http://www.w3.org/TR/REC-CSS2/
+*/
+
+root { 
+    display: block;
+}
+
+div {
+	border: 1px solid #7A2423;
+}
+
+.clear {
+	clear: both;
+}
+
+#main {
+	margin: 0px auto;
+	width: 80%;
+	padding: 10px;
+}
+#header {
+	
+}
+
+#menu {
+	float:left;
+	width:75%;
+	background:#9c9;
+}
+#userlinks {
+	float:right;
+	width:24%;
+	background:#c9c;
+	display:inline;
+	text-align:right;
+}
+
+#userlinks ul {
+	display:inline;
+}
+#userlinks ul li {
+	display:inline;
+	padding-right:20px;
+}
+

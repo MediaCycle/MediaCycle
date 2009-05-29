@@ -41,15 +41,26 @@ require_once 'setup.php';
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <title><?php $gOut->printContent('sitename'); ?> - <?php $gOut->printContent('pagename'); ?></title>
+		<style type="text/css" media="screen,projection">/*<![CDATA[*/ @import "style/skin.css"; /*]]>*/</style>
     </head>
     <body>
-        <?php
-        $gOut->nl();
-		$gOut->printContent('userlinks');
-		
-        $gOut->printContent('pagecontent');
-		echo"\n"
-        ?>
+	<div id="main">
+		<div id="header">header</div>
+		<div id="topmenu">
+			<div id="menu">menu</div>
+			<?php $gOut->printContent('userlinks');?>
+		</div>
+		<div class="clear"></div>
+		<div id="content">
+			<div id="pagecontent"><?php	$gOut->printContent('pagecontent'); ?>
+			</div>
+			<div id="othercontent">content (flash, currently laughing, last comment, ...)
+			</div>
+		</div>
+		<div class="clear"></div>
+		<div id="footer">footer
+		</div>
+	</div>
     </body>
 </html>
 
