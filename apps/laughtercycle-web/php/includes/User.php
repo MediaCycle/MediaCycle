@@ -2,7 +2,7 @@
 /**
  * @brief User.php
  * @author Alexis Moinet
- * @date 29/05/2009
+ * @date 05/06/2009
  * @copyright (c) 2009 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -48,7 +48,7 @@
  * e.g. function names are mainly the same, the loadFromSession function follows the line
  * The question is : "are we GPL'd ?" (I guess so)
  */
-class User {
+class User extends Page {
 	private $id, $name, $password, $salt, $token, $email,
 			$avatar, $description, $language, $regdate,
 			$lastlogin,$admin;
@@ -228,10 +228,10 @@ class User {
 	}
 
 	protected function setCookie( $name, $val ) {
-		setcookie( $name, $val, time() - 86400 );
+		setcookie( $name, $val, time() + 86400 );
 	}
 	protected function clearCookie( $name ) {
-		setCookie( $name, '' );
+		setcookie( $name, $val, time() - 86400 );
 	}
 
 	public function loadFromSession() {
@@ -336,7 +336,7 @@ class User {
 	}
 	public function loadUserFiles() {
 		global $gDB;
-		
+		//TODO : put a limit in the SQL query
 		$query = sprintf("SELECT files.id id,files.title title FROM files");
 		$query .= sprintf(" WHERE files.uploader=%d",$this->id);
 
@@ -397,26 +397,46 @@ class User {
 		$out = "";
 		$out .= "id = " . $this->getId();
 		$out .= ", name = " . $this->getName();
+		$out .= "<br/>";
+		$out .= '<div id="myfiles">My files :';
+		$out .= '<ul>';
+		foreach ($this->files as $file) {
+			$file = new LCFile($file["id"]);
+			$out .= '<li class="li-lastlaugh">';
+			$out .= '<div class="lc-player">';
+			$out .= '<a href="index.php?title=file&id=' . $file->getId() . '">' . $file->getTitle() . '</a>';
+			$out .= LCPlayer::miniPlayer($file->getName());
+			$out .= '</div></li>';
+		}
+		$out .= '</ul></div>';
 		return $out;
 	}
 	public function getLinks() {
 		//return login/logout + userpage link
 		$link = "";
 		if ($this->isLoggedIn()) {
-			$link .= '<div id="userlinks"><ul>';
+		/*	$link .= '<div id="userlinks-logged"><ul>';
 			$link .= '<li id="userpage">';
 			$link .= '<a href="index.php?title=user">' . $this->name . '</a>';
 			$link .= '</li>';
 			$link .= '<li id="logout">';
 			$link .= UserLogin::logoutLink();
 			$link .= '</li>';
-			$link .= '</ul></div>';
+			$link .= '</ul></div>';*/
+			$link .= '<div id="userlinks-logged">';
+			$link .= '<span id="userpage">';
+			$link .= '<a href="index.php?title=user">' . $this->name . '</a>';
+			$link .= '</span>';
+			$link .= '<span id="logout">';
+			$link .= UserLogin::logoutLink();
+			$link .= '</span>';
+			$link .= '</div>';
 		} else {
-			$link .= '<div id="userlinks"><ul>';
-			$link .= '<li id="login">';
+			$link .= '<div id="userlinks-notlogged">';
+			$link .= '<span id="login">';
 			$link .= UserLogin::loginLink();
-			$link .= '</li>';
-			$link .= '</ul></div>';
+			$link .= '</span>';
+			$link .= '</div>';
 		}
 		return $link;
 	}
@@ -470,16 +490,17 @@ class User {
 	static public function isEmailValid($password) {
 		return true;
 	}
-	public function factory() {
-		global $gUser;
-		return $gUser;
-	}
+	
 	public function getPageName() {
 		return $this->name;
 	}
+	static public function factory() {
+		global $gUser;
+		return $gUser;
+	}
 }
 
-class UserLogin implements Page {
+class UserLogin extends Page {
 	//static public LOGIN = ;
 	const CREATE = 0;
 	const LOGIN = 1;
@@ -497,7 +518,7 @@ class UserLogin implements Page {
 		return '<a href="index.php?title=login&do=createuser">Create new User</a>';
 	}
 	static public function logoutLink() {
-		return '<a href="index.php?action=user&do=logout">log out</a>';
+		return '<a href="index.php?action=user&do=logout">log&nbsp;out</a>';
 	}
 	static public function loginForm() {
 		global $gUser;

@@ -2,7 +2,7 @@
 /**
  * @brief Action.php
  * @author Alexis Moinet
- * @date 29/05/2009
+ * @date 05/06/2009
  * @copyright (c) 2009 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -124,10 +124,43 @@ class FileAction extends Action {
 	static public function parse() {
 		global $gOut, $gUser;
 
-		if (isset($_GET["do"])) {
+		if (isset($_GET["do"])) {			
 			$gOut->nl("do");
 			$do = $_GET["do"];
 			switch ($do) {
+				case 'new':
+					$recording = "live";//live recording vs. file upload
+					$type = "audio"; // $_POST["type"];//audio/video (audio only for now)
+					$title = $_POST["title"];
+					$path = $_POST["path"];//UUID of the file + extension ?
+					LCFile::createNewFile($title,$path,$type,$recording);
+					break;
+				case 'upload':
+					//TODO non-logged in user can upload but in a tmp folder
+					if ($gUser->isLoggedIn()) {
+						$recording = "upload";//live recording vs. file upload
+						$type = "audio"; // $_POST["type"];//audio/video (audio only for now)
+						$title = $_POST["title"];
+						$path = UploadFile::getUploadedFile();
+						if (!$path) {
+							$gOut->setContent('error',true);
+							$gOut->setContent('errormsg',"error moving file");
+							//header("Status: 200");
+							//header("Location: ./index.php?title=upload");
+						} else {
+							$file = LCFile::createNewFile($title,$path,$type,$recording);
+							if ($file) {
+								header("Status: 200");
+								header("Location: ./index.php?title=file&id=" . $file->getId());
+							}
+						}
+					} else {
+						$gOut->setContent('error',true);
+						$gOut->setContent('errormsg',"you must be logged in to upload");
+					}
+					break;
+				case 'delete':
+					break;
 				default:
 			}
 		}
@@ -145,9 +178,9 @@ class PageAction extends Action {
 		if (isset($_GET["title"])) {
 			$gOut->nl("title");
 			$title = $_GET["title"];
-			Output::loadPage($title);
+			$gOut->loadPage($title);
 		} else {
-			Output::loadPage('home');
+			$gOut->loadPage($gHomePage);
 		}
 	}
 }

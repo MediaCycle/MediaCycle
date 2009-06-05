@@ -1,8 +1,8 @@
 <?php
 /**
- * @brief LCRecord.php
+ * @brief LCRecorder.php
  * @author Alexis Moinet
- * @date 29/05/2009
+ * @date 05/06/2009
  * @copyright (c) 2009 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -41,12 +41,17 @@
  * Description of LCRecord
  *
   */
-class LCRecord {
+class LCRecorder {
     //put your code here
+	const WIDTH = 702;
+	const HEIGHT = 569;
 	private $id, $width, $height;
 
-	function  __construct() {
-		$this->id = sha1(uniqid(mt_rand(), true));
+	function  __construct($width = 0, $height = 0) {
+		$this->id = gfGetUUID();//no check, makes the hypothesis that it *is* unique
+
+		$this->width = ($width) ? intval($width) : self::WIDTH;
+		$this->height = ($height) ? intval($height) : self::HEIGHT;
 	}
 
 	function getId() {
@@ -60,14 +65,41 @@ class LCRecord {
 	function toHtml() {
 		$out = "";
 		$out .= '<object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000"' . "\n";
-		$out .=	'	id="LaughterCycle" width="702" height="569"' . "\n";
+		$out .=	'	id="LaughterCycle" width="' . $this->width . '" height="' . $this->height . '"' . "\n";
 		$out .=	'	codebase="http://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab">' . "\n";
 		$out .=	'	<param name="movie" value="LaughterCycle.swf?input=' . $this->id . '.flv" >' . "\n";
 		$out .=	'	<param name="quality" value="high" />' . "\n";
 		$out .=	'	<param name="bgcolor" value="#869ca7" />' . "\n";
 		$out .=	'	<param name="allowScriptAccess" value="sameDomain" />' . "\n";
 		$out .=	'	<embed src="LaughterCycle.swf?input=' . $this->id . '.flv" quality="high" bgcolor="#869ca7"' . "\n";
-		$out .=	'		width="702" height="569" name="LaughterCycle" align="middle"' . "\n";
+		$out .=	'		width="' . $this->width . '" height="' . $this->height . '" name="LaughterCycle" align="middle"' . "\n";
+		$out .=	'		play="true"' . "\n";
+		$out .=	'		loop="false"' . "\n";
+		$out .=	'		quality="high"' . "\n";
+		$out .=	'		allowScriptAccess="sameDomain"' . "\n";
+		$out .=	'		type="application/x-shockwave-flash"' . "\n";
+		$out .=	'		pluginspage="http://www.adobe.com/go/getflashplayer">' . "\n";
+		$out .=	'</embed>' . "\n";
+	    $out .=	'</object>' . "\n";
+
+		return $out;
+	}
+
+	static public function Recorder($width=0, $height=0) {
+		$id = gfGetUUID();
+		$width = ($width) ? intval($width) : self::WIDTH;
+		$height = ($height) ? intval($height) : self::HEIGHT;
+
+		$out = "";
+		$out .= '<object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000"' . "\n";
+		$out .=	'	id="LaughterCycle" width="' . $width . '" height="' . $height . '"' . "\n";
+		$out .=	'	codebase="http://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab">' . "\n";
+		$out .=	'	<param name="movie" value="LaughterCycle.swf?input=' . $id . '.flv" >' . "\n";
+		$out .=	'	<param name="quality" value="high" />' . "\n";
+		$out .=	'	<param name="bgcolor" value="#869ca7" />' . "\n";
+		$out .=	'	<param name="allowScriptAccess" value="sameDomain" />' . "\n";
+		$out .=	'	<embed src="LaughterCycle.swf?input=' . $id . '.flv" quality="high" bgcolor="#869ca7"' . "\n";
+		$out .=	'		width="' . $width . '" height="' . $height . '" name="LaughterCycle" align="middle"' . "\n";
 		$out .=	'		play="true"' . "\n";
 		$out .=	'		loop="false"' . "\n";
 		$out .=	'		quality="high"' . "\n";

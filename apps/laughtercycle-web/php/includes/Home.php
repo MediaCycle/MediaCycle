@@ -1,6 +1,6 @@
 <?php
 /**
- * @brief Page.php
+ * @brief Home.php
  * @author Alexis Moinet
  * @date 05/06/2009
  * @copyright (c) 2009 – UMONS - Numediart
@@ -38,24 +38,25 @@
  */
 
 /**
- * Description of Page
+ * Description of Home
  *
   */
-interface PageInterface {
-	public function getPageName();
-	public function toHtml();
-    static public function factory();
-}
-
-class Page {
+class Home extends Page{
 	public function getPageName() {
-		return "";
+		return "Home";
 	}
 	public function toHtml() {
-		return "";
+		$out = "";
+		$out .= "<h1>Welcome</h1><hr><br/>\n";
+		$out .= Output::lipsum();
+
+		return $out;
 	}
-    static public function factory() {
-		return new Page();
+	public static function factory() {
+		return new Home();
+	}
+	public static function getPageLink() {
+		return '<a href="index.php?title=home">Home</a>';
 	}
 }
 ?>

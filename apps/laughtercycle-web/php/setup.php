@@ -2,7 +2,7 @@
 /**
  * @brief setup.php
  * @author Alexis Moinet
- * @date 29/05/2009
+ * @date 05/06/2009
  * @copyright (c) 2009 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -50,7 +50,10 @@ $gDB->connect();
 
 $gOut = new Output();
 $gOut->setContent('sitename', $gConfig["sitename"]);
-$gOut->setContent('pagename', "Home");
+//$gOut->setContent('pagename', "Home");
+
+$gOut->setContent('error', false);
+$gOut->setContent('errormsg', "");
 
 $gUser = new User();
 

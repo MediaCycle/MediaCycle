@@ -2,7 +2,7 @@
 /**
  * @brief index.php
  * @author Alexis Moinet
- * @date 29/05/2009
+ * @date 05/06/2009
  * @copyright (c) 2009 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -46,19 +46,31 @@ require_once 'setup.php';
     <body>
 	<div id="main">
 		<div id="header">header</div>
+		<div class="clear"></div>
 		<div id="topmenu">
-			<div id="menu">menu</div>
-			<?php $gOut->printContent('userlinks');?>
+			<div id="menu"><?php $gOut->printContent('menu');?></div>
+			<div id="userlinks"><?php $gOut->printContent('userlinks');?></div>
 		</div>
 		<div class="clear"></div>
+		<?php if ($gOut->getContent('error')) { ?>
+		<div id="errormsg">
+			<?php $gOut->printContent('errormsg'); ?>
+		</div>
+		<div class="clear"></div>
+		<?php } ?>
 		<div id="content">
+			<div id="recorder"><?php $gOut->printContent('recorder');?></div>
 			<div id="pagecontent"><?php	$gOut->printContent('pagecontent'); ?>
 			</div>
-			<div id="othercontent">content (flash, currently laughing, last comment, ...)
+			<div id="sidecontent">
+			<?php $gOut->printContent('sidecontent');?>
+			<?php $gOut->printContent('last-laugh');?>
+			<?php $gOut->printContent('last-comments');?>
 			</div>
 		</div>
 		<div class="clear"></div>
 		<div id="footer">footer
+		<?php echo $gOut->toHtml(); ?>
 		</div>
 	</div>
     </body>
