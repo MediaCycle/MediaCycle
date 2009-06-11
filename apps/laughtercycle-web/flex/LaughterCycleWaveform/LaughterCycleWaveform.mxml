@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" backgroundColor="#F3C908" height="123" creationComplete="loadXML('http://localhost:8888/LaughterCycle/a.xml');" width="443"> 
+
+<mx:Script>
+	<![CDATA[
+			
+			import mx.rpc.events.ResultEvent;
+            import mx.rpc.events.FaultEvent;
+            import mx.controls.Alert;
+            import mx.utils.*;
+            import mx.collections.*;
+            import flash.display.Sprite;
+			import flash.events.*;
+			import flash.media.Microphone;
+			import flash.media.Video;
+			import flash.net.NetConnection;
+			import flash.net.NetStream;
+
+            
+            //import NetConnectionExampleWaveform;
+            import CustomClient;
+
+            public var alert:Alert;
+            public var points:Array;
+            public var nom:String;
+            public var wave:String;
+            public var waveArray:Array;
+            public var connection:NetConnection = new NetConnection();
+			public var stream:NetStream;
+			public var video:Video = new Video();
+			public var inStream:NetStream;
+			public var microphone:Microphone = Microphone.getMicrophone(-1);
+			public var outStream:NetStream;
+			public var playTime:Number;
+			public var totalSize:Number;
+			public var currentPosition:Number;
+			public var infoSound:CustomClient;
+			public var soundFile:String;
+			public var input:String;
+			
+            //public var netX:NetConnectionExampleWaveform = new NetConnectionExampleWaveform();
+            
+            /* Lecture */
+            
+            private function netConnection():void {
+			connection.addEventListener(NetStatusEvent.NET_STATUS, netStatusHandler);
+			connection.connect("rtmp://localhost/oflaDemo");
+			connection.client = {'onBWDone':function(event){trace('onBWDone');}};
+			
+			}
+	
+			private function netStatusHandler(event:NetStatusEvent):void {
+				switch (event.info.code) {
+					case "NetConnection.Connect.Success" :
+						connectStream();
+						break;
+					case "NetStream.Play.StreamNotFound" :
+						trace("Stream not found");
+						break;
+				}
+			}
+			
+			private function audioPlay(soundFile:String):void{
+				
+				inStream  = new NetStream(connection);	
+				infoSound = new CustomClient();
+				
+				inStream.client = infoSound;
+				inStream.addEventListener(NetStatusEvent.NET_STATUS,endAudioPlay);
+				addEventListener(Event.ENTER_FRAME,updateSlider);
+				inStream.play(soundFile);
+						
+				waveformSlider.value = 0;	
+				
+			}
+			
+			private function endAudioPlay(event:NetStatusEvent):void{
+				if(event.info.code == "NetStream.Play.Stop"){
+					waveformSlider.value = totalSize;
+					inStream.close();
+				    removeEventListener(Event.ENTER_FRAME,updateSlider);
+				}
+			}
+			
+			private function updateSlider(event:Event):void{
+				var flag:Number = 0;
+				var interval:Number = 0;
+				totalSize = infoSound.duration;
+				playTime = inStream.time;
+				//waveformText.text = totalSize.toString();
+				//waveformTextBis.text = playTime.toString();
+				waveformSlider.visible = true;
+				waveformSlider.maximum = totalSize;
+				waveformSlider.value = playTime;
+			}
+	
+			private function connectStream():void {
+				var stream:NetStream=new NetStream(connection);
+	
+				//stream.client = new CustomClient();
+				this.video.attachNetStream(stream);
+				//stream.play(videoURL);
+				//addChild(video);
+			}
+			
+			private function onBWDone():void {
+				trace("yes");
+			}
+		
+			/* Récupération des données XML */
+            
+            private function loadXML(src:String):void{
+            	xmlServer.url = src;
+            	xmlServer.send();
+            	netConnection();
+            	
+            }
+            
+            private function serv_result(evt:ResultEvent):void{
+            	var resultObj:Object = evt.result;
+            	var loop:Number = 0;
+				var tempArray:Number = 0;
+			
+            	nom = resultObj.waveform.name;
+            	wave = resultObj.waveform.data.points;
+            	wave = wave.toString();
+				waveArray = wave.split("\t",2000000);
+			
+            	for (loop = 0; loop<waveArray.length; loop++) 
+				{
+	        		tempArray = waveArray[loop].replace(",",".");
+	        		waveArray[loop] = tempArray.valueOf();
+	        	}
+	        	
+	   			//textAreaXML.text = wave;
+	   			drawWaveform();
+	       	}
+            
+            private function serv_fault(evt:FaultEvent):void{
+            	
+            }
+            
+            /* Tracé de la waveform */
+            
+            public function findMaxArray(tab:Array):Number{
+            	
+            	var maxArray:Number = 0;
+            	for(var loop:Number=0;loop<tab.length;loop++){
+            		if(tab[loop]>maxArray){
+            			maxArray = tab[loop];
+            		}
+                }
+                return maxArray;
+            }
+            
+            public function findMinArray(tab:Array):Number{
+            	
+            	var minArray:Number = 0;
+            	for(var loop:Number=0;loop<tab.length;loop++){
+            		if(tab[loop]<minArray){
+            			minArray = tab[loop];
+            		}
+                }
+                return minArray;
+            }
+            
+            private function drawWaveform():void{
+            	
+            	var boxHeight:Number = curveTrace.height;
+            	var boxWidth:Number = curveTrace.width;
+            	var maxWaveArray:Number = 0;
+            	var minWaveArray:Number = 0;
+            	var loop:Number = 0;
+            	
+            	maxWaveArray = findMaxArray(waveArray);
+                minWaveArray = findMinArray(waveArray);
+                
+                for(loop=0;loop<waveArray.length;loop++){
+            		waveArray[loop] = waveArray[loop]-minWaveArray; 
+                }
+                
+                maxWaveArray = findMaxArray(waveArray);
+                
+                for(loop=0;loop<waveArray.length;loop++){
+            		waveArray[loop] = waveArray[loop]/maxWaveArray; 
+                }
+                maxWaveArray = findMaxArray(waveArray);
+                
+            	curveTrace.graphics.moveTo(0,0.5*boxHeight);
+            	curveTrace.graphics.lineStyle(3);
+                curveTrace.graphics.lineTo(boxWidth,0.5*boxHeight);
+                
+                for(loop=0;loop<waveArray.length;loop++){
+                	curveTrace.graphics.moveTo(loop*boxWidth/(waveArray.length),0.5*boxHeight);
+                	curveTrace.graphics.lineStyle(2,0xFF0000);
+                	curveTrace.graphics.lineTo(loop*boxWidth/(waveArray.length),waveArray[loop]*boxHeight);
+                }
+            }
+            
+            private function playSoundFile(soundFile:String):void{
+        		//input=this.root.input;
+        		//testText.text=input;
+        		input = this.root.loaderInfo.parameters.input;
+        		audioPlay(soundFile);
+        	}
+        	
+        	private function pauseSoundFile():void{
+        		inStream.pause();
+        	}
+        	
+        ]]>
+</mx:Script>
+
+<mx:HTTPService id="xmlServer" resultFormat="object" result="serv_result(event);" fault="serv_fault(event);"/>
+<mx:VBox id="curveTrace" x="172" y="8" height="79" width="265" borderThickness="1000" borderColor="#060606"/>
+<mx:Button x="20" y="28" label="Play" width="128" id="playSoundFileButton" click="playSoundFile(input);"/>
+<mx:Button x="20" y="55" label="Pause" width="128" id="pauseSoundFileButton" click="pauseSoundFile();"/>
+<mx:HSlider x="173" y="97" width="265" id="waveformSlider" visible="true"/>
+</mx:Application>
