@@ -2,7 +2,7 @@
 /**
  * @brief Output.php
  * @author Alexis Moinet
- * @date 05/06/2009
+ * @date 11/06/2009
  * @copyright (c) 2009 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -97,7 +97,7 @@ class Output {
 		
 		$this->setContent('sidecontent', self::lipsum());
 		$this->setContent('last-laugh',LCFile::displayLastNFilesPlayed($gConfig["nlastfilesplayed"]));
-		$this->setContent('last-comments',"<div>Last comments</div>");
+		$this->setContent('last-comments', Comments::getNLastComments());
 	}
 	public function setMenu() {
 		$this->setContent('menu', Home::getPageLink() . " " . UploadFile::getPageLink() . " " .  "Forum");

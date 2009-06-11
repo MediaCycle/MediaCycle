@@ -2,7 +2,7 @@
 /**
  * @brief GlobalFunctions.php
  * @author Alexis Moinet
- * @date 05/06/2009
+ * @date 11/06/2009
  * @copyright (c) 2009 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -36,6 +36,12 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
+
+function gfGetTimeStamp() {
+	$date = new DateTime();
+	return $date->format("U");
+}
+
 function gfGetUUID() {
 		return sha1(uniqid(mt_rand(), true));
 }

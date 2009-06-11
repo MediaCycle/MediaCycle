@@ -2,7 +2,7 @@
 /**
  * @brief config.php
  * @author Alexis Moinet
- * @date 05/06/2009
+ * @date 11/06/2009
  * @copyright (c) 2009 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -48,6 +48,7 @@ global $gConfig;
 $gConfig["sitename"] = "LaughterCycle";
 $gConfig["minpasswordlength"] = 6;
 $gConfig["nlastfilesplayed"] = 7;
+$gConfig["nlastcomments"] = 5;
 $gConfig["filepath"] = "/var/www/LCimages/";
 $gConfig["fileextensions"] = array("mp3","flv","txt");
 

@@ -2,7 +2,7 @@
 /**
  * @brief File.php
  * @author Alexis Moinet
- * @date 05/06/2009
+ * @date 11/06/2009
  * @copyright (c) 2009 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -99,31 +99,6 @@ class LCFile extends page {
 		}
 	}
 
-	public function getComments() {
-		if ($this->id > 0) {
-			global $gDB;
-
-			$query = "SELECT * FROM comments, users";
-			$query .= sprintf(" WHERE file_id=%d AND users.id=comments.user_id",$this->id);
-			$query .= " ORDER BY time DESC";
-			
-			$result = $gDB->query($query);
-
-			$out .= '<div id="filecomments">Comments :';
-			$out .= '<ul>';
-			while ($gDB->next_record()) {
-				$out .= '<li class="li-filecomment">';
-				$out .= '<a href="index.php?title=user&id=' . $gDB->f("user_id") . '">' . $gDB->f("name") . '</a>';
-				$out .= '<div class=filenote>'.$gDB->f("note").'</div>';
-				$out .= '<div class=filecomment>'.$gDB->f("comment").'</div>';
-				$out .= '</li>';
-			}
-			$out .= '</ul></div>';
-			return $out;
-		}
-		return "";
-	}
-
 	public function getTags() {
 		if ($this->id > 0) {
 			global $gDB;
@@ -190,22 +165,6 @@ class LCFile extends page {
 
 		return true;
 	}
-	public function isCommentedBy($userId) {
-		$userId = intval($userId);
-		if ($this->id > 0 && $userId > 0) {
-			global $gDB;
-
-			$query = "SELECT * FROM comments";
-			$query .= sprintf(" WHERE file_id=%d AND user_id=%d",$this->id,$userId);
-
-			$result = $gDB->query($query);
-
-			if ($gDB->next_record()) {
-				return true;
-			}
-		}
-		return false;
-	}
 
 	public function getPageName() {
 		return "File" . $this->title;
@@ -221,10 +180,10 @@ class LCFile extends page {
 			$out .= $this->id . " : " . $this->title;
 			
 			$out .= LCPlayer::miniPlayer($this->getName());			
-			$out .= $this->getComments();
-			if (!$this->isCommentedBy($gUser->getId())) {
+			$out .= Comments::getFileComments($this->getId());
+			if (!Comments::exists($this->getId(), $gUser->getId())) {
 				//TODO comment/note form
-				$out .= "<div>add comment form here</div>";
+				$out .= Comments::form($this->getId());
 			}
 		} else {
 			$out .= "File not found";
@@ -241,6 +200,30 @@ class LCFile extends page {
 		return $file;
 	}
 
+	static public function exists($fileId) {
+		$fileId = intval($fileId);
+		
+		if (0 < $fileId) {
+			global $gDB;
+
+			$query = "SELECT * FROM files";
+			$query .= sprintf(" WHERE id=%d",intval($fileId));
+			$result = $gDB->query($query);
+
+			if ($gDB->nf() > 0) {// $gDB->nf() == 1 ?
+				return true;
+			} else {
+				return false;
+			}
+		} else {
+			return false;
+		}
+	}
+	static public function redirect($fileId) {
+		header("Status: 200");
+		header("Location: ./index.php?title=file&id=" . $fileId);
+		exit();
+	}
 	/*
 	 * geotag and quality blob should also be arg for this function
 	 */
@@ -257,8 +240,7 @@ class LCFile extends page {
 		$query .= " files ";
 		$query .= "(`title`,`path`,`type`,`recording`,`uploader`,`upload_date`)";
 		$query .= " VALUES ";
-		$query .= "('" . $title . "','" . $path . "','" . $type . "','" . $recording . "'," . $gUser->getId() . ",'" . Date::getDate() . "')";
-
+		$query .= "('" . $title . "','" . $path . "','" . $type . "','" . $recording . "'," . $gUser->getId() . "," . gfGetTimeStamp() . ")";
 		
 		$gDB->query($query);
 

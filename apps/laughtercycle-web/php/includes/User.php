@@ -2,7 +2,7 @@
 /**
  * @brief User.php
  * @author Alexis Moinet
- * @date 05/06/2009
+ * @date 11/06/2009
  * @copyright (c) 2009 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -138,7 +138,7 @@ class User extends Page {
 		$query .= " users ";
 		$query .= "(`name`,`password`,`salt`,`token`,`email`,`registration_date`)";
 		$query .= " VALUES ";
-		$query .= "('" . $name . "','" . $password . "','" . $salt . "','" . $token . "','" . $email . "','" . Date::getDate() . "')";
+		$query .= "('" . $name . "','" . $password . "','" . $salt . "','" . $token . "','" . $email . "'," . gfGetTimeStamp() . ")";
 		//get info (id, name, password, salt, token, ...)
 
 		$user = new User;
@@ -182,11 +182,11 @@ class User extends Page {
 		global $gDB;
 
 		if ($type !== UserLogin::LOGOUT) {
-			$query = sprintf("UPDATE users SET last_login=%s WHERE id=%d", Date::getDate(), $this->id);
+			$query = sprintf("UPDATE users SET last_login=%d WHERE id=%d", gfGetTimeStamp(), $this->id);
 			$gDB->query($query);
 		}
 
-		$query = sprintf("INSERT INTO login (`user_id`,`type`,`time`) VALUES (%d, %d, '%s')", $this->id, $type, Date::getDate());
+		$query = sprintf("INSERT INTO login (`user_id`,`type`,`time`) VALUES (%d, %d, %d)", $this->id, $type, gfGetTimeStamp());
 		$gDB->query($query);
 	}
 	public function setSessions() {
@@ -409,28 +409,29 @@ class User extends Page {
 			$out .= '</div></li>';
 		}
 		$out .= '</ul></div>';
+		$out .= Comments::getUserComments($this->getId());
 		return $out;
 	}
 	public function getLinks() {
 		//return login/logout + userpage link
 		$link = "";
 		if ($this->isLoggedIn()) {
-		/*	$link .= '<div id="userlinks-logged"><ul>';
+			$link .= '<div id="userlinks-logged"><ul>';
 			$link .= '<li id="userpage">';
 			$link .= '<a href="index.php?title=user">' . $this->name . '</a>';
 			$link .= '</li>';
 			$link .= '<li id="logout">';
 			$link .= UserLogin::logoutLink();
 			$link .= '</li>';
-			$link .= '</ul></div>';*/
-			$link .= '<div id="userlinks-logged">';
+			$link .= '</ul></div>';
+			/*$link .= '<div id="userlinks-logged">';
 			$link .= '<span id="userpage">';
 			$link .= '<a href="index.php?title=user">' . $this->name . '</a>';
 			$link .= '</span>';
 			$link .= '<span id="logout">';
 			$link .= UserLogin::logoutLink();
 			$link .= '</span>';
-			$link .= '</div>';
+			$link .= '</div>';*/
 		} else {
 			$link .= '<div id="userlinks-notlogged">';
 			$link .= '<span id="login">';

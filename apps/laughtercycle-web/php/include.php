@@ -2,7 +2,7 @@
 /**
  * @brief include.php
  * @author Alexis Moinet
- * @date 05/06/2009
+ * @date 11/06/2009
  * @copyright (c) 2009 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -38,10 +38,10 @@
  */
 
 require_once 'includes/GlobalFunctions.php';
+require_once 'includes/Comments.php';
 require_once 'includes/Page.php';
 require_once 'includes/Home.php';
 require_once 'includes/DatabaseMysql.php';
-require_once 'includes/Date.php';
 require_once 'includes/Action.php';
 require_once 'includes/LCRecorder.php';
 require_once 'includes/LCPlayer.php';

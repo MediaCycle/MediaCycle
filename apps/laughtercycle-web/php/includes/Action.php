@@ -2,7 +2,7 @@
 /**
  * @brief Action.php
  * @author Alexis Moinet
- * @date 05/06/2009
+ * @date 11/06/2009
  * @copyright (c) 2009 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -150,14 +150,20 @@ class FileAction extends Action {
 						} else {
 							$file = LCFile::createNewFile($title,$path,$type,$recording);
 							if ($file) {
-								header("Status: 200");
-								header("Location: ./index.php?title=file&id=" . $file->getId());
+								LCFile::redirect($file->getId());
 							}
 						}
 					} else {
 						$gOut->setContent('error',true);
 						$gOut->setContent('errormsg',"you must be logged in to upload");
 					}
+					break;
+				case 'comment':
+					$fileId = $_POST["fileId"];
+					$comment = $_POST["commenttext"];
+					$note = $_POST["note"];
+					Comments::addComment($fileId, $comment, $note);
+					LCFile::redirect($fileId);
 					break;
 				case 'delete':
 					break;
