@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+ <mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" alpha="1" height="66" width="300" backgroundAlpha="1" borderColor="#EB560D">
+ 	 
+<mx:Script>
+	<![CDATA[
+		
+		import NetConnectionExample;
+		import mx.collections.*;
+		import mx.charts.*;
+		import mx.charts.series.*;
+		import mx.charts.renderers.*;
+		import mx.charts.events.*;
+		import flash.net.*;
+		
+		public var input:String;//= stage.loaderInfo.parameters("input");
+		
+		public var netX:NetConnectionExample = new NetConnectionExample();
+			 
+		        
+        public function testConnexion():void{
+        	
+        	//netX = new NetConnectionExample();
+        	trace("connexion created");
+        }
+        
+        public function testRecordAudio():void{
+        	
+        	increaseSizePanelRecorder();
+        	//netX.audioRecord(soundFileRecord);
+        	input = this.root.loaderInfo.parameters.input;
+        	//input=this.root.input;
+        	testText.text=input;
+        	
+        	netX.audioRecord(input);
+        	
+        }
+        
+        public function testStopRecordAudio():void{
+        	netX.stopAudioRecord();
+        	decreaseSizePanelRecorder();
+        	
+        }
+        
+        public function testAudioPlay():void{
+        	netX.audioPlay(input);
+        	        
+       	}
+       	
+       	public function testValidation():void{
+       		
+       		var loader:URLLoader = new URLLoader();
+       		var request:URLRequest = new URLRequest("http://192.168.2.15/LaughterCycle/test.php");
+       		request.method = URLRequestMethod.POST;
+       		
+       		var variables:URLVariables = new URLVariables();
+       		variables.action = "savefile";
+       		variables.filename = input.substr(0,(input.length)-4);
+       		request.data = variables;
+       		
+       		loader.addEventListener(Event.COMPLETE,activationComplete);
+       		
+       		try{
+       			loader.load(request);
+       		}catch(error:Error){
+       			trace("HTTP Error");
+       		}
+       		
+       	}
+       	
+       	public function increaseSizePanelRecorder():void{
+       		
+       		var loader:URLLoader = new URLLoader();
+       		var request:URLRequest = new URLRequest("http://localhost:8888/LaughterCycle/test.php");
+       		request.method = URLRequestMethod.POST;
+       		
+       		var variables:URLVariables = new URLVariables();
+       		variables.height = 200;
+       		variables.width = 400;
+       		request.data = variables;
+       		
+       		loader.addEventListener(Event.COMPLETE,activationComplete);
+       		
+       		try{
+       			loader.load(request);
+       		}catch(error:Error){
+       			trace("HTTP Error");
+       		}
+       		
+       	}
+       	
+       	public function decreaseSizePanelRecorder():void{
+       		
+       		var loader:URLLoader = new URLLoader();
+       		var request:URLRequest = new URLRequest("http://localhost:8888/LaughterCycle/test.php");
+       		request.method = URLRequestMethod.POST;
+       		
+       		var variables:URLVariables = new URLVariables();
+       		variables.height = 200;
+       		variables.width = 400;
+       		request.data = variables;
+       		
+       		loader.addEventListener(Event.COMPLETE,activationComplete);
+       		
+       		try{
+       			loader.load(request);
+       		}catch(error:Error){
+       			trace("HTTP Error");
+       		}
+       		
+       	}
+       	
+       	public function activationComplete(e:Event):void{
+       		trace("ok");	
+       	}
+       	   	
+        ]]>
+</mx:Script>
+	<mx:Button x="140.5" y="2" id="playSound" click="testAudioPlay();" color="#EBF907" width="40" height="40" icon="@Embed(source='GnomePlayButtonResized.png')" label="Replay Sound"/>
+	<mx:Button x="18" y="2" id="RecordSound" click="testRecordAudio();" color="#FF0000" width="40" height="40" icon="@Embed(source='GnomeRecordButtonResized.png')" label="Record Sound"/>
+	<mx:Button x="67" y="2" id="StopRecordSound" click="testStopRecordAudio();" color="#140C66" width="40" height="40" icon="@Embed(source='GnomeStopButtonResized.png')" label="Stop Recording Sound"/>
+	<mx:Text x="31" y="16" id = "testText" text="Texte" width="118" height="38" visible="false"/>
+	<mx:Button x="218" y="1" id="validationButton" click="testValidation();" width="40" height="40" color="#F10ED9" icon="@Embed(source='GnomeMailButtonResized.png')" label="Send Sound to LaughterCycle"/>
+	<mx:VRule x="121" y="4.5" height="60" width="6"/>
+	<mx:VRule x="198" y="4" height="60"/>
+	<mx:Label x="16.5" y="44" text="Record"/>
+	<mx:Label x="72" y="44" text="Stop"/>
+	<mx:Label x="139" y="44" text="Replay"/>
+	<mx:Label x="213" y="44" text="Validate"/>
+
+</mx:Application>
