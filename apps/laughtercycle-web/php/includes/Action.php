@@ -2,7 +2,7 @@
 /**
  * @brief Action.php
  * @author Alexis Moinet
- * @date 11/06/2009
+ * @date 18/06/2009
  * @copyright (c) 2009 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -134,6 +134,7 @@ class FileAction extends Action {
 					$title = $_POST["title"];
 					$path = $_POST["path"];//UUID of the file + extension ?
 					LCFile::createNewFile($title,$path,$type,$recording);
+					LCFile::convertFlvToWav($path);
 					break;
 				case 'upload':
 					//TODO non-logged in user can upload but in a tmp folder
@@ -164,6 +165,10 @@ class FileAction extends Action {
 					$note = $_POST["note"];
 					Comments::addComment($fileId, $comment, $note);
 					LCFile::redirect($fileId);
+					break;
+				case 'play':
+					$path = $_POST["path"];
+					LCFile::logFilePlayed($path);
 					break;
 				case 'delete':
 					break;

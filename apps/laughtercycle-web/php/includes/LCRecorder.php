@@ -2,7 +2,7 @@
 /**
  * @brief LCRecorder.php
  * @author Alexis Moinet
- * @date 05/06/2009
+ * @date 18/06/2009
  * @copyright (c) 2009 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -67,11 +67,11 @@ class LCRecorder {
 		$out .= '<object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000"' . "\n";
 		$out .=	'	id="LaughterCycle" width="' . $this->width . '" height="' . $this->height . '"' . "\n";
 		$out .=	'	codebase="http://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab">' . "\n";
-		$out .=	'	<param name="movie" value="LaughterCycle.swf?input=' . $this->id . '.flv" >' . "\n";
+		$out .=	'	<param name="movie" value="LaughterCycleRecorderMini.swf?input=' . $this->id . '.flv" >' . "\n";
 		$out .=	'	<param name="quality" value="high" />' . "\n";
 		$out .=	'	<param name="bgcolor" value="#869ca7" />' . "\n";
 		$out .=	'	<param name="allowScriptAccess" value="sameDomain" />' . "\n";
-		$out .=	'	<embed src="LaughterCycle.swf?input=' . $this->id . '.flv" quality="high" bgcolor="#869ca7"' . "\n";
+		$out .=	'	<embed src="LaughterCycleRecorderMini.swf?input=' . $this->id . '.flv" quality="high" bgcolor="#869ca7"' . "\n";
 		$out .=	'		width="' . $this->width . '" height="' . $this->height . '" name="LaughterCycle" align="middle"' . "\n";
 		$out .=	'		play="true"' . "\n";
 		$out .=	'		loop="false"' . "\n";
@@ -94,11 +94,11 @@ class LCRecorder {
 		$out .= '<object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000"' . "\n";
 		$out .=	'	id="LaughterCycle" width="' . $width . '" height="' . $height . '"' . "\n";
 		$out .=	'	codebase="http://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab">' . "\n";
-		$out .=	'	<param name="movie" value="LaughterCycle.swf?input=' . $id . '.flv" >' . "\n";
+		$out .=	'	<param name="movie" value="LaughterCycleRecorderMini.swf?input=' . $id . '.flv" >' . "\n";
 		$out .=	'	<param name="quality" value="high" />' . "\n";
 		$out .=	'	<param name="bgcolor" value="#869ca7" />' . "\n";
 		$out .=	'	<param name="allowScriptAccess" value="sameDomain" />' . "\n";
-		$out .=	'	<embed src="LaughterCycle.swf?input=' . $id . '.flv" quality="high" bgcolor="#869ca7"' . "\n";
+		$out .=	'	<embed src="LaughterCycleRecorderMini.swf?input=' . $id . '.flv" quality="high" bgcolor="#869ca7"' . "\n";
 		$out .=	'		width="' . $width . '" height="' . $height . '" name="LaughterCycle" align="middle"' . "\n";
 		$out .=	'		play="true"' . "\n";
 		$out .=	'		loop="false"' . "\n";

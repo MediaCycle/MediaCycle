@@ -2,7 +2,7 @@
 /**
  * @brief File.php
  * @author Alexis Moinet
- * @date 11/06/2009
+ * @date 18/06/2009
  * @copyright (c) 2009 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -312,6 +312,48 @@ class LCFile extends page {
 		}
 
 		return $nfiles;
+	}
+
+	static public function logFilePlayed($uuid) {
+		global $gUser, $gDB;
+		//$gUser = new User();
+		//$gDB = new DatabaseMySql();
+
+		$uuid = $gDB->cleanInputString($uuid);
+
+		if (strlen($uuid) > 0) {
+			$query = "SELECT id FROM files";
+			$query .= sprintf(" WHERE path LIKE '%s'",$uuid);
+			$result = $gDB->query($query);
+
+			if ($gDB->next_record()) {
+				$file_id = $gDB->f("id");
+				$gDB->free();
+
+				$query = "INSERT INTO";
+				$query .= " history ";
+				$query .= "(`file_id`,`user_id`,`time`)";
+				$query .= " VALUES ";
+				$query .= "(" . $file_id . "," . $gUser->getId() . "," . gfGetTimeStamp() . ")";
+
+				$gDB->query($query);
+			} else {
+				return false;
+			}
+		} else {
+			return false;
+		}
+	}
+
+	static public function convertFlvToWav($path) {
+		global $gOut;
+		$ext = strrchr($strName, '.');
+		if($ext == "flv") {
+			$uuid = substr($strName, 0, -strlen($ext));
+			$command = "ffmpeg -i $path $uuid.wav";
+			$res = exec($command, &$output);
+			$gOut->add(print_r($output,true));
+		}
 	}
 }
 

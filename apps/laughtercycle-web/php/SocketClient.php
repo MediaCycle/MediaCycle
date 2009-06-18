@@ -2,7 +2,7 @@
 /**
  * @brief SocketClient.php
  * @author Alexis Moinet
- * @date 29/05/2009
+ * @date 18/06/2009
  * @copyright (c) 2009 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -44,52 +44,77 @@ $sc = new SocketClient();
  *
   */
 class SocketClient {
-	//put your code here
 	public function __construct() {
 
-		ob_implicit_flush();
+		ob_implicit_flush(true);
+
+		$maxbuflength = 2048;
+		$connexiontype = 'udp';//'tcp'
 		
 		$address = gethostbyname('localhost');
-
 		$port = 2345;
 
-		$socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
+		//$address = "192.168.1.252";
+		//$port = 12345;
+
+		if ($connexiontype == 'tcp') {
+			$socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
+		} elseif ($connexiontype == 'udp') {
+			$socket = socket_create(AF_INET, SOCK_DGRAM, 0);
+		}
+		
 		if ($socket === false) {
 			echo "socket_create() a échoué : raison :  " . socket_strerror(socket_last_error()) . "\n";
 		} else {
-			echo "OK.\n";
+			echo "socket_create() OK.\n";
 		}
 
-		echo "Essai de connexion à '$address' sur le port '$port'...";
-		$result = socket_connect($socket, $address, $port);
-		if ($socket === false) {
-			echo "socket_connect() a échoué : raison : ($result) " . socket_strerror(socket_last_error($socket)) . "\n";
-		} else {
-			echo "OK.\n";
+		if ($connexiontype == 'tcp') { echo "Essai de connexion à '$address' sur le port '$port'...";
+			$result = socket_connect($socket, $address, $port);
+			if ($socket === false) {
+				echo "socket_connect() a échoué : raison : ($result) " . socket_strerror(socket_last_error($socket)) . "\n";
+			} else {
+				echo "OK.\n";
+			}
 		}
 
-		$in = "Hello World (the classic way)";
+		$in = "Hello World (the classic way) " . rand(1,1000) . " ";
 
-		echo "Envoi de la requête HTTP HEAD...";
-		socket_write($socket, $in, strlen($in));
-		echo "OK.\n";
+		echo "<br/>Envoi de la requête ...";
+		if ($connexiontype == 'tcp') {
+			socket_write($socket, $in, strlen($in));
+		} elseif ($connexiontype == 'udp') {
+			$saddress = $address;
+			$sport = $port;
+			if(($ret = socket_sendto($socket, $in, strlen($in), 0, $saddress, $sport)) < 0) {
+				echo "Transmission failure.";
+				exit();
+			}
+			echo "<br/>socket_sendto() OK.\n";
+		}
 
-		echo "Lire la réponse : \n\n<br/>";
+		echo "<br/>Lire la réponse : \n\n<br/>";
 		//socket_set_option($socket,SOL_SOCKET, SO_RCVTIMEO, array("sec"=>1, "usec"=>100));
-		while ($out = socket_read($socket, 2048)) {
+		//socket_getsockname($socket, &$myaddr, &$myport);
+		//echo $myaddr .":". $myport . "<br/>";
+		
+		while ($out = socket_read($socket, $maxbuflength)) {
 		//do {
-			//$out = socket_read($socket, 2048);
+			//$out = socket_read($socket, $maxbuflength);
 			echo "out : " . $out . "<br/>\n";
 			echo "length : " . strlen($out) . "<br/>\n";
 
 			printf("last : %x<br/>\n", ord($out[strlen($out)-2]));
-			
+
+			if (strlen($out) < $maxbuflength) {
+				break;
+			}
 			//if ($out == false) {
 			//	echo "false <br/>\n";
 			//}
-			//$out = socket_read($socket, 2048);
+			//$out = socket_read($socket, $maxbuflength);
 			//echo $out . "\n";
-		//} while (strlen($out)==2048);
+		//} while (strlen($out)==$maxbuflength);
 		}
 
 		echo "Fermeture du socket...";

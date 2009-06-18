@@ -2,7 +2,7 @@
 /**
  * @brief Output.php
  * @author Alexis Moinet
- * @date 11/06/2009
+ * @date 18/06/2009
  * @copyright (c) 2009 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -90,7 +90,7 @@ class Output {
 		return true;
 	}
 	public function setRecorder() {
-		$this->setContent('recorder',LCRecorder::Recorder(300,70));
+		$this->setContent('recorder',LCRecorder::Recorder(500,500));
 	}
 	public function setSideContent() {
 		global $gConfig;
