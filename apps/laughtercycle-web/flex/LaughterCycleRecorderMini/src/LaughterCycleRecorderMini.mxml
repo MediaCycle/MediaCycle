@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
- <mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" alpha="1" height="66" width="300" backgroundAlpha="1" borderColor="#EB560D">
+ <mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" alpha="1" height="188" width="298" backgroundAlpha="1" borderColor="#EB560D">
  	 
 <mx:Script>
 	<![CDATA[
@@ -48,6 +48,7 @@
        	
        	public function testValidation():void{
        		
+       		
        		var loader:URLLoader = new URLLoader();
        		var request:URLRequest = new URLRequest("http://192.168.2.15/LaughterCycle/test.php");
        		request.method = URLRequestMethod.POST;
@@ -55,12 +56,15 @@
        		var variables:URLVariables = new URLVariables();
        		variables.action = "savefile";
        		variables.filename = input.substr(0,(input.length)-4);
+       		variables.title = titleInput.text;
        		request.data = variables;
+       		
        		
        		loader.addEventListener(Event.COMPLETE,activationComplete);
        		
        		try{
        			loader.load(request);
+       			validationWindow.visible = false;
        		}catch(error:Error){
        			trace("HTTP Error");
        		}
@@ -119,12 +123,19 @@
 	<mx:Button x="18" y="2" id="RecordSound" click="testRecordAudio();" color="#FF0000" width="40" height="40" icon="@Embed(source='GnomeRecordButtonResized.png')" label="Record Sound"/>
 	<mx:Button x="67" y="2" id="StopRecordSound" click="testStopRecordAudio();" color="#140C66" width="40" height="40" icon="@Embed(source='GnomeStopButtonResized.png')" label="Stop Recording Sound"/>
 	<mx:Text x="31" y="16" id = "testText" text="Texte" width="118" height="38" visible="false"/>
-	<mx:Button x="218" y="1" id="validationButton" click="testValidation();" width="40" height="40" color="#F10ED9" icon="@Embed(source='GnomeMailButtonResized.png')" label="Send Sound to LaughterCycle"/>
+	<mx:Button x="218" y="1" id="validationButton" click="validationWindow.visible=true" width="40" height="40" color="#F10ED9" icon="@Embed(source='GnomeMailButtonResized.png')" label="Send Sound to LaughterCycle"/>
 	<mx:VRule x="121" y="4.5" height="60" width="6"/>
 	<mx:VRule x="198" y="4" height="60"/>
 	<mx:Label x="16.5" y="44" text="Record"/>
 	<mx:Label x="72" y="44" text="Stop"/>
 	<mx:Label x="139" y="44" text="Replay"/>
 	<mx:Label x="213" y="44" text="Validate"/>
+	<mx:Canvas x="0" y="10" width="298" height="172">
+		<mx:Panel x="11" y="9" width="279" height="141" layout="absolute" id="validationWindow" visible="false">
+			<mx:Label x="10" y="10" text="Enter the title of the recording:" width="239" textAlign="center"/>
+			<mx:TextInput x="10" y="36" width="239" id="titleInput"/>
+			<mx:Button x="10" y="66" label="Ok" width="239" id="validationButtonWindow" click="testValidation();"/>
+		</mx:Panel>
+	</mx:Canvas>
 
 </mx:Application>

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" height="89" width="453">
+
+<mx:Script>
+<![CDATA[
+
+	public function sendSliderValue():void{
+		
+		var loader:URLLoader = new URLLoader();
+   		var request:URLRequest = new URLRequest("http://192.168.2.15/LaughterCycle/test.php");
+   		request.method = URLRequestMethod.POST;
+   		
+   		var variables:URLVariables = new URLVariables();
+   		variables.pitchWeight = pitchSlider.value;
+   		variables.timbreWeight = timbreSlider.value;
+   		request.data = variables;
+   		
+   		
+   		loader.addEventListener(Event.COMPLETE,activationComplete);
+   		
+   		try{
+   			loader.load(request);
+   		}catch(error:Error){
+   			trace("HTTP Error");
+   		}
+	}
+	
+	public function activationComplete(e:Event):void{
+   		trace("ok");	
+   	}
+       	 
+
+]]>
+	
+
+</mx:Script>
+	
+	<mx:HSlider x="106" y="22" width="337" id="pitchSlider" change="sendSliderValue();" maximum="1" minimum="0"/>
+	<mx:HSlider x="105" y="52" width="338" id="timbreSlider" change="sendSliderValue();" maximum="1" minimum="0"/>
+	<mx:Label x="10" y="19" text="Pitch Weight"/>
+	<mx:Label x="10" y="46" text="Timbre Weight"/>
+	
+</mx:Application>
