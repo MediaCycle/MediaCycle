@@ -1,28 +1,59 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" height="89" width="453">
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" height="90" width="400" creationComplete="loadInputs();">
 
 <mx:Script>
-<![CDATA[
-
-	public function sendSliderValue():void{
+	<![CDATA[
 		
-		var loader:URLLoader = new URLLoader();
-   		var request:URLRequest = new URLRequest("http://192.168.2.15/LaughterCycle/test.php");
-   		request.method = URLRequestMethod.POST;
-   		
-   		var variables:URLVariables = new URLVariables();
-   		variables.pitchWeight = pitchSlider.value;
+	import mx.rpc.events.ResultEvent;
+	import mx.rpc.events.FaultEvent;
+	import mx.controls.Alert;
+	import mx.utils.*;
+	import mx.collections.*;
+	import flash.net.*;
+	import flash.net.navigateToURL;
+	
+	public var serverIP:String = "192.168.1.119";//should come from some configuration file on the server
+	
+	public var file:Number;
+	public var pitch:Number;
+	public var timbre:Number;
+
+	
+	public function loadInputs():void {
+		 try {
+		 	file = this.parameters.file;
+			pitch = this.parameters.pitch;
+			timbre = this.parameters.timbre;			
+		}
+		catch (e:Error) {
+                    trace(e);
+                }
+
+		pitchSlider.value = pitch;
+		timbreSlider.value = timbre;				
+	}
+
+	
+	public function sendSliderValue():void{
+		//this should be replaced with some javascript updating only the results instead of refreshing the whole page
+		var url:String = "http://" + serverIP + "/LaughterCycle/index.php?title=query";
+		
+		
+		var request:URLRequest = new URLRequest(url);
+		request.method = URLRequestMethod.POST;
+		
+		var variables:URLVariables = new URLVariables();
+		variables.pitchWeight = pitchSlider.value;
    		variables.timbreWeight = timbreSlider.value;
-   		request.data = variables;
+   		variables.file = file;
    		
-   		
-   		loader.addEventListener(Event.COMPLETE,activationComplete);
-   		
-   		try{
-   			loader.load(request);
-   		}catch(error:Error){
-   			trace("HTTP Error");
-   		}
+		request.data = variables;
+		try {          	
+			navigateToURL(request,"_self");
+		}
+		catch (e:Error) {
+			// handle error here
+		}
 	}
 	
 	public function activationComplete(e:Event):void{
@@ -35,8 +66,8 @@
 
 </mx:Script>
 	
-	<mx:HSlider x="106" y="22" width="337" id="pitchSlider" change="sendSliderValue();" maximum="1" minimum="0"/>
-	<mx:HSlider x="105" y="52" width="338" id="timbreSlider" change="sendSliderValue();" maximum="1" minimum="0"/>
+	<mx:HSlider x="105" y="22" width="275" id="pitchSlider" change="sendSliderValue();" maximum="1" minimum="0"/>
+	<mx:HSlider x="105" y="52" width="275" id="timbreSlider" change="sendSliderValue();" maximum="1" minimum="0"/>
 	<mx:Label x="10" y="19" text="Pitch Weight"/>
 	<mx:Label x="10" y="46" text="Timbre Weight"/>
 	

@@ -95,7 +95,7 @@ class Output {
 	public function setSideContent() {
 		global $gConfig;
 		
-		$this->setContent('sidecontent', self::lipsum());
+		//$this->setContent('sidecontent', self::lipsum());
 		$this->setContent('last-laugh',LCFile::displayLastNFilesPlayed($gConfig["nlastfilesplayed"]));
 		$this->setContent('last-comments', Comments::getNLastComments());
 	}

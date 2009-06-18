@@ -7,6 +7,8 @@ package {
 	import flash.media.Video;
 	import flash.net.NetConnection;
 	import flash.net.NetStream;
+	
+	
 
 	public class NetConnectionExample extends Sprite {
 		//private var videoURL:String="test.flv";
@@ -17,12 +19,12 @@ package {
 		private var inStream:NetStream;
 		private var microphone:Microphone = Microphone.getMicrophone(-1);
 		private var outStream:NetStream;
-			
+		private var serverIP:String = "192.168.1.119";//should be in a separate config file on the server
 
 		public function NetConnectionExample():void {
 			connection.addEventListener(NetStatusEvent.NET_STATUS, netStatusHandler);
 			//connection.addEventListener(SecurityErrorEvent.SECURITY_ERROR, securityErrorHandler);
-			connection.connect("rtmp://localhost/oflaDemo");
+			connection.connect("rtmp://" + serverIP + "/oflaDemo");
 			connection.client = {'onBWDone':function(event){trace('onBWDone');}};			
 		}
 

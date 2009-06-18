@@ -11,6 +11,7 @@
 		public var input:String;//= stage.loaderInfo.parameters("input");
 		
 		public var netX:NetConnectionExample = new NetConnectionExample();
+		public var serverIP:String = "192.168.1.119";
 			 
 		        
         public function testConnexion():void{
@@ -21,7 +22,7 @@
         
         public function testRecordAudio():void{
         	
-        	increaseSizePanelRecorder();
+        	//increaseSizePanelRecorder();
         	//netX.audioRecord(soundFileRecord);
         	input = this.root.loaderInfo.parameters.input;
         	//input=this.root.input;
@@ -33,7 +34,7 @@
         
         public function testStopRecordAudio():void{
         	netX.stopAudioRecord();
-        	decreaseSizePanelRecorder();
+        	//decreaseSizePanelRecorder();
         	
         }
         
@@ -46,12 +47,13 @@
        		
        		
        		var loader:URLLoader = new URLLoader();
-       		var request:URLRequest = new URLRequest("http://192.168.2.15/LaughterCycle/test.php");
+       		var req:String = "http://" + serverIP +"/LaughterCycle/index.php?action=file&do=new";
+       		//&title=HelloWorld&path=" + input.substr(0,(input.length)-4);
+       		var request:URLRequest = new URLRequest(req);
        		request.method = URLRequestMethod.POST;
        		
        		var variables:URLVariables = new URLVariables();
-       		variables.action = "savefile";
-       		variables.filename = input.substr(0,(input.length)-4);
+			variables.path = input.substr(0,(input.length)-4);
        		variables.title = titleInput.text;
        		request.data = variables;
        		

@@ -170,7 +170,7 @@ class LCFile extends page {
 		return "File" . $this->title;
 	}
 	public function toHtml() {
-		global $gUser;
+		global $gUser, $gOut;
 		$out = "";
 
 		if ($this->fileExists()) {
@@ -179,7 +179,8 @@ class LCFile extends page {
 		//+comments/notes & comment form
 			$out .= $this->id . " : " . $this->title;
 			
-			$out .= LCPlayer::miniPlayer($this->getName());			
+			$out .= LCPlayer::miniPlayer($this->getName());
+			$gOut->setContent('sidecontent', LCQuery::sliders($this->getId(),400,90));
 			$out .= Comments::getFileComments($this->getId());
 			if (!Comments::exists($this->getId(), $gUser->getId())) {
 				//TODO comment/note form
@@ -265,15 +266,21 @@ class LCFile extends page {
 		$out .= '<div id="lastlaugh">Currently laughing :';
 		$out .= '<ul>';
 		foreach ($files_id as $file_id) {
-			$file = new LCFile($file_id);
 			$out .= '<li class="li-lastlaugh">';
-			$out .= '<div class="lc-player">';
-			$out .= '<a href="index.php?title=file&id=' . $file->getId() . '">' . $file->getTitle() . '</a>';
-			$out .= LCPlayer::miniPlayer($file->getName());
-			$out .= '</div></li>';
+			$out .= LCFile::miniPlayer($file_id);
+			$out .= '</li>';
 		}
 		$out .= '</ul></div>';
 
+		return $out;
+	}
+	static public function miniPlayer($file_id) {
+		$out = "";
+		$file = new LCFile($file_id);
+		$out .= '<div class="lc-player">';
+		$out .= '<a href="index.php?title=file&id=' . $file->getId() . '">' . $file->getTitle() . '</a>';
+		$out .= LCPlayer::miniPlayer($file->getName());
+		$out .= '</div>';
 		return $out;
 	}
 	static public function lastNFilesPlayed($n = 0) {
