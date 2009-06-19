@@ -2,7 +2,7 @@
 /**
  * @brief File.php
  * @author Alexis Moinet
- * @date 18/06/2009
+ * @date 19/06/2009
  * @copyright (c) 2009 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -76,6 +76,43 @@ class LCFile extends page {
 
 				return true;
 			} else {
+				$this->id = 0;
+				return false;
+			}
+		} else {
+			$this->id = 0;
+			return false;
+		}
+	}
+
+	public function loadFileFromName($name="") {
+		global $gDB;
+
+		if (strlen($name) > 0) {
+			$name = $gDB->cleanInputString($name);
+
+			$query = "SELECT * FROM files";
+			$query .= sprintf(" WHERE path LIKE '%s'",$name);
+			$result = $gDB->query($query);
+
+			if ($gDB->next_record()) {
+				$this->id = $gDB->f("id");
+				$this->title = $gDB->f("title");
+				$this->path = $gDB->f("path");
+				$this->type = $gDB->f("type");
+				$this->recording = $gDB->f("recording");
+				$this->geotag = $gDB->f("geotag");
+				$this->uploader = $gDB->f("uploader");
+				$this->uploadDate = $gDB->f("uploadDate");
+				$this->quality = $gDB->f("quality");//blob
+				$this->meanNote = $gDB->f("meanNote");
+				$gDB->free();
+
+				$this->loadNumberOfNotes();
+
+				return true;
+			} else {
+				$this->id = 0;
 				return false;
 			}
 		} else {
@@ -151,6 +188,10 @@ class LCFile extends page {
 	public function getTitle() {
 		return $this->title;
 	}
+	public function getHtmlTitle() {
+		return htmlentities($this->title,ENT_COMPAT,"ISO8859-1",false);
+	}
+
 	public function getUploader() {
 		return $this->uploader;
 	}
@@ -167,7 +208,7 @@ class LCFile extends page {
 	}
 
 	public function getPageName() {
-		return "File" . $this->title;
+		return "File" . $this->getHtmlTitle();
 	}
 	public function toHtml() {
 		global $gUser, $gOut;
@@ -177,14 +218,16 @@ class LCFile extends page {
 		//insert file player here (*.swf object)
 		//+file description (date/user)
 		//+comments/notes & comment form
-			$out .= $this->id . " : " . $this->title;
+			$out .= $this->id . " : " . $this->getHtmlTitle();
 			
 			$out .= LCPlayer::miniPlayer($this->getName());
 			$gOut->setContent('sidecontent', LCQuery::sliders($this->getId(),400,90));
-			$out .= Comments::getFileComments($this->getId());
-			if (!Comments::exists($this->getId(), $gUser->getId())) {
-				//TODO comment/note form
-				$out .= Comments::form($this->getId());
+			if ($gUser->isLoggedIn()) {
+				$out .= Comments::getFileComments($this->getId());
+				if (!Comments::exists($this->getId(), $gUser->getId())) {
+					//TODO comment/note form
+					$out .= Comments::form($this->getId());
+				}
 			}
 		} else {
 			$out .= "File not found";
@@ -196,7 +239,9 @@ class LCFile extends page {
 
 		if (isset ($_GET["id"])) {
 			$file->loadFileFromId(intval($_GET["id"]));
-		} 
+		} elseif (isset ($_GET["name"])) {
+			$file->loadFileFromName($_GET["name"]);
+		}
 
 		return $file;
 	}
@@ -220,6 +265,27 @@ class LCFile extends page {
 			return false;
 		}
 	}
+
+	static public function nameExists($name="") {
+		global $gDB;
+
+		$name = $gDB->cleanInputString($name);
+
+		if (strlen($name) > 0) {
+			$query = "SELECT * FROM files";
+			$query .= sprintf(" WHERE path LIKE '%s'",$name);
+			$result = $gDB->query($query);
+
+			if ($gDB->nf() > 0) {// $gDB->nf() == 1 ?
+				return true;
+			} else {
+				return false;
+			}
+		} else {
+			return false;
+		}
+	}
+
 	static public function redirect($fileId) {
 		header("Status: 200");
 		header("Location: ./index.php?title=file&id=" . $fileId);
@@ -231,6 +297,10 @@ class LCFile extends page {
 	static public function createNewFile($title,$path,$type,$recording) {
 		//SQL insertion
 		global $gDB, $gUser;
+
+		/*if (self::nameExists($path)) {
+			
+		}*/
 
 		$title = $gDB->cleanInputString($title);
 		$path = $gDB->cleanInputString($path);
@@ -278,7 +348,7 @@ class LCFile extends page {
 		$out = "";
 		$file = new LCFile($file_id);
 		$out .= '<div class="lc-player">';
-		$out .= '<a href="index.php?title=file&id=' . $file->getId() . '">' . $file->getTitle() . '</a>';
+		$out .= '<a href="index.php?title=file&id=' . $file->getId() . '">' . $file->getHtmlTitle() . '</a>';
 		$out .= LCPlayer::miniPlayer($file->getName());
 		$out .= '</div>';
 		return $out;
@@ -353,13 +423,14 @@ class LCFile extends page {
 	}
 
 	static public function convertFlvToWav($path) {
-		global $gOut;
-		$ext = strrchr($strName, '.');
-		if($ext == "flv") {
-			$uuid = substr($strName, 0, -strlen($ext));
-			$command = "ffmpeg -i $path $uuid.wav";
+		global $gConfig;
+		
+		$flvfile = $gConfig["streampath"]. $path . ".flv";
+
+		if(file_exists($flvfile)) {
+			$wavefile = $gConfig["filepath"] . $path . ".wav";
+			$command = "ffmpeg -i $flvfile $wavefile";
 			$res = exec($command, &$output);
-			$gOut->add(print_r($output,true));
 		}
 	}
 }

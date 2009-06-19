@@ -11,7 +11,6 @@
 		public var input:String;//= stage.loaderInfo.parameters("input");
 		
 		public var netX:NetConnectionExample = new NetConnectionExample();
-		public var serverIP:String = "192.168.1.119";
 			 
 		        
         public function testConnexion():void{
@@ -47,7 +46,7 @@
        		
        		
        		var loader:URLLoader = new URLLoader();
-       		var req:String = "http://" + serverIP +"/LaughterCycle/index.php?action=file&do=new";
+       		var req:String = "index.php?action=file&do=new";
        		//&title=HelloWorld&path=" + input.substr(0,(input.length)-4);
        		var request:URLRequest = new URLRequest(req);
        		request.method = URLRequestMethod.POST;
@@ -67,6 +66,23 @@
        			trace("HTTP Error");
        		}
        		
+       		redirectToFile(input.substr(0,(input.length)-4));
+       		
+       	}
+       	
+       	public function redirectToFile(name:String):void {
+       		var url:String = "index.php?title=file&name="+name;
+		
+		
+		var request:URLRequest = new URLRequest(url);
+		request.method = URLRequestMethod.GET;
+
+		try {          	
+			navigateToURL(request,"_self");
+		}
+		catch (e:Error) {
+			// handle error here
+		}
        	}
        	
        	public function increaseSizePanelRecorder():void{

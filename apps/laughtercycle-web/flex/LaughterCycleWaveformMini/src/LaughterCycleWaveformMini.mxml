@@ -213,7 +213,7 @@
         	public function logPlay():void{
        		
        		var loader:URLLoader = new URLLoader();
-       		var req:String = "http://" + serverIP + "/LaughterCycle/index.php?action=file&do=play";
+       		var req:String = "index.php?action=file&do=play";
        		var request:URLRequest = new URLRequest(req);
        		request.method = URLRequestMethod.POST;
        		

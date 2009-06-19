@@ -2,7 +2,7 @@
 /**
  * @brief Action.php
  * @author Alexis Moinet
- * @date 18/06/2009
+ * @date 19/06/2009
  * @copyright (c) 2009 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -132,7 +132,7 @@ class FileAction extends Action {
 					$recording = "live";//live recording vs. file upload
 					$type = "audio"; // $_POST["type"];//audio/video (audio only for now)
 					$title = $_POST["title"];
-					$path = $_POST["path"];//UUID of the file + extension ?
+					$path = $_POST["path"];//UUID of the file wo/ extension
 					LCFile::createNewFile($title,$path,$type,$recording);
 					LCFile::convertFlvToWav($path);
 					break;

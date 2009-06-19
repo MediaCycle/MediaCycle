@@ -12,8 +12,6 @@
 	import flash.net.*;
 	import flash.net.navigateToURL;
 	
-	public var serverIP:String = "192.168.1.119";//should come from some configuration file on the server
-	
 	public var file:Number;
 	public var pitch:Number;
 	public var timbre:Number;
@@ -36,7 +34,7 @@
 	
 	public function sendSliderValue():void{
 		//this should be replaced with some javascript updating only the results instead of refreshing the whole page
-		var url:String = "http://" + serverIP + "/LaughterCycle/index.php?title=query";
+		var url:String = "index.php?title=query";
 		
 		
 		var request:URLRequest = new URLRequest(url);
