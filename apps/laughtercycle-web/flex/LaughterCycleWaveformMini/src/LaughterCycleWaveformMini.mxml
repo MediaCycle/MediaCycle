@@ -3,7 +3,7 @@
 
 <mx:Script>
 	<![CDATA[
-			
+			import mx.rpc.http.mxml.*;
 			import mx.rpc.events.ResultEvent;
             import mx.rpc.events.FaultEvent;
             import mx.controls.Alert;
@@ -15,7 +15,7 @@
 			import flash.media.Video;
 			import flash.net.NetConnection;
 			import flash.net.NetStream;
-
+            
             
             //import NetConnectionExampleWaveform;
             import CustomClient;
@@ -37,17 +37,29 @@
 			public var infoSound:CustomClient;
 			public var soundFile:String;
 			public var input:String;
-            public var serverIP:String = "192.168.1.119";
+            //public var serverIP:String = "192.168.1.119";
+            public var serverIP:String;
+            private var HTTP:HTTPService;
 			
-            //public var netX:NetConnectionExampleWaveform = new NetConnectionExampleWaveform();
+            //public var connection:NetConnectionExampleWaveform = new NetConnectionExampleWaveform();
             
             /* Lecture */
             
             private function netConnection():void {
-			connection.addEventListener(NetStatusEvent.NET_STATUS, netStatusHandler);
-			connection.connect("rtmp://" + serverIP + "/oflaDemo");
-			connection.client = {'onBWDone':function(event){trace('onBWDone');}};
+    			HTTP=new HTTPService();
+			HTTP.method="GET";
+			HTTP.url="serverip.php";
+			HTTP.resultFormat="text";
+			//This is to return the php results
+			HTTP.addEventListener(ResultEvent.RESULT,redConnexion);
+			HTTP.send();			
+			}
 			
+			public function redConnexion(event:ResultEvent):void {
+				serverIP = event.result.toString();
+				connection.addEventListener(NetStatusEvent.NET_STATUS, netStatusHandler);
+				connection.connect("rtmp://" + serverIP + "/oflaDemo");
+				connection.client = {'onBWDone':function(event:Event):void{trace('onBWDone');}};
 			}
 	
 			private function netStatusHandler(event:NetStatusEvent):void {
@@ -111,8 +123,8 @@
 			/* Récupération des données XML */
             
             private function loadXML(src:String):void{
-            	xmlServer.url = src;
-            	xmlServer.send();
+            	//xmlServer.url = src;
+            	//xmlServer.send();
             	netConnection();
             	
             }

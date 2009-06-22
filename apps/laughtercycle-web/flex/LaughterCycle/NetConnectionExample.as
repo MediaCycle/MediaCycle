@@ -7,6 +7,7 @@ package {
 	import flash.media.Video;
 	import flash.net.NetConnection;
 	import flash.net.NetStream;
+	import flash.events.*;
 
 	public class NetConnectionExample extends Sprite {
 		//private var videoURL:String="test.flv";
@@ -23,7 +24,7 @@ package {
 			connection.addEventListener(NetStatusEvent.NET_STATUS, netStatusHandler);
 			//connection.addEventListener(SecurityErrorEvent.SECURITY_ERROR, securityErrorHandler);
 			connection.connect("rtmp://localhost/oflaDemo");
-			connection.client = {'onBWDone':function(event){trace('onBWDone');}};			
+			connection.client = {'onBWDone':function(event:Event):void{trace('onBWDone');}};			
 		}
 
 		private function netStatusHandler(event:NetStatusEvent):void {

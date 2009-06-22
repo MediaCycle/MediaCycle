@@ -15,6 +15,7 @@
 			import flash.media.Video;
 			import flash.net.NetConnection;
 			import flash.net.NetStream;
+			import flash.events.*;
 
             
             //import NetConnectionExampleWaveform;
@@ -45,7 +46,7 @@
             private function netConnection():void {
 			connection.addEventListener(NetStatusEvent.NET_STATUS, netStatusHandler);
 			connection.connect("rtmp://localhost/oflaDemo");
-			connection.client = {'onBWDone':function(event){trace('onBWDone');}};
+			connection.client = {'onBWDone':function(event:Event):void{trace('onBWDone');}};
 			
 			}
 	

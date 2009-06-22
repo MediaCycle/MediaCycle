@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
- <mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" alpha="1" height="188" width="298" backgroundAlpha="1" borderColor="#EB560D">
+ <mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" alpha="1" height="188" width="298" backgroundAlpha="1" borderColor="#EB560D" creationComplete="testConnexion();">
  	 
 <mx:Script>
 	<![CDATA[
@@ -15,7 +15,6 @@
 		        
         public function testConnexion():void{
         	
-        	//netX = new NetConnectionExample();
         	trace("connexion created");
         }
         
@@ -65,9 +64,6 @@
        		}catch(error:Error){
        			trace("HTTP Error");
        		}
-       		
-       		redirectToFile(input.substr(0,(input.length)-4));
-       		
        	}
        	
        	public function redirectToFile(name:String):void {
@@ -128,6 +124,7 @@
        	}
        	
        	public function activationComplete(e:Event):void{
+	       	redirectToFile(input.substr(0,(input.length)-4));
        		trace("ok");	
        	}
        	   	
@@ -136,7 +133,7 @@
 	<mx:Button x="140.5" y="2" id="playSound" click="testAudioPlay();" color="#EBF907" width="40" height="40" icon="@Embed(source='GnomePlayButtonResized.png')" label="Replay Sound"/>
 	<mx:Button x="18" y="2" id="RecordSound" click="testRecordAudio();" color="#FF0000" width="40" height="40" icon="@Embed(source='GnomeRecordButtonResized.png')" label="Record Sound"/>
 	<mx:Button x="67" y="2" id="StopRecordSound" click="testStopRecordAudio();" color="#140C66" width="40" height="40" icon="@Embed(source='GnomeStopButtonResized.png')" label="Stop Recording Sound"/>
-	<mx:Text x="31" y="16" id = "testText" text="Texte" width="118" height="38" visible="false"/>
+	<mx:Text x="31" y="100" id = "testText" text="Texte" width="118" height="38" visible="false"/>
 	<mx:Button x="218" y="1" id="validationButton" click="validationWindow.visible=true" width="40" height="40" color="#F10ED9" icon="@Embed(source='GnomeMailButtonResized.png')" label="Send Sound to LaughterCycle"/>
 	<mx:VRule x="121" y="4.5" height="60" width="6"/>
 	<mx:VRule x="198" y="4" height="60"/>

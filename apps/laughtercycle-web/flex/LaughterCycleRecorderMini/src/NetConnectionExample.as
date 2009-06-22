@@ -7,6 +7,10 @@ package {
 	import flash.media.Video;
 	import flash.net.NetConnection;
 	import flash.net.NetStream;
+	import flash.net.*;
+	import flash.events.*;
+	import mx.rpc.http.*;
+	import mx.rpc.events.*;
 	
 	
 
@@ -19,14 +23,29 @@ package {
 		private var inStream:NetStream;
 		private var microphone:Microphone = Microphone.getMicrophone(-1);
 		private var outStream:NetStream;
-		private var serverIP:String = "192.168.1.119";//should be in a separate config file on the server
+		//private var serverIP:String = "192.168.1.119";//should be in a separate config file on the server
+		private var serverIP:String;
+		private var HTTP:HTTPService;
 
 		public function NetConnectionExample():void {
-			connection.addEventListener(NetStatusEvent.NET_STATUS, netStatusHandler);
+			HTTP=new HTTPService();
+			HTTP.method="GET";
+			HTTP.url="serverip.php";
+			HTTP.resultFormat="text";
+			//This is to return the php results
+			HTTP.addEventListener(ResultEvent.RESULT,redConnexion);
+			HTTP.send();			
+		}
+		
+		public function redConnexion(event:ResultEvent):void {
+        		serverIP = event.result.toString();
+        		//testText.text = event.result.toString();
+        		connection.addEventListener(NetStatusEvent.NET_STATUS, netStatusHandler);
 			//connection.addEventListener(SecurityErrorEvent.SECURITY_ERROR, securityErrorHandler);
 			connection.connect("rtmp://" + serverIP + "/oflaDemo");
-			connection.client = {'onBWDone':function(event){trace('onBWDone');}};			
-		}
+			connection.client = {'onBWDone':function(event:Event):void{trace('onBWDone');}};
+        		//netX = new NetConnectionExample(serverIP);
+	        }
 
 		private function netStatusHandler(event:NetStatusEvent):void {
 			switch (event.info.code) {
