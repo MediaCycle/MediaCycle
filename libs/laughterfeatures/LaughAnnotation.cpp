@@ -44,6 +44,7 @@ LaughAnnotation::LaughAnnotation()
    nSectionsSilence = 0;
    nFramesTrash = 0;
    nSectionsTrash = 0;
+   statsCalculated = false;
 }
 
 // ------------------------------------------------------------------
@@ -206,6 +207,24 @@ void LaughAnnotation::calculateStats( void )
 
    } // Finish iterating through the annotation
 
+   // Now that the label stats are known, calculate some other values.
+   episodeLength = episodeEndTime - episodeStartTime;
+   percentTimeLaugh = totalTimeLaugh/episodeLength;
+   meanTimeLaugh = totalTimeLaugh/nSectionsLaugh;
+   double dummyArray[ timesOfSectionsLaugh.size() ];
+   copy( timesOfSectionsLaugh.begin(), timesOfSectionsLaugh.end(), dummyArray );
+   stdDevTimeLaugh = gsl_stats_sd( dummyArray, 1, timesOfSectionsLaugh.size() );
+   laughSectionsPerSecond = nSectionsLaugh / episodeLength;
+   meanFramesLaughPerSectionsLaugh = (float)nFramesLaugh / nSectionsLaugh;
+   unsigned long int dummyArray2[ nFramesLaughInSectionsLaugh.size() ];
+   copy( nFramesLaughInSectionsLaugh.begin(), nFramesLaughInSectionsLaugh.end(), 
+      dummyArray2 );
+   stdDevFramesLaughPerSectionsLaugh 
+      = gsl_stats_ulong_sd( dummyArray2, 1, nFramesLaughInSectionsLaugh.size() );
+   framesPerSecondInSectionsLaugh = nFramesLaugh / totalTimeLaugh;
+
+   statsCalculated = true;
+
 }
 // ------------------------------------------------------------------
 // show the current annotation on the screen
@@ -220,6 +239,7 @@ void LaughAnnotation::show( void )
      (*it).show();
   }
 
+   // If this is a debug build, output bout info to a file.
 #ifdef DEBUG
    TextFile debugDataFile( "boutStats.dat" );
    debugDataFile.openFileOut();
@@ -238,19 +258,6 @@ void LaughAnnotation::show( void )
    debugDataFile.close();
 #endif
 
-  /*for ( vector< unsigned long int >::iterator it = nFramesLaughInSectionsLaugh.begin(); 
-        it != nFramesLaughInSectionsLaugh.end(); ++it )
-  {
-     // Using an interator forces the use of the pointer precedence
-  }
-
-  for ( vector< unsigned long int >::iterator it = nFramesLaughInSectionsLaugh.begin(); 
-        it != nFramesLaughInSectionsLaugh.end(); ++it )
-  {
-     // Using an interator forces the use of the pointer precedence
-  }
-  */
-
 } 
 
 // ------------------------------------------------------------------
@@ -259,36 +266,47 @@ void LaughAnnotation::show( void )
 void LaughAnnotation::showStats( void )
 {
   //cout << "total labels = " << labels.size() + 1 << endl;
-  episodeLength = episodeEndTime - episodeStartTime;
   cout << "episode length = " << episodeLength << endl;
   cout << "number of bouts = " << nSectionsLaugh << endl;
   cout << "total time in bouts = " << totalTimeLaugh << endl;
-  percTimeLaugh = totalTimeLaugh/episodeLength;
-  cout << "% of time in bouts = " << percTimeLaugh << endl;
-  meanTimeLaugh = totalTimeLaugh/nSectionsLaugh;
+  cout << "% of time in bouts = " << percentTimeLaugh << endl;
   cout << "mean of bout length = " << meanTimeLaugh << endl;
-  double dummyArray[ timesOfSectionsLaugh.size() ];
-  copy( timesOfSectionsLaugh.begin(), timesOfSectionsLaugh.end(), dummyArray );
-  stdDevTimeLaugh = gsl_stats_sd( dummyArray, 1, timesOfSectionsLaugh.size() );
   cout << "standard deviation of bout length = " << stdDevTimeLaugh << endl;
-  laughSectionsPerSecond = nSectionsLaugh / episodeLength;
   cout << "bouts/second = " << laughSectionsPerSecond << endl;
   cout << "number of laugh bursts = " << nFramesLaugh << endl;
-  meanFramesLaughPerSectionsLaugh = (float)nFramesLaugh / nSectionsLaugh;
   cout << "mean of laugh bursts in a bout = " 
        << meanFramesLaughPerSectionsLaugh << endl;
-  unsigned long int dummyArray2[ nFramesLaughInSectionsLaugh.size() ];
-  copy( nFramesLaughInSectionsLaugh.begin(), nFramesLaughInSectionsLaugh.end(), 
-     dummyArray2 );
-  stdDevFramesLaughPerSectionsLaugh 
-     = gsl_stats_ulong_sd( dummyArray2, 1, nFramesLaughInSectionsLaugh.size() );
   cout << "standard deviation of laugh bursts in a bout= " 
        << stdDevFramesLaughPerSectionsLaugh << endl;
-  framesPerSecondInSectionsLaugh = nFramesLaugh / totalTimeLaugh;
   cout << "bursts/second inside bouts = " 
        << framesPerSecondInSectionsLaugh << endl;
   cout << "seconds/burst inside bouts = " 
        << 1.0/framesPerSecondInSectionsLaugh << endl;
+}
+
+// ------------------------------------------------------------------
+// put the current annotation into a features vector
+
+vector< float > LaughAnnotation::statsAsVector( void )
+{
+   vector< float > outputStats;
+
+   if ( statsCalculated ) 
+   {
+      outputStats.push_back( episodeLength );
+      outputStats.push_back( nSectionsLaugh );
+      outputStats.push_back( totalTimeLaugh );
+      outputStats.push_back( percentTimeLaugh );
+      outputStats.push_back( meanTimeLaugh );
+      outputStats.push_back( stdDevTimeLaugh );
+      outputStats.push_back( laughSectionsPerSecond );
+      outputStats.push_back( nFramesLaugh );
+      outputStats.push_back( meanFramesLaughPerSectionsLaugh );
+      outputStats.push_back( stdDevFramesLaughPerSectionsLaugh );
+      outputStats.push_back( framesPerSecondInSectionsLaugh );
+   }  // statsCalculated    
+
+   return outputStats;
 }
 
 // ------------------------------------------------------------------

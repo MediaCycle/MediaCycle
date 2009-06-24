@@ -63,9 +63,11 @@ class LaughAnnotation
       void acquireFromFile( const string & );  // get the Annotation from a file 
       void show( void );                   // show the Annotation on the screen
       void showStats( void );              // show the Annotation statistics
+	    vector< float > statsAsVector( void );
    protected:
       vector< AnnotationLabel > labels;
       void calculateStats( void );
+	    bool statsCalculated;
       // Some notes about semantics.  - First laughter.
       // An episode is from when one starts laughing until one stops.
       // A bout is a full exhalation of laughter through and including an
@@ -81,7 +83,7 @@ class LaughAnnotation
       double episodeEndTime;
       double totalTimeLaugh;
       double episodeLength;
-      double percTimeLaugh;
+      double percentTimeLaugh;
       double meanTimeLaugh;
       double stdDevTimeLaugh;
       unsigned long int nFramesLaugh;
