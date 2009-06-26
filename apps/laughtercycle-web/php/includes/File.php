@@ -2,7 +2,7 @@
 /**
  * @brief File.php
  * @author Alexis Moinet
- * @date 19/06/2009
+ * @date 26/06/2009
  * @copyright (c) 2009 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -208,7 +208,7 @@ class LCFile extends page {
 	}
 
 	public function getPageName() {
-		return "File" . $this->getHtmlTitle();
+		return "File - " . $this->getHtmlTitle();
 	}
 	public function toHtml() {
 		global $gUser, $gOut;
@@ -430,7 +430,18 @@ class LCFile extends page {
 		if(file_exists($flvfile)) {
 			$wavefile = $gConfig["filepath"] . $path . ".wav";
 			$command = "ffmpeg -i $flvfile $wavefile";
-			$res = exec($command, &$output);
+			$res = exec($command, $output);
+		}
+	}
+	static public function convertWavToFlv($path) {
+		global $gConfig;
+
+		$wavefile = $gConfig["filepath"] . $path . ".wav";
+
+		if(file_exists($wavefile)) {
+			$flvfile = $gConfig["streampath"]. $path . ".flv";
+			$command = "ffmpeg -i $wavefile $flvfile";
+			$res = exec($command, $output);
 		}
 	}
 }
