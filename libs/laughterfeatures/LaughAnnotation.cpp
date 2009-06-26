@@ -287,7 +287,7 @@ void LaughAnnotation::showStats( void )
 // ------------------------------------------------------------------
 // put the current annotation into a features vector
 
-vector< float > LaughAnnotation::statsAsVector( void )
+FeaturesVector LaughAnnotation::statsAsVector( void )
 {
    vector< float > outputStats;
 

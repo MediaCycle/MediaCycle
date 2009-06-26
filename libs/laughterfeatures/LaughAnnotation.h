@@ -46,6 +46,7 @@ using namespace std;
 
 #include "AnnotationLabel.h"
 #include "LaughAnnotationFile.h"
+#include "ACFeaturesTypes.h"
 
 #ifdef DEBUG
 #include "TextFile.h"
@@ -63,7 +64,7 @@ class LaughAnnotation
       void acquireFromFile( const string & );  // get the Annotation from a file 
       void show( void );                   // show the Annotation on the screen
       void showStats( void );              // show the Annotation statistics
-	    vector< float > statsAsVector( void );
+	    FeaturesVector statsAsVector( void );
    protected:
       vector< AnnotationLabel > labels;
       void calculateStats( void );
