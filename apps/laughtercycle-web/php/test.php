@@ -2,7 +2,7 @@
 /**
  * @brief test.php
  * @author Alexis Moinet
- * @date 29/05/2009
+ * @date 29/06/2009
  * @copyright (c) 2009 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -32,41 +32,28 @@
 ?>
 
 <?php
-require_once 'includes/User.php';
-include_once 'config.php';
 
-global $wgUser;
+require_once 'config.php';
+require_once 'setup.php';
 
-echo "GET<br/>";
-echo $_GET["action"] . "<br/>" ;
-echo $_GET["filename"] . "<br/>" ;
-echo "POST<br/>";
-echo $_POST["action"] . "<br/>" ;
-echo $_POST["filename"] . "<br/>" ;
+ob_implicit_flush(true);
 
+$file = new LCFile(46);
+echo "addFile : ";
+$result = MediaCycle::addFile($file);
+if ($result) {
+	echo "<br/>worked : <br/>$result";
+} else {
+	echo "<br/>doomed";
+}
 
-$password = "password";
-$salt = sha1(uniqid(mt_rand(), true));
-$crypted = sha1($salt . '-' . sha1($password));
-echo "bt : " . $crypted . "<br/>" . strlen($crypted);
+echo "<br/><br/>getThumbnailXml : ";
+$result = MediaCycle::getThumbnailXml($file);
+echo "<br/><br/><br/> result : " . htmlentities($result);
 
-$wgUser = new User();
+echo "<br/>";
 
-?>
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<html>
-    <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title></title>
-    </head>
-    <body>
-        <?php
-		echo "<br/>myid : "  .$wgUser->getId();
-        // put your code here
-        ?>
-    </body>
-</html>
-
-<?php
+global $gOut;
+echo $gOut->toHtml();
 
 ?>

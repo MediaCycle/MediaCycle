@@ -2,7 +2,7 @@
 /**
  * @brief Action.php
  * @author Alexis Moinet
- * @date 19/06/2009
+ * @date 29/06/2009
  * @copyright (c) 2009 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -133,8 +133,11 @@ class FileAction extends Action {
 					$type = "audio"; // $_POST["type"];//audio/video (audio only for now)
 					$title = $_POST["title"];
 					$path = $_POST["path"];//UUID of the file wo/ extension
-					LCFile::createNewFile($title,$path,$type,$recording);
+					$file = LCFile::createNewFile($title,$path,$type,$recording);
 					LCFile::convertFlvToWav($path);
+					MediaCycle::addFile($file);
+					MediaCycle::getThumbnailXml($file);
+					MediaCycle::saveLibrary();
 					break;
 				case 'upload':
 					//TODO non-logged in user can upload but in a tmp folder

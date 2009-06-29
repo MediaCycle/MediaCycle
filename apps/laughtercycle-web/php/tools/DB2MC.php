@@ -1,6 +1,6 @@
 <?php
 /**
- * @brief include.php
+ * @brief DB2MC.php
  * @author Alexis Moinet
  * @date 29/06/2009
  * @copyright (c) 2009 – UMONS - Numediart
@@ -37,18 +37,32 @@
  * and open the template in the editor.
  */
 
-require_once 'includes/GlobalFunctions.php';
-require_once 'includes/Comments.php';
-require_once 'includes/Page.php';
-require_once 'includes/Home.php';
-require_once 'includes/DatabaseMysql.php';
-require_once 'includes/Action.php';
-require_once 'includes/LCRecorder.php';
-require_once 'includes/LCPlayer.php';
-require_once 'includes/File.php';
-require_once 'includes/Output.php';
-require_once 'includes/User.php';
-require_once 'includes/Query.php';
-require_once 'includes/MediaCycle.php';
+require_once '../config.php';
+require_once '../setup.php';
+
+$query = "SELECT id FROM files";
+
+$gDB2 = new DatabaseMySql();
+$gDB2->connect();
+$gDB2->query($query);
+
+ob_implicit_flush(true);
+echo "# : ". $gDB2->nf() ."<br/>";
+while ($gDB2->next_record()) {
+	$id = $gDB2->f("id");
+	$file = new LCFile($id);
+
+	echo $file->getId() . " : " . $file->getName() . "<br/>";
+	
+	LCFile::convertFlvToWav($file->getName());
+	echo "MC : add file<br/>";
+	MediaCycle::addFile($file);
+	echo "MC : get thumbnail<br/>";
+	MediaCycle::getThumbnailXml($file);
+	echo "<br/>";
+}
+
+echo "MC : save library<br/>";
+MediaCycle::saveLibrary();
 
 ?>

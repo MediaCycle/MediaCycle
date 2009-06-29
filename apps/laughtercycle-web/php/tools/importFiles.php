@@ -2,7 +2,7 @@
 /**
  * @brief importFiles.php
  * @author Alexis Moinet
- * @date 26/06/2009
+ * @date 29/06/2009
  * @copyright (c) 2009 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -40,27 +40,41 @@
 require_once '../config.php';
 require_once '../setup.php';
 
-$dir = "/home/alexis/Bureau/wav/";
+$dir = "/home/alexis/Bureau/aif/";
 
+ob_implicit_flush(true);
+echo "disabled - edit php code to use this";
+exit();
 if (is_dir($dir)) {
     if ( ($dh = opendir($dir)) ) {
         while (($file = readdir($dh)) !== false) {
+			echo intval(is_file($dir . $file)) . " : " . $dir . $file . "<br/>";
 			if (is_file($dir . $file) && $file != "." && $file != "..") {
 				echo "fichier : $file : type : " . filetype($dir . $file) . "\n<br/>";
-				//TODO add file to wav and flv folders with UUID.
-				//TODO : add to database MySQL  (+ implicit add to MediaCycle)
 				$uuid = gfGetUUID();
 				$parts = explode('.', $file);
 				$ext = $parts[count($parts)-1];
-				if ($ext == "wav") {
-					$filename = $uuid . '.' . $ext;
-					if (copy($dir . $file, $gConfig["filepath"].$filename)) {
-						$gOut->nl("The file ".  basename( $_FILES['uploadedfile']['name']) . " has been moved to " . $gConfig["filepath"].$filename);
+				if ($ext == "wav" || $ext == "aif") {
+					$filename = $uuid . '.' . "wav";
+					if ($ext == "aif") {
+						$command = "ffmpeg -i " . $dir . $file . " " . $gConfig["filepath"].$filename;
+						$res = exec($command, $output);
 					} else {
-						$gOut->nl("There was an error uploading the file $file, please try again!");
+						if (copy($dir . $file, $gConfig["filepath"].$filename)) {
+							$gOut->nl("The file ".  $dir . $file . " has been moved to " . $gConfig["filepath"].$filename);
+						} else {
+							$gOut->nl("There was an error uploading the file $file, please try again!");
+						}
 					}
-					LCFile::createNewFile($file, $uuid, 'audio', 'upload');//implicitly added to MediaCycle
+					$lcfile = LCFile::createNewFile($parts[0], $uuid, 'audio', 'upload');
 					LCFile::convertWavToFlv($uuid);
+/*
+					echo "MC : add file<br/>";
+					MediaCycle::addFile($lcfile);
+					echo "MC : get thumbnail<br/>";
+					MediaCycle::getThumbnailXml($lcfile);
+ 
+ */
 				}
 				
 			}

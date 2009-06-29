@@ -2,7 +2,7 @@
 /**
  * @brief File.php
  * @author Alexis Moinet
- * @date 26/06/2009
+ * @date 29/06/2009
  * @copyright (c) 2009 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -207,11 +207,16 @@ class LCFile extends page {
 		return true;
 	}
 
+	public function getKNN($k) {
+		$knn = MediaCycle::getkNN($this,$k);
+		return $knn;
+	}
+
 	public function getPageName() {
 		return "File - " . $this->getHtmlTitle();
 	}
 	public function toHtml() {
-		global $gUser, $gOut;
+		global $gUser, $gOut, $gConfig;
 		$out = "";
 
 		if ($this->fileExists()) {
@@ -229,9 +234,20 @@ class LCFile extends page {
 					$out .= Comments::form($this->getId());
 				}
 			}
+			$knn = $this->getKNN($gConfig["mediacycle"]["knn"]);
+			$out .= '<div id="knn">kNN :';
+			$out .= '<ul>';
+			foreach ($knn as $fileid) {
+				$file = new LCFile($fileid);
+				$out .= '<li class="li-lastlaugh">';
+				$out .= LCFile::miniPlayer($file->getId());
+				$out .= '</li>';
+			}
+			$out .= '</ul></div>';
 		} else {
 			$out .= "File not found";
 		}
+
 		return $out;
 	}
 	static public function factory() {
@@ -322,9 +338,6 @@ class LCFile extends page {
 		}
 
 		$file = new LCFile($id);
-
-		//TODO I guess there should be some DB insertion/analysis asked to laughtercycle here (or not ?)
-		// we also could put a "find similar" button aside from the file player that would send an HTTP request to some php script ?
 
 		return $file;
 	}
