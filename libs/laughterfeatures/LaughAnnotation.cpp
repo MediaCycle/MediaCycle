@@ -210,18 +210,37 @@ void LaughAnnotation::calculateStats( void )
    // Now that the label stats are known, calculate some other values.
    episodeLength = episodeEndTime - episodeStartTime;
    percentTimeLaugh = totalTimeLaugh/episodeLength;
-   meanTimeLaugh = totalTimeLaugh/nSectionsLaugh;
-   double dummyArray[ timesOfSectionsLaugh.size() ];
-   copy( timesOfSectionsLaugh.begin(), timesOfSectionsLaugh.end(), dummyArray );
-   stdDevTimeLaugh = gsl_stats_sd( dummyArray, 1, timesOfSectionsLaugh.size() );
    laughSectionsPerSecond = nSectionsLaugh / episodeLength;
-   meanFramesLaughPerSectionsLaugh = (float)nFramesLaugh / nSectionsLaugh;
-   unsigned long int dummyArray2[ nFramesLaughInSectionsLaugh.size() ];
-   copy( nFramesLaughInSectionsLaugh.begin(), nFramesLaughInSectionsLaugh.end(), 
-      dummyArray2 );
-   stdDevFramesLaughPerSectionsLaugh 
-      = gsl_stats_ulong_sd( dummyArray2, 1, nFramesLaughInSectionsLaugh.size() );
-   framesPerSecondInSectionsLaugh = nFramesLaugh / totalTimeLaugh;
+
+   // necessary because sometimes there is only one (or no!) laughter sections
+   if( 0 < nSectionsLaugh )
+   {
+      meanTimeLaugh = totalTimeLaugh/nSectionsLaugh;
+      meanFramesLaughPerSectionsLaugh = (float)nFramesLaugh / nSectionsLaugh;
+      framesPerSecondInSectionsLaugh = nFramesLaugh / totalTimeLaugh;
+   }
+   else
+   {
+      meanTimeLaugh = 0.0;
+      meanFramesLaughPerSectionsLaugh = 0.0;
+      framesPerSecondInSectionsLaugh = 0.0;
+   }
+   if( 1 < nSectionsLaugh )
+   {
+      double dummyArray[ timesOfSectionsLaugh.size() ];
+      copy( timesOfSectionsLaugh.begin(), timesOfSectionsLaugh.end(), dummyArray );
+      stdDevTimeLaugh = gsl_stats_sd( dummyArray, 1, timesOfSectionsLaugh.size() );
+      unsigned long int dummyArray2[ nFramesLaughInSectionsLaugh.size() ];
+      copy( nFramesLaughInSectionsLaugh.begin(), 
+         nFramesLaughInSectionsLaugh.end(), dummyArray2 );
+      stdDevFramesLaughPerSectionsLaugh = gsl_stats_ulong_sd( dummyArray2, 1, 
+         nFramesLaughInSectionsLaugh.size() );
+   }
+   else 
+   {
+      stdDevTimeLaugh = 0.0;
+      stdDevFramesLaughPerSectionsLaugh = 0.0;
+   }
 
    statsCalculated = true;
 
