@@ -2,7 +2,7 @@
 /**
  * @brief LCPlayer.php
  * @author Alexis Moinet
- * @date 18/06/2009
+ * @date 30/06/2009
  * @copyright (c) 2009 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -43,34 +43,34 @@
   */
 class LCPlayer {
     //put your code here
-	static public function miniPlayer($name = "") {
-		$width = 256;
-		$height = 32;
-		$out = "";
+    static public function miniPlayer($name = "") {
+        $width = 256;
+        $height = 36;
+        $out = "";
 
-		//TODO: change this object for the true one
-		$out .= '<div class="lc-player">';
-		if ($name != "") {
-			$out .= '<object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000"' . "\n";
-			$out .=	'	id="LaughterCycle" width="' . $width . '" height="' . $height . '"' . "\n";
-			$out .=	'	codebase="http://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab">' . "\n";
-			$out .=	'	<param name="movie" value="LaughterCycleWaveformMini.swf?input=' . $name . '" >' . "\n";
-			$out .=	'	<param name="quality" value="high" />' . "\n";
-			$out .=	'	<param name="bgcolor" value="#869ca7" />' . "\n";
-			$out .=	'	<param name="allowScriptAccess" value="sameDomain" />' . "\n";
-			$out .=	'	<embed src="LaughterCycleWaveformMini.swf?input=' . $name . '" quality="high" bgcolor="#869ca7"' . "\n";
-			$out .=	'		width="' . $width . '" height="' . $height . '" name="LaughterCycle" align="middle"' . "\n";
-			$out .=	'		play="true"' . "\n";
-			$out .=	'		loop="false"' . "\n";
-			$out .=	'		quality="high"' . "\n";
-			$out .=	'		allowScriptAccess="sameDomain"' . "\n";
-			$out .=	'		type="application/x-shockwave-flash"' . "\n";
-			$out .=	'		pluginspage="http://www.adobe.com/go/getflashplayer">' . "\n";
-			$out .=	'</embed>' . "\n";
-			$out .=	'</object>' . "\n";
-		}
-		$out .= '</div>';
-		return $out;
-	}
+        //TODO: change this object for the true one
+        $out .= '<div class="lc-player">';
+        if ($name != "") {
+            $out .= '<object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000"' . "\n";
+            $out .=	'	id="LaughterCycle" width="' . $width . '" height="' . $height . '"' . "\n";
+            $out .=	'	codebase="http://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab">' . "\n";
+            $out .=	'	<param name="movie" value="LaughterCycleWaveformMini.swf?input=' . $name . '" >' . "\n";
+            $out .=	'	<param name="quality" value="high" />' . "\n";
+            $out .=	'	<param name="bgcolor" value="#869ca7" />' . "\n";
+            $out .=	'	<param name="allowScriptAccess" value="sameDomain" />' . "\n";
+            $out .=	'	<embed src="LaughterCycleWaveformMini.swf?input=' . $name . '" quality="high" bgcolor="#869ca7"' . "\n";
+            $out .=	'		width="' . $width . '" height="' . $height . '" name="LaughterCycle" align="middle"' . "\n";
+            $out .=	'		play="true"' . "\n";
+            $out .=	'		loop="false"' . "\n";
+            $out .=	'		quality="high"' . "\n";
+            $out .=	'		allowScriptAccess="sameDomain"' . "\n";
+            $out .=	'		type="application/x-shockwave-flash"' . "\n";
+            $out .=	'		pluginspage="http://www.adobe.com/go/getflashplayer">' . "\n";
+            $out .=	'</embed>' . "\n";
+            $out .=	'</object>' . "\n";
+        }
+        $out .= '</div>';
+        return $out;
+    }
 }
 ?>

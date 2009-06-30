@@ -2,7 +2,7 @@
 /**
  * @brief MediaCycle.php
  * @author Alexis Moinet
- * @date 29/06/2009
+ * @date 30/06/2009
  * @copyright (c) 2009 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -38,183 +38,203 @@
  *
   */
 class MediaCycle {
-	static public function addFile(LCFile $file) {
-		global $gConfig;
-		$command = "addfile";
+    static public function addFile(LCFile $file) {
+        global $gConfig;
 
-		$data = "";
-		$data .= $command;
-		$data .= " " . $file->getId();
-		$data .= " ". $file->getName().".wav";
+        if ($gConfig["mediacycle"]["enable"]) {
+            $command = "addfile";
 
-		$filename = $gConfig["filepath"] . $file->getName() . ".wav";
-		$raw = file_get_contents($filename, FILE_BINARY);
+            $data = "";
+            $data .= $command;
+            $data .= " " . $file->getId();
+            $data .= " ". $file->getName().".wav";
 
-		$data .= " " . $raw;
+            $filename = $gConfig["filepath"] . $file->getName() . ".wav";
+            $raw = file_get_contents($filename, FILE_BINARY);
 
-		$sc = new SocketClient($gConfig["mediacycle"]["ip"],$gConfig["mediacycle"]["port"]);
-		//$sc = new SocketClient("192.168.1.167","12345");
+            $data .= " " . $raw;
 
-		$sc->send($data);
-		$sc->receive($answer);
-		$sc->close();
-		//$answer = "addfile n (n=0 or 1)"
+            $sc = new SocketClient($gConfig["mediacycle"]["ip"],$gConfig["mediacycle"]["port"]);
+            //$sc = new SocketClient("192.168.1.167","12345");
 
-		$ans = explode(" ", $answer,3);
-		if ($ans[0] == $command) {
-			if (intval($ans[1]) == 1) {
-				return true;
-			} else {
-				return false;
-			}
+            $sc->send($data);
+            $sc->receive($answer);
+            $sc->close();
+            //$answer = "addfile n (n=0 or 1)"
 
-		} else {
-			return false;
-		}
-	}
+            $ans = explode(" ", $answer,3);
+            if ($ans[0] == $command) {
+                if (intval($ans[1]) == 1) {
+                    return true;
+                } else {
+                    return false;
+                }
 
-	static public function saveLibrary(){
-		global $gConfig;
-		$command = "savelibrary";
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+    }
 
-		$data = "";
-		$data .= $command;
-		$data .= " " . $gConfig["mediacycle"]["libraryname"];
-		
-		$sc = new SocketClient($gConfig["mediacycle"]["ip"],$gConfig["mediacycle"]["port"]);
-		//$sc = new SocketClient("192.168.1.167","12345");
+    static public function saveLibrary(){
+        global $gConfig;
 
-		$sc->send($data);
-		$sc->receive($answer);
-		$sc->close();
-		//$answer = "savelibrary 0/1"
-		$ans = explode(" ", $answer);
-		if ($ans[0] == $command) {
-			if (intval($ans[1]) == 1) {
-				return true;
-			} else {
-				return false;
-			}
-		} else {
-			return false;
-		}
-	}
+        if ($gConfig["mediacycle"]["enable"]) {
+            $command = "savelibrary";
 
-	static public function getkNN(LCFile $file, $k) {
-		global $gConfig;
-		$command = "getknn";
+            $data = "";
+            $data .= $command;
+            $data .= " " . $gConfig["mediacycle"]["libraryname"];
 
-		$data = "";
-		$data .= $command;
-		$data .= " " . $file->getId();
-		$data .= " " . $k;
+            $sc = new SocketClient($gConfig["mediacycle"]["ip"],$gConfig["mediacycle"]["port"]);
+            //$sc = new SocketClient("192.168.1.167","12345");
 
-		$sc = new SocketClient($gConfig["mediacycle"]["ip"],$gConfig["mediacycle"]["port"]);
-		//$sc = new SocketClient("192.168.1.167","12345");
-		
-		$sc->send($data);
-		$sc->receive($answer);
-		$sc->close();
-		
-		//$answer = getknn n id1 id2 .... (n = # of file found, <=$k)
-		$ans = explode(" ", $answer);
-		if ($ans[0] == $command) {
-			$n = intval($ans[1]);
-			$result = array_slice($ans, 2);
-			return $result;
+            $sc->send($data);
+            $sc->receive($answer);
+            $sc->close();
+            //$answer = "savelibrary 0/1"
+            $ans = explode(" ", $answer);
+            if ($ans[0] == $command) {
+                if (intval($ans[1]) == 1) {
+                    return true;
+                } else {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+    }
 
-		} else {
-			return false;
-		}
-	}
+    static public function getkNN(LCFile $file, $k) {
+        global $gConfig;
 
-	static public function getThumbnailXml(LCFile $file) {
-		global $gConfig;
-		$command = "getthumbnail";
+        if ($gConfig["mediacycle"]["enable"]) {
+            $command = "getknn";
 
-		$data = "";
-		$data .= $command;
-		$data .= " " . $file->getId();
+            $data = "";
+            $data .= $command;
+            $data .= " " . $file->getId();
+            $data .= " " . $k;
 
-		$sc = new SocketClient($gConfig["mediacycle"]["ip"],$gConfig["mediacycle"]["port"]);
-		//$sc = new SocketClient("192.168.1.167","12345");
+            $sc = new SocketClient($gConfig["mediacycle"]["ip"],$gConfig["mediacycle"]["port"]);
+            //$sc = new SocketClient("192.168.1.167","12345");
 
-		$sc->send($data);
-		$sc->receive($answer);
-		$sc->close();
-		
-		//$answer = getthumbnail xml (xml = xml representation of waveform)
-		$ans = explode(" ", $answer,2);
+            $sc->send($data);
+            $sc->receive($answer);
+            $sc->close();
 
-		if ($ans[0] == $command) {
-			if (file_put_contents($gConfig["filepath"] . $file->getName() . ".thml",$ans[1]))
-				return true;
-			else
-				return false;
-		} else {
-			return false;
-		}
-	}
+            //$answer = getknn n id1 id2 .... (n = # of file found, <=$k)
+            $ans = explode(" ", $answer);
+            if ($ans[0] == $command) {
+                $n = intval($ans[1]);
+                $result = array_slice($ans, 2);
+                return $result;
+
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+    }
+
+    static public function getThumbnailXml(LCFile $file) {
+        global $gConfig;
+
+        if ($gConfig["mediacycle"]["enable"]) {
+            $command = "getthumbnail";
+
+            $data = "";
+            $data .= $command;
+            $data .= " " . $file->getId();
+
+            $sc = new SocketClient($gConfig["mediacycle"]["ip"],$gConfig["mediacycle"]["port"]);
+            //$sc = new SocketClient("192.168.1.167","12345");
+
+            $sc->send($data);
+            $sc->receive($answer);
+            $sc->close();
+
+            //$answer = getthumbnail xml (xml = xml representation of waveform)
+            $ans = explode(" ", $answer,2);
+
+            if ($ans[0] == $command) {
+                if (file_put_contents($gConfig["filepath"] . $file->getName() . ".thml",$ans[1]))
+                return true;
+                else
+                return false;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+    }
 }
 
 class SocketClient {
-	public $socket = NULL, $address = NULL, $port = NULL;
+    public $socket = NULL, $address = NULL, $port = NULL;
 
-	public function __construct($address, $port) {
-		global $gOut;
+    public function __construct($address, $port) {
+        global $gOut;
 
-		$this->address = $address;
+        $this->address = $address;
         $this->port = $port;
-		$this->socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
+        $this->socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
 
-		if (!$this->socket) {
-			$gOut->nl("socket could not be created");
-			$this->address = NULL;
-			$this->port = NULL;
-			return;
-		}
+        if (!$this->socket) {
+            $gOut->nl("socket could not be created");
+            $this->address = NULL;
+            $this->port = NULL;
+            return;
+        }
 
-		if(!socket_connect($this->socket, $this->address, $this->port)) {
-			$gOut->nl("socket could not connect" . socket_strerror(socket_last_error($this->socket)));
-			$this->address = NULL;
-			$this->port = NULL;
-			return;
-		}
-	}
+        if(!socket_connect($this->socket, $this->address, $this->port)) {
+            $gOut->nl("socket could not connect" . socket_strerror(socket_last_error($this->socket)));
+            $this->address = NULL;
+            $this->port = NULL;
+            return;
+        }
+    }
 
-	public function  __destruct() {
-		//socket_close($this->socket);
-	}
+    public function  __destruct() {
+        //socket_close($this->socket);
+    }
 
-	public function send($data) {
-		global $gOut;
-		$result = socket_write($this->socket, $data, strlen($data));
-		if (!$result || $result != strlen($data)) {
-			$gOut->nl("Socket : send error : $result/" . strlen($data));
-			return false;
-		}
-		
-		return true;
-	}
+    public function send($data) {
+        global $gOut;
+        $result = socket_write($this->socket, $data, strlen($data));
+        if (!$result || $result != strlen($data)) {
+            $gOut->nl("Socket : send error : $result/" . strlen($data));
+            return false;
+        }
 
-	public function receive(&$answer) {
-		$buflen = 2048;
-		$answer = "";
+        return true;
+    }
 
-		while ($out = socket_read($this->socket, $buflen)) {
-			$answer .= $out;
-			//echo "<br/> out : " . strlen($out);
-			/*if (strlen($out) < $buflen) {
-				break;
-			}*/
-			if ($out == "") {
-				break;
-			}
-		}
-	}
+    public function receive(&$answer) {
+        $buflen = 2048;
+        $answer = "";
 
-	public function close() {
-		socket_close($this->socket);
-	}
+        while ($out = socket_read($this->socket, $buflen)) {
+            $answer .= $out;
+            //echo "<br/> out : " . strlen($out);
+            /*if (strlen($out) < $buflen) {
+                break;
+            }*/
+            if ($out == "") {
+                break;
+            }
+        }
+    }
+
+    public function close() {
+        socket_close($this->socket);
+    }
 }
 ?>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" backgroundColor="#FBFBFB" height="32" creationComplete="loadXML('http://localhost:8888/LaughterCycle/a.xml');" width="256"> 
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" backgroundColor="#FBFBFB" height="36" creationComplete="loadXML();" width="256"> 
 
 <mx:Script>
 	<![CDATA[
@@ -57,6 +57,9 @@
 			
 			public function redConnexion(event:ResultEvent):void {
 				serverIP = event.result.toString();
+				input = this.root.loaderInfo.parameters.input;
+			    	xmlServer.url = "http://" + serverIP + "/LCimages/" + input + ".thml";
+			    	xmlServer.send();
 				connection.addEventListener(NetStatusEvent.NET_STATUS, netStatusHandler);
 				connection.connect("rtmp://" + serverIP + "/oflaDemo");
 				connection.client = {'onBWDone':function(event:Event):void{trace('onBWDone');}};
@@ -122,22 +125,20 @@
 		
 			/* Récupération des données XML */
             
-            private function loadXML(src:String):void{
-            	//xmlServer.url = src;
-            	//xmlServer.send();
+            private function loadXML():void{
             	netConnection();
-            	
             }
             
             private function serv_result(evt:ResultEvent):void{
+	        //testText.text= "result : ok";
             	var resultObj:Object = evt.result;
             	var loop:Number = 0;
-				var tempArray:Number = 0;
+		var tempArray:Number = 0;
 			
             	nom = resultObj.waveform.name;
             	wave = resultObj.waveform.data.points;
             	wave = wave.toString();
-				waveArray = wave.split("\t",2000000);
+				waveArray = wave.split(" ",2000000);
 			
             	for (loop = 0; loop<waveArray.length; loop++) 
 				{
@@ -150,7 +151,7 @@
 	       	}
             
             private function serv_fault(evt:FaultEvent):void{
-            	
+            	//testText.text= "result : ko";
             }
             
             /* Tracé de la waveform */
@@ -249,5 +250,5 @@
 </mx:VBox>
 <mx:Button x="6" y="3" label="Play" width="25" id="playSoundFileButton" click="playSoundFile(input);" height="25" icon="@Embed(source='GnomePlayButtonResized.png')">
 </mx:Button>
-<mx:HSlider x="38" y="16" width="208" id="waveformSlider" visible="true"/>
+<mx:HSlider x="38" y="18" width="208" id="waveformSlider" visible="true"/>
 </mx:Application>
