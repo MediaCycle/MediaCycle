@@ -2,7 +2,7 @@
 /**
  * @brief importFiles.php
  * @author Alexis Moinet
- * @date 29/06/2009
+ * @date 30/06/2009
  * @copyright (c) 2009 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -34,7 +34,7 @@
 <?php
 /*
  * script to directly import a bunch of files in the DB
- * 
+ *
  */
 
 require_once '../config.php';
@@ -48,44 +48,44 @@ exit();
 if (is_dir($dir)) {
     if ( ($dh = opendir($dir)) ) {
         while (($file = readdir($dh)) !== false) {
-			echo intval(is_file($dir . $file)) . " : " . $dir . $file . "<br/>";
-			if (is_file($dir . $file) && $file != "." && $file != "..") {
-				echo "fichier : $file : type : " . filetype($dir . $file) . "\n<br/>";
-				$uuid = gfGetUUID();
-				$parts = explode('.', $file);
-				$ext = $parts[count($parts)-1];
-				if ($ext == "wav" || $ext == "aif") {
-					$filename = $uuid . '.' . "wav";
-					if ($ext == "aif") {
-						$command = "ffmpeg -i " . $dir . $file . " " . $gConfig["filepath"].$filename;
-						$res = exec($command, $output);
-					} else {
-						if (copy($dir . $file, $gConfig["filepath"].$filename)) {
-							$gOut->nl("The file ".  $dir . $file . " has been moved to " . $gConfig["filepath"].$filename);
-						} else {
-							$gOut->nl("There was an error uploading the file $file, please try again!");
-						}
-					}
-					$lcfile = LCFile::createNewFile($parts[0], $uuid, 'audio', 'upload');
-					LCFile::convertWavToFlv($uuid);
+            echo intval(is_file($dir . $file)) . " : " . $dir . $file . "<br/>";
+            if (is_file($dir . $file) && $file != "." && $file != "..") {
+                echo "fichier : $file : type : " . filetype($dir . $file) . "\n<br/>";
+                $uuid = gfGetUUID();
+                $parts = explode('.', $file);
+                $ext = $parts[count($parts)-1];
+                if ($ext == "wav" || $ext == "aif") {
+                    $filename = $uuid . '.' . "wav";
+                    if ($ext == "aif") {
+                        $command = "ffmpeg -i " . $dir . $file . " " . $gConfig["filepath"].$filename;
+                        $res = exec($command, $output);
+                    } else {
+                        if (copy($dir . $file, $gConfig["filepath"].$filename)) {
+                            $gOut->nl("The file ".  $dir . $file . " has been moved to " . $gConfig["filepath"].$filename);
+                        } else {
+                            $gOut->nl("There was an error uploading the file $file, please try again!");
+                        }
+                    }
+                    $lcfile = LCFile::createNewFile($parts[0], $uuid, 'audio', 'upload');
+                    LCFile::convertWavToFlv($uuid);
 /*
-					echo "MC : add file<br/>";
-					MediaCycle::addFile($lcfile);
-					echo "MC : get thumbnail<br/>";
-					MediaCycle::getThumbnailXml($lcfile);
- 
+                    echo "MC : add file<br/>";
+                    MediaCycle::addFile($lcfile);
+                    echo "MC : get thumbnail<br/>";
+                    MediaCycle::getThumbnailXml($lcfile);
+
  */
-				}
-				
-			}
+                }
+
+            }
         }
-		echo "no more files\n";
+        echo "no more files\n";
         closedir($dh);
     } else {
-		echo "could not open dir\n";
-	}
+        echo "could not open dir\n";
+    }
 } else {
-	echo "not a dir\n";
+    echo "not a dir\n";
 }
 
 echo $gOut->toHtml();

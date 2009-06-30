@@ -2,7 +2,7 @@
 /**
  * @brief index.php
  * @author Alexis Moinet
- * @date 11/06/2009
+ * @date 30/06/2009
  * @copyright (c) 2009 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -41,49 +41,49 @@ require_once 'setup.php';
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <title><?php $gOut->printContent('sitename'); ?> - <?php $gOut->printContent('pagename'); ?></title>
-		<style type="text/css" media="screen,projection">/*<![CDATA[*/ @import "style/skin.css"; /*]]>*/</style>
-		<style type="text/css">
-			#rateStatus{float:left; clear:both; width:100%; height:20px;}
-			#rateMe{float:left; clear:both; width:100%; height:auto; padding:0px; margin:0px;}
-			#rateMe li{float:left;list-style:none;}
-			#rateMe li a:hover,
-			#rateMe .on{background:url(on.jpg) no-repeat;}
-			#rateMe a{margin-left:1px; border: 1px solid black; float:left;background:url(off.jpg) no-repeat;width:12px; height:12px;}
-			#ratingSaved{display:none;}
-			.saved{color:red; }
-		</style>
+        <style type="text/css" media="screen,projection">/*<![CDATA[*/ @import "style/skin.css"; /*]]>*/</style>
+        <style type="text/css">
+            #rateStatus{float:left; clear:both; width:100%; height:20px;}
+            #rateMe{float:left; clear:both; width:100%; height:auto; padding:0px; margin:0px;}
+            #rateMe li{float:left;list-style:none;}
+            #rateMe li a:hover,
+            #rateMe .on{background:url(on.jpg) no-repeat;}
+            #rateMe a{margin-left:1px; border: 1px solid black; float:left;background:url(off.jpg) no-repeat;width:12px; height:12px;}
+            #ratingSaved{display:none;}
+            .saved{color:red; }
+        </style>
 
     </head>
     <body>
-	<div id="main">
-		<div id="header">header</div>
-		<div class="clear"></div>
-		<div id="topmenu">
-			<div id="menu"><?php $gOut->printContent('menu');?></div>
-			<div id="userlinks"><?php $gOut->printContent('userlinks');?></div>
-		</div>
-		<div class="clear"></div>
-		<?php if ($gOut->getContent('error')) { ?>
-		<div id="errormsg">
-			<?php $gOut->printContent('errormsg'); ?>
-		</div>
-		<div class="clear"></div>
-		<?php } ?>
-		<div id="content">
-			<div id="recorder"><?php $gOut->printContent('recorder');?></div>
-			<div id="pagecontent"><?php	$gOut->printContent('pagecontent'); ?>
-			</div>
-			<div id="sidecontent">
-			<?php $gOut->printContent('sidecontent');?>
-			<?php $gOut->printContent('last-laugh');?>
-			<?php $gOut->printContent('last-comments');?>
-			</div>
-		</div>
-		<div class="clear"></div>
-		<div id="footer">footer
-		<?php echo $gOut->toHtml(); ?>
-		</div>
-	</div>
+        <div id="main">
+            <div id="header">header</div>
+            <div class="clear"></div>
+            <div id="topmenu">
+                <div id="menu"><?php $gOut->printContent('menu');?></div>
+                <div id="userlinks"><?php $gOut->printContent('userlinks');?></div>
+            </div>
+            <div class="clear"></div>
+            <?php if ($gOut->getContent('error')) { ?>
+            <div id="errormsg">
+                <?php $gOut->printContent('errormsg'); ?>
+            </div>
+            <div class="clear"></div>
+            <?php } ?>
+            <div id="content">
+                <div id="recorder"><?php $gOut->printContent('recorder');?></div>
+                <div id="pagecontent"><?php	$gOut->printContent('pagecontent'); ?>
+                </div>
+                <div id="sidecontent">
+                    <?php $gOut->printContent('sidecontent');?>
+                    <?php $gOut->printContent('last-laugh');?>
+                    <?php $gOut->printContent('last-comments');?>
+                </div>
+            </div>
+            <div class="clear"></div>
+            <div id="footer">footer
+                <?php echo $gOut->toHtml(); ?>
+            </div>
+        </div>
     </body>
 </html>
 

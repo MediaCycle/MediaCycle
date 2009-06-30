@@ -2,7 +2,7 @@
 /**
  * @brief Query.php
  * @author Alexis Moinet
- * @date 18/06/2009
+ * @date 30/06/2009
  * @copyright (c) 2009 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -43,70 +43,70 @@
   */
 class LCQuery implements PageInterface {
     //put your code here
-	const WIDTH = 400;
-	const HEIGHT = 90;
-	const PITCH = 0.5;
-	const TIMBRE = 0.5;
-	
-	private $fileId, $pitch, $timbre;
+    const WIDTH = 400;
+    const HEIGHT = 90;
+    const PITCH = 0.5;
+    const TIMBRE = 0.5;
 
-	public function  __construct() {
-		global $gOut;
+    private $fileId, $pitch, $timbre;
 
-		$this->pitch = $_POST["pitchWeight"];
-		$this->timbre = $_POST["timbreWeight"];
-		$this->fileId = intval($_POST["file"]);		
-	}
-	public static function factory() {
-		return new LCQuery();
-	}
-	public function getPageName() {
-		return "Query by example";
-	}
-	public function toHtml() {
-		$out = "";
-		$out .= LCFile::miniPlayer($this->fileId);
-		$out .= self::sliders($this->fileId);
+    public function  __construct() {
+        global $gOut;
 
-		return $out;
-	}
+        $this->pitch = $_POST["pitchWeight"];
+        $this->timbre = $_POST["timbreWeight"];
+        $this->fileId = intval($_POST["file"]);
+    }
+    public static function factory() {
+        return new LCQuery();
+    }
+    public function getPageName() {
+        return "Query by example";
+    }
+    public function toHtml() {
+        $out = "";
+        $out .= LCFile::miniPlayer($this->fileId);
+        $out .= self::sliders($this->fileId);
 
-	static public function sliders($fileId,$width=0, $height=0) {
-		$out = "";
-		
-		if ($fileId > 0) {
-			$width = ($width) ? intval($width) : self::WIDTH;
-			$height = ($height) ? intval($height) : self::HEIGHT;
-			$pitch = self::PITCH;
-			$timbre = self::TIMBRE;
+        return $out;
+    }
 
-			if (isset ($_POST["pitchWeight"])) {
-				$pitch = $_POST["pitchWeight"];
-			}
-			if (isset ($_POST["timbreWeight"])) {
-				$timbre = $_POST["timbreWeight"];
-			}
+    static public function sliders($fileId,$width=0, $height=0) {
+        $out = "";
 
-			$out .= '<object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553541234"' . "\n";
-			$out .=	'	id="LaughterCycleMultiSlider" width="' . $width . '" height="' . $height . '"' . "\n";
-			$out .=	'	codebase="http://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab">' . "\n";
-			$out .=	'	<param name="movie" value="LaughterCycleMultiSlider.swf?file=' . $fileId . '&pitch=' . $pitch . '&timbre=' . $timbre . '" >' . "\n";
-			$out .=	'	<param name="quality" value="high" />' . "\n";
-			$out .=	'	<param name="bgcolor" value="#869ca7" />' . "\n";
-			$out .=	'	<param name="allowScriptAccess" value="sameDomain" />' . "\n";
-			$out .=	'	<embed src="LaughterCycleMultiSlider.swf?file=' . $fileId . '&pitch=' . $pitch . '&timbre=' . $timbre . '" quality="high" bgcolor="#869ca7"' . "\n";
-			$out .=	'		width="' . $width . '" height="' . $height . '" name="LaughterCycle" align="middle"' . "\n";
-			$out .=	'		play="true"' . "\n";
-			$out .=	'		loop="false"' . "\n";
-			$out .=	'		quality="high"' . "\n";
-			$out .=	'		allowScriptAccess="sameDomain"' . "\n";
-			$out .=	'		type="application/x-shockwave-flash"' . "\n";
-			$out .=	'		pluginspage="http://www.adobe.com/go/getflashplayer">' . "\n";
-			$out .=	'</embed>' . "\n";
-			$out .=	'</object>' . "\n";
-		}
+        if ($fileId > 0) {
+            $width = ($width) ? intval($width) : self::WIDTH;
+            $height = ($height) ? intval($height) : self::HEIGHT;
+            $pitch = self::PITCH;
+            $timbre = self::TIMBRE;
 
-		return $out;
-	}
+            if (isset ($_POST["pitchWeight"])) {
+                $pitch = $_POST["pitchWeight"];
+            }
+            if (isset ($_POST["timbreWeight"])) {
+                $timbre = $_POST["timbreWeight"];
+            }
+
+            $out .= '<object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553541234"' . "\n";
+            $out .=	'   id="LaughterCycleMultiSlider" width="' . $width . '" height="' . $height . '"' . "\n";
+            $out .=	'   codebase="http://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab">' . "\n";
+            $out .=	'   <param name="movie" value="LaughterCycleMultiSlider.swf?file=' . $fileId . '&pitch=' . $pitch . '&timbre=' . $timbre . '" >' . "\n";
+            $out .=	'   <param name="quality" value="high" />' . "\n";
+            $out .=	'   <param name="bgcolor" value="#869ca7" />' . "\n";
+            $out .=	'   <param name="allowScriptAccess" value="sameDomain" />' . "\n";
+            $out .=	'   <embed src="LaughterCycleMultiSlider.swf?file=' . $fileId . '&pitch=' . $pitch . '&timbre=' . $timbre . '" quality="high" bgcolor="#869ca7"' . "\n";
+            $out .=	'       width="' . $width . '" height="' . $height . '" name="LaughterCycle" align="middle"' . "\n";
+            $out .=	'       play="true"' . "\n";
+            $out .=	'       loop="false"' . "\n";
+            $out .=	'       quality="high"' . "\n";
+            $out .=	'       allowScriptAccess="sameDomain"' . "\n";
+            $out .=	'       type="application/x-shockwave-flash"' . "\n";
+            $out .=	'       pluginspage="http://www.adobe.com/go/getflashplayer">' . "\n";
+            $out .=	'</embed>' . "\n";
+            $out .=	'</object>' . "\n";
+        }
+
+        return $out;
+    }
 }
 ?>

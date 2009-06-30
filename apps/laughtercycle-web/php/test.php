@@ -2,7 +2,7 @@
 /**
  * @brief test.php
  * @author Alexis Moinet
- * @date 29/06/2009
+ * @date 30/06/2009
  * @copyright (c) 2009 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -42,9 +42,9 @@ $file = new LCFile(46);
 echo "addFile : ";
 $result = MediaCycle::addFile($file);
 if ($result) {
-	echo "<br/>worked : <br/>$result";
+    echo "<br/>worked : <br/>$result";
 } else {
-	echo "<br/>doomed";
+    echo "<br/>doomed";
 }
 
 echo "<br/><br/>getThumbnailXml : ";

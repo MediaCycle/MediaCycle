@@ -2,7 +2,7 @@
 /**
  * @brief Page.php
  * @author Alexis Moinet
- * @date 05/06/2009
+ * @date 30/06/2009
  * @copyright (c) 2009 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -42,20 +42,20 @@
  *
   */
 interface PageInterface {
-	public function getPageName();
-	public function toHtml();
+    public function getPageName();
+    public function toHtml();
     static public function factory();
 }
 
 class Page {
-	public function getPageName() {
-		return "";
-	}
-	public function toHtml() {
-		return "";
-	}
+    public function getPageName() {
+        return "";
+    }
+    public function toHtml() {
+        return "";
+    }
     static public function factory() {
-		return new Page();
-	}
+        return new Page();
+    }
 }
 ?>

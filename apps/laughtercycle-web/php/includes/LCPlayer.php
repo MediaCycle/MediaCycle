@@ -52,20 +52,20 @@ class LCPlayer {
         $out .= '<div class="lc-player">';
         if ($name != "") {
             $out .= '<object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000"' . "\n";
-            $out .=	'	id="LaughterCycle" width="' . $width . '" height="' . $height . '"' . "\n";
-            $out .=	'	codebase="http://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab">' . "\n";
-            $out .=	'	<param name="movie" value="LaughterCycleWaveformMini.swf?input=' . $name . '" >' . "\n";
-            $out .=	'	<param name="quality" value="high" />' . "\n";
-            $out .=	'	<param name="bgcolor" value="#869ca7" />' . "\n";
-            $out .=	'	<param name="allowScriptAccess" value="sameDomain" />' . "\n";
-            $out .=	'	<embed src="LaughterCycleWaveformMini.swf?input=' . $name . '" quality="high" bgcolor="#869ca7"' . "\n";
-            $out .=	'		width="' . $width . '" height="' . $height . '" name="LaughterCycle" align="middle"' . "\n";
-            $out .=	'		play="true"' . "\n";
-            $out .=	'		loop="false"' . "\n";
-            $out .=	'		quality="high"' . "\n";
-            $out .=	'		allowScriptAccess="sameDomain"' . "\n";
-            $out .=	'		type="application/x-shockwave-flash"' . "\n";
-            $out .=	'		pluginspage="http://www.adobe.com/go/getflashplayer">' . "\n";
+            $out .=	'   id="LaughterCycle" width="' . $width . '" height="' . $height . '"' . "\n";
+            $out .=	'   codebase="http://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab">' . "\n";
+            $out .=	'   <param name="movie" value="LaughterCycleWaveformMini.swf?input=' . $name . '" >' . "\n";
+            $out .=	'   <param name="quality" value="high" />' . "\n";
+            $out .=	'   <param name="bgcolor" value="#869ca7" />' . "\n";
+            $out .=	'   <param name="allowScriptAccess" value="sameDomain" />' . "\n";
+            $out .=	'   <embed src="LaughterCycleWaveformMini.swf?input=' . $name . '" quality="high" bgcolor="#869ca7"' . "\n";
+            $out .=	'       width="' . $width . '" height="' . $height . '" name="LaughterCycle" align="middle"' . "\n";
+            $out .=	'       play="true"' . "\n";
+            $out .=	'       loop="false"' . "\n";
+            $out .=	'       quality="high"' . "\n";
+            $out .=	'       allowScriptAccess="sameDomain"' . "\n";
+            $out .=	'       type="application/x-shockwave-flash"' . "\n";
+            $out .=	'       pluginspage="http://www.adobe.com/go/getflashplayer">' . "\n";
             $out .=	'</embed>' . "\n";
             $out .=	'</object>' . "\n";
         }

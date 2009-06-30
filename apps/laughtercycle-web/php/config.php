@@ -62,12 +62,12 @@ $gConfig["mediacycle"]["libraryname"] = "LClib";
 $gConfig["mediacycle"]["knn"] = 5;
 
 global $gPages,$gHomePage;//list of the static pages of the website
-$gPages = array("home"		=> "Home",
-				"file"		=> "LCFile",
-				"login"		=> "UserLogin",
-				"upload"	=> "UploadFile",
-				"user"		=> "User",
-				"query"     => "LCQuery");
+$gPages = array("home"      => "Home",
+                "file"      => "LCFile",
+                "login"     => "UserLogin",
+                "upload"    => "UploadFile",
+                "user"      => "User",
+                "query"     => "LCQuery");
 
 $gHomePage= 'home';
 ?>

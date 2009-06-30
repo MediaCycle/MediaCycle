@@ -2,7 +2,7 @@
 /**
  * @brief DB2MC.php
  * @author Alexis Moinet
- * @date 29/06/2009
+ * @date 30/06/2009
  * @copyright (c) 2009 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -49,17 +49,17 @@ $gDB2->query($query);
 ob_implicit_flush(true);
 echo "# : ". $gDB2->nf() ."<br/>";
 while ($gDB2->next_record()) {
-	$id = $gDB2->f("id");
-	$file = new LCFile($id);
+    $id = $gDB2->f("id");
+    $file = new LCFile($id);
 
-	echo $file->getId() . " : " . $file->getName() . "<br/>";
-	
-	LCFile::convertFlvToWav($file->getName());
-	echo "MC : add file<br/>";
-	MediaCycle::addFile($file);
-	echo "MC : get thumbnail<br/>";
-	MediaCycle::getThumbnailXml($file);
-	echo "<br/>";
+    echo $file->getId() . " : " . $file->getName() . "<br/>";
+
+    LCFile::convertFlvToWav($file->getName());
+    echo "MC : add file<br/>";
+    MediaCycle::addFile($file);
+    echo "MC : get thumbnail<br/>";
+    MediaCycle::getThumbnailXml($file);
+    echo "<br/>";
 }
 
 echo "MC : save library<br/>";

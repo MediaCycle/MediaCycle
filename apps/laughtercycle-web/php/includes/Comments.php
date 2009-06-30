@@ -2,7 +2,7 @@
 /**
  * @brief Comments.php
  * @author Alexis Moinet
- * @date 11/06/2009
+ * @date 30/06/2009
  * @copyright (c) 2009 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -43,129 +43,129 @@
   */
 
 class Comments {
-	static public function exists($fileId,$userId) {
-		$fileId = intval($fileId);
-		$userId = intval($userId);
+    static public function exists($fileId,$userId) {
+        $fileId = intval($fileId);
+        $userId = intval($userId);
 
-		if ($fileId > 0 && $userId > 0) {
-			global $gDB;
+        if ($fileId > 0 && $userId > 0) {
+            global $gDB;
 
-			$query = "SELECT * FROM comments";
-			$query .= sprintf(" WHERE file_id=%d AND user_id=%d",$fileId,$userId);
+            $query = "SELECT * FROM comments";
+            $query .= sprintf(" WHERE file_id=%d AND user_id=%d",$fileId,$userId);
 
-			$result = $gDB->query($query);
+            $result = $gDB->query($query);
 
-			if ($gDB->next_record()) {
-				return true;
-			}
-		}
-		return false;
-	}
-	static public function getFileComments($fileId) {
-		$fileId = intval($fileId);
-		if ($fileId > 0) {
-			global $gDB;
+            if ($gDB->next_record()) {
+                return true;
+            }
+        }
+        return false;
+    }
+    static public function getFileComments($fileId) {
+        $fileId = intval($fileId);
+        if ($fileId > 0) {
+            global $gDB;
 
-			$query = "SELECT * FROM comments, users";
-			$query .= sprintf(" WHERE file_id=%d AND users.id=comments.user_id",$fileId);
-			$query .= " ORDER BY time DESC";
+            $query = "SELECT * FROM comments, users";
+            $query .= sprintf(" WHERE file_id=%d AND users.id=comments.user_id",$fileId);
+            $query .= " ORDER BY time DESC";
 
-			$out = "";
+            $out = "";
 
-			$result = $gDB->query($query);
-			if ($gDB->nf() > 0) {
-				$out .= '<div id="filecomments">Comments :';
-				$out .= '<ul>';
-				while ($gDB->next_record()) {
-					$out .= '<li class="li-filecomment">';
-					$out .= '<a href="index.php?title=user&id=' . $gDB->f("user_id") . '">' . $gDB->f("name") . '</a>';
-					$out .= '<div class=filenote>'.$gDB->f("note").'</div>';
-					$out .= '<div class=filecomment>'.$gDB->f("comment").'</div>';
-					$out .= '</li>';
-				}
-				$out .= '</ul></div>';
-			}
-			return $out;
-		}
-		return "";
-	}
+            $result = $gDB->query($query);
+            if ($gDB->nf() > 0) {
+                $out .= '<div id="filecomments">Comments :';
+                $out .= '<ul>';
+                while ($gDB->next_record()) {
+                    $out .= '<li class="li-filecomment">';
+                    $out .= '<a href="index.php?title=user&id=' . $gDB->f("user_id") . '">' . $gDB->f("name") . '</a>';
+                    $out .= '<div class=filenote>'.$gDB->f("note").'</div>';
+                    $out .= '<div class=filecomment>'.$gDB->f("comment").'</div>';
+                    $out .= '</li>';
+                }
+                $out .= '</ul></div>';
+            }
+            return $out;
+        }
+        return "";
+    }
 
-	static public function getUserComments($userId) {
-		$userId = intval($userId);
-		if ($userId > 0) {
-			global $gDB;
+    static public function getUserComments($userId) {
+        $userId = intval($userId);
+        if ($userId > 0) {
+            global $gDB;
 
-			$query = "SELECT * FROM comments, files";
-			$query .= sprintf(" WHERE user_id=%d AND files.id=comments.file_id",$userId);
-			$query .= " ORDER BY time DESC";
+            $query = "SELECT * FROM comments, files";
+            $query .= sprintf(" WHERE user_id=%d AND files.id=comments.file_id",$userId);
+            $query .= " ORDER BY time DESC";
 
-			$result = $gDB->query($query);
-			
-			$out = "";
-			if ($gDB->nf() > 0) {
-				global $gUser;
-				if ($gUser->getId() == $userId) {
-					$out .= '<div id="filecomments">My comments :';
-				} else {
-					$out .= '<div id="filecomments">His comments :';
-				}
-				$out .= '<ul>';
-				while ($gDB->next_record()) {
-					$out .= '<li class="li-filecomment">';
-					$out .= '<a href="index.php?title=file&id=' . $gDB->f("file_id") . '">' . $gDB->f("title") . '</a>';
-					$out .= '<div class=filenote>'.$gDB->f("note").'</div>';
-					$out .= '<div class=filecomment>'.$gDB->f("comment").'</div>';
-					$out .= '</li>';
-				}
-				$out .= '</ul></div>';
-			}
-			return $out;
-		}
-		return "";
-	}
+            $result = $gDB->query($query);
 
-	static public function getNLastComments($n=0) {
-		global $gConfig, $gDB;
-		
-		if ($n<=0) {
-			$n = $gConfig["nlastcomments"];
-		}
+            $out = "";
+            if ($gDB->nf() > 0) {
+                global $gUser;
+                if ($gUser->getId() == $userId) {
+                    $out .= '<div id="filecomments">My comments :';
+                } else {
+                    $out .= '<div id="filecomments">His comments :';
+                }
+                $out .= '<ul>';
+                while ($gDB->next_record()) {
+                    $out .= '<li class="li-filecomment">';
+                    $out .= '<a href="index.php?title=file&id=' . $gDB->f("file_id") . '">' . $gDB->f("title") . '</a>';
+                    $out .= '<div class=filenote>'.$gDB->f("note").'</div>';
+                    $out .= '<div class=filecomment>'.$gDB->f("comment").'</div>';
+                    $out .= '</li>';
+                }
+                $out .= '</ul></div>';
+            }
+            return $out;
+        }
+        return "";
+    }
 
-		$query = "SELECT * FROM comments, files, users";
-		$query .= " WHERE files.id=comments.file_id AND users.id=comments.user_id";
-		$query .= sprintf(" ORDER BY time DESC LIMIT 0, %d",$n);
+    static public function getNLastComments($n=0) {
+        global $gConfig, $gDB;
 
-		$result = $gDB->query($query);
+        if ($n<=0) {
+            $n = $gConfig["nlastcomments"];
+        }
 
-		$out = "";
-		if ($gDB->nf() > 0) {
-			global $gUser;
+        $query = "SELECT * FROM comments, files, users";
+        $query .= " WHERE files.id=comments.file_id AND users.id=comments.user_id";
+        $query .= sprintf(" ORDER BY time DESC LIMIT 0, %d",$n);
 
-			$out .= '<div id="filecomments">Last comments :';
-			$out .= '<ul>';
-			while ($gDB->next_record()) {
-				$out .= '<li class="li-filecomment">';
-				$out .= '<a href="index.php?title=file&id=' . $gDB->f("file_id") . '">' . $gDB->f("title") . '</a>';
-				$out .= '<div class=filecomment>'.$gDB->f("comment").'</div>';
-				$out .= '</li>';
-			}
-			$out .= '</ul></div>';
-		}
-		return $out;
-	}
+        $result = $gDB->query($query);
 
-	static public function form($fileId=0) {
-		$fileId = intval($fileId);
+        $out = "";
+        if ($gDB->nf() > 0) {
+            global $gUser;
 
-		if ($fileId > 0) {	
-			$out = "";
+            $out .= '<div id="filecomments">Last comments :';
+            $out .= '<ul>';
+            while ($gDB->next_record()) {
+                $out .= '<li class="li-filecomment">';
+                $out .= '<a href="index.php?title=file&id=' . $gDB->f("file_id") . '">' . $gDB->f("title") . '</a>';
+                $out .= '<div class=filecomment>'.$gDB->f("comment").'</div>';
+                $out .= '</li>';
+            }
+            $out .= '</ul></div>';
+        }
+        return $out;
+    }
 
-			$out .= "<div id=\"commentform\">\n";
-			$out .= "<form name=\"commentform\" action=\"index.php?action=file&do=comment\" method=\"POST\">\n";
-			$out .= sprintf("<input type=hidden name=\"fileId\" value=\"%d\">",$fileId);
-			$out .= "<label for=\"note\">Your note: </label><br/>";
-			$out .= "<input type=hidden id=\"noteId\" name=\"note\" value=\"\">";
-			$out .= '<div class="code">
+    static public function form($fileId=0) {
+        $fileId = intval($fileId);
+
+        if ($fileId > 0) {
+            $out = "";
+
+            $out .= "<div id=\"commentform\">\n";
+            $out .= "<form name=\"commentform\" action=\"index.php?action=file&do=comment\" method=\"POST\">\n";
+            $out .= sprintf("<input type=hidden name=\"fileId\" value=\"%d\">",$fileId);
+            $out .= "<label for=\"note\">Your note: </label><br/>";
+            $out .= "<input type=hidden id=\"noteId\" name=\"note\" value=\"\">";
+            $out .= '<div class="code">
                         <script type="text/javascript" language="javascript" src="ratingscript.js"></script>
                         <div id="rateMe" title="Rate Me..." >
                             <a onclick="rateIt(this,1)" id="_1" title="ehh..." onmouseover="rating(this)"></a>
@@ -176,31 +176,31 @@ class Comments {
                         </div>
                     </div>';
 
-			$out .= "<label for=\"commenttext\">Your comment : </label><br/>";
-			$out .= "<textarea name=\"commenttext\" rows=\"8\" cols=\"80\">\n";
-			$out .= "</textarea><br/>\n";
-			$out .= "<input type=\"submit\" value=\"Send comment\" name=\"ok\" />";
-			$out .= "</form>\n</div>\n";
-		}
-		return $out;
-	}
+            $out .= "<label for=\"commenttext\">Your comment : </label><br/>";
+            $out .= "<textarea name=\"commenttext\" rows=\"8\" cols=\"80\">\n";
+            $out .= "</textarea><br/>\n";
+            $out .= "<input type=\"submit\" value=\"Send comment\" name=\"ok\" />";
+            $out .= "</form>\n</div>\n";
+        }
+        return $out;
+    }
 
-	static public function addComment($fileId, $comment, $note) {
-		global $gDB, $gUser;
+    static public function addComment($fileId, $comment, $note) {
+        global $gDB, $gUser;
 
-		$fileId = intval($fileId);
-		$comment = $gDB->cleanInputString($comment);
-		$note = ($note == "") ? "NULL" : "'" . intval($note) . "'";
+        $fileId = intval($fileId);
+        $comment = $gDB->cleanInputString($comment);
+        $note = ($note == "") ? "NULL" : "'" . intval($note) . "'";
 
-		if (LCFile::exists($fileId)) {
-			$query = "INSERT INTO";
-			$query .= " comments ";
-			$query .= "(`file_id`,`user_id`,`comment`,`note`,`time`)";
-			$query .= " VALUES ";
-			$query .= "(" . $fileId . "," . $gUser->getId() . ",'" . $comment . "'," . $note . "," . gfGetTimeStamp() . ")";
+        if (LCFile::exists($fileId)) {
+            $query = "INSERT INTO";
+            $query .= " comments ";
+            $query .= "(`file_id`,`user_id`,`comment`,`note`,`time`)";
+            $query .= " VALUES ";
+            $query .= "(" . $fileId . "," . $gUser->getId() . ",'" . $comment . "'," . $note . "," . gfGetTimeStamp() . ")";
 
-			$gDB->query($query);
-		}
-	}
+            $gDB->query($query);
+        }
+    }
 }
 ?>

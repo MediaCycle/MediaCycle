@@ -1,14 +1,14 @@
 /* 
-    Document   : skin
-    Created on : 29-mai-2009, 16:02:30
-    Author     : Alexis Moinet
-    Description:
-        Purpose of the stylesheet follows.
+Document   : skin
+Created on : 29-mai-2009, 16:02:30
+Author     : Alexis Moinet
+Description:
+Purpose of the stylesheet follows.
 */
 
 /* 
-   TODO customize this sample style
-   Syntax recommendation http://www.w3.org/TR/REC-CSS2/
+TODO customize this sample style
+Syntax recommendation http://www.w3.org/TR/REC-CSS2/
 */
 
 root { 
@@ -16,104 +16,104 @@ root {
 }
 
 div {
-	border: 1px solid #AAAAAA;/*#7A2423;*/
-	margin: 5px;
-	padding: 5px;
+    border: 1px solid #AAAAAA;/*#7A2423;*/
+    margin: 5px;
+    padding: 5px;
 }
 
 .clear {
-	border: none;
-	margin: 0px;
-	clear: both;
+    border: none;
+    margin: 0px;
+    clear: both;
 }
 
 #main {
-	margin: 0px auto;
-	width: 80%;
+    margin: 0px auto;
+    width: 80%;
 }
 #header {
-	
+
 }
 
 #topmenu {
-	width: auto;
-	margin: 0px;
-	padding: 0px;
+    width: auto;
+    margin: 0px;
+    padding: 0px;
 }
 #errormsg {
-	border: 1px solid red;
+    border: 1px solid red;
 }
 
 #menu {
-	width: 70%;
-	background:#9c9;
-	position: relative;
-	float: left;
-	margin: 0px;
-	padding: 0px;
+    width: 70%;
+    background:#9c9;
+    position: relative;
+    float: left;
+    margin: 0px;
+    padding: 0px;
 }
 #userlinks {
-	width: auto;
-	background:#c9c;
-	text-align:right;
-	position: relative;
-	margin: 0;
-	margin-left: 75%;
-	padding: 0px;
+    width: auto;
+    background:#c9c;
+    text-align:right;
+    position: relative;
+    margin: 0;
+    margin-left: 75%;
+    padding: 0px;
 }
 #userlinks-logged {
-	margin: 0;
-	padding: 0px;
+    margin: 0;
+    padding: 0px;
 }
 #userlinks-notlogged {
-	margin: 0;
-	padding: 0px;
+    margin: 0;
+    padding: 0px;
 }
 
 #userlinks ul {
-	margin:0;
-	padding:0;
-	list-style:none;
+    margin:0;
+    padding:0;
+    list-style:none;
 }
 #userlinks ul li {
-	display:inline;
-	margin: 0px;
-	padding: 0px;
-	padding-right: 1em;
+    display:inline;
+    margin: 0px;
+    padding: 0px;
+    padding-right: 1em;
 }
 #userlinks span {
-	margin: 0px;
-	padding: 0px;
-	padding-right: 1em;
+    margin: 0px;
+    padding: 0px;
+    padding-right: 1em;
 }
 
 #content {
-	width: auto;
+    width: auto;
 }
 
 #recorder {
-	text-align: center;
-	clear: both;
+    text-align: center;
+    clear: both;
 }
 #pagecontent {
-	width: 65%;
-	/*background:#7a7;*/
-	position: relative;
-	float: left;
-	text-align: justify
+    width: 65%;
+    /*background:#7a7;*/
+    position: relative;
+    float: left;
+    text-align: justify
 }
 #sidecontent {
-	width: auto;
-	/*background:#a7a;*/
-	position: relative;
-	margin-left: 67%;
-	border-left: 1px solid #aaa;
-	padding-left: 20px;
-	text-align: justify
+    width: auto;
+    /*background:#a7a;*/
+    position: relative;
+    margin-left: 67%;
+    border-left: 1px solid #aaa;
+    padding-left: 20px;
+    text-align: justify
 }
 
 #lastlaugh ul {
-	margin:0;
-	padding:0;
-	list-style:none;
+    margin:0;
+    padding:0;
+    list-style:none;
 }

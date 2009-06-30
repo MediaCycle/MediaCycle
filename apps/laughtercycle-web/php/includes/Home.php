@@ -2,7 +2,7 @@
 /**
  * @brief Home.php
  * @author Alexis Moinet
- * @date 05/06/2009
+ * @date 30/06/2009
  * @copyright (c) 2009 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -42,21 +42,21 @@
  *
   */
 class Home extends Page{
-	public function getPageName() {
-		return "Home";
-	}
-	public function toHtml() {
-		$out = "";
-		$out .= "<h1>Welcome</h1><hr><br/>\n";
-		$out .= Output::lipsum();
+    public function getPageName() {
+        return "Home";
+    }
+    public function toHtml() {
+        $out = "";
+        $out .= "<h1>Welcome</h1><hr><br/>\n";
+        $out .= Output::lipsum();
 
-		return $out;
-	}
-	public static function factory() {
-		return new Home();
-	}
-	public static function getPageLink() {
-		return '<a href="index.php?title=home">Home</a>';
-	}
+        return $out;
+    }
+    public static function factory() {
+        return new Home();
+    }
+    public static function getPageLink() {
+        return '<a href="index.php?title=home">Home</a>';
+    }
 }
 ?>
