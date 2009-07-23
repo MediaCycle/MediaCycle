@@ -2,7 +2,7 @@
 /**
  * @brief DB2MC.php
  * @author Alexis Moinet
- * @date 30/06/2009
+ * @date 23/07/2009
  * @copyright (c) 2009 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -33,36 +33,51 @@
 
 <?php
 /* 
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ * This file is used to "transmit" to MediaCycle all the files referenced in the MySQL database.
  */
 
 require_once '../config.php';
 require_once '../setup.php';
 
+//step 1 : get a list of the files (actually, only their id)
 $query = "SELECT id FROM files";
 
-$gDB2 = new DatabaseMySql();
-$gDB2->connect();
-$gDB2->query($query);
+$result = $gDB->query($query);
 
 ob_implicit_flush(true);
-echo "# : ". $gDB2->nf() ."<br/>";
-while ($gDB2->next_record()) {
-    $id = $gDB2->f("id");
-    $file = new LCFile($id);
+echo "# : ". $gDB->nf() ."<br/>";
 
-    echo $file->getId() . " : " . $file->getName() . "<br/>";
+//put all the ids in an array
+$ids = array();
+while ($gDB->next_record()) {
+    $ids[] = $gDB->f("id");
+}
 
-    LCFile::convertFlvToWav($file->getName());
-    echo "MC : add file<br/>";
-    MediaCycle::addFile($file);
-    echo "MC : get thumbnail<br/>";
-    MediaCycle::getThumbnailXml($file);
-    echo "<br/>";
+//step 2 : browse the list of id and do something
+foreach ($ids as $id) {
+    //create a file instance from an id
+    if ($id > 0) {
+        $file = new LCFile($id);
+
+        echo $file->getId() . " : " . $file->getName() . "<br/>";
+
+        //get the *.flv file (on the red5 server) and create the *.wav (wherever set in config.php, e.g. the apache server)
+        LCFile::convertFlvToWav($file->getName());
+        echo "MC : add file<br/>";
+        //send the file to MediaCycle for analysis/integration in MediaCycle's DB
+        MediaCycle::addFile($file);
+        echo "MC : get thumbnail<br/>";
+        //get the thumbnail of the file from MediaCycle
+        MediaCycle::getThumbnailXml($file);
+        echo "<br/>";
+    }
 }
 
 echo "MC : save library<br/>";
+//ask to MediaCycle to save it's current DB state
 MediaCycle::saveLibrary();
+
+$result = MediaCycle::getkNN(new LCFile(1),2);
+print_r($result);
 
 ?>

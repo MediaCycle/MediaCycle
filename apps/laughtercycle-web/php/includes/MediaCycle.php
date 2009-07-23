@@ -2,7 +2,7 @@
 /**
  * @brief MediaCycle.php
  * @author Alexis Moinet
- * @date 30/06/2009
+ * @date 23/07/2009
  * @copyright (c) 2009 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -38,30 +38,64 @@
  *
   */
 class MediaCycle {
-    static public function addFile(LCFile $file) {
+    /**
+     * Construct a message following the format defined for communications with MediaCycle
+     * @param string $command
+     * @param string $params
+     * @return string
+     */
+    static public function buildMessage($command,$params) {
+        $message = "";
+        $message .= $command;
+        foreach ($params as $param) {
+            $message .= " " . $param;
+        }
+        return $message;
+    }
+    /**
+     *
+     * @param string $command
+     * @param string $params
+     * @return string or bool
+     */
+    static public function askMediaCycle($command,$params) {
         global $gConfig;
-
+        //is MediaCycle enabled in config.php ?
         if ($gConfig["mediacycle"]["enable"]) {
-            $command = "addfile";
-
-            $data = "";
-            $data .= $command;
-            $data .= " " . $file->getId();
-            $data .= " ". $file->getName().".wav";
-
-            $filename = $gConfig["filepath"] . $file->getName() . ".wav";
-            $raw = file_get_contents($filename, FILE_BINARY);
-
-            $data .= " " . $raw;
-
+            $data = self::buildMessage($command, $params);
             $sc = new SocketClient($gConfig["mediacycle"]["ip"],$gConfig["mediacycle"]["port"]);
             //$sc = new SocketClient("192.168.1.167","12345");
-
             $sc->send($data);
             $sc->receive($answer);
             $sc->close();
-            //$answer = "addfile n (n=0 or 1)"
 
+            return $answer;
+        } else {
+            return false;
+        }
+    }
+    /**
+     * Sends a wave file to MediaCycle to be added to its library
+     * @param LCFile $file an instance of a file created using the class LCfile (see File.php)
+     * @return bool
+     */
+    static public function addFile(LCFile $file) {
+        global $gConfig;
+       
+        //in this particular case (loading a whole *.wav file),
+        //I think it's worth it to first check whether it's needed
+        $raw = "";
+        if ($gConfig["mediacycle"]["enable"]) {
+            $filename = $gConfig["filepath"] . $file->getName() . ".wav";
+            $raw = file_get_contents($filename, FILE_BINARY);
+        }
+
+        $command = "addfile";
+        $params = array($file->getId(),$file->getName().".wav",$raw);
+
+        $answer = self::askMediaCycle($command, $params);
+
+        if ($answer) {
             $ans = explode(" ", $answer,3);
             if ($ans[0] == $command) {
                 if (intval($ans[1]) == 1) {
@@ -78,23 +112,45 @@ class MediaCycle {
         }
     }
 
+    /**
+     * Asks MediaCycle to save its current state in a file (so that it can be reloaded later)
+     * @return bool
+     */
     static public function saveLibrary(){
         global $gConfig;
 
-        if ($gConfig["mediacycle"]["enable"]) {
-            $command = "savelibrary";
+        $command = "savelibrary";
+        $params = array($gConfig["mediacycle"]["libraryname"]);
 
-            $data = "";
-            $data .= $command;
-            $data .= " " . $gConfig["mediacycle"]["libraryname"];
+        $answer = self::askMediaCycle($command, $params);
 
-            $sc = new SocketClient($gConfig["mediacycle"]["ip"],$gConfig["mediacycle"]["port"]);
-            //$sc = new SocketClient("192.168.1.167","12345");
+        //$answer = "savelibrary 0/1"
+        if ($answer) {
+            $ans = explode(" ", $answer);
+            if ($ans[0] == $command) {
+                if (intval($ans[1]) == 1) {
+                    return true;
+                } else {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+    }
 
-            $sc->send($data);
-            $sc->receive($answer);
-            $sc->close();
-            //$answer = "savelibrary 0/1"
+    static public function loadLibrary(){
+        global $gConfig;
+
+        $command = "loadlibrary";
+        $params = array($gConfig["mediacycle"]["libraryname"]);
+
+        $answer = self::askMediaCycle($command, $params);
+
+        //$answer = "savelibrary 0/1"
+        if ($answer) {
             $ans = explode(" ", $answer);
             if ($ans[0] == $command) {
                 if (intval($ans[1]) == 1) {
@@ -113,22 +169,13 @@ class MediaCycle {
     static public function getkNN(LCFile $file, $k) {
         global $gConfig;
 
-        if ($gConfig["mediacycle"]["enable"]) {
-            $command = "getknn";
+        $command = "getknn";
+        $params = array($file->getId(),$k);
 
-            $data = "";
-            $data .= $command;
-            $data .= " " . $file->getId();
-            $data .= " " . $k;
+        $answer = self::askMediaCycle($command, $params);
 
-            $sc = new SocketClient($gConfig["mediacycle"]["ip"],$gConfig["mediacycle"]["port"]);
-            //$sc = new SocketClient("192.168.1.167","12345");
-
-            $sc->send($data);
-            $sc->receive($answer);
-            $sc->close();
-
-            //$answer = getknn n id1 id2 .... (n = # of file found, <=$k)
+        //$answer = getknn n id1 id2 .... (n = # of file found, <=$k)
+        if ($answer) {
             $ans = explode(" ", $answer);
             if ($ans[0] == $command) {
                 $n = intval($ans[1]);
@@ -146,21 +193,13 @@ class MediaCycle {
     static public function getThumbnailXml(LCFile $file) {
         global $gConfig;
 
-        if ($gConfig["mediacycle"]["enable"]) {
-            $command = "getthumbnail";
+        $command = "getthumbnail";
+        $params = array($file->getId());
 
-            $data = "";
-            $data .= $command;
-            $data .= " " . $file->getId();
+        $answer = self::askMediaCycle($command, $params);
 
-            $sc = new SocketClient($gConfig["mediacycle"]["ip"],$gConfig["mediacycle"]["port"]);
-            //$sc = new SocketClient("192.168.1.167","12345");
-
-            $sc->send($data);
-            $sc->receive($answer);
-            $sc->close();
-
-            //$answer = getthumbnail xml (xml = xml representation of waveform)
+        //$answer = getthumbnail xml (xml = xml representation of waveform)
+        if ($answer) {
             $ans = explode(" ", $answer,2);
 
             if ($ans[0] == $command) {

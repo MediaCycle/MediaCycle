@@ -2,7 +2,7 @@
 /**
  * @brief User.php
  * @author Alexis Moinet
- * @date 30/06/2009
+ * @date 23/07/2009
  * @copyright (c) 2009 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -32,11 +32,6 @@
 ?>
 
 <?php
-/* 
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 /**
  * Description of User
  *
@@ -341,6 +336,8 @@ class User extends Page {
 
         $gDB->query($query);
 
+        $this->files = array();
+
         while ($gDB->next_record()) {
             $this->files[] = array("id" => $gDB->f("id"), "title" => $gDB->f("title")); //should be a UserFile class instance
         }
@@ -397,17 +394,20 @@ class User extends Page {
         $out .= "id = " . $this->getId();
         $out .= ", name = " . $this->getName();
         $out .= "<br/>";
-        $out .= '<div id="myfiles">My files :';
-        $out .= '<ul>';
-        foreach ($this->files as $file) {
-            $file = new LCFile($file["id"]);
-            $out .= '<li class="li-lastlaugh">';
-            $out .= '<div class="lc-player">';
-            $out .= '<a href="index.php?title=file&id=' . $file->getId() . '">' . $file->getTitle() . '</a>';
-            $out .= LCPlayer::miniPlayer($file->getName());
-            $out .= '</div></li>';
+
+        if (count($this->files) > 0) {
+            $out .= '<div id="myfiles">My files :';
+            $out .= '<ul>';
+            foreach ($this->files as $file) {
+                $file = new LCFile($file["id"]);
+                $out .= '<li class="li-lastlaugh">';
+                $out .= '<div class="lc-player">';
+                $out .= '<a href="index.php?title=file&id=' . $file->getId() . '">' . $file->getTitle() . '</a>';
+                $out .= LCPlayer::miniPlayer($file->getName());
+                $out .= '</div></li>';
+            }
+            $out .= '</ul></div>';
         }
-        $out .= '</ul></div>';
         $out .= Comments::getUserComments($this->getId());
         return $out;
     }
