@@ -1,0 +1,34 @@
+PROJECT(MediaCycle)
+SUBDIRS(core)
+INCLUDE_DIRECTORIES(.)
+#INCLUDE_DIRECTORIES(/home/alexis/Programmation/TiCore/Library)
+INCLUDE_DIRECTORIES(/usr/local/include/TiCore)
+#LINK_DIRECTORIES( ${LINK_DIRECTORIES} /home/alexis/Programmation/TiCore/Builds/linux-x86/Common )
+
+cmake_minimum_required(VERSION 2.6)
+IF(COMMAND cmake_policy)
+      cmake_policy(SET CMP0003 NEW)
+ENDIF(COMMAND cmake_policy)
+
+#options
+OPTION(USE_DEBUG "Use debug" OFF)
+
+IF ( WIN32 )
+	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D_CRT_SECURE_NO_DEPRECATE")
+	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_CRT_SECURE_NO_DEPRECATE")
+ENDIF ( WIN32 )
+
+IF ( APPLE )
+	INCLUDE_DIRECTORIES( "/opt/local/include" )
+ENDIF ( APPLE )
+
+IF ( USE_DEBUG )
+	MESSAGE( "Configured for Debug Build")
+	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DUSE_DEBUG -DTI_DEBUG=1")
+	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUSE_DEBUG -DTI_DEBUG=1")
+ELSE ( USE_DEBUG )
+	MESSAGE( "Configured for Release Build")
+	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DUSE_DEBUG -DTI_DEBUG=0 -O0")
+	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUSE_DEBUG -DTI_DEBUG=0 -O3")
+ENDIF ( USE_DEBUG )
+
