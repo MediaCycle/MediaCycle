@@ -1,0 +1,43 @@
+== NOTES ==
+
+* Do NOT commit any xcode/Visual Studio/name your IDE's project files. (please ?)
+* For the moment only a "MediaCycle" executable is created in Builds/linux-x86/core/
+This should become a shared library used by either a CLI or a GUI executable
+* The CMakeLists.txt files might (will) need to be modified.
+  For instance, right now it supposes that TiCore libs are installed in the PATH
+  and that TiCore header files (TiCore.h, Common/TiMath.h, ...)
+  are located either in the PATH or in /usr/local/include/TiCore/
+
+== CONFIGURATION ==
+
+Linux :
+
+$ mkdir Builds/linux-x86
+$ cd Builds/linux-x86
+$ cmake ../..
+$ make
+
+NB: the name of the directory/subdir (Builds/linux-x86) is not really important
+    but if it starts with "Builds" it will be ignored by mercurial. (cf .hgignore)
+    This is very useful to avoid an accidental commit of all the stuff/crap
+    generated when compiling/cmaking/xcoding/...
+
+You can then configure an IDE (netbeans, eclipse,...) or use vim, emacs,... as you wish
+
+MacOSX :
+
+$ mkdir Builds/darwin-x86
+$ cd Builds/darwin-x86
+$ cmake ../..
+
+This should (not tested yet) generate an xcode project. 
+
+
+Windows :
+
+for the moment the project will not compile on Windows (notably because of pthread, but not only)
+however I suppose it might compile just fine with cygwin
+
+When there is a Windows version available, cmake will generate a Visual Project 
+suitable for any version of the Visual Studio.
+
