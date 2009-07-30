@@ -41,21 +41,7 @@
 
 using namespace std;
 
-/*
- * 
- */
-
-void sigproc(int n) {
-    signal(SIGINT, sigproc); /*  */
-    cout << "exit" << endl;
-    exit(0);
-}
-
 int main(int argc, char** argv) {
-
-    signal(SIGINT, sigproc);
-    signal(SIGQUIT, sigproc);
-    signal(SIGTERM, sigproc);
 
     MediaCycle *mediacycle;
     //string libpath("/home/alexis/NetBeansProjects/MediaCycle/lib/Caltech101-a.acl");

@@ -1,9 +1,10 @@
 PROJECT(MediaCycle)
-SUBDIRS(core)
-INCLUDE_DIRECTORIES(.)
+SUBDIRS(core cli gui)
+INCLUDE_DIRECTORIES(. core)
 #INCLUDE_DIRECTORIES(/home/alexis/Programmation/TiCore/Library)
 INCLUDE_DIRECTORIES(/usr/local/include/TiCore)
 #LINK_DIRECTORIES( ${LINK_DIRECTORIES} /home/alexis/Programmation/TiCore/Builds/linux-x86/Common )
+LINK_DIRECTORIES( ${LINK_DIRECTORIES} /usr/local/lib )
 
 cmake_minimum_required(VERSION 2.6)
 IF(COMMAND cmake_policy)

@@ -657,7 +657,7 @@ void ACMediaBrowser::updateClusters(bool animate)
 		}
 	}
 	
-	
+	// AM : TODO move this out of core (it's GUI related)
 	if(animate)
 	{
 		updateNextPositions();
@@ -683,7 +683,7 @@ void ACMediaBrowser::setSelectedObject(int index)
 
 
 // XS TODO this one is tricky
-
+// AM : TODO move this out of core (it's GUI related)
 void ACMediaBrowser::updateNextPositions()
 {
 	//float radius = 1.0, cluster_disp = 0.1;
