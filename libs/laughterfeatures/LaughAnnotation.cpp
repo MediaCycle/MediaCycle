@@ -45,6 +45,7 @@ LaughAnnotation::LaughAnnotation()
    nFramesTrash = 0;
    nSectionsTrash = 0;
    statsCalculated = false;
+   annotationSorted = false;
 }
 
 // ------------------------------------------------------------------
@@ -84,8 +85,55 @@ void LaughAnnotation::acquireFromFile( const string & fileName )
    // must be tidy and close up files after reading
    lAFile.close();
 
+   // Now sort the laughAnnotation according to startTimes.
+   sortAnnotation();
+
    // Now go calculate the stats 
    calculateStats();
+}
+
+// ------------------------------------------------------------------
+// sort the Annotation by startTimes
+
+void LaughAnnotation::sortAnnotation( void )
+{
+   // Why would I want to do this if it is already sorted?
+   if ( !annotationSorted )
+   {
+     
+      // If labels is empty, then something's weird.
+      if ( labels.empty() )
+         cout << "When sorting a LaughAnnotation, the vector"
+                 " is expected to not be empty." << endl;
+
+      // keep repeating until the annotation is sorted  (BubbleSort)
+      while( !annotationSorted )
+      {
+         // reset the "I'm done" flag for this run through the annotation labels
+         bool swappedAtLeastOnePair = false;
+
+         // run through the entire vector (minus one)
+         for( vector< AnnotationLabel >::iterator iAL = labels.begin();
+              iAL < ( labels.end() - 1 ); iAL++ )
+         {
+            // looking for neighbors out of order to swap
+            if ( ( *( iAL + 1 ) ).getStartTime() < ( *iAL ).getStartTime() ) 
+            {
+               // swap iAL and iAL+1
+               AnnotationLabel dummyAL = *iAL;
+               *iAL = *( iAL + 1 );
+               *( iAL + 1 ) = dummyAL;
+               // set the "I'm done" flag to "I'm not done."
+               swappedAtLeastOnePair = true;
+            } 
+         }
+
+         // I'm really done if the "I'm done" flag says so.
+         annotationSorted = !swappedAtLeastOnePair;
+      }
+
+   }
+   // annotationSorted will now be true;
 }
 
 // ------------------------------------------------------------------

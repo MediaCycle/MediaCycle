@@ -67,6 +67,8 @@ class LaughAnnotation
 	    FeaturesVector statsAsVector( void );
    protected:
       vector< AnnotationLabel > labels;
+      void sortAnnotation( void );
+	    bool annotationSorted;
       void calculateStats( void );
 	    bool statsCalculated;
       // Some notes about semantics.  - First laughter.
