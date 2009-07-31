@@ -32,25 +32,28 @@
 
 #include "MediaCycle.h"
 
-MediaCycle::MediaCycle(int port, int max_connections, string local_directory, string libname) {
-    this->port = port;
-    this->max_connections = max_connections;
+MediaCycle::MediaCycle(ACMediaType aMediaType, string local_directory, string libname) {
     this->local_directory = local_directory;
     this->libname = libname;
+    this->networkSocket = NULL;
 
 
     this->mediaLibrary = new ACMediaLibrary();
-    this->mediaLibrary->setMediaType(AUDIO);
+    this->mediaLibrary->setMediaType(aMediaType);
+    
+    this->mediaBrowser = new ACMediaBrowser();
+    this->mediaBrowser->setLibrary(this->mediaLibrary);
+    
     
     //this doesn't work, I don't know why
     //this->mediaLibrary->openLibrary(local_directory + libname);
 
     //this works
-    string libpath(local_directory + libname);
-    this->mediaLibrary->openLibrary(libpath);
-
-    this->mediaBrowser = new ACMediaBrowser();    
+    /*string libpath(local_directory + libname);
+    this->mediaLibrary->openLibrary(libpath);  
     this->mediaBrowser->libraryContentChanged();
+     */
+    /*
     this->mediaBrowser->setClusterNumber(2);
     this->mediaBrowser->setLibrary(this->mediaLibrary);
     this->mediaBrowser->libraryContentChanged();/* */
@@ -69,19 +72,45 @@ MediaCycle::MediaCycle(int port, int max_connections, string local_directory, st
     
 }
 
+MediaCycle::MediaCycle(const MediaCycle& orig) {
+
+}
+
+MediaCycle::~MediaCycle() {
+    stopTcpServer();
+}
+
+int MediaCycle::startTcpServer(int aPort, int aMaxConnections) {
+    this->port = aPort;
+    this->max_connections = aMaxConnections;
+    if ((this->port>=FIRST_PORT_ID)&&(this->port<=LAST_PORT_ID)) {
+            this->networkSocket = new ACNetworkSocketServer(this->port, this->max_connections, tcp_callback, this);
+            this->networkSocket->start();
+            return 0;
+    }
+
+    return 1;
+}
+
+int MediaCycle::stopTcpServer() {
+     if (this->networkSocket) {
+        this->networkSocket->stop();
+        delete this->networkSocket;
+    }
+}
+
 int MediaCycle::importDirectory(string path, int recursive, int mid) {
 	int ret = this->mediaLibrary->importDirectory(path, recursive, mid);
 	this->mediaLibrary->normalizeFeatures();
 	this->mediaBrowser->libraryContentChanged();
 	return ret;
 }
-MediaCycle::MediaCycle(const MediaCycle& orig) {
 
-}
-
-MediaCycle::~MediaCycle() {
-    this->networkSocket->stop();
-    delete this->networkSocket;
+int MediaCycle::importLibrary(string path) {
+	int ret = this->mediaLibrary->openLibrary(path);
+        this->mediaLibrary->normalizeFeatures();
+        this->mediaBrowser->libraryContentChanged();
+        return ret;
 }
 
 static void tcp_callback(const char *buffer, int l, char **buffer_send, int *l_send, void *userData)
@@ -90,6 +119,7 @@ static void tcp_callback(const char *buffer, int l, char **buffer_send, int *l_s
 	that->processTcpMessage(buffer, l, buffer_send, l_send);
 }
 
+//AM TODO processTcpMessage & processTcpMessageFromSSI must be moved outside of MediaCycle main class
 int MediaCycle::processTcpMessage(const char* buffer, int l, char **buffer_send, int *l_send)
 {
 	FILE *local_file;
@@ -195,6 +225,72 @@ int MediaCycle::processTcpMessage(const char* buffer, int l, char **buffer_send,
 		*l_send = 0;
 	}
 
+        return 0;
+}
+
+//AM TODO processTcpMessage & processTcpMessageFromSSI must be moved outside of MediaCycle main class
+/*
+ * data structure sent by SSI (AVLaughterCycle) :
+ *
+ *   <uint32> tot_size
+ *   <uint32> type_size
+ *   <char> x type_size --> type_name
+ *
+ *   if type_name == 'addwavf'
+ *     <uint32> wav_size
+ *     <byte> x wav_size --> content of wave file
+ *   elif type_name == 'request'
+ *     no wave file is sent
+ *   fi
+ *
+ *   <uint32> burst_size
+ *   <char> x burst_size --> sequence of burst labels
+ *   <uint32> stat_size
+ *   <float>  stat_size --> sequence of statistics
+ */
+int MediaCycle::processTcpMessageFromSSI(char* buffer, int l, char **buffer_send, int *l_send) {
+    //AM : TODO rewrite Tcp in C++ to get something better than a char* buffer ? (and then rewrite code below)
+
+    unsigned long pos = 0;
+    cout << "Processing TCP message of length" <<  l  << endl;
+
+    unsigned int tot_size = *reinterpret_cast<int*>(buffer+pos);
+    pos += sizeof(int);
+    cout << "Actual length : " << tot_size << endl;
+
+    unsigned int type_size = *reinterpret_cast<int*>(buffer+pos);
+    pos += sizeof(int);
+
+    std::string type_name(buffer+pos,type_size);
+    pos += type_size;
+
+    if ( type_name == "addwavf" ) {
+        cout << "SSI : add wave file" << endl;
+        //extract wavefile
+        unsigned int wav_size = *reinterpret_cast<int*>(buffer+pos);
+        pos += sizeof(int);
+        //AM : TODO extract wave file and write it on disk + generate a name for it (date + rand) ?
+        pos += wav_size;
+    } else if ( type_name == "request" ) {
+        cout << "SSI : request" << endl;
+        //nothing specific to do
+    } else {
+        //not a valid request
+        return -1;
+    }
+
+    unsigned int burst_size = *reinterpret_cast<int*>(buffer+pos);
+    pos += sizeof(int);
+
+    std::string burst_labels(buffer+pos,burst_size);
+    pos += burst_size;
+
+    unsigned int stat_size = *reinterpret_cast<int*>(buffer+pos);
+    pos += sizeof(int);
+
+    float *ssi_features = reinterpret_cast<float*>(buffer+pos);
+
+    return 0;
 }
 
 int MediaCycle::getKNN(int id, vector<int> &ids, int k) {

@@ -358,7 +358,7 @@ int ACMediaBrowser::setSourceCurser(int lid, int frame_pos) {
 void ACMediaBrowser::libraryContentChanged()
 {
 	if(mLibrary == NULL) return;
-	
+
 	vector<ACMedia*> loops = mLibrary->getMedia(); // instead of get{audio,image}loops
 	int n, i, fc;
 	// todo: update initial positions and resize other vector structures dependent on loop count.

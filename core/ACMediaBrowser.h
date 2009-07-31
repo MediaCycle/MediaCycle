@@ -94,7 +94,7 @@ struct ACLoopAttribute
 class ACMediaBrowser {
 	
 public:
-	ACMediaBrowser() {};
+	ACMediaBrowser() {mSelectedLoop = 0;};
 	~ACMediaBrowser() {};
 	
 	void setLibrary(ACMediaLibrary *lib) { mLibrary = lib; }

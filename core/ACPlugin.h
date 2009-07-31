@@ -1,8 +1,8 @@
 /* 
- * File:   ACPluginManager.h
- * Author: Julien Dubois, Alexis Moinet
+ * File:   ACPlugin.h
+ * Author: Julien Dubois
  *
- * @date 23 juillet 2009
+ * @date 27 juillet 2009
  * @copyright (c) 2009 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -30,30 +30,40 @@
  * <mailto:avre@umons.ac.be>
  */
 
-#ifndef _ACPLUGINMANAGER_H
-#define	_ACPLUGINMANAGER_H
+#ifndef _ACPLUGIN_H
+#define	_ACPLUGIN_H
 
-#include "ACPlugin.h"
-#include "DynamicLibrary.h"
-
-#include <stdlib.h>
-#include <stdio.h>
 #include <iostream>
 #include <string>
-#include <map>
+#include <vector>
+
+#include "ACMediaTypes.h"
+#include "ACMediaFeatures.h"
+#include "ACMediaTimedFeature.h"
 
 using namespace std;
 
-class ACPluginManager {
+class ACPlugin {
 public:
-    ACPluginManager(std::string aPluginPath);
-    ACPluginManager(const ACPluginManager& orig);
-    virtual ~ACPluginManager();
-
-    
-private:
-    map<string,string> mPlugins;
+    ACPlugin() {};
+    virtual ~ACPlugin() {};
+    virtual std::string getName() = 0;
+    //virtual std::string getName() const = 0; -> error !
+    virtual std::string getIdentifier() = 0;
+    virtual std::string getDescription() = 0;
+    virtual ACMediaType getType() = 0;
+    //TO DO : getType()
+    virtual int initialize() = 0;
+    virtual ACMediaFeatures *calculate() = 0;
+    virtual ACMediaFeatures *calculate(std::string aFileName) {};
+    //virtual int readFile(std::string);
+protected:
 };
 
-#endif	/* _ACPLUGINMANAGER_H */
+// the types of the class factories
+typedef ACPlugin* createFactory(std::string);
+typedef void destroyFactory(ACPlugin*);
+typedef vector<string> listFactory();
+
+#endif	/* _ACPLUGIN_H */
 

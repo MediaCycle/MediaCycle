@@ -2,7 +2,7 @@
 /**
  * @brief config.php
  * @author Alexis Moinet
- * @date 30/06/2009
+ * @date 31/07/2009
  * @copyright (c) 2009 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -55,8 +55,10 @@ $gConfig["fileextensions"] = array("mp3","flv");
 $gConfig["streampath"] = "/opt/red5/red5/dist/webapps/oflaDemo/streams/";
 
 //MEDIACYCLE CONFIG
-$gConfig["mediacycle"]["enable"] = false;
-$gConfig["mediacycle"]["ip"] = "192.168.1.131";
+$gConfig["mediacycle"]["enable"] = true;
+//$gConfig["mediacycle"]["ip"] = "192.168.1.153";
+//$gConfig["mediacycle"]["ip"] = "169.254.49.254";
+$gConfig["mediacycle"]["ip"] = "192.168.3.168";
 $gConfig["mediacycle"]["port"] = "12345";
 $gConfig["mediacycle"]["libraryname"] = "LClib";
 $gConfig["mediacycle"]["knn"] = 5;

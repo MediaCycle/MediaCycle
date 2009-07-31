@@ -36,6 +36,7 @@
 #include "ACMediaLibrary.h"
 #include "ACMediaBrowser.h"
 #include "ACNetworkSocket.h"
+#include "ACPluginManager.h"
 
 #include <string>
 #include <cstring>
@@ -55,13 +56,19 @@ static void tcp_callback(const char *buffer, int l, char **buffer_send, int *l_s
 
 class MediaCycle {
 public:
-    MediaCycle(int port=12345, int max_connections=5, string local_directory="",string libname="");
+    MediaCycle(ACMediaType aMediaType, string local_directory="",string libname="");
     MediaCycle(const MediaCycle& orig);
     virtual ~MediaCycle();
+
+    int startTcpServer(int port=12345, int max_connections=5);
+    int stopTcpServer();
     // Process incoming requests (addfile, getknn, ...)
     int processTcpMessage(const char* buffer, int l, char **buffer_send, int *l_send);
+    // Process incoming tcp request from SSI (AVLaughterCycle)
+    int processTcpMessageFromSSI(char* buffer, int l, char **buffer_send, int *l_send);
     // Media Library
     int importDirectory(std::string path, int recursive, int mid=-1);
+    int importLibrary(std::string path);
 
     // Search by Similarity
     int getKNN(int id, vector<int> &ids, int k);

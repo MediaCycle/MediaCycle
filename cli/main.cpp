@@ -43,12 +43,21 @@ using namespace std;
 
 int main(int argc, char** argv) {
 
+    ACPluginManager *ap;
+    ap = new ACPluginManager("/home/alexis/Programmation/TiCore-app/Applications/Numediart/MediaCycle/src/Builds/linux-x86/plugins/eyesweb/mc_eyesweb.so");
+
     MediaCycle *mediacycle;
     //string libpath("/home/alexis/NetBeansProjects/MediaCycle/lib/Caltech101-a.acl");
 
-    mediacycle = new MediaCycle(12345,5,"/home/alexis/NetBeansProjects/MediaCycle/lib/","LClib.acl");
-    //mediacycle->getLibrary()->setMediaType(AUDIO);
-    //mediacycle->getLibrary()->openLibrary(libpath);
+    cout<<"new MediaCycle"<<endl;
+    mediacycle = new MediaCycle(AUDIO,"/home/alexis/NetBeansProjects/MediaCycle/lib/","mainlib.acl");
+    cout<<"setCulsterN"<<endl;
+    mediacycle->getBrowser()->setClusterNumber(1);
+    cout<<"importLib"<<endl;
+    mediacycle->importLibrary("/home/alexis/NetBeansProjects/MediaCycle/lib/LClib.acl");
+    cout<<"done"<<endl;
+
+    mediacycle->startTcpServer(12345,5);
 
     /*mediacycle->importDirectory("/home/alexis/NetBeansProjects/MediaCycle/lib/b50aac6a76bf5d5b660dd822273fe58af8791131.wav",0,1);
     mediacycle->importDirectory("/home/alexis/NetBeansProjects/MediaCycle/lib/18f038431e4db3c83c7227f47966cbbe7d6e467d.wav",0,2);
@@ -56,6 +65,7 @@ int main(int argc, char** argv) {
     mediacycle->importDirectory("/home/alexis/NetBeansProjects/MediaCycle/lib/c2ea562d07ce786935d278e0bd59cdb2b1948c6d.wav",0,4);
     mediacycle->importDirectory("/home/alexis/NetBeansProjects/MediaCycle/lib/2a28aa910897bc86e243f6f18920b5cc8faa2249.wav",0,5);
 */
+    /*
     vector<int> ids;
     ids.resize(0);
 

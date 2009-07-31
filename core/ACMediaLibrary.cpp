@@ -52,6 +52,7 @@ using namespace std;
 
 ACMediaLibrary::ACMediaLibrary() {
 	index_last_normalized = -1;
+        media_library.resize(0);
 }
 
 int ACMediaLibrary::importDirectory(std::string _path, int _recursive, int id) {	
@@ -123,10 +124,11 @@ int ACMediaLibrary::importDirectory(std::string _path, int _recursive, int id) {
 
 }
 	
-void ACMediaLibrary::openLibrary(std::string _path){
+int ACMediaLibrary::openLibrary(std::string _path, bool aInitLib){
 	// this does not re-initialize the media_library
 	// but appends new media to it.
-	int ret;
+        // except if aInitLib is set to true
+	int ret, file_count=0;
 	
 	FILE *library_file = fopen(_path.c_str(),"r");
 	
@@ -134,17 +136,22 @@ void ACMediaLibrary::openLibrary(std::string _path){
 	ACMedia* local_media;
 	// --TODO-- ???  how does it know which type of media ?
 	// have to be set up  at some point using setMediaType()
-	
+        if (aInitLib) {
+            cleanLibrary();
+        }
 	do {
 		local_media = factory.create(media_type);
 		ret = local_media->load(library_file);
 		if (ret) {
 			media_library.push_back(local_media);
+                        file_count++;
 		}
 	}
 	while (ret>0);
 	
 	fclose(library_file);
+
+        return file_count;
 }
 
 void ACMediaLibrary::saveAsLibrary(string _path) {

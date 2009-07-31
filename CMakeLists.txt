@@ -1,5 +1,5 @@
 PROJECT(MediaCycle)
-SUBDIRS(core cli gui)
+SUBDIRS(core cli gui plugins)
 INCLUDE_DIRECTORIES(. core)
 #INCLUDE_DIRECTORIES(/home/alexis/Programmation/TiCore/Library)
 INCLUDE_DIRECTORIES(/usr/local/include/TiCore)
@@ -12,7 +12,7 @@ IF(COMMAND cmake_policy)
 ENDIF(COMMAND cmake_policy)
 
 #options
-OPTION(USE_DEBUG "Use debug" OFF)
+OPTION(USE_DEBUG "Use debug" ON)
 
 IF ( WIN32 )
 	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D_CRT_SECURE_NO_DEPRECATE")

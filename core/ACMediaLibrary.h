@@ -78,7 +78,7 @@ public:
 	int importDirectory(std::string path, int recursive, int id=-1);
 
 	// trying not to redefine it (except for audio...)
-	void openLibrary(std::string _path);
+	int openLibrary(std::string _path, bool aInitLib=false);
 
 	// have to be redefined for each media -- really ?
 	void saveAsLibrary(std::string _path);

@@ -1,8 +1,8 @@
 /* 
- * File:   ACPluginManager.h
- * Author: Julien Dubois, Alexis Moinet
+ * File:   ACEyesWebPlugin.h
+ * Author: Julien Dubois
  *
- * @date 23 juillet 2009
+ * @date 29 juillet 2009
  * @copyright (c) 2009 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -30,30 +30,28 @@
  * <mailto:avre@umons.ac.be>
  */
 
-#ifndef _ACPLUGINMANAGER_H
-#define	_ACPLUGINMANAGER_H
+#ifndef _ACEYESWEBPLUGIN_H
+#define	_ACEYESWEBPLUGIN_H
+
+#include <armadillo>
 
 #include "ACPlugin.h"
-#include "DynamicLibrary.h"
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <iostream>
-#include <string>
-#include <map>
-
-using namespace std;
-
-class ACPluginManager {
+class ACEyesWebPlugin : public ACPlugin {
 public:
-    ACPluginManager(std::string aPluginPath);
-    ACPluginManager(const ACPluginManager& orig);
-    virtual ~ACPluginManager();
-
-    
-private:
-    map<string,string> mPlugins;
+    ACEyesWebPlugin();
+    ~ACEyesWebPlugin();
+    virtual std::string getName();
+    virtual std::string getIdentifier();
+    virtual std::string getDescription();
+    virtual ACMediaType getType();
+    virtual int initialize();
+	virtual ACMediaFeatures* calculate();
+    virtual ACMediaFeatures* calculate(std::string aFileName);
+    virtual ACMediaFeatures* getMediaFeatures() { return this->mMediaFeatures; };
+protected:
+    ACMediaFeatures *mMediaFeatures;
 };
 
-#endif	/* _ACPLUGINMANAGER_H */
+#endif	/* _ACEYESWEBPLUGIN_H */
 
