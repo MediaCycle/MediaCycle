@@ -40,7 +40,7 @@ using namespace std;
 //------------------------------------------------------------------
 
 ACImage::ACImage() : ACMedia() {
-	_type = IMAGE;
+	_type = MEDIA_TYPE_IMAGE;
 	
 	// XS I defined a resize method for ACMediaFeatures, but it is necessary ?
 	features.resize(0); //FEATURES_NUM_EL);

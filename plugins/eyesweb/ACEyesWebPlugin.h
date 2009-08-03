@@ -41,14 +41,12 @@ class ACEyesWebPlugin : public ACPlugin {
 public:
     ACEyesWebPlugin();
     ~ACEyesWebPlugin();
-    virtual std::string getName();
-    virtual std::string getIdentifier();
-    virtual std::string getDescription();
-    virtual ACMediaType getType();
     virtual int initialize();
     virtual ACMediaFeatures* calculate();
     virtual ACMediaFeatures* calculate(std::string aFileName);
     virtual ACMediaFeatures* getMediaFeatures() { return this->mMediaFeatures; };
+    virtual int start() {};
+    virtual int stop() {};
 protected:
     ACMediaFeatures *mMediaFeatures;
 };

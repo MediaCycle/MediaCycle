@@ -43,20 +43,35 @@
 
 using namespace std;
 
+enum ACPluginType {
+	PLUGIN_TYPE_NONE,
+	PLUGIN_TYPE_FEATURES,
+	PLUGIN_TYPE_SERVER
+};
+
 class ACPlugin {
 public:
     ACPlugin() {};
     virtual ~ACPlugin() {};
-    virtual std::string getName() = 0;
+    virtual std::string getName() {return this->mName;};
     //virtual std::string getName() const = 0; -> error !
-    virtual std::string getIdentifier() = 0;
-    virtual std::string getDescription() = 0;
-    virtual ACMediaType getType() = 0;
+    virtual std::string getIdentifier() {return this->mId;};
+    virtual std::string getDescription() {return this->mDescription;};
+    virtual ACMediaType getMediaType() {return this->mMediaType;};
+    virtual ACPluginType getPluginType() {return this->mPluginType;};
     virtual int initialize() = 0;
     virtual ACMediaFeatures *calculate() = 0;
-    virtual ACMediaFeatures *calculate(std::string aFileName) {};
+    virtual ACMediaFeatures *calculate(std::string aFileName) = 0;
+    virtual int start() = 0;
+    virtual int stop() = 0;
+
     //virtual int readFile(std::string);
 protected:
+    string mName;
+    string mId;
+    string mDescription;
+    ACMediaType mMediaType;
+    ACPluginType mPluginType;
 };
 
 // the types of the class factories

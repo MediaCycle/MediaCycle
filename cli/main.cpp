@@ -46,7 +46,7 @@ int main(int argc, char** argv) {
     //string libpath("/home/alexis/NetBeansProjects/MediaCycle/lib/Caltech101-a.acl");
 
     cout<<"new MediaCycle"<<endl;
-    mediacycle = new MediaCycle(AUDIO,"/home/alexis/NetBeansProjects/MediaCycle/lib/","mainlib.acl");
+    mediacycle = new MediaCycle(MEDIA_TYPE_AUDIO,"/home/alexis/NetBeansProjects/MediaCycle/lib/","mainlib.acl");
     mediacycle->addPlugin("/home/alexis/Programmation/TiCore-app/Applications/Numediart/MediaCycle/src/Builds/linux-x86/plugins/eyesweb/mc_eyesweb.so");
     cout<<"setCulsterN"<<endl;
     mediacycle->getBrowser()->setClusterNumber(1);

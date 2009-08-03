@@ -9,33 +9,20 @@ using namespace std;
 
 ACEyesWebPlugin::ACEyesWebPlugin()
 {
+    //vars herited from ACPlugin
+    this->mMediaType = MEDIA_TYPE_VIDEO;
+    this->mPluginType = PLUGIN_TYPE_FEATURES;
+    this->mName = "EyesWeb";
+    this->mDescription = "EyesWeb plugin";
+    this->mId = "";
+
+    //local vars
     this->mMediaFeatures = new ACMediaFeatures();
 }
 
 ACEyesWebPlugin::~ACEyesWebPlugin()
 {
     delete this->mMediaFeatures;
-}
-
-std::string ACEyesWebPlugin::getName()
-{
-    return "";
-}
-
-std::string ACEyesWebPlugin::getIdentifier()
-{
-    return "";
-}
-
-std::string ACEyesWebPlugin::getDescription()
-{
-    return "";
-}
-
-ACMediaType ACEyesWebPlugin::getType()
-{
-    return VIDEO;
-    //AUDIO, IMAGE, VIDEO
 }
 
 int ACEyesWebPlugin::initialize()

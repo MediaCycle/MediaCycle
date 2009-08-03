@@ -55,7 +55,7 @@ using namespace std;
 ACMediaLibrary::ACMediaLibrary() {
 	index_last_normalized = -1;
         media_library.resize(0);
-        media_type = NONE;
+        media_type = MEDIA_TYPE_NONE;
 }
 
 ACMediaLibrary::ACMediaLibrary(ACMediaType aMediaType) {
@@ -129,7 +129,7 @@ int ACMediaLibrary::importDirectory(std::string _path, int _recursive, int id, A
                         if (acpl) {
                             for (int i=0;i<acpl->getSize();i++) {
                                 for (int j=0;j<acpl->getPluginLibrary(i)->getSize();j++) {
-                                    if (acpl->getPluginLibrary(i)->getPlugin(j)->getType() == media->getType()) {
+                                    if (acpl->getPluginLibrary(i)->getPlugin(j)->getMediaType() == media->getType()) {
                                         //TODO move this in media ?
                                         ACMediaFeatures *af = acpl->getPluginLibrary(i)->getPlugin(j)->calculate(media->getFileName());
                                         //another option :

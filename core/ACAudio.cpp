@@ -37,7 +37,7 @@
 //#include "ACAudioFeaturesFactory.h"
 
 ACAudio::ACAudio() : ACMedia() {
-	_type = AUDIO;
+	_type = MEDIA_TYPE_AUDIO;
 	features.resize(0);
 	db = 0;
 	bpm = 0;

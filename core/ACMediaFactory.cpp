@@ -43,17 +43,17 @@ using namespace std;
 
 // file_extensions is static and thus has to be initialized outside class
 // TODO: complete this...
-const filext::value_type _ini[] = { filext::value_type(".wav", AUDIO), \
-									filext::value_type(".aif", AUDIO), \
-									filext::value_type(".mp3", AUDIO), \
+const filext::value_type _ini[] = { filext::value_type(".wav", MEDIA_TYPE_AUDIO), \
+									filext::value_type(".aif", MEDIA_TYPE_AUDIO), \
+									filext::value_type(".mp3", MEDIA_TYPE_AUDIO), \
 
-									filext::value_type(".jpg", IMAGE), \
-									filext::value_type(".tiff", IMAGE), \
-									filext::value_type(".tif", IMAGE), \
-									filext::value_type(".png", IMAGE), \
+									filext::value_type(".jpg", MEDIA_TYPE_IMAGE), \
+									filext::value_type(".tiff", MEDIA_TYPE_IMAGE), \
+									filext::value_type(".tif", MEDIA_TYPE_IMAGE), \
+									filext::value_type(".png", MEDIA_TYPE_IMAGE), \
 
-									filext::value_type(".mov", VIDEO), \
-									filext::value_type(".avi", VIDEO)
+									filext::value_type(".mov", MEDIA_TYPE_VIDEO), \
+									filext::value_type(".avi", MEDIA_TYPE_VIDEO)
 };
 filext ACMediaFactory::file_extensions(_ini, _ini + sizeof _ini / sizeof *_ini);
 
@@ -74,13 +74,13 @@ ACMedia* ACMediaFactory::create(string file_ext){
 
 ACMedia* ACMediaFactory::create(ACMediaType media_type){
 	switch (media_type) {
-		case AUDIO:
+		case MEDIA_TYPE_AUDIO:
 			return new ACAudio;
 			break;
-		case IMAGE:
+		case MEDIA_TYPE_IMAGE:
 			return new ACImage;
 			break;
-		case VIDEO:
+		case MEDIA_TYPE_VIDEO:
 			return new ACVideo;
 			break;
 		default:

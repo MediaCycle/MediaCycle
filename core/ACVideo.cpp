@@ -41,7 +41,7 @@ using namespace std;
 //#include "ACVideoFeaturesFactory.h"
 
 ACVideo::ACVideo() : ACMedia() {
-	_type = VIDEO;
+	_type = MEDIA_TYPE_VIDEO;
 }	
 
 ACVideo::~ACVideo() {
