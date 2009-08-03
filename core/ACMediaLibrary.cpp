@@ -40,6 +40,8 @@
 #include <iostream>
 #include <fstream>
 
+#include "ACPluginManager.h"
+
 #include "ACMediaLibrary.h"
 #include "ACMediaFactory.h"
 
@@ -53,9 +55,16 @@ using namespace std;
 ACMediaLibrary::ACMediaLibrary() {
 	index_last_normalized = -1;
         media_library.resize(0);
+        media_type = NONE;
 }
 
-int ACMediaLibrary::importDirectory(std::string _path, int _recursive, int id) {	
+ACMediaLibrary::ACMediaLibrary(ACMediaType aMediaType) {
+	index_last_normalized = -1;
+        media_library.resize(0);
+        media_type = aMediaType;
+}
+
+int ACMediaLibrary::importDirectory(std::string _path, int _recursive, int id, ACPluginManager *acpl) {
 // XS : return value convention: -1 = error ; otherwise returns number of files added
 
 	unsigned long file_count = 0;
@@ -75,7 +84,7 @@ int ACMediaLibrary::importDirectory(std::string _path, int _recursive, int id) {
 		return -1;
 	}
 	
-	ACMediaFactory factory;
+	//ACMediaFactory factory;
 	
 	if ( fs::is_directory( full_path ) )
 	{
@@ -105,7 +114,7 @@ int ACMediaLibrary::importDirectory(std::string _path, int _recursive, int id) {
 		extension = fs::extension(_path);
 		cout << "extension:" << extension << endl; 
 		
-		ACMedia* media = factory.create(extension); // XS TODO : import ?
+		ACMedia* media = ACMediaFactory::create(extension); // XS TODO : import ?
 		
 		if (media == NULL) {
 			cout << "extension unknown, skipping " << filename << " ... " << endl;
@@ -116,6 +125,20 @@ int ACMediaLibrary::importDirectory(std::string _path, int _recursive, int id) {
 			if (id>=0) {
 				media->setId(id);
 			}
+                        //compute features with available plugins
+                        if (acpl) {
+                            for (int i=0;i<acpl->getSize();i++) {
+                                for (int j=0;j<acpl->getPluginLibrary(i)->getSize();j++) {
+                                    if (acpl->getPluginLibrary(i)->getPlugin(j)->getType() == media->getType()) {
+                                        //TODO move this in media ?
+                                        ACMediaFeatures *af = acpl->getPluginLibrary(i)->getPlugin(j)->calculate(media->getFileName());
+                                        //another option :
+                                        //ACMediaFeatures *af = acpl->getPluginLibrary(i)->calculate(j,media->getFileName());
+                                        media->addFeatures(af);
+                                    }
+                                }
+                            }
+                        }
 			media_library.push_back(media);
 			++file_count; // XS-SD TODO : here ?
 		}
@@ -132,7 +155,7 @@ int ACMediaLibrary::openLibrary(std::string _path, bool aInitLib){
 	
 	FILE *library_file = fopen(_path.c_str(),"r");
 	
-	ACMediaFactory factory;
+	//ACMediaFactory factory;
 	ACMedia* local_media;
 	// --TODO-- ???  how does it know which type of media ?
 	// have to be set up  at some point using setMediaType()
@@ -140,7 +163,7 @@ int ACMediaLibrary::openLibrary(std::string _path, bool aInitLib){
             cleanLibrary();
         }
 	do {
-		local_media = factory.create(media_type);
+		local_media = ACMediaFactory::create(media_type);
 		ret = local_media->load(library_file);
 		if (ret) {
 			media_library.push_back(local_media);
@@ -251,7 +274,7 @@ void ACMediaLibrary::calculateStats() {
 		}
 	}
 	
-	// divide by N
+	// divide by N --> biased variance estimator
 	for(j=0; j<mean_features.size(); j++) {
 		printf("feature %d\n", j);
 		for(k=0; k<mean_features[j].size(); k++) {

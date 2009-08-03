@@ -1,12 +1,12 @@
 == NOTES ==
 
 * Do NOT commit any xcode/Visual Studio/name your IDE's project files. (please ?)
-* For the moment only a "MediaCycle" executable is created in Builds/linux-x86/core/
-This should become a shared library used by either a CLI or a GUI executable
 * The CMakeLists.txt files might (will) need to be modified.
   For instance, right now it supposes that TiCore libs are installed in the PATH
   and that TiCore header files (TiCore.h, Common/TiMath.h, ...)
   are located either in the PATH or in /usr/local/include/TiCore/
+  TiCore's Cmake config has been modified to have a "make install" build command
+  that installs TiCore libs and headers files were needed
 
 == CONFIGURATION ==
 
@@ -38,6 +38,6 @@ Windows :
 for the moment the project will not compile on Windows (notably because of pthread, but not only)
 however I suppose it might compile just fine with cygwin
 
-When there is a Windows version available, cmake will generate a Visual Project 
+When there is a Windows version available, cmake should generate a Visual Project 
 suitable for any version of the Visual Studio.
 

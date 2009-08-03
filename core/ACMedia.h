@@ -63,6 +63,8 @@ public:
 	std::vector<ACMediaFeatures*> &getFeatures() { return features; }
 	ACMediaFeatures* &getFeatures(int i){ return features[i]; } // XS TODO : add check on i > bounds ?
 	int getNumberOfFeatures() {return features.size();}
+
+        int addFeatures(ACMediaFeatures *aFeatures) { this->features.push_back(aFeatures); };
 	
 	std::string getFileName() { return filename; }
 	std::string getThumbnail() { return filename_thumbnail; };

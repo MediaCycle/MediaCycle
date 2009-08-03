@@ -69,6 +69,8 @@ public:
     // Media Library
     int importDirectory(std::string path, int recursive, int mid=-1);
     int importLibrary(std::string path);
+    // Plugins
+    int addPlugin(std::string aPluginPath);
 
     // Search by Similarity
     int getKNN(int id, vector<int> &ids, int k);
@@ -76,6 +78,8 @@ public:
     // Thumbnail
     string getThumbnail(int id);
 
+    string getLocalDirectoryPath() {return local_directory;}
+    string getLibName() {return libname;}
     ACMediaLibrary* getLibrary() { return mediaLibrary;}
     ACMediaBrowser* getBrowser() { return mediaBrowser;}
 private:
@@ -85,7 +89,8 @@ private:
     string libname;
     ACMediaLibrary *mediaLibrary;
     ACMediaBrowser *mediaBrowser;
-    ACNetworkSocketServer *networkSocket;    
+    ACNetworkSocketServer *networkSocket;
+    ACPluginManager *pluginManager;
 };
 
 #endif	/* _MEDIACYCLE_H */

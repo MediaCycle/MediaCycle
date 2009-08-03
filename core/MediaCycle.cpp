@@ -38,38 +38,13 @@ MediaCycle::MediaCycle(ACMediaType aMediaType, string local_directory, string li
     this->networkSocket = NULL;
 
 
-    this->mediaLibrary = new ACMediaLibrary();
-    this->mediaLibrary->setMediaType(aMediaType);
+    this->mediaLibrary = new ACMediaLibrary(aMediaType);
+    //this->mediaLibrary->setMediaType(aMediaType);
     
     this->mediaBrowser = new ACMediaBrowser();
     this->mediaBrowser->setLibrary(this->mediaLibrary);
-    
-    
-    //this doesn't work, I don't know why
-    //this->mediaLibrary->openLibrary(local_directory + libname);
 
-    //this works
-    /*string libpath(local_directory + libname);
-    this->mediaLibrary->openLibrary(libpath);  
-    this->mediaBrowser->libraryContentChanged();
-     */
-    /*
-    this->mediaBrowser->setClusterNumber(2);
-    this->mediaBrowser->setLibrary(this->mediaLibrary);
-    this->mediaBrowser->libraryContentChanged();/* */
-    /*
-    this->mediaLibrary = new ACMediaLibrary();
-    this->mediaBrowser = new ACMediaBrowser();
-    
-    this->mediaBrowser->setLibrary(this->mediaLibrary);
-    this->mediaBrowser->setClusterNumber(10);/* */
-    
-    /*if ((this->port>=FIRST_PORT_ID)&&(this->port<=LAST_PORT_ID)) {
-            this->networkSocket = new ACNetworkSocketServer(this->port, this->max_connections, tcp_callback, this);
-            this->networkSocket->start();
-    }/* */
-
-    
+    this->pluginManager = new ACPluginManager();
 }
 
 MediaCycle::MediaCycle(const MediaCycle& orig) {
@@ -100,7 +75,7 @@ int MediaCycle::stopTcpServer() {
 }
 
 int MediaCycle::importDirectory(string path, int recursive, int mid) {
-	int ret = this->mediaLibrary->importDirectory(path, recursive, mid);
+	int ret = this->mediaLibrary->importDirectory(path, recursive, mid, this->pluginManager);
 	this->mediaLibrary->normalizeFeatures();
 	this->mediaBrowser->libraryContentChanged();
 	return ret;
@@ -300,4 +275,8 @@ int MediaCycle::getKNN(int id, vector<int> &ids, int k) {
 
 string MediaCycle::getThumbnail(int id) {
 	return this->mediaLibrary->getThumbnail(id);
+}
+
+int MediaCycle::addPlugin(string aPluginPath) {
+    return this->pluginManager->add(aPluginPath);
 }

@@ -46,7 +46,7 @@ public:
     virtual std::string getDescription();
     virtual ACMediaType getType();
     virtual int initialize();
-	virtual ACMediaFeatures* calculate();
+    virtual ACMediaFeatures* calculate();
     virtual ACMediaFeatures* calculate(std::string aFileName);
     virtual ACMediaFeatures* getMediaFeatures() { return this->mMediaFeatures; };
 protected:

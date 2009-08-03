@@ -36,7 +36,7 @@
 #ifndef _ACMEDIASEGMENT
 #define _ACMEDIASEGMENT
 
-#include "armadillo"
+#include <armadillo>
 
 using namespace arma;
 

@@ -41,18 +41,51 @@
 #include <iostream>
 #include <string>
 #include <map>
+#include <vector>
 
 using namespace std;
 
+class ACPluginLibrary {
+public:
+    ACPluginLibrary(DynamicLibrary *aLib);
+    virtual ~ACPluginLibrary();
+    int initialize();
+    
+    //this is not necessary since getPlugin(i) gives direct access to plugins
+    //and their functions.
+    ACMediaFeatures *calculate(int aPluginIndex, string aFileName);
+
+    vector<ACPlugin *> getPlugins() {return this->mPlugins;};
+    ACPlugin *getPlugin(int i) {return this->mPlugins[i];};
+    int getSize() {return this->mPlugins.size();};
+    DynamicLibrary* getLib() { return this->mLib;};
+    void freePlugins();
+
+    //Plugins factories
+    createPluginFactory* create;
+    destroyPluginFactory* destroy;
+    listPluginFactory* list;
+
+private:
+    DynamicLibrary *mLib;
+    vector<ACPlugin *> mPlugins;
+};
+
 class ACPluginManager {
 public:
-    ACPluginManager(std::string aPluginPath);
+    ACPluginManager();
     ACPluginManager(const ACPluginManager& orig);
     virtual ~ACPluginManager();
+    int add(std::string aPluginPath);
+    int remove(std::string aPluginPath);
+    int removeAll();
 
+    vector<ACPluginLibrary *> getPluginLibrary() { return this->mPluginLibrary;};
+    ACPluginLibrary *getPluginLibrary(int i) { return this->mPluginLibrary[i];};
+    int getSize() { return this->mPluginLibrary.size();};
     
 private:
-    map<string,string> mPlugins;
+    vector<ACPluginLibrary *> mPluginLibrary;
 };
 
 #endif	/* _ACPLUGINMANAGER_H */

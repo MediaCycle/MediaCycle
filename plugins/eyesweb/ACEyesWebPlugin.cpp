@@ -67,5 +67,6 @@ ACMediaFeatures* ACEyesWebPlugin::calculate(std::string aFileName)
     for (int i=0; i<meanV.size(); i++)
         this->mMediaFeatures->setFeature(i,meanV[i]);
     this->mMediaFeatures->setComputed();
+    
     return this->mMediaFeatures;
 }

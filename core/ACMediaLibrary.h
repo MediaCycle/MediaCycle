@@ -43,6 +43,7 @@
 #include "ACMediaTypes.h"
 #include "ACMedia.h"
 #include "ACMediaFactory.h"
+#include "ACPluginManager.h"
 
 #include "boost/filesystem.hpp"
 namespace fs = boost::filesystem;
@@ -57,6 +58,7 @@ protected:
 	int index_last_normalized; // last item whose features have been normalized
 public:
 	ACMediaLibrary();
+        ACMediaLibrary(ACMediaType aMediaType);
 	~ACMediaLibrary() {}
 	
 	bool isEmpty();
@@ -75,7 +77,7 @@ public:
 
 	std::vector<ACMedia*> getMedia() {return media_library;};
 	
-	int importDirectory(std::string path, int recursive, int id=-1);
+	int importDirectory(std::string path, int recursive, int id=-1, ACPluginManager *acpl=NULL);
 
 	// trying not to redefine it (except for audio...)
 	int openLibrary(std::string _path, bool aInitLib=false);

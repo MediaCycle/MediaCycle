@@ -55,15 +55,13 @@
 
 bool fileExists(std::string strFilename);
 
-#define EXPORT
-
-class EXPORT DynamicLibrary
+class DynamicLibrary
 {
     public:
 
         typedef void*   HANDLE;
         typedef void*   PROC_ADDRESS;
-
+        
         /** returns a pointer to a DynamicLibrary object on successfully
           * opening of library returns NULL on failure.
           */
@@ -85,9 +83,9 @@ class EXPORT DynamicLibrary
 
         /** get handle to library file */
         static HANDLE getLibraryHandle( const std::string& libraryName);
-
+        
         /** disallow default constructor.*/
-        DynamicLibrary() { }
+        DynamicLibrary() { _handle = NULL; }
         /** disallow copy constructor.*/
         DynamicLibrary(const DynamicLibrary&) { }
         /** disallow copy operator.*/
@@ -97,6 +95,7 @@ class EXPORT DynamicLibrary
           * through loadLibrary() above which returns NULL on
           * failure, a valid DynamicLibrary object on success.
           */
+        DynamicLibrary(const std::string& name) {_name = name; _handle = NULL;}
         DynamicLibrary(const std::string& name,HANDLE handle);
         ~DynamicLibrary();
 
@@ -108,5 +107,9 @@ class EXPORT DynamicLibrary
 
 };
 
+class DynamicLibraryFactory {
+    static DynamicLibrary* loadLibrary(const std::string& libraryName);
+    static DynamicLibrary::HANDLE getLibraryHandle( const std::string& libraryName);
+};
 #endif	/* _DYNAMICLIBRARY_H */
 

@@ -36,6 +36,7 @@
 #define _ACMEDIA_TYPE_H
 
 enum ACMediaType {
+	NONE,
 	AUDIO,
 	IMAGE,
 	VIDEO

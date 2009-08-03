@@ -52,7 +52,6 @@ public:
     virtual std::string getIdentifier() = 0;
     virtual std::string getDescription() = 0;
     virtual ACMediaType getType() = 0;
-    //TO DO : getType()
     virtual int initialize() = 0;
     virtual ACMediaFeatures *calculate() = 0;
     virtual ACMediaFeatures *calculate(std::string aFileName) {};
@@ -61,9 +60,9 @@ protected:
 };
 
 // the types of the class factories
-typedef ACPlugin* createFactory(std::string);
-typedef void destroyFactory(ACPlugin*);
-typedef vector<string> listFactory();
+typedef ACPlugin* createPluginFactory(std::string);
+typedef void destroyPluginFactory(ACPlugin*);
+typedef vector<string> listPluginFactory();
 
 #endif	/* _ACPLUGIN_H */
 

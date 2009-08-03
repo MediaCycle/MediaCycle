@@ -1,1 +1,1 @@
-SUBDIRS(eyesweb)
+SUBDIRS(eyesweb greta)
