@@ -3,10 +3,6 @@ FILE(GLOB HDR *.hpp *.h)
 
 ADD_LIBRARY(mediacycle SHARED ${SRC} ${HDR})
 
-#gsl - uncomment if needed
-#TARGET_LINK_LIBRARIES(mediacycle gsl gslcblas)
-#others
-TARGET_LINK_LIBRARIES(mediacycle armadillo TiCommon pthread)
 
 #OpenCV
 IF ( USE_OPENCV )
@@ -25,6 +21,11 @@ IF ( USE_BOOST_SERIALIZATION )
         TARGET_LINK_LIBRARIES(mediacycle boost_system boost_filesystem)
     ENDIF ( APPLE )
 ENDIF ( USE_BOOST_SERIALIZATION )
+
+#gsl - uncomment if needed
+TARGET_LINK_LIBRARIES(mediacycle gsl gslcblas)
+#others
+TARGET_LINK_LIBRARIES(mediacycle armadillo TiCommon pthread)
 
 # this might require some path adaptation for Windows
 # (e.g. set cmake_install_prefix to the good value for Windows )

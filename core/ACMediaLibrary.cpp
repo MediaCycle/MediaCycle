@@ -100,7 +100,7 @@ int ACMediaLibrary::importDirectory(std::string _path, int _recursive, int id, A
 			}
 			else if ( fs::is_regular( dir_itr->path() ) )
 			{
-				file_count += importDirectory((dir_itr->path()).native_file_string(), 0);										
+			  file_count += importDirectory((dir_itr->path()).native_file_string(), 0, 0, acpl);										
 			}
 			else 
 			{

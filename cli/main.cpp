@@ -46,15 +46,17 @@ int main(int argc, char** argv) {
     //string libpath("/home/alexis/NetBeansProjects/MediaCycle/lib/Caltech101-a.acl");
 
     cout<<"new MediaCycle"<<endl;
-    mediacycle = new MediaCycle(MEDIA_TYPE_AUDIO,"/home/alexis/NetBeansProjects/MediaCycle/lib/","mainlib.acl");
-    mediacycle->addPlugin("/home/alexis/Programmation/TiCore-app/Applications/Numediart/MediaCycle/src/Builds/linux-x86/plugins/eyesweb/mc_eyesweb.so");
-    cout<<"setCulsterN"<<endl;
-    mediacycle->getBrowser()->setClusterNumber(1);
-    cout<<"importLib"<<endl;
-    mediacycle->importLibrary("/home/alexis/NetBeansProjects/MediaCycle/lib/LClib.acl");
-    cout<<"done"<<endl;
+    mediacycle = new MediaCycle(MEDIA_TYPE_VIDEO,"/home/alexis/NetBeansProjects/MediaCycle/lib/","mainlib.acl");
+    //    mediacycle->addPlugin("/home/alexis/Programmation/TiCore-app/Applications/Numediart/MediaCycle/src/Builds/linux-x86/plugins/eyesweb/mc_eyesweb.so");
+    mediacycle->addPlugin("/Users/dtardieu/src/Numediart/ticore-app/Applications/Numediart/MediaCycle/src/Builds/darwin-x86/plugins/eyesweb/Debug/mc_eyesweb.dylib");
+    mediacycle->importDirectory("/Users/dtardieu/data/DANCERS/Video/Test/",0);
+// 	cout<<"setCulsterN"<<endl;
+//     mediacycle->getBrowser()->setClusterNumber(1);
+//     cout<<"importLib"<<endl;
+//     mediacycle->importLibrary("/home/alexis/NetBeansProjects/MediaCycle/lib/LClib.acl");
+//     cout<<"done"<<endl;
 
-    mediacycle->startTcpServer(12345,5);
+//     mediacycle->startTcpServer(12345,5);
 
     /*mediacycle->importDirectory("/home/alexis/NetBeansProjects/MediaCycle/lib/b50aac6a76bf5d5b660dd822273fe58af8791131.wav",0,1);
     mediacycle->importDirectory("/home/alexis/NetBeansProjects/MediaCycle/lib/18f038431e4db3c83c7227f47966cbbe7d6e467d.wav",0,2);

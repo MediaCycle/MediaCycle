@@ -47,6 +47,9 @@ public:
     virtual ACMediaFeatures* getMediaFeatures() { return this->mMediaFeatures; };
     virtual int start() {};
     virtual int stop() {};
+    std::string extractDirectory(std::string path);
+    std::string extractFilename(std::string path);
+    std::string changeExtension(std::string path, std::string ext);
 protected:
     ACMediaFeatures *mMediaFeatures;
 };

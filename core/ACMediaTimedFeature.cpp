@@ -36,6 +36,9 @@
 #include "ACMediaTimedFeature.h"
 //#include <gsl/gsl_interp.h>
 
+using namespace arma;
+using namespace std;
+
 ACMediaTimedFeatures::ACMediaTimedFeatures(){
 }
 
@@ -98,7 +101,7 @@ ACMediaTimedFeatures::ACMediaTimedFeatures(vector<float> time, vector<float> val
   this->seg_v = seg_v;
 }
 
-void ACMediaTimedFeatures::importFromFile(string filename){
+void ACMediaTimedFeatures::importFromFile(string filename){ //see also readFile
   fmat tmp_m;
   tmp_m.load(filename);
   //  tmp_m.print();
@@ -114,11 +117,14 @@ void ACMediaTimedFeatures::importSegmentsFromFile(string filename){
     inf >> tmp;
     this->seg_v.push_back(tmp);
     if (inf.eof()) break;
-    if (seg_v[i] < seg_v[i-1]){
-      cerr << "badly formed segments " << endl;
-      exit(-1);
+    if (i >= 1) //otherwise there is a problem if tmp is equal to 0
+    {
+        if (seg_v[i] < seg_v[i-1]){
+            cerr << "badly formed segments " << endl;
+            exit(-1);
+        }
+        //cout << seg_v.size() << " ; " << seg_v[i] << endl;
     }
-    //    cout << seg_v.size() << " ; " << seg_v[i] << endl;
     i++;
   }
   inf.close();
@@ -137,10 +143,15 @@ vector<float> ACMediaTimedFeatures::getSegments(){
   return seg_v;
 }
 
+float ACMediaTimedFeatures::getSegments(int index){
+  return seg_v[index];
+}
+
 int ACMediaTimedFeatures::getNearestTimePosition(float time, int mode){
   // mode = 0, nearest left
   // mode = 1, nearest right
-  //return an index !
+  // mode = 2, nearest
+  // return an index !
 
   int i=0;
   float currTime = this->time_v(0);
@@ -173,7 +184,7 @@ int ACMediaTimedFeatures::getNearestTimePosition(float time, int mode){
         t_minus = this->time_v(i_minus);
         i_plus = getNearestTimePosition(time, 1);        
         t_plus = this->time_v(i_plus);
-        if (time - t_minus < t_plus - time)
+        if (time - t_minus <= t_plus - time)
             nearPos = i_minus;
         else
             nearPos = i_plus;
@@ -183,6 +194,7 @@ int ACMediaTimedFeatures::getNearestTimePosition(float time, int mode){
         break;
     }
 
+////before the switch case and the add of mode 2
 //  if (mode==0) {
 //    if (i>0)
 //      if (i == this->getLength()-1)
@@ -195,8 +207,8 @@ int ACMediaTimedFeatures::getNearestTimePosition(float time, int mode){
 //  else
 //    nearPos = i;
   
-  if (currTime == time)
-    nearPos=i;
+  /*if (currTime == time)   //OK ??
+    nearPos=i;*/
 
     return nearPos;
 }
@@ -266,21 +278,23 @@ size_t ACMediaTimedFeatures::getDim() {
 
 fmat ACMediaTimedFeatures::getValueAtTime(fcolvec time_v) {
   // return interpolated values at time_v
-  double valueij;
-  double valueDouble[this->getLength()];
-  double timeDouble[this->getLength()];
+
   int nearPos;
   fmat outValue_m = fmat(time_v.n_rows,this->getDim());
   for (int i=0; i<time_v.n_rows;i++){
     nearPos = this->getNearestTimePosition(this->time_v(i),0);
-    cout<<"nearPos : " << nearPos<<endl;
+    //cout<<"nearPos : " << nearPos<<endl;
     for (int j=0; j<this->getDim(); j++){
         outValue_m(i,j) = this->value_m(nearPos,j);
-        cout<<"j : " << j<<endl;
+        //cout<<"j : " << j<<endl;
     }
   }
 
-  /*for (int i=0; i<this->getLength();i++){
+  /*
+  double valueij;
+  double valueDouble[this->getLength()];
+  double timeDouble[this->getLength()];
+  for (int i=0; i<this->getLength();i++){
     timeDouble[i] = this->time_v(i);
   }
   
@@ -304,8 +318,7 @@ fmat ACMediaTimedFeatures::getValueAtTime(fcolvec time_v) {
   return outValue_m;
 }
 
-
-fmat ACMediaTimedFeatures::weightedMean(ACMediaTimedFeatures* weight){  
+fmat ACMediaTimedFeatures::weightedMean(ACMediaTimedFeatures* weight){
   fmat weightVal = weight->getValueAtTime(this->getTime());
   float sumWeight = conv_to<float>::from(sum(weightVal));
   weightVal = weightVal / sumWeight;
@@ -321,15 +334,40 @@ fmat ACMediaTimedFeatures::mean(){
 vector< float > ACMediaTimedFeatures:: meanAsVector(){
   fmat tmpMean = this->mean();
   vector< float > meanVec;
-  for (int i=0; i<tmpMean.n_cols; i++){
+  for (int i=0; i<tmpMean.n_cols; i++)
     meanVec.push_back(tmpMean(0,i));
-  } 
   return meanVec;
 }
 
 fmat ACMediaTimedFeatures::weightedStdDeviation(ACMediaTimedFeatures* weight){
+  fmat weightVal = weight->getValueAtTime(this->getTime());
+  float sumWeight = conv_to<float>::from(sum(weightVal));
+  weightVal = weightVal / sumWeight;
+
+  fmat meanRow = fmat(1,this->getDim());
+  fmat meanMatrix = fmat(this->getLength(),this->getDim());
+  frowvec onesVector = ones<frowvec>(this->getLength());
+
+  meanRow = onesVector * this->getValue() / this->getLength();
+  for (int i=0;i<this->getLength();i++)
+      meanMatrix.row(i) = meanRow;
+  fmat cDataSq = square(this->getValue() - meanMatrix);
+  return sqrt(trans(weightVal) * cDataSq);
 }
 
+fmat ACMediaTimedFeatures::standardDeviation(){
+  fcolvec weightValue = ones<fcolvec>(this->getLength());
+  ACMediaTimedFeatures* weight = new ACMediaTimedFeatures(this->getTime(),weightValue);
+  return weightedStdDeviation(weight);
+}
+
+vector< float > ACMediaTimedFeatures:: standardDeviationAsVector(){
+  fmat tmpStd = this->standardDeviation();
+  vector< float > stdVec;
+  for (int i=0; i<tmpStd.n_cols; i++)
+    stdVec.push_back(tmpStd(0,i));
+  return stdVec;
+}
 
 ACMediaTimedFeatures* ACMediaTimedFeatures::delta(){
 }
@@ -342,8 +380,8 @@ vector<ACMediaTimedFeatures*> ACMediaTimedFeatures::segment(){
   for (int i=0; i<this->seg_v.size()-1; i++){
     leftPos = this->getNearestTimePosition(seg_v[i],1);
     rightPos = this->getNearestTimePosition(seg_v[i+1],0);
-    //    cout << "left : " << leftPos << endl;
-    // cout << "right : " << rightPos << endl;
+    //cout << "left : " << leftPos << endl;
+    //cout << "right : " << rightPos << endl;
     if (rightPos < leftPos){
       cerr << "Badly formed segments" << endl;
       exit(-1);
@@ -357,7 +395,7 @@ vector<ACMediaTimedFeatures*> ACMediaTimedFeatures::segment(){
 
 ACMediaTimedFeatures* ACMediaTimedFeatures::meanSegment(){
   fcolvec weightValue = ones<fcolvec>(this->getLength());
-  weightValue = weightValue / sum(weightValue);
+  //weightValue = weightValue / sum(weightValue);   //unecessary at this time?
   ACMediaTimedFeatures* weight = new ACMediaTimedFeatures(this->getTime(),weightValue);
   return weightedMeanSegment(weight);
 }
@@ -372,16 +410,15 @@ ACMediaTimedFeatures* ACMediaTimedFeatures::weightedMeanSegment(ACMediaTimedFeat
   fmat outAcmtvValue((int)this->getSegments().size()-1,(int)this->getDim());
   
   for (int i=0; i<acmtv.size(); i++){
+    //acmtv[i]->getTime().print("time seg");    
     tmpMean_m = acmtv[i]->weightedMean(weight);//1 line * dim column
     for (int Icol=0; Icol<this->getDim(); Icol++)
       outAcmtvValue(i, Icol) = tmpMean_m(0,Icol);
-    //    outAcmtvTime(i) = (this->getSegments()[i]+this->getSegments()[i+1])/2;
-    outAcmtvTime(i) = (acmtv[i]->getTime()(0) + acmtv[i]->getTime()(acmtv[i]->getLength()-1) )/2;
-    //    cout << "Time" << endl;
-    //cout << outAcmtvTime(i) << endl;
+    //outAcmtvTime(i) = (this->getSegments()[i]+this->getSegments()[i+1])/2;
+    outAcmtvTime(i) = (acmtv[i]->getTime(0) + acmtv[i]->getTime(acmtv[i]->getLength()-1) )/2;
   }
   outAcmtv = new ACMediaTimedFeatures(outAcmtvTime, outAcmtvValue);
-  outAcmtv->setName("raf");
+  //outAcmtv->setName("raf");   //??
   return outAcmtv;
 }
 
@@ -393,9 +430,118 @@ void ACMediaTimedFeatures::readFile(std::string fileName){
     data.load(fileName, raw_ascii);
     this->setTime(data.col(0));          //time information : first column of the file
     this->setValue(data.cols(1,(data.n_cols)-1));   //data : other columns of the file
-    //value_m.print();
-    //time_v.print();
-    //fmat result = mean(value_m,0);
-    //result.print("Mean arma");
 }
 
+umat ACMediaTimedFeatures::hist(int nbrBin, float min, float max){
+    umat resultHist = zeros<umat>(nbrBin,this->getDim());   //final result
+    vector<float> binWidth;                                 //one bin width for every column of the data file
+    fmat binEdge = fmat(nbrBin+1,this->getDim());           //edge values of the bins, one column vector for each data column
+
+    if (min == 0 && max == 0)   //user did not specify min and max values of the histogram (commom case)
+    {
+        fmat extremaM = fmat(2,this->getDim()); //to store min and max values
+        for (int i=0;i<this->getDim();i++)      //for every column of value_m
+        {
+            vector<float> extremaC = this->getExtremaOfVector(this->getValue().col(i));    //find min and max
+            extremaM(0,i) = extremaC[0];
+            extremaM(1,i) = extremaC[1];
+            binWidth.push_back((extremaC[1] - extremaC[0])/nbrBin);
+            //cout<<"binWidth : "<<binWidth.back()<<endl;   //ok
+            for (int j=0;j<binEdge.n_rows-1;j++)
+            {
+                binEdge(j,i) = extremaC[0] + j*binWidth.back(); //compute bin edges
+            }
+            binEdge(binEdge.n_rows-1,i) = extremaC[1];
+        }
+        //extremaM.print("ExtremaM : ");    //ok
+    }
+    else    //user specified min and max values of the histogram
+    {
+        fcolvec binEdgeV = fcolvec(nbrBin+1);        
+        float binWidthS = (max - min)/nbrBin;
+
+        for (int j=0;j<binEdgeV.n_rows-1;j++)
+            binEdgeV(j) = min + j*binWidthS;
+        binEdgeV(binEdgeV.n_rows-1) = max;
+
+        for (int i=0;i<this->getDim();i++)
+            binEdge.col(i) = binEdgeV;  //bin edge values are the same for every column of the data file because we use the same min and max values
+    }
+    //now we have binEdge for both cases (min and max specified or not)
+    //binEdge.print("binEdge : ");  //ok
+
+    for (int i=0;i<this->getDim();i++)  //compute the histogram
+    {
+        for (int j=0;j<this->getLength();j++)   //for each value in the data file
+        {
+            for (int k=0;k<nbrBin;k++)
+            {
+                if (this->getValue(j,i) >= binEdge(k,i) && this->getValue(j,i) < binEdge(k+1,i))
+                {
+                    resultHist(k,i) += 1;   //value included between the two bin edge values
+                    break;
+                }
+            }
+            if (this->getValue(j,i)== binEdge(nbrBin,i)) //maximum value exception
+                resultHist(nbrBin-1,i) += 1;
+        }
+    }
+    //resultHist.print("Histo : ");       //ok, checked with Matlab
+    return resultHist;
+}
+
+vector<float> ACMediaTimedFeatures::getExtremaOfVector(fcolvec column){ //returns min and max value of a vector (fcolvec)
+    vector<float> extrema;
+    float min = column(0);
+    float max = column(0);
+
+    for (int i=1;i<column.n_rows;i++)
+    {
+        if (column(i) < min)
+            min = column(i);
+        if (column(i) > max)
+            max = column(i);
+    }
+    extrema.push_back(min);
+    extrema.push_back(max);
+    return extrema;
+}
+
+fmat ACMediaTimedFeatures::similarity(int mode)
+{
+    //mode : distance type
+    // 0 = euclidian distance
+
+    fmat similarityM = fmat(this->getLength(),this->getLength());
+    similarityM.diag() = zeros<fcolvec>(this->getLength());
+
+    for(int i=0;i<this->getLength();i++)
+    {
+        for (int j=0;j<this->getLength();j++)
+        {
+            if (i != j)
+            {
+                similarityM(i,j) = dist(this->getValue().row(i),this->getValue().row(j),mode);
+            }
+        }
+    }
+    return similarityM;
+}
+
+float ACMediaTimedFeatures::dist(fmat vector1, fmat vector2, int mode)
+{
+    fmat squareV;
+    fmat distM = fmat(1,1);
+    switch(mode)
+    {
+    case 0:   //Euclidian distance
+        squareV = square(vector1 - vector2);
+        distM = sqrt(sum(squareV,1));
+        break;
+    //case 1:
+    //    break;
+    default:
+        break;
+    }
+    return distM(0,0);
+}
