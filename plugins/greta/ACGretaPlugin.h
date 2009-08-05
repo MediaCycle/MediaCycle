@@ -48,7 +48,7 @@ public:
     virtual ACMediaFeatures* calculate(std::string aFileName);
     virtual int start() {return 0;};
     virtual int stop() {return 0;};
-    static std::string generateBML(std::string aFileName);
+    static std::string generateBML(std::string basename);
 protected:
     
 };

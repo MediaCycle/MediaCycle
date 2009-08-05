@@ -42,6 +42,7 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <stdio.h>
+#include <iostream>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <unistd.h>
@@ -72,7 +73,7 @@ int server_send(char *buf, int size, SOCKET s);
 
 int server_receive(char *buf, int size, SOCKET s, unsigned int time_out);
 
-typedef void (*ACNetworkSocketServerCallback)(const char *buffer, int l, char **buffer_send, int *l_send, void *user_data);
+typedef void (*ACNetworkSocketServerCallback)(char *buffer, int l, char **buffer_send, int *l_send, void *user_data);
 
 class ACNetworkSocketServer {
 	

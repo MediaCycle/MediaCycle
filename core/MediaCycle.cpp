@@ -66,6 +66,17 @@ int MediaCycle::startTcpServer(int aPort, int aMaxConnections) {
 
     return 1;
 }
+int MediaCycle::startTcpServer(int aPort, int aMaxConnections, ACNetworkSocketServerCallback aCallback) {
+    this->port = aPort;
+    this->max_connections = aMaxConnections;
+    if ((this->port>=FIRST_PORT_ID)&&(this->port<=LAST_PORT_ID)) {
+            this->networkSocket = new ACNetworkSocketServer(this->port, this->max_connections, aCallback, this);
+            this->networkSocket->start();
+            return 0;
+    }
+
+    return 1;
+}
 
 int MediaCycle::stopTcpServer() {
      if (this->networkSocket) {
@@ -88,14 +99,14 @@ int MediaCycle::importLibrary(string path) {
         return ret;
 }
 
-static void tcp_callback(const char *buffer, int l, char **buffer_send, int *l_send, void *userData)
+static void tcp_callback(char *buffer, int l, char **buffer_send, int *l_send, void *userData)
 {
 	MediaCycle *that = (MediaCycle*)userData;
 	that->processTcpMessage(buffer, l, buffer_send, l_send);
 }
 
 //AM TODO processTcpMessage & processTcpMessageFromSSI must be moved outside of MediaCycle main class
-int MediaCycle::processTcpMessage(const char* buffer, int l, char **buffer_send, int *l_send)
+int MediaCycle::processTcpMessage(char* buffer, int l, char **buffer_send, int *l_send)
 {
 	FILE *local_file;
 	int ret, i;
@@ -203,73 +214,12 @@ int MediaCycle::processTcpMessage(const char* buffer, int l, char **buffer_send,
         return 0;
 }
 
-//AM TODO processTcpMessage & processTcpMessageFromSSI must be moved outside of MediaCycle main class
-/*
- * data structure sent by SSI (AVLaughterCycle) :
- *
- *   <uint32> tot_size
- *   <uint32> type_size
- *   <char> x type_size --> type_name
- *
- *   if type_name == 'addwavf'
- *     <uint32> wav_size
- *     <byte> x wav_size --> content of wave file
- *   elif type_name == 'request'
- *     no wave file is sent
- *   fi
- *
- *   <uint32> burst_size
- *   <char> x burst_size --> sequence of burst labels
- *   <uint32> stat_size
- *   <float>  stat_size --> sequence of statistics
- */
-int MediaCycle::processTcpMessageFromSSI(char* buffer, int l, char **buffer_send, int *l_send) {
-    //AM : TODO rewrite Tcp in C++ to get something better than a char* buffer ? (and then rewrite code below)
-
-    unsigned long pos = 0;
-    cout << "Processing TCP message of length" <<  l  << endl;
-
-    unsigned int tot_size = *reinterpret_cast<int*>(buffer+pos);
-    pos += sizeof(int);
-    cout << "Actual length : " << tot_size << endl;
-
-    unsigned int type_size = *reinterpret_cast<int*>(buffer+pos);
-    pos += sizeof(int);
-
-    std::string type_name(buffer+pos,type_size);
-    pos += type_size;
-
-    if ( type_name == "addwavf" ) {
-        cout << "SSI : add wave file" << endl;
-        //extract wavefile
-        unsigned int wav_size = *reinterpret_cast<int*>(buffer+pos);
-        pos += sizeof(int);
-        //AM : TODO extract wave file and write it on disk + generate a name for it (date + rand) ?
-        pos += wav_size;
-    } else if ( type_name == "request" ) {
-        cout << "SSI : request" << endl;
-        //nothing specific to do
-    } else {
-        //not a valid request
-        return -1;
-    }
-
-    unsigned int burst_size = *reinterpret_cast<int*>(buffer+pos);
-    pos += sizeof(int);
-
-    std::string burst_labels(buffer+pos,burst_size);
-    pos += burst_size;
-
-    unsigned int stat_size = *reinterpret_cast<int*>(buffer+pos);
-    pos += sizeof(int);
-
-    float *ssi_features = reinterpret_cast<float*>(buffer+pos);
-
-    return 0;
-}
-
 int MediaCycle::getKNN(int id, vector<int> &ids, int k) {
 	int ret = this->mediaBrowser->getKNN(id, ids, k);
+	return ret;
+}
+int MediaCycle::getKNN(ACMedia *aMedia, vector<ACMedia *> &result, int k) {
+	int ret = this->mediaBrowser->getKNN(aMedia, result, k);
 	return ret;
 }
 

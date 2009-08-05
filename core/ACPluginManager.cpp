@@ -73,6 +73,18 @@ int ACPluginManager::removeAll() {
     return 0;
 }
 
+ACPlugin *ACPluginManager::getPlugin(std::string aPluginName) {
+    ACPlugin *result = NULL;
+    for (int k=0;k<this->mPluginLibrary.size();k++) {
+        result = this->mPluginLibrary[k]->getPlugin(aPluginName);
+        if (result) {
+            return result;
+        }
+    }
+
+    return result;
+}
+
 /*
  * ACPluginLibrary implementation
  */
@@ -133,9 +145,20 @@ ACMediaFeatures *ACPluginLibrary::calculate(int aPluginIndex,string aFileName)
 }
 
 void ACPluginLibrary::freePlugins() {
-    //TODO replace with iterator
+    //TODO ? replace with iterator
     for (int i=this->mPlugins.size()-1;i>=0;i--) {
         destroy(this->mPlugins[i]);
         this->mPlugins.pop_back();
     }
+}
+
+ACPlugin *ACPluginLibrary::getPlugin(std::string aPluginName) {
+
+    for (int k=0;k<this->mPlugins.size();k++) {
+        if (this->mPlugins[k]->getName() == aPluginName) {
+            return this->mPlugins[k];
+        }
+    }
+
+    return NULL;
 }

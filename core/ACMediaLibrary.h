@@ -76,6 +76,7 @@ public:
 	void calculateStats();
 
 	std::vector<ACMedia*> getMedia() {return media_library;};
+        int addMedia(ACMedia *aMedia);
 	
 	int importDirectory(std::string path, int recursive, int id=-1, ACPluginManager *acpl=NULL);
 

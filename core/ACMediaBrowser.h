@@ -108,6 +108,7 @@ public:
 	
 	// Search by similarity
 	int getKNN(int id, vector<int> &ids, int k);
+        int getKNN(ACMedia *aMedia, vector<ACMedia *> &result, int k);
 		
 	// memory/context
 	void setBack();

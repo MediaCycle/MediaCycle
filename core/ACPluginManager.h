@@ -57,6 +57,7 @@ public:
 
     vector<ACPlugin *> getPlugins() {return this->mPlugins;};
     ACPlugin *getPlugin(int i) {return this->mPlugins[i];};
+    ACPlugin *getPlugin(std::string aPluginName);
     int getSize() {return this->mPlugins.size();};
     DynamicLibrary* getLib() { return this->mLib;};
     void freePlugins();
@@ -83,6 +84,7 @@ public:
     vector<ACPluginLibrary *> getPluginLibrary() { return this->mPluginLibrary;};
     ACPluginLibrary *getPluginLibrary(int i) { return this->mPluginLibrary[i];};
     int getSize() { return this->mPluginLibrary.size();};
+    ACPlugin *getPlugin(std::string aPluginName);
     
 private:
     vector<ACPluginLibrary *> mPluginLibrary;

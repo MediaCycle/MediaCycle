@@ -155,25 +155,27 @@ int ACMediaLibrary::openLibrary(std::string _path, bool aInitLib){
 	int ret, file_count=0;
 	
 	FILE *library_file = fopen(_path.c_str(),"r");
-	
-	//ACMediaFactory factory;
-	ACMedia* local_media;
-	// --TODO-- ???  how does it know which type of media ?
-	// have to be set up  at some point using setMediaType()
-        if (aInitLib) {
-            cleanLibrary();
+        //if the file exists
+        if (library_file) {
+            //ACMediaFactory factory;
+            ACMedia* local_media;
+            // --TODO-- ???  how does it know which type of media ?
+            // have to be set up  at some point using setMediaType()
+            if (aInitLib) {
+                cleanLibrary();
+            }
+            do {
+                    local_media = ACMediaFactory::create(media_type);
+                    ret = local_media->load(library_file);
+                    if (ret) {
+                            media_library.push_back(local_media);
+                            file_count++;
+                    }
+            }
+            while (ret>0);
+
+            fclose(library_file);
         }
-	do {
-		local_media = ACMediaFactory::create(media_type);
-		ret = local_media->load(library_file);
-		if (ret) {
-			media_library.push_back(local_media);
-                        file_count++;
-		}
-	}
-	while (ret>0);
-	
-	fclose(library_file);
 
         return file_count;
 }
@@ -205,6 +207,18 @@ void ACMediaLibrary::cleanStats() {
 	cout << "cleaning features mean and stdev"<< endl;
 	mean_features.clear();
 	stdev_features.clear();
+}
+
+int ACMediaLibrary::addMedia(ACMedia *aMedia) {
+    //TODO remove media_type check
+    // mediacycle should be able to manage a mix of any media
+    // instead of only medias of one type
+    if (aMedia->getType() == this->media_type) {
+        this->media_library.push_back(aMedia);
+        return 0;
+    } else {
+        return -1;
+    }
 }
 
 ACMedia* ACMediaLibrary::getItem(int i){

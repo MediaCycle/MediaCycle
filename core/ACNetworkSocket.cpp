@@ -69,7 +69,9 @@ PORT open_server(int iport, int count)
 	if (listen(s_listen, count) == SOCKET_ERROR)
 		//throw_error(SocketServerError, "open_server: call to 'listen' failed.\n");
 		return -1;
-	
+
+        std::cout << "Socket listening on port " << iport << std::endl;
+
 	return ((PORT)s_listen);
 	
 	/*fprintf(stdout, "Waiting for client to connect ...\n");
@@ -141,6 +143,8 @@ int server_receive(char *buf, int size, SOCKET s, unsigned int time_out)
 			if (ret == SOCKET_ERROR)
 				//throw_error(SocketServerError, "server_receive: call to 'recv' failed.\n");
 				return -1;
+                        if (ret == 0)
+                            return -1;
 			read += ret;
 		} else {
 			//throw_error(SocketServerError, "server_receive: time out (%d sec). No data available !\n", time_out);

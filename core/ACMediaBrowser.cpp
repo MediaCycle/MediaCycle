@@ -429,7 +429,7 @@ int ACMediaBrowser::getKNN(int id, vector<int> &ids, int k) {
 	for (i=0;i<loops.size();i++) {
 		if (id==loops[i]->getId()) {
 			el=i;
-			i=loops.size();
+			break;
 		}
 	}
 	if (el==-1) {
@@ -470,13 +470,73 @@ int ACMediaBrowser::getKNN(int id, vector<int> &ids, int k) {
 			kcount++;
 		}
 		else {
-			j=k;
+                    break;
 		}
 	}
 	
 	return kcount;
 }
 
+int ACMediaBrowser::getKNN(ACMedia *aMedia, vector<ACMedia *> &result, int k) {
+
+    int i, j;
+    //int el;
+    int min_pos;
+    double min_distance, max_distance;
+    int kcount;
+
+    if (mLibrary == NULL) return -1;
+
+    vector<ACMedia*> loops = mLibrary->getMedia();
+    //assert(loops.size() == mLoopAttributes.size());
+    int object_count = loops.size();
+    if (object_count == 0) return -1;
+    int feature_count = loops.back()->getFeatures().size();
+    assert(mFeatureWeights.size() == feature_count);
+
+    double inv_weight = 0.0;
+    vector<float> distances;
+
+    for (i = 0; i < feature_count; i++) {
+        inv_weight += mFeatureWeights[i];
+    }
+    if (inv_weight > 0.0) inv_weight = 1.0 / inv_weight;
+    else return -1;
+
+    distances.resize(object_count);
+
+    for (i = 0; i < object_count; i++) {
+        distances[i] = compute_distance(aMedia->getFeatures(), loops[i]->getFeatures(), mFeatureWeights, false);
+        if (distances[i] > max_distance) {
+            max_distance = distances[i];
+        }
+    }
+    max_distance++;
+    //distances[el] = max_distance;
+
+    kcount = 0;
+    result.clear();
+    for (j = 0; j < k; j++) {
+        min_distance = max_distance;
+        min_pos = -1;
+        for (i = 0; i < object_count; i++) {
+            if (distances[i] < min_distance) {
+                min_distance = distances[i];
+                min_pos = i;
+            }
+        }
+        if (min_pos >= 0) {
+            //int tmpid = loops[min_pos]->getId();
+            result.push_back(loops[min_pos]);
+            distances[min_pos] = max_distance;
+            kcount++;
+        } else {
+            break;
+        }
+    }
+
+    return kcount;
+}
 void ACMediaBrowser::setFeatureWeights(vector<float> &weights)
 {
 	//assert(weights.size() == objects.back().size());

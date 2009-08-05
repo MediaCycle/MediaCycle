@@ -37,14 +37,20 @@
 //#include "ACAudioFeaturesFactory.h"
 
 ACAudio::ACAudio() : ACMedia() {
-	_type = MEDIA_TYPE_AUDIO;
-	features.resize(0);
-	db = 0;
-	bpm = 0;
-	time_signature_num = 0;
-	time_signature_den = 0;
-	key = 0;
-	acid_type = 0;
+    _type = MEDIA_TYPE_AUDIO;
+    features.resize(0);
+    db = 0;
+    bpm = 0;
+    time_signature_num = 0;
+    time_signature_den = 0;
+    key = 0;
+    acid_type = 0;
+    sample_rate = 16000;
+    channels = 0;
+    sample_start = 0;
+    sample_end = 0;
+    n_frames = 0;
+    waveform = NULL;
 }
 
 ACAudio::~ACAudio() {

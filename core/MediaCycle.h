@@ -43,6 +43,7 @@
 #include <iostream>
 #include <sstream>
 #include <sys/stat.h>
+#include <time.h>
 
 using namespace std;
 
@@ -52,7 +53,7 @@ enum MCActionType {
 	MC_ACTION_GETTHUMBNAIL
 };
 
-static void tcp_callback(const char *buffer, int l, char **buffer_send, int *l_send, void *userData);
+static void tcp_callback(char *buffer, int l, char **buffer_send, int *l_send, void *userData);
 
 class MediaCycle {
 public:
@@ -61,11 +62,10 @@ public:
     virtual ~MediaCycle();
 
     int startTcpServer(int port=12345, int max_connections=5);
+    int startTcpServer(int port, int max_connections,ACNetworkSocketServerCallback aCallback);
     int stopTcpServer();
     // Process incoming requests (addfile, getknn, ...)
-    int processTcpMessage(const char* buffer, int l, char **buffer_send, int *l_send);
-    // Process incoming tcp request from SSI (AVLaughterCycle)
-    int processTcpMessageFromSSI(char* buffer, int l, char **buffer_send, int *l_send);
+    int processTcpMessage(char* buffer, int l, char **buffer_send, int *l_send);
     // Media Library
     int importDirectory(std::string path, int recursive, int mid=-1);
     int importLibrary(std::string path);
@@ -74,6 +74,7 @@ public:
 
     // Search by Similarity
     int getKNN(int id, vector<int> &ids, int k);
+    int getKNN(ACMedia *aMedia, vector<ACMedia *> &result, int k);
 
     // Thumbnail
     string getThumbnail(int id);
@@ -82,6 +83,7 @@ public:
     string getLibName() {return libname;}
     ACMediaLibrary* getLibrary() { return mediaLibrary;}
     ACMediaBrowser* getBrowser() { return mediaBrowser;}
+    ACPluginManager* getPluginManager() { return pluginManager;}
 private:
     int port;
     int max_connections;

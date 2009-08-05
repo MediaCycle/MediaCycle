@@ -1,6 +1,6 @@
 PROJECT(MediaCycle)
 
-SUBDIRS(core cli gui plugins)
+SUBDIRS(core cli gui plugins test)
 
 INCLUDE_DIRECTORIES(. core)
 INCLUDE_DIRECTORIES( "/usr/local/include/TiCore" )

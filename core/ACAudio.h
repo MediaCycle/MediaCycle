@@ -75,18 +75,18 @@ private:
 	int sample_rate;
 	int channels;
 	int sample_start;
-	int	sample_end;
+	int sample_end;
 	//float time_stamp_start;	// seconds
 	//float time_stamp_end;
-	int	n_frames;
+	int n_frames;
 	float* waveform; // typically one value every 10ms
 	// following are specific to loops or music
 	float db;
 	float bpm;
-	int   time_signature_num;
-	int	  time_signature_den;
-	int	  key;
-	int	  acid_type;
+	int time_signature_num;
+	int time_signature_den;
+	int key;
+	int acid_type;
 };
 
 
