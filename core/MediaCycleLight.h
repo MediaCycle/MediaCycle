@@ -33,11 +33,6 @@
 #ifndef _MEDIACYCLE_H
 #define	_MEDIACYCLE_H
 
-#include "ACMediaLibrary.h"
-#include "ACMediaBrowser.h"
-#include "ACNetworkSocket.h"
-#include "ACPluginManager.h"
-
 #include <string>
 #include <cstring>
 #include <iostream>
@@ -45,6 +40,26 @@
 #include <sys/stat.h>
 
 using namespace std;
+
+#include <ACMediaTypes.h>
+
+struct ACPoint
+{
+	float x, y, z;
+};
+
+struct ACLoopAttribute
+{
+	ACPoint 	currentPos, nextPos;
+	ACPoint		viewPos;
+	float		distanceMouse;
+	int 		cluster; //cluster index
+	int			active;  // plying or not - and in which mode
+	int			curser;
+	int 		navigationLevel; // initially all set to zero, while traversing, only the one incremented are kept
+	int			hover;
+	ACLoopAttribute() : cluster(0), active(false), navigationLevel(0), hover(0) {}
+};
 
 enum MCActionType {
 	MC_ACTION_ADDFILE,
@@ -80,9 +95,7 @@ public:
 
     string getLocalDirectoryPath() {return local_directory;}
     string getLibName() {return libname;}
-    ACMediaLibrary* getLibrary() { return mediaLibrary;}
-    ACMediaBrowser* getBrowser() { return mediaBrowser;}
-	
+ 	
 	// API REQUIRED BY VISUAL and GUI
 	// 
 	int getLibrarySize();
@@ -138,10 +151,6 @@ private:
     int max_connections;
     string local_directory;
     string libname;
-    ACMediaLibrary *mediaLibrary;
-    ACMediaBrowser *mediaBrowser;
-    ACNetworkSocketServer *networkSocket;
-    ACPluginManager *pluginManager;
 };
 
 #endif	/* _MEDIACYCLE_H */

@@ -33,6 +33,8 @@
 #include "MediaCycle.h"
 
 MediaCycle::MediaCycle(ACMediaType aMediaType, string local_directory, string libname) {
+	
+	this->forwarddown = 0;
     this->local_directory = local_directory;
     this->libname = libname;
     this->networkSocket = NULL;
@@ -279,4 +281,66 @@ string MediaCycle::getThumbnail(int id) {
 
 int MediaCycle::addPlugin(string aPluginPath) {
     return this->pluginManager->add(aPluginPath);
+}
+
+// ADDED FOR VISUAL and GUI
+// API REQUIRED BY VISUAL and GUI
+// 
+int MediaCycle::getLibrarySize() { return mediaLibrary->getSize(); }
+int MediaCycle::getMediaType(int i) { return mediaLibrary->getItem(i)->getType(); }
+int MediaCycle::getWidth(int i) { return mediaLibrary->getItem(i)->getWidth(); }
+int MediaCycle::getHeight(int i) { return mediaLibrary->getItem(i)->getHeight(); }
+void* MediaCycle::getThumbnailPtr(int i) { return mediaLibrary->getItem(i)->getThumbnailPtr(); }
+int MediaCycle::getNeedsDisplay() {	return mediaBrowser->getNeedsDisplay(); }
+void MediaCycle::setNeedsDisplay(int i) { mediaBrowser->setNeedsDisplay(i); }
+float MediaCycle::getCameraZoom() { return mediaBrowser->getCameraZoom(); }
+float MediaCycle::getCameraRotation() { return mediaBrowser->getCameraRotation(); }
+const ACLoopAttribute& MediaCycle::getLoopAttributes(int i) { return (mediaBrowser->getLoopAttributes()[i]); } 
+int MediaCycle::getNavigationLevel() { return mediaBrowser->getNavigationLevel(); }
+void MediaCycle::getMouse(float *mx, float *my) { mediaBrowser->getMouse(mx, my); }
+// 
+void MediaCycle::updateState() { mediaBrowser->updateState(); }
+float MediaCycle::getFrac() { return mediaBrowser->getFrac(); }
+void MediaCycle::setCameraRotation(float angle) { mediaBrowser->setCameraRotation(angle); }
+int MediaCycle::getClickedLoop() { return mediaBrowser->getClickedLoop(); }
+void MediaCycle::incrementLoopNavigationLevels(int i) { mediaBrowser->incrementLoopNavigationLevels(i); }
+void MediaCycle::setSelectedObject(int index) { mediaBrowser->setSelectedObject(index); }
+void MediaCycle::updateClusters(bool animate) { mediaBrowser->updateClusters(animate); }
+void MediaCycle::setCameraPosition(float x, float y)		{ mediaBrowser->setCameraPosition(x,y); }
+void MediaCycle::getCameraPosition(float &x, float &y)		{ mediaBrowser->getCameraPosition(x,y); }
+void MediaCycle::setCameraZoom(float z)				{ mediaBrowser->setCameraZoom(z); }
+void MediaCycle::setCameraRecenter()				{ mediaBrowser->setCameraRecenter(); }
+// 
+void MediaCycle::normalizeFeatures() { mediaLibrary->normalizeFeatures(); }
+void MediaCycle::openLibrary(string path) { mediaLibrary->openLibrary(path); }
+void MediaCycle::libraryContentChanged() { mediaBrowser->libraryContentChanged(); }
+void MediaCycle::saveAsLibrary(string path) {mediaLibrary->saveAsLibrary(path); }
+void MediaCycle::cleanLibrary() { mediaLibrary->cleanLibrary(); }
+void MediaCycle::setBack() { mediaBrowser->setBack(); }
+void MediaCycle::setForward() { mediaBrowser->setForward(); }
+void MediaCycle::setClusterNumber(int n) { mediaBrowser->setClusterNumber(n); }
+void MediaCycle::setWeight(int i, float weight) { mediaBrowser->setWeight(i, weight); }
+void MediaCycle::setForwardDown(int i) { forwarddown = i; }
+// 
+void MediaCycle::setAutoPlay(int i) { mediaBrowser->setAutoPlay(i); }
+void MediaCycle::setClickedLoop(int i) { mediaBrowser->setClickedLoop(i); }
+void MediaCycle::setClosestLoop(int i) { mediaBrowser->setClosestLoop(i); }
+// 
+void MediaCycle::muteAllSources() { mediaBrowser->muteAllSources(); }
+void* MediaCycle::hasBrowser() { return mediaBrowser; }
+
+void MediaCycle::pickedObjectCallback(int pid) {
+	if(pid >= 0) {
+		mediaBrowser->setClickedLoop(pid);
+		if (!forwarddown) {
+			mediaBrowser->toggleSourceActivity(pid);
+		}
+	}
+}
+
+void MediaCycle::hoverObjectCallback(int pid) {
+}
+
+void MediaCycle::hoverCallback(float x, float y) {
+	mediaBrowser->setHoverLoop(-1, x, y);		
 }

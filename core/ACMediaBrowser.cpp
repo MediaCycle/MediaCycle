@@ -109,15 +109,32 @@ static double compute_distance(vector<ACMediaFeatures*> &obj1, vector<ACMediaFea
 	
 	double dis = 0.0;
 	
-	for(int f=0; f<feature_count; f++) {
+	for (int f=0; f<feature_count; f++) {
 		ACEuclideanDistance* E = new ACEuclideanDistance (obj1[f], obj2[f]);
 		dis += E->distance() * (inverse_features?(1.0-weights[f]):weights[f]);
+		delete E;
 	}
 	dis = sqrt(dis);
 	
 	return dis;
-}	
+}
 
+static double compute_distance(vector<ACMediaFeatures*> &obj1, const vector<vector <float> > &obj2, const vector<float> &weights, bool inverse_features)
+{
+	assert(obj1.size() == obj2.size() && obj1.size() == weights.size());
+	int feature_count = obj1.size();
+	
+	double dis = 0.0;
+	
+	for (int f=0; f<feature_count; f++) {
+		ACEuclideanDistance* E = new ACEuclideanDistance (&(obj1[f]->getAllFeatures()), (FeaturesVector*)&obj2[f]);
+		dis += E->distance() * (inverse_features?(1.0-weights[f]):weights[f]);
+		delete E;
+	}
+	dis = sqrt(dis);
+	
+	return dis;
+}
 
 /*void ACAudioBrowser::initRandomFeatures()
  {
@@ -162,6 +179,40 @@ static double compute_distance(vector<ACMediaFeatures*> &obj1, vector<ACMediaFea
  }
  }
  */
+
+
+ACMediaBrowser::ACMediaBrowser() {
+
+	mViewWidth = 820;
+	mViewHeight = 365;
+	mCenterOffsetX = mViewWidth / 2;
+	mCenterOffsetZ = mViewHeight / 2;
+	
+	mCameraPosition[0] = 0.0;
+	mCameraPosition[1] = 0.0;
+	mCameraZoom = 1.0;
+	mCameraAngle = 0.0;
+	
+	mClickedLoop = -1;
+	
+	mClusterCount = 5;
+	mNavigationLevel = 0;
+	
+	mState = AC_IDLE;
+	mRefTime = TiGetTime();
+	mFrac = 0.0;
+	
+	mousex = 0.0;
+	mousey = 0.0;
+	
+	closest_loop = -1;
+	auto_play = 0;
+	auto_play_toggle = 0;
+}
+
+ACMediaBrowser::~ACMediaBrowser() {
+	
+}
 
 // memory/context
 void ACMediaBrowser::setBack()
@@ -358,7 +409,7 @@ int ACMediaBrowser::setSourceCurser(int lid, int frame_pos) {
 void ACMediaBrowser::libraryContentChanged()
 {
 	if(mLibrary == NULL) return;
-
+	
 	vector<ACMedia*> loops = mLibrary->getMedia(); // instead of get{audio,image}loops
 	int n, i, fc;
 	// todo: update initial positions and resize other vector structures dependent on loop count.
@@ -391,13 +442,8 @@ void ACMediaBrowser::libraryContentChanged()
 	// set all features to 1.0
 	
 	printf("setting all features to 1.0 (count=%d)\n", mFeatureWeights.size());	
-	for(i=0; i<fc; i++)
-	{
-		// XS : duh ?
-		if (i==1)
-			mFeatureWeights[i] = 1.0;
-		else
-			mFeatureWeights[i] = 1.0;
+	for(i=0; i<fc; i++) {
+		mFeatureWeights[i] = 1.0;
 	}
 	
 	updateClusters(false);
@@ -609,7 +655,7 @@ void ACMediaBrowser::updateClusters(bool animate)
 				
 				//cluster_distances[j] = compute_distance(mClusterCenters[j], loops[i].getFeatures(), mFeatureWeights, true);
 				cluster_distances[j] = 0; // XS TODO c  :::  compute_distance(mClusterCenters[j], loops[i]->getFeatures(), mFeatureWeights, false);
-				
+				cluster_distances[j] = compute_distance(loops[i]->getFeatures(), mClusterCenters[j], mFeatureWeights, false);
 				
 				//printf("distance cluster %d to object %d = %f\n", j, i,  cluster_distances[j]);
 			}
@@ -692,7 +738,8 @@ void ACMediaBrowser::updateNextPositions()
 	int i, n = loops.size();
 	ACPoint p;
 	
-	if(mSelectedLoop < 0) return ;
+	if (n <=0 ) return;
+	if (mSelectedLoop < 0) return ;
 	
 	p.x = p.y = p.z = 0.0;
 	mLoopAttributes[mSelectedLoop].nextPos = p;
@@ -710,7 +757,7 @@ void ACMediaBrowser::updateNextPositions()
 		// SD TODO - test both approaches
 // XS  TODO c
 		r=1;
-		//r = compute_distance(loops[mSelectedLoop]->getFeatures(), loops[i]->getFeatures(), mFeatureWeights, false);
+		r = compute_distance(loops[mSelectedLoop]->getFeatures(), loops[i]->getFeatures(), mFeatureWeights, false) * 10.0;
 		
 		//r /= 5000.0;
 		
@@ -724,12 +771,12 @@ void ACMediaBrowser::updateNextPositions()
 		//double dt = compute_distance(loops[i].getFeatures(), mClusterCenters[ci], mFeatureWeights, true) / 2.0;
 		// XS  TODO c
 		double dt = 1;
-		//		double dt = compute_distance(loops[i]->getFeatures(), mClusterCenters[ci], mFeatureWeights, false) / 2.0;
+		dt = compute_distance(loops[i]->getFeatures(), mClusterCenters[ci], mFeatureWeights, false) / 2.0 * 10.0;
 		//theta += ((i%2)==0?-1.0:1.0) * dt / 6.0;
 		
 		// dt /= 3.0;
 		// Images
-		dt /= 6.0;
+		dt /= 3.0;
 		
 		//theta += (TiRandom() *2.0 - 1.0) * dt;
 		theta += dt;
@@ -802,3 +849,134 @@ void ACMediaBrowser::updateState()
 	}
 	
 }
+
+#define PICKSCALE 10
+int ACMediaBrowser::pickSource(float _x, float _y)
+{
+	int loop_id;
+	
+	loop_id = (int) (floor(_y / PICKSCALE) * floor(mViewWidth / PICKSCALE) + floor(_x / PICKSCALE));
+	return loop_id;
+}
+
+void ACMediaBrowser::getSourcePosition(int loop_id, float* x, float* z)
+{
+	float ratio = loop_id / floor(mViewWidth / PICKSCALE);
+	*z = floor(ratio) * PICKSCALE
+	+ PICKSCALE / 2;
+	*x = (ratio - floor(ratio)) * floor(mViewWidth / PICKSCALE) * PICKSCALE
+	+ PICKSCALE / 2;
+}
+
+void ACMediaBrowser::setSourcePosition(float _x, float _y, float* x, float* z)
+{
+	*x = _x - mCenterOffsetX;
+	*z = _y - mCenterOffsetZ;
+}
+
+int ACMediaBrowser::toggleSourceActivity(float _x, float _y)
+{
+	int loop_id;
+	float x, z;
+	
+	loop_id = pickSource(_x, _y);
+	
+	toggleSourceActivity(loop_id);
+	setSourcePosition(_x, _y, &x, &z);
+	
+	return loop_id;
+	
+}
+
+int ACMediaBrowser::toggleSourceActivity(int lid, int type)
+{
+	int loop_id;
+	float x, z;
+	
+	loop_id = lid;
+	//
+	
+	if ( (loop_id>=0) && (loop_id<mLibrary->getSize()) )
+	{
+		x = mLoopAttributes[loop_id].currentPos.x * 10;
+		z = mLoopAttributes[loop_id].currentPos.y * 10;
+		
+		if (mLoopAttributes[loop_id].active == 0) {
+			// SD TODO - audio engine
+			// audio_cycle->getAudioFeedback()->createSourceWithPosition(loop_id, x/10, 0, z/10);
+			//mSourceActivity[loop_id] = 1;
+			
+			mLoopAttributes[loop_id].active = type;
+			
+		}
+		else if (mLoopAttributes[loop_id].active >= 1) {
+			// SD TODO - audio engine
+			// audio_cycle->getAudioFeedback()->deleteSource(loop_id);
+			//mSourceActivity[loop_id] = 0;
+			
+			mLoopAttributes[loop_id].active = 0;
+		}
+		return 1;
+	}
+	else {
+		return 0;
+	}
+}
+
+void ACMediaBrowser::setClosestLoop(int _loop_id)
+{
+	int loop_id;
+	
+	if (_loop_id<0) {
+		return;
+	}
+	if (mLoopAttributes[_loop_id].navigationLevel < getNavigationLevel()) {
+		return;
+	}
+	
+	if (auto_play) {
+		for (loop_id=0;loop_id<mLibrary->getSize();loop_id++) {
+			if(mLoopAttributes[loop_id].navigationLevel >= getNavigationLevel()) {
+				if ( (loop_id!=_loop_id) && (mLoopAttributes[loop_id].active == 2) ) {
+					toggleSourceActivity(loop_id);
+				}
+			}
+		}
+		if ( (mLoopAttributes[_loop_id].navigationLevel >= getNavigationLevel()) && (mLoopAttributes[_loop_id].active == 0) ) {
+			toggleSourceActivity(_loop_id, 2);
+		}
+		auto_play_toggle = 1;
+	}
+	else if (auto_play_toggle) {
+		for (loop_id=0;loop_id<mLibrary->getSize();loop_id++) {
+			if ( mLoopAttributes[loop_id].active == 2 ) {
+				toggleSourceActivity(loop_id);
+			}
+		}
+		auto_play_toggle = 0;
+	}
+	/*
+	 if (loop_id!=closest_loop) {
+	 if (closest_loop>=0) {
+	 toggleSourceActivity(closest_loop);
+	 }
+	 closest_loop = loop_id;
+	 toggleSourceActivity(closest_loop);
+	 }
+	 */
+}
+
+
+int ACMediaBrowser::muteAllSources()
+{
+	int loop_id;
+	
+	for (loop_id=0;loop_id<mLibrary->getSize();loop_id++) {
+		if (mLoopAttributes[loop_id].active >= 1) {
+			// SD TODO - audio engine
+			// audio_cycle->getAudioFeedback()->deleteSource(loop_id);
+			mLoopAttributes[loop_id].active = 0;
+		}
+	}
+}
+

@@ -110,7 +110,7 @@ int ACAudio::load(FILE* library_file) {
 	char *retc;
 	
 	//ACAudioFeaturesFactory* factory = new ACAudioFeaturesFactory(0);
-        ACMediaFeatures* mediaFeatures = new ACMediaFeatures();
+	ACMediaFeatures* mediaFeatures;
 	FeaturesVector all_features;
 	float local_feature;
 	
@@ -146,8 +146,8 @@ int ACAudio::load(FILE* library_file) {
 		ret = fscanf(library_file, "%d", &n_features);
 		for (i=0; i<n_features;i++) {
 			ret = fscanf(library_file, "%d", &f_type);
-			//features.push_back(factory->createFeature(factory->getFType(f_type)));
-                        features.push_back(mediaFeatures);
+			mediaFeatures = new ACMediaFeatures();
+			features.push_back(mediaFeatures);
 			features[i]->setComputed();
 			ret = fscanf(library_file, "%d", &n_features_elements);
 			features[i]->resize(n_features_elements);
