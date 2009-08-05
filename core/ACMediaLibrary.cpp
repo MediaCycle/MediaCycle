@@ -96,11 +96,11 @@ int ACMediaLibrary::importDirectory(std::string _path, int _recursive, int id, A
 			if ( _recursive && fs::is_directory( dir_itr->path() ) )
 			{
 				++dir_count;
-				file_count += importDirectory((dir_itr->path()).native_file_string(), _recursive); 
+				file_count += importDirectory((dir_itr->path()).native_file_string(), _recursive,id, acpl);
 			}
 			else if ( fs::is_regular( dir_itr->path() ) )
 			{
-				file_count += importDirectory((dir_itr->path()).native_file_string(), 0);										
+				file_count += importDirectory((dir_itr->path()).native_file_string(), 0, id, acpl);
 			}
 			else 
 			{
@@ -129,7 +129,8 @@ int ACMediaLibrary::importDirectory(std::string _path, int _recursive, int id, A
                         if (acpl) {
                             for (int i=0;i<acpl->getSize();i++) {
                                 for (int j=0;j<acpl->getPluginLibrary(i)->getSize();j++) {
-                                    if (acpl->getPluginLibrary(i)->getPlugin(j)->getMediaType() == media->getType()) {
+                                    if (acpl->getPluginLibrary(i)->getPlugin(j)->getMediaType() == media->getType()
+                                            && acpl->getPluginLibrary(i)->getPlugin(j)->getPluginType() == PLUGIN_TYPE_FEATURES) {
                                         //TODO move this in media ?
                                         ACMediaFeatures *af = acpl->getPluginLibrary(i)->getPlugin(j)->calculate(media->getFileName());
                                         //another option :

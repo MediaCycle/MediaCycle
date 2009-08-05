@@ -64,7 +64,7 @@ DynamicLibrary* DynamicLibrary::loadLibrary(const std::string& libraryName) //!=
     if (!fullLibraryName.empty()) handle = getLibraryHandle( fullLibraryName );    // try the lib we have found
     else handle = getLibraryHandle( libraryName );    // havn't found a lib ourselves, see if the OS can find it simply from the library name.
     */
-    handle = getLibraryHandle( libraryName );
+    handle = DynamicLibrary::getLibraryHandle( libraryName );
     if (handle) return new DynamicLibrary(libraryName,handle);
     // else no lib found so report errors.
     else { cout << "DynamicLibrary::failed loading \""<<libraryName<<"\""<<std::endl; }

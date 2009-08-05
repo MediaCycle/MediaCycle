@@ -5,6 +5,11 @@ ADD_LIBRARY(mediacycle SHARED ${SRC} ${HDR})
 
 #gsl - uncomment if needed
 #TARGET_LINK_LIBRARIES(mediacycle gsl gslcblas)
+
+#somehow OSX cannot link properly blas when using armadillo
+IF ( APPLE )
+    TARGET_LINK_LIBRARIES(mediacycle blas)
+ENDIF ( APPLE )
 #others
 TARGET_LINK_LIBRARIES(mediacycle armadillo TiCommon pthread)
 

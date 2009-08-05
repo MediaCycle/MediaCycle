@@ -46,48 +46,16 @@ ACPluginManager::~ACPluginManager() {
  * Adds a plugin to the manager's list
  */
 int ACPluginManager::add(std::string aPluginPath) {
-    DynamicLibrary libTemp;// = new DynamicLibrary();
-    /*DynamicLibrary *lib;
+    DynamicLibrary *lib;
 
-    if ( !(lib = libTemp.loadLibrary(aPluginPath)) ) {
+    if ( !(lib = DynamicLibrary::loadLibrary(aPluginPath)) ) {
         return -1;
-    }*/
+    }
 
-    ACPluginLibrary *acpl = new ACPluginLibrary(libTemp.loadLibrary(aPluginPath));
+    ACPluginLibrary *acpl = new ACPluginLibrary(lib);
     acpl->initialize();
 
     this->mPluginLibrary.push_back(acpl);
-    
-    //TODO: gestionnaire de Registry pour parser les répertoire à la recherche de DLLs
-/*
-    createFactory* create = (createFactory*) lib->getProcAddress("create");
-    destroyFactory* destroy = (destroyFactory*) lib->getProcAddress("destroy");
-    listFactory* list = (listFactory*) lib->getProcAddress("list");
-
-    vector<std::string> listPlugin = list();
-
-    //faire une boucle for sur chaque plugin et faire un getParameterDescriptors()
-    //ainsi l'hote est mis au courant des parametres et peut faire un setParam()
-    //exemple : AmplitudeFollower.cpp (see vamp-plugin-sdk-2.0/examples)
-
-    for (int i=0; i < listPlugin.size(); i++)
-    {
-        std::cout<<listPlugin[i]<<endl;
-        ACPlugin* plugin = create(listPlugin[i]);
-        if (plugin) {
-            //this->mPlugins.push_back(plugin);
-        } else {
-            return -1;
-        }
-        //operations on the plugin
-        string pluginID = plugin->getIdentifier();
-        plugin->initialize();
-        ACMediaFeatures *af = plugin->calculate("/home/alexis/Programmation/TiCore-app/Applications/Numediart/MediaCycle/src/plugins/eyesweb/BruT_108#2-test.ew.txt");
-        //af->dump();
-        //plugin->calculate();
-
-        destroy(plugin);
-    }/* */
 
     return 0;
 }

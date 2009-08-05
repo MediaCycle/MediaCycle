@@ -1,9 +1,9 @@
 /* 
- * File:   ACEyesWebPlugin.h
- * Author: Julien Dubois
+ * File:   ACGretaPlugin.h
+ * Author: Alexis Moinet
  *
- * @date 29 juillet 2009
- * @copyright (c) 2009 – UMONS - Numediart
+ * @date 03/08/20
+ * @copyright (c) 2020 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -30,26 +30,37 @@
  * <mailto:avre@umons.ac.be>
  */
 
-#ifndef _ACEYESWEBPLUGIN_H
-#define	_ACEYESWEBPLUGIN_H
+#ifndef _ACGRETAPLUGIN_H
+#define	_ACGRETAPLUGIN_H
 
-#include <armadillo>
+#include <Communicator.h>
+#include <Component.h>
+#include <CppAIRPlug.h>
 
 #include "ACPlugin.h"
 
-class ACEyesWebPlugin : public ACPlugin {
+class ACGretaPlugin : public ACPlugin {
 public:
-    ACEyesWebPlugin();
-    ~ACEyesWebPlugin();
+    ACGretaPlugin();
+    ~ACGretaPlugin();
     virtual int initialize();
     virtual ACMediaFeatures* calculate();
     virtual ACMediaFeatures* calculate(std::string aFileName);
-    virtual ACMediaFeatures* getMediaFeatures() { return this->mMediaFeatures; };
     virtual int start() {return 0;};
     virtual int stop() {return 0;};
+    static std::string generateBML(std::string aFileName);
 protected:
-    ACMediaFeatures *mMediaFeatures;
+    
 };
 
-#endif	/* _ACEYESWEBPLUGIN_H */
+using namespace cmlabs;
+
+class CppPoster : public CppAIRPlug
+{
+public:
+	CppPoster(JString name, JString host, int port);
+    virtual ~CppPoster();
+};
+
+#endif	/* _ACGRETAPLUGIN_H */
 

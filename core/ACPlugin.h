@@ -46,7 +46,8 @@ using namespace std;
 enum ACPluginType {
 	PLUGIN_TYPE_NONE,
 	PLUGIN_TYPE_FEATURES,
-	PLUGIN_TYPE_SERVER
+	PLUGIN_TYPE_SERVER,
+        PLUGIN_TYPE_CLIENT
 };
 
 class ACPlugin {
