@@ -48,9 +48,9 @@ extern "C" {
     // L path: /opt/local/lib or /usr/local/lib
     // as of 05/03/2009, MacPorts (/opt/*) only provides version 1.0
     // I downloaded 1.1 from SourceForge
-    #include <cv.h>
-    #include <cxcore.h>
-    #include <highgui.h>
+    #include <OpenCV/cv.h>
+    #include <OpenCV/cxcore.h>
+    #include <OpenCV/highgui.h> // for cvloadimage
     #endif
 #else
     #include <opencv/cv.h>

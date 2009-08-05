@@ -47,9 +47,11 @@ public:
     virtual ACMediaFeatures* getMediaFeatures() { return this->mMediaFeatures; };
     virtual int start() {return 0;};
     virtual int stop() {return 0;};
+    std::string extractDirectory(std::string path);
+    std::string extractFilename(std::string path);
+    std::string changeExtension(std::string path, std::string ext);
 protected:
     ACMediaFeatures *mMediaFeatures;
 };
 
 #endif	/* _ACEYESWEBPLUGIN_H */
-

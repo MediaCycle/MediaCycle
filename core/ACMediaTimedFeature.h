@@ -30,11 +30,22 @@
  *  Any other additional authorizations may be asked to avre@umons.ac.be 
  *  <mailto:avre@umons.ac.be>
  *
+ *  - Julien Dubois - 28/07/09 : 
+ *     added readFile
+ *
+ *  - Julien Dubois - 31/07/09 :
+ *     added hist, getExtremaOfVector
+ *
+ *  - Julien Dubois - 03/08/09 :
+ *     added std, weightedStdDeviation, stdAsVector
+ *
+ *  - Julien Dubois - 04/08/09 :
+ *     added similarity, dist
+ *
  */
 
 #ifndef _ACMEDIATIMEDFEATURE_H
 #define _ACMEDIATIMEDFEATURE_H
-
 
 #include <armadillo>
 #include <vector>
@@ -72,11 +83,12 @@ class ACMediaTimedFeatures {
   float getValue(float index, float dim);
   void setValue(fmat);
   string getName(){return name;};
-  string setName(string name){this->name = name;};
+  void setName(string name){this->name = name;};
   size_t getLength();
   size_t getDim();
   void setSegments(){};
   vector<float> getSegments();
+  float getSegments(int index);
   
   int getNearestTimePosition(float time, int mode);
   fmat getValueAtTime(fcolvec time_v);
@@ -88,9 +100,11 @@ class ACMediaTimedFeatures {
   vector<float> getTimeAsVector();
   
   fmat weightedMean(ACMediaTimedFeatures* weight);
-  fmat weightedStdDeviation(ACMediaTimedFeatures* weight);
   fmat mean();
-  vector< float > meanAsVector();
+  fmat weightedStdDeviation(ACMediaTimedFeatures* weight);
+  fmat standardDeviation();
+  vector<float> meanAsVector();
+  vector<float> standardDeviationAsVector();
   vector<ACMediaTimedFeatures*> segment();
   ACMediaTimedFeatures* weightedMeanSegment(ACMediaTimedFeatures* weight);
   ACMediaTimedFeatures* meanSegment();
@@ -99,6 +113,12 @@ class ACMediaTimedFeatures {
   ACMediaTimedFeatures* delta();
 
   void readFile(std::string);
+
+  umat hist(int nbrBin, float min = 0, float max = 0);
+  vector<float> getExtremaOfVector(fcolvec column);
+
+  fmat similarity(int mode = 0);
+  float dist(fmat rowvector1, fmat rowvector2, int mode = 0);
 };
 
 #endif

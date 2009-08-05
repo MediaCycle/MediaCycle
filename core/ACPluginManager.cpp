@@ -109,6 +109,9 @@ int ACPluginLibrary::initialize()
         } else {
             return -1;
         }
+//         string dataFile = "/Users/dtardieu/data/DANCERS/Video/Front/Bru_102#2.mov";
+//         //plugin->calculate(dataFile);
+//         ACMediaFeatures *mediaFeatures = plugin->calculate(dataFile);
         /*
         //operations on the plugin
         string pluginID = plugin->getIdentifier();
