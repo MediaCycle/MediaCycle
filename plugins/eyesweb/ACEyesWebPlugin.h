@@ -33,6 +33,12 @@
 #ifndef _ACEYESWEBPLUGIN_H
 #define	_ACEYESWEBPLUGIN_H
 
+#ifdef __WIN32__
+#define FILE_SEP = "\\"
+#else
+#define FILE_SEP = "/"
+#endif
+
 #include <armadillo>
 
 #include "ACPlugin.h"
@@ -44,14 +50,13 @@ public:
     virtual int initialize();
     virtual ACMediaFeatures* calculate();
     virtual ACMediaFeatures* calculate(std::string aFileName);
-    virtual ACMediaFeatures* getMediaFeatures() { return this->mMediaFeatures; };
     virtual int start() {return 0;};
     virtual int stop() {return 0;};
     std::string extractDirectory(std::string path);
     std::string extractFilename(std::string path);
     std::string changeExtension(std::string path, std::string ext);
+    std::string changeLastFolder(std::string path, std::string folder);
 protected:
-    ACMediaFeatures *mMediaFeatures;
 };
 
 #endif	/* _ACEYESWEBPLUGIN_H */

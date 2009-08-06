@@ -71,6 +71,7 @@ int ACMediaLibrary::importDirectory(std::string _path, int _recursive, int id, A
 	unsigned long dir_count = 0;
 	unsigned long other_count = 0;
 	
+	bool desc_failed = 0;
 	string filename;
 	string extension;
 	
@@ -136,11 +137,15 @@ int ACMediaLibrary::importDirectory(std::string _path, int _recursive, int id, A
                                         //another option :
                                         //ACMediaFeatures *af = acpl->getPluginLibrary(i)->calculate(j,media->getFileName());
                                         media->addFeatures(af);
+										if (af == NULL)
+											desc_failed = 1;
                                     }
                                 }
                             }
                         }
-			media_library.push_back(media);
+			if (!desc_failed)
+				this->addMedia(media);
+			
 			++file_count; // XS-SD TODO : here ?
 		}
 	}
@@ -213,14 +218,18 @@ int ACMediaLibrary::addMedia(ACMedia *aMedia) {
     //TODO remove media_type check
     // mediacycle should be able to manage a mix of any media
     // instead of only medias of one type
-    if (aMedia->getType() == this->media_type) {
-        this->media_library.push_back(aMedia);
-        return 0;
-    } else {
-        return -1;
-    }
+	if (aMedia != NULL){
+		if (aMedia->getType() == this->media_type) {
+			this->media_library.push_back(aMedia);
+			return 0;
+		} else {
+			return -1;
+		}
+	}
+	else {
+		return -1;
+	}
 }
-
 ACMedia* ACMediaLibrary::getItem(int i){
 	if (i < media_library.size()){
 		return media_library[i];

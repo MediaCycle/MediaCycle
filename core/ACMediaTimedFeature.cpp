@@ -326,9 +326,9 @@ fmat ACMediaTimedFeatures::weightedMean(ACMediaTimedFeatures* weight){
 }
 
 fmat ACMediaTimedFeatures::mean(){
-  fcolvec weightValue = ones<fcolvec>(this->getLength());
-  ACMediaTimedFeatures* weight = new ACMediaTimedFeatures(this->getTime(),weightValue);
-  return weightedMean(weight);
+    fcolvec weightValue = ones<fcolvec>(this->getLength());
+    ACMediaTimedFeatures* weight = new ACMediaTimedFeatures(this->getTime(),weightValue);
+    return weightedMean(weight);
 }
 
 vector< float > ACMediaTimedFeatures:: meanAsVector(){
@@ -355,14 +355,14 @@ fmat ACMediaTimedFeatures::weightedStdDeviation(ACMediaTimedFeatures* weight){
   return sqrt(trans(weightVal) * cDataSq);
 }
 
-fmat ACMediaTimedFeatures::standardDeviation(){
+fmat ACMediaTimedFeatures::std(){
   fcolvec weightValue = ones<fcolvec>(this->getLength());
   ACMediaTimedFeatures* weight = new ACMediaTimedFeatures(this->getTime(),weightValue);
   return weightedStdDeviation(weight);
 }
 
-vector< float > ACMediaTimedFeatures:: standardDeviationAsVector(){
-  fmat tmpStd = this->standardDeviation();
+vector< float > ACMediaTimedFeatures:: stdAsVector(){
+  fmat tmpStd = this->std();
   vector< float > stdVec;
   for (int i=0; i<tmpStd.n_cols; i++)
     stdVec.push_back(tmpStd(0,i));
@@ -425,11 +425,20 @@ ACMediaTimedFeatures* ACMediaTimedFeatures::weightedMeanSegment(ACMediaTimedFeat
 // ACMediaTimedFeatures* ACMediaTimedFeatures::simpleSplineModeling(ACMediaTimedFeatures* weight, ACMediaSegment* segment){
 //}
 
-void ACMediaTimedFeatures::readFile(std::string fileName){
+int ACMediaTimedFeatures::readFile(std::string fileName){
     fmat data;
     data.load(fileName, raw_ascii);
-    this->setTime(data.col(0));          //time information : first column of the file
-    this->setValue(data.cols(1,(data.n_cols)-1));   //data : other columns of the file
+    if(data.n_elem != 0)
+    {
+        this->setTime(data.col(0));          //time information : first column of the file
+        this->setValue(data.cols(1,(data.n_cols)-1));   //data : other columns of the file
+        return 1;
+    }
+    else
+    {
+        cout<<"Error : "<<fileName<< " does not exist"<<endl;
+        return 0;
+    }
 }
 
 umat ACMediaTimedFeatures::hist(int nbrBin, float min, float max){
@@ -509,23 +518,77 @@ vector<float> ACMediaTimedFeatures::getExtremaOfVector(fcolvec column){ //return
 
 fmat ACMediaTimedFeatures::similarity(int mode)
 {
-    //mode : distance type
-    // 0 = euclidian distance
+    //mode : distance type    // 0 = euclidian distance
 
-    fmat similarityM = fmat(this->getLength(),this->getLength());
-    similarityM.diag() = zeros<fcolvec>(this->getLength());
-
-    for(int i=0;i<this->getLength();i++)
+    int samplingFactor = 1;
+    fmat data = zeros<fmat>(((int)floor(this->getLength()/samplingFactor))+1, this->getDim());
+    for(int i=0; i<this->getLength()-1; i++)
     {
-        for (int j=0;j<this->getLength();j++)
-        {
-            if (i != j)
-            {
-                similarityM(i,j) = dist(this->getValue().row(i),this->getValue().row(j),mode);
-            }
-        }
+        if ((i%samplingFactor) == 0)
+            data.row(i/samplingFactor) = this->getValue().row(i);
     }
+    //data.print("data");    //ok
+
+    int n = data.n_rows;
+    int p = this->getDim();
+
+    fmat similarityM = zeros<fmat>(n,n);
+
+    for (int i = 0; i < n-1; i++)
+    {
+        fcolvec dsq = zeros<fcolvec>(n-1-i);
+        fcolvec tmpResult = zeros<fcolvec>(n-1-i);
+
+        for (int q = 0; q < p; q++)
+        {
+            fcolvec tmp2 = data.col(q);
+            fcolvec tmp = tmp2.rows(i+1,n-1);
+            dsq = dsq + square(data(i,q) - tmp);
+        }
+        tmpResult = sqrt(dsq);
+        similarityM.submat(i+1,i,n-1,i) = tmpResult;
+        similarityM.submat(i,i+1,i,n-1) = trans(tmpResult);
+    }
+    
     return similarityM;
+
+//-------------------------------------
+////  no sampling factor !!
+//    fmat similarityM = zeros<fmat>(this->getLength(),this->getLength());
+//
+//    int n = this->getLength();
+//    int p = this->getDim();
+//
+//    for (int i = 0; i < n-1; i++)   //n-1  //i++
+//    {
+//        fcolvec dsq = zeros<fcolvec>(n-1-i);
+//        fcolvec tmpResult = zeros<fcolvec>(n-1-i);
+//        for (int q = 0; q < p; q++)
+//        {
+//            fcolvec tmp2 = this->getValue().col(q);
+//            fcolvec tmp = tmp2.rows(i+1,n-1);
+//            dsq = dsq + square(this->getValue(i,q) - tmp);
+//        }
+//        tmpResult = sqrt(dsq);
+//        similarityM.submat(i+1,i,n-1,i) = tmpResult;
+//        similarityM.submat(i,i+1,i,n-1) = trans(tmpResult);
+//    }
+
+//----------------------------------
+////  slow version !!
+//    for(int i=0;i<this->getLength();i++)
+//    {
+//        for (int j=i;j<this->getLength();j++)
+//        {
+//            if (i != j)
+//            {
+//                float tmp = dist(this->getValue().row(i),this->getValue().row(j),mode);
+//                similarityM(i,j) = tmp;
+//                similarityM(j,i) = tmp;
+//            }
+//        }
+//    }
+
 }
 
 float ACMediaTimedFeatures::dist(fmat vector1, fmat vector2, int mode)

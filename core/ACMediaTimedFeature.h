@@ -102,9 +102,9 @@ class ACMediaTimedFeatures {
   fmat weightedMean(ACMediaTimedFeatures* weight);
   fmat mean();
   fmat weightedStdDeviation(ACMediaTimedFeatures* weight);
-  fmat standardDeviation();
+  fmat std();
   vector<float> meanAsVector();
-  vector<float> standardDeviationAsVector();
+  vector<float> stdAsVector();
   vector<ACMediaTimedFeatures*> segment();
   ACMediaTimedFeatures* weightedMeanSegment(ACMediaTimedFeatures* weight);
   ACMediaTimedFeatures* meanSegment();
@@ -112,7 +112,7 @@ class ACMediaTimedFeatures {
   ACMediaTimedFeatures* simpleSplineModeling();
   ACMediaTimedFeatures* delta();
 
-  void readFile(std::string);
+  int readFile(std::string);
 
   umat hist(int nbrBin, float min = 0, float max = 0);
   vector<float> getExtremaOfVector(fcolvec column);
