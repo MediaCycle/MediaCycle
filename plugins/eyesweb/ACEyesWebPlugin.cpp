@@ -121,15 +121,17 @@ ACMediaFeatures* ACEyesWebPlugin::calculate(std::string fileName)
 
     //-----------------------------------------------
 
-    if (mediaTimedFeatures->readFile(dataFile2) == 0)
+	fmat imagefeatures_m;
+	imagefeatures_m.load(dataFile2, raw_ascii);
+    if (imagefeatures_m.n_elem == 0)
     {
         mMediaFeatures = NULL;
         return mMediaFeatures;
     }
     //mediaTimedFeatures->getValue().print("Value : ");
-    mMediaFeatures->resize(mMediaFeatures->size() + mediaTimedFeatures->getValue().n_cols);
-    for (int i=0; i<mediaTimedFeatures->getValue().n_cols; i++)
-        mMediaFeatures->setFeature(mMediaFeatures->size()-mediaTimedFeatures->getValue().n_cols+i,mediaTimedFeatures->getValue(0,i));
+    mMediaFeatures->resize(mMediaFeatures->size() + imagefeatures_m.n_cols);
+    for (int i=0; i<imagefeatures_m.n_cols; i++)
+        mMediaFeatures->setFeature(mMediaFeatures->size()-imagefeatures_m.n_cols+i,imagefeatures_m(0,i));
 
     mMediaFeatures->setComputed();
 
