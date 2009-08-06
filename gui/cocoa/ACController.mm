@@ -109,20 +109,37 @@ static void osc_callback(TiOscReceiverRef, const char *tagName, void *userData)
 	[[NSNotificationCenter defaultCenter] addObserver: self selector: @selector(myObserver:) name: @"OALNotify" object: NULL];
 	
 	media_cycle = new MediaCycle(MEDIA_TYPE_VIDEO,"/tmp/","mediacycle.acl");
-	media_cycle->setSelectedObject(0);
+	
+
+	
+	NSLog(@"DANCERS!");
+	
+	//media_cycle->importLibrary("/dupont/dancers.acl_copy");
+	
+	NSLog(@"DANCERS!");
+	
+	//media_cycle->setClusterNumber(5);
+	
+	NSLog(@"DANCERS!");
+	
+	//media_cycle->setSelectedObject(0);
 	
 	[browser_osg_view setMediaCycle:media_cycle];
 
-	[browser_osg_view prepareFromBrowser];
+	//[browser_osg_view prepareFromBrowser];
 	
 	[browser_osg_view setPlaying:YES];
+	
+	NSLog(@"DANCERS!");
 }
 
 - (void)updatedLibrary
 {	
+	media_cycle->setSelectedObject(0);
+	
 	[browser_osg_view prepareFromBrowser];
 	
-	media_cycle->setSelectedObject(0);
+	[browser_osg_view setPlaying:YES];
 	//[browser_osg_view updateTransformsFromBrowser];
 }
 
@@ -200,8 +217,8 @@ static void osc_callback(TiOscReceiverRef, const char *tagName, void *userData)
 		
 		NSString* path = [paths objectAtIndex:0];
 		
-		media_cycle->openLibrary((string)[path UTF8String]); // XS instead of getImageLibrary CHECK THIS
-		media_cycle->libraryContentChanged();
+		media_cycle->importLibrary((string)[path UTF8String]); // XS instead of getImageLibrary CHECK THIS
+		//media_cycle->libraryContentChanged();
 	}
 	[self updatedLibrary];
 	}
