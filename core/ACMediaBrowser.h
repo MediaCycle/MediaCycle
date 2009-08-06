@@ -94,8 +94,8 @@ struct ACLoopAttribute
 class ACMediaBrowser {
 	
 public:
-	ACMediaBrowser() {mSelectedLoop = 0;};
-	~ACMediaBrowser() {};
+	ACMediaBrowser();
+	~ACMediaBrowser();
 	
 	void setLibrary(ACMediaLibrary *lib) { mLibrary = lib; }
 	ACMediaLibrary *getLibrary() { return mLibrary; }
@@ -123,10 +123,10 @@ public:
 	// camera
 	void setCameraPosition(float x, float y)		{ mCameraPosition[0] = x;  mCameraPosition[1] = y; }
 	void getCameraPosition(float &x, float &y) 	{ x = mCameraPosition[0];  y = mCameraPosition[1]; }
-	void setCameraZoom(float z)				{ mCameraZoom = TI_MAX(z, 0.000001); }
+	void setCameraZoom(float z)				{ mCameraZoom = TI_MAX(z, 0.000001); setNeedsDisplay(true); }
 	void setCameraRecenter()				{ mCameraPosition[0]=0.0; mCameraPosition[1]=0.0; mCameraZoom=1.0; mCameraAngle=0.0;}
 	float getCameraZoom() const				{ return mCameraZoom; }
-	void setCameraRotation(float angle)				{ mCameraAngle = angle; }
+	void setCameraRotation(float angle)				{ mCameraAngle = angle; setNeedsDisplay(true); }
 	float getCameraRotation() const				{ return mCameraAngle; }
 	
 	// organization
@@ -134,8 +134,9 @@ public:
 	void setWeightRhythm(float weight);
 	void setWeightTimbre(float weight);
 	void setWeightHarmony(float weight);
-	void setClusterNumber(int n);	 
-	
+	void setWeight(int i, float weight) {mFeatureWeights[i] = weight; updateClusters(true); }
+	void setClusterNumber(int n); 
+		
 	// filtering
 	void setFilterIn();
 	void setFilterOut();
@@ -180,6 +181,18 @@ public:
 	ACNavigationState getCurrentNavigationState();
 	void setCurrentNavigationState(ACNavigationState state);
 	
+	// Quick Browser
+	void setClosestLoop(int loop_id);
+	void setAutoPlay(int auto_play) { this->auto_play = auto_play; }
+	
+	// sources - SD reintroduced 2009 aug 4
+	int	 pickSource(float x, float z);
+	void getSourcePosition(int loop_id, float* x, float* z);
+	void setSourcePosition(float _x, float _z, float* x, float* z);
+	int	 toggleSourceActivity(float x, float z);
+	int toggleSourceActivity(int lid, int type=1);
+	int muteAllSources();
+	
 protected:
 	ACMediaLibrary *mLibrary; 
 	
@@ -192,6 +205,11 @@ protected:
 	int 				mSelectedLoop;
 	
 	bool 				mNeedsDisplay;
+	
+	float   			mViewWidth;
+	float   			mViewHeight;
+	float   			mCenterOffsetX;
+	float				mCenterOffsetZ;
 	
 	float 				mCameraPosition[2];
 	float 				mCameraZoom;
@@ -220,7 +238,9 @@ protected:
 	vector<vector<vector <float> > >mClusterCenters; // cluster index, feature index, descriptor index
 	vector<float>			mFeatureWeights; // each value must be in [0,1], important for euclidian distance.
 	
-	
+	int closest_loop;
+	int auto_play;
+	int auto_play_toggle;
 };
 
 #endif // __ACMEDIABROWSER_H__

@@ -67,7 +67,7 @@ public:
 	// TODO: make the following explicitely inlines ?
 	void setThumbnail(IplImage *_thumbnail) { thumbnail = _thumbnail; thumbnail_width = _thumbnail->width; thumbnail_height = _thumbnail->height; }
 // SD?	void setThumbnailSave(IplImage *_thumbnail);
-	IplImage* getThumbnail() { return thumbnail; }
+	void* getThumbnailPtr() { return (void*)thumbnail; }
 	
 	// do we need the original size ?
 	// the thumbnail size can be accessed by thumbnail->width/height !! ;

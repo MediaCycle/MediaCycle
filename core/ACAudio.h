@@ -57,6 +57,9 @@ public:
 	int load(FILE* library_file); // was: loadLoop
 	void import(std::string _path); // was: importFile in library
 	void saveThumbnail(std::string _path);
+	void* getThumbnailPtr() { return (void*)waveform; }
+	int getWidth() {return n_frames;}
+	int getHeight() {return 0;}
 	
 	void setSampleRate(int _sample_rate) { sample_rate = _sample_rate; }
 	int getSampleRate() { return sample_rate; }

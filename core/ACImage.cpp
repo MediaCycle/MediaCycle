@@ -109,6 +109,9 @@ int ACImage::load(FILE* library_file) { // was loadLoop
 	int ret;
 	char *retc;
 	
+	ACMediaFeatures* mediaFeatures;
+	float local_feature;
+	
 	char audio_file_temp[1024];
 	memset(audio_file_temp,0,1024);
 	
@@ -116,9 +119,7 @@ int ACImage::load(FILE* library_file) { // was loadLoop
 	
 	if (retc) {
 		path_size = strlen(audio_file_temp);
-		filename = new char[path_size];
-//		strncpy(filename, audio_file_temp, path_size-1); // XS TODO all string
-		filename[path_size-1] = 0;
+		filename = string(audio_file_temp, path_size-1);
 		
 		/*	memset(audio_file_temp,0,1024);
 		 retc = fgets(audio_file_temp, 1024, library_file);
@@ -130,16 +131,16 @@ int ACImage::load(FILE* library_file) { // was loadLoop
 		ret = fscanf(library_file, "%d", &width);
 		ret = fscanf(library_file, "%d", &height);
 		ret = fscanf(library_file, "%d", &n_features);
-		features.resize(n_features);
 		// SD TODO - following wont't work
 		for (i=0; i<n_features;i++) {
+			mediaFeatures = new ACMediaFeatures();
+			features.push_back(mediaFeatures);
+			features[i]->setComputed();
 			ret = fscanf(library_file, "%d", &n_features_elements);
-			features[i]->resize(n_features_elements); // XS TODO: define resize for ACMediaFeatures
+			features[i]->resize(n_features_elements);
 			for (j=0; j<n_features_elements; j++) {
-                            float tmp;
-                            //ret = fscanf(library_file, "%f", &(features[i][j]));
-                            ret = fscanf(library_file, "%f", &tmp);
-                            features[i]->setFeature(j,tmp);
+				ret = fscanf(library_file, "%f", &(local_feature));
+				features[i]->setFeature(j, local_feature);
 			}
 		}
 		ret = fscanf(library_file, "\n");

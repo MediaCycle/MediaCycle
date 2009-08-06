@@ -52,7 +52,7 @@ int main(int argc, char** argv) {
 
     cout<<"new MediaCycle"<<endl;
     
-    mediacycle = new MediaCycle(MEDIA_TYPE_AUDIO,"/home/alexis/Bureau/AVLC/Radek","avlc-lib.acl");
+    mediacycle = new MediaCycle(MEDIA_TYPE_AUDIO,"/home/alexis/Bureau/AVLC/","avlc-lib-20090806-1.acl");
     //mediacycle->addPlugin("/home/alexis/Programmation/TiCore-app/Applications/Numediart/MediaCycle/src/Builds/linux-x86/plugins/eyesweb/mc_eyesweb.so");
     //mediacycle->addPlugin("/home/alexis/Programmation/TiCore-app/Applications/Numediart/MediaCycle/src/Builds/linux-x86/plugins/greta/mc_greta.so");
     mediacycle->addPlugin("/home/alexis/Programmation/TiCore-app/Applications/Numediart/MediaCycle/src/Builds/linux-x86/plugins/audioanalysis/mc_audioanalysis.so");
@@ -64,10 +64,13 @@ int main(int argc, char** argv) {
     //mediacycle->importDirectory(mediacycle->getLocalDirectoryPath(),0);
     //mediacycle->getLibrary()->saveAsLibrary(mediacycle->getLocalDirectoryPath() + "/" + mediacycle->getLibName());
 
+    /*
     //IMPORT LIBFILE
     cout<<"importLib"<<endl;
     mediacycle->importLibrary(mediacycle->getLocalDirectoryPath() + "/" + mediacycle->getLibName());
+    */
 
+    /*
     //TEST KNN WITH NEW FILE
     cout << "new media" << endl;
     ACPlugin *audioanalysis = mediacycle->getPluginManager()->getPlugin("AudioAnalysis");
@@ -95,9 +98,10 @@ int main(int argc, char** argv) {
     }
 
     delete local_media;
+    */
     
     //test tcp-SSI-greta (all-in-one) = AVLaughterCycle
-    //mediacycle->startTcpServer(12345,5,avlc_tcp_callback);
+    mediacycle->startTcpServer(12345,5,avlc_tcp_callback);
 
     //begin test greta
 /*

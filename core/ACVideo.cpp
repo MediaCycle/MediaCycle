@@ -42,6 +42,8 @@ using namespace std;
 
 ACVideo::ACVideo() : ACMedia() {
 	_type = MEDIA_TYPE_VIDEO;
+	features.resize(0);
+	thumbnail = 0;
 }	
 
 ACVideo::~ACVideo() {
@@ -57,6 +59,56 @@ void ACVideo::import(string _path) {
 	delete factory;
 	delete full_video;
 */
+}
+
+int ACVideo::load(FILE* library_file) { // was loadLoop
+	int i, j;
+	int path_size;
+	int n_features;
+	int n_features_elements;
+	
+	int ret;
+	char *retc;
+	
+	ACMediaFeatures* mediaFeatures;
+	float local_feature;
+	
+	char file_temp[1024];
+	memset(file_temp,0,1024);
+	
+	retc = fgets(file_temp, 1024, library_file);
+	
+	if (retc) {
+		path_size = strlen(file_temp);
+		filename = string(file_temp, path_size-1);
+		
+		retc = fgets(file_temp, 1024, library_file);
+		path_size = strlen(file_temp);
+		filename_thumbnail = string(file_temp, path_size-1);
+		
+		ret = fscanf(library_file, "%d", &mid);
+		ret = fscanf(library_file, "%d", &width);
+		ret = fscanf(library_file, "%d", &height);
+		ret = fscanf(library_file, "%d", &n_features);
+		// SD TODO - following wont't work
+		for (i=0; i<n_features;i++) {
+			mediaFeatures = new ACMediaFeatures();
+			features.push_back(mediaFeatures);
+			features[i]->setComputed();
+			ret = fscanf(library_file, "%d", &n_features_elements);
+			features[i]->resize(n_features_elements);
+			for (j=0; j<n_features_elements; j++) {
+				ret = fscanf(library_file, "%f", &(local_feature));
+				features[i]->setFeature(j, local_feature);
+			}
+		}
+		ret = fscanf(library_file, "\n");
+		
+		return 1;
+	}
+	else {
+		return 0;
+	}
 }
 
 
