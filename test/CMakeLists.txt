@@ -1,6 +1,9 @@
-ADD_EXECUTABLE(mediacycle-avlc avlaughtercycle.cpp)
-ADD_DEPENDENCIES(mediacycle-avlc mediacycle)
+#List the files in "test" and if there are directories, add them to the list of (potential) test programs
+FILE(GLOB DIRLIST * )
 
-TARGET_LINK_LIBRARIES(mediacycle-avlc mediacycle)
-
-INSTALL(TARGETS mediacycle-avlc RUNTIME DESTINATION bin)
+FOREACH(TESTDIR ${DIRLIST})
+    IF(IS_DIRECTORY ${TESTDIR})
+        MESSAGE("Possible test found in : " ${TESTDIR})
+        ADD_SUBDIRECTORY(${TESTDIR})
+    ENDIF()
+ENDFOREACH()

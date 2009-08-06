@@ -48,29 +48,59 @@ static void avlc_tcp_callback(char *buffer, int l, char **buffer_send, int *l_se
 int processTcpMessageFromSSI(MediaCycle *that, char* buffer, int l, char **buffer_send, int *l_send);
 
 int main(int argc, char** argv) {
-    MediaCycle *mediacycle;
-    
+    MediaCycle *mediacycle;    
 
     cout<<"new MediaCycle"<<endl;
     
-    mediacycle = new MediaCycle(MEDIA_TYPE_AUDIO,"/home/alexis/Bureau/AVLC","mainlib.acl");
+    mediacycle = new MediaCycle(MEDIA_TYPE_AUDIO,"/home/alexis/Bureau/AVLC/Radek","avlc-lib.acl");
     //mediacycle->addPlugin("/home/alexis/Programmation/TiCore-app/Applications/Numediart/MediaCycle/src/Builds/linux-x86/plugins/eyesweb/mc_eyesweb.so");
-    mediacycle->addPlugin("/home/alexis/Programmation/TiCore-app/Applications/Numediart/MediaCycle/src/Builds/linux-x86/plugins/greta/mc_greta.so");
+    //mediacycle->addPlugin("/home/alexis/Programmation/TiCore-app/Applications/Numediart/MediaCycle/src/Builds/linux-x86/plugins/greta/mc_greta.so");
+    mediacycle->addPlugin("/home/alexis/Programmation/TiCore-app/Applications/Numediart/MediaCycle/src/Builds/linux-x86/plugins/audioanalysis/mc_audioanalysis.so");
 
-    //mediacycle->importDirectory("/Users/dtardieu/data/DANCERS/Video/Test/",0);
-    /*cout<<"setCulsterN"<<endl;
+    cout<<"setCulsterN"<<endl;
     mediacycle->getBrowser()->setClusterNumber(1);
+    //IMPORT DIRECTORY + SAVE IN LIBFILE
+    //cout<<"importDir"<<endl;
+    //mediacycle->importDirectory(mediacycle->getLocalDirectoryPath(),0);
+    //mediacycle->getLibrary()->saveAsLibrary(mediacycle->getLocalDirectoryPath() + "/" + mediacycle->getLibName());
+
+    //IMPORT LIBFILE
     cout<<"importLib"<<endl;
-    mediacycle->importLibrary("/home/alexis/Bureau/AVLC/LClib.acl");
+    mediacycle->importLibrary(mediacycle->getLocalDirectoryPath() + "/" + mediacycle->getLibName());
+
+    //TEST KNN WITH NEW FILE
+    cout << "new media" << endl;
+    ACPlugin *audioanalysis = mediacycle->getPluginManager()->getPlugin("AudioAnalysis");
+    cout << "audioanalysis" << endl;
+    ACMediaFeatures *amf = audioanalysis->calculate("/media/MightyDrive/5_447102_454154.wav");
+    cout << "creating media" << endl;
+    ACMedia* local_media;
+    local_media = ACMediaFactory::create(MEDIA_TYPE_AUDIO);
+    local_media->addFeatures(amf);
+    cout << "done" << endl;
     cout<<"getKNN"<<endl;
     vector<ACMedia *> result;
-    mediacycle->getKNN(mediacycle->getLibrary()->getMedia()[0], result, 1);
+    mediacycle->getKNN(mediacycle->getLibrary()->getMedia()[0], result, 3);
     cout<<"done"<<endl;
-    */
+
+    if (result.size() > 0) {
+        ACPlugin *greta = mediacycle->getPluginManager()->getPlugin("Greta");
+        //remove extension in greta
+        if (greta) {
+            greta->calculate(result[0]->getFileName());
+        } else {
+            for (int k=0;k<result.size();k++)
+                cout << result[k]->getFileName() << endl;
+        }
+    }
+
+    delete local_media;
+    
     //test tcp-SSI-greta (all-in-one) = AVLaughterCycle
-    mediacycle->startTcpServer(12345,5,avlc_tcp_callback);
+    //mediacycle->startTcpServer(12345,5,avlc_tcp_callback);
 
     //begin test greta
+/*
     ACPlugin *greta = mediacycle->getPluginManager()->getPlugin("Greta");
 
     FILE *f = fopen("/home/alexis/Bureau/faplist.txt","r");
@@ -85,7 +115,7 @@ int main(int argc, char** argv) {
     }
     fclose(f);
     //end test greta
-
+*/
     /*mediacycle->importDirectory("/home/alexis/NetBeansProjects/MediaCycle/lib/b50aac6a76bf5d5b660dd822273fe58af8791131.wav",0,1);
     mediacycle->importDirectory("/home/alexis/NetBeansProjects/MediaCycle/lib/18f038431e4db3c83c7227f47966cbbe7d6e467d.wav",0,2);
     mediacycle->importDirectory("/home/alexis/NetBeansProjects/MediaCycle/lib/d2dd27046e2a241e06d48a22fd1bc4183e7fa990.wav",0,3);
@@ -265,7 +295,9 @@ int processTcpMessageFromSSI(MediaCycle *that, char *buffer, int l, char **buffe
         if (result.size() > 0) {
             ACPlugin *greta = that->getPluginManager()->getPlugin("Greta");
             //remove extension in greta
-            greta->calculate(result[0]->getFileName());
+            if (greta) {
+                greta->calculate(result[0]->getFileName());
+            }
         }
 
         delete local_media; //delete only in "request". In "addwavf", local_media is added to the library and therefore shouyld not be deleted

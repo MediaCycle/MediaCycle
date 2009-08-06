@@ -14,7 +14,7 @@ CppPoster::~CppPoster() {
 
 ACGretaPlugin::ACGretaPlugin() {
     this->mMediaType = MEDIA_TYPE_VIDEO;
-    this->mPluginType = PLUGIN_TYPE_SERVER;
+    this->mPluginType = PLUGIN_TYPE_CLIENT;
     this->mName = "Greta";
     this->mDescription = "Greta plugin - sends request to Greta through Psyclone";
     this->mId = "";
