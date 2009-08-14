@@ -58,7 +58,7 @@ protected:
 	int index_last_normalized; // last item whose features have been normalized
 public:
 	ACMediaLibrary();
-        ACMediaLibrary(ACMediaType aMediaType);
+	ACMediaLibrary(ACMediaType aMediaType);
 	~ACMediaLibrary() {}
 	
 	bool isEmpty();
@@ -74,6 +74,9 @@ public:
 	void normalizeFeatures();
 	void denormalizeFeatures();
 	void calculateStats();
+
+	std::vector< std::vector<double> > getMeanFeatures() {return mean_features;};
+	std::vector< std::vector<double> > getStdevFeatures() {return stdev_features;};
 
 	std::vector<ACMedia*> getMedia() {return media_library;};
         int addMedia(ACMedia *aMedia);

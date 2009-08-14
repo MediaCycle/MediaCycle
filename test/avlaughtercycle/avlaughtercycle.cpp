@@ -51,31 +51,40 @@ int main(int argc, char** argv) {
     MediaCycle *mediacycle;    
 
     cout<<"new MediaCycle"<<endl;
-    
-    mediacycle = new MediaCycle(MEDIA_TYPE_AUDIO,"/home/alexis/Bureau/AVLC/","avlc-lib-20090806-1.acl");
+    mediacycle = new MediaCycle(MEDIA_TYPE_AUDIO,"/home/alexis/Work/eNTERFACE/eNTERFACE09/AVLC/test/","avlc-lib.acl");
+    //mediacycle = new MediaCycle(MEDIA_TYPE_AUDIO,"/home/alexis/Work/eNTERFACE/eNTERFACE09/AVLC/","avlc-lib-20090806-1.acl");
     //mediacycle->addPlugin("/home/alexis/Programmation/TiCore-app/Applications/Numediart/MediaCycle/src/Builds/linux-x86/plugins/eyesweb/mc_eyesweb.so");
     //mediacycle->addPlugin("/home/alexis/Programmation/TiCore-app/Applications/Numediart/MediaCycle/src/Builds/linux-x86/plugins/greta/mc_greta.so");
     mediacycle->addPlugin("/home/alexis/Programmation/TiCore-app/Applications/Numediart/MediaCycle/src/Builds/linux-x86/plugins/audioanalysis/mc_audioanalysis.so");
 
     cout<<"setCulsterN"<<endl;
     mediacycle->getBrowser()->setClusterNumber(1);
+    
     //IMPORT DIRECTORY + SAVE IN LIBFILE
-    //cout<<"importDir"<<endl;
-    //mediacycle->importDirectory(mediacycle->getLocalDirectoryPath(),0);
-    //mediacycle->getLibrary()->saveAsLibrary(mediacycle->getLocalDirectoryPath() + "/" + mediacycle->getLibName());
-
-    /*
+    /*cout<<"importDir"<<endl;
+    mediacycle->importDirectory(mediacycle->getLocalDirectoryPath(),0);
+    mediacycle->getLibrary()->saveAsLibrary(mediacycle->getLocalDirectoryPath() + "/" + mediacycle->getLibName());
+    */
+    
     //IMPORT LIBFILE
     cout<<"importLib"<<endl;
     mediacycle->importLibrary(mediacycle->getLocalDirectoryPath() + "/" + mediacycle->getLibName());
-    */
-
-    /*
+/*   
     //TEST KNN WITH NEW FILE
     cout << "new media" << endl;
     ACPlugin *audioanalysis = mediacycle->getPluginManager()->getPlugin("AudioAnalysis");
     cout << "audioanalysis" << endl;
-    ACMediaFeatures *amf = audioanalysis->calculate("/media/MightyDrive/5_447102_454154.wav");
+    ACMediaFeatures *amf = audioanalysis->calculate("/home/alexis/Work/eNTERFACE/eNTERFACE09/AVLC/validation/alexis.wav");
+    amf->dump();
+    cout << "normalize" <<endl;
+    for(int j=0; j<mediacycle->getLibrary()->getMeanFeatures().size(); j++) {
+        for(int k=0; k<mediacycle->getLibrary()->getMeanFeatures()[j].size(); k++) {
+            float old = amf->getFeature(k);
+            cout << "(" << j << "," << k << ")" << old << " - " << mediacycle->getLibrary()->getMeanFeatures()[j][k] << "/" << mediacycle->getLibrary()->getStdevFeatures()[j][k] << endl;
+            amf->setFeature (k, (old - mediacycle->getLibrary()->getMeanFeatures()[j][k]) / ( TI_MAX(mediacycle->getLibrary()->getStdevFeatures()[j][k] , 0.00001)));
+        }
+    }
+    amf->dump();
     cout << "creating media" << endl;
     ACMedia* local_media;
     local_media = ACMediaFactory::create(MEDIA_TYPE_AUDIO);
@@ -83,7 +92,7 @@ int main(int argc, char** argv) {
     cout << "done" << endl;
     cout<<"getKNN"<<endl;
     vector<ACMedia *> result;
-    mediacycle->getKNN(mediacycle->getLibrary()->getMedia()[0], result, 3);
+    mediacycle->getKNN(local_media, result, 3);
     cout<<"done"<<endl;
 
     if (result.size() > 0) {
@@ -91,14 +100,17 @@ int main(int argc, char** argv) {
         //remove extension in greta
         if (greta) {
             greta->calculate(result[0]->getFileName());
+            result[0]->getFeatures(0)->dump();
         } else {
-            for (int k=0;k<result.size();k++)
+            for (int k=0;k<result.size();k++) {
                 cout << result[k]->getFileName() << endl;
+                result[k]->getFeatures(0)->dump();
+            }
         }
     }
 
     delete local_media;
-    */
+*/
     
     //test tcp-SSI-greta (all-in-one) = AVLaughterCycle
     mediacycle->startTcpServer(12345,5,avlc_tcp_callback);
@@ -107,7 +119,7 @@ int main(int argc, char** argv) {
 /*
     ACPlugin *greta = mediacycle->getPluginManager()->getPlugin("Greta");
 
-    FILE *f = fopen("/home/alexis/Bureau/faplist.txt","r");
+    FILE *f = fopen("/home/alexis/Work/eNTERFACE/eNTERFACE09/faplist.txt","r");
 
     char mystring [100];
     while(fgets(mystring,100,f)) {
@@ -210,6 +222,7 @@ int processTcpMessageFromSSI(MediaCycle *that, char *buffer, int l, char **buffe
 
     cout << "type_name : " << type_name << endl;
 
+    //if a wave file is sent, we save it locally
     if ( type_name == "addwavf" ) {
         cout << "SSI : add wave file" << endl;
         unsigned int name_size = *reinterpret_cast<int*>(buffer+pos);
@@ -259,21 +272,31 @@ int processTcpMessageFromSSI(MediaCycle *that, char *buffer, int l, char **buffe
 
     cout << "stat_size : " << stat_size << endl;
 
-    float *ssi_features = reinterpret_cast<float*>(buffer+pos);
+    int nfeats = stat_size/sizeof(float);
 
-    for (int k=0;k<stat_size/sizeof(float);k++) {
+    //float *ssi_features = reinterpret_cast<float*>(buffer+pos);
+    float *ssi_features = new float[nfeats];
+
+    for (int k=0;k<nfeats;k++) {
+        ssi_features[k] = *reinterpret_cast<float*>(buffer+pos);
+        //cout << "ssi_features (" << k << ") :" << ssi_features[k] << endl;
+        pos += sizeof(float);
+    }
+
+    /*for (int k=0;k<nfeats;k++) {
         cout << dec << "ssi_features (" << k << ") :" << ssi_features[k] << endl;
         for (int j=0;j<4;j++) {
             int tmp = (int) *(buffer+pos+k*4+j);
             cout << tmp << " ";
         }
         cout << endl;
-    }
+    }*/
 
+    //TODO feature normalization if done when loading library
     cout << "creating features" << endl;
     ACMediaFeatures *mediaFeatures = new ACMediaFeatures();
-    mediaFeatures->resize(stat_size/sizeof(float));
-    for (int i=0; i<stat_size/sizeof(float); i++)
+    mediaFeatures->resize(nfeats);
+    for (int i=0; i<nfeats; i++)
         mediaFeatures->setFeature(i,ssi_features[i]);
     mediaFeatures->setComputed();
     cout << "done" << endl;
@@ -298,17 +321,30 @@ int processTcpMessageFromSSI(MediaCycle *that, char *buffer, int l, char **buffe
 
         if (result.size() > 0) {
             ACPlugin *greta = that->getPluginManager()->getPlugin("Greta");
-            //remove extension in greta
+            
             if (greta) {
+                //filename extension is removed in greta
+                cout << "Sent to Greta : " << result[0]->getFileName() << endl;
                 greta->calculate(result[0]->getFileName());
+            } else {
+                cout << "Greta plugin not found, displaying results here ..." << endl;
+                cout << "*** REQUEST DUMP : " << endl;
+                mediaFeatures->dump();
+                
+                for (int k=0;k<result.size();k++) {
+                    cout << "result (" << k << ") : " << result[k]->getFileName() << endl;
+                    result[k]->getFeatures(0)->dump();
+                }
             }
         }
 
-        delete local_media; //delete only in "request". In "addwavf", local_media is added to the library and therefore shouyld not be deleted
+        //delete only in "request". In "addwavf", local_media is added to the library and therefore shouyld not be deleted
+        delete local_media; 
     } else {
         //not valid (should not happen since already checked before)
         return -1;
     }
 
+    //cout << "BUFFER : " << buffer << endl << endl;
     return 0;
 }

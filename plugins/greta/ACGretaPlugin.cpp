@@ -39,10 +39,11 @@ ACMediaFeatures* ACGretaPlugin::calculate(std::string aFileName) {
     cout << "Greta : " << aFileName << endl;
 
     int pos = aFileName.find_last_of(".");
-    std::string basename = aFileName.substr(0,pos);
+    int pos2 = aFileName.find_last_of("/");
+    std::string basename = aFileName.substr(pos2+1,pos-pos2-1);
     //std::string extension = aFileName.substr(pos+1,aFileName.size()-1);
 
-    JString host = "192.168.3.191";
+    JString host = "192.168.3.185";
     int port = 10000;
     CppPoster* tv = new CppPoster("CppPoster", host, port);
 
@@ -79,6 +80,8 @@ ACMediaFeatures* ACGretaPlugin::calculate(std::string aFileName) {
         }
     }
 
+    delete tv;
+
     cout << "Greta : " << count << endl;
 
     return NULL;
@@ -92,13 +95,13 @@ std::string ACGretaPlugin::generateBML(std::string basename) {
     bml += "<bml>";
     bml += "<speech id=\"s1\" start=\"0\" language=\"english\" voice=\"realspeech\" text=\"\">";
     bml += "<description level=\"1\" type=\"gretabml\">";
-    bml += "<reference>" + basename + ".wav</reference>";
+    bml += "<reference>example\\" + basename + ".wav</reference>";
     bml += "</description>";
     bml += "</speech>";
 
     bml += "<face id=\"emotion-1\" start=\"0\">";
     bml += "<description level=\"1\" type=\"gretabml\">";
-    bml += "<reference>faceexp=fapfile:" + basename + ".fap</reference>";
+    bml += "<reference>faceexp=fapfile:example\\" + basename + ".fap</reference>";
     bml += "</description>";
     bml += "</face>";
     bml += "</bml>";
