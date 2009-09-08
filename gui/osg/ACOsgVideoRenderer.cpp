@@ -61,6 +61,7 @@ void ACOsgVideoRenderer::prepareNodes() {
 	
 	time_multiplier = image_stream->getTimeMultiplier();
 	image_stream->setTimeMultiplier(time_multiplier);
+ 
 }
 
 void ACOsgVideoRenderer::updateNodes(double ratio) {
@@ -75,5 +76,4 @@ void ACOsgVideoRenderer::updateNodes(double ratio) {
 	else {
 		image_stream->pause();
 	}
-
 }

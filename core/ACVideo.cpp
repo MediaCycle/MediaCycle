@@ -112,10 +112,18 @@ int ACVideo::load(FILE* library_file) { // was loadLoop
 	ACMediaFeatures* mediaFeatures;
 	float local_feature;
 	
-	char file_temp[1024];
+	char *file_temp;
+	file_temp = new char[1024];
+	memset(file_temp,0,1024);
+	char *file_temp2;
+	file_temp2 = new char[1024];
+	memset(file_temp2,0,1024);
+	
+/*	char file_temp[1024];
 	memset(file_temp,0,1024);
 	char file_temp2[1024];
 	memset(file_temp2,0,1024);
+*/
 	
 	retc = fgets(file_temp, 1024, library_file);
 	

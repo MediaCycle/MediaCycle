@@ -195,14 +195,14 @@ void ACOsgImageRenderer::imageGeode(int flip, float sizemul, float zoomin) {
 		thumbnail_filename = media_cycle->getThumbnail(loop_index);
 		image_image = osgDB::readImageFile(thumbnail_filename);
 	}
-	
+
 	image_texture = new Texture2D;
 	image_texture->setImage(image_image);
 	//image_texture->setUnRefImageDataAfterApply(true);
 	state = image_geometry->getOrCreateStateSet();
 	state->setTextureAttribute(0, image_texture);
 	state->setTextureMode(0, GL_TEXTURE_2D, osg::StateAttribute::ON);
-
+	
 	Vec4 color(1.0f, 1.0f, 1.0f, 0.9f);	
 	Vec4Array* colors = new Vec4Array;
 	colors->push_back(color);		

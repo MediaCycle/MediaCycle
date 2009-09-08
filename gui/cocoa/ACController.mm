@@ -110,8 +110,6 @@ static void osc_callback(TiOscReceiverRef, const char *tagName, void *userData)
 	
 	media_cycle = new MediaCycle(MEDIA_TYPE_VIDEO,"/tmp/","mediacycle.acl");
 	
-
-	
 	NSLog(@"DANCERS!");
 	
 	//media_cycle->importLibrary("/dupont/dancers.acl_copy");
