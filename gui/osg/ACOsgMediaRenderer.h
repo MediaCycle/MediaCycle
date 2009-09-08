@@ -47,7 +47,7 @@
 #include <osg/MatrixTransform>
 #include <osg/BlendFunc>
 #include <osg/BlendColor>
-#include <osg/texture2D>
+#include <osg/Texture2D>
 #include <osg/Image>
 #include <osgDB/ReadFile>
 #include <osgDB/WriteFile>

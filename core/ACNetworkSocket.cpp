@@ -61,6 +61,10 @@ PORT open_server(int iport, int count)
 	addr.sin_port = htons((unsigned short)iport);
 	addr.sin_addr.s_addr = htonl(INADDR_ANY);
 	memset(&(addr.sin_zero), '\0', 8);
+
+        //allows immediate reuse of a port for a socket:
+        int auth = 1;
+        setsockopt(s_listen, SOL_SOCKET, SO_REUSEADDR, &auth, sizeof(int));
 	
 	if (bind(s_listen, (struct sockaddr*)&addr, sizeof(addr)) == SOCKET_ERROR)
 		//throw_error(SocketServerError, "open_server: call to 'bind' failed.\n");
@@ -134,24 +138,27 @@ int server_receive(char *buf, int size, SOCKET s, unsigned int time_out)
 	ret = 0;
 	read = 0;
 	do {
-		if (select(s+1, &rfds, NULL, NULL, pto) == SOCKET_ERROR)
+                ret = select(s+1, &rfds, NULL, NULL, pto);
+		if (ret == SOCKET_ERROR) {
 			//throw_error(SocketServerError, "server_send: call to 'select' failed.\n");
 			return -1;
+                }
 		
 		if (FD_ISSET(s, &rfds)) {
 			ret = recv(s, buf + read, size - read, 0);
-			if (ret == SOCKET_ERROR)
+			if (ret == SOCKET_ERROR) {
 				//throw_error(SocketServerError, "server_receive: call to 'recv' failed.\n");
 				return -1;
-                        if (ret == 0)
-                            return -1;
+                        }
+
+                        //happens only when client closes the connexion
+                        if (ret == 0) {
+                            return read;
+                        }
 			read += ret;
 		} else {
 			//throw_error(SocketServerError, "server_receive: time out (%d sec). No data available !\n", time_out);
-			if (read==0)
-				return -1;
-			else
-				return read;
+			return read;
 		}
 	} while (read < size);
 	
@@ -214,7 +221,7 @@ void ACNetworkSocketServer::thread() {
 		memset(server_buffer, 0, BUFSIZE);
 		bigbuffer = new char[bigbufferl];
 		read = 0;
-		while ( (ret = server_receive(server_buffer, BUFSIZE, server_socket, 1)) >= 0 ) {
+		while ( (ret = server_receive(server_buffer, BUFSIZE, server_socket, 1)) > 0 ) {
 			if (read+ret>bigbufferl) {
 				bigbufferl += bigbufferstep;
 				bigbuffer = (char*)realloc(bigbuffer, bigbufferl);
@@ -222,7 +229,8 @@ void ACNetworkSocketServer::thread() {
 			memcpy(bigbuffer+read, server_buffer, ret);
 			read += ret;
 		}
-		printf ("Ret %d, Received %s\n", ret, server_buffer);
+		//printf ("Ret %d, Received (%d bytes) %s \n", ret, read, server_buffer);
+                printf ("Ret %d, Received (%d bytes)\n", ret, read);
 		if (read>0) {
 			server_callback(bigbuffer, read, &server_buffer_send, &ret_send, server_callback_user_data);
 			if (ret_send) {
