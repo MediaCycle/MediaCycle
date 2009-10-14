@@ -1,5 +1,5 @@
 /*
- *  ACMedia[loop].h
+ *  ACMedia.h
  *  MediaCycle
  *
  *  @author Xavier Siebert
@@ -37,6 +37,7 @@
 
 #include "ACMediaFeatures.h"
 #include "ACMediaTypes.h"
+#include "ACPluginManager.h"
 
 #include <string>
 
@@ -60,9 +61,9 @@ public:
 	void setId(int _id) {mid = _id;}; // SD TODO - should check for duplicate id?
 	int getId() {return mid;};
 	
-	std::vector<ACMediaFeatures*> &getFeatures() { return features; };
-	ACMediaFeatures* &getFeatures(int i){ return features[i]; }; // XS TODO : add check on i > bounds ?
-	int getNumberOfFeatures() {return features.size();};
+	std::vector<ACMediaFeatures*> &getFeatures() { return features; }
+	ACMediaFeatures* &getFeatures(int i);
+	int getNumberOfFeatures() {return features.size();}
 
 	int addFeatures(ACMediaFeatures *aFeatures) { this->features.push_back(aFeatures); };
 	
@@ -73,12 +74,12 @@ public:
 	virtual int getWidth()=0;
 	virtual int getHeight()=0;
 	
-//debug
-	ACMediaType	getType() {return this->_type;};	
-	virtual void save(FILE *){}; // previously saveLoop. To override. 
-	virtual int load(FILE*){}; // previously loadLoop. 
-	virtual void import(std::string _path)=0; // previously importFile dans AC*Library
-
+	ACMediaType	getType() {return this->_type;}	
+	virtual void save(FILE *){}
+	virtual int load(FILE*){}
+	virtual int import(std::string _path, int id=-1, ACPluginManager *acpl=NULL);
+	// XS 23/09/09 : I implemented import in ACMedia.cpp, since it is the same for all media
+	// XS 23/09/09 : import returns 1 if it worked, 0 if it failed
 };
 
 #endif // ACMEDIA_H

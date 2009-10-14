@@ -49,17 +49,17 @@
 namespace fs = boost::filesystem;
 
 class ACMediaLibrary {
-	// these methods should be common to all media
-	// if classes were well defined
+	// these methods are common to all media
+	// media-specific methods (e.g., save, load) are in ACMedia and overloaded in ACAudio, ACImage, ACVideo, ...
 protected:
-	ACMediaType media_type; // useful ??
+	ACMediaType media_type;
 	std::vector<ACMedia*> media_library;
 	std::vector< std::vector<double> > mean_features, stdev_features;
 	int index_last_normalized; // last item whose features have been normalized
 public:
 	ACMediaLibrary();
 	ACMediaLibrary(ACMediaType aMediaType);
-	~ACMediaLibrary() {};
+	~ACMediaLibrary();
 	
 	bool isEmpty();
 	ACMediaType getMediaType(){return media_type;};
@@ -79,15 +79,13 @@ public:
 	std::vector< std::vector<double> > getStdevFeatures() {return stdev_features;};
 
 	std::vector<ACMedia*> getMedia() {return media_library;};
-        int addMedia(ACMedia *aMedia);
+	int addMedia(ACMedia *aMedia);
 	
 	int importDirectory(std::string path, int recursive, int id=-1, ACPluginManager *acpl=NULL);
 
-	// trying not to redefine it (except for audio...)
 	int openLibrary(std::string _path, bool aInitLib=false);
-
-	// have to be redefined for each media -- really ?
 	void saveAsLibrary(std::string _path);
+	
 	//XS special for Thomas Israel
 	void saveSorted(std::string ouput_file);
 	

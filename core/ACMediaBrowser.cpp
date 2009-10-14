@@ -45,12 +45,7 @@
 
 using namespace std;
 
-// XS TODO change this !
-#define INDEX_RYTHMO 0
-#define INDEX_TIMBRO 1
-#define INDEX_CHROMA 2
-
-//
+// XS duh ?
 //#define DEFAULT_FEATURE_COUNT 15
 //#define DEFAULT_OBJECT_COUNT  11000
 
@@ -86,9 +81,9 @@ static double compute_distance(const vector< vector<float> > &obj1, const vector
 		 }*/
 		
 		// Image version
+		// XS TODO: does this work for image too ?
 		l = 0; r = obj1[f].size();
 		
-		//for(int d=0; d<obj1[f].size(); d++)
 		for(int d=l; d<r; d++)
 		{
 			float df = obj1[f][d] - obj2[f][d]; 
@@ -128,6 +123,7 @@ static double compute_distance(vector<ACMediaFeatures*> &obj1, const vector<vect
 	
 	for (int f=0; f<feature_count; f++) {
 		ACEuclideanDistance* E = new ACEuclideanDistance (&(obj1[f]->getAllFeatures()), (FeaturesVector*)&obj2[f]);
+		// XS TODO: warning: taking address of temporary : you can't do this in C++ !!!
 		dis += E->distance() * (inverse_features?(1.0-weights[f]):weights[f]);
 		delete E;
 	}
@@ -269,28 +265,11 @@ void ACMediaBrowser::setFilterSuggest()
 	// SD TODO
 }
 
-// organization
-void ACMediaBrowser::setWeightRhythm(float weight)
-{
-	mFeatureWeights[INDEX_RYTHMO] = weight;
-	
-	updateClusters(true);
+// organization : this replaces the rhythm, timbre, harmony
+void ACMediaBrowser::setWeight(int i, float weight) {
+	mFeatureWeights[i] = weight; 
+	updateClusters(true); 
 }
-
-void ACMediaBrowser::setWeightTimbre(float weight)
-{
-	mFeatureWeights[INDEX_TIMBRO] = weight;
-	
-	updateClusters(true);
-}
-
-void ACMediaBrowser::setWeightHarmony(float weight)
-{
-	mFeatureWeights[INDEX_CHROMA] = weight;
-	
-	updateClusters(true);
-}
-
 
 void ACMediaBrowser::setClusterNumber(int n)
 {
@@ -372,7 +351,6 @@ void ACMediaBrowser::pushNavigationState()
 int ACMediaBrowser::setHoverLoop(int lid, float mx, float my)
 {
 	int loop_id;
-//	float x, z;
 	
 	mousex = mx;
 	mousey = my;
@@ -382,16 +360,7 @@ int ACMediaBrowser::setHoverLoop(int lid, float mx, float my)
 	
 	loop_id = lid;
 	
-	//	if ( (loop_id>=0) && (loop_id<audio_cycle->getAudioLibrary()->getSize()) )
-	if ( (loop_id>=0) && (loop_id<getLibrary()->getSize()) )
-	{
-		//for (int i=0;i<audio_cycle->getAudioLibrary()->getSize();i++) {
-
-		// XS TODO : c 
-		
-		//		for (int i=0;i<audio_cycle->getLibrary()->getSize();i++) {
-//			mLoopAttributes[i].hover = 0;
-//		}
+	if ( (loop_id>=0) && (loop_id<getLibrary()->getSize()) ) {
 		mLoopAttributes[loop_id].hover = 1;
 	}
 	else {
@@ -510,7 +479,7 @@ int ACMediaBrowser::getKNN(int id, vector<int> &ids, int k) {
 			}
 		}
 		if (min_pos>=0) {
-                    int tmpid = loops[min_pos]->getId();
+			int tmpid = loops[min_pos]->getId();
 			ids.push_back(tmpid);
 			distances[min_pos] = max_distance;
 			kcount++;

@@ -54,6 +54,7 @@ enum MCActionType {
 };
 
 static void tcp_callback(char *buffer, int l, char **buffer_send, int *l_send, void *userData);
+//XS TODO: declared static but never defined
 
 class MediaCycle {
 public:

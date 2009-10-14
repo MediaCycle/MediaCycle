@@ -37,7 +37,7 @@ MediaCycle::MediaCycle(ACMediaType aMediaType, string local_directory, string li
 	this->forwarddown = 0;
     this->local_directory = local_directory;
     this->libname = libname;
-    this->networkSocket = NULL;
+    this->networkSocket	= NULL;
 
 
     this->mediaLibrary = new ACMediaLibrary(aMediaType);
@@ -50,7 +50,7 @@ MediaCycle::MediaCycle(ACMediaType aMediaType, string local_directory, string li
 }
 
 MediaCycle::MediaCycle(const MediaCycle& orig) {
-
+	// XS TODO: complete this copy-constructor or remove it !
 }
 
 MediaCycle::~MediaCycle() {
@@ -68,6 +68,7 @@ int MediaCycle::startTcpServer(int aPort, int aMaxConnections) {
 
     return 1;
 }
+
 int MediaCycle::startTcpServer(int aPort, int aMaxConnections, ACNetworkSocketServerCallback aCallback) {
     this->port = aPort;
     this->max_connections = aMaxConnections;
@@ -96,9 +97,9 @@ int MediaCycle::importDirectory(string path, int recursive, int mid) {
 
 int MediaCycle::importLibrary(string path) {
 	int ret = this->mediaLibrary->openLibrary(path);
-        this->mediaLibrary->normalizeFeatures();
-        this->mediaBrowser->libraryContentChanged();
-        return ret;
+	this->mediaLibrary->normalizeFeatures();
+	this->mediaBrowser->libraryContentChanged();
+	return ret;
 }
 
 static void tcp_callback(char *buffer, int l, char **buffer_send, int *l_send, void *userData)

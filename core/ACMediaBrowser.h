@@ -37,14 +37,12 @@
 #ifndef __ACMEDIABROWSER_H__
 #define __ACMEDIABROWSER_H__
 
-#include <Common/TiMath.h> // for Timax ...
+#include <Common/TiMath.h> // for Timax only ...
 
 #include "ACEuclideanDistance.h"
 
 #include "ACMediaLibrary.h"
 #include <vector>
-
-// ??? extern ACAudioCycle* audio_cycle;
 
 using namespace std;
 
@@ -76,6 +74,7 @@ struct ACPoint
 
 // XS TODO
 // XS the following could be renamed but seems valid for all media
+// XS make this a class ?
 // ask SD to check...
 
 struct ACLoopAttribute
@@ -84,7 +83,7 @@ struct ACLoopAttribute
 	ACPoint		viewPos;
 	float		distanceMouse;
 	int 		cluster; //cluster index
-	int			active;  // plying or not - and in which mode
+	int			active;  // playing or not - and in which mode
 	int			curser;
 	int 		navigationLevel; // initially all set to zero, while traversing, only the one incremented are kept
 	int			hover;
@@ -108,7 +107,7 @@ public:
 	
 	// Search by similarity
 	int getKNN(int id, vector<int> &ids, int k);
-        int getKNN(ACMedia *aMedia, vector<ACMedia *> &result, int k);
+	int getKNN(ACMedia *aMedia, vector<ACMedia *> &result, int k);
 		
 	// memory/context
 	void setBack();
@@ -130,11 +129,8 @@ public:
 	float getCameraRotation() const				{ return mCameraAngle; };
 	
 	// organization
-	// XS make this more general !
-	void setWeightRhythm(float weight);
-	void setWeightTimbre(float weight);
-	void setWeightHarmony(float weight);
-	void setWeight(int i, float weight) {mFeatureWeights[i] = weight; updateClusters(true); }
+	// XS 091009 : this unique one replaces rhythm, timbre, harmony
+	void setWeight(int i, float weight);
 	void setClusterNumber(int n); 
 		
 	// filtering
@@ -199,7 +195,7 @@ protected:
 	// state management
 	double 				mRefTime;
 	double 				mFrac;
-	ACBrowserState			mState;
+	ACBrowserState		mState;
 	
 	int 				mClickedLoop; // valid between mouseDown and mouseUp, otherwise -1
 	int 				mSelectedLoop;

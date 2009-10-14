@@ -6,7 +6,8 @@
  *  @date 21/04/09
  *
  *  - XS 26/06/09 : removed size_library (= media_library.size())
- *
+ *  - XS 13/10/09 : added destructor to clean up vector <ACMedia*>
+*
  *  @copyright (c) 2009 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
@@ -54,24 +55,31 @@ using namespace std;
 
 ACMediaLibrary::ACMediaLibrary() {
 	index_last_normalized = -1;
-        media_library.resize(0);
-        media_type = MEDIA_TYPE_NONE;
+	media_library.resize(0);
+	media_type = MEDIA_TYPE_NONE;
 }
 
 ACMediaLibrary::ACMediaLibrary(ACMediaType aMediaType) {
 	index_last_normalized = -1;
-        media_library.resize(0);
-        media_type = aMediaType;
+	media_library.resize(0);
+	media_type = aMediaType;
+}
+
+ACMediaLibrary::~ACMediaLibrary(){
+	// Clean up! 
+	std::vector<ACMedia*>::iterator iter; 
+	for (iter = media_library.begin(); iter != media_library.end(); iter++) { 
+		delete *iter; 
+	}
 }
 
 int ACMediaLibrary::importDirectory(std::string _path, int _recursive, int id, ACPluginManager *acpl) {
-// XS : return value convention: -1 = error ; otherwise returns number of files added
-
+	// XS : return value convention: -1 = error ; otherwise returns number of files added
+	
 	unsigned long file_count = 0;
 	unsigned long dir_count = 0;
 	unsigned long other_count = 0;
 	
-	bool desc_failed = 0;
 	string filename;
 	string extension;
 	
@@ -84,11 +92,9 @@ int ACMediaLibrary::importDirectory(std::string _path, int _recursive, int id, A
 		printf("File or directory not found: %s\n", full_path.native_file_string().c_str());
 		return -1;
 	}
-	
-	//ACMediaFactory factory;
-	
-	if ( fs::is_directory( full_path ) )
-	{
+		
+	if ( fs::is_directory( full_path ) ) 
+	{ // importing directory
 		fs::directory_iterator end_iter;
 		for ( fs::directory_iterator dir_itr( full_path );
 			 dir_itr != end_iter;
@@ -110,49 +116,31 @@ int ACMediaLibrary::importDirectory(std::string _path, int _recursive, int id, A
 		}
 	}
 	else
-	{
+	{ // importing single file
 		filename = _path;
 		extension = fs::extension(_path);
 		cout << "extension:" << extension << endl; 
 		
-		ACMedia* media = ACMediaFactory::create(extension); // XS TODO : import ?
+		ACMedia* media = ACMediaFactory::create(extension);
 		
 		if (media == NULL) {
 			cout << "extension unknown, skipping " << filename << " ... " << endl;
-			++other_count; // XS-SD TODO : OK ?
+			++other_count;
 		}
 		else {
-			media->import(filename); // or try 2d way to make a factory
-			if (id>=0) {
-				media->setId(id);
-			}
-                        //compute features with available plugins
-                        if (acpl) {
-                            for (int i=0;i<acpl->getSize();i++) {
-                                for (int j=0;j<acpl->getPluginLibrary(i)->getSize();j++) {
-                                    if (acpl->getPluginLibrary(i)->getPlugin(j)->getMediaType() == media->getType()
-                                            && acpl->getPluginLibrary(i)->getPlugin(j)->getPluginType() == PLUGIN_TYPE_FEATURES) {
-                                        //TODO move this in media ?
-                                        ACMediaFeatures *af = acpl->getPluginLibrary(i)->getPlugin(j)->calculate(media->getFileName());
-                                        //another option :
-                                        //ACMediaFeatures *af = acpl->getPluginLibrary(i)->calculate(j,media->getFileName());
-                                        media->addFeatures(af);
-										if (af == NULL)
-											desc_failed = 1;
-                                    }
-                                }
-                            }
-                        }
-			if (!desc_failed)
+			if (media->import(filename, id, acpl)){
 				this->addMedia(media);
-			
-			++file_count; // XS-SD TODO : here ?
+			}
+			// XS 23/09/09: import now looks for plugins, in ACMedia.cpp
+			// it also sets id 
+
+			++file_count; // TODO: here or within previous "if" ?
 		}
 	}
 	return file_count;
-
-}
 	
+}
+
 int ACMediaLibrary::openLibrary(std::string _path, bool aInitLib){
   // this does not re-initialize the media_library
   // but appends new media to it.
@@ -173,25 +161,25 @@ int ACMediaLibrary::openLibrary(std::string _path, bool aInitLib){
     do {
       local_media = ACMediaFactory::create(media_type);
       if (local_media != NULL) {
-	ret = local_media->load(library_file);
-	if (ret) {
-	  std::cout << "Media Libray Size : " << media_library.size() << std::endl;
-	  media_library.push_back(local_media);
-	  file_count++;
-	}
-      }
-      else {
-	std::cout<<"OpenLibrary : Wrong Media Type" <<std::endl;
-      }
+		ret = local_media->load(library_file);
+		if (ret) {
+		  std::cout << "Media Libray Size : " << media_library.size() << std::endl;
+		  media_library.push_back(local_media);
+		  file_count++;
+
+		}
+		else {
+		  std::cout<<"OpenLibrary : Wrong Media Type" <<std::endl;
+		}
       
-    }
-    while (ret>0);
+	  }
+	  while (ret>0);
 
-    fclose(library_file);
+	  fclose(library_file);
+	}
+
+	return file_count;
   }
-
-  return file_count;
-}
 
 void ACMediaLibrary::saveAsLibrary(string _path) {
 	
@@ -277,7 +265,7 @@ void ACMediaLibrary::calculateStats() {
 	if ( isEmpty() ) return;
 	int n = media_library.size() ;
 	int number_of_features = media_library[0]->getNumberOfFeatures();
-
+	
 	// initialize to zero
 	int i,j,k;
 	for (i=0; i< number_of_features; i++) {
@@ -295,13 +283,10 @@ void ACMediaLibrary::calculateStats() {
 		for(j=0; j<mean_features.size(); j++){
 			for(k=0; k<mean_features[j].size(); k++){
 				double val = item->getFeatures(j)->getFeature(k);
-				//XS debug
-				cout << "val:" << val << endl;
 				
 				mean_features[j][k] += val;
 				stdev_features[j][k] += val * val;
-
-                                cout << "stdev_features:" << stdev_features[j][k] << endl;
+				
 			}
 		}
 	}
@@ -312,12 +297,12 @@ void ACMediaLibrary::calculateStats() {
 		for(k=0; k<mean_features[j].size(); k++) {
 			mean_features[j][k] /= n;
 			stdev_features[j][k] /= n;
-                        double tmp = stdev_features[j][k] - mean_features[j][k] * mean_features[j][k];
-                        if ( tmp < 0 )
-                            stdev_features[j][k] = 0;
-                        else {
-                            stdev_features[j][k] = sqrt( tmp);
-                        }
+			double tmp = stdev_features[j][k] - mean_features[j][k] * mean_features[j][k];
+			if ( tmp < 0 )
+				stdev_features[j][k] = 0;
+			else {
+				stdev_features[j][k] = sqrt( tmp);
+			}
 			printf("\t[%d] mean_features = %f, stddev = %f\n", k, mean_features[j][k], stdev_features[j][k]);
 		}
 	}
@@ -337,9 +322,8 @@ void ACMediaLibrary::normalizeFeatures() {
 		denormalizeFeatures();
 		calculateStats();
 	}
-		
-	int i,j,k;
 	
+	int i,j,k;
 	int n = media_library.size() ;
 	
 	for(i=0; i<n; i++){
@@ -357,7 +341,7 @@ void ACMediaLibrary::normalizeFeatures() {
 void ACMediaLibrary::denormalizeFeatures() {
 	cout << "denormalizing features" << endl;
 	if ( isEmpty() ) return;	
-
+	
 	int i,j,k;
 	
 	// XS denormalize only those that have been normalized (duh),
@@ -376,8 +360,7 @@ void ACMediaLibrary::denormalizeFeatures() {
 	cleanStats();
 }
 
-
-
+// -------------------------------------------------------------------------
 // XS custom for Thomas Isreal videos : features sorted, along with filename
 void ACMediaLibrary::saveSorted(string output_file){
 	//XS dirty, supposes you save feature number 0 -- should be generalized !
@@ -394,6 +377,7 @@ void ACMediaLibrary::saveSorted(string output_file){
 			f[j].push_back (std::pair<float, int> (media_library[i]->getFeatures(0)->getFeature(j), i));
 		}
 	}
+	
 	for (int j=0; j< nfeat ;j++) {
 		sort (f[j].begin(),f[j].end());
 	}
@@ -409,11 +393,11 @@ void ACMediaLibrary::saveSorted(string output_file){
 	//	}
 	for (int i=0; i<media_library.size() ;i++) {
 		out << f[0][i].first << "\t" << f[0][i].second << "\t" << 
-//		f[1][i].first << "\t" << f[1][i].second << "\t" <<
-//		f[2][i].first << "\t" << f[2][i].second << "\t" << 
-//		f[3][i].first << "\t" << f[3][i].second << "\t" << 
-//		f[4][i].first << "\t" << f[4][i].second << "\t" << 
-//		f[5][i].first << "\t" << f[5][i].second << "\t" <<  
+		//		f[1][i].first << "\t" << f[1][i].second << "\t" <<
+		//		f[2][i].first << "\t" << f[2][i].second << "\t" << 
+		//		f[3][i].first << "\t" << f[3][i].second << "\t" << 
+		//		f[4][i].first << "\t" << f[4][i].second << "\t" << 
+		//		f[5][i].first << "\t" << f[5][i].second << "\t" <<  
 		endl;
 	}
 	out.close();

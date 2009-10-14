@@ -30,6 +30,7 @@ int ACEyesWebPlugin::initialize()
 }
 
 ACMediaFeatures* ACEyesWebPlugin::calculate()
+// TODO XS : do we really want this to return NULL ?
 {
     return NULL;
 }

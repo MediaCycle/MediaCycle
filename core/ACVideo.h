@@ -48,7 +48,6 @@ public:
 	
 	void save(FILE* library_file); // was: saveLoop
 	int load(FILE* library_file); // was: loadLoop
-	void import(std::string _path); // was: importFile in library
 
 	// TODO: make the following explicitely inlines ?
 	void setThumbnail(IplImage *_thumbnail) { thumbnail = _thumbnail; thumbnail_width = _thumbnail->width; thumbnail_height = _thumbnail->height; }

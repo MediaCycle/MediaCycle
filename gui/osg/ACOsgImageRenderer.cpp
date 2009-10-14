@@ -45,7 +45,7 @@ osg::Image* Convert_OpenCV_TO_OSG_IMAGE(IplImage* cvImg)
 	 cvWaitKey(0);
 	 cvDestroyWindow("T");	
 	 */
-
+	
 	if(cvImg->nChannels == 3)
 	{
 		// Flip image from top-left to bottom-left origin
@@ -90,7 +90,7 @@ osg::Image* Convert_OpenCV_TO_OSG_IMAGE(IplImage* cvImg)
 }
 
 ACOsgImageRenderer::ACOsgImageRenderer() {
-
+	
 	image_image = 0; image_geode = 0; border_geode = 0; image_transform = 0;
 }
 
@@ -103,7 +103,7 @@ ACOsgImageRenderer::~ACOsgImageRenderer() {
 }
 
 void ACOsgImageRenderer::imageGeode(int flip, float sizemul, float zoomin) {
-
+	
 	int i;
 	
 	double xstep = 0.0005;
@@ -126,7 +126,7 @@ void ACOsgImageRenderer::imageGeode(int flip, float sizemul, float zoomin) {
 	Vec3Array* vertices;
 	DrawElementsUInt* line_p;
 	Vec2Array* texcoord;
-
+	
 	Geometry *image_geometry;
 	Geometry *border_geometry;
 	Texture2D *image_texture;
@@ -138,11 +138,11 @@ void ACOsgImageRenderer::imageGeode(int flip, float sizemul, float zoomin) {
 	
 	// XS TODO check this wild cast
 	// SD REQUIRED FOR THUMBNAIL ACImage* loop = dynamic_cast<ACImage*> ( browser.getLibrary()->getItem(loop_index) );
-		
+	
 	width = media_cycle->getWidth(loop_index);
 	height = media_cycle->getHeight(loop_index);
 	zpos = zpos + 0.00001 * loop_index;
-		
+	
 	// image vertices
 	float scale;
 	imagesurf = xlim * ylim;
@@ -155,7 +155,7 @@ void ACOsgImageRenderer::imageGeode(int flip, float sizemul, float zoomin) {
 	(*vertices)[2] = Vec3(imagex, imagey, zpos);
 	(*vertices)[3] = Vec3(-imagex, imagey, zpos);
 	image_geometry->setVertexArray(vertices);
-		
+	
 	// Primitive Set
 	DrawElementsUInt *poly = new DrawElementsUInt(PrimitiveSet::QUADS, 4);
 	poly->push_back(0);
@@ -163,7 +163,7 @@ void ACOsgImageRenderer::imageGeode(int flip, float sizemul, float zoomin) {
 	poly->push_back(2);
 	poly->push_back(3);
 	image_geometry->addPrimitiveSet(poly);
-			
+	
 	// State Set
 	state = image_geode->getOrCreateStateSet();
 	state->setMode(GL_LIGHTING, osg::StateAttribute::PROTECTED | osg::StateAttribute::OFF );
@@ -195,7 +195,7 @@ void ACOsgImageRenderer::imageGeode(int flip, float sizemul, float zoomin) {
 		thumbnail_filename = media_cycle->getThumbnail(loop_index);
 		image_image = osgDB::readImageFile(thumbnail_filename);
 	}
-
+	
 	image_texture = new Texture2D;
 	image_texture->setImage(image_image);
 	//image_texture->setUnRefImageDataAfterApply(true);
@@ -210,14 +210,14 @@ void ACOsgImageRenderer::imageGeode(int flip, float sizemul, float zoomin) {
 	image_geometry->setColorBinding(Geometry::BIND_OVERALL);
 	
 	image_geode->addDrawable(image_geometry);
-
+	
 	image_transform->addChild(image_geode);
 	
 #ifdef IMAGE_BORDER
 	
 	border_geode = new Geode();
 	border_geometry = new Geometry();	
-
+	
 	// border vertices
 	vertices = new Vec3Array(5);
 	(*vertices)[0] = Vec3(-imagex-xstep, -imagey-xstep, zpos);
@@ -233,7 +233,7 @@ void ACOsgImageRenderer::imageGeode(int flip, float sizemul, float zoomin) {
 		(*line_p)[2*i+1] = i+1;
 	}
 	border_geometry->addPrimitiveSet(line_p);
-		
+	
 	Vec4 color2(0.4f, 0.4f, 0.4f, 1.0f);	
 	Vec4Array* colors2 = new Vec4Array;
 	colors2->push_back(color2);		
@@ -241,7 +241,7 @@ void ACOsgImageRenderer::imageGeode(int flip, float sizemul, float zoomin) {
 	border_geometry->setColorBinding(Geometry::BIND_OVERALL);
 	state = border_geometry->getOrCreateStateSet();
 	state->setAttribute(new LineWidth(2.0));
-
+	
 	state = border_geode->getOrCreateStateSet();
 	state->setMode(GL_LIGHTING, osg::StateAttribute::PROTECTED | osg::StateAttribute::OFF );
 	state->setMode(GL_BLEND, StateAttribute::ON);
@@ -306,7 +306,7 @@ void ACOsgImageRenderer::updateNodes(double ratio) {
 	const ACLoopAttribute &attribute = media_cycle->getLoopAttributes(loop_index);
 	const ACPoint &p = attribute.currentPos, &p2 = attribute.nextPos;
 	double omr = 1.0-ratio;
-		
+	
 	float zoom = media_cycle->getCameraZoom();
 	float angle = media_cycle->getCameraRotation();
 	
@@ -321,7 +321,7 @@ void ACOsgImageRenderer::updateNodes(double ratio) {
 	else {
 		image_transform->setNodeMask(0);
 	}
-
+	
 	z = 0;
 	
 	if (border_geode->getDrawable(0)) {
@@ -348,7 +348,7 @@ void ACOsgImageRenderer::updateNodes(double ratio) {
 	else if (attribute.active) {
 		z += zpos;
 	}
-		
+	
 	T.makeTranslate(Vec3(x, y, z)); // omr*p.z + ratio*p2.z));	
 	T =  Matrix::rotate(-angle,Vec3(0.0,0.0,1.0)) * Matrix::scale(localscale/zoom,localscale/zoom,localscale/zoom) * T;
 	media_node->setMatrix(T);

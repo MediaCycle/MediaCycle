@@ -159,28 +159,13 @@ int ACImage::load(FILE* library_file) { // was loadLoop
 	}
 }
 
-void ACImage::import(string _path) { // was importFile
-	
-	cout << "importing..." << _path << endl;
-	filename=_path;
+//void ACImage::import(string _path) {
+// XS 23/09/09: now done in ACMedia
+//	if we need to add something here, call first ACMedia::import
 
-/*	ACAnalysedImage* full_image = new ACAnalysedImage(_path);
-	
-	// TODO check if image has been imported properly ..
-	ACImageFeaturesFactory* factory = new ACImageFeaturesFactory(full_image);
-
-	// XS do we need a new factory here ?
-	// XS is this clean enough ?
-	//features.push_back(factory->calculateFeature("Gabor"));
-	features.push_back(factory->calculateFeature("Shape")); // XS TODO fichier
-	//features.push_back(factory->calculateFeature("Color"));
-	
-	// SD TODO - following have to be called because full image will be deleted
+// SD TODO - following have to be called because full image will be deleted
 //	setThumbnail(full_image->getThumbnail());
 //	setHeight(full_image->getHeight());
 //	setWidth(full_image->getWidth());
 	
-	delete factory;
-	delete full_image;
-     */
-}
+//}

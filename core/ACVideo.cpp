@@ -53,17 +53,10 @@ ACVideo::ACVideo() : ACMedia() {
 ACVideo::~ACVideo() {
 }
 
-void ACVideo::import(string _path) { 
-	cout << "importing..." << _path << endl;
-	filename=_path;
-/*	ACAnalysedVideo* full_video = new ACAnalysedVideo(_path);
-	ACVideoFeaturesFactory* factory = new ACVideoFeaturesFactory(full_video);
-	features.push_back(factory->calculateFeature("Speed")); // XS TODO fichier
-
-	delete factory;
-	delete full_video;
-*/
-}
+//void ACVideo::import(string _path) { 
+// XS 23/09/09: now done in ACMedia.
+//	if we need to add something here, call first ACMedia::import
+//}
 
 void ACVideo::save(FILE* library_file) { // was saveloop
 	int i, j;
@@ -159,13 +152,15 @@ int ACVideo::load(FILE* library_file) { // was loadLoop
 			}
 		}
 		ret = fscanf(library_file, "\n");
-		
+		delete file_temp;
+		delete file_temp2;
 		return 1;
 	}
 	else {
+		delete file_temp;
+		delete file_temp2;
 		return 0;
 	}
 }
 
-
-// TODO : complete this (Load/Save)
+// XS TODO: use C++ strings and streams instead of C-functions=======

@@ -57,6 +57,19 @@ ACMediaTimedFeatures::ACMediaTimedFeatures(fcolvec time_v, fmat value_m, string 
   this->seg_v = seg_v;
 }
 
+ACMediaTimedFeatures::ACMediaTimedFeatures( const vector<float> &time, const vector< vector<float> > &value, string name, const vector<float> *seg_v){
+	this->time_v = fcolvec(time.size());
+	this->value_m = fmat((int) value[0].size(), (int) value.size());
+	for (unsigned int Itime=0; Itime<time.size(); Itime++){
+		this->time_v(Itime) = time[Itime];
+		for (unsigned int Idim=0; Idim<value.size(); Idim++){
+			this->value_m(Itime, Idim) = value[Idim][Itime];
+		}
+	}
+	this->name = name;
+	if (seg_v !=0) this->seg_v = *seg_v;	
+}
+
 ACMediaTimedFeatures::ACMediaTimedFeatures(vector<float> time, vector< vector<float> > value, string name, vector<float> seg_v){
   this->time_v = fcolvec(time.size());
   this->value_m = fmat((int) value[0].size(), (int) value.size());
