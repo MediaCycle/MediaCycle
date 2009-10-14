@@ -1,0 +1,9 @@
+FILE(GLOB SRC *.cpp *.c)
+FILE(GLOB HDR *.hpp *.h)
+
+ADD_EXECUTABLE(videoTest ${SRC} ${HDR})
+ADD_DEPENDENCIES(mediacycle)
+
+TARGET_LINK_LIBRARIES(videoTest mediacycle)
+
+INSTALL(TARGETS videoTest RUNTIME DESTINATION bin)
