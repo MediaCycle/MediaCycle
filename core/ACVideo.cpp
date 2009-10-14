@@ -44,6 +44,10 @@ ACVideo::ACVideo() : ACMedia() {
 	_type = MEDIA_TYPE_VIDEO;
 	features.resize(0);
 	thumbnail = 0;
+	width = 0;
+	height = 0;
+	thumbnail_width = 0;
+	thumbnail_height = 0;
 }	
 
 ACVideo::~ACVideo() {
@@ -139,6 +143,9 @@ int ACVideo::load(FILE* library_file) { // was loadLoop
 		ret = fscanf(library_file, "%d", &width);
 		ret = fscanf(library_file, "%d", &height);
 		ret = fscanf(library_file, "%d", &n_features);
+		
+		thumbnail_height = height;
+		thumbnail_width = width;
 		// SD TODO - following wont't work
 		for (i=0; i<n_features;i++) {
 			mediaFeatures = new ACMediaFeatures();

@@ -1,8 +1,8 @@
 PROJECT(MediaCycle)
 
-SUBDIRS(core cli gui plugins test)
+SUBDIRS(core cli gui plugins test armadillo fftooura)
 
-INCLUDE_DIRECTORIES(. core)
+INCLUDE_DIRECTORIES(. core armadillo)
 INCLUDE_DIRECTORIES( "/usr/local/include/TiCore" )
 LINK_DIRECTORIES( ${LINK_DIRECTORIES} "/usr/local/lib" )
 

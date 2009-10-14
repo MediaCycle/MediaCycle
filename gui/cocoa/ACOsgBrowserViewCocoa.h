@@ -33,7 +33,7 @@
 
 #import <Cocoa/Cocoa.h>
 #import <Rendering/TiCocoaOsgView.h>
-#import "ACOsgBrowserEventHandler.h"
+#import <ACOsgBrowserEventHandler.h>
 //#import <Rendering/TiCocoaOsgView+Node.h>
 #import <MediaCycleLight.h>
 
@@ -51,7 +51,7 @@ struct ACOsgBrowserViewData;
 	float refzoom, refrotation;
 	
 	BOOL _initialized;
-}
+};
 
 - (void)setMediaCycle:(MediaCycle*)_media_cycle;
 

@@ -36,7 +36,5 @@
 
 int main(int argc, char *argv[])
 {
-	if (argc == 1){
-		return NSApplicationMain(argc,  (const char **) argv);
-	}
-}
+	return NSApplicationMain(argc,  (const char **) argv);
+};

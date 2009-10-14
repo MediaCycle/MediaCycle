@@ -38,17 +38,70 @@
 #include <cstring>
 #include <iostream>
 #include <signal.h>
+#include <math.h>
+//#include "Armadillo-utils.h"
+//#include "fftsg_h.c"
+#include <time.h>
 
 using namespace std;
 
 int main(int argc, char** argv) {
-    MediaCycle *mediacycle;
-	mediacycle = new MediaCycle(MEDIA_TYPE_VIDEO);
-    //string libpath("/home/alexis/NetBeansProjects/MediaCycle/lib/Caltech101-a.acl");
+  //     MediaCycle *mediacycle;
+  // 	mediacycle = new MediaCycle(MEDIA_TYPE_VIDEO);
+  //     //string libpath("/home/alexis/NetBeansProjects/MediaCycle/lib/Caltech101-a.acl");
+  
+  //     cout<<"new MediaCycle"<<endl;
+  //     mediacycle->addPlugin("/Users/dtardieu/src/Numediart/ticore-app/Applications/Numediart/MediaCycle/src/Builds/darwin-x86/plugins/eyesweb/Debug/mc_eyesweb.dylib");
+  //     mediacycle->importDirectory("/Users/dtardieu/data/DANCERS/Video/Front/",0);
+  //     mediacycle->saveAsLibrary("/Users/dtardieu/data/DANCERS/dancers.acl");
+  //     return (EXIT_SUCCESS);
+  //   mat A = rand<mat>(64,64);
+  //   mat B = rand<mat>(500,500);
+  //   mat C(10,10);
+  
+  //   C = conv2(B,A);
+  //   C.save("C.txt", arma_ascii);
+  MediaCycle *media_cycle = new MediaCycle(MEDIA_TYPE_VIDEO,"/tmp/","mediacycle.acl");
+  media_cycle->openLibrary("/Users/dtardieu/Desktop/dancers-dt-3.acl");
+  
+  ACNavigationState state;
+  state = media_cycle->getBrowser()->getCurrentNavigationState();
+  std::cout << state.mSelectedLoop << std::endl;
+  std::cout << state.mNavigationLevel << std::endl;
+  
+  ACLoopAttribute loopAttribute;
+  loopAttribute = media_cycle->getLoopAttributes(0);
+  
+  mat A,B,C;
+  //  D.load("sin.txt");
+  //D.print();
+  C = randn<mat>(512,2);
+  A = randn<mat>(512,2);
+  //A.load("A.txt", raw_ascii);
+  B = randn<mat>(64,64);
+  //B = ones<mat>(4,4);
+  A.save("A.txt", arma_ascii);
+  B.save("B.txt", arma_ascii);
+  
+  vector<double> Avec1;
+  vector<double> Avec2;
+  
+  for (int d1=0; d1 < A.n_rows; d1++){
+    Avec1.push_back(A(d1,0));
+    Avec2.push_back(A(d1,1));
+  }
+  clock_t start = clock();
+  for (int d1=0; d1 < A.n_rows; d1++){
+    C(d1,0) = Avec1[d1];
+    C(d1,1) = Avec2[d1];
+  }
+  std::cout << "Time elapsed: " << ((double)clock() - start) / CLOCKS_PER_SEC << std::endl;
 
-    cout<<"new MediaCycle"<<endl;
-    mediacycle->addPlugin("/Users/dtardieu/src/Numediart/ticore-app/Applications/Numediart/MediaCycle/src/Builds/darwin-x86/plugins/eyesweb/Debug/mc_eyesweb.dylib");
-    mediacycle->importDirectory("/Users/dtardieu/data/DANCERS/Video/Front/",0);
-    mediacycle->saveAsLibrary("/Users/dtardieu/data/DANCERS/dancers.acl");
-    return (EXIT_SUCCESS);
+//C.save("C.txt", arma_ascii);
+  
+//   A.set_size(1,1);
+//   A(0,0)=1;
+//   C.set_size(1,1);
+//   C = conv2(A,A);
+//   C.print("C");
 }

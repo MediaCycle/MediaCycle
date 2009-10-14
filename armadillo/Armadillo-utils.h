@@ -1,10 +1,10 @@
 /*
- *  ACRefId.h
- *  AudioCycle
+ *  Armadillo-utils.h
+ *  MediaCycle
  *
- *  @author Raphael Sebbe
- *  @date 07/11/08
- *  @copyright (c) 2008 – UMONS - Numediart
+ *  @author Damien Tardieu
+ *  @date 28/08/09
+ *  @copyright (c) 2009 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
  *  licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -32,20 +32,27 @@
  *
  */
 
-#ifndef __REFERENCED_H__
-#define __REFERENCED_H__
 
-#include <osg/ref_ptr>
 
-using namespace osg;
+#include <armadillo>
 
-class ACRefId : public Referenced
-	{
-	public:
-		int object_id;
-		
-		ACRefId(int oid) : Referenced(), object_id(oid) {};
-		~ACRefId() {};
-	};
+using namespace arma;
 
-#endif
+mat conv2(mat A_m, mat B_m);
+mat conv2(mat in, mat kernel, std::string);
+
+cx_mat fft_helper(mat, int);
+cx_mat fft(mat x_m, int n);
+
+cx_mat fft2(mat );
+cx_mat fft2(mat, int, int);
+mat ifft2(cx_mat );
+mat ifft2(cx_mat, int, int);
+template<typename eT>
+int size(const Mat<eT>& m, int dim);
+template<typename eT>
+const Mat<eT>& concat(int dim, const Mat<eT>& A_m, const Mat<eT>& B_m);
+int nextpow2(int n);
+mat rot90(mat A_m, int k);
+mat xcorr2(mat A_m, mat B_m);
+colvec diagxcorr2(mat A_m, mat B_m);

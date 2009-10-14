@@ -140,7 +140,7 @@ private:
 };
 	
 #ifdef  __cplusplus
-}
+};
 #endif
 
 #endif  // _ACNETWORKSOCKET_H_

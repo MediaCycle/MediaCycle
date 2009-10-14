@@ -37,7 +37,7 @@ using namespace::std;
 
 #import <Cocoa/Cocoa.h>
 #import <Io/TiOscReceiver.h>
-#import <Rendering/TiCocoaOsgView.h>
+//#import <Rendering/TiCocoaOsgView.h>
 
 #import "ACOsgBrowserViewCocoa.h"
 #import <MediaCycleLight.h>
@@ -120,7 +120,7 @@ enum	{
 	IBOutlet NSSlider*				mZoomSlider;
 	
 	TiOscReceiverRef			mOscReceiver;
-}
+};
 
 // Context/listener Menu
 - (IBAction)	setAddToLibrary:(id)inSender;

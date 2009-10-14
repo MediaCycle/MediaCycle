@@ -79,11 +79,11 @@ public:
     // Thumbnail
     string getThumbnail(int id);
 
-    string getLocalDirectoryPath() {return local_directory;}
-    string getLibName() {return libname;}
-    ACMediaLibrary* getLibrary() { return mediaLibrary;}
-    ACMediaBrowser* getBrowser() { return mediaBrowser;}
-    ACPluginManager* getPluginManager() { return pluginManager;}
+    string getLocalDirectoryPath() {return local_directory;};
+    string getLibName() {return libname;};
+    ACMediaLibrary* getLibrary() { return mediaLibrary;};
+    ACMediaBrowser* getBrowser() { return mediaBrowser;};
+    ACPluginManager* getPluginManager() { return pluginManager;};
 	
 	// API REQUIRED BY VISUAL and GUI
 	// 

@@ -36,7 +36,7 @@
 #ifndef __ACOSG_BROWSER_RENDERER_H__
 #define __ACOSG_BROWSER_RENDERER_H__
 
-#include "MediaCycle.h"
+//#include "MediaCycle.h"
 
 #include "ACOsgMediaRenderer.h"
 
@@ -83,17 +83,17 @@ protected:
 	vector<float>				 distance_mouse;
 
 public:
-	ACOsgBrowserRenderer()		{ group = 0; }
-	~ACOsgBrowserRenderer() 	{}
+	ACOsgBrowserRenderer()		{ group = 0; };
+	~ACOsgBrowserRenderer() 	{};
 		
-	void setMediaCycle(MediaCycle *media_cycle) { this->media_cycle = media_cycle; }
-	Group *getShapes() 	{ return group.get(); }
+	void setMediaCycle(MediaCycle *media_cycle) { this->media_cycle = media_cycle; };
+	Group *getShapes() 	{ return group.get(); };
 	
 	void prepareNodes(int start=0);
 	void updateNodes(double ratio=0.0);
 		
 	int computeScreenCoordinates(osgViewer::Viewer* view, double ratio=0.0);
-	vector<float> getDistanceMouse() { return distance_mouse; }
+	vector<float> getDistanceMouse() { return distance_mouse; };
 };
 
 #endif

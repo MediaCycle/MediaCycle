@@ -59,15 +59,15 @@ protected:
 public:
 	ACMediaLibrary();
 	ACMediaLibrary(ACMediaType aMediaType);
-	~ACMediaLibrary() {}
+	~ACMediaLibrary() {};
 	
 	bool isEmpty();
-	ACMediaType getMediaType(){return media_type;}
-	void setMediaType(ACMediaType m){media_type = m;}
+	ACMediaType getMediaType(){return media_type;};
+	void setMediaType(ACMediaType m){media_type = m;};
 	int getSize() { return media_library.size(); };
-	int createItem(){} // TODO
-	int deleteItem(int i) {} //TODO
-	void editItem() {} // TODO
+	int createItem(){}; // TODO
+	int deleteItem(int i) {}; //TODO
+	void editItem() {}; // TODO
 	ACMedia* getItem(int i);
 	std::string getThumbnail(int i);
 	

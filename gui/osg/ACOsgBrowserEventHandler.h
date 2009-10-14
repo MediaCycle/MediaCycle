@@ -46,10 +46,10 @@ using namespace osgGA;
 class ACOsgBrowserEventHandler : public GUIEventHandler {
 public: 
 	
-	ACOsgBrowserEventHandler() { media_cycle = 0; }
-	virtual ~ACOsgBrowserEventHandler() {}
+	ACOsgBrowserEventHandler() { media_cycle = 0; };
+	virtual ~ACOsgBrowserEventHandler() {};
 	
-	void setMediaCycle(MediaCycle *media_cycle) { this->media_cycle = media_cycle; }
+	void setMediaCycle(MediaCycle *media_cycle) { this->media_cycle = media_cycle; };
 	
 	bool handle(const osgGA::GUIEventAdapter& ea,osgGA::GUIActionAdapter& aa);
 

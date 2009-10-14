@@ -36,7 +36,7 @@
 #ifndef __ACOSG_MEDIA_RENDERER_H__
 #define __ACOSG_MEDIA_RENDERER_H__
 
-#include "MediaCycle.h"
+#include "MediaCycleLight.h"
 
 #include <osg/ref_ptr>
 #include <osg/Geometry>
@@ -69,13 +69,13 @@ protected:
 	
 public:
 	ACOsgMediaRenderer();
-	virtual ~ACOsgMediaRenderer() {}
+	virtual ~ACOsgMediaRenderer() {};
 
-	void setMediaCycle(MediaCycle *media_cycle) { this->media_cycle = media_cycle; }
-	void setLoopIndex(int loop_index) { this->loop_index = loop_index; }
-	void setDistanceMouse(float distance_mouse) { this->distance_mouse = distance_mouse; }
+	void setMediaCycle(MediaCycle *media_cycle) { this->media_cycle = media_cycle; };
+	void setLoopIndex(int loop_index) { this->loop_index = loop_index; };
+	void setDistanceMouse(float distance_mouse) { this->distance_mouse = distance_mouse; };
 	//void setActivity(int media_activity) { this->media_activity = media_activity; }
-	MatrixTransform* getNode() { return media_node; }
+	MatrixTransform* getNode() { return media_node; };
 	
 	virtual void prepareNodes()=0;
 	virtual void updateNodes(double ratio=0.0)=0;

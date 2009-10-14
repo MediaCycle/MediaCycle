@@ -58,18 +58,18 @@ public:
 	virtual ~ACMediaFeatures()  {};
 //	virtual void calculate(void*) = 0;
 	// the following are common to all features types and should NOT be redefined
-	const FeatureType& getType() const {return _type;}
-	bool isComputed() {return _computed;}
-	void setComputed() { _computed = true; }
+	const FeatureType& getType() const {return _type;};
+	bool isComputed() {return _computed;};
+	void setComputed() { _computed = true; };
 	float getFeature(int i);
 	void setFeature(int i, float f);
-	FeaturesVector getAllFeatures() {return features_vector;}
+	FeaturesVector getAllFeatures() {return features_vector;};
 	void dump(); // output in terminal
 	void write(std::string);  // output in a file -- todo : define format
 	// void read() {} // read from file -- cf. plugin ?
 		
 	// XS TODO : the following 2 have to be discussed with SD
-	void resize(int new_size) { features_vector.resize(new_size); }
+	void resize(int new_size) { features_vector.resize(new_size); };
 	int size();
 	
 };

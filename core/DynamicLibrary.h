@@ -68,13 +68,13 @@ class DynamicLibrary
         static DynamicLibrary* loadLibrary(const std::string& libraryName);
 
         /** return name of library stripped of path.*/
-        const std::string& getName() const     { return _name; }
+	const std::string& getName() const     { return _name; };
 
         /** return name of library including full path to it.*/
-        const std::string& getFullName() const { return _fullName; }
+	const std::string& getFullName() const { return _fullName; };
 
         /** return handle to .dso/.dll dynamic library itself.*/
-        HANDLE             getHandle() const   { return _handle; }
+	HANDLE             getHandle() const   { return _handle; };
 
         /** return address of function located in library.*/
         PROC_ADDRESS       getProcAddress(const std::string& procName);
@@ -85,17 +85,17 @@ class DynamicLibrary
         static HANDLE getLibraryHandle( const std::string& libraryName);
         
         /** disallow default constructor.*/
-        DynamicLibrary() { _handle = NULL; }
+	DynamicLibrary() { _handle = NULL; };
         /** disallow copy constructor.*/
-        DynamicLibrary(const DynamicLibrary&) { }
+	DynamicLibrary(const DynamicLibrary&) { };
         /** disallow copy operator.*/
-        DynamicLibrary& operator = (const DynamicLibrary&) { return *this; }
+	DynamicLibrary& operator = (const DynamicLibrary&) { return *this; };
 
         /** Disallow public construction so that users have to go
           * through loadLibrary() above which returns NULL on
           * failure, a valid DynamicLibrary object on success.
           */
-        DynamicLibrary(const std::string& name) {_name = name; _handle = NULL;}
+	DynamicLibrary(const std::string& name) {_name = name; _handle = NULL;};
         DynamicLibrary(const std::string& name,HANDLE handle);
         ~DynamicLibrary();
 

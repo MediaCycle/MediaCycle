@@ -97,11 +97,11 @@ public:
 	ACMediaBrowser();
 	~ACMediaBrowser();
 	
-	void setLibrary(ACMediaLibrary *lib) { mLibrary = lib; }
-	ACMediaLibrary *getLibrary() { return mLibrary; }
+	void setLibrary(ACMediaLibrary *lib) { mLibrary = lib; };
+	ACMediaLibrary *getLibrary() { return mLibrary; };
 
-	double getFrac() const {return mFrac;}
-	ACBrowserState getState() const {return mState;}
+	double getFrac() const {return mFrac;};
+	ACBrowserState getState() const {return mState;};
 
 	// call this when the number of loops changes in the library
 	void libraryContentChanged();
@@ -117,17 +117,17 @@ public:
 	void setBookmark();
 	void setTag();
 	
-	void setNeedsDisplay(bool val) 				{ mNeedsDisplay = val; }
-	bool getNeedsDisplay() const				{ return mNeedsDisplay; }
+	void setNeedsDisplay(bool val) 				{ mNeedsDisplay = val; };
+	bool getNeedsDisplay() const				{ return mNeedsDisplay; };
 	
 	// camera
-	void setCameraPosition(float x, float y)		{ mCameraPosition[0] = x;  mCameraPosition[1] = y; }
-	void getCameraPosition(float &x, float &y) 	{ x = mCameraPosition[0];  y = mCameraPosition[1]; }
-	void setCameraZoom(float z)				{ mCameraZoom = TI_MAX(z, 0.000001); setNeedsDisplay(true); }
-	void setCameraRecenter()				{ mCameraPosition[0]=0.0; mCameraPosition[1]=0.0; mCameraZoom=1.0; mCameraAngle=0.0;}
-	float getCameraZoom() const				{ return mCameraZoom; }
-	void setCameraRotation(float angle)				{ mCameraAngle = angle; setNeedsDisplay(true); }
-	float getCameraRotation() const				{ return mCameraAngle; }
+	void setCameraPosition(float x, float y)		{ mCameraPosition[0] = x;  mCameraPosition[1] = y; };
+	void getCameraPosition(float &x, float &y) 	{ x = mCameraPosition[0];  y = mCameraPosition[1]; };
+	void setCameraZoom(float z)				{ mCameraZoom = TI_MAX(z, 0.000001); setNeedsDisplay(true); };
+	void setCameraRecenter()				{ mCameraPosition[0]=0.0; mCameraPosition[1]=0.0; mCameraZoom=1.0; mCameraAngle=0.0;};
+	float getCameraZoom() const				{ return mCameraZoom; };
+	void setCameraRotation(float angle)				{ mCameraAngle = angle; setNeedsDisplay(true); };
+	float getCameraRotation() const				{ return mCameraAngle; };
 	
 	// organization
 	// XS make this more general !
@@ -149,8 +149,8 @@ public:
 	// cluster data based on current feature weights
 	void updateClusters(bool animate = false);
 	
-	void setClickedLoop(int index) 				{mClickedLoop = index;}
-	int getClickedLoop()					{return mClickedLoop; }
+	void setClickedLoop(int index) 				{mClickedLoop = index;};
+	int getClickedLoop()					{return mClickedLoop; };
 
 	// this influences updateNextPositions
 	void setSelectedObject(int index);
@@ -164,11 +164,11 @@ public:
 	// next positions -> current positions
 	void commitPositions();
 	
-	const vector<ACLoopAttribute>	&getLoopAttributes() const { return mLoopAttributes; } 
+	const vector<ACLoopAttribute>	&getLoopAttributes() const { return mLoopAttributes; }; 
 	void setLoopAttributesActive(int loop_id, int value) { mLoopAttributes[loop_id].active = value; };
 	//const vector<ACPoint>	&getLoopCurrentPositions() const	{ return mCurrentPos; } 
 	//const vector<ACPoint>	&getLoopNextPositions()	const		{ return mNextPos; }
-	void getMouse(float *mx, float *my) { *mx = mousex; *my = mousey; }
+	void getMouse(float *mx, float *my) { *mx = mousex; *my = mousey; };
 	
 	int setSourceCurser(int lid, int frame_pos);
 	int setHoverLoop(int lid, float x, float y);
@@ -176,14 +176,14 @@ public:
 	// sets all navigationLevel to 0
 	void resetLoopNavigationLevels();
 	void incrementLoopNavigationLevels(int loopIndex);
-	int getNavigationLevel()				{ return mNavigationLevel; }
+	int getNavigationLevel()				{ return mNavigationLevel; };
 	void pushNavigationState();
 	ACNavigationState getCurrentNavigationState();
 	void setCurrentNavigationState(ACNavigationState state);
 	
 	// Quick Browser
 	void setClosestLoop(int loop_id);
-	void setAutoPlay(int auto_play) { this->auto_play = auto_play; }
+	void setAutoPlay(int auto_play) { this->auto_play = auto_play; };
 	
 	// sources - SD reintroduced 2009 aug 4
 	int	 pickSource(float x, float z);
@@ -226,7 +226,7 @@ protected:
 	vector<ACNavigationState>	mBackwardNavigationStates;
 	vector<ACNavigationState>	mForwardNavigationStates;
 	
-	vector <ACLoopAttribute>	mLoopAttributes;
+	vector <ACLoopAttribute>	mLoopAttributes; // one entry per media in the same order as in library.
 	float mousex;
 	float mousey;
 	

@@ -38,6 +38,7 @@
 #include <iostream>
 #include <sstream>
 #include <sys/stat.h>
+#include <vector>
 
 using namespace std;
 
@@ -88,7 +89,7 @@ public:
     int addPlugin(std::string aPluginPath);
 
     // Search by Similarity
-    int getKNN(int id, vector<int> &ids, int k);
+    int getKNN(int id, std::vector<int> &ids, int k);
 
     // Thumbnail
     string getThumbnail(int id);
