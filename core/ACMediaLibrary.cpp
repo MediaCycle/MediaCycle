@@ -161,25 +161,26 @@ int ACMediaLibrary::openLibrary(std::string _path, bool aInitLib){
     do {
       local_media = ACMediaFactory::create(media_type);
       if (local_media != NULL) {
-		ret = local_media->load(library_file);
-		if (ret) {
-		  std::cout << "Media Libray Size : " << media_library.size() << std::endl;
-		  media_library.push_back(local_media);
-		  file_count++;
-
-		}
-		else {
-		  std::cout<<"OpenLibrary : Wrong Media Type" <<std::endl;
-		}
-      
-	  }
-	  while (ret>0);
-
-	  fclose(library_file);
+	ret = local_media->load(library_file);
+	if (ret) {
+	  std::cout << "Media Libray Size : " << media_library.size() << std::endl;
+	  media_library.push_back(local_media);
+	  file_count++;
+	  
 	}
-
-	return file_count;
+      }
+      else {
+	std::cout<<"OpenLibrary : Wrong Media Type" <<std::endl;
+      }
+      
+    }
+    while (ret>0);
+    
+    fclose(library_file);
   }
+  
+  return file_count;
+}
 
 void ACMediaLibrary::saveAsLibrary(string _path) {
 	

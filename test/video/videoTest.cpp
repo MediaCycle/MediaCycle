@@ -41,13 +41,13 @@
 #include "MediaCycle.h"
 #include "ACVideoAnalysis.h"
 
-#include "gnuplot_i.hpp"
+//#include "gnuplot_i.hpp"
 
 using namespace std;
 
 int main(int argc, char** argv) {
-	std::string f1= "/Users/xavier/numediart/Project7.3-DancersCycle/Recordings_Raffinerie_0709/FrontShots/H264/Bru_105#2.mov";
-	std::string bg = "/Users/xavier/numediart/Project7.3-DancersCycle/Recordings_Raffinerie_0709/FrontShots/average_bg_0148.jpg";
+	std::string f1= "/Users/dtardieu/data/DANCERS/Video/Front/Bru_101#1.mov";
+	std::string bg = "/Users/dtardieu/data/DANCERS/Video/analyse/Front/stats/Bru_101#1.mean.bmp";
 	ACVideoAnalysis* V = new ACVideoAnalysis(f1);
 	V->initialize();
 	IplImage *imgp_bg = cvLoadImage(bg.c_str(), CV_LOAD_IMAGE_COLOR);
@@ -66,9 +66,9 @@ int main(int argc, char** argv) {
 		dci[i] = (double) ci[i];
 	}
 	
-	Gnuplot g1 = Gnuplot("lines");
-	g1.reset_plot();
-	g1.plot_x(dci,"dci");
+// 	Gnuplot g1 = Gnuplot("lines");
+// 	g1.reset_plot();
+// 	g1.plot_x(dci,"dci");
 
 	return (EXIT_SUCCESS);
 }

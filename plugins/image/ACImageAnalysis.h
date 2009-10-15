@@ -34,12 +34,13 @@
 
 #ifndef _ACIMAGEANALYSIS_H
 #define	_ACIMAGEANALYSIS_H
+#include <vector>
 
 class ACImageAnalysis {
 public:
-    ACImageAnalysis();
-    ACImageAnalysis(std::string filename);
-    ~ACImageAnalysis();
+    ACImageAnalysis(){};
+  //  ACImageAnalysis(std::string filename){};
+    ~ACImageAnalysis(){};
 };
 
 #endif	/* _ACIMAGEANALYSIS_H */

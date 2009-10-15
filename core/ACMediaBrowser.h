@@ -144,6 +144,7 @@ public:
 
 	// cluster data based on current feature weights
 	void updateClusters(bool animate = false);
+//	void setClusterIndex(int i);
 	
 	void setClickedLoop(int index) 				{mClickedLoop = index;};
 	int getClickedLoop()					{return mClickedLoop; };
