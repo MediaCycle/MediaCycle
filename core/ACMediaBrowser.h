@@ -144,7 +144,10 @@ public:
 
 	// cluster data based on current feature weights
 	void updateClusters(bool animate = false);
-//	void setClusterIndex(int i);
+	void setClusterIndex(int mediaIdx,int clusterIdx);
+	void setClusterCenter(int clusterIdx, vector< vector<float> >);
+	void initClusterCenters();
+	void kmeans(bool animate);
 	
 	void setClickedLoop(int index) 				{mClickedLoop = index;};
 	int getClickedLoop()					{return mClickedLoop; };
@@ -154,6 +157,8 @@ public:
 
 	// update positions based on current clustering
 	void updateNextPositions();
+	void setNextPositionsPropeller();
+	void setNextPositions2dim();
 
 	void updateState();
 	void setState(ACBrowserState state);

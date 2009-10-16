@@ -46,30 +46,32 @@
 using namespace std;
 
 int main(int argc, char** argv) {
-	std::string f1= "/Users/dtardieu/data/DANCERS/Video/Front/Bru_101#1.mov";
-	std::string bg = "/Users/dtardieu/data/DANCERS/Video/analyse/Front/stats/Bru_101#1.mean.bmp";
-	ACVideoAnalysis* V = new ACVideoAnalysis(f1);
-	V->initialize();
-	IplImage *imgp_bg = cvLoadImage(bg.c_str(), CV_LOAD_IMAGE_COLOR);
-	V->computeBlobsInteractively(imgp_bg,true); // , int small_blob)
-	
-	//V->computeBlobs(imgp_bg);
-	V->computeContractionIndices();
-	
-	cvReleaseImage(&imgp_bg);
-	delete V;
-	
-	
-	std::vector<float> ci = V->getContractionIndices();
-	std::vector<double> dci;
-	for (int i=0; i< ci.size(); i++) {
-		dci[i] = (double) ci[i];
-	}
-	
-// 	Gnuplot g1 = Gnuplot("lines");
-// 	g1.reset_plot();
-// 	g1.plot_x(dci,"dci");
-
-	return (EXIT_SUCCESS);
+  std::string f1= "/Volumes/Other/DANCERS/Front/HD/Bru_101#1_2.mp4";
+  //  std::string f1= "/Users/dtardieu/data/DANCERS/Video/Front/Bru_101#1.mov";
+  std::string bg = "/Users/dtardieu/data/DANCERS/Video/analyse/Front/stats/Bru_101#1.mean.bmp";
+  ACVideoAnalysis* V = new ACVideoAnalysis(f1);
+  V->initialize();
+  IplImage *imgp_bg = cvLoadImage(bg.c_str(), CV_LOAD_IMAGE_COLOR);
+  V->showInWindow();	
+  //V->computeBlobsInteractively(imgp_bg,true); // , int small_blob)
+  
+  //V->computeBlobs(imgp_bg);
+  //V->computeContractionIndices();
+  
+  cvReleaseImage(&imgp_bg);
+  delete V;
+  
+  
+  std::vector<float> ci = V->getContractionIndices();
+  std::vector<double> dci;
+  for (int i=0; i< ci.size(); i++) {
+    dci[i] = (double) ci[i];
+  }
+  
+  // 	Gnuplot g1 = Gnuplot("lines");
+  // 	g1.reset_plot();
+  // 	g1.plot_x(dci,"dci");
+  
+  return (EXIT_SUCCESS);
 }
 

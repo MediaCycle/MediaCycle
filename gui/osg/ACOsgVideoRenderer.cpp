@@ -67,7 +67,7 @@ void ACOsgVideoRenderer::prepareNodes() {
 void ACOsgVideoRenderer::updateNodes(double ratio) {
 		
 	ACOsgImageRenderer::updateNodes();
-	
+
 	const ACLoopAttribute &attribute = media_cycle->getLoopAttributes(loop_index);
 	
 	if (attribute.active) {

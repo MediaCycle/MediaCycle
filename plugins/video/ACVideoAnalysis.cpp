@@ -53,10 +53,10 @@
 
 // XS tmp test
 //#include "gnuplot_i.hpp"
-
+using namespace std;
 // ----------- uncomment this to get visual display using highgui and verbose -----
 #define VISUAL_CHECK
-//#define VERBOSE
+#define VERBOSE
 // -----------
 
 ACVideoAnalysis::ACVideoAnalysis(){
@@ -114,7 +114,7 @@ int ACVideoAnalysis::initialize(){
 	cout << "width : " << width << endl;
 	cout << "height : " << height << endl;
 	cout << "fps : " << fps << endl;
-	cout << "numFrames : " << numFrames << endl;
+	cout << "numFrames : " << nframes << endl;
 #endif // VERBOSE
 	int init_ok = 1;
 	if (width*height == 0){ 
