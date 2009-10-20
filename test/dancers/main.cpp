@@ -42,66 +42,283 @@
 //#include "Armadillo-utils.h"
 //#include "fftsg_h.c"
 #include <time.h>
+#include "tinyxml.h"
 
 using namespace std;
 
-int main(int argc, char** argv) {
-  //     MediaCycle *mediacycle;
-  // 	mediacycle = new MediaCycle(MEDIA_TYPE_VIDEO);
-  //     //string libpath("/home/alexis/NetBeansProjects/MediaCycle/lib/Caltech101-a.acl");
-  
-  //     cout<<"new MediaCycle"<<endl;
-  //     mediacycle->addPlugin("/Users/dtardieu/src/Numediart/ticore-app/Applications/Numediart/MediaCycle/src/Builds/darwin-x86/plugins/eyesweb/Debug/mc_eyesweb.dylib");
-  //     mediacycle->importDirectory("/Users/dtardieu/data/DANCERS/Video/Front/",0);
-  //     mediacycle->saveAsLibrary("/Users/dtardieu/data/DANCERS/dancers.acl");
-  //     return (EXIT_SUCCESS);
-  //   mat A = rand<mat>(64,64);
-  //   mat B = rand<mat>(500,500);
-  //   mat C(10,10);
-  
-  //   C = conv2(B,A);
-  //   C.save("C.txt", arma_ascii);
-  MediaCycle *media_cycle = new MediaCycle(MEDIA_TYPE_VIDEO,"/tmp/","mediacycle.acl");
-  media_cycle->openLibrary("/Users/dtardieu/Desktop/dancers-dt-3.acl");
-  
-  ACNavigationState state;
-  state = media_cycle->getBrowser()->getCurrentNavigationState();
-  std::cout << state.mSelectedLoop << std::endl;
-  std::cout << state.mNavigationLevel << std::endl;
-  
-  ACLoopAttribute loopAttribute;
-  loopAttribute = media_cycle->getLoopAttributes(0);
-  
-  mat A,B,C;
-  //  D.load("sin.txt");
-  //D.print();
-  C = randn<mat>(512,2);
-  A = randn<mat>(512,2);
-  //A.load("A.txt", raw_ascii);
-  B = randn<mat>(64,64);
-  //B = ones<mat>(4,4);
-  A.save("A.txt", arma_ascii);
-  B.save("B.txt", arma_ascii);
-  
-  vector<double> Avec1;
-  vector<double> Avec2;
-  
-  for (int d1=0; d1 < A.n_rows; d1++){
-    Avec1.push_back(A(d1,0));
-    Avec2.push_back(A(d1,1));
-  }
-  clock_t start = clock();
-  for (int d1=0; d1 < A.n_rows; d1++){
-    C(d1,0) = Avec1[d1];
-    C(d1,1) = Avec2[d1];
-  }
-  std::cout << "Time elapsed: " << ((double)clock() - start) / CLOCKS_PER_SEC << std::endl;
+static void dancers_tcp_callback(char *buffer, int l, char **buffer_send, int *l_send, void *userData); 
+int processTcpMessageFromInstallation(MediaCycle *that, char *buffer, int l, char **buffer_send, int *l_send); 
+void saveLibraryAsXml(MediaCycle *mediacycle, string _path);
+void readLibraryXml(MediaCycle *mediacycle, std::string filename);
 
-    cout<<"new MediaCycle"<<endl;
-    mediacycle->addPlugin ("/Users/xavier/development/Fall09/ticore-app/Applications/Numediart/MediaCycle/src/Builds/darwin-xcode/plugins/eyesweb/Debug/mc_eyesweb.dylib");
-//	("/Users/dtardieu/src/Numediart/ticore-app/Applications/Numediart/MediaCycle/src/Builds/darwin-x86/plugins/eyesweb/Debug/mc_eyesweb.dylib");
-    mediacycle->importDirectory("/Users/xavier/numediart/Project7.3-DancersCycle/Recordings_Raffinerie_0709/FrontShots/H264_subset/",0);
-//	("/Users/dtardieu/data/DANCERS/Video/Front/",0);
-    mediacycle->saveAsLibrary("/Users/xavier/data/Dancers/dancers-test.acl");
-    return (EXIT_SUCCESS);
+int main(int argc, char** argv) {
+  string path = "/Users/dtardieu/Desktop/dancers-dt-4.acl";
+  string xmlpath = "/Users/dtardieu/Desktop/dancers-dt-4.xml";
+  cout<<"new MediaCycle"<<endl;
+  MediaCycle* mediacycle;
+  mediacycle = new MediaCycle(MEDIA_TYPE_VIDEO);
+  mediacycle->addPlugin ("/Users/dtardieu/src/Numediart/ticore-app/Applications/Numediart/MediaCycle/src/Builds/darwin-x86/plugins/eyesweb/Debug/mc_eyesweb.dylib");
+  mediacycle->importDirectory("/Users/dtardieu/data/DANCERS/Video/FrontTest/", 0);
+  //   mediacycle->importLibrary(path);
+  //   mediacycle->getBrowser()->setClusterNumber(1);
+  //  mediacycle->startTcpServer(12345,5,dancers_tcp_callback);
+  readLibraryXml(mediacycle, "/Users/dtardieu/Desktop/dancers-exemple.xml");
+  saveLibraryAsXml(mediacycle, xmlpath);
+  mediacycle->saveAsLibrary("/Users/dtardieu/Desktop/dancers-exemple.acl");
+  return (EXIT_SUCCESS);
+}
+static void dancers_tcp_callback(char *buffer, int l, char **buffer_send, int *l_send, void *userData) {
+  MediaCycle *that = (MediaCycle*)userData;
+  processTcpMessageFromInstallation(that, buffer, l, buffer_send, l_send);
+}
+
+int processTcpMessageFromInstallation(MediaCycle *that, char *buffer, int l, char **buffer_send, int *l_send) {
+    std::string file_name;
+
+    unsigned long pos = 0;
+    cout << "Processing TCP message of length" <<  l  << endl;
+
+    unsigned int tot_size = *reinterpret_cast<int*>(buffer+pos);
+    pos += sizeof(int);
+    cout << "Actual length : " << tot_size << endl;
+
+    unsigned int type_size = *reinterpret_cast<int*>(buffer+pos);
+    pos += sizeof(int);
+
+    cout << "type_size : " << type_size << endl;
+
+    std::string type_name(buffer+pos,type_size);
+    pos += type_size;
+
+    cout << "type_name : " << type_name << endl;
+
+    //if a wave file is sent, we save it locally
+    if ( type_name == "addwavf" ) {
+        cout << "SSI : add wave file" << endl;
+        unsigned int name_size = *reinterpret_cast<int*>(buffer+pos);
+        //extract filename
+        pos += sizeof(int);
+
+        cout << "name_size : " << name_size << endl;
+        std::string tmp(buffer+pos,name_size);
+        file_name = tmp;
+        pos += name_size;
+
+        cout << "file_name : " << file_name << endl;
+
+        //extract wavefile
+        unsigned int wav_size = *reinterpret_cast<int*>(buffer+pos);
+        pos += sizeof(int);
+
+        FILE *local_file;
+        time_t timer;
+        time(&timer);
+        tmp = that->getLocalDirectoryPath()+"/"+file_name;
+        local_file = fopen(tmp.c_str(),"wb");
+        fwrite((void*)(buffer+pos), 1, wav_size, local_file);
+        fclose(local_file);
+
+        pos += wav_size;
+    } else if ( type_name == "request" ) {
+        cout << "SSI : request" << endl;
+        //nothing specific to do
+    } else {
+        //not a valid request
+        return -1;
+    }
+
+    unsigned int burst_size = *reinterpret_cast<int*>(buffer+pos);
+    pos += sizeof(int);
+
+    cout << "burst_size : " << burst_size << endl;
+
+    std::string burst_labels(buffer+pos,burst_size);
+    pos += burst_size;
+
+    cout << "burst_labels : " << burst_labels << endl;
+
+    unsigned int stat_size = *reinterpret_cast<int*>(buffer+pos);
+    pos += sizeof(int);
+
+    cout << "stat_size : " << stat_size << endl;
+
+    int nfeats = stat_size/sizeof(float);
+
+    //float *ssi_features = reinterpret_cast<float*>(buffer+pos);
+    float *ssi_features = new float[nfeats];
+
+    for (int k=0;k<nfeats;k++) {
+        ssi_features[k] = *reinterpret_cast<float*>(buffer+pos);
+        //cout << "ssi_features (" << k << ") :" << ssi_features[k] << endl;
+        pos += sizeof(float);
+    }
+
+    /*for (int k=0;k<nfeats;k++) {
+        cout << dec << "ssi_features (" << k << ") :" << ssi_features[k] << endl;
+        for (int j=0;j<4;j++) {
+            int tmp = (int) *(buffer+pos+k*4+j);
+            cout << tmp << " ";
+        }
+        cout << endl;
+    }*/
+
+    //TODO feature normalization if done when loading library
+    cout << "creating features" << endl;
+    ACMediaFeatures *mediaFeatures = new ACMediaFeatures();
+    mediaFeatures->resize(nfeats);
+    for (int i=0; i<nfeats; i++)
+        mediaFeatures->setFeature(i,ssi_features[i]);
+    mediaFeatures->setComputed();
+    cout << "done" << endl;
+
+    cout << "creating media" << endl;
+    ACMedia* local_media;
+    local_media = ACMediaFactory::create(MEDIA_TYPE_AUDIO);
+    local_media->addFeatures(mediaFeatures);
+    cout << "done" << endl;
+
+    if ( type_name == "addwavf" ) {
+        cout << "addwavf - name" << file_name << " - " << file_name.size() << endl;
+        local_media->setFileName(file_name);
+        cout << "addwavf - addmedia" << endl;
+        that->getLibrary()->addMedia(local_media);
+        cout << "addwavf - savelib" << endl;
+        that->getLibrary()->saveAsLibrary(that->getLocalDirectoryPath() + "/" + that->getLibName());
+        cout << "done" << endl;
+    } else if (type_name == "request") {
+        vector<ACMedia *> result;
+        that->getKNN(local_media,result,1);
+
+        if (result.size() > 0) {
+            ACPlugin *greta = that->getPluginManager()->getPlugin("Greta");
+            
+            if (greta) {
+                //filename extension is removed in greta
+                cout << "Sent to Greta : " << result[0]->getFileName() << endl;
+                greta->calculate(result[0]->getFileName());
+            } else {
+                cout << "Greta plugin not found, displaying results here ..." << endl;
+                cout << "*** REQUEST DUMP : " << endl;
+                mediaFeatures->dump();
+                
+                for (int k=0;k<result.size();k++) {
+                    cout << "result (" << k << ") : " << result[k]->getFileName() << endl;
+                    result[k]->getFeatures(0)->dump();
+                }
+            }
+        }
+
+        //delete only in "request". In "addwavf", local_media is added to the library and therefore shouyld not be deleted
+        delete local_media; 
+    } else {
+        //not valid (should not happen since already checked before)
+        return -1;
+    }
+
+    //cout << "BUFFER : " << buffer << endl << endl;
+    return 0;
+}
+
+void saveLibraryAsXml(MediaCycle* mediacycle, string _path) {
+  ACMediaLibrary* media_library;
+  media_library = mediacycle->getLibrary();
+  ACMedia* local_media;
+  int n_loops = media_library->getSize();  
+  int featureSize;
+  float featureValue;
+  std::string featureName;
+  FILE *library_file = fopen(_path.c_str(),"w");
+  fprintf(library_file, "%s\n", "<?xml version=\"1.0\"\?>");
+  fprintf(library_file, "%s\n", "<dancers>");
+  fprintf(library_file, "%s\n", "<head>");
+  
+  for (int i=0; i < media_library->getItem(0)->getNumberOfFeatures(); i++){
+    featureSize = media_library->getItem(0)->getFeatures(i)->size();
+    featureValue = media_library->getItem(0)->getFeatures(i)->getFeature(0);
+    featureName = media_library->getItem(0)->getFeatures(i)->getName();
+    
+    if (featureSize > 1){
+	std::cout << "Warning : Multidimensional feature, won't be exported" << std::endl;
+    }
+    else{
+      if (!featureName.compare("ID")){
+	fprintf(library_file, "<feature size=\"6\" >ID</feature>\n");
+      }
+      else{
+	fprintf(library_file, "<feature size=\"1\">");
+	fprintf(library_file, "%s",  media_library->getItem(0)->getFeatures(i)->getName().c_str());
+	fprintf(library_file, "</feature>\n");
+      }
+    }
+  }
+  fprintf(library_file, "%s\n", "</head>");
+  fprintf(library_file, "%s\n", "<items>");
+  for(int i=0; i<n_loops; i++) {
+    fprintf(library_file, "<v>");
+    local_media = media_library->getItem(i);    
+    for (int j=0; j < media_library->getItem(i)->getNumberOfFeatures(); j++){
+      featureSize = media_library->getItem(i)->getFeatures(j)->size();
+      featureValue = media_library->getItem(i)->getFeatures(j)->getFeature(0);
+      featureName = media_library->getItem(i)->getFeatures(j)->getName();
+      
+      if (featureSize == 1){
+	if (!featureName.compare("ID")){
+	  fprintf(library_file, "%.6d", (int) featureValue);
+	}
+	else{
+	  fprintf(library_file, "%d", (int) featureValue);
+	}
+      }
+      else{
+	std::cout << "Warning : Multidimensional feature, won't be exported" << std::endl;
+      }
+    }
+    fprintf(library_file, "</v>\n");
+  }
+  fprintf(library_file, "%s\n", "</items>");  
+  fprintf(library_file, "%s\n", "</dancers>");
+  fclose(library_file);
+}
+
+void readLibraryXml(MediaCycle* mediacycle, std::string filename){
+  std::vector<string> descNames;
+  std::vector<int> descDims;
+  TiXmlDocument doc( filename.c_str() );
+  doc.LoadFile();
+  TiXmlNode* node = 0;
+  TiXmlNode* dancers = 0;
+  TiXmlNode* items = 0;
+  TiXmlElement* head = 0;
+  TiXmlElement* feature=0;
+  
+  int dim;
+  dancers = doc.FirstChild("dancers");
+  assert(dancers);
+  head = dancers->FirstChild("head")->ToElement();
+  assert(head);
+  for( node = head->FirstChild("feature"); node; node = node->NextSibling() ){
+    feature = node->ToElement();
+    feature->QueryIntAttribute("size", &dim);
+    descDims.push_back(dim);
+    descNames.push_back(feature->FirstChild()->Value());
+  }
+  
+  items = dancers->FirstChild("items");
+  string tmpFeature;
+  for( node = items->FirstChild("v"); node; node = node->NextSibling() ){
+    int currIdx = 0;
+    ACMedia* local_media = ACMediaFactory::create(MEDIA_TYPE_VIDEO);
+    tmpFeature = node->FirstChild()->Value();
+    for (int i=0; i < descDims.size(); i++) {
+      ACMediaFeatures* mediaFeatures = new ACMediaFeatures();
+      mediaFeatures->resize(1);
+      mediaFeatures->setComputed();
+      mediaFeatures->setName(descNames[i]);
+      std::cout << tmpFeature.substr(currIdx, descDims[i]).c_str() << std::endl;
+      mediaFeatures->setFeature(0, atof(tmpFeature.substr(currIdx, descDims[i]).c_str()));
+      currIdx = currIdx+descDims[i];
+      local_media->addFeatures(mediaFeatures);
+    }
+    mediacycle->getLibrary()->addMedia(local_media);
+  }
 }

@@ -4,7 +4,7 @@ FILE(GLOB HDR *.hpp *.h)
 SET(PLUGIN_NAME "video")
 
 ADD_LIBRARY(${PLUGIN_NAME} SHARED ${SRC} ${HDR})
-ADD_DEPENDENCIES(${PLUGIN_NAME} mediacycle armadillo)
+ADD_DEPENDENCIES(${PLUGIN_NAME} mediacycle image)
 
 INCLUDE_DIRECTORIES(. ../image/blobs ../image)
 

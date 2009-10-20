@@ -200,6 +200,7 @@ void ACMediaLibrary::saveAsLibrary(string _path) {
 	fclose(library_file);
 }
 
+
 void ACMediaLibrary::cleanLibrary() {
 	cleanStats();
 	media_library.clear();

@@ -29,10 +29,12 @@ int ACEyesWebPlugin::initialize()
     return 0;
 }
 
-ACMediaFeatures* ACEyesWebPlugin::calculate()
+vector<ACMediaFeatures*> ACEyesWebPlugin::calculate()
 // TODO XS : do we really want this to return NULL ?
 {
-    return NULL;
+  vector<ACMediaFeatures*> raf;
+  raf.resize(0);
+  return raf;
 }
 
 string ACEyesWebPlugin::extractDirectory(string path)
@@ -92,75 +94,62 @@ string ACEyesWebPlugin::changeLastFolder(string path, string folder)
     return dir.substr(0,index+1) + folder + sep + extractFilename(path);
 }
 
-ACMediaFeatures* ACEyesWebPlugin::calculate(std::string fileName)
-{
-    ACMediaTimedFeatures *mediaTimedFeatures = new ACMediaTimedFeatures();
-	ACMediaFeatures* mMediaFeatures = new ACMediaFeatures();
-    //fileName = video path (.mov, .avi, ...)
-    string dataFile = changeExtension(changeLastFolder(fileName,"Analyse/Front"),".ew.txt");
-    string dataFile2 = changeExtension(changeLastFolder(fileName,"Analyse/Top"),"imagefeatures.txt");
-    //string dataFile = changeExtension(fileName,".txt");
+vector<ACMediaFeatures*> ACEyesWebPlugin::calculate(std::string fileName){
+  ACMediaTimedFeatures *mediaTimedFeatures = new ACMediaTimedFeatures();
+  //fileName = video path (.mov, .avi, ...)
+  string dataFile = changeExtension(changeLastFolder(fileName,"analyse/Front"),".ew.txt");
+  string dataFile2 = changeExtension(changeLastFolder(fileName,"analyse/Top"),"imagefeatures.txt");
+  //string dataFile = changeExtension(fileName,".txt");
+  const int numDesc = 6;
+  vector<ACMediaFeatures*> featureVec;
+  const std::string descMeanNames[numDesc] = {"xBarycenterMean", "yBarycenterMean", "wRectMean", "hRectMean", "iqomMean", "ciMean"};
+  const std::string descStdNames[numDesc] = {"xBarycenterStd", "yBarycenterStd", "wRectStd", "hRectStd", "iqomStd", "ciStd"};
 
-    if (mediaTimedFeatures->readFile(dataFile) == 0)    //the file is missing
-    {
-        mMediaFeatures = NULL;
-        return mMediaFeatures;
-    }
+  if (mediaTimedFeatures->readFile(dataFile) == 0) {    //the file is missing
+    featureVec.resize(0);
+    return featureVec;
+  }
+  vector<float> meanV = mediaTimedFeatures->meanAsVector();   //mean computation    
 
-    vector<float> meanV = mediaTimedFeatures->meanAsVector();   //mean computation
+  //write meanV in the ACMediaFeature object
+  ACMediaFeatures* mMediaFeatures;
+  for (int i=0; i<meanV.size(); i++){
+    mMediaFeatures = new ACMediaFeatures();
+    mMediaFeatures->resize(1);
+    mMediaFeatures->setName(descMeanNames[i]);
+    mMediaFeatures->setFeature(0,meanV[i]);
+    featureVec.push_back(mMediaFeatures);
+  }
+  vector<float> stdV = mediaTimedFeatures->stdAsVector();     //std computation
+
+  for (int i=0; i<meanV.size(); i++){
+    mMediaFeatures = new ACMediaFeatures();
+    mMediaFeatures->resize(1);
+    mMediaFeatures->setName(descStdNames[i]);
+    mMediaFeatures->setFeature(0,stdV[i]);
+    featureVec.push_back(mMediaFeatures);
+  }
+
+  //-----------------------------------------------
+
+//   fmat imagefeatures_m;
+//   imagefeatures_m.load(dataFile2, raw_ascii);
+//   if (imagefeatures_m.n_elem == 0)
+//     {
+//       mMediaFeatures = NULL;
+//       return mMediaFeatures;
+//     }
+//   //mediaTimedFeatures->getValue().print("Value : ");
+//   mMediaFeatures->resize(mMediaFeatures->size() + imagefeatures_m.n_cols);
+//   for (int i=0; i<imagefeatures_m.n_cols; i++)
+//     mMediaFeatures->setFeature(mMediaFeatures->size()-imagefeatures_m.n_cols+i,imagefeatures_m(0,i));
+
+//   mMediaFeatures->setComputed();
+
+//   mMediaFeatures->dump();
+
     
-    //write meanV in the ACMediaFeature object
-    mMediaFeatures->resize(meanV.size());
-    for (int i=0; i<meanV.size(); i++)
-        mMediaFeatures->setFeature(i,meanV[i]);
-
-    vector<float> stdV = mediaTimedFeatures->stdAsVector();     //std computation
-
-    mMediaFeatures->resize(mMediaFeatures->size() + stdV.size());
-    for (int i=0; i<stdV.size(); i++)
-        mMediaFeatures->setFeature(mMediaFeatures->size()-stdV.size()+i,stdV[i]);
-
-    //-----------------------------------------------
-
-	fmat imagefeatures_m;
-	imagefeatures_m.load(dataFile2, raw_ascii);
-    if (imagefeatures_m.n_elem == 0)
-    {
-        mMediaFeatures = NULL;
-        return mMediaFeatures;
-    }
-    //mediaTimedFeatures->getValue().print("Value : ");
-    mMediaFeatures->resize(mMediaFeatures->size() + imagefeatures_m.n_cols);
-    for (int i=0; i<imagefeatures_m.n_cols; i++)
-        mMediaFeatures->setFeature(mMediaFeatures->size()-imagefeatures_m.n_cols+i,imagefeatures_m(0,i));
-
-    mMediaFeatures->setComputed();
-
-    mMediaFeatures->dump();
-
-    //fmat mean = mediaTimedFeatures->mean();
-    //mean.print("Mean : ");
-
-    //fmat std = mediaTimedFeatures->std();
-    //std.print("STD : ");
-
-    //umat resultHist = mediaTimedFeatures->hist(10);     //10 bins
-    //resultHist.print("Histo : ");       //ok, checked with Matlab
-
-    //fmat similarity = mediaTimedFeatures->similarity();
-    //similarity.print("Similarity matrix : ");
-    //similarity.save("test.txt", raw_ascii);
-
-    //mediaTimedFeatures->importSegmentsFromFile(dataFile2);
-
-    //vector<float> seg = mediaTimedFeatures->getSegments();
-    //for (int i=0;i<seg.size();i++) cout<<"Segment : "<<seg[i]<<endl;
-
-    //ACMediaTimedFeatures *resultseg = mediaTimedFeatures->meanSegment();
-    //resultseg->getTime().print("Time : ");
-    //resultseg->getValue().print("Value : ");
-    
-    return mMediaFeatures;
+  return featureVec;
 }
 
 

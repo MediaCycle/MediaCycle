@@ -48,8 +48,8 @@ public:
     ACEyesWebPlugin();
     ~ACEyesWebPlugin();
     virtual int initialize();
-    virtual ACMediaFeatures* calculate();
-    virtual ACMediaFeatures* calculate(std::string aFileName);
+    virtual std::vector<ACMediaFeatures*> calculate();
+    virtual std::vector<ACMediaFeatures*> calculate(std::string aFileName);
     virtual int start() {return 0;};
     virtual int stop() {return 0;};
     std::string extractDirectory(std::string path);
