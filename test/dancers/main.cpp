@@ -50,6 +50,7 @@ static void dancers_tcp_callback(char *buffer, int l, char **buffer_send, int *l
 int processTcpMessageFromInstallation(MediaCycle *that, char *buffer, int l, char **buffer_send, int *l_send); 
 void saveLibraryAsXml(MediaCycle *mediacycle, string _path);
 void readLibraryXml(MediaCycle *mediacycle, std::string filename);
+std::string generateID(std::string filename);
 
 int main(int argc, char** argv) {
   string path = "/Users/dtardieu/Desktop/dancers-dt-4.acl";
@@ -62,7 +63,7 @@ int main(int argc, char** argv) {
   //   mediacycle->importLibrary(path);
   //   mediacycle->getBrowser()->setClusterNumber(1);
   //  mediacycle->startTcpServer(12345,5,dancers_tcp_callback);
-  readLibraryXml(mediacycle, "/Users/dtardieu/Desktop/dancers-exemple.xml");
+  //readLibraryXml(mediacycle, "/Users/dtardieu/Desktop/dancers-exemple.xml");
   saveLibraryAsXml(mediacycle, xmlpath);
   mediacycle->saveAsLibrary("/Users/dtardieu/Desktop/dancers-exemple.acl");
   return (EXIT_SUCCESS);
@@ -227,47 +228,48 @@ void saveLibraryAsXml(MediaCycle* mediacycle, string _path) {
   int featureSize;
   float featureValue;
   std::string featureName;
+  std::string ID;
   FILE *library_file = fopen(_path.c_str(),"w");
   fprintf(library_file, "%s\n", "<?xml version=\"1.0\"\?>");
   fprintf(library_file, "%s\n", "<dancers>");
+
+  /// HEADER ///
   fprintf(library_file, "%s\n", "<head>");
+
+  fprintf(library_file, "<feature size=\"6\" >ID</feature>\n");
   
   for (int i=0; i < media_library->getItem(0)->getNumberOfFeatures(); i++){
     featureSize = media_library->getItem(0)->getFeatures(i)->size();
-    featureValue = media_library->getItem(0)->getFeatures(i)->getFeature(0);
     featureName = media_library->getItem(0)->getFeatures(i)->getName();
     
     if (featureSize > 1){
 	std::cout << "Warning : Multidimensional feature, won't be exported" << std::endl;
     }
     else{
-      if (!featureName.compare("ID")){
-	fprintf(library_file, "<feature size=\"6\" >ID</feature>\n");
-      }
-      else{
-	fprintf(library_file, "<feature size=\"1\">");
-	fprintf(library_file, "%s",  media_library->getItem(0)->getFeatures(i)->getName().c_str());
-	fprintf(library_file, "</feature>\n");
-      }
+      fprintf(library_file, "<feature size=\"1\">");
+      fprintf(library_file, "%s",  media_library->getItem(0)->getFeatures(i)->getName().c_str());
+      fprintf(library_file, "</feature>\n");
     }
   }
   fprintf(library_file, "%s\n", "</head>");
+  
+  /// ITEMS //
   fprintf(library_file, "%s\n", "<items>");
   for(int i=0; i<n_loops; i++) {
     fprintf(library_file, "<v>");
     local_media = media_library->getItem(i);    
+    
+    // printing ID
+    ID = generateID(local_media->getFileName());
+    fprintf(library_file, "%s", ID.c_str());
+
     for (int j=0; j < media_library->getItem(i)->getNumberOfFeatures(); j++){
       featureSize = media_library->getItem(i)->getFeatures(j)->size();
-      featureValue = media_library->getItem(i)->getFeatures(j)->getFeature(0);
       featureName = media_library->getItem(i)->getFeatures(j)->getName();
       
       if (featureSize == 1){
-	if (!featureName.compare("ID")){
-	  fprintf(library_file, "%.6d", (int) featureValue);
-	}
-	else{
-	  fprintf(library_file, "%d", (int) featureValue);
-	}
+	featureValue = media_library->getItem(i)->getFeatures(j)->getDiscretizedFeature(1,1);
+	fprintf(library_file, "%d", (int) featureValue);
       }
       else{
 	std::cout << "Warning : Multidimensional feature, won't be exported" << std::endl;
@@ -321,4 +323,25 @@ void readLibraryXml(MediaCycle* mediacycle, std::string filename){
     }
     mediacycle->getLibrary()->addMedia(local_media);
   }
+}
+
+std::string generateID(std::string filename){
+  const int nbCities=2;
+  const std::string cityNames[nbCities] = {"Bru", "Par"};
+  const std::string cityID[nbCities] = {"00", "11"};
+  std::string IDs, numDancer, numTry, city;
+  int posCity;
+  int posSep = filename.find_last_of("/\\");
+  int posDot = filename.find_last_of(".");
+  city = filename.substr(posSep+1, 3);
+  numDancer = filename.substr(posSep+5, 3);
+  numTry = filename[posSep+9];
+  for (int i=0; i<nbCities; i++){
+    if (!city.compare(cityNames[i]))
+      posCity = i;
+  }
+  IDs.assign(cityID[posCity]);
+  IDs += numDancer;
+  IDs += numTry;
+  return IDs;
 }

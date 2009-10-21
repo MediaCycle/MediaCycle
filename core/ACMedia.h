@@ -70,6 +70,7 @@ public:
 	std::string getFileName() { return filename; };
 	std::string getThumbnail() { return filename_thumbnail; };
 	void setFileName(std::string s) { filename = s; };
+	std::string getFileName(std::string s) { return filename; };
 	virtual void* getThumbnailPtr()=0;
 	virtual int getWidth()=0;
 	virtual int getHeight()=0;

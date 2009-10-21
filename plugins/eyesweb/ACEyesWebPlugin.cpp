@@ -109,10 +109,13 @@ vector<ACMediaFeatures*> ACEyesWebPlugin::calculate(std::string fileName){
     featureVec.resize(0);
     return featureVec;
   }
-  vector<float> meanV = mediaTimedFeatures->meanAsVector();   //mean computation    
-
-  //write meanV in the ACMediaFeature object
+  
   ACMediaFeatures* mMediaFeatures;
+
+
+  vector<float> meanV = mediaTimedFeatures->meanAsVector();   //mean computation    
+  //write meanV in the ACMediaFeature object
+  
   for (int i=0; i<meanV.size(); i++){
     mMediaFeatures = new ACMediaFeatures();
     mMediaFeatures->resize(1);

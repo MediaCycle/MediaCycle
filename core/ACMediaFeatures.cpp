@@ -36,7 +36,7 @@
 #include <exception>
 #include <iostream>
 #include <fstream>
-
+#include <algorithm>
 using namespace std;
 
 ACMediaFeatures::ACMediaFeatures(){
@@ -60,7 +60,7 @@ int ACMediaFeatures::getDiscretizedFeature(int maxval, int nbSteps){
   }
   else{
     int res;
-    res = (int) this->getFeature(0)*maxval;
+    res = max(0, (int) (this->getFeature(0)+2)*maxval);
     return res;
   }
 }
