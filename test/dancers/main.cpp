@@ -51,6 +51,8 @@ int processTcpMessageFromInstallation(MediaCycle *that, char *buffer, int l, cha
 void saveLibraryAsXml(MediaCycle *mediacycle, string _path);
 void readLibraryXml(MediaCycle *mediacycle, std::string filename);
 std::string generateID(std::string filename);
+void startOrRedraw(int nbVideo, char**, int*);
+
 
 int main(int argc, char** argv) {
   string path = "/Users/dtardieu/Desktop/dancers-dt-4.acl";
@@ -58,12 +60,16 @@ int main(int argc, char** argv) {
   cout<<"new MediaCycle"<<endl;
   MediaCycle* mediacycle;
   mediacycle = new MediaCycle(MEDIA_TYPE_VIDEO);
-  mediacycle->addPlugin ("/Users/dtardieu/src/Numediart/ticore-app/Applications/Numediart/MediaCycle/src/Builds/darwin-x86/plugins/eyesweb/Debug/mc_eyesweb.dylib");
-  mediacycle->importDirectory("/Users/dtardieu/data/DANCERS/Video/FrontTest/", 0);
+  //  mediacycle->addPlugin ("/Users/dtardieu/src/Numediart/ticore-app/Applications/Numediart/MediaCycle/src/Builds/darwin-x86/plugins/eyesweb/Debug/mc_eyesweb.dylib");
+  //mediacycle->importDirectory("/Users/dtardieu/data/DANCERS/Video/FrontTest/", 0);
   //   mediacycle->importLibrary(path);
-  //   mediacycle->getBrowser()->setClusterNumber(1);
-  //  mediacycle->startTcpServer(12345,5,dancers_tcp_callback);
+  //mediacycle->getBrowser()->setClusterNumber(1);
+  mediacycle->startTcpServer(12345,5,dancers_tcp_callback);
   //readLibraryXml(mediacycle, "/Users/dtardieu/Desktop/dancers-exemple.xml");
+  while(1) {
+    sleep(30);
+  }
+
   saveLibraryAsXml(mediacycle, xmlpath);
   mediacycle->saveAsLibrary("/Users/dtardieu/Desktop/dancers-exemple.acl");
   return (EXIT_SUCCESS);
@@ -78,146 +84,29 @@ int processTcpMessageFromInstallation(MediaCycle *that, char *buffer, int l, cha
 
     unsigned long pos = 0;
     cout << "Processing TCP message of length" <<  l  << endl;
+    std::cout << buffer[0] << endl;
+    char msgType = *static_cast<char*>(buffer);
+    std::cout << "message : " << msgType << endl;
+    //for max
+    msgType = msgType-1;
 
-    unsigned int tot_size = *reinterpret_cast<int*>(buffer+pos);
-    pos += sizeof(int);
-    cout << "Actual length : " << tot_size << endl;
-
-    unsigned int type_size = *reinterpret_cast<int*>(buffer+pos);
-    pos += sizeof(int);
-
-    cout << "type_size : " << type_size << endl;
-
-    std::string type_name(buffer+pos,type_size);
-    pos += type_size;
-
-    cout << "type_name : " << type_name << endl;
-
-    //if a wave file is sent, we save it locally
-    if ( type_name == "addwavf" ) {
-        cout << "SSI : add wave file" << endl;
-        unsigned int name_size = *reinterpret_cast<int*>(buffer+pos);
-        //extract filename
-        pos += sizeof(int);
-
-        cout << "name_size : " << name_size << endl;
-        std::string tmp(buffer+pos,name_size);
-        file_name = tmp;
-        pos += name_size;
-
-        cout << "file_name : " << file_name << endl;
-
-        //extract wavefile
-        unsigned int wav_size = *reinterpret_cast<int*>(buffer+pos);
-        pos += sizeof(int);
-
-        FILE *local_file;
-        time_t timer;
-        time(&timer);
-        tmp = that->getLocalDirectoryPath()+"/"+file_name;
-        local_file = fopen(tmp.c_str(),"wb");
-        fwrite((void*)(buffer+pos), 1, wav_size, local_file);
-        fclose(local_file);
-
-        pos += wav_size;
-    } else if ( type_name == "request" ) {
-        cout << "SSI : request" << endl;
-        //nothing specific to do
-    } else {
-        //not a valid request
-        return -1;
+    switch (msgType) {
+    case 0:{
+      unsigned int nbVideo = *static_cast<char*>(buffer+1);
+      startOrRedraw(nbVideo, buffer_send, l_send);
+      break;
     }
-
-    unsigned int burst_size = *reinterpret_cast<int*>(buffer+pos);
-    pos += sizeof(int);
-
-    cout << "burst_size : " << burst_size << endl;
-
-    std::string burst_labels(buffer+pos,burst_size);
-    pos += burst_size;
-
-    cout << "burst_labels : " << burst_labels << endl;
-
-    unsigned int stat_size = *reinterpret_cast<int*>(buffer+pos);
-    pos += sizeof(int);
-
-    cout << "stat_size : " << stat_size << endl;
-
-    int nfeats = stat_size/sizeof(float);
-
-    //float *ssi_features = reinterpret_cast<float*>(buffer+pos);
-    float *ssi_features = new float[nfeats];
-
-    for (int k=0;k<nfeats;k++) {
-        ssi_features[k] = *reinterpret_cast<float*>(buffer+pos);
-        //cout << "ssi_features (" << k << ") :" << ssi_features[k] << endl;
-        pos += sizeof(float);
+    default:
+      break;
     }
-
-    /*for (int k=0;k<nfeats;k++) {
-        cout << dec << "ssi_features (" << k << ") :" << ssi_features[k] << endl;
-        for (int j=0;j<4;j++) {
-            int tmp = (int) *(buffer+pos+k*4+j);
-            cout << tmp << " ";
-        }
-        cout << endl;
-    }*/
-
-    //TODO feature normalization if done when loading library
-    cout << "creating features" << endl;
-    ACMediaFeatures *mediaFeatures = new ACMediaFeatures();
-    mediaFeatures->resize(nfeats);
-    for (int i=0; i<nfeats; i++)
-        mediaFeatures->setFeature(i,ssi_features[i]);
-    mediaFeatures->setComputed();
-    cout << "done" << endl;
-
-    cout << "creating media" << endl;
-    ACMedia* local_media;
-    local_media = ACMediaFactory::create(MEDIA_TYPE_AUDIO);
-    local_media->addFeatures(mediaFeatures);
-    cout << "done" << endl;
-
-    if ( type_name == "addwavf" ) {
-        cout << "addwavf - name" << file_name << " - " << file_name.size() << endl;
-        local_media->setFileName(file_name);
-        cout << "addwavf - addmedia" << endl;
-        that->getLibrary()->addMedia(local_media);
-        cout << "addwavf - savelib" << endl;
-        that->getLibrary()->saveAsLibrary(that->getLocalDirectoryPath() + "/" + that->getLibName());
-        cout << "done" << endl;
-    } else if (type_name == "request") {
-        vector<ACMedia *> result;
-        that->getKNN(local_media,result,1);
-
-        if (result.size() > 0) {
-            ACPlugin *greta = that->getPluginManager()->getPlugin("Greta");
-            
-            if (greta) {
-                //filename extension is removed in greta
-                cout << "Sent to Greta : " << result[0]->getFileName() << endl;
-                greta->calculate(result[0]->getFileName());
-            } else {
-                cout << "Greta plugin not found, displaying results here ..." << endl;
-                cout << "*** REQUEST DUMP : " << endl;
-                mediaFeatures->dump();
-                
-                for (int k=0;k<result.size();k++) {
-                    cout << "result (" << k << ") : " << result[k]->getFileName() << endl;
-                    result[k]->getFeatures(0)->dump();
-                }
-            }
-        }
-
-        //delete only in "request". In "addwavf", local_media is added to the library and therefore shouyld not be deleted
-        delete local_media; 
-    } else {
-        //not valid (should not happen since already checked before)
-        return -1;
-    }
-
-    //cout << "BUFFER : " << buffer << endl << endl;
     return 0;
+}
+
+void startOrRedraw(int nbVideo, char **buffer_send, int* l_send){
+  string sbuffer_send;
+  sbuffer_send = "100010";
+  *buffer_send = (char*)(sbuffer_send).c_str();
+  *l_send = sbuffer_send.length();
 }
 
 void saveLibraryAsXml(MediaCycle* mediacycle, string _path) {
@@ -345,3 +234,5 @@ std::string generateID(std::string filename){
   IDs += numTry;
   return IDs;
 }
+
+
