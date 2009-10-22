@@ -39,19 +39,20 @@
 #include <vector>
 
 #include "BlobResult.h" // Main blob library include (in plugin/image/blobs)
+#include "ACImageAnalysis.h"
 
 typedef std::vector<float> blob_center; // 2D, but could be 3D
 
 class ACVideoAnalysis {
 public:
     ACVideoAnalysis();
-    ACVideoAnalysis(std::string filename);
+    ACVideoAnalysis(const std::string &filename);
     ~ACVideoAnalysis();
 	
 	// general I/O, settings
 	void clean();
 	void rewind();
-	void setFileName(std::string filename);
+	void setFileName(const std::string &filename);
 	int initialize();
 	std::string getFileName() {return file_name;}
 	std::string getColorModel(){return color_model;}
@@ -59,18 +60,22 @@ public:
 	
 	// utilities
 	IplImage* getNextFrame();
-	// averaging nave frames from a video skipping the first nskip ones
-	IplImage* computeAverageImage(int nskip = 0, int nave = 0, std::string s =""); 
-	IplImage* computeMedianImage(int nskip = 0, int nave = 0, std::string s =""); 
+	IplImage* computeAverageImage(int nskip = 0, int nread = 0, int njump = -1, std::string s =""); 
+	IplImage* computeMedianImage(int nskip = 0, int nread = 0, int njump = -1, std::string s =""); 
+	IplImage* computeMedianNoBlobImage(std::string s ="",IplImage *first_guess=NULL);
 	void backgroundSubstraction(IplImage* bg_img, int nskip=0, std::string cmode="BGR");
 	// blob detection could be per channel or in color image
 	//	void detectBlobs(int ichannel=0, std::string cmode="HSV", IplImage* bg_img=NULL, int bg_thesh=40, int big_blob=200, int small_blob=0);
 	void trimBlank(IplImage* bg_img);
 	int getFirstFrameMove();
 	
+	// XS test
+	void histogramEqualize(const IplImage* bg_img);
+	
 	// raw features computation
-	void computeBlobs(IplImage* bg_img=NULL, int bg_thesh=10, int big_blob=200, int small_blob=0);
-	void computeBlobsInteractively(IplImage* bg_img=NULL, bool merge_blobs=false, int bg_thesh=10, int big_blob=200, int small_blob=0);
+	void computeBlobs(IplImage* bg_img=NULL, int bg_thesh=20, int big_blob=200, int small_blob=0);
+	void computeBlobsInteractively(IplImage* bg_img=NULL, bool merge_blobs=false, int bg_thesh=20, int big_blob=200, int small_blob=0);
+	void computeBlobsUL(IplImage* bg_img=NULL, bool merge_blobs=false, int big_blob=200, int small_blob=0);
 
 	// features manipulation
 	void mergeBlobs(float blob_dist = 0);
@@ -89,13 +94,14 @@ public:
 	// to get dummy time stamps (i.e., the indices)
 	// XS TODO: make this a real time stamp (in case you downsample or skip frames...)
 	std::vector<float> getDummyTimeStamps();
+	std::vector<float> getTimeStamps();
 
 	// for display (ifdef VISUAL_CHECK) using highgui
 	void showInWindow(std::string="VIDEO", bool has_win=false);
 	void showFrameInWindow(std::string="VIDEO", IplImage* frame=NULL, bool has_win=true);
+//	void onTrackbarSlide(int pos); 
+	void browseInWindow(std::string="VIDEO", bool has_win=false);
 	// ?	void showBlobsInWindow(std::string="VIDEO", bool has_win=false);
-	
-	
 	
 private:
 	std::string file_name;
@@ -106,15 +112,22 @@ private:
 	
 	bool HAS_TRAJECTORY;
 	
+	// threshold for lower and upper parts of the image
+	int threshU;
+	int threshL;
+	static const int ystar; // where to split the image in half (horizontally)
+
 	// NB: blobs (CBlobResult) may contain more than one blob per frame
-	std::vector<CBlobResult> all_blobs;
+	std::vector<CBlobResult> all_blobs; // XS make this pointers ?
+	std::vector<float> all_blobs_time_stamps;
+	
 	std::vector<blob_center> blob_centers;
 	std::vector<blob_center> blob_speeds; 
 	std::vector<float> contraction_indices;
 
 	std::vector<float> pixel_speeds;
-	// XS: to be passed to ACVideo -- is it still the case ?
 	int width, height, depth, fps, nframes;
+	//	int videocodec;
 	
 	//	MyHistogram *averageHistogram;
 	

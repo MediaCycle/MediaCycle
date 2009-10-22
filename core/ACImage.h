@@ -41,6 +41,7 @@
 
 // -----------------------------------
 // TODO : better than these #define
+// XS they are only used in the resize => remove ?
 
 #define IMAGE_LOOP_SHAPE_NUM_EL  24
 #define IMAGE_LOOP_COLOR_NUM_EL 24

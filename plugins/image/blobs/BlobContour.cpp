@@ -1,6 +1,9 @@
 #include "BlobContour.h"
 #include "OpenCV/cxcore.h"
 
+//XS debug
+#include <iostream>
+
 CBlobContour::CBlobContour()
 {
 	m_startPoint.x = 0;
@@ -84,17 +87,17 @@ CBlobContour& CBlobContour::operator=( const CBlobContour &source )
 
 
 /**
-- FUNCIÓ: AddChainCode
+- FUNCIâ€: AddChainCode
 - FUNCIONALITAT: Add chain code to contour
-- PARÀMETRES:
+- PARÂ¿METRES:
 	- 
 - RESULTAT:
 	- 
 - RESTRICCIONS:
 	- 
 - AUTOR: rborras
-- DATA DE CREACIÓ: 2008/05/06
-- MODIFICACIÓ: Data. Autor. Descripció.
+- DATA DE CREACIâ€: 2008/05/06
+- MODIFICACIâ€: Data. Autor. DescripciÃ›.
 */
 void CBlobContour::AddChainCode(t_chainCode chaincode)
 {
@@ -117,17 +120,17 @@ void CBlobContour::ResetChainCode()
 }
 
 /**
-- FUNCIÓ: GetPerimeter
+- FUNCIâ€: GetPerimeter
 - FUNCIONALITAT: Get perimeter from chain code. Diagonals sum sqrt(2) and horizontal and vertical codes 1
-- PARÀMETRES:
+- PARÂ¿METRES:
 	- 
 - RESULTAT:
 	- 
 - RESTRICCIONS:
 	- 
 - AUTOR: rborras
-- DATA DE CREACIÓ: 2008/04/30
-- MODIFICACIÓ: Data. Autor. Descripció.
+- DATA DE CREACIâ€: 2008/04/30
+- MODIFICACIâ€: Data. Autor. DescripciÃ›.
 - NOTA: Algorithm derived from "Methods to estimate area and perimeters of blob-like objects: A comparison", L.Yang
 */
 double CBlobContour::GetPerimeter()
@@ -147,33 +150,35 @@ double CBlobContour::GetPerimeter()
 }
 
 /**
-- FUNCIÓ: GetArea
+- FUNCIâ€: GetArea
 - FUNCIONALITAT: Computes area from chain code
-- PARÀMETRES:
+- PARÂ¿METRES:
 	- 
 - RESULTAT:
 	- May give negative areas for clock wise contours
 - RESTRICCIONS:
 	- 
 - AUTOR: rborras
-- DATA DE CREACIÓ: 2008/04/30
-- MODIFICACIÓ: Data. Autor. Descripció.
+- DATA DE CREACIâ€: 2008/04/30
+- MODIFICACIâ€: Data. Autor. DescripciÃ›.
 - NOTA: Algorithm derived from "Properties of contour codes", G.R. Wilson
 */
 double CBlobContour::GetArea()
 {
 	// is calculated?
-	if (m_area != -1)
-	{
-		return m_area;
-	}
+	
+	float thresh = 0.01;
+	if (this->m_area > thresh) // XS was : != -1)
+		return this->m_area;
+	else if (this->m_area >= 0)
+		return 0.0;
 
 	if( IsEmpty() )
 		return 0;
 
-	m_area = fabs( cvContourArea( GetContourPoints() ));
+	this->m_area = fabs( cvContourArea( GetContourPoints() ));
 	
-	return m_area;
+	return this->m_area;
 }
 
 //! Get contour moment (p,q up to MAX_CALCULATED_MOMENTS)

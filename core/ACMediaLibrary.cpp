@@ -142,44 +142,45 @@ int ACMediaLibrary::importDirectory(std::string _path, int _recursive, int id, A
 }
 
 int ACMediaLibrary::openLibrary(std::string _path, bool aInitLib){
-  // this does not re-initialize the media_library
-  // but appends new media to it.
-  // except if aInitLib is set to true
-  int ret, file_count=0;
+	// this does not re-initialize the media_library
+	// but appends new media to it.
+	// except if aInitLib is set to true
+	int ret, file_count=0;
 	
-  FILE *library_file = fopen(_path.c_str(),"r");
-  //if the file exists
-  if (library_file) {
-    //ACMediaFactory factory;
-    ACMedia* local_media;
-    // --TODO-- ???  how does it know which type of media ?
-    // have to be set up  at some point using setMediaType()
-    if (aInitLib) {
-      cleanLibrary();
-    }
-    media_library.resize(0);
-    do {
-      local_media = ACMediaFactory::create(media_type);
-      if (local_media != NULL) {
-		ret = local_media->load(library_file);
-		if (ret) {
-		  std::cout << "Media Libray Size : " << media_library.size() << std::endl;
-		  media_library.push_back(local_media);
-		  file_count++;
-
+	FILE *library_file = fopen(_path.c_str(),"r");
+	//if the file exists
+	if (library_file) {
+		//ACMediaFactory factory;
+		ACMedia* local_media;
+		// --TODO-- ???  how does it know which type of media ?
+		// have to be set up  at some point using setMediaType()
+		if (aInitLib) {
+			cleanLibrary();
 		}
-		else {
-		  std::cout<<"OpenLibrary : Wrong Media Type" <<std::endl;
+		media_library.resize(0);
+		do {
+			local_media = ACMediaFactory::create(media_type);
+			if (local_media != NULL) {
+				ret = local_media->load(library_file);
+				if (ret) {
+					std::cout << "Media Libray Size : " << media_library.size() << std::endl;
+					media_library.push_back(local_media);
+					file_count++;
+					
+				}
+			}
+			else {
+				std::cout<<"OpenLibrary : Wrong Media Type" <<std::endl;
+			}
+			
 		}
-      
-	  }
-	  while (ret>0);
-
-	  fclose(library_file);
+		while (ret>0);
+		
+		fclose(library_file);
 	}
-
+	
 	return file_count;
-  }
+}
 
 void ACMediaLibrary::saveAsLibrary(string _path) {
 	

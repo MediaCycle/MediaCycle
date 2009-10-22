@@ -87,7 +87,7 @@ public:
 	//! Copy constructor
 	CBlobResult( const CBlobResult &source );
 	//! Destructor
-	virtual ~CBlobResult();
+	~CBlobResult(); // XS was virtual
 
 	//! operador = per a fer assignacions entre CBlobResult
 	//! Assigment operator

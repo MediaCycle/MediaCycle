@@ -172,6 +172,10 @@ double CBlob::Area()
 		area -= (*itContour).GetArea();
 		itContour++;
 	}
+	// XS added this on 20/10/09
+	double thresh = 0.01;
+	if (area < thresh) area=0;
+	// end XS
 	return area;
 }
 
@@ -711,10 +715,10 @@ void CBlob::JoinBlob( CBlob *blob )
 	// there is a bug in the joinblob function and later getting blob stats
 	// , you have to add this code to make it work:
 	// reset stats for the blob
-	m_area =-1 ;
-	m_perimeter = -1;
-	m_externPerimeter = m_meanGray = m_stdDevGray = -1;
-	m_boundingBox.width = -1;
-	m_ellipse.size.width = -1;
+//	m_area =-1 ;
+//	m_perimeter = -1;
+//	m_externPerimeter = m_meanGray = m_stdDevGray = -1;
+//	m_boundingBox.width = -1;
+//	m_ellipse.size.width = -1;
 	
 }

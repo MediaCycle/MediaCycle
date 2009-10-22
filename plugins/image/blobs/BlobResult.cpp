@@ -50,6 +50,8 @@ MODIFICACIONS (ModificaciÛ, Autor, Data):
 CBlobResult::CBlobResult()
 {
 	m_blobs = Blob_vector();
+	// XS added this:
+	m_blobs.resize(0);
 }
 
 /**
@@ -135,10 +137,10 @@ CBlobResult::CBlobResult(IplImage *source, IplImage *mask, uchar backgroundColor
 */
 CBlobResult::CBlobResult( const CBlobResult &source )
 {
-	m_blobs = Blob_vector( source.GetNumBlobs() );
-	
 	// creem el nou a partir del passat com a par‡metre
-	m_blobs = Blob_vector( source.GetNumBlobs() );
+	m_blobs = Blob_vector();
+	m_blobs.resize(source.GetNumBlobs() );
+	
 	// copiem els blobs de l'origen a l'actual
 	Blob_vector::const_iterator pBlobsSrc = source.m_blobs.begin();
 	Blob_vector::iterator pBlobsDst = m_blobs.begin();
@@ -221,7 +223,8 @@ CBlobResult& CBlobResult::operator=(const CBlobResult& source)
 		}
 		m_blobs.clear();
 		// creem el nou a partir del passat com a par‡metre
-		m_blobs = Blob_vector( source.GetNumBlobs() );
+		m_blobs = Blob_vector();
+		m_blobs.resize (source.GetNumBlobs() );
 		// copiem els blobs de l'origen a l'actual
 		Blob_vector::const_iterator pBlobsSrc = source.m_blobs.begin();
 		Blob_vector::iterator pBlobsDst = m_blobs.begin();
@@ -962,9 +965,11 @@ Added by XS
  */
 double CBlobResult::Area()
 {	
+//	std::cout << "CBlobResult::Area; num blobs = "<< GetNumBlobs()  << std::endl;
+
 	double area=0.0;
 	for(int i=0; i<GetNumBlobs(); i++){
-		area+=m_blobs[i]->Area();
+		area += m_blobs[i]->Area();
 	}
 	return area;
 }
@@ -995,13 +1000,14 @@ CvRect CBlobResult::GetBoundingBox()
 		if (maxy < m_blobs[i]->MaxY() ) maxy =  m_blobs[i]->MaxY();
 	}
 	
-	// XS TODO: add test that min < max, so that width, height > 0
-	
-	std::cout << "X:" << minx << " - " << maxx << std::endl;
-	std::cout << "Y:" << miny << " - " << maxy << std::endl;
+	// XS TODO: add test that min < max, so that width, height > 0	
+//	std::cout << "X:" << minx << " - " << maxx << std::endl;
+//	std::cout << "Y:" << miny << " - " << maxy << std::endl;
 
 	boundingBox.x = minx;
 	boundingBox.y = miny;
+	if (maxx < minx) std::cerr << "<CBlobResult::GetBoundingBox> : wrong box, minx > maxx" << std::endl;
+	if (maxy < miny) std::cerr << "<CBlobResult::GetBoundingBox> : wrong box, miny > maxy" << std::endl;
 	boundingBox.width = maxx-minx;
 	boundingBox.height = maxy-miny;
 	return boundingBox;

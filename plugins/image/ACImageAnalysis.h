@@ -35,6 +35,35 @@
 #ifndef _ACIMAGEANALYSIS_H
 #define	_ACIMAGEANALYSIS_H
 
+//http://www.cs.iit.edu/~agam/cs512/lect-notes/opencv-intro/opencv-intro.html#SECTION00053000000000000000
+// C++ wrapper around IplImage that allows convenient (and hopefully fast) pixel access
+
+template<class T> class Image {
+private:
+	IplImage* imgp;
+public:
+	Image(IplImage* img=0) {imgp=img;}
+	~Image(){imgp=0;}
+	void operator=(IplImage* img) {imgp=img;}
+	inline T* operator[](const int rowIndx) {
+	return ((T *)(imgp->imageData + rowIndx*imgp->widthStep));}
+};
+
+typedef struct{
+	unsigned char b,g,r;
+} BgrPixel;
+
+typedef struct{
+	float b,g,r;
+} BgrPixelFloat;
+
+typedef Image<BgrPixel>       BgrImage;
+typedef Image<BgrPixelFloat>  BgrImageFloat;
+typedef Image<unsigned char>  BwImage;
+typedef Image<float>          BwImageFloat;
+
+// --------------------------------------------------------------------
+
 class ACImageAnalysis {
 public:
     ACImageAnalysis();
