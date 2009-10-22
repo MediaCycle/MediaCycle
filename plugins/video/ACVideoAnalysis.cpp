@@ -46,7 +46,6 @@
 
 // #include "ACImageAnalysis.h" // used in blob detection, when splitting channels
 
-
 #include <iostream>
 #include <fstream>
 #include <sstream>

@@ -34,3 +34,22 @@
 
 #include "ACImageAnalysis.h"
 
+// ----------- uncomment this to get visual display using highgui and verbose -----
+//#define VISUAL_CHECK
+#define VERBOSE
+
+
+ACImageAnalysis::ACImageAnalysis(){
+	clean();
+}
+
+ACImageAnalysis::ACImageAnalysis(const std::string &filename){
+	clean();
+	setFileName(filename);
+}
+
+void ACImageAnalysis::clean(){
+}
+
+ACImageAnalysis::~ACImageAnalysis(){
+}

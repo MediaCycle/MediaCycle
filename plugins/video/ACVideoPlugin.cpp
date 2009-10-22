@@ -55,29 +55,28 @@ ACVideoPlugin::~ACVideoPlugin() {
 int ACVideoPlugin::initialize(){
 }
 
-ACMediaFeatures* ACVideoPlugin::calculate(){
-}
-
-
-
+//ACMediaFeatures* ACVideoPlugin::calculate(){
+//	return NULL;
+//}
+//
 // uses ACVideoAnalysis and converts the results into ACMediaFeatures
-ACMediaFeatures* ACVideoPlugin::calculate(std::string aFileName) {
-	// TODO: test if file exists
-	ACVideoAnalysis* video = new ACVideoAnalysis(aFileName);
-	
+//ACMediaFeatures* ACVideoPlugin::calculate(std::string aFileName) {
+//	// TODO: test if file exists
+//	ACVideoAnalysis* video = new ACVideoAnalysis(aFileName);
+//	
 //	ACMediaFeatures* mMediaFeatures = new ACMediaFeatures();
 //  check how to store the features...
-	
-	//XS TODO: make this more modular
-	this->calculateTrajectory(video);
-	delete video;
-
-}
-
-void ACVideoPlugin::calculateTrajectory(ACVideoAnalysis* video){
-	video->computeMergedBlobsTrajectory(0);
-	std::vector<blob_center> trajectory = video->getMergedBlobsTrajectory();
-	std::vector<float> time_stamps = video->getDummyTimeStamps();
-	ACMediaTimedFeatures *mediaTimedFeatures = new ACMediaTimedFeatures(time_stamps, trajectory, "trajectory");
-
-}
+//	
+//	//XS TODO: make this more modular
+//	this->calculateTrajectory(video);
+//	delete video;
+//
+//}
+//
+//void ACVideoPlugin::calculateTrajectory(ACVideoAnalysis* video){
+//	video->computeMergedBlobsTrajectory(0);
+//	std::vector<blob_center> trajectory = video->getMergedBlobsTrajectory();
+//	std::vector<float> time_stamps = video->getDummyTimeStamps();
+//	ACMediaTimedFeatures *mediaTimedFeatures = new ACMediaTimedFeatures(time_stamps, trajectory, "trajectory");
+//
+//}

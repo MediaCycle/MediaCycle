@@ -197,13 +197,13 @@ int main(int argc, char** argv) {
 //	IplImage *imgp_bg = cvLoadImage(bg.c_str(), CV_LOAD_IMAGE_COLOR);
 //	V->showInWindow();
 
-	get_all_images();
+	// get_all_images();
 	// test_med_ave("Bru_105#2");
 	// test_med_noblob("Bru_203#1");
 	//test_histogram_equalize("Bru_105#2");
 	//test_bg_substraction("Bru_105#2");
 	// test_bg_substraction("Bru_203#2");
-	//test_browse("Bru_105#2");
+	test_browse("Bru_105#2");
 	
 	//	IplImage *imgp_bg = cvLoadImage("/Users/xavier/Desktop/testMed3.jpg", CV_LOAD_IMAGE_COLOR);
 	//V->computeBlobsInteractively(imgp_bg,true); // , int small_blob)

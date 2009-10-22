@@ -44,8 +44,8 @@ public:
     ACVideoPlugin();
     ~ACVideoPlugin();
     virtual int initialize();
-    virtual ACMediaFeatures* calculate();
-    virtual ACMediaFeatures* calculate(std::string aFileName);
+//    virtual ACMediaFeatures* calculate();
+//    virtual ACMediaFeatures* calculate(std::string aFileName);
     virtual int start() {return 0;};
     virtual int stop() {return 0;};
 private:

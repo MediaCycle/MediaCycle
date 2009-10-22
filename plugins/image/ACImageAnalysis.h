@@ -67,9 +67,13 @@ typedef Image<float>          BwImageFloat;
 
 class ACImageAnalysis {
 public:
-    ACImageAnalysis(){};
-  //  ACImageAnalysis(std::string filename){};
-    ~ACImageAnalysis(){};
+    ACImageAnalysis();
+	ACImageAnalysis(const std::string &filename);
+    ~ACImageAnalysis();
+	
+	// general I/O, settings
+	void clean();
+
 };
 
 #endif	/* _ACIMAGEANALYSIS_H */

@@ -10,9 +10,9 @@ ADD_EXECUTABLE(mediacycle-dancers-2 ${SRC} ${HDR} ${MC_SRC} ${MC_HDR})
 ADD_DEPENDENCIES(mediacycle-dancers mediacycle eyesweb)
 
 TARGET_LINK_LIBRARIES(mediacycle-dancers mediacycle)
-TARGET_LINK_LIBRARIES(mediacycle-dancers tinyxml)
+#TARGET_LINK_LIBRARIES(mediacycle-dancers tinyxml)
 
-INCLUDE_DIRECTORIES(. ../../tinyxml)
+#INCLUDE_DIRECTORIES(. ../../tinyxml)
 
 #somehow OSX cannot link properly blas when using armadillo
 IF ( APPLE )
