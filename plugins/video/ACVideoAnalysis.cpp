@@ -55,7 +55,7 @@
 #include "gnuplot_i.hpp"
 
 // ----------- uncomment this to get visual display using highgui and verbose -----
-#define VISUAL_CHECK
+//#define VISUAL_CHECK
 #define VERBOSE
 // ----------- class constants
 const int ACVideoAnalysis::ystar = 220;
@@ -523,7 +523,6 @@ void ACVideoAnalysis::computeBlobsInteractively(IplImage* bg_img, bool merge_blo
 	cvDestroyWindow("BW");
 	cvDestroyWindow("BLOBS");
 }
-	
 
 void ACVideoAnalysis::computeBlobsUL(IplImage* bg_img, bool merge_blobs, int big_blob, int small_blob){
 // different threshold upper/lower part of the image
@@ -586,7 +585,7 @@ void ACVideoAnalysis::computeBlobsUL(IplImage* bg_img, bool merge_blobs, int big
 
 		// tried this to smooth the blob, but it removes too much of the blob
 		// cvMorphologyEx( bitImage, bitImage, NULL, NULL, CV_MOP_CLOSE, 2);
-		cvSmooth(bitImage, bitImage, CV_MEDIAN, 3, 5);
+		//cvSmooth(bitImage, bitImage, CV_MEDIAN, 3, 5);
 		
 		// does not work:
 //		cvRunningAvg (bitImage, r_avg_img, 0.5);

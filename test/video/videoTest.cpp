@@ -97,10 +97,6 @@ void get_all_images(){
 //		IplImage *median_img =	V->computeMedianImage(200, 0, 50, median_file);
 		string first_guess_file= videodir+"median/Bru_101#1_med.jpg";
 		IplImage *first_guess_img = cvLoadImage(first_guess_file.c_str(), CV_LOAD_IMAGE_COLOR);
-		cvNamedWindow("first guess", CV_WINDOW_AUTOSIZE);
-		cvShowImage("first guess", first_guess_img );		
-		cvWaitKey(0);
-		cvDestroyWindow("first guess");
 
 		IplImage *median_img =	V->computeMedianNoBlobImage(median_file_noblob, first_guess_img);
 		clock_t t1=clock();
