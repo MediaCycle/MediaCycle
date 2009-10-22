@@ -138,7 +138,7 @@ int ACPluginLibrary::initialize()
     return 0;
 }
 
-ACMediaFeatures *ACPluginLibrary::calculate(int aPluginIndex,string aFileName)
+vector<ACMediaFeatures*> ACPluginLibrary::calculate(int aPluginIndex,string aFileName)
 {
     return this->mPlugins[aPluginIndex]->calculate(aFileName);
     //return getPlugin(aPluginIndex)->calculate(aFileName);

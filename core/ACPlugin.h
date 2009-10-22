@@ -61,8 +61,8 @@ public:
     virtual ACMediaType getMediaType() {return this->mMediaType;};
     virtual ACPluginType getPluginType() {return this->mPluginType;};
     virtual int initialize() = 0;
-    virtual ACMediaFeatures *calculate() = 0;
-    virtual ACMediaFeatures *calculate(std::string aFileName) = 0;
+    virtual std::vector<ACMediaFeatures*> calculate() = 0;
+    virtual std::vector<ACMediaFeatures*> calculate(std::string aFileName) = 0;
     virtual int start() = 0;
     virtual int stop() = 0;
 

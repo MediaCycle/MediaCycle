@@ -59,43 +59,45 @@ ACVideo::~ACVideo() {
 //}
 
 void ACVideo::save(FILE* library_file) { // was saveloop
-	int i, j;
-	int n_features;
-	int n_features_elements;
-
-	fprintf(library_file, "%s\n", filename.c_str());
-	fprintf(library_file, "%s\n", filename_thumbnail.c_str());
-	
+  int i, j;
+  int n_features;
+  int n_features_elements;
+  
+  fprintf(library_file, "%s\n", filename.c_str());
+  fprintf(library_file, "%s\n", filename_thumbnail.c_str());
+  
 #ifdef SAVE_LOOP_BIN
-	fwrite(&mid,sizeof(int),1,library_file);
-	fwrite(&width,sizeof(int),1,library_file);
-	fwrite(&height,sizeof(int),1,library_file);
-	n_features = features.size();
-	fwrite(&n_features,sizeof(int),1,library_file);
-	for (i=0; i<features.size();i++) {
-		n_features_elements = features[i]->size();
-		fwrite(&n_features_elements,sizeof(int),1,library_file);
-		for (j=0; j<n_features_elements; j++) {
-			value = features[i]->getFeature(j)); // XS instead of [i][j]
-			fwrite(&value,sizeof(float),1,library_file);
-		}
-	}
+  fwrite(&mid,sizeof(int),1,library_file);
+  fwrite(&width,sizeof(int),1,library_file);
+  fwrite(&height,sizeof(int),1,library_file);
+  n_features = features.size();
+  fwrite(&n_features,sizeof(int),1,library_file);
+  for (i=0; i<features.size();i++) {
+    n_features_elements = features[i]->size();
+    fwrite(&n_features_elements,sizeof(int),1,library_file);
+    for (j=0; j<n_features_elements; j++) {
+      value = features[i]->getFeature(j)); // XS instead of [i][j]
+    fwrite(&value,sizeof(float),1,library_file);
+  }
+}
 #else
-	fprintf(library_file, "%d\n", mid);
-	fprintf(library_file, "%d\n", width);
-	fprintf(library_file, "%d\n", height);
-	n_features = features.size();
-	fprintf(library_file, "%d\n", n_features);
-	for (i=0; i<features.size();i++) {
-		n_features_elements = features[i]->size();
-		fprintf(library_file, "%d\n", n_features_elements);
-		for (j=0; j<n_features_elements; j++) {
-			fprintf(library_file, "%f\t", features[i]->getFeature(j)); // XS instead of [i][j]
-		}
-		fprintf(library_file, "\n");
-	}
+fprintf(library_file, "%d\n", mid);
+fprintf(library_file, "%d\n", width);
+fprintf(library_file, "%d\n", height);
+n_features = features.size();
+fprintf(library_file, "%d\n", n_features);
+for (i=0; i<features.size();i++) {
+  n_features_elements = features[i]->size();
+  fprintf(library_file, "%d\n", n_features_elements);
+  for (j=0; j<n_features_elements; j++) {
+    fprintf(library_file, "%f\t", features[i]->getFeature(j)); // XS instead of [i][j]
+  }
+  fprintf(library_file, "\n");
+ }
 #endif
 }
+
+
 
 int ACVideo::load(FILE* library_file) { // was loadLoop
 	int i, j;

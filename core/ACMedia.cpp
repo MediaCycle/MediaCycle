@@ -45,31 +45,33 @@ ACMediaFeatures*& ACMedia::getFeatures(int i){
 }
 
 int ACMedia::import(std::string _path, int id, ACPluginManager *acpl ){
-	std::cout << "importing..." << _path << std::endl;
-	filename=_path;
-	int import_ok = 1;
+  std::cout << "importing..." << _path << std::endl;
+  filename=_path;
+  int import_ok = 1;
 	
-	if (id>=0) this->setId(id);
+  if (id>=0) this->setId(id);
 	
-	//compute features with available plugins
-	if (acpl) {
-		for (int i=0;i<acpl->getSize();i++) {
-			for (int j=0;j<acpl->getPluginLibrary(i)->getSize();j++) {
-				if (acpl->getPluginLibrary(i)->getPlugin(j)->getMediaType() == this->getType()
-					&& acpl->getPluginLibrary(i)->getPlugin(j)->getPluginType() == PLUGIN_TYPE_FEATURES) {
-					ACMediaFeatures *af = acpl->getPluginLibrary(i)->getPlugin(j)->calculate(this->getFileName());
-					//another option :
-					//ACMediaFeatures *af = acpl->getPluginLibrary(i)->calculate(j,this->getFileName());
-					if (af == NULL)
-						import_ok = 0;
-					else {
-						this->addFeatures(af);
-						import_ok = 1;
-					}
-					// XS : addFeatures only if it did not fail !
-				}
-			}
-		}
+  //compute features with available plugins
+  if (acpl) {
+    for (int i=0;i<acpl->getSize();i++) {
+      for (int j=0;j<acpl->getPluginLibrary(i)->getSize();j++) {
+	if (acpl->getPluginLibrary(i)->getPlugin(j)->getMediaType() == this->getType()
+	    && acpl->getPluginLibrary(i)->getPlugin(j)->getPluginType() == PLUGIN_TYPE_FEATURES) {
+	  ACPlugin* plugin =  acpl->getPluginLibrary(i)->getPlugin(j);
+	  vector<ACMediaFeatures*> afv = plugin->calculate(this->getFileName());
+	  //another option :
+	  //ACMediaFeatures *af = acpl->getPluginLibrary(i)->calculate(j,this->getFileName());
+	  if (afv.size()==0)
+	    import_ok = 0;
+	  else {
+	    for (int Iafv=0; Iafv<afv.size(); Iafv++)
+	      this->addFeatures(afv[Iafv]);
+	    import_ok = 1;
+	  }
+	  // XS : addFeatures only if it did not fail !
 	}
-	return import_ok;
+      }
+    }
+  }
+  return import_ok;
 }

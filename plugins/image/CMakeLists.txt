@@ -1,17 +1,12 @@
-FILE(GLOB SRC *.cpp *.c)
-FILE(GLOB HDR *.hpp *.h)
+FILE(GLOB SRC *.cpp *.c ./blobs/*.cpp ./gabor/*.cpp)
+FILE(GLOB HDR *.hpp *.h ./blobs/*.h ./gabor/*.h)
 
-SET(PLUGIN_NAME "video")
+SET(PLUGIN_NAME "image")
 
 ADD_LIBRARY(${PLUGIN_NAME} SHARED ${SRC} ${HDR})
-ADD_DEPENDENCIES(${PLUGIN_NAME} mediacycle image)
+ADD_DEPENDENCIES(${PLUGIN_NAME} mediacycle)
 
-INCLUDE_DIRECTORIES(. ../image/blobs ../image)
-
-SET_TARGET_PROPERTIES(${PLUGIN_NAME} PROPERTIES PREFIX "mc_")
-#SET_TARGET_PROPERTIES(${PLUGIN_NAME} PROPERTIES SUFFIX ".mcp")
 TARGET_LINK_LIBRARIES(${PLUGIN_NAME} mediacycle)
-TARGET_LINK_LIBRARIES(${PLUGIN_NAME} image)
 
 #OpenCV
 IF ( USE_OPENCV )

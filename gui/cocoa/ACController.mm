@@ -134,7 +134,6 @@ static void osc_callback(TiOscReceiverRef, const char *tagName, void *userData)
 - (void)updatedLibrary
 {	
 	media_cycle->setSelectedObject(0);
-	
 	[browser_osg_view prepareFromBrowser];
 	
 	[browser_osg_view setPlaying:YES];

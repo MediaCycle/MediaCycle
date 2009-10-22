@@ -53,7 +53,7 @@ public:
     
     //this is not necessary since getPlugin(i) gives direct access to plugins
     //and their functions.
-    ACMediaFeatures *calculate(int aPluginIndex, string aFileName);
+    vector<ACMediaFeatures*> calculate(int aPluginIndex, string aFileName);
 
     vector<ACPlugin *> getPlugins() {return this->mPlugins;};
     ACPlugin *getPlugin(int i) {return this->mPlugins[i];};

@@ -622,19 +622,19 @@ void ACVideoAnalysis::computeBlobsUL(IplImage* bg_img, bool merge_blobs, int big
 }
 
 void ACVideoAnalysis::computeMergedBlobsTrajectory(float blob_dist){
-	blob_centers.clear();
-	CBlobResult currentBlob;
-
-	for (unsigned int i=0; i< all_blobs.size(); i++){
-		vector<float> tmp;
-		currentBlob = all_blobs[i];
-		CvPoint center = currentBlob.GetCenter();
-		tmp.push_back(center.x);
-		tmp.push_back(center.y);
-		blob_centers.push_back(tmp);
-	}
-	HAS_TRAJECTORY = true;
-
+  blob_centers.clear();
+  CBlobResult currentBlob;
+  
+  for (unsigned int i=0; i< all_blobs.size(); i++){
+    std::vector<float> tmp;
+    currentBlob = all_blobs[i];
+    CvPoint center = currentBlob.GetCenter();
+    tmp.push_back(center.x);
+    tmp.push_back(center.y);
+    blob_centers.push_back(tmp);
+  }
+  HAS_TRAJECTORY = true;
+  
 }
 
 void ACVideoAnalysis::computeMergedBlobsSpeeds(float blob_dist){

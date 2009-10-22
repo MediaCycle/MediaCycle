@@ -36,12 +36,13 @@
 #include <exception>
 #include <iostream>
 #include <fstream>
-
+#include <algorithm>
 using namespace std;
 
 ACMediaFeatures::ACMediaFeatures(){
-	_type = FT_BASE; 
-	_computed = false; 
+  _type = FT_BASE; 
+  _computed = false; 
+  name = "NoName";
 }
 
 float ACMediaFeatures::getFeature(int i) {
@@ -51,6 +52,19 @@ float ACMediaFeatures::getFeature(int i) {
 	}
 	return features_vector[i];
 }
+
+int ACMediaFeatures::getDiscretizedFeature(int maxval, int nbSteps){
+  if (this->size()>1){
+    std::cout << "Warning : Multidimensionnal feature, cannot be discretized" << std::endl;
+    return 0;
+  }
+  else{
+    int res;
+    res = max(0, (int) (this->getFeature(0)+2)*maxval);
+    return res;
+  }
+}
+
 
 void ACMediaFeatures::setFeature(int i, float f) {
 	if (i >= features_vector.size() || i < 0){
