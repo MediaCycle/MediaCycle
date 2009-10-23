@@ -85,10 +85,11 @@ int processTcpMessageFromInstallation(MediaCycle *that, char *buffer, int l, cha
     unsigned long pos = 0;
     cout << "Processing TCP message of length" <<  l  << endl;
     std::cout << buffer[0] << endl;
-    char msgType = *static_cast<char*>(buffer);
+    //int msgType = atoi(buffer);
+    int msgType;
+    std::istringstream stream(buffer);
+    stream >> msgType;
     std::cout << "message : " << msgType << endl;
-    //for max
-    msgType = msgType-1;
 
     switch (msgType) {
     case 0:{
