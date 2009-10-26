@@ -215,10 +215,9 @@ void ACNetworkSocketServer::thread() {
 	int bigbufferl = bigbufferstep;
 	//vector<char> bigbuffer;
 	//bigbuffer.resize(bigbufferl);
-
 	while(1) {
-		server_socket = wait_connection(server_factory);
-		memset(server_buffer, 0, BUFSIZE);
+	  server_socket = wait_connection(server_factory);
+	  memset(server_buffer, 0, BUFSIZE);
 		bigbuffer = new char[bigbufferl];
 		read = 0;
 		while ( (ret = server_receive(server_buffer, BUFSIZE, server_socket, 1)) > 0 ) {
