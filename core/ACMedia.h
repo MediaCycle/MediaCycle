@@ -65,7 +65,7 @@ public:
 	ACMediaFeatures* &getFeatures(int i);
 	int getNumberOfFeatures() {return features.size();}
 
-	int addFeatures(ACMediaFeatures *aFeatures) { this->features.push_back(aFeatures); };
+	void addFeatures(ACMediaFeatures *aFeatures) { this->features.push_back(aFeatures); };
 	
 	std::string getFileName() { return filename; };
 	std::string getThumbnail() { return filename_thumbnail; };

@@ -45,7 +45,7 @@ ACImageAnalysis::ACImageAnalysis(){
 
 ACImageAnalysis::ACImageAnalysis(const std::string &filename){
 	clean();
-	setFileName(filename);
+//	setFileName(filename);
 }
 
 void ACImageAnalysis::clean(){

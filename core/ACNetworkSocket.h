@@ -60,7 +60,7 @@ typedef int PORT;
 #ifdef  __cplusplus
 extern "C" {
 #endif
-
+	
 PORT open_server(int iport, int count);
 
 void close_server(PORT p);
@@ -84,7 +84,7 @@ public:
 	void start();
 	void stop();
 	void thread();
-
+	
 private:
 	int ret;
 	int ret_send;
@@ -113,22 +113,24 @@ void close_client(SOCKET s);
 int client_send(char *buf, int size, SOCKET s);
 
 int client_receive(char *buf, int size, SOCKET s, unsigned int time_out);
-	
+
+
+// -----------------------------
 class ACNetworkSocketClient {
-		
+	
 public:
 	ACNetworkSocketClient(char *ip_adress, int port);
 	~ACNetworkSocketClient();
-		
+	
 	void start();
 	void stop();
 	void send(char *buf, int size);
 	void receive(char *buf, int size);
-		
+	
 private:
 	int ret;
 	int ret_send;
-
+	
 	int server_port;
 	int server_max_connections;
 	int server_factory;

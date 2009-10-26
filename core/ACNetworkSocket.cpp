@@ -358,20 +358,21 @@ int client_receive(char *buf, int size, SOCKET s, unsigned int time_out)
 	return read;
 }
 */
-
+// --------- XS 22/10/09 : uncommented this to try tcp in dancers
+// why was this commented out in previous version ?
 /*
 ACNetworkSocketClient::ACNetworkSocketClient(char *ip_adress, int port) {
 	server_ip = ip_adress;
 	server_port = port;
 	server_max_connections = max_connections;
 	server_callback = callback;
-	server_callback_user_data = user_data;
+	server_callback_user_data = user_data; 
 	server_buffer = new char[BUFSIZE];
 	server_buffer_send = new char[BUFSIZE];
 	server_factory = open_server(server_port, server_max_connections);
 }
 
-ACNetworkSocketServer::~ACNetworkSocketServer() {
+ACNetworkSocketClient::~ACNetworkSocketClient() {
 	close_server(server_port);
 	delete server_buffer;
 }

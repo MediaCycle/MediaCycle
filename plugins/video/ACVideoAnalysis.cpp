@@ -50,6 +50,9 @@
 #include <fstream>
 #include <sstream>
 
+using std::cout;
+using std::endl;
+
 // XS to get (+/- live) visual display of the time series
 #include "gnuplot_i.hpp"
 
@@ -113,7 +116,7 @@ int ACVideoAnalysis::initialize(){
 	frame_counter = 0; // reset frame counter, to make sure
 	if( !capture ) {
 		// Either the video does not exist, or it uses a codec OpenCV does not support. 
-		std::cerr << "<ACVideoAnalysis::initialize> Could not initialize capturing from file " << file_name << "..." << std::endl;
+		std::cerr << "<ACVideoAnalysis::initialize> Could not initialize capturing from file " << file_name << "..." << endl;
 		return 0;
 	}
 	
@@ -128,11 +131,11 @@ int ACVideoAnalysis::initialize(){
 	
 	int init_ok = 1;
 	if (width*height == 0){ 
-		std::cerr << "<ACVideoAnalysis::initialize> : zero image size for " << file_name << std::endl;
+		std::cerr << "<ACVideoAnalysis::initialize> : zero image size for " << file_name << endl;
 		init_ok = 0;
 	}
 	if (nframes == 0){ 
-		std::cerr << "<ACVideoAnalysis::initialize> : zero frames for " << file_name << std::endl;
+		std::cerr << "<ACVideoAnalysis::initialize> : zero frames for " << file_name << endl;
 		init_ok = 0;
 	}
 	// test fps ? does not really matter if badly encoded...  
@@ -151,7 +154,7 @@ int ACVideoAnalysis::initialize(){
 IplImage* ACVideoAnalysis::getNextFrame(){
 	IplImage* tmp = 0; 
 	if(!cvGrabFrame(capture)){              // capture a frame
-		std::cerr << "<ACVideoAnalysis::getNextFrame> Could not find frame..." << std::endl;
+		std::cerr << "<ACVideoAnalysis::getNextFrame> Could not find frame..." << endl;
 		return NULL;
 	}
 	tmp = cvRetrieveFrame(capture);           // retrieve the captured frame
@@ -163,7 +166,7 @@ void ACVideoAnalysis::histogramEqualize(const IplImage* bg_img) {
 	if (bg_img == NULL){
 		bg_img = this->computeMedianImage();
 		if (bg_img == NULL){
-			std::cerr << "<ACVideoAnalysis::histogramEqualize>: error computing median bg image" << std::endl;
+			std::cerr << "<ACVideoAnalysis::histogramEqualize>: error computing median bg image" << endl;
 		}
 		// reset the capture to the beginning of the video
 		this->rewind();
@@ -374,7 +377,7 @@ void ACVideoAnalysis::computeBlobs(IplImage* bg_img, int bg_thresh, int big_blob
 	if (bg_img == NULL){
 		bg_img = this->computeMedianImage();
 		if (bg_img == NULL){
-			std::cerr << "<ACVideoAnalysis::computeBlobs>: error computing average image" << std::endl;
+			std::cerr << "<ACVideoAnalysis::computeBlobs>: error computing average image" << endl;
 		}
 		// reset the capture to the beginning of the video
 		this->clean();
@@ -418,7 +421,7 @@ void ACVideoAnalysis::computeBlobsInteractively(IplImage* bg_img, bool merge_blo
 	if (bg_img == NULL){
 		bg_img = this->computeMedianImage();
 		if (bg_img == NULL){
-			std::cerr << "<ACVideoAnalysis::computeBlobsInteractively>: error computing average image" << std::endl;
+			std::cerr << "<ACVideoAnalysis::computeBlobsInteractively>: error computing average image" << endl;
 		}
 		// reset the capture to the beginning of the video
 		this->rewind();
@@ -532,7 +535,7 @@ void ACVideoAnalysis::computeBlobsUL(IplImage* bg_img, bool merge_blobs, int big
 		if (bg_img == NULL) cout << "NULL" << endl;
 		bg_img = this->computeMedianImage();
 		if (bg_img == NULL){
-			std::cerr << "<ACVideoAnalysis::computeBlobsInteractively>: error computing average image" << std::endl;
+			std::cerr << "<ACVideoAnalysis::computeBlobsInteractively>: error computing average image" << endl;
 		}
 		// reset the capture to the beginning of the video
 		this->rewind();
@@ -620,6 +623,119 @@ void ACVideoAnalysis::computeBlobsUL(IplImage* bg_img, bool merge_blobs, int big
 #endif // VISUAL_CHECK
 }
 
+void ACVideoAnalysis::computeOpticalFlow(){
+	int win_size = 10;
+	const int MAX_COUNT = 500;
+	CvPoint2D32f* points[2] = {0,0}, *swap_points;
+	char* status = 0;
+	int count = 0;
+	int need_to_init = 0;
+	int flags = 0;
+	int add_remove_pt = 0;
+	CvPoint pt;
+	//	cvNamedWindow("Camera", CV_WINDOW_AUTOSIZE );
+	//	cvResizeWindow( "Camera", 800, 600 );
+	
+	IplImage* frame = 0;
+	
+	IplImage *image = cvCreateImage( cvSize(width,height),depth, 3 );
+//	image->origin = frame->origin;
+	IplImage *grey = cvCreateImage( cvSize(width,height),depth, 1 );
+	IplImage *prev_grey = cvCreateImage( cvSize(width,height),depth, 1 );
+	IplImage *pyramid = cvCreateImage( cvSize(width,height),depth, 1 );
+	IplImage *prev_pyramid = cvCreateImage( cvSize(width,height),depth, 1 );
+	IplImage *swap_temp;
+	points[0] = (CvPoint2D32f*)cvAlloc(MAX_COUNT*sizeof(points[0][0]));
+	points[1] = (CvPoint2D32f*)cvAlloc(MAX_COUNT*sizeof(points[0][0]));
+	status = (char*)cvAlloc(MAX_COUNT);
+	
+	for(int ifram=0; ifram<numFrames-1; ifram++) {
+		int i, k, c;
+		frame = getNextFrame(); // XS this could be at the end of loop
+		currentframe++;
+		if (currentframe%5==0) need_to_init = 1;
+		cvCopy( frame, image, 0 ); // XS cvclone
+		cvCvtColor( image, grey, CV_BGR2GRAY );
+		if( need_to_init ) {
+			IplImage* eig = cvCreateImage( cvGetSize(grey), 32, 1 );
+			IplImage* temp = cvCreateImage( cvGetSize(grey), 32, 1 );
+			double quality = 0.01;
+			double min_distance = 4;
+			count = MAX_COUNT;
+			cvGoodFeaturesToTrack( grey, eig, temp, points[1], &count,
+								  quality, min_distance, 0, 5, 0, 0.04 );
+			cvReleaseImage( &eig );
+			cvReleaseImage( &temp );
+		}
+		else if( count > 0 ){
+			cvCalcOpticalFlowPyrLK( prev_grey, grey, prev_pyramid, pyramid,
+								   points[0], points[1], count, cvSize(win_size,win_size), 3, status, 0,
+								   cvTermCriteria(CV_TERMCRIT_ITER|CV_TERMCRIT_EPS,20,0.03), flags );
+			flags |= CV_LKFLOW_PYR_A_READY;
+			
+			CvPoint p,q;
+			
+			for( i = k = 0; i < count; i++ ) {
+				if( add_remove_pt ) {
+					double dx = pt.x - points[1][i].x;
+					double dy = pt.y - points[1][i].y;
+					if( dx*dx + dy*dy <= 25 ) {
+						add_remove_pt = 0;
+						continue;
+					}
+				}
+				
+				if( !status[i] )
+					continue;
+				
+				points[1][k++] = points[1][i];
+				p = cvPointFrom32f(points[0][i]);
+				q = cvPointFrom32f(points[1][i]);
+				double a = atan2( (double) p.y - q.y, (double) p.x - q.x );
+				double m = sqrt( (p.y - q.y)*(p.y - q.y) + (p.x - q.x)*(p.x - q.x) );
+				cvLine( image, p , q , CV_RGB(255,0,0), 1, 8,0);
+				//				printf("%d;%d;%d;%g;%g\n", currentframe, p.x, p.y, a, m);
+				// XS break
+				if (m>0) {
+					firstframemoved=currentframe;
+					break;
+				}				
+			}
+			count = k;
+		}
+		
+		if (firstframemoved > 0) break;
+		
+		need_to_init = 0;
+		if( add_remove_pt && count < MAX_COUNT ) {
+			points[1][count++] = cvPointTo32f(pt);
+			cvFindCornerSubPix( grey, points[1] + count - 1, 1,
+							   cvSize(win_size,win_size), cvSize(-1,-1),
+							   cvTermCriteria(CV_TERMCRIT_ITER|CV_TERMCRIT_EPS,20,0.03));
+			add_remove_pt = 0;
+		}
+		CV_SWAP( prev_grey, grey, swap_temp );
+		CV_SWAP( prev_pyramid, pyramid, swap_temp );
+		CV_SWAP( points[0], points[1], swap_points );
+		//		cvShowImage( "Camera", image );
+		//		c = cvWaitKey(10);
+		//		if( (char)c == 27 )
+		//			break;
+	}
+	cout << fileName << " : " << firstframemoved << endl;
+	
+	//	cvDestroyWindow("Camera");
+	cvReleaseImage(&image);
+	cvReleaseImage(&grey);
+	cvReleaseImage(&prev_grey);
+	cvReleaseImage(&pyramid);
+	cvReleaseImage(&prev_pyramid);
+	// double free:	cvReleaseImage(&swap_temp);
+	return firstframemoved;
+}
+}
+
+
 void ACVideoAnalysis::computeMergedBlobsTrajectory(float blob_dist){
   blob_centers.clear();
   CBlobResult currentBlob;
@@ -662,8 +778,8 @@ IplImage* ACVideoAnalysis::computeAverageImage(int nskip, int nread, int njump, 
 	// so that we go by steps of nread/ncalc frames
 	// saving in a file if fsave != ""
 	if (nskip + nread > nframes) {
-		std::cerr << " <ACVideoAnalysis::computeAverageImage>: not enough frames in video. reduce number of frames to skip and/or to average" << std::endl;
-		std::cerr << "nframes = " << nframes << "; nskip = " << nskip <<  "; nread = " << nread << "; njump = " << njump << std::endl; 
+		std::cerr << " <ACVideoAnalysis::computeAverageImage>: not enough frames in video. reduce number of frames to skip and/or to average" << endl;
+		std::cerr << "nframes = " << nframes << "; nskip = " << nskip <<  "; nread = " << nread << "; njump = " << njump << endl; 
 		return NULL;
 	}
 	if (nread ==0) nread = nframes-nskip;
@@ -671,9 +787,9 @@ IplImage* ACVideoAnalysis::computeAverageImage(int nskip, int nread, int njump, 
 	nread = (nread/njump) * (njump); // integer manipulation to avoid getting over bounds (then cvcapture starts again from beginning)
 
 #ifdef VERBOSE
-	std::cout << "Average : skipping " << nskip << " frames" << std::endl;
-	std::cout << "total frames to read " << nread << std::endl;
-	std::cout << "(by jumps of) " << njump << std::endl;
+	cout << "Average : skipping " << nskip << " frames" << endl;
+	cout << "total frames to read " << nread << endl;
+	cout << "(by jumps of) " << njump << endl;
 #endif // VERBOSE
 
 	IplImage *frame;
@@ -735,8 +851,8 @@ IplImage* ACVideoAnalysis::computeMedianImage(int nskip, int nread, int njump, s
 #endif // VISUAL_CHECK
 	
 	if (nskip + nread > nframes) {
-		std::cerr << " <ACVideoAnalysis::computeMedianImage>: not enough frames in video. reduce number of frames to skip and/or to average" << std::endl;
-		std::cerr << "nframes = " << nframes << "; nskip = " << nskip <<  "; nread = " << nread << "; njump = " << njump << std::endl; 
+		std::cerr << " <ACVideoAnalysis::computeMedianImage>: not enough frames in video. reduce number of frames to skip and/or to average" << endl;
+		std::cerr << "nframes = " << nframes << "; nskip = " << nskip <<  "; nread = " << nread << "; njump = " << njump << endl; 
 		return NULL;
 	}
 	
@@ -745,9 +861,9 @@ IplImage* ACVideoAnalysis::computeMedianImage(int nskip, int nread, int njump, s
 	nread = (nread/njump) * (njump); // integer manipulation to avoid getting over bounds (then cvcapture starts again from beginning)
 
 #ifdef VERBOSE
-	std::cout << "Median : skipping " << nskip << " frames" << std::endl;
-	std::cout << "total frames to read " << nread << std::endl;
-	std::cout << "(by jumps of) " << njump << std::endl;
+	cout << "Median : skipping " << nskip << " frames" << endl;
+	cout << "total frames to read " << nread << endl;
+	cout << "(by jumps of) " << njump << endl;
 #endif // VERBOSE
 
 	int nbins = 256;
@@ -794,7 +910,7 @@ IplImage* ACVideoAnalysis::computeMedianImage(int nskip, int nread, int njump, s
 	cvDestroyWindow(title.c_str());
 #endif // VISUAL_CHECK
 	
-	std::cout << "finished computing for "<< cnt << " images. transfering data" << std::endl;
+	cout << "finished computing for "<< cnt << " images. transfering data" << endl;
 	
 	char* new_image_data;
 	float mid=cnt/2; // *nbins
@@ -837,7 +953,7 @@ IplImage* ACVideoAnalysis::computeMedianImage(int nskip, int nread, int njump, s
 	CvScalar sum_median;
 	sum_median = cvSum (result_frame);
 	for(int j = 0; j < 3; j++){
-		std::cout << "sum over median: " << j << " = " << sum_median.val[j]/(height*width) << std::endl;
+		cout << "sum over median: " << j << " = " << sum_median.val[j]/(height*width) << endl;
 	}
 	
 	cvSetImageROI(result_frame, cvRect(0,0,width,ystar));		
@@ -845,22 +961,22 @@ IplImage* ACVideoAnalysis::computeMedianImage(int nskip, int nread, int njump, s
 	threshU=0;
 	for(int j = 0; j < 3; j++){
 		int v = sum_median.val[j]/(ystar*width);
-		std::cout << "sum over median -- up: " << j << " = " << v << std::endl;
+		cout << "sum over median -- up: " << j << " = " << v << endl;
 		threshU+=v;
 	}
 	threshU/=3;
-	std::cout << "threshU = " << threshU << std::endl;
+	cout << "threshU = " << threshU << endl;
 
 	cvSetImageROI(result_frame, cvRect(0,ystar,width,height));		
 	sum_median = cvSum (result_frame);
 	 this->threshL=0;
 	for(int j = 0; j < 3; j++){
 		int v=sum_median.val[j]/((height-ystar)*width);
-		std::cout << "sum over median -- low: " << j << " = " << v << std::endl;
+		cout << "sum over median -- low: " << j << " = " << v << endl;
 		 this->threshL+=v;
 	}	
 	threshL/=3;
-	std::cout << "threshL = " << threshL << std::endl;
+	cout << "threshL = " << threshL << endl;
 
 	cvSetImageROI(result_frame, cvRect(0,0,width,height));	
 	// END XS 
@@ -884,7 +1000,7 @@ IplImage* ACVideoAnalysis::computeMedianNoBlobImage(std::string fsave, IplImage 
 		computeBlobsUL(first_guess); // could be NULL, in which case aprox median is calculated
 	}
 	if (all_blobs_time_stamps.size() != all_blobs.size()) {
-		std::cerr << "<ACVideoAnalysis::computeMedianNoBlobImage> : time stamp problem" << std::endl;
+		std::cerr << "<ACVideoAnalysis::computeMedianNoBlobImage> : time stamp problem" << endl;
 		return NULL;
 	}
 	
@@ -977,9 +1093,9 @@ IplImage* ACVideoAnalysis::computeMedianNoBlobImage(std::string fsave, IplImage 
 }
 
 void ACVideoAnalysis::computePixelSpeed() {
-	pixel_speeds.clear();
 	// substracts each image from the previous one and sums it all
 	// XS: could add option to calculate just on a segment of the video
+	pixel_speeds.clear();
 	IplImage *frame = 0;
 	IplImage *tmp_frame = 0;
 	IplImage *previous_frame = 0;
@@ -994,7 +1110,7 @@ void ACVideoAnalysis::computePixelSpeed() {
 	
 	if (nframes < 2){
 		std::cerr << "<ACVideoSpeedFeatures::calculate> : not enough frames in video : " << \
-		file_name << std::endl;
+		file_name << endl;
 		return;
 	}
 
@@ -1060,7 +1176,7 @@ void ACVideoAnalysis::computeContractionIndices(){
 		ci = all_blobs[i].Area() / (bbox.width*bbox.height);
 		contraction_indices.push_back(ci);
 		//XS debug
-		//std::cout << i << ": " << ci << std::endl;
+		//cout << i << ": " << ci << endl;
 	}
 }
 
@@ -1106,7 +1222,7 @@ void ACVideoAnalysis::showInWindow(std::string title, bool has_win){
 		img = getNextFrame();
 		if( !img ) {
 			break;
-			std::cout << "end of movie (aka The End)" << std::endl;
+			cout << "end of movie (aka The End)" << endl;
 		}
 		snprintf (str, 64, "%03d[frame]", i);
 		cvPutText (img, str, cvPoint (10, 20), &font, CV_RGB (0, 255, 100));
@@ -1153,14 +1269,14 @@ void ACVideoAnalysis::browseInWindow(std::string title, bool has_win){
 	IplImage* img = 0;
 	for(int i = 0; i < nframes-1; i++){
 		if(!cvGrabFrame(g_capture)){              // capture a frame
-			std::cerr << "<ACVideoAnalysis::browseInWindow> Could not find frame..." << std::endl;
+			std::cerr << "<ACVideoAnalysis::browseInWindow> Could not find frame..." << endl;
 			return;
 		}
 		img = cvRetrieveFrame(g_capture);           // retrieve the captured frame
 		
 		if( !img ) {
 			break;
-			std::cout << "end of movie (aka The End)" << std::endl;
+			cout << "end of movie (aka The End)" << endl;
 		}
 //		snprintf (str, 64, "%03d[frame]", i);
 //		cvPutText (img, str, cvPoint (10, 20), &font, CV_RGB (0, 255, 100));
@@ -1189,7 +1305,7 @@ void ACVideoAnalysis::saveInFile (std::string fileout, int nskip){
 		cvWriteFrame(video_writer, img);  
 		if( !img ) {
 			break;
-			std::cout << "end of movie (aka The End)" << std::endl;
+			cout << "end of movie (aka The End)" << endl;
 		}
 	}
 	cvReleaseVideoWriter(&video_writer); 

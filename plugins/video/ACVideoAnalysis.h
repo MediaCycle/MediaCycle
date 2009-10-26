@@ -54,10 +54,15 @@ public:
 	void rewind();
 	void setFileName(const std::string &filename);
 	int initialize();
+	void saveInFile(std::string fileout, int nskip = 0);
+
+	inline int getWidth() {return width;}
+	inline int getHeight() {return height;}
 	std::string getFileName() {return file_name;}
 	std::string getColorModel(){return color_model;}
-	void saveInFile(std::string fileout, int nskip = 0);
-	
+	inline int getDepth() {return depth;}
+	inline int getNumberOfFrames() {return nframes;}
+		
 	// utilities
 	IplImage* getNextFrame();
 	IplImage* computeAverageImage(int nskip = 0, int nread = 0, int njump = -1, std::string s =""); 
@@ -76,7 +81,8 @@ public:
 	void computeBlobs(IplImage* bg_img=NULL, int bg_thesh=20, int big_blob=200, int small_blob=0);
 	void computeBlobsInteractively(IplImage* bg_img=NULL, bool merge_blobs=false, int bg_thesh=20, int big_blob=200, int small_blob=0);
 	void computeBlobsUL(IplImage* bg_img=NULL, bool merge_blobs=false, int big_blob=200, int small_blob=0);
-
+	void computeOpticalFlow();
+	
 	// features manipulation
 	void mergeBlobs(float blob_dist = 0);
 	void computeMergedBlobsTrajectory(float blob_dist = 0);

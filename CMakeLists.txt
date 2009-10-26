@@ -1,8 +1,8 @@
 PROJECT(MediaCycle)
 
-SUBDIRS(core cli gui plugins test armadillo fftooura)# tinyxml)
+SUBDIRS(core cli gui plugins test armadillo fftooura tinyxml gnuplot_i)
 
-INCLUDE_DIRECTORIES(. core armadillo)
+INCLUDE_DIRECTORIES(. core armadillo gnuplot_i)
 INCLUDE_DIRECTORIES( "/usr/local/include/TiCore" )
 LINK_DIRECTORIES( ${LINK_DIRECTORIES} "/usr/local/lib" )
 
