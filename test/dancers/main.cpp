@@ -46,6 +46,8 @@
 #include <time.h>
 #include "tinyxml.h"
 
+#include <armadillo> // for sort(rand())
+#include <ctime> // for timing with clock()
 using namespace std;
 
 static void dancers_tcp_callback(char *buffer, int l, char **buffer_send, int *l_send, void *userData); 
@@ -53,33 +55,23 @@ int processTcpMessageFromInstallation(MediaCycle *that, char *buffer, int l, cha
 void saveLibraryAsXml(MediaCycle *mediacycle, string _path);
 void readLibraryXml(MediaCycle *mediacycle, std::string filename);
 std::string generateID(std::string filename);
-void startOrRedraw(int nbVideo, char**, int*);
+void startOrRedraw(MediaCycle *that, int nbVideo, char**, int*);
 
 string mypath="/Users/xavier/Desktop/dancers-tmp/";
 
 int main(int argc, char** argv) {
-	string path = mypath+"dancers-ex.acl";
+	string path = mypath+"dancers-dt-1.acl";
 	string xmlpath = mypath+"dancers-ex.xml";
 	cout<<"new MediaCycle"<<endl;
 	MediaCycle* mediacycle;
 	mediacycle = new MediaCycle(MEDIA_TYPE_VIDEO);
 	//  mediacycle->addPlugin ("/Users/dtardieu/src/Numediart/ticore-app/Applications/Numediart/MediaCycle/src/Builds/darwin-x86/plugins/eyesweb/Debug/mc_eyesweb.dylib");
 	//mediacycle->importDirectory("/Users/dtardieu/data/DANCERS/Video/FrontTest/", 0);
-	//   mediacycle->importLibrary(path);
+	mediacycle->importLibrary(path);
+	mediacycle->getBrowser()->randomizePositions();
 	//mediacycle->getBrowser()->setClusterNumber(1);
 	mediacycle->startTcpServer(12345,5,dancers_tcp_callback);
 	//readLibraryXml(mediacycle, "/Users/dtardieu/Desktop/dancers-exemple.xml");
-	
-//	//XS like in laughter_cycle_demo
-//	
-//	ACNetworkSocketClient *ewclient = new ACNetworkSocketClient("127.0.0.1", 12345);
-//	ewclient->start();
-//	ewclient->send("bonjour", 7);
-//	ewclient->stop();
-//	// END XS
-	
-	
-	
 	
 	while(1) {
 		sleep(30);
@@ -120,41 +112,165 @@ spec->num
 num->spec
 idem prec 
 */
+// using streams to detect format errors.
 int processTcpMessageFromInstallation(MediaCycle *that, char *buffer, int l, char **buffer_send, int *l_send) {
+	// XS timing
+	clock_t t0=clock();
+	// end XS
+	
     std::string file_name;
-	
-    unsigned long pos = 0;
-	
-
 	std::istringstream message_in(buffer);
 	string str_message_in;
-	message_in >> str_message_in;
+	if (! (message_in >> str_message_in) ){
+		if (! message_in.good()){ 
+			cerr << "<processTcpMessageFromInstallation> : bad incoming buffer" << endl;
+		}
+		else {
+			cerr << "<processTcpMessageFromInstallation> : bad problem reading incoming buffer" << endl;
+		}
+		cerr << "stream(buffer) = " << message_in << endl;
+		return -1;
+	}
+
 	cout << "str_message_in = "<< str_message_in << endl;
-	cout << "Processing TCP message of length" <<  str_message_in.size() << endl;
-	// is "l" useful at all ?
 	
-	int msgType = str_message_in[0];
-# ifdef MAX_MSP	
-	//for max: message starts at 0, not 1.
-	msgType = msgType-1;
-# endif // MAX_MSP
+	// l is used as a check of the message, but is not necessary
+	if ( l == str_message_in.size()) {
+		cout << "Processing TCP message of length " <<  l << endl;
+	}
+	else{
+		cerr << "<processTcpMessageFromInstallation> : message lengths do not match" << endl;
+		cerr << "l = " << l << "; str_message_in.size() = " << str_message_in.size() << endl;
+	}
+		
+	std::istringstream ss ( str_message_in.substr(0,1) );
+	int msgType ;
+	if ( ! (ss >> msgType)) {
+		if (! ss.good()){
+			cerr << "<processTcpMessageFromInstallation> : bad streaming of message ID in incoming buffer" << endl;
+		}
+		else{
+			cerr << "<processTcpMessageFromInstallation> : problem reading message ID from incoming buffer" << endl;
+		}
+		cerr << "corresponding buffer[0] = " << ss << endl;
+		return -1;
+	}
+	
+	cout << "type of message : " << msgType << endl;
     switch (msgType) {
-		case 0:{
-			unsigned int nbVideo = *static_cast<char*>(buffer+1);
-			startOrRedraw(nbVideo, buffer_send, l_send);
+		case 0:{ 
+			// START / REDRAW
+			// MESSAGE : 0 nbVideo
+			unsigned int nbVideo;
+			std::istringstream s_in ( str_message_in.substr(1,3) );
+			if ( !(s_in >> nbVideo) ){
+				if (! s_in.good()){
+					cerr << "<processTcpMessageFromInstallation> : bad streaming of number of videos from incoming buffer" << endl;
+				}
+				else {
+					cerr << "<processTcpMessageFromInstallation> : problem reading number of videos from incoming buffer" << endl;
+				}
+				cerr << "type : " << msgType << " ; corresponding buffer[1:3] = " << s_in << endl;
+				return -1;
+			}
+			
+			cout << "nb videos : " << nbVideo << endl;
+			startOrRedraw(that,nbVideo, buffer_send, l_send);
+			std::istringstream s_out (*buffer_send);
+			string str_buffer_send;
+			if (! (s_out >> str_buffer_send) ) {
+				if (! s_out.good()){
+					cerr << "<processTcpMessageFromInstallation> : bad streaming of outgoing buffer" << endl;
+				}
+				else {
+					cerr << "<processTcpMessageFromInstallation> : problem writing outgoing buffer" << endl;
+				}
+				cerr << "type : " << msgType << " ; corresponding buffer_send = " << s_out << endl;
+				return -1;
+			}
+			
+
+			cout << "(startOrRedraw) sent back this message : " << str_buffer_send << endl;
+			// XS timing
+			clock_t t1=clock();
+			cout << "Execution time: " << (t1-t0)*1000/CLOCKS_PER_SEC << " ms." << endl;
+
+			// end XS
 			break;
 		}
+		case 1:{ 
+			// ITEMCLICKED
+			// MESSAGE : 1 idVideo
+			unsigned int idVideo;
+			std::istringstream ss( str_message_in.substr(1,3) );
+			ss >> idVideo;
+			cout << "id video : " << idVideo << endl;
+			break;
+		}
+		case 2:{ 
+			// LARGETEXTCLICKED
+			// MESSAGE : 2 idText
+			unsigned int idText;
+			std::istringstream ss( str_message_in.substr(1,3) );
+			ss >> idText;
+			cout << "id Text : " << idText << endl;
+			break;
+		}	
 		default:
 			break;
     }
     return 0;
 }
 
-void startOrRedraw(int nbVideo, char **buffer_send, int* l_send){
-	string sbuffer_send;
-	sbuffer_send = "100010";
-	*buffer_send = (char*)(sbuffer_send).c_str();
+void startOrRedraw(MediaCycle *mediacycle, int nbVideo, char **buffer_send, int* l_send){
+	// 001052050015
+	// dancerxxxyyy
+	ACMediaLibrary* media_library;
+	media_library = mediacycle->getLibrary();
+	int n_loops = media_library->getSize();  
+	
+	ACMediaBrowser* media_browser;
+	media_browser = mediacycle->getBrowser();
+	
+	// using armadillo to get nbVideo random ids among all videos:
+	colvec  q       = rand<colvec>(n_loops);
+	ucolvec indices = sort_index(q);
+	ucolvec trunc_indices = indices.rows(0,nbVideo-1);
+	//cout << trunc_indices << endl;
+	const vector<ACLoopAttribute> loop_attributes = media_browser->getLoopAttributes();
+	if (loop_attributes.size() < trunc_indices.n_rows ){
+		cerr << "<startOrRedraw> : not enough loop attributes" << endl;
+		return;
+	}
+	string sbuffer_send = "";
+	for (unsigned int i=0; i <trunc_indices.n_rows ;i++){
+		int l = trunc_indices[i];
+		// positions should in range [0:999], which is a fraction of the screen size
+		// XS for the moment they depend on mViewWidth, mViewHeight in ACMediaBrowser
+		int posx = (int) loop_attributes[l].currentPos.x;
+		int posy = (int) loop_attributes[l].currentPos.y;
+		ostringstream oss ;
+		oss.fill('0'); // fill with zeros (otherwise will leave blanks)
+		oss << setw(3) << i << setw(3) << posx << setw(3)<< posy; // fixed format
+		cout << oss.str() << endl;
+		
+		sbuffer_send += oss.str(); // concatenates all videos in one string
+
+		// does it send out information each time buffer is updated ?
+
+		//int full_id = generateID(filename); // <- this way we need to get the filename from media[i]->getFileName() ... it's kind of annoying
+	}
+	// XS is this the proper way to do it ?
+	*buffer_send = new char [sbuffer_send.size()+1]; // extra byte needed for the trailing '\0' 
+	strcpy (*buffer_send, sbuffer_send.c_str());
 	*l_send = sbuffer_send.length();
+	
+	
+// try sending dummy packet back
+//	string sbuffer_send;
+//	sbuffer_send = "001052050015";
+//	*buffer_send = (char*) (sbuffer_send).c_str();
+//	*l_send = sbuffer_send.length();
 }
 
 void saveLibraryAsXml(MediaCycle* mediacycle, string _path) {

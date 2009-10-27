@@ -374,9 +374,25 @@ int ACMediaBrowser::setSourceCurser(int lid, int frame_pos) {
 }
 
 
+void ACMediaBrowser::randomizePositions(){
+	if(mLibrary == NULL) return;
+	vector<ACMedia*> loops = mLibrary->getMedia();
+	int n = loops.size();
+	mLoopAttributes.resize(n);
+	for(int i=0; i<n; i++){
+		mLoopAttributes[i].currentPos.x = TiRandom() * mViewWidth;
+		mLoopAttributes[i].currentPos.y = TiRandom() * mViewHeight;
+		mLoopAttributes[i].currentPos.z = 0;
+		
+		mLoopAttributes[i].nextPos.x = mLoopAttributes[i].currentPos.x + TiRandom() * mViewWidth / 100.0;
+		mLoopAttributes[i].nextPos.y = mLoopAttributes[i].currentPos.y + TiRandom() * mViewHeight / 100.0;
+		mLoopAttributes[i].nextPos.z = 0;
+	}	
+}
 
-void ACMediaBrowser::libraryContentChanged()
-{
+
+void ACMediaBrowser::libraryContentChanged() {
+	// XS 27/10/09 TODO this should use the randomizePositions defined above
 	if(mLibrary == NULL) return;
 	
 	vector<ACMedia*> loops = mLibrary->getMedia(); // instead of get{audio,image}loops
@@ -598,7 +614,7 @@ void ACMediaBrowser::updateClusters(bool animate){
     kmeans(animate);
     break;
   case 1:
-    std::cout << "UpdateClusters : Nouvelle mÃ©thode folle" << std::endl;
+    std::cout << "UpdateClusters : Nouvelle methode folle" << std::endl;
     // DT : need to be somewhere else but don't know where
     initClusterCenters();
     break;
@@ -615,7 +631,7 @@ void ACMediaBrowser::updateNextPositions(){
     setNextPositionsPropeller();
     break;
   case 1:
-    std::cout << "setNextPositions2dim : Nouvelle méthode folle" << std::endl;
+    std::cout << "setNextPositions2dim : Nouvelle methode folle" << std::endl;
     // DT : need to be somewhere else but don't know where
     setNextPositions2dim();
     break;

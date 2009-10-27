@@ -105,6 +105,9 @@ public:
 	// call this when the number of loops changes in the library
 	void libraryContentChanged();
 	
+	// handy library to just assign random positions to items
+	void randomizePositions();
+
 	// Search by similarity
 	int getKNN(int id, vector<int> &ids, int k);
 	int getKNN(ACMedia *aMedia, vector<ACMedia *> &result, int k);
