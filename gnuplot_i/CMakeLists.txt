@@ -1,0 +1,7 @@
+FILE(GLOB SRC *.cpp *.c)
+FILE(GLOB HDR *.hpp *.h)
+
+ADD_LIBRARY(gnuplot_i SHARED ${SRC} ${HDR})
+
+INSTALL(TARGETS gnuplot_i LIBRARY DESTINATION lib)
+INSTALL(FILES ${HDR} DESTINATION include/gnuplot_i)
