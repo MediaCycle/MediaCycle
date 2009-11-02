@@ -1,7 +1,7 @@
 FILE(GLOB SRC *.cpp)
 FILE(GLOB HDR *.h)
 
-ADD_LIBRARY(mediacycle-osg SHARED ${SRC} ${HDR})
+ADD_LIBRARY(mediacycle-osg STATIC ${SRC} ${HDR})
 ADD_DEPENDENCIES(mediacycle-osg mediacycle)
 
 #-lmediacycle -lTiCommon -lTiIo -lTiOsc -lTiRendering 
@@ -9,7 +9,7 @@ ADD_DEPENDENCIES(mediacycle-osg mediacycle)
 #-lboost_system -lcv -lcvaux -lhighgui
 TARGET_LINK_LIBRARIES(mediacycle-osg mediacycle)
 TARGET_LINK_LIBRARIES(mediacycle-osg TiCommon TiIo TiOsc TiRendering)
-TARGET_LINK_LIBRARIES(mediacycle-osg osg osgDB osgGA osgViewer)
+TARGET_LINK_LIBRARIES(mediacycle-osg osg osgDB osgGA osgViewer osgText)
 TARGET_LINK_LIBRARIES(mediacycle-osg OpenThreads)
 IF ( APPLE )
   TARGET_LINK_LIBRARIES(mediacycle-osg boost_system-mt)

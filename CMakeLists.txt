@@ -7,6 +7,7 @@ INCLUDE_DIRECTORIES( "/usr/local/include/TiCore" )
 LINK_DIRECTORIES( ${LINK_DIRECTORIES} "/usr/local/lib" )
 
 # add some find scripts
+# SET(CMAKE_USE_RELATIVE_PATHS YES)
 SET(CMAKE_MODULE_PATH "${MediaCycle_SOURCE_DIR}/CMakeModules")
 MESSAGE ( "modules in " ${CMAKE_MODULE_PATH} )
 

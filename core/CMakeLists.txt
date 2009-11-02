@@ -1,7 +1,7 @@
 FILE(GLOB SRC *.cpp *.c)
 FILE(GLOB HDR *.hpp *.h)
 
-ADD_LIBRARY(mediacycle SHARED ${SRC} ${HDR})
+ADD_LIBRARY(mediacycle STATIC ${SRC} ${HDR})
 
 #gsl - uncomment if needed
 #TARGET_LINK_LIBRARIES(mediacycle gsl gslcblas)
@@ -34,6 +34,6 @@ ENDIF ( USE_BOOST_SERIALIZATION )
 # this might require some path adaptation for Windows
 # (e.g. set cmake_install_prefix to the good value for Windows )
 # OSX is probably ok with installing lib in /usr/local/lib/
-INSTALL(TARGETS mediacycle LIBRARY DESTINATION lib)
-INSTALL(FILES ${HDR} DESTINATION include/mediacycle)
+##INSTALL(TARGETS mediacycle LIBRARY DESTINATION lib)
+##INSTALL(FILES ${HDR} DESTINATION include/mediacycle)
 

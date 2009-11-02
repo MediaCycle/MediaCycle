@@ -74,7 +74,7 @@ class MediaCycle {
 public:
     MediaCycle(ACMediaType aMediaType, string local_directory="",string libname="");
     MediaCycle(const MediaCycle& orig);
-    virtual ~MediaCycle();
+    ~MediaCycle();
 
     int startTcpServer(int port=12345, int max_connections=5);
     int stopTcpServer();
@@ -152,6 +152,7 @@ private:
     int max_connections;
     string local_directory;
     string libname;
+	int ah1n1[4];
 };
 
 #endif	/* _MEDIACYCLE_H */

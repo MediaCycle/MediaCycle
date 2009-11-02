@@ -108,7 +108,7 @@ static void osc_callback(TiOscReceiverRef, const char *tagName, void *userData)
 {
 	[[NSNotificationCenter defaultCenter] addObserver: self selector: @selector(myObserver:) name: @"OALNotify" object: NULL];
 	
-	media_cycle = new MediaCycle(MEDIA_TYPE_VIDEO,"/tmp/","mediacycle.acl");
+	media_cycle = new MediaCycle(MEDIA_TYPE_IMAGE,"/tmp/","mediacycle.acl");
 	
 	NSLog(@"DANCERS!");
 	
