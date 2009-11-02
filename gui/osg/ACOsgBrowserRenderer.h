@@ -78,12 +78,15 @@ protected:
 	int n;
 	MediaCycle				*media_cycle;
 	ref_ptr<Group>				 group;
+	ref_ptr<Group>				 media_group;
+	ref_ptr<Group>				 label_group;
 	vector<ACOsgMediaRenderer*>  media_renderer;
+	vector<ACOsgMediaRenderer*>  label_renderer;
 	//vector<bool>				 media_selected;
 	vector<float>				 distance_mouse;
 
 public:
-	ACOsgBrowserRenderer()		{ group = 0; };
+	ACOsgBrowserRenderer();
 	~ACOsgBrowserRenderer() 	{};
 		
 	void setMediaCycle(MediaCycle *media_cycle) { this->media_cycle = media_cycle; };
@@ -91,6 +94,9 @@ public:
 	
 	void prepareNodes(int start=0);
 	void updateNodes(double ratio=0.0);
+
+	void prepareLabels(int start=0);
+	void updateLabels(double ratio=0.0);
 		
 	int computeScreenCoordinates(osgViewer::Viewer* view, double ratio=0.0);
 	vector<float> getDistanceMouse() { return distance_mouse; };

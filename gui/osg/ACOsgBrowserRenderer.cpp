@@ -37,6 +37,17 @@
 #include "ACOsgAudioRenderer.h"
 #include "ACOsgImageRenderer.h"
 #include "ACOsgVideoRenderer.h"
+#include "ACOsgTextRenderer.h"
+
+ACOsgBrowserRenderer::ACOsgBrowserRenderer() {
+	media_renderer.resize(0);
+	label_renderer.resize(0);
+	group = new Group();
+	media_group = new Group();
+	label_group = new Group();
+	group->addChild(media_group);
+	group->addChild(label_group);
+}
 
 void ACOsgBrowserRenderer::prepareNodes(int start) {
 	
@@ -47,23 +58,19 @@ void ACOsgBrowserRenderer::prepareNodes(int start) {
 	if (media_renderer.size()>n) {
 		
 		for (i=n;i<media_renderer.size();i++) {
-			group->removeChild(i, 1);
+			media_group->removeChild(i, 1);
 			delete media_renderer[i];
 		}
-		group = 0;
 	}
 	
-	if (!group) {
-		group = new Group();
-	}
+	/*if (!media_group) {
+		media_group = new Group();
+	}*/
 	
-	int nn = min(n, 1);
-	nn = n;
-	
-	media_renderer.resize(nn);
+	media_renderer.resize(n);
 	distance_mouse.resize(n);
 	
-	for (i=start;i<nn;i++) {
+	for (i=start;i<n;i++) {
 		media_type = media_cycle->getMediaType(i);
 		switch (media_type) {
 			case MEDIA_TYPE_AUDIO:
@@ -75,6 +82,9 @@ void ACOsgBrowserRenderer::prepareNodes(int start) {
 			case MEDIA_TYPE_VIDEO:
 				media_renderer[i] = new ACOsgVideoRenderer();
 				break;
+			case MEDIA_TYPE_TEXT:
+				media_renderer[i] = new ACOsgTextRenderer();
+				break;
 			default:
 				media_renderer[i] = 0;
 				break;
@@ -84,7 +94,7 @@ void ACOsgBrowserRenderer::prepareNodes(int start) {
 			media_renderer[i]->setLoopIndex(i);
 			// media_renderer[i]->setActivity(0);
 			media_renderer[i]->prepareNodes();
-			group->addChild(media_renderer[i]->getNode());
+			media_group->addChild(media_renderer[i]->getNode());
 		}
 	}
 	
@@ -94,6 +104,45 @@ void ACOsgBrowserRenderer::updateNodes(double ratio) {
 	
 	for (i=0;i<media_renderer.size();i++) {
 		media_renderer[i]->updateNodes(ratio);
+	}
+}
+
+void ACOsgBrowserRenderer::prepareLabels(int start) {
+
+	n = media_cycle->getLabelSize(); 	
+	// int n = 1;
+	
+	if (label_renderer.size()>n) {
+		
+		for (i=n;i<label_renderer.size();i++) {
+			label_group->removeChild(i, 1);
+			delete label_renderer[i];
+		}
+	}
+	
+	/*if (!label_group) {
+		label_group = new Group();
+	}*/
+	
+	label_renderer.resize(n);
+	
+	for (i=start;i<n;i++) {
+		label_renderer[i] = new ACOsgTextRenderer();
+		if (label_renderer[i]) {
+			((ACOsgTextRenderer*)label_renderer[i])->setText(media_cycle->getLabelText(i));
+			((ACOsgTextRenderer*)label_renderer[i])->setPos(media_cycle->getLabelPos(i));
+			label_renderer[i]->setMediaCycle(media_cycle);
+			label_renderer[i]->setLoopIndex(i);
+			label_renderer[i]->prepareNodes();
+			label_group->addChild(label_renderer[i]->getNode());
+		}
+	}
+}
+
+void ACOsgBrowserRenderer::updateLabels(double ratio) {
+
+	for (i=0;i<label_renderer.size();i++) {
+		label_renderer[i]->updateNodes(ratio);
 	}
 }
 

@@ -47,6 +47,15 @@ MediaCycle::MediaCycle(ACMediaType aMediaType, string local_directory, string li
     this->mediaBrowser->setLibrary(this->mediaLibrary);
 
     this->pluginManager = new ACPluginManager();
+	
+	// SD TODO - test Labels
+	ACPoint p;
+	p.x = -0.1; p.y = 0.0; p.z = 0.01;
+	this->mediaBrowser->setLabel(0, "Label-1", p);
+	p.x = 0.2; p.y = 0.0; p.z = 0.01;
+	this->mediaBrowser->setLabel(1, "Label-2", p);
+	p.x = 0.0; p.y = 0.1; p.z = 0.01;
+	this->mediaBrowser->setLabel(2, "Label-3", p);
 }
 
 MediaCycle::MediaCycle(const MediaCycle& orig) {
@@ -279,6 +288,11 @@ void MediaCycle::setClosestLoop(int i) { mediaBrowser->setClosestLoop(i); }
 // 
 void MediaCycle::muteAllSources() { mediaBrowser->muteAllSources(); }
 void* MediaCycle::hasBrowser() { return mediaBrowser; }
+
+// LABELS on VIEW
+int MediaCycle::getLabelSize() { return mediaBrowser->getLabelSize(); }
+string MediaCycle::getLabelText(int i) { return mediaBrowser->getLabelText(i); }
+ACPoint MediaCycle::getLabelPos(int i) { return mediaBrowser->getLabelPos(i); }
 
 void MediaCycle::pickedObjectCallback(int pid) {
 	if(pid >= 0) {

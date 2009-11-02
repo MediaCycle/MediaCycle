@@ -135,6 +135,11 @@ public:
 	//
 	void* hasBrowser();
 	
+	// LABELS on VIEW
+ 	int getLabelSize();
+	string getLabelText(int i);
+	ACPoint getLabelPos(int i);
+	
 private:
 	int forwarddown;
 	int port;

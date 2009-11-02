@@ -90,6 +90,12 @@ struct ACLoopAttribute
 	ACLoopAttribute() : cluster(0), active(false), navigationLevel(0), hover(0) {}
 };
 
+struct ACLabelAttribute {
+	string		text;
+	float		size;
+	ACPoint		pos;
+};
+
 class ACMediaBrowser {
 	
 public:
@@ -198,6 +204,11 @@ public:
 	int toggleSourceActivity(int lid, int type=1);
 	int muteAllSources();
 	
+	int getLabelSize();
+	void setLabel(int i, string text, ACPoint pos);
+	string getLabelText(int i);
+	ACPoint getLabelPos(int i);
+	
 protected:
 	ACMediaLibrary *mLibrary; 
 	
@@ -234,6 +245,8 @@ protected:
 	vector <ACLoopAttribute>	mLoopAttributes; // one entry per media in the same order as in library.
 	float mousex;
 	float mousey;
+	
+	vector <ACLabelAttribute>	mLabelAttributes;
 	
 	int 				mNavigationLevel;
 	

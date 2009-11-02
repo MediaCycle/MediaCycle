@@ -204,10 +204,33 @@ ACMediaBrowser::ACMediaBrowser() {
 	closest_loop = -1;
 	auto_play = 0;
 	auto_play_toggle = 0;
+	
+	mLabelAttributes.resize(0);
 }
 
 ACMediaBrowser::~ACMediaBrowser() {
 	
+}
+
+int ACMediaBrowser::getLabelSize() {
+	return mLabelAttributes.size();
+}
+
+void ACMediaBrowser::setLabel(int i, string text, ACPoint pos) {
+	if (mLabelAttributes.size()<=i) {
+		mLabelAttributes.resize(i+1);
+	}
+	mLabelAttributes[i].text = text;
+	mLabelAttributes[i].size = 1.0;
+	mLabelAttributes[i].pos = pos;
+}
+
+string ACMediaBrowser::getLabelText(int i) {
+	return mLabelAttributes[i].text;
+}
+
+ACPoint ACMediaBrowser::getLabelPos(int i) {
+	return mLabelAttributes[i].pos;
 }
 
 // memory/context

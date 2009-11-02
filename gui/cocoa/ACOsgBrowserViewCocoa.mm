@@ -370,7 +370,8 @@ struct ACOsgBrowserViewData
 	@synchronized(self)
 	{
 	_privateData->renderer.prepareNodes();
-	
+	_privateData->renderer.prepareLabels();
+		
 	[self setNode:_privateData->renderer.getShapes()];
 	}
 }
@@ -388,6 +389,7 @@ struct ACOsgBrowserViewData
 	media_cycle->setClosestLoop(closest_loop);
 	// recompute scene graph	
 	_privateData->renderer.updateNodes(frac); // animation time in [0,1]
+	_privateData->renderer.updateLabels(frac);
 	}
 }
 
