@@ -92,12 +92,8 @@ void ACOsgBrowserRenderer::prepareNodes(int start) {
 
 void ACOsgBrowserRenderer::updateNodes(double ratio) {
 	
-	if (media_cycle->getNeedsDisplay()) {
-		for (i=0;i<media_renderer.size();i++) {
-			media_renderer[i]->updateNodes(ratio);
-		}
-		// SD - the scene graph is changing every time we move something (inclusing the mouse)....
-		// media_cycle->setNeedsDisplay(false);
+	for (i=0;i<media_renderer.size();i++) {
+		media_renderer[i]->updateNodes(ratio);
 	}
 }
 

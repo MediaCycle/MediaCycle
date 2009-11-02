@@ -165,6 +165,10 @@ struct ACOsgBrowserViewData
 		frac = media_cycle->getFrac();
 	}
 	
+	if (!media_cycle->getNeedsDisplay()) {
+		return;
+	}	
+	
 	Camera *camera = [self camera];
 	
 	if(camera && media_cycle)
@@ -183,9 +187,10 @@ struct ACOsgBrowserViewData
 		camera->setViewMatrixAsLookAt(Vec3(x*1.0,y*1.0,0.8 / zoom), Vec3(x*1.0,y*1.0,0), Vec3(upx, upy, 0));
 	}
 	
-	
 	[self updateTransformsFromBrowser:frac];
 	[super drawRect:rect];
+	
+	media_cycle->setNeedsDisplay(0);
 	
 	//glSwapAPPLE();
 }
@@ -252,13 +257,15 @@ struct ACOsgBrowserViewData
 	refy = eventLocation.y;
 	media_cycle->getCameraPosition(refcamx, refcamy);
 	refzoom = media_cycle->getCameraZoom();
+	
+	media_cycle->setNeedsDisplay(1);
 }
 
 - (void)mouseMoved:(NSEvent*)event
 {
 	[super mouseMoved:event];
 	
-	//[self setNeedsDisplay:YES];
+	media_cycle->setNeedsDisplay(1);
 }
 
 - (void) mouseDragged:(NSEvent*) event
@@ -283,6 +290,8 @@ struct ACOsgBrowserViewData
 			media_cycle->setCameraPosition(refcamx + xmove2/800/zoom , refcamy + ymove2/800/zoom);
 		}
 	}
+	
+	media_cycle->setNeedsDisplay(1);
 }
 
 - (void)mouseUp:(NSEvent*)event
@@ -294,6 +303,8 @@ struct ACOsgBrowserViewData
 	}
 	
 	mousedown = 0;
+	
+	media_cycle->setNeedsDisplay(1);
 }
 
 // SD - Macbook Pro Trackpad Gestures

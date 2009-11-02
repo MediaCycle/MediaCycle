@@ -269,6 +269,7 @@ void ACMediaBrowser::setFilterSuggest()
 void ACMediaBrowser::setWeight(int i, float weight) {
 	mFeatureWeights[i] = weight; 
 	updateClusters(true); 
+	setNeedsDisplay(true);
 }
 
 void ACMediaBrowser::setClusterNumber(int n)
@@ -276,6 +277,7 @@ void ACMediaBrowser::setClusterNumber(int n)
 	// SD TODO	
 	mClusterCount = n;
 	updateClusters(true);
+	setNeedsDisplay(true);
 }
 
 void ACMediaBrowser::resetLoopNavigationLevels()
@@ -433,6 +435,8 @@ void ACMediaBrowser::libraryContentChanged() {
 	
 	updateClusters(false);
 	updateNextPositions();
+	
+	setNeedsDisplay(true);
 }
 
 // SD - Brute Force KNN
@@ -1126,5 +1130,6 @@ int ACMediaBrowser::muteAllSources()
 			mLoopAttributes[loop_id].active = 0;
 		}
 	}
+	setNeedsDisplay(true);
 }
 

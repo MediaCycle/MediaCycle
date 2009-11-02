@@ -134,10 +134,13 @@ static void osc_callback(TiOscReceiverRef, const char *tagName, void *userData)
 - (void)updatedLibrary
 {	
 	media_cycle->setSelectedObject(0);
+	
 	[browser_osg_view prepareFromBrowser];
 	
 	[browser_osg_view setPlaying:YES];
 	//[browser_osg_view updateTransformsFromBrowser];
+	
+	media_cycle->setNeedsDisplay(true);
 }
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -287,8 +290,6 @@ static void osc_callback(TiOscReceiverRef, const char *tagName, void *userData)
 	float	value = [inSender floatValue];
 	
 	media_cycle->setWeight(0, value);
-	
-	[browser_osg_view setNeedsDisplay:YES];
 }
 
 - (IBAction)setWeight2Slider:(id)inSender
@@ -296,8 +297,6 @@ static void osc_callback(TiOscReceiverRef, const char *tagName, void *userData)
 	float	value = [inSender floatValue];
 	
 	media_cycle->setWeight(1, value);
-	
-	[browser_osg_view setNeedsDisplay:YES];
 }
 
 - (IBAction)setWeight3Slider:(id)inSender
@@ -305,8 +304,6 @@ static void osc_callback(TiOscReceiverRef, const char *tagName, void *userData)
 	float	value = [inSender floatValue];
 	
 	media_cycle->setWeight(2, value);
-	
-	[browser_osg_view setNeedsDisplay:YES];
 }
 
 - (IBAction)setClusterNumberSlider:(id)inSender
@@ -314,8 +311,6 @@ static void osc_callback(TiOscReceiverRef, const char *tagName, void *userData)
 	int	value = [inSender intValue];
 	
 	media_cycle->setClusterNumber(value);
-	
-	[browser_osg_view setNeedsDisplay:YES];
 }
 
 - (IBAction)setCameraRecenter:(id)inSender
