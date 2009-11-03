@@ -644,7 +644,7 @@ void ACMediaBrowser::initClusterCenters(){
 // mClusterCenters
 // mLoopAttributes
 void ACMediaBrowser::updateClusters(bool animate){
-  int method=0;
+  int method=2;
   switch (method) {
   case 0:
     kmeans(animate);
@@ -657,13 +657,18 @@ void ACMediaBrowser::updateClusters(bool animate){
   case 2:
     std::cout << "UpdateClusters : Plugin" << std::endl;
     mVisPlugin->updateClusters(this);
+    if(animate) {
+      updateNextPositions();
+      //commitPositions();
+      setState(AC_CHANGING);
+    }
   default:
     break;
   }
 }
 
 void ACMediaBrowser::updateNextPositions(){
-  int method=0;
+  int method=2;
   switch (method) {
   case 0:
     setNextPositionsPropeller();

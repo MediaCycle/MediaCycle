@@ -357,7 +357,7 @@ ACMediaFeatures* ACMediaTimedFeatures::weightedMean(ACMediaTimedFeatures* weight
   string name = "Weighted mean of ";
   weightVal = weightVal / sumWeight;
   tmp_m = trans(weightVal) * this->getValue();
-  weightedMean_mf->resize(1);
+  weightedMean_mf->resize(tmp_m.n_cols);
   name += this->getName();
   weightedMean_mf->setName(name);
   for (int i=0; i<tmp_m.n_cols; i++)
@@ -371,7 +371,7 @@ ACMediaFeatures* ACMediaTimedFeatures::mean(){
   string name = "Mean of ";
   name += this->getName();
   mean_mf->setName(name);
-  mean_mf->resize(1);
+  mean_mf->resize(mean_m.n_cols);
   for (int i=0; i<mean_m.n_cols; i++)
     mean_mf->setFeature(i, mean_m(0,i));  
   return mean_mf;
@@ -402,7 +402,7 @@ ACMediaFeatures* ACMediaTimedFeatures::weightedStdDeviation(ACMediaTimedFeatures
   ACMediaFeatures* wstd_mf = new ACMediaFeatures();
   fmat wstd_m;
   wstd_m = sqrt(trans(weightVal) * cDataSq);
-  wstd_mf->resize(1);
+  wstd_mf->resize(wstd_m.n_cols);
   string name = "Weighted standard deviation of ";
   name += this->getName();
   wstd_mf->setName(name);
@@ -417,7 +417,7 @@ ACMediaFeatures* ACMediaTimedFeatures::std(){
   ACMediaFeatures* std_mf = new ACMediaFeatures();
   name += this->getName();
   std_mf->setName(name);
-  std_mf->resize(1);
+  std_mf->resize(std_m.n_cols);
   for (int i=0; i<std_m.n_cols; i++)
     std_mf->setFeature(i, std_m(0,i));  
   return std_mf;

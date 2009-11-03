@@ -112,23 +112,24 @@ vector<ACMediaFeatures*> ACEyesWebPlugin::calculate(std::string fileName){
   ACMediaFeatures* mMediaFeatures;
   
   
-  vector<float> meanV = mediaTimedFeatures->meanAsVector();   //mean computation    
+  ACMediaFeatures* meanV = mediaTimedFeatures->mean();   //mean computation    
   //write meanV in the ACMediaFeature object
    
-  for (int i=0; i<meanV.size(); i++){
+  for (int i=0; i<meanV->size(); i++){
     mMediaFeatures = new ACMediaFeatures();
     mMediaFeatures->resize(1);
     mMediaFeatures->setName(descMeanNames[i]);
-    mMediaFeatures->setFeature(0,meanV[i]);
+    mMediaFeatures->setFeature(0, meanV->getFeature(i));
     featureVec.push_back(mMediaFeatures);
   }
-  vector<float> stdV = mediaTimedFeatures->stdAsVector();     //std computation
 
-  for (int i=0; i<meanV.size(); i++){
+  ACMediaFeatures* stdV = mediaTimedFeatures->std();     //std computation
+
+  for (int i=0; i<stdV->size(); i++){
     mMediaFeatures = new ACMediaFeatures();
     mMediaFeatures->resize(1);
     mMediaFeatures->setName(descStdNames[i]);
-    mMediaFeatures->setFeature(0,stdV[i]);
+    mMediaFeatures->setFeature(0,stdV->getFeature(i));
     featureVec.push_back(mMediaFeatures);
   }
 

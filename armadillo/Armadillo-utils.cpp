@@ -562,9 +562,6 @@ void kcluster(mat A_m, int nbClusters, colvec& clusterid_m, mat& center_m){
     delete(mask[i]);
   }   
   delete(mask);
-  for(int i=0;i < nbCols; i++) { 
-    delete(weight);
-  } 
   delete(weight);
   
   for (int i = 0; i < nbClusters; i++){ 
@@ -737,4 +734,23 @@ ucolvec randperm(int n){
   colvec  q_v       = rand<colvec>(n);
   ucolvec perm_v = sort_index(q_v);
   return perm_v;
+}
+
+ucolvec find(umat A_v){
+  ucolvec pos_v;
+  double tmp;
+  if (A_v.n_cols > 1){
+    std::cerr << "Error : Find only works on column vectors" << std::endl;
+    exit(-1);
+  }
+  tmp = conv_to<double>::from(sum(A_v==1));
+  pos_v.set_size(tmp);
+  int index = 0;
+  for (int i=0; i<A_v.n_rows; i++){
+    if (A_v(i,0) != 0){
+      pos_v(index) = i;
+      index++;
+    }
+  }
+  return pos_v;
 }

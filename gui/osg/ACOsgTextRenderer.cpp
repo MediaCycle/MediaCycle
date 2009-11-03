@@ -60,7 +60,8 @@ void ACOsgTextRenderer::textGeode() {
 	text->setColor(textColor);
 	text->setCharacterSizeMode( osgText::Text::SCREEN_COORDS );
 	text->setCharacterSize(textCharacterSize);
-	text->setPosition(osg::Vec3(pos.x,pos.y,pos.z));
+	text->setPosition(osg::Vec3(0,0,0.1));
+	//	text->setPosition(osg::Vec3(pos.x,pos.y,pos.z));
 	text->setLayout(osgText::Text::LEFT_TO_RIGHT);
 	text->setFontResolution(64,64);
 	text->setAlignment( osgText::Text::CENTER_CENTER );
@@ -96,11 +97,8 @@ void ACOsgTextRenderer::updateNodes(double ratio) {
 	osg::Vec4 textColor(0.9f,0.9f,0.9f,0.9f);
 	//((ShapeDrawable*)text_geode->getDrawable(0))->setColor(textColor);
 	
-	float x, y, z;
-	x = -0.1;
-	y = 0;
-	z = 0;
-	T.makeTranslate(Vec3(x, y, z));
+	T.makeTranslate(Vec3(pos.x, pos.y, pos.z));
+	text->setText( text_string );
 	
 	media_node->setMatrix(T);	
 }

@@ -51,7 +51,7 @@ int main(int argc, char** argv) {
     //    mediacycle->addPlugin("/home/alexis/Programmation/TiCore-app/Applications/Numediart/MediaCycle/src/Builds/linux-x86/plugins/eyesweb/mc_eyesweb.so");
     mediacycle->addPlugin ("/Users/xavier/development/Fall09/ticore-app/Applications/Numediart/MediaCycle/src/Builds/darwin-xcode/plugins/eyesweb/Debug/mc_eyesweb.dylib");
 	//	("/Users/dtardieu/src/Numediart/ticore-app/Applications/Numediart/MediaCycle/src/Builds/darwin-x86/plugins/eyesweb/Debug/mc_eyesweb.dylib");
-    mediacycle->importDirectory("/Users/xavier/numediart/Project7.3-DancersCycle/Recordings_Raffinerie_0709/FrontShots/H264_subset/",0);
+    //    mediacycle->importDirectory("/Users/xavier/numediart/Project7.3-DancersCycle/Recordings_Raffinerie_0709/FrontShots/H264_subset/",0);
 	//	("/Users/dtardieu/data/DANCERS/Video/Front/",0);
 	
 // 	cout<<"setCulsterN"<<endl;

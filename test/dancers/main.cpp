@@ -57,7 +57,7 @@ void readLibraryXml(MediaCycle *mediacycle, std::string filename);
 std::string generateID(std::string filename);
 void startOrRedraw(MediaCycle *that, int nbVideo, char**, int*);
 
-string mypath="/Users/xavier/Desktop/dancers-tmp/";
+string mypath="/Users/dtardieu/Desktop/dancers-test/";
 
 int main(int argc, char** argv) {
 	string path = mypath+"dancers-dt-1.acl";
@@ -65,23 +65,23 @@ int main(int argc, char** argv) {
 	cout<<"new MediaCycle"<<endl;
 	MediaCycle* mediacycle;
 	mediacycle = new MediaCycle(MEDIA_TYPE_VIDEO);
-	//  mediacycle->addPlugin ("/Users/dtardieu/src/Numediart/ticore-app/Applications/Numediart/MediaCycle/src/Builds/darwin-x86/plugins/eyesweb/Debug/mc_eyesweb.dylib");
-	//mediacycle->importDirectory("/Users/dtardieu/data/DANCERS/Video/FrontTest/", 0);
+	mediacycle->addPlugin ("/Users/dtardieu/src/Numediart/ticore-app/Applications/Numediart/MediaCycle/src/Builds/darwin-x86/plugins/eyesweb/Debug/mc_eyesweb.dylib");
+	mediacycle->addPlugin ("/Users/dtardieu/src/Numediart/ticore-app/Applications/Numediart/MediaCycle/src/Builds/darwin-x86/plugins/visualisation/Debug/mc_visualisation.dylib");
+	mediacycle->setVisualisationPlugin("Visualisation");
+	mediacycle->importDirectory("/Users/dtardieu/data/DANCERS/Video/FrontTest/", 0);
 	
+	//	mediacycle->importLibrary(mypath+"dancers-ex-2.acl");
 	
 //	mediacycle->importACLLibrary(path);
 	
-	mediacycle->getBrowser()->randomizePositions();
+//	mediacycle->getBrowser()->randomizePositions();
 	//mediacycle->getBrowser()->setClusterNumber(1);
-	mediacycle->startTcpServer(12345,5,dancers_tcp_callback);
+	//	mediacycle->startTcpServer(12345,5,dancers_tcp_callback);
 	//readLibraryXml(mediacycle, "/Users/dtardieu/Desktop/dancers-exemple.xml");
 	
-	while(1) {
-		sleep(30);
-	}
 //	
 //	saveLibraryAsXml(mediacycle, xmlpath);
-//	mediacycle->saveAsLibrary(mypath+"dancers-ex.acl");
+	mediacycle->saveAsLibrary(mypath+"dancers-ex-2.acl");
 	delete mediacycle;	
 	return (EXIT_SUCCESS);
 }
