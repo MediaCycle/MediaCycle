@@ -35,6 +35,7 @@
 
 
 #include <armadillo>
+#include "cluster.h"
 
 using namespace arma;
 
@@ -56,3 +57,8 @@ int nextpow2(int n);
 mat rot90(mat A_m, int k);
 mat xcorr2(mat A_m, mat B_m);
 colvec diagxcorr2(mat A_m, mat B_m);
+void kcluster(mat A_m, int nbClusters, colvec& clusterid_m, mat& center_m);
+void princomp(mat x, mat &coeff, mat &score);
+umat hist(mat A_m, int nbrBin, float minE=0, float maxE=0);
+umat hist3(mat A_m, int nbrBin0, int nbrBin1, float minE0=0, float maxE0=0, float minE1=0, float maxE1=0);
+ucolvec randperm(int);
