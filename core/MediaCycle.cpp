@@ -104,6 +104,13 @@ int MediaCycle::importDirectory(string path, int recursive, int mid) {
 	return ret;
 }
 
+int MediaCycle::importACLLibrary(string path) {
+	int ret = this->mediaLibrary->openACLLibrary(path);
+//	this->mediaLibrary->normalizeFeatures();
+//	this->mediaBrowser->libraryContentChanged();
+	return ret;
+}
+
 int MediaCycle::importLibrary(string path) {
 	int ret = this->mediaLibrary->openLibrary(path);
 	this->mediaLibrary->normalizeFeatures();
@@ -241,6 +248,11 @@ string MediaCycle::getThumbnail(int id) {
 
 int MediaCycle::addPlugin(string aPluginPath) {
     return this->pluginManager->add(aPluginPath);
+}
+
+void MediaCycle::setVisualisationPlugin(string pluginName){
+  ACPlugin* visPlugin = this->getPluginManager()->getPlugin(pluginName);
+  this->getBrowser()->setVisualisationPlugin(visPlugin);
 }
 
 // ADDED FOR VISUAL and GUI

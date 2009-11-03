@@ -15,10 +15,9 @@ ACEyesWebPlugin::ACEyesWebPlugin()
     this->mName = "EyesWeb";
     this->mDescription = "EyesWeb plugin";
     this->mId = "";
-
     //local vars
 }
-
+  
 ACEyesWebPlugin::~ACEyesWebPlugin()
 {
 }
@@ -111,11 +110,11 @@ vector<ACMediaFeatures*> ACEyesWebPlugin::calculate(std::string fileName){
   }
   
   ACMediaFeatures* mMediaFeatures;
-
-
+  
+  
   vector<float> meanV = mediaTimedFeatures->meanAsVector();   //mean computation    
   //write meanV in the ACMediaFeature object
-  
+   
   for (int i=0; i<meanV.size(); i++){
     mMediaFeatures = new ACMediaFeatures();
     mMediaFeatures->resize(1);

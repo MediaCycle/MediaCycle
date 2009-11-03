@@ -104,10 +104,12 @@ int ACMediaLibrary::importDirectory(std::string _path, int _recursive, int id, A
 			{
 				++dir_count;
 				file_count += importDirectory((dir_itr->path()).native_file_string(), _recursive,id, acpl);
+				id=file_count;
 			}
 			else if ( fs::is_regular( dir_itr->path() ) )
 			{
 				file_count += importDirectory((dir_itr->path()).native_file_string(), 0, id, acpl);
+				id=file_count;
 			}
 			else 
 			{
@@ -130,6 +132,7 @@ int ACMediaLibrary::importDirectory(std::string _path, int _recursive, int id, A
 		else {
 			if (media->import(filename, id, acpl)){
 				this->addMedia(media);
+				id++;
 			}
 			// XS 23/09/09: import now looks for plugins, in ACMedia.cpp
 			// it also sets id 
@@ -141,11 +144,60 @@ int ACMediaLibrary::importDirectory(std::string _path, int _recursive, int id, A
 	
 }
 
-int ACMediaLibrary::openLibrary(std::string _path, bool aInitLib){
+// C++ version
+int ACMediaLibrary::openACLLibrary(std::string _path, bool aInitLib){
 	// this does not re-initialize the media_library
 	// but appends new media to it.
 	// except if aInitLib is set to true
 	int ret, file_count=0;
+	
+	ifstream library_file;
+	library_file.open(_path.c_str());
+	
+	if ( ! library_file ) {
+		cerr << "<ACMediaLibrary::openACLLibrary> error reading file " << _path << endl;
+		return 0;
+	}
+	else{
+		cout << "opening " << _path << endl;
+	}
+	ACMedia* local_media;
+	// --TODO-- ???  how does it know which type of media ?
+	// have to be set up  at some point using setMediaType()
+	if (aInitLib) {
+		cleanLibrary();
+	}
+	media_library.resize(0);
+	do {
+		local_media = ACMediaFactory::create(media_type);
+		if (local_media != NULL) {
+			ret = local_media->loadACL(library_file);
+			if (ret) {
+				std::cout << "Media Libray Size : " << media_library.size() << std::endl;
+				media_library.push_back(local_media);
+				file_count++;
+			}
+		}
+		else {
+			std::cout<<"<ACMediaLibrary::openACLLibrary> : Wrong Media Type" << std::endl;
+		}		
+	}
+	while (ret>0);
+	library_file.close();
+	return file_count;
+}
+
+// C++ version
+int ACMediaLibrary::saveACLLibrary(std::string _path){
+	ofstream library_file (_path.c_str());
+}
+
+
+int ACMediaLibrary::openLibrary(std::string _path, bool aInitLib){
+  // this does not re-initialize the media_library
+  // but appends new media to it.
+  // except if aInitLib is set to true
+  int ret, file_count=0;
 	
 	FILE *library_file = fopen(_path.c_str(),"r");
 	//if the file exists
@@ -161,43 +213,42 @@ int ACMediaLibrary::openLibrary(std::string _path, bool aInitLib){
 		do {
 			local_media = ACMediaFactory::create(media_type);
 			if (local_media != NULL) {
-				ret = local_media->load(library_file);
+				ret = local_media->load(library_file); // XS TODO try loadACL
 				if (ret) {
 					std::cout << "Media Libray Size : " << media_library.size() << std::endl;
 					media_library.push_back(local_media);
 					file_count++;
 					
-				}
-			}
-			else {
-				std::cout<<"OpenLibrary : Wrong Media Type" <<std::endl;
-			}
-			
-		}
-		while (ret>0);
-		
-		fclose(library_file);
 	}
+      }
+      else {
+	std::cout<<"OpenLibrary : Wrong Media Type" <<std::endl;
+      }
+			
+    }
+    while (ret>0);
+		
+    fclose(library_file);
+  }
 	
-	return file_count;
+  return file_count;
 }
 
 void ACMediaLibrary::saveAsLibrary(string _path) {
 	
-	int n_loops = media_library.size();
-	
-	FILE *library_file = fopen(_path.c_str(),"w");
-	//ACMediaFactory factory;
-	
-	for(unsigned int i=0; i<n_loops; i++) {
-		//ACMedia* local_media = factory.create(media_type);
-		// --TODO-- ???  how does it know which type of media ?
-		// have to be set up  at some point using setMediaType()
-		ACMedia* local_media = media_library[i];
-		local_media->save(library_file);
-	}	
-	
-	fclose(library_file);
+  int n_loops = media_library.size();
+  
+  FILE *library_file = fopen(_path.c_str(),"w");
+  //ACMediaFactory factory;
+  denormalizeFeatures();
+  for(int i=0; i<n_loops; i++) {
+    //ACMedia* local_media = factory.create(media_type);
+    // --TODO-- ???  how does it know which type of media ?
+    // have to be set up  at some point using setMediaType()
+    ACMedia* local_media = media_library[i];
+    local_media->save(library_file);
+  }
+  fclose(library_file);
 }
 
 void ACMediaLibrary::cleanLibrary() {
@@ -403,3 +454,4 @@ void ACMediaLibrary::saveSorted(string output_file){
 	}
 	out.close();
 }
+

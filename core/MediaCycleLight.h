@@ -39,6 +39,7 @@
 #include <sstream>
 #include <sys/stat.h>
 #include <vector>
+//#include <ACPlugin.h>
 
 using namespace std;
 
@@ -145,6 +146,8 @@ public:
 	void muteAllSources();
 	//
 	void* hasBrowser();
+	void setVisualisationPlugin(string pluginName);
+	//	int addPlugin(std::string aPluginPath);
 	
 	// LABELS on VIEW
 	int getLabelSize();

@@ -48,6 +48,9 @@ public:
 	
 	void save(FILE* library_file); // was: saveLoop
 	int load(FILE* library_file); // was: loadLoop
+	void saveACL(ofstream &library_file);
+	int loadACL(ifstream &library_file);
+
 
 	// TODO: make the following explicitely inlines ?
 	void setThumbnail(IplImage *_thumbnail) { thumbnail = _thumbnail; thumbnail_width = _thumbnail->width; thumbnail_height = _thumbnail->height; }

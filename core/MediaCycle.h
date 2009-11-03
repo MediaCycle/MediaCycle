@@ -69,6 +69,7 @@ public:
     int processTcpMessage(char* buffer, int l, char **buffer_send, int *l_send);
     // Media Library
     int importDirectory(std::string path, int recursive, int mid=-1);
+	int importACLLibrary(std::string path);
     int importLibrary(std::string path);
     // Plugins
     int addPlugin(std::string aPluginPath);
@@ -85,6 +86,7 @@ public:
     ACMediaLibrary* getLibrary() { return mediaLibrary;};
     ACMediaBrowser* getBrowser() { return mediaBrowser;};
     ACPluginManager* getPluginManager() { return pluginManager;};
+    void setVisualisationPlugin(string pluginName);
 	
 	// API REQUIRED BY VISUAL and GUI
 	// 

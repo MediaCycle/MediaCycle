@@ -40,6 +40,9 @@
 #include "ACMediaTypes.h"
 #include "ACMediaFeatures.h"
 #include "ACMediaTimedFeature.h"
+//#include "ACMediaBrowser.h"
+
+class ACMediaBrowser;
 
 using namespace std;
 
@@ -63,6 +66,8 @@ public:
     virtual int initialize() = 0;
     virtual std::vector<ACMediaFeatures*> calculate() = 0;
     virtual std::vector<ACMediaFeatures*> calculate(std::string aFileName) = 0;
+    virtual void updateClusters(ACMediaBrowser*){};
+    virtual void updateNextPositions(ACMediaBrowser*){};
     virtual int start() = 0;
     virtual int stop() = 0;
 

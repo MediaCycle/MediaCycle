@@ -85,6 +85,9 @@ public:
 
 	int openLibrary(std::string _path, bool aInitLib=false);
 	void saveAsLibrary(std::string _path);
+	// C++ versions
+	int openACLLibrary(std::string _path, bool aInitLib=false);
+	int saveACLLibrary(std::string _path);
 	
 	//XS special for Thomas Israel
 	void saveSorted(std::string ouput_file);

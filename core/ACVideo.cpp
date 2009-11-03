@@ -34,7 +34,7 @@
 
 #include "ACVideo.h"
 #include <string>
-
+#include <fstream>
 using namespace std;
 
 //#include "ACAnalysedVideo.h"
@@ -57,6 +57,65 @@ ACVideo::~ACVideo() {
 // XS 23/09/09: now done in ACMedia.
 //	if we need to add something here, call first ACMedia::import
 //}
+
+// C++ version
+// writes in an existing (i.e. already opened) acl file
+void ACVideo::saveACL(ofstream &library_file) {
+	if (! library_file.is_open()) {
+		cerr << "<ACVideo::saveACL> : problem writing video in ACL file, it needs to be opened before" << endl;
+	}	
+	library_file << mid << endl;
+	library_file << width << endl;
+	library_file << height << endl;
+	int n_features = features.size();
+	library_file << n_features << endl;
+	for (int i=0; i<n_features;i++) {
+		int n_features_elements = features[i]->size();
+		library_file << n_features_elements << endl;
+		for (int j=0; j<n_features_elements; j++) {
+			library_file << features[i]->getFeature(j) << "\t";
+		}
+		library_file << endl;
+	}
+}
+
+// C++ version
+// loads from an existing (i.e. already opened) acl file
+int ACVideo::loadACL(ifstream &library_file) {
+	if (! library_file.is_open()) {
+		cerr << "<ACVideo::loadACL> : problem loading video from ACL file, it needs to be opened before" << endl;
+	}		
+	string toto;
+	getline(library_file, toto); 
+	cout << "test first line in ACVIdeo: " << toto << endl;
+//	getline(library_file, toto); 
+//	cout << "test second line in ACVIdeo: " << toto << endl;
+
+	if (!library_file >> mid || !library_file.good()){
+		cerr << "problem reading mid" << endl;
+	}
+	library_file >> width;
+	library_file >> height;
+	int n_features = 0;
+	library_file >> n_features; 
+
+	ACMediaFeatures* mediaFeatures;
+	float local_feature;
+	int n_features_elements = 0;
+	
+	for (int i=0; i<n_features;i++) {
+		mediaFeatures = new ACMediaFeatures();
+		features.push_back(mediaFeatures);
+		features[i]->setComputed();
+		library_file >> n_features_elements;
+		features[i]->resize(n_features_elements);
+		for (int j=0; j<n_features_elements; j++) {
+			library_file >> local_feature;
+			features[i]->setFeature(j, local_feature);
+		}
+	}
+	// XS TODO check if errors and return 0/1
+}
 
 void ACVideo::save(FILE* library_file) { // was saveloop
   int i, j;
@@ -88,6 +147,7 @@ n_features = features.size();
 fprintf(library_file, "%d\n", n_features);
 for (i=0; i<features.size();i++) {
   n_features_elements = features[i]->size();
+  fprintf(library_file, "%s\n", features[i]->getName().c_str());
   fprintf(library_file, "%d\n", n_features_elements);
   for (j=0; j<n_features_elements; j++) {
     fprintf(library_file, "%f\t", features[i]->getFeature(j)); // XS instead of [i][j]
@@ -104,7 +164,8 @@ int ACVideo::load(FILE* library_file) { // was loadLoop
 	int path_size;
 	int n_features;
 	int n_features_elements;
-	
+	char featureName[256];
+
 	int ret;
 	char *retc;
 	
@@ -128,24 +189,35 @@ int ACVideo::load(FILE* library_file) { // was loadLoop
 	
 	if (retc) {
 		path_size = strlen(file_temp);
-		filename = string(file_temp, path_size-1);
-		
+		this->filename = string(file_temp, path_size-1);
+		if (this->filename.size()==0){
+		  cerr << "ACVIdeo : Empty filename" << endl;
+		  exit(-1);
+		}
 		retc = fgets(file_temp2, 1024, library_file);
 		path_size = strlen(file_temp2);
-		filename_thumbnail = string(file_temp2, path_size-1);
+		this->filename_thumbnail = string(file_temp2, path_size-1);
+		if (this->filename_thumbnail.size()==0){
+		  cerr << "ACVIdeo : Empty thumbnail filename" << endl;
+		  exit(-1);
+		}
 		
 		ret = fscanf(library_file, "%d", &mid);
 		ret = fscanf(library_file, "%d", &width);
 		ret = fscanf(library_file, "%d", &height);
 		ret = fscanf(library_file, "%d", &n_features);
 		
-		thumbnail_height = height;
-		thumbnail_width = width;
+		thumbnail_height = 320;
+		thumbnail_width = 180;
+		width = 180;
+		height = 320;	
 		// SD TODO - following wont't work
 		for (i=0; i<n_features;i++) {
 			mediaFeatures = new ACMediaFeatures();
 			features.push_back(mediaFeatures);
 			features[i]->setComputed();
+			ret = fscanf(library_file, "%s", featureName);
+			features[i]->setName(string(featureName));
 			ret = fscanf(library_file, "%d", &n_features_elements);
 			features[i]->resize(n_features_elements);
 			for (j=0; j<n_features_elements; j++) {

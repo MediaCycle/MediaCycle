@@ -45,8 +45,8 @@ ACOsgBrowserRenderer::ACOsgBrowserRenderer() {
 	group = new Group();
 	media_group = new Group();
 	label_group = new Group();
-	group->addChild(media_group);
 	group->addChild(label_group);
+	group->addChild(media_group);
 }
 
 void ACOsgBrowserRenderer::prepareNodes(int start) {

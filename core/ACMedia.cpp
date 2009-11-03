@@ -46,7 +46,8 @@ ACMediaFeatures*& ACMedia::getFeatures(int i){
 
 int ACMedia::import(std::string _path, int id, ACPluginManager *acpl ){
   std::cout << "importing..." << _path << std::endl;
-  filename=_path;
+  this->filename=_path;
+  this->filename_thumbnail = _path;
   int import_ok = 1;
 	
   if (id>=0) this->setId(id);

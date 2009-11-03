@@ -348,7 +348,7 @@ void ACOsgImageRenderer::updateNodes(double ratio) {
 	else if (attribute.active) {
 		z += zpos;
 	}
-	
+
 	T.makeTranslate(Vec3(x, y, z)); // omr*p.z + ratio*p2.z));	
 	T =  Matrix::rotate(-angle,Vec3(0.0,0.0,1.0)) * Matrix::scale(localscale/zoom,localscale/zoom,localscale/zoom) * T;
 	media_node->setMatrix(T);

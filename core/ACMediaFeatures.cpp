@@ -42,7 +42,6 @@ using namespace std;
 ACMediaFeatures::ACMediaFeatures(){
   _type = FT_BASE; 
   _computed = false; 
-  name = "NoName";
 }
 
 float ACMediaFeatures::getFeature(int i) {

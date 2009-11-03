@@ -55,28 +55,38 @@ ACVideoPlugin::~ACVideoPlugin() {
 int ACVideoPlugin::initialize(){
 }
 
-//ACMediaFeatures* ACVideoPlugin::calculate(){
-//	return NULL;
-//}
-//
-// uses ACVideoAnalysis and converts the results into ACMediaFeatures
-//ACMediaFeatures* ACVideoPlugin::calculate(std::string aFileName) {
-//	// TODO: test if file exists
-//	ACVideoAnalysis* video = new ACVideoAnalysis(aFileName);
-//	
-//	ACMediaFeatures* mMediaFeatures = new ACMediaFeatures();
-//  check how to store the features...
-//	
-//	//XS TODO: make this more modular
-//	this->calculateTrajectory(video);
-//	delete video;
-//
-//}
-//
-//void ACVideoPlugin::calculateTrajectory(ACVideoAnalysis* video){
-//	video->computeMergedBlobsTrajectory(0);
-//	std::vector<blob_center> trajectory = video->getMergedBlobsTrajectory();
-//	std::vector<float> time_stamps = video->getDummyTimeStamps();
-//	ACMediaTimedFeatures *mediaTimedFeatures = new ACMediaTimedFeatures(time_stamps, trajectory, "trajectory");
-//
-//}
+ACMediaFeatures* ACVideoPlugin::calculate(){
+	return NULL;
+}
+
+//uses ACVideoAnalysis and converts the results into ACMediaFeatures
+ACMediaFeatures* ACVideoPlugin::calculate(std::string aFileName) {
+  // TODO: test if file exists
+  ACVideoAnalysis* video = new ACVideoAnalysis(aFileName);
+  
+  ACMediaFeatures* mMediaFeatures = new ACMediaFeatures();
+  //check how to store the features...
+    
+  //XS TODO: make this more modular
+  this->calculateTrajectory(video);
+  delete video;
+
+}
+
+void ACVideoPlugin::calculateTrajectory(ACVideoAnalysis* video){
+  video->computeMergedBlobsTrajectory(0);
+  std::vector<blob_center> trajectory = video->getMergedBlobsTrajectory();
+  std::vector<float> time_stamps = video->getDummyTimeStamps();
+  ACMediaTimedFeatures *trajectory_mtf = new ACMediaTimedFeatures(time_stamps, trajectory, "trajectory");
+  //mat hist_m = trajectory_mtf->hist3(10,10);
+  //  hist_m.print();
+  //max_indice(hist_m);
+
+}
+
+ACMediaFeatures* ACVideoPlugin::calculateContractionIndex(ACVideoAnalysis* video){
+  ACMediaTimedFeatures* contractionIndex;
+  video->computeContractionIndices();
+  contractionIndex = new ACMediaTimedFeatures(video->getDummyTimeStamps(), video->getContractionIndices(), "contraction index");
+  return contractionIndex->mean();
+}

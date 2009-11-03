@@ -303,6 +303,15 @@ void ACMediaBrowser::setClusterNumber(int n)
 	setNeedsDisplay(true);
 }
 
+
+void ACMediaBrowser::setLoopPosition(int loop_id, float x, float y, float z){
+  ACPoint p;
+  p.x = x;
+  p.y = y;
+  p.z = z;
+  mLoopAttributes[loop_id].nextPos = p;
+}
+
 void ACMediaBrowser::resetLoopNavigationLevels()
 {
 	int i, n = mLoopAttributes.size();
@@ -449,9 +458,9 @@ void ACMediaBrowser::libraryContentChanged() {
 		
 	}
 	
-	// set all features to 1.0
+	// set all feature weights to 1.0
 	
-	printf("setting all features to 1.0 (count=%d)\n", mFeatureWeights.size());	
+	printf("setting all feature weights to 1.0 (count=%d)\n", mFeatureWeights.size());	
 	for(i=0; i<fc; i++) {
 		mFeatureWeights[i] = 1.0;
 	}
@@ -635,24 +644,26 @@ void ACMediaBrowser::initClusterCenters(){
 // mClusterCenters
 // mLoopAttributes
 void ACMediaBrowser::updateClusters(bool animate){
-  int method=1;
+  int method=0;
   switch (method) {
   case 0:
     kmeans(animate);
     break;
   case 1:
-    std::cout << "UpdateClusters : Nouvelle methode folle" << std::endl;
+    std::cout << "UpdateClusters : Nouvelle méthode folle" << std::endl;
     // DT : need to be somewhere else but don't know where
     initClusterCenters();
     break;
-    
+  case 2:
+    std::cout << "UpdateClusters : Plugin" << std::endl;
+    mVisPlugin->updateClusters(this);
   default:
     break;
   }
 }
 
 void ACMediaBrowser::updateNextPositions(){
-  int method=1;
+  int method=0;
   switch (method) {
   case 0:
     setNextPositionsPropeller();
@@ -661,6 +672,10 @@ void ACMediaBrowser::updateNextPositions(){
     std::cout << "setNextPositions2dim : Nouvelle methode folle" << std::endl;
     // DT : need to be somewhere else but don't know where
     setNextPositions2dim();
+    break;
+  case 2:
+    std::cout << "updateNextPositions : Plugin" << std::endl;
+    mVisPlugin->updateNextPositions(this);
     break;
   default:
     break;
