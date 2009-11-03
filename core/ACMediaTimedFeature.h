@@ -67,13 +67,13 @@ public:
 	ACMediaTimedFeatures();
 	ACMediaTimedFeatures(fcolvec time_v, fmat value_m);
 	ACMediaTimedFeatures(fcolvec time_v, fmat value_m, string name, vector<float> seg_v);
-	
 	// XS use this
 	ACMediaTimedFeatures(const vector<float> &time, const vector< vector<float> > &value, string name, const vector<float> *seg_v=0);
+	ACMediaTimedFeatures(const vector<float> &time, const vector<float> &value, string name, const vector<float> *seg_v=0);
 	
 	// XS do not use this: why pass the whole vector by value ?
-	ACMediaTimedFeatures(vector<float> time, vector< vector<float> > value, string name, vector<float> seg_v);
-	ACMediaTimedFeatures(vector<float> time, vector<float> value, string name, vector<float> seg_v);
+	//	ACMediaTimedFeatures(vector<float> time, vector< vector<float> > value, string name, vector<float> seg_v);
+	//ACMediaTimedFeatures(vector<float> time, vector<float> value, string name, vector<float> seg_v);
 	ACMediaTimedFeatures( float *time, int length, float **value, int dim, string name, vector< float >seg_v );
 	~ACMediaTimedFeatures();
 	
@@ -104,12 +104,14 @@ public:
 	vector< vector<float> > getValueAsVector();
 	vector<float> getTimeAsVector();
 	
-	fmat weightedMean(ACMediaTimedFeatures* weight);
-	fmat mean();
-	fmat weightedStdDeviation(ACMediaTimedFeatures* weight);
-	fmat std();
-	vector<float> meanAsVector();
-	vector<float> stdAsVector();
+	ACMediaFeatures* weightedMean(ACMediaTimedFeatures* weight);
+	ACMediaFeatures* mean();
+	ACMediaFeatures* weightedStdDeviation(ACMediaTimedFeatures* weight);
+	ACMediaFeatures* std();
+	ACMediaFeatures* hist();
+
+	//	vector<float> meanAsVector();
+	//      vector<float> stdAsVector();
 	vector<ACMediaTimedFeatures*> segment();
 	ACMediaTimedFeatures* weightedMeanSegment(ACMediaTimedFeatures* weight);
 	ACMediaTimedFeatures* meanSegment();
@@ -119,8 +121,7 @@ public:
 	
 	int readFile(std::string);
 	
-	umat hist(int nbrBin, float min = 0, float max = 0);
-	vector<float> getExtremaOfVector(fcolvec column);
+	//	umat hist(int nbrBin, float min = 0, float max = 0);
 	
 	fmat similarity(int mode = 0);
 	float dist(fmat rowvector1, fmat rowvector2, int mode = 0);

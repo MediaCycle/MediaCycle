@@ -70,18 +70,35 @@ ACMediaTimedFeatures::ACMediaTimedFeatures( const vector<float> &time, const vec
 	if (seg_v !=0) this->seg_v = *seg_v;	
 }
 
-ACMediaTimedFeatures::ACMediaTimedFeatures(vector<float> time, vector< vector<float> > value, string name, vector<float> seg_v){
+ACMediaTimedFeatures::ACMediaTimedFeatures(const vector<float> &time, const vector<float> &value, string name, const vector<float> *seg_v){
+  if (time.size() != value.size()) {
+    cerr << "Time and value vectors does not have the same size" << endl;
+    exit(-1);
+  }
+
   this->time_v = fcolvec(time.size());
-  this->value_m = fmat((int) value[0].size(), (int) value.size());
+  this->value_m = fmat((int) time.size(),1);
   for (int Itime=0; Itime<time.size(); Itime++){
     this->time_v(Itime) = time[Itime];
-    for (int Idim=0; Idim<value.size(); Idim++){
-      this->value_m(Itime, Idim) = value[Idim][Itime];
-    }
+    this->value_m(Itime, 1) = value[Itime];
   }
   this->name = name;
-  this->seg_v = seg_v;
+  if (seg_v !=0) this->seg_v = *seg_v;	
 }
+
+// We pass by adresse now
+// ACMediaTimedFeatures::ACMediaTimedFeatures(vector<float> time, vector< vector<float> > value, string name, vector<float> seg_v){
+//   this->time_v = fcolvec(time.size());
+//   this->value_m = fmat((int) value[0].size(), (int) value.size());
+//   for (int Itime=0; Itime<time.size(); Itime++){
+//     this->time_v(Itime) = time[Itime];
+//     for (int Idim=0; Idim<value.size(); Idim++){
+//       this->value_m(Itime, Idim) = value[Idim][Itime];
+//     }
+//   }
+//   this->name = name;
+//   this->seg_v = seg_v;
+// }
 
 ACMediaTimedFeatures::ACMediaTimedFeatures( float *time, int length, float **value, int dim, string name, vector< float > seg_v ){
   this->time_v = fcolvec( length );
@@ -98,21 +115,22 @@ ACMediaTimedFeatures::ACMediaTimedFeatures( float *time, int length, float **val
   this->seg_v = seg_v;
 }
 
-ACMediaTimedFeatures::ACMediaTimedFeatures(vector<float> time, vector<float> value, string name, vector<float> seg_v){
-  if (time.size() != value.size()) {
-    cerr << "Time and value vectors does not have the same size" << endl;
-    exit(-1);
-  }
+// We pass by adresse now
+// ACMediaTimedFeatures::ACMediaTimedFeatures(vector<float> time, vector<float> value, string name, vector<float> seg_v){
+//   if (time.size() != value.size()) {
+//     cerr << "Time and value vectors does not have the same size" << endl;
+//     exit(-1);
+//   }
 
-  this->time_v = fcolvec(time.size());
-  this->value_m = fmat((int) time.size(),1);
-  for (int Itime=0; Itime<time.size(); Itime++){
-    this->time_v(Itime) = time[Itime];
-    this->value_m(Itime, 1) = value[Itime];
-  }
-  this->name = name;
-  this->seg_v = seg_v;
-}
+//   this->time_v = fcolvec(time.size());
+//   this->value_m = fmat((int) time.size(),1);
+//   for (int Itime=0; Itime<time.size(); Itime++){
+//     this->time_v(Itime) = time[Itime];
+//     this->value_m(Itime, 1) = value[Itime];
+//   }
+//   this->name = name;
+//   this->seg_v = seg_v;
+// }
 
 void ACMediaTimedFeatures::importFromFile(string filename){ //see also readFile
   fmat tmp_m;
@@ -331,28 +349,43 @@ fmat ACMediaTimedFeatures::getValueAtTime(fcolvec time_v) {
   return outValue_m;
 }
 
-fmat ACMediaTimedFeatures::weightedMean(ACMediaTimedFeatures* weight){
+ACMediaFeatures* ACMediaTimedFeatures::weightedMean(ACMediaTimedFeatures* weight){
+  ACMediaFeatures* weightedMean_mf = new ACMediaFeatures();
   fmat weightVal = weight->getValueAtTime(this->getTime());
   float sumWeight = conv_to<float>::from(sum(weightVal));
+  fmat tmp_m;
+  string name = "Weighted mean of ";
   weightVal = weightVal / sumWeight;
-  return trans(weightVal) * this->getValue() ;
+  tmp_m = trans(weightVal) * this->getValue();
+  weightedMean_mf->resize(1);
+  name += this->getName();
+  weightedMean_mf->setName(name);
+  for (int i=0; i<tmp_m.n_cols; i++)
+    weightedMean_mf->setFeature(i, tmp_m(0,i));
+  return weightedMean_mf;
 }
 
-fmat ACMediaTimedFeatures::mean(){
-    fcolvec weightValue = ones<fcolvec>(this->getLength());
-    ACMediaTimedFeatures* weight = new ACMediaTimedFeatures(this->getTime(),weightValue);
-    return weightedMean(weight);
+ACMediaFeatures* ACMediaTimedFeatures::mean(){
+  ACMediaFeatures* mean_mf = new ACMediaFeatures();  
+  fmat mean_m = arma::mean(this->getValue());
+  string name = "Mean of ";
+  name += this->getName();
+  mean_mf->setName(name);
+  mean_mf->resize(1);
+  for (int i=0; i<mean_m.n_cols; i++)
+    mean_mf->setFeature(i, mean_m(0,i));  
+  return mean_mf;
 }
 
-vector< float > ACMediaTimedFeatures:: meanAsVector(){
-  fmat tmpMean = this->mean();
-  vector< float > meanVec;
-  for (int i=0; i<tmpMean.n_cols; i++)
-    meanVec.push_back(tmpMean(0,i));
-  return meanVec;
-}
+// vector< float > ACMediaTimedFeatures:: meanAsVector(){
+//   fmat tmpMean = this->mean()->getValue();
+//   vector< float > meanVec;
+//   for (int i=0; i<tmpMean.n_cols; i++)
+//     meanVec.push_back(tmpMean(0,i));
+//   return meanVec;
+// }
 
-fmat ACMediaTimedFeatures::weightedStdDeviation(ACMediaTimedFeatures* weight){
+ACMediaFeatures* ACMediaTimedFeatures::weightedStdDeviation(ACMediaTimedFeatures* weight){
   fmat weightVal = weight->getValueAtTime(this->getTime());
   float sumWeight = conv_to<float>::from(sum(weightVal));
   weightVal = weightVal / sumWeight;
@@ -365,22 +398,38 @@ fmat ACMediaTimedFeatures::weightedStdDeviation(ACMediaTimedFeatures* weight){
   for (int i=0;i<this->getLength();i++)
       meanMatrix.row(i) = meanRow;
   fmat cDataSq = square(this->getValue() - meanMatrix);
-  return sqrt(trans(weightVal) * cDataSq);
+  
+  ACMediaFeatures* wstd_mf = new ACMediaFeatures();
+  fmat wstd_m;
+  wstd_m = sqrt(trans(weightVal) * cDataSq);
+  wstd_mf->resize(1);
+  string name = "Weighted standard deviation of ";
+  name += this->getName();
+  wstd_mf->setName(name);
+  for (int i=0; i<wstd_m.n_cols; i++)
+    wstd_mf->setFeature(i, wstd_m(0,i));
+  return wstd_mf;
 }
 
-fmat ACMediaTimedFeatures::std(){
-  fcolvec weightValue = ones<fcolvec>(this->getLength());
-  ACMediaTimedFeatures* weight = new ACMediaTimedFeatures(this->getTime(),weightValue);
-  return weightedStdDeviation(weight);
+ACMediaFeatures* ACMediaTimedFeatures::std(){  
+  fmat std_m = stddev(this->getValue());
+  string name = "Standard deviation of ";
+  ACMediaFeatures* std_mf = new ACMediaFeatures();
+  name += this->getName();
+  std_mf->setName(name);
+  std_mf->resize(1);
+  for (int i=0; i<std_m.n_cols; i++)
+    std_mf->setFeature(i, std_m(0,i));  
+  return std_mf;
 }
 
-vector< float > ACMediaTimedFeatures:: stdAsVector(){
-  fmat tmpStd = this->std();
-  vector< float > stdVec;
-  for (int i=0; i<tmpStd.n_cols; i++)
-    stdVec.push_back(tmpStd(0,i));
-  return stdVec;
-}
+// vector< float > ACMediaTimedFeatures:: stdAsVector(){
+//   fmat tmpStd = this->std();
+//   vector< float > stdVec;
+//   for (int i=0; i<tmpStd.n_cols; i++)
+//     stdVec.push_back(tmpStd(0,i));
+//   return stdVec;
+// }
 
 ACMediaTimedFeatures* ACMediaTimedFeatures::delta(){
 }
@@ -417,21 +466,22 @@ ACMediaTimedFeatures* ACMediaTimedFeatures::weightedMeanSegment(ACMediaTimedFeat
   vector<ACMediaTimedFeatures*> acmtv;
   acmtv = this->segment();
   ACMediaTimedFeatures *outAcmtv;
-  fmat tmpMean_m(1, (int)this->getDim());
+  ACMediaFeatures* tmpMean_mf = new ACMediaFeatures;
   //  cout << (int) this->getSegments().size() << endl;
   fcolvec outAcmtvTime((int)this->getSegments().size()-1);
   fmat outAcmtvValue((int)this->getSegments().size()-1,(int)this->getDim());
   
   for (int i=0; i<acmtv.size(); i++){
     //acmtv[i]->getTime().print("time seg");    
-    tmpMean_m = acmtv[i]->weightedMean(weight);//1 line * dim column
+    tmpMean_mf = acmtv[i]->weightedMean(weight);//1 line * dim column
     for (int Icol=0; Icol<this->getDim(); Icol++)
-      outAcmtvValue(i, Icol) = tmpMean_m(0,Icol);
+      outAcmtvValue(i, Icol) = tmpMean_mf->getFeature(Icol);
     //outAcmtvTime(i) = (this->getSegments()[i]+this->getSegments()[i+1])/2;
     outAcmtvTime(i) = (acmtv[i]->getTime(0) + acmtv[i]->getTime(acmtv[i]->getLength()-1) )/2;
   }
   outAcmtv = new ACMediaTimedFeatures(outAcmtvTime, outAcmtvValue);
   //outAcmtv->setName("raf");   //??
+  delete(tmpMean_mf);
   return outAcmtv;
 }
 
@@ -454,80 +504,7 @@ int ACMediaTimedFeatures::readFile(std::string fileName){
     }
 }
 
-umat ACMediaTimedFeatures::hist(int nbrBin, float min, float max){
-    umat resultHist = zeros<umat>(nbrBin,this->getDim());   //final result
-    vector<float> binWidth;                                 //one bin width for every column of the data file
-    fmat binEdge = fmat(nbrBin+1,this->getDim());           //edge values of the bins, one column vector for each data column
 
-    if (min == 0 && max == 0)   //user did not specify min and max values of the histogram (commom case)
-    {
-        fmat extremaM = fmat(2,this->getDim()); //to store min and max values
-        for (int i=0;i<this->getDim();i++)      //for every column of value_m
-        {
-            vector<float> extremaC = this->getExtremaOfVector(this->getValue().col(i));    //find min and max
-            extremaM(0,i) = extremaC[0];
-            extremaM(1,i) = extremaC[1];
-            binWidth.push_back((extremaC[1] - extremaC[0])/nbrBin);
-            //cout<<"binWidth : "<<binWidth.back()<<endl;   //ok
-            for (int j=0;j<binEdge.n_rows-1;j++)
-            {
-                binEdge(j,i) = extremaC[0] + j*binWidth.back(); //compute bin edges
-            }
-            binEdge(binEdge.n_rows-1,i) = extremaC[1];
-        }
-        //extremaM.print("ExtremaM : ");    //ok
-    }
-    else    //user specified min and max values of the histogram
-    {
-        fcolvec binEdgeV = fcolvec(nbrBin+1);        
-        float binWidthS = (max - min)/nbrBin;
-
-        for (int j=0;j<binEdgeV.n_rows-1;j++)
-            binEdgeV(j) = min + j*binWidthS;
-        binEdgeV(binEdgeV.n_rows-1) = max;
-
-        for (int i=0;i<this->getDim();i++)
-            binEdge.col(i) = binEdgeV;  //bin edge values are the same for every column of the data file because we use the same min and max values
-    }
-    //now we have binEdge for both cases (min and max specified or not)
-    //binEdge.print("binEdge : ");  //ok
-
-    for (int i=0;i<this->getDim();i++)  //compute the histogram
-    {
-        for (int j=0;j<this->getLength();j++)   //for each value in the data file
-        {
-            for (int k=0;k<nbrBin;k++)
-            {
-                if (this->getValue(j,i) >= binEdge(k,i) && this->getValue(j,i) < binEdge(k+1,i))
-                {
-                    resultHist(k,i) += 1;   //value included between the two bin edge values
-                    break;
-                }
-            }
-            if (this->getValue(j,i)== binEdge(nbrBin,i)) //maximum value exception
-                resultHist(nbrBin-1,i) += 1;
-        }
-    }
-    //resultHist.print("Histo : ");       //ok, checked with Matlab
-    return resultHist;
-}
-
-vector<float> ACMediaTimedFeatures::getExtremaOfVector(fcolvec column){ //returns min and max value of a vector (fcolvec)
-    vector<float> extrema;
-    float min = column(0);
-    float max = column(0);
-
-    for (int i=1;i<column.n_rows;i++)
-    {
-        if (column(i) < min)
-            min = column(i);
-        if (column(i) > max)
-            max = column(i);
-    }
-    extrema.push_back(min);
-    extrema.push_back(max);
-    return extrema;
-}
 
 fmat ACMediaTimedFeatures::similarity(int mode)
 {
