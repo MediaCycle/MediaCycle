@@ -40,8 +40,8 @@
 #include <Common/TiMath.h> // for Timax only ...
 
 #include "ACEuclideanDistance.h"
-
 #include "ACMediaLibrary.h"
+#include "ACPlugin.h"
 #include <vector>
 
 using namespace std;
@@ -176,6 +176,8 @@ public:
 	void commitPositions();
 	
 	const vector<ACLoopAttribute>	&getLoopAttributes() const { return mLoopAttributes; }; 
+	void setLoopPosition(int loop_id, float x, float y, float y=0);
+
 	void setLoopAttributesActive(int loop_id, int value) { mLoopAttributes[loop_id].active = value; };
 	//const vector<ACPoint>	&getLoopCurrentPositions() const	{ return mCurrentPos; } 
 	//const vector<ACPoint>	&getLoopNextPositions()	const		{ return mNextPos; }
@@ -208,10 +210,11 @@ public:
 	void setLabel(int i, string text, ACPoint pos);
 	string getLabelText(int i);
 	ACPoint getLabelPos(int i);
-	
+
+	void setVisualisationPlugin(ACPlugin* acpl){mVisPlugin=acpl;};
+
 protected:
 	ACMediaLibrary *mLibrary; 
-	
 	// state management
 	double 				mRefTime;
 	double 				mFrac;
@@ -259,6 +262,8 @@ protected:
 	int closest_loop;
 	int auto_play;
 	int auto_play_toggle;
+
+	ACPlugin* mVisPlugin;
 };
 
 #endif // __ACMEDIABROWSER_H__
