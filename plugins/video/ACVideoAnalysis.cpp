@@ -637,9 +637,11 @@ void ACVideoAnalysis::computeOpticalFlow(){
 	//	cvResizeWindow( "Camera", 800, 600 );
 	
 	IplImage* frame = 0;
+	int currentframe = 0;
+	//	int firstframemoved = 0;
 	
 	IplImage *image = cvCreateImage( cvSize(width,height),depth, 3 );
-//	image->origin = frame->origin;
+	//	image->origin = frame->origin;
 	IplImage *grey = cvCreateImage( cvSize(width,height),depth, 1 );
 	IplImage *prev_grey = cvCreateImage( cvSize(width,height),depth, 1 );
 	IplImage *pyramid = cvCreateImage( cvSize(width,height),depth, 1 );
@@ -649,7 +651,7 @@ void ACVideoAnalysis::computeOpticalFlow(){
 	points[1] = (CvPoint2D32f*)cvAlloc(MAX_COUNT*sizeof(points[0][0]));
 	status = (char*)cvAlloc(MAX_COUNT);
 	
-	for(int ifram=0; ifram<numFrames-1; ifram++) {
+	for(int ifram=0; ifram<nframes-1; ifram++) {
 		int i, k, c;
 		frame = getNextFrame(); // XS this could be at the end of loop
 		currentframe++;
@@ -691,20 +693,20 @@ void ACVideoAnalysis::computeOpticalFlow(){
 				points[1][k++] = points[1][i];
 				p = cvPointFrom32f(points[0][i]);
 				q = cvPointFrom32f(points[1][i]);
-				double a = atan2( (double) p.y - q.y, (double) p.x - q.x );
+				//		double a = atan2( (double) p.y - q.y, (double) p.x - q.x );
 				double m = sqrt( (p.y - q.y)*(p.y - q.y) + (p.x - q.x)*(p.x - q.x) );
 				cvLine( image, p , q , CV_RGB(255,0,0), 1, 8,0);
 				//				printf("%d;%d;%d;%g;%g\n", currentframe, p.x, p.y, a, m);
 				// XS break
-				if (m>0) {
-					firstframemoved=currentframe;
-					break;
-				}				
+				//				if (m>0) {
+				//					firstframemoved=currentframe;
+				//					break;
+				//				}				
 			}
 			count = k;
 		}
 		
-		if (firstframemoved > 0) break;
+		//		if (firstframemoved > 0) break;
 		
 		need_to_init = 0;
 		if( add_remove_pt && count < MAX_COUNT ) {
@@ -721,9 +723,7 @@ void ACVideoAnalysis::computeOpticalFlow(){
 		//		c = cvWaitKey(10);
 		//		if( (char)c == 27 )
 		//			break;
-	}
-	cout << fileName << " : " << firstframemoved << endl;
-	
+	}	
 	//	cvDestroyWindow("Camera");
 	cvReleaseImage(&image);
 	cvReleaseImage(&grey);
@@ -731,8 +731,6 @@ void ACVideoAnalysis::computeOpticalFlow(){
 	cvReleaseImage(&pyramid);
 	cvReleaseImage(&prev_pyramid);
 	// double free:	cvReleaseImage(&swap_temp);
-	return firstframemoved;
-}
 }
 
 

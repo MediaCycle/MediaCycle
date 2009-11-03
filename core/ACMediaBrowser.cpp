@@ -652,7 +652,7 @@ void ACMediaBrowser::updateClusters(bool animate){
 }
 
 void ACMediaBrowser::updateNextPositions(){
-  int method=1;
+  int method=0;
   switch (method) {
   case 0:
     setNextPositionsPropeller();

@@ -67,7 +67,10 @@ int main(int argc, char** argv) {
 	mediacycle = new MediaCycle(MEDIA_TYPE_VIDEO);
 	//  mediacycle->addPlugin ("/Users/dtardieu/src/Numediart/ticore-app/Applications/Numediart/MediaCycle/src/Builds/darwin-x86/plugins/eyesweb/Debug/mc_eyesweb.dylib");
 	//mediacycle->importDirectory("/Users/dtardieu/data/DANCERS/Video/FrontTest/", 0);
-	mediacycle->importLibrary(path);
+	
+	
+//	mediacycle->importACLLibrary(path);
+	
 	mediacycle->getBrowser()->randomizePositions();
 	//mediacycle->getBrowser()->setClusterNumber(1);
 	mediacycle->startTcpServer(12345,5,dancers_tcp_callback);
@@ -76,11 +79,13 @@ int main(int argc, char** argv) {
 	while(1) {
 		sleep(30);
 	}
-	
-	saveLibraryAsXml(mediacycle, xmlpath);
-	mediacycle->saveAsLibrary(mypath+"dancers-ex.acl");
+//	
+//	saveLibraryAsXml(mediacycle, xmlpath);
+//	mediacycle->saveAsLibrary(mypath+"dancers-ex.acl");
+	delete mediacycle;	
 	return (EXIT_SUCCESS);
 }
+
 static void dancers_tcp_callback(char *buffer, int l, char **buffer_send, int *l_send, void *userData) {
 	MediaCycle *that = (MediaCycle*)userData;
 	processTcpMessageFromInstallation(that, buffer, l, buffer_send, l_send);
@@ -95,7 +100,7 @@ IDmotClef = position dans le header du XML en commençant par 0
 
 Message : start ou redraw
 spec->num
-0 nbVideo
+0 nbVideo (nbVideo = 3 bits)
 num->spec
 0 nbVideo IDVideo posX posY
 1 nbMotClef IDmotClef posX posY
@@ -194,7 +199,6 @@ int processTcpMessageFromInstallation(MediaCycle *that, char *buffer, int l, cha
 			// XS timing
 			clock_t t1=clock();
 			cout << "Execution time: " << (t1-t0)*1000/CLOCKS_PER_SEC << " ms." << endl;
-
 			// end XS
 			break;
 		}
@@ -242,7 +246,11 @@ void startOrRedraw(MediaCycle *mediacycle, int nbVideo, char **buffer_send, int*
 		cerr << "<startOrRedraw> : not enough loop attributes" << endl;
 		return;
 	}
-	string sbuffer_send = "";
+	ostringstream onb ;
+	onb.fill('0'); // fill with zeros (otherwise will leave blanks)
+	onb << setw(3) << nbVideo;
+	
+	string sbuffer_send = "0" + onb.str(); // "0" is for message type
 	for (unsigned int i=0; i <trunc_indices.n_rows ;i++){
 		int l = trunc_indices[i];
 		// positions should in range [0:999], which is a fraction of the screen size
@@ -251,7 +259,7 @@ void startOrRedraw(MediaCycle *mediacycle, int nbVideo, char **buffer_send, int*
 		int posy = (int) loop_attributes[l].currentPos.y;
 		ostringstream oss ;
 		oss.fill('0'); // fill with zeros (otherwise will leave blanks)
-		oss << setw(3) << i << setw(3) << posx << setw(3)<< posy; // fixed format
+		oss << setw(6) << i << setw(3) << posx << setw(3)<< posy; // fixed format
 		cout << oss.str() << endl;
 		
 		sbuffer_send += oss.str(); // concatenates all videos in one string
@@ -381,7 +389,7 @@ void readLibraryXml(MediaCycle* mediacycle, std::string filename){
 std::string generateID(std::string filename){
 	const int nbCities=2;
 	const std::string cityNames[nbCities] = {"Bru", "Par"};
-	const std::string cityID[nbCities] = {"00", "11"};
+	const std::string cityID[nbCities] = {"00", "01"};
 	std::string IDs, numDancer, numTry, city;
 	int posCity;
 	int posSep = filename.find_last_of("/\\");

@@ -141,6 +141,55 @@ int ACMediaLibrary::importDirectory(std::string _path, int _recursive, int id, A
 	
 }
 
+// C++ version
+int ACMediaLibrary::openACLLibrary(std::string _path, bool aInitLib){
+	// this does not re-initialize the media_library
+	// but appends new media to it.
+	// except if aInitLib is set to true
+	int ret, file_count=0;
+	
+	ifstream library_file;
+	library_file.open(_path.c_str());
+	
+	if ( ! library_file ) {
+		cerr << "<ACMediaLibrary::openACLLibrary> error reading file " << _path << endl;
+		return 0;
+	}
+	else{
+		cout << "opening " << _path << endl;
+	}
+	ACMedia* local_media;
+	// --TODO-- ???  how does it know which type of media ?
+	// have to be set up  at some point using setMediaType()
+	if (aInitLib) {
+		cleanLibrary();
+	}
+	media_library.resize(0);
+	do {
+		local_media = ACMediaFactory::create(media_type);
+		if (local_media != NULL) {
+			ret = local_media->loadACL(library_file);
+			if (ret) {
+				std::cout << "Media Libray Size : " << media_library.size() << std::endl;
+				media_library.push_back(local_media);
+				file_count++;
+			}
+		}
+		else {
+			std::cout<<"<ACMediaLibrary::openACLLibrary> : Wrong Media Type" << std::endl;
+		}		
+	}
+	while (ret>0);
+	library_file.close();
+	return file_count;
+}
+
+// C++ version
+int ACMediaLibrary::saveACLLibrary(std::string _path){
+	ofstream library_file (_path.c_str());
+}
+
+
 int ACMediaLibrary::openLibrary(std::string _path, bool aInitLib){
 	// this does not re-initialize the media_library
 	// but appends new media to it.
@@ -161,7 +210,7 @@ int ACMediaLibrary::openLibrary(std::string _path, bool aInitLib){
 		do {
 			local_media = ACMediaFactory::create(media_type);
 			if (local_media != NULL) {
-				ret = local_media->load(library_file);
+				ret = local_media->load(library_file); // XS TODO try loadACL
 				if (ret) {
 					std::cout << "Media Libray Size : " << media_library.size() << std::endl;
 					media_library.push_back(local_media);

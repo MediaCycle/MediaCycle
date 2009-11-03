@@ -78,6 +78,9 @@ public:
 	ACMediaType	getType() {return this->_type;}	
 	virtual void save(FILE *){}
 	virtual int load(FILE*){}
+	virtual void saveACL(ofstream &library_file){}
+	virtual int loadACL(ifstream &library_file){}
+
 	virtual int import(std::string _path, int id=-1, ACPluginManager *acpl=NULL);
 	// XS 23/09/09 : I implemented import in ACMedia.cpp, since it is the same for all media
 	// XS 23/09/09 : import returns 1 if it worked, 0 if it failed
