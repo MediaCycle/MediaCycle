@@ -335,8 +335,8 @@ void ACOsgImageRenderer::updateNodes(double ratio) {
 	
 	float localscale;
 	float maxdistance = 0.2;
-	float maxscale = 1.5;
-	float minscale = 0.5;				
+	float maxscale = 1;
+	float minscale = 0.3;				
 	// Apply "rotation" to compensate camera rotation
 	x = omr*p.x + ratio*p2.x;
 	y = omr*p.y + ratio*p2.y;

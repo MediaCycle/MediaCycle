@@ -53,7 +53,7 @@ protected:
 	ACMediaType _type;
 	char  **text_tags;
 	char  **hyper_links;	
-	
+	double duration;
 public:
 	ACMedia() { mid = -1; };
 	virtual ~ACMedia() {};
@@ -61,6 +61,9 @@ public:
 	void setId(int _id) {mid = _id;}; // SD TODO - should check for duplicate id?
 	int getId() {return mid;};
 	
+	void setDuration(double iduration){this->duration = iduration;}
+	double getDuration(){return this->duration;}
+
 	std::vector<ACMediaFeatures*> &getFeatures() { return features; }
 	ACMediaFeatures* &getFeatures(int i);
 	int getNumberOfFeatures() {return features.size();}

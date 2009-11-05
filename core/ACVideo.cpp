@@ -48,6 +48,7 @@ ACVideo::ACVideo() : ACMedia() {
 	height = 0;
 	thumbnail_width = 0;
 	thumbnail_height = 0;
+	duration = 0;
 }	
 
 ACVideo::~ACVideo() {
@@ -140,6 +141,7 @@ void ACVideo::save(FILE* library_file) { // was saveloop
   }
 }
 #else
+fprintf(library_file, "%f\n", duration);
 fprintf(library_file, "%d\n", mid);
 fprintf(library_file, "%d\n", width);
 fprintf(library_file, "%d\n", height);
@@ -202,6 +204,7 @@ int ACVideo::load(FILE* library_file) { // was loadLoop
 		  exit(-1);
 		}
 		
+		ret = fscanf(library_file, "%lf", &duration);
 		ret = fscanf(library_file, "%d", &mid);
 		ret = fscanf(library_file, "%d", &width);
 		ret = fscanf(library_file, "%d", &height);

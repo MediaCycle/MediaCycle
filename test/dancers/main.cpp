@@ -68,10 +68,10 @@ int main(int argc, char** argv) {
 	mediacycle->addPlugin ("/Users/dtardieu/src/Numediart/ticore-app/Applications/Numediart/MediaCycle/src/Builds/darwin-x86/plugins/eyesweb/Debug/mc_eyesweb.dylib");
 	mediacycle->addPlugin ("/Users/dtardieu/src/Numediart/ticore-app/Applications/Numediart/MediaCycle/src/Builds/darwin-x86/plugins/visualisation/Debug/mc_visualisation.dylib");
 	mediacycle->setVisualisationPlugin("Visualisation");
-	mediacycle->importDirectory("/Users/dtardieu/data/DANCERS/Video/FrontTest/", 0);
+	//	mediacycle->importDirectory("/Users/dtardieu/data/DANCERS/Video/FrontTest/", 0);
 	
-	//	mediacycle->importLibrary(mypath+"dancers-ex-2.acl");
-	
+	mediacycle->importLibrary(mypath+"test-data-2.acl");
+	mediacycle->saveAsLibrary(mypath+"test-data-3.acl");
 //	mediacycle->importACLLibrary(path);
 	
 //	mediacycle->getBrowser()->randomizePositions();
@@ -80,8 +80,7 @@ int main(int argc, char** argv) {
 	//readLibraryXml(mediacycle, "/Users/dtardieu/Desktop/dancers-exemple.xml");
 	
 //	
-//	saveLibraryAsXml(mediacycle, xmlpath);
-	mediacycle->saveAsLibrary(mypath+"dancers-ex-2.acl");
+	saveLibraryAsXml(mediacycle, mypath+"test-data-2.xml");
 	delete mediacycle;	
 	return (EXIT_SUCCESS);
 }
@@ -317,8 +316,8 @@ void saveLibraryAsXml(MediaCycle* mediacycle, string _path) {
 	/// ITEMS //
 	fprintf(library_file, "%s\n", "<items>");
 	for(int i=0; i<n_loops; i++) {
-		fprintf(library_file, "<v>");
 		local_media = media_library->getItem(i);    
+		fprintf(library_file, "<v duration=\"%.1lf\">", local_media->getDuration());
 		
 		// printing ID
 		ID = generateID(local_media->getFileName());
