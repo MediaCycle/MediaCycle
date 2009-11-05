@@ -52,10 +52,14 @@
 
 using std::cout;
 using std::endl;
+using std::string;
 
-// XS to get (+/- live) visual display of the time series
+// XS uncomment this to get (+/- live) visual display of the time series
+// #define VISUAL_CHECK_GNUPLOT
+
+#ifdef VISUAL_CHECK_GNUPLOT
 #include "gnuplot_i.hpp"
-
+#endif //  VISUAL_CHECK_GNUPLOT
 // ----------- uncomment this to get visual display using highgui and verbose -----
 //#define VISUAL_CHECK
 #define VERBOSE
@@ -67,17 +71,20 @@ const int ACVideoAnalysis::ystar = 220;
 ACVideoAnalysis::ACVideoAnalysis(){
 	capture = NULL;
 	clean();
+	// NOT initialized, has to be done from outside after setting file name
 }
 
 ACVideoAnalysis::ACVideoAnalysis(const std::string &filename){
 	capture = NULL;
 	clean();
 	setFileName(filename);
+	initialize(); // done here, since we know the file name
 }
 
 void ACVideoAnalysis::clean(){
 	if (capture) cvReleaseCapture(&capture);
 	HAS_TRAJECTORY = false;
+	HAS_BLOBS = false;
 	frame_counter = 0;
 	all_blobs.clear();
 	all_blobs_time_stamps.clear();
@@ -87,15 +94,15 @@ void ACVideoAnalysis::clean(){
 	pixel_speeds.clear();
 	width = height = depth = fps = nframes = 0;
 	threshU = threshL = 0;
-
+	
 	//	averageHistogram = 0;
 }
 
 void ACVideoAnalysis::rewind(){
 	cvSetCaptureProperty(capture, CV_CAP_PROP_POS_FRAMES, 0); 	
-// old way:
-//	if (capture) cvReleaseCapture(&capture);
-//	capture = cvCreateFileCapture(file_name.c_str()); 
+	// old way:
+	//	if (capture) cvReleaseCapture(&capture);
+	//	capture = cvCreateFileCapture(file_name.c_str()); 
 }
 
 ACVideoAnalysis::~ACVideoAnalysis(){
@@ -107,6 +114,8 @@ ACVideoAnalysis::~ACVideoAnalysis(){
 }
 
 void ACVideoAnalysis::setFileName(const std::string &filename){
+	// XS TODO: test if file exists
+
 	file_name=filename;
 }
 
@@ -125,7 +134,7 @@ int ACVideoAnalysis::initialize(){
 	height  = (int) cvGetCaptureProperty(capture, CV_CAP_PROP_FRAME_HEIGHT);
 	fps     = (int) cvGetCaptureProperty(capture, CV_CAP_PROP_FPS);
 	nframes = (int) cvGetCaptureProperty(capture,  CV_CAP_PROP_FRAME_COUNT);
-//	videocodec = (int) cvGetCaptureProperty(capture,  CV_CAP_PROP_FOURCC);
+	//	videocodec = (int) cvGetCaptureProperty(capture,  CV_CAP_PROP_FOURCC);
 	// extra, not stored in capture
 	depth = IPL_DEPTH_8U; // XS TODO: adapt if necessary ? check with first frame?
 	
@@ -139,7 +148,7 @@ int ACVideoAnalysis::initialize(){
 		init_ok = 0;
 	}
 	// test fps ? does not really matter if badly encoded...  
-
+	
 #ifdef VERBOSE
 	cout << "width : " << width << endl;
 	cout << "height : " << height << endl;
@@ -150,7 +159,7 @@ int ACVideoAnalysis::initialize(){
 	
 	return init_ok; // to be consistent with MycolorImage::SetImageFile : returns 0 if works
 }
-	
+
 IplImage* ACVideoAnalysis::getNextFrame(){
 	IplImage* tmp = 0; 
 	if(!cvGrabFrame(capture)){              // capture a frame
@@ -194,7 +203,7 @@ void ACVideoAnalysis::histogramEqualize(const IplImage* bg_img) {
 		IplImage* planes[] = { h_plane, s_plane };
 		
 		cvAbsDiff(frame, bg_img, frame);
-
+		
 		cvCvtColor( frame, hsv, CV_BGR2HSV );
 		cvCvtPixToPlane( hsv, h_plane, s_plane, v_plane, 0 );
 		
@@ -207,7 +216,7 @@ void ACVideoAnalysis::histogramEqualize(const IplImage* bg_img) {
 #ifdef VISUAL_CHECK
 		cvShowImage( "Source", frame );
 #endif // VISUAL_CHECK
-	
+		
 		// Create an image to visualize the histogram
 		//	int scale = 10;
 		//	IplImage* hist_img = cvCreateImage( cvSize( h_bins * scale, s_bins * scale ), 8, 3 );
@@ -373,7 +382,7 @@ void ACVideoAnalysis::computeBlobs(IplImage* bg_img, int bg_thresh, int big_blob
 	// supposes 3-channels image (in whatever mode) but would work on BW images since OpenCV converts it in 3 channels
 	all_blobs.clear();
 	all_blobs_time_stamps.clear();	// just to make sure...
-
+	
 	if (bg_img == NULL){
 		bg_img = this->computeMedianImage();
 		if (bg_img == NULL){
@@ -390,9 +399,7 @@ void ACVideoAnalysis::computeBlobs(IplImage* bg_img, int bg_thresh, int big_blob
 	// 1 channel temporary images
 	IplImage* bitImage = cvCreateImage(cvSize(width,height),depth,1);
 	IplImage* bwImage = cvCreateImage(cvSize(width,height),depth,1);
-	
-	int xi,xf,yi,yf;
-	
+		
 	for(int i = 0; i < nframes-1; i++){
 		frame = getNextFrame();
 		cvAbsDiff(frame, bg_img, frame);
@@ -406,17 +413,18 @@ void ACVideoAnalysis::computeBlobs(IplImage* bg_img, int bg_thresh, int big_blob
 	}
 	cvReleaseImage(&bitImage);
 	cvReleaseImage(&bwImage);
+	HAS_BLOBS = true;
 }
 
 void ACVideoAnalysis::computeBlobsInteractively(IplImage* bg_img, bool merge_blobs, int bg_thesh, int big_blob, int small_blob){
 	all_blobs.clear();
 	all_blobs_time_stamps.clear();	// just to make sure...
-
-#ifdef VISUAL_CHECKe
+	
+#ifdef VISUAL_CHECK_GNUPLOT
 	Gnuplot g1 = Gnuplot("lines");
     g1.reset_plot();
 	std::vector<double> ci;
-#endif //VISUAL_CHECK
+#endif //VISUAL_CHECK_GNUPLOT
 	
 	if (bg_img == NULL){
 		bg_img = this->computeMedianImage();
@@ -429,7 +437,7 @@ void ACVideoAnalysis::computeBlobsInteractively(IplImage* bg_img, bool merge_blo
 	
 	int slider_big_blob = big_blob;
 	int slider_bg_thresh = bg_thesh;
-		
+	
 	// to display image with blobs superimposed
 	IplImage *saveImage = cvCreateImage(cvSize(width,height),depth,1);
 	// font for frame and blob counter; 
@@ -461,7 +469,7 @@ void ACVideoAnalysis::computeBlobsInteractively(IplImage* bg_img, bool merge_blo
 		// XS closing filter (to remove dips) 
 		cvDilate(bitImage, bitImage);
 		cvErode(bitImage, bitImage);
-
+		
 		CBlobResult blobs;
 		blobs = CBlobResult( bitImage, NULL, 255 );
 		blobs.Filter( blobs, B_EXCLUDE, CBlobGetArea(), B_LESS,  slider_big_blob );
@@ -470,19 +478,17 @@ void ACVideoAnalysis::computeBlobsInteractively(IplImage* bg_img, bool merge_blo
 		
 		snprintf (str, 64, "[%03d] : %03d blobs", i, blobs.GetNumBlobs());
 		cvPutText (saveImage, str, cvPoint (10, 20), &font, CV_RGB (0, 255, 100));
-
+		
 		if (blobs.GetNumBlobs() > 0){
 			if (merge_blobs) {
-				// XS : blobs not really merge but get stats 
-				// on the whole list of blobs (in CBlobResult)
+				// for visual purposes only, blobs are not really "merged"
 				CvRect rbox = blobs.GetBoundingBox();				
-
-#ifdef VISUAL_CHECKe
-				ci.push_back( blobs.Area() / (rbox.width*rbox.height) );
-				g1.reset_plot();
-				g1.plot_x(ci,"ci");
-#endif //VISUAL_CHECK
-
+//#ifdef VISUAL_CHECK_GNUPLOT
+//				ci.push_back( blobs.Area() / (rbox.width*rbox.height) );
+//				g1.reset_plot();
+//				g1.plot_x(ci,"ci");
+//#endif //VISUAL_CHECK_GNUPLOT
+				
 				// for visual purposes:
 				for (int j = 0; j < blobs.GetNumBlobs(); j++ ) {
 					blobs.GetBlob(j)->FillBlob(saveImage, CV_RGB(255,0,0));
@@ -491,26 +497,25 @@ void ACVideoAnalysis::computeBlobsInteractively(IplImage* bg_img, bool merge_blo
 				CvPoint ii = cvPoint(rbox.x,rbox.y);
 				CvPoint ff = cvPoint(rbox.x+rbox.width,rbox.y+rbox.height);
 				cvRectangle( saveImage, ii, ff, CV_RGB(255,255,0), 2, 8, 0); // thickness, linetype, shift
-//				cvEllipseBox( saveImage, mergedBlob->GetEllipse(), CV_RGB(255,0,255), 2,8,0); 
+				//				cvEllipseBox( saveImage, mergedBlob->GetEllipse(), CV_RGB(255,0,255), 2,8,0); 
 			}
 			else {
 				for (int j = 0; j < blobs.GetNumBlobs(); j++ ) {
-					CBlob *currentBlob = new CBlob();
-					currentBlob = blobs.GetBlob(j);
+					CBlob *currentBlob = blobs.GetBlob(j);
 					currentBlob->FillBlob(saveImage, CV_RGB(255,0,0));
 					xf=currentBlob->MaxX();
 					xi=currentBlob->MinX();
 					yf=currentBlob->MaxY();
 					yi=currentBlob->MinY();			
 					cvRectangle( saveImage, cvPoint(xi, yi), cvPoint (xf, yf), CV_RGB(255,255,0), 2, 8, 0); // thickness, linetype, shift
-//					cvEllipseBox(saveImage, currentBlob->GetEllipse(), CV_RGB(255,0,255), 2,8,0); 					
-					delete currentBlob;
+					//					cvEllipseBox(saveImage, currentBlob->GetEllipse(), CV_RGB(255,0,255), 2,8,0); 					
 				}
 			}
 		}
 		else {
-			cout << "no blobs : " << cvGetCaptureProperty(capture, CV_CAP_PROP_POS_FRAMES) <<endl;
+			cout << "no blobs for frame: " << cvGetCaptureProperty(capture, CV_CAP_PROP_POS_FRAMES) <<endl;
 		}
+		
 		cvShowImage("ORIG-BG",frame);
 		cvShowImage("BLOBS", saveImage );					
 		cvShowImage("BW",bitImage);
@@ -524,15 +529,21 @@ void ACVideoAnalysis::computeBlobsInteractively(IplImage* bg_img, bool merge_blo
 	cvDestroyWindow("ORIG-BG");
 	cvDestroyWindow("BW");
 	cvDestroyWindow("BLOBS");
+	HAS_BLOBS = true;
+
 }
 
 void ACVideoAnalysis::computeBlobsUL(IplImage* bg_img, bool merge_blobs, int big_blob, int small_blob){
-// different threshold upper/lower part of the image
+	// different threshold upper/lower part of the image
 	all_blobs.clear();
 	all_blobs_time_stamps.clear();	// just to make sure...
 	if (bg_img == NULL || threshU ==0 || threshL ==0){
-		cout << threshU << " " << threshL << " " << endl ;
-		if (bg_img == NULL) cout << "NULL" << endl;
+		if (bg_img == NULL){
+			cout << "No bg image provided for ACVideoAnalysis::computeBlobsUL. Computing Median" << endl;
+		}
+		else{
+			cout << "No bg threshold provided for ACVideoAnalysis::computeBlobsUL. Computing it from Median" << endl;
+		}
 		bg_img = this->computeMedianImage();
 		if (bg_img == NULL){
 			std::cerr << "<ACVideoAnalysis::computeBlobsInteractively>: error computing average image" << endl;
@@ -548,7 +559,7 @@ void ACVideoAnalysis::computeBlobsUL(IplImage* bg_img, bool merge_blobs, int big
 	IplImage* bwImage = cvCreateImage(cvSize(width,height),depth,1);
 	
 	// XS Essai running avg
-//	IplImage* r_avg_img = cvCreateImage(cvSize(width,height),IPL_DEPTH_32F,1);
+	//	IplImage* r_avg_img = cvCreateImage(cvSize(width,height),IPL_DEPTH_32F,1);
 #ifdef VISUAL_CHECK
 	CvFont font;
 	char str[64];
@@ -559,9 +570,9 @@ void ACVideoAnalysis::computeBlobsUL(IplImage* bg_img, bool merge_blobs, int big
 	cvMoveWindow("BW", 700, 400);
 	cvNamedWindow( "BLOBS", CV_WINDOW_AUTOSIZE);
 	cvMoveWindow("BLOBS", 50, 400);	
+	int xi,xf,yi,yf;
 #endif // VISUAL_CHECK
 	
-	int xi,xf,yi,yf;
 	int t_u=threshU*2;
 	int t_l=threshL*2;
 	int joeystar = ystar + 40;
@@ -575,39 +586,62 @@ void ACVideoAnalysis::computeBlobsUL(IplImage* bg_img, bool merge_blobs, int big
 		cvSetImageROI(bwImage, cvRect(0,0,width,joeystar));		
 		cvSetImageROI(bitImage, cvRect(0,0,width,joeystar));		
 		cvThreshold(bwImage, bitImage, t_u,255,CV_THRESH_BINARY_INV);
-
+		
 		// LOW
 		cvSetImageROI(bwImage, cvRect(0,joeystar,width,height));		
 		cvSetImageROI(bitImage, cvRect(0,joeystar,width,height));		
 		cvThreshold(bwImage, bitImage, t_l,255,CV_THRESH_BINARY_INV);
-
+		
 		// RESET ROIs
 		cvSetImageROI(bwImage, cvRect(0,0,width,height));	
 		cvSetImageROI(bitImage, cvRect(0,0,width,height));	
-
+		
 		// tried this to smooth the blob, but it removes too much of the blob
 		// cvMorphologyEx( bitImage, bitImage, NULL, NULL, CV_MOP_CLOSE, 2);
 		//cvSmooth(bitImage, bitImage, CV_MEDIAN, 3, 5);
 		
 		// does not work:
-//		cvRunningAvg (bitImage, r_avg_img, 0.5);
-//		cvConvertImage(r_avg_img, bitImage);
+		//		cvRunningAvg (bitImage, r_avg_img, 0.5);
+		//		cvConvertImage(r_avg_img, bitImage);
 		
 		CBlobResult blobs;
 		blobs = CBlobResult( bitImage, NULL, 255 ); // find blobs in image
 		blobs.Filter( blobs, B_EXCLUDE, CBlobGetArea(), B_LESS, big_blob );
-		all_blobs.push_back(blobs);
-		all_blobs_time_stamps.push_back(cvGetCaptureProperty(capture, CV_CAP_PROP_POS_FRAMES));
-
+		if (blobs.GetNumBlobs() > 0){
+			all_blobs.push_back(blobs);
+			all_blobs_time_stamps.push_back(cvGetCaptureProperty(capture, CV_CAP_PROP_POS_FRAMES));
+		}
 #ifdef VISUAL_CHECK
 		snprintf (str, 64, "[%03d] : %03d blobs", i, blobs.GetNumBlobs());
 		cvPutText (frame, str, cvPoint (10, 20), &font, CV_RGB (0, 255, 100));
-
-		// for visual purposes:
-		for (int j = 0; j < blobs.GetNumBlobs(); j++ ) {
-			blobs.GetBlob(j)->FillBlob(frame, CV_RGB(255,0,0));
+		if (blobs.GetNumBlobs() > 0){
+			if (merge_blobs) {
+				// for visual purposes only, blobs are not really "merged"
+				CvRect rbox = blobs.GetBoundingBox();				
+				for (int j = 0; j < blobs.GetNumBlobs(); j++ ) {
+					blobs.GetBlob(j)->FillBlob(frame, CV_RGB(255,0,0));
+				}
+				
+				CvPoint ii = cvPoint(rbox.x,rbox.y);
+				CvPoint ff = cvPoint(rbox.x+rbox.width,rbox.y+rbox.height);
+				cvRectangle( frame, ii, ff, CV_RGB(255,255,0), 2, 8, 0); // thickness, linetype, shift
+			}
+			else {
+				for (int j = 0; j < blobs.GetNumBlobs(); j++ ) {
+					CBlob *currentBlob = blobs.GetBlob(j);
+					currentBlob->FillBlob(frame, CV_RGB(255,0,0));
+					xf=currentBlob->MaxX();
+					xi=currentBlob->MinX();
+					yf=currentBlob->MaxY();
+					yi=currentBlob->MinY();			
+					cvRectangle( frame, cvPoint(xi, yi), cvPoint (xf, yf), CV_RGB(255,255,0), 2, 8, 0); // thickness, linetype, shift
+				}
+			}
 		}
-
+		else {
+			cout << "no blobs for frame: " << cvGetCaptureProperty(capture, CV_CAP_PROP_POS_FRAMES) <<endl;
+		}
+				
 		cvShowImage("ORIG-BG",frame);
 		cvShowImage("BLOBS", bwImage );					
 		cvShowImage("BW",bitImage);
@@ -621,6 +655,7 @@ void ACVideoAnalysis::computeBlobsUL(IplImage* bg_img, bool merge_blobs, int big
 	cvDestroyWindow("BW");
 	cvDestroyWindow("BLOBS");	
 #endif // VISUAL_CHECK
+	HAS_BLOBS = true;
 }
 
 void ACVideoAnalysis::computeOpticalFlow(){
@@ -652,7 +687,7 @@ void ACVideoAnalysis::computeOpticalFlow(){
 	status = (char*)cvAlloc(MAX_COUNT);
 	
 	for(int ifram=0; ifram<nframes-1; ifram++) {
-		int i, k, c;
+		int i, k;
 		frame = getNextFrame(); // XS this could be at the end of loop
 		currentframe++;
 		if (currentframe%5==0) need_to_init = 1;
@@ -694,7 +729,7 @@ void ACVideoAnalysis::computeOpticalFlow(){
 				p = cvPointFrom32f(points[0][i]);
 				q = cvPointFrom32f(points[1][i]);
 				//		double a = atan2( (double) p.y - q.y, (double) p.x - q.x );
-				double m = sqrt( (p.y - q.y)*(p.y - q.y) + (p.x - q.x)*(p.x - q.x) );
+				// double m = sqrt( (p.y - q.y)*(p.y - q.y) + (p.x - q.x)*(p.x - q.x) );
 				cvLine( image, p , q , CV_RGB(255,0,0), 1, 8,0);
 				//				printf("%d;%d;%d;%g;%g\n", currentframe, p.x, p.y, a, m);
 				// XS break
@@ -735,19 +770,20 @@ void ACVideoAnalysis::computeOpticalFlow(){
 
 
 void ACVideoAnalysis::computeMergedBlobsTrajectory(float blob_dist){
-  blob_centers.clear();
-  CBlobResult currentBlob;
-  
-  for (unsigned int i=0; i< all_blobs.size(); i++){
-    std::vector<float> tmp;
-    currentBlob = all_blobs[i];
-    CvPoint center = currentBlob.GetCenter();
-    tmp.push_back(center.x);
-    tmp.push_back(center.y);
-    blob_centers.push_back(tmp);
-  }
-  HAS_TRAJECTORY = true;
-  
+	blob_centers.clear();
+	CBlobResult currentBlob;
+	if (!HAS_BLOBS) this->computeBlobsUL();
+	
+	for (unsigned int i=0; i< all_blobs.size(); i++){
+		std::vector<float> tmp;
+		currentBlob = all_blobs[i];
+		CvPoint center = currentBlob.GetCenter();
+		tmp.push_back(center.x);
+		tmp.push_back(center.y);
+		blob_centers.push_back(tmp);
+	}
+	HAS_TRAJECTORY = true;
+	
 }
 
 void ACVideoAnalysis::computeMergedBlobsSpeeds(float blob_dist){
@@ -755,7 +791,7 @@ void ACVideoAnalysis::computeMergedBlobsSpeeds(float blob_dist){
 	blob_speeds.clear();
 	blob_center cb_prev;
 	blob_center cb = blob_centers[0];
-
+	
 	for (unsigned int i=1; i< all_blobs.size(); i++){ // not i=0
 		blob_center speed;
 		cb_prev = cb;
@@ -783,17 +819,17 @@ IplImage* ACVideoAnalysis::computeAverageImage(int nskip, int nread, int njump, 
 	if (nread ==0) nread = nframes-nskip;
 	if (njump == -1) njump = 50;		// default values
 	nread = (nread/njump) * (njump); // integer manipulation to avoid getting over bounds (then cvcapture starts again from beginning)
-
+	
 #ifdef VERBOSE
 	cout << "Average : skipping " << nskip << " frames" << endl;
 	cout << "total frames to read " << nread << endl;
 	cout << "(by jumps of) " << njump << endl;
 #endif // VERBOSE
-
+	
 	IplImage *frame;
 	IplImage *av_img = cvCreateImage (cvSize (width, height), IPL_DEPTH_32F, 3);
 	int cnt = 0; 
-
+	
 	// to skip nskip frames:
 	int cursor = nskip;
 	cvSetCaptureProperty(capture, CV_CAP_PROP_POS_FRAMES, cursor); 	
@@ -805,7 +841,7 @@ IplImage* ACVideoAnalysis::computeAverageImage(int nskip, int nread, int njump, 
 	cvInitFont (&font, CV_FONT_HERSHEY_COMPLEX, 0.7, 0.7);
 	char str[64];
 #endif // VISUAL_CHECK
-
+	
 	for (int i = 0; i <  nread/njump; i++) {
 		cnt++;	
 		frame = getNextFrame();
@@ -857,16 +893,16 @@ IplImage* ACVideoAnalysis::computeMedianImage(int nskip, int nread, int njump, s
 	if (nread ==0) nread = nframes-nskip;
 	if (njump == -1) njump = 50;		// default values
 	nread = (nread/njump) * (njump); // integer manipulation to avoid getting over bounds (then cvcapture starts again from beginning)
-
+	
 #ifdef VERBOSE
 	cout << "Median : skipping " << nskip << " frames" << endl;
 	cout << "total frames to read " << nread << endl;
 	cout << "(by jumps of) " << njump << endl;
 #endif // VERBOSE
-
+	
 	int nbins = 256;
 	int histsize = nbins*height*width;
-//	int* histograms = new int[histsize] ;
+	//	int* histograms = new int[histsize] ;
 	//XS make histogram template ?
 	BgrPixel* histograms = new BgrPixel[histsize] ;
 	for (int i=0; i<histsize; i++) {
@@ -877,7 +913,7 @@ IplImage* ACVideoAnalysis::computeMedianImage(int nskip, int nread, int njump, s
 	
 	IplImage *frame;
 	int cnt = 0; 
-
+	
 	// to skip nskip frames:
 	int cursor = nskip;
 	cvSetCaptureProperty(capture, CV_CAP_PROP_POS_FRAMES, cursor); 	
@@ -910,12 +946,11 @@ IplImage* ACVideoAnalysis::computeMedianImage(int nskip, int nread, int njump, s
 	
 	cout << "finished computing for "<< cnt << " images. transfering data" << endl;
 	
-	char* new_image_data;
 	float mid=cnt/2; // *nbins
-
+	
 	// output median image
 	IplImage *result_frame = cvCreateImage (cvSize (width, height), IPL_DEPTH_8U, 3);
-
+	
 	for (int r=0; r<height; r++){
 		for (int c=0; c<width; c++){
 			BgrPixel accum;
@@ -942,11 +977,11 @@ IplImage* ACVideoAnalysis::computeMedianImage(int nskip, int nread, int njump, s
 		}
 	}
 	
-//	// debug
-//	cvWaitKey(0);
-//	cvShowImage(title.c_str(), result_frame); 
-//	cvWaitKey(0);
-
+	//	// debug
+	//	cvWaitKey(0);
+	//	cvShowImage(title.c_str(), result_frame); 
+	//	cvWaitKey(0);
+	
 	// XS to get separate thresholds
 	CvScalar sum_median;
 	sum_median = cvSum (result_frame);
@@ -964,18 +999,18 @@ IplImage* ACVideoAnalysis::computeMedianImage(int nskip, int nread, int njump, s
 	}
 	threshU/=3;
 	cout << "threshU = " << threshU << endl;
-
+	
 	cvSetImageROI(result_frame, cvRect(0,ystar,width,height));		
 	sum_median = cvSum (result_frame);
-	 this->threshL=0;
+	this->threshL=0;
 	for(int j = 0; j < 3; j++){
 		int v=sum_median.val[j]/((height-ystar)*width);
 		cout << "sum over median -- low: " << j << " = " << v << endl;
-		 this->threshL+=v;
+		this->threshL+=v;
 	}	
 	threshL/=3;
 	cout << "threshL = " << threshL << endl;
-
+	
 	cvSetImageROI(result_frame, cvRect(0,0,width,height));	
 	// END XS 
 	
@@ -984,7 +1019,7 @@ IplImage* ACVideoAnalysis::computeMedianImage(int nskip, int nread, int njump, s
 	}
 	
 	delete histograms;
-
+	
 	return result_frame;
 }
 
@@ -1022,7 +1057,7 @@ IplImage* ACVideoAnalysis::computeMedianNoBlobImage(std::string fsave, IplImage 
 	cvNamedWindow("NOBLOBS", CV_WINDOW_AUTOSIZE);
 	cvMoveWindow("NOBLOBS", 50, 400);	
 #endif // VISUAL_CHECK
-
+	
 	for (int i=0;i<all_blobs.size();i++){
 		cout << i << endl;
 		if (all_blobs[i].GetNumBlobs() == 0){
@@ -1048,8 +1083,7 @@ IplImage* ACVideoAnalysis::computeMedianNoBlobImage(std::string fsave, IplImage 
 #ifdef VISUAL_CHECK
 	cvDestroyWindow("NOBLOBS");
 #endif // VISUAL_CHECK
-
-	char* new_image_data;
+	
 	float mid=cnt/2; // *nbins
 	
 	// output median image
@@ -1111,7 +1145,7 @@ void ACVideoAnalysis::computePixelSpeed() {
 		file_name << endl;
 		return;
 	}
-
+	
 	CvScalar sum_diff_frames ;
 	float speed = 0.0;
 	
@@ -1129,7 +1163,7 @@ void ACVideoAnalysis::computePixelSpeed() {
 	cvNamedWindow ("Input", CV_WINDOW_AUTOSIZE);
 	cvNamedWindow ("Substraction", CV_WINDOW_AUTOSIZE);
 #endif //VISUAL_CHECK
-
+	
 	for(int i = 1; i < nframes; i++){ 
 		cvConvert (tmp_frame, previous_frame);
 		tmp_frame = this->getNextFrame();
@@ -1146,7 +1180,7 @@ void ACVideoAnalysis::computePixelSpeed() {
 #ifdef VISUAL_CHECK
 		cvShowImage ("Input", tmp_frame);
 		cvShowImage ("Substraction", diff_frames_U);
-		int c = cvWaitKey (10);
+		cvWaitKey (10);
 #endif //VISUAL_CHECK
 		tmp_frame = this->getNextFrame();
 	}
@@ -1158,7 +1192,7 @@ void ACVideoAnalysis::computePixelSpeed() {
 	//	cvReleaseImage (&tmp_frame); 
 	// XS !! tmp_frame will be release by cvReleasedCapture in cvAnalyzedVideo
 	// releasing it here will result in "double free" error message
-		
+	
 #ifdef VISUAL_CHECK
 	cvDestroyWindow ("Input");
 	cvDestroyWindow ("Substraction");
@@ -1255,14 +1289,9 @@ void ACVideoAnalysis::browseInWindow(std::string title, bool has_win){
 	cvResizeWindow(title.c_str(), 800, 600 );
 	CvFont font;
 	cvInitFont (&font, CV_FONT_HERSHEY_COMPLEX, 0.7, 0.7);
-	char str[64];
 	int c;
 	g_capture = cvCreateFileCapture(file_name.c_str()); 
-    int frames = (int) cvGetCaptureProperty( 
-											g_capture, 
-											CV_CAP_PROP_FRAME_COUNT 
-											); 
-	cvCreateTrackbar("Position", title.c_str(), &g_slider_position, nframes, onTrackbarSlide ); 
+	cvCreateTrackbar("Starting Position", title.c_str(), &g_slider_position, nframes, onTrackbarSlide ); 
 	
 	IplImage* img = 0;
 	for(int i = 0; i < nframes-1; i++){
@@ -1271,20 +1300,16 @@ void ACVideoAnalysis::browseInWindow(std::string title, bool has_win){
 			return;
 		}
 		img = cvRetrieveFrame(g_capture);           // retrieve the captured frame
-		
+
 		if( !img ) {
 			break;
 			cout << "end of movie (aka The End)" << endl;
 		}
-//		snprintf (str, 64, "%03d[frame]", i);
-//		cvPutText (img, str, cvPoint (10, 20), &font, CV_RGB (0, 255, 100));
 		cvShowImage(title.c_str(), img); 
 		
 		c = cvWaitKey (20);
 		if (c == '\x1b') // press ESC to pause the video, then any key to continue
 			cvWaitKey(0);
-		// for a frame by frame display:
-		// cvWaitKey(0);
 	}
 	cvWaitKey(0);
 	//	cvReleaseImage(&img); -- will be released by cvReleaseCapture, because img=getNextFrame 
@@ -1391,35 +1416,35 @@ void ACVideoAnalysis::saveInFile (std::string fileout, int nskip){
 /*===========================================================================*/
 /* quick sort...
  icvSort( double *array, int length )
-{
-    int i, j, index;
-    double swapd;
-	
-    if( !array || length < 1 )
-        return CV_BADFACTOR_ERR;
-	
-    for( i = 0; i < length - 1; i++ )
-    {
-		
-        index = i;
-		
-        for( j = i + 1; j < length; j++ )
-        {
-			
-            if( array[j] < array[index] )
-                index = j;
-        }                     
-		
-        if( index - i )
-        {
-			
-            swapd = array[i];
-            array[i] = array[index];
-            array[index] = swapd;
-        }                 
-    }                     
-	
-    return CV_NO_ERR;
-	
-} 
+ {
+ int i, j, index;
+ double swapd;
+ 
+ if( !array || length < 1 )
+ return CV_BADFACTOR_ERR;
+ 
+ for( i = 0; i < length - 1; i++ )
+ {
+ 
+ index = i;
+ 
+ for( j = i + 1; j < length; j++ )
+ {
+ 
+ if( array[j] < array[index] )
+ index = j;
+ }                     
+ 
+ if( index - i )
+ {
+ 
+ swapd = array[i];
+ array[i] = array[index];
+ array[index] = swapd;
+ }                 
+ }                     
+ 
+ return CV_NO_ERR;
+ 
+ } 
  */

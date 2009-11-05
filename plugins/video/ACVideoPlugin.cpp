@@ -55,38 +55,87 @@ ACVideoPlugin::~ACVideoPlugin() {
 int ACVideoPlugin::initialize(){
 }
 
-ACMediaFeatures* ACVideoPlugin::calculate(){
-	return NULL;
+std::vector<ACMediaFeatures*> ACVideoPlugin::calculate(){
 }
 
 //uses ACVideoAnalysis and converts the results into ACMediaFeatures
-ACMediaFeatures* ACVideoPlugin::calculate(std::string aFileName) {
-  // TODO: test if file exists
-  ACVideoAnalysis* video = new ACVideoAnalysis(aFileName);
-  
-  ACMediaFeatures* mMediaFeatures = new ACMediaFeatures();
-  //check how to store the features...
-    
-  //XS TODO: make this more modular
-  this->calculateTrajectory(video);
-  delete video;
+std::vector<ACMediaFeatures*>  ACVideoPlugin::calculate(std::string aFileName) {
+	ACVideoAnalysis* video = new ACVideoAnalysis(aFileName);
+	std::vector<ACMediaFeatures*> allVideoFeatures;
 
+	ACMediaFeatures* videoMeanTrajectory = this->calculateMeanOfTrajectory(video);
+	if (videoMeanTrajectory != NULL){
+		allVideoFeatures.push_back(videoMeanTrajectory);
+	}
+	else{
+		cerr << "<ACVideoPlugin::calculate> : NULL mean feature" << endl;
+	}
+
+	ACMediaFeatures* videoStdTrajectory = this->calculateStdOfTrajectory(video);
+	if (videoStdTrajectory != NULL){
+		allVideoFeatures.push_back(videoStdTrajectory);
+	}
+	else{
+		cerr << "<ACVideoPlugin::calculate> : NULL std feature" << endl;
+	}
+
+	ACMediaFeatures* videoContractionIndex = this->calculateContractionIndex(video);
+	if (videoContractionIndex != NULL){
+		allVideoFeatures.push_back(videoContractionIndex);
+	}
+	else{
+		cerr << "<ACVideoPlugin::calculate> : NULL mean ci feature" << endl;
+	}
+	
+	delete video;
+	return allVideoFeatures;
 }
 
-void ACVideoPlugin::calculateTrajectory(ACVideoAnalysis* video){
-  video->computeMergedBlobsTrajectory(0);
-  std::vector<blob_center> trajectory = video->getMergedBlobsTrajectory();
-  std::vector<float> time_stamps = video->getDummyTimeStamps();
-  ACMediaTimedFeatures *trajectory_mtf = new ACMediaTimedFeatures(time_stamps, trajectory, "trajectory");
-  //mat hist_m = trajectory_mtf->hist3(10,10);
-  //  hist_m.print();
-  //max_indice(hist_m);
+ACMediaFeatures* ACVideoPlugin::calculateMeanOfTrajectory(ACVideoAnalysis* video){
+	video->computeBlobsUL();
+	video->computeMergedBlobsTrajectory(0);
 
+	// XS TODO: not dummy anymore
+	ACMediaTimedFeatures *trajectory_mtf = new ACMediaTimedFeatures(video->getDummyTimeStamps(), video->getMergedBlobsTrajectory(), "trajectory");
+	ACMediaFeatures* trajectory_mf = trajectory_mtf->mean(); // will do "new" and set name
+	delete trajectory_mtf;
+	return trajectory_mf;
+	
+	//mat hist_m = trajectory_mtf->hist3(10,10);
+	//  hist_m.print();
+	//max_indice(hist_m);	
+}
+
+ACMediaFeatures* ACVideoPlugin::calculateStdOfTrajectory(ACVideoAnalysis* video){
+	if (!video->areBlobsComputed()) video->computeBlobsUL();
+	if (!video->isTrajectoryComputed()) video->computeMergedBlobsTrajectory(0);
+
+	// XS TODO: not dummy anymore
+	ACMediaTimedFeatures *trajectory_mtf = new ACMediaTimedFeatures(video->getDummyTimeStamps(), video->getMergedBlobsTrajectory(), "trajectory");
+	ACMediaFeatures* trajectory_mf = trajectory_mtf->std();
+	delete trajectory_mtf;
+	return trajectory_mf;
+}
+
+ACMediaFeatures* ACVideoPlugin::calculateMaxOfTrajectory(ACVideoAnalysis* video){
+	if (!video->areBlobsComputed()) video->computeBlobsUL();
+	if (!video->isTrajectoryComputed()) video->computeMergedBlobsTrajectory(0);
+	
+	// XS TODO: not dummy anymore
+	ACMediaTimedFeatures *trajectory_mtf = new ACMediaTimedFeatures(video->getDummyTimeStamps(), video->getMergedBlobsTrajectory(), "trajectory");
+	ACMediaFeatures* trajectory_mf = trajectory_mtf->max();
+	delete trajectory_mtf;
+	return trajectory_mf;
 }
 
 ACMediaFeatures* ACVideoPlugin::calculateContractionIndex(ACVideoAnalysis* video){
-  ACMediaTimedFeatures* contractionIndex;
-  video->computeContractionIndices();
-  contractionIndex = new ACMediaTimedFeatures(video->getDummyTimeStamps(), video->getContractionIndices(), "contraction index");
-  return contractionIndex->mean();
+	if (!video->areBlobsComputed()) video->computeBlobsUL();
+	if (!video->isTrajectoryComputed()) video->computeMergedBlobsTrajectory(0);
+	video->computeContractionIndices();
+
+	// XS TODO: not dummy anymore
+	ACMediaTimedFeatures* ci_mtf = new ACMediaTimedFeatures(video->getDummyTimeStamps(), video->getContractionIndices(), "contraction index");
+	ACMediaFeatures* contractionIndex = ci_mtf->mean();
+	delete ci_mtf;
+	return contractionIndex;
 }

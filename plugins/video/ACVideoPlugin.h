@@ -39,17 +39,22 @@
 #include "ACPlugin.h"
 #include "ACMediaFeatures.h"
 
+#include<iostream>
+
 class ACVideoPlugin : public ACPlugin {
 public:
     ACVideoPlugin();
     ~ACVideoPlugin();
     virtual int initialize();
-//    virtual ACMediaFeatures* calculate();
-//    virtual ACMediaFeatures* calculate(std::string aFileName);
+	std::vector<ACMediaFeatures*>  calculate();
+	std::vector<ACMediaFeatures*>  calculate(std::string aFileName);
     virtual int start() {return 0;};
     virtual int stop() {return 0;};
 private:
-	void calculateTrajectory(ACVideoAnalysis* video);
+	ACMediaFeatures* calculateMeanOfTrajectory(ACVideoAnalysis* video);
+	ACMediaFeatures* calculateStdOfTrajectory(ACVideoAnalysis* video);
+	ACMediaFeatures* calculateMaxOfTrajectory(ACVideoAnalysis* video);
+	ACMediaFeatures* calculateContractionIndex(ACVideoAnalysis* video);
 };
 
 #endif	/* _ACVIDEOPLUGIN_H */

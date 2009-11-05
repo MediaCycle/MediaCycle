@@ -1000,10 +1000,6 @@ CvRect CBlobResult::GetBoundingBox()
 		if (maxy < m_blobs[i]->MaxY() ) maxy =  m_blobs[i]->MaxY();
 	}
 	
-	// XS TODO: add test that min < max, so that width, height > 0	
-//	std::cout << "X:" << minx << " - " << maxx << std::endl;
-//	std::cout << "Y:" << miny << " - " << maxy << std::endl;
-
 	boundingBox.x = minx;
 	boundingBox.y = miny;
 	if (maxx < minx) std::cerr << "<CBlobResult::GetBoundingBox> : wrong box, minx > maxx" << std::endl;

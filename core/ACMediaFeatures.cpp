@@ -46,7 +46,7 @@ ACMediaFeatures::ACMediaFeatures(){
 
 float ACMediaFeatures::getFeature(int i) {
 	if (i >= features_vector.size() || i < 0){
-		cerr << " <ACMediaFeatures::GetFeature(int i) error> Invalid Feature Index" << endl;
+		cerr << " <ACMediaFeatures::getFeature(int i) error> Invalid Feature Index" << endl;
 		return -1;
 	}
 	return features_vector[i];
@@ -67,10 +67,14 @@ int ACMediaFeatures::getDiscretizedFeature(int maxval, int nbSteps){
 
 void ACMediaFeatures::setFeature(int i, float f) {
 	if (i >= features_vector.size() || i < 0){
-		cerr << " <ACMediaFeatures::GetFeature(int i) error> Invalid Feature Index" << endl;
+		cerr << " <ACMediaFeatures::setFeature(int i) error> Invalid Feature Index" << endl;
 		return;
 	}
 	features_vector[i] = f;
+}
+
+void ACMediaFeatures::addFeature(float f){
+	features_vector.push_back(f);
 }
 
 int ACMediaFeatures::size() {

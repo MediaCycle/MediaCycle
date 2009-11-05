@@ -63,7 +63,11 @@ MediaCycle::MediaCycle(const MediaCycle& orig) {
 }
 
 MediaCycle::~MediaCycle() {
-    stopTcpServer();
+	// XS added delete for variables whose new is in constructor
+	if (this->mediaLibrary) delete this->mediaLibrary;
+	if (this->mediaBrowser) delete this->mediaBrowser;
+	if (this->pluginManager) delete this->pluginManager;
+    stopTcpServer(); // will delete this->networkSocket;
 }
 
 int MediaCycle::startTcpServer(int aPort, int aMaxConnections) {
@@ -112,6 +116,8 @@ int MediaCycle::importACLLibrary(string path) {
 }
 
 int MediaCycle::importLibrary(string path) {
+	// XS DEBUG
+	cout << "importing library: " << path << endl;
 	int ret = this->mediaLibrary->openLibrary(path);
 	this->mediaLibrary->normalizeFeatures();
 	this->mediaBrowser->libraryContentChanged();
@@ -213,7 +219,7 @@ int MediaCycle::processTcpMessage(char* buffer, int l, char **buffer_send, int *
 		if (thumbnail_filename!="") {
 			stat(thumbnail_filename.c_str(), &file_status);
 			thumbnail_size = file_status.st_size;
-			*buffer_send = new char[13+thumbnail_size];
+			*buffer_send = new char[13+thumbnail_size]; 
 			strcpy(*buffer_send, "getthumbnail ");
 			thumbnail_file = fopen(thumbnail_filename.c_str(),"r");
 			size_t st = fread((*buffer_send)+13, 1, thumbnail_size, thumbnail_file);

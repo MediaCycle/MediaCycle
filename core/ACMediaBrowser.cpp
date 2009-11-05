@@ -206,6 +206,11 @@ ACMediaBrowser::ACMediaBrowser() {
 	auto_play_toggle = 0;
 	
 	mLabelAttributes.resize(0);
+	nbLabelsDisplayed = 0;
+
+	mLoopAttributes.resize(0);
+	nbLoopsDisplayed = 0;
+	
 }
 
 ACMediaBrowser::~ACMediaBrowser() {
@@ -303,6 +308,20 @@ void ACMediaBrowser::setClusterNumber(int n)
 	setNeedsDisplay(true);
 }
 
+void ACMediaBrowser::setClickedLoop(int iloop){
+	if (iloop < 0 || iloop >= this->getNumberOfLoops())
+		mClickedLoop = iloop;
+	else
+		cerr << "<ACMediaBrowser::setClickedLoop> : index " << iloop << "out of bounds" << endl;
+}
+
+void ACMediaBrowser::setClickedLabel(int ilabel){
+	if (ilabel < 0 || ilabel >= this->getNumberOfLabels())
+		mClickedLabel = ilabel;
+	else
+		cerr << "<ACMediaBrowser::setClickedLabel> : index " << ilabel << "out of bounds" << endl;
+}
+
 
 void ACMediaBrowser::setLoopPosition(int loop_id, float x, float y, float z){
   ACPoint p;
@@ -310,6 +329,14 @@ void ACMediaBrowser::setLoopPosition(int loop_id, float x, float y, float z){
   p.y = y;
   p.z = z;
   mLoopAttributes[loop_id].nextPos = p;
+}
+
+void ACMediaBrowser::setLabelPosition(int label_id, float x, float y, float z){
+	ACPoint p;
+	p.x = x;
+	p.y = y;
+	p.z = z;
+	mLabelAttributes[label_id].pos = p;
 }
 
 void ACMediaBrowser::resetLoopNavigationLevels()
@@ -408,7 +435,7 @@ int ACMediaBrowser::setSourceCurser(int lid, int frame_pos) {
 }
 
 
-void ACMediaBrowser::randomizePositions(){
+void ACMediaBrowser::randomizeLoopPositions(){
 	if(mLibrary == NULL) return;
 	vector<ACMedia*> loops = mLibrary->getMedia();
 	int n = loops.size();
@@ -644,13 +671,13 @@ void ACMediaBrowser::initClusterCenters(){
 // mClusterCenters
 // mLoopAttributes
 void ACMediaBrowser::updateClusters(bool animate){
-  int method=2;
+  int method=1;
   switch (method) {
   case 0:
     kmeans(animate);
     break;
   case 1:
-    std::cout << "UpdateClusters : Nouvelle méthode folle" << std::endl;
+    std::cout << "UpdateClusters : Nouvelle mÃˆthode folle" << std::endl;
     // DT : need to be somewhere else but don't know where
     initClusterCenters();
     break;
@@ -668,7 +695,7 @@ void ACMediaBrowser::updateClusters(bool animate){
 }
 
 void ACMediaBrowser::updateNextPositions(){
-  int method=2;
+  int method=1;
   switch (method) {
   case 0:
     setNextPositionsPropeller();

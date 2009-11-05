@@ -44,7 +44,9 @@
 
 class ACMediaBrowser;
 
-using namespace std;
+//using namespace std;
+using std::vector;
+using std::string;
 
 enum ACPluginType {
 	PLUGIN_TYPE_NONE,
