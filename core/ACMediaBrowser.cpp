@@ -207,10 +207,10 @@ ACMediaBrowser::ACMediaBrowser() {
 	auto_play_toggle = 0;
 	
 	mLabelAttributes.resize(0);
-	nbLabelsDisplayed = 0;
+	nbDisplayedLabels = 0;
 
 	mLoopAttributes.resize(0);
-	nbLoopsDisplayed = 0;
+	nbDisplayedLoops = 0;
 	
 	mVisPlugin = NULL;
 }
@@ -318,7 +318,7 @@ void ACMediaBrowser::setClickedLoop(int iloop){
 }
 
 void ACMediaBrowser::setClickedLabel(int ilabel){
-	if (ilabel < -1 || ilabel <= this->getNumberOfLabels())
+	if (ilabel < -1 || ilabel >= this->getNumberOfLabels())
 		cerr << "<ACMediaBrowser::setClickedLabel> : index " << ilabel << "out of bounds" << endl;
 	else
 		mClickedLabel = ilabel;
@@ -339,6 +339,41 @@ void ACMediaBrowser::setLabelPosition(int label_id, float x, float y, float z){
 	p.y = y;
 	p.z = z;
 	mLabelAttributes[label_id].pos = p;
+}
+
+int ACMediaBrowser::getNumberOfDisplayedLoops(){
+	return nbDisplayedLoops;
+// should be the same as:	
+//	int cnt=0;
+//	for (int i=0; i < getNumberOfLoops()){
+//		if (mLoopAttributes[i].isDisplayed) cnt++
+//	}
+//	return cnt;
+}
+
+int ACMediaBrowser::getNumberOfDisplayedLabels(){
+	return nbDisplayedLabels;
+
+// should be the same as:	
+//	int cnt=0;
+//	for (int i=0; i < getNumberOfLabels()){
+//		if (mLabelpAttributes[i].isDisplayed) cnt++
+//	}
+//	return cnt;
+}
+
+void ACMediaBrowser::setNumberOfDisplayedLoops(int nd){
+	if (nd < 0 || nd >= this->getNumberOfLoops())
+		cerr << "<ACMediaBrowser::setNumberOfDisplayedLoops> : too many loops to display: " << nd << endl;
+	else
+		nbDisplayedLoops = nd;
+}
+
+void ACMediaBrowser::setNumberOfDisplayedLabels(int nd){
+	if (nd < 0 || nd >= this->getNumberOfLabels())
+		cerr << "<ACMediaBrowser::setNumberOfDisplayedLabels> : too many labels to display: " << nd << endl;
+	else
+		nbDisplayedLabels = nd;
 }
 
 void ACMediaBrowser::resetLoopNavigationLevels()
