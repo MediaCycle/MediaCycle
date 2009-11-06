@@ -189,7 +189,9 @@ ACNetworkSocketServer::ACNetworkSocketServer(int port, int max_connections, ACNe
 
 ACNetworkSocketServer::~ACNetworkSocketServer() {
 	close_server(server_port);
-	delete server_buffer;
+	// XS 04/11/09 added [] and next line
+	delete [] server_buffer;
+	delete [] server_buffer_send;
 }
 
 void *threadNetworkSocketServerFunction(void *_network_engine_arg) {

@@ -52,6 +52,12 @@ ACVideo::ACVideo() : ACMedia() {
 }	
 
 ACVideo::~ACVideo() {
+	// Clean up! 
+	std::vector<ACMediaFeatures*> ::iterator iter;
+	for (iter = features.begin(); iter != features.end(); iter++) { 
+		delete *iter; 
+	}
+	
 }
 
 //void ACVideo::import(string _path) { 

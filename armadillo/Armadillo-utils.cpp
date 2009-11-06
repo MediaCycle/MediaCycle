@@ -580,7 +580,7 @@ void princomp(mat x, mat &coeff, mat &score){
   int p = x.n_cols;
 
   // Center X by subtracting off column means
-  mat x0 = x-repmat(mean(x,0),n,1);
+  mat x0 = x-repmat(mean(x,0),n,1); // XS repmat is only available in armadillo Version >= 0.7.0
   int r = std::min(n-1,p); // max possible rank of X0
 
   // The principal component coefficients are the eigenvectors of

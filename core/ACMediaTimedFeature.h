@@ -109,6 +109,7 @@ public:
 	ACMediaFeatures* weightedStdDeviation(ACMediaTimedFeatures* weight);
 	ACMediaFeatures* std();
 	ACMediaFeatures* hist();
+	ACMediaFeatures* max();
 
 	//	vector<float> meanAsVector();
 	//      vector<float> stdAsVector();
@@ -119,8 +120,9 @@ public:
 	ACMediaTimedFeatures* simpleSplineModeling();
 	ACMediaTimedFeatures* delta();
 	
-	int readFile(std::string);
-	
+	int readFile(string);
+	void dump();
+	void dump(string);
 	//	umat hist(int nbrBin, float min = 0, float max = 0);
 	
 	fmat similarity(int mode = 0);

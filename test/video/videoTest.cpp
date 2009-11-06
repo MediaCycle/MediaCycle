@@ -41,6 +41,7 @@
 
 #include "MediaCycle.h"
 #include "ACVideoAnalysis.h"
+#include "ACVideoPlugin.h"
 
 #include "gnuplot_i.hpp"
 
@@ -92,7 +93,6 @@ void get_all_images(){
 //		string average_file= videodir+"average/"+dancer+"_ave.jpg";
 		cout << movie_file << endl;
 		ACVideoAnalysis* V = new ACVideoAnalysis(movie_file);
-		V->initialize();
 		clock_t t0=clock();
 //		IplImage *median_img =	V->computeMedianImage(200, 0, 50, median_file);
 		string first_guess_file= videodir+"median/Bru_101#1_med.jpg";
@@ -118,7 +118,6 @@ void test_med_ave(std::string dancer){
 	string average_file= videodir+"average/"+dancer+"_ave-test.jpg";
 	cout << movie_file << endl;
 	ACVideoAnalysis* V = new ACVideoAnalysis(movie_file);
-	V->initialize();
 	clock_t t0=clock();
 	IplImage *median_img =	V->computeMedianImage(200, 0, 50, median_file);
 	clock_t t1=clock();
@@ -136,7 +135,6 @@ void test_med_noblob(std::string dancer){
 	string movie_file= videodir+"H264/"+dancer+".mov";
 	string median_file= videodir+"median/"+dancer+"_med-test-noblob.jpg";
 	ACVideoAnalysis* V = new ACVideoAnalysis(movie_file);
-	V->initialize();
 	clock_t t0=clock();
 	V->computeMedianNoBlobImage(median_file);
 	clock_t t1=clock();
@@ -149,7 +147,6 @@ void test_histogram_equalize(std::string dancer){
 	string median_file= videodir+"median/"+dancer+"_med.jpg";
 	cout << movie_file << endl;
 	ACVideoAnalysis* V = new ACVideoAnalysis(movie_file);
-	V->initialize();
 	clock_t t0=clock();
 	IplImage *imgp_bg = cvLoadImage(median_file.c_str(), CV_LOAD_IMAGE_COLOR);
 	V->histogramEqualize(imgp_bg);
@@ -164,7 +161,6 @@ void test_bg_substraction(std::string dancer){
 	string median_file= videodir+"median/"+dancer+"_med.jpg";
 	cout << movie_file << endl;
 	ACVideoAnalysis* V = new ACVideoAnalysis(movie_file);
-	V->initialize();
 	clock_t t0=clock();
 	IplImage *imgp_bg = cvLoadImage(median_file.c_str(), CV_LOAD_IMAGE_COLOR);
 //	V->computeBlobsInteractively(imgp_bg, true);
@@ -181,10 +177,28 @@ void test_browse(std::string dancer){
 	string median_file= videodir+"median/"+dancer+"_med.jpg";
 	cout << movie_file << endl;
 	ACVideoAnalysis* V = new ACVideoAnalysis(movie_file);
-	V->initialize(); 
 	
 	V->browseInWindow();
 	delete V;
+}
+
+void test_video_plugin(std::string dancer){
+	string movie_file= videodir+"H264/"+dancer+".mov";
+	ACVideoPlugin* P = new ACVideoPlugin();
+	std::vector<ACMediaFeatures*> F = P->calculate(movie_file);
+	cout << "computed " << F.size() << " features" << endl;
+	for (unsigned int i=0; i<F.size(); i++){
+		cout << i << " : " << F[i]->getName() << endl;
+		F[i]->dump();
+	}
+	
+	// clean
+	std::vector<ACMediaFeatures*>::iterator iter; 
+	for (iter = F.begin(); iter != F.end(); iter++) { 
+		delete *iter; 
+	}
+	
+	delete P;	
 }
 
 int main(int argc, char** argv) {
@@ -203,8 +217,9 @@ int main(int argc, char** argv) {
 	//test_histogram_equalize("Bru_105#2");
 	//test_bg_substraction("Bru_105#2");
 	// test_bg_substraction("Bru_203#2");
-	test_browse("Bru_105#2");
-	
+	// test_browse("Bru_105#2");
+	test_video_plugin("Bru_105#2");
+
 	//	IplImage *imgp_bg = cvLoadImage("/Users/xavier/Desktop/testMed3.jpg", CV_LOAD_IMAGE_COLOR);
 	//V->computeBlobsInteractively(imgp_bg,true); // , int small_blob)
 //	V->histogramEqualize(imgp_bg);

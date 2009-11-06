@@ -77,8 +77,7 @@ struct ACPoint
 // XS make this a class ?
 // ask SD to check...
 
-struct ACLoopAttribute
-{
+struct ACLoopAttribute {
 	ACPoint 	currentPos, nextPos;
 	ACPoint		viewPos;
 	float		distanceMouse;
@@ -87,13 +86,15 @@ struct ACLoopAttribute
 	int			curser;
 	int 		navigationLevel; // initially all set to zero, while traversing, only the one incremented are kept
 	int			hover;
-	ACLoopAttribute() : cluster(0), active(false), navigationLevel(0), hover(0) {}
+	bool		isDisplayed;
+	ACLoopAttribute() : cluster(0), active(false), navigationLevel(0), hover(0),isDisplayed(false) {}
 };
 
 struct ACLabelAttribute {
 	string		text;
 	float		size;
 	ACPoint		pos;
+	bool		isDisplayed;
 };
 
 class ACMediaBrowser {
@@ -112,7 +113,7 @@ public:
 	void libraryContentChanged();
 	
 	// handy library to just assign random positions to items
-	void randomizePositions();
+	void randomizeLoopPositions();
 
 	// Search by similarity
 	int getKNN(int id, vector<int> &ids, int k);
@@ -158,8 +159,11 @@ public:
 	void initClusterCenters();
 	void kmeans(bool animate);
 	
-	void setClickedLoop(int index) 				{mClickedLoop = index;};
+	void setClickedLoop(int iloop);
 	int getClickedLoop()					{return mClickedLoop; };
+
+	void setClickedLabel(int ilabel);
+	int getClickedLabel()					{return mClickedLabel; };
 
 	// this influences updateNextPositions
 	void setSelectedObject(int index);
@@ -175,12 +179,16 @@ public:
 	// next positions -> current positions
 	void commitPositions();
 	
+	// loops (or items) 
 	const vector<ACLoopAttribute>	&getLoopAttributes() const { return mLoopAttributes; }; 
-	void setLoopPosition(int loop_id, float x, float y, float y=0);
-
+	void setLoopPosition(int loop_id, float x, float y, float z=0);
+	int getNumberOfDisplayedLoops(){return nbLoopsDisplayed;}
+	int getNumberOfLoops(){return mLoopAttributes.size() ;} // XS this should be the same as mLibrary->getSize(), but this way it is more similar to getNumberOfLabels
+	
 	void setLoopAttributesActive(int loop_id, int value) { mLoopAttributes[loop_id].active = value; };
 	//const vector<ACPoint>	&getLoopCurrentPositions() const	{ return mCurrentPos; } 
 	//const vector<ACPoint>	&getLoopNextPositions()	const		{ return mNextPos; }
+
 	void getMouse(float *mx, float *my) { *mx = mousex; *my = mousey; };
 	
 	int setSourceCurser(int lid, int frame_pos);
@@ -206,10 +214,16 @@ public:
 	int toggleSourceActivity(int lid, int type=1);
 	int muteAllSources();
 	
+	// labels
 	int getLabelSize();
 	void setLabel(int i, string text, ACPoint pos);
 	string getLabelText(int i);
 	ACPoint getLabelPos(int i);
+	
+	const vector<ACLabelAttribute> &getLabelAttributes() const { return mLabelAttributes; }; 
+	void setLabelPosition(int loop_id, float x, float y, float z=0);
+	int getNumberOfDisplayedLabels(){return nbLabelsDisplayed;}
+	int getNumberOfLabels(){return mLabelAttributes.size();}
 
 	void setVisualisationPlugin(ACPlugin* acpl){mVisPlugin=acpl;};
 
@@ -246,17 +260,21 @@ protected:
 	vector<ACNavigationState>	mForwardNavigationStates;
 	
 	vector <ACLoopAttribute>	mLoopAttributes; // one entry per media in the same order as in library.
+	int nbLoopsDisplayed; 
+	
 	float mousex;
 	float mousey;
 	
 	vector <ACLabelAttribute>	mLabelAttributes;
+	int nbLabelsDisplayed;
+	int mClickedLabel;
 	
 	int 				mNavigationLevel;
 	
 	// clusters
 	int				mClusterCount;
 	//vector<vector <int> > 		clusters;
-	vector<vector<vector <float> > >mClusterCenters; // cluster index, feature index, descriptor index
+	vector<vector<vector <float> > > mClusterCenters; // cluster index, feature index, descriptor index
 	vector<float>			mFeatureWeights; // each value must be in [0,1], important for euclidian distance.
 	
 	int closest_loop;

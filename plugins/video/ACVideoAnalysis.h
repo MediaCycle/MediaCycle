@@ -63,6 +63,8 @@ public:
 	inline int getDepth() {return depth;}
 	inline int getNumberOfFrames() {return nframes;}
 		
+	bool isTrajectoryComputed(){return HAS_TRAJECTORY;}
+	bool areBlobsComputed(){return HAS_BLOBS;}
 	// utilities
 	IplImage* getNextFrame();
 	IplImage* computeAverageImage(int nskip = 0, int nread = 0, int njump = -1, std::string s =""); 
@@ -79,8 +81,8 @@ public:
 	
 	// raw features computation
 	void computeBlobs(IplImage* bg_img=NULL, int bg_thesh=20, int big_blob=200, int small_blob=0);
-	void computeBlobsInteractively(IplImage* bg_img=NULL, bool merge_blobs=false, int bg_thesh=20, int big_blob=200, int small_blob=0);
-	void computeBlobsUL(IplImage* bg_img=NULL, bool merge_blobs=false, int big_blob=200, int small_blob=0);
+	void computeBlobsInteractively(IplImage* bg_img=NULL, bool merge_blobs=true, int bg_thesh=20, int big_blob=200, int small_blob=0);
+	void computeBlobsUL(IplImage* bg_img=NULL, bool merge_blobs=true, int big_blob=200, int small_blob=0);
 	void computeOpticalFlow();
 	
 	// features manipulation
@@ -117,7 +119,8 @@ private:
 	int frame_counter;
 	
 	bool HAS_TRAJECTORY;
-	
+	bool HAS_BLOBS;
+
 	// threshold for lower and upper parts of the image
 	int threshU;
 	int threshL;
