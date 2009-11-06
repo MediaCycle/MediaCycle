@@ -86,6 +86,14 @@ std::vector<ACMediaFeatures*>  ACVideoPlugin::calculate(std::string aFileName) {
 	else{
 		cerr << "<ACVideoPlugin::calculate> : NULL mean ci feature" << endl;
 	}
+
+	ACMediaFeatures* videoMaxTrajectory = this->calculateMaxOfTrajectory(video);
+	if (videoMaxTrajectory != NULL){
+		allVideoFeatures.push_back(videoMaxTrajectory);
+	}
+	else{
+		cerr << "<ACVideoPlugin::calculate> : NULL max feature" << endl;
+	}
 	
 	delete video;
 	return allVideoFeatures;
@@ -98,6 +106,9 @@ ACMediaFeatures* ACVideoPlugin::calculateMeanOfTrajectory(ACVideoAnalysis* video
 	// XS TODO: not dummy anymore
 	ACMediaTimedFeatures *trajectory_mtf = new ACMediaTimedFeatures(video->getDummyTimeStamps(), video->getMergedBlobsTrajectory(), "trajectory");
 	ACMediaFeatures* trajectory_mf = trajectory_mtf->mean(); // will do "new" and set name
+
+	// XS TEST
+	trajectory_mtf->dump("/Users/xavier/Desktop/traj.txt");
 	delete trajectory_mtf;
 	return trajectory_mf;
 	

@@ -191,7 +191,7 @@ int processTcpMessageFromInstallation(MediaCycle *that, char *buffer, int l, cha
 			cout << "nb videos : " << nbVideo << endl;
 			
 			// XS test
-			startOrRedrawRandom(that,nbVideo, buffer_send, l_send);
+			startOrRedraw(that,nbVideo, buffer_send, l_send);
 			
 			std::istringstream s_out (*buffer_send);
 			string str_buffer_send;
@@ -250,6 +250,14 @@ int processTcpMessageFromInstallation(MediaCycle *that, char *buffer, int l, cha
     return 0;
 }
 
+
+char* get_error_message(){
+	string sbuffer_send_error="-1";
+	char* buffer_send_error = new char [sbuffer_send_error.size()+1]; // extra byte needed for the trailing '\0' 
+	strcpy (buffer_send_error, sbuffer_send_error.c_str());
+	return buffer_send_error;
+}
+
 // this one is really used in the installation
 // ex: for 50 videos and 3 keywords:
 //     049_000000395082000001537313000002296262000003258158000004418017000005125012000006137074000007725067000008624351000009628293000010164241000011716215000012292320000013127106000014641262000015007337000016359310000017682187000018292364000019172221000020727340000021322181000022202148000023399290000024516337000025547320000026562295000027385060000028679246000029306072000030513305000031462088000032737272000033028157000034131043000035750036000036529002000037538363000038153225000039162223000040605340000041459202000042470296000043639279000044635290000045000002000046436056000047311139000048323257_003-descA2-090031-descB0-029080-descC1-059005
@@ -259,9 +267,11 @@ int processTcpMessageFromInstallation(MediaCycle *that, char *buffer, int l, cha
 
 void startOrRedraw(MediaCycle *mediacycle, int nbVideo, char **buffer_send, int* l_send){
 	ACMediaLibrary* media_library = mediacycle->getLibrary();
+	string sbuffer_send;
 	
 	if (media_library->getSize() == 0) {
 		cerr << "<startOrRedrawRandom> : empty media library" << endl;
+		*buffer_send = get_error_message();	
 		return;
 	}
 	
@@ -273,13 +283,22 @@ void startOrRedraw(MediaCycle *mediacycle, int nbVideo, char **buffer_send, int*
 
 	if (nbVideo > n_loops) {
 		cerr << "<startOrRedrawRandom> : you are asking for too many videos" << endl;
+		*buffer_send = get_error_message();	
 		return;
 	}
 
 	// tell the browser nothing specific was clicked.
 	media_browser->setClickedLoop(-1);
 	media_browser->setClickedLabel(-1);
+	media_browser->setNumberOfDisplayedLoops(nbVideo);
 	media_browser->updateClusters();
+	if (nbVideo != media_browser->getNumberOfDisplayedLoops()){
+		cerr << "<startOrRedraw> browser returned wrong number of videos" << endl;
+		*buffer_send = get_error_message();	
+		return;
+	}
+	
+	// XS below this is common to all message types -- put it in subroutine
 	
 	// === 1) videos
 	string sepu="_";
@@ -287,7 +306,7 @@ void startOrRedraw(MediaCycle *mediacycle, int nbVideo, char **buffer_send, int*
 	onvid.fill('0'); // fill with zeros (otherwise will leave blanks)
 	onvid << setw(3) << nbVideo << sepu;
 	// === start filling sbuffer_send
-	string sbuffer_send = onvid.str(); // could add "0" in front for message type (not done here because not useful for web application)
+	sbuffer_send = onvid.str(); // could add "0" in front for message type (not done here because not useful for web application)
 
 	// loop on all videos to see which ones to send out
 	const vector<ACLoopAttribute> loop_attributes = media_browser->getLoopAttributes();
@@ -309,6 +328,8 @@ void startOrRedraw(MediaCycle *mediacycle, int nbVideo, char **buffer_send, int*
 	}
 	if (chk_loops != media_browser->getNumberOfDisplayedLoops()) {
 		cerr << "<startOrRedraw> consistency check failed: problem with number of displayed videos" << endl;
+		*buffer_send = get_error_message();	
+		return;
 	}
 	
 	// === 2) labels (keywords)
@@ -339,7 +360,12 @@ void startOrRedraw(MediaCycle *mediacycle, int nbVideo, char **buffer_send, int*
 	}
 	if (chk_labels != media_browser->getNumberOfDisplayedLabels()) {
 		cerr << "<startOrRedraw> consistency check failed: problem with number of displayed labels" << endl;
+		*buffer_send = get_error_message();	
+		return;
 	}
+	*buffer_send = new char [sbuffer_send.size()+1]; // extra byte needed for the trailing '\0' 
+	strcpy (*buffer_send, sbuffer_send.c_str());
+	*l_send = sbuffer_send.length();
 	
 }
 

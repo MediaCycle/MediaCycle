@@ -1208,13 +1208,13 @@ void ACVideoAnalysis::computeContractionIndices(){
 		ci = all_blobs[i].Area() / (bbox.width*bbox.height);
 		contraction_indices.push_back(ci);
 		//XS debug
-		//cout << i << ": " << ci << endl;
+		cout << i << ": " << ci << endl;
 	}
 }
 
+// to get dummy time stamps (i.e., the indices 0,1,2,...)
+// XS: I made these FLOAT as in ACMediaFeatures but really it's INT
 std::vector<float> ACVideoAnalysis::getDummyTimeStamps(){
-	// XS: I made these FLOAT as in ACMediaFeatures but really it's INT
-	// these are dummy time stamps (0,1,2, ...)
 	std::vector<float> dummy;
 	for (unsigned int i=0; i<blob_centers.size(); i++){
 		dummy.push_back((float)i);

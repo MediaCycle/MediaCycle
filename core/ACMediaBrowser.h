@@ -182,7 +182,8 @@ public:
 	// loops (or items) 
 	const vector<ACLoopAttribute>	&getLoopAttributes() const { return mLoopAttributes; }; 
 	void setLoopPosition(int loop_id, float x, float y, float z=0);
-	int getNumberOfDisplayedLoops(){return nbLoopsDisplayed;}
+	int getNumberOfDisplayedLoops();
+	void setNumberOfDisplayedLoops(int nd);
 	int getNumberOfLoops(){return mLoopAttributes.size() ;} // XS this should be the same as mLibrary->getSize(), but this way it is more similar to getNumberOfLabels
 	
 	void setLoopAttributesActive(int loop_id, int value) { mLoopAttributes[loop_id].active = value; };
@@ -222,7 +223,8 @@ public:
 	
 	const vector<ACLabelAttribute> &getLabelAttributes() const { return mLabelAttributes; }; 
 	void setLabelPosition(int loop_id, float x, float y, float z=0);
-	int getNumberOfDisplayedLabels(){return nbLabelsDisplayed;}
+	int getNumberOfDisplayedLabels();
+	void setNumberOfDisplayedLabels(int nd);
 	int getNumberOfLabels(){return mLabelAttributes.size();}
 
 	void setVisualisationPlugin(ACPlugin* acpl){mVisPlugin=acpl;};
@@ -260,13 +262,13 @@ protected:
 	vector<ACNavigationState>	mForwardNavigationStates;
 	
 	vector <ACLoopAttribute>	mLoopAttributes; // one entry per media in the same order as in library.
-	int nbLoopsDisplayed; 
+	int nbDisplayedLoops;
 	
 	float mousex;
 	float mousey;
 	
 	vector <ACLabelAttribute>	mLabelAttributes;
-	int nbLabelsDisplayed;
+	int nbDisplayedLabels;
 	int mClickedLabel;
 	
 	int 				mNavigationLevel;

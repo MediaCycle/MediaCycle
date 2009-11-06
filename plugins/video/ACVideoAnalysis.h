@@ -99,11 +99,12 @@ public:
 	std::vector<float> getContractionIndices() {return contraction_indices;}
 	std::vector<float> getPixelSpeeds() {return pixel_speeds;}
 	
-	// to get dummy time stamps (i.e., the indices)
-	// XS TODO: make this a real time stamp (in case you downsample or skip frames...)
 	std::vector<float> getDummyTimeStamps();
 	std::vector<float> getTimeStamps();
 
+	// saves stuff in file
+//XXX TODO	void 
+	
 	// for display (ifdef VISUAL_CHECK) using highgui
 	void showInWindow(std::string="VIDEO", bool has_win=false);
 	void showFrameInWindow(std::string="VIDEO", IplImage* frame=NULL, bool has_win=true);

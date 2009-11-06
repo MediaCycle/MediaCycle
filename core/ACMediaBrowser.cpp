@@ -190,7 +190,8 @@ ACMediaBrowser::ACMediaBrowser() {
 	mCameraAngle = 0.0;
 	
 	mClickedLoop = -1;
-	
+	mClickedLabel = -1;
+
 	mClusterCount = 5;
 	mNavigationLevel = 0;
 	
@@ -206,10 +207,10 @@ ACMediaBrowser::ACMediaBrowser() {
 	auto_play_toggle = 0;
 	
 	mLabelAttributes.resize(0);
-	nbLabelsDisplayed = 0;
+	nbDisplayedLabels = 0;
 
 	mLoopAttributes.resize(0);
-	nbLoopsDisplayed = 0;
+	nbDisplayedLoops = 0;
 	
 }
 
@@ -309,17 +310,17 @@ void ACMediaBrowser::setClusterNumber(int n)
 }
 
 void ACMediaBrowser::setClickedLoop(int iloop){
-	if (iloop < 0 || iloop >= this->getNumberOfLoops())
-		mClickedLoop = iloop;
-	else
+	if (iloop < -1 || iloop >= this->getNumberOfLoops())
 		cerr << "<ACMediaBrowser::setClickedLoop> : index " << iloop << "out of bounds" << endl;
+	else
+		mClickedLoop = iloop;
 }
 
 void ACMediaBrowser::setClickedLabel(int ilabel){
-	if (ilabel < 0 || ilabel >= this->getNumberOfLabels())
-		mClickedLabel = ilabel;
-	else
+	if (ilabel < -1 || ilabel >= this->getNumberOfLabels())
 		cerr << "<ACMediaBrowser::setClickedLabel> : index " << ilabel << "out of bounds" << endl;
+	else
+		mClickedLabel = ilabel;
 }
 
 
@@ -337,6 +338,41 @@ void ACMediaBrowser::setLabelPosition(int label_id, float x, float y, float z){
 	p.y = y;
 	p.z = z;
 	mLabelAttributes[label_id].pos = p;
+}
+
+int ACMediaBrowser::getNumberOfDisplayedLoops(){
+	return nbDisplayedLoops;
+// should be the same as:	
+//	int cnt=0;
+//	for (int i=0; i < getNumberOfLoops()){
+//		if (mLoopAttributes[i].isDisplayed) cnt++
+//	}
+//	return cnt;
+}
+
+int ACMediaBrowser::getNumberOfDisplayedLabels(){
+	return nbDisplayedLabels;
+
+// should be the same as:	
+//	int cnt=0;
+//	for (int i=0; i < getNumberOfLabels()){
+//		if (mLabelpAttributes[i].isDisplayed) cnt++
+//	}
+//	return cnt;
+}
+
+void ACMediaBrowser::setNumberOfDisplayedLoops(int nd){
+	if (nd < 0 || nd >= this->getNumberOfLoops())
+		cerr << "<ACMediaBrowser::setNumberOfDisplayedLoops> : too many loops to display: " << nd << endl;
+	else
+		nbDisplayedLoops = nd;
+}
+
+void ACMediaBrowser::setNumberOfDisplayedLabels(int nd){
+	if (nd < 0 || nd >= this->getNumberOfLabels())
+		cerr << "<ACMediaBrowser::setNumberOfDisplayedLabels> : too many labels to display: " << nd << endl;
+	else
+		nbDisplayedLabels = nd;
 }
 
 void ACMediaBrowser::resetLoopNavigationLevels()

@@ -58,8 +58,13 @@ ACMediaTimedFeatures::ACMediaTimedFeatures(fcolvec time_v, fmat value_m, string 
 }
 
 ACMediaTimedFeatures::ACMediaTimedFeatures( const vector<float> &time, const vector< vector<float> > &value, string name, const vector<float> *seg_v){
+	if (time.size() != value.size()) {
+		cerr << "<ACMediaTimedFeatures::ACMediaTimedFeatures> Time and value vectors do not have the same size" << endl;
+		exit(-1);
+	}
 	this->time_v = fcolvec(time.size());
 	this->value_m = fmat((int) value.size(), (int) value[0].size());
+	//XS debug
 	cout << "value.size(): " << value.size() << " - value [0].size()=" << value[0].size() << endl;
 	for (unsigned int Itime=0; Itime<time.size(); Itime++){
 		this->time_v(Itime) = time[Itime];
@@ -72,16 +77,17 @@ ACMediaTimedFeatures::ACMediaTimedFeatures( const vector<float> &time, const vec
 }
 
 ACMediaTimedFeatures::ACMediaTimedFeatures(const vector<float> &time, const vector<float> &value, string name, const vector<float> *seg_v){
-	if (time.size() != value.size()) {
-		cerr << "Time and value vectors do not have the same size" << endl;
+	unsigned int ts=time.size();
+	if (ts != value.size()) {
+		cerr << "<ACMediaTimedFeatures::ACMediaTimedFeatures> Time and value vectors do not have the same size" << endl;
 		exit(-1);
 	}
 	
-	this->time_v = fcolvec(time.size());
-	this->value_m = fmat((int) time.size(),1);
-	for (int Itime=0; Itime<time.size(); Itime++){
+	this->time_v = fcolvec(ts);
+	this->value_m = fmat((int) ts,1);
+	for (unsigned int Itime=0; Itime<ts; Itime++){
 		this->time_v(Itime) = time[Itime];
-		this->value_m(Itime, 1) = value[Itime];
+		this->value_m(Itime, 0) = value[Itime]; // XS 0 pas 1
 	}
 	this->name = name;
 	if (seg_v !=0) this->seg_v = *seg_v;	
@@ -101,20 +107,25 @@ ACMediaTimedFeatures::ACMediaTimedFeatures(const vector<float> &time, const vect
 //   this->seg_v = seg_v;
 // }
 
-ACMediaTimedFeatures::ACMediaTimedFeatures( float *time, int length, float **value, int dim, string name, vector< float > seg_v ){
-	this->time_v = fcolvec( length );
-	// value is assumed to be dim (first dim) by length (2nd dim) 
-	this->value_m = fmat( (int) length, (int) dim );
-	for (int Itime=0; Itime<length; Itime++){
-		this->time_v(Itime) = time[Itime];
-		for (int Idim=0; Idim<dim; Idim++){
-			this->value_m(Itime, Idim) = value[Idim][Itime];
-		}
-	}
-	this->name = name;
-	//vector< float > seg_v( seg_fp, seg_fp + nBursts );
-	this->seg_v = seg_v;
-}
+
+// ***
+// XS 06/11/09 : commented this one because confusion in ordering of value 
+// i.e.: columns and rows are inversed compared to previous constructor !
+
+//ACMediaTimedFeatures::ACMediaTimedFeatures( float *time, int length, float **value, int dim, string name, vector< float > seg_v ){
+//	this->time_v = fcolvec( length );
+//	// value is assumed to be dim (first dim) by length (2nd dim) 
+//	this->value_m = fmat( (int) length, (int) dim );
+//	for (int Itime=0; Itime<length; Itime++){
+//		this->time_v(Itime) = time[Itime];
+//		for (int Idim=0; Idim<dim; Idim++){
+//			this->value_m(Itime, Idim) = value[Idim][Itime];
+//		}
+//	}
+//	this->name = name;
+//	//vector< float > seg_v( seg_fp, seg_fp + nBursts );
+//	this->seg_v = seg_v;
+//}
 
 // We pass by adresse now
 // ACMediaTimedFeatures::ACMediaTimedFeatures(vector<float> time, vector<float> value, string name, vector<float> seg_v){
@@ -378,7 +389,15 @@ ACMediaFeatures* ACMediaTimedFeatures::mean(){
 }
 
 ACMediaFeatures* ACMediaTimedFeatures::max(){
-	//XS TODO
+	ACMediaFeatures* max_mf = new ACMediaFeatures();  
+	fmat max_m = arma::max(this->getValue());
+	string name = "Max of ";
+	name += this->getName();
+	max_mf->setName(name);
+	for (int i=0; i<max_m.n_cols; i++){
+		max_mf->addFeature(max_m(0,i)); // 0 = per column
+	}
+	return max_mf;
 }
 
 // vector< float > ACMediaTimedFeatures:: meanAsVector(){

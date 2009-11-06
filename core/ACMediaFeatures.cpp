@@ -88,8 +88,7 @@ int ACMediaFeatures::size() {
 }
 
 void ACMediaFeatures::dump(){ // output in terminal
-// XS TODO : make this better
-	cout << "features of type: " << _type << endl;
+	cout << "features name: " << name << endl;
 	for (int i=0; i<features_vector.size(); i++){
 		cout << i << " : " << features_vector[i] << endl;
 	}

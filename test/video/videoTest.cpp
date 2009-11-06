@@ -183,6 +183,7 @@ void test_browse(std::string dancer){
 }
 
 void test_video_plugin(std::string dancer){
+	clock_t t0=clock();
 	string movie_file= videodir+"H264/"+dancer+".mov";
 	ACVideoPlugin* P = new ACVideoPlugin();
 	std::vector<ACMediaFeatures*> F = P->calculate(movie_file);
@@ -197,8 +198,10 @@ void test_video_plugin(std::string dancer){
 	for (iter = F.begin(); iter != F.end(); iter++) { 
 		delete *iter; 
 	}
-	
 	delete P;	
+	clock_t t1=clock();
+	cout<<"Test Video Plugin execution time: " << (t1-t0)/CLOCKS_PER_SEC << " s." << endl;	
+
 }
 
 int main(int argc, char** argv) {
