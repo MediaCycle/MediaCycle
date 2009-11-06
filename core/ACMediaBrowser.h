@@ -182,6 +182,7 @@ public:
 	// loops (or items) 
 	const vector<ACLoopAttribute>	&getLoopAttributes() const { return mLoopAttributes; }; 
 	void setLoopPosition(int loop_id, float x, float y, float z=0);
+	void setLoopIsDisplayed(int loop_id, bool iIsDisplayed) {this->mLoopAttributes[loop_id].isDisplayed = iIsDisplayed;}
 	int getNumberOfDisplayedLoops(){return nbLoopsDisplayed;}
 	int getNumberOfLoops(){return mLoopAttributes.size() ;} // XS this should be the same as mLibrary->getSize(), but this way it is more similar to getNumberOfLabels
 	

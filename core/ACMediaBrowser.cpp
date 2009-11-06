@@ -190,7 +190,8 @@ ACMediaBrowser::ACMediaBrowser() {
 	mCameraAngle = 0.0;
 	
 	mClickedLoop = -1;
-	
+	mClickedLabel = -1;
+
 	mClusterCount = 5;
 	mNavigationLevel = 0;
 	
@@ -211,6 +212,7 @@ ACMediaBrowser::ACMediaBrowser() {
 	mLoopAttributes.resize(0);
 	nbLoopsDisplayed = 0;
 	
+	mVisPlugin = NULL;
 }
 
 ACMediaBrowser::~ACMediaBrowser() {
@@ -309,17 +311,17 @@ void ACMediaBrowser::setClusterNumber(int n)
 }
 
 void ACMediaBrowser::setClickedLoop(int iloop){
-	if (iloop < 0 || iloop >= this->getNumberOfLoops())
-		mClickedLoop = iloop;
-	else
-		cerr << "<ACMediaBrowser::setClickedLoop> : index " << iloop << "out of bounds" << endl;
+  if (iloop < -1 || iloop >= this->getNumberOfLoops())
+    cerr << "<ACMediaBrowser::setClickedLoop> : index " << iloop << " out of bounds (nb loop = " << this->getNumberOfLoops() << ")"<< endl;
+  else
+    mClickedLoop = iloop;
 }
 
 void ACMediaBrowser::setClickedLabel(int ilabel){
-	if (ilabel < 0 || ilabel >= this->getNumberOfLabels())
-		mClickedLabel = ilabel;
-	else
+	if (ilabel < -1 || ilabel <= this->getNumberOfLabels())
 		cerr << "<ACMediaBrowser::setClickedLabel> : index " << ilabel << "out of bounds" << endl;
+	else
+		mClickedLabel = ilabel;
 }
 
 
@@ -344,9 +346,9 @@ void ACMediaBrowser::resetLoopNavigationLevels()
 	int i, n = mLoopAttributes.size();
 	
 	for(i=0; i<n; i++)
-	{
-		mLoopAttributes[i].navigationLevel = 0;
-	}
+		{
+			mLoopAttributes[i].navigationLevel = 0;
+		}
 	
 }
 
@@ -671,17 +673,10 @@ void ACMediaBrowser::initClusterCenters(){
 // mClusterCenters
 // mLoopAttributes
 void ACMediaBrowser::updateClusters(bool animate){
-  int method=1;
-  switch (method) {
-  case 0:
+  if (mVisPlugin==NULL)
     kmeans(animate);
-    break;
-  case 1:
-    std::cout << "UpdateClusters : Nouvelle mÈthode folle" << std::endl;
-    // DT : need to be somewhere else but don't know where
+  else{
     initClusterCenters();
-    break;
-  case 2:
     std::cout << "UpdateClusters : Plugin" << std::endl;
     mVisPlugin->updateClusters(this);
     if(animate) {
@@ -689,28 +684,15 @@ void ACMediaBrowser::updateClusters(bool animate){
       //commitPositions();
       setState(AC_CHANGING);
     }
-  default:
-    break;
   }
 }
 
 void ACMediaBrowser::updateNextPositions(){
-  int method=1;
-  switch (method) {
-  case 0:
+  if (mVisPlugin==NULL)
     setNextPositionsPropeller();
-    break;
-  case 1:
-    std::cout << "setNextPositions2dim : Nouvelle methode folle" << std::endl;
-    // DT : need to be somewhere else but don't know where
-    setNextPositions2dim();
-    break;
-  case 2:
+  else{
     std::cout << "updateNextPositions : Plugin" << std::endl;
     mVisPlugin->updateNextPositions(this);
-    break;
-  default:
-    break;
   }
 }
 

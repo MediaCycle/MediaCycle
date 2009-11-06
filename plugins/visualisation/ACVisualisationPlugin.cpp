@@ -76,7 +76,7 @@ void ACVisualisationPlugin::updateClusters(ACMediaBrowser* mediaBrowser){
 }
 
 void ACVisualisationPlugin::updateNextPositions(ACMediaBrowser* mediaBrowser){
-  int itemClicked=20;
+  int itemClicked, labelClicked, action;
   int libSize = mediaBrowser->getLibrary()->getSize();
   int totalDim =0;
   int featDim;
@@ -97,7 +97,17 @@ void ACVisualisationPlugin::updateNextPositions(ACMediaBrowser* mediaBrowser){
   activeFeatures_v(1)=3;
   activeFeatures_v(2)=4;
   
-  int action=1;
+  itemClicked = mediaBrowser->getClickedLoop();
+  labelClicked = mediaBrowser->getClickedLabel();
+  
+  if (itemClicked >= 0)
+    action = 1;
+  else 
+    if (labelClicked >= 0)
+      action = 2;
+    else
+      action = 0;
+  
   switch (action){
   case 0: // init
     // setting cluster center position
@@ -133,9 +143,12 @@ void ACVisualisationPlugin::updateNextPositions(ACMediaBrowser* mediaBrowser){
     break;
   }
   vector<string> clusterLabelAdj;
-  clusterLabelAdj.push_back("Low");
-  clusterLabelAdj.push_back("Medium");
-  clusterLabelAdj.push_back("High");
+//   clusterLabelAdj.push_back("Low");
+//   clusterLabelAdj.push_back("Medium");
+//   clusterLabelAdj.push_back("High");
+  clusterLabelAdj.push_back("1");
+  clusterLabelAdj.push_back("2");
+  clusterLabelAdj.push_back("3");
   vector<ACMedia*> loops = mediaBrowser->getLibrary()->getMedia();  
   vector<string> featureNames;
   int nbMedia = loops.size(); 
@@ -234,7 +247,7 @@ void ACVisualisationPlugin::updateNextPositions(ACMediaBrowser* mediaBrowser){
     center_m.print("Cluster center: ");
     std::cout << "Label : " << center_m(i,clusterCenterDispLabel_v(i))*3 << " " <<(int)(center_m(i,clusterCenterDispLabel_v(i))*3)<<std::endl;
     labelValue = clusterLabelAdj[(int)(center_m(i,clusterCenterDispLabel_v(i))*3)];
-    labelValue.append(" ");
+    labelValue.append("");
     labelValue.append(featureNames[activeFeatures_v(clusterCenterDispLabel_v(i))]);
     mediaBrowser->setLabel(i, labelValue, p);
   }
@@ -247,8 +260,11 @@ void ACVisualisationPlugin::updateNextPositions(ACMediaBrowser* mediaBrowser){
 //  Because there is no way to prevent a media from displaying it display it far away
   for (int i=0; i<libSize; i++){
     mediaBrowser->setLoopPosition(i, 40, 40);    
+    mediaBrowser->setLoopIsDisplayed(i, false);
   }
-
+  
+  for (int i=0; i < toDisplay_v.n_elem; i++)
+    mediaBrowser->setLoopIsDisplayed(toDisplay_v(i), true);
 //   for (int i=0; i<libSize; i++){
 //     mediaBrowser->setLoopPosition(i, posDisp_m(i,0), posDisp_m(i,1));
 //     //    std::cout<<"disp : " << clusterid_m(toDisplay_v(i)) << ", " << posDisp_m(toDisplay_v(i),0) << ", " << posDisp_m(toDisplay_v(i),1) << std::endl;

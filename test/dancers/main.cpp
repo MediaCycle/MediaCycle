@@ -62,8 +62,8 @@ void startOrRedraw(MediaCycle *that, int nbVideo, char**, int*);
 void startOrRedrawRandom(MediaCycle *that, int nbVideo, char**, int*);
 void itemClicked(MediaCycle *that, int idVideo, char**, int*);
 
-string mypath="/Users/xavier/Desktop/dancers-tmp/";
-
+//string mypath="/Users/xavier/Desktop/dancers-tmp/";
+string mypath = "/Users/dtardieu/Desktop/dancers-test/";
 int main(int argc, char** argv) {
 	string path = mypath+"test-data-2.acl";
 	string xmlpath = mypath+"dancers-ex.xml";
@@ -71,8 +71,8 @@ int main(int argc, char** argv) {
 	MediaCycle* mediacycle;
 	mediacycle = new MediaCycle(MEDIA_TYPE_VIDEO);
 //	mediacycle->addPlugin ("/Users/dtardieu/src/Numediart/ticore-app/Applications/Numediart/MediaCycle/src/Builds/darwin-x86/plugins/eyesweb/Debug/mc_eyesweb.dylib");
-//	mediacycle->addPlugin ("/Users/dtardieu/src/Numediart/ticore-app/Applications/Numediart/MediaCycle/src/Builds/darwin-x86/plugins/visualisation/Debug/mc_visualisation.dylib");
-//	mediacycle->setVisualisationPlugin("Visualisation");
+	mediacycle->addPlugin ("/Users/dtardieu/src/Numediart/ticore-app/Applications/Numediart/MediaCycle/src/Builds/darwin-x86/plugins/visualisation/Debug/mc_visualisation.dylib");
+	mediacycle->setVisualisationPlugin("Visualisation");
 //	mediacycle->importDirectory("/Users/dtardieu/data/DANCERS/Video/FrontTest/", 0);
 	
 	mediacycle->importLibrary(path);
@@ -191,7 +191,7 @@ int processTcpMessageFromInstallation(MediaCycle *that, char *buffer, int l, cha
 			cout << "nb videos : " << nbVideo << endl;
 			
 			// XS test
-			startOrRedrawRandom(that,nbVideo, buffer_send, l_send);
+			startOrRedraw(that,nbVideo, buffer_send, l_send);
 			
 			std::istringstream s_out (*buffer_send);
 			string str_buffer_send;
