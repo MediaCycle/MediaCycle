@@ -86,8 +86,8 @@ struct ACLoopAttribute {
 	int			curser;
 	int 		navigationLevel; // initially all set to zero, while traversing, only the one incremented are kept
 	int			hover;
-	bool		isDisplayed;
-	ACLoopAttribute() : cluster(0), active(false), navigationLevel(0), hover(0),isDisplayed(false) {}
+	bool		isDisplayed;	
+	ACLoopAttribute() : cluster(0), active(0), navigationLevel(0), hover(0),isDisplayed(false) {}
 };
 
 struct ACLabelAttribute {

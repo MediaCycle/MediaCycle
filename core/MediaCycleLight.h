@@ -52,7 +52,7 @@ struct ACPoint
 
 struct ACLoopAttribute
 {
-	ACPoint 	currentPos, nextPos;
+	ACPoint 	currentPos, nextPos, nextPosGrid;
 	ACPoint		viewPos;
 	float		distanceMouse;
 	int 		cluster; //cluster index
