@@ -45,8 +45,8 @@ ACOsgBrowserRenderer::ACOsgBrowserRenderer() {
 	group = new Group();
 	media_group = new Group();
 	label_group = new Group();
-	group->addChild(label_group);
-	group->addChild(media_group);
+	group->addChild(label_group.get());		// SD TODO - check this get(), was needed to compile on OSG v2.4 (used by AM)
+	group->addChild(media_group.get());
 }
 
 void ACOsgBrowserRenderer::prepareNodes(int start) {

@@ -78,7 +78,7 @@ struct ACPoint
 // ask SD to check...
 
 struct ACLoopAttribute {
-	ACPoint 	currentPos, nextPos;
+	ACPoint 	currentPos, nextPos, nextPosGrid;
 	ACPoint		viewPos;
 	float		distanceMouse;
 	int 		cluster; //cluster index
@@ -231,6 +231,17 @@ public:
 	int getNumberOfLabels(){return mLabelAttributes.size();}
 
 	void setVisualisationPlugin(ACPlugin* acpl){mVisPlugin=acpl;};
+	
+	// Proximity Grid		- SD TODO - eventually to be moved in visualization plugin chain
+	float proxgridstepx;
+	float proxgridstepy;
+	float proxgridaspectratio;
+	float proxgridlx;
+	float proxgridly;
+	int proxgridmaxdistance;
+	vector<int> proxgrid;
+	void setProximityGrid();
+	void setRepulsionEngine();	
 
 protected:
 	ACMediaLibrary *mLibrary; 

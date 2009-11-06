@@ -213,6 +213,15 @@ ACMediaBrowser::ACMediaBrowser() {
 	nbDisplayedLoops = 0;
 	
 	mVisPlugin = NULL;
+	
+	// Proximity Grid
+	proxgridstepx = 0.005;
+	proxgridaspectratio = 1.0; //9.0/16.0;
+	proxgridstepy = proxgridstepx * proxgridaspectratio;
+	proxgridlx = 150;
+	proxgridly = 150;
+	proxgridmaxdistance = 12;
+	
 }
 
 ACMediaBrowser::~ACMediaBrowser() {
@@ -700,8 +709,113 @@ void ACMediaBrowser::initClusterCenters(){
     }
   }
 }
-// XS TODO this one is tricky
 
+void ACMediaBrowser::setProximityGrid() {
+	
+	int i, j, k, l;
+	int n;
+	
+	ACPoint p, pgrid, curpos;
+	int index, pgridindex, curposindex;
+	
+	float langle, orientation, spiralstepx, spiralstepy, lorientation;
+	
+	proxgrid.resize((2*proxgridlx+1)*(2*proxgridly+1));
+	fill(proxgrid.begin(), proxgrid.end(), -1);
+	
+	// SD TODO - maybe need to compute MST (Minimum Spanning Tree)
+	
+	for(i=0; i<n; i++) {
+		
+		p = mLoopAttributes[i].nextPos;
+		
+		// grid quantization
+		pgrid.x = (int)round(p.x/proxgridstepx);
+		pgrid.y = (int)round(p.y/proxgridstepy);		
+		pgridindex =  (pgrid.y + proxgridly) * (2*proxgridlx+1) + pgrid.x + proxgridlx;
+		
+		// no further processing for this media if out of grid
+		if ( (pgridindex<0) || (pgridindex>=proxgrid.size()) ) {
+			continue;
+		}
+		
+		// spiral search
+		langle = atan( (p.y-pgrid.y*proxgridstepy) / (p.x-pgrid.x*proxgridstepx) );
+		orientation = fmod(ceil(langle/(M_PI/4.0)), 2) * 2 - 1; // +1 means positive angles
+		spiralstepx = fmod(round((langle-M_PI/2.0)/(M_PI/2.0)), 2);
+		if ((p.x-pgrid.x*proxgridstepy)<0) spiralstepx = - spiralstepx;
+		spiralstepy = fmod(round(langle/(M_PI/2.0)), 2);
+		if ((p.y-pgrid.y*proxgridstepy)<0) spiralstepy = - spiralstepy;
+		lorientation = atan(spiralstepy/spiralstepx);
+		
+		curpos.x = pgrid.x;
+		curpos.y = pgrid.y;
+		curposindex = (curpos.y + proxgridly) * (2*proxgridlx+1) + curpos.x + proxgridlx;
+		if (proxgrid[curposindex]==-1) {
+			l = proxgridmaxdistance;
+		}
+		else {
+			l = 1;
+		}
+		
+		while (l<proxgridmaxdistance) {
+			for (j=0;j<2;j++) {	
+				for (k=0;k<l;k++) {
+					curpos.x += spiralstepx;
+					curpos.y += spiralstepy;
+					curposindex = (curpos.y + proxgridly) * (2*proxgridlx+1) + curpos.x + proxgridlx;
+					if (proxgrid[curposindex]==-1) {
+						l=proxgridmaxdistance;
+						k=l;
+						j=2;
+					}
+				}
+				// minus PI or plus PI depending on orientation
+				lorientation += (orientation * M_PI / 2.0);
+				lorientation = fmod((double)lorientation, 2.0*M_PI);
+				spiralstepx = cos(lorientation);
+				spiralstepy = sin(lorientation);
+			}	
+			l++;
+		}
+		
+		// empty stategy
+		proxgrid[curposindex] = i;
+		
+		// swap strategy
+		// SD TODO
+		
+		// bump strategy
+		// SD TODO
+		
+	}
+	
+	for(i=0; i<n; i++) {
+		mLoopAttributes[i].nextPosGrid = mLoopAttributes[i].nextPos;
+	}
+	
+	for(i=0; i<proxgrid.size(); i++) {
+		index = proxgrid[i];
+		if ( (index>=0) && (index<n) ) {
+			curpos.x = ( fmod(i,(2*proxgridlx+1)) - proxgridlx) * proxgridstepx;
+			curpos.y = (floor((float)i / (2*proxgridlx+1)) - proxgridly) * proxgridstepy;
+			curpos.z = mLoopAttributes[index].nextPos.z;
+			mLoopAttributes[index].nextPosGrid = curpos;
+		}
+	}
+	
+	for(i=0; i<n; i++) {
+		mLoopAttributes[i].nextPos = mLoopAttributes[i].nextPosGrid;
+	}
+	
+	return;
+}
+
+void ACMediaBrowser::setRepulsionEngine() {
+	return;
+}
+
+// XS TODO this one is tricky
 // SD TODO - Different clustering algorithms should have their own classes
 // SD TODO - DIfferent dimensionality reduction too
 // This function make the kmeans and set some varaibles : 
@@ -729,6 +843,7 @@ void ACMediaBrowser::updateNextPositions(){
     std::cout << "updateNextPositions : Plugin" << std::endl;
     mVisPlugin->updateNextPositions(this);
   }
+  setProximityGrid();
 }
 
 void ACMediaBrowser::setNextPositions2dim(){
