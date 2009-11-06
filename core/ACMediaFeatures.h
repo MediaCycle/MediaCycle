@@ -62,7 +62,7 @@ protected:
   bool isComputed() {return _computed;};
   void setComputed() { _computed = true; };
   float getFeature(int i);
-  int getDiscretizedFeature(int scale, int nbSteps);
+  int getDiscretizedFeature();
   void setFeature(int i, float f);
   FeaturesVector getAllFeatures() {return features_vector;};
   void dump(); // output in terminal

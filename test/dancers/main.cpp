@@ -328,7 +328,7 @@ void saveLibraryAsXml(MediaCycle* mediacycle, string _path) {
 			featureName = media_library->getItem(i)->getFeatures(j)->getName();
 			
 			if (featureSize == 1){
-				featureValue = media_library->getItem(i)->getFeatures(j)->getDiscretizedFeature(1,1);
+				featureValue = media_library->getItem(i)->getFeatures(j)->getDiscretizedFeature();
 				fprintf(library_file, "%d", (int) featureValue);
 			}
 			else{

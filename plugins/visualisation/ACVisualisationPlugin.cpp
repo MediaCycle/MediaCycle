@@ -1,7 +1,7 @@
 /**
  * @brief ACVisualisationPlugin.cpp
  * @author Damien Tardieu
- * @date 05/11/2009
+ * @date 06/11/2009
  * @copyright (c) 2009 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -76,6 +76,7 @@ void ACVisualisationPlugin::updateClusters(ACMediaBrowser* mediaBrowser){
 }
 
 void ACVisualisationPlugin::updateNextPositions(ACMediaBrowser* mediaBrowser){
+  int itemClicked=20;
   int libSize = mediaBrowser->getLibrary()->getSize();
   int totalDim =0;
   int featDim;
@@ -91,27 +92,46 @@ void ACVisualisationPlugin::updateNextPositions(ACMediaBrowser* mediaBrowser){
   ucolvec perm_v = sort_index(q_v);
   ucolvec activeFeatures_v;
     //activeFeatures_v = perm_v.rows(0,3);  
-  activeFeatures_v.set_size(2);
-  activeFeatures_v(0)=0;
-  activeFeatures_v(1)=1;
-
-  ucolvec featureDispLabel_v = activeFeatures_v;
-  // setting cluster center position
-  clusterCenterDisp_m(0,0) = -1;
-  clusterCenterDisp_m(0,1) = -.7;
-  // Affectation of text to labels
-  clusterCenterDispLabel_v(0) = featureDispLabel_v(0);
-  clusterCenterDisp_m(1,0) = -1;
-  clusterCenterDisp_m(1,1) = .7;
-  clusterCenterDispLabel_v(1) = featureDispLabel_v(1);
-  clusterCenterDisp_m(2,0) = 1;
-  clusterCenterDisp_m(2,1) = -.7;
-  clusterCenterDispLabel_v(2) = featureDispLabel_v(1);
-  clusterCenterDisp_m(3,0) = 1;
-  clusterCenterDisp_m(3,1) = .7;
-  clusterCenterDispLabel_v(3) = featureDispLabel_v(0);
-
-
+  activeFeatures_v.set_size(3);
+  activeFeatures_v(0)=2;
+  activeFeatures_v(1)=3;
+  activeFeatures_v(2)=4;
+  
+  int action=1;
+  switch (action){
+  case 0: // init
+    // setting cluster center position
+    clusterCenterDisp_m(0,0) = -1;
+    clusterCenterDisp_m(0,1) = -.7;
+    // Which feature is used as a label : indice in activeFeatures
+    clusterCenterDispLabel_v(0) = 0;
+    clusterCenterDisp_m(1,0) = -1;
+    clusterCenterDisp_m(1,1) = .7;
+    clusterCenterDispLabel_v(1) = 1;
+    clusterCenterDisp_m(2,0) = 1;
+    clusterCenterDisp_m(2,1) = -.7;
+    clusterCenterDispLabel_v(2) = 2;
+    clusterCenterDisp_m(3,0) = 1;
+    clusterCenterDisp_m(3,1) = .7;
+    clusterCenterDispLabel_v(3) = 0;
+    break;
+  case 1: // itemClicked
+    // setting cluster center position
+    clusterCenterDisp_m(0,0) = -1;
+    clusterCenterDisp_m(0,1) = -.7;
+    // Which feature is used as a label : indice in activeFeatures
+    clusterCenterDispLabel_v(0) = 0;
+    clusterCenterDisp_m(1,0) = -1;
+    clusterCenterDisp_m(1,1) = .7;
+    clusterCenterDispLabel_v(1) = 1;
+    clusterCenterDisp_m(2,0) = 1;
+    clusterCenterDisp_m(2,1) = -.7;
+    clusterCenterDispLabel_v(2) = 2;
+    clusterCenterDisp_m(3,0) = 1;
+    clusterCenterDisp_m(3,1) = .7;
+    clusterCenterDispLabel_v(3) = 0;
+    break;
+  }
   vector<string> clusterLabelAdj;
   clusterLabelAdj.push_back("Low");
   clusterLabelAdj.push_back("Medium");
@@ -136,7 +156,7 @@ void ACVisualisationPlugin::updateNextPositions(ACMediaBrowser* mediaBrowser){
   // filling desc_m with activeFeatures
   mat desc_m(libSize,activeFeatures_v.n_elem);
   mat pos_m(libSize,2);
-
+  
   for(int i=0; i<nbMedia; i++) {    
     int tmpIdx = 0;
     for(int f=0; f< activeFeatures_v.n_elem; f++){
@@ -148,7 +168,7 @@ void ACVisualisationPlugin::updateNextPositions(ACMediaBrowser* mediaBrowser){
       }
     }
   }
-  
+  desc_m.save("desc.txt", arma_ascii);
   // normalizing features between 0 and 1
   rowvec maxDesc_v = max(desc_m);
   rowvec minDesc_v = min(desc_m);
@@ -161,19 +181,26 @@ void ACVisualisationPlugin::updateNextPositions(ACMediaBrowser* mediaBrowser){
   mat center_m, center2_m;
   mat coeff;
   mat desc2_m;
-  //  mat desc3_m(nbVideoDisplay, activeFeatures_v.n_elem);
-  //princomp(desc_m, coeff, desc2_m);
-  desc2_m = desc_m;
-  
   ucolvec pos_v, pos2_v;
   ucolvec toDisplay_v(nbVideoDisplay);
+  // desc_m for first clustering 
+  
+  switch (action){
+  case 0: // init
+    break;
+  case 1: // itemClicked
+    desc_m = abs(desc_m - repmat(desc_m.row(itemClicked), desc_m.n_rows, 1));
+    break;
+  }
+    // clustering 
+  kcluster(desc_m, nbClusters, clusterid_m, center_m);
 
-  // clusterizing 
-  kcluster(desc2_m, nbClusters, clusterid_m, center_m);
+  // position of screen display
   mat posDisp_m(libSize, 2);
   clusterid_m.print("clusterid_m");
   
-
+  // desc2_m used for display. For now the two first dims of desc_m
+  desc2_m = desc_m; // if I change this, take care to the dimension of the centers of the previous clustering
   mat tmpDesc_m;
   int index=0;
   for (int i=0; i<nbClusters; i++){
@@ -195,19 +222,20 @@ void ACVisualisationPlugin::updateNextPositions(ACMediaBrowser* mediaBrowser){
     tmp_m = tmp_m/repmat(max(abs(tmp_m)), tmp_m.n_rows, 1);
     tmp_m.print("tmp_m");
     for (int k=0; k < tmpDesc_m.n_rows; k++)
-      posDisp_m.row(pos_v(k)) = clusterCenterDisp_m.row(clusterid_m(pos_v(k))) + tmp_m.row(k);
+      posDisp_m.row(pos_v(k)) = clusterCenterDisp_m.row(clusterid_m(pos_v(k))) + tmp_m.submat(k,0,k,1);
   }
   string labelValue;
   for (int i=0; i< nbClusters; i++){
     ACPoint p;
-    center_m.print("Cluster center: ");
     p.x = clusterCenterDisp_m(i,0);
     p.y = clusterCenterDisp_m(i,1);
     p.z = .1;
+    clusterCenterDispLabel_v.print("clusterCenterDispLabel");
+    center_m.print("Cluster center: ");
     std::cout << "Label : " << center_m(i,clusterCenterDispLabel_v(i))*3 << " " <<(int)(center_m(i,clusterCenterDispLabel_v(i))*3)<<std::endl;
     labelValue = clusterLabelAdj[(int)(center_m(i,clusterCenterDispLabel_v(i))*3)];
     labelValue.append(" ");
-    labelValue.append(featureNames[clusterCenterDispLabel_v(i)]);
+    labelValue.append(featureNames[activeFeatures_v(clusterCenterDispLabel_v(i))]);
     mediaBrowser->setLabel(i, labelValue, p);
   }
 
@@ -225,10 +253,21 @@ void ACVisualisationPlugin::updateNextPositions(ACMediaBrowser* mediaBrowser){
 //     mediaBrowser->setLoopPosition(i, posDisp_m(i,0), posDisp_m(i,1));
 //     //    std::cout<<"disp : " << clusterid_m(toDisplay_v(i)) << ", " << posDisp_m(toDisplay_v(i),0) << ", " << posDisp_m(toDisplay_v(i),1) << std::endl;
 //  }
-  for (int i=0; i<nbVideoDisplay; i++){
-    mediaBrowser->setLoopPosition(toDisplay_v(i), posDisp_m(toDisplay_v(i),0), posDisp_m(toDisplay_v(i),1));
-    std::cout<<"disp : " << clusterid_m(toDisplay_v(i)) << ", " << posDisp_m(toDisplay_v(i),0) << ", " << posDisp_m(toDisplay_v(i),1) << std::endl;
- }
+  switch (action){
+  case 0: // init
+    for (int i=0; i<nbVideoDisplay; i++){
+      mediaBrowser->setLoopPosition(toDisplay_v(i), posDisp_m(toDisplay_v(i),0), posDisp_m(toDisplay_v(i),1));
+      std::cout<<"disp : " << clusterid_m(toDisplay_v(i)) << ", " << posDisp_m(toDisplay_v(i),0) << ", " << posDisp_m(toDisplay_v(i),1) << std::endl;
+    }
+    break;
+  case 1: // itemClicked
+    for (int i=0; i<nbVideoDisplay; i++){
+      mediaBrowser->setLoopPosition(toDisplay_v(i), posDisp_m(toDisplay_v(i),0), posDisp_m(toDisplay_v(i),1));
+      std::cout<<"disp : " << clusterid_m(toDisplay_v(i)) << ", " << posDisp_m(toDisplay_v(i),0) << ", " << posDisp_m(toDisplay_v(i),1) << std::endl;
+    }
+    mediaBrowser->setLoopPosition(itemClicked, 0, 0);
+    break;
+  }
 //   for (int i=0; i<libSize; i++){
 //     mediaBrowser->setLoopPosition(i, desc_m(i,0), desc_m(i,1));    
 //   }

@@ -249,6 +249,7 @@ void ACMediaLibrary::saveAsLibrary(string _path) {
     local_media->save(library_file);
   }
   fclose(library_file);
+  normalizeFeatures();
 }
 
 void ACMediaLibrary::cleanLibrary() {
@@ -353,7 +354,7 @@ void ACMediaLibrary::calculateStats() {
 			if ( tmp < 0 )
 				stdev_features[j][k] = 0;
 			else {
-				stdev_features[j][k] = sqrt( tmp);
+			  stdev_features[j][k] = sqrt( tmp*((1.0*n)/(n-1)));
 			}
 			printf("\t[%d] mean_features = %f, stddev = %f\n", k, mean_features[j][k], stdev_features[j][k]);
 		}
