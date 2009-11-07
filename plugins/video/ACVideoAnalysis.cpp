@@ -91,6 +91,7 @@ void ACVideoAnalysis::clean(){
 	blob_centers.clear();
 	blob_speeds.clear(); 
 	contraction_indices.clear();
+	bounding_box_ratios.clear();
 	pixel_speeds.clear();
 	width = height = depth = fps = nframes = 0;
 	threshU = threshL = 0;
@@ -409,7 +410,7 @@ void ACVideoAnalysis::computeBlobs(IplImage* bg_img, int bg_thresh, int big_blob
 		blobs = CBlobResult( bitImage, NULL, 255 ); // find blobs in image
 		blobs.Filter( blobs, B_EXCLUDE, CBlobGetArea(), B_LESS, big_blob );
 		all_blobs.push_back(blobs);
-		all_blobs_time_stamps.push_back(cvGetCaptureProperty(capture, CV_CAP_PROP_POS_FRAMES));
+		all_blobs_time_stamps.push_back(cvGetCaptureProperty(capture, CV_CAP_PROP_POS_FRAMES)*1.0/fps); // in seconds
 	}
 	cvReleaseImage(&bitImage);
 	cvReleaseImage(&bwImage);
@@ -474,7 +475,7 @@ void ACVideoAnalysis::computeBlobsInteractively(IplImage* bg_img, bool merge_blo
 		blobs = CBlobResult( bitImage, NULL, 255 );
 		blobs.Filter( blobs, B_EXCLUDE, CBlobGetArea(), B_LESS,  slider_big_blob );
 		all_blobs.push_back(blobs);
-		all_blobs_time_stamps.push_back(cvGetCaptureProperty(capture, CV_CAP_PROP_POS_FRAMES));
+		all_blobs_time_stamps.push_back(cvGetCaptureProperty(capture, CV_CAP_PROP_POS_FRAMES)*1.0/fps); // in seconds
 		
 		snprintf (str, 64, "[%03d] : %03d blobs", i, blobs.GetNumBlobs());
 		cvPutText (saveImage, str, cvPoint (10, 20), &font, CV_RGB (0, 255, 100));
@@ -609,7 +610,7 @@ void ACVideoAnalysis::computeBlobsUL(IplImage* bg_img, bool merge_blobs, int big
 		blobs.Filter( blobs, B_EXCLUDE, CBlobGetArea(), B_LESS, big_blob );
 		if (blobs.GetNumBlobs() > 0){
 			all_blobs.push_back(blobs);
-			all_blobs_time_stamps.push_back(cvGetCaptureProperty(capture, CV_CAP_PROP_POS_FRAMES));
+			all_blobs_time_stamps.push_back(cvGetCaptureProperty(capture, CV_CAP_PROP_POS_FRAMES)*1.0/fps);
 		}
 #ifdef VISUAL_CHECK
 		snprintf (str, 64, "[%03d] : %03d blobs", i, blobs.GetNumBlobs());
@@ -768,7 +769,6 @@ void ACVideoAnalysis::computeOpticalFlow(){
 	// double free:	cvReleaseImage(&swap_temp);
 }
 
-
 void ACVideoAnalysis::computeMergedBlobsTrajectory(float blob_dist){
 	blob_centers.clear();
 	CBlobResult currentBlob;
@@ -787,11 +787,15 @@ void ACVideoAnalysis::computeMergedBlobsTrajectory(float blob_dist){
 }
 
 void ACVideoAnalysis::computeMergedBlobsSpeeds(float blob_dist){
+	// XS better: do this in ACMediaTimedFeatures
 	if (!HAS_TRAJECTORY) this->computeMergedBlobsTrajectory(blob_dist);
 	blob_speeds.clear();
 	blob_center cb_prev;
 	blob_center cb = blob_centers[0];
-	
+	blob_center v_init;
+	v_init.push_back(0.0);
+	v_init.push_back(0.0);
+	blob_speeds.push_back(v_init); // so that it has the same size for time stamps
 	for (unsigned int i=1; i< all_blobs.size(); i++){ // not i=0
 		blob_center speed;
 		cb_prev = cb;
@@ -800,8 +804,6 @@ void ACVideoAnalysis::computeMergedBlobsSpeeds(float blob_dist){
 			speed.push_back(cb[j]-cb_prev[j]);	
 		}
 		blob_speeds.push_back(speed);
-		// XS TODO : use time stamp !
-		// speed will have one item less than trajectory
 	}
 }
 
@@ -1058,10 +1060,8 @@ IplImage* ACVideoAnalysis::computeMedianNoBlobImage(std::string fsave, IplImage 
 	cvMoveWindow("NOBLOBS", 50, 400);	
 #endif // VISUAL_CHECK
 	
-	for (int i=0;i<all_blobs.size();i++){
-		cout << i << endl;
+	for (unsigned int i=0;i<all_blobs.size();i++){
 		if (all_blobs[i].GetNumBlobs() == 0){
-			cout << i << endl;
 			cnt++;
 			cursor = all_blobs_time_stamps[i];
 			cvSetCaptureProperty(capture, CV_CAP_PROP_POS_FRAMES, cursor); 	
@@ -1128,6 +1128,7 @@ void ACVideoAnalysis::computePixelSpeed() {
 	// substracts each image from the previous one and sums it all
 	// XS: could add option to calculate just on a segment of the video
 	pixel_speeds.clear();
+	this->rewind();
 	IplImage *frame = 0;
 	IplImage *tmp_frame = 0;
 	IplImage *previous_frame = 0;
@@ -1150,8 +1151,8 @@ void ACVideoAnalysis::computePixelSpeed() {
 	float speed = 0.0;
 	
 	// initial frame
-	//	tmp_frame = cvCreateImage (cvSize (width, height), IPL_DEPTH_8U, 3); // -- not necessary
 	tmp_frame = this->getNextFrame();
+	pixel_speeds.push_back(speed); // so that the pixel_speeds vector has the same lenght as the time stamps
 	
 	frame = cvCreateImage (cvSize (width, height), IPL_DEPTH_32S, 3);
 	previous_frame = cvCreateImage (cvSize (width, height), IPL_DEPTH_32S, 3);
@@ -1164,7 +1165,9 @@ void ACVideoAnalysis::computePixelSpeed() {
 	cvNamedWindow ("Substraction", CV_WINDOW_AUTOSIZE);
 #endif //VISUAL_CHECK
 	
-	for(int i = 1; i < nframes; i++){ 
+	for(int i = 1; i < all_blobs.size(); i++){ 
+// XS TODO: this is not clean but we calculate only in frames with blobs
+// could also do a setROI on the bounding box ? no since ROI will be different in consecutive frames
 		cvConvert (tmp_frame, previous_frame);
 		tmp_frame = this->getNextFrame();
 		cvConvert (tmp_frame, frame);
@@ -1207,8 +1210,18 @@ void ACVideoAnalysis::computeContractionIndices(){
 		bbox = all_blobs[i].GetBoundingBox();
 		ci = all_blobs[i].Area() / (bbox.width*bbox.height);
 		contraction_indices.push_back(ci);
-		//XS debug
-		cout << i << ": " << ci << endl;
+	}
+}
+
+void ACVideoAnalysis::computeBoundingBoxRatios(){
+	if (!HAS_TRAJECTORY) this->computeMergedBlobsTrajectory();
+	bounding_box_ratios.clear();
+	CvRect bbox;
+	float bd;
+	for (unsigned int i=0; i< all_blobs.size(); i++){ 
+		bbox = all_blobs[i].GetBoundingBox();
+		bd = all_blobs[i].Area() / (bbox.width*bbox.width); // x/y * n/(xy) --- check this
+		bounding_box_ratios.push_back(bd);
 	}
 }
 

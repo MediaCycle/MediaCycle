@@ -189,7 +189,7 @@ void test_video_plugin(std::string dancer){
 	std::vector<ACMediaFeatures*> F = P->calculate(movie_file);
 	cout << "computed " << F.size() << " features" << endl;
 	for (unsigned int i=0; i<F.size(); i++){
-		cout << i << " : " << F[i]->getName() << endl;
+		cout << "-- Feature " << i << " : " << F[i]->getName() << endl;
 		F[i]->dump();
 	}
 	

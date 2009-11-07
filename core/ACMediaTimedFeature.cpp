@@ -64,8 +64,6 @@ ACMediaTimedFeatures::ACMediaTimedFeatures( const vector<float> &time, const vec
 	}
 	this->time_v = fcolvec(time.size());
 	this->value_m = fmat((int) value.size(), (int) value[0].size());
-	//XS debug
-	cout << "value.size(): " << value.size() << " - value [0].size()=" << value[0].size() << endl;
 	for (unsigned int Itime=0; Itime<time.size(); Itime++){
 		this->time_v(Itime) = time[Itime];
 		for (unsigned int Idim=0; Idim<value[0].size(); Idim++){

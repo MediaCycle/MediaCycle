@@ -55,6 +55,10 @@ private:
 	ACMediaFeatures* calculateStdOfTrajectory(ACVideoAnalysis* video);
 	ACMediaFeatures* calculateMaxOfTrajectory(ACVideoAnalysis* video);
 	ACMediaFeatures* calculateContractionIndex(ACVideoAnalysis* video);
+	ACMediaFeatures* calculateMeanSpeedOfTrajectory(ACVideoAnalysis* video);
+//	ACMediaFeatures* calculateMostOccupiedCell(ACVideoAnalysis* video);
+	ACMediaFeatures* calculateMeanBoundingBoxRatio(ACVideoAnalysis* video);
+	ACMediaFeatures* calculateMeanPixelSpeed(ACVideoAnalysis* video);
 };
 
 #endif	/* _ACVIDEOPLUGIN_H */

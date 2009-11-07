@@ -76,7 +76,7 @@ public:
 	void trimBlank(IplImage* bg_img);
 	int getFirstFrameMove();
 	
-	// XS test
+	// XS not so useful
 	void histogramEqualize(const IplImage* bg_img);
 	
 	// raw features computation
@@ -91,6 +91,7 @@ public:
 	void computeMergedBlobsSpeeds(float blob_dist = 0);
 //	void computeCellOccupation(int nx, int ny);
 	void computeContractionIndices();
+	void computeBoundingBoxRatios();
 	void computePixelSpeed();
 
 	// features accessors (to be called by ACVideoPlugin)
@@ -98,7 +99,7 @@ public:
 	std::vector<blob_center> getMergedBlobsSpeeds() {return blob_speeds;}
 	std::vector<float> getContractionIndices() {return contraction_indices;}
 	std::vector<float> getPixelSpeeds() {return pixel_speeds;}
-	
+	std::vector<float> getBoundingBoxRatios(){return bounding_box_ratios;}
 	std::vector<float> getDummyTimeStamps();
 	std::vector<float> getTimeStamps();
 
@@ -130,10 +131,11 @@ private:
 	// NB: blobs (CBlobResult) may contain more than one blob per frame
 	std::vector<CBlobResult> all_blobs; // XS make this pointers ?
 	std::vector<float> all_blobs_time_stamps;
-	
+
 	std::vector<blob_center> blob_centers;
 	std::vector<blob_center> blob_speeds; 
 	std::vector<float> contraction_indices;
+	std::vector<float> bounding_box_ratios;
 
 	std::vector<float> pixel_speeds;
 	int width, height, depth, fps, nframes;
