@@ -138,6 +138,8 @@ int processTcpMessageFromInstallation(MediaCycle *that, char *buffer, int l, cha
 	
 	std::string file_name;
 	std::istringstream message_in(buffer);
+
+	cout<< "buffer : " << buffer <<endl;
 	string str_message_in;
 	if (! (message_in >> str_message_in) ){
 		if (! message_in.good()){ 
@@ -481,8 +483,8 @@ void itemClicked(MediaCycle *mediacycle, int idVideo, char **buffer_send, int* l
 	int n_loops = media_browser->getNumberOfLoops();
 	// XS should also be = media_library->getSize()
 	
-	if (0 < idVideo || idVideo > n_loops) {
-		cerr << "<itemClicked> : video ID out of bounds" << endl;
+	if (0 > idVideo || idVideo > n_loops) {
+		cerr << "<itemClicked> : video ID out of bounds (Library Size = " << n_loops << ", idvideo = " << idVideo << " )" << endl;
 		return;
 	}
 	

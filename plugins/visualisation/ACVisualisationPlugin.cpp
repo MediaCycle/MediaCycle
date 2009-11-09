@@ -162,8 +162,8 @@ void ACVisualisationPlugin::updateNextPositions(ACMediaBrowser* mediaBrowser){
 		mediaBrowser->setLoopPosition(toDisplay_v(i), posDisp_m(toDisplay_v(i),0), posDisp_m(toDisplay_v(i),1));
 		std::cout<<"disp : " << toDisplay_v(i) << ", " << posDisp_m(toDisplay_v(i),0) << ", " << posDisp_m(toDisplay_v(i),1) << std::endl;
 	}
-	if (itemClicked >= 0)
-		mediaBrowser->setLoopPosition(itemClicked, 0, 0);
+// 	if (itemClicked >= 0)
+// 		mediaBrowser->setLoopPosition(itemClicked, 0, 0);
 }
 
 
@@ -237,7 +237,6 @@ mat ACVisualisationPlugin::updateNextPositionsInit(mat &desc_m, int nbVideoDispl
 		for (int k=0; k < tmpDesc_m.n_rows; k++)
 			posDisp_m.row(pos_v(k)) = clusterCenterDisp_m.row(clusterid_m(pos_v(k))) + tmp_m.submat(k,0,k,1);
 	}
-	
 	labelPos_m = clusterCenterDisp_m;
 	labelIdx_v = clusterLabel_v;
 	center_m.print("center_m : ");
@@ -278,16 +277,17 @@ mat ACVisualisationPlugin::updateNextPositionsItemClicked(mat &desc_m, int nbVid
 	ucolvec spos_v = sort_index(dist_v);
 	toDisplay_v = spos_v.rows(0,nbVideoDisplay-1);
 	mat descDisp_m(nbVideoDisplay, desc_m.n_rows);
-	colvec distDesc_v = log(min(desc_m,1));
+	colvec distDesc_v = min(desc_m,1);
 	urowvec tmpSort_v;
 	double angle;
 	for (int k=0; k<desc_m.n_rows; k++){
 		angle = conv_to<double>::from(rand<mat>(1,1)*(math::pi())/2);
 		tmpSort_v = sort_index(conv_to<rowvec>::from(desc_m.row(k)));
+		distDesc_v.print("distDesc_v");
 		posDisp_m(k,0) = distDesc_v(k)*cos(angle) * clusterCenterDisp_m(tmpSort_v(0),0);
 		posDisp_m(k,1) = distDesc_v(k)*sin(angle) * clusterCenterDisp_m(tmpSort_v(0),1);
 	}
-	
+	posDisp_m.print("posDisp_m");	
 	labelPos_m = clusterCenterDisp_m;
 	for (int k=0; k < desc_m.n_cols; k++){
 		labelIdx_v(k) = k;
