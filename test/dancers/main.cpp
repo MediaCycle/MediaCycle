@@ -222,9 +222,10 @@ int processTcpMessageFromInstallation(MediaCycle *that, char *buffer, int l, cha
 		case 1:{ 
 			// ITEMCLICKED
 			// MESSAGE : 1 idVideo
-			unsigned int idVideo;
-			std::istringstream s_1( str_message_in.substr(1,3) );
-			if ( !(s_1 >> idVideo) ){
+			string idVideoStr;
+			unsigned int idVideo=10;
+			std::istringstream s_1( str_message_in.substr(4,6) );
+			if ( !(s_1 >> idVideoStr) ){
 				if (! s_1.good()){
 					cerr << "<processTcpMessageFromInstallation> : bad streaming of video ID from incoming buffer" << endl;
 				}
@@ -234,9 +235,19 @@ int processTcpMessageFromInstallation(MediaCycle *that, char *buffer, int l, cha
 				cerr << "type : " << msgType << " ; corresponding buffer[1:3] = " << s_1 << endl;
 				return -1;
 			}
-			
-			cout << "id video : " << idVideo << endl;
-			
+			string filename;
+			int posSep;
+			int posDot;
+			for (int k=0; k<that->getLibrarySize(); k++){
+				filename=that->getLibrary()->getItem(k)->getFileName();
+				posSep = filename.find_last_of("/");
+				posDot = filename.find_last_of(".");
+				cout << "test id : " << filename.substr(posSep, posDot-posSep+1) << endl;
+				if (!filename.compare(posSep+1, posDot-posSep-1, idVideoStr)){
+					idVideo = k;
+					break;
+				}	
+			}
 			itemClicked(that,idVideo, buffer_send, l_send);
 
 			break;
@@ -551,7 +562,7 @@ void saveLibraryAsXml(MediaCycle* mediacycle, string _path) {
 	/// ITEMS //
 	fprintf(library_file, "%s\n", "<items>");
 	for(int i=0; i<n_loops; i++) {
-		fprintf(library_file, "<v>");
+		fprintf(library_file, "<v duration=\"120.0\">");
 		local_media = media_library->getItem(i);    
 		
 		// printing ID
@@ -620,26 +631,34 @@ void readLibraryXml(MediaCycle* mediacycle, std::string filename){
 	}
 }
 
+// std::string generateID(std::string filename){
+// 	const int nbCities=2;
+// 	const std::string cityNames[nbCities] = {"Bru", "Par"};
+// 	const std::string cityID[nbCities] = {"00", "01"};
+// 	std::string IDs, numDancer, numTry, city;
+// 	int posCity;
+// 	int posSep = filename.find_last_of("/\\");
+// 	int posDot = filename.find_last_of(".");
+// 	city = filename.substr(posSep+1, 3);
+// 	numDancer = filename.substr(posSep+5, 3);
+// 	numTry = filename[posSep+9];
+// 	for (int i=0; i<nbCities; i++){
+// 		if (!city.compare(cityNames[i]))
+// 			posCity = i;
+// 	}
+// 	IDs.assign(cityID[posCity]);
+// 	IDs += numDancer;
+// 	IDs += numTry;
+// 	return IDs;
+// }
+
 std::string generateID(std::string filename){
-	const int nbCities=2;
-	const std::string cityNames[nbCities] = {"Bru", "Par"};
-	const std::string cityID[nbCities] = {"00", "01"};
-	std::string IDs, numDancer, numTry, city;
-	int posCity;
+	std::string IDs;
 	int posSep = filename.find_last_of("/\\");
-	int posDot = filename.find_last_of(".");
-	city = filename.substr(posSep+1, 3);
-	numDancer = filename.substr(posSep+5, 3);
-	numTry = filename[posSep+9];
-	for (int i=0; i<nbCities; i++){
-		if (!city.compare(cityNames[i]))
-			posCity = i;
-	}
-	IDs.assign(cityID[posCity]);
-	IDs += numDancer;
-	IDs += numTry;
+	IDs = filename.substr(posSep+1, 6);
 	return IDs;
 }
+
 // sample XML file:
 /*
 <?xml version="1.0"?>

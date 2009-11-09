@@ -77,7 +77,7 @@ void ACVisualisationPlugin::updateClusters(ACMediaBrowser* mediaBrowser){
 
 void ACVisualisationPlugin::updateNextPositions(ACMediaBrowser* mediaBrowser){
   int itemClicked, labelClicked, action;
-  int nbVideoDisplay = 20; //mediaBrowser->nbDisplayedLoops(); // should divide by nbClusters
+  int nbVideoDisplay = 16;//mediaBrowser->getNumberOfDisplayedLoops(); // should divide by nbClusters
   ucolvec toDisplay_v(nbVideoDisplay);
 	vector<string> featureNames;
 	int libSize = mediaBrowser->getLibrary()->getSize();
@@ -107,14 +107,17 @@ void ACVisualisationPlugin::updateNextPositions(ACMediaBrowser* mediaBrowser){
 			desc_m = extractDescMatrix(mediaBrowser, nbActiveFeatures, featureNames);			
       posDisp_m = updateNextPositionsInit(desc_m, nbVideoDisplay, toDisplay_v, labelPos_m, labelIdx_v, labelValue_v);
 		}
+	for (int i=0; i<nbActiveFeatures; i++)
+		std::cout << "featureNames : " << featureNames[i] << std::endl;
 
   vector<string> clusterLabelAdj;
 	//   clusterLabelAdj.push_back("Low");
 	//   clusterLabelAdj.push_back("Medium");
 	//   clusterLabelAdj.push_back("High");
-  clusterLabelAdj.push_back("A");
-  clusterLabelAdj.push_back("B");
-  clusterLabelAdj.push_back("C");
+  clusterLabelAdj.push_back("0");
+  clusterLabelAdj.push_back("1");
+  clusterLabelAdj.push_back("2");
+  clusterLabelAdj.push_back("3");
 
 
 
@@ -122,7 +125,7 @@ void ACVisualisationPlugin::updateNextPositions(ACMediaBrowser* mediaBrowser){
   mat center_m, center2_m;
   // desc_m for first clustering 
   	
-// 	// for screen display between 0 and 999 
+	/////// for screen display between 0 and 999  //////////////////////////////////////
   rowvec maxPosDisp_v = max(posDisp_m);
   rowvec minPosDisp_v = min(posDisp_m);
   posDisp_m = posDisp_m - repmat(minPosDisp_v, posDisp_m.n_rows, 1);
@@ -131,16 +134,17 @@ void ACVisualisationPlugin::updateNextPositions(ACMediaBrowser* mediaBrowser){
   labelPos_m = labelPos_m/repmat(maxPosDisp_v-minPosDisp_v, labelPos_m.n_rows, 1)*999;
 	posDisp_m.col(1) = 999-posDisp_m.col(1);
 	labelPos_m.col(1) = 999-labelPos_m.col(1);
-	
+	///////////////////////////////////////////////////////////////////////////////
+
   string labelValue;
   for (int i=0; i< labelIdx_v.n_rows; i++){
     ACPoint p;
     p.x = labelPos_m(i,0);
     p.y = labelPos_m(i,1);
     p.z = .1;
-    labelValue = clusterLabelAdj[labelValue_v(i)];
+    labelValue = featureNames[labelIdx_v(i)];
     labelValue.append("");
-    labelValue.append(featureNames[labelIdx_v(i)]);
+    labelValue.append(clusterLabelAdj[labelValue_v(i)]);
     mediaBrowser->setLabel(i, labelValue, p);
   }
 	std::cout << "toDisplay_v.n_elem : "  << toDisplay_v.n_elem << std::endl;
@@ -184,34 +188,56 @@ mat ACVisualisationPlugin::updateNextPositionsInit(mat &desc_m, int nbVideoDispl
 	clusterCard_v.fill((int)(nbVideoDisplay/nbClusters));
 	clusterCard_v(0) = clusterCard_v(0)+nbVideoDisplay-sum(clusterCard_v);
 	clusterCard_v.print("clusterCard_v :");
+
 	// setting cluster center position
 	clusterCenterDisp_m(0,0) = -1;
 	clusterCenterDisp_m(0,1) = -.7;
 	// Which feature is used as a label : indice in activeFeatures
 	clusterLabel_v(0) = 0;
-	clusterSpread_v(0) = 1;
+	clusterSpread_v(0) = .8;
 	
 	clusterCenterDisp_m(1,0) = -1;
 	clusterCenterDisp_m(1,1) = .7;
 	clusterLabel_v(1) = 1;
-	clusterSpread_v(1) = 1;
+	clusterSpread_v(1) = .8;
 	
 	clusterCenterDisp_m(2,0) = 1;
 	clusterCenterDisp_m(2,1) = -.7;
 	clusterLabel_v(2) = 2;
-	clusterSpread_v(2) = 1;
+	clusterSpread_v(2) = .8;
 	
 	clusterCenterDisp_m(3,0) = 1;
 	clusterCenterDisp_m(3,1) = .7;
 	clusterLabel_v(3) = 0;
-	clusterSpread_v(3) = 1;
+	clusterSpread_v(3) = .8;
+
+// 	// setting cluster center position
+// 	clusterCenterDisp_m(0,0) = 0;
+// 	clusterCenterDisp_m(0,1) = 0;
+// 	// Which feature is used as a label : indice in activeFeatures
+// 	clusterLabel_v(0) = 0;
+// 	clusterSpread_v(0) = 1;
+	
+// 	clusterCenterDisp_m(1,0) = -1.5;
+// 	clusterCenterDisp_m(1,1) = 1.2;
+// 	clusterLabel_v(1) = 1;
+// 	clusterSpread_v(1) = .3;
+	
+// 	clusterCenterDisp_m(2,0) = 1.5;
+// 	clusterCenterDisp_m(2,1) = -1.2;
+// 	clusterLabel_v(2) = 2;
+// 	clusterSpread_v(2) = .3;
+	
+// 	clusterCenterDisp_m(3,0) = 1.5;
+// 	clusterCenterDisp_m(3,1) = 1.2;
+// 	clusterLabel_v(3) = 0;
+// 	clusterSpread_v(3) = .3;
 
 	colvec clusterid_m, clusterid2_m;
 	mat center_m, center2_m;
-
+	desc_m.save("desc.txt", arma_ascii);
 	    // clustering 
 	kcluster(desc_m, nbClusters, clusterid_m, center_m);
-	
 	// desc2_m used for display. For now the two first dims of desc_m
 	mat desc2_m = desc_m; // if I change this, take care to the dimension of the centers of the previous clustering
 	
@@ -233,15 +259,29 @@ mat ACVisualisationPlugin::updateNextPositionsInit(mat &desc_m, int nbVideoDispl
 		}
 		mat tmp_m = tmpDesc_m - repmat(center_m.row(i), tmpDesc_m.n_rows, 1);
 		tmp_m = tmp_m/repmat(max(abs(tmp_m)), tmp_m.n_rows, 1) * clusterSpread_v(i);
-		
 		for (int k=0; k < tmpDesc_m.n_rows; k++)
 			posDisp_m.row(pos_v(k)) = clusterCenterDisp_m.row(clusterid_m(pos_v(k))) + tmp_m.submat(k,0,k,1);
 	}
 	labelPos_m = clusterCenterDisp_m;
-	labelIdx_v = clusterLabel_v;
-	center_m.print("center_m : ");
-	for (int k=0; k < nbClusters; k++)
-		labelValue_v(k) = (int) (center_m(k,labelIdx_v(k))*3);
+	urowvec maxDiff_v = sort_index(conv_to<rowvec>::from(abs(center_m.row(3)-center_m.row(0))), 1);
+	int maxDiffPos = maxDiff_v(0);
+	labelIdx_v(0) = maxDiffPos;
+	labelIdx_v(3) = maxDiffPos;
+	labelIdx_v(1) = maxDiff_v(1);
+	labelIdx_v(2) = maxDiff_v(2);
+
+	for (int k=0; k < nbClusters; k++){
+    if (center_m(k,labelIdx_v(k)) > .6)
+      labelValue_v(k)=3;
+    else 
+      if (center_m(k,labelIdx_v(k)) < .4)
+				labelValue_v(k) = 1;
+      else
+				labelValue_v(k) = 2;
+		std::cout << "center_m(k,labelIdx_v(k)) : " << center_m(k,labelIdx_v(k)) << std::endl;
+		std::cout << "center_m(k,labelIdx_v(k))*3 : " << center_m(k,labelIdx_v(k))*3 << std::endl;
+		std::cout << "labelValue_v(k) : " << labelValue_v(k) << std::endl;
+	}
 	return posDisp_m;
 }
 
@@ -271,11 +311,13 @@ mat ACVisualisationPlugin::updateNextPositionsItemClicked(mat &desc_m, int nbVid
 	labelValue_v.set_size(nbClusters);
 	labelPos_m.set_size(nbClusters,2);
 	labelIdx_v.set_size(nbClusters);
-
+	cout << "itemClicked : " << itemClicked << endl;
 	desc_m = abs(desc_m - repmat(desc_m.row(itemClicked), desc_m.n_rows, 1));
+	desc_m.save("descD_m.txt", arma_ascii);
 	colvec dist_v = min(desc_m,1);
 	ucolvec spos_v = sort_index(dist_v);
 	toDisplay_v = spos_v.rows(0,nbVideoDisplay-1);
+	toDisplay_v.print("toDisplay_v");
 	mat descDisp_m(nbVideoDisplay, desc_m.n_rows);
 	colvec distDesc_v = min(desc_m,1);
 	urowvec tmpSort_v;
@@ -283,16 +325,17 @@ mat ACVisualisationPlugin::updateNextPositionsItemClicked(mat &desc_m, int nbVid
 	for (int k=0; k<desc_m.n_rows; k++){
 		angle = conv_to<double>::from(rand<mat>(1,1)*(math::pi())/2);
 		tmpSort_v = sort_index(conv_to<rowvec>::from(desc_m.row(k)));
-		distDesc_v.print("distDesc_v");
 		posDisp_m(k,0) = distDesc_v(k)*cos(angle) * clusterCenterDisp_m(tmpSort_v(0),0);
 		posDisp_m(k,1) = distDesc_v(k)*sin(angle) * clusterCenterDisp_m(tmpSort_v(0),1);
 	}
-	posDisp_m.print("posDisp_m");	
+	posDisp_m(itemClicked,0)=0;
+	posDisp_m(itemClicked,1)=0;
 	labelPos_m = clusterCenterDisp_m;
 	for (int k=0; k < desc_m.n_cols; k++){
 		labelIdx_v(k) = k;
 		labelValue_v(k) = desc_m(itemClicked,k);
 	}
+	posDisp_m.save("posDisp_m", arma_ascii);
 	return posDisp_m;
 }
 
@@ -320,7 +363,7 @@ mat ACVisualisationPlugin::extractDescMatrix(ACMediaBrowser* mediaBrowser, int n
 //   activeFeatures_v(0)=2;
 //   activeFeatures_v(1)=3;
 //   activeFeatures_v(2)=4;
-
+	activeFeatures_v.print("activeFeatures_v : ");
   // filling desc_m with activeFeatures
   mat desc_m(libSize,activeFeatures_v.n_elem);
   mat pos_m(libSize,2);
@@ -328,7 +371,6 @@ mat ACVisualisationPlugin::extractDescMatrix(ACMediaBrowser* mediaBrowser, int n
   for(int i=0; i<nbMedia; i++) {    
     int tmpIdx = 0;
     for(int f=0; f< activeFeatures_v.n_elem; f++){
-      std::cout << activeFeatures_v(f) << std::endl;
       featDim = loops.back()->getFeatures()[activeFeatures_v(f)]->size();
 			featureNames.push_back(loops.back()->getFeatures()[activeFeatures_v(f)]->getName());
       for(int d=0; d < featDim; d++){
