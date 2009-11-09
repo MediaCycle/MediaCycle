@@ -1,7 +1,7 @@
 /**
  * @brief ACVisualisationPlugin.h
  * @author Damien Tardieu
- * @date 03/11/2009
+ * @date 09/11/2009
  * @copyright (c) 2009 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -46,6 +46,9 @@ public:
   virtual std::vector<ACMediaFeatures*> calculate(std::string aFileName);
   virtual void updateClusters(ACMediaBrowser* );
   virtual void updateNextPositions(ACMediaBrowser* );
+	mat updateNextPositionsItemClicked(mat &desc_m, int nbVideoDisplay, int itemClicked, ucolvec &toDisplay_v, mat &labelPos_m, ucolvec &labelIdx_v, colvec &labelValue_v);
+	mat updateNextPositionsInit(mat &desc_m, int nbVideoDisplay, ucolvec &toDisplay_v, mat &labelPos_m, ucolvec &labelIdx_v, colvec &labelValue_v);
+	mat extractDescMatrix(ACMediaBrowser* mediaBrowser, int nbActiveFeatures, vector<string> &featureNames);
   virtual int start() {return 0;};
   virtual int stop() {return 0;};
 protected:

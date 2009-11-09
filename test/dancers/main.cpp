@@ -64,18 +64,23 @@ void itemClicked(MediaCycle *that, int idVideo, char**, int*);
 
 //string mypath="/Users/xavier/Desktop/dancers-tmp/";
 string mypath = "/Users/dtardieu/Desktop/dancers-test/";
+//string mypath = "/Users/dtardieu/data/DANCERS/BACK UP DANCERS/Front/";
 int main(int argc, char** argv) {
 	string path = mypath+"test-data-2.acl";
-	string xmlpath = mypath+"dancers-ex.xml";
+	string xmlpath = mypath+"test-data-2.xml";
 	cout<<"new MediaCycle"<<endl;
 	MediaCycle* mediacycle;
 	mediacycle = new MediaCycle(MEDIA_TYPE_VIDEO);
 //	mediacycle->addPlugin ("/Users/dtardieu/src/Numediart/ticore-app/Applications/Numediart/MediaCycle/src/Builds/darwin-x86/plugins/eyesweb/Debug/mc_eyesweb.dylib");
+	//mediacycle->addPlugin("/Users/dtardieu/src/Numediart/ticore-app/Applications/Numediart/MediaCycle/src/Builds/darwin-x86/plugins/video/Debug/mc_video.dylib");
 	mediacycle->addPlugin ("/Users/dtardieu/src/Numediart/ticore-app/Applications/Numediart/MediaCycle/src/Builds/darwin-x86/plugins/visualisation/Debug/mc_visualisation.dylib");
 	mediacycle->setVisualisationPlugin("Visualisation");
-//	mediacycle->importDirectory("/Users/dtardieu/data/DANCERS/Video/FrontTest/", 0);
+	//	mediacycle->importDirectory(mypath, 0);
+	//	mediacycle->saveAsLibrary(mypath+"dancers-def-1.acl");
+	//return
 	
 	mediacycle->importLibrary(path);
+	saveLibraryAsXml(mediacycle, xmlpath);
 	
 	// XS test C++ ACL
 	// mediacycle->importACLLibrary(path);
@@ -89,7 +94,6 @@ int main(int argc, char** argv) {
 		sleep(30);
 	}
 //	
-//	saveLibraryAsXml(mediacycle, xmlpath);
 //	mediacycle->saveAsLibrary(mypath+"dancers-ex-2.acl");
 	delete mediacycle;	
 	return (EXIT_SUCCESS);
@@ -132,8 +136,10 @@ int processTcpMessageFromInstallation(MediaCycle *that, char *buffer, int l, cha
 	clock_t t0=clock();
 	// end XS
 	
-    std::string file_name;
+	std::string file_name;
 	std::istringstream message_in(buffer);
+
+	cout<< "buffer : " << buffer <<endl;
 	string str_message_in;
 	if (! (message_in >> str_message_in) ){
 		if (! message_in.good()){ 
@@ -206,7 +212,7 @@ int processTcpMessageFromInstallation(MediaCycle *that, char *buffer, int l, cha
 				return -1;
 			}
 			
-			cout << "(startOrRedrawRandom) sent back this message : " << str_buffer_send << endl;
+			cout << "(startOrRedraw) sent back this message : " << str_buffer_send << endl;
 			// XS timing
 			clock_t t1=clock();
 			cout << "Execution time: " << (t1-t0)*1000/CLOCKS_PER_SEC << " ms." << endl;
@@ -291,7 +297,7 @@ void startOrRedraw(MediaCycle *mediacycle, int nbVideo, char **buffer_send, int*
 	media_browser->setClickedLoop(-1);
 	media_browser->setClickedLabel(-1);
 	media_browser->setNumberOfDisplayedLoops(nbVideo);
-	media_browser->updateClusters();
+	media_browser->updateNextPositions();
 	if (nbVideo != media_browser->getNumberOfDisplayedLoops()){
 		cerr << "<startOrRedraw> browser returned wrong number of videos" << endl;
 		*buffer_send = get_error_message();	
@@ -314,11 +320,11 @@ void startOrRedraw(MediaCycle *mediacycle, int nbVideo, char **buffer_send, int*
 	for (int i=0; i< n_loops; i++){
 		if (loop_attributes[i].isDisplayed){
 			chk_loops++;
-			int posx = (int) loop_attributes[i].currentPos.x;
-			int posy = (int) loop_attributes[i].currentPos.y;
+			int posx = (int) loop_attributes[i].nextPos.x;
+			int posy = (int) loop_attributes[i].nextPos.y;
 			ostringstream oss ;
 			oss.fill('0'); // fill with zeros (otherwise will leave blanks)
-			oss << setw(6) << i << setw(3) << posx << setw(3)<< posy; // fixed format
+			oss << setw(6) << generateID(media_library->getItem(i)->getFileName()) << setw(3) << posx << setw(3)<< posy; // fixed format
 			sbuffer_send += oss.str(); // concatenates all videos in one string
 			
 			// XS test
@@ -350,7 +356,7 @@ void startOrRedraw(MediaCycle *mediacycle, int nbVideo, char **buffer_send, int*
 			int posy = (int) label_attributes[i].pos.y;
 			ostringstream oss ;
 			oss.fill('0'); // fill with zeros (otherwise will leave blanks)
-			oss << setw(6) << label_attributes[i].text << setw(3) << posx << setw(3)<< posy; // fixed format
+			oss << sep << label_attributes[i].text << sep << setw(3) << posx << setw(3)<< posy; // fixed format
 			sbuffer_send += oss.str(); // concatenates all videos in one string
 			
 			// XS test
@@ -477,14 +483,14 @@ void itemClicked(MediaCycle *mediacycle, int idVideo, char **buffer_send, int* l
 	int n_loops = media_browser->getNumberOfLoops();
 	// XS should also be = media_library->getSize()
 	
-	if (0 < idVideo || idVideo > n_loops) {
-		cerr << "<itemClicked> : video ID out of bounds" << endl;
+	if (0 > idVideo || idVideo > n_loops) {
+		cerr << "<itemClicked> : video ID out of bounds (Library Size = " << n_loops << ", idvideo = " << idVideo << " )" << endl;
 		return;
 	}
 	
 	media_browser->setClickedLoop(idVideo);
 	media_browser->setClickedLabel(-1);
-	media_browser->updateClusters();
+	media_browser->updateNextPositions();
 
 }
 
@@ -505,7 +511,7 @@ void labelClicked(MediaCycle *mediacycle, int idLabel, char **buffer_send, int* 
 	
 	media_browser->setClickedLoop(-1);
 	media_browser->setClickedLabel(idLabel);
-	media_browser->updateClusters();
+	media_browser->updateNextPositions();
 	
 }
 

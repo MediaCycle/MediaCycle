@@ -95,6 +95,7 @@ struct ACLabelAttribute {
 	float		size;
 	ACPoint		pos;
 	bool		isDisplayed;
+	ACLabelAttribute() : isDisplayed(true) {}
 };
 
 class ACMediaBrowser {

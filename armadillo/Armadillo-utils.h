@@ -63,3 +63,4 @@ umat hist(mat A_m, int nbrBin, float minE=0, float maxE=0);
 umat hist3(mat A_m, int nbrBin0, int nbrBin1, float minE0=0, float maxE0=0, float minE1=0, float maxE1=0);
 ucolvec randperm(int);
 ucolvec find(umat A_v);
+mat diff(mat A_m, int n=1, int dim=1);
