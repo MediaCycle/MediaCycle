@@ -372,14 +372,14 @@ int ACMediaBrowser::getNumberOfDisplayedLabels(){
 }
 
 void ACMediaBrowser::setNumberOfDisplayedLoops(int nd){
-	if (nd < 0 || nd >= this->getNumberOfLoops())
+	if (nd < 0 || nd > this->getNumberOfLoops())
 		cerr << "<ACMediaBrowser::setNumberOfDisplayedLoops> : too many loops to display: " << nd << endl;
 	else
 		nbDisplayedLoops = nd;
 }
 
 void ACMediaBrowser::setNumberOfDisplayedLabels(int nd){
-	if (nd < 0 || nd >= this->getNumberOfLabels())
+	if (nd < 0 || nd > this->getNumberOfLabels())
 		cerr << "<ACMediaBrowser::setNumberOfDisplayedLabels> : too many labels to display: " << nd << endl;
 	else
 		nbDisplayedLabels = nd;
@@ -843,7 +843,7 @@ void ACMediaBrowser::updateNextPositions(){
     std::cout << "updateNextPositions : Plugin" << std::endl;
     mVisPlugin->updateNextPositions(this);
   }
-  setProximityGrid();
+	//setProximityGrid();
 }
 
 void ACMediaBrowser::setNextPositions2dim(){

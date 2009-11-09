@@ -58,8 +58,18 @@ int ACVideoPlugin::initialize(){
 std::vector<ACMediaFeatures*> ACVideoPlugin::calculate(){
 }
 
-//uses ACVideoAnalysis and converts the results into ACMediaFeatures
 std::vector<ACMediaFeatures*>  ACVideoPlugin::calculate(std::string aFileName) {
+	std::vector<ACMediaFeatures*> allVideoFeatures;
+	std::vector<ACMediaFeatures*> topVideoFeatures;
+	allVideoFeatures = calculateFront(aFileName);
+	string topFilename = changeLastFolder(aFileName,"Top");
+	topVideoFeatures = calculateTop(topFilename);
+	allVideoFeatures.insert( allVideoFeatures.end(), topVideoFeatures.begin(), topVideoFeatures.end() );
+	return allVideoFeatures;
+}
+
+//uses ACVideoAnalysis and converts the results into ACMediaFeatures
+std::vector<ACMediaFeatures*>  ACVideoPlugin::calculateTop(std::string aFileName) {
 	ACVideoAnalysis* video = new ACVideoAnalysis(aFileName);
 	std::vector<ACMediaFeatures*> allVideoFeatures;
 
@@ -81,14 +91,6 @@ std::vector<ACMediaFeatures*>  ACVideoPlugin::calculate(std::string aFileName) {
 		cerr << "<ACVideoPlugin::calculate> : NULL std feature" << endl;
 	}
 
-	cout << "calculateContractionIndex" << endl;
-	ACMediaFeatures* videoContractionIndex = this->calculateContractionIndex(video);
-	if (videoContractionIndex != NULL){
-		allVideoFeatures.push_back(videoContractionIndex);
-	}
-	else{
-		cerr << "<ACVideoPlugin::calculate> : NULL mean ci feature" << endl;
-	}
 
 	cout << "calculateMaxOfTrajectory" << endl;
 	ACMediaFeatures* videoMaxTrajectory = this->calculateMaxOfTrajectory(video);
@@ -107,7 +109,25 @@ std::vector<ACMediaFeatures*>  ACVideoPlugin::calculate(std::string aFileName) {
 	else{
 		cerr << "<ACVideoPlugin::calculate> : NULL speed feature" << endl;
 	}
-	
+		
+	delete video;
+	return allVideoFeatures;
+}
+
+//uses ACVideoAnalysis and converts the results into ACMediaFeatures
+std::vector<ACMediaFeatures*>  ACVideoPlugin::calculateFront(std::string aFileName) {
+	ACVideoAnalysis* video = new ACVideoAnalysis(aFileName);
+	std::vector<ACMediaFeatures*> allVideoFeatures;
+
+	cout << "calculateContractionIndex" << endl;
+	ACMediaFeatures* videoContractionIndex = this->calculateContractionIndex(video);
+	if (videoContractionIndex != NULL){
+		allVideoFeatures.push_back(videoContractionIndex);
+	}
+	else{
+		cerr << "<ACVideoPlugin::calculate> : NULL mean ci feature" << endl;
+	}
+
 	cout << "calculateMeanBoundingBoxRatio" << endl;
 	ACMediaFeatures* videoMeanBoundingBoxRatio = this->calculateMeanBoundingBoxRatio(video);
 	if (videoMeanBoundingBoxRatio != NULL){
@@ -185,6 +205,7 @@ ACMediaFeatures* ACVideoPlugin::calculateMeanSpeedOfTrajectory(ACVideoAnalysis* 
 	return trajectory_mf;
 }
 
+
 //ACMediaFeatures* ACVideoPlugin::calculateMostOccupiedCell(ACVideoAnalysis* video){
 //	if (!video->areBlobsComputed()) video->computeBlobsUL();
 //	if (!video->isTrajectoryComputed()) video->computeMergedBlobsTrajectory(0);
@@ -221,3 +242,53 @@ ACMediaFeatures* ACVideoPlugin::calculateMeanPixelSpeed(ACVideoAnalysis* video){
 	return pixel_speed;
 }
 
+string ACVideoPlugin::changeLastFolder(string path, string folder)
+{
+    int index = 0;
+    int tmp = 0;
+    string sep = "";
+    string dir = extractDirectory(path);
+    
+    tmp = dir.substr(0,dir.size()-2).find_last_of('\\');
+    int tmp2 = 0;
+    tmp2 = dir.substr(0,dir.size()-2).find_last_of('/');
+    if (tmp > tmp2)
+    {
+        index = tmp;
+        sep = "\\";
+    }
+    else
+    {
+        index = tmp2;
+        sep = "/";
+    }
+    return dir.substr(0,index+1) + folder + sep + extractFilename(path);
+}
+
+string ACVideoPlugin::extractDirectory(string path)
+{
+    int index = 0;
+    int tmp = 0;
+    tmp = path.find_last_of('\\');
+    int tmp2 = 0;
+    tmp2 = path.find_last_of('/');
+    if (tmp > tmp2)
+        index = tmp;
+    else
+        index = tmp2;
+    return path.substr(0, index + 1);
+}
+
+string ACVideoPlugin::extractFilename(string path)
+{
+    int index = 0;
+    int tmp = 0;
+    tmp = path.find_last_of('\\' );
+    int tmp2 = 0;
+    tmp2 = path.find_last_of('/');
+    if (tmp > tmp2)
+        index = tmp;
+    else
+        index = tmp2;
+    return path.substr(index + 1);
+}
