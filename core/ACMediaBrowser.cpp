@@ -213,15 +213,6 @@ ACMediaBrowser::ACMediaBrowser() {
 	nbDisplayedLoops = 0;
 	
 	mVisPlugin = NULL;
-	
-	// Proximity Grid
-	proxgridstepx = 0.005;
-	proxgridaspectratio = 1.0; //9.0/16.0;
-	proxgridstepy = proxgridstepx * proxgridaspectratio;
-	proxgridlx = 150;
-	proxgridly = 150;
-	proxgridmaxdistance = 12;
-	
 }
 
 ACMediaBrowser::~ACMediaBrowser() {
@@ -710,49 +701,98 @@ void ACMediaBrowser::initClusterCenters(){
   }
 }
 
+void ACMediaBrowser::setProximityGridQuantize(ACPoint p, ACPoint *pgrid) {
+	pgrid->x = (int)round( (p.x-proxgridl)/proxgridstepx );
+	pgrid->y = (int)round( (p.y-proxgridb)/proxgridstepy );		
+}
+	
+void ACMediaBrowser::setProximityGridUnquantize(ACPoint pgrid, ACPoint *p) {
+	p->x = pgrid.x * proxgridstepx + proxgridl;
+	p->y = pgrid.y * proxgridstepy + proxgridb;		
+}
+
 void ACMediaBrowser::setProximityGrid() {
 	
 	int i, j, k, l;
 	int n;
+	int found_slot;
 	
-	ACPoint p, pgrid, curpos;
+	ACPoint p, pgrid, p2, curpos;
 	int index, pgridindex, curposindex;
 	
 	float langle, orientation, spiralstepx, spiralstepy, lorientation;
 	
-	proxgrid.resize((2*proxgridlx+1)*(2*proxgridly+1));
+	n = mLoopAttributes.size();
+	
+	// Proximity Grid Size	
+	if (n>0) {
+		p = mLoopAttributes[0].nextPos;
+		proxgridl = p.x;
+		proxgridr = p.x;
+		proxgridb = p.y;
+		proxgridt = p.y;
+	}
+	for(i=1; i<n; i++) {
+		p = mLoopAttributes[i].nextPos;
+		if (p.x<proxgridl) {
+			proxgridl = p.x;
+		}
+		if (p.x>proxgridr) {
+			proxgridr = p.x;
+		}
+		if (p.y<proxgridb) {
+			proxgridb = p.y;
+		}
+		if (p.y>proxgridt) {
+			proxgridt = p.y;
+		}
+	}
+	
+	// Proximity Grid Density
+	proxgridlx = 41;
+	proxgridstepx = (proxgridr-proxgridl)/(proxgridlx-1);
+	proxgridaspectratio = 1.0; // 9.0/16.0;
+	proxgridstepy = proxgridstepx * proxgridaspectratio;
+	proxgridly = (proxgridt-proxgridb)/proxgridstepx + 1;	
+	proxgridmaxdistance = 10;
+
+	// Init
+	proxgrid.resize((proxgridlx)*(proxgridly));
 	fill(proxgrid.begin(), proxgrid.end(), -1);
 	
 	// SD TODO - maybe need to compute MST (Minimum Spanning Tree)
 	
 	for(i=0; i<n; i++) {
 		
+		found_slot = 0;
+		
 		p = mLoopAttributes[i].nextPos;
 		
 		// grid quantization
-		pgrid.x = (int)round(p.x/proxgridstepx);
-		pgrid.y = (int)round(p.y/proxgridstepy);		
-		pgridindex =  (pgrid.y + proxgridly) * (2*proxgridlx+1) + pgrid.x + proxgridlx;
+		setProximityGridQuantize(p, &pgrid);
+		pgridindex =  pgrid.y * proxgridlx + pgrid.x;
 		
 		// no further processing for this media if out of grid
-		if ( (pgridindex<0) || (pgridindex>=proxgrid.size()) ) {
+		if ( (pgrid.x<0) || (pgrid.x>=proxgridlx) || (pgrid.y<0) || (pgrid.y>=proxgridly) ) {
 			continue;
 		}
 		
 		// spiral search
-		langle = atan( (p.y-pgrid.y*proxgridstepy) / (p.x-pgrid.x*proxgridstepx) );
+	    setProximityGridUnquantize(pgrid, &p2);
+		langle = atan( (p.y-p2.y) / (p.x-p2.x) );
 		orientation = fmod(ceil(langle/(M_PI/4.0)), 2) * 2 - 1; // +1 means positive angles
 		spiralstepx = fmod(round((langle-M_PI/2.0)/(M_PI/2.0)), 2);
-		if ((p.x-pgrid.x*proxgridstepy)<0) spiralstepx = - spiralstepx;
+		if ((p.x-p2.x)<0) spiralstepx = - spiralstepx;
 		spiralstepy = fmod(round(langle/(M_PI/2.0)), 2);
-		if ((p.y-pgrid.y*proxgridstepy)<0) spiralstepy = - spiralstepy;
+		if ((p.y-p2.y)<0) spiralstepy = - spiralstepy;
 		lorientation = atan(spiralstepy/spiralstepx);
 		
 		curpos.x = pgrid.x;
 		curpos.y = pgrid.y;
-		curposindex = (curpos.y + proxgridly) * (2*proxgridlx+1) + curpos.x + proxgridlx;
+		curposindex = curpos.y * proxgridlx + curpos.x;
 		if (proxgrid[curposindex]==-1) {
 			l = proxgridmaxdistance;
+			found_slot = 1;
 		}
 		else {
 			l = 1;
@@ -763,11 +803,17 @@ void ACMediaBrowser::setProximityGrid() {
 				for (k=0;k<l;k++) {
 					curpos.x += spiralstepx;
 					curpos.y += spiralstepy;
-					curposindex = (curpos.y + proxgridly) * (2*proxgridlx+1) + curpos.x + proxgridlx;
-					if (proxgrid[curposindex]==-1) {
-						l=proxgridmaxdistance;
-						k=l;
-						j=2;
+					curposindex = curpos.y * proxgridlx + curpos.x;
+					if ( (curpos.x<0) || (curpos.x>=proxgridlx) || (curpos.y<0) || (curpos.y>=proxgridly) ) {
+						continue;
+					}
+					else {
+						if (proxgrid[curposindex]==-1) {
+							l=proxgridmaxdistance;
+							found_slot = 1;
+							k=l;
+							j=2;
+						}
 					}
 				}
 				// minus PI or plus PI depending on orientation
@@ -780,7 +826,9 @@ void ACMediaBrowser::setProximityGrid() {
 		}
 		
 		// empty stategy
-		proxgrid[curposindex] = i;
+		if (found_slot) {
+			proxgrid[curposindex] = i;
+		}
 		
 		// swap strategy
 		// SD TODO
@@ -797,10 +845,11 @@ void ACMediaBrowser::setProximityGrid() {
 	for(i=0; i<proxgrid.size(); i++) {
 		index = proxgrid[i];
 		if ( (index>=0) && (index<n) ) {
-			curpos.x = ( fmod(i,(2*proxgridlx+1)) - proxgridlx) * proxgridstepx;
-			curpos.y = (floor((float)i / (2*proxgridlx+1)) - proxgridly) * proxgridstepy;
-			curpos.z = mLoopAttributes[index].nextPos.z;
-			mLoopAttributes[index].nextPosGrid = curpos;
+			curpos.x = fmod((float)i,proxgridlx);
+			curpos.y = floor((float)i/(proxgridlx));
+			setProximityGridUnquantize(curpos, &p2);
+			p2.z = mLoopAttributes[index].nextPos.z;
+			mLoopAttributes[index].nextPosGrid = p2;
 		}
 	}
 	
@@ -810,6 +859,7 @@ void ACMediaBrowser::setProximityGrid() {
 	
 	return;
 }
+
 
 void ACMediaBrowser::setRepulsionEngine() {
 	return;
@@ -843,7 +893,7 @@ void ACMediaBrowser::updateNextPositions(){
     std::cout << "updateNextPositions : Plugin" << std::endl;
     mVisPlugin->updateNextPositions(this);
   }
-	//setProximityGrid();
+  setProximityGrid();
 }
 
 void ACMediaBrowser::setNextPositions2dim(){

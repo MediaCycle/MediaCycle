@@ -237,11 +237,17 @@ public:
 	float proxgridstepx;
 	float proxgridstepy;
 	float proxgridaspectratio;
-	float proxgridlx;
-	float proxgridly;
+	int proxgridlx;
+	int proxgridly;
+	float proxgridl;
+	float proxgridr;
+	float proxgridb;
+	float proxgridt;
 	int proxgridmaxdistance;
 	vector<int> proxgrid;
 	void setProximityGrid();
+	void setProximityGridQuantize(ACPoint p, ACPoint *pgrid);	
+	void setProximityGridUnquantize(ACPoint pgrid, ACPoint *p);
 	void setRepulsionEngine();	
 
 protected:
