@@ -713,6 +713,8 @@ void ACMediaBrowser::setProximityGridUnquantize(ACPoint pgrid, ACPoint *p) {
 
 void ACMediaBrowser::setProximityGrid() {
 	
+	float jitter;
+	
 	int i, j, k, l;
 	int n;
 	int found_slot;
@@ -749,12 +751,13 @@ void ACMediaBrowser::setProximityGrid() {
 	}
 	
 	// Proximity Grid Density
-	proxgridlx = 41;
+	proxgridlx = 11;
 	proxgridstepx = (proxgridr-proxgridl)/(proxgridlx-1);
-	proxgridaspectratio = 1.0; // 9.0/16.0;
+	proxgridaspectratio = 9.0/16.0;
 	proxgridstepy = proxgridstepx * proxgridaspectratio;
 	proxgridly = (proxgridt-proxgridb)/proxgridstepx + 1;	
-	proxgridmaxdistance = 10;
+	proxgridmaxdistance = 5;
+	proxgridjitter = 0.25;
 
 	// Init
 	proxgrid.resize((proxgridlx)*(proxgridly));
@@ -855,6 +858,15 @@ void ACMediaBrowser::setProximityGrid() {
 	
 	for(i=0; i<n; i++) {
 		mLoopAttributes[i].nextPos = mLoopAttributes[i].nextPosGrid;
+	}
+	
+	if (proxgridjitter>0) {
+		for(i=0; i<n; i++) {
+			jitter = (TiRandom()-0.5);
+			mLoopAttributes[i].nextPos.x += jitter*proxgridstepx*proxgridjitter;
+			jitter = (TiRandom()-0.5);
+			mLoopAttributes[i].nextPos.y += jitter*proxgridstepy*proxgridjitter;
+		}
 	}
 	
 	return;
