@@ -2,10 +2,11 @@
 #make-run.sh
 #make sure a process is always running.
 
-export DISPLAY=:0 #needed if you are running a simple gui app.
+export DISPLAY=:0 #needed if you are running a simple gui app
+export DYLD_LIBRARY_PATH=$(dirname "$0")
 
-process=mediacycle-cocoa-osg
-makerun="open mediacycle-cocoa-osg.app"
+process=mediacycle-dancers
+makerun=$(dirname "$0")/mediacycle-dancers
 
 if ps ax | grep -v grep | grep $process > /dev/null
         then
