@@ -55,6 +55,10 @@ public:
 	std::string extractFilename(std::string path);
 	virtual int start() {return 0;};
 	virtual int stop() {return 0;};
+	float getWidth();
+	float getHeight();
+	float getDuration();
+	
 private:
 	ACMediaFeatures* calculateMeanOfTrajectory(ACVideoAnalysis* video);
 	ACMediaFeatures* calculateStdOfTrajectory(ACVideoAnalysis* video);

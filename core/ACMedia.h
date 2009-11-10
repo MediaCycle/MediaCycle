@@ -47,6 +47,7 @@ class ACMedia {
 	// e.g., for image, features[0] = color descriptors, etc.
 protected:
 	int mid;
+	int height, width;
 	std::vector<ACMediaFeatures*> features;
 	std::string filename;
 	std::string filename_thumbnail;
@@ -68,16 +69,18 @@ public:
 	ACMediaFeatures* &getFeatures(int i);
 	int getNumberOfFeatures() {return features.size();}
 
-	void addFeatures(ACMediaFeatures *aFeatures) { this->features.push_back(aFeatures); };
+	void addFeatures(ACMediaFeatures *aFeatures) { this->features.push_back(aFeatures); }
 	
-	std::string getFileName() { return filename; };
-	std::string getThumbnail() { return filename_thumbnail; };
-	void setThumbnail(string ifilename) { filename_thumbnail=ifilename; };
-	void setFileName(std::string s) { filename = s; };
-	std::string getFileName(std::string s) { return filename; };
+	std::string getFileName() { return filename; }
+	std::string getThumbnail() { return filename_thumbnail; }
+	void setThumbnail(string ifilename) { filename_thumbnail=ifilename; }
+	void setFileName(std::string s) { filename = s; }
+	std::string getFileName(std::string s) { return filename; }
 	virtual void* getThumbnailPtr()=0;
 	virtual int getWidth()=0;
 	virtual int getHeight()=0;
+	void setWidth(int w) {width=w;}
+	void setHeight(int h) {height=h;}
 	
 	ACMediaType	getType() {return this->_type;}	
 	virtual void save(FILE *){}

@@ -102,6 +102,8 @@ int MediaCycle::stopTcpServer() {
 }
 
 int MediaCycle::importDirectory(string path, int recursive, int mid) {
+	// XS DEBUG
+	cout << "importing directory: " << path << endl;
 	int ret = this->mediaLibrary->importDirectory(path, recursive, mid, this->pluginManager);
 	this->mediaLibrary->normalizeFeatures();
 	this->mediaBrowser->libraryContentChanged();

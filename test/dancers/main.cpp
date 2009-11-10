@@ -61,9 +61,14 @@ std::string generateID(std::string filename);
 void startOrRedraw(MediaCycle *that, int nbVideo, char**, int*);
 void startOrRedrawRandom(MediaCycle *that, int nbVideo, char**, int*);
 void itemClicked(MediaCycle *that, int idVideo, char**, int*);
+void labelClicked(MediaCycle *mediacycle, int idLabel, char **, int*);
+string fillOutputBuffer(ACMediaLibrary* media_library, ACMediaBrowser* media_browser, int nvid);
 
-//string mypath="/Users/xavier/Desktop/dancers-tmp/";
-string mypath = "/Users/dtardieu/Desktop/dancers-test/";
+
+string mypath="/Users/xavier/Desktop/dancers-tmp/";
+string visualisation_plugin_path="/Users/xavier/development/Fall09/ticore-app/Applications/Numediart/MediaCycle/src/Builds/darwin-x86/plugins/visualisation/Debug/";
+
+//string mypath = "/Users/dtardieu/Desktop/dancers-test/";
 //string mypath = "/Users/dtardieu/data/DANCERS/BACK UP DANCERS/Front/";
 int main(int argc, char** argv) {
 	string path = mypath+"test-data-2.acl";
@@ -73,14 +78,14 @@ int main(int argc, char** argv) {
 	mediacycle = new MediaCycle(MEDIA_TYPE_VIDEO);
 //	mediacycle->addPlugin ("/Users/dtardieu/src/Numediart/ticore-app/Applications/Numediart/MediaCycle/src/Builds/darwin-x86/plugins/eyesweb/Debug/mc_eyesweb.dylib");
 	//mediacycle->addPlugin("/Users/dtardieu/src/Numediart/ticore-app/Applications/Numediart/MediaCycle/src/Builds/darwin-x86/plugins/video/Debug/mc_video.dylib");
-	mediacycle->addPlugin ("/Users/dtardieu/src/Numediart/ticore-app/Applications/Numediart/MediaCycle/src/Builds/darwin-x86/plugins/visualisation/Debug/mc_visualisation.dylib");
+	mediacycle->addPlugin (visualisation_plugin_path+"mc_visualisation.dylib");
 	mediacycle->setVisualisationPlugin("Visualisation");
 	//	mediacycle->importDirectory(mypath, 0);
 	//	mediacycle->saveAsLibrary(mypath+"dancers-def-1.acl");
 	//return
 	
 	mediacycle->importLibrary(path);
-	saveLibraryAsXml(mediacycle, xmlpath);
+	//saveLibraryAsXml(mediacycle, xmlpath);
 	
 	// XS test C++ ACL
 	// mediacycle->importACLLibrary(path);
@@ -256,9 +261,21 @@ int processTcpMessageFromInstallation(MediaCycle *that, char *buffer, int l, cha
 			// LARGETEXTCLICKED
 			// MESSAGE : 2 idText
 			unsigned int idText;
-			std::istringstream ss( str_message_in.substr(1,3) );
-			ss >> idText;
+			std::istringstream s_2( str_message_in.substr(1,3) );
+			if ( !(s_2 >> idText) ){
+				if (! s_2.good()){
+					cerr << "<processTcpMessageFromInstallation> : bad streaming of text ID from incoming buffer" << endl;
+				}
+				else {
+					cerr << "<processTcpMessageFromInstallation> : problem reading text ID from incoming buffer" << endl;
+				}
+				cerr << "type : " << msgType << " ; corresponding buffer[1:3] = " << s_2 << endl;
+				return -1;
+			}			
 			cout << "id Text : " << idText << endl;
+			
+			labelClicked(that,idText, buffer_send, l_send);
+
 			break;
 		}	
 		default:
@@ -275,56 +292,20 @@ char* get_error_message(){
 	return buffer_send_error;
 }
 
-// this one is really used in the installation
-// ex: for 50 videos and 3 keywords:
-//     049_000000395082000001537313000002296262000003258158000004418017000005125012000006137074000007725067000008624351000009628293000010164241000011716215000012292320000013127106000014641262000015007337000016359310000017682187000018292364000019172221000020727340000021322181000022202148000023399290000024516337000025547320000026562295000027385060000028679246000029306072000030513305000031462088000032737272000033028157000034131043000035750036000036529002000037538363000038153225000039162223000040605340000041459202000042470296000043639279000044635290000045000002000046436056000047311139000048323257_003-descA2-090031-descB0-029080-descC1-059005
-// 
-// 001052050015
-// dancerxxxyyy
-
-void startOrRedraw(MediaCycle *mediacycle, int nbVideo, char **buffer_send, int* l_send){
-	ACMediaLibrary* media_library = mediacycle->getLibrary();
-	string sbuffer_send;
-	
-	if (media_library->getSize() == 0) {
-		cerr << "<startOrRedrawRandom> : empty media library" << endl;
-		*buffer_send = get_error_message();	
-		return;
-	}
-	
-	ACMediaBrowser* media_browser;
-	media_browser = mediacycle->getBrowser();
-	
+// common to all types of messages:
+string fillOutputBuffer(ACMediaLibrary* media_library, ACMediaBrowser* media_browser, int nvid){
 	int n_loops = media_browser->getNumberOfLoops();
 	int n_labels = media_browser->getNumberOfLabels();
+	string sbuffer_send;
 
-	if (nbVideo > n_loops) {
-		cerr << "<startOrRedrawRandom> : you are asking for too many videos" << endl;
-		*buffer_send = get_error_message();	
-		return;
-	}
-
-	// tell the browser nothing specific was clicked.
-	media_browser->setClickedLoop(-1);
-	media_browser->setClickedLabel(-1);
-	media_browser->setNumberOfDisplayedLoops(nbVideo);
-	media_browser->updateNextPositions();
-	if (nbVideo != media_browser->getNumberOfDisplayedLoops()){
-		cerr << "<startOrRedraw> browser returned wrong number of videos" << endl;
-		*buffer_send = get_error_message();	
-		return;
-	}
-	
-	// XS below this is common to all message types -- put it in subroutine
-	
 	// === 1) videos
 	string sepu="_";
 	ostringstream onvid ;
 	onvid.fill('0'); // fill with zeros (otherwise will leave blanks)
-	onvid << setw(3) << nbVideo << sepu;
+	onvid << setw(3) << nvid << sepu;
 	// === start filling sbuffer_send
 	sbuffer_send = onvid.str(); // could add "0" in front for message type (not done here because not useful for web application)
-
+	
 	// loop on all videos to see which ones to send out
 	const vector<ACLoopAttribute> loop_attributes = media_browser->getLoopAttributes();
 	int chk_loops=0;
@@ -340,11 +321,10 @@ void startOrRedraw(MediaCycle *mediacycle, int nbVideo, char **buffer_send, int*
 			
 			// XS test
 			cout << oss.str() << endl;
-		
 		}		
 	}
 	if (chk_loops != media_browser->getNumberOfDisplayedLoops()) {
-		cerr << "<startOrRedraw> consistency check failed: problem with number of displayed videos" << endl;
+		cerr << "<startOrRedraw> consistency check failed: problem with number of displayed videos: " << chk_loops << " differs from "<< media_browser->getNumberOfDisplayedLoops() << endl;
 		*buffer_send = get_error_message();	
 		return;
 	}
@@ -376,10 +356,56 @@ void startOrRedraw(MediaCycle *mediacycle, int nbVideo, char **buffer_send, int*
 		}		
 	}
 	if (chk_labels != media_browser->getNumberOfDisplayedLabels()) {
-		cerr << "<startOrRedraw> consistency check failed: problem with number of displayed labels" << endl;
+		cerr << "<startOrRedraw> consistency check failed: problem with number of displayed labels: " << chk_labels << " differs from "<< media_browser->getNumberOfDisplayedLabels() << endl;
 		*buffer_send = get_error_message();	
 		return;
 	}
+	return sbuffer_send;
+}
+
+
+
+// this one is really used in the installation
+// ex: for 50 videos and 3 keywords:
+//     049_000000395082000001537313000002296262000003258158000004418017000005125012000006137074000007725067000008624351000009628293000010164241000011716215000012292320000013127106000014641262000015007337000016359310000017682187000018292364000019172221000020727340000021322181000022202148000023399290000024516337000025547320000026562295000027385060000028679246000029306072000030513305000031462088000032737272000033028157000034131043000035750036000036529002000037538363000038153225000039162223000040605340000041459202000042470296000043639279000044635290000045000002000046436056000047311139000048323257_003-descA2-090031-descB0-029080-descC1-059005
+// 
+// 001052050015
+// dancerxxxyyy
+
+void startOrRedraw(MediaCycle *mediacycle, int nbVideo, char **buffer_send, int* l_send){
+	ACMediaLibrary* media_library = mediacycle->getLibrary();
+	
+	if (media_library->getSize() == 0) {
+		cerr << "<startOrRedrawRandom> : empty media library" << endl;
+		*buffer_send = get_error_message();	
+		return;
+	}
+	
+	ACMediaBrowser* media_browser;
+	media_browser = mediacycle->getBrowser();
+	
+	int n_loops = media_browser->getNumberOfLoops();
+//	int n_labels = media_browser->getNumberOfLabels();
+
+	if (nbVideo > n_loops) {
+		cerr << "<startOrRedrawRandom> : you are asking for too many videos" << endl;
+		*buffer_send = get_error_message();	
+		return;
+	}
+
+	// tell the browser nothing specific was clicked.
+	media_browser->setClickedLoop(-1);
+	media_browser->setClickedLabel(-1);
+	media_browser->setNumberOfDisplayedLoops(nbVideo);
+	media_browser->updateNextPositions();
+	if (nbVideo != media_browser->getNumberOfDisplayedLoops()){
+		cerr << "<startOrRedraw> browser returned wrong number of videos" << endl;
+		*buffer_send = get_error_message();	
+		return;
+	}
+	
+	// XS below this is common to all message types -- put it in subroutine
+	string sbuffer_send = fillOutputBuffer(media_library, media_browser);
 	*buffer_send = new char [sbuffer_send.size()+1]; // extra byte needed for the trailing '\0' 
 	strcpy (*buffer_send, sbuffer_send.c_str());
 	*l_send = sbuffer_send.length();
@@ -494,15 +520,26 @@ void itemClicked(MediaCycle *mediacycle, int idVideo, char **buffer_send, int* l
 	int n_loops = media_browser->getNumberOfLoops();
 	// XS should also be = media_library->getSize()
 	
-	if (0 > idVideo || idVideo > n_loops) {
-		cerr << "<itemClicked> : video ID out of bounds (Library Size = " << n_loops << ", idvideo = " << idVideo << " )" << endl;
+	if (idVideo < 0 || idVideo > n_loops) {
+		cerr << "<itemClicked> : video ID out of bounds" << endl;
 		return;
 	}
 	
 	media_browser->setClickedLoop(idVideo);
 	media_browser->setClickedLabel(-1);
 	media_browser->updateNextPositions();
-
+	if (nbVideo != media_browser->getNumberOfDisplayedLoops()){
+		cerr << "<startOrRedraw> browser returned wrong number of videos" << endl;
+		*buffer_send = get_error_message();	
+		return;
+	}
+	
+	// XS below this is common to all message types -- put it in subroutine
+	string sbuffer_send = fillOutputBuffer(media_library, media_browser);
+	*buffer_send = new char [sbuffer_send.size()+1]; // extra byte needed for the trailing '\0' 
+	strcpy (*buffer_send, sbuffer_send.c_str());
+	*l_send = sbuffer_send.length();
+	
 }
 
 void labelClicked(MediaCycle *mediacycle, int idLabel, char **buffer_send, int* l_send){
@@ -515,7 +552,7 @@ void labelClicked(MediaCycle *mediacycle, int idLabel, char **buffer_send, int* 
 	ACMediaBrowser* media_browser;
 	media_browser = mediacycle->getBrowser();
 	int n_labels = media_browser->getNumberOfLabels();
-	if (0 < idLabel || idLabel > n_labels) {
+	if (idLabel < 0 || idLabel > n_labels) {
 		cerr << "<labelClicked> : label ID out of bounds" << endl;
 		return;
 	}
@@ -523,6 +560,17 @@ void labelClicked(MediaCycle *mediacycle, int idLabel, char **buffer_send, int* 
 	media_browser->setClickedLoop(-1);
 	media_browser->setClickedLabel(idLabel);
 	media_browser->updateNextPositions();
+	if (nbVideo != media_browser->getNumberOfDisplayedLoops()){
+		cerr << "<startOrRedraw> browser returned wrong number of videos" << endl;
+		*buffer_send = get_error_message();	
+		return;
+	}
+	
+	// XS below this is common to all message types -- put it in subroutine
+	string sbuffer_send = fillOutputBuffer(media_library, media_browser);
+	*buffer_send = new char [sbuffer_send.size()+1]; // extra byte needed for the trailing '\0' 
+	strcpy (*buffer_send, sbuffer_send.c_str());
+	*l_send = sbuffer_send.length();
 	
 }
 
