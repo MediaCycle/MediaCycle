@@ -244,6 +244,7 @@ public:
 	float proxgridb;
 	float proxgridt;
 	int proxgridmaxdistance;
+	float proxgridjitter;
 	vector<int> proxgrid;
 	void setProximityGrid();
 	void setProximityGridQuantize(ACPoint p, ACPoint *pgrid);	
