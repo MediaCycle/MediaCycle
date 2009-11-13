@@ -598,7 +598,7 @@ void saveLibraryAsXml(MediaCycle* mediacycle, string _path) {
 	/// ITEMS //
 	fprintf(library_file, "%s\n", "<items>");
 	for(int i=0; i<n_loops; i++) {
-		fprintf(library_file, "<v duration=\"120.0\">");
+		fprintf(library_file, "<v duration=\"%.1lf\">",  media_library->getItem(i)->getDuration());
 		local_media = media_library->getItem(i);    
 		
 		// printing ID

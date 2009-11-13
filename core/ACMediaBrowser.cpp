@@ -910,7 +910,7 @@ void ACMediaBrowser::updateNextPositions(){
     std::cout << "updateNextPositions : Plugin" << std::endl;
     mVisPlugin->updateNextPositions(this);
   }
-	setProximityGrid();
+	//	setProximityGrid();
 }
 
 void ACMediaBrowser::setNextPositions2dim(){

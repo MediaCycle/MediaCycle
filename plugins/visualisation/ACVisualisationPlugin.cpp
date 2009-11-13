@@ -1,7 +1,7 @@
 /**
  * @brief ACVisualisationPlugin.cpp
  * @author Damien Tardieu
- * @date 10/11/2009
+ * @date 13/11/2009
  * @copyright (c) 2009 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -142,6 +142,7 @@ void ACVisualisationPlugin::updateNextPositions(ACMediaBrowser* mediaBrowser){
 	labelPos_m.col(1) = 999-labelPos_m.col(1);
 	///////////////////////////////////////////////////////////////////////////////
 
+	// Set labels in browser ////////////////////////////////////////////////////////
   string labelValue;
   for (int i=0; i< labelIdx_v.n_rows; i++){
     ACPoint p;
@@ -156,9 +157,9 @@ void ACVisualisationPlugin::updateNextPositions(ACMediaBrowser* mediaBrowser){
 	std::cout << "toDisplay_v.n_elem : "  << toDisplay_v.n_elem << std::endl;
 	mediaBrowser->setNumberOfDisplayedLabels(labelIdx_v.n_rows);
 	mediaBrowser->setNumberOfDisplayedLoops(toDisplay_v.n_elem);
+	////////////////////////////////////////////////////////////////////////////////////
 
-
-	//  Because there is no way to prevent a media from displaying it display it far away
+	//  For osg view : Because there is no way to prevent a media from displaying it display it far away
   for (int i=0; i<libSize; i++){
     mediaBrowser->setLoopPosition(i, 40, 40);    
     mediaBrowser->setLoopIsDisplayed(i, false);
@@ -255,18 +256,24 @@ mat ACVisualisationPlugin::updateNextPositionsInit(mat &desc_m, int nbVideoDispl
 		for (int k=0; k < pos_v.n_elem; k++){
 			tmpDesc_m.row(k) = desc2_m.row(pos_v(k));
 		}
+		// TODO : Need some tests on the number of elements in each clusters
 		kcluster(tmpDesc_m, clusterCard_v(i), clusterid2_m, center2_m);
 		for (int k=0; k<nbVideoDisplay/nbClusters; k++){
 			pos2_v = find(clusterid2_m==k);
+			// TODO : Because of this line the same video are often displayed, change the selection to random.
 			toDisplay_v(index) = pos_v(pos2_v(0));
 			index++;
 		}
 		mat tmp_m = tmpDesc_m - repmat(center_m.row(i), tmpDesc_m.n_rows, 1);
 		tmp_m = tmp_m/repmat(max(abs(tmp_m)), tmp_m.n_rows, 1) * clusterSpread_v(i);
 		for (int k=0; k < tmpDesc_m.n_rows; k++)
+			// The clusters are displayed usiing the two first dimensions of desc_m
 			posDisp_m.row(pos_v(k)) = clusterCenterDisp_m.row(clusterid_m(pos_v(k))) + tmp_m.submat(k,0,k,1);
 	}
 	labelPos_m = clusterCenterDisp_m;
+	// Selecting the displayed labels.
+	// The label used for the diagonal is the one with the biggest range. 
+	// TODO : perform a complete search among the cluster centers
 	urowvec maxDiff_v = sort_index(conv_to<rowvec>::from(abs(center_m.row(3)-center_m.row(0))), 1);
 	int maxDiffPos = maxDiff_v(0);
 	labelIdx_v(0) = maxDiffPos;
@@ -274,6 +281,8 @@ mat ACVisualisationPlugin::updateNextPositionsInit(mat &desc_m, int nbVideoDispl
 	labelIdx_v(1) = maxDiff_v(1);
 	labelIdx_v(2) = maxDiff_v(2);
 
+	// This operation is also performed in the main for the xml export.
+	// TODO : join the two functions
 	for (int k=0; k < nbClusters; k++){
     if (center_m(k,labelIdx_v(k)) > .6)
       labelValue_v(k)=3;
@@ -344,7 +353,7 @@ mat ACVisualisationPlugin::updateNextPositionsItemClicked(mat &desc_m, int nbVid
 	labelPos_m = clusterCenterDisp_m;
 	for (int k=0; k < desc_m.n_cols; k++){
 		labelIdx_v(k) = k;
-		labelValue_v(k) = desc_m(itemClicked,k);
+		labelValue_v(k) = 0;//desc_m(itemClicked,k);
 	}
 	return posDisp_m;
 }
