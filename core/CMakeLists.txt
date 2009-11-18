@@ -16,7 +16,7 @@ TARGET_LINK_LIBRARIES(mediacycle armadillo TiCommon pthread)
 #OpenCV
 IF ( USE_OPENCV )
     IF ( APPLE )
-        TARGET_LINK_LIBRARIES(mediacycle ${OPENCV_CV_LIBRARY} ${OPENCV_CXCORE_LIBRARY} ${OPENCV_HIGHGUI_LIBRARY}) //CF OpenCV Framework support
+        TARGET_LINK_LIBRARIES(mediacycle ${OPENCV_CV_LIBRARY} ${OPENCV_CXCORE_LIBRARY} ${OPENCV_HIGHGUI_LIBRARY}) #CF OpenCV Framework support
     ELSE ( APPLE )
         TARGET_LINK_LIBRARIES(mediacycle cv cxcore highgui)
     ENDIF ( APPLE )
