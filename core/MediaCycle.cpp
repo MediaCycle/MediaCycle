@@ -34,7 +34,7 @@
 
 MediaCycle::MediaCycle(ACMediaType aMediaType, string local_directory, string libname) {
 	
-	this->forwarddown = 0;
+    this->forwarddown = 0;
     this->local_directory = local_directory;
     this->libname = libname;
     this->networkSocket	= NULL;
@@ -102,6 +102,8 @@ int MediaCycle::stopTcpServer() {
 }
 
 int MediaCycle::importDirectory(string path, int recursive, int mid) {
+	// XS DEBUG
+	cout << "importing directory: " << path << endl;
 	int ret = this->mediaLibrary->importDirectory(path, recursive, mid, this->pluginManager);
 	this->mediaLibrary->normalizeFeatures();
 	this->mediaBrowser->libraryContentChanged();
@@ -130,7 +132,7 @@ static void tcp_callback(char *buffer, int l, char **buffer_send, int *l_send, v
 	that->processTcpMessage(buffer, l, buffer_send, l_send);
 }
 
-//AM TODO processTcpMessage & processTcpMessageFromSSI must be moved outside of MediaCycle main class
+//AM TODO processTcpMessage must be moved outside of MediaCycle main class
 int MediaCycle::processTcpMessage(char* buffer, int l, char **buffer_send, int *l_send)
 {
 	FILE *local_file;

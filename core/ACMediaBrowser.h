@@ -78,7 +78,7 @@ struct ACPoint
 // ask SD to check...
 
 struct ACLoopAttribute {
-	ACPoint 	currentPos, nextPos;
+	ACPoint 	currentPos, nextPos, nextPosGrid;
 	ACPoint		viewPos;
 	float		distanceMouse;
 	int 		cluster; //cluster index
@@ -86,8 +86,8 @@ struct ACLoopAttribute {
 	int			curser;
 	int 		navigationLevel; // initially all set to zero, while traversing, only the one incremented are kept
 	int			hover;
-	bool		isDisplayed;
-	ACLoopAttribute() : cluster(0), active(false), navigationLevel(0), hover(0),isDisplayed(false) {}
+	bool		isDisplayed;	
+	ACLoopAttribute() : cluster(0), active(0), navigationLevel(0), hover(0),isDisplayed(false) {}
 };
 
 struct ACLabelAttribute {
@@ -95,6 +95,7 @@ struct ACLabelAttribute {
 	float		size;
 	ACPoint		pos;
 	bool		isDisplayed;
+	ACLabelAttribute() : isDisplayed(true) {}
 };
 
 class ACMediaBrowser {
@@ -182,7 +183,11 @@ public:
 	// loops (or items) 
 	const vector<ACLoopAttribute>	&getLoopAttributes() const { return mLoopAttributes; }; 
 	void setLoopPosition(int loop_id, float x, float y, float z=0);
-	int getNumberOfDisplayedLoops(){return nbLoopsDisplayed;}
+	void setLoopIsDisplayed(int loop_id, bool iIsDisplayed) {this->mLoopAttributes[loop_id].isDisplayed = iIsDisplayed;}
+
+	int getNumberOfDisplayedLoops();
+	void setNumberOfDisplayedLoops(int nd);
+
 	int getNumberOfLoops(){return mLoopAttributes.size() ;} // XS this should be the same as mLibrary->getSize(), but this way it is more similar to getNumberOfLabels
 	
 	void setLoopAttributesActive(int loop_id, int value) { mLoopAttributes[loop_id].active = value; };
@@ -222,10 +227,29 @@ public:
 	
 	const vector<ACLabelAttribute> &getLabelAttributes() const { return mLabelAttributes; }; 
 	void setLabelPosition(int loop_id, float x, float y, float z=0);
-	int getNumberOfDisplayedLabels(){return nbLabelsDisplayed;}
+	int getNumberOfDisplayedLabels();
+	void setNumberOfDisplayedLabels(int nd);
 	int getNumberOfLabels(){return mLabelAttributes.size();}
 
 	void setVisualisationPlugin(ACPlugin* acpl){mVisPlugin=acpl;};
+	
+	// Proximity Grid		- SD TODO - eventually to be moved in visualization plugin chain
+	float proxgridstepx;
+	float proxgridstepy;
+	float proxgridaspectratio;
+	int proxgridlx;
+	int proxgridly;
+	float proxgridl;
+	float proxgridr;
+	float proxgridb;
+	float proxgridt;
+	int proxgridmaxdistance;
+	float proxgridjitter;
+	vector<int> proxgrid;
+	void setProximityGrid();
+	void setProximityGridQuantize(ACPoint p, ACPoint *pgrid);	
+	void setProximityGridUnquantize(ACPoint pgrid, ACPoint *p);
+	void setRepulsionEngine();	
 
 protected:
 	ACMediaLibrary *mLibrary; 
@@ -260,13 +284,13 @@ protected:
 	vector<ACNavigationState>	mForwardNavigationStates;
 	
 	vector <ACLoopAttribute>	mLoopAttributes; // one entry per media in the same order as in library.
-	int nbLoopsDisplayed; 
+	int nbDisplayedLoops;
 	
 	float mousex;
 	float mousey;
 	
 	vector <ACLabelAttribute>	mLabelAttributes;
-	int nbLabelsDisplayed;
+	int nbDisplayedLabels;
 	int mClickedLabel;
 	
 	int 				mNavigationLevel;

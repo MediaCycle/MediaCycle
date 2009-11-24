@@ -34,6 +34,9 @@
 
 // Definitions used along with features
 
+// XS: well, this is not really useful if we have a name for each feature.
+// XS TODO: just remove this file and all references to it.
+
 #ifndef _ACFEATURESTYPES_H
 #define _ACFEATURESTYPES_H
 

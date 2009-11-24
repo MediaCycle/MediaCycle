@@ -44,8 +44,9 @@ ACVideoPlugin::ACVideoPlugin() {
     this->mName = "Video";
     this->mDescription = "Video plugin";
     this->mId = "";
-	
-    //local vars
+	this->mwidth = 0.0;
+	this->mheight = 0.0;
+	this->mduration = 0.0;
 }
 
 ACVideoPlugin::~ACVideoPlugin() {
@@ -55,14 +56,41 @@ ACVideoPlugin::~ACVideoPlugin() {
 int ACVideoPlugin::initialize(){
 }
 
+
+// XS TODO: the following 3 will return 0 if calculateFront has not been launched
+
+float ACVideoPlugin::getWidth(){
+	return mwidth;
+}
+
+float ACVideoPlugin::getHeight(){
+	return mheight;
+}
+
+float ACVideoPlugin::getDuration(){
+	return mduration;
+}
+
+
 std::vector<ACMediaFeatures*> ACVideoPlugin::calculate(){
 }
 
-//uses ACVideoAnalysis and converts the results into ACMediaFeatures
 std::vector<ACMediaFeatures*>  ACVideoPlugin::calculate(std::string aFileName) {
+	std::vector<ACMediaFeatures*> allVideoFeatures;
+	std::vector<ACMediaFeatures*> topVideoFeatures;
+	allVideoFeatures = calculateFront(aFileName);
+	string topFilename = changeLastFolder(aFileName,"Top");
+	topVideoFeatures = calculateTop(topFilename);
+	allVideoFeatures.insert( allVideoFeatures.end(), topVideoFeatures.begin(), topVideoFeatures.end() );
+	return allVideoFeatures;
+}
+
+//uses ACVideoAnalysis and converts the results into ACMediaFeatures
+std::vector<ACMediaFeatures*>  ACVideoPlugin::calculateTop(std::string aFileName) {
 	ACVideoAnalysis* video = new ACVideoAnalysis(aFileName);
 	std::vector<ACMediaFeatures*> allVideoFeatures;
 
+	cout << "calculateMeanOfTrajectory" << endl;
 	ACMediaFeatures* videoMeanTrajectory = this->calculateMeanOfTrajectory(video);
 	if (videoMeanTrajectory != NULL){
 		allVideoFeatures.push_back(videoMeanTrajectory);
@@ -71,6 +99,7 @@ std::vector<ACMediaFeatures*>  ACVideoPlugin::calculate(std::string aFileName) {
 		cerr << "<ACVideoPlugin::calculate> : NULL mean feature" << endl;
 	}
 
+	cout << "calculateStdOfTrajectory" << endl;
 	ACMediaFeatures* videoStdTrajectory = this->calculateStdOfTrajectory(video);
 	if (videoStdTrajectory != NULL){
 		allVideoFeatures.push_back(videoStdTrajectory);
@@ -79,6 +108,34 @@ std::vector<ACMediaFeatures*>  ACVideoPlugin::calculate(std::string aFileName) {
 		cerr << "<ACVideoPlugin::calculate> : NULL std feature" << endl;
 	}
 
+	cout << "calculateMaxOfTrajectory" << endl;
+	ACMediaFeatures* videoMaxTrajectory = this->calculateMaxOfTrajectory(video);
+	if (videoMaxTrajectory != NULL){
+		allVideoFeatures.push_back(videoMaxTrajectory);
+	}
+	else{
+		cerr << "<ACVideoPlugin::calculate> : NULL max feature" << endl;
+	}
+
+	cout << "calculateMeanSpeedOfTrajectory" << endl;
+	ACMediaFeatures* videoMeanSpeedTrajectory = this->calculateMeanSpeedOfTrajectory(video);
+	if (videoMeanSpeedTrajectory != NULL){
+		allVideoFeatures.push_back(videoMeanSpeedTrajectory);
+	}
+	else{
+		cerr << "<ACVideoPlugin::calculate> : NULL speed feature" << endl;
+	}
+		
+	delete video;
+	return allVideoFeatures;
+}
+
+//uses ACVideoAnalysis and converts the results into ACMediaFeatures
+std::vector<ACMediaFeatures*>  ACVideoPlugin::calculateFront(std::string aFileName) {
+	ACVideoAnalysis* video = new ACVideoAnalysis(aFileName);
+	std::vector<ACMediaFeatures*> allVideoFeatures;
+
+	cout << "calculateContractionIndex" << endl;
 	ACMediaFeatures* videoContractionIndex = this->calculateContractionIndex(video);
 	if (videoContractionIndex != NULL){
 		allVideoFeatures.push_back(videoContractionIndex);
@@ -86,32 +143,58 @@ std::vector<ACMediaFeatures*>  ACVideoPlugin::calculate(std::string aFileName) {
 	else{
 		cerr << "<ACVideoPlugin::calculate> : NULL mean ci feature" << endl;
 	}
+
+	cout << "calculateMeanBoundingBoxRatio" << endl;
+	ACMediaFeatures* videoMeanBoundingBoxRatio = this->calculateMeanBoundingBoxRatio(video);
+	if (videoMeanBoundingBoxRatio != NULL){
+		allVideoFeatures.push_back(videoMeanBoundingBoxRatio);
+	}
+	else{
+		cerr << "<ACVideoPlugin::calculate> : NULL mean bounding box ratio feature" << endl;
+	}
+
+	cout << "calculateMeanPixelSpeed" << endl;
+	ACMediaFeatures* videoMeanPixelSpeed = this->calculateMeanPixelSpeed(video);
+	if (videoMeanPixelSpeed != NULL){
+		allVideoFeatures.push_back(videoMeanPixelSpeed);
+	}
+	else{
+		cerr << "<ACVideoPlugin::calculate> : NULL mean bounding box ratio feature" << endl;
+	}
+	
+	// fills in info to return
+	// this info corresponds thus to the FRONT video
+	// VERY specific to this dancers setup
+	mwidth = video->getWidth();
+	mheight = video ->getHeight();
+	mduration = video ->getDuration();
+	
 	
 	delete video;
 	return allVideoFeatures;
 }
 
 ACMediaFeatures* ACVideoPlugin::calculateMeanOfTrajectory(ACVideoAnalysis* video){
-	video->computeBlobsUL();
+	//if (!video->areBlobsComputed()) video->computeBlobsUL();
+	//if (!video->isTrajectoryComputed()) video->computeMergedBlobsTrajectory(0);
+	// XS debug for top
+	video->computeBlobs();
 	video->computeMergedBlobsTrajectory(0);
-
-	// XS TODO: not dummy anymore
-	ACMediaTimedFeatures *trajectory_mtf = new ACMediaTimedFeatures(video->getDummyTimeStamps(), video->getMergedBlobsTrajectory(), "trajectory");
+	//
+	ACMediaTimedFeatures *trajectory_mtf = new ACMediaTimedFeatures(video->getTimeStamps(), video->getNormalizedMergedBlobsTrajectory(), "trajectory");
 	ACMediaFeatures* trajectory_mf = trajectory_mtf->mean(); // will do "new" and set name
+
+	// XS TEST
+	// trajectory_mtf->dump("/Users/xavier/Desktop/traj.txt");
 	delete trajectory_mtf;
 	return trajectory_mf;
-	
-	//mat hist_m = trajectory_mtf->hist3(10,10);
-	//  hist_m.print();
-	//max_indice(hist_m);	
 }
 
 ACMediaFeatures* ACVideoPlugin::calculateStdOfTrajectory(ACVideoAnalysis* video){
 	if (!video->areBlobsComputed()) video->computeBlobsUL();
 	if (!video->isTrajectoryComputed()) video->computeMergedBlobsTrajectory(0);
 
-	// XS TODO: not dummy anymore
-	ACMediaTimedFeatures *trajectory_mtf = new ACMediaTimedFeatures(video->getDummyTimeStamps(), video->getMergedBlobsTrajectory(), "trajectory");
+	ACMediaTimedFeatures *trajectory_mtf = new ACMediaTimedFeatures(video->getTimeStamps(), video->getNormalizedMergedBlobsTrajectory(), "trajectory");
 	ACMediaFeatures* trajectory_mf = trajectory_mtf->std();
 	delete trajectory_mtf;
 	return trajectory_mf;
@@ -121,8 +204,7 @@ ACMediaFeatures* ACVideoPlugin::calculateMaxOfTrajectory(ACVideoAnalysis* video)
 	if (!video->areBlobsComputed()) video->computeBlobsUL();
 	if (!video->isTrajectoryComputed()) video->computeMergedBlobsTrajectory(0);
 	
-	// XS TODO: not dummy anymore
-	ACMediaTimedFeatures *trajectory_mtf = new ACMediaTimedFeatures(video->getDummyTimeStamps(), video->getMergedBlobsTrajectory(), "trajectory");
+	ACMediaTimedFeatures *trajectory_mtf = new ACMediaTimedFeatures(video->getTimeStamps(), video->getNormalizedMergedBlobsTrajectory(), "trajectory");
 	ACMediaFeatures* trajectory_mf = trajectory_mtf->max();
 	delete trajectory_mtf;
 	return trajectory_mf;
@@ -133,9 +215,107 @@ ACMediaFeatures* ACVideoPlugin::calculateContractionIndex(ACVideoAnalysis* video
 	if (!video->isTrajectoryComputed()) video->computeMergedBlobsTrajectory(0);
 	video->computeContractionIndices();
 
-	// XS TODO: not dummy anymore
-	ACMediaTimedFeatures* ci_mtf = new ACMediaTimedFeatures(video->getDummyTimeStamps(), video->getContractionIndices(), "contraction index");
+	ACMediaTimedFeatures* ci_mtf = new ACMediaTimedFeatures(video->getTimeStamps(), video->getContractionIndices(), "contraction index");
 	ACMediaFeatures* contractionIndex = ci_mtf->mean();
 	delete ci_mtf;
 	return contractionIndex;
+}
+
+ACMediaFeatures* ACVideoPlugin::calculateMeanSpeedOfTrajectory(ACVideoAnalysis* video){
+	if (!video->areBlobsComputed()) video->computeBlobsUL();
+	if (!video->isTrajectoryComputed()) video->computeMergedBlobsTrajectory(0);
+	
+	video->computeMergedBlobsSpeeds(0);
+	ACMediaTimedFeatures *trajectory_mtf = new ACMediaTimedFeatures(video->getTimeStamps(), video->getNormalizedMergedBlobsSpeeds(), "speed");
+	ACMediaFeatures* trajectory_mf = trajectory_mtf->mean();
+	delete trajectory_mtf;
+	return trajectory_mf;
+}
+
+
+//ACMediaFeatures* ACVideoPlugin::calculateMostOccupiedCell(ACVideoAnalysis* video){
+//	if (!video->areBlobsComputed()) video->computeBlobsUL();
+//	if (!video->isTrajectoryComputed()) video->computeNormalizedMergedBlobsTrajectory(0);
+//	ACMediaTimedFeatures *trajectory_mtf = new ACMediaTimedFeatures(video->getTimeStamps(), video->getNormalizedMergedBlobsTrajectory(), "trajectory");
+//	mat hist_m = hist3(trajectory_mtf->getValue(), 10, 10);
+//	
+//	// XS TODO -- this is not correct
+//	// hist_m.print();
+//	ACMediaFeatures* trajectory_mf = trajectory_mtf->max(); // DELETE THIS
+//	//max_indice(hist_m);	
+//	delete trajectory_mtf;
+//	return trajectory_mf;
+//}
+
+ACMediaFeatures* ACVideoPlugin::calculateMeanBoundingBoxRatio(ACVideoAnalysis* video){
+	if (!video->areBlobsComputed()) video->computeBlobsUL();
+	if (!video->isTrajectoryComputed()) video->computeMergedBlobsTrajectory(0);
+	
+	video->computeBoundingBoxRatios();
+	ACMediaTimedFeatures *trajectory_mtf = new ACMediaTimedFeatures(video->getTimeStamps(), video->getBoundingBoxRatios(), "bounding box ratios");
+	ACMediaFeatures* trajectory_mf = trajectory_mtf->mean();
+	delete trajectory_mtf;
+	return trajectory_mf;
+}
+
+ACMediaFeatures* ACVideoPlugin::calculateMeanPixelSpeed(ACVideoAnalysis* video){
+	video->computePixelSpeed();
+	vector<float> t = video->getTimeStamps();
+	vector<float> s = video->getPixelSpeeds();
+	
+	ACMediaTimedFeatures* ps_mtf = new ACMediaTimedFeatures(t,s, "pixel speed");
+	ACMediaFeatures* pixel_speed = ps_mtf->mean();
+	delete ps_mtf;
+	return pixel_speed;
+}
+
+string ACVideoPlugin::changeLastFolder(string path, string folder)
+{
+    int index = 0;
+    int tmp = 0;
+    string sep = "";
+    string dir = extractDirectory(path);
+    
+    tmp = dir.substr(0,dir.size()-2).find_last_of('\\');
+    int tmp2 = 0;
+    tmp2 = dir.substr(0,dir.size()-2).find_last_of('/');
+    if (tmp > tmp2)
+    {
+        index = tmp;
+        sep = "\\";
+    }
+    else
+    {
+        index = tmp2;
+        sep = "/";
+    }
+    return dir.substr(0,index+1) + folder + sep + extractFilename(path);
+}
+
+string ACVideoPlugin::extractDirectory(string path)
+{
+    int index = 0;
+    int tmp = 0;
+    tmp = path.find_last_of('\\');
+    int tmp2 = 0;
+    tmp2 = path.find_last_of('/');
+    if (tmp > tmp2)
+        index = tmp;
+    else
+        index = tmp2;
+    return path.substr(0, index + 1);
+}
+
+string ACVideoPlugin::extractFilename(string path)
+{
+    int index = 0;
+    int tmp = 0;
+    tmp = path.find_last_of('\\' );
+    int tmp2 = 0;
+    tmp2 = path.find_last_of('/');
+    if (tmp > tmp2)
+        index = tmp;
+    else
+        index = tmp2;
+    return path.substr(index + 1);
 }

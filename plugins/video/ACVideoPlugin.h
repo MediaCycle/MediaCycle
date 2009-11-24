@@ -48,13 +48,26 @@ public:
     virtual int initialize();
 	std::vector<ACMediaFeatures*>  calculate();
 	std::vector<ACMediaFeatures*>  calculate(std::string aFileName);
-    virtual int start() {return 0;};
-    virtual int stop() {return 0;};
+	std::vector<ACMediaFeatures*>  calculateTop(std::string aFileName);
+	std::vector<ACMediaFeatures*>  calculateFront(std::string aFileName);
+	std::string changeLastFolder(std::string path, std::string folder);
+	std::string extractDirectory(std::string path);
+	std::string extractFilename(std::string path);
+	virtual int start() {return 0;};
+	virtual int stop() {return 0;};
+	float getWidth();
+	float getHeight();
+	float getDuration();
+	
 private:
 	ACMediaFeatures* calculateMeanOfTrajectory(ACVideoAnalysis* video);
 	ACMediaFeatures* calculateStdOfTrajectory(ACVideoAnalysis* video);
 	ACMediaFeatures* calculateMaxOfTrajectory(ACVideoAnalysis* video);
 	ACMediaFeatures* calculateContractionIndex(ACVideoAnalysis* video);
+	ACMediaFeatures* calculateMeanSpeedOfTrajectory(ACVideoAnalysis* video);
+//	ACMediaFeatures* calculateMostOccupiedCell(ACVideoAnalysis* video);
+	ACMediaFeatures* calculateMeanBoundingBoxRatio(ACVideoAnalysis* video);
+	ACMediaFeatures* calculateMeanPixelSpeed(ACVideoAnalysis* video);
 };
 
 #endif	/* _ACVIDEOPLUGIN_H */

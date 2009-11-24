@@ -57,7 +57,6 @@ ACVideo::~ACVideo() {
 	for (iter = features.begin(); iter != features.end(); iter++) { 
 		delete *iter; 
 	}
-	
 }
 
 //void ACVideo::import(string _path) { 

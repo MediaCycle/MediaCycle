@@ -63,22 +63,28 @@ std::string generateID(std::string filename);
 void startOrRedraw(MediaCycle *that, int nbVideo, char**, int*);
 void startOrRedrawRandom(MediaCycle *that, int nbVideo, char**, int*);
 void itemClicked(MediaCycle *that, int idVideo, char**, int*);
+void labelClicked(MediaCycle *mediacycle, int idLabel, char **, int*);
+string fillOutputBuffer(ACMediaLibrary* media_library, ACMediaBrowser* media_browser, int nvid);
 
-string mypath="/Users/xavier/Desktop/dancers-tmp/";
+string xmlpath = "/Users/dtardieu/Desktop/dancers-test/dancers-all.xml";
 
 int main(int argc, char** argv) {
-	string path = mypath+"test-data-2.acl";
-	string xmlpath = mypath+"dancers-ex.xml";
+	string configFilename = "./config.txt";
+	ifstream configIF(configFilename.c_str());
+	
+	string libraryFilename, visPluginFilename;
+	configIF >> libraryFilename;
+	configIF >> visPluginFilename;
+	configIF.close();
+
 	cout<<"new MediaCycle"<<endl;
 	MediaCycle* mediacycle;
 	mediacycle = new MediaCycle(MEDIA_TYPE_VIDEO);
-//	mediacycle->addPlugin ("/Users/dtardieu/src/Numediart/ticore-app/Applications/Numediart/MediaCycle/src/Builds/darwin-x86/plugins/eyesweb/Debug/mc_eyesweb.dylib");
-//	mediacycle->addPlugin ("/Users/dtardieu/src/Numediart/ticore-app/Applications/Numediart/MediaCycle/src/Builds/darwin-x86/plugins/visualisation/Debug/mc_visualisation.dylib");
-//	mediacycle->setVisualisationPlugin("Visualisation");
-//	mediacycle->importDirectory("/Users/dtardieu/data/DANCERS/Video/FrontTest/", 0);
-	
-	mediacycle->importLibrary(path);
-	
+	mediacycle->addPlugin (visPluginFilename);
+	mediacycle->setVisualisationPlugin("Visualisation");
+	mediacycle->importLibrary(libraryFilename);
+
+	saveLibraryAsXml(mediacycle, xmlpath);	
 	// XS test C++ ACL
 	// mediacycle->importACLLibrary(path);
 	
@@ -91,7 +97,6 @@ int main(int argc, char** argv) {
 		sleep(30);
 	}
 //	
-//	saveLibraryAsXml(mediacycle, xmlpath);
 //	mediacycle->saveAsLibrary(mypath+"dancers-ex-2.acl");
 	delete mediacycle;	
 	return (EXIT_SUCCESS);
@@ -134,8 +139,10 @@ int processTcpMessageFromInstallation(MediaCycle *that, char *buffer, int l, cha
 	clock_t t0=clock();
 	// end XS
 	
-    std::string file_name;
+	std::string file_name;
 	std::istringstream message_in(buffer);
+
+	cout<< "buffer : " << buffer <<endl;
 	string str_message_in;
 	if (! (message_in >> str_message_in) ){
 		if (! message_in.good()){ 
@@ -193,7 +200,7 @@ int processTcpMessageFromInstallation(MediaCycle *that, char *buffer, int l, cha
 			cout << "nb videos : " << nbVideo << endl;
 			
 			// XS test
-			startOrRedrawRandom(that,nbVideo, buffer_send, l_send);
+			startOrRedraw(that,nbVideo, buffer_send, l_send);
 			
 			std::istringstream s_out (*buffer_send);
 			string str_buffer_send;
@@ -208,7 +215,7 @@ int processTcpMessageFromInstallation(MediaCycle *that, char *buffer, int l, cha
 				return -1;
 			}
 			
-			cout << "(startOrRedrawRandom) sent back this message : " << str_buffer_send << endl;
+			cout << "(startOrRedraw) sent back this message : " << str_buffer_send << endl;
 			// XS timing
 			clock_t t1=clock();
 			cout << "Execution time: " << (t1-t0)*1000/CLOCKS_PER_SEC << " ms." << endl;
@@ -218,9 +225,10 @@ int processTcpMessageFromInstallation(MediaCycle *that, char *buffer, int l, cha
 		case 1:{ 
 			// ITEMCLICKED
 			// MESSAGE : 1 idVideo
-			unsigned int idVideo;
-			std::istringstream s_1( str_message_in.substr(1,3) );
-			if ( !(s_1 >> idVideo) ){
+			string idVideoStr;
+			unsigned int idVideo=10;
+			std::istringstream s_1( str_message_in.substr(4,6) );
+			if ( !(s_1 >> idVideoStr) ){
 				if (! s_1.good()){
 					cerr << "<processTcpMessageFromInstallation> : bad streaming of video ID from incoming buffer" << endl;
 				}
@@ -230,9 +238,19 @@ int processTcpMessageFromInstallation(MediaCycle *that, char *buffer, int l, cha
 				cerr << "type : " << msgType << " ; corresponding buffer[1:3] = " << s_1 << endl;
 				return -1;
 			}
-			
-			cout << "id video : " << idVideo << endl;
-			
+			string filename;
+			int posSep;
+			int posDot;
+			for (int k=0; k<that->getLibrarySize(); k++){
+				filename=that->getLibrary()->getItem(k)->getFileName();
+				posSep = filename.find_last_of("/");
+				posDot = filename.find_last_of(".");
+				cout << "test id : " << filename.substr(posSep, posDot-posSep+1) << endl;
+				if (!filename.compare(posSep+1, posDot-posSep-1, idVideoStr)){
+					idVideo = k;
+					break;
+				}	
+			}
 			itemClicked(that,idVideo, buffer_send, l_send);
 
 			break;
@@ -241,9 +259,21 @@ int processTcpMessageFromInstallation(MediaCycle *that, char *buffer, int l, cha
 			// LARGETEXTCLICKED
 			// MESSAGE : 2 idText
 			unsigned int idText;
-			std::istringstream ss( str_message_in.substr(1,3) );
-			ss >> idText;
+			std::istringstream s_2( str_message_in.substr(1,3) );
+			if ( !(s_2 >> idText) ){
+				if (! s_2.good()){
+					cerr << "<processTcpMessageFromInstallation> : bad streaming of text ID from incoming buffer" << endl;
+				}
+				else {
+					cerr << "<processTcpMessageFromInstallation> : problem reading text ID from incoming buffer" << endl;
+				}
+				cerr << "type : " << msgType << " ; corresponding buffer[1:3] = " << s_2 << endl;
+				return -1;
+			}			
 			cout << "id Text : " << idText << endl;
+			
+			labelClicked(that,idText, buffer_send, l_send);
+
 			break;
 		}	
 		default:
@@ -252,66 +282,50 @@ int processTcpMessageFromInstallation(MediaCycle *that, char *buffer, int l, cha
     return 0;
 }
 
-// this one is really used in the installation
-// ex: for 50 videos and 3 keywords:
-//     049_000000395082000001537313000002296262000003258158000004418017000005125012000006137074000007725067000008624351000009628293000010164241000011716215000012292320000013127106000014641262000015007337000016359310000017682187000018292364000019172221000020727340000021322181000022202148000023399290000024516337000025547320000026562295000027385060000028679246000029306072000030513305000031462088000032737272000033028157000034131043000035750036000036529002000037538363000038153225000039162223000040605340000041459202000042470296000043639279000044635290000045000002000046436056000047311139000048323257_003-descA2-090031-descB0-029080-descC1-059005
-// 
-// 001052050015
-// dancerxxxyyy
 
-void startOrRedraw(MediaCycle *mediacycle, int nbVideo, char **buffer_send, int* l_send){
-	ACMediaLibrary* media_library = mediacycle->getLibrary();
-	
-	if (media_library->getSize() == 0) {
-		cerr << "<startOrRedrawRandom> : empty media library" << endl;
-		return;
-	}
-	
-	ACMediaBrowser* media_browser;
-	media_browser = mediacycle->getBrowser();
-	
+char* get_error_message(){
+	string sbuffer_send_error="-1";
+	char* buffer_send_error = new char [sbuffer_send_error.size()+1]; // extra byte needed for the trailing '\0' 
+	strcpy (buffer_send_error, sbuffer_send_error.c_str());
+	return buffer_send_error;
+}
+
+// common to all types of messages:
+string fillOutputBuffer(ACMediaLibrary* media_library, ACMediaBrowser* media_browser, int nvid){
 	int n_loops = media_browser->getNumberOfLoops();
 	int n_labels = media_browser->getNumberOfLabels();
+	string sbuffer_send;
 
-	if (nbVideo > n_loops) {
-		cerr << "<startOrRedrawRandom> : you are asking for too many videos" << endl;
-		return;
-	}
-
-	// tell the browser nothing specific was clicked.
-	media_browser->setClickedLoop(-1);
-	media_browser->setClickedLabel(-1);
-	media_browser->updateClusters();
-	
 	// === 1) videos
 	string sepu="_";
 	ostringstream onvid ;
 	onvid.fill('0'); // fill with zeros (otherwise will leave blanks)
-	onvid << setw(3) << nbVideo << sepu;
+	onvid << setw(3) << nvid << sepu;
 	// === start filling sbuffer_send
-	string sbuffer_send = onvid.str(); // could add "0" in front for message type (not done here because not useful for web application)
-
+	sbuffer_send = onvid.str(); // could add "0" in front for message type (not done here because not useful for web application)
+	
 	// loop on all videos to see which ones to send out
 	const vector<ACLoopAttribute> loop_attributes = media_browser->getLoopAttributes();
 	int chk_loops=0;
 	for (int i=0; i< n_loops; i++){
 		if (loop_attributes[i].isDisplayed){
 			chk_loops++;
-			int posx = (int) loop_attributes[i].currentPos.x;
-			int posy = (int) loop_attributes[i].currentPos.y;
+			int posx = (int) loop_attributes[i].nextPos.x;
+			int posy = (int) loop_attributes[i].nextPos.y;
 			ostringstream oss ;
 			oss.fill('0'); // fill with zeros (otherwise will leave blanks)
-			oss << setw(6) << i << setw(3) << posx << setw(3)<< posy; // fixed format
+			oss << setw(6) << generateID(media_library->getItem(i)->getFileName()) << setw(3) << posx << setw(3)<< posy; // fixed format
 			sbuffer_send += oss.str(); // concatenates all videos in one string
 			
 			// XS test
 			cout << oss.str() << endl;
-		
 		}		
 	}
-	if (chk_loops != media_browser->getNumberOfDisplayedLoops()) {
-		cerr << "<startOrRedraw> consistency check failed: problem with number of displayed videos" << endl;
-	}
+// 	if (chk_loops != media_browser->getNumberOfDisplayedLoops()) {
+// 		cerr << "<startOrRedraw> consistency check failed: problem with number of displayed videos: " << chk_loops << " differs from "<< media_browser->getNumberOfDisplayedLoops() << endl;
+// 		*buffer_send = get_error_message();	
+// 		return;
+// 	}
 	
 	// === 2) labels (keywords)
 	string sep="-";
@@ -331,7 +345,7 @@ void startOrRedraw(MediaCycle *mediacycle, int nbVideo, char **buffer_send, int*
 			int posy = (int) label_attributes[i].pos.y;
 			ostringstream oss ;
 			oss.fill('0'); // fill with zeros (otherwise will leave blanks)
-			oss << setw(6) << label_attributes[i].text << setw(3) << posx << setw(3)<< posy; // fixed format
+			oss << sep << label_attributes[i].text << sep << setw(3) << posx << setw(3)<< posy; // fixed format
 			sbuffer_send += oss.str(); // concatenates all videos in one string
 			
 			// XS test
@@ -339,9 +353,60 @@ void startOrRedraw(MediaCycle *mediacycle, int nbVideo, char **buffer_send, int*
 			
 		}		
 	}
-	if (chk_labels != media_browser->getNumberOfDisplayedLabels()) {
-		cerr << "<startOrRedraw> consistency check failed: problem with number of displayed labels" << endl;
+// 	if (chk_labels != media_browser->getNumberOfDisplayedLabels()) {
+// 		cerr << "<startOrRedraw> consistency check failed: problem with number of displayed labels: " << chk_labels << " differs from "<< media_browser->getNumberOfDisplayedLabels() << endl;
+// 		*buffer_send = get_error_message();	
+// 		return;
+// 	}
+	return sbuffer_send;
+}
+
+
+
+// this one is really used in the installation
+// ex: for 50 videos and 3 keywords:
+//     049_000000395082000001537313000002296262000003258158000004418017000005125012000006137074000007725067000008624351000009628293000010164241000011716215000012292320000013127106000014641262000015007337000016359310000017682187000018292364000019172221000020727340000021322181000022202148000023399290000024516337000025547320000026562295000027385060000028679246000029306072000030513305000031462088000032737272000033028157000034131043000035750036000036529002000037538363000038153225000039162223000040605340000041459202000042470296000043639279000044635290000045000002000046436056000047311139000048323257_003-descA2-090031-descB0-029080-descC1-059005
+// 
+// 001052050015
+// dancerxxxyyy
+
+void startOrRedraw(MediaCycle *mediacycle, int nbVideo, char **buffer_send, int* l_send){
+	ACMediaLibrary* media_library = mediacycle->getLibrary();
+	
+	if (media_library->getSize() == 0) {
+		cerr << "<startOrRedrawRandom> : empty media library" << endl;
+		*buffer_send = get_error_message();	
+		return;
 	}
+	
+	ACMediaBrowser* media_browser;
+	media_browser = mediacycle->getBrowser();
+	
+	int n_loops = media_browser->getNumberOfLoops();
+//	int n_labels = media_browser->getNumberOfLabels();
+
+	if (nbVideo > n_loops) {
+		cerr << "<startOrRedrawRandom> : you are asking for too many videos" << endl;
+		*buffer_send = get_error_message();	
+		return;
+	}
+
+	// tell the browser nothing specific was clicked.
+	media_browser->setClickedLoop(-1);
+	media_browser->setClickedLabel(-1);
+	media_browser->setNumberOfDisplayedLoops(nbVideo);
+	media_browser->updateNextPositions();
+	if (nbVideo != media_browser->getNumberOfDisplayedLoops()){
+		cerr << "<startOrRedraw> browser returned wrong number of videos" << endl;
+		*buffer_send = get_error_message();	
+		return;
+	}
+	
+	// XS below this is common to all message types -- put it in subroutine
+	string sbuffer_send = fillOutputBuffer(media_library, media_browser,nbVideo);
+	*buffer_send = new char [sbuffer_send.size()+1]; // extra byte needed for the trailing '\0' 
+	strcpy (*buffer_send, sbuffer_send.c_str());
+	*l_send = sbuffer_send.length();
 	
 }
 
@@ -453,15 +518,22 @@ void itemClicked(MediaCycle *mediacycle, int idVideo, char **buffer_send, int* l
 	int n_loops = media_browser->getNumberOfLoops();
 	// XS should also be = media_library->getSize()
 	
-	if (0 < idVideo || idVideo > n_loops) {
+	if (idVideo < 0 || idVideo > n_loops) {
 		cerr << "<itemClicked> : video ID out of bounds" << endl;
 		return;
 	}
 	
 	media_browser->setClickedLoop(idVideo);
 	media_browser->setClickedLabel(-1);
-	media_browser->updateClusters();
-
+	media_browser->updateNextPositions();
+	int nbVideo = media_browser->getNumberOfDisplayedLoops();
+	
+	// XS below this is common to all message types -- put it in subroutine
+	string sbuffer_send = fillOutputBuffer(media_library, media_browser, nbVideo);
+	*buffer_send = new char [sbuffer_send.size()+1]; // extra byte needed for the trailing '\0' 
+	strcpy (*buffer_send, sbuffer_send.c_str());
+	*l_send = sbuffer_send.length();
+	
 }
 
 void labelClicked(MediaCycle *mediacycle, int idLabel, char **buffer_send, int* l_send){
@@ -474,14 +546,21 @@ void labelClicked(MediaCycle *mediacycle, int idLabel, char **buffer_send, int* 
 	ACMediaBrowser* media_browser;
 	media_browser = mediacycle->getBrowser();
 	int n_labels = media_browser->getNumberOfLabels();
-	if (0 < idLabel || idLabel > n_labels) {
+	if (idLabel < 0 || idLabel > n_labels) {
 		cerr << "<labelClicked> : label ID out of bounds" << endl;
 		return;
 	}
 	
 	media_browser->setClickedLoop(-1);
 	media_browser->setClickedLabel(idLabel);
-	media_browser->updateClusters();
+	media_browser->updateNextPositions();
+	int nbVideo = media_browser->getNumberOfDisplayedLoops();
+	
+	// XS below this is common to all message types -- put it in subroutine
+	string sbuffer_send = fillOutputBuffer(media_library, media_browser, nbVideo);
+	*buffer_send = new char [sbuffer_send.size()+1]; // extra byte needed for the trailing '\0' 
+	strcpy (*buffer_send, sbuffer_send.c_str());
+	*l_send = sbuffer_send.length();
 	
 }
 
@@ -521,7 +600,7 @@ void saveLibraryAsXml(MediaCycle* mediacycle, string _path) {
 	/// ITEMS //
 	fprintf(library_file, "%s\n", "<items>");
 	for(int i=0; i<n_loops; i++) {
-		fprintf(library_file, "<v>");
+		fprintf(library_file, "<v duration=\"%.1lf\">",  media_library->getItem(i)->getDuration());
 		local_media = media_library->getItem(i);    
 		
 		// printing ID
@@ -533,7 +612,7 @@ void saveLibraryAsXml(MediaCycle* mediacycle, string _path) {
 			featureName = media_library->getItem(i)->getFeatures(j)->getName();
 			
 			if (featureSize == 1){
-				featureValue = media_library->getItem(i)->getFeatures(j)->getDiscretizedFeature(1,1);
+				featureValue = media_library->getItem(i)->getFeatures(j)->getDiscretizedFeature();
 				fprintf(library_file, "%d", (int) featureValue);
 			}
 			else{
@@ -590,26 +669,34 @@ void readLibraryXml(MediaCycle* mediacycle, std::string filename){
 	}
 }
 
+// std::string generateID(std::string filename){
+// 	const int nbCities=2;
+// 	const std::string cityNames[nbCities] = {"Bru", "Par"};
+// 	const std::string cityID[nbCities] = {"00", "01"};
+// 	std::string IDs, numDancer, numTry, city;
+// 	int posCity;
+// 	int posSep = filename.find_last_of("/\\");
+// 	int posDot = filename.find_last_of(".");
+// 	city = filename.substr(posSep+1, 3);
+// 	numDancer = filename.substr(posSep+5, 3);
+// 	numTry = filename[posSep+9];
+// 	for (int i=0; i<nbCities; i++){
+// 		if (!city.compare(cityNames[i]))
+// 			posCity = i;
+// 	}
+// 	IDs.assign(cityID[posCity]);
+// 	IDs += numDancer;
+// 	IDs += numTry;
+// 	return IDs;
+// }
+
 std::string generateID(std::string filename){
-	const int nbCities=2;
-	const std::string cityNames[nbCities] = {"Bru", "Par"};
-	const std::string cityID[nbCities] = {"00", "01"};
-	std::string IDs, numDancer, numTry, city;
-	int posCity;
+	std::string IDs;
 	int posSep = filename.find_last_of("/\\");
-	int posDot = filename.find_last_of(".");
-	city = filename.substr(posSep+1, 3);
-	numDancer = filename.substr(posSep+5, 3);
-	numTry = filename[posSep+9];
-	for (int i=0; i<nbCities; i++){
-		if (!city.compare(cityNames[i]))
-			posCity = i;
-	}
-	IDs.assign(cityID[posCity]);
-	IDs += numDancer;
-	IDs += numTry;
+	IDs = filename.substr(posSep+1, 6);
 	return IDs;
 }
+
 // sample XML file:
 /*
 <?xml version="1.0"?>

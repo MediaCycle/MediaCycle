@@ -67,7 +67,6 @@ public:
 	
 private:	
 	char  *thumbnail_filename;
-	int width, height; // delete
 	int thumbnail_width, thumbnail_height; // delete
 	IplImage *thumbnail;
 };

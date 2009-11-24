@@ -57,14 +57,20 @@ enum ACPluginType {
 
 class ACPlugin {
 public:
-    ACPlugin() {};
-    virtual ~ACPlugin() {};
-    virtual std::string getName() {return this->mName;};
+    ACPlugin() {}
+    virtual ~ACPlugin() {}
+    virtual std::string getName() {return this->mName;}
     //virtual std::string getName() const = 0; -> error !
-    virtual std::string getIdentifier() {return this->mId;};
-    virtual std::string getDescription() {return this->mDescription;};
-    virtual ACMediaType getMediaType() {return this->mMediaType;};
-    virtual ACPluginType getPluginType() {return this->mPluginType;};
+    virtual std::string getIdentifier() {return this->mId;}
+    virtual std::string getDescription() {return this->mDescription;}
+    virtual ACMediaType getMediaType() {return this->mMediaType;}
+    virtual ACPluginType getPluginType() {return this->mPluginType;}
+	
+	// XS I did not put these = 0 because old plugins won't have it implemented
+	virtual float getWidth(){return 0.0;}
+	virtual float getHeight(){return 0.0;}
+	virtual float getDuration(){return 0.0;}
+
     virtual int initialize() = 0;
     virtual std::vector<ACMediaFeatures*> calculate() = 0;
     virtual std::vector<ACMediaFeatures*> calculate(std::string aFileName) = 0;
@@ -80,6 +86,7 @@ protected:
     string mDescription;
     ACMediaType mMediaType;
     ACPluginType mPluginType;
+	float mwidth, mheight, mduration;
 };
 
 // the types of the class factories

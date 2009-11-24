@@ -191,7 +191,8 @@ ACMediaBrowser::ACMediaBrowser() {
 	mCameraAngle = 0.0;
 	
 	mClickedLoop = -1;
-	
+	mClickedLabel = -1;
+
 	mClusterCount = 5;
 	mNavigationLevel = 0;
 	
@@ -207,11 +208,12 @@ ACMediaBrowser::ACMediaBrowser() {
 	auto_play_toggle = 0;
 	
 	mLabelAttributes.resize(0);
-	nbLabelsDisplayed = 0;
+	nbDisplayedLabels = 0;
 
 	mLoopAttributes.resize(0);
-	nbLoopsDisplayed = 0;
+	nbDisplayedLoops = 0;
 	
+	mVisPlugin = NULL;
 }
 
 ACMediaBrowser::~ACMediaBrowser() {
@@ -310,17 +312,17 @@ void ACMediaBrowser::setClusterNumber(int n)
 }
 
 void ACMediaBrowser::setClickedLoop(int iloop){
-	if (iloop < 0 || iloop >= this->getNumberOfLoops())
-		mClickedLoop = iloop;
-	else
-		cerr << "<ACMediaBrowser::setClickedLoop> : index " << iloop << "out of bounds" << endl;
+  if (iloop < -1 || iloop >= this->getNumberOfLoops())
+    cerr << "<ACMediaBrowser::setClickedLoop> : index " << iloop << " out of bounds (nb loop = " << this->getNumberOfLoops() << ")"<< endl;
+  else
+    mClickedLoop = iloop;
 }
 
 void ACMediaBrowser::setClickedLabel(int ilabel){
-	if (ilabel < 0 || ilabel >= this->getNumberOfLabels())
-		mClickedLabel = ilabel;
-	else
+	if (ilabel < -1 || ilabel >= this->getNumberOfLabels())
 		cerr << "<ACMediaBrowser::setClickedLabel> : index " << ilabel << "out of bounds" << endl;
+	else
+		mClickedLabel = ilabel;
 }
 
 
@@ -338,6 +340,41 @@ void ACMediaBrowser::setLabelPosition(int label_id, float x, float y, float z){
 	p.y = y;
 	p.z = z;
 	mLabelAttributes[label_id].pos = p;
+}
+
+int ACMediaBrowser::getNumberOfDisplayedLoops(){
+	return nbDisplayedLoops;
+// should be the same as:	
+//	int cnt=0;
+//	for (int i=0; i < getNumberOfLoops()){
+//		if (mLoopAttributes[i].isDisplayed) cnt++
+//	}
+//	return cnt;
+}
+
+int ACMediaBrowser::getNumberOfDisplayedLabels(){
+	return nbDisplayedLabels;
+
+// should be the same as:	
+//	int cnt=0;
+//	for (int i=0; i < getNumberOfLabels()){
+//		if (mLabelpAttributes[i].isDisplayed) cnt++
+//	}
+//	return cnt;
+}
+
+void ACMediaBrowser::setNumberOfDisplayedLoops(int nd){
+	if (nd < 0 || nd > this->getNumberOfLoops())
+		cerr << "<ACMediaBrowser::setNumberOfDisplayedLoops> : too many loops to display: " << nd << endl;
+	else
+		nbDisplayedLoops = nd;
+}
+
+void ACMediaBrowser::setNumberOfDisplayedLabels(int nd){
+	if (nd < 0 || nd > this->getNumberOfLabels())
+		cerr << "<ACMediaBrowser::setNumberOfDisplayedLabels> : too many labels to display: " << nd << endl;
+	else
+		nbDisplayedLabels = nd;
 }
 
 void ACMediaBrowser::resetLoopNavigationLevels()
@@ -453,7 +490,7 @@ void ACMediaBrowser::randomizeLoopPositions(){
 }
 
 
-void ACMediaBrowser::libraryContentChanged() 
+void ACMediaBrowser::libraryContentChanged()
 {
 	// XS 27/10/09 TODO this should use the randomizePositions defined above
 	if(mLibrary == NULL) return;
@@ -665,25 +702,199 @@ void ACMediaBrowser::initClusterCenters(){
     }
   }
 }
-// XS TODO this one is tricky
 
+void ACMediaBrowser::setProximityGridQuantize(ACPoint p, ACPoint *pgrid) {
+	pgrid->x = (int)round( (p.x-proxgridl)/proxgridstepx );
+	pgrid->y = (int)round( (p.y-proxgridb)/proxgridstepy );		
+}
+	
+void ACMediaBrowser::setProximityGridUnquantize(ACPoint pgrid, ACPoint *p) {
+	p->x = pgrid.x * proxgridstepx + proxgridl;
+	p->y = pgrid.y * proxgridstepy + proxgridb;		
+}
+
+void ACMediaBrowser::setProximityGrid() {
+	
+	float jitter;
+	
+	int i, j, k, l;
+	int n;
+	int found_slot;
+	
+	ACPoint p, pgrid, p2, curpos;
+	int index, pgridindex, curposindex;
+	
+	float langle, orientation, spiralstepx, spiralstepy, lorientation;
+	
+	n = mLoopAttributes.size();
+	
+	// Proximity Grid Size	
+	if (n>0) {
+		p = mLoopAttributes[0].nextPos;
+		proxgridl = p.x;
+		proxgridr = p.x;
+		proxgridb = p.y;
+		proxgridt = p.y;
+	}
+	for(i=1; i<n; i++) {
+		p = mLoopAttributes[i].nextPos;
+		if (p.x<proxgridl) {
+			proxgridl = p.x;
+		}
+		if (p.x>proxgridr) {
+			proxgridr = p.x;
+		}
+		if (p.y<proxgridb) {
+			proxgridb = p.y;
+		}
+		if (p.y>proxgridt) {
+			proxgridt = p.y;
+		}
+	}
+	
+	// Proximity Grid Density
+	proxgridlx = 7;
+	proxgridstepx = (proxgridr-proxgridl)/(proxgridlx-1);
+	proxgridaspectratio = 9.0/16.0;
+	proxgridstepy = proxgridstepx * proxgridaspectratio;
+	proxgridly = (proxgridt-proxgridb)/proxgridstepy + 1;	
+	proxgridmaxdistance = 5;
+	proxgridjitter = 0.25;
+	
+	// Init
+	proxgrid.resize((proxgridlx)*(proxgridly));
+	fill(proxgrid.begin(), proxgrid.end(), -1);
+	
+	// SD TODO - maybe need to compute MST (Minimum Spanning Tree)
+	
+	for(i=0; i<n; i++) {
+		
+		found_slot = 0;
+		
+		p = mLoopAttributes[i].nextPos;
+		
+		// grid quantization
+		setProximityGridQuantize(p, &pgrid);
+		pgridindex =  pgrid.y * proxgridlx + pgrid.x;
+		
+		// no further processing for this media if out of grid
+		if ( (pgrid.x<0) || (pgrid.x>=proxgridlx) || (pgrid.y<0) || (pgrid.y>=proxgridly) ) {
+			continue;
+		}
+		
+		// spiral search
+	    setProximityGridUnquantize(pgrid, &p2);
+		langle = atan( (p.y-p2.y) / (p.x-p2.x) );
+		orientation = fmod(ceil(langle/(M_PI/4.0)), 2) * 2 - 1; // +1 means positive angles
+		spiralstepx = fmod(round((langle-M_PI/2.0)/(M_PI/2.0)), 2);
+		if ((p.x-p2.x)<0) spiralstepx = - spiralstepx;
+		spiralstepy = fmod(round(langle/(M_PI/2.0)), 2);
+		if ((p.y-p2.y)<0) spiralstepy = - spiralstepy;
+		lorientation = atan(spiralstepy/spiralstepx);
+		
+		curpos.x = pgrid.x;
+		curpos.y = pgrid.y;
+		curposindex = curpos.y * proxgridlx + curpos.x;
+		if (proxgrid[curposindex]==-1) {
+			l = proxgridmaxdistance;
+			found_slot = 1;
+		}
+		else {
+			l = 1;
+		}
+		
+		while (l<proxgridmaxdistance) {
+			for (j=0;j<2;j++) {	
+				for (k=0;k<l;k++) {
+					curpos.x += spiralstepx;
+					curpos.y += spiralstepy;
+					curposindex = curpos.y * proxgridlx + curpos.x;
+					if ( (curpos.x<0) || (curpos.x>=proxgridlx) || (curpos.y<0) || (curpos.y>=proxgridly) ) {
+						continue;
+					}
+					else {
+						if (proxgrid[curposindex]==-1) {
+							l=proxgridmaxdistance;
+							found_slot = 1;
+							k=l;
+							j=2;
+						}
+					}
+				}
+				// minus PI or plus PI depending on orientation
+				lorientation += (orientation * M_PI / 2.0);
+				lorientation = fmod((double)lorientation, 2.0*M_PI);
+				spiralstepx = cos(lorientation);
+				spiralstepy = sin(lorientation);
+			}	
+			l++;
+		}
+		
+		// empty stategy
+		if (found_slot) {
+			proxgrid[curposindex] = i;
+		}
+		
+		// swap strategy
+		// SD TODO
+		
+		// bump strategy
+		// SD TODO
+		
+	}
+	
+	for(i=0; i<n; i++) {
+		mLoopAttributes[i].nextPosGrid = mLoopAttributes[i].nextPos;
+	}
+	
+	for(i=0; i<proxgrid.size(); i++) {
+		index = proxgrid[i];
+		if ( (index>=0) && (index<n) ) {
+			curpos.x = fmod((float)i,proxgridlx);
+			curpos.y = floor((float)i/(proxgridlx));
+			setProximityGridUnquantize(curpos, &p2);
+			p2.z = mLoopAttributes[index].nextPos.z;
+			mLoopAttributes[index].nextPosGrid = p2;
+		}
+	}
+	
+	for(i=0; i<n; i++) {
+		mLoopAttributes[i].nextPos = mLoopAttributes[i].nextPosGrid;
+	}
+	
+	if (proxgridjitter>0) {
+		for(i=0; i<n; i++) {
+			jitter = TiRandom()-0.5;
+			mLoopAttributes[i].nextPos.x += jitter*proxgridjitter*proxgridstepx;
+			jitter = TiRandom()-0.5;
+			mLoopAttributes[i].nextPos.y += jitter*proxgridjitter*proxgridstepy;
+		}
+		for(i=0; i<n; i++) {
+			mLoopAttributes[i].nextPos.x = max(min(mLoopAttributes[i].nextPos.x,proxgridr), proxgridl);
+			mLoopAttributes[i].nextPos.y = max(min(mLoopAttributes[i].nextPos.y,proxgridt), proxgridb);
+		}
+	}
+
+	
+	return;
+}
+
+
+void ACMediaBrowser::setRepulsionEngine() {
+	return;
+}
+
+// XS TODO this one is tricky
 // SD TODO - Different clustering algorithms should have their own classes
 // SD TODO - DIfferent dimensionality reduction too
 // This function make the kmeans and set some varaibles : 
 // mClusterCenters
 // mLoopAttributes
 void ACMediaBrowser::updateClusters(bool animate){
-  int method=1;
-  switch (method) {
-  case 0:
+  if (mVisPlugin==NULL)
     kmeans(animate);
-    break;
-  case 1:
-    std::cout << "UpdateClusters : Nouvelle methode folle" << std::endl;
-    // DT : need to be somewhere else but don't know where
+  else{
     initClusterCenters();
-    break;
-  case 2:
     std::cout << "UpdateClusters : Plugin" << std::endl;
     mVisPlugin->updateClusters(this);
     if(animate) {
@@ -691,29 +902,17 @@ void ACMediaBrowser::updateClusters(bool animate){
       //commitPositions();
       setState(AC_CHANGING);
     }
-  default:
-    break;
   }
 }
 
 void ACMediaBrowser::updateNextPositions(){
-  int method=1;
-  switch (method) {
-  case 0:
+  if (mVisPlugin==NULL)
     setNextPositionsPropeller();
-    break;
-  case 1:
-    std::cout << "setNextPositions2dim : Nouvelle methode folle" << std::endl;
-    // DT : need to be somewhere else but don't know where
-    setNextPositions2dim();
-    break;
-  case 2:
+  else{
     std::cout << "updateNextPositions : Plugin" << std::endl;
     mVisPlugin->updateNextPositions(this);
-    break;
-  default:
-    break;
   }
+	//	setProximityGrid();
 }
 
 void ACMediaBrowser::setNextPositions2dim(){

@@ -54,6 +54,7 @@ public:
 	void rewind();
 	void setFileName(const std::string &filename);
 	int initialize();
+	void resizeAndSaveInFile(std::string fileout, int nskip = 0, int w=320, int h=240);
 	void saveInFile(std::string fileout, int nskip = 0);
 
 	inline int getWidth() {return width;}
@@ -62,7 +63,8 @@ public:
 	std::string getColorModel(){return color_model;}
 	inline int getDepth() {return depth;}
 	inline int getNumberOfFrames() {return nframes;}
-		
+	float getDuration();
+
 	bool isTrajectoryComputed(){return HAS_TRAJECTORY;}
 	bool areBlobsComputed(){return HAS_BLOBS;}
 	// utilities
@@ -76,11 +78,11 @@ public:
 	void trimBlank(IplImage* bg_img);
 	int getFirstFrameMove();
 	
-	// XS test
+	// XS not so useful
 	void histogramEqualize(const IplImage* bg_img);
 	
 	// raw features computation
-	void computeBlobs(IplImage* bg_img=NULL, int bg_thesh=20, int big_blob=200, int small_blob=0);
+	void computeBlobs(IplImage* bg_img=NULL, int bg_thesh=10, int big_blob=200, int small_blob=0);
 	void computeBlobsInteractively(IplImage* bg_img=NULL, bool merge_blobs=true, int bg_thesh=20, int big_blob=200, int small_blob=0);
 	void computeBlobsUL(IplImage* bg_img=NULL, bool merge_blobs=true, int big_blob=200, int small_blob=0);
 	void computeOpticalFlow();
@@ -91,19 +93,24 @@ public:
 	void computeMergedBlobsSpeeds(float blob_dist = 0);
 //	void computeCellOccupation(int nx, int ny);
 	void computeContractionIndices();
+	void computeBoundingBoxRatios();
 	void computePixelSpeed();
 
 	// features accessors (to be called by ACVideoPlugin)
 	std::vector<blob_center> getMergedBlobsTrajectory() {return blob_centers;}
 	std::vector<blob_center> getMergedBlobsSpeeds() {return blob_speeds;}
+	std::vector<blob_center> getNormalizedMergedBlobsTrajectory();
+	std::vector<blob_center> getNormalizedMergedBlobsSpeeds();
+
 	std::vector<float> getContractionIndices() {return contraction_indices;}
 	std::vector<float> getPixelSpeeds() {return pixel_speeds;}
-	
-	// to get dummy time stamps (i.e., the indices)
-	// XS TODO: make this a real time stamp (in case you downsample or skip frames...)
+	std::vector<float> getBoundingBoxRatios(){return bounding_box_ratios;}
 	std::vector<float> getDummyTimeStamps();
 	std::vector<float> getTimeStamps();
 
+	// saves stuff in file
+//XXX TODO	void 
+	
 	// for display (ifdef VISUAL_CHECK) using highgui
 	void showInWindow(std::string="VIDEO", bool has_win=false);
 	void showFrameInWindow(std::string="VIDEO", IplImage* frame=NULL, bool has_win=true);
@@ -129,10 +136,11 @@ private:
 	// NB: blobs (CBlobResult) may contain more than one blob per frame
 	std::vector<CBlobResult> all_blobs; // XS make this pointers ?
 	std::vector<float> all_blobs_time_stamps;
-	
+
 	std::vector<blob_center> blob_centers;
 	std::vector<blob_center> blob_speeds; 
 	std::vector<float> contraction_indices;
+	std::vector<float> bounding_box_ratios;
 
 	std::vector<float> pixel_speeds;
 	int width, height, depth, fps, nframes;

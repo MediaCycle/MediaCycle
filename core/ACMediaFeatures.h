@@ -63,7 +63,7 @@ public:
 	void setComputed() { _computed = true; }
 	float getFeature(int i);
 	void addFeature(float f);
-	int getDiscretizedFeature(int scale, int nbSteps);
+	int getDiscretizedFeature();
 	void setFeature(int i, float f);
 	FeaturesVector *getAllFeatures() {return &features_vector;}
 	void dump(); // output in terminal

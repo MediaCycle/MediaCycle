@@ -80,7 +80,8 @@ const string ghostlist[ndancers] = {
 "Bru_211#1", "Bru_218#1", "Bru_218#2", "Bru_224#1", "Bru_302#2", "Bru_313#2", "Bru_320#1"
 };
 
-const string videodir = "/Users/xavier/numediart/Project7.3-DancersCycle/Recordings_Raffinerie_0709/FrontShots/";
+const string videodir = "/Users/xavier/numediart/Project7.3-DancersCycle/VideosSmall/Front/";
+// const string videodir = "/Users/xavier/numediart/Project7.3-DancersCycle/Recordings_Raffinerie_0709/FrontShots/";
 
 void get_all_images(){
 //	for (int i=0;i<ndancers;i++){	
@@ -183,12 +184,13 @@ void test_browse(std::string dancer){
 }
 
 void test_video_plugin(std::string dancer){
-	string movie_file= videodir+"H264/"+dancer+".mov";
+	clock_t t0=clock();
+	string movie_file= videodir+"Front/"+dancer+".mov";
 	ACVideoPlugin* P = new ACVideoPlugin();
 	std::vector<ACMediaFeatures*> F = P->calculate(movie_file);
 	cout << "computed " << F.size() << " features" << endl;
 	for (unsigned int i=0; i<F.size(); i++){
-		cout << i << " : " << F[i]->getName() << endl;
+		cout << "-- Feature " << i << " : " << F[i]->getName() << endl;
 		F[i]->dump();
 	}
 	
@@ -197,8 +199,31 @@ void test_video_plugin(std::string dancer){
 	for (iter = F.begin(); iter != F.end(); iter++) { 
 		delete *iter; 
 	}
-	
 	delete P;	
+	clock_t t1=clock();
+	cout<<"Test Video Plugin execution time: " << (t1-t0)/CLOCKS_PER_SEC << " s." << endl;	
+}
+
+void test_blobs(std::string dancer){
+	string movie_file= videodir+"Top/"+dancer+".mov";
+	cout << movie_file << endl;
+	ACVideoAnalysis* V = new ACVideoAnalysis(movie_file);
+	clock_t t0=clock();
+	V->computeBlobs();
+	
+	clock_t t1=clock();
+	cout<<"Bg Sub execution time: " << (t1-t0)/CLOCKS_PER_SEC << " s." << endl;	
+	delete V;
+}
+
+
+void test_all_videos_top_front(std::string mypath){
+	MediaCycle* mediacycle;
+	mediacycle = new MediaCycle(MEDIA_TYPE_VIDEO);
+	mediacycle->addPlugin("/Users/xavier/development/Fall09/ticore-app/Applications/Numediart/MediaCycle/src/Builds/darwin-xcode/plugins/video/Debug/mc_video.dylib");
+	mediacycle->importDirectory(mypath, 0);
+	mediacycle->saveAsLibrary(mypath+"ACL"+"dancers-test.acl");
+	delete mediacycle;	
 }
 
 int main(int argc, char** argv) {
@@ -218,8 +243,11 @@ int main(int argc, char** argv) {
 	//test_bg_substraction("Bru_105#2");
 	// test_bg_substraction("Bru_203#2");
 	// test_browse("Bru_105#2");
-	test_video_plugin("Bru_105#2");
-
+	// test_video_plugin("Bru_105#2");
+	//test_video_plugin("001011");
+	test_all_videos_top_front(videodir);
+	//test_blobs("sm001011");
+	
 	//	IplImage *imgp_bg = cvLoadImage("/Users/xavier/Desktop/testMed3.jpg", CV_LOAD_IMAGE_COLOR);
 	//V->computeBlobsInteractively(imgp_bg,true); // , int small_blob)
 //	V->histogramEqualize(imgp_bg);

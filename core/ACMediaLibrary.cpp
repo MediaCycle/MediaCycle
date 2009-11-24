@@ -132,6 +132,13 @@ int ACMediaLibrary::importDirectory(std::string _path, int _recursive, int id, A
 		else {
 			if (media->import(filename, id, acpl)){
 				this->addMedia(media);
+				// XS: save tmp results in acl file
+				/*
+				 string tmp_acl = filename+".acl";
+				FILE *tmp_file = fopen(tmp_acl.c_str(),"w");
+				media->save(tmp_file);
+				fclose(tmp_file);
+				 */
 				id++;
 			}
 			// XS 23/09/09: import now looks for plugins, in ACMedia.cpp
@@ -250,6 +257,7 @@ void ACMediaLibrary::saveAsLibrary(string _path) {
     local_media->save(library_file);
   }
   fclose(library_file);
+  normalizeFeatures();
 }
 
 void ACMediaLibrary::cleanLibrary() {
@@ -344,7 +352,12 @@ void ACMediaLibrary::calculateStats() {
 		}
 	}
 	
-	// divide by N --> biased variance estimator
+	// before: divide by N --> biased variance estimator
+	// now : divide by (n-1) -- unless n=1
+	int nn;
+	if (n==1) nn = n;
+	else nn = n-1;
+	
 	for(j=0; j<mean_features.size(); j++) {
 		printf("feature %d\n", j);
 		for(k=0; k<mean_features[j].size(); k++) {
@@ -354,7 +367,7 @@ void ACMediaLibrary::calculateStats() {
 			if ( tmp < 0 )
 				stdev_features[j][k] = 0;
 			else {
-				stdev_features[j][k] = sqrt( tmp);
+			  stdev_features[j][k] = sqrt( tmp*((1.0*n)/(nn)));
 			}
 			printf("\t[%d] mean_features = %f, stddev = %f\n", k, mean_features[j][k], stdev_features[j][k]);
 		}
