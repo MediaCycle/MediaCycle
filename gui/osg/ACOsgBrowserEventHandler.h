@@ -35,6 +35,7 @@
 #ifndef _ACMEDIABROWEROSGEVENTHANDLER_H
 #define _ACMEDIABROWEROSGEVENTHANDLER_H
 
+#include <cstdio>
 #include <osgGA/GUIEventHandler>
 #include <osgViewer/View>
 #include "ACRefId.h"

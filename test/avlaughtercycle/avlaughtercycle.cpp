@@ -54,8 +54,8 @@ int main(int argc, char** argv) {
     mediacycle = new MediaCycle(MEDIA_TYPE_AUDIO,"/home/alexis/Work/eNTERFACE/eNTERFACE09/AVLC/test/","avlc-lib.acl");
     //mediacycle = new MediaCycle(MEDIA_TYPE_AUDIO,"/home/alexis/Work/eNTERFACE/eNTERFACE09/AVLC/","avlc-lib-20090806-1.acl");
     //mediacycle->addPlugin("/home/alexis/Programmation/TiCore-app/Applications/Numediart/MediaCycle/src/Builds/linux-x86/plugins/eyesweb/mc_eyesweb.so");
-    //mediacycle->addPlugin("/home/alexis/Programmation/TiCore-app/Applications/Numediart/MediaCycle/src/Builds/linux-x86/plugins/greta/mc_greta.so");
-    mediacycle->addPlugin("/home/alexis/Programmation/TiCore-app/Applications/Numediart/MediaCycle/src/Builds/linux-x86/plugins/audioanalysis/mc_audioanalysis.so");
+    mediacycle->addPlugin("/home/alexis/Programmation/TiCore-app/Applications/Numediart/MediaCycle/src/Builds/linux-x86/plugins/greta/mc_greta.so");
+    //mediacycle->addPlugin("/home/alexis/Programmation/TiCore-app/Applications/Numediart/MediaCycle/src/Builds/linux-x86/plugins/audioanalysis/mc_audioanalysis.so");
 
     cout<<"setCulsterN"<<endl;
     mediacycle->getBrowser()->setClusterNumber(1);
@@ -308,14 +308,28 @@ int processTcpMessageFromSSI(MediaCycle *that, char *buffer, int l, char **buffe
     cout << "done" << endl;
 
     if ( type_name == "addwavf" ) {
-        cout << "addwavf - name" << file_name << " - " << file_name.size() << endl;
+        cout << "addwavf - name : " << file_name << " - " << file_name.size() << endl;
         local_media->setFileName(file_name);
         cout << "addwavf - addmedia" << endl;
         that->getLibrary()->addMedia(local_media);
         cout << "addwavf - savelib" << endl;
-        that->getLibrary()->saveAsLibrary(that->getLocalDirectoryPath() + "/" + that->getLibName());
+        //that->getLibrary()->saveAsLibrary(that->getLocalDirectoryPath() + "/" + that->getLibName());
         cout << "done" << endl;
     } else if (type_name == "request") {
+        cout << "normalize" <<endl;
+        cout << "before" << endl;
+        mediaFeatures->dump();
+        for(int j=0; j<that->getLibrary()->getMeanFeatures().size(); j++) {
+            for(int k=0; k<that->getLibrary()->getMeanFeatures()[j].size(); k++) {
+                float old = mediaFeatures->getFeature(k);
+                //cout << "(" << j << "," << k << ")" << old << " - " << that->getLibrary()->getMeanFeatures()[j][k] << "/" << that->getLibrary()->getStdevFeatures()[j][k] << endl;
+                mediaFeatures->setFeature(k, (old - that->getLibrary()->getMeanFeatures()[j][k]) / ( TI_MAX(that->getLibrary()->getStdevFeatures()[j][k] , 0.00001)));
+            }
+        }
+        cout << endl << "after" << endl;
+        local_media->getFeatures(0)->dump();
+        cout << endl;
+
         vector<ACMedia *> result;
         that->getKNN(local_media,result,1);
 
@@ -337,7 +351,7 @@ int processTcpMessageFromSSI(MediaCycle *that, char *buffer, int l, char **buffe
                 }
             }
         }
-
+        cout << endl << endl;
         //delete only in "request". In "addwavf", local_media is added to the library and therefore shouyld not be deleted
         delete local_media; 
     } else {

@@ -55,11 +55,11 @@ protected:
 	char  **hyper_links;	
 	double duration;
 public:
-	ACMedia() { mid = -1; };
-	virtual ~ACMedia() {};
+	ACMedia() { mid = -1; }
+	virtual ~ACMedia() {}
 	
-	void setId(int _id) {mid = _id;}; // SD TODO - should check for duplicate id?
-	int getId() {return mid;};
+	void setId(int _id) {mid = _id;} // SD TODO - should check for duplicate id?
+	int getId() {return mid;}
 	
 	void setDuration(double iduration){this->duration = iduration;}
 	double getDuration(){return this->duration;}
@@ -68,13 +68,13 @@ public:
 	ACMediaFeatures* &getFeatures(int i);
 	int getNumberOfFeatures() {return features.size();}
 
-	void addFeatures(ACMediaFeatures *aFeatures) { this->features.push_back(aFeatures); };
+	void addFeatures(ACMediaFeatures *aFeatures) { this->features.push_back(aFeatures); }
 	
-	std::string getFileName() { return filename; };
-	std::string getThumbnail() { return filename_thumbnail; };
-	void setThumbnail(string ifilename) { filename_thumbnail=ifilename; };
-	void setFileName(std::string s) { filename = s; };
-	std::string getFileName(std::string s) { return filename; };
+	std::string getFileName() { return filename; }
+	std::string getThumbnail() { return filename_thumbnail; }
+	void setThumbnail(string ifilename) { filename_thumbnail=ifilename; }
+	void setFileName(std::string s) { filename = s; }
+	std::string getFileName(std::string s) { return filename; }
 	virtual void* getThumbnailPtr()=0;
 	virtual int getWidth()=0;
 	virtual int getHeight()=0;

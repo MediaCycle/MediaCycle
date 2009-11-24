@@ -23,9 +23,9 @@
 #ifndef CVGABOR_H
 #define CVGABOR_H
 
+#include <cstdio>
 #include <iostream>
-#include <OpenCV/cv.h>
-#include <OpenCV/highgui.h>
+#include "ACOpenCVInclude.h"
 
 #define PI 3.14159265
 #define CV_GABOR_REAL 1

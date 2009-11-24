@@ -62,12 +62,12 @@ public:
 	~ACMediaLibrary();
 	
 	bool isEmpty();
-	ACMediaType getMediaType(){return media_type;};
-	void setMediaType(ACMediaType m){media_type = m;};
-	int getSize() { return media_library.size(); };
-	int createItem(){}; // TODO
-	int deleteItem(int i) {}; //TODO
-	void editItem() {}; // TODO
+	ACMediaType getMediaType(){return media_type;}
+	void setMediaType(ACMediaType m){media_type = m;}
+	int getSize() { return media_library.size(); }
+	int createItem(){return 0;} // TODO
+	int deleteItem(int i) {return i;} //TODO
+	void editItem() {} // TODO
 	ACMedia* getItem(int i);
 	std::string getThumbnail(int i);
 	
@@ -75,10 +75,10 @@ public:
 	void denormalizeFeatures();
 	void calculateStats();
 
-	std::vector< std::vector<double> > getMeanFeatures() {return mean_features;};
-	std::vector< std::vector<double> > getStdevFeatures() {return stdev_features;};
+	std::vector< std::vector<double> > getMeanFeatures() {return mean_features;}
+	std::vector< std::vector<double> > getStdevFeatures() {return stdev_features;}
 
-	std::vector<ACMedia*> getMedia() {return media_library;};
+	std::vector<ACMedia*> getMedia() {return media_library;}
 	int addMedia(ACMedia *aMedia);
 	
 	int importDirectory(std::string path, int recursive, int id=-1, ACPluginManager *acpl=NULL);
