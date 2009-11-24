@@ -2,7 +2,7 @@
 /**
  * @brief Output.php
  * @author Alexis Moinet
- * @date 30/06/2009
+ * @date 24/11/2009
  * @copyright (c) 2009 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -44,6 +44,10 @@
 class Output {
     private $out, $content;
     function  __construct() {
+		//this class stores to types of contents :
+		// 1. a variable ($out)
+		// 2. an array of values ($content)
+		//I usually use $out to store debug info and $content to store the content of the current page
         $this->out = "";
         $this->content = array();
 
@@ -66,8 +70,13 @@ class Output {
         $this->out .= $s;
     }
     public function nl($s = "") {
+		//== new line + add()
         $this->out .= "<br/>" . $s;
     }
+	/*
+	 * this method dynamically loads page given a (key => value)
+	 * $pagename is the key and the value is in $gPages (see config.php)
+	 */
     public function loadPage($pagename) {
         global $gPages,$gHomePage;
 
@@ -76,15 +85,18 @@ class Output {
             //not found, try homepage
             //we might want to add a 'page' table in DB and fetch for it from here
             $classname = $gPages[$gHomePage];
-            if (!class_exists($classname)) {
+            if (!class_exists($classname)) { // page not found --> display lipsum
                 $this->setContent('pagename',"$pagename - Page not found");
                 $this->setContent('pagecontent', self::lipsum());
                 return false;
             }
         }
 
+		//every class that implements a page must have a factory method
+		//which can be called from here
         $obj = call_user_func(array($classname, 'factory'));
 
+		//set pagename and pagecontent (what will be actually displayed to the user, see index.php)
         $this->setContent('pagename',$obj->getPageName());
         $this->setContent('pagecontent', $obj->toHtml());
         return true;
@@ -107,6 +119,7 @@ class Output {
     }
 
     public function toHtml($name = "") {
+		//returns the out variable (set with add() et nl())
         return $this->out;
     }
 

@@ -2,7 +2,7 @@
 /**
  * @brief GlobalFunctions.php
  * @author Alexis Moinet
- * @date 30/06/2009
+ * @date 24/11/2009
  * @copyright (c) 2009 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -32,17 +32,15 @@
 ?>
 
 <?php
-/* 
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 
 function gfGetTimeStamp() {
     $date = new DateTime();
+	//returns number of seconds since Unix Epoch (year 2038 bug-free)
     return $date->format("U");
 }
 
 function gfGetUUID() {
+	//simple but efficient way to get an UUID with constant length/structure (sha1)
     return sha1(uniqid(mt_rand(), true));
 }
 ?>

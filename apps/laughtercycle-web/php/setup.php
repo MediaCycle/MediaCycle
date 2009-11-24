@@ -2,7 +2,7 @@
 /**
  * @brief setup.php
  * @author Alexis Moinet
- * @date 05/06/2009
+ * @date 24/11/2009
  * @copyright (c) 2009 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -32,35 +32,38 @@
 ?>
 
 <?php
-/* 
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 require_once 'include.php';
 
-global $gDB;
+global $gDB; //see config.php
+global $gConfig; //see config.php
 global $gOut;
 global $gUser;
-global $gConfig;
 
 session_start();
 
+//open mysql connexion
 $gDB = new DatabaseMySql();
 $gDB->connect();
 
+//create an output class. Output contains all the page content that is common to all the page : side-column, header, footer, menu, ... (+debug)
 $gOut = new Output();
+//Ouptut works with getter and setter : set variable 'sitename' to the value in $gConfig["sitename"]
 $gOut->setContent('sitename', $gConfig["sitename"]);
 //$gOut->setContent('pagename', "Home");
 
+//for debug (if any error occurs anywhere in the code, we should put this to true and set errormsg with some informing content)
+//so this is one of the first thing to do (before anything happens)
 $gOut->setContent('error', false);
 $gOut->setContent('errormsg', "");
 
+//create a User (loaded from cookies/session if logged in or 'anonymous' user if not logged in)
 $gUser = new User();
 
-//parse $_GET and make stuff
+//parse $_GET (= url) and make stuff
+//this is where everything important happens (see Action.php)
 Action::parse();
 
-//set all the content
-$gOut->setContent('userlinks', $gUser->getLinks());
+//set the links to user's tools
+$gOut->setContent('userlinks', $gUser->getLinks());// login/logout link + preferences link + ... (link specific to the user being connected or not (see Wikipedia upper right corner)
 
 ?>

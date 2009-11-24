@@ -2,7 +2,7 @@
 /**
  * @brief User.php
  * @author Alexis Moinet
- * @date 23/07/2009
+ * @date 24/11/2009
  * @copyright (c) 2009 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -33,7 +33,10 @@
 
 <?php
 /**
- * Description of User
+ * This class manage user's login/logout and preferences get/set.
+ * It also extends the class Page, which means a user's information
+ * can be displayed using : index.php?title=user
+ * (each user can only see its own information on that page)
  *
   */
 
@@ -42,6 +45,14 @@
  * This code follow the same idea/structure but has been over-simplified and adapted
  * e.g. function names are mainly the same, the loadFromSession function follows the line
  * The question is : "are we GPL'd ?" (I guess so)
+ *
+ * NB: many other user-login classes exists with less rectrictive licences
+ * so this class could be replaced by any other similar class.
+ * Normally this should mean that we only have to release User.php under GPL,
+ * not the whole LaughterCycle code !!!
+ *
+ * NB2: all of this is to take into account if (and only if)
+ * we start redistributing LaughterCycle.
  */
 class User extends Page {
     private $id, $name, $password, $salt, $token, $email,
@@ -57,7 +68,14 @@ class User extends Page {
         $this->admin = false;
         $this->loadFromSession();
     }
-
+	/**
+	 * makes the "select * from users" SQL query using either user's name or user's ID
+	 * if user exists, it fills the "$this->" private variables with the results
+	 *
+	 * @param string $condtype
+	 * @param <type> $cond $cond is either an int (login using userid) or a string (login using username)
+	 * @return bool
+	 */
     private function fetchUserQuery($condtype, $cond = "") {
         global $gDB;
 
@@ -71,10 +89,7 @@ class User extends Page {
                     return false;
                 }
                 $cond = $gDB->cleanInputString($cond);//no sql injection
-                /*if(get_magic_quotes_gpc()) {
-                    $cond = stripslashes($cond);
-                }
-                $cond = mysql_real_escape_string($cond,$gDB->link_id());//no sql injection*/
+				
                 $query .= sprintf(" WHERE name LIKE '%s'",$cond);
                 break;
             default:
@@ -125,6 +140,8 @@ class User extends Page {
         //generate salt and token
         $salt = self::saltShaker();
         $token = self::saltShaker();
+		//mixes password and salt using sha1 --> stores in the DB
+		//it makes it virtually impossible to retrieve password (nowadays)
         $password = self::hashShaker($password, $salt);
 
         //SQL insertion
@@ -135,16 +152,21 @@ class User extends Page {
         $query .= "('" . $name . "','" . $password . "','" . $salt . "','" . $token . "','" . $email . "'," . gfGetTimeStamp() . ")";
         //get info (id, name, password, salt, token, ...)
 
+		//create a new instance of the class User
+		//(is there a diff in php between "new User" and "new User()" ???)
         $user = new User;
 
+		//inserts into DB
         $gDB->query($query);
 
+		//if it worked, get the id of the newly inserted user
         if ($gDB->affected_rows()) {
             $user->id = mysql_insert_id($gDB->link_id());
         } else {
             return false;
         }
 
+		//user is an empty shell, fill it based on the newly created id
         if (!$user->loadFromId()) {
             return false;
         }
@@ -152,11 +174,18 @@ class User extends Page {
         //automatically logs the user;
         $user->setSessions();
         $user->setCookies();
+		//save the user creation timestamp in database
         $user->saveLogin(UserLogin::CREATE);
 
         return $user;
     }
 
+	/**
+	 *
+	 * @param <type> $name
+	 * @param <type> $password
+	 * @return <type> 
+	 */
     public function login($name,$password) {
         if (!$this->fetchUserQuery("name",$name)) {
             $this->logout();

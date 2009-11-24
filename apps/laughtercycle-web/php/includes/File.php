@@ -2,7 +2,7 @@
 /**
  * @brief File.php
  * @author Alexis Moinet
- * @date 30/06/2009
+ * @date 24/11/2009
  * @copyright (c) 2009 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -41,7 +41,7 @@
  * Description of File
  *
   */
-class LCFile extends page {
+class LCFile extends Page {
     private $id, $title, $path , $type , $recording, $geotag, $uploader, $uploadDate, $quality, $meanNote, $nNotes;
 
     public function __construct($id=0) {

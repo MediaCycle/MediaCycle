@@ -2,7 +2,7 @@
 /**
  * @brief Page.php
  * @author Alexis Moinet
- * @date 30/06/2009
+ * @date 24/11/2009
  * @copyright (c) 2009 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -32,13 +32,9 @@
 ?>
 
 <?php
-/* 
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 /**
- * Description of Page
+ * The Page class is the parent class of all classes that can be displayed
+ * using index.php?title=pagename (see $gPages explanation in config.php)
  *
   */
 interface PageInterface {
@@ -47,13 +43,32 @@ interface PageInterface {
     static public function factory();
 }
 
+/*
+ * shouldn't this class have a "implement PageInterface" ?
+ * (need to read doc about php's interface - same as java's ?)
+ */
 class Page {
+	/**
+	 * returns the name of the page
+	 * @return string
+	 */
     public function getPageName() {
         return "";
     }
+	/**
+	 * Function used to generate content when calling index.php?title=pagekey
+	 * (see config.php about pagekey and Output.php for usage)
+	 * @return string
+	 */
     public function toHtml() {
         return "";
     }
+	/**
+	 * factory of the class.
+	 * this is called in Output.php
+	 *
+	 * @return Home
+	 */
     static public function factory() {
         return new Page();
     }

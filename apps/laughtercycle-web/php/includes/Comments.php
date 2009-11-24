@@ -2,7 +2,7 @@
 /**
  * @brief Comments.php
  * @author Alexis Moinet
- * @date 30/06/2009
+ * @date 24/11/2009
  * @copyright (c) 2009 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -43,6 +43,15 @@
   */
 
 class Comments {
+	/**
+	 *
+	 * This function checks whether a given user
+	 * has commented a given file
+	 *
+	 * @param int $fileId a valid file id
+	 * @param int $userId a valid user id
+	 * @return boolean
+	 */
     static public function exists($fileId,$userId) {
         $fileId = intval($fileId);
         $userId = intval($userId);
@@ -61,6 +70,15 @@ class Comments {
         }
         return false;
     }
+
+	/**
+	 *
+	 * This function return a string containing an HTML
+	 * representation of all the comments for a given file
+	 * 
+	 * @param int $fileId id of the file for which we want the comments
+	 * @return string
+	 */
     static public function getFileComments($fileId) {
         $fileId = intval($fileId);
         if ($fileId > 0) {
@@ -90,6 +108,14 @@ class Comments {
         return "";
     }
 
+	/**
+	 *
+	 * This function returns a string containing an HTML
+	 * representation of a given user's comments
+	 *
+	 * @param int $userId
+	 * @return string
+	 */
     static public function getUserComments($userId) {
         $userId = intval($userId);
         if ($userId > 0) {
@@ -124,6 +150,14 @@ class Comments {
         return "";
     }
 
+	/**
+	 *
+	 * This function returns the N last comments.
+	 * N can be set as an input argument. If no N is given
+	 * the function will set it as configured in config.php
+	 * @param int $n
+	 * @return string
+	 */
     static public function getNLastComments($n=0) {
         global $gConfig, $gDB;
 
@@ -154,6 +188,14 @@ class Comments {
         return $out;
     }
 
+	/**
+	 *
+	 * This function returns a string containing an HTML form.
+	 * The form can be used to submit comment and note to a given file
+	 *
+	 * @param int $fileId
+	 * @return string
+	 */
     static public function form($fileId=0) {
         $fileId = intval($fileId);
 
@@ -185,6 +227,13 @@ class Comments {
         return $out;
     }
 
+	/**
+	 * This function adds given comment and note to a file in the database
+	 * 
+	 * @param int $fileId
+	 * @param string $comment
+	 * @param int $note
+	 */
     static public function addComment($fileId, $comment, $note) {
         global $gDB, $gUser;
 
