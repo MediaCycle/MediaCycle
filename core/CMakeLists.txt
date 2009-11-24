@@ -15,11 +15,11 @@ TARGET_LINK_LIBRARIES(mediacycle armadillo TiCommon pthread)
 
 #OpenCV
 IF ( USE_OPENCV )
-    IF ( APPLE )
+    IF ( UNIX )
         TARGET_LINK_LIBRARIES(mediacycle ${OPENCV_CV_LIBRARY} ${OPENCV_CXCORE_LIBRARY} ${OPENCV_HIGHGUI_LIBRARY})
-    ELSE ( APPLE )
+    ELSE ( UNIX )
         TARGET_LINK_LIBRARIES(mediacycle cv cxcore highgui)
-    ENDIF ( APPLE )
+    ENDIF ( UNIX )
 ENDIF ( USE_OPENCV )
 
 #Boost

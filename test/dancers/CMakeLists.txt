@@ -23,11 +23,11 @@ TARGET_LINK_LIBRARIES(mediacycle-dancers armadillo TiCommon pthread)
 
 #OpenCV
 IF ( USE_OPENCV )
-    IF ( APPLE )
+    IF ( UNIX ) #AM : works on OSX and linux (don't know about win32)
         TARGET_LINK_LIBRARIES(mediacycle-dancers ${OPENCV_CV_LIBRARY} ${OPENCV_CXCORE_LIBRARY} ${OPENCV_HIGHGUI_LIBRARY})
-    ELSE ( APPLE )
+    ELSE ( UNIX )
         TARGET_LINK_LIBRARIES(mediacycle-dancers cv cxcore highgui)
-    ENDIF ( APPLE )
+    ENDIF ( UNIX )
 ENDIF ( USE_OPENCV )
 
 #Boost
