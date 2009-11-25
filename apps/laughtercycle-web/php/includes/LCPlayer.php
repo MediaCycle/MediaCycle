@@ -2,7 +2,7 @@
 /**
  * @brief LCPlayer.php
  * @author Alexis Moinet
- * @date 30/06/2009
+ * @date 25/11/2009
  * @copyright (c) 2009 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -32,13 +32,9 @@
 ?>
 
 <?php
-/* 
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 /**
- * Description of LCDisplay
+ * LCPlayer is a class that generates the HTML to embed a small Flash player
+ * (Flash player developped during LaughterCycle project (cf. numediart) )
  *
   */
 class LCPlayer {

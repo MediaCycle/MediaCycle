@@ -2,7 +2,7 @@
 /**
  * @brief User.php
  * @author Alexis Moinet
- * @date 24/11/2009
+ * @date 25/11/2009
  * @copyright (c) 2009 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -166,7 +166,7 @@ class User extends Page {
             return false;
         }
 
-		//user is an empty shell, fill it based on the newly created id
+		//$user is an empty shell, fill it based on the newly created id
         if (!$user->loadFromId()) {
             return false;
         }
@@ -181,10 +181,14 @@ class User extends Page {
     }
 
 	/**
-	 *
-	 * @param <type> $name
-	 * @param <type> $password
-	 * @return <type> 
+	 * Normal login : initialize "$this->" with DB content
+	 * that corresponds to the user name given in login form.
+	 * Then compare the password from login form to the password in DB
+	 * (with salt-hash)
+	 * if there is correpsondance: login, otherwise clean everything (=logout)
+	 * @param string $name
+	 * @param string $password
+	 * @return boolean
 	 */
     public function login($name,$password) {
         if (!$this->fetchUserQuery("name",$name)) {
@@ -196,33 +200,52 @@ class User extends Page {
 
         $this->setSessions();
         $this->setCookies();
+		//save timestamp of login in DB
         $this->saveLogin(UserLogin::LOGIN);
 
         return true;
     }
 
+	/**
+	 * This fuction saves into the DB the timestamps of user's logins/logouts/creation
+	 * 
+	 * @param UserLogin::const $type 
+	 */
     public function saveLogin($type = UserLogin::LOGIN) {
         global $gDB;
 
+		//if it's a login or a creation: fill the "lastlogin" field in the users table
         if ($type !== UserLogin::LOGOUT) {
             $query = sprintf("UPDATE users SET last_login=%d WHERE id=%d", gfGetTimeStamp(), $this->id);
             $gDB->query($query);
         }
 
+		//save any kind of login/logout/creation in the "login" table
         $query = sprintf("INSERT INTO login (`user_id`,`type`,`time`) VALUES (%d, %d, %d)", $this->id, $type, gfGetTimeStamp());
         $gDB->query($query);
     }
+	/**
+	 * set $_SESSION variables
+	 */
     public function setSessions() {
         $_SESSION["userId"] = $this->id;
         $_SESSION["userName"] = $this->name;
         $_SESSION["userToken"] = $this->token;
     }
 
+	/**
+	 * set $_COOKIE variable (uses php standard's setcookie() )
+	 */
     public function setCookies() {
         $this->setCookie("userId",$this->id);
         $this->setCookie("userName",$this->name);
         $this->setCookie("userToken",$this->token);
     }
+
+	/**
+	 * empty "$this->" and $_SESSION, delete cookies
+	 * @param boolean $savelog if false the logout is not saved in the DB
+	 */
     public function logout($savelog = false) {
         if ($savelog) {
             $this->saveLogin(UserLogin::LOGOUT);
@@ -250,15 +273,32 @@ class User extends Page {
 
     }
 
+	/**
+	 * set a cookie's value for 24 hours (86400 sec.)
+	 * @param string $name name of the cookie's field
+	 * @param <type> value of the cookie
+	 */
     protected function setCookie( $name, $val ) {
         setcookie( $name, $val, time() + 86400 );
     }
+	/**
+	 * unset a cookie's value (set time validity to -24 hours)
+	 * @param string $name name of the cookie's field
+	 * @param <type> value of the cookie
+	 */
     protected function clearCookie( $name ) {
         setcookie( $name, $val, time() - 86400 );
     }
 
+	/**
+	 * load user info from $_SESSION (or from $_COOKIE if no $_SESSION is found)
+	 * if no valid session or cookie information is found, the user is logged-out
+	 * 
+	 * @return boolean "true" if login, "false" if logout
+	 */
     public function loadFromSession() {
 
+		//1. load user id (from session or from cookie if not found in session)
         if (isset($_SESSION["userId"])){//récupération des variable de session
             if (0 != $_SESSION["userId"]) {
                 $id = $_SESSION["userId"];
@@ -279,6 +319,7 @@ class User extends Page {
             return false;
         }
 
+		//if id found, load username frome session or cookie
         if ( isset( $_SESSION['userName'] ) ) {
             $name = $_SESSION['userName'];
         } else if ( isset( $_COOKIE["userName"] ) ) {
@@ -291,12 +332,16 @@ class User extends Page {
 
         $this->id = $id;
 
+		//replace everything in "$this->" with the info corresponding
+		//to the id found in session or cookie
         if ( !$this->loadFromId() ) {
-            //id doesn't exist --> go back to anon
+            //id doesn't exist --> go back to anonymous
             $this->logout();
             return false;
         }
 
+		//check if token is correct (== valid password in the last login)
+		//in a perfect world, should the token be changed every time ?
         if ( isset( $_SESSION['userToken'] ) ) {
             $passwordCorrect = $this->token == $_SESSION['userToken'];
         } else if ( isset( $_COOKIE["userToken"] ) ) {
@@ -314,22 +359,33 @@ class User extends Page {
             return false;
         }
 
+		//maybe the 3 following calls shouldn't be done here (every page load)
+		//but instead sould be made only when needed
+		//we want to be a facebook-like website !!!
         $this->loadUserGroups();
         $this->loadUserFriends();
+		//load the *information* about this user's files (!= load the user's files)
         $this->loadUserFiles();
 
         return true;
     }
     public function loadFromId() {
+		//no mysql injection please
         $this->id = intval($this->id);
 
         if (0 < $this->id) {
+			//get user's info from the database using id
+			//this suppose that loadFromId() is called only
+			// with a subsequent password/token check + logout if incorrect
             return $this->fetchUserQuery("id");
         } else {
             return false;
         }
     }
 
+	/**
+	 * load current user's groups from DB
+	 */
     public function loadUserGroups() {
         global $gDB;
 
@@ -343,6 +399,9 @@ class User extends Page {
             $this->groups[] = array("id" => $gDB->f("id"), "name" => $gDB->f("name")); //should be a UserGroup class instance
         }
     }
+	/**
+	 * load current user's friends from DB
+	 */
     public function loadUserFriends() {
         global $gDB;
 
@@ -357,6 +416,9 @@ class User extends Page {
         }
 
     }
+	/**
+	 * load information about current user's files (uploaded or recorded)
+	 */
     public function loadUserFiles() {
         global $gDB;
         //TODO : put a limit in the SQL query
@@ -392,6 +454,7 @@ class User extends Page {
         return false;
     }
 
+	//different explicitly-named tools
     public function getId() {
         return $this->id;
     }
@@ -415,9 +478,17 @@ class User extends Page {
         return $this->admin;
     }
     public function isLoggedIn() {
+		//if id = 0, the user is not logged in
+		//this suppose that there is no user with id=0 in the DB
+		//(which should be the case anyway ...)
         return 0 != $this->getId();
     }
 
+	/**
+	 * return a string containing HTML.
+	 * The HTML presents the user information: id, name, files uploaded/recorded + player, comments
+	 * @return string
+	 */
     public function toHtml() {
         $out = "";
         $out .= "id = " . $this->getId();
@@ -470,19 +541,39 @@ class User extends Page {
         return $link;
     }
 
+	/**
+	 * This function generates a UUID
+	 * @return string
+	 */
     static public function saltShaker() {
         return sha1(uniqid(mt_rand(), true));
     }
+	/**
+	 * This function takes a password and some salt as inputs.
+	 * It returns a salted version of the password that will be stored in the database
+	 * @param string $password
+	 * @param string $salt
+	 * @return string
+	 */
     static public function hashShaker($password,$salt) {
         return sha1($salt . sha1($password));
     }
+
+	/**
+	 * This functions checks whether a user exists or not.
+	 * it can use either an id or a name to make the verification
+	 *
+	 * @param string $condtype "id" or "name"
+	 * @param <type> $cond int or string
+	 * @return <type>
+	 */
     static public function userExists($condtype, $cond="") {
         global $gDB;
 
         $query = "SELECT * FROM users";
         switch($condtype) {
             case 'id':
-                $query .= sprintf(" WHERE id=%d",intval($this->id));
+                $query .= sprintf(" WHERE id=%d",intval($this->id));//no sql injection
                 break;
             case 'name':
                 if (cond === "") {
@@ -519,15 +610,30 @@ class User extends Page {
         return true;
     }
 
+	/**
+	 * In the Page's interface/inheritance, the Page "User" has the user's name as a name
+	 *
+	 * @return string
+	 */
     public function getPageName() {
         return $this->name;
     }
+
+
+	/**
+	 * The factory needed by the Page's interface
+	 * @global <type> $gUser
+	 * @return User
+	 */
     static public function factory() {
         global $gUser;
         return $gUser;
     }
 }
 
+/*
+ * This is a class with all the HTML link/forms needed to create/login/logout users
+ */
 class UserLogin extends Page {
     //static public LOGIN = ;
     const CREATE = 0;
@@ -623,9 +729,20 @@ class UserLogin extends Page {
         return $out;
     }
 
+	/**
+	 * Page's interface
+	 * @return string
+	 */
     public function getPageName() {
         return "Login";
     }
+
+	/**
+	 * This function presents a different form depending on whether
+	 * the user asked for creation/login/logout
+	 * @global <type> $gUser
+	 * @return string
+	 */
     public function toHtml() {
         global $gUser;
         $out = "";
@@ -648,6 +765,11 @@ class UserLogin extends Page {
 
         return $out;
     }
+
+	/**
+	 * Page's interface factory
+	 * @return UserLogin
+	 */
     static public function factory() {
         return new UserLogin();
     }

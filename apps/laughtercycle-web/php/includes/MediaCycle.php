@@ -2,7 +2,7 @@
 /**
  * @brief MediaCycle.php
  * @author Alexis Moinet
- * @date 23/07/2009
+ * @date 25/11/2009
  * @copyright (c) 2009 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -40,6 +40,9 @@
 class MediaCycle {
     /**
      * Construct a message following the format defined for communications with MediaCycle
+	 * This is the function that should be changed when the communication protocol is changed
+	 * (e.g. using another separator than a simple space (au hasard...) )
+	 *
      * @param string $command
      * @param string $params
      * @return string
@@ -53,7 +56,8 @@ class MediaCycle {
         return $message;
     }
     /**
-     *
+     * Sends the request to Mediacylce using tcp socket
+	 *
      * @param string $command
      * @param string $params
      * @return string or bool
@@ -76,6 +80,8 @@ class MediaCycle {
     }
     /**
      * Sends a wave file to MediaCycle to be added to its library
+	 * the wavefile is stored as a string (1 byte = 1 char) at the end of the request
+	 * 
      * @param LCFile $file an instance of a file created using the class LCfile (see File.php)
      * @return bool
      */
@@ -113,7 +119,8 @@ class MediaCycle {
     }
 
     /**
-     * Asks MediaCycle to save its current state in a file (so that it can be reloaded later)
+     * Asks MediaCycle to save its current state in a file (on the mediacycle server)
+	 * (so that it can be reloaded later)
      * @return bool
      */
     static public function saveLibrary(){
@@ -141,6 +148,12 @@ class MediaCycle {
         }
     }
 
+	/**
+	 * ask mediacycle to load a previously-saved library
+	 *
+	 * @global <type> $gConfig
+	 * @return boolean
+	 */
     static public function loadLibrary(){
         global $gConfig;
 
@@ -166,6 +179,14 @@ class MediaCycle {
         }
     }
 
+	/**
+	 * ask mediacycle for the $k closest neighbours of the input file
+	 * (remember that mediacycle has a local copy of all the files (and their IDs)
+	 * @global <type> $gConfig
+	 * @param LCFile $file
+	 * @param int $k
+	 * @return <type> array of id (integer) or boolean false (should return empty array ?)
+	 */
     static public function getkNN(LCFile $file, $k) {
         global $gConfig;
 
@@ -190,6 +211,15 @@ class MediaCycle {
         }
     }
 
+	/**
+	 * This function asks mediacycle for a file thumbnail
+	 * (a small XML file that can be plotted as an overview of the actual waveform)
+	 * the file is stored directly in $gConfig["filepath"]
+	 *
+	 * @global <type> $gConfig
+	 * @param LCFile $file
+	 * @return boolean
+	 */
     static public function getThumbnailXml(LCFile $file) {
         global $gConfig;
 
@@ -216,6 +246,9 @@ class MediaCycle {
     }
 }
 
+/*
+ * Tcp Socket client class
+ */
 class SocketClient {
     public $socket = NULL, $address = NULL, $port = NULL;
 

@@ -2,7 +2,7 @@
 /**
  * @brief Query.php
  * @author Alexis Moinet
- * @date 30/06/2009
+ * @date 25/11/2009
  * @copyright (c) 2009 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -32,13 +32,10 @@
 ?>
 
 <?php
-/* 
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 /**
- * Description of Query
+ * LCQuery class generates the HTML to embed a Flash application that contains 2 sliders
+ * these 2 sliders can be used to modify the importance given to respectivelly the pitch and the timbre
+ * during a kNN request (k-nearest-neighbours, see MediaCycle.php)
  *
   */
 class LCQuery implements PageInterface {

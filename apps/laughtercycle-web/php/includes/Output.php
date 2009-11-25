@@ -2,7 +2,7 @@
 /**
  * @brief Output.php
  * @author Alexis Moinet
- * @date 24/11/2009
+ * @date 25/11/2009
  * @copyright (c) 2009 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -97,13 +97,22 @@ class Output {
         $obj = call_user_func(array($classname, 'factory'));
 
 		//set pagename and pagecontent (what will be actually displayed to the user, see index.php)
+		//getPageName() and toHtml() must be implemented in every Page-like object (see Page.php)
         $this->setContent('pagename',$obj->getPageName());
         $this->setContent('pagecontent', $obj->toHtml());
         return true;
     }
     public function setRecorder() {
+		//put the html of a 500px x 500px recorder in the content variable "recorder"
         $this->setContent('recorder',LCRecorder::Recorder(500,500));
     }
+	/**
+	 * set the content of the right-side colum (right-side in index.php,
+	 *  setSideContent() is independent of the page organization,
+	 * it just sets content variables)
+	 *
+	 * @global <type> $gConfig
+	 */
     public function setSideContent() {
         global $gConfig;
 
@@ -120,10 +129,12 @@ class Output {
 
     public function toHtml($name = "") {
 		//returns the out variable (set with add() et nl())
+		//can be (and is) used as debug info
         return $this->out;
     }
 
     static public function lipsum() {
+		//No commentum ...
         return "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin sed magna ac nunc aliquet posuere. Nullam vitae purus tellus. Aenean posuere, justo quis vestibulum porttitor, mi sem facilisis velit, tincidunt eleifend justo mi vitae velit. Curabitur sit amet ullamcorper nunc. Integer ac augue a risus viverra tincidunt. Proin ullamcorper urna nec dui consequat a ultrices mi mattis. Cras lorem est, interdum nec cursus ut, porta eu eros. Etiam cursus, sem eget viverra mollis, urna felis bibendum leo, aliquam aliquam neque turpis vel elit. Ut eu aliquet lacus. Vestibulum laoreet dictum tempus. Vestibulum rutrum urna sit amet urna placerat dictum. Fusce semper elementum massa, eu euismod augue venenatis eu.";
     }
 }
