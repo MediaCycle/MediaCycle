@@ -74,8 +74,10 @@ void ACOsgTextRenderer::textGeode() {
 	//state->setMode(GL_LIGHTING, osg::StateAttribute::PROTECTED | osg::StateAttribute::OFF );
 	//state->setMode(GL_BLEND, StateAttribute::ON);
 	//state->setMode(GL_LINE_SMOOTH, StateAttribute::ON);
-	
-	text_geode->addDrawable(text);
+
+	//TODO check this .get() (see also ACOsgBrowserRenderer.cpp)
+	//".get()" is necessary for compilation under linux (OSG v2.4)
+	text_geode->addDrawable(text.get());
 	
 	text_geode->ref();	
 }

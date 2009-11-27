@@ -2,7 +2,7 @@
 /**
  * @brief include.php
  * @author Alexis Moinet
- * @date 29/06/2009
+ * @date 24/11/2009
  * @copyright (c) 2009 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -33,8 +33,7 @@
 
 <?php
 /* 
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ * load all the classes used by the website
  */
 
 require_once 'includes/GlobalFunctions.php';

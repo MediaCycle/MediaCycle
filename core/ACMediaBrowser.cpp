@@ -122,8 +122,9 @@ static double compute_distance(vector<ACMediaFeatures*> &obj1, const vector<vect
 	double dis = 0.0;
 	
 	for (int f=0; f<feature_count; f++) {
-		ACEuclideanDistance* E = new ACEuclideanDistance (&(obj1[f]->getAllFeatures()), (FeaturesVector*)&obj2[f]);
-		// XS TODO: warning: taking address of temporary : you can't do this in C++ !!!
+		//ACEuclideanDistance* E = new ACEuclideanDistance (&(obj1[f]->getAllFeatures()), (FeaturesVector *) &obj2[f]);
+		//FeaturesVector tmp  = obj1[f]->getAllFeatures();
+		ACEuclideanDistance* E = new ACEuclideanDistance (obj1[f]->getAllFeatures(),  (FeaturesVector *) &obj2[f]);
 		dis += E->distance() * (inverse_features?(1.0-weights[f]):weights[f]);
 		delete E;
 	}
@@ -381,9 +382,9 @@ void ACMediaBrowser::resetLoopNavigationLevels()
 	int i, n = mLoopAttributes.size();
 	
 	for(i=0; i<n; i++)
-		{
-			mLoopAttributes[i].navigationLevel = 0;
-		}
+	{
+		mLoopAttributes[i].navigationLevel = 0;
+	}
 	
 }
 
@@ -489,7 +490,8 @@ void ACMediaBrowser::randomizeLoopPositions(){
 }
 
 
-void ACMediaBrowser::libraryContentChanged() {
+void ACMediaBrowser::libraryContentChanged()
+{
 	// XS 27/10/09 TODO this should use the randomizePositions defined above
 	if(mLibrary == NULL) return;
 	
@@ -524,7 +526,7 @@ void ACMediaBrowser::libraryContentChanged() {
 	
 	// set all feature weights to 1.0
 	
-	printf("setting all feature weights to 1.0 (count=%d)\n", mFeatureWeights.size());	
+	printf("setting all feature weights to 1.0 (count=%d)\n", (int) mFeatureWeights.size());
 	for(i=0; i<fc; i++) {
 		mFeatureWeights[i] = 1.0;
 	}
@@ -1153,65 +1155,67 @@ void ACMediaBrowser::setSelectedObject(int index)
 
 // XS TODO this one is tricky
 // AM : TODO move this out of core (it's GUI related)
-void ACMediaBrowser::setNextPositionsPropeller(){
-  //float radius = 1.0, cluster_disp = 0.1;
-  float r, theta;
-  vector<ACMedia*> loops = mLibrary->getMedia(); // XS instead of get{audio,image}loop
-  int i, n = loops.size();
-  ACPoint p;
+void ACMediaBrowser::setNextPositionsPropeller()
+{
+	//float radius = 1.0, cluster_disp = 0.1;
+	float r, theta;
+	vector<ACMedia*> loops = mLibrary->getMedia(); // XS instead of get{audio,image}loop
+	int i, n = loops.size();
+	ACPoint p;
 	
-  if (n <=0 ) return;
-  if (mSelectedLoop < 0) return ;
+	if (n <=0 ) return;
+	if (mSelectedLoop < 0) return ;
 	
-  p.x = p.y = p.z = 0.0;
-  mLoopAttributes[mSelectedLoop].nextPos = p;
+	p.x = p.y = p.z = 0.0;
+	mLoopAttributes[mSelectedLoop].nextPos = p;
 	
-  //TiRandomSeed((int)TiGetTime());
-  TiRandomSeed(1234);
+	//TiRandomSeed((int)TiGetTime());
+	TiRandomSeed(1234);
 	
-  for(i=0; i<n; i++) {
-    int ci = mLoopAttributes[i].cluster;
+	for(i=0; i<n; i++)
+	{
+		int ci = mLoopAttributes[i].cluster;
 		
-    //theta = 2*M_PI / n * i;
-    //r = compute_distance(objects[selected_object], objects[i], mFeatureWeights, false);
+		//theta = 2*M_PI / n * i;
+		//r = compute_distance(objects[selected_object], objects[i], mFeatureWeights, false);
 		
-    // SD TODO - test both approaches
-    // XS  TODO c
-    r=1;
-    r = compute_distance(loops[mSelectedLoop]->getFeatures(), loops[i]->getFeatures(), mFeatureWeights, false) * 10.0;
+		// SD TODO - test both approaches
+// XS  TODO c
+		r=1;
+		r = compute_distance(loops[mSelectedLoop]->getFeatures(), loops[i]->getFeatures(), mFeatureWeights, false) * 10.0;
 		
-    //r /= 5000.0;
+		//r /= 5000.0;
 		
-    r /= 100.0;
+		r /= 100.0;
 		
-    //r /= sqrt(7.0);
-    //r*= r*r;
+		//r /= sqrt(7.0);
+		//r*= r*r;
 		
-    theta = 2*M_PI * ci / (float)mClusterCount;
+		theta = 2*M_PI * ci / (float)mClusterCount;
 		
-    //double dt = compute_distance(loops[i].getFeatures(), mClusterCenters[ci], mFeatureWeights, true) / 2.0;
-    // XS  TODO c
-    double dt = 1;
-    dt = compute_distance(loops[i]->getFeatures(), mClusterCenters[ci], mFeatureWeights, false) / 2.0 * 10.0;
-    //theta += ((i%2)==0?-1.0:1.0) * dt / 6.0;
+		//double dt = compute_distance(loops[i].getFeatures(), mClusterCenters[ci], mFeatureWeights, true) / 2.0;
+		// XS  TODO c
+		double dt = 1;
+		dt = compute_distance(loops[i]->getFeatures(), mClusterCenters[ci], mFeatureWeights, false) / 2.0 * 10.0;
+		//theta += ((i%2)==0?-1.0:1.0) * dt / 6.0;
 		
-    // dt /= 3.0;
-    // Images
-    dt /= 3.0;
+		// dt /= 3.0;
+		// Images
+		dt /= 3.0;
 		
-    //theta += (TiRandom() *2.0 - 1.0) * dt;
-    theta += dt;
+		//theta += (TiRandom() *2.0 - 1.0) * dt;
+		theta += dt;
 		
-    p.x = sin(theta)*r;
-    p.y = cos(theta)*r;
-    p.z = 0.0;
+		p.x = sin(theta)*r;
+		p.y = cos(theta)*r;
+		p.z = 0.0;
 		
-    printf("computed next position: theta:%f,r=%f,  (%f %f %f)\n", theta, r, p.x, p.y, p.z);
+		printf("computed next position: theta:%f,r=%f,  (%f %f %f)\n", theta, r, p.x, p.y, p.z);
 		
-    mLoopAttributes[i].nextPos = p;
-  }
+		mLoopAttributes[i].nextPos = p;
+	}
 	
-  setNeedsDisplay(true);
+	setNeedsDisplay(true);
 }
 
 

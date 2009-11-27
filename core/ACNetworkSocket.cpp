@@ -62,9 +62,9 @@ PORT open_server(int iport, int count)
 	addr.sin_addr.s_addr = htonl(INADDR_ANY);
 	memset(&(addr.sin_zero), '\0', 8);
 
-        //allows immediate reuse of a port for a socket:
-        int auth = 1;
-        setsockopt(s_listen, SOL_SOCKET, SO_REUSEADDR, &auth, sizeof(int));
+	//allows immediate reuse of a port for a socket:
+	int auth = 1;
+	setsockopt(s_listen, SOL_SOCKET, SO_REUSEADDR, &auth, sizeof(int));
 	
 	if (bind(s_listen, (struct sockaddr*)&addr, sizeof(addr)) == SOCKET_ERROR)
 		//throw_error(SocketServerError, "open_server: call to 'bind' failed.\n");
@@ -218,8 +218,8 @@ void ACNetworkSocketServer::thread() {
 	//vector<char> bigbuffer;
 	//bigbuffer.resize(bigbufferl);
 	while(1) {
-	  server_socket = wait_connection(server_factory);
-	  memset(server_buffer, 0, BUFSIZE);
+		server_socket = wait_connection(server_factory);
+		memset(server_buffer, 0, BUFSIZE);
 		bigbuffer = new char[bigbufferl];
 		read = 0;
 		while ( (ret = server_receive(server_buffer, BUFSIZE, server_socket, 1)) > 0 ) {
@@ -231,7 +231,7 @@ void ACNetworkSocketServer::thread() {
 			read += ret;
 		}
 		//printf ("Ret %d, Received (%d bytes) %s \n", ret, read, server_buffer);
-                printf ("Ret %d, Received (%d bytes)\n", ret, read);
+		printf ("Ret %d, Received (%d bytes)\n", ret, read);
 		if (read>0) {
 			server_callback(bigbuffer, read, &server_buffer_send, &ret_send, server_callback_user_data);
 			if (ret_send) {

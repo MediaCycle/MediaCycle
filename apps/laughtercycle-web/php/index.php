@@ -2,7 +2,7 @@
 /**
  * @brief index.php
  * @author Alexis Moinet
- * @date 30/06/2009
+ * @date 25/11/2009
  * @copyright (c) 2009 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -32,6 +32,8 @@
 ?>
 
 <?php
+//everything starts here in "index.php"
+
 require_once 'config.php';
 require_once 'setup.php';
 

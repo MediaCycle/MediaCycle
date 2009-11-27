@@ -46,7 +46,7 @@ static const DistanceType DT_KLD = 105;
 
 class ACDistance {
 protected:
-	FeaturesVector V1, V2;
+	FeaturesVector *V1, *V2;
 	static const DistanceType DT;
 public:
 	// 	Distance() {} // not used

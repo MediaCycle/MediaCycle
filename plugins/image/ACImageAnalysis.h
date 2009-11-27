@@ -35,6 +35,8 @@
 #ifndef _ACIMAGEANALYSIS_H
 #define	_ACIMAGEANALYSIS_H
 #include <vector>
+#include <string>
+
 #include "ACOpenCVInclude.h"
 //http://www.cs.iit.edu/~agam/cs512/lect-notes/opencv-intro/opencv-intro.html#SECTION00053000000000000000
 // C++ wrapper around IplImage that allows convenient (and hopefully fast) pixel access

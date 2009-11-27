@@ -43,24 +43,24 @@ ACEuclideanDistance::ACEuclideanDistance(ACMediaFeatures* F1, ACMediaFeatures* F
 	V2 = F2->getAllFeatures();
 }
 
-ACEuclideanDistance::ACEuclideanDistance(FeaturesVector* F1, FeaturesVector* F2) : ACDistance( F1, F2) {
-	V1 = *F1;
-	V2 = *F2;
+ACEuclideanDistance::ACEuclideanDistance(FeaturesVector *F1, FeaturesVector *F2) : ACDistance( F1, F2) {
+	V1 = F1;
+	V2 = F2;
 }
 
 double ACEuclideanDistance::distance(){
-	if (V1.size() != V2.size()){
+	if (V1->size() != V2->size()){
 		cerr << "<ACEuclideanDistance::distance> : incomparable features" << endl;
 		return 0.0;
 	}
-	int s = V1.size();
+	int s = V1->size();
 	if (s==0) {
 		cerr << "<ACEuclideanDistance::distance> : empty features" << endl;
 		return 0.0;
 	}
 	double d = 0.0 ;
 	for (int i=0; i < s; i++){
-		d+= pow((V1[i]-V2[i]),2);
+		d+= pow(((*V1)[i]-(*V2)[i]),2);
 	}	
 	return sqrt(d)/s;
 }

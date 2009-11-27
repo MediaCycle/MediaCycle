@@ -2,7 +2,7 @@
 /**
  * @brief Output.php
  * @author Alexis Moinet
- * @date 30/06/2009
+ * @date 25/11/2009
  * @copyright (c) 2009 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -44,6 +44,10 @@
 class Output {
     private $out, $content;
     function  __construct() {
+		//this class stores to types of contents :
+		// 1. a variable ($out)
+		// 2. an array of values ($content)
+		//I usually use $out to store debug info and $content to store the content of the current page
         $this->out = "";
         $this->content = array();
 
@@ -66,8 +70,13 @@ class Output {
         $this->out .= $s;
     }
     public function nl($s = "") {
+		//== new line + add()
         $this->out .= "<br/>" . $s;
     }
+	/*
+	 * this method dynamically loads page given a (key => value)
+	 * $pagename is the key and the value is in $gPages (see config.php)
+	 */
     public function loadPage($pagename) {
         global $gPages,$gHomePage;
 
@@ -76,22 +85,34 @@ class Output {
             //not found, try homepage
             //we might want to add a 'page' table in DB and fetch for it from here
             $classname = $gPages[$gHomePage];
-            if (!class_exists($classname)) {
+            if (!class_exists($classname)) { // page not found --> display lipsum
                 $this->setContent('pagename',"$pagename - Page not found");
                 $this->setContent('pagecontent', self::lipsum());
                 return false;
             }
         }
 
+		//every class that implements a page must have a factory method
+		//which can be called from here
         $obj = call_user_func(array($classname, 'factory'));
 
+		//set pagename and pagecontent (what will be actually displayed to the user, see index.php)
+		//getPageName() and toHtml() must be implemented in every Page-like object (see Page.php)
         $this->setContent('pagename',$obj->getPageName());
         $this->setContent('pagecontent', $obj->toHtml());
         return true;
     }
     public function setRecorder() {
+		//put the html of a 500px x 500px recorder in the content variable "recorder"
         $this->setContent('recorder',LCRecorder::Recorder(500,500));
     }
+	/**
+	 * set the content of the right-side colum (right-side in index.php,
+	 *  setSideContent() is independent of the page organization,
+	 * it just sets content variables)
+	 *
+	 * @global <type> $gConfig
+	 */
     public function setSideContent() {
         global $gConfig;
 
@@ -107,10 +128,13 @@ class Output {
     }
 
     public function toHtml($name = "") {
+		//returns the out variable (set with add() et nl())
+		//can be (and is) used as debug info
         return $this->out;
     }
 
     static public function lipsum() {
+		//No commentum ...
         return "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin sed magna ac nunc aliquet posuere. Nullam vitae purus tellus. Aenean posuere, justo quis vestibulum porttitor, mi sem facilisis velit, tincidunt eleifend justo mi vitae velit. Curabitur sit amet ullamcorper nunc. Integer ac augue a risus viverra tincidunt. Proin ullamcorper urna nec dui consequat a ultrices mi mattis. Cras lorem est, interdum nec cursus ut, porta eu eros. Etiam cursus, sem eget viverra mollis, urna felis bibendum leo, aliquam aliquam neque turpis vel elit. Ut eu aliquet lacus. Vestibulum laoreet dictum tempus. Vestibulum rutrum urna sit amet urna placerat dictum. Fusce semper elementum massa, eu euismod augue venenatis eu.";
     }
 }

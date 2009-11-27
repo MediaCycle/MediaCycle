@@ -31,11 +31,14 @@ int ACGretaPlugin::initialize() {
     return 0;
 }
 
-ACMediaFeatures* ACGretaPlugin::calculate() {
-    return NULL;
+std::vector<ACMediaFeatures*> ACGretaPlugin::calculate() {
+	std::vector<ACMediaFeatures *> result;
+    return result;
 }
 
-ACMediaFeatures* ACGretaPlugin::calculate(std::string aFileName) {
+std::vector<ACMediaFeatures*> ACGretaPlugin::calculate(std::string aFileName) {
+	std::vector<ACMediaFeatures *> result;
+	
     cout << "Greta : " << aFileName << endl;
 
     int pos = aFileName.find_last_of(".");
@@ -43,13 +46,13 @@ ACMediaFeatures* ACGretaPlugin::calculate(std::string aFileName) {
     std::string basename = aFileName.substr(pos2+1,pos-pos2-1);
     //std::string extension = aFileName.substr(pos+1,aFileName.size()-1);
 
-    JString host = "192.168.3.185";
+    JString host = "192.168.1.135";
     int port = 10000;
     CppPoster* tv = new CppPoster("CppPoster", host, port);
 
     if (!tv->init()) {
         printf("Could not connect to Psyclone on '%s' port %d, exiting...\n\n", (char*) host, port);
-        return 0;
+        return result;
     }
 
     if (tv->isServerAvailable())
@@ -84,7 +87,7 @@ ACMediaFeatures* ACGretaPlugin::calculate(std::string aFileName) {
 
     cout << "Greta : " << count << endl;
 
-    return NULL;
+    return result;
 }
 
 std::string ACGretaPlugin::generateBML(std::string basename) {

@@ -56,11 +56,11 @@ protected:
 	char  **hyper_links;	
 	double duration;
 public:
-	ACMedia() { mid = -1; };
-	virtual ~ACMedia() {};
+	ACMedia() { mid = -1; }
+	virtual ~ACMedia() {}
 	
-	void setId(int _id) {mid = _id;}; // SD TODO - should check for duplicate id?
-	int getId() {return mid;};
+	void setId(int _id) {mid = _id;} // SD TODO - should check for duplicate id?
+	int getId() {return mid;}
 	
 	void setDuration(double iduration){this->duration = iduration;}
 	double getDuration(){return this->duration;}

@@ -2,7 +2,7 @@
 /**
  * @brief Home.php
  * @author Alexis Moinet
- * @date 30/06/2009
+ * @date 24/11/2009
  * @copyright (c) 2009 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -32,19 +32,23 @@
 ?>
 
 <?php
-/* 
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 /**
- * Description of Home
+ * home page, currently just displays a "Lorem Ipsum" string
  *
   */
 class Home extends Page{
+	/**
+	 * returns the name of the page
+	 * @return string
+	 */
     public function getPageName() {
         return "Home";
     }
+	/**
+	 * Function used to generate content when calling index.php?title=home
+	 * (see Output.php for usage)
+	 * @return string
+	 */
     public function toHtml() {
         $out = "";
         $out .= "<h1>Welcome</h1><hr><br/>\n";
@@ -52,9 +56,19 @@ class Home extends Page{
 
         return $out;
     }
+	/**
+	 * factory of Home class.
+	 * this is called in Output.php
+	 * 
+	 * @return Home
+	 */
     public static function factory() {
         return new Home();
     }
+	/**
+	 * returns a string with an URL to this page
+	 * @return string
+	 */
     public static function getPageLink() {
         return '<a href="index.php?title=home">Home</a>';
     }
