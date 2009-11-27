@@ -751,7 +751,7 @@ void ACMediaBrowser::setProximityGrid() {
 	}
 	
 	// Proximity Grid Density
-	proxgridlx = 7;
+	proxgridlx = 10;
 	proxgridstepx = (proxgridr-proxgridl)/(proxgridlx-1);
 	proxgridaspectratio = 9.0/16.0;
 	proxgridstepy = proxgridstepx * proxgridaspectratio;
@@ -910,7 +910,7 @@ void ACMediaBrowser::updateNextPositions(){
     std::cout << "updateNextPositions : Plugin" << std::endl;
     mVisPlugin->updateNextPositions(this);
   }
-	//	setProximityGrid();
+	//setProximityGrid();
 }
 
 void ACMediaBrowser::setNextPositions2dim(){

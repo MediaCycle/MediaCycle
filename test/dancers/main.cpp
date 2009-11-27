@@ -600,11 +600,12 @@ void saveLibraryAsXml(MediaCycle* mediacycle, string _path) {
 	for(int i=0; i<n_loops; i++) {
 		fprintf(library_file, "<v duration=\"%.1lf\">",  media_library->getItem(i)->getDuration());
 		local_media = media_library->getItem(i);    
-		
+		if (i>80){
+			std::cout << "filename : " <<  ID << std::endl;
+		}
 		// printing ID
 		ID = generateID(local_media->getFileName());
 		fprintf(library_file, "%s", ID.c_str());
-		
 		for (int j=0; j < media_library->getItem(i)->getNumberOfFeatures(); j++){
 			featureSize = media_library->getItem(i)->getFeatures(j)->size();
 			featureName = media_library->getItem(i)->getFeatures(j)->getName();
@@ -612,6 +613,9 @@ void saveLibraryAsXml(MediaCycle* mediacycle, string _path) {
 			if (featureSize == 1){
 				featureValue = media_library->getItem(i)->getFeatures(j)->getDiscretizedFeature();
 				fprintf(library_file, "%d", (int) featureValue);
+				if (i>80){
+					std::cout << featureName << " = " << featureValue << std::endl;
+				}
 			}
 			else{
 				std::cout << "Warning : Multidimensional feature, won't be exported" << std::endl;
