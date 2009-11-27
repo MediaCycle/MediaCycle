@@ -77,7 +77,7 @@ void ACVisualisationPlugin::updateClusters(ACMediaBrowser* mediaBrowser){
 
 void ACVisualisationPlugin::updateNextPositions(ACMediaBrowser* mediaBrowser){
   int itemClicked, labelClicked, action;
-  int nbVideoDisplay = 16;//mediaBrowser->getNumberOfDisplayedLoops(); // should divide by nbClusters
+  int nbVideoDisplay = mediaBrowser->getNumberOfDisplayedLoops(); // should divide by nbClusters
   ucolvec toDisplay_v(nbVideoDisplay);
 	vector<string> featureNames;
 	int libSize = mediaBrowser->getLibrary()->getSize();

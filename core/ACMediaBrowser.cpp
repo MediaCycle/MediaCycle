@@ -211,7 +211,7 @@ ACMediaBrowser::ACMediaBrowser() {
 	nbDisplayedLabels = 0;
 
 	mLoopAttributes.resize(0);
-	nbDisplayedLoops = 0;
+	nbDisplayedLoops = 16;
 	
 	mVisPlugin = NULL;
 }
