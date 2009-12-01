@@ -1,5 +1,9 @@
+MESSAGE("gui/osg")
+
 FILE(GLOB SRC *.cpp)
 FILE(GLOB HDR *.h)
+
+#IF (USE_OSG)
 
 ADD_LIBRARY(mediacycle-osg STATIC ${SRC} ${HDR})
 ADD_DEPENDENCIES(mediacycle-osg mediacycle)
@@ -28,4 +32,4 @@ ELSE ( OPENGL_FOUND AND GLUT_FOUND )
 	MESSAGE(FATAL_ERROR "OpenGL/Glut requested but not found.")
 ENDIF ( OPENGL_FOUND AND GLUT_FOUND )
 
-
+#ENDIF (USE_OSG)
