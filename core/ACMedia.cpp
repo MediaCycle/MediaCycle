@@ -35,16 +35,27 @@
 #include "ACMedia.h"
 #include <iostream>
 
-ACMediaFeatures*& ACMedia::getFeatures(int i){ 
+ACMediaFeatures*& ACMedia::getFeature(int i) { 
 	if (i < int(features.size()) )
 		return features[i]; 
 	else {
-		std::cerr << "ACMedia::getFeatures : out of bounds" << i << " > " << features.size() << std::endl;
+		std::cerr << "ACMedia::getFeature : out of bounds" << i << " > " << features.size() << std::endl;
 		//		return (ACMediaFeatures*&)NULL; // duh ?
 	}
 }
 
-int ACMedia::import(std::string _path, int id, ACPluginManager *acpl ){
+ACMediaFeatures* ACMedia::getFeature(string feature_name) { 
+	int i;
+	for (i=0;i<int(features.size());i++) {
+		if (!(feature_name.compare(features[i]->getName()))) {
+			return features[i];
+		}
+	}
+	std::cerr << "ACMedia::getFeature : not found feature named" << feature_name << std::endl;
+	return 0;
+}
+
+int ACMedia::import(std::string _path, int id, ACPluginManager *acpl ) {
 	std::cout << "importing..." << _path << std::endl;
 	this->filename=_path;
 	this->filename_thumbnail = _path;

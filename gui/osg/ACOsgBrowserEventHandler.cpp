@@ -115,7 +115,7 @@ void ACOsgBrowserEventHandler::pick(osgViewer::View* view, const osgGA::GUIEvent
 	
 	if (view->computeIntersections(x,y,intersections))
 	{
-		printf("got intersections\n");
+		// printf("got intersections\n");
 		
 		for(osgUtil::LineSegmentIntersector::Intersections::iterator hitr = intersections.begin();
 		    hitr != intersections.end();

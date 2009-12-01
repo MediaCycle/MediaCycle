@@ -100,11 +100,11 @@ int main(int argc, char** argv) {
         //remove extension in greta
         if (greta) {
             greta->calculate(result[0]->getFileName());
-            result[0]->getFeatures(0)->dump();
+            result[0]->getFeature(0)->dump();
         } else {
             for (int k=0;k<result.size();k++) {
                 cout << result[k]->getFileName() << endl;
-                result[k]->getFeatures(0)->dump();
+                result[k]->getFeature(0)->dump();
             }
         }
     }
@@ -347,7 +347,7 @@ int processTcpMessageFromSSI(MediaCycle *that, char *buffer, int l, char **buffe
                 
                 for (int k=0;k<result.size();k++) {
                     cout << "result (" << k << ") : " << result[k]->getFileName() << endl;
-                    result[k]->getFeatures(0)->dump();
+                    result[k]->getFeature(0)->dump();
                 }
             }
         }

@@ -214,10 +214,16 @@ ACMediaBrowser::ACMediaBrowser() {
 	nbDisplayedLoops = 16;
 	
 	mVisPlugin = NULL;
+	
+	proxgridboundsset = 0;
+	
+	pthread_mutexattr_init(&activity_update_mutex_attr);
+	pthread_mutex_init(&activity_update_mutex, &activity_update_mutex_attr);
+	pthread_mutexattr_destroy(&activity_update_mutex_attr);	
 }
 
 ACMediaBrowser::~ACMediaBrowser() {
-	
+	pthread_mutex_destroy(&activity_update_mutex);
 }
 
 int ACMediaBrowser::getLabelSize() {
@@ -446,7 +452,7 @@ void ACMediaBrowser::pushNavigationState()
 	mBackwardNavigationStates.push_back(getCurrentNavigationState());
 }
 
-
+// SD TODO - This is not used anymore I think
 int ACMediaBrowser::setHoverLoop(int lid, float mx, float my)
 {
 	int loop_id;
@@ -507,7 +513,10 @@ void ACMediaBrowser::libraryContentChanged()
 	//mCurrentPos.resize(n);
 	//mNextPos.resize(n);
 	
-	if(n==0) return;
+	if(n==0) {
+		setNeedsDisplay(true);
+		return;
+	}
 	
 	fc = loops.back()->getFeatures().size();
 	mFeatureWeights.resize(fc);
@@ -713,6 +722,14 @@ void ACMediaBrowser::setProximityGridUnquantize(ACPoint pgrid, ACPoint *p) {
 	p->y = pgrid.y * proxgridstepy + proxgridb;		
 }
 
+void ACMediaBrowser::setProximityGridBounds(float l, float r, float b, float t) {
+	proxgridl = l;
+	proxgridr = r;
+	proxgridb = b;
+	proxgridt = t;
+	proxgridboundsset = 1;
+}
+
 void ACMediaBrowser::setProximityGrid() {
 	
 	float jitter;
@@ -729,29 +746,31 @@ void ACMediaBrowser::setProximityGrid() {
 	n = mLoopAttributes.size();
 	
 	// Proximity Grid Size	
-	if (n>0) {
-		p = mLoopAttributes[0].nextPos;
-		proxgridl = p.x;
-		proxgridr = p.x;
-		proxgridb = p.y;
-		proxgridt = p.y;
-	}
-	for(i=1; i<n; i++) {
-		p = mLoopAttributes[i].nextPos;
-		if (p.x<proxgridl) {
+	if (!proxgridboundsset) {
+		if (n>0) {
+			p = mLoopAttributes[0].nextPos;
 			proxgridl = p.x;
-		}
-		if (p.x>proxgridr) {
 			proxgridr = p.x;
-		}
-		if (p.y<proxgridb) {
 			proxgridb = p.y;
-		}
-		if (p.y>proxgridt) {
 			proxgridt = p.y;
 		}
+		for(i=1; i<n; i++) {
+			p = mLoopAttributes[i].nextPos;
+			if (p.x<proxgridl) {
+				proxgridl = p.x;
+			}
+			if (p.x>proxgridr) {
+				proxgridr = p.x;
+			}
+			if (p.y<proxgridb) {
+				proxgridb = p.y;
+			}
+			if (p.y>proxgridt) {
+				proxgridt = p.y;
+			}
+		}
 	}
-	
+		
 	// Proximity Grid Density
 	proxgridlx = 10;
 	proxgridstepx = (proxgridr-proxgridl)/(proxgridlx-1);
@@ -912,7 +931,7 @@ void ACMediaBrowser::updateNextPositions(){
     std::cout << "updateNextPositions : Plugin" << std::endl;
     mVisPlugin->updateNextPositions(this);
   }
-	setProximityGrid();
+	// setProximityGrid();
 }
 
 void ACMediaBrowser::setNextPositions2dim(){
@@ -1299,6 +1318,7 @@ void ACMediaBrowser::setSourcePosition(float _x, float _y, float* x, float* z)
 	*z = _y - mCenterOffsetZ;
 }
 
+/*
 int ACMediaBrowser::toggleSourceActivity(float _x, float _y)
 {
 	int loop_id;
@@ -1312,40 +1332,43 @@ int ACMediaBrowser::toggleSourceActivity(float _x, float _y)
 	return loop_id;
 	
 }
+*/
 
 int ACMediaBrowser::toggleSourceActivity(int lid, int type)
 {
 	int loop_id;
-	float x, z;
+	float x, y, z;
 	
 	loop_id = lid;
 	//
 	
 	if ( (loop_id>=0) && (loop_id<mLibrary->getSize()) )
 	{
-		x = mLoopAttributes[loop_id].currentPos.x * 10;
-		z = mLoopAttributes[loop_id].currentPos.y * 10;
+		x = mLoopAttributes[loop_id].currentPos.x;
+		y = 0;
+		z = mLoopAttributes[loop_id].currentPos.y;
 		
 		if (mLoopAttributes[loop_id].active == 0) {
 			// SD TODO - audio engine
-			// audio_cycle->getAudioFeedback()->createSourceWithPosition(loop_id, x/10, 0, z/10);
-			//mSourceActivity[loop_id] = 1;
-			
-			mLoopAttributes[loop_id].active = type;
-			
+			// audio_cycle->getAudioFeedback()->createSourceWithPosition(loop_id, x, y, z);
+			mLoopAttributes[loop_id].active = type;			
 		}
 		else if (mLoopAttributes[loop_id].active >= 1) {
 			// SD TODO - audio engine
 			// audio_cycle->getAudioFeedback()->deleteSource(loop_id);
-			//mSourceActivity[loop_id] = 0;
-			
 			mLoopAttributes[loop_id].active = 0;
 		}
+		
+		setNeedsActivityUpdateLock(1);
+		setNeedsActivityUpdateAddMedia(loop_id);
+		setNeedsActivityUpdateLock(0);
+		// setNeedsActivityUpdate(1);
+											   
 		return 1;
 	}
 	else {
 		return 0;
-	}
+	}	
 }
 
 void ACMediaBrowser::setClosestLoop(int _loop_id)
@@ -1391,7 +1414,6 @@ void ACMediaBrowser::setClosestLoop(int _loop_id)
 	 */
 }
 
-
 int ACMediaBrowser::muteAllSources()
 {
 	int loop_id;
@@ -1401,8 +1423,36 @@ int ACMediaBrowser::muteAllSources()
 			// SD TODO - audio engine
 			// audio_cycle->getAudioFeedback()->deleteSource(loop_id);
 			mLoopAttributes[loop_id].active = 0;
+			setNeedsActivityUpdateLock(1);
+			setNeedsActivityUpdateAddMedia(loop_id);
+			setNeedsActivityUpdateLock(0);
 		}
 	}
+	
 	setNeedsDisplay(true);
+	// setNeedsActivityUpdate(1);
 }
 
+// Update audio engine sources
+void ACMediaBrowser::setNeedsActivityUpdateLock(int i) {
+	if (i) {
+		pthread_mutex_lock(&activity_update_mutex);
+	}
+	else {
+		pthread_mutex_unlock(&activity_update_mutex);
+	}
+}
+
+void ACMediaBrowser::setNeedsActivityUpdateAddMedia(int loop_id) {
+	mNeedsActivityUpdateMedia.push_back(loop_id);
+	// mNeedsActivityUpdate = 1;
+}
+
+void ACMediaBrowser::setNeedsActivityUpdateRemoveMedia() {
+	mNeedsActivityUpdateMedia.resize(0);
+	// mNeedsActivityUpdate = 1;
+}
+
+vector<int>* ACMediaBrowser::getNeedsActivityUpdateMedia() {
+	return &mNeedsActivityUpdateMedia;
+}

@@ -41,10 +41,23 @@ ACOsgAudioRenderer::ACOsgAudioRenderer() {
 }
 
 ACOsgAudioRenderer::~ACOsgAudioRenderer() {
-	if 	(waveform_geode) { waveform_geode->unref(); waveform_geode=0; }
-	if 	(curser_geode) { curser_geode->unref(); curser_geode=0; }
-	if 	(curser_transform) { curser_transform->unref(); curser_transform=0; }
-	if 	(entry_geode) { entry_geode->unref(); entry_geode=0; }
+	// media_node->removeChild(0,1);
+	if 	(waveform_geode) {
+		waveform_geode->unref();
+		waveform_geode=0;
+	}
+	if 	(curser_geode) {
+		curser_geode->unref();
+		curser_geode=0;
+	}
+	if 	(curser_transform) {
+		curser_transform->unref();
+		curser_transform=0;
+	}
+	if 	(entry_geode) {
+		entry_geode->unref();
+		entry_geode=0;
+	}
 }
 
 void ACOsgAudioRenderer::waveformGeode() {
@@ -70,7 +83,7 @@ void ACOsgAudioRenderer::waveformGeode() {
 	frame_geometry = new Geometry();
 	border_geometry = new Geometry();
 		
-	width = media_cycle->getWidth(loop_index);
+	width = media_cycle->getThumbnailWidth(loop_index);
 	width = width / 2;
 	thumbnail = (float*)media_cycle->getThumbnailPtr(loop_index);
 	
@@ -248,7 +261,7 @@ void ACOsgAudioRenderer::prepareNodes() {
 
 void ACOsgAudioRenderer::updateNodes(double ratio) {
 	
-	double xstep = 0.0005;
+	double xstep = 0.00025;
 	
 #define NCOLORS 5
 	static Vec4 colors[NCOLORS];
@@ -267,6 +280,9 @@ void ACOsgAudioRenderer::updateNodes(double ratio) {
 	const ACPoint &p = attribute.currentPos, &p2 = attribute.nextPos;
 	double omr = 1.0-ratio;
 			
+	omr = 1;
+	ratio = 0;
+	
 	float zoom = media_cycle->getCameraZoom();
 	float angle = media_cycle->getCameraRotation();
 
@@ -274,44 +290,6 @@ void ACOsgAudioRenderer::updateNodes(double ratio) {
 	Matrix Trotate;
 	Matrix curserT;
 
-	if (1) { //(attribute.active) {
-					
-		if(waveform_geode == 0) {
-			waveformGeode();
-		}
-		if (curser_transform == 0) {
-			curserGeode();
-		}
-		
-		if(media_node->getNumChildren() == 1 && media_node->getChild(0) == entry_geode) {
-			media_node->setChild(0, waveform_geode);
-			media_node->addChild(curser_transform);
-		}
-		
-		curserT.makeTranslate(Vec3(omr*p.x + ratio*p2.x + attribute.curser * xstep * 0.5 / zoom, omr*p.y + ratio*p2.y, 0.0)); // omr*p.z + ratio*p2.z));
-		curserT =  Matrix::scale(0.5/zoom,0.5/zoom,0.5/zoom) * curserT;
-		curser_transform->setMatrix(curserT);
-
-	}
-	else {
-			
-		if(media_node->getNumChildren() == 2) {
-			media_node->setChild(0, entry_geode);
-			media_node->removeChild(1, 1);
-		}
-				
-		((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(colors[attribute.cluster%NCOLORS]);
-
-	}
-			
-	unsigned int mask = (unsigned int)-1;
-	if(attribute.navigationLevel >= media_cycle->getNavigationLevel()) {
-		entry_geode->setNodeMask(mask);
-	}
-	else {
-		entry_geode->setNodeMask(0);
-	}
-	
 	float x, y, z;
 	float localscale;
 	float maxdistance = 0.2;
@@ -324,7 +302,52 @@ void ACOsgAudioRenderer::updateNodes(double ratio) {
 	T.makeTranslate(Vec3(x, y, z));
 	localscale = maxscale - distance_mouse * (maxscale - minscale) / maxdistance ;
 	localscale = max(localscale,minscale);
-	T =  Matrix::rotate(-angle,Vec3(0.0,0.0,1.0)) * Matrix::scale(localscale/zoom,localscale/zoom,localscale/zoom) * T;
+	// localscale = 0.5;
+	
+	if (attribute.active) {
+					
+		localscale = 0.5;
+		
+		if(waveform_geode == 0) {
+			waveformGeode();
+		}
+		if (curser_transform == 0) {
+			curserGeode();
+		}
+		
+		if(media_node->getNumChildren() == 1 && media_node->getChild(0) == entry_geode) {
+			media_node->setChild(0, waveform_geode);
+			media_node->addChild(curser_transform);
+		}
+		
+		// curserT.makeTranslate(Vec3(omr*p.x + ratio*p2.x + attribute.curser * xstep * 0.5 / zoom, omr*p.y + ratio*p2.y, 0.0)); // omr*p.z + ratio*p2.z));
+		// curserT =  Matrix::scale(0.5/zoom,0.5/zoom,0.5/zoom) * curserT;
+		curserT.makeTranslate(Vec3(attribute.curser * xstep, 0.0, 0.0)); 
+		curser_transform->setMatrix(curserT);
+	
+		T =  Matrix::rotate(-angle,Vec3(0.0,0.0,1.0)) * Matrix::scale(localscale/zoom,localscale/zoom,localscale/zoom) * T;
+	}
+	else {
+			
+		if(media_node->getNumChildren() == 2) {
+			media_node->setChild(0, entry_geode);
+			media_node->removeChild(1, 1);
+		}
+				
+		((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(colors[attribute.cluster%NCOLORS]);
+		
+		T =  Matrix::rotate(-angle,Vec3(0.0,0.0,1.0)) * Matrix::scale(localscale/zoom,localscale/zoom,localscale/zoom) * T;
+
+	}
+			
+	unsigned int mask = (unsigned int)-1;
+	if(attribute.navigationLevel >= media_cycle->getNavigationLevel()) {
+		entry_geode->setNodeMask(mask);
+	}
+	else {
+		entry_geode->setNodeMask(0);
+	}
+	
 	media_node->setMatrix(T);
 		
 }

@@ -58,7 +58,7 @@ void ACOsgBrowserRenderer::prepareNodes(int start) {
 	if (media_renderer.size()>n) {
 		
 		for (i=n;i<media_renderer.size();i++) {
-			media_group->removeChild(i, 1);
+			media_group->removeChild(media_renderer[i]->getNode());
 			delete media_renderer[i];
 		}
 	}

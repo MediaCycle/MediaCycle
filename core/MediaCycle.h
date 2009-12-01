@@ -91,7 +91,10 @@ public:
 	// API REQUIRED BY VISUAL and GUI
 	// 
 	int getLibrarySize();
+	string getMediaFileName(int i);
 	int getMediaType(int i);
+	int getThumbnailWidth(int i);
+	int getThumbnailHeight(int i);
 	int getWidth(int i);
 	int getHeight(int i);
 	void* getThumbnailPtr(int i);
@@ -136,11 +139,24 @@ public:
 	void muteAllSources();
 	//
 	void* hasBrowser();
+	// void setVisualisationPlugin(string pluginName);
+	//	int addPlugin(std::string aPluginPath);
 	
 	// LABELS on VIEW
  	int getLabelSize();
 	string getLabelText(int i);
 	ACPoint getLabelPos(int i);
+	
+	// Get Features
+	vector<float> getFeature(int i, string feature_name);
+	
+	// Playing time stamp
+	int setSourceCurser(int lid, int frame_pos);
+	
+	// Update audio engine sources
+	void setNeedsActivityUpdateLock(int i);
+	void setNeedsActivityUpdateRemoveMedia();	
+	vector<int>* getNeedsActivityUpdateMedia();
 	
 private:
 	int forwarddown;

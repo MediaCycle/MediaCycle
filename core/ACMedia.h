@@ -66,7 +66,8 @@ public:
 	double getDuration(){return this->duration;}
 
 	std::vector<ACMediaFeatures*> &getFeatures() { return features; }
-	ACMediaFeatures* &getFeatures(int i);
+	ACMediaFeatures* &getFeature(int i);
+	ACMediaFeatures* getFeature(string feature_name);
 	int getNumberOfFeatures() {return features.size();}
 
 	void addFeatures(ACMediaFeatures *aFeatures) { this->features.push_back(aFeatures); }
@@ -77,6 +78,8 @@ public:
 	void setFileName(std::string s) { filename = s; }
 	std::string getFileName(std::string s) { return filename; }
 	virtual void* getThumbnailPtr()=0;
+	virtual int getThumbnailWidth()=0;
+	virtual int getThumbnailHeight()=0;
 	virtual int getWidth()=0;
 	virtual int getHeight()=0;
 	void setWidth(int w) {width=w;}

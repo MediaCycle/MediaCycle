@@ -219,7 +219,7 @@ int ACVideo::load(FILE* library_file) { // was loadLoop
 		thumbnail_width = 320/2;
 		width = 320/2;
 		height = 180/2;	
-		// SD TODO - following wont't work
+
 		for (i=0; i<n_features;i++) {
 			mediaFeatures = new ACMediaFeatures();
 			features.push_back(mediaFeatures);

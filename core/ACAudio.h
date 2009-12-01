@@ -58,7 +58,9 @@ public:
 	void import(std::string _path); // was: importFile in library
 	void saveThumbnail(std::string _path);
 	void* getThumbnailPtr() { return (void*)waveform; }
-	int getWidth() {return n_frames;}
+	int getThumbnailWidth() {return n_frames;} // width in thumbnail frames, not samples
+	int getThumbnailHeight() {return 0;} // width in thumbnail frames, not samples
+	int getWidth() {return sample_end;}
 	int getHeight() {return 0;}
 	
 	void setSampleRate(int _sample_rate) { sample_rate = _sample_rate; }

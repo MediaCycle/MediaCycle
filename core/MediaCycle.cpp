@@ -34,7 +34,11 @@
 
 MediaCycle::MediaCycle(ACMediaType aMediaType, string local_directory, string libname) {
 	
-    this->forwarddown = 0;
+	this->mediaLibrary = 0;
+	this->mediaBrowser = 0;
+	
+	this->forwarddown = 0;
+
     this->local_directory = local_directory;
     this->libname = libname;
     this->networkSocket	= NULL;
@@ -48,14 +52,15 @@ MediaCycle::MediaCycle(ACMediaType aMediaType, string local_directory, string li
 
     this->pluginManager = new ACPluginManager();
 	
-	// SD TODO - test Labels
-	ACPoint p;
+	// Test Labels
+/*	ACPoint p;
 	p.x = -0.1; p.y = 0.0; p.z = 0.01;
 	this->mediaBrowser->setLabel(0, "Label-1", p);
 	p.x = 0.2; p.y = 0.0; p.z = 0.01;
 	this->mediaBrowser->setLabel(1, "Label-2", p);
 	p.x = 0.0; p.y = 0.1; p.z = 0.01;
 	this->mediaBrowser->setLabel(2, "Label-3", p);
+ */
 }
 
 MediaCycle::MediaCycle(const MediaCycle& orig) {
@@ -267,12 +272,19 @@ void MediaCycle::setVisualisationPlugin(string pluginName){
 // API REQUIRED BY VISUAL and GUI
 // 
 int MediaCycle::getLibrarySize() { return mediaLibrary->getSize(); }
+string MediaCycle::getMediaFileName(int i) { return mediaLibrary->getItem(i)->getFileName(); }
 int MediaCycle::getMediaType(int i) { return mediaLibrary->getItem(i)->getType(); }
+int MediaCycle::getThumbnailWidth(int i) { return mediaLibrary->getItem(i)->getThumbnailWidth(); }
+int MediaCycle::getThumbnailHeight(int i) { return mediaLibrary->getItem(i)->getThumbnailHeight(); }
 int MediaCycle::getWidth(int i) { return mediaLibrary->getItem(i)->getWidth(); }
 int MediaCycle::getHeight(int i) { return mediaLibrary->getItem(i)->getHeight(); }
 void* MediaCycle::getThumbnailPtr(int i) { return mediaLibrary->getItem(i)->getThumbnailPtr(); }
 int MediaCycle::getNeedsDisplay() {	return mediaBrowser->getNeedsDisplay(); }
-void MediaCycle::setNeedsDisplay(int i) { mediaBrowser->setNeedsDisplay(i); }
+void MediaCycle::setNeedsDisplay(int i) {
+	if (mediaBrowser) {
+		mediaBrowser->setNeedsDisplay(i);
+	}
+}
 float MediaCycle::getCameraZoom() { return mediaBrowser->getCameraZoom(); }
 float MediaCycle::getCameraRotation() { return mediaBrowser->getCameraRotation(); }
 const ACLoopAttribute& MediaCycle::getLoopAttributes(int i) { return (mediaBrowser->getLoopAttributes()[i]); } 
@@ -313,6 +325,41 @@ void* MediaCycle::hasBrowser() { return mediaBrowser; }
 int MediaCycle::getLabelSize() { return mediaBrowser->getLabelSize(); }
 string MediaCycle::getLabelText(int i) { return mediaBrowser->getLabelText(i); }
 ACPoint MediaCycle::getLabelPos(int i) { return mediaBrowser->getLabelPos(i); }
+
+// Get Features
+vector<float> MediaCycle::getFeature(int i, string feature_name) {
+	ACMedia* lmedia;
+	ACMediaFeatures* lfeatures;
+	FeaturesVector lfeaturesvector;
+	lmedia = mediaLibrary->getItem(i);
+	lfeatures = lmedia->getFeature(feature_name);
+	lfeaturesvector = lfeatures->getAllFeatures();
+	return (vector<float>)lfeaturesvector;
+}
+
+// Playing time stamp
+int MediaCycle::setSourceCurser(int lid, int frame_pos) {
+	return mediaBrowser->setSourceCurser(lid, frame_pos);
+}
+
+// Update audio engine sources
+void MediaCycle::setNeedsActivityUpdateLock(int i) {
+	if (mediaBrowser) {
+		mediaBrowser->setNeedsActivityUpdateLock(i);
+	} 
+}
+
+void MediaCycle::setNeedsActivityUpdateRemoveMedia() {
+	if (mediaBrowser) {
+		mediaBrowser->setNeedsActivityUpdateRemoveMedia();
+	}
+}
+
+vector<int>* MediaCycle::getNeedsActivityUpdateMedia() {
+	if (mediaBrowser) {
+		return mediaBrowser->getNeedsActivityUpdateMedia();
+	}
+}
 
 void MediaCycle::pickedObjectCallback(int pid) {
 	if(pid >= 0) {

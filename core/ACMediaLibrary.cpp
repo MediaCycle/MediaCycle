@@ -331,7 +331,7 @@ void ACMediaLibrary::calculateStats() {
 	int i,j,k;
 	for (i=0; i< number_of_features; i++) {
 		vector<double> tmp_vect;
-		for (j=0; j< media_library[0]->getFeatures(i)->size(); j++) {
+		for (j=0; j< media_library[0]->getFeature(i)->size(); j++) {
 			tmp_vect.push_back(0.0);
 		}
 		mean_features.push_back(tmp_vect);
@@ -343,7 +343,7 @@ void ACMediaLibrary::calculateStats() {
 		ACMedia* item = media_library[i];		
 		for(j=0; j<mean_features.size(); j++){
 			for(k=0; k<mean_features[j].size(); k++){
-				double val = item->getFeatures(j)->getFeature(k);
+				double val = item->getFeature(j)->getFeature(k);
 				
 				mean_features[j][k] += val;
 				stdev_features[j][k] += val * val;
@@ -376,6 +376,8 @@ void ACMediaLibrary::calculateStats() {
 }
 
 void ACMediaLibrary::normalizeFeatures() {
+	
+	ACMediaFeatures* feature;
 	cout << "normalizing features" << endl;
 	if ( isEmpty() )  return;
 	
@@ -395,9 +397,12 @@ void ACMediaLibrary::normalizeFeatures() {
 	for(i=0; i<n; i++){
 		ACMedia* item = media_library[i];
 		for(j=0; j<mean_features.size(); j++) {
-			for(k=0; k<mean_features[j].size(); k++) {
-				float old = item->getFeatures(j)->getFeature(k);
-				item->getFeatures(j)->setFeature (k, (old - mean_features[j][k]) / ( TI_MAX(stdev_features[j][k] , 0.00001)));
+			feature = item->getFeature(j);
+			if (feature->getNeedsNormalization()) {
+				for(k=0; k<mean_features[j].size(); k++) {
+					float old = feature->getFeature(k);
+					feature->setFeature (k, (old - mean_features[j][k]) / ( TI_MAX(stdev_features[j][k] , 0.00001)));
+				}
 			}
 		}
 	}
@@ -417,8 +422,8 @@ void ACMediaLibrary::denormalizeFeatures() {
 		ACMedia* item = media_library[i];
 		for(j=0; j<mean_features.size(); j++) {
 			for(k=0; k<mean_features[j].size(); k++) {
-				float old = item->getFeatures(j)->getFeature(k);
-				item->getFeatures(j)->setFeature (k, old * stdev_features[j][k] + mean_features[j][k]);
+				float old = item->getFeature(j)->getFeature(k);
+				item->getFeature(j)->setFeature (k, old * stdev_features[j][k] + mean_features[j][k]);
 			}
 		}
 	}
@@ -439,8 +444,8 @@ void ACMediaLibrary::saveSorted(string output_file){
 	for (int i=0; i< media_library.size() ;i++) {
 		out << i << " : " << media_library[i]->getFileName() << endl;
 		for (int j=0; j< nfeat ;j++) {
-			out << media_library[i]->getFeatures(0)->getFeature(j) << endl;
-			f[j].push_back (std::pair<float, int> (media_library[i]->getFeatures(0)->getFeature(j), i));
+			out << media_library[i]->getFeature(0)->getFeature(j) << endl;
+			f[j].push_back (std::pair<float, int> (media_library[i]->getFeature(0)->getFeature(j), i));
 		}
 	}
 	

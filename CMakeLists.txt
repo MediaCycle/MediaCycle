@@ -1,8 +1,8 @@
 PROJECT(MediaCycle)
 
-SUBDIRS(core cli gui plugins test armadillo fftooura tinyxml gnuplot_i)
+SUBDIRS(core cli gui audioengine plugins test armadillo fftooura tinyxml gnuplot_i)
 
-INCLUDE_DIRECTORIES(. core armadillo gnuplot_i)
+INCLUDE_DIRECTORIES(. core armadillo gnuplot_i audioengine)
 INCLUDE_DIRECTORIES( "/usr/local/include/TiCore" )
 LINK_DIRECTORIES( ${LINK_DIRECTORIES} "/usr/local/lib" )
 
@@ -113,3 +113,16 @@ IF ( USE_BOOST_SERIALIZATION )
 		MESSAGE(FATAL_ERROR "Boost not found.")
 	ENDIF ( Boost_FOUND )
 ENDIF ( USE_BOOST_SERIALIZATION )
+
+# OpenAL
+SET(USE_OPENAL YES)
+IF ( USE_OPENAL )
+	FIND_PACKAGE( OpenAL )
+	IF ( OPENAL_FOUND )
+		MESSAGE ( "Found OpenAL" )
+		SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUSE_OPENAL")
+		INCLUDE_DIRECTORIES( ${OPENAL_INCLUDE_DIR})
+	ELSE ( OPENAL_FOUND)
+		MESSAGE(FATAL_ERROR "OpenAL requested but not found.")
+	ENDIF ( OPENAL_FOUND )
+ENDIF ( USE_OPENAL )

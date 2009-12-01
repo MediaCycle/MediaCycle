@@ -60,6 +60,8 @@ public:
 	
 	// do we need the original size ?
 	// the thumbnail size can be accessed by thumbnail->width/height !! ;
+	int getThumbnailWidth() {return width;}
+	int getThumbnailHeight() {return height;}
 	int getWidth() {return width;}
 	int getHeight() {return height;}
 	void setWidth(int w) {width = w;} // XS TODO : check if it matches thumbnail?

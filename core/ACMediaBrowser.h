@@ -127,17 +127,23 @@ public:
 	void setBookmark();
 	void setTag();
 	
-	void setNeedsDisplay(bool val) 				{ mNeedsDisplay = val; };
-	bool getNeedsDisplay() const				{ return mNeedsDisplay; };
+	void setNeedsDisplay(bool val) 				{ mNeedsDisplay = val; }
+	bool getNeedsDisplay() const				{ return mNeedsDisplay; }
 	
+	// Update audio engine sources		
+	void setNeedsActivityUpdateLock(int i);
+	void setNeedsActivityUpdateAddMedia(int loop_id);	
+	void setNeedsActivityUpdateRemoveMedia();	
+	vector<int>* getNeedsActivityUpdateMedia();
+
 	// camera
-	void setCameraPosition(float x, float y)		{ mCameraPosition[0] = x;  mCameraPosition[1] = y; setNeedsDisplay(true);};
-	void getCameraPosition(float &x, float &y) 	{ x = mCameraPosition[0];  y = mCameraPosition[1]; setNeedsDisplay(true);};
-	void setCameraZoom(float z)				{ mCameraZoom = TI_MAX(z, 0.000001); setNeedsDisplay(true); };
-	void setCameraRecenter()				{ mCameraPosition[0]=0.0; mCameraPosition[1]=0.0; mCameraZoom=1.0; mCameraAngle=0.0; setNeedsDisplay(true);};
-	float getCameraZoom() const				{ return mCameraZoom; };
-	void setCameraRotation(float angle)				{ mCameraAngle = angle; setNeedsDisplay(true); };
-	float getCameraRotation() const				{ return mCameraAngle; };
+	void setCameraPosition(float x, float y)		{ mCameraPosition[0] = x;  mCameraPosition[1] = y; setNeedsDisplay(true);}
+	void getCameraPosition(float &x, float &y) 	{ x = mCameraPosition[0];  y = mCameraPosition[1]; setNeedsDisplay(true);}
+	void setCameraZoom(float z)				{ mCameraZoom = TI_MAX(z, 0.000001); setNeedsDisplay(true); }
+	void setCameraRecenter()				{ mCameraPosition[0]=0.0; mCameraPosition[1]=0.0; mCameraZoom=1.0; mCameraAngle=0.0; setNeedsDisplay(true);}
+	float getCameraZoom() const				{ return mCameraZoom; }
+	void setCameraRotation(float angle)				{ mCameraAngle = angle; setNeedsDisplay(true); }
+	float getCameraRotation() const				{ return mCameraAngle; }
 	
 	// organization
 	// XS 091009 : this unique one replaces rhythm, timbre, harmony
@@ -215,7 +221,7 @@ public:
 	int	 pickSource(float x, float z);
 	void getSourcePosition(int loop_id, float* x, float* z);
 	void setSourcePosition(float _x, float _z, float* x, float* z);
-	int	 toggleSourceActivity(float x, float z);
+	// int	 toggleSourceActivity(float x, float z);
 	int toggleSourceActivity(int lid, int type=1);
 	int muteAllSources();
 	
@@ -245,10 +251,12 @@ public:
 	float proxgridt;
 	int proxgridmaxdistance;
 	float proxgridjitter;
+	int proxgridboundsset;
 	vector<int> proxgrid;
 	void setProximityGrid();
 	void setProximityGridQuantize(ACPoint p, ACPoint *pgrid);	
 	void setProximityGridUnquantize(ACPoint pgrid, ACPoint *p);
+	void setProximityGridBounds(float l, float r, float b, float t);
 	void setRepulsionEngine();	
 
 protected:
@@ -262,7 +270,11 @@ protected:
 	int 				mSelectedLoop;
 	
 	bool 				mNeedsDisplay;
-	
+	//bool 				mNeedsActivityUpdate;
+	vector<int>			mNeedsActivityUpdateMedia;
+	pthread_mutex_t		activity_update_mutex;
+	pthread_mutexattr_t activity_update_mutex_attr;
+
 	float   			mViewWidth;
 	float   			mViewHeight;
 	float   			mCenterOffsetX;

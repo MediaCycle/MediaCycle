@@ -67,6 +67,8 @@ void ACAudio::save(FILE* library_file) {
 	int i, j;
 	int n_features;
 	int n_features_elements;	
+	int nn;
+	
 	fprintf(library_file, "%s\n", filename.c_str());
 	
 #ifdef SAVE_LOOP_BIN
@@ -101,8 +103,10 @@ void ACAudio::save(FILE* library_file) {
 	n_features = features.size();
 	fprintf(library_file, "%d\n", n_features);
 	for (i=0; i<features.size();i++) {
-		fprintf(library_file, "%d\n", features[i]->getType());
-		n_features_elements = features[i]->size(); // XS TODO: ACMediaFeatures don't have a size method
+		n_features_elements = features[i]->size();
+		nn = features[i]->getNeedsNormalization();
+		fprintf(library_file, "%s\n", features[i]->getName().c_str());
+		fprintf(library_file, "%d\n", nn);
 		fprintf(library_file, "%d\n", n_features_elements);
 		for (j=0; j<n_features_elements; j++) {
 			fprintf(library_file, "%f\t", features[i]->getFeature(j)); // XS instead of [i][j]
@@ -118,6 +122,8 @@ int ACAudio::load(FILE* library_file) {
 	int n_features;
 	int f_type;
 	int n_features_elements;
+	char featureName[256];
+	int nn;
 	
 	int ret;
 	char *retc;
@@ -158,10 +164,13 @@ int ACAudio::load(FILE* library_file) {
 		}
 		ret = fscanf(library_file, "%d", &n_features);
 		for (i=0; i<n_features;i++) {
-			ret = fscanf(library_file, "%d", &f_type);
 			mediaFeatures = new ACMediaFeatures();
 			features.push_back(mediaFeatures);
 			features[i]->setComputed();
+			ret = fscanf(library_file, "%s", featureName);
+			features[i]->setName(string(featureName));
+			ret = fscanf(library_file, "%d", &nn);
+			features[i]->setNeedsNormalization(nn);
 			ret = fscanf(library_file, "%d", &n_features_elements);
 			features[i]->resize(n_features_elements);
 			for (j=0; j<n_features_elements; j++) {

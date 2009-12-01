@@ -53,14 +53,17 @@ protected:
 	bool _computed ;
 	static DistanceType dist_type; // XS check: derive static => 1 per subclass ?
 	std::string name;
+	int needs_normalization;
 public:
 	ACMediaFeatures(); // no media given, probably read features from disk
 	virtual ~ACMediaFeatures()  {};
 	//	virtual void calculate(void*) = 0;
 	// the following are common to all features types and should NOT be redefined
-	const FeatureType& getType() const {return _type;}
-	bool isComputed() {return _computed;}
-	void setComputed() { _computed = true; }
+	const FeatureType& getType() const {return _type;};
+	bool isComputed() {return _computed;};
+	void setComputed() { _computed = true; };
+	void setNeedsNormalization(int i) { needs_normalization = i; }
+	int getNeedsNormalization() { return needs_normalization; }
 	float getFeature(int i);
 	void addFeature(float f);
 	int getDiscretizedFeature();

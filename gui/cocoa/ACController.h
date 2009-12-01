@@ -36,11 +36,12 @@
 using namespace::std;
 
 #import <Cocoa/Cocoa.h>
-#import <Io/TiOscReceiver.h>
-//#import <Rendering/TiCocoaOsgView.h>
 
-#import "ACOsgBrowserViewCocoa.h"
-#import <MediaCycleLight.h>
+#include <Io/TiOscReceiver.h>
+//#import <Rendering/TiCocoaOsgView.h>
+#include <ACOsgBrowserViewCocoa.h>
+#include <MediaCycleLight.h>
+#include <ACAudioFeedback.h>
 
 // Tags of the Text items in the dialog boxes
 enum	{
@@ -57,6 +58,7 @@ enum	{
 @interface ACController : NSObject {
 	
 	MediaCycle				*media_cycle;
+	ACAudioFeedback			*audio_engine;
 	//
 	IBOutlet ACOsgBrowserViewCocoa*		browser_osg_view;
 	//

@@ -61,8 +61,8 @@ using namespace osg;
 
 class ACOsgMediaRenderer {
 protected:
-	MediaCycle	*media_cycle;
-	MatrixTransform		*media_node;
+	MediaCycle* media_cycle;
+	MatrixTransform* media_node;
 	int loop_index;
 	float distance_mouse;
 	// int	media_activity;
