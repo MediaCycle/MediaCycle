@@ -1,0 +1,396 @@
+<ui version="4.0" >
+ <class>ACMainWindowQT</class>
+ <widget class="QMainWindow" name="ACMainWindowQT" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>759</width>
+    <height>517</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>MediaCycleOsgQt</string>
+  </property>
+  <widget class="QWidget" name="centralwidget" >
+   <widget class="QGroupBox" name="groupBoxView" >
+    <property name="geometry" >
+     <rect>
+      <x>280</x>
+      <y>10</y>
+      <width>471</width>
+      <height>471</height>
+     </rect>
+    </property>
+    <property name="title" >
+     <string>Browser Display</string>
+    </property>
+   </widget>
+   <widget class="QGroupBox" name="groupAudioControls" >
+    <property name="geometry" >
+     <rect>
+      <x>10</x>
+      <y>390</y>
+      <width>261</width>
+      <height>91</height>
+     </rect>
+    </property>
+    <property name="title" >
+     <string>Audio Controls</string>
+    </property>
+    <widget class="QSlider" name="horizontalSliderBPM" >
+     <property name="geometry" >
+      <rect>
+       <x>80</x>
+       <y>40</y>
+       <width>160</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="minimum" >
+      <number>-100</number>
+     </property>
+     <property name="maximum" >
+      <number>100</number>
+     </property>
+     <property name="orientation" >
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+    <widget class="QSlider" name="horizontalSliderKey" >
+     <property name="geometry" >
+      <rect>
+       <x>80</x>
+       <y>60</y>
+       <width>160</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="minimum" >
+      <number>-100</number>
+     </property>
+     <property name="maximum" >
+      <number>100</number>
+     </property>
+     <property name="orientation" >
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+    <widget class="QLabel" name="labelAudioBPM" >
+     <property name="geometry" >
+      <rect>
+       <x>20</x>
+       <y>40</y>
+       <width>54</width>
+       <height>18</height>
+      </rect>
+     </property>
+     <property name="text" >
+      <string>BPM</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="labelAudioKey" >
+     <property name="geometry" >
+      <rect>
+       <x>20</x>
+       <y>60</y>
+       <width>54</width>
+       <height>18</height>
+      </rect>
+     </property>
+     <property name="text" >
+      <string>Key</string>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QGroupBox" name="groupBoxMetaData" >
+    <property name="geometry" >
+     <rect>
+      <x>10</x>
+      <y>210</y>
+      <width>261</width>
+      <height>171</height>
+     </rect>
+    </property>
+    <property name="title" >
+     <string>Meta-Data</string>
+    </property>
+    <widget class="QLabel" name="labelFile" >
+     <property name="geometry" >
+      <rect>
+       <x>10</x>
+       <y>20</y>
+       <width>61</width>
+       <height>18</height>
+      </rect>
+     </property>
+     <property name="text" >
+      <string>Media File</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="labelBegin" >
+     <property name="geometry" >
+      <rect>
+       <x>10</x>
+       <y>40</y>
+       <width>54</width>
+       <height>18</height>
+      </rect>
+     </property>
+     <property name="text" >
+      <string>Begin</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="labelEnd" >
+     <property name="geometry" >
+      <rect>
+       <x>10</x>
+       <y>60</y>
+       <width>54</width>
+       <height>18</height>
+      </rect>
+     </property>
+     <property name="text" >
+      <string>End</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="labelMetaBPM" >
+     <property name="geometry" >
+      <rect>
+       <x>10</x>
+       <y>80</y>
+       <width>54</width>
+       <height>18</height>
+      </rect>
+     </property>
+     <property name="text" >
+      <string>BPM</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="labelTimeSignature" >
+     <property name="geometry" >
+      <rect>
+       <x>10</x>
+       <y>100</y>
+       <width>91</width>
+       <height>18</height>
+      </rect>
+     </property>
+     <property name="text" >
+      <string>Time Signature</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="labelMetaKey" >
+     <property name="geometry" >
+      <rect>
+       <x>10</x>
+       <y>120</y>
+       <width>54</width>
+       <height>18</height>
+      </rect>
+     </property>
+     <property name="text" >
+      <string>Key</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="labelUserTags" >
+     <property name="geometry" >
+      <rect>
+       <x>10</x>
+       <y>140</y>
+       <width>61</width>
+       <height>18</height>
+      </rect>
+     </property>
+     <property name="text" >
+      <string>User Tags</string>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QPushButton" name="pushButtonLaunch" >
+    <property name="geometry" >
+     <rect>
+      <x>10</x>
+      <y>10</y>
+      <width>80</width>
+      <height>28</height>
+     </rect>
+    </property>
+    <property name="text" >
+     <string>Launch</string>
+    </property>
+   </widget>
+   <widget class="QGroupBox" name="groupBoxBrowserControls" >
+    <property name="geometry" >
+     <rect>
+      <x>10</x>
+      <y>40</y>
+      <width>261</width>
+      <height>161</height>
+     </rect>
+    </property>
+    <property name="title" >
+     <string>Browser Controls</string>
+    </property>
+    <widget class="QGroupBox" name="groupBoxSimilarity" >
+     <property name="geometry" >
+      <rect>
+       <x>10</x>
+       <y>20</y>
+       <width>241</width>
+       <height>81</height>
+      </rect>
+     </property>
+     <property name="title" >
+      <string>Similarity</string>
+     </property>
+     <widget class="QSlider" name="horizontalSliderRhythm" >
+      <property name="geometry" >
+       <rect>
+        <x>70</x>
+        <y>20</y>
+        <width>160</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="orientation" >
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <property name="tickInterval" >
+       <number>0</number>
+      </property>
+     </widget>
+     <widget class="QSlider" name="horizontalSliderTimbre" >
+      <property name="geometry" >
+       <rect>
+        <x>70</x>
+        <y>40</y>
+        <width>160</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="orientation" >
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+     <widget class="QSlider" name="horizontalSliderHarmony" >
+      <property name="geometry" >
+       <rect>
+        <x>70</x>
+        <y>60</y>
+        <width>160</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="orientation" >
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labelRhythm" >
+      <property name="geometry" >
+       <rect>
+        <x>10</x>
+        <y>20</y>
+        <width>54</width>
+        <height>18</height>
+       </rect>
+      </property>
+      <property name="text" >
+       <string>Rhythm</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labelTimbre" >
+      <property name="geometry" >
+       <rect>
+        <x>10</x>
+        <y>40</y>
+        <width>54</width>
+        <height>18</height>
+       </rect>
+      </property>
+      <property name="text" >
+       <string>Timbre</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labelHarmony" >
+      <property name="geometry" >
+       <rect>
+        <x>10</x>
+        <y>60</y>
+        <width>54</width>
+        <height>18</height>
+       </rect>
+      </property>
+      <property name="text" >
+       <string>Harmony</string>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QGroupBox" name="groupBoxAutoOrganization" >
+     <property name="geometry" >
+      <rect>
+       <x>10</x>
+       <y>110</y>
+       <width>241</width>
+       <height>41</height>
+      </rect>
+     </property>
+     <property name="title" >
+      <string>Auto-Organization</string>
+     </property>
+     <widget class="QSlider" name="horizontalSliderClusters" >
+      <property name="geometry" >
+       <rect>
+        <x>70</x>
+        <y>20</y>
+        <width>160</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="minimum" >
+       <number>1</number>
+      </property>
+      <property name="maximum" >
+       <number>10</number>
+      </property>
+      <property name="orientation" >
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <property name="tickPosition" >
+       <enum>QSlider::TicksAbove</enum>
+      </property>
+      <property name="tickInterval" >
+       <number>1</number>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labelClusters" >
+      <property name="geometry" >
+       <rect>
+        <x>10</x>
+        <y>20</y>
+        <width>54</width>
+        <height>18</height>
+       </rect>
+      </property>
+      <property name="text" >
+       <string>Clusters</string>
+      </property>
+     </widget>
+    </widget>
+   </widget>
+  </widget>
+  <widget class="QMenuBar" name="menubar" >
+   <property name="geometry" >
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>759</width>
+     <height>26</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QStatusBar" name="statusbar" />
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
