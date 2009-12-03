@@ -1294,8 +1294,8 @@ int ACAudioFeedback::createSourceWithPosition(int loop_id, float x, float y, flo
 		}
 	}
 	
-	//
-	loop_slot = loop_id;
+	// SD - bug workaround....
+	// loop_slot = loop_id;
 	
 	// audio_loop = media_cycle->getAudioLibrary()->getItem(loop_id);
 	loop_file = (char*)(media_cycle->getMediaFileName(loop_id)).c_str();

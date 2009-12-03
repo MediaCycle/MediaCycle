@@ -9,7 +9,7 @@ IF ( APPLE )
 	ADD_DEPENDENCIES(mediacycle-cocoa-osg mediacycle)
 	ADD_DEPENDENCIES(mediacycle-cocoa-osg mediacycle-osg)
 	ADD_DEPENDENCIES(mediacycle-cocoa-osg audioengine)
-	set_target_properties(mediacycle-cocoa-osg PROPERTIES MACOSX_BUNDLE_INFO_PLIST ${CMAKE_SOURCE_DIR}/gui/cocoa/Info.plist)
+	set_target_properties(mediacycle-cocoa-osg PROPERTIES MACOSX_BUNDLE_INFO_PLIST ${CMAKE_SOURCE_DIR}/gui/osg-cocoa/Info.plist)
 	set_source_files_properties(MainMenu.nib PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
 	#-lmediacycle -lTiCommon -lTiIo -lTiOsc -lTiRendering 
 	#-losg -losgDB -losgGA -losgViewer -lOpenThreads 
