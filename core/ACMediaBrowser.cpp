@@ -537,8 +537,9 @@ void ACMediaBrowser::libraryContentChanged()
 	
 	printf("setting all feature weights to 1.0 (count=%d)\n", (int) mFeatureWeights.size());
 	for(i=0; i<fc; i++) {
-		mFeatureWeights[i] = 1.0;
+		mFeatureWeights[i] = 0.0;
 	}
+	mFeatureWeights[1] = 1.0;
 	
 	updateClusters(false);
 	updateNextPositions();

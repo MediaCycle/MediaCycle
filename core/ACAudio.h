@@ -55,6 +55,8 @@ public:
   
 	void save(FILE* library_file); // was: saveLoop
 	int load(FILE* library_file); // was: loadLoop
+	int load_v1(FILE* library_file); 
+	
 	void import(std::string _path); // was: importFile in library
 	void saveThumbnail(std::string _path);
 	void* getThumbnailPtr() { return (void*)waveform; }

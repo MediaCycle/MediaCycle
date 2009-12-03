@@ -421,9 +421,11 @@ void ACMediaLibrary::denormalizeFeatures() {
 	for(i=0; i<= index_last_normalized; i++){
 		ACMedia* item = media_library[i];
 		for(j=0; j<mean_features.size(); j++) {
-			for(k=0; k<mean_features[j].size(); k++) {
-				float old = item->getFeature(j)->getFeature(k);
-				item->getFeature(j)->setFeature (k, old * stdev_features[j][k] + mean_features[j][k]);
+			if (item->getFeature(j)->getNeedsNormalization()) {
+				for(k=0; k<mean_features[j].size(); k++) {
+					float old = item->getFeature(j)->getFeature(k);
+					item->getFeature(j)->setFeature (k, old * stdev_features[j][k] + mean_features[j][k]);
+				}
 			}
 		}
 	}
