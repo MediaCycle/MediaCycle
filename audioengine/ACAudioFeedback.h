@@ -125,6 +125,7 @@ public:
 	
 	// Engine
 	void threadAudioEngine();
+	void threadAudioUpdate();
 	void startAudioEngine();
 	void stopAudioEngine();
 
@@ -175,8 +176,15 @@ private:
 	// Audio Engine thread
 	pthread_t	   audio_engine;
 	pthread_attr_t audio_engine_attr;
+	
+	pthread_t	   audio_update;
+	pthread_attr_t audio_update_attr;
+
 	int audio_engine_stacksize;
+	
 	void* audio_engine_arg;
+	void* audio_update_arg;
+	
 	pthread_once_t audio_engine_once;
 	pthread_mutex_t audio_engine_mutex;
 	pthread_mutexattr_t audio_engine_mutex_attr;

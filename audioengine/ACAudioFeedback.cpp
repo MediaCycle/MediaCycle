@@ -39,7 +39,7 @@
 #include <mach/task_policy.h>
 */
 
-//#include <mach/mach.h>
+// #include <mach/mach.h>
 //#include <sched.h>
 
 /*
@@ -135,6 +135,7 @@ kern_return_t  RescheduleStdThread( mach_port_t    machThread,
 }
 */
 
+
 int set_my_thread_priority(int priority) {
     struct sched_param sp;
 	
@@ -163,9 +164,6 @@ int set_my_task_policy(void) {
     return 1;
 }
 
-*/
-
-/*
 int set_realtime(int period, int computation, int constraint) {
     struct thread_time_constraint_policy ttcpolicy;
     int ret;
@@ -184,7 +182,6 @@ int set_realtime(int period, int computation, int constraint) {
     return 1;
 }
 */
-
 
 int OPENAL_NUM_BUFFERS = 64;
 
@@ -260,7 +257,7 @@ ACAudioFeedback::ACAudioFeedback()
 	//
 	createOpenAL();
 #ifdef OPENAL_STREAM_MODE
-	createAudioEngine(44100, 512, 5);
+	createAudioEngine(44100, 512, 10);
 	setTimeSignature(4, 4);
 #endif
 }
@@ -327,7 +324,8 @@ void ACAudioFeedback::createOpenAL()
 			// Create some OpenAL Source Objects
 			loop_sources = new ALuint[OPENAL_NUM_BUFFERS];
 			alGetError(); // clear error code
-			alGenSources(OPENAL_NUM_BUFFERS, loop_sources);
+			// SD - Source Problem
+			// alGenSources(OPENAL_NUM_BUFFERS, loop_sources);
 			if(alGetError() != AL_NO_ERROR) 
 			{
 				printf("Error generating OpenAL Sources!\n");
@@ -367,6 +365,11 @@ void ACAudioFeedback::deleteOpenAL()
 void *threadAudioEngineFunction(void *_audio_engine_arg)
 {
 	((ACAudioFeedback*)_audio_engine_arg)->threadAudioEngine();
+}
+
+void *threadAudioUpdateFunction(void *_audio_update_arg)
+{
+	((ACAudioFeedback*)_audio_update_arg)->threadAudioUpdate();
 }
 
 void ACAudioFeedback::startAudioEngine() {
@@ -420,6 +423,7 @@ void ACAudioFeedback::createAudioEngine(int _output_sample_rate, int _output_buf
 	}
 	
 	pthread_attr_init(&audio_engine_attr);
+	pthread_attr_init(&audio_update_attr);
 	
 	//pthread_attr_setdetachstate(&audio_engine_attr, PTHREAD_CREATE_JOINABLE);
 	
@@ -449,7 +453,9 @@ void ACAudioFeedback::createAudioEngine(int _output_sample_rate, int _output_buf
 	pthread_create(&audio_engine, &audio_engine_attr, &threadAudioEngineFunction, audio_engine_arg);
 	pthread_attr_destroy(&audio_engine_attr);
 	
-
+	audio_update_arg = (void*)this;
+	pthread_create(&audio_update, &audio_update_attr, &threadAudioUpdateFunction, audio_update_arg);
+	pthread_attr_destroy(&audio_update_attr);
 
 }
 
@@ -558,11 +564,11 @@ void ACAudioFeedback::threadAudioEngine()
 			
 			//fprintf(timing, "%f\n", ((sdtime-prevsdtime) * 1000));
 			
-			if (media_cycle) {
+			/*if (media_cycle) {
 				media_cycle->setNeedsActivityUpdateLock(1);
 				processAudioUpdate();
 				media_cycle->setNeedsActivityUpdateLock(0);
-			}
+			}*/
 			
 			pthread_mutex_lock(&audio_engine_mutex);
 			
@@ -589,6 +595,18 @@ void ACAudioFeedback::threadAudioEngine()
 		if (sdsleep>0) {
 			usleep(sdsleep);
 		}
+	}
+}
+
+void ACAudioFeedback::threadAudioUpdate()
+{
+	while (1) {
+		if (media_cycle) {
+			media_cycle->setNeedsActivityUpdateLock(1);
+			processAudioUpdate();
+			media_cycle->setNeedsActivityUpdateLock(0);
+		}
+		usleep(10000);
 	}
 }
 
@@ -671,6 +689,8 @@ void ACAudioFeedback::processAudioEngine()
 		
 	ALuint local_buffer;
 	
+	timeCodeDone = 0;
+	
 	//while (active_loops_counted<active_loops)  {
 	while (count<OPENAL_NUM_BUFFERS-1) {
 		
@@ -685,7 +705,7 @@ void ACAudioFeedback::processAudioEngine()
 			if (buffer_queued<output_buffer_n) {
 				// TODO SD
 				// we may have got a problem here
-				printf ("missing buffers %d\n", (output_buffer_n-buffer_queued));
+				printf ("%d: missing buffers %d\n", count, (output_buffer_n-buffer_queued));
 			}
 			
 			// Detect already processed used buffers
@@ -707,9 +727,13 @@ void ACAudioFeedback::processAudioEngine()
 				if (buffer_queued<output_buffer_n) { add_buffers=output_buffer_n-buffer_queued; }
 				else {add_buffers = buffer_processed;}
 				
+				if (add_buffers) {
+					add_buffers= 1;
+				}
+				
 				for (int k=0;k<add_buffers;k++) {
 					
-					printf ("buffer processed %d\n",buffer_processed);
+					printf ("%d: buffer processed %d\n", count, buffer_processed);
 					//printf ("buffer processed %d\n",buffer_processed);
 					
 					// Compute sample position and resynthesize buffer (may be several analysis frames)
@@ -717,18 +741,23 @@ void ACAudioFeedback::processAudioEngine()
 				
 					//fprintf(timing, "%d %f\n", add_buffers, float(sample_pos));
 					//fprintf(timing, "%f\n", float(sample_pos));
-					
 					processAudioEngineResynth(count, sample_pos, output_buffer);
 					
 					// SD TOTO - check this
 					//if (!timeCodeDone) {
-					timeCodeDone += 1;
+					/* timeCodeDone += 1;
 					if (timeCodeDone>=active_loops) {
 						// SD TODO - why did I need / 2
 						timeCodeAudioEngine(output_buffer_size);
 						//timeCodeAudioEngine(output_buffer_size/2);
 						timeCodeDone -= active_loops;
 					}
+					 */
+					if ( (!timeCodeDone) ) {
+						timeCodeAudioEngine(output_buffer_size);
+						timeCodeDone = 1;
+					}
+					
 					//}
 					
 					// SD - nov 2009 ) alternate method, recreate new buffers because I may have a problem with the order 
@@ -820,14 +849,16 @@ void ACAudioFeedback::processAudioEngineSamplePosition(int _loop_slot, int *_sam
 			}
 			break;
 		case ACAudioEngineSynchroModeAutoBeat:
-			*_sample_pos = time_from_downbeat * output_sample_rate * (active_bpm / use_bpm[_loop_slot]);			
-	
-			float nbeats;
-			nbeats = ((sample_end-sample_start)/output_sample_rate) / 60.0 * local_bpm;
-			
-			if (nbeats>4.1)
-				*_sample_pos += (downbeat_from_start%2) * 4 * output_sample_rate * (60.0 / use_bpm[_loop_slot]);
-			
+			if (use_bpm[_loop_slot]) {
+				*_sample_pos = time_from_downbeat * output_sample_rate * (active_bpm / use_bpm[_loop_slot]);			
+				float nbeats;
+				nbeats = ((sample_end-sample_start)/output_sample_rate) / 60.0 * local_bpm;
+				if (nbeats>4.1)
+					*_sample_pos += (downbeat_from_start%2) * 4 * output_sample_rate * (60.0 / use_bpm[_loop_slot]);
+			}
+			// SD 2009 dec - In auto beat, loops with no BPM should be played at normal speed
+			else {
+			}
 			
 		/*
 			int loop_n_beats;
@@ -881,7 +912,12 @@ void ACAudioFeedback::processAudioEngineSamplePosition(int _loop_slot, int *_sam
 			break;
 	}
 	
-	frame_pos = (float)*_sample_pos / (float) output_sample_rate / 0.01 / (100.0 / use_bpm[_loop_slot]); // SD TODO - hop size should be used.... 
+	if (use_bpm[_loop_slot]) {
+		frame_pos = (float)*_sample_pos / (float) output_sample_rate / 0.01 / (100.0 / use_bpm[_loop_slot]); // SD TODO - hop size should be used.... 
+	}
+	else {
+		frame_pos = (float)*_sample_pos / (float) output_sample_rate / 0.01 / (100.0 / 76.0); // SD TODO - hop size should be used.... 
+	}
 	media_cycle->setSourceCurser(loop_id, frame_pos);
 }
 
@@ -904,8 +940,14 @@ void ACAudioFeedback::processAudioEngineResynth(int _loop_slot, int _sample_pos,
 	void *source;
 	void *destination;
 	
-	float bpm_ratio = active_bpm / use_bpm[_loop_slot];
+	float bpm_ratio;
 	float pitch_ratio = 0;
+	
+	bpm_ratio = ((float)_sample_pos - (float)prev_sample_pos[_loop_slot]);
+	if (bpm_ratio<0) {
+		bpm_ratio += size;
+	}
+	bpm_ratio /= (float)output_buffer_size;
 	
 	// SD TODO - recover code to implements this
 	// SD TODO - this alsa has to resample to the selected output sample rate, for instance 44.1K
@@ -1053,7 +1095,7 @@ void ACAudioFeedback::processAudioEngineResynth(int _loop_slot, int _sample_pos,
 			// no filtering
 			// but still loops
 			// Scratch ... why do we need * 2.0
-			//bpm_ratio = 2.0 * ((float)_sample_pos - (float)prev_sample_pos[_loop_slot]) / (float)output_buffer_size;
+			
 			if (size>0) {
 				local_pos_f = prev_sample_pos[_loop_slot];
 				local_pos = floor(local_pos_f);
@@ -1300,11 +1342,15 @@ int ACAudioFeedback::createSourceWithPosition(int loop_id, float x, float y, flo
 	// audio_loop = media_cycle->getAudioLibrary()->getItem(loop_id);
 	loop_file = (char*)(media_cycle->getMediaFileName(loop_id)).c_str();
 	//loop_buffer = loop_buffers[loop_slot];
+	
+	// SD - Source Problem
+	alGenSources(1, &(loop_sources[loop_slot]));
+	
 	loop_source = loop_sources[loop_slot];
 	loop_pos[0] = x;
 	loop_pos[1] = y;
 	loop_pos[2] = z;
-	local_bpm = 120;
+	local_bpm = 0;
 	local_feature = media_cycle->getFeature(loop_id, "bpm");
 	if ((local_feature).size()) {
 		if ((local_feature).size()==1) {
@@ -1318,6 +1364,7 @@ int ACAudioFeedback::createSourceWithPosition(int loop_id, float x, float y, flo
 			local_key = int((local_feature)[0]);
 		}
 	}
+	// SD TODO - Acid type not yet used
 	local_acid_type = 0;
 	local_feature = media_cycle->getFeature(loop_id, "acid_type");
 	if ((local_feature).size()) {
@@ -1421,14 +1468,13 @@ int ACAudioFeedback::createSourceWithPosition(int loop_id, float x, float y, flo
 	loop_buffers_audio_engine[loop_slot] = datashort;
 	prev_sample_pos[loop_slot] = 0; // SD TODO
 	//current_buffer[loop_slot] = 0;
-	loop_synchro_mode[loop_slot] = ACAudioEngineSynchroModeAutoBeat;
-	//loop_synchro_mode[loop_slot] = ACAudioEngineSynchroModeNone;
-	
+
+	loop_synchro_mode[loop_slot] = ACAudioEngineSynchroModeAutoBeat;	
 	loop_scale_mode[loop_slot] = ACAudioEngineScaleModeVocode;
-	//loop_scale_mode[loop_slot] = ACAudioEngineScaleModeResample;
 	
-	//loop_synchro_mode[loop_slot] = ACAudioEngineSynchroModeNone;
-	//loop_scale_mode[loop_slot] = ACAudioEngineScaleModeNone;
+	if (!use_bpm[loop_slot]) {
+		loop_synchro_mode[loop_slot] = ACAudioEngineSynchroModeNone;
+	}
 	
 	active_loops++;
 	
@@ -1519,13 +1565,13 @@ int ACAudioFeedback::deleteSource(int loop_id)
 	// alSourcei(loop_source, AL_BUFFER, 0);
 	
 	alGetSourcei(loop_sources[loop_slot], AL_BUFFERS_QUEUED, &buffer_queued);
-	printf("Queued buffers %d\n", buffer_queued);
+	printf("%d, Queued buffers %d\n", loop_slot, buffer_queued);
 	
 	alGetSourcei(loop_sources[loop_slot], AL_BUFFERS_PROCESSED, &buffer_processed);
-	printf("Processed buffers %d\n", buffer_processed);
+	printf("%d, Processed buffers %d\n", loop_slot, buffer_processed);
 	
 	current = 0;
-	alSourceUnqueueBuffers(loop_sources[loop_slot], output_buffer_n, loop_buffers_audio_engine_stream[loop_slot]);
+	alSourceUnqueueBuffers(loop_sources[loop_slot], buffer_queued, loop_buffers_audio_engine_stream[loop_slot]);
 	error = alGetError();
 	if(error == AL_INVALID_VALUE) {
 		printf("Error Unqueue Buffers invalid value %d!\n", current);
@@ -1539,15 +1585,21 @@ int ACAudioFeedback::deleteSource(int loop_id)
 		printf("Error Unqueue Buffers invalid operation %d!\n", current);
 		//exit(1);
 	}
-	
+	//alSourcei(loop_source, AL_BUFFER, 0);
+			
+	// SD - Source Problem
+	alDeleteSources(1, &(loop_sources[loop_slot]));
+
 	// SD TODO - Check wether maybe remaining buffers have to be detached from source
 	current_buffer[loop_slot] = 0;
-	
+
 	// has been reserved in createSourceWithPosition, need to delete here
 	delete loop_buffers_audio_engine[loop_slot];
-	
+
 	loop_ids[loop_slot] = -1;
 	active_loops--;
+	
+	printf("%d, Done - %d - %d \n", loop_slot, active_loops, loop_source);
 
 	pthread_mutex_unlock(&audio_engine_mutex);
 	

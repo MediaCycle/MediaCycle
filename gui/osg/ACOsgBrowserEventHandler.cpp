@@ -88,7 +88,7 @@ bool ACOsgBrowserEventHandler::handle(const osgGA::GUIEventAdapter& ea,osgGA::GU
 		{
 			//printf("mouse moved\n");
 			osgViewer::View* view = dynamic_cast<osgViewer::View*>(&aa);
-			if (view) pick(view,ea, true);
+			if (view) pick(view, ea, true);
 			return false;
 		}
 		default:
@@ -111,8 +111,12 @@ void ACOsgBrowserEventHandler::pick(osgViewer::View* view, const osgGA::GUIEvent
 	
 	//printf("pick (%f, %f)\n", x, y);
 	
-	if(hover) hover_callback(xx, yy);
-	
+	if(hover) {
+		// SD TODO - OSG computeIntersections seems to crash often - avoid doing it while howering
+		hover_callback(xx, yy);
+		return;
+	}
+
 	if (view->computeIntersections(x,y,intersections))
 	{
 		// printf("got intersections\n");

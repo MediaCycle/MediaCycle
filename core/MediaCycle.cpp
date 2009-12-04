@@ -333,7 +333,9 @@ vector<float> MediaCycle::getFeature(int i, string feature_name) {
 	FeaturesVector lfeaturesvector;
 	lmedia = mediaLibrary->getItem(i);
 	lfeatures = lmedia->getFeature(feature_name);
-	lfeaturesvector = *(lfeatures->getAllFeatures());
+	if (lfeatures) {
+		lfeaturesvector = *(lfeatures->getAllFeatures());
+	}
 	return (vector<float>)lfeaturesvector;
 }
 
