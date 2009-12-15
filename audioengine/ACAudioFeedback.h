@@ -48,10 +48,10 @@
 
 typedef enum {
 	ACAudioEngineSynchroModeNone				= 0,
-	ACAudioEngineSynchroModeAutoBeat			= 1,		// multi-bar polyrhythm
+	ACAudioEngineSynchroModeAutoBeat			= 1,		// multi-bar polyrhythm //OK
 	ACAudioEngineSynchroModeAutoBarStretch		= 2,		// single-bar polyrythm
-	ACAudioEngineSynchroModeAutoBar				= 3,		// straight bea sync, no polyrhythm, gap may be cause in some loops
-	ACAudioEngineSynchroModeManual				= 4,		// position in loop controled from outside (scratch mode...)
+	ACAudioEngineSynchroModeAutoBar				= 3,		// straight beat sync, no polyrhythm, gap may be cause in some loops
+	ACAudioEngineSynchroModeManual				= 4,		// position in loop controled from outside (scratch mode...) //OK
 	ACAudioEngineSynchroModeDownbeatSimple		= 5,
 } ACAUdioEngineSynchroMode;
 

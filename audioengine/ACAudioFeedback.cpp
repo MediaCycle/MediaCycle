@@ -1469,13 +1469,13 @@ int ACAudioFeedback::createSourceWithPosition(int loop_id, float x, float y, flo
 	prev_sample_pos[loop_slot] = 0; // SD TODO
 	//current_buffer[loop_slot] = 0;
 
-	loop_synchro_mode[loop_slot] = ACAudioEngineSynchroModeAutoBeat;	
-	loop_scale_mode[loop_slot] = ACAudioEngineScaleModeVocode;
+	loop_synchro_mode[loop_slot] = ACAudioEngineSynchroModeAutoBeat;
+	loop_scale_mode[loop_slot] = ACAudioEngineScaleModeVocode; //CF scrub test //ACAudioEngineScaleModeResample; // 
 	
 	if (!use_bpm[loop_slot]) {
 		loop_synchro_mode[loop_slot] = ACAudioEngineSynchroModeNone;
 	}
-	
+	loop_synchro_mode[loop_slot] = ACAudioEngineSynchroModeManual;  //ACAudioEngineSynchroModeAutoBeat; //CF scrub test
 	active_loops++;
 	
 	//pv[loop_slot] = pv_complex_curses_init2(datashort,size,freq,NULL,1.0,0,2048,512,3,2); //hard-coded
