@@ -1375,7 +1375,7 @@ int ACMediaBrowser::toggleSourceActivity(int lid, int type)
 void ACMediaBrowser::setClosestLoop(int _loop_id)
 {
 	int loop_id;
-	
+	closest_loop = _loop_id;
 	if (_loop_id<0) {
 		return;
 	}
