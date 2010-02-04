@@ -317,6 +317,7 @@ void MediaCycle::setForwardDown(int i) { forwarddown = i; }
 void MediaCycle::setAutoPlay(int i) { mediaBrowser->setAutoPlay(i); }
 void MediaCycle::setClickedLoop(int i) { mediaBrowser->setClickedLoop(i); }
 void MediaCycle::setClosestLoop(int i) { mediaBrowser->setClosestLoop(i); }
+int MediaCycle::getClosestLoop() { return mediaBrowser->getClosestLoop(); }
 // 
 void MediaCycle::muteAllSources() { mediaBrowser->muteAllSources(); }
 void* MediaCycle::hasBrowser() { return mediaBrowser; }
@@ -363,12 +364,15 @@ vector<int>* MediaCycle::getNeedsActivityUpdateMedia() {
 	}
 }
 
-void MediaCycle::pickedObjectCallback(int pid) {
-	if(pid >= 0) {
-		mediaBrowser->setClickedLoop(pid);
-		if (!forwarddown) {
-			mediaBrowser->toggleSourceActivity(pid);
-		}
+void MediaCycle::pickedObjectCallback(int _pid) {
+	int pid;
+	pid = _pid;
+	if(pid < 0) {
+		pid = getClosestLoop();
+	}
+	mediaBrowser->setClickedLoop(pid);
+	if (!forwarddown) {
+		mediaBrowser->toggleSourceActivity(pid);
 	}
 }
 

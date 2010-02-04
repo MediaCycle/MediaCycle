@@ -168,6 +168,7 @@ public:
 	
 	void setClickedLoop(int iloop);
 	int getClickedLoop()					{return mClickedLoop; };
+	int getClosestLoop()					{return closest_loop; };
 
 	void setClickedLabel(int ilabel);
 	int getClickedLabel()					{return mClickedLabel; };

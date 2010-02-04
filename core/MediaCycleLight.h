@@ -142,6 +142,7 @@ public:
 	void setAutoPlay(int i);
 	void setClickedLoop(int i);
 	void setClosestLoop(int i);
+	int getClosestLoop();
 	// 
 	void pickedObjectCallback(int pid);
 	void hoverObjectCallback(int pid);
