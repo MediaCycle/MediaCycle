@@ -40,6 +40,7 @@
 */
 
 // #include <mach/mach.h>
+//#include <mach/mach.h>
 //#include <sched.h>
 
 /*
@@ -220,6 +221,8 @@ FILE *debug_vocoder;
 
 ACAudioFeedback::ACAudioFeedback()
 {
+
+	engine_running = 0;
 	media_cycle = 0;
 	
 	int i;
@@ -374,13 +377,15 @@ void *threadAudioUpdateFunction(void *_audio_update_arg)
 
 void ACAudioFeedback::startAudioEngine() {
 #ifdef OPENAL_STREAM_MODE
-	createAudioEngine(output_sample_rate, output_buffer_size, output_buffer_n);
+	if (!engine_running)
+		createAudioEngine(output_sample_rate, output_buffer_size, output_buffer_n);
 #endif
 }
 
 void ACAudioFeedback::stopAudioEngine() {
 #ifdef OPENAL_STREAM_MODE
-	deleteAudioEngine();
+	if (engine_running)
+		deleteAudioEngine();
 #endif
 }
 
@@ -456,20 +461,21 @@ void ACAudioFeedback::createAudioEngine(int _output_sample_rate, int _output_buf
 	audio_update_arg = (void*)this;
 	pthread_create(&audio_update, &audio_update_attr, &threadAudioUpdateFunction, audio_update_arg);
 	pthread_attr_destroy(&audio_update_attr);
+	engine_running=1;
 
 }
 
 void ACAudioFeedback::deleteAudioEngine()
 {
-	fclose(timing);
+// 	fclose(timing);
 	
-	// SD TODO - Clear Buffers
-	//
-	pthread_exit(&audio_engine);
-	pthread_mutex_destroy(&audio_engine_mutex);
-	pthread_cond_destroy(&audio_engine_cond);
-	pthread_mutex_destroy(&audio_engine_cond_mutex);
-	
+// 	// SD TODO - Clear Buffers
+// 	//
+// 	pthread_exit(&audio_engine);
+// 	pthread_mutex_destroy(&audio_engine_mutex);
+// 	pthread_cond_destroy(&audio_engine_cond);
+// 	pthread_mutex_destroy(&audio_engine_cond_mutex);
+// 	engine_running = 0;
 
 	
 }
@@ -1387,9 +1393,23 @@ int ACAudioFeedback::createSourceWithPosition(int loop_id, float x, float y, flo
 	CFRelease(fileName);
 	
 	// Convert to single channel (mono). OpenAl stereo sources are not spatialized indeed.
-	int sample_size = media_cycle->getWidth(loop_id);
+	int sample_size;// = media_cycle->getWidth(loop_id);
 	int sample_start = 0;
-	int sample_end = sample_size + sample_start;
+	int sample_end;
+
+	switch (format) {
+	case AL_FORMAT_MONO16:
+		sample_size = size/2;
+		break;
+	case AL_FORMAT_STEREO8:
+		sample_size = size/2;
+		break;
+	case AL_FORMAT_STEREO16:
+		sample_size = size/4;
+		break;
+	}
+
+	sample_end = sample_size + sample_start;
 	size = sample_size;
 	datashort = new short[size];
 	datas = (short*)data;

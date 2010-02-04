@@ -736,8 +736,8 @@ ucolvec randperm(int n){
   return perm_v;
 }
 
-ucolvec find(umat A_v){
-  ucolvec pos_v;
+colvec find(umat A_v){
+  colvec pos_v;
   double tmp;
   if (A_v.n_cols > 1){
     std::cerr << "Error : Find only works on column vectors" << std::endl;
@@ -767,4 +767,201 @@ mat diff(mat A_m, int n, int dim){
       exit(1);
     } 
 	return R_m;
+}
+
+
+ucolvec paretofront(mat M){
+	unsigned int t,s,i,j,j1,j2;
+	bool coldominatedflag;
+	int col = M.n_cols;
+	int row = M.n_rows;
+	ucolvec front;
+	ucolvec checklist(row);
+	front.zeros(row,1);
+	for(t = 0; t<row; t++) checklist[t] = 1;
+	for(s = 0; s<row; s++) {
+		t=s;
+		if (!checklist[t]) continue;
+		checklist[t]=0;
+		coldominatedflag=1;
+		for(i=t+1;i<row;i++) {
+			if (!checklist[i]) continue;
+			checklist[i]=0;
+			for (j=0,j1=i,j2=t;j<col;j++,j1+=row,j2+=row) {
+				if (M(j1) < M(j2)) {
+					checklist[i]=1;
+					break;
+				}
+			}
+			if (!checklist[i]) continue;
+			coldominatedflag=0;
+			for (j=0,j1=i,j2=t;j<col;j++,j1+=row,j2+=row) {
+				if (M(j1) > M(j2)) {
+					coldominatedflag=1;
+					break;
+				}
+			}
+			if (!coldominatedflag) {     //swap active index continue checking
+				front(t)=0;
+				checklist[i]=0;
+				coldominatedflag=1;
+				t=i;
+			}
+		}
+		front(t)=coldominatedflag;
+		if (t>s) {
+			for (i=s+1; i<t; i++) {
+				if (!checklist[i]) continue;
+				checklist[i]=0;
+				for (j=0,j1=i,j2=t;j<col;j++,j1+=row,j2+=row) {
+					if (M(j1) < M(j2)) {
+						checklist[i]=1;
+						break;
+					}
+				}
+			}
+		}
+	}
+	return front;
+}
+
+ucolvec paretorank(mat X, int maxRank, int minNbItems){
+	// careful : the case were to lines are the same is not handled 
+	int row = X.n_rows;
+	ucolvec front_v(row);
+	ucolvec rank_v;
+	int currentRank = 1;
+	ucolvec posFront_v;
+	imat pos_v = linspace(0, row-1, row, 0);
+	mat oldX;
+	int tmpIdx = 0;
+	imat oldPos_v;
+	int itemRanked = 0;
+	
+	rank_v.zeros(row);
+
+	if (minNbItems == 0)
+		minNbItems = row+1;
+
+	while (X.n_elem > 0 & itemRanked < minNbItems){
+		front_v = paretofront(X);
+		for (int iFront=0; iFront < front_v.n_rows; iFront++){
+			if (front_v(iFront) == 1) 
+				rank_v(pos_v(iFront,0)) = currentRank;
+		}
+		currentRank = currentRank+1;
+		oldX = X;
+		oldPos_v = pos_v;
+		X.set_size(oldX.n_rows - sum(front_v), X.n_cols);
+		pos_v.set_size(oldX.n_rows - sum(front_v), 1);
+		tmpIdx = 0;
+		for (int iFront=0; iFront < front_v.n_rows; iFront++){
+			if (!front_v(iFront)){
+				X.row(tmpIdx) = oldX.row(iFront);
+				pos_v(tmpIdx,0) = oldPos_v(iFront,0);
+				tmpIdx++;
+			}
+		}
+		itemRanked = row - X.n_rows;
+	}
+	return rank_v;
+}
+
+uvec ismember(colvec A_v, colvec X_v){
+	uvec res_v;
+	bool cont;
+	int idx;
+	res_v.zeros(A_v.n_rows);
+	std::cout << "res_v = " << res_v << std::endl;
+	for (int i=0; i<A_v.n_rows; i++){
+		idx=0;
+		cont = true;
+		while (cont & (idx < X_v.n_rows)) {
+			if (A_v(i) == X_v(idx)){
+				res_v(i) = 1;
+				cont = false;
+			}	
+			idx++;	
+		}
+	}
+	return res_v;
+}
+
+mat pdist(mat data){
+	//mode : distance type    // 0 = euclidian distance
+    int n = data.n_rows;
+    int p = data.n_cols;
+
+    mat similarityM = zeros<mat>(n,n);
+
+    for (int i = 0; i < n-1; i++) {
+        colvec dsq = zeros<colvec>(n-1-i);
+        colvec tmpResult = zeros<colvec>(n-1-i);
+
+        for (int q = 0; q < p; q++) {
+            colvec tmp2 = data.col(q);
+            colvec tmp = tmp2.rows(i+1,n-1);
+            dsq = dsq + square(data(i,q) - tmp);
+        }
+        tmpResult = sqrt(dsq);
+        similarityM.submat(i+1,i,n-1,i) = tmpResult;
+        similarityM.submat(i,i+1,i,n-1) = trans(tmpResult);
+    }
+    return similarityM;
+}
+
+
+mat zscore(mat x, int dim){
+	mat z(x.n_rows, x.n_cols);
+	if (x.n_elem == 0)
+		return z;
+	mat mu = mean(x,dim);
+	mat sigma = stddev(x, 0, dim);
+	for (int i=0; i<sigma.n_rows; i++)
+		for (int j=0; j<sigma.n_cols; j++)
+			if (sigma(i,j)==0)
+				sigma(i,j) = 1;
+	if (dim==0){
+		z = x - repmat(mu, x.n_rows, 1);
+		z = z / repmat(sigma, x.n_rows, 1);
+	}
+	else
+		if (dim == 1){
+			z = x - repmat(mu, 1, x.n_cols);
+			z = z / repmat(sigma, 1, x.n_cols);
+		}
+	return z;
+}
+
+
+int cart2pol(colvec x_v, colvec y_v, colvec &th_v, colvec &r_v){
+	// Angle between 0 and 2*pi
+	if (x_v.n_elem != y_v.n_elem){
+		std::cerr << "Error : x and y must be the same length" << std::endl;
+		return 0;
+	}
+
+	th_v.set_size(x_v.n_elem);
+	r_v.set_size(x_v.n_elem);
+		
+	for (int i = 0; i < x_v.n_elem; i++){
+		if (x_v(i)==0)
+			if (y_v(i)==0)
+				th_v(i) = 0;
+			else if (y_v(i)>0)
+				th_v(i) = math::pi()/2;
+			else // if (y_v(i)<0)
+				th_v(i) = math::pi()/2 *3;
+		else
+			if (x_v(i) < 0)
+				th_v(i) = atan(y_v(i)/x_v(i)) + math::pi();
+			else // if (x_v(i) > 0)
+				if (y_v(i) >= 0)
+					th_v(i) = atan(y_v(i)/x_v(i));
+				else //if (y_v(i) < 0)
+					th_v(i) = atan(y_v(i)/x_v(i)) + 2* math::pi();
+	}
+	r_v = sqrt(square(x_v)+square(y_v));
+	
+	return 1;
 }

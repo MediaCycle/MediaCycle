@@ -211,7 +211,7 @@ ACMediaBrowser::ACMediaBrowser() {
 	nbDisplayedLabels = 0;
 
 	mLoopAttributes.resize(0);
-	nbDisplayedLoops = 16;
+	nbDisplayedLoops = 20;
 	
 	mVisPlugin = NULL;
 	
@@ -773,12 +773,12 @@ void ACMediaBrowser::setProximityGrid() {
 	}
 		
 	// Proximity Grid Density
-	proxgridlx = 10;
+	proxgridlx = 2;
 	proxgridstepx = (proxgridr-proxgridl)/(proxgridlx-1);
 	proxgridaspectratio = 9.0/16.0;
 	proxgridstepy = proxgridstepx * proxgridaspectratio;
 	proxgridly = (proxgridt-proxgridb)/proxgridstepy + 1;	
-	proxgridmaxdistance = 5;
+	proxgridmaxdistance = 2;
 	proxgridjitter = 0.25;
 	
 	// Init
@@ -932,7 +932,7 @@ void ACMediaBrowser::updateNextPositions(){
     std::cout << "updateNextPositions : Plugin" << std::endl;
     mVisPlugin->updateNextPositions(this);
   }
-	// setProximityGrid();
+	//setProximityGrid();
 }
 
 void ACMediaBrowser::setNextPositions2dim(){

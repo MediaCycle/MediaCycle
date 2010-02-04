@@ -69,6 +69,7 @@ string fillOutputBuffer(ACMediaLibrary* media_library, ACMediaBrowser* media_bro
 string xmlpath = "/Users/dtardieu/Desktop/dancers-test/dancers-all.xml";
 
 int main(int argc, char** argv) {
+
 	string configFilename = "./config.txt";
 	ifstream configIF(configFilename.c_str());
 	
@@ -76,7 +77,7 @@ int main(int argc, char** argv) {
 	configIF >> libraryFilename;
 	configIF >> visPluginFilename;
 	configIF.close();
-
+	
 	cout<<"new MediaCycle"<<endl;
 	MediaCycle* mediacycle;
 	mediacycle = new MediaCycle(MEDIA_TYPE_VIDEO);
@@ -583,15 +584,15 @@ void saveLibraryAsXml(MediaCycle* mediacycle, string _path) {
 	fprintf(library_file, "<feature size=\"6\" >ID</feature>\n");
 	
 	for (int i=0; i < media_library->getItem(0)->getNumberOfFeatures(); i++){
-		featureSize = media_library->getItem(0)->getFeatures(i)->size();
-		featureName = media_library->getItem(0)->getFeatures(i)->getName();
+		featureSize = media_library->getItem(0)->getFeature(i)->size();
+		featureName = media_library->getItem(0)->getFeature(i)->getName();
 		
 		if (featureSize > 1){
 			std::cout << "Warning : Multidimensional feature, won't be exported" << std::endl;
 		}
 		else{
 			fprintf(library_file, "<feature size=\"1\">");
-			fprintf(library_file, "%s",  media_library->getItem(0)->getFeatures(i)->getName().c_str());
+			fprintf(library_file, "%s",  media_library->getItem(0)->getFeature(i)->getName().c_str());
 			fprintf(library_file, "</feature>\n");
 		}
 	}
@@ -609,11 +610,11 @@ void saveLibraryAsXml(MediaCycle* mediacycle, string _path) {
 		ID = generateID(local_media->getFileName());
 		fprintf(library_file, "%s", ID.c_str());
 		for (int j=0; j < media_library->getItem(i)->getNumberOfFeatures(); j++){
-			featureSize = media_library->getItem(i)->getFeatures(j)->size();
-			featureName = media_library->getItem(i)->getFeatures(j)->getName();
+			featureSize = media_library->getItem(i)->getFeature(j)->size();
+			featureName = media_library->getItem(i)->getFeature(j)->getName();
 			
 			if (featureSize == 1){
-				featureValue = media_library->getItem(i)->getFeatures(j)->getDiscretizedFeature();
+				featureValue = media_library->getItem(i)->getFeature(j)->getDiscretizedFeature();
 				fprintf(library_file, "%d", (int) featureValue);
 				if (i>80){
 					std::cout << featureName << " = " << featureValue << std::endl;

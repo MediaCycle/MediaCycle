@@ -215,6 +215,7 @@ private:
 	long int		 downbeat_from_start;
 	float scrub_pos;
 	
+	int engine_running;
 	// ...
 	FILE *timing;
 	

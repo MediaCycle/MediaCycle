@@ -109,12 +109,12 @@ static void osc_callback(TiOscReceiverRef, const char *tagName, void *userData)
 	[[NSNotificationCenter defaultCenter] addObserver: self selector: @selector(myObserver:) name: @"OALNotify" object: NULL];
 	
 	media_cycle = new MediaCycle(MEDIA_TYPE_AUDIO,"/tmp/","mediacycle.acl");
-	//media_cycle->addPlugin ("/Users/dtardieu/src/Numediart/ticore-app/Applications/Numediart/MediaCycle/src/Builds/darwin-x86/plugins/visualisation/Debug/mc_visualisation.dylib");
-	//media_cycle->setVisualisationPlugin("Visualisation");
+	media_cycle->addPlugin ("/Users/dtardieu/src/Numediart/ticore-app/Applications/Numediart/MediaCycle/src/Builds/darwin-x86/plugins/visualisation/Debug/mc_visualisation.dylib");
+	//	media_cycle->setVisualisationPlugin("Visualisation");
 	
 	audio_engine = new ACAudioFeedback();
 	audio_engine->setMediaCycle(media_cycle);
-	
+
 	NSLog(@"DANCERS!");
 	
 	//media_cycle->importLibrary("/dupont/dancers.acl_copy");
@@ -248,12 +248,14 @@ static void osc_callback(TiOscReceiverRef, const char *tagName, void *userData)
 - (IBAction)	setEngineStart:(id)inSender
 {
 	// SD TODO
+	audio_engine->startAudioEngine();
 	//audio_cycle->getAudioFeedback()->startAudioEngine();
 }
 
 - (IBAction)	setEngineStop:(id)inSender
 {
 	// SD TODO
+	audio_engine->stopAudioEngine();
 	//audio_cycle->getAudioFeedback()->stopAudioEngine();
 }
 
@@ -271,6 +273,7 @@ static void osc_callback(TiOscReceiverRef, const char *tagName, void *userData)
 {
 	media_cycle->muteAllSources();
 }
+
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // BROWSER
