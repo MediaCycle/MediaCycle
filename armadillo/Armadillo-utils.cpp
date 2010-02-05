@@ -872,7 +872,6 @@ uvec ismember(colvec A_v, colvec X_v){
 	bool cont;
 	int idx;
 	res_v.zeros(A_v.n_rows);
-	std::cout << "res_v = " << res_v << std::endl;
 	for (int i=0; i<A_v.n_rows; i++){
 		idx=0;
 		cont = true;

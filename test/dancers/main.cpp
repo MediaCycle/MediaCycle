@@ -85,7 +85,7 @@ int main(int argc, char** argv) {
 	mediacycle->setVisualisationPlugin("Visualisation");
 	mediacycle->importLibrary(libraryFilename);
 
-	saveLibraryAsXml(mediacycle, xmlpath);	
+	//saveLibraryAsXml(mediacycle, xmlpath);	
 	// XS test C++ ACL
 	// mediacycle->importACLLibrary(path);
 	

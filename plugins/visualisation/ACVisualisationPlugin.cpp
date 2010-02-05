@@ -1,7 +1,7 @@
 /**
  * @brief ACVisualisationPlugin.cpp
  * @author Damien Tardieu
- * @date 04/02/2010
+ * @date 05/02/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -145,7 +145,9 @@ void ACVisualisationPlugin::updateNextPositions(ACMediaBrowser* mediaBrowser){
   labelPos_m = labelPos_m/repmat(maxPosDisp_v-minPosDisp_v, labelPos_m.n_rows, 1)*999;
 	posDisp_m.col(1) = 999-posDisp_m.col(1);
 	labelPos_m.col(1) = 999-labelPos_m.col(1);
+#ifdef USE_DEBUG
 	posDisp_m.save("posDispDef.txt", arma_ascii);
+#endif
 // 	///////////////////////////////////////////////////////////////////////////////
 	
 	///for mediacycle osg
@@ -163,8 +165,10 @@ void ACVisualisationPlugin::updateNextPositions(ACMediaBrowser* mediaBrowser){
     labelValue.append(clusterLabelAdj[labelValue_v(i)]);
     mediaBrowser->setLabel(i, labelValue, p);
   }
+#ifdef USE_DEBUG
 	std::cout << "toDisplay_v.n_elem : "  << toDisplay_v.n_elem << std::endl;
 	std::cout << "labelIdx_v.n_elem : "  << labelIdx_v.n_rows << std::endl;
+#endif
 	mediaBrowser->setNumberOfDisplayedLabels(labelIdx_v.n_rows);
 	mediaBrowser->setNumberOfDisplayedLoops(toDisplay_v.n_elem);
 	////////////////////////////////////////////////////////////////////////////////////
@@ -308,9 +312,11 @@ mat ACVisualisationPlugin::updateNextPositionsInit(mat &desc_m, int nbVideoDispl
 				labelValue_v(k) = 1;
       else
 				labelValue_v(k) = 2;
+#ifdef USE_DEBUG
 		std::cout << "center_m(k,labelIdx_v(k)) : " << center_m(k,labelIdx_v(k)) << std::endl;
 		std::cout << "center_m(k,labelIdx_v(k))*3 : " << center_m(k,labelIdx_v(k))*3 << std::endl;
 		std::cout << "labelValue_v(k) : " << labelValue_v(k) << std::endl;
+#endif
 	}
 #ifdef USE_DEBUG
 	std::cout << "debug" << std::endl;
@@ -338,8 +344,9 @@ mat ACVisualisationPlugin::updateNextPositionsInit2(mat &desc_m, int nbVideoDisp
 	mat centroid_m;
 	newD_m = newD_m.cols(0,1);
 	kcluster(newD_m,nbClusters, idx_v,centroid_m);
+#ifdef USE_DEBUG
 	newD_m.save("newD.txt", arma_ascii);
-	
+#endif	
 	// 	selectedClusters_v = randperm(nbClusters);
 	// 	selectedClusters_v = selectedClusters_v.cols(0,nbSelectedClusters-1);
 	
@@ -405,19 +412,21 @@ mat ACVisualisationPlugin::updateNextPositionsInit2(mat &desc_m, int nbVideoDisp
 				maxPos_v(1) = j;
 				maxVal = distC_m(i,j);
 			}
-	std::cout << "maxPos_v = " << maxPos_v << std::endl;
 	rowvec sameLabel_v = sort(maxPos_v);
-	std::cout << "sameLabel_v = \n" << sameLabel_v << std::endl;
 	//[Mv, Mp]=max(diff(centroidO_m(sameLabel_v,:)));
 	mat centroidSameLabel_m(2, centroidO_m.n_cols);
 	centroidSameLabel_m.row(0) = centroidO_m.row(sameLabel_v(0));
 	centroidSameLabel_m.row(1) = centroidO_m.row(sameLabel_v(1));
-	std::cout << "centroidSameLabel_m = \n" << centroidSameLabel_m << std::endl;
 
 	urowvec Mp_v = sort_index(conv_to<rowvec>::from(abs(diff(centroidSameLabel_m))), 1);
-	
+
+#ifdef USE_DEBUG	
+	std::cout << "maxPos_v = " << maxPos_v << std::endl;
+	std::cout << "sameLabel_v = \n" << sameLabel_v << std::endl;
+	std::cout << "centroidSameLabel_m = \n" << centroidSameLabel_m << std::endl;
 	std::cout << "diff(centroidSameLabel_m) = " << abs(diff(centroidSameLabel_m)) << std::endl;
 	std::cout << "Mp_v = " << Mp_v << std::endl;
+#endif
 	labelIdx_v.zeros(nbSelectedClusters, 1);
 	labelIdx_v += desc2_m.n_cols;
 	labelIdx_v(sameLabel_v(0))=Mp_v(0);
@@ -439,12 +448,16 @@ mat ACVisualisationPlugin::updateNextPositionsInit2(mat &desc_m, int nbVideoDisp
 	}
 	for (int i=0; i < toDisplay_v.n_elem; i++){
 		toDisplay_v(i) = posSC_v(toDisplay_v(i));
+#ifdef USE_DEBUG
 		std::cout << "toDisplay_v = \n" << toDisplay_v << std::endl;
 		std::cout << "posSC_v = \n" << posSC_v << std::endl;
+#endif
 	}
 	for (int k=0; k < nbSelectedClusters; k++){
+#ifdef USE_DEBUG
 		std::cout << "centroid2_m = \n" << centroid2_m << std::endl;    
 		std::cout << "labelIdx_v = \n" << labelIdx_v << std::endl;    
+#endif
 		if (centroidO_m(k,labelIdx_v(k)) > .5)
       labelValue_v(k)=3;
     else 
@@ -454,8 +467,10 @@ mat ACVisualisationPlugin::updateNextPositionsInit2(mat &desc_m, int nbVideoDisp
 				labelValue_v(k) = 2;
 	}
 
+#ifdef USE_DEBUG
 	std::cout << "labelValue_v = \n" << labelValue_v << std::endl;    	
 	toDisplay_v.save("toDisplay.txt", arma_ascii);
+#endif
 	labelPos_m = centroid2_m;
 	return newD_m;
 }
@@ -562,9 +577,10 @@ mat ACVisualisationPlugin::updateNextPositionsItemClicked2(mat &desc_m, int nbVi
 	}
 	
 	labelPos_m = centroid_m;
+#ifdef USE_DEBUG
 	std::cout << "centroid_m = \n" << centroid_m << std::endl;
 	std::cout << "labelIdx_v = \n" << labelIdx_v << std::endl;
-	
+#endif	
 	toDisplay_v.set_size(selPos_v.n_rows);
 	
 	for (int i=0; i<selPos_v.n_elem; i++)
@@ -587,8 +603,10 @@ mat ACVisualisationPlugin::updateNextPositionsItemClicked3(mat &desc_m, int nbVi
 	mat tg_v = desc_m.row(itemClicked);
 	mat dist_m = abs(desc_m - repmat(tg_v, desc_m.n_rows, 1));
 	ucolvec rank_v = paretorank(dist_m, 20, nbVideoDisplay);
+#ifdef USE_DEBUG
  	dist_m.save("dist_m", arma_ascii);
 	rank_v.save("rank.txt", arma_ascii);
+#endif
 	std::cout << "Item Clicked : " << itemClicked << std::endl;
 	colvec selPos_v = find(rank_v > 0);
 	colvec distEucl_v = sqrt(sum(square(dist_m), 1));
@@ -598,18 +616,18 @@ mat ACVisualisationPlugin::updateNextPositionsItemClicked3(mat &desc_m, int nbVi
 		distEuclFront_v(i) = distEucl_v(selPos_v(i));
 	ucolvec sp_v = sort_index(distEuclFront_v);
 	double maxDistEucl = distEuclFront_v(sp_v(nbVideoDisplay-1));
+#ifdef USE_DEBUG
 	std::cout << "maxDistEucl = " << maxDistEucl << std::endl;
+#endif
 	toDisplay_v.set_size(nbVideoDisplay);
 	for (int i = 0; i < nbVideoDisplay; i++)
 		toDisplay_v(i) = selPos_v(sp_v(i));
 	toDisplay_v = sort(toDisplay_v);
+
+#ifdef USE_DEBUG
 	toDisplay_v.save("toDisplay.txt", arma_ascii);
-	//selPos_v = shuffle(selPos_v);
- 	//selPos_v = sort(selPos_v.rows(0, nbVideoDisplay-1));
-	// 	toDisplay_v.set_size(selPos_v.n_rows);
-	// 	for (int i=0; i<selPos_v.n_elem; i++)
-	// 		toDisplay_v(i) = selPos_v(i);
-	
+#endif
+
 	mat sv = sort(dist_m, 0, 1);
 	mat dist2_m = dist_m % (dist_m<repmat(sv.col(2), 1, 3));
 	mat dist3_m= dist2_m / repmat(sum(dist2_m,1),1,3);
@@ -638,7 +656,9 @@ mat ACVisualisationPlugin::updateNextPositionsItemClicked3(mat &desc_m, int nbVi
 	rowvec maxPosDisp_v = max(posDispOk_m);
 	rowvec minPosDisp_v = min(posDispOk_m);
 
+#ifdef USE_DEBUG
 	posDisp_m.save("posDisp1.txt", arma_ascii);
+#endif
 	labelIdx_v.set_size(3);
 	labelIdx_v(0)=0;
 	labelIdx_v(1)=1;
