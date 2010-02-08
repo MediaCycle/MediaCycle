@@ -1,16 +1,15 @@
-MESSAGE("gui/osg-qt")
-project (AudioCycleQtOsg) 
-
-FILE(GLOB SRC *.cpp)
-FILE(GLOB HDR *.h)
-
-INCLUDE_DIRECTORIES(. ../osg)
-
-#IF ( APPLE )
-#	SET(APP_TYPE MACOSX_BUNDLE)
-#ENDIF ( APPLE )
-
 IF ( USE_QT4 )
+	MESSAGE("gui/osg-qt")
+
+	FILE(GLOB SRC *.cpp)
+	FILE(GLOB HDR *.h)
+
+	INCLUDE_DIRECTORIES(. ../osg)
+
+	#IF ( APPLE )
+	#	SET(APP_TYPE MACOSX_BUNDLE)
+	#ENDIF ( APPLE )
+
 	SET(MediaCycleQtOsg_SRCS main.cpp ACMainWindowQT.cpp ACOsgBrowserViewQT.cpp)
 	SET(MediaCycleQtOsg_MOC_HDRS ACMainWindowQT.h)
 	SET(MediaCycleQtOsg_UIS ACMainWindowQT.ui)
@@ -54,12 +53,21 @@ IF ( USE_QT4 )
 	TARGET_LINK_LIBRARIES(MediaCycleQtOsg TiCommon TiIo TiOsc TiRendering)
 	TARGET_LINK_LIBRARIES(MediaCycleQtOsg TiCommon TiRendering)
 	TARGET_LINK_LIBRARIES(MediaCycleQtOsg osg osgDB osgGA osgViewer)
-	TARGET_LINK_LIBRARIES(MediaCycleQtOsg boost_system)
+
+	#Boost : TARGET_LINK_LIBRARIES(MediaCycleQtOsg boost_system) (or boost_system-mt depending on platform)
+	FIND_PACKAGE ( Boost COMPONENTS system )
+	IF ( Boost_SYSTEM_FOUND )
+		MESSAGE( "Found boost system in ${Boost_SYSTEM_LIBRARY}" )
+		TARGET_LINK_LIBRARIES(MediaCycleQtOsg ${Boost_SYSTEM_LIBRARY})
+	ELSE ( )
+		MESSAGE(FATAL_ERROR "Boost system not found.")
+	ENDIF ( )
+
 	TARGET_LINK_LIBRARIES(MediaCycleQtOsg ${QT_LIBRARIES})
 	TARGET_LINK_LIBRARIES(MediaCycleQtOsg ${QT4_LIBRARY} ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY} ${QT_QTOPENGL_LIBRARY} )
 
 	#IF ( APPLE )
-		set(CMAKE_EXE_LINKER_FLAGS "-framework CoreVideo -framework AppKit -framework Foundation")
+	#	set(CMAKE_EXE_LINKER_FLAGS "-framework CoreVideo -framework AppKit -framework Foundation")
 	#ENDIF ( APPLE )
 
 	IF ( OPENGL_FOUND AND GLUT_FOUND)
