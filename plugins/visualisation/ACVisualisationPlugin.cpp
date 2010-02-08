@@ -1,7 +1,7 @@
 /**
  * @brief ACVisualisationPlugin.cpp
  * @author Damien Tardieu
- * @date 05/02/2010
+ * @date 08/02/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -369,7 +369,7 @@ mat ACVisualisationPlugin::updateNextPositionsInit2(mat &desc_m, int nbVideoDisp
 	
 	
 	
-	int nbItemPerCluster = 5;
+	int nbItemPerCluster = (int)(nbVideoDisplay/nbSelectedClusters);
 	toDisplay_v.set_size(nbItemPerCluster*nbSelectedClusters);
 	colvec posTmp_v;
 	colvec idxC_v;
