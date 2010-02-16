@@ -327,7 +327,7 @@ int processTcpMessageFromSSI(MediaCycle *that, char *buffer, int l, char **buffe
             }
         }
         cout << endl << "after" << endl;
-        local_media->getFeatures(0)->dump();
+        local_media->getFeature(0)->dump();
         cout << endl;
 
         vector<ACMedia *> result;
