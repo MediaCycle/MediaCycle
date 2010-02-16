@@ -1,0 +1,4 @@
+IF ( USE_OSC )
+        MESSAGE("io")
+	ADD_SUBDIRECTORY(osc)
+ENDIF ( USE_OSC )
