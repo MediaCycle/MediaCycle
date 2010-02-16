@@ -9,7 +9,7 @@ IF ( USE_OSG )
 	#-losg -losgDB -losgGA -losgViewer -lOpenThreads
 	#-lboost_system -lcv -lcvaux -lhighgui
 	TARGET_LINK_LIBRARIES(mediacycle-osg mediacycle)
-	TARGET_LINK_LIBRARIES(mediacycle-osg TiCommon TiIo TiOsc TiRendering)
+	#TARGET_LINK_LIBRARIES(mediacycle-osg TiCommon TiIo TiOsc TiRendering) #CF: only necessary for osg-cocoa
 	TARGET_LINK_LIBRARIES(mediacycle-osg osg osgDB osgGA osgViewer osgText)
 	TARGET_LINK_LIBRARIES(mediacycle-osg OpenThreads)
 

@@ -63,7 +63,7 @@ ACOsgAudioRenderer::~ACOsgAudioRenderer() {
 void ACOsgAudioRenderer::waveformGeode() {
 	
 	int i;
-	float zpos = 0.02;
+	float zpos = 0.04; //CF sphere hack instead of 0.02 for boxes
 	double xstep = 0.0005, ylim = 0.025;
 
 	int width;
@@ -130,7 +130,7 @@ void ACOsgAudioRenderer::waveformGeode() {
 		(*line_p)[2*i] = i;
 		(*line_p)[2*i+1] = i+1;
 	}
-	border_geometry->addPrimitiveSet(line_p);
+	//border_geometry->addPrimitiveSet(line_p); // CF, temporarily disabled
 	
 	DrawElementsUInt *poly = new DrawElementsUInt(PrimitiveSet::QUADS, 4);
 	poly->push_back(0);
@@ -169,8 +169,7 @@ void ACOsgAudioRenderer::waveformGeode() {
 
 void ACOsgAudioRenderer::curserGeode() {
 	
-	int i;
-	float zpos = 0.02;
+	float zpos = 0.04; //CF sphere hack instead of 0.02
 	double xstep = 0.0005, ylim = 0.025;
 	
 	StateSet *state;
@@ -237,8 +236,10 @@ void ACOsgAudioRenderer::entryGeode() {
 	state = entry_geode->getOrCreateStateSet();
 	state->setMode(GL_NORMALIZE, osg::StateAttribute::ON);	
 
-	entry_geode->addDrawable(new osg::ShapeDrawable(new osg::Box(osg::Vec3(0.0f,0.0f,0.0f),0.01), hints));
-	
+	//entry_geode->addDrawable(new osg::ShapeDrawable(new osg::Box(osg::Vec3(0.0f,0.0f,0.0f),0.01), hints)); //draws a square
+	entry_geode->addDrawable(new osg::ShapeDrawable(new osg::Sphere(osg::Vec3(0.0f,0.0f,0.0f),0.01), hints)); // draws a sphere
+	//entry_geode->addDrawable(new osg::ShapeDrawable(new osg::Cylinder(osg::Vec3(0.0f,0.0f,0.0f),0.01, 0.0f), hints)); // draws a disc
+	//entry_geode->addDrawable(new osg::ShapeDrawable(new osg::Capsule(osg::Vec3(0.0f,0.0f,0.0f),0.01, 0.005f), hints)); // draws a sphere
 	//sprintf(name, "some audio element");
 	entry_geode->setUserData(new ACRefId(loop_index));
 	//entry_geode->setName(name);

@@ -71,10 +71,10 @@ public:
 	ACOsgMediaRenderer();
 	virtual ~ACOsgMediaRenderer() {};
 
-	void setMediaCycle(MediaCycle *media_cycle) { this->media_cycle = media_cycle; };
-	void setLoopIndex(int loop_index) { this->loop_index = loop_index; };
-	void setDistanceMouse(float distance_mouse) { this->distance_mouse = distance_mouse; };
-	//void setActivity(int media_activity) { this->media_activity = media_activity; }
+	void setMediaCycle(MediaCycle *_media_cycle) { this->media_cycle = _media_cycle; };
+	void setLoopIndex(int _loop_index) { this->loop_index = _loop_index; };
+	void setDistanceMouse(float _distance_mouse) { this->distance_mouse = _distance_mouse; };
+	//void setActivity(int _media_activity) { this->media_activity = _media_activity; }
 	MatrixTransform* getNode() { return media_node; };
 	
 	virtual void prepareNodes()=0;

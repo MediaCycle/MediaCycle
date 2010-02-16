@@ -1296,6 +1296,32 @@ int ACAudioFeedback::getLoopSlot(int loop_id)
 	return loop_slot;
 }
 
+void ACAudioFeedback::setLoopSynchroMode(int _loop_id, ACAudioEngineSynchroMode _synchro_mode)
+{
+	int _loop_slot = getLoopSlot(_loop_id); 
+	if (_loop_slot != -1)
+	{	
+		if (loop_synchro_mode != NULL)
+		{	
+			loop_synchro_mode[_loop_slot] = _synchro_mode;
+		}	
+	}
+	//else {//some error message?};
+}
+
+void ACAudioFeedback::setLoopScaleMode(int _loop_id, ACAudioEngineScaleMode _scale_mode)
+{
+	int _loop_slot = getLoopSlot(_loop_id); 
+	if (_loop_slot != -1)
+	{	
+		if (loop_scale_mode != NULL)
+		{	
+			loop_scale_mode[_loop_slot] = _scale_mode;
+		}	
+	}
+	//else {//some error message?};
+}
+
 int ACAudioFeedback::createSource(int loop_id)
 {
 	return createSourceWithPosition(loop_id, 0, 0, 0);
@@ -1490,12 +1516,12 @@ int ACAudioFeedback::createSourceWithPosition(int loop_id, float x, float y, flo
 	//current_buffer[loop_slot] = 0;
 
 	loop_synchro_mode[loop_slot] = ACAudioEngineSynchroModeAutoBeat;
-	loop_scale_mode[loop_slot] = ACAudioEngineScaleModeVocode; //CF scrub test //ACAudioEngineScaleModeResample; // 
+	loop_scale_mode[loop_slot] = ACAudioEngineScaleModeResample; //ACAudioEngineScaleModeVocode; //CF scrub test  
 	
 	if (!use_bpm[loop_slot]) {
 		loop_synchro_mode[loop_slot] = ACAudioEngineSynchroModeNone;
 	}
-	loop_synchro_mode[loop_slot] = ACAudioEngineSynchroModeManual;  //ACAudioEngineSynchroModeAutoBeat; //CF scrub test
+	//loop_synchro_mode[loop_slot] = ACAudioEngineSynchroModeAutoBeat;  //ACAudioEngineSynchroModeManual; //CF scrub test
 	active_loops++;
 	
 	//pv[loop_slot] = pv_complex_curses_init2(datashort,size,freq,NULL,1.0,0,2048,512,3,2); //hard-coded

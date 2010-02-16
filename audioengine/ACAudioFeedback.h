@@ -53,7 +53,7 @@ typedef enum {
 	ACAudioEngineSynchroModeAutoBar				= 3,		// straight beat sync, no polyrhythm, gap may be cause in some loops
 	ACAudioEngineSynchroModeManual				= 4,		// position in loop controled from outside (scratch mode...) //OK
 	ACAudioEngineSynchroModeDownbeatSimple		= 5,
-} ACAUdioEngineSynchroMode;
+} ACAudioEngineSynchroMode;
 
 typedef enum {
 	ACAudioEngineScaleModeNone					= 0,
@@ -101,6 +101,12 @@ public:
 	// Scrub/Scratch control
 	void setScrub(float scrub);
 	
+	// Synchro and Scale modes
+	void setLoopSynchroMode(int _loop_id, ACAudioEngineSynchroMode _synchro_mode);
+	void setLoopScaleMode(int _loop_id, ACAudioEngineScaleMode _scale_mode);
+	//void setCurrentLoopSynchroMode(ACAudioEngineSynchroMode synchro);
+	//void setCurrentLoopScaleMode(ACAUdioEngineScaleMode scale);
+
 	// OpenAL listener settings (from browser)
 	void setListenerPosition(float x, float y, float z);
 	void setListenerElevation(float y);

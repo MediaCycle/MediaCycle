@@ -1,8 +1,8 @@
 /**
  * @brief ACOsgBrowserViewQT.h
  * @author Christian Frisson
- * @date 01/12/2009
- * @copyright (c) 2009 – UMONS - Numediart
+ * @date 16/02/2010
+ * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -97,7 +97,8 @@ class ACOsgBrowserViewQT : public QGLWidget, public osgViewer::Viewer
 {
 	public:
         ACOsgBrowserViewQT( QWidget * parent = 0, const char * name = 0, const QGLWidget * shareWidget = 0, WindowFlags f = 0 );
-        virtual ~ACOsgBrowserViewQT() {free(_privateData);}
+        //virtual ~ACOsgBrowserViewQT() {free(_privateData);}
+	virtual ~ACOsgBrowserViewQT() {};
         osgViewer::GraphicsWindow* getGraphicsWindow() { return _gw.get(); }
         const osgViewer::GraphicsWindow* getGraphicsWindow() const { return _gw.get(); }
         virtual void paintGL()
@@ -109,6 +110,7 @@ class ACOsgBrowserViewQT : public QGLWidget, public osgViewer::Viewer
     protected:
         void init();
         virtual void resizeGL( int width, int height );
+		virtual void updateGL();
         virtual void keyPressEvent( QKeyEvent* event );
         virtual void keyReleaseEvent( QKeyEvent* event );
         virtual void mousePressEvent( QMouseEvent* event );
@@ -120,8 +122,8 @@ class ACOsgBrowserViewQT : public QGLWidget, public osgViewer::Viewer
 
 	private:
 		MediaCycle *media_cycle;
-		ACOsgBrowserViewData *_privateData;
-		//ACOsgBrowserRenderer *renderer;
+		//ACOsgBrowserViewData *_privateData;
+		ACOsgBrowserRenderer *renderer;
 		ACOsgBrowserEventHandler *event_handler;
 
 	public:
@@ -130,9 +132,10 @@ class ACOsgBrowserViewQT : public QGLWidget, public osgViewer::Viewer
 		// needs to be called when loops positions are changed
 		void updateTransformsFromBrowser( double frac);
 		void setMediaCycle(MediaCycle* _media_cycle);
+		ACOsgBrowserRenderer* getRenderer(){return renderer;};
 
 	private:
-		int mousedown, zoomdown, forwarddown;
+		int mousedown, zoomdown, forwarddown, autoplaydown;
 		float refx, refy;
 		float refcamx, refcamy;
 		float refzoom;
