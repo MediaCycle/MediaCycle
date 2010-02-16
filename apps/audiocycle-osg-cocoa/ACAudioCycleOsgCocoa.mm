@@ -35,45 +35,55 @@
  *
  */
 
-#import "ACController.h"
+#include<iostream>
+#import <ACAudioCycleOsgCocoa.h>
 
-@interface ACController ()
-- (void)processOscMessage:(const char*)tagName;
-@end
+////
+/*
+@interface ACAudioCycleOsgCocoa ()
+ - (void)processOscMessage:(const char*)tagName;
+ @end
+ 
+ static void osc_callback(TiOscReceiverRef, const char *tagName, void *userData)
+ {
+ ACAudioCycleOsgCocoa *self = (ACAudioCycleOsgCocoa*)userData;
+ 
+ //printf("osc received tag: %s\n", tagName);
+ 
+ [self processOscMessage:tagName];
+ 
+ }
+*/
+////
 
-static void osc_callback(TiOscReceiverRef, const char *tagName, void *userData)
-{
-	ACController *self = (ACController*)userData;
-	
-	printf("osc received tag: %s\n", tagName);
-	
-	[self processOscMessage:tagName];
-}
-
-@implementation ACController
+@implementation ACAudioCycleOsgCocoa
 
 + (void)initialize
 {
 	// to avoid linker from discarding that class
 	[TiCocoaOsgView class];
+	[ACOsgBrowserViewCocoa class];//CF
 }
 
-- (void)initCommonACController
+- (void)initCommonACAudioCycleOsgCocoa
 {
-	/*mOscReceiver = TiOscReceiverCreate(NULL, 12345);
+////
+	/*
+	mOscReceiver = TiOscReceiverCreate("localhost", 12345);
 	
 	TiOscReceiverSetUserData(mOscReceiver, self);
 	TiOscReceiverSetCallback(mOscReceiver, osc_callback);
 	
 	TiOscReceiverStart(mOscReceiver);
 	 */
+////	 
 }
 
 - init
 {
 	if(self = [super init])
 	{
-		[self initCommonACController];
+		[self initCommonACAudioCycleOsgCocoa];
 	}
 	
 	return self;
@@ -81,9 +91,13 @@ static void osc_callback(TiOscReceiverRef, const char *tagName, void *userData)
 
 - (void)dealloc
 {
-	/*TiOscReceiverStop(mOscReceiver);
+	////osc_browser->stop();
+////
+	/*
+	TiOscReceiverStop(mOscReceiver);
 	TiOscReceiverRelease(mOscReceiver);
 	*/
+////
 	
 	[super dealloc];
 }
@@ -92,7 +106,7 @@ static void osc_callback(TiOscReceiverRef, const char *tagName, void *userData)
 {
 	if(self/* = [super initWithCoder:coder]*/)
 	{
-		[self initCommonACController];
+		[self initCommonACAudioCycleOsgCocoa];
 	}
 	
 	return self;
@@ -102,38 +116,6 @@ static void osc_callback(TiOscReceiverRef, const char *tagName, void *userData)
 - (void)myObserver:(NSNotification *)inNotification
 {
 	
-}
-
-- (void) awakeFromNib
-{
-	[[NSNotificationCenter defaultCenter] addObserver: self selector: @selector(myObserver:) name: @"OALNotify" object: NULL];
-	
-	media_cycle = new MediaCycle(MEDIA_TYPE_AUDIO,"/tmp/","mediacycle.acl");
-	media_cycle->addPlugin ("/Users/dtardieu/src/Numediart/ticore-app/Applications/Numediart/MediaCycle/src/Builds/darwin-x86/plugins/visualisation/Debug/mc_visualisation.dylib");
-	//	media_cycle->setVisualisationPlugin("Visualisation");
-	
-	audio_engine = new ACAudioFeedback();
-	audio_engine->setMediaCycle(media_cycle);
-
-	NSLog(@"DANCERS!");
-	
-	//media_cycle->importLibrary("/dupont/dancers.acl_copy");
-	
-	NSLog(@"DANCERS!");
-	
-	//media_cycle->setClusterNumber(5);
-	
-	NSLog(@"DANCERS!");
-	
-	//media_cycle->setSelectedObject(0);
-	
-	[browser_osg_view setMediaCycle:media_cycle];
-
-	//[browser_osg_view prepareFromBrowser];
-	
-	[browser_osg_view setPlaying:YES];
-	
-	NSLog(@"DANCERS!");
 }
 
 - (void)updatedLibrary
@@ -148,6 +130,33 @@ static void osc_callback(TiOscReceiverRef, const char *tagName, void *userData)
 	media_cycle->setNeedsDisplay(true);
 }
 
+- (void) awakeFromNib
+{
+	[[NSNotificationCenter defaultCenter] addObserver: self selector: @selector(myObserver:) name: @"OALNotify" object: NULL];
+	
+	media_cycle = new MediaCycle(MEDIA_TYPE_AUDIO,"/tmp/","mediacycle.acl");
+	//media_cycle->addPlugin ("/Users/dtardieu/src/Numediart/ticore-app/Applications/Numediart/MediaCycle/src/Builds/darwin-x86/plugins/visualisation/Debug/mc_visualisation.dylib");
+	//media_cycle->setVisualisationPlugin("Visualisation");
+	
+	media_cycle->addPlugin ("/Users/dtardieu/src/Numediart/ticore-app/Applications/Numediart/MediaCycle/src/Builds/darwin-x86/plugins/visualisation/Debug/mc_visualisation.dylib");	
+	//	media_cycle->setVisualisationPlugin("Visualisation");
+	
+	audio_engine = new ACAudioFeedback();
+	audio_engine->setMediaCycle(media_cycle);
+
+	////osc_browser = new ACOscBrowser();
+	////osc_browser->setMediaCycle(media_cycle);
+	////osc_browser->start("localhost", 12345);
+	
+	//media_cycle->importLibrary("/dupont/dancers.acl_copy");
+	//media_cycle->setClusterNumber(5);
+	//media_cycle->setSelectedObject(0);
+	
+	[browser_osg_view setMediaCycle:media_cycle];
+	[browser_osg_view prepareFromBrowser];
+	[browser_osg_view setPlaying:YES];
+}
+
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // MAIN MENU
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -155,6 +164,7 @@ static void osc_callback(TiOscReceiverRef, const char *tagName, void *userData)
 {
 	[browser_osg_view setPlaying:NO];
 	delete audio_engine;
+	////delete osc_browser;
 	delete media_cycle;
 }
 
@@ -273,8 +283,34 @@ static void osc_callback(TiOscReceiverRef, const char *tagName, void *userData)
 {
 	media_cycle->muteAllSources();
 }
+/*
+- (IBAction)	setOscIp:(id)inSender
+{
+	NSString* 	value = [inSender stringValue];
+	osc_ip = value;
+	NSLog(@"OSC IP: %s",osc_ip);
+}
 
+- (IBAction)	setOscPort:(id)inSender
+{
+	float 	value = [inSender floatValue];
+	osc_port = (int) value;
+	NSLog(@"OSC port: %i",osc_port);
+}
 
+- (IBAction)	setOscStatus:(id)inSender
+{
+	NSLog(@"OSC server: %s %i",osc_ip,osc_port);
+	//int	value = [inSender intValue];
+	//if (value == 1)
+	//{
+	mOscReceiver = TiOscReceiverCreate((const char*)[osc_ip UTF8String], osc_port);
+	TiOscReceiverSetUserData(mOscReceiver, self);
+	TiOscReceiverSetCallback(mOscReceiver, osc_callback);
+	TiOscReceiverStart(mOscReceiver);
+	//}	
+}
+*/
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // BROWSER
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -348,34 +384,136 @@ static void osc_callback(TiOscReceiverRef, const char *tagName, void *userData)
 	}
 }
 
+////
+/*
 - (void)processOscMessage:(const char*)tagName
 {
 	id pool = [NSAutoreleasePool new];
-	if(strcasecmp(tagName, "/audiocycle/1/browser/1/move/xy") == 0)
+
+	if(strcasecmp(tagName, "/audiocycle/test") == 0)
 	{
-		float val1 = 0.0, val2 = 0.0;
+		std::cout << "OSC communication established" << std::endl;
+	}
+	else if(strcasecmp(tagName, "/audiocycle/1/browser/1/move/xy") == 0)
+	{
+		float x = 0.0, y = 0.0;
+		media_cycle->getCameraPosition(x,y);
+		TiOscReceiverReadFloat(mOscReceiver, &x);
+		TiOscReceiverReadFloat(mOscReceiver, &y);
+
+		float zoom = media_cycle->getCameraZoom();
+		float angle = media_cycle->getCameraRotation();
+		float xmove = x*cos(-angle)-y*sin(-angle);
+		float ymove = y*cos(-angle)+x*sin(-angle);
+		media_cycle->setCameraPosition(xmove/2/zoom , ymove/2/zoom); // norm [-1;1] = 2 (instead of 100 from mediacycle-osg)
+		NSLog(@"zoom: %f setCameraPosition: %f %f",zoom,xmove/2/zoom ,ymove/2/zoom);
+		media_cycle->setNeedsDisplay(1);
+	}
+	else if(strcasecmp(tagName, "/audiocycle/1/browser/1/hover/xy") == 0)
+	{
+		float x = 0.0, y = 0.0;
+		TiOscReceiverReadFloat(mOscReceiver, &x);
+		TiOscReceiverReadFloat(mOscReceiver, &y);
 		
-		TiOscReceiverReadFloat(mOscReceiver, &val1);
-		TiOscReceiverReadFloat(mOscReceiver, &val2);
-		
-		id msg = [NSDictionary dictionaryWithObjectsAndKeys:@"movexy", @"name", [NSNumber numberWithFloat:val1], @"x", [NSNumber numberWithFloat:val2], @"y", nil];
-		
-		[self performSelectorOnMainThread:@selector(dispatchMessage:) withObject:msg waitUntilDone:YES];
+		media_cycle->hoverCallback(x,y);
+		//media_cycle->setNeedsDisplay(1);
 	}
 	else if(strcasecmp(tagName, "/audiocycle/1/browser/1/move/zoom") == 0)
 	{
-		float val1 = 0.0;
-		
-		TiOscReceiverReadFloat(mOscReceiver, &val1);
-		
-		id msg = [NSDictionary dictionaryWithObjectsAndKeys:@"zoom", @"name", [NSNumber numberWithFloat:val1], @"val", nil];
-		
-		[self performSelectorOnMainThread:@selector(dispatchMessage:) withObject:msg waitUntilDone:YES];
+		float zoom, refzoom = media_cycle->getCameraZoom();
+		TiOscReceiverReadFloat(mOscReceiver, &zoom);
+		//zoom = zoom*600/50; // refzoom +
+		media_cycle->setCameraZoom((float)zoom);
+		media_cycle->setNeedsDisplay(1);
 	}
+	else if(strcasecmp(tagName, "/audiocycle/1/browser/1/move/angle") == 0)
+	{
+		float angle;//, refangle = media_cycle->getCameraRotation();
+		TiOscReceiverReadFloat(mOscReceiver, &angle);
+		media_cycle->setCameraRotation((float)angle);
+		media_cycle->setNeedsDisplay(1);
+	}
+	else if(strcasecmp(tagName, "/audiocycle/1/browser/library/load") == 0)
+	{
+		char *lib_path = NULL;
+		lib_path = new char[500]; // wrong magic number!
+		TiOscReceiverReadString(mOscReceiver, lib_path, 500); // wrong magic number!
+		std::cout << "Importing file library '" << lib_path << "'..." << std::endl;
+		media_cycle->importLibrary(lib_path); // XS instead of getImageLibrary CHECK THIS
+		[self updatedLibrary]; // change for non-objective-c code
+	}
+	else if(strcasecmp(tagName, "/audiocycle/1/browser/library/clear") == 0)
+	{
+		media_cycle->cleanLibrary(); // XS instead of getImageLibrary CHECK THIS
+		media_cycle->libraryContentChanged();
+		[self updatedLibrary]; // change for non-objective-c code
+	}	
+	else if(strcasecmp(tagName, "/audiocycle/1/browser/recenter") == 0)
+	{
+		media_cycle->setCameraRecenter();
+	}
+	else if(strcasecmp(tagName, "/audiocycle/1/player/1/playclosestloop") == 0)
+	{	
+		media_cycle->pickedObjectCallback(-1);
+	}
+	else if(strcasecmp(tagName, "/audiocycle/1/player/1/muteall") == 0)
+	{	
+		media_cycle->muteAllSources();
+	}
+	else if(strcasecmp(tagName, "/audiocycle/1/player/1/bpm") == 0)
+	{
+		float bpm;
+		TiOscReceiverReadFloat(mOscReceiver, &bpm);
+		int clicked_loop = media_cycle->getClickedLoop();
+		if (clicked_loop > -1)
+		{
+			audio_engine->setLoopSynchroMode(clicked_loop, ACAudioEngineSynchroModeAutoBeat);
+			audio_engine->setLoopScaleMode(clicked_loop, ACAudioEngineScaleModeResample);
+			audio_engine->setBPM((float)bpm);
+		}
+	}	
+	else if(strcasecmp(tagName, "/audiocycle/1/player/1/scrub") == 0)
+	{
+		float scrub;
+		TiOscReceiverReadFloat(mOscReceiver, &scrub);
+		
+		 int clicked_loop = media_cycle->getClickedLoop();
+		 if (clicked_loop > -1)
+		 {
+			 //media_cycle->pickedObjectCallback(-1);
+			 audio_engine->setLoopSynchroMode(clicked_loop, ACAudioEngineSynchroModeManual);
+			 audio_engine->setLoopScaleMode(clicked_loop, ACAudioEngineScaleModeVocode);
+			 audio_engine->setScrub((float)scrub*10000); // temporary hack to scrub between 0 an 1
+		 }
+	}
+	else if(strcasecmp(tagName, "/audiocycle/1/player/1/pitch") == 0)
+	{
+		float pitch;
+		TiOscReceiverReadFloat(mOscReceiver, &pitch);
+	
+		int clicked_loop = media_cycle->getClickedLoop();
+		if (clicked_loop > -1)
+		{
+			
+			//if (!is_pitching)
+			//{	
+			//	is_pitching = true;
+			//	is_scrubing = false;
+			 
+				//media_cycle->pickedObjectCallback(-1);
+				audio_engine->setLoopSynchroMode(clicked_loop, ACAudioEngineSynchroModeAutoBeat);
+				audio_engine->setLoopScaleMode(clicked_loop, ACAudioEngineScaleModeResample);
+			//}
+			audio_engine->setSourcePitch(clicked_loop, (float) pitch); 
+		}
+		 
+	}
+
 	// ...
-	
-	
+	 //void setKey(int key);
+
 	[pool release];
 }
-
+////
+*/
 @end

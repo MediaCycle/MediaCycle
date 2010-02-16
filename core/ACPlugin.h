@@ -39,7 +39,6 @@
 
 #include "ACMediaTypes.h"
 #include "ACMediaFeatures.h"
-#include "ACMediaTimedFeature.h"
 //#include "ACMediaBrowser.h"
 
 class ACMediaBrowser;

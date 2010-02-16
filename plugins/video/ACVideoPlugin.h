@@ -38,6 +38,7 @@
 #include "ACVideoAnalysis.h"
 #include "ACPlugin.h"
 #include "ACMediaFeatures.h"
+#include "ACMediaTimedFeature.h"
 
 #include<iostream>
 

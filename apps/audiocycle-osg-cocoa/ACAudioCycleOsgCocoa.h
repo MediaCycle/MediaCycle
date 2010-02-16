@@ -37,11 +37,12 @@ using namespace::std;
 
 #import <Cocoa/Cocoa.h>
 
-#include <Io/TiOscReceiver.h>
+//#include <Io/TiOscReceiver.h>
 //#import <Rendering/TiCocoaOsgView.h>
-#include <ACOsgBrowserViewCocoa.h>
+#import <ACOsgBrowserViewCocoa.h>
 #include <MediaCycleLight.h>
 #include <ACAudioFeedback.h>
+//#include <ACOscBrowser.h>
 
 // Tags of the Text items in the dialog boxes
 enum	{
@@ -55,10 +56,15 @@ enum	{
 	kVelocitySpeedEditTextItem	= 4002
 };
 
-@interface ACController : NSObject {
+@interface ACAudioCycleOsgCocoa : NSObject {
 	
 	MediaCycle				*media_cycle;
 	ACAudioFeedback			*audio_engine;
+	/*
+	NSString* osc_ip;
+	int osc_port;
+	 */
+	//ACOscBrowser			*osc_browser;
 	//
 	IBOutlet ACOsgBrowserViewCocoa*		browser_osg_view;
 	//
@@ -120,8 +126,12 @@ enum	{
 	IBOutlet NSSlider*				mPosXSlider;
 	IBOutlet NSSlider*				mPosYSlider;
 	IBOutlet NSSlider*				mZoomSlider;
-	
-	TiOscReceiverRef			mOscReceiver;
+/*	
+	IBOutlet NSTextField*			mOscIp;
+	IBOutlet NSTextField*			mOscPort;
+	IBOutlet NSButton*				mOscStatus;
+*/	
+	//TiOscReceiverRef			mOscReceiver;
 };
 
 // Context/listener Menu
@@ -174,9 +184,15 @@ enum	{
 - (IBAction)	setZoomSlider:(id)inSender;
 
 - (IBAction)	setCameraRecenter:(id)inSender;
-
+/*
+- (IBAction)	setOscIp:(id)inSender;
+- (IBAction)	setOscPort:(id)inSender;
+- (IBAction)	setOscStatus:(id)inSender;
+*/
 - (void) controlTextDidEndEditing:(NSNotification *) aNotification;
 - (void) myObserver:(NSNotification *)inNotification;
 - (void) awakeFromNib;
+- (void) updatedLibrary;
+
 
 @end

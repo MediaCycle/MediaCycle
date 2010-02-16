@@ -42,6 +42,7 @@
 #include <armadillo>
 
 #include "ACPlugin.h"
+#include "ACMediaTimedFeature.h"
 
 class ACEyesWebPlugin : public ACPlugin {
 public:

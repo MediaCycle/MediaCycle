@@ -19,14 +19,6 @@
 			<string>ObjC</string>
 		</dict>
 		<dict>
-			<key>CLASS</key>
-			<string>ACOsgBrowserViewCocoa</string>
-			<key>LANGUAGE</key>
-			<string>ObjC</string>
-			<key>SUPERCLASS</key>
-			<string>TiCocoaOsgView</string>
-		</dict>
-		<dict>
 			<key>ACTIONS</key>
 			<dict>
 				<key>setAddToLibrary</key>
@@ -75,6 +67,12 @@
 				<string>id</string>
 				<key>setOpen</key>
 				<string>id</string>
+				<key>setOscIp</key>
+				<string>id</string>
+				<key>setOscPort</key>
+				<string>id</string>
+				<key>setOscStatus</key>
+				<string>id</string>
 				<key>setPosXSlider</key>
 				<string>id</string>
 				<key>setPosYSlider</key>
@@ -107,7 +105,7 @@
 				<string>id</string>
 			</dict>
 			<key>CLASS</key>
-			<string>ACController</string>
+			<string>ACAudioCycleOsgCocoa</string>
 			<key>LANGUAGE</key>
 			<string>ObjC</string>
 			<key>OUTLETS</key>
@@ -186,6 +184,12 @@
 				<string>NSTextField</string>
 				<key>mMediaUserTags</key>
 				<string>NSTextField</string>
+				<key>mOscIp</key>
+				<string>NSTextField</string>
+				<key>mOscPort</key>
+				<string>NSTextField</string>
+				<key>mOscStatus</key>
+				<string>NSButton</string>
 				<key>mPosXSlider</key>
 				<string>NSSlider</string>
 				<key>mPosYSlider</key>
@@ -217,6 +221,14 @@
 			</dict>
 			<key>SUPERCLASS</key>
 			<string>NSObject</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>ACOsgBrowserViewCocoa</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>TiCocoaOsgView</string>
 		</dict>
 		<dict>
 			<key>CLASS</key>

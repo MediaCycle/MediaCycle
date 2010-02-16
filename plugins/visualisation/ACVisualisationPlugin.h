@@ -1,7 +1,7 @@
 /**
  * @brief ACVisualisationPlugin.h
- * @author Damien Tardieu
- * @date 04/02/2010
+ * @author Alexis Moinet
+ * @date 08/02/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -33,6 +33,7 @@
 
 #include "ACPlugin.h"
 #include "ACMediaBrowser.h"
+#include "ACMediaTimedFeature.h"
 
 #ifndef _ACVISUALISATIONPLUGIN_
 #define _ACVISUALISATIONPLUGIN_
