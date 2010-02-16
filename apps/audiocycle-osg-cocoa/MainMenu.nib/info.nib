@@ -5,13 +5,13 @@
 	<key>IBFramework Version</key>
 	<string>677</string>
 	<key>IBLastKnownRelativeProjectPath</key>
-	<string>../../Builds/darwin-xcode/MediaCycle.xcodeproj</string>
+	<string>../../Builds/darwin-x86/MediaCycle.xcodeproj</string>
 	<key>IBOldestOS</key>
 	<integer>5</integer>
 	<key>IBOpenObjects</key>
 	<array>
-		<integer>2727</integer>
 		<integer>24</integer>
+		<integer>2728</integer>
 	</array>
 	<key>IBSystem Version</key>
 	<string>9L31a</string>

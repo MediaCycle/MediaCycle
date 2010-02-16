@@ -138,6 +138,9 @@
 	//media_cycle->addPlugin ("/Users/dtardieu/src/Numediart/ticore-app/Applications/Numediart/MediaCycle/src/Builds/darwin-x86/plugins/visualisation/Debug/mc_visualisation.dylib");
 	//media_cycle->setVisualisationPlugin("Visualisation");
 	
+	media_cycle->addPlugin ("/Users/dtardieu/src/Numediart/ticore-app/Applications/Numediart/MediaCycle/src/Builds/darwin-x86/plugins/visualisation/Debug/mc_visualisation.dylib");	
+	//	media_cycle->setVisualisationPlugin("Visualisation");
+	
 	audio_engine = new ACAudioFeedback();
 	audio_engine->setMediaCycle(media_cycle);
 
@@ -255,12 +258,14 @@
 - (IBAction)	setEngineStart:(id)inSender
 {
 	// SD TODO
+	audio_engine->startAudioEngine();
 	//audio_cycle->getAudioFeedback()->startAudioEngine();
 }
 
 - (IBAction)	setEngineStop:(id)inSender
 {
 	// SD TODO
+	audio_engine->stopAudioEngine();
 	//audio_cycle->getAudioFeedback()->stopAudioEngine();
 }
 
