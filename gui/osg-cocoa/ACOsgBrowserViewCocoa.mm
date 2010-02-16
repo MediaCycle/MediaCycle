@@ -32,14 +32,15 @@
 //
 
 #import "ACOsgBrowserViewCocoa.h"
-#import "ACOsgBrowserRenderer.h"
 #import <Rendering/TiCocoaOsgView+Node.h>
 #import <Common/TiTime.h>
+
 
 struct ACOsgBrowserViewData
 {
 	ACOsgBrowserRenderer renderer;
 };
+ 
 
 @implementation ACOsgBrowserViewCocoa
 
@@ -61,9 +62,10 @@ struct ACOsgBrowserViewData
 #pragma mark Main
 - (void)setMediaCycle:(MediaCycle*)_media_cycle
 {
-	NSLog(@"setMediaCycle");
+	//NSLog(@"setMediaCycle");
 	media_cycle = _media_cycle;
-	_privateData->renderer.setMediaCycle(media_cycle);
+	////_privateData->renderer.setMediaCycle(media_cycle);//CF
+	renderer->setMediaCycle(media_cycle);//CF
 	event_handler = new ACOsgBrowserEventHandler;
 	event_handler->setMediaCycle(media_cycle);
 	[self addEventHandler:(event_handler)];
@@ -71,7 +73,12 @@ struct ACOsgBrowserViewData
 
 - (void)initCommonACBrowserOsgView
 {	
-	_privateData = new ACOsgBrowserViewData();
+	//NSLog(@"initCommonACBrowserOsgView");
+	////_privateData = new ACOsgBrowserViewData();
+	
+	
+	renderer = new ACOsgBrowserRenderer();//CF
+	
 	
 	//_privateData->renderer.setMediaCycle(media_cycle);
 	
@@ -82,7 +89,7 @@ struct ACOsgBrowserViewData
 
 - (id)initWithFrame:(NSRect)frameRect pixelFormat:(NSOpenGLPixelFormat*)format
 {
-	//NSLog(@"initWithFrame:...");
+	NSLog(@"initWithFrame:...");
 	
 	if(self = [super initWithFrame:frameRect pixelFormat:format])
 	{
@@ -94,7 +101,7 @@ struct ACOsgBrowserViewData
 
 - (void)dealloc
 {
-	delete _privateData;
+	////delete _privateData; //CF
 	
 	[super dealloc];
 }
@@ -104,7 +111,7 @@ struct ACOsgBrowserViewData
 
 - initWithCoder:coder
 {
-	//NSLog(@"initWithCoder:...");
+	NSLog(@"initWithCoder:...");
 	if(self = [super initWithCoder:coder])
 	{
 		[self initCommonACBrowserOsgView];
@@ -112,6 +119,7 @@ struct ACOsgBrowserViewData
 	
 	return self;
 }
+
 
 - (void)awakeFromNib
 {
@@ -127,7 +135,7 @@ struct ACOsgBrowserViewData
 
 - (void)prepareOpenGL
 {
-	NSLog(@"ACImageBrowserOsgView's prepareOpenGL (0x%x)", self);
+	//NSLog(@"ACImageBrowserOsgView's prepareOpenGL (0x%x)", self);
 	//NSLog(@"pixelFormat : %@", [self pixelFormat]);
 	[super prepareOpenGL];
 	[self setCameraManipulator:NULL];
@@ -155,6 +163,7 @@ struct ACOsgBrowserViewData
 
 - (void)drawRect:(NSRect)rect
 {	
+	//std::cout << "drawRect" << std::endl;
 	//NSLog(@"ACImageBrowserOsgView's drawRect (0x%x)", self);
 	double frac = 0.0;
 	
@@ -288,6 +297,7 @@ struct ACOsgBrowserViewData
 			xmove2 = xmove*cos(-angle)-ymove*sin(-angle);
 			ymove2 = ymove*cos(-angle)+xmove*sin(-angle);		
 			media_cycle->setCameraPosition(refcamx + xmove2/800/zoom , refcamy + ymove2/800/zoom);
+			//NSLog(@"zoom %f eventLocations: %f %f and setCameraPosition: %f %f",zoom,eventLocation.x,eventLocation.y,refcamx + xmove2/800/zoom , refcamy + ymove2/800/zoom);
 		}
 	}
 	
@@ -310,6 +320,7 @@ struct ACOsgBrowserViewData
 // SD - Macbook Pro Trackpad Gestures
 //		This is not documented by Apple
 //		More should come with the OSX 10.6 API
+// 2-finger zoom
 - (void)magnifyWithEvent:(NSEvent*)event
 {
 	float deltaZ = [event deltaZ];
@@ -317,6 +328,7 @@ struct ACOsgBrowserViewData
 	refzoom = media_cycle->getCameraZoom();
 	media_cycle->setCameraZoom(refzoom + (deltaZ)/100);
 	refzoom = refzoom + (deltaZ)/100;
+
 }
 
 - (void)rotateWithEvent:(NSEvent*)event
@@ -332,7 +344,7 @@ struct ACOsgBrowserViewData
 - (void)swipeWithEvent:(NSEvent*)event
 {
 	/*
-	 float zoom, angle;
+	float zoom, angle;
 	float xmove, ymove, xmove2, ymove2;
 	float x, y;
 	float deltaX = [event deltaX];
@@ -369,10 +381,14 @@ struct ACOsgBrowserViewData
 	
 	@synchronized(self)
 	{
-	_privateData->renderer.prepareNodes();
-	_privateData->renderer.prepareLabels();
 		
-	[self setNode:_privateData->renderer.getShapes()];
+	/////_privateData->renderer.prepareNodes();//CF
+	////_privateData->renderer.prepareLabels();//CF
+	renderer->prepareNodes();
+	renderer->prepareLabels();
+		
+	//[self setNode:_privateData->renderer.getShapes()];//CF
+	[self setNode:renderer->getShapes()];//CF	
 	}
 }
 
@@ -385,11 +401,14 @@ struct ACOsgBrowserViewData
 	@synchronized(self)
 	{
 	// get screen coordinates
-	closest_loop = _privateData->renderer.computeScreenCoordinates(view, frac);
+	////closest_loop = _privateData->renderer.computeScreenCoordinates(view, frac);//CF
+	closest_loop = renderer->computeScreenCoordinates(view, frac);//CF
 	media_cycle->setClosestLoop(closest_loop);
 	// recompute scene graph	
-	_privateData->renderer.updateNodes(frac); // animation time in [0,1]
-	_privateData->renderer.updateLabels(frac);
+	////_privateData->renderer.updateNodes(frac); // animation time in [0,1] //CF
+	////_privateData->renderer.updateLabels(frac); //CF
+	renderer->updateNodes(frac); // animation time in [0,1] //CF
+	renderer->updateLabels(frac);//CF
 	}
 }
 

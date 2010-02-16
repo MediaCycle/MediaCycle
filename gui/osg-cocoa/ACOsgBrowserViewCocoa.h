@@ -36,14 +36,16 @@
 #import <ACOsgBrowserEventHandler.h>
 //#import <Rendering/TiCocoaOsgView+Node.h>
 #import <MediaCycleLight.h>
+#import "ACOsgBrowserRenderer.h"
 
-struct ACOsgBrowserViewData;
+////struct ACOsgBrowserViewData;//CF
 
 @interface ACOsgBrowserViewCocoa : TiCocoaOsgView {
-	struct ACOsgBrowserViewData *_privateData;
+	////struct ACOsgBrowserViewData *_privateData;//CF
 	
 	MediaCycle				*media_cycle;
 	ACOsgBrowserEventHandler *event_handler;
+	ACOsgBrowserRenderer *renderer; //CF
 
 	int mousedown, zoomdown, forwarddown, autoplaydown;
 	float refx, refy;
