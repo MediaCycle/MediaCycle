@@ -22,20 +22,16 @@ IF ( USE_OPENCV )
     ENDIF ( UNIX )
 ENDIF ( USE_OPENCV )
 
-#Boost
-FIND_PACKAGE ( Boost COMPONENTS system )
+#linking w/ Boost (searched for in main CMakeLists.txt)
 IF ( Boost_SYSTEM_FOUND )
-	MESSAGE( "Found boost system in ${Boost_SYSTEM_LIBRARY}" )
 	TARGET_LINK_LIBRARIES(mediacycle ${Boost_SYSTEM_LIBRARY})
 ELSE ( )
-	MESSAGE(FATAL_ERROR "Boost system not found.")
+	MESSAGE(FATAL_ERROR "Boost system not found. needed in core mediacycle.")
 ENDIF ( )
-FIND_PACKAGE ( Boost COMPONENTS filesystem )
 IF ( Boost_FILESYSTEM_FOUND )
-	MESSAGE( "Found boost filesystem in ${Boost_FILESYSTEM_LIBRARY}" )
 	TARGET_LINK_LIBRARIES(mediacycle ${Boost_FILESYSTEM_LIBRARY})
 ELSE ( )
-	MESSAGE(FATAL_ERROR "Boost filesystem not found.")
+	MESSAGE(FATAL_ERROR "Boost filesystem not found. needed in core mediacycle.")
 ENDIF ( )
 
 # this might require some path adaptation for Windows

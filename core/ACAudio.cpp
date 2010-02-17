@@ -260,7 +260,7 @@ int ACAudio::load(FILE* library_file) {
 		ret = fscanf(library_file, "%d", &sample_end);
 		ret = fscanf(library_file, "%d", &n_frames);
 		waveform = new float[n_frames];
-                cout << "nframes : " << n_frames << endl;
+		cout << "nframes : " << n_frames << endl;
 		for (i=0; i<n_frames; i++) {
 			ret = fscanf(library_file, "%f", &waveform[i]);
 		}

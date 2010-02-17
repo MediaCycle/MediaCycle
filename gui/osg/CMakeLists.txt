@@ -13,9 +13,8 @@ IF ( USE_OSG )
 	TARGET_LINK_LIBRARIES(mediacycle-osg osg osgDB osgGA osgViewer osgText)
 	TARGET_LINK_LIBRARIES(mediacycle-osg OpenThreads)
 
-	FIND_PACKAGE ( Boost COMPONENTS system )
+	#boost_system is looked for in the main CMakeLists.txt
 	IF ( Boost_SYSTEM_FOUND )
-		MESSAGE( "Found boost system in ${Boost_SYSTEM_LIBRARY}" )
 		TARGET_LINK_LIBRARIES(mediacycle-osg ${Boost_SYSTEM_LIBRARY})
 	ELSE ( )
 		MESSAGE(FATAL_ERROR "Boost system not found.")

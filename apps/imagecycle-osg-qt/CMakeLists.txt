@@ -1,14 +1,14 @@
-MESSAGE("apps/imagecycle-osg-qt")
-
 IF ( USE_QT4 )
+	MESSAGE("apps/imagecycle-osg-qt")
+
 	FILE(GLOB SRC *.cpp)
 	FILE(GLOB HDR *.h)
 
 	INCLUDE_DIRECTORIES(. ../../gui/osg ../../gui/osg-qt)
 
-	#IF ( APPLE )
+	IF ( APPLE )
 		SET(APP_TYPE MACOSX_BUNDLE)
-	#ENDIF ( APPLE )
+	ENDIF ( APPLE )
 
 	SET(imagecycle-osg-qt_SRCS main.cpp ACImageCycleOsgQt.cpp)
 	SET(imagecycle-osg-qt_MOC_HDRS ACImageCycleOsgQt.h)
@@ -32,11 +32,11 @@ IF ( USE_QT4 )
 	ADD_DEFINITIONS(-DQT_THREAD_SUPPORT)
 
 
-	#IF ( APPLE )
-	#	ADD_EXECUTABLE(imagecycle-osg-qt ${APP_TYPE} ${MACOSX_BUNDLE_INFO_PLIST} ${imagecycle-osg-qt_SRCS} ${imagecycle-osg-qt_UIS_H} ${imagecycle-osg-qt_MOC_SRCS})
-	#ELSE ( APPLE )
+	IF ( APPLE )
+		ADD_EXECUTABLE(imagecycle-osg-qt ${APP_TYPE} ${MACOSX_BUNDLE_INFO_PLIST} ${imagecycle-osg-qt_SRCS} ${imagecycle-osg-qt_UIS_H} ${imagecycle-osg-qt_MOC_SRCS})
+	ELSE ( APPLE )
 		ADD_EXECUTABLE(imagecycle-osg-qt ${imagecycle-osg-qt_SRCS} ${imagecycle-osg-qt_UIS_H} ${imagecycle-osg-qt_MOC_SRCS})
-	#ENDIF ( APPLE )
+	ENDIF ( APPLE )
 
 	ADD_DEPENDENCIES(imagecycle-osg-qt mediacycle)
 	ADD_DEPENDENCIES(imagecycle-osg-qt mediacycle-osg)
@@ -53,25 +53,19 @@ IF ( USE_QT4 )
 	TARGET_LINK_LIBRARIES(imagecycle-osg-qt osg osgDB osgGA osgViewer osgText osgUtil osgText)
 	TARGET_LINK_LIBRARIES(imagecycle-osg-qt OpenThreads)
 	TARGET_LINK_LIBRARIES(imagecycle-osg-qt osg osgDB osgGA osgViewer)
-	TARGET_LINK_LIBRARIES(imagecycle-osg-qt boost_system)
+	TARGET_LINK_LIBRARIES(imagecycle-osg-qt ${Boost_SYSTEM_LIBRARY})
 	TARGET_LINK_LIBRARIES(imagecycle-osg-qt ${QT_LIBRARIES})
 	TARGET_LINK_LIBRARIES(imagecycle-osg-qt ${QT4_LIBRARY} ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY} ${QT_QTOPENGL_LIBRARY} )
 
-	#IF ( APPLE )
+	IF ( APPLE )
 		set(CMAKE_EXE_LINKER_FLAGS "-framework CoreVideo -framework AppKit -framework Foundation")
-	#ENDIF ( APPLE )
+	ENDIF ( APPLE )
 
 	IF ( OPENGL_FOUND AND GLUT_FOUND)
 		TARGET_LINK_LIBRARIES(imagecycle-osg-qt ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES})
 	ELSE ( OPENGL_FOUND AND GLUT_FOUND )
 		MESSAGE(FATAL_ERROR "OpenGL/Glut requested but not found.")
 	ENDIF ( OPENGL_FOUND AND GLUT_FOUND ) 
-
-	IF ( OPENAL_FOUND)
-		TARGET_LINK_LIBRARIES(imagecycle-osg-qt ${OPENAL_LIBRARY})
-	ELSE ( OPENAL_FOUND)
-		MESSAGE(FATAL_ERROR "OpenAL requested but not found.")
-	ENDIF ( OPENAL_FOUND)
 
 ELSE ( USE_QT4 )
 	MESSAGE("imagecycle-osg-qt disabled - not compiling Qt GUI.")

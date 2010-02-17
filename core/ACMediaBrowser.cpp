@@ -537,10 +537,9 @@ void ACMediaBrowser::libraryContentChanged()
 	
 	printf("setting all feature weights to 1.0 (count=%d)\n", (int) mFeatureWeights.size());
 	for(i=0; i<fc; i++) {
-		mFeatureWeights[i] = 0.0;
+		mFeatureWeights[i] = 1.0;
 	}
-	mFeatureWeights[1] = 1.0;
-	
+
 	updateClusters(false);
 	updateNextPositions();
 	
@@ -1053,8 +1052,10 @@ void ACMediaBrowser::kmeans(bool animate)
 	
 	int n_iterations = 20, it;
 	
-	printf("feature weights: %f %f %f\n", mFeatureWeights[0], mFeatureWeights[1], mFeatureWeights[2]);
-	
+	printf("feature weights:");
+	for (int fw=0; fw < mFeatureWeights.size(); fw++)
+		printf("%f ", mFeatureWeights[fw]);
+	printf("\n");
 	
 	// applying a few K-means iterations
 	for(it = 0; it < n_iterations; it++)

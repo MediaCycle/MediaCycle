@@ -1,6 +1,6 @@
-MESSAGE("apps/audiocycle-osg-qt")
+IF ( USE_QT4 AND APPLE)
+	MESSAGE("apps/audiocycle-osg-qt")
 
-IF ( USE_QT4 )
 	FILE(GLOB SRC *.cpp)
 	FILE(GLOB HDR *.h)
 
@@ -68,7 +68,7 @@ IF ( USE_QT4 )
 	ENDIF (USE_OSC)
 	TARGET_LINK_LIBRARIES(audiocycle-osg-qt osg osgDB osgGA osgViewer)
 	TARGET_LINK_LIBRARIES(audiocycle-osg-qt audioengine)
-	TARGET_LINK_LIBRARIES(audiocycle-osg-qt boost_system)
+	TARGET_LINK_LIBRARIES(audiocycle-osg-qt ${Boost_SYSTEM_LIBRARY})
 	TARGET_LINK_LIBRARIES(audiocycle-osg-qt ${QT_LIBRARIES})
 	TARGET_LINK_LIBRARIES(audiocycle-osg-qt ${QT4_LIBRARY} ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY} ${QT_QTOPENGL_LIBRARY} )
 
@@ -88,6 +88,6 @@ IF ( USE_QT4 )
 		MESSAGE(FATAL_ERROR "OpenAL requested but not found.")
 	ENDIF ( OPENAL_FOUND)
 
-ELSE ( USE_QT4 )
+ELSE ( )
 	MESSAGE("Qt4 disabled - not compiling Qt GUI.")
-ENDIF ( USE_QT4 )
+ENDIF ( )

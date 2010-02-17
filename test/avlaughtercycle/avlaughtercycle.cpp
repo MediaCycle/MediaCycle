@@ -51,10 +51,11 @@ int main(int argc, char** argv) {
     MediaCycle *mediacycle;    
 
     cout<<"new MediaCycle"<<endl;
-    mediacycle = new MediaCycle(MEDIA_TYPE_AUDIO,"/home/alexis/Work/eNTERFACE/eNTERFACE09/AVLC/test/","avlc-lib.acl");
+	mediacycle = new MediaCycle(MEDIA_TYPE_AUDIO,"/home/alexis/Work/eNTERFACE/eNTERFACE09/JMUI/","avlc-lib.acl");
+    //mediacycle = new MediaCycle(MEDIA_TYPE_AUDIO,"/home/alexis/Work/eNTERFACE/eNTERFACE09/AVLC/test/","avlc-lib.acl");
     //mediacycle = new MediaCycle(MEDIA_TYPE_AUDIO,"/home/alexis/Work/eNTERFACE/eNTERFACE09/AVLC/","avlc-lib-20090806-1.acl");
     //mediacycle->addPlugin("/home/alexis/Programmation/TiCore-app/Applications/Numediart/MediaCycle/src/Builds/linux-x86/plugins/eyesweb/mc_eyesweb.so");
-    mediacycle->addPlugin("/home/alexis/Programmation/TiCore-app/Applications/Numediart/MediaCycle/src/Builds/linux-x86/plugins/greta/mc_greta.so");
+    //mediacycle->addPlugin("/home/alexis/Programmation/TiCore-app/Applications/Numediart/MediaCycle/src/Builds/linux-x86/plugins/greta/mc_greta.so");
     //mediacycle->addPlugin("/home/alexis/Programmation/TiCore-app/Applications/Numediart/MediaCycle/src/Builds/linux-x86/plugins/audioanalysis/mc_audioanalysis.so");
 
     cout<<"setCulsterN"<<endl;
@@ -68,7 +69,7 @@ int main(int argc, char** argv) {
     
     //IMPORT LIBFILE
     cout<<"importLib"<<endl;
-    mediacycle->importLibrary(mediacycle->getLocalDirectoryPath() + "/" + mediacycle->getLibName());
+    mediacycle->importLibrary(mediacycle->getLocalDirectoryPath() + mediacycle->getLibName());
 /*   
     //TEST KNN WITH NEW FILE
     cout << "new media" << endl;
@@ -113,7 +114,7 @@ int main(int argc, char** argv) {
 */
     
     //test tcp-SSI-greta (all-in-one) = AVLaughterCycle
-    mediacycle->startTcpServer(12345,5,avlc_tcp_callback);
+    //mediacycle->startTcpServer(12345,5,avlc_tcp_callback);
 
     //begin test greta
 /*
@@ -167,6 +168,29 @@ int main(int argc, char** argv) {
     }
 */
 
+	/* Test KNN for JMUI */
+	cout<<"JMUI : get KNN"<<endl;
+	vector<ACMedia *> result;
+
+	mediacycle->getBrowser()->setWeight(0,1.0);
+
+	for (int m=0;m<mediacycle->getLibrary()->getMedia().size();m++) {
+		mediacycle->getKNN(mediacycle->getLibrary()->getMedia()[m], result, 11);
+		//mediacycle->getLibrary()->getMedia()[m]->getFeature(0)->dump();
+		if (result.size() > 0) {
+			result[1]->getFeature(0)->dump();
+			cout << mediacycle->getLibrary()->getMedia()[m]->getFileName() << " ";
+			for (int k=1;k<result.size();k++) {
+				cout << result[k]->getFileName() << " ";
+				//result[k]->getFeature(0)->dump();
+			}
+			cout << endl;
+
+		} else {
+			cout<<"JMUI : no result from KNN"<<endl;
+		}
+	}
+	
     cout << endl;
     cout.flush();
     
@@ -296,8 +320,12 @@ int processTcpMessageFromSSI(MediaCycle *that, char *buffer, int l, char **buffe
     cout << "creating features" << endl;
     ACMediaFeatures *mediaFeatures = new ACMediaFeatures();
     mediaFeatures->resize(nfeats);
-    for (int i=0; i<nfeats; i++)
+    for (int i=0; i<nfeats; i++) {
+		stringstream tmpstr;
+		tmpstr << "ssi" << i;
+		mediaFeatures->setName(tmpstr.str());
         mediaFeatures->setFeature(i,ssi_features[i]);
+	}
     mediaFeatures->setComputed();
     cout << "done" << endl;
 
@@ -313,7 +341,7 @@ int processTcpMessageFromSSI(MediaCycle *that, char *buffer, int l, char **buffe
         cout << "addwavf - addmedia" << endl;
         that->getLibrary()->addMedia(local_media);
         cout << "addwavf - savelib" << endl;
-        //that->getLibrary()->saveAsLibrary(that->getLocalDirectoryPath() + "/" + that->getLibName());
+        that->getLibrary()->saveAsLibrary(that->getLocalDirectoryPath() + "/" + that->getLibName());
         cout << "done" << endl;
     } else if (type_name == "request") {
         cout << "normalize" <<endl;
@@ -326,9 +354,9 @@ int processTcpMessageFromSSI(MediaCycle *that, char *buffer, int l, char **buffe
                 mediaFeatures->setFeature(k, (old - that->getLibrary()->getMeanFeatures()[j][k]) / ( TI_MAX(that->getLibrary()->getStdevFeatures()[j][k] , 0.00001)));
             }
         }
-        cout << endl << "after" << endl;
+        /*cout << endl << "after" << endl;
         local_media->getFeature(0)->dump();
-        cout << endl;
+        cout << endl;*/
 
         vector<ACMedia *> result;
         that->getKNN(local_media,result,1);

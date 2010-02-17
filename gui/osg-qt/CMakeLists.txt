@@ -1,6 +1,6 @@
-MESSAGE("gui/osg-qt")
-
 IF ( USE_QT4 )
+	MESSAGE("gui/osg-qt")
+
 	FILE(GLOB SRC *.cpp)
 	FILE(GLOB HDR *.h)
 
@@ -20,7 +20,7 @@ IF ( USE_QT4 )
 	#TARGET_LINK_LIBRARIES(mediacycle-osg-qt TiCommon TiIo TiOsc)
 	#TARGET_LINK_LIBRARIES(mediacycle-osg-qt TiCommon TiRendering)
 	TARGET_LINK_LIBRARIES(mediacycle-osg-qt osg osgDB osgGA osgViewer)
-	TARGET_LINK_LIBRARIES(mediacycle-osg-qt boost_system)
+	TARGET_LINK_LIBRARIES(mediacycle-osg-qt ${Boost_SYSTEM_LIBRARY})
 	TARGET_LINK_LIBRARIES(mediacycle-osg-qt ${QT_LIBRARIES})
 	TARGET_LINK_LIBRARIES(mediacycle-osg-qt ${QT4_LIBRARY} ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY} ${QT_QTOPENGL_LIBRARY} )
 
