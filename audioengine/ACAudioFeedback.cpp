@@ -33,6 +33,7 @@
  */
 
 #include "ACAudioFeedback.h"
+#include <iostream>
 
 /*#include <mach/mach_init.h>
 #include <mach/thread_policy.h>
@@ -186,6 +187,7 @@ int set_realtime(int period, int computation, int constraint) {
 
 int OPENAL_NUM_BUFFERS = 64;
 
+#if defined(__APPLE__)
 typedef ALvoid	AL_APIENTRY	(*alMacOSXRenderChannelCountProcPtr) (const ALint value);
 ALvoid  alMacOSXRenderChannelCountProc(const ALint value)
 {
@@ -216,6 +218,7 @@ ALvoid  alcMacOSXRenderingQualityProc(const ALint value)
 	
     return;
 }
+#endif
 
 FILE *debug_vocoder;
 
@@ -739,7 +742,7 @@ void ACAudioFeedback::processAudioEngine()
 				
 				for (int k=0;k<add_buffers;k++) {
 					
-					printf ("%d: buffer processed %d\n", count, buffer_processed);
+					/////////CF printf ("%d: buffer processed %d\n", count, buffer_processed);
 					//printf ("buffer processed %d\n",buffer_processed);
 					
 					// Compute sample position and resynthesize buffer (may be several analysis frames)
@@ -1189,16 +1192,22 @@ void ACAudioFeedback::setListenerGain(float gain)
 
 void ACAudioFeedback::setRenderChannels(int channels)
 {	
-	UInt32 setting = (channels == 0) ? alcGetEnumValue(NULL, "ALC_RENDER_CHANNEL_COUNT_MULTICHANNEL") : alcGetEnumValue(NULL, "ALC_RENDER_CHANNEL_COUNT_STEREO");
+	//CF UInt32
+	unsigned int setting = (channels == 0) ? alcGetEnumValue(NULL, "ALC_RENDER_CHANNEL_COUNT_MULTICHANNEL") : alcGetEnumValue(NULL, "ALC_RENDER_CHANNEL_COUNT_STEREO");
 	// TODO SD - Check wether this allows to support multichannel (f.i. 5.1) rendering
-	alMacOSXRenderChannelCountProc((const ALint) setting);
+	#if defined(__APPLE__)
+		alMacOSXRenderChannelCountProc((const ALint) setting);
+	#endif
 }
 
 void ACAudioFeedback::setRenderQuality(int quality)
 {
-	UInt32 setting = (quality == 0) ? alcGetEnumValue(NULL, "ALC_SPATIAL_RENDERING_QUALITY_LOW") : alcGetEnumValue(NULL, "ALC_SPATIAL_RENDERING_QUALITY_HIGH");
+	//CF UInt32
+	unsigned int setting = (quality == 0) ? alcGetEnumValue(NULL, "ALC_SPATIAL_RENDERING_QUALITY_LOW") : alcGetEnumValue(NULL, "ALC_SPATIAL_RENDERING_QUALITY_HIGH");
 	// TODO SD - This will activate OS-X specific extension for HRTF.
-	alcMacOSXRenderingQualityProc((const ALint) setting);
+	#if defined(__APPLE__)
+		alcMacOSXRenderingQualityProc((const ALint) setting);
+	#endif
 }
 
 void ACAudioFeedback::setDistanceModel(int model)
@@ -1343,7 +1352,6 @@ int ACAudioFeedback::createSourceWithPosition(int loop_id, float x, float y, flo
 	ALsizei size;
 	ALsizei freq;
 	char*	loop_file;
-	ALuint	loop_buffer;
 	ALuint	loop_source;
 	float   loop_pos[3];
 	
@@ -1408,15 +1416,26 @@ int ACAudioFeedback::createSourceWithPosition(int loop_id, float x, float y, flo
 	// local_key = 65;
 	// local_acid_type = 2;
 	
-	// TODO SD - This is OS-X specific. Should be changed.
 	data = 0;
-	CFStringRef fileName = CFStringCreateWithCString(kCFAllocatorDefault, (const char*)(loop_file), kCFStringEncodingUTF8);
-	CFStringRef fileNameEscaped = CFURLCreateStringByAddingPercentEscapes(NULL, fileName, NULL, NULL, kCFStringEncodingUTF8);
-	CFURLRef	fileURL = CFURLCreateWithString(NULL, fileNameEscaped, NULL);	
-	data = MyGetOpenALAudioData(fileURL, &size, &format, &freq);
-	CFRelease(fileURL);
-	CFRelease(fileNameEscaped);
-	CFRelease(fileName);
+	
+	// CF Cross-platform ALUT attempt...
+	#ifdef WIN32 
+		ALboolean al_bool;
+		alutLoadWAVFile(loop_file, &format, &data, &size, &freq, &al_bool); 
+	#elif defined(__APPLE__)
+		// TODO SD - This is OS-X specific. Should be changed.
+		CFStringRef fileName = CFStringCreateWithCString(kCFAllocatorDefault, (const char*)(loop_file), kCFStringEncodingUTF8);
+		CFStringRef fileNameEscaped = CFURLCreateStringByAddingPercentEscapes(NULL, fileName, NULL, NULL, kCFStringEncodingUTF8);
+		CFURLRef	fileURL = CFURLCreateWithString(NULL, fileNameEscaped, NULL);	
+		data = MyGetOpenALAudioData(fileURL, &size, &format, &freq);
+		CFRelease(fileURL);
+		CFRelease(fileNameEscaped);
+		CFRelease(fileName);
+		//CF by this (working!): alutLoadWAVFile(loop_file, &format, &data, &size, &freq); 
+	#else 
+		ALboolean al_bool;
+		alutLoadWAVFile((Albyte *) loop_file, &format, &data, size,&freq, &al_bool);
+	#endif
 	
 	// Convert to single channel (mono). OpenAl stereo sources are not spatialized indeed.
 	int sample_size;// = media_cycle->getWidth(loop_id);
@@ -1547,6 +1566,7 @@ int ACAudioFeedback::createSourceWithPosition(int loop_id, float x, float y, flo
 	
 	// Attach Audio Data to OpenAL Buffer
 	alBufferData(loop_buffer, format, datashort, size, freq);
+	
 	// Attach OpenAL Buffer to OpenAL Source
 	alSourceQueueBuffers(loop_source, 1, &loop_buffer);
 	

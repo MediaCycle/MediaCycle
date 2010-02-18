@@ -11,6 +11,16 @@ IF ( USE_OPENAL )
 
 		TARGET_LINK_LIBRARIES(audioengine mediacycle)
 	ELSE ( APPLE )
-		MESSAGE("AudioEngine is OSX only, it won't be compiled on this platform")
+		IF ( USE_ALUT )
+			MESSAGE("AudioEngine enabled")
+			INCLUDE_DIRECTORIES(.)
+
+			ADD_LIBRARY(audioengine STATIC ${SRC} ${HDR})
+			ADD_DEPENDENCIES(audioengine mediacycle)
+
+			TARGET_LINK_LIBRARIES(audioengine mediacycle)
+		ELSE ( USE_ALUT )
+			MESSAGE("AudioEngine disabled (ALUT required)")
+		ENDIF ( USE_ALUT )		
 	ENDIF ( APPLE )
 ENDIF ( USE_OPENAL )

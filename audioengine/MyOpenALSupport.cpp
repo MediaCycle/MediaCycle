@@ -38,6 +38,8 @@
 			STRICT LIABILITY OR OTHERWISE, EVEN IF APPLE HAS BEEN ADVISED OF THE
 			POSSIBILITY OF SUCH DAMAGE.
 */
+
+#if defined(__APPLE__)
 #include "MyOpenALSupport.h"
 
 void* MyGetOpenALAudioData(CFURLRef inFileURL, ALsizei *outDataSize, ALenum *outDataFormat, ALsizei *outSampleRate)
@@ -114,3 +116,5 @@ Exit:
 	if (extRef) ExtAudioFileDispose(extRef);
 	return theData;
 }
+
+#endif

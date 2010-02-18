@@ -50,6 +50,7 @@ ACAudioCycleOsgQt::ACAudioCycleOsgQt(QWidget *parent)
 {
 	ui.setupUi(this); // first thing to do
 	media_cycle = new MediaCycle(MEDIA_TYPE_AUDIO,"/tmp/","mediacycle.acl");
+	//media_cycle->setVisualisationPlugin("Visualisation");
 
 	audio_engine = new ACAudioFeedback();
 	audio_engine->setMediaCycle(media_cycle);	

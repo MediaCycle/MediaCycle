@@ -32,4 +32,5 @@ IF ( APPLE )
 	ELSE ( OPENAL_FOUND)
 		MESSAGE(FATAL_ERROR "OpenAL requested but not found.")
 	ENDIF ( OPENAL_FOUND)
+
 ENDIF ( APPLE )

@@ -34,9 +34,17 @@
 
 #include "MediaCycleLight.h"
 
-#import <OpenAL/al.h>
-#import <OpenAL/alc.h>
-#include <MyOpenALSupport.h>
+#if defined(__APPLE__)
+	#include <OpenAL/al.h>
+	#include <OpenAL/alc.h>
+	//#include <AL/alut.h>
+	#include <MyOpenALSupport.h>
+#else
+	#include <AL/al.h>
+	#include <AL/alc.h>
+	#include <AL/alut.h>
+#endif
+
 #include <sys/time.h>
 #include <TiPhaseVocoder.h>
 
