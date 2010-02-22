@@ -202,12 +202,13 @@ int ACMediaLibrary::saveACLLibrary(std::string _path){
 
 
 int ACMediaLibrary::openLibrary(std::string _path, bool aInitLib){
-  // this does not re-initialize the media_library
-  // but appends new media to it.
-  // except if aInitLib is set to true
-  int ret, file_count=0;
-	
+	// this does not re-initialize the media_library
+	// but appends new media to it.
+	// except if aInitLib is set to true
+	int ret, file_count=0;
+
 	FILE *library_file = fopen(_path.c_str(),"r");
+	setlocale(LC_NUMERIC, "C");//correct problem with fscanf caused by Qt (cannot read floating point string without it)
 	//if the file exists
 	if (library_file) {
 		//ACMediaFactory factory;
@@ -227,37 +228,34 @@ int ACMediaLibrary::openLibrary(std::string _path, bool aInitLib){
 					media_library.push_back(local_media);
 					file_count++;
 					
-	}
-      }
-      else {
-	std::cout<<"OpenLibrary : Wrong Media Type" <<std::endl;
-      }
-			
-    }
-    while (ret>0);
+				}
+			} else {
+				std::cout<<"OpenLibrary : Wrong Media Type" <<std::endl;
+			}
+		} while (ret>0);
 		
-    fclose(library_file);
-  }
+	fclose(library_file);
+	}
 	
-  return file_count;
+	return file_count;
 }
 
 void ACMediaLibrary::saveAsLibrary(string _path) {
-	
-  int n_loops = media_library.size();
-  
-  FILE *library_file = fopen(_path.c_str(),"w");
-  //ACMediaFactory factory;
-  denormalizeFeatures();
-  for(int i=0; i<n_loops; i++) {
-    //ACMedia* local_media = factory.create(media_type);
-    // --TODO-- ???  how does it know which type of media ?
-    // have to be set up  at some point using setMediaType()
-    ACMedia* local_media = media_library[i];
-    local_media->save(library_file);
-  }
-  fclose(library_file);
-  normalizeFeatures();
+
+	int n_loops = media_library.size();
+
+	FILE *library_file = fopen(_path.c_str(), "w");
+	//ACMediaFactory factory;
+	denormalizeFeatures();
+	for (int i = 0; i < n_loops; i++) {
+		//ACMedia* local_media = factory.create(media_type);
+		// --TODO-- ???  how does it know which type of media ?
+		// have to be set up  at some point using setMediaType()
+		ACMedia* local_media = media_library[i];
+		local_media->save(library_file);
+	}
+	fclose(library_file);
+	normalizeFeatures();
 }
 
 void ACMediaLibrary::cleanLibrary() {

@@ -1434,7 +1434,7 @@ int ACAudioFeedback::createSourceWithPosition(int loop_id, float x, float y, flo
 		//CF by this (working!): alutLoadWAVFile(loop_file, &format, &data, &size, &freq); 
 	#else 
 		ALboolean al_bool;
-		alutLoadWAVFile((Albyte *) loop_file, &format, &data, size,&freq, &al_bool);
+		alutLoadWAVFile((ALbyte *) loop_file, &format, &data, &size,&freq, &al_bool);
 	#endif
 	
 	// Convert to single channel (mono). OpenAl stereo sources are not spatialized indeed.
@@ -1553,7 +1553,7 @@ int ACAudioFeedback::createSourceWithPosition(int loop_id, float x, float y, flo
 	   
 	pthread_mutex_unlock(&audio_engine_mutex);
 		
-#else if OPENAL_STATIC_MODE	
+#elif OPENAL_STATIC_MODE	
 	
 	loop_ids[loop_slot] = loop_id; 
 	
@@ -1669,7 +1669,7 @@ int ACAudioFeedback::deleteSource(int loop_id)
 
 	pthread_mutex_unlock(&audio_engine_mutex);
 	
-#else if OPENAL_STATIC_MODE
+#elif OPENAL_STATIC_MODE
 	
 	loop_ids[loop_slot] = -1;
 	active_loops--;

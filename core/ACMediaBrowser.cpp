@@ -1185,7 +1185,7 @@ void ACMediaBrowser::setNextPositionsPropeller()
 	ACPoint p;
 	
 	if (n <=0 ) return;
-	if (mSelectedLoop < 0) return ;
+	if (mSelectedLoop < 0 || mSelectedLoop >= mLoopAttributes.size()) return ;
 	
 	p.x = p.y = p.z = 0.0;
 	mLoopAttributes[mSelectedLoop].nextPos = p;
