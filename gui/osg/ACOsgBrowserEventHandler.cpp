@@ -33,7 +33,7 @@
  */
 
 #include "ACOsgBrowserEventHandler.h"
-
+#include <iostream>
 
 void ACOsgBrowserEventHandler::picked_object_callback(int pid) {
 	media_cycle->pickedObjectCallback(pid);

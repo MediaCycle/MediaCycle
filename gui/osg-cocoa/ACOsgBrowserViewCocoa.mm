@@ -75,11 +75,7 @@ struct ACOsgBrowserViewData
 {	
 	//NSLog(@"initCommonACBrowserOsgView");
 	////_privateData = new ACOsgBrowserViewData();
-	
-	
-	renderer = new ACOsgBrowserRenderer();//CF
-	
-	
+		renderer = new ACOsgBrowserRenderer();//CF
 	//_privateData->renderer.setMediaCycle(media_cycle);
 	
 	// to get multisample, we have to do it by code...
@@ -102,7 +98,6 @@ struct ACOsgBrowserViewData
 - (void)dealloc
 {
 	////delete _privateData; //CF
-	
 	[super dealloc];
 }
 
@@ -234,7 +229,6 @@ struct ACOsgBrowserViewData
 - (void)keyUp:event
 {
 	//[super keyUp:event];
-	
 	zoomdown = 0;
 	forwarddown = 0;
 	media_cycle->setForwardDown(0);

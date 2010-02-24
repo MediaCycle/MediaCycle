@@ -33,8 +33,8 @@
  *
  */
 
-#ifndef HEADER_ACImageCycleOsgQt
-#define HEADER_ACImageCycleOsgQt
+#ifndef HEADER_ACIMAGECYCLEOSGQT
+#define HEADER_ACIMAGECYCLEOSGQT
 
 #include <iostream>
 #include <string.h>
@@ -59,6 +59,8 @@ class ACImageCycleOsgQt : public QMainWindow
 		void on_pushButtonLaunch_clicked();
 		void on_pushButtonClean_clicked();
 		void on_pushButtonRecenter_clicked();
+		void on_pushButtonBack_clicked();
+		void on_pushButtonForward_clicked();
 
 		void on_checkBoxFeat1_stateChanged(int state);
 		void on_checkBoxFeat2_stateChanged(int state);

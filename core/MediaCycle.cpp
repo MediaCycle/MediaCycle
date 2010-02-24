@@ -370,7 +370,7 @@ void MediaCycle::pickedObjectCallback(int _pid) {
 		pid = getClosestLoop();
 	}
 	mediaBrowser->setClickedLoop(pid);
-	if (!forwarddown) {
+	if (forwarddown == 0) {//if (!forwarddown) { //CF forwardown is not a boolean
 		mediaBrowser->toggleSourceActivity(pid);
 	}
 }

@@ -106,6 +106,16 @@ void ACImageCycleOsgQt::on_pushButtonRecenter_clicked()
 	media_cycle->setCameraRecenter();
 }	
 
+void ACImageCycleOsgQt::on_pushButtonBack_clicked()
+{
+	media_cycle->setBack();
+}
+
+void ACImageCycleOsgQt::on_pushButtonForward_clicked()
+{
+	media_cycle->setForward();
+}
+
 void ACImageCycleOsgQt::on_checkBoxFeat1_stateChanged(int state)
 {
 	if (updatedLibrary)

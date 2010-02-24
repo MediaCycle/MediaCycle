@@ -1,7 +1,7 @@
 /**
  * @brief ACOsgBrowserViewQT.h
  * @author Christian Frisson
- * @date 16/02/2010
+ * @date 24/02/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -29,8 +29,8 @@
  * <mailto:avre@umons.ac.be>
 */
 
-#ifndef HEADER_ACOsgBrowserVIEWQT
-#define HEADER_ACOsgBrowserVIEWQT
+#ifndef HEADER_ACOSGBROWSERVIEWQT
+#define HEADER_ACOSGBROWSERVIEWQT
 
 //
 //  ACOsgBrowserViewQT.h
@@ -67,40 +67,26 @@
 #include <osgViewer/Viewer>
 #include <osgViewer/ViewerEventHandlers>
 
-#if USE_QT4
-    #include <QtCore/QString>
-    #include <QtCore/QTimer>
-    #include <QtGui/QKeyEvent>
-    #include <QtGui/QApplication>
-    #include <QtOpenGL/QGLWidget>
-    #include <QtGui/QMainWindow>
-    using Qt::WindowFlags;
-#else
-    class QWidget;
-    #include <qtimer.h>
-    #include <qgl.h>
-    #include <qapplication.h>
-    #define WindowFlags WFlags
-#endif
+#include <QtCore/QString>
+#include <QtCore/QTimer>
+#include <QtGui/QKeyEvent>
+#include <QtGui/QApplication>
+#include <QtOpenGL/QGLWidget>
+#include <QtGui/QMainWindow>
+using Qt::WindowFlags;
 
 #include <iostream>
+#include <MediaCycleLight.h>
 #include <ACOsgBrowserRenderer.h>
 #include <ACOsgBrowserEventHandler.h>
-
-//struct ACOsgBrowserViewData;
-struct ACOsgBrowserViewData
-{
-	ACOsgBrowserRenderer renderer;
-};
 
 class ACOsgBrowserViewQT : public QGLWidget, public osgViewer::Viewer
 {
 	public:
         ACOsgBrowserViewQT( QWidget * parent = 0, const char * name = 0, const QGLWidget * shareWidget = 0, WindowFlags f = 0 );
-        //virtual ~ACOsgBrowserViewQT() {free(_privateData);}
-	virtual ~ACOsgBrowserViewQT() {};
-        osgViewer::GraphicsWindow* getGraphicsWindow() { return _gw.get(); }
-        const osgViewer::GraphicsWindow* getGraphicsWindow() const { return _gw.get(); }
+		virtual ~ACOsgBrowserViewQT() {};
+		osgViewer::GraphicsWindow* getGraphicsWindow() { return osg_view.get(); }
+		const osgViewer::GraphicsWindow* getGraphicsWindow() const { return osg_view.get(); }
         virtual void paintGL()
         {
 			//updateTransformsFromBrowser(0.0);
@@ -116,13 +102,12 @@ class ACOsgBrowserViewQT : public QGLWidget, public osgViewer::Viewer
         virtual void mousePressEvent( QMouseEvent* event );
         virtual void mouseReleaseEvent( QMouseEvent* event );
         virtual void mouseMoveEvent( QMouseEvent* event );
-        virtual void mouseDoubleClickEvent( QMouseEvent* event );
-        osg::ref_ptr<osgViewer::GraphicsWindowEmbedded> _gw;
+        //virtual void mouseDoubleClickEvent( QMouseEvent* event );
+        osg::ref_ptr<osgViewer::GraphicsWindowEmbedded> osg_view;
         QTimer _timer;
 
 	private:
 		MediaCycle *media_cycle;
-		//ACOsgBrowserViewData *_privateData;
 		ACOsgBrowserRenderer *renderer;
 		ACOsgBrowserEventHandler *event_handler;
 
@@ -135,10 +120,10 @@ class ACOsgBrowserViewQT : public QGLWidget, public osgViewer::Viewer
 		ACOsgBrowserRenderer* getRenderer(){return renderer;};
 
 	private:
-		int mousedown, zoomdown, forwarddown, autoplaydown;
+		int mousedown, zoomdown, forwarddown, autoplaydown, rotationdown;
 		float refx, refy;
 		float refcamx, refcamy;
-		float refzoom;
-		//bool _initialized; // CF cocoa rip
+		float refzoom, refrotation;
 };
+
 #endif

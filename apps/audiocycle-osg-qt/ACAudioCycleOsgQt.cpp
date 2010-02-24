@@ -151,7 +151,19 @@ void ACAudioCycleOsgQt::on_pushButtonClean_clicked()
 void ACAudioCycleOsgQt::on_pushButtonRecenter_clicked()
 {
 	media_cycle->setCameraRecenter();
-}	
+}
+
+void ACAudioCycleOsgQt::on_pushButtonBack_clicked()
+{
+	//std::cout << media_cycle->getNavigationLevel() << std::endl;
+	media_cycle->setBack();
+}
+
+void ACAudioCycleOsgQt::on_pushButtonForward_clicked()
+{
+	//std::cout << media_cycle->getNavigationLevel() << std::endl;
+	media_cycle->setForward();
+}
 
 void ACAudioCycleOsgQt::on_pushButtonControlStart_clicked()
 {

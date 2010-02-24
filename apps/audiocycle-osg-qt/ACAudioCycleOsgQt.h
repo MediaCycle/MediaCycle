@@ -33,8 +33,8 @@
  *
  */
 
-#ifndef HEADER_ACAudioCycleOsgQt
-#define HEADER_ACAudioCycleOsgQt
+#ifndef HEADER_ACAUDIOCYCLEOSGQT
+#define HEADER_ACAUDIOCYCLEOSGQT
 
 #include <iostream>
 #include <string.h>
@@ -66,6 +66,8 @@ class ACAudioCycleOsgQt : public QMainWindow
 		void on_pushButtonMuteAll_clicked();
 		void on_pushButtonClean_clicked();
 		void on_pushButtonRecenter_clicked();
+		void on_pushButtonBack_clicked();
+		void on_pushButtonForward_clicked();
 		void on_pushButtonControlStart_clicked();
 		void on_pushButtonFeedbackStart_clicked();
 
