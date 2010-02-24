@@ -47,8 +47,10 @@ public:
     ACVideoPlugin();
     ~ACVideoPlugin();
     virtual int initialize();
-	std::vector<ACMediaFeatures*>  calculate();
-	std::vector<ACMediaFeatures*>  calculate(std::string aFileName);
+	std::vector<ACMediaFeatures*> calculate();
+	std::vector<ACMediaFeatures*> calculate(std::string aFileName);
+	std::vector<ACMediaFeatures*> calculate(ACMediaData* _data);
+
 	std::vector<ACMediaFeatures*>  calculateTop(std::string aFileName);
 	std::vector<ACMediaFeatures*>  calculateFront(std::string aFileName);
 	std::string changeLastFolder(std::string path, std::string folder);
@@ -56,9 +58,6 @@ public:
 	std::string extractFilename(std::string path);
 	virtual int start() {return 0;};
 	virtual int stop() {return 0;};
-	float getWidth();
-	float getHeight();
-	float getDuration();
 	
 private:
 	ACMediaFeatures* calculateMeanOfTrajectory(ACVideoAnalysis* video);

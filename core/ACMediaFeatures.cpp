@@ -37,34 +37,49 @@
 #include <iostream>
 #include <fstream>
 #include <algorithm>
-using namespace std;
+
+using std::cerr;
+using std::cout;
+using std::endl;
+using std::ofstream;
 
 ACMediaFeatures::ACMediaFeatures(){
-  _type = FT_BASE; 
+	//XS TODO: is this flag still necessary ?
+
   _computed = false; 
   needs_normalization = 1;
   name = "none";
 }
 
-float ACMediaFeatures::getFeature(int i) {
+ACMediaFeatures::ACMediaFeatures(FeaturesVector V, string myname){
+	// XS TODO:  add checks
+	features_vector = V;
+	name = myname;
+	if (V.size() > 0) _computed = true;
+	else cerr << "<ACMediaFeatures Constructor> trying to construct empty media features" << endl;
+}
+
+
+float ACMediaFeatures::getFeatureElement(int i) {
 	if (i >= features_vector.size() || i < 0){
-		cerr << " <ACMediaFeatures::getFeature(int i) error> Invalid Feature Index" << endl;
+		cerr << " <ACMediaFeatures::getFeatureElement(int i) error> Invalid Feature Index" << endl;
 		return -1;
 	}
 	return features_vector[i];
 }
 
+//XS TODO: is often multidimensional...
 int ACMediaFeatures::getDiscretizedFeature(){
-  if (this->size()>1){
-    std::cout << "Warning : Multidimensionnal feature, cannot be discretized" << std::endl;
+  if (this->getSize()>1){
+    cout << "Warning : Multidimensionnal feature, cannot be discretized" << endl;
     return 0;
   }
   else{
     int res = 0;
-    if (this->getFeature(0) > .5)
+    if (this->getFeatureElement(0) > .5)
       res=3;
     else 
-      if (this->getFeature(0) < -.5)
+      if (this->getFeatureElement(0) < -.5)
 	res = 1;
       else
 	res = 2;
@@ -73,31 +88,31 @@ int ACMediaFeatures::getDiscretizedFeature(){
 }
 
 
-void ACMediaFeatures::setFeature(int i, float f) {
-	if (i >= features_vector.size() || i < 0){
-		cerr << " <ACMediaFeatures::setFeature(int i) error> Invalid Feature Index" << endl;
+void ACMediaFeatures::setFeatureElement(int i, float f) {
+	if (i >= int(features_vector.size()) || i < 0){
+		cerr << " <ACMediaFeatures::setFeatureElement(int i) error> Invalid Feature Index" << endl;
 		return;
 	}
 	features_vector[i] = f;
 }
 
-void ACMediaFeatures::addFeature(float f){
+void ACMediaFeatures::addFeatureElement(float f){
 	features_vector.push_back(f);
 }
 
-int ACMediaFeatures::size() {
+int ACMediaFeatures::getSize() { // XS TODO:  getSize
 	return features_vector.size();
 }
 
 void ACMediaFeatures::dump(){ // output in terminal
-	for (int i=0; i<features_vector.size(); i++){
+	for (int i=0; i< int(features_vector.size()); i++){
 		cout << i << " : " << features_vector[i] << endl;
 	}
 }
 
 void ACMediaFeatures::write(string file_name){ // output in file
 	ofstream out(file_name.c_str()); 
-	out << "features of type: " << _type << endl;
+	out << "features name: " << getName() << endl;
 	for (int i=0; i<features_vector.size(); i++){
 		out << i << " : " << features_vector[i] << endl;
 	}

@@ -93,7 +93,7 @@ public:
     int getKNN(int id, std::vector<int> &ids, int k);
 
     // Thumbnail
-    string getThumbnail(int id);
+    string getThumbnailFileName(int id);
 
     string getLocalDirectoryPath() {return local_directory;}
     string getLibName() {return libname;}
@@ -159,7 +159,7 @@ public:
 	ACPoint getLabelPos(int i);
 
 	// Get Features
-	vector<float> getFeature(int i, string feature_name);
+	vector<float> getFeaturesVectorInMedia(int i, string feature_name);
 	
 	// Playing time stamp
 	int setSourceCurser(int lid, int frame_pos);

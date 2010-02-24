@@ -33,53 +33,89 @@
  */
 
 #include "ACVideo.h"
+
 #include <string>
 #include <fstream>
 using namespace std;
 
-//#include "ACAnalysedVideo.h"
-//#include "ACVideoFeaturesFactory.h"
-
 ACVideo::ACVideo() : ACMedia() {
-	_type = MEDIA_TYPE_VIDEO;
-	features.resize(0);
+	media_type = MEDIA_TYPE_VIDEO;
 	thumbnail = 0;
-	width = 0;
-	height = 0;
 	thumbnail_width = 0;
 	thumbnail_height = 0;
-	duration = 0;
 }	
 
 ACVideo::~ACVideo() {
-	// Clean up! 
-	std::vector<ACMediaFeatures*> ::iterator iter;
-	for (iter = features.begin(); iter != features.end(); iter++) { 
-		delete *iter; 
-	}
+	delete thumbnail;
 }
 
-//void ACVideo::import(string _path) { 
-// XS 23/09/09: now done in ACMedia.
-//	if we need to add something here, call first ACMedia::import
-//}
+int ACVideo::computeThumbnail(ACMediaData* data_ptr, int w, int h){
+	if (w <=0 || h <=0){
+		cerr << "<ACImage::computeThumbnail> dimensions should be positive: " << w << " x " << h << endl;
+		return -1;
+	}
+	
+	CvCapture* capture = data_ptr->getVideoData();
+	
+	// take thumbnail in the middle of the video...
+	int nframes = (int) cvGetCaptureProperty(capture,  CV_CAP_PROP_FRAME_COUNT);
+	cvSetCaptureProperty(capture, CV_CAP_PROP_POS_FRAMES, nframes/2); 	
+	
+	if(!cvGrabFrame(capture)){
+		cerr << "<ACVideo::computeThumbnail> Could not find frame..." << endl;
+		return -1;
+	}
+	thumbnail = cvRetrieveFrame(capture);
+	
+	if (!thumbnail){
+		cerr << "<ACVideo::computeThumbnail> problem creating thumbnail" << endl;
+		return -1;
+	}
+	thumbnail_width = w;
+	thumbnail_height = h;
+	
+	return 1;
+}
+
+ACMediaData* ACVideo::extractData(string _fname){
+	// XS todo : store the default header (16 below) size somewhere...
+	ACMediaData* video_data = new ACMediaData(_fname, MEDIA_TYPE_VIDEO);
+	computeThumbnail(video_data, 16, 16);
+	width = thumbnail_width;
+	height = thumbnail_height;
+
+	CvCapture* capture = video_data->getVideoData();
+	int fps     = (int) cvGetCaptureProperty(capture, CV_CAP_PROP_FPS);
+	int nframes = (int) cvGetCaptureProperty(capture,  CV_CAP_PROP_FRAME_COUNT);
+	
+	duration=0.0;
+	if (fps != 0) duration = nframes * 1.0/fps;
+	else duration = nframes;
+
+	return video_data;
+}
 
 // C++ version
 // writes in an existing (i.e. already opened) acl file
+// works for binary too, the stream deals with it
 void ACVideo::saveACL(ofstream &library_file) {
 	if (! library_file.is_open()) {
 		cerr << "<ACVideo::saveACL> : problem writing video in ACL file, it needs to be opened before" << endl;
 	}	
+	library_file << filename << endl;
+	library_file << filename_thumbnail << endl;
+	library_file << duration << endl;
 	library_file << mid << endl;
 	library_file << width << endl;
 	library_file << height << endl;
-	int n_features = features.size();
+	int n_features = features_vectors.size();
 	library_file << n_features << endl;
 	for (int i=0; i<n_features;i++) {
-		int n_features_elements = features[i]->size();
+		int n_features_elements = features_vectors[i]->getSize();
+		library_file << features_vectors[i]->getName() << endl;
 		library_file << n_features_elements << endl;
 		for (int j=0; j<n_features_elements; j++) {
-			library_file << features[i]->getFeature(j) << "\t";
+			library_file << features_vectors[i]->getFeatureElement(j) << "\t";
 		}
 		library_file << endl;
 	}
@@ -91,76 +127,74 @@ int ACVideo::loadACL(ifstream &library_file) {
 	if (! library_file.is_open()) {
 		cerr << "<ACVideo::loadACL> : problem loading video from ACL file, it needs to be opened before" << endl;
 	}		
-	string toto;
-	getline(library_file, toto); 
-	cout << "test first line in ACVIdeo: " << toto << endl;
-//	getline(library_file, toto); 
-//	cout << "test second line in ACVIdeo: " << toto << endl;
-
-	if (!library_file >> mid || !library_file.good()){
-		cerr << "problem reading mid" << endl;
+	if (!library_file.good()){
+		cerr << "<ACVideo::loadACL> : bad library file" << endl;
 	}
+	library_file >> filename ;
+	library_file >> filename_thumbnail;
+	library_file >> duration;
+	library_file >> mid;	
 	library_file >> width;
 	library_file >> height;
 	int n_features = 0;
 	library_file >> n_features; 
-
+	
 	ACMediaFeatures* mediaFeatures;
 	float local_feature;
 	int n_features_elements = 0;
 	
 	for (int i=0; i<n_features;i++) {
 		mediaFeatures = new ACMediaFeatures();
-		features.push_back(mediaFeatures);
-		features[i]->setComputed();
+		features_vectors.push_back(mediaFeatures);
+		features_vectors[i]->setComputed();
 		library_file >> n_features_elements;
-		features[i]->resize(n_features_elements);
+		features_vectors[i]->resize(n_features_elements);
 		for (int j=0; j<n_features_elements; j++) {
 			library_file >> local_feature;
-			features[i]->setFeature(j, local_feature);
+			features_vectors[i]->setFeatureElement(j, local_feature);
 		}
 	}
 	// XS TODO check if errors and return 0/1
 }
 
-void ACVideo::save(FILE* library_file) { // was saveloop
-  int i, j;
-  int n_features;
-  int n_features_elements;
-  
-  fprintf(library_file, "%s\n", filename.c_str());
-  fprintf(library_file, "%s\n", filename_thumbnail.c_str());
-  
+void ACVideo::save(FILE* library_file) {
+	int i, j;
+	int n_features;
+	int n_features_elements;
+	
+	fprintf(library_file, "%s\n", filename.c_str());
+	fprintf(library_file, "%s\n", filename_thumbnail.c_str());
+	
 #ifdef SAVE_LOOP_BIN
-  fwrite(&mid,sizeof(int),1,library_file);
-  fwrite(&width,sizeof(int),1,library_file);
-  fwrite(&height,sizeof(int),1,library_file);
-  n_features = features.size();
-  fwrite(&n_features,sizeof(int),1,library_file);
-  for (i=0; i<features.size();i++) {
-    n_features_elements = features[i]->size();
-    fwrite(&n_features_elements,sizeof(int),1,library_file);
-    for (j=0; j<n_features_elements; j++) {
-      value = features[i]->getFeature(j)); // XS instead of [i][j]
-    fwrite(&value,sizeof(float),1,library_file);
-  }
-}
+	fwrite(&mid,sizeof(int),1,library_file);
+	fwrite(&width,sizeof(int),1,library_file);
+	fwrite(&height,sizeof(int),1,library_file);
+	n_features = features_vectors.size();
+	fwrite(&n_features,sizeof(int),1,library_file);
+	for (i=0; i<features_vectors.size();i++) {
+		n_features_elements = features_vectors[i]->size();
+		fwrite(&n_features_elements,sizeof(int),1,library_file);
+		for (j=0; j<n_features_elements; j++) {
+			value = features_vectors[i]->getFeatureElement(j)); // XS instead of [i][j]
+			fwrite(&value,sizeof(float),1,library_file);
+		}
+	}
 #else
-fprintf(library_file, "%f\n", duration);
-fprintf(library_file, "%d\n", mid);
-fprintf(library_file, "%d\n", width);
-fprintf(library_file, "%d\n", height);
-n_features = features.size();
-fprintf(library_file, "%d\n", n_features);
-for (i=0; i<features.size();i++) {
-  n_features_elements = features[i]->size();
-  fprintf(library_file, "%s\n", features[i]->getName().c_str());
-  fprintf(library_file, "%d\n", n_features_elements);
-  for (j=0; j<n_features_elements; j++) {
-    fprintf(library_file, "%f\t", features[i]->getFeature(j)); // XS instead of [i][j]
-  }
-  fprintf(library_file, "\n");
- }
+	fprintf(library_file, "%f\n", duration);
+	fprintf(library_file, "%d\n", mid);
+	fprintf(library_file, "%d\n", width);
+	fprintf(library_file, "%d\n", height);
+	n_features = features_vectors.size();
+	fprintf(library_file, "%d\n", n_features);
+	for (i=0; i<features_vectors.size();i++) {
+		n_features_elements = features_vectors[i]->getSize();
+		fprintf(library_file, "%s\n", features_vectors[i]->getName().c_str());
+		fprintf(library_file, "%d\n", n_features_elements);
+		for (j=0; j<n_features_elements; j++) {
+			fprintf(library_file, "%f\t", features_vectors[i]->getFeatureElement(j)); // XS instead of [i][j]
+		}
+		fprintf(library_file, "\n");
+	}
 #endif
 }
 
@@ -172,7 +206,7 @@ int ACVideo::load(FILE* library_file) { // was loadLoop
 	int n_features;
 	int n_features_elements;
 	char featureName[256];
-
+	
 	int ret;
 	char *retc;
 	
@@ -186,11 +220,11 @@ int ACVideo::load(FILE* library_file) { // was loadLoop
 	file_temp2 = new char[1024];
 	memset(file_temp2,0,1024);
 	
-/*	char file_temp[1024];
-	memset(file_temp,0,1024);
-	char file_temp2[1024];
-	memset(file_temp2,0,1024);
-*/
+	/*	char file_temp[1024];
+	 memset(file_temp,0,1024);
+	 char file_temp2[1024];
+	 memset(file_temp2,0,1024);
+	 */
 	
 	retc = fgets(file_temp, 1024, library_file);
 	
@@ -198,15 +232,15 @@ int ACVideo::load(FILE* library_file) { // was loadLoop
 		path_size = strlen(file_temp);
 		this->filename = string(file_temp, path_size-1);
 		if (this->filename.size()==0){
-		  cerr << "ACVIdeo : Empty filename" << endl;
-		  exit(-1);
+			cerr << "ACVIdeo : Empty filename" << endl;
+			exit(-1);
 		}
 		retc = fgets(file_temp2, 1024, library_file);
 		path_size = strlen(file_temp2);
 		this->filename_thumbnail = string(file_temp2, path_size-1);
 		if (this->filename_thumbnail.size()==0){
-		  cerr << "ACVIdeo : Empty thumbnail filename" << endl;
-		  exit(-1);
+			cerr << "ACVIdeo : Empty thumbnail filename" << endl;
+			exit(-1);
 		}
 		
 		ret = fscanf(library_file, "%lf", &duration);
@@ -222,15 +256,15 @@ int ACVideo::load(FILE* library_file) { // was loadLoop
 
 		for (i=0; i<n_features;i++) {
 			mediaFeatures = new ACMediaFeatures();
-			features.push_back(mediaFeatures);
-			features[i]->setComputed();
+			features_vectors.push_back(mediaFeatures);
+			features_vectors[i]->setComputed();
 			ret = fscanf(library_file, "%s", featureName);
-			features[i]->setName(string(featureName));
+			features_vectors[i]->setName(string(featureName));
 			ret = fscanf(library_file, "%d", &n_features_elements);
-			features[i]->resize(n_features_elements);
+			features_vectors[i]->resize(n_features_elements);
 			for (j=0; j<n_features_elements; j++) {
 				ret = fscanf(library_file, "%f", &(local_feature));
-				features[i]->setFeature(j, local_feature);
+				features_vectors[i]->setFeatureElement(j, local_feature);
 			}
 		}
 		ret = fscanf(library_file, "\n");
@@ -244,5 +278,3 @@ int ACVideo::load(FILE* library_file) { // was loadLoop
 		return 0;
 	}
 }
-
-// XS TODO: use C++ strings and streams instead of C-functions=======

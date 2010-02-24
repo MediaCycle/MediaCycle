@@ -40,49 +40,33 @@
 #include <string>
 
 // -----------------------------------
-// TODO : better than these #define
-// XS they are only used in the resize => remove ?
-
-#define IMAGE_LOOP_SHAPE_NUM_EL  24
-#define IMAGE_LOOP_COLOR_NUM_EL 24
-#define IMAGE_LOOP_TEXTURE_NUM_EL  24
-#define FEATURES_NUM_EL	3
-
-//#define INDEX_SHAPE 0
-//#define INDEX_COLOR 1
-//#define INDEX_TEXTURE 2
-
-// -----------------------------------
 
 class ACImage: public ACMedia {
 	// contains the *minimal* information about an image
-	// is this too much already ?
 public:
 	ACImage();
 	~ACImage();
 	
 	void save(FILE* library_file);
 	int load(FILE* library_file);
+	void saveACL(ofstream &library_file);
+	int loadACL(ifstream &library_file);
 
-	// TODO: make the following explicitely inlines ?
 	void setThumbnail(IplImage *_thumbnail) { thumbnail = _thumbnail; thumbnail_width = _thumbnail->width; thumbnail_height = _thumbnail->height; }
-// SD?	void setThumbnailSave(IplImage *_thumbnail);
+	// IplImage* getThumbnail() { return thumbnail; }
+	int getThumbnailWidth() {return thumbnail_width;}
+	int getThumbnailHeight() {return thumbnail_height;}
 	void* getThumbnailPtr() { return (void*)thumbnail; }
 	
-	// do we need the original size ?
-	// the thumbnail size can be accessed by thumbnail->width/height !! ;
-	int getThumbnailWidth() {return width;}
-	int getThumbnailHeight() {return height;}
-	int getWidth() {return width;}
-	int getHeight() {return height;}
-	void setWidth(int w) {width = w;} // XS TODO : check if it matches thumbnail?
-	void setHeight(int h) {height = h;}
-	
+	ACMediaData* extractData(std::string fname);
+		
 private:	
 	char  *thumbnail_filename;
-	int width, height; // delete
-	int thumbnail_width, thumbnail_height; // delete
+	int thumbnail_width, thumbnail_height; 
 	IplImage *thumbnail;
+	
+	int computeThumbnail(string _fname, int w, int h);
+	int computeThumbnail(ACMediaData* data_ptr, int w=0, int h=0);
 };
 
 #endif // ACIMAGE_H

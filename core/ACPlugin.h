@@ -39,11 +39,12 @@
 
 #include "ACMediaTypes.h"
 #include "ACMediaFeatures.h"
+#include "ACMediaData.h"
+//#include "ACMediaTimedFeature.h"
 //#include "ACMediaBrowser.h"
 
 class ACMediaBrowser;
 
-//using namespace std;
 using std::vector;
 using std::string;
 
@@ -58,22 +59,19 @@ class ACPlugin {
 public:
     ACPlugin() {}
     virtual ~ACPlugin() {}
-    virtual std::string getName() {return this->mName;}
+	std::string getName() {return this->mName;}
     //virtual std::string getName() const = 0; -> error !
-    virtual std::string getIdentifier() {return this->mId;}
-    virtual std::string getDescription() {return this->mDescription;}
-    virtual ACMediaType getMediaType() {return this->mMediaType;}
-    virtual ACPluginType getPluginType() {return this->mPluginType;}
-	
-	// XS I did not put these = 0 because old plugins won't have it implemented
-	virtual float getWidth(){return 0.0;}
-	virtual float getHeight(){return 0.0;}
-	virtual float getDuration(){return 0.0;}
-
+    std::string getIdentifier() {return this->mId;}
+    std::string getDescription() {return this->mDescription;}
+	ACMediaType getMediaType() {return this->mMediaType;}
+    ACPluginType getPluginType() {return this->mPluginType;}
+		
     virtual int initialize() = 0;
+	// XS TODO: why are they all =0 ?
     virtual std::vector<ACMediaFeatures*> calculate() = 0;
     virtual std::vector<ACMediaFeatures*> calculate(std::string aFileName) = 0;
-    virtual void updateClusters(ACMediaBrowser*){};
+	virtual std::vector<ACMediaFeatures*> calculate(ACMediaData* _data) =0;
+	virtual void updateClusters(ACMediaBrowser*){};
     virtual void updateNextPositions(ACMediaBrowser*){};
     virtual int start() = 0;
     virtual int stop() = 0;
@@ -85,7 +83,6 @@ protected:
     string mDescription;
     ACMediaType mMediaType;
     ACPluginType mPluginType;
-	float mwidth, mheight, mduration;
 };
 
 // the types of the class factories

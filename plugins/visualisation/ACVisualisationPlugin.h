@@ -1,7 +1,7 @@
 /**
  * @brief ACVisualisationPlugin.h
- * @author Alexis Moinet
- * @date 08/02/2010
+ * @author Xavier Siebert
+ * @date 24/02/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -35,6 +35,8 @@
 #include "ACMediaBrowser.h"
 #include "ACMediaTimedFeature.h"
 
+using namespace arma;
+
 #ifndef _ACVISUALISATIONPLUGIN_
 #define _ACVISUALISATIONPLUGIN_
 
@@ -45,6 +47,8 @@ public:
   virtual int initialize();
   virtual std::vector<ACMediaFeatures*> calculate();
   virtual std::vector<ACMediaFeatures*> calculate(std::string aFileName);
+	std::vector<ACMediaFeatures*> calculate(ACMediaData* _data){}
+
   virtual void updateClusters(ACMediaBrowser* );
   virtual void updateNextPositions(ACMediaBrowser* );
 	mat updateNextPositionsItemClicked(mat &desc_m, int nbVideoDisplay, int itemClicked, ucolvec &toDisplay_v, mat &labelPos_m, ucolvec &labelIdx_v, colvec &labelValue_v);

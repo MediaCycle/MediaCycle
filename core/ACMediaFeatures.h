@@ -46,9 +46,13 @@
 
 #include "ACFeaturesTypes.h"
 
-class ACMediaFeatures  {	
+using std::string;
+
+class ACMediaFeatures  {
+	// ACMediaFeatures is essentially a vector of floats with some extra methods.
+	// . each plugin should return one ACMediaFeatures.
+	// . each element of ACMediaFeatures could be called "feature", but we call it featureElement to avoid confusion between the vector and one of its elements
 protected:
-	FeatureType _type;
 	FeaturesVector features_vector; // vector<float>
 	bool _computed ;
 	static DistanceType dist_type; // XS check: derive static => 1 per subclass ?
@@ -56,28 +60,32 @@ protected:
 	int needs_normalization;
 public:
 	ACMediaFeatures(); // no media given, probably read features from disk
+	ACMediaFeatures(FeaturesVector V, string myname="");
 	virtual ~ACMediaFeatures()  {};
 	//	virtual void calculate(void*) = 0;
 	// the following are common to all features types and should NOT be redefined
-	const FeatureType& getType() const {return _type;};
 	bool isComputed() {return _computed;};
 	void setComputed() { _computed = true; };
 	void setNeedsNormalization(int i) { needs_normalization = i; }
 	int getNeedsNormalization() { return needs_normalization; }
-	float getFeature(int i);
-	void addFeature(float f);
+	
+	float getFeatureElement(int i);
+	void addFeatureElement(float f);
+	void setFeatureElement(int i, float f);
+	FeaturesVector *getFeaturesVector() {return &features_vector;}
+	
+	// this works only for 1D features -- does it belong here ?
 	int getDiscretizedFeature();
-	void setFeature(int i, float f);
-	FeaturesVector *getAllFeatures() {return &features_vector;}
+
 	void dump(); // output in terminal
-	void write(std::string);  // output in a file -- todo : define format
+	void write(string);  // output in a file -- todo : define format
 	// void read() {} // read from file -- cf. plugin ?
 	
-	std::string getName() {return name;};
-	void setName(std::string namei) {this->name = namei;};
-	// XS TODO : the following 2 have to be discussed with SD
+	string getName() {return name;};
+	void setName(string namei) {this->name = namei;};
+
 	void resize(int new_size) { features_vector.resize(new_size); }
-	int size();
+	int getSize();
 	
 };
 

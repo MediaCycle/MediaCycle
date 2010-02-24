@@ -370,7 +370,7 @@ ACMediaFeatures* ACMediaTimedFeatures::weightedMean(ACMediaTimedFeatures* weight
 	name += this->getName();
 	weightedMean_mf->setName(name);
 	for (int i=0; i<tmp_m.n_cols; i++)
-		weightedMean_mf->addFeature(tmp_m(0,i));
+		weightedMean_mf->addFeatureElement(tmp_m(0,i));
 	return weightedMean_mf;
 }
 
@@ -381,7 +381,7 @@ ACMediaFeatures* ACMediaTimedFeatures::mean(){
 	name += this->getName();
 	mean_mf->setName(name);
 	for (int i=0; i<mean_m.n_cols; i++){
-		mean_mf->addFeature(mean_m(0,i)); // 0 = per column
+		mean_mf->addFeatureElement(mean_m(0,i)); // 0 = per column
 	}
 	return mean_mf;
 }
@@ -393,7 +393,7 @@ ACMediaFeatures* ACMediaTimedFeatures::max(){
 	name += this->getName();
 	max_mf->setName(name);
 	for (int i=0; i<max_m.n_cols; i++){
-		max_mf->addFeature(max_m(0,i)); // 0 = per column
+		max_mf->addFeatureElement(max_m(0,i)); // 0 = per column
 	}
 	return max_mf;
 }
@@ -427,7 +427,7 @@ ACMediaFeatures* ACMediaTimedFeatures::weightedStdDeviation(ACMediaTimedFeatures
 	name += this->getName();
 	wstd_mf->setName(name);
 	for (int i=0; i<wstd_m.n_cols; i++)
-		wstd_mf->addFeature(wstd_m(0,i));
+		wstd_mf->addFeatureElement(wstd_m(0,i));
 	return wstd_mf;
 }
 
@@ -438,7 +438,7 @@ ACMediaFeatures* ACMediaTimedFeatures::std(){
 	name += this->getName();
 	std_mf->setName(name);
 	for (int i=0; i<std_m.n_cols; i++)
-		std_mf->addFeature(std_m(0,i));  
+		std_mf->addFeatureElement(std_m(0,i));  
 	return std_mf;
 }
 
@@ -494,7 +494,7 @@ ACMediaTimedFeatures* ACMediaTimedFeatures::weightedMeanSegment(ACMediaTimedFeat
 		//acmtv[i]->getTime().print("time seg");    
 		tmpMean_mf = acmtv[i]->weightedMean(weight);//1 line * dim column
 		for (int Icol=0; Icol<this->getDim(); Icol++)
-			outAcmtvValue(i, Icol) = tmpMean_mf->getFeature(Icol);
+			outAcmtvValue(i, Icol) = tmpMean_mf->getFeatureElement(Icol);
 		//outAcmtvTime(i) = (this->getSegments()[i]+this->getSegments()[i+1])/2;
 		outAcmtvTime(i) = (acmtv[i]->getTime(0) + acmtv[i]->getTime(acmtv[i]->getLength()-1) )/2;
 	}

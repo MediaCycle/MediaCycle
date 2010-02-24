@@ -1,4 +1,5 @@
 #include "BlobContour.h"
+#include "ACOpenCVInclude.h"
 
 //XS debug
 #include <iostream>

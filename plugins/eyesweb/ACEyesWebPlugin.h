@@ -43,6 +43,7 @@
 
 #include "ACPlugin.h"
 #include "ACMediaTimedFeature.h"
+#include "ACMediaData.h"
 
 class ACEyesWebPlugin : public ACPlugin {
 public:
@@ -51,6 +52,8 @@ public:
     virtual int initialize();
     virtual std::vector<ACMediaFeatures*> calculate();
     virtual std::vector<ACMediaFeatures*> calculate(std::string aFileName);
+	std::vector<ACMediaFeatures*> calculate(ACMediaData* _data){}
+
     virtual int start() {return 0;};
     virtual int stop() {return 0;};
     std::string extractDirectory(std::string path);

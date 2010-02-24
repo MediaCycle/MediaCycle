@@ -359,7 +359,7 @@ void ACAudioFeedback::deleteOpenAL()
 	*/
 	
 	//Get active context
-    context = alcGetCurrentContext();
+    context = alcGetCurrentContext(); // XS (0) added
     //Get device for active context
     device = alcGetContextsDevice(context);
     //Release context
@@ -843,7 +843,7 @@ void ACAudioFeedback::processAudioEngineSamplePosition(int _loop_slot, int *_sam
 	float local_bpm;
 	
 	loop_id = loop_ids[_loop_slot];
-	// audio_loop = media_cycle->getAudioLibrary()->getItem(loop_id);
+	// audio_loop = media_cycle->getAudioLibrary()->getMedia(loop_id);
 	size = use_sample_end[_loop_slot] - use_sample_start[_loop_slot];
 		
 	int sample_size = media_cycle->getWidth(loop_id);
@@ -943,7 +943,7 @@ void ACAudioFeedback::processAudioEngineResynth(int _loop_slot, int _sample_pos,
 	float local_pos_f;
 	
 	loop_id = loop_ids[_loop_slot];
-	// audio_loop = media_cycle->getAudioLibrary()->getItem(loop_id);
+	// audio_loop = media_cycle->getAudioLibrary()->getMedia(loop_id);
 	size = use_sample_end[_loop_slot] - use_sample_start[_loop_slot];
 	
 	void *source;
@@ -1379,7 +1379,7 @@ int ACAudioFeedback::createSourceWithPosition(int loop_id, float x, float y, flo
 	// SD - bug workaround....
 	// loop_slot = loop_id;
 	
-	// audio_loop = media_cycle->getAudioLibrary()->getItem(loop_id);
+	// audio_loop = media_cycle->getAudioLibrary()->getMedia(loop_id);
 	loop_file = (char*)(media_cycle->getMediaFileName(loop_id)).c_str();
 	//loop_buffer = loop_buffers[loop_slot];
 	
@@ -1391,14 +1391,14 @@ int ACAudioFeedback::createSourceWithPosition(int loop_id, float x, float y, flo
 	loop_pos[1] = y;
 	loop_pos[2] = z;
 	local_bpm = 0;
-	local_feature = media_cycle->getFeature(loop_id, "bpm");
+	local_feature = media_cycle->getFeaturesVectorInMedia(loop_id, "bpm");
 	if ((local_feature).size()) {
 		if ((local_feature).size()==1) {
 			local_bpm = (local_feature)[0];
 		}
 	}
 	local_key = 0;
-	local_feature = media_cycle->getFeature(loop_id, "key");
+	local_feature = media_cycle->getFeaturesVectorInMedia(loop_id, "key");
 	if ((local_feature).size()) {
 		if ((local_feature).size()==1) {
 			local_key = int((local_feature)[0]);
@@ -1406,7 +1406,7 @@ int ACAudioFeedback::createSourceWithPosition(int loop_id, float x, float y, flo
 	}
 	// SD TODO - Acid type not yet used
 	local_acid_type = 0;
-	local_feature = media_cycle->getFeature(loop_id, "acid_type");
+	local_feature = media_cycle->getFeaturesVectorInMedia(loop_id, "acid_type");
 	if ((local_feature).size()) {
 		if ((local_feature).size()==1) {
 			local_acid_type = int((local_feature)[0]);

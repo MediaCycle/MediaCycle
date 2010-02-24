@@ -38,26 +38,27 @@
 #include "ACMediaFeatures.h"
 #include "ACMediaTypes.h"
 #include "ACPluginManager.h"
-
+#include "ACMediaData.h"
 #include <string>
 
 class ACMedia {
 	// contains the minimal information about a media
 	// uses vector of vector to store media features. 
-	// e.g., for image, features[0] = color descriptors, etc.
+	// features_vectors[i] = vector of numbers calculated by plugin number i (starting at 0)
+	// note 230210: features_vectors[i] could later be grouped with other features, depending on the configuration file (or the preferences menu)
 protected:
 	int mid;
+	ACMediaType media_type;
 	int height, width;
-	std::vector<ACMediaFeatures*> features;
+	double duration;
+	std::vector<ACMediaFeatures*> features_vectors;
 	std::string filename;
 	std::string filename_thumbnail;
-	ACMediaType _type;
 	char  **text_tags;
 	char  **hyper_links;	
-	double duration;
 public:
-	ACMedia() { mid = -1; }
-	virtual ~ACMedia() {}
+	ACMedia();
+	virtual ~ACMedia();
 	
 	void setId(int _id) {mid = _id;} // SD TODO - should check for duplicate id?
 	int getId() {return mid;}
@@ -65,32 +66,44 @@ public:
 	void setDuration(double iduration){this->duration = iduration;}
 	double getDuration(){return this->duration;}
 
-	std::vector<ACMediaFeatures*> &getFeatures() { return features; }
-	ACMediaFeatures* &getFeature(int i);
-	ACMediaFeatures* getFeature(string feature_name);
-	int getNumberOfFeatures() {return features.size();}
-
-	void addFeatures(ACMediaFeatures *aFeatures) { this->features.push_back(aFeatures); }
+	std::vector<ACMediaFeatures*> &getAllFeaturesVectors() { return features_vectors; }
+	ACMediaFeatures* &getFeaturesVector(int i);
+	ACMediaFeatures* getFeaturesVector(string feature_name);
+	int getNumberOfFeaturesVectors() {return features_vectors.size();}
+	void addFeaturesVector(ACMediaFeatures *aFeatures) { this->features_vectors.push_back(aFeatures); }
 	
 	std::string getFileName() { return filename; }
-	std::string getThumbnail() { return filename_thumbnail; }
-	void setThumbnail(string ifilename) { filename_thumbnail=ifilename; }
 	void setFileName(std::string s) { filename = s; }
-	std::string getFileName(std::string s) { return filename; }
+
+	// thumbnail
+	std::string getThumbnailFileName() { return filename_thumbnail; }
+	void setThumbnailFileName(string ifilename) { filename_thumbnail=ifilename; }
+	// the following 2 were re-introduced for audio...
+	virtual int getThumbnailWidth() {return 0;}
+	virtual int getThumbnailHeight() {return 0;}
+
+//	virtual int computeThumbnail(std::string fname="", int w=0, int h=0){}
+//	virtual int computeThumbnail(ACMediaData* data_ptr, int w=0, int h=0){}
+
 	virtual void* getThumbnailPtr()=0;
-	virtual int getThumbnailWidth()=0;
-	virtual int getThumbnailHeight()=0;
-	virtual int getWidth()=0;
-	virtual int getHeight()=0;
+	//XS TODO: remove the following one  -- type-specific !
+	virtual void setThumbnailPtr(void *ptr){};
+
+	// accessors -- these should not be redefined for each media
+	int getWidth() {return width;}
+	int getHeight() {return height;}
 	void setWidth(int w) {width=w;}
 	void setHeight(int h) {height=h;}
+	ACMediaType	getType() {return this->media_type;}	
 	
-	ACMediaType	getType() {return this->_type;}	
+	// I/O -- these are media-specific (at least for the moment...) 
 	virtual void save(FILE *){}
 	virtual int load(FILE*){}
 	virtual void saveACL(ofstream &library_file){}
 	virtual int loadACL(ifstream &library_file){}
-
+	virtual ACMediaData* extractData(std::string filename){}
+	
+	// function that calls the plugins and fills in info such as width, height, ...
 	virtual int import(std::string _path, int id=-1, ACPluginManager *acpl=NULL);
 	// XS 23/09/09 : I implemented import in ACMedia.cpp, since it is the same for all media
 	// XS 23/09/09 : import returns 1 if it worked, 0 if it failed

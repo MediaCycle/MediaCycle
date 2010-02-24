@@ -80,16 +80,18 @@ const string ghostlist[ndancers] = {
 "Bru_211#1", "Bru_218#1", "Bru_218#2", "Bru_224#1", "Bru_302#2", "Bru_313#2", "Bru_320#1"
 };
 
-const string videodir = "/Users/xavier/numediart/Project7.3-DancersCycle/VideosSmall/Front/";
+const string videodir = "/Users/xavier/numediart/Project7.3-DancersCycle/VideosSmall/Test/";
 // const string videodir = "/Users/xavier/numediart/Project7.3-DancersCycle/Recordings_Raffinerie_0709/FrontShots/";
+
+const string video_plugin_path = "/Users/xavier/development/Fall09/ticore-app/Applications/Numediart/MediaCycle/src/Builds/darwin-xcode/plugins/video/Debug/";
 
 void get_all_images(){
 //	for (int i=0;i<ndancers;i++){	
 	for (int i=0;i<13;i++){	
 //		string dancer = dancerslist[i];
 		string dancer = ghostlist[i];
-		string movie_file= videodir+"H264/"+dancer+".mov";
-		string median_file_noblob= videodir+"median/"+dancer+"_med_noblob.jpg";
+		string movie_file= videodir+"Front/"+dancer+".mov";
+		string median_file_noblob= videodir+"Test/"+dancer+"_med_noblob.jpg";
 //		string median_file= videodir+"median/"+dancer+"_med.jpg";
 //		string average_file= videodir+"average/"+dancer+"_ave.jpg";
 		cout << movie_file << endl;
@@ -204,8 +206,20 @@ void test_video_plugin(std::string dancer){
 	cout<<"Test Video Plugin execution time: " << (t1-t0)/CLOCKS_PER_SEC << " s." << endl;	
 }
 
+void test_video_plugin_acl_save(std::string dancer){
+	string movie_file= videodir+"Front/"+dancer+".mov";
+	string acl_file = videodir+"Test/"+dancer+"-cpp.acl";
+
+	MediaCycle* mediacycle;
+	mediacycle = new MediaCycle(MEDIA_TYPE_VIDEO);
+	mediacycle->addPlugin(video_plugin_path+"mc_video.dylib");
+	mediacycle->importDirectory(movie_file, 0);
+	mediacycle->saveACLLibrary(acl_file);
+	delete mediacycle;	
+}
+
 void test_blobs(std::string dancer){
-	string movie_file= videodir+"Top/"+dancer+".mov";
+	string movie_file= videodir+"Front/"+dancer+".mov";
 	cout << movie_file << endl;
 	ACVideoAnalysis* V = new ACVideoAnalysis(movie_file);
 	clock_t t0=clock();
@@ -220,43 +234,28 @@ void test_blobs(std::string dancer){
 void test_all_videos_top_front(std::string mypath){
 	MediaCycle* mediacycle;
 	mediacycle = new MediaCycle(MEDIA_TYPE_VIDEO);
-	mediacycle->addPlugin("/Users/xavier/development/Fall09/ticore-app/Applications/Numediart/MediaCycle/src/Builds/darwin-xcode/plugins/video/Debug/mc_video.dylib");
+	mediacycle->addPlugin(video_plugin_path+"mc_video.dylib");
 	mediacycle->importDirectory(mypath, 0);
 	mediacycle->saveAsLibrary(mypath+"ACL"+"dancers-test.acl");
 	delete mediacycle;	
 }
 
 int main(int argc, char** argv) {
-	cout << "-XS- Using Opencv " << CV_VERSION << "(" << CV_MAJOR_VERSION << "." << CV_MINOR_VERSION  << "." <<  CV_SUBMINOR_VERSION << ")" << endl;	
-//	string f1= "/Users/xavier/numediart/Project7.3-DancersCycle/Recordings_Raffinerie_0709/FrontShots/H264/Bru_102#2.mov";
-
-//	string f1= "/Users/xavier/numediart/Project7.3-DancersCycle/tests/Bru_101\#1_1.f4v";
-//	string bg = "/Users/xavier/numediart/Project7.3-DancersCycle/Recordings_Raffinerie_0709/FrontShots/average_bg_0148.jpg";
-
-//	IplImage *imgp_bg = cvLoadImage(bg.c_str(), CV_LOAD_IMAGE_COLOR);
-//	V->showInWindow();
+	cout << "Using Opencv " << CV_VERSION << "(" << CV_MAJOR_VERSION << "." << CV_MINOR_VERSION  << "." <<  CV_SUBMINOR_VERSION << ")" << endl;	
 
 	// get_all_images();
 	// test_med_ave("Bru_105#2");
 	// test_med_noblob("Bru_203#1");
 	//test_histogram_equalize("Bru_105#2");
-	test_bg_substraction("Bru_105#2");
+	//test_bg_substraction("Bru_105#2");
 	// test_bg_substraction("Bru_203#2");
 	// test_browse("Bru_105#2");
 	// test_video_plugin("Bru_105#2");
 	//test_video_plugin("001011");
+	//test_video_plugin_acl_save("001011");
 	//test_all_videos_top_front(videodir);
-	//test_blobs("sm001011");
+	test_blobs("001011");
 	
-	//	IplImage *imgp_bg = cvLoadImage("/Users/xavier/Desktop/testMed3.jpg", CV_LOAD_IMAGE_COLOR);
-	//V->computeBlobsInteractively(imgp_bg,true); // , int small_blob)
-//	V->histogramEqualize(imgp_bg);
-
-//	
-//	//V->computeBlobs(imgp_bg);
-//	V->computeContractionIndices();
-//	
-//	cvReleaseImage(&imgp_bg);
 	
 //	vector<float> ci = V->getContractionIndices();
 //	vector<double> dci;

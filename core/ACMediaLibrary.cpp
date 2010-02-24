@@ -7,7 +7,7 @@
  *
  *  - XS 26/06/09 : removed size_library (= media_library.size())
  *  - XS 13/10/09 : added destructor to clean up vector <ACMedia*>
-*
+ *
  *  @copyright (c) 2009 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
@@ -41,8 +41,10 @@
 #include <iostream>
 #include <fstream>
 
-#include "ACPluginManager.h"
+// XS try openMP for parallelisation
+// #include <omp.h>
 
+#include "ACPluginManager.h"
 #include "ACMediaLibrary.h"
 #include "ACMediaFactory.h"
 
@@ -52,7 +54,24 @@
 #include <Common/TiMath.h> // for Timax ...
 
 using namespace std;
+// to save library items in binary format, uncomment the following line:
+// #define SAVE_LOOP_BIN
 
+// XS pthread needs a single argument to the function to be multithreaded
+// so put them all in a struct
+struct pthread_input
+{
+	ACMedia* media;
+	string filename;
+	int id;
+	ACPluginManager *acpl;
+};
+
+void* p_importSingleFile(void *arg){
+	struct pthread_input *data =(struct pthread_input *)arg;
+	cout << data->filename << " ; " <<  data->id << " ; plugin size : " << data->acpl->getSize() << endl;
+	data->media->import(data->filename, data->id, data->acpl);
+}
 ACMediaLibrary::ACMediaLibrary() {
 	index_last_normalized = -1;
 	media_library.resize(0);
@@ -75,7 +94,9 @@ ACMediaLibrary::~ACMediaLibrary(){
 
 int ACMediaLibrary::importDirectory(std::string _path, int _recursive, int id, ACPluginManager *acpl) {
 	// XS : return value convention: -1 = error ; otherwise returns number of files added
-	
+	// for parallelisation with openMP
+	//omp_set_num_threads(2);
+
 	unsigned long file_count = 0;
 	unsigned long dir_count = 0;
 	unsigned long other_count = 0;
@@ -92,13 +113,14 @@ int ACMediaLibrary::importDirectory(std::string _path, int _recursive, int id, A
 		printf("File or directory not found: %s\n", full_path.native_file_string().c_str());
 		return -1;
 	}
-		
+	
 	if ( fs::is_directory( full_path ) ) 
 	{ // importing directory
 		fs::directory_iterator end_iter;
-		for ( fs::directory_iterator dir_itr( full_path );
-			 dir_itr != end_iter;
-			 ++dir_itr )
+//XS note #pragma omp parallel for does not work here
+// because it needs to know how many elements are in the loop beforehand.
+		
+		for ( fs::directory_iterator dir_itr( full_path ); dir_itr != end_iter; ++dir_itr )
 		{
 			if ( _recursive && fs::is_directory( dir_itr->path() ) )
 			{
@@ -130,26 +152,27 @@ int ACMediaLibrary::importDirectory(std::string _path, int _recursive, int id, A
 			++other_count;
 		}
 		else {
+			// XS test: parallel version with threads
+			struct pthread_input pdata;
+			pdata.media = media;
+			pdata.filename = filename;
+			pdata.id = id;
+			pdata.acpl = acpl;
+// XS removed if
 			if (media->import(filename, id, acpl)){
+//			pthread_t pid;
+//			pthread_create(&pid, NULL,p_importSingleFile,(void *) &pdata);
+
+			// XS check if import worked properly...
 				this->addMedia(media);
-				// XS: save tmp results in acl file
-				/*
-				 string tmp_acl = filename+".acl";
-				FILE *tmp_file = fopen(tmp_acl.c_str(),"w");
-				media->save(tmp_file);
-				fclose(tmp_file);
-				 */
 				id++;
 			}
-			// XS 23/09/09: import now looks for plugins, in ACMedia.cpp
-			// it also sets id 
-
 			++file_count; // TODO: here or within previous "if" ?
 		}
 	}
 	return file_count;
-	
 }
+
 
 // C++ version
 int ACMediaLibrary::openACLLibrary(std::string _path, bool aInitLib){
@@ -180,7 +203,7 @@ int ACMediaLibrary::openACLLibrary(std::string _path, bool aInitLib){
 		if (local_media != NULL) {
 			ret = local_media->loadACL(library_file);
 			if (ret) {
-				std::cout << "Media Libray Size : " << media_library.size() << std::endl;
+				std::cout << "Media Libray Size : " << this->getSize() << std::endl;
 				media_library.push_back(local_media);
 				file_count++;
 			}
@@ -196,8 +219,21 @@ int ACMediaLibrary::openACLLibrary(std::string _path, bool aInitLib){
 
 // C++ version
 int ACMediaLibrary::saveACLLibrary(std::string _path){
+#ifdef SAVE_LOOP_BIN
+	ofstream library_file (_path.c_str(), ios::binary);
+#else
 	ofstream library_file (_path.c_str());
-	// XS TODO
+#endif //SAVE_LOOP_BIN
+	cout << "saving ACL file: " << _path << endl;
+	
+	int n_loops = this->getSize();
+	// we save UNnormalized features
+	denormalizeFeatures();
+	for(int i=0; i<n_loops; i++) {
+		media_library[i]->saveACL(library_file);
+	}
+	library_file.close();
+	normalizeFeatures();
 }
 
 
@@ -206,7 +242,7 @@ int ACMediaLibrary::openLibrary(std::string _path, bool aInitLib){
 	// but appends new media to it.
 	// except if aInitLib is set to true
 	int ret, file_count=0;
-
+	
 	FILE *library_file = fopen(_path.c_str(),"r");
 	setlocale(LC_NUMERIC, "C");//correct problem with fscanf caused by Qt (cannot read floating point string without it)
 	//if the file exists
@@ -224,35 +260,37 @@ int ACMediaLibrary::openLibrary(std::string _path, bool aInitLib){
 			if (local_media != NULL) {
 				ret = local_media->load(library_file); // XS TODO try loadACL
 				if (ret) {
-					std::cout << "Media Libray Size : " << media_library.size() << std::endl;
+					std::cout << "Media Libray Size : " << this->getSize() << std::endl;
 					media_library.push_back(local_media);
 					file_count++;
 					
 				}
-			} else {
-				std::cout<<"OpenLibrary : Wrong Media Type" <<std::endl;
 			}
-		} while (ret>0);
+			else {
+				std::cout<<"openLibrary : Wrong Media Type" <<std::endl;
+			}
+			
+		}
+		while (ret>0);
 		
-	fclose(library_file);
+		fclose(library_file);
 	}
 	
 	return file_count;
 }
 
 void ACMediaLibrary::saveAsLibrary(string _path) {
-
-	int n_loops = media_library.size();
-
-	FILE *library_file = fopen(_path.c_str(), "w");
-	//ACMediaFactory factory;
+	
+	int n_loops = this->getSize();
+	
+	FILE *library_file = fopen(_path.c_str(),"w");
+	
+	// we save UNnormalized features
 	denormalizeFeatures();
-	for (int i = 0; i < n_loops; i++) {
-		//ACMedia* local_media = factory.create(media_type);
+	for(int i=0; i<n_loops; i++) {
 		// --TODO-- ???  how does it know which type of media ?
 		// have to be set up  at some point using setMediaType()
-		ACMedia* local_media = media_library[i];
-		local_media->save(library_file);
+		media_library[i]->save(library_file);
 	}
 	fclose(library_file);
 	normalizeFeatures();
@@ -285,26 +323,40 @@ int ACMediaLibrary::addMedia(ACMedia *aMedia) {
 		return -1;
 	}
 }
-ACMedia* ACMediaLibrary::getItem(int i){
-	if (i < media_library.size()){
+
+ACMedia* ACMediaLibrary::getMedia(int i){
+	if (i < this->getSize() && i >=0){
 		return media_library[i];
 	}
-	else return NULL;
+	else {
+		cerr << "<ACMediaLibrary::getMedia> index out of bounds: " << i << endl;
+		return NULL;
+	}
 }
 
-std::string ACMediaLibrary::getThumbnail(int id) {
+int ACMediaLibrary::deleteMedia(int i){
+	if (i < this->getSize() && i >=0){
+		media_library.erase(media_library.begin()+i);
+		return 1;
+	}
+	else {
+		cerr << "<ACMediaLibrary::deleteMedia> index out of bounds: " << i << endl;
+		return -1;
+	}
+}
+
+std::string ACMediaLibrary::getThumbnailFileName(int id) {
 	int i;
-	for (i=0;i<media_library.size();i++) {
+	for (i=0;i<this->getSize();i++) {
 		if (id==media_library[i]->getId()) {
-			return media_library[i]->getThumbnail();
+			return media_library[i]->getThumbnailFileName();
 		}
 	}
 	return "";
 }
 
 bool ACMediaLibrary::isEmpty() {
-	int n = media_library.size() ;
-	if (n <= 0) {
+	if (this->getSize() <= 0) {
 		cout << "empty library" << endl;
 		return true;
 	}
@@ -312,9 +364,9 @@ bool ACMediaLibrary::isEmpty() {
 	// XS assumes each item has same number of features
 	// and each feature has the same number of floats in its vector
 	
-	int number_of_features = media_library[0]->getNumberOfFeatures();
+	int number_of_features = media_library[0]->getNumberOfFeaturesVectors();
 	if (number_of_features <= 0) {
-		cout << "no features to normalize" << endl;
+		cout << "no features in vector [0]" << endl;
 		return true;
 	}
 	return false;
@@ -322,14 +374,14 @@ bool ACMediaLibrary::isEmpty() {
 
 void ACMediaLibrary::calculateStats() {
 	if ( isEmpty() ) return;
-	int n = media_library.size() ;
-	int number_of_features = media_library[0]->getNumberOfFeatures();
+	int n = this->getSize() ;
+	int number_of_features = media_library[0]->getNumberOfFeaturesVectors();
 	
 	// initialize to zero
 	int i,j,k;
 	for (i=0; i< number_of_features; i++) {
 		vector<double> tmp_vect;
-		for (j=0; j< media_library[0]->getFeature(i)->size(); j++) {
+		for (j=0; j< media_library[0]->getFeaturesVector(i)->getSize(); j++) {
 			tmp_vect.push_back(0.0);
 		}
 		mean_features.push_back(tmp_vect);
@@ -339,9 +391,9 @@ void ACMediaLibrary::calculateStats() {
 	// computing sums
 	for(i=0; i<n; i++) {
 		ACMedia* item = media_library[i];		
-		for(j=0; j<mean_features.size(); j++){
-			for(k=0; k<mean_features[j].size(); k++){
-				double val = item->getFeature(j)->getFeature(k);
+		for(j=0; j<(int)mean_features.size(); j++){
+			for(k=0; k<(int)mean_features[j].size(); k++){
+				double val = item->getFeaturesVector(j)->getFeatureElement(k);
 				
 				mean_features[j][k] += val;
 				stdev_features[j][k] += val * val;
@@ -356,21 +408,20 @@ void ACMediaLibrary::calculateStats() {
 	if (n==1) nn = n;
 	else nn = n-1;
 	
-	for(j=0; j<mean_features.size(); j++) {
+	for(j=0; j<(int)mean_features.size(); j++) {
 		printf("feature %d\n", j);
-		for(k=0; k<mean_features[j].size(); k++) {
+		for(k=0; k<(int)mean_features[j].size(); k++) {
 			mean_features[j][k] /= n;
 			stdev_features[j][k] /= n;
 			double tmp = stdev_features[j][k] - mean_features[j][k] * mean_features[j][k];
 			if ( tmp < 0 )
 				stdev_features[j][k] = 0;
 			else {
-			  stdev_features[j][k] = sqrt( tmp*((1.0*n)/(nn)));
+				stdev_features[j][k] = sqrt( tmp*((1.0*n)/(nn)));
 			}
 			printf("\t[%d] mean_features = %f, stddev = %f\n", k, mean_features[j][k], stdev_features[j][k]);
 		}
 	}
-	
 }
 
 void ACMediaLibrary::normalizeFeatures() {
@@ -390,16 +441,16 @@ void ACMediaLibrary::normalizeFeatures() {
 	}
 	
 	int i,j,k;
-	int n = media_library.size() ;
+	int n = this->getSize() ;
 	
 	for(i=0; i<n; i++){
 		ACMedia* item = media_library[i];
 		for(j=0; j<mean_features.size(); j++) {
-			feature = item->getFeature(j);
+			feature = item->getFeaturesVector(j);
 			if (feature->getNeedsNormalization()) {
 				for(k=0; k<mean_features[j].size(); k++) {
-					float old = feature->getFeature(k);
-					feature->setFeature (k, (old - mean_features[j][k]) / ( TI_MAX(stdev_features[j][k] , 0.00001)));
+					float old = feature->getFeatureElement(k);
+					feature->setFeatureElement(k, (old - mean_features[j][k]) / ( TI_MAX(stdev_features[j][k] , 0.00001)));
 				}
 			}
 		}
@@ -419,10 +470,10 @@ void ACMediaLibrary::denormalizeFeatures() {
 	for(i=0; i<= index_last_normalized; i++){
 		ACMedia* item = media_library[i];
 		for(j=0; j<mean_features.size(); j++) {
-			if (item->getFeature(j)->getNeedsNormalization()) {
+			if (item->getFeaturesVector(j)->getNeedsNormalization()) {
 				for(k=0; k<mean_features[j].size(); k++) {
-					float old = item->getFeature(j)->getFeature(k);
-					item->getFeature(j)->setFeature (k, old * stdev_features[j][k] + mean_features[j][k]);
+					float old = item->getFeaturesVector(j)->getFeatureElement(k);
+					item->getFeaturesVector(j)->setFeatureElement(k, old * stdev_features[j][k] + mean_features[j][k]);
 				}
 			}
 		}
@@ -441,11 +492,11 @@ void ACMediaLibrary::saveSorted(string output_file){
 	
 	std::vector<std::pair<float, int> > f[nfeat];
 	
-	for (int i=0; i< media_library.size() ;i++) {
+	for (int i=0; i< this->getSize() ;i++) {
 		out << i << " : " << media_library[i]->getFileName() << endl;
 		for (int j=0; j< nfeat ;j++) {
-			out << media_library[i]->getFeature(0)->getFeature(j) << endl;
-			f[j].push_back (std::pair<float, int> (media_library[i]->getFeature(0)->getFeature(j), i));
+			out << media_library[i]->getFeaturesVector(0)->getFeatureElement(j) << endl;
+			f[j].push_back (std::pair<float, int> (media_library[i]->getFeaturesVector(0)->getFeatureElement(j), i));
 		}
 	}
 	
@@ -462,7 +513,7 @@ void ACMediaLibrary::saveSorted(string output_file){
 	//			out  << (*itr).first << "\t" << (*itr).second+1  << endl;		}
 	//		out << endl;
 	//	}
-	for (int i=0; i<media_library.size() ;i++) {
+	for (int i=0; i<this->getSize() ;i++) {
 		out << f[0][i].first << "\t" << f[0][i].second << "\t" << 
 		//		f[1][i].first << "\t" << f[1][i].second << "\t" <<
 		//		f[2][i].first << "\t" << f[2][i].second << "\t" << 

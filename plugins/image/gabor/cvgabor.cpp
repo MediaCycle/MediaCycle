@@ -331,7 +331,7 @@ void CvGabor::conv_img(IplImage *src, IplImage *dst, int Type) {
 	cvReleaseMat(&mat);
 }
 
-double* CvGabor::GetFeatures(IplImage *src) {	
+double* CvGabor::getMeanAndStdevs(IplImage *src) {	
 	// returns a pointer to a double[2] array containing mean and stdev.
 	CvMat *mat = cvCreateMat(src->width, src->height, CV_32FC1);
 	for (int i = 0; i < src->width; i++) {
@@ -361,8 +361,9 @@ double* CvGabor::GetFeatures(IplImage *src) {
 	rstats[0] = mean.val[0];
 	rstats[1] = stdev.val[0];
 
-	
+#ifdef VERBOSE	
 	cout << "mean = " << mean.val[0] << "; stdev = " << stdev.val[0] <<endl;
+#endif // VERBOSE
 	cvReleaseMat(&imat);
 	cvReleaseMat(&rmat);
 	cvReleaseMat(&mat);

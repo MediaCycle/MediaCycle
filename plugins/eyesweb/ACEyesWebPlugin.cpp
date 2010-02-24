@@ -115,21 +115,21 @@ vector<ACMediaFeatures*> ACEyesWebPlugin::calculate(std::string fileName){
   ACMediaFeatures* meanV = mediaTimedFeatures->mean();   //mean computation    
   //write meanV in the ACMediaFeature object
    
-  for (int i=0; i<meanV->size(); i++){
+  for (int i=0; i<meanV->getSize(); i++){
     mMediaFeatures = new ACMediaFeatures();
     mMediaFeatures->resize(1);
     mMediaFeatures->setName(descMeanNames[i]);
-    mMediaFeatures->setFeature(0, meanV->getFeature(i));
+    mMediaFeatures->setFeatureElement(0, meanV->getFeatureElement(i));
     featureVec.push_back(mMediaFeatures);
   }
 
   ACMediaFeatures* stdV = mediaTimedFeatures->std();     //std computation
 
-  for (int i=0; i<stdV->size(); i++){
+  for (int i=0; i<stdV->getSize(); i++){
     mMediaFeatures = new ACMediaFeatures();
     mMediaFeatures->resize(1);
     mMediaFeatures->setName(descStdNames[i]);
-    mMediaFeatures->setFeature(0,stdV->getFeature(i));
+    mMediaFeatures->setFeatureElement(0,stdV->getFeatureElement(i));
     featureVec.push_back(mMediaFeatures);
   }
 
@@ -145,7 +145,7 @@ vector<ACMediaFeatures*> ACEyesWebPlugin::calculate(std::string fileName){
 //   //mediaTimedFeatures->getValue().print("Value : ");
 //   mMediaFeatures->resize(mMediaFeatures->size() + imagefeatures_m.n_cols);
 //   for (int i=0; i<imagefeatures_m.n_cols; i++)
-//     mMediaFeatures->setFeature(mMediaFeatures->size()-imagefeatures_m.n_cols+i,imagefeatures_m(0,i));
+//     mMediaFeatures->setFeatureElement(mMediaFeatures->size()-imagefeatures_m.n_cols+i,imagefeatures_m(0,i));
 
 //   mMediaFeatures->setComputed();
 

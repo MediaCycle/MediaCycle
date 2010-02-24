@@ -81,7 +81,7 @@ int main(int argc, char** argv) {
         cout << "similar : " << ids[k] << endl;
     cout.flush();
 
-    vector<ACMedia*> loops = mediacycle->getLibrary()->getMedia();
+    vector<ACMedia*> loops = mediacycle->getLibrary()->getAllMedia();
     if (loops.size() > 0) {
         cout << "loopssize : " << loops.size() << endl;
         cout << "filename : " << loops[1]->getFileName() << endl;
@@ -120,7 +120,7 @@ int main(int argc, char** argv) {
 */
 /*    int NN = 500;
     int similar[2];
-    vector<ACMedia*> loops = mediacycle->getLibrary()->getMedia();
+    vector<ACMedia*> loops = mediacycle->getLibrary()->getAllMedia();
     mediacycle->getBrowser()->getKNN(loops[NN]->getId(),similar,2);
 
     cout << "similar : " << similar[0] << " & " << similar[1] << endl;

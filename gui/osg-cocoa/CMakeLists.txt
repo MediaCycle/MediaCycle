@@ -21,3 +21,4 @@ IF ( APPLE )
 		MESSAGE(FATAL_ERROR "OpenGL/Glut requested but not found.")
 	ENDIF ( OPENGL_FOUND AND GLUT_FOUND )
 ENDIF ( APPLE )
+								   

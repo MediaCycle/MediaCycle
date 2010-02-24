@@ -55,7 +55,7 @@ public:
 	CvGabor(int iMu, int iNu);
     void normalize( const CvArr* src, CvArr* dst, double a, double b, int norm_type, const CvArr* mask );
 	
-	double* GetFeatures(IplImage *src);
+	double* getMeanAndStdevs(IplImage *src);
 
 protected:
     double Sigma;

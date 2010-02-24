@@ -146,7 +146,7 @@ void ACOsgBrowserRenderer::updateLabels(double ratio) {
 	}
 }
 
-int ACOsgBrowserRenderer::computeScreenCoordinates(osgViewer::Viewer* view, double ratio)// XS TODO c : should be image
+int ACOsgBrowserRenderer::computeScreenCoordinates(osgViewer::Viewer* view, double ratio)
 
 {		
 	int closest_loop;

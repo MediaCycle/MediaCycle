@@ -66,32 +66,44 @@ void itemClicked(MediaCycle *that, int idVideo, char**, int*);
 void labelClicked(MediaCycle *mediacycle, int idLabel, char **, int*);
 string fillOutputBuffer(ACMediaLibrary* media_library, ACMediaBrowser* media_browser, int nvid);
 
-string xmlpath = "/Users/dtardieu/Desktop/dancers-test/dancers-all.xml";
+// string dirpath = "/Users/dtardieu/Desktop/dancers-test/dancers-all.xml";
+string dirpath = "/Users/xavier/Desktop/dancers-tmp/";
+string xmlpath = dirpath+"dancers-all.xml";
 
 int main(int argc, char** argv) {
-
-	string configFilename = "./config.txt";
+	string configFilename = dirpath+"config.txt";
 	ifstream configIF(configFilename.c_str());
-	
+	cout << "MediaCycle - Dancers" << endl;
+
 	string libraryFilename, visPluginFilename;
 	configIF >> libraryFilename;
+	cout << "library : " << libraryFilename << endl;
 	configIF >> visPluginFilename;
+	cout << "plugin" << visPluginFilename << endl;
 	configIF.close();
 	
 	cout<<"new MediaCycle"<<endl;
 	MediaCycle* mediacycle;
 	mediacycle = new MediaCycle(MEDIA_TYPE_VIDEO);
-	mediacycle->addPlugin (visPluginFilename);
+	if (mediacycle->addPlugin (visPluginFilename) < 0){
+		cerr << "<MediaCycle-Dancers main> could not add Plugin: " << visPluginFilename << endl;
+		return EXIT_FAILURE;
+	}
 	mediacycle->setVisualisationPlugin("Visualisation");
-	mediacycle->importLibrary(libraryFilename);
-
-	//saveLibraryAsXml(mediacycle, xmlpath);	
+	if (mediacycle->importLibrary(libraryFilename) == 0) {
+		cerr << "<MediaCycle-Dancers main> empty library: " << libraryFilename << endl;
+		return EXIT_FAILURE;
+	}
+	// saveLibraryAsXml(mediacycle, xmlpath);	
 	// XS test C++ ACL
 	// mediacycle->importACLLibrary(path);
 	
 	mediacycle->getBrowser()->randomizeLoopPositions();
 //	mediacycle->getBrowser()->setClusterNumber(1);
-	mediacycle->startTcpServer(12345,5,dancers_tcp_callback);
+	if (mediacycle->startTcpServer(12345,5,dancers_tcp_callback) < 0){
+		cerr << "<MediaCycle-Dancers main> could not start tcp server" << endl;
+		return EXIT_FAILURE;
+	}
 //	//readLibraryXml(mediacycle, "/Users/dtardieu/Desktop/dancers-exemple.xml");
 //	
 	while(1) {
@@ -243,7 +255,7 @@ int processTcpMessageFromInstallation(MediaCycle *that, char *buffer, int l, cha
 			int posSep;
 			int posDot;
 			for (int k=0; k<that->getLibrarySize(); k++){
-				filename=that->getLibrary()->getItem(k)->getFileName();
+				filename=that->getLibrary()->getMedia(k)->getFileName();
 				posSep = filename.find_last_of("/");
 				posDot = filename.find_last_of(".");
 				cout << "test id : " << filename.substr(posSep, posDot-posSep+1) << endl;
@@ -283,7 +295,6 @@ int processTcpMessageFromInstallation(MediaCycle *that, char *buffer, int l, cha
     return 0;
 }
 
-
 char* get_error_message(){
 	string sbuffer_send_error="-1";
 	char* buffer_send_error = new char [sbuffer_send_error.size()+1]; // extra byte needed for the trailing '\0' 
@@ -315,18 +326,18 @@ string fillOutputBuffer(ACMediaLibrary* media_library, ACMediaBrowser* media_bro
 			int posy = (int) loop_attributes[i].nextPos.y;
 			ostringstream oss ;
 			oss.fill('0'); // fill with zeros (otherwise will leave blanks)
-			oss << setw(6) << generateID(media_library->getItem(i)->getFileName()) << setw(3) << posx << setw(3)<< posy; // fixed format
+			oss << setw(6) << generateID(media_library->getMedia(i)->getFileName()) << setw(3) << posx << setw(3)<< posy; // fixed format
 			sbuffer_send += oss.str(); // concatenates all videos in one string
 			
 			// XS test
 			cout << oss.str() << endl;
 		}		
 	}
-// 	if (chk_loops != media_browser->getNumberOfDisplayedLoops()) {
-// 		cerr << "<startOrRedraw> consistency check failed: problem with number of displayed videos: " << chk_loops << " differs from "<< media_browser->getNumberOfDisplayedLoops() << endl;
-// 		*buffer_send = get_error_message();	
-// 		return;
-// 	}
+	if (chk_loops != media_browser->getNumberOfDisplayedLoops()) {
+		cerr << "<startOrRedraw> consistency check failed: problem with number of displayed videos: " << chk_loops << " differs from "<< media_browser->getNumberOfDisplayedLoops() << endl;
+		sbuffer_send = "-1";	
+		return sbuffer_send;
+	}
 	
 	// === 2) labels (keywords)
 	string sep="-";
@@ -354,15 +365,13 @@ string fillOutputBuffer(ACMediaLibrary* media_library, ACMediaBrowser* media_bro
 			
 		}		
 	}
-// 	if (chk_labels != media_browser->getNumberOfDisplayedLabels()) {
-// 		cerr << "<startOrRedraw> consistency check failed: problem with number of displayed labels: " << chk_labels << " differs from "<< media_browser->getNumberOfDisplayedLabels() << endl;
-// 		*buffer_send = get_error_message();	
-// 		return;
-// 	}
+	if (chk_labels != media_browser->getNumberOfDisplayedLabels()) {
+		cerr << "<startOrRedraw> consistency check failed: problem with number of displayed labels: " << chk_labels << " differs from "<< media_browser->getNumberOfDisplayedLabels() << endl;
+		sbuffer_send = "-1";	
+		return sbuffer_send;
+	}
 	return sbuffer_send;
 }
-
-
 
 // this one is really used in the installation
 // ex: for 50 videos and 3 keywords:
@@ -562,7 +571,6 @@ void labelClicked(MediaCycle *mediacycle, int idLabel, char **buffer_send, int* 
 	*buffer_send = new char [sbuffer_send.size()+1]; // extra byte needed for the trailing '\0' 
 	strcpy (*buffer_send, sbuffer_send.c_str());
 	*l_send = sbuffer_send.length();
-	
 }
 
 void saveLibraryAsXml(MediaCycle* mediacycle, string _path) {
@@ -583,16 +591,16 @@ void saveLibraryAsXml(MediaCycle* mediacycle, string _path) {
 	
 	fprintf(library_file, "<feature size=\"6\" >ID</feature>\n");
 	
-	for (int i=0; i < media_library->getItem(0)->getNumberOfFeatures(); i++){
-		featureSize = media_library->getItem(0)->getFeature(i)->size();
-		featureName = media_library->getItem(0)->getFeature(i)->getName();
+	for (int i=0; i < media_library->getMedia(0)->getNumberOfFeaturesVectors(); i++){
+		featureSize = media_library->getMedia(0)->getFeaturesVector(i)->getSize();
+		featureName = media_library->getMedia(0)->getFeaturesVector(i)->getName();
 		
 		if (featureSize > 1){
 			std::cout << "Warning : Multidimensional feature, won't be exported" << std::endl;
 		}
 		else{
 			fprintf(library_file, "<feature size=\"1\">");
-			fprintf(library_file, "%s",  media_library->getItem(0)->getFeature(i)->getName().c_str());
+			fprintf(library_file, "%s",  media_library->getMedia(0)->getFeaturesVector(i)->getName().c_str());
 			fprintf(library_file, "</feature>\n");
 		}
 	}
@@ -601,20 +609,20 @@ void saveLibraryAsXml(MediaCycle* mediacycle, string _path) {
 	/// ITEMS //
 	fprintf(library_file, "%s\n", "<items>");
 	for(int i=0; i<n_loops; i++) {
-		fprintf(library_file, "<v duration=\"%.1lf\">",  media_library->getItem(i)->getDuration());
-		local_media = media_library->getItem(i);    
+		fprintf(library_file, "<v duration=\"%.1lf\">",  media_library->getMedia(i)->getDuration());
+		local_media = media_library->getMedia(i);    
 		if (i>80){
 			std::cout << "filename : " <<  ID << std::endl;
 		}
 		// printing ID
 		ID = generateID(local_media->getFileName());
 		fprintf(library_file, "%s", ID.c_str());
-		for (int j=0; j < media_library->getItem(i)->getNumberOfFeatures(); j++){
-			featureSize = media_library->getItem(i)->getFeature(j)->size();
-			featureName = media_library->getItem(i)->getFeature(j)->getName();
+		for (int j=0; j < media_library->getMedia(i)->getNumberOfFeaturesVectors(); j++){
+			featureSize = media_library->getMedia(i)->getFeaturesVector(j)->getSize();
+			featureName = media_library->getMedia(i)->getFeaturesVector(j)->getName();
 			
 			if (featureSize == 1){
-				featureValue = media_library->getItem(i)->getFeature(j)->getDiscretizedFeature();
+				featureValue = media_library->getMedia(i)->getFeaturesVector(j)->getDiscretizedFeature();
 				fprintf(library_file, "%d", (int) featureValue);
 				if (i>80){
 					std::cout << featureName << " = " << featureValue << std::endl;
@@ -666,9 +674,9 @@ void readLibraryXml(MediaCycle* mediacycle, std::string filename){
 			mediaFeatures->setComputed();
 			mediaFeatures->setName(descNames[i]);
 			std::cout << tmpFeature.substr(currIdx, descDims[i]).c_str() << std::endl;
-			mediaFeatures->setFeature(0, atof(tmpFeature.substr(currIdx, descDims[i]).c_str()));
+			mediaFeatures->setFeatureElement(0, atof(tmpFeature.substr(currIdx, descDims[i]).c_str()));
 			currIdx = currIdx+descDims[i];
-			local_media->addFeatures(mediaFeatures);
+			local_media->addFeaturesVector(mediaFeatures);
 		}
 		mediacycle->getLibrary()->addMedia(local_media);
 	}

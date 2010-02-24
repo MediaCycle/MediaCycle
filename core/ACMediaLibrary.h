@@ -49,7 +49,8 @@
 namespace fs = boost::filesystem;
 
 class ACMediaLibrary {
-	// these methods are common to all media
+	// these methods are common to all media.
+	// there is no need for an AudioLibrary, ImageLibrary, ...
 	// media-specific methods (e.g., save, load) are in ACMedia and overloaded in ACAudio, ACImage, ACVideo, ...
 protected:
 	ACMediaType media_type;
@@ -62,24 +63,25 @@ public:
 	~ACMediaLibrary();
 	
 	bool isEmpty();
-	ACMediaType getMediaType(){return media_type;}
-	void setMediaType(ACMediaType m){media_type = m;}
-	int getSize() { return media_library.size(); }
-	int createItem(){return 0;} // TODO
-	int deleteItem(int i) {return i;} //TODO
-	void editItem() {} // TODO
-	ACMedia* getItem(int i);
-	std::string getThumbnail(int i);
+	ACMediaType getMediaType(){return media_type;};
+	void setMediaType(ACMediaType m){media_type = m;};
+	int getSize() { return media_library.size(); };
+
+//	void editMedia() {}; // TODO ?
+
+	std::vector<ACMedia*> getAllMedia() {return media_library;};
+	int addMedia(ACMedia *aMedia);
+	ACMedia* getMedia(int i);
+	int deleteMedia(int i);
+	
+	std::string getThumbnailFileName(int i);
 	
 	void normalizeFeatures();
 	void denormalizeFeatures();
 	void calculateStats();
 
-	std::vector< std::vector<double> > getMeanFeatures() {return mean_features;}
-	std::vector< std::vector<double> > getStdevFeatures() {return stdev_features;}
-
-	std::vector<ACMedia*> getMedia() {return media_library;}
-	int addMedia(ACMedia *aMedia);
+	std::vector< std::vector<double> > getMeanFeatures() {return mean_features;};
+	std::vector< std::vector<double> > getStdevFeatures() {return stdev_features;};
 	
 	int importDirectory(std::string path, int recursive, int id=-1, ACPluginManager *acpl=NULL);
 
@@ -94,6 +96,9 @@ public:
 	
 	void cleanLibrary();
 	void cleanStats();
+
+	// pthreads
+//	void* p_importSingleFile(void *arg);
 
 };
 

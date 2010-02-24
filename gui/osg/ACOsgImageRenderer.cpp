@@ -82,6 +82,7 @@ osg::Image* Convert_OpenCV_TO_OSG_IMAGE(IplImage* cvImg)
 		//printf("Conversion completed\n");
 		return osgImg;
 	}
+	// XS TODO : what happens with BW images ?
 	else {
 		printf("Unrecognized image type");
 		return 0;
@@ -137,10 +138,11 @@ void ACOsgImageRenderer::imageGeode(int flip, float sizemul, float zoomin) {
 	image_geometry = new Geometry();	
 	
 	// XS TODO check this wild cast
-	// SD REQUIRED FOR THUMBNAIL ACImage* loop = dynamic_cast<ACImage*> ( browser.getLibrary()->getItem(loop_index) );
+	// SD REQUIRED FOR THUMBNAIL ACImage* loop = dynamic_cast<ACImage*> ( browser.getLibrary()->getMedia(loop_index) );
 	
 	width = media_cycle->getWidth(loop_index);
 	height = media_cycle->getHeight(loop_index);
+	
 	zpos = zpos + 0.00001 * loop_index;
 	
 	// image vertices
@@ -187,12 +189,13 @@ void ACOsgImageRenderer::imageGeode(int flip, float sizemul, float zoomin) {
 	// Use pre-computed thumbnail instead
 	// SD REQUIRED
 	
+	// XS Debug
 	thumbnail = (IplImage*)media_cycle->getThumbnailPtr(loop_index);
 	if (thumbnail) {
 		image_image = Convert_OpenCV_TO_OSG_IMAGE(thumbnail);
 	}
 	else {
-		thumbnail_filename = media_cycle->getThumbnail(loop_index);
+		thumbnail_filename = media_cycle->getThumbnailFileName(loop_index);
 		image_image = osgDB::readImageFile(thumbnail_filename);
 	}
 	

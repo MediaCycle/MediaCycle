@@ -832,7 +832,7 @@ ucolvec paretorank(mat X, int maxRank, int minNbItems){
 	ucolvec rank_v;
 	int currentRank = 1;
 	ucolvec posFront_v;
-	imat pos_v = linspace(0, row-1, row, 0);
+	imat pos_v = linspace<imat>(0, row-1, row, 0);
 	mat oldX;
 	int tmpIdx = 0;
 	imat oldPos_v;

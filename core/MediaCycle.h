@@ -79,7 +79,7 @@ public:
     int getKNN(ACMedia *aMedia, vector<ACMedia *> &result, int k);
 
     // Thumbnail
-    string getThumbnail(int id);
+    string getThumbnailFileName(int id);
 
     string getLocalDirectoryPath() {return local_directory;};
     string getLibName() {return libname;};
@@ -122,6 +122,7 @@ public:
 	void openLibrary(string path);
 	void libraryContentChanged();
 	void saveAsLibrary(string path);
+	void saveACLLibrary(string path);
 	void cleanLibrary();
 	void setBack();
 	void setForward();
@@ -148,8 +149,8 @@ public:
 	string getLabelText(int i);
 	ACPoint getLabelPos(int i);
 	
-	// Get Features
-	vector<float> getFeature(int i, string feature_name);
+	// Get Features Vector (identified by feature_name) in media i 
+	vector<float> getFeaturesVectorInMedia(int i, string feature_name);
 	
 	// Playing time stamp
 	int setSourceCurser(int lid, int frame_pos);

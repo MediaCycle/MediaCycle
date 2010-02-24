@@ -34,8 +34,6 @@
 
 // Definitions used along with features
 
-// XS: well, this is not really useful if we have a name for each feature.
-// XS TODO: just remove this file and all references to it.
 
 #ifndef _ACFEATURESTYPES_H
 #define _ACFEATURESTYPES_H
@@ -43,18 +41,8 @@
 #include <vector>
 
 typedef unsigned int DistanceType;
-typedef unsigned int FeatureType; // to keep track of the feature's ID
 
 typedef std::vector<float> FeaturesVector;
 // other option : make FeaturesVector a class
-
-static const FeatureType FT_BASE=100;
-static const FeatureType FT_SHAPE=101;
-static const FeatureType FT_COLOR=102;
-static const FeatureType FT_TEXTURE=103;
-
-static const FeatureType FT_SPEED=201; // for video
-
-static const FeatureType FT_TIMBRE=301;
 
 #endif  // ACFEATURESTYPES_H

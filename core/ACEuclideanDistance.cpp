@@ -39,8 +39,8 @@ using namespace std;
 
 ACEuclideanDistance::ACEuclideanDistance(ACMediaFeatures* F1, ACMediaFeatures* F2) : ACDistance( F1, F2) {
 // TODO XS add tests !
-	V1 = F1->getAllFeatures();
-	V2 = F2->getAllFeatures();
+	V1 = F1->getFeaturesVector();
+	V2 = F2->getFeaturesVector();
 }
 
 ACEuclideanDistance::ACEuclideanDistance(FeaturesVector *F1, FeaturesVector *F2) : ACDistance( F1, F2) {

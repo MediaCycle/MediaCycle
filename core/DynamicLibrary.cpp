@@ -60,22 +60,22 @@ DynamicLibrary* DynamicLibrary::loadLibrary(const std::string& libraryName) //!=
 {
     HANDLE handle = NULL;
     /*
-    std::string fullLibraryName = osgDB::findLibraryFile(libraryName);
-    if (!fullLibraryName.empty()) handle = getLibraryHandle( fullLibraryName );    // try the lib we have found
-    else handle = getLibraryHandle( libraryName );    // havn't found a lib ourselves, see if the OS can find it simply from the library name.
-    */
+	 std::string fullLibraryName = osgDB::findLibraryFile(libraryName);
+	 if (!fullLibraryName.empty()) handle = getLibraryHandle( fullLibraryName );    // try the lib we have found
+	 else handle = getLibraryHandle( libraryName );    // havn't found a lib ourselves, see if the OS can find it simply from the library name.
+	 */
     handle = DynamicLibrary::getLibraryHandle( libraryName );
     if (handle) return new DynamicLibrary(libraryName,handle);
     // else no lib found so report errors.
     else { cout << "DynamicLibrary::failed loading \""<<libraryName<<"\""<<std::endl; }
-
+	
     return NULL;
 }
 
 DynamicLibrary::HANDLE DynamicLibrary::getLibraryHandle( const std::string& libraryName)
 {
     HANDLE handle = NULL;
-
+	
 #if defined(WIN32) && !defined(__CYGWIN__)
     handle = LoadLibrary( libraryName.c_str() );
 #elif defined(__APPLE__) && defined(APPLE_PRE_10_3)
@@ -95,12 +95,12 @@ DynamicLibrary::HANDLE DynamicLibrary::getLibraryHandle( const std::string& libr
     // they are prefaced with './'  (DB - Nov 5, 2003).
     std::string localLibraryName;
     /*if( libraryName == osgDB::getSimpleFileName( libraryName ) )
-        localLibraryName = "./" + libraryName;
-    else
-        localLibraryName = libraryName;*/
-
+	 localLibraryName = "./" + libraryName;
+	 else
+	 localLibraryName = libraryName;*/
+	
     localLibraryName = libraryName;
-
+	
     handle = dlopen( localLibraryName.c_str(), RTLD_LAZY | RTLD_GLOBAL);
     if( handle == NULL )
     {
@@ -124,7 +124,7 @@ DynamicLibrary::PROC_ADDRESS DynamicLibrary::getProcAddress(const std::string& p
     if (_handle==NULL) return NULL;
 #if defined(WIN32) && !defined(__CYGWIN__)
     return (DynamicLibrary::PROC_ADDRESS)GetProcAddress( (HMODULE)_handle,
-                                                         procName.c_str() );
+														procName.c_str() );
 #elif defined(__APPLE__) && defined(APPLE_PRE_10_3)
     std::string temp("_");
     NSSymbol symbol;
@@ -154,25 +154,25 @@ DynamicLibrary::PROC_ADDRESS DynamicLibrary::getProcAddress(const std::string& p
 }
 
 bool fileExists(string strFilename) {
-  struct stat stFileInfo;
-  bool blnReturn;
-  int intStat;
-
-  // Attempt to get the file attributes
-  intStat = stat(strFilename.c_str(),&stFileInfo);
-  if(intStat == 0) {
-    // We were able to get the file attributes
-    // so the file obviously exists.
-    blnReturn = true;
-  } else {
-    // We were not able to get the file attributes.
-    // This may mean that we don't have permission to
-    // access the folder which contains this file. If you
-    // need to do that level of checking, lookup the
-    // return values of stat which will give you
-    // more details on why stat failed.
-    blnReturn = false;
-  }
-
-  return(blnReturn);
+	struct stat stFileInfo;
+	bool blnReturn;
+	int intStat;
+	
+	// Attempt to get the file attributes
+	intStat = stat(strFilename.c_str(),&stFileInfo);
+	if(intStat == 0) {
+		// We were able to get the file attributes
+		// so the file obviously exists.
+		blnReturn = true;
+	} else {
+		// We were not able to get the file attributes.
+		// This may mean that we don't have permission to
+		// access the folder which contains this file. If you
+		// need to do that level of checking, lookup the
+		// return values of stat which will give you
+		// more details on why stat failed.
+		blnReturn = false;
+	}
+	
+	return(blnReturn);
 }

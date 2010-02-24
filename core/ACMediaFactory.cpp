@@ -46,14 +46,24 @@ using namespace std;
 const filext::value_type _ini[] = { filext::value_type(".wav", MEDIA_TYPE_AUDIO), \
 									filext::value_type(".aif", MEDIA_TYPE_AUDIO), \
 									filext::value_type(".mp3", MEDIA_TYPE_AUDIO), \
+									filext::value_type(".WAV", MEDIA_TYPE_AUDIO), \
+									filext::value_type(".AIF", MEDIA_TYPE_AUDIO), \
+									filext::value_type(".MP3", MEDIA_TYPE_AUDIO), \
+
 
 									filext::value_type(".jpg", MEDIA_TYPE_IMAGE), \
 									filext::value_type(".tiff", MEDIA_TYPE_IMAGE), \
 									filext::value_type(".tif", MEDIA_TYPE_IMAGE), \
 									filext::value_type(".png", MEDIA_TYPE_IMAGE), \
+									filext::value_type(".JPG", MEDIA_TYPE_IMAGE), \
+									filext::value_type(".TIFF", MEDIA_TYPE_IMAGE), \
+									filext::value_type(".TIF", MEDIA_TYPE_IMAGE), \
+									filext::value_type(".PNG", MEDIA_TYPE_IMAGE), \
 
+									filext::value_type(".avi", MEDIA_TYPE_VIDEO), \
 									filext::value_type(".mov", MEDIA_TYPE_VIDEO), \
-									filext::value_type(".avi", MEDIA_TYPE_VIDEO)
+									filext::value_type(".AVI", MEDIA_TYPE_VIDEO), \
+									filext::value_type(".MOV", MEDIA_TYPE_VIDEO)
 };
 filext ACMediaFactory::file_extensions(_ini, _ini + sizeof _ini / sizeof *_ini);
 

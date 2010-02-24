@@ -84,7 +84,7 @@ int MediaCycle::startTcpServer(int aPort, int aMaxConnections) {
             return 0;
     }
 
-    return 1;
+    return -1;
 }
 
 int MediaCycle::startTcpServer(int aPort, int aMaxConnections, ACNetworkSocketServerCallback aCallback) {
@@ -96,7 +96,7 @@ int MediaCycle::startTcpServer(int aPort, int aMaxConnections, ACNetworkSocketSe
             return 0;
     }
 
-    return 1;
+    return -1;
 }
 
 int MediaCycle::stopTcpServer() {
@@ -107,7 +107,6 @@ int MediaCycle::stopTcpServer() {
 }
 
 int MediaCycle::importDirectory(string path, int recursive, int mid) {
-	// XS DEBUG
 	cout << "importing directory: " << path << endl;
 	int ret = this->mediaLibrary->importDirectory(path, recursive, mid, this->pluginManager);
 	this->mediaLibrary->normalizeFeatures();
@@ -123,7 +122,6 @@ int MediaCycle::importACLLibrary(string path) {
 }
 
 int MediaCycle::importLibrary(string path) {
-	// XS DEBUG
 	cout << "importing library: " << path << endl;
 	int ret = this->mediaLibrary->openLibrary(path);
 	this->mediaLibrary->normalizeFeatures();
@@ -222,7 +220,7 @@ int MediaCycle::processTcpMessage(char* buffer, int l, char **buffer_send, int *
 		bufpos1 = bufpos2+1;
 		path = sbuffer.substr(bufpos1);
 		sscanf(path.c_str(), "%d", &id);
-		thumbnail_filename = getThumbnail(id);
+		thumbnail_filename = getThumbnailFileName(id);
 		if (thumbnail_filename!="") {
 			stat(thumbnail_filename.c_str(), &file_status);
 			thumbnail_size = file_status.st_size;
@@ -255,8 +253,8 @@ int MediaCycle::getKNN(ACMedia *aMedia, vector<ACMedia *> &result, int k) {
 	return ret;
 }
 
-string MediaCycle::getThumbnail(int id) {
-	return this->mediaLibrary->getThumbnail(id);
+string MediaCycle::getThumbnailFileName(int id) {
+	return this->mediaLibrary->getThumbnailFileName(id);
 }
 
 int MediaCycle::addPlugin(string aPluginPath) {
@@ -272,13 +270,13 @@ void MediaCycle::setVisualisationPlugin(string pluginName){
 // API REQUIRED BY VISUAL and GUI
 // 
 int MediaCycle::getLibrarySize() { return mediaLibrary->getSize(); }
-string MediaCycle::getMediaFileName(int i) { return mediaLibrary->getItem(i)->getFileName(); }
-int MediaCycle::getMediaType(int i) { return mediaLibrary->getItem(i)->getType(); }
-int MediaCycle::getThumbnailWidth(int i) { return mediaLibrary->getItem(i)->getThumbnailWidth(); }
-int MediaCycle::getThumbnailHeight(int i) { return mediaLibrary->getItem(i)->getThumbnailHeight(); }
-int MediaCycle::getWidth(int i) { return mediaLibrary->getItem(i)->getWidth(); }
-int MediaCycle::getHeight(int i) { return mediaLibrary->getItem(i)->getHeight(); }
-void* MediaCycle::getThumbnailPtr(int i) { return mediaLibrary->getItem(i)->getThumbnailPtr(); }
+string MediaCycle::getMediaFileName(int i) { return mediaLibrary->getMedia(i)->getFileName(); }
+int MediaCycle::getMediaType(int i) { return mediaLibrary->getMedia(i)->getType(); }
+int MediaCycle::getThumbnailWidth(int i) { return mediaLibrary->getMedia(i)->getThumbnailWidth(); }
+int MediaCycle::getThumbnailHeight(int i) { return mediaLibrary->getMedia(i)->getThumbnailHeight(); }
+int MediaCycle::getWidth(int i) { return mediaLibrary->getMedia(i)->getWidth(); }
+int MediaCycle::getHeight(int i) { return mediaLibrary->getMedia(i)->getHeight(); }
+void* MediaCycle::getThumbnailPtr(int i) { return mediaLibrary->getMedia(i)->getThumbnailPtr(); }
 int MediaCycle::getNeedsDisplay() {	return mediaBrowser->getNeedsDisplay(); }
 void MediaCycle::setNeedsDisplay(int i) {
 	if (mediaBrowser) {
@@ -307,6 +305,7 @@ void MediaCycle::normalizeFeatures() { mediaLibrary->normalizeFeatures(); }
 void MediaCycle::openLibrary(string path) { mediaLibrary->openLibrary(path); }
 void MediaCycle::libraryContentChanged() { mediaBrowser->libraryContentChanged(); }
 void MediaCycle::saveAsLibrary(string path) {mediaLibrary->saveAsLibrary(path); }
+void MediaCycle::saveACLLibrary(string path) {mediaLibrary->saveACLLibrary(path); }
 void MediaCycle::cleanLibrary() { mediaLibrary->cleanLibrary(); }
 void MediaCycle::setBack() { mediaBrowser->setBack(); }
 void MediaCycle::setForward() { mediaBrowser->setForward(); }
@@ -328,14 +327,14 @@ string MediaCycle::getLabelText(int i) { return mediaBrowser->getLabelText(i); }
 ACPoint MediaCycle::getLabelPos(int i) { return mediaBrowser->getLabelPos(i); }
 
 // Get Features
-vector<float> MediaCycle::getFeature(int i, string feature_name) {
+vector<float> MediaCycle::getFeaturesVectorInMedia(int i, string feature_name) {
 	ACMedia* lmedia;
 	ACMediaFeatures* lfeatures;
 	FeaturesVector lfeaturesvector;
-	lmedia = mediaLibrary->getItem(i);
-	lfeatures = lmedia->getFeature(feature_name);
+	lmedia = mediaLibrary->getMedia(i);
+	lfeatures = lmedia->getFeaturesVector(feature_name);
 	if (lfeatures) {
-		lfeaturesvector = *(lfeatures->getAllFeatures());
+		lfeaturesvector = *(lfeatures->getFeaturesVector());
 	}
 	return (vector<float>)lfeaturesvector;
 }

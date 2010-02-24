@@ -37,6 +37,13 @@
 #include <vector>
 #include <string>
 
+// to check if file exist
+#include "boost/filesystem.hpp"
+namespace fs = boost::filesystem;
+using std::cout;
+using std::endl;
+using std::cerr;
+
 ACVideoPlugin::ACVideoPlugin() {
     //vars herited from ACPlugin
     this->mMediaType = MEDIA_TYPE_VIDEO;
@@ -44,9 +51,6 @@ ACVideoPlugin::ACVideoPlugin() {
     this->mName = "Video";
     this->mDescription = "Video plugin";
     this->mId = "";
-	this->mwidth = 0.0;
-	this->mheight = 0.0;
-	this->mduration = 0.0;
 }
 
 ACVideoPlugin::~ACVideoPlugin() {
@@ -56,34 +60,26 @@ ACVideoPlugin::~ACVideoPlugin() {
 int ACVideoPlugin::initialize(){
 }
 
-
-// XS TODO: the following 3 will return 0 if calculateFront has not been launched
-
-float ACVideoPlugin::getWidth(){
-	return mwidth;
-}
-
-float ACVideoPlugin::getHeight(){
-	return mheight;
-}
-
-float ACVideoPlugin::getDuration(){
-	return mduration;
-}
-
-
 std::vector<ACMediaFeatures*> ACVideoPlugin::calculate(){
 }
 
 std::vector<ACMediaFeatures*>  ACVideoPlugin::calculate(std::string aFileName) {
 	std::vector<ACMediaFeatures*> allVideoFeatures;
 	std::vector<ACMediaFeatures*> topVideoFeatures;
-	allVideoFeatures = calculateFront(aFileName);
 	string topFilename = changeLastFolder(aFileName,"Top");
+
+	allVideoFeatures = calculateFront(aFileName);
 	topVideoFeatures = calculateTop(topFilename);
 	allVideoFeatures.insert( allVideoFeatures.end(), topVideoFeatures.begin(), topVideoFeatures.end() );
 	return allVideoFeatures;
 }
+
+std::vector<ACMediaFeatures*> ACVideoPlugin::calculate(ACMediaData* video_data) {
+	string file_name_front = video_data -> getFileName();
+	vector<ACMediaFeatures*> tmp = this->calculate(file_name_front);
+	return tmp;
+}
+
 
 //uses ACVideoAnalysis and converts the results into ACMediaFeatures
 std::vector<ACMediaFeatures*>  ACVideoPlugin::calculateTop(std::string aFileName) {
@@ -161,15 +157,7 @@ std::vector<ACMediaFeatures*>  ACVideoPlugin::calculateFront(std::string aFileNa
 	else{
 		cerr << "<ACVideoPlugin::calculate> : NULL mean bounding box ratio feature" << endl;
 	}
-	
-	// fills in info to return
-	// this info corresponds thus to the FRONT video
-	// VERY specific to this dancers setup
-	mwidth = video->getWidth();
-	mheight = video ->getHeight();
-	mduration = video ->getDuration();
-	
-	
+		
 	delete video;
 	return allVideoFeatures;
 }
@@ -177,7 +165,8 @@ std::vector<ACMediaFeatures*>  ACVideoPlugin::calculateFront(std::string aFileNa
 ACMediaFeatures* ACVideoPlugin::calculateMeanOfTrajectory(ACVideoAnalysis* video){
 	//if (!video->areBlobsComputed()) video->computeBlobsUL();
 	//if (!video->isTrajectoryComputed()) video->computeMergedBlobsTrajectory(0);
-	// XS debug for top
+	// XS blobs instead of blobsUL for top
+	// TODO make this more general ?
 	video->computeBlobs();
 	video->computeMergedBlobsTrajectory(0);
 	//

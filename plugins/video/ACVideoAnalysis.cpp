@@ -65,7 +65,7 @@ using std::cerr;
 #include "gnuplot_i.hpp"
 #endif //  VISUAL_CHECK_GNUPLOT
 // ----------- uncomment this to get visual display using highgui and verbose -----
-//#define VISUAL_CHECK
+#define VISUAL_CHECK
 #define VERBOSE
 // ----------- class constants
 const int ACVideoAnalysis::ystar = 150; // 220
@@ -99,7 +99,6 @@ void ACVideoAnalysis::clean(){
 	pixel_speeds.clear();
 	width = height = depth = fps = nframes = 0;
 	threshU = threshL = 0;
-	
 	//	averageHistogram = 0;
 }
 

@@ -1,7 +1,7 @@
 /**
  * @brief ACVisualisationPlugin.cpp
- * @author Damien Tardieu
- * @date 08/02/2010
+ * @author Xavier Siebert
+ * @date 24/02/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -40,12 +40,13 @@ using namespace std;
 ACVisualisationPlugin::ACVisualisationPlugin()
 {
     //vars herited from ACPlugin
+	// XS TODO: are these general enough ? can we use this only for video ??
     this->mMediaType = MEDIA_TYPE_VIDEO;
     this->mPluginType = PLUGIN_TYPE_NONE;
     this->mName = "Visualisation";
     this->mDescription = "Visualisation plugin";
     this->mId = "";
-
+	
     //local vars
 }
 
@@ -60,15 +61,15 @@ int ACVisualisationPlugin::initialize()
 }
 
 vector<ACMediaFeatures*> ACVisualisationPlugin::calculate(){
-  vector<ACMediaFeatures*> raf;
-  raf.resize(0);
-  return raf;
+	vector<ACMediaFeatures*> raf;
+	raf.resize(0);
+	return raf;
 }
 
 vector<ACMediaFeatures*> ACVisualisationPlugin::calculate(std::string aFileName) {
-  vector<ACMediaFeatures*> raf;
-  raf.resize(0);
-  return raf;
+	vector<ACMediaFeatures*> raf;
+	raf.resize(0);
+	return raf;
 }
 
 void ACVisualisationPlugin::updateClusters(ACMediaBrowser* mediaBrowser){
@@ -81,12 +82,12 @@ void ACVisualisationPlugin::updateNextPositions(ACMediaBrowser* mediaBrowser){
   ucolvec toDisplay_v(nbVideoDisplay);
 	vector<string> featureNames;
 	int libSize = mediaBrowser->getLibrary()->getSize();
-  itemClicked = mediaBrowser->getClickedLoop();
-  labelClicked = mediaBrowser->getClickedLabel();
+	itemClicked = mediaBrowser->getClickedLoop();
+	labelClicked = mediaBrowser->getClickedLabel();
 	
 	int nbActiveFeatures;
 	mat desc_m;
-  mat posDisp_m;
+	mat posDisp_m;
 	mat labelPos_m;
 	ucolvec labelIdx_v;
 	colvec labelValue_v;
@@ -119,16 +120,14 @@ void ACVisualisationPlugin::updateNextPositions(ACMediaBrowser* mediaBrowser){
 	//   clusterLabelAdj.push_back("Low");
 	//   clusterLabelAdj.push_back("Medium");
 	//   clusterLabelAdj.push_back("High");
-  clusterLabelAdj.push_back("0");
-  clusterLabelAdj.push_back("1");
-  clusterLabelAdj.push_back("2");
-  clusterLabelAdj.push_back("3");
-
-
-
-  colvec clusterid_m(desc_m.n_rows), clusterid2_m;
-  mat center_m, center2_m;
-  // desc_m for first clustering 
+	clusterLabelAdj.push_back("0");
+	clusterLabelAdj.push_back("1");
+	clusterLabelAdj.push_back("2");
+	clusterLabelAdj.push_back("3");
+	
+	colvec clusterid_m(desc_m.n_rows), clusterid2_m;
+	mat center_m, center2_m;
+	// desc_m for first clustering 
   	
 // 	/////// for screen display between 0 and 999  //////////////////////////////////////
 	mat posDispOk_m(toDisplay_v.n_rows,2);
@@ -185,10 +184,10 @@ void ACVisualisationPlugin::updateNextPositions(ACMediaBrowser* mediaBrowser){
 	
 	for (int i=0; i<mediaBrowser->getNumberOfDisplayedLoops(); i++){
 		mediaBrowser->setLoopPosition(toDisplay_v(i), posDisp_m(toDisplay_v(i),0), posDisp_m(toDisplay_v(i),1));
-		std::cout<<"disp : " << toDisplay_v(i) << ", " << mediaBrowser->getLibrary()->getItem(toDisplay_v(i))->getFileName() << posDisp_m(toDisplay_v(i),0) << ", " << posDisp_m(toDisplay_v(i),1) << std::endl;
+		std::cout<<"disp : " << toDisplay_v(i) << ", " << mediaBrowser->getLibrary()->getMedia(toDisplay_v(i))->getFileName() << posDisp_m(toDisplay_v(i),0) << ", " << posDisp_m(toDisplay_v(i),1) << std::endl;
 	}
-// 	if (itemClicked >= 0)
-// 		mediaBrowser->setLoopPosition(itemClicked, 0, 0);
+	// 	if (itemClicked >= 0)
+	// 		mediaBrowser->setLoopPosition(itemClicked, 0, 0);
 }
 
 
@@ -478,27 +477,27 @@ mat ACVisualisationPlugin::updateNextPositionsInit2(mat &desc_m, int nbVideoDisp
 
 mat ACVisualisationPlugin::updateNextPositionsItemClicked(mat &desc_m, int nbVideoDisplay, int itemClicked, ucolvec &toDisplay_v, mat &labelPos_m, ucolvec &labelIdx_v, colvec &labelValue_v){
 	int libSize = desc_m.n_rows;
-  int nbClusters = 4;
-  // position of screen display
-  mat posDisp_m(libSize, 2);  
-  mat clusterCenterDisp_m(nbClusters, 2);
-  ucolvec clusterLabel_v(nbClusters);  // for each cluster, which feature will be displayed
+	int nbClusters = 4;
+	// position of screen display
+	mat posDisp_m(libSize, 2);  
+	mat clusterCenterDisp_m(nbClusters, 2);
+	ucolvec clusterLabel_v(nbClusters);  // for each cluster, which feature will be displayed
 	colvec clusterSpread_v(nbClusters);
-  ucolvec clusterCard_v(nbClusters);
-
+	ucolvec clusterCard_v(nbClusters);
+	
 	// setting cluster center position
 	clusterCenterDisp_m(0,0) = -1;
 	clusterCenterDisp_m(0,1) = -.7;
 	// Which feature is used as a label : indice in activeFeatures
 	clusterCenterDisp_m(1,0) = -1;
 	clusterCenterDisp_m(1,1) = .7;
-
+	
 	clusterCenterDisp_m(2,0) = 1;
 	clusterCenterDisp_m(2,1) = -.7;
-
+	
 	clusterCenterDisp_m(3,0) = 1;
 	clusterCenterDisp_m(3,1) = .7;
-
+	
 	labelValue_v.set_size(nbClusters);
 	labelPos_m.set_size(nbClusters,2);
 	labelIdx_v.set_size(nbClusters);
@@ -680,24 +679,24 @@ mat ACVisualisationPlugin::updateNextPositionsItemClicked3(mat &desc_m, int nbVi
 }
 
 mat ACVisualisationPlugin::extractDescMatrix(ACMediaBrowser* mediaBrowser, int nbActiveFeatures, vector<string> &featureNames, mat &descD_m){
-  vector<ACMedia*> loops = mediaBrowser->getLibrary()->getMedia();  
+  vector<ACMedia*> loops = mediaBrowser->getLibrary()->getAllMedia();
   int libSize = mediaBrowser->getLibrary()->getSize();
   int nbMedia = loops.size(); 
 	int featDim;
 	int totalDim = 0;
 	
-  // Count nb of feature
-  int nbFeature = loops.back()->getFeatures().size();
-  for(int f=0; f< nbFeature; f++){
-    featDim = loops.back()->getFeatures()[f]->size();
-    for(int d=0; d < featDim; d++){
-      totalDim++;
-    }
-  }
-
+	// Count nb of feature
+	int nbFeature = loops.back()->getNumberOfFeaturesVectors();
+	for(int f=0; f< nbFeature; f++){
+		featDim = loops.back()->getFeaturesVector(f)->getSize();
+		for(int d=0; d < featDim; d++){
+			totalDim++;
+		}
+	}
+	
 	colvec  q_v       = rand<colvec>(totalDim);
-  ucolvec perm_v = sort_index(q_v);
-  ucolvec activeFeatures_v;
+	ucolvec perm_v = sort_index(q_v);
+	ucolvec activeFeatures_v;
 	activeFeatures_v = perm_v.rows(0,nbActiveFeatures-1);  
 //   activeFeatures_v.set_size(3);
 //   activeFeatures_v(0)=2;
@@ -711,11 +710,11 @@ mat ACVisualisationPlugin::extractDescMatrix(ACMediaBrowser* mediaBrowser, int n
   for(int i=0; i<nbMedia; i++) {    
     int tmpIdx = 0;
     for(int f=0; f< activeFeatures_v.n_elem; f++){
-      featDim = loops.back()->getFeatures()[activeFeatures_v(f)]->size();
-			featureNames.push_back(loops.back()->getFeatures()[activeFeatures_v(f)]->getName());
-      for(int d=0; d < featDim; d++){
-				desc_m(i,tmpIdx) = loops[i]->getFeatures()[activeFeatures_v(f)]->getFeature(d);
-				descD_m(i,tmpIdx) = loops[i]->getFeatures()[activeFeatures_v(f)]->getDiscretizedFeature();
+      featDim = loops.back()->getFeaturesVector(activeFeatures_v(f))->getSize();
+			featureNames.push_back(loops.back()->getFeaturesVector(activeFeatures_v(f))->getName());
+			for(int d=0; d < featDim; d++){
+				desc_m(i,tmpIdx) = loops[i]->getFeaturesVector(activeFeatures_v(f))->getFeatureElement(d);
+				descD_m(i,tmpIdx) = loops[i]->getFeaturesVector(activeFeatures_v(f))->getDiscretizedFeature();
 				tmpIdx++;
       }
     }

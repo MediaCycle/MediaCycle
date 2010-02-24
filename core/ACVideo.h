@@ -41,36 +41,29 @@
 
 class ACVideo: public ACMedia {
 	// contains the *minimal* information about a video
-	// TODO : define this with SD.
 public:
 	ACVideo();
 	~ACVideo();
 	
-	void save(FILE* library_file); // was: saveLoop
-	int load(FILE* library_file); // was: loadLoop
+	void save(FILE* library_file);
+	int load(FILE* library_file);
 	void saveACL(ofstream &library_file);
 	int loadACL(ifstream &library_file);
 
-
-	// TODO: make the following explicitely inlines ?
 	void setThumbnail(IplImage *_thumbnail) { thumbnail = _thumbnail; thumbnail_width = _thumbnail->width; thumbnail_height = _thumbnail->height; }
-	// SD?	void setThumbnailSave(IplImage *_thumbnail);
 	// IplImage* getThumbnail() { return thumbnail; }
 	void* getThumbnailPtr() { return (void*)thumbnail; }
-	
-	// do we need the original size ?
-	// the thumbnail size can be accessed by thumbnail->width/height !! ;
-	int getThumbnailWidth() {return width;}
-	int getThumbnailHeight() {return height;}
-	int getWidth() {return width;}
-	int getHeight() {return height;}
-	void setWidth(int w) {width = w;} // XS TODO : check if it matches thumbnail?
-	void setHeight(int h) {height = h;}
+	int getThumbnailWidth() {return thumbnail_width;}
+	int getThumbnailHeight() {return thumbnail_height;}
+
+	ACMediaData* extractData(std::string fname);
 	
 private:	
 	char  *thumbnail_filename;
-	int thumbnail_width, thumbnail_height; // delete
+	int thumbnail_width, thumbnail_height;
 	IplImage *thumbnail;
+	
+	int computeThumbnail(ACMediaData* data_ptr, int w=0, int h=0);
 };
 
 #endif // ACVIDEO_H

@@ -35,23 +35,42 @@
 #include "ACMedia.h"
 #include <iostream>
 
-ACMediaFeatures*& ACMedia::getFeature(int i) { 
-	if (i < int(features.size()) )
-		return features[i]; 
+ACMedia::ACMedia() { 
+	mid = -1;
+	width = 0;
+	height = 0;
+	duration = 0.0;
+	features_vectors.resize(0);
+}
+
+ACMedia::~ACMedia() { 
+	// XS TODO Clean up cout ! 
+	// XS check that this is common to all media -- is it really called
+	cout << "XS debug -- ACMedia destructor" <<endl;
+	vector<ACMediaFeatures*> ::iterator iter;
+	for (iter = features_vectors.begin(); iter != features_vectors.end(); iter++) { 
+		delete *iter; 
+	}		
+}
+
+ACMediaFeatures*& ACMedia::getFeaturesVector(int i){ 
+	if (i < int(features_vectors.size()) )
+		return features_vectors[i]; 
 	else {
-		std::cerr << "ACMedia::getFeature : out of bounds" << i << " > " << features.size() << std::endl;
+		std::cerr << "ACMedia::getFeaturesVector : out of bounds" << i << " > " << features_vectors.size() << std::endl;
+		// XS TODO: duh ?
 		//		return (ACMediaFeatures*&)NULL; // duh ?
 	}
 }
 
-ACMediaFeatures* ACMedia::getFeature(string feature_name) { 
+ACMediaFeatures* ACMedia::getFeaturesVector(string feature_name) { 
 	int i;
-	for (i=0;i<int(features.size());i++) {
-		if (!(feature_name.compare(features[i]->getName()))) {
-			return features[i];
+	for (i=0;i<int(features_vectors.size());i++) {
+		if (!(feature_name.compare(features_vectors[i]->getName()))) {
+			return features_vectors[i];
 		}
 	}
-	std::cerr << "ACMedia::getFeature : not found feature named" << feature_name << std::endl;
+	std::cerr << "ACMedia::getFeaturesVector : not found feature named" << feature_name << std::endl;
 	return 0;
 }
 
@@ -63,6 +82,15 @@ int ACMedia::import(std::string _path, int id, ACPluginManager *acpl ) {
 	
 	if (id>=0) this->setId(id);
 	
+	// get info about width, height, thumbnail, ...
+	// and return a pointer to the data
+	ACMediaData* data_ptr = this->extractData(this->getFileName());
+	if (data_ptr==NULL){
+		import_ok = 0;
+		cerr << "<ACMedia::import> failed accessing data for media number: " << id << endl;
+		return 0;
+	}
+	
 	//compute features with available plugins
 	if (acpl) {
 		for (int i=0;i<acpl->getSize();i++) {
@@ -70,32 +98,32 @@ int ACMedia::import(std::string _path, int id, ACPluginManager *acpl ) {
 				if (acpl->getPluginLibrary(i)->getPlugin(j)->getMediaType() == this->getType()
 					&& acpl->getPluginLibrary(i)->getPlugin(j)->getPluginType() == PLUGIN_TYPE_FEATURES) {
 					ACPlugin* plugin =  acpl->getPluginLibrary(i)->getPlugin(j);
-
-	
-					vector<ACMediaFeatures*> afv = plugin->calculate(this->getFileName());
+					
+					//vector<ACMediaFeatures*> afv = plugin->calculate(this->getFileName());
+					vector<ACMediaFeatures*> afv = plugin->calculate(data_ptr);
+					
 					//another option :
 					//ACMediaFeatures *af = acpl->getPluginLibrary(i)->calculate(j,this->getFileName());
-					if (afv.size()==0)
+					if (afv.size()==0){
 						import_ok = 0;
+						cerr << "<ACMedia::import> failed importing feature from plugin: " << plugin->getName() << endl;
+					}
 					else {
-						// XS TODO: make sure this makes sense for all media
-						// have to be called after calculate !
-						this->setWidth(plugin->getWidth());
-						cout << "w=" << width << endl;
-						this->setHeight(plugin->getHeight());
-						cout << "h=" << height << endl;
-
-						this->setDuration((double) plugin->getDuration());
-						cout << "d=" << duration << endl;
-
 						for (int Iafv=0; Iafv<afv.size(); Iafv++)
-							this->addFeatures(afv[Iafv]);
+							this->addFeaturesVector(afv[Iafv]);
 						import_ok = 1;
 					}
-					// XS : addFeatures only if it did not fail !
+				}
+				else {
+					cerr << "<ACMedia::import> compatibility problem with plugins" << endl;
+					cerr << "acpl->getPluginLibrary(i)->getPlugin(j)->getMediaType(): " << acpl->getPluginLibrary(i)->getPlugin(j)->getMediaType()  << endl;
+					cerr << "this->getType(): " << this->getType() << endl;
+					cerr << "acpl->getPluginLibrary(i)->getPlugin(j)->getPluginType(): " << acpl->getPluginLibrary(i)->getPlugin(j)->getPluginType() << endl;
+					cerr << "PLUGIN_TYPE_FEATURES: "<< PLUGIN_TYPE_FEATURES << endl;
 				}
 			}
 		}
 	}
+	delete data_ptr;
 	return import_ok;
 }

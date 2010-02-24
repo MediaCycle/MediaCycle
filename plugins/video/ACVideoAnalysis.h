@@ -57,6 +57,7 @@ public:
 	void resizeAndSaveInFile(std::string fileout, int nskip = 0, int w=320, int h=240);
 	void saveInFile(std::string fileout, int nskip = 0);
 
+	//accessors 
 	inline int getWidth() {return width;}
 	inline int getHeight() {return height;}
 	std::string getFileName() {return file_name;}
@@ -121,6 +122,7 @@ public:
 private:
 	std::string file_name;
 	std::string color_model; // "BGR" or "HSV" : these are already in IPLimage, but not used in OpenCV (see manual !)
+	IplImage* thumbnail;
 	
 	CvCapture* capture ;
 	int frame_counter;
