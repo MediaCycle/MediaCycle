@@ -714,6 +714,7 @@ void ACVideoAnalysis::computeBlobsUL(IplImage* bg_img, bool merge_blobs, int big
 }
 
 void ACVideoAnalysis::computeOpticalFlow(){
+	// from Sidi Mahmoudi
 	int win_size = 10;
 	const int MAX_COUNT = 500;
 	CvPoint2D32f* points[2] = {0,0}, *swap_points;

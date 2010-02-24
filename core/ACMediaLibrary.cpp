@@ -153,11 +153,11 @@ int ACMediaLibrary::importDirectory(std::string _path, int _recursive, int id, A
 		}
 		else {
 			// XS test: parallel version with threads
-			struct pthread_input pdata;
-			pdata.media = media;
-			pdata.filename = filename;
-			pdata.id = id;
-			pdata.acpl = acpl;
+//			struct pthread_input pdata;
+//			pdata.media = media;
+//			pdata.filename = filename;
+//			pdata.id = id;
+//			pdata.acpl = acpl;
 // XS removed if
 			if (media->import(filename, id, acpl)){
 //			pthread_t pid;
