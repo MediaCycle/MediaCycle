@@ -49,8 +49,8 @@ ACMedia::~ACMedia() {
 	cout << "XS debug -- ACMedia destructor" <<endl;
 	vector<ACMediaFeatures*> ::iterator iter;
 	for (iter = features_vectors.begin(); iter != features_vectors.end(); iter++) { 
-		delete *iter; 
-	}		
+		features_vectors.erase(iter); //CF: instead of "delete *iter;" 
+	}	
 }
 
 ACMediaFeatures* ACMedia::getFeaturesVector(int i){ 
