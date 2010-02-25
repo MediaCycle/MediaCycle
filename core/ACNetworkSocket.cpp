@@ -206,7 +206,7 @@ void ACNetworkSocketServer::start() {
 }
 
 void ACNetworkSocketServer::stop() {
-	pthread_exit(&server_engine);
+	pthread_cancel(server_engine);
 }
 
 // SD TODO - need a loop around server_receive to collect larger amounts of packets
@@ -390,7 +390,7 @@ void ACNetworkSocketServer::start() {
 }
 
 void ACNetworkSocketServer::stop() {
-	pthread_exit(&server_engine);
+	pthread_cancel(server_engine);
 }
 
 // SD TODO - need a loop around server_receive to collect larger amounts of packets

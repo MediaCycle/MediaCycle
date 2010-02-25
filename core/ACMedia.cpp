@@ -53,7 +53,7 @@ ACMedia::~ACMedia() {
 	}		
 }
 
-ACMediaFeatures*& ACMedia::getFeaturesVector(int i){ 
+ACMediaFeatures* ACMedia::getFeaturesVector(int i){ 
 	if (i < int(features_vectors.size()) )
 		return features_vectors[i]; 
 	else {

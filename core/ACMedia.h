@@ -67,7 +67,7 @@ public:
 	double getDuration(){return this->duration;}
 
 	std::vector<ACMediaFeatures*> &getAllFeaturesVectors() { return features_vectors; }
-	ACMediaFeatures* &getFeaturesVector(int i);
+	ACMediaFeatures* getFeaturesVector(int i);
 	ACMediaFeatures* getFeaturesVector(string feature_name);
 	int getNumberOfFeaturesVectors() {return features_vectors.size();}
 	void addFeaturesVector(ACMediaFeatures *aFeatures) { this->features_vectors.push_back(aFeatures); }

@@ -474,7 +474,8 @@ void ACAudioFeedback::deleteAudioEngine()
 	
 // 	// SD TODO - Clear Buffers
 // 	//
-// 	pthread_exit(&audio_engine);
+ 	pthread_cancel(audio_engine);
+	pthread_cancel(audio_update);
 // 	pthread_mutex_destroy(&audio_engine_mutex);
 // 	pthread_cond_destroy(&audio_engine_cond);
 // 	pthread_mutex_destroy(&audio_engine_cond_mutex);
@@ -562,7 +563,7 @@ void ACAudioFeedback::threadAudioEngine()
 	
 	// Prepare end send buffers to audio rendering
 	while (1) {
-		
+		pthread_testcancel();
 		gettimeofday(&tv, &tz);
 		audio_engine_current_time = (double)tv.tv_sec + tv.tv_usec / 1000000.0;
 		
@@ -610,6 +611,7 @@ void ACAudioFeedback::threadAudioEngine()
 void ACAudioFeedback::threadAudioUpdate()
 {
 	while (1) {
+		pthread_testcancel();
 		if (media_cycle) {
 			media_cycle->setNeedsActivityUpdateLock(1);
 			processAudioUpdate();

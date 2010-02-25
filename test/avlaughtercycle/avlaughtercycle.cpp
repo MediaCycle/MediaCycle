@@ -123,23 +123,26 @@ int main(int argc, char** argv) {
 
 	FILE *f = fopen("/home/alexis/Work/eNTERFACE/eNTERFACE09/faplist.txt","r");
 
-    vector<ACMedia*> loops = mediacycle->getLibrary()->getAllMedia();
-    if (loops.size() > 0) {
-        cout << "loopssize : " << loops.size() << endl;
-        cout << "filename : " << loops[1]->getFileName() << endl;
-        for(int y=0; y<loops.size(); y++)
-        {
-            for (k=0;k<ids.size();k++) {
-                if (loops[y]->getId() == ids[k]) {
-                    cout << "filename : " << loops[y]->getFileName() << endl;
-                }
-            }
-            //Should output 1 4 8
-        }
-    }
-*/
-/*    vector<int> ids;
-    ids.resize(0);
+	char mystring [100];
+	while(fgets(mystring,100,f)) {
+		std::string filename = mystring;
+		filename = filename.substr(0,filename.size()-1) + ".wav";
+		cout << filename << endl;
+		getchar();
+		greta->calculate(filename);
+	}
+	fclose(f);
+	//end test greta
+	*/
+	/*mediacycle->importDirectory("/home/alexis/NetBeansProjects/MediaCycle/lib/b50aac6a76bf5d5b660dd822273fe58af8791131.wav",0,1);
+	mediacycle->importDirectory("/home/alexis/NetBeansProjects/MediaCycle/lib/18f038431e4db3c83c7227f47966cbbe7d6e467d.wav",0,2);
+	mediacycle->importDirectory("/home/alexis/NetBeansProjects/MediaCycle/lib/d2dd27046e2a241e06d48a22fd1bc4183e7fa990.wav",0,3);
+	mediacycle->importDirectory("/home/alexis/NetBeansProjects/MediaCycle/lib/c2ea562d07ce786935d278e0bd59cdb2b1948c6d.wav",0,4);
+	mediacycle->importDirectory("/home/alexis/NetBeansProjects/MediaCycle/lib/2a28aa910897bc86e243f6f18920b5cc8faa2249.wav",0,5);
+	 */
+	/*
+	vector<int> ids;
+	ids.resize(0);
 
 	mediacycle->getKNN(1, ids, 2);
 	cout << "size : " << ids.size() << endl;
@@ -164,8 +167,8 @@ int main(int argc, char** argv) {
 			//Should output 1 4 8
 		}
 	}
-	
-*/
+	*/
+
 	/* Test KNN for JMUI */
 	cout << "JMUI : get KNN" << endl;
 	vector<ACMedia *> result;
@@ -322,69 +325,68 @@ int processTcpMessageFromSSI(MediaCycle *that, char *buffer, int l, char **buffe
 		stringstream tmpstr;
 		tmpstr << "ssi" << i;
 		mediaFeatures->setName(tmpstr.str());
-        mediaFeatures->setFeatureElement(i,ssi_features[i]);
+		mediaFeatures->setFeatureElement(i,ssi_features[i]);
 	}
 	mediaFeatures->setComputed();
 	cout << "done" << endl;
 
-    cout << "creating media" << endl;
-    ACMedia* local_media;
-    local_media = ACMediaFactory::create(MEDIA_TYPE_AUDIO);
-    local_media->addFeaturesVector(mediaFeatures);
-    cout << "done" << endl;
+	cout << "creating media" << endl;
+	ACMedia* local_media;
+	local_media = ACMediaFactory::create(MEDIA_TYPE_AUDIO);
+	local_media->addFeaturesVector(mediaFeatures);
+	cout << "done" << endl;
 
-    if ( type_name == "addwavf" ) {
-        cout << "addwavf - name : " << file_name << " - " << file_name.size() << endl;
-        local_media->setFileName(file_name);
-        cout << "addwavf - addmedia" << endl;
-        that->getLibrary()->addMedia(local_media);
-        cout << "addwavf - savelib" << endl;
-        that->getLibrary()->saveAsLibrary(that->getLocalDirectoryPath() + "/" + that->getLibName());
-        cout << "done" << endl;
-    } else if (type_name == "request") {
-        cout << "normalize" <<endl;
-        cout << "before" << endl;
-        mediaFeatures->dump();
-        for(int j=0; j<that->getLibrary()->getMeanFeatures().size(); j++) {
-            for(int k=0; k<that->getLibrary()->getMeanFeatures()[j].size(); k++) {
-                float old = mediaFeatures->getFeatureElement(k);
-                //cout << "(" << j << "," << k << ")" << old << " - " << that->getLibrary()->getMeanFeatures()[j][k] << "/" << that->getLibrary()->getStdevFeatures()[j][k] << endl;
-                mediaFeatures->setFeatureElement(k, (old - that->getLibrary()->getMeanFeatures()[j][k]) / ( TI_MAX(that->getLibrary()->getStdevFeatures()[j][k] , 0.00001)));
-            }
-        }
-        cout << endl << "after" << endl;
-        local_media->getFeaturesVector(0)->dump(); // XS ou getFeatures ?
-        cout << endl;
+	if (type_name == "addwavf") {
+		cout << "addwavf - name : " << file_name << " - " << file_name.size() << endl;
+		local_media->setFileName(file_name);
+		cout << "addwavf - addmedia" << endl;
+		that->getLibrary()->addMedia(local_media);
+		cout << "addwavf - savelib" << endl;
+		that->getLibrary()->saveAsLibrary(that->getLocalDirectoryPath() + "/" + that->getLibName());
+		cout << "done" << endl;
+	} else if (type_name == "request") {
+		cout << "normalize" << endl;
+		cout << "before" << endl;
+		mediaFeatures->dump();
+		for (int j=0; j<that->getLibrary()->getMeanFeatures().size(); j++) {
+			for (int k=0; k<that->getLibrary()->getMeanFeatures()[j].size(); k++) {
+				float old = mediaFeatures->getFeatureElement(k);
+				//cout << "(" << j << "," << k << ")" << old << " - " << that->getLibrary()->getMeanFeatures()[j][k] << "/" << that->getLibrary()->getStdevFeatures()[j][k] << endl;
+				mediaFeatures->setFeatureElement(k, (old - that->getLibrary()->getMeanFeatures()[j][k]) / (TI_MAX(that->getLibrary()->getStdevFeatures()[j][k], 0.00001)));
+			}
+		}
+		/*cout << endl << "after" << endl;
+		local_media->getFeaturesVector(0)->dump(); // XS ou getFeatures ?
+		cout << endl;*/
 
 		vector<ACMedia *> result;
 		that->getKNN(local_media, result, 1);
 
-        if (result.size() > 0) {
-            ACPlugin *greta = that->getPluginManager()->getPlugin("Greta");
-            
-            if (greta) {
-                //filename extension is removed in greta
-                cout << "Sent to Greta : " << result[0]->getFileName() << endl;
-                greta->calculate(result[0]->getFileName());
-            } else {
-                cout << "Greta plugin not found, displaying results here ..." << endl;
-                cout << "*** REQUEST DUMP : " << endl;
-                mediaFeatures->dump();
-                
-                for (int k=0;k<result.size();k++) {
-                    cout << "result (" << k << ") : " << result[k]->getFileName() << endl;
-                    result[k]->getFeaturesVector(0)->dump();
-                }
-            }
-        }
-        cout << endl << endl;
-        //delete only in "request". In "addwavf", local_media is added to the library and therefore shouyld not be deleted
-        delete local_media; 
-    } else {
-        //not valid (should not happen since already checked before)
-        return -1;
-    }
+		if (result.size() > 0) {
+			ACPlugin *greta = that->getPluginManager()->getPlugin("Greta");
+			if (greta) {
+				//filename extension is removed in greta
+				cout << "Sent to Greta : " << result[0]->getFileName() << endl;
+				greta->calculate(result[0]->getFileName());
+			} else {
+				cout << "Greta plugin not found, displaying results here ..." << endl;
+				cout << "*** REQUEST DUMP : " << endl;
+				mediaFeatures->dump();
 
-    //cout << "BUFFER : " << buffer << endl << endl;
-    return 0;
+				for (int k=0; k < result.size(); k++) {
+					cout << "result (" << k << ") : " << result[k]->getFileName() << endl;
+					result[k]->getFeaturesVector(0)->dump();
+				}
+			}
+		}
+		cout << endl << endl;
+		//delete only in "request". In "addwavf", local_media is added to the library and therefore shouyld not be deleted
+		delete local_media;
+	} else {
+		//not valid (should not happen since already checked before)
+		return -1;
+	}
+
+	//cout << "BUFFER : " << buffer << endl << endl;
+	return 0;
 }

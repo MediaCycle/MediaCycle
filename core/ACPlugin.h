@@ -57,32 +57,32 @@ enum ACPluginType {
 
 class ACPlugin {
 public:
-    ACPlugin() {}
-    virtual ~ACPlugin() {}
+	ACPlugin() {}
+	virtual ~ACPlugin() {}
 	std::string getName() {return this->mName;}
-    //virtual std::string getName() const = 0; -> error !
-    std::string getIdentifier() {return this->mId;}
-    std::string getDescription() {return this->mDescription;}
+	//virtual std::string getName() const = 0; -> error !
+	std::string getIdentifier() {return this->mId;}
+	std::string getDescription() {return this->mDescription;}
 	ACMediaType getMediaType() {return this->mMediaType;}
-    ACPluginType getPluginType() {return this->mPluginType;}
-		
-    virtual int initialize() = 0;
+	ACPluginType getPluginType() {return this->mPluginType;}
+
+	virtual int initialize() = 0;
 	// XS TODO: why are they all =0 ?
-    virtual std::vector<ACMediaFeatures*> calculate() = 0;
-    virtual std::vector<ACMediaFeatures*> calculate(std::string aFileName) = 0;
-	virtual std::vector<ACMediaFeatures*> calculate(ACMediaData* _data) =0;
+	virtual std::vector<ACMediaFeatures*> calculate() = 0;
+	virtual std::vector<ACMediaFeatures*> calculate(std::string aFileName) = 0;
+	virtual std::vector<ACMediaFeatures*> calculate(ACMediaData* aData) = 0;
 	virtual void updateClusters(ACMediaBrowser*){};
-    virtual void updateNextPositions(ACMediaBrowser*){};
-    virtual int start() = 0;
-    virtual int stop() = 0;
+	virtual void updateNextPositions(ACMediaBrowser*){};
+	virtual int start() = 0;
+	virtual int stop() = 0;
 
     //virtual int readFile(std::string);
 protected:
-    string mName;
-    string mId;
-    string mDescription;
-    ACMediaType mMediaType;
-    ACPluginType mPluginType;
+	string mName;
+	string mId;
+	string mDescription;
+	ACMediaType mMediaType;
+	ACPluginType mPluginType;
 };
 
 // the types of the class factories

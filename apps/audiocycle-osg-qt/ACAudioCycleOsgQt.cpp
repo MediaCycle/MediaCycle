@@ -53,7 +53,10 @@ ACAudioCycleOsgQt::ACAudioCycleOsgQt(QWidget *parent)
 	//media_cycle->setVisualisationPlugin("Visualisation");
 
 	audio_engine = new ACAudioFeedback();
-	audio_engine->setMediaCycle(media_cycle);	
+	audio_engine->setMediaCycle(media_cycle);
+
+	osc_feedback = NULL;
+	osc_browser = NULL;
 	
 	ui.browserOsgView->move(0,20);
 	ui.browserOsgView->setMediaCycle(media_cycle);
@@ -78,18 +81,21 @@ ACAudioCycleOsgQt::~ACAudioCycleOsgQt()
 {
 	//browserOsgView->setPlaying(false);
 	//free(media_cycle);
-	if (osc_browser)
-	{	
+	if (osc_browser) {
 		osc_browser->stop(mOscReceiver);
-		
+		delete osc_browser;
 		//osc_browser->release(mOscReceiver);
 	}
-	if (osc_feedback)
-		osc_feedback->release();//mOscFeeder);
-	delete audio_engine;
-	delete media_cycle;
-	delete osc_browser;
-	delete osc_feedback;
+	if (osc_feedback) {
+		//osc_feedback->release();//mOscFeeder);
+		delete osc_feedback;//osc_feedback destructor calls ACOscFeedback::release()
+	}
+
+	if (audio_engine) //should always be true (new() called in constructor) except if problem with new().
+		delete audio_engine;
+	if (media_cycle) //idem
+		delete media_cycle;
+	
 	//delete mOscReceiver;
 	//delete mOscFeeder;
 }

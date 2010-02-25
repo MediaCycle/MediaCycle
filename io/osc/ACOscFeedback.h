@@ -57,7 +57,7 @@ struct OpaqSender
 class ACOscFeedback {
 	public:
 		ACOscFeedback(){};
-		~ACOscFeedback(){};
+		~ACOscFeedback(){ release();}
 	
 		void create(const char *hostname, int port);
 		void release();

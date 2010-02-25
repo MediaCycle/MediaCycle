@@ -59,10 +59,13 @@ void ACOscFeedback::create(const char *hostname, int port)
 void ACOscFeedback::release()
 {
 	//sender = (OpaqSender*)aSender; assert(sender);
-	
-	delete sender->oscStream;
-	delete sender->oscSocket;
-	delete sender;
+	if (sender) {
+		if (sender->oscStream)
+			delete sender->oscStream;
+		if (sender->oscSocket)
+			delete sender->oscSocket;
+		delete sender;
+	}
 }
 
 void ACOscFeedback::messageBegin(const char *tag)//ACOscFeedbackRef aSender,const char *tag)

@@ -1,6 +1,6 @@
 PROJECT(MediaCycle)
 
-SUBDIRS(audioengine core cli gui plugins armadillo fftooura gnuplot_i)
+SUBDIRS(audioengine core cli gui armadillo fftooura gnuplot_i)
 
 INCLUDE_DIRECTORIES(. audioengine core armadillo gnuplot_i)
 INCLUDE_DIRECTORIES( "/usr/local/include/TiCore" )
@@ -28,8 +28,9 @@ OPTION(USE_PSYCLONE "Use Psyclone" OFF)
 OPTION(USE_OSC "Use OpenSoundControl" ON)
 OPTION(USE_QT4 "Use Qt4 Toolkit" ON)
 OPTION(USE_COCOA "Use Cocoa" ON)
-OPTION(BUILD_TESTS "Build tests" OFF)
 OPTION(BUILD_APPS "Build apps" ON)
+OPTION(BUILD_TESTS "Build tests" OFF)
+OPTION(BUILD_PLUGINS "Build plugins" ON)
 
 IF ( APPLE )
 	OPTION(USE_ALUT "Use ALUT" OFF)
@@ -52,14 +53,20 @@ IF ( APPLE )
 	LINK_DIRECTORIES( ${LINK_DIRECTORIES} "/opt/local" )
 ENDIF ( APPLE )
 
+IF ( BUILD_APPS )
+	INCLUDE_DIRECTORIES(apps)
+	SUBDIRS(apps)
+ENDIF ( BUILD_APPS )
+
 IF ( BUILD_TESTS )
 	SUBDIRS(test tinyxml)
 ENDIF ( BUILD_TESTS )
 
-IF ( BUILD_APPS )
-	INCLUDE_DIRECTORIES(apps)
-	SUBDIRS(apps)
-ENDIF ( BUILD_APPS ) 
+IF ( BUILD_PLUGINS )
+	SUBDIRS(plugins)
+ENDIF ( BUILD_PLUGINS )
+
+
 
 IF ( USE_DEBUG )
 	MESSAGE( "Configured for Debug Build")
