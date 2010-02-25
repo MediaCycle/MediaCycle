@@ -6,12 +6,12 @@ FILE(GLOB MC_HDR ../../core/*.hpp ../../core/*.h)
 
 ADD_EXECUTABLE(mediacycle-dancers ${SRC} ${HDR})
 
-ADD_DEPENDENCIES(mediacycle-dancers mediacycle visualisation)
+ADD_DEPENDENCIES(mediacycle-dancers mediacycle)
 
 TARGET_LINK_LIBRARIES(mediacycle-dancers mediacycle)
 TARGET_LINK_LIBRARIES(mediacycle-dancers tinyxml armadillo-utils)
 
-INCLUDE_DIRECTORIES(. ../../tinyxml)
+INCLUDE_DIRECTORIES(. ../../tinyxml ../../armadillo)
 
 
 INSTALL(TARGETS mediacycle-dancers RUNTIME DESTINATION bin)

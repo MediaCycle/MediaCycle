@@ -2,7 +2,7 @@ PROJECT(MediaCycle)
 
 SUBDIRS(audioengine core cli gui armadillo fftooura gnuplot_i)
 
-INCLUDE_DIRECTORIES(. audioengine core armadillo gnuplot_i)
+INCLUDE_DIRECTORIES(. audioengine core gnuplot_i)
 INCLUDE_DIRECTORIES( "/usr/local/include/TiCore" )
 LINK_DIRECTORIES( ${LINK_DIRECTORIES} "/usr/local/lib" )
 
@@ -15,6 +15,9 @@ cmake_minimum_required(VERSION 2.6)
 IF(COMMAND cmake_policy)
       cmake_policy(SET CMP0003 NEW)
 ENDIF(COMMAND cmake_policy)
+#config
+SET(PLUGIN_PREFIX "mc_")
+# SET(PLUGIN_SUFFIX ".mcp") #change OS-dependent extension (so, dll, dynlib) to a fixed one (.mcp)
 
 #options
 OPTION(USE_DEBUG "Use debug" ON)
