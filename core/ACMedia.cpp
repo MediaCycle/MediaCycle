@@ -46,10 +46,12 @@ ACMedia::ACMedia() {
 ACMedia::~ACMedia() { 
 	// XS TODO Clean up cout ! 
 	// XS check that this is common to all media -- is it really called
+	// AM yes it is called
 	cout << "XS debug -- ACMedia destructor" <<endl;
 	vector<ACMediaFeatures*> ::iterator iter;
-	for (iter = features_vectors.begin(); iter != features_vectors.end(); iter++) { 
-		features_vectors.erase(iter); //CF: instead of "delete *iter;" 
+	for (iter = features_vectors.begin(); iter != features_vectors.end(); iter++) {
+		delete *iter;//needed erase call destructor of pointer (i.e. none since it's just a pointer) not of pointee ACMediaFeatures
+		//features_vectors.erase(iter); //will cause segfault. besides the vector is automatically emptied, no need to erase.
 	}	
 }
 

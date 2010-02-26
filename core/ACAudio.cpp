@@ -55,12 +55,7 @@ ACAudio::ACAudio() : ACMedia() {
 
 ACAudio::~ACAudio() {
 	// XS added this on 4/11/2009 to clean up memory
-	if (waveform) delete waveform;
-	// Clean up! 
-	std::vector<ACMediaFeatures*> ::iterator iter;
-	for (iter = features_vectors.begin(); iter != features_vectors.end(); iter++) { 
-		delete *iter; 
-	}	
+	if (waveform) delete waveform;	
 }
 
 void ACAudio::save(FILE* library_file) {
