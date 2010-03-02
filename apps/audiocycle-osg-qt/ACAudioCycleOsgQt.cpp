@@ -82,19 +82,14 @@ ACAudioCycleOsgQt::~ACAudioCycleOsgQt()
 	//browserOsgView->setPlaying(false);
 	//free(media_cycle);
 	if (osc_browser) {
-		osc_browser->stop(mOscReceiver);
-		delete osc_browser;
-		//osc_browser->release(mOscReceiver);
-	}
-	if (osc_feedback) {
-		//osc_feedback->release();//mOscFeeder);
-		delete osc_feedback;//osc_feedback destructor calls ACOscFeedback::release()
+		osc_browser->stop(mOscReceiver);		
+		//osc_browser->release(mOscReceiver);//should be in destructor ?
 	}
 
-	if (audio_engine) //should always be true (new() called in constructor) except if problem with new().
-		delete audio_engine;
-	if (media_cycle) //idem
-		delete media_cycle;
+	delete osc_browser;
+	delete osc_feedback;//osc_feedback destructor calls ACOscFeedback::release()
+	delete audio_engine;
+	delete media_cycle;
 	
 	//delete mOscReceiver;
 	//delete mOscFeeder;

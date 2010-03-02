@@ -35,8 +35,9 @@
 #include <algorithm>
 #include <string>
 #include <iostream>
-#include <lib/tree/tree.hh>
 #include <vector>
+
+#include "lib/tree/tree.hh"
 
 using namespace std;
 
