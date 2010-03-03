@@ -266,6 +266,16 @@ void MediaCycle::setVisualisationPlugin(string pluginName){
   this->getBrowser()->setVisualisationPlugin(visPlugin);
 }
 
+void MediaCycle::setPositionsPlugin(string pluginName){
+	ACPlugin* posPlugin = this->getPluginManager()->getPlugin(pluginName);
+	this->getBrowser()->setPositionsPlugin(posPlugin);
+}
+
+void MediaCycle::setNeighborhoodsPlugin(string pluginName){
+	ACPlugin* neighborsPlugin = this->getPluginManager()->getPlugin(pluginName);
+	this->getBrowser()->setNeighborhoodsPlugin(neighborsPlugin);
+}
+
 // ADDED FOR VISUAL and GUI
 // API REQUIRED BY VISUAL and GUI
 // 
@@ -296,6 +306,7 @@ int MediaCycle::getClickedLoop() { return mediaBrowser->getClickedLoop(); }
 void MediaCycle::incrementLoopNavigationLevels(int i) { mediaBrowser->incrementLoopNavigationLevels(i); }
 void MediaCycle::setSelectedObject(int index) { mediaBrowser->setSelectedObject(index); }
 void MediaCycle::updateClusters(bool animate) { mediaBrowser->updateClusters(animate); }
+void MediaCycle::updateNeighborhoods() { mediaBrowser->updateNeighborhoods(); }
 void MediaCycle::setCameraPosition(float x, float y)		{ mediaBrowser->setCameraPosition(x,y); }
 void MediaCycle::getCameraPosition(float &x, float &y)		{ mediaBrowser->getCameraPosition(x,y); }
 void MediaCycle::setCameraZoom(float z)				{ mediaBrowser->setCameraZoom(z); }

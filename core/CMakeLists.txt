@@ -30,6 +30,12 @@ ELSE ( )
 	MESSAGE(FATAL_ERROR "Boost filesystem not found. needed in core mediacycle.")
 ENDIF ( )
 
+IF ( Boost_GRAPH_FOUND )
+	TARGET_LINK_LIBRARIES(mediacycle ${Boost_GRAPH_LIBRARY})
+ELSE ( )
+	MESSAGE(FATAL_ERROR "Boost graph not found. needed in core mediacycle.")
+ENDIF ( )
+
 # this might require some path adaptation for Windows
 # (e.g. set cmake_install_prefix to the good value for Windows )
 # OSX is probably ok with installing lib in /usr/local/lib/

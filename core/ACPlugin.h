@@ -73,6 +73,7 @@ public:
 	virtual std::vector<ACMediaFeatures*> calculate(ACMediaData* aData) = 0;
 	virtual void updateClusters(ACMediaBrowser*){};
 	virtual void updateNextPositions(ACMediaBrowser*){};
+	virtual void updateNeighborhoods(ACMediaBrowser*){};
 	virtual int start() = 0;
 	virtual int stop() = 0;
 

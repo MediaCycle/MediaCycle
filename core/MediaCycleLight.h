@@ -123,6 +123,7 @@ public:
 	void incrementLoopNavigationLevels(int i);
 	void setSelectedObject(int index);
 	void updateClusters(bool animate);
+	void updateNeighborhoods();
 	void setCameraPosition(float x, float y);
 	void getCameraPosition(float &x, float &y);
 	void setCameraZoom(float z);
@@ -151,6 +152,8 @@ public:
 	//
 	void* hasBrowser();
 	void setVisualisationPlugin(string pluginName);
+	void setNeighborhoodsPlugin(string pluginName);
+	void setPositionsPlugin(string pluginName);
 	//	int addPlugin(std::string aPluginPath);
 	
 	// LABELS on VIEW

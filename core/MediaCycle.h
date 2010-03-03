@@ -87,6 +87,8 @@ public:
     ACMediaBrowser* getBrowser() { return mediaBrowser;};
     ACPluginManager* getPluginManager() { return pluginManager;};
     void setVisualisationPlugin(string pluginName);
+	void setNeighborhoodsPlugin(string pluginName);
+	void setPositionsPlugin(string pluginName);
 	
 	// API REQUIRED BY VISUAL and GUI
 	// 
@@ -113,6 +115,7 @@ public:
 	void incrementLoopNavigationLevels(int i);
 	void setSelectedObject(int index);
 	void updateClusters(bool animate);
+	void updateNeighborhoods();
 	void setCameraPosition(float x, float y);
 	void getCameraPosition(float &x, float &y);
 	void setCameraZoom(float z);

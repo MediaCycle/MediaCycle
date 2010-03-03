@@ -141,6 +141,9 @@
 	//media_cycle->addPlugin ("/Users/dtardieu/src/Numediart/ticore-app/Applications/Numediart/MediaCycle/src/Builds/darwin-x86/plugins/visualisation/Debug/mc_visualisation.dylib");	
 	//	media_cycle->setVisualisationPlugin("Visualisation");
 	
+	//media_cycle->setNeighborhoodsPlugin("RandomNeighborhoods");
+	//media_cycle->setPositionsPlugin("RandomPositions");
+	
 	audio_engine = new ACAudioFeedback();
 	audio_engine->setMediaCycle(media_cycle);
 

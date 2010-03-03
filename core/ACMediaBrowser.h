@@ -42,6 +42,7 @@
 #include "ACEuclideanDistance.h"
 #include "ACMediaLibrary.h"
 #include "ACPlugin.h"
+#include "ACUserLog.h"
 #include <vector>
 
 using namespace std;
@@ -166,6 +167,9 @@ public:
 	void initClusterCenters();
 	void kmeans(bool animate);
 	
+	// neighbors
+	void updateNeighborhoods();
+	
 	void setClickedLoop(int iloop);
 	int getClickedLoop()					{return mClickedLoop; };
 	int getClosestLoop()					{return closest_loop; };
@@ -239,6 +243,8 @@ public:
 	int getNumberOfLabels(){return mLabelAttributes.size();}
 
 	void setVisualisationPlugin(ACPlugin* acpl){mVisPlugin=acpl;};
+	void setPositionsPlugin(ACPlugin* acpl){mPosPlugin=acpl;};
+	void setNeighborhoodsPlugin(ACPlugin* acpl){mNeighborsPlugin=acpl;};	
 	
 	// Proximity Grid		- SD TODO - eventually to be moved in visualization plugin chain
 	float proxgridstepx;
@@ -258,7 +264,9 @@ public:
 	void setProximityGridQuantize(ACPoint p, ACPoint *pgrid);	
 	void setProximityGridUnquantize(ACPoint pgrid, ACPoint *p);
 	void setProximityGridBounds(float l, float r, float b, float t);
-	void setRepulsionEngine();	
+	void setRepulsionEngine();
+	
+	ACUserLog* getUserLog(){return mUserLog;};
 
 protected:
 	ACMediaLibrary *mLibrary; 
@@ -319,6 +327,10 @@ protected:
 	int auto_play_toggle;
 
 	ACPlugin* mVisPlugin;
+	ACPlugin* mPosPlugin;
+	ACPlugin* mNeighborsPlugin;
+	ACUserLog* mUserLog;
+	
 };
 
 #endif // __ACMEDIABROWSER_H__
