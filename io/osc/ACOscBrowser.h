@@ -40,6 +40,7 @@
 typedef void *ACOscBrowserRef;
 typedef void (*ACOscBrowserCallback)(ACOscBrowserRef, const char *tagName, void *userData);
 
+// TODO : shouldn't this class have only static functions ?
 class ACOscBrowser {
 	// We need an opaque type as oscpack definition conflicts with Objective-C definitions.
 public:

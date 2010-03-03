@@ -41,7 +41,7 @@ MediaCycle::MediaCycle(ACMediaType aMediaType, string local_directory, string li
 
     this->local_directory = local_directory;
     this->libname = libname;
-    this->networkSocket	= NULL;
+    this->networkSocket	= 0;
 
 
     this->mediaLibrary = new ACMediaLibrary(aMediaType);
@@ -69,9 +69,9 @@ MediaCycle::MediaCycle(const MediaCycle& orig) {
 
 MediaCycle::~MediaCycle() {
 	// XS added delete for variables whose new is in constructor
-	if (this->mediaLibrary) delete this->mediaLibrary;
-	if (this->mediaBrowser) delete this->mediaBrowser;
-	if (this->pluginManager) delete this->pluginManager;
+	delete this->mediaLibrary;
+	delete this->mediaBrowser;
+	delete this->pluginManager;
     stopTcpServer(); // will delete this->networkSocket;
 }
 
