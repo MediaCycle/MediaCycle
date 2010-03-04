@@ -57,6 +57,7 @@ ACAudioCycleOsgQt::ACAudioCycleOsgQt(QWidget *parent)
 
 	audio_engine = new ACAudioFeedback();
 	audio_engine->setMediaCycle(media_cycle);
+	audio_engine->printDeviceList();
 
 	osc_feedback = NULL;
 	osc_browser = NULL;

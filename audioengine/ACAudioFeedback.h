@@ -142,6 +142,10 @@ public:
 	void threadAudioUpdate();
 	void startAudioEngine();
 	void stopAudioEngine();
+	
+	// Devices
+	void printDeviceList();
+	void getDeviceList(std::vector<std::string>& devices);
 
 private:
 	// Table for interpreting time-signatures

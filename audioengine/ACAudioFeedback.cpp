@@ -278,6 +278,39 @@ ACAudioFeedback::~ACAudioFeedback()
 	deleteOpenAL();
 }
 
+void ACAudioFeedback::printDeviceList()
+{
+    const ALCchar* deviceList = alcGetString(NULL, ALC_DEVICE_SPECIFIER);
+	
+    if (deviceList)
+    {
+        while (strlen(deviceList) > 0)
+        {
+			std::cout << "Audio device available: " << deviceList << std::endl;
+            deviceList += strlen(deviceList) + 1;
+
+        }
+    }
+	else
+		std::cout << "No compliant audio device available" << std::endl;
+}
+
+void ACAudioFeedback::getDeviceList(std::vector<std::string>& devices)
+{
+    devices.clear();	
+    const ALCchar* deviceList = alcGetString(NULL, ALC_DEVICE_SPECIFIER);
+	
+    if (deviceList)
+    {
+        while (strlen(deviceList) > 0)
+        {
+            devices.push_back(deviceList);
+            deviceList += strlen(deviceList) + 1;
+        }
+    }
+}
+
+
 void ACAudioFeedback::createOpenAL()
 {
 	int count;
@@ -310,7 +343,7 @@ void ACAudioFeedback::createOpenAL()
 	if (newDevice != NULL)
 	{
 		// Create a new OpenAL Context
-		newContext = alcCreateContext(newDevice, 0);
+		newContext = alcCreateContext(newDevice, 0);//CF make this choosable
 		
 		if (newContext != NULL)
 		{
