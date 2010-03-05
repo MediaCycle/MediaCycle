@@ -4,6 +4,7 @@
  *
  *  @author Damien Tardieu
  *  @date 22/06/09
+ *  @author XS
  *  @copyright (c) 2009 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
@@ -53,17 +54,19 @@ public:
 	ACAudio();
 	~ACAudio();
   
-	void save(FILE* library_file); // was: saveLoop
-	int load(FILE* library_file); // was: loadLoop
+	void save(FILE* library_file);
+	int load(FILE* library_file);
 	int load_v1(FILE* library_file); 
 	
-	void import(std::string _path); // was: importFile in library
+//	void import(std::string _path); // XS 240210 : migrated to ACMedia
 	void saveThumbnail(std::string _path);
 	void* getThumbnailPtr() { return (void*)waveform; }
 	int getThumbnailWidth() {return n_frames;} // width in thumbnail frames, not samples
 	int getThumbnailHeight() {return 0;} // width in thumbnail frames, not samples
 	int getWidth() {return sample_end;}
 	int getHeight() {return 0;}
+	
+	ACMediaData* extractData(std::string fname);
 	
 	void setSampleRate(int _sample_rate) { sample_rate = _sample_rate; }
 	int getSampleRate() { return sample_rate; }
