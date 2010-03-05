@@ -168,7 +168,6 @@ void ACOsgBrowserViewQT::mousePressEvent( QMouseEvent* event )
 		{
 			media_cycle->incrementLoopNavigationLevels(loop);
 			media_cycle->setSelectedObject(loop);
-			media_cycle->updateNeighborhoods();
 			media_cycle->updateClusters(true);
 			media_cycle->updateNeighborhoods();
 			// audio_cycle->saveNavigationState();

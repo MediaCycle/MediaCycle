@@ -216,7 +216,7 @@ ACMediaBrowser::ACMediaBrowser() {
 	mVisPlugin = NULL;
 	mPosPlugin = NULL;
 	mNeighborsPlugin = NULL;
-	mUserLog = NULL;
+	mUserLog = new ACUserLog();
 	
 	proxgridboundsset = 0;
 	
@@ -227,6 +227,7 @@ ACMediaBrowser::ACMediaBrowser() {
 
 ACMediaBrowser::~ACMediaBrowser() {
 	pthread_mutex_destroy(&activity_update_mutex);
+	delete mUserLog;
 }
 
 int ACMediaBrowser::getLabelSize() {
@@ -915,32 +916,34 @@ void ACMediaBrowser::setRepulsionEngine() {
 // mClusterCenters
 // mLoopAttributes
 void ACMediaBrowser::updateClusters(bool animate){
-	if (mVisPlugin==NULL)
+	if (mVisPlugin==NULL && mNeighborsPlugin==NULL)
 		kmeans(animate);
 	else{
-		initClusterCenters();
-		std::cout << "UpdateClusters : Plugin" << std::endl;
-		mVisPlugin->updateClusters(this);
-		if(animate) {
-			updateNextPositions();
-			//commitPositions();
-			setState(AC_CHANGING);
+		if (mNeighborsPlugin==NULL) {
+			initClusterCenters();
+			std::cout << "UpdateClusters : Plugin" << std::endl;
+			mVisPlugin->updateClusters(this);
+			if(animate) {
+				updateNextPositions();
+				//commitPositions();
+				setState(AC_CHANGING);
+			}
+			
 		}
 	}
-}
+}	
 
 void ACMediaBrowser::updateNeighborhoods(){
 	if (mNeighborsPlugin==NULL)
 		std::cout << "No neighboorhood plugin set" << std::endl; // CF: waiting for one!
 	else{
-		initClusterCenters();
 		std::cout << "UpdateNeighborhoods : Plugin" << std::endl;
 		mNeighborsPlugin->updateNeighborhoods(this);
 	}
 }
 
 void ACMediaBrowser::updateNextPositions(){
-	if (mVisPlugin==NULL || mPosPlugin==NULL)
+	if (mVisPlugin==NULL && mPosPlugin==NULL)
 		setNextPositionsPropeller();
 	else{
 		if (mPosPlugin){

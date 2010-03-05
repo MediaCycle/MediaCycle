@@ -44,7 +44,7 @@ ACUserNode::ACUserNode(long int nodeId, long int mediaId, int clickTime) {
 	this->nodeId = nodeId;
 	this->mediaId = mediaId;
 	this->isVisible = 1;
-	clickNode(clickTime);
+	clickNode(clickTime);// CF clicked when constructed?!
 }
 
 ACUserNode::~ACUserNode() {
@@ -62,6 +62,7 @@ void ACUserNode::clickNode(long int clickTime) {
 
 ACUserLog::ACUserLog() {
 	mNodeId = 0;
+	mLastClickedNodeId = -1;
 }
 
 ACUserLog::~ACUserLog() {
@@ -100,6 +101,8 @@ void ACUserLog::clickNode(long int nodeId, long int clickTime) {
 	(*location).clickNode(clickTime);
 	
 	delete tmpNode;
+	
+	mLastClickedNodeId = nodeId;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

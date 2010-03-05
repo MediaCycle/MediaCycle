@@ -249,8 +249,8 @@ struct ACOsgBrowserViewData
 		{
 			media_cycle->incrementLoopNavigationLevels(loop);
 			media_cycle->setSelectedObject(loop);
-			media_cycle->updateNeighborhoods();
 			media_cycle->updateClusters(true);
+			media_cycle->updateNeighborhoods();
 			// audio_cycle->getAudioBrowser()->saveNavigationState();
 		}
 	}

@@ -64,8 +64,14 @@ public:
 			
 	long int addNode(long int parentId, long int mediaId, int clickTime);
 	void clickNode(long int nodeId, long int clickTime);
+	int getSize() {return userLogTree.size();};
+	int getMaxDepth() {return userLogTree.max_depth();};
+	//int getMaxDepth(long int nodeId);
+	int getLastClickedNodeId(){return mLastClickedNodeId;};
+	//ACUserNode* getNode(long int nodeId);
 	
 private:	
 	int mNodeId;
 	tree<ACUserNode> userLogTree;
+	int mLastClickedNodeId;
 };

@@ -212,7 +212,7 @@ void ACAudioCycleOsgQt::on_checkBoxRhythm_stateChanged(int state)
 {
 	if (updatedLibrary)
 	{
-		media_cycle->setWeight(1,state/2.0f);
+		media_cycle->setWeight(0,state/2.0f);
 		ui.browserOsgView->updateTransformsFromBrowser(1.0); 
 	}
 }
@@ -221,7 +221,7 @@ void ACAudioCycleOsgQt::on_checkBoxTimbre_stateChanged(int state)
 {
 	if (updatedLibrary)
 	{
-		media_cycle->setWeight(2,state/2.0f);
+		media_cycle->setWeight(1,state/2.0f);
 		ui.browserOsgView->updateTransformsFromBrowser(1.0); 
 	}
 }
@@ -230,7 +230,7 @@ void ACAudioCycleOsgQt::on_checkBoxHarmony_stateChanged(int state)
 {
 	if (updatedLibrary)
 	{
-		media_cycle->setWeight(3,state/2.0f);
+		media_cycle->setWeight(2,state/2.0f);
 		ui.browserOsgView->updateTransformsFromBrowser(1.0); 
 	}
 }

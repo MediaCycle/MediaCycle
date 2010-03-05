@@ -40,6 +40,7 @@ vector<ACMediaFeatures*> ACNeighborhoodsPluginRandom::calculate(std::string aFil
 }
 
 void ACNeighborhoodsPluginRandom::updateNeighborhoods(ACMediaBrowser* mediaBrowser) {
-	if ( mediaBrowser->getUserLog() == NULL )
-		std::cout << "Need to create an user log " << std::endl;
+
+	int _clickedloop = mediaBrowser->getClickedLoop();
+	//mediaBrowser->getUserLog()->getTree()
 }
