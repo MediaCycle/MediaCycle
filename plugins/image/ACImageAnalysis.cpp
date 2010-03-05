@@ -97,7 +97,7 @@ ACImageAnalysis::~ACImageAnalysis(){
 }
 
 void ACImageAnalysis::setFileName(const string &filename){
-	// XS TODO: test if file exists ?
+	// XS TODO: test if file exists using boost:filesystem ?
 	file_name=filename;	
 }
 
@@ -357,10 +357,10 @@ void ACImageAnalysis::computeHuMoments(int mmax, int thresh){ // default 7, 100
 #endif
 }
 
-void ACImageAnalysis::computeGaborFeatures(int mumax, int numax){ // default 7, 5
+void ACImageAnalysis::computeGaborMoments(int mumax, int numax){ // default 7, 5
 	gabor_moments.clear();
 	if (imgp == NULL) {
-		cerr << " <ACImageAnalysis::computeGaborFeatures() error> missing image !" << endl;
+		cerr << " <ACImageAnalysis::computeGaborMoments() error> missing image !" << endl;
 		return;
 	}
 	IplImage *BWimg = cvCreateImage (cvSize (this->getWidth(), this->getHeight()), IPL_DEPTH_8U, 1); 
@@ -404,7 +404,7 @@ void ACImageAnalysis::computeColorMoments(int n){
 	ACImageHistogram* tmp_hist  = new ACImageHistogram(imgp, color_model);
 	
 	tmp_hist->normalize(1);
-	tmp_hist->getStats();
+	tmp_hist->computeStats();
 	tmp_hist->computeMoments(n);
 	
 	// normalized first 
@@ -418,7 +418,9 @@ void ACImageAnalysis::computeColorMoments(int n){
 	for (int i=1;i<=n;i++){
 		for (int channel=0; channel<this->getNumberOfChannels(); channel++){
 			color_moments.push_back (tmp_hist->getMoment(i)[channel]) ;
+#ifdef VERBOSE
 			cout << tmp_hist->getMoment(i)[channel] << endl;
+#endif // VERBOSE
 		}	
 	}
 #ifdef VISUAL_CHECK

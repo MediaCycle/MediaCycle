@@ -152,6 +152,12 @@ int ACMediaLibrary::importDirectory(std::string _path, int _recursive, int id, A
 			++other_count;
 		}
 		else {
+			if (media->import(filename, id, acpl)){
+				this->addMedia(media);
+				id++;
+			}
+			++file_count; // TODO: here or within previous "if" ?
+			
 			// XS test: parallel version with threads
 //			struct pthread_input pdata;
 //			pdata.media = media;
@@ -159,15 +165,8 @@ int ACMediaLibrary::importDirectory(std::string _path, int _recursive, int id, A
 //			pdata.id = id;
 //			pdata.acpl = acpl;
 // XS removed if
-			if (media->import(filename, id, acpl)){
 //			pthread_t pid;
-//			pthread_create(&pid, NULL,p_importSingleFile,(void *) &pdata);
-
-			// XS check if import worked properly...
-				this->addMedia(media);
-				id++;
-			}
-			++file_count; // TODO: here or within previous "if" ?
+//			pthread_create(&pid, NULL,p_importSingleFile,(void *) &pdata);			
 		}
 	}
 	return file_count;

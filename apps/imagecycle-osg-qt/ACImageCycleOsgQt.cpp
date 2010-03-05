@@ -4,6 +4,7 @@
  *
  *  @author Christian Frisson
  *  @date 16/02/10
+ *  @author Xavier Siebert
  *
  *  @copyright (c) 2010 – UMONS - Numediart
  *  
@@ -42,12 +43,19 @@ ACImageCycleOsgQt::ACImageCycleOsgQt(QWidget *parent)
 {
 	ui.setupUi(this); // first thing to do
 	media_cycle = new MediaCycle(MEDIA_TYPE_IMAGE,"/tmp/","mediacycle.acl");
-		
+	
+	media_cycle->addPlugin("/Users/xavier/development/Fall09/ticore-app/Applications/Numediart/MediaCycle/src/Builds/darwin-xcode/plugins/image/Debug/libimage.dylib");
+	
 	ui.browserOsgView->move(0,20);
 	ui.browserOsgView->setMediaCycle(media_cycle);
 	ui.browserOsgView->prepareFromBrowser();
 	//browserOsgView->setPlaying(true);
 	
+	connect(ui.actionLoad_Media_Directory, SIGNAL(triggered()), this, SLOT(loadMediaDirectory()));
+	connect(ui.actionLoad_Media_Files, SIGNAL(triggered()), this, SLOT(loadMediaFiles()));
+	connect(ui.actionLoad_ACL, SIGNAL(triggered()), this, SLOT(on_pushButtonLaunch_clicked()));
+	connect(ui.actionSave_ACL, SIGNAL(triggered()), this, SLOT(saveACLFile()));
+
 	this->show();
 }
 
@@ -96,7 +104,7 @@ void ACImageCycleOsgQt::on_pushButtonLaunch_clicked()
 
 void ACImageCycleOsgQt::on_pushButtonClean_clicked()
 {
-	media_cycle->cleanLibrary(); // XS instead of getImageLibrary CHECK THIS
+	media_cycle->cleanLibrary();
 	media_cycle->libraryContentChanged();
 	this->updateLibrary();
 }	
@@ -120,7 +128,7 @@ void ACImageCycleOsgQt::on_checkBoxFeat1_stateChanged(int state)
 {
 	if (updatedLibrary)
 	{
-		media_cycle->setWeight(1,state/2.0f);
+		media_cycle->setWeight(0,state/2.0f);
 		ui.browserOsgView->updateTransformsFromBrowser(1.0); 
 	}
 }
@@ -129,7 +137,7 @@ void ACImageCycleOsgQt::on_checkBoxFeat2_stateChanged(int state)
 {
 	if (updatedLibrary)
 	{
-		media_cycle->setWeight(2,state/2.0f);
+		media_cycle->setWeight(1,state/2.0f);
 		ui.browserOsgView->updateTransformsFromBrowser(1.0); 
 	}
 }
@@ -138,7 +146,7 @@ void ACImageCycleOsgQt::on_checkBoxFeat3_stateChanged(int state)
 {
 	if (updatedLibrary)
 	{
-		media_cycle->setWeight(3,state/2.0f);
+		media_cycle->setWeight(2,state/2.0f);
 		ui.browserOsgView->updateTransformsFromBrowser(1.0); 
 	}
 }
@@ -150,4 +158,66 @@ void ACImageCycleOsgQt::on_sliderClusters_sliderReleased()
 		media_cycle->setClusterNumber(ui.sliderClusters->value());
 		ui.browserOsgView->updateTransformsFromBrowser(1.0);
 	}
+}
+
+void ACImageCycleOsgQt::saveACLFile(){
+	cout << "Saving ACL File..." << endl;
+	
+	QString fileName = QFileDialog::getSaveFileName(this);
+	QFile file(fileName);
+	
+	if (!file.open(QIODevice::WriteOnly)) {
+		QMessageBox::warning(this,
+							 tr("File error"),
+							 tr("Failed to open\n%1").arg(fileName));
+	} 
+	else {
+		string acl_file = fileName.toStdString();
+		cout << "saving ACL file: " << acl_file << endl;
+		media_cycle->saveACLLibrary(acl_file);
+	}		
+}
+
+void ACImageCycleOsgQt::loadMediaDirectory(){
+
+	QString selectDir = QFileDialog::getExistingDirectory
+	(
+	 this, 
+	 tr("Open Directory"),
+	 "",
+	 QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks
+	);
+	
+	// XS TODO : check if directory exists
+	// XS : do not separate directory and files in Qt and let MediaCycle handle it
+	
+	media_cycle->importDirectory(selectDir.toStdString(), 1);
+	// with this function call here, do not import twice!!!
+	media_cycle->normalizeFeatures();
+	// XS check this !
+	media_cycle->libraryContentChanged();
+
+	this->updateLibrary();
+
+	
+//	QStringList listFilter;
+//	listFilter << "*.png";
+//	listFilter << "*.jpg";
+//	
+//	QDirIterator dirIterator(selectDir, listFilter ,QDir::Files | QDir::NoSymLinks, QDirIterator::Subdirectories);
+//	
+//	// Variable qui contiendra tous les fichiers correspondant à notre recherche
+//	QStringList fileList; 
+//	// Tant qu'on n'est pas arrivé à la fin de l'arborescence...
+//	while(dirIterator.hasNext()) 
+//	{   
+//		// ...on va au prochain fichier correspondant à notre filtre
+//		fileList << dirIterator.next(); 
+//	}
+//	for ( QStringList::Iterator it = fileList.begin(); it != fileList.end(); ++it ) {
+//		cout << (*it).toStdString() << endl;
+//	}	
+}
+
+void ACImageCycleOsgQt::loadMediaFiles(){
 }

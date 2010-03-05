@@ -1,5 +1,5 @@
 /*
- *  ACController.mm
+ *  ACAudioCycleOsgCocoa.mm
  *  MediaCycle
  *
  *  @author Stéphane Dupont
@@ -205,7 +205,7 @@
 			}
 			
 			// with this function call here, do not import twice!!!
-			media_cycle->normalizeFeatures(); // XS instead of getImageLibrary CHECK THIS
+			media_cycle->normalizeFeatures();
 		}
 		
 		[self updatedLibrary];

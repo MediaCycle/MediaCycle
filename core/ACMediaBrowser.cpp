@@ -306,7 +306,6 @@ void ACMediaBrowser::setFilterSuggest()
 	// SD TODO
 }
 
-// organization : this replaces the rhythm, timbre, harmony
 void ACMediaBrowser::setWeight(int i, float weight) {
 	mFeatureWeights[i] = weight; 
 	updateClusters(true); 
@@ -909,7 +908,6 @@ void ACMediaBrowser::setRepulsionEngine() {
 	return;
 }
 
-// XS TODO this one is tricky
 // SD TODO - Different clustering algorithms should have their own classes
 // SD TODO - DIfferent dimensionality reduction too
 // This function make the kmeans and set some varaibles : 
@@ -1197,8 +1195,6 @@ void ACMediaBrowser::setSelectedObject(int index)
 }
 
 
-
-// XS TODO this one is tricky
 // AM : TODO move this out of core (it's GUI related)
 void ACMediaBrowser::setNextPositionsPropeller(){
 	//float radius = 1.0, cluster_disp = 0.1;

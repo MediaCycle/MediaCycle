@@ -49,13 +49,10 @@ class ACEyesWebPlugin : public ACPlugin {
 public:
     ACEyesWebPlugin();
     ~ACEyesWebPlugin();
-    virtual int initialize();
     virtual std::vector<ACMediaFeatures*> calculate();
     virtual std::vector<ACMediaFeatures*> calculate(std::string aFileName);
 	std::vector<ACMediaFeatures*> calculate(ACMediaData* _data){}
 
-    virtual int start() {return 0;};
-    virtual int stop() {return 0;};
     std::string extractDirectory(std::string path);
     std::string extractFilename(std::string path);
     std::string changeExtension(std::string path, std::string ext);

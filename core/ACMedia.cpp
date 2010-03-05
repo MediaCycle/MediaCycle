@@ -60,9 +60,8 @@ ACMediaFeatures* ACMedia::getFeaturesVector(int i){
 		return features_vectors[i]; 
 	else {
 		std::cerr << "ACMedia::getFeaturesVector : out of bounds" << i << " > " << features_vectors.size() << std::endl;
-		// XS TODO: duh ?
-		//		return (ACMediaFeatures*&)NULL; // duh ?
 	}
+	return NULL;
 }
 
 ACMediaFeatures* ACMedia::getFeaturesVector(string feature_name) { 

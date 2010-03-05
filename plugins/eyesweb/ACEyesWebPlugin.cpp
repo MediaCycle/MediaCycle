@@ -22,12 +22,6 @@ ACEyesWebPlugin::~ACEyesWebPlugin()
 {
 }
 
-int ACEyesWebPlugin::initialize()
-{
-    std::cout << "ACEyesWebPlugin initialized" << std::endl;
-    return 0;
-}
-
 vector<ACMediaFeatures*> ACEyesWebPlugin::calculate()
 // TODO XS : do we really want this to return NULL ?
 {

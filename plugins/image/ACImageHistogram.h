@@ -66,14 +66,13 @@ public:
 	inline int getSize() {return size;}
 	inline int getNorm() {return norm;}
 	float getValue(int,int);
-	void getStats();
+	void computeStats();
 	void showStats();
 	void computeMoments(int highest_order);
 	std::vector<double*> getMoments(){return moments;}
 	double* getMoment(int i);
 	double* getMean(){return mean;}
 	double* getStdev(){return stdev;}
-
 private:
 	CvHistogram *hist[3];
 	int norm, size;

@@ -45,7 +45,6 @@ using std::ofstream;
 
 ACMediaFeatures::ACMediaFeatures(){
 	//XS TODO: is this flag still necessary ?
-
   _computed = false; 
   needs_normalization = 1;
   name = "none";

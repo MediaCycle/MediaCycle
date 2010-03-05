@@ -46,8 +46,6 @@ class ACVideoPlugin : public ACPlugin {
 public:
     ACVideoPlugin();
     ~ACVideoPlugin();
-    virtual int initialize();
-	std::vector<ACMediaFeatures*> calculate();
 	std::vector<ACMediaFeatures*> calculate(std::string aFileName);
 	std::vector<ACMediaFeatures*> calculate(ACMediaData* _data);
 
@@ -56,8 +54,6 @@ public:
 	std::string changeLastFolder(std::string path, std::string folder);
 	std::string extractDirectory(std::string path);
 	std::string extractFilename(std::string path);
-	virtual int start() {return 0;};
-	virtual int stop() {return 0;};
 	
 private:
 	ACMediaFeatures* calculateMeanOfTrajectory(ACVideoAnalysis* video);

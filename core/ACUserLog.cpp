@@ -96,6 +96,7 @@ void ACUserLog::clickNode(long int nodeId, long int clickTime) {
 	
 	tmpNode = new ACUserNode(nodeId, 0, 0);
 	
+	// XS what if it does not find it ?
 	location = find(userLogTree.begin(), userLogTree.end(), *tmpNode);
 	
 	(*location).clickNode(clickTime);

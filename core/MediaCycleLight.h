@@ -85,6 +85,7 @@ public:
     int processTcpMessageFromSSI(char* buffer, int l, char **buffer_send, int *l_send);
     // Media Library
     int importDirectory(std::string path, int recursive, int mid=-1);
+	int importACLLibrary(std::string path);
     int importLibrary(std::string path);
     // Plugins
     int addPlugin(std::string aPluginPath);
@@ -133,6 +134,7 @@ public:
 	void openLibrary(string path);
 	void libraryContentChanged();
 	void saveAsLibrary(string path);
+	void saveACLLibrary(string path);
 	void cleanLibrary();
 	void setBack();
 	void setForward();

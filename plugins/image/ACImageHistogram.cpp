@@ -117,6 +117,7 @@ void ACImageHistogram::normalize(const double& factor) {
 	for (int i = 0; i < 3; i++){
 		cvNormalizeHist (hist[i], factor);
 	}
+	norm=factor;
 }
 
 void ACImageHistogram::show() {
@@ -191,14 +192,16 @@ void ACImageHistogram::computeMoments(int highest_order){
 		cerr << "moment order has to be positive" << endl;
 		return;
 	}
-	this->getStats(); // gives mean and stdev
+	this->computeStats(); // gives mean and stdev
 	moments.push_back(mean);
 	if (highest_order == 1) return;
+	moments.push_back(stdev);
+	if (highest_order == 2) return;
 	double binsize[3];
 	for (int i = 0; i < 3; i++){
 		binsize[i] = (range[i][1]-range[i][0])/size;
 	}
-	for (int n=2; n<=highest_order; n++){
+	for (int n=3; n<=highest_order; n++){
 		double* mom;
 		mom = new double[3];
 		for (int i = 0; i < 3; i++){
@@ -208,15 +211,16 @@ void ACImageHistogram::computeMoments(int highest_order){
 				double p_i = cvQueryHistValue_1D(hist[i],j);
 				mom[i] += p_i * pow(( x_i - mean[i]),n) ;
 			}
-			// XS TODO : normalized moment 
-			//if (stdev[i] !=0){
-//				mom[i] = mom[i]/pow(stdev[i],n);
-//			}
-//			else{
-//				cout << "<ACImageHistogram::computeMoments> *WARNING* : channel " << i << " has zero stdev. cannot normalize moment" << endl;
-//			}
-			mom[i] = mom[i]; //*pow(size,n-1);
-			cout << "test " << i << " : " << mom[i] << endl;
+			// normalized moment 
+			if (stdev[i] !=0){
+				mom[i] = mom[i]/pow(stdev[i],n);
+			}
+			else{
+				cout << "<ACImageHistogram::computeMoments> *WARNING* : channel " << i << " has zero stdev. cannot normalize moment" << endl;
+			}
+			//mom[i] = mom[i] * pow(size,n-1);
+			//mom[i] = pow(mom[i], 1.0/n);
+			//cout << "test moment order " << n << "for hist " << i << " : " << mom[i] << endl;
 		}
 		moments.push_back(mom);
 	}
@@ -231,13 +235,13 @@ double* ACImageHistogram::getMoment(int i){ // i starts at 1
 	return moments[i-1];
 }
 
-void ACImageHistogram::getStats(){
+void ACImageHistogram::computeStats(){
 	if (size ==0){
-		cerr << "<ACImageHistogram::getStats> : empty histogram" << endl;
+		cerr << "<ACImageHistogram::computeStats> : empty histogram" << endl;
 		return;
 	}
 	else if (size == 1){
-		cout << "<ACImageHistogram::getStats> : histogram has only one bin..." << endl;
+		cout << "<ACImageHistogram::computeStats> : histogram has only one bin..." << endl;
 		return;
 	}
 	
@@ -252,9 +256,10 @@ void ACImageHistogram::getStats(){
 			mean[i] += x_i * p_i ;
 			stdev[i] += x_i * x_i * p_i ;
 		}
-		// don't do this if p_i contains 1/n (histogram normalized...)
-		//		mean[i] /= size;
-		//		stdev[i] /= size;
+		// XS TODO
+		// don't do this if p_i contains 1/n (histogram normalized... ??)
+		//mean[i] /= size;
+		//stdev[i] /= size;
 
 		stdev[i] = sqrt( ((stdev[i] - mean[i] * mean[i]) * size)/(size-1) );
 	}

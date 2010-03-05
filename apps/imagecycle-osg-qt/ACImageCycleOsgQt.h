@@ -46,36 +46,40 @@ using namespace std;
 #include <MediaCycleLight.h>
 
 class ACImageCycleOsgQt : public QMainWindow
-{
-    Q_OBJECT
-	
+	{
+		Q_OBJECT
+		
     public:
         ACImageCycleOsgQt(QWidget *parent = 0);
 		~ACImageCycleOsgQt();
 		void updateLibrary();
-
-    private slots:
+		
+		private slots:
         /* Insérez les prototypes de vos slots personnalisés ici */
-		void on_pushButtonLaunch_clicked();
+		void on_pushButtonLaunch_clicked(); // loadACLFile
 		void on_pushButtonClean_clicked();
 		void on_pushButtonRecenter_clicked();
 		void on_pushButtonBack_clicked();
 		void on_pushButtonForward_clicked();
-
+		
 		void on_checkBoxFeat1_stateChanged(int state);
 		void on_checkBoxFeat2_stateChanged(int state);
 		void on_checkBoxFeat3_stateChanged(int state);
-	
+		
 		void on_sliderClusters_sliderReleased();
-
+		
+		void saveACLFile();
+		void loadMediaDirectory();
+		void loadMediaFiles();
+		
 	public:
 		MediaCycle *media_cycle;
-	
+		
     private:
         Ui::ACImageCycleOsgQt ui;
 		bool updatedLibrary;
-
+		
 	protected:
 		//ACOsgBrowserViewQT* browserOsgView;
-};
+	};
 #endif

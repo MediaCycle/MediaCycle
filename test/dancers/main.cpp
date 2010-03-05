@@ -95,8 +95,6 @@ int main(int argc, char** argv) {
 		return EXIT_FAILURE;
 	}
 	// saveLibraryAsXml(mediacycle, xmlpath);	
-	// XS test C++ ACL
-	// mediacycle->importACLLibrary(path);
 	
 	mediacycle->getBrowser()->randomizeLoopPositions();
 //	mediacycle->getBrowser()->setClusterNumber(1);

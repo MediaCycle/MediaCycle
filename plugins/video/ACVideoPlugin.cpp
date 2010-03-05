@@ -56,13 +56,6 @@ ACVideoPlugin::ACVideoPlugin() {
 ACVideoPlugin::~ACVideoPlugin() {
 }
 
-// the following two HAVE to be defined to make the class non-abstract
-int ACVideoPlugin::initialize(){
-}
-
-std::vector<ACMediaFeatures*> ACVideoPlugin::calculate(){
-}
-
 std::vector<ACMediaFeatures*>  ACVideoPlugin::calculate(std::string aFileName) {
 	std::vector<ACMediaFeatures*> allVideoFeatures;
 	std::vector<ACMediaFeatures*> topVideoFeatures;

@@ -1,4 +1,4 @@
-== NOTES ==
+ == NOTES ==
 
 * Do NOT commit any xcode/Visual Studio/name your IDE's project files. (please ?)
 * The CMakeLists.txt files might (will) need to be modified.

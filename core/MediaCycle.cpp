@@ -116,8 +116,8 @@ int MediaCycle::importDirectory(string path, int recursive, int mid) {
 
 int MediaCycle::importACLLibrary(string path) {
 	int ret = this->mediaLibrary->openACLLibrary(path);
-//	this->mediaLibrary->normalizeFeatures();
-//	this->mediaBrowser->libraryContentChanged();
+	this->mediaLibrary->normalizeFeatures();
+	this->mediaBrowser->libraryContentChanged();
 	return ret;
 }
 

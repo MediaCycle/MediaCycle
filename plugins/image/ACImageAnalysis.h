@@ -115,13 +115,13 @@ public:
 	
 	// computation of features
 	void computeHuMoments(int mmax = 7, int thresh = 100);
-	void computeGaborFeatures(int mumax = 7, int numax = 5);
+	void computeGaborMoments(int mumax = 7, int numax = 5);
 	void computeColorMoments(int n = 4);
 
 	// features accessors
 	vector <float> getHuMoments(){return hu_moments;}
-	vector <float> getGaborFeatures(){return gabor_moments;}
-	vector <float> getColorFeatures(){return color_moments;}
+	vector <float> getGaborMoments(){return gabor_moments;}
+	vector <float> getColorMoments(){return color_moments;}
 
 	// handy
 	void check_imgp(); 

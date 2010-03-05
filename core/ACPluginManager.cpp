@@ -53,7 +53,7 @@ int ACPluginManager::add(std::string aPluginPath) {
     }
 
     ACPluginLibrary *acpl = new ACPluginLibrary(lib);
-    acpl->initialize();
+    // acpl->initialize(); //useless
 
     mPluginLibrary.push_back(acpl);
 
