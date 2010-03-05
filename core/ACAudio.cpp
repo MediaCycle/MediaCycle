@@ -283,34 +283,29 @@ int ACAudio::load(FILE* library_file) {
 	}	
 }
 
-void ACAudio::import(std::string _path) {
-//This should just add an audio file to the list of media
-//creating/adding features should somehow be done by calling the plugin manager (here or somewhere else)
-	// DT : Maybe try to put those lines in ACMedia
-	cout << "importing..." << _path << endl;
-	filename=_path;
-
-//creating features : where should this go ?
-/*	ACAnalysedAudio* full_audio = new ACAnalysedAudio(_path);
-	ACAudioFeaturesFactory* factory = new ACAudioFeaturesFactory(full_audio);
-	features_vectors.push_back(factory->calculateFeature("Timbre")); // XS TODO fichier
-	//features_vectors.push_back(factory->calculateFeature("LaughRhythm")); 
+ACMediaData* ACAudio::extractData(string fname){
+	// XS/SD todo : extraire ce qu'il faut passer au plugin.
+	// SD : help me with this one !!!
 	
-	sample_rate = full_audio->getSampleRate();
-	channels = full_audio->getNbChannels();
-	sample_start = 0;
-	sample_end = full_audio->getLength();
-	if (sample_end) {
-		full_audio->getWaveform(&n_frames, &waveform);
-		filename_thumbnail = _path + ".thumb";
-		saveThumbnail(filename_thumbnail);
-	}
+	// ça devrait ressembler à:
+	//	ACAnalysedAudio* full_audio = new ACAnalysedAudio(_path);
+//	sample_rate = full_audio->getSampleRate();
+//	channels = full_audio->getNbChannels();
+//	sample_start = 0;
+//	sample_end = full_audio->getLength();
+//	if (sample_end) {
+//		full_audio->getWaveform(&n_frames, &waveform);
+//		filename_thumbnail = _path + ".thumb";
+//		saveThumbnail(filename_thumbnail);
+//	}
+//	delete full_audio;
 
-	delete factory;
-	delete full_audio;
-  // DT:  until here
-    */
+	ACMediaData* audio_data = NULL;
+	return audio_data;
 }
+
+// void ACAudio::import(std::string _path)
+// migrated to ACMedia::import.
 
 void ACAudio::saveThumbnail(std::string _path) {
 	int i;
