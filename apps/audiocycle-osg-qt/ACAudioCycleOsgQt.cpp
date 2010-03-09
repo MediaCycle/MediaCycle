@@ -50,10 +50,10 @@ ACAudioCycleOsgQt::ACAudioCycleOsgQt(QWidget *parent)
 {
 	ui.setupUi(this); // first thing to do
 	media_cycle = new MediaCycle(MEDIA_TYPE_AUDIO,"/tmp/","mediacycle.acl");
-	//media_cycle->addPlugin ("/Users/frisson/Dev/numediart/MediaCycle/ticore-app/Applications/Numediart/MediaCycle/src/Builds/plugins/visualisation/Debug/mc_visualisation.dylib");
+	media_cycle->addPlugin("/Users/frisson/Dev/numediart/MediaCycle/ticore-app/Applications/Numediart/MediaCycle/src/Builds/plugins/visualisation/Debug/mc_visualisation.dylib");
 	//media_cycle->setVisualisationPlugin("Visualisation");
-	//media_cycle->setNeighborhoodsPlugin("RandomNeighborhoods");
-	//media_cycle->setPositionsPlugin("RandomPositions");
+	media_cycle->setNeighborhoodsPlugin("RandomNeighborhoods");
+	media_cycle->setPositionsPlugin("RandomPositions");
 
 	audio_engine = new ACAudioFeedback();
 	audio_engine->setMediaCycle(media_cycle);

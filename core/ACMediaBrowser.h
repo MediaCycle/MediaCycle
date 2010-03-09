@@ -198,13 +198,14 @@ public:
 
 	int getNumberOfDisplayedLoops();
 	void setNumberOfDisplayedLoops(int nd);
+	int getNumberOfLoopsToDisplay();
 
-	int getNumberOfLoops(){return mLoopAttributes.size() ;} // XS this should be the same as mLibrary->getSize(), but this way it is more similar to getNumberOfLabels
+	int getNumberOfLoops(){return mLoopAttributes.size() ;} // XS this should be the same as mLibrary->getSize(), but this way it is more similar to getNumberOfLabels // CF not true in non-explatory mode (one loop can be displayed more than once at a time)
 	
 	void setLoopAttributesActive(int loop_id, int value) { mLoopAttributes[loop_id].active = value; };
 	//const vector<ACPoint>	&getLoopCurrentPositions() const	{ return mCurrentPos; } 
 	//const vector<ACPoint>	&getLoopNextPositions()	const		{ return mNextPos; }
-
+	
 	void getMouse(float *mx, float *my) { *mx = mousex; *my = mousey; };
 	
 	int setSourceCurser(int lid, int frame_pos);

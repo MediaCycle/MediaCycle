@@ -355,10 +355,18 @@ int ACMediaBrowser::getNumberOfDisplayedLoops(){
 	return nbDisplayedLoops;
 	// should be the same as:	
 	//	int cnt=0;
-	//	for (int i=0; i < getNumberOfLoops()){
-	//		if (mLoopAttributes[i].isDisplayed) cnt++
+	//	for (int i=0; i < getNumberOfLoops();i++){
+	//		if (mLoopAttributes[i].isDisplayed) cnt++;
 	//	}
 	//	return cnt;
+}
+
+int ACMediaBrowser::getNumberOfLoopsToDisplay(){
+	int cnt=0;
+	for (int i=0; i < getNumberOfLoops();i++){
+		if (mLoopAttributes[i].isDisplayed) cnt++;
+	}
+	return cnt;
 }
 
 int ACMediaBrowser::getNumberOfDisplayedLabels(){
@@ -525,18 +533,33 @@ void ACMediaBrowser::libraryContentChanged()
 	fc = loops.back()->getNumberOfFeaturesVectors();
 	mFeatureWeights.resize(fc);
 	
-	for(i=0; i<n; i++)
-	{
-		mLoopAttributes[i].currentPos.x = TiRandom();
-		mLoopAttributes[i].currentPos.y = TiRandom();
-		mLoopAttributes[i].currentPos.z = TiRandom() / 10.0;
+	if (mVisPlugin==NULL && mPosPlugin==NULL) {
+		for(i=0; i<n; i++)
+		{
+			mLoopAttributes[i].currentPos.x = TiRandom();
+			mLoopAttributes[i].currentPos.y = TiRandom();
+			mLoopAttributes[i].currentPos.z = TiRandom() / 10.0;
 		
-		mLoopAttributes[i].nextPos.x = mLoopAttributes[i].currentPos.x + TiRandom() / 100.0;
-		mLoopAttributes[i].nextPos.y = mLoopAttributes[i].currentPos.y + TiRandom() / 100.0;
-		mLoopAttributes[i].nextPos.z = mLoopAttributes[i].currentPos.z + TiRandom() / 100.0;
+			mLoopAttributes[i].nextPos.x = mLoopAttributes[i].currentPos.x + TiRandom() / 100.0;
+			mLoopAttributes[i].nextPos.y = mLoopAttributes[i].currentPos.y + TiRandom() / 100.0;
+			mLoopAttributes[i].nextPos.z = mLoopAttributes[i].currentPos.z + TiRandom() / 100.0;		
+			mLoopAttributes[i].isDisplayed = true;
+		}
+	}/*
+	else {
+		for(i=0; i<n; i++)
+		{
+			mLoopAttributes[i].currentPos.x = i/10.0;
+			mLoopAttributes[i].currentPos.y = i/10.0;
+			mLoopAttributes[i].currentPos.z = 0;
+			
+			mLoopAttributes[i].nextPos.x = i/10.0;
+			mLoopAttributes[i].nextPos.y = i/10.0;
+			mLoopAttributes[i].nextPos.z = 0;		
+		}
 		
-	}
-	
+	}*/	
+		
 	// set all feature weights to 1.0
 	
 	printf("setting all feature weights to 1.0 (count=%d)\n", (int) mFeatureWeights.size());
@@ -1197,6 +1220,7 @@ void ACMediaBrowser::setSelectedObject(int index)
 
 // AM : TODO move this out of core (it's GUI related)
 void ACMediaBrowser::setNextPositionsPropeller(){
+	std::cout << "ACMediaBrowser::setNextPositionsPropeller" <<std::endl;
 	//float radius = 1.0, cluster_disp = 0.1;
 	float r, theta;
 	vector<ACMedia*> loops = mLibrary->getAllMedia();

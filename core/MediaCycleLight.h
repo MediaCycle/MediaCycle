@@ -60,8 +60,9 @@ struct ACLoopAttribute
 	int			curser;
 	int 		navigationLevel; // initially all set to zero, while traversing, only the one incremented are kept
 	int			hover;
-	ACLoopAttribute() : cluster(0), active(false), navigationLevel(0), hover(0) {}
-};
+	bool		isDisplayed;//CF
+	ACLoopAttribute() : cluster(0), active(0), navigationLevel(0), hover(0), isDisplayed(false) {}
+};//CF: how come isDisplayed is missing here while it is part of ACMediaBrowser!
 
 enum MCActionType {
 	MC_ACTION_ADDFILE,

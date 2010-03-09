@@ -36,15 +36,16 @@
 
 #include "ACUserLog.h"
 
+//using namespace core;
 using namespace std;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-ACUserNode::ACUserNode(long int nodeId, long int mediaId, int clickTime) {
-	this->nodeId = nodeId;
-	this->mediaId = mediaId;
-	this->isVisible = 1;
-	clickNode(clickTime);// CF clicked when constructed?!
+ACUserNode::ACUserNode(long int _nodeId, long int _mediaId, int _clickTime) {
+	this->nodeId = _nodeId;
+	this->mediaId = _mediaId;
+	this->isVisible = true;
+	clickNode(_clickTime);// CF clicked when constructed?!
 }
 
 ACUserNode::~ACUserNode() {
@@ -54,8 +55,8 @@ bool ACUserNode::operator==(const ACUserNode &other) const {
     return (this->nodeId == other.nodeId);
 }
 
-void ACUserNode::clickNode(long int clickTime) {
-	(this->clickTime).push_back(clickTime);
+void ACUserNode::clickNode(long int _clickTime) {
+	(this->clickTime).push_back(_clickTime);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -69,19 +70,38 @@ ACUserLog::~ACUserLog() {
 	
 }
 
-long int ACUserLog::addNode(long int parentId, long int mediaId, int clickTime) {
+void ACUserLog::addRootNode(long int _mediaId, int _clickTime) {
 	
-	tree<ACUserNode>::iterator location;
-	ACUserNode *tmpNode;
 	ACUserNode *userNode;
+	userNode = new ACUserNode(0, _mediaId, _clickTime);
 	
-	tmpNode = new ACUserNode(parentId, 0, 0);
-	userNode = new ACUserNode(mNodeId, mediaId, clickTime);
+	userLogTree.set_head(*userNode);
+	//location.insert(*userNode);
+
 	mNodeId++;
 	
+	delete userNode;
+}
+
+
+long int ACUserLog::addNode(long int _parentId, long int _mediaId, int _clickTime) {
+	
+	tree<ACUserNode>::iterator location;
+
+	ACUserNode *userNode;
+	userNode = new ACUserNode(mNodeId, _mediaId, _clickTime);
+
+	
+	ACUserNode *tmpNode;
+	tmpNode = new ACUserNode(_parentId, 0, 0);
+
+	mNodeId++;
+
 	location = find(userLogTree.begin(), userLogTree.end(), *tmpNode);
+	//location = userLogTree.tree_find_depth(*tmpNode);
 	
 	userLogTree.append_child(location, *userNode);
+	//location.insert(*userNode);
 	
 	delete userNode;
 	delete tmpNode;
@@ -89,21 +109,37 @@ long int ACUserLog::addNode(long int parentId, long int mediaId, int clickTime) 
 	return mNodeId;
 }
 
-void ACUserLog::clickNode(long int nodeId, long int clickTime) {
+void ACUserLog::clickNode(long int _nodeId, long int _clickTime) {
 	
 	tree<ACUserNode>::iterator location;
 	ACUserNode *tmpNode;
 	
-	tmpNode = new ACUserNode(nodeId, 0, 0);
+	tmpNode = new ACUserNode(_nodeId, 0, 0);
 	
-	// XS what if it does not find it ?
 	location = find(userLogTree.begin(), userLogTree.end(), *tmpNode);
+	//location = userLogTree.tree_find_depth(*tmpNode);
 	
-	(*location).clickNode(clickTime);
+	(*location).clickNode(_clickTime);
 	
 	delete tmpNode;
 	
-	mLastClickedNodeId = nodeId;
+	mLastClickedNodeId = _nodeId;
 }
+
+long int ACUserLog::getMediaIdFromNodeId(long int _nodeId) {
+	long int _mediaId = -1;
+	if ((_nodeId >=0) && (_nodeId <= mNodeId)){
+		tree<ACUserNode>::iterator node = userLogTree.begin();		
+		while( (node!=userLogTree.end()) ) { //(_nodeId != node->getNodeId()) && 
+			//std::cout << "Node Id loop" << _nodeId << " node " << node->getNodeId() << std::endl;
+			if (node->getNodeId() == _nodeId) {
+				_mediaId = node->getMediaId();
+				break;
+			}	
+			++node;
+		}
+	}
+	return _mediaId;
+}	
 
 ///////////////////////////////////////////////////////////////////////////////

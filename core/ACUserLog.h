@@ -38,16 +38,19 @@
 #include <vector>
 
 #include "lib/tree/tree.hh"
-
+//#include "lib/tree/tree.h"
+//using namespace core;
 using namespace std;
 
 class ACUserNode {
 	
 public:
-	ACUserNode(long int nodeId, long int mediaId, int clickTime);
+	ACUserNode(long int _nodeId, long int _mediaId, int _clickTime);
 	~ACUserNode();
 	bool operator == (const ACUserNode &other) const;
 	void clickNode(long int clickTime);
+	long int getNodeId(){return this->nodeId;}
+	long int getMediaId(){return this->mediaId;}
 	
 private:
 	long int nodeId;
@@ -62,16 +65,19 @@ public:
 	ACUserLog();
 	~ACUserLog();
 			
+	void addRootNode(long int mediaId, int clickTime);
 	long int addNode(long int parentId, long int mediaId, int clickTime);
+	long int getMediaIdFromNodeId(long int nodeId);
 	void clickNode(long int nodeId, long int clickTime);
 	int getSize() {return userLogTree.size();};
 	int getMaxDepth() {return userLogTree.max_depth();};
-	//int getMaxDepth(long int nodeId);
+	bool isEmpty() {return userLogTree.empty();};
 	int getLastClickedNodeId(){return mLastClickedNodeId;};
 	//ACUserNode* getNode(long int nodeId);
 	
 private:	
 	int mNodeId;
 	tree<ACUserNode> userLogTree;
+	//core::tree<ACUserNode> userLogTree;
 	int mLastClickedNodeId;
 };

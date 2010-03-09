@@ -53,7 +53,7 @@ void ACOsgBrowserRenderer::prepareNodes(int start) {
 	
 	int media_type;
 	
-	n = media_cycle->getLibrarySize(); 	
+	n = media_cycle->getLibrarySize(); 
 		
 	if (media_renderer.size()>n) {
 		
