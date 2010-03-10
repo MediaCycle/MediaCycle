@@ -68,9 +68,9 @@ void ACOsgVideoRenderer::updateNodes(double ratio) {
 		
 	ACOsgImageRenderer::updateNodes();
 
-	const ACLoopAttribute &attribute = media_cycle->getLoopAttributes(loop_index);
+	const ACMediaNode &attribute = media_cycle->getLoopAttributes(loop_index);
 	
-	if (attribute.active) {
+	if (attribute.getActivity()) {
 		image_stream->play();
 	}
 	else {

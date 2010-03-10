@@ -45,10 +45,6 @@
 
 using namespace std;
 
-// XS duh ?
-//#define DEFAULT_FEATURE_COUNT 15
-//#define DEFAULT_OBJECT_COUNT  11000
-
 // XS TODO this will need to be changed
 // once we define a class with methods to compute distances
 // ....
@@ -207,10 +203,10 @@ ACMediaBrowser::ACMediaBrowser() {
 	auto_play = 0;
 	auto_play_toggle = 0;
 	
-	mLabelAttributes.resize(0);
+	mLabelAttributes.resize(0); // XS leave it like this or also make a tree ?
 	nbDisplayedLabels = 0;
 	
-	mLoopAttributes.resize(0);
+	mLoopAttributes.resize(0); // XS TODO make this a tree
 	nbDisplayedLoops = 20;
 	
 	mVisPlugin = NULL;
@@ -336,14 +332,11 @@ void ACMediaBrowser::setClickedLabel(int ilabel){
 
 
 void ACMediaBrowser::setLoopPosition(int loop_id, float x, float y, float z){
-	ACPoint p;
-	p.x = x;
-	p.y = y;
-	p.z = z;
-	mLoopAttributes[loop_id].nextPos = p;
+	mLoopAttributes[loop_id].setNextPosition(x,y,z);
 }
 
 void ACMediaBrowser::setLabelPosition(int label_id, float x, float y, float z){
+// XS todo change this too
 	ACPoint p;
 	p.x = x;
 	p.y = y;
@@ -361,23 +354,16 @@ int ACMediaBrowser::getNumberOfDisplayedLoops(){
 	//	return cnt;
 }
 
-int ACMediaBrowser::getNumberOfLoopsToDisplay(){
-	int cnt=0;
-	for (int i=0; i < getNumberOfLoops();i++){
-		if (mLoopAttributes[i].isDisplayed) cnt++;
-	}
-	return cnt;
-}
+//int ACMediaBrowser::getNumberOfLoopsToDisplay(){
+//	int cnt=0;
+//	for (int i=0; i < getNumberOfLoops();i++){
+//		if (mLoopAttributes[i].isDisplayed) cnt++;
+//	}
+//	return cnt;
+//}
 
 int ACMediaBrowser::getNumberOfDisplayedLabels(){
 	return nbDisplayedLabels;
-	
-	// should be the same as:	
-	//	int cnt=0;
-	//	for (int i=0; i < getNumberOfLabels()){
-	//		if (mLabelpAttributes[i].isDisplayed) cnt++
-	//	}
-	//	return cnt;
 }
 
 void ACMediaBrowser::setNumberOfDisplayedLoops(int nd){
@@ -396,35 +382,35 @@ void ACMediaBrowser::setNumberOfDisplayedLabels(int nd){
 
 void ACMediaBrowser::resetLoopNavigationLevels()
 {
-	int i, n = mLoopAttributes.size();
+	int i, n = mLoopAttributes.size(); // XS TODO getsize
 	
-	for(i=0; i<n; i++)
+	for(i=0; i<n; i++) // XS TODO iterator
 	{
-		mLoopAttributes[i].navigationLevel = 0;
+		mLoopAttributes[i].setNavigationLevel (0);
 	}
 	
 }
 
 void ACMediaBrowser::incrementLoopNavigationLevels(int loopIndex)
 {
-	int i,n=mLoopAttributes.size(),clusterIndex;
+	int i,n=mLoopAttributes.size(),clusterIndex; // XS TODO getsize
 	
 	if (mNavigationLevel==0)
 		resetLoopNavigationLevels();
 	
 	if(!(loopIndex >= 0 && loopIndex < n)) return;
 	
-	clusterIndex = mLoopAttributes[loopIndex].cluster;
+	clusterIndex = mLoopAttributes[loopIndex].getClusterId();
 	
 	if(clusterIndex < 0 || clusterIndex >= mClusterCount) return;
 	
 	for(i=0; i<n; i++)
 	{
-		ACLoopAttribute &attr = mLoopAttributes[i];
+		ACMediaNode &attr = mLoopAttributes[i];
 		
-		if(attr.cluster == clusterIndex)
+		if(attr.getClusterId() == clusterIndex)
 		{
-			attr.navigationLevel++;
+			attr.increaseNavigationLevel();
 		}
 	}
 	
@@ -478,7 +464,7 @@ int ACMediaBrowser::setHoverLoop(int lid, float mx, float my)
 	loop_id = lid;
 	
 	if ( (loop_id>=0) && (loop_id<getLibrary()->getSize()) ) {
-		mLoopAttributes[loop_id].hover = 1;
+		mLoopAttributes[loop_id].setHover(1);
 	}
 	else {
 		return 0;
@@ -486,8 +472,8 @@ int ACMediaBrowser::setHoverLoop(int lid, float mx, float my)
 }
 
 
-int ACMediaBrowser::setSourceCurser(int lid, int frame_pos) {
-	mLoopAttributes[lid].curser = frame_pos;
+int ACMediaBrowser::setSourceCursor(int lid, int frame_pos) {
+	mLoopAttributes[lid].setCursor(frame_pos);
 }
 
 
@@ -495,19 +481,19 @@ void ACMediaBrowser::randomizeLoopPositions(){
 	if(mLibrary == NULL) return;
 	vector<ACMedia*> loops = mLibrary->getAllMedia();
 	int n = loops.size();
-	mLoopAttributes.resize(n);
+	mLoopAttributes.resize(n); // XS TODO remove
 	for(int i=0; i<n; i++){
-		mLoopAttributes[i].currentPos.x = TiRandom() * mViewWidth;
-		mLoopAttributes[i].currentPos.y = TiRandom() * mViewHeight;
-		mLoopAttributes[i].currentPos.z = 0;
+		mLoopAttributes[i].setCurrentPosition (TiRandom() * mViewWidth, 
+											   TiRandom() * mViewHeight, 
+											   0);
 		
-		mLoopAttributes[i].nextPos.x = mLoopAttributes[i].currentPos.x + TiRandom() * mViewWidth / 100.0;
-		mLoopAttributes[i].nextPos.y = mLoopAttributes[i].currentPos.y + TiRandom() * mViewHeight / 100.0;
-		mLoopAttributes[i].nextPos.z = 0;
+		mLoopAttributes[i].setNextPosition(mLoopAttributes[i].getCurrentPositionX() + TiRandom() * mViewWidth / 100.0, 
+										   mLoopAttributes[i].getCurrentPositionY() + TiRandom() * mViewHeight / 100.0, 
+										   0);
 	}	
 }
 
-
+// XS rename to updateLibrary()
 void ACMediaBrowser::libraryContentChanged()
 {
 	// XS 27/10/09 TODO this should use the randomizePositions defined above
@@ -519,7 +505,7 @@ void ACMediaBrowser::libraryContentChanged()
 	
 	n = loops.size();
 	
-	mLoopAttributes.resize(n);
+	mLoopAttributes.resize(n); // XS TODO resize
 	
 	//mObjectCluster.resize(n);
 	//mCurrentPos.resize(n);
@@ -536,26 +522,26 @@ void ACMediaBrowser::libraryContentChanged()
 	if (mVisPlugin==NULL && mPosPlugin==NULL) {
 		for(i=0; i<n; i++)
 		{
-			mLoopAttributes[i].currentPos.x = TiRandom();
-			mLoopAttributes[i].currentPos.y = TiRandom();
-			mLoopAttributes[i].currentPos.z = TiRandom() / 10.0;
+			mLoopAttributes[i].setCurrentPosition (TiRandom(), 
+												   TiRandom(), 
+												   TiRandom() / 10.0);
 		
-			mLoopAttributes[i].nextPos.x = mLoopAttributes[i].currentPos.x + TiRandom() / 100.0;
-			mLoopAttributes[i].nextPos.y = mLoopAttributes[i].currentPos.y + TiRandom() / 100.0;
-			mLoopAttributes[i].nextPos.z = mLoopAttributes[i].currentPos.z + TiRandom() / 100.0;		
-			mLoopAttributes[i].isDisplayed = true;
+			mLoopAttributes[i].setNextPosition (mLoopAttributes[i].getCurrentPositionX() + TiRandom() / 100.0,
+												mLoopAttributes[i].getCurrentPositionY() + TiRandom() / 100.0, 
+												mLoopAttributes[i].getCurrentPositionZ() + TiRandom() / 100.0);		
+			mLoopAttributes[i].setDisplayed (true);
 		}
 	}/*
 	else {
 		for(i=0; i<n; i++)
 		{
-			mLoopAttributes[i].currentPos.x = i/10.0;
-			mLoopAttributes[i].currentPos.y = i/10.0;
-			mLoopAttributes[i].currentPos.z = 0;
+			mLoopAttributes[i].getCurrentPositionX() = i/10.0;
+			mLoopAttributes[i].getCurrentPositionY() = i/10.0;
+			mLoopAttributes[i].getCurrentPositionZ() = 0;
 			
-			mLoopAttributes[i].nextPos.x = i/10.0;
-			mLoopAttributes[i].nextPos.y = i/10.0;
-			mLoopAttributes[i].nextPos.z = 0;		
+			mLoopAttributes[i].getNextPositionX() = i/10.0;
+			mLoopAttributes[i].getNextPositionY() = i/10.0;
+			mLoopAttributes[i].getNextPositionZ() = 0;		
 		}
 		
 	}*/	
@@ -716,7 +702,7 @@ void ACMediaBrowser::setFeatureWeights(vector<float> &weights)
 
 
 void ACMediaBrowser::setClusterIndex(int mediaIdx,int clusterIdx){
-	this->mLoopAttributes[mediaIdx].cluster = clusterIdx;
+	this->mLoopAttributes[mediaIdx].setClusterId (clusterIdx);
 }
 
 void ACMediaBrowser::setClusterCenter(int clusterIdx, vector< vector<float> > clusterCenter){
@@ -771,19 +757,19 @@ void ACMediaBrowser::setProximityGrid() {
 	
 	float langle, orientation, spiralstepx, spiralstepy, lorientation;
 	
-	n = mLoopAttributes.size();
+	n = mLoopAttributes.size(); // XS TODO getsize
 	
 	// Proximity Grid Size	
 	if (!proxgridboundsset) {
 		if (n>0) {
-			p = mLoopAttributes[0].nextPos;
+			p = mLoopAttributes[0].getNextPosition();
 			proxgridl = p.x;
 			proxgridr = p.x;
 			proxgridb = p.y;
 			proxgridt = p.y;
 		}
 		for(i=1; i<n; i++) {
-			p = mLoopAttributes[i].nextPos;
+			p = mLoopAttributes[i].getNextPosition();
 			if (p.x<proxgridl) {
 				proxgridl = p.x;
 			}
@@ -818,7 +804,7 @@ void ACMediaBrowser::setProximityGrid() {
 		
 		found_slot = 0;
 		
-		p = mLoopAttributes[i].nextPos;
+		p = mLoopAttributes[i].getNextPosition();
 		
 		// grid quantization
 		setProximityGridQuantize(p, &pgrid);
@@ -891,7 +877,7 @@ void ACMediaBrowser::setProximityGrid() {
 	}
 	
 	for(i=0; i<n; i++) {
-		mLoopAttributes[i].nextPosGrid = mLoopAttributes[i].nextPos;
+		mLoopAttributes[i].setNextPositionGrid (mLoopAttributes[i].getNextPosition());
 	}
 	
 	for(i=0; i<proxgrid.size(); i++) {
@@ -900,25 +886,28 @@ void ACMediaBrowser::setProximityGrid() {
 			curpos.x = fmod((float)i,proxgridlx);
 			curpos.y = floor((float)i/(proxgridlx));
 			setProximityGridUnquantize(curpos, &p2);
-			p2.z = mLoopAttributes[index].nextPos.z;
-			mLoopAttributes[index].nextPosGrid = p2;
+			p2.z = mLoopAttributes[index].getNextPosition().z;
+			mLoopAttributes[index].setNextPositionGrid (p2);
 		}
 	}
 	
 	for(i=0; i<n; i++) {
-		mLoopAttributes[i].nextPos = mLoopAttributes[i].nextPosGrid;
+		mLoopAttributes[i].setNextPosition(mLoopAttributes[i].getNextPositionGrid());
 	}
 	
 	if (proxgridjitter>0) {
 		for(i=0; i<n; i++) {
+			// XS heavy ?
 			jitter = TiRandom()-0.5;
-			mLoopAttributes[i].nextPos.x += jitter*proxgridjitter*proxgridstepx;
+			mLoopAttributes[i].setNextPositionX( mLoopAttributes[i].getNextPositionX() +
+												jitter*proxgridjitter*proxgridstepx);
 			jitter = TiRandom()-0.5;
-			mLoopAttributes[i].nextPos.y += jitter*proxgridjitter*proxgridstepy;
+			mLoopAttributes[i].setNextPositionY( mLoopAttributes[i].getNextPositionY() + 
+												jitter*proxgridjitter*proxgridstepy);
 		}
 		for(i=0; i<n; i++) {
-			mLoopAttributes[i].nextPos.x = max(min(mLoopAttributes[i].nextPos.x,proxgridr), proxgridl);
-			mLoopAttributes[i].nextPos.y = max(min(mLoopAttributes[i].nextPos.y,proxgridt), proxgridb);
+			mLoopAttributes[i].setNextPositionX( max(min(mLoopAttributes[i].getNextPositionX(),proxgridr), proxgridl));
+			mLoopAttributes[i].setNextPositionY( max(min(mLoopAttributes[i].getNextPositionY(),proxgridt), proxgridb));
 		}
 	}
 
@@ -935,7 +924,7 @@ void ACMediaBrowser::setRepulsionEngine() {
 // SD TODO - DIfferent dimensionality reduction too
 // This function make the kmeans and set some varaibles : 
 // mClusterCenters
-// mLoopAttributes
+// mLoopAttributes -> ACMediaNode
 void ACMediaBrowser::updateClusters(bool animate){
 	if (mVisPlugin==NULL && mNeighborsPlugin==NULL)
 		kmeans(animate);
@@ -985,7 +974,7 @@ void ACMediaBrowser::setNextPositions2dim(){
 	ACPoint p;
 	vector<float> tmpFeatures;
 	vector<ACMedia*> loops = mLibrary->getAllMedia();
-	assert(loops.size() == mLoopAttributes.size()); 
+	assert(loops.size() == mLoopAttributes.size()); // XS TODO remove
 	
 	int nbMedia = loops.size(); 
 	if(nbMedia == 0) 
@@ -1018,7 +1007,7 @@ void ACMediaBrowser::setNextPositions2dim(){
 		// DT : Problem if there is less than 2 dims
 		p.x = tmpFeatures[1]/10;
 		p.y = tmpFeatures[2]/10;
-		mLoopAttributes[i].nextPos = p;
+		mLoopAttributes[i].setNextPosition(p);
 	}
 }
 
@@ -1029,7 +1018,7 @@ void ACMediaBrowser::kmeans(bool animate)
 	if(mLibrary == NULL) return; 
 	
 	vector<ACMedia*> loops = mLibrary->getAllMedia();
-	assert(loops.size() == mLoopAttributes.size()); 
+	assert(loops.size() == mLoopAttributes.size()); // XS remove
 	
 	int object_count = loops.size(); if(object_count == 0) return;
 	int feature_count = loops.back()->getNumberOfFeaturesVectors();
@@ -1068,7 +1057,7 @@ void ACMediaBrowser::kmeans(bool animate)
 		// TODO SD - Avoid selecting the same twice
 		while(l--)
 		{
-			if(mLoopAttributes[r].navigationLevel >= mNavigationLevel) break;
+			if(mLoopAttributes[r].getNavigationLevel() >= mNavigationLevel) break;
 			else r = random() % object_count;
 		}
 		
@@ -1123,7 +1112,7 @@ void ACMediaBrowser::kmeans(bool animate)
 		for(i=0; i<object_count; i++)
 		{
 			// check if we should include this object
-			if(mLoopAttributes[i].navigationLevel < mNavigationLevel) continue;
+			if(mLoopAttributes[i].getNavigationLevel() < mNavigationLevel) continue;
 			
 			// compute distance between this object and every cluster
 			for(j=0; j<mClusterCount; j++)
@@ -1159,14 +1148,13 @@ void ACMediaBrowser::kmeans(bool animate)
 			// update accumulator and counts
 			
 			cluster_counts[jmin]++;
-			mLoopAttributes[i].cluster = jmin;
+			mLoopAttributes[i].setClusterId (jmin);
 			for(f=0; f<feature_count; f++)
 			{
 				int desc_count = loops.back()->getFeaturesVector(f)->getSize();
 				
 				for(d=0; d<desc_count; d++)
 				{
-					// XS TODO check this getFeature
 					cluster_accumulators[jmin][f][d] += loops[i]->getFeaturesVector(f)->getFeatureElement(d);
 				}
 			}
@@ -1228,17 +1216,17 @@ void ACMediaBrowser::setNextPositionsPropeller(){
 	ACPoint p;
 	
 	if (n <=0 ) return;
-	if (mSelectedLoop < 0 || mSelectedLoop >= mLoopAttributes.size()) return ;
+	if (mSelectedLoop < 0 || mSelectedLoop >= mLoopAttributes.size()) return ; // XS TODO getsize
 	
 	p.x = p.y = p.z = 0.0;
-	mLoopAttributes[mSelectedLoop].nextPos = p;
+	mLoopAttributes[mSelectedLoop].setNextPosition(p);
 	
 	//TiRandomSeed((int)TiGetTime());
 	TiRandomSeed(1234);
 	
 	for(i=0; i<n; i++)
 	{
-		int ci = mLoopAttributes[i].cluster;
+		int ci = mLoopAttributes[i].getClusterId();
 		
 		//theta = 2*M_PI / n * i;
 		//r = compute_distance(objects[selected_object], objects[i], mFeatureWeights, false);
@@ -1274,7 +1262,7 @@ void ACMediaBrowser::setNextPositionsPropeller(){
 		
 		printf("computed next position: theta:%f,r=%f,  (%f %f %f)\n", theta, r, p.x, p.y, p.z);
 		
-		mLoopAttributes[i].nextPos = p;
+		mLoopAttributes[i].setNextPosition(p);
 	}
 	
 	setNeedsDisplay(true);
@@ -1287,9 +1275,9 @@ void ACMediaBrowser::commitPositions()
 {
 	int i;
 	
-	for(i=0; i<mLoopAttributes.size(); i++)
+	for(i=0; i<mLoopAttributes.size(); i++) // XS TODO iterator
 	{
-		mLoopAttributes[i].currentPos = mLoopAttributes[i].nextPos;
+		mLoopAttributes[i].commitPosition();
 	}
 }
 
@@ -1387,19 +1375,20 @@ int ACMediaBrowser::toggleSourceActivity(int lid, int type)
 	
 	if ( (loop_id>=0) && (loop_id<mLibrary->getSize()) )
 	{
-		x = mLoopAttributes[loop_id].currentPos.x;
+		// XS oh shit
+		x = mLoopAttributes[loop_id].getCurrentPositionX();
 		y = 0;
-		z = mLoopAttributes[loop_id].currentPos.y;
+		z = mLoopAttributes[loop_id].getCurrentPositionY();
 		
-		if (mLoopAttributes[loop_id].active == 0) {
+		if (mLoopAttributes[loop_id].getActivity()==0) {
 			// SD TODO - audio engine
 			// audio_cycle->getAudioFeedback()->createSourceWithPosition(loop_id, x, y, z);
-			mLoopAttributes[loop_id].active = type;			
+			mLoopAttributes[loop_id].setActivity(type);			
 		}
-		else if (mLoopAttributes[loop_id].active >= 1) {
+		else if (mLoopAttributes[loop_id].getActivity() >= 1) {
 			// SD TODO - audio engine
 			// audio_cycle->getAudioFeedback()->deleteSource(loop_id);
-			mLoopAttributes[loop_id].active = 0;
+			mLoopAttributes[loop_id].setActivity(0);
 		}
 		
 		setNeedsActivityUpdateLock(1);
@@ -1421,26 +1410,26 @@ void ACMediaBrowser::setClosestLoop(int _loop_id)
 	if (_loop_id<0) {
 		return;
 	}
-	if (mLoopAttributes[_loop_id].navigationLevel < getNavigationLevel()) {
+	if (mLoopAttributes[_loop_id].getNavigationLevel() < getNavigationLevel()) {
 		return;
 	}
 	
 	if (auto_play) {
 		for (loop_id=0;loop_id<mLibrary->getSize();loop_id++) {
-			if(mLoopAttributes[loop_id].navigationLevel >= getNavigationLevel()) {
-				if ( (loop_id!=_loop_id) && (mLoopAttributes[loop_id].active == 2) ) {
+			if(mLoopAttributes[loop_id].getNavigationLevel() >= getNavigationLevel()) {
+				if ( (loop_id!=_loop_id) && (mLoopAttributes[loop_id].getActivity() == 2) ) {
 					toggleSourceActivity(loop_id);
 				}
 			}
 		}
-		if ( (mLoopAttributes[_loop_id].navigationLevel >= getNavigationLevel()) && (mLoopAttributes[_loop_id].active == 0) ) {
+		if ( (mLoopAttributes[_loop_id].getNavigationLevel() >= getNavigationLevel()) && (mLoopAttributes[_loop_id].getActivity() == 0) ) {
 			toggleSourceActivity(_loop_id, 2);
 		}
 		auto_play_toggle = 1;
 	}
 	else if (auto_play_toggle) {
 		for (loop_id=0;loop_id<mLibrary->getSize();loop_id++) {
-			if ( mLoopAttributes[loop_id].active == 2 ) {
+			if ( mLoopAttributes[loop_id].getActivity() == 2 ) {
 				toggleSourceActivity(loop_id);
 			}
 		}
@@ -1462,10 +1451,10 @@ int ACMediaBrowser::muteAllSources()
 	int loop_id;
 	
 	for (loop_id=0;loop_id<mLibrary->getSize();loop_id++) {
-		if (mLoopAttributes[loop_id].active >= 1) {
+		if (mLoopAttributes[loop_id].getActivity() >= 1) {
 			// SD TODO - audio engine
 			// audio_cycle->getAudioFeedback()->deleteSource(loop_id);
-			mLoopAttributes[loop_id].active = 0;
+			mLoopAttributes[loop_id].setActivity(0);
 			setNeedsActivityUpdateLock(1);
 			setNeedsActivityUpdateAddMedia(loop_id);
 			setNeedsActivityUpdateLock(0);

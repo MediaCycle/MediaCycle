@@ -33,6 +33,7 @@
  */
 
 // TODO: check if all this is really common to all media browsers
+// XS 090310 : removed struct ACLoopAttribute -> ACMediaNode
 
 #ifndef __ACMEDIABROWSER_H__
 #define __ACMEDIABROWSER_H__
@@ -43,6 +44,9 @@
 #include "ACMediaLibrary.h"
 #include "ACPlugin.h"
 #include "ACUserLog.h"
+
+#include "ACMediaNode.h"  // this contains ACPoint
+
 #include <vector>
 
 using namespace std;
@@ -65,30 +69,6 @@ struct ACNavigationState
 	int 			mSelectedLoop;
 	int 			mNavigationLevel;
 	vector<float> 		mFeatureWeights;
-};
-
-struct ACPoint
-{
-	float x, y, z;
-};
-
-
-// XS TODO
-// XS the following could be renamed but seems valid for all media
-// XS make this a class ?
-// ask SD to check...
-
-struct ACLoopAttribute {
-	ACPoint 	currentPos, nextPos, nextPosGrid;
-	ACPoint		viewPos;
-	float		distanceMouse;
-	int 		cluster; //cluster index
-	int			active;  // playing or not - and in which mode
-	int			curser;
-	int 		navigationLevel; // initially all set to zero, while traversing, only the one incremented are kept
-	int			hover;
-	bool		isDisplayed;	
-	ACLoopAttribute() : cluster(0), active(0), curser(0), navigationLevel(0), hover(0), isDisplayed(false) {}
 };
 
 struct ACLabelAttribute {
@@ -192,23 +172,23 @@ public:
 	void commitPositions();
 	
 	// loops (or items) 
-	const vector<ACLoopAttribute>	&getLoopAttributes() const { return mLoopAttributes; }; 
+	const vector<ACMediaNode>	&getLoopAttributes() const { return mLoopAttributes; }; 
 	void setLoopPosition(int loop_id, float x, float y, float z=0);
-	void setLoopIsDisplayed(int loop_id, bool iIsDisplayed) {this->mLoopAttributes[loop_id].isDisplayed = iIsDisplayed;}
+	void setLoopIsDisplayed(int loop_id, bool iIsDisplayed) {this->mLoopAttributes[loop_id].setDisplayed(iIsDisplayed);}
 
 	int getNumberOfDisplayedLoops();
 	void setNumberOfDisplayedLoops(int nd);
-	int getNumberOfLoopsToDisplay();
+//	int getNumberOfLoopsToDisplay();
 
 	int getNumberOfLoops(){return mLoopAttributes.size() ;} // XS this should be the same as mLibrary->getSize(), but this way it is more similar to getNumberOfLabels // CF not true in non-explatory mode (one loop can be displayed more than once at a time)
 	
-	void setLoopAttributesActive(int loop_id, int value) { mLoopAttributes[loop_id].active = value; };
+	void setLoopAttributesActive(int loop_id, int value) { mLoopAttributes[loop_id].setActivity(value); };
 	//const vector<ACPoint>	&getLoopCurrentPositions() const	{ return mCurrentPos; } 
 	//const vector<ACPoint>	&getLoopNextPositions()	const		{ return mNextPos; }
 	
 	void getMouse(float *mx, float *my) { *mx = mousex; *my = mousey; };
 	
-	int setSourceCurser(int lid, int frame_pos);
+	int setSourceCursor(int lid, int frame_pos);
 	int setHoverLoop(int lid, float x, float y);
 	
 	// sets all navigationLevel to 0
@@ -305,7 +285,9 @@ protected:
 	vector<ACNavigationState>	mBackwardNavigationStates;
 	vector<ACNavigationState>	mForwardNavigationStates;
 	
-	vector <ACLoopAttribute>	mLoopAttributes; // one entry per media in the same order as in library.
+	vector <ACMediaNode>	mLoopAttributes; 
+	// XS was: one entry per media in the same order as in library.
+	
 	int nbDisplayedLoops;
 	
 	float mousex;
@@ -317,7 +299,7 @@ protected:
 	
 	int 				mNavigationLevel;
 	
-	// clusters
+	// XS TODO: make a class clusters
 	int				mClusterCount;
 	//vector<vector <int> > 		clusters;
 	vector<vector<vector <float> > > mClusterCenters; // cluster index, feature index, descriptor index

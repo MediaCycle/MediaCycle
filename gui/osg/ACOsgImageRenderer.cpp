@@ -306,8 +306,8 @@ void ACOsgImageRenderer::updateNodes(double ratio) {
 		colors3->push_back(color3);	
 	}
 	
-	const ACLoopAttribute &attribute = media_cycle->getLoopAttributes(loop_index);
-	const ACPoint &p = attribute.currentPos, &p2 = attribute.nextPos;
+	const ACMediaNode &attribute = media_cycle->getLoopAttributes(loop_index);
+	const ACPoint &p = attribute.getCurrentPosition(), &p2 = attribute.getNextPosition();
 	double omr = 1.0-ratio;
 	
 	float zoom = media_cycle->getCameraZoom();
@@ -318,7 +318,7 @@ void ACOsgImageRenderer::updateNodes(double ratio) {
 	Matrix imageT;
 	
 	unsigned int mask = (unsigned int)-1;
-	if(attribute.navigationLevel >= media_cycle->getNavigationLevel()) {
+	if(attribute.getNavigationLevel() >= media_cycle->getNavigationLevel()) {
 		image_transform->setNodeMask(mask);
 	}
 	else {
@@ -328,7 +328,7 @@ void ACOsgImageRenderer::updateNodes(double ratio) {
 	z = 0;
 	
 	if (border_geode->getDrawable(0)) {
-		if (attribute.active) {
+		if (attribute.getActivity()) {
 			((Geometry*)border_geode->getDrawable(0))->setColorArray(colors2);
 		}
 		else {
@@ -348,7 +348,7 @@ void ACOsgImageRenderer::updateNodes(double ratio) {
 	if (localscale>minscale) {
 		z += 2*zpos;
 	}
-	else if (attribute.active) {
+	else if (attribute.getActivity()) {
 		z += zpos;
 	}
 

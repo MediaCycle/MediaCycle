@@ -3,15 +3,14 @@
  */
 
 #include "ACPlugin.h"
-//#include "ACPlugVizDancers.h"
-#include "ACVisualisationPlugin.h"
+#include "ACVisualizationPlugin.h" // "ACPlugVizDancers.h"
 #include "ACNeighborhoodsPluginRandom.h"
 #include "ACPositionsPluginRandom.h"
 
 //the factories
 
 extern "C" ACPlugin* create(std::string namePlugin) {
-    if (namePlugin == "ACVisualisationPlugin") {return new ACVisualisationPlugin();}
+    if (namePlugin == "ACVisualizationPlugin") {return new ACVisualizationPlugin();}
 	if (namePlugin == "ACNeighborhoodsPluginRandom") {return new ACNeighborhoodsPluginRandom();}
 	if (namePlugin == "ACPositionsPluginRandom") {return new ACPositionsPluginRandom();}
 }

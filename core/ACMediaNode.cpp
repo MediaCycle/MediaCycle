@@ -1,9 +1,9 @@
 /*
- *  ACMediaUserlog.h
+ *  ACMediaNode.cpp
  *  MediaCycle
  *
- *  @author Stéphane Dupont
- *  @date 25/02/10
+ *  @author Xavier Siebert
+ *  @date 9/03/10
  *  @copyright (c) 2010 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
@@ -32,52 +32,65 @@
  *
  */
 
-#include <algorithm>
-#include <string>
-#include <iostream>
-#include <vector>
+#include "ACMediaNode.h"
 
-#include "lib/tree/tree.hh"
-
-using namespace std;
-
-class ACUserNode {
+ACMediaNode::ACMediaNode(){
+	clusterId = 0;
+	active = 0;
+	cursor = 0; 
+	navigationLevel = 0;
+	hover = 0;
+	displayed = false;
 	
-public:
-	ACUserNode(long int _nodeId, long int _mediaId, int _clickTime);
-	~ACUserNode();
-	bool operator == (const ACUserNode &other) const;
-	void clickNode(long int clickTime);
+	currentPos.x = 0;
+	currentPos.y = 0;
+	currentPos.z = 0;
 	
-	int getNodeId(){return nodeId;}
-	int getMediaId(){return mediaId;}
+	nextPos.x = 0;
+	nextPos.y = 0;
+	nextPos.z = 0;
 
-private:
-	long int nodeId;
-	long int mediaId;
-	bool isVisible;
-	vector<int> clickTime;
-};
+	nextPosGrid.x = 0;
+	nextPosGrid.y = 0;
+	nextPosGrid.z = 0;
 
-class ACUserLog {
+	viewPos.x = 0;
+	viewPos.y = 0;
+	viewPos.z = 0;
+}
 
-public:
-	ACUserLog();
-	~ACUserLog();
-			
-	void addRootNode(long int mediaId, int clickTime);
-	long int addNode(long int parentId, long int mediaId, int clickTime);
-	long int getMediaIdFromNodeId(long int nodeId);
-	void clickNode(long int nodeId, long int clickTime);
-	int getSize() {return userLogTree.size();};
-	int getMaxDepth() {return userLogTree.max_depth();};
-	bool isEmpty() {return userLogTree.empty();};
-	int getLastClickedNodeId(){return mLastClickedNodeId;};
-	//ACUserNode* getNode(long int nodeId);
-	
-	void dump();
-private:	
-	int mNodeId;
-	tree<ACUserNode> userLogTree;
-	int mLastClickedNodeId;
-};
+ACMediaNode::~ACMediaNode(){
+}
+
+void ACMediaNode::setCurrentPosition(float x, float y, float z){
+	currentPos.x = x;
+	currentPos.y = y;
+	currentPos.z = z;
+}
+
+void ACMediaNode::setCurrentPosition(ACPoint p){
+	currentPos = p;
+}
+
+void ACMediaNode::setNextPosition(float x, float y, float z){
+	nextPos.x = x;
+	nextPos.y = y;
+	nextPos.z = z;
+}
+
+void ACMediaNode::setNextPosition(ACPoint p){
+	nextPos = p;
+}
+
+void ACMediaNode::setNextPositionX(float x){
+	nextPos.x = x;
+}
+
+void ACMediaNode::setNextPositionY(float y){
+	nextPos.y = y;
+}
+
+void ACMediaNode::setNextPositionZ(float z){
+	nextPos.z = z;
+}
+

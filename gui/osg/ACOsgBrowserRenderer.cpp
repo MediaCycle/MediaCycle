@@ -174,8 +174,8 @@ int ACOsgBrowserRenderer::computeScreenCoordinates(osgViewer::Viewer* view, doub
 	
 	for(i=0; i<n; i++) {
 		
-		const ACLoopAttribute &attribute = media_cycle->getLoopAttributes(i);
-		const ACPoint &p = attribute.currentPos, &p2 = attribute.nextPos;
+		const ACMediaNode &attribute = media_cycle->getLoopAttributes(i);
+		const ACPoint &p = attribute.getCurrentPosition(), &p2 = attribute.getNextPosition();
 		double omr = 1.0-ratio;
 		
 		x = omr*p.x + ratio*p2.x;

@@ -36,7 +36,6 @@
 
 #include "ACUserLog.h"
 
-//using namespace core;
 using namespace std;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -116,6 +115,7 @@ void ACUserLog::clickNode(long int _nodeId, long int _clickTime) {
 	
 	tmpNode = new ACUserNode(_nodeId, 0, 0);
 	
+	// XS what if it does not find it ?
 	location = find(userLogTree.begin(), userLogTree.end(), *tmpNode);
 	//location = userLogTree.tree_find_depth(*tmpNode);
 	
@@ -141,5 +141,21 @@ long int ACUserLog::getMediaIdFromNodeId(long int _nodeId) {
 	}
 	return _mediaId;
 }	
+
+void ACUserLog::dump(){
+	tree<ACUserNode>::iterator loc  = userLogTree.begin();
+	tree<ACUserNode>::iterator end  = userLogTree.end();
+	
+	int rootdepth=userLogTree.depth(loc);
+	
+	std::cout << "-----" << std::endl;
+	while(loc!=end) {
+		for(int i=0; i < userLogTree.depth(loc)-rootdepth; ++i) 
+			std::cout << "  ";
+		std::cout << "n=" << loc->getNodeId() << " m=" << loc->getMediaId() << std::endl;
+		++loc;
+	}
+	std::cout << "-----" << std::endl;
+}
 
 ///////////////////////////////////////////////////////////////////////////////

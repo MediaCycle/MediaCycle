@@ -255,7 +255,7 @@ void ACOsgAudioRenderer::prepareNodes() {
 	
 	// waveformGeode();
 	// curserGeode();
-	if  (media_cycle->getLoopAttributes(loop_index).isDisplayed){
+	if  (media_cycle->getLoopAttributes(loop_index).isDisplayed() ){
 		entryGeode();
 		media_node->addChild(entry_geode);
 	}	
@@ -278,10 +278,10 @@ void ACOsgAudioRenderer::updateNodes(double ratio) {
 		colors[4] = Vec4(0.5,1,0.5,1);
 	}
 	
-	const ACLoopAttribute &attribute = media_cycle->getLoopAttributes(loop_index);
+	const ACMediaNode &attribute = media_cycle->getLoopAttributes(loop_index);
 
-	if ( attribute.isDisplayed ){
-		const ACPoint &p = attribute.currentPos, &p2 = attribute.nextPos;
+	if ( attribute.isDisplayed() ){
+		const ACPoint &p = attribute.getCurrentPosition(), &p2 = attribute.getNextPosition();
 		double omr = 1.0-ratio;
 				
 		omr = 1;
@@ -308,7 +308,7 @@ void ACOsgAudioRenderer::updateNodes(double ratio) {
 		localscale = max(localscale,minscale);
 		// localscale = 0.5;
 		
-		if (attribute.active) {
+		if (attribute.getActivity()) {
 						
 			localscale = 0.5;
 			
@@ -326,7 +326,7 @@ void ACOsgAudioRenderer::updateNodes(double ratio) {
 			
 			// curserT.makeTranslate(Vec3(omr*p.x + ratio*p2.x + attribute.curser * xstep * 0.5 / zoom, omr*p.y + ratio*p2.y, 0.0)); // omr*p.z + ratio*p2.z));
 			// curserT =  Matrix::scale(0.5/zoom,0.5/zoom,0.5/zoom) * curserT;
-			curserT.makeTranslate(Vec3(attribute.curser * xstep, 0.0, 0.0)); 
+			curserT.makeTranslate(Vec3(attribute.getCursor() * xstep, 0.0, 0.0)); 
 			curser_transform->setMatrix(curserT);
 		
 			T =  Matrix::rotate(-angle,Vec3(0.0,0.0,1.0)) * Matrix::scale(localscale/zoom,localscale/zoom,localscale/zoom) * T;
@@ -337,13 +337,13 @@ void ACOsgAudioRenderer::updateNodes(double ratio) {
 				media_node->removeChild(1, 1);
 			}
 					
-			((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(colors[attribute.cluster%NCOLORS]);
+			((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(colors[attribute.getClusterId()%NCOLORS]);
 			
 			T =  Matrix::rotate(-angle,Vec3(0.0,0.0,1.0)) * Matrix::scale(localscale/zoom,localscale/zoom,localscale/zoom) * T;
 		}
 				
 		unsigned int mask = (unsigned int)-1;
-		if(attribute.navigationLevel >= media_cycle->getNavigationLevel()) {
+		if(attribute.getNavigationLevel() >= media_cycle->getNavigationLevel()) {
 			entry_geode->setNodeMask(mask);
 		}
 		else {

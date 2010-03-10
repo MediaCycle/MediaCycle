@@ -315,13 +315,13 @@ string fillOutputBuffer(ACMediaLibrary* media_library, ACMediaBrowser* media_bro
 	sbuffer_send = onvid.str(); // could add "0" in front for message type (not done here because not useful for web application)
 	
 	// loop on all videos to see which ones to send out
-	const vector<ACLoopAttribute> loop_attributes = media_browser->getLoopAttributes();
+	const vector<ACMediaNode> loop_attributes = media_browser->getLoopAttributes();
 	int chk_loops=0;
 	for (int i=0; i< n_loops; i++){
-		if (loop_attributes[i].isDisplayed){
+		if (loop_attributes[i].isDisplayed()){
 			chk_loops++;
-			int posx = (int) loop_attributes[i].nextPos.x;
-			int posy = (int) loop_attributes[i].nextPos.y;
+			int posx = (int) loop_attributes[i].getNextPositionX();
+			int posy = (int) loop_attributes[i].getNextPositionY();
 			ostringstream oss ;
 			oss.fill('0'); // fill with zeros (otherwise will leave blanks)
 			oss << setw(6) << generateID(media_library->getMedia(i)->getFileName()) << setw(3) << posx << setw(3)<< posy; // fixed format
@@ -443,8 +443,8 @@ void startOrRedrawRandom(MediaCycle *mediacycle, int nbVideo, char **buffer_send
 	ucolvec indices = sort_index(q);
 	ucolvec trunc_indices = indices.rows(0,nbVideo-1);
 	//cout << trunc_indices << endl;
-	const vector<ACLoopAttribute> loop_attributes = media_browser->getLoopAttributes();
-	if (loop_attributes.size() < trunc_indices.n_rows ){
+	const vector<ACMediaNode> loop_attributes = media_browser->getLoopAttributes();
+	if (loop_attributes.size() < trunc_indices.n_rows ){ // XS TODO getsize
 		cerr << "<startOrRedrawRandom> : not enough loop attributes" << endl;
 		return;
 	}
@@ -461,8 +461,8 @@ void startOrRedrawRandom(MediaCycle *mediacycle, int nbVideo, char **buffer_send
 		int l = trunc_indices[i];
 		// positions should in range [0:999], which is a fraction of the screen size
 		// XS for the moment they depend on mViewWidth, mViewHeight in ACMediaBrowser
-		int posx = (int) loop_attributes[l].currentPos.x;
-		int posy = (int) loop_attributes[l].currentPos.y;
+		int posx = (int) loop_attributes[l].getCurrentPositionX();
+		int posy = (int) loop_attributes[l].getCurrentPositionY();
 		ostringstream oss ;
 		oss.fill('0'); // fill with zeros (otherwise will leave blanks)
 		oss << setw(6) << i << setw(3) << posx << setw(3)<< posy; // fixed format
