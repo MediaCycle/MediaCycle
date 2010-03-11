@@ -308,7 +308,7 @@ void ACOsgAudioRenderer::updateNodes(double ratio) {
 		localscale = max(localscale,minscale);
 		// localscale = 0.5;
 		
-		if (attribute.active) {
+		if (0) { //attribute.active) {
 						
 			localscale = 0.5;
 			

@@ -59,7 +59,7 @@ ACMediaFeatures* ACMedia::getFeaturesVector(int i){
 	if (i < int(features_vectors.size()) )
 		return features_vectors[i]; 
 	else {
-		std::cerr << "ACMedia::getFeaturesVector : out of bounds" << i << " > " << features_vectors.size() << std::endl;
+		std::cerr << "ACMedia::getFeaturesVector : out of bounds " << i << " > " << features_vectors.size() << std::endl;
 	}
 	return NULL;
 }
@@ -71,7 +71,7 @@ ACMediaFeatures* ACMedia::getFeaturesVector(string feature_name) {
 			return features_vectors[i];
 		}
 	}
-	std::cerr << "ACMedia::getFeaturesVector : not found feature named" << feature_name << std::endl;
+	std::cerr << "ACMedia::getFeaturesVector : not found feature named " << feature_name << std::endl;
 	return 0;
 }
 
