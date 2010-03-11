@@ -1,7 +1,7 @@
 /**
  * @brief ACVisualisationPlugin.cpp
- * @author Xavier Siebert
- * @date 24/02/2010
+ * @author Damien Tardieu
+ * @date 11/03/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -337,7 +337,7 @@ mat ACVisualisationPlugin::updateNextPositionsInit2(mat &desc_m, int nbVideoDisp
 	mat desc2_m = zscore(desc_m, 0);	
 	labelValue_v.set_size(nbSelectedClusters);
 	mat T_m, newD_m, newD2_m;
-	princomp(desc2_m, T_m, newD_m);
+	princomp(T_m, newD_m, desc2_m);
 	
 	colvec idx_v;
 	mat centroid_m;
@@ -543,7 +543,7 @@ mat ACVisualisationPlugin::updateNextPositionsItemClicked2(mat &desc_m, int nbVi
 	mat T_m, newD_m;
 
 	mat desc2_m = zscore(desc_m);
-	princomp(desc2_m, T_m, newD_m);
+	princomp(T_m, newD_m, desc2_m);
 	newD_m = newD_m.cols(0,1);
 	
 	colvec distEucl_v;
@@ -639,7 +639,7 @@ mat ACVisualisationPlugin::updateNextPositionsItemClicked3(mat &desc_m, int nbVi
 	
 	colvec th_v;
 	colvec r_v;
-	cart2pol(proj_m.col(0), proj_m.col(1), th_v, r_v);
+	cart2pol(conv_to<colvec>::from(proj_m.col(0)), conv_to<colvec>::from(proj_m.col(1)), th_v, r_v);
 	
 	mat posDisp_m(desc_m.n_rows,2);
 	posDisp_m.col(0) = (distEucl_v/maxDistEucl) % cos(th_v);

@@ -12,8 +12,8 @@
 
 extern "C" ACPlugin* create(std::string namePlugin) {
     if (namePlugin == "ACVisualisationPlugin") {return new ACVisualisationPlugin();}
-	if (namePlugin == "ACNeighborhoodsPluginRandom") {return new ACNeighborhoodsPluginRandom();}
-	if (namePlugin == "ACPositionsPluginRandom") {return new ACPositionsPluginRandom();}
+		if (namePlugin == "ACNeighborhoodsPluginRandom") {return new ACNeighborhoodsPluginRandom();}
+		if (namePlugin == "ACPositionsPluginRandom") {return new ACPositionsPluginRandom();}
 }
 
 extern "C" void destroy(ACPlugin* d) {

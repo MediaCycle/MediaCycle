@@ -33,6 +33,7 @@
  */
 
 #include "ACAudio.h"
+#include <sndfile.h>
 //#include "ACAnalysedAudio.h"
 //#include "ACAudioFeaturesFactory.h"
 
@@ -299,8 +300,25 @@ ACMediaData* ACAudio::extractData(string fname){
 //		saveThumbnail(filename_thumbnail);
 //	}
 //	delete full_audio;
-
-	ACMediaData* audio_data = NULL;
+	SF_INFO sfinfo;
+	SNDFILE* testFile;
+	if (! (testFile = sf_open (fname.c_str(), SFM_READ, &sfinfo))){  
+		/* Open failed so print an error message. */
+		printf ("Not able to open input file %s.\n", fname.c_str()) ;
+		/* Print the error message from libsndfile. */
+		puts (sf_strerror (NULL)) ;
+		return  NULL;
+	}
+	sample_rate = sfinfo.samplerate;
+	channels = sfinfo.channels;
+	sample_start = 0;
+	n_frames = sfinfo.frames;
+	sample_end = sfinfo.frames/channels;
+	float* data = new float[(long) sfinfo.frames];
+	sf_read_float(testFile, data, sfinfo.frames);
+	ACMediaData* audio_data = new ACMediaData(fname, MEDIA_TYPE_AUDIO);
+	audio_data->setAudioData(data);
+	sf_close(testFile);
 	return audio_data;
 }
 

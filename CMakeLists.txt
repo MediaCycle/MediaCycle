@@ -1,6 +1,6 @@
 PROJECT(MediaCycle)
 
-SUBDIRS(audioengine core cli gui armadillo fftooura gnuplot_i)
+SUBDIRS(audioengine core cli gui armadillo fftooura gnuplot_i audio)
 
 INCLUDE_DIRECTORIES(. audioengine core gnuplot_i)
 INCLUDE_DIRECTORIES( "/usr/local/include/TiCore" )
@@ -209,3 +209,4 @@ IF ( USE_OSC )
 	INCLUDE_DIRECTORIES(io)
 	SUBDIRS(io)
 ENDIF ( USE_OSC )
+

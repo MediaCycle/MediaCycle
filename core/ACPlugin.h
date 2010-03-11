@@ -40,9 +40,11 @@
 #include "ACMediaTypes.h"
 #include "ACMediaFeatures.h"
 #include "ACMediaData.h"
-//#include "ACMediaTimedFeature.h"
+//#include "ACMedia.h"
+/* #include "ACMediaTimedFeature.h" */
 //#include "ACMediaBrowser.h"
 
+class ACMedia;
 class ACMediaBrowser;
 
 using std::vector;
@@ -67,14 +69,15 @@ public:
 	ACPluginType getPluginType() {return this->mPluginType;}
 
 	virtual int initialize(){};
-	virtual std::vector<ACMediaFeatures*> calculate(){} ;
-	virtual std::vector<ACMediaFeatures*> calculate(std::string aFileName) {} ;
-	virtual std::vector<ACMediaFeatures*> calculate(ACMediaData* aData) {};
+	// XS TODO: why are they all =0 ?
+	virtual std::vector<ACMediaFeatures*> calculate(){};
+	virtual std::vector<ACMediaFeatures*> calculate(std::string aFileName){};
+	virtual std::vector<ACMediaFeatures*> calculate(ACMediaData* aData, ACMedia* theMedia){};
 	virtual void updateClusters(ACMediaBrowser*){};
 	virtual void updateNextPositions(ACMediaBrowser*){};
 	virtual void updateNeighborhoods(ACMediaBrowser*){};
-	virtual int start() {};
-	virtual int stop() {};
+	virtual int start(){};
+	virtual int stop(){};
 
     //virtual int readFile(std::string);
 protected:

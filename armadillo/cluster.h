@@ -27,6 +27,9 @@
  * 
  */
 
+#ifndef CLUSTER_H
+#define CLUSTER_H
+
 #ifdef WINDOWS
 #  include <windows.h>
 #endif
@@ -84,3 +87,5 @@ double median (int n, double* x);
 
 double* calculate_weights(int nrows, int ncolumns, double** data, int** mask,
   double weights[], int transpose, char dist, double cutoff, double exponent);
+
+#endif //CLUSTER_H

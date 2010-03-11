@@ -11,7 +11,7 @@ ADD_DEPENDENCIES(mediacycle-dancers mediacycle)
 TARGET_LINK_LIBRARIES(mediacycle-dancers mediacycle)
 TARGET_LINK_LIBRARIES(mediacycle-dancers tinyxml armadillo-utils)
 
-INCLUDE_DIRECTORIES(. ../../tinyxml ../../armadillo)
+INCLUDE_DIRECTORIES(. ../../tinyxml ../../armadillo ../../fftooura)
 
 
 INSTALL(TARGETS mediacycle-dancers RUNTIME DESTINATION bin)

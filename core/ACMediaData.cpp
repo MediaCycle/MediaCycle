@@ -36,6 +36,7 @@
 // One of the goals is to avoid ugly void* pointers
 #include "ACMediaData.h"
 #include <iostream>
+#include <sndfile.h>
 
 using std::cerr;
 using std::endl;
@@ -76,7 +77,25 @@ ACMediaData::~ACMediaData() {
 	if (video_ptr != NULL) cvReleaseCapture(&video_ptr);
 }
 
+void ACMediaData::setAudioData(float* data){
+	audio_ptr = data;
+}
+
 void ACMediaData::readAudioData(string _fname){ 
+	SF_INFO sfinfo;
+	SNDFILE* testFile;
+	float* data;
+	if (! (testFile = sf_open (_fname.c_str(), SFM_READ, &sfinfo))){  
+		/* Open failed so print an error message. */
+		printf ("Not able to open input file %s.\n", _fname.c_str()) ;
+		/* Print the error message from libsndfile. */
+		puts (sf_strerror (NULL)) ;
+		exit(1);
+	}
+	data = new float[(long) sfinfo.frames];
+	sf_read_float(testFile, data, sfinfo.frames);
+	audio_ptr = data;
+	sf_close(testFile);
 }
 
 void ACMediaData::readImageData(string _fname){ 

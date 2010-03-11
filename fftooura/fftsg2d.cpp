@@ -1187,4 +1187,3 @@ void *ddxt2d_th(void *p)
     return (void *) 0;
 }
 #endif /* USE_FFT2D_THREADS */
-

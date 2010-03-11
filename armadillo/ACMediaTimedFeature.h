@@ -50,6 +50,7 @@
 #include <armadillo>
 #include <vector>
 #include "ACMediaFeatures.h"
+//#include "Armadillo-utils.h"
 
 using namespace arma;
 using namespace std;
@@ -65,8 +66,9 @@ protected:
 	
 public:
 	ACMediaTimedFeatures();
+	ACMediaTimedFeatures(long iSize, int iDim, string name);
 	ACMediaTimedFeatures(fcolvec time_v, fmat value_m);
-	ACMediaTimedFeatures(fcolvec time_v, fmat value_m, string name, vector<float> seg_v);
+	ACMediaTimedFeatures(fcolvec time_v, fmat value_m, string name, vector<float> *seg_v=0);
 	// XS use this
 	ACMediaTimedFeatures(const vector<float> &time, const vector< vector<float> > &value, string name, const vector<float> *seg_v=0);
 	ACMediaTimedFeatures(const vector<float> &time, const vector<float> &value, string name, const vector<float> *seg_v=0);
@@ -74,7 +76,7 @@ public:
 	// XS do not use this: why pass the whole vector by value ?
 	//	ACMediaTimedFeatures(vector<float> time, vector< vector<float> > value, string name, vector<float> seg_v);
 	//ACMediaTimedFeatures(vector<float> time, vector<float> value, string name, vector<float> seg_v);
-	ACMediaTimedFeatures( float *time, int length, float **value, int dim, string name, vector< float >seg_v );
+	ACMediaTimedFeatures( float *time, int length, float **value, int dim, string name, vector< float > *seg_v=0 );
 	~ACMediaTimedFeatures();
 	
 	void importFromFile(string filename);
@@ -87,6 +89,7 @@ public:
 	fmat getValue();
 	float getValue(float index, float dim);
 	void setValue(fmat);
+	void setTimeAndValueForIndex(long iIndex, double iTime, rowvec iVal_v);
 	string getName(){return name;};
 	void setName(string name){this->name = name;};
 	size_t getLength();
@@ -127,6 +130,8 @@ public:
 	
 	fmat similarity(int mode = 0);
 	float dist(fmat rowvector1, fmat rowvector2, int mode = 0);
+	int saveAsSdif(const char* name);
+
 };
 
 #endif

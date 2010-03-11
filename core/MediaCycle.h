@@ -37,6 +37,7 @@
 #include "ACMediaBrowser.h"
 #include "ACNetworkSocket.h"
 #include "ACPluginManager.h"
+#include "ACAudio.h"
 
 #include <string>
 #include <cstring>

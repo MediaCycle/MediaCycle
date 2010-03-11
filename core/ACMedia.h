@@ -41,6 +41,7 @@
 #include "ACMediaData.h"
 #include <string>
 
+
 class ACMedia {
 	// contains the minimal information about a media
 	// uses vector of vector to store media features. 
@@ -99,8 +100,8 @@ public:
 	// I/O -- these are media-specific (at least for the moment...) 
 	virtual void save(FILE *){}
 	virtual int load(FILE*){}
-	virtual void saveACL(ofstream &library_file){}
-	virtual int loadACL(ifstream &library_file){}
+	virtual void saveACL(std::ofstream &library_file){}
+	virtual int loadACL(std::ifstream &library_file){}
 	virtual ACMediaData* extractData(std::string filename){}
 	
 	// function that calls the plugins and fills in info such as width, height, ...

@@ -4,7 +4,7 @@ FILE(GLOB HDR *.hpp *.h)
 ADD_LIBRARY(armadillo-utils SHARED ${SRC} ${HDR})
 
 #gsl - uncomment if needed
-TARGET_LINK_LIBRARIES(armadillo-utils mediacycle fftooura armadillo atlas lapack blas)
+TARGET_LINK_LIBRARIES(armadillo-utils mediacycle fftooura armadillo atlas lapack blas sdif)
 INCLUDE_DIRECTORIES(. ../fftooura ../core)
 
 INSTALL(TARGETS armadillo-utils LIBRARY DESTINATION lib)

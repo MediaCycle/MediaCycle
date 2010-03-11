@@ -50,7 +50,7 @@ public:
 	float* getAudioData(){return audio_ptr;}
 	IplImage* getImageData(){return image_ptr;}
 	CvCapture* getVideoData(){return video_ptr;}
-	
+
 	void setAudioData(float* _data);
 	void setImageData(IplImage* _data);
 	void setVideoData(CvCapture* _data);

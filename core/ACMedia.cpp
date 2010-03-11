@@ -34,7 +34,7 @@
 
 #include "ACMedia.h"
 #include <iostream>
-
+using namespace std;
 ACMedia::ACMedia() { 
 	mid = -1;
 	width = 0;
@@ -101,7 +101,7 @@ int ACMedia::import(std::string _path, int id, ACPluginManager *acpl ) {
 					ACPlugin* plugin =  acpl->getPluginLibrary(i)->getPlugin(j);
 					
 					//vector<ACMediaFeatures*> afv = plugin->calculate(this->getFileName());
-					vector<ACMediaFeatures*> afv = plugin->calculate(data_ptr);
+					vector<ACMediaFeatures*> afv = plugin->calculate(data_ptr, this);
 					
 					//another option :
 					//ACMediaFeatures *af = acpl->getPluginLibrary(i)->calculate(j,this->getFileName());

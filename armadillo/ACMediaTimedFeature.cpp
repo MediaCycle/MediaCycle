@@ -34,12 +34,19 @@
  */
 
 #include "ACMediaTimedFeature.h"
-//#include <gsl/gsl_interp.h>
+#include "sdif.h"
+#include "Armadillo-utils.h"
 
 using namespace arma;
 using namespace std;
 
 ACMediaTimedFeatures::ACMediaTimedFeatures(){
+}
+
+ACMediaTimedFeatures::ACMediaTimedFeatures(long iSize, int iDim, string name){
+	this->time_v.set_size(iSize);
+	this->value_m.set_size(iSize, iDim);
+	this->name = name;
 }
 
 ACMediaTimedFeatures::~ACMediaTimedFeatures(){
@@ -50,11 +57,11 @@ ACMediaTimedFeatures::ACMediaTimedFeatures(fcolvec time_v, fmat value_m){
 	this->value_m = value_m;
 }
 
-ACMediaTimedFeatures::ACMediaTimedFeatures(fcolvec time_v, fmat value_m, string name, vector<float> seg_v){
+ACMediaTimedFeatures::ACMediaTimedFeatures(fcolvec time_v, fmat value_m, string name, vector<float> *seg_v){
 	this->time_v = time_v;
 	this->value_m = value_m;
 	this->name = name;
-	this->seg_v = seg_v;
+	if (seg_v !=0) this->seg_v = *seg_v;	
 }
 
 ACMediaTimedFeatures::ACMediaTimedFeatures( const vector<float> &time, const vector< vector<float> > &value, string name, const vector<float> *seg_v){
@@ -290,6 +297,15 @@ void ACMediaTimedFeatures::setValue(fmat value_m) {
 	this->value_m = value_m;
 }
 
+// void ACMediaTimedFeatures::setTimeAndValueForIndex(long iIndex, double iTime, rowvec iVal_v) {
+// 	if (iVal_v.n_cols != this->getDim()){
+// 		std::cerr << "setValueForTime : Wrong dimension" << std::endl;
+// 		exit(1);
+// 	}
+// 	this->time_v(iIndex) = iTime;
+// 	this->value_m.row(iIndex) = iVal_v;
+// }
+
 size_t ACMediaTimedFeatures::getLength() {
 	return time_v.n_rows;
 }
@@ -451,6 +467,9 @@ ACMediaFeatures* ACMediaTimedFeatures::std(){
 // }
 
 ACMediaTimedFeatures* ACMediaTimedFeatures::delta(){
+	ACMediaTimedFeatures* deltaf;
+	deltaf = new ACMediaTimedFeatures(this->time_v.rows(1,this->getLength()-1), diff(this->value_m, 1, 1), "Delta "+this->getName());
+	return deltaf;
 }
 
 vector<ACMediaTimedFeatures*> ACMediaTimedFeatures::segment(){
@@ -624,4 +643,38 @@ float ACMediaTimedFeatures::dist(fmat vector1, fmat vector2, int mode)
 			break;
     }
     return distM(0,0);
+}
+
+
+int ACMediaTimedFeatures::saveAsSdif(const char *name){
+	SdifGenInit ("");
+	SdifFileT *file = SdifFOpen(name, eWriteFile);  /* Open file for writing */
+	/* Here, you could add some text data to the name-value tables */
+	SdifFWriteGeneralHeader  (file);    /* Write file header information */
+	SdifFWriteAllASCIIChunks (file);    /* Write ASCII header information */
+
+	SdifUInt4 SizeFrameW = 0;
+	int mystream = 1;
+
+
+	for (int t=0; t < this->getLength(); t++){
+		SdifFSetCurrFrameHeader (file, SdifSignatureConst('1', 'F', 'Q', '0'), _SdifUnknownSize, 1, mystream, this->time_v(t));
+		SizeFrameW += SdifFWriteFrameHeader (file);
+		
+		/* Write matrix header */
+		SdifFSetCurrMatrixHeader (file, SdifSignatureConst('1','F','Q','0'), eFloat4, 1, this->getDim());
+		SizeFrameW += SdifFWriteMatrixHeader (file);
+		
+		/* Write matrix data */
+		for (int col = 1; col <= this->getDim(); col++){
+			SdifFSetCurrOneRowCol (file, col, this->value_m(t,col-1));
+		}
+		SizeFrameW += SdifFWriteOneRow (file);
+		/* Write matrix padding */
+		SizeFrameW += SdifFWritePadding (file, SdifFPaddingCalculate (file->Stream, SizeFrameW));
+		
+		SdifUpdateChunkSize (file, SizeFrameW - 8);  /* Set frame size */
+	}
+	SdifFClose (file);
+	SdifGenKill ();
 }
