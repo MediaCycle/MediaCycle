@@ -1,6 +1,6 @@
 PROJECT(MediaCycle)
 
-SUBDIRS(audioengine core cli gui armadillo fftooura gnuplot_i audio)
+SUBDIRS(audioengine core cli gui armadillo fftooura gnuplot_i)
 
 INCLUDE_DIRECTORIES(. audioengine core gnuplot_i)
 INCLUDE_DIRECTORIES( "/usr/local/include/TiCore" )
@@ -68,8 +68,6 @@ ENDIF ( BUILD_TESTS )
 IF ( BUILD_PLUGINS )
 	SUBDIRS(plugins)
 ENDIF ( BUILD_PLUGINS )
-
-
 
 IF ( USE_DEBUG )
 	MESSAGE( "Configured for Debug Build")
@@ -210,3 +208,48 @@ IF ( USE_OSC )
 	SUBDIRS(io)
 ENDIF ( USE_OSC )
 
+# armadillo
+FIND_PACKAGE ( Armadillo )
+IF (ARMADILLO_FOUND)
+	MESSAGE("Armadillo found.")
+	INCLUDE_DIRECTORIES(${ARMADILLO_INCLUDE_DIR})
+ELSE (ARMADILLO_FOUND)
+	MESSAGE("Armadillo not found.")
+ENDIF (ARMADILLO_FOUND)
+
+# libsndfile
+FIND_PACKAGE ( Sndfile )
+IF (SNDFILE_FOUND)
+	MESSAGE("libsndfile found.")
+ELSE (SNDFILE_FOUND)
+	MESSAGE("libsndfile not found.")
+ENDIF (SNDFILE_FOUND)
+
+# libsamplerate
+FIND_PACKAGE ( Samplerate )
+IF (SAMPLERATE_FOUND)
+	MESSAGE("libsamplerate found.")
+ELSE (SAMPLERATE_FOUND)
+	MESSAGE("libsamplerate not found.")
+ENDIF (SAMPLERATE_FOUND)
+
+# libsdif
+FIND_PACKAGE ( SDIF )
+IF (SDIF_FOUND)
+	MESSAGE("SDIF found.")
+ELSE (SDIF_FOUND)
+	MESSAGE("SDIF not found.")
+ENDIF (SDIF_FOUND)
+
+IF ( ARMADILLO_FOUND AND SNDFILE_FOUND AND SAMPLERATE_FOUND AND SDIF_FOUND )
+	MESSAGE("Building audio features plugin/lib/cli.")
+	OPTION(USE_AUDIOFEAT "Using audio features" ON)
+	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUSE_AUDIOFEAT")
+	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DUSE_AUDIOFEAT")
+	INCLUDE_DIRECTORIES(${SNDFILE_INCLUDE_DIR} ${SAMPLERATE_INCLUDE_DIR} ${SDIF_INCLUDE_DIR})
+	INCLUDE_DIRECTORIES(audio)
+	SUBDIRS(audio)
+ELSE ( ARMADILLO_FOUND AND SNDFILE_FOUND AND SAMPLERATE_FOUND )
+	MESSAGE("Not building audio features plugin/lib/cli.")
+	OPTION(USE_AUDIOFEAT "Using audio features" OFF)
+ENDIF ( ARMADILLO_FOUND AND SNDFILE_FOUND AND SAMPLERATE_FOUND AND SDIF_FOUND )
