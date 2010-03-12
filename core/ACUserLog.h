@@ -1,9 +1,10 @@
 /*
- *  ACMediaUserlog.h
+ *  ACMediaUserLog.h
  *  MediaCycle
  *
  *  @author Stéphane Dupont
  *  @date 25/02/10
+ *  Filled by Christian Frisson on 12/03/2010
  *  @copyright (c) 2010 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
@@ -38,8 +39,6 @@
 #include <vector>
 
 #include "lib/tree/tree.hh"
-//#include "lib/tree/tree.h"
-//using namespace core;
 using namespace std;
 
 class ACUserNode {
@@ -51,6 +50,7 @@ public:
 	void clickNode(long int clickTime);
 	long int getNodeId(){return this->nodeId;}
 	long int getMediaId(){return this->mediaId;}
+	bool getVisibility(){return this->isVisible;}
 	
 private:
 	long int nodeId;
@@ -65,19 +65,25 @@ public:
 	ACUserLog();
 	~ACUserLog();
 			
-	void addRootNode(long int mediaId, int clickTime);
-	long int addNode(long int parentId, long int mediaId, int clickTime);
-	long int getMediaIdFromNodeId(long int nodeId);
-	void clickNode(long int nodeId, long int clickTime);
+	void addRootNode(long int _mediaId, int _clickTime);
+	long int addNode(long int _parentId, long int _mediaId, int _clickTime);
+	ACUserNode& getNodeFromId(long int _nodeId);
+	long int getMediaIdFromNodeId(long int _nodeId);
+	void clickNode(long int nodeId, long int _clickTime);
 	int getSize() {return userLogTree.size();};
 	int getMaxDepth() {return userLogTree.max_depth();};
 	bool isEmpty() {return userLogTree.empty();};
 	int getLastClickedNodeId(){return mLastClickedNodeId;};
-	//ACUserNode* getNode(long int nodeId);
+	int getSpanAtDepth(int _depth);
+	int getChildCountAtNodeId(long int _nodeId);
+	int getPreviousSiblingFromNodeId(long int _nodeId);
+	int getNextSiblingFromNodeId(long int _nodeId);
+	int getFirstChildFromNodeId(long int _nodeId);
+	int getLastChildFromNodeId(long int _nodeId);
+	int getParentFromNodeId(long int _nodeId);
 	
 private:	
 	int mNodeId;
 	tree<ACUserNode> userLogTree;
-	//core::tree<ACUserNode> userLogTree;
 	int mLastClickedNodeId;
 };

@@ -37,11 +37,11 @@ void ACNeighborhoodsPluginRandom::updateNeighborhoods(ACMediaBrowser* mediaBrows
 		mediaBrowser->getUserLog()->clickNode(0,0);
 	
 		// add his neighbors
-		mediaBrowser->getUserLog()->addNode(0, 17, 0); // 1
-		mediaBrowser->getUserLog()->addNode(0, 3, 0);  // 2
-		mediaBrowser->getUserLog()->addNode(0, 14, 0); // 3
-		mediaBrowser->getUserLog()->addNode(0, 12, 0); // 4
-		mediaBrowser->getUserLog()->addNode(0, 8, 0);  // 5
+		mediaBrowser->getUserLog()->addNode(0, 1, 0); // 1
+		mediaBrowser->getUserLog()->addNode(0, 2, 0);  // 2
+		mediaBrowser->getUserLog()->addNode(0, 3, 0); // 3
+		mediaBrowser->getUserLog()->addNode(0, 4, 0); // 4
+		mediaBrowser->getUserLog()->addNode(0, 5, 0);  // 5
 
 		// clicked on node 3 at time 1
 		mediaBrowser->getUserLog()->clickNode(3,1);  
@@ -49,11 +49,23 @@ void ACNeighborhoodsPluginRandom::updateNeighborhoods(ACMediaBrowser* mediaBrows
 		// add his neighbors
 		//CF: impossible to display currently an ACMedia assigned to more than one ACLoopAttribute
 		//mediaBrowser->getUserLog()->addNode(3, 0, 0);  // 6 == 0
-		mediaBrowser->getUserLog()->addNode(3, 13, 0); 
+		mediaBrowser->getUserLog()->addNode(3, 6, 0); // 6
 		//
-		mediaBrowser->getUserLog()->addNode(3, 4, 0);  // 7
-		mediaBrowser->getUserLog()->addNode(3, 11, 0); // 8
-		mediaBrowser->getUserLog()->addNode(3, 10, 0); // 9
-		mediaBrowser->getUserLog()->addNode(3, 9, 0) ; // 10
+		mediaBrowser->getUserLog()->addNode(3, 7, 0);  // 7
+		mediaBrowser->getUserLog()->addNode(3, 8, 0); // 8
+		mediaBrowser->getUserLog()->addNode(3, 9, 0); // 9
+		mediaBrowser->getUserLog()->addNode(3, 10, 0) ; // 10
+
+		mediaBrowser->getUserLog()->addNode(1, 11, 0); // 11
+		mediaBrowser->getUserLog()->addNode(1, 12, 0);  // 12
+
+		mediaBrowser->getUserLog()->addNode(2, 13, 0); // 13
+		mediaBrowser->getUserLog()->addNode(2, 14, 0); // 14
+		mediaBrowser->getUserLog()->addNode(2, 15, 0) ; // 15
+
+		mediaBrowser->getUserLog()->addNode(13, 16, 0); // 16
+		mediaBrowser->getUserLog()->addNode(13, 17, 0); // 17
+		mediaBrowser->getUserLog()->addNode(13, 18, 0) ; // 18
+		
 	}	
 }

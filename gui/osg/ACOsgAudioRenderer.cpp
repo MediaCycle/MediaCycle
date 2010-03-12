@@ -236,8 +236,8 @@ void ACOsgAudioRenderer::entryGeode() {
 	state = entry_geode->getOrCreateStateSet();
 	state->setMode(GL_NORMALIZE, osg::StateAttribute::ON);	
 
-	//entry_geode->addDrawable(new osg::ShapeDrawable(new osg::Box(osg::Vec3(0.0f,0.0f,0.0f),0.01), hints)); //draws a square
-	entry_geode->addDrawable(new osg::ShapeDrawable(new osg::Sphere(osg::Vec3(0.0f,0.0f,0.0f),0.01), hints)); // draws a sphere
+	//entry_geode->addDrawable(new osg::ShapeDrawable(new osg::Box(osg::Vec3(0.0f,0.0f,0.0f),0.01), hints)); //draws a square // Vintage AudioCycle
+	entry_geode->addDrawable(new osg::ShapeDrawable(new osg::Sphere(osg::Vec3(0.0f,0.0f,0.0f),0.01), hints)); // draws a sphere // MultiMediaCycle
 	//entry_geode->addDrawable(new osg::ShapeDrawable(new osg::Cylinder(osg::Vec3(0.0f,0.0f,0.0f),0.01, 0.0f), hints)); // draws a disc
 	//entry_geode->addDrawable(new osg::ShapeDrawable(new osg::Capsule(osg::Vec3(0.0f,0.0f,0.0f),0.01, 0.005f), hints)); // draws a sphere
 	//sprintf(name, "some audio element");
@@ -253,8 +253,8 @@ void ACOsgAudioRenderer::prepareNodes() {
 	curser_geode = 0;
 	entry_geode = 0;
 	
-	// waveformGeode();
-	// curserGeode();
+	//waveformGeode();
+	//curserGeode();
 	if  (media_cycle->getLoopAttributes(loop_index).isDisplayed){
 		entryGeode();
 		media_node->addChild(entry_geode);
@@ -308,8 +308,8 @@ void ACOsgAudioRenderer::updateNodes(double ratio) {
 		localscale = max(localscale,minscale);
 		// localscale = 0.5;
 		
-		if (0) { //attribute.active) {
-						
+		if (attribute.active) {	// with waveform
+		//if (0) {	// without waveform
 			localscale = 0.5;
 			
 			if(waveform_geode == 0) {

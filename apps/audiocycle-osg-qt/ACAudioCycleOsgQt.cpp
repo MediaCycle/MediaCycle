@@ -53,7 +53,7 @@ ACAudioCycleOsgQt::ACAudioCycleOsgQt(QWidget *parent)
 	media_cycle->addPlugin("/Users/frisson/Dev/numediart/MediaCycle/ticore-app/Applications/Numediart/MediaCycle/src/Builds/plugins/visualisation/Debug/mc_visualisation.dylib");
 	//media_cycle->setVisualisationPlugin("Visualisation");
 	media_cycle->setNeighborhoodsPlugin("RandomNeighborhoods");
-	//media_cycle->setPositionsPlugin("RandomPositions");
+	media_cycle->setPositionsPlugin("NodeLinkTreeLayoutPositions");
 
 	audio_engine = new ACAudioFeedback();
 	audio_engine->setMediaCycle(media_cycle);
