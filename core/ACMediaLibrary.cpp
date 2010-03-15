@@ -90,6 +90,7 @@ ACMediaLibrary::~ACMediaLibrary(){
 	for (iter = media_library.begin(); iter != media_library.end(); iter++) { 
 		delete *iter; 
 	}
+	media_library.clear();
 }
 
 int ACMediaLibrary::importDirectory(std::string _path, int _recursive, int id, ACPluginManager *acpl) {
@@ -246,7 +247,6 @@ int ACMediaLibrary::openLibrary(std::string _path, bool aInitLib){
 	setlocale(LC_NUMERIC, "C");//correct problem with fscanf caused by Qt (cannot read floating point string without it)
 	//if the file exists
 	if (library_file) {
-		//ACMediaFactory factory;
 		ACMedia* local_media;
 		// --TODO-- ???  how does it know which type of media ?
 		// have to be set up  at some point using setMediaType()
@@ -257,7 +257,7 @@ int ACMediaLibrary::openLibrary(std::string _path, bool aInitLib){
 		do {
 			local_media = ACMediaFactory::create(media_type);
 			if (local_media != NULL) {
-				ret = local_media->load(library_file); // XS TODO try loadACL
+				ret = local_media->load(library_file);
 				if (ret) {
 					std::cout << "Media Libray Size : " << this->getSize() << std::endl;
 					media_library.push_back(local_media);

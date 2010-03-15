@@ -295,7 +295,10 @@ void MediaCycle::setNeedsDisplay(int i) {
 }
 float MediaCycle::getCameraZoom() { return mediaBrowser->getCameraZoom(); }
 float MediaCycle::getCameraRotation() { return mediaBrowser->getCameraRotation(); }
-const ACLoopAttribute& MediaCycle::getLoopAttributes(int i) { return (mediaBrowser->getLoopAttributes()[i]); } 
+
+// XS 100310 - started migration LoopAttributes -> MediaNode
+const ACMediaNode& MediaCycle::getMediaNode(int i) { return (mediaBrowser->getMediaNode(i)); } 
+
 int MediaCycle::getNavigationLevel() { return mediaBrowser->getNavigationLevel(); }
 void MediaCycle::getMouse(float *mx, float *my) { mediaBrowser->getMouse(mx, my); }
 // 
@@ -351,8 +354,8 @@ vector<float> MediaCycle::getFeaturesVectorInMedia(int i, string feature_name) {
 }
 
 // Playing time stamp
-int MediaCycle::setSourceCurser(int lid, int frame_pos) {
-	return mediaBrowser->setSourceCurser(lid, frame_pos);
+int MediaCycle::setSourceCursor(int lid, int frame_pos) {
+	return mediaBrowser->setSourceCursor(lid, frame_pos);
 }
 
 // Update audio engine sources

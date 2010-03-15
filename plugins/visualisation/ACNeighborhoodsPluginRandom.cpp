@@ -28,7 +28,7 @@ int ACNeighborhoodsPluginRandom::initialize()
 void ACNeighborhoodsPluginRandom::updateNeighborhoods(ACMediaBrowser* mediaBrowser) {
 	//int _clickedloop = mediaBrowser->getClickedLoop();
 	std::cout << "ACNeighborhoodsPluginRandom::updateNeighborhoods" << std::endl;
-	if (mediaBrowser->getUserLog()->getLastClickedNodeId() == -1 && mediaBrowser->getNumberOfLoops() >= 19) { //CF: 19 audio samples on the mercurialized dataset
+	if (mediaBrowser->getUserLog()->getLastClickedNodeId() == -1 && mediaBrowser->getNumberOfMediaNodes() >= 19) { //CF: 19 audio samples on the mercurialized dataset
 		// XSrandom...
 		std::cout << "ACNeighborhoodsPluginRandom: filling tree..." << std::endl;
 		// initialize -  node #0                      // node ID

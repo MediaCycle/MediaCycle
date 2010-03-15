@@ -39,25 +39,9 @@
 #include <vector>
 
 #include "lib/tree/tree.hh"
-using namespace std;
+#include "ACMediaNode.h"
 
-class ACUserNode {
-	
-public:
-	ACUserNode(long int _nodeId, long int _mediaId, int _clickTime);
-	~ACUserNode();
-	bool operator == (const ACUserNode &other) const;
-	void clickNode(long int clickTime);
-	long int getNodeId(){return this->nodeId;}
-	long int getMediaId(){return this->mediaId;}
-	bool getVisibility(){return this->isVisible;}
-	
-private:
-	long int nodeId;
-	long int mediaId;
-	bool isVisible;
-	vector<int> clickTime;
-};
+using namespace std;
 
 class ACUserLog {
 
@@ -67,9 +51,9 @@ public:
 			
 	void addRootNode(long int _mediaId, int _clickTime);
 	long int addNode(long int _parentId, long int _mediaId, int _clickTime);
-	ACUserNode& getNodeFromId(long int _nodeId);
+	ACMediaNode& getNodeFromId(long int _nodeId);
 	long int getMediaIdFromNodeId(long int _nodeId);
-	void clickNode(long int nodeId, long int _clickTime);
+	void clickNode(long int _nodeId, long int _clickTime);
 	int getSize() {return userLogTree.size();};
 	int getMaxDepth() {return userLogTree.max_depth();};
 	bool isEmpty() {return userLogTree.empty();};
@@ -82,8 +66,10 @@ public:
 	int getLastChildFromNodeId(long int _nodeId);
 	int getParentFromNodeId(long int _nodeId);
 	
+	void dump();
+
 private:	
 	int mNodeId;
-	tree<ACUserNode> userLogTree;
+	tree<ACMediaNode> userLogTree;
 	int mLastClickedNodeId;
 };

@@ -33,6 +33,7 @@
  */
 
 // TODO: check if all this is really common to all media browsers
+// XS 090310 : removed struct ACLoopAttribute -> ACMediaNode
 
 #ifndef __ACMEDIABROWSER_H__
 #define __ACMEDIABROWSER_H__
@@ -43,9 +44,17 @@
 #include "ACMediaLibrary.h"
 #include "ACPlugin.h"
 #include "ACUserLog.h"
+
+#include "ACMediaNode.h"  // this contains ACPoint
+
 #include <vector>
 
 using namespace std;
+
+// XS 110310 added this to make the transition towards tree instead of vector
+// could even be a class ?
+typedef vector<ACMediaNode> ACMediaNodes;
+
 
 enum ACBrowserState {
 	AC_IDLE=0,
@@ -65,30 +74,6 @@ struct ACNavigationState
 	int 			mSelectedLoop;
 	int 			mNavigationLevel;
 	vector<float> 		mFeatureWeights;
-};
-
-struct ACPoint
-{
-	float x, y, z;
-};
-
-
-// XS TODO
-// XS the following could be renamed but seems valid for all media
-// XS make this a class ?
-// ask SD to check...
-
-struct ACLoopAttribute {
-	ACPoint 	currentPos, nextPos, nextPosGrid;
-	ACPoint		viewPos;
-	float		distanceMouse;
-	int 		cluster; //cluster index
-	int			active;  // playing or not - and in which mode
-	int			curser;
-	int 		navigationLevel; // initially all set to zero, while traversing, only the one incremented are kept
-	int			hover;
-	bool		isDisplayed;	
-	ACLoopAttribute() : cluster(0), active(0), curser(0), navigationLevel(0), hover(0), isDisplayed(false) {}
 };
 
 struct ACLabelAttribute {
@@ -192,23 +177,32 @@ public:
 	void commitPositions();
 	
 	// loops (or items) 
-	const vector<ACLoopAttribute>	&getLoopAttributes() const { return mLoopAttributes; }; 
+	// XS 100310 is this still necessary ? const ?
+	const ACMediaNodes	&getLoopAttributes() const { return mLoopAttributes; }; 
+	
+	// XS NEW 100310
+	ACMediaNode &getMediaNode(int i) ; // not const because accesors to MediaNode can modify it
+	void initializeNodes(int _defaultNodeId = 0); 
+
+	
 	void setLoopPosition(int loop_id, float x, float y, float z=0);
-	void setLoopIsDisplayed(int loop_id, bool iIsDisplayed) {this->mLoopAttributes[loop_id].isDisplayed = iIsDisplayed;}
+	// XS 100310 MediaNode
+	void setLoopIsDisplayed(int loop_id, bool iIsDisplayed) {this->getMediaNode(loop_id).setDisplayed(iIsDisplayed);}
 
 	int getNumberOfDisplayedLoops();
 	void setNumberOfDisplayedLoops(int nd);
-	int getNumberOfLoopsToDisplay();
 
-	int getNumberOfLoops(){return mLoopAttributes.size() ;} // XS this should be the same as mLibrary->getSize(), but this way it is more similar to getNumberOfLabels // CF not true in non-explatory mode (one loop can be displayed more than once at a time)
+	// XS TODO getsize
+	int getNumberOfMediaNodes(){return mLoopAttributes.size() ;} // XS this should be the same as mLibrary->getSize(), but this way it is more similar to getNumberOfLabels // CF not true in non-explatory mode (one loop can be displayed more than once at a time)
 	
-	void setLoopAttributesActive(int loop_id, int value) { mLoopAttributes[loop_id].active = value; };
+	// XS 100310 MediaNode
+	void setLoopAttributesActive(int loop_id, int value) { this->getMediaNode(loop_id).setActivity(value); };
 	//const vector<ACPoint>	&getLoopCurrentPositions() const	{ return mCurrentPos; } 
 	//const vector<ACPoint>	&getLoopNextPositions()	const		{ return mNextPos; }
 	
 	void getMouse(float *mx, float *my) { *mx = mousex; *my = mousey; };
 	
-	int setSourceCurser(int lid, int frame_pos);
+	int setSourceCursor(int lid, int frame_pos);
 	int setHoverLoop(int lid, float x, float y);
 	
 	// sets all navigationLevel to 0
@@ -228,7 +222,8 @@ public:
 	void getSourcePosition(int loop_id, float* x, float* z);
 	void setSourcePosition(float _x, float _z, float* x, float* z);
 	// int	 toggleSourceActivity(float x, float z);
-	int toggleSourceActivity(int lid, int type=1);
+	int toggleSourceActivity(int lid, int type=1); // XS deprecated
+	int toggleSourceActivity(ACMediaNode &node, int _activity = 1); // XS new 150310
 	int muteAllSources();
 	
 	// labels
@@ -305,7 +300,11 @@ protected:
 	vector<ACNavigationState>	mBackwardNavigationStates;
 	vector<ACNavigationState>	mForwardNavigationStates;
 	
-	vector <ACLoopAttribute>	mLoopAttributes; // one entry per media in the same order as in library.
+	// XS TODO 1 generalize to tree
+	// XS TODO 2 make this vector of pointers
+	ACMediaNodes mLoopAttributes; 
+	// XS was: one entry per media in the same order as in library.
+	
 	int nbDisplayedLoops;
 	
 	float mousex;
@@ -317,7 +316,7 @@ protected:
 	
 	int 				mNavigationLevel;
 	
-	// clusters
+	// XS TODO: make a class clusters
 	int				mClusterCount;
 	//vector<vector <int> > 		clusters;
 	vector<vector<vector <float> > > mClusterCenters; // cluster index, feature index, descriptor index

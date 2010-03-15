@@ -114,9 +114,9 @@ void ACImage::saveACL(ofstream &library_file) {
 		cerr << "<ACImage::saveACL> : problem writing video in ACL file, it needs to be opened before" << endl;
 	}	
 	library_file << filename << endl;
-//	library_file << filename_thumbnail << endl;
-//	library_file << duration << endl;
-//	library_file << mid << endl;
+//	library_file << filename_thumbnail << endl; // generated on the fly (sur la mouche)
+//	library_file << duration << endl; // 0
+	library_file << mid << endl;
 	library_file << width << endl;
 	library_file << height << endl;
 	int n_features = features_vectors.size();
@@ -144,7 +144,7 @@ int ACImage::loadACL(ifstream &library_file) {
 	library_file >> filename ;
 //	library_file >> filename_thumbnail;
 //	library_file >> duration;
-//	library_file >> mid;	
+	library_file >> mid;	
 	library_file >> width;
 	library_file >> height;
 	int n_features = 0;
@@ -182,6 +182,7 @@ void ACImage::save(FILE* library_file) {
 	//fprintf(library_file, "%s\n", thumbnail_filename);
 	
 #ifdef SAVE_LOOP_BIN
+	fwrite(&mid, ,sizeof(int),1,library_file); // XS 150310
 	fwrite(&width,sizeof(int),1,library_file);
 	fwrite(&height,sizeof(int),1,library_file);
 	n_features = features_vectors.size();
@@ -195,6 +196,7 @@ void ACImage::save(FILE* library_file) {
 		}
 	}
 #else
+	fprintf(library_file, "%d\n", mid); // XS 150310
 	fprintf(library_file, "%d\n", width);
 	fprintf(library_file, "%d\n", height);
 	n_features = features_vectors.size();
@@ -217,7 +219,7 @@ void ACImage::save(FILE* library_file) {
 	//fprintf(library_file, "\n");
 }
 
-int ACImage::load(FILE* library_file) { // was loadLoop
+int ACImage::load(FILE* library_file) {
 	int i, j;
 	int path_size;
 	int n_features;
@@ -244,11 +246,12 @@ int ACImage::load(FILE* library_file) { // was loadLoop
 		 thumbnail_filename = new char[path_size];
 		 strncpy(thumbnail_filename, audio_file_temp, path_size-1);
 		 thumbnail_filename[path_size-1] = 0;*/
-		
+		ret = fscanf(library_file, "%d", &mid);	 //XS 	
 		ret = fscanf(library_file, "%d", &width);
 		ret = fscanf(library_file, "%d", &height);
 		ret = fscanf(library_file, "%d", &n_features);
 		// SD TODO - following wont't work
+		// XS why ? Fix it then, please... works for me (AFAIK)...
 		for (i=0; i<n_features;i++) {
 			mediaFeatures = new ACMediaFeatures();
 			features_vectors.push_back(mediaFeatures);

@@ -39,7 +39,6 @@
 #include "ACMedia.h"
 #include <string>
 
-using namespace std;
 // -----------------------------------
 
 class ACImage: public ACMedia {

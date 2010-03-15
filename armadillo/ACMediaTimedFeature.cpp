@@ -34,7 +34,7 @@
  */
 
 #include "ACMediaTimedFeature.h"
-#include "sdif.h"
+#include "sdif.h" // XS to include in the distribution ??
 #include "Armadillo-utils.h"
 
 using namespace arma;
