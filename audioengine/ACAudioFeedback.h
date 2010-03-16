@@ -242,7 +242,7 @@ private:
 	void deleteAudioEngine();
 	void threadAudioEngineInit();
 	void timeCodeAudioEngine(int n_samples);
-	void processAudioEngine();
+	bool processAudioEngine();
 	void processAudioUpdate();
 	void processAudioEngineSamplePosition(int _loop_slot, int *_sample_pos);
 	void processAudioEngineResynth(int _loop_slot, int _sample_pos, short *_output_buffer);

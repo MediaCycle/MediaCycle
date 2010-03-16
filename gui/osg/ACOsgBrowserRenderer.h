@@ -36,9 +36,11 @@
 #ifndef __ACOSG_BROWSER_RENDERER_H__
 #define __ACOSG_BROWSER_RENDERER_H__
 
-//#include "MediaCycle.h"
+#include "MediaCycle.h"
 
 #include "ACOsgMediaRenderer.h"
+//#include "ACOsgLayoutRenderer.h"
+#include "ACOsgNodeLinkRenderer.h"
 
 #include <osgDB/ReadFile>
 //#include <osgDB/WriteFile>
@@ -69,6 +71,8 @@
 
 #include "ACRefId.h"
 
+//#include "ACPlugin.h"
+
 using namespace std;
 using namespace osg;
 
@@ -80,16 +84,23 @@ protected:
 	ref_ptr<Group>				 group;
 	ref_ptr<Group>				 media_group;
 	ref_ptr<Group>				 label_group;
+	ref_ptr<Group>				 link_group;
 	vector<ACOsgMediaRenderer*>  media_renderer;
 	vector<ACOsgMediaRenderer*>  label_renderer;
+	vector<ACOsgNodeLinkRenderer*>  link_renderer;
+	//ACOsgLayoutRenderer*		layout_renderer;
 	//vector<bool>				 media_selected;
 	vector<float>				 distance_mouse;
+	//ACPlugin* mLayoutPlugin;
+	//ACOsgLayoutType layout_type;
 
 public:
 	ACOsgBrowserRenderer();
-	~ACOsgBrowserRenderer() 	{};
+	~ACOsgBrowserRenderer() {};
 		
 	void setMediaCycle(MediaCycle *media_cycle) { this->media_cycle = media_cycle; };
+	//void setLayoutPlugin(ACPlugin* acpl){mLayoutPlugin=acpl;};
+	//void setLayout(ACOsgBrowserLayoutType _type){layout_type = _type;}
 	Group *getShapes() 	{ return group.get(); };
 	
 	void prepareNodes(int start=0);

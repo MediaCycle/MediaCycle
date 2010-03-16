@@ -51,12 +51,18 @@ ACAudioCycleOsgQt::ACAudioCycleOsgQt(QWidget *parent)
 	ui.setupUi(this); // first thing to do
 	media_cycle = new MediaCycle(MEDIA_TYPE_AUDIO,"/tmp/","mediacycle.acl");
 	// XS TODO fichier de configuration
-	media_cycle->addPlugin("/Users/xavier/development/Fall09/ticore-app/Applications/Numediart/MediaCycle/src/Builds/darwin-xcode/plugins/visualisation/Debug/mc_visualisation.dylib");
-	//media_cycle->addPlugin("/Users/frisson/Dev/numediart/MediaCycle/ticore-app/Applications/Numediart/MediaCycle/src/Builds/plugins/visualisation/Debug/mc_visualisation.dylib");
-	//media_cycle->setVisualisationPlugin("Visualisation");
-	media_cycle->setNeighborhoodsPlugin("RandomNeighborhoods");
-	media_cycle->setPositionsPlugin("NodeLinkTreeLayoutPositions");
-
+	#if defined(__APPLE__)
+		std::string build_type ("Release");
+		#ifdef USE_DEBUG
+			build_type = "Debug";
+		#endif
+		media_cycle->addPlugin("../../../plugins/visualisation/" + build_type + "/mc_visualisation.dylib");
+		//media_cycle->addPlugin("../../../plugins/audio/" + build_type + "/mc_audiofeatures.dylib");	
+		//media_cycle->setVisualisationPlugin("Visualisation");
+		media_cycle->setNeighborhoodsPlugin("RandomNeighborhoods");
+		media_cycle->setPositionsPlugin("NodeLinkTreeLayoutPositions");
+	#endif
+	
 	audio_engine = new ACAudioFeedback();
 	audio_engine->setMediaCycle(media_cycle);
 	audio_engine->printDeviceList();
@@ -68,25 +74,18 @@ ACAudioCycleOsgQt::ACAudioCycleOsgQt(QWidget *parent)
 	ui.browserOsgView->setMediaCycle(media_cycle);
 	ui.browserOsgView->prepareFromBrowser();
 	//browserOsgView->setPlaying(true);
+
+	connect(ui.actionLoad_Media_Directory, SIGNAL(triggered()), this, SLOT(loadMediaDirectory()));
+	connect(ui.actionLoad_Media_Files, SIGNAL(triggered()), this, SLOT(loadMediaFiles()));
+	connect(ui.actionLoad_ACL, SIGNAL(triggered()), this, SLOT(on_pushButtonLaunch_clicked()));
+	connect(ui.actionSave_ACL, SIGNAL(triggered()), this, SLOT(saveACLFile()));
 	
 	this->show();
-
-/*	
-	osc_browser = new ACOscBrowser();
-	mOscReceiver = osc_browser->create("localhost", 12345);
-	osc_browser->setUserData(mOscReceiver, this);
-	osc_browser->setCallback(mOscReceiver, osc_callback);
-	osc_browser->start(mOscReceiver);	
-	osc_feedback = new ACOscFeedback();
-	mOscFeeder = osc_feedback->create("localhost", 12346);
-*/
-
 }
 
 ACAudioCycleOsgQt::~ACAudioCycleOsgQt()
 {
 	//browserOsgView->setPlaying(false);
-	//free(media_cycle);
 	if (osc_browser) {
 		osc_browser->stop(mOscReceiver);		
 		//osc_browser->release(mOscReceiver);//should be in destructor ?
@@ -96,7 +95,6 @@ ACAudioCycleOsgQt::~ACAudioCycleOsgQt()
 	delete osc_feedback;//osc_feedback destructor calls ACOscFeedback::release()
 	delete audio_engine;
 	delete media_cycle;
-	
 	//delete mOscReceiver;
 	//delete mOscFeeder;
 }
@@ -113,34 +111,7 @@ void ACAudioCycleOsgQt::updateLibrary()
 
 void ACAudioCycleOsgQt::on_pushButtonLaunch_clicked()
 {
-/*
-	std::cout << "Importing file library..." << std::endl;
-	media_cycle->importLibrary((char*) "/Users/frisson/Videodrome/numediart/DataSets/AudioCycle/AudioCycleProPackTest/zero-g-pro-pack-mc-frisson-100105.acl");
- */
-	QString fileName;
-	
-	QFileDialog dialog(this,"Open AudioCycle Library File(s)");
-	dialog.setDefaultSuffix ("acl");
-	dialog.setNameFilter("AudioCycle Library Files (*.acl)");
-	dialog.setFileMode(QFileDialog::ExistingFile); // change to ExistingFiles for multiple file handling
-	
-	QStringList fileNames;
-	if (dialog.exec())
-		fileNames = dialog.selectedFiles();
-	
-	QStringList::Iterator file = fileNames.begin();
-	while(file != fileNames.end()) {
-		//std::cout << "File library: '" << (*file).toStdString() << "'" << std::endl;
-		fileName = *file;
-		++file;
-	}
-	//std::cout << "Will open: '" << fileName.toStdString() << "'" << std::endl;
-	//fileName = QFileDialog::getOpenFileName(this, "~", );
-	
-	media_cycle->importLibrary((char*) fileName.toStdString().c_str());
-	std::cout << "File library imported" << std::endl;
-	this->updateLibrary();
-
+	this->loadACLFile();
 }
 
 void ACAudioCycleOsgQt::on_pushButtonMuteAll_clicked()
@@ -150,7 +121,7 @@ void ACAudioCycleOsgQt::on_pushButtonMuteAll_clicked()
 
 void ACAudioCycleOsgQt::on_pushButtonClean_clicked()
 {
-	media_cycle->cleanLibrary(); // XS instead of getImageLibrary CHECK THIS
+	media_cycle->cleanLibrary();
 	media_cycle->libraryContentChanged();
 	this->updateLibrary();
 }	
@@ -162,13 +133,11 @@ void ACAudioCycleOsgQt::on_pushButtonRecenter_clicked()
 
 void ACAudioCycleOsgQt::on_pushButtonBack_clicked()
 {
-	//std::cout << media_cycle->getNavigationLevel() << std::endl;
 	media_cycle->setBack();
 }
 
 void ACAudioCycleOsgQt::on_pushButtonForward_clicked()
 {
-	//std::cout << media_cycle->getNavigationLevel() << std::endl;
 	media_cycle->setForward();
 }
 
@@ -236,36 +205,6 @@ void ACAudioCycleOsgQt::on_checkBoxHarmony_stateChanged(int state)
 		ui.browserOsgView->updateTransformsFromBrowser(1.0); 
 	}
 }
-	
-/*
-void ACAudioCycleOsgQt::on_sliderRhythm_sliderReleased()
-{
-	std::cout << "WeightRhythm: " << ui.sliderRhythm->value()/100.0f << std::endl;
-	if (updatedLibrary)
-	{
-		media_cycle->setWeight(1,ui.sliderRhythm->value()/100.0f);
-		ui.browserOsgView->updateTransformsFromBrowser(1.0); 
-	}
-}
-
-void ACAudioCycleOsgQt::on_sliderTimbre_sliderReleased()
-{
-	std::cout << "WeightTimbre: " << ui.sliderTimbre->value()/100.0f << std::endl;
-	if (updatedLibrary){
-		media_cycle->setWeight(2,ui.sliderTimbre->value()/100.0f);
-		ui.browserOsgView->updateTransformsFromBrowser(1.0);
-	}
-}
-
-void ACAudioCycleOsgQt::on_sliderHarmony_sliderReleased()
-{
-	std::cout << "WeightHarmony: " << ui.sliderHarmony->value()/100.0f << std::endl;
-	if (updatedLibrary){
-		media_cycle->setWeight(3,ui.sliderHarmony->value()/100.0f);
-		ui.browserOsgView->updateTransformsFromBrowser(1.0);
-	}
-}
-*/ 
 
 void ACAudioCycleOsgQt::on_sliderClusters_sliderReleased()
 {
@@ -274,6 +213,96 @@ void ACAudioCycleOsgQt::on_sliderClusters_sliderReleased()
 		media_cycle->setClusterNumber(ui.sliderClusters->value());
 		ui.browserOsgView->updateTransformsFromBrowser(1.0);
 	}
+}
+
+void ACAudioCycleOsgQt::loadACLFile(){
+	QString fileName;
+
+	QFileDialog dialog(this,"Open AudioCycle Library File(s)");
+	dialog.setDefaultSuffix ("acl");
+	dialog.setNameFilter("AudioCycle Library Files (*.acl)");
+	dialog.setFileMode(QFileDialog::ExistingFile); // change to ExistingFiles for multiple file handling
+
+	QStringList fileNames;
+	if (dialog.exec())
+	fileNames = dialog.selectedFiles();
+
+	QStringList::Iterator file = fileNames.begin();
+	while(file != fileNames.end()) {
+		//std::cout << "File library: '" << (*file).toStdString() << "'" << std::endl;
+		fileName = *file;
+		++file;
+	}
+	//std::cout << "Will open: '" << fileName.toStdString() << "'" << std::endl;
+	//fileName = QFileDialog::getOpenFileName(this, "~", );
+
+	if (!(fileName.isEmpty())) {
+		media_cycle->importLibrary((char*) fileName.toStdString().c_str());
+		std::cout << "File library imported" << std::endl;
+		this->updateLibrary();
+	}	
+}
+
+void ACAudioCycleOsgQt::saveACLFile(){
+	cout << "Saving ACL File..." << endl;
+	
+	QString fileName = QFileDialog::getSaveFileName(this);
+	QFile file(fileName);
+	
+	if (!file.open(QIODevice::WriteOnly)) {
+		QMessageBox::warning(this,
+							 tr("File error"),
+							 tr("Failed to open\n%1").arg(fileName));
+	} 
+	else {
+		string acl_file = fileName.toStdString();
+		cout << "saving ACL file: " << acl_file << endl;
+		media_cycle->saveACLLibrary(acl_file);
+	}		
+}
+
+void ACAudioCycleOsgQt::loadMediaDirectory(){
+	
+	QString selectDir = QFileDialog::getExistingDirectory
+	(
+	 this, 
+	 tr("Open Directory"),
+	 "",
+	 QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks
+	 );
+	
+	// XS TODO : check if directory exists
+	// XS : do not separate directory and files in Qt and let MediaCycle handle it
+	
+	media_cycle->importDirectory(selectDir.toStdString(), 1);
+	// with this function call here, do not import twice!!!
+	media_cycle->normalizeFeatures();
+	
+	// media_cycle->libraryContentChanged(); // XS already in importDirectory
+	
+	this->updateLibrary();
+	
+	
+	//	QStringList listFilter;
+	//	listFilter << "*.png";
+	//	listFilter << "*.jpg";
+	//	
+	//	QDirIterator dirIterator(selectDir, listFilter ,QDir::Files | QDir::NoSymLinks, QDirIterator::Subdirectories);
+	//	
+	//	// Variable qui contiendra tous les fichiers correspondant à notre recherche
+	//	QStringList fileList; 
+	//	// Tant qu'on n'est pas arrivé à la fin de l'arborescence...
+	//	while(dirIterator.hasNext()) 
+	//	{   
+	//		// ...on va au prochain fichier correspondant à notre filtre
+	//		fileList << dirIterator.next(); 
+	//	}
+	//	for ( QStringList::Iterator it = fileList.begin(); it != fileList.end(); ++it ) {
+	//		cout << (*it).toStdString() << endl;
+	//	}	
+}
+
+void ACAudioCycleOsgQt::loadMediaFiles(){
 }
 
 void ACAudioCycleOsgQt::on_sliderBPM_valueChanged()
@@ -392,7 +421,6 @@ void ACAudioCycleOsgQt::processOscMessage(const char* tagName)
 		media_cycle->importLibrary(lib_path); // XS instead of getImageLibrary CHECK THIS
 		//updateLibrary();
 		std::cout << "File library imported" << std::endl;
-		
 		media_cycle->setSelectedObject(0);
 		ui.browserOsgView->prepareFromBrowser();
 		media_cycle->setNeedsDisplay(true);
@@ -402,7 +430,6 @@ void ACAudioCycleOsgQt::processOscMessage(const char* tagName)
 	{
 		media_cycle->cleanLibrary(); // XS instead of getImageLibrary CHECK THIS
 		media_cycle->libraryContentChanged();
-		
 		media_cycle->setSelectedObject(0);
 		ui.browserOsgView->prepareFromBrowser();
 		media_cycle->setNeedsDisplay(true);

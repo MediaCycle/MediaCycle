@@ -40,6 +40,7 @@
 #include "ACMediaTypes.h"
 #include "ACMediaFeatures.h"
 #include "ACMediaData.h"
+//#include "ACOsgBrowserRenderer.h"
 //#include "ACMedia.h"
 /* #include "ACMediaTimedFeature.h" */
 //#include "ACMediaBrowser.h"
@@ -78,6 +79,8 @@ public:
 	virtual void updateNeighborhoods(ACMediaBrowser*){};
 	virtual int start(){};
 	virtual int stop(){};
+	//virtual void prepareLayout(ACOsgBrowserRenderer*, int start){};
+	//virtual void updateLayout(ACOsgBrowserRenderer*, double ratio){};
 
     //virtual int readFile(std::string);
 protected:

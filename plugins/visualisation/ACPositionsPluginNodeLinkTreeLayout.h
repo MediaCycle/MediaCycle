@@ -111,6 +111,8 @@ class ACPositionsPluginNodeLinkTreeLayout : public ACPlugin {
 		void updateClusters(ACMediaBrowser* ){};//not implemented
 		void updateNextPositions(ACMediaBrowser* );
 		void updateNeighborhoods(ACMediaBrowser* ){};//not implemented
+		//void prepareLayout(ACOsgBrowserRenderer*, int start){};
+		//void updateLayout(ACOsgBrowserRenderer*, double ratio){};
 	protected:
 		ACMediaBrowser* mediaBrowser;
 		ACPositionsPluginNodeLinkTreeOrientation    m_orientation;  // the orientation of the tree

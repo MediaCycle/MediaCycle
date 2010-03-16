@@ -615,7 +615,7 @@ void ACAudioFeedback::threadAudioEngine()
 			
 			pthread_mutex_lock(&audio_engine_mutex);
 			
-			processAudioEngine();
+			bool isPlaying = processAudioEngine();
 			
 			// timeCodeAudioEngine(sleep_time*output_sample_rate);
 			
@@ -624,7 +624,7 @@ void ACAudioFeedback::threadAudioEngine()
 			pthread_mutex_unlock(&audio_engine_mutex);
 			
 			// TODO - this should be done less frequently than frame rate
-			if (media_cycle) {
+			if (media_cycle && isPlaying) {
 				media_cycle->setNeedsDisplay(1);
 			}
 		}
@@ -704,7 +704,7 @@ void ACAudioFeedback::processAudioUpdate()
 	media_cycle->setNeedsActivityUpdateRemoveMedia();
 }
 
-void ACAudioFeedback::processAudioEngine()
+bool ACAudioFeedback::processAudioEngine()
 {	
 	ALenum error;
 	
@@ -859,7 +859,7 @@ void ACAudioFeedback::processAudioEngine()
 		}
 	}
 	
-
+	return (active_loops_counted >=1 ? true : false);
 }
 
 void ACAudioFeedback::setScrub(float scrub) {

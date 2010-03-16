@@ -61,6 +61,11 @@ enum ACBrowserState {
 	AC_CHANGING
 };
 
+enum ACBrowserLayout {
+	LAYOUT_TYPE_NONE=0,
+	LAYOUT_TYPE_NODELINK=1
+};
+
 //
 //enum ACNavigationStateType
 //{
@@ -212,6 +217,8 @@ public:
 	void pushNavigationState();
 	ACNavigationState getCurrentNavigationState();
 	void setCurrentNavigationState(ACNavigationState state);
+	ACBrowserLayout getLayout();
+	void setLayout(ACBrowserLayout _layout);
 	
 	// Quick Browser
 	void setClosestLoop(int loop_id);
@@ -270,6 +277,7 @@ protected:
 	double 				mRefTime;
 	double 				mFrac;
 	ACBrowserState		mState;
+	ACBrowserLayout		mLayout;
 	
 	int 				mClickedLoop; // valid between mouseDown and mouseUp, otherwise -1
 	int 				mSelectedLoop;

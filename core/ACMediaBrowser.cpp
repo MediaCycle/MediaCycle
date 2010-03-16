@@ -193,6 +193,7 @@ ACMediaBrowser::ACMediaBrowser() {
 	mNavigationLevel = 0;
 	
 	mState = AC_IDLE;
+	mLayout = LAYOUT_TYPE_NONE;
 	mRefTime = TiGetTime();
 	mFrac = 0.0;
 	
@@ -424,6 +425,22 @@ void ACMediaBrowser::setCurrentNavigationState(ACNavigationState state)
 	updateClusters(true);
 }
 
+ACBrowserLayout ACMediaBrowser::getLayout()
+{
+	return mLayout;
+}	
+
+void ACMediaBrowser::setLayout(ACBrowserLayout _layout)
+{
+	mLayout = _layout;
+	
+	//updateNeighborhoods();
+	//updateClusters(false);
+	//updateNextPositions();
+	
+	//setNeedsDisplay(true);
+}	
+
 void ACMediaBrowser::pushNavigationState()
 {
 	mForwardNavigationStates.clear();
@@ -482,7 +499,7 @@ void ACMediaBrowser::libraryContentChanged() {
 	// XS 150310 TODO: check this one
 	initializeNodes(1); // media_ID = loop_ID
 
-	
+
 	// XS 27/10/09 TODO this should use the randomizePositions defined above
 	if(mLibrary == NULL) return;
 	else if(mLibrary->isEmpty()) {
@@ -490,7 +507,7 @@ void ACMediaBrowser::libraryContentChanged() {
 		return;
 	}
 	
-	if (mVisPlugin==NULL && mPosPlugin==NULL) {
+	if (mVisPlugin==NULL && mPosPlugin==NULL) {	
 		for (ACMediaNodes::iterator node = mLoopAttributes.begin(); node != mLoopAttributes.end(); ++node){
 			
 			(*node).setCurrentPosition (TiRandom(), 
@@ -899,7 +916,7 @@ void ACMediaBrowser::updateClusters(bool animate){
 	else{
 		if (mNeighborsPlugin==NULL) {
 			initClusterCenters();
-			std::cout << "UpdateClusters : Plugin" << std::endl;
+			//std::cout << "UpdateClusters : Plugin" << std::endl;
 			mVisPlugin->updateClusters(this);
 			if(animate) {
 				updateNextPositions();

@@ -48,11 +48,11 @@ protected:
 	Geode* curser_geode;
 	MatrixTransform* curser_transform;
 	Geode* entry_geode;
-		
+	
 	void waveformGeode();
 	void curserGeode();
 	void entryGeode();
-		
+	
 public:
 	ACOsgAudioRenderer();
 	~ACOsgAudioRenderer();

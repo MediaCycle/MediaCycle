@@ -43,8 +43,15 @@ ACImageCycleOsgQt::ACImageCycleOsgQt(QWidget *parent)
 {
 	ui.setupUi(this); // first thing to do
 	media_cycle = new MediaCycle(MEDIA_TYPE_IMAGE,"/tmp/","mediacycle.acl");
-	
-	media_cycle->addPlugin("/Users/xavier/development/Fall09/ticore-app/Applications/Numediart/MediaCycle/src/Builds/darwin-xcode/plugins/image/Debug/libimage.dylib");
+
+	// XS TODO fichier de configuration
+	#if defined(__APPLE__)
+		std::string build_type ("Release");
+		#ifdef USE_DEBUG
+			build_type = "Debug";
+		#endif
+		media_cycle->addPlugin("../../../plugins/image/" + build_type + "/libimage.dylib");
+	#endif
 	
 	ui.browserOsgView->move(0,20);
 	ui.browserOsgView->setMediaCycle(media_cycle);
@@ -157,9 +164,11 @@ void ACImageCycleOsgQt::loadACLFile(){
 	//std::cout << "Will open: '" << fileName.toStdString() << "'" << std::endl;
 	//fileName = QFileDialog::getOpenFileName(this, "~", );
 	
-	media_cycle->importLibrary((char*) fileName.toStdString().c_str());
-	std::cout << "File library imported" << std::endl;
-	this->updateLibrary();
+	if (!(fileName.isEmpty())) {
+		media_cycle->importLibrary((char*) fileName.toStdString().c_str());
+		std::cout << "File library imported" << std::endl;
+		this->updateLibrary();
+	}	
 
 }
 

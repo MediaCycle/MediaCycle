@@ -41,12 +41,15 @@
 
 ACOsgBrowserRenderer::ACOsgBrowserRenderer() {
 	media_renderer.resize(0);
+	link_renderer.resize(0);
 	label_renderer.resize(0);
 	group = new Group();
 	media_group = new Group();
 	label_group = new Group();
+	link_group = new Group();
 	group->addChild(label_group.get());		// SD TODO - check this get(), was needed to compile on OSG v2.4 (used by AM)
 	group->addChild(media_group.get());
+	group->addChild(link_group.get());
 }
 
 void ACOsgBrowserRenderer::prepareNodes(int start) {
@@ -62,12 +65,23 @@ void ACOsgBrowserRenderer::prepareNodes(int start) {
 			delete media_renderer[i];
 		}
 	}
+
+	if (media_cycle->getBrowser()->getLayout() == 1 && link_renderer.size()>n) {
+		
+		for (i=n;i<link_renderer.size();i++) {
+			link_group->removeChild(link_renderer[i]->getLink());
+			delete link_renderer[i];
+		}
+	}
+	
 	
 	/*if (!media_group) {
 		media_group = new Group();
 	}*/
 	
 	media_renderer.resize(n);
+	if (media_cycle->getBrowser()->getLayout() == 1)
+		link_renderer.resize(n);
 	distance_mouse.resize(n);
 	
 	for (i=start;i<n;i++) {
@@ -96,14 +110,39 @@ void ACOsgBrowserRenderer::prepareNodes(int start) {
 			media_renderer[i]->prepareNodes();
 			media_group->addChild(media_renderer[i]->getNode());
 		}
+		
+		if (media_cycle->getBrowser()->getLayout() == 1) {
+			link_renderer[i] = new ACOsgNodeLinkRenderer();
+			if (link_renderer[i]) {
+				link_renderer[i]->setMediaCycle(media_cycle);
+				link_renderer[i]->setLoopIndex(i);
+				// media_renderer[i]->setActivity(0);
+				link_renderer[i]->prepareLinks();
+				link_group->addChild(link_renderer[i]->getLink());
+			}
+		}	
 	}
-	
+	/*
+	layout_renderer = new ACOsgLayoutRenderer();
+	layout_renderer->setMediaCycle(media_cycle); 
+	group->addChild(layout_renderer->getGroup());
+	layout_renderer->prepareLayout(start);
+	 */
 }
 
 void ACOsgBrowserRenderer::updateNodes(double ratio) {
 	
 	for (i=0;i<media_renderer.size();i++) {
 		media_renderer[i]->updateNodes(ratio);
+	}
+	/*	
+	//if (media_cycle && media_cycle->hasBrowser() && media_cycle->getBrowser()->getNumberOfLoopsToDisplay()>0)
+		layout_renderer->updateLayout(ratio);
+	*/
+	if (media_cycle->getBrowser()->getLayout() == 1) {
+		for (i=0;i<link_renderer.size();i++) {
+			link_renderer[i]->updateLinks(ratio);
+		}
 	}
 }
 
@@ -190,6 +229,8 @@ int ACOsgBrowserRenderer::computeScreenCoordinates(osgViewer::Viewer* view, doub
 		// compute distance between mouse and media element in view
 		distance_mouse[i] = sqrt((screenPoint[0]-mx)*(screenPoint[0]-mx)+(screenPoint[1]-my)*(screenPoint[1]-my));
 		media_renderer[i]->setDistanceMouse(distance_mouse[i]);
+		if (media_cycle->getBrowser()->getLayout() == 1)
+			link_renderer[i]->setDistanceMouse(distance_mouse[i]);
 	
 		if (distance_mouse[i]<closest_distance) {
 			closest_distance = distance_mouse[i];

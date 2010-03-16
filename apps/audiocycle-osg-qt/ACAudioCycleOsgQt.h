@@ -55,13 +55,9 @@ class ACAudioCycleOsgQt : public QMainWindow
     public:
         ACAudioCycleOsgQt(QWidget *parent = 0);
 		~ACAudioCycleOsgQt();
-		//ACOsgBrowserViewQT* getViewerWindow(){return browserOsgView;};
-		//bool isLibraryUpToDate(){return updatedLibrary;};
-		//void updateLibrary(bool update){updatedLibrary = update;};
 		void updateLibrary();
 
     private slots:
-        /* Insérez les prototypes de vos slots personnalisés ici */
 		void on_pushButtonLaunch_clicked();
 		void on_pushButtonMuteAll_clicked();
 		void on_pushButtonClean_clicked();
@@ -78,8 +74,12 @@ class ACAudioCycleOsgQt : public QMainWindow
 		void on_sliderClusters_sliderReleased();
 		void on_sliderBPM_valueChanged(); // or sliderMoved();?
 		void on_sliderKey_valueChanged(); // or sliderMoved();?
-	
 
+		void loadACLFile();
+		void saveACLFile();
+		void loadMediaDirectory();
+		void loadMediaFiles();
+	
 	public:
 		MediaCycle *media_cycle;
 	
@@ -96,6 +96,5 @@ class ACAudioCycleOsgQt : public QMainWindow
 	public:
 		void processOscMessage(const char* tagName);
 		ACOscBrowserRef mOscReceiver;
-		//ACOscFeedbackRef mOscFeeder;
 };
 #endif

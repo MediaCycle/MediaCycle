@@ -53,7 +53,7 @@ ACPositionsPluginNodeLinkTreeLayout::ACPositionsPluginNodeLinkTreeLayout()
     this->mMediaType = MEDIA_TYPE_MIXED; // ALL
     this->mPluginType = PLUGIN_TYPE_NONE;
     this->mName = "NodeLinkTreeLayoutPositions";
-    this->mDescription = "Plugin for the computation of positions for a node-link tree layout";
+    this->mDescription = "Plugin for the computation of positions and layout for a node-link tree layout";
     this->mId = "";
 	
     //local vars
@@ -81,6 +81,8 @@ void ACPositionsPluginNodeLinkTreeLayout::updateNextPositions(ACMediaBrowser* _m
 	}
 	if (!(mediaBrowser->getUserLog()->isEmpty()))
 	{
+		
+		mediaBrowser->setLayout(LAYOUT_TYPE_NODELINK);
 		//vector<ACMedia*> loops = _mediaBrowser->getLibrary()->getAllMedia();
 		//int n = loops.size();
 		
@@ -349,3 +351,13 @@ void ACPositionsPluginNodeLinkTreeLayout::setDepth(int n, int p, double d) {
 			std::cerr << "setDepth error" << std::endl;
 	}
 }
+/*
+void ACPositionsPluginNodeLinkTreeLayout::prepareLayout(ACOsgBrowserRenderer*, int start)
+{
+	std::cout << "ACPositionsPluginNodeLinkTreeLayout::prepareLayout" << std::endl;
+}
+void ACPositionsPluginNodeLinkTreeLayout::updateLayout(ACOsgBrowserRenderer*, double ratio)
+{
+	std::cout << "ACPositionsPluginNodeLinkTreeLayout::updateLayout" << std::endl;
+}
+*/

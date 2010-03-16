@@ -86,7 +86,7 @@ void ACOsgAudioRenderer::waveformGeode() {
 	width = media_cycle->getThumbnailWidth(loop_index);
 	width = width / 2;
 	thumbnail = (float*)media_cycle->getThumbnailPtr(loop_index);
-	
+
 	// samples vertices
 	vertices = new Vec3Array(2*width+2);
 	for(i=0; i<width; i++) {
@@ -104,7 +104,7 @@ void ACOsgAudioRenderer::waveformGeode() {
 	(*vertices)[2] = Vec3(width * xstep, ylim, zpos);
 	(*vertices)[3] = Vec3(0, ylim, zpos);
 	frame_geometry->setVertexArray(vertices);
-	
+
 	//border vertices
 	vertices = new Vec3Array(5);
 	(*vertices)[0] = Vec3(0, -ylim, zpos);
@@ -117,7 +117,7 @@ void ACOsgAudioRenderer::waveformGeode() {
 	Vec4 color(0.9f, 0.9f, 0.9f, 0.9f);	
 	Vec4Array* colors = new Vec4Array;
 	colors->push_back(color);
-	
+
 	line_p = new DrawElementsUInt(PrimitiveSet::LINES, 2*width+2);
 	for(i=0; i<width+1; i++) {
 		(*line_p)[2*i] = 2*i;
@@ -130,7 +130,7 @@ void ACOsgAudioRenderer::waveformGeode() {
 		(*line_p)[2*i] = i;
 		(*line_p)[2*i+1] = i+1;
 	}
-	//border_geometry->addPrimitiveSet(line_p); // CF, temporarily disabled
+	border_geometry->addPrimitiveSet(line_p); // CF, bounding box temporarily disabled
 	
 	DrawElementsUInt *poly = new DrawElementsUInt(PrimitiveSet::QUADS, 4);
 	poly->push_back(0);
@@ -148,7 +148,7 @@ void ACOsgAudioRenderer::waveformGeode() {
 	(*colors)[0] = Vec4(0.0, 0.0, 0.0, 0.3);
 	frame_geometry->setColorArray(colors);
 	frame_geometry->setColorBinding(Geometry::BIND_OVERALL);
-	
+
 	state = waveform_geode->getOrCreateStateSet();
 	state->setMode(GL_LIGHTING, osg::StateAttribute::PROTECTED | osg::StateAttribute::OFF );
 	state->setMode(GL_BLEND, StateAttribute::ON);
@@ -308,8 +308,8 @@ void ACOsgAudioRenderer::updateNodes(double ratio) {
 		localscale = max(localscale,minscale);
 		// localscale = 0.5;
 		
-		if (attribute.getActivity()==1) {	// with waveform
-		//if (0) {	// without waveform
+		//if (attribute.getActivity()==1) {	// with waveform
+		if (0) {	// without waveform
 			localscale = 0.5;
 			
 			if(waveform_geode == 0) {

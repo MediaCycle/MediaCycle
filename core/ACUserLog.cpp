@@ -253,7 +253,8 @@ int ACUserLog::getParentFromNodeId(long int _nodeId)
 			++node;
 		}	
 		else {
-			_parentId = (*(userLogTree.parent(node))).getNodeId();
+			if (userLogTree.is_valid(userLogTree.parent(node)) )
+				_parentId = (*(userLogTree.parent(node))).getNodeId();
 			break;
 		}	
 	}

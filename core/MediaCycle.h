@@ -146,7 +146,7 @@ public:
 	void* hasBrowser();
 	// void setVisualisationPlugin(string pluginName);
 	//	int addPlugin(std::string aPluginPath);
-	
+		
 	// LABELS on VIEW
  	int getLabelSize();
 	string getLabelText(int i);
