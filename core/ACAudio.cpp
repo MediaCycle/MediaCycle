@@ -93,7 +93,7 @@ void ACAudio::save(FILE* library_file) {
 	fprintf(library_file, "%d\n", sample_end);
 	fprintf(library_file, "%d\n", n_frames);
 	for (i=0; i<n_frames; i++) {
-		fprintf(library_file, "%2.6f\t", waveform[i]);
+		//fprintf(library_file, "%2.6f\t", waveform[i]);
 	}
 	fprintf(library_file, "\n");
 	n_features = features_vectors.size();
@@ -105,7 +105,7 @@ void ACAudio::save(FILE* library_file) {
 		fprintf(library_file, "%d\n", nn);
 		fprintf(library_file, "%d\n", n_features_elements);
 		for (j=0; j<n_features_elements; j++) {
-			fprintf(library_file, "%f\t", features_vectors[i]->getFeatureElement(j)); // XS instead of [i][j]
+			fprintf(library_file, "%0.15e\t", features_vectors[i]->getFeatureElement(j)); // XS instead of [i][j]
 		}
 		fprintf(library_file, "\n");
 	}
@@ -164,12 +164,12 @@ int ACAudio::load_v1(FILE* library_file) {
 		ret = fscanf(library_file, "%d", &n_frames);
 		waveform = new float[n_frames];
 		cout << "nframes : " << n_frames << endl;
-		for (i=0; i<n_frames; i++) {
+		/* for (i=0; i<n_frames; i++) {
 			ret = fscanf(library_file, "%f", &waveform[i]);
 			s = i % 2;
 			if (s==0) {s=-1;} else {s=1;}
 			waveform[i] *= s;
-		}
+		} */
 		ret = fscanf(library_file, "%d", &n_features);
 		for (i=0; i<n_features;i++) {
 			mediaFeatures = new ACMediaFeatures();
@@ -257,15 +257,16 @@ int ACAudio::load(FILE* library_file) {
 		ret = fscanf(library_file, "%d", &n_frames);
 		waveform = new float[n_frames];
 		cout << "nframes : " << n_frames << endl;
-		for (i=0; i<n_frames; i++) {
+		/* for (i=0; i<n_frames; i++) {
 			ret = fscanf(library_file, "%f", &waveform[i]);
-		}
-		ret = fscanf(library_file, "%d", &n_features);
+		} */
+		ret = fscanf(library_file, "%d\n", &n_features);
 		for (i=0; i<n_features;i++) {
 			mediaFeatures = new ACMediaFeatures();
 			features_vectors.push_back(mediaFeatures);
 			features_vectors[i]->setComputed();
-			ret = fscanf(library_file, "%s", featureName);
+			//ret = fscanf(library_file, "%s", featureName);
+			fgets(featureName, 100, library_file);
 			features_vectors[i]->setName(string(featureName));
 			ret = fscanf(library_file, "%d", &nn);
 			features_vectors[i]->setNeedsNormalization(nn);
@@ -275,6 +276,8 @@ int ACAudio::load(FILE* library_file) {
 				ret = fscanf(library_file, "%f", &(local_feature));
 				features_vectors[i]->setFeatureElement(j, local_feature);
 			}
+			ret = fscanf(library_file, "\n");
+			ret = fscanf(library_file, "\t");
 		}
 		ret = fscanf(library_file, "\n");
 		return 1;
@@ -313,7 +316,7 @@ ACMediaData* ACAudio::extractData(string fname){
 	channels = sfinfo.channels;
 	sample_start = 0;
 	n_frames = sfinfo.frames;
-	sample_end = sfinfo.frames/channels;
+	sample_end = sfinfo.frames;
 	float* data = new float[(long) sfinfo.frames];
 	sf_read_float(testFile, data, sfinfo.frames);
 	ACMediaData* audio_data = new ACMediaData(fname, MEDIA_TYPE_AUDIO);

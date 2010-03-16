@@ -1,9 +1,8 @@
-/* 
- * File:   ACOpenCVInclude.h
- * Author: Alexis Moinet
- *
- * @date 15 juillet 2009
- * @copyright (c) 2009 – UMONS - Numediart
+/**
+ * @brief ACVisPluginPCA.h
+ * @author Damien Tardieu
+ * @date 16/03/2010
+ * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -28,37 +27,36 @@
  * 
  * Any other additional authorizations may be asked to avre@umons.ac.be 
  * <mailto:avre@umons.ac.be>
- */
+*/
 
-#ifndef ACOPENCVINCLUDE_H
-#define	ACOPENCVINCLUDE_H
+#include <armadillo>
 
-#ifdef	__cplusplus
-extern "C" {
-#endif
+#include "ACPlugin.h"
+#include "ACMediaBrowser.h"
+#include "ACMediaTimedFeature.h"
 
-#ifdef __APPLE__
-    #ifdef MAC_FRAMEWORKS
-    #include <OpenCV/cv.h>
-    #include <OpenCV/cxcore.h>
-    #include <OpenCV/highgui.h> // for cvloadimage
-    #else
-    // -lcv -lhighgui -lcxcore
-    // I path: /opt/local/include/opencv or /usr/local/include/opencv
-    // L path: /opt/local/lib or /usr/local/lib
-    // as of 05/03/2009, MacPorts (/opt/*) only provides version 1.0
-    // I downloaded 1.1 from SourceForge
-    #include "OpenCV/cv.h"
-    #include "OpenCV/cxcore.h"
-    #include "OpenCV/highgui.h" // for cvloadimage
-    #endif
-#else
-    #include <opencv/cv.h>
-    #include <opencv/cxcore.h>
-    #include <opencv/highgui.h>
-#endif
+using namespace arma;
 
-#ifdef	__cplusplus
+#ifndef _ACVISPLUGINPCA_
+#define _ACVISPLUGINPCA_
+
+class ACVisPluginPCA : public ACPlugin {
+public:
+  ACVisPluginPCA();
+  ~ACVisPluginPCA();
+  virtual int initialize();
+  virtual std::vector<ACMediaFeatures*> calculate();
+  virtual std::vector<ACMediaFeatures*> calculate(std::string aFileName);
+	std::vector<ACMediaFeatures*> calculate(ACMediaData* _data){}
+
+  virtual void updateClusters(ACMediaBrowser* );
+  virtual void updateNextPositions(ACMediaBrowser* );
+	void extractDescMatrix(ACMediaBrowser* mediaBrowser, mat& desc_m, vector<string> &featureNames);
+  virtual int start() {return 0;};
+  virtual int stop() {return 0;};
+protected:
 };
-#endif
-#endif	/* ACOPENCVINCLUDE_H */
+
+#endif	/* _ACVISUALISATIONPLUGIN_ */
+
+

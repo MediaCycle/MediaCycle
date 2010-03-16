@@ -383,6 +383,10 @@ ACMediaFeatures* ACMediaTimedFeatures::weightedMean(ACMediaTimedFeatures* weight
 	string name = "Weighted mean of ";
 	weightVal = weightVal / sumWeight;
 	tmp_m = trans(weightVal) * this->getValue();
+	if (! tmp_m.is_finite()){
+		std::cout<<"Weighted not finite" << std::endl;
+		exit(1);
+	}
 	name += this->getName();
 	weightedMean_mf->setName(name);
 	for (int i=0; i<tmp_m.n_cols; i++)

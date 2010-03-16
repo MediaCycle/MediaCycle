@@ -1,7 +1,7 @@
 /**
  * @brief main.cpp
  * @author Damien Tardieu
- * @date 11/03/2010
+ * @date 16/03/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -124,7 +124,6 @@ int main(int argc, char** argv){
 	std::cout << "Window size : " << windowSize << std::endl;
 	std::cout << "Number of MFCC channels : " << mfccNbChannels << std::endl;
 	std::cout << "Number of MFCC : " << mfccNb << std::endl;
-	std::cout << "-----------------------------------------" << std::endl;
 	
 	if (! (testFile = sf_open (filename.c_str(), SFM_READ, &sfinfo))){  
 		/* Open failed so print an error message. */
@@ -135,19 +134,33 @@ int main(int argc, char** argv){
 	}
 	
 	std::vector<ACMediaTimedFeatures*> desc;
-	//std::cout << sfinfo.frames << std::endl;
-	data = new float[(long) sfinfo.frames];
-	sf_read_float(testFile, data, sfinfo.frames);
+	std::cout << "Length : " << sfinfo.frames << std::endl;
+	std::cout << "Sampling Rate : " << sfinfo.samplerate << std::endl;
+	std::cout << "Channels : " << sfinfo.channels << std::endl;
+	data = new float[(long) sfinfo.frames*sfinfo.channels];
+	std::cout << sf_read_float(testFile, data, sfinfo.frames*sfinfo.channels) << std::endl;
 	desc = computeFeatures(data, sfinfo.samplerate, sfinfo.channels, sfinfo.frames, mfccNbChannels, mfccNb, windowSize, 	extendSoundLimits);
 	
 	std::string descFileName;
 	int posSep = filename.find_last_of("/\\");
 	int posDot = filename.find_last_of(".");
 	std::string rootFileName = filename.substr(posSep+1, posDot-posSep-1);
+	std::string soundDir = filename.substr(0, posSep);
 	std::cout << rootFileName << std::endl;	
-	std::string descDir = outDir + rootFileName + "/";
-	struct stat st;
 
+	std::string descDir;
+	if (outDir.size()==0){
+		descDir = soundDir + "/." + rootFileName + "/";
+	}
+	else{
+		descDir = outDir + rootFileName + "/";
+	}
+
+	std::cout << "Features directory : " << descDir << std::endl;
+	std::cout << "-----------------------------------------" << std::endl;
+
+	struct stat st;
+	
 	if(!stat(descDir.c_str(),&st) == 0)
 		mkdir(descDir.c_str(), 01777);
 
