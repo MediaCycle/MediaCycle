@@ -14,7 +14,6 @@ class ACNeighborhoodsPluginRandom : public ACPlugin {
 public:
   ACNeighborhoodsPluginRandom();
   ~ACNeighborhoodsPluginRandom();
-	virtual int initialize();
 	void updateClusters(ACMediaBrowser* ){};//not implemented
 	void updateNextPositions(ACMediaBrowser* ){};//not implemented
 	virtual void updateNeighborhoods(ACMediaBrowser* );

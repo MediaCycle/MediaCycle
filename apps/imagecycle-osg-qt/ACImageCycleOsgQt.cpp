@@ -74,32 +74,8 @@ void ACImageCycleOsgQt::updateLibrary()
 	updatedLibrary = true;
 }
 
-void ACImageCycleOsgQt::on_pushButtonLaunch_clicked()
-{
-	QString fileName;
-	
-	QFileDialog dialog(this,"Open ImageCycle Library File(s)");
-	dialog.setDefaultSuffix ("acl");
-	dialog.setNameFilter("ImageCycle Library Files (*.acl)");
-	dialog.setFileMode(QFileDialog::ExistingFile); // change to ExistingFiles for multiple file handling
-	
-	QStringList fileNames;
-	if (dialog.exec())
-		fileNames = dialog.selectedFiles();
-	
-	QStringList::Iterator file = fileNames.begin();
-	while(file != fileNames.end()) {
-		//std::cout << "File library: '" << (*file).toStdString() << "'" << std::endl;
-		fileName = *file;
-		++file;
-	}
-	//std::cout << "Will open: '" << fileName.toStdString() << "'" << std::endl;
-	//fileName = QFileDialog::getOpenFileName(this, "~", );
-	
-	media_cycle->importLibrary((char*) fileName.toStdString().c_str());
-	std::cout << "File library imported" << std::endl;
-	this->updateLibrary();
-
+void ACImageCycleOsgQt::on_pushButtonLaunch_clicked() {
+	this->loadACLFile();
 }
 
 void ACImageCycleOsgQt::on_pushButtonClean_clicked()
@@ -158,6 +134,33 @@ void ACImageCycleOsgQt::on_sliderClusters_sliderReleased()
 		media_cycle->setClusterNumber(ui.sliderClusters->value());
 		ui.browserOsgView->updateTransformsFromBrowser(1.0);
 	}
+}
+
+void ACImageCycleOsgQt::loadACLFile(){
+	QString fileName;
+	
+	QFileDialog dialog(this,"Open ImageCycle Library File(s)");
+	dialog.setDefaultSuffix ("acl");
+	dialog.setNameFilter("ImageCycle Library Files (*.acl)");
+	dialog.setFileMode(QFileDialog::ExistingFile); // change to ExistingFiles for multiple file handling
+	
+	QStringList fileNames;
+	if (dialog.exec())
+		fileNames = dialog.selectedFiles();
+	
+	QStringList::Iterator file = fileNames.begin();
+	while(file != fileNames.end()) {
+		//std::cout << "File library: '" << (*file).toStdString() << "'" << std::endl;
+		fileName = *file;
+		++file;
+	}
+	//std::cout << "Will open: '" << fileName.toStdString() << "'" << std::endl;
+	//fileName = QFileDialog::getOpenFileName(this, "~", );
+	
+	media_cycle->importLibrary((char*) fileName.toStdString().c_str());
+	std::cout << "File library imported" << std::endl;
+	this->updateLibrary();
+
 }
 
 void ACImageCycleOsgQt::saveACLFile(){
