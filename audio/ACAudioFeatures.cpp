@@ -1,7 +1,7 @@
 /**
  * @brief ACAudioFeatures.cpp
  * @author Damien Tardieu
- * @date 11/03/2010
+ * @date 16/03/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -32,7 +32,7 @@
 #include <stdio.h>
 #include <sndfile.h>
 #include <string.h>
-#include "ACAudiofeatures.h"
+#include "ACAudioFeatures.h"
 #include <samplerate.h>
 #include <iostream>
 #include "Armadillo-utils.h"
@@ -58,10 +58,11 @@ std::vector<ACMediaTimedFeatures*> computeFeatures(float* data, int samplerate, 
 	sfinfo.samplerate = samplerate;
 	sfinfo.frames = length;
 	sfinfo.channels = nchannels;
+	sfinfo.seekable = 1;
 
 	int sr_hz = 22050;
 	double srcRatio = (double) sr_hz/ (double) samplerate;
-	int outFrames = (int) (length * srcRatio + 1);
+	int outFrames = (int) (length * srcRatio * nchannels + 1);
 	float f2b = (float)fftSize/(float)sr_hz;
 	float b2f = 1/f2b;
 	dataout = new float[outFrames];
@@ -77,9 +78,9 @@ std::vector<ACMediaTimedFeatures*> computeFeatures(float* data, int samplerate, 
 			signal_v(i+sfinfo2.frames+windowSize/2) = 0;
 	}		
 	else{
-		signal_v.set_size(sfinfo2.frames);// = colvec(dataout, sfinfo2.frames);
+		signal_v.set_size(sfinfo2.frames);
 		for (long i = 0; i < sfinfo2.frames; i++)
-			signal_v(i) = dataout[i];
+			signal_v(i) = dataout[i*nchannels]; // we keep only channel 1
 	}
 	colvec frame_v = colvec(windowSize);
 	colvec frameW_v = colvec(windowSize);
@@ -118,6 +119,10 @@ std::vector<ACMediaTimedFeatures*> computeFeatures(float* data, int samplerate, 
  		frameFFTabs_v = abs(fft(frameW_v, fftSize));
  		frameFFTabs2_v = frameFFTabs_v.rows(0,fftSize/2-1);
 		sc_v(index) = spectralCentroid(frameFFTabs2_v)*b2f;
+		if (std::isnan(sc_v(index)) | std::isinf(sc_v(index))){
+			std::cout<<"not finite : " << i << std::endl;
+			std::cout << frame_v << std::endl;
+		}
 		ss_v(index) = spectralSpread(frameFFTabs2_v)*b2f;
 		zcr_v(index) = zcr(frame_v, sr_hz, windowSize);
 		sd_v(index) = spectralDecrease(frameFFTabs2_v);
@@ -128,25 +133,49 @@ std::vector<ACMediaTimedFeatures*> computeFeatures(float* data, int samplerate, 
 		// 		frame_v.save("frame.txt", arma_ascii);
 		//  		window_v.save("window.txt", arma_ascii);
 	}
+	
+	if (!sc_v.is_finite() ){
+		std::cout << "sc_v is not finite" << std::endl;
+		exit(1);
+	}
+	if (!ss_v.is_finite()){
+		std::cout << "ss_v is not finite" << std::endl;
+		exit(1);
+	}
+	if (!zcr_v.is_finite()){
+		std::cout << "zcr_v is not finite" << std::endl;
+		exit(1);
+	}
+	if (!sd_v.is_finite() ){
+		std::cout << "sd_v is not finite" << std::endl;
+		exit(1);
+	}
+	if (!ener_v.is_finite()){
+		std::cout << "ener_v is not finite" << std::endl;
+		exit(1);
+	}
+	if (!mfcc_m.is_finite() ){
+		std::cout << "mfcc_m is not finite" << std::endl;
+		exit(1);
+	}
 
+	
+	ACMediaTimedFeatures* mfcc_tf = new ACMediaTimedFeatures(conv_to<fcolvec>::from(time_v), conv_to<fmat>::from(mfcc_m), std::string("MFCC"));
+	desc.push_back(mfcc_tf);
 	desc.push_back(new ACMediaTimedFeatures(conv_to<fcolvec>::from(time_v), conv_to<fmat>::from(sc_v), std::string("Spectral Centroid")));
 	desc.push_back(new ACMediaTimedFeatures(conv_to<fcolvec>::from(time_v), conv_to<fmat>::from(ss_v), std::string("Spectral Spread")));
 	desc.push_back(new ACMediaTimedFeatures(conv_to<fcolvec>::from(time_v), conv_to<fmat>::from(zcr_v), std::string("Zero Crossing Rate")));
 	desc.push_back(new ACMediaTimedFeatures(conv_to<fcolvec>::from(time_v), conv_to<fmat>::from(sd_v), std::string("Spectral Decrease")));
 	desc.push_back(new ACMediaTimedFeatures(conv_to<fcolvec>::from(time_v), conv_to<fmat>::from(ener_v), std::string("Energy")));
-	ACMediaTimedFeatures* mfcc_tf = new ACMediaTimedFeatures(conv_to<fcolvec>::from(time_v), conv_to<fmat>::from(mfcc_m), std::string("MFCC"));
-	desc.push_back(mfcc_tf);
+
 	desc.push_back(mfcc_tf->delta());
 	mat modFr_m;
 	mat modAmp_m;
 	colvec modTime_v;
-
 	modulation(ener_v, env_fs, modFr_m, modAmp_m, modTime_v);
 	desc.push_back(new ACMediaTimedFeatures(conv_to<fcolvec>::from(modTime_v), conv_to<fmat>::from(modFr_m), std::string("Energy Modulation Frequency")));
 	desc.push_back(new ACMediaTimedFeatures(conv_to<fcolvec>::from(modTime_v), conv_to<fmat>::from(modAmp_m), std::string("Energy Modulation Amplitude")));
 	lat = logAttackTime(ener_v, env_fs);
-	modFr_m.save("modFr.txt", arma_ascii);
-	modAmp_m.save("modAmp.txt", arma_ascii);
 
 
 	std::cout << "lat = " << lat << std::endl;
@@ -154,14 +183,26 @@ std::vector<ACMediaTimedFeatures*> computeFeatures(float* data, int samplerate, 
 }
 
 double spectralCentroid(colvec x_v){
-	colvec in_v = linspace<colvec>(0, x_v.n_rows-1, x_v.n_rows);
-	colvec sc_v = weightedMean(in_v, x_v);
+	colvec sc_v(1);
+	if (sum(x_v) == 0){
+		sc_v(0) = 0;
+	}
+	else{
+		colvec in_v = linspace<colvec>(0, x_v.n_rows-1, x_v.n_rows);
+		sc_v = weightedMean(in_v, x_v);
+	}
 	return sc_v(0);
 }
 
 double spectralSpread(colvec x_v){
-	colvec in_v = linspace<colvec>(0, x_v.n_rows-1, x_v.n_rows);
-	colvec ss_v = weightedStdDeviation(in_v, x_v);
+	colvec ss_v(1);
+	if (sum(x_v) == 0){
+		ss_v(0) = 0;
+	}
+	else{
+		colvec in_v = linspace<colvec>(0, x_v.n_rows-1, x_v.n_rows);
+		ss_v = weightedStdDeviation(in_v, x_v);
+	}		
 	return ss_v(0);
 }
 
@@ -171,8 +212,14 @@ double zcr(colvec frame_v, int sr_hz, int frameSize){
 }
 
 double spectralDecrease(colvec x_v){
-	colvec f_v = linspace<colvec>(1, x_v.n_rows-1, x_v.n_rows-1);
-	double sd = 1/as_scalar(sum(x_v.rows(1,x_v.n_rows-1))) * as_scalar(sum( (x_v.rows(1,x_v.n_rows-1) - x_v(0)) /f_v));
+	double sd;
+	if (sum(x_v) == 0){
+		sd = 0;
+	}
+	else{
+		colvec f_v = linspace<colvec>(1, x_v.n_rows-1, x_v.n_rows-1);
+		sd = 1/as_scalar(sum(x_v.rows(1,x_v.n_rows-1))) * as_scalar(sum( (x_v.rows(1,x_v.n_rows-1) - x_v(0)) /f_v));
+	}
 	return sd;
 }
 
@@ -215,7 +262,7 @@ int resample(float* datain, SF_INFO *sfinfo, float* dataout, SF_INFO* sfinfoout)
 	src_data.data_out = dataout;
 	src_data.src_ratio = srcRatio;
 	src_data.output_frames = outFrames;
-	src_simple(&src_data, 0, 1);
+	src_simple(&src_data, 0, sfinfo->channels);
 	dataout = src_data.data_out;
 
 	sfinfoout->channels = sfinfo->channels;
