@@ -1454,6 +1454,7 @@ ACMediaNode& ACMediaBrowser::getMediaNode(int i) {
 	return mLoopAttributes[i];
 }
 
+// CF prepareNodes ? (cf. OSG)
 void ACMediaBrowser::initializeNodes(int _defaultNodeId){ // default = 0
 	// makes an ACMediaNode for each Media in the library
 	// if _defaultNodeId is set to 1, it will give a nodeID = mediaID

@@ -84,7 +84,7 @@ void ACPositionsPluginNodeLinkTreeLayout::updateNextPositions(ACMediaBrowser* _m
 		//vector<ACMedia*> loops = _mediaBrowser->getLibrary()->getAllMedia();
 		//int n = loops.size();
 		
-		int librarySize = mediaBrowser->getLibrary()->getAllMedia().size();
+		int librarySize = mediaBrowser->getLibrary()->getSize();
 		//int attributesSize = mediaBrowser->getLoopAttributes().size();
 		
 		if(librarySize==0) {
@@ -166,6 +166,7 @@ void ACPositionsPluginNodeLinkTreeLayout::firstWalk(int n, int num, int depth) {
 	updateDepths(depth, n);
 	
 	bool expanded = mediaBrowser->getUserLog()->getNodeFromId(n).getVisibility(); //n.isExpanded();
+	
 	if ( mediaBrowser->getUserLog()->getChildCountAtNodeId(n) == 0 || !expanded ) // is leaf
 	{ 
 		int l = mediaBrowser->getUserLog()->getPreviousSiblingFromNodeId(n);

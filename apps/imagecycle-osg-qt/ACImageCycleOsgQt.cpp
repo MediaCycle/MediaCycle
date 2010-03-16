@@ -194,8 +194,8 @@ void ACImageCycleOsgQt::loadMediaDirectory(){
 	media_cycle->importDirectory(selectDir.toStdString(), 1);
 	// with this function call here, do not import twice!!!
 	media_cycle->normalizeFeatures();
-	// XS check this !
-	media_cycle->libraryContentChanged();
+
+	// media_cycle->libraryContentChanged(); // XS already in importDirectory
 
 	this->updateLibrary();
 
