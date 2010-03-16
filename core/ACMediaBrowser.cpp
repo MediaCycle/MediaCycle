@@ -45,10 +45,6 @@
 
 using namespace std;
 
-// XS duh ?
-//#define DEFAULT_FEATURE_COUNT 15
-//#define DEFAULT_OBJECT_COUNT  11000
-
 // XS TODO this will need to be changed
 // once we define a class with methods to compute distances
 // ....
@@ -207,10 +203,10 @@ ACMediaBrowser::ACMediaBrowser() {
 	auto_play = 0;
 	auto_play_toggle = 0;
 	
-	mLabelAttributes.resize(0);
+	mLabelAttributes.resize(0); // XS leave it like this or also make a tree ?
 	nbDisplayedLabels = 0;
 	
-	mLoopAttributes.resize(0);
+//	mLoopAttributes.resize(0); // XS TODO make this a tree
 	nbDisplayedLoops = 20;
 	
 	mVisPlugin = NULL;
@@ -226,6 +222,7 @@ ACMediaBrowser::ACMediaBrowser() {
 }
 
 ACMediaBrowser::~ACMediaBrowser() {
+	// XS TODO delete mLoopAttributes
 	pthread_mutex_destroy(&activity_update_mutex);
 	delete mUserLog;
 }
@@ -321,8 +318,8 @@ void ACMediaBrowser::setClusterNumber(int n)
 }
 
 void ACMediaBrowser::setClickedLoop(int iloop){
-	if (iloop < -1 || iloop >= this->getNumberOfLoops())
-		cerr << "<ACMediaBrowser::setClickedLoop> : index " << iloop << " out of bounds (nb loop = " << this->getNumberOfLoops() << ")"<< endl;
+	if (iloop < -1 || iloop >= this->getNumberOfMediaNodes())
+		cerr << "<ACMediaBrowser::setClickedLoop> : index " << iloop << " out of bounds (nb loop = " << this->getNumberOfMediaNodes() << ")"<< endl;
 	else
 		mClickedLoop = iloop;
 }
@@ -334,16 +331,13 @@ void ACMediaBrowser::setClickedLabel(int ilabel){
 		mClickedLabel = ilabel;
 }
 
-
+// XS TODO: setNodePosition -- or even NodeNextPosition ??
 void ACMediaBrowser::setLoopPosition(int loop_id, float x, float y, float z){
-	ACPoint p;
-	p.x = x;
-	p.y = y;
-	p.z = z;
-	mLoopAttributes[loop_id].nextPos = p;
+	this->getMediaNode(loop_id).setNextPosition(x,y,z);
 }
 
 void ACMediaBrowser::setLabelPosition(int label_id, float x, float y, float z){
+// XS todo change this too
 	ACPoint p;
 	p.x = x;
 	p.y = y;
@@ -361,27 +355,12 @@ int ACMediaBrowser::getNumberOfDisplayedLoops(){
 	//	return cnt;
 }
 
-int ACMediaBrowser::getNumberOfLoopsToDisplay(){
-	int cnt=0;
-	for (int i=0; i < getNumberOfLoops();i++){
-		if (mLoopAttributes[i].isDisplayed) cnt++;
-	}
-	return cnt;
-}
-
 int ACMediaBrowser::getNumberOfDisplayedLabels(){
 	return nbDisplayedLabels;
-	
-	// should be the same as:	
-	//	int cnt=0;
-	//	for (int i=0; i < getNumberOfLabels()){
-	//		if (mLabelpAttributes[i].isDisplayed) cnt++
-	//	}
-	//	return cnt;
 }
 
 void ACMediaBrowser::setNumberOfDisplayedLoops(int nd){
-	if (nd < 0 || nd > this->getNumberOfLoops())
+	if (nd < 0 || nd > this->getNumberOfMediaNodes())
 		cerr << "<ACMediaBrowser::setNumberOfDisplayedLoops> : too many loops to display: " << nd << endl;
 	else
 		nbDisplayedLoops = nd;
@@ -394,42 +373,31 @@ void ACMediaBrowser::setNumberOfDisplayedLabels(int nd){
 		nbDisplayedLabels = nd;
 }
 
-void ACMediaBrowser::resetLoopNavigationLevels()
-{
-	int i, n = mLoopAttributes.size();
-	
-	for(i=0; i<n; i++)
-	{
-		mLoopAttributes[i].navigationLevel = 0;
-	}
-	
+void ACMediaBrowser::resetLoopNavigationLevels() {
+	for (ACMediaNodes::iterator node = mLoopAttributes.begin(); node != mLoopAttributes.end(); ++node){
+		(*node).setNavigationLevel (0);
+	}	
 }
 
-void ACMediaBrowser::incrementLoopNavigationLevels(int loopIndex)
-{
-	int i,n=mLoopAttributes.size(),clusterIndex;
+void ACMediaBrowser::incrementLoopNavigationLevels(int loopIndex) {
+	int n=getNumberOfMediaNodes(),clusterIndex;
 	
+	// XS which if goes first ?
 	if (mNavigationLevel==0)
 		resetLoopNavigationLevels();
 	
 	if(!(loopIndex >= 0 && loopIndex < n)) return;
 	
-	clusterIndex = mLoopAttributes[loopIndex].cluster;
-	
+	clusterIndex = this->getMediaNode(loopIndex).getClusterId();	
 	if(clusterIndex < 0 || clusterIndex >= mClusterCount) return;
 	
-	for(i=0; i<n; i++)
-	{
-		ACLoopAttribute &attr = mLoopAttributes[i];
-		
-		if(attr.cluster == clusterIndex)
-		{
-			attr.navigationLevel++;
+	for (ACMediaNodes::iterator node = mLoopAttributes.begin(); node != mLoopAttributes.end(); ++node){
+		if ((*node).getClusterId() == clusterIndex){
+			(*node).increaseNavigationLevel();
 		}
 	}
 	
 	mNavigationLevel++;
-	
 }
 
 ACNavigationState ACMediaBrowser::getCurrentNavigationState()
@@ -440,7 +408,6 @@ ACNavigationState ACMediaBrowser::getCurrentNavigationState()
 	state.mSelectedLoop = mSelectedLoop;
 	state.mNavigationLevel = mNavigationLevel;
 	state.mFeatureWeights = mFeatureWeights;
-	
 	
 	return state;
 }
@@ -465,6 +432,11 @@ void ACMediaBrowser::pushNavigationState()
 }
 
 // SD TODO - This is not used anymore I think
+// XS - it is still used by 
+//    void ACOsgBrowserEventHandler::hover_callback(float x, float y) {
+//        media_cycle->hoverCallback(x, y);
+//    }
+
 int ACMediaBrowser::setHoverLoop(int lid, float mx, float my)
 {
 	int loop_id;
@@ -478,7 +450,7 @@ int ACMediaBrowser::setHoverLoop(int lid, float mx, float my)
 	loop_id = lid;
 	
 	if ( (loop_id>=0) && (loop_id<getLibrary()->getSize()) ) {
-		mLoopAttributes[loop_id].hover = 1;
+		this->getMediaNode(loop_id).setHover(1);
 	}
 	else {
 		return 0;
@@ -486,84 +458,59 @@ int ACMediaBrowser::setHoverLoop(int lid, float mx, float my)
 }
 
 
-int ACMediaBrowser::setSourceCurser(int lid, int frame_pos) {
-	mLoopAttributes[lid].curser = frame_pos;
+int ACMediaBrowser::setSourceCursor(int lid, int frame_pos) {
+	this->getMediaNode(lid).setCursor(frame_pos);
 }
 
-
+// XS Node
 void ACMediaBrowser::randomizeLoopPositions(){
 	if(mLibrary == NULL) return;
-	vector<ACMedia*> loops = mLibrary->getAllMedia();
-	int n = loops.size();
-	mLoopAttributes.resize(n);
-	for(int i=0; i<n; i++){
-		mLoopAttributes[i].currentPos.x = TiRandom() * mViewWidth;
-		mLoopAttributes[i].currentPos.y = TiRandom() * mViewHeight;
-		mLoopAttributes[i].currentPos.z = 0;
-		
-		mLoopAttributes[i].nextPos.x = mLoopAttributes[i].currentPos.x + TiRandom() * mViewWidth / 100.0;
-		mLoopAttributes[i].nextPos.y = mLoopAttributes[i].currentPos.y + TiRandom() * mViewHeight / 100.0;
-		mLoopAttributes[i].nextPos.z = 0;
+	for (ACMediaNodes::iterator node = mLoopAttributes.begin(); node != mLoopAttributes.end(); ++node){
+		(*node).setCurrentPosition (TiRandom() * mViewWidth, 
+									TiRandom() * mViewHeight, 
+									0);
+		(*node).setNextPosition((*node).getCurrentPositionX() + TiRandom() * mViewWidth / 100.0, 
+								(*node).getCurrentPositionY() + TiRandom() * mViewHeight / 100.0, 
+								0);
 	}	
 }
 
+// XS rename to updateLibrary() ?
+void ACMediaBrowser::libraryContentChanged() {
+	// update initial positions and resize other vector structures dependent on loop count.
+	
+	// XS 150310 TODO: check this one
+	initializeNodes(1); // media_ID = loop_ID
 
-void ACMediaBrowser::libraryContentChanged()
-{
+	
 	// XS 27/10/09 TODO this should use the randomizePositions defined above
 	if(mLibrary == NULL) return;
-	
-	vector<ACMedia*> loops = mLibrary->getAllMedia();
-	int n, i, fc;
-	// todo: update initial positions and resize other vector structures dependent on loop count.
-	
-	n = loops.size();
-	
-	mLoopAttributes.resize(n);
-	
-	//mObjectCluster.resize(n);
-	//mCurrentPos.resize(n);
-	//mNextPos.resize(n);
-	
-	if(n==0) {
+	else if(mLibrary->isEmpty()) {
 		setNeedsDisplay(true);
 		return;
 	}
 	
-	fc = loops.back()->getNumberOfFeaturesVectors();
+	if (mVisPlugin==NULL && mPosPlugin==NULL) {
+		for (ACMediaNodes::iterator node = mLoopAttributes.begin(); node != mLoopAttributes.end(); ++node){
+			
+			(*node).setCurrentPosition (TiRandom(), 
+										TiRandom(), 
+										TiRandom() / 10.0);
+			
+			(*node).setNextPosition ((*node).getCurrentPositionX() + TiRandom() / 100.0,
+									 (*node).getCurrentPositionY() + TiRandom() / 100.0, 
+									 (*node).getCurrentPositionZ() + TiRandom() / 100.0);		
+			(*node).setDisplayed (true);
+		}
+	}
+	
+	// XS what if all media don't have the same number of features as the first one ?
+	int fc = mLibrary->getMedia(0)->getNumberOfFeaturesVectors();
 	mFeatureWeights.resize(fc);
 	
-	if (mVisPlugin==NULL && mPosPlugin==NULL) {
-		for(i=0; i<n; i++)
-		{
-			mLoopAttributes[i].currentPos.x = TiRandom();
-			mLoopAttributes[i].currentPos.y = TiRandom();
-			mLoopAttributes[i].currentPos.z = TiRandom() / 10.0;
-		
-			mLoopAttributes[i].nextPos.x = mLoopAttributes[i].currentPos.x + TiRandom() / 100.0;
-			mLoopAttributes[i].nextPos.y = mLoopAttributes[i].currentPos.y + TiRandom() / 100.0;
-			mLoopAttributes[i].nextPos.z = mLoopAttributes[i].currentPos.z + TiRandom() / 100.0;		
-			mLoopAttributes[i].isDisplayed = true;
-		}
-	}/*
-	else {
-		for(i=0; i<n; i++)
-		{
-			mLoopAttributes[i].currentPos.x = i/10.0;
-			mLoopAttributes[i].currentPos.y = i/10.0;
-			mLoopAttributes[i].currentPos.z = 0;
-			
-			mLoopAttributes[i].nextPos.x = i/10.0;
-			mLoopAttributes[i].nextPos.y = i/10.0;
-			mLoopAttributes[i].nextPos.z = 0;		
-		}
-		
-	}*/	
-		
-	// set all feature weights to 1.0
-	
+	// XS if (config_file)...
 	printf("setting all feature weights to 1.0 (count=%d)\n", (int) mFeatureWeights.size());
-	for(i=0; i<fc; i++) {
+	for(int i=0; i<fc; i++) {
 		mFeatureWeights[i] = 0.0;//SD temporary hack before config filing
 	}
 	mFeatureWeights[0] = 1.0;//SD temporary hack before config filing
@@ -574,6 +521,7 @@ void ACMediaBrowser::libraryContentChanged()
 	setNeedsDisplay(true);
 }
 
+	
 // SD - Brute Force KNN
 // SD TODO - Different kNN algorithms should have their own classes
 int ACMediaBrowser::getKNN(int id, vector<int> &ids, int k) {
@@ -586,8 +534,8 @@ int ACMediaBrowser::getKNN(int id, vector<int> &ids, int k) {
 	
 	if(mLibrary == NULL) return -1; 
 	
+	// XS TODO simplify this
 	vector<ACMedia*> loops = mLibrary->getAllMedia();
-	//assert(loops.size() == mLoopAttributes.size()); 
 	int object_count = loops.size(); if(object_count == 0) return -1;
 	int feature_count = loops.back()->getNumberOfFeaturesVectors();
 	assert(mFeatureWeights.size() == feature_count);
@@ -596,7 +544,7 @@ int ACMediaBrowser::getKNN(int id, vector<int> &ids, int k) {
 	vector<float> distances;
 	
 	el = -1;
-	for (i=0;i<loops.size();i++) {
+	for (i=0;i<loops.size();i++) { // XS TODO iterator
 		if (id==loops[i]->getId()) {
 			el=i;
 			break;
@@ -657,6 +605,7 @@ int ACMediaBrowser::getKNN(ACMedia *aMedia, vector<ACMedia *> &result, int k) {
 	
     if (mLibrary == NULL) return -1;
 	
+	// XS TODO simplify this (same as above)
     vector<ACMedia*> loops = mLibrary->getAllMedia();
     //assert(loops.size() == mLoopAttributes.size());
     int object_count = loops.size();
@@ -710,16 +659,18 @@ int ACMediaBrowser::getKNN(ACMedia *aMedia, vector<ACMedia *> &result, int k) {
 void ACMediaBrowser::setFeatureWeights(vector<float> &weights)
 {
 	//assert(weights.size() == objects.back().size());
-	
+// XS todo check sizes without assert	
 	mFeatureWeights = weights;
 }
 
-
-void ACMediaBrowser::setClusterIndex(int mediaIdx,int clusterIdx){
-	this->mLoopAttributes[mediaIdx].cluster = clusterIdx;
+// XS node, not media
+void ACMediaBrowser::setClusterIndex(int nodeIdx,int clusterIdx){
+	// XS TODO check bounds
+	this->getMediaNode(nodeIdx).setClusterId (clusterIdx);
 }
 
 void ACMediaBrowser::setClusterCenter(int clusterIdx, vector< vector<float> > clusterCenter){
+	// XS TODO check bounds
 	this->mClusterCenters[clusterIdx] = clusterCenter;
 }
 
@@ -758,6 +709,7 @@ void ACMediaBrowser::setProximityGridBounds(float l, float r, float b, float t) 
 	proxgridboundsset = 1;
 }
 
+// XS TODO clean this and sent to plugin
 void ACMediaBrowser::setProximityGrid() {
 	
 	float jitter;
@@ -771,19 +723,19 @@ void ACMediaBrowser::setProximityGrid() {
 	
 	float langle, orientation, spiralstepx, spiralstepy, lorientation;
 	
-	n = mLoopAttributes.size();
+	n = getNumberOfMediaNodes(); // mLoopAttributes.size(); // XS TODO getsize
 	
 	// Proximity Grid Size	
 	if (!proxgridboundsset) {
 		if (n>0) {
-			p = mLoopAttributes[0].nextPos;
+			p = getMediaNode(0).getNextPosition();
 			proxgridl = p.x;
 			proxgridr = p.x;
 			proxgridb = p.y;
 			proxgridt = p.y;
 		}
 		for(i=1; i<n; i++) {
-			p = mLoopAttributes[i].nextPos;
+			p = getMediaNode(i).getNextPosition();
 			if (p.x<proxgridl) {
 				proxgridl = p.x;
 			}
@@ -818,7 +770,7 @@ void ACMediaBrowser::setProximityGrid() {
 		
 		found_slot = 0;
 		
-		p = mLoopAttributes[i].nextPos;
+		p = getMediaNode(i).getNextPosition();
 		
 		// grid quantization
 		setProximityGridQuantize(p, &pgrid);
@@ -890,8 +842,9 @@ void ACMediaBrowser::setProximityGrid() {
 		
 	}
 	
+	// XS TODO iter
 	for(i=0; i<n; i++) {
-		mLoopAttributes[i].nextPosGrid = mLoopAttributes[i].nextPos;
+		getMediaNode(i).setNextPositionGrid (getMediaNode(i).getNextPosition());
 	}
 	
 	for(i=0; i<proxgrid.size(); i++) {
@@ -900,25 +853,29 @@ void ACMediaBrowser::setProximityGrid() {
 			curpos.x = fmod((float)i,proxgridlx);
 			curpos.y = floor((float)i/(proxgridlx));
 			setProximityGridUnquantize(curpos, &p2);
-			p2.z = mLoopAttributes[index].nextPos.z;
-			mLoopAttributes[index].nextPosGrid = p2;
+			p2.z = getMediaNode(index).getNextPosition().z;
+			getMediaNode(index).setNextPositionGrid (p2);
 		}
 	}
 	
+	// XS TODO iter
 	for(i=0; i<n; i++) {
-		mLoopAttributes[i].nextPos = mLoopAttributes[i].nextPosGrid;
+		getMediaNode(i).setNextPosition(getMediaNode(i).getNextPositionGrid());
 	}
 	
 	if (proxgridjitter>0) {
 		for(i=0; i<n; i++) {
+			// XS heavy ?
 			jitter = TiRandom()-0.5;
-			mLoopAttributes[i].nextPos.x += jitter*proxgridjitter*proxgridstepx;
+			mLoopAttributes[i].setNextPositionX( mLoopAttributes[i].getNextPositionX() +
+												jitter*proxgridjitter*proxgridstepx);
 			jitter = TiRandom()-0.5;
-			mLoopAttributes[i].nextPos.y += jitter*proxgridjitter*proxgridstepy;
+			mLoopAttributes[i].setNextPositionY( mLoopAttributes[i].getNextPositionY() + 
+												jitter*proxgridjitter*proxgridstepy);
 		}
 		for(i=0; i<n; i++) {
-			mLoopAttributes[i].nextPos.x = max(min(mLoopAttributes[i].nextPos.x,proxgridr), proxgridl);
-			mLoopAttributes[i].nextPos.y = max(min(mLoopAttributes[i].nextPos.y,proxgridt), proxgridb);
+			mLoopAttributes[i].setNextPositionX( max(min(mLoopAttributes[i].getNextPositionX(),proxgridr), proxgridl));
+			mLoopAttributes[i].setNextPositionY( max(min(mLoopAttributes[i].getNextPositionY(),proxgridt), proxgridb));
 		}
 	}
 
@@ -935,7 +892,7 @@ void ACMediaBrowser::setRepulsionEngine() {
 // SD TODO - DIfferent dimensionality reduction too
 // This function make the kmeans and set some varaibles : 
 // mClusterCenters
-// mLoopAttributes
+// mLoopAttributes -> ACMediaNode
 void ACMediaBrowser::updateClusters(bool animate){
 	if (mVisPlugin==NULL && mNeighborsPlugin==NULL)
 		kmeans(animate);
@@ -980,23 +937,28 @@ void ACMediaBrowser::updateNextPositions(){
 }
 
 void ACMediaBrowser::setNextPositions2dim(){
-	if(mLibrary == NULL) return; 
+	// XS TODO clean this one !
+	if(mLibrary == NULL) 
+		return; 
+	if(mLibrary->isEmpty()) 
+		return;
 	
 	ACPoint p;
 	vector<float> tmpFeatures;
-	vector<ACMedia*> loops = mLibrary->getAllMedia();
-	assert(loops.size() == mLoopAttributes.size()); 
-	
-	int nbMedia = loops.size(); 
-	if(nbMedia == 0) 
-		return;
-	int nbFeature = loops.back()->getNumberOfFeaturesVectors();
+		
+	int nbMedia = mLibrary->getSize(); 
+	// XS TODO problem if all media don't have the same number of features
+	int nbFeature = mLibrary->getMedia(0)->getNumberOfFeaturesVectors();
 	int featDim;
 	int totalDim = 0;
-	assert(mFeatureWeights.size() == nbFeature);
+	assert(mFeatureWeights.size() == nbFeature); // XS TODO change this
 	
+	// XS why recalculate totaldim ?
+	// ACMediaLibrary should know it
+	// XS and, you can do a +getSize() instead of ++ !!!
 	for(int f=0; f< nbFeature; f++){
-		featDim = loops.back()->getFeaturesVector(f)->getSize();
+		// XS TODO again, problem if all media don't have the same number of features
+		featDim = mLibrary->getMedia(0)->getFeaturesVector(f)->getSize();
 		for(int d=0; d < featDim; d++){
 			totalDim++;
 		}
@@ -1006,37 +968,45 @@ void ACMediaBrowser::setNextPositions2dim(){
 	tmpFeatures.resize(totalDim);
 	std::cout << "Total dimension = " << totalDim << std::endl;
 	
+	// XS TODO iterator
 	for(int i=0; i<nbMedia; i++) {    
 		int tmpIdx = 0;
 		for(int f=0; f< nbFeature; f++){
-			featDim = loops.back()->getFeaturesVector(f)->getSize();
+			// XS TODO again, problem if all media don't have the same number of features
+			featDim = mLibrary->getMedia(0)->getFeaturesVector(f)->getSize();
 			for(int d=0; d < featDim; d++){
-				tmpFeatures[tmpIdx] = loops[i]->getFeaturesVector(f)->getFeatureElement(d);
+				tmpFeatures[tmpIdx] = mLibrary->getMedia(i)->getFeaturesVector(f)->getFeatureElement(d);
 				tmpIdx++;
 			}
 		}
 		// DT : Problem if there is less than 2 dims
 		p.x = tmpFeatures[1]/10;
 		p.y = tmpFeatures[2]/10;
-		mLoopAttributes[i].nextPos = p;
+		this->getMediaNode(i).setNextPosition(p);
 	}
 }
 
-void ACMediaBrowser::kmeans(bool animate)
-{
+// XS 150310
+// . removed assert size
+// . included ACMediaNode 
+void ACMediaBrowser::kmeans(bool animate) {
 	int i,j,d,f;
 	
-	if(mLibrary == NULL) return; 
+	if(mLibrary == NULL) {
+		cerr << "<ACMediaBrowser::kmeans> : Media Library NULL" << endl;
+		return;
+	}
+	else if(mLibrary->isEmpty()) {
+		cerr << "<ACMediaBrowser::kmeans> : empty Media Library " << endl;
+		return;
+	}
+
+	int object_count = mLibrary->getSize();
 	
-	vector<ACMedia*> loops = mLibrary->getAllMedia();
-	assert(loops.size() == mLoopAttributes.size()); 
-	
-	int object_count = loops.size(); if(object_count == 0) return;
-	int feature_count = loops.back()->getNumberOfFeaturesVectors();
+	// XS TODO problem if all media don't have the same number of features
+	int feature_count = mLibrary->getMedia(0)->getNumberOfFeaturesVectors();
 	double inv_weight = 0.0;
-	
-	assert(mFeatureWeights.size() == feature_count);
-	
+		
 	vector< int > 			cluster_counts;
 	vector<vector<vector <float> > >cluster_accumulators; // cluster, feature, desc
 	vector< float > 		cluster_distances; // for computation
@@ -1068,7 +1038,7 @@ void ACMediaBrowser::kmeans(bool animate)
 		// TODO SD - Avoid selecting the same twice
 		while(l--)
 		{
-			if(mLoopAttributes[r].navigationLevel >= mNavigationLevel) break;
+			if(this->getMediaNode(r).getNavigationLevel() >= mNavigationLevel) break;
 			else r = random() % object_count;
 		}
 		
@@ -1077,23 +1047,20 @@ void ACMediaBrowser::kmeans(bool animate)
 		
 		for(f=0; f<feature_count; f++)
 		{
-			int desc_count = loops.back()->getFeaturesVector(f)->getSize();
+			// XS again, what if all media don't have the same number of features ?
+			int desc_count = mLibrary->getMedia(0)->getFeaturesVector(f)->getSize();
 			
 			mClusterCenters[i][f].resize(desc_count);
 			cluster_accumulators[i][f].resize(desc_count);
 			
 			for(d=0; d<desc_count; d++)
 			{
-				// XS TODO check this getFeature
-				mClusterCenters[i][f][d] = loops[r]->getFeaturesVector(f)->getFeatureElement(d);
+				mClusterCenters[i][f][d] = mLibrary->getMedia(r)->getFeaturesVector(f)->getFeatureElement(d);
 				
 				//printf("cluster  %d center: %f\n", i, mClusterCenters[i][f][d]);
 			}
 		}
 	}
-	
-	
-	
 	
 	int n_iterations = 20, it;
 	
@@ -1111,7 +1078,8 @@ void ACMediaBrowser::kmeans(bool animate)
 			cluster_counts[i] = 0;
 			for(f=0; f<feature_count; f++)
 			{
-				int desc_count = loops.back()->getFeaturesVector(f)->getSize();
+				// XS again, what if all media don't have the same number of features ?
+				int desc_count = mLibrary->getMedia(0)->getFeaturesVector(f)->getSize();
 				
 				for(d=0; d<desc_count; d++)
 				{
@@ -1123,7 +1091,7 @@ void ACMediaBrowser::kmeans(bool animate)
 		for(i=0; i<object_count; i++)
 		{
 			// check if we should include this object
-			if(mLoopAttributes[i].navigationLevel < mNavigationLevel) continue;
+			if(this->getMediaNode(i).getNavigationLevel() < mNavigationLevel) continue;
 			
 			// compute distance between this object and every cluster
 			for(j=0; j<mClusterCount; j++)
@@ -1145,7 +1113,7 @@ void ACMediaBrowser::kmeans(bool animate)
 				
 				//cluster_distances[j] = compute_distance(mClusterCenters[j], loops[i].getAllFeaturesVectors(), mFeatureWeights, true);
 				cluster_distances[j] = 0;
-				cluster_distances[j] = compute_distance(loops[i]->getAllFeaturesVectors(), mClusterCenters[j], mFeatureWeights, false);
+				cluster_distances[j] = compute_distance(mLibrary->getMedia(i)->getAllFeaturesVectors(), mClusterCenters[j], mFeatureWeights, false);
 				
 				//printf("distance cluster %d to object %d = %f\n", j, i,  cluster_distances[j]);
 			}
@@ -1159,15 +1127,15 @@ void ACMediaBrowser::kmeans(bool animate)
 			// update accumulator and counts
 			
 			cluster_counts[jmin]++;
-			mLoopAttributes[i].cluster = jmin;
+			this->getMediaNode(i).setClusterId (jmin);
 			for(f=0; f<feature_count; f++)
 			{
-				int desc_count = loops.back()->getFeaturesVector(f)->getSize();
+				// XS again, what if all media don't have the same number of features ?
+				int desc_count = mLibrary->getMedia(0)->getFeaturesVector(f)->getSize();
 				
 				for(d=0; d<desc_count; d++)
 				{
-					// XS TODO check this getFeature
-					cluster_accumulators[jmin][f][d] += loops[i]->getFeaturesVector(f)->getFeatureElement(d);
+					cluster_accumulators[jmin][f][d] += mLibrary->getMedia(i)->getFeaturesVector(f)->getFeatureElement(d);
 				}
 			}
 		}
@@ -1180,7 +1148,8 @@ void ACMediaBrowser::kmeans(bool animate)
 			{
 				for(f=0; f<feature_count; f++)
 				{
-					int desc_count = loops.back()->getFeaturesVector(f)->getSize();
+					// XS again, what if all media don't have the same number of features ?
+					int desc_count = mLibrary->getMedia(0)->getFeaturesVector(f)->getSize();
 					
 					for(d=0; d<desc_count; d++)
 					{
@@ -1221,51 +1190,35 @@ void ACMediaBrowser::setSelectedObject(int index)
 // AM : TODO move this out of core (it's GUI related)
 void ACMediaBrowser::setNextPositionsPropeller(){
 	std::cout << "ACMediaBrowser::setNextPositionsPropeller" <<std::endl;
-	//float radius = 1.0, cluster_disp = 0.1;
+
+	if (mLibrary->isEmpty() ) return;
+	if (mSelectedLoop < 0 || mSelectedLoop >= getNumberOfMediaNodes()) return ;
+
+
 	float r, theta;
-	vector<ACMedia*> loops = mLibrary->getAllMedia();
-	int i, n = loops.size();
 	ACPoint p;
-	
-	if (n <=0 ) return;
-	if (mSelectedLoop < 0 || mSelectedLoop >= mLoopAttributes.size()) return ;
-	
 	p.x = p.y = p.z = 0.0;
-	mLoopAttributes[mSelectedLoop].nextPos = p;
+	this->getMediaNode(mSelectedLoop).setNextPosition(p);
 	
-	//TiRandomSeed((int)TiGetTime());
 	TiRandomSeed(1234);
 	
-	for(i=0; i<n; i++)
-	{
-		int ci = mLoopAttributes[i].cluster;
-		
-		//theta = 2*M_PI / n * i;
-		//r = compute_distance(objects[selected_object], objects[i], mFeatureWeights, false);
-		
+	// XS loop on MediaNodes.
+	// each MediaNode has a MediaId by which we can access the Media
+	
+	for (ACMediaNodes::iterator node = mLoopAttributes.begin(); node != mLoopAttributes.end(); ++node){
+		int ci = (*node).getClusterId();
+
 		// SD TODO - test both approaches
 		r=1;
-		r = compute_distance(loops[mSelectedLoop]->getAllFeaturesVectors(), loops[i]->getAllFeaturesVectors(), mFeatureWeights, false) * 10.0;
-		
-		//r /= 5000.0;
-		
+		r = compute_distance(mLibrary->getMedia(mSelectedLoop)->getAllFeaturesVectors(), 
+							 mLibrary->getMedia((*node).getMediaId())->getAllFeaturesVectors(), 
+							 mFeatureWeights, false) * 10.0;
 		r /= 100.0;
-		
-		//r /= sqrt(7.0);
-		//r*= r*r;
-		
 		theta = 2*M_PI * ci / (float)mClusterCount;
 		
-		//double dt = compute_distance(loops[i].getAllFeaturesVectors(), mClusterCenters[ci], mFeatureWeights, true) / 2.0;
 		double dt = 1;
-		dt = compute_distance(loops[i]->getAllFeaturesVectors(), mClusterCenters[ci], mFeatureWeights, false) / 2.0 * 10.0;
-		//theta += ((i%2)==0?-1.0:1.0) * dt / 6.0;
-		
-		// dt /= 3.0;
-		// Images
+		dt = compute_distance(mLibrary->getMedia((*node).getMediaId())->getAllFeaturesVectors(), mClusterCenters[ci], mFeatureWeights, false) / 2.0 * 10.0;
 		dt /= 3.0;
-		
-		//theta += (TiRandom() *2.0 - 1.0) * dt;
 		theta += dt;
 		
 		p.x = sin(theta)*r;
@@ -1274,7 +1227,7 @@ void ACMediaBrowser::setNextPositionsPropeller(){
 		
 		printf("computed next position: theta:%f,r=%f,  (%f %f %f)\n", theta, r, p.x, p.y, p.z);
 		
-		mLoopAttributes[i].nextPos = p;
+		(*node).setNextPosition(p);
 	}
 	
 	setNeedsDisplay(true);
@@ -1287,9 +1240,8 @@ void ACMediaBrowser::commitPositions()
 {
 	int i;
 	
-	for(i=0; i<mLoopAttributes.size(); i++)
-	{
-		mLoopAttributes[i].currentPos = mLoopAttributes[i].nextPos;
+	for (ACMediaNodes::iterator node = mLoopAttributes.begin(); node != mLoopAttributes.end(); ++node){
+		(*node).commitPosition();
 	}
 }
 
@@ -1377,6 +1329,17 @@ int ACMediaBrowser::toggleSourceActivity(float _x, float _y)
 }
 */
 
+// XS new 150310
+// . toggleSourceActivity is in fact in ACMediaNode now
+// . browser takes care of threads
+int ACMediaBrowser::toggleSourceActivity(ACMediaNode &node, int _activity) {
+	node.toggleActivity(_activity);
+	setNeedsActivityUpdateLock(1);
+	setNeedsActivityUpdateAddMedia(node.getMediaId()); // XS previously: loop_id
+	setNeedsActivityUpdateLock(0);	
+}
+
+// XS deprecated
 int ACMediaBrowser::toggleSourceActivity(int lid, int type)
 {
 	int loop_id;
@@ -1387,19 +1350,11 @@ int ACMediaBrowser::toggleSourceActivity(int lid, int type)
 	
 	if ( (loop_id>=0) && (loop_id<mLibrary->getSize()) )
 	{
-		x = mLoopAttributes[loop_id].currentPos.x;
-		y = 0;
-		z = mLoopAttributes[loop_id].currentPos.y;
-		
-		if (mLoopAttributes[loop_id].active == 0) {
-			// SD TODO - audio engine
-			// audio_cycle->getAudioFeedback()->createSourceWithPosition(loop_id, x, y, z);
-			mLoopAttributes[loop_id].active = type;			
+		if (this->getMediaNode(loop_id).getActivity()==0) {
+			this->getMediaNode(loop_id).setActivity(type);			
 		}
-		else if (mLoopAttributes[loop_id].active >= 1) {
-			// SD TODO - audio engine
-			// audio_cycle->getAudioFeedback()->deleteSource(loop_id);
-			mLoopAttributes[loop_id].active = 0;
+		else if (this->getMediaNode(loop_id).getActivity() >= 1) {
+			this->getMediaNode(loop_id).setActivity(0);
 		}
 		
 		setNeedsActivityUpdateLock(1);
@@ -1414,58 +1369,49 @@ int ACMediaBrowser::toggleSourceActivity(int lid, int type)
 	}	
 }
 
-void ACMediaBrowser::setClosestLoop(int _loop_id)
-{
-	int loop_id;
-	closest_loop = _loop_id;
+// XS TODO loopId is in fact a nodeId
+void ACMediaBrowser::setClosestLoop(int _loop_id) {
+	closest_loop = _loop_id; // XS set it here even if < 0 ?
 	if (_loop_id<0) {
 		return;
 	}
-	if (mLoopAttributes[_loop_id].navigationLevel < getNavigationLevel()) {
+	if (this->getMediaNode(_loop_id).getNavigationLevel() < getNavigationLevel()) {
 		return;
 	}
 	
 	if (auto_play) {
-		for (loop_id=0;loop_id<mLibrary->getSize();loop_id++) {
-			if(mLoopAttributes[loop_id].navigationLevel >= getNavigationLevel()) {
-				if ( (loop_id!=_loop_id) && (mLoopAttributes[loop_id].active == 2) ) {
-					toggleSourceActivity(loop_id);
-				}
+		// set inactive nodes from 0 to 2
+		// set active modes from 2 to 0
+		// nodes with activity = 1 are left as is
+		for (ACMediaNodes::iterator node = mLoopAttributes.begin(); node != mLoopAttributes.end(); ++node){
+			if (((*node).getNavigationLevel() >= getNavigationLevel()) && ((*node).getActivity() != 1 )) {
+				toggleSourceActivity(*node, 2);	
 			}
+			auto_play_toggle = 1;
 		}
-		if ( (mLoopAttributes[_loop_id].navigationLevel >= getNavigationLevel()) && (mLoopAttributes[_loop_id].active == 0) ) {
-			toggleSourceActivity(_loop_id, 2);
-		}
-		auto_play_toggle = 1;
 	}
+	// switch to zero the nodes with activity =2
 	else if (auto_play_toggle) {
-		for (loop_id=0;loop_id<mLibrary->getSize();loop_id++) {
-			if ( mLoopAttributes[loop_id].active == 2 ) {
-				toggleSourceActivity(loop_id);
+		for (ACMediaNodes::iterator node = mLoopAttributes.begin(); node != mLoopAttributes.end(); ++node){
+			if ( (*node).getActivity() == 2 ) {
+				toggleSourceActivity(*node);
 			}
 		}
 		auto_play_toggle = 0;
 	}
-	/*
-	 if (loop_id!=closest_loop) {
-	 if (closest_loop>=0) {
-	 toggleSourceActivity(closest_loop);
-	 }
-	 closest_loop = loop_id;
-	 toggleSourceActivity(closest_loop);
-	 }
-	 */
 }
 
+	
 int ACMediaBrowser::muteAllSources()
 {
 	int loop_id;
 	
+	// XS TODO iterator
 	for (loop_id=0;loop_id<mLibrary->getSize();loop_id++) {
-		if (mLoopAttributes[loop_id].active >= 1) {
+		if (mLoopAttributes[loop_id].getActivity() >= 1) {
 			// SD TODO - audio engine
 			// audio_cycle->getAudioFeedback()->deleteSource(loop_id);
-			mLoopAttributes[loop_id].active = 0;
+			mLoopAttributes[loop_id].setActivity(0);
 			setNeedsActivityUpdateLock(1);
 			setNeedsActivityUpdateAddMedia(loop_id);
 			setNeedsActivityUpdateLock(0);
@@ -1498,4 +1444,35 @@ void ACMediaBrowser::setNeedsActivityUpdateRemoveMedia() {
 
 vector<int>* ACMediaBrowser::getNeedsActivityUpdateMedia() {
 	return &mNeedsActivityUpdateMedia;
+}
+
+
+// XS NEW 100310
+ACMediaNode& ACMediaBrowser::getMediaNode(int i) {
+// XS TODO check on bounds
+// XS TODO mLoopAttributes is not necessarily a vector anymore --> tree
+	return mLoopAttributes[i];
+}
+
+// CF prepareNodes ? (cf. OSG)
+void ACMediaBrowser::initializeNodes(int _defaultNodeId){ // default = 0
+	// makes an ACMediaNode for each Media in the library
+	// if _defaultNodeId is set to 1, it will give a nodeID = mediaID
+	// otherwize by default nodeID = 0;
+	mLoopAttributes.clear(); // XS TODO if this is a vector of pointers it should be deleted properly
+	if  (_defaultNodeId = 0){
+		for (int i=0; i<mLibrary->getSize();i++){
+			//ACMediaNode* mn = new ACMediaNode(0,mLibrary->getMedia(i)->getId());
+			ACMediaNode mn(0,mLibrary->getMedia(i)->getId());
+			mLoopAttributes.push_back(mn); // XS generalize
+		}
+	}
+	else{
+		for (int i=0; i<mLibrary->getSize();i++){
+			int n= mLibrary->getMedia(i)->getId();
+			//ACMediaNode* mn = new ACMediaNode(n,n);
+			ACMediaNode mn(n,n);
+			mLoopAttributes.push_back(mn); // XS generalize
+		}
+	}
 }

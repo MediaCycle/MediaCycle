@@ -37,7 +37,6 @@
 #include "ACMediaBrowser.h"
 #include "ACNetworkSocket.h"
 #include "ACPluginManager.h"
-#include "ACAudio.h"
 
 #include <string>
 #include <cstring>
@@ -105,7 +104,7 @@ public:
 	void setNeedsDisplay(int i);
 	float getCameraZoom();
 	float getCameraRotation();
-	const ACLoopAttribute &getLoopAttributes(int i);
+	const ACMediaNode &getMediaNode(int i);
 	int getNavigationLevel();
 	void getMouse(float *mx, float *my);
 	// 
@@ -157,7 +156,7 @@ public:
 	vector<float> getFeaturesVectorInMedia(int i, string feature_name);
 	
 	// Playing time stamp
-	int setSourceCurser(int lid, int frame_pos);
+	int setSourceCursor(int lid, int frame_pos);
 	
 	// Update audio engine sources
 	void setNeedsActivityUpdateLock(int i);

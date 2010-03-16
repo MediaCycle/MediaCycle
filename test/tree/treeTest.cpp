@@ -1,10 +1,10 @@
 /*
- *  ACImage[loop].h
+ *  tree_test.cpp
  *  MediaCycle
  *
  *  @author Xavier Siebert
- *  @date 11/05/09
- *  @copyright (c) 2009 – UMONS - Numediart
+ *  @date 9/03/10
+ *  @copyright (c) 2010 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
  *  licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -32,41 +32,39 @@
  *
  */
 
-#ifndef ACIMAGE_H
-#define ACIMAGE_H
 
-#include "ACOpenCVInclude.h"
-#include "ACMedia.h"
+#include <algorithm>
 #include <string>
+#include <iostream>
+#include "ACUserLog.h"
 
-// -----------------------------------
+using namespace std;
 
-class ACImage: public ACMedia {
-	// contains the *minimal* information about an image
-public:
-	ACImage();
-	~ACImage();
+int main(int, char **)
+{
+	ACUserLog *pipo = new ACUserLog();
+	pipo->addRootNode(0,0);
+	// clicked on node 0 at time 0
+	pipo->clickNode(0,0);
 	
-	void save(FILE* library_file);
-	int load(FILE* library_file);
-	void saveACL(ofstream &library_file);
-	int loadACL(ifstream &library_file);
-
-	void setThumbnail(IplImage *_thumbnail) { thumbnail = _thumbnail; thumbnail_width = _thumbnail->width; thumbnail_height = _thumbnail->height; }
-	// IplImage* getThumbnail() { return thumbnail; }
-	int getThumbnailWidth() {return thumbnail_width;}
-	int getThumbnailHeight() {return thumbnail_height;}
-	void* getThumbnailPtr() { return (void*)thumbnail; }
+	// add his neighbors
+	pipo->addNode(0, 17, 0); // 1
+	pipo->addNode(0, 3, 0);  // 2
+	pipo->addNode(0, 14, 0); // 3
+	pipo->addNode(0, 12, 0); // 4
+	pipo->addNode(0, 8, 0);  // 5
 	
-	ACMediaData* extractData(std::string fname);
-		
-private:	
-	char  *thumbnail_filename;
-	int thumbnail_width, thumbnail_height; 
-	IplImage *thumbnail;
+	// clicked on node 3 at time 1
+	pipo->clickNode(3,1);  
 	
-	int computeThumbnail(string _fname, int w, int h);
-	int computeThumbnail(ACMediaData* data_ptr, int w=0, int h=0);
-};
-
-#endif // ACIMAGE_H
+	// add his neighbors
+	pipo->addNode(3, 13, 0);  // 6 == 0
+	pipo->addNode(3, 4, 0);  // 7
+	pipo->addNode(3, 11, 0); // 8
+	pipo->addNode(3, 10, 0); // 9
+	pipo->addNode(3, 9, 0) ; // 10	
+	
+	pipo->dump();
+	
+	delete pipo;
+}

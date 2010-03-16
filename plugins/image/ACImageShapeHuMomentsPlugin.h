@@ -1,9 +1,9 @@
 /*
- *  ACImage[loop].h
+ *  ACImageShapeHuMomentsPlugin.h
  *  MediaCycle
  *
  *  @author Xavier Siebert
- *  @date 11/05/09
+ *  @date 17/11/09
  *  @copyright (c) 2009 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
@@ -32,41 +32,23 @@
  *
  */
 
-#ifndef ACIMAGE_H
-#define ACIMAGE_H
+#ifndef _ACIMAGESHAPEMMOMENTSPLUGIN_H
+#define	_ACIMAGESHAPEMMOMENTSPLUGIN_H
 
-#include "ACOpenCVInclude.h"
-#include "ACMedia.h"
-#include <string>
+#include "ACImageAnalysis.h"
+#include "ACPlugin.h"
+#include "ACMediaFeatures.h"
 
-// -----------------------------------
+#include<iostream>
 
-class ACImage: public ACMedia {
-	// contains the *minimal* information about an image
+class ACImageShapeHuMomentsPlugin : public ACPlugin {
 public:
-	ACImage();
-	~ACImage();
-	
-	void save(FILE* library_file);
-	int load(FILE* library_file);
-	void saveACL(ofstream &library_file);
-	int loadACL(ifstream &library_file);
-
-	void setThumbnail(IplImage *_thumbnail) { thumbnail = _thumbnail; thumbnail_width = _thumbnail->width; thumbnail_height = _thumbnail->height; }
-	// IplImage* getThumbnail() { return thumbnail; }
-	int getThumbnailWidth() {return thumbnail_width;}
-	int getThumbnailHeight() {return thumbnail_height;}
-	void* getThumbnailPtr() { return (void*)thumbnail; }
-	
-	ACMediaData* extractData(std::string fname);
-		
-private:	
-	char  *thumbnail_filename;
-	int thumbnail_width, thumbnail_height; 
-	IplImage *thumbnail;
-	
-	int computeThumbnail(string _fname, int w, int h);
-	int computeThumbnail(ACMediaData* data_ptr, int w=0, int h=0);
+    ACImageShapeHuMomentsPlugin();
+    ~ACImageShapeHuMomentsPlugin();
+	std::vector<ACMediaFeatures*> calculate(std::string aFileName);
+	std::vector<ACMediaFeatures*> calculate(ACMediaData* _data);
+private:
+	ACMediaFeatures* calculateHuMoments(ACImageAnalysis* image);
 };
 
-#endif // ACIMAGE_H
+#endif	/* _ACIMAGESHAPEMMOMENTSPLUGIN_H */

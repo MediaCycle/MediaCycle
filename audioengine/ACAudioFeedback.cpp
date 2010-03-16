@@ -689,12 +689,12 @@ void ACAudioFeedback::processAudioUpdate()
 	
 	for (i=0;i<(*mNeedsActivityUpdateMedia).size();i++) {
 		loop_id = (*mNeedsActivityUpdateMedia)[i];
-		const ACLoopAttribute &attribute = media_cycle->getLoopAttributes(loop_id);
-		const ACPoint &p = attribute.currentPos, &p2 = attribute.nextPos;
+		const ACMediaNode &attribute = media_cycle->getMediaNode(loop_id);
+		const ACPoint &p = attribute.getCurrentPosition(), &p2 = attribute.getNextPosition();
 		x=p.x;
 		y=0;
 		z=p.y;
-		if (attribute.active) {
+		if (attribute.getActivity()==1) {
 			createSourceWithPosition(loop_id, x, y, z);
 		}
 		else {
@@ -962,7 +962,7 @@ void ACAudioFeedback::processAudioEngineSamplePosition(int _loop_slot, int *_sam
 	else {
 		frame_pos = (float)*_sample_pos / (float) output_sample_rate / 0.01 / (100.0 / 76.0); // SD TODO - hop size should be used.... 
 	}
-	media_cycle->setSourceCurser(loop_id, frame_pos);
+	media_cycle->setSourceCursor(loop_id, frame_pos);
 }
 
 // SD TODO - should be passed a pointer to the loop samples to make the engine separate from ACAudioFeedback

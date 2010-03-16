@@ -68,6 +68,7 @@ class ACImageCycleOsgQt : public QMainWindow
 		
 		void on_sliderClusters_sliderReleased();
 		
+		void loadACLFile();
 		void saveACLFile();
 		void loadMediaDirectory();
 		void loadMediaFiles();

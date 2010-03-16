@@ -33,6 +33,7 @@
  */
 
 #include "ACAudioFeaturesPlugin.h"
+#include "ACAudio.h"
 
 #include <vector>
 #include <string>

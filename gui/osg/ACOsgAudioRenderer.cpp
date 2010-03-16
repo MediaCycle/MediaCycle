@@ -236,8 +236,8 @@ void ACOsgAudioRenderer::entryGeode() {
 	state = entry_geode->getOrCreateStateSet();
 	state->setMode(GL_NORMALIZE, osg::StateAttribute::ON);	
 
-	//entry_geode->addDrawable(new osg::ShapeDrawable(new osg::Box(osg::Vec3(0.0f,0.0f,0.0f),0.01), hints)); //draws a square
-	entry_geode->addDrawable(new osg::ShapeDrawable(new osg::Sphere(osg::Vec3(0.0f,0.0f,0.0f),0.01), hints)); // draws a sphere
+	//entry_geode->addDrawable(new osg::ShapeDrawable(new osg::Box(osg::Vec3(0.0f,0.0f,0.0f),0.01), hints)); //draws a square // Vintage AudioCycle
+	entry_geode->addDrawable(new osg::ShapeDrawable(new osg::Sphere(osg::Vec3(0.0f,0.0f,0.0f),0.01), hints)); // draws a sphere // MultiMediaCycle
 	//entry_geode->addDrawable(new osg::ShapeDrawable(new osg::Cylinder(osg::Vec3(0.0f,0.0f,0.0f),0.01, 0.0f), hints)); // draws a disc
 	//entry_geode->addDrawable(new osg::ShapeDrawable(new osg::Capsule(osg::Vec3(0.0f,0.0f,0.0f),0.01, 0.005f), hints)); // draws a sphere
 	//sprintf(name, "some audio element");
@@ -253,9 +253,9 @@ void ACOsgAudioRenderer::prepareNodes() {
 	curser_geode = 0;
 	entry_geode = 0;
 	
-	// waveformGeode();
-	// curserGeode();
-	if  (media_cycle->getLoopAttributes(loop_index).isDisplayed){
+	//waveformGeode();
+	//curserGeode();
+	if  (media_cycle->getMediaNode(loop_index).isDisplayed()){
 		entryGeode();
 		media_node->addChild(entry_geode);
 	}	
@@ -278,10 +278,10 @@ void ACOsgAudioRenderer::updateNodes(double ratio) {
 		colors[4] = Vec4(0.5,1,0.5,1);
 	}
 	
-	const ACLoopAttribute &attribute = media_cycle->getLoopAttributes(loop_index);
+	const ACMediaNode &attribute = media_cycle->getMediaNode(loop_index);
 
-	if ( attribute.isDisplayed ){
-		const ACPoint &p = attribute.currentPos, &p2 = attribute.nextPos;
+	if ( attribute.isDisplayed() ){
+		const ACPoint &p = attribute.getCurrentPosition(), &p2 = attribute.getNextPosition();
 		double omr = 1.0-ratio;
 				
 		omr = 1;
@@ -308,8 +308,8 @@ void ACOsgAudioRenderer::updateNodes(double ratio) {
 		localscale = max(localscale,minscale);
 		// localscale = 0.5;
 		
-		if (0) { //attribute.active) {
-						
+		if (attribute.getActivity()==1) {	// with waveform
+		//if (0) {	// without waveform
 			localscale = 0.5;
 			
 			if(waveform_geode == 0) {
@@ -326,7 +326,7 @@ void ACOsgAudioRenderer::updateNodes(double ratio) {
 			
 			// curserT.makeTranslate(Vec3(omr*p.x + ratio*p2.x + attribute.curser * xstep * 0.5 / zoom, omr*p.y + ratio*p2.y, 0.0)); // omr*p.z + ratio*p2.z));
 			// curserT =  Matrix::scale(0.5/zoom,0.5/zoom,0.5/zoom) * curserT;
-			curserT.makeTranslate(Vec3(attribute.curser * xstep, 0.0, 0.0)); 
+			curserT.makeTranslate(Vec3(attribute.getCursor() * xstep, 0.0, 0.0)); 
 			curser_transform->setMatrix(curserT);
 		
 			T =  Matrix::rotate(-angle,Vec3(0.0,0.0,1.0)) * Matrix::scale(localscale/zoom,localscale/zoom,localscale/zoom) * T;
@@ -337,13 +337,13 @@ void ACOsgAudioRenderer::updateNodes(double ratio) {
 				media_node->removeChild(1, 1);
 			}
 					
-			((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(colors[attribute.cluster%NCOLORS]);
+			((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(colors[attribute.getClusterId()%NCOLORS]);
 			
 			T =  Matrix::rotate(-angle,Vec3(0.0,0.0,1.0)) * Matrix::scale(localscale/zoom,localscale/zoom,localscale/zoom) * T;
 		}
 				
 		unsigned int mask = (unsigned int)-1;
-		if(attribute.navigationLevel >= media_cycle->getNavigationLevel()) {
+		if(attribute.getNavigationLevel() >= media_cycle->getNavigationLevel()) {
 			entry_geode->setNodeMask(mask);
 		}
 		else {

@@ -44,25 +44,27 @@
 using namespace std;
 
 #include <ACMediaTypes.h>
+#include <ACMediaNode.h>
 
-struct ACPoint
-{
-	float x, y, z;
-};
+// XS the following 2 structs are now in ACMediaNode
+//struct ACPoint
+//{
+//	float x, y, z;
+//};
 
-struct ACLoopAttribute
-{
-	ACPoint 	currentPos, nextPos, nextPosGrid;
-	ACPoint		viewPos;
-	float		distanceMouse;
-	int 		cluster; //cluster index
-	int			active;  // plying or not - and in which mode
-	int			curser;
-	int 		navigationLevel; // initially all set to zero, while traversing, only the one incremented are kept
-	int			hover;
-	bool		isDisplayed;//CF
-	ACLoopAttribute() : cluster(0), active(0), navigationLevel(0), hover(0), isDisplayed(false) {}
-};//CF: how come isDisplayed is missing here while it is part of ACMediaBrowser!
+//struct ACLoopAttribute
+//{
+//	ACPoint 	currentPos, nextPos, nextPosGrid;
+//	ACPoint		viewPos;
+//	float		distanceMouse;
+//	int 		cluster; //cluster index
+//	int			active;  // plying or not - and in which mode
+//	int			cursor;
+//	int 		navigationLevel; // initially all set to zero, while traversing, only the one incremented are kept
+//	int			hover;
+//	bool		isDisplayed;//CF
+//	ACLoopAttribute() : cluster(0), active(0), navigationLevel(0), hover(0), isDisplayed(false) {}
+//};//CF: how come isDisplayed is missing here while it is part of ACMediaBrowser!
 
 enum MCActionType {
 	MC_ACTION_ADDFILE,
@@ -114,7 +116,7 @@ public:
 	void setNeedsDisplay(int i);
 	float getCameraZoom();
 	float getCameraRotation();
-	const ACLoopAttribute &getLoopAttributes(int i);
+	const ACMediaNode &getMediaNode(int i);
 	int getNavigationLevel();
 	void getMouse(float *mx, float *my);
 	// 
@@ -168,7 +170,7 @@ public:
 	vector<float> getFeaturesVectorInMedia(int i, string feature_name);
 	
 	// Playing time stamp
-	int setSourceCurser(int lid, int frame_pos);
+	int setSourceCursor(int lid, int frame_pos);
 	
 	// Update audio engine sources
 	void setNeedsActivityUpdateLock(int i);

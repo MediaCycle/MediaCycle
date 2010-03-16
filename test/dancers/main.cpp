@@ -302,7 +302,7 @@ char* get_error_message(){
 
 // common to all types of messages:
 string fillOutputBuffer(ACMediaLibrary* media_library, ACMediaBrowser* media_browser, int nvid){
-	int n_loops = media_browser->getNumberOfLoops();
+	int n_loops = media_browser->getNumberOfMediaNodes();
 	int n_labels = media_browser->getNumberOfLabels();
 	string sbuffer_send;
 
@@ -315,13 +315,15 @@ string fillOutputBuffer(ACMediaLibrary* media_library, ACMediaBrowser* media_bro
 	sbuffer_send = onvid.str(); // could add "0" in front for message type (not done here because not useful for web application)
 	
 	// loop on all videos to see which ones to send out
-	const vector<ACLoopAttribute> loop_attributes = media_browser->getLoopAttributes();
 	int chk_loops=0;
+// XS TODO iterators ?
+// like	for (ACMediaNodes::iterator node = mLoopAttributes.begin(); node != mLoopAttributes.end(); ++node){
+
 	for (int i=0; i< n_loops; i++){
-		if (loop_attributes[i].isDisplayed){
+		if (media_browser->getMediaNode(i).isDisplayed()){
 			chk_loops++;
-			int posx = (int) loop_attributes[i].nextPos.x;
-			int posy = (int) loop_attributes[i].nextPos.y;
+			int posx = (int) media_browser->getMediaNode(i).getNextPositionX();
+			int posy = (int) media_browser->getMediaNode(i).getNextPositionY();
 			ostringstream oss ;
 			oss.fill('0'); // fill with zeros (otherwise will leave blanks)
 			oss << setw(6) << generateID(media_library->getMedia(i)->getFileName()) << setw(3) << posx << setw(3)<< posy; // fixed format
@@ -390,7 +392,7 @@ void startOrRedraw(MediaCycle *mediacycle, int nbVideo, char **buffer_send, int*
 	ACMediaBrowser* media_browser;
 	media_browser = mediacycle->getBrowser();
 	
-	int n_loops = media_browser->getNumberOfLoops();
+	int n_loops = media_browser->getNumberOfMediaNodes();
 //	int n_labels = media_browser->getNumberOfLabels();
 
 	if (nbVideo > n_loops) {
@@ -443,8 +445,7 @@ void startOrRedrawRandom(MediaCycle *mediacycle, int nbVideo, char **buffer_send
 	ucolvec indices = sort_index(q);
 	ucolvec trunc_indices = indices.rows(0,nbVideo-1);
 	//cout << trunc_indices << endl;
-	const vector<ACLoopAttribute> loop_attributes = media_browser->getLoopAttributes();
-	if (loop_attributes.size() < trunc_indices.n_rows ){
+	if (media_browser->getNumberOfMediaNodes() < trunc_indices.n_rows ){
 		cerr << "<startOrRedrawRandom> : not enough loop attributes" << endl;
 		return;
 	}
@@ -461,8 +462,8 @@ void startOrRedrawRandom(MediaCycle *mediacycle, int nbVideo, char **buffer_send
 		int l = trunc_indices[i];
 		// positions should in range [0:999], which is a fraction of the screen size
 		// XS for the moment they depend on mViewWidth, mViewHeight in ACMediaBrowser
-		int posx = (int) loop_attributes[l].currentPos.x;
-		int posy = (int) loop_attributes[l].currentPos.y;
+		int posx = (int) media_browser->getMediaNode(l).getCurrentPositionX();
+		int posy = (int) media_browser->getMediaNode(l).getCurrentPositionY();
 		ostringstream oss ;
 		oss.fill('0'); // fill with zeros (otherwise will leave blanks)
 		oss << setw(6) << i << setw(3) << posx << setw(3)<< posy; // fixed format
@@ -523,7 +524,7 @@ void itemClicked(MediaCycle *mediacycle, int idVideo, char **buffer_send, int* l
 	
 	ACMediaBrowser* media_browser;
 	media_browser = mediacycle->getBrowser();
-	int n_loops = media_browser->getNumberOfLoops();
+	int n_loops = media_browser->getNumberOfMediaNodes();
 	// XS should also be = media_library->getSize()
 	
 	if (idVideo < 0 || idVideo > n_loops) {

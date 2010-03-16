@@ -7,19 +7,19 @@
 
 //using namespace arma;
 
-#ifndef _ACNEIGHBORHOODSPLUGINRANDOM_
-#define _ACNEIGHBORHOODSPLUGINRANDOM_
+#ifndef _ACNEIGHBORHOODSPLUGIN_
+#define _ACNEIGHBORHOODSPLUGIN_
 
-class ACNeighborhoodsPluginRandom : public ACPlugin {
+class ACNeighborhoodsPlugin : public ACPlugin {
 public:
-  ACNeighborhoodsPluginRandom();
-  ~ACNeighborhoodsPluginRandom();
+  ACNeighborhoodsPlugin();
+  ~ACNeighborhoodsPlugin();
 	void updateClusters(ACMediaBrowser* ){};//not implemented
 	void updateNextPositions(ACMediaBrowser* ){};//not implemented
 	virtual void updateNeighborhoods(ACMediaBrowser* );
 protected:
 };
 
-#endif	/* _ACNEIGHBORHOODSPLUGINRANDOM_ */
+#endif	/* _ACNEIGHBORHOODSPLUGIN_ */
 
 

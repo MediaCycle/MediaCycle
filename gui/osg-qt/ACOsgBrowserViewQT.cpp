@@ -235,7 +235,7 @@ void ACOsgBrowserViewQT::mouseReleaseEvent( QMouseEvent* event )
     }
     osg_view->getEventQueue()->mouseButtonRelease(event->x(), event->y(), button);
 	
-	if(media_cycle && media_cycle->hasBrowser())
+	if(media_cycle && media_cycle->hasBrowser() && forwarddown==0)
 	{
 		media_cycle->setClickedLoop(-1);
 	}
