@@ -46,14 +46,14 @@ int main(int argc, char** argv) {
     //string libpath("/home/alexis/NetBeansProjects/MediaCycle/lib/Caltech101-a.acl");
 
     cout<<"new MediaCycle"<<endl;
-    mediacycle = new MediaCycle(MEDIA_TYPE_VIDEO,"/home/alexis/NetBeansProjects/MediaCycle/lib/","mainlib.acl");
-    //mediacycle = new MediaCycle(MEDIA_TYPE_AUDIO,"/home/alexis/NetBeansProjects/MediaCycle/lib/","mainlib.acl");
-    //    mediacycle->addPlugin("/home/alexis/Programmation/TiCore-app/Applications/Numediart/MediaCycle/src/Builds/linux-x86/plugins/eyesweb/mc_eyesweb.so");
-    mediacycle->addPlugin ("/Users/xavier/development/Fall09/ticore-app/Applications/Numediart/MediaCycle/src/Builds/darwin-xcode/plugins/eyesweb/Debug/mc_eyesweb.dylib");
-	//	("/Users/dtardieu/src/Numediart/ticore-app/Applications/Numediart/MediaCycle/src/Builds/darwin-x86/plugins/eyesweb/Debug/mc_eyesweb.dylib");
-    //    mediacycle->importDirectory("/Users/xavier/numediart/Project7.3-DancersCycle/Recordings_Raffinerie_0709/FrontShots/H264_subset/",0);
-	//	("/Users/dtardieu/data/DANCERS/Video/Front/",0);
-	
+		mediacycle = new MediaCycle(MEDIA_TYPE_AUDIO,"/tmp/","mediacycle.acl");
+		mediacycle->addPlugin("/Users/dtardieu/src/Numediart/ticore-app/Applications/Numediart/MediaCycle/src/Builds/darwin-x86/plugins/audio/Debug/mc_audiofeatures.dylib");
+		mediacycle->addPlugin ("/Users/dtardieu/src/Numediart/ticore-app/Applications/Numediart/MediaCycle/src/Builds/darwin-x86/plugins/visualisation/Debug/mc_visualisation.dylib");
+		//		media_cycle->setVisualisationPlugin("PCAVis");
+
+		mediacycle->importDirectory("/Users/dtardieu/data/olpc-sound-samples-v2/Sounds/AdamKeshen44/",0);
+    mediacycle->getLibrary()->saveAsLibrary("test.mcl");
+		
 // 	cout<<"setCulsterN"<<endl;
 //     mediacycle->getBrowser()->setClusterNumber(1);
 //     cout<<"importLib"<<endl;
