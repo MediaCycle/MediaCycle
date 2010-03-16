@@ -3,8 +3,6 @@ PROJECT(MediaCycle)
 SUBDIRS(audioengine core cli gui armadillo fftooura gnuplot_i)
 
 INCLUDE_DIRECTORIES(. audioengine core gnuplot_i)
-INCLUDE_DIRECTORIES( "/usr/local/include/TiCore" )
-LINK_DIRECTORIES( ${LINK_DIRECTORIES} "/usr/local/lib" )
 
 # add some find scripts
 # SET(CMAKE_USE_RELATIVE_PATHS YES)
@@ -179,8 +177,11 @@ IF ( USE_BOOST )
 ENDIF ( USE_BOOST )
 
 IF ( USE_COCOA )
-		SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUSE_COCOA")
-		SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DUSE_COCOA")
+	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUSE_COCOA")
+	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DUSE_COCOA")
+	MESSAGE( "TiCore required..." )
+	INCLUDE_DIRECTORIES( "/usr/local/include/TiCore" )
+	LINK_DIRECTORIES( ${LINK_DIRECTORIES} "/usr/local/lib" )
 ENDIF ( USE_COCOA )
 
 # Qt

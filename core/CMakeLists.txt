@@ -7,7 +7,8 @@ ADD_LIBRARY(mediacycle STATIC ${SRC} ${HDR})
 #TARGET_LINK_LIBRARIES(mediacycle gsl gslcblas)
 
 #others
-TARGET_LINK_LIBRARIES(mediacycle TiCommon pthread sndfile)
+#TARGET_LINK_LIBRARIES(mediacycle TiCommon)
+TARGET_LINK_LIBRARIES(mediacycle pthread sndfile)
 
 #OpenCV
 IF ( USE_OPENCV )

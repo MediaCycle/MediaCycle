@@ -51,7 +51,7 @@
 // XS for sorting:
 #include <algorithm>
 
-#include <Common/TiMath.h> // for Timax ...
+//#include <Common/TiMath.h> // for Timax ...
 
 using namespace std;
 // to save library items in binary format, uncomment the following line:
@@ -449,7 +449,7 @@ void ACMediaLibrary::normalizeFeatures() {
 			if (feature->getNeedsNormalization()) {
 				for(k=0; k<mean_features[j].size(); k++) {
 					float old = feature->getFeatureElement(k);
-					feature->setFeatureElement(k, (old - mean_features[j][k]) / ( TI_MAX(stdev_features[j][k] , 0.00001)));
+					feature->setFeatureElement(k, (old - mean_features[j][k]) / ( max(stdev_features[j][k] , 0.00001)));//CF TI_MAX(stdev_features[j][k] , 0.00001)));
 				}
 			}
 		}

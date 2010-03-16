@@ -1,4 +1,4 @@
-IF ( APPLE )
+IF ( APPLE AND USE_COCOA)
 	FILE(GLOB SRC *.m *.mm *.nib)
 	FILE(GLOB HDR *.h)
 
@@ -33,4 +33,4 @@ IF ( APPLE )
 		MESSAGE(FATAL_ERROR "OpenAL requested but not found.")
 	ENDIF ( OPENAL_FOUND)
 
-ENDIF ( APPLE )
+ENDIF ( APPLE AND USE_COCOA)

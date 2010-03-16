@@ -29,7 +29,7 @@
 */
 #ifdef _WIN32
 
-#include <Io/Osc/UdpSocket.h>
+#include "UdpSocket.h"
 
 #include <winsock2.h>   // this must come first to prevent errors with MSVC7
 #include <windows.h>

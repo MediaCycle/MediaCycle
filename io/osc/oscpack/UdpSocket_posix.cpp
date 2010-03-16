@@ -30,7 +30,7 @@
 
 #ifndef _WIN32
 
-#include <Io/Osc/UdpSocket.h>
+#include "UdpSocket.h"
 
 #include <vector>
 #include <algorithm>
@@ -51,8 +51,8 @@
 #include <sys/time.h>
 #include <netinet/in.h> // for sockaddr_in
 
-#include <Io/Osc/PacketListener.h>
-#include <Io/Osc/TimerListener.h>
+#include "PacketListener.h"
+#include "TimerListener.h"
 
 
 #if defined(__APPLE__) && !defined(_SOCKLEN_T)

@@ -35,13 +35,25 @@
 #include "ACMediaBrowser.h"
 
 // XS : this is for initRandomFeatures() ?
-#include <Common/TiMath.h>
-#include <Common/TiTime.h>
+//#include <Common/TiMath.h>
+//#include <Common/TiTime.h>
 
 #include <assert.h>
 #include <math.h>
 #include <algorithm>
 #include <vector>
+
+#include <sys/time.h>
+
+static double getTime()
+{
+    struct timeval tv = {0, 0};
+    struct timezone tz = {0, 0};
+    
+    gettimeofday(&tv, &tz);
+    
+    return (double)tv.tv_sec + tv.tv_usec / 1000000.0;
+}
 
 using namespace std;
 
@@ -194,7 +206,7 @@ ACMediaBrowser::ACMediaBrowser() {
 	
 	mState = AC_IDLE;
 	mLayout = LAYOUT_TYPE_NONE;
-	mRefTime = TiGetTime();
+	mRefTime = getTime();//CF TiGetTime();
 	mFrac = 0.0;
 	
 	mousex = 0.0;
@@ -483,11 +495,11 @@ int ACMediaBrowser::setSourceCursor(int lid, int frame_pos) {
 void ACMediaBrowser::randomizeLoopPositions(){
 	if(mLibrary == NULL) return;
 	for (ACMediaNodes::iterator node = mLoopAttributes.begin(); node != mLoopAttributes.end(); ++node){
-		(*node).setCurrentPosition (TiRandom() * mViewWidth, 
-									TiRandom() * mViewHeight, 
+		(*node).setCurrentPosition (mViewWidth * ((float)rand()) / (float)((1LL<<31)-1L), // CF instead of * TiRandom()
+									mViewHeight * ((float)rand()) / (float)((1LL<<31)-1L), // CF instead of * TiRandom()
 									0);
-		(*node).setNextPosition((*node).getCurrentPositionX() + TiRandom() * mViewWidth / 100.0, 
-								(*node).getCurrentPositionY() + TiRandom() * mViewHeight / 100.0, 
+		(*node).setNextPosition((*node).getCurrentPositionX() + ((float)rand()) / (float)((1LL<<31)-1L) * mViewWidth / 100.0, // CF instead of * TiRandom()
+								(*node).getCurrentPositionY() + ((float)rand()) / (float)((1LL<<31)-1L) * mViewHeight / 100.0, // CF instead of * TiRandom()
 								0);
 	}	
 }
@@ -510,13 +522,13 @@ void ACMediaBrowser::libraryContentChanged() {
 	if (mVisPlugin==NULL && mPosPlugin==NULL) {	
 		for (ACMediaNodes::iterator node = mLoopAttributes.begin(); node != mLoopAttributes.end(); ++node){
 			
-			(*node).setCurrentPosition (TiRandom(), 
-										TiRandom(), 
-										TiRandom() / 10.0);
+			(*node).setCurrentPosition (((float)rand()) / (float)((1LL<<31)-1L), // CF instead of TiRandom(), 
+										((float)rand()) / (float)((1LL<<31)-1L), // CF instead of TiRandom(),  
+										((float)rand()) / (float)((1LL<<31)-1L) / 10.0); // CF instead of TiRandom() / 10.0);
 			
-			(*node).setNextPosition ((*node).getCurrentPositionX() + TiRandom() / 100.0,
-									 (*node).getCurrentPositionY() + TiRandom() / 100.0, 
-									 (*node).getCurrentPositionZ() + TiRandom() / 100.0);		
+			(*node).setNextPosition ((*node).getCurrentPositionX() + ((float)rand()) / (float)((1LL<<31)-1L) / 100.0, // CF instead of TiRandom()
+									 (*node).getCurrentPositionY() + ((float)rand()) / (float)((1LL<<31)-1L) / 100.0, // CF instead of TiRandom()
+									 (*node).getCurrentPositionZ() + ((float)rand()) / (float)((1LL<<31)-1L) / 100.0); // CF instead of TiRandom()	
 			(*node).setDisplayed (true);
 		}
 	}
@@ -883,10 +895,10 @@ void ACMediaBrowser::setProximityGrid() {
 	if (proxgridjitter>0) {
 		for(i=0; i<n; i++) {
 			// XS heavy ?
-			jitter = TiRandom()-0.5;
+			jitter = ((float)rand()) / (float)((1LL<<31)-1L)-0.5;//CF instead of TiRandom()-0.5;
 			mLoopAttributes[i].setNextPositionX( mLoopAttributes[i].getNextPositionX() +
 												jitter*proxgridjitter*proxgridstepx);
-			jitter = TiRandom()-0.5;
+			jitter = ((float)rand()) / (float)((1LL<<31)-1L)-0.5;//CF instead of TiRandom()-0.5;
 			mLoopAttributes[i].setNextPositionY( mLoopAttributes[i].getNextPositionY() + 
 												jitter*proxgridjitter*proxgridstepy);
 		}
@@ -1217,7 +1229,7 @@ void ACMediaBrowser::setNextPositionsPropeller(){
 	p.x = p.y = p.z = 0.0;
 	this->getMediaNode(mSelectedLoop).setNextPosition(p);
 	
-	TiRandomSeed(1234);
+	srand(1234);//CF TiRandomSeed(1234);
 	
 	// XS loop on MediaNodes.
 	// each MediaNode has a MediaId by which we can access the Media
@@ -1267,7 +1279,7 @@ void ACMediaBrowser::setState(ACBrowserState state)
 {
 	if(mState == AC_IDLE)
 	{
-		mRefTime = TiGetTime();
+		mRefTime = getTime(); //CF instead of TiGetTime();
 		mState = state;
 		
 		printf("state changing to %d", state);
@@ -1277,7 +1289,8 @@ void ACMediaBrowser::setState(ACBrowserState state)
 void ACMediaBrowser::updateState()
 {
 #define CUB_FRAC(x) (x*x*(-2.0*x + 3.0))
-	double t = TiGetTime(), frac;
+	double t = getTime(); // CF instead of TiGetTime()
+	double frac;
 	
 	//frac = 2.0 * fabs(t - floor(t) - 0.5);
 	

@@ -30,7 +30,7 @@
 
 #ifndef _WIN32
 
-#include <Io/Osc/NetworkingUtils.h>
+#include "NetworkingUtils.h"
 
 #include <netdb.h>
 #include <sys/socket.h>

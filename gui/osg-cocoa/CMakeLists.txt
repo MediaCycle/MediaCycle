@@ -1,5 +1,5 @@
-IF ( APPLE )
-	FILE(GLOB SRC *.m *.mm *.nib)
+IF ( APPLE AND USE_COCOA)
+	FILE(GLOB SRC *.m *.mm)
 	FILE(GLOB HDR *.h)
 
 	INCLUDE_DIRECTORIES(. ../osg)
@@ -20,5 +20,5 @@ IF ( APPLE )
 	ELSE ( OPENGL_FOUND AND GLUT_FOUND )
 		MESSAGE(FATAL_ERROR "OpenGL/Glut requested but not found.")
 	ENDIF ( OPENGL_FOUND AND GLUT_FOUND )
-ENDIF ( APPLE )
+ENDIF ( APPLE AND USE_COCOA)
 								   
