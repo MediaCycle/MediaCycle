@@ -352,7 +352,7 @@ int processTcpMessageFromSSI(MediaCycle *that, char *buffer, int l, char **buffe
 			for (int k=0; k<that->getLibrary()->getMeanFeatures()[j].size(); k++) {
 				float old = mediaFeatures->getFeatureElement(k);
 				//cout << "(" << j << "," << k << ")" << old << " - " << that->getLibrary()->getMeanFeatures()[j][k] << "/" << that->getLibrary()->getStdevFeatures()[j][k] << endl;
-				mediaFeatures->setFeatureElement(k, (old - that->getLibrary()->getMeanFeatures()[j][k]) / (TI_MAX(that->getLibrary()->getStdevFeatures()[j][k], 0.00001)));
+				mediaFeatures->setFeatureElement(k, (old - that->getLibrary()->getMeanFeatures()[j][k]) / (max(that->getLibrary()->getStdevFeatures()[j][k], 0.00001)));
 			}
 		}
 		/*cout << endl << "after" << endl;
