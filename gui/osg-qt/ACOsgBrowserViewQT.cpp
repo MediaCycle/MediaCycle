@@ -160,7 +160,7 @@ void ACOsgBrowserViewQT::mousePressEvent( QMouseEvent* event )
 	if ( button==1 && media_cycle && media_cycle->hasBrowser() && forwarddown==1)
 	{
 		media_cycle->setForwardDown(1);
-		int loop = media_cycle->getClickedLoop();
+		int loop = media_cycle->getClickedNode();
 		//media_cycle->hoverCallback(event->x(),event->y());
 		//int loop = media_cycle->getClosestNode();
 

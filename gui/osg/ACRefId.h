@@ -43,6 +43,7 @@ class ACRefId : public Referenced
 	{
 	public:
 		int object_id;
+		// contains an identifier for each object (= node)
 		
 		ACRefId(int oid) : Referenced(), object_id(oid) {};
 		~ACRefId() {};

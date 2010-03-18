@@ -80,7 +80,7 @@ void ACVisPluginPCA::updateNextPositions(ACMediaBrowser* mediaBrowser){
   int itemClicked, labelClicked, action;
 	vector<string> featureNames;
 	int libSize = mediaBrowser->getLibrary()->getSize();
-	itemClicked = mediaBrowser->getClickedLoop();
+	itemClicked = mediaBrowser->getClickedNode();
 	labelClicked = mediaBrowser->getClickedLabel();
 	
 	int nbActiveFeatures;

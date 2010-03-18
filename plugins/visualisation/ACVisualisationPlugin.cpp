@@ -82,7 +82,7 @@ void ACVisualisationPlugin::updateNextPositions(ACMediaBrowser* mediaBrowser){
   ucolvec toDisplay_v(nbVideoDisplay);
 	vector<string> featureNames;
 	int libSize = mediaBrowser->getLibrary()->getSize();
-	itemClicked = mediaBrowser->getClickedLoop();
+	itemClicked = mediaBrowser->getClickedNode();
 	labelClicked = mediaBrowser->getClickedLabel();
 	
 	int nbActiveFeatures;

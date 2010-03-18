@@ -118,7 +118,7 @@ void ACOsgNodeLinkRenderer::updateLinks(double ratio) {
 		colors[4] = Vec4(0.5,1,0.5,1);
 	}
 	
-	const ACMediaNode &attribute = media_cycle->getMediaNode(loop_index);
+	const ACMediaNode &attribute = media_cycle->getMediaNode(node_index);
 
 	if ( attribute.isDisplayed() ){
 		const ACPoint &p = attribute.getCurrentPosition(), &p2 = attribute.getNextPosition();
@@ -139,8 +139,8 @@ void ACOsgNodeLinkRenderer::updateLinks(double ratio) {
 		T.makeTranslate(Vec3(x, y, z));
 
 		if(link_geode == 0) {
-			if (media_cycle->getBrowser()->getUserLog()->getParentFromNodeId(loop_index) != -1) { //if( loop_index > 0) { 
-				int parentId = media_cycle->getBrowser()->getUserLog()->getParentFromNodeId(loop_index);
+			if (media_cycle->getBrowser()->getUserLog()->getParentFromNodeId(node_index) != -1) { //if( node_index > 0) { 
+				int parentId = media_cycle->getBrowser()->getUserLog()->getParentFromNodeId(node_index);
 				const ACMediaNode &to_attribute = media_cycle->getMediaNode( parentId );
 				const ACPoint &to_p = to_attribute.getNextPosition();
 				double _to_x = to_p.x-p2.x;

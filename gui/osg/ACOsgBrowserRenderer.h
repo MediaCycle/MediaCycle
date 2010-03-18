@@ -78,14 +78,12 @@ using namespace osg;
 
 class ACOsgBrowserRenderer {
 protected:
-	int i;
-	int n;
 	MediaCycle				*media_cycle;
 	ref_ptr<Group>				 group;
 	ref_ptr<Group>				 media_group;
 	ref_ptr<Group>				 label_group;
 	ref_ptr<Group>				 link_group;
-	vector<ACOsgMediaRenderer*>  media_renderer;
+	vector<ACOsgMediaRenderer*>  node_renderer;
 	vector<ACOsgMediaRenderer*>  label_renderer;
 	vector<ACOsgNodeLinkRenderer*>  link_renderer;
 	//ACOsgLayoutRenderer*		layout_renderer;

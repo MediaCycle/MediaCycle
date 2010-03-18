@@ -1,7 +1,7 @@
 /**
  * @brief ACNeighborhoodsPluginRandom.cpp
  * @author Xavier Siebert
- * @date 16/03/2010
+ * @date 18/03/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -48,7 +48,7 @@ ACNeighborhoodsPluginRandom::~ACNeighborhoodsPluginRandom() {
 }
 
 void ACNeighborhoodsPluginRandom::updateNeighborhoods(ACMediaBrowser* mediaBrowser) {
-	//int _clickedloop = mediaBrowser->getClickedLoop();
+	//int _clickedloop = mediaBrowser->getClickedNode();
 	std::cout << "ACNeighborhoodsPluginRandom::updateNeighborhoods" << std::endl;
 	if (mediaBrowser->getUserLog()->getLastClickedNodeId() == -1 && mediaBrowser->getNumberOfMediaNodes() >= 19) { //CF: 19 audio samples on the mercurialized dataset
 		// XSrandom...

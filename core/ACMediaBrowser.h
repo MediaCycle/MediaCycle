@@ -160,8 +160,8 @@ public:
 	// neighbors
 	void updateNeighborhoods();
 	
-	void setClickedNode(int iloop);
-	int getClickedLoop()					{return mClickedNode; };
+	void setClickedNode(int inode);
+	int getClickedNode()					{return mClickedNode; };
 	int getClosestNode()					{return mClosestNode; };
 
 	void setClickedLabel(int ilabel);
@@ -188,7 +188,6 @@ public:
 	// XS NEW 100310
 	ACMediaNode &getMediaNode(int i) ; // not const because accesors to MediaNode can modify it
 	void initializeNodes(int _defaultNodeId = 0); 
-
 	
 	void setNodePosition(int loop_id, float x, float y, float z=0);
 	// XS 100310 MediaNode

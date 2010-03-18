@@ -33,9 +33,11 @@
 #ifndef ACOPENCVINCLUDE_H
 #define	ACOPENCVINCLUDE_H
 
-#ifdef	__cplusplus
-extern "C" {
-#endif
+//#ifdef	__cplusplus
+//extern "C" {
+//#endif
+
+//#define MAC_FRAMEWORKS
 
 #ifdef __APPLE__
     #ifdef MAC_FRAMEWORKS
@@ -58,7 +60,7 @@ extern "C" {
     #include <opencv/highgui.h>
 #endif
 
-#ifdef	__cplusplus
-};
-#endif
+//#ifdef	__cplusplus
+//};
+//#endif
 #endif	/* ACOPENCVINCLUDE_H */

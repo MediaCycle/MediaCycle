@@ -461,7 +461,6 @@ void ACMediaBrowser::libraryContentChanged() {
 	initializeNodes(1); // media_ID = loop_ID
 
 
-	// XS 27/10/09 TODO this should use the randomizePositions defined above
 	if(mLibrary == NULL) return;
 	else if(mLibrary->isEmpty()) {
 		setNeedsDisplay(true);

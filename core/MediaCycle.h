@@ -92,7 +92,9 @@ public:
 	
 	// API REQUIRED BY VISUAL and GUI
 	// 
-	int getLibrarySize();
+	int getLibrarySize(); // = getnumberofmedia
+	int getNumberOfMediaNodes();
+	
 	string getMediaFileName(int i);
 	int getMediaType(int i);
 	int getThumbnailWidth(int i);
@@ -111,7 +113,7 @@ public:
 	void updateState();
 	float getFrac();
 	void setCameraRotation(float angle);
-	int getClickedLoop();
+	int getClickedNode();
 	void incrementLoopNavigationLevels(int i);
 	void setSelectedObject(int index);
 	void updateClusters(bool animate);

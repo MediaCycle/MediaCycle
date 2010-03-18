@@ -309,11 +309,11 @@ void ACAudioCycleOsgQt::on_sliderBPM_valueChanged()
 {
 	std::cout << "BPM: " << ui.sliderBPM->value() << std::endl;
 	//if (updatedLibrary){
-		int clicked_loop = media_cycle->getClickedLoop();
-		if (clicked_loop > -1)
+		int clicked_node = media_cycle->getClickedNode();
+		if (clicked_node > -1)
 		{
-			audio_engine->setLoopSynchroMode(clicked_loop, ACAudioEngineSynchroModeAutoBeat);
-			audio_engine->setLoopScaleMode(clicked_loop, ACAudioEngineScaleModeResample);
+			audio_engine->setLoopSynchroMode(clicked_node, ACAudioEngineSynchroModeAutoBeat);
+			audio_engine->setLoopScaleMode(clicked_node, ACAudioEngineScaleModeResample);
 			audio_engine->setBPM(ui.sliderBPM->value());
 		}
 	//}
@@ -323,8 +323,8 @@ void ACAudioCycleOsgQt::on_sliderKey_valueChanged()
 {
 	std::cout << "Key: " << ui.sliderKey->value() << std::endl;
 	//if (updatedLibrary){
-		int clicked_loop = media_cycle->getClickedLoop();
-		if (clicked_loop > -1)
+		int clicked_node = media_cycle->getClickedNode();
+		if (clicked_node > -1)
 		{
 			/*
 			 if (!is_pitching)
@@ -333,10 +333,10 @@ void ACAudioCycleOsgQt::on_sliderKey_valueChanged()
 			 is_scrubing = false;
 			 */ 
 			//media_cycle->pickedObjectCallback(-1);
-			audio_engine->setLoopSynchroMode(clicked_loop, ACAudioEngineSynchroModeAutoBeat);
-			audio_engine->setLoopScaleMode(clicked_loop, ACAudioEngineScaleModeResample);
+			audio_engine->setLoopSynchroMode(clicked_node, ACAudioEngineSynchroModeAutoBeat);
+			audio_engine->setLoopScaleMode(clicked_node, ACAudioEngineScaleModeResample);
 			//}
-			audio_engine->setSourcePitch(clicked_loop, ui.sliderKey->value()); 
+			audio_engine->setSourcePitch(clicked_node, ui.sliderKey->value()); 
 		}
 	//}
 }
@@ -451,11 +451,11 @@ void ACAudioCycleOsgQt::processOscMessage(const char* tagName)
 	{
 		float bpm;
 		osc_browser->readFloat(mOscReceiver, &bpm);
-		int clicked_loop = media_cycle->getClickedLoop();
-		if (clicked_loop > -1)
+		int clicked_node = media_cycle->getClickedNode();
+		if (clicked_node > -1)
 		{
-			audio_engine->setLoopSynchroMode(clicked_loop, ACAudioEngineSynchroModeAutoBeat);
-			audio_engine->setLoopScaleMode(clicked_loop, ACAudioEngineScaleModeResample);
+			audio_engine->setLoopSynchroMode(clicked_node, ACAudioEngineSynchroModeAutoBeat);
+			audio_engine->setLoopScaleMode(clicked_node, ACAudioEngineScaleModeResample);
 			audio_engine->setBPM((float)bpm);
 		}
 	}	
@@ -464,12 +464,12 @@ void ACAudioCycleOsgQt::processOscMessage(const char* tagName)
 		float scrub;
 		osc_browser->readFloat(mOscReceiver, &scrub);
 		
-		int clicked_loop = media_cycle->getClickedLoop();
-		if (clicked_loop > -1)
+		int clicked_node = media_cycle->getClickedNode();
+		if (clicked_node > -1)
 		{
 			//media_cycle->pickedObjectCallback(-1);
-			audio_engine->setLoopSynchroMode(clicked_loop, ACAudioEngineSynchroModeManual);
-			audio_engine->setLoopScaleMode(clicked_loop, ACAudioEngineScaleModeVocode);
+			audio_engine->setLoopSynchroMode(clicked_node, ACAudioEngineSynchroModeManual);
+			audio_engine->setLoopScaleMode(clicked_node, ACAudioEngineScaleModeVocode);
 			audio_engine->setScrub((float)scrub*10000); // temporary hack to scrub between 0 an 1
 		}
 	}
@@ -478,8 +478,8 @@ void ACAudioCycleOsgQt::processOscMessage(const char* tagName)
 		float pitch;
 		osc_browser->readFloat(mOscReceiver, &pitch);
 		
-		int clicked_loop = media_cycle->getClickedLoop();
-		if (clicked_loop > -1)
+		int clicked_node = media_cycle->getClickedNode();
+		if (clicked_node > -1)
 		{
 			/*
 			 if (!is_pitching)
@@ -488,10 +488,10 @@ void ACAudioCycleOsgQt::processOscMessage(const char* tagName)
 			 is_scrubing = false;
 			 */ 
 			//media_cycle->pickedObjectCallback(-1);
-			audio_engine->setLoopSynchroMode(clicked_loop, ACAudioEngineSynchroModeAutoBeat);
-			audio_engine->setLoopScaleMode(clicked_loop, ACAudioEngineScaleModeResample);
+			audio_engine->setLoopSynchroMode(clicked_node, ACAudioEngineSynchroModeAutoBeat);
+			audio_engine->setLoopScaleMode(clicked_node, ACAudioEngineScaleModeResample);
 			//}
-			audio_engine->setSourcePitch(clicked_loop, (float) pitch); 
+			audio_engine->setSourcePitch(clicked_node, (float) pitch); 
 		}
 		
 	}

@@ -242,7 +242,7 @@ struct ACOsgBrowserViewData
 	
 	if ([event clickCount] == 1 && media_cycle && media_cycle->hasBrowser() && forwarddown==1)
 	{
-		int loop = media_cycle->getClickedLoop();
+		int loop = media_cycle->getClickedNode();
 		NSLog(@"click on %d when 'a' key pressed", loop);		
 		
 		if(loop >= 0)

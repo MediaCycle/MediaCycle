@@ -138,12 +138,12 @@ void ACOsgImageRenderer::imageGeode(int flip, float sizemul, float zoomin) {
 	image_geometry = new Geometry();	
 	
 	// XS TODO check this wild cast
-	// SD REQUIRED FOR THUMBNAIL ACImage* loop = dynamic_cast<ACImage*> ( browser.getLibrary()->getMedia(loop_index) );
+	// SD REQUIRED FOR THUMBNAIL ACImage* my_image = dynamic_cast<ACImage*> ( browser.getLibrary()->getMedia(node_index) );
 	
-	width = media_cycle->getWidth(loop_index);
-	height = media_cycle->getHeight(loop_index);
+	width = media_cycle->getWidth(node_index);
+	height = media_cycle->getHeight(node_index);
 	
-	zpos = zpos + 0.00001 * loop_index;
+	zpos = zpos + 0.00001 * node_index;
 	
 	// image vertices
 	float scale;
@@ -189,13 +189,12 @@ void ACOsgImageRenderer::imageGeode(int flip, float sizemul, float zoomin) {
 	// Use pre-computed thumbnail instead
 	// SD REQUIRED
 	
-	// XS Debug
-	thumbnail = (IplImage*)media_cycle->getThumbnailPtr(loop_index);
+	thumbnail = (IplImage*)media_cycle->getThumbnailPtr(node_index);
 	if (thumbnail) {
 		image_image = Convert_OpenCV_TO_OSG_IMAGE(thumbnail);
 	}
 	else {
-		thumbnail_filename = media_cycle->getThumbnailFileName(loop_index);
+		thumbnail_filename = media_cycle->getThumbnailFileName(node_index);
 		image_image = osgDB::readImageFile(thumbnail_filename);
 	}
 	
@@ -258,11 +257,11 @@ void ACOsgImageRenderer::imageGeode(int flip, float sizemul, float zoomin) {
 #endif	
 	
 	//sprintf(name, "some audio element");
-	image_transform->setUserData(new ACRefId(loop_index));
+	image_transform->setUserData(new ACRefId(node_index));
 	//curser_transform->setName(name);
 	image_transform->ref();
 	//sprintf(name, "some audio element");
-	image_geode->setUserData(new ACRefId(loop_index));
+	image_geode->setUserData(new ACRefId(node_index));
 	//waveform_geode->setName(name);
 	image_geode->ref();	
 	border_geode->ref();	
@@ -306,7 +305,7 @@ void ACOsgImageRenderer::updateNodes(double ratio) {
 		colors3->push_back(color3);	
 	}
 	
-	const ACMediaNode &attribute = media_cycle->getMediaNode(loop_index);
+	const ACMediaNode &attribute = media_cycle->getMediaNode(node_index);
 	const ACPoint &p = attribute.getCurrentPosition(), &p2 = attribute.getNextPosition();
 	double omr = 1.0-ratio;
 	

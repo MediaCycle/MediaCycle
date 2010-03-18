@@ -468,11 +468,11 @@
 	{
 		float bpm;
 		TiOscReceiverReadFloat(mOscReceiver, &bpm);
-		int clicked_loop = media_cycle->getClickedLoop();
-		if (clicked_loop > -1)
+		int clicked_node = media_cycle->getClickedNode();
+		if (clicked_node > -1)
 		{
-			audio_engine->setLoopSynchroMode(clicked_loop, ACAudioEngineSynchroModeAutoBeat);
-			audio_engine->setLoopScaleMode(clicked_loop, ACAudioEngineScaleModeResample);
+			audio_engine->setLoopSynchroMode(clicked_node, ACAudioEngineSynchroModeAutoBeat);
+			audio_engine->setLoopScaleMode(clicked_node, ACAudioEngineScaleModeResample);
 			audio_engine->setBPM((float)bpm);
 		}
 	}	
@@ -481,12 +481,12 @@
 		float scrub;
 		TiOscReceiverReadFloat(mOscReceiver, &scrub);
 		
-		 int clicked_loop = media_cycle->getClickedLoop();
-		 if (clicked_loop > -1)
+		 int clicked_node = media_cycle->getClickedNode();
+		 if (clicked_node > -1)
 		 {
 			 //media_cycle->pickedObjectCallback(-1);
-			 audio_engine->setLoopSynchroMode(clicked_loop, ACAudioEngineSynchroModeManual);
-			 audio_engine->setLoopScaleMode(clicked_loop, ACAudioEngineScaleModeVocode);
+			 audio_engine->setLoopSynchroMode(clicked_node, ACAudioEngineSynchroModeManual);
+			 audio_engine->setLoopScaleMode(clicked_node, ACAudioEngineScaleModeVocode);
 			 audio_engine->setScrub((float)scrub*10000); // temporary hack to scrub between 0 an 1
 		 }
 	}
@@ -495,8 +495,8 @@
 		float pitch;
 		TiOscReceiverReadFloat(mOscReceiver, &pitch);
 	
-		int clicked_loop = media_cycle->getClickedLoop();
-		if (clicked_loop > -1)
+		int clicked_node = media_cycle->getClickedNode();
+		if (clicked_node > -1)
 		{
 			
 			//if (!is_pitching)
@@ -505,10 +505,10 @@
 			//	is_scrubing = false;
 			 
 				//media_cycle->pickedObjectCallback(-1);
-				audio_engine->setLoopSynchroMode(clicked_loop, ACAudioEngineSynchroModeAutoBeat);
-				audio_engine->setLoopScaleMode(clicked_loop, ACAudioEngineScaleModeResample);
+				audio_engine->setLoopSynchroMode(clicked_node, ACAudioEngineSynchroModeAutoBeat);
+				audio_engine->setLoopScaleMode(clicked_node, ACAudioEngineScaleModeResample);
 			//}
-			audio_engine->setSourcePitch(clicked_loop, (float) pitch); 
+			audio_engine->setSourcePitch(clicked_node, (float) pitch); 
 		}
 		 
 	}

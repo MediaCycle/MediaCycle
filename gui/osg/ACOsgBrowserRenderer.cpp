@@ -40,7 +40,7 @@
 #include "ACOsgTextRenderer.h"
 
 ACOsgBrowserRenderer::ACOsgBrowserRenderer() {
-	media_renderer.resize(0);
+	node_renderer.resize(0);
 	link_renderer.resize(0);
 	label_renderer.resize(0);
 	group = new Group();
@@ -53,70 +53,67 @@ ACOsgBrowserRenderer::ACOsgBrowserRenderer() {
 }
 
 void ACOsgBrowserRenderer::prepareNodes(int start) {
-	
+	// XS 180310: nodes are added here in the node_renderer
+	// previously media were added into media_renderer
+	// TODO: check it is incremental
 	int media_type;
 	
-	n = media_cycle->getLibrarySize(); 
-		
-	if (media_renderer.size()>n) {
-		
-		for (i=n;i<media_renderer.size();i++) {
-			media_group->removeChild(media_renderer[i]->getNode());
-			delete media_renderer[i];
+	int n = media_cycle->getNumberOfMediaNodes(); //XS was: getLibrarySize(); 
+	
+	// XS are these tests necessary ?
+	if (node_renderer.size()>n) {
+		for (int i=n;i<node_renderer.size();i++) {
+			media_group->removeChild(node_renderer[i]->getNode());
+			delete node_renderer[i];
 		}
 	}
 
 	if (media_cycle->getBrowser()->getLayout() == 1 && link_renderer.size()>n) {
-		
-		for (i=n;i<link_renderer.size();i++) {
+		for (int i=n;i<link_renderer.size();i++) {
 			link_group->removeChild(link_renderer[i]->getLink());
 			delete link_renderer[i];
 		}
 	}
 	
 	
-	/*if (!media_group) {
-		media_group = new Group();
-	}*/
-	
-	media_renderer.resize(n);
+	node_renderer.resize(n);
 	if (media_cycle->getBrowser()->getLayout() == 1)
 		link_renderer.resize(n);
 	distance_mouse.resize(n);
 	
-	for (i=start;i<n;i++) {
+	for (int i=start;i<n;i++) {
 		media_type = media_cycle->getMediaType(i);
 		switch (media_type) {
 			case MEDIA_TYPE_AUDIO:
-				media_renderer[i] = new ACOsgAudioRenderer();
+				node_renderer[i] = new ACOsgAudioRenderer();
 				break;
 			case MEDIA_TYPE_IMAGE:
-				media_renderer[i] = new ACOsgImageRenderer();
+				node_renderer[i] = new ACOsgImageRenderer();
 				break;
 			case MEDIA_TYPE_VIDEO:
-				media_renderer[i] = new ACOsgVideoRenderer();
+				node_renderer[i] = new ACOsgVideoRenderer();
 				break;
 			case MEDIA_TYPE_TEXT:
-				media_renderer[i] = new ACOsgTextRenderer();
+				node_renderer[i] = new ACOsgTextRenderer();
 				break;
 			default:
-				media_renderer[i] = 0;
+				node_renderer[i] = NULL;
 				break;
 		}
-		if (media_renderer[i]) {
-			media_renderer[i]->setMediaCycle(media_cycle);
-			media_renderer[i]->setLoopIndex(i);
-			// media_renderer[i]->setActivity(0);
-			media_renderer[i]->prepareNodes();
-			media_group->addChild(media_renderer[i]->getNode());
+		if (node_renderer[i] != NULL) {
+			node_renderer[i]->setMediaCycle(media_cycle);
+			node_renderer[i]->setNodeIndex(i);
+			// node_renderer[i]->setActivity(0);
+			node_renderer[i]->prepareNodes();
+			media_group->addChild(node_renderer[i]->getNode());
 		}
 		
 		if (media_cycle->getBrowser()->getLayout() == 1) {
 			link_renderer[i] = new ACOsgNodeLinkRenderer();
 			if (link_renderer[i]) {
 				link_renderer[i]->setMediaCycle(media_cycle);
-				link_renderer[i]->setLoopIndex(i);
-				// media_renderer[i]->setActivity(0);
+				link_renderer[i]->setNodeIndex(i);
+				// node_renderer[i]->setActivity(0);
 				link_renderer[i]->prepareLinks();
 				link_group->addChild(link_renderer[i]->getLink());
 			}
@@ -132,15 +129,15 @@ void ACOsgBrowserRenderer::prepareNodes(int start) {
 
 void ACOsgBrowserRenderer::updateNodes(double ratio) {
 	
-	for (i=0;i<media_renderer.size();i++) {
-		media_renderer[i]->updateNodes(ratio);
+	for (unsigned int i=0;i<node_renderer.size();i++) {
+		node_renderer[i]->updateNodes(ratio);
 	}
 	/*	
 	//if (media_cycle && media_cycle->hasBrowser() && media_cycle->getBrowser()->getNumberOfLoopsToDisplay()>0)
 		layout_renderer->updateLayout(ratio);
 	*/
 	if (media_cycle->getBrowser()->getLayout() == 1) {
-		for (i=0;i<link_renderer.size();i++) {
+		for (unsigned int i=0;i<link_renderer.size();i++) {
 			link_renderer[i]->updateLinks(ratio);
 		}
 	}
@@ -148,12 +145,12 @@ void ACOsgBrowserRenderer::updateNodes(double ratio) {
 
 void ACOsgBrowserRenderer::prepareLabels(int start) {
 
-	n = media_cycle->getLabelSize(); 	
+	int n = media_cycle->getLabelSize(); 	
 	// int n = 1;
 	
 	if (label_renderer.size()>n) {
 		
-		for (i=n;i<label_renderer.size();i++) {
+		for (unsigned int i=n;i<label_renderer.size();i++) {
 			label_group->removeChild(i, 1);
 			delete label_renderer[i];
 		}
@@ -165,13 +162,13 @@ void ACOsgBrowserRenderer::prepareLabels(int start) {
 	
 	label_renderer.resize(n);
 	
-	for (i=start;i<n;i++) {
+	for (unsigned int i=start;i<n;i++) {
 		label_renderer[i] = new ACOsgTextRenderer();
 		if (label_renderer[i]) {
 			((ACOsgTextRenderer*)label_renderer[i])->setText(media_cycle->getLabelText(i));
 			((ACOsgTextRenderer*)label_renderer[i])->setPos(media_cycle->getLabelPos(i));
 			label_renderer[i]->setMediaCycle(media_cycle);
-			label_renderer[i]->setLoopIndex(i);
+			label_renderer[i]->setNodeIndex(i);
 			label_renderer[i]->prepareNodes();
 			label_group->addChild(label_renderer[i]->getNode());
 		}
@@ -180,7 +177,7 @@ void ACOsgBrowserRenderer::prepareLabels(int start) {
 
 void ACOsgBrowserRenderer::updateLabels(double ratio) {
 
-	for (i=0;i<label_renderer.size();i++) {
+	for (unsigned int i=0;i<label_renderer.size();i++) {
 		label_renderer[i]->updateNodes(ratio);
 	}
 }
@@ -193,12 +190,11 @@ int ACOsgBrowserRenderer::computeScreenCoordinates(osgViewer::Viewer* view, doub
 	closest_distance = 1000000;
 	closest_node = -1;
 	
-	int i;
 	float x, y, z;
 	float mx, my;
 	
-	n = media_cycle->getLibrarySize(); 	
-	n = media_renderer.size();
+	int n = media_cycle->getLibrarySize(); 	
+	n = node_renderer.size();
 	
 	//osg::Matrix modelModel = view->getModelMatrix();
 	osg::Matrix viewMatrix = view->getCamera()->getViewMatrix();
@@ -211,7 +207,7 @@ int ACOsgBrowserRenderer::computeScreenCoordinates(osgViewer::Viewer* view, doub
 	osg::Vec3 modelPoint;
 	osg::Vec3 screenPoint;
 	
-	for(i=0; i<n; i++) {
+	for(int i=0; i<n; i++) {
 		
 		const ACMediaNode &attribute = media_cycle->getMediaNode(i);
 		const ACPoint &p = attribute.getCurrentPosition(), &p2 = attribute.getNextPosition();
@@ -228,7 +224,7 @@ int ACOsgBrowserRenderer::computeScreenCoordinates(osgViewer::Viewer* view, doub
 		
 		// compute distance between mouse and media element in view
 		distance_mouse[i] = sqrt((screenPoint[0]-mx)*(screenPoint[0]-mx)+(screenPoint[1]-my)*(screenPoint[1]-my));
-		media_renderer[i]->setDistanceMouse(distance_mouse[i]);
+		node_renderer[i]->setDistanceMouse(distance_mouse[i]);
 		if (media_cycle->getBrowser()->getLayout() == 1)
 			link_renderer[i]->setDistanceMouse(distance_mouse[i]);
 	

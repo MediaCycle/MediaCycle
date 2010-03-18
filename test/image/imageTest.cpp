@@ -184,10 +184,10 @@ int main(int argc, char** argv) {
 	else{
 //		makeNumbered("/Users/xavier/Pictures/numbered",2000);
 
-//		displayrect();
+		displayrect();
 
 //		testFFT ("image_0001.jpg");
-		testFFT ("small_circle.jpg");
+//		testFFT ("small_circle.jpg");
 	}
 	return (EXIT_SUCCESS);
 }

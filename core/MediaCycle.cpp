@@ -280,6 +280,9 @@ void MediaCycle::setNeighborhoodsPlugin(string pluginName){
 // API REQUIRED BY VISUAL and GUI
 // 
 int MediaCycle::getLibrarySize() { return mediaLibrary->getSize(); }
+int MediaCycle::getNumberOfMediaNodes(){return mediaBrowser->getNumberOfMediaNodes();}
+
+
 string MediaCycle::getMediaFileName(int i) { return mediaLibrary->getMedia(i)->getFileName(); }
 int MediaCycle::getMediaType(int i) { return mediaLibrary->getMedia(i)->getType(); }
 int MediaCycle::getThumbnailWidth(int i) { return mediaLibrary->getMedia(i)->getThumbnailWidth(); }
@@ -305,7 +308,7 @@ void MediaCycle::getMouse(float *mx, float *my) { mediaBrowser->getMouse(mx, my)
 void MediaCycle::updateState() { mediaBrowser->updateState(); }
 float MediaCycle::getFrac() { return mediaBrowser->getFrac(); }
 void MediaCycle::setCameraRotation(float angle) { mediaBrowser->setCameraRotation(angle); }
-int MediaCycle::getClickedLoop() { return mediaBrowser->getClickedLoop(); }
+int MediaCycle::getClickedNode() { return mediaBrowser->getClickedNode(); }
 void MediaCycle::incrementLoopNavigationLevels(int i) { mediaBrowser->incrementLoopNavigationLevels(i); }
 void MediaCycle::setSelectedObject(int index) { mediaBrowser->setSelectedObject(index); }
 void MediaCycle::updateClusters(bool animate) { mediaBrowser->updateClusters(animate); }

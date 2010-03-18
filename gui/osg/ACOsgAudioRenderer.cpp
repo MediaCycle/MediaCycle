@@ -83,9 +83,9 @@ void ACOsgAudioRenderer::waveformGeode() {
 	frame_geometry = new Geometry();
 	border_geometry = new Geometry();
 		
-	width = media_cycle->getThumbnailWidth(loop_index);
+	width = media_cycle->getThumbnailWidth(node_index);
 	width = width / 2;
-	thumbnail = (float*)media_cycle->getThumbnailPtr(loop_index);
+	thumbnail = (float*)media_cycle->getThumbnailPtr(node_index);
 
 	// samples vertices
 	vertices = new Vec3Array(2*width+2);
@@ -162,7 +162,7 @@ void ACOsgAudioRenderer::waveformGeode() {
 	waveform_geode->addDrawable(frame_geometry);
 	
 	//sprintf(name, "some audio element");
-	waveform_geode->setUserData(new ACRefId(loop_index));
+	waveform_geode->setUserData(new ACRefId(node_index));
 	//waveform_geode->setName(name);
 	waveform_geode->ref();	
 }
@@ -216,10 +216,10 @@ void ACOsgAudioRenderer::curserGeode() {
 	curser_transform->addChild(curser_geode);
 	
 	//sprintf(name, "some audio element");
-	curser_transform->setUserData(new ACRefId(loop_index));
+	curser_transform->setUserData(new ACRefId(node_index));
 	//curser_transform->setName(name);
 	curser_transform->ref();
-	curser_geode->setUserData(new ACRefId(loop_index));
+	curser_geode->setUserData(new ACRefId(node_index));
 	//curser_geode->setName(name);
 	curser_geode->ref();
 }
@@ -241,7 +241,7 @@ void ACOsgAudioRenderer::entryGeode() {
 	//entry_geode->addDrawable(new osg::ShapeDrawable(new osg::Cylinder(osg::Vec3(0.0f,0.0f,0.0f),0.01, 0.0f), hints)); // draws a disc
 	//entry_geode->addDrawable(new osg::ShapeDrawable(new osg::Capsule(osg::Vec3(0.0f,0.0f,0.0f),0.01, 0.005f), hints)); // draws a sphere
 	//sprintf(name, "some audio element");
-	entry_geode->setUserData(new ACRefId(loop_index));
+	entry_geode->setUserData(new ACRefId(node_index));
 	//entry_geode->setName(name);
 	entry_geode->ref();	
 }
@@ -255,7 +255,7 @@ void ACOsgAudioRenderer::prepareNodes() {
 	
 	//waveformGeode();
 	//curserGeode();
-	if  (media_cycle->getMediaNode(loop_index).isDisplayed()){
+	if  (media_cycle->getMediaNode(node_index).isDisplayed()){
 		entryGeode();
 		media_node->addChild(entry_geode);
 	}	
@@ -278,7 +278,7 @@ void ACOsgAudioRenderer::updateNodes(double ratio) {
 		colors[4] = Vec4(0.5,1,0.5,1);
 	}
 	
-	const ACMediaNode &attribute = media_cycle->getMediaNode(loop_index);
+	const ACMediaNode &attribute = media_cycle->getMediaNode(node_index);
 
 	if ( attribute.isDisplayed() ){
 		const ACPoint &p = attribute.getCurrentPosition(), &p2 = attribute.getNextPosition();

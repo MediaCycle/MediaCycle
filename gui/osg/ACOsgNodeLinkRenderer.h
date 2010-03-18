@@ -62,13 +62,13 @@ using namespace osg;
 class ACOsgNodeLinkRenderer {
 public:	
 	void setMediaCycle(MediaCycle *_media_cycle) { this->media_cycle = _media_cycle; };
-	void setLoopIndex(int _loop_index) { this->loop_index = _loop_index; };
+	void setNodeIndex(int _node_index) { this->node_index = _node_index; };
 	void setDistanceMouse(float _distance_mouse) { this->distance_mouse = _distance_mouse; };
 	MatrixTransform* getLink() { return link_node; };
 protected:
 	MediaCycle* media_cycle;
 	MatrixTransform* link_node;
-	int loop_index;
+	int node_index;
 	float distance_mouse;	
 protected:
 	Geode* link_geode;	
