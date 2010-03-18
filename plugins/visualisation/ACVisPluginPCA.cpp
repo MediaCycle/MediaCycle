@@ -1,6 +1,6 @@
 /**
  * @brief ACVisPluginPCA.cpp
- * @author Xavier Siebert
+ * @author Damien Tardieu
  * @date 18/03/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
@@ -122,7 +122,6 @@ void ACVisPluginPCA::updateNextPositions(ACMediaBrowser* mediaBrowser){
 
 void ACVisPluginPCA::extractDescMatrix(ACMediaBrowser* mediaBrowser, mat& desc_m, vector<string> &featureNames){
   vector<ACMedia*> loops = mediaBrowser->getLibrary()->getAllMedia();
-  int libSize = mediaBrowser->getLibrary()->getSize();
   int nbMedia = loops.size(); 
 	int featDim;
 	int totalDim = 0;
@@ -136,8 +135,8 @@ void ACVisPluginPCA::extractDescMatrix(ACMediaBrowser* mediaBrowser, mat& desc_m
 		}
 	}
 	
-  desc_m.set_size(libSize,totalDim);
-  mat pos_m(libSize,2);
+  desc_m.set_size(nbMedia,totalDim);
+  mat pos_m(nbMedia,2);
   
   for(int i=0; i<nbMedia; i++) {    
     int tmpIdx = 0;

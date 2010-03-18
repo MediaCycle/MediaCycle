@@ -282,8 +282,10 @@ void ACMediaBrowser::setClusterNumber(int n)
 void ACMediaBrowser::setClickedNode(int inode){
 	if (inode < -1 || inode >= this->getNumberOfMediaNodes())
 		cerr << "<ACMediaBrowser::setClickedNode> : index " << inode << " out of bounds (nb node = " << this->getNumberOfMediaNodes() << ")"<< endl;
-	else
+	else{
 		mClickedNode = inode;
+		mUserLog->clickNode(inode, 0);
+	}
 }
 
 void ACMediaBrowser::setClickedLabel(int ilabel){
@@ -1061,7 +1063,7 @@ void ACMediaBrowser::updateState()
 		//gRenderer.updateTransformsFromLibrary(gLibrary, CUB_FRAC(frac));
 		//[self updateTransformsFromBrowser:CUB_FRAC(frac)];
 		
-		printf("frac = %f\n", mFrac);
+		//		printf("frac = %f\n", mFrac);
 		
 		if(t-mRefTime > andur)
 		{

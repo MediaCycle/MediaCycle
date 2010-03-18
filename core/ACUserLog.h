@@ -58,7 +58,8 @@ public:
 	int getMaxDepth() {return userLogTree.max_depth();};
 	bool isEmpty() {return userLogTree.empty();};
 	int getLastClickedNodeId(){return mLastClickedNodeId;};
-	int getSpanAtDepth(int _depth);
+	void setLastClickedNodeId(long int id){mLastClickedNodeId=id;};
+ 	int getSpanAtDepth(int _depth);
 	int getChildCountAtNodeId(long int _nodeId);
 	int getPreviousSiblingFromNodeId(long int _nodeId);
 	int getNextSiblingFromNodeId(long int _nodeId);

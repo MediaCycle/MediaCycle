@@ -257,9 +257,9 @@ int ACAudio::load(FILE* library_file) {
 		ret = fscanf(library_file, "%d", &n_frames);
 		waveform = new float[n_frames];
 		cout << "nframes : " << n_frames << endl;
-		for (i=0; i<n_frames; i++) {
+		/* for (i=0; i<n_frames; i++) {
 			ret = fscanf(library_file, "%f", &waveform[i]);
-		}
+		} */
 		ret = fscanf(library_file, "%d\n", &n_features);
 		for (i=0; i<n_features;i++) {
 			mediaFeatures = new ACMediaFeatures();

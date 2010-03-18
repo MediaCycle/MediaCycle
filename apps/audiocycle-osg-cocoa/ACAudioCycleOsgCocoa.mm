@@ -142,8 +142,11 @@
 	media_cycle->addPlugin("../../../plugins/audio/" + build_type + "/mc_audiofeatures.dylib");
 	media_cycle->addPlugin("../../../plugins/visualisation/" + build_type + "/mc_visualisation.dylib");
 	//media_cycle->setVisualisationPlugin("Visualisation");
-	media_cycle->setVisualisationPlugin("PCAVis");
+	//media_cycle->setVisualisationPlugin("PCAVis");
+	media_cycle->setNeighborhoodsPlugin("EuclideanNeighborhoods");
 	//media_cycle->setNeighborhoodsPlugin("RandomNeighborhoods");
+	media_cycle->setPositionsPlugin("NodeLinkTreeLayoutPositions");
+
 	//media_cycle->setPositionsPlugin("RandomPositions");
 	
 	audio_engine = new ACAudioFeedback();
