@@ -805,7 +805,7 @@ void ACMediaBrowser::kmeans(bool animate) {
 	else return;
 	
 	// picking random object as initial cluster center
-	srandom(15);
+	srand(15);
 	mClusterCenters.resize(mClusterCount);
 	cluster_counts.resize(mClusterCount);
 	cluster_accumulators.resize(mClusterCount);
@@ -817,14 +817,14 @@ void ACMediaBrowser::kmeans(bool animate) {
 		cluster_accumulators[i].resize(feature_count);
 		
 		// initialize cluster center with a randomly chosen object
-		int r = random() % object_count;
+		int r = rand() % object_count;
 		int l = 100;
 		
 		// TODO SD - Avoid selecting the same twice
 		while(l--)
 		{
 			if(this->getMediaNode(r).getNavigationLevel() >= mNavigationLevel) break;
-			else r = random() % object_count;
+			else r = rand() % object_count;
 		}
 		
 		// couldn't find center in this nav level...

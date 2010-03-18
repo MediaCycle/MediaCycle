@@ -64,7 +64,11 @@ PORT open_server(int iport, int count)
 
 	//allows immediate reuse of a port for a socket:
 	int auth = 1;
-	setsockopt(s_listen, SOL_SOCKET, SO_REUSEADDR, &auth, sizeof(int));
+	#ifdef __MINGW32__ //CF dirty temp mingw hack
+		setsockopt(s_listen, SOL_SOCKET, SO_REUSEADDR, (const char*)auth, sizeof(int));
+	#else
+		setsockopt(s_listen, SOL_SOCKET, SO_REUSEADDR, &auth, sizeof(int));
+	#endif
 	
 	if (bind(s_listen, (struct sockaddr*)&addr, sizeof(addr)) == SOCKET_ERROR)
 		//throw_error(SocketServerError, "open_server: call to 'bind' failed.\n");

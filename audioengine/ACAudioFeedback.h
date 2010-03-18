@@ -47,6 +47,7 @@
 
 #include <sys/time.h>
 #include <TiPhaseVocoder.h>
+#include <pthread.h>
 
 #define DEG2RAD(x) (0.0174532925 * (x))
 #define RAD2DEG(x) (57.295779578 * (x))

@@ -7,9 +7,6 @@ IF ( USE_QT4 )
 	INCLUDE_DIRECTORIES(. ../osg)
 
 	ADD_LIBRARY(mediacycle-osg-qt STATIC ${SRC} ${HDR})
-	ADD_DEFINITIONS(-DQT_DLL)
-	ADD_DEFINITIONS(-DQT_THREAD_SUPPORT)
-
 	ADD_DEPENDENCIES(mediacycle-osg-qt mediacycle)
 	ADD_DEPENDENCIES(mediacycle-osg-qt mediacycle-osg)
 
@@ -28,11 +25,11 @@ IF ( USE_QT4 )
 	#	set(CMAKE_EXE_LINKER_FLAGS "-framework CoreVideo -framework AppKit -framework Foundation")
 	#ENDIF ( APPLE )
 
-	IF ( OPENGL_FOUND AND GLUT_FOUND)
+	IF ( WIN32 )
+		TARGET_LINK_LIBRARIES(mediacycle-osg-qt ${OPENGL_LIBRARIES} ${FREEGLUT_LIBRARIES})
+	ELSE ( WIN32 )
 		TARGET_LINK_LIBRARIES(mediacycle-osg-qt ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES})
-	ELSE ( OPENGL_FOUND AND GLUT_FOUND )
-		MESSAGE(FATAL_ERROR "OpenGL/Glut requested but not found.")
-	ENDIF ( OPENGL_FOUND AND GLUT_FOUND ) 
+	ENDIF ( WIN32 ) 
 
 ELSE ( USE_QT4 )
 	MESSAGE("Qt4 disabled - not compiling Qt GUI.")

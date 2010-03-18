@@ -26,18 +26,10 @@ IF ( USE_QT4 AND USE_OSC AND USE_OPENAL )
 	# the UI file won't be wrapped!
 	include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
-	#Now add these generated files to the ADD_EXECUTABLE
-	# step. If this is NOT done, then the ui_*.h files
-	# will not be generated
-
-	ADD_DEFINITIONS(-DQT_DLL)
-	ADD_DEFINITIONS(-DQT_THREAD_SUPPORT)
-
-
 	#IF ( APPLE )
 	#	ADD_EXECUTABLE(audiocycle-osg-qt ${APP_TYPE} ${MACOSX_BUNDLE_INFO_PLIST} ${audiocycle-osg-qt_SRCS} ${audiocycle-osg-qt_UIS_H} ${audiocycle-osg-qt_MOC_SRCS})
 	#ELSE ( APPLE )
-		ADD_EXECUTABLE(audiocycle-osg-qt ${audiocycle-osg-qt_SRCS} ${audiocycle-osg-qt_UIS_H} ${audiocycle-osg-qt_MOC_SRCS})
+		ADD_EXECUTABLE(audiocycle-osg-qt WIN32 ${audiocycle-osg-qt_SRCS} ${audiocycle-osg-qt_UIS_H} ${audiocycle-osg-qt_MOC_SRCS})
 	#ENDIF ( APPLE )
 
 	ADD_DEPENDENCIES(audiocycle-osg-qt mediacycle)
@@ -68,11 +60,11 @@ IF ( USE_QT4 AND USE_OSC AND USE_OPENAL )
 		set(CMAKE_EXE_LINKER_FLAGS "-framework CoreVideo -framework AppKit -framework Foundation -framework AudioToolbox")
 	ENDIF ( APPLE )
 
-	IF ( OPENGL_FOUND AND GLUT_FOUND)
+	IF ( WIN32 )
+		TARGET_LINK_LIBRARIES(audiocycle-osg-qt ${OPENGL_LIBRARIES} ${FREEGLUT_LIBRARIES})
+	ELSE ( WIN32 )
 		TARGET_LINK_LIBRARIES(audiocycle-osg-qt ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES})
-	ELSE ( OPENGL_FOUND AND GLUT_FOUND )
-		MESSAGE(FATAL_ERROR "OpenGL/Glut requested but not found.")
-	ENDIF ( OPENGL_FOUND AND GLUT_FOUND ) 
+	ENDIF ( WIN32 ) 
 
 	TARGET_LINK_LIBRARIES(audiocycle-osg-qt ${OPENAL_LIBRARY})
 

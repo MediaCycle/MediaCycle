@@ -8,7 +8,11 @@ ADD_LIBRARY(mediacycle STATIC ${SRC} ${HDR})
 
 #others
 #TARGET_LINK_LIBRARIES(mediacycle TiCommon)
-TARGET_LINK_LIBRARIES(mediacycle pthread sndfile)
+IF ( MINGW )
+	TARGET_LINK_LIBRARIES(mediacycle sndfile FLAC vorbisenc vorbis m ogg pthread wsock32 ws2_32) # CF: should be detected in main CMakeLists.txt
+ELSE ( MINGW )
+	TARGET_LINK_LIBRARIES(mediacycle sndfile pthread)
+ENDIF ( MINGW )
 
 #OpenCV
 #IF ( USE_OPENCV )
@@ -19,23 +23,7 @@ TARGET_LINK_LIBRARIES(mediacycle pthread sndfile)
 #    ENDIF ( UNIX )
 #ENDIF ( USE_OPENCV )
 
-#linking w/ Boost (searched for in main CMakeLists.txt)
-IF ( Boost_SYSTEM_FOUND )
-	TARGET_LINK_LIBRARIES(mediacycle ${Boost_SYSTEM_LIBRARY})
-ELSE ( )
-	MESSAGE(FATAL_ERROR "Boost system not found. needed in core mediacycle.")
-ENDIF ( )
-IF ( Boost_FILESYSTEM_FOUND )
-	TARGET_LINK_LIBRARIES(mediacycle ${Boost_FILESYSTEM_LIBRARY})
-ELSE ( )
-	MESSAGE(FATAL_ERROR "Boost filesystem not found. needed in core mediacycle.")
-ENDIF ( )
-
-IF ( Boost_GRAPH_FOUND )
-	TARGET_LINK_LIBRARIES(mediacycle ${Boost_GRAPH_LIBRARY})
-ELSE ( )
-	MESSAGE(FATAL_ERROR "Boost graph not found. needed in core mediacycle.")
-ENDIF ( )
+	TARGET_LINK_LIBRARIES(mediacycle ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_GRAPH_LIBRARY})
 
 # this might require some path adaptation for Windows
 # (e.g. set cmake_install_prefix to the good value for Windows )

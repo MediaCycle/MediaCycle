@@ -41,9 +41,9 @@
 #include <assert.h>
 #include <signal.h>
 
-#include <Io/Osc/NetworkingUtils.h>
-#include <Io/Osc/PacketListener.h>
-#include <Io/Osc/TimerListener.h>
+#include "NetworkingUtils.h"
+#include "PacketListener.h"
+#include "TimerListener.h"
 
 
 typedef int socklen_t;

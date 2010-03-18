@@ -55,7 +55,7 @@ using namespace std;
 // XS TMP -- to remove:
 //#include <Common/TiMath.h>
 //TiRandom() comes from TiMath.h. This should be moved somewhere else (in the core ?)
-inline float TiRandom() { return ((float)random()) / (float)((1LL<<31)-1L); }
+inline float TiRandom() { return ((float)rand()) / (float)((1LL<<31)-1L); }
 
 static void dancers_tcp_callback(char *buffer, int l, char **buffer_send, int *l_send, void *userData); 
 int processTcpMessageFromInstallation(MediaCycle *that, char *buffer, int l, char **buffer_send, int *l_send); 

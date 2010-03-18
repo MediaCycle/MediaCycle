@@ -5,8 +5,8 @@
 #include "ACPlugin.h"
 #include "ACVisualisationPlugin.h" // "ACPlugVizDancers.h"
 #include "ACNeighborhoodsPluginRandom.h"
-#include "ACNeighborhoodsPluginPareto.h"
-#include "ACNeighborhoodsPluginEuclidean.h"
+//#include "ACNeighborhoodsPluginPareto.h"
+//#include "ACNeighborhoodsPluginEuclidean.h"
 #include "ACVisPluginPCA.h"
 #include "ACPositionsPluginNodeLinkTreeLayout.h"
 //#include "ACPositionsPluginRandom.h"
@@ -16,8 +16,8 @@
 extern "C" ACPlugin* create(std::string namePlugin) {
 	if (namePlugin == "ACVisualisationPlugin") {return new ACVisualisationPlugin();}
 	if (namePlugin == "ACNeighborhoodsPluginRandom") {return new ACNeighborhoodsPluginRandom();}
-	if (namePlugin == "ACNeighborhoodsPluginPareto") {return new ACNeighborhoodsPluginPareto();}
-	if (namePlugin == "ACNeighborhoodsPluginEuclidean") {return new ACNeighborhoodsPluginEuclidean();}
+//	if (namePlugin == "ACNeighborhoodsPluginPareto") {return new ACNeighborhoodsPluginPareto();}
+//	if (namePlugin == "ACNeighborhoodsPluginEuclidean") {return new ACNeighborhoodsPluginEuclidean();}
 	if (namePlugin == "ACPositionsPluginNodeLinkTreeLayout") {return new ACPositionsPluginNodeLinkTreeLayout();}
 	if (namePlugin == "ACVisPluginPCA") {return new ACVisPluginPCA();}
 	//if (namePlugin == "ACPositionsPluginRandom") {return new ACPositionsPluginRandom();}

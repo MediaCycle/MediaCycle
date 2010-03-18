@@ -48,6 +48,7 @@
 #include "ACMediaNode.h"  // this contains ACPoint
 
 #include <vector>
+#include <pthread.h>
 
 using namespace std;
 

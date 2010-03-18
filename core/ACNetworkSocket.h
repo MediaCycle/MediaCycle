@@ -39,17 +39,32 @@
 #include <string>
 #include <cstring>
 #include <cstdlib>
-#include <arpa/inet.h>
-#include <netinet/in.h>
 #include <stdio.h>
 #include <iostream>
 #include <sys/types.h>
-#include <sys/socket.h>
 #include <unistd.h>
+
+//CF dirty temp "mingw hack begins:
+#ifdef __MINGW32__
+#include <winsock2.h>
+typedef int socklen_t;
+#else
+#include <arpa/inet.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
+typedef int SOCKET;
+#endif
+
+#if !defined(SHUT_RDWR) && defined (SD_BOTH)
+#define SHUT_RDWR 2
+#endif
+#if !defined SHUT_RDWR && defined SD_BOTH
+#define SHUT_RDWR SD_BOTH
+#endif
+//CF dirty temp mingw hack ends...
 
 #define BUFSIZE 512
 
-typedef int SOCKET;
 #define SOCKET_ERROR (-1)
 typedef struct sockaddr_in SOCKADDR_IN;
 typedef int PORT;
