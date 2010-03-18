@@ -60,7 +60,6 @@ ACImageAnalysis::ACImageAnalysis(const string &filename){
 	IplImage *imgp_full = cvLoadImage(file_name.c_str(), CV_LOAD_IMAGE_COLOR);
 	setImage(imgp_full);
 	cvReleaseImage(&imgp_full);
-
 }
 
 ACImageAnalysis::ACImageAnalysis(IplImage* img){
@@ -120,8 +119,8 @@ int ACImageAnalysis::setImage(IplImage* imgp_full, float _scale){
 	// XS -- DEBUG !!!!
 	
 	//workaround opencv peculiar definition of step
-	//imgp_full->widthStep = original_width * imgp_full->nChannels;
-	//	imgp_full->imageSize = original_width * original_height * imgp_full->nChannels;
+	imgp_full->widthStep = original_width * imgp_full->nChannels;
+	imgp_full->imageSize = original_width * original_height * imgp_full->nChannels;
 	
 	scale = _scale;
 	// does not scale image if scale specified and > 0, otherwise rescale
@@ -130,8 +129,8 @@ int ACImageAnalysis::setImage(IplImage* imgp_full, float _scale){
 	
 	imgp = cvCreateImage(cvSize (scale*original_width, scale*original_height), imgp_full->depth, imgp_full->nChannels);
 //	// SD TODO - This is stange cvCreateImage creates image with as a widthStep of 152
-//	imgp->widthStep = imgp->width * imgp->nChannels;
-//	imgp->imageSize = imgp->width * imgp->height * imgp->nChannels;
+	imgp->widthStep = imgp->width * imgp->nChannels;
+	imgp->imageSize = imgp->width * imgp->height * imgp->nChannels;
 	cvResize(imgp_full, imgp, CV_INTER_CUBIC);
 	check_imgp();
 	color_model = "BGR"; // before splitchannels

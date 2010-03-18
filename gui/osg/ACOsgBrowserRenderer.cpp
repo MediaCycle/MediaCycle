@@ -188,10 +188,10 @@ void ACOsgBrowserRenderer::updateLabels(double ratio) {
 int ACOsgBrowserRenderer::computeScreenCoordinates(osgViewer::Viewer* view, double ratio)
 
 {		
-	int closest_loop;
+	int closest_node;
 	float closest_distance;
 	closest_distance = 1000000;
-	closest_loop = -1;
+	closest_node = -1;
 	
 	int i;
 	float x, y, z;
@@ -234,9 +234,9 @@ int ACOsgBrowserRenderer::computeScreenCoordinates(osgViewer::Viewer* view, doub
 	
 		if (distance_mouse[i]<closest_distance) {
 			closest_distance = distance_mouse[i];
-			closest_loop = i;
+			closest_node = i;
 		}
 	}	
 	
-	return closest_loop;
+	return closest_node;
 }

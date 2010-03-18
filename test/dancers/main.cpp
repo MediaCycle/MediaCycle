@@ -404,7 +404,7 @@ void startOrRedraw(MediaCycle *mediacycle, int nbVideo, char **buffer_send, int*
 	}
 
 	// tell the browser nothing specific was clicked.
-	media_browser->setClickedLoop(-1);
+	media_browser->setClickedNode(-1);
 	media_browser->setClickedLabel(-1);
 	media_browser->setNumberOfDisplayedLoops(nbVideo);
 	media_browser->updateNextPositions();
@@ -439,7 +439,7 @@ void startOrRedrawRandom(MediaCycle *mediacycle, int nbVideo, char **buffer_send
 	ACMediaBrowser* media_browser;
 	media_browser = mediacycle->getBrowser();
 	// tell the browser nothing specific was clicked.
-	media_browser->setClickedLoop(-1);
+	media_browser->setClickedNode(-1);
 	media_browser->setClickedLabel(-1);
 
 	// using armadillo to get nbVideo random ids among all videos:
@@ -534,7 +534,7 @@ void itemClicked(MediaCycle *mediacycle, int idVideo, char **buffer_send, int* l
 		return;
 	}
 	
-	media_browser->setClickedLoop(idVideo);
+	media_browser->setClickedNode(idVideo);
 	media_browser->setClickedLabel(-1);
 	media_browser->updateNextPositions();
 	int nbVideo = media_browser->getNumberOfDisplayedLoops();
@@ -562,7 +562,7 @@ void labelClicked(MediaCycle *mediacycle, int idLabel, char **buffer_send, int* 
 		return;
 	}
 	
-	media_browser->setClickedLoop(-1);
+	media_browser->setClickedNode(-1);
 	media_browser->setClickedLabel(idLabel);
 	media_browser->updateNextPositions();
 	int nbVideo = media_browser->getNumberOfDisplayedLoops();

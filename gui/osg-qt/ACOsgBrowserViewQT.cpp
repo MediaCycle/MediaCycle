@@ -162,7 +162,7 @@ void ACOsgBrowserViewQT::mousePressEvent( QMouseEvent* event )
 		media_cycle->setForwardDown(1);
 		int loop = media_cycle->getClickedLoop();
 		//media_cycle->hoverCallback(event->x(),event->y());
-		//int loop = media_cycle->getClosestLoop();
+		//int loop = media_cycle->getClosestNode();
 
 		if(loop >= 0)
 		{
@@ -237,7 +237,7 @@ void ACOsgBrowserViewQT::mouseReleaseEvent( QMouseEvent* event )
 	
 	if(media_cycle && media_cycle->hasBrowser() && forwarddown==0)
 	{
-		media_cycle->setClickedLoop(-1);
+		media_cycle->setClickedNode(-1);
 	}
 	forwarddown == 0;
 	mousedown = 0;
@@ -255,10 +255,10 @@ void ACOsgBrowserViewQT::prepareFromBrowser()
 
 void ACOsgBrowserViewQT::updateTransformsFromBrowser( double frac)
 {
-	int closest_loop;	
+	int closest_node;	
 	// get screen coordinates
-	closest_loop = renderer->computeScreenCoordinates(this, frac); //this instead of view with osgViewer::Viewer* view = this;
-	media_cycle->setClosestLoop(closest_loop);
+	closest_node = renderer->computeScreenCoordinates(this, frac); //this instead of view with osgViewer::Viewer* view = this;
+	media_cycle->setClosestNode(closest_node);
 	// recompute scene graph	
 	renderer->updateNodes(frac); // animation time in [0,1]
 	renderer->updateLabels(frac);

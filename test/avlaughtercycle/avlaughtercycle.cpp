@@ -42,6 +42,8 @@
 #include <iostream>
 #include <signal.h>
 
+#define TI_MAX(x,y) ((x)>(y)?(x):(y))
+
 using namespace std;
 
 static void avlc_tcp_callback(char *buffer, int l, char **buffer_send, int *l_send, void *userData);

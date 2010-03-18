@@ -134,9 +134,9 @@ public:
 	void setForwardDown(int i);
 	// 
 	void setAutoPlay(int i);
-	void setClickedLoop(int i);
-	void setClosestLoop(int i);
-	int getClosestLoop();
+	void setClickedNode(int i);
+	void setClosestNode(int i);
+	int getClosestNode();
 	// 
 	void pickedObjectCallback(int pid);
 	void hoverObjectCallback(int pid);

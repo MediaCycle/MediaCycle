@@ -76,7 +76,7 @@ struct ACNavigationState
 {
 	//ACNavigationStateType	mNavType;
 	
-	int 			mSelectedLoop;
+	int 			mSelectedNode;
 	int 			mNavigationLevel;
 	vector<float> 		mFeatureWeights;
 };
@@ -160,9 +160,9 @@ public:
 	// neighbors
 	void updateNeighborhoods();
 	
-	void setClickedLoop(int iloop);
-	int getClickedLoop()					{return mClickedLoop; };
-	int getClosestLoop()					{return closest_loop; };
+	void setClickedNode(int iloop);
+	int getClickedLoop()					{return mClickedNode; };
+	int getClosestNode()					{return mClosestNode; };
 
 	void setClickedLabel(int ilabel);
 	int getClickedLabel()					{return mClickedLabel; };
@@ -190,7 +190,7 @@ public:
 	void initializeNodes(int _defaultNodeId = 0); 
 
 	
-	void setLoopPosition(int loop_id, float x, float y, float z=0);
+	void setNodePosition(int loop_id, float x, float y, float z=0);
 	// XS 100310 MediaNode
 	void setLoopIsDisplayed(int loop_id, bool iIsDisplayed) {this->getMediaNode(loop_id).setDisplayed(iIsDisplayed);}
 
@@ -202,8 +202,6 @@ public:
 	
 	// XS 100310 MediaNode
 	void setLoopAttributesActive(int loop_id, int value) { this->getMediaNode(loop_id).setActivity(value); };
-	//const vector<ACPoint>	&getLoopCurrentPositions() const	{ return mCurrentPos; } 
-	//const vector<ACPoint>	&getLoopNextPositions()	const		{ return mNextPos; }
 	
 	void getMouse(float *mx, float *my) { *mx = mousex; *my = mousey; };
 	
@@ -221,7 +219,7 @@ public:
 	void setLayout(ACBrowserLayout _layout);
 	
 	// Quick Browser
-	void setClosestLoop(int loop_id);
+	void setClosestNode(int loop_id);
 	void setAutoPlay(int auto_play) { this->auto_play = auto_play; };
 	
 	// sources - SD reintroduced 2009 aug 4
@@ -249,25 +247,7 @@ public:
 	void setPositionsPlugin(ACPlugin* acpl){mPosPlugin=acpl;};
 	void setNeighborhoodsPlugin(ACPlugin* acpl){mNeighborsPlugin=acpl;};	
 	
-	// Proximity Grid		- SD TODO - eventually to be moved in visualization plugin chain
-	float proxgridstepx;
-	float proxgridstepy;
-	float proxgridaspectratio;
-	int proxgridlx;
-	int proxgridly;
-	float proxgridl;
-	float proxgridr;
-	float proxgridb;
-	float proxgridt;
-	int proxgridmaxdistance;
-	float proxgridjitter;
-	int proxgridboundsset;
-	vector<int> proxgrid;
-	void setProximityGrid();
-	void setProximityGridQuantize(ACPoint p, ACPoint *pgrid);	
-	void setProximityGridUnquantize(ACPoint pgrid, ACPoint *p);
-	void setProximityGridBounds(float l, float r, float b, float t);
-	void setRepulsionEngine();
+	// Proximity Grid moved to plugin
 	
 	ACUserLog* getUserLog(){return mUserLog;};
 
@@ -279,9 +259,10 @@ protected:
 	ACBrowserState		mState;
 	ACBrowserLayout		mLayout;
 	
-	int 				mClickedLoop; // valid between mouseDown and mouseUp, otherwise -1
-	int 				mSelectedLoop;
-	
+	int 				mClickedNode; // valid between mouseDown and mouseUp, otherwise -1
+	int 				mSelectedNode;
+	int					mClosestNode;
+
 	bool 				mNeedsDisplay;
 	//bool 				mNeedsActivityUpdate;
 	vector<int>			mNeedsActivityUpdateMedia;
@@ -297,21 +278,12 @@ protected:
 	float 				mCameraZoom;
 	float				mCameraAngle;
 	
-	
-	// clustering data
-	//vector< int > 			mObjectCluster; // cluster index for each object
-	
-	// displayed positions
-	//vector<ACPoint>			mCurrentPos;
-	//vector<ACPoint>			mNextPos;
-	
 	vector<ACNavigationState>	mBackwardNavigationStates;
 	vector<ACNavigationState>	mForwardNavigationStates;
 	
 	// XS TODO 1 generalize to tree
 	// XS TODO 2 make this vector of pointers
 	ACMediaNodes mLoopAttributes; 
-	// XS was: one entry per media in the same order as in library.
 	
 	int nbDisplayedLoops;
 	
@@ -330,7 +302,6 @@ protected:
 	vector<vector<vector <float> > > mClusterCenters; // cluster index, feature index, descriptor index
 	vector<float>			mFeatureWeights; // each value must be in [0,1], important for euclidian distance.
 	
-	int closest_loop;
 	int auto_play;
 	int auto_play_toggle;
 

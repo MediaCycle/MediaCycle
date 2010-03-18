@@ -249,7 +249,7 @@ int main(int argc, char** argv) {
 	//test_histogram_equalize("Bru_105#2");
 	//test_bg_substraction("Bru_105#2");
 	// test_bg_substraction("Bru_203#2");
-	// test_browse("Bru_105#2");
+	//test_browse("Bru_105#2");
 	// test_video_plugin("Bru_105#2");
 	//test_video_plugin("001011");
 	//test_video_plugin_acl_save("001011");

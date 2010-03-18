@@ -1,7 +1,7 @@
 /**
  * @brief ACVisPluginPCA.cpp
- * @author Damien Tardieu
- * @date 16/03/2010
+ * @author Xavier Siebert
+ * @date 18/03/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -114,7 +114,7 @@ void ACVisPluginPCA::updateNextPositions(ACMediaBrowser* mediaBrowser){
 
   for (int i=0; i<libSize; i++){
     mediaBrowser->setLoopIsDisplayed(i, true);
-		mediaBrowser->setLoopPosition(i, posDisp_m(i,0), posDisp_m(i,1));
+		mediaBrowser->setNodePosition(i, posDisp_m(i,0), posDisp_m(i,1));
   }
 	////////////////////////////////////////////////////////////////
 }

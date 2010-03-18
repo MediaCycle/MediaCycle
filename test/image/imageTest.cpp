@@ -47,7 +47,8 @@
 
 using namespace std;
 
-string image_dir = "/Users/xavier/Pictures/101_ObjectCategories/beaver/";
+string image_dir = "/Users/xavier/Pictures/bw_128/";
+//string image_dir = "/Users/xavier/Pictures/101_ObjectCategories/beaver/";
 string acl_dir = "/Users/xavier/Desktop/acl_tmp/";
 
 void testshapes(string sim1, string sim2){
@@ -183,8 +184,10 @@ int main(int argc, char** argv) {
 	else{
 //		makeNumbered("/Users/xavier/Pictures/numbered",2000);
 
-		displayrect();
+//		displayrect();
+
 //		testFFT ("image_0001.jpg");
+		testFFT ("small_circle.jpg");
 	}
 	return (EXIT_SUCCESS);
 }

@@ -328,9 +328,9 @@ void MediaCycle::setWeight(int i, float weight) { mediaBrowser->setWeight(i, wei
 void MediaCycle::setForwardDown(int i) { forwarddown = i; }
 // 
 void MediaCycle::setAutoPlay(int i) { mediaBrowser->setAutoPlay(i); }
-void MediaCycle::setClickedLoop(int i) { mediaBrowser->setClickedLoop(i); }
-void MediaCycle::setClosestLoop(int i) { mediaBrowser->setClosestLoop(i); }
-int MediaCycle::getClosestLoop() { return mediaBrowser->getClosestLoop(); }
+void MediaCycle::setClickedNode(int i) { mediaBrowser->setClickedNode(i); }
+void MediaCycle::setClosestNode(int i) { mediaBrowser->setClosestNode(i); }
+int MediaCycle::getClosestNode() { return mediaBrowser->getClosestNode(); }
 // 
 void MediaCycle::muteAllSources() { mediaBrowser->muteAllSources(); }
 void* MediaCycle::hasBrowser() { return mediaBrowser; }
@@ -377,15 +377,15 @@ vector<int>* MediaCycle::getNeedsActivityUpdateMedia() {
 	}
 }
 
-void MediaCycle::pickedObjectCallback(int _pid) {
-	int pid;
-	pid = _pid;
-	if(pid < 0) {
-		pid = getClosestLoop();
+void MediaCycle::pickedObjectCallback(int _nodeId) {
+	int nodeId = _nodeId;
+	if(nodeId < 0) {
+		// clicked close to a node
+		nodeId = getClosestNode();
 	}
-	mediaBrowser->setClickedLoop(pid);
+	mediaBrowser->setClickedNode(nodeId);
 	if (forwarddown == 0) {//if (!forwarddown) { //CF forwardown is not a boolean
-		mediaBrowser->toggleSourceActivity(pid);
+		mediaBrowser->toggleSourceActivity(nodeId);
 	}
 }
 

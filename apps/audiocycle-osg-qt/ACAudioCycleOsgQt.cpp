@@ -386,11 +386,11 @@ void ACAudioCycleOsgQt::processOscMessage(const char* tagName)
 		osc_browser->readFloat(mOscReceiver, &y);
 		
 		media_cycle->hoverCallback(x,y);
-		int closest_loop = media_cycle->getClosestLoop();
-		float distance = ui.browserOsgView->getRenderer()->getDistanceMouse()[closest_loop];
+		int closest_node = media_cycle->getClosestNode();
+		float distance = ui.browserOsgView->getRenderer()->getDistanceMouse()[closest_node];
 		if (osc_feedback)
 		{
-			osc_feedback->messageBegin("/audiocycle/closest_loop_at");
+			osc_feedback->messageBegin("/audiocycle/closest_node_at");
 			osc_feedback->messageAppendFloat(distance);
 			osc_feedback->messageEnd();
 			osc_feedback->messageSend();

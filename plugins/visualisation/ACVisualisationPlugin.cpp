@@ -1,7 +1,7 @@
 /**
  * @brief ACVisualisationPlugin.cpp
- * @author Damien Tardieu
- * @date 11/03/2010
+ * @author Xavier Siebert
+ * @date 18/03/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -174,7 +174,7 @@ void ACVisualisationPlugin::updateNextPositions(ACMediaBrowser* mediaBrowser){
 
 	//  For osg view : Because there is no way to prevent a media from displaying it display it far away
   for (int i=0; i<libSize; i++){
-    mediaBrowser->setLoopPosition(i, 40, 40);    
+    mediaBrowser->setNodePosition(i, 40, 40);    
     mediaBrowser->setLoopIsDisplayed(i, false);
   }
 	////////////////////////////////////////////////////////////////
@@ -183,11 +183,11 @@ void ACVisualisationPlugin::updateNextPositions(ACMediaBrowser* mediaBrowser){
     mediaBrowser->setLoopIsDisplayed(toDisplay_v(i), true);
 	
 	for (int i=0; i<mediaBrowser->getNumberOfDisplayedLoops(); i++){
-		mediaBrowser->setLoopPosition(toDisplay_v(i), posDisp_m(toDisplay_v(i),0), posDisp_m(toDisplay_v(i),1));
+		mediaBrowser->setNodePosition(toDisplay_v(i), posDisp_m(toDisplay_v(i),0), posDisp_m(toDisplay_v(i),1));
 		std::cout<<"disp : " << toDisplay_v(i) << ", " << mediaBrowser->getLibrary()->getMedia(toDisplay_v(i))->getFileName() << posDisp_m(toDisplay_v(i),0) << ", " << posDisp_m(toDisplay_v(i),1) << std::endl;
 	}
 	// 	if (itemClicked >= 0)
-	// 		mediaBrowser->setLoopPosition(itemClicked, 0, 0);
+	// 		mediaBrowser->setNodePosition(itemClicked, 0, 0);
 }
 
 

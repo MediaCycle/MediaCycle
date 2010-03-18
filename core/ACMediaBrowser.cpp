@@ -34,10 +34,6 @@
 
 #include "ACMediaBrowser.h"
 
-// XS : this is for initRandomFeatures() ?
-//#include <Common/TiMath.h>
-//#include <Common/TiTime.h>
-
 #include <assert.h>
 #include <math.h>
 #include <algorithm>
@@ -141,51 +137,6 @@ static double compute_distance(vector<ACMediaFeatures*> &obj1, const vector<vect
 	return dis;
 }
 
-/*void ACAudioBrowser::initRandomFeatures()
- {
- int i, d;
- 
- objects.resize(DEFAULT_OBJECT_COUNT);
- mObjectCluster.resize(DEFAULT_OBJECT_COUNT);
- 
- srandom(156);
- for(i=0; i<DEFAULT_OBJECT_COUNT; i++)
- {
- objects[i].resize(DEFAULT_FEATURE_COUNT);
- 
- for(d=0; d<DEFAULT_FEATURE_COUNT; d++)
- {
- objects[i][d] = ((float)random()) / (float)((1<<31)-1);
- }
- }
- 
- 
- mCurrentPos.resize(DEFAULT_OBJECT_COUNT);
- mNextPos.resize(DEFAULT_OBJECT_COUNT);
- 
- for(i=0; i<DEFAULT_OBJECT_COUNT; i++)
- {
- mCurrentPos[i].x = TiRandom();
- mCurrentPos[i].y = TiRandom();
- mCurrentPos[i].z = TiRandom() / 10.0;
- 
- mNextPos[i].x = mCurrentPos[i].x + TiRandom() / 100.0;
- mNextPos[i].y = mCurrentPos[i].y + TiRandom() / 100.0;
- mNextPos[i].z = mCurrentPos[i].z + TiRandom() / 100.0;
- 
- }
- 
- 
- mFeatureWeights.resize(DEFAULT_FEATURE_COUNT);
- 
- for(i=0; i<DEFAULT_FEATURE_COUNT; i++)
- {
- mFeatureWeights[i] = i<6?1.0:0.0;
- }
- }
- */
-
-
 ACMediaBrowser::ACMediaBrowser() {
 	
 	mViewWidth = 820;
@@ -198,9 +149,10 @@ ACMediaBrowser::ACMediaBrowser() {
 	mCameraZoom = 1.0;
 	mCameraAngle = 0.0;
 	
-	mClickedLoop = -1;
+	mClickedNode = -1;
 	mClickedLabel = -1;
-	
+	mClosestNode = -1;
+
 	mClusterCount = 5;
 	mNavigationLevel = 0;
 	
@@ -212,7 +164,6 @@ ACMediaBrowser::ACMediaBrowser() {
 	mousex = 0.0;
 	mousey = 0.0;
 	
-	closest_loop = -1;
 	auto_play = 0;
 	auto_play_toggle = 0;
 	
@@ -226,9 +177,7 @@ ACMediaBrowser::ACMediaBrowser() {
 	mPosPlugin = NULL;
 	mNeighborsPlugin = NULL;
 	mUserLog = new ACUserLog();
-	
-	proxgridboundsset = 0;
-	
+		
 	pthread_mutexattr_init(&activity_update_mutex_attr);
 	pthread_mutex_init(&activity_update_mutex, &activity_update_mutex_attr);
 	pthread_mutexattr_destroy(&activity_update_mutex_attr);	
@@ -330,11 +279,11 @@ void ACMediaBrowser::setClusterNumber(int n)
 	setNeedsDisplay(true);
 }
 
-void ACMediaBrowser::setClickedLoop(int iloop){
-	if (iloop < -1 || iloop >= this->getNumberOfMediaNodes())
-		cerr << "<ACMediaBrowser::setClickedLoop> : index " << iloop << " out of bounds (nb loop = " << this->getNumberOfMediaNodes() << ")"<< endl;
+void ACMediaBrowser::setClickedNode(int inode){
+	if (inode < -1 || inode >= this->getNumberOfMediaNodes())
+		cerr << "<ACMediaBrowser::setClickedNode> : index " << inode << " out of bounds (nb node = " << this->getNumberOfMediaNodes() << ")"<< endl;
 	else
-		mClickedLoop = iloop;
+		mClickedNode = inode;
 }
 
 void ACMediaBrowser::setClickedLabel(int ilabel){
@@ -345,8 +294,8 @@ void ACMediaBrowser::setClickedLabel(int ilabel){
 }
 
 // XS TODO: setNodePosition -- or even NodeNextPosition ??
-void ACMediaBrowser::setLoopPosition(int loop_id, float x, float y, float z){
-	this->getMediaNode(loop_id).setNextPosition(x,y,z);
+void ACMediaBrowser::setNodePosition(int node_id, float x, float y, float z){
+	this->getMediaNode(node_id).setNextPosition(x,y,z);
 }
 
 void ACMediaBrowser::setLabelPosition(int label_id, float x, float y, float z){
@@ -418,7 +367,7 @@ ACNavigationState ACMediaBrowser::getCurrentNavigationState()
 	ACNavigationState state;
 	
 	//state.mNavType = AC_NAV_SELECTION;
-	state.mSelectedLoop = mSelectedLoop;
+	state.mSelectedNode = mSelectedNode;
 	state.mNavigationLevel = mNavigationLevel;
 	state.mFeatureWeights = mFeatureWeights;
 	
@@ -428,7 +377,7 @@ ACNavigationState ACMediaBrowser::getCurrentNavigationState()
 
 void ACMediaBrowser::setCurrentNavigationState(ACNavigationState state)
 {
-	mSelectedLoop = state.mSelectedLoop;
+	mSelectedNode = state.mSelectedNode;
 	mNavigationLevel = state.mNavigationLevel;
 	mFeatureWeights = state.mFeatureWeights;
 	
@@ -720,202 +669,7 @@ void ACMediaBrowser::initClusterCenters(){
 	}
 }
 
-void ACMediaBrowser::setProximityGridQuantize(ACPoint p, ACPoint *pgrid) {
-	pgrid->x = (int)round( (p.x-proxgridl)/proxgridstepx );
-	pgrid->y = (int)round( (p.y-proxgridb)/proxgridstepy );		
-}
 
-void ACMediaBrowser::setProximityGridUnquantize(ACPoint pgrid, ACPoint *p) {
-	p->x = pgrid.x * proxgridstepx + proxgridl;
-	p->y = pgrid.y * proxgridstepy + proxgridb;		
-}
-
-void ACMediaBrowser::setProximityGridBounds(float l, float r, float b, float t) {
-	proxgridl = l;
-	proxgridr = r;
-	proxgridb = b;
-	proxgridt = t;
-	proxgridboundsset = 1;
-}
-
-// XS TODO clean this and sent to plugin
-void ACMediaBrowser::setProximityGrid() {
-	
-	float jitter;
-	
-	int i, j, k, l;
-	int n;
-	int found_slot;
-	
-	ACPoint p, pgrid, p2, curpos;
-	int index, pgridindex, curposindex;
-	
-	float langle, orientation, spiralstepx, spiralstepy, lorientation;
-	
-	n = getNumberOfMediaNodes(); // mLoopAttributes.size(); // XS TODO getsize
-	
-	// Proximity Grid Size	
-	if (!proxgridboundsset) {
-		if (n>0) {
-			p = getMediaNode(0).getNextPosition();
-			proxgridl = p.x;
-			proxgridr = p.x;
-			proxgridb = p.y;
-			proxgridt = p.y;
-		}
-		for(i=1; i<n; i++) {
-			p = getMediaNode(i).getNextPosition();
-			if (p.x<proxgridl) {
-				proxgridl = p.x;
-			}
-			if (p.x>proxgridr) {
-				proxgridr = p.x;
-			}
-			if (p.y<proxgridb) {
-				proxgridb = p.y;
-			}
-			if (p.y>proxgridt) {
-				proxgridt = p.y;
-			}
-		}
-	}
-		
-	// Proximity Grid Density
-	proxgridlx = 2;
-	proxgridstepx = (proxgridr-proxgridl)/(proxgridlx-1);
-	proxgridaspectratio = 9.0/16.0;
-	proxgridstepy = proxgridstepx * proxgridaspectratio;
-	proxgridly = (proxgridt-proxgridb)/proxgridstepy + 1;	
-	proxgridmaxdistance = 2;
-	proxgridjitter = 0.25;
-	
-	// Init
-	proxgrid.resize((proxgridlx)*(proxgridly));
-	fill(proxgrid.begin(), proxgrid.end(), -1);
-	
-	// SD TODO - maybe need to compute MST (Minimum Spanning Tree)
-	
-	for(i=0; i<n; i++) {
-		
-		found_slot = 0;
-		
-		p = getMediaNode(i).getNextPosition();
-		
-		// grid quantization
-		setProximityGridQuantize(p, &pgrid);
-		pgridindex =  pgrid.y * proxgridlx + pgrid.x;
-		
-		// no further processing for this media if out of grid
-		if ( (pgrid.x<0) || (pgrid.x>=proxgridlx) || (pgrid.y<0) || (pgrid.y>=proxgridly) ) {
-			continue;
-		}
-		
-		// spiral search
-	    setProximityGridUnquantize(pgrid, &p2);
-		langle = atan( (p.y-p2.y) / (p.x-p2.x) );
-		orientation = fmod(ceil(langle/(M_PI/4.0)), 2) * 2 - 1; // +1 means positive angles
-		spiralstepx = fmod(round((langle-M_PI/2.0)/(M_PI/2.0)), 2);
-		if ((p.x-p2.x)<0) spiralstepx = - spiralstepx;
-		spiralstepy = fmod(round(langle/(M_PI/2.0)), 2);
-		if ((p.y-p2.y)<0) spiralstepy = - spiralstepy;
-		lorientation = atan(spiralstepy/spiralstepx);
-		
-		curpos.x = pgrid.x;
-		curpos.y = pgrid.y;
-		curposindex = curpos.y * proxgridlx + curpos.x;
-		if (proxgrid[curposindex]==-1) {
-			l = proxgridmaxdistance;
-			found_slot = 1;
-		}
-		else {
-			l = 1;
-		}
-		
-		while (l<proxgridmaxdistance) {
-			for (j=0;j<2;j++) {	
-				for (k=0;k<l;k++) {
-					curpos.x += spiralstepx;
-					curpos.y += spiralstepy;
-					curposindex = curpos.y * proxgridlx + curpos.x;
-					if ( (curpos.x<0) || (curpos.x>=proxgridlx) || (curpos.y<0) || (curpos.y>=proxgridly) ) {
-						continue;
-					}
-					else {
-						if (proxgrid[curposindex]==-1) {
-							l=proxgridmaxdistance;
-							found_slot = 1;
-							k=l;
-							j=2;
-						}
-					}
-				}
-				// minus PI or plus PI depending on orientation
-				lorientation += (orientation * M_PI / 2.0);
-				lorientation = fmod((double)lorientation, 2.0*M_PI);
-				spiralstepx = cos(lorientation);
-				spiralstepy = sin(lorientation);
-			}	
-			l++;
-		}
-		
-		// empty stategy
-		if (found_slot) {
-			proxgrid[curposindex] = i;
-		}
-		
-		// swap strategy
-		// SD TODO
-		
-		// bump strategy
-		// SD TODO
-		
-	}
-	
-	// XS TODO iter
-	for(i=0; i<n; i++) {
-		getMediaNode(i).setNextPositionGrid (getMediaNode(i).getNextPosition());
-	}
-	
-	for(i=0; i<proxgrid.size(); i++) {
-		index = proxgrid[i];
-		if ( (index>=0) && (index<n) ) {
-			curpos.x = fmod((float)i,proxgridlx);
-			curpos.y = floor((float)i/(proxgridlx));
-			setProximityGridUnquantize(curpos, &p2);
-			p2.z = getMediaNode(index).getNextPosition().z;
-			getMediaNode(index).setNextPositionGrid (p2);
-		}
-	}
-	
-	// XS TODO iter
-	for(i=0; i<n; i++) {
-		getMediaNode(i).setNextPosition(getMediaNode(i).getNextPositionGrid());
-	}
-	
-	if (proxgridjitter>0) {
-		for(i=0; i<n; i++) {
-			// XS heavy ?
-			jitter = ((float)rand()) / (float)((1LL<<31)-1L)-0.5;//CF instead of TiRandom()-0.5;
-			mLoopAttributes[i].setNextPositionX( mLoopAttributes[i].getNextPositionX() +
-												jitter*proxgridjitter*proxgridstepx);
-			jitter = ((float)rand()) / (float)((1LL<<31)-1L)-0.5;//CF instead of TiRandom()-0.5;
-			mLoopAttributes[i].setNextPositionY( mLoopAttributes[i].getNextPositionY() + 
-												jitter*proxgridjitter*proxgridstepy);
-		}
-		for(i=0; i<n; i++) {
-			mLoopAttributes[i].setNextPositionX( max(min(mLoopAttributes[i].getNextPositionX(),proxgridr), proxgridl));
-			mLoopAttributes[i].setNextPositionY( max(min(mLoopAttributes[i].getNextPositionY(),proxgridt), proxgridb));
-		}
-	}
-
-	
-	return;
-}
-
-
-void ACMediaBrowser::setRepulsionEngine() {
-	return;
-}
 
 // SD TODO - Different clustering algorithms should have their own classes
 // SD TODO - DIfferent dimensionality reduction too
@@ -962,7 +716,8 @@ void ACMediaBrowser::updateNextPositions(){
 			mVisPlugin->updateNextPositions(this);
 		}	
 	}
-//	setProximityGrid();
+	//	setProximityGrid(); // XS change to something like: mGridPlugin->updateNextPositions(this);
+
 }
 
 void ACMediaBrowser::setNextPositions2dim(){
@@ -1207,7 +962,7 @@ void ACMediaBrowser::setSelectedObject(int index)
 {
 	//assert(index >= -1 && index < objects.size());
 	
-	mSelectedLoop = index;
+	mSelectedNode = index;
 	
 	pushNavigationState();
 	
@@ -1221,13 +976,13 @@ void ACMediaBrowser::setNextPositionsPropeller(){
 	std::cout << "ACMediaBrowser::setNextPositionsPropeller" <<std::endl;
 
 	if (mLibrary->isEmpty() ) return;
-	if (mSelectedLoop < 0 || mSelectedLoop >= getNumberOfMediaNodes()) return ;
+	if (mSelectedNode < 0 || mSelectedNode >= getNumberOfMediaNodes()) return ;
 
 
 	float r, theta;
 	ACPoint p;
 	p.x = p.y = p.z = 0.0;
-	this->getMediaNode(mSelectedLoop).setNextPosition(p);
+	this->getMediaNode(mSelectedNode).setNextPosition(p);
 	
 	srand(1234);//CF TiRandomSeed(1234);
 	
@@ -1239,7 +994,7 @@ void ACMediaBrowser::setNextPositionsPropeller(){
 
 		// SD TODO - test both approaches
 		r=1;
-		r = compute_distance(mLibrary->getMedia(mSelectedLoop)->getAllFeaturesVectors(), 
+		r = compute_distance(mLibrary->getMedia(mSelectedNode)->getAllFeaturesVectors(), 
 							 mLibrary->getMedia((*node).getMediaId())->getAllFeaturesVectors(), 
 							 mFeatureWeights, false) * 10.0;
 		r /= 100.0;
@@ -1399,13 +1154,15 @@ int ACMediaBrowser::toggleSourceActivity(int lid, int type)
 	}	
 }
 
-// XS TODO loopId is in fact a nodeId
-void ACMediaBrowser::setClosestLoop(int _loop_id) {
-	closest_loop = _loop_id; // XS set it here even if < 0 ?
-	if (_loop_id<0) {
+void ACMediaBrowser::setClosestNode(int _node_id) {
+	mClosestNode = _node_id; 
+	// XS: if _node_id < 0 should we still assign it to closest_node ?
+	// note : MediaCycle::pickedObjectCallback will look for closest loop if < 0
+
+	if (_node_id<0) {
 		return;
 	}
-	if (this->getMediaNode(_loop_id).getNavigationLevel() < getNavigationLevel()) {
+	if (this->getMediaNode(_node_id).getNavigationLevel() < getNavigationLevel()) {
 		return;
 	}
 	
@@ -1434,16 +1191,14 @@ void ACMediaBrowser::setClosestLoop(int _loop_id) {
 	
 int ACMediaBrowser::muteAllSources()
 {
-	int loop_id;
-	
 	// XS TODO iterator
-	for (loop_id=0;loop_id<mLibrary->getSize();loop_id++) {
-		if (mLoopAttributes[loop_id].getActivity() >= 1) {
+	for (int node_id=0;node_id<mLibrary->getSize();node_id++) {
+		if (mLoopAttributes[node_id].getActivity() >= 1) {
 			// SD TODO - audio engine
-			// audio_cycle->getAudioFeedback()->deleteSource(loop_id);
-			mLoopAttributes[loop_id].setActivity(0);
+			// audio_cycle->getAudioFeedback()->deleteSource(node_id);
+			mLoopAttributes[node_id].setActivity(0);
 			setNeedsActivityUpdateLock(1);
-			setNeedsActivityUpdateAddMedia(loop_id);
+			setNeedsActivityUpdateAddMedia(node_id);
 			setNeedsActivityUpdateLock(0);
 		}
 	}
@@ -1462,8 +1217,8 @@ void ACMediaBrowser::setNeedsActivityUpdateLock(int i) {
 	}
 }
 
-void ACMediaBrowser::setNeedsActivityUpdateAddMedia(int loop_id) {
-	mNeedsActivityUpdateMedia.push_back(loop_id);
+void ACMediaBrowser::setNeedsActivityUpdateAddMedia(int node_id) {
+	mNeedsActivityUpdateMedia.push_back(node_id);
 	// mNeedsActivityUpdate = 1;
 }
 

@@ -304,7 +304,7 @@ struct ACOsgBrowserViewData
 	[super mouseUp:event];
 	
 	if(media_cycle && media_cycle->hasBrowser()) {
-		media_cycle->setClickedLoop(-1);
+		media_cycle->setClickedNode(-1);
 	}
 	
 	mousedown = 0;
@@ -389,16 +389,16 @@ struct ACOsgBrowserViewData
 
 - (void)updateTransformsFromBrowser:(double)frac
 {
-	int closest_loop;
+	int closest_node;
 	
 	osgViewer::Viewer* view = [self viewer];
 	
 	@synchronized(self)
 	{
 	// get screen coordinates
-	////closest_loop = _privateData->renderer.computeScreenCoordinates(view, frac);//CF
-	closest_loop = renderer->computeScreenCoordinates(view, frac);//CF
-	media_cycle->setClosestLoop(closest_loop);
+	////closest_node = _privateData->renderer.computeScreenCoordinates(view, frac);//CF
+	closest_node = renderer->computeScreenCoordinates(view, frac);//CF
+	media_cycle->setClosestNode(closest_node);
 	// recompute scene graph	
 	////_privateData->renderer.updateNodes(frac); // animation time in [0,1] //CF
 	////_privateData->renderer.updateLabels(frac); //CF
