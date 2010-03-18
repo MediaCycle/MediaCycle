@@ -22,13 +22,13 @@ IF ( USE_OSG )
 
 	# TARGET_LINK_LIBRARIES(mediacycle-osg cv cvaux highgui)
 	# TODO test on win32 : does it find opencv libs ?
-	IF ( USE_OPENCV )
-		IF ( UNIX )
-			TARGET_LINK_LIBRARIES(mediacycle-osg ${OPENCV_CV_LIBRARY} ${OPENCV_CXCORE_LIBRARY} ${OPENCV_HIGHGUI_LIBRARY}) #CF compatibility with OpenCV frameworks in OSX
-		ELSE ( UNIX )
+	#IF ( USE_OPENCV )
+	#	IF ( UNIX )
+	#		TARGET_LINK_LIBRARIES(mediacycle-osg ${OPENCV_CV_LIBRARY} ${OPENCV_CXCORE_LIBRARY} ${OPENCV_HIGHGUI_LIBRARY}) #CF compatibility with OpenCV frameworks in OSX
+	#	ELSE ( UNIX )
 			TARGET_LINK_LIBRARIES(mediacycle-osg cv cvaux highgui)
-		ENDIF ( UNIX )
-	ENDIF ( USE_OPENCV )
+	#	ENDIF ( UNIX )
+	#ENDIF ( USE_OPENCV )
 
 	#everything is already set in the first CMakeLists.txt (but the linkage of course) :
 	# -DUSE_OPENGL
