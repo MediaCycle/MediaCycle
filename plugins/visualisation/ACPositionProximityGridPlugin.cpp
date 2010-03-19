@@ -242,10 +242,10 @@ void ACPositionProximityGridPlugin::setProximityGrid() {
 	if (proxgridjitter>0) {
 		for(i=0; i<n; i++) {
 			// XS heavy ?
-			jitter = ((float)rand()) / (float)((1LL<<31)-1L)-0.5;//CF instead of TiRandom()-0.5;
+			jitter = ACRandom()-0.5;//CF instead of TiRandom()-0.5;
 			mediaBrowser->getMediaNode(i).setNextPositionX( mediaBrowser->getMediaNode(i).getNextPositionX() +
 												jitter*proxgridjitter*proxgridstepx);
-			jitter = ((float)rand()) / (float)((1LL<<31)-1L)-0.5;//CF instead of TiRandom()-0.5;
+			jitter = ACRandom()-0.5;//CF instead of TiRandom()-0.5;
 			mediaBrowser->getMediaNode(i).setNextPositionY( mediaBrowser->getMediaNode(i).getNextPositionY() + 
 												jitter*proxgridjitter*proxgridstepy);
 		}

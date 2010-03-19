@@ -52,11 +52,6 @@
 #include <ctime> // for timing with clock()
 using namespace std;
 
-// XS TMP -- to remove:
-//#include <Common/TiMath.h>
-//TiRandom() comes from TiMath.h. This should be moved somewhere else (in the core ?)
-inline float TiRandom() { return ((float)rand()) / (float)((1LL<<31)-1L); }
-
 static void dancers_tcp_callback(char *buffer, int l, char **buffer_send, int *l_send, void *userData); 
 int processTcpMessageFromInstallation(MediaCycle *that, char *buffer, int l, char **buffer_send, int *l_send); 
 void saveLibraryAsXml(MediaCycle *mediacycle, string _path);
@@ -490,9 +485,9 @@ void startOrRedrawRandom(MediaCycle *mediacycle, int nbVideo, char **buffer_send
 	v.push_back("B");
 	v.push_back("C");
 	for (int i=0; i<3; i++){
-		int dumx = int(TiRandom()*100);
-		int dumy = int(TiRandom()*100);
-		int hlm = int(TiRandom()*3.9);
+		int dumx = int(ACRandom()*100);
+		int dumy = int(ACRandom()*100);
+		int hlm = int(ACRandom()*3.9);
 		ostringstream oss ;
 		oss.fill('0');
 		oss << sep << "desc" << v[i] << hlm << sep  << setw(3) << dumx  << setw(3) << dumy ;

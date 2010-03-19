@@ -40,15 +40,20 @@
 
 //#include <Common/TiMath.h> // for Timax only ...
 
+#include <assert.h>
+#include <math.h>
+#include <algorithm>
+#include <vector>
+#include <sys/time.h>
+#include <pthread.h>
+
+inline float ACRandom() { return ((float)random()) / (float)((1LL<<31)-1L); }
+
 #include "ACEuclideanDistance.h"
 #include "ACMediaLibrary.h"
 #include "ACPlugin.h"
 #include "ACUserLog.h"
-
 #include "ACMediaNode.h"  // this contains ACPoint
-
-#include <vector>
-#include <pthread.h>
 
 using namespace std;
 

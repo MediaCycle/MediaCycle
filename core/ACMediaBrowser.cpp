@@ -34,13 +34,6 @@
 
 #include "ACMediaBrowser.h"
 
-#include <assert.h>
-#include <math.h>
-#include <algorithm>
-#include <vector>
-
-#include <sys/time.h>
-
 static double getTime()
 {
     struct timeval tv = {0, 0};
@@ -177,7 +170,7 @@ ACMediaBrowser::ACMediaBrowser() {
 	mPosPlugin = NULL;
 	mNeighborsPlugin = NULL;
 	mUserLog = new ACUserLog();
-		
+	
 	pthread_mutexattr_init(&activity_update_mutex_attr);
 	pthread_mutex_init(&activity_update_mutex, &activity_update_mutex_attr);
 	pthread_mutexattr_destroy(&activity_update_mutex_attr);	
@@ -446,11 +439,11 @@ int ACMediaBrowser::setSourceCursor(int lid, int frame_pos) {
 void ACMediaBrowser::randomizeLoopPositions(){
 	if(mLibrary == NULL) return;
 	for (ACMediaNodes::iterator node = mLoopAttributes.begin(); node != mLoopAttributes.end(); ++node){
-		(*node).setCurrentPosition (mViewWidth * ((float)rand()) / (float)((1LL<<31)-1L), // CF instead of * TiRandom()
-									mViewHeight * ((float)rand()) / (float)((1LL<<31)-1L), // CF instead of * TiRandom()
+		(*node).setCurrentPosition (ACRandom() * mViewWidth, 
+									ACRandom() * mViewHeight, 
 									0);
-		(*node).setNextPosition((*node).getCurrentPositionX() + ((float)rand()) / (float)((1LL<<31)-1L) * mViewWidth / 100.0, // CF instead of * TiRandom()
-								(*node).getCurrentPositionY() + ((float)rand()) / (float)((1LL<<31)-1L) * mViewHeight / 100.0, // CF instead of * TiRandom()
+		(*node).setNextPosition((*node).getCurrentPositionX() + ACRandom() * mViewWidth / 100.0, 
+								(*node).getCurrentPositionY() + ACRandom() * mViewHeight / 100.0, 
 								0);
 	}	
 }
@@ -472,13 +465,13 @@ void ACMediaBrowser::libraryContentChanged() {
 	if (mVisPlugin==NULL && mPosPlugin==NULL) {	
 		for (ACMediaNodes::iterator node = mLoopAttributes.begin(); node != mLoopAttributes.end(); ++node){
 			
-			(*node).setCurrentPosition (((float)rand()) / (float)((1LL<<31)-1L), // CF instead of TiRandom(), 
-										((float)rand()) / (float)((1LL<<31)-1L), // CF instead of TiRandom(),  
-										((float)rand()) / (float)((1LL<<31)-1L) / 10.0); // CF instead of TiRandom() / 10.0);
+			(*node).setCurrentPosition (ACRandom(), 
+										ACRandom(), 
+										ACRandom() / 10.0);
 			
-			(*node).setNextPosition ((*node).getCurrentPositionX() + ((float)rand()) / (float)((1LL<<31)-1L) / 100.0, // CF instead of TiRandom()
-									 (*node).getCurrentPositionY() + ((float)rand()) / (float)((1LL<<31)-1L) / 100.0, // CF instead of TiRandom()
-									 (*node).getCurrentPositionZ() + ((float)rand()) / (float)((1LL<<31)-1L) / 100.0); // CF instead of TiRandom()	
+			(*node).setNextPosition ((*node).getCurrentPositionX() + ACRandom() / 100.0,
+									 (*node).getCurrentPositionY() + ACRandom() / 100.0, 
+									 (*node).getCurrentPositionZ() + ACRandom() / 100.0);		
 			(*node).setDisplayed (true);
 		}
 	}
