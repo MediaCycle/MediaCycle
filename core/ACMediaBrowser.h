@@ -47,7 +47,7 @@
 #include <sys/time.h>
 #include <pthread.h>
 
-inline float ACRandom() { return ((float)random()) / (float)((1LL<<31)-1L); }
+inline float ACRandom() { return ((float)rand()) / (float)((1LL<<31)-1L); }
 
 #include "ACEuclideanDistance.h"
 #include "ACMediaLibrary.h"

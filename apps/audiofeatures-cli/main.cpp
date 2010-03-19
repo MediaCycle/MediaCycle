@@ -95,7 +95,7 @@ int main(int argc, char** argv){
 		case 'L':
 			windowSize = atoi(optarg);
 			break;
-		case 'mc':
+		case 'mc': //AM : gcc warning: multi-character character constant
 			mfccNbChannels = atoi(optarg);
 			break;
 		case 'm':
