@@ -1,7 +1,7 @@
 /**
  * @brief main.cpp
- * @author Damien Tardieu
- * @date 16/03/2010
+ * @author Alexis Moinet
+ * @date 19/03/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -33,7 +33,7 @@
 #include <sndfile.h>
 #include <string>
 #include <iostream>
-#include "ACaudiofeatures.h"
+#include "ACAudioFeatures.h"
 #include "ACMediaTimedFeature.h"
 #include <unistd.h>
 #include <sys/stat.h>

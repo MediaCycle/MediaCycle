@@ -85,7 +85,7 @@ int main(int argc, char** argv) {
 		for(int k=0; k<mediacycle->getLibrary()->getMeanFeatures()[j].size(); k++) {
 			float old = amf->getFeature(k);
 			cout << "(" << j << "," << k << ")" << old << " - " << mediacycle->getLibrary()->getMeanFeatures()[j][k] << "/" << mediacycle->getLibrary()->getStdevFeatures()[j][k] << endl;
-			amf->setFeature (k, (old - mediacycle->getLibrary()->getMeanFeatures()[j][k]) / ( TI_MAX(mediacycle->getLibrary()->getStdevFeatures()[j][k] , 0.00001)));
+			amf->setFeature (k, (old - mediacycle->getLibrary()->getMeanFeatures()[j][k]) / ( max(mediacycle->getLibrary()->getStdevFeatures()[j][k] , 0.00001)));
 		}
 	}
 	amf->dump();
