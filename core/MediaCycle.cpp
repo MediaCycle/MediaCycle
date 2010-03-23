@@ -41,6 +41,7 @@ MediaCycle::MediaCycle(ACMediaType aMediaType, string local_directory, string li
 
     this->local_directory = local_directory;
     this->libname = libname;
+	
     this->networkSocket	= 0;
 
 

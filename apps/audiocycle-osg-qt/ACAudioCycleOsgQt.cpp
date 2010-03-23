@@ -57,10 +57,10 @@ ACAudioCycleOsgQt::ACAudioCycleOsgQt(QWidget *parent)
 			build_type = "Debug";
 		#endif
 		media_cycle->addPlugin("../../../plugins/visualisation/" + build_type + "/mc_visualisation.dylib");
-		//media_cycle->addPlugin("../../../plugins/audio/" + build_type + "/mc_audiofeatures.dylib");	
+		media_cycle->addPlugin("../../../plugins/audio/" + build_type + "/mc_audiofeatures.dylib");	
 		//media_cycle->setVisualisationPlugin("Visualisation");
-		media_cycle->setNeighborhoodsPlugin("RandomNeighborhoods");
-		media_cycle->setPositionsPlugin("NodeLinkTreeLayoutPositions");
+		//media_cycle->setNeighborhoodsPlugin("RandomNeighborhoods");
+		//media_cycle->setPositionsPlugin("NodeLinkTreeLayoutPositions");
 	#endif
 	
 	audio_engine = new ACAudioFeedback();
@@ -225,7 +225,7 @@ void ACAudioCycleOsgQt::loadACLFile(){
 
 	QStringList fileNames;
 	if (dialog.exec())
-	fileNames = dialog.selectedFiles();
+		fileNames = dialog.selectedFiles();
 
 	QStringList::Iterator file = fileNames.begin();
 	while(file != fileNames.end()) {
@@ -239,6 +239,7 @@ void ACAudioCycleOsgQt::loadACLFile(){
 	if (!(fileName.isEmpty())) {
 		media_cycle->importLibrary((char*) fileName.toStdString().c_str());
 		std::cout << "File library imported" << std::endl;
+		//media_cycle->libraryContentChanged();
 		this->updateLibrary();
 	}	
 }

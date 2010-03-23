@@ -482,7 +482,7 @@ void ACAudioFeedback::createAudioEngine(int _output_sample_rate, int _output_buf
 	
 	pthread_condattr_init(&audio_engine_cond_attr);
 	/////////// SD TODO
-	pthread_cond_init(&audio_engine_cond, &audio_engine_cond_attr);
+	pthread_cond_init(&audio_engine_cond, &audio_engine_cond_attr); //
 	pthread_condattr_destroy(&audio_engine_cond_attr);
 	
 	pthread_mutexattr_init(&audio_engine_mutex_attr);
@@ -1456,7 +1456,8 @@ int ACAudioFeedback::createSourceWithPosition(int loop_id, float x, float y, flo
 	// CF Cross-platform ALUT attempt...
 	#ifdef WIN32 
 		ALboolean al_bool;
-		alutLoadWAVFile(loop_file, &format, &data, &size, &freq, &al_bool); 
+		data = alutLoadMemoryFromFile (loop_file, &format, &size, (ALfloat*) &freq);
+		//alutLoadWAVFile(loop_file, &format, &data, &size, &freq, &al_bool); 
 	#elif defined(__APPLE__)
 		// TODO SD - This is OS-X specific. Should be changed.
 		CFStringRef fileName = CFStringCreateWithCString(kCFAllocatorDefault, (const char*)(loop_file), kCFStringEncodingUTF8);

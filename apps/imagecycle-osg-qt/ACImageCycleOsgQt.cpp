@@ -50,7 +50,7 @@ ACImageCycleOsgQt::ACImageCycleOsgQt(QWidget *parent)
 		#ifdef USE_DEBUG
 			build_type = "Debug";
 		#endif
-		media_cycle->addPlugin("../../../plugins/image/" + build_type + "/libimage.dylib");
+		//media_cycle->addPlugin("../../../plugins/image/" + build_type + "/libimage.dylib");
 	#endif
 	
 	ui.browserOsgView->move(0,20);
@@ -167,6 +167,7 @@ void ACImageCycleOsgQt::loadACLFile(){
 	if (!(fileName.isEmpty())) {
 		media_cycle->importLibrary((char*) fileName.toStdString().c_str());
 		std::cout << "File library imported" << std::endl;
+		//media_cycle->libraryContentChanged();
 		this->updateLibrary();
 	}	
 
