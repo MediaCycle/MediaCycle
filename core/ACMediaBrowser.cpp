@@ -1161,15 +1161,20 @@ void ACMediaBrowser::setClosestNode(int _node_id) {
 	}
 	
 	if (auto_play) {
-		// set inactive nodes from 0 to 2
 		// set active modes from 2 to 0
+		// set closest from 0 to 2
 		// nodes with activity = 1 are left as is
 		for (ACMediaNodes::iterator node = mLoopAttributes.begin(); node != mLoopAttributes.end(); ++node){
-			if (((*node).getNavigationLevel() >= getNavigationLevel()) && ((*node).getActivity() != 1 )) {
-				toggleSourceActivity(*node, 2);	
+			if ((*node).getNavigationLevel() >= getNavigationLevel()) {
+				if ( ((*node).getNodeId()==mClosestNode) && ((*node).getActivity() == 0) ) {
+					toggleSourceActivity(*node, 2);	
+				}
+				else if ( ((*node).getNodeId()!=mClosestNode) && ((*node).getActivity() == 2) ) {
+					toggleSourceActivity(*node);	
+				}
 			}
-			auto_play_toggle = 1;
 		}
+		auto_play_toggle = 1;
 	}
 	// switch to zero the nodes with activity =2
 	else if (auto_play_toggle) {

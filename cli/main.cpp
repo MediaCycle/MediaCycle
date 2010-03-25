@@ -47,7 +47,7 @@ int main(int argc, char** argv) {
 
     cout<<"new MediaCycle"<<endl;
 		mediacycle = new MediaCycle(MEDIA_TYPE_AUDIO,"/tmp/","mediacycle.acl");
-		mediacycle->addPlugin("/Users/dtardieu/src/Numediart/ticore-app/Applications/Numediart/MediaCycle/src/Builds/darwin-x86/plugins/audio/Debug/mc_audiofeatures.dylib");
+		mediacycle->addPlugin("/Users/dtardieu/src/Numediart/ticore-app/Applications/Numediart/MediaCycle/src/Builds/darwin-x86/plugins/audio/Debug/mc_audio.dylib");
 		mediacycle->addPlugin ("/Users/dtardieu/src/Numediart/ticore-app/Applications/Numediart/MediaCycle/src/Builds/darwin-x86/plugins/visualisation/Debug/mc_visualisation.dylib");
 		//		media_cycle->setVisualisationPlugin("PCAVis");
 

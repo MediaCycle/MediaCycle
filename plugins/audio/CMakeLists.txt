@@ -3,7 +3,7 @@ IF (USE_AUDIOFEAT)
 	FILE(GLOB SRC *.cpp *.c)
 	FILE(GLOB HDR *.hpp *.h)
 
-	SET(PLUGIN_NAME "audiofeatures")
+	SET(PLUGIN_NAME "audio")
 	SET(TARGET_NAME "${PLUGIN_PREFIX}${PLUGIN_NAME}")
 
 	INCLUDE_DIRECTORIES(. ../../armadillo ../../audio)

@@ -686,7 +686,7 @@ void ACAudioFeedback::processAudioUpdate()
 	
 	vector<int>* mNeedsActivityUpdateMedia;
 	mNeedsActivityUpdateMedia = media_cycle->getNeedsActivityUpdateMedia();
-	
+		
 	for (i=0;i<(*mNeedsActivityUpdateMedia).size();i++) {
 		loop_id = (*mNeedsActivityUpdateMedia)[i];
 		const ACMediaNode &attribute = media_cycle->getMediaNode(loop_id);
@@ -694,7 +694,7 @@ void ACAudioFeedback::processAudioUpdate()
 		x=p.x;
 		y=0;
 		z=p.y;
-		if (attribute.getActivity()==1) {
+		if (attribute.getActivity()>0) {
 			createSourceWithPosition(loop_id, x, y, z);
 		}
 		else {
