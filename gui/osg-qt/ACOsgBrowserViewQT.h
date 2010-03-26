@@ -1,7 +1,7 @@
 /**
  * @brief ACOsgBrowserViewQT.h
- * @author Christian Frisson
- * @date 24/02/2010
+ * @author Xavier Siebert
+ * @date 26/03/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -76,7 +76,7 @@
 using Qt::WindowFlags;
 
 #include <iostream>
-#include <MediaCycleLight.h>
+#include <MediaCycle.h>
 #include <ACOsgBrowserRenderer.h>
 #include <ACOsgBrowserEventHandler.h>
 

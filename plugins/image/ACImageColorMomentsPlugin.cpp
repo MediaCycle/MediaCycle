@@ -89,6 +89,11 @@ std::vector<ACMediaFeatures*> ACImageColorMomentsPlugin::calculate(ACMediaData* 
 	return allImageFeatures;
 }
 
+std::vector<ACMediaFeatures*> ACImageColorMomentsPlugin::calculate(ACMediaData* _aData, ACMedia* _theMedia){
+	return this->calculate(_aData);
+	// no need for ACMedia here...
+};
+
 
 ACMediaFeatures* ACImageColorMomentsPlugin::calculateColorFeatures(ACImageAnalysis* image){
 	image->computeColorMoments(); // default n=4

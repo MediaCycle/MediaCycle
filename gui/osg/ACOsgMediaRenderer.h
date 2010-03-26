@@ -36,7 +36,7 @@
 #ifndef __ACOSG_MEDIA_RENDERER_H__
 #define __ACOSG_MEDIA_RENDERER_H__
 
-#include "MediaCycleLight.h"
+#include "MediaCycle.h"
 
 #include <osg/ref_ptr>
 #include <osg/Geometry>

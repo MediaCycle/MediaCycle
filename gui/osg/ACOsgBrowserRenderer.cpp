@@ -68,7 +68,7 @@ void ACOsgBrowserRenderer::prepareNodes(int start) {
 		}
 	}
 
-	if (media_cycle->getBrowser()->getLayout() == 1 && link_renderer.size()>n) {
+	if (media_cycle->getBrowser()->getLayout() == AC_LAYOUT_TYPE_NODELINK && link_renderer.size()>n) {
 		for (int i=n;i<link_renderer.size();i++) {
 			link_group->removeChild(link_renderer[i]->getLink());
 			delete link_renderer[i];
@@ -77,7 +77,7 @@ void ACOsgBrowserRenderer::prepareNodes(int start) {
 	
 	
 	node_renderer.resize(n);
-	if (media_cycle->getBrowser()->getLayout() == 1)
+	if (media_cycle->getBrowser()->getLayout() == AC_LAYOUT_TYPE_NODELINK)
 		link_renderer.resize(n);
 	distance_mouse.resize(n);
 	
@@ -108,7 +108,7 @@ void ACOsgBrowserRenderer::prepareNodes(int start) {
 			media_group->addChild(node_renderer[i]->getNode());
 		}
 		
-		if (media_cycle->getBrowser()->getLayout() == 1) {
+		if (media_cycle->getBrowser()->getLayout() == AC_LAYOUT_TYPE_NODELINK) {
 			link_renderer[i] = new ACOsgNodeLinkRenderer();
 			if (link_renderer[i]) {
 				link_renderer[i]->setMediaCycle(media_cycle);
@@ -136,7 +136,7 @@ void ACOsgBrowserRenderer::updateNodes(double ratio) {
 	//if (media_cycle && media_cycle->hasBrowser() && media_cycle->getBrowser()->getNumberOfLoopsToDisplay()>0)
 		layout_renderer->updateLayout(ratio);
 	*/
-	if (media_cycle->getBrowser()->getLayout() == 1) {
+	if (media_cycle->getBrowser()->getLayout() == AC_LAYOUT_TYPE_NODELINK) {
 		for (unsigned int i=0;i<link_renderer.size();i++) {
 			link_renderer[i]->updateLinks(ratio);
 		}
@@ -225,7 +225,7 @@ int ACOsgBrowserRenderer::computeScreenCoordinates(osgViewer::Viewer* view, doub
 		// compute distance between mouse and media element in view
 		distance_mouse[i] = sqrt((screenPoint[0]-mx)*(screenPoint[0]-mx)+(screenPoint[1]-my)*(screenPoint[1]-my));
 		node_renderer[i]->setDistanceMouse(distance_mouse[i]);
-		if (media_cycle->getBrowser()->getLayout() == 1)
+		if (media_cycle->getBrowser()->getLayout() == AC_LAYOUT_TYPE_NODELINK)
 			link_renderer[i]->setDistanceMouse(distance_mouse[i]);
 	
 		if (distance_mouse[i]<closest_distance) {

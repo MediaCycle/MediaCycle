@@ -308,8 +308,8 @@ void ACOsgAudioRenderer::updateNodes(double ratio) {
 		localscale = max(localscale,minscale);
 		// localscale = 0.5;
 		
-		//if (attribute.getActivity()==1) {	// with waveform
-		if (0) {	// without waveform
+		if (attribute.getActivity()==1) {	// with waveform
+		//if (0) {	// without waveform
 			localscale = 0.5;
 			
 			if(waveform_geode == 0) {

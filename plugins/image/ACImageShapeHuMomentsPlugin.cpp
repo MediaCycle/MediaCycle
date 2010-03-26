@@ -90,6 +90,10 @@ std::vector<ACMediaFeatures*> ACImageShapeHuMomentsPlugin::calculate(ACMediaData
 	return allImageFeatures;
 }
 
+std::vector<ACMediaFeatures*> ACImageShapeHuMomentsPlugin::calculate(ACMediaData* _aData, ACMedia* _theMedia){
+	return this->calculate(_aData);
+	// no need for ACMedia here...
+};
 
 ACMediaFeatures* ACImageShapeHuMomentsPlugin::calculateHuMoments(ACImageAnalysis* image){
 	image->computeHuMoments();

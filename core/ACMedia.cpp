@@ -93,6 +93,7 @@ int ACMedia::import(std::string _path, int id, ACPluginManager *acpl ) {
 	}
 	
 	//compute features with available plugins
+	// XS TODO config file
 	if (acpl) {
 		for (int i=0;i<acpl->getSize();i++) {
 			for (int j=0;j<acpl->getPluginLibrary(i)->getSize();j++) {

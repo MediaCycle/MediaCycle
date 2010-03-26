@@ -47,6 +47,7 @@ public:
     ~ACImageTextureWaveletsMomentsPlugin();
 	std::vector<ACMediaFeatures*> calculate(std::string aFileName);
 	std::vector<ACMediaFeatures*> calculate(ACMediaData* _data);
+	std::vector<ACMediaFeatures*> calculate(ACMediaData* _aData, ACMedia* _theMedia);
 private:
 	ACMediaFeatures* calculateHuMoments(ACImageAnalysis* image);
 };

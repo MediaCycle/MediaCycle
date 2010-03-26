@@ -44,7 +44,6 @@ MediaCycle::MediaCycle(ACMediaType aMediaType, string local_directory, string li
 	
     this->networkSocket	= 0;
 
-
     this->mediaLibrary = new ACMediaLibrary(aMediaType);
     //this->mediaLibrary->setMediaType(aMediaType);
     
@@ -108,26 +107,34 @@ int MediaCycle::stopTcpServer() {
 }
 
 int MediaCycle::importDirectory(string path, int recursive, int mid) {
-	cout << "importing directory: " << path << endl;
-	int ret = this->mediaLibrary->importDirectory(path, recursive, mid, this->pluginManager);
-	this->mediaLibrary->normalizeFeatures();
-	this->mediaBrowser->libraryContentChanged();
-	return ret;
+// XS import = import + some processing 
+	cout << "MediaCycle: importing directory: " << path << endl;	
+	int ok = 0;
+	ok = this->mediaLibrary->importDirectory(path, recursive, mid, this->pluginManager);
+	if (ok==1) this->mediaLibrary->normalizeFeatures();
+	//	XS TODO this->mediaBrowser->libraryContentChanged();	
+	return ok;
 }
 
 int MediaCycle::importACLLibrary(string path) {
-	int ret = this->mediaLibrary->openACLLibrary(path);
-	this->mediaLibrary->normalizeFeatures();
-	this->mediaBrowser->libraryContentChanged();
-	return ret;
+// XS import = open + some processing 
+	cout << "MediaCycle: importing library: " << path << endl;
+	int ok = 0;
+	ok = this->mediaLibrary->openACLLibrary(path);
+	if (ok==1) this->mediaLibrary->normalizeFeatures();
+	//	XS TODO this->mediaBrowser->libraryContentChanged();	
+	return ok;
+	
 }
 
 int MediaCycle::importLibrary(string path) {
-	cout << "importing library: " << path << endl;
-	int ret = this->mediaLibrary->openLibrary(path);
-	this->mediaLibrary->normalizeFeatures();
-	this->mediaBrowser->libraryContentChanged();
-	return ret;
+// XS import = open + some processing 
+	cout << "MediaCycle: importing library: " << path << endl;
+	int ok = 0;
+	ok = this->mediaLibrary->openLibrary(path);
+	if (ok==1) this->mediaLibrary->normalizeFeatures();
+	//	XS TODO this->mediaBrowser->libraryContentChanged();	
+	return ok;
 }
 
 static void tcp_callback(char *buffer, int l, char **buffer_send, int *l_send, void *userData)
@@ -307,11 +314,12 @@ int MediaCycle::getNavigationLevel() { return mediaBrowser->getNavigationLevel()
 void MediaCycle::getMouse(float *mx, float *my) { mediaBrowser->getMouse(mx, my); }
 // 
 void MediaCycle::updateState() { mediaBrowser->updateState(); }
+void MediaCycle::pushNavigationState() { mediaBrowser->pushNavigationState(); }
 float MediaCycle::getFrac() { return mediaBrowser->getFrac(); }
 void MediaCycle::setCameraRotation(float angle) { mediaBrowser->setCameraRotation(angle); }
 int MediaCycle::getClickedNode() { return mediaBrowser->getClickedNode(); }
 void MediaCycle::incrementLoopNavigationLevels(int i) { mediaBrowser->incrementLoopNavigationLevels(i); }
-void MediaCycle::setSelectedObject(int index) { mediaBrowser->setSelectedObject(index); }
+void MediaCycle::setSelectedNode(int index) { mediaBrowser->setSelectedNode(index); }
 void MediaCycle::updateClusters(bool animate) { mediaBrowser->updateClusters(animate); }
 void MediaCycle::updateNeighborhoods() { mediaBrowser->updateNeighborhoods(); }
 void MediaCycle::setCameraPosition(float x, float y)		{ mediaBrowser->setCameraPosition(x,y); }
@@ -325,8 +333,8 @@ void MediaCycle::libraryContentChanged() { mediaBrowser->libraryContentChanged()
 void MediaCycle::saveAsLibrary(string path) {mediaLibrary->saveAsLibrary(path); }
 void MediaCycle::saveACLLibrary(string path) {mediaLibrary->saveACLLibrary(path); }
 void MediaCycle::cleanLibrary() { mediaLibrary->cleanLibrary(); }
-void MediaCycle::setBack() { mediaBrowser->setBack(); }
-void MediaCycle::setForward() { mediaBrowser->setForward(); }
+void MediaCycle::goBack() { mediaBrowser->goBack(); }
+void MediaCycle::goForward() { mediaBrowser->goForward(); }
 void MediaCycle::setClusterNumber(int n) { mediaBrowser->setClusterNumber(n); }
 void MediaCycle::setWeight(int i, float weight) { mediaBrowser->setWeight(i, weight); }
 void MediaCycle::setForwardDown(int i) { forwarddown = i; }
@@ -394,6 +402,7 @@ void MediaCycle::pickedObjectCallback(int _nodeId) {
 }
 
 void MediaCycle::hoverObjectCallback(int pid) {
+	// XS duh ?
 }
 
 void MediaCycle::hoverCallback(float x, float y) {

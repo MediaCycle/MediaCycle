@@ -62,6 +62,10 @@ int main(int argc, char** argv) {
 
 	cout << "setCulsterN" << endl;
 	mediacycle->getBrowser()->setClusterNumber(1);
+	// XSCF251003 added this
+	mediacycle->updateClusters(true);
+	mediacycle->setNeedsDisplay(true);
+	
 
 	//IMPORT DIRECTORY + SAVE IN LIBFILE
 	/*cout<<"importDir"<<endl;
@@ -176,6 +180,8 @@ int main(int argc, char** argv) {
 	vector<ACMedia *> result;
 
 	mediacycle->getBrowser()->setWeight(0, 1.0);
+	mediacycle->updateClusters(true); 
+	mediacycle->setNeedsDisplay(true);
 
 	for (int m=0;m<mediacycle->getLibrarySize();m++) {
 		mediacycle->getKNN(mediacycle->getLibrary()->getMedia(m), result, 11);

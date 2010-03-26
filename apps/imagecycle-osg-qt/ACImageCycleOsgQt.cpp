@@ -74,7 +74,12 @@ ACImageCycleOsgQt::~ACImageCycleOsgQt()
 
 void ACImageCycleOsgQt::updateLibrary()
 {	
-	media_cycle->setSelectedObject(0);
+	media_cycle->setSelectedNode(0);
+	// XSCF 250310 added these 3
+	media_cycle->pushNavigationState();
+	media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
+	media_cycle->getBrowser()->setState(AC_CHANGING);
+	
 	ui.browserOsgView->prepareFromBrowser();
 	//browserOsgView->setPlaying(true);
 	media_cycle->setNeedsDisplay(true);
@@ -99,12 +104,12 @@ void ACImageCycleOsgQt::on_pushButtonRecenter_clicked()
 
 void ACImageCycleOsgQt::on_pushButtonBack_clicked()
 {
-	media_cycle->setBack();
+	media_cycle->goBack();
 }
 
 void ACImageCycleOsgQt::on_pushButtonForward_clicked()
 {
-	media_cycle->setForward();
+	media_cycle->goForward();
 }
 
 void ACImageCycleOsgQt::on_checkBoxFeat1_stateChanged(int state)
@@ -112,6 +117,9 @@ void ACImageCycleOsgQt::on_checkBoxFeat1_stateChanged(int state)
 	if (updatedLibrary)
 	{
 		media_cycle->setWeight(0,state/2.0f);
+		media_cycle->updateClusters(true); 
+		media_cycle->setNeedsDisplay(true);
+
 		ui.browserOsgView->updateTransformsFromBrowser(1.0); 
 	}
 }
@@ -121,6 +129,9 @@ void ACImageCycleOsgQt::on_checkBoxFeat2_stateChanged(int state)
 	if (updatedLibrary)
 	{
 		media_cycle->setWeight(1,state/2.0f);
+		media_cycle->updateClusters(true); 
+		media_cycle->setNeedsDisplay(true);
+
 		ui.browserOsgView->updateTransformsFromBrowser(1.0); 
 	}
 }
@@ -130,6 +141,9 @@ void ACImageCycleOsgQt::on_checkBoxFeat3_stateChanged(int state)
 	if (updatedLibrary)
 	{
 		media_cycle->setWeight(2,state/2.0f);
+		media_cycle->updateClusters(true); 
+		media_cycle->setNeedsDisplay(true);
+
 		ui.browserOsgView->updateTransformsFromBrowser(1.0); 
 	}
 }
@@ -139,6 +153,9 @@ void ACImageCycleOsgQt::on_sliderClusters_sliderReleased()
 	std::cout << "ClusterNumber: " << ui.sliderClusters->value() << std::endl;
 	if (updatedLibrary){
 		media_cycle->setClusterNumber(ui.sliderClusters->value());
+		// XSCF251003 added this
+		media_cycle->updateClusters(true);
+		media_cycle->setNeedsDisplay(true);
 		ui.browserOsgView->updateTransformsFromBrowser(1.0);
 	}
 }
@@ -166,6 +183,8 @@ void ACImageCycleOsgQt::loadACLFile(){
 	
 	if (!(fileName.isEmpty())) {
 		media_cycle->importLibrary((char*) fileName.toStdString().c_str());
+		media_cycle->normalizeFeatures();
+		media_cycle->libraryContentChanged();
 		std::cout << "File library imported" << std::endl;
 		//media_cycle->libraryContentChanged();
 		this->updateLibrary();
@@ -206,12 +225,10 @@ void ACImageCycleOsgQt::loadMediaDirectory(){
 	
 	media_cycle->importDirectory(selectDir.toStdString(), 1);
 	// with this function call here, do not import twice!!!
+	// XS TODO: what if we add a new directory to the existing library ?
 	media_cycle->normalizeFeatures();
-
-	// media_cycle->libraryContentChanged(); // XS already in importDirectory
-
+	media_cycle->libraryContentChanged(); 	
 	this->updateLibrary();
-
 	
 //	QStringList listFilter;
 //	listFilter << "*.png";

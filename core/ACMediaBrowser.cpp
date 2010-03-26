@@ -150,8 +150,10 @@ ACMediaBrowser::ACMediaBrowser() {
 	mNavigationLevel = 0;
 	
 	mState = AC_IDLE;
-	mLayout = LAYOUT_TYPE_NONE;
-	mRefTime = getTime();//CF TiGetTime();
+	mLayout = AC_LAYOUT_TYPE_NONE;
+	mMode = AC_MODE_CLUSTERS;
+	
+	mRefTime = getTime();
 	mFrac = 0.0;
 	
 	mousex = 0.0;
@@ -204,7 +206,7 @@ ACPoint ACMediaBrowser::getLabelPos(int i) {
 }
 
 // memory/context
-void ACMediaBrowser::setBack()
+void ACMediaBrowser::goBack()
 {
 	printf("backward\n");
 	
@@ -213,10 +215,14 @@ void ACMediaBrowser::setBack()
 		mBackwardNavigationStates.pop_back();
 		
 		setCurrentNavigationState(mBackwardNavigationStates.back());
+		// XSCF 250310 added this
+		this->updateNeighborhoods();
+		this->updateClusters(true);
+
 	}
 }
 
-void ACMediaBrowser::setForward()
+void ACMediaBrowser::goForward()
 {
 	printf("forward\n");
 	
@@ -225,6 +231,10 @@ void ACMediaBrowser::setForward()
 		mForwardNavigationStates.pop_back();
 		
 		setCurrentNavigationState(mBackwardNavigationStates.back());
+		// XSCF 250310 added this
+		this->updateNeighborhoods();
+		this->updateClusters(true);
+
 	}
 }
 
@@ -260,16 +270,18 @@ void ACMediaBrowser::setFilterSuggest()
 
 void ACMediaBrowser::setWeight(int i, float weight) {
 	mFeatureWeights[i] = weight; 
-	updateClusters(true); 
-	setNeedsDisplay(true);
+	// XSCF 250310 removed this
+	// updateClusters(true); 
+	// setNeedsDisplay(true);
 }
 
 void ACMediaBrowser::setClusterNumber(int n)
 {
-	// SD TODO	
+	// SD TODO
 	mClusterCount = n;
-	updateClusters(true);
-	setNeedsDisplay(true);
+	// XSCF 250310 removed this
+//	updateClusters(true);
+//	setNeedsDisplay(true);
 }
 
 void ACMediaBrowser::setClickedNode(int inode){
@@ -288,8 +300,8 @@ void ACMediaBrowser::setClickedLabel(int ilabel){
 		mClickedLabel = ilabel;
 }
 
-// XS TODO: setNodePosition -- or even NodeNextPosition ??
-void ACMediaBrowser::setNodePosition(int node_id, float x, float y, float z){
+// XS 250310 was: setNodePosition
+void ACMediaBrowser::setNodeNextPosition(int node_id, float x, float y, float z){
 	this->getMediaNode(node_id).setNextPosition(x,y,z);
 }
 
@@ -376,31 +388,34 @@ void ACMediaBrowser::setCurrentNavigationState(ACNavigationState state)
 	mNavigationLevel = state.mNavigationLevel;
 	mFeatureWeights = state.mFeatureWeights;
 	
-	// re-cluster, blabla
-	updateNeighborhoods();
-	updateClusters(true);
+	// XSCF 250310 removed this
+//	updateNeighborhoods();
+//	updateClusters(true);
 }
 
 ACBrowserLayout ACMediaBrowser::getLayout()
 {
 	return mLayout;
-}	
+}
 
 void ACMediaBrowser::setLayout(ACBrowserLayout _layout)
 {
 	mLayout = _layout;
-	
-	//updateNeighborhoods();
-	//updateClusters(false);
-	//updateNextPositions();
-	
-	//setNeedsDisplay(true);
-}	
+}
+
+ACBrowserMode ACMediaBrowser::getMode()
+{
+	return mMode;
+}
+
+void ACMediaBrowser::setMode(ACBrowserMode _mode)
+{
+	mMode = _mode;
+}
 
 void ACMediaBrowser::pushNavigationState()
 {
 	mForwardNavigationStates.clear();
-	
 	mBackwardNavigationStates.push_back(getCurrentNavigationState());
 }
 
@@ -435,8 +450,7 @@ int ACMediaBrowser::setSourceCursor(int lid, int frame_pos) {
 	this->getMediaNode(lid).setCursor(frame_pos);
 }
 
-// XS Node
-void ACMediaBrowser::randomizeLoopPositions(){
+void ACMediaBrowser::randomizeNodePositions(){
 	if(mLibrary == NULL) return;
 	for (ACMediaNodes::iterator node = mLoopAttributes.begin(); node != mLoopAttributes.end(); ++node){
 		(*node).setCurrentPosition (ACRandom() * mViewWidth, 
@@ -448,12 +462,12 @@ void ACMediaBrowser::randomizeLoopPositions(){
 	}	
 }
 
-// XS rename to updateLibrary() ?
 void ACMediaBrowser::libraryContentChanged() {
-	// update initial positions and resize other vector structures dependent on loop count.
+	// update initial positions 
+	// previously: resize other vector structures dependent on loop count.
 	
 	// XS 150310 TODO: check this one
-	initializeNodes(1); // media_ID = loop_ID
+	initializeNodes(1); // media_ID = node_ID
 
 
 	if(mLibrary == NULL) return;
@@ -486,10 +500,10 @@ void ACMediaBrowser::libraryContentChanged() {
 		mFeatureWeights[i] = 0.0;//SD temporary hack before config filing
 	}
 	mFeatureWeights[0] = 1.0;//SD temporary hack before config filing
+
 	updateNeighborhoods();
 	updateClusters(false);
-	updateNextPositions();
-	
+	updateNextPositions();		
 	setNeedsDisplay(true);
 }
 
@@ -672,7 +686,7 @@ void ACMediaBrowser::initClusterCenters(){
 // mLoopAttributes -> ACMediaNode
 void ACMediaBrowser::updateClusters(bool animate){
 	if (mVisPlugin==NULL && mNeighborsPlugin==NULL)
-		kmeans(animate);
+		updateClustersKMeans(animate);
 	else{
 		if (mNeighborsPlugin==NULL) {
 			initClusterCenters();
@@ -699,7 +713,7 @@ void ACMediaBrowser::updateNeighborhoods(){
 
 void ACMediaBrowser::updateNextPositions(){
 	if (mVisPlugin==NULL && mPosPlugin==NULL)
-		setNextPositionsPropeller();
+		updateNextPositionsPropeller();
 	else{
 		if (mPosPlugin){
 			std::cout << "updateNextPositions : Positions Plugin" << std::endl;
@@ -714,7 +728,7 @@ void ACMediaBrowser::updateNextPositions(){
 
 }
 
-void ACMediaBrowser::setNextPositions2dim(){
+void ACMediaBrowser::updateNextPositions2dim(){
 	// XS TODO clean this one !
 	if(mLibrary == NULL) 
 		return; 
@@ -767,15 +781,15 @@ void ACMediaBrowser::setNextPositions2dim(){
 // XS 150310
 // . removed assert size
 // . included ACMediaNode 
-void ACMediaBrowser::kmeans(bool animate) {
+void ACMediaBrowser::updateClustersKMeans(bool animate) {
 	int i,j,d,f;
 	
 	if(mLibrary == NULL) {
-		cerr << "<ACMediaBrowser::kmeans> : Media Library NULL" << endl;
+		cerr << "<ACMediaBrowser::updateClustersKMeans> : Media Library NULL" << endl;
 		return;
 	}
 	else if(mLibrary->isEmpty()) {
-		cerr << "<ACMediaBrowser::kmeans> : empty Media Library " << endl;
+		cerr << "<ACMediaBrowser::updateClustersKMeans> : empty Media Library " << endl;
 		return;
 	}
 
@@ -952,22 +966,22 @@ void ACMediaBrowser::kmeans(bool animate) {
 
 
 
-void ACMediaBrowser::setSelectedObject(int index)
+void ACMediaBrowser::setSelectedNode(int index)
 {
-	//assert(index >= -1 && index < objects.size());
+	// XS TODO (index >= -1 && index < objects.size());
 	
 	mSelectedNode = index;
-	
-	pushNavigationState();
-	
-	updateNextPositions();
-	setState(AC_CHANGING);
+
+	// XSCF 250310 commented this 
+//	pushNavigationState();
+//	updateNextPositions();
+//	setState(AC_CHANGING);
 }
 
-
 // AM : TODO move this out of core (it's GUI related)
-void ACMediaBrowser::setNextPositionsPropeller(){
-	std::cout << "ACMediaBrowser::setNextPositionsPropeller" <<std::endl;
+// CF : it should be a core positions component (as opposed to plugin loaded at runtime)
+void ACMediaBrowser::updateNextPositionsPropeller(){
+	std::cout << "ACMediaBrowser::updateNextPositionsPropeller" <<std::endl;
 
 	if (mLibrary->isEmpty() ) return;
 	if (mSelectedNode < 0 || mSelectedNode >= getNumberOfMediaNodes()) return ;
@@ -978,7 +992,7 @@ void ACMediaBrowser::setNextPositionsPropeller(){
 	p.x = p.y = p.z = 0.0;
 	this->getMediaNode(mSelectedNode).setNextPosition(p);
 	
-	srand(1234);//CF TiRandomSeed(1234);
+	srand(1234);
 	
 	// XS loop on MediaNodes.
 	// each MediaNode has a MediaId by which we can access the Media
@@ -1037,14 +1051,14 @@ void ACMediaBrowser::setState(ACBrowserState state)
 
 void ACMediaBrowser::updateState()
 {
-#define CUB_FRAC(x) (x*x*(-2.0*x + 3.0))
-	double t = getTime(); // CF instead of TiGetTime()
-	double frac;
-	
-	//frac = 2.0 * fabs(t - floor(t) - 0.5);
-	
 	if(mState == AC_CHANGING)
 	{
+		#define CUB_FRAC(x) (x*x*(-2.0*x + 3.0))
+		double t = getTime();
+		double frac;
+		
+		//frac = 2.0 * fabs(t - floor(t) - 0.5);
+		
 		double andur = 1.0;
 		frac = (t-mRefTime)/andur;
 		

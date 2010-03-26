@@ -74,6 +74,7 @@ public:
 	virtual std::vector<ACMediaFeatures*> calculate(){};
 	virtual std::vector<ACMediaFeatures*> calculate(std::string aFileName){};
 	virtual std::vector<ACMediaFeatures*> calculate(ACMediaData* aData, ACMedia* theMedia){};
+	//XSCF TODO: should the plugin receive MediaCycle ?
 	virtual void updateClusters(ACMediaBrowser*){};
 	virtual void updateNextPositions(ACMediaBrowser*){};
 	virtual void updateNeighborhoods(ACMediaBrowser*){};

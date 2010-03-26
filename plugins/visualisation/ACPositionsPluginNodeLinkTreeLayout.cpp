@@ -82,7 +82,7 @@ void ACPositionsPluginNodeLinkTreeLayout::updateNextPositions(ACMediaBrowser* _m
 	if (!(mediaBrowser->getUserLog()->isEmpty()))
 	{
 		
-		mediaBrowser->setLayout(LAYOUT_TYPE_NODELINK);
+		mediaBrowser->setLayout(AC_LAYOUT_TYPE_NODELINK);
 		//vector<ACMedia*> loops = _mediaBrowser->getLibrary()->getAllMedia();
 		//int n = loops.size();
 		
@@ -119,7 +119,8 @@ void ACPositionsPluginNodeLinkTreeLayout::updateNextPositions(ACMediaBrowser* _m
 		
 		for(int n=0; n<mediaBrowser->getUserLog()->getSize(); n++)
 		{
-			mediaBrowser->setNodePosition(mediaBrowser->getUserLog()->getMediaIdFromNodeId(n), m_nodeParams[n].getX()/200, -m_nodeParams[n].getY()/200); // CF: note OSG's inverted Y
+			// TODO: check next
+			mediaBrowser->setNodeNextPosition(mediaBrowser->getUserLog()->getMediaIdFromNodeId(n), m_nodeParams[n].getX()/200, -m_nodeParams[n].getY()/200); // CF: note OSG's inverted Y
 			mediaBrowser->setLoopIsDisplayed(mediaBrowser->getUserLog()->getMediaIdFromNodeId(n), true);
 			std::cout << "ACPositionsPluginNodeLinkTreeLayout::updateNextPositions: Node " << n << " x " << m_nodeParams[n].getX() << " y " << -m_nodeParams[n].getY() << std::endl;
 		}

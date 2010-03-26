@@ -93,8 +93,12 @@ int main(int argc, char** argv) {
 	}
 	// saveLibraryAsXml(mediacycle, xmlpath);	
 	
-	mediacycle->getBrowser()->randomizeLoopPositions();
+	mediacycle->getBrowser()->randomizeNodePositions();
 //	mediacycle->getBrowser()->setClusterNumber(1);
+	// XSCF251003 added this
+	//mediacycle->updateClusters(true);
+	//mediacycle->setNeedsDisplay(true);
+	
 	if (mediacycle->startTcpServer(12345,5,dancers_tcp_callback) < 0){
 		cerr << "<MediaCycle-Dancers main> could not start tcp server" << endl;
 		return EXIT_FAILURE;

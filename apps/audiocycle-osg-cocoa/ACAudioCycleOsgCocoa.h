@@ -40,7 +40,7 @@ using namespace::std;
 //#include <Io/TiOscReceiver.h>
 //#import <Rendering/TiCocoaOsgView.h>
 #import <ACOsgBrowserViewCocoa.h>
-#include <MediaCycleLight.h>
+#include <MediaCycle.h>
 #include <ACAudioFeedback.h>
 //#include <ACOscBrowser.h>
 

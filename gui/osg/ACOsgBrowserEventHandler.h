@@ -40,7 +40,7 @@
 #include <osgViewer/View>
 #include "ACRefId.h"
 
-#include "MediaCycleLight.h"
+#include "MediaCycle.h"
 
 using namespace osgGA;
 

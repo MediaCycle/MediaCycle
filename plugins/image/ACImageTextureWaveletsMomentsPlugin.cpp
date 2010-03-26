@@ -91,6 +91,11 @@ std::vector<ACMediaFeatures*> ACImageTextureWaveletsMomentsPlugin::calculate(ACM
 	return allImageFeatures;
 }
 
+std::vector<ACMediaFeatures*> ACImageTextureWaveletsMomentsPlugin::calculate(ACMediaData* _aData, ACMedia* _theMedia){
+	return this->calculate(_aData);
+	// no need for ACMedia here...
+};
+
 ACMediaFeatures* ACImageTextureWaveletsMomentsPlugin::calculateHuMoments(ACImageAnalysis* image){
 	image->computeGaborMoments();
 	ACMediaFeatures* gabor_moments = new ACMediaFeatures(image->getGaborMoments(), "Texture");

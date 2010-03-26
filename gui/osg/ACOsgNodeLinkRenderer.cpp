@@ -143,10 +143,8 @@ void ACOsgNodeLinkRenderer::updateLinks(double ratio) {
 				int parentId = media_cycle->getBrowser()->getUserLog()->getParentFromNodeId(node_index);
 				const ACMediaNode &to_attribute = media_cycle->getMediaNode( parentId );
 				const ACPoint &to_p = to_attribute.getNextPosition();
-				double _to_x = to_p.x-p2.x;
-				double _to_y = to_p.y-p2.y;
 				linkGeode(to_p.x-p2.x,to_p.y-p2.y);
-			}	
+	 		}	
 		}
 		link_node->addChild(link_geode);
 		link_node->setMatrix(T);

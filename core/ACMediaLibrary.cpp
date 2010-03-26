@@ -203,7 +203,7 @@ int ACMediaLibrary::openACLLibrary(std::string _path, bool aInitLib){
 		if (local_media != NULL) {
 			ret = local_media->loadACL(library_file);
 			if (ret) {
-				std::cout << "Media Libray Size : " << this->getSize() << std::endl;
+				std::cout << "Media Library Size : " << this->getSize() << std::endl;
 				media_library.push_back(local_media);
 				file_count++;
 			}
@@ -253,7 +253,7 @@ int ACMediaLibrary::openLibrary(std::string _path, bool aInitLib){
 		if (aInitLib) {
 			cleanLibrary();
 		}
-		//media_library.resize(0); //no reason to be here if no reset asked. resize to 0 when calling cleanLibrary()
+		media_library.resize(0); //no reason to be here if no reset asked. resize to 0 when calling cleanLibrary()
 		do {
 			local_media = ACMediaFactory::create(media_type);
 			if (local_media != NULL) {
@@ -262,7 +262,7 @@ int ACMediaLibrary::openLibrary(std::string _path, bool aInitLib){
 					// problem if id is -1 (==default value) --> this corrects the problem (used temporarily in avlaughtercycle where all ids were -1
 					//if (local_media->getId() < 0)
 					//	local_media->setId(media_library.size());//this is not reliable if the library file lists a mix of audio files w/ and w/o an id. maybe we should set the id only here
-					std::cout << "Media Libray Size : " << this->getSize() << std::endl;
+					std::cout << "Media Library Size : " << this->getSize() << std::endl;
 					media_library.push_back(local_media);
 					file_count++;
 					

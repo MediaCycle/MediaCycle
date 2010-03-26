@@ -1,7 +1,7 @@
 /**
  * @brief ACVisualisationPlugin.cpp
  * @author Xavier Siebert
- * @date 18/03/2010
+ * @date 26/03/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -77,11 +77,11 @@ void ACVisualisationPlugin::updateClusters(ACMediaBrowser* mediaBrowser){
 }
 
 void ACVisualisationPlugin::updateNextPositions(ACMediaBrowser* mediaBrowser){
-  int itemClicked, labelClicked, action;
+  int itemClicked, labelClicked;
   int nbVideoDisplay = mediaBrowser->getNumberOfDisplayedLoops(); // should divide by nbClusters
   ucolvec toDisplay_v(nbVideoDisplay);
 	vector<string> featureNames;
-	int libSize = mediaBrowser->getLibrary()->getSize();
+	int libSize = mediaBrowser->getLibrary()->getSize(); // XSCF TODO: court-circuite MediaCycle...
 	itemClicked = mediaBrowser->getClickedNode();
 	labelClicked = mediaBrowser->getClickedLabel();
 	
@@ -174,7 +174,8 @@ void ACVisualisationPlugin::updateNextPositions(ACMediaBrowser* mediaBrowser){
 
 	//  For osg view : Because there is no way to prevent a media from displaying it display it far away
   for (int i=0; i<libSize; i++){
-    mediaBrowser->setNodePosition(i, 40, 40);    
+	  //TODO make sur you meant next
+    mediaBrowser->setNodeNextPosition(i, 40, 40);    
     mediaBrowser->setLoopIsDisplayed(i, false);
   }
 	////////////////////////////////////////////////////////////////
@@ -183,11 +184,13 @@ void ACVisualisationPlugin::updateNextPositions(ACMediaBrowser* mediaBrowser){
     mediaBrowser->setLoopIsDisplayed(toDisplay_v(i), true);
 	
 	for (int i=0; i<mediaBrowser->getNumberOfDisplayedLoops(); i++){
-		mediaBrowser->setNodePosition(toDisplay_v(i), posDisp_m(toDisplay_v(i),0), posDisp_m(toDisplay_v(i),1));
+		//TODO make sur you meant next
+		mediaBrowser->setNodeNextPosition(toDisplay_v(i), posDisp_m(toDisplay_v(i),0), posDisp_m(toDisplay_v(i),1));
 		std::cout<<"disp : " << toDisplay_v(i) << ", " << mediaBrowser->getLibrary()->getMedia(toDisplay_v(i))->getFileName() << posDisp_m(toDisplay_v(i),0) << ", " << posDisp_m(toDisplay_v(i),1) << std::endl;
 	}
 	// 	if (itemClicked >= 0)
-	// 		mediaBrowser->setNodePosition(itemClicked, 0, 0);
+	//TODO make sur you meant next
+	// 		mediaBrowser->setNodeNextPosition(itemClicked, 0, 0);
 }
 
 

@@ -68,8 +68,13 @@ enum ACBrowserState {
 };
 
 enum ACBrowserLayout {
-	LAYOUT_TYPE_NONE=0,
-	LAYOUT_TYPE_NODELINK=1
+	AC_LAYOUT_TYPE_NONE=0,
+	AC_LAYOUT_TYPE_NODELINK=1
+};
+
+enum ACBrowserMode {
+	AC_MODE_CLUSTERS=0,
+	AC_MODE_NEIGHBORS=1
 };
 
 //
@@ -111,15 +116,15 @@ public:
 	void libraryContentChanged();
 	
 	// handy library to just assign random positions to items
-	void randomizeLoopPositions();
+	void randomizeNodePositions();
 
 	// Search by similarity
 	int getKNN(int id, vector<int> &ids, int k);
 	int getKNN(ACMedia *aMedia, vector<ACMedia *> &result, int k);
 		
 	// memory/context
-	void setBack();
-	void setForward();
+	void goBack();
+	void goForward();
 	void setHistory();
 	void setBookmark();
 	void setTag();
@@ -161,7 +166,7 @@ public:
 	void setClusterIndex(int mediaIdx,int clusterIdx);
 	void setClusterCenter(int clusterIdx, vector< vector<float> >);
 	void initClusterCenters();
-	void kmeans(bool animate);
+	void updateClustersKMeans(bool animate);
 	
 	// neighbors
 	void updateNeighborhoods();
@@ -173,13 +178,12 @@ public:
 	void setClickedLabel(int ilabel);
 	int getClickedLabel()					{return mClickedLabel; };
 
-	// this influences updateNextPositions
-	void setSelectedObject(int index);
+	void setSelectedNode(int index);
 
 	// update positions based on current clustering
 	void updateNextPositions();
-	void setNextPositionsPropeller();
-	void setNextPositions2dim();
+	void updateNextPositionsPropeller();
+	void updateNextPositions2dim();
 
 	void updateState();
 	void setState(ACBrowserState state);
@@ -195,7 +199,7 @@ public:
 	ACMediaNode &getMediaNode(int i) ; // not const because accesors to MediaNode can modify it
 	void initializeNodes(int _defaultNodeId = 0); 
 	
-	void setNodePosition(int loop_id, float x, float y, float z=0);
+	void setNodeNextPosition(int loop_id, float x, float y, float z=0);
 	// XS 100310 MediaNode
 	void setLoopIsDisplayed(int loop_id, bool iIsDisplayed) {this->getMediaNode(loop_id).setDisplayed(iIsDisplayed);}
 
@@ -222,7 +226,9 @@ public:
 	void setCurrentNavigationState(ACNavigationState state);
 	ACBrowserLayout getLayout();
 	void setLayout(ACBrowserLayout _layout);
-	
+	ACBrowserMode getMode();
+	void setMode(ACBrowserMode _mode);
+		
 	// Quick Browser
 	void setClosestNode(int loop_id);
 	void setAutoPlay(int auto_play) { this->auto_play = auto_play; };
@@ -263,6 +269,7 @@ protected:
 	double 				mFrac;
 	ACBrowserState		mState;
 	ACBrowserLayout		mLayout;
+	ACBrowserMode		mMode;
 	
 	int 				mClickedNode; // valid between mouseDown and mouseUp, otherwise -1
 	int 				mSelectedNode;

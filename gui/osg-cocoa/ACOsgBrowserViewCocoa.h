@@ -35,7 +35,7 @@
 #import <Rendering/TiCocoaOsgView.h>
 #import <ACOsgBrowserEventHandler.h>
 //#import <Rendering/TiCocoaOsgView+Node.h>
-#import <MediaCycleLight.h>
+#include <MediaCycle.h>
 #import "ACOsgBrowserRenderer.h"
 
 ////struct ACOsgBrowserViewData;//CF

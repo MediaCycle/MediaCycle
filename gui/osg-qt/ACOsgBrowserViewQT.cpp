@@ -76,6 +76,7 @@ void ACOsgBrowserViewQT::resizeGL( int width, int height )
   osg_view->resized(0,0,width,height);
 }
 
+// called according to timer
 void ACOsgBrowserViewQT::updateGL()
 {
 	double frac = 0.0;
@@ -110,7 +111,7 @@ void ACOsgBrowserViewQT::updateGL()
 	if (frac != 0.0)
 		setMouseTracking(true); //CF necessary for the hover callback
 	QGLWidget::updateGL();
-	media_cycle->setNeedsDisplay(0);
+	media_cycle->setNeedsDisplay(false);
 }	
 
 void ACOsgBrowserViewQT::keyPressEvent( QKeyEvent* event )
@@ -167,9 +168,13 @@ void ACOsgBrowserViewQT::mousePressEvent( QMouseEvent* event )
 		if(loop >= 0)
 		{
 			media_cycle->incrementLoopNavigationLevels(loop);
-			media_cycle->setSelectedObject(loop);
+			media_cycle->setSelectedNode(loop);
+			// XSCF 250310 added these 3
+			media_cycle->pushNavigationState();
+			media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
+			media_cycle->getBrowser()->setState(AC_CHANGING);
+			
 			media_cycle->updateClusters(true);
-			// audio_cycle->saveNavigationState();
 		}
 	}
 	

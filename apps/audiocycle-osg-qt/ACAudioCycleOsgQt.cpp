@@ -59,8 +59,8 @@ ACAudioCycleOsgQt::ACAudioCycleOsgQt(QWidget *parent)
 		media_cycle->addPlugin("../../../plugins/visualisation/" + build_type + "/mc_visualisation.dylib");
 		media_cycle->addPlugin("../../../plugins/audio/" + build_type + "/mc_audiofeatures.dylib");	
 		//media_cycle->setVisualisationPlugin("Visualisation");
-		//media_cycle->setNeighborhoodsPlugin("RandomNeighborhoods");
-		//media_cycle->setPositionsPlugin("NodeLinkTreeLayoutPositions");
+		media_cycle->setNeighborhoodsPlugin("RandomNeighborhoods");
+		media_cycle->setPositionsPlugin("NodeLinkTreeLayoutPositions");
 	#endif
 	
 	audio_engine = new ACAudioFeedback();
@@ -102,7 +102,16 @@ ACAudioCycleOsgQt::~ACAudioCycleOsgQt()
 
 void ACAudioCycleOsgQt::updateLibrary()
 {	
-	media_cycle->setSelectedObject(0);
+	if (!updatedLibrary) {
+		// set to 0 the first time a library is loaded
+		// XSCF do we always want this to be 0 ?
+		media_cycle->setSelectedNode(0);
+	}
+	// XSCF 250310 added these 3
+	media_cycle->pushNavigationState();
+	media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
+	media_cycle->getBrowser()->setState(AC_CHANGING);
+	
 	ui.browserOsgView->prepareFromBrowser();
 	//browserOsgView->setPlaying(true);
 	media_cycle->setNeedsDisplay(true);
@@ -133,12 +142,12 @@ void ACAudioCycleOsgQt::on_pushButtonRecenter_clicked()
 
 void ACAudioCycleOsgQt::on_pushButtonBack_clicked()
 {
-	media_cycle->setBack();
+	media_cycle->goBack();
 }
 
 void ACAudioCycleOsgQt::on_pushButtonForward_clicked()
 {
-	media_cycle->setForward();
+	media_cycle->goForward();
 }
 
 void ACAudioCycleOsgQt::on_pushButtonControlStart_clicked()
@@ -184,6 +193,9 @@ void ACAudioCycleOsgQt::on_checkBoxRhythm_stateChanged(int state)
 	if (updatedLibrary)
 	{
 		media_cycle->setWeight(0,state/2.0f);
+		media_cycle->updateClusters(true); 
+		media_cycle->setNeedsDisplay(true);
+
 		ui.browserOsgView->updateTransformsFromBrowser(1.0); 
 	}
 }
@@ -193,6 +205,8 @@ void ACAudioCycleOsgQt::on_checkBoxTimbre_stateChanged(int state)
 	if (updatedLibrary)
 	{
 		media_cycle->setWeight(1,state/2.0f);
+		media_cycle->updateClusters(true); 
+		media_cycle->setNeedsDisplay(true);
 		ui.browserOsgView->updateTransformsFromBrowser(1.0); 
 	}
 }
@@ -202,6 +216,8 @@ void ACAudioCycleOsgQt::on_checkBoxHarmony_stateChanged(int state)
 	if (updatedLibrary)
 	{
 		media_cycle->setWeight(2,state/2.0f);
+		media_cycle->updateClusters(true); 
+		media_cycle->setNeedsDisplay(true);
 		ui.browserOsgView->updateTransformsFromBrowser(1.0); 
 	}
 }
@@ -211,6 +227,9 @@ void ACAudioCycleOsgQt::on_sliderClusters_sliderReleased()
 	std::cout << "ClusterNumber: " << ui.sliderClusters->value() << std::endl;
 	if (updatedLibrary){
 		media_cycle->setClusterNumber(ui.sliderClusters->value());
+		// XSCF251003 added this
+		media_cycle->updateClusters(true);
+		media_cycle->setNeedsDisplay(true);		
 		ui.browserOsgView->updateTransformsFromBrowser(1.0);
 	}
 }
@@ -238,8 +257,9 @@ void ACAudioCycleOsgQt::loadACLFile(){
 
 	if (!(fileName.isEmpty())) {
 		media_cycle->importLibrary((char*) fileName.toStdString().c_str());
+		media_cycle->normalizeFeatures();
+		media_cycle->libraryContentChanged();
 		std::cout << "File library imported" << std::endl;
-		//media_cycle->libraryContentChanged();
 		this->updateLibrary();
 	}	
 }
@@ -277,10 +297,9 @@ void ACAudioCycleOsgQt::loadMediaDirectory(){
 	
 	media_cycle->importDirectory(selectDir.toStdString(), 1);
 	// with this function call here, do not import twice!!!
+	// XS TODO: what if we add a new directory to the existing library ?
 	media_cycle->normalizeFeatures();
-	
-	// media_cycle->libraryContentChanged(); // XS already in importDirectory
-	
+	media_cycle->libraryContentChanged(); 
 	this->updateLibrary();
 	
 	
@@ -422,7 +441,12 @@ void ACAudioCycleOsgQt::processOscMessage(const char* tagName)
 		media_cycle->importLibrary(lib_path); // XS instead of getImageLibrary CHECK THIS
 		//updateLibrary();
 		std::cout << "File library imported" << std::endl;
-		media_cycle->setSelectedObject(0);
+		media_cycle->setSelectedNode(0);
+		// XSCF 250310 added these 3
+		media_cycle->pushNavigationState();
+		media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
+		media_cycle->getBrowser()->setState(AC_CHANGING);
+		
 		ui.browserOsgView->prepareFromBrowser();
 		media_cycle->setNeedsDisplay(true);
 		updatedLibrary = true;
@@ -431,7 +455,12 @@ void ACAudioCycleOsgQt::processOscMessage(const char* tagName)
 	{
 		media_cycle->cleanLibrary(); // XS instead of getImageLibrary CHECK THIS
 		media_cycle->libraryContentChanged();
-		media_cycle->setSelectedObject(0);
+		media_cycle->setSelectedNode(0);
+		// XSCF 250310 added these 3
+		media_cycle->pushNavigationState();
+		media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
+		media_cycle->getBrowser()->setState(AC_CHANGING);
+		
 		ui.browserOsgView->prepareFromBrowser();
 		media_cycle->setNeedsDisplay(true);
 		updatedLibrary = true;

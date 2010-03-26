@@ -81,11 +81,11 @@ public:
     // Thumbnail
     string getThumbnailFileName(int id);
 
-    string getLocalDirectoryPath() {return local_directory;};
-    string getLibName() {return libname;};
-    ACMediaLibrary* getLibrary() { return mediaLibrary;};
-    ACMediaBrowser* getBrowser() { return mediaBrowser;};
-    ACPluginManager* getPluginManager() { return pluginManager;};
+    string getLocalDirectoryPath() {return local_directory;}
+    string getLibName() {return libname;}
+    ACMediaLibrary* getLibrary() { return mediaLibrary;}
+    ACMediaBrowser* getBrowser() { return mediaBrowser;}
+    ACPluginManager* getPluginManager() { return pluginManager;}
     void setVisualisationPlugin(string pluginName);
 	void setNeighborhoodsPlugin(string pluginName);
 	void setPositionsPlugin(string pluginName);
@@ -111,11 +111,12 @@ public:
 	void getMouse(float *mx, float *my);
 	// 
 	void updateState();
+	void pushNavigationState();
 	float getFrac();
 	void setCameraRotation(float angle);
 	int getClickedNode();
 	void incrementLoopNavigationLevels(int i);
-	void setSelectedObject(int index);
+	void setSelectedNode(int index);
 	void updateClusters(bool animate);
 	void updateNeighborhoods();
 	void setCameraPosition(float x, float y);
@@ -129,8 +130,8 @@ public:
 	void saveAsLibrary(string path);
 	void saveACLLibrary(string path);
 	void cleanLibrary();
-	void setBack();
-	void setForward();
+	void goBack();
+	void goForward();
 	void setClusterNumber(int n);
 	void setWeight(int i, float weight);
 	void setForwardDown(int i);

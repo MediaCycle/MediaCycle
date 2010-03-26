@@ -115,6 +115,10 @@ int main(int argc, char** argv) {
     mediabrowser = new ACMediaBrowser();
     mediabrowser->libraryContentChanged(); 
     mediabrowser->setClusterNumber(4);
+	// XSCF251003 added this
+	mediabrowser->updateClusters(true);
+	mediabrowser->setNeedsDisplay(true);
+	//
     mediabrowser->setLibrary(medialib);
     mediabrowser->libraryContentChanged(); 
 */

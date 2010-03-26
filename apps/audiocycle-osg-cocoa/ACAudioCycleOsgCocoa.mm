@@ -120,7 +120,11 @@
 
 - (void)updatedLibrary
 {	
-	media_cycle->setSelectedObject(0);
+	media_cycle->setSelectedNode(0);
+	// XSCF 250310 added these 3
+	media_cycle->pushNavigationState();
+	media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
+	media_cycle->getBrowser()->setState(AC_CHANGING);
 	
 	[browser_osg_view prepareFromBrowser];
 	
@@ -158,7 +162,15 @@
 	
 	//media_cycle->importLibrary("/dupont/dancers.acl_copy");
 	//media_cycle->setClusterNumber(5);
-	//media_cycle->setSelectedObject(0);
+	// XSCF251003 added this
+	//media_cycle->updateClusters(true);
+	//media_cycle->setNeedsDisplay(true);
+	
+	//media_cycle->setSelectedNode(0);
+	// XSCF 250310 added these 3
+	//media_cycle->pushNavigationState();
+	//media_cycle->updateNextPositions(); // TODO is it required ?? .. hehehe
+	//media_cycle->setState(AC_CHANGING);
 	
 	[browser_osg_view setMediaCycle:media_cycle];
 	[browser_osg_view prepareFromBrowser];
@@ -325,12 +337,12 @@
 
 - (IBAction)	setBackButton:(id)inSender
 {
-	media_cycle->setBack();
+	media_cycle->goBack();
 }
 
 - (IBAction)	setForwardButton:(id)inSender
 {
-	media_cycle->setForward();
+	media_cycle->goForward();
 }
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -343,6 +355,9 @@
 	float	value = [inSender floatValue];
 	
 	media_cycle->setWeight(0, value);
+	media_cycle->updateClusters(true); 
+	media_cycle->setNeedsDisplay(true);
+
 }
 
 - (IBAction)setWeight2Slider:(id)inSender
@@ -350,6 +365,9 @@
 	float	value = [inSender floatValue];
 	
 	media_cycle->setWeight(1, value);
+	media_cycle->updateClusters(true); 
+	media_cycle->setNeedsDisplay(true);
+
 }
 
 - (IBAction)setWeight3Slider:(id)inSender
@@ -357,6 +375,9 @@
 	float	value = [inSender floatValue];
 	
 	media_cycle->setWeight(2, value);
+	media_cycle->updateClusters(true); 
+	media_cycle->setNeedsDisplay(true);
+
 }
 
 - (IBAction)setClusterNumberSlider:(id)inSender
@@ -364,6 +385,10 @@
 	int	value = [inSender intValue];
 	
 	media_cycle->setClusterNumber(value);
+	// XSCF251003 added this
+	media_cycle->updateClusters(true);
+	media_cycle->setNeedsDisplay(true);
+	
 }
 
 - (IBAction)setCameraRecenter:(id)inSender
