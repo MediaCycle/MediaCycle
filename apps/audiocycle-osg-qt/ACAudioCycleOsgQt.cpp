@@ -57,10 +57,10 @@ ACAudioCycleOsgQt::ACAudioCycleOsgQt(QWidget *parent)
 			build_type = "Debug";
 		#endif
 		media_cycle->addPlugin("../../../plugins/visualisation/" + build_type + "/mc_visualisation.dylib");
-		media_cycle->addPlugin("../../../plugins/audio/" + build_type + "/mc_audiofeatures.dylib");	
+		media_cycle->addPlugin("../../../plugins/audio/" + build_type + "/mc_audio.dylib");	
 		//media_cycle->setVisualisationPlugin("Visualisation");
-		media_cycle->setNeighborhoodsPlugin("RandomNeighborhoods");
-		media_cycle->setPositionsPlugin("NodeLinkTreeLayoutPositions");
+		//media_cycle->setNeighborhoodsPlugin("RandomNeighborhoods");
+		//media_cycle->setPositionsPlugin("NodeLinkTreeLayoutPositions");
 	#endif
 	
 	audio_engine = new ACAudioFeedback();

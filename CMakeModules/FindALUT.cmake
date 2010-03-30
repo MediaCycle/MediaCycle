@@ -1,3 +1,22 @@
+# - Find ALUT
+# Find the native ALUT includes and library
+# This module defines
+#  ALUT_INCLUDE_DIR, where to find jpeglib.h, etc.
+#  ALUT_LIBRARIES, the libraries needed to use ALUT.
+#  ALUT_FOUND, If false, do not try to use ALUT.
+# also defined, but not for general use are
+#  ALUT_LIBRARY, where to find the ALUT library.
+
+#=============================================================================
+# Copyright 2001-2009 Kitware, Inc.
+#
+# Distributed under the OSI-approved BSD License (the "License");
+# see accompanying file Copyright.txt for details.
+#
+# This software is distributed WITHOUT ANY WARRANTY; without even the
+# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the License for more information.
+#=============================================================================
 # Locate ALUT
 # This module defines
 # ALUT_LIBRARY
@@ -59,4 +78,3 @@ SET(ALUT_FOUND "NO")
 IF(ALUT_LIBRARY AND ALUT_INCLUDE_DIR)
   SET(ALUT_FOUND "YES")
 ENDIF(ALUT_LIBRARY AND ALUT_INCLUDE_DIR)
-

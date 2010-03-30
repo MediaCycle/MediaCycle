@@ -39,7 +39,7 @@
 			POSSIBILITY OF SUCH DAMAGE.
 */
 
-#if defined(__APPLE__)
+#if defined(__APPLE__) and not defined(__x86_64__)
 #include "MyOpenALSupport.h"
 
 void* MyGetOpenALAudioData(CFURLRef inFileURL, ALsizei *outDataSize, ALenum *outDataFormat, ALsizei *outSampleRate)

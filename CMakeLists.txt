@@ -21,6 +21,13 @@ ENDIF(COMMAND cmake_policy)
 SET(PLUGIN_PREFIX "mc_")
 # SET(PLUGIN_SUFFIX ".mcp") #change OS-dependent extension (so, dll, dynlib) to a fixed one (.mcp)
 
+# Snow Leopard?
+IF (APPLE)
+	IF(${CMAKE_SYSTEM_VERSION} MATCHES "10.")
+		SET(SNOW_LEOPARD ON)
+	ENDIF()
+ENDIF()
+
 #options
 OPTION(USE_DEBUG "Use Debug" ON)
 #OPTION(USE_BOOST "Use Boost C++" ON) # core dependency
@@ -28,20 +35,19 @@ OPTION(USE_DEBUG "Use Debug" ON)
 OPTION(USE_OPENGL "Use OpenGL" ON)
 OPTION(USE_OSG "Use OpenSceneGraph" ON)
 OPTION(USE_QT4 "Use Qt4 Toolkit" ON)
-IF ( APPLE )
+IF ( APPLE AND NOT SNOW_LEOPARD ) # CF: the OSG COCOA wrapper doesn't work currently
 	OPTION(USE_COCOA "Use Cocoa" ON)
 ENDIF ( )
 OPTION(USE_OPENAL "Use OpenAL" ON)
-IF ( NOT APPLE )
+IF ( NOT APPLE OR SNOW_LEOPARD )
 	OPTION(USE_ALUT "Use ALUT" ON)
 ENDIF ( )
 OPTION(USE_OSC "Use OpenSoundControl" ON)
-OPTION(USE_AUDIOFEAT "Using audio features" OFF)
+OPTION(USE_AUDIOFEAT "Using audio features" ON)
 OPTION(USE_PSYCLONE "Use Psyclone" OFF)
 OPTION(BUILD_APPS "Build apps" ON)
 OPTION(BUILD_TESTS "Build tests" ON)
 OPTION(BUILD_PLUGINS "Build plugins" ON)
-
 
 IF ( UNIX )
 	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
@@ -251,11 +257,11 @@ IF ( USE_OPENAL )
 	ENDIF ( OPENAL_FOUND )
 
 	# ALUT
-	IF ( APPLE )
+	IF ( APPLE AND NOT SNOW_LEOPARD )
 		MESSAGE("ALUT not yet required.")
 		SUBDIRS(audioengine)
 		INCLUDE_DIRECTORIES(audioengine)
-	ELSE ( APPLE )
+	ELSE ()
 		IF ( USE_ALUT )
 			IF ( OPENAL_FOUND )
 				FIND_PACKAGE( ALUT )
@@ -273,7 +279,7 @@ IF ( USE_OPENAL )
 				MESSAGE(FATAL_ERROR "ALUT requires OpenAL that is not found.")
 			ENDIF ( OPENAL_FOUND )
 		ENDIF ( USE_ALUT )
-	ENDIF ( APPLE )
+	ENDIF ()
 ENDIF ( USE_OPENAL )
 
 # Armadillo
