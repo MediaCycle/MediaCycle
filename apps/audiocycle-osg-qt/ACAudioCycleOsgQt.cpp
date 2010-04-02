@@ -81,6 +81,12 @@ ACAudioCycleOsgQt::ACAudioCycleOsgQt(QWidget *parent)
 	connect(ui.actionSave_ACL, SIGNAL(triggered()), this, SLOT(saveACLFile()));
 	
 	this->show();
+	
+	#ifdef USE_APPLE_MULTITOUCH
+		multitouch_trackpad = new ACAppleMultitouchTrackpadSupport();
+		multitouch_trackpad->setMediaCycle(media_cycle);
+		multitouch_trackpad->start();
+	#endif
 }
 
 ACAudioCycleOsgQt::~ACAudioCycleOsgQt()
@@ -91,6 +97,10 @@ ACAudioCycleOsgQt::~ACAudioCycleOsgQt()
 		//osc_browser->release(mOscReceiver);//should be in destructor ?
 	}
 
+	#ifdef USE_APPLE_MULTITOUCH
+		multitouch_trackpad->stop();
+	#endif
+	
 	delete osc_browser;
 	delete osc_feedback;//osc_feedback destructor calls ACOscFeedback::release()
 	delete audio_engine;
@@ -109,8 +119,9 @@ void ACAudioCycleOsgQt::updateLibrary()
 	}
 	// XSCF 250310 added these 3
 	media_cycle->pushNavigationState();
-	media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
 	media_cycle->getBrowser()->setState(AC_CHANGING);
+	media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
+	
 	
 	ui.browserOsgView->prepareFromBrowser();
 	//browserOsgView->setPlaying(true);

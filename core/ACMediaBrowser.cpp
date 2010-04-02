@@ -503,8 +503,8 @@ void ACMediaBrowser::libraryContentChanged() {
 
 	updateNeighborhoods();
 	updateClusters(false);
-	updateNextPositions();		
-	setNeedsDisplay(true);
+	updateNextPositions();//CFtree		
+	setNeedsDisplay(true);//CFtree
 }
 
 	

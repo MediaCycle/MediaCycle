@@ -47,6 +47,9 @@ using namespace std;
 #include <ACAudioFeedback.h>
 #include <ACOscBrowser.h>
 #include <ACOscFeedback.h>
+#ifdef USE_APPLE_MULTITOUCH
+	#include <ACAppleMultitouchTrackpadSupport.h>
+#endif
 
 class ACAudioCycleOsgQt : public QMainWindow
 {
@@ -87,6 +90,9 @@ class ACAudioCycleOsgQt : public QMainWindow
 		ACAudioFeedback *audio_engine;
 		ACOscBrowser *osc_browser;
 		ACOscFeedback *osc_feedback;
+		#ifdef USE_APPLE_MULTITOUCH
+			ACAppleMultitouchTrackpadSupport *multitouch_trackpad;
+		#endif
         Ui::ACAudioCycleOsgQt ui;
 		bool updatedLibrary;
 

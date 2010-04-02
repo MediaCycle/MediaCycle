@@ -6,6 +6,7 @@ IF ( ARMADILLO_FOUND AND SDIF_FOUND )
 
 	#gsl - uncomment if needed
 	TARGET_LINK_LIBRARIES(armadillo-utils mediacycle fftooura armadillo atlas lapack blas sdif)
+	TARGET_LINK_LIBRARIES(armadillo-utils ${ARMADILLO_LIBRARY})
 	INCLUDE_DIRECTORIES(. ../fftooura ../core)
 
 	#INSTALL(TARGETS armadillo-utils LIBRARY DESTINATION lib)
