@@ -123,8 +123,8 @@
 	media_cycle->setSelectedNode(0);
 	// XSCF 250310 added these 3
 	media_cycle->pushNavigationState();
-	media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
 	media_cycle->getBrowser()->setState(AC_CHANGING);
+	media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
 	
 	[browser_osg_view prepareFromBrowser];
 	
@@ -254,7 +254,8 @@
 		NSString* path = [paths objectAtIndex:0];
 		
 		media_cycle->importLibrary((string)[path UTF8String]); // XS instead of getImageLibrary CHECK THIS
-		//media_cycle->libraryContentChanged();
+		media_cycle->normalizeFeatures();
+		media_cycle->libraryContentChanged();
 	}
 	[self updatedLibrary];
 	}
