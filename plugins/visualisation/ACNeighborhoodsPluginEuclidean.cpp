@@ -1,0 +1,112 @@
+/**
+ * @brief ACNeighborhoodsPluginEuclidean.cpp
+ * @author Damien Tardieu
+ * @date 21/04/2010
+ * @copyright (c) 2010 – UMONS - Numediart
+ * 
+ * MediaCycle of University of Mons – Numediart institute is 
+ * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
+ * licence (the “License”); you may not use this file except in compliance 
+ * with the License.
+ * 
+ * This program is free software: you can redistribute it and/or 
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * 
+ * Each use of this software must be attributed to University of Mons – 
+ * Numediart Institute
+ * 
+ * Any other additional authorizations may be asked to avre@umons.ac.be 
+ * <mailto:avre@umons.ac.be>
+*/
+
+#include "ACNeighborhoodsPluginEuclidean.h"
+
+//using namespace arma;
+using namespace std;
+
+ACNeighborhoodsPluginEuclidean::ACNeighborhoodsPluginEuclidean() {
+    this->mMediaType = MEDIA_TYPE_MIXED; // ALL
+    this->mPluginType = PLUGIN_TYPE_NONE;
+    this->mName = "EuclideanNeighborhoods";
+    this->mDescription = "Plugin for the computation of Euclidean neighborhoods";
+    this->mId = "";
+    //local vars
+}
+
+ACNeighborhoodsPluginEuclidean::~ACNeighborhoodsPluginEuclidean() {
+}
+
+void ACNeighborhoodsPluginEuclidean::updateNeighborhoods(ACMediaBrowser* mediaBrowser) {
+	//int _clickedloop = mediaBrowser->getClickedLoop();
+	std::cout << "ACNeighborhoodsPluginEuclidean::updateNeighborhoods" << std::endl;
+	if (mediaBrowser->getUserLog()->getLastClickedNodeId() == -1) { //CF: 19 audio samples on the mercurialized dataset	 
+			mediaBrowser->getUserLog()->addRootNode(0, 0); // 0
+		mediaBrowser->getUserLog()->clickNode(0, 0);
+	}
+	else{
+		long lastClickedNodeId = mediaBrowser->getUserLog()->getLastClickedNodeId();
+		long targetMediaId = mediaBrowser->getUserLog()->getMediaIdFromNodeId(lastClickedNodeId);
+		ACMedia* loop = mediaBrowser->getLibrary()->getMedia(0);
+		
+		
+		long libSize = mediaBrowser->getLibrary()->getSize();
+		int nbFeature = loop->getNumberOfFeaturesVectors();
+		mat desc_m;
+		mat tg_v;
+		colvec dist_v(libSize);
+		
+		desc_m = extractDescMatrix(mediaBrowser);
+		tg_v = desc_m.row(targetMediaId);
+		dist_v= sqrt(sum(square(desc_m - repmat(tg_v, desc_m.n_rows, 1)), 1));
+
+		ucolvec sortRank_v = sort_index(dist_v);
+
+		for (int k=0; k<10; k++){
+			mediaBrowser->getUserLog()->addNode(lastClickedNodeId, sortRank_v(k), 0);
+		}
+		mediaBrowser->getUserLog()->dump();
+	}	
+}
+
+
+mat ACNeighborhoodsPluginEuclidean::extractDescMatrix(ACMediaBrowser* mediaBrowser){
+  vector<ACMedia*> loops = mediaBrowser->getLibrary()->getAllMedia();
+  int nbMedia = loops.size(); 
+	int featDim;
+	int totalDim = 0;
+	
+	// Count nb of feature
+	int nbFeature = loops.back()->getNumberOfFeaturesVectors();
+	for(int f=0; f< nbFeature; f++){
+		featDim = loops.back()->getFeaturesVector(f)->getSize();
+		for(int d=0; d < featDim; d++){
+			totalDim++;
+		}
+	}
+	
+  mat desc_m(nbMedia,totalDim);
+  mat pos_m(nbMedia,2);
+  
+  for(int i=0; i<nbMedia; i++) {    
+    int tmpIdx = 0;
+    for(int f=0; f< nbFeature; f++){
+			//std::cout << f << std::endl;
+      featDim = loops.back()->getFeaturesVector(f)->getSize();
+			for(int d=0; d < featDim; d++){
+				desc_m(i,tmpIdx) = loops[i]->getFeaturesVector(f)->getFeatureElement(d);
+				tmpIdx++;
+      }
+    }
+  }
+	return desc_m;
+}
