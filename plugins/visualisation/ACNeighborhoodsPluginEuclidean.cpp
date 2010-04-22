@@ -1,7 +1,7 @@
 /**
  * @brief ACNeighborhoodsPluginEuclidean.cpp
- * @author Damien Tardieu
- * @date 21/04/2010
+ * @author Christian Frisson
+ * @date 22/04/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -70,8 +70,8 @@ void ACNeighborhoodsPluginEuclidean::updateNeighborhoods(ACMediaBrowser* mediaBr
 		dist_v= sqrt(sum(square(desc_m - repmat(tg_v, desc_m.n_rows, 1)), 1));
 
 		ucolvec sortRank_v = sort_index(dist_v);
-
-		for (int k=0; k<10; k++){
+		std::cout << "sortRank_v = " << sortRank_v(0) << " " << sortRank_v(1) << " " << sortRank_v(2) << std::endl;
+		for (int k=1; k<10; k++){ // to avoid returning the request itself (k=1)
 			mediaBrowser->getUserLog()->addNode(lastClickedNodeId, sortRank_v(k), 0);
 		}
 		mediaBrowser->getUserLog()->dump();

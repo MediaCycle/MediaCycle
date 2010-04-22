@@ -107,7 +107,7 @@ public:
 	void prepareLabels(int start=0);
 	void updateLabels(double ratio=0.0);
 		
-	int computeScreenCoordinates(osgViewer::Viewer* view, double ratio=0.0);
+	int computeScreenCoordinates(osgViewer::Viewer* view, double ratio=0.0); //CF: use osgViewer::View* for CompositeViewers
 	vector<float> getDistanceMouse() { return distance_mouse; };
 };
 

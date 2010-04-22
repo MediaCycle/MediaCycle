@@ -1373,7 +1373,6 @@ int ACAudioFeedback::createSource(int loop_id)
 
 int ACAudioFeedback::createSourceWithPosition(int loop_id, float x, float y, float z) 
 {	
-	
 	// ACAudioLoop *audio_loop;
 
 	int count;
@@ -1414,8 +1413,12 @@ int ACAudioFeedback::createSourceWithPosition(int loop_id, float x, float y, flo
 	// SD - bug workaround....
 	// loop_slot = loop_id;
 	
+	// CF: temporary workaround as the ACUserLog tree and the ACLoopAttributes vector in ACMediaBrowser are not sync'd 
+	int media_id = loop_id; // or media_cycle->getBrowser()->getMediaNode(loop_id).getMediaId(); 
+	if (media_cycle->getBrowser()->getMode() == AC_MODE_NEIGHBORS)
+		media_id = media_cycle->getBrowser()->getUserLog()->getMediaIdFromNodeId(loop_id);
 	// audio_loop = media_cycle->getAudioLibrary()->getMedia(loop_id);
-	loop_file = (char*)(media_cycle->getMediaFileName(loop_id)).c_str();
+	loop_file = (char*)(media_cycle->getMediaFileName(media_id)).c_str();
 	//loop_buffer = loop_buffers[loop_slot];
 	
 	// SD - Source Problem
@@ -1426,14 +1429,14 @@ int ACAudioFeedback::createSourceWithPosition(int loop_id, float x, float y, flo
 	loop_pos[1] = y;
 	loop_pos[2] = z;
 	local_bpm = 0;
-	local_feature = media_cycle->getFeaturesVectorInMedia(loop_id, "bpm");
+	local_feature = media_cycle->getFeaturesVectorInMedia(media_id, "bpm");
 	if ((local_feature).size()) {
 		if ((local_feature).size()==1) {
 			local_bpm = (local_feature)[0];
 		}
 	}
 	local_key = 0;
-	local_feature = media_cycle->getFeaturesVectorInMedia(loop_id, "key");
+	local_feature = media_cycle->getFeaturesVectorInMedia(media_id, "key");
 	if ((local_feature).size()) {
 		if ((local_feature).size()==1) {
 			local_key = int((local_feature)[0]);
@@ -1441,7 +1444,7 @@ int ACAudioFeedback::createSourceWithPosition(int loop_id, float x, float y, flo
 	}
 	// SD TODO - Acid type not yet used
 	local_acid_type = 0;
-	local_feature = media_cycle->getFeaturesVectorInMedia(loop_id, "acid_type");
+	local_feature = media_cycle->getFeaturesVectorInMedia(media_id, "acid_type");
 	if ((local_feature).size()) {
 		if ((local_feature).size()==1) {
 			local_acid_type = int((local_feature)[0]);

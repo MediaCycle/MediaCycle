@@ -147,10 +147,10 @@
 	media_cycle->addPlugin("../../../plugins/visualisation/" + build_type + "/mc_visualisation.dylib");
 	//media_cycle->setVisualisationPlugin("Visualisation");
 	//media_cycle->setVisualisationPlugin("PCAVis");
-	////media_cycle->setNeighborhoodsPlugin("EuclideanNeighborhoods");
+	//media_cycle->setNeighborhoodsPlugin("EuclideanNeighborhoods");
 	//media_cycle->setNeighborhoodsPlugin("RandomNeighborhoods");
-	////media_cycle->setPositionsPlugin("NodeLinkTreeLayoutPositions");
-
+	//media_cycle->getBrowser()->setMode(AC_MODE_NEIGHBORS);// set this if using NeighborhoodsPlugins
+	//media_cycle->setPositionsPlugin("NodeLinkTreeLayoutPositions");
 	//media_cycle->setPositionsPlugin("RandomPositions");
 	
 	audio_engine = new ACAudioFeedback();

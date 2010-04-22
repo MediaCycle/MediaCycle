@@ -1,7 +1,7 @@
 /**
  * @brief ACOsgBrowserViewQT.h
- * @author Xavier Siebert
- * @date 26/03/2010
+ * @author Christian Frisson
+ * @date 22/04/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -65,7 +65,10 @@
 //
 
 #include <osgViewer/Viewer>
+#include <osgViewer/CompositeViewer>
 #include <osgViewer/ViewerEventHandlers>
+#include <osgGA/TrackballManipulator>
+#include <osgDB/ReadFile>
 
 #include <QtCore/QString>
 #include <QtCore/QTimer>
@@ -80,7 +83,7 @@ using Qt::WindowFlags;
 #include <ACOsgBrowserRenderer.h>
 #include <ACOsgBrowserEventHandler.h>
 
-class ACOsgBrowserViewQT : public QGLWidget, public osgViewer::Viewer
+class ACOsgBrowserViewQT : public QGLWidget, public osgViewer::Viewer //CF or CompositeViewer
 {
 	public:
         ACOsgBrowserViewQT( QWidget * parent = 0, const char * name = 0, const QGLWidget * shareWidget = 0, WindowFlags f = 0 );
@@ -89,7 +92,7 @@ class ACOsgBrowserViewQT : public QGLWidget, public osgViewer::Viewer
 		const osgViewer::GraphicsWindow* getGraphicsWindow() const { return osg_view.get(); }
         virtual void paintGL()
         {
-			//updateTransformsFromBrowser(0.0);
+			updateTransformsFromBrowser(0.0);
             frame();
         }
 
@@ -102,7 +105,6 @@ class ACOsgBrowserViewQT : public QGLWidget, public osgViewer::Viewer
         virtual void mousePressEvent( QMouseEvent* event );
         virtual void mouseReleaseEvent( QMouseEvent* event );
         virtual void mouseMoveEvent( QMouseEvent* event );
-        //virtual void mouseDoubleClickEvent( QMouseEvent* event );
         osg::ref_ptr<osgViewer::GraphicsWindowEmbedded> osg_view;
         QTimer _timer;
 
@@ -110,6 +112,8 @@ class ACOsgBrowserViewQT : public QGLWidget, public osgViewer::Viewer
 		MediaCycle *media_cycle;
 		ACOsgBrowserRenderer *renderer;
 		ACOsgBrowserEventHandler *event_handler;
+		//osgViewer::View* database_view;
+		//osgViewer::View* element_view;//CF for CompositeViewers
 
 	public:
 		// needs to be called when loops are added or removed

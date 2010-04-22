@@ -1,7 +1,7 @@
 /**
  * @brief ACNeighborhoodsPluginRandom.cpp
- * @author Damien Tardieu
- * @date 18/03/2010
+ * @author Christian Frisson
+ * @date 22/04/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -68,16 +68,41 @@ void ACNeighborhoodsPluginRandom::updateNeighborhoods(ACMediaBrowser* mediaBrows
 		mediaBrowser->getUserLog()->addNode(0, 4, 0); // 4
 		mediaBrowser->getUserLog()->addNode(0, 5, 0);  // 5
 
+		// CF test for positions
+		// /*
+		mediaBrowser->getUserLog()->addNode(0, 6, 0); 
+		mediaBrowser->getUserLog()->addNode(0, 7, 0);
+		mediaBrowser->getUserLog()->addNode(0, 8, 0);
+		mediaBrowser->getUserLog()->addNode(0, 9, 0);
+		
+		mediaBrowser->getUserLog()->clickNode(4,1); 
+		mediaBrowser->getUserLog()->addNode(4, 1, 0);
+		mediaBrowser->getUserLog()->addNode(4, 2, 0);
+		mediaBrowser->getUserLog()->addNode(4, 3, 0);
+		mediaBrowser->getUserLog()->addNode(4, 4, 0);
+		mediaBrowser->getUserLog()->addNode(4, 5, 0);
+		mediaBrowser->getUserLog()->addNode(4, 6, 0);
+		mediaBrowser->getUserLog()->addNode(4, 7, 0);
+		mediaBrowser->getUserLog()->addNode(4, 8, 0);
+		mediaBrowser->getUserLog()->addNode(4, 9, 0);
+		
+		mediaBrowser->getUserLog()->clickNode(6,2); 
+		mediaBrowser->getUserLog()->addNode(6, 1, 0);
+		mediaBrowser->getUserLog()->addNode(6, 2, 0);
+		mediaBrowser->getUserLog()->addNode(6, 3, 0);
+		mediaBrowser->getUserLog()->addNode(6, 4, 0);
+		mediaBrowser->getUserLog()->addNode(6, 5, 0);
+		mediaBrowser->getUserLog()->addNode(6, 6, 0);
+		mediaBrowser->getUserLog()->addNode(6, 7, 0);
+		mediaBrowser->getUserLog()->addNode(6, 8, 0);
+		mediaBrowser->getUserLog()->addNode(6, 9, 0);
+		// */
+/*
 		// clicked on node 3 at time 1
 		mediaBrowser->getUserLog()->clickNode(3,1);  
-
+ 
 		// add his neighbors
-		//CF: impossible to display currently an ACMedia assigned to more than one ACLoopAttribute
-		//mediaBrowser->getUserLog()->addNode(3, 0, 0);  // 6 == 0
-		mediaBrowser->getUserLog()->addNode(3, 6, 0); // 6
-		//
-		mediaBrowser->getUserLog()->addNode(3, 7, 0);  // 7
-		mediaBrowser->getUserLog()->addNode(3, 8, 0); // 8
+		mediaBrowser->getUserLog()->addNode(3, 0, 0);  // 6 == 0
 		mediaBrowser->getUserLog()->addNode(3, 9, 0); // 9
 		mediaBrowser->getUserLog()->addNode(3, 10, 0) ; // 10
 
@@ -88,9 +113,12 @@ void ACNeighborhoodsPluginRandom::updateNeighborhoods(ACMediaBrowser* mediaBrows
 		mediaBrowser->getUserLog()->addNode(2, 14, 0); // 14
 		mediaBrowser->getUserLog()->addNode(2, 15, 0) ; // 15
 
+
 		mediaBrowser->getUserLog()->addNode(13, 16, 0); // 16
 		mediaBrowser->getUserLog()->addNode(13, 17, 0); // 17
 		mediaBrowser->getUserLog()->addNode(13, 18, 0) ; // 18
-		
+*/		
+
+		mediaBrowser->getUserLog()->dump();
 	}	
 }

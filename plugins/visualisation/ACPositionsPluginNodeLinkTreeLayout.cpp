@@ -48,7 +48,7 @@ ACPositionsPluginTreeNodeParams::ACPositionsPluginTreeNodeParams()
 
 ACPositionsPluginNodeLinkTreeLayout::ACPositionsPluginNodeLinkTreeLayout() 
 //: m_bspace(5), m_tspace(25), m_dspace(50), m_offset(50),m_maxDepth(0),m_ax(0.0),m_ay(0.0) // from Prefuse Java
-: m_bspace(0.005), m_tspace(0.005), m_dspace(0.05), m_offset(0.05),m_maxDepth(0),m_ax(0.0),m_ay(0.0) 
+: m_bspace(0.05), m_tspace(0.05), m_dspace(0.05), m_offset(0.05),m_maxDepth(0),m_ax(0.0),m_ay(0.0) 
 {
     this->mMediaType = MEDIA_TYPE_MIXED; // ALL
     this->mPluginType = PLUGIN_TYPE_NONE;
@@ -98,30 +98,33 @@ void ACPositionsPluginNodeLinkTreeLayout::updateNextPositions(ACMediaBrowser* _m
 		//	mediaBrowser->setLoopIsDisplayed(i,false);
 		
 		// init params:
+		m_depths.clear(); // ugly, to empty the vector
+		m_depths.resize(10); // to init it at its default size
+		m_nodeParams.clear();
 		m_nodeParams.resize(mediaBrowser->getUserLog()->getSize());
 		for(int n=0; n<mediaBrowser->getUserLog()->getSize(); n++)
 			m_nodeParams[n]=ACPositionsPluginTreeNodeParams();
 		
 		// do first pass - compute breadth information, collect depth info
 		std::cout << "ACPositionsPluginNodeLinkTreeLayout::updateNextPositions:firstWalk"<< std::endl;
-		firstWalk(0, 0, 1);
+		this->firstWalk(0, 0, 1);
 		
 		for(int n=0; n<mediaBrowser->getUserLog()->getSize(); n++)
 			std::cout << "ACPositionsPluginNodeLinkTreeLayout::updateNextPositions: Node " << n << " with prelim " << m_nodeParams[n].getPrelim() << std::endl;
 		
 		// sum up the depth info
 		std::cout << "ACPositionsPluginNodeLinkTreeLayout::updateNextPositions: determineDepths"<< std::endl;
-		determineDepths();
+		this->determineDepths();
 		
 		// do second pass - assign layout positions
 		std::cout << "ACPositionsPluginNodeLinkTreeLayout::updateNextPositions: secondWalk"<< std::endl;
-		secondWalk(0, NULL, -m_nodeParams[0].getPrelim(), 0);
+		this->secondWalk(0, NULL, -m_nodeParams[0].getPrelim(), 0);
 		
 		for(int n=0; n<mediaBrowser->getUserLog()->getSize(); n++)
 		{
 			// TODO: check next
-			mediaBrowser->setNodeNextPosition(mediaBrowser->getUserLog()->getMediaIdFromNodeId(n), m_nodeParams[n].getX()/200, -m_nodeParams[n].getY()/200); // CF: note OSG's inverted Y
-			mediaBrowser->setLoopIsDisplayed(mediaBrowser->getUserLog()->getMediaIdFromNodeId(n), true);
+			mediaBrowser->setNodeNextPosition(n, m_nodeParams[n].getX()/200, -m_nodeParams[n].getY()/200); // CF: note OSG's inverted Y //CF n instead of mediaBrowser->getUserLog()->getMediaIdFromNodeId(n)
+			mediaBrowser->setLoopIsDisplayed(n, true); // CF n instead of mediaBrowser->getUserLog()->getMediaIdFromNodeId(n)
 			std::cout << "ACPositionsPluginNodeLinkTreeLayout::updateNextPositions: Node " << n << " x " << m_nodeParams[n].getX() << " y " << -m_nodeParams[n].getY() << std::endl;
 		}
 

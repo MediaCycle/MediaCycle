@@ -256,7 +256,10 @@ public:
 
 	void setVisualisationPlugin(ACPlugin* acpl){mVisPlugin=acpl;};
 	void setPositionsPlugin(ACPlugin* acpl){mPosPlugin=acpl;};
-	void setNeighborhoodsPlugin(ACPlugin* acpl){mNeighborsPlugin=acpl;};	
+	void setNeighborhoodsPlugin(ACPlugin* acpl){
+		mNeighborsPlugin=acpl;
+		this->setMode(AC_MODE_NEIGHBORS);//CF this stays until it is correctly used on main applications
+	};	
 	
 	// Proximity Grid moved to plugin
 	

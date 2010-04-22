@@ -140,8 +140,12 @@ void ACOsgImageRenderer::imageGeode(int flip, float sizemul, float zoomin) {
 	// XS TODO check this wild cast
 	// SD REQUIRED FOR THUMBNAIL ACImage* my_image = dynamic_cast<ACImage*> ( browser.getLibrary()->getMedia(node_index) );
 	
-	width = media_cycle->getWidth(node_index);
-	height = media_cycle->getHeight(node_index);
+	// CF: temporary workaround as the ACUserLog tree and the ACLoopAttributes vector in ACMediaBrowser are not sync'd 
+	int media_index = node_index; // or media_cycle->getBrowser()->getMediaNode(node_index).getMediaId(); 
+	if (media_cycle->getBrowser()->getMode() == AC_MODE_NEIGHBORS)
+		media_index = media_cycle->getBrowser()->getUserLog()->getMediaIdFromNodeId(node_index);	
+	width = media_cycle->getWidth(media_index);//CF instead of node_index
+	height = media_cycle->getHeight(media_index);//CF instead of node_index
 	
 	zpos = zpos + 0.00001 * node_index;
 	
@@ -189,12 +193,12 @@ void ACOsgImageRenderer::imageGeode(int flip, float sizemul, float zoomin) {
 	// Use pre-computed thumbnail instead
 	// SD REQUIRED
 	
-	thumbnail = (IplImage*)media_cycle->getThumbnailPtr(node_index);
+	thumbnail = (IplImage*)media_cycle->getThumbnailPtr(media_index);//CF instead of node_index
 	if (thumbnail) {
 		image_image = Convert_OpenCV_TO_OSG_IMAGE(thumbnail);
 	}
 	else {
-		thumbnail_filename = media_cycle->getThumbnailFileName(node_index);
+		thumbnail_filename = media_cycle->getThumbnailFileName(media_index);//CF instead of node_index
 		image_image = osgDB::readImageFile(thumbnail_filename);
 	}
 	

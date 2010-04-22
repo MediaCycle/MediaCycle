@@ -57,10 +57,12 @@ ACAudioCycleOsgQt::ACAudioCycleOsgQt(QWidget *parent)
 			build_type = "Debug";
 		#endif
 		media_cycle->addPlugin("../../../plugins/visualisation/" + build_type + "/mc_visualisation.dylib");
-		media_cycle->addPlugin("../../../plugins/audio/" + build_type + "/mc_audio.dylib");	
+		//media_cycle->addPlugin("../../../plugins/audio/" + build_type + "/mc_audio.dylib");	
 		//media_cycle->setVisualisationPlugin("Visualisation");
-		//media_cycle->setNeighborhoodsPlugin("RandomNeighborhoods");
-		//media_cycle->setPositionsPlugin("NodeLinkTreeLayoutPositions");
+		media_cycle->setNeighborhoodsPlugin("RandomNeighborhoods");
+		//media_cycle->setNeighborhoodsPlugin("EuclideanNeighborhoods");
+		//media_cycle->getBrowser()->setMode(AC_MODE_NEIGHBORS);// set this if using NeighborhoodsPlugins
+		media_cycle->setPositionsPlugin("NodeLinkTreeLayoutPositions");
 	#endif
 	
 	audio_engine = new ACAudioFeedback();
@@ -111,7 +113,7 @@ ACAudioCycleOsgQt::~ACAudioCycleOsgQt()
 
 
 void ACAudioCycleOsgQt::updateLibrary()
-{	
+{
 	if (!updatedLibrary) {
 		// set to 0 the first time a library is loaded
 		// XSCF do we always want this to be 0 ?
@@ -121,12 +123,11 @@ void ACAudioCycleOsgQt::updateLibrary()
 	media_cycle->pushNavigationState();
 	media_cycle->getBrowser()->setState(AC_CHANGING);
 	media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
-	
-	
+
 	ui.browserOsgView->prepareFromBrowser();
-	//browserOsgView->setPlaying(true);
+	//ui.browserOsgView->setPlaying(true);
 	media_cycle->setNeedsDisplay(true);
-	updatedLibrary = true;
+	updatedLibrary = true;	
 }
 
 void ACAudioCycleOsgQt::on_pushButtonLaunch_clicked()

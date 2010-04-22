@@ -82,10 +82,15 @@ void ACOsgAudioRenderer::waveformGeode() {
 	samples_geometry = new Geometry();
 	frame_geometry = new Geometry();
 	border_geometry = new Geometry();
-		
-	width = media_cycle->getThumbnailWidth(node_index);
+	
+	// CF: temporary workaround as the ACUserLog tree and the ACLoopAttributes vector in ACMediaBrowser are not sync'd 
+	int media_index = node_index; // or media_cycle->getBrowser()->getMediaNode(node_index).getMediaId(); 
+	if (media_cycle->getBrowser()->getMode() == AC_MODE_NEIGHBORS)
+		media_index = media_cycle->getBrowser()->getUserLog()->getMediaIdFromNodeId(node_index);
+	
+	width = media_cycle->getThumbnailWidth(media_index);//CF instead of node_index
 	width = width / 2;
-	thumbnail = (float*)media_cycle->getThumbnailPtr(node_index);
+	thumbnail = (float*)media_cycle->getThumbnailPtr(media_index);//CF instead of node_index
 
 	// samples vertices
 	vertices = new Vec3Array(2*width+2);

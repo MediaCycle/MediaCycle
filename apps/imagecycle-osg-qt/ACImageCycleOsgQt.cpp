@@ -51,6 +51,9 @@ ACImageCycleOsgQt::ACImageCycleOsgQt(QWidget *parent)
 			build_type = "Debug";
 		#endif
 		//media_cycle->addPlugin("../../../plugins/image/" + build_type + "/libimage.dylib");
+		//media_cycle->setNeighborhoodsPlugin("RandomNeighborhoods");
+		//media_cycle->setNeighborhoodsPlugin("EuclideanNeighborhoods");
+		//media_cycle->setPositionsPlugin("NodeLinkTreeLayoutPositions");
 	#endif
 	
 	ui.browserOsgView->move(0,20);
