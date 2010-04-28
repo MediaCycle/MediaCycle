@@ -1,7 +1,7 @@
 /**
  * @brief ACNeighborhoodsPluginEuclidean.h
- * @author Damien Tardieu
- * @date 21/04/2010
+ * @author Alexis Moinet
+ * @date 28/04/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -29,7 +29,7 @@
  * <mailto:avre@umons.ac.be>
 */
 
-#include "armadillo-utils.h"
+#include "Armadillo-utils.h"
 
 #include "ACPlugin.h"
 #include "ACMediaBrowser.h"
