@@ -67,6 +67,7 @@ ACImageCycleOsgQt::ACImageCycleOsgQt(QWidget *parent)
 	connect(ui.actionSave_ACL, SIGNAL(triggered()), this, SLOT(saveACLFile()));
 
 	this->show();
+	//ui.browserOsgView->setFocus();
 }
 
 ACImageCycleOsgQt::~ACImageCycleOsgQt()
@@ -87,10 +88,12 @@ void ACImageCycleOsgQt::updateLibrary()
 	//browserOsgView->setPlaying(true);
 	media_cycle->setNeedsDisplay(true);
 	updatedLibrary = true;
+	ui.browserOsgView->setFocus();
 }
 
 void ACImageCycleOsgQt::on_pushButtonLaunch_clicked() {
 	this->loadACLFile();
+	//ui.browserOsgView->setFocus();
 }
 
 void ACImageCycleOsgQt::on_pushButtonClean_clicked()
@@ -98,21 +101,25 @@ void ACImageCycleOsgQt::on_pushButtonClean_clicked()
 	media_cycle->cleanLibrary();
 	media_cycle->libraryContentChanged();
 	this->updateLibrary();
+	//ui.browserOsgView->setFocus();
 }	
 
 void ACImageCycleOsgQt::on_pushButtonRecenter_clicked()
 {
 	media_cycle->setCameraRecenter();
+	//ui.browserOsgView->setFocus();
 }	
 
 void ACImageCycleOsgQt::on_pushButtonBack_clicked()
 {
 	media_cycle->goBack();
+	//ui.browserOsgView->setFocus();
 }
 
 void ACImageCycleOsgQt::on_pushButtonForward_clicked()
 {
 	media_cycle->goForward();
+	//ui.browserOsgView->setFocus();
 }
 
 void ACImageCycleOsgQt::on_checkBoxFeat1_stateChanged(int state)
@@ -125,6 +132,7 @@ void ACImageCycleOsgQt::on_checkBoxFeat1_stateChanged(int state)
 
 		ui.browserOsgView->updateTransformsFromBrowser(1.0); 
 	}
+	//ui.browserOsgView->setFocus();
 }
 
 void ACImageCycleOsgQt::on_checkBoxFeat2_stateChanged(int state)
@@ -137,6 +145,7 @@ void ACImageCycleOsgQt::on_checkBoxFeat2_stateChanged(int state)
 
 		ui.browserOsgView->updateTransformsFromBrowser(1.0); 
 	}
+	//ui.browserOsgView->setFocus();
 }
 
 void ACImageCycleOsgQt::on_checkBoxFeat3_stateChanged(int state)
@@ -149,6 +158,7 @@ void ACImageCycleOsgQt::on_checkBoxFeat3_stateChanged(int state)
 
 		ui.browserOsgView->updateTransformsFromBrowser(1.0); 
 	}
+	//ui.browserOsgView->setFocus();
 }
 
 void ACImageCycleOsgQt::on_sliderClusters_sliderReleased()
@@ -161,6 +171,7 @@ void ACImageCycleOsgQt::on_sliderClusters_sliderReleased()
 		media_cycle->setNeedsDisplay(true);
 		ui.browserOsgView->updateTransformsFromBrowser(1.0);
 	}
+	//ui.browserOsgView->setFocus();
 }
 
 void ACImageCycleOsgQt::loadACLFile(){
@@ -191,7 +202,8 @@ void ACImageCycleOsgQt::loadACLFile(){
 		std::cout << "File library imported" << std::endl;
 		//media_cycle->libraryContentChanged();
 		this->updateLibrary();
-	}	
+	}
+	//ui.browserOsgView->setFocus();
 
 }
 
@@ -210,7 +222,8 @@ void ACImageCycleOsgQt::saveACLFile(){
 		string acl_file = fileName.toStdString();
 		cout << "saving ACL file: " << acl_file << endl;
 		media_cycle->saveACLLibrary(acl_file);
-	}		
+	}
+	//ui.browserOsgView->setFocus();
 }
 
 void ACImageCycleOsgQt::loadMediaDirectory(){
@@ -232,6 +245,7 @@ void ACImageCycleOsgQt::loadMediaDirectory(){
 	media_cycle->normalizeFeatures();
 	media_cycle->libraryContentChanged(); 	
 	this->updateLibrary();
+	//ui.browserOsgView->setFocus();
 	
 //	QStringList listFilter;
 //	listFilter << "*.png";
@@ -253,4 +267,5 @@ void ACImageCycleOsgQt::loadMediaDirectory(){
 }
 
 void ACImageCycleOsgQt::loadMediaFiles(){
+	//ui.browserOsgView->setFocus();
 }

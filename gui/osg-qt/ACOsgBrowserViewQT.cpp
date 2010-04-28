@@ -41,7 +41,7 @@ ACOsgBrowserViewQT::ACOsgBrowserViewQT( QWidget * parent, const char * name, con
 	refzoom(0.0f),refrotation(0.0f)
 {
 	osg_view = new osgViewer::GraphicsWindowEmbedded(0,0,width(),height());
-	setFocusPolicy(Qt::ClickFocus);
+	setFocusPolicy(Qt::StrongFocus);// CF instead of ClickFocus
 
 	//CF comment out this block for CompositeViewers
 	getCamera()->setViewport(new osg::Viewport(0,0,width(),height()));
@@ -79,7 +79,7 @@ void ACOsgBrowserViewQT::setMediaCycle(MediaCycle* _media_cycle)
 */	
 	event_handler = new ACOsgBrowserEventHandler;
 	event_handler->setMediaCycle(media_cycle);
-	this->addEventHandler(event_handler); // CF database_view->addEventHandler for CompositeViewer
+	((osgViewer::Viewer*) (this))->addEventHandler(event_handler); // CF database_view->addEventHandler for CompositeViewer
 	
 	//CF uncomment this for CompositeViewer	
 /*
@@ -142,19 +142,23 @@ void ACOsgBrowserViewQT::updateGL()
 void ACOsgBrowserViewQT::keyPressEvent( QKeyEvent* event )
 {
 	osg_view->getEventQueue()->keyPress( (osgGA::GUIEventAdapter::KeySymbol) *(event->text().toAscii().data() ) );
-	if ( event->text() ==  "z" ) {
-		zoomdown = 1;
-	}
-	else if ( event->text() ==  "a" ) {
-		media_cycle->setForwardDown(1);
-		forwarddown = 1;
-	}
-	else if ( event->text() ==  "q" ) {
-		media_cycle->setAutoPlay(1);
-		autoplaydown = 1;
-	}
-	else if ( event->text() ==  "r" ) {
-		rotationdown = 1;
+	
+	switch( event->key() )
+	{
+		case Qt::Key_Z:
+			zoomdown = 1;
+			break;
+		case Qt::Key_A:
+			media_cycle->setForwardDown(1);
+			forwarddown = 1;
+			break;
+		case Qt::Key_Q:
+			media_cycle->setAutoPlay(1);
+			autoplaydown = 1;
+			break;
+		case Qt::Key_R:
+			rotationdown = 1;
+			break;
 	}
 }
 
@@ -173,6 +177,7 @@ void ACOsgBrowserViewQT::keyReleaseEvent( QKeyEvent* event )
 void ACOsgBrowserViewQT::mousePressEvent( QMouseEvent* event )
 {
     int button = 0;
+	mousedown = 1;
     switch(event->button())
     {
         case(Qt::LeftButton): button = 1; break;
@@ -182,36 +187,8 @@ void ACOsgBrowserViewQT::mousePressEvent( QMouseEvent* event )
         default: button = 0; break;
     }
 
-    osg_view->getEventQueue()->mouseButtonPress(event->x(), event->y(), button);
-
-	if ( (media_cycle) && (media_cycle->hasBrowser()) && (forwarddown==1) )
-	{
-		//media_cycle->setForwardDown(1);
-		int loop = media_cycle->getClickedNode();
-		//media_cycle->hoverCallback(event->x(),event->y());
-		//int loop = media_cycle->getClosestNode();
-
-		if(loop >= 0)
-		{
-			//media_cycle->incrementLoopNavigationLevels(loop);
-			media_cycle->setSelectedNode(loop);
-			std::cout << "Selected node: " << loop << std::endl;
-			
-			// XSCF 250310 added these 3
-			media_cycle->pushNavigationState();
-			media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
-			media_cycle->getBrowser()->setState(AC_CHANGING);
-			
-			media_cycle->updateNeighborhoods();
-			media_cycle->updateClusters(false);// was true
-			
-			// remainders from updateClusters(true)
-			media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
-			media_cycle->getBrowser()->setState(AC_CHANGING);
-		}
-	}
+	osg_view->getEventQueue()->mouseButtonPress(event->x(), event->y(), button);
 	
-	mousedown = 1;
 	refx = event->x();
 	refy = event->y();
 	media_cycle->getCameraPosition(refcamx, refcamy);
@@ -238,7 +215,7 @@ void ACOsgBrowserViewQT::mouseMoveEvent( QMouseEvent* event )
 	float x, y;
 	x = event->x(); 
 	y = event->y();
-	if ( mousedown==1 ) {
+	if ( (mousedown==1) && (forwarddown == 0)) {
 		if ( zoomdown==1 ) {
 			media_cycle->setCameraZoom(refzoom - (y-refy)/50);
 			//media_cycle->setCameraZoom(refzoom + (y-refy) / abs (y-refy) * sqrt( pow((y-refy),2) + pow((x-refx),2) )/50 );
@@ -273,8 +250,33 @@ void ACOsgBrowserViewQT::mouseReleaseEvent( QMouseEvent* event )
     }
     osg_view->getEventQueue()->mouseButtonRelease(event->x(), event->y(), button);
 	
-	if( (media_cycle) && (media_cycle->hasBrowser()) && (forwarddown==0) )
+	if ( (media_cycle) && (media_cycle->hasBrowser()))
 	{
+		if ( forwarddown==1 )
+		{	
+			int loop = media_cycle->getClickedNode();
+			std::cout << "node " << loop << " selected" << std::endl;
+			//media_cycle->hoverCallback(event->x(),event->y());
+			//int loop = media_cycle->getClosestNode();
+			
+			if(loop >= 0)
+			{
+				//media_cycle->incrementLoopNavigationLevels(loop);
+				media_cycle->setSelectedNode(loop);
+				
+				// XSCF 250310 added these 3
+				media_cycle->pushNavigationState();
+				media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
+				media_cycle->getBrowser()->setState(AC_CHANGING);
+				
+				media_cycle->updateNeighborhoods();
+				media_cycle->updateClusters(false);// CF was true, equivalent to what's following
+				
+				// remainders from updateClusters(true)
+				media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
+				media_cycle->getBrowser()->setState(AC_CHANGING);
+			}
+		}	
 		media_cycle->setClickedNode(-1);
 	}
 	forwarddown = 0;

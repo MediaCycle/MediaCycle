@@ -49,7 +49,6 @@ void ACOsgBrowserEventHandler::hover_callback(float x, float y) {
 	
 bool ACOsgBrowserEventHandler::handle(const osgGA::GUIEventAdapter& ea,osgGA::GUIActionAdapter& aa)
 {
-	
 	switch(ea.getEventType())
 	{
 		case(osgGA::GUIEventAdapter::PUSH):

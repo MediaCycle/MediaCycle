@@ -1,7 +1,7 @@
 /**
  * @brief ACOsgBrowserViewQT.h
  * @author Christian Frisson
- * @date 22/04/2010
+ * @date 28/04/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -83,7 +83,7 @@ using Qt::WindowFlags;
 #include <ACOsgBrowserRenderer.h>
 #include <ACOsgBrowserEventHandler.h>
 
-class ACOsgBrowserViewQT : public QGLWidget, public osgViewer::Viewer //CF or CompositeViewer
+class ACOsgBrowserViewQT : public osgViewer::Viewer, public QGLWidget //CF or CompositeViewer
 {
 	public:
         ACOsgBrowserViewQT( QWidget * parent = 0, const char * name = 0, const QGLWidget * shareWidget = 0, WindowFlags f = 0 );

@@ -43,7 +43,7 @@ using namespace std;
 #include <QtGui>
 #include "ui_ACImageCycleOsgQt.h"
 #include <ACOsgBrowserViewQT.h>
-#include <MediaCycleLight.h>
+#include <MediaCycle.h>
 
 class ACImageCycleOsgQt : public QMainWindow
 	{

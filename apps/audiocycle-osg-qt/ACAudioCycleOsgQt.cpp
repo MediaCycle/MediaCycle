@@ -89,6 +89,7 @@ ACAudioCycleOsgQt::ACAudioCycleOsgQt(QWidget *parent)
 		multitouch_trackpad->setMediaCycle(media_cycle);
 		multitouch_trackpad->start();
 	#endif
+	//ui.browserOsgView->setFocus();
 }
 
 ACAudioCycleOsgQt::~ACAudioCycleOsgQt()
@@ -127,17 +128,20 @@ void ACAudioCycleOsgQt::updateLibrary()
 	ui.browserOsgView->prepareFromBrowser();
 	//ui.browserOsgView->setPlaying(true);
 	media_cycle->setNeedsDisplay(true);
-	updatedLibrary = true;	
+	updatedLibrary = true;
+	ui.browserOsgView->setFocus();
 }
 
 void ACAudioCycleOsgQt::on_pushButtonLaunch_clicked()
 {
 	this->loadACLFile();
+	//ui.browserOsgView->setFocus();
 }
 
 void ACAudioCycleOsgQt::on_pushButtonMuteAll_clicked()
 {
 	media_cycle->muteAllSources();
+	//ui.browserOsgView->setFocus();
 }
 
 void ACAudioCycleOsgQt::on_pushButtonClean_clicked()
@@ -150,16 +154,19 @@ void ACAudioCycleOsgQt::on_pushButtonClean_clicked()
 void ACAudioCycleOsgQt::on_pushButtonRecenter_clicked()
 {
 	media_cycle->setCameraRecenter();
+	//ui.browserOsgView->setFocus();
 }
 
 void ACAudioCycleOsgQt::on_pushButtonBack_clicked()
 {
 	media_cycle->goBack();
+	//ui.browserOsgView->setFocus();
 }
 
 void ACAudioCycleOsgQt::on_pushButtonForward_clicked()
 {
 	media_cycle->goForward();
+	//ui.browserOsgView->setFocus();
 }
 
 void ACAudioCycleOsgQt::on_pushButtonControlStart_clicked()
@@ -180,7 +187,8 @@ void ACAudioCycleOsgQt::on_pushButtonControlStart_clicked()
 	{	
 		osc_browser->stop(mOscReceiver);
 		ui.pushButtonControlStart->setText("Start");
-	}	
+	}
+	//ui.browserOsgView->setFocus();
 }	
 
 void ACAudioCycleOsgQt::on_pushButtonFeedbackStart_clicked()
@@ -198,6 +206,7 @@ void ACAudioCycleOsgQt::on_pushButtonFeedbackStart_clicked()
 		osc_feedback->release();//mOscFeeder);
 		ui.pushButtonFeedbackStart->setText("Start");
 	}
+	//ui.browserOsgView->setFocus();
 }	
 
 void ACAudioCycleOsgQt::on_checkBoxRhythm_stateChanged(int state)
@@ -210,6 +219,7 @@ void ACAudioCycleOsgQt::on_checkBoxRhythm_stateChanged(int state)
 
 		ui.browserOsgView->updateTransformsFromBrowser(1.0); 
 	}
+	//ui.browserOsgView->setFocus();
 }
 
 void ACAudioCycleOsgQt::on_checkBoxTimbre_stateChanged(int state)
@@ -221,6 +231,7 @@ void ACAudioCycleOsgQt::on_checkBoxTimbre_stateChanged(int state)
 		media_cycle->setNeedsDisplay(true);
 		ui.browserOsgView->updateTransformsFromBrowser(1.0); 
 	}
+	//ui.browserOsgView->setFocus();
 }
 
 void ACAudioCycleOsgQt::on_checkBoxHarmony_stateChanged(int state)
@@ -232,6 +243,7 @@ void ACAudioCycleOsgQt::on_checkBoxHarmony_stateChanged(int state)
 		media_cycle->setNeedsDisplay(true);
 		ui.browserOsgView->updateTransformsFromBrowser(1.0); 
 	}
+	//ui.browserOsgView->setFocus();
 }
 
 void ACAudioCycleOsgQt::on_sliderClusters_sliderReleased()
@@ -244,6 +256,7 @@ void ACAudioCycleOsgQt::on_sliderClusters_sliderReleased()
 		media_cycle->setNeedsDisplay(true);		
 		ui.browserOsgView->updateTransformsFromBrowser(1.0);
 	}
+	//ui.browserOsgView->setFocus();
 }
 
 void ACAudioCycleOsgQt::loadACLFile(){
@@ -273,7 +286,8 @@ void ACAudioCycleOsgQt::loadACLFile(){
 		media_cycle->libraryContentChanged();
 		std::cout << "File library imported" << std::endl;
 		this->updateLibrary();
-	}	
+	}
+	//ui.browserOsgView->setFocus();
 }
 
 void ACAudioCycleOsgQt::saveACLFile(){
@@ -291,7 +305,8 @@ void ACAudioCycleOsgQt::saveACLFile(){
 		string acl_file = fileName.toStdString();
 		cout << "saving ACL file: " << acl_file << endl;
 		media_cycle->saveACLLibrary(acl_file);
-	}		
+	}
+	//ui.browserOsgView->setFocus();
 }
 
 void ACAudioCycleOsgQt::loadMediaDirectory(){
@@ -313,7 +328,7 @@ void ACAudioCycleOsgQt::loadMediaDirectory(){
 	media_cycle->normalizeFeatures();
 	media_cycle->libraryContentChanged(); 
 	this->updateLibrary();
-	
+	//ui.browserOsgView->setFocus();
 	
 	//	QStringList listFilter;
 	//	listFilter << "*.png";
@@ -349,6 +364,7 @@ void ACAudioCycleOsgQt::on_sliderBPM_valueChanged()
 			audio_engine->setBPM(ui.sliderBPM->value());
 		}
 	//}
+	//ui.browserOsgView->setFocus();
 }
 
 void ACAudioCycleOsgQt::on_sliderKey_valueChanged()
@@ -371,6 +387,7 @@ void ACAudioCycleOsgQt::on_sliderKey_valueChanged()
 			audio_engine->setSourcePitch(clicked_node, ui.sliderKey->value()); 
 		}
 	//}
+	//ui.browserOsgView->setFocus();
 }
 
 void ACAudioCycleOsgQt::processOscMessage(const char* tagName)
