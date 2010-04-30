@@ -1,5 +1,5 @@
 /**
- * @brief ACOsgBrowserViewQT.h
+ * @brief ACOsgCompositeViewQt.h
  * @author Christian Frisson
  * @date 30/04/2010
  * @copyright (c) 2010 – UMONS - Numediart
@@ -29,15 +29,15 @@
  * <mailto:avre@umons.ac.be>
 */
 
-#ifndef HEADER_ACOSGBROWSERVIEWQT
-#define HEADER_ACOSGBROWSERVIEWQT
+#ifndef HEADER_AC_COMPOSITE_VIEW_OSG_QT
+#define HEADER_AC_COMPOSITE_VIEW_OSG_QT
 
 //
-//  ACOsgBrowserViewQT.h
-//  AudioCycle
+//  ACOsgCompositeViewQt.h
+//  MediaCycle
 //
-//  Created by Christian F. on 15/04/09.
-//  @copyright (c) 2009 – UMONS - Numediart
+//  Created by Christian F. on 29/04/10.
+//  @copyright (c) 2010 – UMONS - Numediart
 //  
 //  MediaCycle of University of Mons – Numediart institute is 
 //  licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -82,17 +82,19 @@ using Qt::WindowFlags;
 #include <MediaCycle.h>
 #include <ACOsgBrowserRenderer.h>
 #include <ACOsgBrowserEventHandler.h>
+#include <ACOsgTimelineRenderer.h>
 
-class ACOsgBrowserViewQT : public osgViewer::Viewer, public QGLWidget
+class ACOsgCompositeViewQt : public osgViewer::CompositeViewer, public QGLWidget
 {
 	public:
-        ACOsgBrowserViewQT( QWidget * parent = 0, const char * name = 0, const QGLWidget * shareWidget = 0, WindowFlags f = 0 );
-		virtual ~ACOsgBrowserViewQT() {};
+        ACOsgCompositeViewQt( QWidget * parent = 0, const char * name = 0, const QGLWidget * shareWidget = 0, WindowFlags f = 0 );
+		virtual ~ACOsgCompositeViewQt() {};
 		osgViewer::GraphicsWindow* getGraphicsWindow() { return osg_view.get(); }
 		const osgViewer::GraphicsWindow* getGraphicsWindow() const { return osg_view.get(); }
         virtual void paintGL()
         {
 			updateTransformsFromBrowser(0.0);
+			//updateTransformsFromTimeline(0.0);
             frame();
         }
 
@@ -110,8 +112,11 @@ class ACOsgBrowserViewQT : public osgViewer::Viewer, public QGLWidget
 
 	private:
 		MediaCycle *media_cycle;
-		ACOsgBrowserRenderer *renderer;
+		ACOsgBrowserRenderer *browser_renderer;
 		ACOsgBrowserEventHandler *event_handler;
+		ACOsgTimelineRenderer *timeline_renderer;
+		osgViewer::View* browser_view;
+		osgViewer::View* timeline_view;
 
 	public:
 		// needs to be called when loops are added or removed
@@ -119,13 +124,22 @@ class ACOsgBrowserViewQT : public osgViewer::Viewer, public QGLWidget
 		// needs to be called when loops positions are changed
 		void updateTransformsFromBrowser( double frac);
 		void setMediaCycle(MediaCycle* _media_cycle);
-		ACOsgBrowserRenderer* getRenderer(){return renderer;};
-
+		// needs to be called when tracks are added or removed
+		void prepareFromTimeline();
+		// needs to be called when tracks positions are changed
+		void updateTransformsFromTimeline( double frac);
+		ACOsgBrowserRenderer* getBrowserRenderer(){return browser_renderer;};
+		ACOsgTimelineRenderer* getTimelineRenderer(){return timeline_renderer;};
+	
 	private:
 		int mousedown, zoomdown, forwarddown, autoplaydown, rotationdown;
+		int borderdown, transportdown, setrhythmpatterndown;
 		float refx, refy;
 		float refcamx, refcamy;
 		float refzoom, refrotation;
+		int septhick; // CF half of the thickness of the border that separates the browser and timeline viewers
+		float sepx,sepy; //CF location (in OSG coordinates) of the border that separates the browser and timeline viewers
+		float refsepy;
 };
 
 #endif

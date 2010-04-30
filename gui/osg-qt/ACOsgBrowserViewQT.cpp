@@ -43,11 +43,10 @@ ACOsgBrowserViewQT::ACOsgBrowserViewQT( QWidget * parent, const char * name, con
 	osg_view = new osgViewer::GraphicsWindowEmbedded(0,0,width(),height());
 	setFocusPolicy(Qt::StrongFocus);// CF instead of ClickFocus
 
-	//CF comment out this block for CompositeViewers
-	getCamera()->setViewport(new osg::Viewport(0,0,width(),height()));
-	getCamera()->setProjectionMatrixAsPerspective(45.0f, getCamera()->getViewport()->aspectRatio(), 0.1f, 10.0f);
+	getCamera()->setViewport(new osg::Viewport(0.0f,0.0f,width(),height()));
+	getCamera()->setProjectionMatrixAsPerspective(45.0f, getCamera()->getViewport()->aspectRatio(), 0.001f, 10.0f);
 	getCamera()->getViewMatrix().makeIdentity();
-	getCamera()->setViewMatrixAsLookAt(Vec3(0,0,0.8), Vec3(0,0,0), Vec3(0,1,0));
+	getCamera()->setViewMatrixAsLookAt(Vec3(0.0f,0.0f,1.0f), Vec3(0.0f,0.0f,0.0f), Vec3(0.0f,1.0f,0.0f));
 	getCamera()->setGraphicsContext(getGraphicsWindow());
 
 	setThreadingModel(osgViewer::CompositeViewer::SingleThreaded);
@@ -66,39 +65,15 @@ void ACOsgBrowserViewQT::setMediaCycle(MediaCycle* _media_cycle)
 	media_cycle = _media_cycle;
 	renderer->setMediaCycle(media_cycle);
 	
-	//CF uncomment this for CompositeViewer
-/*	
-	database_view = new osgViewer::View;
-	database_view->getCamera()->setGraphicsContext(this->getGraphicsWindow());
-	database_view->getCamera()->setViewport(new osg::Viewport(0,height()/4,width(),3*height()/4));
-	database_view->getCamera()->setProjectionMatrixAsPerspective(30.0f, static_cast<double>(width())/static_cast<double>(3*height()/4), 0.1f, 10.0f);
-	database_view->getCamera()->getViewMatrix().makeIdentity();
-	database_view->getCamera()->setViewMatrixAsLookAt(Vec3(0,0,0.8), Vec3(0,0,0), Vec3(0,1,0));
-	
-	this->addView(database_view);
-*/	
 	event_handler = new ACOsgBrowserEventHandler;
 	event_handler->setMediaCycle(media_cycle);
-	((osgViewer::Viewer*) (this))->addEventHandler(event_handler); // CF database_view->addEventHandler for CompositeViewer
-	
-	//CF uncomment this for CompositeViewer	
-/*
-	element_view = new osgViewer::View;
-	//element_view->getCamera()->setClearColor(Vec4f(0.0,0.0,0.0,0.0));
-	element_view->getCamera()->setGraphicsContext(this->getGraphicsWindow());
-	element_view->getCamera()->setViewport(new osg::Viewport(0,0,width(),height()/4));
-	element_view->getCamera()->setProjectionMatrixAsPerspective(30.0f, static_cast<double>(width())/static_cast<double>(height()/4), 0.1f, 10.0f);
-	element_view->getCamera()->getViewMatrix().makeIdentity();
-	element_view->getCamera()->setViewMatrixAsLookAt(Vec3(0,0,0.8), Vec3(0,0,0), Vec3(0,1,0));
-	
-	this->addView(element_view);
-*/
+	((osgViewer::Viewer*) (this))->addEventHandler(event_handler);
 }
 
 void ACOsgBrowserViewQT::resizeGL( int width, int height )
 {
-  osg_view->getEventQueue()->windowResize(0, 0, width, height );
-  osg_view->resized(0,0,width,height);
+	osg_view->getEventQueue()->windowResize(0, 0, width, height );
+	osg_view->resized(0,0,width,height);
 }
 
 // called according to timer
@@ -116,10 +91,10 @@ void ACOsgBrowserViewQT::updateGL()
 		return;
 	}
 
-	if(getCamera() && media_cycle) //CF: database_view->getCamera() for CompositeViewer
+	if(getCamera() && media_cycle)
 	{
 		
-		float x=0.0, y=0.0, zoom, angle;
+		float x=0.0f, y=0.0f, zoom, angle;
 		float upx, upy;
 		
 		zoom = media_cycle->getCameraZoom();
@@ -129,7 +104,7 @@ void ACOsgBrowserViewQT::updateGL()
 		upx = cos(-angle+pi/2);
 		upy = sin(-angle+pi/2);		
 		
-		getCamera()->setViewMatrixAsLookAt(Vec3(x*1.0,y*1.0,0.8 / zoom), Vec3(x*1.0,y*1.0,0), Vec3(upx, upy, 0));//CF database_view->getCamera() for the CompositeViewer
+		getCamera()->setViewMatrixAsLookAt(Vec3(x*1.0,y*1.0,0.8 / zoom), Vec3(x*1.0,y*1.0,0), Vec3(upx, upy, 0));
 	}
 	
 	this->updateTransformsFromBrowser(frac);
@@ -159,6 +134,11 @@ void ACOsgBrowserViewQT::keyPressEvent( QKeyEvent* event )
 		case Qt::Key_R:
 			rotationdown = 1;
 			break;
+		case Qt::Key_M:	
+			media_cycle->muteAllSources();
+			break;
+		default:
+			break;	
 	}
 }
 
@@ -215,7 +195,7 @@ void ACOsgBrowserViewQT::mouseMoveEvent( QMouseEvent* event )
 	float x, y;
 	x = event->x(); 
 	y = event->y();
-	if ( (mousedown==1) && (forwarddown == 0)) {
+	if ( (mousedown==1) && (forwarddown == 0) ) {
 		if ( zoomdown==1 ) {
 			media_cycle->setCameraZoom(refzoom - (y-refy)/50);
 			//media_cycle->setCameraZoom(refzoom + (y-refy) / abs (y-refy) * sqrt( pow((y-refy),2) + pow((x-refx),2) )/50 );
@@ -224,7 +204,7 @@ void ACOsgBrowserViewQT::mouseMoveEvent( QMouseEvent* event )
 			float rotation = atan2(-(y-this->height()/2),x-this->width()/2)-atan2(-(refy-this->height()/2),refx-this->width()/2);
 			media_cycle->setCameraRotation(refrotation + rotation);
 		}	
-		else {
+		else { // translation
 			zoom = media_cycle->getCameraZoom();
 			angle = media_cycle->getCameraRotation();
 			xmove = (refx-x);
@@ -289,7 +269,7 @@ void ACOsgBrowserViewQT::prepareFromBrowser()
 	setMouseTracking(false); //CF necessary for the hover callback
 	renderer->prepareNodes(); 
 	renderer->prepareLabels();
-	this->setSceneData(renderer->getShapes()); //CF database_view->setSceneData for CompositeViewer
+	this->setSceneData(renderer->getShapes());
 }
 
 
@@ -297,7 +277,7 @@ void ACOsgBrowserViewQT::updateTransformsFromBrowser( double frac)
 {
 	int closest_node;	
 	// get screen coordinates
-	closest_node = renderer->computeScreenCoordinates(this, frac); //CF database_view instead of this for the CompositeViewer
+	closest_node = renderer->computeScreenCoordinates(this, frac);
 	media_cycle->setClosestNode(closest_node);
 	// recompute scene graph	
 	renderer->updateNodes(frac); // animation time in [0,1]
