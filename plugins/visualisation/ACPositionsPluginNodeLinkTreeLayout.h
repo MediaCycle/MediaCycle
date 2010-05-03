@@ -71,6 +71,8 @@ class ACPositionsPluginTreeNodeParams {
 	public:
 		int getWidth(){return width;}
 		int getHeight(){return height;}
+		void setWidth(int _width){this->width=_width;}
+		void setHeight(int _height){this->height=_height;}
 		double getPrelim(){return prelim;}
 		void setPrelim(double _prelim){this->prelim=_prelim;}
 		double getMod(){return mod;}
@@ -101,6 +103,11 @@ class ACPositionsPluginTreeNodeParams {
 		int number;
 		int ancestor;
 		int thread;
+	
+	public:
+		void init(int item);
+		void clear();
+	
 };
 
 class ACPositionsPluginNodeLinkTreeLayout : public ACPlugin {
@@ -123,7 +130,7 @@ class ACPositionsPluginNodeLinkTreeLayout : public ACPlugin {
 		vector<double> m_depths;
 		int      m_maxDepth;
 		double m_ax, m_ay; // for holding anchor co-ordinates
-		vector<ACPositionsPluginTreeNodeParams> m_nodeParams;
+		vector<ACPositionsPluginTreeNodeParams*> m_nodeParams;
 	
 	public:
 		void setOrientation(ACPositionsPluginNodeLinkTreeOrientation orientation);		
@@ -153,6 +160,7 @@ class ACPositionsPluginNodeLinkTreeLayout : public ACPlugin {
 		void secondWalk(int n, int p, double m, int depth);
 		void setBreadth(int n, int p, double b);
 		void setDepth(int n, int p, double d);
+		ACPositionsPluginTreeNodeParams* getParams(int item);
 };
 
 #endif	/* _ACPOSITIONSPLUGINNODELINKTREELAYOUT_ */

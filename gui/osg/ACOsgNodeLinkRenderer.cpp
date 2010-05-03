@@ -120,6 +120,7 @@ void ACOsgNodeLinkRenderer::updateLinks(double ratio) {
 	
 	const ACMediaNode &attribute = media_cycle->getMediaNode(node_index);
 
+	link_node->removeChild(link_geode);
 	if ( attribute.isDisplayed() ){
 		const ACPoint &p = attribute.getCurrentPosition(), &p2 = attribute.getNextPosition();
 		double omr = 1.0-ratio;
@@ -138,15 +139,20 @@ void ACOsgNodeLinkRenderer::updateLinks(double ratio) {
 		z = 0;
 		T.makeTranslate(Vec3(x, y, z));
 
-		if(link_geode == 0) {
-			if (media_cycle->getBrowser()->getUserLog()->getParentFromNodeId(node_index) != -1) { //if( node_index > 0) { 
-				int parentId = media_cycle->getBrowser()->getUserLog()->getParentFromNodeId(node_index);
-				const ACMediaNode &to_attribute = media_cycle->getMediaNode( parentId );
-				const ACPoint &to_p = to_attribute.getNextPosition();
-				linkGeode(to_p.x-p2.x,to_p.y-p2.y);
-	 		}	
-		}
-		link_node->addChild(link_geode);
+		if (media_cycle->getBrowser()->getUserLog()->getParentFromNodeId(node_index) != -1 ) {
+			int parentId = media_cycle->getBrowser()->getUserLog()->getParentFromNodeId(node_index);
+			const ACMediaNode &to_attribute = media_cycle->getMediaNode( parentId );
+			const ACPoint &to_p = to_attribute.getCurrentPosition();
+			const ACPoint &to_p2 = to_attribute.getNextPosition();
+			float to_x,to_y;
+			to_x = omr*to_p.x + ratio*to_p2.x;
+			to_y = omr*to_p.y + ratio*to_p2.y;
+			if ( (x != 0) || ( y!=0 ) ) //CF prevents false early nodelinks with new nodes, requires testing with animation
+			{
+				linkGeode(to_x-x,to_y-y);
+				link_node->addChild(link_geode);
+			}	
+	 	}	
 		link_node->setMatrix(T);
-	}	
+	}
 }

@@ -1,7 +1,7 @@
 /**
  * @brief ACNeighborhoodsPluginEuclidean.cpp
  * @author Christian Frisson
- * @date 22/04/2010
+ * @date 03/05/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -41,6 +41,7 @@ ACNeighborhoodsPluginEuclidean::ACNeighborhoodsPluginEuclidean() {
     this->mDescription = "Plugin for the computation of Euclidean neighborhoods";
     this->mId = "";
     //local vars
+	lastClickedNodeId = -1;
 }
 
 ACNeighborhoodsPluginEuclidean::~ACNeighborhoodsPluginEuclidean() {
@@ -50,14 +51,19 @@ void ACNeighborhoodsPluginEuclidean::updateNeighborhoods(ACMediaBrowser* mediaBr
 	//int _clickedloop = mediaBrowser->getClickedLoop();
 	std::cout << "ACNeighborhoodsPluginEuclidean::updateNeighborhoods" << std::endl;
 	if (mediaBrowser->getUserLog()->getLastClickedNodeId() == -1) { //CF: 19 audio samples on the mercurialized dataset	 
-			mediaBrowser->getUserLog()->addRootNode(0, 0); // 0
+		mediaBrowser->getUserLog()->addRootNode(0, 0); // 0
 		mediaBrowser->getUserLog()->clickNode(0, 0);
+		lastClickedNodeId = 0;
 	}
+	else if ( (mediaBrowser->getUserLog()->getLastClickedNodeId() !=0) && (mediaBrowser->getUserLog()->getLastClickedNodeId() == lastClickedNodeId) ) {
+			//CF define properly what to do if the user clicked twice on the same node: 
+			//CF previous case: add 8 more children node
+			//CF possible case: hide the children, or replace the nodes
+	}	
 	else{
-		long lastClickedNodeId = mediaBrowser->getUserLog()->getLastClickedNodeId();
+		lastClickedNodeId = mediaBrowser->getUserLog()->getLastClickedNodeId();
 		long targetMediaId = mediaBrowser->getUserLog()->getMediaIdFromNodeId(lastClickedNodeId);
 		ACMedia* loop = mediaBrowser->getLibrary()->getMedia(0);
-		
 		
 		long libSize = mediaBrowser->getLibrary()->getSize();
 		int nbFeature = loop->getNumberOfFeaturesVectors();
@@ -75,7 +81,9 @@ void ACNeighborhoodsPluginEuclidean::updateNeighborhoods(ACMediaBrowser* mediaBr
 			mediaBrowser->getUserLog()->addNode(lastClickedNodeId, sortRank_v(k), 0);
 		}
 		mediaBrowser->getUserLog()->dump();
-	}	
+	}
+	
+	
 }
 
 

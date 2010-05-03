@@ -1,7 +1,7 @@
 /**
  * @brief ACNeighborhoodsPluginEuclidean.h
- * @author Alexis Moinet
- * @date 28/04/2010
+ * @author Christian Frisson
+ * @date 03/05/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -50,6 +50,7 @@ public:
 	virtual void updateNeighborhoods(ACMediaBrowser* );
 protected:
 	mat extractDescMatrix(ACMediaBrowser* mediaBrowser);
+	long lastClickedNodeId;
 };
 
 #endif	/* _ACNEIGHBORHOODSPLUGINEUCLIDEAN_ */
