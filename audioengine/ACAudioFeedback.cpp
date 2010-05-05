@@ -34,7 +34,8 @@
 
 #include "ACAudioFeedback.h"
 #include <iostream>
-
+//DT : to have access to the media/audio functions
+#include "ACAudio.h"
 /*#include <mach/mach_init.h>
 #include <mach/thread_policy.h>
 #include <mach/task_policy.h>
@@ -881,9 +882,11 @@ void ACAudioFeedback::processAudioEngineSamplePosition(int _loop_slot, int *_sam
 	// audio_loop = media_cycle->getAudioLibrary()->getMedia(loop_id);
 	size = use_sample_end[_loop_slot] - use_sample_start[_loop_slot];
 		
-	int sample_size = media_cycle->getWidth(loop_id);
-	int sample_start = 0;
-	int sample_end = sample_size + sample_start;
+	
+	// DT : made sample_start and end actually useful
+	int sample_start = ((ACAudio*) media_cycle->getLibrary()->getMedia(loop_id))->getSampleStart();
+	int sample_end = ((ACAudio*) media_cycle->getLibrary()->getMedia(loop_id))->getSampleEnd();
+	int sample_size = sample_end - sample_start;
 	
 	switch (loop_synchro_mode[_loop_slot]) {
 		case ACAudioEngineSynchroModeDownbeatSimple:
@@ -1480,10 +1483,14 @@ int ACAudioFeedback::createSourceWithPosition(int loop_id, float x, float y, flo
 	#endif
 	
 	// Convert to single channel (mono). OpenAl stereo sources are not spatialized indeed.
-	int sample_size;// = media_cycle->getWidth(loop_id);
-	int sample_start = 0;
-	int sample_end;
-
+	// DT: To make sample_start and end actually work
+	//	int sample_size;// = media_cycle->getWidth(loop_id);
+	//	int sample_start = 0;
+	//	int sample_end;
+	int sample_start = ((ACAudio*) media_cycle->getLibrary()->getMedia(loop_id))->getSampleStart();
+	int sample_end = ((ACAudio*) media_cycle->getLibrary()->getMedia(loop_id))->getSampleEnd();
+	int sample_size = sample_end - sample_start;
+	
 	switch (format) {
 	case AL_FORMAT_MONO16:
 		sample_size = size/2;
@@ -1573,7 +1580,8 @@ int ACAudioFeedback::createSourceWithPosition(int loop_id, float x, float y, flo
 	
 	// buffer has to be kept for our real-tim audio engine
 	loop_buffers_audio_engine[loop_slot] = datashort;
-	prev_sample_pos[loop_slot] = 0; // SD TODO
+	// DT: make sample start work
+	prev_sample_pos[loop_slot] = use_sample_start[loop_slot]; // SD TODO
 	//current_buffer[loop_slot] = 0;
 
 	loop_synchro_mode[loop_slot] = ACAudioEngineSynchroModeAutoBeat;

@@ -1127,6 +1127,7 @@ int ACMediaBrowser::toggleSourceActivity(float _x, float _y)
 // . browser takes care of threads
 int ACMediaBrowser::toggleSourceActivity(ACMediaNode &node, int _activity) {
 	node.toggleActivity(_activity);
+	std::cout << "Toggle Acitivity of media : " << node.getMediaId() << " to " << _activity << std::endl;
 	setNeedsActivityUpdateLock(1);
 	setNeedsActivityUpdateAddMedia(node.getMediaId()); // XS previously: loop_id
 	setNeedsActivityUpdateLock(0);	
@@ -1166,7 +1167,6 @@ void ACMediaBrowser::setClosestNode(int _node_id) {
 	mClosestNode = _node_id; 
 	// XS: if _node_id < 0 should we still assign it to closest_node ?
 	// note : MediaCycle::pickedObjectCallback will look for closest loop if < 0
-
 	if (_node_id<0) {
 		return;
 	}
@@ -1269,6 +1269,7 @@ void ACMediaBrowser::initializeNodes(int _defaultNodeId){ // default = 0
 		for (int i=0; i<mLibrary->getSize();i++){
 			int n= mLibrary->getMedia(i)->getId();
 			//ACMediaNode* mn = new ACMediaNode(n,n);
+			std::cout << "Media Id : " << n << std::endl;
 			ACMediaNode mn(n,n);
 			mLoopAttributes.push_back(mn); // XS generalize
 		}

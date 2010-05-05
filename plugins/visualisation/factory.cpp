@@ -8,6 +8,8 @@
 //#include "ACNeighborhoodsPluginPareto.h"
 //#include "ACNeighborhoodsPluginEuclidean.h"
 #include "ACVisPluginPCA.h"
+#include "ACVisPlugin2Desc.h"
+#include "ACVisPluginAudiogarden.h"
 #include "ACPositionsPluginNodeLinkTreeLayout.h"
 //#include "ACPositionsPluginRandom.h"
 
@@ -20,6 +22,8 @@ extern "C" ACPlugin* create(std::string namePlugin) {
 //	if (namePlugin == "ACNeighborhoodsPluginEuclidean") {return new ACNeighborhoodsPluginEuclidean();}
 	if (namePlugin == "ACPositionsPluginNodeLinkTreeLayout") {return new ACPositionsPluginNodeLinkTreeLayout();}
 	if (namePlugin == "ACVisPluginPCA") {return new ACVisPluginPCA();}
+	if (namePlugin == "ACVisPlugin2Desc") {return new ACVisPlugin2Desc();}
+	if (namePlugin == "ACVisPluginAudiogarden") {return new ACVisPluginAudiogarden();}
 	//if (namePlugin == "ACPositionsPluginRandom") {return new ACPositionsPluginRandom();}
 }
 
@@ -32,9 +36,11 @@ extern "C" std::vector<std::string> list() {    //returns a string vector contai
 	listPlugin.push_back("ACVisualisationPlugin");
 	listPlugin.push_back("ACPositionsPluginNodeLinkTreeLayout");
 	listPlugin.push_back("ACNeighborhoodsPluginRandom");
-	listPlugin.push_back("ACNeighborhoodsPluginPareto");
-	listPlugin.push_back("ACNeighborhoodsPluginEuclidean");
+	//	listPlugin.push_back("ACNeighborhoodsPluginPareto");
+	//	listPlugin.push_back("ACNeighborhoodsPluginEuclidean");
 	listPlugin.push_back("ACVisPluginPCA");
+	listPlugin.push_back("ACVisPlugin2Desc");
+	listPlugin.push_back("ACVisPluginAudiogarden");
 	//listPlugin.push_back("ACPositionsPluginRandom");
 	//listPlugin.push_back("...");
 	return listPlugin;

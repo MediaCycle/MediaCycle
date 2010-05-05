@@ -313,6 +313,7 @@ void ACOsgAudioRenderer::updateNodes(double ratio) {
 			localscale = 0.5;
 			
 			if(waveform_geode == 0) {
+			// DT: prevent the display of the waveform
 				waveformGeode();
 			}
 			if (curser_transform == 0) {

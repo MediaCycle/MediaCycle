@@ -58,8 +58,9 @@ ACAudioCycleOsgQt::ACAudioCycleOsgQt(QWidget *parent)
 		#endif
 		media_cycle->addPlugin("../../../plugins/visualisation/" + build_type + "/mc_visualisation.dylib");
 		media_cycle->addPlugin("../../../plugins/audio/" + build_type + "/mc_audio.dylib");	
-		//media_cycle->setVisualisationPlugin("Visualisation");
-		//media_cycle->setNeighborhoodsPlugin("RandomNeighborhoods");
+		media_cycle->setVisualisationPlugin("VisAudiogarden");
+		//media_cycle->setVisualisationPlugin("Vis2Desc");
+	//media_cycle->setNeighborhoodsPlugin("RandomNeighborhoods");
 		//media_cycle->setPositionsPlugin("NodeLinkTreeLayoutPositions");
 	#endif
 	
@@ -300,13 +301,13 @@ void ACAudioCycleOsgQt::loadMediaDirectory(){
 	 this, 
 	 tr("Open Directory"),
 	 "",
-	 QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks
+	 QFileDialog::DontResolveSymlinks
 	 );
 	
 	// XS TODO : check if directory exists
 	// XS : do not separate directory and files in Qt and let MediaCycle handle it
 	
-	media_cycle->importDirectory(selectDir.toStdString(), 1);
+	media_cycle->importDirectory(selectDir.toStdString(), 1, 0);
 	// with this function call here, do not import twice!!!
 	// XS TODO: what if we add a new directory to the existing library ?
 	media_cycle->normalizeFeatures();
@@ -334,6 +335,35 @@ void ACAudioCycleOsgQt::loadMediaDirectory(){
 }
 
 void ACAudioCycleOsgQt::loadMediaFiles(){
+	QString fileName;
+	
+	QFileDialog dialog(this,"Open AudioCycle Media File(s)");
+	dialog.setDefaultSuffix ("wav");
+	dialog.setNameFilter("Media Files (*.wav)");
+	dialog.setFileMode(QFileDialog::ExistingFile); // change to ExistingFiles for multiple file handling
+	
+	QStringList fileNames;
+	if (dialog.exec())
+		fileNames = dialog.selectedFiles();
+	
+	QStringList::Iterator file = fileNames.begin();
+	while(file != fileNames.end()) {
+		//std::cout << "File library: '" << (*file).toStdString() << "'" << std::endl;
+		fileName = *file;
+		++file;
+	}
+	//std::cout << "Will open: '" << fileName.toStdString() << "'" << std::endl;
+	//fileName = QFileDialog::getOpenFileName(this, "~", );
+	
+	if (!(fileName.isEmpty())) {
+
+		media_cycle->importDirectory((char*) fileName.toStdString().c_str(),0, 0);
+		media_cycle->normalizeFeatures();
+		media_cycle->libraryContentChanged();
+		std::cout << "File library imported" << std::endl;
+		this->updateLibrary();
+	}	
+	
 }
 
 void ACAudioCycleOsgQt::on_sliderBPM_valueChanged()

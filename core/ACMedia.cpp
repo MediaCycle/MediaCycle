@@ -43,6 +43,14 @@ ACMedia::ACMedia() {
 	features_vectors.resize(0);
 }
 
+ACMedia::ACMedia(const ACMedia& m){
+	mid = -1;
+	width = m.width;
+	height = m.height;
+	duration = m.duration;
+	features_vectors.resize(0);	
+}
+
 ACMedia::~ACMedia() { 
 	// XS TODO Clean up cout ! 
 	// XS check that this is common to all media -- is it really called
@@ -102,6 +110,7 @@ int ACMedia::import(std::string _path, int id, ACPluginManager *acpl ) {
 					ACPlugin* plugin =  acpl->getPluginLibrary(i)->getPlugin(j);
 					
 					//vector<ACMediaFeatures*> afv = plugin->calculate(this->getFileName());
+					cout << "Computing features using plugin : " << plugin->getName() << std::endl;
 					vector<ACMediaFeatures*> afv = plugin->calculate(data_ptr, this);
 					
 					//another option :
@@ -117,11 +126,11 @@ int ACMedia::import(std::string _path, int id, ACPluginManager *acpl ) {
 					}
 				}
 				else {
-					cerr << "<ACMedia::import> compatibility problem with plugins" << endl;
-					cerr << "acpl->getPluginLibrary(i)->getPlugin(j)->getMediaType(): " << acpl->getPluginLibrary(i)->getPlugin(j)->getMediaType()  << endl;
-					cerr << "this->getType(): " << this->getType() << endl;
-					cerr << "acpl->getPluginLibrary(i)->getPlugin(j)->getPluginType(): " << acpl->getPluginLibrary(i)->getPlugin(j)->getPluginType() << endl;
-					cerr << "PLUGIN_TYPE_FEATURES: "<< PLUGIN_TYPE_FEATURES << endl;
+					cerr << "Plugin " << acpl->getPluginLibrary(i)->getPlugin(j)->getName() << " not used here." << endl;
+					//cerr << "acpl->getPluginLibrary(i)->getPlugin(j)->getMediaType(): " << acpl->getPluginLibrary(i)->getPlugin(j)->getMediaType()  << endl;
+					//cerr << "this->getType(): " << this->getType() << endl;
+					//cerr << "acpl->getPluginLibrary(i)->getPlugin(j)->getPluginType(): " << acpl->getPluginLibrary(i)->getPlugin(j)->getPluginType() << endl;
+					//cerr << "PLUGIN_TYPE_FEATURES: "<< PLUGIN_TYPE_FEATURES << endl;
 				}
 			}
 		}

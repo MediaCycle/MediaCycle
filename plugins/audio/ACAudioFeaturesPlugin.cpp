@@ -63,6 +63,7 @@ std::vector<ACMediaFeatures*> ACAudioFeaturesPlugin::calculate(ACMediaData* audi
 	//	int sr = ((ACAudio*)theMedia)->getSampleRate();
 	ACAudio* theAudio = (ACAudio*) theMedia;
 	descmf = computeFeatures(audio_data->getAudioData(), theAudio->getSampleRate(), theAudio->getChannels(), theAudio->getNFrames());
+
 	for (int i=0; i<descmf.size(); i++)
 		desc.push_back(descmf[i]->mean());
 	return desc;

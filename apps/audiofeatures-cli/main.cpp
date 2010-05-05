@@ -1,7 +1,7 @@
 /**
  * @brief main.cpp
- * @author Alexis Moinet
- * @date 19/03/2010
+ * @author Damien Tardieu
+ * @date 05/05/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -46,6 +46,12 @@ std::string descAbbreviation(std::string descName){
 	if (descName == "Spectral Spread"){
 		abbrev = "ss";
 	}	
+	if (descName == "Spectral Variation"){
+		abbrev = "sv";
+	}	
+	if (descName == "Spectral Flux"){
+		abbrev = "sf";
+	}	
 	if (descName == "Zero Crossing Rate"){
 		abbrev = "zcr";
 	}	
@@ -80,7 +86,7 @@ int main(int argc, char** argv){
 	int bflag, ch, fd;
 	int mfccNbChannels = 16;
 	int mfccNb = 13;
-	int windowSize = 512; 	
+	int windowSize = 256; 	
 	bool extendSoundLimits = false;
 
 	bflag = 0;

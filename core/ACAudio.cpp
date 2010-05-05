@@ -35,7 +35,14 @@
 #include "ACAudio.h"
 #include <sndfile.h>
 //#include "ACAnalysedAudio.h"
-//#include "ACAudioFeaturesFactory.h"
+//#include "ACAudioFeaturesFactory.h
+#include <fstream>
+
+using std::vector;
+using std::string;
+
+using std::ofstream;
+using std::ifstream;
 
 ACAudio::ACAudio() : ACMedia() {
     media_type = MEDIA_TYPE_AUDIO;
@@ -51,7 +58,26 @@ ACAudio::ACAudio() : ACMedia() {
     sample_start = 0;
     sample_end = 0;
     n_frames = 0;
-    waveform = NULL;
+    waveformLength = 0;
+		waveform = NULL;
+}
+
+ACAudio::ACAudio(const ACAudio& m) : ACMedia(m) {
+	media_type = MEDIA_TYPE_AUDIO;
+	db = m.db;
+	bpm = m.bpm;
+	time_signature_num = m.time_signature_num;
+	time_signature_den = m.time_signature_den;
+	key = m.key;
+	acid_type = m.acid_type;
+	sample_rate = m.sample_rate;
+	channels = m.channels;
+	sample_start = m.sample_start;
+	sample_end = m.sample_end;
+	n_frames = m.n_frames;
+	waveformLength = m.waveformLength;
+	for (int i=0; i<waveformLength; i++)
+		waveform[i] = m.waveform[i];
 }
 
 ACAudio::~ACAudio() {
@@ -73,8 +99,8 @@ void ACAudio::save(FILE* library_file) {
 	fwrite(&channels,sizeof(int),1,library_file);
 	fwrite(&sample_start,sizeof(int),1,library_file);
 	fwrite(&sample_end,sizeof(int),1,library_file);
-	fwrite(&n_frames,sizeof(int),1,library_file);
-	fwrite(waveform,sizeof(float),n_frames,library_file);	// XS: was: waverform (typo)
+	fwrite(&waveformLength,sizeof(int),1,library_file);
+	fwrite(waveform,sizeof(float),waveformLength,library_file);	// XS: was: waverform (typo)
 	n_features = features_vectors.size();
 	fwrite(&n_features,sizeof(int),1,library_file);
 	for (i=0; i<features_vectors.size();i++) {
@@ -91,9 +117,9 @@ void ACAudio::save(FILE* library_file) {
 	fprintf(library_file, "%d\n", channels);
 	fprintf(library_file, "%d\n", sample_start);
 	fprintf(library_file, "%d\n", sample_end);
-	fprintf(library_file, "%d\n", n_frames);
-	for (i=0; i<n_frames; i++) {
-		//fprintf(library_file, "%2.6f\t", waveform[i]);
+	fprintf(library_file, "%d\n", waveformLength);
+	for (i=0; i<waveformLength; i++) {
+		fprintf(library_file, "%2.6f\t", waveform[i]);
 	}
 	fprintf(library_file, "\n");
 	n_features = features_vectors.size();
@@ -112,107 +138,105 @@ void ACAudio::save(FILE* library_file) {
 #endif
 }
 
-int gmid = 0;
-
-int ACAudio::load_v1(FILE* library_file) {
-	
-	float dump;
-	int s;
-	
+void ACAudio::saveACL(ofstream &library_file) {
 	int i, j;
-	int path_size;
 	int n_features;
-	int f_type;
-	int n_features_elements;
-	char featureName[256];
+	int n_features_elements;	
 	int nn;
 	
-	int ret;
-	char *retc;
+	library_file << filename << endl;
+
+	library_file << mid << endl;
+	library_file << sample_rate << endl;
+	library_file << channels << endl;
+	library_file << sample_start << endl;
+	library_file << sample_end << endl;
+	library_file << waveformLength << endl;
+	for (i=0; i<waveformLength; i++) {
+		library_file << waveform[i] << " ";
+	}
+	library_file << endl;
+	n_features = features_vectors.size();
+	library_file << n_features << endl;
+	for (i=0; i<features_vectors.size();i++) {
+		n_features_elements = features_vectors[i]->getSize();
+		nn = features_vectors[i]->getNeedsNormalization();
+		library_file << features_vectors[i]->getName() << endl;
+		library_file << nn << endl;
+		library_file << n_features_elements << endl;
+		for (j=0; j<n_features_elements; j++) {
+			library_file << features_vectors[i]->getFeatureElement(j)  << "\t"; // XS instead of [i][j]
+			cout << features_vectors[i]->getFeatureElement(j)  << endl; // XS instead of [i][j]
+		}
+		library_file << endl;
+	}
+}
+
+int ACAudio::loadACL(ifstream &library_file) {
+	if (! library_file.is_open()) {
+		cerr << "<ACAudio::loadACL> : problem loading image from ACL file, it needs to be opened before" << endl;
+		return 0;
+	}		
+	if (!library_file.good()){
+		cerr << "<ACAudio::loadACL> : bad library file" << endl;
+		return 0;
+	}
+
+	int i, j;
+	int n_features;
+	int n_features_elements = 0;	
+	int nn;
+	string tab;
 	
-	//ACAudioFeaturesFactory* factory = new ACAudioFeaturesFactory(0);
 	ACMediaFeatures* mediaFeatures;
-	FeaturesVector all_features;
+	string featureName;
 	float local_feature;
-	
-	char audio_file_temp[1024];
-	memset(audio_file_temp,0,1024);
-	
-	retc = fgets(audio_file_temp, 1024, library_file);
-	
-	if (retc) {
-		path_size = strlen(audio_file_temp);
-		// filename = new char[path_size];
-		//		strncpy(filename, audio_file_temp, path_size-1); // XS TODO all string
-		// filename[path_size-1] = 0;
-		filename = string(audio_file_temp, path_size-1);
+
+	getline(library_file, filename, '\n');
+	cout << filename << endl;
+	if (!filename.empty()){
+		library_file >> mid;
+		library_file >> sample_rate;
+		library_file >> channels;
+		library_file >> sample_start;
+		library_file >> sample_end;
+ 		n_frames = sample_end-sample_start;
+		duration = (float)n_frames/(float)sample_rate;
+		//library_file >> n_frames;
+		//		library_file >> duration;
+		library_file >> waveformLength;
+		waveform = new float[waveformLength];
+		for (i=0; i<waveformLength; i++) {
+			library_file >> waveform[i];
+		}
+		getline(library_file, tab);
+		library_file >> n_features;
 		
-		/*	memset(audio_file_temp,0,1024);
-		 retc = fgets(audio_file_temp, 1024, library_file);
-		 path_size = strlen(audio_file_temp);
-		 thumbnail_filename = new char[path_size];
-		 strncpy(thumbnail_filename, audio_file_temp, path_size-1);
-		 thumbnail_filename[path_size-1] = 0;*/
-		//ret = fscanf(library_file, "%d", &mid);
-		mid = gmid; gmid++;
-		ret = fscanf(library_file, "%d", &sample_rate);
-		ret = fscanf(library_file, "%d", &channels);
-		ret = fscanf(library_file, "%d", &sample_start);
-		ret = fscanf(library_file, "%d", &sample_end);
-		ret = fscanf(library_file, "%f", &dump);
-		ret = fscanf(library_file, "%f", &dump);
-		ret = fscanf(library_file, "%d", &n_frames);
-		waveform = new float[n_frames];
-		cout << "nframes : " << n_frames << endl;
-		/* for (i=0; i<n_frames; i++) {
-			ret = fscanf(library_file, "%f", &waveform[i]);
-			s = i % 2;
-			if (s==0) {s=-1;} else {s=1;}
-			waveform[i] *= s;
-		} */
-		ret = fscanf(library_file, "%d", &n_features);
-		for (i=0; i<n_features;i++) {
+		for (int i=0; i<n_features;i++) {
 			mediaFeatures = new ACMediaFeatures();
 			features_vectors.push_back(mediaFeatures);
 			features_vectors[i]->setComputed();
-			if (i==0) { strcpy(featureName, "rhythm"); nn=1; }
-			if (i==1) { strcpy(featureName, "timbre"); nn=1; }
-			if (i==2) { strcpy(featureName, "harmony"); nn=1; }
-			features_vectors[i]->setName(string(featureName));
+//			getline(library_file, featureName, '\n');
+			getline(library_file, featureName);
+			features_vectors[i]->setName(featureName);
+			library_file >> nn;
 			features_vectors[i]->setNeedsNormalization(nn);
-			ret = fscanf(library_file, "%d", &n_features_elements);
+			library_file >> n_features_elements;
 			features_vectors[i]->resize(n_features_elements);
-			for (j=0; j<n_features_elements; j++) {
-				ret = fscanf(library_file, "%f", &(local_feature));
+			for (int j=0; j<n_features_elements; j++) {
+				library_file >> local_feature;
 				features_vectors[i]->setFeatureElement(j, local_feature);
+				cout << this->getFeaturesVector(i)->getFeatureElement(j) << endl;
 			}
+			getline(library_file, tab);	
 		}
-		n_features += 5;
-		for (i=i; i<n_features;i++) {
-			mediaFeatures = new ACMediaFeatures();
-			features_vectors.push_back(mediaFeatures);
-			features_vectors[i]->setComputed();
-			if (i==3) { strcpy(featureName, "db"); nn=0; n_features_elements = 1;}
-			if (i==4) { strcpy(featureName, "bpm"); nn=0; n_features_elements = 1;}
-			if (i==5) { strcpy(featureName, "time_signature"); nn=0; n_features_elements = 2; }
-			if (i==6) { strcpy(featureName, "key"); nn=0; n_features_elements = 1;}
-			if (i==7) { strcpy(featureName, "acid_type"); nn=0; n_features_elements = 1;}
-			features_vectors[i]->setName(string(featureName));
-			features_vectors[i]->setNeedsNormalization(nn);
-			features_vectors[i]->resize(n_features_elements);
-			for (j=0; j<n_features_elements; j++) {
-				ret = fscanf(library_file, "%f", &(local_feature));
-				features_vectors[i]->setFeatureElement(j, local_feature);
-			}
-		}
-		
-		ret = fscanf(library_file, "\n");
 		return 1;
 	}
-	else {
+	else{
 		return 0;
-	}	
+	}
 }
+
 
 int ACAudio::load(FILE* library_file) {
 	int i, j;
@@ -255,10 +279,11 @@ int ACAudio::load(FILE* library_file) {
 		ret = fscanf(library_file, "%d", &sample_start);
 		ret = fscanf(library_file, "%d", &sample_end);
 		ret = fscanf(library_file, "%d", &n_frames);
-		waveform = new float[n_frames];
-		cout << "nframes : " << n_frames << endl;
+		ret = fscanf(library_file, "%d", &waveformLength);
+		waveform = new float[waveformLength];
+		cout << "nframes : " << waveformLength << endl;
 		// load waveform
-		for (i=0; i<n_frames; i++) {
+		for (i=0; i<waveformLength; i++) {
 			ret = fscanf(library_file, "%f", &waveform[i]);
 		}
 		ret = fscanf(library_file, "%d\n", &n_features);
@@ -289,21 +314,6 @@ int ACAudio::load(FILE* library_file) {
 }
 
 ACMediaData* ACAudio::extractData(string fname){
-	// XS/SD todo : extraire ce qu'il faut passer au plugin.
-	// SD : help me with this one !!!
-	
-	// ça devrait ressembler à:
-	//	ACAnalysedAudio* full_audio = new ACAnalysedAudio(_path);
-//	sample_rate = full_audio->getSampleRate();
-//	channels = full_audio->getNbChannels();
-//	sample_start = 0;
-//	sample_end = full_audio->getLength();
-//	if (sample_end) {
-//		full_audio->getWaveform(&n_frames, &waveform);
-//		filename_thumbnail = _path + ".thumb";
-//		saveThumbnail(filename_thumbnail);
-//	}
-//	delete full_audio;
 	SF_INFO sfinfo;
 	SNDFILE* testFile;
 	if (! (testFile = sf_open (fname.c_str(), SFM_READ, &sfinfo))){  
@@ -318,16 +328,16 @@ ACMediaData* ACAudio::extractData(string fname){
 	sample_start = 0;
 	n_frames = sfinfo.frames;
 	sample_end = sfinfo.frames;
+	duration = (float)n_frames / (float)sample_rate;
 	float* data = new float[(long) sfinfo.frames];
 	sf_read_float(testFile, data, sfinfo.frames);
+	this->computeWaveform(data);
 	ACMediaData* audio_data = new ACMediaData(fname, MEDIA_TYPE_AUDIO);
 	audio_data->setAudioData(data);
 	sf_close(testFile);
 	return audio_data;
 }
 
-// void ACAudio::import(std::string _path)
-// migrated to ACMedia::import.
 
 void ACAudio::saveThumbnail(std::string _path) {
 	int i;
@@ -340,7 +350,7 @@ void ACAudio::saveThumbnail(std::string _path) {
 		fprintf(thumbnail_file, "<data> ");
 		fprintf(thumbnail_file, "<points> ");
 		//fprintf(thumbnail_file, "%d ", n_frames);
-		for (i=0;i<n_frames;i++) {
+		for (i=0;i<waveformLength;i++) {
 			fprintf(thumbnail_file, "%2.6f ", waveform[i]);
 		}
 		//fprintf(thumbnail_file, "\n");
@@ -349,4 +359,38 @@ void ACAudio::saveThumbnail(std::string _path) {
 		fprintf(thumbnail_file, "</waveform>\n");
 		fclose(thumbnail_file);	
 	}
+}
+
+
+void ACAudio::computeWaveform(float* samples_v) {
+	int i, j, k;
+	int n_samples_hop;
+	float hop = .02;
+	int minWaveformLength = 30;
+	
+	waveformLength = ((float)n_frames / (float)sample_rate) / (hop);
+	waveformLength--;
+	
+	if (waveformLength < minWaveformLength){
+		waveformLength = minWaveformLength;
+		hop =  ((float)n_frames / (float)sample_rate) / (float)(waveformLength);
+	}
+	n_samples_hop = hop * sample_rate;
+	
+	waveform = new float[2 * waveformLength];
+	k = 0;
+	for (i=0; i<2 * waveformLength; i=i+2) {
+		waveform[i] = 0;
+		waveform[i+1] = 0;
+		for (j=k;j<k+n_samples_hop;j++) {
+ 			if ((samples_v[j])< waveform[i]) {
+				waveform[i] = samples_v[j];
+			}
+			if ( samples_v[j] > waveform[i+1] ) {
+				waveform[i+1] = samples_v[j];
+			}
+		}
+		k += n_samples_hop;
+	}
+	waveformLength *= 2;
 }

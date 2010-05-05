@@ -84,6 +84,7 @@ public:
 	std::vector< std::vector<double> > getStdevFeatures() {return stdev_features;};
 	
 	int importDirectory(std::string path, int recursive, int id=-1, ACPluginManager *acpl=NULL);
+	int scanDirectory(std::string _path, int _recursive, std::vector<string>& filenames);
 
 	int openLibrary(std::string _path, bool aInitLib=false);
 	void saveAsLibrary(std::string _path);

@@ -131,7 +131,7 @@ int MediaCycle::importLibrary(string path) {
 // XS import = open + some processing 
 	cout << "MediaCycle: importing library: " << path << endl;
 	int ok = 0;
-	ok = this->mediaLibrary->openLibrary(path);
+	ok = this->mediaLibrary->openACLLibrary(path);
 	if (ok==1) this->mediaLibrary->normalizeFeatures();
 	//	XS TODO this->mediaBrowser->libraryContentChanged();	
 	return ok;

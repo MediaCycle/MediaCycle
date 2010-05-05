@@ -1,7 +1,7 @@
 /**
  * @brief ACAudioFeatures.h
  * @author Damien Tardieu
- * @date 11/03/2010
+ * @date 05/05/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -29,6 +29,9 @@
  * <mailto:avre@umons.ac.be>
 */
 
+#ifndef _ACAUDIOFEATURES_H
+#define _ACAUDIOFEATURES_H
+
 #include <stdio.h>
 #include <sndfile.h>
 #include <string.h>
@@ -43,8 +46,14 @@ std::vector<ACMediaTimedFeatures*> computeFeatures(float* data, int samplerate, 
 int resample(float* datain, SF_INFO *sfinfo, float* dataout, SF_INFO* sfinfoout);
 double spectralCentroid(colvec x_v);
 double spectralSpread(colvec x_v);
+double spectralVariation(colvec, colvec);
+double spectralFlux(colvec x_v, colvec xPrev_v);
 double zcr(colvec frame_v, int sr_hz, int frameSize);
 double spectralDecrease(colvec x_v);
 double energyRMS(colvec frame_v);
+double loudness(colvec x_v, mat melfilter_m);
 double logAttackTime(colvec ener_v, int sr_hz);
+rowvec effectiveDuration(colvec time_v, colvec loud_v);
 rowvec mfcc(colvec x_v, mat melfilter_m, int mfccNb);
+
+#endif
