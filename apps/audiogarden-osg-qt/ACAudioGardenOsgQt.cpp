@@ -63,6 +63,7 @@ ACAudioGardenOsgQt::ACAudioGardenOsgQt(QWidget *parent)
 		//media_cycle->setNeighborhoodsPlugin("EuclideanNeighborhoods");
 		//media_cycle->getBrowser()->setMode(AC_MODE_NEIGHBORS);// set this if using NeighborhoodsPlugins
 		//media_cycle->setPositionsPlugin("NodeLinkTreeLayoutPositions");
+		media_cycle->setVisualisationPlugin("VisAudiogarden");
 	#endif
 	
 	audio_engine = new ACAudioFeedback();
