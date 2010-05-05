@@ -476,9 +476,9 @@ void ACMediaBrowser::libraryContentChanged() {
 		return;
 	}
 	
+	
 	if (mVisPlugin==NULL && mPosPlugin==NULL) {	
 		for (ACMediaNodes::iterator node = mLoopAttributes.begin(); node != mLoopAttributes.end(); ++node){
-			
 			(*node).setCurrentPosition (ACRandom(), 
 										ACRandom(), 
 										ACRandom() / 10.0);
@@ -487,7 +487,7 @@ void ACMediaBrowser::libraryContentChanged() {
 									 (*node).getCurrentPositionY() + ACRandom() / 100.0, 
 									 (*node).getCurrentPositionZ() + ACRandom() / 100.0);		
 			(*node).setDisplayed (true);
-		}
+		}	
 	}
 	
 	// XS what if all media don't have the same number of features as the first one ?
@@ -503,8 +503,10 @@ void ACMediaBrowser::libraryContentChanged() {
 
 	updateNeighborhoods();
 	updateClusters(false);
-	updateNextPositions();//CFtree		
-	setNeedsDisplay(true);//CFtree
+	if (mNeighborsPlugin==NULL) {	//CF to replace by mode check (neighborhoods vs clusters)
+		updateNextPositions();//CF		
+		setNeedsDisplay(true);//CF
+	}	
 }
 
 	

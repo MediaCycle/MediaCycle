@@ -1,9 +1,9 @@
 /*
- *  ACImageCycleOsgQt.h
+ *  ACOsgTrackRenderer.cpp
  *  MediaCycle
  *
  *  @author Christian Frisson
- *  @date 16/02/10
+ *  @date 28/04/10
  *
  *  @copyright (c) 2010 – UMONS - Numediart
  *  
@@ -33,54 +33,11 @@
  *
  */
 
-#ifndef HEADER_ACIMAGECYCLEOSGQT
-#define HEADER_ACIMAGECYCLEOSGQT
+#include "ACOsgTrackRenderer.h"
 
-#include <iostream>
-#include <string.h>
-using namespace std;
+ACOsgTrackRenderer::ACOsgTrackRenderer()
+: track_index(-1),media_index(-1)
+{
+	track_node = new MatrixTransform();
+}
 
-#include <QtGui>
-#include "ui_ACImageCycleOsgQt.h"
-#include <ACOsgBrowserViewQT.h>
-#include <MediaCycle.h>
-
-class ACImageCycleOsgQt : public QMainWindow
-	{
-		Q_OBJECT
-		
-    public:
-        ACImageCycleOsgQt(QWidget *parent = 0);
-		~ACImageCycleOsgQt();
-		void updateLibrary();
-		
-		private slots:
-        /* Insérez les prototypes de vos slots personnalisés ici */
-		void on_pushButtonLaunch_clicked(); // loadACLFile
-		void on_pushButtonClean_clicked();
-		void on_pushButtonRecenter_clicked();
-		void on_pushButtonBack_clicked();
-		void on_pushButtonForward_clicked();
-		
-		void on_checkBoxFeat1_stateChanged(int state);
-		void on_checkBoxFeat2_stateChanged(int state);
-		void on_checkBoxFeat3_stateChanged(int state);
-		
-		void on_sliderClusters_sliderReleased();
-		
-		void loadACLFile();
-		void saveACLFile();
-		void loadMediaDirectory();
-		void loadMediaFiles();
-		
-	public:
-		MediaCycle *media_cycle;
-		
-    private:
-        Ui::ACImageCycleOsgQt ui;
-		bool updatedLibrary;
-		
-	protected:
-		//ACOsgBrowserViewQT* browserOsgView;
-	};
-#endif

@@ -1,9 +1,9 @@
 /*
- *  ACImageCycleOsgQt.h
+ *  ACOsgAudioTrackRenderer.h
  *  MediaCycle
  *
  *  @author Christian Frisson
- *  @date 16/02/10
+ *  @date 28/04/10
  *
  *  @copyright (c) 2010 – UMONS - Numediart
  *  
@@ -33,54 +33,36 @@
  *
  */
 
-#ifndef HEADER_ACIMAGECYCLEOSGQT
-#define HEADER_ACIMAGECYCLEOSGQT
+#ifndef __ACOSG_AUDIO_TRACK_RENDERER_H__
+#define __ACOSG_AUDIO_TRACK_RENDERER_H__
 
-#include <iostream>
-#include <string.h>
+#include "ACOsgTrackRenderer.h"
+
 using namespace std;
+using namespace osg;
 
-#include <QtGui>
-#include "ui_ACImageCycleOsgQt.h"
-#include <ACOsgBrowserViewQT.h>
-#include <MediaCycle.h>
-
-class ACImageCycleOsgQt : public QMainWindow
-	{
-		Q_OBJECT
+class ACOsgAudioTrackRenderer : public ACOsgTrackRenderer {
+	
+	protected:
+		Geode* waveform_geode;
+		Geode* curser_geode;
+		MatrixTransform* curser_transform;
+		Geode* track_geode;
 		
-    public:
-        ACImageCycleOsgQt(QWidget *parent = 0);
-		~ACImageCycleOsgQt();
-		void updateLibrary();
+		void waveformGeode();
+		void curserGeode();
+		void trackGeode();
 		
-		private slots:
-        /* Insérez les prototypes de vos slots personnalisés ici */
-		void on_pushButtonLaunch_clicked(); // loadACLFile
-		void on_pushButtonClean_clicked();
-		void on_pushButtonRecenter_clicked();
-		void on_pushButtonBack_clicked();
-		void on_pushButtonForward_clicked();
-		
-		void on_checkBoxFeat1_stateChanged(int state);
-		void on_checkBoxFeat2_stateChanged(int state);
-		void on_checkBoxFeat3_stateChanged(int state);
-		
-		void on_sliderClusters_sliderReleased();
-		
-		void loadACLFile();
-		void saveACLFile();
-		void loadMediaDirectory();
-		void loadMediaFiles();
+		float zoom_x, zoom_y, translate_x;
 		
 	public:
-		MediaCycle *media_cycle;
-		
-    private:
-        Ui::ACImageCycleOsgQt ui;
-		bool updatedLibrary;
-		
-	protected:
-		//ACOsgBrowserViewQT* browserOsgView;
-	};
+		ACOsgAudioTrackRenderer();
+		~ACOsgAudioTrackRenderer();
+		void prepareTracks();
+		void updateTracks(double ratio=0.0);
+
+	private:
+		int displayed_media_index;
+};
+
 #endif

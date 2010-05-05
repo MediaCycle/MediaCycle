@@ -1,11 +1,11 @@
 /*
- *  ACOsgBrowserRenderer.h
+ *  ACOsgTimelineRenderer.h
  *  MediaCycle
  *
- *  @author Stéphane Dupont
- *  @date 24/08/09
+ *  @author Christian Frisson
+ *  @date 28/04/10
  *
- *  @copyright (c) 2009 – UMONS - Numediart
+ *  @copyright (c) 2010 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
  *  licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -33,14 +33,12 @@
  *
  */
 
-#ifndef __ACOSG_BROWSER_RENDERER_H__
-#define __ACOSG_BROWSER_RENDERER_H__
+#ifndef __ACOSG_TIMELINE_RENDERER_H__
+#define __ACOSG_TIMELINE_RENDERER_H__
 
 #include "MediaCycle.h"
 
-#include "ACOsgMediaRenderer.h"
-//#include "ACOsgLayoutRenderer.h"
-#include "ACOsgNodeLinkRenderer.h"
+#include "ACOsgTrackRenderer.h"
 
 #include <osgDB/ReadFile>
 //#include <osgDB/WriteFile>
@@ -76,37 +74,26 @@
 using namespace std;
 using namespace osg;
 
-class ACOsgBrowserRenderer {
+class ACOsgTimelineRenderer {
 protected:
 	MediaCycle				*media_cycle;
 	ref_ptr<Group>				 group;
-	ref_ptr<Group>				 media_group;
-	ref_ptr<Group>				 label_group;
-	ref_ptr<Group>				 link_group;
-	vector<ACOsgMediaRenderer*>  node_renderer;
-	vector<ACOsgMediaRenderer*>  label_renderer;
-	vector<ACOsgNodeLinkRenderer*>  link_renderer;
-	//ACOsgLayoutRenderer*		layout_renderer;
-	//vector<bool>				 media_selected;
+	ref_ptr<Group>				 track_group;
+	vector<ACOsgTrackRenderer*>  track_renderer;
 	vector<float>				 distance_mouse;
-	//ACPlugin* mLayoutPlugin;
-	//ACOsgLayoutType layout_type;
 
 public:
-	ACOsgBrowserRenderer();
-	~ACOsgBrowserRenderer() {};
+	ACOsgTimelineRenderer();
+	~ACOsgTimelineRenderer() {};
 		
 	void setMediaCycle(MediaCycle *media_cycle) { this->media_cycle = media_cycle; };
-	//void setLayoutPlugin(ACPlugin* acpl){mLayoutPlugin=acpl;};
-	//void setLayout(ACOsgBrowserLayoutType _type){layout_type = _type;}
 	Group *getShapes() 	{ return group.get(); };
+	ACOsgTrackRenderer* getTrack(int number){if ( (number>=0) && (number<track_renderer.size()) ) return track_renderer[number];}
+	//bool addTrack(int position,ACMediaType media_type = -1);
 	
-	void prepareNodes(int start=0);
-	void updateNodes(double ratio=0.0);
+	void prepareTracks(int start=0);
+	void updateTracks(double ratio=0.0);
 
-	void prepareLabels(int start=0);
-	void updateLabels(double ratio=0.0);
-		
 	int computeScreenCoordinates(osgViewer::View* view, double ratio=0.0); //CF: use osgViewer::Viewer* for simple Viewers
 	vector<float> getDistanceMouse() { return distance_mouse; };
 };

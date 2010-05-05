@@ -182,8 +182,7 @@ void ACOsgBrowserRenderer::updateLabels(double ratio) {
 	}
 }
 
-int ACOsgBrowserRenderer::computeScreenCoordinates(osgViewer::Viewer* view, double ratio)
-
+int ACOsgBrowserRenderer::computeScreenCoordinates(osgViewer::View* view, double ratio) //CF: use osgViewer::Viewer* for the simple Viewer
 {		
 	int closest_node;
 	float closest_distance;

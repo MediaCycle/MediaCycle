@@ -1,11 +1,11 @@
 /*
- *  ACOsgBrowserRenderer.cpp
+ *  ACOsgAudioTrackRenderer.cpp
  *  MediaCycle
  *
- *  @author Stéphane Dupont
- *  @date 24/08/09
+ *  @author Christian Frisson
+ *  @date 28/04/10
  *
- *  @copyright (c) 2009 – UMONS - Numediart
+ *  @copyright (c) 2010 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
  *  licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -33,15 +33,19 @@
  *
  */
 
-#include "ACOsgAudioRenderer.h"
+#include "ACOsgAudioTrackRenderer.h"
 
-ACOsgAudioRenderer::ACOsgAudioRenderer() {
+ACOsgAudioTrackRenderer::ACOsgAudioTrackRenderer() {
 
-	waveform_geode = 0; curser_geode = 0; curser_transform = 0; entry_geode = 0;
+	waveform_geode = 0; curser_geode = 0; curser_transform = 0; track_geode = 0;
+	//zoom_x = 10.0; zoom_y = 6.0;
+	zoom_x = 1.0; zoom_y = 1.0;
+	translate_x = 0.0;
+	displayed_media_index = -1;
 }
 
-ACOsgAudioRenderer::~ACOsgAudioRenderer() {
-	// media_node->removeChild(0,1);
+ACOsgAudioTrackRenderer::~ACOsgAudioTrackRenderer() {
+	// track_node->removeChild(0,1);
 	if 	(waveform_geode) {
 		waveform_geode->unref();
 		waveform_geode=0;
@@ -54,18 +58,18 @@ ACOsgAudioRenderer::~ACOsgAudioRenderer() {
 		curser_transform->unref();
 		curser_transform=0;
 	}
-	if 	(entry_geode) {
-		entry_geode->unref();
-		entry_geode=0;
+	if 	(track_geode) {
+		track_geode->unref();
+		track_geode=0;
 	}
 }
 
-void ACOsgAudioRenderer::waveformGeode() {
+void ACOsgAudioTrackRenderer::waveformGeode() {
 	
 	int i;
-	float zpos = 0.04; //CF sphere hack instead of 0.02 for boxes
-	double xstep = 0.0005, ylim = 0.025;
-
+	float zpos = 0.01;
+	double xstep = 0.0005, ylim = 0.25;//0.025
+	
 	int width;
 	float *thumbnail;
 	
@@ -84,39 +88,44 @@ void ACOsgAudioRenderer::waveformGeode() {
 	border_geometry = new Geometry();
 	
 	// CF: temporary workaround as the ACUserLog tree and the ACLoopAttributes vector in ACMediaBrowser are not sync'd 
-	int media_index = node_index; // or media_cycle->getBrowser()->getMediaNode(node_index).getMediaId(); 
+	//int media_index = track_index; // or media_cycle->getBrowser()->getMediaTrack(track_index).getMediaId(); 
 	if (media_cycle->getBrowser()->getMode() == AC_MODE_NEIGHBORS)
-		media_index = media_cycle->getBrowser()->getUserLog()->getMediaIdFromNodeId(node_index);
+		media_index = media_cycle->getBrowser()->getUserLog()->getMediaIdFromNodeId(media_index);//CF can waveformGeode() occur more than once, once media_index is set?
 	
-	width = media_cycle->getThumbnailWidth(media_index);//CF instead of node_index
+	width = media_cycle->getThumbnailWidth(media_index);//CF instead of track_index
+	std::cout << "Number of points of the waveform: " << width << std::endl;
 	width = width / 2;
-	thumbnail = (float*)media_cycle->getThumbnailPtr(media_index);//CF instead of node_index
+	
+	zoom_x = 5.0*240.0/width;// CF autosizefit possible only when displaying one track
+	translate_x = -(width * xstep * zoom_x)/2; // CF autocenter possible only when displaying one track
+
+	thumbnail = (float*)media_cycle->getThumbnailPtr(media_index);//CF instead of track_index
 
 	// samples vertices
 	vertices = new Vec3Array(2*width+2);
 	for(i=0; i<width; i++) {
-		(*vertices)[2*i] = Vec3(i * xstep, ylim * thumbnail[2*i], zpos);
-		(*vertices)[2*i+1] = Vec3(i * xstep, ylim * thumbnail[2*i+1], zpos);
+		(*vertices)[2*i] = Vec3(translate_x + i * xstep * zoom_x, ylim * thumbnail[2*i] * zoom_y, zpos);
+		(*vertices)[2*i+1] = Vec3(translate_x + i * xstep * zoom_x, ylim * thumbnail[2*i+1] * zoom_y, zpos);
 	}
-	(*vertices)[2*i] = Vec3(0.0, 0.0, zpos);
-	(*vertices)[2*i+1] = Vec3((i-1) * xstep, 0.0, zpos);
+	(*vertices)[2*i] = Vec3(translate_x + 0.0, 0.0, zpos);
+	(*vertices)[2*i+1] = Vec3(translate_x + (i-1) * xstep * zoom_x, 0.0, zpos);
 	samples_geometry->setVertexArray(vertices);
 	
 	//frame vertices
 	vertices = new Vec3Array(4);
-	(*vertices)[0] = Vec3(0, -ylim, zpos);
-	(*vertices)[1] = Vec3(width * xstep, -ylim, zpos);
-	(*vertices)[2] = Vec3(width * xstep, ylim, zpos);
-	(*vertices)[3] = Vec3(0, ylim, zpos);
+	(*vertices)[0] = Vec3(translate_x + 0, -ylim * zoom_y, zpos);
+	(*vertices)[1] = Vec3(translate_x + width * xstep * zoom_x, -ylim * zoom_y, zpos);
+	(*vertices)[2] = Vec3(translate_x + width * xstep * zoom_x, ylim * zoom_y, zpos);
+	(*vertices)[3] = Vec3(translate_x + 0, ylim * zoom_y, zpos);
 	frame_geometry->setVertexArray(vertices);
 
 	//border vertices
 	vertices = new Vec3Array(5);
-	(*vertices)[0] = Vec3(0, -ylim, zpos);
-	(*vertices)[1] = Vec3(width * xstep, -ylim+xstep, zpos);
-	(*vertices)[2] = Vec3(width * xstep, ylim-xstep, zpos);
-	(*vertices)[3] = Vec3(0, ylim, zpos);
-	(*vertices)[4] = Vec3(0, -ylim, zpos);
+	(*vertices)[0] = Vec3(translate_x + 0, -ylim * zoom_y, zpos);
+	(*vertices)[1] = Vec3(translate_x + width * xstep * zoom_x, (-ylim+xstep) * zoom_y, zpos);
+	(*vertices)[2] = Vec3(translate_x + width * xstep * zoom_x, (ylim-xstep) * zoom_y, zpos);
+	(*vertices)[3] = Vec3(translate_x + 0, ylim * zoom_y, zpos);
+	(*vertices)[4] = Vec3(translate_x + 0, -ylim * zoom_y, zpos);
 	border_geometry->setVertexArray(vertices);
 	
 	Vec4 color(0.9f, 0.9f, 0.9f, 0.9f);	
@@ -167,15 +176,15 @@ void ACOsgAudioRenderer::waveformGeode() {
 	waveform_geode->addDrawable(frame_geometry);
 	
 	//sprintf(name, "some audio element");
-	waveform_geode->setUserData(new ACRefId(node_index));
+	waveform_geode->setUserData(new ACRefId(media_index));
 	//waveform_geode->setName(name);
 	waveform_geode->ref();	
 }
 
-void ACOsgAudioRenderer::curserGeode() {
+void ACOsgAudioTrackRenderer::curserGeode() {
 	
-	float zpos = 0.04; //CF sphere hack instead of 0.02
-	double xstep = 0.0005, ylim = 0.025;
+	float zpos = 0.02; //CF sphere hack instead of 0.02
+	double xstep = 0.0005, ylim = 0.25;//0.025
 	
 	StateSet *state;
 	
@@ -190,8 +199,8 @@ void ACOsgAudioRenderer::curserGeode() {
 	curser_geometry = new Geometry();
 
 	vertices = new Vec3Array(2);
-	(*vertices)[0] = Vec3(0, -ylim+xstep, zpos+0.00005);
-	(*vertices)[1] = Vec3(0, ylim-xstep, zpos+0.00005);	
+	(*vertices)[0] = Vec3(translate_x + 0, (-ylim+xstep) * zoom_y, zpos+0.00005);
+	(*vertices)[1] = Vec3(translate_x + 0, (ylim-xstep) * zoom_y, zpos+0.00005);	
 	curser_geometry->setVertexArray(vertices);
 
 	Vec4 curser_color(0.2f, 0.9f, 0.2f, 0.9f);	
@@ -221,141 +230,106 @@ void ACOsgAudioRenderer::curserGeode() {
 	curser_transform->addChild(curser_geode);
 	
 	//sprintf(name, "some audio element");
-	curser_transform->setUserData(new ACRefId(node_index));
+	curser_transform->setUserData(new ACRefId(media_index));
 	//curser_transform->setName(name);
 	curser_transform->ref();
-	curser_geode->setUserData(new ACRefId(node_index));
+	curser_geode->setUserData(new ACRefId(media_index));
 	//curser_geode->setName(name);
 	curser_geode->ref();
 }
 
-void ACOsgAudioRenderer::entryGeode() {
+void ACOsgAudioTrackRenderer::trackGeode() {
 	
 	StateSet *state;
 	
-	entry_geode = new Geode();
+	track_geode = new Geode();
 
 	TessellationHints *hints = new TessellationHints();
 	hints->setDetailRatio(0.0);
 	
-	state = entry_geode->getOrCreateStateSet();
+	state = track_geode->getOrCreateStateSet();
 	state->setMode(GL_NORMALIZE, osg::StateAttribute::ON);	
 
-	//entry_geode->addDrawable(new osg::ShapeDrawable(new osg::Box(osg::Vec3(0.0f,0.0f,0.0f),0.01), hints)); //draws a square // Vintage AudioCycle
-	entry_geode->addDrawable(new osg::ShapeDrawable(new osg::Sphere(osg::Vec3(0.0f,0.0f,0.0f),0.01), hints)); // draws a sphere // MultiMediaCycle
-	//entry_geode->addDrawable(new osg::ShapeDrawable(new osg::Cylinder(osg::Vec3(0.0f,0.0f,0.0f),0.01, 0.0f), hints)); // draws a disc
-	//entry_geode->addDrawable(new osg::ShapeDrawable(new osg::Capsule(osg::Vec3(0.0f,0.0f,0.0f),0.01, 0.005f), hints)); // draws a sphere
+	//track_geode->addDrawable(new osg::ShapeDrawable(new osg::Box(osg::Vec3(0.0f,0.0f,0.0f),0.65,0.65,0.0), hints)); //draws a square // Vintage AudioCycle
+	track_geode->addDrawable(new osg::ShapeDrawable(new osg::Box(osg::Vec3(0.0f,0.0f,0.0f),0.6,0.5,0.0), hints)); //draws a square // Vintage AudioCycle
 	//sprintf(name, "some audio element");
-	entry_geode->setUserData(new ACRefId(node_index));
-	//entry_geode->setName(name);
-	entry_geode->ref();	
+	//track_geode->setUserData(new ACRefId(media_index));
+	//track_geode->setName(name);
+	track_geode->ref();	
 }
 
-void ACOsgAudioRenderer::prepareNodes() {
+void ACOsgAudioTrackRenderer::prepareTracks() {
 		
 	waveform_geode = 0;
 	curser_transform = 0;
 	curser_geode = 0;
-	entry_geode = 0;
+	track_geode = 0;
 	
-	//waveformGeode();
-	//curserGeode();
-	if  (media_cycle->getMediaNode(node_index).isDisplayed()){
-		entryGeode();
-		media_node->addChild(entry_geode);
-	}	
+	trackGeode();
+	track_node->addChild(track_geode);
+	((ShapeDrawable*)track_geode->getDrawable(0))->setColor(Vec4(0.2,0.2,0.4,1.0));
+	std::cout << "track_node_addChild(track_geode)" << std::endl;
+	
 }
 
-void ACOsgAudioRenderer::updateNodes(double ratio) {
-	
+void ACOsgAudioTrackRenderer::updateTracks(double ratio) {
 	double xstep = 0.00025;
+/*	
+	ACPoint p,p2;//CF dummy
+	p.x = p.y = p.z = p2.x = p2.y = p2.z = 0.0f; // CF dummy
+
+	double omr = 1.0-ratio;
+				
+	omr = 1;
+	ratio = 0;
+		
+	float zoom = 1.0f;
+	float angle = 0.0f;
+
+	Matrix T;
+	Matrix Trotate;
+	Matrix curserT;
+	Matrix waveT;
+
+	float x, y, z;
+	float localscale;
+	float maxdistance = 0.2;
+	float maxscale = 1.5;
+	float minscale = 0.33;				
+	// Apply "rotation" to compensate camera rotation
+	x = omr*p.x + ratio*p2.x;
+	y = omr*p.y + ratio*p2.y;
+	z = 0;
+	T.makeTranslate(Vec3(x, y, z));
+	localscale = maxscale - distance_mouse * (maxscale - minscale) / maxdistance ;
+	localscale = max(localscale,minscale);
+
+ 	localscale = 1.0;//CF
+	*/	
 	
-#define NCOLORS 5
-	static Vec4 colors[NCOLORS];
-	static bool colors_ready = false;
+	Matrix curserT;
 	
-	if(!colors_ready)
-	{
-		colors[0] = Vec4(1,1,0.5,1);
-		colors[1] = Vec4(1,0.5,1,1);
-		colors[2] = Vec4(0.5,1,1,1);
-		colors[3] = Vec4(1,0.5,0.5,1);
-		colors[4] = Vec4(0.5,1,0.5,1);
+	if (media_index > -1) {//CF dummy
+		//localscale = 1.0;//CF
+
+		if (displayed_media_index != media_index)
+		{
+			track_node->removeChild(curser_transform);
+			track_node->removeChild(waveform_geode);
+			waveformGeode();
+			curserGeode();
+			track_node->addChild(waveform_geode);
+			track_node->addChild(curser_transform);
+			displayed_media_index = media_index;	
+		}	
+			
+		const ACMediaNode &attribute = media_cycle->getMediaNode(media_index);
+		if ( attribute.getActivity()==1) 
+		{	
+			curserT.makeTranslate(Vec3(attribute.getCursor() * xstep * zoom_x, 0.0, 0.0));			// curserT =  Matrix::scale(0.5/zoom,0.5/zoom,0.5/zoom) * curserT;
+			curser_transform->setMatrix(curserT);
+		}	
 	}
 	
-	const ACMediaNode &attribute = media_cycle->getMediaNode(node_index);
-
-	if ( attribute.isDisplayed() ){
-		const ACPoint &p = attribute.getCurrentPosition(), &p2 = attribute.getNextPosition();
-		double omr = 1.0-ratio;
-				
-		omr = 1;
-		ratio = 0;
-		
-		float zoom = media_cycle->getCameraZoom();
-		float angle = media_cycle->getCameraRotation();
-
-		Matrix T;
-		Matrix Trotate;
-		Matrix curserT;
-
-		float x, y, z;
-		float localscale;
-		float maxdistance = 0.2;
-		float maxscale = 1.5;
-		float minscale = 0.33;				
-		// Apply "rotation" to compensate camera rotation
-		x = omr*p.x + ratio*p2.x;
-		y = omr*p.y + ratio*p2.y;
-		z = 0;
-		T.makeTranslate(Vec3(x, y, z));
-		localscale = maxscale - distance_mouse * (maxscale - minscale) / maxdistance ;
-		localscale = max(localscale,minscale);
-		// localscale = 0.5;
-		
-		if (attribute.getActivity()==1) {	// with waveform
-		//if (0) {	// without waveform
-			localscale = 0.5;
-			
-			if(waveform_geode == 0) {
-			// DT: prevent the display of the waveform
-				waveformGeode();
-			}
-			if (curser_transform == 0) {
-				curserGeode();
-			}
-			
-			if(media_node->getNumChildren() == 1 && media_node->getChild(0) == entry_geode) {
-				media_node->setChild(0, waveform_geode);
-				media_node->addChild(curser_transform);
-			}
-			
-			// curserT.makeTranslate(Vec3(omr*p.x + ratio*p2.x + attribute.curser * xstep * 0.5 / zoom, omr*p.y + ratio*p2.y, 0.0)); // omr*p.z + ratio*p2.z));
-			// curserT =  Matrix::scale(0.5/zoom,0.5/zoom,0.5/zoom) * curserT;
-			curserT.makeTranslate(Vec3(attribute.getCursor() * xstep, 0.0, 0.0)); 
-			curser_transform->setMatrix(curserT);
-		
-			T =  Matrix::rotate(-angle,Vec3(0.0,0.0,1.0)) * Matrix::scale(localscale/zoom,localscale/zoom,localscale/zoom) * T;
-		}
-		else {
-			if(media_node->getNumChildren() == 2) {
-				media_node->setChild(0, entry_geode);
-				media_node->removeChild(1, 1);
-			}
-					
-			((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(colors[attribute.getClusterId()%NCOLORS]);
-			
-			T =  Matrix::rotate(-angle,Vec3(0.0,0.0,1.0)) * Matrix::scale(localscale/zoom,localscale/zoom,localscale/zoom) * T;
-		}
-				
-		unsigned int mask = (unsigned int)-1;
-		if(attribute.getNavigationLevel() >= media_cycle->getNavigationLevel()) {
-			entry_geode->setNodeMask(mask);
-		}
-		else {
-			entry_geode->setNodeMask(0);
-		}
-		
-		media_node->setMatrix(T);
-	}	
+	//track_node->setMatrix(T);
 }

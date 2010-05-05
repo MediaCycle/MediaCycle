@@ -1,9 +1,9 @@
 /*
- *  ACAudioCycleOsgQt.h
+ *  ACAudioGardenOsgQt.h
  *  MediaCycle
  *
  *  @author Christian Frisson
- *  @date 16/02/10
+ *  @date 27/04/10
  *
  *  @copyright (c) 2010 – UMONS - Numediart
  *  
@@ -33,16 +33,16 @@
  *
  */
 
-#ifndef HEADER_ACAUDIOCYCLEOSGQT
-#define HEADER_ACAUDIOCYCLEOSGQT
+#ifndef HEADER_ACAUDIOGARDENOSGQT
+#define HEADER_ACAUDIOGARDENOSGQT
 
 #include <iostream>
 #include <string.h>
 using namespace std;
 
 #include <QtGui>
-#include "ui_ACAudioCycleOsgQt.h"
-#include <ACOsgBrowserViewQT.h>
+#include "ui_ACAudioGardenOsgQt.h"
+#include <ACOsgCompositeViewQt.h>
 #include <MediaCycle.h>
 #include <ACAudioFeedback.h>
 #include <ACOscBrowser.h>
@@ -51,13 +51,13 @@ using namespace std;
 	#include <ACAppleMultitouchTrackpadSupport.h>
 #endif
 
-class ACAudioCycleOsgQt : public QMainWindow
+class ACAudioGardenOsgQt : public QMainWindow
 {
     Q_OBJECT
 	
     public:
-        ACAudioCycleOsgQt(QWidget *parent = 0);
-		~ACAudioCycleOsgQt();
+        ACAudioGardenOsgQt(QWidget *parent = 0);
+		~ACAudioGardenOsgQt();
 		void updateLibrary();
 
     private slots:
@@ -93,11 +93,11 @@ class ACAudioCycleOsgQt : public QMainWindow
 		#ifdef USE_APPLE_MULTITOUCH
 			ACAppleMultitouchTrackpadSupport *multitouch_trackpad;
 		#endif
-        Ui::ACAudioCycleOsgQt ui;
+        Ui::ACAudioGardenOsgQt ui;
 		bool updatedLibrary;
 
 	protected:
-		//ACOsgBrowserViewQT* browserOsgView;
+		//ACOsgCompositeViewQt* compositeOsgView;
 	
 	public:
 		void processOscMessage(const char* tagName);
