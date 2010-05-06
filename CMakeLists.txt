@@ -48,6 +48,11 @@ OPTION(USE_PSYCLONE "Use Psyclone" OFF)
 OPTION(BUILD_APPS "Build apps" ON)
 OPTION(BUILD_TESTS "Build tests" ON)
 OPTION(BUILD_PLUGINS "Build plugins" ON)
+OPTION(USE_AUDIOGARDEN "Use audiogarden" ON)
+
+IF (USE_AUDIOGARDEN)
+	SUBDIRS( ../../../../../audiogarden/ )
+ENDIF (USE_AUDIOGARDEN)
 
 IF ( UNIX )
 	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
