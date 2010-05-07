@@ -210,8 +210,9 @@ int ACAudio::loadACL(ifstream &library_file) {
 			library_file >> waveform[i];
 		}
 		getline(library_file, tab);
-		library_file >> n_features;
-		
+		library_file >> n_features;	
+		getline(library_file, tab);
+	
 		for (int i=0; i<n_features;i++) {
 			mediaFeatures = new ACMediaFeatures();
 			features_vectors.push_back(mediaFeatures);
