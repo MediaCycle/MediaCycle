@@ -14,8 +14,15 @@ SET(CMAKE_MODULE_PATH "${MediaCycle_SOURCE_DIR}/CMakeModules")
 MESSAGE ( "modules in " ${CMAKE_MODULE_PATH} )
 
 cmake_minimum_required(VERSION 2.6)
+MESSAGE(${CMAKE_VERSION})
+
 IF(COMMAND cmake_policy)
-      cmake_policy(SET CMP0014 NEW)
+	IF ( ${CMAKE_VERSION} STRLESS "2.8.0")
+		#AM: don't know which is the best, but must be < CMP0008 for cmake 2.6.0 and < CMP0012 for cmake 2.6.4
+		cmake_policy(SET CMP0003 NEW) 
+	ELSE ( )
+		cmake_policy(SET CMP0014 NEW)
+	ENDIF ( )
 ENDIF(COMMAND cmake_policy)
 #config
 SET(PLUGIN_PREFIX "mc_")
