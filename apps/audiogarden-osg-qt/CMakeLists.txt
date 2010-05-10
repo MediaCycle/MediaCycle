@@ -1,4 +1,4 @@
-IF ( USE_QT4 AND USE_OSC AND USE_OPENAL )
+IF ( USE_AUDIOGARDEN AND USE_QT4 AND USE_OSG AND USE_OSC AND USE_OPENAL )
 
 	MESSAGE("apps/audiogarden-osg-qt")
 
@@ -94,5 +94,5 @@ IF ( USE_QT4 AND USE_OSC AND USE_OPENAL )
 	
 
 ELSE ( )
-	MESSAGE("Qt4 and/or OpenAL and/or OSC disabled - not compiling Audiogarden OSG Qt GUI.")
+	MESSAGE("Qt4 and/or OpenAL and/or OSG and/or OSC disabled - not compiling Audiogarden OSG Qt GUI.")
 ENDIF ( )
