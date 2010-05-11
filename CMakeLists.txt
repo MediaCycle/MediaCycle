@@ -14,8 +14,15 @@ SET(CMAKE_MODULE_PATH "${MediaCycle_SOURCE_DIR}/CMakeModules")
 MESSAGE ( "modules in " ${CMAKE_MODULE_PATH} )
 
 cmake_minimum_required(VERSION 2.6)
+MESSAGE(${CMAKE_VERSION})
+
 IF(COMMAND cmake_policy)
-      cmake_policy(SET CMP0003 NEW)
+	IF ( ${CMAKE_VERSION} STRLESS "2.8.0")
+		#AM: don't know which is the best, but must be < CMP0008 for cmake 2.6.0 and < CMP0012 for cmake 2.6.4
+		cmake_policy(SET CMP0003 NEW) 
+	ELSE ( )
+		cmake_policy(SET CMP0014 NEW)
+	ENDIF ( )
 ENDIF(COMMAND cmake_policy)
 #config
 SET(PLUGIN_PREFIX "mc_")
@@ -48,11 +55,7 @@ OPTION(USE_PSYCLONE "Use Psyclone" OFF)
 OPTION(BUILD_APPS "Build apps" ON)
 OPTION(BUILD_TESTS "Build tests" ON)
 OPTION(BUILD_PLUGINS "Build plugins" ON)
-OPTION(USE_AUDIOGARDEN "Use audiogarden" ON)
-
-IF (USE_AUDIOGARDEN)
-	SUBDIRS( ../../../../../audiogarden/ )
-ENDIF (USE_AUDIOGARDEN)
+OPTION(USE_AUDIOGARDEN "Use audiogarden" OFF)
 
 IF ( UNIX )
 	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
@@ -93,6 +96,12 @@ ENDIF ( BUILD_TESTS )
 IF ( BUILD_PLUGINS )
 	SUBDIRS(plugins)
 ENDIF ( BUILD_PLUGINS )
+
+IF (USE_AUDIOGARDEN)
+	SUBDIRS( ../../../../../audiogarden/ )
+	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUSE_AUDIOGARDEN")
+	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DUSE_AUDIOGARDEN")
+ENDIF (USE_AUDIOGARDEN)
 
 IF ( USE_DEBUG )
 	MESSAGE( "Configured for Debug Build")
@@ -327,6 +336,14 @@ IF (SDIF_FOUND)
 ELSE (SDIF_FOUND)
 	MESSAGE("SDIF not found.")
 ENDIF (SDIF_FOUND)
+
+# MAT File I/O http://sf.net/projects/matio/
+FIND_PACKAGE ( MATIO )
+IF (MATIO_FOUND)
+	MESSAGE("MATIO found.")
+ELSE (MATIO_FOUND)
+	MESSAGE("MATIO not found.")
+ENDIF (MATIO_FOUND)
 
 IF ( ARMADILLO_FOUND AND SAMPLERATE_FOUND AND SDIF_FOUND AND USE_AUDIOFEAT )
 	MESSAGE("Building audio features plugin/lib/cli.")

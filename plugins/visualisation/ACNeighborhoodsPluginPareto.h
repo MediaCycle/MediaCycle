@@ -1,7 +1,7 @@
 /**
  * @brief ACNeighborhoodsPluginPareto.h
- * @author Damien Tardieu
- * @date 05/05/2010
+ * @author Alexis Moinet
+ * @date 10/05/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -29,7 +29,7 @@
  * <mailto:avre@umons.ac.be>
 */
 
-#include "armadillo-utils.h"
+#include "Armadillo-utils.h"
 
 #include "ACPlugin.h"
 #include "ACMediaBrowser.h"
