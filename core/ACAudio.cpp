@@ -166,7 +166,6 @@ void ACAudio::saveACL(ofstream &library_file) {
 		library_file << n_features_elements << endl;
 		for (j=0; j<n_features_elements; j++) {
 			library_file << features_vectors[i]->getFeatureElement(j)  << "\t"; // XS instead of [i][j]
-			cout << features_vectors[i]->getFeatureElement(j)  << endl; // XS instead of [i][j]
 		}
 		library_file << endl;
 	}
@@ -193,7 +192,6 @@ int ACAudio::loadACL(ifstream &library_file) {
 	float local_feature;
 
 	getline(library_file, filename, '\n');
-	cout << filename << endl;
 	if (!filename.empty()){
 		library_file >> mid;
 		library_file >> sample_rate;
@@ -227,7 +225,6 @@ int ACAudio::loadACL(ifstream &library_file) {
 			for (int j=0; j<n_features_elements; j++) {
 				library_file >> local_feature;
 				features_vectors[i]->setFeatureElement(j, local_feature);
-				cout << this->getFeaturesVector(i)->getFeatureElement(j) << endl;
 			}
 			getline(library_file, tab);	
 		}
@@ -282,7 +279,6 @@ int ACAudio::load(FILE* library_file) {
 		ret = fscanf(library_file, "%d", &n_frames);
 		ret = fscanf(library_file, "%d", &waveformLength);
 		waveform = new float[waveformLength];
-		cout << "nframes : " << waveformLength << endl;
 		// load waveform
 		for (i=0; i<waveformLength; i++) {
 			ret = fscanf(library_file, "%f", &waveform[i]);
