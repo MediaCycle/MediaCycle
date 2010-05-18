@@ -1755,15 +1755,20 @@ int ACAudioFeedback::setSourcePosition(int loop_id, float x, float y, float z)
 
 int ACAudioFeedback::setSourcePitch(int loop_id, float pitch)
 {
-	int loop_slot;	
-	ALuint	loop_source;
-	loop_slot = getLoopSlot(loop_id);
-	if (loop_slot==-1) {
-		return 1;
+	if (pitch > 0.5 && pitch < 2.0) //due to AL_PITCH
+	{
+		int loop_slot;	
+		ALuint	loop_source;
+		loop_slot = getLoopSlot(loop_id);
+		if (loop_slot==-1) {
+			return 1;
+		}
+		loop_source = loop_sources[loop_slot];
+		alSourcef(loop_source, AL_PITCH, pitch);//CF find another equivalent that accepts a pitch lower than 0.5
+		return 0;
 	}
-	loop_source = loop_sources[loop_slot];
-	alSourcef(loop_source, AL_PITCH, pitch);
-	return 0;
+	else
+		return 1;
 }
 
 int ACAudioFeedback::setSourceGain(int loop_id, float gain)

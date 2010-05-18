@@ -294,6 +294,7 @@
 	@synchronized(browser_osg_view)
 	{
 		media_cycle->cleanLibrary(); // XS instead of getImageLibrary CHECK THIS
+		media_cycle->cleanUserLog();
 		media_cycle->libraryContentChanged();
 		[self updatedLibrary];
 	}
