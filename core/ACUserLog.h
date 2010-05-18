@@ -66,8 +66,10 @@ public:
 	int getFirstChildFromNodeId(long int _nodeId);
 	int getLastChildFromNodeId(long int _nodeId);
 	int getParentFromNodeId(long int _nodeId);
-	
+	const tree<ACMediaNode> getTree() const {return userLogTree;} //CF should be const?
+	int getNthChildAtNodeId(long int _nodeId,long int _nthChild);
 	void dump();
+	void clean();
 
 private:	
 	int mNodeId;

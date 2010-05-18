@@ -333,6 +333,7 @@ void MediaCycle::libraryContentChanged() { mediaBrowser->libraryContentChanged()
 void MediaCycle::saveAsLibrary(string path) {mediaLibrary->saveAsLibrary(path); }
 void MediaCycle::saveACLLibrary(string path) {mediaLibrary->saveACLLibrary(path); }
 void MediaCycle::cleanLibrary() { mediaLibrary->cleanLibrary(); }
+void MediaCycle::cleanUserLog() { mediaBrowser->getUserLog()->clean(); }
 void MediaCycle::goBack() { mediaBrowser->goBack(); }
 void MediaCycle::goForward() { mediaBrowser->goForward(); }
 void MediaCycle::setClusterNumber(int n) { mediaBrowser->setClusterNumber(n); }

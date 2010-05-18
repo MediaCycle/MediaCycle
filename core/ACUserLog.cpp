@@ -277,3 +277,29 @@ void ACUserLog::dump(){
 	}
 	std::cout << "-----" << std::endl;
 }
+
+int ACUserLog::getNthChildAtNodeId(long int _nodeId,long int _nthChild)
+{
+	int _childId = -1;
+	int _childCount = getChildCountAtNodeId(_nodeId);
+	if ( _childCount>0 && _nthChild < _childCount )
+	{
+		_childId = getFirstChildFromNodeId(_nodeId);
+		int _nth = 0;
+		while ( _childId !=1 && _childId != getLastChildFromNodeId(_nodeId) && _nth < _nthChild) {
+			_childId = getNextSiblingFromNodeId(_childId);
+			_nth++;
+		}	
+		
+	}	
+	return _childId;
+}
+
+void ACUserLog::clean()
+{
+	mNodeId = 0;
+	mLastClickedNodeId = -1;
+	//tree<ACMediaNode> userLogTree;
+	userLogTree.clear(); //CF erases all nodes, what about the root?
+	std::cout << "Is the tree empty? " << userLogTree.empty() << std::endl;
+}	

@@ -130,6 +130,7 @@ public:
 	void saveAsLibrary(string path);
 	void saveACLLibrary(string path);
 	void cleanLibrary();
+	void cleanUserLog();
 	void goBack();
 	void goForward();
 	void setClusterNumber(int n);
