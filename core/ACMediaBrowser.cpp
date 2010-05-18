@@ -289,7 +289,7 @@ void ACMediaBrowser::setClickedNode(int inode){
 		cerr << "<ACMediaBrowser::setClickedNode> : index " << inode << " out of bounds (nb node = " << this->getNumberOfMediaNodes() << ")"<< endl;
 	else{
 		mClickedNode = inode;
-		mUserLog->clickNode(inode, 0);
+		mUserLog->clickNode(inode, 0);//CF put some machine time in here!
 	}
 }
 
@@ -489,6 +489,10 @@ void ACMediaBrowser::libraryContentChanged() {
 			(*node).setDisplayed (true);
 		}	
 	}
+	
+	//mFrac = 0.0f; //CF
+	//this->updateState(); //CF
+	//setNeedsDisplay(true);//CF
 	
 	// XS what if all media don't have the same number of features as the first one ?
 	int fc = mLibrary->getMedia(0)->getNumberOfFeaturesVectors();
@@ -1019,7 +1023,7 @@ void ACMediaBrowser::updateNextPositionsPropeller(){
 		p.y = cos(theta)*r;
 		p.z = 0.0;
 		
-		printf("computed next position: theta:%f,r=%f,  (%f %f %f)\n", theta, r, p.x, p.y, p.z);
+		//printf("computed next position: theta:%f,r=%f,  (%f %f %f)\n", theta, r, p.x, p.y, p.z);//CF free the console
 		
 		(*node).setNextPosition(p);
 	}
@@ -1057,6 +1061,7 @@ void ACMediaBrowser::updateState()
 	{
 		#define CUB_FRAC(x) (x*x*(-2.0*x + 3.0))
 		double t = getTime();
+		//printf("time: %f", t);
 		double frac;
 		
 		//frac = 2.0 * fabs(t - floor(t) - 0.5);
@@ -1064,15 +1069,20 @@ void ACMediaBrowser::updateState()
 		double andur = 1.0;
 		frac = (t-mRefTime)/andur;
 		
-		mFrac = CUB_FRAC(frac);
+		frac = CUB_FRAC(frac); //CF was mFrac = 
 		
 		mNeedsDisplay = true;
-		//frac = TI_CLAMP(frac, 0,1);
+		
+		#define TI_CLAMP(x,a,b) ((x)<(a)?(a):(x)>(b)?(b):(x))
+		
+		mFrac = TI_CLAMP(frac, 0,1);
 		
 		//gRenderer.updateTransformsFromLibrary(gLibrary, CUB_FRAC(frac));
 		//[self updateTransformsFromBrowser:CUB_FRAC(frac)];
+		//frac = CUB_FRAC(frac);
 		
-		//		printf("frac = %f\n", mFrac);
+		printf("frac = %f\n", mFrac);
+		//this->commitPositions();//CF
 		
 		if(t-mRefTime > andur)
 		{
@@ -1271,7 +1281,7 @@ void ACMediaBrowser::initializeNodes(int _defaultNodeId){ // default = 0
 		for (int i=0; i<mLibrary->getSize();i++){
 			int n= mLibrary->getMedia(i)->getId();
 			//ACMediaNode* mn = new ACMediaNode(n,n);
-			std::cout << "Media Id : " << n << std::endl;
+			//std::cout << "Media Id : " << n << std::endl;//CF free the console
 			ACMediaNode mn(n,n);
 			mLoopAttributes.push_back(mn); // XS generalize
 		}

@@ -1,7 +1,7 @@
 /**
  * @brief ACOsgCompositeViewQt.h
  * @author Christian Frisson
- * @date 30/04/2010
+ * @date 18/05/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -93,7 +93,7 @@ class ACOsgCompositeViewQt : public osgViewer::CompositeViewer, public QGLWidget
 		const osgViewer::GraphicsWindow* getGraphicsWindow() const { return osg_view.get(); }
         virtual void paintGL()
         {
-			updateTransformsFromBrowser(0.0);
+			//updateTransformsFromBrowser(0.0);
 			//updateTransformsFromTimeline(0.0);
             frame();
         }

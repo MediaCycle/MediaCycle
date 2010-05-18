@@ -289,8 +289,8 @@ void ACOsgAudioRenderer::updateNodes(double ratio) {
 		const ACPoint &p = attribute.getCurrentPosition(), &p2 = attribute.getNextPosition();
 		double omr = 1.0-ratio;
 				
-		omr = 1;
-		ratio = 0;
+		//omr = 1;
+		//ratio = 0;
 		
 		float zoom = media_cycle->getCameraZoom();
 		float angle = media_cycle->getCameraRotation();

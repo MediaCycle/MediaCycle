@@ -93,7 +93,6 @@ ACMediaLibrary::~ACMediaLibrary(){
 	media_library.clear();
 }
 
-
 int ACMediaLibrary::importDirectory(std::string _path, int _recursive, int id, ACPluginManager *acpl) {
 
 	string filename;
@@ -259,7 +258,7 @@ int ACMediaLibrary::openACLLibrary(std::string _path, bool aInitLib){
 		if (local_media != NULL) {
 			ret = local_media->loadACL(library_file);
 			if (ret) {
-				std::cout << "Media Library Size : " << this->getSize() << std::endl;
+				//std::cout << "Media Library Size : " << this->getSize() << std::endl;//CF free the console
 				media_library.push_back(local_media);
 				file_count++;
 			}
@@ -318,7 +317,7 @@ int ACMediaLibrary::openLibrary(std::string _path, bool aInitLib){
 					// problem if id is -1 (==default value) --> this corrects the problem (used temporarily in avlaughtercycle where all ids were -1
 					//if (local_media->getId() < 0)
 					//	local_media->setId(media_library.size());//this is not reliable if the library file lists a mix of audio files w/ and w/o an id. maybe we should set the id only here
-					std::cout << "Media Library Size : " << this->getSize() << std::endl;
+					//std::cout << "Media Library Size : " << this->getSize() << std::endl;//CF free the console
 					media_library.push_back(local_media);
 					file_count++;
 					
@@ -477,7 +476,7 @@ void ACMediaLibrary::calculateStats() {
 			else {
 				stdev_features[j][k] = sqrt( tmp*((1.0*n)/(nn)));
 			}
-			printf("\t[%d] mean_features = %f, stddev = %f\n", k, mean_features[j][k], stdev_features[j][k]);
+			//printf("\t[%d] mean_features = %f, stddev = %f\n", k, mean_features[j][k], stdev_features[j][k]);//CF free the console
 		}
 	}
 }

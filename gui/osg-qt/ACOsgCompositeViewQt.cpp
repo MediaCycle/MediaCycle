@@ -118,7 +118,7 @@ void ACOsgCompositeViewQt::updateGL()
 		return;
 	}
 
-	if(browser_view->getCamera() && media_cycle)
+	if(browser_view->getCamera() && media_cycle && media_cycle->hasBrowser())
 	{
 		
 		float x=0.0, y=0.0, zoom, angle;

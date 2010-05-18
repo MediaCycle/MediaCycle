@@ -91,7 +91,7 @@ void ACOsgBrowserViewQT::updateGL()
 		return;
 	}
 
-	if(getCamera() && media_cycle)
+	if(getCamera() && media_cycle && media_cycle->hasBrowser())
 	{
 		
 		float x=0.0f, y=0.0f, zoom, angle;
@@ -106,12 +106,20 @@ void ACOsgBrowserViewQT::updateGL()
 		
 		getCamera()->setViewMatrixAsLookAt(Vec3(x*1.0,y*1.0,0.8 / zoom), Vec3(x*1.0,y*1.0,0), Vec3(upx, upy, 0));
 	}
-	
 	this->updateTransformsFromBrowser(frac);
-	if (frac != 0.0)
-		setMouseTracking(true); //CF necessary for the hover callback
+	/*
+	if (frac >= 0.0 && frac < 1.0 ) {
+		setMouseTracking(false); //CF necessary for the hover callback
+	}
+	else 
+		setMouseTracking(true); 
+	*/ 
 	QGLWidget::updateGL();
-	media_cycle->setNeedsDisplay(false);
+	//if (frac < 1.0) {
+	//	media_cycle->setNeedsDisplay(true);
+	//}
+	//else
+		media_cycle->setNeedsDisplay(false);
 }	
 
 void ACOsgBrowserViewQT::keyPressEvent( QKeyEvent* event )
@@ -266,7 +274,7 @@ void ACOsgBrowserViewQT::mouseReleaseEvent( QMouseEvent* event )
 
 void ACOsgBrowserViewQT::prepareFromBrowser()
 {
-	setMouseTracking(false); //CF necessary for the hover callback
+	//setMouseTracking(false); //CF necessary for the hover callback
 	renderer->prepareNodes(); 
 	renderer->prepareLabels();
 	this->setSceneData(renderer->getShapes());
