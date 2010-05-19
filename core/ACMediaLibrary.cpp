@@ -355,6 +355,10 @@ void ACMediaLibrary::saveAsLibrary(string _path) {
 
 void ACMediaLibrary::cleanLibrary() {
 	cleanStats();
+	std::vector<ACMedia*>::iterator iter; 
+	for (iter = media_library.begin(); iter != media_library.end(); iter++) { 
+		delete *iter; 
+	}
 	media_library.clear();
 }
 
