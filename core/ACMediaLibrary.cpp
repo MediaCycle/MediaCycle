@@ -85,12 +85,13 @@ ACMediaLibrary::ACMediaLibrary(ACMediaType aMediaType) {
 }
 
 ACMediaLibrary::~ACMediaLibrary(){
-	// Clean up! 
-	std::vector<ACMedia*>::iterator iter; 
+	// Clean up!
+	cleanLibrary();
+	/*std::vector<ACMedia*>::iterator iter;
 	for (iter = media_library.begin(); iter != media_library.end(); iter++) { 
 		delete *iter; 
 	}
-	media_library.clear();
+	media_library.clear();*/
 }
 
 int ACMediaLibrary::importDirectory(std::string _path, int _recursive, int id, ACPluginManager *acpl) {
@@ -252,7 +253,7 @@ int ACMediaLibrary::openACLLibrary(std::string _path, bool aInitLib){
 	if (aInitLib) {
 		cleanLibrary();
 	}
-	media_library.resize(0);
+	//media_library.resize(0);
 	do {
 		local_media = ACMediaFactory::create(media_type);
 		if (local_media != NULL) {
@@ -308,7 +309,7 @@ int ACMediaLibrary::openLibrary(std::string _path, bool aInitLib){
 		if (aInitLib) {
 			cleanLibrary();
 		}
-		media_library.resize(0); //no reason to be here if no reset asked. resize to 0 when calling cleanLibrary()
+		//media_library.resize(0); //no reason to be here if no reset asked. resize to 0 when calling cleanLibrary()
 		do {
 			local_media = ACMediaFactory::create(media_type);
 			if (local_media != NULL) {
@@ -355,6 +356,10 @@ void ACMediaLibrary::saveAsLibrary(string _path) {
 
 void ACMediaLibrary::cleanLibrary() {
 	cleanStats();
+	std::vector<ACMedia*>::iterator iter;
+	for (iter = media_library.begin(); iter != media_library.end(); iter++) {
+		delete *iter;
+	}
 	media_library.clear();
 }
 
