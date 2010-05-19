@@ -1,7 +1,7 @@
 /**
  * @brief ACNeighborhoodsPluginRandom.cpp
  * @author Christian Frisson
- * @date 22/04/2010
+ * @date 19/05/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -51,9 +51,7 @@ void ACNeighborhoodsPluginRandom::updateNeighborhoods(ACMediaBrowser* mediaBrows
 	//int _clickedloop = mediaBrowser->getClickedNode();
 	std::cout << "ACNeighborhoodsPluginRandom::updateNeighborhoods" << std::endl;
 	std::cout << "Last clicked Node = " << mediaBrowser->getUserLog()->getLastClickedNodeId() << std::endl;
-	if (mediaBrowser->getUserLog()->getLastClickedNodeId() == -1 && mediaBrowser->getNumberOfMediaNodes() >= 19) { //CF: 19 audio samples on the mercurialized dataset
-		
-		
+	if (mediaBrowser->getUserLog()->getLastClickedNodeId() == -1) { 
 		// XSrandom...
 		std::cout << "ACNeighborhoodsPluginRandom: filling tree..." << std::endl;
 		// initialize -  node #0                      // node ID
@@ -61,6 +59,7 @@ void ACNeighborhoodsPluginRandom::updateNeighborhoods(ACMediaBrowser* mediaBrows
 		// clicked on node 0 at time 0
 		mediaBrowser->getUserLog()->clickNode(0,0);
 		
+		//CF: NB 19 audio samples on the mercurialized dataset		
 		// add his neighbors
 		mediaBrowser->getUserLog()->addNode(0, 1, 0); // 1
 		mediaBrowser->getUserLog()->addNode(0, 2, 0);  // 2

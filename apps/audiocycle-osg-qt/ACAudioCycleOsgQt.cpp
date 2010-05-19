@@ -64,8 +64,8 @@ ACAudioCycleOsgQt::ACAudioCycleOsgQt(QWidget *parent)
 			//media_cycle->setNeighborhoodsPlugin("RandomNeighborhoods");
 			media_cycle->setNeighborhoodsPlugin("EuclideanNeighborhoods");
 			//media_cycle->setNeighborhoodsPlugin("ParetoNeighborhoods");
-			media_cycle->setPositionsPlugin("NodeLinkTreeLayoutPositions");
-			//media_cycle->setPositionsPlugin("RadialTreeLayoutPositions");
+			//media_cycle->setPositionsPlugin("NodeLinkTreeLayoutPositions");
+			media_cycle->setPositionsPlugin("RadialTreeLayoutPositions");
 		}
 		media_cycle->addPlugin("../../../plugins/audio/" + build_type + "/mc_audio.dylib");	
 	#endif
@@ -123,7 +123,7 @@ void ACAudioCycleOsgQt::updateLibrary()
 	if (!updatedLibrary) {
 		// set to 0 the first time a library is loaded
 		// XSCF do we always want this to be 0 ?
-		media_cycle->setSelectedNode(0);
+		media_cycle->setReferenceNode(0);
 	}
 	// XSCF 250310 added these 3
 	media_cycle->pushNavigationState();
@@ -497,7 +497,7 @@ void ACAudioCycleOsgQt::processOscMessage(const char* tagName)
 		media_cycle->importLibrary(lib_path); // XS instead of getImageLibrary CHECK THIS
 		//updateLibrary();
 		std::cout << "File library imported" << std::endl;
-		media_cycle->setSelectedNode(0);
+		media_cycle->setReferenceNode(0);
 		// XSCF 250310 added these 3
 		media_cycle->pushNavigationState();
 		media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
@@ -511,7 +511,7 @@ void ACAudioCycleOsgQt::processOscMessage(const char* tagName)
 	{
 		media_cycle->cleanLibrary(); // XS instead of getImageLibrary CHECK THIS
 		media_cycle->libraryContentChanged();
-		media_cycle->setSelectedNode(0);
+		media_cycle->setReferenceNode(0);
 		// XSCF 250310 added these 3
 		media_cycle->pushNavigationState();
 		media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
@@ -550,12 +550,13 @@ void ACAudioCycleOsgQt::processOscMessage(const char* tagName)
 		float scrub;
 		osc_browser->readFloat(mOscReceiver, &scrub);
 		
-		int clicked_node = media_cycle->getClickedNode();
+		//int clicked_node = media_cycle->getClickedNode();
+		int clicked_node = media_cycle->getClosestNode();
 		if (clicked_node > -1)
 		{
 			//media_cycle->pickedObjectCallback(-1);
 			audio_engine->setLoopSynchroMode(clicked_node, ACAudioEngineSynchroModeManual);
-			audio_engine->setLoopScaleMode(clicked_node, ACAudioEngineScaleModeVocode);
+			audio_engine->setLoopScaleMode(clicked_node, ACAudioEngineScaleModeResample);//ACAudioEngineScaleModeVocode
 			audio_engine->setScrub((float)scrub*10000); // temporary hack to scrub between 0 an 1
 		}
 	}
@@ -564,7 +565,8 @@ void ACAudioCycleOsgQt::processOscMessage(const char* tagName)
 		float pitch;
 		osc_browser->readFloat(mOscReceiver, &pitch);
 		
-		int clicked_node = media_cycle->getClickedNode();
+		//int clicked_node = media_cycle->getClickedNode();
+		int clicked_node = media_cycle->getClosestNode();
 		if (clicked_node > -1)
 		{
 			/*

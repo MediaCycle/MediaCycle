@@ -120,7 +120,7 @@
 
 - (void)updatedLibrary
 {	
-	media_cycle->setSelectedNode(0);
+	media_cycle->setReferenceNode(0);
 	// XSCF 250310 added these 3
 	media_cycle->pushNavigationState();
 	media_cycle->getBrowser()->setState(AC_CHANGING);
@@ -147,11 +147,13 @@
 	media_cycle->addPlugin("../../../plugins/visualisation/" + build_type + "/mc_visualisation.dylib");
 	//media_cycle->setVisualisationPlugin("Visualisation");
 	//media_cycle->setVisualisationPlugin("PCAVis");
-	//media_cycle->setNeighborhoodsPlugin("EuclideanNeighborhoods");
+	//media_cycle->setVisualisationPlugin("Vis2Desc");
 	//media_cycle->setNeighborhoodsPlugin("RandomNeighborhoods");
-	//media_cycle->getBrowser()->setMode(AC_MODE_NEIGHBORS);// set this if using NeighborhoodsPlugins
+	//media_cycle->setNeighborhoodsPlugin("EuclideanNeighborhoods");
+	//media_cycle->setNeighborhoodsPlugin("ParetoNeighborhoods");
+	//media_cycle->setNeighborhoodsPlugin("RandomNeighborhoods");
 	//media_cycle->setPositionsPlugin("NodeLinkTreeLayoutPositions");
-	//media_cycle->setPositionsPlugin("RandomPositions");
+	//media_cycle->setPositionsPlugin("RadialTreeLayoutPositions");
 	
 	audio_engine = new ACAudioFeedback();
 	audio_engine->setMediaCycle(media_cycle);
@@ -166,7 +168,7 @@
 	//media_cycle->updateClusters(true);
 	//media_cycle->setNeedsDisplay(true);
 	
-	//media_cycle->setSelectedNode(0);
+	//media_cycle->setReferenceNode(0);
 	// XSCF 250310 added these 3
 	//media_cycle->pushNavigationState();
 	//media_cycle->updateNextPositions(); // TODO is it required ?? .. hehehe

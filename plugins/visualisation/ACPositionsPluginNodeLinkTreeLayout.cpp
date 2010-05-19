@@ -40,9 +40,9 @@
 using namespace std;
 
 ACPositionsPluginTreeNodeParams::ACPositionsPluginTreeNodeParams()
-: x(0.0),y(0.0),width(10),height(10),
+: x(0.0),y(0.0),width(10.0),height(10.0),
 	prelim(0.0),mod(0.0),shift(0.0),change(0.0),
-	number(-2),ancestor(-1),thread(-1)//or -1?
+	number(-2),ancestor(-1),thread(-1)
 {
 }
 
@@ -62,7 +62,7 @@ void ACPositionsPluginTreeNodeParams::clear()
 
 ACPositionsPluginNodeLinkTreeLayout::ACPositionsPluginNodeLinkTreeLayout() 
 //: m_bspace(5), m_tspace(25), m_dspace(50), m_offset(50),m_maxDepth(0),m_ax(0.0),m_ay(0.0) // from Prefuse Java
-: m_bspace(0.005), m_tspace(0.025), m_dspace(0.05), m_offset(0.05),m_maxDepth(0),m_ax(0.0),m_ay(0.0) 
+: m_bspace(0.005), m_tspace(0.0025), m_dspace(0.005), m_offset(0.05),m_maxDepth(0),m_ax(0.0),m_ay(0.0) 
 {
     this->mMediaType = MEDIA_TYPE_MIXED; // ALL
     this->mPluginType = PLUGIN_TYPE_NONE;
@@ -75,9 +75,6 @@ ACPositionsPluginNodeLinkTreeLayout::ACPositionsPluginNodeLinkTreeLayout()
 	m_depths.resize(10);
 	m_orientation = ORIENT_LEFT_RIGHT;//CF: the current one is "Finder-like", try ORIENT_TOP_BOTTOM; or...
 	m_nodeParams = vector<ACPositionsPluginTreeNodeParams*>();
-}
-
-ACPositionsPluginNodeLinkTreeLayout::~ACPositionsPluginNodeLinkTreeLayout() {
 }
 
 int ACPositionsPluginNodeLinkTreeLayout::initialize()
@@ -106,36 +103,43 @@ void ACPositionsPluginNodeLinkTreeLayout::updateNextPositions(ACMediaBrowser* _m
 		// init params:
 		m_maxDepth = 0;
 		m_depths.clear();
+		
 		m_depths.resize(10); // to init it at its default size
 		for (int d = 0; d++; d<m_depths.size())
 			m_depths[d]=0;
+		// CF or m_depths = vector<int>(10,0); ?
+		
 		m_nodeParams.clear();
 		m_nodeParams.resize(mediaBrowser->getUserLog()->getSize());
 		for(int n=0; n<mediaBrowser->getUserLog()->getSize(); n++)
 			m_nodeParams[n]= new ACPositionsPluginTreeNodeParams();
 		
 		// do first pass - compute breadth information, collect depth info
-		std::cout << "ACPositionsPluginNodeLinkTreeLayout::updateNextPositions:firstWalk"<< std::endl;
+		//std::cout << "ACPositionsPluginNodeLinkTreeLayout::updateNextPositions:firstWalk"<< std::endl;
 		ACPositionsPluginTreeNodeParams* rp = getParams(0);		
 		this->firstWalk(0, 0, 1);
 		
-		for(int n=0; n<mediaBrowser->getUserLog()->getSize(); n++)
-			std::cout << "ACPositionsPluginNodeLinkTreeLayout::updateNextPositions: Node " << n << " with prelim " << m_nodeParams[n]->getPrelim() << std::endl;
+		//for(int n=0; n<mediaBrowser->getUserLog()->getSize(); n++)
+		//	std::cout << "ACPositionsPluginNodeLinkTreeLayout::updateNextPositions: Node " << n << " with prelim " << m_nodeParams[n]->getPrelim() << std::endl;
 		
 		// sum up the depth info
-		std::cout << "ACPositionsPluginNodeLinkTreeLayout::updateNextPositions: determineDepths"<< std::endl;
+		//std::cout << "ACPositionsPluginNodeLinkTreeLayout::updateNextPositions: determineDepths"<< std::endl;
 		this->determineDepths();
 		
 		// do second pass - assign layout positions
-		std::cout << "ACPositionsPluginNodeLinkTreeLayout::updateNextPositions: secondWalk"<< std::endl;
+		//std::cout << "ACPositionsPluginNodeLinkTreeLayout::updateNextPositions: secondWalk"<< std::endl;
 		this->secondWalk(0, NULL, -rp->getPrelim(), 0);
 		
 		for(int n=0; n<mediaBrowser->getUserLog()->getSize(); n++)
 		{
-			// TODO: check next
-			mediaBrowser->setNodeNextPosition(n, m_nodeParams[n]->getX()/200, -m_nodeParams[n]->getY()/200); // CF: note OSG's inverted Y //CF n instead of mediaBrowser->getUserLog()->getMediaIdFromNodeId(n)
+			// CF: hack so that newly expanded nodes animate from their parental position
+			int p = mediaBrowser->getUserLog()->getParentFromNodeId(n);
+			if ( p > 0 && mediaBrowser->getMediaNode(n).getCurrentPositionX() == 0.0f && mediaBrowser->getMediaNode(n).getCurrentPositionY() == 0.0f)
+				mediaBrowser->getMediaNode(n).setCurrentPosition(mediaBrowser->getMediaNode(p).getCurrentPosition());
+			
+			mediaBrowser->setNodeNextPosition(n, m_nodeParams[n]->getX()/400, -m_nodeParams[n]->getY()/400); // CF: note OSG's inverted Y //CF n instead of mediaBrowser->getUserLog()->getMediaIdFromNodeId(n)
 			mediaBrowser->setLoopIsDisplayed(n, true); // CF n instead of mediaBrowser->getUserLog()->getMediaIdFromNodeId(n)
-			std::cout << "ACPositionsPluginNodeLinkTreeLayout::updateNextPositions: Node " << n << " x " << m_nodeParams[n]->getX() << " y " << -m_nodeParams[n]->getY() << std::endl;
+			//std::cout << "ACPositionsPluginNodeLinkTreeLayout::updateNextPositions: Node " << n << " x " << m_nodeParams[n]->getX() << " y " << -m_nodeParams[n]->getY() << std::endl;
 		}
 
 		mediaBrowser->setNeedsDisplay(true);
@@ -180,7 +184,7 @@ void ACPositionsPluginNodeLinkTreeLayout::firstWalk(int n, int num, int depth) {
 	m_nodeParams[n]->setNumber(num);
 	updateDepths(depth, n);
 	
-	bool expanded = mediaBrowser->getUserLog()->getNodeFromId(n).getVisibility(); //n.isExpanded();
+	bool expanded = mediaBrowser->getUserLog()->getNodeFromId(n).isDisplayed(); //n.isExpanded();
 	
 	if ( mediaBrowser->getUserLog()->getChildCountAtNodeId(n) == 0 || !expanded ) // is leaf
 	{ 
@@ -197,7 +201,7 @@ void ACPositionsPluginNodeLinkTreeLayout::firstWalk(int n, int num, int depth) {
 		int rightMost = mediaBrowser->getUserLog()->getLastChildFromNodeId(n);
 		int defaultAncestor = leftMost;
 		int c = leftMost;
-		//for ( int i=0; c > -1; ++i, c = mediaBrowser->getUserLog()->getNextSiblingFromNodeId(c) )
+		//CF was: "for ( int i=0; c > -1; ++i, c = mediaBrowser->getUserLog()->getNextSiblingFromNodeId(c) )"
 		int i=0;
 		while (c != -1)
 		{
@@ -276,13 +280,14 @@ int ACPositionsPluginNodeLinkTreeLayout::apportion(int v, int a) {
 
 int ACPositionsPluginNodeLinkTreeLayout::nextLeft(int n) {
 	int c = -1;
-	if ( mediaBrowser->getUserLog()->getNodeFromId(n).getVisibility() ) c = mediaBrowser->getUserLog()->getFirstChildFromNodeId(n);
+	if ( mediaBrowser->getUserLog()->getNodeFromId(n).isDisplayed() ) 
+		c = mediaBrowser->getUserLog()->getFirstChildFromNodeId(n);
 	return ( c != -1 ? c : getParams(n)->getThread() );
 }
 
 int ACPositionsPluginNodeLinkTreeLayout::nextRight(int n) {
 	int c = -1;
-	if ( mediaBrowser->getUserLog()->getNodeFromId(n).getVisibility() )
+	if ( mediaBrowser->getUserLog()->getNodeFromId(n).isDisplayed() )
 		c = mediaBrowser->getUserLog()->getLastChildFromNodeId(n);
 	return ( c != -1 ? c : getParams(n)->getThread() );
 }
@@ -326,7 +331,7 @@ void ACPositionsPluginNodeLinkTreeLayout::secondWalk(int n, int p, double m, int
 	setBreadth(n, p, np->getPrelim() + m);
 	setDepth(n, p, m_depths[depth]);
 	
-	if ( mediaBrowser->getUserLog()->getNodeFromId(n).getVisibility() ) {
+	if ( mediaBrowser->getUserLog()->getNodeFromId(n).isDisplayed() ) {
 		depth += 1;
 		for ( int c = mediaBrowser->getUserLog()->getFirstChildFromNodeId(n);
 			 c != -1; c = mediaBrowser->getUserLog()->getNextSiblingFromNodeId(c) )
@@ -372,34 +377,12 @@ void ACPositionsPluginNodeLinkTreeLayout::setDepth(int n, int p, double d) {
 }
 
 ACPositionsPluginTreeNodeParams* ACPositionsPluginNodeLinkTreeLayout::getParams(int item) {
-	//ACPositionsPluginTreeNodeParams rp = ACPositionsPluginTreeNodeParams();
-	//if ((item >=0) && (item<m_nodeParams.size()))
-	//{
-		//if (m_nodeParams[item] == NULL)
-		//	m_nodeParams[item] = ACPositionsPluginTreeNodeParams();
-		/*
-		rp.setWidth(m_nodeParams[item].getWidth());
-		rp.setHeight(m_nodeParams[item].getHeight());
-		rp.setPrelim(m_nodeParams[item].getPrelim());
-		rp.setMod(m_nodeParams[item].getMod());
-		rp.setShift(m_nodeParams[item].getShift());
-		rp.setChange(m_nodeParams[item].getChange());
-		rp.setNumber(m_nodeParams[item].getNumber());
-		rp.setAncestor(m_nodeParams[item].getAncestor());
-		rp.setThread(m_nodeParams[item].getThread());
-		rp.setX(m_nodeParams[item].getX());
-		rp.setY(m_nodeParams[item].getY());
-		 */
-		
-		if ( m_nodeParams[item]->getNumber() == -2 ) {
-			m_nodeParams[item]->init(item);
-		}	
-	
-		return m_nodeParams[item];
-	//}
-	//else
-	//	return ACPositionsPluginTreeNodeParams();
+	if ( m_nodeParams[item]->getNumber() == -2 ) {
+		m_nodeParams[item]->init(item);
+	}	
+	return m_nodeParams[item];
 }
+
 /*
 void ACPositionsPluginNodeLinkTreeLayout::prepareLayout(ACOsgBrowserRenderer*, int start)
 {

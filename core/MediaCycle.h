@@ -116,7 +116,7 @@ public:
 	void setCameraRotation(float angle);
 	int getClickedNode();
 	void incrementLoopNavigationLevels(int i);
-	void setSelectedNode(int index);
+	void setReferenceNode(int index);
 	void updateClusters(bool animate);
 	void updateNeighborhoods();
 	void setCameraPosition(float x, float y);

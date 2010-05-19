@@ -374,7 +374,7 @@ ACNavigationState ACMediaBrowser::getCurrentNavigationState()
 	ACNavigationState state;
 	
 	//state.mNavType = AC_NAV_SELECTION;
-	state.mSelectedNode = mSelectedNode;
+	state.mReferenceNode = mReferenceNode;
 	state.mNavigationLevel = mNavigationLevel;
 	state.mFeatureWeights = mFeatureWeights;
 	
@@ -384,7 +384,7 @@ ACNavigationState ACMediaBrowser::getCurrentNavigationState()
 
 void ACMediaBrowser::setCurrentNavigationState(ACNavigationState state)
 {
-	mSelectedNode = state.mSelectedNode;
+	mReferenceNode = state.mReferenceNode;
 	mNavigationLevel = state.mNavigationLevel;
 	mFeatureWeights = state.mFeatureWeights;
 	
@@ -467,15 +467,30 @@ void ACMediaBrowser::libraryContentChanged() {
 	// previously: resize other vector structures dependent on loop count.
 	
 	// XS 150310 TODO: check this one
-	initializeNodes(1); // media_ID = node_ID
-
+	//if (this->getMode() == AC_MODE_CLUSTERS)
+		initializeNodes(1); // media_ID = node_ID
 
 	if(mLibrary == NULL) return;
 	else if(mLibrary->isEmpty()) {
+		
+		// Reset the browser settings when cleaning the library
+		mCameraPosition[0] = 0.0;
+		mCameraPosition[1] = 0.0;
+		mCameraZoom = 1.0;
+		mCameraAngle = 0.0;
+		
+		//CF we need more than setCameraRecenter()
+		mClickedNode = -1;
+		mClickedLabel = -1;
+		mClosestNode = -1;
+		//mClusterCount = 5; //CF might be previously set by apps
+		mNavigationLevel = 0;
+		
+		resetLoopNavigationLevels();
+		
 		setNeedsDisplay(true);
 		return;
 	}
-	
 	
 	if (mVisPlugin==NULL && mPosPlugin==NULL) {	
 		for (ACMediaNodes::iterator node = mLoopAttributes.begin(); node != mLoopAttributes.end(); ++node){
@@ -508,7 +523,8 @@ void ACMediaBrowser::libraryContentChanged() {
 	updateNeighborhoods();
 	updateClusters(false);
 	if (mNeighborsPlugin==NULL) {	//CF to replace by mode check (neighborhoods vs clusters)
-		updateNextPositions();//CF		
+		updateNextPositions();//CF	
+		//setState(AC_CHANGING);
 		setNeedsDisplay(true);//CF
 	}	
 }
@@ -972,11 +988,11 @@ void ACMediaBrowser::updateClustersKMeans(bool animate) {
 
 
 
-void ACMediaBrowser::setSelectedNode(int index)
+void ACMediaBrowser::setReferenceNode(int index)
 {
 	// XS TODO (index >= -1 && index < objects.size());
 	
-	mSelectedNode = index;
+	mReferenceNode = index;
 
 	// XSCF 250310 commented this 
 //	pushNavigationState();
@@ -990,13 +1006,13 @@ void ACMediaBrowser::updateNextPositionsPropeller(){
 	std::cout << "ACMediaBrowser::updateNextPositionsPropeller" <<std::endl;
 
 	if (mLibrary->isEmpty() ) return;
-	if (mSelectedNode < 0 || mSelectedNode >= getNumberOfMediaNodes()) return ;
+	if (mReferenceNode < 0 || mReferenceNode >= getNumberOfMediaNodes()) return ;
 
 
 	float r, theta;
 	ACPoint p;
 	p.x = p.y = p.z = 0.0;
-	this->getMediaNode(mSelectedNode).setNextPosition(p);
+	this->getMediaNode(mReferenceNode).setNextPosition(p);
 	
 	srand(1234);
 	
@@ -1008,7 +1024,7 @@ void ACMediaBrowser::updateNextPositionsPropeller(){
 
 		// SD TODO - test both approaches
 		r=1;
-		r = compute_distance(mLibrary->getMedia(mSelectedNode)->getAllFeaturesVectors(), 
+		r = compute_distance(mLibrary->getMedia(mReferenceNode)->getAllFeaturesVectors(), 
 							 mLibrary->getMedia((*node).getMediaId())->getAllFeaturesVectors(), 
 							 mFeatureWeights, false) * 10.0;
 		r /= 100.0;
@@ -1270,7 +1286,7 @@ void ACMediaBrowser::initializeNodes(int _defaultNodeId){ // default = 0
 	// if _defaultNodeId is set to 1, it will give a nodeID = mediaID
 	// otherwize by default nodeID = 0;
 	mLoopAttributes.clear(); // XS TODO if this is a vector of pointers it should be deleted properly
-	if  (_defaultNodeId = 0){
+	if  (_defaultNodeId == 0){
 		for (int i=0; i<mLibrary->getSize();i++){
 			//ACMediaNode* mn = new ACMediaNode(0,mLibrary->getMedia(i)->getId());
 			ACMediaNode mn(0,mLibrary->getMedia(i)->getId());

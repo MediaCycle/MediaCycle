@@ -123,9 +123,6 @@ public:
 	bool isDisplayed() const {return displayed;}
 	void setDisplayed(bool _dis){displayed = _dis;}
 
-	// XS compat CF. == isDisplayed(). chage this !
-	bool getVisibility(){return displayed;}
-
 	void increaseNavigationLevel(){navigationLevel++;}
 };
 

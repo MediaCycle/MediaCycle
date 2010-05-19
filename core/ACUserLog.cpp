@@ -299,7 +299,6 @@ void ACUserLog::clean()
 {
 	mNodeId = 0;
 	mLastClickedNodeId = -1;
-	//tree<ACMediaNode> userLogTree;
 	userLogTree.clear(); //CF erases all nodes, what about the root?
 	std::cout << "Is the tree empty? " << userLogTree.empty() << std::endl;
 }	
