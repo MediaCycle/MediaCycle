@@ -1,7 +1,7 @@
 /**
  * @brief ACNeighborhoodsPluginEuclidean.cpp
  * @author Christian Frisson
- * @date 03/05/2010
+ * @date 19/05/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -50,7 +50,7 @@ ACNeighborhoodsPluginEuclidean::~ACNeighborhoodsPluginEuclidean() {
 void ACNeighborhoodsPluginEuclidean::updateNeighborhoods(ACMediaBrowser* mediaBrowser) {
 	//int _clickedloop = mediaBrowser->getClickedLoop();
 	std::cout << "ACNeighborhoodsPluginEuclidean::updateNeighborhoods" << std::endl;
-	if (mediaBrowser->getUserLog()->getLastClickedNodeId() == -1) { //CF: 19 audio samples on the mercurialized dataset	 
+	if (mediaBrowser->getUserLog()->getLastClickedNodeId() == -1) {	 
 		mediaBrowser->getUserLog()->addRootNode(0, 0); // 0
 		mediaBrowser->getUserLog()->clickNode(0, 0);
 		lastClickedNodeId = 0;

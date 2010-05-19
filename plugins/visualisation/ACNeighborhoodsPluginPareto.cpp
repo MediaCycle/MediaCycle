@@ -1,7 +1,7 @@
 /**
  * @brief ACNeighborhoodsPluginPareto.cpp
- * @author Damien Tardieu
- * @date 05/05/2010
+ * @author Christian Frisson
+ * @date 19/05/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -50,7 +50,7 @@ ACNeighborhoodsPluginPareto::~ACNeighborhoodsPluginPareto() {
 void ACNeighborhoodsPluginPareto::updateNeighborhoods(ACMediaBrowser* mediaBrowser) {
 	//int _clickedloop = mediaBrowser->getClickedLoop();
 	std::cout << "ACNeighborhoodsPluginPareto::updateNeighborhoods" << std::endl;
-	if (mediaBrowser->getUserLog()->getLastClickedNodeId() == -1 && mediaBrowser->getNumberOfMediaNodes() >= 19) { //CF: 19 audio samples on the mercurialized dataset	 
+	if (mediaBrowser->getUserLog()->getLastClickedNodeId() == -1 ) { 	 
 		long lastClickedNodeId = mediaBrowser->getUserLog()->getLastClickedNodeId();
 		long targetMediaId = mediaBrowser->getUserLog()->getMediaIdFromNodeId(lastClickedNodeId);
 		ACMedia* loop = mediaBrowser->getLibrary()->getMedia(0);
