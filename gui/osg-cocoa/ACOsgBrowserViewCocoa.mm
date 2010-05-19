@@ -247,7 +247,7 @@ struct ACOsgBrowserViewData
 		
 		if(loop >= 0)
 		{
-			//media_cycle->incrementLoopNavigationLevels(loop);
+			media_cycle->incrementLoopNavigationLevels(loop);
 			media_cycle->setSelectedNode(loop);
 			
 			// XSCF 250310 added these 3
