@@ -124,7 +124,7 @@ void ACAudioGardenOsgQt::updateLibrary()
 	if (!updatedLibrary) {
 		// set to 0 the first time a library is loaded
 		// XSCF do we always want this to be 0 ?
-		media_cycle->setSelectedNode(0);
+		media_cycle->setReferenceNode(0);
 	}
 	// XSCF 250310 added these 3
 	media_cycle->pushNavigationState();
@@ -470,7 +470,7 @@ void ACAudioGardenOsgQt::processOscMessage(const char* tagName)
 		media_cycle->importLibrary(lib_path); // XS instead of getImageLibrary CHECK THIS
 		//updateLibrary();
 		std::cout << "File library imported" << std::endl;
-		media_cycle->setSelectedNode(0);
+		media_cycle->setReferenceNode(0);
 		// XSCF 250310 added these 3
 		media_cycle->pushNavigationState();
 		media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
@@ -484,7 +484,7 @@ void ACAudioGardenOsgQt::processOscMessage(const char* tagName)
 	{
 		media_cycle->cleanLibrary(); // XS instead of getImageLibrary CHECK THIS
 		media_cycle->libraryContentChanged();
-		media_cycle->setSelectedNode(0);
+		media_cycle->setReferenceNode(0);
 		// XSCF 250310 added these 3
 		media_cycle->pushNavigationState();
 		media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe

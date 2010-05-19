@@ -267,7 +267,7 @@ void ACOsgBrowserViewQT::mouseReleaseEvent( QMouseEvent* event )
 			if(loop >= 0)
 			{
 				media_cycle->incrementLoopNavigationLevels(loop);
-				media_cycle->setSelectedNode(loop);
+				media_cycle->setReferenceNode(loop);
 				
 				// XSCF 250310 added these 3
 				media_cycle->pushNavigationState();

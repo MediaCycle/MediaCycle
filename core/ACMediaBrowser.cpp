@@ -374,7 +374,7 @@ ACNavigationState ACMediaBrowser::getCurrentNavigationState()
 	ACNavigationState state;
 	
 	//state.mNavType = AC_NAV_SELECTION;
-	state.mSelectedNode = mSelectedNode;
+	state.mReferenceNode = mReferenceNode;
 	state.mNavigationLevel = mNavigationLevel;
 	state.mFeatureWeights = mFeatureWeights;
 	
@@ -384,7 +384,7 @@ ACNavigationState ACMediaBrowser::getCurrentNavigationState()
 
 void ACMediaBrowser::setCurrentNavigationState(ACNavigationState state)
 {
-	mSelectedNode = state.mSelectedNode;
+	mReferenceNode = state.mReferenceNode;
 	mNavigationLevel = state.mNavigationLevel;
 	mFeatureWeights = state.mFeatureWeights;
 	
@@ -988,11 +988,11 @@ void ACMediaBrowser::updateClustersKMeans(bool animate) {
 
 
 
-void ACMediaBrowser::setSelectedNode(int index)
+void ACMediaBrowser::setReferenceNode(int index)
 {
 	// XS TODO (index >= -1 && index < objects.size());
 	
-	mSelectedNode = index;
+	mReferenceNode = index;
 
 	// XSCF 250310 commented this 
 //	pushNavigationState();
@@ -1006,13 +1006,13 @@ void ACMediaBrowser::updateNextPositionsPropeller(){
 	std::cout << "ACMediaBrowser::updateNextPositionsPropeller" <<std::endl;
 
 	if (mLibrary->isEmpty() ) return;
-	if (mSelectedNode < 0 || mSelectedNode >= getNumberOfMediaNodes()) return ;
+	if (mReferenceNode < 0 || mReferenceNode >= getNumberOfMediaNodes()) return ;
 
 
 	float r, theta;
 	ACPoint p;
 	p.x = p.y = p.z = 0.0;
-	this->getMediaNode(mSelectedNode).setNextPosition(p);
+	this->getMediaNode(mReferenceNode).setNextPosition(p);
 	
 	srand(1234);
 	
@@ -1024,7 +1024,7 @@ void ACMediaBrowser::updateNextPositionsPropeller(){
 
 		// SD TODO - test both approaches
 		r=1;
-		r = compute_distance(mLibrary->getMedia(mSelectedNode)->getAllFeaturesVectors(), 
+		r = compute_distance(mLibrary->getMedia(mReferenceNode)->getAllFeaturesVectors(), 
 							 mLibrary->getMedia((*node).getMediaId())->getAllFeaturesVectors(), 
 							 mFeatureWeights, false) * 10.0;
 		r /= 100.0;

@@ -120,7 +120,7 @@
 
 - (void)updatedLibrary
 {	
-	media_cycle->setSelectedNode(0);
+	media_cycle->setReferenceNode(0);
 	// XSCF 250310 added these 3
 	media_cycle->pushNavigationState();
 	media_cycle->getBrowser()->setState(AC_CHANGING);
@@ -168,7 +168,7 @@
 	//media_cycle->updateClusters(true);
 	//media_cycle->setNeedsDisplay(true);
 	
-	//media_cycle->setSelectedNode(0);
+	//media_cycle->setReferenceNode(0);
 	// XSCF 250310 added these 3
 	//media_cycle->pushNavigationState();
 	//media_cycle->updateNextPositions(); // TODO is it required ?? .. hehehe

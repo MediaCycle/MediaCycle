@@ -319,7 +319,7 @@ float MediaCycle::getFrac() { return mediaBrowser->getFrac(); }
 void MediaCycle::setCameraRotation(float angle) { mediaBrowser->setCameraRotation(angle); }
 int MediaCycle::getClickedNode() { return mediaBrowser->getClickedNode(); }
 void MediaCycle::incrementLoopNavigationLevels(int i) { mediaBrowser->incrementLoopNavigationLevels(i); }
-void MediaCycle::setSelectedNode(int index) { mediaBrowser->setSelectedNode(index); }
+void MediaCycle::setReferenceNode(int index) { mediaBrowser->setReferenceNode(index); }
 void MediaCycle::updateClusters(bool animate) { mediaBrowser->updateClusters(animate); }
 void MediaCycle::updateNeighborhoods() { mediaBrowser->updateNeighborhoods(); }
 void MediaCycle::setCameraPosition(float x, float y)		{ mediaBrowser->setCameraPosition(x,y); }
