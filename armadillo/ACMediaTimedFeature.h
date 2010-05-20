@@ -94,7 +94,7 @@ public:
 	void setName(string name){this->name = name;};
 	size_t getLength();
 	size_t getDim();
-	void setSegments(){};
+	void setSegments(std::vector<float> iSeg_v){seg_v=iSeg_v;};
 	vector<float> getSegments();
 	float getSegments(int index);
 	
@@ -121,6 +121,7 @@ public:
 	ACMediaTimedFeatures* meanSegment();
 	
 	ACMediaTimedFeatures* simpleSplineModeling();
+	ACMediaFeatures* temporalModel(double, double);
 	ACMediaTimedFeatures* delta();
 	
 	int readFile(string);

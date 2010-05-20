@@ -131,7 +131,7 @@ int MediaCycle::importLibrary(string path) {
 // XS import = open + some processing 
 	cout << "MediaCycle: importing library: " << path << endl;
 	int ok = 0;
-	ok = this->mediaLibrary->openLibrary(path);
+	ok = this->mediaLibrary->openACLLibrary(path);
 	if (ok==1) this->mediaLibrary->normalizeFeatures();
 	//	XS TODO this->mediaBrowser->libraryContentChanged();	
 	return ok;
@@ -319,7 +319,7 @@ float MediaCycle::getFrac() { return mediaBrowser->getFrac(); }
 void MediaCycle::setCameraRotation(float angle) { mediaBrowser->setCameraRotation(angle); }
 int MediaCycle::getClickedNode() { return mediaBrowser->getClickedNode(); }
 void MediaCycle::incrementLoopNavigationLevels(int i) { mediaBrowser->incrementLoopNavigationLevels(i); }
-void MediaCycle::setSelectedNode(int index) { mediaBrowser->setSelectedNode(index); }
+void MediaCycle::setReferenceNode(int index) { mediaBrowser->setReferenceNode(index); }
 void MediaCycle::updateClusters(bool animate) { mediaBrowser->updateClusters(animate); }
 void MediaCycle::updateNeighborhoods() { mediaBrowser->updateNeighborhoods(); }
 void MediaCycle::setCameraPosition(float x, float y)		{ mediaBrowser->setCameraPosition(x,y); }
@@ -333,6 +333,7 @@ void MediaCycle::libraryContentChanged() { mediaBrowser->libraryContentChanged()
 void MediaCycle::saveAsLibrary(string path) {mediaLibrary->saveAsLibrary(path); }
 void MediaCycle::saveACLLibrary(string path) {mediaLibrary->saveACLLibrary(path); }
 void MediaCycle::cleanLibrary() { mediaLibrary->cleanLibrary(); }
+void MediaCycle::cleanUserLog() { mediaBrowser->getUserLog()->clean(); }
 void MediaCycle::goBack() { mediaBrowser->goBack(); }
 void MediaCycle::goForward() { mediaBrowser->goForward(); }
 void MediaCycle::setClusterNumber(int n) { mediaBrowser->setClusterNumber(n); }

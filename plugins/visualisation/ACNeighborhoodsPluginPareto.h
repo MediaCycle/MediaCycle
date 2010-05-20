@@ -1,7 +1,7 @@
 /**
- * @brief ACAudioFeatures.h
- * @author Damien Tardieu
- * @date 05/05/2010
+ * @brief ACNeighborhoodsPluginPareto.h
+ * @author Alexis Moinet
+ * @date 10/05/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -29,31 +29,30 @@
  * <mailto:avre@umons.ac.be>
 */
 
-#ifndef _ACAUDIOFEATURES_H
-#define _ACAUDIOFEATURES_H
+#include "Armadillo-utils.h"
 
-#include <stdio.h>
-#include <sndfile.h>
-#include <string.h>
-#include <armadillo>
-#include <vector>
-#include "ACMediaTimedFeature.h"
+#include "ACPlugin.h"
+#include "ACMediaBrowser.h"
+//#include "ACMediaBrowser.h"
+//#include "ACMediaTimedFeature.h"
 
-using namespace arma;
+//using namespace arma;
+
+#ifndef _ACNEIGHBORHOODSPLUGINPARETO_
+#define _ACNEIGHBORHOODSPLUGINPARETO_
+
+class ACNeighborhoodsPluginPareto : public ACPlugin {
+public:
+  ACNeighborhoodsPluginPareto();
+  ~ACNeighborhoodsPluginPareto();
+	void updateClusters(ACMediaBrowser* ){};//not implemented
+	void updateNextPositions(ACMediaBrowser* ){};//not implemented
+	virtual void updateNeighborhoods(ACMediaBrowser* );
+protected:
+	mat extractDescMatrix(ACMediaBrowser* mediaBrowser, int descId);
+
+};
+
+#endif	/* _ACNEIGHBORHOODSPLUGINPARETO_ */
 
 
-std::vector<ACMediaTimedFeatures*> computeFeatures(float* data, int samplerate, int nchannels, int length,int mfccNbChannels = 16, int mfccNb = 13, int windowSize=512, 	bool extendSoundLimits = false); 
-int resample(float* datain, SF_INFO *sfinfo, float* dataout, SF_INFO* sfinfoout);
-double spectralCentroid(colvec x_v);
-double spectralSpread(colvec x_v);
-double spectralVariation(colvec, colvec);
-double spectralFlux(colvec x_v, colvec xPrev_v);
-double zcr(colvec frame_v, int sr_hz, int frameSize);
-double spectralDecrease(colvec x_v);
-double energyRMS(colvec frame_v);
-double loudness(colvec x_v, mat melfilter_m);
-double logAttackTime(colvec ener_v, int sr_hz);
-rowvec effectiveDuration(colvec time_v, colvec loud_v);
-rowvec mfcc(colvec x_v, mat melfilter_m, int mfccNb);
-
-#endif

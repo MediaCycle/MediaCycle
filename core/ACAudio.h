@@ -52,16 +52,20 @@ class ACAudio : public ACMedia {
 	// is this too much already ?
 public:
 	ACAudio();
+	ACAudio(const ACAudio&);
+
 	~ACAudio();
   
 	void save(FILE* library_file);
+	void saveACL(ofstream &library_file);
+	int loadACL(ifstream &library_file);
 	int load(FILE* library_file);
 	int load_v1(FILE* library_file); 
 	
 //	void import(std::string _path); // XS 240210 : migrated to ACMedia
 	void saveThumbnail(std::string _path);
 	void* getThumbnailPtr() { return (void*)waveform; }
-	int getThumbnailWidth() {return n_frames;} // width in thumbnail frames, not samples
+	int getThumbnailWidth() {return waveformLength;} // width in thumbnail frames, not samples
 	int getThumbnailHeight() {return 0;} // width in thumbnail frames, not samples
 	int getWidth() {return sample_end;}
 	int getHeight() {return 0;}
@@ -76,11 +80,17 @@ public:
 	int getSampleStart() { return sample_start; }
 	void setSampleEnd(int _sample_end) { sample_end = _sample_end; }
 	int getSampleEnd() { return sample_end; }
-	void setNFrames(int _n_frames) { n_frames = _n_frames; }
-	int getNFrames() { return n_frames; }
+	void setNFrames(long _n_frames) { n_frames = _n_frames; }
+	long getNFrames() { return n_frames; }
+	float getDuration() {return (float)n_frames/(float) sample_rate;}
+
+	void setWaveformLength(int _waveformLength) { waveformLength = _waveformLength; }
+	int getWaveformLength() { return waveformLength; }
 	void setWaveform(float *_waveform) { waveform = _waveform; }
 	float* getWaveform() { return waveform; }
 	
+	void computeWaveform(float* samples_v);
+
 private:	
 	int sample_rate;
 	int channels;
@@ -88,7 +98,8 @@ private:
 	int sample_end;
 	//float time_stamp_start;	// seconds
 	//float time_stamp_end;
-	int n_frames;
+	long n_frames;
+	int waveformLength;
 	float* waveform; // typically one value every 10ms
 	// following are specific to loops or music
 	float db;

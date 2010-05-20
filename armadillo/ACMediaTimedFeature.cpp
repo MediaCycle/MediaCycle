@@ -378,7 +378,7 @@ fmat ACMediaTimedFeatures::getValueAtTime(fcolvec time_v) {
 ACMediaFeatures* ACMediaTimedFeatures::weightedMean(ACMediaTimedFeatures* weight){
 	ACMediaFeatures* weightedMean_mf = new ACMediaFeatures();
 	fmat weightVal = weight->getValueAtTime(this->getTime());
-	float sumWeight = conv_to<float>::from(sum(weightVal));
+	float sumWeight = as_scalar(sum(weightVal));
 	fmat tmp_m;
 	string name = "Weighted mean of ";
 	weightVal = weightVal / sumWeight;
@@ -472,7 +472,7 @@ ACMediaFeatures* ACMediaTimedFeatures::std(){
 
 ACMediaTimedFeatures* ACMediaTimedFeatures::delta(){
 	ACMediaTimedFeatures* deltaf;
-	deltaf = new ACMediaTimedFeatures(this->time_v.rows(1,this->getLength()-1), diff(this->value_m, 1, 1), "Delta "+this->getName());
+	deltaf = new ACMediaTimedFeatures(this->time_v.rows(1,this->getLength()-1), diff(this->value_m, 1, 0), "Delta "+this->getName());
 	return deltaf;
 }
 
@@ -527,8 +527,94 @@ ACMediaTimedFeatures* ACMediaTimedFeatures::weightedMeanSegment(ACMediaTimedFeat
 	return outAcmtv;
 }
 
-// ACMediaTimedFeatures* ACMediaTimedFeatures::simpleSplineModeling(ACMediaTimedFeatures* weight, ACMediaSegment* segment){
-//}
+ACMediaFeatures* ACMediaTimedFeatures::temporalModel(double start_sec, double stop_sec){
+	
+	if (value_m.n_cols > 1){
+		std::cout << "error : simpleSegmentModel can only be applied to unidimensional features." << std::endl;
+		exit(1);
+	}
+
+	ACMediaFeatures* temporalModel_mf = new ACMediaFeatures();
+	fcolvec value_v;
+	long start_sp = this->getNearestTimePosition(start_sec,2);
+	long stop_sp = this->getNearestTimePosition(stop_sec,2);
+	value_v = value_m.col(0);
+	value_v = value_v.rows(start_sp, stop_sp);
+	
+	fcolvec time2_v = time_v.rows(start_sp, stop_sp);
+	
+	unsigned long lMaxp = max_index(value_v);
+	unsigned long lMinp = min_index(value_v);
+	rowvec seg1_v(4);
+	rowvec seg_v(3);
+
+	seg1_v(0) = 0;
+	seg1_v(1) = lMinp;
+	seg1_v(2) = lMaxp;
+	seg1_v(3) = value_v.n_rows-1;
+	seg1_v = sort(seg1_v);
+	
+	rowvec seglength_v = diff(seg1_v,1,1);
+	unsigned long minSegLength_pos = min_index(seglength_v);
+	
+	seg_v(0) = seg1_v(0);
+	seg_v(2) = seg1_v(3);
+	
+	if (minSegLength_pos == 0){
+		seg_v(1) = seg1_v(2);
+	}
+	else if (minSegLength_pos == 1){
+		seg_v(1) = seg1_v(1);	
+	}
+	else if (minSegLength_pos == 2){
+		seg_v(1) = seg1_v(1);
+	}
+
+	float d1 = time2_v(seg_v(1)) - time2_v(seg_v(0));
+	float s1;
+	if (d1 > 0)
+		s1 = (value_v(seg_v(1)) - value_v(seg_v(0)))/d1;
+	else
+		s1 = 0;
+	
+	float d2 = time2_v(seg_v(2)) - time2_v(seg_v(1));
+	float s2;
+	if (d2 > 0)
+		s2 = (value_v(seg_v(2)) - value_v(seg_v(1))) / d2;
+	else
+		s2 = 0;
+
+	float slopeDiff = s2-s1;
+	float sa, sd;
+	frowvec sm_v(5);
+	if (s1 > 0){ // if the first segment is ascending
+		sm_v(0) = s1; //sa = s1; // slope ascending part
+		sm_v(1) = d1; //da = d1; // duration ascending part
+		sm_v(2) = s2; //sd = s2; // slope descending
+		sm_v(3) = d2; //dd = d2; // duration descending
+		sm_v(4) = slopeDiff; //dd = d2; // duration descending
+	}
+	else{
+		sm_v(0) = s2; //sa = s2; 
+		sm_v(1) = d2; //da = d2;
+		sm_v(2) = s1; //sd = s1;
+		sm_v(3) = d1; //dd = d1;
+		sm_v(3) = slopeDiff; //dd = d1;
+	}
+	std::cout << "temporal model : " << sm_v << std::endl;
+	if (!sm_v.is_finite()){
+		std::cout << "Temporal model is not finite" << std::endl;
+		exit(1);
+	}
+
+	string name = "Temporal Model of ";
+	name += this->getName();
+	temporalModel_mf->setName(name);
+	for (int i = 0; i < sm_v.n_cols; i++){
+		temporalModel_mf->addFeatureElement(sm_v(i)); 
+	}
+	return temporalModel_mf;
+}
 
 int ACMediaTimedFeatures::readFile(std::string fileName){
     fmat data;
@@ -648,6 +734,7 @@ float ACMediaTimedFeatures::dist(fmat vector1, fmat vector2, int mode)
     }
     return distM(0,0);
 }
+
 
 
 int ACMediaTimedFeatures::saveAsSdif(const char *name){

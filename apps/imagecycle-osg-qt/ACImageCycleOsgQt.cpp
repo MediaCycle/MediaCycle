@@ -78,7 +78,7 @@ ACImageCycleOsgQt::~ACImageCycleOsgQt()
 
 void ACImageCycleOsgQt::updateLibrary()
 {	
-	media_cycle->setSelectedNode(0);
+	media_cycle->setReferenceNode(0);
 	// XSCF 250310 added these 3
 	media_cycle->pushNavigationState();
 	media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
@@ -98,6 +98,7 @@ void ACImageCycleOsgQt::on_pushButtonLaunch_clicked() {
 
 void ACImageCycleOsgQt::on_pushButtonClean_clicked()
 {
+	media_cycle->cleanUserLog();
 	media_cycle->cleanLibrary();
 	media_cycle->libraryContentChanged();
 	this->updateLibrary();
@@ -130,7 +131,7 @@ void ACImageCycleOsgQt::on_checkBoxFeat1_stateChanged(int state)
 		media_cycle->updateClusters(true); 
 		media_cycle->setNeedsDisplay(true);
 
-		ui.browserOsgView->updateTransformsFromBrowser(1.0); 
+		ui.browserOsgView->updateTransformsFromBrowser(0.0); 
 	}
 	//ui.browserOsgView->setFocus();
 }
@@ -143,7 +144,7 @@ void ACImageCycleOsgQt::on_checkBoxFeat2_stateChanged(int state)
 		media_cycle->updateClusters(true); 
 		media_cycle->setNeedsDisplay(true);
 
-		ui.browserOsgView->updateTransformsFromBrowser(1.0); 
+		ui.browserOsgView->updateTransformsFromBrowser(0.0); 
 	}
 	//ui.browserOsgView->setFocus();
 }
@@ -156,7 +157,7 @@ void ACImageCycleOsgQt::on_checkBoxFeat3_stateChanged(int state)
 		media_cycle->updateClusters(true); 
 		media_cycle->setNeedsDisplay(true);
 
-		ui.browserOsgView->updateTransformsFromBrowser(1.0); 
+		ui.browserOsgView->updateTransformsFromBrowser(0.0); 
 	}
 	//ui.browserOsgView->setFocus();
 }
@@ -169,7 +170,7 @@ void ACImageCycleOsgQt::on_sliderClusters_sliderReleased()
 		// XSCF251003 added this
 		media_cycle->updateClusters(true);
 		media_cycle->setNeedsDisplay(true);
-		ui.browserOsgView->updateTransformsFromBrowser(1.0);
+		ui.browserOsgView->updateTransformsFromBrowser(0.0);
 	}
 	//ui.browserOsgView->setFocus();
 }

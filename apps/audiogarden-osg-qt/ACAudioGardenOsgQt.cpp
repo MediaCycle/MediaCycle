@@ -36,6 +36,8 @@
 #include <iostream>
 #include "ACAudioGardenOsgQt.h"
 
+using namespace std;
+
 static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 {
 	ACAudioGardenOsgQt *window = (ACAudioGardenOsgQt*)userData;
@@ -56,13 +58,17 @@ ACAudioGardenOsgQt::ACAudioGardenOsgQt(QWidget *parent)
 		#ifdef USE_DEBUG
 			build_type = "Debug";
 		#endif
-		media_cycle->addPlugin("../../../plugins/visualisation/" + build_type + "/mc_visualisation.dylib");
+		int vizplugloaded = media_cycle->addPlugin("../../../plugins/visualisation/" + build_type + "/mc_visualisation.dylib");
+		if ( vizplugloaded == 0 )
+		{
+			//media_cycle->setVisualisationPlugin("Visualisation");
+			//media_cycle->setNeighborhoodsPlugin("RandomNeighborhoods");
+			//media_cycle->setNeighborhoodsPlugin("EuclideanNeighborhoods");
+			//media_cycle->getBrowser()->setMode(AC_MODE_NEIGHBORS);// set this if using NeighborhoodsPlugins
+			//media_cycle->setPositionsPlugin("NodeLinkTreeLayoutPositions");
+			media_cycle->setVisualisationPlugin("VisAudiogarden");
+		}
 		//media_cycle->addPlugin("../../../plugins/audio/" + build_type + "/mc_audio.dylib");	
-		//media_cycle->setVisualisationPlugin("Visualisation");
-		//media_cycle->setNeighborhoodsPlugin("RandomNeighborhoods");
-		//media_cycle->setNeighborhoodsPlugin("EuclideanNeighborhoods");
-		//media_cycle->getBrowser()->setMode(AC_MODE_NEIGHBORS);// set this if using NeighborhoodsPlugins
-		//media_cycle->setPositionsPlugin("NodeLinkTreeLayoutPositions");
 	#endif
 	
 	audio_engine = new ACAudioFeedback();
@@ -118,7 +124,7 @@ void ACAudioGardenOsgQt::updateLibrary()
 	if (!updatedLibrary) {
 		// set to 0 the first time a library is loaded
 		// XSCF do we always want this to be 0 ?
-		media_cycle->setSelectedNode(0);
+		media_cycle->setReferenceNode(0);
 	}
 	// XSCF 250310 added these 3
 	media_cycle->pushNavigationState();
@@ -147,6 +153,7 @@ void ACAudioGardenOsgQt::on_pushButtonMuteAll_clicked()
 
 void ACAudioGardenOsgQt::on_pushButtonClean_clicked()
 {
+	media_cycle->cleanUserLog();
 	media_cycle->cleanLibrary();
 	media_cycle->libraryContentChanged();
 	this->updateLibrary();
@@ -218,7 +225,7 @@ void ACAudioGardenOsgQt::on_checkBoxRhythm_stateChanged(int state)
 		media_cycle->updateClusters(true); 
 		media_cycle->setNeedsDisplay(true);
 
-		ui.compositeOsgView->updateTransformsFromBrowser(1.0); 
+		ui.compositeOsgView->updateTransformsFromBrowser(0.0); 
 	}
 	//ui.compositeOsgView->setFocus();
 }
@@ -230,7 +237,7 @@ void ACAudioGardenOsgQt::on_checkBoxTimbre_stateChanged(int state)
 		media_cycle->setWeight(1,state/2.0f);
 		media_cycle->updateClusters(true); 
 		media_cycle->setNeedsDisplay(true);
-		ui.compositeOsgView->updateTransformsFromBrowser(1.0); 
+		ui.compositeOsgView->updateTransformsFromBrowser(0.0); 
 	}
 	//ui.compositeOsgView->setFocus();
 }
@@ -242,7 +249,7 @@ void ACAudioGardenOsgQt::on_checkBoxHarmony_stateChanged(int state)
 		media_cycle->setWeight(2,state/2.0f);
 		media_cycle->updateClusters(true); 
 		media_cycle->setNeedsDisplay(true);
-		ui.compositeOsgView->updateTransformsFromBrowser(1.0); 
+		ui.compositeOsgView->updateTransformsFromBrowser(0.0); 
 	}
 	//ui.compositeOsgView->setFocus();
 }
@@ -255,7 +262,7 @@ void ACAudioGardenOsgQt::on_sliderClusters_sliderReleased()
 		// XSCF251003 added this
 		media_cycle->updateClusters(true);
 		media_cycle->setNeedsDisplay(true);		
-		ui.compositeOsgView->updateTransformsFromBrowser(1.0);
+		ui.compositeOsgView->updateTransformsFromBrowser(0.0);
 	}
 	//ui.compositeOsgView->setFocus();
 }
@@ -353,7 +360,7 @@ void ACAudioGardenOsgQt::loadMediaDirectory(){
 void ACAudioGardenOsgQt::loadMediaFiles(){
 }
 
-void ACAudioGardenOsgQt::on_sliderBPM_valueChanged()
+void ACAudioGardenOsgQt::on_sliderBPM_valueChanged() // [0;220]
 {
 	std::cout << "BPM: " << ui.sliderBPM->value() << std::endl;
 	//if (updatedLibrary){
@@ -368,24 +375,16 @@ void ACAudioGardenOsgQt::on_sliderBPM_valueChanged()
 	//ui.compositeOsgView->setFocus();
 }
 
-void ACAudioGardenOsgQt::on_sliderKey_valueChanged()
+void ACAudioGardenOsgQt::on_sliderPitch_valueChanged() // [50;200]
 {
-	std::cout << "Key: " << ui.sliderKey->value() << std::endl;
+	std::cout << "Pitch: " << (float) ui.sliderPitch->value()/100.0f << std::endl;
 	//if (updatedLibrary){
 		int clicked_node = media_cycle->getClickedNode();
 		if (clicked_node > -1)
 		{
-			/*
-			 if (!is_pitching)
-			 {	
-			 is_pitching = true;
-			 is_scrubing = false;
-			 */ 
-			//media_cycle->pickedObjectCallback(-1);
 			audio_engine->setLoopSynchroMode(clicked_node, ACAudioEngineSynchroModeAutoBeat);
 			audio_engine->setLoopScaleMode(clicked_node, ACAudioEngineScaleModeResample);
-			//}
-			audio_engine->setSourcePitch(clicked_node, ui.sliderKey->value()); 
+			audio_engine->setSourcePitch(clicked_node, (float) ui.sliderPitch->value()/100.0f); 
 		}
 	//}
 	//ui.compositeOsgView->setFocus();
@@ -471,7 +470,7 @@ void ACAudioGardenOsgQt::processOscMessage(const char* tagName)
 		media_cycle->importLibrary(lib_path); // XS instead of getImageLibrary CHECK THIS
 		//updateLibrary();
 		std::cout << "File library imported" << std::endl;
-		media_cycle->setSelectedNode(0);
+		media_cycle->setReferenceNode(0);
 		// XSCF 250310 added these 3
 		media_cycle->pushNavigationState();
 		media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
@@ -485,7 +484,7 @@ void ACAudioGardenOsgQt::processOscMessage(const char* tagName)
 	{
 		media_cycle->cleanLibrary(); // XS instead of getImageLibrary CHECK THIS
 		media_cycle->libraryContentChanged();
-		media_cycle->setSelectedNode(0);
+		media_cycle->setReferenceNode(0);
 		// XSCF 250310 added these 3
 		media_cycle->pushNavigationState();
 		media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe

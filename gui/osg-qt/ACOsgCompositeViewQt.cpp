@@ -30,6 +30,8 @@
 //  <mailto:avre@umons.ac.be>
 //
 
+#define PI 3.1415926535897932384626433832795f
+
 #include "ACOsgCompositeViewQt.h"
 #include <cmath>
 
@@ -46,7 +48,17 @@ ACOsgCompositeViewQt::ACOsgCompositeViewQt( QWidget * parent, const char * name,
 	setFocusPolicy(Qt::StrongFocus);// CF instead of ClickFocus
 
 	setThreadingModel(osgViewer::CompositeViewer::SingleThreaded);
-
+	/*
+	 CF: other threading models to test are:
+		 SingleThreaded 	
+		 CullDrawThreadPerContext 	
+		 ThreadPerContext 	
+		 DrawThreadPerContext 	
+		 CullThreadPerCameraDrawThreadPerContext 	
+		 ThreadPerCamera 	
+		 AutomaticSelection
+	 */
+	
 	connect(&_timer, SIGNAL(timeout()), this, SLOT(updateGL()));
 	_timer.start(10);
 
@@ -103,6 +115,16 @@ void ACOsgCompositeViewQt::resizeGL( int width, int height )
 	timeline_view->getCamera()->setProjectionMatrixAsPerspective(45.0f, 1.0f, 0.001f, 10.0f);//static_cast<double>(width())/static_cast<double>(sepy), 0.001f, 10.0f);}
 }
 
+void ACOsgCompositeViewQt::paintGL()
+{
+	if (media_cycle->getBrowser()->getMode() == AC_MODE_CLUSTERS)
+	{	
+		updateTransformsFromBrowser(0.0);
+		//updateTransformsFromTimeline(0.0);
+	}	
+	frame();
+}
+
 // called according to timer
 void ACOsgCompositeViewQt::updateGL()
 {
@@ -118,7 +140,7 @@ void ACOsgCompositeViewQt::updateGL()
 		return;
 	}
 
-	if(browser_view->getCamera() && media_cycle)
+	if(browser_view->getCamera() && media_cycle && media_cycle->hasBrowser())
 	{
 		
 		float x=0.0, y=0.0, zoom, angle;
@@ -127,9 +149,8 @@ void ACOsgCompositeViewQt::updateGL()
 		zoom = media_cycle->getCameraZoom();
 		angle = media_cycle->getCameraRotation();
 		media_cycle->getCameraPosition(x, y);
-		float pi = 3.14; //CF
-		upx = cos(-angle+pi/2);
-		upy = sin(-angle+pi/2);		
+		upx = cos(-angle+PI/2);
+		upy = sin(-angle+PI/2);		
 		
 		browser_view->getCamera()->setViewMatrixAsLookAt(Vec3(x*1.0,y*1.0,0.8 / zoom), Vec3(x*1.0,y*1.0,0), Vec3(upx, upy, 0));
 		//timeline_view->getCamera()->setViewMatrixAsLookAt(Vec3(x*1.0,y*1.0,0.8 / zoom), Vec3(x*1.0,y*1.0,0), Vec3(upx, upy, 0));
@@ -141,8 +162,10 @@ void ACOsgCompositeViewQt::updateGL()
 	
 	this->updateTransformsFromBrowser(frac);
 	this->updateTransformsFromTimeline(frac);
+	/*
 	if (frac != 0.0)
 		setMouseTracking(true); //CF necessary for the hover callback
+	*/ 
 	QGLWidget::updateGL();
 	media_cycle->setNeedsDisplay(false);
 }	
@@ -328,7 +351,7 @@ void ACOsgCompositeViewQt::mouseReleaseEvent( QMouseEvent* event )
 				if (forwarddown==1)
 				{	
 					//media_cycle->incrementLoopNavigationLevels(loop);
-					media_cycle->setSelectedNode(loop);
+					media_cycle->setReferenceNode(loop);
 					
 					// XSCF 250310 added these 3
 					media_cycle->pushNavigationState();
@@ -364,7 +387,7 @@ void ACOsgCompositeViewQt::mouseReleaseEvent( QMouseEvent* event )
 
 void ACOsgCompositeViewQt::prepareFromBrowser()
 {
-	setMouseTracking(false); //CF necessary for the hover callback
+	//setMouseTracking(false); //CF necessary for the hover callback
 	browser_renderer->prepareNodes(); 
 	browser_renderer->prepareLabels();
 	browser_view->setSceneData(browser_renderer->getShapes());
@@ -378,13 +401,13 @@ void ACOsgCompositeViewQt::updateTransformsFromBrowser( double frac)
 	closest_node = browser_renderer->computeScreenCoordinates(browser_view, frac);
 	media_cycle->setClosestNode(closest_node);
 	// recompute scene graph	
-	browser_renderer->updateNodes(frac); // animation time in [0,1]
+	browser_renderer->updateNodes(frac); // animation starts at 0.0 and ends at 1.0
 	browser_renderer->updateLabels(frac);
 }
 
 void ACOsgCompositeViewQt::prepareFromTimeline()
 {
-	setMouseTracking(false); //CF necessary for the hover callback
+	//setMouseTracking(false); //CF necessary for the hover callback
 	timeline_renderer->prepareTracks(); 
 	timeline_view->setSceneData(timeline_renderer->getShapes());
 	//timeline_view->setSceneData(osgDB::readNodeFile("cessnafire.osg"));
@@ -398,5 +421,5 @@ void ACOsgCompositeViewQt::updateTransformsFromTimeline( double frac)
 	/////////closest_track = timeline_renderer->computeScreenCoordinates(timeline_view, frac); //CF this instead of browser_view for the the simple Viewer
 	////////media_cycle->setClosestNode(closest_node);
 	// recompute scene graph	
-	timeline_renderer->updateTracks(frac); // animation time in [0,1]
+	timeline_renderer->updateTracks(frac); // animation starts at 0.0 and ends at 1.0
 }

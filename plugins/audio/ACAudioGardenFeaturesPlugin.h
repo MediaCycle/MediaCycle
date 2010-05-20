@@ -1,5 +1,5 @@
 /*
- *  ACAudioFeaturesPlugin.cpp
+ *  ACAudioFeaturesPlugin.h
  *  MediaCycle
  *
  *  @author Xavier Siebert
@@ -32,40 +32,28 @@
  *
  */
 
-#include "ACAudioFeaturesPlugin.h"
-#include "ACAudio.h"
+#ifndef _ACAUDIOGARDENFEATURESPLUGIN_H
+#define	_ACAUDIOGARDENFEATURESPLUGIN_H
 
-#include <vector>
-#include <string>
+#include "ACAudioFeatures.h"
+#include "MediaCycle.h"
 
-//class ACMedia;
+#include<iostream>
 
-ACAudioFeaturesPlugin::ACAudioFeaturesPlugin() {
-    //vars herited from ACPlugin
-    this->mMediaType = MEDIA_TYPE_AUDIO;
-    this->mPluginType = PLUGIN_TYPE_FEATURES;
-    this->mName = "AudioFeatures";
-    this->mDescription = "AudioFeatures plugin";
-    this->mId = "";
-}
+class ACAudioGardenFeaturesPlugin : public ACPlugin {
+public:
+	ACAudioGardenFeaturesPlugin();
+	~ACAudioGardenFeaturesPlugin();
+	
+	virtual int initialize(){return 1;};
+	virtual int start(){return 1;};
+	virtual int stop(){return 1;};
 
-ACAudioFeaturesPlugin::~ACAudioFeaturesPlugin() {
-}
+	virtual std::vector<ACMediaFeatures*> calculate(){};
+	virtual std::vector<ACMediaFeatures*> calculate(std::string aFileName){};
+	virtual std::vector<ACMediaFeatures*> calculate(ACMediaData* _data, ACMedia*);
+	
+private:
+};
 
-
-std::vector<ACMediaFeatures*> ACAudioFeaturesPlugin::calculate(ACMediaData* audio_data, ACMedia* theMedia) {
-	int mfccNbChannels = 16;
-	int mfccNb = 13;
-	int windowSize = 512; 	
-	bool extendSoundLimits = false;
-	std::vector<ACMediaTimedFeatures*> descmf;
-	std::vector<ACMediaFeatures*> desc;
-	//	int sr = ((ACAudio*)theMedia)->getSampleRate();
-	ACAudio* theAudio = (ACAudio*) theMedia;
-	descmf = computeFeatures(audio_data->getAudioData(), theAudio->getSampleRate(), theAudio->getChannels(), theAudio->getNFrames());
-
-	for (int i=0; i<descmf.size(); i++)
-		desc.push_back(descmf[i]->mean());
-	return desc;
-}
-
+#endif	/* _ACVIDEOPLUGIN_H */

@@ -30,6 +30,8 @@
 //  <mailto:avre@umons.ac.be>
 //
 
+#define PI 3.1415926535897932384626433832795f
+
 #include "ACOsgBrowserViewQT.h"
 #include <cmath>
 
@@ -49,8 +51,17 @@ ACOsgBrowserViewQT::ACOsgBrowserViewQT( QWidget * parent, const char * name, con
 	getCamera()->setViewMatrixAsLookAt(Vec3(0.0f,0.0f,1.0f), Vec3(0.0f,0.0f,0.0f), Vec3(0.0f,1.0f,0.0f));
 	getCamera()->setGraphicsContext(getGraphicsWindow());
 
-	setThreadingModel(osgViewer::CompositeViewer::SingleThreaded);
-
+	setThreadingModel(osgViewer::Viewer::SingleThreaded);
+	/*
+	CF: other threading models to test are:
+		SingleThreaded 	
+		CullDrawThreadPerContext 	
+		ThreadPerContext 	
+		DrawThreadPerContext 	
+		CullThreadPerCameraDrawThreadPerContext 	
+		ThreadPerCamera 	
+		AutomaticSelection
+	 */
 	connect(&_timer, SIGNAL(timeout()), this, SLOT(updateGL()));
 	_timer.start(10);
 
@@ -76,6 +87,13 @@ void ACOsgBrowserViewQT::resizeGL( int width, int height )
 	osg_view->resized(0,0,width,height);
 }
 
+void ACOsgBrowserViewQT::paintGL()
+{
+	if (media_cycle->getBrowser()->getMode() == AC_MODE_CLUSTERS)
+		updateTransformsFromBrowser(0.0);
+	frame();
+}
+
 // called according to timer
 void ACOsgBrowserViewQT::updateGL()
 {
@@ -91,7 +109,7 @@ void ACOsgBrowserViewQT::updateGL()
 		return;
 	}
 
-	if(getCamera() && media_cycle)
+	if(getCamera() && media_cycle && media_cycle->hasBrowser())
 	{
 		
 		float x=0.0f, y=0.0f, zoom, angle;
@@ -100,18 +118,25 @@ void ACOsgBrowserViewQT::updateGL()
 		zoom = media_cycle->getCameraZoom();
 		angle = media_cycle->getCameraRotation();
 		media_cycle->getCameraPosition(x, y);
-		float pi = 3.14; //CF
-		upx = cos(-angle+pi/2);
-		upy = sin(-angle+pi/2);		
+		upx = cos(-angle+PI/2);
+		upy = sin(-angle+PI/2);		
 		
 		getCamera()->setViewMatrixAsLookAt(Vec3(x*1.0,y*1.0,0.8 / zoom), Vec3(x*1.0,y*1.0,0), Vec3(upx, upy, 0));
 	}
-	
 	this->updateTransformsFromBrowser(frac);
-	if (frac != 0.0)
-		setMouseTracking(true); //CF necessary for the hover callback
+	/*
+	if (frac >= 0.0 && frac < 1.0 ) {
+		setMouseTracking(false); //CF necessary for the hover callback
+	}
+	else 
+		setMouseTracking(true); 
+	*/ 
 	QGLWidget::updateGL();
-	media_cycle->setNeedsDisplay(false);
+	//if (frac < 1.0) {
+	//	media_cycle->setNeedsDisplay(true);
+	//}
+	//else
+		media_cycle->setNeedsDisplay(false);
 }	
 
 void ACOsgBrowserViewQT::keyPressEvent( QKeyEvent* event )
@@ -241,8 +266,8 @@ void ACOsgBrowserViewQT::mouseReleaseEvent( QMouseEvent* event )
 			
 			if(loop >= 0)
 			{
-				//media_cycle->incrementLoopNavigationLevels(loop);
-				media_cycle->setSelectedNode(loop);
+				media_cycle->incrementLoopNavigationLevels(loop);
+				media_cycle->setReferenceNode(loop);
 				
 				// XSCF 250310 added these 3
 				media_cycle->pushNavigationState();
@@ -266,7 +291,7 @@ void ACOsgBrowserViewQT::mouseReleaseEvent( QMouseEvent* event )
 
 void ACOsgBrowserViewQT::prepareFromBrowser()
 {
-	setMouseTracking(false); //CF necessary for the hover callback
+	//setMouseTracking(false); //CF necessary for the hover callback
 	renderer->prepareNodes(); 
 	renderer->prepareLabels();
 	this->setSceneData(renderer->getShapes());
@@ -280,6 +305,6 @@ void ACOsgBrowserViewQT::updateTransformsFromBrowser( double frac)
 	closest_node = renderer->computeScreenCoordinates(this, frac);
 	media_cycle->setClosestNode(closest_node);
 	// recompute scene graph	
-	renderer->updateNodes(frac); // animation time in [0,1]
+	renderer->updateNodes(frac); // animation starts at 0.0 and ends at 1.0
 	renderer->updateLabels(frac);
 }

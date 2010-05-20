@@ -59,6 +59,7 @@ protected:
 	char  **hyper_links;	
 public:
 	ACMedia();
+	ACMedia(const ACMedia&);
 	virtual ~ACMedia();
 	
 	void setId(int _id) {mid = _id;} // SD TODO - should check for duplicate id?

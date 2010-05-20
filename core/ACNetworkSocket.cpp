@@ -133,7 +133,8 @@ int server_receive(char *buf, int size, SOCKET s, unsigned int time_out)
 	struct timeval to = {0,0};
 	struct timeval *pto;
 	
-	to.tv_sec = time_out;
+	to.tv_sec = 0;
+	to.tv_usec = time_out;
 	pto = (time_out == 0) ? NULL : &to;
 	
 	FD_ZERO(&rfds);
@@ -142,23 +143,23 @@ int server_receive(char *buf, int size, SOCKET s, unsigned int time_out)
 	ret = 0;
 	read = 0;
 	do {
-                ret = select(s+1, &rfds, NULL, NULL, pto);
+		ret = select(s+1, &rfds, NULL, NULL, pto);
 		if (ret == SOCKET_ERROR) {
 			//throw_error(SocketServerError, "server_send: call to 'select' failed.\n");
 			return -1;
-                }
+		}
 		
 		if (FD_ISSET(s, &rfds)) {
 			ret = recv(s, buf + read, size - read, 0);
 			if (ret == SOCKET_ERROR) {
 				//throw_error(SocketServerError, "server_receive: call to 'recv' failed.\n");
 				return -1;
-                        }
+			}
 
-                        //happens only when client closes the connexion
-                        if (ret == 0) {
-                            return read;
-                        }
+			//happens only when client closes the connexion
+			if (ret == 0) {
+				return read;
+			}
 			read += ret;
 		} else {
 			//throw_error(SocketServerError, "server_receive: time out (%d sec). No data available !\n", time_out);
@@ -226,7 +227,7 @@ void ACNetworkSocketServer::thread() {
 		memset(server_buffer, 0, BUFSIZE);
 		bigbuffer = new char[bigbufferl];
 		read = 0;
-		while ( (ret = server_receive(server_buffer, BUFSIZE, server_socket, 1)) > 0 ) {
+		while ( (ret = server_receive(server_buffer, BUFSIZE, server_socket, 1000)) > 0 ) {
 			if (read+ret>bigbufferl) {
 				bigbufferl += bigbufferstep;
 				bigbuffer = (char*)realloc(bigbuffer, bigbufferl);

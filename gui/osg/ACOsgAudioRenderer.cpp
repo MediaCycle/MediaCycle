@@ -289,8 +289,8 @@ void ACOsgAudioRenderer::updateNodes(double ratio) {
 		const ACPoint &p = attribute.getCurrentPosition(), &p2 = attribute.getNextPosition();
 		double omr = 1.0-ratio;
 				
-		omr = 1;
-		ratio = 0;
+		//omr = 1;
+		//ratio = 0;
 		
 		float zoom = media_cycle->getCameraZoom();
 		float angle = media_cycle->getCameraRotation();
@@ -318,6 +318,7 @@ void ACOsgAudioRenderer::updateNodes(double ratio) {
 			localscale = 0.5;
 			
 			if(waveform_geode == 0) {
+			// DT: prevent the display of the waveform
 				waveformGeode();
 			}
 			if (curser_transform == 0) {

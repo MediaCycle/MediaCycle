@@ -87,7 +87,7 @@ struct ACNavigationState
 {
 	//ACNavigationStateType	mNavType;
 	
-	int 			mSelectedNode;
+	int 			mReferenceNode;
 	int 			mNavigationLevel;
 	vector<float> 		mFeatureWeights;
 };
@@ -178,7 +178,7 @@ public:
 	void setClickedLabel(int ilabel);
 	int getClickedLabel()					{return mClickedLabel; };
 
-	void setSelectedNode(int index);
+	void setReferenceNode(int index);
 
 	// update positions based on current clustering
 	void updateNextPositions();
@@ -275,7 +275,7 @@ protected:
 	ACBrowserMode		mMode;
 	
 	int 				mClickedNode; // valid between mouseDown and mouseUp, otherwise -1
-	int 				mSelectedNode;
+	int 				mReferenceNode;
 	int					mClosestNode;
 
 	bool 				mNeedsDisplay;

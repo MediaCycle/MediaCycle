@@ -116,7 +116,7 @@ public:
 	void setCameraRotation(float angle);
 	int getClickedNode();
 	void incrementLoopNavigationLevels(int i);
-	void setSelectedNode(int index);
+	void setReferenceNode(int index);
 	void updateClusters(bool animate);
 	void updateNeighborhoods();
 	void setCameraPosition(float x, float y);
@@ -130,6 +130,7 @@ public:
 	void saveAsLibrary(string path);
 	void saveACLLibrary(string path);
 	void cleanLibrary();
+	void cleanUserLog();
 	void goBack();
 	void goForward();
 	void setClusterNumber(int n);

@@ -51,7 +51,7 @@ std::vector<ACMediaTimedFeatures*> computeFeatures(float* data, int samplerate, 
 	}
 	
 	int fftSize=windowSize*2;
-	int hopSize = windowSize /2;
+	int hopSize = windowSize /8;
 	float * dataout;
 	SF_INFO sfinfo2;
 	SF_INFO sfinfo;
@@ -73,9 +73,9 @@ std::vector<ACMediaTimedFeatures*> computeFeatures(float* data, int samplerate, 
 		for (long i = 0; i < windowSize/2; i++)
 			signal_v(i) = 0;
 		for (long i = 0; i < sfinfo2.frames; i++)
-			signal_v(i+windowSize/2) = dataout[i];
+			signal_v(i+windowSize/2) = dataout[i*nchannels];
 		for (long i = 0; i < windowSize/2; i++)
-			signal_v(i+sfinfo2.frames+windowSize/2) = 0;
+			signal_v(i+sfinfo2.frames+windowSize/2 - 1) = 0;
 	}		
 	else{
 		signal_v.set_size(sfinfo2.frames);
@@ -87,7 +87,8 @@ std::vector<ACMediaTimedFeatures*> computeFeatures(float* data, int samplerate, 
  	colvec window_v = blackman(windowSize);
  	colvec frameFFTabs_v;
  	colvec frameFFTabs2_v(fftSize/2);
-	
+	colvec prevFrameFFTabs_v;
+	prevFrameFFTabs_v.zeros(fftSize/2);
 	long nbFrames = (long)(signal_v.n_elem-windowSize)/hopSize+1;
 	int env_fs = (int) sr_hz/hopSize;
 	mat melfilter_m;
@@ -95,13 +96,17 @@ std::vector<ACMediaTimedFeatures*> computeFeatures(float* data, int samplerate, 
 
 	colvec sc_v(nbFrames);
 	colvec ss_v(nbFrames);
+	colvec sv_v;
+	sv_v.zeros(nbFrames);
+	colvec sf_v(nbFrames);
 	colvec zcr_v(nbFrames);
 	colvec sd_v(nbFrames);
 	colvec ener_v(nbFrames);
+	colvec loud_v(nbFrames);
 	colvec time_v(nbFrames);
 	mat mfcc_m(nbFrames, mfccNb);
 	double lat;
-	
+	rowvec ed_v;
 	melfilter_m = melfilters(mfccNbChannels, fftSize, sr_hz);
 // 	std::vector<ACMediaTimedFeature> descVec;
 	
@@ -113,7 +118,7 @@ std::vector<ACMediaTimedFeatures*> computeFeatures(float* data, int samplerate, 
 	// 	std::cout << "nbFrames = " << nbFrames << std::endl;
 	
 	for (long i=0; i < signal_v.n_elem-windowSize; i = i+hopSize){
-		time_v(index) = ((double)i+(double)windowSize/2.0)/(double)sr_hz;
+		time_v(index) = ((double)i+((double)windowSize*(1.0-(double)extendSoundLimits))/2.0)/(double)sr_hz;
 		frame_v = signal_v.rows(i,i+windowSize-1);
 		frameW_v = signal_v.rows(i,i+windowSize-1)%window_v;
  		frameFFTabs_v = abs(fft(frameW_v, fftSize));
@@ -124,14 +129,22 @@ std::vector<ACMediaTimedFeatures*> computeFeatures(float* data, int samplerate, 
 			std::cout << frame_v << std::endl;
 		}
 		ss_v(index) = spectralSpread(frameFFTabs2_v)*b2f;
+		sv_v(index) = spectralVariation(frameFFTabs2_v, prevFrameFFTabs_v);
+		float sv = spectralVariation(frameFFTabs2_v, prevFrameFFTabs_v);
+		if (!sv_v.is_finite()){
+			std::cout << "sv_v is not finite : " << sv_v << std::endl;
+	 		sv_v(index) = spectralVariation(frameFFTabs2_v, prevFrameFFTabs_v);
+			exit(1);
+		}
+		
+		sf_v(index) = spectralFlux(frameFFTabs2_v, prevFrameFFTabs_v);
 		zcr_v(index) = zcr(frame_v, sr_hz, windowSize);
 		sd_v(index) = spectralDecrease(frameFFTabs2_v);
  		ener_v(index) = energyRMS(frame_v);
+ 		loud_v(index) = loudness(frameFFTabs2_v, melfilter_m);
 		mfcc_m.row(index) = mfcc(frameFFTabs2_v, melfilter_m, mfccNb);
 		index++;
-		//    
-		// 		frame_v.save("frame.txt", arma_ascii);
-		//  		window_v.save("window.txt", arma_ascii);
+		prevFrameFFTabs_v = frameFFTabs2_v;
 	}
 	
 	if (!sc_v.is_finite() ){
@@ -140,6 +153,10 @@ std::vector<ACMediaTimedFeatures*> computeFeatures(float* data, int samplerate, 
 	}
 	if (!ss_v.is_finite()){
 		std::cout << "ss_v is not finite" << std::endl;
+		exit(1);
+	}
+	if (!sv_v.is_finite()){
+		std::cout << "sv_v is not finite" << std::endl;
 		exit(1);
 	}
 	if (!zcr_v.is_finite()){
@@ -154,6 +171,10 @@ std::vector<ACMediaTimedFeatures*> computeFeatures(float* data, int samplerate, 
 		std::cout << "ener_v is not finite" << std::endl;
 		exit(1);
 	}
+	if (!loud_v.is_finite()){
+		std::cout << "loud_v is not finite" << std::endl;
+		exit(1);
+	}
 	if (!mfcc_m.is_finite() ){
 		std::cout << "mfcc_m is not finite" << std::endl;
 		exit(1);
@@ -164,10 +185,12 @@ std::vector<ACMediaTimedFeatures*> computeFeatures(float* data, int samplerate, 
 	desc.push_back(mfcc_tf);
 	desc.push_back(new ACMediaTimedFeatures(conv_to<fcolvec>::from(time_v), conv_to<fmat>::from(sc_v), std::string("Spectral Centroid")));
 	desc.push_back(new ACMediaTimedFeatures(conv_to<fcolvec>::from(time_v), conv_to<fmat>::from(ss_v), std::string("Spectral Spread")));
+	desc.push_back(new ACMediaTimedFeatures(conv_to<fcolvec>::from(time_v), conv_to<fmat>::from(sv_v), std::string("Spectral Variation")));
+	desc.push_back(new ACMediaTimedFeatures(conv_to<fcolvec>::from(time_v), conv_to<fmat>::from(sf_v), std::string("Spectral Flux")));
 	desc.push_back(new ACMediaTimedFeatures(conv_to<fcolvec>::from(time_v), conv_to<fmat>::from(zcr_v), std::string("Zero Crossing Rate")));
 	desc.push_back(new ACMediaTimedFeatures(conv_to<fcolvec>::from(time_v), conv_to<fmat>::from(sd_v), std::string("Spectral Decrease")));
 	desc.push_back(new ACMediaTimedFeatures(conv_to<fcolvec>::from(time_v), conv_to<fmat>::from(ener_v), std::string("Energy")));
-
+	desc.push_back(new ACMediaTimedFeatures(conv_to<fcolvec>::from(time_v), conv_to<fmat>::from(loud_v), std::string("Loudness")));
 	desc.push_back(mfcc_tf->delta());
 	mat modFr_m;
 	mat modAmp_m;
@@ -176,9 +199,15 @@ std::vector<ACMediaTimedFeatures*> computeFeatures(float* data, int samplerate, 
 	desc.push_back(new ACMediaTimedFeatures(conv_to<fcolvec>::from(modTime_v), conv_to<fmat>::from(modFr_m), std::string("Energy Modulation Frequency")));
 	desc.push_back(new ACMediaTimedFeatures(conv_to<fcolvec>::from(modTime_v), conv_to<fmat>::from(modAmp_m), std::string("Energy Modulation Amplitude")));
 	lat = logAttackTime(ener_v, env_fs);
-
+	ed_v = effectiveDuration(time_v, loud_v);
+	fcolvec zero_v = "0";
+	fcolvec lat_v(1);
+	lat_v(0) = lat;
+	desc.push_back(new ACMediaTimedFeatures(zero_v, lat_v, std::string("Log Attack Time")));
+	desc.push_back(new ACMediaTimedFeatures(zero_v, conv_to<fmat>::from(ed_v), std::string("Effective Duration")));
 
 	std::cout << "lat = " << lat << std::endl;
+	std::cout << "effective duration = " << ed_v(0) << std::endl;
 	return desc;
 }
 
@@ -205,6 +234,27 @@ double spectralSpread(colvec x_v){
 	}		
 	return ss_v(0);
 }
+
+double spectralVariation(colvec x_v, colvec xPrev_v){
+	double sv;
+	if (sum(x_v) < 1e-5 | sum(xPrev_v) < 1e-5){
+		sv = 1;
+	}	
+	else{
+		sv = as_scalar(abs(cor(x_v, xPrev_v)));
+	}
+	return sv;
+}
+
+double spectralFlux(colvec x_v, colvec xPrev_v){
+	double sf;
+	colvec dX_v = x_v-xPrev_v;
+	// half wave rectifier
+	colvec y_v = (abs(dX_v) + dX_v)/2;
+	sf = as_scalar(sum(y_v));
+	return sf;
+}
+
 
 double zcr(colvec frame_v, int sr_hz, int frameSize){
 	double zz = as_scalar(sum((frame_v.rows(1,frame_v.n_rows-1) % frame_v.rows(0,frame_v.n_rows-2)) < 0)) / (double)frameSize * (double)sr_hz;
@@ -246,6 +296,26 @@ rowvec mfcc(colvec x_v, mat melfilter_m, int mfccNb){
 	rowvec mfcc_v = trans(dct(x2_v, x2_v.n_elem));
 	mfcc_v = mfcc_v.cols(0, mfccNb-1);
 	return mfcc_v;
+}
+
+double loudness(colvec x_v, mat melfilter_m){
+	double loud = as_scalar(sum(pow(trans(melfilter_m)*(x_v+math::eps()),.6)));
+	return loud;
+}
+
+rowvec effectiveDuration(colvec time_v, colvec loud_v){
+	double Mv = max(loud_v);
+	colvec pos_v = find(loud_v>.15*Mv);
+	double start_sec = time_v(pos_v(0));
+	double stop_sec = time_v(pos_v(pos_v.n_rows-1));
+	double ed_sec = stop_sec -start_sec;
+	double ed_sp = pos_v(pos_v.n_rows-1)-pos_v(0);
+	rowvec ed_v(4);
+	ed_v(0) = ed_sec;
+	ed_v(1) = start_sec;
+	ed_v(2) = stop_sec;
+	ed_v(3) = ed_sp;
+	return ed_v;
 }
 
 int resample(float* datain, SF_INFO *sfinfo, float* dataout, SF_INFO* sfinfoout){

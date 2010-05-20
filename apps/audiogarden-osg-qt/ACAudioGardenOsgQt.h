@@ -76,7 +76,7 @@ class ACAudioGardenOsgQt : public QMainWindow
 	
 		void on_sliderClusters_sliderReleased();
 		void on_sliderBPM_valueChanged(); // or sliderMoved();?
-		void on_sliderKey_valueChanged(); // or sliderMoved();?
+		void on_sliderPitch_valueChanged(); // or sliderMoved();?
 
 		void loadACLFile();
 		void saveACLFile();

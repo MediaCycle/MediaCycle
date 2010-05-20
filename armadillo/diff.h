@@ -1,7 +1,7 @@
 /**
  * @brief diff.h
  * @author Damien Tardieu
- * @date 11/03/2010
+ * @date 05/05/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -35,12 +35,12 @@
 #define DIFF_H
 
 template<typename eT>
-const Mat<eT> diff(const Mat<eT>& A_m, int n=1, int dim=1){
+const Mat<eT> diff(const Mat<eT>& A_m, int n=1, int dim=0){
   Mat<eT> R_m;
-	if (dim == 1)
+	if (dim == 0)
 		R_m = A_m.rows(1,A_m.n_rows-1) - A_m.rows(0,A_m.n_rows-2);
 	else
-    if (dim == 2)
+    if (dim == 1)
 			R_m = A_m.cols(1,A_m.n_cols-1) - A_m.cols(0,A_m.n_cols-2);
     else {
       std::cout << "Wrong dimension" << std::endl;

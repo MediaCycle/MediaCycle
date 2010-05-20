@@ -46,7 +46,7 @@
  * Improving Walker's Algorithm to Run in Linear Time, Graph Drawing 2002.
  * This algorithm corrects performance issues in Walker's algorithm, which
  * generalizes Reingold and Tilford's method for tidy drawings of trees to
- * support trees with an arbitrary number of children at any given node.</p>
+ * support trees with an arbitrary number of children at any given node.
  */
 
 #include "ACPlugin.h"
@@ -68,11 +68,12 @@ class ACPositionsPluginTreeNodeParams {
 	public:	
 		ACPositionsPluginTreeNodeParams();
 		~ACPositionsPluginTreeNodeParams(){};
+	
 	public:
-		int getWidth(){return width;}
-		int getHeight(){return height;}
-		void setWidth(int _width){this->width=_width;}
-		void setHeight(int _height){this->height=_height;}
+		double getWidth(){return width;}
+		double getHeight(){return height;}
+		void setWidth(double _width){this->width=_width;}
+		void setHeight(double _height){this->height=_height;}
 		double getPrelim(){return prelim;}
 		void setPrelim(double _prelim){this->prelim=_prelim;}
 		double getMod(){return mod;}
@@ -107,19 +108,19 @@ class ACPositionsPluginTreeNodeParams {
 	public:
 		void init(int item);
 		void clear();
-	
 };
 
 class ACPositionsPluginNodeLinkTreeLayout : public ACPlugin {
 	public:
 		ACPositionsPluginNodeLinkTreeLayout();
-		~ACPositionsPluginNodeLinkTreeLayout();
+		~ACPositionsPluginNodeLinkTreeLayout(){};
 		virtual int initialize();
 		void updateClusters(ACMediaBrowser* ){};//not implemented
 		void updateNextPositions(ACMediaBrowser* );
 		void updateNeighborhoods(ACMediaBrowser* ){};//not implemented
 		//void prepareLayout(ACOsgBrowserRenderer*, int start){};
 		//void updateLayout(ACOsgBrowserRenderer*, double ratio){};
+	
 	protected:
 		ACMediaBrowser* mediaBrowser;
 		ACPositionsPluginNodeLinkTreeOrientation    m_orientation;  // the orientation of the tree

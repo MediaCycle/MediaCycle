@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>848</width>
-    <height>617</height>
+    <width>858</width>
+    <height>632</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -283,7 +283,7 @@
          <x>10</x>
          <y>460</y>
          <width>155</width>
-         <height>91</height>
+         <height>111</height>
         </rect>
        </property>
        <property name="sizePolicy">
@@ -302,7 +302,7 @@
         <property name="geometry">
          <rect>
           <x>10</x>
-          <y>40</y>
+          <y>50</y>
           <width>54</width>
           <height>18</height>
          </rect>
@@ -311,62 +311,77 @@
          <string>BPM</string>
         </property>
        </widget>
-       <widget class="QLabel" name="labelAudioKey">
+       <widget class="QLabel" name="labelAudioPitch">
         <property name="geometry">
          <rect>
           <x>10</x>
-          <y>20</y>
+          <y>30</y>
           <width>54</width>
           <height>18</height>
          </rect>
         </property>
         <property name="text">
-         <string>Key</string>
+         <string>Pitch</string>
         </property>
        </widget>
        <widget class="QSlider" name="sliderBPM">
         <property name="geometry">
          <rect>
           <x>40</x>
-          <y>40</y>
+          <y>50</y>
           <width>101</width>
-          <height>16</height>
+          <height>21</height>
          </rect>
         </property>
         <property name="minimum">
          <number>0</number>
         </property>
         <property name="maximum">
-         <number>100</number>
+         <number>220</number>
         </property>
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>
+        <property name="tickPosition">
+         <enum>QSlider::TicksBelow</enum>
+        </property>
+        <property name="tickInterval">
+         <number>10</number>
+        </property>
        </widget>
-       <widget class="QSlider" name="sliderKey">
+       <widget class="QSlider" name="sliderPitch">
         <property name="geometry">
          <rect>
           <x>40</x>
-          <y>20</y>
+          <y>25</y>
           <width>101</width>
-          <height>16</height>
+          <height>21</height>
          </rect>
         </property>
         <property name="minimum">
-         <number>0</number>
+         <number>50</number>
         </property>
         <property name="maximum">
+         <number>200</number>
+        </property>
+        <property name="value">
          <number>100</number>
         </property>
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="tickPosition">
+         <enum>QSlider::TicksAbove</enum>
+        </property>
+        <property name="tickInterval">
+         <number>50</number>
         </property>
        </widget>
        <widget class="QPushButton" name="pushButtonMuteAll">
         <property name="geometry">
          <rect>
           <x>30</x>
-          <y>60</y>
+          <y>80</y>
           <width>80</width>
           <height>30</height>
          </rect>
@@ -560,7 +575,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>848</width>
+     <width>858</width>
      <height>22</height>
     </rect>
    </property>
@@ -568,33 +583,33 @@
     <property name="title">
      <string>File</string>
     </property>
-    <addaction name="actionLoad_Media_Directory" />
-    <addaction name="actionLoad_Media_Files" />
-    <addaction name="actionLoad_ACL" />
-    <addaction name="separator" />
-    <addaction name="actionSave_ACL" />
-    <addaction name="separator" />
+    <addaction name="actionLoad_Media_Directory"/>
+    <addaction name="actionLoad_Media_Files"/>
+    <addaction name="actionLoad_ACL"/>
+    <addaction name="separator"/>
+    <addaction name="actionSave_ACL"/>
+    <addaction name="separator"/>
    </widget>
    <addaction name="menu_File"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
-  <action name="actionLoad_Media_Directory" >
-   <property name="text" >
+  <action name="actionLoad_Media_Directory">
+   <property name="text">
     <string>Load Media Directory</string>
    </property>
   </action>
-  <action name="actionLoad_ACL" >
-   <property name="text" >
+  <action name="actionLoad_ACL">
+   <property name="text">
     <string>Load ACL</string>
    </property>
   </action>
-  <action name="actionSave_ACL" >
-   <property name="text" >
+  <action name="actionSave_ACL">
+   <property name="text">
     <string>Save ACL</string>
    </property>
   </action>
-  <action name="actionLoad_Media_Files" >
-   <property name="text" >
+  <action name="actionLoad_Media_Files">
+   <property name="text">
     <string>Load Media Files</string>
    </property>
   </action>

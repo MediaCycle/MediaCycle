@@ -1,5 +1,5 @@
 /**
- * @brief ACAudioFeatures.h
+ * @brief ACVisPluginAudiogarden.h
  * @author Damien Tardieu
  * @date 05/05/2010
  * @copyright (c) 2010 – UMONS - Numediart
@@ -29,31 +29,33 @@
  * <mailto:avre@umons.ac.be>
 */
 
-#ifndef _ACAUDIOFEATURES_H
-#define _ACAUDIOFEATURES_H
-
-#include <stdio.h>
-#include <sndfile.h>
-#include <string.h>
 #include <armadillo>
-#include <vector>
+
+#include "ACPlugin.h"
+#include "ACMediaBrowser.h"
 #include "ACMediaTimedFeature.h"
 
 using namespace arma;
 
+#ifndef _ACVISPLUGINAUDIOGARDEN_
+#define _ACVISPLUGINAUDIOGARDEN_
 
-std::vector<ACMediaTimedFeatures*> computeFeatures(float* data, int samplerate, int nchannels, int length,int mfccNbChannels = 16, int mfccNb = 13, int windowSize=512, 	bool extendSoundLimits = false); 
-int resample(float* datain, SF_INFO *sfinfo, float* dataout, SF_INFO* sfinfoout);
-double spectralCentroid(colvec x_v);
-double spectralSpread(colvec x_v);
-double spectralVariation(colvec, colvec);
-double spectralFlux(colvec x_v, colvec xPrev_v);
-double zcr(colvec frame_v, int sr_hz, int frameSize);
-double spectralDecrease(colvec x_v);
-double energyRMS(colvec frame_v);
-double loudness(colvec x_v, mat melfilter_m);
-double logAttackTime(colvec ener_v, int sr_hz);
-rowvec effectiveDuration(colvec time_v, colvec loud_v);
-rowvec mfcc(colvec x_v, mat melfilter_m, int mfccNb);
+class ACVisPluginAudiogarden : public ACPlugin {
+public:
+  ACVisPluginAudiogarden();
+  ~ACVisPluginAudiogarden();
+  virtual int initialize();
+/*   virtual std::vector<ACMediaFeatures*> calculate(); */
+/*   virtual std::vector<ACMediaFeatures*> calculate(std::string aFileName); */
+/* 	std::vector<ACMediaFeatures*> calculate(ACMediaData* _data){} */
+/*   virtual void updateClusters(ACMediaBrowser* ); */
+  virtual void updateNextPositions(ACMediaBrowser* );
+	void extractDescMatrix(ACMediaBrowser* mediaBrowser, mat& desc_m, vector<string> &featureNames);
+  virtual int start() {return 0;};
+  virtual int stop() {return 0;};
+protected:
+};
 
-#endif
+#endif	/* _ACVISPLUGINAUDIOGARDEN_ */
+
+
