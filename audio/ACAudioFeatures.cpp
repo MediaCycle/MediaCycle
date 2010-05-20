@@ -1,7 +1,7 @@
 /**
  * @brief ACAudioFeatures.cpp
- * @author Damien Tardieu
- * @date 16/03/2010
+ * @author Stéphane Dupont
+ * @date 20/05/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -262,7 +262,8 @@ int resample(float* datain, SF_INFO *sfinfo, float* dataout, SF_INFO* sfinfoout)
 	src_data.data_out = dataout;
 	src_data.src_ratio = srcRatio;
 	src_data.output_frames = outFrames;
-	src_simple(&src_data, 0, sfinfo->channels);
+	// SD - SRC_LINEAR to get faster processing, default mode is very slow
+	src_simple(&src_data, SRC_LINEAR, sfinfo->channels);
 	dataout = src_data.data_out;
 
 	sfinfoout->channels = sfinfo->channels;
