@@ -224,6 +224,11 @@ FILE *debug_vocoder;
 
 ACAudioFeedback::ACAudioFeedback()
 {
+	prev_scrub_pos = 0;
+	scrub_pos = 0;
+	prev_scrub_time = 0;
+	scrub_time = 0;
+	scrub_speed = 0;
 
 	engine_running = 0;
 	media_cycle = 0;
@@ -309,7 +314,6 @@ void ACAudioFeedback::getDeviceList(std::vector<std::string>& devices)
         }
     }
 }
-
 
 void ACAudioFeedback::createOpenAL()
 {
@@ -863,7 +867,17 @@ bool ACAudioFeedback::processAudioEngine()
 }
 
 void ACAudioFeedback::setScrub(float scrub) {
+	prev_scrub_pos = scrub_pos;
 	scrub_pos = scrub / 100;
+	
+	prev_scrub_time = scrub_time;
+	scrub_time = audio_engine_current_time;
+	
+	scrub_speed = (scrub_pos - prev_scrub_pos);
+	if (scrub_speed>0.5) {
+		scrub_speed -= 1.0;
+	}
+	scrub_speed /= (scrub_time - prev_scrub_time);
 }
 
 // SD TODO - should be passed to this funciton: the buffer size + time code + normalize time code to buffer size + controler positions
@@ -938,7 +952,17 @@ void ACAudioFeedback::processAudioEngineSamplePosition(int _loop_slot, int *_sam
 			
 			break;
 		case ACAudioEngineSynchroModeManual:
-			*_sample_pos = (int)(scrub_pos * size / 100);
+			//*_sample_pos = (int)(scrub_pos * size / 100);
+			*_sample_pos = prev_sample_pos[_loop_slot] + (output_buffer_size)*scrub_speed;
+			while (*_sample_pos>=size) {
+				*_sample_pos -= size;
+			}
+			while (*_sample_pos<0) {
+				*_sample_pos += size;
+			}
+			if (audio_engine_current_time-scrub_time>0.5) {
+				scrub_speed *= 0.9;
+			}
 			break;
 		case ACAudioEngineSynchroModeNone:
 			// no synchronization, just play the loop as it is

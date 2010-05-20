@@ -235,7 +235,8 @@ private:
 	int*	 current_buffer;
 	float		 time_from_start, time_from_downbeat, time_from_beat, time_from_tatum;
 	long int		 downbeat_from_start;
-	float scrub_pos;
+	float prev_scrub_pos, scrub_pos, scrub_speed;
+	float prev_scrub_time, scrub_time;
 	
 	int engine_running;
 	// ...
