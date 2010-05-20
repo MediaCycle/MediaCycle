@@ -64,8 +64,8 @@ ACAudioCycleOsgQt::ACAudioCycleOsgQt(QWidget *parent)
 			//media_cycle->setNeighborhoodsPlugin("RandomNeighborhoods");
 			media_cycle->setNeighborhoodsPlugin("EuclideanNeighborhoods");
 			//media_cycle->setNeighborhoodsPlugin("ParetoNeighborhoods");
-			//media_cycle->setPositionsPlugin("NodeLinkTreeLayoutPositions");
-			media_cycle->setPositionsPlugin("RadialTreeLayoutPositions");
+			media_cycle->setPositionsPlugin("NodeLinkTreeLayoutPositions");
+			//media_cycle->setPositionsPlugin("RadialTreeLayoutPositions");
 		}
 		media_cycle->addPlugin("../../../plugins/audio/" + build_type + "/mc_audio.dylib");	
 	#endif
@@ -475,7 +475,7 @@ void ACAudioCycleOsgQt::processOscMessage(const char* tagName)
 	}
 	else if(strcasecmp(tagName, "/audiocycle/1/browser/1/move/zoom") == 0)
 	{
-		float zoom;
+		float zoom;//, refzoom = media_cycle->getCameraZoom();
 		osc_browser->readFloat(mOscReceiver, &zoom);
 		//zoom = zoom*600/50; // refzoom +
 		media_cycle->setCameraZoom((float)zoom);
@@ -494,32 +494,18 @@ void ACAudioCycleOsgQt::processOscMessage(const char* tagName)
 		lib_path = new char[500]; // wrong magic number!
 		osc_browser->readString(mOscReceiver, lib_path, 500); // wrong magic number!
 		std::cout << "Importing file library '" << lib_path << "'..." << std::endl;
-		media_cycle->importLibrary(lib_path); // XS instead of getImageLibrary CHECK THIS
-		//updateLibrary();
+		media_cycle->importLibrary(lib_path);
+		media_cycle->normalizeFeatures();
+		media_cycle->libraryContentChanged();
 		std::cout << "File library imported" << std::endl;
-		media_cycle->setReferenceNode(0);
-		// XSCF 250310 added these 3
-		media_cycle->pushNavigationState();
-		media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
-		media_cycle->getBrowser()->setState(AC_CHANGING);
-		
-		ui.browserOsgView->prepareFromBrowser();
-		media_cycle->setNeedsDisplay(true);
-		updatedLibrary = true;
+		this->updateLibrary();
 	}
 	else if(strcasecmp(tagName, "/audiocycle/1/browser/library/clear") == 0)
 	{
-		media_cycle->cleanLibrary(); // XS instead of getImageLibrary CHECK THIS
+		media_cycle->cleanLibrary();
+		media_cycle->cleanUserLog();
 		media_cycle->libraryContentChanged();
-		media_cycle->setReferenceNode(0);
-		// XSCF 250310 added these 3
-		media_cycle->pushNavigationState();
-		media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
-		media_cycle->getBrowser()->setState(AC_CHANGING);
-		
-		ui.browserOsgView->prepareFromBrowser();
-		media_cycle->setNeedsDisplay(true);
-		updatedLibrary = true;
+		this->updateLibrary();
 	}	
 	else if(strcasecmp(tagName, "/audiocycle/1/browser/recenter") == 0)
 	{
@@ -537,7 +523,8 @@ void ACAudioCycleOsgQt::processOscMessage(const char* tagName)
 	{
 		float bpm;
 		osc_browser->readFloat(mOscReceiver, &bpm);
-		int clicked_node = media_cycle->getClickedNode();
+		//int clicked_node = media_cycle->getClickedNode();
+		int clicked_node = media_cycle->getClosestNode();
 		if (clicked_node > -1)
 		{
 			audio_engine->setLoopSynchroMode(clicked_node, ACAudioEngineSynchroModeAutoBeat);

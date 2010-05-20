@@ -32,9 +32,6 @@
  *
 */
 
-#include <string>
-using namespace::std;
-
 #import <Cocoa/Cocoa.h>
 
 //#include <Io/TiOscReceiver.h>
@@ -43,6 +40,8 @@ using namespace::std;
 #include <MediaCycle.h>
 #include <ACAudioFeedback.h>
 //#include <ACOscBrowser.h>
+#include <ACOscBrowser.h>
+#include <ACOscFeedback.h>
 
 // Tags of the Text items in the dialog boxes
 enum	{
@@ -60,10 +59,15 @@ enum	{
 	
 	MediaCycle				*media_cycle;
 	ACAudioFeedback			*audio_engine;
-	/*
-	NSString* osc_ip;
-	int osc_port;
-	 */
+	ACOscBrowser			*osc_browser;
+	ACOscFeedback			*osc_feedback;
+	ACOscBrowserRef			mOscReceiver;
+
+	NSString* osc_control_ip;
+	int osc_control_port;
+	NSString* osc_feedback_ip;
+	int osc_feedback_port; 
+
 	//ACOscBrowser			*osc_browser;
 	//
 	IBOutlet ACOsgBrowserViewCocoa*		browser_osg_view;
@@ -105,7 +109,7 @@ enum	{
 	IBOutlet NSButton*				mFilterInButton;
 	IBOutlet NSButton*				mFilterOutButton;
 	IBOutlet NSButton*				mFilterSuggestButton;
-	//
+	/*
 	IBOutlet NSTextField*			mMediaFileName;
 	IBOutlet NSTextField*			mMediaTimestampBegin;
 	IBOutlet NSTextField*			mMediaTimestampEnd;
@@ -113,7 +117,7 @@ enum	{
 	IBOutlet NSTextField*			mMediaTimeSignature;
 	IBOutlet NSTextField*			mMediaKey;
 	IBOutlet NSTextField*			mMediaUserTags;
-	//
+	*/
 	IBOutlet NSTextField*			mALExtensionList;
 	IBOutlet NSTextField*			mALCExtensionList;
 	IBOutlet NSTextField*			mALCDefaultDeviceName;
@@ -130,7 +134,16 @@ enum	{
 	IBOutlet NSTextField*			mOscIp;
 	IBOutlet NSTextField*			mOscPort;
 	IBOutlet NSButton*				mOscStatus;
-*/	
+*/ 
+	IBOutlet NSTextField*			mOscControlIp;
+	IBOutlet NSTextField*			mOscControlPort;
+	IBOutlet NSButton*				mOscControlStatus;
+ 
+	IBOutlet NSTextField*			mOscFeedbackIp;
+	IBOutlet NSTextField*			mOscFeedbackPort;
+	IBOutlet NSButton*				mOscFeedbackStatus;
+ 
+	
 	//TiOscReceiverRef			mOscReceiver;
 };
 
@@ -184,15 +197,19 @@ enum	{
 - (IBAction)	setZoomSlider:(id)inSender;
 
 - (IBAction)	setCameraRecenter:(id)inSender;
-/*
-- (IBAction)	setOscIp:(id)inSender;
-- (IBAction)	setOscPort:(id)inSender;
-- (IBAction)	setOscStatus:(id)inSender;
-*/
+
+- (IBAction)	setOscControlIp:(id)inSender;
+- (IBAction)	setOscControlPort:(id)inSender;
+- (IBAction)	setOscControlStatus:(id)inSender;
+ 
+- (IBAction)	setOscFeedbackIp:(id)inSender;
+- (IBAction)	setOscFeedbackPort:(id)inSender;
+- (IBAction)	setOscFeedbackStatus:(id)inSender;
+
 - (void) controlTextDidEndEditing:(NSNotification *) aNotification;
 - (void) myObserver:(NSNotification *)inNotification;
 - (void) awakeFromNib;
 - (void) updatedLibrary;
-
+- (void) processOscMessage:(const char*) tagName;
 
 @end
