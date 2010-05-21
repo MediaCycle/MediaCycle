@@ -115,13 +115,12 @@ void ACOsgCompositeViewQt::resizeGL( int width, int height )
 	timeline_view->getCamera()->setProjectionMatrixAsPerspective(45.0f, 1.0f, 0.001f, 10.0f);//static_cast<double>(width())/static_cast<double>(sepy), 0.001f, 10.0f);}
 }
 
+// CF to do: understand paintGL vs updateGL to use them more correctly
 void ACOsgCompositeViewQt::paintGL()
 {
-	if (media_cycle->getBrowser()->getMode() == AC_MODE_CLUSTERS)
-	{	
-		updateTransformsFromBrowser(0.0);
-		//updateTransformsFromTimeline(0.0);
-	}	
+	//CF to improve, we want to know if the view is being animated to force a frequent refresh of the positions:
+	if (media_cycle->getBrowser()->getState() == AC_CHANGING)
+		updateTransformsFromBrowser(media_cycle->getFrac());
 	frame();
 }
 
@@ -355,8 +354,8 @@ void ACOsgCompositeViewQt::mouseReleaseEvent( QMouseEvent* event )
 					
 					// XSCF 250310 added these 3
 					media_cycle->pushNavigationState();
-					media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
-					media_cycle->getBrowser()->setState(AC_CHANGING);
+					//media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
+					//media_cycle->getBrowser()->setState(AC_CHANGING);
 					
 					//			media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
 					//			media_cycle->getBrowser()->setState(AC_CHANGING);

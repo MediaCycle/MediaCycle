@@ -139,17 +139,19 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 		build_type = "Debug";
 	#endif
 	media_cycle->addPlugin("../../../plugins/audio/" + build_type + "/mc_audio.dylib");
-	media_cycle->addPlugin("../../../plugins/visualisation/" + build_type + "/mc_visualisation.dylib");
-	//media_cycle->setVisualisationPlugin("Visualisation");
-	//media_cycle->setVisualisationPlugin("PCAVis");
-	//media_cycle->setVisualisationPlugin("Vis2Desc");
-	//media_cycle->setNeighborhoodsPlugin("RandomNeighborhoods");
-	media_cycle->setNeighborhoodsPlugin("EuclideanNeighborhoods");
-	//media_cycle->setNeighborhoodsPlugin("ParetoNeighborhoods");
-	//media_cycle->setNeighborhoodsPlugin("RandomNeighborhoods");
-	//media_cycle->setPositionsPlugin("NodeLinkTreeLayoutPositions");
-	media_cycle->setPositionsPlugin("RadialTreeLayoutPositions");
-	
+	int vizplugloaded = media_cycle->addPlugin("../../../plugins/visualisation/" + build_type + "/mc_visualisation.dylib");
+	if ( vizplugloaded == 0 )
+	{
+		//media_cycle->setVisualisationPlugin("Visualisation");
+		//media_cycle->setVisualisationPlugin("PCAVis");
+		//media_cycle->setVisualisationPlugin("Vis2Desc");
+		//media_cycle->setNeighborhoodsPlugin("RandomNeighborhoods");
+		media_cycle->setNeighborhoodsPlugin("EuclideanNeighborhoods");
+		//media_cycle->setNeighborhoodsPlugin("ParetoNeighborhoods");
+		//media_cycle->setNeighborhoodsPlugin("RandomNeighborhoods");
+		//media_cycle->setPositionsPlugin("NodeLinkTreeLayoutPositions");
+		media_cycle->setPositionsPlugin("RadialTreeLayoutPositions");
+	}
 	audio_engine = new ACAudioFeedback();
 	audio_engine->setMediaCycle(media_cycle);
 
@@ -251,7 +253,7 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 		
 		NSString* path = [paths objectAtIndex:0];
 		
-		media_cycle->importLibrary((string)[path UTF8String]); // XS instead of getImageLibrary CHECK THIS
+		media_cycle->importACLLibrary((string)[path UTF8String]); // XS instead of getImageLibrary CHECK THIS
 		media_cycle->normalizeFeatures();
 		media_cycle->libraryContentChanged();
 	}
@@ -525,7 +527,7 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 		lib_path = new char[500]; // wrong magic number!
 		osc_browser->readString(mOscReceiver, lib_path, 500); // wrong magic number!
 		std::cout << "Importing file library '" << lib_path << "'..." << std::endl;
-		media_cycle->importLibrary(lib_path);
+		media_cycle->importACLLibrary(lib_path);
 		media_cycle->normalizeFeatures();
 		media_cycle->libraryContentChanged();
 		std::cout << "File library imported" << std::endl;

@@ -66,6 +66,7 @@ updatedLibrary(false)
 			//media_cycle->setNeighborhoodsPlugin("ParetoNeighborhoods");
 			//media_cycle->setPositionsPlugin("NodeLinkTreeLayoutPositions");
 			media_cycle->setPositionsPlugin("RadialTreeLayoutPositions");
+			//media_cycle->setMode(AC_MODE_NEIGHBORS);
 		}
 		media_cycle->addPlugin("../../../plugins/audio/" + build_type + "/mc_audio.dylib");	
 	#endif
@@ -287,7 +288,7 @@ void ACAudioCycleOsgQt::loadACLFile(){
 	//fileName = QFileDialog::getOpenFileName(this, "~", );
 
 	if (!(fileName.isEmpty())) {
-		media_cycle->importLibrary(fileName.toStdString());//(char*) fileName.toStdString().c_str());
+		media_cycle->importACLLibrary(fileName.toStdString());//(char*) fileName.toStdString().c_str());
 		//media_cycle->setNeedsDisplay(true);//CF
 		//ui.browserOsgView->updateTransformsFromBrowser(1.0);//CF
 		media_cycle->normalizeFeatures();
@@ -494,7 +495,7 @@ void ACAudioCycleOsgQt::processOscMessage(const char* tagName)
 		lib_path = new char[500]; // wrong magic number!
 		osc_browser->readString(mOscReceiver, lib_path, 500); // wrong magic number!
 		std::cout << "Importing file library '" << lib_path << "'..." << std::endl;
-		media_cycle->importLibrary(lib_path); // XS instead of getImageLibrary CHECK THIS
+		media_cycle->importACLLibrary(lib_path); // XS instead of getImageLibrary CHECK THIS
 		//updateLibrary();
 		std::cout << "File library imported" << std::endl;
 		media_cycle->setReferenceNode(0);

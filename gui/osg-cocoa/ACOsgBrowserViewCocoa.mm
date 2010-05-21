@@ -252,8 +252,8 @@ struct ACOsgBrowserViewData
 			
 			// XSCF 250310 added these 3
 			media_cycle->pushNavigationState();
-			media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
-			media_cycle->getBrowser()->setState(AC_CHANGING);
+			//media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
+			//media_cycle->getBrowser()->setState(AC_CHANGING);
 			
 			//			media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
 			//			media_cycle->getBrowser()->setState(AC_CHANGING);

@@ -1313,19 +1313,32 @@ void ACMediaBrowser::initializeNodes(int _defaultNodeId){ // default = 0
 void ACMediaBrowser::updateDisplay(bool animate){
 	switch ( mMode ){
 		case AC_MODE_CLUSTERS:
+			//XS TODO check this
+			if(animate) {
+				setState(AC_CHANGING);
+			}
 			if (mVisPlugin != NULL){
 				mVisPlugin->updateNextPositions(this);
-				//XS TODO check this
-				if(animate) {
-					setState(AC_CHANGING);
-				}
 			}
 			else {
 				updateClustersKMeans(animate); // = neighborhood
 				updateNextPositionsPropeller(); // = positions
 			}
-			
+			break;
 		case AC_MODE_NEIGHBORS:
+			/*
+			if (mPosPlugin != NULL){
+				mPosPlugin->updateNextPositions(this);
+				//XS TODO check this
+				if(animate) {
+					setState(AC_CHANGING);
+				}
+			}
+			*/
+			if(animate) {
+				setState(AC_CHANGING);
+			}
+			
 			if (mNeighborsPlugin != NULL){
 				mNeighborsPlugin->updateNeighborhoods(this);
 			}
@@ -1336,8 +1349,10 @@ void ACMediaBrowser::updateDisplay(bool animate){
 			if (mPosPlugin != NULL){
 				mPosPlugin->updateNextPositions(this);
 			}
+			break;
 		default:
 			cerr << "unknown browser mode: " << mMode << endl;
+			break;
 	}
 	this->setNeedsDisplay(true);
 	

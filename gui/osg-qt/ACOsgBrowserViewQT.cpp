@@ -87,10 +87,12 @@ void ACOsgBrowserViewQT::resizeGL( int width, int height )
 	osg_view->resized(0,0,width,height);
 }
 
+// CF to do: understand paintGL vs updateGL to use them more correctly
 void ACOsgBrowserViewQT::paintGL()
 {
-	if (media_cycle->getBrowser()->getMode() == AC_MODE_CLUSTERS)
-		updateTransformsFromBrowser(0.0);
+	//CF to improve, we want to know if the view is being animated to force a frequent refresh of the positions:
+	if (media_cycle->getBrowser()->getState() == AC_CHANGING)
+		updateTransformsFromBrowser(media_cycle->getFrac());
 	frame();
 }
 
@@ -220,6 +222,7 @@ void ACOsgBrowserViewQT::mouseMoveEvent( QMouseEvent* event )
 	float x, y;
 	x = event->x(); 
 	y = event->y();
+	
 	if ( (mousedown==1) && (forwarddown == 0) ) {
 		if ( zoomdown==1 ) {
 			media_cycle->setCameraZoom(refzoom - (y-refy)/50);
