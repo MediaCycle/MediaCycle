@@ -237,6 +237,8 @@ private:
 	long int		 downbeat_from_start;
 	float prev_scrub_pos, scrub_pos, scrub_speed;
 	float prev_scrub_time, scrub_time;
+	double sdtime, prevsdtime;
+	int reached_end, reached_begin;
 	
 	int engine_running;
 	// ...

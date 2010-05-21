@@ -144,11 +144,11 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 	//media_cycle->setVisualisationPlugin("PCAVis");
 	//media_cycle->setVisualisationPlugin("Vis2Desc");
 	//media_cycle->setNeighborhoodsPlugin("RandomNeighborhoods");
-	//media_cycle->setNeighborhoodsPlugin("EuclideanNeighborhoods");
+	media_cycle->setNeighborhoodsPlugin("EuclideanNeighborhoods");
 	//media_cycle->setNeighborhoodsPlugin("ParetoNeighborhoods");
 	//media_cycle->setNeighborhoodsPlugin("RandomNeighborhoods");
 	//media_cycle->setPositionsPlugin("NodeLinkTreeLayoutPositions");
-	//media_cycle->setPositionsPlugin("RadialTreeLayoutPositions");
+	media_cycle->setPositionsPlugin("RadialTreeLayoutPositions");
 	
 	audio_engine = new ACAudioFeedback();
 	audio_engine->setMediaCycle(media_cycle);
@@ -575,7 +575,7 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 			 //media_cycle->pickedObjectCallback(-1);
 			 audio_engine->setLoopSynchroMode(clicked_node, ACAudioEngineSynchroModeManual);
 			 audio_engine->setLoopScaleMode(clicked_node, ACAudioEngineScaleModeResample);//ACAudioEngineScaleModeVocode
-			 audio_engine->setScrub((float)scrub*10000); // temporary hack to scrub between 0 an 1
+			 audio_engine->setScrub((float)scrub*100); // temporary hack to scrub between 0 an 1
 		 }
 	}
 	else if(strcasecmp(tagName, "/audiocycle/1/player/1/pitch") == 0)
