@@ -92,6 +92,7 @@ void ACVideoAnalysis::clean(){
 	frame_counter = 0;
 	all_blobs.clear();
 	all_blobs_time_stamps.clear();
+	all_blobs_frame_stamps.clear();
 	blob_centers.clear();
 	blob_speeds.clear(); 
 	contraction_indices.clear();
@@ -104,9 +105,6 @@ void ACVideoAnalysis::clean(){
 
 void ACVideoAnalysis::rewind(){
 	cvSetCaptureProperty(capture, CV_CAP_PROP_POS_FRAMES, 0); 	
-	// old way:
-	//	if (capture) cvReleaseCapture(&capture);
-	//	capture = cvCreateFileCapture(file_name.c_str()); 
 }
 
 ACVideoAnalysis::~ACVideoAnalysis(){
@@ -396,7 +394,8 @@ void ACVideoAnalysis::computeBlobs(IplImage* bg_img, int bg_thresh, int big_blob
 	// supposes 3-channels image (in whatever mode) but would work on BW images since OpenCV converts it in 3 channels
 	all_blobs.clear();
 	all_blobs_time_stamps.clear();	// just to make sure...
-	
+	all_blobs_frame_stamps.clear();	// just to make sure...
+
 	if (bg_img == NULL){
 		bg_img = this->computeMedianImage();
 		if (bg_img == NULL){
@@ -425,7 +424,7 @@ void ACVideoAnalysis::computeBlobs(IplImage* bg_img, int bg_thresh, int big_blob
 	cvMoveWindow("BLOBS", 50, 400);	
 #endif // VISUAL_CHECK
 	
-	for(int i = 0; i < nframes-1; i++){
+	for(int i = 0; i < nframes; i++){
 		frame = getNextFrame();
 		cvAbsDiff(frame, bg_img, frame);
 		cvCvtColor(frame, bwImage,CV_BGR2GRAY);
@@ -435,7 +434,9 @@ void ACVideoAnalysis::computeBlobs(IplImage* bg_img, int bg_thresh, int big_blob
 		blobs.Filter( blobs, B_EXCLUDE, CBlobGetArea(), B_LESS, big_blob );
 		if (blobs.GetNumBlobs() > 0){
 			all_blobs.push_back(blobs);
-			all_blobs_time_stamps.push_back(cvGetCaptureProperty(capture, CV_CAP_PROP_POS_FRAMES)*1.0/fps); // in seconds
+			int _frame_number = cvGetCaptureProperty(capture, CV_CAP_PROP_POS_FRAMES);
+			all_blobs_time_stamps.push_back(_frame_number*1.0/fps); // in seconds
+			all_blobs_frame_stamps.push_back(_frame_number); // in frames
 		}
 #ifdef VISUAL_CHECK
 		snprintf (str, 64, "[%03d] : %03d blobs", i, blobs.GetNumBlobs());
@@ -474,7 +475,8 @@ void ACVideoAnalysis::computeBlobs(IplImage* bg_img, int bg_thresh, int big_blob
 void ACVideoAnalysis::computeBlobsInteractively(IplImage* bg_img, bool merge_blobs, int bg_thesh, int big_blob, int small_blob){
 	all_blobs.clear();
 	all_blobs_time_stamps.clear();	// just to make sure...
-	
+	all_blobs_frame_stamps.clear();	// just to make sure...
+
 #ifdef VISUAL_CHECK_GNUPLOT
 	Gnuplot g1 = Gnuplot("lines");
     g1.reset_plot();
@@ -529,8 +531,10 @@ void ACVideoAnalysis::computeBlobsInteractively(IplImage* bg_img, bool merge_blo
 		blobs = CBlobResult( bitImage, NULL, 255 );
 		blobs.Filter( blobs, B_EXCLUDE, CBlobGetArea(), B_LESS,  slider_big_blob );
 		all_blobs.push_back(blobs);
-		all_blobs_time_stamps.push_back(cvGetCaptureProperty(capture, CV_CAP_PROP_POS_FRAMES)*1.0/fps); // in seconds
-		
+		int _frame_number = cvGetCaptureProperty(capture, CV_CAP_PROP_POS_FRAMES);
+		all_blobs_time_stamps.push_back(_frame_number*1.0/fps); // in seconds
+		all_blobs_frame_stamps.push_back(_frame_number); // in frames
+
 		snprintf (str, 64, "[%03d] : %03d blobs", i, blobs.GetNumBlobs());
 		cvPutText (saveImage, str, cvPoint (10, 20), &font, CV_RGB (0, 255, 100));
 		
@@ -592,6 +596,7 @@ void ACVideoAnalysis::computeBlobsUL(IplImage* bg_img, bool merge_blobs, int big
 	// different threshold upper/lower part of the image
 	all_blobs.clear();
 	all_blobs_time_stamps.clear();	// just to make sure...
+	all_blobs_frame_stamps.clear();	// just to make sure...
 	if (bg_img == NULL || threshU ==0 || threshL ==0){
 		if (bg_img == NULL){
 			cout << "No bg image provided for ACVideoAnalysis::computeBlobsUL. Computing Median" << endl;
@@ -664,7 +669,9 @@ void ACVideoAnalysis::computeBlobsUL(IplImage* bg_img, bool merge_blobs, int big
 		blobs.Filter( blobs, B_EXCLUDE, CBlobGetArea(), B_LESS, big_blob );
 		if (blobs.GetNumBlobs() > 0){
 			all_blobs.push_back(blobs);
-			all_blobs_time_stamps.push_back(cvGetCaptureProperty(capture, CV_CAP_PROP_POS_FRAMES)*1.0/fps);
+			int _frame_number = cvGetCaptureProperty(capture, CV_CAP_PROP_POS_FRAMES);
+			all_blobs_time_stamps.push_back(_frame_number*1.0/fps); // in seconds
+			all_blobs_frame_stamps.push_back(_frame_number); // in frames
 		}
 #ifdef VISUAL_CHECK
 		snprintf (str, 64, "[%03d] : %03d blobs", i, blobs.GetNumBlobs());
@@ -724,9 +731,10 @@ void ACVideoAnalysis::computeOpticalFlow(){
 	int flags = 0;
 	int add_remove_pt = 0;
 	CvPoint pt;
-	//	cvNamedWindow("Camera", CV_WINDOW_AUTOSIZE );
-	//	cvResizeWindow( "Camera", 800, 600 );
-	
+#ifdef VISUAL_CHECK
+	cvNamedWindow("Camera", CV_WINDOW_AUTOSIZE );
+	cvResizeWindow( "Camera", 800, 600 );
+#endif // VISUAL_CHECK
 	IplImage* frame = 0;
 	int currentframe = 0;
 	//	int firstframemoved = 0;
@@ -810,12 +818,18 @@ void ACVideoAnalysis::computeOpticalFlow(){
 		CV_SWAP( prev_grey, grey, swap_temp );
 		CV_SWAP( prev_pyramid, pyramid, swap_temp );
 		CV_SWAP( points[0], points[1], swap_points );
-		//		cvShowImage( "Camera", image );
-		//		c = cvWaitKey(10);
-		//		if( (char)c == 27 )
-		//			break;
+#ifdef VISUAL_CHECK
+		cvShowImage( "Camera", image );
+		int c = cvWaitKey(10);
+		if( (char)c == 27 )
+			break;
+#endif // VISUAL_CHECK
+
 	}	
-	//	cvDestroyWindow("Camera");
+#ifdef VISUAL_CHECK
+	cvDestroyWindow("Camera");
+#endif // VISUAL_CHECK
+
 	cvReleaseImage(&image);
 	cvReleaseImage(&grey);
 	cvReleaseImage(&prev_grey);
@@ -1244,7 +1258,7 @@ void ACVideoAnalysis::computePixelSpeed() {
 	cvNamedWindow ("Substraction", CV_WINDOW_AUTOSIZE);
 #endif //VISUAL_CHECK
 	
-	for(int i = 1; i < all_blobs.size(); i++){ 
+	for(unsigned int i = 1; i < all_blobs.size(); i++){ 
 // XS TODO: this is not clean but we calculate only in frames with blobs
 // could also do a setROI on the bounding box ? no since ROI will be different in consecutive frames
 		cvConvert (tmp_frame, previous_frame);
@@ -1303,6 +1317,38 @@ void ACVideoAnalysis::computeBoundingBoxRatios(){
 		bounding_box_ratios.push_back(bd);
 	}
 }
+
+void ACVideoAnalysis::computeFrameAbsoluteDifferences(){
+	// reset the capture to the beginning of the video
+//	this->rewind();
+	IplImage* current_frame  = getNextFrame();
+	IplImage* previous_frame = cvCreateImage( cvGetSize(current_frame), IPL_DEPTH_8U, 3 );;
+	IplImage* diff_frames = cvCreateImage( cvGetSize(current_frame), IPL_DEPTH_8U, 3 );
+	CvScalar sum_diff_frames ;
+	float frame_diff = 0.0;
+	
+	cvNamedWindow("check", CV_WINDOW_AUTOSIZE);
+
+	for(int ifram=1; ifram<nframes-1; ifram++) {
+		cvCopy (current_frame, previous_frame) ;
+		current_frame = getNextFrame();
+		showFrameInWindow("check", current_frame);
+		cvAbsDiff (current_frame, previous_frame, diff_frames);
+		sum_diff_frames = cvSum (diff_frames);
+		frame_diff = 0.0;
+		for(int j = 0; j < 3; j++){
+			frame_diff += sum_diff_frames.val[j];
+		}
+		frame_diff = frame_diff / (4*width*height);
+		cout << "frame " << ifram << " : diff = " << frame_diff << endl;
+
+	}
+	cvReleaseImage (&current_frame);
+	cvReleaseImage (&previous_frame);
+	cvReleaseImage (&diff_frames);
+	
+}
+
 
 // to get dummy time stamps (i.e., the indices 0,1,2,...)
 // XS: I made these FLOAT as in ACMediaFeatures but really it's INT
@@ -1449,8 +1495,32 @@ void ACVideoAnalysis::resizeAndSaveInFile (string fileout, int nskip, int w, int
 	cvReleaseVideoWriter(&video_writer); 
 }
 
+void ACVideoAnalysis::dumpTrajectory() {
+	// in terminal
 
+	// XS TODO check if computed
+	for (int i = 0; i < int(blob_centers.size()); i++){
+		cout << all_blobs_frame_stamps[i]  << " " << blob_centers[i][0] << " - " << blob_centers[i][1] << endl; 
+	}; 
+}	
 
+void ACVideoAnalysis::dumpContractionIndices() {
+	// in terminal
+	
+	// XS TODO check if computed
+	for (int i = 0; i < int(contraction_indices.size()); i++){
+		cout << all_blobs_frame_stamps[i]  << " " << contraction_indices[i] << endl; 
+	}; 
+}	
+
+void ACVideoAnalysis::dumpBoundingBoxRatios() {
+	// in terminal
+	
+	// XS TODO check if computed
+	for (int i = 0; i < int(bounding_box_ratios.size()); i++){
+		cout << all_blobs_frame_stamps[i]  << " " << bounding_box_ratios[i] << endl; 
+	}; 
+}	
 
 // TODO: detect blob on a selected channel
 // (suffit de nettoyer ci-dessous)

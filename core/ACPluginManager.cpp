@@ -85,6 +85,15 @@ ACPlugin *ACPluginManager::getPlugin(std::string aPluginName) {
     return result;
 }
 
+void ACPluginManager::dump() {
+	cout << "ACPluginManager: " << this->mPluginLibrary.size() << " plugin libraries" << endl;
+    for (int k=0;k<this->mPluginLibrary.size();k++) {
+		cout << " --- plugin library #" << k << endl;
+		this->mPluginLibrary[k]->dump();
+    }
+}
+
+
 /*
  * ACPluginLibrary implementation
  */
@@ -162,3 +171,11 @@ ACPlugin *ACPluginLibrary::getPlugin(std::string aPluginName) {
 
     return NULL;
 }
+
+void ACPluginLibrary::dump() {
+	cout << "ACPluginLibrary: " << this->mPlugins.size() << " plugins" << endl;
+    for (int k=0;k<this->mPlugins.size();k++) {
+        cout << "plugin #" << k << ": " << this->mPlugins[k]->getName() << endl;
+    }
+}
+

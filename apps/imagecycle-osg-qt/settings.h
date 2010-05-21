@@ -1,7 +1,9 @@
-/**
- * @brief ACNeighborhoodsPlugin.cpp
- * @author Xavier Siebert
- * @date 21/05/2010
+/* 
+ * File:   settings.h
+ * Author: xavier
+ * inspired from Qt's "browser" example
+ *
+ * @date 31/03/10
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -27,27 +29,45 @@
  * 
  * Any other additional authorizations may be asked to avre@umons.ac.be 
  * <mailto:avre@umons.ac.be>
-*/
+ */
 
-#include "ACNeighborhoodsPlugin.h"
 
-//using namespace arma;
-using namespace std;
+#ifndef SETTINGS_H
+#define SETTINGS_H
 
-ACNeighborhoodsPlugin::ACNeighborhoodsPlugin() {
-    this->mMediaType = MEDIA_TYPE_MIXED; // ALL
-    this->mPluginType = PLUGIN_TYPE_NONE;
-    this->mName = "Neighborhoods";
-    this->mDescription = "Plugin for the computation of  neighborhoods";
-    this->mId = "";
-	
-    //local vars
-}
+#include <QDialog>
+#include <QtGui>
+#include "ui_settings.h"
 
-ACNeighborhoodsPlugin::~ACNeighborhoodsPlugin() {
-}
+#include "ACImageCycleOsgQt.h"
 
-void ACNeighborhoodsPlugin::updateNeighborhoods(ACMediaBrowser* mediaBrowser) {
-	int _clickednode = mediaBrowser->getClickedNode();
-	// TODO: pareto
-}
+#include <string>
+using std::string;
+
+class ACImageCycleOsgQt;
+
+class SettingsDialog : public QMainWindow, private Ui::SettingsDialog
+{
+    Q_OBJECT
+
+public:
+    SettingsDialog(QWidget *parent = 0);
+	virtual ~SettingsDialog(){};
+	void setMediaCycleMainWindow(ACImageCycleOsgQt* _mc); 
+
+public slots:
+//    void loadFromSettings();
+
+ //   void saveLog();
+ //   void selectFeaturesPlugins();
+ //   void selectVisualizationPlugins();
+ //   void saveCurrentSettings();
+	void selectSaveConfigFile();
+
+private:
+//	Ui::SettingsDialog ui;
+	string config_file;	
+};
+
+#endif // SETTINGS_H
+

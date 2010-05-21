@@ -240,7 +240,7 @@ int ACAudio::load(FILE* library_file) {
 	int i, j;
 	int path_size;
 	int n_features;
-	int f_type;
+//	int f_type;
 	int n_features_elements;
 	char featureName[256];
 	int nn;

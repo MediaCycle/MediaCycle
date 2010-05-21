@@ -222,8 +222,10 @@ void ACAudioGardenOsgQt::on_checkBoxRhythm_stateChanged(int state)
 	if (updatedLibrary)
 	{
 		media_cycle->setWeight(0,state/2.0f);
-		media_cycle->updateClusters(true); 
-		media_cycle->setNeedsDisplay(true);
+// XS CF TODO check if this works
+		media_cycle->updateDisplay(true); 
+		//		media_cycle->updateClusters(true); 
+		//media_cycle->setNeedsDisplay(true);
 
 		ui.compositeOsgView->updateTransformsFromBrowser(0.0); 
 	}
@@ -235,9 +237,11 @@ void ACAudioGardenOsgQt::on_checkBoxTimbre_stateChanged(int state)
 	if (updatedLibrary)
 	{
 		media_cycle->setWeight(1,state/2.0f);
-		media_cycle->updateClusters(true); 
-		media_cycle->setNeedsDisplay(true);
-		ui.compositeOsgView->updateTransformsFromBrowser(0.0); 
+		// XS CF TODO check if this works
+		media_cycle->updateDisplay(true); 
+//		media_cycle->updateClusters(true); 
+//		media_cycle->setNeedsDisplay(true);
+		ui.compositeOsgView->updateTransformsFromBrowser(1.0); 
 	}
 	//ui.compositeOsgView->setFocus();
 }
@@ -247,9 +251,11 @@ void ACAudioGardenOsgQt::on_checkBoxHarmony_stateChanged(int state)
 	if (updatedLibrary)
 	{
 		media_cycle->setWeight(2,state/2.0f);
-		media_cycle->updateClusters(true); 
-		media_cycle->setNeedsDisplay(true);
-		ui.compositeOsgView->updateTransformsFromBrowser(0.0); 
+		// XS CF TODO check if this works
+		media_cycle->updateDisplay(true); 
+		//		media_cycle->updateClusters(true); 
+		//		media_cycle->setNeedsDisplay(true);
+		ui.compositeOsgView->updateTransformsFromBrowser(1.0); 
 	}
 	//ui.compositeOsgView->setFocus();
 }
@@ -259,10 +265,11 @@ void ACAudioGardenOsgQt::on_sliderClusters_sliderReleased()
 	std::cout << "ClusterNumber: " << ui.sliderClusters->value() << std::endl;
 	if (updatedLibrary){
 		media_cycle->setClusterNumber(ui.sliderClusters->value());
-		// XSCF251003 added this
-		media_cycle->updateClusters(true);
-		media_cycle->setNeedsDisplay(true);		
-		ui.compositeOsgView->updateTransformsFromBrowser(0.0);
+		// XS CF TODO check if this works
+		media_cycle->updateDisplay(true); 
+		//		media_cycle->updateClusters(true); 
+		//		media_cycle->setNeedsDisplay(true);
+		ui.compositeOsgView->updateTransformsFromBrowser(1.0);
 	}
 	//ui.compositeOsgView->setFocus();
 }

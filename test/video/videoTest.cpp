@@ -80,7 +80,9 @@ const string ghostlist[ndancers] = {
 "Bru_211#1", "Bru_218#1", "Bru_218#2", "Bru_224#1", "Bru_302#2", "Bru_313#2", "Bru_320#1"
 };
 
-const string videodir = "/Users/xavier/numediart/Project7.3-DancersCycle/VideosSmall/Test/";
+//const string videodir = "/Users/xavier/numediart/Project7.3-DancersCycle/VideosSmall/Test/";
+const string videodir = "/Users/xavier/numediart/Project10.1-Borderlands/2010_4_prox_alpa/";
+
 // const string videodir = "/Users/xavier/numediart/Project7.3-DancersCycle/Recordings_Raffinerie_0709/FrontShots/";
 
 const string video_plugin_path = "/Users/xavier/development/Fall09/ticore-app/Applications/Numediart/MediaCycle/src/Builds/darwin-xcode/plugins/video/Debug/";
@@ -219,15 +221,19 @@ void test_video_plugin_acl_save(std::string dancer){
 }
 
 void test_blobs(std::string dancer){
-	string movie_file= videodir+"Front/"+dancer+".mov";
+	string movie_file= videodir+dancer+".mov"; //+"Front/"+dancer+".mov";
 	cout << movie_file << endl;
 	ACVideoAnalysis* V = new ACVideoAnalysis(movie_file);
 	clock_t t0=clock();
-	V->computeBlobs();
+	
+	// XS TODO tmp hack
+	IplImage *imgp_bg = cvLoadImage("/Users/xavier/numediart/Project10.1-Borderlands/work/bg_black.png", CV_LOAD_IMAGE_COLOR);
+	V->computeBlobs(imgp_bg);
 	
 	clock_t t1=clock();
 	cout<<"Bg Sub execution time: " << (t1-t0)/CLOCKS_PER_SEC << " s." << endl;	
 	delete V;
+	cvReleaseImage(&imgp_bg);
 }
 
 
@@ -239,6 +245,43 @@ void test_all_videos_top_front(std::string mypath){
 	mediacycle->saveAsLibrary(mypath+"ACL"+"dancers-test.acl");
 	delete mediacycle;	
 }
+
+void test_read_write_video(std::string full_video_path){
+	ACVideoAnalysis* V = new ACVideoAnalysis(full_video_path);
+	string file_out = "/Users/xavier/tmp/toto.avi";
+	V->saveInFile (file_out, 0);
+	delete V;
+}
+
+void test_frame_diff(std::string full_video_path){
+	ACVideoAnalysis* V = new ACVideoAnalysis(full_video_path);
+	V->computeFrameAbsoluteDifferences();
+	delete V;
+}
+
+void test_video_features(std::string full_video_path, string bg_img_file=""){
+	// and output to terminal for Borderlands first tests
+	ACVideoAnalysis* V = new ACVideoAnalysis(full_video_path);
+	if (bg_img_file != "") {
+		IplImage *bg_img = cvLoadImage(bg_img_file.c_str(), CV_LOAD_IMAGE_COLOR);
+		V->computeBlobs(bg_img);	
+	} 
+	else V->computeBlobs();
+//	V->computeMergedBlobsTrajectory(0);
+//	V->computeContractionIndices();
+	V->computeBoundingBoxRatios();
+//	V->dumpTrajectory();
+//	V->dumpContractionIndices();
+	V->dumpBoundingBoxRatios();
+	delete V;
+}
+
+void test_optical_flow(std::string full_video_path){
+	ACVideoAnalysis* V = new ACVideoAnalysis(full_video_path);
+	V->computeOpticalFlow();
+	delete V;
+}
+
 
 int main(int argc, char** argv) {
 	cout << "Using Opencv " << CV_VERSION << "(" << CV_MAJOR_VERSION << "." << CV_MINOR_VERSION  << "." <<  CV_SUBMINOR_VERSION << ")" << endl;	
@@ -254,9 +297,15 @@ int main(int argc, char** argv) {
 	//test_video_plugin("001011");
 	//test_video_plugin_acl_save("001011");
 	//test_all_videos_top_front(videodir);
-	test_blobs("001011");
-	
-	
+//	test_blobs("001011");
+
+	// christian graupner videos
+	//test_blobs("10151");
+	//test_frame_diff("/Users/xavier/numediart/Project10.1-Borderlands/2010_4_prox_alpa/10151.mov");
+//	test_video_features("/Users/xavier/numediart/Project10.1-Borderlands/2010_4_prox_alpa/10151.mov",
+//						"/Users/xavier/numediart/Project10.1-Borderlands/work/bg_black.png");
+	test_optical_flow("/Users/xavier/numediart/Project10.1-Borderlands/2010_4_prox_alpa/10151.mov");
+
 //	vector<float> ci = V->getContractionIndices();
 //	vector<double> dci;
 //	for (int i=0; i< ci.size(); i++) {

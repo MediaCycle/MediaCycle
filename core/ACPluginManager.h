@@ -61,6 +61,7 @@ public:
     int getSize() {return this->mPlugins.size();};
     DynamicLibrary* getLib() { return this->mLib;};
     void freePlugins();
+	void dump();
 
     //Plugins factories
     createPluginFactory* create;
@@ -80,6 +81,7 @@ public:
     int add(std::string aPluginPath);
     int remove(std::string aPluginPath);
     int removeAll();
+	void dump();
 
     vector<ACPluginLibrary *> getPluginLibrary() { return this->mPluginLibrary;};
     ACPluginLibrary *getPluginLibrary(int i) { return this->mPluginLibrary[i];};

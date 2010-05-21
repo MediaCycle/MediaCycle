@@ -358,12 +358,17 @@ void ACOsgCompositeViewQt::mouseReleaseEvent( QMouseEvent* event )
 					media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
 					media_cycle->getBrowser()->setState(AC_CHANGING);
 					
-					media_cycle->updateNeighborhoods();
-					media_cycle->updateClusters(false);// CF was true, equivalent to what's following
+					//			media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
+					//			media_cycle->getBrowser()->setState(AC_CHANGING);
+					
+					media_cycle->updateDisplay(true); //XS250310 was: media_cycle->updateClusters(true);
+					// XSCF 250310 removed this:
+					// media_cycle->updateNeighborhoods();
+					//					media_cycle->updateClusters(false);// CF was true, equivalent to what's following
 					
 					// remainders from updateClusters(true)
-					media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
-					media_cycle->getBrowser()->setState(AC_CHANGING);
+//					media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
+//					media_cycle->getBrowser()->setState(AC_CHANGING);
 				}
 				else if (setrhythmpatterndown == 1)
 				{

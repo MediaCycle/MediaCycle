@@ -5,6 +5,7 @@ IF ( USE_QT4 )
 	FILE(GLOB HDR *.h)
 
 	INCLUDE_DIRECTORIES(. ../../gui/osg ../../gui/osg-qt)
+	INCLUDE_DIRECTORIES(../../plugins/image)
 
 	IF ( APPLE )
 		SET(APP_TYPE MACOSX_BUNDLE)
@@ -14,11 +15,17 @@ IF ( USE_QT4 )
 	SET(imagecycle-osg-qt_MOC_HDRS ACImageCycleOsgQt.h)
 	SET(imagecycle-osg-qt_UIS ACImageCycleOsgQt.ui)
 
-	# Generates ui_ACImageCycleOsgQt.h
-	QT4_WRAP_UI(imagecycle-osg-qt_UIS_H ${imagecycle-osg-qt_UIS})
+	SET(settings_SRCS settings.cpp)
+	SET(settings_MOC_HDRS settings.h)
+	SET(settings_UIS settings.ui)
 
-	# Generates moc_ACImageCycleOsgQt.cxx
+	# Generates ui_ACImageCycleOsgQt.h  and ui_settings.h
+	QT4_WRAP_UI(imagecycle-osg-qt_UIS_H ${imagecycle-osg-qt_UIS})
+	QT4_WRAP_UI(settings_UIS_H ${settings_UIS})
+
+	# Generates moc_ACImageCycleOsgQt.cxx and moc_settings.cxx
 	QT4_WRAP_CPP(imagecycle-osg-qt_MOC_SRCS ${imagecycle-osg-qt_MOC_HDRS})
+	QT4_WRAP_CPP(settings_MOC_SRCS ${settings_MOC_HDRS})
 
 	# Don't forget to include output directory, otherwise
 	# the UI file won't be wrapped!
@@ -30,10 +37,11 @@ IF ( USE_QT4 )
 		#IF ( APPLE )
 		#	ADD_EXECUTABLE(imagecycle-osg-qt ${APP_TYPE} ${MACOSX_BUNDLE_INFO_PLIST} ${imagecycle-osg-qt_SRCS} ${imagecycle-osg-qt_UIS_H} ${imagecycle-osg-qt_MOC_SRCS})
 		#ELSE ()
-			ADD_EXECUTABLE(imagecycle-osg-qt ${imagecycle-osg-qt_SRCS} ${imagecycle-osg-qt_UIS_H} ${imagecycle-osg-qt_MOC_SRCS})
+			ADD_EXECUTABLE(imagecycle-osg-qt ${imagecycle-osg-qt_SRCS} ${imagecycle-osg-qt_UIS_H} ${imagecycle-osg-qt_MOC_SRCS}  ${settings_SRCS} ${settings_UIS_H} ${settings_MOC_SRCS})
 		#ENDIF ()
 	ENDIF ( )
 
+	ADD_DEPENDENCIES(imagecycle-osg-qt mc_image)
 	ADD_DEPENDENCIES(imagecycle-osg-qt mediacycle)
 	ADD_DEPENDENCIES(imagecycle-osg-qt mediacycle-osg)
 	ADD_DEPENDENCIES(imagecycle-osg-qt mediacycle-osg-qt)
@@ -43,6 +51,7 @@ IF ( USE_QT4 )
 	#	set_source_files_properties(PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
 	#ENDIF ( APPLE )
 
+	TARGET_LINK_LIBRARIES(imagecycle-osg-qt mc_image)
 	TARGET_LINK_LIBRARIES(imagecycle-osg-qt mediacycle)
 	TARGET_LINK_LIBRARIES(imagecycle-osg-qt mediacycle-osg)
 	TARGET_LINK_LIBRARIES(imagecycle-osg-qt mediacycle-osg-qt)

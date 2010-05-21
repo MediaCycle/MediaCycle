@@ -45,8 +45,8 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 }
 
 ACAudioCycleOsgQt::ACAudioCycleOsgQt(QWidget *parent)
- : QMainWindow(parent), 
- updatedLibrary(false)
+: QMainWindow(parent), 
+updatedLibrary(false)
 {
 	ui.setupUi(this); // first thing to do
 	media_cycle = new MediaCycle(MEDIA_TYPE_AUDIO,"/tmp/","mediacycle.acl");
@@ -64,8 +64,8 @@ ACAudioCycleOsgQt::ACAudioCycleOsgQt(QWidget *parent)
 			//media_cycle->setNeighborhoodsPlugin("RandomNeighborhoods");
 			media_cycle->setNeighborhoodsPlugin("EuclideanNeighborhoods");
 			//media_cycle->setNeighborhoodsPlugin("ParetoNeighborhoods");
-			media_cycle->setPositionsPlugin("NodeLinkTreeLayoutPositions");
-			//media_cycle->setPositionsPlugin("RadialTreeLayoutPositions");
+			//media_cycle->setPositionsPlugin("NodeLinkTreeLayoutPositions");
+			media_cycle->setPositionsPlugin("RadialTreeLayoutPositions");
 		}
 		media_cycle->addPlugin("../../../plugins/audio/" + build_type + "/mc_audio.dylib");	
 	#endif
@@ -73,15 +73,15 @@ ACAudioCycleOsgQt::ACAudioCycleOsgQt(QWidget *parent)
 	audio_engine = new ACAudioFeedback();
 	audio_engine->setMediaCycle(media_cycle);
 	audio_engine->printDeviceList();
-
+	
 	osc_feedback = NULL;
 	osc_browser = NULL;
 	
 	ui.browserOsgView->move(0,20);
 	ui.browserOsgView->setMediaCycle(media_cycle);
 	ui.browserOsgView->prepareFromBrowser();
-	//ui.browserOsgView->setPlaying(true);
-
+	//browserOsgView->setPlaying(true);
+	
 	connect(ui.actionLoad_Media_Directory, SIGNAL(triggered()), this, SLOT(loadMediaDirectory()));
 	connect(ui.actionLoad_Media_Files, SIGNAL(triggered()), this, SLOT(loadMediaFiles()));
 	connect(ui.actionLoad_ACL, SIGNAL(triggered()), this, SLOT(on_pushButtonLaunch_clicked()));
@@ -127,9 +127,9 @@ void ACAudioCycleOsgQt::updateLibrary()
 	}
 	// XSCF 250310 added these 3
 	media_cycle->pushNavigationState();
+	//media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
 	media_cycle->getBrowser()->setState(AC_CHANGING);
-	media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
-
+	
 	ui.browserOsgView->prepareFromBrowser();
 	//ui.browserOsgView->setPlaying(true);
 	media_cycle->setNeedsDisplay(true);
@@ -220,8 +220,8 @@ void ACAudioCycleOsgQt::on_checkBoxRhythm_stateChanged(int state)
 	if (updatedLibrary)
 	{
 		media_cycle->setWeight(0,state/2.0f);
-		media_cycle->updateClusters(true); 
-		media_cycle->setNeedsDisplay(true);
+		media_cycle->updateDisplay(true); //XS 250310 was: media_cycle->updateClusters(true);
+		// XS250310 removed mediacycle->setNeedsDisplay(true); // now in updateDisplay
 
 		ui.browserOsgView->updateTransformsFromBrowser(0.0); 
 	}
@@ -233,9 +233,9 @@ void ACAudioCycleOsgQt::on_checkBoxTimbre_stateChanged(int state)
 	if (updatedLibrary)
 	{
 		media_cycle->setWeight(1,state/2.0f);
-		media_cycle->updateClusters(true); 
-		media_cycle->setNeedsDisplay(true);
-		ui.browserOsgView->updateTransformsFromBrowser(0.0); 
+		media_cycle->updateDisplay(true); //XS 250310 was: media_cycle->updateClusters(true);
+		// XS250310 removed mediacycle->setNeedsDisplay(true); // now in updateDisplay
+		ui.browserOsgView->updateTransformsFromBrowser(1.0); 
 	}
 	//ui.browserOsgView->setFocus();
 }
@@ -245,9 +245,9 @@ void ACAudioCycleOsgQt::on_checkBoxHarmony_stateChanged(int state)
 	if (updatedLibrary)
 	{
 		media_cycle->setWeight(2,state/2.0f);
-		media_cycle->updateClusters(true); 
-		media_cycle->setNeedsDisplay(true);
-		ui.browserOsgView->updateTransformsFromBrowser(0.0); 
+		media_cycle->updateDisplay(true); //XS 250310 was: media_cycle->updateClusters(true);
+		// XS250310 removed mediacycle->setNeedsDisplay(true); // now in updateDisplay
+		ui.browserOsgView->updateTransformsFromBrowser(1.0); 
 	}
 	//ui.browserOsgView->setFocus();
 }
@@ -258,9 +258,9 @@ void ACAudioCycleOsgQt::on_sliderClusters_sliderReleased()
 	if (updatedLibrary){
 		media_cycle->setClusterNumber(ui.sliderClusters->value());
 		// XSCF251003 added this
-		media_cycle->updateClusters(true);
-		media_cycle->setNeedsDisplay(true);		
-		ui.browserOsgView->updateTransformsFromBrowser(0.0);
+		media_cycle->updateDisplay(true); //XS 250310 was: media_cycle->updateClusters(true);
+		// XS250310 removed mediacycle->setNeedsDisplay(true); // now in updateDisplay
+		ui.browserOsgView->updateTransformsFromBrowser(1.0);
 	}
 	//ui.browserOsgView->setFocus();
 }
@@ -453,7 +453,7 @@ void ACAudioCycleOsgQt::processOscMessage(const char* tagName)
 		float xmove = x*cos(-angle)-y*sin(-angle);
 		float ymove = y*cos(-angle)+x*sin(-angle);
 		media_cycle->setCameraPosition(xmove/2/zoom , ymove/2/zoom); // norm [-1;1] = 2 (instead of 100 from mediacycle-osg)
-		media_cycle->setNeedsDisplay(1);
+		media_cycle->setNeedsDisplay(true);
 	}
 	else if(strcasecmp(tagName, "/audiocycle/1/browser/1/hover/xy") == 0)
 	{
@@ -471,7 +471,7 @@ void ACAudioCycleOsgQt::processOscMessage(const char* tagName)
 			osc_feedback->messageEnd();
 			osc_feedback->messageSend();
 		}	
-		//media_cycle->setNeedsDisplay(1);
+		//media_cycle->setNeedsDisplay(true);
 	}
 	else if(strcasecmp(tagName, "/audiocycle/1/browser/1/move/zoom") == 0)
 	{
@@ -479,14 +479,14 @@ void ACAudioCycleOsgQt::processOscMessage(const char* tagName)
 		osc_browser->readFloat(mOscReceiver, &zoom);
 		//zoom = zoom*600/50; // refzoom +
 		media_cycle->setCameraZoom((float)zoom);
-		media_cycle->setNeedsDisplay(1);
+		media_cycle->setNeedsDisplay(true);
 	}
 	else if(strcasecmp(tagName, "/audiocycle/1/browser/1/move/angle") == 0)
 	{
 		float angle;//, refangle = media_cycle->getCameraRotation();
 		osc_browser->readFloat(mOscReceiver, &angle);
 		media_cycle->setCameraRotation((float)angle);
-		media_cycle->setNeedsDisplay(1);
+		media_cycle->setNeedsDisplay(true);
 	}
 	else if(strcasecmp(tagName, "/audiocycle/1/browser/library/load") == 0)
 	{
@@ -494,18 +494,32 @@ void ACAudioCycleOsgQt::processOscMessage(const char* tagName)
 		lib_path = new char[500]; // wrong magic number!
 		osc_browser->readString(mOscReceiver, lib_path, 500); // wrong magic number!
 		std::cout << "Importing file library '" << lib_path << "'..." << std::endl;
-		media_cycle->importLibrary(lib_path);
-		media_cycle->normalizeFeatures();
-		media_cycle->libraryContentChanged();
+		media_cycle->importLibrary(lib_path); // XS instead of getImageLibrary CHECK THIS
+		//updateLibrary();
 		std::cout << "File library imported" << std::endl;
-		this->updateLibrary();
+		media_cycle->setReferenceNode(0);
+		// XSCF 250310 added these 3
+		media_cycle->pushNavigationState();
+		media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
+		media_cycle->getBrowser()->setState(AC_CHANGING);
+		
+		ui.browserOsgView->prepareFromBrowser();
+		media_cycle->setNeedsDisplay(true);
+		updatedLibrary = true;
 	}
 	else if(strcasecmp(tagName, "/audiocycle/1/browser/library/clear") == 0)
 	{
-		media_cycle->cleanLibrary();
-		media_cycle->cleanUserLog();
+		media_cycle->cleanLibrary(); // XS instead of getImageLibrary CHECK THIS
 		media_cycle->libraryContentChanged();
-		this->updateLibrary();
+		media_cycle->setReferenceNode(0);
+		// XSCF 250310 added these 3
+		media_cycle->pushNavigationState();
+		media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
+		media_cycle->getBrowser()->setState(AC_CHANGING);
+		
+		ui.browserOsgView->prepareFromBrowser();
+		media_cycle->setNeedsDisplay(true);
+		updatedLibrary = true;
 	}	
 	else if(strcasecmp(tagName, "/audiocycle/1/browser/recenter") == 0)
 	{

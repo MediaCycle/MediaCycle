@@ -72,6 +72,7 @@ void* p_importSingleFile(void *arg){
 	cout << data->filename << " ; " <<  data->id << " ; plugin size : " << data->acpl->getSize() << endl;
 	data->media->import(data->filename, data->id, data->acpl);
 }
+
 ACMediaLibrary::ACMediaLibrary() {
 	index_last_normalized = -1;
 	media_library.resize(0);
@@ -85,13 +86,16 @@ ACMediaLibrary::ACMediaLibrary(ACMediaType aMediaType) {
 }
 
 ACMediaLibrary::~ACMediaLibrary(){
-	// Clean up!
-	cleanLibrary();
-	/*std::vector<ACMedia*>::iterator iter;
+	this->deleteAllMedia();
+}
+
+void ACMediaLibrary::deleteAllMedia(){
+	// Clean up properly by calling destructor of each ACMedia*
+	std::vector<ACMedia*>::iterator iter; 
 	for (iter = media_library.begin(); iter != media_library.end(); iter++) { 
 		delete *iter; 
 	}
-	media_library.clear();*/
+	media_library.clear();	
 }
 
 int ACMediaLibrary::importDirectory(std::string _path, int _recursive, int id, ACPluginManager *acpl) {
@@ -356,11 +360,7 @@ void ACMediaLibrary::saveAsLibrary(string _path) {
 
 void ACMediaLibrary::cleanLibrary() {
 	cleanStats();
-	std::vector<ACMedia*>::iterator iter;
-	for (iter = media_library.begin(); iter != media_library.end(); iter++) {
-		delete *iter;
-	}
-	media_library.clear();
+	deleteAllMedia();
 }
 
 void ACMediaLibrary::cleanStats() {

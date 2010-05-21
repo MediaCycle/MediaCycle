@@ -46,7 +46,10 @@ using namespace osg;
 
 class ACOsgImageRenderer : public ACOsgMediaRenderer  {
 protected:
+	static const int NCOLORS ;
+	Vec4Array* colors;
 	Vec4Array* colors2;
+	Vec4Array* colors3;
 	
 	Image *image_image;
 	Geode* image_geode;

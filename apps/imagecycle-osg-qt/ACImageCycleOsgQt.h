@@ -41,9 +41,13 @@
 using namespace std;
 
 #include <QtGui>
+#include "settings.h" // SettingsDialog
+
 #include "ui_ACImageCycleOsgQt.h"
 #include <ACOsgBrowserViewQT.h>
 #include <MediaCycle.h>
+
+class SettingsDialog; // forward declaration; NB: SettingsDialog member has to be a pointer
 
 class ACImageCycleOsgQt : public QMainWindow
 	{
@@ -54,7 +58,10 @@ class ACImageCycleOsgQt : public QMainWindow
 		~ACImageCycleOsgQt();
 		void updateLibrary();
 		
-		private slots:
+		// XS test
+		void disBonjour(){cout << "bonjour" << endl;}
+
+	private slots:
         /* Insérez les prototypes de vos slots personnalisés ici */
 		void on_pushButtonLaunch_clicked(); // loadACLFile
 		void on_pushButtonClean_clicked();
@@ -65,21 +72,25 @@ class ACImageCycleOsgQt : public QMainWindow
 		void on_checkBoxFeat1_stateChanged(int state);
 		void on_checkBoxFeat2_stateChanged(int state);
 		void on_checkBoxFeat3_stateChanged(int state);
-		
+
+		void spinBoxClustersValueChanged(int _value);
+//		void on_sliderClusters_sliderMoved();
 		void on_sliderClusters_sliderReleased();
-		
+
 		void loadACLFile();
-		void saveACLFile();
+		void saveACLFile();		
 		void loadMediaDirectory();
 		void loadMediaFiles();
+		void editConfigFile();
 		
 	public:
 		MediaCycle *media_cycle;
-		
+		SettingsDialog *settingsDialog;
+
     private:
         Ui::ACImageCycleOsgQt ui;
 		bool updatedLibrary;
-		
+
 	protected:
 		//ACOsgBrowserViewQT* browserOsgView;
 	};

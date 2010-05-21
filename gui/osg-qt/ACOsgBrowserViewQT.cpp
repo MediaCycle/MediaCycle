@@ -199,7 +199,7 @@ void ACOsgBrowserViewQT::mousePressEvent( QMouseEvent* event )
 	media_cycle->getCameraPosition(refcamx, refcamy);
 	refzoom = media_cycle->getCameraZoom();
 	refrotation = media_cycle->getCameraRotation();
-	media_cycle->setNeedsDisplay(1);
+	media_cycle->setNeedsDisplay(true);
 }
 
 void ACOsgBrowserViewQT::mouseMoveEvent( QMouseEvent* event )
@@ -239,7 +239,7 @@ void ACOsgBrowserViewQT::mouseMoveEvent( QMouseEvent* event )
 			media_cycle->setCameraPosition(refcamx + xmove2/800/zoom , refcamy + ymove2/800/zoom);
 		}
 	}
-	media_cycle->setNeedsDisplay(1);
+	media_cycle->setNeedsDisplay(true);
 }
 
 void ACOsgBrowserViewQT::mouseReleaseEvent( QMouseEvent* event )
@@ -271,22 +271,25 @@ void ACOsgBrowserViewQT::mouseReleaseEvent( QMouseEvent* event )
 				
 				// XSCF 250310 added these 3
 				media_cycle->pushNavigationState();
-				media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
-				media_cycle->getBrowser()->setState(AC_CHANGING);
+
+				//			media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
+				//			media_cycle->getBrowser()->setState(AC_CHANGING);
 				
-				media_cycle->updateNeighborhoods();
-				media_cycle->updateClusters(false);// CF was true, equivalent to what's following
+				media_cycle->updateDisplay(true); //XS250310 was: media_cycle->updateClusters(true);
+				// XSCF 250310 removed this:
+				// media_cycle->updateNeighborhoods();
+				//	media_cycle->updateClusters(false);// CF was true, equivalent to what's following
 				
-				// remainders from updateClusters(true)
-				media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
-				media_cycle->getBrowser()->setState(AC_CHANGING);
+//				// remainders from updateClusters(true)
+//				media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
+//				media_cycle->getBrowser()->setState(AC_CHANGING);
 			}
 		}	
 		media_cycle->setClickedNode(-1);
 	}
 	forwarddown = 0;
 	mousedown = 0;
-	media_cycle->setNeedsDisplay(1);
+	media_cycle->setNeedsDisplay(true);
 }
 
 void ACOsgBrowserViewQT::prepareFromBrowser()

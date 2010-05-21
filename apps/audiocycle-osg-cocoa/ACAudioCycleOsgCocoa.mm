@@ -393,8 +393,8 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 	float	value = [inSender floatValue];
 	
 	media_cycle->setWeight(0, value);
-	media_cycle->updateClusters(true); 
-	media_cycle->setNeedsDisplay(true);
+	media_cycle->updateDisplay(true); //XS 250310 was: media_cycle->updateClusters(true);
+	// XS 310310 removed media_cycle->setNeedsDisplay(true); // now in updateDisplay
 
 }
 
@@ -403,8 +403,8 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 	float	value = [inSender floatValue];
 	
 	media_cycle->setWeight(1, value);
-	media_cycle->updateClusters(true); 
-	media_cycle->setNeedsDisplay(true);
+	media_cycle->updateDisplay(true); //XS 250310 was: media_cycle->updateClusters(true);
+	// XS 310310 removed media_cycle->setNeedsDisplay(true); // now in updateDisplay
 
 }
 
@@ -413,8 +413,8 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 	float	value = [inSender floatValue];
 	
 	media_cycle->setWeight(2, value);
-	media_cycle->updateClusters(true); 
-	media_cycle->setNeedsDisplay(true);
+	media_cycle->updateDisplay(true); //XS 250310 was: media_cycle->updateClusters(true);
+	// XS 310310 removed media_cycle->setNeedsDisplay(true); // now in updateDisplay
 
 }
 
@@ -424,8 +424,8 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 	
 	media_cycle->setClusterNumber(value);
 	// XSCF251003 added this
-	media_cycle->updateClusters(true);
-	media_cycle->setNeedsDisplay(true);
+	media_cycle->updateDisplay(true); //XS 250310 was: media_cycle->updateClusters(true);
+	// XS 310310 removed media_cycle->setNeedsDisplay(true); // now in updateDisplay
 	
 }
 
@@ -482,7 +482,7 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 		float ymove = y*cos(-angle)+x*sin(-angle);
 		media_cycle->setCameraPosition(xmove/2/zoom , ymove/2/zoom); // norm [-1;1] = 2 (instead of 100 from mediacycle-osg)
 		NSLog(@"zoom: %f setCameraPosition: %f %f",zoom,xmove/2/zoom ,ymove/2/zoom);
-		media_cycle->setNeedsDisplay(1);
+		media_cycle->setNeedsDisplay(true);
 	}
 	else if(strcasecmp(tagName, "/audiocycle/1/browser/1/hover/xy") == 0)
 	{

@@ -631,7 +631,7 @@ void ACAudioFeedback::threadAudioEngine()
 			
 			// TODO - this should be done less frequently than frame rate
 			if (media_cycle && isPlaying) {
-				media_cycle->setNeedsDisplay(1);
+				media_cycle->setNeedsDisplay(true);
 			}
 		}
 		
@@ -696,7 +696,7 @@ void ACAudioFeedback::processAudioUpdate()
 	for (i=0;i<(*mNeedsActivityUpdateMedia).size();i++) {
 		loop_id = (*mNeedsActivityUpdateMedia)[i];
 		const ACMediaNode &attribute = media_cycle->getMediaNode(loop_id);
-		const ACPoint &p = attribute.getCurrentPosition(), &p2 = attribute.getNextPosition();
+		const ACPoint &p = attribute.getCurrentPosition();
 		x=p.x;
 		y=0;
 		z=p.y;

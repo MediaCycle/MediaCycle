@@ -47,7 +47,7 @@ ACOsgTextRenderer::~ACOsgTextRenderer() {
 
 void ACOsgTextRenderer::textGeode() {
 	
-	StateSet *state;
+//	StateSet *state;
 	
 	osg::Vec4 textColor(0.9f,0.9f,0.9f,0.9f);
 	float textCharacterSize = 96.0f; // 10 pixels ? 

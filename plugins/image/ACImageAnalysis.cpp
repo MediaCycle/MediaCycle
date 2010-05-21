@@ -402,18 +402,10 @@ void ACImageAnalysis::computeColorMoments(int n){
 	color_moments.clear();
 	ACImageHistogram* tmp_hist  = new ACImageHistogram(imgp, color_model);
 	
-	tmp_hist->normalize(1);
+	//tmp_hist->normalize(1);
 	tmp_hist->computeStats();
 	tmp_hist->computeMoments(n);
-	
-	// normalized first 
-	//for (int i = 0; i < 3; i++){
-//		for (int j = 0; j < tmp_hist->getSize(); j++){
-//			// XS TODO : add option to store the moments of the histogram
-//			color_moments.push_back (tmp_hist->getValue(i,j)) ;
-//		}
-//	}
-		
+			
 	for (int i=1;i<=n;i++){
 		for (int channel=0; channel<this->getNumberOfChannels(); channel++){
 			color_moments.push_back (tmp_hist->getMoment(i)[channel]) ;
