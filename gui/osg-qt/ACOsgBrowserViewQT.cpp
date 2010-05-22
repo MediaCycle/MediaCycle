@@ -87,10 +87,12 @@ void ACOsgBrowserViewQT::resizeGL( int width, int height )
 	osg_view->resized(0,0,width,height);
 }
 
+// CF to do: understand paintGL vs updateGL to use them more correctly
 void ACOsgBrowserViewQT::paintGL()
 {
-	if (media_cycle->getBrowser()->getMode() == AC_MODE_CLUSTERS)
-		updateTransformsFromBrowser(0.0);
+	//CF to improve, we want to know if the view is being animated to force a frequent refresh of the positions:
+	if (media_cycle->getBrowser()->getState() == AC_CHANGING)
+		updateTransformsFromBrowser(media_cycle->getFrac());
 	frame();
 }
 
@@ -199,7 +201,7 @@ void ACOsgBrowserViewQT::mousePressEvent( QMouseEvent* event )
 	media_cycle->getCameraPosition(refcamx, refcamy);
 	refzoom = media_cycle->getCameraZoom();
 	refrotation = media_cycle->getCameraRotation();
-	media_cycle->setNeedsDisplay(1);
+	media_cycle->setNeedsDisplay(true);
 }
 
 void ACOsgBrowserViewQT::mouseMoveEvent( QMouseEvent* event )
@@ -220,6 +222,7 @@ void ACOsgBrowserViewQT::mouseMoveEvent( QMouseEvent* event )
 	float x, y;
 	x = event->x(); 
 	y = event->y();
+	
 	if ( (mousedown==1) && (forwarddown == 0) ) {
 		if ( zoomdown==1 ) {
 			media_cycle->setCameraZoom(refzoom - (y-refy)/50);
@@ -239,7 +242,7 @@ void ACOsgBrowserViewQT::mouseMoveEvent( QMouseEvent* event )
 			media_cycle->setCameraPosition(refcamx + xmove2/800/zoom , refcamy + ymove2/800/zoom);
 		}
 	}
-	media_cycle->setNeedsDisplay(1);
+	media_cycle->setNeedsDisplay(true);
 }
 
 void ACOsgBrowserViewQT::mouseReleaseEvent( QMouseEvent* event )
@@ -271,22 +274,25 @@ void ACOsgBrowserViewQT::mouseReleaseEvent( QMouseEvent* event )
 				
 				// XSCF 250310 added these 3
 				media_cycle->pushNavigationState();
-				media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
-				media_cycle->getBrowser()->setState(AC_CHANGING);
+
+				//			media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
+				//			media_cycle->getBrowser()->setState(AC_CHANGING);
 				
-				media_cycle->updateNeighborhoods();
-				media_cycle->updateClusters(false);// CF was true, equivalent to what's following
+				media_cycle->updateDisplay(true); //XS250310 was: media_cycle->updateClusters(true);
+				// XSCF 250310 removed this:
+				// media_cycle->updateNeighborhoods();
+				//	media_cycle->updateClusters(false);// CF was true, equivalent to what's following
 				
-				// remainders from updateClusters(true)
-				media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
-				media_cycle->getBrowser()->setState(AC_CHANGING);
+//				// remainders from updateClusters(true)
+//				media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
+//				media_cycle->getBrowser()->setState(AC_CHANGING);
 			}
 		}	
 		media_cycle->setClickedNode(-1);
 	}
 	forwarddown = 0;
 	mousedown = 0;
-	media_cycle->setNeedsDisplay(1);
+	media_cycle->setNeedsDisplay(true);
 }
 
 void ACOsgBrowserViewQT::prepareFromBrowser()

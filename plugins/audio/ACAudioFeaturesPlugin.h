@@ -56,4 +56,4 @@ public:
 private:
 };
 
-#endif	/* _ACVIDEOPLUGIN_H */
+#endif	/* _ACAUDIOFEATURESPLUGIN_H */

@@ -63,8 +63,8 @@ int main(int argc, char** argv) {
 	cout << "setCulsterN" << endl;
 	mediacycle->getBrowser()->setClusterNumber(1);
 	// XSCF251003 added this
-	mediacycle->updateClusters(true);
-	mediacycle->setNeedsDisplay(true);
+	mediacycle->updateDisplay(true); //XS 250310 was: media_cycle->updateClusters(true);
+	// XS250310 removed mediacycle->setNeedsDisplay(true); // now in updateDisplay
 	
 
 	//IMPORT DIRECTORY + SAVE IN LIBFILE
@@ -180,8 +180,8 @@ int main(int argc, char** argv) {
 	vector<ACMedia *> result;
 
 	mediacycle->getBrowser()->setWeight(0, 1.0);
-	mediacycle->updateClusters(true); 
-	mediacycle->setNeedsDisplay(true);
+	mediacycle->updateDisplay(true); //XS 250310 was: media_cycle->updateClusters(true);
+	// XS250310 removed mediacycle->setNeedsDisplay(true); // now in updateDisplay
 
 	for (int m=0;m<mediacycle->getLibrarySize();m++) {
 		mediacycle->getKNN(mediacycle->getLibrary()->getMedia(m), result, 11);

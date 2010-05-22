@@ -116,8 +116,8 @@ int main(int argc, char** argv) {
     mediabrowser->libraryContentChanged(); 
     mediabrowser->setClusterNumber(4);
 	// XSCF251003 added this
-	mediabrowser->updateClusters(true);
-	mediabrowser->setNeedsDisplay(true);
+	 mediacycle->updateDisplay(true); //XS 250310 was: media_cycle->updateClusters(true);
+	 // XS250310 removed mediacycle->setNeedsDisplay(true); // now in updateDisplay
 	//
     mediabrowser->setLibrary(medialib);
     mediabrowser->libraryContentChanged(); 

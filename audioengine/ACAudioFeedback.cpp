@@ -225,7 +225,14 @@ FILE *debug_vocoder;
 
 ACAudioFeedback::ACAudioFeedback()
 {
-
+	prev_scrub_pos = 0;
+	scrub_pos = 0;
+	prev_scrub_time = 0;
+	scrub_time = 0;
+	scrub_speed = 0;
+	reached_begin = 0;
+	reached_end = 0;
+	
 	engine_running = 0;
 	media_cycle = 0;
 	
@@ -310,7 +317,6 @@ void ACAudioFeedback::getDeviceList(std::vector<std::string>& devices)
         }
     }
 }
-
 
 void ACAudioFeedback::createOpenAL()
 {
@@ -564,7 +570,6 @@ void ACAudioFeedback::threadAudioEngine()
 	
 	timeCodeDone = 0;
 		
-	double sdtime, prevsdtime;
 	double sdsleep;
 	
 	// MACH thread priority set
@@ -626,7 +631,7 @@ void ACAudioFeedback::threadAudioEngine()
 			
 			// TODO - this should be done less frequently than frame rate
 			if (media_cycle && isPlaying) {
-				media_cycle->setNeedsDisplay(1);
+				media_cycle->setNeedsDisplay(true);
 			}
 		}
 		
@@ -691,7 +696,7 @@ void ACAudioFeedback::processAudioUpdate()
 	for (i=0;i<(*mNeedsActivityUpdateMedia).size();i++) {
 		loop_id = (*mNeedsActivityUpdateMedia)[i];
 		const ACMediaNode &attribute = media_cycle->getMediaNode(loop_id);
-		const ACPoint &p = attribute.getCurrentPosition(), &p2 = attribute.getNextPosition();
+		const ACPoint &p = attribute.getCurrentPosition();
 		x=p.x;
 		y=0;
 		z=p.y;
@@ -864,7 +869,42 @@ bool ACAudioFeedback::processAudioEngine()
 }
 
 void ACAudioFeedback::setScrub(float scrub) {
+	
+	float alpha;
+	float local_scrub_speed;
+	float delta_time;
+	struct timeval  tv = {0, 0};
+	struct timezone tz = {0, 0};
+	double current_scrub_time;
+	
+	alpha = 0.05;
+	
+	gettimeofday(&tv, &tz);
+	current_scrub_time = (double)tv.tv_sec + tv.tv_usec / 1000000.0;
+	current_scrub_time -= audio_engine_wakeup_time;
+	
+	prev_scrub_pos = scrub_pos;
 	scrub_pos = scrub / 100;
+	
+	prev_scrub_time = scrub_time;
+	scrub_time = current_scrub_time;
+	delta_time = scrub_time - prev_scrub_time;
+	
+	local_scrub_speed = (scrub_pos - prev_scrub_pos);
+	if (local_scrub_speed>0.5) {
+		local_scrub_speed -= 1.0;
+	}
+	else if (local_scrub_speed<-0.5) {
+		local_scrub_speed += 1.0;
+	}
+	local_scrub_speed /= delta_time;
+	local_scrub_speed *= 10;
+	if ( signbit(local_scrub_speed)==signbit(scrub_speed) ) {
+		scrub_speed = alpha*local_scrub_speed + (1-alpha)*scrub_speed;
+	}
+	else {
+		scrub_speed = local_scrub_speed;
+	}
 }
 
 // SD TODO - should be passed to this funciton: the buffer size + time code + normalize time code to buffer size + controler positions
@@ -941,7 +981,21 @@ void ACAudioFeedback::processAudioEngineSamplePosition(int _loop_slot, int *_sam
 			
 			break;
 		case ACAudioEngineSynchroModeManual:
-			*_sample_pos = (int)(scrub_pos * size / 100);
+			reached_end = 0;
+			reached_begin = 0;
+			//*_sample_pos = (int)(scrub_pos * size / 100);
+			*_sample_pos = prev_sample_pos[_loop_slot] + (output_buffer_size)*scrub_speed;
+			while (*_sample_pos>=size) {
+				reached_end = 1;
+				*_sample_pos -= size;
+			}
+			while (*_sample_pos<0) {
+				reached_begin = 1;
+				*_sample_pos += size;
+			}
+			if (sdtime-scrub_time>0.25) {
+				scrub_speed *= 0.9;
+			}
 			break;
 		case ACAudioEngineSynchroModeNone:
 			// no synchronization, just play the loop as it is
@@ -978,7 +1032,7 @@ void ACAudioFeedback::processAudioEngineResynth(int _loop_slot, int _sample_pos,
 	int loop_id;
 	int size;
 	int copied, local_pos, tocopy;
-	float local_pos_f;
+	float local_pos_f, local_pos_frac;
 	
 	loop_id = loop_ids[_loop_slot];
 	// audio_loop = media_cycle->getAudioLibrary()->getMedia(loop_id);
@@ -991,15 +1045,16 @@ void ACAudioFeedback::processAudioEngineResynth(int _loop_slot, int _sample_pos,
 	float pitch_ratio = 0;
 	
 	bpm_ratio = ((float)_sample_pos - (float)prev_sample_pos[_loop_slot]);
-	if (bpm_ratio<0) {
-		bpm_ratio += size;
-	}
-	bpm_ratio /= (float)output_buffer_size;
 	
 	// SD TODO - recover code to implements this
 	// SD TODO - this alsa has to resample to the selected output sample rate, for instance 44.1K
 	switch (loop_scale_mode[_loop_slot]) {
 		case ACAudioEngineScaleModeVocode:
+			
+			if (bpm_ratio<0) {
+				bpm_ratio += size;
+			}
+			bpm_ratio /= (float)output_buffer_size;
 			
 			memset(_output_buffer, 0, output_buffer_size*sizeof(short));
 
@@ -1143,13 +1198,24 @@ void ACAudioFeedback::processAudioEngineResynth(int _loop_slot, int _sample_pos,
 			// but still loops
 			// Scratch ... why do we need * 2.0
 			
+			if (reached_end) {
+				bpm_ratio += size;
+			}
+			else if (reached_begin) {
+				bpm_ratio -= size;
+			}
+			bpm_ratio /= (float)output_buffer_size;
+			
 			if (size>0) {
 				local_pos_f = prev_sample_pos[_loop_slot];
 				local_pos = floor(local_pos_f);
+				local_pos_frac = local_pos_f - local_pos;
 				//if (_sample_pos>=0) {
 				if (local_pos>=0) {
 					for (i=0;i<output_buffer_size;i++) {
-						_output_buffer[i] = loop_buffers_audio_engine[_loop_slot][local_pos];
+						_output_buffer[i] = (1.0-local_pos_frac)*(float)loop_buffers_audio_engine[_loop_slot][local_pos]
+											+(local_pos_frac)*(float)loop_buffers_audio_engine[_loop_slot][(local_pos+1)%size];
+						//_output_buffer[i] = loop_buffers_audio_engine[_loop_slot][local_pos];
 						local_pos_f += bpm_ratio;
 						if (local_pos_f>=size) {
 							local_pos_f -= size;
@@ -1157,7 +1223,7 @@ void ACAudioFeedback::processAudioEngineResynth(int _loop_slot, int _sample_pos,
 						if (local_pos_f<=0) {
 							local_pos_f = 0;
 						}
-							local_pos = floor(local_pos_f);
+						local_pos = floor(local_pos_f);
 					}
 				}
 				else {

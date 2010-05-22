@@ -52,9 +52,9 @@ void ACOsgNodeLinkRenderer::linkGeode(double to_x, double to_y) {
 	
 	int i;
 	float zpos = 0;
-	double xstep = 0.0005, ylim = 0.025;
+//	double xstep = 0.0005, ylim = 0.025;
 
-	int width = 4;
+//	int width = 4;
 	
 	StateSet *state;
 	
@@ -103,7 +103,7 @@ void ACOsgNodeLinkRenderer::prepareLinks() {
 
 void ACOsgNodeLinkRenderer::updateLinks(double ratio) {
 	
-	double xstep = 0.00025;
+//	double xstep = 0.00025;
 	
 #define NCOLORS 5
 	static Vec4 colors[NCOLORS];

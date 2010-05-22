@@ -40,6 +40,8 @@
 
 using namespace std;
 
+#define DEBUG_ME
+
 ACImageHistogram::ACImageHistogram(IplImage** channel_img, string _cmode, int _size, int _norm) {
 	initialize(channel_img, _cmode, _size, _norm);
 }
@@ -201,6 +203,9 @@ void ACImageHistogram::computeMoments(int highest_order){
 	for (int i = 0; i < 3; i++){
 		binsize[i] = (range[i][1]-range[i][0])/size;
 	}
+#ifdef DEBUG_ME
+	showStats();
+#endif // DEBUG_ME	
 	for (int n=3; n<=highest_order; n++){
 		double* mom;
 		mom = new double[3];
@@ -218,9 +223,12 @@ void ACImageHistogram::computeMoments(int highest_order){
 			else{
 				cout << "<ACImageHistogram::computeMoments> *WARNING* : channel " << i << " has zero stdev. cannot normalize moment" << endl;
 			}
+#ifdef DEBUG_ME
+			cout << "test moment order " << n << "for hist " << i << " : " << mom[i] << endl;
+#endif // DEBUG_ME
 			//mom[i] = mom[i] * pow(size,n-1);
 			//mom[i] = pow(mom[i], 1.0/n);
-			//cout << "test moment order " << n << "for hist " << i << " : " << mom[i] << endl;
+			
 		}
 		moments.push_back(mom);
 	}

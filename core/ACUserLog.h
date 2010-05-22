@@ -33,6 +33,9 @@
  *
  */
 
+#ifndef ACUSERLOG_H
+#define ACUSERLOG_H
+
 #include <algorithm>
 #include <string>
 #include <iostream>
@@ -76,3 +79,5 @@ private:
 	tree<ACMediaNode> userLogTree;
 	int mLastClickedNodeId;
 };
+
+#endif // ACUSERLOG_H

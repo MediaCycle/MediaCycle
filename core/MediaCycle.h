@@ -62,39 +62,45 @@ public:
     MediaCycle(const MediaCycle& orig);
     virtual ~MediaCycle();
 
+	// == TCP
     int startTcpServer(int port=12345, int max_connections=5);
     int startTcpServer(int port, int max_connections,ACNetworkSocketServerCallback aCallback);
     int stopTcpServer();
-    // Process incoming requests (addfile, getknn, ...)
-    int processTcpMessage(char* buffer, int l, char **buffer_send, int *l_send);
-    // Media Library
-    int importDirectory(std::string path, int recursive, int mid=-1);
+    int processTcpMessage(char* buffer, int l, char **buffer_send, int *l_send);     // Process incoming requests (addfile, getknn, ...)
+
+    // == Media Library
+    int importDirectory(std::string path, int recursive, int mid=0);
 	int importACLLibrary(std::string path);
     int importLibrary(std::string path);
-    // Plugins
-    int addPlugin(std::string aPluginPath);
+	int getLibrarySize(); // = getnumberofmedia
+	int getNumberOfMediaNodes();
+    ACMediaLibrary* getLibrary() { return mediaLibrary;}
+    string getLocalDirectoryPath() {return local_directory;}
+    string getLibName() {return libname;}
 
-    // Search by Similarity
+    // == Search by Similarity
     int getKNN(int id, vector<int> &ids, int k);
     int getKNN(ACMedia *aMedia, vector<ACMedia *> &result, int k);
 
     // Thumbnail
     string getThumbnailFileName(int id);
 
-    string getLocalDirectoryPath() {return local_directory;}
-    string getLibName() {return libname;}
-    ACMediaLibrary* getLibrary() { return mediaLibrary;}
+	// == Media Browser
     ACMediaBrowser* getBrowser() { return mediaBrowser;}
-    ACPluginManager* getPluginManager() { return pluginManager;}
+	void* hasBrowser();
+	ACBrowserMode getMode();
+	void setMode(ACBrowserMode _mode);
+
+	// Plugins
+    int addPlugin(std::string aPluginPath);
+	ACPluginManager* getPluginManager() { return pluginManager;}
     void setVisualisationPlugin(string pluginName);
 	void setNeighborhoodsPlugin(string pluginName);
-	void setPositionsPlugin(string pluginName);
+	void setPositionsPlugin(string pluginName);	
+	void dumpPluginsList();
 	
-	// API REQUIRED BY VISUAL and GUI
-	// 
-	int getLibrarySize(); // = getnumberofmedia
-	int getNumberOfMediaNodes();
-	
+	// == Media
+	const ACMediaNode &getMediaNode(int i);
 	string getMediaFileName(int i);
 	int getMediaType(int i);
 	int getThumbnailWidth(int i);
@@ -103,70 +109,74 @@ public:
 	int getHeight(int i);
 	void* getThumbnailPtr(int i);
 	int getNeedsDisplay();
-	void setNeedsDisplay(int i);
+	void setNeedsDisplay(bool _dis);
+	
+	// == view
+	void getMouse(float *mx, float *my);
 	float getCameraZoom();
 	float getCameraRotation();
-	const ACMediaNode &getMediaNode(int i);
-	int getNavigationLevel();
-	void getMouse(float *mx, float *my);
-	// 
-	void updateState();
-	void pushNavigationState();
-	float getFrac();
 	void setCameraRotation(float angle);
-	int getClickedNode();
-	void incrementLoopNavigationLevels(int i);
-	void setReferenceNode(int index);
-	void updateClusters(bool animate);
-	void updateNeighborhoods();
 	void setCameraPosition(float x, float y);
 	void getCameraPosition(float &x, float &y);
 	void setCameraZoom(float z);
 	void setCameraRecenter();
-	// 
+	void setAutoPlay(int i);
+	int getClickedNode();
+	void setClickedNode(int i);
+	void setClosestNode(int i);
+	int getClosestNode();
+	
+	// == Cluster Display
+	void updateState();
+	void pushNavigationState();
+	int getNavigationLevel();
+	float getFrac();
+	void incrementLoopNavigationLevels(int i);
+	void setReferenceNode(int index);
+	void goBack();
+	void goForward();
+	void setClusterNumber(int n);
+	void setWeight(int i, float weight);
+	void setForwardDown(int i);
+	
+	// == Features
 	void normalizeFeatures();
 	void openLibrary(string path);
 	void libraryContentChanged();
 	void saveAsLibrary(string path);
 	void saveACLLibrary(string path);
 	void cleanLibrary();
-	void cleanUserLog();
-	void goBack();
-	void goForward();
-	void setClusterNumber(int n);
-	void setWeight(int i, float weight);
-	void setForwardDown(int i);
-	// 
-	void setAutoPlay(int i);
-	void setClickedNode(int i);
-	void setClosestNode(int i);
-	int getClosestNode();
-	// 
-	void pickedObjectCallback(int pid);
-	void hoverObjectCallback(int pid);
-	void hoverCallback(float x, float y);
-	void muteAllSources();
-	//
-	void* hasBrowser();
-	// void setVisualisationPlugin(string pluginName);
-	//	int addPlugin(std::string aPluginPath);
+	// Get Features Vector (identified by feature_name) in media i 
+	vector<float> getFeaturesVectorInMedia(int i, string feature_name);
 		
-	// LABELS on VIEW
+	// == LABELS on VIEW
  	int getLabelSize();
 	string getLabelText(int i);
 	ACPoint getLabelPos(int i);
 	
-	// Get Features Vector (identified by feature_name) in media i 
-	vector<float> getFeaturesVectorInMedia(int i, string feature_name);
-	
-	// Playing time stamp
+	// == Playing time stamp
 	int setSourceCursor(int lid, int frame_pos);
-	
-	// Update audio engine sources
+	void muteAllSources();
+
+	// == Update audio engine sources
 	void setNeedsActivityUpdateLock(int i);
 	void setNeedsActivityUpdateRemoveMedia();	
 	vector<int>* getNeedsActivityUpdateMedia();
-	
+
+	// == callbacks
+	void pickedObjectCallback(int pid);
+	void hoverObjectCallback(int pid);
+	void hoverCallback(float x, float y);
+
+	// == NEW, replaces updateClusters and updateNeighborhoods
+	void updateDisplay(bool animate);
+	void readConfigFile(string fname);
+//	void dumpConfigFile();
+
+	// == User log
+	void cleanUserLog();
+
+
 private:
 	int forwarddown;
 	int port;
@@ -177,6 +187,7 @@ private:
     ACMediaBrowser *mediaBrowser;
     ACNetworkSocketServer *networkSocket;
     ACPluginManager *pluginManager;
+	string config_file;
 };
 
 #endif	/* _MEDIACYCLE_H */

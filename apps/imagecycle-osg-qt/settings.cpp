@@ -1,7 +1,9 @@
-/**
- * @brief ACNeighborhoodsPlugin.cpp
- * @author Xavier Siebert
- * @date 21/05/2010
+/* 
+ * File:   settings.cpp
+ * Author: xavier
+ * inspired from Qt's "browser" example
+ *
+ * @date 31/03/10
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -27,27 +29,29 @@
  * 
  * Any other additional authorizations may be asked to avre@umons.ac.be 
  * <mailto:avre@umons.ac.be>
-*/
+ */
 
-#include "ACNeighborhoodsPlugin.h"
+#include "settings.h"
 
-//using namespace arma;
-using namespace std;
-
-ACNeighborhoodsPlugin::ACNeighborhoodsPlugin() {
-    this->mMediaType = MEDIA_TYPE_MIXED; // ALL
-    this->mPluginType = PLUGIN_TYPE_NONE;
-    this->mName = "Neighborhoods";
-    this->mDescription = "Plugin for the computation of  neighborhoods";
-    this->mId = "";
-	
-    //local vars
+SettingsDialog::SettingsDialog(QWidget *parent) : QMainWindow(parent) {
+    setupUi(this);
+//    connect(buttonSaveLog, SIGNAL(clicked()), this, SLOT(saveLog()));
+//    connect(buttonSelectFeaturesPlugin, SIGNAL(clicked()), this, SLOT(selectFeaturesPlugins()));
+//    connect(buttonSelectVisualizationPlugin, SIGNAL(clicked()), this, SLOT(selectVisualizationPlugins()));
+//	connect(buttonSaveCurrentSettings, SIGNAL(clicked()), this, SLOT(saveCurrentSettings()));
+	connect(buttonSelectSaveConfigFile, SIGNAL(clicked()), this, SLOT(selectSaveConfigFile()));
 }
 
-ACNeighborhoodsPlugin::~ACNeighborhoodsPlugin() {
+
+void SettingsDialog::selectSaveConfigFile() {
+	QString _configFile = QFileDialog::getOpenFileName();
+	// TODO: try/catch
+	config_file = _configFile.toStdString();
+	lineEditSaveConfigFile->setText(_configFile);
+	lineEditSaveConfigFile->update();
 }
 
-void ACNeighborhoodsPlugin::updateNeighborhoods(ACMediaBrowser* mediaBrowser) {
-	int _clickednode = mediaBrowser->getClickedNode();
-	// TODO: pareto
+void SettingsDialog::setMediaCycleMainWindow(ACImageCycleOsgQt* _mc) {
+	//XS test
+	_mc->disBonjour() ;
 }

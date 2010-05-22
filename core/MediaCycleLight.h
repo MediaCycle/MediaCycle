@@ -87,7 +87,7 @@ public:
     // Process incoming tcp request from SSI (AVLaughterCycle)
     int processTcpMessageFromSSI(char* buffer, int l, char **buffer_send, int *l_send);
     // Media Library
-    int importDirectory(std::string path, int recursive, int mid=-1);
+    int importDirectory(std::string path, int recursive, int mid=0);
 	int importACLLibrary(std::string path);
     int importLibrary(std::string path);
     // Plugins
@@ -113,7 +113,7 @@ public:
 	int getHeight(int i);
 	void* getThumbnailPtr(int i);
 	int getNeedsDisplay();
-	void setNeedsDisplay(int i);
+	void setNeedsDisplay(bool _dis);
 	float getCameraZoom();
 	float getCameraRotation();
 	const ACMediaNode &getMediaNode(int i);

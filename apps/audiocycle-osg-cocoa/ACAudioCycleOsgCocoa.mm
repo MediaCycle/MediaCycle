@@ -39,21 +39,16 @@
 #import <ACAudioCycleOsgCocoa.h>
 
 ////
-/*
 @interface ACAudioCycleOsgCocoa ()
  - (void)processOscMessage:(const char*)tagName;
- @end
+@end
  
- static void osc_callback(TiOscReceiverRef, const char *tagName, void *userData)
- {
- ACAudioCycleOsgCocoa *self = (ACAudioCycleOsgCocoa*)userData;
- 
- //printf("osc received tag: %s\n", tagName);
- 
- [self processOscMessage:tagName];
- 
- }
-*/
+static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
+{
+	ACAudioCycleOsgCocoa *self = (ACAudioCycleOsgCocoa*)userData;
+	//printf("osc received tag: %s\n", tagName);
+	[self processOscMessage:tagName];
+}
 ////
 
 @implementation ACAudioCycleOsgCocoa
@@ -144,23 +139,24 @@
 		build_type = "Debug";
 	#endif
 	media_cycle->addPlugin("../../../plugins/audio/" + build_type + "/mc_audio.dylib");
-	media_cycle->addPlugin("../../../plugins/visualisation/" + build_type + "/mc_visualisation.dylib");
-	//media_cycle->setVisualisationPlugin("Visualisation");
-	//media_cycle->setVisualisationPlugin("PCAVis");
-	//media_cycle->setVisualisationPlugin("Vis2Desc");
-	//media_cycle->setNeighborhoodsPlugin("RandomNeighborhoods");
-	//media_cycle->setNeighborhoodsPlugin("EuclideanNeighborhoods");
-	//media_cycle->setNeighborhoodsPlugin("ParetoNeighborhoods");
-	//media_cycle->setNeighborhoodsPlugin("RandomNeighborhoods");
-	//media_cycle->setPositionsPlugin("NodeLinkTreeLayoutPositions");
-	//media_cycle->setPositionsPlugin("RadialTreeLayoutPositions");
-	
+	int vizplugloaded = media_cycle->addPlugin("../../../plugins/visualisation/" + build_type + "/mc_visualisation.dylib");
+	if ( vizplugloaded == 0 )
+	{
+		//media_cycle->setVisualisationPlugin("Visualisation");
+		//media_cycle->setVisualisationPlugin("PCAVis");
+		//media_cycle->setVisualisationPlugin("Vis2Desc");
+		//media_cycle->setNeighborhoodsPlugin("RandomNeighborhoods");
+		media_cycle->setNeighborhoodsPlugin("EuclideanNeighborhoods");
+		//media_cycle->setNeighborhoodsPlugin("ParetoNeighborhoods");
+		//media_cycle->setNeighborhoodsPlugin("RandomNeighborhoods");
+		//media_cycle->setPositionsPlugin("NodeLinkTreeLayoutPositions");
+		media_cycle->setPositionsPlugin("RadialTreeLayoutPositions");
+	}
 	audio_engine = new ACAudioFeedback();
 	audio_engine->setMediaCycle(media_cycle);
 
-	////osc_browser = new ACOscBrowser();
-	////osc_browser->setMediaCycle(media_cycle);
-	////osc_browser->start("localhost", 12345);
+	osc_feedback = NULL;
+	osc_browser = NULL;
 	
 	//media_cycle->importLibrary("/dupont/dancers.acl_copy");
 	//media_cycle->setClusterNumber(5);
@@ -185,6 +181,8 @@
 - (void)applicationWillTerminate:(NSNotification *)aNotification
 {
 	[browser_osg_view setPlaying:NO];
+	delete osc_browser;
+	delete osc_feedback;//osc_feedback destructor calls ACOscFeedback::release()
 	delete audio_engine;
 	delete media_cycle;
 }
@@ -255,7 +253,7 @@
 		
 		NSString* path = [paths objectAtIndex:0];
 		
-		media_cycle->importLibrary((string)[path UTF8String]); // XS instead of getImageLibrary CHECK THIS
+		media_cycle->importACLLibrary((string)[path UTF8String]); // XS instead of getImageLibrary CHECK THIS
 		media_cycle->normalizeFeatures();
 		media_cycle->libraryContentChanged();
 	}
@@ -306,34 +304,72 @@
 {
 	media_cycle->muteAllSources();
 }
-/*
-- (IBAction)	setOscIp:(id)inSender
+
+- (IBAction)	setOscControlIp:(id)inSender
 {
 	NSString* 	value = [inSender stringValue];
-	osc_ip = value;
-	NSLog(@"OSC IP: %s",osc_ip);
+	osc_control_ip = value;
+	NSLog(@"OSC IP: %s",osc_control_ip);
 }
 
-- (IBAction)	setOscPort:(id)inSender
+- (IBAction)	setOscControlPort:(id)inSender
 {
 	float 	value = [inSender floatValue];
-	osc_port = (int) value;
-	NSLog(@"OSC port: %i",osc_port);
+	osc_control_port = (int) value;
+	NSLog(@"OSC port: %i",osc_control_port);
 }
 
-- (IBAction)	setOscStatus:(id)inSender
+- (IBAction)	setOscControlStatus:(id)inSender
 {
-	NSLog(@"OSC server: %s %i",osc_ip,osc_port);
-	//int	value = [inSender intValue];
-	//if (value == 1)
-	//{
-	mOscReceiver = TiOscReceiverCreate((const char*)[osc_ip UTF8String], osc_port);
-	TiOscReceiverSetUserData(mOscReceiver, self);
-	TiOscReceiverSetCallback(mOscReceiver, osc_callback);
-	TiOscReceiverStart(mOscReceiver);
-	//}	
+	osc_control_ip = [mOscControlIp stringValue];
+	osc_control_port = [mOscControlPort intValue];
+	NSLog(@"OSC server: %s %i",osc_control_ip,osc_control_port);
+	int	value = [inSender intValue];
+	if (value == 1)
+	{
+		osc_browser = new ACOscBrowser();
+		mOscReceiver = osc_browser->create((const char*)[osc_control_ip UTF8String], osc_control_port);
+		osc_browser->setUserData(mOscReceiver, self);
+		osc_browser->setCallback(mOscReceiver, osc_callback);
+		osc_browser->start(mOscReceiver);
+	}
+	else
+	{
+		osc_browser->stop(mOscReceiver);
+	}
 }
-*/
+ 
+- (IBAction)	setOscFeedbackIp:(id)inSender
+{
+	NSString* 	value = [inSender stringValue];
+	osc_feedback_ip = value;
+	NSLog(@"OSC IP: %s",osc_feedback_ip);
+}
+ 
+- (IBAction)	setOscFeedbackPort:(id)inSender
+{
+	float 	value = [inSender floatValue];
+	osc_feedback_port = (int) value;
+	NSLog(@"OSC port: %i",osc_feedback_port);
+}
+ 
+- (IBAction)	setOscFeedbackStatus:(id)inSender
+{
+	osc_feedback_ip = [mOscFeedbackIp stringValue];
+	osc_feedback_port = [mOscFeedbackPort intValue];
+	NSLog(@"OSC server: %s %i",*osc_feedback_ip,osc_feedback_port);
+	int	value = [inSender intValue];
+	if (value == 1)
+	{
+		osc_feedback = new ACOscFeedback();
+		osc_feedback->create((const char*)[osc_feedback_ip UTF8String], osc_feedback_port);
+	}
+	else
+	{
+		osc_feedback->release();
+	}
+}
+
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // BROWSER
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -359,8 +395,8 @@
 	float	value = [inSender floatValue];
 	
 	media_cycle->setWeight(0, value);
-	media_cycle->updateClusters(true); 
-	media_cycle->setNeedsDisplay(true);
+	media_cycle->updateDisplay(true); //XS 250310 was: media_cycle->updateClusters(true);
+	// XS 310310 removed media_cycle->setNeedsDisplay(true); // now in updateDisplay
 
 }
 
@@ -369,8 +405,8 @@
 	float	value = [inSender floatValue];
 	
 	media_cycle->setWeight(1, value);
-	media_cycle->updateClusters(true); 
-	media_cycle->setNeedsDisplay(true);
+	media_cycle->updateDisplay(true); //XS 250310 was: media_cycle->updateClusters(true);
+	// XS 310310 removed media_cycle->setNeedsDisplay(true); // now in updateDisplay
 
 }
 
@@ -379,8 +415,8 @@
 	float	value = [inSender floatValue];
 	
 	media_cycle->setWeight(2, value);
-	media_cycle->updateClusters(true); 
-	media_cycle->setNeedsDisplay(true);
+	media_cycle->updateDisplay(true); //XS 250310 was: media_cycle->updateClusters(true);
+	// XS 310310 removed media_cycle->setNeedsDisplay(true); // now in updateDisplay
 
 }
 
@@ -390,8 +426,8 @@
 	
 	media_cycle->setClusterNumber(value);
 	// XSCF251003 added this
-	media_cycle->updateClusters(true);
-	media_cycle->setNeedsDisplay(true);
+	media_cycle->updateDisplay(true); //XS 250310 was: media_cycle->updateClusters(true);
+	// XS 310310 removed media_cycle->setNeedsDisplay(true); // now in updateDisplay
 	
 }
 
@@ -420,8 +456,6 @@
 	}
 }
 
-////
-/*
 - (void)processOscMessage:(const char*)tagName
 {
 	id pool = [NSAutoreleasePool new];
@@ -429,13 +463,20 @@
 	if(strcasecmp(tagName, "/audiocycle/test") == 0)
 	{
 		std::cout << "OSC communication established" << std::endl;
+		
+		if (osc_feedback)
+		{
+			osc_feedback->messageBegin("/audiocycle/received");
+			osc_feedback->messageEnd();
+			osc_feedback->messageSend();
+		}
 	}
 	else if(strcasecmp(tagName, "/audiocycle/1/browser/1/move/xy") == 0)
 	{
 		float x = 0.0, y = 0.0;
 		media_cycle->getCameraPosition(x,y);
-		TiOscReceiverReadFloat(mOscReceiver, &x);
-		TiOscReceiverReadFloat(mOscReceiver, &y);
+		osc_browser->readFloat(mOscReceiver, &x);
+		osc_browser->readFloat(mOscReceiver, &y);
 
 		float zoom = media_cycle->getCameraZoom();
 		float angle = media_cycle->getCameraRotation();
@@ -443,21 +484,32 @@
 		float ymove = y*cos(-angle)+x*sin(-angle);
 		media_cycle->setCameraPosition(xmove/2/zoom , ymove/2/zoom); // norm [-1;1] = 2 (instead of 100 from mediacycle-osg)
 		NSLog(@"zoom: %f setCameraPosition: %f %f",zoom,xmove/2/zoom ,ymove/2/zoom);
-		media_cycle->setNeedsDisplay(1);
+		media_cycle->setNeedsDisplay(true);
 	}
 	else if(strcasecmp(tagName, "/audiocycle/1/browser/1/hover/xy") == 0)
 	{
 		float x = 0.0, y = 0.0;
-		TiOscReceiverReadFloat(mOscReceiver, &x);
-		TiOscReceiverReadFloat(mOscReceiver, &y);
+		osc_browser->readFloat(mOscReceiver, &x);
+		osc_browser->readFloat(mOscReceiver, &y);
 		
 		media_cycle->hoverCallback(x,y);
+		int closest_node = media_cycle->getClosestNode();
+		//CF debug the objective-c accessor on renderer!
+		/*float distance = browser_osg_view.renderer->getDistanceMouse()[closest_node];
+		if (osc_feedback)
+		{
+			osc_feedback->messageBegin("/audiocycle/closest_node_at");
+			osc_feedback->messageAppendFloat(distance);
+			osc_feedback->messageEnd();
+			osc_feedback->messageSend();
+		}
+		*/
 		//media_cycle->setNeedsDisplay(1);
 	}
 	else if(strcasecmp(tagName, "/audiocycle/1/browser/1/move/zoom") == 0)
 	{
-		float zoom, refzoom = media_cycle->getCameraZoom();
-		TiOscReceiverReadFloat(mOscReceiver, &zoom);
+		float zoom;//, refzoom = media_cycle->getCameraZoom();
+		osc_browser->readFloat(mOscReceiver, &zoom);
 		//zoom = zoom*600/50; // refzoom +
 		media_cycle->setCameraZoom((float)zoom);
 		media_cycle->setNeedsDisplay(1);
@@ -465,7 +517,7 @@
 	else if(strcasecmp(tagName, "/audiocycle/1/browser/1/move/angle") == 0)
 	{
 		float angle;//, refangle = media_cycle->getCameraRotation();
-		TiOscReceiverReadFloat(mOscReceiver, &angle);
+		osc_browser->readFloat(mOscReceiver, &angle);
 		media_cycle->setCameraRotation((float)angle);
 		media_cycle->setNeedsDisplay(1);
 	}
@@ -473,14 +525,18 @@
 	{
 		char *lib_path = NULL;
 		lib_path = new char[500]; // wrong magic number!
-		TiOscReceiverReadString(mOscReceiver, lib_path, 500); // wrong magic number!
+		osc_browser->readString(mOscReceiver, lib_path, 500); // wrong magic number!
 		std::cout << "Importing file library '" << lib_path << "'..." << std::endl;
-		media_cycle->importLibrary(lib_path); // XS instead of getImageLibrary CHECK THIS
+		media_cycle->importACLLibrary(lib_path);
+		media_cycle->normalizeFeatures();
+		media_cycle->libraryContentChanged();
+		std::cout << "File library imported" << std::endl;
 		[self updatedLibrary]; // change for non-objective-c code
 	}
 	else if(strcasecmp(tagName, "/audiocycle/1/browser/library/clear") == 0)
 	{
-		media_cycle->cleanLibrary(); // XS instead of getImageLibrary CHECK THIS
+		media_cycle->cleanLibrary();
+		media_cycle->cleanUserLog();
 		media_cycle->libraryContentChanged();
 		[self updatedLibrary]; // change for non-objective-c code
 	}	
@@ -499,8 +555,9 @@
 	else if(strcasecmp(tagName, "/audiocycle/1/player/1/bpm") == 0)
 	{
 		float bpm;
-		TiOscReceiverReadFloat(mOscReceiver, &bpm);
-		int clicked_node = media_cycle->getClickedNode();
+		osc_browser->readFloat(mOscReceiver, &bpm);
+		//int clicked_node = media_cycle->getClickedNode();
+		int clicked_node = media_cycle->getClosestNode();
 		if (clicked_node > -1)
 		{
 			audio_engine->setLoopSynchroMode(clicked_node, ACAudioEngineSynchroModeAutoBeat);
@@ -511,45 +568,42 @@
 	else if(strcasecmp(tagName, "/audiocycle/1/player/1/scrub") == 0)
 	{
 		float scrub;
-		TiOscReceiverReadFloat(mOscReceiver, &scrub);
+		osc_browser->readFloat(mOscReceiver, &scrub);
 		
-		 int clicked_node = media_cycle->getClickedNode();
+		//int clicked_node = media_cycle->getClickedNode();
+		int clicked_node = media_cycle->getClosestNode();
 		 if (clicked_node > -1)
 		 {
 			 //media_cycle->pickedObjectCallback(-1);
 			 audio_engine->setLoopSynchroMode(clicked_node, ACAudioEngineSynchroModeManual);
-			 audio_engine->setLoopScaleMode(clicked_node, ACAudioEngineScaleModeVocode);
-			 audio_engine->setScrub((float)scrub*10000); // temporary hack to scrub between 0 an 1
+			 audio_engine->setLoopScaleMode(clicked_node, ACAudioEngineScaleModeResample);//ACAudioEngineScaleModeVocode
+			 audio_engine->setScrub((float)scrub*100); // temporary hack to scrub between 0 an 1
 		 }
 	}
 	else if(strcasecmp(tagName, "/audiocycle/1/player/1/pitch") == 0)
 	{
 		float pitch;
-		TiOscReceiverReadFloat(mOscReceiver, &pitch);
+		osc_browser->readFloat(mOscReceiver, &pitch);
 	
-		int clicked_node = media_cycle->getClickedNode();
+		//int clicked_node = media_cycle->getClickedNode();
+		int clicked_node = media_cycle->getClosestNode();
 		if (clicked_node > -1)
 		{
-			
 			//if (!is_pitching)
 			//{	
 			//	is_pitching = true;
 			//	is_scrubing = false;
-			 
-				//media_cycle->pickedObjectCallback(-1);
-				audio_engine->setLoopSynchroMode(clicked_node, ACAudioEngineSynchroModeAutoBeat);
-				audio_engine->setLoopScaleMode(clicked_node, ACAudioEngineScaleModeResample);
+			//media_cycle->pickedObjectCallback(-1);
+			audio_engine->setLoopSynchroMode(clicked_node, ACAudioEngineSynchroModeAutoBeat);
+			audio_engine->setLoopScaleMode(clicked_node, ACAudioEngineScaleModeResample);
 			//}
 			audio_engine->setSourcePitch(clicked_node, (float) pitch); 
 		}
 		 
 	}
-
 	// ...
-	 //void setKey(int key);
-
+	//void setKey(int key);
 	[pool release];
 }
 ////
-*/
 @end

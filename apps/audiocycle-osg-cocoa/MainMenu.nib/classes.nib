@@ -67,6 +67,18 @@
 				<string>id</string>
 				<key>setOpen</key>
 				<string>id</string>
+				<key>setOscControlIp</key>
+				<string>id</string>
+				<key>setOscControlPort</key>
+				<string>id</string>
+				<key>setOscControlStatus</key>
+				<string>id</string>
+				<key>setOscFeedbackIp</key>
+				<string>id</string>
+				<key>setOscFeedbackPort</key>
+				<string>id</string>
+				<key>setOscFeedbackStatus</key>
+				<string>id</string>
 				<key>setOscIp</key>
 				<string>id</string>
 				<key>setOscPort</key>
@@ -170,20 +182,18 @@
 				<string>NSTextField</string>
 				<key>mListenerZVelocity</key>
 				<string>NSTextField</string>
-				<key>mMediaBPM</key>
+				<key>mOscControlIp</key>
 				<string>NSTextField</string>
-				<key>mMediaFileName</key>
+				<key>mOscControlPort</key>
 				<string>NSTextField</string>
-				<key>mMediaKey</key>
+				<key>mOscControlStatus</key>
+				<string>NSButton</string>
+				<key>mOscFeedbackIp</key>
 				<string>NSTextField</string>
-				<key>mMediaTimeSignature</key>
+				<key>mOscFeedbackPort</key>
 				<string>NSTextField</string>
-				<key>mMediaTimestampBegin</key>
-				<string>NSTextField</string>
-				<key>mMediaTimestampEnd</key>
-				<string>NSTextField</string>
-				<key>mMediaUserTags</key>
-				<string>NSTextField</string>
+				<key>mOscFeedbackStatus</key>
+				<string>NSButton</string>
 				<key>mOscIp</key>
 				<string>NSTextField</string>
 				<key>mOscPort</key>

@@ -72,7 +72,7 @@ int ACImage::computeThumbnail(string _fname, int w, int h){
 	}
 	thumbnail_width = w;
 	thumbnail_height = h;
-	//	cvReleaseImage(&imgp_full);
+	cvReleaseImage(&imgp_full); // because  cvLoadImage == new()
 	return 1;
 }
 
@@ -92,12 +92,12 @@ int ACImage::computeThumbnail(ACMediaData* data_ptr, int w, int h){
 	}
 	thumbnail_width = w;
 	thumbnail_height = h;
-//	cvReleaseImage(&imgp_full);
+	// *NOT* cvReleaseImage(&imgp_full); // because there is no new, we just access data_ptr->getImageData();
 	return 1;
 }
 
 ACMediaData* ACImage::extractData(string fname){
-	// XS todo : store the default header (16 below) size somewhere...
+	// XS todo : store the default header (16 or 64 below) size somewhere...
 	ACMediaData* image_data = new ACMediaData(fname, MEDIA_TYPE_IMAGE);
 	computeThumbnail(image_data, 64, 64);
 	width = thumbnail_width;
@@ -123,7 +123,7 @@ void ACImage::saveACL(ofstream &library_file) {
 	library_file << n_features << endl;
 	for (int i=0; i<n_features;i++) {
 		int n_features_elements = features_vectors[i]->getSize();
-		library_file << features_vectors[i]->getName() << endl;
+//		library_file << features_vectors[i]->getName() << endl;
 		library_file << n_features_elements << endl;
 		for (int j=0; j<n_features_elements; j++) {
 			library_file << features_vectors[i]->getFeatureElement(j) << "\t";
@@ -134,12 +134,18 @@ void ACImage::saveACL(ofstream &library_file) {
 
 // C++ version
 // loads from an existing (i.e. already opened) acl file
+// returns 0 if error (trying to open empty file, failed making thumbnail, ...)
+// returns 1 if fine
+// return value is used in ACMediaLibrary::openACLLibrary
+
 int ACImage::loadACL(ifstream &library_file) {
 	if (! library_file.is_open()) {
 		cerr << "<ACImage::loadACL> : problem loading image from ACL file, it needs to be opened before" << endl;
+		return 0;
 	}		
 	if (!library_file.good()){
 		cerr << "<ACImage::loadACL> : bad library file" << endl;
+		return 0;
 	}
 	library_file >> filename ;
 //	library_file >> filename_thumbnail;
@@ -165,7 +171,11 @@ int ACImage::loadACL(ifstream &library_file) {
 			features_vectors[i]->setFeatureElement(j, local_feature);
 		}
 	}
-	// XS TODO check if errors and return 0/1
+	if (computeThumbnail(filename, height, width) != 1){
+		cerr << "<ACImage::load> : problem computing thumbnail" << endl;
+		return 0;
+	}
+	return 1;
 }
 
 

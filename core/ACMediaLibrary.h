@@ -98,9 +98,10 @@ public:
 	void cleanLibrary();
 	void cleanStats();
 
-	// pthreads
-//	void* p_importSingleFile(void *arg);
-
+	// XS TODO: add pthreads
+	//	void* p_importSingleFile(void *arg);
+private:
+	void deleteAllMedia();
 };
 
 #endif // ACMEDIALIBRARY_H

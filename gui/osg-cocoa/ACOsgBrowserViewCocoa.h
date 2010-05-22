@@ -63,4 +63,6 @@
 // needs to be called when image positions are changed
 - (void)updateTransformsFromBrowser:(double)frac;
 
+- (ACOsgBrowserRenderer*) renderer;
+
 @end

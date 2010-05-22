@@ -179,7 +179,7 @@ ACMediaBrowser::ACMediaBrowser() {
 }
 
 ACMediaBrowser::~ACMediaBrowser() {
-	// XS TODO delete mLoopAttributes
+	// XS TODO delete mLoopAttributes if vector of pointers <*>
 	pthread_mutex_destroy(&activity_update_mutex);
 	delete mUserLog;
 }
@@ -189,9 +189,10 @@ int ACMediaBrowser::getLabelSize() {
 }
 
 void ACMediaBrowser::setLabel(int i, string text, ACPoint pos) {
-	if (mLabelAttributes.size()<=i) {
-		mLabelAttributes.resize(i+1);
-	}
+	// XS 260310 removed this ugly if : if you want to append, don't set
+//	if (mLabelAttributes.size()<=i) {
+//		mLabelAttributes.resize(i+1);
+//	}
 	mLabelAttributes[i].text = text;
 	mLabelAttributes[i].size = 1.0;
 	mLabelAttributes[i].pos = pos;
@@ -205,7 +206,6 @@ ACPoint ACMediaBrowser::getLabelPos(int i) {
 	return mLabelAttributes[i].pos;
 }
 
-// memory/context
 void ACMediaBrowser::goBack()
 {
 	printf("backward\n");
@@ -290,7 +290,6 @@ float ACMediaBrowser::getWeight(int i){
 
 void ACMediaBrowser::setClusterNumber(int n)
 {
-	// SD TODO
 	mClusterCount = n;
 	// XSCF 250310 removed this
 //	updateClusters(true);
@@ -315,7 +314,12 @@ void ACMediaBrowser::setClickedLabel(int ilabel){
 
 // XS 250310 was: setNodePosition
 void ACMediaBrowser::setNodeNextPosition(int node_id, float x, float y, float z){
-	this->getMediaNode(node_id).setNextPosition(x,y,z);
+	if (node_id>=0 && node_id < this->getNumberOfMediaNodes()) {
+		this->getMediaNode(node_id).setNextPosition(x,y,z);
+	}	
+	else {
+		cerr << "ACMediaBrowser::setNodeNextPosition : wrong node ID:" << node_id << endl;
+	}
 }
 
 void ACMediaBrowser::setLabelPosition(int label_id, float x, float y, float z){
@@ -364,11 +368,11 @@ void ACMediaBrowser::resetLoopNavigationLevels() {
 void ACMediaBrowser::incrementLoopNavigationLevels(int loopIndex) {
 	int n=getNumberOfMediaNodes(),clusterIndex;
 	
-	// XS which if goes first ?
+	// XS TODO: which if goes first ? do we still want to reset if we have a wrong loop_index ?
 	if (mNavigationLevel==0)
 		resetLoopNavigationLevels();
 	
-	if(!(loopIndex >= 0 && loopIndex < n)) return;
+	if(!(loopIndex >= 0 && loopIndex < n))  return;
 	
 	clusterIndex = this->getMediaNode(loopIndex).getClusterId();	
 	if(clusterIndex < 0 || clusterIndex >= mClusterCount) return;
@@ -505,6 +509,7 @@ void ACMediaBrowser::libraryContentChanged() {
 		return;
 	}
 	
+	// XS TODO randomiwe positions only at the beginning...
 	if (mVisPlugin==NULL && mPosPlugin==NULL) {	
 		for (ACMediaNodes::iterator node = mLoopAttributes.begin(); node != mLoopAttributes.end(); ++node){
 			(*node).setCurrentPosition (ACRandom(), 
@@ -533,13 +538,13 @@ void ACMediaBrowser::libraryContentChanged() {
 	}
 	mFeatureWeights[0] = 1.0;//SD temporary hack before config filing
 
-	updateNeighborhoods();
-	updateClusters(false);
-	if (mNeighborsPlugin==NULL) {	//CF to replace by mode check (neighborhoods vs clusters)
-		updateNextPositions();//CF	
-		//setState(AC_CHANGING);
-		setNeedsDisplay(true);//CF
-	}	
+	// XS 250310 cleaned these 4:
+//	updateNeighborhoods();
+//	updateClusters(false);
+//	updateNextPositions();		
+//	setNeedsDisplay(true);
+	// into:
+	updateDisplay(true);
 }
 
 	
@@ -727,6 +732,7 @@ void ACMediaBrowser::updateClusters(bool animate){
 			initClusterCenters();
 			//std::cout << "UpdateClusters : Plugin" << std::endl;
 			mVisPlugin->updateClusters(this);
+			//XS TODO check this
 			if(animate) {
 				updateNextPositions();
 				//commitPositions();
@@ -830,7 +836,8 @@ void ACMediaBrowser::updateClustersKMeans(bool animate) {
 
 	int object_count = mLibrary->getSize();
 	
-	// XS TODO problem if all media don't have the same number of features
+	// XS note: problem if all media don't have the same number of features
+	//          but we suppose it is not going to happen
 	int feature_count = mLibrary->getMedia(0)->getNumberOfFeaturesVectors();
 	double inv_weight = 0.0;
 		
@@ -1285,8 +1292,6 @@ vector<int>* ACMediaBrowser::getNeedsActivityUpdateMedia() {
 	return &mNeedsActivityUpdateMedia;
 }
 
-
-// XS NEW 100310
 ACMediaNode& ACMediaBrowser::getMediaNode(int i) {
 // XS TODO check on bounds
 // XS TODO mLoopAttributes is not necessarily a vector anymore --> tree
@@ -1316,3 +1321,56 @@ void ACMediaBrowser::initializeNodes(int _defaultNodeId){ // default = 0
 		}
 	}
 }
+
+// XS 260310 new way to manage update of clusters, positions, neighborhoods, ...
+void ACMediaBrowser::updateDisplay(bool animate){
+	switch ( mMode ){
+		case AC_MODE_CLUSTERS:
+			//XS TODO check this
+			if(animate) {
+				setState(AC_CHANGING);
+			}
+			if (mVisPlugin != NULL){
+				mVisPlugin->updateNextPositions(this);
+			}
+			else {
+				updateClustersKMeans(animate); // = neighborhood
+				updateNextPositionsPropeller(); // = positions
+			}
+			break;
+		case AC_MODE_NEIGHBORS:
+			/*
+			if (mPosPlugin != NULL){
+				mPosPlugin->updateNextPositions(this);
+				//XS TODO check this
+				if(animate) {
+					setState(AC_CHANGING);
+				}
+			}
+			*/
+			if(animate) {
+				setState(AC_CHANGING);
+			}
+			
+			if (mNeighborsPlugin != NULL){
+				mNeighborsPlugin->updateNeighborhoods(this);
+			}
+			else {
+				cout << "No neighboorhood plugin set" << endl; // XS default ?
+			}
+			
+			if (mPosPlugin != NULL){
+				mPosPlugin->updateNextPositions(this);
+			}
+			break;
+		default:
+			cerr << "unknown browser mode: " << mMode << endl;
+			break;
+	}
+	this->setNeedsDisplay(true);
+	
+	// TODO: SD/XS check this
+//	if (mGridPlugin != NULL){
+//		mGridPlugin->setProximityGrid();
+//	}
+}	

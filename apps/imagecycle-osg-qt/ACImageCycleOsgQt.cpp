@@ -42,18 +42,19 @@ ACImageCycleOsgQt::ACImageCycleOsgQt(QWidget *parent)
  updatedLibrary(false)
 {
 	ui.setupUi(this); // first thing to do
-	media_cycle = new MediaCycle(MEDIA_TYPE_IMAGE,"/tmp/","mediacycle.acl");
 
-	// XS TODO fichier de configuration
+	media_cycle = new MediaCycle(MEDIA_TYPE_IMAGE,"/tmp/","mediacycle.acl");
+	
+	// XS TODO detect if fichier de configuration
+	// if not, set default options
+	media_cycle->setMode(AC_MODE_CLUSTERS);
+
 	#if defined(__APPLE__)
 		std::string build_type ("Release");
 		#ifdef USE_DEBUG
 			build_type = "Debug";
 		#endif
-		//media_cycle->addPlugin("../../../plugins/image/" + build_type + "/libimage.dylib");
-		//media_cycle->setNeighborhoodsPlugin("RandomNeighborhoods");
-		//media_cycle->setNeighborhoodsPlugin("EuclideanNeighborhoods");
-		//media_cycle->setPositionsPlugin("NodeLinkTreeLayoutPositions");
+		media_cycle->addPlugin("../../../plugins/image/" + build_type + "/mc_image.dylib");
 	#endif
 	
 	ui.browserOsgView->move(0,20);
@@ -65,8 +66,17 @@ ACImageCycleOsgQt::ACImageCycleOsgQt(QWidget *parent)
 	connect(ui.actionLoad_Media_Files, SIGNAL(triggered()), this, SLOT(loadMediaFiles()));
 	connect(ui.actionLoad_ACL, SIGNAL(triggered()), this, SLOT(on_pushButtonLaunch_clicked()));
 	connect(ui.actionSave_ACL, SIGNAL(triggered()), this, SLOT(saveACLFile()));
+	connect(ui.actionEdit_Config_File, SIGNAL(triggered()), this, SLOT(editConfigFile()));
+
+	// connect spinBox and slider
+	connect(ui.spinBoxClusters, SIGNAL(valueChanged(int)), this, SLOT(spinBoxClustersValueChanged(int)));
+	connect(ui.sliderClusters, SIGNAL(valueChanged(int)), ui.spinBoxClusters , SIGNAL(valueChanged(int)));
+
+	settingsDialog = new SettingsDialog(parent);
+	settingsDialog->setMediaCycleMainWindow(this);
 
 	this->show();
+	
 	//ui.browserOsgView->setFocus();
 }
 
@@ -78,10 +88,11 @@ ACImageCycleOsgQt::~ACImageCycleOsgQt()
 
 void ACImageCycleOsgQt::updateLibrary()
 {	
+	media_cycle->libraryContentChanged(); 	
 	media_cycle->setReferenceNode(0);
 	// XSCF 250310 added these 3
 	media_cycle->pushNavigationState();
-	media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
+	//media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
 	media_cycle->getBrowser()->setState(AC_CHANGING);
 	
 	ui.browserOsgView->prepareFromBrowser();
@@ -100,7 +111,6 @@ void ACImageCycleOsgQt::on_pushButtonClean_clicked()
 {
 	media_cycle->cleanUserLog();
 	media_cycle->cleanLibrary();
-	media_cycle->libraryContentChanged();
 	this->updateLibrary();
 	//ui.browserOsgView->setFocus();
 }	
@@ -128,8 +138,8 @@ void ACImageCycleOsgQt::on_checkBoxFeat1_stateChanged(int state)
 	if (updatedLibrary)
 	{
 		media_cycle->setWeight(0,state/2.0f);
-		media_cycle->updateClusters(true); 
-		media_cycle->setNeedsDisplay(true);
+		media_cycle->updateDisplay(true); //XS 250310 was: media_cycle->updateClusters(true);
+		// XS250310 removed mediacycle->setNeedsDisplay(true); // now in updateDisplay
 
 		ui.browserOsgView->updateTransformsFromBrowser(0.0); 
 	}
@@ -141,8 +151,8 @@ void ACImageCycleOsgQt::on_checkBoxFeat2_stateChanged(int state)
 	if (updatedLibrary)
 	{
 		media_cycle->setWeight(1,state/2.0f);
-		media_cycle->updateClusters(true); 
-		media_cycle->setNeedsDisplay(true);
+		media_cycle->updateDisplay(true); //XS 250310 was: media_cycle->updateClusters(true);
+		// XS 310310 removed media_cycle->setNeedsDisplay(true); // now in updateDisplay
 
 		ui.browserOsgView->updateTransformsFromBrowser(0.0); 
 	}
@@ -154,23 +164,36 @@ void ACImageCycleOsgQt::on_checkBoxFeat3_stateChanged(int state)
 	if (updatedLibrary)
 	{
 		media_cycle->setWeight(2,state/2.0f);
-		media_cycle->updateClusters(true); 
-		media_cycle->setNeedsDisplay(true);
+		media_cycle->updateDisplay(true); //XS 250310 was: media_cycle->updateClusters(true);
+		// XS 310310 removed media_cycle->setNeedsDisplay(true); // now in updateDisplay
 
 		ui.browserOsgView->updateTransformsFromBrowser(0.0); 
 	}
 	//ui.browserOsgView->setFocus();
 }
 
-void ACImageCycleOsgQt::on_sliderClusters_sliderReleased()
+// this one is too slow when many items
+//void ACImageCycleOsgQt::on_sliderClusters_sliderMoved(){
+//	// for synchronous display of values 
+//	ui.spinBoxClusters->setValue(ui.sliderClusters->value());
+//}
+
+void ACImageCycleOsgQt::on_sliderClusters_sliderReleased(){
+	// for synchronous display of values 
+	ui.spinBoxClusters->setValue(ui.sliderClusters->value());
+}
+
+void ACImageCycleOsgQt::spinBoxClustersValueChanged(int _value)
 {
-	std::cout << "ClusterNumber: " << ui.sliderClusters->value() << std::endl;
+	ui.sliderClusters->setValue(_value); 	// for synchronous display of values 
+
+	std::cout << "ClusterNumber: " << _value << std::endl;
 	if (updatedLibrary){
-		media_cycle->setClusterNumber(ui.sliderClusters->value());
+		media_cycle->setClusterNumber(_value);
 		// XSCF251003 added this
-		media_cycle->updateClusters(true);
-		media_cycle->setNeedsDisplay(true);
-		ui.browserOsgView->updateTransformsFromBrowser(0.0);
+		media_cycle->updateDisplay(true); //XS 250310 was: media_cycle->updateClusters(true);
+		// XS 310310 removed media_cycle->setNeedsDisplay(true); // now in updateDisplay
+		ui.browserOsgView->updateTransformsFromBrowser(1.0);
 	}
 	//ui.browserOsgView->setFocus();
 }
@@ -199,13 +222,9 @@ void ACImageCycleOsgQt::loadACLFile(){
 	if (!(fileName.isEmpty())) {
 		media_cycle->importLibrary((char*) fileName.toStdString().c_str());
 		media_cycle->normalizeFeatures();
-		media_cycle->libraryContentChanged();
 		std::cout << "File library imported" << std::endl;
-		//media_cycle->libraryContentChanged();
 		this->updateLibrary();
-	}
-	//ui.browserOsgView->setFocus();
-
+	}	
 }
 
 void ACImageCycleOsgQt::saveACLFile(){
@@ -244,7 +263,6 @@ void ACImageCycleOsgQt::loadMediaDirectory(){
 	// with this function call here, do not import twice!!!
 	// XS TODO: what if we add a new directory to the existing library ?
 	media_cycle->normalizeFeatures();
-	media_cycle->libraryContentChanged(); 	
 	this->updateLibrary();
 	//ui.browserOsgView->setFocus();
 	
@@ -269,4 +287,10 @@ void ACImageCycleOsgQt::loadMediaDirectory(){
 
 void ACImageCycleOsgQt::loadMediaFiles(){
 	//ui.browserOsgView->setFocus();
+}
+
+void ACImageCycleOsgQt::editConfigFile(){
+	cout << "Editing config file with GUI..." << endl;
+	settingsDialog->show();
+	settingsDialog->setFocus();
 }

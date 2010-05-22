@@ -37,6 +37,8 @@
 
 #define IMAGE_BORDER
 
+const int ACOsgImageRenderer::NCOLORS = 5;
+
 osg::Image* Convert_OpenCV_TO_OSG_IMAGE(IplImage* cvImg)
 {
 	
@@ -93,9 +95,32 @@ osg::Image* Convert_OpenCV_TO_OSG_IMAGE(IplImage* cvImg)
 ACOsgImageRenderer::ACOsgImageRenderer() {
 	
 	image_image = 0; image_geode = 0; border_geode = 0; image_transform = 0;
+	
+	Vec4 color(1.0f, 1.0f, 1.0f, 0.9f);	
+	Vec4 color2(0.2f, 0.8f, 0.2f, 1.0f);	
+	Vec4 color3(0.4f, 0.4f, 0.4f, 1.0f);	
+	colors = new Vec4Array;
+	colors2 = new Vec4Array;
+	colors3 = new Vec4Array;
+
+	colors->push_back(color);		
+	colors2->push_back(color2);	
+	colors3->push_back(color3);	
+
+	
+// was in updateNodes but not used...
+//		colors[0] = Vec4(0.2,0.6,0.2,1);
+//		colors[1] = Vec4(0.4,0.4,0.4,1);
+//		colors[2] = Vec4(0.5,1,1,1);
+//		colors[3] = Vec4(1,0.5,0.5,1);
+//		colors[4] = Vec4(0.5,1,0.5,1);
+	
 }
 
 ACOsgImageRenderer::~ACOsgImageRenderer() {
+//	delete colors;
+//	delete colors2;
+//	delete colors3;
 	
 	if (image_geode) { image_geode->unref(); image_geode=0; }
 	if (border_geode) { border_geode->unref(); border_geode=0; }
@@ -209,9 +234,6 @@ void ACOsgImageRenderer::imageGeode(int flip, float sizemul, float zoomin) {
 	state->setTextureAttribute(0, image_texture);
 	state->setTextureMode(0, GL_TEXTURE_2D, osg::StateAttribute::ON);
 	
-	Vec4 color(1.0f, 1.0f, 1.0f, 0.9f);	
-	Vec4Array* colors = new Vec4Array;
-	colors->push_back(color);		
 	image_geometry->setColorArray(colors);
 	image_geometry->setColorBinding(Geometry::BIND_OVERALL);
 	
@@ -240,10 +262,7 @@ void ACOsgImageRenderer::imageGeode(int flip, float sizemul, float zoomin) {
 	}
 	border_geometry->addPrimitiveSet(line_p);
 	
-	Vec4 color2(0.4f, 0.4f, 0.4f, 1.0f);	
-	Vec4Array* colors2 = new Vec4Array;
-	colors2->push_back(color2);		
-	border_geometry->setColorArray(colors2);
+	border_geometry->setColorArray(colors3);// XS was : colors2, but (0.4f, 0.4f, 0.4f, 1.0f)
 	border_geometry->setColorBinding(Geometry::BIND_OVERALL);
 	state = border_geometry->getOrCreateStateSet();
 	state->setAttribute(new LineWidth(2.0));
@@ -286,28 +305,6 @@ void ACOsgImageRenderer::updateNodes(double ratio) {
 	float x, y, z;
 	float zpos = 0.001;
 	
-#define NCOLORS 5
-	static Vec4 colors[NCOLORS];
-	static bool colors_ready = false;
-	
-	static Vec4 color2(0.2f, 0.8f, 0.2f, 1.0f);	
-	static Vec4Array* colors2;
-	
-	static Vec4 color3(0.4f, 0.4f, 0.4f, 1.0f);	
-	static Vec4Array* colors3;
-	
-	if(!colors_ready)
-	{
-		colors[0] = Vec4(0.2,0.6,0.2,1);
-		colors[1] = Vec4(0.4,0.4,0.4,1);
-		colors[2] = Vec4(0.5,1,1,1);
-		colors[3] = Vec4(1,0.5,0.5,1);
-		colors[4] = Vec4(0.5,1,0.5,1);
-		colors2 = new Vec4Array;
-		colors2->push_back(color2);	
-		colors3 = new Vec4Array;
-		colors3->push_back(color3);	
-	}
 	
 	const ACMediaNode &attribute = media_cycle->getMediaNode(node_index);
 	const ACPoint &p = attribute.getCurrentPosition(), &p2 = attribute.getNextPosition();

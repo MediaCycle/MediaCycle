@@ -194,7 +194,7 @@ struct ACOsgBrowserViewData
 	[self updateTransformsFromBrowser:frac];
 	[super drawRect:rect];
 	
-	media_cycle->setNeedsDisplay(0);
+	media_cycle->setNeedsDisplay(false);
 	
 	//glSwapAPPLE();
 }
@@ -252,15 +252,20 @@ struct ACOsgBrowserViewData
 			
 			// XSCF 250310 added these 3
 			media_cycle->pushNavigationState();
-			media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
-			media_cycle->getBrowser()->setState(AC_CHANGING);
+			//media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
+			//media_cycle->getBrowser()->setState(AC_CHANGING);
 			
-			media_cycle->updateNeighborhoods();
-			media_cycle->updateClusters(false);// was true
+			//			media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
+			//			media_cycle->getBrowser()->setState(AC_CHANGING);
 			
-			// remainders from updateClusters(true)
-			media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
-			media_cycle->getBrowser()->setState(AC_CHANGING);
+			media_cycle->updateDisplay(true); //XS250310 was: media_cycle->updateClusters(true);
+			// XSCF 250310 removed this:
+			// media_cycle->updateNeighborhoods();
+//			media_cycle->updateClusters(false);// was true
+//			
+//			// remainders from updateClusters(true)
+//			media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
+//			media_cycle->getBrowser()->setState(AC_CHANGING);
 		}
 	}
 		
@@ -271,14 +276,14 @@ struct ACOsgBrowserViewData
 	media_cycle->getCameraPosition(refcamx, refcamy);
 	refzoom = media_cycle->getCameraZoom();
 	
-	media_cycle->setNeedsDisplay(1);
+	media_cycle->setNeedsDisplay(true);
 }
 
 - (void)mouseMoved:(NSEvent*)event
 {
 	[super mouseMoved:event];
 	
-	media_cycle->setNeedsDisplay(1);
+	media_cycle->setNeedsDisplay(true);
 }
 
 - (void) mouseDragged:(NSEvent*) event
@@ -305,7 +310,7 @@ struct ACOsgBrowserViewData
 		}
 	}
 	
-	media_cycle->setNeedsDisplay(1);
+	media_cycle->setNeedsDisplay(true);
 }
 
 - (void)mouseUp:(NSEvent*)event
@@ -318,7 +323,7 @@ struct ACOsgBrowserViewData
 	
 	mousedown = 0;
 	
-	media_cycle->setNeedsDisplay(1);
+	media_cycle->setNeedsDisplay(true);
 }
 
 // SD - Macbook Pro Trackpad Gestures
@@ -368,7 +373,7 @@ struct ACOsgBrowserViewData
 	float x, y;	
 	float deltaX = [event deltaX];
 	float deltaY = [event deltaY];
-	float deltaZ = [event deltaZ];
+//	float deltaZ = [event deltaZ];
 	xmove = deltaX;
 	ymove = -deltaY;
 	zoom = media_cycle->getCameraZoom();

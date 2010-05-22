@@ -87,7 +87,8 @@ public:
 	void computeBlobsInteractively(IplImage* bg_img=NULL, bool merge_blobs=true, int bg_thesh=20, int big_blob=200, int small_blob=0);
 	void computeBlobsUL(IplImage* bg_img=NULL, bool merge_blobs=true, int big_blob=200, int small_blob=0);
 	void computeOpticalFlow();
-	
+	void computeFrameAbsoluteDifferences();
+
 	// features manipulation
 	void mergeBlobs(float blob_dist = 0);
 	void computeMergedBlobsTrajectory(float blob_dist = 0);
@@ -110,8 +111,10 @@ public:
 	std::vector<float> getTimeStamps();
 
 	// saves stuff in file
-//XXX TODO	void 
-	
+	void dumpTrajectory();
+	void dumpContractionIndices();
+	void dumpBoundingBoxRatios();
+
 	// for display (ifdef VISUAL_CHECK) using highgui
 	void showInWindow(std::string="VIDEO", bool has_win=false);
 	void showFrameInWindow(std::string="VIDEO", IplImage* frame=NULL, bool has_win=true);
@@ -138,6 +141,7 @@ private:
 	// NB: blobs (CBlobResult) may contain more than one blob per frame
 	std::vector<CBlobResult> all_blobs; // XS make this pointers ?
 	std::vector<float> all_blobs_time_stamps;
+	std::vector<float> all_blobs_frame_stamps;
 
 	std::vector<blob_center> blob_centers;
 	std::vector<blob_center> blob_speeds; 

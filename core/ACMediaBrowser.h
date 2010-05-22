@@ -64,7 +64,7 @@ typedef vector<ACMediaNode> ACMediaNodes;
 
 enum ACBrowserState {
 	AC_IDLE=0,
-	AC_CHANGING
+	AC_CHANGING=1
 };
 
 enum ACBrowserLayout {
@@ -109,9 +109,6 @@ public:
 	void setLibrary(ACMediaLibrary *lib) { mLibrary = lib; };
 	ACMediaLibrary *getLibrary() { return mLibrary; };
 
-	double getFrac() const {return mFrac;};
-	ACBrowserState getState() const {return mState;};
-
 	// call this when the number of loops changes in the library
 	void libraryContentChanged();
 	
@@ -122,13 +119,12 @@ public:
 	int getKNN(int id, vector<int> &ids, int k);
 	int getKNN(ACMedia *aMedia, vector<ACMedia *> &result, int k);
 		
-	// memory/context
-	void goBack();
-	void goForward();
+	// memory/context - undefined
 	void setHistory();
 	void setBookmark();
 	void setTag();
 	
+	// to tell if the view (e.g., ACOsgBrowserViewQT) has to be updated.
 	void setNeedsDisplay(bool val) 				{ mNeedsDisplay = val; }
 	bool getNeedsDisplay() const				{ return mNeedsDisplay; }
 	
@@ -147,8 +143,7 @@ public:
 	void setCameraRotation(float angle)				{ mCameraAngle = angle; setNeedsDisplay(true); }
 	float getCameraRotation() const				{ return mCameraAngle; }
 	
-	// organization
-	// XS 091009 : this unique one replaces rhythm, timbre, harmony
+	// weights of features
 	void setWeight(int i, float weight);
 	std::vector<float> getWeightVector(){return mFeatureWeights;};
 	float getWeight(int i);
@@ -159,73 +154,56 @@ public:
 	void setFilterOut();
 	void setFilterSuggest();	
 	
-// Cluster and Visualization methods
-	// set feature weights used for clustering
-	void setFeatureWeights(vector<float> &weights);
-
-	// cluster data based on current feature weights
-	void updateClusters(bool animate = false);
+	// == Cluster Mode == (based on features weights)
+	void setClusterNumber(int n); 
 	void setClusterIndex(int mediaIdx,int clusterIdx);
 	void setClusterCenter(int clusterIdx, vector< vector<float> >);
 	void initClusterCenters();
-	void updateClustersKMeans(bool animate);
-	
-	// neighbors
-	void updateNeighborhoods();
-	
-	void setClickedNode(int inode);
-	int getClickedNode()					{return mClickedNode; };
-	int getClosestNode()					{return mClosestNode; };
-
-	void setClickedLabel(int ilabel);
-	int getClickedLabel()					{return mClickedLabel; };
-
-	void setReferenceNode(int index);
-
-	// update positions based on current clustering
-	void updateNextPositions();
-	void updateNextPositionsPropeller();
-	void updateNextPositions2dim();
-
-	void updateState();
-	void setState(ACBrowserState state);
-
-	// next positions -> current positions
-	void commitPositions();
-	
-	// loops (or items) 
-	// XS 100310 is this still necessary ? const ?
-	const ACMediaNodes	&getLoopAttributes() const { return mLoopAttributes; }; 
-	
-	// XS NEW 100310
-	ACMediaNode &getMediaNode(int i) ; // not const because accesors to MediaNode can modify it
-	void initializeNodes(int _defaultNodeId = 0); 
-	
-	void setNodeNextPosition(int loop_id, float x, float y, float z=0);
-	// XS 100310 MediaNode
-	void setLoopIsDisplayed(int loop_id, bool iIsDisplayed) {this->getMediaNode(loop_id).setDisplayed(iIsDisplayed);}
-
-	int getNumberOfDisplayedLoops();
-	void setNumberOfDisplayedLoops(int nd);
-
-	// XS TODO getsize
-	int getNumberOfMediaNodes(){return mLoopAttributes.size() ;} // XS this should be the same as mLibrary->getSize(), but this way it is more similar to getNumberOfLabels // CF not true in non-explatory mode (one loop can be displayed more than once at a time)
-	
-	// XS 100310 MediaNode
-	void setLoopAttributesActive(int loop_id, int value) { this->getMediaNode(loop_id).setActivity(value); };
-	
-	void getMouse(float *mx, float *my) { *mx = mousex; *my = mousey; };
-	
-	int setSourceCursor(int lid, int frame_pos);
-	int setHoverLoop(int lid, float x, float y);
-	
-	// sets all navigationLevel to 0
+	// XS TODO clean level / state ...
 	void resetLoopNavigationLevels();
 	void incrementLoopNavigationLevels(int loopIndex);
 	int getNavigationLevel()				{ return mNavigationLevel; };
 	void pushNavigationState();
 	ACNavigationState getCurrentNavigationState();
 	void setCurrentNavigationState(ACNavigationState state);
+	// go back/forward in the navigation into clusters 
+	void goBack();
+	void goForward();
+		
+	// == Nodes
+	void setClickedNode(int inode);
+	int getClickedNode()					{return mClickedNode; };
+	int getClosestNode()					{return mClosestNode; };
+	void setReferenceNode(int index);
+	const ACMediaNodes	&getLoopAttributes() const { return mLoopAttributes; } 	// XS 100310 is this still necessary ? const ?
+	ACMediaNode &getMediaNode(int i) ; // not const because accesors to MediaNode can modify it
+	void setNodeNextPosition(int loop_id, float x, float y, float z=0);
+	// XS TODO : displayed vs active
+	void setLoopIsDisplayed(int loop_id, bool iIsDisplayed) {this->getMediaNode(loop_id).setDisplayed(iIsDisplayed);}	
+	void setLoopAttributesActive(int loop_id, int value) { this->getMediaNode(loop_id).setActivity(value); };
+	int getNumberOfDisplayedLoops();
+	void setNumberOfDisplayedLoops(int nd);
+	int getNumberOfMediaNodes(){return mLoopAttributes.size() ;} // XS TODO getsize; this should be the same as mLibrary->getSize(), but this way it is more similar to getNumberOfLabels // CF not true in non-explatory mode (one loop can be displayed more than once at a time)
+	// XS TODO: define this one
+	void initializeNodes(int _defaultNodeId = 0); 	
+	
+	// == Labels 
+	void setClickedLabel(int ilabel);
+	int getClickedLabel()					{return mClickedLabel; };
+
+	// = States : AC_ IDLE or AC_CHANGING (i.e., from current to next position)
+	double getFrac() const {return mFrac;} // fraction between current and next position
+	ACBrowserState getState() const {return mState;};
+	void setState(ACBrowserState state);
+	void updateState();
+	// next positions -> current positions
+	void commitPositions();
+	
+	// interaction with mouse
+	void getMouse(float *mx, float *my) { *mx = mousex; *my = mousey; };
+	int setSourceCursor(int lid, int frame_pos);
+	int setHoverLoop(int lid, float x, float y);
+	
 	ACBrowserLayout getLayout();
 	void setLayout(ACBrowserLayout _layout);
 	ACBrowserMode getMode();
@@ -263,9 +241,31 @@ public:
 		this->setMode(AC_MODE_NEIGHBORS);//CF this stays until it is correctly used on main applications
 	};	
 	
-	// Proximity Grid moved to plugin
+	// NB: Proximity Grid moved to plugin
 	
+	// == User Log
 	ACUserLog* getUserLog(){return mUserLog;};
+
+	// == XS 260310 new way to manage update of clusters, positions, neighborhoods, ...
+	void updateDisplay(bool animate=false);
+	
+//XS this should be private when we use updateDisplay
+public:
+	// update positions based on current clustering
+
+	// == Cluster Mode 
+	void updateClusters(bool animate = false);
+	// default cluster : 
+	// - neighborhood = Kmeans
+	// - position = propeller
+	void updateNextPositionsPropeller();
+	void updateClustersKMeans(bool animate);
+
+	// == Neighbors Mode ==
+	void updateNeighborhoods();
+
+	void updateNextPositions();
+	void updateNextPositions2dim();
 
 protected:
 	ACMediaLibrary *mLibrary; 
@@ -326,6 +326,8 @@ protected:
 	ACPlugin* mPosPlugin;
 	ACPlugin* mNeighborsPlugin;
 	ACUserLog* mUserLog;
+	
+
 	
 };
 

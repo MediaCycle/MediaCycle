@@ -73,7 +73,8 @@ std::vector<ACMediaFeatures*>  ACImageColorMomentsPlugin::calculate(std::string 
 
 std::vector<ACMediaFeatures*> ACImageColorMomentsPlugin::calculate(ACMediaData* image_data) {
 	cout << "calculating Color Moments from histogram..." << endl;
-	ACImageAnalysis* image = new ACImageAnalysis(image_data->getImageData());	
+	IplImage* image_data_ptr = image_data->getImageData();
+	ACImageAnalysis* image = new ACImageAnalysis(image_data_ptr);	
 	std::vector<ACMediaFeatures*> allImageFeatures;
 	
 	ACMediaFeatures* imageColorFeatures = this->calculateColorFeatures(image);

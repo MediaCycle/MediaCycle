@@ -69,7 +69,7 @@ public:
 	ACMediaType getMediaType() {return this->mMediaType;}
 	ACPluginType getPluginType() {return this->mPluginType;}
 
-	virtual int initialize(){};
+	virtual int initialize(){return 0;}
 	// XS TODO: why are they all =0 ?
 	virtual std::vector<ACMediaFeatures*> calculate(){};
 	virtual std::vector<ACMediaFeatures*> calculate(std::string aFileName){};
@@ -78,8 +78,8 @@ public:
 	virtual void updateClusters(ACMediaBrowser*){};
 	virtual void updateNextPositions(ACMediaBrowser*){};
 	virtual void updateNeighborhoods(ACMediaBrowser*){};
-	virtual int start(){};
-	virtual int stop(){};
+	virtual int start(){return 0;}
+	virtual int stop(){return 0;}
 	//virtual void prepareLayout(ACOsgBrowserRenderer*, int start){};
 	//virtual void updateLayout(ACOsgBrowserRenderer*, double ratio){};
 

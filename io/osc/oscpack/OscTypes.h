@@ -120,8 +120,12 @@ extern MessageTerminator EndMessage;
 struct NilType{
 };
 
+// CF hack so that oscpack's Nil won't break Cocoa's Nil
+#ifdef Nil
+#undef Nil
+#endif
+	
 extern NilType Nil;
-
 
 struct InfinitumType{
 };

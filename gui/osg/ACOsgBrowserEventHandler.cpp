@@ -63,8 +63,9 @@ bool ACOsgBrowserEventHandler::handle(const osgGA::GUIEventAdapter& ea,osgGA::GU
 		}    
 		case(osgGA::GUIEventAdapter::KEYDOWN):
 		{
-			if (ea.getKey()=='c')
-			{        
+			// XS TODO what if key ='a' ?
+//			if (ea.getKey()=='c')
+//			{        
 				osgViewer::View* view = dynamic_cast<osgViewer::View*>(&aa);
 				// xs this one was in image but is not used !
 				// osgViewer::Viewer* viewer = dynamic_cast<osgViewer::Viewer*>(&aa);
@@ -73,7 +74,7 @@ bool ACOsgBrowserEventHandler::handle(const osgGA::GUIEventAdapter& ea,osgGA::GU
 				event->setX((ea.getXmin()+ea.getXmax())*0.5);
 				event->setY((ea.getYmin()+ea.getYmax())*0.5);
 				if (view) pick(view,*event, false);
-			}
+//			}
 			return false;
 		}    
 		case(GUIEventAdapter::FRAME):

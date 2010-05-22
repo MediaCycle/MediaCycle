@@ -1,7 +1,7 @@
 /**
  * @brief ACVisualisationPlugin.cpp
  * @author Xavier Siebert
- * @date 26/03/2010
+ * @date 21/05/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -73,7 +73,7 @@ vector<ACMediaFeatures*> ACVisualisationPlugin::calculate(std::string aFileName)
 }
 
 void ACVisualisationPlugin::updateClusters(ACMediaBrowser* mediaBrowser){
-	//	this->updateNextPositions(mediaBrowser);
+	this->updateNextPositions(mediaBrowser);
 }
 
 void ACVisualisationPlugin::updateNextPositions(ACMediaBrowser* mediaBrowser){
@@ -174,7 +174,7 @@ void ACVisualisationPlugin::updateNextPositions(ACMediaBrowser* mediaBrowser){
 
 	//  For osg view : Because there is no way to prevent a media from displaying it display it far away
   for (int i=0; i<libSize; i++){
-	  //TODO make sur you meant next
+	  //TODO make sure you meant next
     mediaBrowser->setNodeNextPosition(i, 40, 40);    
     mediaBrowser->setLoopIsDisplayed(i, false);
   }
