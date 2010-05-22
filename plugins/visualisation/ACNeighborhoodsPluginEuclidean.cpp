@@ -1,7 +1,7 @@
 /**
  * @brief ACNeighborhoodsPluginEuclidean.cpp
- * @author Christian Frisson
- * @date 19/05/2010
+ * @author Damien Tardieu
+ * @date 22/05/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -41,7 +41,7 @@ ACNeighborhoodsPluginEuclidean::ACNeighborhoodsPluginEuclidean() {
     this->mDescription = "Plugin for the computation of Euclidean neighborhoods";
     this->mId = "";
     //local vars
-	lastClickedNodeId = -1;
+		lastClickedNodeId = -1;
 }
 
 ACNeighborhoodsPluginEuclidean::~ACNeighborhoodsPluginEuclidean() {
@@ -68,12 +68,17 @@ void ACNeighborhoodsPluginEuclidean::updateNeighborhoods(ACMediaBrowser* mediaBr
 		long libSize = mediaBrowser->getLibrary()->getSize();
 		int nbFeature = loop->getNumberOfFeaturesVectors();
 		mat desc_m;
+		rowvec weight_v; 
 		mat tg_v;
 		colvec dist_v(libSize);
 		
-		desc_m = extractDescMatrix(mediaBrowser);
+		extractDescMatrix(mediaBrowser, desc_m, weight_v);
 		tg_v = desc_m.row(targetMediaId);
-		dist_v= sqrt(sum(square(desc_m - repmat(tg_v, desc_m.n_rows, 1)), 1));
+		dist_v= sqrt(sum(square(desc_m - repmat(tg_v, desc_m.n_rows, 1)) % repmat(weight_v, desc_m.n_rows, 1), 1));
+
+	//	std::cout << "1_v = " << std::endl <<  square(desc_m - repmat(tg_v, desc_m.n_rows, 1)) << std::endl;
+	//	std::cout << "2_v = " << std::endl <<  repmat(weight_v, desc_m.n_rows, 1) << std::endl;
+	//	std::cout << "3_v = " << std::endl <<  sum(square(desc_m - repmat(tg_v, desc_m.n_rows, 1)) % repmat(weight_v, desc_m.n_rows, 1),1) << std::endl;
 
 		ucolvec sortRank_v = sort_index(dist_v);
 		std::cout << "sortRank_v = " << sortRank_v(0) << " " << sortRank_v(1) << " " << sortRank_v(2) << std::endl;
@@ -87,7 +92,7 @@ void ACNeighborhoodsPluginEuclidean::updateNeighborhoods(ACMediaBrowser* mediaBr
 }
 
 
-mat ACNeighborhoodsPluginEuclidean::extractDescMatrix(ACMediaBrowser* mediaBrowser){
+void ACNeighborhoodsPluginEuclidean::extractDescMatrix(ACMediaBrowser* mediaBrowser, mat &desc_m, rowvec &weight_v){
   vector<ACMedia*> loops = mediaBrowser->getLibrary()->getAllMedia();
   int nbMedia = loops.size(); 
 	int featDim;
@@ -97,12 +102,14 @@ mat ACNeighborhoodsPluginEuclidean::extractDescMatrix(ACMediaBrowser* mediaBrows
 	int nbFeature = loops.back()->getNumberOfFeaturesVectors();
 	for(int f=0; f< nbFeature; f++){
 		featDim = loops.back()->getFeaturesVector(f)->getSize();
+		std::cout << "feature weight " << f << " = " << mediaBrowser->getWeight(f) << std::endl;
 		for(int d=0; d < featDim; d++){
 			totalDim++;
 		}
 	}
 	
-  mat desc_m(nbMedia,totalDim);
+  desc_m.set_size(nbMedia,totalDim);
+  weight_v.set_size(totalDim);
   mat pos_m(nbMedia,2);
   
   for(int i=0; i<nbMedia; i++) {    
@@ -112,9 +119,9 @@ mat ACNeighborhoodsPluginEuclidean::extractDescMatrix(ACMediaBrowser* mediaBrows
       featDim = loops.back()->getFeaturesVector(f)->getSize();
 			for(int d=0; d < featDim; d++){
 				desc_m(i,tmpIdx) = loops[i]->getFeaturesVector(f)->getFeatureElement(d);
+				weight_v(tmpIdx) = mediaBrowser->getWeight(f);
 				tmpIdx++;
       }
     }
   }
-	return desc_m;
 }

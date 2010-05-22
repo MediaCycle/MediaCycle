@@ -102,17 +102,17 @@ void ACPositionsPluginRadialTreeLayout::updateNextPositions(ACMediaBrowser* _med
 		if ( m_autoScale ) setScale(1,1);
 		
 		//std::cout << "ACPositionsPluginRadialTreeLayout::updateNextPositions::calcAngularBounds" << std::endl;
-        if ( !m_setTheta ) calcAngularBounds(n);
+		if ( !m_setTheta ) calcAngularBounds(n);
 
 		// perform the layout
 		//std::cout << "ACPositionsPluginRadialTreeLayout::updateNextPositions::layout" << std::endl;
-        if ( m_maxDepth > 0 )
-            layout(n, m_radiusInc, m_theta1, m_theta2);
-        
-        // update properties of the root node
-        m_nodeParams[n]->setX(m_origin.x);
-        m_nodeParams[n]->setY(m_origin.y);
-        np->setAngle(m_theta2-m_theta1);
+		if ( m_maxDepth > 0 )
+			layout(n, m_radiusInc, m_theta1, m_theta2);
+		
+		// update properties of the root node
+		m_nodeParams[n]->setX(m_origin.x);
+		m_nodeParams[n]->setY(m_origin.y);
+		np->setAngle(m_theta2-m_theta1);
 		
 		for(int n=0; n<mediaBrowser->getUserLog()->getSize(); n++)
 		{

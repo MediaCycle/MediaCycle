@@ -1,7 +1,7 @@
 /**
  * @brief ACNeighborhoodsPluginPareto.h
- * @author Alexis Moinet
- * @date 10/05/2010
+ * @author Damien Tardieu
+ * @date 22/05/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -50,7 +50,7 @@ public:
 	virtual void updateNeighborhoods(ACMediaBrowser* );
 protected:
 	mat extractDescMatrix(ACMediaBrowser* mediaBrowser, int descId);
-
+	long lastClickedNodeId;
 };
 
 #endif	/* _ACNEIGHBORHOODSPLUGINPARETO_ */

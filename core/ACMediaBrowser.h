@@ -150,6 +150,8 @@ public:
 	// organization
 	// XS 091009 : this unique one replaces rhythm, timbre, harmony
 	void setWeight(int i, float weight);
+	std::vector<float> getWeightVector(){return mFeatureWeights;};
+	float getWeight(int i);
 	void setClusterNumber(int n); 
 		
 	// filtering

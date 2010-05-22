@@ -269,10 +269,23 @@ void ACMediaBrowser::setFilterSuggest()
 }
 
 void ACMediaBrowser::setWeight(int i, float weight) {
-	mFeatureWeights[i] = weight; 
+	mFeatureWeights[i] = weight;
+	std::cout << "mFeatureWeights = " << mFeatureWeights[0] << std::endl;
+		std::cout << "mFeatureWeights = " << mFeatureWeights[1] << std::endl;
+		std::cout << "mFeatureWeights = " << mFeatureWeights[2] << std::endl;
 	// XSCF 250310 removed this
 	// updateClusters(true); 
 	// setNeedsDisplay(true);
+}
+
+float ACMediaBrowser::getWeight(int i){
+	if (i < mFeatureWeights.size()){
+		return mFeatureWeights[i];
+	}
+	else{
+		std::cerr << "getWeight : Index of weight out of bound" << std::endl;
+		exit(1);
+	}
 }
 
 void ACMediaBrowser::setClusterNumber(int n)

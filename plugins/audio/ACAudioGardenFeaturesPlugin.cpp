@@ -102,14 +102,30 @@ std::vector<ACMediaFeatures*> ACAudioGardenFeaturesPlugin::calculate(ACMediaData
 	}
 	std::cout << "zcrIdx = " << zcrIdx << std::endl;
 
+	int mfccIdx = 0;
+	for (int i=0; i<descmf.size(); i++){
+		if (descmf[i]->getName() == "MFCC")
+			mfccIdx = i;
+	}
+	std::cout << "mfccIdx = " << mfccIdx << std::endl;
+
+	int emaIdx = 0;
+	for (int i=0; i<descmf.size(); i++){
+		if (descmf[i]->getName() == "Energy Modulation Amplitude")
+			emaIdx = i;
+	}
+	std::cout << "emaIdx = " << emaIdx << std::endl;
+
+	
 	float start_sec = descmf[edIdx]->getValue(0, 1);;
 	float stop_sec =  descmf[edIdx]->getValue(0, 2);
 
 	//	desc.push_back(descmf[loudIdx]->temporalModel(start_sec, stop_sec));
 	//desc.push_back(descmf[edIdx]->mean());
 	
-	desc.push_back(descmf[scIdx]->mean());
-	desc.push_back(descmf[zcrIdx]->mean());
+	desc.push_back(descmf[edIdx]->mean());
+	desc.push_back(descmf[mfccIdx]->mean());
+	desc.push_back(descmf[emaIdx]->mean());
 	return desc;
 }
 

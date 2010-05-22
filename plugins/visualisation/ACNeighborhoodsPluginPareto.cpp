@@ -1,7 +1,7 @@
 /**
  * @brief ACNeighborhoodsPluginPareto.cpp
- * @author Christian Frisson
- * @date 19/05/2010
+ * @author Damien Tardieu
+ * @date 22/05/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -40,7 +40,7 @@ ACNeighborhoodsPluginPareto::ACNeighborhoodsPluginPareto() {
     this->mName = "ParetoNeighborhoods";
     this->mDescription = "Plugin for the computation of Pareto neighborhoods";
     this->mId = "";
-	
+		lastClickedNodeId = -1;	
     //local vars
 }
 
@@ -50,7 +50,17 @@ ACNeighborhoodsPluginPareto::~ACNeighborhoodsPluginPareto() {
 void ACNeighborhoodsPluginPareto::updateNeighborhoods(ACMediaBrowser* mediaBrowser) {
 	//int _clickedloop = mediaBrowser->getClickedLoop();
 	std::cout << "ACNeighborhoodsPluginPareto::updateNeighborhoods" << std::endl;
-	if (mediaBrowser->getUserLog()->getLastClickedNodeId() == -1 ) { 	 
+	if (mediaBrowser->getUserLog()->getLastClickedNodeId() == -1) {	 
+		mediaBrowser->getUserLog()->addRootNode(0, 0); // 0
+		mediaBrowser->getUserLog()->clickNode(0, 0);
+		lastClickedNodeId = 0;
+	}
+	else if ( (mediaBrowser->getUserLog()->getLastClickedNodeId() !=0) && (mediaBrowser->getUserLog()->getLastClickedNodeId() == lastClickedNodeId) ) {
+		//CF define properly what to do if the user clicked twice on the same node: 
+			//CF previous case: add 8 more children node
+			//CF possible case: hide the children, or replace the nodes
+	}	
+	else{
 		long lastClickedNodeId = mediaBrowser->getUserLog()->getLastClickedNodeId();
 		long targetMediaId = mediaBrowser->getUserLog()->getMediaIdFromNodeId(lastClickedNodeId);
 		ACMedia* loop = mediaBrowser->getLibrary()->getMedia(0);
@@ -64,9 +74,9 @@ void ACNeighborhoodsPluginPareto::updateNeighborhoods(ACMediaBrowser* mediaBrows
 		for (int f=0; f<nbFeature; f++){
 			tmpDesc_m = extractDescMatrix(mediaBrowser, f);
 			tmpTg_v = tmpDesc_m.row(targetMediaId);
-			dist_m.col(f) = sqrt(sum(square(tmpDesc_m - repmat(tmpTg_v, tmpDesc_m.n_rows, 1))));
+			dist_m.col(f) = sqrt(sum(square(tmpDesc_m - repmat(tmpTg_v, tmpDesc_m.n_rows, 1)), 1));
 		}
-		ucolvec rank_v = paretorank(dist_m, 20, 10);
+		ucolvec rank_v = paretorank(dist_m, 20, 6);
 		colvec selPos_v = find(rank_v > 0);
 		for (int k=0; k<selPos_v.n_rows; k++){
 			mediaBrowser->getUserLog()->addNode(lastClickedNodeId, selPos_v(k), 0);
@@ -79,17 +89,17 @@ mat ACNeighborhoodsPluginPareto::extractDescMatrix(ACMediaBrowser* mediaBrowser,
   vector<ACMedia*> loops = mediaBrowser->getLibrary()->getAllMedia();
   int nbMedia = loops.size(); 
 	int featDim;
-	mat desc_m;
 
 	// Count nb of feature
 	featDim = loops.back()->getFeaturesVector(descId)->getSize();
 	
-  desc_m.set_size(nbMedia, featDim);
-  
+  mat desc_m(nbMedia, featDim);
   for(int i=0; i<nbMedia; i++) {    
     int tmpIdx = 0;
 		for(int d=0; d < featDim; d++){
+			std::cout << "(i,d) = " << i << " , " << d << std::endl;
 			desc_m(i,d) = loops[i]->getFeaturesVector(descId)->getFeatureElement(d);
 		}
   }
+	return desc_m;
 }

@@ -62,8 +62,8 @@ ACAudioCycleOsgQt::ACAudioCycleOsgQt(QWidget *parent)
 			//media_cycle->setVisualisationPlugin("VisAudiogarden");
 			//media_cycle->setVisualisationPlugin("Vis2Desc");
 			//media_cycle->setNeighborhoodsPlugin("RandomNeighborhoods");
-			media_cycle->setNeighborhoodsPlugin("EuclideanNeighborhoods");
-			//media_cycle->setNeighborhoodsPlugin("ParetoNeighborhoods");
+			//media_cycle->setNeighborhoodsPlugin("EuclideanNeighborhoods");
+			media_cycle->setNeighborhoodsPlugin("ParetoNeighborhoods");
 			//media_cycle->setPositionsPlugin("NodeLinkTreeLayoutPositions");
 			media_cycle->setPositionsPlugin("RadialTreeLayoutPositions");
 		}
