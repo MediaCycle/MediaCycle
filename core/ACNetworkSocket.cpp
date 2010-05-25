@@ -227,7 +227,7 @@ void ACNetworkSocketServer::thread() {
 		memset(server_buffer, 0, BUFSIZE);
 		bigbuffer = new char[bigbufferl];
 		read = 0;
-		while ( (ret = server_receive(server_buffer, BUFSIZE, server_socket, 1)) > 0 ) {
+		while ( (ret = server_receive(server_buffer, BUFSIZE, server_socket, 1000)) > 0 ) {
 			if (read+ret>bigbufferl) {
 				bigbufferl += bigbufferstep;
 				bigbuffer = (char*)realloc(bigbuffer, bigbufferl);
