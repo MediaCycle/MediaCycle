@@ -116,12 +116,21 @@ void ACOsgNodeLinkRenderer::updateLinks(double ratio) {
 		colors[2] = Vec4(0.5,1,1,1);
 		colors[3] = Vec4(1,0.5,0.5,1);
 		colors[4] = Vec4(0.5,1,0.5,1);
+		colors_ready = true;
 	}
 	
 	const ACMediaNode &attribute = media_cycle->getMediaNode(node_index);
 
-	link_node->removeChild(link_geode);
+	// SD TODO - rather than recomputing the geometry, use matrix transforms instead
+	if (link_node->getNumChildren() == 1) {
+		if (link_geode) {
+			link_node->removeChild(0,1);
+			link_geode->unref();
+		}
+	}
+	
 	if ( attribute.isDisplayed() ){
+		
 		const ACPoint &p = attribute.getCurrentPosition(), &p2 = attribute.getNextPosition();
 		double omr = 1.0-ratio;
 				

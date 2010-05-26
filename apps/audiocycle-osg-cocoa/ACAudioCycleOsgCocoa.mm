@@ -115,7 +115,17 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 
 - (void)updatedLibrary
 {	
-	media_cycle->setReferenceNode(0);
+	// SD TOTO - srand() is called in other places, so no randomization actually.
+	int library_size = media_cycle->getLibrarySize();
+	int rand_node;
+	if (library_size==0) {
+		rand_node = 0;
+	}
+	else {
+		rand_node = rand();
+		rand_node = rand_node % library_size;
+	}
+	media_cycle->setReferenceNode(rand_node);
 	// XSCF 250310 added these 3
 	media_cycle->pushNavigationState();
 	media_cycle->getBrowser()->setState(AC_CHANGING);
@@ -130,7 +140,7 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 }
 
 - (void) awakeFromNib
-{
+{	
 	[[NSNotificationCenter defaultCenter] addObserver: self selector: @selector(myObserver:) name: @"OALNotify" object: NULL];
 	
 	media_cycle = new MediaCycle(MEDIA_TYPE_AUDIO,"/tmp/","mediacycle.acl");
@@ -139,18 +149,19 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 		build_type = "Debug";
 	#endif
 	media_cycle->addPlugin("../../../plugins/audio/" + build_type + "/mc_audio.dylib");
-	int vizplugloaded = media_cycle->addPlugin("../../../plugins/visualisation/" + build_type + "/mc_visualisation.dylib");
+	//int vizplugloaded = media_cycle->addPlugin("../../../plugins/visualisation/" + build_type + "/mc_visualisation.dylib");
+	int vizplugloaded = media_cycle->addPlugin("/dupont/development/workdir-new/ticore-app/Applications/Numediart/MediaCycle/src/Builds/darwin-x86/plugins/visualisation/" + build_type + "/mc_visualisation.dylib");
 	if ( vizplugloaded == 0 )
 	{
 		//media_cycle->setVisualisationPlugin("Visualisation");
 		//media_cycle->setVisualisationPlugin("PCAVis");
 		//media_cycle->setVisualisationPlugin("Vis2Desc");
 		//media_cycle->setNeighborhoodsPlugin("RandomNeighborhoods");
-		media_cycle->setNeighborhoodsPlugin("EuclideanNeighborhoods");
 		//media_cycle->setNeighborhoodsPlugin("ParetoNeighborhoods");
 		//media_cycle->setNeighborhoodsPlugin("RandomNeighborhoods");
 		//media_cycle->setPositionsPlugin("NodeLinkTreeLayoutPositions");
-		media_cycle->setPositionsPlugin("RadialTreeLayoutPositions");
+		//media_cycle->setNeighborhoodsPlugin("EuclideanNeighborhoods");
+		//media_cycle->setPositionsPlugin("RadialTreeLayoutPositions");
 	}
 	audio_engine = new ACAudioFeedback();
 	audio_engine->setMediaCycle(media_cycle);
@@ -231,6 +242,8 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 
 - (IBAction)	setOpen:(id)inSender
 {
+	int n;
+	
 	@synchronized(browser_osg_view)
 	{
 	// Create the File Open Dialog class.
@@ -256,6 +269,7 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 		media_cycle->importACLLibrary((string)[path UTF8String]); // XS instead of getImageLibrary CHECK THIS
 		media_cycle->normalizeFeatures();
 		media_cycle->libraryContentChanged();
+		n = media_cycle->getNumberOfMediaNodes();
 	}
 	[self updatedLibrary];
 	}
@@ -390,12 +404,60 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #pragma mark ***** Browser Controls *****
 
+- (IBAction)	setNeighboursModeRadio:(id)inSender
+{
+	NSButtonCell *selCell = [inSender selectedCell];
+    int value = [selCell tag];
+	if (value==0) {		// pareto
+		media_cycle->setNeighborhoodsPlugin("ParetoNeighborhoods");
+	}
+	else if (value==1) { // euclidean
+		media_cycle->setNeighborhoodsPlugin("EuclideanNeighborhoods");
+	}	
+}
+
+- (IBAction)	setWeight1Check:(id)inSender
+{
+	int	value = [inSender intValue];
+	if (value == 1) {
+		media_cycle->setWeight(0, 1);
+	}
+	else {
+		media_cycle->setWeight(0, 0);
+	}
+	media_cycle->updateDisplay(true, 0);
+}
+
+- (IBAction)	setWeight2Check:(id)inSender
+{
+	int	value = [inSender intValue];
+	if (value == 1) {
+		media_cycle->setWeight(1, 1);
+	}
+	else {
+		media_cycle->setWeight(1, 0);
+	}
+	media_cycle->updateDisplay(true, 0);
+}
+
+- (IBAction)	setWeight3Check:(id)inSender
+{
+	int	value = [inSender intValue];
+	if (value == 1) {
+		media_cycle->setWeight(2, 1);
+	}
+	else {
+		media_cycle->setWeight(2, 0);
+	}
+	media_cycle->updateDisplay(true, 0);
+}
+
 - (IBAction)setWeight1Slider:(id)inSender
 {
 	float	value = [inSender floatValue];
 	
 	media_cycle->setWeight(0, value);
-	media_cycle->updateDisplay(true); //XS 250310 was: media_cycle->updateClusters(true);
+	media_cycle->updateDisplay(true, 0); //XS 250310 was: media_cycle->updateClusters(true);
 	// XS 310310 removed media_cycle->setNeedsDisplay(true); // now in updateDisplay
 
 }
@@ -405,7 +467,7 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 	float	value = [inSender floatValue];
 	
 	media_cycle->setWeight(1, value);
-	media_cycle->updateDisplay(true); //XS 250310 was: media_cycle->updateClusters(true);
+	media_cycle->updateDisplay(true, 0); //XS 250310 was: media_cycle->updateClusters(true);
 	// XS 310310 removed media_cycle->setNeedsDisplay(true); // now in updateDisplay
 
 }
@@ -415,7 +477,7 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 	float	value = [inSender floatValue];
 	
 	media_cycle->setWeight(2, value);
-	media_cycle->updateDisplay(true); //XS 250310 was: media_cycle->updateClusters(true);
+	media_cycle->updateDisplay(true, 0); //XS 250310 was: media_cycle->updateClusters(true);
 	// XS 310310 removed media_cycle->setNeedsDisplay(true); // now in updateDisplay
 
 }
@@ -426,7 +488,7 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 	
 	media_cycle->setClusterNumber(value);
 	// XSCF251003 added this
-	media_cycle->updateDisplay(true); //XS 250310 was: media_cycle->updateClusters(true);
+	media_cycle->updateDisplay(true, 0); //XS 250310 was: media_cycle->updateClusters(true);
 	// XS 310310 removed media_cycle->setNeedsDisplay(true); // now in updateDisplay
 	
 }
@@ -576,7 +638,7 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 		 {
 			 //media_cycle->pickedObjectCallback(-1);
 			 audio_engine->setLoopSynchroMode(clicked_node, ACAudioEngineSynchroModeManual);
-			 audio_engine->setLoopScaleMode(clicked_node, ACAudioEngineScaleModeResample);//ACAudioEngineScaleModeVocode
+			 audio_engine->setLoopScaleMode(clicked_node, ACAudioEngineScaleModeVocode);//ACAudioEngineScaleModeVocode
 			 audio_engine->setScrub((float)scrub*100); // temporary hack to scrub between 0 an 1
 		 }
 	}

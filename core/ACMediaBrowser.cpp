@@ -682,12 +682,15 @@ int ACMediaBrowser::getKNN(ACMedia *aMedia, vector<ACMedia *> &result, int k) {
 	
     return kcount;
 }
+
+/*
 void ACMediaBrowser::setFeatureWeights(vector<float> &weights)
 {
 	//assert(weights.size() == objects.back().size());
 // XS todo check sizes without assert	
 	mFeatureWeights = weights;
 }
+*/
 
 // XS node, not media
 void ACMediaBrowser::setClusterIndex(int nodeIdx,int clusterIdx){
@@ -853,7 +856,7 @@ void ACMediaBrowser::updateClustersKMeans(bool animate) {
 	if(inv_weight > 0.0) inv_weight = 1.0 / inv_weight;
 	else return;
 	
-	// picking random object as initial cluster center
+	// SD TOTO 
 	srand(15);
 	mClusterCenters.resize(mClusterCount);
 	cluster_counts.resize(mClusterCount);
@@ -1034,7 +1037,7 @@ void ACMediaBrowser::updateNextPositionsPropeller(){
 	p.x = p.y = p.z = 0.0;
 	this->getMediaNode(mReferenceNode).setNextPosition(p);
 	
-	srand(1234);
+	// srand(1234);
 	
 	// XS loop on MediaNodes.
 	// each MediaNode has a MediaId by which we can access the Media
@@ -1176,9 +1179,13 @@ int ACMediaBrowser::toggleSourceActivity(float _x, float _y)
 int ACMediaBrowser::toggleSourceActivity(ACMediaNode &node, int _activity) {
 	node.toggleActivity(_activity);
 	std::cout << "Toggle Acitivity of media : " << node.getMediaId() << " to " << _activity << std::endl;
-	setNeedsActivityUpdateLock(1);
-	setNeedsActivityUpdateAddMedia(node.getMediaId()); // XS previously: loop_id
-	setNeedsActivityUpdateLock(0);	
+	int mt;
+	mt = mLibrary->getMedia(node.getMediaId())->getType();
+	if (mt == MEDIA_TYPE_AUDIO) {
+		setNeedsActivityUpdateLock(1);
+		setNeedsActivityUpdateAddMedia(node.getMediaId()); // XS previously: loop_id
+		setNeedsActivityUpdateLock(0);	
+	}
 }
 
 // XS deprecated
@@ -1199,9 +1206,13 @@ int ACMediaBrowser::toggleSourceActivity(int lid, int type)
 			this->getMediaNode(loop_id).setActivity(0);
 		}
 		
-		setNeedsActivityUpdateLock(1);
-		setNeedsActivityUpdateAddMedia(loop_id);
-		setNeedsActivityUpdateLock(0);
+		int mt;
+		mt = mLibrary->getMedia(loop_id)->getType();
+		if (mt == MEDIA_TYPE_AUDIO) {
+			setNeedsActivityUpdateLock(1);
+			setNeedsActivityUpdateAddMedia(loop_id);
+			setNeedsActivityUpdateLock(0);
+		}
 		// setNeedsActivityUpdate(1);
 											   
 		return 1;
@@ -1323,7 +1334,7 @@ void ACMediaBrowser::initializeNodes(int _defaultNodeId){ // default = 0
 }
 
 // XS 260310 new way to manage update of clusters, positions, neighborhoods, ...
-void ACMediaBrowser::updateDisplay(bool animate){
+void ACMediaBrowser::updateDisplay(bool animate, bool neighborhoods){
 	switch ( mMode ){
 		case AC_MODE_CLUSTERS:
 			//XS TODO check this
@@ -1339,6 +1350,7 @@ void ACMediaBrowser::updateDisplay(bool animate){
 			}
 			break;
 		case AC_MODE_NEIGHBORS:
+			
 			/*
 			if (mPosPlugin != NULL){
 				mPosPlugin->updateNextPositions(this);
@@ -1348,6 +1360,8 @@ void ACMediaBrowser::updateDisplay(bool animate){
 				}
 			}
 			*/
+			if (neighborhoods) {
+				
 			if(animate) {
 				setState(AC_CHANGING);
 			}
@@ -1361,6 +1375,7 @@ void ACMediaBrowser::updateDisplay(bool animate){
 			
 			if (mPosPlugin != NULL){
 				mPosPlugin->updateNextPositions(this);
+			}
 			}
 			break;
 		default:

@@ -157,10 +157,6 @@ void ACOsgImageRenderer::imageGeode(int flip, float sizemul, float zoomin) {
 	Geometry *border_geometry;
 	Texture2D *image_texture;
 	
-	image_transform = new MatrixTransform();
-	
-	image_geode = new Geode();
-	image_geometry = new Geometry();	
 	
 	// XS TODO check this wild cast
 	// SD REQUIRED FOR THUMBNAIL ACImage* my_image = dynamic_cast<ACImage*> ( browser.getLibrary()->getMedia(node_index) );
@@ -169,10 +165,19 @@ void ACOsgImageRenderer::imageGeode(int flip, float sizemul, float zoomin) {
 	int media_index = node_index; // or media_cycle->getBrowser()->getMediaNode(node_index).getMediaId(); 
 	if (media_cycle->getBrowser()->getMode() == AC_MODE_NEIGHBORS)
 		media_index = media_cycle->getBrowser()->getUserLog()->getMediaIdFromNodeId(node_index);	
+	
+	if (media_index<0)
+		media_index = 0;
+	
 	width = media_cycle->getWidth(media_index);//CF instead of node_index
 	height = media_cycle->getHeight(media_index);//CF instead of node_index
 	
-	zpos = zpos + 0.00001 * node_index;
+	image_transform = new MatrixTransform();
+	
+	image_geode = new Geode();
+	image_geometry = new Geometry();	
+
+	zpos = zpos - 0.00001 * node_index;
 	
 	// image vertices
 	float scale;
@@ -218,6 +223,10 @@ void ACOsgImageRenderer::imageGeode(int flip, float sizemul, float zoomin) {
 	// Use pre-computed thumbnail instead
 	// SD REQUIRED
 	
+	// SD TODO - thumbnailing has issues (image colors changed) because bug in opencv?
+	thumbnail_filename = media_cycle->getMediaFileName(media_index);//CF instead of node_index
+	image_image = osgDB::readImageFile(thumbnail_filename);
+	/*
 	thumbnail = (IplImage*)media_cycle->getThumbnailPtr(media_index);//CF instead of node_index
 	if (thumbnail) {
 		image_image = Convert_OpenCV_TO_OSG_IMAGE(thumbnail);
@@ -226,6 +235,7 @@ void ACOsgImageRenderer::imageGeode(int flip, float sizemul, float zoomin) {
 		thumbnail_filename = media_cycle->getThumbnailFileName(media_index);//CF instead of node_index
 		image_image = osgDB::readImageFile(thumbnail_filename);
 	}
+	*/
 	
 	image_texture = new Texture2D;
 	image_texture->setImage(image_image);
@@ -292,21 +302,30 @@ void ACOsgImageRenderer::imageGeode(int flip, float sizemul, float zoomin) {
 
 void ACOsgImageRenderer::prepareNodes() {
 	
-	if (!image_geode) {
-		imageGeode();
+	// SD TODO - move this upwards?
+	int media_index = node_index; // or media_cycle->getBrowser()->getMediaNode(node_index).getMediaId(); 
+	if (media_cycle->getBrowser()->getMode() == AC_MODE_NEIGHBORS)
+		media_index = media_cycle->getBrowser()->getUserLog()->getMediaIdFromNodeId(node_index);
+	
+	if  (media_cycle->getMediaNode(node_index).isDisplayed()) {
+		if (!image_geode) {
+			imageGeode();
+			media_node->addChild(image_transform);
+		}
 	}
 	
-	media_node->addChild(image_transform);
+	prev_media_index = media_index;
 }
-
 
 void ACOsgImageRenderer::updateNodes(double ratio) {
 	
 	float x, y, z;
 	float zpos = 0.001;
-	
-	
+		
 	const ACMediaNode &attribute = media_cycle->getMediaNode(node_index);
+
+	if ( attribute.isDisplayed() ) {
+			
 	const ACPoint &p = attribute.getCurrentPosition(), &p2 = attribute.getNextPosition();
 	double omr = 1.0-ratio;
 	
@@ -317,6 +336,19 @@ void ACOsgImageRenderer::updateNodes(double ratio) {
 	Matrix Trotate;
 	Matrix imageT;
 	
+	int media_index = node_index; // or media_cycle->getBrowser()->getMediaNode(node_index).getMediaId(); 
+	if (media_cycle->getBrowser()->getMode() == AC_MODE_NEIGHBORS)
+		media_index = media_cycle->getBrowser()->getUserLog()->getMediaIdFromNodeId(node_index);
+	
+	if (media_index!=prev_media_index) {
+		if(media_node->getNumChildren() == 1) {
+			media_node->removeChild(0, 1);
+		}
+		imageGeode();
+		media_node->addChild(image_transform);
+		prev_media_index = media_index;
+	}
+		
 	unsigned int mask = (unsigned int)-1;
 	if(attribute.getNavigationLevel() >= media_cycle->getNavigationLevel()) {
 		image_transform->setNodeMask(mask);
@@ -338,8 +370,8 @@ void ACOsgImageRenderer::updateNodes(double ratio) {
 	
 	float localscale;
 	float maxdistance = 0.2;
-	float maxscale = 1;
-	float minscale = 0.3;				
+	float maxscale = 1.5;
+	float minscale = 0.6;				
 	// Apply "rotation" to compensate camera rotation
 	x = omr*p.x + ratio*p2.x;
 	y = omr*p.y + ratio*p2.y;
@@ -355,5 +387,5 @@ void ACOsgImageRenderer::updateNodes(double ratio) {
 	T.makeTranslate(Vec3(x, y, z)); // omr*p.z + ratio*p2.z));	
 	T =  Matrix::rotate(-angle,Vec3(0.0,0.0,1.0)) * Matrix::scale(localscale/zoom,localscale/zoom,localscale/zoom) * T;
 	media_node->setMatrix(T);
-	
+	}
 }

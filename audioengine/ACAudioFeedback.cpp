@@ -600,8 +600,12 @@ void ACAudioFeedback::threadAudioEngine()
 	retvalue = GetStdThreadSchedule(machThread, &priority, &isTimeshare);
 	*/
 	
+	int slow_refresh;
+	slow_refresh = 0;
+	
 	// Prepare end send buffers to audio rendering
 	while (1) {
+		
 		pthread_testcancel();
 		gettimeofday(&tv, &tz);
 		audio_engine_current_time = (double)tv.tv_sec + tv.tv_usec / 1000000.0;
@@ -623,6 +627,9 @@ void ACAudioFeedback::threadAudioEngine()
 			
 			bool isPlaying = processAudioEngine();
 			
+			if (isPlaying)
+				slow_refresh++;
+			
 			// timeCodeAudioEngine(sleep_time*output_sample_rate);
 			
 			audio_engine_fire_time += sleep_time;
@@ -630,8 +637,10 @@ void ACAudioFeedback::threadAudioEngine()
 			pthread_mutex_unlock(&audio_engine_mutex);
 			
 			// TODO - this should be done less frequently than frame rate
-			if (media_cycle && isPlaying) {
+			// if (media_cycle && isPlaying && slow_refresh>=20) {
+			if (media_cycle && slow_refresh>=40) {
 				media_cycle->setNeedsDisplay(true);
+				slow_refresh = 0;
 			}
 		}
 		
@@ -795,18 +804,18 @@ bool ACAudioFeedback::processAudioEngine()
 					
 					// SD TOTO - check this
 					//if (!timeCodeDone) {
-					/* timeCodeDone += 1;
+					 timeCodeDone += 1;
 					if (timeCodeDone>=active_loops) {
 						// SD TODO - why did I need / 2
 						timeCodeAudioEngine(output_buffer_size);
 						//timeCodeAudioEngine(output_buffer_size/2);
 						timeCodeDone -= active_loops;
 					}
-					 */
-					if ( (!timeCodeDone) ) {
+					 
+					/*if ( (!timeCodeDone) ) {
 						timeCodeAudioEngine(output_buffer_size);
 						timeCodeDone = 1;
-					}
+					}*/
 					
 					//}
 					
@@ -942,7 +951,7 @@ void ACAudioFeedback::processAudioEngineSamplePosition(int _loop_slot, int *_sam
 				nbeats = ((sample_end-sample_start)/output_sample_rate) / 60.0 * local_bpm;
 				if (nbeats>4.1)
 					*_sample_pos += (downbeat_from_start%2) * 4 * output_sample_rate * (60.0 / use_bpm[_loop_slot]);
-			}
+				 }
 			// SD 2009 dec - In auto beat, loops with no BPM should be played at normal speed
 			else {
 			}
@@ -1654,7 +1663,7 @@ int ACAudioFeedback::createSourceWithPosition(int loop_id, float x, float y, flo
 	//current_buffer[loop_slot] = 0;
 
 	loop_synchro_mode[loop_slot] = ACAudioEngineSynchroModeAutoBeat;
-	loop_scale_mode[loop_slot] = ACAudioEngineScaleModeResample; //ACAudioEngineScaleModeVocode; //CF scrub test  
+	loop_scale_mode[loop_slot] = ACAudioEngineScaleModeVocode; //ACAudioEngineScaleModeVocode; //CF scrub test  
 	
 	if (!use_bpm[loop_slot]) {
 		loop_synchro_mode[loop_slot] = ACAudioEngineSynchroModeNone;
