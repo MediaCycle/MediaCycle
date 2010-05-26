@@ -144,10 +144,10 @@ public:
 	float getCameraRotation() const				{ return mCameraAngle; }
 	
 	// weights of features
+	void setFeatureWeights(vector<float> &weights);
 	void setWeight(int i, float weight);
 	std::vector<float> getWeightVector(){return mFeatureWeights;};
 	float getWeight(int i);
-	void setClusterNumber(int n); 
 		
 	// filtering
 	void setFilterIn();
