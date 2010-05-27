@@ -55,7 +55,15 @@ enum ACPluginType {
 	PLUGIN_TYPE_NONE,
 	PLUGIN_TYPE_FEATURES,
 	PLUGIN_TYPE_SERVER,
-	PLUGIN_TYPE_CLIENT
+	PLUGIN_TYPE_CLIENT,	
+	PLUGIN_TYPE_CLUSTERS_METHOD,//CF updateClusters
+	PLUGIN_TYPE_CLUSTERS_POSITIONS,//CF updatePositions for the Clusters mode
+	PLUGIN_TYPE_CLUSTERS_PIPELINE,//CF updateClusters and updatePositions for the Clusters mode
+	PLUGIN_TYPE_NEIGHBORS_METHOD,//CF updateNeighborhoods
+	PLUGIN_TYPE_NEIGHBORS_POSITIONS,//CF updatePositions for the Neighbors mode
+	PLUGIN_TYPE_NEIGHBORS_PIPELINE,//CF updateNeighborhoods and updatePositions for the Neighbors mode
+	PLUGIN_TYPE_ANYMODE_POSITIONS,//CF updatePositions for the Clusters or Neighbors modes
+	PLUGIN_TYPE_ALLMODES_PIPELINE//CF updateClusters and updateNeighborhoods and updatePositions for both modes
 };
 
 class ACPlugin {

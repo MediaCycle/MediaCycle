@@ -289,20 +289,56 @@ int MediaCycle::addPlugin(string aPluginPath) {
     return this->pluginManager->add(aPluginPath);
 }
 
-void MediaCycle::setVisualisationPlugin(string pluginName){
-  ACPlugin* visPlugin = this->getPluginManager()->getPlugin(pluginName);
-  this->getBrowser()->setVisualisationPlugin(visPlugin);
+void MediaCycle::setClustersMethodPlugin(string pluginName){
+	ACPlugin* clustersPlugin = this->getPluginManager()->getPlugin(pluginName);
+	this->getBrowser()->setClustersMethodPlugin(clustersPlugin);
 }
 
-void MediaCycle::setPositionsPlugin(string pluginName){
-	ACPlugin* posPlugin = this->getPluginManager()->getPlugin(pluginName);
-	this->getBrowser()->setPositionsPlugin(posPlugin);
-}
-
-void MediaCycle::setNeighborhoodsPlugin(string pluginName){
+void MediaCycle::setNeighborsMethodPlugin(string pluginName){
 	ACPlugin* neighborsPlugin = this->getPluginManager()->getPlugin(pluginName);
-	this->getBrowser()->setNeighborhoodsPlugin(neighborsPlugin);
+	this->getBrowser()->setNeighborsMethodPlugin(neighborsPlugin);
 }
+
+void MediaCycle::setClustersPositionsPlugin(string pluginName){
+	ACPlugin* clustersPlugin = this->getPluginManager()->getPlugin(pluginName);
+	this->getBrowser()->setClustersPositionsPlugin(clustersPlugin);
+}
+
+void MediaCycle::setNeighborsPositionsPlugin(string pluginName){
+	ACPlugin* neighborsPlugin = this->getPluginManager()->getPlugin(pluginName);
+	this->getBrowser()->setNeighborsPositionsPlugin(neighborsPlugin);
+}
+
+void MediaCycle::setVisualisationPlugin(string pluginName){
+	ACPlugin* visPlugin = this->getPluginManager()->getPlugin(pluginName);
+	this->getBrowser()->setVisualisationPlugin(visPlugin);
+}
+
+void MediaCycle::changeClustersMethodPlugin(string pluginName){
+	ACPlugin* clustersPlugin = this->getPluginManager()->getPlugin(pluginName);
+	this->getBrowser()->changeClustersMethodPlugin(clustersPlugin);
+}
+
+void MediaCycle::changeNeighborsMethodPlugin(string pluginName){
+	ACPlugin* neighborsPlugin = this->getPluginManager()->getPlugin(pluginName);
+	this->getBrowser()->changeNeighborsMethodPlugin(neighborsPlugin);
+}
+
+void MediaCycle::changeClustersPositionsPlugin(string pluginName){
+	ACPlugin* clustersPlugin = this->getPluginManager()->getPlugin(pluginName);
+	this->getBrowser()->changeClustersPositionsPlugin(clustersPlugin);
+}
+
+void MediaCycle::changeNeighborsPositionsPlugin(string pluginName){
+	ACPlugin* neighborsPlugin = this->getPluginManager()->getPlugin(pluginName);
+	this->getBrowser()->changeNeighborsPositionsPlugin(neighborsPlugin);
+}
+/*
+void MediaCycle::changeVisualisationPlugin(string pluginName){
+	ACPlugin* visPlugin = this->getPluginManager()->getPlugin(pluginName);
+	this->getBrowser()->changeVisualisationPlugin(visPlugin);
+}
+*/
 
 void MediaCycle::dumpPluginsList(){this->pluginManager->dump();}
 
@@ -423,7 +459,7 @@ void MediaCycle::hoverCallback(float x, float y) {
 
 
 // == NEW
-void MediaCycle::updateDisplay(bool _animate, bool neighborhoods) { mediaBrowser->updateDisplay(_animate, neighborhoods);}
+void MediaCycle::updateDisplay(bool _animate) { mediaBrowser->updateDisplay(_animate);}
 
 void MediaCycle::readConfigFile(string _fname) {
 	ifstream library_file;

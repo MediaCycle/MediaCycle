@@ -1,7 +1,7 @@
 /**
  * @brief ACVisPluginAudiogarden.cpp
- * @author Damien Tardieu
- * @date 05/05/2010
+ * @author Christian Frisson
+ * @date 27/05/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -40,9 +40,9 @@ using namespace std;
 ACVisPluginAudiogarden::ACVisPluginAudiogarden()
 {
     //vars herited from ACPlugin
-	// XS TODO: are these general enough ? can we use this only for video ??
-    this->mMediaType = MEDIA_TYPE_VIDEO;
-    this->mPluginType = PLUGIN_TYPE_NONE;
+	// XS TODO: are these general enough ? can we use this only for audio ??
+    this->mMediaType = MEDIA_TYPE_AUDIO;
+    this->mPluginType = PLUGIN_TYPE_CLUSTERS_POSITIONS;
     this->mName = "VisAudiogarden";
     this->mDescription = "Audiogarden Visualisation plugin";
     this->mId = "";

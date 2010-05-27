@@ -54,7 +54,7 @@ ACPositionsPluginRadialTreeLayout::ACPositionsPluginRadialTreeLayout()
 	m_theta1(0.0f), m_theta2(m_theta1 + 2*PI), m_setTheta(false), m_autoScale(true),
 	m_prevRoot(-1) {
     this->mMediaType = MEDIA_TYPE_MIXED; // ALL
-    this->mPluginType = PLUGIN_TYPE_NONE;
+    this->mPluginType = PLUGIN_TYPE_NEIGHBORS_POSITIONS;
     this->mName = "RadialTreeLayoutPositions";
     this->mDescription = "Plugin for the computation of positions and layout for a radial node-link tree layout";
     this->mId = "";

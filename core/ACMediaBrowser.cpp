@@ -145,6 +145,7 @@ ACMediaBrowser::ACMediaBrowser() {
 	mClickedNode = -1;
 	mClickedLabel = -1;
 	mClosestNode = -1;
+	mReferenceNode = 0; //CF ugly, could be -1
 
 	mClusterCount = 5;
 	mNavigationLevel = 0;
@@ -168,9 +169,12 @@ ACMediaBrowser::ACMediaBrowser() {
 //	mLoopAttributes.resize(0); // XS TODO make this a tree
 	nbDisplayedLoops = 20;
 	
+	mClustersMethodPlugin = NULL;
+	mNeighborsMethodPlugin = NULL;
+	mClustersPosPlugin = NULL;
+	mNeighborsPosPlugin = NULL;
 	mVisPlugin = NULL;
-	mPosPlugin = NULL;
-	mNeighborsPlugin = NULL;
+	
 	mUserLog = new ACUserLog();
 	
 	pthread_mutexattr_init(&activity_update_mutex_attr);
@@ -510,7 +514,7 @@ void ACMediaBrowser::libraryContentChanged() {
 	}
 	
 	// XS TODO randomiwe positions only at the beginning...
-	if (mVisPlugin==NULL && mPosPlugin==NULL) {	
+	if (mMode == AC_MODE_CLUSTERS) {//(mVisPlugin==NULL && mPosPlugin==NULL) {	
 		for (ACMediaNodes::iterator node = mLoopAttributes.begin(); node != mLoopAttributes.end(); ++node){
 			(*node).setCurrentPosition (ACRandom(), 
 										ACRandom(), 
@@ -720,56 +724,89 @@ void ACMediaBrowser::initClusterCenters(){
 	}
 }
 
-
-
-// SD TODO - Different clustering algorithms should have their own classes
 // SD TODO - DIfferent dimensionality reduction too
 // This function make the kmeans and set some varaibles : 
 // mClusterCenters
 // mLoopAttributes -> ACMediaNode
+//CF do we need an extra level of tests along the browsing mode (render inactive during AC_MODE_NEIGHBORS?)
 void ACMediaBrowser::updateClusters(bool animate){
-	if (mVisPlugin==NULL && mNeighborsPlugin==NULL)
+	if (mClustersMethodPlugin==NULL && mVisPlugin==NULL){//CF no plugin set, factory settings
+		std::cout << "updateNextPositions : Cluster KMeans (default)" << std::endl;
 		updateClustersKMeans(animate);
+	}	
 	else{
-		if (mNeighborsPlugin==NULL) {
-			initClusterCenters();
-			//std::cout << "UpdateClusters : Plugin" << std::endl;
-			mVisPlugin->updateClusters(this);
-			//XS TODO check this
-			if(animate) {
-				updateNextPositions();
-				//commitPositions();
-				setState(AC_CHANGING);
-			}
-			
+		initClusterCenters();
+		if (mClustersMethodPlugin) { //CF priority on the Clusters Plugin
+			mClustersMethodPlugin->updateClusters(this);
+		}
+		else if (mVisPlugin) {
+			if ( mVisPlugin->getPluginType() == PLUGIN_TYPE_CLUSTERS_PIPELINE || mVisPlugin->getPluginType() == PLUGIN_TYPE_ALLMODES_PIPELINE)
+				mVisPlugin->updateClusters(this);
+			else
+				animate=false;//CF trick to end ACMediaBrowser::updateClusters
+		}	
+		if(animate) {
+			updateNextPositions();
+			//commitPositions();
+			setState(AC_CHANGING);
 		}
 	}
 }	
 
+//CF do we need an extra level of tests along the browsing mode (render inactive during AC_MODE_CLUSTERS?)
 void ACMediaBrowser::updateNeighborhoods(){
-	if (mNeighborsPlugin==NULL)
-		std::cout << "No neighboorhood plugin set" << std::endl; // CF: waiting for one!
+	if (mNeighborsMethodPlugin==NULL && mVisPlugin==NULL)
+		std::cout << "No neighboorhood method plugin set" << std::endl; // CF: waiting for a factory one!
 	else{
-		std::cout << "UpdateNeighborhoods : Plugin" << std::endl;
-		mNeighborsPlugin->updateNeighborhoods(this);
+		if (mNeighborsMethodPlugin){
+			std::cout << "UpdateNeighborhoods : Plugin" << std::endl;
+			mNeighborsMethodPlugin->updateNeighborhoods(this);
+		}
+		else if (mVisPlugin){
+			if ( mVisPlugin->getPluginType() == PLUGIN_TYPE_NEIGHBORS_PIPELINE || mVisPlugin->getPluginType() == PLUGIN_TYPE_ALLMODES_PIPELINE)
+				mVisPlugin->updateNeighborhoods(this);
+		}
 	}
 }
 
+//CF do we need an extra level of tests along the browsing mode and plugin types?
 void ACMediaBrowser::updateNextPositions(){
-	if (mVisPlugin==NULL && mPosPlugin==NULL)
-		updateNextPositionsPropeller();
-	else{
-		if (mPosPlugin){
-			std::cout << "updateNextPositions : Positions Plugin" << std::endl;
-			mPosPlugin->updateNextPositions(this);	
-		}	
-		else{	
-			std::cout << "updateNextPositions : Visualisation Plugin" << std::endl;
-			mVisPlugin->updateNextPositions(this);
-		}	
+	switch ( mMode ){
+		case AC_MODE_CLUSTERS:
+			if (mClustersPosPlugin==NULL && mVisPlugin==NULL) {
+				std::cout << "updateNextPositions : Cluster Propeller (default)" << std::endl;
+				updateNextPositionsPropeller();
+			}	
+			else{
+				if (mClustersPosPlugin){
+					std::cout << "updateNextPositions : Cluster Positions Plugin" << std::endl;
+					mClustersPosPlugin->updateNextPositions(this);	
+				}	
+				else{	
+					std::cout << "updateNextPositions : Visualisation Plugin" << std::endl;
+					mVisPlugin->updateNextPositions(this);
+				}	
+			}
+			break;
+		case AC_MODE_NEIGHBORS:
+			if (mNeighborsPosPlugin==NULL && mVisPlugin==NULL)
+				std::cout << "No neighboorhood positions plugin set" << std::endl; // CF: waiting for a factory one!
+			else{
+				if (mNeighborsPosPlugin){
+					std::cout << "updateNextPositions : Neighbors Positions Plugin" << std::endl;
+					mNeighborsPosPlugin->updateNextPositions(this);	
+				}	
+				else{	
+					std::cout << "updateNextPositions : Visualisation Plugin" << std::endl;
+					mVisPlugin->updateNextPositions(this);
+				}	
+			}
+			break;
+		default:
+			cerr << "unknown browser mode: " << mMode << endl;
+			break;
 	}
 	//	setProximityGrid(); // XS change to something like: mGridPlugin->updateNextPositions(this);
-
 }
 
 void ACMediaBrowser::updateNextPositions2dim(){
@@ -856,7 +893,7 @@ void ACMediaBrowser::updateClustersKMeans(bool animate) {
 	if(inv_weight > 0.0) inv_weight = 1.0 / inv_weight;
 	else return;
 	
-	// SD TOTO 
+	// picking random object as initial cluster center
 	srand(15);
 	mClusterCenters.resize(mClusterCount);
 	cluster_counts.resize(mClusterCount);
@@ -1334,48 +1371,55 @@ void ACMediaBrowser::initializeNodes(int _defaultNodeId){ // default = 0
 }
 
 // XS 260310 new way to manage update of clusters, positions, neighborhoods, ...
-void ACMediaBrowser::updateDisplay(bool animate, bool neighborhoods){
+void ACMediaBrowser::updateDisplay(bool animate){
 	switch ( mMode ){
 		case AC_MODE_CLUSTERS:
 			//XS TODO check this
 			if(animate) {
 				setState(AC_CHANGING);
 			}
-			if (mVisPlugin != NULL){
+			
+			// updateClusters
+			if (mClustersMethodPlugin != NULL){
+				mClustersMethodPlugin->updateClusters(this);
+			}
+			else
+				updateClustersKMeans(animate);
+			
+			// updateNextPositions
+			if (mClustersPosPlugin != NULL){
+				//CF don't we need to recluster first as in the following "else" case?
+				mClustersPosPlugin->updateNextPositions(this);
+			}
+			else if (mVisPlugin != NULL){
+				//CF don't we need to recluster first as in the following "else" case?
 				mVisPlugin->updateNextPositions(this);
 			}
 			else {
-				updateClustersKMeans(animate); // = neighborhood
-				updateNextPositionsPropeller(); // = positions
+				updateNextPositionsPropeller();
 			}
+			
 			break;
 		case AC_MODE_NEIGHBORS:
-			
-			/*
-			if (mPosPlugin != NULL){
-				mPosPlugin->updateNextPositions(this);
-				//XS TODO check this
+			if (mNeighborsMethodPlugin != NULL && mNeighborsPosPlugin != NULL){//CF as we have no factory Method/Positions plugins for Neighbors
+				/*
+				if (mPosPlugin != NULL){
+					mPosPlugin->updateNextPositions(this);
+					//XS TODO check this
+					if(animate) {
+						setState(AC_CHANGING);
+					}
+				}
+				*/
 				if(animate) {
 					setState(AC_CHANGING);
 				}
-			}
-			*/
-			if (neighborhoods) {
 				
-			if(animate) {
-				setState(AC_CHANGING);
-			}
-			
-			if (mNeighborsPlugin != NULL){
-				mNeighborsPlugin->updateNeighborhoods(this);
-			}
-			else {
-				cout << "No neighboorhood plugin set" << endl; // XS default ?
-			}
-			
-			if (mPosPlugin != NULL){
-				mPosPlugin->updateNextPositions(this);
-			}
+				// updateNeighborhoods
+				mNeighborsMethodPlugin->updateNeighborhoods(this);
+		
+				// updateNextPositions
+				mNeighborsPosPlugin->updateNextPositions(this);
 			}
 			break;
 		default:
@@ -1388,4 +1432,166 @@ void ACMediaBrowser::updateDisplay(bool animate, bool neighborhoods){
 //	if (mGridPlugin != NULL){
 //		mGridPlugin->setProximityGrid();
 //	}
-}	
+}
+
+//CF to debug with all scenarios! Plugins and OSG (tree nodes should not be colored) might need some tweaking...
+void ACMediaBrowser::switchMode(ACBrowserMode _mode){
+	switch ( mMode ){
+		case AC_MODE_CLUSTERS:
+			switch ( _mode ){
+				case AC_MODE_CLUSTERS:
+					break;
+				case AC_MODE_NEIGHBORS:
+					if ( getLibrary()->getSize() > 0 ) {
+						//CF do we have to clean the navigation states?
+						//CF do we have to reset the referent node? mUserLog->addRootNode( mReferenceNode , 0); //CF change clicktime (2nd arg)!, use LastClickedNode instead of ReferenceNode?
+						//CF 1) bring the nodes to the center
+						for (ACMediaNodes::iterator node = mLoopAttributes.begin(); node != mLoopAttributes.end(); ++node){	
+							//(*node).setDisplayed (false);
+							(*node).setNextPosition(0.0, 0.0, 0.0);
+						}
+						this->updateDisplay(true);
+						//CF 2) hide all nodes, change mode and make the reference node appear
+						for (ACMediaNodes::iterator node = mLoopAttributes.begin(); node != mLoopAttributes.end(); ++node){	
+							(*node).setDisplayed (false);
+						}
+						this->setMode(_mode);
+						this->updateDisplay(false);
+						//CF 3) develop the first branch at the reference node
+						mUserLog->clickNode(0,0);//CF check if the ref node is correct everytime this way (1 arg), change clicktime (2nd arg)
+						this->updateDisplay(true);
+					}	
+					else
+						this->setMode(_mode);
+					break;
+				default:
+					cerr << "unknown browser mode: " << mMode << endl;
+					break;
+			}	
+			break;
+		case AC_MODE_NEIGHBORS:
+			switch ( _mode ){
+				case AC_MODE_CLUSTERS:
+					//CF 1) clean the user log, links should thus disappear
+					mUserLog->clean();
+					//CF 2) change mode and display all the nodes
+					this->setMode(_mode);
+					for (ACMediaNodes::iterator node = mLoopAttributes.begin(); node != mLoopAttributes.end(); ++node){	
+						(*node).setDisplayed (true);
+						//(*node).setNextPosition(0.0, 0.0, 0.0);
+					}
+					this->updateDisplay(true);
+					break;
+				case AC_MODE_NEIGHBORS:
+					break;
+				default:
+					cerr << "unknown browser mode: " << mMode << endl;
+					break;
+			}
+			break;
+		default:
+			cerr << "unknown browser mode: " << mMode << endl;
+			break;	
+	}	
+}
+
+bool ACMediaBrowser::changeClustersMethodPlugin(ACPlugin* acpl)
+{
+	bool success = false;
+	switch ( mMode ){
+		case AC_MODE_CLUSTERS:
+			this->setClustersMethodPlugin(acpl);
+			this->updateDisplay(true);
+			success = true;
+			break;
+		case AC_MODE_NEIGHBORS:
+			this->setClustersMethodPlugin(acpl);
+			success = true;
+			break;
+		default:
+			cerr << "unknown browser mode: " << mMode << endl;
+			break;
+	}
+	return success;	
+}
+
+bool ACMediaBrowser::changeNeighborsMethodPlugin(ACPlugin* acpl)
+{
+	bool success = false;
+	switch ( mMode ){
+		case AC_MODE_CLUSTERS:
+			this->setNeighborsMethodPlugin(acpl);
+			success = true;
+			break;
+		case AC_MODE_NEIGHBORS:	
+			this->setNeighborsMethodPlugin(acpl);
+			if (mNeighborsPosPlugin != NULL)
+				this->updateDisplay(true);
+			success = true;
+			break;
+		default:
+			cerr << "unknown browser mode: " << mMode << endl;
+			break;
+	}
+	return success;
+}
+
+bool ACMediaBrowser::changeClustersPositionsPlugin(ACPlugin* acpl)
+{
+	bool success = false;
+	switch ( mMode ){
+		case AC_MODE_CLUSTERS:
+			this->setClustersPositionsPlugin(acpl);
+			this->updateDisplay(true);
+			success = true;
+			break;
+		case AC_MODE_NEIGHBORS:	
+			this->setClustersPositionsPlugin(acpl);
+			success = true;
+			break;
+		default:
+			cerr << "unknown browser mode: " << mMode << endl;
+			break;
+	}
+	return success;	
+}
+
+bool ACMediaBrowser::changeNeighborsPositionsPlugin(ACPlugin* acpl)
+{
+	bool success = false;
+	switch ( mMode ){
+		case AC_MODE_CLUSTERS:
+			this->setNeighborsPositionsPlugin(acpl);
+			success = true;
+			break;
+		case AC_MODE_NEIGHBORS:	
+			this->setNeighborsPositionsPlugin(acpl);
+			if (mNeighborsMethodPlugin != NULL)
+				this->updateDisplay(true);
+			success = true;
+			break;
+		default:
+			cerr << "unknown browser mode: " << mMode << endl;
+			break;
+	}
+	return success;	
+}
+
+/*
+bool ACMediaBrowser::changeVisualisationPlugin(ACPlugin* acpl)
+{
+	bool success = false;
+	switch ( mMode ){
+		case AC_MODE_CLUSTERS:
+			success = true;
+			break;
+		case AC_MODE_NEIGHBORS:	
+			success = true;
+			break;
+		default:
+			cerr << "unknown browser mode: " << mMode << endl;
+			break;
+	}
+	return success;
+}
+*/
