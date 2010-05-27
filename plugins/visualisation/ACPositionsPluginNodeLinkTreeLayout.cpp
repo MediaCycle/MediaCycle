@@ -65,7 +65,7 @@ ACPositionsPluginNodeLinkTreeLayout::ACPositionsPluginNodeLinkTreeLayout()
 : m_bspace(0.005), m_tspace(0.0025), m_dspace(0.005), m_offset(0.05),m_maxDepth(0),m_ax(0.0),m_ay(0.0) 
 {
     this->mMediaType = MEDIA_TYPE_MIXED; // ALL
-    this->mPluginType = PLUGIN_TYPE_NONE;
+    this->mPluginType = PLUGIN_TYPE_NEIGHBORS_POSITIONS;
     this->mName = "NodeLinkTreeLayoutPositions";
     this->mDescription = "Plugin for the computation of positions and layout for a node-link tree layout";
     this->mId = "";

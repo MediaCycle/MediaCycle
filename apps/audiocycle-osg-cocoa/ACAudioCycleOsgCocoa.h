@@ -67,6 +67,7 @@ enum	{
 	int osc_control_port;
 	NSString* osc_feedback_ip;
 	int osc_feedback_port; 
+	int browser_mode;
 
 	//ACOscBrowser			*osc_browser;
 	//
@@ -130,11 +131,7 @@ enum	{
 	IBOutlet NSSlider*				mPosXSlider;
 	IBOutlet NSSlider*				mPosYSlider;
 	IBOutlet NSSlider*				mZoomSlider;
-/*	
-	IBOutlet NSTextField*			mOscIp;
-	IBOutlet NSTextField*			mOscPort;
-	IBOutlet NSButton*				mOscStatus;
-*/ 
+
 	IBOutlet NSTextField*			mOscControlIp;
 	IBOutlet NSTextField*			mOscControlPort;
 	IBOutlet NSButton*				mOscControlStatus;
@@ -143,8 +140,12 @@ enum	{
 	IBOutlet NSTextField*			mOscFeedbackPort;
 	IBOutlet NSButton*				mOscFeedbackStatus;
  
+	IBOutlet NSSegmentedControl*	mBrowserMode;
 	
-	//TiOscReceiverRef			mOscReceiver;
+	IBOutlet NSPopUpButton*			mClustersMethodPopUpButton;
+	IBOutlet NSPopUpButton*			mClustersPositionsPopUpButton;
+	IBOutlet NSPopUpButton*			mNeighborsMethodPopUpButton;
+	IBOutlet NSPopUpButton*			mNeighborsPositionsPopUpButton;	
 };
 
 // Context/listener Menu
@@ -173,11 +174,17 @@ enum	{
 
 - (IBAction)	setBackButton:(id)inSender;
 - (IBAction)	setForwardButton:(id)inSender;
+- (IBAction)	setBrowserMode:(id)inSender;
 - (IBAction)	setHistoryButton:(id)inSender;
 - (IBAction)	setBookmarkButton:(id)inSender;
 - (IBAction)	setTagButton:(id)inSender;
 
 - (IBAction)	setNeighboursModeRadio:(id)inSender;
+
+- (IBAction)	setClustersMethodPopUpButton:(id)inSender;
+- (IBAction)	setClustersPositionsPopUpButton:(id)inSender;
+- (IBAction)	setNeighborsMethodPopUpButton:(id)inSender;
+- (IBAction)	setNeighborsPositionsPopUpButton:(id)inSender;
 
 - (IBAction)	setWeight1Check:(id)inSender;
 - (IBAction)	setWeight2Check:(id)inSender;

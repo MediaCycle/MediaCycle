@@ -158,7 +158,7 @@ public:
 	//
 	void* hasBrowser();
 	void setVisualisationPlugin(string pluginName);
-	void setNeighborhoodsPlugin(string pluginName);
+	void setNeighborhoodsMethodPlugin(string pluginName);
 	void setPositionsPlugin(string pluginName);
 	//	int addPlugin(std::string aPluginPath);
 	

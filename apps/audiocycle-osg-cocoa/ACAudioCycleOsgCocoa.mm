@@ -115,17 +115,22 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 
 - (void)updatedLibrary
 {	
-	// SD TOTO - srand() is called in other places, so no randomization actually.
-	int library_size = media_cycle->getLibrarySize();
-	int rand_node;
-	if (library_size==0) {
-		rand_node = 0;
-	}
-	else {
-		rand_node = rand();
-		rand_node = rand_node % library_size;
-	}
-	media_cycle->setReferenceNode(rand_node);
+	#ifdef USE_DEBUG
+		media_cycle->setReferenceNode(0);//CF we want to debug the view and positions using the same layout at each relaunch!
+	#else
+		// SD TOTO - srand() is called in other places, so no randomization actually.
+		int library_size = media_cycle->getLibrarySize();
+		int rand_node;
+		if (library_size==0) {
+			rand_node = 0;
+		}
+		else {
+			rand_node = rand();
+			rand_node = rand_node % library_size;
+		}
+		media_cycle->setReferenceNode(rand_node);
+	#endif
+	
 	// XSCF 250310 added these 3
 	media_cycle->pushNavigationState();
 	media_cycle->getBrowser()->setState(AC_CHANGING);
@@ -144,25 +149,68 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 	[[NSNotificationCenter defaultCenter] addObserver: self selector: @selector(myObserver:) name: @"OALNotify" object: NULL];
 	
 	media_cycle = new MediaCycle(MEDIA_TYPE_AUDIO,"/tmp/","mediacycle.acl");
+	
+	// XS TODO fichier de configuration
 	std::string build_type ("Release");
 	#ifdef USE_DEBUG
 		build_type = "Debug";
 	#endif
 	media_cycle->addPlugin("../../../plugins/audio/" + build_type + "/mc_audio.dylib");
-	//int vizplugloaded = media_cycle->addPlugin("../../../plugins/visualisation/" + build_type + "/mc_visualisation.dylib");
-	int vizplugloaded = media_cycle->addPlugin("/dupont/development/workdir-new/ticore-app/Applications/Numediart/MediaCycle/src/Builds/darwin-x86/plugins/visualisation/" + build_type + "/mc_visualisation.dylib");
+	int vizplugloaded = media_cycle->addPlugin("../../../plugins/visualisation/" + build_type + "/mc_visualisation.dylib");
+	//int vizplugloaded = media_cycle->addPlugin("/dupont/development/workdir-new/ticore-app/Applications/Numediart/MediaCycle/src/Builds/darwin-x86/plugins/visualisation/" + build_type + "/mc_visualisation.dylib");
 	if ( vizplugloaded == 0 )
 	{
-		//media_cycle->setVisualisationPlugin("Visualisation");
-		//media_cycle->setVisualisationPlugin("PCAVis");
-		//media_cycle->setVisualisationPlugin("Vis2Desc");
-		//media_cycle->setNeighborhoodsPlugin("RandomNeighborhoods");
-		//media_cycle->setNeighborhoodsPlugin("ParetoNeighborhoods");
-		//media_cycle->setNeighborhoodsPlugin("RandomNeighborhoods");
-		//media_cycle->setPositionsPlugin("NodeLinkTreeLayoutPositions");
-		//media_cycle->setNeighborhoodsPlugin("EuclideanNeighborhoods");
-		//media_cycle->setPositionsPlugin("RadialTreeLayoutPositions");
+		//CF this should be on a separate function or even on a mediacycle-(osg-)cocoa class
+		//CF we could use some NSArrays instead...
+		ACPluginManager *acpl = media_cycle->getPluginManager(); //getPlugins
+		if (acpl) {
+			for (int i=0;i<acpl->getSize();i++) {
+				for (int j=0;j<acpl->getPluginLibrary(i)->getSize();j++) {
+					//if (acpl->getPluginLibrary(i)->getPlugin(j)->getMediaType() == MEDIA_TYPE_AUDIO) {
+					if (acpl->getPluginLibrary(i)->getPlugin(j)->getPluginType() == PLUGIN_TYPE_CLUSTERS_METHOD) {
+						//CF on the first detected Clusters Method plugin
+						if ([mClustersMethodPopUpButton numberOfItems] == 1 && [[mClustersMethodPopUpButton titleOfSelectedItem] isEqualToString:@"KMeans (default)"]) {
+							[mClustersMethodPopUpButton setEnabled: YES];
+							//CF default settings: no Clusters Method plugin, use KMeans 
+						}
+						[mClustersMethodPopUpButton addItemWithTitle:[NSString stringWithCString:acpl->getPluginLibrary(i)->getPlugin(j)->getName().c_str()]];
+
+					}
+					else if (acpl->getPluginLibrary(i)->getPlugin(j)->getPluginType() == PLUGIN_TYPE_CLUSTERS_POSITIONS) {
+						//CF on the first detected Clusters Positions plugin
+						if ([mClustersPositionsPopUpButton numberOfItems] == 1 && [[mClustersPositionsPopUpButton titleOfSelectedItem] isEqualToString:@"Propeller (default)"]) {
+							[mClustersPositionsPopUpButton setEnabled: YES];
+							//CF default settings: no Clusters Positions plugin, use Propeller 
+						}	
+						[mClustersPositionsPopUpButton addItemWithTitle:[NSString stringWithCString:acpl->getPluginLibrary(i)->getPlugin(j)->getName().c_str()]];
+
+					}
+					else if (acpl->getPluginLibrary(i)->getPlugin(j)->getPluginType() == PLUGIN_TYPE_NEIGHBORS_METHOD) {
+						//CF on the first detected Neighbors Method plugin
+						if ([mNeighborsMethodPopUpButton numberOfItems] == 1 && [[mNeighborsMethodPopUpButton titleOfSelectedItem] isEqualToString:@"None available"]) {
+							[mNeighborsMethodPopUpButton setEnabled: YES];
+							[mNeighborsMethodPopUpButton removeAllItems];
+							//CF default settings: no factory method available, use the first detected Neighbors Method plugin
+							media_cycle->setNeighborsMethodPlugin(acpl->getPluginLibrary(i)->getPlugin(j)->getName());
+						}	
+						[mNeighborsMethodPopUpButton addItemWithTitle:[NSString stringWithCString:acpl->getPluginLibrary(i)->getPlugin(j)->getName().c_str()]];
+					}
+					else if (acpl->getPluginLibrary(i)->getPlugin(j)->getPluginType() == PLUGIN_TYPE_NEIGHBORS_POSITIONS) {
+						//CF on the first detected Neighbors Positions plugin
+						if ([mNeighborsPositionsPopUpButton numberOfItems] == 1 && [[mNeighborsPositionsPopUpButton titleOfSelectedItem] isEqualToString:@"None available"]) {
+							[mNeighborsPositionsPopUpButton setEnabled: YES];
+							[mNeighborsPositionsPopUpButton removeAllItems];
+							//CF default settings: no factory method available, use the first detected Neighbors Positions plugin
+							media_cycle->setNeighborsPositionsPlugin(acpl->getPluginLibrary(i)->getPlugin(j)->getName());
+						}	
+						[mNeighborsPositionsPopUpButton addItemWithTitle:[NSString stringWithCString:acpl->getPluginLibrary(i)->getPlugin(j)->getName().c_str()]];
+					}
+					//CF we don't yet deal with Visualisation Plugins (combining Methods and Positions for Clusters and/or Neighborhoods)
+				}
+			}
+		}
 	}
+	
 	audio_engine = new ACAudioFeedback();
 	audio_engine->setMediaCycle(media_cycle);
 
@@ -184,6 +232,7 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 	[browser_osg_view setMediaCycle:media_cycle];
 	[browser_osg_view prepareFromBrowser];
 	[browser_osg_view setPlaying:YES];
+	//media_cycle->setNeedsDisplay(true);//CF temp patch so that the osg browser is "OSG blue" instead of "ghostly white" on startup...
 }
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -399,6 +448,14 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 	media_cycle->goForward();
 }
 
+- (IBAction)	setBrowserMode:(id)inSender
+{
+	browser_mode = [inSender selectedSegment];
+	NSLog(@"Browser Mode: %i", browser_mode);
+	if (media_cycle && media_cycle->hasBrowser()) //CF and test on library loaded?
+		media_cycle->getBrowser()->switchMode( (ACBrowserMode) browser_mode );
+}
+
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // BROWSER CONTROLS
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -409,11 +466,41 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 	NSButtonCell *selCell = [inSender selectedCell];
     int value = [selCell tag];
 	if (value==0) {		// pareto
-		media_cycle->setNeighborhoodsPlugin("ParetoNeighborhoods");
+		media_cycle->setNeighborsMethodPlugin("ParetoNeighborhoods");
 	}
 	else if (value==1) { // euclidean
-		media_cycle->setNeighborhoodsPlugin("EuclideanNeighborhoods");
+		media_cycle->setNeighborsMethodPlugin("EuclideanNeighborhoods");
 	}	
+}
+
+- (IBAction)	setClustersMethodPopUpButton:(id)inSender
+{
+	NSString *selItem = [mClustersMethodPopUpButton titleOfSelectedItem];
+	NSLog(@"Clusters Method: %s", selItem);
+	media_cycle->changeClustersMethodPlugin((string)[selItem UTF8String]);	
+}
+
+- (IBAction)	setClustersPositionsPopUpButton:(id)inSender
+{
+	NSString *selItem = [inSender titleOfSelectedItem];
+	NSLog(@"Clusters Positions: %s", selItem);	
+	media_cycle->changeClustersPositionsPlugin((string)[selItem UTF8String]);	
+}
+
+- (IBAction)	setNeighborsMethodPopUpButton:(id)inSender
+{
+	NSString *selItem = [inSender titleOfSelectedItem];
+	NSLog(@"Neighbors Method: %s", selItem);
+	//if ([[mNeighborsMethodPopUpButton titleOfSelectedItem] isEqualToString:@"ParetoNeighborhoods"])
+	//	std::cout << "NeighborsMethod: ParetoNeighborhoods" << std::endl;
+	media_cycle->changeNeighborsMethodPlugin((string)[selItem UTF8String]);	
+}
+
+- (IBAction)	setNeighborsPositionsPopUpButton:(id)inSender
+{
+	NSString *selItem = [inSender titleOfSelectedItem];
+	NSLog(@"Neighbors Positions: %s", selItem);	
+	media_cycle->changeNeighborsPositionsPlugin((string)[selItem UTF8String]);	
 }
 
 - (IBAction)	setWeight1Check:(id)inSender
@@ -425,7 +512,8 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 	else {
 		media_cycle->setWeight(0, 0);
 	}
-	media_cycle->updateDisplay(true, 0);
+	if ( media_cycle->getMode() == AC_MODE_CLUSTERS )
+		media_cycle->updateDisplay(true);
 }
 
 - (IBAction)	setWeight2Check:(id)inSender
@@ -437,7 +525,8 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 	else {
 		media_cycle->setWeight(1, 0);
 	}
-	media_cycle->updateDisplay(true, 0);
+	if ( media_cycle->getMode() == AC_MODE_CLUSTERS )
+		media_cycle->updateDisplay(true);
 }
 
 - (IBAction)	setWeight3Check:(id)inSender
@@ -449,7 +538,8 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 	else {
 		media_cycle->setWeight(2, 0);
 	}
-	media_cycle->updateDisplay(true, 0);
+	if ( media_cycle->getMode() == AC_MODE_CLUSTERS )
+		media_cycle->updateDisplay(true);
 }
 
 - (IBAction)setWeight1Slider:(id)inSender
@@ -457,7 +547,8 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 	float	value = [inSender floatValue];
 	
 	media_cycle->setWeight(0, value);
-	media_cycle->updateDisplay(true, 0); //XS 250310 was: media_cycle->updateClusters(true);
+	if ( media_cycle->getMode() == AC_MODE_CLUSTERS )
+		media_cycle->updateDisplay(true); //XS 250310 was: media_cycle->updateClusters(true);
 	// XS 310310 removed media_cycle->setNeedsDisplay(true); // now in updateDisplay
 
 }
@@ -467,7 +558,8 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 	float	value = [inSender floatValue];
 	
 	media_cycle->setWeight(1, value);
-	media_cycle->updateDisplay(true, 0); //XS 250310 was: media_cycle->updateClusters(true);
+	if ( media_cycle->getMode() == AC_MODE_CLUSTERS )
+		media_cycle->updateDisplay(true); //XS 250310 was: media_cycle->updateClusters(true);
 	// XS 310310 removed media_cycle->setNeedsDisplay(true); // now in updateDisplay
 
 }
@@ -477,7 +569,8 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 	float	value = [inSender floatValue];
 	
 	media_cycle->setWeight(2, value);
-	media_cycle->updateDisplay(true, 0); //XS 250310 was: media_cycle->updateClusters(true);
+	if ( media_cycle->getMode() == AC_MODE_CLUSTERS )
+		media_cycle->updateDisplay(true); //XS 250310 was: media_cycle->updateClusters(true);
 	// XS 310310 removed media_cycle->setNeedsDisplay(true); // now in updateDisplay
 
 }
@@ -488,7 +581,8 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 	
 	media_cycle->setClusterNumber(value);
 	// XSCF251003 added this
-	media_cycle->updateDisplay(true, 0); //XS 250310 was: media_cycle->updateClusters(true);
+	if ( media_cycle->getMode() == AC_MODE_CLUSTERS )
+		media_cycle->updateDisplay(true); //XS 250310 was: media_cycle->updateClusters(true);
 	// XS 310310 removed media_cycle->setNeedsDisplay(true); // now in updateDisplay
 	
 }

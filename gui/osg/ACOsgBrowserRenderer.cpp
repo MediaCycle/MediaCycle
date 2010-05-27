@@ -68,7 +68,7 @@ void ACOsgBrowserRenderer::prepareNodes(int start) {
 		}
 	}
 
-	if (media_cycle->getBrowser()->getLayout() == AC_LAYOUT_TYPE_NODELINK && link_renderer.size()>n) {
+	if (link_renderer.size()>n){//media_cycle->getBrowser()->getLayout() == AC_LAYOUT_TYPE_NODELINK && ) {
 		for (int i=n;i<link_renderer.size();i++) {
 			link_group->removeChild(link_renderer[i]->getLink());
 			delete link_renderer[i];
@@ -77,7 +77,7 @@ void ACOsgBrowserRenderer::prepareNodes(int start) {
 	
 	
 	node_renderer.resize(n);
-	if (media_cycle->getBrowser()->getLayout() == AC_LAYOUT_TYPE_NODELINK)
+	//if (media_cycle->getBrowser()->getLayout() == AC_LAYOUT_TYPE_NODELINK)
 		link_renderer.resize(n);
 	distance_mouse.resize(n);
 	
@@ -108,7 +108,7 @@ void ACOsgBrowserRenderer::prepareNodes(int start) {
 			media_group->addChild(node_renderer[i]->getNode());
 		}
 		
-		if (media_cycle->getBrowser()->getLayout() == AC_LAYOUT_TYPE_NODELINK) {
+		//if (media_cycle->getBrowser()->getLayout() == AC_LAYOUT_TYPE_NODELINK) {
 			link_renderer[i] = new ACOsgNodeLinkRenderer();
 			if (link_renderer[i]) {
 				link_renderer[i]->setMediaCycle(media_cycle);
@@ -117,7 +117,7 @@ void ACOsgBrowserRenderer::prepareNodes(int start) {
 				link_renderer[i]->prepareLinks();
 				link_group->addChild(link_renderer[i]->getLink());
 			}
-		}	
+		//}	
 	}
 	/*
 	layout_renderer = new ACOsgLayoutRenderer();
@@ -136,6 +136,7 @@ void ACOsgBrowserRenderer::updateNodes(double ratio) {
 	//if (media_cycle && media_cycle->hasBrowser() && media_cycle->getBrowser()->getNumberOfLoopsToDisplay()>0)
 		layout_renderer->updateLayout(ratio);
 	*/
+	//CF or visible and updated only if AC_LAYOUT_TYPE_NODELINK
 	if (media_cycle->getBrowser()->getLayout() == AC_LAYOUT_TYPE_NODELINK) {
 		for (unsigned int i=0;i<link_renderer.size();i++) {
 			link_renderer[i]->updateLinks(ratio);

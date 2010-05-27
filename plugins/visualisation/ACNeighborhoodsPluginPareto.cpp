@@ -1,7 +1,7 @@
 /**
  * @brief ACNeighborhoodsPluginPareto.cpp
- * @author Damien Tardieu
- * @date 22/05/2010
+ * @author Christian Frisson
+ * @date 27/05/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -36,7 +36,7 @@ using namespace std;
 
 ACNeighborhoodsPluginPareto::ACNeighborhoodsPluginPareto() {
     this->mMediaType = MEDIA_TYPE_MIXED; // ALL
-    this->mPluginType = PLUGIN_TYPE_NONE;
+    this->mPluginType = PLUGIN_TYPE_NEIGHBORS_METHOD;
     this->mName = "ParetoNeighborhoods";
     this->mDescription = "Plugin for the computation of Pareto neighborhoods";
     this->mId = "";

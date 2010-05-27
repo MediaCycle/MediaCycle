@@ -94,9 +94,16 @@ public:
 	// Plugins
     int addPlugin(std::string aPluginPath);
 	ACPluginManager* getPluginManager() { return pluginManager;}
-    void setVisualisationPlugin(string pluginName);
-	void setNeighborhoodsPlugin(string pluginName);
-	void setPositionsPlugin(string pluginName);	
+	void setClustersMethodPlugin(string pluginName);
+	void setNeighborsMethodPlugin(string pluginName);
+	void setClustersPositionsPlugin(string pluginName);
+	void setNeighborsPositionsPlugin(string pluginName);
+	void setVisualisationPlugin(string pluginName);
+	void changeClustersMethodPlugin(string pluginName);
+	void changeNeighborsMethodPlugin(string pluginName);
+	void changeClustersPositionsPlugin(string pluginName);
+	void changeNeighborsPositionsPlugin(string pluginName);
+	//void changeVisualisationPlugin(string pluginName);
 	void dumpPluginsList();
 	
 	// == Media
@@ -169,7 +176,7 @@ public:
 	void hoverCallback(float x, float y);
 
 	// == NEW, replaces updateClusters and updateNeighborhoods
-	void updateDisplay(bool animate, bool neighborhoods=1);
+	void updateDisplay(bool animate);
 	void readConfigFile(string fname);
 //	void dumpConfigFile();
 

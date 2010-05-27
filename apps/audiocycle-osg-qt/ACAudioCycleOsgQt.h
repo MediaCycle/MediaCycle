@@ -73,11 +73,18 @@ class ACAudioCycleOsgQt : public QMainWindow
 		void on_checkBoxRhythm_stateChanged(int state);
 		void on_checkBoxTimbre_stateChanged(int state);
 		void on_checkBoxHarmony_stateChanged(int state);
-	
 		void on_sliderClusters_sliderReleased();
+		
+		void on_radioButtonClusters_toggled();
+	
+		void on_comboBoxClustersMethod_activated(const QString & text);//CF or (int index);} 
+		void on_comboBoxClustersPositions_activated(const QString & text);//CF or (int index);} 
+		void on_comboBoxNeighborsMethod_activated(const QString & text);//CF or (int index);} 
+		void on_comboBoxNeighborsPositions_activated(const QString & text);//CF or (int index);} 
+	
 		void on_sliderBPM_valueChanged(); // or sliderMoved();?
 		void on_sliderPitch_valueChanged(); // or sliderMoved();?
-
+	
 		void loadACLFile();
 		void saveACLFile();
 		void loadMediaDirectory();

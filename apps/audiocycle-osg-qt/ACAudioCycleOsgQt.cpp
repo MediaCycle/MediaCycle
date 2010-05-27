@@ -50,6 +50,7 @@ updatedLibrary(false)
 {
 	ui.setupUi(this); // first thing to do
 	media_cycle = new MediaCycle(MEDIA_TYPE_AUDIO,"/tmp/","mediacycle.acl");
+		
 	// XS TODO fichier de configuration
 	#if defined(__APPLE__)
 		std::string build_type ("Release");
@@ -59,17 +60,59 @@ updatedLibrary(false)
 		int vizplugloaded = media_cycle->addPlugin("../../../plugins/visualisation/" + build_type + "/mc_visualisation.dylib");
 		if ( vizplugloaded == 0 )
 		{
-			//media_cycle->setVisualisationPlugin("VisAudiogarden");
-			//media_cycle->setVisualisationPlugin("Vis2Desc");
-			//media_cycle->setNeighborhoodsPlugin("RandomNeighborhoods");
-			//media_cycle->setNeighborhoodsPlugin("EuclideanNeighborhoods");
-			media_cycle->setNeighborhoodsPlugin("ParetoNeighborhoods");
-			//media_cycle->setPositionsPlugin("NodeLinkTreeLayoutPositions");
-			media_cycle->setPositionsPlugin("RadialTreeLayoutPositions");
-			//media_cycle->setMode(AC_MODE_NEIGHBORS);
+			//CF this should be on a separate function or even on a mediacycle-(osg-)qt class
+			ACPluginManager *acpl = media_cycle->getPluginManager();
+			if (acpl) {
+				for (int i=0;i<acpl->getSize();i++) {
+					for (int j=0;j<acpl->getPluginLibrary(i)->getSize();j++) {
+						//if (acpl->getPluginLibrary(i)->getPlugin(j)->getMediaType() == MEDIA_TYPE_AUDIO) {
+						if (acpl->getPluginLibrary(i)->getPlugin(j)->getPluginType() == PLUGIN_TYPE_CLUSTERS_METHOD) {
+							//CF on the first detected Clusters Method plugin
+							if (ui.comboBoxClustersMethod->count() == 1 && ui.comboBoxClustersMethod->currentText().toStdString() == "KMeans (default)") {
+								ui.comboBoxClustersMethod->setEnabled(true);
+								//CF default settings: no Clusters Method plugin, use KMeans 
+							}
+							ui.comboBoxClustersMethod->addItem(QString(acpl->getPluginLibrary(i)->getPlugin(j)->getName().c_str()));
+							
+						}
+						else if (acpl->getPluginLibrary(i)->getPlugin(j)->getPluginType() == PLUGIN_TYPE_CLUSTERS_POSITIONS) {
+							//CF on the first detected Clusters Positions plugin
+							if (ui.comboBoxClustersPositions->count() == 1 && ui.comboBoxClustersPositions->currentText().toStdString() == "Propeller (default)") {
+								ui.comboBoxClustersPositions->setEnabled(true);
+								//CF default settings: no Clusters Positions plugin, use Propeller 
+							}	
+							ui.comboBoxClustersPositions->addItem(QString(acpl->getPluginLibrary(i)->getPlugin(j)->getName().c_str()));
+							
+						}
+						else if (acpl->getPluginLibrary(i)->getPlugin(j)->getPluginType() == PLUGIN_TYPE_NEIGHBORS_METHOD) {
+							//CF on the first detected Neighbors Method plugin
+							if (ui.comboBoxNeighborsMethod->count() == 1 && ui.comboBoxNeighborsMethod->currentText().toStdString() == "None available") {
+								ui.comboBoxNeighborsMethod->setEnabled(true);
+								ui.comboBoxNeighborsMethod->clear();
+								//CF default settings: no factory method available, use the first detected Neighbors Method plugin
+								media_cycle->setNeighborsMethodPlugin(acpl->getPluginLibrary(i)->getPlugin(j)->getName());
+							}	
+							ui.comboBoxNeighborsMethod->addItem(QString(acpl->getPluginLibrary(i)->getPlugin(j)->getName().c_str()));
+						}
+						else if (acpl->getPluginLibrary(i)->getPlugin(j)->getPluginType() == PLUGIN_TYPE_NEIGHBORS_POSITIONS) {
+							//CF on the first detected Neighbors Positions plugin
+							if (ui.comboBoxNeighborsPositions->count() == 1 && ui.comboBoxNeighborsPositions->currentText().toStdString() == "None available") {
+								ui.comboBoxNeighborsPositions->setEnabled(true);
+								ui.comboBoxNeighborsPositions->clear();
+								//CF default settings: no factory method available, use the first detected Neighbors Positions plugin
+								media_cycle->setNeighborsPositionsPlugin(acpl->getPluginLibrary(i)->getPlugin(j)->getName());
+							}	
+							ui.comboBoxNeighborsPositions->addItem(QString(acpl->getPluginLibrary(i)->getPlugin(j)->getName().c_str()));
+						}
+						//CF we don't yet deal with Visualisation Plugins (combining Methods and Positions for Clusters and/or Neighborhoods)
+					}
+				}
+			}
 		}
 		media_cycle->addPlugin("../../../plugins/audio/" + build_type + "/mc_audio.dylib");	
 	#endif
+	
+
 	
 	audio_engine = new ACAudioFeedback();
 	audio_engine->setMediaCycle(media_cycle);
@@ -265,6 +308,40 @@ void ACAudioCycleOsgQt::on_sliderClusters_sliderReleased()
 	}
 	//ui.browserOsgView->setFocus();
 }
+
+void ACAudioCycleOsgQt::on_comboBoxClustersMethod_activated(const QString & text) 
+{
+	std::cout << "Clusters Method: " << text.toStdString() << std::endl;
+	media_cycle->changeClustersMethodPlugin(text.toStdString());
+}
+
+void ACAudioCycleOsgQt::on_comboBoxClustersPositions_activated(const QString & text) 
+{
+	std::cout << "Clusters Positions: " << text.toStdString() << std::endl;
+	media_cycle->changeClustersPositionsPlugin(text.toStdString());
+}
+
+
+void ACAudioCycleOsgQt::on_comboBoxNeighborsMethod_activated(const QString & text) 
+{
+	std::cout << "Neighbors Method: " << text.toStdString() << std::endl;
+	media_cycle->changeNeighborsMethodPlugin(text.toStdString());
+}
+
+
+void ACAudioCycleOsgQt::on_comboBoxNeighborsPositions_activated(const QString & text) 
+{
+	std::cout << "Neighbors Method: " << text.toStdString() << std::endl;
+	media_cycle->changeNeighborsPositionsPlugin(text.toStdString());	
+}
+
+void ACAudioCycleOsgQt::on_radioButtonClusters_toggled()
+{
+	//std::cout << ui.radioButtonClusters->isChecked() << std::endl;
+	ACBrowserMode mode = (ui.radioButtonClusters->isChecked() ? AC_MODE_CLUSTERS : AC_MODE_NEIGHBORS);
+	if (media_cycle && media_cycle->hasBrowser()) //CF and test on library loaded?
+		media_cycle->getBrowser()->switchMode( mode );
+}	
 
 void ACAudioCycleOsgQt::loadACLFile(){
 	QString fileName;

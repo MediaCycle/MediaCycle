@@ -1,7 +1,7 @@
 /**
  * @brief ACNeighborhoodsPluginRandom.cpp
  * @author Christian Frisson
- * @date 19/05/2010
+ * @date 27/05/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -36,7 +36,7 @@ using namespace std;
 
 ACNeighborhoodsPluginRandom::ACNeighborhoodsPluginRandom() {
     this->mMediaType = MEDIA_TYPE_MIXED; // ALL
-    this->mPluginType = PLUGIN_TYPE_NONE;
+    this->mPluginType = PLUGIN_TYPE_NEIGHBORS_METHOD;
     this->mName = "RandomNeighborhoods";
     this->mDescription = "Plugin for the computation of random neighborhoods";
     this->mId = "";

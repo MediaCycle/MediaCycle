@@ -143,7 +143,7 @@ public:
 	void setCameraRotation(float angle)				{ mCameraAngle = angle; setNeedsDisplay(true); }
 	float getCameraRotation() const				{ return mCameraAngle; }
 	
-	// weights of features
+	// 0 of features
 	void setWeight(int i, float weight);
 	std::vector<float> getWeightVector(){return mFeatureWeights;};
 	void setFeatureWeights(vector<float> &weights);
@@ -234,12 +234,20 @@ public:
 	void setNumberOfDisplayedLabels(int nd);
 	int getNumberOfLabels(){return mLabelAttributes.size();}
 
-	void setVisualisationPlugin(ACPlugin* acpl){mVisPlugin=acpl;};
-	void setPositionsPlugin(ACPlugin* acpl){mPosPlugin=acpl;};
-	void setNeighborhoodsPlugin(ACPlugin* acpl){
-		mNeighborsPlugin=acpl;
-		this->setMode(AC_MODE_NEIGHBORS);//CF this stays until it is correctly used on main applications
-	};	
+	void setClustersMethodPlugin(ACPlugin* acpl){mClustersMethodPlugin=acpl;}
+	void setNeighborsMethodPlugin(ACPlugin* acpl){
+		mNeighborsMethodPlugin=acpl;
+		//this->setMode(AC_MODE_NEIGHBORS);//CF this stays until it is correctly used on main applications
+	};
+	void setClustersPositionsPlugin(ACPlugin* acpl){mClustersPosPlugin=acpl;}
+	void setNeighborsPositionsPlugin(ACPlugin* acpl){mNeighborsPosPlugin=acpl;}
+	void setVisualisationPlugin(ACPlugin* acpl){mVisPlugin=acpl;}
+	
+	bool changeClustersMethodPlugin(ACPlugin* acpl);
+	bool changeNeighborsMethodPlugin(ACPlugin* acpl);
+	bool changeClustersPositionsPlugin(ACPlugin* acpl);
+	bool changeNeighborsPositionsPlugin(ACPlugin* acpl);
+	//bool changeVisualisationPlugin(ACPlugin* acpl);//CF we need to sort out first what a VisualisationPlugin can contain vs Clusters/Neighbors Method/Positions plugins
 	
 	// NB: Proximity Grid moved to plugin
 	
@@ -247,7 +255,10 @@ public:
 	ACUserLog* getUserLog(){return mUserLog;};
 
 	// == XS 260310 new way to manage update of clusters, positions, neighborhoods, ...
-	void updateDisplay(bool animate=false, bool neighborhoods=true);
+	void updateDisplay(bool animate=false);//, bool neighborhoods=true);
+	
+	// CF switch navigation mode while navigating
+	void switchMode(ACBrowserMode _mode);
 	
 //XS this should be private when we use updateDisplay
 public:
@@ -311,10 +322,10 @@ protected:
 	int nbDisplayedLabels;
 	int mClickedLabel;
 	
-	int 				mNavigationLevel;
+	int mNavigationLevel;
 	
 	// XS TODO: make a class clusters
-	int				mClusterCount;
+	int mClusterCount;
 	//vector<vector <int> > 		clusters;
 	vector<vector<vector <float> > > mClusterCenters; // cluster index, feature index, descriptor index
 	vector<float>			mFeatureWeights; // each value must be in [0,1], important for euclidian distance.
@@ -322,13 +333,13 @@ protected:
 	int auto_play;
 	int auto_play_toggle;
 
+	ACPlugin* mClustersMethodPlugin;
+	ACPlugin* mNeighborsMethodPlugin;
+	ACPlugin* mClustersPosPlugin;
+	ACPlugin* mNeighborsPosPlugin;
 	ACPlugin* mVisPlugin;
-	ACPlugin* mPosPlugin;
-	ACPlugin* mNeighborsPlugin;
+	
 	ACUserLog* mUserLog;
-	
-
-	
 };
 
 #endif // __ACMEDIABROWSER_H__
