@@ -169,7 +169,7 @@ public:
 	void hoverCallback(float x, float y);
 
 	// == NEW, replaces updateClusters and updateNeighborhoods
-	void updateDisplay(bool animate);
+	void updateDisplay(bool animate, bool neighborhoods=1);
 	void readConfigFile(string fname);
 //	void dumpConfigFile();
 

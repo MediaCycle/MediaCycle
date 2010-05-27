@@ -46,6 +46,8 @@ using namespace osg;
 
 class ACOsgImageRenderer : public ACOsgMediaRenderer  {
 protected:
+	
+	int prev_media_index;
 	static const int NCOLORS ;
 	Vec4Array* colors;
 	Vec4Array* colors2;

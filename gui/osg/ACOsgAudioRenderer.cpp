@@ -82,7 +82,7 @@ void ACOsgAudioRenderer::waveformGeode() {
 	samples_geometry = new Geometry();
 	frame_geometry = new Geometry();
 	border_geometry = new Geometry();
-	
+	 
 	// CF: temporary workaround as the ACUserLog tree and the ACLoopAttributes vector in ACMediaBrowser are not sync'd 
 	int media_index = node_index; // or media_cycle->getBrowser()->getMediaNode(node_index).getMediaId(); 
 	if (media_cycle->getBrowser()->getMode() == AC_MODE_NEIGHBORS)
@@ -281,11 +281,13 @@ void ACOsgAudioRenderer::updateNodes(double ratio) {
 		colors[2] = Vec4(0.5,1,1,1);
 		colors[3] = Vec4(1,0.5,0.5,1);
 		colors[4] = Vec4(0.5,1,0.5,1);
+		colors_ready = true;
 	}
 	
 	const ACMediaNode &attribute = media_cycle->getMediaNode(node_index);
-
+	
 	if ( attribute.isDisplayed() ){
+		
 		const ACPoint &p = attribute.getCurrentPosition(), &p2 = attribute.getNextPosition();
 		double omr = 1.0-ratio;
 				
@@ -313,7 +315,7 @@ void ACOsgAudioRenderer::updateNodes(double ratio) {
 		localscale = max(localscale,minscale);
 		// localscale = 0.5;
 		
-		if (attribute.getActivity()==1) {	// with waveform
+		if (attribute.getActivity()>=1) {	// with waveform
 		//if (0) {	// without waveform
 			localscale = 0.5;
 			

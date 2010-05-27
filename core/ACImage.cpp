@@ -52,7 +52,10 @@ ACImage::ACImage() : ACMedia() {
 }
 
 ACImage::~ACImage() {
-	delete thumbnail;
+	if (thumbnail) {
+		cvReleaseImage(&thumbnail);
+		thumbnail = 0;
+	}
 }
 
 // XS: when we load from file, there is no need to have a pointer to the data passed to the plugin
@@ -147,39 +150,60 @@ int ACImage::loadACL(ifstream &library_file) {
 		cerr << "<ACImage::loadACL> : bad library file" << endl;
 		return 0;
 	}
-	library_file >> filename ;
-//	library_file >> filename_thumbnail;
-//	library_file >> duration;
-	library_file >> mid;	
-	library_file >> width;
-	library_file >> height;
-	int n_features = 0;
-	library_file >> n_features; 
+
+	int i, j;
+	int n_features;
+	int n_features_elements = 0;	
+	int nn;
+	string tab;
 	
 	ACMediaFeatures* mediaFeatures;
+	string featureName;
 	float local_feature;
-	int n_features_elements = 0;
 	
-	for (int i=0; i<n_features;i++) {
-		mediaFeatures = new ACMediaFeatures();
-		features_vectors.push_back(mediaFeatures);
-		features_vectors[i]->setComputed();
-		library_file >> n_features_elements;
-		features_vectors[i]->resize(n_features_elements);
-		for (int j=0; j<n_features_elements; j++) {
-			library_file >> local_feature;
-			features_vectors[i]->setFeatureElement(j, local_feature);
+	getline(library_file, filename, '\n');
+	if (!filename.empty()){
+		library_file >> mid;	
+		library_file >> width;
+		library_file >> height;
+		library_file >> n_features; 
+		getline(library_file, tab);
+		
+		for (int i=0; i<n_features;i++) {
+			mediaFeatures = new ACMediaFeatures();
+			features_vectors.push_back(mediaFeatures);
+			features_vectors[i]->setComputed();
+			getline(library_file, featureName, '\n');
+			features_vectors[i]->setName(featureName);
+			library_file >> nn;
+			features_vectors[i]->setNeedsNormalization(nn);
+			library_file >> n_features_elements;
+			features_vectors[i]->resize(n_features_elements);
+			for (int j=0; j<n_features_elements; j++) {
+				library_file >> local_feature;
+				features_vectors[i]->setFeatureElement(j, local_feature);
+			}
+			getline(library_file, tab);	
 		}
+		
+		// SD TODO done for AES - thumbnailing has issues (image colors changed) because bug in opencv?
+		thumbnail = cvLoadImage(filename.c_str(), CV_LOAD_IMAGE_COLOR);	
+		thumbnail_width = width;
+		thumbnail_height = height;
+		/*
+		 if (computeThumbnail(filename, height, width) != 1){
+		 cerr << "<ACImage::load> : problem computing thumbnail" << endl;
+		 return 0;
+		 }*/
+		return 1;
 	}
-	if (computeThumbnail(filename, height, width) != 1){
-		cerr << "<ACImage::load> : problem computing thumbnail" << endl;
+	else {
 		return 0;
 	}
-	return 1;
 }
 
-
 void ACImage::save(FILE* library_file) {
+	int nn;
 	int i, j;
 //	int path_size; // XS removed
 	int n_features;
@@ -213,6 +237,9 @@ void ACImage::save(FILE* library_file) {
 	fprintf(library_file, "%d\n", n_features);
 	for (i=0; i<features_vectors.size();i++) {
 		n_features_elements = features_vectors[i]->getSize(); // XS TODO: ACMediaFeatures don't have a size method
+		nn = features_vectors[i]->getNeedsNormalization();
+		fprintf(library_file, "%s\n", features_vectors[i]->getName().c_str());
+		fprintf(library_file, "%d\n", nn);
 		fprintf(library_file, "%d\n", n_features_elements);
 		for (j=0; j<n_features_elements; j++) {
 			fprintf(library_file, "%f\t", features_vectors[i]->getFeatureElement(j)); // XS instead of [i][j]

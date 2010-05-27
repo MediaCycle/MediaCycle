@@ -232,7 +232,7 @@ int MediaCycle::importDirectory(string path, int recursive, int mid) {
 	cout << "MediaCycle: importing directory: " << path << endl;	
 	int ok = 0;
 	ok = this->mediaLibrary->importDirectory(path, recursive, mid, this->pluginManager);
-	if (ok==1) this->mediaLibrary->normalizeFeatures();
+	if (ok>=1) this->mediaLibrary->normalizeFeatures();
 	//	XS TODO this->mediaBrowser->libraryContentChanged();	
 	return ok;
 }
@@ -242,7 +242,7 @@ int MediaCycle::importACLLibrary(string path) {
 	cout << "MediaCycle: importing library: " << path << endl;
 	int ok = 0;
 	ok = this->mediaLibrary->openACLLibrary(path);
-	if (ok==1) this->mediaLibrary->normalizeFeatures();
+	if (ok>=1) this->mediaLibrary->normalizeFeatures();
 	//	XS TODO this->mediaBrowser->libraryContentChanged();	
 	return ok;
 	
@@ -253,7 +253,7 @@ int MediaCycle::importLibrary(string path) {
 	cout << "MediaCycle: importing library: " << path << endl;
 	int ok = 0;
 	ok = this->mediaLibrary->openLibrary(path);
-	if (ok==1) this->mediaLibrary->normalizeFeatures();
+	if (ok>=1) this->mediaLibrary->normalizeFeatures();
 	//	XS TODO this->mediaBrowser->libraryContentChanged();	
 	return ok;
 }
@@ -423,7 +423,7 @@ void MediaCycle::hoverCallback(float x, float y) {
 
 
 // == NEW
-void MediaCycle::updateDisplay(bool _animate) { mediaBrowser->updateDisplay(_animate);}
+void MediaCycle::updateDisplay(bool _animate, bool neighborhoods) { mediaBrowser->updateDisplay(_animate, neighborhoods);}
 
 void MediaCycle::readConfigFile(string _fname) {
 	ifstream library_file;

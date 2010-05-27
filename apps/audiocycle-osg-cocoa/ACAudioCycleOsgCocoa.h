@@ -177,6 +177,12 @@ enum	{
 - (IBAction)	setBookmarkButton:(id)inSender;
 - (IBAction)	setTagButton:(id)inSender;
 
+- (IBAction)	setNeighboursModeRadio:(id)inSender;
+
+- (IBAction)	setWeight1Check:(id)inSender;
+- (IBAction)	setWeight2Check:(id)inSender;
+- (IBAction)	setWeight3Check:(id)inSender;
+
 - (IBAction)	setWeight1Slider:(id)inSender;
 - (IBAction)	setWeight2Slider:(id)inSender;
 - (IBAction)	setWeight3Slider:(id)inSender;

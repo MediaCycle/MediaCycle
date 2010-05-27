@@ -144,11 +144,11 @@ public:
 	float getCameraRotation() const				{ return mCameraAngle; }
 	
 	// weights of features
-	void setFeatureWeights(vector<float> &weights);
 	void setWeight(int i, float weight);
 	std::vector<float> getWeightVector(){return mFeatureWeights;};
+	void setFeatureWeights(vector<float> &weights);
 	float getWeight(int i);
-		
+	
 	// filtering
 	void setFilterIn();
 	void setFilterOut();
@@ -247,7 +247,7 @@ public:
 	ACUserLog* getUserLog(){return mUserLog;};
 
 	// == XS 260310 new way to manage update of clusters, positions, neighborhoods, ...
-	void updateDisplay(bool animate=false);
+	void updateDisplay(bool animate=false, bool neighborhoods=true);
 	
 //XS this should be private when we use updateDisplay
 public:

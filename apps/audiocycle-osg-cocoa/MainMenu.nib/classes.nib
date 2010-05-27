@@ -65,6 +65,8 @@
 				<string>id</string>
 				<key>setMuteAllSources</key>
 				<string>id</string>
+				<key>setNeighboursModeRadio</key>
+				<string>id</string>
 				<key>setOpen</key>
 				<string>id</string>
 				<key>setOscControlIp</key>
@@ -101,9 +103,15 @@
 				<string>id</string>
 				<key>setTagButton</key>
 				<string>id</string>
+				<key>setWeight1Check</key>
+				<string>id</string>
 				<key>setWeight1Slider</key>
 				<string>id</string>
+				<key>setWeight2Check</key>
+				<string>id</string>
 				<key>setWeight2Slider</key>
+				<string>id</string>
+				<key>setWeight3Check</key>
 				<string>id</string>
 				<key>setWeight3Slider</key>
 				<string>id</string>

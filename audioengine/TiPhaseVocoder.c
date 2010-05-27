@@ -217,8 +217,14 @@ int getCurrentFrame(TiPhaseVocoder *tpv,int flagResetPhase) {
 			memset(tmpdata, 0, (tpv->winSize)*sizeof(short));
 			
 			// SD
-            if (tpv->samples) {
-				memcpy(tmpdata,(tpv->samples)+currentFrame*(tpv->hopSize-1),tpv->winSize*sizeof(short));
+			if (tpv->samples) {
+				toread = tpv->numberOfSamples-currentFrame*(tpv->hopSize-1);
+				if (tpv->winSize<toread) {
+					toread = tpv->winSize;
+				}
+				if (toread>0) {
+					memcpy(tmpdata,(tpv->samples)+currentFrame*(tpv->hopSize-1),toread*sizeof(short));
+				}
 			}
 			else if (tpv->f) {
 				result = fseek(tpv->f,currentFrame*(tpv->hopSize-1)*BYTESPERSAMPLE,SEEK_SET);
