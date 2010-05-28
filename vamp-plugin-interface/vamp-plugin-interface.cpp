@@ -87,7 +87,7 @@ void printPluginPath(bool verbose);
 void printPluginCategoryList();
 void enumeratePlugins(Verbosity);
 void listPluginsInLibrary(string soname);
-FeatureSet runPlugin(string soname, string plugid, string output, int outputNo, string inputFile, bool frames);
+int runPlugin(string soname, string plugid, string output, int outputNo, string inputFile, bool frames);
 
 
 
@@ -101,10 +101,10 @@ int runPlugin(string soname, string id, string output, int outputNo, string inpu
     SF_INFO sfinfo;
     memset(&sfinfo, 0, sizeof(SF_INFO));
 
-    sndfile = sf_open(wavname.c_str(), SFM_READ, &sfinfo);
+    sndfile = sf_open(inputFile.c_str(), SFM_READ, &sfinfo);
     if (!sndfile) {
 	cerr << " vamp interface : ERROR: Failed to open input file \""
-             << wavname << "\": " << sf_strerror(sndfile) << endl;
+             << inputFile << "\": " << sf_strerror(sndfile) << endl;
 	return 1;
     }
 
