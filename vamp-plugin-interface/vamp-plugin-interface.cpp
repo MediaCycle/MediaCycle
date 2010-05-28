@@ -87,14 +87,14 @@ void printPluginPath(bool verbose);
 void printPluginCategoryList();
 void enumeratePlugins(Verbosity);
 void listPluginsInLibrary(string soname);
-FeatureSet runPlugin(string myname, string soname, string id, string inputFile, bool frames);
+FeatureSet runPlugin(string soname, string plugid, string output, int outputNo, string inputFile, bool frames);
 
 
 
-int runPlugin(string myname, string soname, string id, string inputFile, bool useFrames)
+int runPlugin(string soname, string id, string output, int outputNo, string inputFile, bool useFrames)
 {
     PluginLoader *loader = PluginLoader::getInstance();
-
+    string outfilename = "";
     PluginLoader::PluginKey key = loader->composePluginKey(soname, id);
     
     SNDFILE *sndfile;
@@ -103,7 +103,7 @@ int runPlugin(string myname, string soname, string id, string inputFile, bool us
 
     sndfile = sf_open(wavname.c_str(), SFM_READ, &sfinfo);
     if (!sndfile) {
-	cerr << myname << ": ERROR: Failed to open input file \""
+	cerr << " vamp interface : ERROR: Failed to open input file \""
              << wavname << "\": " << sf_strerror(sndfile) << endl;
 	return 1;
     }
@@ -112,7 +112,7 @@ int runPlugin(string myname, string soname, string id, string inputFile, bool us
     if (outfilename != "") {
         out = new ofstream(outfilename.c_str(), ios::out);
         if (!*out) {
-            cerr << myname << ": ERROR: Failed to open output file \""
+            cerr << "vamp interface : ERROR: Failed to open output file \""
                  << outfilename << "\" for writing" << endl;
             delete out;
             return 1;
@@ -122,7 +122,7 @@ int runPlugin(string myname, string soname, string id, string inputFile, bool us
     Plugin *plugin = loader->loadPlugin
         (key, sfinfo.samplerate, PluginLoader::ADAPT_ALL_SAFE);
     if (!plugin) {
-        cerr << myname << ": ERROR: Failed to load plugin \"" << id
+        cerr << "vamp interface : ERROR: Failed to load plugin \"" << id
              << "\" from library \"" << soname << "\"" << endl;
         sf_close(sndfile);
         if (out) {
@@ -269,8 +269,7 @@ int runPlugin(string myname, string soname, string id, string inputFile, bool us
 
         rt = RealTime::frame2RealTime(i, sfinfo.samplerate);
 
-        printFeatures
-            (RealTime::realTime2Frame(rt + adjustment, sfinfo.samplerate),
+        printFeatures(RealTime::realTime2Frame(rt + adjustment, sfinfo.samplerate),
              sfinfo.samplerate, outputNo, plugin->process(plugbuf, rt),
              out, useFrames);
 
