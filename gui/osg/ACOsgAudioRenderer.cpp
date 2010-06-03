@@ -270,7 +270,7 @@ void ACOsgAudioRenderer::updateNodes(double ratio) {
 	
 	double xstep = 0.00025;
 	
-#define NCOLORS 5
+	#define NCOLORS 5
 	static Vec4 colors[NCOLORS];
 	static bool colors_ready = false;
 	
@@ -344,8 +344,12 @@ void ACOsgAudioRenderer::updateNodes(double ratio) {
 				media_node->setChild(0, entry_geode);
 				media_node->removeChild(1, 1);
 			}
-					
-			((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(colors[attribute.getClusterId()%NCOLORS]);
+			
+			//CF nodes colored along their relative cluster on in Clusters Mode 
+			if (media_cycle->getMode() == AC_MODE_CLUSTERS)
+				((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(colors[attribute.getClusterId()%NCOLORS]);
+			else
+				((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(colors[0]);
 			
 			T =  Matrix::rotate(-angle,Vec3(0.0,0.0,1.0)) * Matrix::scale(localscale/zoom,localscale/zoom,localscale/zoom) * T;
 		}

@@ -1,7 +1,7 @@
 /**
  * @brief ACOsgCompositeViewQt.h
  * @author Christian Frisson
- * @date 19/05/2010
+ * @date 03/06/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -36,7 +36,8 @@
 //  ACOsgCompositeViewQt.h
 //  MediaCycle
 //
-//  Created by Christian F. on 29/04/10.
+//  @author Christian Frisson
+//  @date 29/04/10
 //  @copyright (c) 2010 – UMONS - Numediart
 //  
 //  MediaCycle of University of Mons – Numediart institute is 

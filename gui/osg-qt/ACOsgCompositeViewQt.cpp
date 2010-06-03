@@ -2,7 +2,8 @@
 //  ACOsgCompositeViewQt.cpp
 //  MediaCycle
 //
-//  Created by Christian F. on 29/04/10.
+//  @author Christian Frisson
+//  @date 29/04/10
 //  @copyright (c) 2009 – UMONS - Numediart
 //  
 //  MediaCycle of University of Mons – Numediart institute is 

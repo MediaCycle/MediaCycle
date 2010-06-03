@@ -2,7 +2,8 @@
 //  ACOsgBrowserViewQT.cpp
 //  AudioCycle
 //
-//  Created by Christian F. on 15/04/09.
+//  @author Christian Frisson
+//  @date 15/04/09
 //  @copyright (c) 2009 – UMONS - Numediart
 //  
 //  MediaCycle of University of Mons – Numediart institute is 

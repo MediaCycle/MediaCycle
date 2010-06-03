@@ -1,7 +1,7 @@
 /**
  * @brief ACOsgBrowserViewQT.h
  * @author Christian Frisson
- * @date 19/05/2010
+ * @date 03/06/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -36,7 +36,8 @@
 //  ACOsgBrowserViewQT.h
 //  AudioCycle
 //
-//  Created by Christian F. on 15/04/09.
+//  @author Christian Frisson
+//  @date 15/04/09
 //  @copyright (c) 2009 – UMONS - Numediart
 //  
 //  MediaCycle of University of Mons – Numediart institute is 
