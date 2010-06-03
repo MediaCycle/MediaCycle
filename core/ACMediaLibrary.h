@@ -90,7 +90,9 @@ public:
 	void saveAsLibrary(std::string _path);
 	// C++ versions
 	int openACLLibrary(std::string _path, bool aInitLib=false);
+	int openMCSLLibrary(std::string _path, bool aInitLib=false);//CF 31/05/2010 temporary MediaCycle Segmented Library (MCSL) for AudioGarden, adding a parentID for segments to the initial ACL, awaiting approval
 	int saveACLLibrary(std::string _path);
+	int saveMCSLLibrary(std::string _path);//CF 31/05/2010 temporary MediaCycle Segmented Library (MCSL) for AudioGarden, adding a parentID for segments to the initial ACL, awaiting approval
 	
 	//XS special for Thomas Israel
 	void saveSorted(std::string ouput_file);

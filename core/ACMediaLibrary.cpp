@@ -277,6 +277,67 @@ int ACMediaLibrary::openACLLibrary(std::string _path, bool aInitLib){
 	return file_count;
 }
 
+//CF 31/05/2010 temporary MediaCycle Segmented Library (MCSL) for AudioGarden, adding a parentID for segments to the initial ACL, awaiting approval
+int ACMediaLibrary::openMCSLLibrary(std::string _path, bool aInitLib){
+	// this does not re-initialize the media_library
+	// but appends new media to it.
+	// except if aInitLib is set to true
+	int ret, file_count=0;
+	
+	ifstream library_file;
+	library_file.open(_path.c_str());
+	
+	if ( ! library_file ) {
+		cerr << "<ACMediaLibrary::openMCSLLibrary> error reading file " << _path << endl;
+		return 0;
+	}
+	else{
+		cout << "opening " << _path << endl;
+	}
+	
+	//CF Header checks
+	std::string type;
+	std::string version;
+	getline(library_file, type);
+	getline(library_file, version); //CF v. 0.1 on 31/05/2010, adding parentid to ACL v0.1
+	if ( type != "MediaCycle Segmented Library") {
+		if ( type.find_first_of('/') != string::npos || type.find_first_of('\\') != string::npos) //CF ugly: ACL using path delimiters/special caracters on OSX/Linux (/) or Windows (\)
+			cerr << "<ACMediaLibrary::openMCSLLibrary> wrong library file type: original ACL" << endl;
+		else 
+			cerr << "<ACMediaLibrary::openMCSLLibrary> wrong library file type: '" << type << "', instead of 'MediaCycle Segmented Library'" << endl;
+		return 0;
+	}
+	if ( version != "0.1" ) {
+		cerr << "<ACMediaLibrary::openMCSLLibrary> unsupported version: v." << version << ", instead of v.0.1" << endl;
+		return 0;
+	}
+	
+	ACMedia* local_media;
+	// --TODO-- ???  how does it know which type of media ?
+	// have to be set up  at some point using setMediaType()
+	if (aInitLib) {
+		cleanLibrary();
+	}
+	//media_library.resize(0);
+	do {
+		local_media = ACMediaFactory::create(media_type);
+		if (local_media != NULL) {
+			ret = local_media->loadMCSL(library_file);
+			if (ret) {
+				//std::cout << "Media Library Size : " << this->getSize() << std::endl;//CF free the console
+				media_library.push_back(local_media);
+				file_count++;
+			}
+		}
+		else {
+			std::cout<<"<ACMediaLibrary::openMCSLLibrary> : Wrong Media Type" << std::endl;
+		}		
+	}
+	while (ret>0);
+	library_file.close();
+	return file_count;
+}
+
 // C++ version
 int ACMediaLibrary::saveACLLibrary(std::string _path){
 #ifdef SAVE_LOOP_BIN
@@ -296,6 +357,28 @@ int ACMediaLibrary::saveACLLibrary(std::string _path){
 	normalizeFeatures();
 }
 
+//CF 31/05/2010 temporary MediaCycle Segmented Library (MCSL) for AudioGarden, adding a parentID for segments to the initial ACL, awaiting approval
+int ACMediaLibrary::saveMCSLLibrary(std::string _path){
+#ifdef SAVE_LOOP_BIN
+	ofstream library_file (_path.c_str(), ios::binary);
+#else
+	ofstream library_file (_path.c_str());
+#endif //SAVE_LOOP_BIN
+	cout << "saving MCSL file: " << _path << endl;
+	
+	//CF Header
+	library_file << "MediaCycle Segmented Library" << endl; 
+	library_file << 0.1 << endl; //CF v. 0.1 on 31/05/2010, adding parentid to ACL v0.1
+	
+	int n_loops = this->getSize();
+	// we save UNnormalized features
+	denormalizeFeatures();
+	for(int i=0; i<n_loops; i++) {
+		media_library[i]->saveMCSL(library_file);
+	}
+	library_file.close();
+	normalizeFeatures();
+}
 
 int ACMediaLibrary::openLibrary(std::string _path, bool aInitLib){
 	// this does not re-initialize the media_library

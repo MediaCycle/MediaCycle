@@ -41,7 +41,6 @@
 #include "ACMediaData.h"
 #include <string>
 
-
 class ACMedia {
 	// contains the minimal information about a media
 	// uses vector of vector to store media features. 
@@ -49,6 +48,7 @@ class ACMedia {
 	// note 230210: features_vectors[i] could later be grouped with other features, depending on the configuration file (or the preferences menu)
 protected:
 	int mid;
+	int parentid; //CF so that segments can be defined as ACMedia having other ACMedia as parents
 	ACMediaType media_type;
 	int height, width;
 	double duration;
@@ -56,7 +56,8 @@ protected:
 	std::string filename;
 	std::string filename_thumbnail;
 	char  **text_tags;
-	char  **hyper_links;	
+	char  **hyper_links;
+	std::vector<ACMedia*> segments;//CF
 public:
 	ACMedia();
 	ACMedia(const ACMedia&);
@@ -64,9 +65,15 @@ public:
 	
 	void setId(int _id) {mid = _id;} // SD TODO - should check for duplicate id?
 	int getId() {return mid;}
+	void setParentId(int _parentid) {parentid = _parentid;} //CF so that segments can be defined as ACMedia having other ACMedia as parents
+	int getParentId() {return parentid;}
 	
 	void setDuration(double iduration){this->duration = iduration;}
 	double getDuration(){return this->duration;}
+	
+	void addSegment(ACMedia* _segment){segments.push_back(_segment);}
+	//void removeSegment(ACMedia* _segment){segments.erase(_segment);}//CF wow, tricky
+	std::vector<ACMedia*> &getAllSegments() { return segments; }
 
 	std::vector<ACMediaFeatures*> &getAllFeaturesVectors() { return features_vectors; }
 	ACMediaFeatures* getFeaturesVector(int i);
@@ -102,7 +109,9 @@ public:
 	virtual void save(FILE *){}
 	virtual int load(FILE*){}
 	virtual void saveACL(std::ofstream &library_file){}
+	virtual void saveMCSL(std::ofstream &library_file){}//CF 31/05/2010 temporary MediaCycle Segmented Library (MCSL) for AudioGarden, adding a parentID for segments to the initial ACL, awaiting approval
 	virtual int loadACL(std::ifstream &library_file){}
+	virtual int loadMCSL(std::ifstream &library_file){}//CF 31/05/2010 temporary MediaCycle Segmented Library (MCSL) for AudioGarden, adding a parentID for segments to the initial ACL, awaiting approval
 	virtual ACMediaData* extractData(std::string filename){}
 	
 	// function that calls the plugins and fills in info such as width, height, ...

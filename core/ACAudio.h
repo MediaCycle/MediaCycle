@@ -58,7 +58,9 @@ public:
   
 	void save(FILE* library_file);
 	void saveACL(ofstream &library_file);
+	void saveMCSL(ofstream &library_file);//CF 31/05/2010 temporary MediaCycle Segmented Library (MCSL) for AudioGarden, adding a parentID for segments to the initial ACL, awaiting approval
 	int loadACL(ifstream &library_file);
+	int loadMCSL(ifstream &library_file);//CF 31/05/2010 temporary MediaCycle Segmented Library (MCSL) for AudioGarden, adding a parentID for segments to the initial ACL, awaiting approval
 	int load(FILE* library_file);
 	int load_v1(FILE* library_file); 
 	

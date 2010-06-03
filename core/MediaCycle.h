@@ -71,6 +71,7 @@ public:
     // == Media Library
     int importDirectory(std::string path, int recursive, int mid=0);
 	int importACLLibrary(std::string path);
+	int importMCSLLibrary(std::string path);//CF 31/05/2010 temporary MediaCycle Segmented Library (MCSL) for AudioGarden, adding a parentID for segments to the initial ACL, awaiting approval
     int importLibrary(std::string path);
 	int getLibrarySize(); // = getnumberofmedia
 	int getNumberOfMediaNodes();
@@ -152,6 +153,7 @@ public:
 	void libraryContentChanged();
 	void saveAsLibrary(string path);
 	void saveACLLibrary(string path);
+	void saveMCSLLibrary(string path);//CF 31/05/2010 temporary MediaCycle Segmented Library (MCSL) for AudioGarden, adding a parentID for segments to the initial ACL, awaiting approval
 	void cleanLibrary();
 	// Get Features Vector (identified by feature_name) in media i 
 	vector<float> getFeaturesVectorInMedia(int i, string feature_name);

@@ -37,6 +37,7 @@
 using namespace std;
 ACMedia::ACMedia() { 
 	mid = -1;
+	parentid = -1;	
 	width = 0;
 	height = 0;
 	duration = 0.0;

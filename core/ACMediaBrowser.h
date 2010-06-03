@@ -69,7 +69,8 @@ enum ACBrowserState {
 
 enum ACBrowserLayout {
 	AC_LAYOUT_TYPE_NONE=0,
-	AC_LAYOUT_TYPE_NODELINK=1
+	AC_LAYOUT_TYPE_NODELINK=1,
+	AC_LAYOUT_TYPE_CONSTELLATION=2//CF: for egs. to link segments from a given media together... but what if we want to combine it with a node link layout?s
 };
 
 enum ACBrowserMode {
@@ -185,7 +186,7 @@ public:
 	void setNumberOfDisplayedLoops(int nd);
 	int getNumberOfMediaNodes(){return mLoopAttributes.size() ;} // XS TODO getsize; this should be the same as mLibrary->getSize(), but this way it is more similar to getNumberOfLabels // CF not true in non-explatory mode (one loop can be displayed more than once at a time)
 	// XS TODO: define this one
-	void initializeNodes(int _defaultNodeId = 0); 	
+	void initializeNodes(ACBrowserMode _mode = AC_MODE_CLUSTERS); 	
 	
 	// == Labels 
 	void setClickedLabel(int ilabel);

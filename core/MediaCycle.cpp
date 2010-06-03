@@ -248,6 +248,17 @@ int MediaCycle::importACLLibrary(string path) {
 	
 }
 
+//CF 31/05/2010 temporary MediaCycle Segmented Library (MCSL) for AudioGarden, adding a parentID for segments to the initial ACL, awaiting approval
+int MediaCycle::importMCSLLibrary(string path) {
+	// XS import = open + some processing 
+	cout << "MediaCycle: importing MCSL library: " << path << endl;
+	int ok = 0;
+	ok = this->mediaLibrary->openMCSLLibrary(path);
+	if (ok>=1) this->mediaLibrary->normalizeFeatures();
+	//	XS TODO this->mediaBrowser->libraryContentChanged();	
+	return ok;
+}
+
 int MediaCycle::importLibrary(string path) {
 // XS import = open + some processing 
 	cout << "MediaCycle: importing library: " << path << endl;
@@ -392,6 +403,7 @@ void MediaCycle::openLibrary(string path) { mediaLibrary->openLibrary(path); }
 void MediaCycle::libraryContentChanged() { mediaBrowser->libraryContentChanged(); }
 void MediaCycle::saveAsLibrary(string path) {mediaLibrary->saveAsLibrary(path); }
 void MediaCycle::saveACLLibrary(string path) {mediaLibrary->saveACLLibrary(path); }
+void MediaCycle::saveMCSLLibrary(string path) {mediaLibrary->saveMCSLLibrary(path); }
 void MediaCycle::cleanLibrary() { mediaLibrary->cleanLibrary(); }
 // Get Features Vector (identified by feature_name) in media i 
 vector<float> MediaCycle::getFeaturesVectorInMedia(int i, string feature_name) {
