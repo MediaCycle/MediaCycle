@@ -301,7 +301,7 @@ void ACAudioGardenOsgQt::loadACLFile(){
 void ACAudioGardenOsgQt::saveACLFile(){
 	cout << "Saving ACL File..." << endl;
 	
-	QString fileName = QFileDialog::getSaveFileName(this);
+	QString fileName = QFileDialog::getSaveFileName(this, tr("Save as MediaCycle Library"),"",tr("MediaCycle Library (*.acl)"));
 	QFile file(fileName);
 	
 	if (!file.open(QIODevice::WriteOnly)) {
@@ -355,9 +355,9 @@ void ACAudioGardenOsgQt::loadMCSLFile(){
 void ACAudioGardenOsgQt::saveMCSLFile(){
 	cout << "Saving MCSL File..." << endl;
 	
-	QString fileName = QFileDialog::getSaveFileName(this);
+	QString fileName = QFileDialog::getSaveFileName(this, tr("Save as MediaCycle Segmented Library"),"",tr("MediaCycle Segmented Library (*.mcsl)"));
 	QFile file(fileName);
-	
+
 	if (!file.open(QIODevice::WriteOnly)) {
 		QMessageBox::warning(this,
 							 tr("File error"),
@@ -384,18 +384,12 @@ void ACAudioGardenOsgQt::loadMediaDirectory(){
 	// XS TODO : check if directory exists
 	// XS : do not separate directory and files in Qt and let MediaCycle handle it
 	
-	media_cycle->importDirectory(selectDir.toStdString(), 1);
+	media_cycle->importDirectory(selectDir.toStdString(), 1, 0, false); //CF false for reverse order, subdirs last, ie: source sound first, grains after
 
 	// with this function call here, do not import twice!!!
 	// XS TODO: what if we add a new directory to the existing library ?
 	media_cycle->normalizeFeatures();
 
-	//CF saving ACL before it crashes...
-	/*
-	std::cout<< "Saving ACL file..." << std::endl;
-	media_cycle->saveACLLibrary(selectDir.toStdString() + "/audiogarden.acl");
-	std::cout<< "ACL file saved." << std::endl;
-	*/
 	media_cycle->libraryContentChanged(); 
 	this->updateLibrary();
 	

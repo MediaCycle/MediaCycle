@@ -184,7 +184,23 @@ public:
 	void setLoopAttributesActive(int loop_id, int value) { this->getMediaNode(loop_id).setActivity(value); };
 	int getNumberOfDisplayedLoops();
 	void setNumberOfDisplayedLoops(int nd);
-	int getNumberOfMediaNodes(){return mLoopAttributes.size() ;} // XS TODO getsize; this should be the same as mLibrary->getSize(), but this way it is more similar to getNumberOfLabels // CF not true in non-explatory mode (one loop can be displayed more than once at a time)
+	int getNumberOfMediaNodes(){
+		long _n = -1;
+		switch (mMode){
+			case AC_MODE_CLUSTERS:
+				_n = mLoopAttributes.size();
+				break;
+			case AC_MODE_NEIGHBORS:
+				_n = mUserLog->getSize();
+				break;
+			default:
+				cerr << "unknown browser mode: " << mMode << endl;
+				break;
+		}		
+		std::cout << "mLoopAttributes.size() " << mLoopAttributes.size() << " mUserLog->getSize() " << mUserLog->getSize() << std::endl;
+		return _n;
+	
+	} // XS TODO getsize; this should be the same as mLibrary->getSize(), but this way it is more similar to getNumberOfLabels // CF not true in non-explatory mode (one loop can be displayed more than once at a time)
 	// XS TODO: define this one
 	void initializeNodes(ACBrowserMode _mode = AC_MODE_CLUSTERS); 	
 	

@@ -1156,7 +1156,7 @@ void ACMediaBrowser::updateState()
 		//[self updateTransformsFromBrowser:CUB_FRAC(frac)];
 		//frac = CUB_FRAC(frac);
 		
-		printf("frac = %f\n", mFrac);
+		//printf("frac = %f\n", mFrac);
 		//this->commitPositions();//CF
 		
 		if(t-mRefTime > andur)

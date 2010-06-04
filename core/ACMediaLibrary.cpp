@@ -98,7 +98,7 @@ void ACMediaLibrary::deleteAllMedia(){
 	media_library.clear();	
 }
 
-int ACMediaLibrary::importDirectory(std::string _path, int _recursive, int id, ACPluginManager *acpl) {
+int ACMediaLibrary::importDirectory(std::string _path, int _recursive, int id, ACPluginManager *acpl, bool forward_order) {
 
 	string filename;
 	string extension;
@@ -106,14 +106,15 @@ int ACMediaLibrary::importDirectory(std::string _path, int _recursive, int id, A
 	scanDirectory(_path, _recursive, filenames);
 	
 	for (int i=0; i<filenames.size(); i++){
-		extension = fs::extension(filenames[i]);
+		int index = forward_order ? i : filenames.size()-1-i;//CF if reverse order (not forward_order), segments in subdirs are added to the library after the source recording
+		extension = fs::extension(filenames[index]);
 		ACMedia* media = ACMediaFactory::create(extension);
 		cout << "extension:" << extension << endl; 		
 		if (media == NULL) {
 			cout << "extension unknown, skipping " << filename << " ... " << endl;
 		}
 		else {
-			if (media->import(filenames[i], id, acpl)){
+			if (media->import(filenames[index], id, acpl)){
 				this->addMedia(media);
 				id++;
 			}
