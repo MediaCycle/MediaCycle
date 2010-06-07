@@ -159,7 +159,7 @@ int MediaCycle::processTcpMessage(char* buffer, int l, char **buffer_send, int *
 		local_file = fopen(fullpath.c_str(),"wb");
 		fwrite((void*)(buffer+bufpos1), 1, l-bufpos1, local_file);
 		fclose(local_file);
-		ret = importDirectory(fullpath, 0, id);
+		ret = importDirectory(fullpath, 0, id, true);
 		// SD TODO - allow import of remote file (not transfered as data as done here for the LaughterCycle demo)
 		//	but rather using TCP client
 		osstream << "addfile " << ret;
@@ -227,11 +227,11 @@ int MediaCycle::processTcpMessage(char* buffer, int l, char **buffer_send, int *
 
 // == Media Library
 
-int MediaCycle::importDirectory(string path, int recursive, int mid) {
+int MediaCycle::importDirectory(string path, int recursive, int mid, bool forward_order) {
 // XS import = import + some processing 
 	cout << "MediaCycle: importing directory: " << path << endl;	
 	int ok = 0;
-	ok = this->mediaLibrary->importDirectory(path, recursive, mid, this->pluginManager);
+	ok = this->mediaLibrary->importDirectory(path, recursive, mid, this->pluginManager, forward_order);
 	if (ok>=1) this->mediaLibrary->normalizeFeatures();
 	//	XS TODO this->mediaBrowser->libraryContentChanged();	
 	return ok;
@@ -246,6 +246,17 @@ int MediaCycle::importACLLibrary(string path) {
 	//	XS TODO this->mediaBrowser->libraryContentChanged();	
 	return ok;
 	
+}
+
+//CF 31/05/2010 temporary MediaCycle Segmented Library (MCSL) for AudioGarden, adding a parentID for segments to the initial ACL, awaiting approval
+int MediaCycle::importMCSLLibrary(string path) {
+	// XS import = open + some processing 
+	cout << "MediaCycle: importing MCSL library: " << path << endl;
+	int ok = 0;
+	ok = this->mediaLibrary->openMCSLLibrary(path);
+	if (ok>=1) this->mediaLibrary->normalizeFeatures();
+	//	XS TODO this->mediaBrowser->libraryContentChanged();	
+	return ok;
 }
 
 int MediaCycle::importLibrary(string path) {
@@ -392,6 +403,7 @@ void MediaCycle::openLibrary(string path) { mediaLibrary->openLibrary(path); }
 void MediaCycle::libraryContentChanged() { mediaBrowser->libraryContentChanged(); }
 void MediaCycle::saveAsLibrary(string path) {mediaLibrary->saveAsLibrary(path); }
 void MediaCycle::saveACLLibrary(string path) {mediaLibrary->saveACLLibrary(path); }
+void MediaCycle::saveMCSLLibrary(string path) {mediaLibrary->saveMCSLLibrary(path); }
 void MediaCycle::cleanLibrary() { mediaLibrary->cleanLibrary(); }
 // Get Features Vector (identified by feature_name) in media i 
 vector<float> MediaCycle::getFeaturesVectorInMedia(int i, string feature_name) {

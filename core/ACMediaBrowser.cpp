@@ -488,8 +488,7 @@ void ACMediaBrowser::libraryContentChanged() {
 	// previously: resize other vector structures dependent on loop count.
 	
 	// XS 150310 TODO: check this one
-	//if (this->getMode() == AC_MODE_CLUSTERS)
-		initializeNodes(1); // media_ID = node_ID
+	initializeNodes(mMode);
 
 	if(mLibrary == NULL) return;
 	else if(mLibrary->isEmpty()) {
@@ -1157,7 +1156,7 @@ void ACMediaBrowser::updateState()
 		//[self updateTransformsFromBrowser:CUB_FRAC(frac)];
 		//frac = CUB_FRAC(frac);
 		
-		printf("frac = %f\n", mFrac);
+		//printf("frac = %f\n", mFrac);
 		//this->commitPositions();//CF
 		
 		if(t-mRefTime > andur)
@@ -1347,26 +1346,31 @@ ACMediaNode& ACMediaBrowser::getMediaNode(int i) {
 }
 
 // CF prepareNodes ? (cf. OSG)
-void ACMediaBrowser::initializeNodes(int _defaultNodeId){ // default = 0
+void ACMediaBrowser::initializeNodes(ACBrowserMode _mode){ // default = AC_MODE_CLUSTERS
 	// makes an ACMediaNode for each Media in the library
-	// if _defaultNodeId is set to 1, it will give a nodeID = mediaID
-	// otherwize by default nodeID = 0;
-	mLoopAttributes.clear(); // XS TODO if this is a vector of pointers it should be deleted properly
-	if  (_defaultNodeId == 0){
-		for (int i=0; i<mLibrary->getSize();i++){
-			//ACMediaNode* mn = new ACMediaNode(0,mLibrary->getMedia(i)->getId());
-			ACMediaNode mn(0,mLibrary->getMedia(i)->getId());
-			mLoopAttributes.push_back(mn); // XS generalize
-		}
-	}
-	else{
-		for (int i=0; i<mLibrary->getSize();i++){
-			int n= mLibrary->getMedia(i)->getId();
-			//ACMediaNode* mn = new ACMediaNode(n,n);
-			//std::cout << "Media Id : " << n << std::endl;//CF free the console
-			ACMediaNode mn(n,n);
-			mLoopAttributes.push_back(mn); // XS generalize
-		}
+	mLoopAttributes.clear(); // XS TODO if this is a vector of pointers it should be deleted properly	
+	switch ( _mode ){
+		case AC_MODE_CLUSTERS:
+			for (int i=0; i<mLibrary->getSize();i++){
+				int n= mLibrary->getMedia(i)->getId();
+				//ACMediaNode* mn = new ACMediaNode(n,n);
+				//std::cout << "Media Id : " << n << std::endl;//CF free the console
+				// nodeID = mediaID
+				ACMediaNode mn(n,n);
+				mLoopAttributes.push_back(mn); // XS generalize
+			}
+			break;
+		case AC_MODE_NEIGHBORS:
+			for (int i=0; i<mLibrary->getSize();i++){
+				//ACMediaNode* mn = new ACMediaNode(0,mLibrary->getMedia(i)->getId());
+				// nodeID = 0;
+				ACMediaNode mn(0,mLibrary->getMedia(i)->getId());
+				mLoopAttributes.push_back(mn); // XS generalize
+			}
+			break;
+		default:
+			cerr << "unknown browser mode: " << _mode << endl;
+			break;
 	}
 }
 

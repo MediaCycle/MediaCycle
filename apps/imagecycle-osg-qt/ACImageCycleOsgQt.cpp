@@ -230,7 +230,7 @@ void ACImageCycleOsgQt::loadACLFile(){
 void ACImageCycleOsgQt::saveACLFile(){
 	cout << "Saving ACL File..." << endl;
 	
-	QString fileName = QFileDialog::getSaveFileName(this);
+	QString fileName = QFileDialog::getSaveFileName(this, tr("Save as MediaCycle Library"),"",tr("MediaCycle Library (*.acl)"));
 	QFile file(fileName);
 	
 	if (!file.open(QIODevice::WriteOnly)) {

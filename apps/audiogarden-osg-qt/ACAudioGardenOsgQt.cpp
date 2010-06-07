@@ -63,8 +63,9 @@ ACAudioGardenOsgQt::ACAudioGardenOsgQt(QWidget *parent)
 		{
 			//media_cycle->getBrowser()->setMode(AC_MODE_NEIGHBORS);// set this if using NeighborhoodsPlugins
 			media_cycle->setVisualisationPlugin("VisAudiogarden");
+			//media_cycle->setClustersPositionsPlugin("VisAudiogarden");
 		}
-		media_cycle->addPlugin("../../../plugins/vamp/" + build_type + "/mc_vamp.dylib");	
+		media_cycle->addPlugin("../../../plugins/audio/" + build_type + "/mc_audio.dylib");	
 	#endif
 	
 	audio_engine = new ACAudioFeedback();
@@ -84,6 +85,8 @@ ACAudioGardenOsgQt::ACAudioGardenOsgQt(QWidget *parent)
 	connect(ui.actionLoad_Media_Files, SIGNAL(triggered()), this, SLOT(loadMediaFiles()));
 	connect(ui.actionLoad_ACL, SIGNAL(triggered()), this, SLOT(on_pushButtonLaunch_clicked()));
 	connect(ui.actionSave_ACL, SIGNAL(triggered()), this, SLOT(saveACLFile()));
+	connect(ui.actionLoad_MCSL, SIGNAL(triggered()), this, SLOT(loadMCSLFile()));
+	connect(ui.actionSave_MCSL, SIGNAL(triggered()), this, SLOT(saveMCSLFile()));
 	
 	this->show();
 	
@@ -124,9 +127,9 @@ void ACAudioGardenOsgQt::updateLibrary()
 	}
 	// XSCF 250310 added these 3
 	media_cycle->pushNavigationState();
+	//media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
 	media_cycle->getBrowser()->setState(AC_CHANGING);
-	media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
-
+	
 	ui.compositeOsgView->prepareFromBrowser();
 	ui.compositeOsgView->prepareFromTimeline();
 	//ui.compositeOsgView->setPlaying(true);
@@ -149,8 +152,8 @@ void ACAudioGardenOsgQt::on_pushButtonMuteAll_clicked()
 
 void ACAudioGardenOsgQt::on_pushButtonClean_clicked()
 {
-	media_cycle->cleanUserLog();
 	media_cycle->cleanLibrary();
+	media_cycle->cleanUserLog();
 	media_cycle->libraryContentChanged();
 	this->updateLibrary();
 }	
@@ -213,6 +216,10 @@ void ACAudioGardenOsgQt::on_pushButtonFeedbackStart_clicked()
 	//ui.compositeOsgView->setFocus();
 }	
 
+void ACAudioGardenOsgQt::on_pushButtonCompositing_clicked(){
+	std::cout << "Compositing" << std::endl;
+}	
+
 void ACAudioGardenOsgQt::on_checkBoxRhythm_stateChanged(int state)
 {
 	if (updatedLibrary)
@@ -256,20 +263,6 @@ void ACAudioGardenOsgQt::on_checkBoxHarmony_stateChanged(int state)
 	//ui.compositeOsgView->setFocus();
 }
 
-void ACAudioGardenOsgQt::on_sliderClusters_sliderReleased()
-{
-	std::cout << "ClusterNumber: " << ui.sliderClusters->value() << std::endl;
-	if (updatedLibrary){
-		media_cycle->setClusterNumber(ui.sliderClusters->value());
-		// XS CF TODO check if this works
-		media_cycle->updateDisplay(true); 
-		//		media_cycle->updateClusters(true); 
-		//		media_cycle->setNeedsDisplay(true);
-		ui.compositeOsgView->updateTransformsFromBrowser(1.0);
-	}
-	//ui.compositeOsgView->setFocus();
-}
-
 void ACAudioGardenOsgQt::loadACLFile(){
 	QString fileName;
 
@@ -292,11 +285,15 @@ void ACAudioGardenOsgQt::loadACLFile(){
 	//fileName = QFileDialog::getOpenFileName(this, "~", );
 
 	if (!(fileName.isEmpty())) {
-		media_cycle->importACLLibrary((char*) fileName.toStdString().c_str());
-		media_cycle->normalizeFeatures();
-		media_cycle->libraryContentChanged();
-		std::cout << "File library imported" << std::endl;
-		this->updateLibrary();
+		int size = media_cycle->importACLLibrary((char*) fileName.toStdString().c_str());
+		if (size > 0) {
+			media_cycle->normalizeFeatures();
+			media_cycle->libraryContentChanged();
+			std::cout << "File library imported" << std::endl;
+			this->updateLibrary();
+		}
+		else
+			std::cout << "Couldn't read the file" << std::endl; //CF or better, some modal error window
 	}
 	//ui.compositeOsgView->setFocus();
 }
@@ -304,7 +301,7 @@ void ACAudioGardenOsgQt::loadACLFile(){
 void ACAudioGardenOsgQt::saveACLFile(){
 	cout << "Saving ACL File..." << endl;
 	
-	QString fileName = QFileDialog::getSaveFileName(this);
+	QString fileName = QFileDialog::getSaveFileName(this, tr("Save as MediaCycle Library"),"",tr("MediaCycle Library (*.acl)"));
 	QFile file(fileName);
 	
 	if (!file.open(QIODevice::WriteOnly)) {
@@ -316,6 +313,60 @@ void ACAudioGardenOsgQt::saveACLFile(){
 		string acl_file = fileName.toStdString();
 		cout << "saving ACL file: " << acl_file << endl;
 		media_cycle->saveACLLibrary(acl_file);
+	}
+	//ui.compositeOsgView->setFocus();
+}
+
+void ACAudioGardenOsgQt::loadMCSLFile(){
+	QString fileName;
+	
+	QFileDialog dialog(this,"Open MediaCycle Segmented Library File(s)");
+	dialog.setDefaultSuffix ("mcsl");
+	dialog.setNameFilter("AudioCycle Library Files (*.mcsl)");
+	dialog.setFileMode(QFileDialog::ExistingFile); // change to ExistingFiles for multiple file handling
+	
+	QStringList fileNames;
+	if (dialog.exec())
+		fileNames = dialog.selectedFiles();
+	
+	QStringList::Iterator file = fileNames.begin();
+	while(file != fileNames.end()) {
+		//std::cout << "File library: '" << (*file).toStdString() << "'" << std::endl;
+		fileName = *file;
+		++file;
+	}
+	//std::cout << "Will open: '" << fileName.toStdString() << "'" << std::endl;
+	//fileName = QFileDialog::getOpenFileName(this, "~", );
+	
+	if (!(fileName.isEmpty())) {
+		int size = media_cycle->importMCSLLibrary((char*) fileName.toStdString().c_str());
+		if (size > 0) {
+			media_cycle->normalizeFeatures();
+			media_cycle->libraryContentChanged();
+			std::cout << "File library imported" << std::endl;
+			this->updateLibrary();
+		}
+		else
+			std::cout << "Couldn't read the file" << std::endl; //CF or better, some modal error window	
+	}
+	//ui.compositeOsgView->setFocus();
+}
+
+void ACAudioGardenOsgQt::saveMCSLFile(){
+	cout << "Saving MCSL File..." << endl;
+	
+	QString fileName = QFileDialog::getSaveFileName(this, tr("Save as MediaCycle Segmented Library"),"",tr("MediaCycle Segmented Library (*.mcsl)"));
+	QFile file(fileName);
+
+	if (!file.open(QIODevice::WriteOnly)) {
+		QMessageBox::warning(this,
+							 tr("File error"),
+							 tr("Failed to open\n%1").arg(fileName));
+	} 
+	else {
+		string mcsl_file = fileName.toStdString();
+		cout << "saving MCSL file: " << mcsl_file << endl;
+		media_cycle->saveMCSLLibrary(mcsl_file);
 	}
 	//ui.compositeOsgView->setFocus();
 }
@@ -333,10 +384,12 @@ void ACAudioGardenOsgQt::loadMediaDirectory(){
 	// XS TODO : check if directory exists
 	// XS : do not separate directory and files in Qt and let MediaCycle handle it
 	
-	media_cycle->importDirectory(selectDir.toStdString(), 1);
+	media_cycle->importDirectory(selectDir.toStdString(), 1, 0, false); //CF false for reverse order, subdirs last, ie: source sound first, grains after
+
 	// with this function call here, do not import twice!!!
 	// XS TODO: what if we add a new directory to the existing library ?
 	media_cycle->normalizeFeatures();
+
 	media_cycle->libraryContentChanged(); 
 	this->updateLibrary();
 	
@@ -361,36 +414,6 @@ void ACAudioGardenOsgQt::loadMediaDirectory(){
 }
 
 void ACAudioGardenOsgQt::loadMediaFiles(){
-}
-
-void ACAudioGardenOsgQt::on_sliderBPM_valueChanged() // [0;220]
-{
-	std::cout << "BPM: " << ui.sliderBPM->value() << std::endl;
-	//if (updatedLibrary){
-		int clicked_node = media_cycle->getClickedNode();
-		if (clicked_node > -1)
-		{
-			audio_engine->setLoopSynchroMode(clicked_node, ACAudioEngineSynchroModeAutoBeat);
-			audio_engine->setLoopScaleMode(clicked_node, ACAudioEngineScaleModeResample);
-			audio_engine->setBPM(ui.sliderBPM->value());
-		}
-	//}
-	//ui.compositeOsgView->setFocus();
-}
-
-void ACAudioGardenOsgQt::on_sliderPitch_valueChanged() // [50;200]
-{
-	std::cout << "Pitch: " << (float) ui.sliderPitch->value()/100.0f << std::endl;
-	//if (updatedLibrary){
-		int clicked_node = media_cycle->getClickedNode();
-		if (clicked_node > -1)
-		{
-			audio_engine->setLoopSynchroMode(clicked_node, ACAudioEngineSynchroModeAutoBeat);
-			audio_engine->setLoopScaleMode(clicked_node, ACAudioEngineScaleModeResample);
-			audio_engine->setSourcePitch(clicked_node, (float) ui.sliderPitch->value()/100.0f); 
-		}
-	//}
-	//ui.compositeOsgView->setFocus();
 }
 
 void ACAudioGardenOsgQt::processOscMessage(const char* tagName)

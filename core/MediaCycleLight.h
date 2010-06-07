@@ -87,7 +87,7 @@ public:
     // Process incoming tcp request from SSI (AVLaughterCycle)
     int processTcpMessageFromSSI(char* buffer, int l, char **buffer_send, int *l_send);
     // Media Library
-    int importDirectory(std::string path, int recursive, int mid=0);
+    int importDirectory(std::string path, int recursive, int mid=0, bool forward_order=true);
 	int importACLLibrary(std::string path);
     int importLibrary(std::string path);
     // Plugins

@@ -69,19 +69,19 @@ class ACAudioGardenOsgQt : public QMainWindow
 		void on_pushButtonForward_clicked();
 		void on_pushButtonControlStart_clicked();
 		void on_pushButtonFeedbackStart_clicked();
+	
+		void on_pushButtonCompositing_clicked();
 
 		void on_checkBoxRhythm_stateChanged(int state);
 		void on_checkBoxTimbre_stateChanged(int state);
 		void on_checkBoxHarmony_stateChanged(int state);
-	
-		void on_sliderClusters_sliderReleased();
-		void on_sliderBPM_valueChanged(); // or sliderMoved();?
-		void on_sliderPitch_valueChanged(); // or sliderMoved();?
 
 		void loadACLFile();
 		void saveACLFile();
 		void loadMediaDirectory();
 		void loadMediaFiles();
+		void loadMCSLFile();
+		void saveMCSLFile();
 	
 	public:
 		MediaCycle *media_cycle;

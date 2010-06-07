@@ -364,6 +364,7 @@ void ACOsgImageRenderer::updateNodes(double ratio) {
 			((Geometry*)border_geode->getDrawable(0))->setColorArray(colors2);
 		}
 		else {
+			// CF a yet undertermined bug crashes here with imagecycle-osg-qt
 			((Geometry*)border_geode->getDrawable(0))->setColorArray(colors3);
 		}
 	}

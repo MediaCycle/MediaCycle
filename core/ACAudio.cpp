@@ -171,6 +171,40 @@ void ACAudio::saveACL(ofstream &library_file) {
 	}
 }
 
+void ACAudio::saveMCSL(ofstream &library_file) {
+	int i, j;
+	int n_features;
+	int n_features_elements;	
+	int nn;
+
+	library_file << filename << endl;
+	
+	library_file << mid << endl;
+	library_file << parentid << endl; //CF the only addition to saveACL!
+	library_file << sample_rate << endl;
+	library_file << channels << endl;
+	library_file << sample_start << endl;
+	library_file << sample_end << endl;
+	library_file << waveformLength << endl;
+	for (i=0; i<waveformLength; i++) {
+		library_file << waveform[i] << " ";
+	}
+	library_file << endl;
+	n_features = features_vectors.size();
+	library_file << n_features << endl;
+	for (i=0; i<features_vectors.size();i++) {
+		n_features_elements = features_vectors[i]->getSize();
+		nn = features_vectors[i]->getNeedsNormalization();
+		library_file << features_vectors[i]->getName() << endl;
+		library_file << nn << endl;
+		library_file << n_features_elements << endl;
+		for (j=0; j<n_features_elements; j++) {
+			library_file << features_vectors[i]->getFeatureElement(j)  << "\t"; // XS instead of [i][j]
+		}
+		library_file << endl;
+	}
+}
+
 int ACAudio::loadACL(ifstream &library_file) {
 	if (! library_file.is_open()) {
 		cerr << "<ACAudio::loadACL> : problem loading image from ACL file, it needs to be opened before" << endl;
@@ -236,6 +270,70 @@ int ACAudio::loadACL(ifstream &library_file) {
 	}
 }
 
+int ACAudio::loadMCSL(ifstream &library_file) {
+	if (! library_file.is_open()) {
+		cerr << "<ACAudio::loadACL> : problem loading image from ACL file, it needs to be opened before" << endl;
+		return 0;
+	}		
+	if (!library_file.good()){
+		cerr << "<ACAudio::loadACL> : bad library file" << endl;
+		return 0;
+	}
+	
+	int i, j;
+	int n_features;
+	int n_features_elements = 0;	
+	int nn;
+	string tab;
+	
+	ACMediaFeatures* mediaFeatures;
+	string featureName;
+	float local_feature;
+	
+	getline(library_file, filename, '\n');
+	if (!filename.empty()){
+		library_file >> mid;
+		library_file >> parentid; //CF the only addition to saveACL!
+		library_file >> sample_rate;
+		library_file >> channels;
+		library_file >> sample_start;
+		library_file >> sample_end;
+ 		n_frames = sample_end-sample_start;
+		duration = (float)n_frames/(float)sample_rate;
+		//library_file >> n_frames;
+		//		library_file >> duration;
+		library_file >> waveformLength;
+		waveform = new float[waveformLength];
+		for (i=0; i<waveformLength; i++) {
+			library_file >> waveform[i];
+		}
+		getline(library_file, tab);
+		library_file >> n_features;	
+		getline(library_file, tab);
+		
+		for (int i=0; i<n_features;i++) {
+			mediaFeatures = new ACMediaFeatures();
+			features_vectors.push_back(mediaFeatures);
+			features_vectors[i]->setComputed();
+			//			getline(library_file, featureName, '\n');
+			getline(library_file, featureName);
+			features_vectors[i]->setName(featureName);
+			library_file >> nn;
+			features_vectors[i]->setNeedsNormalization(nn);
+			library_file >> n_features_elements;
+			features_vectors[i]->resize(n_features_elements);
+			for (int j=0; j<n_features_elements; j++) {
+				library_file >> local_feature;
+				features_vectors[i]->setFeatureElement(j, local_feature);
+			}
+			getline(library_file, tab);	
+		}
+		return 1;
+	}
+	else{
+		return 0;
+	}
+}
 
 int ACAudio::load(FILE* library_file) {
 	int i, j;

@@ -83,14 +83,16 @@ public:
 	std::vector< std::vector<double> > getMeanFeatures() {return mean_features;};
 	std::vector< std::vector<double> > getStdevFeatures() {return stdev_features;};
 	
-	int importDirectory(std::string path, int recursive, int id=-1, ACPluginManager *acpl=NULL);
+	int importDirectory(std::string path, int recursive, int id=-1, ACPluginManager *acpl=NULL, bool forward_order=true);
 	int scanDirectory(std::string _path, int _recursive, std::vector<string>& filenames);
 
 	int openLibrary(std::string _path, bool aInitLib=false);
 	void saveAsLibrary(std::string _path);
 	// C++ versions
 	int openACLLibrary(std::string _path, bool aInitLib=false);
+	int openMCSLLibrary(std::string _path, bool aInitLib=false);//CF 31/05/2010 temporary MediaCycle Segmented Library (MCSL) for AudioGarden, adding a parentID for segments to the initial ACL, awaiting approval
 	int saveACLLibrary(std::string _path);
+	int saveMCSLLibrary(std::string _path);//CF 31/05/2010 temporary MediaCycle Segmented Library (MCSL) for AudioGarden, adding a parentID for segments to the initial ACL, awaiting approval
 	
 	//XS special for Thomas Israel
 	void saveSorted(std::string ouput_file);
