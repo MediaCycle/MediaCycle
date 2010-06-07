@@ -227,6 +227,7 @@ int ACAudio::loadACL(ifstream &library_file) {
 				features_vectors[i]->setFeatureElement(j, local_feature);
 			}
 			getline(library_file, tab);	
+			std::cout << "read extra chars : \n" << tab << std::endl;
 		}
 		return 1;
 	}

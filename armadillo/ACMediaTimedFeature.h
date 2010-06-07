@@ -89,7 +89,8 @@ public:
 	fmat getValue();
 	float getValue(float index, float dim);
 	void setValue(fmat);
-	void setTimeAndValueForIndex(long iIndex, double iTime, rowvec iVal_v);
+	void setTimeAndValueForIndex(long iIndex, double iTime, frowvec iVal_v);
+	void setTimeAndValueForIndex(long iIndex, double iTime, vector<float> iVal);
 	string getName(){return name;};
 	void setName(string name){this->name = name;};
 	size_t getLength();

@@ -297,14 +297,24 @@ void ACMediaTimedFeatures::setValue(fmat value_m) {
 	this->value_m = value_m;
 }
 
-// void ACMediaTimedFeatures::setTimeAndValueForIndex(long iIndex, double iTime, rowvec iVal_v) {
-// 	if (iVal_v.n_cols != this->getDim()){
-// 		std::cerr << "setValueForTime : Wrong dimension" << std::endl;
-// 		exit(1);
-// 	}
-// 	this->time_v(iIndex) = iTime;
-// 	this->value_m.row(iIndex) = iVal_v;
-// }
+void ACMediaTimedFeatures::setTimeAndValueForIndex(long iIndex, double iTime, frowvec iVal_v) {
+	if (iVal_v.n_cols != this->getDim()){
+		std::cerr << "setValueForTime : Wrong dimension" << std::endl;
+		exit(1);
+	}
+	this->time_v(iIndex) = iTime;
+	this->value_m.row(iIndex) = iVal_v;
+}
+
+void ACMediaTimedFeatures::setTimeAndValueForIndex(long iIndex, double iTime, vector<float> iVal) {
+	if (iVal.size() != this->getDim()){
+		std::cerr << "setValueForTime : Wrong dimension" << std::endl;
+		exit(1);
+	}
+	this->time_v(iIndex) = iTime;
+	for (int i=0; i < this->getDim(); i++)
+		this->value_m(iIndex, i) = iVal[i];
+}
 
 size_t ACMediaTimedFeatures::getLength() {
 	return time_v.n_rows;
@@ -313,24 +323,6 @@ size_t ACMediaTimedFeatures::getLength() {
 size_t ACMediaTimedFeatures::getDim() {
 	return value_m.n_cols;
 }
-
-// fcolvec getValueAtColumn(size_t index){
-//   gsl vector* column;  
-//   gsl_matrix_get_col (column, this->getValue(), index);
-//   return column;
-// }
-
-// fcolvec ACMediaTimedFeatures::getValueAtColumn(size_t index){
-//   return this->getValue().col(index);
-// }
-
-/*double* ACMediaTimedFeatures::getValueAtColumnAsDouble(size_t index){
- double valueDouble[this->getLength()];  
- for (int i=0; i < this->getLength(); i++){
- valueDouble[i] = this->value_m(i, index);
- }
- return valueDouble;
- }*/
 
 
 fmat ACMediaTimedFeatures::getValueAtTime(fcolvec time_v) {
@@ -347,31 +339,6 @@ fmat ACMediaTimedFeatures::getValueAtTime(fcolvec time_v) {
 		}
 	}
 	
-	/*
-	 double valueij;
-	 double valueDouble[this->getLength()];
-	 double timeDouble[this->getLength()];
-	 for (int i=0; i<this->getLength();i++){
-	 timeDouble[i] = this->time_v(i);
-	 }
-	 
-	 outValue_m = fmat(time_v.n_rows,this->getDim());
-	 const gsl_interp_type* ltype = gsl_interp_linear;
-	 gsl_interp_accel *acc = gsl_interp_accel_alloc();
-	 gsl_interp* interp = gsl_interp_alloc(ltype, this->getLength());
-	 for (size_t Icol = 0; Icol < this->getDim(); Icol++){
-	 
-	 for (int i=0; i<this->getLength();i++){
-	 valueDouble[i] = this->value_m(i,Icol);
-	 }
-	 
-	 gsl_interp_init (interp, timeDouble, valueDouble, this->getLength());
-	 for (size_t Itime=0; Itime<time_v.n_rows; Itime++){
-	 valueij = gsl_interp_eval(interp, timeDouble, valueDouble, time_v(Itime), acc);    
-	 outValue_m(Itime, Icol) = valueij;
-	 }
-	 }
-	 gsl_interp_free (interp);*/
 	return outValue_m;
 }
 

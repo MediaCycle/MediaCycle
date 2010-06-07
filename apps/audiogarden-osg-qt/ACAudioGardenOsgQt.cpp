@@ -64,7 +64,7 @@ ACAudioGardenOsgQt::ACAudioGardenOsgQt(QWidget *parent)
 			//media_cycle->getBrowser()->setMode(AC_MODE_NEIGHBORS);// set this if using NeighborhoodsPlugins
 			media_cycle->setVisualisationPlugin("VisAudiogarden");
 		}
-		//media_cycle->addPlugin("../../../plugins/audio/" + build_type + "/mc_audio.dylib");	
+		media_cycle->addPlugin("../../../plugins/vamp/" + build_type + "/mc_vamp.dylib");	
 	#endif
 	
 	audio_engine = new ACAudioFeedback();

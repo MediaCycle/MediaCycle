@@ -1,7 +1,7 @@
 /**
  * @brief ACVisPlugin2Desc.cpp
- * @author Christian Frisson
- * @date 27/05/2010
+ * @author Damien Tardieu
+ * @date 07/06/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -69,16 +69,17 @@ void ACVisPlugin2Desc::updateNextPositions(ACMediaBrowser* mediaBrowser){
 	labelClicked = mediaBrowser->getClickedLabel();
 	
 	mat desc_m, descD_m;
-	mat posDisp_m;
+	mat posDisp_m;	
 
 	extractDescMatrix(mediaBrowser, desc_m, featureNames);
-
+	if (desc_m.n_cols < 2){
+		std::cout << "Not enough features for this display" << std::endl;
+		return;
+	}
+		
 	for (int i=0; i< featureNames.size(); i++)
 		std::cout << "featureNames : " << featureNames[i] << std::endl;
 
-	
-	desc_m.save("posDispDef.txt", arma_ascii);
-	
 	mediaBrowser->setNumberOfDisplayedLoops(desc_m.n_rows);
 
   for (int i=0; i<libSize; i++){

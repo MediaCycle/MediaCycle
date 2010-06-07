@@ -46,53 +46,12 @@
  * via libsndfile.
  */
 
-#include <vamp-hostsdk/PluginHostAdapter.h>
-#include <vamp-hostsdk/PluginInputDomainAdapter.h>
-#include <vamp-hostsdk/PluginLoader.h>
 
-#include <iostream>
-#include <fstream>
-#include <set>
-#include <sndfile.h>
+#include "vamp-plugin-interface.h"
 
-#include <cstring>
-#include <cstdlib>
-
-#include "system.h"
-
-#include <cmath>
-
-using namespace std;
-
-using Vamp::Plugin;
-using Vamp::PluginHostAdapter;
-using Vamp::RealTime;
-using Vamp::HostExt::PluginLoader;
-using Vamp::HostExt::PluginWrapper;
-using Vamp::HostExt::PluginInputDomainAdapter;
-
-#define HOST_VERSION "1.4"
-
-enum Verbosity {
-    PluginIds,
-    PluginOutputIds,
-    PluginInformation,
-    PluginInformationDetailed
-};
-
-void printFeatures(int, int, int, Plugin::FeatureSet, ofstream *, bool frames);
-void transformInput(float *, size_t);
-void fft(unsigned int, bool, double *, double *, double *, double *);
-void printPluginPath(bool verbose);
-void printPluginCategoryList();
-void enumeratePlugins(Verbosity);
-void listPluginsInLibrary(string soname);
-int runPlugin(string soname, string plugid, string output, int outputNo, string inputFile, bool frames);
-
-
-
-int runPlugin(string soname, string id, string output, int outputNo, string inputFile, bool useFrames)
+ACMediaTimedFeatures* runPlugin(string soname, string id, string output, int outputNo, string inputFile, bool useFrames)
 {
+    ACMediaTimedFeatures* descmf;
     PluginLoader *loader = PluginLoader::getInstance();
     string outfilename = "";
     PluginLoader::PluginKey key = loader->composePluginKey(soname, id);
@@ -103,9 +62,9 @@ int runPlugin(string soname, string id, string output, int outputNo, string inpu
 
     sndfile = sf_open(inputFile.c_str(), SFM_READ, &sfinfo);
     if (!sndfile) {
-	cerr << " vamp interface : ERROR: Failed to open input file \""
+        cerr << " vamp interface : ERROR: Failed to open input file \""
              << inputFile << "\": " << sf_strerror(sndfile) << endl;
-	return 1;
+        return descmf;
     }
 
     ofstream *out = 0;
@@ -115,7 +74,7 @@ int runPlugin(string soname, string id, string output, int outputNo, string inpu
             cerr << "vamp interface : ERROR: Failed to open output file \""
                  << outfilename << "\" for writing" << endl;
             delete out;
-            return 1;
+            return descmf;
         }
     }
 
@@ -129,7 +88,7 @@ int runPlugin(string soname, string id, string output, int outputNo, string inpu
             out->close();
             delete out;
         }
-        return 1;
+        return descmf;
     }
 
     cerr << "Running plugin: \"" << plugin->getIdentifier() << "\"..." << endl;
@@ -187,6 +146,8 @@ int runPlugin(string soname, string id, string output, int outputNo, string inpu
 
     Plugin::OutputList outputs = plugin->getOutputDescriptors();
     Plugin::OutputDescriptor od;
+    
+    //n_cols
 
     int returnValue = 1;
     int progress = 0;
@@ -196,7 +157,7 @@ int runPlugin(string soname, string id, string output, int outputNo, string inpu
     RealTime adjustment = RealTime::zeroTime;
 
     if (outputs.empty()) {
-	cerr << "ERROR: Plugin has no outputs!" << endl;
+        cerr << "ERROR: Plugin has no outputs!" << endl;
         goto done;
     }
 
@@ -241,6 +202,10 @@ int runPlugin(string soname, string id, string output, int outputNo, string inpu
         if (ida) adjustment = ida->getTimestampAdjustment();
     }
 
+
+    long nbFrames = (long)(sfinfo.frames)/stepSize+1;
+    descmf = new ACMediaTimedFeatures(nbFrames, outputs[0].binCount, outputs[0].name); 
+
     for (sf_count_t i = 0; i < sfinfo.frames; i += stepSize) {
 
         int count;
@@ -268,10 +233,16 @@ int runPlugin(string soname, string id, string output, int outputNo, string inpu
         }
 
         rt = RealTime::frame2RealTime(i, sfinfo.samplerate);
-
-        printFeatures(RealTime::realTime2Frame(rt + adjustment, sfinfo.samplerate),
-             sfinfo.samplerate, outputNo, plugin->process(plugbuf, rt),
-             out, useFrames);
+        
+        RealTime currentTime;
+        //.values
+        Plugin::FeatureSet fs;
+        fs = plugin->process(plugbuf, rt);
+        
+        descmf->setTimeAndValueForIndex((long)(i/stepSize), (float) rt.msec()/1000, fs[0][0].values);
+//         printFeatures(RealTime::realTime2Frame(rt + adjustment, sfinfo.samplerate),
+//              sfinfo.samplerate, outputNo, plugin->process(plugbuf, rt),
+//              out, useFrames);
 
         int pp = progress;
         progress = lrintf((float(i) / sfinfo.frames) * 100.f);
@@ -283,15 +254,15 @@ int runPlugin(string soname, string id, string output, int outputNo, string inpu
 
     rt = RealTime::frame2RealTime(sfinfo.frames, sfinfo.samplerate);
 
-    printFeatures(RealTime::realTime2Frame(rt + adjustment, sfinfo.samplerate),
-                  sfinfo.samplerate, outputNo,
-                  plugin->getRemainingFeatures(), out, useFrames);
+//     printFeatures(RealTime::realTime2Frame(rt + adjustment, sfinfo.samplerate),
+//                   sfinfo.samplerate, outputNo,
+//                   plugin->getRemainingFeatures(), out, useFrames);
 
     returnValue = 0;
-
+    descmf->dump();
 done:
     delete plugin;
     sf_close(sndfile);
-    return returnValue;
+    return descmf;
 }
 
