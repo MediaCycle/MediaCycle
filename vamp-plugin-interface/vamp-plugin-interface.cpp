@@ -156,6 +156,8 @@ ACMediaTimedFeatures* runPlugin(string soname, string id, string output, int out
     PluginWrapper *wrapper = 0;
     RealTime adjustment = RealTime::zeroTime;
 
+	long nbFrames;
+
     if (outputs.empty()) {
         cerr << "ERROR: Plugin has no outputs!" << endl;
         goto done;
@@ -203,7 +205,7 @@ ACMediaTimedFeatures* runPlugin(string soname, string id, string output, int out
     }
 
 
-    long nbFrames = (long)(sfinfo.frames)/stepSize+1;
+    nbFrames = (long)(sfinfo.frames)/stepSize+1;
     descmf = new ACMediaTimedFeatures(nbFrames, outputs[0].binCount, outputs[0].name); 
 
     for (sf_count_t i = 0; i < sfinfo.frames; i += stepSize) {
