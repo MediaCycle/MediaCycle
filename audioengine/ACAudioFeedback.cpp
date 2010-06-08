@@ -1567,7 +1567,8 @@ int ACAudioFeedback::createSourceWithPosition(int loop_id, float x, float y, flo
 	//	int sample_end;
 	int sample_start = ((ACAudio*) media_cycle->getLibrary()->getMedia(loop_id))->getSampleStart();
 	int sample_end = ((ACAudio*) media_cycle->getLibrary()->getMedia(loop_id))->getSampleEnd();
-	int sample_size = sample_end - sample_start;
+	int sample_size;
+	//int sample_size = sample_end - sample_start;
 	
 	switch (format) {
 	case AL_FORMAT_MONO16:
@@ -1581,9 +1582,10 @@ int ACAudioFeedback::createSourceWithPosition(int loop_id, float x, float y, flo
 		break;
 	}
 
-	sample_end = sample_size + sample_start;
-	size = sample_size;
-	datashort = new short[size];
+	//sample_end = sample_size + sample_start;
+	//size = sample_size;
+	int segment_size = sample_end - sample_start;
+	datashort = new short[segment_size];
 	datas = (short*)data;
 	if (format ==  AL_FORMAT_STEREO16) {
 		for (count=sample_start;count<sample_end;count++) {
@@ -1618,14 +1620,14 @@ int ACAudioFeedback::createSourceWithPosition(int loop_id, float x, float y, flo
 	// resample_ratio = 1;
 	
 	use_bpm[loop_slot] = local_bpm * resample_ratio;
-	use_sample_end[loop_slot] = (int)((float)sample_end / resample_ratio);
-	use_sample_start[loop_slot] = (int)((float)sample_start / resample_ratio);
-	int prevsize = size;
-	size = use_sample_end[loop_slot] - use_sample_start[loop_slot];
-	datashort2 = new short[size];
+	use_sample_end[loop_slot] = (int)((float)(sample_end-sample_start) / resample_ratio);
+	use_sample_start[loop_slot] = 0; //(int)((float)sample_start / resample_ratio);
+	int prevsize = segment_size;
+	int segment_size_resample = use_sample_end[loop_slot] - use_sample_start[loop_slot];
+	datashort2 = new short[segment_size_resample];
 	int i;
 	float j=0;
-	for (i=0;i<size;i++) {
+	for (i=0;i<segment_size_resample;i++) {
 		datashort2[i] = datashort[(int)(j)];
 		j += resample_ratio;
 		if (j>=prevsize) {
@@ -1634,6 +1636,7 @@ int ACAudioFeedback::createSourceWithPosition(int loop_id, float x, float y, flo
 	}
 	delete datashort;
 	datashort = datashort2;
+	size = segment_size_resample;
 	
 #ifdef OPENAL_STREAM_MODE
 	
