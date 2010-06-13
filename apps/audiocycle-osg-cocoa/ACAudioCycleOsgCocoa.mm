@@ -650,8 +650,7 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 		
 		media_cycle->hoverCallback(x,y);
 		int closest_node = media_cycle->getClosestNode();
-		//CF debug the objective-c accessor on renderer!
-		/*float distance = browser_osg_view.renderer->getDistanceMouse()[closest_node];
+		float distance = [browser_osg_view getMouseDistanceAtNode:closest_node];
 		if (osc_feedback)
 		{
 			osc_feedback->messageBegin("/audiocycle/closest_node_at");
@@ -659,8 +658,7 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 			osc_feedback->messageEnd();
 			osc_feedback->messageSend();
 		}
-		*/
-		//media_cycle->setNeedsDisplay(1);
+		media_cycle->setNeedsDisplay(1);
 	}
 	else if(strcasecmp(tagName, "/audiocycle/1/browser/1/move/zoom") == 0)
 	{

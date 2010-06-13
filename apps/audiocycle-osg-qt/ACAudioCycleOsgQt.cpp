@@ -549,7 +549,7 @@ void ACAudioCycleOsgQt::processOscMessage(const char* tagName)
 			osc_feedback->messageEnd();
 			osc_feedback->messageSend();
 		}	
-		//media_cycle->setNeedsDisplay(true);
+		media_cycle->setNeedsDisplay(true);
 	}
 	else if(strcasecmp(tagName, "/audiocycle/1/browser/1/move/zoom") == 0)
 	{

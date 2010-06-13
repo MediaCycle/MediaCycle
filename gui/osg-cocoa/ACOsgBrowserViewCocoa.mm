@@ -209,6 +209,7 @@ struct ACOsgBrowserViewData
 		return;            // reject dead keys
 	if ( [theArrow length] == 1 ) {
 		keyChar = [theArrow characterAtIndex:0];
+		//std::cout << "Key (Cocoa) " << keyChar << std::endl;
 		if ( keyChar == 122 ) {		// 'z'
 			zoomdown = 1;
 			return;
@@ -221,6 +222,10 @@ struct ACOsgBrowserViewData
 		if ( keyChar == 113 ) {		// 'q'
 			media_cycle->setAutoPlay(1);
 			autoplaydown = 1;
+			return;
+		}
+		if ( keyChar == 109 ) {		// 'm'
+			media_cycle->muteAllSources();
 			return;
 		}
 	}
@@ -420,5 +425,8 @@ struct ACOsgBrowserViewData
 	renderer->updateLabels(frac);//CF
 	}
 }
+
+//CF workaround due to issues with accessing C++ pointer through Objective-C functions...
+- (float) getMouseDistanceAtNode:(int)closest_node {return renderer->getDistanceMouse()[closest_node];}
 
 @end
