@@ -63,11 +63,13 @@ ACMediaTimedFeature* computeFeature(float* data, string featureName, int sampler
 	vector<ACMediaTimedFeature*> desc_mf;
 	descList.push_back(featureName);
 	desc_mf =  computeFeatures(data, descList, samplerate, nchannels, length, mfccNbChannels, mfccNb, windowSize, extendSoundLimits);	
+	descList.clear();
 	return desc_mf[0];
 }
 
 std::vector<ACMediaTimedFeature*> computeFeatures(float* data, int samplerate, int nchannels, long length, int mfccNbChannels, int mfccNb, int windowSize, 	bool extendSoundLimits){
 	vector<string> descList;
+	std::vector<ACMediaTimedFeature*> desc_amtf;
 	descList.push_back("Spectral Centroid");
 	descList.push_back("Spectral Spread");
 	descList.push_back("Spectral Variation");
@@ -83,7 +85,9 @@ std::vector<ACMediaTimedFeature*> computeFeatures(float* data, int samplerate, i
 	descList.push_back("Log Attack Time");
 	descList.push_back("Energy Modulation Frequency");
 	descList.push_back("Energy Modulation Amplitude");
-	return computeFeatures(data, descList, samplerate, nchannels, length, mfccNbChannels, mfccNb, windowSize, extendSoundLimits);	
+	desc_amtf = computeFeatures(data, descList, samplerate, nchannels, length, mfccNbChannels, mfccNb, windowSize, extendSoundLimits);	
+	descList.clear();
+	return desc_amtf;
 }
 
 std::vector<ACMediaTimedFeature*> computeFeatures(float* data, vector<string> descList, int samplerate, int nchannels, long length, int mfccNbChannels, int mfccNb, int windowSize, 	bool extendSoundLimits){
@@ -148,6 +152,7 @@ std::vector<ACMediaTimedFeature*> computeFeatures(float* data, vector<string> de
 		for (long i = 0; i < sfinfo2.frames; i++)
 			signal_v(i) = dataout[i*nchannels]; // we keep only channel 1
 	}
+	delete [] dataout;
 	colvec frame_v = colvec(windowSize);
 	colvec frameW_v = colvec(windowSize);
  	colvec window_v = blackman(windowSize);
@@ -332,6 +337,7 @@ std::vector<ACMediaTimedFeature*> computeFeatures(float* data, vector<string> de
 //			break;
 		}
 	}
+	descMap.clear();
 	return desc;
 }
 

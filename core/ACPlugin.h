@@ -70,7 +70,7 @@ enum ACPluginType {
 class ACPlugin {
 public:
 	ACPlugin() {}
-	virtual ~ACPlugin() {}
+	virtual ~ACPlugin() {mName.clear(); mDescription.clear(); mId.clear();}
 	std::string getName() {return this->mName;}
 	//virtual std::string getName() const = 0; -> error !
 	std::string getIdentifier() {return this->mId;}

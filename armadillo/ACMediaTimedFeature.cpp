@@ -50,6 +50,8 @@ ACMediaTimedFeature::ACMediaTimedFeature(long iSize, int iDim, string name){
 }
 
 ACMediaTimedFeature::~ACMediaTimedFeature(){
+	seg_v.clear();
+	name.clear();
 }
 
 ACMediaTimedFeature::ACMediaTimedFeature(fcolvec time_v, fmat value_m){
@@ -529,7 +531,6 @@ ACMediaTimedFeature* ACMediaTimedFeature::interpN(int n){
 	float minTime = min(time_v);
 	float maxTime = arma::max(time_v);
 	fcolvec newTime_v = linspace<fcolvec>(minTime, maxTime, n);
-	std::cout<<newTime_v << std::endl;
 	fmat newVal_m = this->getValueAtTime(newTime_v);
 	interp_amtf = new ACMediaTimedFeature(newTime_v, newVal_m, "Interpolated "+this->getName());
 	return interp_amtf;

@@ -60,6 +60,8 @@ ACMedia::ACMedia(const ACMedia& m){
 }
 
 ACMedia::~ACMedia() { 
+	filename.clear();
+	filename_thumbnail.clear();
 	vector<ACMediaFeatures*> ::iterator iter;
 	for (iter = features_vectors.begin(); iter != features_vectors.end(); iter++) {
 		delete *iter;//needed erase call destructor of pointer (i.e. none since it's just a pointer) not of pointee ACMediaFeatures

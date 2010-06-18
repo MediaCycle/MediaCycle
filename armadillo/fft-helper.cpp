@@ -1,7 +1,7 @@
 /**
  * @brief fft-helper.cpp
  * @author Damien Tardieu
- * @date 11/03/2010
+ * @date 18/06/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -106,9 +106,9 @@ cx_mat fft_helper(mat x_m, int n){
     }  
     //imag_m.print("imag");
     y_m = cx_mat(real_m, imag_m);
-    delete(x_db);
-    delete(ip);
-    delete(w);
+    delete[] x_db;
+    delete[] ip;
+    delete[] w;
   }
   return y_m;
 }

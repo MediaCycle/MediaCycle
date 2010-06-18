@@ -72,7 +72,7 @@ ACMediaData::ACMediaData(string _fname, ACMediaType _type) {
 }
 
 ACMediaData::~ACMediaData() { 
-	if (audio_ptr != NULL) delete audio_ptr;
+	if (audio_ptr != NULL) delete [] audio_ptr;
 	if (image_ptr != NULL) cvReleaseImage(&image_ptr);
 	if (video_ptr != NULL) cvReleaseCapture(&video_ptr);
 }
@@ -92,9 +92,8 @@ void ACMediaData::readAudioData(string _fname){
 		puts (sf_strerror (NULL)) ;
 		exit(1);
 	}
-	data = new float[(long) sfinfo.frames];
-	sf_read_float(testFile, data, sfinfo.frames);
-	audio_ptr = data;
+	audio_ptr = new float[(long) sfinfo.frames];
+	sf_read_float(testFile, audio_ptr, sfinfo.frames);
 	sf_close(testFile);
 }
 

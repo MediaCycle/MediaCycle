@@ -137,7 +137,7 @@ std::vector<ACMedia*> ACAudioSegmentationPlugin::segment(ACMediaData* audio_data
 // 	for(int i=0; i < (long) theAudio->getNFrames() * theAudio->getChannels(); i++){
 // 		output<<data[i]<<endl;
 // 	}
-
+	delete[] data;
 	return segments;
 }
 

@@ -77,7 +77,7 @@ ACAudio::ACAudio(const ACAudio& m) : ACMedia(m) {
 
 ACAudio::~ACAudio() {
 	// XS added this on 4/11/2009 to clean up memory
-	if (waveform) delete waveform;	
+	if (waveform) delete [] waveform;	
 }
 
 int ACAudio::getSampleStart(){
@@ -463,13 +463,11 @@ ACMediaData* ACAudio::extractData(string fname){
 	if (this->getSampleEnd() < 0)
 		this->setSampleEnd(sfinfo.frames);	
 
-	float* data = new float[(long) sfinfo.frames * sfinfo.channels];
 	std::cout << "Duration of the segment : " << this->getDuration() << std::endl;
 	std::cout << "Number of frame of the segment : " << this->getNFrames() << std::endl;
-	sf_readf_float(testFile, data, sfinfo.frames);
-	this->computeWaveform(data);
+// 	sf_readf_float(testFile, data, sfinfo.frames);
 	ACMediaData* audio_data = new ACMediaData(fname, MEDIA_TYPE_AUDIO);
-	audio_data->setAudioData(data);
+ 	this->computeWaveform(audio_data->getAudioData());
 	sf_close(testFile);
 	return audio_data;
 }

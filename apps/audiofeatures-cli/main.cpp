@@ -214,8 +214,12 @@ int main(int argc, char** argv){
 		descFileName = descDir + rootFileName + "." + descAbbreviation(desc[i]->getName()) + ".txt";
 		std::cout << "Saving " << descFileName << std::endl;
 		desc[i]->saveAsTxt(descFileName);
-	}		
-	delete(data);
+	}
+
+	for (int i=0; i<desc.size(); i++){
+		delete desc[i];
+	}
+	delete [] data;
 	sf_close(testFile);
 }
 

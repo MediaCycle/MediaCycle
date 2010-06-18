@@ -126,6 +126,11 @@ std::vector<ACMediaFeatures*> ACAudioGardenFeaturesPlugin::calculate(ACMediaData
 	desc.push_back(descmf[edIdx]->mean());
 	desc.push_back(descmf[mfccIdx]->mean());
 	desc.push_back(descmf[emaIdx]->mean());
+	
+	for (int i=0; i<descmf.size(); i++){
+		delete descmf[i];
+	}
+	descmf.clear();
 	return desc;
 }
 

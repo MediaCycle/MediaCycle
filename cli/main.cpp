@@ -63,7 +63,7 @@ int main(int argc, char** argv) {
 		//mediacycle->importDirectory("/Users/dtardieu/data/test/testEnv/",1);
 		//		mediacycle->importDirectory("/Users/dtardieu/data/rire-audiocycle/",1);
 		//		mediacycle->importDirectory("/Users/dtardieu/data/footsteps/", 1);
-		mediacycle->importDirectory("/Users/dtardieu/data/AudioGarden/test123",1);
+		mediacycle->importDirectory("/Users/dtardieu/data/AudioGarden/audiogarden/sounds-extract",1);
 		//mediacycle->saveMCSLLibrary("/Users/dtardieu/data/AudioCycleProPackTest/zero-g-pro-pack_b/Super Funk/Funkmachine-E.acl");
 		//mediacycle->saveACLLibrary("/Users/dtardieu/data/test/testEnv/testEnv.acl");
 
@@ -72,13 +72,13 @@ int main(int argc, char** argv) {
 		//		mediacycle->saveMCSLLibrary("/Users/dtardieu/data/AudioCycleProPackTest/zero-g-pro-pack_b/Super Funk/Funkmachine-E.mcsl");
 		//		mediacycle->saveMCSLLibrary("/Users/dtardieu/data/rire-audiocycle/rire-audiocycle.mcsl");
 		//		mediacycle->saveMCSLLibrary("/Users/dtardieu/data/footsteps/footsteps.mcsl");
-		mediacycle->saveMCSLLibrary("/Users/dtardieu/data/AudioGarden/test123/test123.mcsl");
+		mediacycle->saveMCSLLibrary("/Users/dtardieu/data/AudioGarden/audiogarden/audiogarden.mcsl");
 
 		for (int i = 0; i < mediacycle->getLibrary()->getSize(); i++){
 			std::cout << i << " : " << mediacycle->getLibrary()->getMedia(i)->getFileName() << "   " << ((ACAudio*)mediacycle->getLibrary()->getMedia(i))->getNFrames() << std::endl;
 		}
 
-		vector<long> grainIds;
+		/* vector<long> grainIds;
 		for (int i=31; i<84; i++){
 			//for (int i=1; i<20; i++){
 			grainIds.push_back(i);
@@ -86,24 +86,26 @@ int main(int argc, char** argv) {
 		float* syn_v;
 		long length;
 		AGSynthesis(mediacycle->getLibrary(), 0, grainIds, &syn_v, length);
-		
+
 		SF_INFO sfinfo;
 		SNDFILE* testFile;
 		sfinfo.samplerate = 44100;
 		sfinfo.channels = 1;
 		sfinfo.format = SF_FORMAT_WAV | SF_FORMAT_PCM_16;
-		
+
 		if (! (testFile = sf_open ("synthesis.wav", SFM_WRITE, &sfinfo))){  
 			printf ("Not able to open input file %s.\n", "synthesis.wav") ;
 			puts (sf_strerror (NULL)) ;
 			return 1;
 		}
-		
+
 		float tt[1];
 		tt[0] =1.0;
 		sf_writef_float  (testFile, syn_v, length);
 		sf_close(testFile);
-
+		 */
+	
+	
 // 	cout<<"setCulsterN"<<endl;
 //     mediacycle->getBrowser()->setClusterNumber(1);
 //     cout<<"importLib"<<endl;

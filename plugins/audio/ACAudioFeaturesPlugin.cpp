@@ -91,7 +91,12 @@ std::vector<ACMediaFeatures*> ACAudioFeaturesPlugin::calculate(ACMediaData* audi
 	std::cout << "nrgIdx = " << nrgIdx << std::endl;
 	
 	desc.push_back(descmf[nrgIdx]->interpN(10)->toMediaFeatures());
-	
+
+	for (int i=0; i<descmf.size(); i++){
+		delete descmf[i];
+	}
+	descmf.clear();
+	delete [] data;
 	return desc;
 }
 
