@@ -127,7 +127,7 @@ public:
 	// XS 23/09/09 : I implemented import in ACMedia.cpp, since it is the same for all media
 	// XS 23/09/09 : import returns 1 if it worked, 0 if it failed
 
-	int ACMedia::segment(ACPluginManager *acpl );
+	int segment(ACPluginManager *acpl );
 
 	//	int segment();
 };

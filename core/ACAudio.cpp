@@ -308,7 +308,6 @@ int ACAudio::loadMCSL(ifstream &library_file) {
 		return 0;
 	}
 	
-	int i, j;
 	int n_features;
 	int n_features_elements = 0;	
 	int nn;
@@ -341,7 +340,7 @@ int ACAudio::loadMCSL(ifstream &library_file) {
 		//		library_file >> duration;
 		library_file >> waveformLength;
 		waveform = new float[waveformLength];
-		for (i=0; i<waveformLength; i++) {
+		for (int i=0; i<waveformLength; i++) {
 			library_file >> waveform[i];
 		}
 		getline(library_file, tab);
@@ -479,7 +478,7 @@ float* ACAudio::getSamples(){
 	SNDFILE* testFile;
 	if (! (testFile = sf_open (this->getFileName().c_str(), SFM_READ, &sfinfo))){  
 		/* Open failed so print an error message. */
-		printf ("Not able to open input file %s.\n", this->getFileName()) ;
+		printf ("Not able to open input file %s.\n", this->getFileName().c_str()) ;
 		/* Print the error message from libsndfile. */
 		puts (sf_strerror (NULL)) ;
 		return  NULL;

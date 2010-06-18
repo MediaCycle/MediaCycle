@@ -251,7 +251,7 @@ int ACVideo::load(FILE* library_file) { // was loadLoop
 			exit(-1);
 		}
 		
-		ret = fscanf(library_file, "%lf", &end);
+		ret = fscanf(library_file, "%f", &end);
 		ret = fscanf(library_file, "%d", &mid);
 		ret = fscanf(library_file, "%d", &width);
 		ret = fscanf(library_file, "%d", &height);

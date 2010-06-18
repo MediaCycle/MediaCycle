@@ -1,11 +1,11 @@
 PROJECT(MediaCycle)
 
 IF ( WIN32 )
-	SUBDIRS(core gui)
 	INCLUDE_DIRECTORIES(. core)
+	SUBDIRS(core gui)
 ELSE ( WIN32 )
-	SUBDIRS(core cli gui fftooura gnuplot_i lib vamp-plugin-interface audiogarden)
 	INCLUDE_DIRECTORIES(. core gnuplot_i)
+	SUBDIRS(core cli gui fftooura gnuplot_i lib vamp-plugin-interface audiogarden)	
 ENDIF ( WIN32 )
 
 # add some find scripts
@@ -60,6 +60,13 @@ OPTION(USE_AUDIOGARDEN "Use audiogarden" OFF)
 IF ( UNIX )
 	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
 	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+
+	#http://www.cmake.org/Wiki/CMake:Packaging_With_CPack
+	#enables packaging (ubuntu : .deb, .sh, .tar.gz, .tar.Z, other platforms : ?)
+	#to build packages, use: make package
+	#to enable .deb build (disabled by default) use: cmake .. -DCPACK_BINARY_DEB:BOOL=on
+	SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "Numediart")
+	INCLUDE(CPack)#enable packaging by including the CPack module
 ENDIF ( UNIX )
 
 IF ( WIN32 )

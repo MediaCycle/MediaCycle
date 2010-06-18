@@ -1,6 +1,6 @@
 /**
  * @brief ACAudioFeatures.cpp
- * @author Damien Tardieu
+ * @author Alexis Moinet
  * @date 18/06/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
@@ -231,7 +231,7 @@ std::vector<ACMediaTimedFeature*> computeFeatures(float* data, vector<string> de
 		prevFrameFFTabs_v = frameFFTabs2_v;
 	}
 	
-
+	ACMediaTimedFeature* mfcc_tf;
 	
 	for (int iDesc = 0; iDesc < descList.size(); iDesc++){
 		switch (descMap[descList[iDesc]]) {
@@ -295,13 +295,15 @@ std::vector<ACMediaTimedFeature*> computeFeatures(float* data, vector<string> de
 			desc.push_back(new ACMediaTimedFeature(conv_to<fcolvec>::from(time_v), conv_to<fmat>::from(loud_v), std::string("Loudness")));
 			break;
 		case MFCC:
+		{
 			if (!mfcc_m.is_finite() ){
 				std::cout << "mfcc_m is not finite" << std::endl;
 				exit(1);
 			}
-			ACMediaTimedFeature* mfcc_tf = new ACMediaTimedFeature(conv_to<fcolvec>::from(time_v), conv_to<fmat>::from(mfcc_m), std::string("MFCC"));
+			mfcc_tf = new ACMediaTimedFeature(conv_to<fcolvec>::from(time_v), conv_to<fmat>::from(mfcc_m), std::string("MFCC"));
 			desc.push_back(mfcc_tf);
 			break;
+		}
 		case DMFCC:
 			desc.push_back(mfcc_tf->delta());
 			break;

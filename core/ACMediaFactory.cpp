@@ -102,17 +102,23 @@ ACMedia* ACMediaFactory::create(ACMediaType media_type){
 ACMedia* ACMediaFactory::create(ACMedia* media){
 	switch (media->getMediaType()) {
 		case MEDIA_TYPE_AUDIO:
+		{
 			ACAudio* audio = (ACAudio*) media;
 			return new ACAudio(*audio);
 			break;
+		}
 		case MEDIA_TYPE_IMAGE:
+		{
 			ACImage* image = (ACImage*) media;
 			return new ACImage(*image);
 			break;
+		}
 		case MEDIA_TYPE_VIDEO:
+		{
 			ACVideo* video = (ACVideo*) media;
 			return new ACVideo(*video);
 			break;
+		}
 		default:
 			return NULL;
 			break;

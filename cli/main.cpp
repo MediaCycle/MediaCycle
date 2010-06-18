@@ -39,7 +39,6 @@
 #include <iostream>
 #include <signal.h>
 #include "ACAudio.h"
-#include "AGSynthesis.h"
 #include "sndfile.h"
 
 using namespace std;
@@ -85,7 +84,6 @@ int main(int argc, char** argv) {
 		}
 		float* syn_v;
 		long length;
-		AGSynthesis(mediacycle->getLibrary(), 0, grainIds, &syn_v, length);
 		
 		SF_INFO sfinfo;
 		SNDFILE* testFile;
