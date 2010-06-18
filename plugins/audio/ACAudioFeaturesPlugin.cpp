@@ -57,15 +57,41 @@ std::vector<ACMediaFeatures*> ACAudioFeaturesPlugin::calculate(ACMediaData* audi
 	int mfccNbChannels = 16;
 	int mfccNb = 13;
 	int windowSize = 512; 	
-	bool extendSoundLimits = false;
-	std::vector<ACMediaTimedFeatures*> descmf;
+	bool extendSoundLimits = true;
+	std::vector<ACMediaTimedFeature*> descmf;
 	std::vector<ACMediaFeatures*> desc;
 	//	int sr = ((ACAudio*)theMedia)->getSampleRate();
 	ACAudio* theAudio = (ACAudio*) theMedia;
-	descmf = computeFeatures(audio_data->getAudioData(), theAudio->getSampleRate(), theAudio->getChannels(), theAudio->getNFrames());
+	
+	float* data = new float[theAudio->getNFrames() * theAudio->getChannels()];
+	long index = 0;
+	
+	for (long i = theAudio->getSampleStart(); i< theAudio->getSampleEnd(); i++){
+		for (long j = 0; j < theAudio->getChannels(); j++){
+			data[index] = audio_data->getAudioData()[i*theAudio->getChannels()+j];
+			index++;
+		}
+	}
 
+// 	ofstream output("signal1.txt");
+// 	for(int i=0; i < (long) theAudio->getNFrames() * theAudio->getChannels(); i++){
+// 		output<<data[i]<<endl;
+// 	}
+
+	descmf = computeFeatures(data, theAudio->getSampleRate(), theAudio->getChannels(), theAudio->getNFrames(),16, 13, 1024, extendSoundLimits);
+	
 	for (int i=0; i<descmf.size(); i++)
 		desc.push_back(descmf[i]->mean());
+	
+	int nrgIdx = 0;
+	for (int i=0; i<descmf.size(); i++){
+		if (descmf[i]->getName() == "Energy")
+			nrgIdx = i;
+	}
+	std::cout << "nrgIdx = " << nrgIdx << std::endl;
+	
+	desc.push_back(descmf[nrgIdx]->interpN(10)->toMediaFeatures());
+	
 	return desc;
 }
 

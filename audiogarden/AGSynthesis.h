@@ -1,5 +1,5 @@
 /**
- * @brief melfilters.cpp
+ * @brief AGSynthesis.h
  * @author Damien Tardieu
  * @date 18/06/2010
  * @copyright (c) 2010 – UMONS - Numediart
@@ -29,44 +29,20 @@
  * <mailto:avre@umons.ac.be>
 */
 
+#include <stdio.h>
+#include <sndfile.h>
+#include <string.h>
+#include "ACAudioFeatures.h"
+#include <samplerate.h>
+#include <iostream>
 #include "Armadillo-utils.h"
-#include "melfilters.h"
+#include <vector>
+#include <map>
+#include "Mediacycle.h"
 
-mat melfilters(int nChannels, int fftSize, int sr_hz){
+using namespace arma;
 
+mat extractDescMatrix(ACMediaLibrary* lib, string featureName, vector<long> mediaIds);
+mat extractDescMatrix(ACMediaLibrary* lib, vector<string> featureList, vector<long> mediaIds);
+void AGSynthesis(ACMediaLibrary* lib, long targetId, vector<long> garinIds, float** , long&);
 
-	float fmin = 0;
-	float fmax = (float)sr_hz/2;
-	float f2b = (float)fftSize/(float)sr_hz;
-	float bmax = fftSize/2;
-	
-	float mmin = freq2mel(fmin);
-	float mmax = freq2mel(fmax);
-
-	float chanDist = (mmax - mmin)/(nChannels+1);
-	rowvec centerM_v = linspace<rowvec>(0, nChannels+1, nChannels+2);
-	centerM_v = centerM_v*chanDist;
-	centerM_v(nChannels+1) = mmax;
-
-	//	centerM_v.save("centerM.txt", arma_ascii);
-
-	rowvec centerB_v = mel2freq(centerM_v)*f2b;
-	
-	//	centerB_v.save("centerB.txt", arma_ascii);
-	
-	mat melf_m = zeros<mat>(bmax, nChannels);
-
-	for (int iChan=1; iChan < nChannels+1; iChan++){
-		for (int iBin=0; iBin < bmax; iBin++){
-			if(iBin > centerB_v(iChan-1) & iBin < centerB_v(iChan)){
-				melf_m(iBin, iChan-1) = (iBin - centerB_v(iChan-1))/(centerB_v(iChan)-centerB_v(iChan-1));
-			}
-			else if(iBin >= centerB_v(iChan) & iBin <= centerB_v(iChan+1)) {
-				melf_m(iBin, iChan-1) = (iBin - centerB_v(iChan+1))/(centerB_v(iChan)-centerB_v(iChan+1));			
-			}
-		}
-		melf_m.col(iChan-1) = f2b*melf_m.col(iChan-1)/(2*(centerB_v(iChan+1)-centerB_v(iChan-1)));
-	}
-	
-	return melf_m;
-}

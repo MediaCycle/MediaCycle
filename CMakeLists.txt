@@ -4,7 +4,7 @@ IF ( WIN32 )
 	SUBDIRS(core gui)
 	INCLUDE_DIRECTORIES(. core)
 ELSE ( WIN32 )
-	SUBDIRS(core cli gui fftooura gnuplot_i lib vamp-plugin-interface)
+	SUBDIRS(core cli gui fftooura gnuplot_i lib vamp-plugin-interface audiogarden)
 	INCLUDE_DIRECTORIES(. core gnuplot_i)
 ENDIF ( WIN32 )
 

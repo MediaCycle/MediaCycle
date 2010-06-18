@@ -103,6 +103,9 @@ int ACMediaLibrary::importDirectory(std::string _path, int _recursive, int id, A
 	string filename;
 	string extension;
 	std::vector<string> filenames;
+	std::vector<ACMedia*> mediaSegments;
+	bool doSegment = true;
+
 	scanDirectory(_path, _recursive, filenames);
 	
 	for (int i=0; i<filenames.size(); i++){
@@ -114,12 +117,25 @@ int ACMediaLibrary::importDirectory(std::string _path, int _recursive, int id, A
 			cout << "extension unknown, skipping " << filename << " ... " << endl;
 		}
 		else {
+			// This has to be done before segmentation to have proper id
 			if (media->import(filenames[index], id, acpl)){
 				this->addMedia(media);
 				id++;
 			}
+			if (doSegment){
+				// segments are created without id 
+				media->segment(acpl);
+				mediaSegments = media->getAllSegments();
+				for (int i = 0; i < mediaSegments.size(); i++){
+					if (mediaSegments[i]->import(filenames[index], id, acpl)){
+						this->addMedia(mediaSegments[i]);
+						id++;
+					}
+				}
+			}
 		}
 	}
+	std::cout << "Library size : " << this->getSize() << std::endl;
 	return 1;
 }
 
@@ -152,87 +168,6 @@ int ACMediaLibrary::scanDirectory(std::string _path, int _recursive, std::vector
 	}
 	return 1;
 }
-
-// int ACMediaLibrary::importDirectory2(std::string _path, int _recursive, int id, ACPluginManager *acpl) {
-// 	// XS : return value convention: -1 = error ; otherwise returns number of files added
-// 	// for parallelisation with openMP
-// 	//omp_set_num_threads(2);
-
-// 	unsigned long file_count = 0;
-// 	unsigned long dir_count = 0;
-// 	unsigned long other_count = 0;
-	
-// 	string filename;
-// 	string extension;
-	
-// 	fs::path full_path( fs::initial_path<fs::path>() );
-	
-// 	full_path = fs::system_complete( fs::path( _path, fs::native ) );
-	
-// 	if ( !fs::exists( full_path ) )
-// 	{
-// 		printf("File or directory not found: %s\n", full_path.native_file_string().c_str());
-// 		return -1;
-// 	}
-	
-// 	if ( fs::is_directory( full_path ) ) 
-// 	{ // importing directory
-// 		fs::directory_iterator end_iter;
-// //XS note #pragma omp parallel for does not work here
-// // because it needs to know how many elements are in the loop beforehand.
-		
-// 		for ( fs::directory_iterator dir_itr( full_path ); dir_itr != end_iter; ++dir_itr )
-// 		{
-// 			if ( _recursive && fs::is_directory( dir_itr->path() ) )
-// 			{
-// 				++dir_count;
-// 				file_count += importDirectory((dir_itr->path()).native_file_string(), _recursive,id, acpl);
-// 				id=file_count;
-// 			}
-// 			else if ( fs::is_regular( dir_itr->path() ) )
-// 			{
-// 				file_count += importDirectory((dir_itr->path()).native_file_string(), 0, id, acpl);
-// 				id+=file_count;
-// 			}
-// 			else 
-// 			{
-// 				++other_count;
-// 			}
-// 		}
-// 	}
-// 	else
-// 	{ // importing single file
-// 		filename = _path;
-// 		extension = fs::extension(_path);
-// 		cout << "extension:" << extension << endl; 
-		
-// 		ACMedia* media = ACMediaFactory::create(extension);
-		
-// 		if (media == NULL) {
-// 			cout << "extension unknown, skipping " << filename << " ... " << endl;
-// 			++other_count;
-// 		}
-// 		else {
-// 			if (media->import(filename, id, acpl)){
-// 				std::cout << "(import) Media Id = " << media->getId() << "   " << id << std::endl;
-// 				this->addMedia(media);
-// 				id++;
-// 			}
-// 			++file_count; // TODO: here or within previous "if" ?
-			
-// 			// XS test: parallel version with threads
-// //			struct pthread_input pdata;
-// //			pdata.media = media;
-// //			pdata.filename = filename;
-// //			pdata.id = id;
-// //			pdata.acpl = acpl;
-// // XS removed if
-// //			pthread_t pid;
-// //			pthread_create(&pid, NULL,p_importSingleFile,(void *) &pdata);			
-// 		}
-// 	}
-// 	return file_count;
-// }
 
 
 // C++ version
@@ -425,7 +360,7 @@ int ACMediaLibrary::openLibrary(std::string _path, bool aInitLib){
 	return file_count;
 }
 
-void ACMediaLibrary::saveAsLibrary(string _path) {
+/* void ACMediaLibrary::saveAsLibrary(string _path) {
 	
 	int n_loops = this->getSize();
 	
@@ -441,7 +376,7 @@ void ACMediaLibrary::saveAsLibrary(string _path) {
 	fclose(library_file);
 	normalizeFeatures();
 }
-
+ */
 void ACMediaLibrary::cleanLibrary() {
 	cleanStats();
 	deleteAllMedia();

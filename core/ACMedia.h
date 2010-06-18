@@ -51,29 +51,32 @@ protected:
 	int parentid; //CF so that segments can be defined as ACMedia having other ACMedia as parents
 	ACMediaType media_type;
 	int height, width;
-	double duration;
 	std::vector<ACMediaFeatures*> features_vectors;
 	std::string filename;
 	std::string filename_thumbnail;
 	char  **text_tags;
 	char  **hyper_links;
 	std::vector<ACMedia*> segments;//CF
+	
+	float start, end; // seconds
+	
 public:
 	ACMedia();
 	ACMedia(const ACMedia&);
 	virtual ~ACMedia();
-	
+
+	ACMediaType getMediaType() {return media_type;};
 	void setId(int _id) {mid = _id;} // SD TODO - should check for duplicate id?
 	int getId() {return mid;}
 	void setParentId(int _parentid) {parentid = _parentid;} //CF so that segments can be defined as ACMedia having other ACMedia as parents
 	int getParentId() {return parentid;}
 	
-	void setDuration(double iduration){this->duration = iduration;}
-	double getDuration(){return this->duration;}
+	double getDuration(){return this->getEnd()-this->getStart();}
 	
 	void addSegment(ACMedia* _segment){segments.push_back(_segment);}
 	//void removeSegment(ACMedia* _segment){segments.erase(_segment);}//CF wow, tricky
 	std::vector<ACMedia*> &getAllSegments() { return segments; }
+	ACMedia* getSegment(int i) { return segments[i]; }
 
 	std::vector<ACMediaFeatures*> &getAllFeaturesVectors() { return features_vectors; }
 	ACMediaFeatures* getFeaturesVector(int i);
@@ -105,6 +108,11 @@ public:
 	void setHeight(int h) {height=h;}
 	ACMediaType	getType() {return this->media_type;}	
 	
+	void setStart(float st){this->start = st;};
+	void setEnd(float en){this->end = en;};
+	float getStart(){return this->start;};
+	float getEnd(){return this->end;};
+	
 	// I/O -- these are media-specific (at least for the moment...) 
 	virtual void save(FILE *){}
 	virtual int load(FILE*){}
@@ -118,6 +126,10 @@ public:
 	virtual int import(std::string _path, int id=-1, ACPluginManager *acpl=NULL);
 	// XS 23/09/09 : I implemented import in ACMedia.cpp, since it is the same for all media
 	// XS 23/09/09 : import returns 1 if it worked, 0 if it failed
+
+	int ACMedia::segment(ACPluginManager *acpl );
+
+	//	int segment();
 };
 
 #endif // ACMEDIA_H

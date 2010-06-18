@@ -54,6 +54,7 @@ using std::string;
 enum ACPluginType {
 	PLUGIN_TYPE_NONE,
 	PLUGIN_TYPE_FEATURES,
+	PLUGIN_TYPE_SEGMENTATION,
 	PLUGIN_TYPE_SERVER,
 	PLUGIN_TYPE_CLIENT,	
 	PLUGIN_TYPE_CLUSTERS_METHOD,//CF updateClusters
@@ -86,6 +87,9 @@ public:
 	virtual void updateClusters(ACMediaBrowser*){};
 	virtual void updateNextPositions(ACMediaBrowser*){};
 	virtual void updateNeighborhoods(ACMediaBrowser*){};
+	
+	virtual std::vector<ACMedia*> segment(ACMediaData* audio_data, ACMedia*){};
+
 	virtual int start(){return 0;}
 	virtual int stop(){return 0;}
 	//virtual void prepareLayout(ACOsgBrowserRenderer*, int start){};

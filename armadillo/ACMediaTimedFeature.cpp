@@ -40,33 +40,33 @@
 using namespace arma;
 using namespace std;
 
-ACMediaTimedFeatures::ACMediaTimedFeatures(){
+ACMediaTimedFeature::ACMediaTimedFeature(){
 }
 
-ACMediaTimedFeatures::ACMediaTimedFeatures(long iSize, int iDim, string name){
+ACMediaTimedFeature::ACMediaTimedFeature(long iSize, int iDim, string name){
 	this->time_v.set_size(iSize);
 	this->value_m.set_size(iSize, iDim);
 	this->name = name;
 }
 
-ACMediaTimedFeatures::~ACMediaTimedFeatures(){
+ACMediaTimedFeature::~ACMediaTimedFeature(){
 }
 
-ACMediaTimedFeatures::ACMediaTimedFeatures(fcolvec time_v, fmat value_m){
+ACMediaTimedFeature::ACMediaTimedFeature(fcolvec time_v, fmat value_m){
 	this->time_v = time_v;
 	this->value_m = value_m;
 }
 
-ACMediaTimedFeatures::ACMediaTimedFeatures(fcolvec time_v, fmat value_m, string name, vector<float> *seg_v){
+ACMediaTimedFeature::ACMediaTimedFeature(fcolvec time_v, fmat value_m, string name, vector<float> *seg_v){
 	this->time_v = time_v;
 	this->value_m = value_m;
 	this->name = name;
 	if (seg_v !=0) this->seg_v = *seg_v;	
 }
 
-ACMediaTimedFeatures::ACMediaTimedFeatures( const vector<float> &time, const vector< vector<float> > &value, string name, const vector<float> *seg_v){
+ACMediaTimedFeature::ACMediaTimedFeature( const vector<float> &time, const vector< vector<float> > &value, string name, const vector<float> *seg_v){
 	if (time.size() != value.size()) {
-		cerr << "<ACMediaTimedFeatures::ACMediaTimedFeatures> Time and value vectors do not have the same size" << endl;
+		cerr << "<ACMediaTimedFeature::ACMediaTimedFeature> Time and value vectors do not have the same size" << endl;
 		exit(-1);
 	}
 	this->time_v = fcolvec(time.size());
@@ -81,10 +81,10 @@ ACMediaTimedFeatures::ACMediaTimedFeatures( const vector<float> &time, const vec
 	if (seg_v !=0) this->seg_v = *seg_v;	
 }
 
-ACMediaTimedFeatures::ACMediaTimedFeatures(const vector<float> &time, const vector<float> &value, string name, const vector<float> *seg_v){
+ACMediaTimedFeature::ACMediaTimedFeature(const vector<float> &time, const vector<float> &value, string name, const vector<float> *seg_v){
 	unsigned int ts=time.size();
 	if (ts != value.size()) {
-		cerr << "<ACMediaTimedFeatures::ACMediaTimedFeatures> Time and value vectors do not have the same size" << endl;
+		cerr << "<ACMediaTimedFeature::ACMediaTimedFeature> Time and value vectors do not have the same size" << endl;
 		exit(-1);
 	}
 	
@@ -99,7 +99,7 @@ ACMediaTimedFeatures::ACMediaTimedFeatures(const vector<float> &time, const vect
 }
 
 // We pass by adresse now
-// ACMediaTimedFeatures::ACMediaTimedFeatures(vector<float> time, vector< vector<float> > value, string name, vector<float> seg_v){
+// ACMediaTimedFeature::ACMediaTimedFeature(vector<float> time, vector< vector<float> > value, string name, vector<float> seg_v){
 //   this->time_v = fcolvec(time.size());
 //   this->value_m = fmat((int) value[0].size(), (int) value.size());
 //   for (int Itime=0; Itime<time.size(); Itime++){
@@ -117,7 +117,7 @@ ACMediaTimedFeatures::ACMediaTimedFeatures(const vector<float> &time, const vect
 // XS 06/11/09 : commented this one because confusion in ordering of value 
 // i.e.: columns and rows are inversed compared to previous constructor !
 
-//ACMediaTimedFeatures::ACMediaTimedFeatures( float *time, int length, float **value, int dim, string name, vector< float > seg_v ){
+//ACMediaTimedFeature::ACMediaTimedFeature( float *time, int length, float **value, int dim, string name, vector< float > seg_v ){
 //	this->time_v = fcolvec( length );
 //	// value is assumed to be dim (first dim) by length (2nd dim) 
 //	this->value_m = fmat( (int) length, (int) dim );
@@ -133,7 +133,7 @@ ACMediaTimedFeatures::ACMediaTimedFeatures(const vector<float> &time, const vect
 //}
 
 // We pass by adresse now
-// ACMediaTimedFeatures::ACMediaTimedFeatures(vector<float> time, vector<float> value, string name, vector<float> seg_v){
+// ACMediaTimedFeature::ACMediaTimedFeature(vector<float> time, vector<float> value, string name, vector<float> seg_v){
 //   if (time.size() != value.size()) {
 //     cerr << "Time and value vectors does not have the same size" << endl;
 //     exit(-1);
@@ -149,7 +149,7 @@ ACMediaTimedFeatures::ACMediaTimedFeatures(const vector<float> &time, const vect
 //   this->seg_v = seg_v;
 // }
 
-void ACMediaTimedFeatures::importFromFile(string filename){ //see also readFile
+void ACMediaTimedFeature::importFromFile(string filename){ //see also readFile
 	fmat tmp_m;
 	tmp_m.load(filename);
 	//  tmp_m.print();
@@ -157,7 +157,7 @@ void ACMediaTimedFeatures::importFromFile(string filename){ //see also readFile
 	this->time_v = tmp_m.col(0);
 }
 
-void ACMediaTimedFeatures::importSegmentsFromFile(string filename){
+void ACMediaTimedFeature::importSegmentsFromFile(string filename){
 	ifstream inf(filename.c_str(),ifstream::in);
 	int i=0;
 	float tmp;
@@ -179,23 +179,23 @@ void ACMediaTimedFeatures::importSegmentsFromFile(string filename){
 }
 
 
-fcolvec ACMediaTimedFeatures::getTime() {
+fcolvec ACMediaTimedFeature::getTime() {
 	return time_v;
 }
 
-float ACMediaTimedFeatures::getTime(int index) {
+float ACMediaTimedFeature::getTime(int index) {
 	return time_v(index);
 }
 
-vector<float> ACMediaTimedFeatures::getSegments(){
+vector<float> ACMediaTimedFeature::getSegments(){
 	return seg_v;
 }
 
-float ACMediaTimedFeatures::getSegments(int index){
+float ACMediaTimedFeature::getSegments(int index){
 	return seg_v[index];
 }
 
-int ACMediaTimedFeatures::getNearestTimePosition(float time, int mode){
+int ACMediaTimedFeature::getNearestTimePosition(float time, int mode){
 	// mode = 0, nearest left
 	// mode = 1, nearest right
 	// mode = 2, nearest
@@ -261,11 +261,11 @@ int ACMediaTimedFeatures::getNearestTimePosition(float time, int mode){
     return nearPos;
 }
 
-void ACMediaTimedFeatures::setTime(fcolvec time_v) {
+void ACMediaTimedFeature::setTime(fcolvec time_v) {
 	this->time_v = time_v;
 }
 
-double* ACMediaTimedFeatures::getTimeAsDouble() {
+double* ACMediaTimedFeature::getTimeAsDouble() {
 	double* timeDouble;
 	timeDouble = new double[this->getLength()];  
 	for (int i=0; i < this->getLength(); i++) {
@@ -274,7 +274,7 @@ double* ACMediaTimedFeatures::getTimeAsDouble() {
 	return timeDouble;
 }
 
-vector<float> ACMediaTimedFeatures::getTimeAsVector() {
+vector<float> ACMediaTimedFeature::getTimeAsVector() {
 	vector<float> value;
 	for (int i=0; i<this->getLength(); i++)
 		value.push_back(this->getTime()(i));
@@ -282,22 +282,22 @@ vector<float> ACMediaTimedFeatures::getTimeAsVector() {
 }
 
 
-fmat ACMediaTimedFeatures::getValue() {
+fmat ACMediaTimedFeature::getValue() {
 	return value_m;
 }
 
-float ACMediaTimedFeatures::getValue(float index, float dim){
+float ACMediaTimedFeature::getValue(float index, float dim){
 	return this->value_m(index, dim);
 }
 
-vector< vector<float> > ACMediaTimedFeatures::getValueAsVector(){
+vector< vector<float> > ACMediaTimedFeature::getValueAsVector(){
 }
 
-void ACMediaTimedFeatures::setValue(fmat value_m) {
+void ACMediaTimedFeature::setValue(fmat value_m) {
 	this->value_m = value_m;
 }
 
-void ACMediaTimedFeatures::setTimeAndValueForIndex(long iIndex, double iTime, frowvec iVal_v) {
+void ACMediaTimedFeature::setTimeAndValueForIndex(long iIndex, double iTime, frowvec iVal_v) {
 	if (iVal_v.n_cols != this->getDim()){
 		std::cerr << "setValueForTime : Wrong dimension" << std::endl;
 		exit(1);
@@ -306,7 +306,7 @@ void ACMediaTimedFeatures::setTimeAndValueForIndex(long iIndex, double iTime, fr
 	this->value_m.row(iIndex) = iVal_v;
 }
 
-void ACMediaTimedFeatures::setTimeAndValueForIndex(long iIndex, double iTime, vector<float> iVal) {
+void ACMediaTimedFeature::setTimeAndValueForIndex(long iIndex, double iTime, vector<float> iVal) {
 	if (iVal.size() != this->getDim()){
 		std::cerr << "setValueForTime : Wrong dimension" << std::endl;
 		exit(1);
@@ -316,33 +316,44 @@ void ACMediaTimedFeatures::setTimeAndValueForIndex(long iIndex, double iTime, ve
 		this->value_m(iIndex, i) = iVal[i];
 }
 
-size_t ACMediaTimedFeatures::getLength() {
+size_t ACMediaTimedFeature::getLength() {
 	return time_v.n_rows;
 }
 
-size_t ACMediaTimedFeatures::getDim() {
+size_t ACMediaTimedFeature::getDim() {
 	return value_m.n_cols;
 }
 
 
-fmat ACMediaTimedFeatures::getValueAtTime(fcolvec time_v) {
+fmat ACMediaTimedFeature::getValueAtTime(fcolvec iTime_v) {
 	// return interpolated values at time_v
 	
-	int nearPos;
-	fmat outValue_m = fmat(time_v.n_rows,this->getDim());
-	for (int i=0; i<time_v.n_rows;i++){
-		nearPos = this->getNearestTimePosition(this->time_v(i),0);
-		//cout<<"nearPos : " << nearPos<<endl;
-		for (int j=0; j<this->getDim(); j++){
-			outValue_m(i,j) = this->value_m(nearPos,j);
-			//cout<<"j : " << j<<endl;
+	int nearPosL, nearPosR;
+	float v1, v2, t1, t2, a, b;
+	fmat outValue_m = fmat(iTime_v.n_rows,this->getDim());
+	for (int i=0; i < iTime_v.n_rows; i++){
+		nearPosL = this->getNearestTimePosition(iTime_v(i),0);
+		nearPosR = this->getNearestTimePosition(iTime_v(i),1);
+		if (nearPosR == nearPosL){
+			outValue_m.row(i) = this->value_m.row(nearPosL);
+		}
+		else{
+			t1  = this->time_v(nearPosL);
+			t2  = this->time_v(nearPosR);
+			for (int j=0; j<this->getDim(); j++){
+				v1  = this->value_m(nearPosL,j);
+				v2  = this->value_m(nearPosR,j);
+				a = (v1-v2)/(t1-t2);
+				b = v1 - a*t1;
+				outValue_m(i,j) = a * iTime_v(i) + b;
+			}
 		}
 	}
 	
 	return outValue_m;
 }
 
-ACMediaFeatures* ACMediaTimedFeatures::weightedMean(ACMediaTimedFeatures* weight){
+ACMediaFeatures* ACMediaTimedFeature::weightedMean(ACMediaTimedFeature* weight){
 	ACMediaFeatures* weightedMean_mf = new ACMediaFeatures();
 	fmat weightVal = weight->getValueAtTime(this->getTime());
 	float sumWeight = as_scalar(sum(weightVal));
@@ -361,7 +372,7 @@ ACMediaFeatures* ACMediaTimedFeatures::weightedMean(ACMediaTimedFeatures* weight
 	return weightedMean_mf;
 }
 
-ACMediaFeatures* ACMediaTimedFeatures::mean(){
+ACMediaFeatures* ACMediaTimedFeature::mean(){
 	ACMediaFeatures* mean_mf = new ACMediaFeatures();  
 	fmat mean_m = arma::mean(this->getValue());
 	string name = "Mean of ";
@@ -373,7 +384,7 @@ ACMediaFeatures* ACMediaTimedFeatures::mean(){
 	return mean_mf;
 }
 
-ACMediaFeatures* ACMediaTimedFeatures::max(){
+ACMediaFeatures* ACMediaTimedFeature::max(){
 	ACMediaFeatures* max_mf = new ACMediaFeatures();  
 	fmat max_m = arma::max(this->getValue());
 	string name = "Max of ";
@@ -385,7 +396,7 @@ ACMediaFeatures* ACMediaTimedFeatures::max(){
 	return max_mf;
 }
 
-// vector< float > ACMediaTimedFeatures:: meanAsVector(){
+// vector< float > ACMediaTimedFeature:: meanAsVector(){
 //   fmat tmpMean = this->mean()->getValue();
 //   vector< float > meanVec;
 //   for (int i=0; i<tmpMean.n_cols; i++)
@@ -393,7 +404,7 @@ ACMediaFeatures* ACMediaTimedFeatures::max(){
 //   return meanVec;
 // }
 
-ACMediaFeatures* ACMediaTimedFeatures::weightedStdDeviation(ACMediaTimedFeatures* weight){
+ACMediaFeatures* ACMediaTimedFeature::weightedStdDeviation(ACMediaTimedFeature* weight){
 	fmat weightVal = weight->getValueAtTime(this->getTime());
 	float sumWeight = conv_to<float>::from(sum(weightVal));
 	weightVal = weightVal / sumWeight;
@@ -418,7 +429,7 @@ ACMediaFeatures* ACMediaTimedFeatures::weightedStdDeviation(ACMediaTimedFeatures
 	return wstd_mf;
 }
 
-ACMediaFeatures* ACMediaTimedFeatures::std(){  
+ACMediaFeatures* ACMediaTimedFeature::std(){  
 	fmat std_m = stddev(this->getValue());
 	string name = "Standard deviation of ";
 	ACMediaFeatures* std_mf = new ACMediaFeatures();
@@ -429,7 +440,21 @@ ACMediaFeatures* ACMediaTimedFeatures::std(){
 	return std_mf;
 }
 
-// vector< float > ACMediaTimedFeatures:: stdAsVector(){
+
+ACMediaFeatures* ACMediaTimedFeature::toMediaFeatures(){
+	if (this->getDim() > 1){
+		std::cerr << "Error : toMediaFeatures can only be applied to unidimensionnal features" << std::endl;
+		exit(1);
+	}
+	else{
+		ACMediaFeatures* desc_mf = new ACMediaFeatures();
+		desc_mf->setName(this->getName());
+		for (int i=0; i < this->getLength(); i++)
+			desc_mf->addFeatureElement(value_m(i,0));  
+		return desc_mf;
+	}	
+}
+// vector< float > ACMediaTimedFeature:: stdAsVector(){
 //   fmat tmpStd = this->std();
 //   vector< float > stdVec;
 //   for (int i=0; i<tmpStd.n_cols; i++)
@@ -437,15 +462,20 @@ ACMediaFeatures* ACMediaTimedFeatures::std(){
 //   return stdVec;
 // }
 
-ACMediaTimedFeatures* ACMediaTimedFeatures::delta(){
-	ACMediaTimedFeatures* deltaf;
-	deltaf = new ACMediaTimedFeatures(this->time_v.rows(1,this->getLength()-1), diff(this->value_m, 1, 0), "Delta "+this->getName());
+ACMediaTimedFeature* ACMediaTimedFeature::delta(){
+	ACMediaTimedFeature* deltaf;
+	if (this->getLength() > 2){
+		deltaf = new ACMediaTimedFeature(this->time_v.rows(1,this->getLength()-1), diff(this->value_m, 1, 0), "Delta "+this->getName());
+	}
+	else{
+		deltaf = new ACMediaTimedFeature(this->time_v, zeros<fmat>(this->getLength(), this->getDim()), "Delta "+this->getName());
+	}
 	return deltaf;
 }
 
-vector<ACMediaTimedFeatures*> ACMediaTimedFeatures::segment(){
-	vector<ACMediaTimedFeatures*> acmfSegmented;
-	ACMediaTimedFeatures* tmpAtmf;
+vector<ACMediaTimedFeature*> ACMediaTimedFeature::segment(){
+	vector<ACMediaTimedFeature*> acmfSegmented;
+	ACMediaTimedFeature* tmpAtmf;
 	int leftPos;
 	int rightPos;
 	for (int i=0; i<this->seg_v.size()-1; i++){
@@ -458,23 +488,23 @@ vector<ACMediaTimedFeatures*> ACMediaTimedFeatures::segment(){
 			exit(-1);
 		}
 		
-		tmpAtmf = new ACMediaTimedFeatures(this->time_v.rows(leftPos,rightPos), this->value_m.rows(leftPos, rightPos));
+		tmpAtmf = new ACMediaTimedFeature(this->time_v.rows(leftPos,rightPos), this->value_m.rows(leftPos, rightPos));
 		acmfSegmented.push_back(tmpAtmf);
 	}  
 	return acmfSegmented;
 }
 
-ACMediaTimedFeatures* ACMediaTimedFeatures::meanSegment(){
+ACMediaTimedFeature* ACMediaTimedFeature::meanSegment(){
 	fcolvec weightValue = ones<fcolvec>(this->getLength());
 	//weightValue = weightValue / sum(weightValue);   //unecessary at this time?
-	ACMediaTimedFeatures* weight = new ACMediaTimedFeatures(this->getTime(),weightValue);
+	ACMediaTimedFeature* weight = new ACMediaTimedFeature(this->getTime(),weightValue);
 	return weightedMeanSegment(weight);
 }
 
-ACMediaTimedFeatures* ACMediaTimedFeatures::weightedMeanSegment(ACMediaTimedFeatures* weight){
-	vector<ACMediaTimedFeatures*> acmtv;
+ACMediaTimedFeature* ACMediaTimedFeature::weightedMeanSegment(ACMediaTimedFeature* weight){
+	vector<ACMediaTimedFeature*> acmtv;
 	acmtv = this->segment();
-	ACMediaTimedFeatures *outAcmtv;
+	ACMediaTimedFeature *outAcmtv;
 	ACMediaFeatures* tmpMean_mf = new ACMediaFeatures;
 	//  cout << (int) this->getSegments().size() << endl;
 	fcolvec outAcmtvTime((int)this->getSegments().size()-1);
@@ -488,13 +518,24 @@ ACMediaTimedFeatures* ACMediaTimedFeatures::weightedMeanSegment(ACMediaTimedFeat
 		//outAcmtvTime(i) = (this->getSegments()[i]+this->getSegments()[i+1])/2;
 		outAcmtvTime(i) = (acmtv[i]->getTime(0) + acmtv[i]->getTime(acmtv[i]->getLength()-1) )/2;
 	}
-	outAcmtv = new ACMediaTimedFeatures(outAcmtvTime, outAcmtvValue);
+	outAcmtv = new ACMediaTimedFeature(outAcmtvTime, outAcmtvValue);
 	//outAcmtv->setName("raf");   //??
 	delete(tmpMean_mf);
 	return outAcmtv;
 }
 
-ACMediaFeatures* ACMediaTimedFeatures::temporalModel(double start_sec, double stop_sec){
+ACMediaTimedFeature* ACMediaTimedFeature::interpN(int n){
+	ACMediaTimedFeature* interp_amtf;
+	float minTime = min(time_v);
+	float maxTime = arma::max(time_v);
+	fcolvec newTime_v = linspace<fcolvec>(minTime, maxTime, n);
+	std::cout<<newTime_v << std::endl;
+	fmat newVal_m = this->getValueAtTime(newTime_v);
+	interp_amtf = new ACMediaTimedFeature(newTime_v, newVal_m, "Interpolated "+this->getName());
+	return interp_amtf;
+}
+
+ACMediaFeatures* ACMediaTimedFeature::temporalModel(double start_sec, double stop_sec){
 	
 	if (value_m.n_cols > 1){
 		std::cout << "error : simpleSegmentModel can only be applied to unidimensional features." << std::endl;
@@ -583,7 +624,7 @@ ACMediaFeatures* ACMediaTimedFeatures::temporalModel(double start_sec, double st
 	return temporalModel_mf;
 }
 
-int ACMediaTimedFeatures::readFile(std::string fileName){
+int ACMediaTimedFeature::readFile(std::string fileName){
     fmat data;
     data.load(fileName, raw_ascii);
     if(data.n_elem != 0)
@@ -599,17 +640,27 @@ int ACMediaTimedFeatures::readFile(std::string fileName){
     }
 }
 
-void ACMediaTimedFeatures::dump(){ // in cout
+void ACMediaTimedFeature::dump(){ // in cout
 	fmat data = this->getValue();
 	data.print();
 }
 
-void ACMediaTimedFeatures::dump(string fname){ // in file
+void ACMediaTimedFeature::dump(string fname){ // in file
 	fmat data = this->getValue();
 	data.save(fname, arma_ascii); // default format = arma_binary
 }
 
-fmat ACMediaTimedFeatures::similarity(int mode)
+int ACMediaTimedFeature::saveAsTxt(string fname){ // in file
+	fmat data = join_rows(this->getTime(), this->getValue());
+	ofstream library_file (fname.c_str());
+	library_file << this->getName() << endl;
+	library_file << this->getLength() << " " << this->getDim() << endl;
+	library_file << data << endl;
+	library_file.close();
+	return 1;
+}
+
+fmat ACMediaTimedFeature::similarity(int mode)
 {
     //mode : distance type    // 0 = euclidian distance
 	
@@ -684,7 +735,7 @@ fmat ACMediaTimedFeatures::similarity(int mode)
 	
 }
 
-float ACMediaTimedFeatures::dist(fmat vector1, fmat vector2, int mode)
+float ACMediaTimedFeature::dist(fmat vector1, fmat vector2, int mode)
 {
     fmat squareV;
     fmat distM = fmat(1,1);
@@ -704,7 +755,7 @@ float ACMediaTimedFeatures::dist(fmat vector1, fmat vector2, int mode)
 
 
 
-int ACMediaTimedFeatures::saveAsSdif(const char *name){
+int ACMediaTimedFeature::saveAsSdif(const char *name){
 	SdifGenInit ("");
 	SdifFileT *file = SdifFOpen(name, eWriteFile);  /* Open file for writing */
 	/* Here, you could add some text data to the name-value tables */
@@ -735,4 +786,5 @@ int ACMediaTimedFeatures::saveAsSdif(const char *name){
 	}
 	SdifFClose (file);
 	SdifGenKill ();
+	return 1;
 }

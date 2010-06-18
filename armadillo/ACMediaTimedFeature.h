@@ -55,7 +55,7 @@
 using namespace arma;
 using namespace std;
 
-class ACMediaTimedFeatures {
+class ACMediaTimedFeature {
 	// Class describing feature that are time stamped
 	
 protected:
@@ -65,19 +65,19 @@ protected:
 	string name;
 	
 public:
-	ACMediaTimedFeatures();
-	ACMediaTimedFeatures(long iSize, int iDim, string name);
-	ACMediaTimedFeatures(fcolvec time_v, fmat value_m);
-	ACMediaTimedFeatures(fcolvec time_v, fmat value_m, string name, vector<float> *seg_v=0);
+	ACMediaTimedFeature();
+	ACMediaTimedFeature(long iSize, int iDim, string name);
+	ACMediaTimedFeature(fcolvec time_v, fmat value_m);
+	ACMediaTimedFeature(fcolvec time_v, fmat value_m, string name, vector<float> *seg_v=0);
 	// XS use this
-	ACMediaTimedFeatures(const vector<float> &time, const vector< vector<float> > &value, string name, const vector<float> *seg_v=0);
-	ACMediaTimedFeatures(const vector<float> &time, const vector<float> &value, string name, const vector<float> *seg_v=0);
+	ACMediaTimedFeature(const vector<float> &time, const vector< vector<float> > &value, string name, const vector<float> *seg_v=0);
+	ACMediaTimedFeature(const vector<float> &time, const vector<float> &value, string name, const vector<float> *seg_v=0);
 	
 	// XS do not use this: why pass the whole vector by value ?
-	//	ACMediaTimedFeatures(vector<float> time, vector< vector<float> > value, string name, vector<float> seg_v);
-	//ACMediaTimedFeatures(vector<float> time, vector<float> value, string name, vector<float> seg_v);
-	ACMediaTimedFeatures( float *time, int length, float **value, int dim, string name, vector< float > *seg_v=0 );
-	~ACMediaTimedFeatures();
+	//	ACMediaTimedFeature(vector<float> time, vector< vector<float> > value, string name, vector<float> seg_v);
+	//ACMediaTimedFeature(vector<float> time, vector<float> value, string name, vector<float> seg_v);
+	ACMediaTimedFeature( float *time, int length, float **value, int dim, string name, vector< float > *seg_v=0 );
+	~ACMediaTimedFeature();
 	
 	void importFromFile(string filename);
 	void importSegmentsFromFile(string filename);
@@ -108,22 +108,26 @@ public:
 	vector< vector<float> > getValueAsVector();
 	vector<float> getTimeAsVector();
 	
-	ACMediaFeatures* weightedMean(ACMediaTimedFeatures* weight);
+	ACMediaFeatures* weightedMean(ACMediaTimedFeature* weight);
 	ACMediaFeatures* mean();
-	ACMediaFeatures* weightedStdDeviation(ACMediaTimedFeatures* weight);
+	ACMediaFeatures* weightedStdDeviation(ACMediaTimedFeature* weight);
 	ACMediaFeatures* std();
 	ACMediaFeatures* hist();
 	ACMediaFeatures* max();
+	
+	ACMediaFeatures* toMediaFeatures(); // only for one dim features
 
 	//	vector<float> meanAsVector();
 	//      vector<float> stdAsVector();
-	vector<ACMediaTimedFeatures*> segment();
-	ACMediaTimedFeatures* weightedMeanSegment(ACMediaTimedFeatures* weight);
-	ACMediaTimedFeatures* meanSegment();
+	vector<ACMediaTimedFeature*> segment();
+	ACMediaTimedFeature* weightedMeanSegment(ACMediaTimedFeature* weight);
+	ACMediaTimedFeature* meanSegment();
 	
-	ACMediaTimedFeatures* simpleSplineModeling();
+	ACMediaTimedFeature* simpleSplineModeling();
 	ACMediaFeatures* temporalModel(double, double);
-	ACMediaTimedFeatures* delta();
+	ACMediaTimedFeature* delta();
+
+	ACMediaTimedFeature* interpN(int n);
 	
 	int readFile(string);
 	void dump();
@@ -133,6 +137,7 @@ public:
 	fmat similarity(int mode = 0);
 	float dist(fmat rowvector1, fmat rowvector2, int mode = 0);
 	int saveAsSdif(const char* name);
+	int saveAsTxt(string fname);
 
 };
 

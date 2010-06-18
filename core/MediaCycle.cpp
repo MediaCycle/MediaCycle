@@ -173,7 +173,7 @@ int MediaCycle::processTcpMessage(char* buffer, int l, char **buffer_send, int *
 		bufpos1 = bufpos2+1;
 		path = sbuffer.substr(bufpos1);
 		fullpath = local_directory + path + ".acl";
-		getLibrary()->saveAsLibrary(fullpath);
+		getLibrary()->saveACLLibrary(fullpath);
 		ret = 1;
 		osstream << "savelibrary " << ret;
 		sbuffer_send = osstream.str();
@@ -254,6 +254,12 @@ int MediaCycle::importMCSLLibrary(string path) {
 	cout << "MediaCycle: importing MCSL library: " << path << endl;
 	int ok = 0;
 	ok = this->mediaLibrary->openMCSLLibrary(path);
+	// Finding segments for each media
+	for (int i=0; i<this->mediaLibrary->getSize(); i++){
+		if (this->mediaLibrary->getMedia(i)->getParentId() != -1){
+			this->mediaLibrary->getMedia(this->mediaLibrary->getMedia(i)->getParentId())->addSegment(this->mediaLibrary->getMedia(i));
+		}
+	}
 	if (ok>=1) this->mediaLibrary->normalizeFeatures();
 	//	XS TODO this->mediaBrowser->libraryContentChanged();	
 	return ok;
@@ -401,7 +407,7 @@ void MediaCycle::setForwardDown(int i) { forwarddown = i; }
 void MediaCycle::normalizeFeatures() { mediaLibrary->normalizeFeatures(); }
 void MediaCycle::openLibrary(string path) { mediaLibrary->openLibrary(path); }
 void MediaCycle::libraryContentChanged() { mediaBrowser->libraryContentChanged(); }
-void MediaCycle::saveAsLibrary(string path) {mediaLibrary->saveAsLibrary(path); }
+//void MediaCycle::saveAsLibrary(string path) {mediaLibrary->saveAsLibrary(path); }
 void MediaCycle::saveACLLibrary(string path) {mediaLibrary->saveACLLibrary(path); }
 void MediaCycle::saveMCSLLibrary(string path) {mediaLibrary->saveMCSLLibrary(path); }
 void MediaCycle::cleanLibrary() { mediaLibrary->cleanLibrary(); }

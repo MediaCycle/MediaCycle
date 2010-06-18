@@ -1,7 +1,7 @@
 /**
  * @brief ACAudioFeatures.cpp
- * @author Stéphane Dupont
- * @date 20/05/2010
+ * @author Damien Tardieu
+ * @date 18/06/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -37,8 +37,56 @@
 #include <iostream>
 #include "Armadillo-utils.h"
 #include <vector>
+#include <map>
 
-std::vector<ACMediaTimedFeatures*> computeFeatures(float* data, int samplerate, int nchannels, int length, int mfccNbChannels, int mfccNb, int windowSize, 	bool extendSoundLimits){
+enum desc_idx{
+	SPECTRAL_CENTROID,
+	SPECTRAL_SPREAD,
+	SPECTRAL_VARIATION,
+	SPECTRAL_FLATNESS,
+	SPECTRAL_FLUX,
+	SPECTRAL_DECREASE,
+	MFCC,
+	DMFCC,
+	DDMFCC,
+	ZERO_CROSSING_RATE,
+	ENERGY,
+	LOUDNESS,
+	LOG_ATTACK_TIME,
+	ENERGY_MODULATION_FREQUENCY,
+	ENERGY_MODULATION_AMPLITUDE,
+	MODULATION
+};
+
+ACMediaTimedFeature* computeFeature(float* data, string featureName, int samplerate, int nchannels, long length, int mfccNbChannels, int mfccNb, int windowSize, 	bool extendSoundLimits){
+	vector<string> descList;
+	vector<ACMediaTimedFeature*> desc_mf;
+	descList.push_back(featureName);
+	desc_mf =  computeFeatures(data, descList, samplerate, nchannels, length, mfccNbChannels, mfccNb, windowSize, extendSoundLimits);	
+	return desc_mf[0];
+}
+
+std::vector<ACMediaTimedFeature*> computeFeatures(float* data, int samplerate, int nchannels, long length, int mfccNbChannels, int mfccNb, int windowSize, 	bool extendSoundLimits){
+	vector<string> descList;
+	descList.push_back("Spectral Centroid");
+	descList.push_back("Spectral Spread");
+	descList.push_back("Spectral Variation");
+	descList.push_back("Spectral Flatness");
+	descList.push_back("Spectral Flux");
+	descList.push_back("Spectral Decrease");
+	descList.push_back("MFCC");
+	descList.push_back("DMFCC");
+	descList.push_back("DDMFCC");
+	descList.push_back("Zero Crossing Rate");
+	descList.push_back("Energy");
+	descList.push_back("Loudness");
+	descList.push_back("Log Attack Time");
+	descList.push_back("Energy Modulation Frequency");
+	descList.push_back("Energy Modulation Amplitude");
+	return computeFeatures(data, descList, samplerate, nchannels, length, mfccNbChannels, mfccNb, windowSize, extendSoundLimits);	
+}
+
+std::vector<ACMediaTimedFeature*> computeFeatures(float* data, vector<string> descList, int samplerate, int nchannels, long length, int mfccNbChannels, int mfccNb, int windowSize, 	bool extendSoundLimits){
 	
 	if ((mfccNbChannels & (mfccNbChannels-1)) != 0){
 		std::cerr << "Number of mfcc channels should be a power of two" << std::endl;
@@ -49,6 +97,24 @@ std::vector<ACMediaTimedFeatures*> computeFeatures(float* data, int samplerate, 
 		std::cerr << "Window size should be a power of two"  << std::endl;
 		exit(1);
 	}
+
+	map<string, desc_idx> descMap;
+	descMap["Spectral Centroid"] = SPECTRAL_CENTROID;
+	descMap["Spectral Spread"] = SPECTRAL_SPREAD;
+	descMap["Spectral Variation"] = SPECTRAL_VARIATION;
+	descMap["Spectral Flatness"] = SPECTRAL_FLATNESS;
+	descMap["Spectral Flux"] = SPECTRAL_FLUX;
+	descMap["Spectral Decrease"] = SPECTRAL_DECREASE;
+	descMap["MFCC"] = MFCC;
+	descMap["DMFCC"] = DMFCC;
+	descMap["DDMFCC"] = DDMFCC;
+	descMap["Zero Crossing Rate"] = ZERO_CROSSING_RATE;
+	descMap["Energy"] = ENERGY;
+	descMap["Loudness"] = LOUDNESS;
+	descMap["Log Attack Time"] = LOG_ATTACK_TIME;
+	descMap["Energy Modulation Frequency"] = ENERGY_MODULATION_FREQUENCY;
+	descMap["Energy Modulation Amplitude"] = ENERGY_MODULATION_AMPLITUDE;
+
 	
 	int fftSize=windowSize*2;
 	int hopSize = windowSize /8;
@@ -92,7 +158,7 @@ std::vector<ACMediaTimedFeatures*> computeFeatures(float* data, int samplerate, 
 	long nbFrames = (long)(signal_v.n_elem-windowSize)/hopSize+1;
 	int env_fs = (int) sr_hz/hopSize;
 	mat melfilter_m;
-	std::vector<ACMediaTimedFeatures*> desc;	
+	std::vector<ACMediaTimedFeature*> desc;	
 
 	colvec sc_v(nbFrames);
 	colvec ss_v(nbFrames);
@@ -105,6 +171,7 @@ std::vector<ACMediaTimedFeatures*> computeFeatures(float* data, int samplerate, 
 	colvec loud_v(nbFrames);
 	colvec time_v(nbFrames);
 	mat mfcc_m(nbFrames, mfccNb);
+	mat sfm_m(nbFrames, 4);
 	double lat;
 	rowvec ed_v;
 	melfilter_m = melfilters(mfccNbChannels, fftSize, sr_hz);
@@ -120,94 +187,151 @@ std::vector<ACMediaTimedFeatures*> computeFeatures(float* data, int samplerate, 
 	for (long i=0; i < signal_v.n_elem-windowSize; i = i+hopSize){
 		time_v(index) = ((double)i+((double)windowSize*(1.0-(double)extendSoundLimits))/2.0)/(double)sr_hz;
 		frame_v = signal_v.rows(i,i+windowSize-1);
+		//frame_v.save("frame.txt", arma_ascii);
 		frameW_v = signal_v.rows(i,i+windowSize-1)%window_v;
  		frameFFTabs_v = abs(fft(frameW_v, fftSize));
  		frameFFTabs2_v = frameFFTabs_v.rows(0,fftSize/2-1);
-		sc_v(index) = spectralCentroid(frameFFTabs2_v)*b2f;
-		if (std::isnan(sc_v(index)) | std::isinf(sc_v(index))){
-			std::cout<<"not finite : " << i << std::endl;
-			std::cout << frame_v << std::endl;
+		//frameFFTabs2_v.save("frameFFTabs2.txt", arma_ascii);
+
+		for (int iDesc = 0; iDesc < descList.size(); iDesc++){
+			switch (descMap[descList[iDesc]]) {
+			case SPECTRAL_CENTROID: 
+				sc_v(index) = spectralCentroid(frameFFTabs2_v)*b2f;
+				break;
+			case SPECTRAL_SPREAD:
+				ss_v(index) = spectralSpread(frameFFTabs2_v)*b2f;
+				break;
+			case SPECTRAL_FLATNESS:
+				sfm_m.row(index) = spectralFlatness(frameFFTabs2_v, fftSize, sr_hz);
+				break;
+			case SPECTRAL_VARIATION:
+				sv_v(index) = spectralVariation(frameFFTabs2_v, prevFrameFFTabs_v);
+				break;
+			case SPECTRAL_FLUX:
+				sf_v(index) = spectralFlux(frameFFTabs2_v, prevFrameFFTabs_v);
+				break;
+			case ZERO_CROSSING_RATE:
+				zcr_v(index) = zcr(frame_v, sr_hz, windowSize);
+				break;
+			case SPECTRAL_DECREASE:
+				sd_v(index) = spectralDecrease(frameFFTabs2_v);
+				break;
+			case ENERGY:
+				ener_v(index) = energyRMS(frame_v);
+				break;
+			case LOUDNESS:
+				loud_v(index) = loudness(frameFFTabs2_v, melfilter_m);
+				break;
+			case MFCC:
+				mfcc_m.row(index) = mfcc(frameFFTabs2_v, melfilter_m, mfccNb);
+				break;
+			}
 		}
-		ss_v(index) = spectralSpread(frameFFTabs2_v)*b2f;
-		sv_v(index) = spectralVariation(frameFFTabs2_v, prevFrameFFTabs_v);
-		float sv = spectralVariation(frameFFTabs2_v, prevFrameFFTabs_v);
-		if (!sv_v.is_finite()){
-			std::cout << "sv_v is not finite : " << sv_v << std::endl;
-	 		sv_v(index) = spectralVariation(frameFFTabs2_v, prevFrameFFTabs_v);
-			exit(1);
-		}
-		
-		sf_v(index) = spectralFlux(frameFFTabs2_v, prevFrameFFTabs_v);
-		zcr_v(index) = zcr(frame_v, sr_hz, windowSize);
-		sd_v(index) = spectralDecrease(frameFFTabs2_v);
- 		ener_v(index) = energyRMS(frame_v);
- 		loud_v(index) = loudness(frameFFTabs2_v, melfilter_m);
-		mfcc_m.row(index) = mfcc(frameFFTabs2_v, melfilter_m, mfccNb);
 		index++;
 		prevFrameFFTabs_v = frameFFTabs2_v;
 	}
 	
-	if (!sc_v.is_finite() ){
-		std::cout << "sc_v is not finite" << std::endl;
-		exit(1);
-	}
-	if (!ss_v.is_finite()){
-		std::cout << "ss_v is not finite" << std::endl;
-		exit(1);
-	}
-	if (!sv_v.is_finite()){
-		std::cout << "sv_v is not finite" << std::endl;
-		exit(1);
-	}
-	if (!zcr_v.is_finite()){
-		std::cout << "zcr_v is not finite" << std::endl;
-		exit(1);
-	}
-	if (!sd_v.is_finite() ){
-		std::cout << "sd_v is not finite" << std::endl;
-		exit(1);
-	}
-	if (!ener_v.is_finite()){
-		std::cout << "ener_v is not finite" << std::endl;
-		exit(1);
-	}
-	if (!loud_v.is_finite()){
-		std::cout << "loud_v is not finite" << std::endl;
-		exit(1);
-	}
-	if (!mfcc_m.is_finite() ){
-		std::cout << "mfcc_m is not finite" << std::endl;
-		exit(1);
-	}
 
 	
-	ACMediaTimedFeatures* mfcc_tf = new ACMediaTimedFeatures(conv_to<fcolvec>::from(time_v), conv_to<fmat>::from(mfcc_m), std::string("MFCC"));
-	desc.push_back(mfcc_tf);
-	desc.push_back(new ACMediaTimedFeatures(conv_to<fcolvec>::from(time_v), conv_to<fmat>::from(sc_v), std::string("Spectral Centroid")));
-	desc.push_back(new ACMediaTimedFeatures(conv_to<fcolvec>::from(time_v), conv_to<fmat>::from(ss_v), std::string("Spectral Spread")));
-	desc.push_back(new ACMediaTimedFeatures(conv_to<fcolvec>::from(time_v), conv_to<fmat>::from(sv_v), std::string("Spectral Variation")));
-	desc.push_back(new ACMediaTimedFeatures(conv_to<fcolvec>::from(time_v), conv_to<fmat>::from(sf_v), std::string("Spectral Flux")));
-	desc.push_back(new ACMediaTimedFeatures(conv_to<fcolvec>::from(time_v), conv_to<fmat>::from(zcr_v), std::string("Zero Crossing Rate")));
-	desc.push_back(new ACMediaTimedFeatures(conv_to<fcolvec>::from(time_v), conv_to<fmat>::from(sd_v), std::string("Spectral Decrease")));
-	desc.push_back(new ACMediaTimedFeatures(conv_to<fcolvec>::from(time_v), conv_to<fmat>::from(ener_v), std::string("Energy")));
-	desc.push_back(new ACMediaTimedFeatures(conv_to<fcolvec>::from(time_v), conv_to<fmat>::from(loud_v), std::string("Loudness")));
-	desc.push_back(mfcc_tf->delta());
-	mat modFr_m;
-	mat modAmp_m;
-	colvec modTime_v;
-	modulation(ener_v, env_fs, modFr_m, modAmp_m, modTime_v);
-	desc.push_back(new ACMediaTimedFeatures(conv_to<fcolvec>::from(modTime_v), conv_to<fmat>::from(modFr_m), std::string("Energy Modulation Frequency")));
-	desc.push_back(new ACMediaTimedFeatures(conv_to<fcolvec>::from(modTime_v), conv_to<fmat>::from(modAmp_m), std::string("Energy Modulation Amplitude")));
-	lat = logAttackTime(ener_v, env_fs);
-	ed_v = effectiveDuration(time_v, loud_v);
-	fcolvec zero_v = "0";
-	fcolvec lat_v(1);
-	lat_v(0) = lat;
-	desc.push_back(new ACMediaTimedFeatures(zero_v, lat_v, std::string("Log Attack Time")));
-	desc.push_back(new ACMediaTimedFeatures(zero_v, conv_to<fmat>::from(ed_v), std::string("Effective Duration")));
-
-	std::cout << "lat = " << lat << std::endl;
-	std::cout << "effective duration = " << ed_v(0) << std::endl;
+	for (int iDesc = 0; iDesc < descList.size(); iDesc++){
+		switch (descMap[descList[iDesc]]) {
+		case SPECTRAL_CENTROID: 
+			if (!sc_v.is_finite() ){
+				std::cout << "sc_v is not finite" << std::endl;
+				exit(1);
+			}
+			desc.push_back(new ACMediaTimedFeature(conv_to<fcolvec>::from(time_v), conv_to<fmat>::from(sc_v), std::string("Spectral Centroid")));
+			break;
+		case SPECTRAL_SPREAD:
+			if (!ss_v.is_finite()){
+				std::cout << "ss_v is not finite" << std::endl;
+				exit(1);
+			}
+			desc.push_back(new ACMediaTimedFeature(conv_to<fcolvec>::from(time_v), conv_to<fmat>::from(ss_v), std::string("Spectral Spread")));
+			break;
+		case SPECTRAL_FLATNESS:
+			if (!sfm_m.is_finite()){
+				std::cout << "sfm_m is not finite" << std::endl;
+				exit(1);
+			}
+			desc.push_back(new ACMediaTimedFeature(conv_to<fcolvec>::from(time_v), conv_to<fmat>::from(sfm_m), std::string("Spectral Flatness")));
+			break;
+		case SPECTRAL_VARIATION:
+			if (!sv_v.is_finite()){
+				std::cout << "sv_v is not finite" << std::endl;
+				exit(1);
+			}
+			desc.push_back(new ACMediaTimedFeature(conv_to<fcolvec>::from(time_v), conv_to<fmat>::from(sv_v), std::string("Spectral Variation")));
+			break;
+		case SPECTRAL_FLUX:
+			desc.push_back(new ACMediaTimedFeature(conv_to<fcolvec>::from(time_v), conv_to<fmat>::from(sf_v), std::string("Spectral Flux")));
+			break;
+		case ZERO_CROSSING_RATE:
+			if (!zcr_v.is_finite()){
+				std::cout << "zcr_v is not finite" << std::endl;
+				exit(1);
+			}
+			desc.push_back(new ACMediaTimedFeature(conv_to<fcolvec>::from(time_v), conv_to<fmat>::from(zcr_v), std::string("Zero Crossing Rate")));
+			break;
+		case SPECTRAL_DECREASE:
+			if (!sd_v.is_finite() ){
+				std::cout << "sd_v is not finite" << std::endl;
+				exit(1);
+			}
+			desc.push_back(new ACMediaTimedFeature(conv_to<fcolvec>::from(time_v), conv_to<fmat>::from(sd_v), std::string("Spectral Decrease")));
+			break;
+		case ENERGY:
+			if (!ener_v.is_finite()){
+				std::cout << "ener_v is not finite" << std::endl;
+				exit(1);
+			}
+			desc.push_back(new ACMediaTimedFeature(conv_to<fcolvec>::from(time_v), conv_to<fmat>::from(ener_v), std::string("Energy")));
+			break;
+		case LOUDNESS:
+			if (!loud_v.is_finite()){
+				std::cout << "loud_v is not finite" << std::endl;
+				exit(1);
+			}
+			desc.push_back(new ACMediaTimedFeature(conv_to<fcolvec>::from(time_v), conv_to<fmat>::from(loud_v), std::string("Loudness")));
+			break;
+		case MFCC:
+			if (!mfcc_m.is_finite() ){
+				std::cout << "mfcc_m is not finite" << std::endl;
+				exit(1);
+			}
+			ACMediaTimedFeature* mfcc_tf = new ACMediaTimedFeature(conv_to<fcolvec>::from(time_v), conv_to<fmat>::from(mfcc_m), std::string("MFCC"));
+			desc.push_back(mfcc_tf);
+			break;
+		case DMFCC:
+			desc.push_back(mfcc_tf->delta());
+			break;
+		case DDMFCC:
+			desc.push_back(mfcc_tf->delta()->delta());
+			break;
+// 		case MODULATION: // Added to the list if any modulation feature is required
+// 			mat modFr_m;
+// 			mat modAmp_m;
+// 			colvec modTime_v;
+// 			modulation(ener_v, env_fs, modFr_m, modAmp_m, modTime_v);
+// 			break;
+// 		case ENERGY_MODULATION_AMPLITUDE:
+// 			desc.push_back(new ACMediaTimedFeature(conv_to<fcolvec>::from(modTime_v), conv_to<fmat>::from(modAmp_m), std::string("Energy Modulation Amplitude")));
+// 			break;
+// 		case ENERGY_MODULATION_FREQUENCY:
+// 			desc.push_back(new ACMediaTimedFeature(conv_to<fcolvec>::from(modTime_v), conv_to<fmat>::from(modFr_m), std::string("Energy Modulation Frequency")));
+// 			break;
+// 		case LOG_ATTACK_TIME:
+// 			lat = logAttackTime(ener_v, env_fs);
+// 			fcolvec lat_v(1);
+// 			lat_v(0) = lat;
+// 			desc.push_back(new ACMediaTimedFeature(zero_v, lat_v, std::string("Log Attack Time")));
+// 			break;
+//		case EFFECTIVE_DURATION:
+//			ed_v = effectiveDuration(time_v, loud_v);
+//			desc.push_back(new ACMediaTimedFeature(zero_v, conv_to<fmat>::from(ed_v), std::string("Effective Duration")));
+//			break;
+		}
+	}
 	return desc;
 }
 
@@ -233,6 +357,26 @@ double spectralSpread(colvec x_v){
 		ss_v = weightedStdDeviation(in_v, x_v);
 	}		
 	return ss_v(0);
+}
+
+rowvec spectralFlatness(colvec x_v, int fftSize, int sr_hz){
+	rowvec sfm_v(4);
+	rowvec band_hz_v = "250 500 1000 2000 4000;";
+	float f2b = (float)fftSize/(float)sr_hz;
+	urowvec band_bin_v;
+	band_bin_v = conv_to<urowvec>::from(band_hz_v * f2b);
+	
+	colvec fftBand_v; 
+	for (int iBand = 0; iBand < band_bin_v.n_elem-1; iBand++){
+		fftBand_v = x_v.rows(band_bin_v(iBand), band_bin_v(iBand+1)-1);
+		if (sum(fftBand_v) == 0){
+			sfm_v(iBand) = 1;
+		}
+		else{
+			sfm_v(iBand) = as_scalar(exp(sum(log(fftBand_v))/fftBand_v.n_elem)) / as_scalar(mean(fftBand_v));			
+		}
+	}
+	return sfm_v;
 }
 
 double spectralVariation(colvec x_v, colvec xPrev_v){
@@ -281,9 +425,9 @@ double energyRMS(colvec frame_v){
 
 double logAttackTime(colvec ener_v, int sr_hz){
 	double maxEner = max(ener_v);
-	colvec posD_v = find(ener_v > .2 * maxEner);
+	ucolvec posD_v = find(ener_v > .2 * maxEner);
 	double posD = posD_v(0);
-	colvec posF_v = find(ener_v > .9 * maxEner);
+	ucolvec posF_v = find(ener_v > .9 * maxEner);
 	double posF = posF_v(0);
 	double lat = ((posF-posD)/sr_hz);
 	return lat;
@@ -305,7 +449,7 @@ double loudness(colvec x_v, mat melfilter_m){
 
 rowvec effectiveDuration(colvec time_v, colvec loud_v){
 	double Mv = max(loud_v);
-	colvec pos_v = find(loud_v>.15*Mv);
+	ucolvec pos_v = find(loud_v>.15*Mv);
 	double start_sec = time_v(pos_v(0));
 	double stop_sec = time_v(pos_v(pos_v.n_rows-1));
 	double ed_sec = stop_sec -start_sec;

@@ -142,6 +142,7 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 	//[browser_osg_view updateTransformsFromBrowser];
 	
 	media_cycle->setNeedsDisplay(true);
+	
 }
 
 - (void) awakeFromNib
@@ -156,6 +157,7 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 		build_type = "Debug";
 	#endif
 	media_cycle->addPlugin("../../../plugins/audio/" + build_type + "/mc_audio.dylib");
+	media_cycle->addPlugin("../../../plugins/segmentation/" + build_type + "/mc_segmentation.dylib");
 	int vizplugloaded = media_cycle->addPlugin("../../../plugins/visualisation/" + build_type + "/mc_visualisation.dylib");
 	//int vizplugloaded = media_cycle->addPlugin("/dupont/development/workdir-new/ticore-app/Applications/Numediart/MediaCycle/src/Builds/darwin-x86/plugins/visualisation/" + build_type + "/mc_visualisation.dylib");
 	if ( vizplugloaded == 0 )
@@ -283,6 +285,7 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 			
 			// with this function call here, do not import twice!!!
 			media_cycle->normalizeFeatures();
+			media_cycle->libraryContentChanged();
 		}
 		
 		[self updatedLibrary];
@@ -334,7 +337,7 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 	{
 		NSString* path = [saveDlg filename];
 		
-		media_cycle->saveAsLibrary((string)[path UTF8String]); // XS instead of getImageLibrary CHECK THIS
+		media_cycle->saveACLLibrary((string)[path UTF8String]); // XS instead of getImageLibrary CHECK THIS
 	}
 }
 

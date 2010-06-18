@@ -43,6 +43,7 @@ class ACVideo: public ACMedia {
 	// contains the *minimal* information about a video
 public:
 	ACVideo();
+	ACVideo(const ACVideo& m);
 	~ACVideo();
 	
 	void save(FILE* library_file);

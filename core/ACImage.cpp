@@ -105,7 +105,6 @@ ACMediaData* ACImage::extractData(string fname){
 	computeThumbnail(image_data, 64, 64);
 	width = thumbnail_width;
 	height = thumbnail_height;
-	duration = 0;
 	return image_data;
 }
 

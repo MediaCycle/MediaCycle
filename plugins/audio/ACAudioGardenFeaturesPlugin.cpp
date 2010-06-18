@@ -58,7 +58,7 @@ std::vector<ACMediaFeatures*> ACAudioGardenFeaturesPlugin::calculate(ACMediaData
 	int mfccNb = 13;
 	int windowSize = 1024; 	
 	bool extendSoundLimits = true;
-	std::vector<ACMediaTimedFeatures*> descmf;
+	std::vector<ACMediaTimedFeature*> descmf;
 	std::vector<ACMediaFeatures*> desc;
 	//	int sr = ((ACAudio*)theMedia)->getSampleRate();
 	ACAudio* theAudio = (ACAudio*) theMedia;

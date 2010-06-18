@@ -49,6 +49,14 @@ ACVideo::~ACVideo() {
 	delete thumbnail;
 }
 
+ACVideo::ACVideo(const ACVideo& m) : ACMedia(m) {
+	media_type = MEDIA_TYPE_VIDEO;
+	thumbnail = m.thumbnail;
+	thumbnail_width = m.thumbnail_width;
+	thumbnail_height = m.thumbnail_height;
+	// Should I copy the thumbnail ?
+}	
+
 int ACVideo::computeThumbnail(ACMediaData* data_ptr, int w, int h){
 	if (w <=0 || h <=0){
 		cerr << "<ACImage::computeThumbnail> dimensions should be positive: " << w << " x " << h << endl;
@@ -88,9 +96,9 @@ ACMediaData* ACVideo::extractData(string _fname){
 	int fps     = (int) cvGetCaptureProperty(capture, CV_CAP_PROP_FPS);
 	int nframes = (int) cvGetCaptureProperty(capture,  CV_CAP_PROP_FRAME_COUNT);
 	
-	duration=0.0;
-	if (fps != 0) duration = nframes * 1.0/fps;
-	else duration = nframes;
+	start = 0.0;
+	if (fps != 0) end = nframes * 1.0/fps;
+	else end = nframes;
 
 	return video_data;
 }
@@ -104,7 +112,7 @@ void ACVideo::saveACL(ofstream &library_file) {
 	}	
 	library_file << filename << endl;
 	library_file << filename_thumbnail << endl;
-	library_file << duration << endl;
+	library_file << this->getDuration() << endl;
 	library_file << mid << endl;
 	library_file << width << endl;
 	library_file << height << endl;
@@ -132,7 +140,7 @@ int ACVideo::loadACL(ifstream &library_file) {
 	}
 	library_file >> filename ;
 	library_file >> filename_thumbnail;
-	library_file >> duration;
+	library_file >> end;
 	library_file >> mid;	
 	library_file >> width;
 	library_file >> height;
@@ -180,7 +188,7 @@ void ACVideo::save(FILE* library_file) {
 		}
 	}
 #else
-	fprintf(library_file, "%f\n", duration);
+  fprintf(library_file, "%f\n", end);
 	fprintf(library_file, "%d\n", mid);
 	fprintf(library_file, "%d\n", width);
 	fprintf(library_file, "%d\n", height);
@@ -243,7 +251,7 @@ int ACVideo::load(FILE* library_file) { // was loadLoop
 			exit(-1);
 		}
 		
-		ret = fscanf(library_file, "%lf", &duration);
+		ret = fscanf(library_file, "%lf", &end);
 		ret = fscanf(library_file, "%d", &mid);
 		ret = fscanf(library_file, "%d", &width);
 		ret = fscanf(library_file, "%d", &height);

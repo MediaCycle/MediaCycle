@@ -1,7 +1,7 @@
 /**
  * @brief modulation.cpp
  * @author Damien Tardieu
- * @date 11/03/2010
+ * @date 18/06/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -60,7 +60,7 @@ void modulation(colvec xi_v, int fs, mat &modFr_m, mat &modAmp_m, colvec &modTim
 	colvec frameW_v = colvec(windowsize);
 	rowvec p_v(2);
 	colvec sampleidx = linspace(0, windowsize-1, windowsize);
-	colvec pos2_v, pos3_v;
+	ucolvec pos2_v, pos3_v;
  	icolvec pos_v;
 	colvec frameFFTabs_v;
  	colvec frameFFTabs2_v(fftsize/2);

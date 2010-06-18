@@ -46,7 +46,6 @@ using namespace arma;
 #include "nextpow2.h"
 #include "rot90.h"
 #include "size.h"
-#include "find.h"
 #include "findpeaks.h"
 #include "diff.h"
 #include "cart2pol.h"
@@ -60,6 +59,7 @@ using namespace arma;
 #include "kcluster.h"
 
 #include "blackman.h"
+#include "tukeywin.h"
 #include "fft-helper.h"
 #include "fft.h"
 #include "fft2.h"
@@ -81,7 +81,7 @@ using namespace arma;
 #include "paretofront.h"
 #include "paretorank.h"
 #include "pdist.h"
-//#include "princomp.h"
+#include "euclideanDistance.h"
 #include "randperm.h"
 
 #endif

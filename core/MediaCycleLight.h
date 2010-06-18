@@ -137,7 +137,7 @@ public:
 	void normalizeFeatures();
 	void openLibrary(string path);
 	void libraryContentChanged();
-	void saveAsLibrary(string path);
+	//	void saveAsLibrary(string path);
 	void saveACLLibrary(string path);
 	void cleanLibrary();
 	void goBack();

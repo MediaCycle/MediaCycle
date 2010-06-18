@@ -56,20 +56,20 @@ public:
 
 	~ACAudio();
   
-	void save(FILE* library_file);
+//	void save(FILE* library_file);
 	void saveACL(ofstream &library_file);
 	void saveMCSL(ofstream &library_file);//CF 31/05/2010 temporary MediaCycle Segmented Library (MCSL) for AudioGarden, adding a parentID for segments to the initial ACL, awaiting approval
 	int loadACL(ifstream &library_file);
 	int loadMCSL(ifstream &library_file);//CF 31/05/2010 temporary MediaCycle Segmented Library (MCSL) for AudioGarden, adding a parentID for segments to the initial ACL, awaiting approval
-	int load(FILE* library_file);
-	int load_v1(FILE* library_file); 
+	//	int load(FILE* library_file);
+	//int load_v1(FILE* library_file); 
 	
 //	void import(std::string _path); // XS 240210 : migrated to ACMedia
 	void saveThumbnail(std::string _path);
 	void* getThumbnailPtr() { return (void*)waveform; }
 	int getThumbnailWidth() {return waveformLength;} // width in thumbnail frames, not samples
 	int getThumbnailHeight() {return 0;} // width in thumbnail frames, not samples
-	int getWidth() {return sample_end;}
+	int getWidth() {return getSampleEnd();}
 	int getHeight() {return 0;}
 	
 	ACMediaData* extractData(std::string fname);
@@ -78,29 +78,31 @@ public:
 	int getSampleRate() { return sample_rate; }
 	void setChannels(int _channels) { channels = _channels; }
 	int getChannels() { return channels; }
-	void setSampleStart(int _sample_start) { sample_start = _sample_start; }
-	int getSampleStart() { return sample_start; }
-	void setSampleEnd(int _sample_end) { sample_end = _sample_end; }
-	int getSampleEnd() { return sample_end; }
-	void setNFrames(long _n_frames) { n_frames = _n_frames; }
-	long getNFrames() { return n_frames; }
-	float getDuration() {return (float)n_frames/(float) sample_rate;}
+
+	long getNFrames() { return getSampleEnd() - getSampleStart() + 1; }
+	float getDuration() {return (float)getNFrames()/(float) sample_rate;}
+
+	int getSampleStart();
+	int getSampleEnd();
+
+	void setSampleStart(int st){this->start = (float) st / (float) sample_rate; };
+	void setSampleEnd(int en){this->end = (float) en / (float) sample_rate; };
 
 	void setWaveformLength(int _waveformLength) { waveformLength = _waveformLength; }
 	int getWaveformLength() { return waveformLength; }
 	void setWaveform(float *_waveform) { waveform = _waveform; }
 	float* getWaveform() { return waveform; }
 	
-	void computeWaveform(float* samples_v);
+	void computeWaveform(const float* samples_v);
+
+	float* getSamples();
+
 
 private:	
 	int sample_rate;
 	int channels;
-	int sample_start;
-	int sample_end;
 	//float time_stamp_start;	// seconds
 	//float time_stamp_end;
-	long n_frames;
 	int waveformLength;
 	float* waveform; // typically one value every 10ms
 	// following are specific to loops or music

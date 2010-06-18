@@ -34,21 +34,28 @@
 
 #include "ACMedia.h"
 #include <iostream>
+#include "ACMediaFactory.h"
+
 using namespace std;
 ACMedia::ACMedia() { 
 	mid = -1;
 	parentid = -1;	
 	width = 0;
 	height = 0;
-	duration = 0.0;
+	start = -1;
+	end = -1;
 	features_vectors.resize(0);
 }
 
 ACMedia::ACMedia(const ACMedia& m){
+	media_type = m.media_type;
 	mid = -1;
 	width = m.width;
 	height = m.height;
-	duration = m.duration;
+	filename = m.filename;
+	filename_thumbnail = m.filename_thumbnail;
+	start = m.start;
+	end = m.end;
 	features_vectors.resize(0);	
 }
 
@@ -135,3 +142,52 @@ int ACMedia::import(std::string _path, int id, ACPluginManager *acpl ) {
 	delete data_ptr;
 	return import_ok;
 }
+
+int ACMedia::segment(ACPluginManager *acpl ) {
+	int import_ok = 1;
+	
+	ACMediaData* data_ptr = this->extractData(this->getFileName());
+	if (data_ptr==NULL){
+		import_ok = 0;
+		cerr << "<ACMedia::import> failed accessing data for media number: " << this->getId() << endl;
+		return 0;
+	}
+	
+	if (acpl) {
+		for (int i=0;i<acpl->getSize();i++) {
+			for (int j=0;j<acpl->getPluginLibrary(i)->getSize();j++) {
+				if (acpl->getPluginLibrary(i)->getPlugin(j)->getMediaType() == this->getType()
+					&& acpl->getPluginLibrary(i)->getPlugin(j)->getPluginType() == PLUGIN_TYPE_SEGMENTATION) {
+					ACPlugin* plugin =  acpl->getPluginLibrary(i)->getPlugin(j);
+					
+					cout << "Segmenting media using plugin : " << plugin->getName() << std::endl;
+					vector<ACMedia*> afv = plugin->segment(data_ptr, this);
+					
+					if (afv.size()==0){
+						import_ok = 0;
+						cerr << "<ACMedia::import> failed importing feature from plugin: " << plugin->getName() << endl;
+					}
+					else {
+						for (int Iafv=0; Iafv<afv.size(); Iafv++){
+							this->addSegment(afv[Iafv]);
+						}
+					import_ok = 1;
+					}
+				}
+			}
+		}
+	}
+	delete data_ptr;
+	return import_ok;
+}
+
+// int ACMedia::segment(){
+// 	for (int i = 0; i < 4; i++){
+// 		ACMedia* media = ACMediaFactory::create(this);
+// 		media->setParentId(this->mid);
+// 		media->setStart(this->start + ((float)i/4.0) * this->getDuration());
+// 		media->setEnd(this->start + ((float)(i+1)/4.0) * this->getDuration()-.01);
+// 		this->addSegment(media);
+// 	}
+// }
+

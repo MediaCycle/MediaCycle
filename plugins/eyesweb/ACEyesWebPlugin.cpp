@@ -88,7 +88,7 @@ string ACEyesWebPlugin::changeLastFolder(string path, string folder)
 }
 
 vector<ACMediaFeatures*> ACEyesWebPlugin::calculate(std::string fileName){
-  ACMediaTimedFeatures *mediaTimedFeatures = new ACMediaTimedFeatures();
+  ACMediaTimedFeature *mediaTimedFeatures = new ACMediaTimedFeature();
   //fileName = video path (.mov, .avi, ...)
   string dataFile = changeExtension(changeLastFolder(fileName,"analyse/Front"),".ew.txt");
   string dataFile2 = changeExtension(changeLastFolder(fileName,"analyse/Top"),"imagefeatures.txt");

@@ -1,7 +1,7 @@
 /**
  * @brief vamp-plugin-interface.h
  * @author Damien Tardieu
- * @date 08/06/2010
+ * @date 18/06/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -74,7 +74,7 @@ void printPluginPath(bool verbose);
 void printPluginCategoryList();
 void enumeratePlugins(Verbosity);
 void listPluginsInLibrary(string soname);
-ACMediaTimedFeatures* runPlugin(string soname, string plugid, string output, int outputNo, string inputFile, bool frames);
+ACMediaTimedFeature* runPlugin(string soname, string plugid, string output, int outputNo, string inputFile, bool frames);
 
 
 

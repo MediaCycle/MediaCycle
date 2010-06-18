@@ -87,7 +87,7 @@ public:
 	int scanDirectory(std::string _path, int _recursive, std::vector<string>& filenames);
 
 	int openLibrary(std::string _path, bool aInitLib=false);
-	void saveAsLibrary(std::string _path);
+//	void saveAsLibrary(std::string _path);
 	// C++ versions
 	int openACLLibrary(std::string _path, bool aInitLib=false);
 	int openMCSLLibrary(std::string _path, bool aInitLib=false);//CF 31/05/2010 temporary MediaCycle Segmented Library (MCSL) for AudioGarden, adding a parentID for segments to the initial ACL, awaiting approval

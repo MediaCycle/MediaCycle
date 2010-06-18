@@ -151,7 +151,7 @@ public:
 	void normalizeFeatures();
 	void openLibrary(string path);
 	void libraryContentChanged();
-	void saveAsLibrary(string path);
+	//	void saveAsLibrary(string path);
 	void saveACLLibrary(string path);
 	void saveMCSLLibrary(string path);//CF 31/05/2010 temporary MediaCycle Segmented Library (MCSL) for AudioGarden, adding a parentID for segments to the initial ACL, awaiting approval
 	void cleanLibrary();

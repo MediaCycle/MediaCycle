@@ -1,5 +1,5 @@
 /**
- * @brief melfilters.cpp
+ * @brief armadillo-test.cpp
  * @author Damien Tardieu
  * @date 18/06/2010
  * @copyright (c) 2010 – UMONS - Numediart
@@ -29,44 +29,63 @@
  * <mailto:avre@umons.ac.be>
 */
 
+#include <string>
+#include <armadillo>
 #include "Armadillo-utils.h"
-#include "melfilters.h"
+#include <time.h>
+#include <stdio.h>
+#include "ACMediaTimedFeature.h"
+using namespace arma;
 
-mat melfilters(int nChannels, int fftSize, int sr_hz){
 
+int main(){
 
-	float fmin = 0;
-	float fmax = (float)sr_hz/2;
-	float f2b = (float)fftSize/(float)sr_hz;
-	float bmax = fftSize/2;
-	
-	float mmin = freq2mel(fmin);
-	float mmax = freq2mel(fmax);
+	int a;
+	unsigned t0;
+	int L = 10000;
+	int D = 1;
 
-	float chanDist = (mmax - mmin)/(nChannels+1);
-	rowvec centerM_v = linspace<rowvec>(0, nChannels+1, nChannels+2);
-	centerM_v = centerM_v*chanDist;
-	centerM_v(nChannels+1) = mmax;
+// 	float* mem;
+// 	mem = new float* [D];
+// 	for(int i=0; i<n; i++)
+// 		mem[i] = new double [L];
+	float* mem = new float[L];
 
-	//	centerM_v.save("centerM.txt", arma_ascii);
-
-	rowvec centerB_v = mel2freq(centerM_v)*f2b;
-	
-	//	centerB_v.save("centerB.txt", arma_ascii);
-	
-	mat melf_m = zeros<mat>(bmax, nChannels);
-
-	for (int iChan=1; iChan < nChannels+1; iChan++){
-		for (int iBin=0; iBin < bmax; iBin++){
-			if(iBin > centerB_v(iChan-1) & iBin < centerB_v(iChan)){
-				melf_m(iBin, iChan-1) = (iBin - centerB_v(iChan-1))/(centerB_v(iChan)-centerB_v(iChan-1));
-			}
-			else if(iBin >= centerB_v(iChan) & iBin <= centerB_v(iChan+1)) {
-				melf_m(iBin, iChan-1) = (iBin - centerB_v(iChan+1))/(centerB_v(iChan)-centerB_v(iChan+1));			
-			}
+	for (int d=0; d<D; d++){
+		for (int i=0; i<L; i++){
+			mem[d] = d+i*.1;
 		}
-		melf_m.col(iChan-1) = f2b*melf_m.col(iChan-1)/(2*(centerB_v(iChan+1)-centerB_v(iChan-1)));
 	}
 	
-	return melf_m;
+	t0=clock();
+	fmat test4(L, D);
+	for (int d=0; d<D; d++){
+		for (int i=0; i<L; i++){
+			test4(d,i) = mem[i];
+		}
+	}
+	std::cout << "Methode 2 : " << clock()-t0 << std::endl;	
+
+	t0=clock();
+	fmat test3(mem, L, D, true);
+	std::cout << "Methode 1 : " << clock()-t0 << std::endl;
+	
+	t0=clock();
+	fmat test(mem, L, D, true);
+	std::cout << "Methode 1 : " << clock()-t0 << std::endl;
+	
+	t0=clock();
+	fmat test2(L, D);
+	for (int d=0; d<D; d++){
+		for (int i=0; i<L; i++){
+			test2(d,i) = mem[i];
+		}
+	}
+	std::cout << "Methode 2 : " << clock()-t0 << std::endl;	
+
+
+	test.save("test.txt", arma_ascii);
+	test.save("test3.txt", arma_ascii);
+	return 0;
 }
+

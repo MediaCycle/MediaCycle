@@ -110,6 +110,7 @@ updatedLibrary(false)
 			}
 		}
 		media_cycle->addPlugin("../../../plugins/audio/" + build_type + "/mc_audio.dylib");	
+		media_cycle->addPlugin("../../../plugins/segmentation/" + build_type + "/mc_segmentation.dylib");	
 	#endif
 	
 

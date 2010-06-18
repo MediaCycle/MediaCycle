@@ -38,6 +38,9 @@
 #include <cstring>
 #include <iostream>
 #include <signal.h>
+#include "ACAudio.h"
+#include "AGSynthesis.h"
+#include "sndfile.h"
 
 using namespace std;
 
@@ -47,13 +50,60 @@ int main(int argc, char** argv) {
 
     cout<<"new MediaCycle"<<endl;
 		mediacycle = new MediaCycle(MEDIA_TYPE_AUDIO,"/tmp/","mediacycle.acl");
-		mediacycle->addPlugin("/Users/dtardieu/src/Numediart/ticore-app/Applications/Numediart/MediaCycle/src/Builds/darwin-x86/plugins/audio/Debug/mc_audio.dylib");
-		mediacycle->addPlugin ("/Users/dtardieu/src/Numediart/ticore-app/Applications/Numediart/MediaCycle/src/Builds/darwin-x86/plugins/visualisation/Debug/mc_visualisation.dylib");
-		//		media_cycle->setVisualisationPlugin("PCAVis");
 
-		mediacycle->importDirectory("/Users/dtardieu/data/olpc-sound-samples-v2/Sounds/AdamKeshen44/",0);
-    mediacycle->getLibrary()->saveAsLibrary("test.mcl");
+		std::string build_type ("Release");
+#ifdef USE_DEBUG
+		build_type = "Debug";
+#endif
 		
+		mediacycle->addPlugin("../../plugins/audio/" + build_type + "/mc_audio.dylib");
+		mediacycle->addPlugin("../../plugins/segmentation/" + build_type + "/mc_segmentation.dylib");
+	
+		//		mediacycle->importDirectory("/Users/dtardieu/data/AudioCycleProPackTest/zero-g-pro-pack_b/Super Funk/Funkmachine-E/", 1);
+		//mediacycle->importDirectory("/Users/dtardieu/data/test/testEnv/",1);
+		//		mediacycle->importDirectory("/Users/dtardieu/data/rire-audiocycle/",1);
+		//		mediacycle->importDirectory("/Users/dtardieu/data/footsteps/", 1);
+		mediacycle->importDirectory("/Users/dtardieu/data/AudioGarden/test123",1);
+		//mediacycle->saveMCSLLibrary("/Users/dtardieu/data/AudioCycleProPackTest/zero-g-pro-pack_b/Super Funk/Funkmachine-E.acl");
+		//mediacycle->saveACLLibrary("/Users/dtardieu/data/test/testEnv/testEnv.acl");
+
+		//mediacycle->importMCSLLibrary("/Users/dtardieu/data/AudioCycleProPackTest/zero-g-pro-pack_b/Super Funk/Funkmachine-E.acl");
+
+		//		mediacycle->saveMCSLLibrary("/Users/dtardieu/data/AudioCycleProPackTest/zero-g-pro-pack_b/Super Funk/Funkmachine-E.mcsl");
+		//		mediacycle->saveMCSLLibrary("/Users/dtardieu/data/rire-audiocycle/rire-audiocycle.mcsl");
+		//		mediacycle->saveMCSLLibrary("/Users/dtardieu/data/footsteps/footsteps.mcsl");
+		mediacycle->saveMCSLLibrary("/Users/dtardieu/data/AudioGarden/test123/test123.mcsl");
+
+		for (int i = 0; i < mediacycle->getLibrary()->getSize(); i++){
+			std::cout << i << " : " << mediacycle->getLibrary()->getMedia(i)->getFileName() << "   " << ((ACAudio*)mediacycle->getLibrary()->getMedia(i))->getNFrames() << std::endl;
+		}
+
+		vector<long> grainIds;
+		for (int i=31; i<84; i++){
+			//for (int i=1; i<20; i++){
+			grainIds.push_back(i);
+		}
+		float* syn_v;
+		long length;
+		AGSynthesis(mediacycle->getLibrary(), 0, grainIds, &syn_v, length);
+		
+		SF_INFO sfinfo;
+		SNDFILE* testFile;
+		sfinfo.samplerate = 44100;
+		sfinfo.channels = 1;
+		sfinfo.format = SF_FORMAT_WAV | SF_FORMAT_PCM_16;
+		
+		if (! (testFile = sf_open ("synthesis.wav", SFM_WRITE, &sfinfo))){  
+			printf ("Not able to open input file %s.\n", "synthesis.wav") ;
+			puts (sf_strerror (NULL)) ;
+			return 1;
+		}
+		
+		float tt[1];
+		tt[0] =1.0;
+		sf_writef_float  (testFile, syn_v, length);
+		sf_close(testFile);
+
 // 	cout<<"setCulsterN"<<endl;
 //     mediacycle->getBrowser()->setClusterNumber(1);
 //     cout<<"importLib"<<endl;

@@ -1,7 +1,7 @@
 /**
  * @brief ACVisualisationPlugin.cpp
- * @author Christian Frisson
- * @date 27/05/2010
+ * @author Damien Tardieu
+ * @date 18/06/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -265,7 +265,7 @@ mat ACVisualisationPlugin::updateNextPositionsInit(mat &desc_m, int nbVideoDispl
 
 	mat tmpDesc_m;
 	int index=0;
-	colvec pos_v, pos2_v;
+	ucolvec pos_v, pos2_v;
 	for (int i=0; i<nbClusters; i++){
 		pos_v = find(clusterid_m==i);
 		tmpDesc_m.zeros(pos_v.n_elem, desc2_m.n_cols);
@@ -355,7 +355,7 @@ mat ACVisualisationPlugin::updateNextPositionsInit2(mat &desc_m, int nbVideoDisp
 	colvec selectedClusters_v;
 	selectedClusters_v = linspace(0.0, nbSelectedClusters-1, nbSelectedClusters);
 	
-	colvec posSC_v = find(ismember(idx_v, selectedClusters_v));
+	ucolvec posSC_v = find(ismember(idx_v, selectedClusters_v));
 	//sort(find(ismember(idx_v, selectedClusters_v)));
 	colvec idx2_v;
 	mat centroid2_m(nbSelectedClusters, desc2_m.n_cols);
@@ -373,7 +373,7 @@ mat ACVisualisationPlugin::updateNextPositionsInit2(mat &desc_m, int nbVideoDisp
 	
 	int nbItemPerCluster = (int)(nbVideoDisplay/nbSelectedClusters);
 	toDisplay_v.set_size(nbItemPerCluster*nbSelectedClusters);
-	colvec posTmp_v;
+	ucolvec posTmp_v;
 	colvec idxC_v;
 	mat centroidC_m;
 	int tmpIdx=0;
@@ -389,7 +389,7 @@ mat ACVisualisationPlugin::updateNextPositionsInit2(mat &desc_m, int nbVideoDisp
 			
 			kcluster(newD3_m, nbItemPerCluster, idxC_v, centroidC_m);
 			for (int m=0; m<nbItemPerCluster; m++){
-				anTmp_v = shuffle(find(idxC_v==m));
+				anTmp_v = shuffle(conv_to<colvec>::from(find(idxC_v==m)));
 				toDisplay_v(tmpIdx) = posTmp_v(anTmp_v(0));
 				tmpIdx++;
 			}
@@ -554,7 +554,7 @@ mat ACVisualisationPlugin::updateNextPositionsItemClicked2(mat &desc_m, int nbVi
 	mat dist_m = abs(desc2_m - repmat(tg_v, desc2_m.n_rows, 1));
 	
 	ucolvec rank_v = paretorank(dist_m, 20, nbVideoDisplay);
- 	colvec selPos_v = find(rank_v > 0);
+ 	ucolvec selPos_v = find(rank_v > 0);
  	selPos_v = shuffle(selPos_v);
  	selPos_v = sort(selPos_v.rows(0, nbVideoDisplay-1));
 
@@ -610,7 +610,7 @@ mat ACVisualisationPlugin::updateNextPositionsItemClicked3(mat &desc_m, int nbVi
 	rank_v.save("rank.txt", arma_ascii);
 #endif
 	std::cout << "Item Clicked : " << itemClicked << std::endl;
-	colvec selPos_v = find(rank_v > 0);
+	ucolvec selPos_v = find(rank_v > 0);
 	colvec distEucl_v = sqrt(sum(square(dist_m), 1));
  	
 	colvec distEuclFront_v(selPos_v.n_elem);

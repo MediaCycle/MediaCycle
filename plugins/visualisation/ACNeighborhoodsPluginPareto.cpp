@@ -1,7 +1,7 @@
 /**
  * @brief ACNeighborhoodsPluginPareto.cpp
- * @author Christian Frisson
- * @date 27/05/2010
+ * @author Damien Tardieu
+ * @date 18/06/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -72,7 +72,7 @@ void ACNeighborhoodsPluginPareto::updateNeighborhoods(ACMediaBrowser* mediaBrows
 			dist_m.col(f) = sqrt(sum(square(tmpDesc_m - repmat(tmpTg_v, tmpDesc_m.n_rows, 1)), 1));
 		}
 		ucolvec rank_v = paretorank(dist_m, 2, 6);
-		colvec selPos_v = find(rank_v > 1);
+		ucolvec selPos_v = find(rank_v > 1);
 		colvec distE_v(selPos_v.n_rows);
 		for (int k=0; k<selPos_v.n_rows; k++){
 			distE_v(k) = sum(dist_m.row(selPos_v(k)));

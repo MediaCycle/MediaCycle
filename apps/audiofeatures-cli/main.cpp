@@ -1,7 +1,7 @@
 /**
  * @brief main.cpp
  * @author Damien Tardieu
- * @date 05/05/2010
+ * @date 18/06/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -38,6 +38,25 @@
 #include <unistd.h>
 #include <sys/stat.h>
 
+void usage(string myname){        
+	cerr << endl;
+	cerr << "A utility for feature extraction from audio files." << endl;
+	//	cerr << "Damien Tardieu -  TCTS/UMONS, Mons, Belgium" << endl;
+	cerr << "Copyright 2010-2011 University of Mons." << endl;
+	cerr << endl;
+	cerr << "  Usage: " << myname
+			 << " [OPTION] audiofile" << endl;
+	cerr << endl;
+	cerr << "  -L       Size of the analysis window, must be a power of two [default: 256]."<< endl;
+	cerr << "  -c      Number of MFCC channels [default: 16]." << endl;
+	cerr << "  -m       Number of MFCC [default: 13]." << endl;
+	cerr << "  -o       Directory for storing feature files [default \"audiofile directory/audiofile.desc/\"]" << std::endl;
+	cerr << "  -e       Extend sound limits for computation" << std::endl;
+	cerr << endl;
+	cerr << endl;
+	
+}
+
 std::string descAbbreviation(std::string descName){
 	std::string abbrev;
 	if (descName == "Spectral Centroid"){
@@ -45,6 +64,9 @@ std::string descAbbreviation(std::string descName){
 	}	
 	if (descName == "Spectral Spread"){
 		abbrev = "ss";
+	}	
+	if (descName == "Spectral Flatness"){
+		abbrev = "sfm";
 	}	
 	if (descName == "Spectral Variation"){
 		abbrev = "sv";
@@ -61,11 +83,17 @@ std::string descAbbreviation(std::string descName){
 	if (descName == "Delta MFCC"){
 		abbrev = "dmfcc";
 	}	
+	if (descName == "Delta Delta MFCC"){
+		abbrev = "ddmfcc";
+	}	
 	if (descName == "Spectral Decrease"){
 		abbrev = "sd";
 	}	
 	if (descName == "Energy"){
 		abbrev = "ener";
+	}	
+	if (descName == "Loudness"){
+		abbrev = "loud";
 	}	
 	if (descName == "Energy Modulation Amplitude"){
 		abbrev = "ema";
@@ -88,20 +116,20 @@ int main(int argc, char** argv){
 	int mfccNb = 13;
 	int windowSize = 256; 	
 	bool extendSoundLimits = false;
+	
+	string myname(argv[0]);
 
 	bflag = 0;
-	while ((ch = getopt(argc, argv, "ei:L:mc:m:o:")) != -1) {
+	while ((ch = getopt(argc, argv, "heL:c:m:o:")) != -1) {
 		switch (ch) {
 		case 'e' :
 			std::cout << "Extend sound limits" << std::endl;
 			extendSoundLimits = true;
-// 		case 'i':
-// 			filename += optarg;
-// 			break;
+			break;	
 		case 'L':
 			windowSize = atoi(optarg);
 			break;
-		case 'mc': //AM : gcc warning: multi-character character constant
+		case 'c': 
 			mfccNbChannels = atoi(optarg);
 			break;
 		case 'm':
@@ -109,6 +137,10 @@ int main(int argc, char** argv){
 			break;
 		case 'o':
 			outDir += optarg;
+			break;
+		case 'h':
+			usage(myname);
+			exit(1); 
 			break;
 		case '?':
 			break;
@@ -133,30 +165,38 @@ int main(int argc, char** argv){
 	
 	if (! (testFile = sf_open (filename.c_str(), SFM_READ, &sfinfo))){  
 		/* Open failed so print an error message. */
-		printf ("Not able to open input file %s.\n", filename.c_str()) ;
+		printf ("Not able to open input file %s\n", filename.c_str()) ;
 		/* Print the error message from libsndfile. */
 		puts (sf_strerror (NULL)) ;
 		return  1 ;
 	}
 	
-	std::vector<ACMediaTimedFeatures*> desc;
+	std::vector<ACMediaTimedFeature*> desc;
 	std::cout << "Length : " << sfinfo.frames << std::endl;
 	std::cout << "Sampling Rate : " << sfinfo.samplerate << std::endl;
 	std::cout << "Channels : " << sfinfo.channels << std::endl;
 	data = new float[(long) sfinfo.frames*sfinfo.channels];
-	std::cout << sf_read_float(testFile, data, sfinfo.frames*sfinfo.channels) << std::endl;
+	std::cout << "Read " << sf_read_float(testFile, data, sfinfo.frames*sfinfo.channels) << " frames" << std::endl;
 	desc = computeFeatures(data, sfinfo.samplerate, sfinfo.channels, sfinfo.frames, mfccNbChannels, mfccNb, windowSize, 	extendSoundLimits);
 	
 	std::string descFileName;
 	int posSep = filename.find_last_of("/\\");
 	int posDot = filename.find_last_of(".");
-	std::string rootFileName = filename.substr(posSep+1, posDot-posSep-1);
-	std::string soundDir = filename.substr(0, posSep);
-	std::cout << rootFileName << std::endl;	
+	
+	std::string rootFileName;
+	std::string soundDir;
+	if (posSep == -1){
+		rootFileName = filename.substr(0, posDot);
+		soundDir = ".";
+	}
+	else{
+		rootFileName = filename.substr(posSep+1, posDot-posSep-1);
+		soundDir = filename.substr(0, posSep);
+	}
 
 	std::string descDir;
 	if (outDir.size()==0){
-		descDir = soundDir + "/." + rootFileName + "/";
+		descDir = soundDir + "/" + rootFileName + ".desc" + "/";
 	}
 	else{
 		descDir = outDir + rootFileName + "/";
@@ -171,11 +211,12 @@ int main(int argc, char** argv){
 		mkdir(descDir.c_str(), 01777);
 
 	for (int i=0; i<desc.size(); i++){
-		descFileName = descDir + rootFileName + "." + descAbbreviation(desc[i]->getName()) + ".sdif";
+		descFileName = descDir + rootFileName + "." + descAbbreviation(desc[i]->getName()) + ".txt";
 		std::cout << "Saving " << descFileName << std::endl;
-		desc[i]->saveAsSdif(descFileName.c_str());
+		desc[i]->saveAsTxt(descFileName);
 	}		
 	delete(data);
 	sf_close(testFile);
 }
+
 

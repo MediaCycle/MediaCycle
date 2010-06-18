@@ -350,7 +350,7 @@ int processTcpMessageFromSSI(MediaCycle *that, char *buffer, int l, char **buffe
 		cout << "addwavf - addmedia" << endl;
 		that->getLibrary()->addMedia(local_media);
 		cout << "addwavf - savelib" << endl;
-		that->getLibrary()->saveAsLibrary(that->getLocalDirectoryPath() + "/" + that->getLibName());
+		that->getLibrary()->saveACLLibrary(that->getLocalDirectoryPath() + "/" + that->getLibName());
 		cout << "done" << endl;
 	} else if (type_name == "request") {
 		cout << "normalize" << endl;

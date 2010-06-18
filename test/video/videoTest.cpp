@@ -242,7 +242,7 @@ void test_all_videos_top_front(std::string mypath){
 	mediacycle = new MediaCycle(MEDIA_TYPE_VIDEO);
 	mediacycle->addPlugin(video_plugin_path+"mc_video.dylib");
 	mediacycle->importDirectory(mypath, 0);
-	mediacycle->saveAsLibrary(mypath+"ACL"+"dancers-test.acl");
+	mediacycle->saveACLLibrary(mypath+"ACL"+"dancers-test.acl");
 	delete mediacycle;	
 }
 

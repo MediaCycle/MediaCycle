@@ -1,7 +1,7 @@
 /**
  * @brief ACAudioFeatures.h
  * @author Damien Tardieu
- * @date 05/05/2010
+ * @date 18/06/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -41,11 +41,37 @@
 
 using namespace arma;
 
+ACMediaTimedFeature* computeFeature(float* data, 
+																		 string featureName, 
+																		 int samplerate, 
+																		 int nchannels, 
+																		 long length,
+																		 int mfccNbChannels = 16, 
+																		 int mfccNb = 13, 
+																		 int windowSize=512, 	
+																		 bool extendSoundLimits = false); 
+std::vector<ACMediaTimedFeature*> computeFeatures(float* data, 
+																									 vector<string> descList, 
+																									 int samplerate, 
+																									 int nchannels, 
+																									 long length, 
+																									 int mfccNbChannels = 16, 
+																									 int mfccNb = 13, 
+																									 int windowSize=512, 	
+																									 bool extendSoundLimits = false); 
+std::vector<ACMediaTimedFeature*> computeFeatures(float* data, 
+																									 int samplerate, 
+																									 int nchannels, 
+																									 long length, 
+																									 int mfccNbChannels = 16, 
+																									 int mfccNb = 13, 
+																									 int windowSize=512, 	
+																									 bool extendSoundLimits = false); 
 
-std::vector<ACMediaTimedFeatures*> computeFeatures(float* data, int samplerate, int nchannels, int length,int mfccNbChannels = 16, int mfccNb = 13, int windowSize=512, 	bool extendSoundLimits = false); 
 int resample(float* datain, SF_INFO *sfinfo, float* dataout, SF_INFO* sfinfoout);
 double spectralCentroid(colvec x_v);
 double spectralSpread(colvec x_v);
+rowvec spectralFlatness(colvec x_v, int fftSize, int sr_hz);
 double spectralVariation(colvec, colvec);
 double spectralFlux(colvec x_v, colvec xPrev_v);
 double zcr(colvec frame_v, int sr_hz, int frameSize);

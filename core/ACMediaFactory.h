@@ -57,6 +57,10 @@ public:
 	static ACMedia* create(std::string file_ext);
 	// 2) directly specify which media (e.g. for openLibrary)
 	static ACMedia* create(ACMediaType media_type);
+
+	// 3) copy a media 
+	static ACMedia* create(ACMedia* media);
+
 };
 
 #endif // _ACMEDIAFACTORY_H

@@ -49,9 +49,9 @@
 
 #include "vamp-plugin-interface.h"
 
-ACMediaTimedFeatures* runPlugin(string soname, string id, string output, int outputNo, string inputFile, bool useFrames)
+ACMediaTimedFeature* runPlugin(string soname, string id, string output, int outputNo, string inputFile, bool useFrames)
 {
-    ACMediaTimedFeatures* descmf;
+    ACMediaTimedFeature* descmf;
     PluginLoader *loader = PluginLoader::getInstance();
     string outfilename = "";
     PluginLoader::PluginKey key = loader->composePluginKey(soname, id);
@@ -206,7 +206,7 @@ ACMediaTimedFeatures* runPlugin(string soname, string id, string output, int out
 
 
     nbFrames = (long)(sfinfo.frames)/stepSize+1;
-    descmf = new ACMediaTimedFeatures(nbFrames, outputs[0].binCount, outputs[0].name); 
+    descmf = new ACMediaTimedFeature(nbFrames, outputs[0].binCount, outputs[0].name); 
 
     for (sf_count_t i = 0; i < sfinfo.frames; i += stepSize) {
 
