@@ -63,6 +63,8 @@ bool ACOsgBrowserEventHandler::handle(const osgGA::GUIEventAdapter& ea,osgGA::GU
 		}    
 		case(osgGA::GUIEventAdapter::KEYDOWN):
 		{
+			
+			//std::cout << "Key (OSG) " << ea.getKey() << std::endl;
 			// XS TODO what if key ='a' ?
 //			if (ea.getKey()=='c')
 //			{        

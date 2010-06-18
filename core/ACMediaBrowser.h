@@ -197,7 +197,8 @@ public:
 				cerr << "unknown browser mode: " << mMode << endl;
 				break;
 		}		
-		std::cout << "mLoopAttributes.size() " << mLoopAttributes.size() << " mUserLog->getSize() " << mUserLog->getSize() << std::endl;
+		//std::cout << "mLoopAttributes.size() " << mLoopAttributes.size() << " mUserLog->getSize() " << mUserLog->getSize() << std::endl;
+		_n = mLoopAttributes.size();//CF this is not normal, inconsistency in OSG
 		return _n;
 	
 	} // XS TODO getsize; this should be the same as mLibrary->getSize(), but this way it is more similar to getNumberOfLabels // CF not true in non-explatory mode (one loop can be displayed more than once at a time)

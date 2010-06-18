@@ -145,7 +145,7 @@ void ACOsgBrowserViewQT::updateGL()
 void ACOsgBrowserViewQT::keyPressEvent( QKeyEvent* event )
 {
 	osg_view->getEventQueue()->keyPress( (osgGA::GUIEventAdapter::KeySymbol) *(event->text().toAscii().data() ) );
-	
+	//std::cout << "Key (Qt) " << event->text().toAscii().data() << std::endl; 
 	switch( event->key() )
 	{
 		case Qt::Key_Z:
@@ -215,8 +215,9 @@ void ACOsgBrowserViewQT::mouseMoveEvent( QMouseEvent* event )
         case(Qt::RightButton): button = 3; break;
         case(Qt::NoButton): button = 0; break;
         default: button = 0; break;
-    }	
-    osg_view->getEventQueue()->mouseMotion(event->x(), event->y());
+    }
+	
+	osg_view->getEventQueue()->mouseMotion(event->x(), event->y());
 
 	float zoom, angle;
 	float xmove, ymove, xmove2, ymove2;
@@ -270,11 +271,13 @@ void ACOsgBrowserViewQT::mouseReleaseEvent( QMouseEvent* event )
 			
 			if(loop >= 0)
 			{
-				media_cycle->incrementLoopNavigationLevels(loop);
+				if (media_cycle->getBrowser()->getMode() == AC_MODE_CLUSTERS)
+					media_cycle->incrementLoopNavigationLevels(loop);
 				media_cycle->setReferenceNode(loop);
 				
 				// XSCF 250310 added these 3
-				media_cycle->pushNavigationState();
+				if (media_cycle->getBrowser()->getMode() == AC_MODE_CLUSTERS)
+					media_cycle->pushNavigationState();
 
 				//			media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
 				//			media_cycle->getBrowser()->setState(AC_CHANGING);
@@ -287,6 +290,7 @@ void ACOsgBrowserViewQT::mouseReleaseEvent( QMouseEvent* event )
 //				// remainders from updateClusters(true)
 //				media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
 //				media_cycle->getBrowser()->setState(AC_CHANGING);
+				media_cycle->setNeedsDisplay(true);
 			}
 		}	
 		media_cycle->setClickedNode(-1);

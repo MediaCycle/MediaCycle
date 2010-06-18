@@ -256,7 +256,7 @@ void ACOsgCompositeViewQt::mousePressEvent( QMouseEvent* event )
 		borderdown = 1;
 		refsepy = sepy;
 	}	
-	media_cycle->setNeedsDisplay(1);
+	media_cycle->setNeedsDisplay(true);
 }
 
 void ACOsgCompositeViewQt::mouseMoveEvent( QMouseEvent* event )
@@ -321,7 +321,7 @@ void ACOsgCompositeViewQt::mouseMoveEvent( QMouseEvent* event )
 			}
 		}
 	}
-	media_cycle->setNeedsDisplay(1);
+	media_cycle->setNeedsDisplay(true);
 }
 
 void ACOsgCompositeViewQt::mouseReleaseEvent( QMouseEvent* event )
@@ -350,11 +350,13 @@ void ACOsgCompositeViewQt::mouseReleaseEvent( QMouseEvent* event )
 			{
 				if (forwarddown==1)
 				{	
-					//media_cycle->incrementLoopNavigationLevels(loop);
+					if (media_cycle->getBrowser()->getMode() == AC_MODE_CLUSTERS)
+						media_cycle->incrementLoopNavigationLevels(loop);
 					media_cycle->setReferenceNode(loop);
 					
 					// XSCF 250310 added these 3
-					media_cycle->pushNavigationState();
+					if (media_cycle->getBrowser()->getMode() == AC_MODE_CLUSTERS)
+						media_cycle->pushNavigationState();
 					//media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
 					//media_cycle->getBrowser()->setState(AC_CHANGING);
 					
@@ -387,7 +389,7 @@ void ACOsgCompositeViewQt::mouseReleaseEvent( QMouseEvent* event )
 	}
 	mousedown = 0;
 	borderdown = 0;
-	media_cycle->setNeedsDisplay(1);
+	media_cycle->setNeedsDisplay(true);
 }
 
 void ACOsgCompositeViewQt::prepareFromBrowser()

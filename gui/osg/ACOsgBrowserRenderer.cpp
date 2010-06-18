@@ -39,7 +39,9 @@
 #include "ACOsgVideoRenderer.h"
 #include "ACOsgTextRenderer.h"
 
-ACOsgBrowserRenderer::ACOsgBrowserRenderer() {
+ACOsgBrowserRenderer::ACOsgBrowserRenderer()
+: displayed_nodes(0)
+{
 	node_renderer.resize(0);
 	link_renderer.resize(0);
 	label_renderer.resize(0);
@@ -128,6 +130,78 @@ void ACOsgBrowserRenderer::prepareNodes(int start) {
 }
 
 void ACOsgBrowserRenderer::updateNodes(double ratio) {
+	
+	
+	//CF prepareNodes
+	/*
+	int media_type;
+	
+	int n = media_cycle->getNumberOfMediaNodes(); //XS was: getLibrarySize(); 
+	
+	// XS are these tests necessary ?
+	if (node_renderer.size()>n) {
+		for (int i=n;i<node_renderer.size();i++) {
+			media_group->removeChild(node_renderer[i]->getNode());
+			delete node_renderer[i];
+		}
+	}
+	
+	if (link_renderer.size()>n){//media_cycle->getBrowser()->getLayout() == AC_LAYOUT_TYPE_NODELINK && ) {
+		for (int i=n;i<link_renderer.size();i++) {
+			link_group->removeChild(link_renderer[i]->getLink());
+			delete link_renderer[i];
+		}
+	}
+	
+	
+	node_renderer.resize(n);
+	//if (media_cycle->getBrowser()->getLayout() == AC_LAYOUT_TYPE_NODELINK)
+	link_renderer.resize(n);
+	distance_mouse.resize(n);
+	
+	for (int i=0;i<n;i++) {
+		media_type = media_cycle->getMediaType(i);
+		switch (media_type) {
+			case MEDIA_TYPE_AUDIO:
+				node_renderer[i] = new ACOsgAudioRenderer();
+				break;
+			case MEDIA_TYPE_IMAGE:
+				node_renderer[i] = new ACOsgImageRenderer();
+				break;
+			case MEDIA_TYPE_VIDEO:
+				node_renderer[i] = new ACOsgVideoRenderer();
+				break;
+			case MEDIA_TYPE_TEXT:
+				node_renderer[i] = new ACOsgTextRenderer();
+				break;
+			default:
+				node_renderer[i] = NULL;
+				break;
+		}
+		if (node_renderer[i] != NULL) {
+			node_renderer[i]->setMediaCycle(media_cycle);
+			node_renderer[i]->setNodeIndex(i);
+			// node_renderer[i]->setActivity(0);
+			node_renderer[i]->prepareNodes();
+			media_group->addChild(node_renderer[i]->getNode());
+		}
+		
+		//if (media_cycle->getBrowser()->getLayout() == AC_LAYOUT_TYPE_NODELINK) {
+		link_renderer[i] = new ACOsgNodeLinkRenderer();
+		if (link_renderer[i]) {
+			link_renderer[i]->setMediaCycle(media_cycle);
+			link_renderer[i]->setNodeIndex(i);
+			// node_renderer[i]->setActivity(0);
+			link_renderer[i]->prepareLinks();
+			link_group->addChild(link_renderer[i]->getLink());
+		}
+		//}	
+	}
+	*/
+
+	
+	//CF
+	
 	
 	for (unsigned int i=0;i<node_renderer.size();i++) {
 		node_renderer[i]->updateNodes(ratio);

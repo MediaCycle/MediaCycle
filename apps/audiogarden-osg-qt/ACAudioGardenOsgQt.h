@@ -94,7 +94,7 @@ class ACAudioGardenOsgQt : public QMainWindow
 			ACAppleMultitouchTrackpadSupport *multitouch_trackpad;
 		#endif
         Ui::ACAudioGardenOsgQt ui;
-		bool updatedLibrary;
+		bool library_loaded;
 
 	protected:
 		//ACOsgCompositeViewQt* compositeOsgView;

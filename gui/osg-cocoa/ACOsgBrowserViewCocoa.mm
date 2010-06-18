@@ -252,11 +252,13 @@ struct ACOsgBrowserViewData
 		
 		if(loop >= 0)
 		{
-			media_cycle->incrementLoopNavigationLevels(loop);
+			if (media_cycle->getBrowser()->getMode() == AC_MODE_CLUSTERS)
+				media_cycle->incrementLoopNavigationLevels(loop);
 			media_cycle->setReferenceNode(loop);
 			
 			// XSCF 250310 added these 3
-			media_cycle->pushNavigationState();
+			if (media_cycle->getBrowser()->getMode() == AC_MODE_CLUSTERS)
+				media_cycle->pushNavigationState();
 			//media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
 			//media_cycle->getBrowser()->setState(AC_CHANGING);
 			
@@ -271,6 +273,7 @@ struct ACOsgBrowserViewData
 //			// remainders from updateClusters(true)
 //			media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
 //			media_cycle->getBrowser()->setState(AC_CHANGING);
+			media_cycle->setNeedsDisplay(true);
 		}
 	}
 		

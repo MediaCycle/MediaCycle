@@ -103,6 +103,9 @@ enum	{
 	IBOutlet NSSlider*				mWeight1Slider;
 	IBOutlet NSSlider*				mWeight2Slider;
 	IBOutlet NSSlider*				mWeight3Slider;
+	IBOutlet NSButton*				mWeight1Check;
+	IBOutlet NSButton*				mWeight2Check;
+	IBOutlet NSButton*				mWeight3Check;
 	IBOutlet NSSlider*				mWeightRhythmSlider;
 	IBOutlet NSSlider*				mWeightTimbreSlider;
 	IBOutlet NSSlider*				mWeightHarmonySlider;
