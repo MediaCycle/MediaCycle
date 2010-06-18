@@ -132,7 +132,12 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 	#endif
 	
 	// XSCF 250310 added these 3
-	media_cycle->pushNavigationState();
+	if (media_cycle->getMode() == AC_MODE_CLUSTERS) {
+		media_cycle->pushNavigationState();
+		media_cycle->setWeight(0, [mWeight1Check floatValue]);
+		media_cycle->setWeight(1, [mWeight2Check floatValue]);
+		media_cycle->setWeight(2, [mWeight3Check floatValue]);
+	}	
 	media_cycle->getBrowser()->setState(AC_CHANGING);
 	media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
 	
@@ -218,18 +223,8 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 
 	osc_feedback = NULL;
 	osc_browser = NULL;
-	
-	//media_cycle->importLibrary("/dupont/dancers.acl_copy");
-	//media_cycle->setClusterNumber(5);
-	// XSCF251003 added this
-	//media_cycle->updateClusters(true);
-	//media_cycle->setNeedsDisplay(true);
-	
-	//media_cycle->setReferenceNode(0);
-	// XSCF 250310 added these 3
-	//media_cycle->pushNavigationState();
-	//media_cycle->updateNextPositions(); // TODO is it required ?? .. hehehe
-	//media_cycle->setState(AC_CHANGING);
+
+	media_cycle->setClusterNumber([mClusterNumberSlider intValue]);
 	
 	[browser_osg_view setMediaCycle:media_cycle];
 	[browser_osg_view prepareFromBrowser];
@@ -653,8 +648,7 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 		
 		media_cycle->hoverCallback(x,y);
 		int closest_node = media_cycle->getClosestNode();
-		//CF debug the objective-c accessor on renderer!
-		/*float distance = browser_osg_view.renderer->getDistanceMouse()[closest_node];
+		float distance = [browser_osg_view getMouseDistanceAtNode:closest_node];
 		if (osc_feedback)
 		{
 			osc_feedback->messageBegin("/audiocycle/closest_node_at");
@@ -662,8 +656,7 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 			osc_feedback->messageEnd();
 			osc_feedback->messageSend();
 		}
-		*/
-		//media_cycle->setNeedsDisplay(1);
+		media_cycle->setNeedsDisplay(1);
 	}
 	else if(strcasecmp(tagName, "/audiocycle/1/browser/1/move/zoom") == 0)
 	{
@@ -715,12 +708,12 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 	{
 		float bpm;
 		osc_browser->readFloat(mOscReceiver, &bpm);
-		//int clicked_node = media_cycle->getClickedNode();
-		int clicked_node = media_cycle->getClosestNode();
-		if (clicked_node > -1)
+		//int node = media_cycle->getClickedNode();
+		int node = media_cycle->getClosestNode();
+		if (node > -1)
 		{
-			audio_engine->setLoopSynchroMode(clicked_node, ACAudioEngineSynchroModeAutoBeat);
-			audio_engine->setLoopScaleMode(clicked_node, ACAudioEngineScaleModeResample);
+			audio_engine->setLoopSynchroMode(node, ACAudioEngineSynchroModeAutoBeat);
+			audio_engine->setLoopScaleMode(node, ACAudioEngineScaleModeResample);
 			audio_engine->setBPM((float)bpm);
 		}
 	}	
@@ -729,13 +722,13 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 		float scrub;
 		osc_browser->readFloat(mOscReceiver, &scrub);
 		
-		//int clicked_node = media_cycle->getClickedNode();
-		int clicked_node = media_cycle->getClosestNode();
-		 if (clicked_node > -1)
+		//int node = media_cycle->getClickedNode();
+		int node = media_cycle->getClosestNode();
+		 if (node > -1)
 		 {
 			 //media_cycle->pickedObjectCallback(-1);
-			 audio_engine->setLoopSynchroMode(clicked_node, ACAudioEngineSynchroModeManual);
-			 audio_engine->setLoopScaleMode(clicked_node, ACAudioEngineScaleModeVocode);//ACAudioEngineScaleModeVocode
+			 audio_engine->setLoopSynchroMode(node, ACAudioEngineSynchroModeManual);
+			 audio_engine->setLoopScaleMode(node, ACAudioEngineScaleModeVocode);//ACAudioEngineScaleModeVocode
 			 audio_engine->setScrub((float)scrub*100); // temporary hack to scrub between 0 an 1
 		 }
 	}
@@ -744,21 +737,40 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 		float pitch;
 		osc_browser->readFloat(mOscReceiver, &pitch);
 	
-		//int clicked_node = media_cycle->getClickedNode();
-		int clicked_node = media_cycle->getClosestNode();
-		if (clicked_node > -1)
+		//int node = media_cycle->getClickedNode();
+		int node = media_cycle->getClosestNode();
+		if (node > -1)
 		{
 			//if (!is_pitching)
 			//{	
 			//	is_pitching = true;
 			//	is_scrubing = false;
 			//media_cycle->pickedObjectCallback(-1);
-			audio_engine->setLoopSynchroMode(clicked_node, ACAudioEngineSynchroModeAutoBeat);
-			audio_engine->setLoopScaleMode(clicked_node, ACAudioEngineScaleModeResample);
+			audio_engine->setLoopSynchroMode(node, ACAudioEngineSynchroModeAutoBeat);
+			audio_engine->setLoopScaleMode(node, ACAudioEngineScaleModeResample);
 			//}
-			audio_engine->setSourcePitch(clicked_node, (float) pitch); 
+			audio_engine->setSourcePitch(node, (float) pitch); 
 		}
 		 
+	}
+	else if(strcasecmp(tagName, "/audiocycle/1/browser/recluster") == 0)
+	{		
+		//int node = media_cycle->getClickedNode();
+		int node = media_cycle->getClosestNode();
+		if (media_cycle->getLibrary()->getSize() > 0 && media_cycle->getBrowser()->getMode() == AC_MODE_CLUSTERS && node > -1)
+		{
+			media_cycle->setReferenceNode(node);
+			media_cycle->pushNavigationState();
+			media_cycle->updateDisplay(true);
+		}
+	}
+	else if(strcasecmp(tagName, "/audiocycle/1/browser/back") == 0)
+	{		
+		media_cycle->goBack();
+	}
+	else if(strcasecmp(tagName, "/audiocycle/1/browser/forward") == 0)
+	{		
+		media_cycle->goForward();
 	}
 	// ...
 	//void setKey(int key);

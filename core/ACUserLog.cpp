@@ -53,7 +53,7 @@ void ACUserLog::addRootNode(long int _mediaId, int _clickTime) {
 	
 	ACMediaNode *userNode;
 	userNode = new ACMediaNode(0, _mediaId, _clickTime);
-	userNode->setDisplayed (true);
+	userNode->setDisplayed(true);
 	
 	userLogTree.set_head(*userNode);
 	//location.insert(*userNode);
@@ -70,7 +70,7 @@ long int ACUserLog::addNode(long int _parentId, long int _mediaId, int _clickTim
 
 	ACMediaNode *userNode;
 	userNode = new ACMediaNode(mNodeId, _mediaId, _clickTime);
-	userNode->setDisplayed (true);
+	userNode->setDisplayed(true);
 
 	// temporary node for comparison on nodeID using "==" method 
 	ACMediaNode *tmpNode;
@@ -78,6 +78,8 @@ long int ACUserLog::addNode(long int _parentId, long int _mediaId, int _clickTim
 
 	location = find(userLogTree.begin(), userLogTree.end(), *tmpNode);
 	userLogTree.append_child(location, *userNode); //CF: instead of location.insert(*userNode);
+	
+	this->getNodeFromId(mNodeId).setDisplayed(true);
 	
 	mNodeId++;
 	

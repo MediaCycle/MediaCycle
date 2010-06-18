@@ -65,4 +65,7 @@
 
 - (ACOsgBrowserRenderer*) renderer;
 
+//CF workaround due to issues with accessing C++ pointer through Objective-C functions...
+- (float) getMouseDistanceAtNode:(int)closest_node;
+
 @end

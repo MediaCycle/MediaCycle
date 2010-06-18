@@ -101,7 +101,7 @@ class ACAudioCycleOsgQt : public QMainWindow
 			ACAppleMultitouchTrackpadSupport *multitouch_trackpad;
 		#endif
         Ui::ACAudioCycleOsgQt ui;
-		bool updatedLibrary;
+		bool library_loaded;
 
 	protected:
 		//ACOsgBrowserViewQT* browserOsgView;

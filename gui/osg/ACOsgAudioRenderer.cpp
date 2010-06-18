@@ -351,6 +351,11 @@ void ACOsgAudioRenderer::updateNodes(double ratio) {
 			else
 				((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(colors[0]);
 			
+			if (attribute.isSelected()) {
+				Vec4 selected_color(0,0,0,1);
+				((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(selected_color);
+			}	
+			
 			T =  Matrix::rotate(-angle,Vec3(0.0,0.0,1.0)) * Matrix::scale(localscale/zoom,localscale/zoom,localscale/zoom) * T;
 		}
 				

@@ -59,6 +59,7 @@ private:
 	int 		navigationLevel; // initially all set to zero, while traversing, only the one incremented are kept
 	int			hover;
 	bool		displayed;
+	bool		selected;
 	
 	// previously in ACUserNode:
 	long int nodeId;
@@ -122,6 +123,9 @@ public:
 	
 	bool isDisplayed() const {return displayed;}
 	void setDisplayed(bool _dis){displayed = _dis;}
+	
+	bool isSelected() const {return selected;}
+	void setSelection(bool _sel){selected = _sel;}
 
 	void increaseNavigationLevel(){navigationLevel++;}
 };

@@ -91,6 +91,7 @@ protected:
 	vector<float>				 distance_mouse;
 	//ACPlugin* mLayoutPlugin;
 	//ACOsgLayoutType layout_type;
+	int displayed_nodes;
 
 public:
 	ACOsgBrowserRenderer();

@@ -214,32 +214,32 @@ void ACMediaBrowser::goBack()
 {
 	printf("backward\n");
 	
-	if (mBackwardNavigationStates.size() > 1) {
-		mForwardNavigationStates.push_back(mBackwardNavigationStates.back());
-		mBackwardNavigationStates.pop_back();
-		
-		setCurrentNavigationState(mBackwardNavigationStates.back());
-		// XSCF 250310 added this
-		this->updateNeighborhoods();
-		this->updateClusters(true);
-
-	}
+	if (getMode() == AC_MODE_CLUSTERS){
+		if (mBackwardNavigationStates.size() > 1) {
+			mForwardNavigationStates.push_back(mBackwardNavigationStates.back());
+			mBackwardNavigationStates.pop_back();
+			
+			setCurrentNavigationState(mBackwardNavigationStates.back());
+			// XSCF 250310 added this
+			this->updateClusters(true);
+		}
+	}	
 }
 
 void ACMediaBrowser::goForward()
 {
 	printf("forward\n");
 	
-	if (mForwardNavigationStates.size() > 0) {
-		mBackwardNavigationStates.push_back(mForwardNavigationStates.back());
-		mForwardNavigationStates.pop_back();
-		
-		setCurrentNavigationState(mBackwardNavigationStates.back());
-		// XSCF 250310 added this
-		this->updateNeighborhoods();
-		this->updateClusters(true);
-
-	}
+	if (getMode() == AC_MODE_CLUSTERS){
+		if (mForwardNavigationStates.size() > 0) {
+			mBackwardNavigationStates.push_back(mForwardNavigationStates.back());
+			mForwardNavigationStates.pop_back();
+			
+			setCurrentNavigationState(mBackwardNavigationStates.back());
+			// XSCF 250310 added this
+			this->updateClusters(true);
+		}
+	}	
 }
 
 void ACMediaBrowser::setHistory()
@@ -308,6 +308,29 @@ void ACMediaBrowser::setClickedNode(int inode){
 		mUserLog->clickNode(inode, 0);//CF put some machine time in here!
 	}
 }
+
+// returns true if the node is selected, false if not selected
+bool ACMediaBrowser::toggleNode(int node){
+	
+	for (set<int>::const_iterator iter = mSelectedNodes.begin();iter != mSelectedNodes.end();++iter){
+		if ((*iter)==node) {
+			mSelectedNodes.erase(*iter);
+			this->getMediaNode(node).setSelection(false);
+			return false;
+		}	
+	}
+	
+	mSelectedNodes.insert(node);
+	this->getMediaNode(node).setSelection(true);
+	return true;
+}	
+
+void ACMediaBrowser::dumpSelectedNodes(){
+	std::cout << "Selected Nodes: ";
+	for (set<int>::const_iterator iter = mSelectedNodes.begin();iter != mSelectedNodes.end();++iter)
+		std::cout << *iter << " ";
+	std::cout << std::endl;
+}	
 
 void ACMediaBrowser::setClickedLabel(int ilabel){
 	if (ilabel < -1 || ilabel >= this->getNumberOfLabels())
@@ -518,10 +541,10 @@ void ACMediaBrowser::libraryContentChanged() {
 			(*node).setCurrentPosition (ACRandom(), 
 										ACRandom(), 
 										ACRandom() / 10.0);
-			
+				
 			(*node).setNextPosition ((*node).getCurrentPositionX() + ACRandom() / 100.0,
 									 (*node).getCurrentPositionY() + ACRandom() / 100.0, 
-									 (*node).getCurrentPositionZ() + ACRandom() / 100.0);		
+									 (*node).getCurrentPositionZ() + ACRandom() / 100.0);
 			(*node).setDisplayed (true);
 		}	
 	}
@@ -1458,9 +1481,9 @@ void ACMediaBrowser::switchMode(ACBrowserMode _mode){
 						//CF 2) hide all nodes, change mode and make the reference node appear
 						for (ACMediaNodes::iterator node = mLoopAttributes.begin(); node != mLoopAttributes.end(); ++node){	
 							(*node).setDisplayed (false);
-						}
+						}	
 						this->setMode(_mode);
-						this->updateDisplay(false);
+						this->updateDisplay(true);
 						//CF 3) develop the first branch at the reference node
 						mUserLog->clickNode(0,0);//CF check if the ref node is correct everytime this way (1 arg), change clicktime (2nd arg)
 						this->updateDisplay(true);
@@ -1505,7 +1528,8 @@ bool ACMediaBrowser::changeClustersMethodPlugin(ACPlugin* acpl)
 	switch ( mMode ){
 		case AC_MODE_CLUSTERS:
 			this->setClustersMethodPlugin(acpl);
-			this->updateDisplay(true);
+			if (getLibrary()->getSize() > 0)
+				this->updateDisplay(true);
 			success = true;
 			break;
 		case AC_MODE_NEIGHBORS:
@@ -1529,7 +1553,7 @@ bool ACMediaBrowser::changeNeighborsMethodPlugin(ACPlugin* acpl)
 			break;
 		case AC_MODE_NEIGHBORS:	
 			this->setNeighborsMethodPlugin(acpl);
-			if (mNeighborsPosPlugin != NULL)
+			if (mNeighborsPosPlugin != NULL && getLibrary()->getSize() > 0)
 				this->updateDisplay(true);
 			success = true;
 			break;
@@ -1546,7 +1570,10 @@ bool ACMediaBrowser::changeClustersPositionsPlugin(ACPlugin* acpl)
 	switch ( mMode ){
 		case AC_MODE_CLUSTERS:
 			this->setClustersPositionsPlugin(acpl);
-			this->updateDisplay(true);
+			if (getLibrary()->getSize() > 0){
+				setState(AC_CHANGING);
+				mClustersPosPlugin->updateNextPositions(this);
+			}	
 			success = true;
 			break;
 		case AC_MODE_NEIGHBORS:	
@@ -1570,8 +1597,10 @@ bool ACMediaBrowser::changeNeighborsPositionsPlugin(ACPlugin* acpl)
 			break;
 		case AC_MODE_NEIGHBORS:	
 			this->setNeighborsPositionsPlugin(acpl);
-			if (mNeighborsMethodPlugin != NULL)
-				this->updateDisplay(true);
+			if (mNeighborsMethodPlugin != NULL && getLibrary()->getSize() > 0){
+				setState(AC_CHANGING);
+				mNeighborsPosPlugin->updateNextPositions(this);
+			}
 			success = true;
 			break;
 		default:

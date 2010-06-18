@@ -209,6 +209,7 @@ struct ACOsgBrowserViewData
 		return;            // reject dead keys
 	if ( [theArrow length] == 1 ) {
 		keyChar = [theArrow characterAtIndex:0];
+		//std::cout << "Key (Cocoa) " << keyChar << std::endl;
 		if ( keyChar == 122 ) {		// 'z'
 			zoomdown = 1;
 			return;
@@ -221,6 +222,10 @@ struct ACOsgBrowserViewData
 		if ( keyChar == 113 ) {		// 'q'
 			media_cycle->setAutoPlay(1);
 			autoplaydown = 1;
+			return;
+		}
+		if ( keyChar == 109 ) {		// 'm'
+			media_cycle->muteAllSources();
 			return;
 		}
 	}
@@ -247,11 +252,13 @@ struct ACOsgBrowserViewData
 		
 		if(loop >= 0)
 		{
-			media_cycle->incrementLoopNavigationLevels(loop);
+			if (media_cycle->getBrowser()->getMode() == AC_MODE_CLUSTERS)
+				media_cycle->incrementLoopNavigationLevels(loop);
 			media_cycle->setReferenceNode(loop);
 			
 			// XSCF 250310 added these 3
-			media_cycle->pushNavigationState();
+			if (media_cycle->getBrowser()->getMode() == AC_MODE_CLUSTERS)
+				media_cycle->pushNavigationState();
 			//media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
 			//media_cycle->getBrowser()->setState(AC_CHANGING);
 			
@@ -266,6 +273,7 @@ struct ACOsgBrowserViewData
 //			// remainders from updateClusters(true)
 //			media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
 //			media_cycle->getBrowser()->setState(AC_CHANGING);
+			media_cycle->setNeedsDisplay(true);
 		}
 	}
 		
@@ -420,5 +428,8 @@ struct ACOsgBrowserViewData
 	renderer->updateLabels(frac);//CF
 	}
 }
+
+//CF workaround due to issues with accessing C++ pointer through Objective-C functions...
+- (float) getMouseDistanceAtNode:(int)closest_node {return renderer->getDistanceMouse()[closest_node];}
 
 @end

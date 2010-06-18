@@ -68,6 +68,7 @@ void ACMediaNode::init(long int _nodeId, long int _mediaId){ // (0,0) by default
 	navigationLevel = 0;
 	hover = 0;
 	displayed = true;
+	selected = false;
 	
 	currentPos.x = 0;
 	currentPos.y = 0;

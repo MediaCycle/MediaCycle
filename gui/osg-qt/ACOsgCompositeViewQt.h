@@ -1,7 +1,7 @@
 /**
  * @brief ACOsgCompositeViewQt.h
  * @author Christian Frisson
- * @date 03/06/2010
+ * @date 18/06/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -126,16 +126,19 @@ class ACOsgCompositeViewQt : public osgViewer::CompositeViewer, public QGLWidget
 		void updateTransformsFromTimeline( double frac);
 		ACOsgBrowserRenderer* getBrowserRenderer(){return browser_renderer;};
 		ACOsgTimelineRenderer* getTimelineRenderer(){return timeline_renderer;};
+		int getSelectedRhythmPattern(){return selectedRhythmPattern;}
 	
 	private:
 		int mousedown, zoomdown, forwarddown, autoplaydown, rotationdown;
-		int borderdown, transportdown, setrhythmpatterndown;
+		int borderdown, transportdown;
+		bool selectrhythmpattern, selectgrains;
 		float refx, refy;
 		float refcamx, refcamy;
 		float refzoom, refrotation;
 		int septhick; // CF half of the thickness of the border that separates the browser and timeline viewers
 		float sepx,sepy; //CF location (in OSG coordinates) of the border that separates the browser and timeline viewers
 		float refsepy;
+		int selectedRhythmPattern;
 };
 
 #endif

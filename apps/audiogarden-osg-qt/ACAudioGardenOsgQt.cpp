@@ -47,11 +47,11 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 }
 
 ACAudioGardenOsgQt::ACAudioGardenOsgQt(QWidget *parent)
- : QMainWindow(parent), 
- updatedLibrary(false)
+ : QMainWindow(parent), library_loaded(false)
 {
 	ui.setupUi(this); // first thing to do
 	media_cycle = new MediaCycle(MEDIA_TYPE_AUDIO,"/tmp/","mediacycle.acl");
+	
 	// XS TODO fichier de configuration
 	#if defined(__APPLE__)
 		std::string build_type ("Release");
@@ -120,7 +120,7 @@ ACAudioGardenOsgQt::~ACAudioGardenOsgQt()
 
 void ACAudioGardenOsgQt::updateLibrary()
 {
-	if (!updatedLibrary) {
+	if (!library_loaded) {
 		// set to 0 the first time a library is loaded
 		// XSCF do we always want this to be 0 ?
 		media_cycle->setReferenceNode(0);
@@ -134,7 +134,7 @@ void ACAudioGardenOsgQt::updateLibrary()
 	ui.compositeOsgView->prepareFromTimeline();
 	//ui.compositeOsgView->setPlaying(true);
 	media_cycle->setNeedsDisplay(true);
-	updatedLibrary = true;
+	library_loaded = true;
 	ui.compositeOsgView->setFocus();
 }
 
@@ -156,6 +156,7 @@ void ACAudioGardenOsgQt::on_pushButtonClean_clicked()
 	media_cycle->cleanUserLog();
 	media_cycle->libraryContentChanged();
 	this->updateLibrary();
+	library_loaded = false;
 }	
 
 void ACAudioGardenOsgQt::on_pushButtonRecenter_clicked()
@@ -218,49 +219,42 @@ void ACAudioGardenOsgQt::on_pushButtonFeedbackStart_clicked()
 
 void ACAudioGardenOsgQt::on_pushButtonCompositing_clicked(){
 	std::cout << "Compositing" << std::endl;
+	
+	//CF list selected rhythm pattern
+	std::cout << "Selected Rhythm Pattern: " << ui.compositeOsgView->getSelectedRhythmPattern() << std::endl;
+	
+	//CF list selected grains
+	media_cycle->getBrowser()->dumpSelectedNodes();
+	
+	//CF do something with these grains
+	set<int> selectedNodes = media_cycle->getBrowser()->getSelectedNodes();
+	std::cout << "Selected Grains: ";
+	for (set<int>::const_iterator iter = selectedNodes.begin();iter != selectedNodes.end();++iter){
+		std::cout << *iter << " ";
+		//CF right here...
+	}	
+	std::cout << std::endl;
 }	
 
 void ACAudioGardenOsgQt::on_checkBoxRhythm_stateChanged(int state)
 {
-	if (updatedLibrary)
-	{
-		media_cycle->setWeight(0,state/2.0f);
-// XS CF TODO check if this works
-		media_cycle->updateDisplay(true); 
-		//		media_cycle->updateClusters(true); 
-		//media_cycle->setNeedsDisplay(true);
-
-		ui.compositeOsgView->updateTransformsFromBrowser(0.0); 
-	}
-	//ui.compositeOsgView->setFocus();
+	media_cycle->setWeight(0,state/2.0f);
+	if (library_loaded)
+		media_cycle->updateDisplay(true);
 }
 
 void ACAudioGardenOsgQt::on_checkBoxTimbre_stateChanged(int state)
 {
-	if (updatedLibrary)
-	{
-		media_cycle->setWeight(1,state/2.0f);
-		// XS CF TODO check if this works
-		media_cycle->updateDisplay(true); 
-//		media_cycle->updateClusters(true); 
-//		media_cycle->setNeedsDisplay(true);
-		ui.compositeOsgView->updateTransformsFromBrowser(1.0); 
-	}
-	//ui.compositeOsgView->setFocus();
+	media_cycle->setWeight(1,state/2.0f);
+	if (library_loaded)
+		media_cycle->updateDisplay(true);
 }
 
 void ACAudioGardenOsgQt::on_checkBoxHarmony_stateChanged(int state)
 {
-	if (updatedLibrary)
-	{
-		media_cycle->setWeight(2,state/2.0f);
-		// XS CF TODO check if this works
-		media_cycle->updateDisplay(true); 
-		//		media_cycle->updateClusters(true); 
-		//		media_cycle->setNeedsDisplay(true);
-		ui.compositeOsgView->updateTransformsFromBrowser(1.0); 
-	}
-	//ui.compositeOsgView->setFocus();
+	media_cycle->setWeight(2,state/2.0f);
+	if (library_loaded)
+		media_cycle->updateDisplay(true);
 }
 
 void ACAudioGardenOsgQt::loadACLFile(){
@@ -504,7 +498,7 @@ void ACAudioGardenOsgQt::processOscMessage(const char* tagName)
 		
 		ui.compositeOsgView->prepareFromBrowser();
 		media_cycle->setNeedsDisplay(true);
-		updatedLibrary = true;
+		library_loaded = true;
 	}
 	else if(strcasecmp(tagName, "/audiocycle/1/browser/library/clear") == 0)
 	{
@@ -518,7 +512,7 @@ void ACAudioGardenOsgQt::processOscMessage(const char* tagName)
 		
 		ui.compositeOsgView->prepareFromBrowser();
 		media_cycle->setNeedsDisplay(true);
-		updatedLibrary = true;
+		library_loaded = true;
 	}	
 	else if(strcasecmp(tagName, "/audiocycle/1/browser/recenter") == 0)
 	{
@@ -536,11 +530,11 @@ void ACAudioGardenOsgQt::processOscMessage(const char* tagName)
 	{
 		float bpm;
 		osc_browser->readFloat(mOscReceiver, &bpm);
-		int clicked_node = media_cycle->getClickedNode();
-		if (clicked_node > -1)
+		int node = media_cycle->getClickedNode();
+		if (node > -1)
 		{
-			audio_engine->setLoopSynchroMode(clicked_node, ACAudioEngineSynchroModeAutoBeat);
-			audio_engine->setLoopScaleMode(clicked_node, ACAudioEngineScaleModeResample);
+			audio_engine->setLoopSynchroMode(node, ACAudioEngineSynchroModeAutoBeat);
+			audio_engine->setLoopScaleMode(node, ACAudioEngineScaleModeResample);
 			audio_engine->setBPM((float)bpm);
 		}
 	}	
@@ -549,12 +543,12 @@ void ACAudioGardenOsgQt::processOscMessage(const char* tagName)
 		float scrub;
 		osc_browser->readFloat(mOscReceiver, &scrub);
 		
-		int clicked_node = media_cycle->getClickedNode();
-		if (clicked_node > -1)
+		int node = media_cycle->getClickedNode();
+		if (node > -1)
 		{
 			//media_cycle->pickedObjectCallback(-1);
-			audio_engine->setLoopSynchroMode(clicked_node, ACAudioEngineSynchroModeManual);
-			audio_engine->setLoopScaleMode(clicked_node, ACAudioEngineScaleModeVocode);
+			audio_engine->setLoopSynchroMode(node, ACAudioEngineSynchroModeManual);
+			audio_engine->setLoopScaleMode(node, ACAudioEngineScaleModeVocode);
 			audio_engine->setScrub((float)scrub*10000); // temporary hack to scrub between 0 an 1
 		}
 	}
@@ -563,8 +557,8 @@ void ACAudioGardenOsgQt::processOscMessage(const char* tagName)
 		float pitch;
 		osc_browser->readFloat(mOscReceiver, &pitch);
 		
-		int clicked_node = media_cycle->getClickedNode();
-		if (clicked_node > -1)
+		int node = media_cycle->getClickedNode();
+		if (node > -1)
 		{
 			/*
 			 if (!is_pitching)
@@ -573,12 +567,31 @@ void ACAudioGardenOsgQt::processOscMessage(const char* tagName)
 			 is_scrubing = false;
 			 */ 
 			//media_cycle->pickedObjectCallback(-1);
-			audio_engine->setLoopSynchroMode(clicked_node, ACAudioEngineSynchroModeAutoBeat);
-			audio_engine->setLoopScaleMode(clicked_node, ACAudioEngineScaleModeResample);
+			audio_engine->setLoopSynchroMode(node, ACAudioEngineSynchroModeAutoBeat);
+			audio_engine->setLoopScaleMode(node, ACAudioEngineScaleModeResample);
 			//}
-			audio_engine->setSourcePitch(clicked_node, (float) pitch); 
+			audio_engine->setSourcePitch(node, (float) pitch); 
 		}
 		
 	}
+	else if(strcasecmp(tagName, "/audiocycle/1/browser/recluster") == 0)
+	{		
+		//int node = media_cycle->getClickedNode();
+		int node = media_cycle->getClosestNode();
+		if (library_loaded && media_cycle->getBrowser()->getMode() == AC_MODE_CLUSTERS && node > -1)
+		{
+			media_cycle->setReferenceNode(node);
+			media_cycle->pushNavigationState();
+			media_cycle->updateDisplay(true);
+		}
+	}
+	else if(strcasecmp(tagName, "/audiocycle/1/browser/back") == 0)
+	{		
+		media_cycle->goBack();
+	}
+	else if(strcasecmp(tagName, "/audiocycle/1/browser/forward") == 0)
+	{		
+		media_cycle->goForward();
+	}	
 	//std::cout << "End of OSC process messages" << std::endl;
 }
