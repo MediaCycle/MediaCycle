@@ -6,6 +6,6 @@ ADD_DEPENDENCIES(mediacycle-cli mediacycle)
 INCLUDE_DIRECTORIES(. ../audiogarden)
 INCLUDE_DIRECTORIES(. ../fftooura ../armadillo)
 
-TARGET_LINK_LIBRARIES(mediacycle-cli mediacycle audiogarden)
+TARGET_LINK_LIBRARIES(mediacycle-cli mediacycle)
 
 INSTALL(TARGETS mediacycle-cli RUNTIME DESTINATION bin)

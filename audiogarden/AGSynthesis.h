@@ -1,6 +1,6 @@
 /**
  * @brief AGSynthesis.h
- * @author Damien Tardieu
+ * @author Alexis Moinet
  * @date 18/06/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
@@ -38,7 +38,7 @@
 #include "Armadillo-utils.h"
 #include <vector>
 #include <map>
-#include "Mediacycle.h"
+#include "MediaCycle.h"
 
 using namespace arma;
 
