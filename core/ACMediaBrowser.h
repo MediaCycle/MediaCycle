@@ -174,6 +174,9 @@ public:
 	// == Nodes
 	void setClickedNode(int inode);
 	int getClickedNode()					{return mClickedNode; };
+	bool toggleNode(int node);
+	void dumpSelectedNodes();
+	set<int>& getSelectedNodes(){return mSelectedNodes;}
 	int getClosestNode()					{return mClosestNode; };
 	void setReferenceNode(int index);
 	const ACMediaNodes	&getLoopAttributes() const { return mLoopAttributes; } 	// XS 100310 is this still necessary ? const ?
@@ -306,6 +309,7 @@ protected:
 	ACBrowserMode		mMode;
 	
 	int 				mClickedNode; // valid between mouseDown and mouseUp, otherwise -1
+	set<int>			mSelectedNodes;
 	int 				mReferenceNode;
 	int					mClosestNode;
 

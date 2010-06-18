@@ -309,6 +309,29 @@ void ACMediaBrowser::setClickedNode(int inode){
 	}
 }
 
+// returns true if the node is selected, false if not selected
+bool ACMediaBrowser::toggleNode(int node){
+	
+	for (set<int>::const_iterator iter = mSelectedNodes.begin();iter != mSelectedNodes.end();++iter){
+		if ((*iter)==node) {
+			mSelectedNodes.erase(*iter);
+			this->getMediaNode(node).setSelection(false);
+			return false;
+		}	
+	}
+	
+	mSelectedNodes.insert(node);
+	this->getMediaNode(node).setSelection(true);
+	return true;
+}	
+
+void ACMediaBrowser::dumpSelectedNodes(){
+	std::cout << "Selected Nodes: ";
+	for (set<int>::const_iterator iter = mSelectedNodes.begin();iter != mSelectedNodes.end();++iter)
+		std::cout << *iter << " ";
+	std::cout << std::endl;
+}	
+
 void ACMediaBrowser::setClickedLabel(int ilabel){
 	if (ilabel < -1 || ilabel >= this->getNumberOfLabels())
 		cerr << "<ACMediaBrowser::setClickedLabel> : index " << ilabel << "out of bounds" << endl;

@@ -219,6 +219,21 @@ void ACAudioGardenOsgQt::on_pushButtonFeedbackStart_clicked()
 
 void ACAudioGardenOsgQt::on_pushButtonCompositing_clicked(){
 	std::cout << "Compositing" << std::endl;
+	
+	//CF list selected rhythm pattern
+	std::cout << "Selected Rhythm Pattern: " << ui.compositeOsgView->getSelectedRhythmPattern() << std::endl;
+	
+	//CF list selected grains
+	media_cycle->getBrowser()->dumpSelectedNodes();
+	
+	//CF do something with these grains
+	set<int> selectedNodes = media_cycle->getBrowser()->getSelectedNodes();
+	std::cout << "Selected Grains: ";
+	for (set<int>::const_iterator iter = selectedNodes.begin();iter != selectedNodes.end();++iter){
+		std::cout << *iter << " ";
+		//CF right here...
+	}	
+	std::cout << std::endl;
 }	
 
 void ACAudioGardenOsgQt::on_checkBoxRhythm_stateChanged(int state)

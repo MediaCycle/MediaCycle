@@ -39,11 +39,12 @@
 ACOsgCompositeViewQt::ACOsgCompositeViewQt( QWidget * parent, const char * name, const QGLWidget * shareWidget, WindowFlags f):
 	QGLWidget(parent, shareWidget, f),
 	mousedown(0), zoomdown(0), forwarddown(0), autoplaydown(0),rotationdown(0),
-	borderdown(0), transportdown(0), setrhythmpatterndown(0),
+	borderdown(0), transportdown(0), selectrhythmpattern(false), selectgrains(false),
 	refx(0.0f), refy(0.0f),
 	refcamx(0.0f), refcamy(0.0f),
 	refzoom(0.0f),refrotation(0.0f),
-	septhick(5),sepx(0.0f),sepy(0.0f),refsepy(0.0f)
+	septhick(5),sepx(0.0f),sepy(0.0f),refsepy(0.0f),
+	selectedRhythmPattern(-1)
 {
 	osg_view = new osgViewer::GraphicsWindowEmbedded(0,0,width(),height());
 	setFocusPolicy(Qt::StrongFocus);// CF instead of ClickFocus
@@ -200,7 +201,10 @@ void ACOsgCompositeViewQt::keyPressEvent( QKeyEvent* event )
 			}	
 			break;
 		case Qt::Key_P:
-			setrhythmpatterndown = 1;
+			selectrhythmpattern = true;
+			break;
+		case Qt::Key_G:
+			selectgrains = true;
 			break;	
 		default:
 			break;
@@ -218,7 +222,8 @@ void ACOsgCompositeViewQt::keyReleaseEvent( QKeyEvent* event )
 	media_cycle->setAutoPlay(0);
 	rotationdown = 0;
 	transportdown = 0;
-	setrhythmpatterndown = 0;
+	selectrhythmpattern = false;
+	selectgrains = false;
 }
 
 void ACOsgCompositeViewQt::mousePressEvent( QMouseEvent* event )
@@ -293,7 +298,7 @@ void ACOsgCompositeViewQt::mouseMoveEvent( QMouseEvent* event )
 		}
 		else
 		{	
-			if ( (forwarddown == 0) && (setrhythmpatterndown == 0) ) 
+			if ( (forwarddown == 0) && (selectrhythmpattern == false) && (selectgrains == false)) 
 			{
 				if ( (event->y() >= height() - ( browser_view->getCamera()->getViewport()->height() + browser_view->getCamera()->getViewport()->y() ) ) && (event->y() <= height() - ( browser_view->getCamera()->getViewport()->y() + septhick) ))
 				{
@@ -339,7 +344,7 @@ void ACOsgCompositeViewQt::mouseReleaseEvent( QMouseEvent* event )
 	
 	if ( (media_cycle) && (media_cycle->hasBrowser()))
 	{
-		if ( (forwarddown==1) || (setrhythmpatterndown == 1) )
+		if ( (forwarddown==1) || (selectrhythmpattern == true) || (selectgrains == true))
 		{	
 			int loop = media_cycle->getClickedNode();
 			std::cout << "node " << loop << " selected" << std::endl;
@@ -372,8 +377,9 @@ void ACOsgCompositeViewQt::mouseReleaseEvent( QMouseEvent* event )
 //					media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
 //					media_cycle->getBrowser()->setState(AC_CHANGING);
 				}
-				else if (setrhythmpatterndown == 1)
+				else if (selectrhythmpattern == true)
 				{
+					selectedRhythmPattern = loop;
 					if ( timeline_renderer->getTrack(0)!=NULL ) {
 						if ( (timeline_renderer->getTrack(0)->getMediaIndex() != loop) )
 						{	
@@ -382,7 +388,12 @@ void ACOsgCompositeViewQt::mouseReleaseEvent( QMouseEvent* event )
 							timeline_renderer->getTrack(0)->setMediaIndex(loop);
 						}	
 					}
-				}	
+				}
+				else if (selectgrains == true)
+				{
+					media_cycle->getBrowser()->toggleNode(loop);
+					media_cycle->getBrowser()->dumpSelectedNodes();
+				}
 			}
 		}	
 		media_cycle->setClickedNode(-1);
