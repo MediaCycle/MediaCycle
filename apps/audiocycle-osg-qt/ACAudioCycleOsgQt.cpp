@@ -643,7 +643,7 @@ void ACAudioCycleOsgQt::processOscMessage(const char* tagName)
 		}
 		
 	}
-	else if(strcasecmp(tagName, "/audiocycle/1/browser/1/recluster") == 0)
+	else if(strcasecmp(tagName, "/audiocycle/1/browser/recluster") == 0)
 	{		
 		//int node = media_cycle->getClickedNode();
 		int node = media_cycle->getClosestNode();
@@ -654,11 +654,11 @@ void ACAudioCycleOsgQt::processOscMessage(const char* tagName)
 			media_cycle->updateDisplay(true);
 		}
 	}
-	else if(strcasecmp(tagName, "/audiocycle/1/browser/1/back") == 0)
+	else if(strcasecmp(tagName, "/audiocycle/1/browser/back") == 0)
 	{		
 		media_cycle->goBack();
 	}
-	else if(strcasecmp(tagName, "/audiocycle/1/browser/1/forward") == 0)
+	else if(strcasecmp(tagName, "/audiocycle/1/browser/forward") == 0)
 	{		
 		media_cycle->goForward();
 	}
