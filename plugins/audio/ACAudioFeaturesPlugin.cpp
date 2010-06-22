@@ -77,8 +77,11 @@ std::vector<ACMediaFeatures*> ACAudioFeaturesPlugin::calculate(ACMediaData* audi
 // 	for(int i=0; i < (long) theAudio->getNFrames() * theAudio->getChannels(); i++){
 // 		output<<data[i]<<endl;
 // 	}
-
-	descmf = computeFeatures(data, theAudio->getSampleRate(), theAudio->getChannels(), theAudio->getNFrames(),16, 13, 1024, extendSoundLimits);
+	
+	vector<string> descList;
+	descList.push_back("MFCC");
+	descList.push_back("Energy");
+	descmf = computeFeatures(data, theAudio->getSampleRate(), theAudio->getChannels(), theAudio->getNFrames(),32, 13, 1024, extendSoundLimits);
 	
 	for (int i=0; i<descmf.size(); i++)
 		desc.push_back(descmf[i]->mean());
