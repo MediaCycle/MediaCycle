@@ -1,7 +1,7 @@
 /**
  * @brief ACAudioFeatures.h
  * @author Damien Tardieu
- * @date 18/06/2010
+ * @date 22/06/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -46,7 +46,7 @@ ACMediaTimedFeature* computeFeature(float* data,
 																		 int samplerate, 
 																		 int nchannels, 
 																		 long length,
-																		 int mfccNbChannels = 16, 
+																		 int mfccNbChannels = 32, 
 																		 int mfccNb = 13, 
 																		 int windowSize=512, 	
 																		 bool extendSoundLimits = false); 
@@ -55,7 +55,7 @@ std::vector<ACMediaTimedFeature*> computeFeatures(float* data,
 																									 int samplerate, 
 																									 int nchannels, 
 																									 long length, 
-																									 int mfccNbChannels = 16, 
+																									 int mfccNbChannels = 32, 
 																									 int mfccNb = 13, 
 																									 int windowSize=512, 	
 																									 bool extendSoundLimits = false); 
@@ -63,7 +63,7 @@ std::vector<ACMediaTimedFeature*> computeFeatures(float* data,
 																									 int samplerate, 
 																									 int nchannels, 
 																									 long length, 
-																									 int mfccNbChannels = 16, 
+																									 int mfccNbChannels = 32, 
 																									 int mfccNb = 13, 
 																									 int windowSize=512, 	
 																									 bool extendSoundLimits = false); 

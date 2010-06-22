@@ -1,7 +1,7 @@
 /**
  * @brief ACAudioFeatures.cpp
  * @author Damien Tardieu
- * @date 18/06/2010
+ * @date 22/06/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -192,7 +192,6 @@ std::vector<ACMediaTimedFeature*> computeFeatures(float* data, vector<string> de
 	for (long i=0; i < signal_v.n_elem-windowSize; i = i+hopSize){
 		time_v(index) = ((double)i+((double)windowSize*(1.0-(double)extendSoundLimits))/2.0)/(double)sr_hz;
 		frame_v = signal_v.rows(i,i+windowSize-1);
-		//frame_v.save("frame.txt", arma_ascii);
 		frameW_v = signal_v.rows(i,i+windowSize-1)%window_v;
  		frameFFTabs_v = abs(fft(frameW_v, fftSize));
  		frameFFTabs2_v = frameFFTabs_v.rows(0,fftSize/2-1);
@@ -443,8 +442,8 @@ double logAttackTime(colvec ener_v, int sr_hz){
 
 
 rowvec mfcc(colvec x_v, mat melfilter_m, int mfccNb){
-	colvec x2_v = log(trans(melfilter_m)*(x_v+math::eps()));
-	//	colvec x2_v = trans(melfilter_m)*x_v;
+	colvec x2_v = log10(trans(melfilter_m)*(x_v+math::eps()));
+	colvec xdct_v = dct(x2_v, x2_v.n_elem);
 	rowvec mfcc_v = trans(dct(x2_v, x2_v.n_elem));
 	mfcc_v = mfcc_v.cols(0, mfccNb-1);
 	return mfcc_v;

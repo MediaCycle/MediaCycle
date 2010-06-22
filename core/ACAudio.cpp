@@ -531,7 +531,7 @@ void ACAudio::computeWaveform(const float* samples_v) {
 	
 	waveform = new float[2 * waveformLength];
 	k = 0;
-	for (i=0; i<2 * waveformLength; i=i+2) {
+	for (i=0; i< 2*waveformLength-1; i=i+2) {
 		waveform[i] = 0;
 		waveform[i+1] = 0;
 		for (j=k;j<k+n_samples_hop;j++) {

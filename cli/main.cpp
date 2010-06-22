@@ -59,17 +59,17 @@ int main(int argc, char** argv) {
 		mediacycle->addPlugin("../../plugins/audio/" + build_type + "/mc_audio.dylib");
 		mediacycle->addPlugin("../../plugins/segmentation/" + build_type + "/mc_segmentation.dylib");
 	
-		//		mediacycle->importDirectory("/Users/dtardieu/data/AudioCycleProPackTest/zero-g-pro-pack_b/Super Funk/Funkmachine-E/", 1);
+		//mediacycle->importDirectory("/Users/dtardieu/data/AudioCycleProPackTest/zero-g-pro-pack_b/Super Funk/Funkmachine-E/", 1);
 		//mediacycle->importDirectory("/Users/dtardieu/data/test/testEnv/",1);
 		//		mediacycle->importDirectory("/Users/dtardieu/data/rire-audiocycle/",1);
 		//		mediacycle->importDirectory("/Users/dtardieu/data/footsteps/", 1);
-		mediacycle->importDirectory("/Users/dtardieu/data/AudioGarden/audiogarden/sounds-extract",1);
+		mediacycle->importDirectory("/Users/dtardieu/data/AudioGarden/audiogarden/sounds2",1);
 		//mediacycle->saveMCSLLibrary("/Users/dtardieu/data/AudioCycleProPackTest/zero-g-pro-pack_b/Super Funk/Funkmachine-E.acl");
 		//mediacycle->saveACLLibrary("/Users/dtardieu/data/test/testEnv/testEnv.acl");
 
 		//mediacycle->importMCSLLibrary("/Users/dtardieu/data/AudioCycleProPackTest/zero-g-pro-pack_b/Super Funk/Funkmachine-E.acl");
 
-		//		mediacycle->saveMCSLLibrary("/Users/dtardieu/data/AudioCycleProPackTest/zero-g-pro-pack_b/Super Funk/Funkmachine-E.mcsl");
+		//mediacycle->saveMCSLLibrary("/Users/dtardieu/data/AudioCycleProPackTest/zero-g-pro-pack_b/Super Funk/Funkmachine-E.mcsl");
 		//		mediacycle->saveMCSLLibrary("/Users/dtardieu/data/rire-audiocycle/rire-audiocycle.mcsl");
 		//		mediacycle->saveMCSLLibrary("/Users/dtardieu/data/footsteps/footsteps.mcsl");
 		mediacycle->saveMCSLLibrary("/Users/dtardieu/data/AudioGarden/audiogarden/audiogarden.mcsl");

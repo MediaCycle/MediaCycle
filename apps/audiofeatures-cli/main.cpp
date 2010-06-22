@@ -1,7 +1,7 @@
 /**
  * @brief main.cpp
  * @author Damien Tardieu
- * @date 18/06/2010
+ * @date 22/06/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -112,9 +112,9 @@ int main(int argc, char** argv){
 	float* data;
 
 	int bflag, ch, fd;
-	int mfccNbChannels = 16;
+	int mfccNbChannels = 32;
 	int mfccNb = 13;
-	int windowSize = 256; 	
+	int windowSize = 512; 	
 	bool extendSoundLimits = false;
 	
 	string myname(argv[0]);

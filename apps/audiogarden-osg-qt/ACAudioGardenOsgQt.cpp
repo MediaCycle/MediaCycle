@@ -55,9 +55,11 @@ ACAudioGardenOsgQt::ACAudioGardenOsgQt(QWidget *parent)
 	// XS TODO fichier de configuration
 	#if defined(__APPLE__)
 		std::string build_type ("Release");
-		#ifdef USE_DEBUG
-			build_type = "Debug";
-		#endif
+#ifdef USE_DEBUG
+		build_type = "Debug";
+#endif
+		
+		media_cycle->addPlugin("../../../plugins/segmentation/" + build_type + "/mc_segmentation.dylib");
 		int vizplugloaded = media_cycle->addPlugin("../../../plugins/visualisation/" + build_type + "/mc_visualisation.dylib");
 		if ( vizplugloaded == 0 )
 		{

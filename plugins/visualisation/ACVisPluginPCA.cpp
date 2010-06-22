@@ -1,7 +1,7 @@
 /**
  * @brief ACVisPluginPCA.cpp
- * @author Christian Frisson
- * @date 27/05/2010
+ * @author Damien Tardieu
+ * @date 22/06/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -89,7 +89,6 @@ void ACVisPluginPCA::updateNextPositions(ACMediaBrowser* mediaBrowser){
 
 	nbActiveFeatures = 9;
 	extractDescMatrix(mediaBrowser, desc_m, featureNames);
-	desc_m.save("desc.txt", arma_ascii);
 	mat descN_m = zscore(desc_m);
 	mat coeff;
 	mat score;

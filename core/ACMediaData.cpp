@@ -92,8 +92,8 @@ void ACMediaData::readAudioData(string _fname){
 		puts (sf_strerror (NULL)) ;
 		exit(1);
 	}
-	audio_ptr = new float[(long) sfinfo.frames];
-	sf_read_float(testFile, audio_ptr, sfinfo.frames);
+	audio_ptr = new float[(long) sfinfo.frames * sfinfo.channels];
+	sf_readf_float(testFile, audio_ptr, sfinfo.frames);
 	sf_close(testFile);
 }
 
