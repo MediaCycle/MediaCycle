@@ -65,7 +65,7 @@ IF ( UNIX )
 	#enables packaging (ubuntu : .deb, .sh, .tar.gz, .tar.Z, other platforms : ?)
 	#to build packages, use: make package
 	#to enable .deb build (disabled by default) use: cmake .. -DCPACK_BINARY_DEB:BOOL=on
-	SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "Numediart")
+	SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "numediart")
 	INCLUDE(CPack)#enable packaging by including the CPack module
 ENDIF ( UNIX )
 
