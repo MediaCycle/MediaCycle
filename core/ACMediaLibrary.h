@@ -57,6 +57,9 @@ protected:
 	std::vector<ACMedia*> media_library;
 	std::vector< std::vector<double> > mean_features, stdev_features;
 	int index_last_normalized; // last item whose features have been normalized
+	
+	long synthesisID;
+	
 public:
 	ACMediaLibrary();
 	ACMediaLibrary(ACMediaType aMediaType);
@@ -75,6 +78,9 @@ public:
 	int deleteMedia(int i);
 	
 	std::string getThumbnailFileName(int i);
+
+	long getSynthesisID(){return synthesisID;};
+	void setSynthesisID(long _id){synthesisID = _id;};
 	
 	void normalizeFeatures();
 	void denormalizeFeatures();
@@ -83,7 +89,7 @@ public:
 	std::vector< std::vector<double> > getMeanFeatures() {return mean_features;};
 	std::vector< std::vector<double> > getStdevFeatures() {return stdev_features;};
 	
-	int importDirectory(std::string path, int recursive, int id=-1, ACPluginManager *acpl=NULL, bool forward_order=true);
+	int importDirectory(std::string path, int recursive, int id=-1, ACPluginManager *acpl=NULL, bool forward_order=true, bool doSegment=false);
 	int scanDirectory(std::string _path, int _recursive, std::vector<string>& filenames);
 
 	int openLibrary(std::string _path, bool aInitLib=false);

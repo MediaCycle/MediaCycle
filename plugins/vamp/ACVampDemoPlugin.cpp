@@ -58,7 +58,10 @@ std::vector<ACMediaFeatures*> ACVampDemoPlugin::calculate(ACMediaData* audio_dat
 	std::vector<ACMediaFeatures*> desc;
 	//	int sr = ((ACAudio*)theMedia)->getSampleRate();
 	ACAudio* theAudio = (ACAudio*) theMedia;
-  descmf.push_back(runPlugin("qm-vamp-plugins", "qm-chromagram", "0", 0, theAudio->getFileName(), 0));
+	float* audioSamples = theAudio->getSamples();
+	descmf.push_back(runPlugin("qm-vamp-plugins", "qm-chromagram", "0", 0, audioSamples, theAudio->getNFrames(), theAudio->getSampleRate(), theAudio->getChannels(), 0));
+	//	descmf.push_back(runPlugin("qm-vamp-plugins", "qm-chromagram", "0", 0, theAudio->getFileName(), 0));
+	delete [] audioSamples;
 
 	for (int i=0; i<descmf.size(); i++)
 		desc.push_back(descmf[i]->mean());

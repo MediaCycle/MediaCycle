@@ -1,7 +1,7 @@
 /**
  * @brief AGSynthesis.cpp
  * @author Damien Tardieu
- * @date 18/06/2010
+ * @date 29/06/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -31,12 +31,26 @@
 
 #include "AGSynthesis.h"
 #include "ACAudio.h"
+#include <stdio.h>
+#include <sndfile.h>
+#include <string.h>
+#include "ACAudioFeatures.h"
+#include <samplerate.h>
+#include <iostream>
+#include "Armadillo-utils.h"
+#include <map>
+#include "MediaCycle.h"
 
-void AGSynthesis(ACMediaLibrary* lib, long targetId, vector<long> grainIds, float** syn, long &length){
 
+using namespace arma;
+
+
+void AGSynthesis(MediaCycle* mc, long targetId, vector<long> grainIds, float** syn, long &length){
+
+	ACMediaLibrary* lib = mc->getLibrary();
 	vector<string> featureList;
-	featureList.push_back("Mean Of MFCC");
-	featureList.push_back("Mean of SFM");
+	featureList.push_back("Mean of MFCC");
+	featureList.push_back("Mean of Spectral Flatness");
 	featureList.push_back("Interpolated Energy");
 
 	int durationT = lib->getMedia(targetId)->getDuration();
@@ -73,18 +87,23 @@ void AGSynthesis(ACMediaLibrary* lib, long targetId, vector<long> grainIds, floa
 
 	// features of the target segments
 	mat descTS_m = extractDescMatrix(lib, featureList, targetSegmentIds);
-
 	
 	descG_m = zscore(descG_m);
 	descTS_m = zscore(descTS_m);
-
-	mat dist_m = euclideanDistance(descTS_m, descG_m);
 	
+	descG_m.save("descG.txt", arma_ascii);
+	descTS_m.save("descTS.txt", arma_ascii);
+	mat dist_m = euclideanDistance(descTS_m, descG_m);
+	dist_m.save("dist.txt", arma_ascii);
+
 	ucolvec mp_v(dist_m.n_rows);
 	for (int i=0; i<dist_m.n_rows; i++){
 		mp_v(i) = min_index(conv_to<rowvec>::from(dist_m.row(i)));
 	}
-	std::cout << mp_v << std::endl;
+	
+	for (int i=0; i < mp_v.n_elem; i++){
+		std::cout << grainIds[mp_v(i)] << " ";		
+	}
 
 	colvec seg_samp_start_v(targetSegment_v.size()); 
 	colvec seg_samp_end_v(targetSegment_v.size());
@@ -100,8 +119,8 @@ void AGSynthesis(ACMediaLibrary* lib, long targetId, vector<long> grainIds, floa
 	// compuation of the synthesized sound duration
 	long durationSyn = 0;
 	for (int i=0; i<targetSegment_v.size(); i++){
-		if (seg_samp_start_v(i) + ((ACAudio*)lib->getMedia(mp_v(i)))->getNFrames() - 1 > durationSyn){
-			durationSyn = seg_samp_start_v(i) + ((ACAudio*)lib->getMedia(mp_v(i)))->getNFrames() - 1;
+		if (seg_samp_start_v(i) + ((ACAudio*)lib->getMedia(grainIds[mp_v(i)]))->getNFrames() > durationSyn){
+			durationSyn = seg_samp_start_v(i) + ((ACAudio*)lib->getMedia(grainIds[mp_v(i)]))->getNFrames();
 		}
 	}
 	
@@ -125,12 +144,19 @@ void AGSynthesis(ACMediaLibrary* lib, long targetId, vector<long> grainIds, floa
 		for (long i = 0; i< audioGrain->getNFrames(); i++){
 			selG_v[i] = audioSamples[i*audioGrain->getChannels()];
 		}
-		
-		win_v = tukeywin(audioGrain->getNFrames(), .1);
-		std::cout << "Start = " << seg_samp_start_v(i) << std::endl;
-		std::cout << "NFrames = " << audioGrain->getNFrames()-1 << std::endl;		
-		
-		syn_v.rows(seg_samp_start_v(i), seg_samp_start_v(i)+audioGrain->getNFrames()-1) = selG_v % win_v;
+		delete [] audioSamples;
+		win_v = tukeywin(audioGrain->getNFrames(), .01);
+// 		std::cout << "Start = " << seg_samp_start_v(i) << std::endl;
+// 		std::cout << "NFrames = " << audioGrain->getNFrames()-1 << std::endl;		
+		if (seg_samp_start_v(i)+audioGrain->getNFrames() - 1 < syn_v.n_elem){
+			syn_v.rows(seg_samp_start_v(i), seg_samp_start_v(i)+audioGrain->getNFrames()-1) = selG_v % win_v;
+		}
+		else{
+			std::cout << "----------------" << std::endl;
+			std::cout << syn_v.n_elem << std::endl;
+			std::cout << seg_samp_start_v(i)+audioGrain->getNFrames()-1 << std::endl;
+			std::cerr << "Wrong synthesis vector size" << std::endl;
+		}
 	}
 	
 	*syn = new float[durationSyn];
@@ -176,7 +202,7 @@ mat extractDescMatrix(ACMediaLibrary* lib, string featureName, vector<long> medi
   
   for(int i=0; i<mediaIds.size(); i++) {    
 		for(int d=0; d < featureSize; d++){
-			desc_m(i, d) = loops[i]->getFeaturesVector(featureId)->getFeatureElement(d);
+			desc_m(i, d) = loops[mediaIds[i]]->getFeaturesVector(featureId)->getFeatureElement(d);
 		}
   }
 	return desc_m;

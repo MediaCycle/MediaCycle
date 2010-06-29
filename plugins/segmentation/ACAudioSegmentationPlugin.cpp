@@ -74,6 +74,7 @@ std::vector<ACMedia*> ACAudioSegmentationPlugin::segment(ACMediaData* audio_data
 	icolvec peaks_v;
 	fcolvec time_v;
 	fcolvec desc_v;
+	fmat desc_m;
 	switch (method){
 	case 0:{
 		desc_mf = computeFeature(data, "Energy", theAudio->getSampleRate(), theAudio->getChannels(), theAudio->getNFrames(), 16, 13, 1024, extendSoundLimits);
@@ -83,8 +84,8 @@ std::vector<ACMedia*> ACAudioSegmentationPlugin::segment(ACMediaData* audio_data
 		break;
 	}
 	case 1:{
-		desc_mf = computeFeature(data, "Spectral Flux", theAudio->getSampleRate(), theAudio->getChannels(), theAudio->getNFrames(), 16, 13, 1024, extendSoundLimits);
-		desc_v = conv_to<fcolvec>::from(desc_mf->getValue());
+		desc_mf = computeFeature(data, "Spectral Flux", theAudio->getSampleRate(), theAudio->getChannels(), theAudio->getNFrames(), 16, 13, 1024*2, extendSoundLimits);
+		desc_v = conv_to<fcolvec>::from(desc_mf->delta()->getValue());
 		time_v = desc_mf->getTime();
 		peaks_v = findpeaks(desc_v, 10);		
 		break;

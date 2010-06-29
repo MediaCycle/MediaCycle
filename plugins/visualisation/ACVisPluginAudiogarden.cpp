@@ -1,7 +1,7 @@
 /**
  * @brief ACVisPluginAudiogarden.cpp
- * @author Christian Frisson
- * @date 27/05/2010
+ * @author Damien Tardieu
+ * @date 29/06/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -81,7 +81,7 @@ void ACVisPluginAudiogarden::updateNextPositions(ACMediaBrowser* mediaBrowser){
 	extractDescMatrix(mediaBrowser, desc_m, featureNames);
 	theta_v = desc_m.col(0);
 	theta_v = (theta_v - min(theta_v))/(max(theta_v)-min(theta_v)) * 2 * math::pi();
-	std::cout << theta_v << std::endl;
+//	std::cout << theta_v << std::endl;
 
 	
 	mediaBrowser->setNumberOfDisplayedLoops(desc_m.n_rows);
@@ -120,16 +120,16 @@ void ACVisPluginAudiogarden::extractDescMatrix(ACMediaBrowser* mediaBrowser, mat
       featDim = loops.back()->getFeaturesVector(f)->getSize();
 			featureNames.push_back(loops.back()->getFeaturesVector(f)->getName());
 			for(int d=0; d < featDim; d++){
-				std::cout << loops[i]->getFeaturesVector(f)->getFeatureElement(d) << std::endl;
+//				std::cout << loops[i]->getFeaturesVector(f)->getFeatureElement(d) << std::endl;
 				desc_m(i,tmpIdx) = loops[i]->getFeaturesVector(f)->getFeatureElement(d);
 				tmpIdx++;
       }
     }
   }
   // normalizing features between 0 and 1 ///////////////////////////////////////
-//   rowvec maxDesc_v = max(desc_m);
-//   rowvec minDesc_v = min(desc_m);
-//   desc_m = desc_m - repmat(minDesc_v, desc_m.n_rows, 1);
-//   desc_m = desc_m/repmat(maxDesc_v-minDesc_v, desc_m.n_rows, 1);
+	//   rowvec maxDesc_v = max(desc_m);
+	//   rowvec minDesc_v = min(desc_m);
+	//   desc_m = desc_m - repmat(minDesc_v, desc_m.n_rows, 1);
+	//   desc_m = desc_m/repmat(maxDesc_v-minDesc_v, desc_m.n_rows, 1);
 	/////////////////////////////////////////////////////////////////////////////////
 }

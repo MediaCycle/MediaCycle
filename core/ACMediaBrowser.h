@@ -246,6 +246,7 @@ public:
 	// labels
 	int getLabelSize();
 	void setLabel(int i, string text, ACPoint pos);
+	void addLabel(string text, ACPoint pos);
 	string getLabelText(int i);
 	ACPoint getLabelPos(int i);
 	

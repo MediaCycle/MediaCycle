@@ -1,7 +1,7 @@
 /**
  * @brief tukeywin.h
  * @author Damien Tardieu
- * @date 18/06/2010
+ * @date 29/06/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -29,10 +29,11 @@
  * <mailto:avre@umons.ac.be>
 */
 
-#include "Armadillo-utils.h"
-
 #ifndef TUKEYWIN_H
 #define TUKEYWIN_H
+
+#include "Armadillo-utils.h"
+
 
 // TUKEYWIN Tukey window.
 //   TUKEYWIN(N) returns an N-point Tukey window in a column vector.

@@ -63,23 +63,23 @@ int main(int argc, char** argv) {
 		//mediacycle->importDirectory("/Users/dtardieu/data/test/testEnv/",1);
 		//		mediacycle->importDirectory("/Users/dtardieu/data/rire-audiocycle/",1);
 		//		mediacycle->importDirectory("/Users/dtardieu/data/footsteps/", 1);
-		mediacycle->importDirectory("/Users/dtardieu/data/AudioGarden/audiogarden/sounds2",1);
+		//mediacycle->importDirectory("/Users/dtardieu/data/AudioGarden/audiogarden/sounds2",1);
 		//mediacycle->saveMCSLLibrary("/Users/dtardieu/data/AudioCycleProPackTest/zero-g-pro-pack_b/Super Funk/Funkmachine-E.acl");
 		//mediacycle->saveACLLibrary("/Users/dtardieu/data/test/testEnv/testEnv.acl");
 
-		//mediacycle->importMCSLLibrary("/Users/dtardieu/data/AudioCycleProPackTest/zero-g-pro-pack_b/Super Funk/Funkmachine-E.acl");
+		mediacycle->importMCSLLibrary("/Users/dtardieu/data/AudioCycleProPackTest/zero-g-pro-pack_b/Super Funk/Funkmachine-E.acl");
 
 		//mediacycle->saveMCSLLibrary("/Users/dtardieu/data/AudioCycleProPackTest/zero-g-pro-pack_b/Super Funk/Funkmachine-E.mcsl");
 		//		mediacycle->saveMCSLLibrary("/Users/dtardieu/data/rire-audiocycle/rire-audiocycle.mcsl");
 		//		mediacycle->saveMCSLLibrary("/Users/dtardieu/data/footsteps/footsteps.mcsl");
-		mediacycle->saveMCSLLibrary("/Users/dtardieu/data/AudioGarden/audiogarden/audiogarden.mcsl");
+		//mediacycle->saveMCSLLibrary("/Users/dtardieu/data/AudioGarden/audiogarden/audiogarden.mcsl");
 
 		for (int i = 0; i < mediacycle->getLibrary()->getSize(); i++){
 			std::cout << i << " : " << mediacycle->getLibrary()->getMedia(i)->getFileName() << "   " << ((ACAudio*)mediacycle->getLibrary()->getMedia(i))->getNFrames() << std::endl;
 		}
 
-		/* vector<long> grainIds;
-		for (int i=31; i<84; i++){
+		 vector<long> grainIds;
+		for (int i=1; i<45; i++){
 			//for (int i=1; i<20; i++){
 			grainIds.push_back(i);
 		}
@@ -103,7 +103,7 @@ int main(int argc, char** argv) {
 		tt[0] =1.0;
 		sf_writef_float  (testFile, syn_v, length);
 		sf_close(testFile);
-		 */
+		 
 	
 	
 // 	cout<<"setCulsterN"<<endl;

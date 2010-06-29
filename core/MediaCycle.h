@@ -69,7 +69,7 @@ public:
     int processTcpMessage(char* buffer, int l, char **buffer_send, int *l_send);     // Process incoming requests (addfile, getknn, ...)
 
     // == Media Library
-    int importDirectory(std::string path, int recursive, int mid=0, bool forward_order=true);
+    int importDirectory(std::string path, int recursive, int mid=0, bool forward_order=true, bool doSegment=false);
 	int importACLLibrary(std::string path);
 	int importMCSLLibrary(std::string path);//CF 31/05/2010 temporary MediaCycle Segmented Library (MCSL) for AudioGarden, adding a parentID for segments to the initial ACL, awaiting approval
     int importLibrary(std::string path);
@@ -146,6 +146,8 @@ public:
 	void setClusterNumber(int n);
 	void setWeight(int i, float weight);
 	void setForwardDown(int i);
+	void setPlayKeyDown(bool i){playkeydown = i;};
+	bool getPlayKeyDown(){return playkeydown;};
 	
 	// == Features
 	void normalizeFeatures();
@@ -188,14 +190,15 @@ public:
 
 private:
 	int forwarddown;
+	bool playkeydown;
 	int port;
-    int max_connections;
-    string local_directory;
-    string libname;
-    ACMediaLibrary *mediaLibrary;
-    ACMediaBrowser *mediaBrowser;
-    ACNetworkSocketServer *networkSocket;
-    ACPluginManager *pluginManager;
+	int max_connections;
+	string local_directory;
+	string libname;
+	ACMediaLibrary *mediaLibrary;
+	ACMediaBrowser *mediaBrowser;
+	ACNetworkSocketServer *networkSocket;
+	ACPluginManager *pluginManager;
 	string config_file;
 };
 

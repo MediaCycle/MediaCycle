@@ -33,8 +33,10 @@
  *
  */
 
+#include "AGSynthesis.h"
 #include <iostream>
 #include "ACAudioGardenOsgQt.h"
+#include "sndfile.h"
 
 using namespace std;
 
@@ -68,6 +70,7 @@ ACAudioGardenOsgQt::ACAudioGardenOsgQt(QWidget *parent)
 			//media_cycle->setClustersPositionsPlugin("VisAudiogarden");
 		}
 		media_cycle->addPlugin("../../../plugins/audio/" + build_type + "/mc_audio.dylib");	
+		media_cycle->addPlugin("../../../plugins/vamp/" + build_type + "/mc_vamp.dylib");	
 	#endif
 	
 	audio_engine = new ACAudioFeedback();
@@ -231,11 +234,45 @@ void ACAudioGardenOsgQt::on_pushButtonCompositing_clicked(){
 	//CF do something with these grains
 	set<int> selectedNodes = media_cycle->getBrowser()->getSelectedNodes();
 	std::cout << "Selected Grains: ";
+	vector<long> grainIds;
 	for (set<int>::const_iterator iter = selectedNodes.begin();iter != selectedNodes.end();++iter){
 		std::cout << *iter << " ";
+		grainIds.push_back(*iter);
 		//CF right here...
 	}	
+	float* syn_v;
+	long length;
+	AGSynthesis(media_cycle, ui.compositeOsgView->getSelectedRhythmPattern(), grainIds, &syn_v, length);
+	SF_INFO sfinfo;
+	SNDFILE* testFile;
+	sfinfo.samplerate = 44100;
+	sfinfo.channels = 1;
+	sfinfo.format = SF_FORMAT_WAV | SF_FORMAT_PCM_16;
+	
+	string synthesisPath = "./synthesis.wav";
+	if (! (testFile = sf_open (synthesisPath.c_str(), SFM_WRITE, &sfinfo))){  
+		printf ("Not able to open input file %s.\n", "synthesis.wav") ;
+		puts (sf_strerror (NULL)) ;
+		return;
+	}
+	
+	sf_writef_float  (testFile, syn_v, length);
+	sf_close(testFile);
+
+	if (media_cycle->getLibrary()->getSynthesisID() < 0){
+		media_cycle->getLibrary()->setSynthesisID(media_cycle->getLibrarySize());
+		media_cycle->importDirectory(synthesisPath, 0, media_cycle->getLibrary()->getSynthesisID(), false, false);
+		media_cycle->libraryContentChanged();
+		media_cycle->getBrowser()->toggleSourceActivity(media_cycle->getLibrary()->getSynthesisID(), 1);
+	}
+	else{
+		media_cycle->getBrowser()->toggleSourceActivity(media_cycle->getLibrary()->getSynthesisID(), 0);
+		usleep(100000);
+		media_cycle->getBrowser()->toggleSourceActivity(media_cycle->getLibrary()->getSynthesisID(), 1);	
+		media_cycle->getLibrary()->getMedia(media_cycle->getLibrary()->getSynthesisID())->setEnd(length/(float)sfinfo.samplerate);
+	}
 	std::cout << std::endl;
+	return;
 }	
 
 void ACAudioGardenOsgQt::on_checkBoxRhythm_stateChanged(int state)
@@ -380,8 +417,8 @@ void ACAudioGardenOsgQt::loadMediaDirectory(){
 	// XS TODO : check if directory exists
 	// XS : do not separate directory and files in Qt and let MediaCycle handle it
 	
-	media_cycle->importDirectory(selectDir.toStdString(), 1, 0, false); //CF false for reverse order, subdirs last, ie: source sound first, grains after
-
+	media_cycle->importDirectory(selectDir.toStdString(), 1, 0, false, true); //CF false for reverse order, subdirs last, ie: source sound first, grains after. DT: true to segment
+	
 	// with this function call here, do not import twice!!!
 	// XS TODO: what if we add a new directory to the existing library ?
 	media_cycle->normalizeFeatures();

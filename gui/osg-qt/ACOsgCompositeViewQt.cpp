@@ -179,32 +179,40 @@ void ACOsgCompositeViewQt::keyPressEvent( QKeyEvent* event )
 	{
 		case Qt::Key_Z:
 			zoomdown = 1;
+			media_cycle->setPlayKeyDown(false);
 			break;
 		case Qt::Key_A:
 			media_cycle->setForwardDown(1);
 			forwarddown = 1;
+			media_cycle->setPlayKeyDown(false);
 			break;
 		case Qt::Key_Q:
 			media_cycle->setAutoPlay(1);
 			autoplaydown = 1;
+			media_cycle->setPlayKeyDown(true);
 			break;
 		case Qt::Key_R:
 			rotationdown = 1;
+			media_cycle->setPlayKeyDown(false);
 			break;
 		case Qt::Key_M:	
 			media_cycle->muteAllSources();
+			media_cycle->setPlayKeyDown(true);			
 			break;
 		case Qt::Key_Space:
 			if ( (media_cycle) && (media_cycle->hasBrowser()) && (timeline_renderer->getTrack(0)!=NULL) ) {
 				transportdown = 1;
 				media_cycle->getBrowser()->toggleSourceActivity( timeline_renderer->getTrack(0)->getMediaIndex() );
 			}	
+			media_cycle->setPlayKeyDown(true);			
 			break;
 		case Qt::Key_P:
 			selectrhythmpattern = true;
+			media_cycle->setPlayKeyDown(false);			
 			break;
 		case Qt::Key_G:
 			selectgrains = true;
+			media_cycle->setPlayKeyDown(false);			
 			break;	
 		default:
 			break;

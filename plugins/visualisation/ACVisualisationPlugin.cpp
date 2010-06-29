@@ -1,7 +1,7 @@
 /**
  * @brief ACVisualisationPlugin.cpp
  * @author Damien Tardieu
- * @date 18/06/2010
+ * @date 29/06/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -153,7 +153,9 @@ void ACVisualisationPlugin::updateNextPositions(ACMediaBrowser* mediaBrowser){
 // 	posDisp_m = posDisp_m/10;
 // 	labelPos_m = labelPos_m/10;
 	// Set labels in browser ////////////////////////////////////////////////////////
-  string labelValue;
+	
+	string labelValue;
+	mediaBrowser->setNumberOfDisplayedLabels(labelIdx_v.n_rows);	
   for (int i=0; i< labelIdx_v.n_rows; i++){
     ACPoint p;
     p.x = labelPos_m(i,0);

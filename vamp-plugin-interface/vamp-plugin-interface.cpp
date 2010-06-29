@@ -49,8 +49,181 @@
 
 #include "vamp-plugin-interface.h"
 
-ACMediaTimedFeature* runPlugin(string soname, string id, string output, int outputNo, string inputFile, bool useFrames)
-{
+ACMediaTimedFeature* runPlugin(string soname, string id, string output, int outputNo, float* data, int nframes, int sr_hz, int channels, bool useFrames){
+    ACMediaTimedFeature* descmf;
+    PluginLoader *loader = PluginLoader::getInstance();
+    string outfilename = "";
+    PluginLoader::PluginKey key = loader->composePluginKey(soname, id);
+    
+
+    Plugin *plugin = loader->loadPlugin
+        (key, sr_hz, PluginLoader::ADAPT_ALL_SAFE);
+    if (!plugin) {
+        cerr << "vamp interface : ERROR: Failed to load plugin \"" << id
+             << "\" from library \"" << soname << "\"" << endl;
+        return descmf;
+    }
+
+    cerr << "Running plugin: \"" << plugin->getIdentifier() << "\"..." << endl;
+
+    // Note that the following would be much simpler if we used a
+    // PluginBufferingAdapter as well -- i.e. if we had passed
+    // PluginLoader::ADAPT_ALL to loader->loadPlugin() above, instead
+    // of ADAPT_ALL_SAFE.  Then we could simply specify our own block
+    // size, keep the step size equal to the block size, and ignore
+    // the plugin's bleatings.  However, there are some issues with
+    // using a PluginBufferingAdapter that make the results sometimes
+    // technically different from (if effectively the same as) the
+    // un-adapted plugin, so we aren't doing that here.  See the
+    // PluginBufferingAdapter documentation for details.
+
+    int blockSize = plugin->getPreferredBlockSize();
+    int stepSize = plugin->getPreferredStepSize();
+
+    if (blockSize == 0) {
+        blockSize = 1024;
+    }
+    if (stepSize == 0) {
+        if (plugin->getInputDomain() == Plugin::FrequencyDomain) {
+            stepSize = blockSize/2;
+        } else {
+            stepSize = blockSize;
+        }
+    } else if (stepSize > blockSize) {
+        cerr << "WARNING: stepSize " << stepSize << " > blockSize " << blockSize << ", resetting blockSize to ";
+        if (plugin->getInputDomain() == Plugin::FrequencyDomain) {
+            blockSize = stepSize * 2;
+        } else {
+            blockSize = stepSize;
+        }
+        cerr << blockSize << endl;
+    }
+
+
+    float **plugbuf = new float*[channels];
+    for (int c = 0; c < channels; ++c) plugbuf[c] = new float[blockSize + 2];
+
+    cerr << "Using block size = " << blockSize << ", step size = "
+              << stepSize << endl;
+
+    // The channel queries here are for informational purposes only --
+    // a PluginChannelAdapter is being used automatically behind the
+    // scenes, and it will take case of any channel mismatch
+
+    int minch = plugin->getMinChannelCount();
+    int maxch = plugin->getMaxChannelCount();
+    cerr << "Plugin accepts " << minch << " -> " << maxch << " channel(s)" << endl;
+    cerr << "Sound file has " << channels << " (will mix/augment if necessary)" << endl;
+
+    Plugin::OutputList outputs = plugin->getOutputDescriptors();
+    Plugin::OutputDescriptor od;
+    
+    //n_cols
+
+    int returnValue = 1;
+    int progress = 0;
+
+    RealTime rt;
+    PluginWrapper *wrapper = 0;
+    RealTime adjustment = RealTime::zeroTime;
+
+	long nbFrames;
+
+    if (outputs.empty()) {
+        cerr << "ERROR: Plugin has no outputs!" << endl;
+        goto done;
+    }
+
+    if (outputNo < 0) {
+
+        for (size_t oi = 0; oi < outputs.size(); ++oi) {
+            if (outputs[oi].identifier == output) {
+                outputNo = oi;
+                break;
+            }
+        }
+
+        if (outputNo < 0) {
+            cerr << "ERROR: Non-existent output \"" << output << "\" requested" << endl;
+            goto done;
+        }
+
+    } else {
+
+        if (int(outputs.size()) <= outputNo) {
+            cerr << "ERROR: Output " << outputNo << " requested, but plugin has only " << outputs.size() << " output(s)" << endl;
+            goto done;
+        }        
+    }
+
+    od = outputs[outputNo];
+    cerr << "Output is: \"" << od.identifier << "\"" << endl;
+
+    if (!plugin->initialise(channels, stepSize, blockSize)) {
+        cerr << "ERROR: Plugin initialise (channels = " << channels
+             << ", stepSize = " << stepSize << ", blockSize = "
+             << blockSize << ") failed." << endl;
+        goto done;
+    }
+
+    wrapper = dynamic_cast<PluginWrapper *>(plugin);
+    if (wrapper) {
+        // See documentation for
+        // PluginInputDomainAdapter::getTimestampAdjustment
+        PluginInputDomainAdapter *ida =
+            wrapper->getWrapper<PluginInputDomainAdapter>();
+        if (ida) adjustment = ida->getTimestampAdjustment();
+    }
+
+
+    nbFrames = (long)(nframes)/stepSize+1;
+    descmf = new ACMediaTimedFeature(nbFrames, outputs[0].binCount, outputs[0].name); 
+    
+    for (sf_count_t i = 0; i < nframes; i += stepSize) {
+
+        int count;
+        count = nframes - i;
+        
+        for (int c = 0; c < channels; ++c) {
+            int j = 0;
+            while (j < count & j < blockSize) {
+                plugbuf[c][j] = data[j * channels + c + i*channels];
+                ++j;
+            }
+            while (j < blockSize) {
+                plugbuf[c][j] = 0.0f;
+                ++j;
+            }
+        }
+
+        rt = RealTime::frame2RealTime(i, sr_hz);
+        
+        RealTime currentTime;
+        //.values
+        Plugin::FeatureSet fs;
+        fs = plugin->process(plugbuf, rt);
+        descmf->setTimeAndValueForIndex((long)(i/stepSize), (float) rt.msec()/1000, fs[0][0].values);
+//         printFeatures(RealTime::realTime2Frame(rt + adjustment, sfinfo.samplerate),
+//              sfinfo.samplerate, outputNo, plugin->process(plugbuf, rt),
+//              out, useFrames);
+
+        progress = lrintf((float(i) / nframes) * 100.f);
+    }
+
+    rt = RealTime::frame2RealTime(nframes, sr_hz);
+
+//     printFeatures(RealTime::realTime2Frame(rt + adjustment, sfinfo.samplerate),
+//                   sfinfo.samplerate, outputNo,
+//                   plugin->getRemainingFeatures(), out, useFrames);
+
+    returnValue = 0;
+done:
+    delete plugin;
+    return descmf;
+}
+
+
+ACMediaTimedFeature* runPlugin(string soname, string id, string output, int outputNo, string inputFile, bool useFrames){
     ACMediaTimedFeature* descmf;
     PluginLoader *loader = PluginLoader::getInstance();
     string outfilename = "";
@@ -240,7 +413,6 @@ ACMediaTimedFeature* runPlugin(string soname, string id, string output, int outp
         //.values
         Plugin::FeatureSet fs;
         fs = plugin->process(plugbuf, rt);
-        
         descmf->setTimeAndValueForIndex((long)(i/stepSize), (float) rt.msec()/1000, fs[0][0].values);
 //         printFeatures(RealTime::realTime2Frame(rt + adjustment, sfinfo.samplerate),
 //              sfinfo.samplerate, outputNo, plugin->process(plugbuf, rt),
@@ -261,10 +433,10 @@ ACMediaTimedFeature* runPlugin(string soname, string id, string output, int outp
 //                   plugin->getRemainingFeatures(), out, useFrames);
 
     returnValue = 0;
-    descmf->dump();
 done:
     delete plugin;
     sf_close(sndfile);
     return descmf;
 }
+
 

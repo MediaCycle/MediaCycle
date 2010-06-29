@@ -300,11 +300,11 @@ int ACAudio::loadACL(ifstream &library_file) {
 
 int ACAudio::loadMCSL(ifstream &library_file) {
 	if (! library_file.is_open()) {
-		cerr << "<ACAudio::loadACL> : problem loading image from ACL file, it needs to be opened before" << endl;
+		cerr << "<ACAudio::loadMCSL> : problem loading image from ACL file, it needs to be opened before" << endl;
 		return 0;
 	}		
 	if (!library_file.good()){
-		cerr << "<ACAudio::loadACL> : bad library file" << endl;
+		cerr << "<ACAudio::loadMCSL> : bad library file" << endl;
 		return 0;
 	}
 	

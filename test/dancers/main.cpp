@@ -64,7 +64,7 @@ void labelClicked(MediaCycle *mediacycle, int idLabel, char **, int*);
 string fillOutputBuffer(ACMediaLibrary* media_library, ACMediaBrowser* media_browser, int nvid);
 
 // string dirpath = "/Users/dtardieu/Desktop/dancers-test/dancers-all.xml";
-string dirpath = "/Users/xavier/Desktop/dancers-tmp/";
+string dirpath = "./";
 string xmlpath = dirpath+"dancers-all.xml";
 
 int main(int argc, char** argv) {
@@ -91,6 +91,7 @@ int main(int argc, char** argv) {
 		cerr << "<MediaCycle-Dancers main> empty library: " << libraryFilename << endl;
 		return EXIT_FAILURE;
 	}
+	mediacycle->libraryContentChanged();
 	// saveLibraryAsXml(mediacycle, xmlpath);	
 	
 	mediacycle->getBrowser()->randomizeNodePositions();
@@ -257,7 +258,7 @@ int processTcpMessageFromInstallation(MediaCycle *that, char *buffer, int l, cha
 				filename=that->getLibrary()->getMedia(k)->getFileName();
 				posSep = filename.find_last_of("/");
 				posDot = filename.find_last_of(".");
-				cout << "test id : " << filename.substr(posSep, posDot-posSep+1) << endl;
+				cout << "test id : " << filename.substr(posSep+1, posDot-posSep-10) << endl;
 				if (!filename.compare(posSep+1, posDot-posSep-1, idVideoStr)){
 					idVideo = k;
 					break;
@@ -304,7 +305,7 @@ char* get_error_message(){
 // common to all types of messages:
 string fillOutputBuffer(ACMediaLibrary* media_library, ACMediaBrowser* media_browser, int nvid){
 	int n_loops = media_browser->getNumberOfMediaNodes();
-	int n_labels = media_browser->getNumberOfLabels();
+	int n_labels = media_browser->getNumberOfDisplayedLabels();
 	string sbuffer_send;
 
 	// === 1) videos
@@ -393,7 +394,7 @@ void startOrRedraw(MediaCycle *mediacycle, int nbVideo, char **buffer_send, int*
 	ACMediaBrowser* media_browser;
 	media_browser = mediacycle->getBrowser();
 	
-	int n_loops = media_browser->getNumberOfMediaNodes();
+	int n_loops = media_browser->getLibrary()->getSize();
 //	int n_labels = media_browser->getNumberOfLabels();
 
 	if (nbVideo > n_loops) {

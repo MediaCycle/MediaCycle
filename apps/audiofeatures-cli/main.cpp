@@ -1,7 +1,7 @@
 /**
  * @brief main.cpp
  * @author Damien Tardieu
- * @date 22/06/2010
+ * @date 29/06/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -48,7 +48,7 @@ void usage(string myname){
 			 << " [OPTION] audiofile" << endl;
 	cerr << endl;
 	cerr << "  -L       Size of the analysis window, must be a power of two [default: 256]."<< endl;
-	cerr << "  -c      Number of MFCC channels [default: 16]." << endl;
+	cerr << "  -c       Number of MFCC channels [default: 16]." << endl;
 	cerr << "  -m       Number of MFCC [default: 13]." << endl;
 	cerr << "  -o       Directory for storing feature files [default \"audiofile directory/audiofile.desc/\"]" << std::endl;
 	cerr << "  -e       Extend sound limits for computation" << std::endl;
@@ -119,7 +119,7 @@ int main(int argc, char** argv){
 	
 	string myname(argv[0]);
 
-	bflag = 0;
+	bflag = 0;
 	while ((ch = getopt(argc, argv, "heL:c:m:o:")) != -1) {
 		switch (ch) {
 		case 'e' :
@@ -143,14 +143,23 @@ int main(int argc, char** argv){
 			exit(1); 
 			break;
 		case '?':
+			usage(myname);
+			exit(1); 
 			break;
 		default:
+			usage(myname);
+			exit(1);
 			break;
 		}
 	}
 	
 // 	for (int index = optind; index < argc; index++)
 // 		printf ("Non-option argument %s\n", argv[index]);
+	if (optind >= argc) {
+		fprintf(stderr, "Expected filename after options\n");
+		usage(myname);
+		exit(1);
+	}
 	filename += argv[optind];
 // 	filename = "/Users/dtardieu/data/Sol-v2-Damien/Sounds/Bb-Clarinet/flatterzunge/samples/BbCl-flatt-A#3-ff.aif";
 // 	//	filename = "/Users/dtardieu/data/Sol-v2-Damien/Sounds/Violin/pizzicato-secco/samples/Vn-pizz-sec-A#3-ff-4c.aif";

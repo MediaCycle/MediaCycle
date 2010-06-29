@@ -42,18 +42,19 @@ MediaCycle::MediaCycle(ACMediaType aMediaType, string local_directory, string li
 	this->mediaBrowser = 0;
 	
 	this->forwarddown = 0;
+	this->playkeydown = true;
 
-    this->local_directory = local_directory;
-    this->libname = libname;
+	this->local_directory = local_directory;
+	this->libname = libname;
 	
-    this->networkSocket	= 0;
-
-    this->mediaLibrary = new ACMediaLibrary(aMediaType);
-    
-    this->mediaBrowser = new ACMediaBrowser();
-    this->mediaBrowser->setLibrary(this->mediaLibrary);
-
-    this->pluginManager = new ACPluginManager();
+	this->networkSocket	= 0;
+	
+	this->mediaLibrary = new ACMediaLibrary(aMediaType);
+  
+	this->mediaBrowser = new ACMediaBrowser();
+	this->mediaBrowser->setLibrary(this->mediaLibrary);
+	
+	this->pluginManager = new ACPluginManager();
 	
 	this->config_file = "";
 	// Test Labels
@@ -227,11 +228,11 @@ int MediaCycle::processTcpMessage(char* buffer, int l, char **buffer_send, int *
 
 // == Media Library
 
-int MediaCycle::importDirectory(string path, int recursive, int mid, bool forward_order) {
+int MediaCycle::importDirectory(string path, int recursive, int mid, bool forward_order, bool doSegment) {
 // XS import = import + some processing 
 	cout << "MediaCycle: importing directory: " << path << endl;	
 	int ok = 0;
-	ok = this->mediaLibrary->importDirectory(path, recursive, mid, this->pluginManager, forward_order);
+	ok = this->mediaLibrary->importDirectory(path, recursive, mid, this->pluginManager, forward_order, doSegment);
 	if (ok>=1) this->mediaLibrary->normalizeFeatures();
 	//	XS TODO this->mediaBrowser->libraryContentChanged();	
 	return ok;
@@ -462,7 +463,7 @@ void MediaCycle::pickedObjectCallback(int _nodeId) {
 		nodeId = getClosestNode();
 	}
 	mediaBrowser->setClickedNode(nodeId);
-	if (forwarddown == 0) {//if (!forwarddown) { //CF forwardown is not a boolean
+	if (forwarddown == 0 & playkeydown) {//if (!forwarddown) { //CF forwardown is not a boolean
 		mediaBrowser->toggleSourceActivity(nodeId);
 	}
 }

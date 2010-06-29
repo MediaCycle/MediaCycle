@@ -192,11 +192,20 @@ int ACMediaBrowser::getLabelSize() {
 	return mLabelAttributes.size();
 }
 
+void ACMediaBrowser::addLabel(string text, ACPoint pos) {
+	ACLabelAttribute tmpLbl;
+	tmpLbl.text = text;
+	tmpLbl.size = 1.0;
+	tmpLbl.pos = pos;
+	mLabelAttributes.push_back(tmpLbl);
+	return;
+}
+
 void ACMediaBrowser::setLabel(int i, string text, ACPoint pos) {
-	// XS 260310 removed this ugly if : if you want to append, don't set
-//	if (mLabelAttributes.size()<=i) {
-//		mLabelAttributes.resize(i+1);
-//	}
+	// TODO : XS 260310 removed this ugly if : if you want to append, don't set
+	if (mLabelAttributes.size()<=i) {
+		mLabelAttributes.resize(i+1);
+	}
 	mLabelAttributes[i].text = text;
 	mLabelAttributes[i].size = 1.0;
 	mLabelAttributes[i].pos = pos;
@@ -373,7 +382,7 @@ int ACMediaBrowser::getNumberOfDisplayedLabels(){
 }
 
 void ACMediaBrowser::setNumberOfDisplayedLoops(int nd){
-	if (nd < 0 || nd > this->getNumberOfMediaNodes())
+	if (nd < 0 || nd > this->getLibrary()->getSize())
 		cerr << "<ACMediaBrowser::setNumberOfDisplayedLoops> : too many loops to display: " << nd << endl;
 	else
 		nbDisplayedLoops = nd;

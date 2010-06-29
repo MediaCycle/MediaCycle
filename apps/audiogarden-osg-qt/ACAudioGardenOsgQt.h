@@ -43,7 +43,7 @@ using namespace std;
 #include <QtGui>
 #include "ui_ACAudioGardenOsgQt.h"
 #include <ACOsgCompositeViewQt.h>
-#include <MediaCycle.h>
+#include "MediaCycle.h"
 #include <ACAudioFeedback.h>
 #include <ACOscBrowser.h>
 #include <ACOscFeedback.h>

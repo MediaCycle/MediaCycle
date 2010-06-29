@@ -77,12 +77,14 @@ ACMediaLibrary::ACMediaLibrary() {
 	index_last_normalized = -1;
 	media_library.resize(0);
 	media_type = MEDIA_TYPE_NONE;
+	synthesisID = -1;
 }
 
 ACMediaLibrary::ACMediaLibrary(ACMediaType aMediaType) {
 	index_last_normalized = -1;
 	media_library.resize(0);
 	media_type = aMediaType;
+	synthesisID = -1;
 }
 
 ACMediaLibrary::~ACMediaLibrary(){
@@ -98,13 +100,12 @@ void ACMediaLibrary::deleteAllMedia(){
 	media_library.clear();	
 }
 
-int ACMediaLibrary::importDirectory(std::string _path, int _recursive, int id, ACPluginManager *acpl, bool forward_order) {
+int ACMediaLibrary::importDirectory(std::string _path, int _recursive, int id, ACPluginManager *acpl, bool forward_order, bool doSegment) {
 
 	string filename;
 	string extension;
 	std::vector<string> filenames;
 	std::vector<ACMedia*> mediaSegments;
-	bool doSegment = true;
 
 	scanDirectory(_path, _recursive, filenames);
 	
