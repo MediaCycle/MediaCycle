@@ -112,9 +112,10 @@ ACAudioCycleOsgQt::ACAudioCycleOsgQt(QWidget *parent)
 		media_cycle->addPlugin("../../../plugins/segmentation/" + build_type + "/mc_segmentation.dylib");	
 	#endif
 
-	audio_engine = new ACAudioFeedback();
+	audio_engine = new ACAudioEngine();
 	audio_engine->setMediaCycle(media_cycle);
 	audio_engine->printDeviceList();
+	audio_engine->printCaptureDeviceList();
 	
 	osc_feedback = NULL;
 	osc_browser = NULL;
@@ -184,12 +185,6 @@ void ACAudioCycleOsgQt::on_pushButtonLaunch_clicked()
 	//ui.browserOsgView->setFocus();
 }
 
-void ACAudioCycleOsgQt::on_pushButtonMuteAll_clicked()
-{
-	media_cycle->muteAllSources();
-	//ui.browserOsgView->setFocus();
-}
-
 void ACAudioCycleOsgQt::on_pushButtonClean_clicked()
 {
 	media_cycle->cleanLibrary();
@@ -255,6 +250,35 @@ void ACAudioCycleOsgQt::on_pushButtonFeedbackStart_clicked()
 		ui.pushButtonFeedbackStart->setText("Start");
 	}
 	//ui.browserOsgView->setFocus();
+}	
+
+void ACAudioCycleOsgQt::on_pushButtonMuteAll_clicked()
+{
+	media_cycle->muteAllSources();
+	//ui.browserOsgView->setFocus();
+}
+
+void ACAudioCycleOsgQt::on_pushButtonRecord_toggled()
+{
+	if (ui.pushButtonRecord->isChecked() == 1)
+	{
+		if (audio_engine->isCaptureAvailable())
+		{
+			std::cout <<"Recording..."<<std::endl;
+			// CF There is a delay before the recording actually starts: work around with a countdown on a modal window?
+			audio_engine->startCapture();
+		}
+		else
+			ui.pushButtonRecord->setChecked(true);
+	}
+	else
+	{
+		if (audio_engine->isCaptureAvailable())
+		{	
+			audio_engine->stopCapture();	
+			std::cout <<"Recording done."<<std::endl;
+		}	
+	}	
 }	
 
 void ACAudioCycleOsgQt::on_checkBoxRhythm_stateChanged(int state)

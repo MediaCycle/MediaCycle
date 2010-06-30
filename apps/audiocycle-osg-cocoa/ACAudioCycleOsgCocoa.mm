@@ -218,7 +218,7 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 		}
 	}
 	
-	audio_engine = new ACAudioFeedback();
+	audio_engine = new ACAudioEngine();
 	audio_engine->setMediaCycle(media_cycle);
 
 	osc_feedback = NULL;

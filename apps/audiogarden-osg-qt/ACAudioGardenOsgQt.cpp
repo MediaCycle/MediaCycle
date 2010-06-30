@@ -73,7 +73,7 @@ ACAudioGardenOsgQt::ACAudioGardenOsgQt(QWidget *parent)
 		media_cycle->addPlugin("../../../plugins/vamp/" + build_type + "/mc_vamp.dylib");	
 	#endif
 	
-	audio_engine = new ACAudioFeedback();
+	audio_engine = new ACAudioEngine();
 	audio_engine->setMediaCycle(media_cycle);
 	audio_engine->printDeviceList();
 

@@ -637,14 +637,30 @@
        <widget class="QPushButton" name="pushButtonMuteAll">
         <property name="geometry">
          <rect>
-          <x>60</x>
-          <y>80</y>
+          <x>10</x>
+          <y>70</y>
           <width>80</width>
           <height>30</height>
          </rect>
         </property>
         <property name="text">
          <string>Mute All</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButtonRecord">
+        <property name="geometry">
+         <rect>
+          <x>90</x>
+          <y>70</y>
+          <width>111</width>
+          <height>30</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Record Query</string>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
         </property>
        </widget>
       </widget>

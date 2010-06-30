@@ -43,8 +43,8 @@ using namespace std;
 #include <QtGui>
 #include "ui_ACAudioGardenOsgQt.h"
 #include <ACOsgCompositeViewQt.h>
-#include "MediaCycle.h"
-#include <ACAudioFeedback.h>
+#include <MediaCycle.h>
+#include <ACAudioEngine.h>
 #include <ACOscBrowser.h>
 #include <ACOscFeedback.h>
 #ifdef USE_APPLE_MULTITOUCH
@@ -87,7 +87,7 @@ class ACAudioGardenOsgQt : public QMainWindow
 		MediaCycle *media_cycle;
 	
     private:
-		ACAudioFeedback *audio_engine;
+		ACAudioEngine *audio_engine;
 		ACOscBrowser *osc_browser;
 		ACOscFeedback *osc_feedback;
 		#ifdef USE_APPLE_MULTITOUCH

@@ -38,7 +38,7 @@
 //#import <Rendering/TiCocoaOsgView.h>
 #import <ACOsgBrowserViewCocoa.h>
 #include <MediaCycle.h>
-#include <ACAudioFeedback.h>
+#include <ACAudioEngine.h>
 //#include <ACOscBrowser.h>
 #include <ACOscBrowser.h>
 #include <ACOscFeedback.h>
@@ -58,7 +58,7 @@ enum	{
 @interface ACAudioCycleOsgCocoa : NSObject {
 	
 	MediaCycle				*media_cycle;
-	ACAudioFeedback			*audio_engine;
+	ACAudioEngine			*audio_engine;
 	ACOscBrowser			*osc_browser;
 	ACOscFeedback			*osc_feedback;
 	ACOscBrowserRef			mOscReceiver;

@@ -44,7 +44,7 @@ using namespace std;
 #include "ui_ACAudioCycleOsgQt.h"
 #include <ACOsgBrowserViewQT.h>
 #include <MediaCycle.h>
-#include <ACAudioFeedback.h>
+#include <ACAudioEngine.h>
 #include <ACOscBrowser.h>
 #include <ACOscFeedback.h>
 #ifdef USE_APPLE_MULTITOUCH
@@ -62,13 +62,14 @@ class ACAudioCycleOsgQt : public QMainWindow
 
     private slots:
 		void on_pushButtonLaunch_clicked();
-		void on_pushButtonMuteAll_clicked();
 		void on_pushButtonClean_clicked();
 		void on_pushButtonRecenter_clicked();
 		void on_pushButtonBack_clicked();
 		void on_pushButtonForward_clicked();
 		void on_pushButtonControlStart_clicked();
 		void on_pushButtonFeedbackStart_clicked();
+		void on_pushButtonMuteAll_clicked();
+		void on_pushButtonRecord_toggled();	
 
 		void on_checkBoxRhythm_stateChanged(int state);
 		void on_checkBoxTimbre_stateChanged(int state);
@@ -94,7 +95,7 @@ class ACAudioCycleOsgQt : public QMainWindow
 		MediaCycle *media_cycle;
 	
     private:
-		ACAudioFeedback *audio_engine;
+		ACAudioEngine *audio_engine;
 		ACOscBrowser *osc_browser;
 		ACOscFeedback *osc_feedback;
 		#ifdef USE_APPLE_MULTITOUCH

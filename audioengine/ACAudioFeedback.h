@@ -90,10 +90,10 @@ public:
 class ACAudioFeedback : public ACMediaFeedback {
 	
 public:
-	ACAudioFeedback();
+	ACAudioFeedback(ALCdevice* _device);
 	~ACAudioFeedback();
 	
-	// MediaCycle to querry database and browser
+	// MediaCycle to query database and browser
 	MediaCycle				*media_cycle;
 	void setMediaCycle(MediaCycle *media_cycle) { this->media_cycle = media_cycle; };
 	
@@ -146,11 +146,12 @@ public:
 	void threadAudioUpdate();
 	void startAudioEngine();
 	void stopAudioEngine();
-	
+	/*
 	// Devices
 	void printDeviceList();
 	void getDeviceList(std::vector<std::string>& devices);
-
+	 */
+	void setDevice(ALCdevice* _device){device = _device;}
 private:
 	// Table for interpreting time-signatures
 	int		n_time_signatures;
@@ -182,6 +183,7 @@ private:
 	int timeCodeDone; 
 	
 	// OpenAL init and delete
+	ALCdevice		*device;
 	void createOpenAL();
 	void deleteOpenAL();
 	
