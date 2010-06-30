@@ -61,27 +61,50 @@ class ACAudioGardenOsgQt : public QMainWindow
 		void updateLibrary();
 
     private slots:
+	
+		// Library controls
 		void on_pushButtonLaunch_clicked();
-		void on_pushButtonMuteAll_clicked();
 		void on_pushButtonClean_clicked();
+		void loadACLFile();
+		void saveACLFile();
+		void loadMCSLFile();
+		void saveMCSLFile();
+		void loadMediaDirectory();
+		void loadMediaFiles();
+	
+		// Browser controls
 		void on_pushButtonRecenter_clicked();
 		void on_pushButtonBack_clicked();
 		void on_pushButtonForward_clicked();
-		void on_pushButtonControlStart_clicked();
-		void on_pushButtonFeedbackStart_clicked();
 	
-		void on_pushButtonCompositing_clicked();
-
+		// Clustering controls
 		void on_checkBoxRhythm_stateChanged(int state);
 		void on_checkBoxTimbre_stateChanged(int state);
 		void on_checkBoxHarmony_stateChanged(int state);
-
-		void loadACLFile();
-		void saveACLFile();
-		void loadMediaDirectory();
-		void loadMediaFiles();
-		void loadMCSLFile();
-		void saveMCSLFile();
+		void on_sliderClusters_sliderReleased();
+		void on_comboBoxClustersMethod_activated(const QString & text);//CF or (int index);} 
+		void on_comboBoxClustersPositions_activated(const QString & text);//CF or (int index);} 
+	
+		// Audio controls
+		void on_pushButtonMuteAll_clicked();
+	
+		// Audio query
+		void on_pushButtonQueryRecord_toggled();	
+		void on_pushButtonQueryReplay_clicked();
+		void on_pushButtonQueryKeep_clicked();
+	
+		// Audio query for compositing
+		void on_pushButtonQueryPattern_clicked();
+		void on_pushButtonQueryGrain_clicked();
+	
+		// Compositing controls
+		void on_pushButtonCompositing_clicked();
+		//ui.checkBoxCompositeParam1/2/3
+		void on_checkBoxCompositeAutosynth_toggled();
+	
+		// OSC I/O controls
+		void on_pushButtonControlStart_clicked();
+		void on_pushButtonFeedbackStart_clicked();
 	
 	public:
 		MediaCycle *media_cycle;

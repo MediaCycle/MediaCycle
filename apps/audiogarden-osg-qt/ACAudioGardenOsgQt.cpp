@@ -57,20 +57,52 @@ ACAudioGardenOsgQt::ACAudioGardenOsgQt(QWidget *parent)
 	// XS TODO fichier de configuration
 	#if defined(__APPLE__)
 		std::string build_type ("Release");
-#ifdef USE_DEBUG
-		build_type = "Debug";
-#endif
+		#ifdef USE_DEBUG
+			build_type = "Debug";
+		#endif
 		
+		// Audio plugins
 		media_cycle->addPlugin("../../../plugins/segmentation/" + build_type + "/mc_segmentation.dylib");
+		media_cycle->addPlugin("../../../plugins/audio/" + build_type + "/mc_audio.dylib");	
+		media_cycle->addPlugin("../../../plugins/vamp/" + build_type + "/mc_vamp.dylib");	
+	
+		// Clusters Method/Position Plugins
 		int vizplugloaded = media_cycle->addPlugin("../../../plugins/visualisation/" + build_type + "/mc_visualisation.dylib");
 		if ( vizplugloaded == 0 )
 		{
-			//media_cycle->getBrowser()->setMode(AC_MODE_NEIGHBORS);// set this if using NeighborhoodsPlugins
-			media_cycle->setVisualisationPlugin("VisAudiogarden");
-			//media_cycle->setClustersPositionsPlugin("VisAudiogarden");
+			//CF this should be on a separate function or even on a mediacycle-(osg-)qt class
+			ACPluginManager *acpl = media_cycle->getPluginManager();
+			if (acpl) {
+				for (int i=0;i<acpl->getSize();i++) {
+					for (int j=0;j<acpl->getPluginLibrary(i)->getSize();j++) {
+						//if (acpl->getPluginLibrary(i)->getPlugin(j)->getMediaType() == MEDIA_TYPE_AUDIO) {
+						if (acpl->getPluginLibrary(i)->getPlugin(j)->getPluginType() == PLUGIN_TYPE_CLUSTERS_METHOD) {
+							//CF on the first detected Clusters Method plugin
+							if (ui.comboBoxClustersMethod->count() == 1 && ui.comboBoxClustersMethod->currentText().toStdString() == "KMeans (default)") {
+								ui.comboBoxClustersMethod->setEnabled(true);
+								//CF default settings: no Clusters Method plugin, use KMeans 
+							}
+							ui.comboBoxClustersMethod->addItem(QString(acpl->getPluginLibrary(i)->getPlugin(j)->getName().c_str()));
+							
+						}
+						else if (acpl->getPluginLibrary(i)->getPlugin(j)->getPluginType() == PLUGIN_TYPE_CLUSTERS_POSITIONS) {
+							//CF on the first detected Clusters Positions plugin
+							if (ui.comboBoxClustersPositions->count() == 1 && ui.comboBoxClustersPositions->currentText().toStdString() == "Propeller (default)") {
+								ui.comboBoxClustersPositions->setEnabled(true);
+								//CF default settings: no Clusters Positions plugin, use Propeller 
+							}	
+							ui.comboBoxClustersPositions->addItem(QString(acpl->getPluginLibrary(i)->getPlugin(j)->getName().c_str()));
+							if (acpl->getPluginLibrary(i)->getPlugin(j)->getName() == "VisAudiogarden") {
+								//CF we use the AudioGarden plugin as default
+								media_cycle->setVisualisationPlugin("VisAudiogarden");
+								ui.comboBoxClustersPositions->setCurrentIndex(ui.comboBoxClustersPositions->count()-1);
+							}
+						}
+						//CF we don't yet deal with Visualisation Plugins (combining Methods and Positions for Clusters and/or Neighborhoods)
+					}
+				}
+			}
 		}
-		media_cycle->addPlugin("../../../plugins/audio/" + build_type + "/mc_audio.dylib");	
-		media_cycle->addPlugin("../../../plugins/vamp/" + build_type + "/mc_vamp.dylib");	
 	#endif
 	
 	audio_engine = new ACAudioEngine();
@@ -149,12 +181,6 @@ void ACAudioGardenOsgQt::on_pushButtonLaunch_clicked()
 	//ui.compositeOsgView->setFocus();
 }
 
-void ACAudioGardenOsgQt::on_pushButtonMuteAll_clicked()
-{
-	media_cycle->muteAllSources();
-	//ui.compositeOsgView->setFocus();
-}
-
 void ACAudioGardenOsgQt::on_pushButtonClean_clicked()
 {
 	media_cycle->cleanLibrary();
@@ -162,152 +188,20 @@ void ACAudioGardenOsgQt::on_pushButtonClean_clicked()
 	media_cycle->libraryContentChanged();
 	this->updateLibrary();
 	library_loaded = false;
-}	
-
-void ACAudioGardenOsgQt::on_pushButtonRecenter_clicked()
-{
-	media_cycle->setCameraRecenter();
-	//ui.compositeOsgView->setFocus();
-}
-
-void ACAudioGardenOsgQt::on_pushButtonBack_clicked()
-{
-	media_cycle->goBack();
-	//ui.compositeOsgView->setFocus();
-}
-
-void ACAudioGardenOsgQt::on_pushButtonForward_clicked()
-{
-	media_cycle->goForward();
-	//ui.compositeOsgView->setFocus();
-}
-
-void ACAudioGardenOsgQt::on_pushButtonControlStart_clicked()
-{
-	std::cout << "IP: " << ui.lineEditControlIP->text().toStdString() << std::endl;
-	std::cout << "Port: " << ui.lineEditControlPort->text().toInt() << std::endl;
-	if ( ui.pushButtonControlStart->text().toStdString() == "Start")
-	{	
-		osc_browser = new ACOscBrowser();
-		mOscReceiver = osc_browser->create(ui.lineEditControlIP->text().toStdString().c_str(), ui.lineEditControlPort->text().toInt());
-		osc_browser->setUserData(mOscReceiver, this);
-		osc_browser->setCallback(mOscReceiver, osc_callback);
-		osc_browser->start(mOscReceiver);
-		ui.pushButtonControlStart->setText("Stop");
-		 
-	}	
-	else if ( ui.pushButtonControlStart->text().toStdString() == "Stop")
-	{	
-		osc_browser->stop(mOscReceiver);
-		ui.pushButtonControlStart->setText("Start");
-	}
-	//ui.compositeOsgView->setFocus();
-}	
-
-void ACAudioGardenOsgQt::on_pushButtonFeedbackStart_clicked()
-{
-	std::cout << "IP: " << ui.lineEditFeedbackIP->text().toStdString() << std::endl;
-	std::cout << "Port: " << ui.lineEditFeedbackPort->text().toInt() << std::endl;
-	if ( ui.pushButtonFeedbackStart->text().toStdString() == "Start")
-	{	
-		osc_feedback = new ACOscFeedback();
-		osc_feedback->create(ui.lineEditFeedbackIP->text().toStdString().c_str(), ui.lineEditFeedbackPort->text().toInt());
-		ui.pushButtonFeedbackStart->setText("Stop");
-	}	
-	else if ( ui.pushButtonFeedbackStart->text().toStdString() == "Stop")
-	{	
-		osc_feedback->release();//mOscFeeder);
-		ui.pushButtonFeedbackStart->setText("Start");
-	}
-	//ui.compositeOsgView->setFocus();
-}	
-
-void ACAudioGardenOsgQt::on_pushButtonCompositing_clicked(){
-	std::cout << "Compositing" << std::endl;
-	
-	//CF list selected rhythm pattern
-	std::cout << "Selected Rhythm Pattern: " << ui.compositeOsgView->getSelectedRhythmPattern() << std::endl;
-	
-	//CF list selected grains
-	media_cycle->getBrowser()->dumpSelectedNodes();
-	
-	//CF do something with these grains
-	set<int> selectedNodes = media_cycle->getBrowser()->getSelectedNodes();
-	std::cout << "Selected Grains: ";
-	vector<long> grainIds;
-	for (set<int>::const_iterator iter = selectedNodes.begin();iter != selectedNodes.end();++iter){
-		std::cout << *iter << " ";
-		grainIds.push_back(*iter);
-		//CF right here...
-	}	
-	float* syn_v;
-	long length;
-	AGSynthesis(media_cycle, ui.compositeOsgView->getSelectedRhythmPattern(), grainIds, &syn_v, length);
-	SF_INFO sfinfo;
-	SNDFILE* testFile;
-	sfinfo.samplerate = 44100;
-	sfinfo.channels = 1;
-	sfinfo.format = SF_FORMAT_WAV | SF_FORMAT_PCM_16;
-	
-	string synthesisPath = "./synthesis.wav";
-	if (! (testFile = sf_open (synthesisPath.c_str(), SFM_WRITE, &sfinfo))){  
-		printf ("Not able to open input file %s.\n", "synthesis.wav") ;
-		puts (sf_strerror (NULL)) ;
-		return;
-	}
-	
-	sf_writef_float  (testFile, syn_v, length);
-	sf_close(testFile);
-
-	if (media_cycle->getLibrary()->getSynthesisID() < 0){
-		media_cycle->getLibrary()->setSynthesisID(media_cycle->getLibrarySize());
-		media_cycle->importDirectory(synthesisPath, 0, media_cycle->getLibrary()->getSynthesisID(), false, false);
-		media_cycle->libraryContentChanged();
-		media_cycle->getBrowser()->toggleSourceActivity(media_cycle->getLibrary()->getSynthesisID(), 1);
-	}
-	else{
-		media_cycle->getBrowser()->toggleSourceActivity(media_cycle->getLibrary()->getSynthesisID(), 0);
-		usleep(100000);
-		media_cycle->getBrowser()->toggleSourceActivity(media_cycle->getLibrary()->getSynthesisID(), 1);	
-		media_cycle->getLibrary()->getMedia(media_cycle->getLibrary()->getSynthesisID())->setEnd(length/(float)sfinfo.samplerate);
-	}
-	std::cout << std::endl;
-	return;
-}	
-
-void ACAudioGardenOsgQt::on_checkBoxRhythm_stateChanged(int state)
-{
-	media_cycle->setWeight(0,state/2.0f);
-	if (library_loaded)
-		media_cycle->updateDisplay(true);
-}
-
-void ACAudioGardenOsgQt::on_checkBoxTimbre_stateChanged(int state)
-{
-	media_cycle->setWeight(1,state/2.0f);
-	if (library_loaded)
-		media_cycle->updateDisplay(true);
-}
-
-void ACAudioGardenOsgQt::on_checkBoxHarmony_stateChanged(int state)
-{
-	media_cycle->setWeight(2,state/2.0f);
-	if (library_loaded)
-		media_cycle->updateDisplay(true);
 }
 
 void ACAudioGardenOsgQt::loadACLFile(){
 	QString fileName;
-
+	
 	QFileDialog dialog(this,"Open AudioCycle Library File(s)");
 	dialog.setDefaultSuffix ("acl");
 	dialog.setNameFilter("AudioCycle Library Files (*.acl)");
 	dialog.setFileMode(QFileDialog::ExistingFile); // change to ExistingFiles for multiple file handling
-
+	
 	QStringList fileNames;
 	if (dialog.exec())
 		fileNames = dialog.selectedFiles();
-
+	
 	QStringList::Iterator file = fileNames.begin();
 	while(file != fileNames.end()) {
 		//std::cout << "File library: '" << (*file).toStdString() << "'" << std::endl;
@@ -316,7 +210,7 @@ void ACAudioGardenOsgQt::loadACLFile(){
 	}
 	//std::cout << "Will open: '" << fileName.toStdString() << "'" << std::endl;
 	//fileName = QFileDialog::getOpenFileName(this, "~", );
-
+	
 	if (!(fileName.isEmpty())) {
 		int size = media_cycle->importACLLibrary((char*) fileName.toStdString().c_str());
 		if (size > 0) {
@@ -390,7 +284,7 @@ void ACAudioGardenOsgQt::saveMCSLFile(){
 	
 	QString fileName = QFileDialog::getSaveFileName(this, tr("Save as MediaCycle Segmented Library"),"",tr("MediaCycle Segmented Library (*.mcsl)"));
 	QFile file(fileName);
-
+	
 	if (!file.open(QIODevice::WriteOnly)) {
 		QMessageBox::warning(this,
 							 tr("File error"),
@@ -422,7 +316,7 @@ void ACAudioGardenOsgQt::loadMediaDirectory(){
 	// with this function call here, do not import twice!!!
 	// XS TODO: what if we add a new directory to the existing library ?
 	media_cycle->normalizeFeatures();
-
+	
 	media_cycle->libraryContentChanged(); 
 	this->updateLibrary();
 	
@@ -446,8 +340,233 @@ void ACAudioGardenOsgQt::loadMediaDirectory(){
 	//	}	
 }
 
-void ACAudioGardenOsgQt::loadMediaFiles(){
+void ACAudioGardenOsgQt::loadMediaFiles()
+{
+	
 }
+
+void ACAudioGardenOsgQt::on_pushButtonRecenter_clicked()
+{
+	media_cycle->setCameraRecenter();
+	//ui.compositeOsgView->setFocus();
+}
+
+void ACAudioGardenOsgQt::on_pushButtonBack_clicked()
+{
+	media_cycle->goBack();
+	//ui.compositeOsgView->setFocus();
+}
+
+void ACAudioGardenOsgQt::on_pushButtonForward_clicked()
+{
+	media_cycle->goForward();
+	//ui.compositeOsgView->setFocus();
+}
+
+void ACAudioGardenOsgQt::on_checkBoxRhythm_stateChanged(int state)
+{
+	media_cycle->setWeight(0,state/2.0f);
+	if (library_loaded)
+		media_cycle->updateDisplay(true);
+}
+
+void ACAudioGardenOsgQt::on_checkBoxTimbre_stateChanged(int state)
+{
+	media_cycle->setWeight(1,state/2.0f);
+	if (library_loaded)
+		media_cycle->updateDisplay(true);
+}
+
+void ACAudioGardenOsgQt::on_checkBoxHarmony_stateChanged(int state)
+{
+	media_cycle->setWeight(2,state/2.0f);
+	if (library_loaded)
+		media_cycle->updateDisplay(true);
+}
+
+void ACAudioGardenOsgQt::on_sliderClusters_sliderReleased()
+{
+	std::cout << "ClusterNumber: " << ui.sliderClusters->value() << std::endl;
+	if (library_loaded){
+		media_cycle->setClusterNumber(ui.sliderClusters->value());
+		// XSCF251003 added this
+		media_cycle->updateDisplay(true); //XS 250310 was: media_cycle->updateClusters(true);
+		// XS250310 removed mediacycle->setNeedsDisplay(true); // now in updateDisplay
+		//ui.browserOsgView->updateTransformsFromBrowser(1.0);
+	}
+	//ui.browserOsgView->setFocus();
+}
+
+void ACAudioGardenOsgQt::on_comboBoxClustersMethod_activated(const QString & text) 
+{
+	std::cout << "Clusters Method: " << text.toStdString() << std::endl;
+	media_cycle->changeClustersMethodPlugin(text.toStdString());
+}
+
+void ACAudioGardenOsgQt::on_comboBoxClustersPositions_activated(const QString & text) 
+{
+	std::cout << "Clusters Positions: " << text.toStdString() << std::endl;
+	media_cycle->changeClustersPositionsPlugin(text.toStdString());
+}
+
+void ACAudioGardenOsgQt::on_pushButtonMuteAll_clicked()
+{
+	media_cycle->muteAllSources();
+	//ui.browserOsgView->setFocus();
+}
+
+void ACAudioGardenOsgQt::on_pushButtonQueryRecord_toggled()
+{
+	if (ui.pushButtonQueryRecord->isChecked() == 1)
+	{
+		if (audio_engine->isCaptureAvailable())
+		{
+			ui.pushButtonQueryReplay->setEnabled(false);
+			ui.pushButtonQueryKeep->setEnabled(false);
+			ui.pushButtonQueryPattern->setEnabled(false);
+			ui.pushButtonQueryGrain->setEnabled(false);
+			std::cout <<"Recording..."<<std::endl;
+			// CF There is a delay before the recording actually starts: work around with a countdown on a modal window?
+			audio_engine->startCapture();
+		}
+		else
+			ui.pushButtonQueryRecord->setChecked(true);
+	}
+	else
+	{
+		if (audio_engine->isCaptureAvailable())
+		{	
+			audio_engine->stopCapture();	
+			std::cout <<"Recording done."<<std::endl;
+			ui.pushButtonQueryReplay->setEnabled(true);
+			ui.pushButtonQueryKeep->setEnabled(true);
+			ui.pushButtonQueryPattern->setEnabled(true);
+			ui.pushButtonQueryGrain->setEnabled(true);
+		}	
+	}	
+}	
+
+void ACAudioGardenOsgQt::on_pushButtonQueryReplay_clicked()
+{
+	
+}
+
+// Pops up a modal window for saving the query as wavefile and add it to the library
+void ACAudioGardenOsgQt::on_pushButtonQueryKeep_clicked()
+{
+	//...
+	
+	//CF then only re-recording can re-enable the keeping
+	ui.pushButtonQueryKeep->setEnabled(false);
+}
+
+void ACAudioGardenOsgQt::on_pushButtonQueryPattern_clicked()
+{
+	
+}
+
+void ACAudioGardenOsgQt::on_pushButtonQueryGrain_clicked()
+{
+	
+}
+
+void ACAudioGardenOsgQt::on_checkBoxCompositeAutosynth_toggled()
+{
+	
+}
+
+void ACAudioGardenOsgQt::on_pushButtonCompositing_clicked(){
+	std::cout << "Compositing" << std::endl;
+	
+	//CF list selected rhythm pattern
+	std::cout << "Selected Rhythm Pattern: " << ui.compositeOsgView->getSelectedRhythmPattern() << std::endl;
+	
+	//CF list selected grains
+	media_cycle->getBrowser()->dumpSelectedNodes();
+	
+	//CF do something with these grains
+	set<int> selectedNodes = media_cycle->getBrowser()->getSelectedNodes();
+	std::cout << "Selected Grains: ";
+	vector<long> grainIds;
+	for (set<int>::const_iterator iter = selectedNodes.begin();iter != selectedNodes.end();++iter){
+		std::cout << *iter << " ";
+		grainIds.push_back(*iter);
+		//CF right here...
+	}	
+	float* syn_v;
+	long length;
+	AGSynthesis(media_cycle, ui.compositeOsgView->getSelectedRhythmPattern(), grainIds, &syn_v, length);
+	SF_INFO sfinfo;
+	SNDFILE* testFile;
+	sfinfo.samplerate = 44100;
+	sfinfo.channels = 1;
+	sfinfo.format = SF_FORMAT_WAV | SF_FORMAT_PCM_16;
+	
+	string synthesisPath = "./synthesis.wav";
+	if (! (testFile = sf_open (synthesisPath.c_str(), SFM_WRITE, &sfinfo))){  
+		printf ("Not able to open input file %s.\n", "synthesis.wav") ;
+		puts (sf_strerror (NULL)) ;
+		return;
+	}
+	
+	sf_writef_float  (testFile, syn_v, length);
+	sf_close(testFile);
+	
+	if (media_cycle->getLibrary()->getSynthesisID() < 0){
+		media_cycle->getLibrary()->setSynthesisID(media_cycle->getLibrarySize());
+		media_cycle->importDirectory(synthesisPath, 0, media_cycle->getLibrary()->getSynthesisID(), false, false);
+		media_cycle->libraryContentChanged();
+		media_cycle->getBrowser()->toggleSourceActivity(media_cycle->getLibrary()->getSynthesisID(), 1);
+	}
+	else{
+		media_cycle->getBrowser()->toggleSourceActivity(media_cycle->getLibrary()->getSynthesisID(), 0);
+		usleep(100000);
+		media_cycle->getBrowser()->toggleSourceActivity(media_cycle->getLibrary()->getSynthesisID(), 1);	
+		media_cycle->getLibrary()->getMedia(media_cycle->getLibrary()->getSynthesisID())->setEnd(length/(float)sfinfo.samplerate);
+	}
+	std::cout << std::endl;
+	return;
+}	
+
+void ACAudioGardenOsgQt::on_pushButtonControlStart_clicked()
+{
+	std::cout << "IP: " << ui.lineEditControlIP->text().toStdString() << std::endl;
+	std::cout << "Port: " << ui.lineEditControlPort->text().toInt() << std::endl;
+	if ( ui.pushButtonControlStart->text().toStdString() == "Start")
+	{	
+		osc_browser = new ACOscBrowser();
+		mOscReceiver = osc_browser->create(ui.lineEditControlIP->text().toStdString().c_str(), ui.lineEditControlPort->text().toInt());
+		osc_browser->setUserData(mOscReceiver, this);
+		osc_browser->setCallback(mOscReceiver, osc_callback);
+		osc_browser->start(mOscReceiver);
+		ui.pushButtonControlStart->setText("Stop");
+		 
+	}	
+	else if ( ui.pushButtonControlStart->text().toStdString() == "Stop")
+	{	
+		osc_browser->stop(mOscReceiver);
+		ui.pushButtonControlStart->setText("Start");
+	}
+	//ui.compositeOsgView->setFocus();
+}	
+
+void ACAudioGardenOsgQt::on_pushButtonFeedbackStart_clicked()
+{
+	std::cout << "IP: " << ui.lineEditFeedbackIP->text().toStdString() << std::endl;
+	std::cout << "Port: " << ui.lineEditFeedbackPort->text().toInt() << std::endl;
+	if ( ui.pushButtonFeedbackStart->text().toStdString() == "Start")
+	{	
+		osc_feedback = new ACOscFeedback();
+		osc_feedback->create(ui.lineEditFeedbackIP->text().toStdString().c_str(), ui.lineEditFeedbackPort->text().toInt());
+		ui.pushButtonFeedbackStart->setText("Stop");
+	}	
+	else if ( ui.pushButtonFeedbackStart->text().toStdString() == "Stop")
+	{	
+		osc_feedback->release();//mOscFeeder);
+		ui.pushButtonFeedbackStart->setText("Start");
+	}
+	//ui.compositeOsgView->setFocus();
+}	
 
 void ACAudioGardenOsgQt::processOscMessage(const char* tagName)
 {	
@@ -461,8 +580,6 @@ void ACAudioGardenOsgQt::processOscMessage(const char* tagName)
 			osc_feedback->messageEnd();
 			osc_feedback->messageSend();
 		}
-
-		
 	}
 	else if(strcasecmp(tagName, "/audiocycle/fullscreen") == 0)
 	{
