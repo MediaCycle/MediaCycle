@@ -1,7 +1,7 @@
 /**
  * @brief ACOsgCompositeViewQt.h
  * @author Christian Frisson
- * @date 18/06/2010
+ * @date 01/07/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -127,6 +127,7 @@ class ACOsgCompositeViewQt : public osgViewer::CompositeViewer, public QGLWidget
 		ACOsgBrowserRenderer* getBrowserRenderer(){return browser_renderer;};
 		ACOsgTimelineRenderer* getTimelineRenderer(){return timeline_renderer;};
 		int getSelectedRhythmPattern(){return selectedRhythmPattern;}
+		void setAutoSynth(bool _autosynth){autosynth = _autosynth;}
 	
 	private:
 		int mousedown, zoomdown, forwarddown, autoplaydown, rotationdown;
@@ -139,6 +140,7 @@ class ACOsgCompositeViewQt : public osgViewer::CompositeViewer, public QGLWidget
 		float sepx,sepy; //CF location (in OSG coordinates) of the border that separates the browser and timeline viewers
 		float refsepy;
 		int selectedRhythmPattern;
+		bool autosynth;
 };
 
 #endif

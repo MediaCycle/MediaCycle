@@ -94,7 +94,8 @@ ACAudioGardenOsgQt::ACAudioGardenOsgQt(QWidget *parent)
 							ui.comboBoxClustersPositions->addItem(QString(acpl->getPluginLibrary(i)->getPlugin(j)->getName().c_str()));
 							if (acpl->getPluginLibrary(i)->getPlugin(j)->getName() == "VisAudiogarden") {
 								//CF we use the AudioGarden plugin as default
-								media_cycle->setVisualisationPlugin("VisAudiogarden");
+								//media_cycle->setVisualisationPlugin("VisAudiogarden");
+								media_cycle->setClustersPositionsPlugin("VisAudiogarden");
 								ui.comboBoxClustersPositions->setCurrentIndex(ui.comboBoxClustersPositions->count()-1);
 							}
 						}
@@ -472,7 +473,7 @@ void ACAudioGardenOsgQt::on_pushButtonQueryGrain_clicked()
 
 void ACAudioGardenOsgQt::on_checkBoxCompositeAutosynth_toggled()
 {
-	
+	ui.compositeOsgView->setAutoSynth((bool)(ui.pushButtonQueryRecord->isChecked()));
 }
 
 void ACAudioGardenOsgQt::on_pushButtonCompositing_clicked(){
@@ -525,7 +526,7 @@ void ACAudioGardenOsgQt::on_pushButtonCompositing_clicked(){
 		media_cycle->getLibrary()->getMedia(media_cycle->getLibrary()->getSynthesisID())->setEnd(length/(float)sfinfo.samplerate);
 	}
 	std::cout << std::endl;
-	return;
+	//return;
 }	
 
 void ACAudioGardenOsgQt::on_pushButtonControlStart_clicked()

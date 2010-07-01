@@ -44,7 +44,8 @@ ACOsgCompositeViewQt::ACOsgCompositeViewQt( QWidget * parent, const char * name,
 	refcamx(0.0f), refcamy(0.0f),
 	refzoom(0.0f),refrotation(0.0f),
 	septhick(5),sepx(0.0f),sepy(0.0f),refsepy(0.0f),
-	selectedRhythmPattern(-1)
+	selectedRhythmPattern(-1),
+	autosynth(false)
 {
 	osg_view = new osgViewer::GraphicsWindowEmbedded(0,0,width(),height());
 	setFocusPolicy(Qt::StrongFocus);// CF instead of ClickFocus
@@ -401,6 +402,8 @@ void ACOsgCompositeViewQt::mouseReleaseEvent( QMouseEvent* event )
 				{
 					media_cycle->getBrowser()->toggleNode(loop);
 					media_cycle->getBrowser()->dumpSelectedNodes();
+					//if (autosynth)
+						//...
 				}
 			}
 		}	
