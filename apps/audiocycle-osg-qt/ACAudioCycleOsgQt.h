@@ -96,6 +96,7 @@ class ACAudioCycleOsgQt : public QMainWindow
 		void on_pushButtonQueryRecord_toggled();	
 		void on_pushButtonQueryReplay_clicked();
 		void on_pushButtonQueryKeep_clicked();
+		void on_pushButtonQueryReferent_clicked();
 
 		// OSC I/O controls
 		void on_pushButtonControlStart_clicked();

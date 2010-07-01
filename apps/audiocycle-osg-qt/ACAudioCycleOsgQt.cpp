@@ -386,7 +386,7 @@ void ACAudioCycleOsgQt::on_comboBoxClustersMethod_activated(const QString & text
 
 void ACAudioCycleOsgQt::on_comboBoxClustersPositions_activated(const QString & text) 
 {
-	std::cout << "Clusters Positions: " << text.toStdString() << std::endl;
+	std::cout << "Clusters Positions: " << text.toStdString() << std::endl;	
 	media_cycle->changeClustersPositionsPlugin(text.toStdString());
 }
 
@@ -448,6 +448,7 @@ void ACAudioCycleOsgQt::on_pushButtonQueryRecord_toggled()
 		{
 			ui.pushButtonQueryReplay->setEnabled(false);
 			ui.pushButtonQueryKeep->setEnabled(false);
+			ui.pushButtonQueryReferent->setEnabled(false);
 			std::cout <<"Recording..."<<std::endl;
 			// CF There is a delay before the recording actually starts: work around with a countdown on a modal window?
 			audio_engine->startCapture();
@@ -463,6 +464,7 @@ void ACAudioCycleOsgQt::on_pushButtonQueryRecord_toggled()
 			std::cout <<"Recording done."<<std::endl;
 			ui.pushButtonQueryReplay->setEnabled(true);
 			ui.pushButtonQueryKeep->setEnabled(true);
+			ui.pushButtonQueryReferent->setEnabled(true);
 		}	
 	}	
 }	
@@ -479,6 +481,11 @@ void ACAudioCycleOsgQt::on_pushButtonQueryKeep_clicked()
 	
 	//CF then only re-recording can re-enable the keeping
 	ui.pushButtonQueryKeep->setEnabled(false);
+}
+
+void ACAudioCycleOsgQt::on_pushButtonQueryReferent_clicked()
+{
+
 }
 
 void ACAudioCycleOsgQt::on_pushButtonControlStart_clicked()

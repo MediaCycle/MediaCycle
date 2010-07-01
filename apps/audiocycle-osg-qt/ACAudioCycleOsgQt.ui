@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>975</width>
-    <height>732</height>
+    <width>976</width>
+    <height>758</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -530,7 +530,7 @@
          <x>10</x>
          <y>530</y>
          <width>201</width>
-         <height>151</height>
+         <height>171</height>
         </rect>
        </property>
        <property name="sizePolicy">
@@ -653,7 +653,7 @@
           <x>10</x>
           <y>90</y>
           <width>181</width>
-          <height>51</height>
+          <height>71</height>
          </rect>
         </property>
         <property name="title">
@@ -714,6 +714,43 @@
          </property>
          <property name="checkable">
           <bool>false</bool>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="pushButtonQueryReferent">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="geometry">
+          <rect>
+           <x>60</x>
+           <y>40</y>
+           <width>81</width>
+           <height>30</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Referent</string>
+         </property>
+         <property name="checkable">
+          <bool>false</bool>
+         </property>
+        </widget>
+        <widget class="QLabel" name="labelQueryUse">
+         <property name="geometry">
+          <rect>
+           <x>20</x>
+           <y>40</y>
+           <width>41</width>
+           <height>31</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>10</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>Set as</string>
          </property>
         </widget>
        </widget>
@@ -922,7 +959,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>975</width>
+     <width>976</width>
      <height>22</height>
     </rect>
    </property>
