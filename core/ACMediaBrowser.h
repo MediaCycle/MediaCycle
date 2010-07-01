@@ -257,11 +257,8 @@ public:
 	int getNumberOfLabels(){return mLabelAttributes.size();}
 
 	void setClustersMethodPlugin(ACPlugin* acpl){mClustersMethodPlugin=acpl;}
-	void setNeighborsMethodPlugin(ACPlugin* acpl){
-		mNeighborsMethodPlugin=acpl;
-		//this->setMode(AC_MODE_NEIGHBORS);//CF this stays until it is correctly used on main applications
-	};
-	void setClustersPositionsPlugin(ACPlugin* acpl){mClustersPosPlugin=acpl;}
+	void setNeighborsMethodPlugin(ACPlugin* acpl){mNeighborsMethodPlugin=acpl;}
+	void setClustersPositionsPlugin(ACPlugin* acpl){mClustersPosPlugin=acpl;}	
 	void setNeighborsPositionsPlugin(ACPlugin* acpl){mNeighborsPosPlugin=acpl;}
 	void setVisualisationPlugin(ACPlugin* acpl){mVisPlugin=acpl;}
 	

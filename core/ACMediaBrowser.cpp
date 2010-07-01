@@ -1536,13 +1536,21 @@ bool ACMediaBrowser::changeClustersMethodPlugin(ACPlugin* acpl)
 	bool success = false;
 	switch ( mMode ){
 		case AC_MODE_CLUSTERS:
-			this->setClustersMethodPlugin(acpl);
+			if (acpl) {
+				this->setClustersMethodPlugin(acpl);
+			}	
+			else
+				mClustersMethodPlugin = NULL;
 			if (getLibrary()->getSize() > 0)
 				this->updateDisplay(true);
 			success = true;
 			break;
 		case AC_MODE_NEIGHBORS:
-			this->setClustersMethodPlugin(acpl);
+			if (acpl) {
+				this->setClustersMethodPlugin(acpl);
+			}	
+			else
+				mClustersMethodPlugin = NULL;
 			success = true;
 			break;
 		default:
@@ -1578,15 +1586,25 @@ bool ACMediaBrowser::changeClustersPositionsPlugin(ACPlugin* acpl)
 	bool success = false;
 	switch ( mMode ){
 		case AC_MODE_CLUSTERS:
-			this->setClustersPositionsPlugin(acpl);
+			if (acpl) {
+				this->setClustersPositionsPlugin(acpl);
+			}	
+			else
+				mClustersPosPlugin = NULL;
 			if (getLibrary()->getSize() > 0){
 				setState(AC_CHANGING);
-				mClustersPosPlugin->updateNextPositions(this);
+				if (acpl) 
+					mClustersPosPlugin->updateNextPositions(this);
+				else
+					this->updateNextPositionsPropeller();
 			}	
 			success = true;
 			break;
 		case AC_MODE_NEIGHBORS:	
-			this->setClustersPositionsPlugin(acpl);
+			if (acpl)
+				this->setClustersPositionsPlugin(acpl);
+			else
+				mClustersPosPlugin = NULL;
 			success = true;
 			break;
 		default:
