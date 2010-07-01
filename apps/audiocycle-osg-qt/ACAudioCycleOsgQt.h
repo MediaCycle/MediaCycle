@@ -42,7 +42,7 @@ using namespace std;
 
 #include <QtGui>
 #include "ui_ACAudioCycleOsgQt.h"
-#include <ACOsgBrowserViewQT.h>
+#include <ACOsgCompositeViewQt.h>
 #include <MediaCycle.h>
 #include <ACAudioEngine.h>
 #include <ACOscBrowser.h>
@@ -116,7 +116,7 @@ class ACAudioCycleOsgQt : public QMainWindow
 		bool library_loaded;
 
 	protected:
-		//ACOsgBrowserViewQT* browserOsgView;
+		//ACOsgCompositeViewQt* compositeOsgView;
 	
 	public:
 		void processOscMessage(const char* tagName);

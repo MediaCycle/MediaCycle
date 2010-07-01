@@ -1,10 +1,10 @@
 //
-//  ACOsgCompositeViewQt.cpp
-//  MediaCycle
+//  AGOsgCompositeViewQt.cpp
+//  MediaCycle+AudioGarden
 //
 //  @author Christian Frisson
-//  @date 29/04/10
-//  @copyright (c) 2009 – UMONS - Numediart
+//  @date 01/07/10
+//  @copyright (c) 2010 – UMONS - Numediart
 //  
 //  MediaCycle of University of Mons – Numediart institute is 
 //  licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -32,21 +32,24 @@
 //
 //  Qt QGLWidget and OSG CompositeViewer that wraps 
 //  a MediaCycle browser and multitrack timeline viewer 
+//  customized for AudioGarden
 //
 
 #define PI 3.1415926535897932384626433832795f
 
-#include "ACOsgCompositeViewQt.h"
+#include "AGOsgCompositeViewQt.h"
 #include <cmath>
 
-ACOsgCompositeViewQt::ACOsgCompositeViewQt( QWidget * parent, const char * name, const QGLWidget * shareWidget, WindowFlags f):
+AGOsgCompositeViewQt::AGOsgCompositeViewQt( QWidget * parent, const char * name, const QGLWidget * shareWidget, WindowFlags f):
 	QGLWidget(parent, shareWidget, f),
 	mousedown(0), zoomdown(0), forwarddown(0), autoplaydown(0),rotationdown(0),
-	borderdown(0), transportdown(0),
+	borderdown(0), transportdown(0), selectrhythmpattern(false), selectgrains(false),
 	refx(0.0f), refy(0.0f),
 	refcamx(0.0f), refcamy(0.0f),
 	refzoom(0.0f),refrotation(0.0f),
-	septhick(5),sepx(0.0f),sepy(0.0f),refsepy(0.0f)
+	septhick(5),sepx(0.0f),sepy(0.0f),refsepy(0.0f),
+	selectedRhythmPattern(-1),
+	autosynth(false)
 {
 	osg_view = new osgViewer::GraphicsWindowEmbedded(0,0,width(),height());
 	setFocusPolicy(Qt::StrongFocus);// CF instead of ClickFocus
@@ -73,13 +76,13 @@ ACOsgCompositeViewQt::ACOsgCompositeViewQt( QWidget * parent, const char * name,
 	setMouseTracking(true); //CF necessary for the hover callback
 }
 
-void ACOsgCompositeViewQt::setMediaCycle(MediaCycle* _media_cycle)
+void AGOsgCompositeViewQt::setMediaCycle(MediaCycle* _media_cycle)
 {
 	media_cycle = _media_cycle;
 	browser_renderer->setMediaCycle(media_cycle);
 	timeline_renderer->setMediaCycle(media_cycle);
 	
-	sepy = 0;//height()/4;// CF browser/timeline proportions at startup
+	sepy = height()/4;// CF browser/timeline proportions at startup
 	browser_view = new osgViewer::View;
 	browser_view->getCamera()->setGraphicsContext(this->getGraphicsWindow());
 	browser_view->getCamera()->setViewport(new osg::Viewport(0,sepy,width(),height()-sepy)); // CF: for OSG y=0 is on the bottom, for Qt on the top
@@ -104,7 +107,7 @@ void ACOsgCompositeViewQt::setMediaCycle(MediaCycle* _media_cycle)
 	this->addView(timeline_view);
 }
 
-void ACOsgCompositeViewQt::resizeGL( int width, int height )
+void AGOsgCompositeViewQt::resizeGL( int width, int height )
 {
 	//std::cout << "height() " << browser_view->getCamera()->getViewport()->height()+timeline_view->getCamera()->getViewport()->height() << " height " << height << std::endl;
 	float prevheight = browser_view->getCamera()->getViewport()->height()+timeline_view->getCamera()->getViewport()->height();
@@ -120,7 +123,7 @@ void ACOsgCompositeViewQt::resizeGL( int width, int height )
 }
 
 // CF to do: understand paintGL vs updateGL to use them more correctly
-void ACOsgCompositeViewQt::paintGL()
+void AGOsgCompositeViewQt::paintGL()
 {
 	//CF to improve, we want to know if the view is being animated to force a frequent refresh of the positions:
 	if (media_cycle->getBrowser()->getState() == AC_CHANGING)
@@ -129,7 +132,7 @@ void ACOsgCompositeViewQt::paintGL()
 }
 
 // called according to timer
-void ACOsgCompositeViewQt::updateGL()
+void AGOsgCompositeViewQt::updateGL()
 {
 	double frac = 0.0;
 	
@@ -173,7 +176,7 @@ void ACOsgCompositeViewQt::updateGL()
 	media_cycle->setNeedsDisplay(false);
 }	
 
-void ACOsgCompositeViewQt::keyPressEvent( QKeyEvent* event )
+void AGOsgCompositeViewQt::keyPressEvent( QKeyEvent* event )
 {
 	osg_view->getEventQueue()->keyPress( (osgGA::GUIEventAdapter::KeySymbol) *(event->text().toAscii().data() ) );
 
@@ -208,12 +211,20 @@ void ACOsgCompositeViewQt::keyPressEvent( QKeyEvent* event )
 			}	
 			media_cycle->setPlayKeyDown(true);			
 			break;
+		case Qt::Key_P:
+			selectrhythmpattern = true;
+			media_cycle->setPlayKeyDown(false);			
+			break;
+		case Qt::Key_G:
+			selectgrains = true;
+			media_cycle->setPlayKeyDown(false);			
+			break;	
 		default:
 			break;
 	}
 }
 
-void ACOsgCompositeViewQt::keyReleaseEvent( QKeyEvent* event )
+void AGOsgCompositeViewQt::keyReleaseEvent( QKeyEvent* event )
 {
 	osg_view->getEventQueue()->keyRelease( (osgGA::GUIEventAdapter::KeySymbol) *(event->text().toAscii().data() ) );
 
@@ -224,9 +235,11 @@ void ACOsgCompositeViewQt::keyReleaseEvent( QKeyEvent* event )
 	media_cycle->setAutoPlay(0);
 	rotationdown = 0;
 	transportdown = 0;
+	selectrhythmpattern = false;
+	selectgrains = false;
 }
 
-void ACOsgCompositeViewQt::mousePressEvent( QMouseEvent* event )
+void AGOsgCompositeViewQt::mousePressEvent( QMouseEvent* event )
 {
     int button = 0;
 	mousedown = 1;
@@ -264,7 +277,7 @@ void ACOsgCompositeViewQt::mousePressEvent( QMouseEvent* event )
 	media_cycle->setNeedsDisplay(true);
 }
 
-void ACOsgCompositeViewQt::mouseMoveEvent( QMouseEvent* event )
+void AGOsgCompositeViewQt::mouseMoveEvent( QMouseEvent* event )
 {
 	int button = 0;
     switch(event->button())
@@ -298,7 +311,7 @@ void ACOsgCompositeViewQt::mouseMoveEvent( QMouseEvent* event )
 		}
 		else
 		{	
-			if ( (forwarddown == 0)) 
+			if ( (forwarddown == 0) && (selectrhythmpattern == false) && (selectgrains == false)) 
 			{
 				if ( (event->y() >= height() - ( browser_view->getCamera()->getViewport()->height() + browser_view->getCamera()->getViewport()->y() ) ) && (event->y() <= height() - ( browser_view->getCamera()->getViewport()->y() + septhick) ))
 				{
@@ -329,7 +342,7 @@ void ACOsgCompositeViewQt::mouseMoveEvent( QMouseEvent* event )
 	media_cycle->setNeedsDisplay(true);
 }
 
-void ACOsgCompositeViewQt::mouseReleaseEvent( QMouseEvent* event )
+void AGOsgCompositeViewQt::mouseReleaseEvent( QMouseEvent* event )
 {
     int button = 0;
     switch(event->button())
@@ -344,7 +357,7 @@ void ACOsgCompositeViewQt::mouseReleaseEvent( QMouseEvent* event )
 	
 	if ( (media_cycle) && (media_cycle->hasBrowser()))
 	{
-		if ( (forwarddown==1))
+		if ( (forwarddown==1) || (selectrhythmpattern == true) || (selectgrains == true))
 		{	
 			int loop = media_cycle->getClickedNode();
 			std::cout << "node " << loop << " selected" << std::endl;
@@ -353,28 +366,49 @@ void ACOsgCompositeViewQt::mouseReleaseEvent( QMouseEvent* event )
 			
 			if(loop >= 0)
 			{
-	
-				if (media_cycle->getBrowser()->getMode() == AC_MODE_CLUSTERS)
-					media_cycle->incrementLoopNavigationLevels(loop);
-				media_cycle->setReferenceNode(loop);
-				
-				// XSCF 250310 added these 3
-				if (media_cycle->getBrowser()->getMode() == AC_MODE_CLUSTERS)
-					media_cycle->pushNavigationState();
-				//media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
-				//media_cycle->getBrowser()->setState(AC_CHANGING);
-				
-				//			media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
-				//			media_cycle->getBrowser()->setState(AC_CHANGING);
-				
-				media_cycle->updateDisplay(true); //XS250310 was: media_cycle->updateClusters(true);
-				// XSCF 250310 removed this:
-				// media_cycle->updateNeighborhoods();
-				//					media_cycle->updateClusters(false);// CF was true, equivalent to what's following
-				
-				// remainders from updateClusters(true)
+				if (forwarddown==1)
+				{	
+					if (media_cycle->getBrowser()->getMode() == AC_MODE_CLUSTERS)
+						media_cycle->incrementLoopNavigationLevels(loop);
+					media_cycle->setReferenceNode(loop);
+					
+					// XSCF 250310 added these 3
+					if (media_cycle->getBrowser()->getMode() == AC_MODE_CLUSTERS)
+						media_cycle->pushNavigationState();
+					//media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
+					//media_cycle->getBrowser()->setState(AC_CHANGING);
+					
+					//			media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
+					//			media_cycle->getBrowser()->setState(AC_CHANGING);
+					
+					media_cycle->updateDisplay(true); //XS250310 was: media_cycle->updateClusters(true);
+					// XSCF 250310 removed this:
+					// media_cycle->updateNeighborhoods();
+					//					media_cycle->updateClusters(false);// CF was true, equivalent to what's following
+					
+					// remainders from updateClusters(true)
 //					media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
 //					media_cycle->getBrowser()->setState(AC_CHANGING);
+				}
+				else if (selectrhythmpattern == true)
+				{
+					selectedRhythmPattern = loop;
+					if ( timeline_renderer->getTrack(0)!=NULL ) {
+						if ( (timeline_renderer->getTrack(0)->getMediaIndex() != loop) )
+						{	
+							//if (timeline_renderer->getTrack(0)->getMediaIndex() != -1)
+								media_cycle->getBrowser()->toggleSourceActivity( timeline_renderer->getTrack(0)->getMediaIndex(), 0 );
+							timeline_renderer->getTrack(0)->setMediaIndex(loop);
+						}	
+					}
+				}
+				else if (selectgrains == true)
+				{
+					media_cycle->getBrowser()->toggleNode(loop);
+					media_cycle->getBrowser()->dumpSelectedNodes();
+					//if (autosynth)
+						//...
+				}
 			}
 		}	
 		media_cycle->setClickedNode(-1);
@@ -384,7 +418,7 @@ void ACOsgCompositeViewQt::mouseReleaseEvent( QMouseEvent* event )
 	media_cycle->setNeedsDisplay(true);
 }
 
-void ACOsgCompositeViewQt::prepareFromBrowser()
+void AGOsgCompositeViewQt::prepareFromBrowser()
 {
 	//setMouseTracking(false); //CF necessary for the hover callback
 	browser_renderer->prepareNodes(); 
@@ -393,7 +427,7 @@ void ACOsgCompositeViewQt::prepareFromBrowser()
 }
 
 
-void ACOsgCompositeViewQt::updateTransformsFromBrowser( double frac)
+void AGOsgCompositeViewQt::updateTransformsFromBrowser( double frac)
 {
 	int closest_node;	
 	// get screen coordinates
@@ -404,7 +438,7 @@ void ACOsgCompositeViewQt::updateTransformsFromBrowser( double frac)
 	browser_renderer->updateLabels(frac);
 }
 
-void ACOsgCompositeViewQt::prepareFromTimeline()
+void AGOsgCompositeViewQt::prepareFromTimeline()
 {
 	//setMouseTracking(false); //CF necessary for the hover callback
 	timeline_renderer->prepareTracks(); 
@@ -413,7 +447,7 @@ void ACOsgCompositeViewQt::prepareFromTimeline()
 }
 
 
-void ACOsgCompositeViewQt::updateTransformsFromTimeline( double frac)
+void AGOsgCompositeViewQt::updateTransformsFromTimeline( double frac)
 {
 	//int closest_track;	
 	// get screen coordinates

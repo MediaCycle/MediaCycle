@@ -1,5 +1,5 @@
 /**
- * @brief ACOsgCompositeViewQt.h
+ * @brief AGOsgCompositeViewQt.h
  * @author Christian Frisson
  * @date 01/07/2010
  * @copyright (c) 2010 – UMONS - Numediart
@@ -29,15 +29,15 @@
  * <mailto:avre@umons.ac.be>
 */
 
-#ifndef HEADER_AC_COMPOSITE_VIEW_OSG_QT
-#define HEADER_AC_COMPOSITE_VIEW_OSG_QT
+#ifndef HEADER_AG_COMPOSITE_VIEW_OSG_QT
+#define HEADER_AG_COMPOSITE_VIEW_OSG_QT
 
 //
-//  ACOsgCompositeViewQt.h
-//  MediaCycle
+//  AGOsgCompositeViewQt.h
+//  MediaCycle+AudioGarden
 //
 //  @author Christian Frisson
-//  @date 29/04/10
+//  @date 01/07/10
 //  @copyright (c) 2010 – UMONS - Numediart
 //  
 //  MediaCycle of University of Mons – Numediart institute is 
@@ -66,6 +66,7 @@
 //
 //  Qt QGLWidget and OSG CompositeViewer that wraps 
 //  a MediaCycle browser and multitrack timeline viewer 
+//  customized for AudioGarden
 //
 
 #include <osgViewer/Viewer>
@@ -88,11 +89,11 @@ using Qt::WindowFlags;
 #include <ACOsgBrowserEventHandler.h>
 #include <ACOsgTimelineRenderer.h>
 
-class ACOsgCompositeViewQt : public osgViewer::CompositeViewer, public QGLWidget
+class AGOsgCompositeViewQt : public osgViewer::CompositeViewer, public QGLWidget
 {
 	public:
-        ACOsgCompositeViewQt( QWidget * parent = 0, const char * name = 0, const QGLWidget * shareWidget = 0, WindowFlags f = 0 );
-		virtual ~ACOsgCompositeViewQt() {};
+        AGOsgCompositeViewQt( QWidget * parent = 0, const char * name = 0, const QGLWidget * shareWidget = 0, WindowFlags f = 0 );
+		virtual ~AGOsgCompositeViewQt() {};
 		osgViewer::GraphicsWindow* getGraphicsWindow() { return osg_view.get(); }
 		const osgViewer::GraphicsWindow* getGraphicsWindow() const { return osg_view.get(); }
 		virtual void paintGL();
@@ -129,16 +130,21 @@ class ACOsgCompositeViewQt : public osgViewer::CompositeViewer, public QGLWidget
 		void updateTransformsFromTimeline( double frac);
 		ACOsgBrowserRenderer* getBrowserRenderer(){return browser_renderer;};
 		ACOsgTimelineRenderer* getTimelineRenderer(){return timeline_renderer;};
+		int getSelectedRhythmPattern(){return selectedRhythmPattern;}
+		void setAutoSynth(bool _autosynth){autosynth = _autosynth;}
 	
 	private:
 		int mousedown, zoomdown, forwarddown, autoplaydown, rotationdown;
 		int borderdown, transportdown;
+		bool selectrhythmpattern, selectgrains;
 		float refx, refy;
 		float refcamx, refcamy;
 		float refzoom, refrotation;
 		int septhick; // CF half of the thickness of the border that separates the browser and timeline viewers
 		float sepx,sepy; //CF location (in OSG coordinates) of the border that separates the browser and timeline viewers
 		float refsepy;
+		int selectedRhythmPattern;
+		bool autosynth;
 };
 
 #endif
