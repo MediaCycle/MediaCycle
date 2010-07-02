@@ -713,7 +713,6 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 		//int node = media_cycle->getClosestNode();
 		int node = media_cycle->getLastSelectedNode();
 		
-		int node = media_cycle->getClosestNode();
 		if (node > -1)
 		{
 			audio_engine->setLoopSynchroMode(node, ACAudioEngineSynchroModeAutoBeat);
