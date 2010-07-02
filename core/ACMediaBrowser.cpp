@@ -539,6 +539,7 @@ void ACMediaBrowser::libraryContentChanged() {
 		mClickedNode = -1;
 		mClickedLabel = -1;
 		mClosestNode = -1;
+		mLastSelectedNode = -1;
 		//mClusterCount = 5; //CF might be previously set by apps
 		mNavigationLevel = 0;
 		
@@ -548,7 +549,7 @@ void ACMediaBrowser::libraryContentChanged() {
 		return;
 	}
 	
-	// XS TODO randomiwe positions only at the beginning...
+	// XS TODO randomize positions only at the beginning...
 	if (mMode == AC_MODE_CLUSTERS) {//(mVisPlugin==NULL && mPosPlugin==NULL) {	
 		for (ACMediaNodes::iterator node = mLoopAttributes.begin(); node != mLoopAttributes.end(); ++node){
 			(*node).setCurrentPosition (ACRandom(), 
