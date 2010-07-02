@@ -130,13 +130,15 @@ ACAudioCycleOsgQt::ACAudioCycleOsgQt(QWidget *parent)
 	connect(ui.actionLoad_Media_Files, SIGNAL(triggered()), this, SLOT(loadMediaFiles()));
 	connect(ui.actionLoad_ACL, SIGNAL(triggered()), this, SLOT(on_pushButtonLaunch_clicked()));
 	connect(ui.actionSave_ACL, SIGNAL(triggered()), this, SLOT(saveACLFile()));
-	
+
 	this->show();
 	
 	#ifdef USE_APPLE_MULTITOUCH
+	/*
 		multitouch_trackpad = new ACAppleMultitouchTrackpadSupport();
 		multitouch_trackpad->setMediaCycle(media_cycle);
 		multitouch_trackpad->start();
+	*/ 
 	#endif
 	//ui.compositeOsgView->setFocus();
 }
@@ -150,7 +152,7 @@ ACAudioCycleOsgQt::~ACAudioCycleOsgQt()
 	}
 
 	#ifdef USE_APPLE_MULTITOUCH
-		multitouch_trackpad->stop();
+		//multitouch_trackpad->stop();
 	#endif
 	
 	delete osc_browser;
@@ -219,8 +221,6 @@ void ACAudioCycleOsgQt::loadACLFile(){
 	
 	if (!(fileName.isEmpty())) {
 		media_cycle->importACLLibrary(fileName.toStdString());//(char*) fileName.toStdString().c_str());
-		//media_cycle->setNeedsDisplay(true);//CF
-		//ui.compositeOsgView->updateTransformsFromBrowser(1.0);//CF
 		media_cycle->normalizeFeatures();
 		media_cycle->libraryContentChanged();
 		std::cout << "File library imported" << std::endl;
@@ -606,17 +606,10 @@ void ACAudioCycleOsgQt::processOscMessage(const char* tagName)
 		osc_browser->readString(mOscReceiver, lib_path, 500); // wrong magic number!
 		std::cout << "Importing file library '" << lib_path << "'..." << std::endl;
 		media_cycle->importACLLibrary(lib_path); // XS instead of getImageLibrary CHECK THIS
-		//updateLibrary();
+		media_cycle->normalizeFeatures();
+		media_cycle->libraryContentChanged();
 		std::cout << "File library imported" << std::endl;
-		media_cycle->setReferenceNode(0);
-		// XSCF 250310 added these 3
-		media_cycle->pushNavigationState();
-		media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
-		media_cycle->getBrowser()->setState(AC_CHANGING);
-		
-		ui.compositeOsgView->prepareFromBrowser();
-		media_cycle->setNeedsDisplay(true);
-		library_loaded = true;
+		this->updateLibrary();
 	}
 	else if(strcasecmp(tagName, "/audiocycle/1/browser/library/clear") == 0)
 	{
@@ -648,8 +641,11 @@ void ACAudioCycleOsgQt::processOscMessage(const char* tagName)
 	{
 		float bpm;
 		osc_browser->readFloat(mOscReceiver, &bpm);
+		
 		//int node = media_cycle->getClickedNode();
-		int node = media_cycle->getClosestNode();
+		//int node = media_cycle->getClosestNode();
+		int node = media_cycle->getLastSelectedNode();
+		
 		if (node > -1)
 		{
 			audio_engine->setLoopSynchroMode(node, ACAudioEngineSynchroModeAutoBeat);
@@ -663,13 +659,15 @@ void ACAudioCycleOsgQt::processOscMessage(const char* tagName)
 		osc_browser->readFloat(mOscReceiver, &scrub);
 		
 		//int node = media_cycle->getClickedNode();
-		int node = media_cycle->getClosestNode();
+		//int node = media_cycle->getClosestNode();
+		int node = media_cycle->getLastSelectedNode();
+		
 		if (node > -1)
 		{
 			//media_cycle->pickedObjectCallback(-1);
 			audio_engine->setLoopSynchroMode(node, ACAudioEngineSynchroModeManual);
 			audio_engine->setLoopScaleMode(node, ACAudioEngineScaleModeResample);//ACAudioEngineScaleModeVocode
-			audio_engine->setScrub((float)scrub*10000); // temporary hack to scrub between 0 an 1
+			audio_engine->setScrub((float)scrub*100); // temporary hack to scrub between 0 an 1
 		}
 	}
 	else if(strcasecmp(tagName, "/audiocycle/1/player/1/pitch") == 0)
@@ -678,7 +676,9 @@ void ACAudioCycleOsgQt::processOscMessage(const char* tagName)
 		osc_browser->readFloat(mOscReceiver, &pitch);
 		
 		//int node = media_cycle->getClickedNode();
-		int node = media_cycle->getClosestNode();
+		//int node = media_cycle->getClosestNode();
+		int node = media_cycle->getLastSelectedNode();
+		
 		if (node > -1)
 		{
 			/*

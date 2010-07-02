@@ -708,7 +708,11 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 	{
 		float bpm;
 		osc_browser->readFloat(mOscReceiver, &bpm);
+		
 		//int node = media_cycle->getClickedNode();
+		//int node = media_cycle->getClosestNode();
+		int node = media_cycle->getLastSelectedNode();
+		
 		int node = media_cycle->getClosestNode();
 		if (node > -1)
 		{
@@ -723,7 +727,10 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 		osc_browser->readFloat(mOscReceiver, &scrub);
 		
 		//int node = media_cycle->getClickedNode();
-		int node = media_cycle->getClosestNode();
+		//int node = media_cycle->getClosestNode();
+		int node = media_cycle->getLastSelectedNode();
+		//std::cout << "Scrub on node " << node << std::endl;
+		
 		 if (node > -1)
 		 {
 			 //media_cycle->pickedObjectCallback(-1);
@@ -738,7 +745,10 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 		osc_browser->readFloat(mOscReceiver, &pitch);
 	
 		//int node = media_cycle->getClickedNode();
-		int node = media_cycle->getClosestNode();
+		//int node = media_cycle->getClosestNode();
+		int node = media_cycle->getLastSelectedNode();
+		//std::cout << "Pitch on node " << node << std::endl;
+		
 		if (node > -1)
 		{
 			//if (!is_pitching)

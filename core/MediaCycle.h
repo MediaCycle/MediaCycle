@@ -133,6 +133,7 @@ public:
 	void setClickedNode(int i);
 	void setClosestNode(int i);
 	int getClosestNode();
+	int	getLastSelectedNode();
 	
 	// == Cluster Display
 	void updateState();
@@ -141,6 +142,7 @@ public:
 	float getFrac();
 	void incrementLoopNavigationLevels(int i);
 	void setReferenceNode(int index);
+	int getReferenceNode();
 	void goBack();
 	void goForward();
 	void setClusterNumber(int n);

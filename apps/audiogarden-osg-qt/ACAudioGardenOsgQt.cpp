@@ -687,7 +687,11 @@ void ACAudioGardenOsgQt::processOscMessage(const char* tagName)
 	{
 		float bpm;
 		osc_browser->readFloat(mOscReceiver, &bpm);
-		int node = media_cycle->getClickedNode();
+		
+		//int node = media_cycle->getClickedNode();
+		//int node = media_cycle->getClosestNode();
+		int node = media_cycle->getLastSelectedNode();
+		
 		if (node > -1)
 		{
 			audio_engine->setLoopSynchroMode(node, ACAudioEngineSynchroModeAutoBeat);
@@ -700,7 +704,10 @@ void ACAudioGardenOsgQt::processOscMessage(const char* tagName)
 		float scrub;
 		osc_browser->readFloat(mOscReceiver, &scrub);
 		
-		int node = media_cycle->getClickedNode();
+		//int node = media_cycle->getClickedNode();
+		//int node = media_cycle->getClosestNode();
+		int node = media_cycle->getLastSelectedNode();
+		
 		if (node > -1)
 		{
 			//media_cycle->pickedObjectCallback(-1);
@@ -714,7 +721,10 @@ void ACAudioGardenOsgQt::processOscMessage(const char* tagName)
 		float pitch;
 		osc_browser->readFloat(mOscReceiver, &pitch);
 		
-		int node = media_cycle->getClickedNode();
+		//int node = media_cycle->getClickedNode();
+		//int node = media_cycle->getClosestNode();
+		int node = media_cycle->getLastSelectedNode();
+		
 		if (node > -1)
 		{
 			/*

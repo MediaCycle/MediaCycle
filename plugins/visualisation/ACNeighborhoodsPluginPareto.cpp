@@ -1,7 +1,7 @@
 /**
  * @brief ACNeighborhoodsPluginPareto.cpp
- * @author Damien Tardieu
- * @date 18/06/2010
+ * @author Christian Frisson
+ * @date 02/07/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -51,8 +51,8 @@ void ACNeighborhoodsPluginPareto::updateNeighborhoods(ACMediaBrowser* mediaBrows
 	//int _clickedloop = mediaBrowser->getClickedLoop();
 	std::cout << "ACNeighborhoodsPluginPareto::updateNeighborhoods" << std::endl;
 	if (mediaBrowser->getUserLog()->getLastClickedNodeId() == -1) {	 
-		mediaBrowser->getUserLog()->addRootNode(0, 0); // 0
-		mediaBrowser->getUserLog()->clickNode(0, 0);
+		mediaBrowser->getUserLog()->addRootNode(mediaBrowser->getReferenceNode(), 0); // 0
+		mediaBrowser->getUserLog()->clickNode(mediaBrowser->getReferenceNode(), 0);
 		lastClickedNodeId = 0;
 	}
 	else{

@@ -173,12 +173,14 @@ public:
 		
 	// == Nodes
 	void setClickedNode(int inode);
-	int getClickedNode()					{return mClickedNode; };
+	int getClickedNode() {return mClickedNode; };
 	bool toggleNode(int node);
 	void dumpSelectedNodes();
 	set<int>& getSelectedNodes(){return mSelectedNodes;}
-	int getClosestNode()					{return mClosestNode; };
+	int getClosestNode() {return mClosestNode; };
+	int	getLastSelectedNode(){return mLastSelectedNode;}
 	void setReferenceNode(int index);
+	int getReferenceNode(){return mReferenceNode;}
 	const ACMediaNodes	&getLoopAttributes() const { return mLoopAttributes; } 	// XS 100310 is this still necessary ? const ?
 	ACMediaNode &getMediaNode(int i) ; // not const because accesors to MediaNode can modify it
 	void setNodeNextPosition(int loop_id, float x, float y, float z=0);
@@ -310,6 +312,7 @@ protected:
 	set<int>			mSelectedNodes;
 	int 				mReferenceNode;
 	int					mClosestNode;
+	int					mLastSelectedNode;
 
 	bool 				mNeedsDisplay;
 	//bool 				mNeedsActivityUpdate;
