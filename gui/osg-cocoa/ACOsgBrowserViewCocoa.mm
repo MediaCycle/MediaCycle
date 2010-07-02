@@ -97,6 +97,7 @@ struct ACOsgBrowserViewData
 
 - (void)dealloc
 {
+	//[[NSNotificationCenter defaultCenter] removeObserver:self];//CF should have been used for the resize event
 	////delete _privateData; //CF
 	[super dealloc];
 }
@@ -198,6 +199,19 @@ struct ACOsgBrowserViewData
 	
 	//glSwapAPPLE();
 }
+
+- (void)viewDidMoveToWindow
+{
+	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(windowResized:) name:NSWindowDidResizeNotification object:[self window]];	
+}
+
+- (void)windowResized:(NSNotification *)notification;
+{
+	NSSize size = [[self window] frame].size;
+	media_cycle->setNeedsDisplay(true);
+	//NSLog(@"window width = %f, window height = %f", size.width, size.height);
+}
+
 
 - (void)keyDown:event
 {	
