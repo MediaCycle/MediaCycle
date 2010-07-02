@@ -376,6 +376,8 @@ struct ACOsgBrowserViewData
 
 - (void)scrollWheel:(NSEvent*)event
 {
+	//CF to disable the jog wheel outer wheel scrolling
+/*	
 	float zoom, angle;
 	float xmove, ymove, xmove2, ymove2;
 	float x, y;	
@@ -390,6 +392,7 @@ struct ACOsgBrowserViewData
 	ymove2 = ymove*cos(-angle)+xmove*sin(-angle);		
 	media_cycle->getCameraPosition(x, y);
 	media_cycle->setCameraPosition(x+xmove2/400/zoom, y+ymove2/400/zoom);
+ */
 }
 
 - (void)prepareFromBrowser
