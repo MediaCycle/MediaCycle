@@ -112,43 +112,47 @@ ACAudioCycleOsgQt::ACAudioCycleOsgQt(QWidget *parent)
 		media_cycle->addPlugin("../../../plugins/segmentation/" + build_type + "/mc_segmentation.dylib");	
 	#endif
 
-	audio_engine = new ACAudioFeedback();
+	audio_engine = new ACAudioEngine();
 	audio_engine->setMediaCycle(media_cycle);
 	audio_engine->printDeviceList();
+	audio_engine->printCaptureDeviceList();
 	
 	osc_feedback = NULL;
 	osc_browser = NULL;
 	
-	ui.browserOsgView->move(0,20);
-	ui.browserOsgView->setMediaCycle(media_cycle);
-	ui.browserOsgView->prepareFromBrowser();
-	//browserOsgView->setPlaying(true);
+	ui.compositeOsgView->move(0,20);
+	ui.compositeOsgView->setMediaCycle(media_cycle);
+	ui.compositeOsgView->prepareFromBrowser();
+	ui.compositeOsgView->prepareFromTimeline();
+	//compositeOsgView->setPlaying(true);
 	
 	connect(ui.actionLoad_Media_Directory, SIGNAL(triggered()), this, SLOT(loadMediaDirectory()));
 	connect(ui.actionLoad_Media_Files, SIGNAL(triggered()), this, SLOT(loadMediaFiles()));
 	connect(ui.actionLoad_ACL, SIGNAL(triggered()), this, SLOT(on_pushButtonLaunch_clicked()));
 	connect(ui.actionSave_ACL, SIGNAL(triggered()), this, SLOT(saveACLFile()));
-	
+
 	this->show();
 	
 	#ifdef USE_APPLE_MULTITOUCH
+	/*
 		multitouch_trackpad = new ACAppleMultitouchTrackpadSupport();
 		multitouch_trackpad->setMediaCycle(media_cycle);
 		multitouch_trackpad->start();
+	*/ 
 	#endif
-	//ui.browserOsgView->setFocus();
+	//ui.compositeOsgView->setFocus();
 }
 
 ACAudioCycleOsgQt::~ACAudioCycleOsgQt()
 {
-	//browserOsgView->setPlaying(false);
+	//compositeOsgView->setPlaying(false);
 	if (osc_browser) {
 		osc_browser->stop(mOscReceiver);		
 		//osc_browser->release(mOscReceiver);//should be in destructor ?
 	}
 
 	#ifdef USE_APPLE_MULTITOUCH
-		multitouch_trackpad->stop();
+		//multitouch_trackpad->stop();
 	#endif
 	
 	delete osc_browser;
@@ -171,23 +175,18 @@ void ACAudioCycleOsgQt::updateLibrary()
 	//media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
 	media_cycle->getBrowser()->setState(AC_CHANGING);
 	
-	ui.browserOsgView->prepareFromBrowser();
-	//ui.browserOsgView->setPlaying(true);
+	ui.compositeOsgView->prepareFromBrowser();
+	ui.compositeOsgView->prepareFromTimeline();
+	//ui.compositeOsgView->setPlaying(true);
 	media_cycle->setNeedsDisplay(true);
 	library_loaded = true;
-	ui.browserOsgView->setFocus();
+	ui.compositeOsgView->setFocus();
 }
 
 void ACAudioCycleOsgQt::on_pushButtonLaunch_clicked()
 {
 	this->loadACLFile();
-	//ui.browserOsgView->setFocus();
-}
-
-void ACAudioCycleOsgQt::on_pushButtonMuteAll_clicked()
-{
-	media_cycle->muteAllSources();
-	//ui.browserOsgView->setFocus();
+	//ui.compositeOsgView->setFocus();
 }
 
 void ACAudioCycleOsgQt::on_pushButtonClean_clicked()
@@ -199,144 +198,18 @@ void ACAudioCycleOsgQt::on_pushButtonClean_clicked()
 	library_loaded = false;
 }	
 
-void ACAudioCycleOsgQt::on_pushButtonRecenter_clicked()
-{
-	media_cycle->setCameraRecenter();
-	//ui.browserOsgView->setFocus();
-}
-
-void ACAudioCycleOsgQt::on_pushButtonBack_clicked()
-{
-	media_cycle->goBack();
-	//ui.browserOsgView->setFocus();
-}
-
-void ACAudioCycleOsgQt::on_pushButtonForward_clicked()
-{
-	media_cycle->goForward();
-	//ui.browserOsgView->setFocus();
-}
-
-void ACAudioCycleOsgQt::on_pushButtonControlStart_clicked()
-{
-	std::cout << "IP: " << ui.lineEditControlIP->text().toStdString() << std::endl;
-	std::cout << "Port: " << ui.lineEditControlPort->text().toInt() << std::endl;
-	if ( ui.pushButtonControlStart->text().toStdString() == "Start")
-	{	
-		osc_browser = new ACOscBrowser();
-		mOscReceiver = osc_browser->create(ui.lineEditControlIP->text().toStdString().c_str(), ui.lineEditControlPort->text().toInt());
-		osc_browser->setUserData(mOscReceiver, this);
-		osc_browser->setCallback(mOscReceiver, osc_callback);
-		osc_browser->start(mOscReceiver);
-		ui.pushButtonControlStart->setText("Stop");
-		 
-	}	
-	else if ( ui.pushButtonControlStart->text().toStdString() == "Stop")
-	{	
-		osc_browser->stop(mOscReceiver);
-		ui.pushButtonControlStart->setText("Start");
-	}
-	//ui.browserOsgView->setFocus();
-}	
-
-void ACAudioCycleOsgQt::on_pushButtonFeedbackStart_clicked()
-{
-	std::cout << "IP: " << ui.lineEditFeedbackIP->text().toStdString() << std::endl;
-	std::cout << "Port: " << ui.lineEditFeedbackPort->text().toInt() << std::endl;
-	if ( ui.pushButtonFeedbackStart->text().toStdString() == "Start")
-	{	
-		osc_feedback = new ACOscFeedback();
-		osc_feedback->create(ui.lineEditFeedbackIP->text().toStdString().c_str(), ui.lineEditFeedbackPort->text().toInt());
-		ui.pushButtonFeedbackStart->setText("Stop");
-	}	
-	else if ( ui.pushButtonFeedbackStart->text().toStdString() == "Stop")
-	{	
-		osc_feedback->release();//mOscFeeder);
-		ui.pushButtonFeedbackStart->setText("Start");
-	}
-	//ui.browserOsgView->setFocus();
-}	
-
-void ACAudioCycleOsgQt::on_checkBoxRhythm_stateChanged(int state)
-{
-	media_cycle->setWeight(0,state/2.0f);
-	if (library_loaded)
-		media_cycle->updateDisplay(true);
-}
-
-void ACAudioCycleOsgQt::on_checkBoxTimbre_stateChanged(int state)
-{
-	media_cycle->setWeight(1,state/2.0f);
-	if (library_loaded)
-		media_cycle->updateDisplay(true);
-}
-
-void ACAudioCycleOsgQt::on_checkBoxHarmony_stateChanged(int state)
-{
-	media_cycle->setWeight(2,state/2.0f);
-	if (library_loaded)
-		media_cycle->updateDisplay(true);
-}	
-
-void ACAudioCycleOsgQt::on_sliderClusters_sliderReleased()
-{
-	std::cout << "ClusterNumber: " << ui.sliderClusters->value() << std::endl;
-	if (library_loaded){
-		media_cycle->setClusterNumber(ui.sliderClusters->value());
-		// XSCF251003 added this
-		media_cycle->updateDisplay(true); //XS 250310 was: media_cycle->updateClusters(true);
-		// XS250310 removed mediacycle->setNeedsDisplay(true); // now in updateDisplay
-		//ui.browserOsgView->updateTransformsFromBrowser(1.0);
-	}
-	//ui.browserOsgView->setFocus();
-}
-
-void ACAudioCycleOsgQt::on_comboBoxClustersMethod_activated(const QString & text) 
-{
-	std::cout << "Clusters Method: " << text.toStdString() << std::endl;
-	media_cycle->changeClustersMethodPlugin(text.toStdString());
-}
-
-void ACAudioCycleOsgQt::on_comboBoxClustersPositions_activated(const QString & text) 
-{
-	std::cout << "Clusters Positions: " << text.toStdString() << std::endl;
-	media_cycle->changeClustersPositionsPlugin(text.toStdString());
-}
-
-
-void ACAudioCycleOsgQt::on_comboBoxNeighborsMethod_activated(const QString & text) 
-{
-	std::cout << "Neighbors Method: " << text.toStdString() << std::endl;
-	media_cycle->changeNeighborsMethodPlugin(text.toStdString());
-}
-
-
-void ACAudioCycleOsgQt::on_comboBoxNeighborsPositions_activated(const QString & text) 
-{
-	std::cout << "Neighbors Method: " << text.toStdString() << std::endl;
-	media_cycle->changeNeighborsPositionsPlugin(text.toStdString());	
-}
-
-void ACAudioCycleOsgQt::on_radioButtonClusters_toggled()
-{
-	//std::cout << ui.radioButtonClusters->isChecked() << std::endl;
-	ACBrowserMode mode = (ui.radioButtonClusters->isChecked() ? AC_MODE_CLUSTERS : AC_MODE_NEIGHBORS);
-	if (media_cycle && media_cycle->hasBrowser()) //CF and test on library loaded?
-		media_cycle->getBrowser()->switchMode( mode );
-}	
-
 void ACAudioCycleOsgQt::loadACLFile(){
 	QString fileName;
-
+	
 	QFileDialog dialog(this,"Open AudioCycle Library File(s)");
 	dialog.setDefaultSuffix ("acl");
 	dialog.setNameFilter("AudioCycle Library Files (*.acl)");
 	dialog.setFileMode(QFileDialog::ExistingFile); // change to ExistingFiles for multiple file handling
-
+	
 	QStringList fileNames;
 	if (dialog.exec())
 		fileNames = dialog.selectedFiles();
-
+	
 	QStringList::Iterator file = fileNames.begin();
 	while(file != fileNames.end()) {
 		//std::cout << "File library: '" << (*file).toStdString() << "'" << std::endl;
@@ -345,17 +218,15 @@ void ACAudioCycleOsgQt::loadACLFile(){
 	}
 	std::cout << "Will open: '" << fileName.toStdString() << "'" << std::endl;
 	//fileName = QFileDialog::getOpenFileName(this, "~", );
-
+	
 	if (!(fileName.isEmpty())) {
 		media_cycle->importACLLibrary(fileName.toStdString());//(char*) fileName.toStdString().c_str());
-		//media_cycle->setNeedsDisplay(true);//CF
-		//ui.browserOsgView->updateTransformsFromBrowser(1.0);//CF
 		media_cycle->normalizeFeatures();
 		media_cycle->libraryContentChanged();
 		std::cout << "File library imported" << std::endl;
 		this->updateLibrary();
 	}
-	//ui.browserOsgView->setFocus();
+	//ui.compositeOsgView->setFocus();
 }
 
 void ACAudioCycleOsgQt::saveACLFile(){
@@ -374,7 +245,7 @@ void ACAudioCycleOsgQt::saveACLFile(){
 		cout << "saving ACL file: " << acl_file << endl;
 		media_cycle->saveACLLibrary(acl_file);
 	}
-	//ui.browserOsgView->setFocus();
+	//ui.compositeOsgView->setFocus();
 }
 
 void ACAudioCycleOsgQt::loadMediaDirectory(){
@@ -396,7 +267,7 @@ void ACAudioCycleOsgQt::loadMediaDirectory(){
 	media_cycle->normalizeFeatures();
 	media_cycle->libraryContentChanged(); 
 	this->updateLibrary();
-	//ui.browserOsgView->setFocus();
+	//ui.compositeOsgView->setFocus();
 	
 	//	QStringList listFilter;
 	//	listFilter << "*.png";
@@ -439,7 +310,7 @@ void ACAudioCycleOsgQt::loadMediaFiles(){
 	//fileName = QFileDialog::getOpenFileName(this, "~", );
 	
 	if (!(fileName.isEmpty())) {
-
+		
 		media_cycle->importDirectory((char*) fileName.toStdString().c_str(),0, 0);
 		media_cycle->normalizeFeatures();
 		media_cycle->libraryContentChanged();
@@ -449,35 +320,215 @@ void ACAudioCycleOsgQt::loadMediaFiles(){
 	
 }
 
+void ACAudioCycleOsgQt::on_pushButtonRecenter_clicked()
+{
+	media_cycle->setCameraRecenter();
+	//ui.compositeOsgView->setFocus();
+}
+
+void ACAudioCycleOsgQt::on_pushButtonBack_clicked()
+{
+	media_cycle->goBack();
+	//ui.compositeOsgView->setFocus();
+}
+
+void ACAudioCycleOsgQt::on_pushButtonForward_clicked()
+{
+	media_cycle->goForward();
+	//ui.compositeOsgView->setFocus();
+}
+
+void ACAudioCycleOsgQt::on_radioButtonClusters_toggled()
+{
+	//std::cout << ui.radioButtonClusters->isChecked() << std::endl;
+	ACBrowserMode mode = (ui.radioButtonClusters->isChecked() ? AC_MODE_CLUSTERS : AC_MODE_NEIGHBORS);
+	if (media_cycle && media_cycle->hasBrowser()) //CF and test on library loaded?
+		media_cycle->getBrowser()->switchMode( mode );
+}	
+
+void ACAudioCycleOsgQt::on_checkBoxRhythm_stateChanged(int state)
+{
+	media_cycle->setWeight(0,state/2.0f);
+	if (library_loaded)
+		media_cycle->updateDisplay(true);
+}
+
+void ACAudioCycleOsgQt::on_checkBoxTimbre_stateChanged(int state)
+{
+	media_cycle->setWeight(1,state/2.0f);
+	if (library_loaded)
+		media_cycle->updateDisplay(true);
+}
+
+void ACAudioCycleOsgQt::on_checkBoxHarmony_stateChanged(int state)
+{
+	media_cycle->setWeight(2,state/2.0f);
+	if (library_loaded)
+		media_cycle->updateDisplay(true);
+}	
+
+void ACAudioCycleOsgQt::on_sliderClusters_sliderReleased()
+{
+	std::cout << "ClusterNumber: " << ui.sliderClusters->value() << std::endl;
+	if (library_loaded){
+		media_cycle->setClusterNumber(ui.sliderClusters->value());
+		// XSCF251003 added this
+		media_cycle->updateDisplay(true); //XS 250310 was: media_cycle->updateClusters(true);
+		// XS250310 removed mediacycle->setNeedsDisplay(true); // now in updateDisplay
+		//ui.compositeOsgView->updateTransformsFromBrowser(1.0);
+	}
+	//ui.compositeOsgView->setFocus();
+}
+
+void ACAudioCycleOsgQt::on_comboBoxClustersMethod_activated(const QString & text) 
+{
+	std::cout << "Clusters Method: " << text.toStdString() << std::endl;
+	media_cycle->changeClustersMethodPlugin(text.toStdString());
+}
+
+void ACAudioCycleOsgQt::on_comboBoxClustersPositions_activated(const QString & text) 
+{
+	std::cout << "Clusters Positions: " << text.toStdString() << std::endl;	
+	media_cycle->changeClustersPositionsPlugin(text.toStdString());
+}
+
+
+void ACAudioCycleOsgQt::on_comboBoxNeighborsMethod_activated(const QString & text) 
+{
+	std::cout << "Neighbors Method: " << text.toStdString() << std::endl;
+	media_cycle->changeNeighborsMethodPlugin(text.toStdString());
+}
+
+
+void ACAudioCycleOsgQt::on_comboBoxNeighborsPositions_activated(const QString & text) 
+{
+	std::cout << "Neighbors Method: " << text.toStdString() << std::endl;
+	media_cycle->changeNeighborsPositionsPlugin(text.toStdString());	
+}
+
 void ACAudioCycleOsgQt::on_sliderBPM_valueChanged() //[0;220]
 {
 	std::cout << "BPM: " << ui.sliderBPM->value() << std::endl;
 	//if (library_loaded){
-		int node = media_cycle->getClickedNode();
-		if (node > -1)
-		{
-			audio_engine->setLoopSynchroMode(node, ACAudioEngineSynchroModeAutoBeat);
-			audio_engine->setLoopScaleMode(node, ACAudioEngineScaleModeResample);
-			audio_engine->setBPM(ui.sliderBPM->value());
-		}
+	int node = media_cycle->getClickedNode();
+	if (node > -1)
+	{
+		audio_engine->setLoopSynchroMode(node, ACAudioEngineSynchroModeAutoBeat);
+		audio_engine->setLoopScaleMode(node, ACAudioEngineScaleModeResample);
+		audio_engine->setBPM(ui.sliderBPM->value());
+	}
 	//}
-	//ui.browserOsgView->setFocus();
+	//ui.compositeOsgView->setFocus();
 }
 
 void ACAudioCycleOsgQt::on_sliderPitch_valueChanged() // [50;200]
 {
 	std::cout << "Pitch: " << (float) ui.sliderPitch->value()/100.0f << std::endl;
 	//if (library_loaded){
-		int node = media_cycle->getClickedNode();
-		if (node > -1)
-		{
-			audio_engine->setLoopSynchroMode(node, ACAudioEngineSynchroModeAutoBeat);
-			audio_engine->setLoopScaleMode(node, ACAudioEngineScaleModeResample);
-			audio_engine->setSourcePitch(node, (float) ui.sliderPitch->value()/100.0f); 
-		}
+	int node = media_cycle->getClickedNode();
+	if (node > -1)
+	{
+		audio_engine->setLoopSynchroMode(node, ACAudioEngineSynchroModeAutoBeat);
+		audio_engine->setLoopScaleMode(node, ACAudioEngineScaleModeResample);
+		audio_engine->setSourcePitch(node, (float) ui.sliderPitch->value()/100.0f); 
+	}
 	//}
-	//ui.browserOsgView->setFocus();
+	//ui.compositeOsgView->setFocus();
 }
+
+void ACAudioCycleOsgQt::on_pushButtonMuteAll_clicked()
+{
+	media_cycle->muteAllSources();
+	//ui.compositeOsgView->setFocus();
+}
+
+void ACAudioCycleOsgQt::on_pushButtonQueryRecord_toggled()
+{
+	if (ui.pushButtonQueryRecord->isChecked() == 1)
+	{
+		if (audio_engine->isCaptureAvailable())
+		{
+			ui.pushButtonQueryReplay->setEnabled(false);
+			ui.pushButtonQueryKeep->setEnabled(false);
+			ui.pushButtonQueryReferent->setEnabled(false);
+			std::cout <<"Recording..."<<std::endl;
+			// CF There is a delay before the recording actually starts: work around with a countdown on a modal window?
+			audio_engine->startCapture();
+		}
+		else
+			ui.pushButtonQueryRecord->setChecked(true);
+	}
+	else
+	{
+		if (audio_engine->isCaptureAvailable())
+		{	
+			audio_engine->stopCapture();	
+			std::cout <<"Recording done."<<std::endl;
+			ui.pushButtonQueryReplay->setEnabled(true);
+			ui.pushButtonQueryKeep->setEnabled(true);
+			ui.pushButtonQueryReferent->setEnabled(true);
+		}	
+	}	
+}	
+
+void ACAudioCycleOsgQt::on_pushButtonQueryReplay_clicked()
+{
+	
+}
+
+// Pops up a modal window for saving the query as wavefile and add it to the library
+void ACAudioCycleOsgQt::on_pushButtonQueryKeep_clicked()
+{
+	//...
+	
+	//CF then only re-recording can re-enable the keeping
+	ui.pushButtonQueryKeep->setEnabled(false);
+}
+
+void ACAudioCycleOsgQt::on_pushButtonQueryReferent_clicked()
+{
+
+}
+
+void ACAudioCycleOsgQt::on_pushButtonControlStart_clicked()
+{
+	std::cout << "IP: " << ui.lineEditControlIP->text().toStdString() << std::endl;
+	std::cout << "Port: " << ui.lineEditControlPort->text().toInt() << std::endl;
+	if ( ui.pushButtonControlStart->text().toStdString() == "Start")
+	{	
+		osc_browser = new ACOscBrowser();
+		mOscReceiver = osc_browser->create(ui.lineEditControlIP->text().toStdString().c_str(), ui.lineEditControlPort->text().toInt());
+		osc_browser->setUserData(mOscReceiver, this);
+		osc_browser->setCallback(mOscReceiver, osc_callback);
+		osc_browser->start(mOscReceiver);
+		ui.pushButtonControlStart->setText("Stop");
+		
+	}	
+	else if ( ui.pushButtonControlStart->text().toStdString() == "Stop")
+	{	
+		osc_browser->stop(mOscReceiver);
+		ui.pushButtonControlStart->setText("Start");
+	}
+	//ui.compositeOsgView->setFocus();
+}	
+
+void ACAudioCycleOsgQt::on_pushButtonFeedbackStart_clicked()
+{
+	std::cout << "IP: " << ui.lineEditFeedbackIP->text().toStdString() << std::endl;
+	std::cout << "Port: " << ui.lineEditFeedbackPort->text().toInt() << std::endl;
+	if ( ui.pushButtonFeedbackStart->text().toStdString() == "Start")
+	{	
+		osc_feedback = new ACOscFeedback();
+		osc_feedback->create(ui.lineEditFeedbackIP->text().toStdString().c_str(), ui.lineEditFeedbackPort->text().toInt());
+		ui.pushButtonFeedbackStart->setText("Stop");
+	}	
+	else if ( ui.pushButtonFeedbackStart->text().toStdString() == "Stop")
+	{	
+		osc_feedback->release();//mOscFeeder);
+		ui.pushButtonFeedbackStart->setText("Start");
+	}
+	//ui.compositeOsgView->setFocus();
+}	
 
 void ACAudioCycleOsgQt::processOscMessage(const char* tagName)
 {	
@@ -523,7 +574,7 @@ void ACAudioCycleOsgQt::processOscMessage(const char* tagName)
 		
 		media_cycle->hoverCallback(x,y);
 		int closest_node = media_cycle->getClosestNode();
-		float distance = ui.browserOsgView->getRenderer()->getDistanceMouse()[closest_node];
+		float distance = ui.compositeOsgView->getBrowserRenderer()->getDistanceMouse()[closest_node];
 		if (osc_feedback)
 		{
 			osc_feedback->messageBegin("/audiocycle/closest_node_at");
@@ -555,17 +606,10 @@ void ACAudioCycleOsgQt::processOscMessage(const char* tagName)
 		osc_browser->readString(mOscReceiver, lib_path, 500); // wrong magic number!
 		std::cout << "Importing file library '" << lib_path << "'..." << std::endl;
 		media_cycle->importACLLibrary(lib_path); // XS instead of getImageLibrary CHECK THIS
-		//updateLibrary();
+		media_cycle->normalizeFeatures();
+		media_cycle->libraryContentChanged();
 		std::cout << "File library imported" << std::endl;
-		media_cycle->setReferenceNode(0);
-		// XSCF 250310 added these 3
-		media_cycle->pushNavigationState();
-		media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
-		media_cycle->getBrowser()->setState(AC_CHANGING);
-		
-		ui.browserOsgView->prepareFromBrowser();
-		media_cycle->setNeedsDisplay(true);
-		library_loaded = true;
+		this->updateLibrary();
 	}
 	else if(strcasecmp(tagName, "/audiocycle/1/browser/library/clear") == 0)
 	{
@@ -577,7 +621,7 @@ void ACAudioCycleOsgQt::processOscMessage(const char* tagName)
 		media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
 		media_cycle->getBrowser()->setState(AC_CHANGING);
 		
-		ui.browserOsgView->prepareFromBrowser();
+		ui.compositeOsgView->prepareFromBrowser();
 		media_cycle->setNeedsDisplay(true);
 		library_loaded = true;
 	}	
@@ -597,8 +641,11 @@ void ACAudioCycleOsgQt::processOscMessage(const char* tagName)
 	{
 		float bpm;
 		osc_browser->readFloat(mOscReceiver, &bpm);
+		
 		//int node = media_cycle->getClickedNode();
-		int node = media_cycle->getClosestNode();
+		//int node = media_cycle->getClosestNode();
+		int node = media_cycle->getLastSelectedNode();
+		
 		if (node > -1)
 		{
 			audio_engine->setLoopSynchroMode(node, ACAudioEngineSynchroModeAutoBeat);
@@ -612,13 +659,15 @@ void ACAudioCycleOsgQt::processOscMessage(const char* tagName)
 		osc_browser->readFloat(mOscReceiver, &scrub);
 		
 		//int node = media_cycle->getClickedNode();
-		int node = media_cycle->getClosestNode();
+		//int node = media_cycle->getClosestNode();
+		int node = media_cycle->getLastSelectedNode();
+		
 		if (node > -1)
 		{
 			//media_cycle->pickedObjectCallback(-1);
 			audio_engine->setLoopSynchroMode(node, ACAudioEngineSynchroModeManual);
 			audio_engine->setLoopScaleMode(node, ACAudioEngineScaleModeResample);//ACAudioEngineScaleModeVocode
-			audio_engine->setScrub((float)scrub*10000); // temporary hack to scrub between 0 an 1
+			audio_engine->setScrub((float)scrub*100); // temporary hack to scrub between 0 an 1
 		}
 	}
 	else if(strcasecmp(tagName, "/audiocycle/1/player/1/pitch") == 0)
@@ -627,7 +676,9 @@ void ACAudioCycleOsgQt::processOscMessage(const char* tagName)
 		osc_browser->readFloat(mOscReceiver, &pitch);
 		
 		//int node = media_cycle->getClickedNode();
-		int node = media_cycle->getClosestNode();
+		//int node = media_cycle->getClosestNode();
+		int node = media_cycle->getLastSelectedNode();
+		
 		if (node > -1)
 		{
 			/*

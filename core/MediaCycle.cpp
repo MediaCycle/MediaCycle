@@ -390,6 +390,7 @@ int MediaCycle::getClickedNode() { return mediaBrowser->getClickedNode(); }
 void MediaCycle::setClickedNode(int i) { mediaBrowser->setClickedNode(i); }
 void MediaCycle::setClosestNode(int i) { mediaBrowser->setClosestNode(i); }
 int MediaCycle::getClosestNode() { return mediaBrowser->getClosestNode(); }
+int	MediaCycle::getLastSelectedNode() { return mediaBrowser->getLastSelectedNode(); }
 
 // == Cluster Display
 void MediaCycle::updateState() { mediaBrowser->updateState(); }
@@ -398,6 +399,7 @@ int MediaCycle::getNavigationLevel() { return mediaBrowser->getNavigationLevel()
 float MediaCycle::getFrac() { return mediaBrowser->getFrac(); }
 void MediaCycle::incrementLoopNavigationLevels(int i) { mediaBrowser->incrementLoopNavigationLevels(i); }
 void MediaCycle::setReferenceNode(int index) { mediaBrowser->setReferenceNode(index); }
+int MediaCycle::getReferenceNode() { return mediaBrowser->getReferenceNode(); }
 void MediaCycle::goBack() { mediaBrowser->goBack(); }
 void MediaCycle::goForward() { mediaBrowser->goForward(); }
 void MediaCycle::setClusterNumber(int n) { mediaBrowser->setClusterNumber(n); }

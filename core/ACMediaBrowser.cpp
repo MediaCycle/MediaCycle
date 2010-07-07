@@ -146,6 +146,7 @@ ACMediaBrowser::ACMediaBrowser() {
 	mClickedLabel = -1;
 	mClosestNode = -1;
 	mReferenceNode = 0; //CF ugly, could be -1
+	mLastSelectedNode = -1;
 
 	mClusterCount = 5;
 	mNavigationLevel = 0;
@@ -314,6 +315,8 @@ void ACMediaBrowser::setClickedNode(int inode){
 		cerr << "<ACMediaBrowser::setClickedNode> : index " << inode << " out of bounds (nb node = " << this->getNumberOfMediaNodes() << ")"<< endl;
 	else{
 		mClickedNode = inode;
+		if (inode > -1)
+			mLastSelectedNode = inode;
 		mUserLog->clickNode(inode, 0);//CF put some machine time in here!
 	}
 }
@@ -331,6 +334,7 @@ bool ACMediaBrowser::toggleNode(int node){
 	
 	mSelectedNodes.insert(node);
 	this->getMediaNode(node).setSelection(true);
+	mLastSelectedNode = node;
 	return true;
 }	
 
@@ -535,6 +539,7 @@ void ACMediaBrowser::libraryContentChanged() {
 		mClickedNode = -1;
 		mClickedLabel = -1;
 		mClosestNode = -1;
+		mLastSelectedNode = -1;
 		//mClusterCount = 5; //CF might be previously set by apps
 		mNavigationLevel = 0;
 		
@@ -544,7 +549,7 @@ void ACMediaBrowser::libraryContentChanged() {
 		return;
 	}
 	
-	// XS TODO randomiwe positions only at the beginning...
+	// XS TODO randomize positions only at the beginning...
 	if (mMode == AC_MODE_CLUSTERS) {//(mVisPlugin==NULL && mPosPlugin==NULL) {	
 		for (ACMediaNodes::iterator node = mLoopAttributes.begin(); node != mLoopAttributes.end(); ++node){
 			(*node).setCurrentPosition (ACRandom(), 
@@ -1246,7 +1251,7 @@ int ACMediaBrowser::toggleSourceActivity(float _x, float _y)
 // . browser takes care of threads
 int ACMediaBrowser::toggleSourceActivity(ACMediaNode &node, int _activity) {
 	node.toggleActivity(_activity);
-	std::cout << "Toggle Acitivity of media : " << node.getMediaId() << " to " << _activity << std::endl;
+	std::cout << "Toggle Activity of media : " << node.getMediaId() << " to " << _activity << std::endl;
 	int mt;
 	mt = mLibrary->getMedia(node.getMediaId())->getType();
 	if (mt == MEDIA_TYPE_AUDIO) {
@@ -1333,14 +1338,14 @@ int ACMediaBrowser::muteAllSources()
 {
 	// XS TODO iterator
 	for (int node_id=0;node_id<mLibrary->getSize();node_id++) {
-		if (mLoopAttributes[node_id].getActivity() >= 1) {
+		//if (mLoopAttributes[node_id].getActivity() >= 1) {
 			// SD TODO - audio engine
 			// audio_cycle->getAudioFeedback()->deleteSource(node_id);
 			mLoopAttributes[node_id].setActivity(0);
 			setNeedsActivityUpdateLock(1);
 			setNeedsActivityUpdateAddMedia(node_id);
 			setNeedsActivityUpdateLock(0);
-		}
+		//}
 	}
 	
 	setNeedsDisplay(true);
@@ -1487,13 +1492,20 @@ void ACMediaBrowser::switchMode(ACBrowserMode _mode){
 							(*node).setNextPosition(0.0, 0.0, 0.0);
 						}
 						this->updateDisplay(true);
+						/*
+						this->setState(AC_CHANGING);
+						this->commitPositions();
+						this->setNeedsDisplay(true);
+						*/
+						
 						//CF 2) hide all nodes, change mode and make the reference node appear
 						for (ACMediaNodes::iterator node = mLoopAttributes.begin(); node != mLoopAttributes.end(); ++node){	
 							(*node).setDisplayed (false);
 						}	
 						this->setMode(_mode);
 						this->updateDisplay(true);
-						//CF 3) develop the first branch at the reference node
+						
+						//CF 3) expand the first branch at the reference node
 						mUserLog->clickNode(0,0);//CF check if the ref node is correct everytime this way (1 arg), change clicktime (2nd arg)
 						this->updateDisplay(true);
 					}	
@@ -1508,9 +1520,18 @@ void ACMediaBrowser::switchMode(ACBrowserMode _mode){
 		case AC_MODE_NEIGHBORS:
 			switch ( _mode ){
 				case AC_MODE_CLUSTERS:
-					//CF 1) clean the user log, links should thus disappear
-					mUserLog->clean();
-					//CF 2) change mode and display all the nodes
+					//CF 1) Move all nodes to the center
+					for (ACMediaNodes::iterator node = mLoopAttributes.begin(); node != mLoopAttributes.end(); ++node){	
+						(*node).setNextPosition(0.0, 0.0, 0.0);
+					}
+					this->setState(AC_CHANGING);
+					this->setNeedsDisplay(true);
+					
+					//CF 2) Recreate the user log, links should thus disappear
+					delete mUserLog;
+					mUserLog = new ACUserLog();
+					
+					//CF 3) Change the mode and display all the nodes
 					this->setMode(_mode);
 					for (ACMediaNodes::iterator node = mLoopAttributes.begin(); node != mLoopAttributes.end(); ++node){	
 						(*node).setDisplayed (true);
@@ -1536,13 +1557,21 @@ bool ACMediaBrowser::changeClustersMethodPlugin(ACPlugin* acpl)
 	bool success = false;
 	switch ( mMode ){
 		case AC_MODE_CLUSTERS:
-			this->setClustersMethodPlugin(acpl);
+			if (acpl) {
+				this->setClustersMethodPlugin(acpl);
+			}	
+			else
+				mClustersMethodPlugin = NULL;
 			if (getLibrary()->getSize() > 0)
 				this->updateDisplay(true);
 			success = true;
 			break;
 		case AC_MODE_NEIGHBORS:
-			this->setClustersMethodPlugin(acpl);
+			if (acpl) {
+				this->setClustersMethodPlugin(acpl);
+			}	
+			else
+				mClustersMethodPlugin = NULL;
 			success = true;
 			break;
 		default:
@@ -1561,9 +1590,27 @@ bool ACMediaBrowser::changeNeighborsMethodPlugin(ACPlugin* acpl)
 			success = true;
 			break;
 		case AC_MODE_NEIGHBORS:	
+			//CF 1) Move all nodes to the center
+			for (ACMediaNodes::iterator node = mLoopAttributes.begin(); node != mLoopAttributes.end(); ++node){	
+				(*node).setNextPosition(0.0, 0.0, 0.0);
+			}
+			this->setState(AC_CHANGING);
+			this->setNeedsDisplay(true);
+			
+			//CF 2) Recreate the user log
+			delete mUserLog;
+			mUserLog = new ACUserLog();
+			
+			//CF 3) Change the plugin and update the display, it will make the reference node appear:
 			this->setNeighborsMethodPlugin(acpl);
 			if (mNeighborsPosPlugin != NULL && getLibrary()->getSize() > 0)
+			{	
 				this->updateDisplay(true);
+			
+			//CF 4) Expand the first branch at the reference node
+				mUserLog->clickNode(0,0);//CF check if the ref node is correct everytime this way (1 arg), change clicktime (2nd arg)
+				this->updateDisplay(true);
+			}	
 			success = true;
 			break;
 		default:
@@ -1578,15 +1625,25 @@ bool ACMediaBrowser::changeClustersPositionsPlugin(ACPlugin* acpl)
 	bool success = false;
 	switch ( mMode ){
 		case AC_MODE_CLUSTERS:
-			this->setClustersPositionsPlugin(acpl);
+			if (acpl) {
+				this->setClustersPositionsPlugin(acpl);
+			}	
+			else
+				mClustersPosPlugin = NULL;
 			if (getLibrary()->getSize() > 0){
 				setState(AC_CHANGING);
-				mClustersPosPlugin->updateNextPositions(this);
+				if (acpl) 
+					mClustersPosPlugin->updateNextPositions(this);
+				else
+					this->updateNextPositionsPropeller();
 			}	
 			success = true;
 			break;
 		case AC_MODE_NEIGHBORS:	
-			this->setClustersPositionsPlugin(acpl);
+			if (acpl)
+				this->setClustersPositionsPlugin(acpl);
+			else
+				mClustersPosPlugin = NULL;
 			success = true;
 			break;
 		default:

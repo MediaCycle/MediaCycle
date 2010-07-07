@@ -223,7 +223,7 @@ ALvoid  alcMacOSXRenderingQualityProc(const ALint value)
 
 FILE *debug_vocoder;
 
-ACAudioFeedback::ACAudioFeedback()
+ACAudioFeedback::ACAudioFeedback(ALCdevice* _device)
 {
 	prev_scrub_pos = 0;
 	scrub_pos = 0;
@@ -269,6 +269,7 @@ ACAudioFeedback::ACAudioFeedback()
 	tpv_winsize = 2048;
 	pv_currentsample = new long int[OPENAL_NUM_BUFFERS];
 	//
+	device = _device;
 	createOpenAL();
 #ifdef OPENAL_STREAM_MODE
 	createAudioEngine(44100, 512, 10);
@@ -283,9 +284,11 @@ ACAudioFeedback::~ACAudioFeedback()
 	deleteAudioEngine();
 #endif
 	//
-	deleteOpenAL();
+	//deleteOpenAL();//CF moved to AudioEngine
 }
 
+//CF moved to AudioEngine
+/*
 void ACAudioFeedback::printDeviceList()
 {
     const ALCchar* deviceList = alcGetString(NULL, ALC_DEVICE_SPECIFIER);
@@ -317,6 +320,7 @@ void ACAudioFeedback::getDeviceList(std::vector<std::string>& devices)
         }
     }
 }
+*/
 
 void ACAudioFeedback::createOpenAL()
 {
@@ -324,8 +328,8 @@ void ACAudioFeedback::createOpenAL()
 	
 	ALenum			error;
 	ALCcontext		*newContext = NULL;
-	ALCdevice		*newDevice = NULL;
-	
+	//ALCdevice		*device = NULL;//CF promoted to class member
+		
 	// Loop ids for each OpenAL source
 	loop_ids = new int[OPENAL_NUM_BUFFERS];
 	for (count=0;count<OPENAL_NUM_BUFFERS;count++) {
@@ -342,15 +346,16 @@ void ACAudioFeedback::createOpenAL()
 	for (count=0;count<OPENAL_NUM_BUFFERS;count++) {
 		mSourcePos[count] = new float[3];
 	}
-		
+
+/*	
 	// SD TODO - Allow the user to select the device, and probably the speaker configuration (stereo, 5.1...)
 	// Create a new OpenAL Device: NULL -> default output device
-	newDevice = alcOpenDevice(NULL);
-
-	if (newDevice != NULL)
+	device = alcOpenDevice(NULL);
+*/
+	if (device != NULL)
 	{
 		// Create a new OpenAL Context
-		newContext = alcCreateContext(newDevice, 0);//CF make this choosable
+		newContext = alcCreateContext(device, 0);//CF make this choosable
 		
 		if (newContext != NULL)
 		{
@@ -377,18 +382,20 @@ void ACAudioFeedback::createOpenAL()
 				printf("Error generating OpenAL Sources!\n");
 				exit(1);
 			}
+	
 		}
 	}
-	
 	//alListenerf(AL_GAIN, 0.25);
-	
 }
 
 void ACAudioFeedback::deleteOpenAL()
 {
+//CF moved to AudioEngine	
+/*	
     ALCcontext	*context = NULL;
-    ALCdevice	*device = NULL;
+    //ALCdevice	*device = NULL;//CF
 	//ALuint		*returnedNames;
+*/	
 	
 	// SD TODO - Check this and remove comments
 	/*
@@ -398,6 +405,8 @@ void ACAudioFeedback::deleteOpenAL()
 	alDeleteBuffers(NUM_BUFFERS_SOURCES, returnedNames);
 	*/
 	
+//CF moved to AudioEngine	
+/*	
 	//Get active context
     context = alcGetCurrentContext(); // XS (0) added
     //Get device for active context
@@ -406,6 +415,7 @@ void ACAudioFeedback::deleteOpenAL()
     alcDestroyContext(context);
     //Close device
     alcCloseDevice(device);
+*/ 
 }
 
 void *threadAudioEngineFunction(void *_audio_engine_arg)

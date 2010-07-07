@@ -97,6 +97,7 @@ struct ACOsgBrowserViewData
 
 - (void)dealloc
 {
+	//[[NSNotificationCenter defaultCenter] removeObserver:self];//CF should have been used for the resize event
 	////delete _privateData; //CF
 	[super dealloc];
 }
@@ -198,6 +199,19 @@ struct ACOsgBrowserViewData
 	
 	//glSwapAPPLE();
 }
+
+- (void)viewDidMoveToWindow
+{
+	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(windowResized:) name:NSWindowDidResizeNotification object:[self window]];	
+}
+
+- (void)windowResized:(NSNotification *)notification;
+{
+	NSSize size = [[self window] frame].size;
+	media_cycle->setNeedsDisplay(true);
+	//NSLog(@"window width = %f, window height = %f", size.width, size.height);
+}
+
 
 - (void)keyDown:event
 {	
@@ -376,6 +390,8 @@ struct ACOsgBrowserViewData
 
 - (void)scrollWheel:(NSEvent*)event
 {
+	//CF to disable the jog wheel outer wheel scrolling
+/*	
 	float zoom, angle;
 	float xmove, ymove, xmove2, ymove2;
 	float x, y;	
@@ -390,6 +406,7 @@ struct ACOsgBrowserViewData
 	ymove2 = ymove*cos(-angle)+xmove*sin(-angle);		
 	media_cycle->getCameraPosition(x, y);
 	media_cycle->setCameraPosition(x+xmove2/400/zoom, y+ymove2/400/zoom);
+ */
 }
 
 - (void)prepareFromBrowser

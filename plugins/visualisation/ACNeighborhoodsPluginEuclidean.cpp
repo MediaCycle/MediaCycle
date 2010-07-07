@@ -1,7 +1,7 @@
 /**
  * @brief ACNeighborhoodsPluginEuclidean.cpp
- * @author Damien Tardieu
- * @date 07/06/2010
+ * @author Christian Frisson
+ * @date 02/07/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -52,8 +52,8 @@ void ACNeighborhoodsPluginEuclidean::updateNeighborhoods(ACMediaBrowser* mediaBr
 	std::cout << "ACNeighborhoodsPluginEuclidean::updateNeighborhoods" << std::endl;
 	if (mediaBrowser->getUserLog()->getLastClickedNodeId() == -1) {	 
 		mediaBrowser->getUserLog()->dump();
-		mediaBrowser->getUserLog()->addRootNode(0, 0); // 0
-		mediaBrowser->getUserLog()->clickNode(0, 0);
+		mediaBrowser->getUserLog()->addRootNode(mediaBrowser->getReferenceNode(), 0); // 0
+		mediaBrowser->getUserLog()->clickNode(mediaBrowser->getReferenceNode(), 0);
 		lastClickedNodeId = 0;
 	}
 	else if ( (mediaBrowser->getUserLog()->getLastClickedNodeId() !=0) && (mediaBrowser->getUserLog()->getLastClickedNodeId() == lastClickedNodeId) ) {

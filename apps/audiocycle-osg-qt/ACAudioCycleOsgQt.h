@@ -42,9 +42,9 @@ using namespace std;
 
 #include <QtGui>
 #include "ui_ACAudioCycleOsgQt.h"
-#include <ACOsgBrowserViewQT.h>
+#include <ACOsgCompositeViewQt.h>
 #include <MediaCycle.h>
-#include <ACAudioFeedback.h>
+#include <ACAudioEngine.h>
 #include <ACOscBrowser.h>
 #include <ACOscFeedback.h>
 #ifdef USE_APPLE_MULTITOUCH
@@ -61,40 +61,52 @@ class ACAudioCycleOsgQt : public QMainWindow
 		void updateLibrary();
 
     private slots:
+		// Library controls
 		void on_pushButtonLaunch_clicked();
-		void on_pushButtonMuteAll_clicked();
 		void on_pushButtonClean_clicked();
-		void on_pushButtonRecenter_clicked();
-		void on_pushButtonBack_clicked();
-		void on_pushButtonForward_clicked();
-		void on_pushButtonControlStart_clicked();
-		void on_pushButtonFeedbackStart_clicked();
-
-		void on_checkBoxRhythm_stateChanged(int state);
-		void on_checkBoxTimbre_stateChanged(int state);
-		void on_checkBoxHarmony_stateChanged(int state);
-		void on_sliderClusters_sliderReleased();
-		
-		void on_radioButtonClusters_toggled();
-	
-		void on_comboBoxClustersMethod_activated(const QString & text);//CF or (int index);} 
-		void on_comboBoxClustersPositions_activated(const QString & text);//CF or (int index);} 
-		void on_comboBoxNeighborsMethod_activated(const QString & text);//CF or (int index);} 
-		void on_comboBoxNeighborsPositions_activated(const QString & text);//CF or (int index);} 
-	
-		void on_sliderBPM_valueChanged(); // or sliderMoved();?
-		void on_sliderPitch_valueChanged(); // or sliderMoved();?
-	
 		void loadACLFile();
 		void saveACLFile();
 		void loadMediaDirectory();
 		void loadMediaFiles();
 	
+		// Browser controls
+		void on_pushButtonRecenter_clicked();
+		void on_pushButtonBack_clicked();
+		void on_pushButtonForward_clicked();
+		void on_radioButtonClusters_toggled();
+		
+		// Clustering controls
+		void on_checkBoxRhythm_stateChanged(int state);
+		void on_checkBoxTimbre_stateChanged(int state);
+		void on_checkBoxHarmony_stateChanged(int state);
+		void on_sliderClusters_sliderReleased();
+		void on_comboBoxClustersMethod_activated(const QString & text);//CF or (int index);} 
+		void on_comboBoxClustersPositions_activated(const QString & text);//CF or (int index);} 
+
+		// Neighborhoods controls
+		void on_comboBoxNeighborsMethod_activated(const QString & text);//CF or (int index);} 
+		void on_comboBoxNeighborsPositions_activated(const QString & text);//CF or (int index);} 
+	
+		// Audio controls
+		void on_sliderBPM_valueChanged(); // or sliderMoved();?
+		void on_sliderPitch_valueChanged(); // or sliderMoved();?
+		void on_pushButtonMuteAll_clicked();
+	
+		// Audio query
+		void on_pushButtonQueryRecord_toggled();	
+		void on_pushButtonQueryReplay_clicked();
+		void on_pushButtonQueryKeep_clicked();
+		void on_pushButtonQueryReferent_clicked();
+
+		// OSC I/O controls
+		void on_pushButtonControlStart_clicked();
+		void on_pushButtonFeedbackStart_clicked();
+	
 	public:
 		MediaCycle *media_cycle;
 	
     private:
-		ACAudioFeedback *audio_engine;
+		ACAudioEngine *audio_engine;
 		ACOscBrowser *osc_browser;
 		ACOscFeedback *osc_feedback;
 		#ifdef USE_APPLE_MULTITOUCH
@@ -104,7 +116,7 @@ class ACAudioCycleOsgQt : public QMainWindow
 		bool library_loaded;
 
 	protected:
-		//ACOsgBrowserViewQT* browserOsgView;
+		//ACOsgCompositeViewQt* compositeOsgView;
 	
 	public:
 		void processOscMessage(const char* tagName);
