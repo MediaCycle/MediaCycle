@@ -1,7 +1,7 @@
 /**
  * @brief AGSynthesis.cpp
  * @author Damien Tardieu
- * @date 07/07/2010
+ * @date 08/07/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -34,6 +34,13 @@
 
 using namespace arma;
 
+
+AGSynthesis::AGSynthesis(){
+	method = AG_METHOD_SIMPLE;
+	mapping = AG_MAPPING_MEANVAR;
+	randomness = 0;
+	threshold = 1;
+}
 
 bool AGSynthesis::compute(long targetId, set<int> selectedNodes){
 	vector<long> grainIds;
@@ -100,6 +107,8 @@ bool AGSynthesis::compute(long targetId, vector<long> grainIds){
 	for (int i=0; i<dist_m.n_rows; i++){
 		sp_m.row(i) = sort_index(conv_to<rowvec>::from(dist_m.row(i)));
 	}
+	mp_v.print("mp_v");
+	sp_m.print("sp_m");
 
 	for (int i=0; i < mp_v.n_elem; i++){
 		std::cout << grainIds[mp_v(i)] << " ";		
@@ -135,7 +144,6 @@ bool AGSynthesis::compute(long targetId, vector<long> grainIds){
 	colvec syn_v;
 	syn_v.zeros(durationSyn);
 	colvec win_v;
-	int add_mode = 3;
 
 	long ind0 = 0;
 
@@ -145,8 +153,8 @@ bool AGSynthesis::compute(long targetId, vector<long> grainIds){
 		
 		win_v = tukeywin(audioGrain->getNFrames(), .01);
 		
-		switch (add_mode) {
-		case 1:{
+		switch (this->getMethod()) {
+		case AG_METHOD_SIMPLE:{
 			if (seg_samp_start_v(i)+audioGrain->getNFrames() - 1 < syn_v.n_elem){
 				syn_v.rows(seg_samp_start_v(i), seg_samp_start_v(i)+audioGrain->getNFrames()-1) += selG_v % win_v;
 			}
@@ -158,7 +166,7 @@ bool AGSynthesis::compute(long targetId, vector<long> grainIds){
 			}
 			break;
 		}
-		case 2:{
+		case AG_METHOD_SQUEEZED:{
 			if (ind0+audioGrain->getNFrames() - 1 < syn_v.n_elem){
 				syn_v.rows(ind0, ind0+audioGrain->getNFrames()-1) = selG_v % win_v;
 				ind0 = ind0+audioGrain->getNFrames();
@@ -171,7 +179,7 @@ bool AGSynthesis::compute(long targetId, vector<long> grainIds){
 			}
 			break;
 		}
-		case 3:{
+		case AG_METHOD_PADDED:{
 			if (seg_samp_start_v(i)+audioGrain->getNFrames() - 1 < syn_v.n_elem){
 				syn_v.rows(seg_samp_start_v(i), seg_samp_start_v(i)+audioGrain->getNFrames()-1) = selG_v % win_v;
 			}
@@ -213,9 +221,9 @@ bool AGSynthesis::compute(long targetId, vector<long> grainIds){
 		delete [] synthesisSound;
 	}
 	
-	*synthesisSound = new float[durationSyn];
+	synthesisSound = new float[durationSyn];
 	for (int i=0; i < durationSyn; i++)
-		(*synthesisSound)[i] = syn_v(i);
+		synthesisSound[i] = syn_v(i);
 	this->synthesisLength = durationSyn;
 	return true;
 }
@@ -280,3 +288,19 @@ colvec AGSynthesis::extractSamples(ACAudio* audioGrain){
 	return selG_v;
 }
 
+bool AGSynthesis::saveAsWav(string path){
+	SF_INFO sfinfo;
+	SNDFILE* testFile;
+	sfinfo.samplerate = 44100;
+	sfinfo.channels = 1;
+	sfinfo.format = SF_FORMAT_WAV | SF_FORMAT_PCM_16;
+	
+	if (! (testFile = sf_open (path.c_str(), SFM_WRITE, &sfinfo))){  
+		printf ("Not able to open input file %s.\n", "synthesis.wav") ;
+		puts (sf_strerror (NULL)) ;
+		return false;
+	}
+	sf_writef_float  (testFile, synthesisSound, synthesisLength);
+	sf_close(testFile);
+	return true;
+}

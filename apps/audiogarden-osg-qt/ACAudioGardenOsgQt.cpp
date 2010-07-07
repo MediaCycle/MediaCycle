@@ -537,82 +537,16 @@ void ACAudioGardenOsgQt::on_pushButtonCompositingGo_clicked(){
 	
 	//CF list selected grains
 	media_cycle->getBrowser()->dumpSelectedNodes();
+		
 	
-	//CF do something with these grains
-	/*
-	set<int> selectedNodes = media_cycle->getBrowser()->getSelectedNodes();
-	std::cout << "Selected Grains: ";
-	vector<long> grainIds;
-	for (set<int>::const_iterator iter = selectedNodes.begin();iter != selectedNodes.end();++iter){
-		std::cout << *iter << " ";
-		grainIds.push_back(*iter);
-		//CF right here...
-	}	
-	float* syn_v;
-	long length;
-	*/ 
-	std::string filename = "../../../../data/audio/zero-g-pro-pack_a/Brass Elements/Brass 076 BPM/076 Brass 01-C.wav";
-	SF_INFO sfinfo;
-	SNDFILE* testFile;
-	float* data;
-
-	if (! (testFile = sf_open (filename.c_str(), SFM_READ, &sfinfo))){  
-		/* Open failed so print an error message. */
-		printf ("Not able to open input file %s\n", filename.c_str()) ;
-		/* Print the error message from libsndfile. */
-		puts (sf_strerror (NULL)) ;
-		return;
-	}
-	
-	std::cout << "Length : " << sfinfo.frames << std::endl;
-	std::cout << "Sampling Rate : " << sfinfo.samplerate << std::endl;
-	std::cout << "Channels : " << sfinfo.channels << std::endl;
-	data = new float[(long) sfinfo.frames*sfinfo.channels];
-	std::cout << "Read " << sf_read_float(testFile, data, sfinfo.frames*sfinfo.channels) << " frames" << std::endl;
-	
-	
-	audio_engine->getFeedback()->createExtSource(data, sfinfo.frames);
-	audio_engine->getFeedback()->loopExtSource();
-	
-	/*
 	if ( ui.compositeOsgView->getSelectedRhythmPattern() > -1 && media_cycle->getBrowser()->getSelectedNodes().size() > 0)
 	{	
 		ui.compositeOsgView->getSynth()->compute(ui.compositeOsgView->getSelectedRhythmPattern(), media_cycle->getBrowser()->getSelectedNodes());
+		audio_engine->getFeedback()->createExtSource(ui.compositeOsgView->getSynth()->getSound(), ui.compositeOsgView->getSynth()->getLength());
+		audio_engine->getFeedback()->loopExtSource();
 	}
-	 */
 		
-	/*	
-	SF_INFO sfinfo;
-	SNDFILE* testFile;
-	sfinfo.samplerate = 44100;
-	sfinfo.channels = 1;
-	sfinfo.format = SF_FORMAT_WAV | SF_FORMAT_PCM_16;
 	
-	string synthesisPath = "./synthesis.wav";
-	if (! (testFile = sf_open (synthesisPath.c_str(), SFM_WRITE, &sfinfo))){  
-		printf ("Not able to open input file %s.\n", "synthesis.wav") ;
-		puts (sf_strerror (NULL)) ;
-		return;
-	}
-	
-	sf_writef_float  (testFile, syn_v, length);
-	sf_close(testFile);
-	
-	if (media_cycle->getLibrary()->getSynthesisID() < 0){
-		media_cycle->getLibrary()->setSynthesisID(media_cycle->getLibrarySize());
-		media_cycle->importDirectory(synthesisPath, 0, media_cycle->getLibrary()->getSynthesisID(), false, false);
-		media_cycle->libraryContentChanged();
-		media_cycle->getBrowser()->toggleSourceActivity(media_cycle->getLibrary()->getSynthesisID(), 1);
-	}
-	else{
-		media_cycle->getBrowser()->toggleSourceActivity(media_cycle->getLibrary()->getSynthesisID(), 0);
-		usleep(100000);
-		media_cycle->getBrowser()->toggleSourceActivity(media_cycle->getLibrary()->getSynthesisID(), 1);	
-		media_cycle->getLibrary()->getMedia(media_cycle->getLibrary()->getSynthesisID())->setEnd(length/(float)sfinfo.samplerate);
-	}
-	std::cout << std::endl;
-	*/ 
-	//return;
 }	
 
 void ACAudioGardenOsgQt::on_pushButtonCompositingReset_clicked()

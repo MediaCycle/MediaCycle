@@ -1,7 +1,7 @@
 /**
  * @brief AGSynthesis.h
  * @author Damien Tardieu
- * @date 07/07/2010
+ * @date 08/07/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -39,7 +39,6 @@
 #include <sndfile.h>
 #include <string.h>
 #include "ACAudioFeatures.h"
-#include <samplerate.h>
 #include <iostream>
 #include <map>
 #include "MediaCycle.h"
@@ -60,7 +59,7 @@ enum AGMapping{
 
 class AGSynthesis {
  public:
-	AGSynthesis(){};
+	AGSynthesis();
 	~AGSynthesis(){};
 	bool compute(long targetId, std::vector<long> garinIds);
 	bool compute(long targetId, set<int> selectedNodes);
@@ -73,13 +72,15 @@ class AGSynthesis {
 	void setRandomness(float rand){randomness = randomness;};
 	float getThreshold(){return this->threshold;};
 	void setThreshold(float thresh){this->threshold = thresh;};
-	
+	float* getSound(){return synthesisSound;};
+	long getLength(){return synthesisLength;};
+
 	void setMediaCycle(MediaCycle* mc){this->mediacycle = mc;};
 
-	bool saveAsWav();
-
+	bool saveAsWav(string);
+	
  private:
-	float** synthesisSound;
+	float* synthesisSound;
 	long synthesisLength;
 	MediaCycle* mediacycle;
 	long synthesisID;
