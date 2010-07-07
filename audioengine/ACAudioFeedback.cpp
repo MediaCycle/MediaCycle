@@ -1737,6 +1737,9 @@ return 0;
 int ACAudioFeedback::createExtSource(float* _buffer, int _length){
 	
 	//pthread_mutex_lock(&audio_engine_mutex);
+	if (ext_loop_length != 0)
+		deleteExtSource();	
+		
 	short* buffer_short = new short[_length];
 	
 	for (int i=0;i<_length;i++){
@@ -1745,12 +1748,12 @@ int ACAudioFeedback::createExtSource(float* _buffer, int _length){
 	
 	ext_loop_length = _length;
 	
-    alGenBuffers(1, &ext_loop_buffer);
+	alGenBuffers(1, &ext_loop_buffer);
 	
-    alBufferData(ext_loop_buffer, AL_FORMAT_MONO16, buffer_short, _length * sizeof(short), 44100);
+	alBufferData(ext_loop_buffer, AL_FORMAT_MONO16, buffer_short, _length * sizeof(short), 44100);
 	
-    if (alGetError() != AL_NO_ERROR)
-        return 0;
+	if (alGetError() != AL_NO_ERROR)
+		return 0;
 	
 	alGenSources(1, &ext_loop_source);
 	
@@ -1759,7 +1762,8 @@ int ACAudioFeedback::createExtSource(float* _buffer, int _length){
 	alSourcei(ext_loop_source, AL_LOOPING, AL_TRUE);
 
 	//pthread_mutex_unlock(&audio_engine_mutex);
-
+	delete[] buffer_short;
+	
 	return 0;	
 }	
 
@@ -1858,12 +1862,10 @@ return 0;
 
 int ACAudioFeedback::deleteExtSource()
 {
-	ext_loop_length = 0;
-
 	alDeleteBuffers(1, &ext_loop_buffer);
-	
 	alSourcei(ext_loop_source, AL_BUFFER, 0);
 	alDeleteSources(1, &ext_loop_source);
+	ext_loop_length = 0;
 	return 0;
 }
 
