@@ -84,7 +84,6 @@ class ACMediaFeedback {
 public:
 	ACMediaFeedback() {};
 	~ACMediaFeedback() {};
-	
 };
 
 class ACAudioFeedback : public ACMediaFeedback {
@@ -129,9 +128,13 @@ public:
 	int getLoopId(int slot);
 	int getLoopSlot(int loop_id);
 	int createSource(int loop_id);
+	int createExtSource(float* _buffer, int _length);
 	int createSourceWithPosition(int loop_id, float x, float y, float z);
 	int deleteSource(int loop_id);
-	int setSourcePosition(int loop_id, float x, float y, float z);	
+	int deleteExtSource();
+	void loopExtSource();
+	void stopExtSource();
+	int setSourcePosition(int loop_id, float x, float y, float z);
 	
 	// other (less crucial) effects possible with OpenAL
 	int setSourcePitch(int loop_id, float pitch);
@@ -173,6 +176,9 @@ private:
 	// SD TODO - port this to structure created by RS 
 	ALuint* loop_buffers;
 	ALuint* loop_sources;
+	ALuint	ext_loop_source;
+	ALuint ext_loop_buffer;
+	int ext_loop_length;
 	int*	loop_ids;
 	float*  use_bpm;
 	int*    use_sample_start;

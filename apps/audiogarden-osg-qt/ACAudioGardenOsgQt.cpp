@@ -550,12 +550,36 @@ void ACAudioGardenOsgQt::on_pushButtonCompositingGo_clicked(){
 	}	
 	float* syn_v;
 	long length;
-	*/
+	*/ 
+	std::string filename = "../../../../data/audio/zero-g-pro-pack_a/Brass Elements/Brass 076 BPM/076 Brass 01-C.wav";
+	SF_INFO sfinfo;
+	SNDFILE* testFile;
+	float* data;
 
+	if (! (testFile = sf_open (filename.c_str(), SFM_READ, &sfinfo))){  
+		/* Open failed so print an error message. */
+		printf ("Not able to open input file %s\n", filename.c_str()) ;
+		/* Print the error message from libsndfile. */
+		puts (sf_strerror (NULL)) ;
+		return;
+	}
+	
+	std::cout << "Length : " << sfinfo.frames << std::endl;
+	std::cout << "Sampling Rate : " << sfinfo.samplerate << std::endl;
+	std::cout << "Channels : " << sfinfo.channels << std::endl;
+	data = new float[(long) sfinfo.frames*sfinfo.channels];
+	std::cout << "Read " << sf_read_float(testFile, data, sfinfo.frames*sfinfo.channels) << " frames" << std::endl;
+	
+	
+	audio_engine->getFeedback()->createExtSource(data, sfinfo.frames);
+	audio_engine->getFeedback()->loopExtSource();
+	
+	/*
 	if ( ui.compositeOsgView->getSelectedRhythmPattern() > -1 && media_cycle->getBrowser()->getSelectedNodes().size() > 0)
 	{	
 		ui.compositeOsgView->getSynth()->compute(ui.compositeOsgView->getSelectedRhythmPattern(), media_cycle->getBrowser()->getSelectedNodes());
 	}
+	 */
 		
 	/*	
 	SF_INFO sfinfo;

@@ -275,6 +275,7 @@ ACAudioFeedback::ACAudioFeedback(ALCdevice* _device)
 	createAudioEngine(44100, 512, 10);
 	setTimeSignature(4, 4);
 #endif
+	ext_loop_length = 0;
 }
 
 ACAudioFeedback::~ACAudioFeedback()
@@ -1644,7 +1645,7 @@ int ACAudioFeedback::createSourceWithPosition(int loop_id, float x, float y, flo
 			j = prevsize-1;
 		}
 	}
-	delete datashort;
+	delete[] datashort;
 	datashort = datashort2;
 	size = segment_size_resample;
 	
@@ -1676,7 +1677,7 @@ int ACAudioFeedback::createSourceWithPosition(int loop_id, float x, float y, flo
 	//current_buffer[loop_slot] = 0;
 
 	loop_synchro_mode[loop_slot] = ACAudioEngineSynchroModeAutoBeat;
-	loop_scale_mode[loop_slot] = ACAudioEngineScaleModeVocode; //ACAudioEngineScaleModeVocode; //CF scrub test  
+	loop_scale_mode[loop_slot] = ACAudioEngineScaleModeResample; //CF: the Vocode mode sounds dirty, the Resample mode introduces a click at the beginning
 	
 	if (!use_bpm[loop_slot]) {
 		loop_synchro_mode[loop_slot] = ACAudioEngineSynchroModeNone;
@@ -1720,7 +1721,7 @@ int ACAudioFeedback::createSourceWithPosition(int loop_id, float x, float y, flo
 	}
 	
 	// In this case, the buffer is not needed anymore, it has been copied by OpenAL
-	delete datashort;
+	delete[] datashort;
 	
 	active_loops++;
 	
@@ -1731,6 +1732,36 @@ int ACAudioFeedback::createSourceWithPosition(int loop_id, float x, float y, flo
 
 return 0;
 }
+
+//CF check bit depth and sampling rate later...
+int ACAudioFeedback::createExtSource(float* _buffer, int _length){
+	
+	//pthread_mutex_lock(&audio_engine_mutex);
+	short* buffer_short = new short[_length];
+	
+	for (int i=0;i<_length;i++){
+		buffer_short[i] = _buffer[i]*32767;
+	}	
+	
+	ext_loop_length = _length;
+	
+    alGenBuffers(1, &ext_loop_buffer);
+	
+    alBufferData(ext_loop_buffer, AL_FORMAT_MONO16, buffer_short, _length * sizeof(short), 44100);
+	
+    if (alGetError() != AL_NO_ERROR)
+        return 0;
+	
+	alGenSources(1, &ext_loop_source);
+	
+	// On attache le tampon contenant les échantillons audio à la source
+	alSourcei(ext_loop_source, AL_BUFFER, ext_loop_buffer);
+	alSourcei(ext_loop_source, AL_LOOPING, AL_TRUE);
+
+	//pthread_mutex_unlock(&audio_engine_mutex);
+
+	return 0;	
+}	
 
 /*
 For streaming, and hence real-time control, we'll have:
@@ -1801,7 +1832,7 @@ int ACAudioFeedback::deleteSource(int loop_id)
 	current_buffer[loop_slot] = 0;
 
 	// has been reserved in createSourceWithPosition, need to delete here
-	delete loop_buffers_audio_engine[loop_slot];
+	delete[] loop_buffers_audio_engine[loop_slot];
 
 	loop_ids[loop_slot] = -1;
 	active_loops--;
@@ -1824,6 +1855,29 @@ int ACAudioFeedback::deleteSource(int loop_id)
 	
 return 0;
 }
+
+int ACAudioFeedback::deleteExtSource()
+{
+	ext_loop_length = 0;
+
+	alDeleteBuffers(1, &ext_loop_buffer);
+	
+	alSourcei(ext_loop_source, AL_BUFFER, 0);
+	alDeleteSources(1, &ext_loop_source);
+	return 0;
+}
+
+void ACAudioFeedback::loopExtSource()
+{
+	if (ext_loop_length > 0)
+		alSourcePlay(ext_loop_source);
+}	
+
+void ACAudioFeedback::stopExtSource()
+{
+	if (ext_loop_length > 0)
+		alSourceStop(ext_loop_source);	
+}	
 
 int ACAudioFeedback::setSourcePosition(int loop_id, float x, float y, float z)
 {
