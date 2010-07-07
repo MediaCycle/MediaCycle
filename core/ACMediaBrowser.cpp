@@ -316,8 +316,11 @@ void ACMediaBrowser::setClickedNode(int inode){
 	else{
 		mClickedNode = inode;
 		if (inode > -1)
+		{
 			mLastSelectedNode = inode;
-		mUserLog->clickNode(inode, 0);//CF put some machine time in here!
+			if (mMode == AC_MODE_NEIGHBORS)
+				mUserLog->clickNode(inode, 0);//CF put some machine time in here!
+		}
 	}
 }
 
