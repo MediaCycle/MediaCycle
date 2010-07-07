@@ -496,7 +496,7 @@ void ACAudioGardenOsgQt::on_pushButtonCompositing_clicked(){
 	}	
 	float* syn_v;
 	long length;
-	AGSynthesis(media_cycle, ui.compositeOsgView->getSelectedRhythmPattern(), grainIds, &syn_v, length);
+	//	AGSynthesis(media_cycle, ui.compositeOsgView->getSelectedRhythmPattern(), grainIds, &syn_v, length);
 	SF_INFO sfinfo;
 	SNDFILE* testFile;
 	sfinfo.samplerate = 44100;

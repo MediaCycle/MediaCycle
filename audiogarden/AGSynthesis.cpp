@@ -30,32 +30,22 @@
 */
 
 #include "AGSynthesis.h"
-#include "ACAudio.h"
-#include <stdio.h>
-#include <sndfile.h>
-#include <string.h>
-#include "ACAudioFeatures.h"
-#include <samplerate.h>
-#include <iostream>
-#include "Armadillo-utils.h"
-#include <map>
-#include "MediaCycle.h"
 
 
 using namespace arma;
 
-void AGSynthesis(MediaCycle* mc, long targetId, set<int> selectedNodes, float** syn, long &length){
+
+bool AGSynthesis::compute(long targetId, set<int> selectedNodes){
 	vector<long> grainIds;
 	for (set<int>::const_iterator iter = selectedNodes.begin();iter != selectedNodes.end();++iter){
 		grainIds.push_back(*iter);
 	}
-	AGSynthesis(mc, targetId, grainIds, syn, length);
-	return;
+	return compute(targetId, grainIds);
 }
 
-void AGSynthesis(MediaCycle* mc, long targetId, vector<long> grainIds, float** syn, long &length){
+bool AGSynthesis::compute(long targetId, vector<long> grainIds){
 
-	ACMediaLibrary* lib = mc->getLibrary();
+	ACMediaLibrary* lib = mediacycle->getLibrary();
 	vector<string> featureList;
 	featureList.push_back("Mean of MFCC");
 	featureList.push_back("Mean of Spectral Flatness");
@@ -218,15 +208,19 @@ void AGSynthesis(MediaCycle* mc, long targetId, vector<long> grainIds, float** s
 	if (max(syn_v) > 1){
 		syn_v = (syn_v/max(syn_v))*.99;
 	}
-
-	*syn = new float[durationSyn];
+	
+	if (this->synthesisLength > 0){
+		delete [] synthesisSound;
+	}
+	
+	*synthesisSound = new float[durationSyn];
 	for (int i=0; i < durationSyn; i++)
-		(*syn)[i] = syn_v(i);
-	length = durationSyn;
-	return;
+		(*synthesisSound)[i] = syn_v(i);
+	this->synthesisLength = durationSyn;
+	return true;
 }
 	
-mat extractDescMatrix(ACMediaLibrary* lib, vector<string> featureList, vector<long> mediaIds){
+mat AGSynthesis::extractDescMatrix(ACMediaLibrary* lib, vector<string> featureList, vector<long> mediaIds){
 	mat desc_m;
 	mat tmpDesc_m;
 	
@@ -238,7 +232,7 @@ mat extractDescMatrix(ACMediaLibrary* lib, vector<string> featureList, vector<lo
 	return desc_m;
 }
 
-mat extractDescMatrix(ACMediaLibrary* lib, string featureName, vector<long> mediaIds){
+mat AGSynthesis::extractDescMatrix(ACMediaLibrary* lib, string featureName, vector<long> mediaIds){
   vector<ACMedia*> loops = lib->getAllMedia();
   int nbMedia = loops.size(); 
 	int featDim;
@@ -268,7 +262,7 @@ mat extractDescMatrix(ACMediaLibrary* lib, string featureName, vector<long> medi
 	return desc_m;
 }
  
-colvec extractSamples(ACAudio* audioGrain){
+colvec AGSynthesis::extractSamples(ACAudio* audioGrain){
 	//	audioGrain = (ACAudio*) lib->getMedia(mediaId);
 	float* audioSamples = audioGrain->getSamples();
 	// TODO resample

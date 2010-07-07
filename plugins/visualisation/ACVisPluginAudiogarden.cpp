@@ -86,7 +86,7 @@ void ACVisPluginAudiogarden::updateNextPositions(ACMediaBrowser* mediaBrowser){
 	desc_m = extractDescMatrix(mediaBrowser->getLibrary(), featureList);
 	mat coef_m;
 	mat proj_m;
-	princomp(desc_m, coef_m, proj_m);
+	princomp(coef_m, proj_m, desc_m);
 	theta_v = proj_m.col(0);
 	theta_v = (theta_v - min(theta_v))/(max(theta_v)-min(theta_v)) * 2 * math::pi();
 	//	std::cout << theta_v << std::endl;

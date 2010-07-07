@@ -33,16 +33,66 @@
 #define AGSYNTHESIS_H
 
 #include <vector>
-#include "MediaCycle.h"
 #include "ACAudio.h"
 #include "Armadillo-utils.h"
+#include <stdio.h>
+#include <sndfile.h>
+#include <string.h>
+#include "ACAudioFeatures.h"
+#include <samplerate.h>
+#include <iostream>
+#include <map>
+#include "MediaCycle.h"
 
 using namespace arma;
 
-colvec extractSamples(ACAudio* audioGrain);
-mat extractDescMatrix(ACMediaLibrary* lib, string featureName, std::vector<long> mediaIds);
-mat extractDescMatrix(ACMediaLibrary* lib, std::vector<string> featureList, std::vector<long> mediaIds);
-void AGSynthesis(MediaCycle* mc, long targetId, std::vector<long> garinIds, float** , long&);
-void AGSynthesis(MediaCycle* mc, long targetId, set<int> selectedNodes, float** syn, long &length);
+enum AGMethod{
+	AG_METHOD_SIMPLE=0,
+	AG_METHOD_SQUEEZED=1,
+	AG_METHOD_PADDED = 2
+};
+
+enum AGMapping{
+	AG_MAPPING_NONE=0,
+	AG_MAPPING_MEAN=1,
+	AG_MAPPING_MEANVAR = 2
+};
+
+class AGSynthesis {
+ public:
+	AGSynthesis(){};
+	~AGSynthesis(){};
+	bool compute(long targetId, std::vector<long> garinIds);
+	bool compute(long targetId, set<int> selectedNodes);
+	
+	AGMethod getMethod(){return method;};
+	void setMethod(AGMethod met){this->method=met;};
+	AGMapping getMapping(){return mapping;};
+	void setMapping(AGMapping map){this->mapping = map;};
+	float getRandomness(){return randomness;};
+	void setRandomness(float rand){randomness = randomness;};
+	float getThreshold(){return this->threshold;};
+	void setThreshold(float thresh){this->threshold = thresh;};
+	
+	void setMediaCycle(MediaCycle* mc){this->mediacycle = mc;};
+
+	bool saveAsWav();
+
+ private:
+	float** synthesisSound;
+	long synthesisLength;
+	MediaCycle* mediacycle;
+	long synthesisID;
+	
+	// param
+	AGMethod method;
+	AGMapping mapping;
+	float randomness;
+	float threshold;
+	
+	colvec extractSamples(ACAudio* audioGrain);
+	mat extractDescMatrix(ACMediaLibrary* lib, string featureName, std::vector<long> mediaIds);
+	mat extractDescMatrix(ACMediaLibrary* lib, std::vector<string> featureList, std::vector<long> mediaIds);
+};
 
 #endif
