@@ -87,7 +87,7 @@ std::vector<ACMedia*> ACAudioSegmentationPlugin::segment(ACMediaData* audio_data
 		desc_mf = computeFeature(data, "Spectral Flux", theAudio->getSampleRate(), theAudio->getChannels(), theAudio->getNFrames(), 16, 13, 1024*2, extendSoundLimits);
 		desc_v = conv_to<fcolvec>::from(desc_mf->delta()->getValue());
 		time_v = desc_mf->getTime();
-		peaks_v = findpeaks(desc_v, 10);		
+		peaks_v = findpeaks(desc_v, min((unsigned int) 10, desc_v.n_elem-1));		
 		break;
 	}
 	default:

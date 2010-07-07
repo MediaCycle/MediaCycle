@@ -1,7 +1,7 @@
 /**
  * @brief randperm.h
  * @author Damien Tardieu
- * @date 11/03/2010
+ * @date 07/07/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -34,9 +34,15 @@
 #ifndef RANDPERM_H 
 #define RANDPERM_H
 
+#include <time.h>
+
 inline ucolvec randperm(int n){
-  colvec  q_v       = rand<colvec>(n);
-  ucolvec perm_v = sort_index(q_v);
+	int t0 = clock();
+	int seed = t0 - (int)(t0/1000)*1000; 
+	srand ( seed * 3 ); 
+
+  colvec  q_v       = rand<colvec>(n+1);
+  ucolvec perm_v = sort_index(q_v.rows(1,n));
   return perm_v;
 }
 

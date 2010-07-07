@@ -1,7 +1,7 @@
 /**
  * @brief armadillo-test.cpp
  * @author Damien Tardieu
- * @date 18/06/2010
+ * @date 07/07/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -34,58 +34,69 @@
 #include "Armadillo-utils.h"
 #include <time.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include "ACMediaTimedFeature.h"
+#include "MediaCycle.h"
 using namespace arma;
 
 
 int main(){
 
 	int a;
-	unsigned t0;
 	int L = 10000;
 	int D = 1;
-
-// 	float* mem;
-// 	mem = new float* [D];
-// 	for(int i=0; i<n; i++)
-// 		mem[i] = new double [L];
-	float* mem = new float[L];
-
-	for (int d=0; d<D; d++){
-		for (int i=0; i<L; i++){
-			mem[d] = d+i*.1;
-		}
+	int t0 = clock();
+	std::cout << t0  << std::endl;
+	int seed = t0 - (int)(t0/1000)*1000;
+	std::cout << seed + 3 << std::endl;
+	srand ( seed * 3 );
+	for (int i =0; i<3; i++){
+		//colvec q = rand<rowvec>(10);
+		std::cout << trans(randperm(10)) << std::endl;
 	}
-	
-	t0=clock();
-	fmat test4(L, D);
-	for (int d=0; d<D; d++){
-		for (int i=0; i<L; i++){
-			test4(d,i) = mem[i];
-		}
-	}
-	std::cout << "Methode 2 : " << clock()-t0 << std::endl;	
+	//	std::cout << ACRandom() << std::endl;
+	std::cout << rand() << std::endl;
+// 	// 	float* mem;
+// 	// 	mem = new float* [D];
+// 	// 	for(int i=0; i<n; i++)
+// 	// 		mem[i] = new double [L];
+// 	float* mem = new float[L];
 
-	t0=clock();
-	fmat test3(mem, L, D, true);
-	std::cout << "Methode 1 : " << clock()-t0 << std::endl;
+// 	for (int d=0; d<D; d++){
+// 		for (int i=0; i<L; i++){
+// 			mem[d] = d+i*.1;
+// 		}
+// 	}
 	
-	t0=clock();
-	fmat test(mem, L, D, true);
-	std::cout << "Methode 1 : " << clock()-t0 << std::endl;
+// 	t0=clock();
+// 	fmat test4(L, D);
+// 	for (int d=0; d<D; d++){
+// 		for (int i=0; i<L; i++){
+// 			test4(d,i) = mem[i];
+// 		}
+// 	}
+// 	std::cout << "Methode 2 : " << clock()-t0 << std::endl;	
+
+// 	t0=clock();
+// 	fmat test3(mem, L, D, true);
+// 	std::cout << "Methode 1 : " << clock()-t0 << std::endl;
 	
-	t0=clock();
-	fmat test2(L, D);
-	for (int d=0; d<D; d++){
-		for (int i=0; i<L; i++){
-			test2(d,i) = mem[i];
-		}
-	}
-	std::cout << "Methode 2 : " << clock()-t0 << std::endl;	
+// 	t0=clock();
+// 	fmat test(mem, L, D, true);
+// 	std::cout << "Methode 1 : " << clock()-t0 << std::endl;
+	
+// 	t0=clock();
+// 	fmat test2(L, D);
+// 	for (int d=0; d<D; d++){
+// 		for (int i=0; i<L; i++){
+// 			test2(d,i) = mem[i];
+// 		}
+// 	}
+// 	std::cout << "Methode 2 : " << clock()-t0 << std::endl;	
 
 
-	test.save("test.txt", arma_ascii);
-	test.save("test3.txt", arma_ascii);
+// 	test.save("test.txt", arma_ascii);
+// 	test.save("test3.txt", arma_ascii);
 	return 0;
 }
 

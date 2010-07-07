@@ -1,7 +1,7 @@
 /**
  * @brief main.cpp
  * @author Damien Tardieu
- * @date 29/06/2010
+ * @date 07/07/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -119,7 +119,7 @@ int main(int argc, char** argv){
 	
 	string myname(argv[0]);
 
-	bflag = 0;
+	bflag = 0;
 	while ((ch = getopt(argc, argv, "heL:c:m:o:")) != -1) {
 		switch (ch) {
 		case 'e' :

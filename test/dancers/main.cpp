@@ -70,7 +70,10 @@ string xmlpath = dirpath+"dancers-all.xml";
 int main(int argc, char** argv) {
 	string configFilename = dirpath+"config.txt";
 	ifstream configIF(configFilename.c_str());
-	cout << "MediaCycle - Dancers" << endl;
+	cout << "MediaCycle - Dancers - v3" << endl;
+	cout << "MediaCycle - Dancers - v3" << endl;
+	cout << "MediaCycle - Dancers - v3" << endl;
+	cout << "MediaCycle - Dancers - v3" << endl;
 
 	string libraryFilename, visPluginFilename;
 	configIF >> libraryFilename;

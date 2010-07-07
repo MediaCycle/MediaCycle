@@ -1,7 +1,7 @@
 /**
  * @brief ACVisualisationPlugin.cpp
  * @author Damien Tardieu
- * @date 29/06/2010
+ * @date 07/07/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -112,9 +112,6 @@ void ACVisualisationPlugin::updateNextPositions(ACMediaBrowser* mediaBrowser){
 	for (int i=0; i<nbActiveFeatures; i++)
 		std::cout << "featureNames : " << featureNames[i] << std::endl;
 
-#ifdef USE_DEBUG
-	descD_m.save("descD.txt", arma_ascii);
-#endif
 
   vector<string> clusterLabelAdj;
 	//   clusterLabelAdj.push_back("Low");
@@ -144,9 +141,12 @@ void ACVisualisationPlugin::updateNextPositions(ACMediaBrowser* mediaBrowser){
   labelPos_m = labelPos_m/repmat(maxPosDisp_v-minPosDisp_v, labelPos_m.n_rows, 1)*999;
 	posDisp_m.col(1) = 999-posDisp_m.col(1);
 	labelPos_m.col(1) = 999-labelPos_m.col(1);
-#ifdef USE_DEBUG
-	posDisp_m.save("posDispDef.txt", arma_ascii);
-#endif
+	
+	if (itemClicked >=0) {
+		posDisp_m(itemClicked,0) = 500;
+		posDisp_m(itemClicked,1) = 500;
+	}
+	
 // 	///////////////////////////////////////////////////////////////////////////////
 	
 	///for mediacycle osg
@@ -166,10 +166,7 @@ void ACVisualisationPlugin::updateNextPositions(ACMediaBrowser* mediaBrowser){
     labelValue.append(clusterLabelAdj[labelValue_v(i)]);
     mediaBrowser->setLabel(i, labelValue, p);
   }
-#ifdef USE_DEBUG
-	std::cout << "toDisplay_v.n_elem : "  << toDisplay_v.n_elem << std::endl;
-	std::cout << "labelIdx_v.n_elem : "  << labelIdx_v.n_rows << std::endl;
-#endif
+
 	mediaBrowser->setNumberOfDisplayedLabels(labelIdx_v.n_rows);
 	mediaBrowser->setNumberOfDisplayedLoops(toDisplay_v.n_elem);
 	////////////////////////////////////////////////////////////////////////////////////
@@ -188,7 +185,6 @@ void ACVisualisationPlugin::updateNextPositions(ACMediaBrowser* mediaBrowser){
 	for (int i=0; i<mediaBrowser->getNumberOfDisplayedLoops(); i++){
 		//TODO make sur you meant next
 		mediaBrowser->setNodeNextPosition(toDisplay_v(i), posDisp_m(toDisplay_v(i),0), posDisp_m(toDisplay_v(i),1));
-		std::cout<<"disp : " << toDisplay_v(i) << ", " << mediaBrowser->getLibrary()->getMedia(toDisplay_v(i))->getFileName() << posDisp_m(toDisplay_v(i),0) << ", " << posDisp_m(toDisplay_v(i),1) << std::endl;
 	}
 	// 	if (itemClicked >= 0)
 	//TODO make sur you meant next
@@ -288,9 +284,6 @@ mat ACVisualisationPlugin::updateNextPositionsInit(mat &desc_m, int nbVideoDispl
 		//tmp_m = tmp_m/repmat(max(abs(tmp_m)), tmp_m.n_rows, 1) * clusterSpread_v(i);
 		tmp_m.col(0) = clusterSpread_v(i) * cos(2*math::pi() * clusterid2_m/nbClusters) + randn<colvec>(tmp_m.n_rows);
 		tmp_m.col(1) = clusterSpread_v(i) * sin(2*math::pi() * clusterid2_m/nbClusters) + randn<colvec>(tmp_m.n_rows);
-#ifdef USE_DEBUG
-		std::cout << "tmp_m : " << tmp_m << std::endl;
-#endif
 		for (int k=0; k < tmpDesc_m.n_rows; k++)
 			// The clusters are displayed usiing the two first dimensions of desc_m
 			posDisp_m.row(pos_v(k)) = clusterCenterDisp_m.row(clusterid_m(pos_v(k))) + tmp_m.submat(k,0,k,1);
@@ -316,20 +309,7 @@ mat ACVisualisationPlugin::updateNextPositionsInit(mat &desc_m, int nbVideoDispl
 				labelValue_v(k) = 1;
       else
 				labelValue_v(k) = 2;
-#ifdef USE_DEBUG
-		std::cout << "center_m(k,labelIdx_v(k)) : " << center_m(k,labelIdx_v(k)) << std::endl;
-		std::cout << "center_m(k,labelIdx_v(k))*3 : " << center_m(k,labelIdx_v(k))*3 << std::endl;
-		std::cout << "labelValue_v(k) : " << labelValue_v(k) << std::endl;
-#endif
 	}
-#ifdef USE_DEBUG
-	std::cout << "debug" << std::endl;
-	desc_m.save("desc.txt", arma_ascii);
-	clusterid_m.save("clusterid.txt", arma_ascii);
-	center_m.save("center.txt", arma_ascii);
-	toDisplay_v.save("toDisplay.txt", arma_ascii);
-	posDisp_m.save("posDisp.txt", arma_ascii);
-#endif
 
 	return posDisp_m;
 }
@@ -348,11 +328,6 @@ mat ACVisualisationPlugin::updateNextPositionsInit2(mat &desc_m, int nbVideoDisp
 	mat centroid_m;
 	newD_m = newD_m.cols(0,1);
 	kcluster(newD_m,nbClusters, idx_v,centroid_m);
-#ifdef USE_DEBUG
-	newD_m.save("newD.txt", arma_ascii);
-#endif	
-	// 	selectedClusters_v = randperm(nbClusters);
-	// 	selectedClusters_v = selectedClusters_v.cols(0,nbSelectedClusters-1);
 	
 	colvec selectedClusters_v;
 	selectedClusters_v = linspace(0.0, nbSelectedClusters-1, nbSelectedClusters);
@@ -424,13 +399,6 @@ mat ACVisualisationPlugin::updateNextPositionsInit2(mat &desc_m, int nbVideoDisp
 
 	urowvec Mp_v = sort_index(conv_to<rowvec>::from(abs(diff(centroidSameLabel_m))), 1);
 
-#ifdef USE_DEBUG	
-	std::cout << "maxPos_v = " << maxPos_v << std::endl;
-	std::cout << "sameLabel_v = \n" << sameLabel_v << std::endl;
-	std::cout << "centroidSameLabel_m = \n" << centroidSameLabel_m << std::endl;
-	std::cout << "diff(centroidSameLabel_m) = " << abs(diff(centroidSameLabel_m)) << std::endl;
-	std::cout << "Mp_v = " << Mp_v << std::endl;
-#endif
 	labelIdx_v.zeros(nbSelectedClusters, 1);
 	labelIdx_v += desc2_m.n_cols;
 	labelIdx_v(sameLabel_v(0))=Mp_v(0);
@@ -452,16 +420,8 @@ mat ACVisualisationPlugin::updateNextPositionsInit2(mat &desc_m, int nbVideoDisp
 	}
 	for (int i=0; i < toDisplay_v.n_elem; i++){
 		toDisplay_v(i) = posSC_v(toDisplay_v(i));
-#ifdef USE_DEBUG
-		std::cout << "toDisplay_v = \n" << toDisplay_v << std::endl;
-		std::cout << "posSC_v = \n" << posSC_v << std::endl;
-#endif
 	}
 	for (int k=0; k < nbSelectedClusters; k++){
-#ifdef USE_DEBUG
-		std::cout << "centroid2_m = \n" << centroid2_m << std::endl;    
-		std::cout << "labelIdx_v = \n" << labelIdx_v << std::endl;    
-#endif
 		if (centroidO_m(k,labelIdx_v(k)) > .5)
       labelValue_v(k)=3;
     else 
@@ -471,10 +431,6 @@ mat ACVisualisationPlugin::updateNextPositionsInit2(mat &desc_m, int nbVideoDisp
 				labelValue_v(k) = 2;
 	}
 
-#ifdef USE_DEBUG
-	std::cout << "labelValue_v = \n" << labelValue_v << std::endl;    	
-	toDisplay_v.save("toDisplay.txt", arma_ascii);
-#endif
 	labelPos_m = centroid2_m;
 	return newD_m;
 }
@@ -516,7 +472,7 @@ mat ACVisualisationPlugin::updateNextPositionsItemClicked(mat &desc_m, int nbVid
 	double angle;
 	//	mat posDispOk_m(toDisplay_v.n_rows,2);
 	for (int k=0; k<desc_m.n_rows; k++){
-		angle = conv_to<double>::from(rand<mat>(1,1)*(math::pi())/2);
+		angle = ACRandom()*(math::pi())/2;
 		tmpSort_v = sort_index(conv_to<rowvec>::from(desc_m.row(k)));
 		posDisp_m(k,0) = pow(distDesc_v(k)+.005,2)*cos(angle) * clusterCenterDisp_m(tmpSort_v(0),0);
 		posDisp_m(k,1) = pow(distDesc_v(k)+.005,2)*sin(angle) * clusterCenterDisp_m(tmpSort_v(0),1);
@@ -581,10 +537,6 @@ mat ACVisualisationPlugin::updateNextPositionsItemClicked2(mat &desc_m, int nbVi
 	}
 	
 	labelPos_m = centroid_m;
-#ifdef USE_DEBUG
-	std::cout << "centroid_m = \n" << centroid_m << std::endl;
-	std::cout << "labelIdx_v = \n" << labelIdx_v << std::endl;
-#endif	
 	toDisplay_v.set_size(selPos_v.n_rows);
 	
 	for (int i=0; i<selPos_v.n_elem; i++)
@@ -607,10 +559,6 @@ mat ACVisualisationPlugin::updateNextPositionsItemClicked3(mat &desc_m, int nbVi
 	mat tg_v = desc_m.row(itemClicked);
 	mat dist_m = abs(desc_m - repmat(tg_v, desc_m.n_rows, 1));
 	ucolvec rank_v = paretorank(dist_m, 20, nbVideoDisplay);
-#ifdef USE_DEBUG
- 	dist_m.save("dist_m", arma_ascii);
-	rank_v.save("rank.txt", arma_ascii);
-#endif
 	std::cout << "Item Clicked : " << itemClicked << std::endl;
 	ucolvec selPos_v = find(rank_v > 0);
 	colvec distEucl_v = sqrt(sum(square(dist_m), 1));
@@ -620,17 +568,11 @@ mat ACVisualisationPlugin::updateNextPositionsItemClicked3(mat &desc_m, int nbVi
 		distEuclFront_v(i) = distEucl_v(selPos_v(i));
 	ucolvec sp_v = sort_index(distEuclFront_v);
 	double maxDistEucl = distEuclFront_v(sp_v(nbVideoDisplay-1));
-#ifdef USE_DEBUG
-	std::cout << "maxDistEucl = " << maxDistEucl << std::endl;
-#endif
 	toDisplay_v.set_size(nbVideoDisplay);
 	for (int i = 0; i < nbVideoDisplay; i++)
 		toDisplay_v(i) = selPos_v(sp_v(i));
 	toDisplay_v = sort(toDisplay_v);
 
-#ifdef USE_DEBUG
-	toDisplay_v.save("toDisplay.txt", arma_ascii);
-#endif
 
 	mat sv = sort(dist_m, 0, 1);
 	mat dist2_m = dist_m % (dist_m<repmat(sv.col(2), 1, 3));
@@ -650,6 +592,8 @@ mat ACVisualisationPlugin::updateNextPositionsItemClicked3(mat &desc_m, int nbVi
 	posDisp_m.col(0) = (distEucl_v/maxDistEucl) % cos(th_v);
 	posDisp_m.col(1) = (distEucl_v/maxDistEucl) % sin(th_v);
 
+	
+
 	posDisp_m(itemClicked,0)=0;
 	posDisp_m(itemClicked,1)=0;
 
@@ -657,28 +601,27 @@ mat ACVisualisationPlugin::updateNextPositionsItemClicked3(mat &desc_m, int nbVi
 	mat posDispOk_m(toDisplay_v.n_rows,2);
 	for (int k=0; k<toDisplay_v.n_rows; k++)
 		posDispOk_m.row(k) = posDisp_m.row(toDisplay_v(k));
+	
+
 	rowvec maxPosDisp_v = max(posDispOk_m);
 	rowvec minPosDisp_v = min(posDispOk_m);
 
-#ifdef USE_DEBUG
-	posDisp_m.save("posDisp1.txt", arma_ascii);
-#endif
 	labelIdx_v.set_size(3);
 	labelIdx_v(0)=0;
 	labelIdx_v(1)=1;
 	labelIdx_v(2)=2;
 	labelValue_v.zeros(3, 1);
 	labelPos_m.set_size(3,2);
+	mat labelPosRand_m = randn<mat>(3,2)*.05;
+
 	labelPos_m(0,0) = 0;
 	labelPos_m(0,1) = maxPosDisp_v(1);
 	labelPos_m(1,0) = maxPosDisp_v(0);
 	labelPos_m(1,1) = minPosDisp_v(1);
 	labelPos_m(2,0) = minPosDisp_v(0);
 	labelPos_m(2,1) = minPosDisp_v(1);
-	labelPos_m = labelPos_m * .6;
-#ifdef USE_DEBUG
-	labelPos_m.save("labelPos.txt", arma_ascii);
-#endif
+	labelPos_m = labelPosRand_m + labelPos_m * .6;
+
 
 	return posDisp_m;
 }
@@ -699,8 +642,7 @@ mat ACVisualisationPlugin::extractDescMatrix(ACMediaBrowser* mediaBrowser, int n
 		}
 	}
 	
-	colvec  q_v       = rand<colvec>(totalDim);
-	ucolvec perm_v = sort_index(q_v);
+	ucolvec perm_v = randperm(totalDim);
 	ucolvec activeFeatures_v;
 	activeFeatures_v = perm_v.rows(0,nbActiveFeatures-1);  
 //   activeFeatures_v.set_size(3);

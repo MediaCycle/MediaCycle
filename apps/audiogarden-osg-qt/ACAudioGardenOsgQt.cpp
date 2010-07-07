@@ -70,7 +70,7 @@ ACAudioGardenOsgQt::ACAudioGardenOsgQt(QWidget *parent)
 			//media_cycle->setClustersPositionsPlugin("VisAudiogarden");
 		}
 		media_cycle->addPlugin("../../../plugins/audio/" + build_type + "/mc_audio.dylib");	
-		media_cycle->addPlugin("../../../plugins/vamp/" + build_type + "/mc_vamp.dylib");	
+		//		media_cycle->addPlugin("../../../plugins/vamp/" + build_type + "/mc_vamp.dylib");	
 	#endif
 	
 	audio_engine = new ACAudioFeedback();

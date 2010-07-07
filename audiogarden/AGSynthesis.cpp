@@ -1,7 +1,7 @@
 /**
  * @brief AGSynthesis.cpp
  * @author Damien Tardieu
- * @date 29/06/2010
+ * @date 07/07/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -91,16 +91,18 @@ void AGSynthesis(MediaCycle* mc, long targetId, vector<long> grainIds, float** s
 	descG_m = zscore(descG_m);
 	descTS_m = zscore(descTS_m);
 	
-	descG_m.save("descG.txt", arma_ascii);
-	descTS_m.save("descTS.txt", arma_ascii);
 	mat dist_m = euclideanDistance(descTS_m, descG_m);
-	dist_m.save("dist.txt", arma_ascii);
 
 	ucolvec mp_v(dist_m.n_rows);
 	for (int i=0; i<dist_m.n_rows; i++){
 		mp_v(i) = min_index(conv_to<rowvec>::from(dist_m.row(i)));
 	}
-	
+
+	umat sp_m(dist_m.n_rows, dist_m.n_cols);
+	for (int i=0; i<dist_m.n_rows; i++){
+		sp_m.row(i) = sort_index(conv_to<rowvec>::from(dist_m.row(i)));
+	}
+
 	for (int i=0; i < mp_v.n_elem; i++){
 		std::cout << grainIds[mp_v(i)] << " ";		
 	}
@@ -124,48 +126,98 @@ void AGSynthesis(MediaCycle* mc, long targetId, vector<long> grainIds, float** s
 		}
 	}
 	
-
-	float* audioSamples;
+	long maxGrainLength = 0;
+	for (int i=0; i<grainIds.size(); i++){
+		if (((ACAudio*)lib->getMedia(grainIds[i]))->getNFrames() > maxGrainLength){
+			maxGrainLength = ((ACAudio*)lib->getMedia(grainIds[i]))->getNFrames();
+		}
+	}
+	durationSyn += maxGrainLength;
+	
 	colvec syn_v;
 	syn_v.zeros(durationSyn);
 	colvec win_v;
-	
+	int add_mode = 3;
+
+	long ind0 = 0;
+
 	for (int i=0; i < targetSegment_v.size(); i++){
 		audioGrain = (ACAudio*) lib->getMedia(grainIds[mp_v(i)]);
-		audioSamples = audioGrain->getSamples();
-		// TODO resample
-		if (audioGrain->getSampleRate() != 44100){
-			std::cerr << "Wrong sampling rate" << std::endl;
-			exit(1);
+		colvec selG_v = extractSamples(audioGrain);
+		
+		win_v = tukeywin(audioGrain->getNFrames(), .01);
+		
+		switch (add_mode) {
+		case 1:{
+			if (seg_samp_start_v(i)+audioGrain->getNFrames() - 1 < syn_v.n_elem){
+				syn_v.rows(seg_samp_start_v(i), seg_samp_start_v(i)+audioGrain->getNFrames()-1) += selG_v % win_v;
+			}
+			else{
+				std::cout << "----------------" << std::endl;
+				std::cout << syn_v.n_elem << std::endl;
+				std::cout << seg_samp_start_v(i)+audioGrain->getNFrames()-1 << std::endl;
+				std::cerr << "Wrong synthesis vector size" << std::endl;
+			}
+			break;
+		}
+		case 2:{
+			if (ind0+audioGrain->getNFrames() - 1 < syn_v.n_elem){
+				syn_v.rows(ind0, ind0+audioGrain->getNFrames()-1) = selG_v % win_v;
+				ind0 = ind0+audioGrain->getNFrames();
+			}
+			else{
+				std::cout << "----------------" << std::endl;
+				std::cout << syn_v.n_elem << std::endl;
+				std::cout << ind0+audioGrain->getNFrames()-1 << std::endl;
+				std::cerr << "Wrong synthesis vector size" << std::endl;
+			}
+			break;
+		}
+		case 3:{
+			if (seg_samp_start_v(i)+audioGrain->getNFrames() - 1 < syn_v.n_elem){
+				syn_v.rows(seg_samp_start_v(i), seg_samp_start_v(i)+audioGrain->getNFrames()-1) = selG_v % win_v;
+			}
+			else{
+				std::cout << "----------------" << std::endl;
+				std::cout << syn_v.n_elem << std::endl;
+				std::cout << seg_samp_start_v(i)+audioGrain->getNFrames()-1 << std::endl;
+				std::cerr << "Wrong synthesis vector size" << std::endl;
+			}
+			ind0 = ind0+audioGrain->getNFrames();
+			int round = 1;
+			while (ind0 < seg_samp_end_v(i) & round < grainIds.size()){
+				std::cout << "Plus! " << round << std::endl;
+				int sGrainId = grainIds[sp_m(i,round)];
+				audioGrain = (ACAudio*) lib->getMedia(sGrainId);
+				selG_v = extractSamples(audioGrain);
+				win_v = tukeywin(audioGrain->getNFrames(), .01);
+				if (ind0+audioGrain->getNFrames() - 1 < syn_v.n_elem){
+					syn_v.rows(ind0, ind0+audioGrain->getNFrames()-1) = selG_v % win_v;
+				}
+				else{
+					std::cout << "----------------" << std::endl;
+					std::cout << syn_v.n_elem << std::endl;
+					std::cout << ind0+audioGrain->getNFrames()-1 << std::endl;
+					std::cerr << "Wrong synthesis vector size" << std::endl;
+				}
+				ind0 += audioGrain->getNFrames();
+				round++;
+			}
+		}
 		}
 
-		colvec selG_v(audioGrain->getNFrames());
-		
-		for (long i = 0; i< audioGrain->getNFrames(); i++){
-			selG_v[i] = audioSamples[i*audioGrain->getChannels()];
-		}
-		delete [] audioSamples;
-		win_v = tukeywin(audioGrain->getNFrames(), .01);
-// 		std::cout << "Start = " << seg_samp_start_v(i) << std::endl;
-// 		std::cout << "NFrames = " << audioGrain->getNFrames()-1 << std::endl;		
-		if (seg_samp_start_v(i)+audioGrain->getNFrames() - 1 < syn_v.n_elem){
-			syn_v.rows(seg_samp_start_v(i), seg_samp_start_v(i)+audioGrain->getNFrames()-1) = selG_v % win_v;
-		}
-		else{
-			std::cout << "----------------" << std::endl;
-			std::cout << syn_v.n_elem << std::endl;
-			std::cout << seg_samp_start_v(i)+audioGrain->getNFrames()-1 << std::endl;
-			std::cerr << "Wrong synthesis vector size" << std::endl;
-		}
 	}
-	
+	if (max(syn_v) > 1){
+		syn_v = (syn_v/max(syn_v))*.99;
+	}
+
 	*syn = new float[durationSyn];
 	for (int i=0; i < durationSyn; i++)
 		(*syn)[i] = syn_v(i);
 	length = durationSyn;
 	return;
 }
-
+	
 mat extractDescMatrix(ACMediaLibrary* lib, vector<string> featureList, vector<long> mediaIds){
 	mat desc_m;
 	mat tmpDesc_m;
@@ -207,3 +259,22 @@ mat extractDescMatrix(ACMediaLibrary* lib, string featureName, vector<long> medi
   }
 	return desc_m;
 }
+ 
+colvec extractSamples(ACAudio* audioGrain){
+	//	audioGrain = (ACAudio*) lib->getMedia(mediaId);
+	float* audioSamples = audioGrain->getSamples();
+	// TODO resample
+	if (audioGrain->getSampleRate() != 44100){
+		std::cerr << "Wrong sampling rate" << std::endl;
+		exit(1);
+	}
+	
+	colvec selG_v(audioGrain->getNFrames());
+	
+	for (long i = 0; i< audioGrain->getNFrames(); i++){
+		selG_v[i] = audioSamples[i*audioGrain->getChannels()];
+	}
+	delete [] audioSamples;
+	return selG_v;
+}
+

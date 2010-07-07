@@ -7,7 +7,7 @@ IF ( ARMADILLO_FOUND )
 
 	ADD_EXECUTABLE(mediacycle-dancers ${SRC} ${HDR})
 
-	ADD_DEPENDENCIES(mediacycle-dancers mediacycle)
+	ADD_DEPENDENCIES(mediacycle-dancers mediacycle mc_visualisation)
 
 	TARGET_LINK_LIBRARIES(mediacycle-dancers mediacycle)
 	TARGET_LINK_LIBRARIES(mediacycle-dancers tinyxml armadillo-utils)

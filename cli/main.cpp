@@ -78,31 +78,31 @@ int main(int argc, char** argv) {
 			std::cout << i << " : " << mediacycle->getLibrary()->getMedia(i)->getFileName() << "   " << ((ACAudio*)mediacycle->getLibrary()->getMedia(i))->getNFrames() << std::endl;
 		}
 
-		 vector<long> grainIds;
-		for (int i=1; i<45; i++){
-			//for (int i=1; i<20; i++){
-			grainIds.push_back(i);
-		}
-		float* syn_v;
-		long length;
-		AGSynthesis(mediacycle->getLibrary(), 0, grainIds, &syn_v, length);
+// 		 vector<long> grainIds;
+// 		for (int i=1; i<45; i++){
+// 			//for (int i=1; i<20; i++){
+// 			grainIds.push_back(i);
+// 		}
+// 		float* syn_v;
+// 		long length;
+// 		AGSynthesis(mediacycle->getLibrary(), 0, grainIds, &syn_v, length);
 
-		SF_INFO sfinfo;
-		SNDFILE* testFile;
-		sfinfo.samplerate = 44100;
-		sfinfo.channels = 1;
-		sfinfo.format = SF_FORMAT_WAV | SF_FORMAT_PCM_16;
+// 		SF_INFO sfinfo;
+// 		SNDFILE* testFile;
+// 		sfinfo.samplerate = 44100;
+// 		sfinfo.channels = 1;
+// 		sfinfo.format = SF_FORMAT_WAV | SF_FORMAT_PCM_16;
 
-		if (! (testFile = sf_open ("synthesis.wav", SFM_WRITE, &sfinfo))){  
-			printf ("Not able to open input file %s.\n", "synthesis.wav") ;
-			puts (sf_strerror (NULL)) ;
-			return 1;
-		}
+// 		if (! (testFile = sf_open ("synthesis.wav", SFM_WRITE, &sfinfo))){  
+// 			printf ("Not able to open input file %s.\n", "synthesis.wav") ;
+// 			puts (sf_strerror (NULL)) ;
+// 			return 1;
+// 		}
 
-		float tt[1];
-		tt[0] =1.0;
-		sf_writef_float  (testFile, syn_v, length);
-		sf_close(testFile);
+// 		float tt[1];
+// 		tt[0] =1.0;
+// 		sf_writef_float  (testFile, syn_v, length);
+// 		sf_close(testFile);
 		 
 	
 	

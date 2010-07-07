@@ -1,7 +1,7 @@
 /**
  * @brief AGSynthesis.h
  * @author Damien Tardieu
- * @date 29/06/2010
+ * @date 07/07/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -34,10 +34,12 @@
 
 #include <vector>
 #include "MediaCycle.h"
+#include "ACAudio.h"
 #include "Armadillo-utils.h"
 
 using namespace arma;
 
+colvec extractSamples(ACAudio* audioGrain);
 mat extractDescMatrix(ACMediaLibrary* lib, string featureName, std::vector<long> mediaIds);
 mat extractDescMatrix(ACMediaLibrary* lib, std::vector<string> featureList, std::vector<long> mediaIds);
 void AGSynthesis(MediaCycle* mc, long targetId, std::vector<long> garinIds, float** , long&);
