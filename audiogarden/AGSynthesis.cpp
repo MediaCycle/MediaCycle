@@ -44,6 +44,14 @@
 
 using namespace arma;
 
+void AGSynthesis(MediaCycle* mc, long targetId, set<int> selectedNodes, float** syn, long &length){
+	vector<long> grainIds;
+	for (set<int>::const_iterator iter = selectedNodes.begin();iter != selectedNodes.end();++iter){
+		grainIds.push_back(*iter);
+	}
+	AGSynthesis(mc, targetId, grainIds, syn, length);
+	return;
+}
 
 void AGSynthesis(MediaCycle* mc, long targetId, vector<long> grainIds, float** syn, long &length){
 

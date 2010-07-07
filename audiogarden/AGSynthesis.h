@@ -43,5 +43,6 @@ colvec extractSamples(ACAudio* audioGrain);
 mat extractDescMatrix(ACMediaLibrary* lib, string featureName, std::vector<long> mediaIds);
 mat extractDescMatrix(ACMediaLibrary* lib, std::vector<string> featureList, std::vector<long> mediaIds);
 void AGSynthesis(MediaCycle* mc, long targetId, std::vector<long> garinIds, float** , long&);
+void AGSynthesis(MediaCycle* mc, long targetId, set<int> selectedNodes, float** syn, long &length);
 
 #endif

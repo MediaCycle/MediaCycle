@@ -1,7 +1,7 @@
 /**
  * @brief ACVisPluginAudiogarden.h
  * @author Damien Tardieu
- * @date 05/05/2010
+ * @date 07/07/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -50,7 +50,8 @@ public:
 /* 	std::vector<ACMediaFeatures*> calculate(ACMediaData* _data){} */
 /*   virtual void updateClusters(ACMediaBrowser* ); */
   virtual void updateNextPositions(ACMediaBrowser* );
-	void extractDescMatrix(ACMediaBrowser* mediaBrowser, mat& desc_m, vector<string> &featureNames);
+	mat extractDescMatrix(ACMediaLibrary* lib, string featureName);
+	mat extractDescMatrix(ACMediaLibrary* lib, std::vector<string> featureList);
   virtual int start() {return 0;};
   virtual int stop() {return 0;};
 protected:
