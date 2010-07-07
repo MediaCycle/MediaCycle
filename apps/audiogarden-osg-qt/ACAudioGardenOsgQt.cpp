@@ -33,7 +33,7 @@
  *
  */
 
-#include "AGSynthesis.h"
+//#include "AGSynthesis.h"
 #include <iostream>
 #include "ACAudioGardenOsgQt.h"
 #include "sndfile.h"
@@ -64,7 +64,7 @@ ACAudioGardenOsgQt::ACAudioGardenOsgQt(QWidget *parent)
 		// Audio plugins
 		media_cycle->addPlugin("../../../plugins/segmentation/" + build_type + "/mc_segmentation.dylib");
 		media_cycle->addPlugin("../../../plugins/audio/" + build_type + "/mc_audio.dylib");	
-		media_cycle->addPlugin("../../../plugins/vamp/" + build_type + "/mc_vamp.dylib");	
+		//media_cycle->addPlugin("../../../plugins/vamp/" + build_type + "/mc_vamp.dylib");	
 	
 		// Clusters Method/Position Plugins
 		int vizplugloaded = media_cycle->addPlugin("../../../plugins/visualisation/" + build_type + "/mc_visualisation.dylib");
@@ -471,13 +471,66 @@ void ACAudioGardenOsgQt::on_pushButtonQueryGrain_clicked()
 	
 }
 
-void ACAudioGardenOsgQt::on_checkBoxCompositeAutosynth_toggled()
+void ACAudioGardenOsgQt::on_comboBoxCompositingMethod_activated(const QString & text)
 {
-	ui.compositeOsgView->setAutoSynth((bool)(ui.pushButtonQueryRecord->isChecked()));
+	//std::cout << "Compositing Method: " << text.toStdString() << std::endl;
+	if (text.toStdString() == "Simple")
+	{
+		std::cout << "Compositing Method: Simple" << std::endl;
+		ui.compositeOsgView->getSynth()->setMethod(AG_METHOD_SIMPLE);
+	}
+	else if (text.toStdString() == "Squeezed")
+	{
+		std::cout << "Compositing Method: Squeezed" << std::endl;
+		ui.compositeOsgView->getSynth()->setMethod(AG_METHOD_SQUEEZED);
+	}
+	else if (text.toStdString() == "Padded")
+	{
+		std::cout << "Compositing Method: Padded" << std::endl;
+		ui.compositeOsgView->getSynth()->setMethod(AG_METHOD_PADDED);
+	}
 }
 
-void ACAudioGardenOsgQt::on_pushButtonCompositing_clicked(){
-	std::cout << "Compositing" << std::endl;
+void ACAudioGardenOsgQt::on_comboBoxCompositingMapping_activated(const QString & text)
+{
+	//std::cout << "Compositing Mapping: " << text.toStdString() << std::endl;
+	if (text.toStdString() == "Mean+Variance")
+	{
+		std::cout << "Compositing Mapping: Mean+Variance" << std::endl;
+		ui.compositeOsgView->getSynth()->setMapping(AG_MAPPING_MEANVAR);
+	}
+	else if (text.toStdString() == "Mean")
+	{
+		std::cout << "Compositing Mapping: Mean" << std::endl;
+		ui.compositeOsgView->getSynth()->setMapping(AG_MAPPING_MEAN);
+	}
+	else if (text.toStdString() == "None")
+	{
+		std::cout << "Compositing Mapping: None" << std::endl;
+		ui.compositeOsgView->getSynth()->setMapping(AG_MAPPING_NONE);
+	}
+}
+
+void ACAudioGardenOsgQt::on_sliderCompositingRandom_sliderReleased()
+{
+	std::cout << "Compositing Random: " << ui.sliderCompositingRandom->value() << std::endl;
+	ui.compositeOsgView->getSynth()->setRandomness((float)(ui.sliderCompositingRandom->value()/100.0f));
+}
+
+void ACAudioGardenOsgQt::on_sliderCompositingThreshold_sliderReleased()
+{
+	std::cout << "Compositing Threshold: " << ui.sliderCompositingThreshold->value() << std::endl;
+	ui.compositeOsgView->getSynth()->setThreshold((float)(ui.sliderCompositingThreshold->value()/100.0f));
+}
+
+void ACAudioGardenOsgQt::on_checkBoxCompositingAuto_toggled()
+{
+	std::cout << "Auto: " << ui.checkBoxCompositingAuto->isChecked() << std::endl;
+	ui.compositeOsgView->setAutoSynth((bool)(ui.checkBoxCompositingAuto->isChecked()));
+}
+
+void ACAudioGardenOsgQt::on_pushButtonCompositingGo_clicked(){
+	std::cout << "Compositing: Go" << std::endl;
 	
 	//CF list selected rhythm pattern
 	std::cout << "Selected Rhythm Pattern: " << ui.compositeOsgView->getSelectedRhythmPattern() << std::endl;
@@ -486,6 +539,7 @@ void ACAudioGardenOsgQt::on_pushButtonCompositing_clicked(){
 	media_cycle->getBrowser()->dumpSelectedNodes();
 	
 	//CF do something with these grains
+	/*
 	set<int> selectedNodes = media_cycle->getBrowser()->getSelectedNodes();
 	std::cout << "Selected Grains: ";
 	vector<long> grainIds;
@@ -496,7 +550,14 @@ void ACAudioGardenOsgQt::on_pushButtonCompositing_clicked(){
 	}	
 	float* syn_v;
 	long length;
-	//	AGSynthesis(media_cycle, ui.compositeOsgView->getSelectedRhythmPattern(), grainIds, &syn_v, length);
+	*/
+
+	if ( ui.compositeOsgView->getSelectedRhythmPattern() > -1 && media_cycle->getBrowser()->getSelectedNodes().size() > 0)
+	{	
+		ui.compositeOsgView->getSynth()->compute(ui.compositeOsgView->getSelectedRhythmPattern(), media_cycle->getBrowser()->getSelectedNodes());
+	}
+		
+	/*	
 	SF_INFO sfinfo;
 	SNDFILE* testFile;
 	sfinfo.samplerate = 44100;
@@ -526,9 +587,15 @@ void ACAudioGardenOsgQt::on_pushButtonCompositing_clicked(){
 		media_cycle->getLibrary()->getMedia(media_cycle->getLibrary()->getSynthesisID())->setEnd(length/(float)sfinfo.samplerate);
 	}
 	std::cout << std::endl;
+	*/ 
 	//return;
 }	
 
+void ACAudioGardenOsgQt::on_pushButtonCompositingReset_clicked()
+{
+	std::cout << "Compositing: Reset" << std::endl;
+}	
+	
 void ACAudioGardenOsgQt::on_pushButtonControlStart_clicked()
 {
 	std::cout << "IP: " << ui.lineEditControlIP->text().toStdString() << std::endl;

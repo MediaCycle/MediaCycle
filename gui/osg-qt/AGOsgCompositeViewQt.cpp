@@ -72,6 +72,8 @@ AGOsgCompositeViewQt::AGOsgCompositeViewQt( QWidget * parent, const char * name,
 	browser_renderer = new ACOsgBrowserRenderer();
 	timeline_renderer = new ACOsgTimelineRenderer();
 	
+	synth = new AGSynthesis();
+	
 	//this->setAttribute(Qt::WA_Hover, true);
 	setMouseTracking(true); //CF necessary for the hover callback
 }
@@ -105,6 +107,8 @@ void AGOsgCompositeViewQt::setMediaCycle(MediaCycle* _media_cycle)
 	timeline_view->getCamera()->getViewMatrix().makeIdentity();
 	timeline_view->getCamera()->setViewMatrixAsLookAt(Vec3(0,0,0.8), Vec3(0,0,0), Vec3(0,1,0));
 	this->addView(timeline_view);
+	
+	synth->setMediaCycle(media_cycle);
 }
 
 void AGOsgCompositeViewQt::resizeGL( int width, int height )
@@ -406,8 +410,10 @@ void AGOsgCompositeViewQt::mouseReleaseEvent( QMouseEvent* event )
 				{
 					media_cycle->getBrowser()->toggleNode(loop);
 					media_cycle->getBrowser()->dumpSelectedNodes();
-					//if (autosynth)
-						//...
+					if (autosynth)
+					{	
+					
+					}
 				}
 			}
 		}	

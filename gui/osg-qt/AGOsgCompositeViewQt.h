@@ -1,7 +1,7 @@
 /**
  * @brief AGOsgCompositeViewQt.h
  * @author Christian Frisson
- * @date 01/07/2010
+ * @date 07/07/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -69,6 +69,8 @@
 //  customized for AudioGarden
 //
 
+#include "AGSynthesis.h"
+
 #include <osgViewer/Viewer>
 #include <osgViewer/CompositeViewer>
 #include <osgViewer/ViewerEventHandlers>
@@ -130,9 +132,7 @@ class AGOsgCompositeViewQt : public osgViewer::CompositeViewer, public QGLWidget
 		void updateTransformsFromTimeline( double frac);
 		ACOsgBrowserRenderer* getBrowserRenderer(){return browser_renderer;};
 		ACOsgTimelineRenderer* getTimelineRenderer(){return timeline_renderer;};
-		int getSelectedRhythmPattern(){return selectedRhythmPattern;}
-		void setAutoSynth(bool _autosynth){autosynth = _autosynth;}
-	
+		
 	private:
 		int mousedown, zoomdown, forwarddown, autoplaydown, rotationdown;
 		int borderdown, transportdown;
@@ -143,8 +143,19 @@ class AGOsgCompositeViewQt : public osgViewer::CompositeViewer, public QGLWidget
 		int septhick; // CF half of the thickness of the border that separates the browser and timeline viewers
 		float sepx,sepy; //CF location (in OSG coordinates) of the border that separates the browser and timeline viewers
 		float refsepy;
+	
+	//AudioGarden specific members:
+	private:
+		AGSynthesis *synth;
 		int selectedRhythmPattern;
 		bool autosynth;
+	
+	//AudioGarden specific functions:
+	public:
+		void setSynth(AGSynthesis* _synth){this->synth=_synth;}
+		AGSynthesis* getSynth(){return this->synth;}
+		int getSelectedRhythmPattern(){return selectedRhythmPattern;}
+		void setAutoSynth(bool _autosynth){autosynth = _autosynth;}
 };
 
 #endif

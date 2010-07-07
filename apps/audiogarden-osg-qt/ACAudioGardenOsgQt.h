@@ -98,10 +98,14 @@ class ACAudioGardenOsgQt : public QMainWindow
 		void on_pushButtonQueryGrain_clicked();
 	
 		// Compositing controls
-		void on_pushButtonCompositing_clicked();
-		//ui.checkBoxCompositeParam1/2/3
-		void on_checkBoxCompositeAutosynth_toggled();
-	
+		void on_comboBoxCompositingMethod_activated(const QString & text);
+		void on_comboBoxCompositingMapping_activated(const QString & text);
+		void on_sliderCompositingRandom_sliderReleased();
+		void on_sliderCompositingThreshold_sliderReleased();
+		void on_checkBoxCompositingAuto_toggled();
+		void on_pushButtonCompositingGo_clicked();
+		void on_pushButtonCompositingReset_clicked();
+
 		// OSC I/O controls
 		void on_pushButtonControlStart_clicked();
 		void on_pushButtonFeedbackStart_clicked();
