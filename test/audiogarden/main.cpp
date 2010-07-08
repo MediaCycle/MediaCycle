@@ -67,7 +67,7 @@ int main(int argc, char** argv) {
 		//mediacycle->saveMCSLLibrary("/Users/dtardieu/data/AudioCycleProPackTest/zero-g-pro-pack_b/Super Funk/Funkmachine-E.acl");
 		//mediacycle->saveACLLibrary("/Users/dtardieu/data/test/testEnv/testEnv.acl");
 
-		mediacycle->importMCSLLibrary("/Users/dtardieu/data/AudioCycleProPackTest/zero-g-pro-pack_b/Super Funk/Funkmachine-E.mcsl");
+		mediacycle->importMCSLLibrary("/Users/dtardieu/data/AudioGarden/potpourri.mcsl");
 
 		//mediacycle->saveMCSLLibrary("/Users/dtardieu/data/AudioCycleProPackTest/zero-g-pro-pack_b/Super Funk/Funkmachine-E.mcsl");
 		//		mediacycle->saveMCSLLibrary("/Users/dtardieu/data/rire-audiocycle/rire-audiocycle.mcsl");
@@ -78,35 +78,14 @@ int main(int argc, char** argv) {
 			std::cout << i << " : " << mediacycle->getLibrary()->getMedia(i)->getFileName() << "   " << ((ACAudio*)mediacycle->getLibrary()->getMedia(i))->getNFrames() << std::endl;
 		}
 
-		 vector<long> grainIds;
-		for (int i=40; i<50; i++){
+		vector<long> grainIds;
+		for (int i=1; i<10; i++){
 			grainIds.push_back(i);
 		}
-		float* syn_v;
-		long length;
-		AGSynthesis synth = new AGSynthesis();
-		synth.setMediaCycle(mediacycle);
-		synth.compute(0, grainIds);
-		string path="./synthesis.wav";
-		synth.saveAsWav(path.c_str());
 
-		SF_INFO sfinfo;
-		SNDFILE* testFile;
-		sfinfo.samplerate = 44100;
-		sfinfo.channels = 1;
-		sfinfo.format = SF_FORMAT_WAV | SF_FORMAT_PCM_16;
-
-		if (! (testFile = sf_open ("synthesis.wav", SFM_WRITE, &sfinfo))){  
-			printf ("Not able to open input file %s.\n", "synthesis.wav") ;
-			puts (sf_strerror (NULL)) ;
-			return 1;
-		}
-
-		float tt[1];
-		tt[0] =1.0;
-		sf_writef_float  (testFile, syn_v, length);
-		sf_close(testFile);
-		 
+		AGSynthesis* synth = new AGSynthesis();
+		synth->setMediaCycle(mediacycle);
+		synth->compute(0, grainIds);
 	
 	
 // 	cout<<"setCulsterN"<<endl;
