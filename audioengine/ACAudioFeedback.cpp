@@ -1737,8 +1737,8 @@ return 0;
 int ACAudioFeedback::createExtSource(float* _buffer, int _length){
 	
 	//pthread_mutex_lock(&audio_engine_mutex);
-	if (ext_loop_length != 0)
-		deleteExtSource();	
+	//	if (ext_loop_length != 0)
+	//	deleteExtSource();	
 		
 	short* buffer_short = new short[_length];
 	

@@ -69,7 +69,7 @@ class AGSynthesis {
 	AGMapping getMapping(){return mapping;};
 	void setMapping(AGMapping map){this->mapping = map;};
 	float getRandomness(){return randomness;};
-	void setRandomness(float rand){randomness = randomness;};
+	void setRandomness(float rand){randomness = rand;};
 	float getThreshold(){return this->threshold;};
 	void setThreshold(float thresh){this->threshold = thresh;};
 	float* getSound(){return synthesisSound;};

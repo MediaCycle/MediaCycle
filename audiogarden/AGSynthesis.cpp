@@ -92,26 +92,46 @@ bool AGSynthesis::compute(long targetId, vector<long> grainIds){
 
 	// features of the target segments
 	mat descTS_m = extractDescMatrix(lib, featureList, targetSegmentIds);
+
+	// Mapping choice
+	switch (this->getMapping()) {
+	case AG_MAPPING_NONE:{
+		break;
+	}
+	case AG_MAPPING_MEAN:{
+		descG_m = descG_m - repmat(mean(descG_m, 1), 1, descG_m.n_cols);
+		descTS_m = descTS_m - repmat(mean(descTS_m, 1), 1, descTS_m.n_cols);
+		break;
+	}
+	case AG_MAPPING_MEANVAR:{
+		descG_m = zscore(descG_m);
+		descTS_m = zscore(descTS_m);
+		break;
+	}
+	}
 	
-	descG_m = zscore(descG_m);
-	descTS_m = zscore(descTS_m);
-	
+	// distance computation between all target (pattern) segments and all grain
 	mat dist_m = euclideanDistance(descTS_m, descG_m);
 
-	ucolvec mp_v(dist_m.n_rows);
-	for (int i=0; i<dist_m.n_rows; i++){
-		mp_v(i) = min_index(conv_to<rowvec>::from(dist_m.row(i)));
-	}
-
+	// sorting the dist matrix to find the closest grains
 	umat sp_m(dist_m.n_rows, dist_m.n_cols);
+	umat tmp_v; 	// actually a vector
+	ucolvec perm_v;
+	std::cout << "Random = " << this->getRandomness() << std::endl;
 	for (int i=0; i<dist_m.n_rows; i++){
 		sp_m.row(i) = sort_index(conv_to<rowvec>::from(dist_m.row(i)));
+		std::cout << "O sp_m.row(i) : "  << sp_m.row(i) << std::endl;
+		perm_v = randperm(max((int) round(sp_m.n_cols * this->getRandomness()),1));
+		std::cout << "perm_v =  " << perm_v << std::endl;
+		tmp_v = sp_m.submat(i, 0, i, perm_v.n_elem-1);
+		for (int j=0; j<perm_v.n_elem; j++){
+			sp_m(i,j) = tmp_v(perm_v(j));
+		}
+		std::cout << "M sp_m.row(i) : "  << sp_m.row(i) << std::endl;
 	}
-	mp_v.print("mp_v");
-	sp_m.print("sp_m");
 
-	for (int i=0; i < mp_v.n_elem; i++){
-		std::cout << grainIds[mp_v(i)] << " ";		
+	for (int i=0; i < sp_m.n_rows; i++){
+		std::cout << grainIds[sp_m(i,0)] << " ";		
 	}
 
 	colvec seg_samp_start_v(targetSegment_v.size()); 
@@ -128,8 +148,8 @@ bool AGSynthesis::compute(long targetId, vector<long> grainIds){
 	// compuation of the synthesized sound duration
 	long durationSyn = 0;
 	for (int i=0; i<targetSegment_v.size(); i++){
-		if (seg_samp_start_v(i) + ((ACAudio*)lib->getMedia(grainIds[mp_v(i)]))->getNFrames() > durationSyn){
-			durationSyn = seg_samp_start_v(i) + ((ACAudio*)lib->getMedia(grainIds[mp_v(i)]))->getNFrames();
+		if (seg_samp_start_v(i) + ((ACAudio*)lib->getMedia(grainIds[sp_m(i,0)]))->getNFrames() > durationSyn){
+			durationSyn = seg_samp_start_v(i) + ((ACAudio*)lib->getMedia(grainIds[sp_m(i,0)]))->getNFrames();
 		}
 	}
 	
@@ -148,7 +168,7 @@ bool AGSynthesis::compute(long targetId, vector<long> grainIds){
 	long ind0 = 0;
 
 	for (int i=0; i < targetSegment_v.size(); i++){
-		audioGrain = (ACAudio*) lib->getMedia(grainIds[mp_v(i)]);
+		audioGrain = (ACAudio*) lib->getMedia(grainIds[sp_m(i,0)]);
 		colvec selG_v = extractSamples(audioGrain);
 		
 		win_v = tukeywin(audioGrain->getNFrames(), .01);

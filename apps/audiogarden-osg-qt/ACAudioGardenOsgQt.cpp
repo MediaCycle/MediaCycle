@@ -513,8 +513,8 @@ void ACAudioGardenOsgQt::on_comboBoxCompositingMapping_activated(const QString &
 
 void ACAudioGardenOsgQt::on_sliderCompositingRandom_sliderReleased()
 {
-	std::cout << "Compositing Random: " << ui.sliderCompositingRandom->value() << std::endl;
-	ui.compositeOsgView->getSynth()->setRandomness((float)(ui.sliderCompositingRandom->value()/100.0f));
+	std::cout << "Compositing Random: " << (float)(ui.sliderCompositingRandom->value())/100.0f << std::endl;
+	ui.compositeOsgView->getSynth()->setRandomness((float)(ui.sliderCompositingRandom->value())/100.0f);
 }
 
 void ACAudioGardenOsgQt::on_sliderCompositingThreshold_sliderReleased()
