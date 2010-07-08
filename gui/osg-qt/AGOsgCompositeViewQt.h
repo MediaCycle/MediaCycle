@@ -155,6 +155,8 @@ class AGOsgCompositeViewQt : public osgViewer::CompositeViewer, public QGLWidget
 		AGSynthesis *synth;
 		int selectedRhythmPattern;
 		bool autosynth;
+		ACAudio* synthAudio;
+		bool track_playing;
 	
 	//AudioGarden specific functions:
 	public:
@@ -162,6 +164,7 @@ class AGOsgCompositeViewQt : public osgViewer::CompositeViewer, public QGLWidget
 		AGSynthesis* getSynth(){return this->synth;}
 		int getSelectedRhythmPattern(){return selectedRhythmPattern;}
 		void setAutoSynth(bool _autosynth){autosynth = _autosynth;}
+		void synthesize();
 };
 
 #endif

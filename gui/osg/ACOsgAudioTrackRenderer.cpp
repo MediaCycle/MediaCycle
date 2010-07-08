@@ -89,18 +89,25 @@ void ACOsgAudioTrackRenderer::waveformGeode() {
 	
 	// CF: temporary workaround as the ACUserLog tree and the ACLoopAttributes vector in ACMediaBrowser are not sync'd 
 	//int media_index = track_index; // or media_cycle->getBrowser()->getMediaTrack(track_index).getMediaId(); 
-	if (media_cycle->getBrowser()->getMode() == AC_MODE_NEIGHBORS)
+	if (media_from_lib && media_cycle->getBrowser()->getMode() == AC_MODE_NEIGHBORS)
 		media_index = media_cycle->getBrowser()->getUserLog()->getMediaIdFromNodeId(media_index);//CF can waveformGeode() occur more than once, once media_index is set?
 	
-	width = media_cycle->getThumbnailWidth(media_index);//CF instead of track_index
+	if (media_from_lib)
+		width = media_cycle->getThumbnailWidth(media_index);//CF instead of track_index
+	else
+		width = media->getThumbnailWidth(); //CF media should be non-null
+	
 	std::cout << "Number of points of the waveform: " << width << std::endl;
 	width = width / 2;
 	
 	zoom_x = 5.0*240.0/width;// CF autosizefit possible only when displaying one track
 	translate_x = -(width * xstep * zoom_x)/2; // CF autocenter possible only when displaying one track
 
-	thumbnail = (float*)media_cycle->getThumbnailPtr(media_index);//CF instead of track_index
-
+	if (media_from_lib)
+		thumbnail = (float*)media_cycle->getThumbnailPtr(media_index);//CF instead of track_index
+	else
+		thumbnail = (float*)media->getThumbnailPtr();
+		
 	// samples vertices
 	vertices = new Vec3Array(2*width+2);
 	for(i=0; i<width; i++) {
@@ -176,7 +183,10 @@ void ACOsgAudioTrackRenderer::waveformGeode() {
 	waveform_geode->addDrawable(frame_geometry);
 	
 	//sprintf(name, "some audio element");
-	waveform_geode->setUserData(new ACRefId(media_index));
+	if (media_from_lib)
+		waveform_geode->setUserData(new ACRefId(media_index));
+	else
+		waveform_geode->setUserData(new ACRefId(-1)); //CF?
 	//waveform_geode->setName(name);
 	waveform_geode->ref();	
 }
@@ -230,10 +240,16 @@ void ACOsgAudioTrackRenderer::curserGeode() {
 	curser_transform->addChild(curser_geode);
 	
 	//sprintf(name, "some audio element");
-	curser_transform->setUserData(new ACRefId(media_index));
+	if (media_from_lib)
+		curser_transform->setUserData(new ACRefId(media_index));
+	else
+		curser_transform->setUserData(new ACRefId(-1));//CF?
 	//curser_transform->setName(name);
 	curser_transform->ref();
-	curser_geode->setUserData(new ACRefId(media_index));
+	if (media_from_lib)
+		curser_geode->setUserData(new ACRefId(media_index));
+	else
+		curser_geode->setUserData(new ACRefId(-1));//CF?
 	//curser_geode->setName(name);
 	curser_geode->ref();
 }
@@ -309,27 +325,45 @@ void ACOsgAudioTrackRenderer::updateTracks(double ratio) {
 	
 	Matrix curserT;
 	
-	if (media_index > -1) {//CF dummy
-		//localscale = 1.0;//CF
-
-		if (displayed_media_index != media_index)
+	if (media_from_lib) 
+	{
+		if (media_index > -1) {//CF dummy
+			//localscale = 1.0;//CF
+			
+			//CF: if we have updated the media from the library
+			if (media_changed || displayed_media_index != media_index)//CF try to remove the 2nd arg
+			{
+				track_node->removeChild(curser_transform);
+				track_node->removeChild(waveform_geode);
+				waveformGeode();
+				curserGeode();
+				track_node->addChild(waveform_geode);
+				track_node->addChild(curser_transform);
+				displayed_media_index = media_index;
+				media_changed = false;
+			}
+			
+			const ACMediaNode &attribute = media_cycle->getMediaNode(media_index);
+			if ( attribute.getActivity()==1) 
+			{	
+				curserT.makeTranslate(Vec3(attribute.getCursor() * xstep * zoom_x, 0.0, 0.0));			// curserT =  Matrix::scale(0.5/zoom,0.5/zoom,0.5/zoom) * curserT;
+				curser_transform->setMatrix(curserT);
+			}	
+		}
+	}	
+	else
+	{
+		if (media_changed)
 		{
+			std::cout << "Media change outside lib" << std::endl;
 			track_node->removeChild(curser_transform);
 			track_node->removeChild(waveform_geode);
 			waveformGeode();
 			curserGeode();
 			track_node->addChild(waveform_geode);
 			track_node->addChild(curser_transform);
-			displayed_media_index = media_index;	
-		}	
-			
-		const ACMediaNode &attribute = media_cycle->getMediaNode(media_index);
-		if ( attribute.getActivity()==1) 
-		{	
-			curserT.makeTranslate(Vec3(attribute.getCursor() * xstep * zoom_x, 0.0, 0.0));			// curserT =  Matrix::scale(0.5/zoom,0.5/zoom,0.5/zoom) * curserT;
-			curser_transform->setMatrix(curserT);
-		}	
-	}
-	
+			media_changed = false;		
+		}
+	}	
 	//track_node->setMatrix(T);
 }

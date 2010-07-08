@@ -53,8 +53,8 @@ ACAudio::ACAudio() : ACMedia() {
     time_signature_den = 0;
     key = 0;
     acid_type = 0;
-    sample_rate = 16000;
-    channels = 0;
+    sample_rate = 44100;
+    channels = 1;
 //     sample_start = 0;
 //     sample_end = 0;
     waveformLength = 0;
@@ -71,6 +71,11 @@ ACAudio::ACAudio(const ACAudio& m) : ACMedia(m) {
 	acid_type = m.acid_type;
 	sample_rate = m.sample_rate;
 	channels = m.channels;
+	waveformLength = m.waveformLength;
+	waveform = new float[waveformLength];
+	for (int i=0; i<waveformLength; i++){
+		waveform[i] = m.waveform[i];
+	}
 // 	sample_start = m.sample_start;
 // 	sample_end = m.sample_end;
 }
@@ -494,6 +499,30 @@ float* ACAudio::getSamples(){
 	return data;
 }
 
+float* ACAudio::getMonoSamples(){
+	SF_INFO sfinfo;
+	SNDFILE* testFile;
+	if (! (testFile = sf_open (this->getFileName().c_str(), SFM_READ, &sfinfo))){  
+		/* Open failed so print an error message. */
+		printf ("Not able to open input file %s.\n", this->getFileName().c_str()) ;
+		/* Print the error message from libsndfile. */
+		puts (sf_strerror (NULL)) ;
+		return  NULL;
+	}
+	
+	float* tmpdata = new float[(long) this->getNFrames() * this->getChannels()];
+	float* data = new float[(long) this->getNFrames()];
+	
+	sf_seek(testFile, this->getSampleStart(), SEEK_SET);
+	sf_readf_float(testFile, tmpdata, this->getNFrames());
+	sf_close(testFile);
+	
+	for (long i = 0; i< this->getNFrames(); i++){
+		data[i] = tmpdata[i*this->getChannels()];
+	}
+	return data;
+}
+
 
 void ACAudio::saveThumbnail(std::string _path) {
 	int i;
@@ -521,8 +550,8 @@ void ACAudio::saveThumbnail(std::string _path) {
 void ACAudio::computeWaveform(const float* samples_v) {
 	int i, j, k;
 	int n_samples_hop;
-	float hop = .02;
-	int minWaveformLength = 60;
+	float hop = 0.02f;
+	int minWaveformLength = 200;
 	
 	waveformLength = ((float)getNFrames() / (float)sample_rate) / (hop);
 	waveformLength--;

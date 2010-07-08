@@ -96,7 +96,7 @@ public:
 	void computeWaveform(const float* samples_v);
 
 	float* getSamples();
-
+	float* getMonoSamples();
 
 private:	
 	int sample_rate;

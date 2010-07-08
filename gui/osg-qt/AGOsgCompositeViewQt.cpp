@@ -49,7 +49,7 @@ AGOsgCompositeViewQt::AGOsgCompositeViewQt( QWidget * parent, const char * name,
 	refzoom(0.0f),refrotation(0.0f),
 	septhick(5),sepx(0.0f),sepy(0.0f),refsepy(0.0f),
 	selectedRhythmPattern(-1),
-	autosynth(false)
+	autosynth(false),track_playing(false)
 {
 	osg_view = new osgViewer::GraphicsWindowEmbedded(0,0,width(),height());
 	setFocusPolicy(Qt::StrongFocus);// CF instead of ClickFocus
@@ -217,10 +217,35 @@ void AGOsgCompositeViewQt::keyPressEvent( QKeyEvent* event )
 			media_cycle->setPlayKeyDown(false);
 			break;
 		case Qt::Key_Space:
-			if ( (media_cycle) && (media_cycle->hasBrowser()) && (timeline_renderer->getTrack(0)!=NULL) ) {
+			if ( (media_cycle) && (media_cycle->hasBrowser()) && (timeline_renderer->getTrack(0)!=NULL) )
+			{
 				transportdown = 1;
-				media_cycle->getBrowser()->toggleSourceActivity( timeline_renderer->getTrack(0)->getMediaIndex() );
-			}	
+				
+				if (track_playing)
+				{	
+					audio_engine->getFeedback()->stopExtSource();
+					//audio_engine->getFeedback()->deleteExtSource();
+				}	
+				else
+				{	
+					//media_cycle->getBrowser()->toggleSourceActivity( timeline_renderer->getTrack(0)->getMediaIndex() );
+					audio_engine->getFeedback()->loopExtSource();
+					//usleep(2000000);//CF 2 sec, j'arrive!
+				}	
+				track_playing = track_playing ? false : true;
+
+				
+				/*
+				delete synthAudio;
+				synthAudio = new ACAudio();
+				synthAudio->setStart(0);
+				synthAudio->setEnd(this->getSynth()->getLength()/44100 );
+				synthAudio->computeWaveform( this->getSynth()->getSound()  );
+				this->getTimelineRenderer()->getTrack(0)->updateMedia( synthAudio ); //media_cycle->getLibrary()->getMedia(loop) );
+				media_cycle->setNeedsDisplay(true);
+				*/
+			
+			}
 			media_cycle->setPlayKeyDown(true);			
 			break;
 		case Qt::Key_Z:
@@ -240,17 +265,7 @@ void AGOsgCompositeViewQt::keyReleaseEvent( QKeyEvent* event )
 	{
 		case Qt::Key_G:
 			if (autosynth)
-			{	
-				if ( this->getSelectedRhythmPattern() > -1 && media_cycle->getBrowser()->getSelectedNodes().size() > 0)
-				{	
-					this->getSynth()->compute(this->getSelectedRhythmPattern(), media_cycle->getBrowser()->getSelectedNodes());
-					audio_engine->getFeedback()->createExtSource(this->getSynth()->getSound(), this->getSynth()->getLength());
-					audio_engine->getFeedback()->loopExtSource();
-					usleep(2000000);//CF 2 sec, j'arrive!
-					audio_engine->getFeedback()->stopExtSource();
-					audio_engine->getFeedback()->deleteExtSource();
-				}
-			}
+				this->synthesize();
 			break;
 		default:
 			break;
@@ -420,15 +435,57 @@ void AGOsgCompositeViewQt::mouseReleaseEvent( QMouseEvent* event )
 				}
 				else if (selectrhythmpattern == true)
 				{
+					/*
 					selectedRhythmPattern = loop;
 					if ( timeline_renderer->getTrack(0)!=NULL ) {
 						if ( (timeline_renderer->getTrack(0)->getMediaIndex() != loop) )
 						{	
 							//if (timeline_renderer->getTrack(0)->getMediaIndex() != -1)
 								media_cycle->getBrowser()->toggleSourceActivity( timeline_renderer->getTrack(0)->getMediaIndex(), 0 );
-							timeline_renderer->getTrack(0)->setMediaIndex(loop);
+						 
+							timeline_renderer->getTrack(0)->updateMedia(loop);
+					 */
+							/*
+							ACAudio* test = new ACAudio();
+							test->extractData("/Users/frisson/Videodrome/numediart/DataSets/AudioGarden/sounds/anklung_1.wav");
+							timeline_renderer->getTrack(0)->updateMedia( test ); //media_cycle->getLibrary()->getMedia(loop) );
+							 */
+					/*
 						}	
 					}
+					*/
+					
+					selectedRhythmPattern = loop;
+					if ( timeline_renderer->getTrack(0)!=NULL )
+					{
+						
+						if (track_playing) {
+							audio_engine->getFeedback()->stopExtSource();
+							audio_engine->getFeedback()->deleteExtSource();
+							track_playing = false;
+						}	
+							
+						//CF possible only for audio? then do some tests
+						ACAudio* tempAudio = (ACAudio*) media_cycle->getLibrary()->getMedia(loop);
+						
+						
+						/*
+						synthAudio = new ACAudio();
+						synthAudio->setStart(0);
+						synthAudio->setEnd( ((ACAudio*)media_cycle->getLibrary()->getMedia(loop))->getNFrames() / ((ACAudio*)media_cycle->getLibrary()->getMedia(loop))->getSampleRate() );
+						synthAudio->computeWaveform( (float*)((ACAudio*)media_cycle->getLibrary()->getMedia(loop))->getSamples() );
+					*/
+						
+						synthAudio = new ACAudio( *tempAudio );
+						float* tempBuffer = (float*)synthAudio->getMonoSamples();
+						audio_engine->getFeedback()->createExtSource(tempBuffer, synthAudio->getNFrames() );
+						
+						this->getTimelineRenderer()->getTrack(0)->updateMedia( synthAudio ); //media_cycle->getLibrary()->getMedia(loop) );
+						delete tempAudio;
+						delete[] tempBuffer;
+						media_cycle->setNeedsDisplay(true);
+					}
+			
 				}
 				else if (selectgrains == true)
 				{
@@ -481,4 +538,26 @@ void AGOsgCompositeViewQt::updateTransformsFromTimeline( double frac)
 	////////media_cycle->setClosestNode(closest_node);
 	// recompute scene graph	
 	timeline_renderer->updateTracks(frac); // animation starts at 0.0 and ends at 1.0
+}
+
+void AGOsgCompositeViewQt::synthesize()
+{
+	if ( this->getSelectedRhythmPattern() > -1 && media_cycle->getBrowser()->getSelectedNodes().size() > 0)
+	{	
+		this->getSynth()->compute(this->getSelectedRhythmPattern(), media_cycle->getBrowser()->getSelectedNodes());
+		audio_engine->getFeedback()->createExtSource(this->getSynth()->getSound(), this->getSynth()->getLength());
+		
+		delete synthAudio;
+		synthAudio = new ACAudio();
+		synthAudio->setStart(0);
+		synthAudio->setEnd(this->getSynth()->getLength()/44100 );
+		synthAudio->computeWaveform( this->getSynth()->getSound()  );
+		this->getTimelineRenderer()->getTrack(0)->updateMedia( synthAudio ); //media_cycle->getLibrary()->getMedia(loop) );
+		media_cycle->setNeedsDisplay(true);
+				
+		audio_engine->getFeedback()->loopExtSource();
+		//usleep(2000000);//CF 2 sec, j'arrive!
+		//audio_engine->getFeedback()->stopExtSource();
+		//audio_engine->getFeedback()->deleteExtSource();
+	}
 }

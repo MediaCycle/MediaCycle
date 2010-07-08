@@ -66,6 +66,9 @@ protected:
 	int track_index, media_index;
 	float distance_mouse;
 	// int	media_activity;
+	ACMedia* media;
+	bool media_from_lib;
+	bool media_changed;
 	
 public:
 	ACOsgTrackRenderer();
@@ -75,6 +78,9 @@ public:
 	void setTrackIndex(int _track_index) { this->track_index = _track_index; };
 	void setMediaIndex(int _media_index) { this->media_index = _media_index; };
 	int getMediaIndex() { return media_index; }
+	void updateMedia(ACMedia* _media);
+	void updateMedia(int _media_index);
+	ACMedia* getMedia(){return media;}
 	void setDistanceMouse(float _distance_mouse) { this->distance_mouse = _distance_mouse; };
 	//void setActivity(int _media_activity) { this->media_activity = _media_activity; }
 	MatrixTransform* getTrack() { return track_node; };

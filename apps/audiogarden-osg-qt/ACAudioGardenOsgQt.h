@@ -76,6 +76,7 @@ class ACAudioGardenOsgQt : public QMainWindow
 		void on_pushButtonRecenter_clicked();
 		void on_pushButtonBack_clicked();
 		void on_pushButtonForward_clicked();
+		void on_pushButtonDisplayGrains_toggled();
 	
 		// Clustering controls
 		void on_checkBoxRhythm_stateChanged(int state);

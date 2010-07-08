@@ -36,8 +36,23 @@
 #include "ACOsgTrackRenderer.h"
 
 ACOsgTrackRenderer::ACOsgTrackRenderer()
-: track_index(-1),media_index(-1)
+: track_index(-1),media_index(-1),media_from_lib(true),media_changed(false)
 {
 	track_node = new MatrixTransform();
 }
 
+void ACOsgTrackRenderer::updateMedia(ACMedia* _media)
+{
+	media = _media;
+	media_index = -1;
+	media_from_lib = false;
+	media_changed = true;
+}
+
+void ACOsgTrackRenderer::updateMedia(int _media_index)
+{
+	media = NULL;
+	media_index = _media_index;
+	media_from_lib = true;
+	media_changed = true;
+}

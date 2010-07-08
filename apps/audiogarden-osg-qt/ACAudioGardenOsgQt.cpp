@@ -366,6 +366,11 @@ void ACAudioGardenOsgQt::on_pushButtonForward_clicked()
 	//ui.compositeOsgView->setFocus();
 }
 
+void ACAudioGardenOsgQt::on_pushButtonDisplayGrains_toggled()
+{
+	std::cout << "Display Grains: " << ui.pushButtonDisplayGrains->isChecked() << std::endl;
+}	
+
 void ACAudioGardenOsgQt::on_checkBoxRhythm_stateChanged(int state)
 {
 	media_cycle->setWeight(0,state/2.0f);
@@ -539,17 +544,8 @@ void ACAudioGardenOsgQt::on_pushButtonCompositingGo_clicked(){
 	
 	//CF list selected grains
 	media_cycle->getBrowser()->dumpSelectedNodes();
-		
 	
-	if ( ui.compositeOsgView->getSelectedRhythmPattern() > -1 && media_cycle->getBrowser()->getSelectedNodes().size() > 0)
-	{	
-		ui.compositeOsgView->getSynth()->compute(ui.compositeOsgView->getSelectedRhythmPattern(), media_cycle->getBrowser()->getSelectedNodes());
-		audio_engine->getFeedback()->createExtSource(ui.compositeOsgView->getSynth()->getSound(), ui.compositeOsgView->getSynth()->getLength());
-		audio_engine->getFeedback()->loopExtSource();
-		usleep(2000000);//CF 2 sec, j'arrive!
-		audio_engine->getFeedback()->stopExtSource();
-		audio_engine->getFeedback()->deleteExtSource();
-	}
+	ui.compositeOsgView->synthesize();
 }	
 
 void ACAudioGardenOsgQt::on_pushButtonCompositingReset_clicked()
