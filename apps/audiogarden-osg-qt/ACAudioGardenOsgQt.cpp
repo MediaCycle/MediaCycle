@@ -123,7 +123,7 @@ ACAudioGardenOsgQt::ACAudioGardenOsgQt(QWidget *parent)
 
 	connect(ui.actionLoad_Media_Directory, SIGNAL(triggered()), this, SLOT(loadMediaDirectory()));
 	connect(ui.actionLoad_Media_Files, SIGNAL(triggered()), this, SLOT(loadMediaFiles()));
-	connect(ui.actionLoad_ACL, SIGNAL(triggered()), this, SLOT(on_pushButtonLaunch_clicked()));
+	connect(ui.actionLoad_ACL, SIGNAL(triggered()), this, SLOT(loadACLFile()));
 	connect(ui.actionSave_ACL, SIGNAL(triggered()), this, SLOT(saveACLFile()));
 	connect(ui.actionLoad_MCSL, SIGNAL(triggered()), this, SLOT(loadMCSLFile()));
 	connect(ui.actionSave_MCSL, SIGNAL(triggered()), this, SLOT(saveMCSLFile()));
