@@ -502,15 +502,17 @@ void AGOsgCompositeViewQt::synthesize()
 {
 	if ( this->getSelectedRhythmPattern() > -1 && media_cycle->getBrowser()->getSelectedNodes().size() > 0)
 	{	
+		// Stop the track playback
 		if (track_playing) {
 			audio_engine->getFeedback()->stopExtSource();
 			audio_engine->getFeedback()->deleteExtSource();
 			track_playing = false;
 		}	
 		
+		// Synthesize
 		this->getSynth()->compute(this->getSelectedRhythmPattern(), media_cycle->getBrowser()->getSelectedNodes());
-		audio_engine->getFeedback()->createExtSource(this->getSynth()->getSound(), this->getSynth()->getLength());
 		
+		// Display the synthesis
 		delete synthAudio;
 		synthAudio = new ACAudio();
 		synthAudio->setStart(0);
@@ -518,26 +520,31 @@ void AGOsgCompositeViewQt::synthesize()
 		synthAudio->computeWaveform( this->getSynth()->getSound()  );
 		this->getTimelineRenderer()->getTrack(0)->updateMedia( synthAudio ); //media_cycle->getLibrary()->getMedia(loop) );
 		media_cycle->setNeedsDisplay(true);
-				
+		
+		// Playback the synthesis
+		audio_engine->getFeedback()->createExtSource(this->getSynth()->getSound(), this->getSynth()->getLength());
 		audio_engine->getFeedback()->loopExtSource();
+		track_playing = true;
 	}
 }
 
 void AGOsgCompositeViewQt::resetSynth()
 {
+	// Stop the track playback
 	if (track_playing) {
 		audio_engine->getFeedback()->stopExtSource();
 		audio_engine->getFeedback()->deleteExtSource();
 		track_playing = false;
 	}	
 	
+	// Unselect pattern and grains
 	selectedRhythmPattern = -1;
 	media_cycle->getBrowser()->unselectNodes();
-	media_cycle->getBrowser()->dumpSelectedNodes();
 	
+	// Empty the synthesizer buffer but keep the synthesis parameters
 	synth->resetSound();
 	
+	// Empty the visual track
 	this->getTimelineRenderer()->getTrack(0)->clearMedia();
-	
 	media_cycle->setNeedsDisplay(true);	
 }	
