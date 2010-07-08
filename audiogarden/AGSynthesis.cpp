@@ -40,6 +40,7 @@ AGSynthesis::AGSynthesis(){
 	mapping = AG_MAPPING_MEANVAR;
 	randomness = 0;
 	threshold = 1;
+	synthesisLength = 0;
 }
 
 bool AGSynthesis::compute(long targetId, set<int> selectedNodes){
@@ -61,7 +62,9 @@ bool AGSynthesis::compute(long targetId, vector<long> grainIds){
 	int durationT = lib->getMedia(targetId)->getDuration();
 
 	mat descG_m = extractDescMatrix(lib, featureList, grainIds);
-	
+	mat enerG_m = extractDescMatrix(lib, "Mean of Energy", grainIds);
+	enerG_m.print("enerG_m");
+
 	vector<ACMedia*> targetSegment1_v = lib->getMedia(targetId)-> getAllSegments();
 	vector<ACAudio*> targetSegment_v;
 
