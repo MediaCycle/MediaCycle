@@ -70,7 +70,7 @@ std::vector<ACMedia*> ACAudioSegmentationPlugin::segment(ACMediaData* audio_data
 			index++;
 		}
 	}
-	int method=1;
+	int method=0;
 	icolvec peaks_v;
 	fcolvec time_v;
 	fcolvec desc_v;
