@@ -232,6 +232,26 @@ void AGOsgCompositeViewQt::keyReleaseEvent( QKeyEvent* event )
 {
 	osg_view->getEventQueue()->keyRelease( (osgGA::GUIEventAdapter::KeySymbol) *(event->text().toAscii().data() ) );
 
+	switch( event->key() )
+	{
+		case Qt::Key_G:
+			if (autosynth)
+			{	
+				if ( this->getSelectedRhythmPattern() > -1 && media_cycle->getBrowser()->getSelectedNodes().size() > 0)
+				{	
+					this->getSynth()->compute(this->getSelectedRhythmPattern(), media_cycle->getBrowser()->getSelectedNodes());
+					audio_engine->getFeedback()->createExtSource(this->getSynth()->getSound(), this->getSynth()->getLength());
+					audio_engine->getFeedback()->loopExtSource();
+					usleep(2000000);//CF 2 sec, j'arrive!
+					audio_engine->getFeedback()->stopExtSource();
+					audio_engine->getFeedback()->deleteExtSource();
+				}
+			}
+			break;
+		default:
+			break;
+	}		
+			
 	zoomdown = 0;
 	forwarddown = 0;
 	media_cycle->setForwardDown(0);
@@ -410,10 +430,6 @@ void AGOsgCompositeViewQt::mouseReleaseEvent( QMouseEvent* event )
 				{
 					media_cycle->getBrowser()->toggleNode(loop);
 					media_cycle->getBrowser()->dumpSelectedNodes();
-					if (autosynth)
-					{	
-					
-					}
 				}
 			}
 		}	

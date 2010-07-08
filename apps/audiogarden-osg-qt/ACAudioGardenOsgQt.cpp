@@ -118,6 +118,8 @@ ACAudioGardenOsgQt::ACAudioGardenOsgQt(QWidget *parent)
 	ui.compositeOsgView->prepareFromBrowser();
 	ui.compositeOsgView->prepareFromTimeline();
 	//ui.compositeOsgView->setPlaying(true);
+	
+	ui.compositeOsgView->setAudioEngine(audio_engine);
 
 	connect(ui.actionLoad_Media_Directory, SIGNAL(triggered()), this, SLOT(loadMediaDirectory()));
 	connect(ui.actionLoad_Media_Files, SIGNAL(triggered()), this, SLOT(loadMediaFiles()));
@@ -544,9 +546,10 @@ void ACAudioGardenOsgQt::on_pushButtonCompositingGo_clicked(){
 		ui.compositeOsgView->getSynth()->compute(ui.compositeOsgView->getSelectedRhythmPattern(), media_cycle->getBrowser()->getSelectedNodes());
 		audio_engine->getFeedback()->createExtSource(ui.compositeOsgView->getSynth()->getSound(), ui.compositeOsgView->getSynth()->getLength());
 		audio_engine->getFeedback()->loopExtSource();
+		usleep(2000000);//CF 2 sec, j'arrive!
+		audio_engine->getFeedback()->stopExtSource();
+		audio_engine->getFeedback()->deleteExtSource();
 	}
-		
-	
 }	
 
 void ACAudioGardenOsgQt::on_pushButtonCompositingReset_clicked()

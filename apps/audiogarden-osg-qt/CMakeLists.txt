@@ -9,9 +9,6 @@ IF ( USE_AUDIOGARDEN AND USE_QT4 AND USE_OSG AND USE_OSC AND USE_OPENAL )
 	INCLUDE_DIRECTORIES(../../io/osc ../../io/osc/oscpack)
 	INCLUDE_DIRECTORIES(. ../../armadillo ../../audio ../../ ../../fftooura ../../audiogarden)
 
-	
-
-
 	IF ( USE_APPLE_MULTITOUCH )
 		INCLUDE_DIRECTORIES( ../../io/applemultitouch)
 	ENDIF ( USE_APPLE_MULTITOUCH )
