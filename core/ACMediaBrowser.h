@@ -78,6 +78,7 @@ enum ACBrowserMode {
 	AC_MODE_NEIGHBORS=1
 };
 
+
 //
 //enum ACNavigationStateType
 //{

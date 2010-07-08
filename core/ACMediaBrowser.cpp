@@ -848,55 +848,6 @@ void ACMediaBrowser::updateNextPositions(){
 	//	setProximityGrid(); // XS change to something like: mGridPlugin->updateNextPositions(this);
 }
 
-void ACMediaBrowser::updateNextPositions2dim(){
-	// XS TODO clean this one !
-	if(mLibrary == NULL) 
-		return; 
-	if(mLibrary->isEmpty()) 
-		return;
-	
-	ACPoint p;
-	vector<float> tmpFeatures;
-		
-	int nbMedia = mLibrary->getSize(); 
-	// XS TODO problem if all media don't have the same number of features
-	int nbFeature = mLibrary->getMedia(0)->getNumberOfFeaturesVectors();
-	int featDim;
-	int totalDim = 0;
-	assert(mFeatureWeights.size() == nbFeature); // XS TODO change this
-	
-	// XS why recalculate totaldim ?
-	// ACMediaLibrary should know it
-	// XS and, you can do a +getSize() instead of ++ !!!
-	for(int f=0; f< nbFeature; f++){
-		// XS TODO again, problem if all media don't have the same number of features
-		featDim = mLibrary->getMedia(0)->getFeaturesVector(f)->getSize();
-		for(int d=0; d < featDim; d++){
-			totalDim++;
-		}
-	}
-	assert(totalDim > 1);
-	
-	tmpFeatures.resize(totalDim);
-	std::cout << "Total dimension = " << totalDim << std::endl;
-	
-	// XS TODO iterator
-	for(int i=0; i<nbMedia; i++) {    
-		int tmpIdx = 0;
-		for(int f=0; f< nbFeature; f++){
-			// XS TODO again, problem if all media don't have the same number of features
-			featDim = mLibrary->getMedia(0)->getFeaturesVector(f)->getSize();
-			for(int d=0; d < featDim; d++){
-				tmpFeatures[tmpIdx] = mLibrary->getMedia(i)->getFeaturesVector(f)->getFeatureElement(d);
-				tmpIdx++;
-			}
-		}
-		// DT : Problem if there is less than 2 dims
-		p.x = tmpFeatures[1]/10;
-		p.y = tmpFeatures[2]/10;
-		this->getMediaNode(i).setNextPosition(p);
-	}
-}
 
 // XS 150310
 // . removed assert size
