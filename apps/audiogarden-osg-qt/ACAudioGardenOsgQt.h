@@ -125,6 +125,8 @@ class ACAudioGardenOsgQt : public QMainWindow
 
 	protected:
 		//AGOsgCompositeViewQt* compositeOsgView;
+		virtual void keyPressEvent( QKeyEvent* event ){};
+		virtual void keyReleaseEvent( QKeyEvent* event );
 	
 	public:
 		void processOscMessage(const char* tagName);

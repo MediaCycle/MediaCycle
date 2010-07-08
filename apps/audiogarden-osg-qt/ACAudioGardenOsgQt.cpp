@@ -180,7 +180,7 @@ void ACAudioGardenOsgQt::updateLibrary()
 
 void ACAudioGardenOsgQt::on_pushButtonLaunch_clicked()
 {
-	this->loadACLFile();
+	this->loadMCSLFile();
 	//ui.compositeOsgView->setFocus();
 }
 
@@ -596,6 +596,19 @@ void ACAudioGardenOsgQt::on_pushButtonFeedbackStart_clicked()
 	}
 	//ui.compositeOsgView->setFocus();
 }	
+
+void ACAudioGardenOsgQt::keyReleaseEvent( QKeyEvent* event )
+{
+	switch( event->key() )
+	{
+		case Qt::Key_L:
+			//CF buggy works only at startup, ie before the OSG view gets the focus...
+			this->loadMCSLFile();
+			break;	
+		default:
+			break;
+	}
+}
 
 void ACAudioGardenOsgQt::processOscMessage(const char* tagName)
 {	
