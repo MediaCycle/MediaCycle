@@ -1,7 +1,7 @@
 /**
  * @brief fft2.cpp
- * @author Damien Tardieu
- * @date 11/03/2010
+ * @author Cecile Picard
+ * @date 08/07/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -162,3 +162,4 @@ cx_mat fft2(mat x_m, int nrows, int ncols){
 cx_mat fft2(mat x_m){
   return fft2(x_m, x_m.n_rows, x_m.n_cols);
 }
+
