@@ -67,7 +67,7 @@ int main(int argc, char** argv) {
 		//mediacycle->saveMCSLLibrary("/Users/dtardieu/data/AudioCycleProPackTest/zero-g-pro-pack_b/Super Funk/Funkmachine-E.acl");
 		//mediacycle->saveACLLibrary("/Users/dtardieu/data/test/testEnv/testEnv.acl");
 
-		mediacycle->importMCSLLibrary("/Users/dtardieu/data/AudioGarden/potpourri.mcsl");
+		mediacycle->importMCSLLibrary("/Users/ccl/Dropbox/Numediart/audiogarden/soundsExt.mcsl");
 
 		//mediacycle->saveMCSLLibrary("/Users/dtardieu/data/AudioCycleProPackTest/zero-g-pro-pack_b/Super Funk/Funkmachine-E.mcsl");
 		//		mediacycle->saveMCSLLibrary("/Users/dtardieu/data/rire-audiocycle/rire-audiocycle.mcsl");
