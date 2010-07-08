@@ -10,6 +10,7 @@
 #include "ACVisPluginPCA.h"
 #include "ACVisPlugin2Desc.h"
 #include "ACVisPluginAudiogarden.h"
+#include "ACPosPlugAudioGardenFlower.h"
 #include "ACPositionsPluginNodeLinkTreeLayout.h"
 #include "ACPositionsPluginRadialTreeLayout.h"
 //#include "ACPositionsPluginRandom.h"
@@ -25,6 +26,7 @@ extern "C" ACPlugin* create(std::string namePlugin) {
 	if (namePlugin == "ACVisPluginPCA") {return new ACVisPluginPCA();}
 	if (namePlugin == "ACVisPlugin2Desc") {return new ACVisPlugin2Desc();}
 	if (namePlugin == "ACVisPluginAudiogarden") {return new ACVisPluginAudiogarden();}
+	if (namePlugin == "ACPosPlugAudioGardenFlower") {return new ACPosPlugAudioGardenFlower();}
 	if (namePlugin == "ACPositionsPluginRadialTreeLayout") {return new ACPositionsPluginRadialTreeLayout();}
 	//if (namePlugin == "ACPositionsPluginRandom") {return new ACPositionsPluginRandom();}
 }
@@ -43,6 +45,7 @@ extern "C" std::vector<std::string> list() {    //returns a string vector contai
 	listPlugin.push_back("ACVisPluginPCA");
 	listPlugin.push_back("ACVisPlugin2Desc");
 	listPlugin.push_back("ACVisPluginAudiogarden");
+	listPlugin.push_back("ACPosPlugAudioGardenFlower");
 	listPlugin.push_back("ACPositionsPluginRadialTreeLayout");
 	//listPlugin.push_back("ACPositionsPluginRandom");
 	//listPlugin.push_back("...");

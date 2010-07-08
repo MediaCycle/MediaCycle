@@ -83,8 +83,6 @@ std::vector<ACMediaFeatures*> ACAudioFeaturesPlugin::calculate(ACMediaData* audi
 	descList.push_back("Energy");
 	descmf = computeFeatures(data, theAudio->getSampleRate(), theAudio->getChannels(), theAudio->getNFrames(),32, 13, 1024, extendSoundLimits);
 	
-	for (int i=0; i<descmf.size(); i++)
-		desc.push_back(descmf[i]->mean());
 	
 	int nrgIdx = 0;
 	for (int i=0; i<descmf.size(); i++){
@@ -93,8 +91,15 @@ std::vector<ACMediaFeatures*> ACAudioFeaturesPlugin::calculate(ACMediaData* audi
 	}
 	std::cout << "nrgIdx = " << nrgIdx << std::endl;
 	
+	for (int i=0; i<descmf.size(); i++){
+		desc.push_back(descmf[i]->mean());
+		if (i==nrgIdx){
+			desc[i]->setNeedsNormalization(0);
+		}
+	}
+	
 	desc.push_back(descmf[nrgIdx]->interpN(10)->toMediaFeatures());
-
+	
 	for (int i=0; i<descmf.size(); i++){
 		delete descmf[i];
 	}
