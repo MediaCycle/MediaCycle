@@ -120,9 +120,9 @@ bool AGSynthesis::compute(long targetId, vector<long> grainIds){
 	std::cout << "Random = " << this->getRandomness() << std::endl;
 	for (int i=0; i<dist_m.n_rows; i++){
 		sp_m.row(i) = sort_index(conv_to<rowvec>::from(dist_m.row(i)));
-		std::cout << "O sp_m.row(i) : "  << sp_m.row(i) << std::endl;
 		perm_v = randperm(max((int) round(sp_m.n_cols * this->getRandomness()),1));
 		std::cout << "perm_v =  " << perm_v << std::endl;
+		std::cout << "O sp_m.row(i) : "  << sp_m.row(i) << std::endl;
 		tmp_v = sp_m.submat(i, 0, i, perm_v.n_elem-1);
 		for (int j=0; j<perm_v.n_elem; j++){
 			sp_m(i,j) = tmp_v(perm_v(j));

@@ -1737,8 +1737,13 @@ return 0;
 int ACAudioFeedback::createExtSource(float* _buffer, int _length){
 	
 	//pthread_mutex_lock(&audio_engine_mutex);
-	//if (ext_loop_length != 0)
-	//	deleteExtSource();	
+	if (ext_loop_length != 0)
+		deleteExtSource();	
+
+	if (alGetError() != AL_NO_ERROR){
+		std::cerr << "createExtSource, openAL error : " << alGetError() << std::endl;
+		exit(1);
+	}
 		
 	short* buffer_short = new short[_length];
 	
@@ -1749,11 +1754,17 @@ int ACAudioFeedback::createExtSource(float* _buffer, int _length){
 	ext_loop_length = _length;
 	
 	alGenBuffers(1, &ext_loop_buffer);
+	if (alGetError() != AL_NO_ERROR){
+		std::cerr << "createExtSource, openAL error : " << alGetError() << std::endl;
+		exit(1);
+	}
 	
 	alBufferData(ext_loop_buffer, AL_FORMAT_MONO16, buffer_short, _length * sizeof(short), 44100);
 	
-	if (alGetError() != AL_NO_ERROR)
-		return 0;
+	if (alGetError() != AL_NO_ERROR){
+		std::cerr << "createExtSource, openAL error : " << alGetError() << std::endl;
+		exit(1);
+	}
 	
 	alGenSources(1, &ext_loop_source);
 	
@@ -1862,9 +1873,21 @@ return 0;
 
 int ACAudioFeedback::deleteExtSource()
 {
-	alDeleteBuffers(1, &ext_loop_buffer);
-	alSourcei(ext_loop_source, AL_BUFFER, 0);
+	stopExtSource();
+	if (alGetError() != AL_NO_ERROR){
+		std::cerr << "createExtSource, openAL error : " << alGetError() << std::endl;
+		exit(1);
+	}	
 	alDeleteSources(1, &ext_loop_source);
+	if (alGetError() != AL_NO_ERROR){
+		std::cerr << "createExtSource, openAL error : " << alGetError() << std::endl;
+		exit(1);
+	}
+	alDeleteBuffers(1, &ext_loop_buffer);
+	if (alGetError() != AL_NO_ERROR){
+		std::cerr << "createExtSource, openAL error : " << alGetError() << std::endl;
+		exit(1);
+	}
 	ext_loop_length = 0;
 	return 0;
 }
@@ -1873,12 +1896,22 @@ void ACAudioFeedback::loopExtSource()
 {
 	if (ext_loop_length > 0)
 		alSourcePlay(ext_loop_source);
+	if (alGetError() != AL_NO_ERROR){
+		std::cerr << "createExtSource, openAL error : " << alGetError() << std::endl;
+		exit(1);
+	}	
+
 }	
 
 void ACAudioFeedback::stopExtSource()
 {
 	if (ext_loop_length > 0)
-		alSourceStop(ext_loop_source);	
+		alSourceStop(ext_loop_source);
+	if (alGetError() != AL_NO_ERROR){
+		std::cerr << "createExtSource, openAL error : " << alGetError() << std::endl;
+		exit(1);
+	}	
+	
 }	
 
 int ACAudioFeedback::setSourcePosition(int loop_id, float x, float y, float z)
