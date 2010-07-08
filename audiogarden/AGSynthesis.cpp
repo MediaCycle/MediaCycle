@@ -1,6 +1,6 @@
 /**
  * @brief AGSynthesis.cpp
- * @author Damien Tardieu
+ * @author Cecile Picard
  * @date 08/07/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
@@ -61,6 +61,8 @@ bool AGSynthesis::compute(long targetId, vector<long> grainIds){
 	int durationT = lib->getMedia(targetId)->getDuration();
 
 	mat descG_m = extractDescMatrix(lib, featureList, grainIds);
+	mat enerG_m = extractDescMatrix(lib, "Mean of Energy", grainIds);
+	mat specG_m = extractDescMatrix(lib, "Mean of Spectral Centroid", grainIds);
 	
 	vector<ACMedia*> targetSegment1_v = lib->getMedia(targetId)-> getAllSegments();
 	vector<ACAudio*> targetSegment_v;
@@ -92,6 +94,7 @@ bool AGSynthesis::compute(long targetId, vector<long> grainIds){
 
 	// features of the target segments
 	mat descTS_m = extractDescMatrix(lib, featureList, targetSegmentIds);
+	mat enerTS_m = extractDescMatrix(lib, "Mean of Energy", targetSegmentIds);
 
 	// Mapping choice
 	switch (this->getMapping()) {
@@ -170,13 +173,29 @@ bool AGSynthesis::compute(long targetId, vector<long> grainIds){
 	for (int i=0; i < targetSegment_v.size(); i++){
 		audioGrain = (ACAudio*) lib->getMedia(grainIds[sp_m(i,0)]);
 		colvec selG_v = extractSamples(audioGrain);
-		
+		colvec targetSample_v = extractSamples(targetSegment_v[i]);
+		colvec selGS_v = zeros<colvec>(selG_v.n_rows); colvec targetSampleS_v = zeros<colvec>(targetSample_v.n_rows);
+		//targetSample_v = pow(targetSample_v,2)
+		//Amplitude factor to take into account amplitude evolution of the signal model (target)
+		float ampFactor1 = ((enerTS_m(i,0)) / (enerG_m(sp_m(i,0),0)));
+		for (int j=0; j < targetSampleS_v.n_rows; j++){
+			targetSampleS_v[j] = targetSample_v[j] * targetSample_v[j];
+		}
+		for (int j=0; j < selGS_v.n_rows; j++){
+			selGS_v[j] = selG_v[j] * selG_v[j];
+		}
+		float ampFactor2 = sqrt(sum(targetSampleS_v) / sum(selGS_v));
+		if (ampFactor2 > 5.0)
+			ampFactor2 = 1;
+			
 		win_v = tukeywin(audioGrain->getNFrames(), .01);
 		
 		switch (this->getMethod()) {
 		case AG_METHOD_SIMPLE:{
 			if (seg_samp_start_v(i)+audioGrain->getNFrames() - 1 < syn_v.n_elem){
-				syn_v.rows(seg_samp_start_v(i), seg_samp_start_v(i)+audioGrain->getNFrames()-1) += selG_v % win_v;
+				syn_v.rows(seg_samp_start_v(i), seg_samp_start_v(i)+audioGrain->getNFrames()-1) += ampFactor2*selG_v % win_v;
+				//syn_v = syn_v * ampFactor2;
+				std::cout << " ampFactor " << grainIds[sp_m(i,0)] << " " << ampFactor1 << " " << ampFactor2;
 			}
 			else{
 				std::cout << "----------------" << std::endl;
@@ -188,8 +207,11 @@ bool AGSynthesis::compute(long targetId, vector<long> grainIds){
 		}
 		case AG_METHOD_SQUEEZED:{
 			if (ind0+audioGrain->getNFrames() - 1 < syn_v.n_elem){
-				syn_v.rows(ind0, ind0+audioGrain->getNFrames()-1) = selG_v % win_v;
+				syn_v.rows(ind0, ind0+audioGrain->getNFrames()-1) = ampFactor2 * selG_v % win_v;
+				//syn_v = syn_v * ampFactor2;
 				ind0 = ind0+audioGrain->getNFrames();
+				std::cout << " ampFactor " << grainIds[sp_m(i,0)] << " " << ampFactor1 << " " << ampFactor2;
+				
 			}
 			else{
 				std::cout << "----------------" << std::endl;
@@ -201,7 +223,9 @@ bool AGSynthesis::compute(long targetId, vector<long> grainIds){
 		}
 		case AG_METHOD_PADDED:{
 			if (seg_samp_start_v(i)+audioGrain->getNFrames() - 1 < syn_v.n_elem){
-				syn_v.rows(seg_samp_start_v(i), seg_samp_start_v(i)+audioGrain->getNFrames()-1) = selG_v % win_v;
+				syn_v.rows(seg_samp_start_v(i), seg_samp_start_v(i)+audioGrain->getNFrames()-1) = ampFactor2 * selG_v % win_v;
+				//syn_v = syn_v * ampFactor2;
+				std::cout << " ampFactor " << ampFactor2;
 			}
 			else{
 				std::cout << "----------------" << std::endl;
@@ -209,6 +233,7 @@ bool AGSynthesis::compute(long targetId, vector<long> grainIds){
 				std::cout << seg_samp_start_v(i)+audioGrain->getNFrames()-1 << std::endl;
 				std::cerr << "Wrong synthesis vector size" << std::endl;
 			}
+
 			ind0 = ind0+audioGrain->getNFrames();
 			int round = 1;
 			while (ind0 < seg_samp_end_v(i) & round < grainIds.size()){
@@ -216,9 +241,24 @@ bool AGSynthesis::compute(long targetId, vector<long> grainIds){
 				int sGrainId = grainIds[sp_m(i,round)];
 				audioGrain = (ACAudio*) lib->getMedia(sGrainId);
 				selG_v = extractSamples(audioGrain);
+				colvec targetSample_v = extractSamples(targetSegment_v[i]);
+				colvec selGS_v = zeros<colvec>(selG_v.n_rows); colvec targetSampleS_v = zeros<colvec>(targetSample_v.n_rows);
+				//Amplitude factor to take into account amplitude evolution of the signal model (target)
+				float ampFactor1 = sqrt((enerTS_m(i,0)) / (enerG_m(sp_m(i,0),0)));
+				for (int j=0; j < targetSampleS_v.n_rows; j++){
+					targetSampleS_v[j] = targetSample_v[j] * targetSample_v[j];
+				}
+				for (int j=0; j < selGS_v.n_rows; j++){
+					selGS_v[j] = selG_v[j] * selG_v[j];
+				}
+				float ampFactor2 = sqrt(sum(targetSampleS_v) / sum(selGS_v));
+				if (ampFactor2 > 5.0)
+					ampFactor2 = 1;
 				win_v = tukeywin(audioGrain->getNFrames(), .01);
 				if (ind0+audioGrain->getNFrames() - 1 < syn_v.n_elem){
-					syn_v.rows(ind0, ind0+audioGrain->getNFrames()-1) = selG_v % win_v;
+					syn_v.rows(ind0, ind0+audioGrain->getNFrames()-1) = ampFactor2 * selG_v % win_v;
+					//syn_v = syn_v * ampFactor2;
+					std::cout << " ampFactor " << ampFactor2;
 				}
 				else{
 					std::cout << "----------------" << std::endl;

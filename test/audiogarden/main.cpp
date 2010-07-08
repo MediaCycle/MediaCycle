@@ -84,11 +84,11 @@ int main(int argc, char** argv) {
 		}
 		float* syn_v;
 		long length;
-		AGSynthesis synth = new AGSynthesis();
-		synth.setMediaCycle(mediacycle);
-		synth.compute(0, grainIds);
+		AGSynthesis* synth = new AGSynthesis();
+		synth->setMediaCycle(mediacycle);
+		synth->compute(0, grainIds);
 		string path="./synthesis.wav";
-		synth.saveAsWav(path.c_str());
+		synth->saveAsWav(path.c_str());
 
 		SF_INFO sfinfo;
 		SNDFILE* testFile;
