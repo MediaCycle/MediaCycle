@@ -521,8 +521,8 @@ void ACAudioGardenOsgQt::on_sliderCompositingRandom_sliderReleased()
 
 void ACAudioGardenOsgQt::on_sliderCompositingThreshold_sliderReleased()
 {
-	std::cout << "Compositing Threshold: " << ui.sliderCompositingThreshold->value() << std::endl;
-	ui.compositeOsgView->getSynth()->setThreshold((float)(ui.sliderCompositingThreshold->value()/100.0f));
+	std::cout << "Compositing Threshold: " << (float)(ui.sliderCompositingThreshold->value())/100.0f << std::endl;
+	ui.compositeOsgView->getSynth()->setThreshold((float)(ui.sliderCompositingThreshold->value())/100.0f);
 }
 
 void ACAudioGardenOsgQt::on_checkBoxCompositingAuto_toggled()
