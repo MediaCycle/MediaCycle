@@ -1,7 +1,7 @@
 /**
  * @brief AGSynthesis.h
- * @author Damien Tardieu
- * @date 08/07/2010
+ * @author Christian Frisson
+ * @date 09/07/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -79,11 +79,12 @@ class AGSynthesis {
 
 	bool saveAsWav(string);
 	
+	void resetSound();
+	
  private:
 	float* synthesisSound;
 	long synthesisLength;
 	MediaCycle* mediacycle;
-	long synthesisID;
 	
 	// param
 	AGMethod method;

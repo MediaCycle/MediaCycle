@@ -232,19 +232,7 @@ void AGOsgCompositeViewQt::keyPressEvent( QKeyEvent* event )
 					audio_engine->getFeedback()->loopExtSource();
 					//usleep(2000000);//CF 2 sec, j'arrive!
 				}	
-				track_playing = track_playing ? false : true;
-
-				
-				/*
-				delete synthAudio;
-				synthAudio = new ACAudio();
-				synthAudio->setStart(0);
-				synthAudio->setEnd(this->getSynth()->getLength()/44100 );
-				synthAudio->computeWaveform( this->getSynth()->getSound()  );
-				this->getTimelineRenderer()->getTrack(0)->updateMedia( synthAudio ); //media_cycle->getLibrary()->getMedia(loop) );
-				media_cycle->setNeedsDisplay(true);
-				*/
-			
+				track_playing = track_playing ? false : true; //CF toggling
 			}
 			media_cycle->setPlayKeyDown(true);			
 			break;
@@ -435,30 +423,9 @@ void AGOsgCompositeViewQt::mouseReleaseEvent( QMouseEvent* event )
 				}
 				else if (selectrhythmpattern == true)
 				{
-					/*
-					selectedRhythmPattern = loop;
-					if ( timeline_renderer->getTrack(0)!=NULL ) {
-						if ( (timeline_renderer->getTrack(0)->getMediaIndex() != loop) )
-						{	
-							//if (timeline_renderer->getTrack(0)->getMediaIndex() != -1)
-								media_cycle->getBrowser()->toggleSourceActivity( timeline_renderer->getTrack(0)->getMediaIndex(), 0 );
-						 
-							timeline_renderer->getTrack(0)->updateMedia(loop);
-					 */
-							/*
-							ACAudio* test = new ACAudio();
-							test->extractData("/Users/frisson/Videodrome/numediart/DataSets/AudioGarden/sounds/anklung_1.wav");
-							timeline_renderer->getTrack(0)->updateMedia( test ); //media_cycle->getLibrary()->getMedia(loop) );
-							 */
-					/*
-						}	
-					}
-					*/
-					
 					selectedRhythmPattern = loop;
 					if ( timeline_renderer->getTrack(0)!=NULL )
 					{
-						
 						if (track_playing) {
 							audio_engine->getFeedback()->stopExtSource();
 							audio_engine->getFeedback()->deleteExtSource();
@@ -467,15 +434,7 @@ void AGOsgCompositeViewQt::mouseReleaseEvent( QMouseEvent* event )
 							
 						//CF possible only for audio? then do some tests
 						ACAudio* tempAudio = (ACAudio*) media_cycle->getLibrary()->getMedia(loop);
-						
-						
-						/*
-						synthAudio = new ACAudio();
-						synthAudio->setStart(0);
-						synthAudio->setEnd( ((ACAudio*)media_cycle->getLibrary()->getMedia(loop))->getNFrames() / ((ACAudio*)media_cycle->getLibrary()->getMedia(loop))->getSampleRate() );
-						synthAudio->computeWaveform( (float*)((ACAudio*)media_cycle->getLibrary()->getMedia(loop))->getSamples() );
-					*/
-						
+
 						delete synthAudio;
 						synthAudio = new ACAudio( *tempAudio, false);
 						float* tempBuffer = (float*)synthAudio->getMonoSamples();
@@ -485,7 +444,6 @@ void AGOsgCompositeViewQt::mouseReleaseEvent( QMouseEvent* event )
 						delete[] tempBuffer;
 						media_cycle->setNeedsDisplay(true);
 					}
-			
 				}
 				else if (selectgrains == true)
 				{
@@ -544,6 +502,12 @@ void AGOsgCompositeViewQt::synthesize()
 {
 	if ( this->getSelectedRhythmPattern() > -1 && media_cycle->getBrowser()->getSelectedNodes().size() > 0)
 	{	
+		if (track_playing) {
+			audio_engine->getFeedback()->stopExtSource();
+			audio_engine->getFeedback()->deleteExtSource();
+			track_playing = false;
+		}	
+		
 		this->getSynth()->compute(this->getSelectedRhythmPattern(), media_cycle->getBrowser()->getSelectedNodes());
 		audio_engine->getFeedback()->createExtSource(this->getSynth()->getSound(), this->getSynth()->getLength());
 		
@@ -556,8 +520,24 @@ void AGOsgCompositeViewQt::synthesize()
 		media_cycle->setNeedsDisplay(true);
 				
 		audio_engine->getFeedback()->loopExtSource();
-		//usleep(2000000);//CF 2 sec, j'arrive!
-		//audio_engine->getFeedback()->stopExtSource();
-		//audio_engine->getFeedback()->deleteExtSource();
 	}
 }
+
+void AGOsgCompositeViewQt::resetSynth()
+{
+	if (track_playing) {
+		audio_engine->getFeedback()->stopExtSource();
+		audio_engine->getFeedback()->deleteExtSource();
+		track_playing = false;
+	}	
+	
+	selectedRhythmPattern = -1;
+	media_cycle->getBrowser()->unselectNodes();
+	media_cycle->getBrowser()->dumpSelectedNodes();
+	
+	synth->resetSound();
+	
+	this->getTimelineRenderer()->getTrack(0)->clearMedia();
+	
+	media_cycle->setNeedsDisplay(true);	
+}	

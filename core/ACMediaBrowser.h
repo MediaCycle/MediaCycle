@@ -178,6 +178,7 @@ public:
 	bool toggleNode(int node);
 	void dumpSelectedNodes();
 	set<int>& getSelectedNodes(){return mSelectedNodes;}
+	void unselectNodes();
 	int getClosestNode() {return mClosestNode; };
 	int	getLastSelectedNode(){return mLastSelectedNode;}
 	void setReferenceNode(int index);

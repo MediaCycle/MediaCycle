@@ -80,6 +80,7 @@ public:
 	int getMediaIndex() { return media_index; }
 	void updateMedia(ACMedia* _media);
 	void updateMedia(int _media_index);
+	void clearMedia();
 	ACMedia* getMedia(){return media;}
 	void setDistanceMouse(float _distance_mouse) { this->distance_mouse = _distance_mouse; };
 	//void setActivity(int _media_activity) { this->media_activity = _media_activity; }

@@ -56,3 +56,11 @@ void ACOsgTrackRenderer::updateMedia(int _media_index)
 	media_from_lib = true;
 	media_changed = true;
 }
+
+void ACOsgTrackRenderer::clearMedia()
+{
+	media = NULL;
+	media_index = -1;
+	media_from_lib = true;
+	media_changed = true;
+}

@@ -1,7 +1,7 @@
 /**
  * @brief AGOsgCompositeViewQt.h
  * @author Christian Frisson
- * @date 08/07/2010
+ * @date 09/07/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -165,6 +165,7 @@ class AGOsgCompositeViewQt : public osgViewer::CompositeViewer, public QGLWidget
 		int getSelectedRhythmPattern(){return selectedRhythmPattern;}
 		void setAutoSynth(bool _autosynth){autosynth = _autosynth;}
 		void synthesize();
+		void resetSynth();
 };
 
 #endif

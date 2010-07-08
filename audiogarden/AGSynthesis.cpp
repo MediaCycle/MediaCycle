@@ -1,6 +1,6 @@
 /**
  * @brief AGSynthesis.cpp
- * @author Damien Tardieu
+ * @author Christian Frisson
  * @date 09/07/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
@@ -372,3 +372,9 @@ bool AGSynthesis::saveAsWav(string path){
 	sf_close(testFile);
 	return true;
 }
+
+void AGSynthesis::resetSound()
+{
+	delete[] synthesisSound;
+	synthesisLength = 0;
+}	

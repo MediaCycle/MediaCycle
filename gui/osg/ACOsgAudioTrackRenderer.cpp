@@ -350,6 +350,13 @@ void ACOsgAudioTrackRenderer::updateTracks(double ratio) {
 				curser_transform->setMatrix(curserT);
 			}	
 		}
+		else if (media_index == -1)
+		{
+			track_node->removeChild(curser_transform);
+			track_node->removeChild(waveform_geode);
+			displayed_media_index = -1;
+			media_changed = false;
+		}	
 	}	
 	else
 	{

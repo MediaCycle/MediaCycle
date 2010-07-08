@@ -551,6 +551,7 @@ void ACAudioGardenOsgQt::on_pushButtonCompositingGo_clicked(){
 void ACAudioGardenOsgQt::on_pushButtonCompositingReset_clicked()
 {
 	std::cout << "Compositing: Reset" << std::endl;
+	ui.compositeOsgView->resetSynth();
 }	
 	
 void ACAudioGardenOsgQt::on_pushButtonControlStart_clicked()

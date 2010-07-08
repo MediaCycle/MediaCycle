@@ -356,6 +356,14 @@ void ACMediaBrowser::dumpSelectedNodes(){
 	std::cout << std::endl;
 }	
 
+void ACMediaBrowser::unselectNodes(){
+	for (set<int>::const_iterator iter = mSelectedNodes.begin();iter != mSelectedNodes.end();++iter){
+		this->getMediaNode(*iter).setSelection(false);
+		//mSelectedNodes.erase(*iter);
+	}
+	mSelectedNodes.clear();
+}	
+
 void ACMediaBrowser::setClickedLabel(int ilabel){
 	if (ilabel < -1 || ilabel >= this->getNumberOfLabels())
 		cerr << "<ACMediaBrowser::setClickedLabel> : index " << ilabel << "out of bounds" << endl;
