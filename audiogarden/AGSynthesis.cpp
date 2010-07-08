@@ -1,6 +1,6 @@
 /**
  * @brief AGSynthesis.cpp
- * @author Damien Tardieu
+ * @author Cecile Picard
  * @date 08/07/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
@@ -274,9 +274,10 @@ bool AGSynthesis::compute(long targetId, vector<long> grainIds){
 		}
 
 	}
-	if (max(syn_v) > 1){
+	/*if (max(syn_v) > 1){
 		syn_v = (syn_v/max(syn_v))*.99;
-	}
+	}*/
+	syn_v = (syn_v/max(syn_v))*.99;
 	
 	if (this->synthesisLength > 0){
 		delete [] synthesisSound;
