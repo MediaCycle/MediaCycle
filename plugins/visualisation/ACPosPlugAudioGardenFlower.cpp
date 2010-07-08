@@ -93,7 +93,7 @@ void ACPosPlugAudioGardenFlower::updateNextPositions(ACMediaBrowser* mediaBrowse
 	mat coefP_m;
 	mat projP_m;
 	princomp(coefP_m, projP_m, descP_m);
-
+	projP_m = zscore(projP_m)*.1;
 	// affecting parents position
 	for (int i=0; i<posParents.size();i++){
 		posDisp_m(posParents[i],0) = projP_m(i,0);
@@ -103,14 +103,16 @@ void ACPosPlugAudioGardenFlower::updateNextPositions(ACMediaBrowser* mediaBrowse
 	float angle;
 	for (long i=0; i<posParents.size(); i++){
 		tmpSegments = loops[posParents[i]]->getAllSegments();
-		for (int i=0; i<tmpSegments.size(); i++){
-			angle = (2*math::pi() / (float) tmpSegments.size()) * (float) i + (math::pi()/2);
-			posDisp_m(tmpSegments[i]->getId(),0) = .001 * cos(angle) + posDisp_m(posParents[i],0);
-			posDisp_m(tmpSegments[i]->getId(),0) = .001 * sin(angle) + posDisp_m(posParents[i],1);
+		for (int j=0; j<tmpSegments.size(); j++){
+			angle = (2*math::pi() / (float) tmpSegments.size()) * (float) j + (math::pi()/2);
+			posDisp_m(tmpSegments[j]->getId(),0) = .01 * cos(angle) + posDisp_m(posParents[i],0);
+			posDisp_m(tmpSegments[j]->getId(),1) = .01 * sin(angle) + posDisp_m(posParents[i],1);
+			std::cout << "angle = " << angle << std::endl;			
+			std::cout << "posDisp_m.row(tmpSegments[j]->getId())" << posDisp_m.row(tmpSegments[j]->getId()) << std::endl;
 		}
 	}
 
-	
+	posDisp_m.save("posDisp_m", arma_ascii);
  	mediaBrowser->setNumberOfDisplayedLoops(loops.size());
 	
   for (int i=0; i<libSize; i++){
