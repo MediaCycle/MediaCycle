@@ -52,7 +52,7 @@ class ACAudio : public ACMedia {
 	// is this too much already ?
 public:
 	ACAudio();
-	ACAudio(const ACAudio&);
+	ACAudio(const ACAudio&, bool reduced);
 
 	~ACAudio();
   

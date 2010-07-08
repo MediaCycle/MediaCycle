@@ -298,7 +298,6 @@ public:
 	void updateNeighborhoods();
 
 	void updateNextPositions();
-	void updateNextPositions2dim();
 
 protected:
 	ACMediaLibrary *mLibrary; 

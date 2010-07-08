@@ -1,7 +1,7 @@
 /**
  * @brief ACPosPlugAudioGardenFlower.cpp
  * @author Damien Tardieu
- * @date 08/07/2010
+ * @date 09/07/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -112,8 +112,7 @@ void ACPosPlugAudioGardenFlower::updateNextPositions(ACMediaBrowser* mediaBrowse
 		}
 	}
 
-	posDisp_m.save("posDisp_m", arma_ascii);
- 	mediaBrowser->setNumberOfDisplayedLoops(loops.size());
+	mediaBrowser->setNumberOfDisplayedLoops(loops.size());
 	
   for (int i=0; i<libSize; i++){
     mediaBrowser->setLoopIsDisplayed(i, true);

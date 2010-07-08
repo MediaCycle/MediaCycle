@@ -1,7 +1,7 @@
 /**
  * @brief ACVisPlugin2Desc.cpp
  * @author Damien Tardieu
- * @date 07/06/2010
+ * @date 09/07/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -85,7 +85,7 @@ void ACVisPlugin2Desc::updateNextPositions(ACMediaBrowser* mediaBrowser){
   for (int i=0; i<libSize; i++){
     mediaBrowser->setLoopIsDisplayed(i, true);
 	  // TODO: make sure you meant next
-		mediaBrowser->setNodeNextPosition(i, desc_m(i,0), desc_m(i,1));
+		mediaBrowser->setNodeNextPosition(i, desc_m(i,0)*.1, desc_m(i,1)*.1);
   }
 	////////////////////////////////////////////////////////////////
 }

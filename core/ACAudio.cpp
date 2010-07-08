@@ -61,7 +61,7 @@ ACAudio::ACAudio() : ACMedia() {
 		waveform = NULL;
 }
 
-ACAudio::ACAudio(const ACAudio& m) : ACMedia(m) {
+ACAudio::ACAudio(const ACAudio& m, bool reduced) : ACMedia(m) {
 	media_type = MEDIA_TYPE_AUDIO;
 	db = m.db;
 	bpm = m.bpm;
@@ -71,13 +71,13 @@ ACAudio::ACAudio(const ACAudio& m) : ACMedia(m) {
 	acid_type = m.acid_type;
 	sample_rate = m.sample_rate;
 	channels = m.channels;
-	waveformLength = m.waveformLength;
-	waveform = new float[waveformLength];
-	for (int i=0; i<waveformLength; i++){
-		waveform[i] = m.waveform[i];
+	if (!reduced){
+		waveformLength = m.waveformLength;
+		waveform = new float[waveformLength];
+		for (int i=0; i<waveformLength; i++){
+			waveform[i] = m.waveform[i];
+		}
 	}
-// 	sample_start = m.sample_start;
-// 	sample_end = m.sample_end;
 }
 
 ACAudio::~ACAudio() {

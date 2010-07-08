@@ -56,8 +56,8 @@ int main(int argc, char** argv) {
 		build_type = "Debug";
 #endif
 		
-		mediacycle->addPlugin("../../plugins/audio/" + build_type + "/mc_audio.dylib");
-		mediacycle->addPlugin("../../plugins/segmentation/" + build_type + "/mc_segmentation.dylib");
+		mediacycle->addPlugin("../../../plugins/audio/" + build_type + "/mc_audio.dylib");
+		mediacycle->addPlugin("../../../plugins/segmentation/" + build_type + "/mc_segmentation.dylib");
 	
 		//mediacycle->importDirectory("/Users/dtardieu/data/AudioCycleProPackTest/zero-g-pro-pack_b/Super Funk/Funkmachine-E/", 1);
 		//mediacycle->importDirectory("/Users/dtardieu/data/test/testEnv/",1);
@@ -67,9 +67,9 @@ int main(int argc, char** argv) {
 		//mediacycle->saveMCSLLibrary("/Users/dtardieu/data/AudioCycleProPackTest/zero-g-pro-pack_b/Super Funk/Funkmachine-E.acl");
 		//mediacycle->saveACLLibrary("/Users/dtardieu/data/test/testEnv/testEnv.acl");
 
-		mediacycle->importMCSLLibrary("/Users/ccl/Dropbox/Numediart/audiogarden/soundsExt.mcsl");
+		//mediacycle->importMCSLLibrary("/Users/ccl/Dropbox/Numediart/audiogarden/soundsExt.mcsl");
 
-		//mediacycle->saveMCSLLibrary("/Users/dtardieu/data/AudioCycleProPackTest/zero-g-pro-pack_b/Super Funk/Funkmachine-E.mcsl");
+		mediacycle->importMCSLLibrary("/Users/dtardieu/data/AudioGarden/potpourri.mcsl");
 		//		mediacycle->saveMCSLLibrary("/Users/dtardieu/data/rire-audiocycle/rire-audiocycle.mcsl");
 		//		mediacycle->saveMCSLLibrary("/Users/dtardieu/data/footsteps/footsteps.mcsl");
 		//mediacycle->saveMCSLLibrary("/Users/dtardieu/data/AudioGarden/audiogarden/audiogarden.mcsl");
@@ -79,14 +79,14 @@ int main(int argc, char** argv) {
 		}
 
 		vector<long> grainIds;
-		for (int i=1; i<10; i++){
+		for (int i=38; i<39; i++){
 			grainIds.push_back(i);
 		}
 
 		AGSynthesis* synth = new AGSynthesis();
 		synth->setMediaCycle(mediacycle);
-		synth->compute(0, grainIds);
-	
+		synth->compute(37, grainIds);
+		synth->saveAsWav("./synthesis.wav");
 	
 // 	cout<<"setCulsterN"<<endl;
 //     mediacycle->getBrowser()->setClusterNumber(1);

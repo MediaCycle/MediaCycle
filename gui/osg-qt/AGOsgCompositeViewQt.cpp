@@ -476,12 +476,12 @@ void AGOsgCompositeViewQt::mouseReleaseEvent( QMouseEvent* event )
 						synthAudio->computeWaveform( (float*)((ACAudio*)media_cycle->getLibrary()->getMedia(loop))->getSamples() );
 					*/
 						
-						synthAudio = new ACAudio( *tempAudio );
+						delete synthAudio;
+						synthAudio = new ACAudio( *tempAudio, false);
 						float* tempBuffer = (float*)synthAudio->getMonoSamples();
 						audio_engine->getFeedback()->createExtSource(tempBuffer, synthAudio->getNFrames() );
 						
 						this->getTimelineRenderer()->getTrack(0)->updateMedia( synthAudio ); //media_cycle->getLibrary()->getMedia(loop) );
-						delete tempAudio;
 						delete[] tempBuffer;
 						media_cycle->setNeedsDisplay(true);
 					}

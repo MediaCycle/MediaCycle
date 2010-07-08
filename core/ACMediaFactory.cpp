@@ -104,7 +104,7 @@ ACMedia* ACMediaFactory::create(ACMedia* media){
 		case MEDIA_TYPE_AUDIO:
 		{
 			ACAudio* audio = (ACAudio*) media;
-			return new ACAudio(*audio);
+			return new ACAudio(*audio,true);
 			break;
 		}
 		case MEDIA_TYPE_IMAGE:

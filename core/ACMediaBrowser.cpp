@@ -335,9 +335,17 @@ bool ACMediaBrowser::toggleNode(int node){
 		}	
 	}
 	
+	
 	mSelectedNodes.insert(node);
 	this->getMediaNode(node).setSelection(true);
 	mLastSelectedNode = node;
+	
+	vector<ACMedia*> tmpSegments;
+	tmpSegments =  mLibrary->getMedia(this->getMediaNode(node).getMediaId())->getAllSegments();
+	for (vector<ACMedia*>::const_iterator iter = tmpSegments.begin(); iter != tmpSegments.end() ; iter++){
+		mSelectedNodes.insert((*iter)->getId());
+		this->getMediaNode((*iter)->getId()).setSelection(true);		
+	}
 	return true;
 }	
 
@@ -929,7 +937,8 @@ void ACMediaBrowser::updateClustersKMeans(bool animate) {
 	int n_iterations = 20, it;
 	
 	printf("feature weights:");
-	for (int fw=0; fw < mFeatureWeights.size(); fw++)
+
+	for(int fw=0; fw < mFeatureWeights.size(); fw++)
 		printf("%f ", mFeatureWeights[fw]);
 	printf("\n");
 	
