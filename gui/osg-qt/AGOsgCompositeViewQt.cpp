@@ -548,3 +548,13 @@ void AGOsgCompositeViewQt::resetSynth()
 	this->getTimelineRenderer()->getTrack(0)->clearMedia();
 	media_cycle->setNeedsDisplay(true);	
 }	
+
+void AGOsgCompositeViewQt::stopSound()
+{
+	// Stop the track playback
+	if (track_playing) {
+		audio_engine->getFeedback()->stopExtSource();
+		audio_engine->getFeedback()->deleteExtSource();
+		track_playing = false;
+	}
+}
