@@ -511,7 +511,7 @@ void AGOsgCompositeViewQt::synthesize()
 		
 		// Synthesize
 		this->getSynth()->compute(this->getSelectedRhythmPattern(), media_cycle->getBrowser()->getSelectedNodes());
-		
+		this->getSynth()->saveAsWav("./synthesis.wav");
 		// Display the synthesis
 		delete synthAudio;
 		synthAudio = new ACAudio();
