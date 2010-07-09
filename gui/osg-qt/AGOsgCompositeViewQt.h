@@ -166,6 +166,7 @@ class AGOsgCompositeViewQt : public osgViewer::CompositeViewer, public QGLWidget
 		void setAutoSynth(bool _autosynth){autosynth = _autosynth;}
 		void synthesize();
 		void resetSynth();
+		void stopSound();
 };
 
 #endif

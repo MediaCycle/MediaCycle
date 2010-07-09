@@ -400,9 +400,9 @@ void ACAudioGardenOsgQt::on_sliderClusters_sliderReleased()
 		// XSCF251003 added this
 		media_cycle->updateDisplay(true); //XS 250310 was: media_cycle->updateClusters(true);
 		// XS250310 removed mediacycle->setNeedsDisplay(true); // now in updateDisplay
-		//ui.browserOsgView->updateTransformsFromBrowser(1.0);
+		//ui.compositeOsgView->updateTransformsFromBrowser(1.0);
 	}
-	//ui.browserOsgView->setFocus();
+	//ui.compositeOsgView->setFocus();
 }
 
 void ACAudioGardenOsgQt::on_comboBoxClustersMethod_activated(const QString & text) 
@@ -420,7 +420,8 @@ void ACAudioGardenOsgQt::on_comboBoxClustersPositions_activated(const QString & 
 void ACAudioGardenOsgQt::on_pushButtonMuteAll_clicked()
 {
 	media_cycle->muteAllSources();
-	//ui.browserOsgView->setFocus();
+	ui.compositeOsgView->stopSound();
+	//ui.compositeOsgView->setFocus();
 }
 
 void ACAudioGardenOsgQt::on_pushButtonQueryRecord_toggled()
@@ -720,6 +721,7 @@ void ACAudioGardenOsgQt::processOscMessage(const char* tagName)
 	else if(strcasecmp(tagName, "/audiocycle/1/player/1/muteall") == 0)
 	{	
 		media_cycle->muteAllSources();
+		ui.compositeOsgView->stopSound();
 	}
 	else if(strcasecmp(tagName, "/audiocycle/1/player/1/bpm") == 0)
 	{
