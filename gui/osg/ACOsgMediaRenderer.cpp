@@ -37,5 +37,7 @@
 
 ACOsgMediaRenderer::ACOsgMediaRenderer() {
 	media_node = new MatrixTransform();
+	node_color = Vec4(1,1,0.5,1); //CF seminal yellow
+	user_defined_color = false;
 }
 

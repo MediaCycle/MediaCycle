@@ -66,6 +66,8 @@ protected:
 	int node_index;
 	float distance_mouse;
 	// int	media_activity;
+	Vec4 node_color;
+	bool user_defined_color;
 	
 public:
 	ACOsgMediaRenderer();
@@ -79,6 +81,9 @@ public:
 	
 	virtual void prepareNodes()=0;
 	virtual void updateNodes(double ratio=0.0)=0;
+	
+	void changeNodeColor(Vec4 _color){node_color = _color; user_defined_color = true;}
+	void resetNodeColor(){node_color = Vec4(1,1,0.5,1); user_defined_color = false;}
 	
 };
 

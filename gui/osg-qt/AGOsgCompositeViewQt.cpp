@@ -423,7 +423,13 @@ void AGOsgCompositeViewQt::mouseReleaseEvent( QMouseEvent* event )
 				}
 				else if (selectrhythmpattern == true)
 				{
+					if (selectedRhythmPattern != -1)
+						this->getBrowserRenderer()->resetNodeColor(selectedRhythmPattern);
+					
 					selectedRhythmPattern = loop;
+					if (selectedRhythmPattern != -1)
+						this->getBrowserRenderer()->changeNodeColor(selectedRhythmPattern, Vec4(1.0,1.0,1.0,1.0));//CF color the rhythm pattern in white
+			
 					if ( timeline_renderer->getTrack(0)!=NULL )
 					{
 						if (track_playing) {
@@ -538,6 +544,8 @@ void AGOsgCompositeViewQt::resetSynth()
 	}	
 	
 	// Unselect pattern and grains
+	if (selectedRhythmPattern != -1 )
+		this->getBrowserRenderer()->resetNodeColor(selectedRhythmPattern);
 	selectedRhythmPattern = -1;
 	media_cycle->getBrowser()->unselectNodes();
 	

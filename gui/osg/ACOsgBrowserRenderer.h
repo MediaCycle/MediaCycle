@@ -110,6 +110,9 @@ public:
 		
 	int computeScreenCoordinates(osgViewer::View* view, double ratio=0.0); //CF: use osgViewer::Viewer* for simple Viewers
 	vector<float> getDistanceMouse() { return distance_mouse; };
+	
+	void changeNodeColor(int _node, Vec4 _color){node_renderer[_node]->changeNodeColor(_color);}
+	void resetNodeColor(int _node){node_renderer[_node]->resetNodeColor();}
 };
 
 #endif
