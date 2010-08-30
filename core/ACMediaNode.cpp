@@ -34,11 +34,11 @@
 
 #include "ACMediaNode.h"
 
-// XS debug
+#ifdef VERBOSE
 #include <iostream>
 using std::cout;
 using std::endl;
-// XS end debug
+#endif // VERBOSE
 
 ACMediaNode::ACMediaNode(){ // (0,0) by default
 	init();
@@ -139,12 +139,16 @@ bool ACMediaNode::operator==(const ACMediaNode &other) const {
 // example : some loops are playing (1), we hover on others (0->2)
 void ACMediaNode::toggleActivity(int type){
 	if (this->getActivity()==0) {
-//		cout << "activity node " << nodeId << " set to " << type << endl;
+#ifdef VERBOSE
+		cout << "activity node " << nodeId << " set to " << type << endl;
+#endif // VERBOSE
 		this->setActivity(type);			
 	}
-	else 
-//		cout << "activity node " << nodeId << " set to 0" << endl;
-		this->setActivity(0);
+	else
+#ifdef VERBOSE		
+		cout << "activity node " << nodeId << " set to 0" << endl;
+#endif // VERBOSE
+	this->setActivity(0);
 }
 
 

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>902</width>
-    <height>622</height>
+    <width>940</width>
+    <height>615</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -56,10 +56,10 @@
       <widget class="QGroupBox" name="groupBoxBrowserControls">
        <property name="geometry">
         <rect>
-         <x>10</x>
-         <y>20</y>
-         <width>151</width>
-         <height>281</height>
+         <x>6</x>
+         <y>30</y>
+         <width>157</width>
+         <height>421</height>
         </rect>
        </property>
        <property name="sizePolicy">
@@ -69,103 +69,33 @@
         </sizepolicy>
        </property>
        <property name="title">
-        <string>Browser Controls</string>
+        <string/>
        </property>
        <property name="alignment">
         <set>Qt::AlignCenter</set>
        </property>
-       <widget class="QGroupBox" name="groupBoxSimilarity">
-        <property name="geometry">
-         <rect>
-          <x>10</x>
-          <y>40</y>
-          <width>131</width>
-          <height>81</height>
-         </rect>
-        </property>
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="title">
-         <string>Similarity</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-        <widget class="QCheckBox" name="checkBoxFeat1">
-         <property name="geometry">
-          <rect>
-           <x>10</x>
-           <y>20</y>
-           <width>87</width>
-           <height>20</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>Feature 1</string>
-         </property>
-        </widget>
-        <widget class="QCheckBox" name="checkBoxFeat2">
-         <property name="geometry">
-          <rect>
-           <x>10</x>
-           <y>40</y>
-           <width>87</width>
-           <height>20</height>
-          </rect>
-         </property>
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="text">
-          <string>Feature 2</string>
-         </property>
-         <property name="checked">
-          <bool>true</bool>
-         </property>
-        </widget>
-        <widget class="QCheckBox" name="checkBoxFeat3">
-         <property name="geometry">
-          <rect>
-           <x>10</x>
-           <y>60</y>
-           <width>87</width>
-           <height>20</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>Feature 3</string>
-         </property>
-        </widget>
-       </widget>
        <widget class="QGroupBox" name="groupBoxAutoOrganization">
         <property name="geometry">
          <rect>
           <x>10</x>
-          <y>120</y>
+          <y>225</y>
           <width>131</width>
           <height>81</height>
          </rect>
         </property>
         <property name="title">
-         <string>Auto-Organization</string>
+         <string/>
         </property>
         <widget class="QWidget" name="layoutWidget">
          <property name="geometry">
           <rect>
-           <x>10</x>
-           <y>20</y>
-           <width>118</width>
-           <height>65</height>
+           <x>4</x>
+           <y>4</y>
+           <width>124</width>
+           <height>81</height>
           </rect>
          </property>
-         <layout class="QGridLayout" name="gridLayout_2">
+         <layout class="QGridLayout" name="clustersGridLayout">
           <item row="0" column="0">
            <widget class="QLabel" name="labelClusters">
             <property name="text">
@@ -214,11 +144,14 @@
        <widget class="QPushButton" name="pushButtonRecenter">
         <property name="geometry">
          <rect>
-          <x>30</x>
-          <y>250</y>
+          <x>33</x>
+          <y>370</y>
           <width>80</width>
           <height>28</height>
          </rect>
+        </property>
+        <property name="toolTip">
+         <string>recenters the current view</string>
         </property>
         <property name="text">
          <string>Recenter</string>
@@ -227,11 +160,14 @@
        <widget class="QPushButton" name="pushButtonClean">
         <property name="geometry">
          <rect>
-          <x>70</x>
-          <y>20</y>
-          <width>80</width>
+          <x>77</x>
+          <y>0</y>
+          <width>73</width>
           <height>28</height>
          </rect>
+        </property>
+        <property name="toolTip">
+         <string>resets everything</string>
         </property>
         <property name="text">
          <string>Clean</string>
@@ -241,35 +177,41 @@
         <property name="geometry">
          <rect>
           <x>0</x>
-          <y>20</y>
-          <width>80</width>
+          <y>0</y>
+          <width>85</width>
           <height>28</height>
          </rect>
         </property>
+        <property name="toolTip">
+         <string>shortcut to load acl file (instead of using th menu)</string>
+        </property>
         <property name="text">
-         <string>Launch</string>
+         <string>Load ACL</string>
         </property>
        </widget>
        <widget class="QGroupBox" name="groupBoxHierarchy">
         <property name="geometry">
          <rect>
           <x>10</x>
-          <y>200</y>
-          <width>131</width>
+          <y>320</y>
+          <width>133</width>
           <height>51</height>
          </rect>
         </property>
         <property name="title">
-         <string>Hierarchy</string>
+         <string>navigate in/out cluster</string>
         </property>
         <widget class="QPushButton" name="pushButtonBack">
          <property name="geometry">
           <rect>
            <x>0</x>
            <y>20</y>
-           <width>61</width>
+           <width>51</width>
            <height>30</height>
           </rect>
+         </property>
+         <property name="toolTip">
+          <string>zoom out of this cluster</string>
          </property>
          <property name="text">
           <string>&lt;</string>
@@ -278,17 +220,52 @@
         <widget class="QPushButton" name="pushButtonForward">
          <property name="geometry">
           <rect>
-           <x>69</x>
+           <x>80</x>
            <y>20</y>
-           <width>61</width>
+           <width>51</width>
            <height>31</height>
           </rect>
+         </property>
+         <property name="toolTip">
+          <string>zoom in  previously computed cluster</string>
          </property>
          <property name="text">
           <string>&gt;</string>
          </property>
         </widget>
        </widget>
+       <widget class="QListWidget" name="featuresListWidget">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>30</y>
+          <width>157</width>
+          <height>186</height>
+         </rect>
+        </property>
+        <property name="toolTip">
+         <string>when loading media files or pre-computed features (acl files), the available features will appear here</string>
+        </property>
+        <property name="autoScroll">
+         <bool>true</bool>
+        </property>
+        <property name="tabKeyNavigation">
+         <bool>false</bool>
+        </property>
+        <property name="movement">
+         <enum>QListView::Static</enum>
+        </property>
+        <property name="viewMode">
+         <enum>QListView::ListMode</enum>
+        </property>
+       </widget>
+       <zorder>groupBoxAutoOrganization</zorder>
+       <zorder>pushButtonRecenter</zorder>
+       <zorder>pushButtonClean</zorder>
+       <zorder>pushButtonLaunch</zorder>
+       <zorder>groupBoxHierarchy</zorder>
+       <zorder>featuresListWidget</zorder>
+       <zorder>layoutWidget</zorder>
       </widget>
      </widget>
     </item>
@@ -324,6 +301,9 @@
            <verstretch>0</verstretch>
           </sizepolicy>
          </property>
+         <property name="toolTip">
+          <string>media organized by similarity according to selected features</string>
+         </property>
         </widget>
        </item>
       </layout>
@@ -336,7 +316,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>902</width>
+     <width>940</width>
      <height>22</height>
     </rect>
    </property>

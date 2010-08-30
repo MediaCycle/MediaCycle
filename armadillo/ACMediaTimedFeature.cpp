@@ -293,6 +293,7 @@ float ACMediaTimedFeature::getValue(float index, float dim){
 }
 
 vector< vector<float> > ACMediaTimedFeature::getValueAsVector(){
+	// XS duh ?
 }
 
 void ACMediaTimedFeature::setValue(fmat value_m) {
@@ -735,6 +736,25 @@ fmat ACMediaTimedFeature::similarity(int mode)
 	//    }
 	
 }
+
+// n1 and n2 can be different if two media have different duration
+// but at each time stamp the same features have to be extracted
+fmat ACMediaTimedFeature::similarity(ACMediaTimedFeature* B){
+	int n1 = this->getLength();
+	int n2 = B->getLength();
+	
+	fmat similarityM = zeros<fmat>(n1,n2); // NB: non symmetric
+    for (int i1 = 0; i1 < n1; i1++) {
+		for (int i2 = 0; i2 < n2; i2++) {
+			fmat xtmp1 = square(this->getValue().row(i1) - B->getValue().row(i2));
+			// XS for 1-D features it amounts to:
+			// float xtmp2=pow((this->getValue(i1,0) - B->getValue(i2,0)),2);
+			similarityM(i1,i2) = accu(xtmp1);;
+		}
+	}
+	return similarityM;
+}
+
 
 float ACMediaTimedFeature::dist(fmat vector1, fmat vector2, int mode)
 {

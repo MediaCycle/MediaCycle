@@ -262,7 +262,7 @@ void ACOsgBrowserViewQT::mouseReleaseEvent( QMouseEvent* event )
 	
 	if ( (media_cycle) && (media_cycle->hasBrowser()))
 	{
-		if ( forwarddown==1 )
+		if ( forwarddown==1 ) // 'a'
 		{	
 			int loop = media_cycle->getClickedNode();
 			std::cout << "node " << loop << " selected" << std::endl;
@@ -271,13 +271,15 @@ void ACOsgBrowserViewQT::mouseReleaseEvent( QMouseEvent* event )
 			
 			if(loop >= 0)
 			{
+				// XSCF 250310 added these 3
+				// XS 260810 put this "if" first otherwise we store the next state
+				if (media_cycle->getBrowser()->getMode() == AC_MODE_CLUSTERS)
+					media_cycle->storeNavigationState();
+				
 				if (media_cycle->getBrowser()->getMode() == AC_MODE_CLUSTERS)
 					media_cycle->incrementLoopNavigationLevels(loop);
 				media_cycle->setReferenceNode(loop);
 				
-				// XSCF 250310 added these 3
-				if (media_cycle->getBrowser()->getMode() == AC_MODE_CLUSTERS)
-					media_cycle->pushNavigationState();
 
 				//			media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
 				//			media_cycle->getBrowser()->setState(AC_CHANGING);

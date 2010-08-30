@@ -224,9 +224,10 @@ void ACOsgImageRenderer::imageGeode(int flip, float sizemul, float zoomin) {
 	// SD REQUIRED
 	
 	// SD TODO - thumbnailing has issues (image colors changed) because bug in opencv?
-	thumbnail_filename = media_cycle->getMediaFileName(media_index);//CF instead of node_index
-	image_image = osgDB::readImageFile(thumbnail_filename);
-	/*
+	// thumbnail_filename = media_cycle->getMediaFileName(media_index);//CF instead of node_index
+	//image_image = osgDB::readImageFile(thumbnail_filename);
+	
+	// XS TODO : what's the problem with thumbnail ?
 	thumbnail = (IplImage*)media_cycle->getThumbnailPtr(media_index);//CF instead of node_index
 	if (thumbnail) {
 		image_image = Convert_OpenCV_TO_OSG_IMAGE(thumbnail);
@@ -235,7 +236,7 @@ void ACOsgImageRenderer::imageGeode(int flip, float sizemul, float zoomin) {
 		thumbnail_filename = media_cycle->getThumbnailFileName(media_index);//CF instead of node_index
 		image_image = osgDB::readImageFile(thumbnail_filename);
 	}
-	*/
+	
 	
 	image_texture = new Texture2D;
 	image_texture->setImage(image_image);
@@ -359,15 +360,14 @@ void ACOsgImageRenderer::updateNodes(double ratio) {
 	
 	z = 0;
 	
-	if (border_geode->getDrawable(0)) {
-		if (attribute.getActivity()==1) {
-			((Geometry*)border_geode->getDrawable(0))->setColorArray(colors2);
-		}
-		else {
-			// CF a yet undertermined bug crashes here with imagecycle-osg-qt
-			((Geometry*)border_geode->getDrawable(0))->setColorArray(colors3);
-		}
-	}
+//	if (border_geode->getDrawable(0)) {
+//		if (attribute.getActivity()==1) {
+//			((Geometry*)border_geode->getDrawable(0))->setColorArray(colors2);
+//		}
+//		else {
+//			((Geometry*)border_geode->getDrawable(0))->setColorArray(colors3);
+//		}
+//	}
 	
 	float localscale;
 	float maxdistance = 0.2;

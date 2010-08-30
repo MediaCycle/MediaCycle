@@ -40,33 +40,45 @@
 #include <ctime>
 
 #include "MediaCycle.h"
-#include "ACImageAnalysis.h"
+#include "ACColorImageAnalysis.h"
+#include "ACBWImageAnalysis.h"
+
 //#include "ACImagePlugin.h"
 
 #include "gnuplot_i.hpp"
 
 using namespace std;
 
-string image_dir = "/Users/xavier/Pictures/bw_128/";
+//string image_dir = "/Users/xavier/numediart/Project10.1-Borderlands/Images/";
+string image_dir = "/Users/xavier/Pictures/letters/";
+//string image_dir = "/Users/xavier/Pictures/bw_tests/";
 //string image_dir = "/Users/xavier/Pictures/101_ObjectCategories/beaver/";
 string acl_dir = "/Users/xavier/Desktop/acl_tmp/";
 
 void testshapes(string sim1, string sim2){
 	string f1=image_dir+sim1;
 	string f2=image_dir+sim2;
-	ACImageAnalysis* Im1 = new ACImageAnalysis(f1);
-	ACImageAnalysis* Im2 = new ACImageAnalysis(f2);
+	ACColorImageAnalysis* Im1 = new ACColorImageAnalysis(f1);
+	ACColorImageAnalysis* Im2 = new ACColorImageAnalysis(f2);
 	Im1->computeHuMoments();
 	Im2->computeHuMoments();
 	delete Im1;
 	delete Im2;
 }
 
+void testHuMoments(string sim1){
+	string f1=image_dir+sim1;
+	ACBWImageAnalysis* Im1 = new ACBWImageAnalysis(f1);
+	Im1->computeHuMoments();
+	Im1->dumpHuMoments(cout);
+	delete Im1;
+}
+
 void testgabor(string sim1, string sim2){
 	string f1=image_dir+sim1;
 	string f2=image_dir+sim2;
-	ACImageAnalysis* Im1 = new ACImageAnalysis(f1);
-	ACImageAnalysis* Im2 = new ACImageAnalysis(f2);
+	ACColorImageAnalysis* Im1 = new ACColorImageAnalysis(f1);
+	ACColorImageAnalysis* Im2 = new ACColorImageAnalysis(f2);
 	Im1->computeGaborMoments();
 	Im2->computeGaborMoments();
 	delete Im1;
@@ -74,20 +86,20 @@ void testgabor(string sim1, string sim2){
 }
 
 void testgabor1(string sim1){
-	string f1=sim1;
-	ACImageAnalysis* Im1 = new ACImageAnalysis(f1);
-	Im1->showInWindow("Fabian");
+	string f1=image_dir+sim1;
+	ACColorImageAnalysis* Im1 = new ACColorImageAnalysis(f1);
+	Im1->showInNewWindow("Fabian");
 	cvWaitKey(0);
 	Im1->computeGaborMoments();
-	
+	Im1->closeNewWindow("Fabian");
 	delete Im1;
 }
 
 void testcolor(string sim1, string sim2){
 	string f1=image_dir+sim1;
 	string f2=image_dir+sim2;
-	ACImageAnalysis* Im1 = new ACImageAnalysis(f1);
-	ACImageAnalysis* Im2 = new ACImageAnalysis(f2);
+	ACColorImageAnalysis* Im1 = new ACColorImageAnalysis(f1);
+	ACColorImageAnalysis* Im2 = new ACColorImageAnalysis(f2);
 	Im1->computeColorMoments();
 	Im2->computeColorMoments();
 	delete Im1;
@@ -96,10 +108,14 @@ void testcolor(string sim1, string sim2){
 
 void testFFT(string sim1){
 	string f1=image_dir+sim1;
-	ACImageAnalysis* Im1 = new ACImageAnalysis(f1);
-	Im1->showInWindow("image");
-	Im1->FFT2D();
-	Im1->showFFTInWindow("fft");
+	ACBWImageAnalysis* Im1 = new ACBWImageAnalysis(f1);
+//	Im1->showInNewWindow("image");
+//	Im1->computeFFT2D_complex();
+	Im1->computeFourierPolarMoments(5, 8);
+//	Im1->dumpFourierPolarMoments(cout);
+
+//	Im1->showFFTComplexInWindow("fft");
+//	Im1->closeNewWindow("image");
 	delete Im1;
 }
 
@@ -168,6 +184,38 @@ int makeNumbered(string sdir, int n){
 	return 1;
 }
 
+void test_image_class(string sim1){
+	string f1=image_dir+sim1;
+	IplImage* img = cvLoadImage(f1.c_str(), CV_LOAD_IMAGE_COLOR);
+	cvShowImage("test", img);
+	BgrImage toto(img);
+	cout << "0 0 : " << float(toto[0][0].b)<< endl;
+	cout << "10 10 : " <<  float(toto[10][10].b) << endl;
+	cvDestroyWindow("test");
+	cvReleaseImage(&img);
+}
+
+void testLogPolar(string sim1){
+	string f1=image_dir+sim1;
+	ACBWImageAnalysis* Im1 = new ACBWImageAnalysis(f1);
+	Im1->showLogPolarInWindow("new");
+	delete Im1;
+}
+
+void testFourierMellin(string sim1){
+	string f1=image_dir+sim1;
+	ACBWImageAnalysis* Im1 = new ACBWImageAnalysis(f1);
+	Im1->computeFourierMellinMoments();
+	delete Im1;
+}
+
+void testMakePGM(string sim1){
+	string f1=image_dir+sim1;
+	ACBWImageAnalysis* Im1 = new ACBWImageAnalysis(f1);
+	Im1->savePGM(f1+".pgm");
+	delete Im1;
+}
+
 int main(int argc, char** argv) {
 	cout << "Using Opencv " << CV_VERSION << "(" << CV_MAJOR_VERSION << "." << CV_MINOR_VERSION  << "." <<  CV_SUBMINOR_VERSION << ")" << endl;	
 	// testshapes("beaver/image_0001.jpg", "beaver/image_0012.jpg");
@@ -176,7 +224,7 @@ int main(int argc, char** argv) {
 
 	// displayrect();
 	// testgabor1("/Users/xavier/Desktop/Images-Fabian/C00428-sm.tif");
-	
+		
 	if (argc==2) {
 		// command-line, e.g., for cluster
 		testoneimage(argv[1]);//"image_0001.jpg");
@@ -184,10 +232,71 @@ int main(int argc, char** argv) {
 	else{
 //		makeNumbered("/Users/xavier/Pictures/numbered",2000);
 
-//		displayrect();
+//	displayrect();
 
-//		testFFT ("image_0001.jpg");
-		testFFT ("small_circle.jpg");
+		cout << "-------- M ------------" << endl;
+ 		testFFT ("M.png");
+		cout << "-------- Mt ------------" << endl;
+		testFFT  ("Mt.png");
+
+//		cout << "-------- W ------------" << endl;
+// 		testFourierMellin ("W.png");
+//		cout << "-------- M90 ------------" << endl;
+// 		testFourierMellin ("M90.png");
+//		cout << "-------- W90 ------------" << endl;
+// 		testFourierMellin ("W90.png");
+//		cout << "-------- I ------------" << endl;
+//		testFourierMellin ("I.png");
+//		cout << "-------- A ------------" << endl;
+//		testFourierMellin ("A.png");
+//		cout << "-------- O ------------" << endl;
+//		testFourierMellin ("O.png");
+//		cout << "-------- Ot ------------" << endl;
+// 		testFourierMellin ("Ot.png");
+//		cout << "-------- Or ------------" << endl;
+// 		testFourierMellin ("Or.png");
+//		cout << "-------- Os ------------" << endl;
+// 		testFourierMellin ("Os.png");
+		
+		
+//		cout << "-------- 10151-100 ------------" << endl;
+// 		testFourierMellin ("10151-100.png");
+//		cout << "-------- 10151-250 ------------" << endl;
+// 		testFourierMellin ("10151-250.png");
+//		cout << "-------- 10151-450 ------------" << endl;
+// 		testFourierMellin ("10151-450.png");
+//		cout << "-------- 10151-500 ------------" << endl;
+// 		testFourierMellin ("10151-500.png");
+//		cout << "-------- 10151-600 ------------" << endl;
+// 		testFourierMellin ("10151-600.png");
+//		cout << "-------- 10151-750 ------------" << endl;
+// 		testFourierMellin ("10151-750.png");
+//		cout << "-------- 10151-950 ------------" << endl;
+// 		testFourierMellin ("10151-950.png");
+//		cout << "-------- 10151-1100 ------------" << endl;
+// 		testFourierMellin ("10151-1100.png");
+		
+//		testMakePGM ("M90.png");
+//		testMakePGM ("W90.png");
+		
+//		cout << "-------- Ot ------------" << endl;
+//		testFFT ("Ot.png");
+//		cout << "-------- Olittle ------------" << endl;
+//		testFFT ("Olittle.png");
+//		cout << "-------- Os ------------" << endl;
+//		testFFT ("Os.png");
+//		cout << "-------- I ------------" << endl;
+//		testFFT("I.png");
+
+//		testFFT("lena_bw.png");
+//		testFFT("10151_F288.png");
+//		testHuMoments("A.png");
+//		testHuMoments("I.png");
+//		testHuMoments("O.png");
+//		testHuMoments("O2.png");
+//		testHuMoments("Ot.png");
+//		testHuMoments("Os.png");
+//		testHuMoments("M.png");
 	}
 	return (EXIT_SUCCESS);
 }

@@ -42,36 +42,33 @@
 
 
 #include "ACVideoAnalysis.h"
+#include "ACColorImageAnalysis.h" 
+#include "ACBWImageAnalysis.h" 
+#include "ACMediaTimedFeature.h" // essai similarity matrix
+
 #include <string>
-
-// #include "ACImageAnalysis.h" // used in blob detection, when splitting channels
-
 #include <iostream>
-#include <fstream>
 #include <sstream>
-
 #include <cmath> // for fabs
 
-using std::cout;
-using std::endl;
-using std::string;
-using std::vector;
-using std::cerr;
+#include <iomanip>
+using namespace std;
 
-// XS uncomment this to get (+/- live) visual display of the time series
-// #define VISUAL_CHECK_GNUPLOT
+// ----------- uncomment this to get (+/- live) visual display of the time series
+//#define VISUAL_CHECK_GNUPLOT
 
 #ifdef VISUAL_CHECK_GNUPLOT
 #include "gnuplot_i.hpp"
 #endif //  VISUAL_CHECK_GNUPLOT
+
 // ----------- uncomment this to get visual display using highgui and verbose -----
-#define VISUAL_CHECK
-#define VERBOSE
+//#define VISUAL_CHECK
+//#define VERBOSE
 // ----------- class constants
 const int ACVideoAnalysis::ystar = 150; // 220
 // -----------
 
-
+ 
 ACVideoAnalysis::ACVideoAnalysis(){
 	capture = NULL;
 	clean();
@@ -97,7 +94,15 @@ void ACVideoAnalysis::clean(){
 	blob_speeds.clear(); 
 	contraction_indices.clear();
 	bounding_box_ratios.clear();
+	bounding_box_heights.clear();
+	bounding_box_widths.clear();	
 	pixel_speeds.clear();
+	interest_points.clear();
+	raw_moments.clear();
+	hu_moments.clear();
+	fourier_polar_moments.clear();
+	fourier_mellin_moments.clear();
+
 	width = height = depth = fps = nframes = 0;
 	threshU = threshL = 0;
 	//	averageHistogram = 0;
@@ -173,11 +178,11 @@ float ACVideoAnalysis::getDuration(){
 }
 
 IplImage* ACVideoAnalysis::getNextFrame(){
-	IplImage* tmp = 0; 
 	if(!cvGrabFrame(capture)){              // capture a frame
 		cerr << "<ACVideoAnalysis::getNextFrame> Could not find frame..." << endl;
 		return NULL;
 	}
+	IplImage* tmp;
 	tmp = cvRetrieveFrame(capture);           // retrieve the captured frame
 	frame_counter++;
 	return tmp;
@@ -432,12 +437,14 @@ void ACVideoAnalysis::computeBlobs(IplImage* bg_img, int bg_thresh, int big_blob
 		CBlobResult blobs;
 		blobs = CBlobResult( bitImage, NULL, 255 ); // find blobs in image
 		blobs.Filter( blobs, B_EXCLUDE, CBlobGetArea(), B_LESS, big_blob );
-		if (blobs.GetNumBlobs() > 0){
+		// XS for dancers we only stored when there was a blob
+		
+		//		if (blobs.GetNumBlobs() > 0){
 			all_blobs.push_back(blobs);
 			int _frame_number = cvGetCaptureProperty(capture, CV_CAP_PROP_POS_FRAMES);
 			all_blobs_time_stamps.push_back(_frame_number*1.0/fps); // in seconds
 			all_blobs_frame_stamps.push_back(_frame_number); // in frames
-		}
+//		}
 #ifdef VISUAL_CHECK
 		snprintf (str, 64, "[%03d] : %03d blobs", i, blobs.GetNumBlobs());
 		cvPutText (frame, str, cvPoint (10, 20), &font, CV_RGB (0, 255, 100));
@@ -516,6 +523,8 @@ void ACVideoAnalysis::computeBlobsInteractively(IplImage* bg_img, bool merge_blo
 	IplImage* bwImage = cvCreateImage(cvSize(width,height),depth,1);
 	
 	int xi,xf,yi,yf;
+	CBlobResult blobs;
+
 	for(int i = 0; i < nframes-1; i++){
 		frame = getNextFrame();
 		saveImage =cvCloneImage(frame);
@@ -527,9 +536,8 @@ void ACVideoAnalysis::computeBlobsInteractively(IplImage* bg_img, bool merge_blo
 		cvDilate(bitImage, bitImage);
 		cvErode(bitImage, bitImage);
 		
-		CBlobResult blobs;
 		blobs = CBlobResult( bitImage, NULL, 255 );
-		blobs.Filter( blobs, B_EXCLUDE, CBlobGetArea(), B_LESS,  slider_big_blob );
+		blobs.Filter( blobs, B_EXCLUDE, CBlobGetArea(), B_INSIDE,  slider_big_blob );
 		all_blobs.push_back(blobs);
 		int _frame_number = cvGetCaptureProperty(capture, CV_CAP_PROP_POS_FRAMES);
 		all_blobs_time_stamps.push_back(_frame_number*1.0/fps); // in seconds
@@ -667,12 +675,14 @@ void ACVideoAnalysis::computeBlobsUL(IplImage* bg_img, bool merge_blobs, int big
 		CBlobResult blobs;
 		blobs = CBlobResult( bitImage, NULL, 255 ); // find blobs in image
 		blobs.Filter( blobs, B_EXCLUDE, CBlobGetArea(), B_LESS, big_blob );
-		if (blobs.GetNumBlobs() > 0){
+
+// XS for dancers we only stored when there was a blob
+//		if (blobs.GetNumBlobs() > 0){
 			all_blobs.push_back(blobs);
 			int _frame_number = cvGetCaptureProperty(capture, CV_CAP_PROP_POS_FRAMES);
 			all_blobs_time_stamps.push_back(_frame_number*1.0/fps); // in seconds
 			all_blobs_frame_stamps.push_back(_frame_number); // in frames
-		}
+//		}
 #ifdef VISUAL_CHECK
 		snprintf (str, 64, "[%03d] : %03d blobs", i, blobs.GetNumBlobs());
 		cvPutText (frame, str, cvPoint (10, 20), &font, CV_RGB (0, 255, 100));
@@ -721,6 +731,8 @@ void ACVideoAnalysis::computeBlobsUL(IplImage* bg_img, bool merge_blobs, int big
 }
 
 void ACVideoAnalysis::computeOpticalFlow(){
+	interest_points.clear();
+
 	// from Sidi Mahmoudi
 	int win_size = 10;
 	const int MAX_COUNT = 500;
@@ -737,7 +749,6 @@ void ACVideoAnalysis::computeOpticalFlow(){
 #endif // VISUAL_CHECK
 	IplImage* frame = 0;
 	int currentframe = 0;
-	//	int firstframemoved = 0;
 	
 	IplImage *image = cvCreateImage( cvSize(width,height),depth, 3 );
 	//	image->origin = frame->origin;
@@ -768,6 +779,7 @@ void ACVideoAnalysis::computeOpticalFlow(){
 			cvReleaseImage( &eig );
 			cvReleaseImage( &temp );
 		}
+
 		else if( count > 0 ){
 			cvCalcOpticalFlowPyrLK( prev_grey, grey, prev_pyramid, pyramid,
 								   points[0], points[1], count, cvSize(win_size,win_size), 3, status, 0,
@@ -792,21 +804,19 @@ void ACVideoAnalysis::computeOpticalFlow(){
 				points[1][k++] = points[1][i];
 				p = cvPointFrom32f(points[0][i]);
 				q = cvPointFrom32f(points[1][i]);
-				//		double a = atan2( (double) p.y - q.y, (double) p.x - q.x );
-				// double m = sqrt( (p.y - q.y)*(p.y - q.y) + (p.x - q.x)*(p.x - q.x) );
+#ifdef VERBOSE		
+				double a = atan2( (double) p.y - q.y, (double) p.x - q.x );
+				double m = sqrt( (p.y - q.y)*(p.y - q.y) + (p.x - q.x)*(p.x - q.x) );
+#endif //VERBOSE
 				cvLine( image, p , q , CV_RGB(255,0,0), 1, 8,0);
-				//				printf("%d;%d;%d;%g;%g\n", currentframe, p.x, p.y, a, m);
-				// XS break
-				//				if (m>0) {
-				//					firstframemoved=currentframe;
-				//					break;
-				//				}				
+#ifdef VERBOSE		
+//				printf("%d;%d;%d;%g;%g\n", currentframe, p.x, p.y, a, m);
+#endif //VERBOSE
 			}
 			count = k;
+			printf("%d;%d\n", currentframe, count);
 		}
-		
-		//		if (firstframemoved > 0) break;
-		
+
 		need_to_init = 0;
 		if( add_remove_pt && count < MAX_COUNT ) {
 			points[1][count++] = cvPointTo32f(pt);
@@ -846,9 +856,16 @@ void ACVideoAnalysis::computeMergedBlobsTrajectory(float blob_dist){
 	for (unsigned int i=0; i< all_blobs.size(); i++){
 		vector<float> tmp;
 		currentBlob = all_blobs[i];
-		CvPoint center = currentBlob.GetCenter();
-		tmp.push_back(center.x);
-		tmp.push_back(center.y);
+		if (currentBlob.GetNumBlobs() > 0){
+			CvPoint center = currentBlob.GetCenter();
+			tmp.push_back(center.x);
+			tmp.push_back(center.y);
+		}
+		else{
+			tmp.push_back(0);
+			tmp.push_back(0);
+		}
+			
 		blob_centers.push_back(tmp);
 	}
 	HAS_TRAJECTORY = true;
@@ -894,7 +911,7 @@ void ACVideoAnalysis::computeMergedBlobsSpeeds(float blob_dist){
 		cb_prev = cb;
 		cb = blob_centers[i];
 		for (unsigned j=0; j< cb.size(); j++) { // normally 2D
-			speed.push_back(fabs(cb[j]-cb_prev[j]));	
+			speed.push_back(cb[j]-cb_prev[j]); // fabs ?	
 		}
 		blob_speeds.push_back(speed);
 	}
@@ -1255,7 +1272,7 @@ void ACVideoAnalysis::computePixelSpeed() {
 	
 #ifdef VISUAL_CHECK
 	cvNamedWindow ("Input", CV_WINDOW_AUTOSIZE);
-	cvNamedWindow ("Substraction", CV_WINDOW_AUTOSIZE);
+	cvNamedWindow ("Subtraction", CV_WINDOW_AUTOSIZE);
 #endif //VISUAL_CHECK
 	
 	for(unsigned int i = 1; i < all_blobs.size(); i++){ 
@@ -1271,6 +1288,10 @@ void ACVideoAnalysis::computePixelSpeed() {
 			speed += sum_diff_frames.val[j];
 		}
 		speed = speed / (4*width*height);
+#ifdef VERBOSE
+		cout << "frame " << i << ": pixel speed = " << speed << endl;
+#endif // VERBOSE
+
 		pixel_speeds.push_back(speed);
 		cvConvert (diff_frames, diff_frames_U);
 #ifdef VISUAL_CHECK
@@ -1300,21 +1321,36 @@ void ACVideoAnalysis::computeContractionIndices(){
 	CvRect bbox;
 	float ci;
 	for (unsigned int i=0; i< all_blobs.size(); i++){ 
-		bbox = all_blobs[i].GetBoundingBox();
-		ci = all_blobs[i].Area() / (bbox.width*bbox.height);
-		contraction_indices.push_back(ci);
+		if (all_blobs[i].GetNumBlobs() > 0){
+			bbox = all_blobs[i].GetBoundingBox();
+			ci = all_blobs[i].Area() / (bbox.width*bbox.height);
+			contraction_indices.push_back(ci);
+		}
+		else 
+			contraction_indices.push_back(0);
 	}
 }
 
 void ACVideoAnalysis::computeBoundingBoxRatios(){
 	if (!HAS_TRAJECTORY) this->computeMergedBlobsTrajectory();
 	bounding_box_ratios.clear();
+	bounding_box_heights.clear();
+	bounding_box_widths.clear();
 	CvRect bbox;
 	float bd;
 	for (unsigned int i=0; i< all_blobs.size(); i++){ 
-		bbox = all_blobs[i].GetBoundingBox();
-		bd = all_blobs[i].Area() / (bbox.width*bbox.width); // x/y * n/(xy) --- check this
-		bounding_box_ratios.push_back(bd);
+		if (all_blobs[i].GetNumBlobs() > 0){
+			bbox = all_blobs[i].GetBoundingBox();
+			bd = all_blobs[i].Area() / (bbox.width*bbox.width); // x/y * n/(xy) --- check this
+			bounding_box_ratios.push_back(bd);
+			bounding_box_heights.push_back(bbox.height);
+			bounding_box_widths.push_back(bbox.width);
+		}
+		else {
+			bounding_box_ratios.push_back(0);
+			bounding_box_heights.push_back(0);
+			bounding_box_widths.push_back(0);
+		}
 	}
 }
 
@@ -1329,6 +1365,7 @@ void ACVideoAnalysis::computeFrameAbsoluteDifferences(){
 	
 	cvNamedWindow("check", CV_WINDOW_AUTOSIZE);
 
+	// XS todo check bounds
 	for(int ifram=1; ifram<nframes-1; ifram++) {
 		cvCopy (current_frame, previous_frame) ;
 		current_frame = getNextFrame();
@@ -1345,16 +1382,102 @@ void ACVideoAnalysis::computeFrameAbsoluteDifferences(){
 	}
 	cvReleaseImage (&current_frame);
 	cvReleaseImage (&previous_frame);
-	cvReleaseImage (&diff_frames);
-	
+	cvReleaseImage (&diff_frames);	
 }
 
+// computes Raw moments for the same price
+void ACVideoAnalysis::computeHuMoments(int tresh){
+}
+
+void ACVideoAnalysis::computeHuMoments(IplImage* bg_img, int thresh){
+	hu_moments.clear();
+	raw_moments.clear();
+	this->rewind(); // reset the capture to the beginning of the video
+
+#ifdef VISUAL_CHECK
+	cvNamedWindow ("Thresh", CV_WINDOW_AUTOSIZE);
+#endif //VISUAL_CHECK
+	
+	IplImage* current_frame;
+	for(int ifram=0; ifram<nframes; ifram++) {
+		current_frame  = getNextFrame();
+		cvAbsDiff(current_frame, bg_img, current_frame);
+		ACColorImageAnalysis color_frame(current_frame);
+		color_frame.computeHuMoments(thresh);
+		
+#ifdef VISUAL_CHECK
+		color_frame.showInWindow ("Thresh");
+		cvWaitKey (10);
+#endif //VISUAL_CHECK
+		
+		raw_moments.push_back(color_frame.getRawMoments());
+		hu_moments.push_back(color_frame.getHuMoments());
+	}
+#ifdef VISUAL_CHECK
+	cvDestroyWindow ("Thresh");
+#endif //VISUAL_CHECK
+}
+
+void ACVideoAnalysis::computeFourierPolarMoments(int RadialBins, int AngularBins){
+	fourier_polar_moments.clear();
+	this->rewind(); // reset the capture to the beginning of the video
+		
+	IplImage* current_frame;
+	for(int ifram=0; ifram<nframes; ifram++) {
+		current_frame  = getNextFrame();
+		ACColorImageAnalysis color_frame(current_frame);
+		color_frame.computeFourierPolarMoments(RadialBins,AngularBins);
+		fourier_polar_moments.push_back(color_frame.getFourierPolarMoments());
+	}
+}
+
+void ACVideoAnalysis::computeFourierMellinMoments(){
+	fourier_mellin_moments.clear();
+	this->rewind(); // reset the capture to the beginning of the video
+	
+	IplImage* current_frame;
+	for(int ifram=0; ifram<nframes; ifram++) {
+		current_frame  = getNextFrame();
+		ACColorImageAnalysis color_frame(current_frame);
+		color_frame.computeFourierMellinMoments();
+		fourier_mellin_moments.push_back(color_frame.getFourierMellinMoments());
+	}
+}
+
+void ACVideoAnalysis::computeImageHistograms(int w, int h){
+	image_histograms.clear();
+	this->rewind(); // reset the capture to the beginning of the video
+	
+	IplImage* current_frame;
+	for(int ifram=0; ifram<nframes; ifram++) {
+		current_frame  = getNextFrame();
+		ACColorImageAnalysis color_frame(current_frame);
+		color_frame.computeImageHistogram(w,h);
+		image_histograms.push_back(color_frame.getImageHistogram());
+	}
+}
+
+// XS TODO watch out index !!
+// first moment = [0]
+// use armadillo instead ?
+
+vector<float> ACVideoAnalysis::getHuMoment(int momi){
+	if (momi < 0 || momi >= 7) {
+		cerr << "no Hu moment of this order, " << momi << " not in [0,6]" << endl;
+		exit(1);
+	}
+	vector<float> dummy;
+	for (unsigned int i=0; i<hu_moments.size(); i++){
+		dummy.push_back (hu_moments[i][momi] ) ;
+	}
+	return dummy;
+}
 
 // to get dummy time stamps (i.e., the indices 0,1,2,...)
 // XS: I made these FLOAT as in ACMediaFeatures but really it's INT
-vector<float> ACVideoAnalysis::getDummyTimeStamps(){
+vector<float> ACVideoAnalysis::getDummyTimeStamps(int nsize){
 	vector<float> dummy;
-	for (unsigned int i=0; i<blob_centers.size(); i++){
+	for (int i=0; i<nsize; i++){ 
 		dummy.push_back((float)i);
 	}
 	return dummy;
@@ -1410,6 +1533,32 @@ void ACVideoAnalysis::showInWindow(string title, bool has_win){
 	cvDestroyWindow(title.c_str());
 }
 
+void ACVideoAnalysis::showFFTInWindow(string title, bool has_win){
+	if (not has_win)
+		cvNamedWindow(title.c_str(), CV_WINDOW_AUTOSIZE);
+	
+	cvResizeWindow(title.c_str(), 800, 600 );
+
+	CvFont font;
+	cvInitFont (&font, CV_FONT_HERSHEY_COMPLEX, 0.7, 0.7);
+	
+	IplImage* img = 0;
+	for(int i = 0; i < nframes; i++){
+		img = getNextFrame();
+		ACColorImageAnalysis color_frame(img);
+		color_frame.makeBWImage();
+		ACBWImageAnalysis *bw_helper = new ACBWImageAnalysis(color_frame.getBWImage());
+		bw_helper->computeFFT2D_complex();
+		bw_helper->showFFTComplexInWindow (title.c_str());
+		delete bw_helper;
+	}
+	cvWaitKey(0);
+	//	cvReleaseImage(&img); -- will be released by cvReleaseCapture, because img=getNextFrame 
+	// do not free twice the same buffer !
+	cvDestroyWindow(title.c_str());
+
+}
+
 // ----------- for "fancy" browsing
 
 int        g_slider_position = 0; 
@@ -1458,7 +1607,7 @@ void ACVideoAnalysis::browseInWindow(string title, bool has_win){
 // ------------------ file output functions -----------------
 
 void ACVideoAnalysis::saveInFile (string fileout, int nskip){
-	// CV_FOURCC(‘M’,‘J’,‘P’,‘G’)
+	// CV_FOURCC('M','J','P','G')
 	CvVideoWriter* video_writer = cvCreateVideoWriter( fileout.c_str(), -1, fps, cvSize(width,height) );  // "-1" pops up a nice GUI 
 	IplImage* img = 0;
 	rewind();
@@ -1495,32 +1644,155 @@ void ACVideoAnalysis::resizeAndSaveInFile (string fileout, int nskip, int w, int
 	cvReleaseVideoWriter(&video_writer); 
 }
 
-void ACVideoAnalysis::dumpTrajectory() {
-	// in terminal
-
+void ACVideoAnalysis::dumpTrajectory(ostream &odump) {
 	// XS TODO check if computed
+	odump << setiosflags(ios::fixed) <<setprecision(3); // 0.123
+	odump << showpoint;
 	for (int i = 0; i < int(blob_centers.size()); i++){
-		cout << all_blobs_frame_stamps[i]  << " " << blob_centers[i][0] << " - " << blob_centers[i][1] << endl; 
+		odump << setw(10);
+		odump << all_blobs_frame_stamps[i]  << " ";
+		odump << setw(10);
+		odump << blob_centers[i][0] << " ";
+		odump << setw(10);
+		odump << blob_centers[i][1] << endl; 
 	}; 
 }	
 
-void ACVideoAnalysis::dumpContractionIndices() {
-	// in terminal
-	
+void ACVideoAnalysis::dumpContractionIndices(ostream &odump) {
 	// XS TODO check if computed
+	odump.precision(3); // 0.123
+	odump << showpoint;
 	for (int i = 0; i < int(contraction_indices.size()); i++){
-		cout << all_blobs_frame_stamps[i]  << " " << contraction_indices[i] << endl; 
+		odump << setw(10);
+		odump << all_blobs_frame_stamps[i]  << " ";
+		odump << setw(10);
+		odump << contraction_indices[i] << endl; 
 	}; 
 }	
 
-void ACVideoAnalysis::dumpBoundingBoxRatios() {
-	// in terminal
-	
+void ACVideoAnalysis::dumpBoundingBoxRatios(ostream &odump) {
 	// XS TODO check if computed
+	odump.precision(3); // 0.123
+	odump << showpoint;
 	for (int i = 0; i < int(bounding_box_ratios.size()); i++){
-		cout << all_blobs_frame_stamps[i]  << " " << bounding_box_ratios[i] << endl; 
+		odump << setw(10);
+		odump << all_blobs_frame_stamps[i]  << " ";
+		odump << setw(10);
+		odump << bounding_box_ratios[i] << endl; 
 	}; 
 }	
+
+
+void ACVideoAnalysis::dumpBlobSpeed(ostream &odump) {
+	// XS TODO check if computed
+	odump << setiosflags(ios::fixed) << setprecision(3); // 0.123
+	odump << showpoint;
+	for (int i = 0; i < int(blob_speeds.size()); i++){
+		odump << setw(10);
+		odump << all_blobs_frame_stamps[i]  << " ";
+		odump << setw(10);
+		odump << blob_speeds[i][0] << " ";
+		odump << setw(10);
+		odump << blob_speeds[i][1] << endl; 
+	}; 	
+}
+
+void ACVideoAnalysis::dumpRawMoments(ostream &odump) {
+	// XS TODO check if computed
+	// m00, m10, m01, m20, m11, m02, m30, m21, m12, m03; 
+	for (unsigned int i = 0; i < raw_moments.size(); i++){
+		odump << setw(10);
+		odump << i << " ";
+		for (unsigned int momi = 0; momi < 10; momi++){
+			odump << setw(10); 
+			odump << raw_moments[i][momi];
+		}
+		odump << endl;
+	}
+}
+
+void ACVideoAnalysis::dumpHuMoments(ostream &odump) {
+	// XS TODO check if computed
+	for (unsigned int i = 0; i < hu_moments.size(); i++){
+		odump << setw(10);
+		odump << i << " ";
+		for (unsigned int momi = 0; momi < 7; momi++){
+			odump << setw(10); 
+			odump << hu_moments[i][momi];
+		}
+		odump << endl;
+	}	
+}
+
+void ACVideoAnalysis::dumpFourierPolarMoments(ostream &odump) {
+	// XS TODO check if computed
+	for (unsigned int i = 0; i < fourier_polar_moments.size(); i++){
+		odump << setw(10);
+		odump << i << " ";
+		for (unsigned int momi = 0; momi < fourier_polar_moments[i].size(); momi++){
+			odump << setw(10); 
+			odump << fourier_polar_moments[i][momi] << " ";
+		}
+		odump << endl;
+	}	
+}
+
+void ACVideoAnalysis::dumpAll(ostream &odump) {
+	string fn = extractFilename(this->getFileName());
+	string todor = fn.substr(0, fn.size()-4)+"_";
+	odump << setiosflags(ios::fixed) <<setprecision(3); // 0.123
+	odump << showpoint;
+	for (int i = 0; i < int(blob_centers.size()); i++){
+		odump << todor ;
+		odump << all_blobs_frame_stamps[i]  << ", ";
+		odump << setw(10);
+		odump << blob_centers[i][0] << " ";
+		odump << setw(10);
+		odump << blob_centers[i][1] << " ";
+		odump << setw(10);
+		odump << contraction_indices[i] << " "; 
+		odump << setw(10);
+		odump << bounding_box_ratios[i] << " "; 
+		odump << setw(10);
+		odump << bounding_box_heights[i] << " ";
+		odump << setw(10);
+		odump << bounding_box_widths[i] << " ";
+		for (unsigned int momi = 0; momi < 7; momi++){
+			odump << setw(10); 
+			odump << hu_moments[i][momi];
+		}
+		for (unsigned int momi = 0; momi < 10; momi++){
+			odump << setw(10); 
+			odump << raw_moments[i][momi];
+		}
+		
+//		odump << setw(10);
+//		odump << blob_speeds[i][0] << " ";
+//		odump << setw(10);
+//		odump << blob_speeds[i][1] << " "; 		
+		odump << " ; " << endl; 
+	}
+}
+
+
+string ACVideoAnalysis::extractFilename(string path)
+{
+    int index = 0;
+    int tmp = 0;
+    tmp = path.find_last_of('\\' );
+    int tmp2 = 0;
+    tmp2 = path.find_last_of('/');
+    if (tmp > tmp2)
+        index = tmp;
+    else
+        index = tmp2;
+    return path.substr(index + 1);
+}
+
+
+void ACVideoAnalysis::test_match_shapes(ACVideoAnalysis *V2, IplImage* bg_img){
+// XS TODO CVMATCHSHAPES
+}
 
 // TODO: detect blob on a selected channel
 // (suffit de nettoyer ci-dessous)

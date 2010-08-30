@@ -55,9 +55,6 @@ bool ACOsgBrowserEventHandler::handle(const osgGA::GUIEventAdapter& ea,osgGA::GU
 		{
 			//printf("event PUSH: aa=%x\n", &aa);
 			osgViewer::View* view = dynamic_cast<osgViewer::View*>(&aa);
-
-			// xs this one was in image but is not used !
-			//osgViewer::Viewer* viewer = dynamic_cast<osgViewer::Viewer*>(&aa);
 			if (view) pick(view,ea,false);
 			return false;
 		}    

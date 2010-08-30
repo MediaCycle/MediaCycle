@@ -242,6 +242,7 @@ int MediaCycle::importACLLibrary(string path) {
 // XS import = open + some processing 
 	cout << "MediaCycle: importing library: " << path << endl;
 	int ok = 0;
+	// Xs debug ACL
 	ok = this->mediaLibrary->openACLLibrary(path);
 	if (ok>=1) this->mediaLibrary->normalizeFeatures();
 	//	XS TODO this->mediaBrowser->libraryContentChanged();	
@@ -394,7 +395,6 @@ int	MediaCycle::getLastSelectedNode() { return mediaBrowser->getLastSelectedNode
 
 // == Cluster Display
 void MediaCycle::updateState() { mediaBrowser->updateState(); }
-void MediaCycle::pushNavigationState() { mediaBrowser->pushNavigationState(); }
 int MediaCycle::getNavigationLevel() { return mediaBrowser->getNavigationLevel(); }
 float MediaCycle::getFrac() { return mediaBrowser->getFrac(); }
 void MediaCycle::incrementLoopNavigationLevels(int i) { mediaBrowser->incrementLoopNavigationLevels(i); }
@@ -402,8 +402,12 @@ void MediaCycle::setReferenceNode(int index) { mediaBrowser->setReferenceNode(in
 int MediaCycle::getReferenceNode() { return mediaBrowser->getReferenceNode(); }
 void MediaCycle::goBack() { mediaBrowser->goBack(); }
 void MediaCycle::goForward() { mediaBrowser->goForward(); }
+void MediaCycle::storeNavigationState() { mediaBrowser->storeNavigationState(); }
 void MediaCycle::setClusterNumber(int n) { mediaBrowser->setClusterNumber(n); }
 void MediaCycle::setWeight(int i, float weight) { mediaBrowser->setWeight(i, weight); }
+vector<float> MediaCycle::getWeightVector(){return mediaBrowser->getWeightVector();}
+float MediaCycle::getWeight(int i){return mediaBrowser->getWeight(i);}
+
 void MediaCycle::setForwardDown(int i) { forwarddown = i; }
 
 // == Features
@@ -519,5 +523,20 @@ void MediaCycle::readConfigFile(string _fname) {
 
 void MediaCycle::cleanUserLog() { 
   mediaBrowser->getUserLog()->clean(); 
+}
+
+
+// == Dump / used for Debug 
+void MediaCycle::dumpNavigationLevel(){
+	cout << "Global Navigation Level = " <<  getNavigationLevel() << endl;
+}
+									
+void MediaCycle::dumpLoopNavigationLevels(){
+	int nl = this->getBrowser()->getNumberOfMediaNodes();
+	cout << "loops nav lev for :" << endl;
+	for (int i=0; i < nl; i++){
+		cout << this->getBrowser()->getMediaNode(i).getNavigationLevel() << " ";
+	}
+	cout << endl;
 }
 

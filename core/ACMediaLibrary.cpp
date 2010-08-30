@@ -109,7 +109,7 @@ int ACMediaLibrary::importDirectory(std::string _path, int _recursive, int id, A
 
 	scanDirectory(_path, _recursive, filenames);
 	
-	for (int i=0; i<filenames.size(); i++){
+	for (unsigned int i=0; i<filenames.size(); i++){
 		int index = forward_order ? i : filenames.size()-1-i;//CF if reverse order (not forward_order), segments in subdirs are added to the library after the source recording
 		extension = fs::extension(filenames[index]);
 		ACMedia* media = ACMediaFactory::create(extension);
@@ -127,7 +127,7 @@ int ACMediaLibrary::importDirectory(std::string _path, int _recursive, int id, A
 				// segments are created without id 
 				media->segment(acpl);
 				mediaSegments = media->getAllSegments();
-				for (int i = 0; i < mediaSegments.size(); i++){
+				for (unsigned int i = 0; i < mediaSegments.size(); i++){
 					if (mediaSegments[i]->import(filenames[index], id, acpl)){
 						this->addMedia(mediaSegments[i]);
 						id++;
@@ -522,8 +522,8 @@ void ACMediaLibrary::normalizeFeatures() {
 		calculateStats();
 	}
 	
-	int i,j,k;
-	int n = this->getSize() ;
+	unsigned int i,j,k;
+	unsigned int n = this->getSize() ;
 	
 	for(i=0; i<n; i++){
 		ACMedia* item = media_library[i];
@@ -544,7 +544,7 @@ void ACMediaLibrary::denormalizeFeatures() {
 	cout << "denormalizing features" << endl;
 	if ( isEmpty() ) return;	
 	
-	int i,j,k;
+	unsigned int i,j,k;
 	
 	// XS denormalize only those that have been normalized (duh),
 	// so n is NOT the full library size !

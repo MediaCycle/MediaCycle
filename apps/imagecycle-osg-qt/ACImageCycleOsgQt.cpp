@@ -42,6 +42,7 @@ ACImageCycleOsgQt::ACImageCycleOsgQt(QWidget *parent)
  updatedLibrary(false)
 {
 	ui.setupUi(this); // first thing to do
+	features_known = false; // when launching the app we don't know how many features.
 
 	media_cycle = new MediaCycle(MEDIA_TYPE_IMAGE,"/tmp/","mediacycle.acl");
 	
@@ -56,6 +57,8 @@ ACImageCycleOsgQt::ACImageCycleOsgQt(QWidget *parent)
 		#endif
 		media_cycle->addPlugin("../../../plugins/image/" + build_type + "/mc_image.dylib");
 	#endif
+	
+	//this->configureCheckBoxes();
 	
 	ui.browserOsgView->move(0,20);
 	ui.browserOsgView->setMediaCycle(media_cycle);
@@ -91,14 +94,20 @@ void ACImageCycleOsgQt::updateLibrary()
 	media_cycle->libraryContentChanged(); 	
 	media_cycle->setReferenceNode(0);
 	// XSCF 250310 added these 3
-	media_cycle->pushNavigationState();
+	// media_cycle->pushNavigationState(); // XS 250810 removed this
 	//media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
+	
+	// XS TODO this is sooo ugly:
 	media_cycle->getBrowser()->setState(AC_CHANGING);
 	
 	ui.browserOsgView->prepareFromBrowser();
 	//browserOsgView->setPlaying(true);
 	media_cycle->setNeedsDisplay(true);
 	updatedLibrary = true;
+	
+	//XS new, use this carefully 
+	this->configureCheckBoxes();
+	
 	ui.browserOsgView->setFocus();
 }
 
@@ -124,59 +133,29 @@ void ACImageCycleOsgQt::on_pushButtonRecenter_clicked()
 void ACImageCycleOsgQt::on_pushButtonBack_clicked()
 {
 	media_cycle->goBack();
+	this->synchronizeFeaturesWeights();
+//	ui.navigationLineEdit->setText(QString::number(media_cycle->getNavigationLevel()));
+	
+	// XS debug
+	media_cycle->dumpNavigationLevel() ;
+	media_cycle->dumpLoopNavigationLevels() ;
+
 	//ui.browserOsgView->setFocus();
 }
 
 void ACImageCycleOsgQt::on_pushButtonForward_clicked()
 {
 	media_cycle->goForward();
+	this->synchronizeFeaturesWeights();
+
+//	ui.navigationLineEdit->setText(QString::number(media_cycle->getNavigationLevel()));
+	
+	// XS debug
+	media_cycle->dumpNavigationLevel() ;
+	media_cycle->dumpLoopNavigationLevels() ;
+
 	//ui.browserOsgView->setFocus();
 }
-
-void ACImageCycleOsgQt::on_checkBoxFeat1_stateChanged(int state)
-{
-	if (updatedLibrary)
-	{
-		media_cycle->setWeight(0,state/2.0f);
-		media_cycle->updateDisplay(true); //XS 250310 was: media_cycle->updateClusters(true);
-		// XS250310 removed mediacycle->setNeedsDisplay(true); // now in updateDisplay
-
-		ui.browserOsgView->updateTransformsFromBrowser(0.0); 
-	}
-	//ui.browserOsgView->setFocus();
-}
-
-void ACImageCycleOsgQt::on_checkBoxFeat2_stateChanged(int state)
-{
-	if (updatedLibrary)
-	{
-		media_cycle->setWeight(1,state/2.0f);
-		media_cycle->updateDisplay(true); //XS 250310 was: media_cycle->updateClusters(true);
-		// XS 310310 removed media_cycle->setNeedsDisplay(true); // now in updateDisplay
-
-		ui.browserOsgView->updateTransformsFromBrowser(0.0); 
-	}
-	//ui.browserOsgView->setFocus();
-}
-
-void ACImageCycleOsgQt::on_checkBoxFeat3_stateChanged(int state)
-{
-	if (updatedLibrary)
-	{
-		media_cycle->setWeight(2,state/2.0f);
-		media_cycle->updateDisplay(true); //XS 250310 was: media_cycle->updateClusters(true);
-		// XS 310310 removed media_cycle->setNeedsDisplay(true); // now in updateDisplay
-
-		ui.browserOsgView->updateTransformsFromBrowser(0.0); 
-	}
-	//ui.browserOsgView->setFocus();
-}
-
-// this one is too slow when many items
-//void ACImageCycleOsgQt::on_sliderClusters_sliderMoved(){
-//	// for synchronous display of values 
-//	ui.spinBoxClusters->setValue(ui.sliderClusters->value());
-//}
 
 void ACImageCycleOsgQt::on_sliderClusters_sliderReleased(){
 	// for synchronous display of values 
@@ -220,11 +199,21 @@ void ACImageCycleOsgQt::loadACLFile(){
 	//fileName = QFileDialog::getOpenFileName(this, "~", );
 	
 	if (!(fileName.isEmpty())) {
-		media_cycle->importLibrary((char*) fileName.toStdString().c_str());
+		media_cycle->importACLLibrary((char*) fileName.toStdString().c_str());
 		media_cycle->normalizeFeatures();
 		std::cout << "File library imported" << std::endl;
 		this->updateLibrary();
 	}	
+	
+	// XS watch this one...
+	media_cycle->storeNavigationState(); 
+	
+	// XS play
+//	ui.navigationLineEdit->setText(QString::number(media_cycle->getNavigationLevel()));
+	
+	// XS debug
+	media_cycle->dumpNavigationLevel();
+	media_cycle->dumpLoopNavigationLevels() ;
 }
 
 void ACImageCycleOsgQt::saveACLFile(){
@@ -286,11 +275,124 @@ void ACImageCycleOsgQt::loadMediaDirectory(){
 }
 
 void ACImageCycleOsgQt::loadMediaFiles(){
-	//ui.browserOsgView->setFocus();
+	QString fileName;
+	
+	QFileDialog dialog(this,"Open MediaCycle Image File(s)");
+	dialog.setDefaultSuffix ("png");
+	dialog.setNameFilter("Image Files (*.jpg *.png *.tif *.tiff)");
+	dialog.setFileMode(QFileDialog::ExistingFiles); // ExistingFile(s); "s" is for multiple file handling
+	
+	QStringList fileNames;
+	if (dialog.exec())
+		fileNames = dialog.selectedFiles();
+	
+	QStringList::Iterator file = fileNames.begin();
+	while(file != fileNames.end()) {
+		//std::cout << "File library: '" << (*file).toStdString() << "'" << std::endl;
+		fileName = *file;
+		++file;
+		std::cout << "Will open: '" << fileName.toStdString() << "'" << std::endl;
+		//fileName = QFileDialog::getOpenFileName(this, "~", );
+	
+		if (!(fileName.isEmpty())) {
+		
+			media_cycle->importDirectory((char*) fileName.toStdString().c_str(),0, 0);
+			media_cycle->normalizeFeatures();
+			media_cycle->libraryContentChanged();
+			std::cout <<  fileName.toStdString() << " imported" << std::endl;
+			this->updateLibrary();
+		}
+	}
 }
 
 void ACImageCycleOsgQt::editConfigFile(){
 	cout << "Editing config file with GUI..." << endl;
 	settingsDialog->show();
 	settingsDialog->setFocus();
+}
+
+void ACImageCycleOsgQt::configureCheckBoxes(){
+	// dynamic config of checkboxes
+	// according to plugins found by plugin manager
+	ACPluginManager *acpl = media_cycle->getPluginManager(); //getPlugins
+	if (acpl) {
+		for (int i=0;i<acpl->getSize();i++) {
+			for (int j=0;j<acpl->getPluginLibrary(i)->getSize();j++) {
+				if (acpl->getPluginLibrary(i)->getPlugin(j)->getPluginType() == PLUGIN_TYPE_FEATURES && acpl->getPluginLibrary(i)->getPlugin(j)->getMediaType() == MEDIA_TYPE_IMAGE) {
+					QString s(acpl->getPluginLibrary(i)->getPlugin(j)->getName().c_str());
+					QListWidgetItem * item = new QListWidgetItem(s,ui.featuresListWidget);
+					item->setCheckState (Qt::Unchecked);
+				}
+			}
+		}
+	}
+	
+	this->synchronizeFeaturesWeights();
+
+	connect(ui.featuresListWidget, SIGNAL(itemClicked(QListWidgetItem*)),
+            this, SLOT(modifyListItem(QListWidgetItem*)));
+
+//	w2.show();
+	
+	//	QCheckBox* toto = new QCheckBox("toto",ui.groupBoxSimilarity);
+	//	QCheckBox* toto2 = new QCheckBox("toto2",ui.groupBoxSimilarity);
+	//	QCheckBox* toto3 = new QCheckBox("toto3",ui.groupBoxSimilarity);
+	//	QCheckBox* toto4 = new QCheckBox("toto4",ui.groupBoxSimilarity);
+	//	QCheckBox* toto5 = new QCheckBox("toto5",ui.groupBoxSimilarity);
+	//	QCheckBox* toto6 = new QCheckBox("toto6",ui.groupBoxSimilarity);
+	//	QGridLayout *lo = new QGridLayout;
+	//	lo->addWidget(toto);
+	//	lo->addWidget(toto2);
+	//	lo->addWidget(toto3);
+	//	lo->addWidget(toto4);
+	//	lo->addWidget(toto5);
+	//	lo->addWidget(toto6);
+	//
+	//	ui.groupBoxSimilarity->setLayout(lo);
+	
+	// XS end test -- need to delete !!!
+}
+void ACImageCycleOsgQt::cleanCheckBoxes(){
+}
+
+// NEW SLOTS
+void ACImageCycleOsgQt::modifyListItem(QListWidgetItem *item)
+{
+	// XS check
+	cout << item->text().toStdString() << endl; // isselected...
+	cout << ui.featuresListWidget->currentRow() << endl;
+	// end XS check 
+	
+	if (updatedLibrary){
+		float w;
+		if (item->checkState() == Qt::Unchecked) w = 0.0;
+		else w = 1.0 ;
+		int f =  ui.featuresListWidget->currentRow(); // index of selected feature
+		media_cycle->setWeight(f,w);
+		media_cycle->updateDisplay(true); 
+		//XS 250310 was: media_cycle->updateClusters(true);
+		// XS250310 removed mediacycle->setNeedsDisplay(true); // now in updateDisplay
+		ui.browserOsgView->updateTransformsFromBrowser(0.0); 
+	}
+}
+
+void ACImageCycleOsgQt::synchronizeFeaturesWeights(){
+	// synchronize weights with what is loaded in mediacycle
+	// note: here weights are 1 or 0 (checkbox).
+	// conversion: 0 remains 0, and value > 0 becomes 1.
+	vector<float> w = media_cycle->getWeightVector();
+	int nw = w.size();
+	if (ui.featuresListWidget->count() != nw){
+		cerr << "Checkboxes in GUI do not match Features in MediaCycle" << endl;
+		cerr << ui.featuresListWidget->count() << "!=" << nw << endl;
+		exit(1);
+	}
+	else {
+		for (int i=0; i< nw; i++){
+			if (w[i]==0) 
+				ui.featuresListWidget->item(i)->setCheckState (Qt::Unchecked);
+			else
+				ui.featuresListWidget->item(i)->setCheckState (Qt::Checked);		
+		}
+	}
 }

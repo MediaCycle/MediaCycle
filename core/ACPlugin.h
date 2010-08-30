@@ -79,7 +79,7 @@ public:
 	ACPluginType getPluginType() {return this->mPluginType;}
 
 	virtual int initialize(){return 0;}
-	// XS TODO: why are they all =0 ?
+
 	virtual std::vector<ACMediaFeatures*> calculate(){};
 	virtual std::vector<ACMediaFeatures*> calculate(std::string aFileName){};
 	virtual std::vector<ACMediaFeatures*> calculate(ACMediaData* aData, ACMedia* theMedia){};

@@ -84,7 +84,6 @@ void ACMediaData::setAudioData(float* data){
 void ACMediaData::readAudioData(string _fname){ 
 	SF_INFO sfinfo;
 	SNDFILE* testFile;
-	float* data;
 	if (! (testFile = sf_open (_fname.c_str(), SFM_READ, &sfinfo))){  
 		/* Open failed so print an error message. */
 		printf ("Not able to open input file %s.\n", _fname.c_str()) ;

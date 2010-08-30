@@ -1,7 +1,7 @@
 /**
  * @brief ACAudioFeatures.cpp
- * @author Damien Tardieu
- * @date 22/06/2010
+ * @author Xavier Siebert
+ * @date 30/08/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -388,7 +388,9 @@ rowvec spectralFlatness(colvec x_v, int fftSize, int sr_hz){
 
 double spectralVariation(colvec x_v, colvec xPrev_v){
 	double sv;
-	if (sum(x_v) < 1e-5 | sum(xPrev_v) < 1e-5){
+	//XS-SD 240810: typo || not | ; added lim parameter
+	double lim = 1e-5;
+	if (sum(x_v) < lim || sum(xPrev_v) < lim){
 		sv = 1;
 	}	
 	else{

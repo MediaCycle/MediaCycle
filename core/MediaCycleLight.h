@@ -121,7 +121,7 @@ public:
 	void getMouse(float *mx, float *my);
 	// 
 	void updateState();
-	void pushNavigationState();
+	void storeNavigationState();
 	float getFrac();
 	void setCameraRotation(float angle);
 	int getClickedNode();

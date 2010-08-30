@@ -45,8 +45,13 @@
 #include <fftw3.h>
 #include <complex>
 
+#include <fstream> 
+
 using std::vector;
 using std::string;
+
+
+// --------------------------------------------------------------------
 
 //http://www.cs.iit.edu/~agam/cs512/lect-notes/opencv-intro/opencv-intro.html#SECTION00053000000000000000
 // C++ wrapper around IplImage that allows convenient (and hopefully fast) pixel access
@@ -59,7 +64,9 @@ public:
 	~Image(){imgp=0;}
 	void operator=(IplImage* img) {imgp=img;}
 	inline T* operator[](const int rowIndx) {
-	return ((T *)(imgp->imageData + rowIndx*imgp->widthStep));}
+		return ((T *)(imgp->imageData + rowIndx*imgp->widthStep));
+	}
+	IplImage* getImage(){return imgp;}
 };
 
 typedef struct{
@@ -80,62 +87,80 @@ typedef Image<float>          BwImageFloat;
 class ACImageAnalysis {
 public:
     ACImageAnalysis();
-	ACImageAnalysis(const string &filename);	
-	ACImageAnalysis(IplImage*);
 
-    ~ACImageAnalysis();
+    virtual ~ACImageAnalysis(){};
 	
 	// general I/O, settings
-	void clean();
-	int initialize();
+	virtual void reset(){};
+	virtual void clean(){};
 	void setFileName(const string &filename);
 	int saveInFile(string fileout); // XS TODO: void in video
 	
 	//accessors 
-	inline int getWidth() {return width;}
-	inline int getHeight() {return height;}
-	inline int getDepth() {return depth;}
-	int getNumberOfChannels(){return channels;}
+	int getWidth() ;
+	int getHeight() ;
+	int getDepth();
+	int getNumberOfChannels();
 	string getFileName() {return file_name;}
-	string getColorModel(){return color_model;}
+	string getColorModel() {return color_model;}
 
 	// image reduced to a size appropriate for analysis 
 	IplImage* getImage(){return imgp;}
-	int setImage(IplImage* img, float _scale=0.0);
+	int scaleImage(IplImage* img, float _scale=0.0);
 	
-	// channels
-	int splitChannels(string col="BGR");
-	void removeChannels(); 
-	IplImage* getChannel(int i);
+//	// channels
+//	int splitChannels(string col="BGR");
+//	void removeChannels(); 
+//	IplImage* getChannel(int i);
 	
-	// FFT
-	void FFT2D(string col="BGR"); // or HSV 
-	void FFT2D_centered(string col="BGR"); // or HSV 
-	fftw_complex** getFFT2D(){return fft;}
+//	// FFT
+//	void computeFFT2D(string col="BGR"); // or HSV 
+//	void computeFFT2D_complex(string col="BGR"); // or HSV 
+//	void computeFFT2D_centered(string col="BGR"); // or HSV 
+//	fftw_complex** getFFT2D(){return fft;}
 	
 	// computation of features
-	void computeHuMoments(int mmax = 7, int thresh = 100);
-	void computeGaborMoments(int mumax = 7, int numax = 5);
-	void computeColorMoments(int n = 4);
+	virtual void computeHuMoments(int thresh = 0){};
+	virtual void computeFourierPolarMoments(int RadialBins=5, int AngularBins=8){};
+	virtual void computeFourierMellinMoments(){};
+	virtual void computeContourHuMoments(int thresh = 0){};
+	virtual void computeGaborMoments(int mumax = 7, int numax = 5){};
+	virtual void computeColorMoments(int n = 4){};
 
 	// features accessors
+	vector <float> getRawMoments(){return raw_moments;}
 	vector <float> getHuMoments(){return hu_moments;}
+	vector <float> getFourierPolarMoments(){return fourier_polar_moments;}
+	vector <float> getFourierMellinMoments(){return fourier_mellin_moments;}
+	vector <float> getContourHuMoments(){return contour_hu_moments;}
 	vector <float> getGaborMoments(){return gabor_moments;}
 	vector <float> getColorMoments(){return color_moments;}
+	vector <float> getImageHistogram(){return image_histogram;}
 
 	// handy
 	void check_imgp(); 
 
 	// visual
-	void showInWindow(const string, bool has_win=false);
-	void showChannels(string col="BGR");
-	void showChannels(string cmode, const char* w0, const char* w1, const char* w2);
-	void showFFTInWindow(const string);
+	void showInWindow(const string); // existing window, closed elsewhere
+	void showInNewWindow(const string); // new window created
+	void closeNewWindow(const string); // new window deleted
+
+//	void showFFTInWindow(const string);
+//	void showFFTComplexInWindow(const string);
+
+	//I/O
+//	void dumpContractionIndex(std::ostream &odump);
+//	void dumpBoundingBoxRatio(std::ostream &odump);
+	void dumpRawMoments(std::ostream &odump);
+	void dumpHuMoments(std::ostream &odump);
+	void dumpContourHuMoments(std::ostream &odump);
+	void dumpFourierPolarMoments(std::ostream &odump);
+	void dumpFourierMellinMoments(std::ostream &odump);
+//	void dumpAll(std::ostream &odump);
 	
 
-private:
+protected:
 	IplImage *imgp; // not imgp_full
-	int width, height, step, depth, channels;
 	float scale;
 	
 	string file_name;
@@ -148,21 +173,25 @@ private:
 	// original image size (image not stored in memory)
 	int original_width, original_height;
 
-	// channels
-	IplImage *channel_img[3];
-	bool HAS_CHANNELS;
+//	// channels
+//	IplImage *channel_img[3];
+//	bool HAS_CHANNELS;
 	
 	// FFT
-	fftw_complex *fft[3]; // one per channel
-	bool HAS_FFT;
+//	fftw_complex *fft[3]; // one per channel
+//	fftw_complex *fft_bw; // on grayscale image
+//	bool HAS_FFT;
 	
 	// features
 	vector <float> color_moments;
 	vector <float> gabor_moments;
+	vector <float> raw_moments;
 	vector <float> hu_moments;
-	
-	
-	
+	vector <float> contour_hu_moments;
+	vector <float> fourier_polar_moments;
+	vector <float> fourier_mellin_moments;
+	vector <float> image_histogram;
+
 };
 
 #endif	/* _ACIMAGEANALYSIS_H */

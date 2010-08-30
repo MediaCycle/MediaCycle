@@ -42,6 +42,7 @@ using std::cerr;
 using std::cout;
 using std::endl;
 using std::ofstream;
+using std::vector;
 
 ACMediaFeatures::ACMediaFeatures(){
 	//XS TODO: is this flag still necessary ?
@@ -58,9 +59,19 @@ ACMediaFeatures::ACMediaFeatures(FeaturesVector V, string myname){
 	else cerr << "<ACMediaFeatures Constructor> trying to construct empty media features" << endl;
 }
 
+//ACMediaFeatures::ACMediaFeatures(FeaturesVectorAsDouble V, string myname){
+//	// XS TODO:  add checks
+//	// XS TODO: clumsy conversion double -> float. keep double ? template ?
+//	vector<float> tmp(V.begin(), V.end());
+//	features_vector = tmp;
+//	name = myname;
+//	if (V.size() > 0) _computed = true;
+//	else cerr << "<ACMediaFeatures Constructor> trying to construct empty media features" << endl;
+//}
+
 
 float ACMediaFeatures::getFeatureElement(int i) {
-	if (i >= features_vector.size() || i < 0){
+	if (i >= int(features_vector.size()) || i < 0){
 		cerr << " <ACMediaFeatures::getFeatureElement(int i) error> Invalid Feature Index" << endl;
 		return -1;
 	}
@@ -112,7 +123,7 @@ void ACMediaFeatures::dump(){ // output in terminal
 void ACMediaFeatures::write(string file_name){ // output in file
 	ofstream out(file_name.c_str()); 
 	out << "features name: " << getName() << endl;
-	for (int i=0; i<features_vector.size(); i++){
+	for (int i=0; i<int(features_vector.size()); i++){
 		out << i << " : " << features_vector[i] << endl;
 	}
 	

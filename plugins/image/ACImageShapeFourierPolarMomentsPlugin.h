@@ -1,9 +1,9 @@
 /*
- *  ACFeaturesTypes.h
+ *  ACImageShapeFourierPolarMomentsPlugin.h
  *  MediaCycle
  *
  *  @author Xavier Siebert
- *  @date 11/05/09
+ *  @date 24/08/10
  *  @copyright (c) 2009 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
@@ -32,18 +32,24 @@
  *
  */
 
-// Definitions used along with features
+#ifndef _ACIMAGESHAPEFOURIERPOLARMOMENTSPLUGIN_H
+#define	_ACIMAGESHAPEFOURIERPOLARMOMENTSPLUGIN_H
 
+#include "ACColorImageAnalysis.h"
+#include "ACPlugin.h"
+#include "ACMediaFeatures.h"
 
-#ifndef _ACFEATURESTYPES_H
-#define _ACFEATURESTYPES_H
+#include<iostream>
 
-#include <vector>
+class ACImageShapeFourierPolarMomentsPlugin : public ACPlugin {
+public:
+    ACImageShapeFourierPolarMomentsPlugin();
+    ~ACImageShapeFourierPolarMomentsPlugin();
+	std::vector<ACMediaFeatures*> calculate(std::string aFileName);
+	std::vector<ACMediaFeatures*> calculate(ACMediaData* _data);
+	std::vector<ACMediaFeatures*> calculate(ACMediaData* _aData, ACMedia* _theMedia);
+private:
+	ACMediaFeatures* calculateFourierPolarMoments(ACImageAnalysis* image);
+};
 
-typedef unsigned int DistanceType;
-
-typedef std::vector<float> FeaturesVector;
-//typedef std::vector<double> FeaturesVectorAsDouble;
-// other option : make FeaturesVector a class or a template
-
-#endif  // ACFEATURESTYPES_H
+#endif	/* _ACIMAGESHAPEFOURIERPOLARMOMENTSPLUGIN_H */

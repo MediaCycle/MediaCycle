@@ -1,9 +1,9 @@
 /*
- *  ACImageShapeHuMomentsPlugin.cpp
+ *  ACImageShapeFourierPolarMomentsPlugin.cpp
  *  MediaCycle
  *
  *  @author Xavier Siebert
- *  @date 17/11/09
+ *  @date 24/08/10
  *  @copyright (c) 2009 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
@@ -32,7 +32,7 @@
  *
  */
 
-#include "ACImageShapeHuMomentsPlugin.h"
+#include "ACImageShapeFourierPolarMomentsPlugin.h"
 
 #include <vector>
 #include <string>
@@ -44,45 +44,45 @@ using std::cout;
 using std::cerr;
 using std::endl;
 
-ACImageShapeHuMomentsPlugin::ACImageShapeHuMomentsPlugin() {
+ACImageShapeFourierPolarMomentsPlugin::ACImageShapeFourierPolarMomentsPlugin() {
     //vars herited from ACPlugin
     this->mMediaType = MEDIA_TYPE_IMAGE;
     this->mPluginType = PLUGIN_TYPE_FEATURES;
-    this->mName = "Shape Hu Moments";
-    this->mDescription = "Image Shape Hu Moments plugin";
+    this->mName = "Shape FP Moments";
+    this->mDescription = "Image Shape Fourier Polar Moments plugin";
     this->mId = "";
 }
 
-ACImageShapeHuMomentsPlugin::~ACImageShapeHuMomentsPlugin() {
+ACImageShapeFourierPolarMomentsPlugin::~ACImageShapeFourierPolarMomentsPlugin() {
 }
 
-std::vector<ACMediaFeatures*>  ACImageShapeHuMomentsPlugin::calculate(std::string aFileName) {
-	cout << "calculating Shape (Hu) Moments from file name..." << endl;
+std::vector<ACMediaFeatures*>  ACImageShapeFourierPolarMomentsPlugin::calculate(std::string aFileName) {
+	cout << "calculating Shape (FourierPolar) Moments from file name..." << endl;
 	ACColorImageAnalysis* image = new ACColorImageAnalysis(aFileName);
 	std::vector<ACMediaFeatures*> allImageFeatures;
 
-	ACMediaFeatures* imageShapeFeatures = this->calculateHuMoments(image);
+	ACMediaFeatures* imageShapeFeatures = this->calculateFourierPolarMoments(image);
 	if (imageShapeFeatures != NULL){
 		allImageFeatures.push_back(imageShapeFeatures);
 	}
 	else{
-		cerr << "<ACImageShapeHuMomentsPlugin::calculate> : NULL shape feature" << endl;
+		cerr << "<ACImageShapeFourierPolarMomentsPlugin::calculate> : NULL shape feature" << endl;
 	}
 	delete image;
 	return allImageFeatures;
 }
 
-std::vector<ACMediaFeatures*> ACImageShapeHuMomentsPlugin::calculate(ACMediaData* image_data) {
-	cout << "calculating Shape (Hu) Moments from ACMediaData..." << endl;
+std::vector<ACMediaFeatures*> ACImageShapeFourierPolarMomentsPlugin::calculate(ACMediaData* image_data) {
+	cout << "calculating Shape (FourierPolar) Moments from ACMediaData..." << endl;
 	ACColorImageAnalysis* image = new ACColorImageAnalysis(image_data->getImageData());
 	std::vector<ACMediaFeatures*> allImageFeatures;
 	
-	ACMediaFeatures* imageShapeFeatures = this->calculateHuMoments(image);
+	ACMediaFeatures* imageShapeFeatures = this->calculateFourierPolarMoments(image);
 	if (imageShapeFeatures != NULL){
 		allImageFeatures.push_back(imageShapeFeatures);
 	}
 	else{
-		cerr << "<ACImageShapeHuMomentsPlugin::calculate> : NULL shape feature" << endl;
+		cerr << "<ACImageShapeFourierPolarMomentsPlugin::calculate> : NULL shape feature" << endl;
 	}
 		
 	delete image;
@@ -90,14 +90,14 @@ std::vector<ACMediaFeatures*> ACImageShapeHuMomentsPlugin::calculate(ACMediaData
 	return allImageFeatures;
 }
 
-std::vector<ACMediaFeatures*> ACImageShapeHuMomentsPlugin::calculate(ACMediaData* _aData, ACMedia* _theMedia){
+std::vector<ACMediaFeatures*> ACImageShapeFourierPolarMomentsPlugin::calculate(ACMediaData* _aData, ACMedia* _theMedia){
 	return this->calculate(_aData);
 	// no need for ACMedia here...
 };
 
-ACMediaFeatures* ACImageShapeHuMomentsPlugin::calculateHuMoments(ACImageAnalysis* image){
-	image->computeHuMoments();
-	ACMediaFeatures* shape_moments = new ACMediaFeatures(image->getHuMoments(), "Shape");
+ACMediaFeatures* ACImageShapeFourierPolarMomentsPlugin::calculateFourierPolarMoments(ACImageAnalysis* image){
+	image->computeFourierPolarMoments();
+	ACMediaFeatures* shape_moments = new ACMediaFeatures(image->getFourierPolarMoments(), "Shape");
 	return shape_moments;	
 }
 

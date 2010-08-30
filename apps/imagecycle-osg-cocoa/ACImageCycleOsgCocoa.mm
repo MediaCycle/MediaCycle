@@ -133,7 +133,7 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 	#endif
 	
 	// XSCF 250310 added these 3
-	media_cycle->pushNavigationState();
+	media_cycle->storeNavigationState();
 	//media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
 	media_cycle->getBrowser()->setState(AC_CHANGING);
 	
@@ -698,7 +698,7 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 		if (media_cycle->getLibrary()->getSize() > 0 && media_cycle->getBrowser()->getMode() == AC_MODE_CLUSTERS && node > -1)
 		{
 			media_cycle->setReferenceNode(node);
-			media_cycle->pushNavigationState();
+			media_cycle->storeNavigationState(); // XS TODO: is this what we want ?
 			media_cycle->updateDisplay(true);
 		}
 	}

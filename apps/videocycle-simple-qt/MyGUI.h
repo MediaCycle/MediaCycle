@@ -1,9 +1,7 @@
-/* 
- * File:   settings.cpp
- * Author: xavier
- * inspired from Qt's "browser" example
- *
- * @date 31/03/10
+/**
+ * @brief MyGUI.h
+ * @author Xavier Siebert
+ * @date 30/08/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -29,29 +27,29 @@
  * 
  * Any other additional authorizations may be asked to avre@umons.ac.be 
  * <mailto:avre@umons.ac.be>
- */
+*/
 
-#include "settings.h"
+#ifndef MYGUI_H
+#define MYGUI_H
 
-SettingsDialog::SettingsDialog(QWidget *parent) : QMainWindow(parent) {
-    setupUi(this);
-//    connect(buttonSaveLog, SIGNAL(clicked()), this, SLOT(saveLog()));
-//    connect(buttonSelectFeaturesPlugin, SIGNAL(clicked()), this, SLOT(selectFeaturesPlugins()));
-//    connect(buttonSelectVisualizationPlugin, SIGNAL(clicked()), this, SLOT(selectVisualizationPlugins()));
-//	connect(buttonSaveCurrentSettings, SIGNAL(clicked()), this, SLOT(saveCurrentSettings()));
-	connect(buttonSelectSaveConfigFile, SIGNAL(clicked()), this, SLOT(selectSaveConfigFile()));
-}
+#include <QtGui/QMainwindow>
+#include <QtGui/QLabel>
+#include <QtGui/QLineEdit>
 
+#include "ui_VideoCycle.h"
 
-void SettingsDialog::selectSaveConfigFile() {
-	QString _configFile = QFileDialog::getOpenFileName();
-	// TODO: try/catch
-	config_file = _configFile.toStdString();
-	lineEditSaveConfigFile->setText(_configFile);
-	lineEditSaveConfigFile->update();
-}
+class MyGUI : public QMainWindow, private Ui_MainWindow
+{
+    Q_OBJECT
 
-void SettingsDialog::setMediaCycleMainWindow(ACImageCycleOsgQt* _mc) {
-	//XS test
-	//_mc->disBonjour() ;
-}
+public:
+    MyGUI(QWidget* parent = 0);
+    virtual ~MyGUI();
+
+public slots: // or private ? or protected ?
+	void BrowseVideoDir();
+	void BrowseOutputFile();
+	void Calculate();
+};
+
+#endif // MYGUI_H

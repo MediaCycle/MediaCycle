@@ -115,11 +115,11 @@ public:
 	
 	// I/O -- these are media-specific (at least for the moment...) 
 	virtual void save(FILE *){}
-	virtual int load(FILE*){}
+	virtual int load(FILE*){return -1;}
 	virtual void saveACL(std::ofstream &library_file){}
 	virtual void saveMCSL(std::ofstream &library_file){}//CF 31/05/2010 temporary MediaCycle Segmented Library (MCSL) for AudioGarden, adding a parentID for segments to the initial ACL, awaiting approval
-	virtual int loadACL(std::ifstream &library_file){}
-	virtual int loadMCSL(std::ifstream &library_file){}//CF 31/05/2010 temporary MediaCycle Segmented Library (MCSL) for AudioGarden, adding a parentID for segments to the initial ACL, awaiting approval
+	virtual int loadACL(std::ifstream &library_file){return -1;}
+	virtual int loadMCSL(std::ifstream &library_file){return -1;}//CF 31/05/2010 temporary MediaCycle Segmented Library (MCSL) for AudioGarden, adding a parentID for segments to the initial ACL, awaiting approval
 	virtual ACMediaData* extractData(std::string filename){}
 	
 	// function that calls the plugins and fills in info such as width, height, ...

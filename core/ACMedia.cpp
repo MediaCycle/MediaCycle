@@ -126,7 +126,7 @@ int ACMedia::import(std::string _path, int id, ACPluginManager *acpl ) {
 						cerr << "<ACMedia::import> failed importing feature from plugin: " << plugin->getName() << endl;
 					}
 					else {
-						for (int Iafv=0; Iafv<afv.size(); Iafv++)
+						for (unsigned int Iafv=0; Iafv< afv.size() ; Iafv++)
 							this->addFeaturesVector(afv[Iafv]);
 						import_ok = 1;
 					}
@@ -170,7 +170,7 @@ int ACMedia::segment(ACPluginManager *acpl ) {
 						cerr << "<ACMedia::import> failed importing feature from plugin: " << plugin->getName() << endl;
 					}
 					else {
-						for (int Iafv=0; Iafv<afv.size(); Iafv++){
+						for (unsigned int Iafv=0; Iafv<afv.size(); Iafv++){
 							this->addSegment(afv[Iafv]);
 						}
 					import_ok = 1;

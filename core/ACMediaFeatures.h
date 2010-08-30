@@ -61,6 +61,7 @@ protected:
 public:
 	ACMediaFeatures(); // no media given, probably read features from disk
 	ACMediaFeatures(FeaturesVector V, string myname="");
+//	ACMediaFeatures(FeaturesVectorAsDouble V, string myname="");
 	virtual ~ACMediaFeatures()  {};
 	//	virtual void calculate(void*) = 0;
 	// the following are common to all features types and should NOT be redefined

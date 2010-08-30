@@ -40,6 +40,8 @@
 
 #include "BlobResult.h" // Main blob library include (in plugin/image/blobs)
 #include "ACImageAnalysis.h"
+#include <fstream>
+#include <cmath>
 
 typedef std::vector<float> blob_center; // 2D, but could be 3D
 
@@ -84,7 +86,7 @@ public:
 	
 	// raw features computation
 	void computeBlobs(IplImage* bg_img=NULL, int bg_thesh=10, int big_blob=200, int small_blob=0);
-	void computeBlobsInteractively(IplImage* bg_img=NULL, bool merge_blobs=true, int bg_thesh=20, int big_blob=200, int small_blob=0);
+	void computeBlobsInteractively(IplImage* bg_img=NULL, bool merge_blobs=false, int bg_thesh=20, int big_blob=200, int small_blob=0);
 	void computeBlobsUL(IplImage* bg_img=NULL, bool merge_blobs=true, int big_blob=200, int small_blob=0);
 	void computeOpticalFlow();
 	void computeFrameAbsoluteDifferences();
@@ -97,6 +99,11 @@ public:
 	void computeContractionIndices();
 	void computeBoundingBoxRatios();
 	void computePixelSpeed();
+	void computeHuMoments(int tresh=0);
+	void computeHuMoments(IplImage* bg_img, int tresh=0); // with background subtraction
+	void computeFourierPolarMoments(int RadialBins=5, int AngularBins=8); // without background subtraction
+	void computeFourierMellinMoments(); // without background subtraction
+	void computeImageHistograms(int w=10, int h=10); // image histogram, turned into a 1D vector
 
 	// features accessors (to be called by ACVideoPlugin)
 	std::vector<blob_center> getMergedBlobsTrajectory() {return blob_centers;}
@@ -106,21 +113,42 @@ public:
 
 	std::vector<float> getContractionIndices() {return contraction_indices;}
 	std::vector<float> getPixelSpeeds() {return pixel_speeds;}
-	std::vector<float> getBoundingBoxRatios(){return bounding_box_ratios;}
-	std::vector<float> getDummyTimeStamps();
+	std::vector<float> getBoundingBoxRatios() {return bounding_box_ratios;}
+	std::vector<float> getDummyTimeStamps(int nsize);
 	std::vector<float> getTimeStamps();
+	// XS or float* (dim 7)
+	std::vector<vector<float> > getRawMoments() {return raw_moments;}
+	std::vector<vector<float> > getHuMoments() {return hu_moments;}
+	std::vector<float> getHuMoment(int i);
+	std::vector<vector<float> > getFourierPolarMoments() {return fourier_polar_moments;}
+	std::vector<vector<float> > getFourierMellinMoments() {return fourier_mellin_moments;}
+	std::vector<vector<float> > getImageHistograms() {return image_histograms;}
 
 	// saves stuff in file
-	void dumpTrajectory();
-	void dumpContractionIndices();
-	void dumpBoundingBoxRatios();
-
+	void dumpTrajectory(std::ostream &odump);
+	void dumpContractionIndices(std::ostream &odump);
+	void dumpBoundingBoxRatios(std::ostream &odump);
+	void dumpBlobSpeed(std::ostream &odump);
+	void dumpRawMoments(std::ostream &odump);
+	void dumpHuMoments(std::ostream &odump);
+	void dumpFourierPolarMoments(std::ostream &odump);
+	void dumpAll(std::ostream &odump);
+	
 	// for display (ifdef VISUAL_CHECK) using highgui
 	void showInWindow(std::string="VIDEO", bool has_win=false);
+	void showFFTInWindow(std::string="VIDEO", bool has_win=false);
+
 	void showFrameInWindow(std::string="VIDEO", IplImage* frame=NULL, bool has_win=true);
 //	void onTrackbarSlide(int pos); 
 	void browseInWindow(std::string="VIDEO", bool has_win=false);
 	// ?	void showBlobsInWindow(std::string="VIDEO", bool has_win=false);
+	
+
+	//handy - remove path, keeps only filename
+	string extractFilename(string path);
+	
+	// XS tmp tests
+	void test_match_shapes (ACVideoAnalysis *V2, IplImage* bg_img);
 	
 private:
 	std::string file_name;
@@ -147,8 +175,17 @@ private:
 	std::vector<blob_center> blob_speeds; 
 	std::vector<float> contraction_indices;
 	std::vector<float> bounding_box_ratios;
-
+	std::vector<float> bounding_box_heights;
+	std::vector<float> bounding_box_widths;
 	std::vector<float> pixel_speeds;
+	std::vector<float> interest_points;
+
+	std::vector<vector<float> > raw_moments;
+	std::vector<vector<float> > hu_moments;
+	std::vector<vector<float> > fourier_polar_moments;
+	std::vector<vector<float> > fourier_mellin_moments;
+	std::vector<vector<float> > image_histograms;
+
 	int width, height, depth, fps, nframes;
 	//	int videocodec;
 	

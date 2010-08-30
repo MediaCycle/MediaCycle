@@ -145,12 +145,12 @@ int ACImage::loadACL(ifstream &library_file) {
 		cerr << "<ACImage::loadACL> : problem loading image from ACL file, it needs to be opened before" << endl;
 		return 0;
 	}		
+
 	if (!library_file.good()){
 		cerr << "<ACImage::loadACL> : bad library file" << endl;
 		return 0;
 	}
 
-	int i, j;
 	int n_features;
 	int n_features_elements = 0;	
 	int nn;
@@ -160,40 +160,38 @@ int ACImage::loadACL(ifstream &library_file) {
 	string featureName;
 	float local_feature;
 	
-	getline(library_file, filename, '\n');
+	library_file >> filename;
 	if (!filename.empty()){
 		library_file >> mid;	
 		library_file >> width;
 		library_file >> height;
 		library_file >> n_features; 
-		getline(library_file, tab);
 		
 		for (int i=0; i<n_features;i++) {
 			mediaFeatures = new ACMediaFeatures();
 			features_vectors.push_back(mediaFeatures);
 			features_vectors[i]->setComputed();
-			getline(library_file, featureName, '\n');
-			features_vectors[i]->setName(featureName);
-			library_file >> nn;
-			features_vectors[i]->setNeedsNormalization(nn);
+//			library_file >> featureName;
+//			features_vectors[i]->setName(featureName);
+//			library_file >> nn;
+//			features_vectors[i]->setNeedsNormalization(nn);
 			library_file >> n_features_elements;
 			features_vectors[i]->resize(n_features_elements);
 			for (int j=0; j<n_features_elements; j++) {
 				library_file >> local_feature;
 				features_vectors[i]->setFeatureElement(j, local_feature);
 			}
-			getline(library_file, tab);	
 		}
 		
-		// SD TODO done for AES - thumbnailing has issues (image colors changed) because bug in opencv?
-		thumbnail = cvLoadImage(filename.c_str(), CV_LOAD_IMAGE_COLOR);	
-		thumbnail_width = width;
-		thumbnail_height = height;
-		/*
-		 if (computeThumbnail(filename, height, width) != 1){
-		 cerr << "<ACImage::load> : problem computing thumbnail" << endl;
-		 return 0;
-		 }*/
+// SD TODO done for AES - thumbnailing has issues (image colors changed) because bug in opencv?
+//      thumbnail = cvLoadImage(filename.c_str(), CV_LOAD_IMAGE_COLOR);	
+//		thumbnail_width = width;
+//		thumbnail_height = height;
+		
+		if (computeThumbnail(filename, height, width) != 1){
+			cerr << "<ACImage::load> : problem computing thumbnail" << endl;
+			return 0;
+		}
 		return 1;
 	}
 	else {
@@ -203,14 +201,10 @@ int ACImage::loadACL(ifstream &library_file) {
 
 void ACImage::save(FILE* library_file) {
 	int nn;
-	int i, j;
-//	int path_size; // XS removed
+	unsigned int i, j;
 	int n_features;
 	int n_features_elements;
-//	float value;  // XS removed
 	
-//	path_size = filename.size(); // XS TODO CHECK THIS // strlen(filename) + 1; // XS TODO: all string
-	//fprintf(library_file, "%d\n", path_size);
 	fprintf(library_file, "%s\n", filename.c_str());
 	//fprintf(library_file, "%s\n", thumbnail_filename);
 	
@@ -224,7 +218,7 @@ void ACImage::save(FILE* library_file) {
 		n_features_elements = features_vectors[i].size();
 		fwrite(&n_features_elements,sizeof(int),1,library_file);
 		for (j=0; j<n_features_elements; j++) {
-			value = features_vectors[i]->getFeatureElement(j)); // XS instead of [i][j]
+			value = features_vectors[i]->getFeatureElement(j));
 			fwrite(&value,sizeof(float),1,library_file);
 		}
 	}
@@ -234,8 +228,8 @@ void ACImage::save(FILE* library_file) {
 	fprintf(library_file, "%d\n", height);
 	n_features = features_vectors.size();
 	fprintf(library_file, "%d\n", n_features);
-	for (i=0; i<features_vectors.size();i++) {
-		n_features_elements = features_vectors[i]->getSize(); // XS TODO: ACMediaFeatures don't have a size method
+	for (i=0; i< features_vectors.size();i++) {
+		n_features_elements = features_vectors[i]->getSize();
 		nn = features_vectors[i]->getNeedsNormalization();
 		fprintf(library_file, "%s\n", features_vectors[i]->getName().c_str());
 		fprintf(library_file, "%d\n", nn);
@@ -286,8 +280,6 @@ int ACImage::load(FILE* library_file) {
 		ret = fscanf(library_file, "%d", &width);
 		ret = fscanf(library_file, "%d", &height);
 		ret = fscanf(library_file, "%d", &n_features);
-		// SD TODO - following wont't work
-		// XS why ? Fix it then, please... works for me (AFAIK)...
 		for (i=0; i<n_features;i++) {
 			mediaFeatures = new ACMediaFeatures();
 			features_vectors.push_back(mediaFeatures);

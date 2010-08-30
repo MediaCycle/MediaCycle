@@ -32,459 +32,595 @@
  *
  */
 
+// when loading an image, *always* create
+// 1) BW image
+// 2) 3 channels (BGR by default, HSV optional)
+
 #include "ACImageAnalysis.h"
 #include <iostream>
+#include <iomanip> // for setw
 #include <cmath>
 
-using std::cerr;
-using std::cout;
-using std::endl;
+using namespace std;
+
 //const double PI = 4 * std::atan(1);
 
-const int ACImageAnalysis::standard_width = 128; // 16 ?
-const int ACImageAnalysis::standard_height = 128;
+const int ACImageAnalysis::standard_width = 0; // 16 ?
+const int ACImageAnalysis::standard_height = 0;
 
 // ----------- uncomment this to get visual display using highgui and verbose -----
-//#define VISUAL_CHECK
-//#define VERBOSE
+#define VISUAL_CHECK
+#define VERBOSE
 
 
 ACImageAnalysis::ACImageAnalysis(){
-	clean();
+	//reset();
 	// needs setFileName or setImage later...
 }
 
-ACImageAnalysis::ACImageAnalysis(const string &filename){
-	clean();
-	setFileName(filename);
-	IplImage *imgp_full = cvLoadImage(file_name.c_str(), CV_LOAD_IMAGE_COLOR);
-	setImage(imgp_full);
-	cvReleaseImage(&imgp_full);
-}
+//ACImageAnalysis::ACImageAnalysis(const string &filename, string _cmode){
+//	reset();
+//	setFileName(filename);
+//	IplImage *imgp_full;
+//	if (_cmode == "BGR" || _cmode == "RGB")
+//		imgp_full = cvLoadImage(file_name.c_str(), CV_LOAD_IMAGE_COLOR);
+//	else if (_cmode == "BW" || _cmode == "GRAYSCALE")
+//		imgp_full = cvLoadImage(file_name.c_str(), CV_LOAD_IMAGE_GRAYSCALE);
+//	setImage(imgp_full, _cmode);
+//	cvReleaseImage(&imgp_full);
+//}
+//
+//ACImageAnalysis::ACImageAnalysis(IplImage* img, string _cmode){
+//	reset();
+//	// here the filename is unknown.	
+//	setImage(img, _cmode);
+//}
 
-ACImageAnalysis::ACImageAnalysis(IplImage* img){
-	clean();
-	// here the filename is unknown.	
-	setImage(img);
-}
 
+//void ACImageAnalysis::reset(){
+//	imgp = NULL;
+//	for (int i=0; i<3 ; i++) { 
+//		channel_img[i] = NULL;
+//		fft[i] = NULL;
+//	}
+//	fft_bw = NULL;
+//	HAS_CHANNELS = HAS_FFT = false;
+//	width = height = step = depth = channels = 0;
+//	original_width = original_height = 0;
+//	file_name = color_model = "";
+//}
 
-void ACImageAnalysis::clean(){
-	imgp = NULL;
-	for (int i=0; i<3 ; i++) { 
-		channel_img[i] = NULL;
-		fft[i] = NULL;
-	}
-	HAS_CHANNELS = HAS_FFT = false;
-	width = height = step = depth = channels = 0;
-	original_width = original_height = 0;
-	file_name = color_model = "";
-}
-	
-ACImageAnalysis::~ACImageAnalysis(){
-	if (imgp != NULL) cvReleaseImage(&imgp);
-	if (HAS_CHANNELS) {
-		for (int i=0; i<3 ; i++) { 
-			if (channel_img[i] != NULL) cvReleaseImage (&channel_img[i]); 
-		}
-	}
-	if (HAS_FFT) {
-		for (int i=0; i<3 ; i++) { 
-			if (fft[i] != NULL) fftw_free (fft[i]);
-		}
-	}
-}
+//void ACImageAnalysis::clean(){
+//	if (imgp != NULL) cvReleaseImage(&imgp);
+//	if (HAS_CHANNELS) {
+//		for (int i=0; i<3 ; i++) { 
+//			if (channel_img[i] != NULL) cvReleaseImage (&channel_img[i]); 
+//		}
+//	}
+//	if (HAS_FFT) {
+//		for (int i=0; i<3 ; i++) { 
+//			if (fft[i] != NULL) fftw_free (fft[i]);
+//		}
+//		if (fft_bw != NULL) fftw_free (fft_bw);
+//	}
+//}
+
+//ACImageAnalysis::~ACImageAnalysis(){
+//	clean();
+//}
 
 void ACImageAnalysis::setFileName(const string &filename){
 	// XS TODO: test if file exists using boost:filesystem ?
 	file_name=filename;	
 }
 
-int ACImageAnalysis::setImage(IplImage* imgp_full, float _scale){
+int ACImageAnalysis::scaleImage(IplImage* imgp_full, float _scale){
 	// returns 1 if it worked, 0 if not
 	// original image reduced to imgp and destroyed
+	// works whatever color code, whatever nchannels
 	try {
 		if (!imgp_full) {
 			cerr << "Check file name : " << file_name << endl;
-			throw(string(" <ACAnalysedImage::setImage> CV_LOAD_IMAGE_COLOR : not a color image !"));
+			throw(string(" <ACImageAnalysis::scaleImage> : not a valid image !"));
 		}
 	}
 	catch (const string& not_image_file) {
 		cerr << not_image_file << endl;
 		return 0;
 	}
-	original_width = imgp_full->width;
-	original_height = imgp_full->height;
-
-	// XS -- DEBUG !!!!
 	
-	//workaround opencv peculiar definition of step
-	imgp_full->widthStep = original_width * imgp_full->nChannels;
-	imgp_full->imageSize = original_width * original_height * imgp_full->nChannels;
-	
-	scale = _scale;
-	// does not scale image if scale specified and > 0, otherwise rescale
-	if (scale <= 0.0)
-		scale = sqrt (standard_width * standard_height * 1.0 / (original_width * original_height));
-	
-	imgp = cvCreateImage(cvSize (scale*original_width, scale*original_height), imgp_full->depth, imgp_full->nChannels);
-//	// SD TODO - This is stange cvCreateImage creates image with as a widthStep of 152
-	imgp->widthStep = imgp->width * imgp->nChannels;
-	imgp->imageSize = imgp->width * imgp->height * imgp->nChannels;
-	cvResize(imgp_full, imgp, CV_INTER_CUBIC);
-	check_imgp();
-	color_model = "BGR"; // before splitchannels
-
-	return 1;
-}
-	
-void ACImageAnalysis::check_imgp(){
-	// keep track of stuff -- really needed ?
-	width = imgp->width;
-	height = imgp->height;
-	depth = imgp->depth;
-	step = imgp->widthStep;
-	channels = imgp->nChannels;
-	
-	try {
-		if (!imgp) throw(string(" < MyColorImage::SetImage error> CV_LOAD_IMAGE_COLOR : not a color image !"));
-	}
-	catch (const string& not_image_file) {
-		cerr << not_image_file << endl;
-	}
-}
-
-int ACImageAnalysis::splitChannels(std::string cmode){ // or HSV
-	if (imgp == NULL){
-		cerr << " <MyColorImage::SplitChannels> : no image loaded yet " << endl;
-		return 0;
-	}
-	
-	if (cmode == color_model) {
-		if (HAS_CHANNELS){
-			cout << " Channels have already been split. Doing Nothing. " << endl;
-			return 1;
-		}
-		else {
-			for (int i = 0; i < 3; i++)
-				channel_img[i] = cvCreateImage (cvSize (width, height), depth, 1);
-			cvSplit (imgp, channel_img[0], channel_img[1], channel_img[2], NULL); 
-			HAS_CHANNELS = true;
-			return 1;
-		}
-	}
-	else {
-		cout << "cmode :" << cmode << endl;
-		cout << "color_model :" << color_model << endl;
-		
-		removeChannels();
-		HAS_CHANNELS = false;
-		IplImage *tmp_im = cvCreateImage (cvGetSize(imgp), IPL_DEPTH_8U, 3); 
-		if (cmode == "HSV" && color_model == "BGR") {
-			cvCvtColor (imgp, tmp_im, CV_BGR2HSV);
-			color_model = "HSV";
-		}
-		else if (cmode == "BGR" && color_model == "HSV") {
-			cvCvtColor (imgp, tmp_im, CV_HSV2BGR);
-			color_model = "BGR";
-		}
-		else {
-			cerr << " <MyColorImage::SplitChannels> : unsupported color format: should be BGR or HSV " << endl;
-			return 0;
-		}
-		for (int i = 0; i < 3; i++)
-			channel_img[i] = cvCreateImage (cvSize (width, height), depth, 1);
-		cvSplit (tmp_im, channel_img[0], channel_img[1], channel_img[2], NULL); 
-		HAS_CHANNELS = true;
-		cvReleaseImage( &tmp_im );
+	// nothing to do, just set scale parameter to 1
+	if (_scale = 1.0) {
+		scale = 1.0;
+		imgp=cvCloneImage(imgp_full);
+		check_imgp(); 
 		return 1;
 	}
+	// scale < 0 = automatically rescale image to standard size (const)
+	else if (_scale <= 0.0 && standard_width !=0 && standard_height !=0 )
+		scale = sqrt (standard_width * standard_height * 1.0 / (original_width * original_height));
+	else
+		// scale is specified and > 0, then use it (i.e. overwrites standard size)
+		scale = _scale;
+	
+	// keep original size (for records, it's not really used)
+	original_width = imgp_full->width;
+	original_height = imgp_full->height;
+	
+	imgp = cvCreateImage(cvSize (scale*original_width, scale*original_height), imgp_full->depth, imgp_full->nChannels);
+	cvResize(imgp_full, imgp, CV_INTER_CUBIC);
+	check_imgp(); 
+	return 1;
+	
+	// old comment, keep an eye on it:
+	// SD TODO - This is stange cvCreateImage creates image with as a widthStep of 152
+	// imgp->widthStep = imgp->width * imgp->nChannels;
+	// imgp->imageSize = imgp->width * imgp->height * imgp->nChannels;
 }
 
-IplImage* ACImageAnalysis::getChannel(int i){
-	if (imgp == NULL){
-		cerr << " <MyColorImage::SplitChannels> : no image loaded yet " << endl;
-		return NULL;
+void ACImageAnalysis::check_imgp(){
+	try {
+		if (!imgp) throw(string(" < ACImageAnalysis::check_imgp error> : not a valid image !"));
 	}
-	// XS  TODO : could split the channels here
-	if (!HAS_CHANNELS) return NULL;
-	if (i > channels-1 || i < 0) {
-		cerr << "channel index out of range" << endl;
-		return NULL;
-	}
-	return channel_img[i];
-}
-
-void ACImageAnalysis::removeChannels(){
-	HAS_CHANNELS = false;
-	for (int i = 0; i < 3; i++){
-		cvReleaseImage(&channel_img[i]);
+	catch (const string& not_image_file) {
+		cerr << not_image_file << endl;
+		exit(1);
 	}
 }
 
-void ACImageAnalysis::FFT2D (string cmode){
-	splitChannels(cmode);
- 	const int cdim = height * (width / 2 + 1);
-	const int area = width * height;
-	double data_in[area];
-	uchar* ddata;
-	for (int i = 0; i < 3; i++){	
-		try {
-			fft[i] = new fftw_complex [cdim];
-		}
-		catch (std::bad_alloc) {
-			cerr << "Memory allocation problem in fft2d for fft of channel " << i << endl;
-		}
- 		ddata = (uchar*) channel_img[i]->imageData;
-		cout << "checking ddata[0] for channel" << " i : " << (double) ddata[0] <<endl;
-		for (int j = 0; j < area; j++)
-			data_in[j] = (double) ddata[j];
-		cout << "doing fft for channel " << i << endl;
-		fftw_plan p = fftw_plan_dft_r2c_2d(height, width, data_in, fft[i], FFTW_ESTIMATE); 
-		fftw_execute(p);
-		cout << "fft cleanup : " << endl;
-		fftw_destroy_plan(p);
-	}	
- 	HAS_FFT = true;
+int ACImageAnalysis::getWidth() {
+	if (imgp == NULL) return 0;
+	return imgp->width;
 }
 
-void ACImageAnalysis::FFT2D_centered (string cmode){
-	// 0 0 will appear at the center of the FFT image
-	splitChannels(cmode);
- 	const int cdim = height * (width / 2 + 1);
-	const int area = width * height;
-	double data_in[area];
-	uchar* ddata;
-	for (int i = 0; i < 3; i++){	
-		try {
-			fft[i] = new fftw_complex [cdim];
-		}
-		catch (std::bad_alloc) {
-			cerr << "Memory allocation problem in fft2d for fft of channel " << i << endl;
-		}
- 		ddata = (uchar*) channel_img[i]->imageData;
-		cout << "checking ddata[0] for channel" << " i : " << (double) ddata[0] <<endl;
-		int k=0;
-		for(int irow=0; irow< height; irow++){
-			for (int icolumn=0; icolumn< width; icolumn++){
-				data_in[k] = double(pow(float(-1),float(irow+icolumn)) * (double)(ddata[irow*width+icolumn] +128));
-				k++;
-			}
-		}		
-		
-		cout << "doing fft for channel " << i << endl;
-		fftw_plan p = fftw_plan_dft_r2c_2d(height, width, data_in, fft[i], FFTW_ESTIMATE); 
-		fftw_execute(p);
-		cout << "fft cleanup : " << endl;
-		fftw_destroy_plan(p);
-	}	
-	HAS_FFT = true;
+int ACImageAnalysis::getHeight() {
+	if (imgp == NULL) return 0;
+	return imgp->height;
 }
+
+int ACImageAnalysis::getDepth() {
+	if (imgp == NULL) return 0;
+	return imgp->depth;
+}
+
+int ACImageAnalysis::getNumberOfChannels(){	
+	if (imgp == NULL) return 0;
+	return imgp->nChannels;
+}
+
+
+
+//void ACImageAnalysis::computeFFT2D (string cmode){
+// 	const int cdim = height * (width / 2 + 1);
+//	const int area = width * height;
+//	double data_in[area];
+//	uchar* ddata;
+//	if (cmode == "BGR" || cmode == "HSV"){
+//		splitChannels(cmode);
+//		for	(int i = 0; i < 3; i++){	
+//			try {
+//				fft[i] = new fftw_complex [cdim];
+//			}
+//			catch (std::bad_alloc) {
+//				cerr << "Memory allocation problem in fft2d for fft of channel " << i << endl;
+//			}
+//			ddata = (uchar*) channel_img[i]->imageData;
+//			cout << "checking ddata[0] for channel" << " i : " << (double) ddata[0] <<endl;
+//			for (int j = 0; j < area; j++)
+//				data_in[j] = (double) ddata[j];
+//			cout << "doing fft for channel " << i << endl;
+//			fftw_plan p = fftw_plan_dft_r2c_2d(height, width, data_in, fft[i], FFTW_ESTIMATE); 
+//			fftw_execute(p);
+//			cout << "fft cleanup : " << endl;
+//			fftw_destroy_plan(p);
+//		}
+//	}
+//	else if (cmode == "BW"){
+//		try {
+//			fft_bw = new fftw_complex [cdim];
+//		}
+//		catch (std::bad_alloc) {
+//			cerr << "Memory allocation problem in fft2d for fft_bw" << endl;
+//		}
+//		ddata = (uchar*) getImage()->imageData;
+//		cout << "checking ddata[0] for bw" <<  (double) ddata[0] <<endl;
+//		for (int j = 0; j < area; j++)
+//			data_in[j] = (double) ddata[j];
+//		cout << "doing fft for bw " << endl;
+//		fftw_plan p = fftw_plan_dft_r2c_2d(height, width, data_in, fft_bw, FFTW_ESTIMATE); 
+//		fftw_execute(p);
+//		cout << "fft cleanup : " << endl;
+//		fftw_destroy_plan(p);
+//	}
+//HAS_FFT = true;
+//}
+
+//void ACImageAnalysis::computeFFT2D_complex (string cmode){
+//	const int area = width * height;
+//	fftw_complex *data_in;
+//	if (cmode == "BW"){
+//		try {
+//			fft_bw = new fftw_complex [area];
+//			data_in = new fftw_complex [area];
+//		}
+//		catch (std::bad_alloc) {
+//			cerr << "Memory allocation problem in fft2d for fft_bw" << endl;
+//		}
+//		int k = 0;
+//		BwImage Im(getImage());
+//		for(int i = 0;i < height ; i++ ) {
+//			for( int j = 0 ; j < width ; j++ ) {
+//				data_in[k][0] = ( double )Im[i][j];
+//				data_in[k][1] = 0.0;
+//				k++;
+//			}
+//		}
+//		cout << "doing fft for bw " << endl;
+//		fftw_plan p = fftw_plan_dft_2d(height, width, data_in, fft_bw,  FFTW_FORWARD, FFTW_ESTIMATE); 
+//		fftw_execute(p);
+//		cout << "fft cleanup : " << endl;
+//		fftw_destroy_plan(p);
+//		
+//	}
+//	HAS_FFT = true;
+//}
+
+
+//void ACImageAnalysis::computeFFT2D_centered (string cmode){
+//	// 0 0 will appear at the center of the FFT image
+// 	const int cdim = height * (width / 2 + 1);
+//	const int area = width * height;
+//	double data_in[area];
+//	uchar* ddata;
+//	if (cmode == "BGR" || cmode == "HSV"){
+//		splitChannels(cmode);
+//		for (int i = 0; i < 3; i++){	
+//			try {
+//				fft[i] = new fftw_complex [cdim];
+//			}
+//			catch (std::bad_alloc) {
+//				cerr << "Memory allocation problem in fft2d for fft of channel " << i << endl;
+//			}
+//			ddata = (uchar*) channel_img[i]->imageData;
+//			cout << "checking ddata[0] for channel" << " i : " << (double) ddata[0] <<endl;
+//			int k=0;
+//			for(int irow=0; irow< height; irow++){
+//				for (int icolumn=0; icolumn< width; icolumn++){
+//					data_in[k] = double(pow(float(-1),float(irow+icolumn)) * (double)(ddata[irow*width+icolumn] +128));
+//					k++;
+//				}
+//			}		
+//			
+//			cout << "doing fft for channel " << i << endl;
+//			fftw_plan p = fftw_plan_dft_r2c_2d(height, width, data_in, fft[i], FFTW_ESTIMATE); 
+//			fftw_execute(p);
+//			cout << "fft cleanup : " << endl;
+//			fftw_destroy_plan(p);
+//		}
+//	}
+//	else if (cmode == "BW"){
+//		try {
+//			fft_bw = new fftw_complex [cdim];
+//		}
+//		catch (std::bad_alloc) {
+//			cerr << "Memory allocation problem in fft2d for fft_bw" << endl;
+//		}
+//		ddata = (uchar*) getImage()->imageData;
+//		cout << "checking ddata[0] for bw : ππ" <<  (double) ddata[0] <<endl;
+//		int k=0;
+//		for(int irow=0; irow< height; irow++){
+//			for (int icolumn=0; icolumn< width; icolumn++){
+//				data_in[k] = double(pow(float(-1),float(irow+icolumn)) * (double)(ddata[irow*width+icolumn] +128));
+//				k++;
+//			}
+//		}		
+//		cout << "doing fft for bw " << endl;
+//		fftw_plan p = fftw_plan_dft_r2c_2d(height, width, data_in, fft_bw, FFTW_ESTIMATE); 
+//		fftw_execute(p);
+//		cout << "fft cleanup : " << endl;
+//		fftw_destroy_plan(p);
+//		
+//	}
+//	
+//	HAS_FFT = true;
+//}
 
 // ------------------ features computation -----------------
 
-void ACImageAnalysis::computeHuMoments(int mmax, int thresh){ // default 7, 100
-	hu_moments.clear();
-	
-	if (imgp == NULL){
-		cerr << " <ACImageAnalysis::computeHuMoments() error> missing image !" << endl;
-		return;
+//void ACImageAnalysis::computeHuMoments(int mmax, int thresh){ // default 7, 100
+//	
+//	// XS TODO what if BW ?
+//	hu_moments.clear();
+//	
+//	if (imgp == NULL){
+//		cerr << " <ACImageAnalysis::computeHuMoments() error> missing image !" << endl;
+//		return;
+//	}
+//	// XS we create again a BW image -- have to do the same for Gabor
+//	IplImage *BWimg = cvCreateImage (cvSize (this->getWidth(), this->getHeight()), IPL_DEPTH_8U, 1); 
+//	IplImage* gray = cvCreateImage( cvGetSize(BWimg), 8, 1 );
+//	cvZero( gray); 
+//	
+//	cvCvtColor (imgp, BWimg, CV_BGR2GRAY);
+//	CvMemStorage*  storage  = cvCreateMemStorage(0);
+//	CvSeq* contours = 0;
+////	cvThreshold( BWimg, BWimg, thresh, 255, CV_THRESH_BINARY_INV ); 
+////	cvFindContours( BWimg, storage, &contours ); // XS TODO : more parameters ?
+//	// CvArr* img, CvSeq* contour, CvScalar external_color, CvScalar hole_color, int max_level, 
+//	// int thickness = 1,  int line_type = 8, CvPoint offset  = cvPoint(0,0) 	); 
+//	if( contours ) cvDrawContours( gray, contours, cvScalarAll(255), cvScalarAll(255), thresh ); 
+//		
+//#ifdef VISUAL_CHECK
+//		cvNamedWindow( "ImageC", 1 ); 
+//		cvShowImage( "ImageC", imgp ); 
+//		cvNamedWindow( "Image", 1 ); 
+//		cvShowImage( "Image", BWimg ); 
+//		cvNamedWindow( "Contours", 1 ); 
+//		cvShowImage( "Contours", gray ); 
+//		cvWaitKey(0); 
+//		cvDestroyWindow("Image");
+//		cvDestroyWindow("ImageC");
+//		cvDestroyWindow("Contours");
+//#endif // VISUAL_CHECK
+//	CvMoments mymoments;
+//	CvHuMoments myHumoments ;
+//	// XS TODO : add option to discriminate these 
+//	//	cvContourMoments (gray, &mymoments); // contour moments
+//	cvContourMoments (BWimg, &mymoments); // image moments
+//	
+//	cvGetHuMoments(&mymoments, &myHumoments);
+//	cvReleaseImage(&BWimg);
+//	cvReleaseImage(&gray);
+//	
+//	cvReleaseMemStorage(&storage );	
+//	hu_moments.push_back (myHumoments.hu1) ;
+//	hu_moments.push_back (myHumoments.hu2) ;
+//	hu_moments.push_back (myHumoments.hu3) ;
+//	hu_moments.push_back (myHumoments.hu4) ;
+//	hu_moments.push_back (myHumoments.hu5) ;
+//	hu_moments.push_back (myHumoments.hu6) ;
+//	hu_moments.push_back (myHumoments.hu7) ;
+//	
+//#ifdef VERBOSE
+//	cout << " Hu Moments :" << endl;
+//	cout << " ---------- " << endl;
+//#endif
+//	
+//	for (int i = 0; i < mmax; i++){
+//#ifdef VERBOSE
+//		cout << "raw Hu moment " << i << " : " << hu_moments[i] << endl ;
+//		cout << " ---------- ---------- ---------- " << endl;
+//#endif
+//		if (hu_moments[i] != 0) {
+//			hu_moments[i] = hu_moments[i] / fabs(hu_moments[i]) * log (fabs(hu_moments[i]));
+//		}
+//	}
+//#ifdef VERBOSE
+//	for (int i = 0; i < mmax; i++)
+//		cout << "log Hu moment " << i << " : " << hu_moments[i] << endl ;
+//	cout << " ---------- ---------- ---------- " << endl;
+//#endif
+//}
+
+//void ACImageAnalysis::computeGaborMoments(int mumax, int numax){ // default 7, 5
+//	gabor_moments.clear();
+//	if (imgp == NULL) {
+//		cerr << " <ACImageAnalysis::computeGaborMoments() error> missing image !" << endl;
+//		return;
+//	}
+//	IplImage *BWimg = cvCreateImage (cvSize (this->getWidth(), this->getHeight()), IPL_DEPTH_8U, 1); 
+//	cvCvtColor (imgp, BWimg, CV_BGR2GRAY);
+//	CvGabor *gabor = new CvGabor();
+//	for (int i = 0; i < mumax; i++){	
+//		for (int j = 0; j < numax; j++){
+//			gabor->Reset(i,j);
+//			double *tmpft = new double[2];
+//			tmpft = gabor->getMeanAndStdevs(BWimg); // will compute all what's necessary
+//			
+//			gabor_moments.push_back (tmpft[0]) ;
+//			gabor_moments.push_back (tmpft[1]) ;
+//			delete [] tmpft;
+//#ifdef VISUAL_CHECK
+//			IplImage *kernel = cvCreateImage( cvSize(gabor->GetMaskWidth(), gabor->GetMaskWidth()), IPL_DEPTH_8U, 1);
+// 			kernel = gabor->get_image(CV_GABOR_REAL);
+//			cvNamedWindow("Gabor Kernel", CV_WINDOW_AUTOSIZE);
+//			cvShowImage("Gabor Kernel", kernel);
+//			cvWaitKey(0);
+//			cvDestroyWindow("Gabor Kernel");			
+//			
+//			IplImage *magimg = cvCreateImage(cvSize(BWimg->width,BWimg->height), IPL_DEPTH_8U, 1);
+//			gabor->conv_img(BWimg, magimg, CV_GABOR_MAG);
+//			cvNamedWindow("Magnitude Response",CV_WINDOW_AUTOSIZE);
+//			cvShowImage("Magnitude Response",magimg);
+//			cvWaitKey(0);
+//			cvDestroyWindow("Magnitude Response");		
+//			cvReleaseImage( &kernel );	
+//			cvReleaseImage( &magimg );	
+//#endif
+//		}
+//	}
+//	cvReleaseImage( &BWimg );	
+//	//	cvReleaseImage( &image );	// no, we did not create it!!
+//}
+
+//void ACImageAnalysis::computeColorMoments(int n){
+//	// n = number of moments to compute
+//	color_moments.clear();
+//	ACImageHistogram* tmp_hist  = new ACImageHistogram(imgp, color_model);
+//	
+//	//tmp_hist->normalize(1);
+//	tmp_hist->computeStats();
+//	tmp_hist->computeMoments(n);
+//			
+//	for (int i=1;i<=n;i++){
+//		for (int channel=0; channel<this->getNumberOfChannels(); channel++){
+//			color_moments.push_back (tmp_hist->getMoment(i)[channel]) ;
+//#ifdef VERBOSE
+//			cout << tmp_hist->getMoment(i)[channel] << endl;
+//#endif // VERBOSE
+//		}	
+//	}
+//#ifdef VISUAL_CHECK
+//	tmp_hist->show();
+//#endif // VISUAL_CHECK
+//
+//	//	averageHistogram->ShowStats();
+//	delete tmp_hist;
+//	
+//}
+
+// ------------------ I/O  -----------------
+// XS better: make a class for vector<float> with a >> method ?
+void ACImageAnalysis::dumpHuMoments(ostream &odump) {
+	for (int i = 0; i < int(hu_moments.size()); i++){
+		odump << setw(10);
+		odump << hu_moments[i];
 	}
-	// XS we create again a BW image -- have to do the same for Gabor
-	IplImage *BWimg = cvCreateImage (cvSize (this->getWidth(), this->getHeight()), IPL_DEPTH_8U, 1); 
-	IplImage* gray = cvCreateImage( cvGetSize(BWimg), 8, 1 );
-	cvZero( gray); 
-	
-	cvCvtColor (imgp, BWimg, CV_BGR2GRAY);
-	CvMemStorage*  storage  = cvCreateMemStorage(0);
-	CvSeq* contours = 0;
-	cvThreshold( BWimg, BWimg, thresh, 255, CV_THRESH_BINARY ); 
-	cvFindContours( BWimg, storage, &contours ); // XS TODO : more parameters ?
-	// CvArr* img, CvSeq* contour, CvScalar external_color, CvScalar hole_color, int max_level, 
-	// int thickness = 1,  int line_type = 8, CvPoint offset  = cvPoint(0,0) 	); 
-	if( contours ) cvDrawContours( gray, contours, cvScalarAll(255), cvScalarAll(255), thresh ); 
-		
-#ifdef VISUAL_CHECK
-		cvNamedWindow( "ImageC", 1 ); 
-		cvShowImage( "ImageC", imgp ); 
-		cvNamedWindow( "Image", 1 ); 
-		cvShowImage( "Image", BWimg ); 
-		cvNamedWindow( "Contours", 1 ); 
-		cvShowImage( "Contours", gray ); 
-		cvWaitKey(0); 
-		cvDestroyWindow("Image");
-		cvDestroyWindow("ImageC");
-		cvDestroyWindow("Contours");
-#endif // VISUAL_CHECK
-	CvMoments mymoments;
-	CvHuMoments myHumoments ;
-	// XS TODO : add option to discriminate these 
-	//	cvContourMoments (gray, &mymoments); // contour moments
-	cvContourMoments (BWimg, &mymoments); // image moments
-	
-	cvGetHuMoments(&mymoments, &myHumoments);
-	cvReleaseImage(&BWimg);
-	cvReleaseImage(&gray);
-	
-	cvReleaseMemStorage(&storage );	
-	hu_moments.push_back (myHumoments.hu1) ;
-	hu_moments.push_back (myHumoments.hu2) ;
-	hu_moments.push_back (myHumoments.hu3) ;
-	hu_moments.push_back (myHumoments.hu4) ;
-	hu_moments.push_back (myHumoments.hu5) ;
-	hu_moments.push_back (myHumoments.hu6) ;
-	hu_moments.push_back (myHumoments.hu7) ;
-	
-#ifdef VERBOSE
-	cout << " Hu Moments :" << endl;
-	cout << " ---------- " << endl;
-#endif
-	
-	for (int i = 0; i < mmax; i++){
-#ifdef VERBOSE
-		cout << "raw Hu moment " << i << " : " << hu_moments[i] << endl ;
-		cout << " ---------- ---------- ---------- " << endl;
-#endif
-		if (hu_moments[i] != 0) {
-			hu_moments[i] = hu_moments[i] / fabs(hu_moments[i]) * log (fabs(hu_moments[i]));
-		}
-	}
-#ifdef VERBOSE
-	for (int i = 0; i < mmax; i++)
-		cout << "log Hu moment " << i << " : " << hu_moments[i] << endl ;
-	cout << " ---------- ---------- ---------- " << endl;
-#endif
+	odump << endl;
 }
 
-void ACImageAnalysis::computeGaborMoments(int mumax, int numax){ // default 7, 5
-	gabor_moments.clear();
-	if (imgp == NULL) {
-		cerr << " <ACImageAnalysis::computeGaborMoments() error> missing image !" << endl;
-		return;
+void ACImageAnalysis::dumpContourHuMoments(ostream &odump) {
+	for (int i = 0; i < int(contour_hu_moments.size()); i++){
+		odump << setw(10);
+		odump << contour_hu_moments[i];
 	}
-	IplImage *BWimg = cvCreateImage (cvSize (this->getWidth(), this->getHeight()), IPL_DEPTH_8U, 1); 
-	cvCvtColor (imgp, BWimg, CV_BGR2GRAY);
-	CvGabor *gabor = new CvGabor();
-	for (int i = 0; i < mumax; i++){	
-		for (int j = 0; j < numax; j++){
-			gabor->Reset(i,j);
-			double *tmpft = new double[2];
-			tmpft = gabor->getMeanAndStdevs(BWimg); // ?
-			
-			gabor_moments.push_back (tmpft[0]) ;
-			gabor_moments.push_back (tmpft[1]) ;
-			delete [] tmpft;
-#ifdef VISUAL_CHECK
-			IplImage *kernel = cvCreateImage( cvSize(gabor->GetMaskWidth(), gabor->GetMaskWidth()), IPL_DEPTH_8U, 1);
- 			kernel = gabor->get_image(CV_GABOR_REAL);
-			cvNamedWindow("Gabor Kernel", CV_WINDOW_AUTOSIZE);
-			cvShowImage("Gabor Kernel", kernel);
-			cvWaitKey(0);
-			cvDestroyWindow("Gabor Kernel");			
-			
-			IplImage *magimg = cvCreateImage(cvSize(BWimg->width,BWimg->height), IPL_DEPTH_8U, 1);
-			gabor->conv_img(BWimg, magimg, CV_GABOR_MAG);
-			cvNamedWindow("Magnitude Response",CV_WINDOW_AUTOSIZE);
-			cvShowImage("Magnitude Response",magimg);
-			cvWaitKey(0);
-			cvDestroyWindow("Magnitude Response");		
-			cvReleaseImage( &kernel );	
-			cvReleaseImage( &magimg );	
-#endif
-		}
-	}
-	cvReleaseImage( &BWimg );	
-	//	cvReleaseImage( &image );	// no, we did not create it!!
+	odump << endl;
 }
 
-void ACImageAnalysis::computeColorMoments(int n){
-	// n = number of moments to compute
-	color_moments.clear();
-	ACImageHistogram* tmp_hist  = new ACImageHistogram(imgp, color_model);
-	
-	//tmp_hist->normalize(1);
-	tmp_hist->computeStats();
-	tmp_hist->computeMoments(n);
-			
-	for (int i=1;i<=n;i++){
-		for (int channel=0; channel<this->getNumberOfChannels(); channel++){
-			color_moments.push_back (tmp_hist->getMoment(i)[channel]) ;
-#ifdef VERBOSE
-			cout << tmp_hist->getMoment(i)[channel] << endl;
-#endif // VERBOSE
-		}	
+void ACImageAnalysis::dumpRawMoments(ostream &odump) {
+	for (int i = 0; i < int(raw_moments.size()); i++){
+		odump << setw(10);
+		odump << raw_moments[i];
 	}
-#ifdef VISUAL_CHECK
-	tmp_hist->show();
-#endif // VISUAL_CHECK
-
-	//	averageHistogram->ShowStats();
-	delete tmp_hist;
-	
+	odump << endl;
 }
 
-// ------------------ visual output functions -----------------
+void ACImageAnalysis::dumpFourierPolarMoments(ostream &odump) {
+	for (int i = 0; i < int(fourier_polar_moments.size()); i++){
+		odump << setw(10);
+		odump << fourier_polar_moments[i] << " ";
+	}
+	odump << endl;
+}
 
-void ACImageAnalysis::showInWindow(const std::string title, bool has_win){
-	// using highgui
-	if (not has_win)
-		cvNamedWindow(title.c_str(), CV_WINDOW_AUTOSIZE);
+void ACImageAnalysis::dumpFourierMellinMoments(ostream &odump) {
+	for (int i = 0; i < int(fourier_mellin_moments.size()); i++){
+		odump << setw(10);
+		odump << fourier_mellin_moments[i] << " ";
+	}
+	odump << endl;
+}
+
+// ------------------ visual output  -----------------
+
+void ACImageAnalysis::showInWindow(const std::string title){
     cvShowImage(title.c_str(), imgp);
 }
 
-void ACImageAnalysis::showChannels(string cmode){
-	// cmode default = "BGR"
-	splitChannels(cmode);
-	cvNamedWindow("0", CV_WINDOW_AUTOSIZE);
-    cvShowImage("0", channel_img[0]);
-	cvNamedWindow("1", CV_WINDOW_AUTOSIZE);
-    cvShowImage("1", channel_img[1]);
-	cvNamedWindow("2", CV_WINDOW_AUTOSIZE);
-    cvShowImage("2", channel_img[2]);
-	cvWaitKey(0); // XS remove ?
-	cvDestroyWindow("0");
-	cvDestroyWindow("1");
-	cvDestroyWindow("2");	
+void ACImageAnalysis::showInNewWindow(const std::string title){
+	cvNamedWindow(title.c_str(), CV_WINDOW_AUTOSIZE);
+    cvShowImage(title.c_str(), imgp);
 }
 
-void ACImageAnalysis::showChannels(string cmode, const char* w0, const char* w1, const char* w2){
-	// XS no default cmode here
-	splitChannels(cmode);
-    cvShowImage(w0, channel_img[0]);
-    cvShowImage(w1, channel_img[1]);
-    cvShowImage(w2, channel_img[2]);
+void ACImageAnalysis::closeNewWindow(const std::string title){
+	cvDestroyWindow(title.c_str());
 }
 
-void ACImageAnalysis::showFFTInWindow(const std::string title){
-	IplImage* fftimage[3];
-	string t[3];
-	
-	for(int ic=0; ic< 3; ic++){
-		std::ostringstream oss;
-		fftimage[ic] = cvCreateImage(cvSize(width,height),8,1);
-		oss << title << ic;
-		t[ic] = oss.str();
-	}
-	
- 	for(int ic=0; ic< 3; ic++){
-		cvNamedWindow(t[ic].c_str() ,CV_WINDOW_AUTOSIZE);
-		int k = 0;
-		for(int i=0; i< width; i++){
-			for (int j=0; j< height; j++){
-				fftimage[ic]->imageData[i*width + j] = (uchar)(sqrt(fft[ic][k][0]*fft[ic][k][0]+fft[ic][k][1]*fft[ic][k][1]));
-				k++;
-			}
-		}
-		cvWaitKey(0);
-		cvShowImage(t[ic].c_str(),fftimage[ic]);
-	}
-	cvWaitKey(0);
-	for(int ic=0; ic< 3; ic++){
-		cvReleaseImage(&fftimage[ic]);
-		cvDestroyWindow(t[ic].c_str());
-	}
-}
+//void ACImageAnalysis::showChannels(string cmode, const char* w0, const char* w1, const char* w2){
+//	// XS no default cmode here
+//	if (cmode=="BW"){
+//		cout << "not showing channels for bw image" << endl;
+//		return;
+//	}
+//	splitChannels(cmode);
+//    cvShowImage(w0, channel_img[0]);
+//    cvShowImage(w1, channel_img[1]);
+//    cvShowImage(w2, channel_img[2]);
+//}
 
+//void ACImageAnalysis::showFFTInWindow(const std::string title){
+// 	const int cdim = height * (width / 2 + 1);
+//	if (color_model == "BGR") {
+//		IplImage* fftimage[3];
+//		string t[3];
+//		
+//		for(int ic=0; ic< 3; ic++){
+//			std::ostringstream oss;
+//			fftimage[ic] = cvCreateImage(cvSize(width,height),8,1);
+//			oss << title << ic;
+//			t[ic] = oss.str();
+//		}
+//		
+//		for(int ic=0; ic< 3; ic++){
+//			cvNamedWindow(t[ic].c_str() ,CV_WINDOW_AUTOSIZE);
+//			int k = 0;
+//			for(int i=0; i< width; i++){
+//				for (int j=0; j< height; j++){
+//					fftimage[ic]->imageData[i*width + j] = (uchar)(sqrt(fft[ic][k][0]*fft[ic][k][0]+fft[ic][k][1]*fft[ic][k][1]));
+//					k++;
+//				}
+//			}
+//			cvWaitKey(0);
+//			cvShowImage(t[ic].c_str(),fftimage[ic]);
+//		}
+//		cvWaitKey(0);
+//		for(int ic=0; ic< 3; ic++){
+//			cvReleaseImage(&fftimage[ic]);
+//			cvDestroyWindow(t[ic].c_str());
+//		}
+//	}
+//	else if (color_model == "BW"){
+//		IplImage* fftimage  = cvCreateImage(cvSize(width/2 +1,height),8,1);
+//		BwImage Bwfftimage(fftimage);
+//		int k = 0;
+//		for(int i=0; i< height; i++){
+//			for (int j=0; j< width/2 + 1; j++){
+//				Bwfftimage[i][j] = (uchar)(sqrt(fft_bw[k][0]*fft_bw[k][0]+fft_bw[k][1]*fft_bw[k][1]));
+//				k++;
+//			}
+//		}
+//		cvNamedWindow(title.c_str() ,CV_WINDOW_AUTOSIZE);
+//		cvShowImage(title.c_str(),fftimage);
+//		cvWaitKey(0);
+//		cvReleaseImage(&fftimage);
+//		cvDestroyWindow(title.c_str());
+//	}
+//}
+
+//void ACImageAnalysis::showFFTComplexInWindow(const std::string title){
+//	if (color_model == "BW"){
+//		IplImage* fftimage  = cvCreateImage(cvSize(width,height),IPL_DEPTH_32F,1);
+//		BwImageFloat Bwfftimage(fftimage);
+//		int x=0;
+//		int y=0;
+//		float xtmp = 0;
+//		float xmax = 0;
+//		int area = height * width; 
+//		for(int kk=1; kk < height * width; kk++){
+//			xtmp = (fft_bw[kk][0]*fft_bw[kk][0]+fft_bw[kk][1]*fft_bw[kk][1]);
+//			//cout << xtmp << endl;
+//			if (xtmp > xmax) xmax = xtmp;
+//		}
+//		int k=0;
+//		for(int i=0; i< height; i++){
+//			for (int j=0; j< width; j++){
+//				if (i<height/2 && j<width/2){ x=i+height/2; y=j+width/2; }
+//				if (i>=height/2 && j<width/2){ x=i-height/2; y=j+width/2; }
+//				if (i<height/2 && j>=width/2){ x=i+height/2; y=j-width/2; }
+//				if (i>=height/2 && j>=width/2){ x=i-height/2; y=j-width/2; }
+//				xtmp = sqrt((fft_bw[k][0]*fft_bw[k][0]+fft_bw[k][1]*fft_bw[k][1])/area); //*255/sqrt(xmax);
+//				Bwfftimage[x][y] = xtmp;
+//				k++;
+//			}
+//		}
+//		cvNamedWindow(title.c_str() ,CV_WINDOW_AUTOSIZE);
+//		cvShowImage(title.c_str(),fftimage);
+//		cvWaitKey(0);
+//		cvReleaseImage(&fftimage);
+//		cvDestroyWindow(title.c_str());
+//	}
+//}
+//
 
 
 int ACImageAnalysis::saveInFile (string filename){

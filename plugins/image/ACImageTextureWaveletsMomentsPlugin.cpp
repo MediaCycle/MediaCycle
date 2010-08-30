@@ -48,7 +48,7 @@ ACImageTextureWaveletsMomentsPlugin::ACImageTextureWaveletsMomentsPlugin() {
     //vars herited from ACPlugin
     this->mMediaType = MEDIA_TYPE_IMAGE;
     this->mPluginType = PLUGIN_TYPE_FEATURES;
-    this->mName = "Image Texture Moments";
+    this->mName = "Texture Gabor";
     this->mDescription = "Image Texture Moments plugin";
     this->mId = "";
 }
@@ -58,7 +58,7 @@ ACImageTextureWaveletsMomentsPlugin::~ACImageTextureWaveletsMomentsPlugin() {
 
 std::vector<ACMediaFeatures*>  ACImageTextureWaveletsMomentsPlugin::calculate(std::string aFileName) {
 	cout << "calculating Texture Moments from wavelets" << endl;
-	ACImageAnalysis* image = new ACImageAnalysis(aFileName);
+	ACColorImageAnalysis* image = new ACColorImageAnalysis(aFileName);
 	std::vector<ACMediaFeatures*> allImageFeatures;
 
 	ACMediaFeatures* imageTextureFeatures = this->calculateHuMoments(image);
@@ -75,7 +75,7 @@ std::vector<ACMediaFeatures*>  ACImageTextureWaveletsMomentsPlugin::calculate(st
 
 std::vector<ACMediaFeatures*> ACImageTextureWaveletsMomentsPlugin::calculate(ACMediaData* image_data) {
 	cout << "calculating Texture Moments from wavelets" << endl;
-	ACImageAnalysis* image = new ACImageAnalysis(image_data->getImageData());
+	ACColorImageAnalysis* image = new ACColorImageAnalysis(image_data->getImageData());
 	std::vector<ACMediaFeatures*> allImageFeatures;
 	
 	ACMediaFeatures* imageTextureFeatures = this->calculateHuMoments(image);

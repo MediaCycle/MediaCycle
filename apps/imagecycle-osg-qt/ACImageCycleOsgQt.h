@@ -47,6 +47,11 @@ using namespace std;
 #include <ACOsgBrowserViewQT.h>
 #include <MediaCycle.h>
 
+// FORWARD DECLARATIONS
+QT_BEGIN_NAMESPACE
+class QListWidgetItem;
+QT_END_NAMESPACE
+
 class SettingsDialog; // forward declaration; NB: SettingsDialog member has to be a pointer
 
 class ACImageCycleOsgQt : public QMainWindow
@@ -61,6 +66,10 @@ class ACImageCycleOsgQt : public QMainWindow
 		// XS test
 		void disBonjour(){cout << "bonjour" << endl;}
 
+	// XS attempt to make dynamic buttons
+	public slots: 
+		virtual void modifyListItem(QListWidgetItem *item);
+		
 	private slots:
         /* Insérez les prototypes de vos slots personnalisés ici */
 		void on_pushButtonLaunch_clicked(); // loadACLFile
@@ -69,12 +78,7 @@ class ACImageCycleOsgQt : public QMainWindow
 		void on_pushButtonBack_clicked();
 		void on_pushButtonForward_clicked();
 		
-		void on_checkBoxFeat1_stateChanged(int state);
-		void on_checkBoxFeat2_stateChanged(int state);
-		void on_checkBoxFeat3_stateChanged(int state);
-
 		void spinBoxClustersValueChanged(int _value);
-//		void on_sliderClusters_sliderMoved();
 		void on_sliderClusters_sliderReleased();
 
 		void loadACLFile();
@@ -90,6 +94,10 @@ class ACImageCycleOsgQt : public QMainWindow
     private:
         Ui::ACImageCycleOsgQt ui;
 		bool updatedLibrary;
+		void configureCheckBoxes();
+		void cleanCheckBoxes();
+		void synchronizeFeaturesWeights();
+		bool features_known;
 
 	protected:
 		//ACOsgBrowserViewQT* browserOsgView;

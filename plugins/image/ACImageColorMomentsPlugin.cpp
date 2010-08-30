@@ -45,7 +45,7 @@ ACImageColorMomentsPlugin::ACImageColorMomentsPlugin() {
     //vars herited from ACPlugin
     this->mMediaType = MEDIA_TYPE_IMAGE;
     this->mPluginType = PLUGIN_TYPE_FEATURES;
-    this->mName = "Image Color Moments";
+    this->mName = "Color Moments";
     this->mDescription = "Image Color Moments plugin";
     this->mId = "";
 }
@@ -56,7 +56,7 @@ ACImageColorMomentsPlugin::~ACImageColorMomentsPlugin() {
 
 std::vector<ACMediaFeatures*>  ACImageColorMomentsPlugin::calculate(std::string aFileName) {
 	cout << "calculating Color Moments from histogram..." << endl;
-	ACImageAnalysis* image = new ACImageAnalysis(aFileName);
+	ACColorImageAnalysis* image = new ACColorImageAnalysis(aFileName);
 	std::vector<ACMediaFeatures*> allImageFeatures;
 
 	ACMediaFeatures* imageColorFeatures = this->calculateColorFeatures(image);
@@ -74,7 +74,9 @@ std::vector<ACMediaFeatures*>  ACImageColorMomentsPlugin::calculate(std::string 
 std::vector<ACMediaFeatures*> ACImageColorMomentsPlugin::calculate(ACMediaData* image_data) {
 	cout << "calculating Color Moments from histogram..." << endl;
 	IplImage* image_data_ptr = image_data->getImageData();
-	ACImageAnalysis* image = new ACImageAnalysis(image_data_ptr);	
+	
+	// XS TODO: which color model ?
+	ACColorImageAnalysis* image = new ACColorImageAnalysis(image_data_ptr);	
 	std::vector<ACMediaFeatures*> allImageFeatures;
 	
 	ACMediaFeatures* imageColorFeatures = this->calculateColorFeatures(image);
@@ -96,7 +98,7 @@ std::vector<ACMediaFeatures*> ACImageColorMomentsPlugin::calculate(ACMediaData* 
 };
 
 
-ACMediaFeatures* ACImageColorMomentsPlugin::calculateColorFeatures(ACImageAnalysis* image){
+ACMediaFeatures* ACImageColorMomentsPlugin::calculateColorFeatures(ACColorImageAnalysis* image){
 	image->computeColorMoments(); // default n=4
 	ACMediaFeatures* color_moments = new ACMediaFeatures(image->getColorMoments(), "Color");
 	return color_moments;	

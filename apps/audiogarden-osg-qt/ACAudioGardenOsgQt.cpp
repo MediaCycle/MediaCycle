@@ -166,7 +166,7 @@ void ACAudioGardenOsgQt::updateLibrary()
 		media_cycle->setReferenceNode(0);
 	}
 	// XSCF 250310 added these 3
-	media_cycle->pushNavigationState();
+	// media_cycle->pushNavigationState(); // XS250810 removed
 	//media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
 	media_cycle->getBrowser()->setState(AC_CHANGING);
 	
@@ -688,7 +688,7 @@ void ACAudioGardenOsgQt::processOscMessage(const char* tagName)
 		std::cout << "File library imported" << std::endl;
 		media_cycle->setReferenceNode(0);
 		// XSCF 250310 added these 3
-		media_cycle->pushNavigationState();
+		// media_cycle->pushNavigationState(); // XS 250810 removed
 		media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
 		media_cycle->getBrowser()->setState(AC_CHANGING);
 		
@@ -702,7 +702,7 @@ void ACAudioGardenOsgQt::processOscMessage(const char* tagName)
 		media_cycle->libraryContentChanged();
 		media_cycle->setReferenceNode(0);
 		// XSCF 250310 added these 3
-		media_cycle->pushNavigationState();
+		// media_cycle->pushNavigationState(); // XS 250810 removed
 		media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
 		media_cycle->getBrowser()->setState(AC_CHANGING);
 		
@@ -788,7 +788,7 @@ void ACAudioGardenOsgQt::processOscMessage(const char* tagName)
 		if (library_loaded && media_cycle->getBrowser()->getMode() == AC_MODE_CLUSTERS && node > -1)
 		{
 			media_cycle->setReferenceNode(node);
-			media_cycle->pushNavigationState();
+			//media_cycle->pushNavigationState(); // XS 250810 removed
 			media_cycle->updateDisplay(true);
 		}
 	}

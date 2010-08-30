@@ -1,10 +1,10 @@
 /*
- *  ACFeaturesTypes.h
- *  MediaCycle
+ *  main.cpp
+ *  tryxcodeqt
  *
  *  @author Xavier Siebert
- *  @date 11/05/09
- *  @copyright (c) 2009 – UMONS - Numediart
+ *  @date 29/12/08
+ *  @copyright (c) 2008 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
  *  licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -32,18 +32,15 @@
  *
  */
 
-// Definitions used along with features
+#include <QtGui/QApplication>
 
+#include "MyGUI.h"
+#include <iostream>
+using namespace std;
 
-#ifndef _ACFEATURESTYPES_H
-#define _ACFEATURESTYPES_H
-
-#include <vector>
-
-typedef unsigned int DistanceType;
-
-typedef std::vector<float> FeaturesVector;
-//typedef std::vector<double> FeaturesVectorAsDouble;
-// other option : make FeaturesVector a class or a template
-
-#endif  // ACFEATURESTYPES_H
+int main(int argc, char* argv[]) {
+		QApplication app(argc, argv);
+		MyGUI toto;
+		toto.show();
+		return app.exec();
+}

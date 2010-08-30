@@ -33,6 +33,7 @@
  */
 
 #include "ACMediaBrowser.h"
+using namespace std;
 
 static double getTime()
 {
@@ -44,55 +45,6 @@ static double getTime()
     return (double)tv.tv_sec + tv.tv_usec / 1000000.0;
 }
 
-using namespace std;
-
-// XS TODO this will need to be changed
-// once we define a class with methods to compute distances
-// ....
-
-static double compute_distance(const vector< vector<float> > &obj1, const vector<vector <float> > &obj2, const vector<float> &weights, bool inverse_features)
-{
-	assert(obj1.size() == obj2.size() && obj1.size() == weights.size());
-	
-	int feature_count = obj1.size();
-	double dis = 0.0;
-	
-	/*if(inverse_features)
-	 {
-	 total_weight = double(feature_count) - total_weight;
-	 }*/
-	
-	int l, r;
-	
-	for(int f=0; f<feature_count; f++)
-	{
-		/*
-		 if (f==INDEX_RYTHMO) {
-		 l=0; r=24;
-		 }
-		 if (f==INDEX_TIMBRO) {
-		 l=1; r=12;
-		 }
-		 if (f==INDEX_CHROMA) {
-		 l=0; r=12;
-		 }*/
-		
-		// Image version
-		// XS TODO: does this work for image too ?
-		l = 0; r = obj1[f].size();
-		
-		for(int d=l; d<r; d++)
-		{
-			float df = obj1[f][d] - obj2[f][d]; 
-			
-			dis += df*df * (inverse_features?(1.0-weights[f]):weights[f]);
-		}
-	}
-	
-	dis = sqrt(dis);
-	
-	return dis;
-}
 
 static double compute_distance(vector<ACMediaFeatures*> &obj1, vector<ACMediaFeatures*> &obj2, const vector<float> &weights, bool inverse_features)
 {
@@ -110,6 +62,9 @@ static double compute_distance(vector<ACMediaFeatures*> &obj1, vector<ACMediaFea
 	
 	return dis;
 }
+
+// this one is mostly used
+// e.g., compute_distance(mLibrary->getMedia(i)->getAllFeaturesVectors(), mClusterCenters[j], mFeatureWeights, false);
 
 static double compute_distance(vector<ACMediaFeatures*> &obj1, const vector<vector <float> > &obj2, const vector<float> &weights, bool inverse_features)
 {
@@ -136,6 +91,8 @@ ACMediaBrowser::ACMediaBrowser() {
 	mViewHeight = 365;
 	mCenterOffsetX = mViewWidth / 2;
 	mCenterOffsetZ = mViewHeight / 2;
+	
+	// XS TODO put the following in a separate function, since it's called by libraryContentChanged too !
 	
 	mCameraPosition[0] = 0.0;
 	mCameraPosition[1] = 0.0;
@@ -204,6 +161,7 @@ void ACMediaBrowser::addLabel(string text, ACPoint pos) {
 
 void ACMediaBrowser::setLabel(int i, string text, ACPoint pos) {
 	// TODO : XS 260310 removed this ugly if : if you want to append, don't set
+	// (was introduced again to make the dancers app work)
 	if (mLabelAttributes.size()<=i) {
 		mLabelAttributes.resize(i+1);
 	}
@@ -222,14 +180,20 @@ ACPoint ACMediaBrowser::getLabelPos(int i) {
 
 void ACMediaBrowser::goBack()
 {
+#ifdef VERBOSE
 	printf("backward\n");
+#endif // VERBOSE
 	
 	if (getMode() == AC_MODE_CLUSTERS){
-		if (mBackwardNavigationStates.size() > 1) {
-			mForwardNavigationStates.push_back(mBackwardNavigationStates.back());
+		if (mBackwardNavigationStates.size() > 0) { // XS: was 1
+			// XS way
+			mForwardNavigationStates.push_back(this->getCurrentNavigationState());
+			setCurrentNavigationState(mBackwardNavigationStates.back());
 			mBackwardNavigationStates.pop_back();
 			
-			setCurrentNavigationState(mBackwardNavigationStates.back());
+//			mForwardNavigationStates.push_back(mBackwardNavigationStates.back());
+//			mBackwardNavigationStates.pop_back();	
+//			setCurrentNavigationState(mBackwardNavigationStates.back());
 			// XSCF 250310 added this
 			this->updateClusters(true);
 		}
@@ -238,18 +202,45 @@ void ACMediaBrowser::goBack()
 
 void ACMediaBrowser::goForward()
 {
+#ifdef VERBOSE
 	printf("forward\n");
+#endif // VERBOSE
 	
 	if (getMode() == AC_MODE_CLUSTERS){
 		if (mForwardNavigationStates.size() > 0) {
-			mBackwardNavigationStates.push_back(mForwardNavigationStates.back());
+			// XS way
+			mBackwardNavigationStates.push_back(this->getCurrentNavigationState());
+			setCurrentNavigationState(mForwardNavigationStates.back());
 			mForwardNavigationStates.pop_back();
 			
-			setCurrentNavigationState(mBackwardNavigationStates.back());
+//			mBackwardNavigationStates.push_back(mForwardNavigationStates.back());
+//			mForwardNavigationStates.pop_back();		
+//			setCurrentNavigationState(mBackwardNavigationStates.back());
 			// XSCF 250310 added this
 			this->updateClusters(true);
 		}
 	}	
+}
+
+void ACMediaBrowser::storeNavigationState(){
+	// e.g., user does 'a' + left-click
+	// so we zoom into cluster, but must keep track of the previous state
+	// if there was a list of forward states, we will overwrite it (no branching)
+	// previously = (sort of) pushNavigationState, which was ambiguous
+	mForwardNavigationStates.clear();
+	mBackwardNavigationStates.push_back(getCurrentNavigationState());
+	
+	// XS all items that are at higher navigation states should go back to current navigation state
+	// XS might be sort of heavy. 
+	int l=this->getNavigationLevel();
+	for (ACMediaNodes::iterator node = mLoopAttributes.begin(); node != mLoopAttributes.end(); ++node){
+		if ((*node).getNavigationLevel() > l){
+			(*node).setNavigationLevel(l);
+		}
+	}
+	
+	// XS  TODO check this : do we need
+	// this->updateCluster() ou updateDisplay() ?
 }
 
 void ACMediaBrowser::setHistory()
@@ -284,27 +275,34 @@ void ACMediaBrowser::setFilterSuggest()
 
 void ACMediaBrowser::setWeight(int i, float weight) {
 	mFeatureWeights[i] = weight;
+
+#ifdef VERBOSE
 	std::cout << "mFeatureWeights = " << mFeatureWeights[0] << std::endl;
-		std::cout << "mFeatureWeights = " << mFeatureWeights[1] << std::endl;
-		std::cout << "mFeatureWeights = " << mFeatureWeights[2] << std::endl;
+	std::cout << "mFeatureWeights = " << mFeatureWeights[1] << std::endl;
+	std::cout << "mFeatureWeights = " << mFeatureWeights[2] << std::endl;
+#endif // VERBOSE
+
 	// XSCF 250310 removed this
 	// updateClusters(true); 
 	// setNeedsDisplay(true);
 }
 
 float ACMediaBrowser::getWeight(int i){
-	if (i < mFeatureWeights.size()){
+	if (i < int(mFeatureWeights.size()) && i >= 0){
 		return mFeatureWeights[i];
 	}
 	else{
-		std::cerr << "getWeight : Index of weight out of bound" << std::endl;
+		std::cerr << "getWeight : Index of weight out of bounds : " << i << std::endl;
 		exit(1);
 	}
 }
 
 void ACMediaBrowser::setClusterNumber(int n)
 {
-	mClusterCount = n;
+	if (n>=0)
+		mClusterCount = n;
+	else
+		std::cerr << "<ACMediaBrowser::setClusterNumber> : n has to be > 0" << std::endl;
 	// XSCF 250310 removed this
 //	updateClusters(true);
 //	setNeedsDisplay(true);
@@ -334,8 +332,7 @@ bool ACMediaBrowser::toggleNode(int node){
 			return false;
 		}	
 	}
-	
-	
+		
 	mSelectedNodes.insert(node);
 	this->getMediaNode(node).setSelection(true);
 	mLastSelectedNode = node;
@@ -418,19 +415,21 @@ void ACMediaBrowser::setNumberOfDisplayedLabels(int nd){
 		nbDisplayedLabels = nd;
 }
 
-void ACMediaBrowser::resetLoopNavigationLevels() {
+void ACMediaBrowser::resetLoopNavigationLevels(int l) {
+	// default : l=0
 	for (ACMediaNodes::iterator node = mLoopAttributes.begin(); node != mLoopAttributes.end(); ++node){
-		(*node).setNavigationLevel (0);
+		(*node).setNavigationLevel (l);
 	}	
 }
 
 void ACMediaBrowser::incrementLoopNavigationLevels(int loopIndex) {
 	int n=getNumberOfMediaNodes(),clusterIndex;
 	
-	// XS TODO: which if goes first ? do we still want to reset if we have a wrong loop_index ?
-	if (mNavigationLevel==0)
-		resetLoopNavigationLevels();
+	// XS TODO: why this "if" ?
+//	if (mNavigationLevel==0)
+//		resetLoopNavigationLevels();
 	
+	// XS TODO: which "if" goes first ? do we still want to reset if we have a wrong loop_index ?
 	if(!(loopIndex >= 0 && loopIndex < n))  return;
 	
 	clusterIndex = this->getMediaNode(loopIndex).getClusterId();	
@@ -438,10 +437,12 @@ void ACMediaBrowser::incrementLoopNavigationLevels(int loopIndex) {
 	
 	for (ACMediaNodes::iterator node = mLoopAttributes.begin(); node != mLoopAttributes.end(); ++node){
 		if ((*node).getClusterId() == clusterIndex){
+			//XS TODO vérifier que ça n'incrémente pas 2x celle sur laquelle on a cliqué
 			(*node).increaseNavigationLevel();
 		}
 	}
-	
+
+// I just don't get why this is here: 
 	mNavigationLevel++;
 }
 
@@ -489,18 +490,6 @@ void ACMediaBrowser::setMode(ACBrowserMode _mode)
 	mMode = _mode;
 }
 
-void ACMediaBrowser::pushNavigationState()
-{
-	mForwardNavigationStates.clear();
-	mBackwardNavigationStates.push_back(getCurrentNavigationState());
-}
-
-// SD TODO - This is not used anymore I think
-// XS - it is still used by 
-//    void ACOsgBrowserEventHandler::hover_callback(float x, float y) {
-//        media_cycle->hoverCallback(x, y);
-//    }
-
 int ACMediaBrowser::setHoverLoop(int lid, float mx, float my)
 {
 	int loop_id;
@@ -519,6 +508,7 @@ int ACMediaBrowser::setHoverLoop(int lid, float mx, float my)
 	else {
 		return 0;
 	}
+	return 1;
 }
 
 
@@ -538,6 +528,7 @@ void ACMediaBrowser::randomizeNodePositions(){
 	}	
 }
 
+// XS TODO change this name into something non-passive.
 void ACMediaBrowser::libraryContentChanged() {
 	// update initial positions 
 	// previously: resize other vector structures dependent on loop count.
@@ -868,6 +859,7 @@ void ACMediaBrowser::updateNextPositions(){
 // XS 150310
 // . removed assert size
 // . included ACMediaNode 
+// XS 230810 removed inv_weight (not used)
 void ACMediaBrowser::updateClustersKMeans(bool animate) {
 	int i,j,d,f;
 	
@@ -885,19 +877,10 @@ void ACMediaBrowser::updateClustersKMeans(bool animate) {
 	// XS note: problem if all media don't have the same number of features
 	//          but we suppose it is not going to happen
 	int feature_count = mLibrary->getMedia(0)->getNumberOfFeaturesVectors();
-	double inv_weight = 0.0;
 		
 	vector< int > 			cluster_counts;
 	vector<vector<vector <float> > >cluster_accumulators; // cluster, feature, desc
 	vector< float > 		cluster_distances; // for computation
-	
-	for(i=0; i<feature_count; i++)
-	{
-		inv_weight += mFeatureWeights[i];
-	}
-	
-	if(inv_weight > 0.0) inv_weight = 1.0 / inv_weight;
-	else return;
 	
 	// picking random object as initial cluster center
 	srand(15);
@@ -945,8 +928,7 @@ void ACMediaBrowser::updateClustersKMeans(bool animate) {
 	int n_iterations = 20, it;
 	
 	printf("feature weights:");
-
-	for(int fw=0; fw < mFeatureWeights.size(); fw++)
+	for (unsigned int fw=0; fw < mFeatureWeights.size(); fw++)
 		printf("%f ", mFeatureWeights[fw]);
 	printf("\n");
 	
@@ -972,27 +954,12 @@ void ACMediaBrowser::updateClustersKMeans(bool animate) {
 		for(i=0; i<object_count; i++)
 		{
 			// check if we should include this object
+			// note: the following "if" skips to next i if true.
 			if(this->getMediaNode(i).getNavigationLevel() < mNavigationLevel) continue;
 			
 			// compute distance between this object and every cluster
 			for(j=0; j<mClusterCount; j++)
 			{
-				/*float d = 0.0;
-				 
-				 for(f=0; f<feature_count; f++)
-				 {
-				 float df = mClusterCenters[j][f] - objects[i][f]; 
-				 
-				 d += df*df * mFeatureWeights[f] * inv_weight;
-				 }
-				 
-				 d = sqrt(d);
-				 
-				 
-				 cluster_distances[j] = d;
-				 */
-				
-				//cluster_distances[j] = compute_distance(mClusterCenters[j], loops[i].getAllFeaturesVectors(), mFeatureWeights, true);
 				cluster_distances[j] = 0;
 				cluster_distances[j] = compute_distance(mLibrary->getMedia(i)->getAllFeaturesVectors(), mClusterCenters[j], mFeatureWeights, false);
 				
@@ -1060,11 +1027,6 @@ void ACMediaBrowser::setReferenceNode(int index)
 	// XS TODO (index >= -1 && index < objects.size());
 	
 	mReferenceNode = index;
-
-	// XSCF 250310 commented this 
-//	pushNavigationState();
-//	updateNextPositions();
-//	setState(AC_CHANGING);
 }
 
 // AM : TODO move this out of core (it's GUI related)
@@ -1118,9 +1080,7 @@ void ACMediaBrowser::updateNextPositionsPropeller(){
 
 
 void ACMediaBrowser::commitPositions()
-{
-	int i;
-	
+{	
 	for (ACMediaNodes::iterator node = mLoopAttributes.begin(); node != mLoopAttributes.end(); ++node){
 		(*node).commitPosition();
 	}
@@ -1134,7 +1094,7 @@ void ACMediaBrowser::setState(ACBrowserState state)
 		mRefTime = getTime(); //CF instead of TiGetTime();
 		mState = state;
 		
-		printf("state changing to %d", state);
+		printf("state changing to %d \n", state);
 	}
 }
 
@@ -1236,7 +1196,6 @@ int ACMediaBrowser::toggleSourceActivity(ACMediaNode &node, int _activity) {
 int ACMediaBrowser::toggleSourceActivity(int lid, int type)
 {
 	int loop_id;
-	float x, y, z;
 	
 	loop_id = lid;
 	//

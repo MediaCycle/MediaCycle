@@ -39,7 +39,7 @@ ACPluginManager::ACPluginManager(const ACPluginManager& orig) {
 }
 
 ACPluginManager::~ACPluginManager() {
-
+// XS TODO: this->removeAll() ???
 }
 
 /*
@@ -75,7 +75,7 @@ int ACPluginManager::removeAll() {
 
 ACPlugin *ACPluginManager::getPlugin(std::string aPluginName) {
     ACPlugin *result = NULL;
-    for (int k=0;k<this->mPluginLibrary.size();k++) {
+    for (unsigned int k=0;k<this->mPluginLibrary.size();k++) {
         result = this->mPluginLibrary[k]->getPlugin(aPluginName);
         if (result) {
             return result;
@@ -87,7 +87,7 @@ ACPlugin *ACPluginManager::getPlugin(std::string aPluginName) {
 
 void ACPluginManager::dump() {
 	cout << "ACPluginManager: " << this->mPluginLibrary.size() << " plugin libraries" << endl;
-    for (int k=0;k<this->mPluginLibrary.size();k++) {
+    for (unsigned int k=0;k<this->mPluginLibrary.size();k++) {
 		cout << " --- plugin library #" << k << endl;
 		this->mPluginLibrary[k]->dump();
     }
@@ -121,7 +121,7 @@ int ACPluginLibrary::initialize()
     //ainsi l'hote est mis au courant des parametres et peut faire un setParam()
     //exemple : AmplitudeFollower.cpp (see vamp-plugin-sdk-2.0/examples)
 
-    for (int i=0; i < listPlugin.size(); i++)
+    for (unsigned int i=0; i < listPlugin.size(); i++)
     {
         std::cout<<listPlugin[i]<<endl;
         ACPlugin* plugin = create(listPlugin[i]);
@@ -163,7 +163,7 @@ void ACPluginLibrary::freePlugins() {
 
 ACPlugin *ACPluginLibrary::getPlugin(std::string aPluginName) {
 
-    for (int k=0;k<this->mPlugins.size();k++) {
+    for (unsigned int k=0;k<this->mPlugins.size();k++) {
         if (this->mPlugins[k]->getName() == aPluginName) {
             return this->mPlugins[k];
         }
@@ -174,7 +174,7 @@ ACPlugin *ACPluginLibrary::getPlugin(std::string aPluginName) {
 
 void ACPluginLibrary::dump() {
 	cout << "ACPluginLibrary: " << this->mPlugins.size() << " plugins" << endl;
-    for (int k=0;k<this->mPlugins.size();k++) {
+    for (unsigned int k=0;k<this->mPlugins.size();k++) {
         cout << "plugin #" << k << ": " << this->mPlugins[k]->getName() << endl;
     }
 }

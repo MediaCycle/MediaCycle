@@ -32,10 +32,10 @@
  *
  */
 
-#ifndef _ACIMAGESHAPEMMOMENTSPLUGIN_H
-#define	_ACIMAGESHAPEMMOMENTSPLUGIN_H
+#ifndef _ACIMAGESHAPEHUMOMENTSPLUGIN_H
+#define	_ACIMAGESHAPEHUMOMENTSPLUGIN_H
 
-#include "ACImageAnalysis.h"
+#include "ACColorImageAnalysis.h"
 #include "ACPlugin.h"
 #include "ACMediaFeatures.h"
 
@@ -52,4 +52,4 @@ private:
 	ACMediaFeatures* calculateHuMoments(ACImageAnalysis* image);
 };
 
-#endif	/* _ACIMAGESHAPEMMOMENTSPLUGIN_H */
+#endif	/* _ACIMAGESHAPEHUMOMENTSPLUGIN_H */

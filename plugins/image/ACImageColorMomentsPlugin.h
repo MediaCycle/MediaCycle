@@ -35,7 +35,7 @@
 #ifndef _ACIMAGECOLORMOMENTSPLUGIN_H
 #define	_ACIMAGECOLORMOMENTSPLUGIN_H
 
-#include "ACImageAnalysis.h"
+#include "ACColorImageAnalysis.h"
 #include "ACPlugin.h"
 #include "ACMediaFeatures.h"
 
@@ -49,7 +49,7 @@ public:
 	std::vector<ACMediaFeatures*> calculate(ACMediaData* _data);	
 	std::vector<ACMediaFeatures*> calculate(ACMediaData* _aData, ACMedia* _theMedia);
 private:
-	ACMediaFeatures* calculateColorFeatures(ACImageAnalysis* image);
+	ACMediaFeatures* calculateColorFeatures(ACColorImageAnalysis* image);
 };
 
 #endif	/* _ACIMAGECOLORMOMENTSPLUGIN_H */

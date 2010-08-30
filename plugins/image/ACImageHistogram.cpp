@@ -40,7 +40,7 @@
 
 using namespace std;
 
-#define DEBUG_ME
+//#define DEBUG_ME
 
 ACImageHistogram::ACImageHistogram(IplImage** channel_img, string _cmode, int _size, int _norm) {
 	initialize(channel_img, _cmode, _size, _norm);
@@ -228,7 +228,6 @@ void ACImageHistogram::computeMoments(int highest_order){
 #endif // DEBUG_ME
 			//mom[i] = mom[i] * pow(size,n-1);
 			//mom[i] = pow(mom[i], 1.0/n);
-			
 		}
 		moments.push_back(mom);
 	}

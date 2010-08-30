@@ -137,7 +137,7 @@ public:
 	
 	// == Cluster Display
 	void updateState();
-	void pushNavigationState();
+	void storeNavigationState();
 	int getNavigationLevel();
 	float getFrac();
 	void incrementLoopNavigationLevels(int i);
@@ -146,7 +146,6 @@ public:
 	void goBack();
 	void goForward();
 	void setClusterNumber(int n);
-	void setWeight(int i, float weight);
 	void setForwardDown(int i);
 	void setPlayKeyDown(bool i){playkeydown = i;};
 	bool getPlayKeyDown(){return playkeydown;};
@@ -161,7 +160,10 @@ public:
 	void cleanLibrary();
 	// Get Features Vector (identified by feature_name) in media i 
 	vector<float> getFeaturesVectorInMedia(int i, string feature_name);
-		
+	void setWeight(int i, float weight);
+	vector<float> getWeightVector();
+	float getWeight(int i);
+	
 	// == LABELS on VIEW
  	int getLabelSize();
 	string getLabelText(int i);
@@ -189,6 +191,9 @@ public:
 	// == User log
 	void cleanUserLog();
 
+	// == Dump / used for Debug 
+	void dumpNavigationLevel();
+	void dumpLoopNavigationLevels();
 
 private:
 	int forwarddown;

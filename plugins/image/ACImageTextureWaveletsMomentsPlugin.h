@@ -35,7 +35,7 @@
 #ifndef _ACIMAGETEXTUREWAELETSMOMENTSPLUGIN_H
 #define	_ACIMAGETEXTUREWAELETSMOMENTSPLUGIN_H
 
-#include "ACImageAnalysis.h"
+#include "ACColorImageAnalysis.h"
 #include "ACPlugin.h"
 #include "ACMediaFeatures.h"
 

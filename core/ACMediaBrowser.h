@@ -162,15 +162,15 @@ public:
 	void setClusterCenter(int clusterIdx, vector< vector<float> >);
 	void initClusterCenters();
 	// XS TODO clean level / state ...
-	void resetLoopNavigationLevels();
+	void resetLoopNavigationLevels(int l=0);
 	void incrementLoopNavigationLevels(int loopIndex);
 	int getNavigationLevel()				{ return mNavigationLevel; };
-	void pushNavigationState();
 	ACNavigationState getCurrentNavigationState();
 	void setCurrentNavigationState(ACNavigationState state);
 	// go back/forward in the navigation into clusters 
 	void goBack();
 	void goForward();
+	void storeNavigationState(); // was: pushNavigationState();
 		
 	// == Nodes
 	void setClickedNode(int inode);

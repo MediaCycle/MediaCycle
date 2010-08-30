@@ -171,7 +171,7 @@ void ACAudioCycleOsgQt::updateLibrary()
 		media_cycle->setReferenceNode(0);
 	}
 	// XSCF 250310 added these 3
-	media_cycle->pushNavigationState();
+	// media_cycle->pushNavigationState();  XS 250810 removed
 	//media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
 	media_cycle->getBrowser()->setState(AC_CHANGING);
 	
@@ -293,8 +293,8 @@ void ACAudioCycleOsgQt::loadMediaFiles(){
 	
 	QFileDialog dialog(this,"Open AudioCycle Media File(s)");
 	dialog.setDefaultSuffix ("wav");
-	dialog.setNameFilter("Media Files (*.wav)");
-	dialog.setFileMode(QFileDialog::ExistingFile); // change to ExistingFiles for multiple file handling
+	dialog.setNameFilter("Media Files (*.wav *.aif)");
+	dialog.setFileMode(QFileDialog::ExistingFiles); // ExistingFile(s); "s" is for multiple file handling
 	
 	QStringList fileNames;
 	if (dialog.exec())
@@ -617,7 +617,7 @@ void ACAudioCycleOsgQt::processOscMessage(const char* tagName)
 		media_cycle->libraryContentChanged();
 		media_cycle->setReferenceNode(0);
 		// XSCF 250310 added these 3
-		media_cycle->pushNavigationState();
+		// media_cycle->pushNavigationState();  XS 250810 removed
 		media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
 		media_cycle->getBrowser()->setState(AC_CHANGING);
 		
@@ -702,7 +702,7 @@ void ACAudioCycleOsgQt::processOscMessage(const char* tagName)
 		if (library_loaded && media_cycle->getBrowser()->getMode() == AC_MODE_CLUSTERS && node > -1)
 		{
 			media_cycle->setReferenceNode(node);
-			media_cycle->pushNavigationState();
+			// media_cycle->pushNavigationState(); XS 250810 removed
 			media_cycle->updateDisplay(true);
 		}
 	}

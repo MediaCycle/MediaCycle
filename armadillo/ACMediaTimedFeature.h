@@ -135,6 +135,7 @@ public:
 	//	umat hist(int nbrBin, float min = 0, float max = 0);
 	
 	fmat similarity(int mode = 0);
+	fmat similarity(ACMediaTimedFeature *B);
 	float dist(fmat rowvector1, fmat rowvector2, int mode = 0);
 	int saveAsSdif(const char* name);
 	int saveAsTxt(string fname);

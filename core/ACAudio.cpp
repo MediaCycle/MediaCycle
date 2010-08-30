@@ -163,7 +163,7 @@ int ACAudio::getSampleEnd(){
 // }
 
 void ACAudio::saveACL(ofstream &library_file) {
-	int i, j;
+	unsigned int i, j;
 	int n_features;
 	int n_features_elements;	
 	int nn;
@@ -196,7 +196,7 @@ void ACAudio::saveACL(ofstream &library_file) {
 }
 
 void ACAudio::saveMCSL(ofstream &library_file) {
-	int i, j;
+	unsigned int i, j;
 	int n_features;
 	int n_features_elements;	
 	int nn;
@@ -246,7 +246,7 @@ int ACAudio::loadACL(ifstream &library_file) {
 		return 0;
 	}
 
-	int i, j;
+	int i;
 	int n_features;
 	int n_features_elements = 0;	
 	int nn;

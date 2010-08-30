@@ -133,7 +133,7 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 	
 	// XSCF 250310 added these 3
 	if (media_cycle->getMode() == AC_MODE_CLUSTERS) {
-		media_cycle->pushNavigationState();
+		// media_cycle->pushNavigationState(); // XS 250810 removed
 		media_cycle->setWeight(0, [mWeight1Check floatValue]);
 		media_cycle->setWeight(1, [mWeight2Check floatValue]);
 		media_cycle->setWeight(2, [mWeight3Check floatValue]);
@@ -769,7 +769,7 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 		if (media_cycle->getLibrary()->getSize() > 0 && media_cycle->getBrowser()->getMode() == AC_MODE_CLUSTERS && node > -1)
 		{
 			media_cycle->setReferenceNode(node);
-			media_cycle->pushNavigationState();
+			// media_cycle->pushNavigationState(); // XS 250810 removed
 			media_cycle->updateDisplay(true);
 		}
 	}

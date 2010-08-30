@@ -177,12 +177,9 @@ void test_bg_substraction(std::string dancer){
 	cvReleaseImage(&imgp_bg);	
 }
 
-void test_browse(std::string dancer){
-	string movie_file= videodir+"H264/"+dancer+".mov";
-	string median_file= videodir+"median/"+dancer+"_med.jpg";
-	cout << movie_file << endl;
-	ACVideoAnalysis* V = new ACVideoAnalysis(movie_file);
-	
+void test_browse(std::string movie_file){
+//	string movie_file= videodir+"H264/"+dancer+".mov";
+	ACVideoAnalysis* V = new ACVideoAnalysis(movie_file);	
 	V->browseInWindow();
 	delete V;
 }
@@ -262,17 +259,63 @@ void test_frame_diff(std::string full_video_path){
 void test_video_features(std::string full_video_path, string bg_img_file=""){
 	// and output to terminal for Borderlands first tests
 	ACVideoAnalysis* V = new ACVideoAnalysis(full_video_path);
+	IplImage *bg_img = NULL;
 	if (bg_img_file != "") {
-		IplImage *bg_img = cvLoadImage(bg_img_file.c_str(), CV_LOAD_IMAGE_COLOR);
+		bg_img = cvLoadImage(bg_img_file.c_str(), CV_LOAD_IMAGE_COLOR);
 		V->computeBlobs(bg_img);	
 	} 
 	else V->computeBlobs();
-//	V->computeMergedBlobsTrajectory(0);
-//	V->computeContractionIndices();
+	
+	ofstream f("/Users/xavier/numediart/Project10.1-Borderlands/work/BL_blueNoTC-features-FFT.out");
+
+	
+	V->computeMergedBlobsTrajectory(0);
+	V->computeContractionIndices();
 	V->computeBoundingBoxRatios();
-//	V->dumpTrajectory();
-//	V->dumpContractionIndices();
-	V->dumpBoundingBoxRatios();
+//	V->computeRawMoments();
+	V->computeHuMoments(bg_img); // compute Raw too !
+
+	// XS TODO computeEverything at once !
+	// may be using imageanalysis...
+	
+	//***
+//	V->computePixelSpeed(); -- weird 
+	//***
+//	V->computeMergedBlobsSpeeds();
+//	V->dumpTrajectory(cout);
+//	V->dumpContractionIndices(f);
+//	V->dumpBoundingBoxRatios();
+//	V->dumpBlobSpeed();
+//	ofstream f("/Users/xavier/numediart/Project10.1-Borderlands/work/ALL_PROT2may_1_all_features.out");
+//	V->dumpHuMoments(f);
+	V->dumpAll(f);
+	f.close();	
+	delete V;
+	cvReleaseImage(&bg_img);
+
+}
+
+void test_video_hu_moments(std::string full_video_path, string bg_img_file){
+	ACVideoAnalysis* V = new ACVideoAnalysis(full_video_path);
+	IplImage *bg_img = NULL;
+	if (bg_img_file != "") {
+		bg_img = cvLoadImage(bg_img_file.c_str(), CV_LOAD_IMAGE_COLOR);
+	} 
+// XS TODO	else ... 
+	V->computeHuMoments(bg_img);
+//	ofstream f("/Users/xavier/numediart/Project10.1-Borderlands/work/10151_hu_moments_contour.out");
+
+	V->dumpHuMoments(cout);
+//	f.close();
+	delete V;
+}
+
+void test_video_raw_moments(std::string full_video_path, string bg_img_file=""){
+	ACVideoAnalysis* V = new ACVideoAnalysis(full_video_path);
+	V->computeHuMoments();
+	ofstream f("/Users/xavier/numediart/Project10.1-Borderlands/work/10151_raw_moments.out");
+	V->dumpRawMoments(f);
+	f.close();
 	delete V;
 }
 
@@ -282,6 +325,137 @@ void test_optical_flow(std::string full_video_path){
 	delete V;
 }
 
+void test_video_similarity_hu(std::string full_video_path){
+	ACVideoAnalysis* V = new ACVideoAnalysis(full_video_path);
+	IplImage *bg_img = cvLoadImage("/Users/xavier/numediart/Project10.1-Borderlands/bg/bg_blue.png", CV_LOAD_IMAGE_COLOR);
+
+	V->computeHuMoments(bg_img);
+	std::vector< float > M1 = V->getHuMoment(1);
+	
+	ACMediaTimedFeature *trajectory_mtf = new ACMediaTimedFeature(V->getDummyTimeStamps(M1.size()), M1, "test");
+	fmat toto = trajectory_mtf->similarity();
+	toto.save("/Users/xavier/numediart/Project10.1-Borderlands/work/10151-sim-hu.txt", arma_ascii);
+	delete trajectory_mtf;
+
+	delete V;
+	cvReleaseImage(&bg_img);
+}
+
+void test_video_similarity_hu(std::string full_video_path1, std::string full_video_path2){
+	ACVideoAnalysis* V1 = new ACVideoAnalysis(full_video_path1);
+	ACVideoAnalysis* V2 = new ACVideoAnalysis(full_video_path2);
+	IplImage *bg_img = cvLoadImage("/Users/xavier/numediart/Project10.1-Borderlands/bg/bg_blue.png", CV_LOAD_IMAGE_COLOR);
+
+	V1->computeHuMoments(bg_img,20);
+	V2->computeHuMoments(bg_img,20);
+
+	// NB first hu moment = (0), not (1)
+	std::vector< vector<float> > M1 = V1->getHuMoments();
+	std::vector< vector<float> > M2 = V2->getHuMoments();
+	
+	ACMediaTimedFeature *trajectory_mtf1 = new ACMediaTimedFeature(V1->getDummyTimeStamps(M1.size()), M1, "test");
+	ACMediaTimedFeature *trajectory_mtf2 = new ACMediaTimedFeature(V2->getDummyTimeStamps(M2.size()), M2, "test");
+	
+	fmat toto = trajectory_mtf1->similarity(trajectory_mtf2);
+	toto.save("/Users/xavier/numediart/Project10.1-Borderlands/work/10151-20102-sim-hu1-nocont-all.txt", arma_ascii);
+	delete trajectory_mtf1;	
+	delete trajectory_mtf2;	
+	
+	delete V1;
+	delete V2;
+	cvReleaseImage(&bg_img);
+}
+
+void test_video_similarity_fft(std::string full_video_path){
+	ACVideoAnalysis* V = new ACVideoAnalysis(full_video_path);
+	V->computeFourierPolarMoments();
+	std::vector< vector<float> > FFTPM = V->getFourierPolarMoments();
+	//V->dumpFourierPolarMoments(cout);
+	ACMediaTimedFeature *trajectory_mtf = new ACMediaTimedFeature(V->getDummyTimeStamps(FFTPM.size()), FFTPM, "fft_pm");
+	fmat toto = trajectory_mtf->similarity();
+	toto.save("/Users/xavier/numediart/Project10.1-Borderlands/work/10151-BW-sim-fft.txt", arma_ascii);
+	delete trajectory_mtf;
+	delete V;
+}
+
+void test_video_similarity_fft(std::string full_video_path1, std::string full_video_path2){
+	ACVideoAnalysis* V1 = new ACVideoAnalysis(full_video_path1);
+	ACVideoAnalysis* V2 = new ACVideoAnalysis(full_video_path2);
+
+	V1->computeFourierPolarMoments();
+	V2->computeFourierPolarMoments();
+	std::vector< vector<float> > FFT1 = V1->getFourierPolarMoments();
+	std::vector< vector<float> > FFT2 = V2->getFourierPolarMoments();
+	
+	ACMediaTimedFeature *trajectory_mtf1 = new ACMediaTimedFeature(V1->getDummyTimeStamps(FFT1.size()), FFT1, "test");
+	ACMediaTimedFeature *trajectory_mtf2 = new ACMediaTimedFeature(V2->getDummyTimeStamps(FFT2.size()), FFT2, "test");
+	
+	//cout << "first video" << endl;
+	//	this->dumpFourierPolarMoments(cout);
+	//	
+	//	cout << "second video" << endl;
+	//	V2->dumpFourierPolarMoments(cout);
+	
+	fmat toto = trajectory_mtf1->similarity(trajectory_mtf2);
+	toto.save("/Users/xavier/numediart/Project10.1-Borderlands/work/10151-20102-sim-fft-R7-A10.txt", arma_ascii);
+
+	delete trajectory_mtf1;	
+	delete trajectory_mtf2;
+	delete V1;
+	delete V2;
+}
+
+void test_video_similarity_fm(std::string full_video_path1, std::string full_video_path2){
+	ACVideoAnalysis* V1 = new ACVideoAnalysis(full_video_path1);
+	ACVideoAnalysis* V2 = new ACVideoAnalysis(full_video_path2);
+
+	V1->computeFourierMellinMoments();
+	V2->computeFourierMellinMoments();
+	std::vector< vector<float> > FFT1 = V1->getFourierMellinMoments();
+	std::vector< vector<float> > FFT2 = V2->getFourierMellinMoments();
+	
+	ACMediaTimedFeature *trajectory_mtf1 = new ACMediaTimedFeature(V1->getDummyTimeStamps(FFT1.size()), FFT1, "test");
+	ACMediaTimedFeature *trajectory_mtf2 = new ACMediaTimedFeature(V2->getDummyTimeStamps(FFT2.size()), FFT2, "test");
+	
+	fmat toto = trajectory_mtf1->similarity(trajectory_mtf2);
+	toto.save("/Users/xavier/numediart/Project10.1-Borderlands/work/10151-20102-sim-fm.txt", arma_ascii);
+	delete trajectory_mtf1;	
+	delete trajectory_mtf2;		
+	
+	delete V1;
+	delete V2;
+}
+
+void test_video_similarity_histogram(std::string full_video_path1, std::string full_video_path2){
+	ACVideoAnalysis* V1 = new ACVideoAnalysis(full_video_path1);
+	ACVideoAnalysis* V2 = new ACVideoAnalysis(full_video_path2);
+
+	V1->computeImageHistograms();
+	V2->computeImageHistograms();
+	std::vector< vector<float> > I1 = V1->getImageHistograms();
+	std::vector< vector<float> > I2 = V2->getImageHistograms();
+	
+	ACMediaTimedFeature *trajectory_mtf1 = new ACMediaTimedFeature(V1->getDummyTimeStamps(I1.size()), I1, "test_hist");
+	ACMediaTimedFeature *trajectory_mtf2 = new ACMediaTimedFeature(V2->getDummyTimeStamps(I2.size()), I2, "test_hist");
+
+	fmat toto = trajectory_mtf1->similarity(trajectory_mtf2);
+	toto.save("/Users/xavier/numediart/Project10.1-Borderlands/work/10151-20102-sim-histo.txt", arma_ascii);
+
+	delete trajectory_mtf1;	
+	delete trajectory_mtf2;		
+
+	delete V1;
+	delete V2;
+}
+
+
+void test_show_fft(std::string full_video_path){
+	ACVideoAnalysis* V = new ACVideoAnalysis(full_video_path);
+	V->showFFTInWindow("toto", false);
+
+	delete V;
+
+}
 
 int main(int argc, char** argv) {
 	cout << "Using Opencv " << CV_VERSION << "(" << CV_MAJOR_VERSION << "." << CV_MINOR_VERSION  << "." <<  CV_SUBMINOR_VERSION << ")" << endl;	
@@ -302,9 +476,17 @@ int main(int argc, char** argv) {
 	// christian graupner videos
 	//test_blobs("10151");
 	//test_frame_diff("/Users/xavier/numediart/Project10.1-Borderlands/2010_4_prox_alpa/10151.mov");
-//	test_video_features("/Users/xavier/numediart/Project10.1-Borderlands/2010_4_prox_alpa/10151.mov",
-//						"/Users/xavier/numediart/Project10.1-Borderlands/work/bg_black.png");
-	test_optical_flow("/Users/xavier/numediart/Project10.1-Borderlands/2010_4_prox_alpa/10151.mov");
+	// 10603
+//	test_video_hu_moments("/Users/xavier/numediart/Project10.1-Borderlands/2010_4rgb_alpha/10151.mov",
+//						"/Users/xavier/numediart/Project10.1-Borderlands/bg/bg_blue.png");
+
+						   
+//	test_video_similarity_fft("/Users/xavier/numediart/Project10.1-Borderlands/2010_4_prox_alpa/10151.mov"); // complete_movies/BL_blueNoTC.mov");
+	
+//	test_show_fft("/Users/xavier/numediart/Project10.1-Borderlands/2010_4rgb_alpha/10151.mov");
+
+	test_video_similarity_histogram("/Users/xavier/numediart/Project10.1-Borderlands/2010_4rgb_alpha/10151.mov",
+						  "/Users/xavier/numediart/Project10.1-Borderlands/2010_4rgb_alpha/20102.mov");
 
 //	vector<float> ci = V->getContractionIndices();
 //	vector<double> dci;
