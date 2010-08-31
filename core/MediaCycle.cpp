@@ -228,13 +228,15 @@ int MediaCycle::processTcpMessage(char* buffer, int l, char **buffer_send, int *
 
 // == Media Library
 
-int MediaCycle::importDirectory(string path, int recursive, int mid, bool forward_order, bool doSegment) {
+int MediaCycle::importDirectory(string path, int recursive, bool forward_order, bool doSegment) {
 // XS import = import + some processing 
 	cout << "MediaCycle: importing directory: " << path << endl;	
 	int ok = 0;
-	ok = this->mediaLibrary->importDirectory(path, recursive, mid, this->pluginManager, forward_order, doSegment);
-	if (ok>=1) this->mediaLibrary->normalizeFeatures();
-	//	XS TODO this->mediaBrowser->libraryContentChanged();	
+	ok = this->mediaLibrary->importDirectory(path, recursive, this->pluginManager, forward_order, doSegment);
+	// XS normalizing automatically is a problem, for example if we load a bunch of files instead of a directory,
+	//    it should not normalize after each file.
+	// XS TODO ? if (ok>=1) this->mediaLibrary->normalizeFeatures();
+	// XS TODO ? this->mediaBrowser->libraryContentChanged();	
 	return ok;
 }
 

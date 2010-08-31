@@ -89,20 +89,23 @@ ACMediaFeatures* ACMedia::getFeaturesVector(string feature_name) {
 	return 0;
 }
 
-int ACMedia::import(std::string _path, int id, ACPluginManager *acpl ) {
+// Calls the plugins and fills in info such as width, height, ...
+// Implemented in ACMedia.cpp, since it is the same for all media
+// Returns 1 if it worked, 0 if it failed
+int ACMedia::import(std::string _path, int _mid, ACPluginManager *acpl ) {
 	std::cout << "importing..." << _path << std::endl;
 	this->filename=_path;
 	this->filename_thumbnail = _path;
 	int import_ok = 1;
 	
-	if (id>=0) this->setId(id);
+	if (_mid>=0) this->setId(_mid);
 	
 	// get info about width, height, thumbnail, ...
 	// and return a pointer to the data
 	ACMediaData* data_ptr = this->extractData(this->getFileName());
 	if (data_ptr==NULL){
 		import_ok = 0;
-		cerr << "<ACMedia::import> failed accessing data for media number: " << id << endl;
+		cerr << "<ACMedia::import> failed accessing data for media number: " << _mid << endl;
 		return 0;
 	}
 	

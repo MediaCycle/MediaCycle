@@ -51,7 +51,7 @@
 // XS for sorting:
 #include <algorithm>
 
-//#include <Common/TiMath.h> // for Timax ...
+#define VERBOSE
 
 using namespace std;
 // to save library items in binary format, uncomment the following line:
@@ -74,17 +74,15 @@ void* p_importSingleFile(void *arg){
 }
 
 ACMediaLibrary::ACMediaLibrary() {
-	index_last_normalized = -1;
-	media_library.resize(0);
+	this->cleanLibrary();
+	this->cleanStats();
 	media_type = MEDIA_TYPE_NONE;
-	synthesisID = -1;
 }
 
 ACMediaLibrary::ACMediaLibrary(ACMediaType aMediaType) {
-	index_last_normalized = -1;
-	media_library.resize(0);
+	this->cleanLibrary();
+	this->cleanStats();
 	media_type = aMediaType;
-	synthesisID = -1;
 }
 
 ACMediaLibrary::~ACMediaLibrary(){
@@ -100,46 +98,73 @@ void ACMediaLibrary::deleteAllMedia(){
 	media_library.clear();	
 }
 
-int ACMediaLibrary::importDirectory(std::string _path, int _recursive, int id, ACPluginManager *acpl, bool forward_order, bool doSegment) {
+// this is the method to be called when re-initializing
+void ACMediaLibrary::cleanLibrary() {
+	cleanStats();
+	deleteAllMedia();
+	index_last_normalized = -1;
+	media_library.resize(0);
+	synthesisID = -1;
+	mediaID = 0; // index of the next one to be inserted (= the number of media already imported); not -1
+}
 
-	string filename;
-	string extension;
+void ACMediaLibrary::cleanStats() {
+	cout << "cleaning features mean and stdev"<< endl;
+	mean_features.clear();
+	stdev_features.clear();
+}
+
+
+// this same function is used to import a whole directory, a single file or a list of files.
+// it uses scanDirectory to construct a vector (filenames) containing the files to be analyzed.
+int ACMediaLibrary::importDirectory(std::string _path, int _recursive, ACPluginManager *acpl, bool forward_order, bool doSegment) {
 	std::vector<string> filenames;
-	std::vector<ACMedia*> mediaSegments;
 
 	scanDirectory(_path, _recursive, filenames);
 	
 	for (unsigned int i=0; i<filenames.size(); i++){
 		int index = forward_order ? i : filenames.size()-1-i;//CF if reverse order (not forward_order), segments in subdirs are added to the library after the source recording
-		extension = fs::extension(filenames[index]);
-		ACMedia* media = ACMediaFactory::create(extension);
-		cout << "extension:" << extension << endl; 		
-		if (media == NULL) {
-			cout << "extension unknown, skipping " << filename << " ... " << endl;
+		this->importFile(filenames[index], acpl, doSegment );
 		}
-		else {
-			// This has to be done before segmentation to have proper id
-			if (media->import(filenames[index], id, acpl)){
-				this->addMedia(media);
-				id++;
-			}
-			if (doSegment){
-				// segments are created without id 
-				media->segment(acpl);
-				mediaSegments = media->getAllSegments();
-				for (unsigned int i = 0; i < mediaSegments.size(); i++){
-					if (mediaSegments[i]->import(filenames[index], id, acpl)){
-						this->addMedia(mediaSegments[i]);
-						id++;
-					}
-				}
-			}
-		}
-	}
 	std::cout << "Library size : " << this->getSize() << std::endl;
 	return 1;
 }
 
+int ACMediaLibrary::importFile(std::string _filename, ACPluginManager *acpl, bool doSegment) {
+	string extension;
+	std::vector<ACMedia*> mediaSegments;
+
+	extension = fs::extension(_filename);
+	ACMedia* media = ACMediaFactory::create(extension);
+	cout << "extension:" << extension << endl; 		
+	if (media == NULL) {
+		cout << "extension unknown, skipping " << _filename << " ... " << endl;
+	}
+	else {
+		// This has to be done before segmentation to have proper id
+		if (media->import(_filename, this->getMediaID(), acpl)){
+			this->addMedia(media);
+#ifdef VERBOSE
+			cout << "imported " << _filename << " with mid = " <<  this->getMediaID() << endl;
+#endif // VERBOSE
+			this->incrementMediaID();
+		}
+		if (doSegment){
+			// segments are created without id 
+			media->segment(acpl);
+			mediaSegments = media->getAllSegments();
+			for (unsigned int i = 0; i < mediaSegments.size(); i++){
+				if (mediaSegments[i]->import(_filename, this->getMediaID(), acpl)){
+					this->addMedia(mediaSegments[i]);
+					this->incrementMediaID();
+				}
+			}
+		}
+	}
+	
+}
+// construct a vector (filenames) containing the files in a given directory (_path).
+// when "recursive" is turned on, it will scan subdirectories too 
 int ACMediaLibrary::scanDirectory(std::string _path, int _recursive, std::vector<string>& filenames) {
 	
 	fs::path full_path( fs::initial_path<fs::path>() );
@@ -164,7 +189,9 @@ int ACMediaLibrary::scanDirectory(std::string _path, int _recursive, std::vector
 			}
 		}
 	}
-	else { // importing single file
+	else { 
+		// encounter a file in the directory
+		// put it in the vector of files to be analyzed
 		filenames.push_back(_path);
 	}
 	return 1;
@@ -378,16 +405,6 @@ int ACMediaLibrary::openLibrary(std::string _path, bool aInitLib){
 	normalizeFeatures();
 }
  */
-void ACMediaLibrary::cleanLibrary() {
-	cleanStats();
-	deleteAllMedia();
-}
-
-void ACMediaLibrary::cleanStats() {
-	cout << "cleaning features mean and stdev"<< endl;
-	mean_features.clear();
-	stdev_features.clear();
-}
 
 int ACMediaLibrary::addMedia(ACMedia *aMedia) {
     //TODO remove media_type check

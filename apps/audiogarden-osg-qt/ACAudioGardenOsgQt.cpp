@@ -311,10 +311,8 @@ void ACAudioGardenOsgQt::loadMediaDirectory(){
 	 QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks
 	 );
 	
-	// XS TODO : check if directory exists
-	// XS : do not separate directory and files in Qt and let MediaCycle handle it
-	
-	media_cycle->importDirectory(selectDir.toStdString(), 1, 0, false, true); //CF false for reverse order, subdirs last, ie: source sound first, grains after. DT: true to segment
+	// XS TODO : check if directory exists	
+	media_cycle->importDirectory(selectDir.toStdString(), 1, false, true); //CF false for reverse order, subdirs last, ie: source sound first, grains after. DT: true to segment
 	
 	// with this function call here, do not import twice!!!
 	// XS TODO: what if we add a new directory to the existing library ?

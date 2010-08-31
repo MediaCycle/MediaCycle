@@ -153,7 +153,6 @@ int ACImage::loadACL(ifstream &library_file) {
 
 	int n_features;
 	int n_features_elements = 0;	
-	int nn;
 	string tab;
 	
 	ACMediaFeatures* mediaFeatures;

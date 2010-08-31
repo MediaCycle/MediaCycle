@@ -88,6 +88,7 @@ public:
 	void setFileName(std::string s) { filename = s; }
 
 	// thumbnail
+	virtual void* getThumbnailPtr()=0;
 	std::string getThumbnailFileName() { return filename_thumbnail; }
 	void setThumbnailFileName(string ifilename) { filename_thumbnail=ifilename; }
 	// the following 2 were re-introduced for audio...
@@ -96,10 +97,6 @@ public:
 
 //	virtual int computeThumbnail(std::string fname="", int w=0, int h=0){}
 //	virtual int computeThumbnail(ACMediaData* data_ptr, int w=0, int h=0){}
-
-	virtual void* getThumbnailPtr()=0;
-	//XS TODO: remove the following one  -- type-specific !
-	virtual void setThumbnailPtr(void *ptr){};
 
 	// accessors -- these should not be redefined for each media
 	int getWidth() {return width;}
@@ -122,10 +119,7 @@ public:
 	virtual int loadMCSL(std::ifstream &library_file){return -1;}//CF 31/05/2010 temporary MediaCycle Segmented Library (MCSL) for AudioGarden, adding a parentID for segments to the initial ACL, awaiting approval
 	virtual ACMediaData* extractData(std::string filename){}
 	
-	// function that calls the plugins and fills in info such as width, height, ...
-	virtual int import(std::string _path, int id=-1, ACPluginManager *acpl=NULL);
-	// XS 23/09/09 : I implemented import in ACMedia.cpp, since it is the same for all media
-	// XS 23/09/09 : import returns 1 if it worked, 0 if it failed
+	virtual int import(std::string _path, int _mid=0, ACPluginManager *acpl=NULL);
 
 	int segment(ACPluginManager *acpl );
 

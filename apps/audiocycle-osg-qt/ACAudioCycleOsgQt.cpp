@@ -261,7 +261,7 @@ void ACAudioCycleOsgQt::loadMediaDirectory(){
 	// XS TODO : check if directory exists
 	// XS : do not separate directory and files in Qt and let MediaCycle handle it
 	
-	media_cycle->importDirectory(selectDir.toStdString(), 1, 0);
+	media_cycle->importDirectory(selectDir.toStdString(), 1);
 	// with this function call here, do not import twice!!!
 	// XS TODO: what if we add a new directory to the existing library ?
 	media_cycle->normalizeFeatures();
@@ -305,19 +305,21 @@ void ACAudioCycleOsgQt::loadMediaFiles(){
 		//std::cout << "File library: '" << (*file).toStdString() << "'" << std::endl;
 		fileName = *file;
 		++file;
-	}
 	//std::cout << "Will open: '" << fileName.toStdString() << "'" << std::endl;
 	//fileName = QFileDialog::getOpenFileName(this, "~", );
 	
-	if (!(fileName.isEmpty())) {
-		
-		media_cycle->importDirectory((char*) fileName.toStdString().c_str(),0, 0);
-		media_cycle->normalizeFeatures();
-		media_cycle->libraryContentChanged();
-		std::cout << "File library imported" << std::endl;
-		this->updateLibrary();
-	}	
-	
+		if (!(fileName.isEmpty())) {
+			
+			media_cycle->importDirectory((char*) fileName.toStdString().c_str(), 0);
+			//media_cycle->normalizeFeatures();
+			//media_cycle->libraryContentChanged();
+			std::cout << "File library imported" << std::endl;
+		}	
+	}
+	// XS do this only after loading all files (it was in the while loop) !
+	// XS for CF: in ImageCycle I put "libraryContentChanged" inside updateLibrary
+	media_cycle->libraryContentChanged();
+	this->updateLibrary();
 }
 
 void ACAudioCycleOsgQt::on_pushButtonRecenter_clicked()

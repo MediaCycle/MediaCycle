@@ -295,14 +295,14 @@ void ACImageCycleOsgQt::loadMediaFiles(){
 		//fileName = QFileDialog::getOpenFileName(this, "~", );
 	
 		if (!(fileName.isEmpty())) {
-		
-			media_cycle->importDirectory((char*) fileName.toStdString().c_str(),0, 0);
-			media_cycle->normalizeFeatures();
-			media_cycle->libraryContentChanged();
+			media_cycle->importDirectory((char*) fileName.toStdString().c_str(), 0);
+			//media_cycle->normalizeFeatures();
+			//media_cycle->libraryContentChanged(); no, this is in updatelibrary
 			std::cout <<  fileName.toStdString() << " imported" << std::endl;
-			this->updateLibrary();
 		}
 	}
+	// XS do this only after loading all files (it was in the while loop) !
+	this->updateLibrary();
 }
 
 void ACImageCycleOsgQt::editConfigFile(){

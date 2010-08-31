@@ -57,13 +57,16 @@ protected:
 	std::vector<ACMedia*> media_library;
 	std::vector< std::vector<double> > mean_features, stdev_features;
 	int index_last_normalized; // last item whose features have been normalized
-	
 	long synthesisID;
+	// XS new 300810
+	int mediaID; // mid of the media currently being imported. by default, starts at 0 and is incremented after each import.
 	
 public:
 	ACMediaLibrary();
 	ACMediaLibrary(ACMediaType aMediaType);
 	~ACMediaLibrary();
+	void cleanLibrary();
+	void cleanStats();
 	
 	bool isEmpty();
 	ACMediaType getMediaType(){return media_type;};
@@ -89,8 +92,10 @@ public:
 	std::vector< std::vector<double> > getMeanFeatures() {return mean_features;};
 	std::vector< std::vector<double> > getStdevFeatures() {return stdev_features;};
 	
-	int importDirectory(std::string path, int recursive, int id=-1, ACPluginManager *acpl=NULL, bool forward_order=true, bool doSegment=false);
-	int scanDirectory(std::string _path, int _recursive, std::vector<string>& filenames);
+	// XS removed default id ?
+	int importDirectory(std::string _path, int recursive,  ACPluginManager *acpl=NULL, bool forward_order=true, bool doSegment=false);
+	// XS new 300810
+	int importFile(std::string _filename, ACPluginManager *acpl=NULL, bool doSegment=false);
 
 	int openLibrary(std::string _path, bool aInitLib=false);
 //	void saveAsLibrary(std::string _path);
@@ -101,15 +106,16 @@ public:
 	int saveMCSLLibrary(std::string _path);//CF 31/05/2010 temporary MediaCycle Segmented Library (MCSL) for AudioGarden, adding a parentID for segments to the initial ACL, awaiting approval
 	
 	//XS special for Thomas Israel
-	void saveSorted(std::string ouput_file);
-	
-	void cleanLibrary();
-	void cleanStats();
+	void saveSorted(std::string ouput_file);	
 
 	// XS TODO: add pthreads
 	//	void* p_importSingleFile(void *arg);
 private:
 	void deleteAllMedia();
+	int scanDirectory(std::string _path, int _recursive, std::vector<string>& filenames);
+	void incrementMediaID(){mediaID++ ;}
+	int getMediaID(){return mediaID ;}
+
 };
 
 #endif // ACMEDIALIBRARY_H
