@@ -1,7 +1,7 @@
 /**
  * @brief paretorank.h
- * @author Damien Tardieu
- * @date 11/03/2010
+ * @author Christian Frisson
+ * @date 07/09/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -42,7 +42,7 @@ ucolvec paretorank(Mat<eT> X, int maxRank, int minNbItems){
 	ucolvec rank_v;
 	int currentRank = 1;
 	ucolvec posFront_v;
-	imat pos_v = linspace<imat>(0, row-1, row, 0);
+	imat pos_v = linspace<imat>(0, row-1, row);
 	Mat<eT> oldX;
 	int tmpIdx = 0;
 	imat oldPos_v;
