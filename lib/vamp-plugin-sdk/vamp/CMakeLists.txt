@@ -1,6 +1,3 @@
+# Dummy file so that CMake won't complain...
 FILE(GLOB HDR *.hpp *.h)
-
-ADD_LIBRARY(vamp STATIC ${HDR})
-SET_TARGET_PROPERTIES(vamp PROPERTIES LINKER_LANGUAGE C)
-
 INCLUDE_DIRECTORIES(.)
