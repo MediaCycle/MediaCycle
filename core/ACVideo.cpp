@@ -103,68 +103,27 @@ ACMediaData* ACVideo::extractData(string _fname){
 	return video_data;
 }
 
-// C++ version
-// writes in an existing (i.e. already opened) acl file
-// works for binary too, the stream deals with it
-void ACVideo::saveACL(ofstream &library_file) {
-	if (! library_file.is_open()) {
-		cerr << "<ACVideo::saveACL> : problem writing video in ACL file, it needs to be opened before" << endl;
-	}	
-	library_file << filename << endl;
+void ACVideo::saveACLSpecific(ofstream &library_file) {
+
 	library_file << filename_thumbnail << endl;
 	library_file << this->getDuration() << endl;
-	library_file << mid << endl;
 	library_file << width << endl;
 	library_file << height << endl;
-	int n_features = features_vectors.size();
-	library_file << n_features << endl;
-	for (int i=0; i<n_features;i++) {
-		int n_features_elements = features_vectors[i]->getSize();
-		library_file << features_vectors[i]->getName() << endl;
-		library_file << n_features_elements << endl;
-		for (int j=0; j<n_features_elements; j++) {
-			library_file << features_vectors[i]->getFeatureElement(j) << "\t";
-		}
-		library_file << endl;
-	}
 }
 
-// C++ version
-// loads from an existing (i.e. already opened) acl file
-int ACVideo::loadACL(ifstream &library_file) {
-	if (! library_file.is_open()) {
-		cerr << "<ACVideo::loadACL> : problem loading video from ACL file, it needs to be opened before" << endl;
-	}		
-	if (!library_file.good()){
-		cerr << "<ACVideo::loadACL> : bad library file" << endl;
-	}
-	library_file >> filename ;
+int ACVideo::loadACLSpecific(ifstream &library_file) {
+
 	library_file >> filename_thumbnail;
 	library_file >> end;
-	library_file >> mid;	
 	library_file >> width;
 	library_file >> height;
 	int n_features = 0;
 	library_file >> n_features; 
-	
-	ACMediaFeatures* mediaFeatures;
-	float local_feature;
-	int n_features_elements = 0;
-	
-	for (int i=0; i<n_features;i++) {
-		mediaFeatures = new ACMediaFeatures();
-		features_vectors.push_back(mediaFeatures);
-		features_vectors[i]->setComputed();
-		library_file >> n_features_elements;
-		features_vectors[i]->resize(n_features_elements);
-		for (int j=0; j<n_features_elements; j++) {
-			library_file >> local_feature;
-			features_vectors[i]->setFeatureElement(j, local_feature);
-		}
-	}
-	// XS TODO check if errors and return 0/1
+
+	return 1;
 }
 
+/*
 void ACVideo::save(FILE* library_file) {
 	int i, j;
 	int n_features;
@@ -206,8 +165,6 @@ void ACVideo::save(FILE* library_file) {
 #endif
 }
 
-
-
 int ACVideo::load(FILE* library_file) { // was loadLoop
 	int i, j;
 	int path_size;
@@ -228,11 +185,10 @@ int ACVideo::load(FILE* library_file) { // was loadLoop
 	file_temp2 = new char[1024];
 	memset(file_temp2,0,1024);
 	
-	/*	char file_temp[1024];
-	 memset(file_temp,0,1024);
-	 char file_temp2[1024];
-	 memset(file_temp2,0,1024);
-	 */
+	//char file_temp[1024];
+	//memset(file_temp,0,1024);
+	//char file_temp2[1024];
+	//memset(file_temp2,0,1024);
 	
 	retc = fgets(file_temp, 1024, library_file);
 	
@@ -286,3 +242,4 @@ int ACVideo::load(FILE* library_file) { // was loadLoop
 		return 0;
 	}
 }
+*/

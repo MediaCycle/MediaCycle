@@ -1,5 +1,5 @@
 /*
- *  ACImageCycleOsgCocoa.mm
+ *  ACAudioCycleOsgCocoa.mm
  *  MediaCycle
  *
  *  @author Stéphane Dupont
@@ -36,22 +36,22 @@
  */
 
 #include<iostream>
-#import <ACImageCycleOsgCocoa.h>
+#import <ACModelCycleOsgCocoa.h>
 
 ////
-@interface ACImageCycleOsgCocoa ()
+@interface ACAudioCycleOsgCocoa ()
  - (void)processOscMessage:(const char*)tagName;
 @end
  
 static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 {
-	ACImageCycleOsgCocoa *self = (ACImageCycleOsgCocoa*)userData;
+	ACAudioCycleOsgCocoa *self = (ACAudioCycleOsgCocoa*)userData;
 	//printf("osc received tag: %s\n", tagName);
 	[self processOscMessage:tagName];
 }
 ////
 
-@implementation ACImageCycleOsgCocoa
+@implementation ACAudioCycleOsgCocoa
 
 + (void)initialize
 {
@@ -60,7 +60,7 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 	[ACOsgBrowserViewCocoa class];//CF
 }
 
-- (void)initCommonACImageCycleOsgCocoa
+- (void)initCommonACAudioCycleOsgCocoa
 {
 ////
 	/*
@@ -78,7 +78,7 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 {
 	if(self = [super init])
 	{
-		[self initCommonACImageCycleOsgCocoa];
+		[self initCommonACAudioCycleOsgCocoa];
 	}
 	
 	return self;
@@ -101,7 +101,7 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 {
 	if(self/* = [super initWithCoder:coder]*/)
 	{
-		[self initCommonACImageCycleOsgCocoa];
+		[self initCommonACAudioCycleOsgCocoa];
 	}
 	
 	return self;
@@ -115,7 +115,6 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 
 - (void)updatedLibrary
 {	
-	media_cycle->libraryContentChanged(); 
 	#ifdef USE_DEBUG
 		media_cycle->setReferenceNode(0);//CF we want to debug the view and positions using the same layout at each relaunch!
 	#else
@@ -133,54 +132,37 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 	#endif
 	
 	// XSCF 250310 added these 3
-	media_cycle->storeNavigationState();
-	//media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
+	// media_cycle->storeNavigationState(); // This line was in ACImageCycleOsgCocoa...
+	if (media_cycle->getMode() == AC_MODE_CLUSTERS) {
+		// media_cycle->pushNavigationState(); // XS 250810 removed
+		//media_cycle->setWeight(0, [mWeight1Check floatValue]);
+		//media_cycle->setWeight(1, [mWeight2Check floatValue]);
+		//media_cycle->setWeight(2, [mWeight3Check floatValue]);
+	}	
 	media_cycle->getBrowser()->setState(AC_CHANGING);
+	media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
 	
 	[browser_osg_view prepareFromBrowser];
-	media_cycle->setNeedsDisplay(true);	
+	
+	[browser_osg_view setPlaying:YES];
 	//[browser_osg_view updateTransformsFromBrowser];
+	
 	media_cycle->setNeedsDisplay(true);
+	
 }
 
 - (void) awakeFromNib
 {	
 	[[NSNotificationCenter defaultCenter] addObserver: self selector: @selector(myObserver:) name: @"OALNotify" object: NULL];
 	
-	media_cycle = new MediaCycle(MEDIA_TYPE_IMAGE,"/tmp/","mediacycle.acl");
+	media_cycle = new MediaCycle(MEDIA_TYPE_3DMODEL,"/tmp/","mediacycle.acl");
 	
 	// XS TODO fichier de configuration
-	media_cycle->setMode(AC_MODE_CLUSTERS);
 	std::string build_type ("Release");
 	#ifdef USE_DEBUG
 		build_type = "Debug";
 	#endif
-	int implugloaded = media_cycle->addPlugin("../../../plugins/image/" + build_type + "/mc_image.dylib");
-	if ( implugloaded == 0 )
-	{
-		//CF this should be on a separate function or even on a mediacycle-(osg-)cocoa class
-		//CF we could use some NSArrays instead...
-		ACPluginManager *acpl = media_cycle->getPluginManager(); //getPlugins
-		int featureCount = 0;
-		if (acpl) {
-			for (int i=0;i<acpl->getSize();i++) {
-				for (int j=0;j<acpl->getPluginLibrary(i)->getSize();j++) {
-					if (acpl->getPluginLibrary(i)->getPlugin(j)->getPluginType() == PLUGIN_TYPE_FEATURES && acpl->getPluginLibrary(i)->getPlugin(j)->getMediaType() == MEDIA_TYPE_IMAGE) {
-						std::cout << "Image feature extraction: " << acpl->getPluginLibrary(i)->getPlugin(j)->getName() << std::endl;
-						featureCount++;
-						//CF yuk!
-						if (featureCount == 1)
-							[mWeight1Check setTitle:[NSString stringWithCString:acpl->getPluginLibrary(i)->getPlugin(j)->getName().c_str()]];
-						if (featureCount == 2)
-							[mWeight2Check setTitle:[NSString stringWithCString:acpl->getPluginLibrary(i)->getPlugin(j)->getName().c_str()]];
-						if (featureCount == 3)
-							[mWeight3Check setTitle:[NSString stringWithCString:acpl->getPluginLibrary(i)->getPlugin(j)->getName().c_str()]];
-					}
-				}
-			}
-		}
-	}	
-	
+	media_cycle->addPlugin("../../../plugins/3Dmodel/" + build_type + "/mc_3Dmodel.dylib");
 	int vizplugloaded = media_cycle->addPlugin("../../../plugins/visualisation/" + build_type + "/mc_visualisation.dylib");
 	//int vizplugloaded = media_cycle->addPlugin("/dupont/development/workdir-new/ticore-app/Applications/Numediart/MediaCycle/src/Builds/darwin-x86/plugins/visualisation/" + build_type + "/mc_visualisation.dylib");
 	if ( vizplugloaded == 0 )
@@ -236,6 +218,9 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 		}
 	}
 	
+	audio_engine = new ACAudioEngine();
+	audio_engine->setMediaCycle(media_cycle);
+
 	osc_feedback = NULL;
 	osc_browser = NULL;
 
@@ -255,6 +240,7 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 	[browser_osg_view setPlaying:NO];
 	delete osc_browser;
 	delete osc_feedback;//osc_feedback destructor calls ACOscFeedback::release()
+	delete audio_engine;
 	delete media_cycle;
 }
 
@@ -294,7 +280,7 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 			
 			// with this function call here, do not import twice!!!
 			media_cycle->normalizeFeatures();
-			//media_cycle->libraryContentChanged();
+			media_cycle->libraryContentChanged();
 		}
 		
 		[self updatedLibrary];
@@ -350,6 +336,20 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 	}
 }
 
+- (IBAction)	setEngineStart:(id)inSender
+{
+	// SD TODO
+	audio_engine->startAudioEngine();
+	//audio_cycle->getAudioFeedback()->startAudioEngine();
+}
+
+- (IBAction)	setEngineStop:(id)inSender
+{
+	// SD TODO
+	audio_engine->stopAudioEngine();
+	//audio_cycle->getAudioFeedback()->stopAudioEngine();
+}
+
 - (IBAction)	setCleanLibrary:(id)inSender
 {
 	@synchronized(browser_osg_view)
@@ -359,6 +359,11 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 		media_cycle->libraryContentChanged();
 		[self updatedLibrary];
 	}
+}
+
+- (IBAction)	setMuteAllSources:(id)inSender
+{
+	media_cycle->muteAllSources();
 }
 
 - (IBAction)	setOscControlIp:(id)inSender
@@ -691,6 +696,72 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 	{
 		media_cycle->setCameraRecenter();
 	}
+	else if(strcasecmp(tagName, "/audiocycle/1/player/1/playclosestloop") == 0)
+	{	
+		media_cycle->pickedObjectCallback(-1);
+	}
+	else if(strcasecmp(tagName, "/audiocycle/1/player/1/muteall") == 0)
+	{	
+		media_cycle->muteAllSources();
+	}
+	else if(strcasecmp(tagName, "/audiocycle/1/player/1/bpm") == 0)
+	{
+		float bpm;
+		osc_browser->readFloat(mOscReceiver, &bpm);
+		
+		//int node = media_cycle->getClickedNode();
+		//int node = media_cycle->getClosestNode();
+		int node = media_cycle->getLastSelectedNode();
+		
+		if (node > -1)
+		{
+			audio_engine->setLoopSynchroMode(node, ACAudioEngineSynchroModeAutoBeat);
+			audio_engine->setLoopScaleMode(node, ACAudioEngineScaleModeResample);
+			audio_engine->setBPM((float)bpm);
+		}
+	}	
+	else if(strcasecmp(tagName, "/audiocycle/1/player/1/scrub") == 0)
+	{
+		float scrub;
+		osc_browser->readFloat(mOscReceiver, &scrub);
+		
+		//int node = media_cycle->getClickedNode();
+		//int node = media_cycle->getClosestNode();
+		int node = media_cycle->getLastSelectedNode();
+		//std::cout << "Scrub on node " << node << std::endl;
+		
+		 if (node > -1)
+		 {
+			 //media_cycle->pickedObjectCallback(-1);
+			 audio_engine->setLoopSynchroMode(node, ACAudioEngineSynchroModeManual);
+			 audio_engine->setLoopScaleMode(node, ACAudioEngineScaleModeVocode);//ACAudioEngineScaleModeVocode
+			 audio_engine->setScrub((float)scrub*100); // temporary hack to scrub between 0 an 1
+		 }
+	}
+	else if(strcasecmp(tagName, "/audiocycle/1/player/1/pitch") == 0)
+	{
+		float pitch;
+		osc_browser->readFloat(mOscReceiver, &pitch);
+	
+		//int node = media_cycle->getClickedNode();
+		//int node = media_cycle->getClosestNode();
+		int node = media_cycle->getLastSelectedNode();
+		//std::cout << "Pitch on node " << node << std::endl;
+		
+		if (node > -1)
+		{
+			//if (!is_pitching)
+			//{	
+			//	is_pitching = true;
+			//	is_scrubing = false;
+			//media_cycle->pickedObjectCallback(-1);
+			audio_engine->setLoopSynchroMode(node, ACAudioEngineSynchroModeAutoBeat);
+			audio_engine->setLoopScaleMode(node, ACAudioEngineScaleModeResample);
+			//}
+			audio_engine->setSourcePitch(node, (float) pitch); 
+		}
+		 
+	}
 	else if(strcasecmp(tagName, "/audiocycle/1/browser/recluster") == 0)
 	{		
 		//int node = media_cycle->getClickedNode();
@@ -698,7 +769,7 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 		if (media_cycle->getLibrary()->getSize() > 0 && media_cycle->getBrowser()->getMode() == AC_MODE_CLUSTERS && node > -1)
 		{
 			media_cycle->setReferenceNode(node);
-			media_cycle->storeNavigationState(); // XS TODO: is this what we want ?
+			// media_cycle->pushNavigationState(); // XS 250810 removed
 			media_cycle->updateDisplay(true);
 		}
 	}

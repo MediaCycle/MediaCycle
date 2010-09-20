@@ -285,7 +285,7 @@ void ACBWImageAnalysis::computeHuMoments(int thresh){
 	double momo[7];
 	
 	// XS tried opencv 2.0 version of Hu Moments to see if it's any better
-	cv::HuMoments(myRawmoments, momo); 
+	// cv::HuMoments(myRawmoments, momo); 
 	
 	cvGetHuMoments(&myRawmoments, &myHumoments);
 	

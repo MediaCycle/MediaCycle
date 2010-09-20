@@ -35,9 +35,9 @@
  *  <mailto:avre@umons.ac.be>
  */
 
-#define PI 3.1415926535897932384626433832795f
-
 #include "ACPositionsPluginRadialTreeLayout.h"
+
+#define PI 3.1415926535897932384626433832795f
 
 //CF: uncomment this if you need to adapt ACPositionsPluginRadialTreeNodeParams::sortedChildren()
 //#include <armadillo>

@@ -1,9 +1,9 @@
 /*
- *  ACMediaData.h
+ *  main.m
  *  MediaCycle
  *
  *  @author Xavier Siebert
- *  @date 11/12/09
+ *  @date 13/05/09
  *  @copyright (c) 2009 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
@@ -32,49 +32,9 @@
  *
  */
 
-#ifndef _ACMEDIADATA_H
-#define _ACMEDIADATA_H
+#import <Cocoa/Cocoa.h>
 
-#include "ACMediaTypes.h"
-#include <sndfile.h>
-#include "ACOpenCVInclude.h"
-#include <osgDB/ReadFile>
-#include <osg/ComputeBoundsVisitor>
-#include <string>
-
-using std::string;
-
-class ACMediaData {
-public:
-	ACMediaData();
-	ACMediaData(string _fname, ACMediaType _type = MEDIA_TYPE_NONE);
-	~ACMediaData();
-	
-	float* getAudioData() {return audio_ptr;}
-	IplImage* getImageData() {return image_ptr;}
-	CvCapture* getVideoData() {return video_ptr;}
-	osg::Node* get3DModelData();
-	
-	void setAudioData(float* _data);
-	void setImageData(IplImage* _data);
-	void setVideoData(CvCapture* _data);
-	void set3DModelData(osg::ref_ptr< osg::Node > _data);
-					  
-	void readAudioData(string _fname);
-	void readImageData(string _fname);
-	void readVideoData(string _fname);
-	void read3DModelData(string _fname);
-	
-	string getFileName() {return file_name;}
-	void setFileName(string _fname);
-	
-private:
-	ACMediaType media_type;
-	string file_name;
-	float* audio_ptr;
-	IplImage* image_ptr;
-	CvCapture* video_ptr;
-	osg::Node* model_ptr;
+int main(int argc, char *argv[])
+{
+	return NSApplicationMain(argc,  (const char **) argv);
 };
-
-#endif  // ACMEDIADATA_H

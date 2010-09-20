@@ -36,7 +36,6 @@
 // One of the goals is to avoid ugly void* pointers
 #include "ACMediaData.h"
 #include <iostream>
-#include <sndfile.h>
 
 using std::cerr;
 using std::endl;
@@ -48,12 +47,14 @@ ACMediaData::ACMediaData() {
 	audio_ptr = NULL;
 	image_ptr = NULL;
 	video_ptr = NULL;
+	model_ptr = NULL;
 }
 
 ACMediaData::ACMediaData(string _fname, ACMediaType _type) { 
 	audio_ptr = NULL;
 	image_ptr = NULL;
 	video_ptr = NULL;
+	model_ptr = NULL;
 	file_name=_fname;
 	media_type = _type;
 	switch (_type) {
@@ -66,6 +67,9 @@ ACMediaData::ACMediaData(string _fname, ACMediaType _type) {
 		case MEDIA_TYPE_VIDEO :
 			readVideoData(_fname);
 			break;
+		case MEDIA_TYPE_3DMODEL :
+			read3DModelData(_fname);
+			break;
 		default:
 			break;
 	}
@@ -75,6 +79,7 @@ ACMediaData::~ACMediaData() {
 	if (audio_ptr != NULL) delete [] audio_ptr;
 	if (image_ptr != NULL) cvReleaseImage(&image_ptr);
 	if (video_ptr != NULL) cvReleaseCapture(&video_ptr);
+	if (model_ptr != NULL) { model_ptr->unref(); model_ptr=0; }
 }
 
 void ACMediaData::setAudioData(float* data){
@@ -82,6 +87,7 @@ void ACMediaData::setAudioData(float* data){
 }
 
 void ACMediaData::readAudioData(string _fname){ 
+	
 	SF_INFO sfinfo;
 	SNDFILE* testFile;
 	if (! (testFile = sf_open (_fname.c_str(), SFM_READ, &sfinfo))){  
@@ -97,6 +103,7 @@ void ACMediaData::readAudioData(string _fname){
 }
 
 void ACMediaData::readImageData(string _fname){ 
+	
 	image_ptr = cvLoadImage(_fname.c_str(), CV_LOAD_IMAGE_COLOR);	
 	try {
 		if (!image_ptr) {
@@ -110,10 +117,26 @@ void ACMediaData::readImageData(string _fname){
 }
 
 void ACMediaData::readVideoData(string _fname){
+	
 	video_ptr = cvCreateFileCapture(_fname.c_str());		
 	if( !video_ptr ) {
 		// Either the video does not exist, or it uses a codec OpenCV does not support. 
 		cerr << "<ACMediaData::readImageData> Could not initialize capturing from file " << _fname << endl;
 	}	
 }
+
+void ACMediaData::read3DModelData(string _fname){ 
 	
+	if (model_ptr != NULL) { model_ptr->unref(); model_ptr=0; }
+	
+	model_ptr = osgDB::readNodeFile(_fname);
+	model_ptr->ref();
+    if( model_ptr == NULL ) {
+		cerr << "<ACMediaData::read3DModelData> file can not be read !" << endl;
+     }
+}
+
+osg::Node* ACMediaData::get3DModelData() {
+
+	return model_ptr;
+}

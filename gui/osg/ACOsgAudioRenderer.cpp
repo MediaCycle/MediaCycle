@@ -286,7 +286,6 @@ void ACOsgAudioRenderer::updateNodes(double ratio) {
 	
 	const ACMediaNode &attribute = media_cycle->getMediaNode(node_index);
 	
-	if ( attribute.isDisplayed() ){
 		
 		const ACPoint &p = attribute.getCurrentPosition(), &p2 = attribute.getNextPosition();
 		double omr = 1.0-ratio;
@@ -294,9 +293,6 @@ void ACOsgAudioRenderer::updateNodes(double ratio) {
 		//omr = 1;
 		//ratio = 0;
 		
-		float zoom = media_cycle->getCameraZoom();
-		float angle = media_cycle->getCameraRotation();
-
 		Matrix T;
 		Matrix Trotate;
 		Matrix curserT;
@@ -337,7 +333,7 @@ void ACOsgAudioRenderer::updateNodes(double ratio) {
 			curserT.makeTranslate(Vec3(attribute.getCursor() * xstep, 0.0, 0.0)); 
 			curser_transform->setMatrix(curserT);
 		
-			T =  Matrix::rotate(-angle,Vec3(0.0,0.0,1.0)) * Matrix::scale(localscale/zoom,localscale/zoom,localscale/zoom) * T;
+			T =  Matrix::rotate(-media_cycle_angle,Vec3(0.0,0.0,1.0)) * Matrix::scale(localscale/media_cycle_zoom,localscale/media_cycle_zoom,localscale/media_cycle_zoom) * T;
 		}
 		else {
 			if(media_node->getNumChildren() == 2) {
@@ -360,7 +356,7 @@ void ACOsgAudioRenderer::updateNodes(double ratio) {
 			if (user_defined_color)
 				((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(node_color);
 			
-			T =  Matrix::rotate(-angle,Vec3(0.0,0.0,1.0)) * Matrix::scale(localscale/zoom,localscale/zoom,localscale/zoom) * T;
+			T =  Matrix::rotate(-media_cycle_angle,Vec3(0.0,0.0,1.0)) * Matrix::scale(localscale/media_cycle_zoom,localscale/media_cycle_zoom,localscale/media_cycle_zoom) * T;
 		}
 				
 		unsigned int mask = (unsigned int)-1;
@@ -372,5 +368,5 @@ void ACOsgAudioRenderer::updateNodes(double ratio) {
 		}
 		
 		media_node->setMatrix(T);
-	}	
+
 }

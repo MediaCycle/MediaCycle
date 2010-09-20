@@ -1,10 +1,10 @@
 /*
- *  ACMediaData.h
+ *  AC3DModel.h
  *  MediaCycle
  *
- *  @author Xavier Siebert
- *  @date 11/12/09
- *  @copyright (c) 2009 – UMONS - Numediart
+ *  @author Stéphane Dupont
+ *  @date 06/09/10
+ *  @copyright (c) 2010 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
  *  licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -32,49 +32,33 @@
  *
  */
 
-#ifndef _ACMEDIADATA_H
-#define _ACMEDIADATA_H
+#ifndef AC3DMODEL_H
+#define AC3DMODEL_H
 
-#include "ACMediaTypes.h"
-#include <sndfile.h>
-#include "ACOpenCVInclude.h"
+#include "ACMedia.h"
 #include <osgDB/ReadFile>
 #include <osg/ComputeBoundsVisitor>
 #include <string>
 
-using std::string;
+// -----------------------------------
 
-class ACMediaData {
+class AC3DModel: public ACMedia {
+
 public:
-	ACMediaData();
-	ACMediaData(string _fname, ACMediaType _type = MEDIA_TYPE_NONE);
-	~ACMediaData();
+	AC3DModel();
+	~AC3DModel();
 	
-	float* getAudioData() {return audio_ptr;}
-	IplImage* getImageData() {return image_ptr;}
-	CvCapture* getVideoData() {return video_ptr;}
-	osg::Node* get3DModelData();
+	void saveACLSpecific(ofstream &library_file);
+	int loadACLSpecific(ifstream &library_file);
 	
-	void setAudioData(float* _data);
-	void setImageData(IplImage* _data);
-	void setVideoData(CvCapture* _data);
-	void set3DModelData(osg::ref_ptr< osg::Node > _data);
-					  
-	void readAudioData(string _fname);
-	void readImageData(string _fname);
-	void readVideoData(string _fname);
-	void read3DModelData(string _fname);
+	ACMediaData* extractData(std::string fname);
 	
-	string getFileName() {return file_name;}
-	void setFileName(string _fname);
+	void* getThumbnailPtr() { return 0; }
 	
-private:
-	ACMediaType media_type;
-	string file_name;
-	float* audio_ptr;
-	IplImage* image_ptr;
-	CvCapture* video_ptr;
-	osg::Node* model_ptr;
+private:	
+	
+	vector<float> center;
+	vector<float> extent;
 };
 
-#endif  // ACMEDIADATA_H
+#endif // AC3DMODEL_H

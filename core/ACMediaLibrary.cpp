@@ -344,6 +344,7 @@ int ACMediaLibrary::saveMCSLLibrary(std::string _path){
 	normalizeFeatures();
 }
 
+/* SD 2010 sep discontinued
 int ACMediaLibrary::openLibrary(std::string _path, bool aInitLib){
 	// this does not re-initialize the media_library
 	// but appends new media to it.
@@ -387,6 +388,7 @@ int ACMediaLibrary::openLibrary(std::string _path, bool aInitLib){
 	
 	return file_count;
 }
+*/
 
 /* void ACMediaLibrary::saveAsLibrary(string _path) {
 	

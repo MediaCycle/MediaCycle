@@ -41,3 +41,45 @@ ACOsgMediaRenderer::ACOsgMediaRenderer() {
 	user_defined_color = false;
 }
 
+void ACOsgMediaRenderer::setDeltaTime(double media_cycle_deltatime) {
+	this->media_cycle_deltatime = media_cycle_deltatime;
+}
+
+void ACOsgMediaRenderer::setZoomAngle(float media_cycle_zoom, float media_cycle_angle) {
+	this->media_cycle_zoom = media_cycle_zoom;
+	this->media_cycle_angle = media_cycle_angle;
+}
+
+void ACOsgMediaRenderer::setMode(int media_cycle_mode) {
+	this->media_cycle_mode = media_cycle_mode;
+}
+
+void ACOsgMediaRenderer::setGlobalNavigation(int media_cycle_global_navigation_level) {
+	this->media_cycle_global_navigation_level = media_cycle_global_navigation_level;
+}
+
+void ACOsgMediaRenderer::setIsDisplayed(int media_cycle_isdisplayed) {
+	this->media_cycle_isdisplayed = media_cycle_isdisplayed;
+}
+
+void ACOsgMediaRenderer::setPos(ACPoint &media_cycle_current_pos, ACPoint &media_cycle_next_pos) {
+	this->media_cycle_current_pos = media_cycle_current_pos;
+	this->media_cycle_next_pos = media_cycle_next_pos;
+}
+
+void ACOsgMediaRenderer::setNavigation(int media_cycle_navigation_level) {
+	this->media_cycle_navigation_level = media_cycle_navigation_level;
+}
+
+void ACOsgMediaRenderer::setActivity(int media_cycle_activity) {
+	this->media_cycle_activity = media_cycle_activity;
+}
+
+void ACOsgMediaRenderer::setMediaIndex(int media_index) {
+	this->media_index = media_index;
+}
+
+void ACOsgMediaRenderer::setFilename(std::string media_cycle_filename) {
+	this->media_cycle_filename = media_cycle_filename;
+}
+

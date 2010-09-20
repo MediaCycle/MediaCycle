@@ -9,12 +9,12 @@ IF (USE_AUDIOFEAT)
 	INCLUDE_DIRECTORIES(. ../../armadillo ../../audio)
 
 	ADD_LIBRARY(${TARGET_NAME} SHARED ${SRC} ${HDR})
-	ADD_DEPENDENCIES(${TARGET_NAME} mediacycle armadillo armadillo-utils audiofeatures)
+	ADD_DEPENDENCIES(${TARGET_NAME} mediacycle armadillo armadillo-utils audiofeatures OpenThreads osg osgDB)
 
 	SET_TARGET_PROPERTIES(${TARGET_NAME} PROPERTIES PREFIX ${PLUGIN_PREFIX})
 	SET_TARGET_PROPERTIES(${TARGET_NAME} PROPERTIES OUTPUT_NAME ${PLUGIN_NAME})
 	#SET_TARGET_PROPERTIES(${TARGET_NAME} PROPERTIES SUFFIX ${PLUGIN_SUFFIX})
-	TARGET_LINK_LIBRARIES(${TARGET_NAME} mediacycle armadillo-utils audiofeatures)
+	TARGET_LINK_LIBRARIES(${TARGET_NAME} mediacycle armadillo-utils audiofeatures OpenThreads osgDB osg)
 
 	INSTALL(TARGETS ${TARGET_NAME} LIBRARY DESTINATION lib/${PROJECT_NAME})
 

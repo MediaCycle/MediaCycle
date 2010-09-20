@@ -97,7 +97,7 @@ public:
 	// XS new 300810
 	int importFile(std::string _filename, ACPluginManager *acpl=NULL, bool doSegment=false);
 
-	int openLibrary(std::string _path, bool aInitLib=false);
+	//int openLibrary(std::string _path, bool aInitLib=false); // SD 2010 sep discontinued
 //	void saveAsLibrary(std::string _path);
 	// C++ versions
 	int openACLLibrary(std::string _path, bool aInitLib=false);

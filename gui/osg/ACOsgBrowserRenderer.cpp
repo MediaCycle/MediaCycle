@@ -37,6 +37,7 @@
 #include "ACOsgAudioRenderer.h"
 #include "ACOsgImageRenderer.h"
 #include "ACOsgVideoRenderer.h"
+#include "ACOsg3DModelRenderer.h"
 #include "ACOsgTextRenderer.h"
 
 ACOsgBrowserRenderer::ACOsgBrowserRenderer()
@@ -52,6 +53,15 @@ ACOsgBrowserRenderer::ACOsgBrowserRenderer()
 	group->addChild(label_group.get());		// SD TODO - check this get(), was needed to compile on OSG v2.4 (used by AM)
 	group->addChild(media_group.get());
 	group->addChild(link_group.get());
+	
+	nodes_prepared = 0;
+}
+
+double ACOsgBrowserRenderer::getTime() {
+	struct timeval  tv = {0, 0};
+	struct timezone tz = {0, 0};
+	gettimeofday(&tv, &tz);
+	return (double)tv.tv_sec + (double)tv.tv_usec / 1000000.0;
 }
 
 void ACOsgBrowserRenderer::prepareNodes(int start) {
@@ -95,6 +105,9 @@ void ACOsgBrowserRenderer::prepareNodes(int start) {
 			case MEDIA_TYPE_VIDEO:
 				node_renderer[i] = new ACOsgVideoRenderer();
 				break;
+			case MEDIA_TYPE_3DMODEL:
+				node_renderer[i] = new ACOsg3DModelRenderer();
+				break;
 			case MEDIA_TYPE_TEXT:
 				node_renderer[i] = new ACOsgTextRenderer();
 				break;
@@ -103,8 +116,21 @@ void ACOsgBrowserRenderer::prepareNodes(int start) {
 				break;
 		}
 		if (node_renderer[i] != NULL) {
+						
 			node_renderer[i]->setMediaCycle(media_cycle);
 			node_renderer[i]->setNodeIndex(i);
+			
+			media_cycle_node = media_cycle->getMediaNode(i);
+			node_index = node_renderer[i]->getNodeIndex();
+			media_index = node_index; 
+			if (media_cycle_mode == AC_MODE_NEIGHBORS)
+				media_index = media_cycle->getBrowser()->getUserLog()->getMediaIdFromNodeId(node_index);	
+			if (media_index<0)
+				media_index = 0;
+			media_cycle_filename = media_cycle->getMediaFileName(media_index);
+			node_renderer[i]->setMediaIndex(media_index);
+			node_renderer[i]->setFilename(media_cycle_filename);
+
 			// node_renderer[i]->setActivity(0);
 			node_renderer[i]->prepareNodes();
 			media_group->addChild(node_renderer[i]->getNode());
@@ -127,11 +153,15 @@ void ACOsgBrowserRenderer::prepareNodes(int start) {
 	group->addChild(layout_renderer->getGroup());
 	layout_renderer->prepareLayout(start);
 	 */
+	if ((n-start)>0)
+		nodes_prepared = 1;
 }
 
 void ACOsgBrowserRenderer::updateNodes(double ratio) {
 	
-	
+	if (!nodes_prepared) {
+		return;
+	}
 	//CF prepareNodes
 	/*
 	int media_type;
@@ -198,14 +228,52 @@ void ACOsgBrowserRenderer::updateNodes(double ratio) {
 		//}	
 	}
 	*/
-
 	
-	//CF
-	
+	media_cycle_time = getTime();
+	media_cycle_deltatime = media_cycle_time - media_cycle_prevtime;
+	media_cycle_prevtime = media_cycle_time;
+	media_cycle_zoom = media_cycle->getCameraZoom();		// SD TODO - why still part of mediacycle? 
+	media_cycle_angle = media_cycle->getCameraRotation();
+	media_cycle_mode = media_cycle->getBrowser()->getMode();
+	media_cycle_global_navigation_level = media_cycle->getNavigationLevel();
 	
 	for (unsigned int i=0;i<node_renderer.size();i++) {
-		node_renderer[i]->updateNodes(ratio);
+		
+		media_cycle_node = media_cycle->getMediaNode(i);
+		media_cycle_isdisplayed = media_cycle_node.isDisplayed();
+		media_cycle_current_pos = media_cycle_node.getCurrentPosition();
+		media_cycle_next_pos = media_cycle_node.getNextPosition();
+		media_cycle_navigation_level = media_cycle_node.getNavigationLevel();
+		media_cycle_activity = media_cycle_node.getActivity();		
+		node_index = node_renderer[i]->getNodeIndex();
+		media_index = node_index; 
+		if (media_cycle_mode == AC_MODE_NEIGHBORS)
+			media_index = media_cycle->getBrowser()->getUserLog()->getMediaIdFromNodeId(node_index);	
+		if (media_index<0)
+			media_index = 0;
+		media_cycle_filename = media_cycle->getMediaFileName(media_index);	
+		
+		if (media_cycle_isdisplayed) {
+			
+			// GLOBAL
+			node_renderer[i]->setDeltaTime(media_cycle_deltatime);
+			node_renderer[i]->setZoomAngle(media_cycle_zoom, media_cycle_angle);
+			node_renderer[i]->setMode(media_cycle_mode);
+			node_renderer[i]->setGlobalNavigation(media_cycle_global_navigation_level);
+			
+			// NODE SPECIFIC
+			node_renderer[i]->setIsDisplayed(media_cycle_isdisplayed);
+			node_renderer[i]->setPos(media_cycle_current_pos, media_cycle_next_pos);
+			node_renderer[i]->setNavigation(media_cycle_navigation_level);
+			node_renderer[i]->setActivity(media_cycle_activity);
+			node_renderer[i]->setMediaIndex(media_index);
+			node_renderer[i]->setFilename(media_cycle_filename);
+			
+			// UPDATE
+			node_renderer[i]->updateNodes(ratio);
+		}
 	}
+		
 	/*	
 	//if (media_cycle && media_cycle->hasBrowser() && media_cycle->getBrowser()->getNumberOfLoopsToDisplay()>0)
 		layout_renderer->updateLayout(ratio);

@@ -56,15 +56,10 @@ public:
 
 	~ACAudio();
   
-//	void save(FILE* library_file);
-	void saveACL(ofstream &library_file);
-	void saveMCSL(ofstream &library_file);//CF 31/05/2010 temporary MediaCycle Segmented Library (MCSL) for AudioGarden, adding a parentID for segments to the initial ACL, awaiting approval
-	int loadACL(ifstream &library_file);
-	int loadMCSL(ifstream &library_file);//CF 31/05/2010 temporary MediaCycle Segmented Library (MCSL) for AudioGarden, adding a parentID for segments to the initial ACL, awaiting approval
-	//	int load(FILE* library_file);
-	//int load_v1(FILE* library_file); 
+	void saveACLSpecific(ofstream &library_file);
+	int loadACLSpecific(ifstream &library_file);
 	
-//	void import(std::string _path); // XS 240210 : migrated to ACMedia
+	//void import(std::string _path); // XS 240210 : migrated to ACMedia
 	void saveThumbnail(std::string _path);
 	void* getThumbnailPtr() { return (void*)waveform; }
 	int getThumbnailWidth() {return waveformLength;} // width in thumbnail frames, not samples

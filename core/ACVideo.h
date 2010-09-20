@@ -46,10 +46,8 @@ public:
 	ACVideo(const ACVideo& m);
 	~ACVideo();
 	
-	void save(FILE* library_file);
-	int load(FILE* library_file);
-	void saveACL(ofstream &library_file);
-	int loadACL(ifstream &library_file);
+	void saveACLSpecific(ofstream &library_file);
+	int loadACLSpecific(ifstream &library_file);
 
 	void setThumbnail(IplImage *_thumbnail) { thumbnail = _thumbnail; thumbnail_width = _thumbnail->width; thumbnail_height = _thumbnail->height; }
 	// IplImage* getThumbnail() { return thumbnail; }

@@ -100,6 +100,7 @@ int ACImage::computeThumbnail(ACMediaData* data_ptr, int w, int h){
 }
 
 ACMediaData* ACImage::extractData(string fname){
+	
 	// XS todo : store the default header (16 or 64 below) size somewhere...
 	ACMediaData* image_data = new ACMediaData(fname, MEDIA_TYPE_IMAGE);
 	computeThumbnail(image_data, 64, 64);
@@ -108,204 +109,21 @@ ACMediaData* ACImage::extractData(string fname){
 	return image_data;
 }
 
-// C++ version
-// writes in an existing (i.e. already opened) acl file
-// works for binary too, the stream deals with it
-void ACImage::saveACL(ofstream &library_file) {
-	if (! library_file.is_open()) {
-		cerr << "<ACImage::saveACL> : problem writing video in ACL file, it needs to be opened before" << endl;
-	}	
-	library_file << filename << endl;
-//	library_file << filename_thumbnail << endl; // generated on the fly (sur la mouche)
-//	library_file << duration << endl; // 0
-	library_file << mid << endl;
+void ACImage::saveACLSpecific(ofstream &library_file) {
+	
 	library_file << width << endl;
 	library_file << height << endl;
-	int n_features = features_vectors.size();
-	library_file << n_features << endl;
-	for (int i=0; i<n_features;i++) {
-		int n_features_elements = features_vectors[i]->getSize();
-//		library_file << features_vectors[i]->getName() << endl;
-		library_file << n_features_elements << endl;
-		for (int j=0; j<n_features_elements; j++) {
-			library_file << features_vectors[i]->getFeatureElement(j) << "\t";
-		}
-		library_file << endl;
-	}
 }
 
-// C++ version
-// loads from an existing (i.e. already opened) acl file
-// returns 0 if error (trying to open empty file, failed making thumbnail, ...)
-// returns 1 if fine
-// return value is used in ACMediaLibrary::openACLLibrary
-
-int ACImage::loadACL(ifstream &library_file) {
-	if (! library_file.is_open()) {
-		cerr << "<ACImage::loadACL> : problem loading image from ACL file, it needs to be opened before" << endl;
-		return 0;
-	}		
-
-	if (!library_file.good()){
-		cerr << "<ACImage::loadACL> : bad library file" << endl;
+int ACImage::loadACLSpecific(ifstream &library_file) {
+		
+	library_file >> width;
+	library_file >> height;
+	
+	if (computeThumbnail(filename, height, width) != 1){
+		cerr << "<ACImage::loadACLSpecific> : problem computing thumbnail" << endl;
 		return 0;
 	}
-
-	int n_features;
-	int n_features_elements = 0;	
-	string tab;
 	
-	ACMediaFeatures* mediaFeatures;
-	string featureName;
-	float local_feature;
-	
-	library_file >> filename;
-	if (!filename.empty()){
-		library_file >> mid;	
-		library_file >> width;
-		library_file >> height;
-		library_file >> n_features; 
-		
-		for (int i=0; i<n_features;i++) {
-			mediaFeatures = new ACMediaFeatures();
-			features_vectors.push_back(mediaFeatures);
-			features_vectors[i]->setComputed();
-//			library_file >> featureName;
-//			features_vectors[i]->setName(featureName);
-//			library_file >> nn;
-//			features_vectors[i]->setNeedsNormalization(nn);
-			library_file >> n_features_elements;
-			features_vectors[i]->resize(n_features_elements);
-			for (int j=0; j<n_features_elements; j++) {
-				library_file >> local_feature;
-				features_vectors[i]->setFeatureElement(j, local_feature);
-			}
-		}
-		
-// SD TODO done for AES - thumbnailing has issues (image colors changed) because bug in opencv?
-//      thumbnail = cvLoadImage(filename.c_str(), CV_LOAD_IMAGE_COLOR);	
-//		thumbnail_width = width;
-//		thumbnail_height = height;
-		
-		if (computeThumbnail(filename, height, width) != 1){
-			cerr << "<ACImage::load> : problem computing thumbnail" << endl;
-			return 0;
-		}
-		return 1;
-	}
-	else {
-		return 0;
-	}
-}
-
-void ACImage::save(FILE* library_file) {
-	int nn;
-	unsigned int i, j;
-	int n_features;
-	int n_features_elements;
-	
-	fprintf(library_file, "%s\n", filename.c_str());
-	//fprintf(library_file, "%s\n", thumbnail_filename);
-	
-#ifdef SAVE_LOOP_BIN
-	fwrite(&mid, ,sizeof(int),1,library_file); // XS 150310
-	fwrite(&width,sizeof(int),1,library_file);
-	fwrite(&height,sizeof(int),1,library_file);
-	n_features = features_vectors.size();
-	fwrite(&n_features,sizeof(int),1,library_file);
-	for (i=0; i<features_vectors.size();i++) {
-		n_features_elements = features_vectors[i].size();
-		fwrite(&n_features_elements,sizeof(int),1,library_file);
-		for (j=0; j<n_features_elements; j++) {
-			value = features_vectors[i]->getFeatureElement(j));
-			fwrite(&value,sizeof(float),1,library_file);
-		}
-	}
-#else
-	fprintf(library_file, "%d\n", mid); // XS 150310
-	fprintf(library_file, "%d\n", width);
-	fprintf(library_file, "%d\n", height);
-	n_features = features_vectors.size();
-	fprintf(library_file, "%d\n", n_features);
-	for (i=0; i< features_vectors.size();i++) {
-		n_features_elements = features_vectors[i]->getSize();
-		nn = features_vectors[i]->getNeedsNormalization();
-		fprintf(library_file, "%s\n", features_vectors[i]->getName().c_str());
-		fprintf(library_file, "%d\n", nn);
-		fprintf(library_file, "%d\n", n_features_elements);
-		for (j=0; j<n_features_elements; j++) {
-			fprintf(library_file, "%f\t", features_vectors[i]->getFeatureElement(j)); // XS instead of [i][j]
-		}
-		fprintf(library_file, "\n");
-	}
-#endif
-	
-	/*
-	 fprintf(library_file, "%d\n", thumbnail_width);
-	 fprintf(library_file, "%d\n", thumbnail_height);
-	 fwrite((void*)thumbnail->imageData, 3, thumbnail_width*thumbnail_height, library_file);
-	 */
-	//fprintf(library_file, "\n");
-}
-
-int ACImage::load(FILE* library_file) {
-	int i, j;
-	int path_size;
-	int n_features;
-	int n_features_elements;
-	
-	int ret;
-	char *retc;
-	
-	ACMediaFeatures* mediaFeatures;
-	float local_feature;
-	
-	char audio_file_temp[1024];
-	memset(audio_file_temp,0,1024);
-	
-	retc = fgets(audio_file_temp, 1024, library_file);
-	
-	if (retc) {
-		path_size = strlen(audio_file_temp);
-		filename = string(audio_file_temp, path_size-1);
-		
-		/*	memset(audio_file_temp,0,1024);
-		 retc = fgets(audio_file_temp, 1024, library_file);
-		 path_size = strlen(audio_file_temp);
-		 thumbnail_filename = new char[path_size];
-		 strncpy(thumbnail_filename, audio_file_temp, path_size-1);
-		 thumbnail_filename[path_size-1] = 0;*/
-		ret = fscanf(library_file, "%d", &mid);	 //XS 	
-		ret = fscanf(library_file, "%d", &width);
-		ret = fscanf(library_file, "%d", &height);
-		ret = fscanf(library_file, "%d", &n_features);
-		for (i=0; i<n_features;i++) {
-			mediaFeatures = new ACMediaFeatures();
-			features_vectors.push_back(mediaFeatures);
-			features_vectors[i]->setComputed();
-			ret = fscanf(library_file, "%d", &n_features_elements);
-			features_vectors[i]->resize(n_features_elements);
-			for (j=0; j<n_features_elements; j++) {
-				ret = fscanf(library_file, "%f", &(local_feature));
-				features_vectors[i]->setFeatureElement(j, local_feature);
-			}
-		}
-		ret = fscanf(library_file, "\n");
-		if (computeThumbnail(filename, height, width) != 1){
-			cerr << "<ACImage::load> : problem computing thumbnail" << endl;
-		}
-
-//		ret = fscanf(library_file, "%d", &thumbnail_width);
-//		ret = fscanf(library_file, "%d\n", &thumbnail_height);
-//		thumbnail = cvCreateImage(cvSize (thumbnail_width, thumbnail_height), 8, 3);
-//		thumbnail->widthStep = thumbnail_width * 3;
-//		thumbnail->origin = 1;
-//		strcpy(thumbnail->channelSeq,"RGB"); //XS TODO : or BGR ??
-//		ret = fread ((void*)thumbnail->imageData, 3, thumbnail_width*thumbnail_height, library_file);
-		//fscanf(library_file, "\n");
-		return 1;
-	}
-	else {
-		return 0;
-	}
+	return 1;
 }

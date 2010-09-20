@@ -90,7 +90,7 @@ int main(int argc, char** argv) {
 		return EXIT_FAILURE;
 	}
 	mediacycle->setVisualisationPlugin("Visualisation");
-	if (mediacycle->importLibrary(libraryFilename) == 0) {
+	if (mediacycle->importACLLibrary(libraryFilename) == 0) {
 		cerr << "<MediaCycle-Dancers main> empty library: " << libraryFilename << endl;
 		return EXIT_FAILURE;
 	}

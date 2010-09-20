@@ -71,6 +71,8 @@
 
 #include "ACRefId.h"
 
+#include <sys/time.h>
+
 //#include "ACPlugin.h"
 
 using namespace std;
@@ -93,9 +95,34 @@ protected:
 	//ACOsgLayoutType layout_type;
 	int displayed_nodes;
 
+	// SD - Results from centralized request to MediaCycle - GLOBAL
+	double						media_cycle_time;
+	double						media_cycle_prevtime;
+	double						media_cycle_deltatime;
+	float						media_cycle_zoom;
+	float						media_cycle_angle;
+	int							media_cycle_mode;
+	int							media_cycle_global_navigation_level;
+	
+	// SD - Results from centralized request to MediaCycle - NODE SPECIFIC
+	ACMediaNode					media_cycle_node;
+	bool						media_cycle_isdisplayed;
+	ACPoint						media_cycle_current_pos;
+	ACPoint						media_cycle_next_pos;
+	int							media_cycle_navigation_level;
+	int							media_cycle_activity;
+	int							node_index;
+	int							media_index;
+	int							prev_media_index;	
+	std::string					media_cycle_filename;
+	
+	int nodes_prepared;
+	
 public:
 	ACOsgBrowserRenderer();
 	~ACOsgBrowserRenderer() {};
+		
+	double getTime();
 		
 	void setMediaCycle(MediaCycle *media_cycle) { this->media_cycle = media_cycle; };
 	//void setLayoutPlugin(ACPlugin* acpl){mLayoutPlugin=acpl;};

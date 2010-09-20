@@ -195,7 +195,13 @@ struct ACOsgBrowserViewData
 	[self updateTransformsFromBrowser:frac];
 	[super drawRect:rect];
 	
-	media_cycle->setNeedsDisplay(false);
+	if (media_cycle->getNeedsDisplay3D()) {
+		media_cycle->setNeedsDisplay(true);
+		media_cycle->setNeedsDisplay3D(false);
+	}
+	else {
+		media_cycle->setNeedsDisplay(false);
+	}
 	
 	//glSwapAPPLE();
 }

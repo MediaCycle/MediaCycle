@@ -72,7 +72,7 @@ public:
     int importDirectory(std::string path, int recursive, bool forward_order=true, bool doSegment=false);
 	int importACLLibrary(std::string path);
 	int importMCSLLibrary(std::string path);//CF 31/05/2010 temporary MediaCycle Segmented Library (MCSL) for AudioGarden, adding a parentID for segments to the initial ACL, awaiting approval
-    int importLibrary(std::string path);
+    // int importLibrary(std::string path); // SD 2010 sep discontinued
 	int getLibrarySize(); // = getnumberofmedia
 	int getNumberOfMediaNodes();
     ACMediaLibrary* getLibrary() { return mediaLibrary;}
@@ -116,6 +116,8 @@ public:
 	int getWidth(int i);
 	int getHeight(int i);
 	void* getThumbnailPtr(int i);
+	int getNeedsDisplay3D();
+	void setNeedsDisplay3D(bool _dis);
 	int getNeedsDisplay();
 	void setNeedsDisplay(bool _dis);
 	
@@ -207,6 +209,8 @@ private:
 	ACNetworkSocketServer *networkSocket;
 	ACPluginManager *pluginManager;
 	string config_file;
+	
+	bool mNeedsDisplay;
 };
 
 #endif	/* _MEDIACYCLE_H */

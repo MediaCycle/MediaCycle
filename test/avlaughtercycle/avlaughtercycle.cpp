@@ -75,7 +75,7 @@ int main(int argc, char** argv) {
 
 	//IMPORT LIBFILE
 	cout << "importLib" << endl;
-	mediacycle->importLibrary(mediacycle->getLocalDirectoryPath() + mediacycle->getLibName());
+	mediacycle->importACLLibrary(mediacycle->getLocalDirectoryPath() + mediacycle->getLibName()); // SD
 	//mediacycle->importLibrary("/home/alexis/test-fscanf.acl");
 	/*
 	//TEST KNN WITH NEW FILE

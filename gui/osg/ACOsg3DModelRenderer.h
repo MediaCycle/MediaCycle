@@ -1,10 +1,11 @@
 /*
- *  ACImage[loop].h
+ *  ACOsg3DModelRenderer.h
  *  MediaCycle
  *
- *  @author Xavier Siebert
- *  @date 11/05/09
- *  @copyright (c) 2009 – UMONS - Numediart
+ *  @author Stéphane Dupont
+ *  @date 06/09/10
+ *
+ *  @copyright (c) 2010 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
  *  licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -32,39 +33,43 @@
  *
  */
 
-#ifndef ACIMAGE_H
-#define ACIMAGE_H
+#ifndef __ACOSG_3DMODEL_RENDERER_H__
+#define __ACOSG_3DMODEL_RENDERER_H__
 
-#include "ACOpenCVInclude.h"
-#include "ACMedia.h"
-#include <string>
+#include "ACOsgMediaRenderer.h"
 
-// -----------------------------------
+#include <osg/Geometry>
+#include <osg/PolygonMode>
+#include <osg/ShapeDrawable>
 
-class ACImage: public ACMedia {
-	// contains the *minimal* information about an image
-public:
-	ACImage();
-	~ACImage();
-	
-	void saveACLSpecific(ofstream &library_file);
-	int loadACLSpecific(ifstream &library_file);
+using namespace std;
+using namespace osg;
 
-	void setThumbnail(IplImage *_thumbnail) { thumbnail = _thumbnail; thumbnail_width = _thumbnail->width; thumbnail_height = _thumbnail->height; }
-	// IplImage* getThumbnail() { return thumbnail; }
-	int getThumbnailWidth() {return thumbnail_width;}
-	int getThumbnailHeight() {return thumbnail_height;}
-	void* getThumbnailPtr() { return (void*)thumbnail; }
-	
-	ACMediaData* extractData(std::string fname);
+class ACOsg3DModelRenderer : public ACOsgMediaRenderer  {
+protected:
 		
-private:	
-	char  *thumbnail_filename;
-	int thumbnail_width, thumbnail_height; 
-	IplImage *thumbnail;
+	Vec4Array* colors_off;
+	Vec4Array* colors_on;
+	double modelangle;
+	vector<float> media_cycle_center;
+	vector<float> media_cycle_extent;
 	
-	int computeThumbnail(string _fname, int w, int h);
-	int computeThumbnail(ACMediaData* data_ptr, int w=0, int h=0);
+	Node* model_node;
+	Geode* border_geode;
+	MatrixTransform* acti_transform;
+	MatrixTransform* norm_transform;
+	
+	void modelGeode();
+	void borderGeode();
+	void normTransform();
+	
+public:
+	
+	ACOsg3DModelRenderer();
+	~ACOsg3DModelRenderer();
+	
+	void prepareNodes();
+	void updateNodes(double ratio=0.0);
 };
 
-#endif // ACIMAGE_H
+#endif

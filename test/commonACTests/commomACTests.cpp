@@ -45,12 +45,12 @@ void test_audio_library(string file_name){
 
 	cout << "-------------------------------------------------------" << endl;
 	cout << "Test Import Audio Library" << endl;
-	media_cycle->importLibrary(file_name);
+	media_cycle->importACLLibrary(file_name);
 	cout << "Library Size = " << media_cycle->getLibrarySize() << endl;
 
 	cout << "-------------------------------------------------------" << endl;
 	cout << "Test Writing ACL file (old C version)" << endl;
-	media_cycle->saveACLLibrary("_testold_"+file_name);
+	media_cycle->saveACLLibrary("_testold_"+file_name);		// SD ?
 
 	cout << "-------------------------------------------------------" << endl;
 	cout << "Test Writing ACL file (new CPP version): _testnew_"+file_name << endl;

@@ -47,6 +47,7 @@ class ACMedia {
 	// features_vectors[i] = vector of numbers calculated by plugin number i (starting at 0)
 	// note 230210: features_vectors[i] could later be grouped with other features, depending on the configuration file (or the preferences menu)
 protected:
+		
 	int mid;
 	int parentid; //CF so that segments can be defined as ACMedia having other ACMedia as parents
 	ACMediaType media_type;
@@ -111,13 +112,15 @@ public:
 	float getEnd(){return this->end;};
 	
 	// I/O -- these are media-specific (at least for the moment...) 
-	virtual void save(FILE *){}
-	virtual int load(FILE*){return -1;}
-	virtual void saveACL(std::ofstream &library_file){}
-	virtual void saveMCSL(std::ofstream &library_file){}//CF 31/05/2010 temporary MediaCycle Segmented Library (MCSL) for AudioGarden, adding a parentID for segments to the initial ACL, awaiting approval
-	virtual int loadACL(std::ifstream &library_file){return -1;}
-	virtual int loadMCSL(std::ifstream &library_file){return -1;}//CF 31/05/2010 temporary MediaCycle Segmented Library (MCSL) for AudioGarden, adding a parentID for segments to the initial ACL, awaiting approval
-	virtual ACMediaData* extractData(std::string filename){}
+
+	void saveACL(std::ofstream &library_file, int mcsl=0);
+	int loadACL(std::ifstream &library_file, int mcsl=0);
+	void saveMCSL(std::ofstream &library_file); //CF 31/05/2010 temporary MediaCycle Segmented Library (MCSL) for AudioGarden, adding a parentID for segments to the initial ACL, awaiting approval
+	int loadMCSL(std::ifstream &library_file); //CF 31/05/2010 temporary MediaCycle Segmented Library (MCSL) for AudioGarden, adding a parentID for segments to the initial ACL, awaiting approval
+
+	virtual void saveACLSpecific(std::ofstream &library_file) {}
+	virtual int loadACLSpecific(std::ifstream &library_file) {return -1;}
+	virtual ACMediaData* extractData(std::string filename) {}
 	
 	virtual int import(std::string _path, int _mid=0, ACPluginManager *acpl=NULL);
 

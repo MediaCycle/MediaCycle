@@ -132,6 +132,7 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 	#endif
 	
 	// XSCF 250310 added these 3
+	// media_cycle->storeNavigationState(); // This line was in ACImageCycleOsgCocoa...
 	if (media_cycle->getMode() == AC_MODE_CLUSTERS) {
 		// media_cycle->pushNavigationState(); // XS 250810 removed
 		media_cycle->setWeight(0, [mWeight1Check floatValue]);

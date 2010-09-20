@@ -69,6 +69,132 @@ ACMedia::~ACMedia() {
 	}	
 }
 
+// C++ version
+// writes in an existing (i.e. already opened) acl file
+// works for binary too, the stream deals with it
+void ACMedia::saveACL(ofstream &library_file, int mcsl) {
+	
+	unsigned int i, j;
+	int n_features;
+	int n_features_elements;	
+	int nn;
+	
+	if (! library_file.is_open()) {
+		cerr << "<ACMedia::saveACL> : problem writing in ACL file, it needs to be opened before" << endl;
+	}	
+	
+	library_file << filename << endl;
+	library_file << mid << endl;
+	
+	if (mcsl) {
+		library_file << parentid << endl; 
+		library_file << this->getAllSegments().size() << endl;
+		for (int i=0; i < this->getAllSegments().size(); i++){
+			library_file << this->getSegment(i)->getId() << "\t";
+		}
+		library_file << endl;
+	}
+	
+	saveACLSpecific(library_file);
+	
+	n_features = features_vectors.size();
+	library_file << n_features << endl;
+	for (i=0; i<features_vectors.size();i++) {
+		n_features_elements = features_vectors[i]->getSize();
+		nn = features_vectors[i]->getNeedsNormalization();
+		library_file << features_vectors[i]->getName() << endl;
+		library_file << nn << endl;
+		library_file << n_features_elements << endl;
+		for (j=0; j<n_features_elements; j++) {
+			library_file << features_vectors[i]->getFeatureElement(j)  << "\t"; // XS instead of [i][j]
+		}
+		library_file << endl;
+	}	
+}
+
+// C++ version
+// loads from an existing (i.e. already opened) acl file
+// returns 0 if error (trying to open empty file, failed making thumbnail, ...)
+// returns 1 if fine
+// return value is used in ACMediaLibrary::openACLLibrary
+int ACMedia::loadACL(ifstream &library_file, int mcsl) {
+	
+	int i, j;
+	int n_features;
+	int n_features_elements = 0;	
+	int nn;
+	string tab;
+	
+	ACMediaFeatures* mediaFeatures;
+	string featureName;
+	float local_feature;
+	
+	int nbSegments, segId;
+	
+	if (! library_file.is_open()) {
+		cerr << "<ACAudio::loadACL> : problem loading image from ACL file, it needs to be opened before" << endl;
+		return 0;
+	}		
+	if (!library_file.good()){
+		cerr << "<ACAudio::loadACL> : bad library file" << endl;
+		return 0;
+	}
+	
+	getline(library_file, filename, '\n');
+	
+	if (!filename.empty()) {
+		
+		library_file >> mid;	
+		
+		if (mcsl) {
+			library_file >> parentid; 
+			library_file >> nbSegments;
+			for (int i=0; i < nbSegments; i++){
+				library_file >> segId;
+				cout << segId << "\t";
+			} 
+		}
+		
+		if (!loadACLSpecific(library_file)) {
+			return 0;
+		}		
+		
+		library_file >> n_features;	
+		getline(library_file, tab);
+		
+		for (int i=0; i<n_features;i++) {
+			mediaFeatures = new ACMediaFeatures();
+			features_vectors.push_back(mediaFeatures);
+			features_vectors[i]->setComputed();
+			//			getline(library_file, featureName, '\n');
+			getline(library_file, featureName);
+			features_vectors[i]->setName(featureName);
+			library_file >> nn;
+			features_vectors[i]->setNeedsNormalization(nn);
+			library_file >> n_features_elements;
+			features_vectors[i]->resize(n_features_elements);
+			for (int j=0; j<n_features_elements; j++) {
+				library_file >> local_feature;
+				features_vectors[i]->setFeatureElement(j, local_feature);
+			}
+			getline(library_file, tab);	
+			//std::cout << "read extra chars : \n" << tab << std::endl;//CF
+		}
+		return 1;
+	}
+	else {
+		return 0;
+	}
+}
+
+void ACMedia::saveMCSL(ofstream &library_file) {
+	saveACL(library_file, 1);
+}
+
+int ACMedia::loadMCSL(ifstream &library_file) {
+	return loadACL(library_file, 1);
+}
+
 ACMediaFeatures* ACMedia::getFeaturesVector(int i){ 
 	if (i < int(features_vectors.size()) )
 		return features_vectors[i]; 
@@ -96,7 +222,7 @@ int ACMedia::import(std::string _path, int _mid, ACPluginManager *acpl ) {
 	std::cout << "importing..." << _path << std::endl;
 	this->filename=_path;
 	this->filename_thumbnail = _path;
-	int import_ok = 1;
+	int import_ok = 0; // SD
 	
 	if (_mid>=0) this->setId(_mid);
 	

@@ -322,71 +322,65 @@ void ACOsgImageRenderer::updateNodes(double ratio) {
 	
 	float x, y, z;
 	float zpos = 0.001;
-		
+	
 	const ACMediaNode &attribute = media_cycle->getMediaNode(node_index);
-
-	if ( attribute.isDisplayed() ) {
-			
-	const ACPoint &p = attribute.getCurrentPosition(), &p2 = attribute.getNextPosition();
-	double omr = 1.0-ratio;
-	
-	float zoom = media_cycle->getCameraZoom();
-	float angle = media_cycle->getCameraRotation();
-	
-	Matrix T;
-	Matrix Trotate;
-	Matrix imageT;
-	
-	int media_index = node_index; // or media_cycle->getBrowser()->getMediaNode(node_index).getMediaId(); 
-	if (media_cycle->getBrowser()->getMode() == AC_MODE_NEIGHBORS)
-		media_index = media_cycle->getBrowser()->getUserLog()->getMediaIdFromNodeId(node_index);
-	
-	if (media_index!=prev_media_index) {
-		if(media_node->getNumChildren() == 1) {
-			media_node->removeChild(0, 1);
-		}
-		imageGeode();
-		media_node->addChild(image_transform);
-		prev_media_index = media_index;
-	}
 		
-	unsigned int mask = (unsigned int)-1;
-	if(attribute.getNavigationLevel() >= media_cycle->getNavigationLevel()) {
-		image_transform->setNodeMask(mask);
-	}
-	else {
-		image_transform->setNodeMask(0);
-	}
-	
-	z = 0;
-	
-//	if (border_geode->getDrawable(0)) {
-//		if (attribute.getActivity()==1) {
-//			((Geometry*)border_geode->getDrawable(0))->setColorArray(colors2);
-//		}
-//		else {
-//			((Geometry*)border_geode->getDrawable(0))->setColorArray(colors3);
-//		}
-//	}
-	
-	float localscale;
-	float maxdistance = 0.2;
-	float maxscale = 3;//1.5;//CF
-	float minscale = 0.6;				
-	// Apply "rotation" to compensate camera rotation
-	x = omr*p.x + ratio*p2.x;
-	y = omr*p.y + ratio*p2.y;
-	localscale = maxscale - distance_mouse * (maxscale - minscale) / maxdistance ;
-	localscale = max(localscale,minscale);
-	if (localscale>minscale) {
-		z += 2*zpos;
-	}
-	else if (attribute.getActivity()==1) {
-		z += zpos;
-	}
-
-	T.makeTranslate(Vec3(x, y, z)); // omr*p.z + ratio*p2.z));	
-	T =  Matrix::rotate(-angle,Vec3(0.0,0.0,1.0)) * Matrix::scale(localscale/zoom,localscale/zoom,localscale/zoom) * T;
-	media_node->setMatrix(T);
-	}
+		const ACPoint &p = attribute.getCurrentPosition(), &p2 = attribute.getNextPosition();
+		double omr = 1.0-ratio;
+				
+		Matrix T;
+		Matrix Trotate;
+		Matrix imageT;
+		
+		int media_index = node_index; // or media_cycle->getBrowser()->getMediaNode(node_index).getMediaId(); 
+		if (media_cycle->getBrowser()->getMode() == AC_MODE_NEIGHBORS)
+			media_index = media_cycle->getBrowser()->getUserLog()->getMediaIdFromNodeId(node_index);
+		
+		if (media_index!=prev_media_index) {
+			if(media_node->getNumChildren() == 1) {
+				media_node->removeChild(0, 1);
+			}
+			imageGeode();
+			media_node->addChild(image_transform);
+			prev_media_index = media_index;
+		}
+		
+		unsigned int mask = (unsigned int)-1;
+		if(attribute.getNavigationLevel() >= media_cycle->getNavigationLevel()) {
+			image_transform->setNodeMask(mask);
+		}
+		else {
+			image_transform->setNodeMask(0);
+		}
+		
+		z = 0;
+		
+		//	if (border_geode->getDrawable(0)) {
+		//		if (attribute.getActivity()==1) {
+		//			((Geometry*)border_geode->getDrawable(0))->setColorArray(colors2);
+		//		}
+		//		else {
+		//			((Geometry*)border_geode->getDrawable(0))->setColorArray(colors3);
+		//		}
+		//	}
+		
+		float localscale;
+		float maxdistance = 0.2;
+		float maxscale = 3;//1.5;//CF
+		float minscale = 0.6;				
+		// Apply "rotation" to compensate camera rotation
+		x = omr*p.x + ratio*p2.x;
+		y = omr*p.y + ratio*p2.y;
+		localscale = maxscale - distance_mouse * (maxscale - minscale) / maxdistance ;
+		localscale = max(localscale,minscale);
+		if (localscale>minscale) {
+			z += 2*zpos;
+		}
+		else if (attribute.getActivity()==1) {
+			z += zpos;
+		}
+		
+		T.makeTranslate(Vec3(x, y, z)); // omr*p.z + ratio*p2.z));	
+		T =  Matrix::rotate(-media_cycle_angle,Vec3(0.0,0.0,1.0)) * Matrix::scale(localscale/media_cycle_zoom,localscale/media_cycle_zoom,localscale/media_cycle_zoom) * T;
+		media_node->setMatrix(T);
 }

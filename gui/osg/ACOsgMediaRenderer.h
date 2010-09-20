@@ -68,6 +68,23 @@ protected:
 	// int	media_activity;
 	Vec4 node_color;
 	bool user_defined_color;
+		
+	// GLOBAL
+	double						media_cycle_deltatime;
+	float						media_cycle_zoom;
+	float						media_cycle_angle;
+	int							media_cycle_mode;
+	int							media_cycle_global_navigation_level;
+	
+	// NODE SPECIFIC
+	bool						media_cycle_isdisplayed;
+	ACPoint						media_cycle_current_pos;
+	ACPoint						media_cycle_next_pos;
+	int							media_cycle_navigation_level;
+	int							media_cycle_activity;
+	std::string					media_cycle_filename;	
+	int							media_index;
+	int							prev_media_index;
 	
 public:
 	ACOsgMediaRenderer();
@@ -78,6 +95,7 @@ public:
 	void setDistanceMouse(float _distance_mouse) { this->distance_mouse = _distance_mouse; };
 	//void setActivity(int _media_activity) { this->media_activity = _media_activity; }
 	MatrixTransform* getNode() { return media_node; };
+	int	getNodeIndex() { return node_index; };
 	
 	virtual void prepareNodes()=0;
 	virtual void updateNodes(double ratio=0.0)=0;
@@ -85,6 +103,16 @@ public:
 	void changeNodeColor(Vec4 _color){node_color = _color; user_defined_color = true;}
 	void resetNodeColor(){node_color = Vec4(1,1,0.5,1); user_defined_color = false;}
 	
+	void setDeltaTime(double media_cycle_deltatime);
+	void setZoomAngle(float media_cycle_zoom, float media_cycle_angle);
+	void setMode(int media_cycle_mode);
+	void setGlobalNavigation(int media_cycle_global_navigation_level);
+	void setIsDisplayed(int media_cycle_isdisplayed);
+	void setPos(ACPoint &media_cycle_current_pos, ACPoint &media_cycle_next_pos);
+	void setNavigation(int media_cycle_navigation_level);
+	void setActivity(int media_cycle_activity);
+	void setMediaIndex(int media_index);
+	void setFilename(std::string media_cycle_filename);
 };
 
 #endif

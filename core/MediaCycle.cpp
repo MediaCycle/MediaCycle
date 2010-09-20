@@ -269,6 +269,7 @@ int MediaCycle::importMCSLLibrary(string path) {
 	return ok;
 }
 
+/* SD 2010 sep discontinued
 int MediaCycle::importLibrary(string path) {
 // XS import = open + some processing 
 	cout << "MediaCycle: importing library: " << path << endl;
@@ -278,6 +279,8 @@ int MediaCycle::importLibrary(string path) {
 	//	XS TODO this->mediaBrowser->libraryContentChanged();	
 	return ok;
 }
+*/
+
 int MediaCycle::getLibrarySize() { return mediaLibrary->getSize(); }
 int MediaCycle::getNumberOfMediaNodes(){return mediaBrowser->getNumberOfMediaNodes();}
 
@@ -378,6 +381,8 @@ void MediaCycle::setNeedsDisplay(bool _dis) {
 		mediaBrowser->setNeedsDisplay(_dis);
 	}
 }
+int MediaCycle::getNeedsDisplay3D() { return mNeedsDisplay; }
+void MediaCycle::setNeedsDisplay3D(bool mNeedsDisplay) { this->mNeedsDisplay = mNeedsDisplay; }
 
 // == view
 void MediaCycle::getMouse(float *mx, float *my) { mediaBrowser->getMouse(mx, my); }
@@ -414,7 +419,7 @@ void MediaCycle::setForwardDown(int i) { forwarddown = i; }
 
 // == Features
 void MediaCycle::normalizeFeatures() { mediaLibrary->normalizeFeatures(); }
-void MediaCycle::openLibrary(string path) { mediaLibrary->openLibrary(path); }
+// void MediaCycle::openLibrary(string path) { mediaLibrary->openLibrary(path); }		// discontinued SD 2010 sep
 void MediaCycle::libraryContentChanged() { mediaBrowser->libraryContentChanged(); }
 //void MediaCycle::saveAsLibrary(string path) {mediaLibrary->saveAsLibrary(path); }
 void MediaCycle::saveACLLibrary(string path) {mediaLibrary->saveACLLibrary(path); }
@@ -465,6 +470,7 @@ vector<int>* MediaCycle::getNeedsActivityUpdateMedia() {
 // == callbacks
 
 void MediaCycle::pickedObjectCallback(int _nodeId) {
+	printf("PICKED\n");
 	int nodeId = _nodeId;
 	if(nodeId < 0) {
 		// clicked close to a node
