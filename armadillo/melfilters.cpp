@@ -1,7 +1,7 @@
 /**
  * @brief melfilters.cpp
- * @author Damien Tardieu
- * @date 18/06/2010
+ * @author Jerome Urbain
+ * @date 22/09/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -56,7 +56,26 @@ mat melfilters(int nChannels, int fftSize, int sr_hz){
 	
 	mat melf_m = zeros<mat>(bmax, nChannels);
 
+        //code compliant to MATLAB: filters linear in MEL
+        float currentMel, dist;
 	for (int iChan=1; iChan < nChannels+1; iChan++){
+		for (int iBin=centerB_v(iChan-1); iBin <= centerB_v(iChan+1); iBin++){
+			if(iBin > centerB_v(iChan-1) & iBin < centerB_v(iChan)){
+                            currentMel=freq2mel(iBin/f2b);
+                            dist=centerM_v(iChan)-currentMel;
+                            melf_m(iBin, iChan-1) = 2*(1-dist/chanDist);
+			}
+			else if(iBin >= centerB_v(iChan) & iBin <= centerB_v(iChan+1)) {
+                            currentMel=freq2mel(iBin/f2b);
+                            dist=currentMel-centerM_v(iChan);
+                            melf_m(iBin, iChan-1) = 2*(1-dist/chanDist);			
+			}
+		}
+		//melf_m.col(iChan-1) = f2b*melf_m.col(iChan-1)/(2*(centerB_v(iChan+1)-centerB_v(iChan-1)));
+	}
+
+        // old code:
+        /*for (int iChan=1; iChan < nChannels+1; iChan++){
 		for (int iBin=0; iBin < bmax; iBin++){
 			if(iBin > centerB_v(iChan-1) & iBin < centerB_v(iChan)){
 				melf_m(iBin, iChan-1) = (iBin - centerB_v(iChan-1))/(centerB_v(iChan)-centerB_v(iChan-1));
@@ -66,7 +85,8 @@ mat melfilters(int nChannels, int fftSize, int sr_hz){
 			}
 		}
 		melf_m.col(iChan-1) = f2b*melf_m.col(iChan-1)/(2*(centerB_v(iChan+1)-centerB_v(iChan-1)));
-	}
+	}*/
+
 	
 	return melf_m;
 }

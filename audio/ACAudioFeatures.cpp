@@ -1,7 +1,7 @@
 /**
  * @brief ACAudioFeatures.cpp
- * @author Xavier Siebert
- * @date 30/08/2010
+ * @author Jerome Urbain
+ * @date 22/09/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -156,6 +156,7 @@ std::vector<ACMediaTimedFeature*> computeFeatures(float* data, vector<string> de
 	colvec frame_v = colvec(windowSize);
 	colvec frameW_v = colvec(windowSize);
  	colvec window_v = blackman(windowSize);
+        //colvec window_v=ones<colvec>(windowSize); //no framing
  	colvec frameFFTabs_v;
  	colvec frameFFTabs2_v(fftSize/2);
 	colvec prevFrameFFTabs_v;
@@ -444,7 +445,8 @@ double logAttackTime(colvec ener_v, int sr_hz){
 
 
 rowvec mfcc(colvec x_v, mat melfilter_m, int mfccNb){
-	colvec x2_v = log10(trans(melfilter_m)*(x_v+math::eps()));
+	//colvec x2_v = log10(trans(melfilter_m)*(x_v+math::eps()));
+        colvec x2_v = log(trans(melfilter_m)*(x_v)+math::eps()); // log as MAtlab does
 	colvec xdct_v = dct(x2_v, x2_v.n_elem);
 	rowvec mfcc_v = trans(dct(x2_v, x2_v.n_elem));
 	mfcc_v = mfcc_v.cols(0, mfccNb-1);
