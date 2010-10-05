@@ -464,6 +464,8 @@ void ACAudioFeedback::createAudioEngine(int _output_sample_rate, int _output_buf
 	//
 	current_buffer = new int[OPENAL_NUM_BUFFERS];
 	memset(current_buffer, 0, OPENAL_NUM_BUFFERS*sizeof(int));
+        current_buffer_unqueue = new int[OPENAL_NUM_BUFFERS];
+	memset(current_buffer_unqueue, 0, OPENAL_NUM_BUFFERS*sizeof(int));
 	// 
 	prev_sample_pos = new int[OPENAL_NUM_BUFFERS];
 	output_buffer = new short[output_buffer_size];
@@ -734,7 +736,7 @@ bool ACAudioFeedback::processAudioEngine()
 {	
 	ALenum error;
 	
-	int count, current;
+	int count, current, current_unqueue;
 	
 	ALenum  format;
 	ALvoid* data;
@@ -796,8 +798,10 @@ bool ACAudioFeedback::processAudioEngine()
 				int add_buffers;
 				if (buffer_queued<output_buffer_n) { add_buffers=output_buffer_n-buffer_queued; }
 				else {add_buffers = buffer_processed;}
-				
-				if (add_buffers) {
+                                if(!buffer_queued){
+                                    add_buffers=2;
+                                }
+                                else if (add_buffers) {
 					add_buffers= 1;
 				}
 				
@@ -838,7 +842,7 @@ bool ACAudioFeedback::processAudioEngine()
 					//alGenBuffers(1, &(loop_buffers_audio_engine_stream[count][current]));
 					
 					alDeleteBuffers(1, &loop_buffers_audio_engine_stream[count][current]);
-					
+
 					alGenBuffers(1, &local_buffer);
 					if((error = alGetError()) != AL_NO_ERROR) {
 						printf("Error Regenerating OpenAL Buffers for audio engine AL_STREAM !\n");
@@ -857,11 +861,15 @@ bool ACAudioFeedback::processAudioEngine()
 					
 					data = output_buffer;
 					current = current_buffer[count];
-					
+                                        current_unqueue= current_buffer_unqueue[count];
 					// Fill buffer
 					if (k<buffer_processed) {
-						alSourceUnqueueBuffers(loop_sources[count], 1, &loop_buffers_audio_engine_stream[count][current]);
-					}
+						alSourceUnqueueBuffers(loop_sources[count], 1, &loop_buffers_audio_engine_stream[count][current_unqueue]);
+                                                current_buffer_unqueue[count]++;
+                                                if (current_buffer_unqueue[count] >= output_buffer_n) {
+                                                    current_buffer_unqueue[count] = 0;
+                                                }
+                                        }
 					
 					alBufferData(loop_buffers_audio_engine_stream[count][current], format, data, size*2, freq);
 					current_buffer[count]++;
@@ -1845,6 +1853,7 @@ int ACAudioFeedback::deleteSource(int loop_id)
 
 	// SD TODO - Check wether maybe remaining buffers have to be detached from source
 	current_buffer[loop_slot] = 0;
+        current_buffer_unqueue[loop_slot] = 0;
 
 	// has been reserved in createSourceWithPosition, need to delete here
 	delete[] loop_buffers_audio_engine[loop_slot];

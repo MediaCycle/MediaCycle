@@ -54,4 +54,6 @@ public:
 private:
 };
 
+icolvec FastBIC(fmat audiofeatures_m, float lambda, int samplerate);
+
 #endif	/* _ACAUDIOSEGMENTATIONPLUGIN_H */

@@ -90,6 +90,11 @@ std::vector<ACMedia*> ACAudioSegmentationPlugin::segment(ACMediaData* audio_data
 		peaks_v = findpeaks(desc_v, min((unsigned int) 10, desc_v.n_elem-1));		
 		break;
 	}
+        case 2:{ //FASTBIC
+                desc_mf = computeFeature(data, "MFCC", theAudio->getSampleRate(), theAudio->getChannels(), theAudio->getNFrames(), 16, 13, 1024*2, false);
+                peaks_v=FastBIC(desc_mf->getValue(), 2, theAudio->getSampleRate());
+                break;
+        }
 	default:
 		std::cerr << "Error : Wrong method" << std::endl;
 		exit(1);
@@ -140,5 +145,29 @@ std::vector<ACMedia*> ACAudioSegmentationPlugin::segment(ACMediaData* audio_data
 // 	}
 	delete[] data;
 	return segments;
+}
+
+icolvec FastBIC(fmat audiofeatures_m, float lambda, int samplerate)
+{
+    int nwindows=audiofeatures_m.n_cols;
+    int nfeatures=audiofeatures_m.n_rows;
+    icolvec segment_v;
+    
+    /// ALGORITHM PARAMETERS ///
+    int delta_h=1; // high resolution: linked to to accuracy of the estimation
+    int delta_l=10*delta_h; // low resolution, to obtain a first estimation of the segmentation point. Must be a multiple of delta_h.
+    float Wmin=0.05; /// in seconds, minimum length of the search window 
+    int Nmin=(int)(Wmin*samplerate/delta_l+0.5)*delta_l; // in samples, minimum window length. Must be a multiple of delta_l
+    float Wmax=0.2; // in seconds, maximum length of the search window
+    int Nmax=(int)(Wmax*samplerate/delta_l+0.5)*delta_l; // in samples, maximum length of the window. Must be a multiple of delta_l.
+    int Nsecond=Nmin; // length of the window when refining the segment position. Must be a multiple of delta_h
+    int delta_Ngrow=2*delta_l; // increase of the window when no candidate segmentation is found. Must be a multiple of delta_l
+    int delta_Nshift=4*delta_l; // shift of the window when no candidate segmentation is found and window size=Nmax. Must be a multiple of delta_l;
+    int delta_Nmargin=2*delta_l; // size of the border windows on which deltaBIC is not computed. Must be a multiple of delta_l
+    
+    
+    
+    
+    return segment_v;
 }
 

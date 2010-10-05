@@ -561,7 +561,7 @@ void ACMediaLibrary::normalizeFeatures() {
 
 void ACMediaLibrary::denormalizeFeatures() {
 	cout << "denormalizing features" << endl;
-	if ( isEmpty() ) return;	
+	if ( isEmpty() || index_last_normalized<0) return; // Ju: added index_last_normalized<0 to avoid segmentation fault under linux, I believe caused by the fact i is declared as unsigned int while index_last_normalized is int, so it messed up in the for loop
 	
 	unsigned int i,j,k;
 	

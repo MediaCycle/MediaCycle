@@ -241,6 +241,7 @@ private:
 	ALuint** loop_buffers_audio_engine_stream;
 	int*	 prev_sample_pos;
 	int*	 current_buffer;
+        int*     current_buffer_unqueue;
 	float		 time_from_start, time_from_downbeat, time_from_beat, time_from_tatum;
 	long int		 downbeat_from_start;
 	float prev_scrub_pos, scrub_pos, scrub_speed;
