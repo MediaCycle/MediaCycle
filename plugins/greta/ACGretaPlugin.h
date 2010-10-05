@@ -33,11 +33,11 @@
 #ifndef _ACGRETAPLUGIN_H
 #define	_ACGRETAPLUGIN_H
 
+#include "MediaCycle.h"
+
 #include <Communicator.h>
 #include <Component.h>
 #include <CppAIRPlug.h>
-
-#include "ACPlugin.h"
 
 class ACGretaPlugin : public ACPlugin {
 public:

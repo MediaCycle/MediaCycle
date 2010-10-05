@@ -24,6 +24,7 @@ ENDIF ( MINGW )
 #ENDIF ( USE_OPENCV )
 
 	TARGET_LINK_LIBRARIES(mediacycle ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_GRAPH_LIBRARY})
+	TARGET_LINK_LIBRARIES(mediacycle osg osgDB) # used in AC3DModel
 
 # this might require some path adaptation for Windows
 # (e.g. set cmake_install_prefix to the good value for Windows )
