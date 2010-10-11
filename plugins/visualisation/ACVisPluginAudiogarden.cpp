@@ -1,7 +1,7 @@
 /**
  * @brief ACVisPluginAudiogarden.cpp
- * @author Damien Tardieu
- * @date 09/07/2010
+ * @author Christian Frisson
+ * @date 11/10/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -43,7 +43,7 @@ ACVisPluginAudiogarden::ACVisPluginAudiogarden()
 	// XS TODO: are these general enough ? can we use this only for audio ??
     this->mMediaType = MEDIA_TYPE_AUDIO;
     this->mPluginType = PLUGIN_TYPE_CLUSTERS_POSITIONS;
-    this->mName = "VisAudiogarden";
+    this->mName = "Gramophone";
     this->mDescription = "Audiogarden Visualisation plugin";
     this->mId = "";
 	

@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
 	<key>CFBundleExecutable</key>
-	<string>MediaCycleOsgQt</string>
+	<string>AudioGarden</string>
 	<key>CFBundleIdentifier</key>
 	<string>numediart</string>
 	<key>CFBundleInfoDictionaryVersion</key>

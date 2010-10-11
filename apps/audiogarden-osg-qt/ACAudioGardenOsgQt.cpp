@@ -92,10 +92,10 @@ ACAudioGardenOsgQt::ACAudioGardenOsgQt(QWidget *parent)
 								//CF default settings: no Clusters Positions plugin, use Propeller 
 							}	
 							ui.comboBoxClustersPositions->addItem(QString(acpl->getPluginLibrary(i)->getPlugin(j)->getName().c_str()));
-							if (acpl->getPluginLibrary(i)->getPlugin(j)->getName() == "VisAudiogarden") {
+							if (acpl->getPluginLibrary(i)->getPlugin(j)->getName() == "Gramophone") {
 								//CF we use the AudioGarden plugin as default
 								//media_cycle->setVisualisationPlugin("VisAudiogarden");
-								media_cycle->setClustersPositionsPlugin("VisAudiogarden");
+								media_cycle->setClustersPositionsPlugin("Gramophone");
 								ui.comboBoxClustersPositions->setCurrentIndex(ui.comboBoxClustersPositions->count()-1);
 							}
 						}
@@ -495,6 +495,8 @@ void ACAudioGardenOsgQt::on_comboBoxCompositingMethod_activated(const QString & 
 		std::cout << "Compositing Method: Padded" << std::endl;
 		ui.compositeOsgView->getSynth()->setMethod(AG_METHOD_PADDED);
 	}
+	if (ui.checkBoxCompositingAuto->isChecked() )
+		ui.compositeOsgView->synthesize();
 }
 
 void ACAudioGardenOsgQt::on_comboBoxCompositingMapping_activated(const QString & text)
@@ -515,18 +517,24 @@ void ACAudioGardenOsgQt::on_comboBoxCompositingMapping_activated(const QString &
 		std::cout << "Compositing Mapping: None" << std::endl;
 		ui.compositeOsgView->getSynth()->setMapping(AG_MAPPING_NONE);
 	}
+	if (ui.checkBoxCompositingAuto->isChecked() )
+		ui.compositeOsgView->synthesize();
 }
 
 void ACAudioGardenOsgQt::on_sliderCompositingRandom_sliderReleased()
 {
 	std::cout << "Compositing Random: " << (float)(ui.sliderCompositingRandom->value())/100.0f << std::endl;
 	ui.compositeOsgView->getSynth()->setRandomness((float)(ui.sliderCompositingRandom->value())/100.0f);
+	if (ui.checkBoxCompositingAuto->isChecked() )
+		ui.compositeOsgView->synthesize();
 }
 
 void ACAudioGardenOsgQt::on_sliderCompositingThreshold_sliderReleased()
 {
 	std::cout << "Compositing Threshold: " << (float)(ui.sliderCompositingThreshold->value())/100.0f << std::endl;
 	ui.compositeOsgView->getSynth()->setThreshold((float)(ui.sliderCompositingThreshold->value())/100.0f);
+	if (ui.checkBoxCompositingAuto->isChecked() )
+		ui.compositeOsgView->synthesize();
 }
 
 void ACAudioGardenOsgQt::on_checkBoxCompositingAuto_toggled()

@@ -1,7 +1,7 @@
 /**
  * @brief AGSynthesis.cpp
- * @author Damien Tardieu
- * @date 09/07/2010
+ * @author Christian Frisson
+ * @date 11/10/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -150,24 +150,39 @@ bool AGSynthesis::compute(long targetId, vector<long> grainIds){
 
 	ACAudio* audioGrain;
 
-	// compuation of the synthesized sound duration
-	long durationSyn = 0;
-	for (int i=0; i<targetSegment_v.size(); i++){
-		if (seg_samp_start_v(i) + ((ACAudio*)lib->getMedia(grainIds[sp_m(i,0)]))->getNFrames() > durationSyn){
+	// Computation of the synthesized sound duration //Ccl
+	// 2 cases: 
+	// if the synthesis follows the rhythmic pattern of the model ('simple' and 'padded'), the duration is durationSyn
+	// if the synthesis is 'squeezed', the duration is durationSynb
+	long durationSyn = 0; long durationSynb = 0;
+	/*for (int i=0; i<targetSegment_v.size(); i++){
+		//if (seg_samp_start_v(i) + ((ACAudio*)lib->getMedia(grainIds[sp_m(i,0)]))->getNFrames() > durationSyn){ //Ccl
 			durationSyn = seg_samp_start_v(i) + ((ACAudio*)lib->getMedia(grainIds[sp_m(i,0)]))->getNFrames();
-		}
-	}
+			std::cout<< "durationSyn: " << durationSyn << std::endl;
+		//}
+
+	}*/ //Ccl
+	durationSyn = seg_samp_start_v(targetSegment_v.size()-1) + ((ACAudio*)lib->getMedia(grainIds[sp_m(targetSegment_v.size()-1,0)]))->getNFrames(); //Ccl, no need to do all for loop
+	std::cout<< "durationSyn: " << durationSyn << std::endl;
 	
-	long maxGrainLength = 0;
+	/*long maxGrainLength = 0;
 	for (int i=0; i<grainIds.size(); i++){
 		if (((ACAudio*)lib->getMedia(grainIds[i]))->getNFrames() > maxGrainLength){
 			maxGrainLength = ((ACAudio*)lib->getMedia(grainIds[i]))->getNFrames();
 		}
-	}
-	durationSyn += maxGrainLength;
+	}*/ //Ccl
+	//durationSyn += maxGrainLength;
+	//std::cout<< "durationSyn: " << durationSyn << std::endl;
+	
+	for (int i=0; i<targetSegment_v.size(); i++){
+	 //if (seg_samp_start_v(i) + ((ACAudio*)lib->getMedia(grainIds[sp_m(i,0)]))->getNFrames() > durationSyn){ //Ccl
+	 durationSynb += ((ACAudio*)lib->getMedia(grainIds[sp_m(i,0)]))->getNFrames();
+	 //}
+	 }
+	std::cout<< "durationSynb: " << durationSynb << std::endl;
 	
 	colvec syn_v;
-	syn_v.zeros(durationSyn);
+	syn_v.zeros(max(durationSyn, durationSynb));
 	colvec win_v;
 
 	long ind0 = 0;
@@ -178,22 +193,19 @@ bool AGSynthesis::compute(long targetId, vector<long> grainIds){
 	for (int i=0; i < targetSegment_v.size(); i++){
 		audioGrain = (ACAudio*) lib->getMedia(grainIds[sp_m(i,0)]);
 		colvec selG_v = extractSamples(audioGrain);
-
-// 		colvec targetSample_v = extractSamples(targetSegment_v[i]);		
-// 		colvec selGS_v = zeros<colvec>(selG_v.n_rows); colvec targetSampleS_v = zeros<colvec>(targetSample_v.n_rows);
-// 		//targetSample_v = pow(targetSample_v,2)
-// 		//Amplitude factor to take into account amplitude evolution of the signal model (target)
-// 		float ampFactor1 = ((enerTS_m(i,0)) / (enerG_m(sp_m(i,0),0)));
+		colvec targetSample_v = extractSamples(targetSegment_v[i]);		
+		colvec selGS_v = zeros<colvec>(selG_v.n_rows); 
+		colvec targetSampleS_v = zeros<colvec>(targetSample_v.n_rows);
 		
-// 		for (int j=0; j < targetSampleS_v.n_rows; j++){
-// 			targetSampleS_v[j] = targetSample_v[j] * targetSample_v[j];
-// 		}
-// 		for (int j=0; j < selGS_v.n_rows; j++){
-// 			selGS_v[j] = selG_v[j] * selG_v[j];
-// 		}
-// 		float ampFactor2 = sqrt(sum(targetSampleS_v) / sum(selGS_v));
-// 		if (ampFactor2 > 5.0)
-// 			ampFactor2 = 1;
+ 		for (int j=0; j < targetSampleS_v.n_rows; j++){
+ 			targetSampleS_v[j] = targetSample_v[j] * targetSample_v[j];
+ 		}
+		for (int j=0; j < selGS_v.n_rows; j++){
+ 			selGS_v[j] = selG_v[j] * selG_v[j];
+ 		}
+		//Amplitude factor to take into account amplitude evolution of the signal model (target)
+ 		float ampFactor2 = sqrt(sum(targetSampleS_v) / sum(selGS_v)); //Ccl
+
 			
 		win_v = tukeywin(audioGrain->getNFrames(), .01);
 		switch (this->getMethod()) {
@@ -201,8 +213,9 @@ bool AGSynthesis::compute(long targetId, vector<long> grainIds){
 			if (seg_samp_start_v(i)+audioGrain->getNFrames() - 1 < syn_v.n_elem){
 				//				syn_v.rows(seg_samp_start_v(i), seg_samp_start_v(i)+audioGrain->getNFrames()-1) += ampFactor2*selG_v % win_v;
 				ampFactor = sqrt(enerTS_m(i)/enerG_m(sp_m(i,0)));
-				syn_v.rows(seg_samp_start_v(i), seg_samp_start_v(i)+audioGrain->getNFrames()-1) += ampFactor*selG_v % win_v;
-				realDurationSyn = max(realDurationSyn, (int) seg_samp_start_v(i)+audioGrain->getNFrames());
+				syn_v.rows(seg_samp_start_v(i), seg_samp_start_v(i)+audioGrain->getNFrames()-1) += selG_v % win_v  * ampFactor2; //Ccl
+				realDurationSyn = max(realDurationSyn, (int) seg_samp_start_v(i)+audioGrain->getNFrames()); //Ccl: wrong definition..?
+				//std::cout<< "realDurationSyn: " << durationSyn << " // " << (int) seg_samp_start_v(i)+audioGrain->getNFrames() <<  std::endl;
 				//syn_v = syn_v * ampFactor2;
 				//std::cout << " ampFactor " << grainIds[sp_m(i,0)] << " " << ampFactor1 << " " << ampFactor2;
 			}
@@ -217,7 +230,7 @@ bool AGSynthesis::compute(long targetId, vector<long> grainIds){
 		case AG_METHOD_SQUEEZED:{
 			if (ind0+audioGrain->getNFrames() - 1 < syn_v.n_elem){
 				ampFactor = sqrt(enerTS_m(i)/enerG_m(sp_m(i,0)));
-				syn_v.rows(ind0, ind0+audioGrain->getNFrames()-1) = selG_v % win_v * ampFactor;
+				syn_v.rows(ind0, ind0+audioGrain->getNFrames()-1) = selG_v % win_v * ampFactor2; //Ccl
 				realDurationSyn = max(realDurationSyn, (int) ind0+audioGrain->getNFrames());
 				//				syn_v.rows(ind0, ind0+audioGrain->getNFrames()-1) = ampFactor2 * selG_v % win_v;
 				//syn_v = syn_v * ampFactor2;
@@ -237,10 +250,10 @@ bool AGSynthesis::compute(long targetId, vector<long> grainIds){
 			if (seg_samp_start_v(i)+audioGrain->getNFrames() - 1 < syn_v.n_elem){
 				//				syn_v.rows(seg_samp_start_v(i), seg_samp_start_v(i)+audioGrain->getNFrames()-1) = ampFactor2 * selG_v % win_v;
 				ampFactor = sqrt(enerTS_m(i)/enerG_m(sp_m(i,0)));
-				syn_v.rows(seg_samp_start_v(i), seg_samp_start_v(i)+audioGrain->getNFrames()-1) = selG_v % win_v * ampFactor;
+				syn_v.rows(seg_samp_start_v(i), seg_samp_start_v(i)+audioGrain->getNFrames()-1) = selG_v % win_v * ampFactor2; //Ccl
 				realDurationSyn = max(realDurationSyn, (int) seg_samp_start_v(i)+audioGrain->getNFrames());
 				//syn_v = syn_v * ampFactor2;
-				//std::cout << " ampFactor " << ampFactor2;
+				std::cout << " ampFactor 1 " << ampFactor << " ampFactor 2 " << ampFactor2 << std::endl;
 			}
 			else{
 				std::cout << "----------------" << std::endl;
@@ -256,27 +269,21 @@ bool AGSynthesis::compute(long targetId, vector<long> grainIds){
 				int sGrainId = grainIds[sp_m(i,round)];
 				audioGrain = (ACAudio*) lib->getMedia(sGrainId);
 				selG_v = extractSamples(audioGrain);
-// 				colvec targetSample_v = extractSamples(targetSegment_v[i]);
-// 				colvec selGS_v = zeros<colvec>(selG_v.n_rows); colvec targetSampleS_v = zeros<colvec>(targetSample_v.n_rows);
+ 				colvec selGS_v = zeros<colvec>(selG_v.n_rows); 
 // 				//Amplitude factor to take into account amplitude evolution of the signal model (target)
-// 				float ampFactor1 = sqrt((enerTS_m(i,0)) / (enerG_m(sp_m(i,0),0)));
-// 				for (int j=0; j < targetSampleS_v.n_rows; j++){
-// 					targetSampleS_v[j] = targetSample_v[j] * targetSample_v[j];
-// 				}
-// 				for (int j=0; j < selGS_v.n_rows; j++){
-// 					selGS_v[j] = selG_v[j] * selG_v[j];
-// 				}
-// 				float ampFactor2 = sqrt(sum(targetSampleS_v) / sum(selGS_v));
-// 				if (ampFactor2 > 5.0)
-// 					ampFactor2 = 1;
+ 				for (int j=0; j < selGS_v.n_rows; j++){
+ 					selGS_v[j] = selG_v[j] * selG_v[j];
+ 				}
+ 				float ampFactor2 = sqrt(sum(targetSampleS_v) / sum(selGS_v));
+
 				win_v = tukeywin(audioGrain->getNFrames(), .01);
 				if (ind0+audioGrain->getNFrames() - 1 < syn_v.n_elem){
-					ampFactor = sqrt(enerTS_m(i)/enerG_m(sp_m(i,round)))*ampFactor;
-					syn_v.rows(ind0, ind0+audioGrain->getNFrames()-1) = selG_v % win_v;
+					ampFactor = sqrt(enerTS_m(i)/enerG_m(sp_m(i,round)));// * ampFactor
+					syn_v.rows(ind0, ind0+audioGrain->getNFrames()-1) = selG_v % win_v  * ampFactor2;
 					realDurationSyn = max(realDurationSyn, (int) ind0+audioGrain->getNFrames());
 					//					syn_v.rows(ind0, ind0+audioGrain->getNFrames()-1) = ampFactor2 * selG_v % win_v;
 					//syn_v = syn_v * ampFactor2;
-					//std::cout << " ampFactor " << ampFactor2;
+					std::cout << " ampFactor 1 " << ampFactor << " ampFactor 2 " << ampFactor2 << std::endl;
 				}
 				else{
 					std::cout << "----------------" << std::endl;

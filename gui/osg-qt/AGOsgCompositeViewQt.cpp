@@ -203,6 +203,10 @@ void AGOsgCompositeViewQt::keyPressEvent( QKeyEvent* event )
 			media_cycle->muteAllSources();
 			media_cycle->setPlayKeyDown(true);			
 			break;	
+		case Qt::Key_C:	
+			media_cycle->setCameraRecenter();
+			media_cycle->setPlayKeyDown(true);
+			break;
 		case Qt::Key_P:
 			selectrhythmpattern = true;
 			media_cycle->setPlayKeyDown(false);			
@@ -441,7 +445,7 @@ void AGOsgCompositeViewQt::mouseReleaseEvent( QMouseEvent* event )
 						//CF possible only for audio? then do some tests
 						ACAudio* tempAudio = (ACAudio*) media_cycle->getLibrary()->getMedia(loop);
 
-						delete synthAudio;
+						//delete synthAudio;
 						synthAudio = new ACAudio( *tempAudio, false);
 						float* tempBuffer = (float*)synthAudio->getMonoSamples();
 						audio_engine->getFeedback()->createExtSource(tempBuffer, synthAudio->getNFrames() );
