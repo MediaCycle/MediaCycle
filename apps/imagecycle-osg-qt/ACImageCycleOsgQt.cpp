@@ -55,7 +55,11 @@ ACImageCycleOsgQt::ACImageCycleOsgQt(QWidget *parent)
 		#ifdef USE_DEBUG
 			build_type = "Debug";
 		#endif
-		media_cycle->addPlugin("../../../plugins/image/" + build_type + "/mc_image.dylib");
+		media_cycle->addPlugin(QApplication::applicationDirPath().toStdString() + "/../../../plugins/image/" + build_type + "/mc_image.dylib");
+	#elif defined (__WIN32__)
+		media_cycle->addPlugin(QApplication::applicationDirPath().toStdString() + "\..\..\plugins\image\mc_image.dll");
+	#else
+		media_cycle->addPlugin(QApplication::applicationDirPath().toStdString() + "/../../plugins/image/mc_image.so");
 	#endif
 	
 	//this->configureCheckBoxes();
@@ -382,17 +386,18 @@ void ACImageCycleOsgQt::synchronizeFeaturesWeights(){
 	// conversion: 0 remains 0, and value > 0 becomes 1.
 	vector<float> w = media_cycle->getWeightVector();
 	int nw = w.size();
-	if (ui.featuresListWidget->count() != nw){
+	// CF cerr makes the application exit, we'd like a warning message instead... temporarily disabled
+	/*if (ui.featuresListWidget->count() != nw){
 		cerr << "Checkboxes in GUI do not match Features in MediaCycle" << endl;
 		cerr << ui.featuresListWidget->count() << "!=" << nw << endl;
 		exit(1);
 	}
-	else {
+	else {*/
 		for (int i=0; i< nw; i++){
 			if (w[i]==0) 
 				ui.featuresListWidget->item(i)->setCheckState (Qt::Unchecked);
 			else
 				ui.featuresListWidget->item(i)->setCheckState (Qt::Checked);		
 		}
-	}
+	/*}*/ //
 }
