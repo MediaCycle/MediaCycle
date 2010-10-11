@@ -3,7 +3,7 @@ FILE(GLOB DIRLIST * )
 
 FOREACH(PLUGINDIR ${DIRLIST})
     IF(IS_DIRECTORY ${PLUGINDIR})
-        MESSAGE("Possible plugin found in : " ${PLUGINDIR})
+        MESSAGE("Building plugin: " ${PLUGINDIR})
         ADD_SUBDIRECTORY(${PLUGINDIR})
     ENDIF()
 ENDFOREACH()

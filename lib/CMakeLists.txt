@@ -3,7 +3,7 @@ FILE(GLOB DIRLIST * )
 
 FOREACH(LIBDIR ${DIRLIST})
     IF(IS_DIRECTORY ${LIBDIR})
-        MESSAGE("Possible library found in : " ${LIBDIR})
+        MESSAGE("Building library: " ${LIBDIR})
         ADD_SUBDIRECTORY(${LIBDIR})
     ENDIF()
 ENDFOREACH()

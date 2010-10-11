@@ -1,18 +1,22 @@
-IF ( ARMADILLO_FOUND AND SDIF_FOUND )
+IF ( ARMADILLO_FOUND )
 	FILE(GLOB SRC *.cpp *.c)
 	FILE(GLOB HDR *.hpp *.h)
 
 	ADD_LIBRARY(armadillo-utils STATIC ${SRC} ${HDR})
 
 	#gsl - uncomment if needed
-	TARGET_LINK_LIBRARIES(armadillo-utils mediacycle fftooura armadillo atlas lapack blas sdif)
+	TARGET_LINK_LIBRARIES(armadillo-utils mediacycle fftooura armadillo atlas lapack blas)
+	IF ( SDIF_FOUND )
+		TARGET_LINK_LIBRARIES(armadillo-utils sdif)
+	ENDIF ( )
+
 	TARGET_LINK_LIBRARIES(armadillo-utils ${ARMADILLO_LIBRARY})
 	INCLUDE_DIRECTORIES(. ../fftooura ../core)
 
 	#INSTALL(TARGETS armadillo-utils LIBRARY DESTINATION lib)
 	#INSTALL(FILES ${HDR} DESTINATION include/armadillo-utils)
 
-ELSE ( ARMADILLO_FOUND AND SDIF_FOUND )
-	MESSAGE ("Not building armadillo-utils: armadillo and SDIF are required.")
-ENDIF ( ARMADILLO_FOUND AND SDIF_FOUND )
+ELSE ( ARMADILLO_FOUND )
+	MESSAGE ("Not building armadillo-utils: armadillo is required.")
+ENDIF ( ARMADILLO_FOUND )
 

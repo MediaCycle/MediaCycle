@@ -137,7 +137,9 @@ public:
 	fmat similarity(int mode = 0);
 	fmat similarity(ACMediaTimedFeature *B);
 	float dist(fmat rowvector1, fmat rowvector2, int mode = 0);
-	int saveAsSdif(const char* name);
+	#ifdef USE_SDIF
+		int saveAsSdif(const char* name);
+	#endif
 	int saveAsTxt(string fname);
 
 };

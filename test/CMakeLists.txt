@@ -3,7 +3,7 @@ FILE(GLOB DIRLIST * )
 
 FOREACH(TESTDIR ${DIRLIST})
     IF(IS_DIRECTORY ${TESTDIR})
-        MESSAGE("Possible test found in : " ${TESTDIR})
+        MESSAGE("Building test: " ${TESTDIR})
         ADD_SUBDIRECTORY(${TESTDIR})
     ENDIF()
 ENDFOREACH()

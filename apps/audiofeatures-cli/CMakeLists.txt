@@ -8,7 +8,7 @@ IF (USE_AUDIOFEAT)
 	ADD_DEPENDENCIES(audiofeatures-cli armadillo-utils audiofeatures)
 	INCLUDE_DIRECTORIES(. ../../armadillo ../../audio)
 
-	TARGET_LINK_LIBRARIES(audiofeatures-cli audiofeatures ${SNDFILE_LIBRARY} ${SAMPLERATE_LIBRARY} ${SDIF_LIBRARY})
+	TARGET_LINK_LIBRARIES(audiofeatures-cli audiofeatures ${SNDFILE_LIBRARY} ${SAMPLERATE_LIBRARY})
 
 	INSTALL(TARGETS audiofeatures-cli RUNTIME DESTINATION bin)
 

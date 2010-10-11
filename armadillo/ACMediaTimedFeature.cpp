@@ -34,7 +34,9 @@
  */
 
 #include "ACMediaTimedFeature.h"
-#include "sdif.h" // XS to include in the distribution ??
+#ifdef USE_SDIF
+	#include "sdif.h"
+#endif
 #include "Armadillo-utils.h"
 
 using namespace arma;
@@ -775,7 +777,7 @@ float ACMediaTimedFeature::dist(fmat vector1, fmat vector2, int mode)
 }
 
 
-
+#ifdef USE_SDIF
 int ACMediaTimedFeature::saveAsSdif(const char *name){
 	SdifGenInit ("");
 	SdifFileT *file = SdifFOpen(name, eWriteFile);  /* Open file for writing */
@@ -809,3 +811,4 @@ int ACMediaTimedFeature::saveAsSdif(const char *name){
 	SdifGenKill ();
 	return 1;
 }
+#endif
