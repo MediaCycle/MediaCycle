@@ -181,32 +181,26 @@ void ACOsgCompositeViewQt::keyPressEvent( QKeyEvent* event )
 	{
 		case Qt::Key_Z:
 			zoomdown = 1;
-			media_cycle->setPlayKeyDown(false);
 			break;
 		case Qt::Key_A:
 			media_cycle->setForwardDown(1);
 			forwarddown = 1;
-			media_cycle->setPlayKeyDown(false);
 			break;
 		case Qt::Key_Q:
 			media_cycle->setAutoPlay(1);
 			autoplaydown = 1;
-			media_cycle->setPlayKeyDown(true);
 			break;
 		case Qt::Key_R:
 			rotationdown = 1;
-			media_cycle->setPlayKeyDown(false);
 			break;
 		case Qt::Key_M:	
 			media_cycle->muteAllSources();
-			media_cycle->setPlayKeyDown(true);			
 			break;
 		case Qt::Key_Space:
 			if ( (media_cycle) && (media_cycle->hasBrowser()) && (timeline_renderer->getTrack(0)!=NULL) ) {
 				transportdown = 1;
 				media_cycle->getBrowser()->toggleSourceActivity( timeline_renderer->getTrack(0)->getMediaIndex() );
 			}	
-			media_cycle->setPlayKeyDown(true);			
 			break;
 		default:
 			break;
@@ -354,15 +348,15 @@ void ACOsgCompositeViewQt::mouseReleaseEvent( QMouseEvent* event )
 			if(loop >= 0)
 			{
 	
+				// XSCF 250310 added these 3
+				// XS 260810 put this "if" first otherwise we store the next state
+				if (media_cycle->getBrowser()->getMode() == AC_MODE_CLUSTERS)
+					media_cycle->storeNavigationState();
+				
 				if (media_cycle->getBrowser()->getMode() == AC_MODE_CLUSTERS)
 					media_cycle->incrementLoopNavigationLevels(loop);
 				media_cycle->setReferenceNode(loop);
 				
-				// XSCF 250310 added these 3
-				if (media_cycle->getBrowser()->getMode() == AC_MODE_CLUSTERS)
-					media_cycle->storeNavigationState();
-				//media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
-				//media_cycle->getBrowser()->setState(AC_CHANGING);
 				
 				//			media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
 				//			media_cycle->getBrowser()->setState(AC_CHANGING);
@@ -370,11 +364,12 @@ void ACOsgCompositeViewQt::mouseReleaseEvent( QMouseEvent* event )
 				media_cycle->updateDisplay(true); //XS250310 was: media_cycle->updateClusters(true);
 				// XSCF 250310 removed this:
 				// media_cycle->updateNeighborhoods();
-				//					media_cycle->updateClusters(false);// CF was true, equivalent to what's following
+				//	media_cycle->updateClusters(false);// CF was true, equivalent to what's following
 				
-				// remainders from updateClusters(true)
-//					media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
-//					media_cycle->getBrowser()->setState(AC_CHANGING);
+				//				// remainders from updateClusters(true)
+				//				media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
+				//				media_cycle->getBrowser()->setState(AC_CHANGING);
+				media_cycle->setNeedsDisplay(true);
 			}
 		}	
 		media_cycle->setClickedNode(-1);

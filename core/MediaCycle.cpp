@@ -477,7 +477,7 @@ void MediaCycle::pickedObjectCallback(int _nodeId) {
 		nodeId = getClosestNode();
 	}
 	mediaBrowser->setClickedNode(nodeId);
-	if (forwarddown == 0 & playkeydown) {//if (!forwarddown) { //CF forwardown is not a boolean
+	if (forwarddown == 0){// & playkeydown) {//if (!forwarddown) { //CF forwardown is not a boolean
 		mediaBrowser->toggleSourceActivity(nodeId);
 	}
 }

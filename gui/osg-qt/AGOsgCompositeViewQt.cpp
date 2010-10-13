@@ -190,35 +190,28 @@ void AGOsgCompositeViewQt::keyPressEvent( QKeyEvent* event )
 		case Qt::Key_A:
 			media_cycle->setForwardDown(1);
 			forwarddown = 1;
-			media_cycle->setPlayKeyDown(false);
 			break;
 		case Qt::Key_G:
 			selectgrains = true;
-			media_cycle->setPlayKeyDown(false);			
 			break;
 		case Qt::Key_L:
 			//CF used in ACAudioGardenOsgQt
 			break;
 		case Qt::Key_M:	
 			media_cycle->muteAllSources();
-			media_cycle->setPlayKeyDown(true);			
 			break;	
 		case Qt::Key_C:	
 			media_cycle->setCameraRecenter();
-			media_cycle->setPlayKeyDown(true);
 			break;
 		case Qt::Key_P:
 			selectrhythmpattern = true;
-			media_cycle->setPlayKeyDown(false);			
 			break;	
 		case Qt::Key_Q:
 			media_cycle->setAutoPlay(1);
 			autoplaydown = 1;
-			media_cycle->setPlayKeyDown(true);
 			break;
 		case Qt::Key_R:
 			rotationdown = 1;
-			media_cycle->setPlayKeyDown(false);
 			break;
 		case Qt::Key_Space:
 			if ( (media_cycle) && (media_cycle->hasBrowser()) && (timeline_renderer->getTrack(0)!=NULL) )
@@ -238,11 +231,9 @@ void AGOsgCompositeViewQt::keyPressEvent( QKeyEvent* event )
 				}	
 				track_playing = track_playing ? false : true; //CF toggling
 			}
-			media_cycle->setPlayKeyDown(true);			
 			break;
 		case Qt::Key_Z:
 			zoomdown = 1;
-			media_cycle->setPlayKeyDown(false);
 			break;	
 		default:
 			break;
