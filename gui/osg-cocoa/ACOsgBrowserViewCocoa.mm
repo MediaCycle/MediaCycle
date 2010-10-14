@@ -32,9 +32,7 @@
 //
 
 #import "ACOsgBrowserViewCocoa.h"
-#import <Rendering/TiCocoaOsgView+Node.h>
-//#import <Common/TiTime.h>
-
+#import "ACOsgViewNodeCocoa.h"
 
 struct ACOsgBrowserViewData
 {

@@ -56,7 +56,7 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 + (void)initialize
 {
 	// to avoid linker from discarding that class
-	[TiCocoaOsgView class];
+	[ACOsgViewCocoa class];
 	[ACOsgBrowserViewCocoa class];//CF
 }
 

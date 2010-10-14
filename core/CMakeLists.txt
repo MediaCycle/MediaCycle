@@ -8,7 +8,6 @@ IF ( USE_OSG )
 	#TARGET_LINK_LIBRARIES(mediacycle gsl gslcblas)
 
 	#others
-	#TARGET_LINK_LIBRARIES(mediacycle TiCommon)
 	IF ( MINGW )
 		TARGET_LINK_LIBRARIES(mediacycle sndfile FLAC vorbisenc vorbis m ogg pthread wsock32 ws2_32) # CF: should be detected in main CMakeLists.txt
 	ELSE ( MINGW )

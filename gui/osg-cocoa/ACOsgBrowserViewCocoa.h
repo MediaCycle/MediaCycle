@@ -32,15 +32,15 @@
 //
 
 #import <Cocoa/Cocoa.h>
-#import <Rendering/TiCocoaOsgView.h>
+#import "ACOsgViewCocoa.h"
 #import <ACOsgBrowserEventHandler.h>
-//#import <Rendering/TiCocoaOsgView+Node.h>
+//#import "ACOsgViewNodeCocoa.h"
 #include <MediaCycle.h>
 #import "ACOsgBrowserRenderer.h"
 
 ////struct ACOsgBrowserViewData;//CF
 
-@interface ACOsgBrowserViewCocoa : TiCocoaOsgView {
+@interface ACOsgBrowserViewCocoa : ACOsgViewCocoa {
 	////struct ACOsgBrowserViewData *_privateData;//CF
 	
 	MediaCycle				*media_cycle;

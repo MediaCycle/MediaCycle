@@ -11,7 +11,6 @@ IF ( APPLE AND USE_COCOA)
 
 	TARGET_LINK_LIBRARIES(mediacycle-osg-cocoa mediacycle)
 	TARGET_LINK_LIBRARIES(mediacycle-osg-cocoa mediacycle-osg)
-	TARGET_LINK_LIBRARIES(mediacycle-osg-cocoa TiCommon TiRendering)
 	TARGET_LINK_LIBRARIES(mediacycle-osg-cocoa osg osgDB osgGA osgViewer)
 	set(CMAKE_EXE_LINKER_FLAGS "-framework CoreVideo -framework Foundation")
 
