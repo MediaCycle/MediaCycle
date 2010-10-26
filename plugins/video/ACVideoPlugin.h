@@ -47,7 +47,7 @@ public:
     ACVideoPlugin();
     ~ACVideoPlugin();
 	std::vector<ACMediaFeatures*> calculate(std::string aFileName);
-	std::vector<ACMediaFeatures*> calculate(ACMediaData* _data);
+	std::vector<ACMediaFeatures*> calculate(ACMediaData* _data, ACMedia*);
 
 	std::vector<ACMediaFeatures*>  calculateTop(std::string aFileName);
 	std::vector<ACMediaFeatures*>  calculateFront(std::string aFileName);

@@ -67,7 +67,7 @@ std::vector<ACMediaFeatures*>  ACVideoPlugin::calculate(std::string aFileName) {
 	return allVideoFeatures;
 }
 
-std::vector<ACMediaFeatures*> ACVideoPlugin::calculate(ACMediaData* video_data) {
+std::vector<ACMediaFeatures*> ACVideoPlugin::calculate(ACMediaData* video_data, ACMedia* theMedia) {
 	string file_name_front = video_data -> getFileName();
 	vector<ACMediaFeatures*> tmp = this->calculate(file_name_front);
 	return tmp;
