@@ -51,6 +51,11 @@ using namespace std;
 	#include <ACAppleMultitouchTrackpadSupport.h>
 #endif
 
+// FORWARD DECLARATIONS
+QT_BEGIN_NAMESPACE
+class QListWidgetItem;
+QT_END_NAMESPACE
+
 class ACAudioCycleOsgQt : public QMainWindow
 {
     Q_OBJECT
@@ -59,6 +64,10 @@ class ACAudioCycleOsgQt : public QMainWindow
         ACAudioCycleOsgQt(QWidget *parent = 0);
 		~ACAudioCycleOsgQt();
 		void updateLibrary();
+	
+	// XS attempt to make dynamic buttons
+	public slots: 
+		virtual void modifyListItem(QListWidgetItem *item);
 
     private slots:
 		// Library controls
@@ -76,9 +85,6 @@ class ACAudioCycleOsgQt : public QMainWindow
 		void on_radioButtonClusters_toggled();
 		
 		// Clustering controls
-		void on_checkBoxRhythm_stateChanged(int state);
-		void on_checkBoxTimbre_stateChanged(int state);
-		void on_checkBoxHarmony_stateChanged(int state);
 		void on_sliderClusters_sliderReleased();
 		void on_comboBoxClustersMethod_activated(const QString & text);//CF or (int index);} 
 		void on_comboBoxClustersPositions_activated(const QString & text);//CF or (int index);} 
@@ -113,6 +119,9 @@ class ACAudioCycleOsgQt : public QMainWindow
 			ACAppleMultitouchTrackpadSupport *multitouch_trackpad;
 		#endif
         Ui::ACAudioCycleOsgQt ui;
+		void configureCheckBoxes();
+		void cleanCheckBoxes();
+		void synchronizeFeaturesWeights();
 		bool library_loaded;
 
 	protected:

@@ -38,7 +38,7 @@
 			STRICT LIABILITY OR OTHERWISE, EVEN IF APPLE HAS BEEN ADVISED OF THE
 			POSSIBILITY OF SUCH DAMAGE.
 */
-#if defined(__APPLE__) and not defined(__x86_64__)
+#if defined(APPLE_LEOPARD)
 #include <CoreFoundation/CoreFoundation.h>
 #include <AudioToolbox/AudioToolbox.h>
 #import <OpenAL/al.h>

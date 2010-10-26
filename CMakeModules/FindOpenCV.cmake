@@ -87,9 +87,10 @@ FIND_PATH(OpenCV_ROOT_DIR
   cv/include/cv.h     # windows
   include/opencv/cv.h # linux /opt/net
   include/cv/cv.h 
-  include/cv.h 
+  include/cv.h
+  include/opencv/cv.h 
   PATHS ${OpenCV_POSSIBLE_ROOT_DIRS})
-DBG_MSG("OpenCV_ROOT_DIR=${OpenCV_ROOT_DIR}")
+#DBG_MSG("OpenCV_ROOT_DIR=${OpenCV_ROOT_DIR}")
 
 
 # header include dir suffixes appended to OpenCV_ROOT_DIR

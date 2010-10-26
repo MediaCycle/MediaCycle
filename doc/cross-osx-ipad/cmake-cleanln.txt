@@ -1,0 +1,7 @@
+#!/bin/bash
+sudo rm /usr/bin/cmake
+sudo rm /usr/bin/ccmake
+sudo rm /usr/bin/cmake-gui
+sudo rm /usr/bin/cmakexbuild
+sudo rm /usr/bin/cpack
+sudo rm /usr/bin/ctest

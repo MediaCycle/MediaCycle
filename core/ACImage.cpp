@@ -32,6 +32,8 @@
  *
  */
 
+#if !defined (APPLE_IOS)
+
 #include "ACImage.h"
 #include <fstream>
 
@@ -127,3 +129,4 @@ int ACImage::loadACLSpecific(ifstream &library_file) {
 	
 	return 1;
 }
+#endif//CF APPLE_IOS APPLE_IOS

@@ -35,6 +35,8 @@
 
 #include "ACOsgVideoRenderer.h"
 
+#if !defined (APPLE_IOS)
+
 ACOsgVideoRenderer::ACOsgVideoRenderer() {
 	
 	image_stream = 0;
@@ -77,3 +79,4 @@ void ACOsgVideoRenderer::updateNodes(double ratio) {
 		image_stream->pause();
 	}
 }
+#endif//CF APPLE_IOS

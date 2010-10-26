@@ -45,15 +45,19 @@ using std::endl;
 
 ACMediaData::ACMediaData() { 
 	audio_ptr = NULL;
+#if !defined (APPLE_IOS)	
 	image_ptr = NULL;
 	video_ptr = NULL;
+#endif//CF APPLE_IOS
 	model_ptr = NULL;
 }
 
 ACMediaData::ACMediaData(string _fname, ACMediaType _type) { 
 	audio_ptr = NULL;
+#if !defined (APPLE_IOS)		
 	image_ptr = NULL;
 	video_ptr = NULL;
+#endif//CF APPLE_IOS	
 	model_ptr = NULL;
 	file_name=_fname;
 	media_type = _type;
@@ -62,10 +66,14 @@ ACMediaData::ACMediaData(string _fname, ACMediaType _type) {
 			readAudioData(_fname);
 			break;
 		case MEDIA_TYPE_IMAGE :
+#if !defined (APPLE_IOS)			
 			readImageData(_fname);
+#endif//CF APPLE_IOS		
 			break;
 		case MEDIA_TYPE_VIDEO :
+#if !defined (APPLE_IOS)				
 			readVideoData(_fname);
+#endif//CF APPLE_IOS			
 			break;
 		case MEDIA_TYPE_3DMODEL :
 			read3DModelData(_fname);
@@ -77,8 +85,10 @@ ACMediaData::ACMediaData(string _fname, ACMediaType _type) {
 
 ACMediaData::~ACMediaData() { 
 	if (audio_ptr != NULL) delete [] audio_ptr;
+#if !defined (APPLE_IOS)
 	if (image_ptr != NULL) cvReleaseImage(&image_ptr);
 	if (video_ptr != NULL) cvReleaseCapture(&video_ptr);
+#endif//CF APPLE_IOS
 	if (model_ptr != NULL) { model_ptr->unref(); model_ptr=0; }
 }
 
@@ -102,8 +112,8 @@ void ACMediaData::readAudioData(string _fname){
 	sf_close(testFile);
 }
 
+#if !defined (APPLE_IOS)
 void ACMediaData::readImageData(string _fname){ 
-	
 	image_ptr = cvLoadImage(_fname.c_str(), CV_LOAD_IMAGE_COLOR);	
 	try {
 		if (!image_ptr) {
@@ -117,13 +127,14 @@ void ACMediaData::readImageData(string _fname){
 }
 
 void ACMediaData::readVideoData(string _fname){
-	
 	video_ptr = cvCreateFileCapture(_fname.c_str());		
 	if( !video_ptr ) {
 		// Either the video does not exist, or it uses a codec OpenCV does not support. 
 		cerr << "<ACMediaData::readImageData> Could not initialize capturing from file " << _fname << endl;
-	}	
+	}
+
 }
+#endif//CF APPLE_IOS
 
 void ACMediaData::read3DModelData(string _fname){ 
 	

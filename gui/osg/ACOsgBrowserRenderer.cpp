@@ -100,10 +100,14 @@ void ACOsgBrowserRenderer::prepareNodes(int start) {
 				node_renderer[i] = new ACOsgAudioRenderer();
 				break;
 			case MEDIA_TYPE_IMAGE:
+				#if !defined (APPLE_IOS)
 				node_renderer[i] = new ACOsgImageRenderer();
+				#endif//CF APPLE_IOS
 				break;
 			case MEDIA_TYPE_VIDEO:
+				#if !defined (APPLE_IOS)
 				node_renderer[i] = new ACOsgVideoRenderer();
+				#endif//CF APPLE_IOS
 				break;
 			case MEDIA_TYPE_3DMODEL:
 				node_renderer[i] = new ACOsg3DModelRenderer();

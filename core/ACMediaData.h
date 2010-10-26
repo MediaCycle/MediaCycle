@@ -51,18 +51,25 @@ public:
 	~ACMediaData();
 	
 	float* getAudioData() {return audio_ptr;}
+	
+#if !defined (APPLE_IOS)	
 	IplImage* getImageData() {return image_ptr;}
 	CvCapture* getVideoData() {return video_ptr;}
+#endif	
 	osg::Node* get3DModelData();
 	
 	void setAudioData(float* _data);
+#if !defined (APPLE_IOS)
 	void setImageData(IplImage* _data);
 	void setVideoData(CvCapture* _data);
+#endif	
 	void set3DModelData(osg::ref_ptr< osg::Node > _data);
 					  
 	void readAudioData(string _fname);
+#if !defined (APPLE_IOS)	
 	void readImageData(string _fname);
 	void readVideoData(string _fname);
+#endif	
 	void read3DModelData(string _fname);
 	
 	string getFileName() {return file_name;}
@@ -72,8 +79,10 @@ private:
 	ACMediaType media_type;
 	string file_name;
 	float* audio_ptr;
+#if !defined (APPLE_IOS)	
 	IplImage* image_ptr;
 	CvCapture* video_ptr;
+#endif	
 	osg::Node* model_ptr;
 };
 

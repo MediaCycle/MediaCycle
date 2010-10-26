@@ -15,15 +15,13 @@ IF ( USE_OSG )
 	ENDIF ( MINGW )
 
 	#OpenCV
-	#IF ( USE_OPENCV )
-	#    IF ( UNIX )
-	#        TARGET_LINK_LIBRARIES(mediacycle ${OPENCV_CV_LIBRARY} ${OPENCV_CXCORE_LIBRARY} ${OPENCV_HIGHGUI_LIBRARY})
-	#    ELSE ( UNIX )
-			TARGET_LINK_LIBRARIES(mediacycle cv cxcore highgui)
-	#    ENDIF ( UNIX )
-	#ENDIF ( USE_OPENCV )
+	IF( APPLE_IOS_DEV OR APPLE_IOS_SIM OR APPLE_IOS_XCODE )
+		TARGET_LINK_LIBRARIES(mediacycle cv cxcore)
+	ELSE()
+		TARGET_LINK_LIBRARIES(mediacycle cv cxcore highgui)
+	ENDIF()
 
-		TARGET_LINK_LIBRARIES(mediacycle ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_GRAPH_LIBRARY})
+	TARGET_LINK_LIBRARIES(mediacycle ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_GRAPH_LIBRARY})
 
 	# OSG for 3D Models
 	TARGET_LINK_LIBRARIES(mediacycle osg osgDB OpenThreads)

@@ -89,7 +89,9 @@ void ACOsgNodeLinkRenderer::linkGeode(double to_x, double to_y) {
 	state = link_geode->getOrCreateStateSet();
 	state->setMode(GL_LIGHTING, osg::StateAttribute::PROTECTED | osg::StateAttribute::OFF );
 	state->setMode(GL_BLEND, StateAttribute::ON);
+	#if !defined (APPLE_IOS)
 	state->setMode(GL_LINE_SMOOTH, StateAttribute::ON);
+	#endif//CF APPLE_IOS
 	state->setAttribute(new LineWidth(0.5));
 
 	link_geode->addDrawable(link_geometry);

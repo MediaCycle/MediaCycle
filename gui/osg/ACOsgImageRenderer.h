@@ -36,6 +36,8 @@
 #ifndef __ACOSG_IMAGE_RENDERER_H__
 #define __ACOSG_IMAGE_RENDERER_H__
 
+#if !defined (APPLE_IOS)
+
 #include "ACOsgMediaRenderer.h"
 #include "ACOpenCVInclude.h"
 
@@ -66,4 +68,5 @@ public:
 	void updateNodes(double ratio=0.0);
 };
 
+#endif//CF APPLE_IOS
 #endif

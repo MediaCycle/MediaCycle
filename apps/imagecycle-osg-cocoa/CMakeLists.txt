@@ -18,16 +18,9 @@ IF ( APPLE AND USE_COCOA AND USE_OSC)
 	TARGET_LINK_LIBRARIES(imagecycle-osg-cocoa mediacycle)
 	TARGET_LINK_LIBRARIES(imagecycle-osg-cocoa mediacycle-osg)
 	TARGET_LINK_LIBRARIES(imagecycle-osg-cocoa mediacycle-osg-cocoa)
-	TARGET_LINK_LIBRARIES(imagecycle-osg-cocoa TiCommon TiIo TiRendering)
 	TARGET_LINK_LIBRARIES(imagecycle-osg-cocoa osg osgDB osgGA osgViewer)
 	TARGET_LINK_LIBRARIES(imagecycle-osg-cocoa mediacycle-io-osc)
+	TARGET_LINK_LIBRARIES(imagecycle-osg-cocoa ${OPENGL_LIBRARIES})
 
 	set(CMAKE_EXE_LINKER_FLAGS "-framework CoreVideo -framework AppKit -framework Foundation")
-
-	IF ( OPENGL_FOUND AND GLUT_FOUND)
-		TARGET_LINK_LIBRARIES(imagecycle-osg-cocoa ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES})
-	ELSE ( OPENGL_FOUND AND GLUT_FOUND )
-		MESSAGE(FATAL_ERROR "OpenGL/Glut requested but not found.")
-	ENDIF ( OPENGL_FOUND AND GLUT_FOUND )
-
 ENDIF ( APPLE AND USE_COCOA AND USE_OSC)

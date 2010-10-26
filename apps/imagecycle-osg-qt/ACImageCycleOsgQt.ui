@@ -259,13 +259,6 @@
          <enum>QListView::ListMode</enum>
         </property>
        </widget>
-       <zorder>groupBoxAutoOrganization</zorder>
-       <zorder>pushButtonRecenter</zorder>
-       <zorder>pushButtonClean</zorder>
-       <zorder>pushButtonLaunch</zorder>
-       <zorder>groupBoxHierarchy</zorder>
-       <zorder>featuresListWidget</zorder>
-       <zorder>layoutWidget</zorder>
       </widget>
      </widget>
     </item>

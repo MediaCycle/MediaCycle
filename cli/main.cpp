@@ -39,7 +39,7 @@
 #include <iostream>
 #include <signal.h>
 #include "ACAudio.h"
-#include "AGSynthesis.h"
+//#include "AGSynthesis.h"
 #include "sndfile.h"
 
 using namespace std;

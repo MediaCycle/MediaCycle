@@ -1,10 +1,11 @@
 /*
- *  ACVideo.h
+ *  ACAudioCycleOsgiPad.h
  *  MediaCycle
  *
- *  @author Xavier Siebert
- *  @date 25/05/09
- *  @copyright (c) 2009 – UMONS - Numediart
+ *  @author Christian Frisson
+ *  @date 26/10/10
+ *
+ *  @copyright (c) 2010 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
  *  licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -30,41 +31,42 @@
  *  Any other additional authorizations may be asked to avre@umons.ac.be 
  *  <mailto:avre@umons.ac.be>
  *
+ *  Adapted from Thomas Hogarth's 2009 examples from:
+ *  http://github.com/stmh/osg/tree/iphone
  */
 
-#ifndef ACVIDEO_H
-#define ACVIDEO_H
+#include "osgPlugins.h"
 
-#if !defined (APPLE_IOS)
+#include <osgDB/ReadFile>
+#include <osg/MatrixTransform>
+#include <osgViewer/Viewer>
 
-#include "ACOpenCVInclude.h"
-#include "ACMedia.h"
-#include <string>
+#include <MediaCycle.h>
+#include <ACOsgBrowserRenderer.h>
+#include <ACOsgBrowserEventHandler.h>
+#include <ACAudioEngine.h>
 
-class ACVideo: public ACMedia {
-	// contains the *minimal* information about a video
-public:
-	ACVideo();
-	ACVideo(const ACVideo& m);
-	~ACVideo();
+#import <UIKit/UIKit.h>
+
+
+@interface ACAudioCycleOsgiPad : NSObject <UIApplicationDelegate, UIAccelerometerDelegate> {
+
+	UIAccelerationValue		accel[3];
 	
-	void saveACLSpecific(ofstream &library_file);
-	int loadACLSpecific(ifstream &library_file);
-
-	void setThumbnail(IplImage *_thumbnail) { thumbnail = _thumbnail; thumbnail_width = _thumbnail->width; thumbnail_height = _thumbnail->height; }
-	// IplImage* getThumbnail() { return thumbnail; }
-	void* getThumbnailPtr() { return (void*)thumbnail; }
-	int getThumbnailWidth() {return thumbnail_width;}
-	int getThumbnailHeight() {return thumbnail_height;}
-
-	ACMediaData* extractData(std::string fname);
+	osg::ref_ptr<osgViewer::Viewer> _viewer;
+	osg::ref_ptr<osg::MatrixTransform> _root;
 	
-private:	
-	char  *thumbnail_filename;
-	int thumbnail_width, thumbnail_height;
-	IplImage *thumbnail;
-	
-	int computeThumbnail(ACMediaData* data_ptr, int w=0, int h=0);
-};
-#endif//CF APPLE_IOS
-#endif // ACVIDEO_H
+	MediaCycle				*media_cycle;
+	ACAudioEngine			*audio_engine;
+	ACOsgBrowserEventHandler *event_handler;
+	ACOsgBrowserRenderer *renderer;
+	osg::ref_ptr<osgViewer::GraphicsWindowEmbedded> osg_view;
+}
+
+- (void)updateScene;
+- (void)prepareFromBrowser;
+- (void)updateTransformsFromBrowser:(double)frac;
+- (void)updatedLibrary;
+
+@end
+

@@ -152,10 +152,14 @@ ACMedia* ACMediaFactory::create(ACMediaType media_type){
 			return new ACAudio;
 			break;
 		case MEDIA_TYPE_IMAGE:
+#if !defined (APPLE_IOS)				
 			return new ACImage;
+#endif//CF APPLE_IOS			
 			break;
 		case MEDIA_TYPE_VIDEO:
+#if !defined (APPLE_IOS)				
 			return new ACVideo;
+#endif//CF APPLE_IOS			
 			break;
 		case MEDIA_TYPE_3DMODEL:
 			return new AC3DModel;
@@ -176,14 +180,18 @@ ACMedia* ACMediaFactory::create(ACMedia* media){
 		}
 		case MEDIA_TYPE_IMAGE:
 		{
+#if !defined (APPLE_IOS)				
 			ACImage* image = (ACImage*) media;
 			return new ACImage(*image);
+#endif//CF APPLE_IOS			
 			break;
 		}
 		case MEDIA_TYPE_VIDEO:
 		{
+#if !defined (APPLE_IOS)				
 			ACVideo* video = (ACVideo*) media;
 			return new ACVideo(*video);
+#endif//CF APPLE_IOS			
 			break;
 		}
 		case MEDIA_TYPE_3DMODEL:

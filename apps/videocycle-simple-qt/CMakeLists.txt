@@ -55,16 +55,11 @@ IF ( USE_QT4 )
 	TARGET_LINK_LIBRARIES(videocycle-simple-qt ${Boost_SYSTEM_LIBRARY})
 	TARGET_LINK_LIBRARIES(videocycle-simple-qt ${QT_LIBRARIES})
 	TARGET_LINK_LIBRARIES(videocycle-simple-qt ${QT4_LIBRARY} ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY} ${QT_QTOPENGL_LIBRARY} )
+	TARGET_LINK_LIBRARIES(videocycle-simple-qt ${OPENGL_LIBRARIES})
 
 	IF ( APPLE )
 		set(CMAKE_EXE_LINKER_FLAGS "-framework CoreVideo -framework AppKit -framework Foundation")
 	ENDIF ( APPLE )
-
-	IF ( WIN32 )
-		TARGET_LINK_LIBRARIES(videocycle-simple-qt ${OPENGL_LIBRARIES} ${FREEGLUT_LIBRARIES})
-	ELSE ( WIN32 )
-		TARGET_LINK_LIBRARIES(videocycle-simple-qt ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES})
-	ENDIF ( WIN32 ) 
 
 ELSE ( USE_QT4 )
 	MESSAGE("videocycle-simple-qt disabled - not compiling Qt GUI.")

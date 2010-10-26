@@ -17,64 +17,27 @@
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 # See the License for more information.
 #=============================================================================
-# Locate ALUT
-# This module defines
-# ALUT_LIBRARY
-# ALUT_FOUND, if false, do not try to link to gdal 
-# ALUT_INCLUDE_DIR, where to find the headers
-#
-#=============================================================================
-# Author: Christian Frisson
-# Copyright (c) 2011 – UMONS - Numediart
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
 # (To distributed this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
+FIND_PATH(ALUT_INCLUDE_DIR AL/alut.h OpenAL/alut.h alut.h)
 
-MESSAGE ( "Trying to find ALUT" )
+SET(ALUT_NAMES ${ALUT_NAMES} alut)
+FIND_LIBRARY(ALUT_LIBRARY NAMES ${ALUT_NAMES} )
 
-FIND_PATH(ALUT_INCLUDE_DIR alut.h
-  HINTS
-  $ENV{ALUTDIR}
-  PATH_SUFFIXES include/AL include/OpenAL include
-  PATHS
-  ~/Library/Frameworks
-  /Library/Frameworks
-  /usr/local
-  /usr
-  /sw # Fink
-  /opt/local # DarwinPorts
-  /opt/csw # Blastwave
-  /opt
-  [HKEY_LOCAL_MACHINE\\SOFTWARE\\Creative\ Labs\\OpenAL\ 1.1\ Software\ Development\ Kit\\1.00.0000;InstallDir]
-)
+# handle the QUIETLY and REQUIRED arguments and set ALUT_FOUND to TRUE if 
+# all listed variables are TRUE
+INCLUDE(FindPackageHandleStandardArgs)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(ALUT DEFAULT_MSG ALUT_LIBRARY ALUT_INCLUDE_DIR)
 
-FIND_LIBRARY(ALUT_LIBRARY 
-  NAMES alut
-  HINTS
-  $ENV{ALUTDIR}
-  PATH_SUFFIXES lib64 lib libs64 libs libs/Win32 libs/Win64
-  PATHS
-  ~/Library/Frameworks
-  /Library/Frameworks
-  /usr/local
-  /usr
-  /sw
-  /opt/local
-  /opt/csw
-  /opt
-  [HKEY_LOCAL_MACHINE\\SOFTWARE\\Creative\ Labs\\OpenAL\ 1.1\ Software\ Development\ Kit\\1.00.0000;InstallDir]
-)
+IF(ALUT_FOUND)
+  SET(ALUT_LIBRARIES ${ALUT_LIBRARY})
+ENDIF(ALUT_FOUND)
 
+# Deprecated declarations.
+SET (NATIVE_ALUT_INCLUDE_PATH ${ALUT_INCLUDE_DIR} )
+IF(ALUT_LIBRARY)
+  GET_FILENAME_COMPONENT (NATIVE_ALUT_LIB_PATH ${ALUT_LIBRARY} PATH)
+ENDIF(ALUT_LIBRARY)
 
-SET(ALUT_FOUND "NO")
-IF(ALUT_LIBRARY AND ALUT_INCLUDE_DIR)
-  SET(ALUT_FOUND "YES")
-ENDIF(ALUT_LIBRARY AND ALUT_INCLUDE_DIR)
+MARK_AS_ADVANCED(ALUT_LIBRARY ALUT_INCLUDE_DIR )

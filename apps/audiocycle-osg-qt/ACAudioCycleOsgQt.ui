@@ -95,67 +95,29 @@
         <property name="alignment">
          <set>Qt::AlignCenter</set>
         </property>
-        <widget class="QCheckBox" name="checkBoxRhythm">
+        <widget class="QListWidget" name="featuresListWidget">
          <property name="geometry">
           <rect>
            <x>10</x>
-           <y>20</y>
-           <width>87</width>
-           <height>20</height>
+           <y>30</y>
+           <width>161</width>
+           <height>41</height>
           </rect>
          </property>
-         <property name="font">
-          <font>
-           <pointsize>10</pointsize>
-          </font>
+         <property name="toolTip">
+          <string>when loading media files or pre-computed features (acl files), the available features will appear here</string>
          </property>
-         <property name="text">
-          <string>Rhythm</string>
-         </property>
-        </widget>
-        <widget class="QCheckBox" name="checkBoxTimbre">
-         <property name="geometry">
-          <rect>
-           <x>10</x>
-           <y>40</y>
-           <width>87</width>
-           <height>20</height>
-          </rect>
-         </property>
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="font">
-          <font>
-           <pointsize>10</pointsize>
-          </font>
-         </property>
-         <property name="text">
-          <string>Timbre</string>
-         </property>
-         <property name="checked">
+         <property name="autoScroll">
           <bool>true</bool>
          </property>
-        </widget>
-        <widget class="QCheckBox" name="checkBoxHarmony">
-         <property name="geometry">
-          <rect>
-           <x>10</x>
-           <y>60</y>
-           <width>87</width>
-           <height>20</height>
-          </rect>
+         <property name="tabKeyNavigation">
+          <bool>false</bool>
          </property>
-         <property name="font">
-          <font>
-           <pointsize>10</pointsize>
-          </font>
+         <property name="movement">
+          <enum>QListView::Static</enum>
          </property>
-         <property name="text">
-          <string>Harmony</string>
+         <property name="viewMode">
+          <enum>QListView::ListMode</enum>
          </property>
         </widget>
        </widget>

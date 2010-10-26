@@ -32,6 +32,8 @@
  *
  */
 
+#if !defined (APPLE_IOS)
+
 #include "ACVideo.h"
 
 #include <string>
@@ -243,3 +245,4 @@ int ACVideo::load(FILE* library_file) { // was loadLoop
 	}
 }
 */
+#endif//CF APPLE_IOS

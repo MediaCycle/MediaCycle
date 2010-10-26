@@ -35,6 +35,9 @@
 #ifndef ACIMAGE_H
 #define ACIMAGE_H
 
+#if defined (APPLE_IOS)//CF ugly
+#else
+
 #include "ACOpenCVInclude.h"
 #include "ACMedia.h"
 #include <string>
@@ -67,4 +70,5 @@ private:
 	int computeThumbnail(ACMediaData* data_ptr, int w=0, int h=0);
 };
 
+#endif//CF APPLE_IOS
 #endif // ACIMAGE_H

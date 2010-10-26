@@ -157,8 +157,9 @@ void ACOsgAudioRenderer::waveformGeode() {
 	state = waveform_geode->getOrCreateStateSet();
 	state->setMode(GL_LIGHTING, osg::StateAttribute::PROTECTED | osg::StateAttribute::OFF );
 	state->setMode(GL_BLEND, StateAttribute::ON);
-	state->setMode(GL_LINE_SMOOTH, StateAttribute::ON);
-		
+#if !defined(APPLE_IOS)
+	state->setMode(GL_LINE_SMOOTH, StateAttribute::ON); //CF not supported by OpenGL ES 2...
+#endif		
 	state = samples_geometry->getOrCreateStateSet();
 	state->setAttribute(new LineWidth(1.0));
 	
@@ -211,8 +212,9 @@ void ACOsgAudioRenderer::curserGeode() {
 	state = curser_geode->getOrCreateStateSet();
 	state->setMode(GL_LIGHTING, osg::StateAttribute::PROTECTED | osg::StateAttribute::OFF );
 	state->setMode(GL_BLEND, StateAttribute::ON);
-	state->setMode(GL_LINE_SMOOTH, StateAttribute::ON);
-	
+#if !defined(APPLE_IOS)
+	state->setMode(GL_LINE_SMOOTH, StateAttribute::ON); //CF not supported by OpenGL ES 2...
+#endif		
 	state = curser_transform->getOrCreateStateSet();
 	state->setMode(GL_NORMALIZE, osg::StateAttribute::ON);
 

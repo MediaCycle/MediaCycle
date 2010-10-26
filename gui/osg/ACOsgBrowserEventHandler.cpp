@@ -114,7 +114,7 @@ bool ACOsgBrowserEventHandler::handle(const osgGA::GUIEventAdapter& ea,osgGA::GU
 		}
 		default:
 		{	
-			//printf("received event: %d\n", ea.getEventType());
+			printf("received event: %d\n", ea.getEventType());
 			return false;
 		}	
 	}

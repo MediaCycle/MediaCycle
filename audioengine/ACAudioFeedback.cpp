@@ -1559,12 +1559,8 @@ int ACAudioFeedback::createSourceWithPosition(int loop_id, float x, float y, flo
 		ALboolean al_bool;
 		alutLoadWAVFile(loop_file, &format, &data, &size, &freq, &al_bool); 
 	#elif defined(__APPLE__)
-		#if defined(__x86_64__)
-			//data = alutLoadMemoryFromFile (loop_file, &format, &size, (ALfloat*) &freq);
-			alutLoadWAVFile(loop_file, &format, &data, &size, &freq);
-		 #else
+		#if defined(APPLE_LEOPARD)
 			// TODO SD - This is OS-X specific. Should be changed.
-	 
 			CFStringRef fileName = CFStringCreateWithCString(kCFAllocatorDefault, (const char*)(loop_file), kCFStringEncodingUTF8);
 			CFStringRef fileNameEscaped = CFURLCreateStringByAddingPercentEscapes(NULL, fileName, NULL, NULL, kCFStringEncodingUTF8);
 			CFURLRef	fileURL = CFURLCreateWithString(NULL, fileNameEscaped, NULL);	
@@ -1573,6 +1569,9 @@ int ACAudioFeedback::createSourceWithPosition(int loop_id, float x, float y, flo
 			CFRelease(fileNameEscaped);
 			CFRelease(fileName);
 			//CF by this (working!): alutLoadWAVFile(loop_file, &format, &data, &size, &freq);
+		#else	
+			//data = alutLoadMemoryFromFile (loop_file, &format, &size, (ALfloat*) &freq);
+			alutLoadWAVFile(loop_file, &format, &data, &size, &freq);
 		#endif
 	#else 
 		ALboolean al_bool;

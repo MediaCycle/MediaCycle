@@ -33,6 +33,8 @@
  *
  */
 
+#if !defined (APPLE_IOS)
+
 #include "ACOsgImageRenderer.h"
 
 #define IMAGE_BORDER
@@ -384,3 +386,4 @@ void ACOsgImageRenderer::updateNodes(double ratio) {
 		T =  Matrix::rotate(-media_cycle_angle,Vec3(0.0,0.0,1.0)) * Matrix::scale(localscale/media_cycle_zoom,localscale/media_cycle_zoom,localscale/media_cycle_zoom) * T;
 		media_node->setMatrix(T);
 }
+#endif//CF APPLE_IOS

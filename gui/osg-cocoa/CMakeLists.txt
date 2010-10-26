@@ -1,4 +1,4 @@
-IF ( APPLE AND USE_COCOA)
+IF ( APPLE AND USE_COCOA )
 	FILE(GLOB SRC *.m *.mm)
 	FILE(GLOB HDR *.h)
 
@@ -12,12 +12,6 @@ IF ( APPLE AND USE_COCOA)
 	TARGET_LINK_LIBRARIES(mediacycle-osg-cocoa mediacycle)
 	TARGET_LINK_LIBRARIES(mediacycle-osg-cocoa mediacycle-osg)
 	TARGET_LINK_LIBRARIES(mediacycle-osg-cocoa osg osgDB osgGA osgViewer)
+	TARGET_LINK_LIBRARIES(mediacycle-osg-cocoa ${OPENGL_LIBRARIES})
 	set(CMAKE_EXE_LINKER_FLAGS "-framework CoreVideo -framework Foundation")
-
-	IF ( OPENGL_FOUND AND GLUT_FOUND)
-		TARGET_LINK_LIBRARIES(mediacycle-osg-cocoa ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES})
-	ELSE ( OPENGL_FOUND AND GLUT_FOUND )
-		MESSAGE(FATAL_ERROR "OpenGL/Glut requested but not found.")
-	ENDIF ( OPENGL_FOUND AND GLUT_FOUND )
-ENDIF ( APPLE AND USE_COCOA)
-								   
+ENDIF ( APPLE AND USE_COCOA )

@@ -1,4 +1,4 @@
-IF ( APPLE AND USE_COCOA AND USE_OSC)
+IF ( APPLE AND USE_COCOA AND USE_OSC AND OPENAL_FOUND)
 	FILE(GLOB SRC *.m *.mm *.nib)
 	FILE(GLOB HDR *.h)
 
@@ -20,23 +20,11 @@ IF ( APPLE AND USE_COCOA AND USE_OSC)
 	TARGET_LINK_LIBRARIES(modelcycle-osg-cocoa mediacycle)
 	TARGET_LINK_LIBRARIES(modelcycle-osg-cocoa mediacycle-osg)
 	TARGET_LINK_LIBRARIES(modelcycle-osg-cocoa mediacycle-osg-cocoa)
-	TARGET_LINK_LIBRARIES(modelcycle-osg-cocoa TiCommon TiIo TiRendering)
 	TARGET_LINK_LIBRARIES(modelcycle-osg-cocoa osg osgDB osgGA osgViewer)
 	TARGET_LINK_LIBRARIES(modelcycle-osg-cocoa mediacycle-io-osc)
 	TARGET_LINK_LIBRARIES(modelcycle-osg-cocoa audioengine)
+	TARGET_LINK_LIBRARIES(modelcycle-osg-cocoa ${OPENGL_LIBRARIES})
+	TARGET_LINK_LIBRARIES(modelcycle-osg-cocoa ${OPENAL_LIBRARY})
 
 	set(CMAKE_EXE_LINKER_FLAGS "-framework CoreVideo -framework AppKit -framework Foundation -framework AudioToolbox")
-
-	IF ( OPENGL_FOUND AND GLUT_FOUND)
-		TARGET_LINK_LIBRARIES(modelcycle-osg-cocoa ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES})
-	ELSE ( OPENGL_FOUND AND GLUT_FOUND )
-		MESSAGE(FATAL_ERROR "OpenGL/Glut requested but not found.")
-	ENDIF ( OPENGL_FOUND AND GLUT_FOUND )
-
-	IF ( OPENAL_FOUND)
-		TARGET_LINK_LIBRARIES(modelcycle-osg-cocoa ${OPENAL_LIBRARY})
-	ELSE ( OPENAL_FOUND)
-		MESSAGE(FATAL_ERROR "OpenAL requested but not found.")
-	ENDIF ( OPENAL_FOUND)
-
-ENDIF ( APPLE AND USE_COCOA AND USE_OSC)
+ENDIF ( APPLE AND USE_COCOA AND USE_OSC AND OPENAL_FOUND)

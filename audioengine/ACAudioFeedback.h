@@ -37,10 +37,10 @@
 #if defined(__APPLE__)
 	#include <OpenAL/al.h>
 	#include <OpenAL/alc.h>
-	#if defined(__x86_64__)
-		#include <AL/alut.h>//CF
-	#else
+	#if defined(APPLE_LEOPARD)
 		#include <MyOpenALSupport.h>//CF
+	#else
+		#include <AL/alut.h>//CF
 	#endif
 #else
 	#include <AL/al.h>

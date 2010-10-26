@@ -180,6 +180,10 @@ void ACAudioCycleOsgQt::updateLibrary()
 	//ui.compositeOsgView->setPlaying(true);
 	media_cycle->setNeedsDisplay(true);
 	library_loaded = true;
+	
+	//XS new, use this carefully 
+	this->configureCheckBoxes();
+	
 	ui.compositeOsgView->setFocus();
 }
 
@@ -322,6 +326,95 @@ void ACAudioCycleOsgQt::loadMediaFiles(){
 	this->updateLibrary();
 }
 
+void ACAudioCycleOsgQt::configureCheckBoxes(){
+	// dynamic config of checkboxes
+	// according to plugins found by plugin manager
+	ACPluginManager *acpl = media_cycle->getPluginManager(); //getPlugins
+	if (acpl) {
+		for (int i=0;i<acpl->getSize();i++) {
+			for (int j=0;j<acpl->getPluginLibrary(i)->getSize();j++) {
+				if (acpl->getPluginLibrary(i)->getPlugin(j)->getPluginType() == PLUGIN_TYPE_FEATURES && acpl->getPluginLibrary(i)->getPlugin(j)->getMediaType() == MEDIA_TYPE_AUDIO) {
+					QString s(acpl->getPluginLibrary(i)->getPlugin(j)->getName().c_str());
+					QListWidgetItem * item = new QListWidgetItem(s,ui.featuresListWidget);
+					item->setCheckState (Qt::Unchecked);
+					std::cout << "Using audio feature extraction plugin: " << acpl->getPluginLibrary(i)->getPlugin(j)->getName() << std::endl;
+				}
+			}
+		}
+	}
+	
+	this->synchronizeFeaturesWeights();
+	
+	connect(ui.featuresListWidget, SIGNAL(itemClicked(QListWidgetItem*)),
+            this, SLOT(modifyListItem(QListWidgetItem*)));
+	
+	//	w2.show();
+	
+	//	QCheckBox* toto = new QCheckBox("toto",ui.groupBoxSimilarity);
+	//	QCheckBox* toto2 = new QCheckBox("toto2",ui.groupBoxSimilarity);
+	//	QCheckBox* toto3 = new QCheckBox("toto3",ui.groupBoxSimilarity);
+	//	QCheckBox* toto4 = new QCheckBox("toto4",ui.groupBoxSimilarity);
+	//	QCheckBox* toto5 = new QCheckBox("toto5",ui.groupBoxSimilarity);
+	//	QCheckBox* toto6 = new QCheckBox("toto6",ui.groupBoxSimilarity);
+	//	QGridLayout *lo = new QGridLayout;
+	//	lo->addWidget(toto);
+	//	lo->addWidget(toto2);
+	//	lo->addWidget(toto3);
+	//	lo->addWidget(toto4);
+	//	lo->addWidget(toto5);
+	//	lo->addWidget(toto6);
+	//
+	//	ui.groupBoxSimilarity->setLayout(lo);
+	
+	// XS end test -- need to delete !!!
+}
+void ACAudioCycleOsgQt::cleanCheckBoxes(){
+}
+
+// NEW SLOTS
+void ACAudioCycleOsgQt::modifyListItem(QListWidgetItem *item)
+{
+	// XS check
+	cout << item->text().toStdString() << endl; // isselected...
+	cout << ui.featuresListWidget->currentRow() << endl;
+	// end XS check 
+	
+	if (library_loaded){
+		float w;
+		if (item->checkState() == Qt::Unchecked) w = 0.0;
+		else w = 1.0 ;
+		int f =  ui.featuresListWidget->currentRow(); // index of selected feature
+		media_cycle->setWeight(f,w);
+		media_cycle->updateDisplay(true); 
+		//XS 250310 was: media_cycle->updateClusters(true);
+		// XS250310 removed mediacycle->setNeedsDisplay(true); // now in updateDisplay
+		ui.compositeOsgView->updateTransformsFromBrowser(0.0); 
+	}
+}
+
+void ACAudioCycleOsgQt::synchronizeFeaturesWeights(){
+	// synchronize weights with what is loaded in mediacycle
+	// note: here weights are 1 or 0 (checkbox).
+	// conversion: 0 remains 0, and value > 0 becomes 1.
+	vector<float> w = media_cycle->getWeightVector();
+	int nw = w.size();
+	/*
+	if (ui.featuresListWidget->count() != nw){
+		cerr << "Checkboxes in GUI do not match Features in MediaCycle" << endl;
+		cerr << ui.featuresListWidget->count() << "!=" << nw << endl;
+		exit(1);
+	}
+	else {*/
+		for (int i=0; i< ui.featuresListWidget->count(); i++){ //for (int i=0; i< nw; i++){
+			if (w[i]==0) 
+				ui.featuresListWidget->item(i)->setCheckState (Qt::Unchecked);
+			else
+				ui.featuresListWidget->item(i)->setCheckState (Qt::Checked);		
+		}
+	//}
+}
+
+
 void ACAudioCycleOsgQt::on_pushButtonRecenter_clicked()
 {
 	media_cycle->setCameraRecenter();
@@ -346,27 +439,6 @@ void ACAudioCycleOsgQt::on_radioButtonClusters_toggled()
 	ACBrowserMode mode = (ui.radioButtonClusters->isChecked() ? AC_MODE_CLUSTERS : AC_MODE_NEIGHBORS);
 	if (media_cycle && media_cycle->hasBrowser()) //CF and test on library loaded?
 		media_cycle->getBrowser()->switchMode( mode );
-}	
-
-void ACAudioCycleOsgQt::on_checkBoxRhythm_stateChanged(int state)
-{
-	media_cycle->setWeight(0,state/2.0f);
-	if (library_loaded)
-		media_cycle->updateDisplay(true);
-}
-
-void ACAudioCycleOsgQt::on_checkBoxTimbre_stateChanged(int state)
-{
-	media_cycle->setWeight(1,state/2.0f);
-	if (library_loaded)
-		media_cycle->updateDisplay(true);
-}
-
-void ACAudioCycleOsgQt::on_checkBoxHarmony_stateChanged(int state)
-{
-	media_cycle->setWeight(2,state/2.0f);
-	if (library_loaded)
-		media_cycle->updateDisplay(true);
 }	
 
 void ACAudioCycleOsgQt::on_sliderClusters_sliderReleased()
