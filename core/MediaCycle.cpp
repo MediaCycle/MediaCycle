@@ -367,7 +367,7 @@ void MediaCycle::changeVisualisationPlugin(string pluginName){
 void MediaCycle::dumpPluginsList(){this->pluginManager->dump();}
 
 // == Media
-const ACMediaNode& MediaCycle::getMediaNode(int i) { return (mediaBrowser->getMediaNode(i)); } 
+ACMediaNode& MediaCycle::getMediaNode(int i) { return (mediaBrowser->getMediaNode(i)); } 
 string MediaCycle::getMediaFileName(int i) { return mediaLibrary->getMedia(i)->getFileName(); }
 int MediaCycle::getMediaType(int i) { return mediaLibrary->getMedia(i)->getType(); }
 int MediaCycle::getThumbnailWidth(int i) { return mediaLibrary->getMedia(i)->getThumbnailWidth(); }

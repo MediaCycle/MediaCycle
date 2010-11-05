@@ -58,6 +58,8 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 	// to avoid linker from discarding that class
 	[ACOsgViewCocoa class];
 	[ACOsgBrowserViewCocoa class];//CF
+	
+	prevz=1700;
 }
 
 - (void)initCommonACAudioCycleOsgCocoa
@@ -118,8 +120,10 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 	#ifdef USE_DEBUG
 		media_cycle->setReferenceNode(0);//CF we want to debug the view and positions using the same layout at each relaunch!
 	#else
+		media_cycle->setReferenceNode(0);
 		// SD TOTO - srand() is called in other places, so no randomization actually.
-		int library_size = media_cycle->getLibrarySize();
+		/*
+		 int library_size = media_cycle->getLibrarySize();
 		int rand_node;
 		if (library_size==0) {
 			rand_node = 0;
@@ -129,8 +133,10 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 			rand_node = rand_node % library_size;
 		}
 		media_cycle->setReferenceNode(rand_node);
+		 */
 	#endif
 	
+	/*
 	// XSCF 250310 added these 3
 	// media_cycle->storeNavigationState(); // This line was in ACImageCycleOsgCocoa...
 	if (media_cycle->getMode() == AC_MODE_CLUSTERS) {
@@ -141,14 +147,16 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 	}	
 	media_cycle->getBrowser()->setState(AC_CHANGING);
 	media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
+	*/
 	
 	[browser_osg_view prepareFromBrowser];
 	
+	/*
 	[browser_osg_view setPlaying:YES];
 	//[browser_osg_view updateTransformsFromBrowser];
 	
 	media_cycle->setNeedsDisplay(true);
-	
+	*/
 }
 
 - (void) awakeFromNib
@@ -277,8 +285,8 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 {
 	int count;
 	
-	@synchronized(browser_osg_view)
-	{
+	//@synchronized(browser_osg_view)
+	//{
 		// Create the File Open Dialog class.
 		NSOpenPanel* openDlg = [NSOpenPanel openPanel];
 		
@@ -304,16 +312,18 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 				
 				// Do something with the filename
 				// SD TODO - Ask user for confirmation and display progress bar....
-				media_cycle->importDirectory((string)[path UTF8String], true, false);//CF 1st true means forward order, subdirs first; and 2nd false means no segmentation
-			}
-			
-			// with this function call here, do not import twice!!!
-			media_cycle->normalizeFeatures();
-			media_cycle->libraryContentChanged();
+				media_cycle->importDirectory((string)[path UTF8String], 1);
+				
+				// with this function call here, do not import twice!!!
+				media_cycle->normalizeFeatures();
+				media_cycle->libraryContentChanged();
+				[self updatedLibrary];
+				//usleep(2000000);
+			}			
 		}
 		
-		[self updatedLibrary];
-	}
+		
+	//}
 }
 
 - (IBAction)	setOpen:(id)inSender
@@ -418,7 +428,8 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 	if (value == 1)
 	{
 		osc_browser = new ACOscBrowser();
-		mOscReceiver = osc_browser->create((const char*)[osc_control_ip UTF8String], osc_control_port);
+		//mOscReceiver = osc_browser->create((const char*)[osc_control_ip UTF8String], osc_control_port);
+		mOscReceiver = osc_browser->create(NULL, osc_control_port);
 		osc_browser->setUserData(mOscReceiver, self);
 		osc_browser->setCallback(mOscReceiver, osc_callback);
 		osc_browser->start(mOscReceiver);
@@ -675,6 +686,33 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 		osc_browser->readFloat(mOscReceiver, &x);
 		osc_browser->readFloat(mOscReceiver, &y);
 		
+		media_cycle->hoverCallback(x,y);
+		int closest_node = media_cycle->getClosestNode();
+		float distance = [browser_osg_view getMouseDistanceAtNode:closest_node];
+		if (osc_feedback)
+		{
+			osc_feedback->messageBegin("/audiocycle/closest_node_at");
+			osc_feedback->messageAppendFloat(distance);
+			osc_feedback->messageEnd();
+			osc_feedback->messageSend();
+		}
+		media_cycle->setNeedsDisplay(1);
+	}
+	else if(strcasecmp(tagName, "/position") == 0)
+	{
+		float x = 0.0, y = 0.0, z = 0.0;
+		osc_browser->readFloat(mOscReceiver, &x);
+		osc_browser->readFloat(mOscReceiver, &y);
+		osc_browser->readFloat(mOscReceiver, &z);
+		
+		float alpha=0.0;
+		prevz = alpha*prevz + (1-alpha)*z;
+		if (prevz>2000) {
+			media_cycle->setAutoPlay(1);
+		}
+		else {
+			media_cycle->setAutoPlay(0);
+		}
 		media_cycle->hoverCallback(x,y);
 		int closest_node = media_cycle->getClosestNode();
 		float distance = [browser_osg_view getMouseDistanceAtNode:closest_node];

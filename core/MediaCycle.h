@@ -108,7 +108,7 @@ public:
 	void dumpPluginsList();
 	
 	// == Media
-	const ACMediaNode &getMediaNode(int i);
+	ACMediaNode &getMediaNode(int i);
 	string getMediaFileName(int i);
 	int getMediaType(int i);
 	int getThumbnailWidth(int i);

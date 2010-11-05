@@ -79,12 +79,16 @@ protected:
 	// NODE SPECIFIC
 	bool						media_cycle_isdisplayed;
 	ACPoint						media_cycle_current_pos;
+	ACPoint						media_cycle_view_pos;
 	ACPoint						media_cycle_next_pos;
 	int							media_cycle_navigation_level;
 	int							media_cycle_activity;
 	std::string					media_cycle_filename;	
 	int							media_index;
 	int							prev_media_index;
+	
+	bool						initialized;
+	float						frac;
 	
 public:
 	ACOsgMediaRenderer();
@@ -108,7 +112,18 @@ public:
 	void setMode(int media_cycle_mode);
 	void setGlobalNavigation(int media_cycle_global_navigation_level);
 	void setIsDisplayed(int media_cycle_isdisplayed);
-	void setPos(ACPoint &media_cycle_current_pos, ACPoint &media_cycle_next_pos);
+	
+	//void setPos(ACPoint &media_cycle_current_pos, ACPoint &media_cycle_next_pos);
+	void setViewPos(ACPoint media_cycle_view_pos);
+	void setCurrentPos(ACPoint media_cycle_current_pos);
+	void setNextPos(ACPoint media_cycle_next_pos);
+	ACPoint getViewPos();
+	ACPoint getCurrentPos();
+	ACPoint getNextPos();
+	bool getInitialized() { return initialized; }
+	void setFrac(float frac) { this->frac = frac; }
+	float getFrac() {return this->frac; }
+	
 	void setNavigation(int media_cycle_navigation_level);
 	void setActivity(int media_cycle_activity);
 	void setMediaIndex(int media_index);

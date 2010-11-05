@@ -1,7 +1,7 @@
 /**
  * @brief ACVisualisationPlugin.cpp
- * @author Damien Tardieu
- * @date 07/07/2010
+ * @author Stéphane Dupont
+ * @date 05/11/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -156,8 +156,8 @@ void ACVisualisationPlugin::updateNextPositions(ACMediaBrowser* mediaBrowser){
 	
 	string labelValue;
 	mediaBrowser->setNumberOfDisplayedLabels(labelIdx_v.n_rows);	
+	ACPoint p;
   for (int i=0; i< labelIdx_v.n_rows; i++){
-    ACPoint p;
     p.x = labelPos_m(i,0);
     p.y = labelPos_m(i,1);
     p.z = .1;
@@ -174,7 +174,10 @@ void ACVisualisationPlugin::updateNextPositions(ACMediaBrowser* mediaBrowser){
 	//  For osg view : Because there is no way to prevent a media from displaying it display it far away
   for (int i=0; i<libSize; i++){
 	  //TODO make sure you meant next
-    mediaBrowser->setNodeNextPosition(i, 40, 40);    
+	  p.x = 40;
+	  p.y = 40;
+	  p.z = 0;
+    mediaBrowser->setNodeNextPosition(i, p);    
     mediaBrowser->setLoopIsDisplayed(i, false);
   }
 	////////////////////////////////////////////////////////////////
@@ -184,7 +187,10 @@ void ACVisualisationPlugin::updateNextPositions(ACMediaBrowser* mediaBrowser){
 	
 	for (int i=0; i<mediaBrowser->getNumberOfDisplayedLoops(); i++){
 		//TODO make sur you meant next
-		mediaBrowser->setNodeNextPosition(toDisplay_v(i), posDisp_m(toDisplay_v(i),0), posDisp_m(toDisplay_v(i),1));
+		p.x = posDisp_m(toDisplay_v(i),0);
+		p.y = posDisp_m(toDisplay_v(i),1);
+		p.z = 0;
+		mediaBrowser->setNodeNextPosition(toDisplay_v(i), p);
 	}
 	// 	if (itemClicked >= 0)
 	//TODO make sur you meant next

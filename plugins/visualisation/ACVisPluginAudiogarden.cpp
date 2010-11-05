@@ -1,7 +1,7 @@
 /**
  * @brief ACVisPluginAudiogarden.cpp
- * @author Christian Frisson
- * @date 11/10/2010
+ * @author Stéphane Dupont
+ * @date 05/11/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -97,10 +97,15 @@ void ACVisPluginAudiogarden::updateNextPositions(ACMediaBrowser* mediaBrowser){
 	posDisp_m.col(0) = r_v % cos(theta_v);
 	posDisp_m.col(1) = r_v % sin(theta_v);
 	posDisp_m = zscore(posDisp_m)*.1;
+	
+	ACPoint p;
   for (int i=0; i<libSize; i++){
     mediaBrowser->setLoopIsDisplayed(i, true);
 	  // TODO: make sure you meant next
-		mediaBrowser->setNodeNextPosition(i, posDisp_m(i,0), posDisp_m(i,1));
+	  p.x = posDisp_m(i,0);
+	  p.y = posDisp_m(i,1);
+	  p.z = 0;
+		mediaBrowser->setNodeNextPosition(i, p);
   }
 	//   for (int i=0; i<libSize; i++){
 	//     mediaBrowser->setLoopIsDisplayed(i, true);

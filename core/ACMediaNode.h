@@ -51,7 +51,7 @@ class ACMediaNode {
 private:
 	// previsously in ACLoopAttribute:
 	ACPoint 	currentPos, nextPos, nextPosGrid;
-	ACPoint		viewPos;
+	double		nextPosTime;
 	float		distanceMouse;
 	int 		clusterId; //cluster index
 	int			active;  // playing or not - and in which mode
@@ -60,7 +60,7 @@ private:
 	int			hover;
 	bool		displayed;
 	bool		selected;
-	
+	bool	    changed;
 	// previously in ACUserNode:
 	long int nodeId;
 	long int mediaId;
@@ -89,27 +89,20 @@ public:
 	int getActivity() const {return active;}
 	ACPoint getCurrentPosition() const {return currentPos;}
 	// XS X,Y,Z -> float *3 ?
-	float getCurrentPositionX() const {return currentPos.x;}
-	float getCurrentPositionY() const {return currentPos.y;}
-	float getCurrentPositionZ() const {return currentPos.z;}
-
 	ACPoint getNextPosition() const {return nextPos;}
-	float getNextPositionX() const {return nextPos.x;}
-	float getNextPositionY() const {return nextPos.y;}
-	float getNextPositionZ() const {return nextPos.z;}
 
+	double getNextTime() const {return nextPosTime;}
+	
 	ACPoint getNextPositionGrid(){return nextPosGrid;}
-
-	void setCurrentPosition(float x, float y, float z);
+		
 	void setCurrentPosition(ACPoint p);
-	void setNextPosition(float x, float y, float z);
-	void setNextPosition(ACPoint p);
-	void setNextPositionX(float x);
-	void setNextPositionY(float y);
-	void setNextPositionZ(float z);
+	void setNextPosition(ACPoint p, double t);
 
 	void commitPosition(){currentPos = nextPos;}
-
+	
+	bool getChanged() { return changed; }
+	void setChanged(bool changed) { this->changed = changed; }
+	
 	// for proximity grid
 	void setNextPositionGrid(ACPoint p){nextPosGrid = p;}
 

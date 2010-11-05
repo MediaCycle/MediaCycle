@@ -270,13 +270,15 @@ struct ACOsgBrowserViewData
 		
 		if(loop >= 0)
 		{
+			// SD MIC demo - store need to be done befoe increment I think
+			// XSCF 250310 added these 3
+			if (media_cycle->getBrowser()->getMode() == AC_MODE_CLUSTERS)
+				media_cycle->storeNavigationState();
+			
 			if (media_cycle->getBrowser()->getMode() == AC_MODE_CLUSTERS)
 				media_cycle->incrementLoopNavigationLevels(loop);
 			media_cycle->setReferenceNode(loop);
 			
-			// XSCF 250310 added these 3
-			if (media_cycle->getBrowser()->getMode() == AC_MODE_CLUSTERS)
-				media_cycle->storeNavigationState();
 			//media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
 			//media_cycle->getBrowser()->setState(AC_CHANGING);
 			

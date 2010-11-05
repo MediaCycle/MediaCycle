@@ -108,6 +108,7 @@ protected:
 	ACMediaNode					media_cycle_node;
 	bool						media_cycle_isdisplayed;
 	ACPoint						media_cycle_current_pos;
+	ACPoint						media_cycle_view_pos;
 	ACPoint						media_cycle_next_pos;
 	int							media_cycle_navigation_level;
 	int							media_cycle_activity;

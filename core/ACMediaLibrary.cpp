@@ -121,11 +121,11 @@ int ACMediaLibrary::importDirectory(std::string _path, int _recursive, ACPluginM
 	std::vector<string> filenames;
 
 	scanDirectory(_path, _recursive, filenames);
-	
-	for (unsigned int i=0; i<filenames.size(); i++){
+		
+	for (unsigned int i=0; i<filenames.size(); i++) {
 		int index = forward_order ? i : filenames.size()-1-i;//CF if reverse order (not forward_order), segments in subdirs are added to the library after the source recording
 		this->importFile(filenames[index], acpl, doSegment );
-		}
+	}
 	std::cout << "Library size : " << this->getSize() << std::endl;
 	return 1;
 }
@@ -149,6 +149,7 @@ int ACMediaLibrary::importFile(std::string _filename, ACPluginManager *acpl, boo
 #endif // VERBOSE
 			this->incrementMediaID();
 		}
+		// SD TODO - Is this correct?
 		if (doSegment){
 			// segments are created without id 
 			media->segment(acpl);

@@ -81,44 +81,18 @@ void ACMediaNode::init(long int _nodeId, long int _mediaId){ // (0,0) by default
 	nextPosGrid.x = 0;
 	nextPosGrid.y = 0;
 	nextPosGrid.z = 0;
-	
-	viewPos.x = 0;
-	viewPos.y = 0;
-	viewPos.z = 0;
 }
 
 // methods coming from ACLoopAttribute:
 
-void ACMediaNode::setCurrentPosition(float x, float y, float z){
-	currentPos.x = x;
-	currentPos.y = y;
-	currentPos.z = z;
-}
-
-void ACMediaNode::setCurrentPosition(ACPoint p){
+void ACMediaNode::setCurrentPosition(ACPoint p) {
 	currentPos = p;
 }
 
-void ACMediaNode::setNextPosition(float x, float y, float z){
-	nextPos.x = x;
-	nextPos.y = y;
-	nextPos.z = z;
-}
-
-void ACMediaNode::setNextPosition(ACPoint p){
+void ACMediaNode::setNextPosition(ACPoint p, double t) {
+	changed = 1;
 	nextPos = p;
-}
-
-void ACMediaNode::setNextPositionX(float x){
-	nextPos.x = x;
-}
-
-void ACMediaNode::setNextPositionY(float y){
-	nextPos.y = y;
-}
-
-void ACMediaNode::setNextPositionZ(float z){
-	nextPos.z = z;
+	nextPosTime = t;
 }
 
 // methods previously in ACUserNode:

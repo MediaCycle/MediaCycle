@@ -114,14 +114,19 @@ void ACPositionsPluginRadialTreeLayout::updateNextPositions(ACMediaBrowser* _med
 		m_nodeParams[n]->setY(m_origin.y);
 		np->setAngle(m_theta2-m_theta1);
 		
+		ACPoint p;
 		for(int n=0; n<mediaBrowser->getUserLog()->getSize(); n++)
 		{
 			// CF: hack so that newly expanded nodes animate from their parental position
-			int p = mediaBrowser->getUserLog()->getParentFromNodeId(n);
-			if ( p > 0 && mediaBrowser->getMediaNode(n).getCurrentPositionX() == 0.0f && mediaBrowser->getMediaNode(n).getCurrentPositionY() == 0.0f)
-				mediaBrowser->getMediaNode(n).setCurrentPosition(mediaBrowser->getMediaNode(p).getCurrentPosition());
+			int pn = mediaBrowser->getUserLog()->getParentFromNodeId(n);
+			p = mediaBrowser->getMediaNode(n).getCurrentPosition();
+			if ( pn > 0 && p.x == 0.0f && p.y == 0.0f)
+				mediaBrowser->getMediaNode(n).setCurrentPosition(mediaBrowser->getMediaNode(pn).getCurrentPosition());
 			
-			mediaBrowser->setNodeNextPosition(n, m_nodeParams[n]->getX()/150, -m_nodeParams[n]->getY()/150); // CF: note OSG's inverted Y //CF n instead of mediaBrowser->getUserLog()->getMediaIdFromNodeId(n)
+			p.x = m_nodeParams[n]->getX()/150;
+			p.y = -m_nodeParams[n]->getY()/150;
+			p.z = 0;
+			mediaBrowser->setNodeNextPosition(n, p); // CF: note OSG's inverted Y //CF n instead of mediaBrowser->getUserLog()->getMediaIdFromNodeId(n)
 			mediaBrowser->setLoopIsDisplayed(n, true); // CF n instead of mediaBrowser->getUserLog()->getMediaIdFromNodeId(n)
 			//std::cout << "ACPositionsPluginRadialTreeLayout::updateNextPositions: Node " << n << " x " << m_nodeParams[n]->getX() << " y " << -m_nodeParams[n]->getY() << std::endl;
 		}

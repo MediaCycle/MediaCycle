@@ -324,11 +324,13 @@ string fillOutputBuffer(ACMediaLibrary* media_library, ACMediaBrowser* media_bro
 // XS TODO iterators ?
 // like	for (ACMediaNodes::iterator node = mLoopAttributes.begin(); node != mLoopAttributes.end(); ++node){
 
+	ACPoint p;
 	for (int i=0; i< n_loops; i++){
 		if (media_browser->getMediaNode(i).isDisplayed()){
 			chk_loops++;
-			int posx = (int) media_browser->getMediaNode(i).getNextPositionX();
-			int posy = (int) media_browser->getMediaNode(i).getNextPositionY();
+			p = media_browser->getMediaNode(i).getNextPosition;
+			int posx = (int) p.x;
+			int posy = (int) p.y;
 			ostringstream oss ;
 			oss.fill('0'); // fill with zeros (otherwise will leave blanks)
 			oss << setw(6) << generateID(media_library->getMedia(i)->getFileName()) << setw(3) << posx << setw(3)<< posy; // fixed format

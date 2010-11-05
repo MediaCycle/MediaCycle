@@ -208,15 +208,22 @@ void ACOsg3DModelRenderer::updateNodes(double ratio) {
 			
 	float x, y, z;
 	// float zpos = 0.001;
-	double omr = 1.0-ratio;
 	float localscale;
 	float maxdistance = 0.2;
 	float maxscale = 6;
 	float minscale = 1.2;	
 	
+	// SD 2010 OCT - This animation has moved from Browser to Renderer
+	/*
+	double omr = 1.0-ratio;
 	x = omr*media_cycle_current_pos.x + ratio*media_cycle_next_pos.x;
 	y = omr*media_cycle_current_pos.y + ratio*media_cycle_next_pos.y;
 	z = 0;
+	 */
+	x = media_cycle_view_pos.x;
+	y = media_cycle_view_pos.y;
+	z = 0;
+	
 	localscale = maxscale - distance_mouse * (maxscale - minscale) / maxdistance ;
 	localscale = max(localscale, minscale);
 	//localscale = maxscale;

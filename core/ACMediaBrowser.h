@@ -185,7 +185,7 @@ public:
 	int getReferenceNode(){return mReferenceNode;}
 	const ACMediaNodes	&getLoopAttributes() const { return mLoopAttributes; } 	// XS 100310 is this still necessary ? const ?
 	ACMediaNode &getMediaNode(int i) ; // not const because accesors to MediaNode can modify it
-	void setNodeNextPosition(int loop_id, float x, float y, float z=0);
+	void setNodeNextPosition(int loop_id, ACPoint p);
 	// XS TODO : displayed vs active
 	void setLoopIsDisplayed(int loop_id, bool iIsDisplayed) {this->getMediaNode(loop_id).setDisplayed(iIsDisplayed);}	
 	void setLoopAttributesActive(int loop_id, int value) { this->getMediaNode(loop_id).setActivity(value); };
@@ -364,6 +364,8 @@ protected:
 	ACPlugin* mVisPlugin;
 	
 	ACUserLog* mUserLog;
+	
+	int prevLibrarySize;
 };
 
 #endif // __ACMEDIABROWSER_H__

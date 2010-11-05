@@ -34,6 +34,16 @@
 
 #include "ACPositionProximityGridPlugin.h"
 
+static double getTime()
+{
+    struct timeval tv = {0, 0};
+    struct timezone tz = {0, 0};
+    
+    gettimeofday(&tv, &tz);
+    
+    return (double)tv.tv_sec + tv.tv_usec / 1000000.0;
+}
+
 ACPositionProximityGridPlugin::ACPositionProximityGridPlugin() {
     this->mMediaType = MEDIA_TYPE_MIXED; // ALL
     this->mPluginType = PLUGIN_TYPE_NONE;
@@ -235,23 +245,23 @@ void ACPositionProximityGridPlugin::setProximityGrid() {
 	}
 	
 	// XS TODO iter
+	double t = getTime();
 	for(i=0; i<n; i++) {
-		mediaBrowser->getMediaNode(i).setNextPosition(mediaBrowser->getMediaNode(i).getNextPositionGrid());
+		mediaBrowser->getMediaNode(i).setNextPosition(mediaBrowser->getMediaNode(i).getNextPositionGrid(), t);
 	}
 	
 	if (proxgridjitter>0) {
 		for(i=0; i<n; i++) {
 			// XS heavy ?
-			jitter = ACRandom()-0.5;//CF instead of TiRandom()-0.5;
-			mediaBrowser->getMediaNode(i).setNextPositionX( mediaBrowser->getMediaNode(i).getNextPositionX() +
-												jitter*proxgridjitter*proxgridstepx);
-			jitter = ACRandom()-0.5;//CF instead of TiRandom()-0.5;
-			mediaBrowser->getMediaNode(i).setNextPositionY( mediaBrowser->getMediaNode(i).getNextPositionY() + 
-												jitter*proxgridjitter*proxgridstepy);
-		}
-		for(i=0; i<n; i++) {
-			mediaBrowser->getMediaNode(i).setNextPositionX( max(min(mediaBrowser->getMediaNode(i).getNextPositionX(),proxgridr), proxgridl));
-			mediaBrowser->getMediaNode(i).setNextPositionY( max(min(mediaBrowser->getMediaNode(i).getNextPositionY(),proxgridt), proxgridb));
+			p = mediaBrowser->getMediaNode(i).getNextPosition();
+			jitter = ACRandom()-0.5;
+			p.x = p.x + jitter*proxgridjitter*proxgridstepx;
+			jitter = ACRandom()-0.5;
+			p.y = p.y + jitter*proxgridjitter*proxgridstepy;
+			p.x = max(min(p.x,proxgridr), proxgridl);
+			p.y = max(min(p.y,proxgridt), proxgridb);
+			p.z = p.z;
+			mediaBrowser->getMediaNode(i).setNextPosition(p, t);
 		}
 	}	
 	return;

@@ -39,6 +39,7 @@ ACOsgMediaRenderer::ACOsgMediaRenderer() {
 	media_node = new MatrixTransform();
 	node_color = Vec4(1,1,0.5,1); //CF seminal yellow
 	user_defined_color = false;
+	initialized = 0;
 }
 
 void ACOsgMediaRenderer::setDeltaTime(double media_cycle_deltatime) {
@@ -62,9 +63,36 @@ void ACOsgMediaRenderer::setIsDisplayed(int media_cycle_isdisplayed) {
 	this->media_cycle_isdisplayed = media_cycle_isdisplayed;
 }
 
+/*
 void ACOsgMediaRenderer::setPos(ACPoint &media_cycle_current_pos, ACPoint &media_cycle_next_pos) {
 	this->media_cycle_current_pos = media_cycle_current_pos;
 	this->media_cycle_next_pos = media_cycle_next_pos;
+}
+*/
+
+void ACOsgMediaRenderer::setViewPos(ACPoint media_cycle_view_pos) {
+	this->media_cycle_view_pos = media_cycle_view_pos;
+}
+
+void ACOsgMediaRenderer::setCurrentPos(ACPoint media_cycle_current_pos) {
+	this->media_cycle_current_pos = media_cycle_current_pos;
+	initialized = 1;
+}
+
+void ACOsgMediaRenderer::setNextPos(ACPoint media_cycle_next_pos) {
+	this->media_cycle_next_pos = media_cycle_next_pos;
+}
+
+ACPoint ACOsgMediaRenderer::getViewPos() {
+	return this->media_cycle_view_pos;
+}
+
+ACPoint ACOsgMediaRenderer::getCurrentPos() {
+	return this->media_cycle_current_pos;
+}
+
+ACPoint ACOsgMediaRenderer::getNextPos() {
+	return this->media_cycle_next_pos;
 }
 
 void ACOsgMediaRenderer::setNavigation(int media_cycle_navigation_level) {

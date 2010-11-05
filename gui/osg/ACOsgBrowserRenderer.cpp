@@ -64,13 +64,21 @@ double ACOsgBrowserRenderer::getTime() {
 	return (double)tv.tv_sec + (double)tv.tv_usec / 1000000.0;
 }
 
-void ACOsgBrowserRenderer::prepareNodes(int start) {
+void ACOsgBrowserRenderer::prepareNodes(int _start) {
 	// XS 180310: nodes are added here in the node_renderer
 	// previously media were added into media_renderer
 	// TODO: check it is incremental
 	int media_type;
+	int start;
 	
 	int n = media_cycle->getNumberOfMediaNodes(); //XS was: getLibrarySize(); 
+	
+	if (_start) {
+		start = _start;
+	}
+	else {
+		start = node_renderer.size();
+	}
 	
 	// XS are these tests necessary ?
 	if (node_renderer.size()>n) {
@@ -86,11 +94,10 @@ void ACOsgBrowserRenderer::prepareNodes(int start) {
 			delete link_renderer[i];
 		}
 	}
-	
-	
+		
 	node_renderer.resize(n);
 	//if (media_cycle->getBrowser()->getLayout() == AC_LAYOUT_TYPE_NODELINK)
-		link_renderer.resize(n);
+	link_renderer.resize(n);
 	distance_mouse.resize(n);
 	
 	for (int i=start;i<n;i++) {
@@ -233,6 +240,15 @@ void ACOsgBrowserRenderer::updateNodes(double ratio) {
 	}
 	*/
 	
+	// SD 2010 OCT - This animation has moved from Browser to Renderer
+	/*
+	#define CUB_FRAC(x) (x*x*(-2.0*x + 3.0))
+	#define TI_CLAMP(x,a,b) ((x)<(a)?(a):(x)>(b)?(b):(x))
+	double t = getTime();
+	double frac;
+	double andur = 2.0;	
+	*/
+	
 	media_cycle_time = getTime();
 	media_cycle_deltatime = media_cycle_time - media_cycle_prevtime;
 	media_cycle_prevtime = media_cycle_time;
@@ -267,7 +283,8 @@ void ACOsgBrowserRenderer::updateNodes(double ratio) {
 			
 			// NODE SPECIFIC
 			node_renderer[i]->setIsDisplayed(media_cycle_isdisplayed);
-			node_renderer[i]->setPos(media_cycle_current_pos, media_cycle_next_pos);
+			// SD 2010 OCT
+			//node_renderer[i]->setPos(media_cycle_current_pos, media_cycle_next_pos);
 			node_renderer[i]->setNavigation(media_cycle_navigation_level);
 			node_renderer[i]->setActivity(media_cycle_activity);
 			node_renderer[i]->setMediaIndex(media_index);
@@ -353,15 +370,75 @@ int ACOsgBrowserRenderer::computeScreenCoordinates(osgViewer::View* view, double
 	osg::Vec3 modelPoint;
 	osg::Vec3 screenPoint;
 	
+	// SD 2010 OCT - This animation has moved from Browser to Renderer
+	#define CUB_FRAC(x) (x*x*(-2.0*x + 3.0))
+	#define TI_CLAMP(x,a,b) ((x)<(a)?(a):(x)>(b)?(b):(x))
+	double t = getTime();
+	double frac;
+	double andur = 1.0;	
+	double alpha = 0.99;
+	double omr;
+	
 	for(int i=0; i<n; i++) {
 		
-		const ACMediaNode &attribute = media_cycle->getMediaNode(i);
-		const ACPoint &p = attribute.getCurrentPosition(), &p2 = attribute.getNextPosition();
-		double omr = 1.0-ratio;
+		ACMediaNode &attribute = media_cycle->getMediaNode(i);
 		
-		x = omr*p.x + ratio*p2.x;
-		y = omr*p.y + ratio*p2.y;
-		z = 0;
+		/*
+		const ACPoint &p = attribute.getCurrentPosition();
+		const ACPoint &p2 = attribute.getNextPosition();
+		double refTime = attribute.getNextTime();
+		
+		frac = (t-refTime)/andur;
+		if (frac<1) {
+			frac = CUB_FRAC(frac);
+		}
+		frac = TI_CLAMP(frac, 0, 1);
+		
+		omr = 1.0-frac;
+		x = omr*p.x + frac*p2.x;
+		y = omr*p.y + frac*p2.y;
+		z = 0;		
+		*/
+		
+		/*
+		 if (i==1) {
+		 printf ("POS: %f, %f, %f\n",p.x,p2.x,frac);
+		 }
+		 */
+		
+		if (attribute.getChanged()) {
+			if (node_renderer[i]->getInitialized()) {
+				node_renderer[i]->setCurrentPos(node_renderer[i]->getViewPos());
+			}
+			else {
+				node_renderer[i]->setCurrentPos(attribute.getCurrentPosition());
+				node_renderer[i]->setViewPos(attribute.getCurrentPosition());
+			}
+			node_renderer[i]->setNextPos(attribute.getNextPosition());
+			attribute.setChanged(0);
+		}
+		
+		const ACPoint &p = node_renderer[i]->getCurrentPos();
+		const ACPoint &p2 = node_renderer[i]->getNextPos();
+		double refTime = attribute.getNextTime();
+		
+		frac = (t-refTime)/andur;
+		if (frac<1) {
+			//frac = CUB_FRAC(frac);
+		}
+		frac = TI_CLAMP(frac, 0, 1);
+		
+		omr = 1.0-frac;
+		x = omr*p.x + frac*p2.x;
+		y = omr*p.y + frac*p2.y;
+		z = 0;		
+		
+		media_cycle_view_pos.x = x;
+		media_cycle_view_pos.y = y;
+		
+		node_renderer[i]->setFrac(frac);
+		node_renderer[i]->setViewPos(media_cycle_view_pos);
+		//attribute.setViewPosition(media_cycle_view_pos);
 		
 		modelPoint = Vec3(x,y,z);
 		screenPoint = modelPoint * VPM;

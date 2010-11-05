@@ -130,6 +130,7 @@ public:
 	int createSource(int loop_id);
 	int createExtSource(float* _buffer, int _length);
 	int createSourceWithPosition(int loop_id, float x, float y, float z);
+	int createSourceSynchro();
 	int deleteSource(int loop_id);
 	int deleteExtSource();
 	void loopExtSource();
@@ -226,6 +227,7 @@ private:
 	// Audio Engine Variables
 	// engine settings
 	int	  output_buffer_size;		// size of output audio buffer in samples
+	int   output_buffer_n0;
 	int   output_buffer_n;
 	int   output_sample_rate;
 	// synthesize settings
@@ -243,11 +245,15 @@ private:
 	int*	 current_buffer;
         int*     current_buffer_unqueue;
 	float		 time_from_start, time_from_downbeat, time_from_beat, time_from_tatum;
+	float		 prev_time_from_start, prev_time_from_downbeat, prev_time_from_beat, prev_time_from_tatum;
 	long int		 downbeat_from_start;
+	long int		 prev_downbeat_from_start;
 	float prev_scrub_pos, scrub_pos, scrub_speed;
 	float prev_scrub_time, scrub_time;
 	double sdtime, prevsdtime;
 	int reached_end, reached_begin;
+	
+	int loop_slot_syncho;
 	
 	int engine_running;
 	// ...
@@ -259,9 +265,10 @@ private:
 	void threadAudioEngineInit();
 	void timeCodeAudioEngine(int n_samples);
 	bool processAudioEngine();
+	bool processAudioEngineNew();
 	void processAudioUpdate();
-	void processAudioEngineSamplePosition(int _loop_slot, int *_sample_pos);
-	void processAudioEngineResynth(int _loop_slot, int _sample_pos, short *_output_buffer);
+	void processAudioEngineSamplePosition(int _loop_slot, int *_prev_sample_pos, int *_sample_pos, int *_sample_pos_limit);
+	void processAudioEngineResynth(int _loop_slot, int _prev_sample_pos, int _sample_pos, int _sample_pos_limit, short *_output_buffer);
 	void setMIDITimeCode();
 	
 };

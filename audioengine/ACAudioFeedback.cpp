@@ -186,7 +186,7 @@ int set_realtime(int period, int computation, int constraint) {
 }
 */
 
-int OPENAL_NUM_BUFFERS = 64;
+int OPENAL_NUM_BUFFERS = 32;
 
 #if defined(__APPLE__)
 typedef ALvoid	AL_APIENTRY	(*alMacOSXRenderChannelCountProcPtr) (const ALint value);
@@ -272,7 +272,7 @@ ACAudioFeedback::ACAudioFeedback(ALCdevice* _device)
 	device = _device;
 	createOpenAL();
 #ifdef OPENAL_STREAM_MODE
-	createAudioEngine(44100, 512, 10);
+	createAudioEngine(44100, 512, 3);
 	setTimeSignature(4, 4);
 #endif
 	ext_loop_length = 0;
@@ -446,6 +446,7 @@ void ACAudioFeedback::stopAudioEngine() {
 void ACAudioFeedback::createAudioEngine(int _output_sample_rate, int _output_buffer_size, int _output_num_buffers)
 {
 	int count;
+	int local_output_buffer_n;
 	
 	timing = fopen("/AudioCycleProPackLibrary/timing","w");
 	
@@ -453,7 +454,8 @@ void ACAudioFeedback::createAudioEngine(int _output_sample_rate, int _output_buf
 	
 	// Engine settings
 	output_buffer_size = _output_buffer_size;
-	output_buffer_n	= _output_num_buffers;
+	output_buffer_n0	= _output_num_buffers;
+	output_buffer_n	= _output_num_buffers+3;
 	output_sample_rate = _output_sample_rate;
 	
 	// Synthsizer settgins
@@ -474,9 +476,15 @@ void ACAudioFeedback::createAudioEngine(int _output_sample_rate, int _output_buf
 	//	2/ audio engine buffers that will be queued to OpenAL
 	loop_buffers_audio_engine_stream = new ALuint*[OPENAL_NUM_BUFFERS];
 	for (count=0;count<OPENAL_NUM_BUFFERS;count++) {
-		loop_buffers_audio_engine_stream[count] = new ALuint[output_buffer_n];
+		if (count==0) {
+			local_output_buffer_n = output_buffer_n0;
+		}
+		else {
+			local_output_buffer_n = output_buffer_n;
+		}
+		loop_buffers_audio_engine_stream[count] = new ALuint[local_output_buffer_n];
 		alGetError(); // clear error code
-		alGenBuffers(output_buffer_n, loop_buffers_audio_engine_stream[count]);
+		alGenBuffers(local_output_buffer_n, loop_buffers_audio_engine_stream[count]);
 		if((error = alGetError()) != AL_NO_ERROR) {
 			printf("Error Generating OpenAL Buffers for audio engine AL_STREAM mode!");
 			exit(1);
@@ -518,7 +526,8 @@ void ACAudioFeedback::createAudioEngine(int _output_sample_rate, int _output_buf
 	pthread_create(&audio_update, &audio_update_attr, &threadAudioUpdateFunction, audio_update_arg);
 	pthread_attr_destroy(&audio_update_attr);
 	engine_running=1;
-
+	
+	createSourceSynchro(); // create dummy source for synchronization
 }
 
 void ACAudioFeedback::deleteAudioEngine()
@@ -579,7 +588,16 @@ void ACAudioFeedback::threadAudioEngine()
 	
 	time_from_start = 0;
 	time_from_downbeat = 0;
+	time_from_beat = 0;
+	time_from_tatum = 0;
 	downbeat_from_start = 0;
+	
+	
+	prev_time_from_start = 0;
+	prev_time_from_downbeat = 0;
+	prev_time_from_beat = 0;
+	prev_time_from_tatum = 0;
+	prev_downbeat_from_start = 0;
 	
 	timeCodeDone = 0;
 		
@@ -638,12 +656,14 @@ void ACAudioFeedback::threadAudioEngine()
 			
 			pthread_mutex_lock(&audio_engine_mutex);
 			
-			bool isPlaying = processAudioEngine();
+			//bool isPlaying = processAudioEngine();
+			bool isPlaying = processAudioEngineNew();
 			
 			if (isPlaying)
 				slow_refresh++;
 			
-			// timeCodeAudioEngine(sleep_time*output_sample_rate);
+			// SD BUG
+			//timeCodeAudioEngine(sleep_time*output_sample_rate);
 			
 			audio_engine_fire_time += sleep_time;
 			
@@ -683,6 +703,12 @@ void ACAudioFeedback::threadAudioUpdate()
 }
 
 void ACAudioFeedback::timeCodeAudioEngine(int n_samples) {
+	
+	prev_time_from_start = time_from_start;
+	prev_time_from_downbeat = time_from_downbeat;
+	prev_time_from_beat = time_from_beat;
+	prev_time_from_tatum = time_from_tatum;
+	prev_downbeat_from_start = downbeat_from_start;
 	
 	//time_from_downbeat += (float)output_buffer_size / output_sample_rate / 2;
 	time_from_start += (float)n_samples / output_sample_rate;
@@ -732,6 +758,203 @@ void ACAudioFeedback::processAudioUpdate()
 	media_cycle->setNeedsActivityUpdateRemoveMedia();
 }
 
+bool ACAudioFeedback::processAudioEngineNew()
+{	
+	ALenum error;
+	
+	int count, current, current_unqueue;
+	
+	ALenum  format;
+	ALvoid* data;
+	ALsizei size;
+	ALsizei freq;
+	
+	ALint	buffer_processed;
+	ALint	buffer_queued;
+	ALint	buffer_processed_1;
+	ALint	buffer_queued_1;
+	ALint  source_state;
+	int		prev_sample_pos;
+	int		sample_pos;
+	int		sample_pos_limit;
+	
+	format = AL_FORMAT_MONO16;
+	size = output_buffer_size;
+	freq = output_sample_rate;
+	
+	ALuint local_new_buffer;
+	
+	int active_loops_counted = 0;
+	
+	ALuint local_buffer;
+	
+	timeCodeDone = 0;
+	
+	// add_buffers
+	int add_buffers;
+	
+	add_buffers = 0;
+	
+	// SD NEW - First check for synchro loop
+	count = 0;
+	
+	if (loop_ids[count]==-2) {
+		
+		// Detect queued buffers
+		alGetSourcei(loop_sources[count], AL_BUFFERS_QUEUED, &buffer_queued);
+		
+		// Detect already processed used buffers
+		alGetSourcei(loop_sources[count], AL_BUFFERS_PROCESSED, &buffer_processed);
+		
+		//printf ("synchro buffers %d, %d\n", buffer_queued, buffer_processed);
+
+		if ( (buffer_queued<output_buffer_n0) || (buffer_processed>0) ) {
+			add_buffers= 1;
+		}
+		
+		for (int k=0;k<add_buffers;k++) {
+			
+			timeCodeAudioEngine(output_buffer_size);
+			
+			memset(output_buffer, 0, output_buffer_size*sizeof(short));
+			data = output_buffer;
+			current = current_buffer[count];
+			current_unqueue = current_buffer_unqueue[count];
+			
+			// Unqueue processed buffers
+			if (k<buffer_processed) {
+				alSourceUnqueueBuffers(loop_sources[count], 1, &loop_buffers_audio_engine_stream[count][current_unqueue]);
+				current_buffer_unqueue[count]++;
+				if (current_buffer_unqueue[count] >= output_buffer_n0) {
+					current_buffer_unqueue[count] = 0;
+				}
+			}
+			
+			// Fill with data
+			alBufferData(loop_buffers_audio_engine_stream[count][current], format, data, size*2, freq);
+			current_buffer[count]++;
+			if (current_buffer[count] >= output_buffer_n0) {
+				current_buffer[count] = 0;
+			}
+			
+			// Queue prepared stream buffer to appropriate source
+			alSourceQueueBuffers(loop_sources[count], 1, &loop_buffers_audio_engine_stream[count][current]);
+		}
+		
+		alGetSourcei(loop_sources[count], AL_SOURCE_STATE, &source_state);
+		if ( (source_state!=AL_PLAYING) ) {
+			alSourcePlay(loop_sources[count]);
+		}
+		
+	}
+	count++;
+	
+	
+	//while (active_loops_counted<active_loops)  {
+	while (count<OPENAL_NUM_BUFFERS) {
+		
+		if (loop_ids[count]>=0) {
+			
+			active_loops_counted++;
+			
+			// Detect queued buffers
+			alGetSourcei(loop_sources[count], AL_BUFFERS_QUEUED, &buffer_queued);
+			
+			// Detect already processed used buffers
+			alGetSourcei(loop_sources[count], AL_BUFFERS_PROCESSED, &buffer_processed);
+						
+			// If source has just started, first fill with zeros.. beurk...
+			if ( (add_buffers) && (buffer_queued==0) ) {
+				for (int k=0;k<output_buffer_n0-add_buffers;k++) {
+					
+					memset(output_buffer, 0, output_buffer_size*sizeof(short));
+					data = output_buffer;
+					current = current_buffer[count];
+					
+					// Fill with data
+					alBufferData(loop_buffers_audio_engine_stream[count][current], format, data, size*2, freq);
+					
+					// Queue prepared stream buffer to appropriate source
+					alSourceQueueBuffers(loop_sources[count], 1, &loop_buffers_audio_engine_stream[count][current]);
+					
+					// Forward in buffers
+					current_buffer[count]++;
+					if (current_buffer[count] >= output_buffer_n) {
+						current_buffer[count] = 0;
+					}
+				}
+			}
+			
+			for (int k=0;k<buffer_processed;k++) {
+				
+				current_unqueue = current_buffer_unqueue[count];
+				
+				// Unqueue processed buffers
+				alSourceUnqueueBuffers(loop_sources[count], 1, &loop_buffers_audio_engine_stream[count][current_unqueue]);
+				
+				// Forward in buffers
+				current_buffer_unqueue[count]++;
+				if (current_buffer_unqueue[count] >= output_buffer_n) {
+					current_buffer_unqueue[count] = 0;
+				}
+			}
+			
+			for (int k=0;k<add_buffers;k++) {
+				
+				// Compute sample position and resynthesize buffer (may be several analysis frames)
+				processAudioEngineSamplePosition(count, &prev_sample_pos, &sample_pos, &sample_pos_limit);
+				
+				//fprintf(timing, "%d %f\n", add_buffers, float(sample_pos));
+				//fprintf(timing, "%f\n", float(sample_pos));
+				processAudioEngineResynth(count, prev_sample_pos, sample_pos, sample_pos_limit, output_buffer);
+				
+				data = output_buffer;
+				current = current_buffer[count];
+			
+				// Fill with data
+				alBufferData(loop_buffers_audio_engine_stream[count][current], format, data, size*2, freq);
+				
+				// Queue prepared stream buffer to appropriate source
+				alSourceQueueBuffers(loop_sources[count], 1, &loop_buffers_audio_engine_stream[count][current]);
+				
+				// Forward in buffers
+				current_buffer[count]++;
+				if (current_buffer[count] >= output_buffer_n) {
+					current_buffer[count] = 0;
+				}
+				
+			}
+			
+			// SD TODO - Check this
+			alGetSourcei(loop_sources[count], AL_SOURCE_STATE, &source_state);
+			if ( (source_state!=AL_PLAYING) ) {
+				alSourcePlay(loop_sources[count]);
+				//fprintf(timing, "WAS OFF\n");
+			}
+			
+			// Detect queued buffers
+			alGetSourcei(loop_sources[count], AL_BUFFERS_QUEUED, &buffer_queued_1);
+			
+			// Detect already processed used buffers
+			alGetSourcei(loop_sources[count], AL_BUFFERS_PROCESSED, &buffer_processed_1);
+			
+			if (add_buffers) {
+				printf ("Synchro buffers %d, %d, %d - %d, %d\n", count, buffer_queued, buffer_processed, buffer_queued_1, buffer_processed_1);
+			}
+			
+		}
+		
+		count++;
+		
+	}
+	
+	if (add_buffers && active_loops_counted) {
+		printf ("========================================\n");
+	}	
+	
+	return (active_loops_counted >=1 ? true : false);
+}
+
 bool ACAudioFeedback::processAudioEngine()
 {	
 	ALenum error;
@@ -746,7 +969,9 @@ bool ACAudioFeedback::processAudioEngine()
 	ALint	buffer_processed;
 	ALint	buffer_queued;
 	ALint  source_state;
+	int		prev_sample_pos;
 	int		sample_pos;
+	int		sample_pos_limit;
 	
 	format = AL_FORMAT_MONO16;
 	size = output_buffer_size;
@@ -757,16 +982,14 @@ bool ACAudioFeedback::processAudioEngine()
 	//for (count=0;count<active_loops;count++) {
 	int active_loops_counted = 0;
 	
-	count = -1;
-		
 	ALuint local_buffer;
 	
 	timeCodeDone = 0;
+
+	count = 0;
 	
 	//while (active_loops_counted<active_loops)  {
-	while (count<OPENAL_NUM_BUFFERS-1) {
-		
-		count++;
+	while (count<OPENAL_NUM_BUFFERS) {
 		
 		if (loop_ids[count]>=0) {
 			
@@ -798,10 +1021,10 @@ bool ACAudioFeedback::processAudioEngine()
 				int add_buffers;
 				if (buffer_queued<output_buffer_n) { add_buffers=output_buffer_n-buffer_queued; }
 				else {add_buffers = buffer_processed;}
-                                if(!buffer_queued){
-                                    add_buffers=2;
-                                }
-                                else if (add_buffers) {
+                if(!buffer_queued){
+					add_buffers=2;
+                }
+                else if (add_buffers) {
 					add_buffers= 1;
 				}
 				
@@ -811,11 +1034,11 @@ bool ACAudioFeedback::processAudioEngine()
 					//printf ("buffer processed %d\n",buffer_processed);
 					
 					// Compute sample position and resynthesize buffer (may be several analysis frames)
-					processAudioEngineSamplePosition(count, &sample_pos);
+					processAudioEngineSamplePosition(count, &prev_sample_pos, &sample_pos, &sample_pos_limit);
 				
 					//fprintf(timing, "%d %f\n", add_buffers, float(sample_pos));
 					//fprintf(timing, "%f\n", float(sample_pos));
-					processAudioEngineResynth(count, sample_pos, output_buffer);
+					processAudioEngineResynth(count, prev_sample_pos, sample_pos, sample_pos_limit, output_buffer);
 					
 					// SD TOTO - check this
 					//if (!timeCodeDone) {
@@ -823,7 +1046,6 @@ bool ACAudioFeedback::processAudioEngine()
 					if (timeCodeDone>=active_loops) {
 						// SD TODO - why did I need / 2
 						timeCodeAudioEngine(output_buffer_size);
-						//timeCodeAudioEngine(output_buffer_size/2);
 						timeCodeDone -= active_loops;
 					}
 					 
@@ -891,6 +1113,9 @@ bool ACAudioFeedback::processAudioEngine()
 				//fprintf(timing, "WAS OFF\n");
 			}
 		}
+		
+		count++;
+		
 	}
 	
 	return (active_loops_counted >=1 ? true : false);
@@ -936,7 +1161,7 @@ void ACAudioFeedback::setScrub(float scrub) {
 }
 
 // SD TODO - should be passed to this funciton: the buffer size + time code + normalize time code to buffer size + controler positions
-void ACAudioFeedback::processAudioEngineSamplePosition(int _loop_slot, int *_sample_pos)
+void ACAudioFeedback::processAudioEngineSamplePosition(int _loop_slot, int *_prev_sample_pos, int *_sample_pos, int *_sample_pos_limit)
 {
 	int frame_pos;
 	
@@ -959,18 +1184,32 @@ void ACAudioFeedback::processAudioEngineSamplePosition(int _loop_slot, int *_sam
 	switch (loop_synchro_mode[_loop_slot]) {
 		case ACAudioEngineSynchroModeDownbeatSimple:
 			*_sample_pos  = time_from_downbeat * output_sample_rate;
-			while (*_sample_pos >= size) {
+			reached_end = 0;
+			reached_begin = 0;
+			while (*_sample_pos>=size) {
+				reached_end = 1;
 				*_sample_pos -= size;
+			}
+			while (*_sample_pos<0) {
+				reached_begin = 1;
+				*_sample_pos += size;
 			}
 			break;
 		case ACAudioEngineSynchroModeAutoBeat:
 			if (use_bpm[_loop_slot]) {
-				*_sample_pos = time_from_downbeat * output_sample_rate * (active_bpm / use_bpm[_loop_slot]);			
 				float nbeats;
 				nbeats = ((sample_end-sample_start)/output_sample_rate) / 60.0 * local_bpm;
-				if (nbeats>4.1)
+				*_prev_sample_pos = prev_time_from_downbeat * output_sample_rate * (active_bpm / use_bpm[_loop_slot]);
+				*_sample_pos = time_from_downbeat * output_sample_rate * (active_bpm / use_bpm[_loop_slot]);
+				*_sample_pos_limit = (60.0/active_bpm*4) * output_sample_rate * (active_bpm / use_bpm[_loop_slot]);	
+				if (size<*_sample_pos_limit) {
+					*_sample_pos_limit = size;
+				}
+				/*if (nbeats>4.1) {
+					*_prev_sample_pos += (prev_downbeat_from_start%2) * 4 * output_sample_rate * (60.0 / use_bpm[_loop_slot]);
 					*_sample_pos += (downbeat_from_start%2) * 4 * output_sample_rate * (60.0 / use_bpm[_loop_slot]);
-				 }
+				}*/
+			}
 			// SD 2009 dec - In auto beat, loops with no BPM should be played at normal speed
 			else {
 			}
@@ -995,12 +1234,7 @@ void ACAudioFeedback::processAudioEngineSamplePosition(int _loop_slot, int *_sam
 					*_sample_pos -= size;
 				}
 			}
-		 */
-	 
-			if (*_sample_pos >= size) {
-				*_sample_pos = -1;
-			}
-			
+		 */			
 			break;
 		case ACAudioEngineSynchroModeAutoBarStretch:
 			
@@ -1013,6 +1247,7 @@ void ACAudioFeedback::processAudioEngineSamplePosition(int _loop_slot, int *_sam
 			reached_begin = 0;
 			//*_sample_pos = (int)(scrub_pos * size / 100);
 			*_sample_pos = prev_sample_pos[_loop_slot] + (output_buffer_size)*scrub_speed;
+			*_sample_pos_limit = size;
 			while (*_sample_pos>=size) {
 				reached_end = 1;
 				*_sample_pos -= size;
@@ -1033,9 +1268,17 @@ void ACAudioFeedback::processAudioEngineSamplePosition(int _loop_slot, int *_sam
 			else {
 				// SD TODO - why do we need / 2
 				// *_sample_pos  = prev_sample_pos[_loop_slot] + output_buffer_size / 2;
+				reached_end = 0;
+				reached_begin = 0;
 				*_sample_pos  = prev_sample_pos[_loop_slot] + output_buffer_size;
+				*_sample_pos_limit = size;
 				while (*_sample_pos>=size) {
+					reached_end = 1;
 					*_sample_pos -= size;
+				}
+				while (*_sample_pos<0) {
+					reached_begin = 1;
+					*_sample_pos += size;
 				}
 			}
 			break;
@@ -1052,7 +1295,7 @@ void ACAudioFeedback::processAudioEngineSamplePosition(int _loop_slot, int *_sam
 
 // SD TODO - should be passed a pointer to the loop samples to make the engine separate from ACAudioFeedback
 //		output buffer size should be passed too
-void ACAudioFeedback::processAudioEngineResynth(int _loop_slot, int _sample_pos, short *_output_buffer)
+void ACAudioFeedback::processAudioEngineResynth(int _loop_slot, int _prev_sample_pos, int _sample_pos, int _sample_pos_limit, short *_output_buffer)
 {
 	int i;
 	
@@ -1071,6 +1314,11 @@ void ACAudioFeedback::processAudioEngineResynth(int _loop_slot, int _sample_pos,
 	
 	float bpm_ratio;
 	float pitch_ratio = 0;
+	
+	if (loop_synchro_mode[_loop_slot] == ACAudioEngineSynchroModeAutoBeat) {
+		size = _sample_pos_limit;
+		prev_sample_pos[_loop_slot] = _prev_sample_pos;
+	}
 	
 	bpm_ratio = ((float)_sample_pos - (float)prev_sample_pos[_loop_slot]);
 	
@@ -1226,23 +1474,40 @@ void ACAudioFeedback::processAudioEngineResynth(int _loop_slot, int _sample_pos,
 			// but still loops
 			// Scratch ... why do we need * 2.0
 			
-			if (reached_end) {
+			/*if (reached_end) {
 				bpm_ratio += size;
 			}
 			else if (reached_begin) {
 				bpm_ratio -= size;
+			}*/
+			while (bpm_ratio<0) {
+				bpm_ratio += size;
 			}
 			bpm_ratio /= (float)output_buffer_size;
 			
+			memset(_output_buffer, 0, output_buffer_size*sizeof(short));
+			
 			if (size>0) {
 				local_pos_f = prev_sample_pos[_loop_slot];
+				/*if (local_pos_f>=size) {
+					local_pos_f -= size;
+				}
+				if (local_pos_f<=0) {
+					local_pos_f = 0;
+				}*/				
+				// printf ("%d - %f - %d - %f\n", size, local_pos_f, _sample_pos, bpm_ratio);
 				local_pos = floor(local_pos_f);
 				local_pos_frac = local_pos_f - local_pos;
 				//if (_sample_pos>=0) {
 				if (local_pos>=0) {
 					for (i=0;i<output_buffer_size;i++) {
-						_output_buffer[i] = (1.0-local_pos_frac)*(float)loop_buffers_audio_engine[_loop_slot][local_pos]
+						if (local_pos<size-1) {
+							_output_buffer[i] = (1.0-local_pos_frac)*(float)loop_buffers_audio_engine[_loop_slot][local_pos]
 											+(local_pos_frac)*(float)loop_buffers_audio_engine[_loop_slot][(local_pos+1)%size];
+						}
+						else {
+							_output_buffer[i] = 0;
+						}
 						//_output_buffer[i] = loop_buffers_audio_engine[_loop_slot][local_pos];
 						local_pos_f += bpm_ratio;
 						if (local_pos_f>=size) {
@@ -1252,6 +1517,7 @@ void ACAudioFeedback::processAudioEngineResynth(int _loop_slot, int _sample_pos,
 							local_pos_f = 0;
 						}
 						local_pos = floor(local_pos_f);
+						local_pos_frac = local_pos_f - local_pos;
 					}
 				}
 				else {
@@ -1468,6 +1734,45 @@ int ACAudioFeedback::createSource(int loop_id)
 	return createSourceWithPosition(loop_id, 0, 0, 0);
 }
 
+int ACAudioFeedback::createSourceSynchro() 
+{	
+	float   loop_pos[3];
+	int loop_slot;
+	ALuint	loop_source;
+	
+	loop_pos[0] = 0;
+	loop_pos[1] = 0;
+	loop_pos[2] = 0;
+	
+	loop_slot = 0;
+	
+	alGenSources(1, &(loop_sources[loop_slot]));
+	loop_source = loop_sources[loop_slot];
+		
+#ifdef OPENAL_STREAM_MODE
+	
+	pthread_mutex_lock(&audio_engine_mutex);
+	
+	loop_ids[loop_slot] = -2; 
+	
+	// Turn Looping OFF - audio engine that controls the looping (done in audio engine thread)
+	alSourcei(loop_source, AL_LOOPING, AL_FALSE);
+	// Set Source Position
+	alSourcefv(loop_source, AL_POSITION, loop_pos);
+	// Set Source Reference Distance
+	alSourcef(loop_source, AL_REFERENCE_DISTANCE, 5.0f);
+		
+	alSourcePlay(loop_source);
+			
+	active_loops++;
+		
+	pthread_mutex_unlock(&audio_engine_mutex);
+	
+#endif
+	
+	return 0;
+}
+
 int ACAudioFeedback::createSourceWithPosition(int loop_id, float x, float y, float z) 
 {	
 	// ACAudioLoop *audio_loop;
@@ -1499,14 +1804,14 @@ int ACAudioFeedback::createSourceWithPosition(int loop_id, float x, float y, flo
 	// Check if specified loop is already active or not and find free source/buffer
 	loop_slot = -1;
 	for (count=0;count<OPENAL_NUM_BUFFERS;count++) {
-		if(loop_ids[count]==loop_id) {
+		if( (loop_id != -1) && (loop_ids[count]==loop_id) ) {
 			return 2;
 		}
 		if ( (loop_slot==-1) && (loop_ids[count]==-1) ) {
 			loop_slot = count;
 		}
 	}
-	
+		
 	// SD - bug workaround....
 	// loop_slot = loop_id;
 	
@@ -1801,6 +2106,7 @@ int ACAudioFeedback::deleteSource(int loop_id)
 	int buffer_queued;
 	int buffer_processed;
 	int current;
+	int current_unqueue;
 	int i;
 	
 	int loop_slot;
@@ -1831,7 +2137,16 @@ int ACAudioFeedback::deleteSource(int loop_id)
 	printf("%d, Processed buffers %d\n", loop_slot, buffer_processed);
 	
 	current = 0;
-	alSourceUnqueueBuffers(loop_sources[loop_slot], buffer_queued, loop_buffers_audio_engine_stream[loop_slot]);
+	current_unqueue = current_buffer_unqueue[loop_slot];	
+	// Unqueue processed buffers
+	if (i<buffer_queued) {
+		alSourceUnqueueBuffers(loop_sources[loop_slot], 1, &loop_buffers_audio_engine_stream[loop_slot][current_unqueue]);
+		current_buffer_unqueue[loop_slot]++;
+		if (current_buffer_unqueue[loop_slot] >= output_buffer_n) {
+			current_buffer_unqueue[loop_slot] = 0;
+		}
+	}
+	
 	error = alGetError();
 	if(error == AL_INVALID_VALUE) {
 		printf("Error Unqueue Buffers invalid value %d!\n", current);
@@ -1852,7 +2167,7 @@ int ACAudioFeedback::deleteSource(int loop_id)
 
 	// SD TODO - Check wether maybe remaining buffers have to be detached from source
 	current_buffer[loop_slot] = 0;
-        current_buffer_unqueue[loop_slot] = 0;
+	current_buffer_unqueue[loop_slot] = 0;
 
 	// has been reserved in createSourceWithPosition, need to delete here
 	delete[] loop_buffers_audio_engine[loop_slot];
