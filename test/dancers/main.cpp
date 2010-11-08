@@ -328,7 +328,7 @@ string fillOutputBuffer(ACMediaLibrary* media_library, ACMediaBrowser* media_bro
 	for (int i=0; i< n_loops; i++){
 		if (media_browser->getMediaNode(i).isDisplayed()){
 			chk_loops++;
-			p = media_browser->getMediaNode(i).getNextPosition;
+			p = media_browser->getMediaNode(i).getNextPosition();
 			int posx = (int) p.x;
 			int posy = (int) p.y;
 			ostringstream oss ;
@@ -469,11 +469,13 @@ void startOrRedrawRandom(MediaCycle *mediacycle, int nbVideo, char **buffer_send
 		int l = trunc_indices[i];
 		// positions should in range [0:999], which is a fraction of the screen size
 		// XS for the moment they depend on mViewWidth, mViewHeight in ACMediaBrowser
-		int posx = (int) media_browser->getMediaNode(l).getCurrentPositionX();
-		int posy = (int) media_browser->getMediaNode(l).getCurrentPositionY();
+		
+		ACPoint pos = media_browser->getMediaNode(l).getCurrentPosition();
+		//int posx = (int) media_browser->getMediaNode(l).getCurrentPositionX();
+		//int posy = (int) media_browser->getMediaNode(l).getCurrentPositionY();
 		ostringstream oss ;
 		oss.fill('0'); // fill with zeros (otherwise will leave blanks)
-		oss << setw(6) << i << setw(3) << posx << setw(3)<< posy; // fixed format
+		oss << setw(6) << i << setw(3) << (int) pos.x << setw(3)<< (int) pos.y; // fixed format
 		sbuffer_send += oss.str(); // concatenates all videos in one string
 
 		// XS test

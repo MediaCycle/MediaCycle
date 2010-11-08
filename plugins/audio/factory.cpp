@@ -5,7 +5,7 @@
 #include "ACPlugin.h"
 #include "ACAudioFeaturesPlugin.h"
 #include "ACAudioGardenFeaturesPlugin.h"
-#include "ACAudioFeaturesChromaRhythmPlugin.h"
+//#include "ACAudioFeaturesChromaRhythmPlugin.h"
 
 //the factories
 

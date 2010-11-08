@@ -1417,6 +1417,7 @@ void ACMediaBrowser::updateDisplay(bool animate) {
 
 //CF to debug with all scenarios! Plugins and OSG (tree nodes should not be colored) might need some tweaking...
 void ACMediaBrowser::switchMode(ACBrowserMode _mode){
+	double t = getTime();
 	switch ( mMode ){
 		case AC_MODE_CLUSTERS:
 			switch ( _mode ){
@@ -1428,7 +1429,6 @@ void ACMediaBrowser::switchMode(ACBrowserMode _mode){
 						//CF do we have to reset the referent node? mUserLog->addRootNode( mReferenceNode , 0); //CF change click
 						//(2nd arg)!, use LastClickedNode instead of ReferenceNode?
 						//CF 1) bring the nodes to the center
-						double t = getTime();
 						ACPoint p;
 						for (ACMediaNodes::iterator node = mLoopAttributes.begin(); node != mLoopAttributes.end(); ++node){	
 							//(*node).setDisplayed (false);
@@ -1467,7 +1467,6 @@ void ACMediaBrowser::switchMode(ACBrowserMode _mode){
 			switch ( _mode ){
 				case AC_MODE_CLUSTERS:
 					//CF 1) Move all nodes to the center
-					double t = getTime();
 					ACPoint p;
 					for (ACMediaNodes::iterator node = mLoopAttributes.begin(); node != mLoopAttributes.end(); ++node){	
 						p.x = 0;
@@ -1535,6 +1534,7 @@ bool ACMediaBrowser::changeClustersMethodPlugin(ACPlugin* acpl)
 bool ACMediaBrowser::changeNeighborsMethodPlugin(ACPlugin* acpl)
 {
 	bool success = false;
+	double t = getTime();
 	switch ( mMode ){
 		case AC_MODE_CLUSTERS:
 			this->setNeighborsMethodPlugin(acpl);
@@ -1542,7 +1542,6 @@ bool ACMediaBrowser::changeNeighborsMethodPlugin(ACPlugin* acpl)
 			break;
 		case AC_MODE_NEIGHBORS:	
 			//CF 1) Move all nodes to the center
-			double t = getTime();
 			ACPoint p;
 			for (ACMediaNodes::iterator node = mLoopAttributes.begin(); node != mLoopAttributes.end(); ++node){	
 				p.x = 0;
