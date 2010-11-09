@@ -48,7 +48,7 @@ ACVideo::ACVideo() : ACMedia() {
 }	
 
 ACVideo::~ACVideo() {
-	delete thumbnail;
+	cvReleaseImage(&thumbnail);
 }
 
 ACVideo::ACVideo(const ACVideo& m) : ACMedia(m) {
@@ -75,7 +75,8 @@ int ACVideo::computeThumbnail(ACMediaData* data_ptr, int w, int h){
 		cerr << "<ACVideo::computeThumbnail> Could not find frame..." << endl;
 		return -1;
 	}
-	thumbnail = cvRetrieveFrame(capture);
+	IplImage* tmp = cvRetrieveFrame(capture);
+	thumbnail = cvCloneImage(tmp);
 	
 	if (!thumbnail){
 		cerr << "<ACVideo::computeThumbnail> problem creating thumbnail" << endl;
