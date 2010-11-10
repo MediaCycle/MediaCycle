@@ -80,6 +80,11 @@ MediaCycle::~MediaCycle() {
     stopTcpServer(); // will delete this->networkSocket;
 }
 
+bool MediaCycle::changeMediaType(ACMediaType aMediaType)
+{
+	return this->mediaLibrary->changeMediaType(aMediaType);
+}	
+
 // == TCP
 static void tcp_callback(char *buffer, int l, char **buffer_send, int *l_send, void *userData)
 {

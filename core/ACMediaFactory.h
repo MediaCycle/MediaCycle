@@ -44,7 +44,7 @@
 typedef  std::map<std::string, ACMediaType> filext;
 
 class ACMediaFactory {
-//privat, not protected, since there is no ACImageFactory
+//private, not protected, since there is no ACImageFactory
 private:
 	// for log(n) search through extensions:
 	static filext file_extensions;
@@ -61,6 +61,7 @@ public:
 	// 3) copy a media 
 	static ACMedia* create(ACMedia* media);
 
+	static ACMediaType getMediaType(std::string file_ext);
 };
 
 #endif // _ACMEDIAFACTORY_H

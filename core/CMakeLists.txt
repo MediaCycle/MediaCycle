@@ -1,4 +1,4 @@
-IF ( USE_OSG )
+IF ( USE_OSG AND FFMPEG_FOUND )
 	FILE(GLOB SRC *.cpp *.c)
 	FILE(GLOB HDR *.hpp *.h)
 
@@ -22,6 +22,7 @@ IF ( USE_OSG )
 	ENDIF()
 
 	TARGET_LINK_LIBRARIES(mediacycle ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_GRAPH_LIBRARY})
+	TARGET_LINK_LIBRARIES(mediacycle ${FFMPEG_LIBRARIES} ${FFMPEG_LIBSWSCALE_LIBRARIES})
 
 	# OSG for 3D Models
 	TARGET_LINK_LIBRARIES(mediacycle osg osgDB OpenThreads)
@@ -31,4 +32,4 @@ IF ( USE_OSG )
 	# OSX is probably ok with installing lib in /usr/local/lib/
 	##INSTALL(TARGETS mediacycle LIBRARY DESTINATION lib)
 	##INSTALL(FILES ${HDR} DESTINATION include/mediacycle)
-ENDIF ( USE_OSG )
+ENDIF ( USE_OSG AND FFMPEG_FOUND )

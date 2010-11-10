@@ -61,6 +61,7 @@ public:
     MediaCycle(ACMediaType aMediaType, string local_directory="",string libname="");
     MediaCycle(const MediaCycle& orig);
     virtual ~MediaCycle();
+	bool changeMediaType(ACMediaType aMediaType);
 
 	// == TCP
     int startTcpServer(int port=12345, int max_connections=5);

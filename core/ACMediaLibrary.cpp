@@ -53,6 +53,16 @@
 
 #define VERBOSE
 
+// CF FFmpeg for checking audio/video channels in containers
+extern "C" {
+	#include <libavcodec/avcodec.h>
+	#include <libavformat/avformat.h>
+	#include <libswscale/swscale.h>
+	#include <stdio.h>
+	#include <stdlib.h>
+	#include <stdbool.h>
+}
+
 using namespace std;
 // to save library items in binary format, uncomment the following line:
 // #define SAVE_LOOP_BIN
@@ -83,11 +93,24 @@ ACMediaLibrary::ACMediaLibrary(ACMediaType aMediaType) {
 	this->cleanLibrary();
 	this->cleanStats();
 	media_type = aMediaType;
+	
+	// Register all formats and codecs from FFmpeg
+	av_register_all();
 }
 
 ACMediaLibrary::~ACMediaLibrary(){
 	this->deleteAllMedia();
 }
+
+bool ACMediaLibrary::changeMediaType(ACMediaType aMediaType){
+	if (this->isEmpty()){
+		media_type = aMediaType;
+		return true;
+	}
+	else {
+		return false;
+	}
+}	
 
 void ACMediaLibrary::deleteAllMedia(){
 	// Clean up properly by calling destructor of each ACMedia*
@@ -135,7 +158,64 @@ int ACMediaLibrary::importFile(std::string _filename, ACPluginManager *acpl, boo
 	std::vector<ACMedia*> mediaSegments;
 
 	extension = fs::extension(_filename);
-	ACMedia* media = ACMediaFactory::create(extension);
+	
+	//CF early check in video files for audio and video streams, towards ACMediaDocuments
+	// from http://www.inb.uni-luebeck.de/~boehme/using_libavcodec.html
+	// and http://www.inb.uni-luebeck.de/~boehme/libavcodec_update.html
+	ACMediaType fileMediaType = ACMediaFactory::getMediaType(extension);
+	ACMedia* media;
+	if (media_type == MEDIA_TYPE_VIDEO || media_type == MEDIA_TYPE_AUDIO) {
+		if (fileMediaType == MEDIA_TYPE_VIDEO) {			
+			AVFormatContext *pFormatCtx;
+			int             i, videoStreams, audioStreams;
+			/*
+			AVCodecContext  *pCodecCtx;
+			AVCodec         *pCodec;
+			AVFrame         *pFrame; 
+			AVFrame         *pFrameRGB;
+			AVPacket        packet;
+			int             frameFinished;
+			int             numBytes;
+			uint8_t         *buffer;
+			*/
+			// Open video file
+			if(av_open_input_file(&pFormatCtx, _filename.c_str(), NULL, 0, NULL)!=0){
+				std::cout << "Couldn't open file" << std::endl;
+				return 0; 
+			}
+	
+			// Retrieve stream information
+			if(av_find_stream_info(pFormatCtx)<0){
+				std::cout << "Couldn't find stream information" << std::endl;
+				return 0;
+			}
+			
+			// Dump information about file onto standard error
+			dump_format(pFormatCtx, 0, _filename.c_str(), false);
+			
+			// Count video streams
+			videoStreams=0;
+			for(i=0; i<pFormatCtx->nb_streams; i++)
+				if(pFormatCtx->streams[i]->codec->codec_type==CODEC_TYPE_VIDEO)
+					videoStreams++;
+			if(videoStreams == 0)
+				std::cout << "Didn't find any video stream." << std::endl;
+			else
+				std::cout << "Found " << videoStreams << " video streams." << std::endl;
+			
+			// Count audio streams
+			audioStreams=0;
+			for(i=0; i<pFormatCtx->nb_streams; i++)
+				if(pFormatCtx->streams[i]->codec->codec_type==CODEC_TYPE_AUDIO)
+					audioStreams++;
+			if(audioStreams == 0)
+				std::cout << "Didn't find any audio stream" << std::endl;
+			else
+				std::cout << "Found " << audioStreams << " audio streams." << std::endl;	
+		}
+	}
+	
+	media = ACMediaFactory::create(extension);
 	cout << "extension:" << extension << endl; 		
 	if (media == NULL) {
 		cout << "extension unknown, skipping " << _filename << " ... " << endl;

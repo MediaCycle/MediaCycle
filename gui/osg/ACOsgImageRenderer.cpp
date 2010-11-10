@@ -247,29 +247,6 @@ void ACOsgImageRenderer::imageGeode(int flip, float sizemul, float zoomin) {
 	}
 	else if (media_type == MEDIA_TYPE_VIDEO)
 	{
-		//std::cout << osgDB::listAllAvailablePlugins() << std::endl;  	
-		
-		//CF forcing to load the OSG FFMpeg plugin, this should be done elsewhere at app launch time
-		std::cout <<"ACOsgImageRenderer::imageGeode: current media type: " << media_cycle->getLibrary()->getMedia(media_index)->getType() << std::endl;
-		std::string libName = osgDB::Registry::instance()->createLibraryNameForExtension("ffmpeg"); 
-		
-		osgDB::Registry::LoadStatus ffmpegStatus = osgDB::Registry::instance()->loadLibrary(libName);
-		//NOT_LOADED, PREVIOUSLY_LOADED, LOADED 
-		std::cout << "FFMpeg library status; "<< ffmpegStatus << std::endl;
-		//osgDB::Registry::instance()->getLibrary(libName);
-		
-		osgDB::Registry::ReaderWriterList readerWriterList = osgDB::Registry::instance()->getReaderWriterList();
-		//osgDB::Registry::ReaderWriterList::iterator rWLIt;
-		//rWLIt = readerWriterList.begin();
-		
-		std::cout << "List of supported extensions: " << std::endl;
-		for (int r=0; r<readerWriterList.size();r++)
-		{
-			osgDB::ReaderWriter::FormatDescriptionMap fDM = readerWriterList[r]->supportedExtensions();
-			//for (int f=0; f<fDM.size();f++)
-			//	std::cout << fDM[f] << std::endl;
-		}	
-		
 		image_image = osgDB::readImageFile(media_cycle_filename);
 	}
 

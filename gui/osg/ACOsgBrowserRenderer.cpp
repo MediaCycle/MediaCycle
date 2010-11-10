@@ -68,6 +68,37 @@ void ACOsgBrowserRenderer::prepareNodes(int _start) {
 	// XS 180310: nodes are added here in the node_renderer
 	// previously media were added into media_renderer
 	// TODO: check it is incremental
+	
+	// CF checking for available OSG video plugins, everytime the library content changes
+	// when we'll be able to the media type on the fly, this test will be relocated at app startup
+	#if !defined (APPLE_LEOPARD) // for now OSG should always come with the QuickTime plugin in Leopard
+		if (media_cycle->getLibrary()->getMediaType() == MEDIA_TYPE_VIDEO) {
+		 
+			//CF forcing to load the OSG FFMpeg plugin
+			std::string libName = osgDB::Registry::instance()->createLibraryNameForExtension("ffmpeg"); 
+			
+			osgDB::Registry::LoadStatus ffmpegStatus = osgDB::Registry::instance()->loadLibrary(libName);
+			if (ffmpegStatus == osgDB::Registry::NOT_LOADED) {
+				std::cout << "FFMpeg plugin for OSG can't be loaded, videos can't be visualized." << std::endl;
+				exit(0);//too harsh maybe?
+			}	
+			else if (ffmpegStatus == osgDB::Registry::PREVIOUSLY_LOADED) {
+				std::cout << "FFMpeg plugin for OSG already loaded." << std::endl;
+			}
+			else if (ffmpegStatus == osgDB::Registry::LOADED) {
+				std::cout << "FFMpeg plugin for OSG just loaded, supporting the following extensions:" << std::endl;
+				osgDB::Registry::ReaderWriterList readerWriterList = osgDB::Registry::instance()->getReaderWriterList();
+				for (int r=0; r<readerWriterList.size();r++)
+				{
+					osgDB::ReaderWriter::FormatDescriptionMap fDM = readerWriterList[r]->supportedExtensions();
+					osgDB::ReaderWriter::FormatDescriptionMap::iterator iter = fDM.begin();
+					for(;iter!=fDM.end();++iter)
+						std::cout << "-- (*." << iter->first << ") "<< iter->second << std::endl;
+				}	
+			}
+		}
+	#endif
+	
 	int media_type;
 	int start;
 	
@@ -170,6 +201,7 @@ void ACOsgBrowserRenderer::prepareNodes(int _start) {
 
 void ACOsgBrowserRenderer::updateNodes(double ratio) {
 	
+
 	if (!nodes_prepared) {
 		return;
 	}

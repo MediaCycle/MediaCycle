@@ -61,7 +61,6 @@ IF ( USE_QT4 )
 	TARGET_LINK_LIBRARIES(imagecycle-osg-qt ${Boost_SYSTEM_LIBRARY})
 	TARGET_LINK_LIBRARIES(imagecycle-osg-qt ${QT_LIBRARIES})
 	TARGET_LINK_LIBRARIES(imagecycle-osg-qt ${QT4_LIBRARY} ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY} ${QT_QTOPENGL_LIBRARY} )
-	TARGET_LINK_LIBRARIES(imagecycle-osg-qt ${OPENGL_LIBRARIES})
 
 	IF ( APPLE )
 		set(CMAKE_EXE_LINKER_FLAGS "-framework CoreVideo -framework AppKit -framework Foundation")

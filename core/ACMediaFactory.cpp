@@ -44,11 +44,14 @@ using namespace std;
 
 // file_extensions is static and thus has to be initialized outside class
 // TODO: complete this...
+// CF TODO can this be automatically generated depending on the available multimedia I/O libs?
 const filext::value_type _ini[] = { filext::value_type(".wav", MEDIA_TYPE_AUDIO), \
 filext::value_type(".aif", MEDIA_TYPE_AUDIO), \
+//filext::value_type(".ogg", MEDIA_TYPE_AUDIO), \	
 filext::value_type(".mp3", MEDIA_TYPE_AUDIO), \
 filext::value_type(".WAV", MEDIA_TYPE_AUDIO), \
 filext::value_type(".AIF", MEDIA_TYPE_AUDIO), \
+//filext::value_type(".OGG", MEDIA_TYPE_AUDIO), \
 filext::value_type(".MP3", MEDIA_TYPE_AUDIO), \
 
 filext::value_type(".jpg", MEDIA_TYPE_IMAGE), \
@@ -66,8 +69,10 @@ filext::value_type(".GIF", MEDIA_TYPE_IMAGE), \
 
 filext::value_type(".avi", MEDIA_TYPE_VIDEO), \
 filext::value_type(".mov", MEDIA_TYPE_VIDEO), \
+filext::value_type(".mp4", MEDIA_TYPE_VIDEO), \
 filext::value_type(".AVI", MEDIA_TYPE_VIDEO), \
 filext::value_type(".MOV", MEDIA_TYPE_VIDEO), \
+filext::value_type(".MP4", MEDIA_TYPE_VIDEO), \	
 
 // SD TODO - these are the 3D formats supported by osgdb
 //			Need to test that these are really behaving properly
@@ -204,4 +209,12 @@ ACMedia* ACMediaFactory::create(ACMedia* media){
 			return NULL;
 			break;
 	}
+}
+
+ACMediaType ACMediaFactory::getMediaType(std::string file_ext){
+	filext::iterator iter = file_extensions.find(file_ext);
+	if( iter == file_extensions.end() ) {
+		return MEDIA_TYPE_NONE;
+	}
+	return (ACMediaType)(iter->second);
 }

@@ -65,6 +65,7 @@ public:
 	ACMediaLibrary();
 	ACMediaLibrary(ACMediaType aMediaType);
 	~ACMediaLibrary();
+	bool changeMediaType(ACMediaType aMediaType);
 	void cleanLibrary();
 	void cleanStats();
 	
