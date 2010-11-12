@@ -219,7 +219,7 @@ struct ACOsgBrowserViewData
 
 - (void)keyDown:event
 {	
-	//[super keyDown:event];
+	[super keyDown:event];
 	
 	NSString *theArrow = [event charactersIgnoringModifiers];
 	unichar keyChar = 0;
@@ -251,7 +251,7 @@ struct ACOsgBrowserViewData
 
 - (void)keyUp:event
 {
-	//[super keyUp:event];
+	[super keyUp:event];
 	zoomdown = 0;
 	forwarddown = 0;
 	media_cycle->setForwardDown(0);

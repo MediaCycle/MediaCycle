@@ -367,6 +367,20 @@ static NSDate *gReferenceDate = nil;
 	}
 }
 
+- (void)keyDown:(NSEvent*)event 
+{
+	NSString* event_characters = [event characters];
+	unichar unicode_character = [event_characters characterAtIndex:0];
+	_osgViewData->window->getEventQueue()->keyPress(static_cast<osgGA::GUIEventAdapter::KeySymbol>(unicode_character));
+}
+
+- (void)keyUp:(NSEvent*)event 
+{
+	NSString* event_characters = [event characters];
+	unichar unicode_character = [event_characters characterAtIndex:0];
+	_osgViewData->window->getEventQueue()->keyRelease(static_cast<osgGA::GUIEventAdapter::KeySymbol>(unicode_character));
+}
+
 - (void)osgMouseDown:(NSEvent*)event buttonIndex:(int)bindex
 {
 	//NSLog(@"MouseDown");

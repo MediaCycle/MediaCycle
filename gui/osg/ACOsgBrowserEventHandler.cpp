@@ -49,29 +49,6 @@ void ACOsgBrowserEventHandler::hover_callback(float x, float y) {
 	
 bool ACOsgBrowserEventHandler::handle(const osgGA::GUIEventAdapter& ea,osgGA::GUIActionAdapter& aa)
 {
-	
-	/*
-	switch(ea.getEventType())
-	{
-		case(osgGA::GUIEventAdapter::FRAME):
-		{
-			break;
-		}	
-		case(osgGA::GUIEventAdapter::MOVE):
-		{
-			break;
-		}
-		case(osgGA::GUIEventAdapter::PUSH):
-		{
-			break;
-		}
-		default:
-		{	
-			printf("first received event: %d\n", ea.getEventType());
-			break;
-		}
-	}
-	 */
 	switch(ea.getEventType())
 	{
 		case(osgGA::GUIEventAdapter::PUSH):
@@ -83,19 +60,20 @@ bool ACOsgBrowserEventHandler::handle(const osgGA::GUIEventAdapter& ea,osgGA::GU
 		}    
 		case(osgGA::GUIEventAdapter::KEYDOWN):
 		{
-			
-			std::cout << "Key (OSG) " << ea.getKey() << std::endl;
-			// XS TODO what if key ='a' ?
-//			if (ea.getKey()=='c')
-//			{        
-				osgViewer::View* view = dynamic_cast<osgViewer::View*>(&aa);
-				// xs this one was in image but is not used !
-				// osgViewer::Viewer* viewer = dynamic_cast<osgViewer::Viewer*>(&aa);
-
-				osg::ref_ptr<osgGA::GUIEventAdapter> event = new osgGA::GUIEventAdapter(ea);
-				event->setX((ea.getXmin()+ea.getXmax())*0.5);
-				event->setY((ea.getYmin()+ea.getYmax())*0.5);
-//			}
+			std::cout << "Key (OSG) '" << (char)ea.getKey() << "'" << std::endl;
+/*
+			switch( ea.getKey() )
+			{
+				case osgGA::GUIEventAdapter::KEY_Space:
+					break;
+				default:
+					break;
+			}
+ */
+			return false;
+		} 
+		case(osgGA::GUIEventAdapter::KEYUP):
+		{		
 			return false;
 		}    
 		case(GUIEventAdapter::FRAME):
