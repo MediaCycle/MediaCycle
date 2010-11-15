@@ -343,7 +343,48 @@ void ACAudioGardenOsgQt::loadMediaDirectory(){
 
 void ACAudioGardenOsgQt::loadMediaFiles()
 {
+	QString fileName;
+	QFileDialog dialog(this,"Open AudioGarden Audio File(s)");
+	//CF generating supported file extensions from used media I/O libraries and current media type:
+	std::vector<std::string> mediaExt = media_cycle->getExtensionsFromMediaType( media_cycle->getLibrary()->getMediaType() );
+	QString mediaExts = "Supported Extensions (";
+	std::vector<std::string>::iterator mediaIter = mediaExt.begin();
+	for(;mediaIter!=mediaExt.end();++mediaIter){
+		if (mediaIter != mediaExt.begin())
+			mediaExts.append(" ");
+		mediaExts.append("*");
+		mediaExts.append(QString((*mediaIter).c_str()));
+	}		
+	mediaExts.append(")");
+	//dialog.setDefaultSuffix ("wav");
+	//dialog.setNameFilter("Supported Audio Files (*.wav *.aif)");
+	dialog.setNameFilter(mediaExts);
+	dialog.setFileMode(QFileDialog::ExistingFiles); // ExistingFile(s); "s" is for multiple file handling
 	
+	QStringList fileNames;
+	if (dialog.exec())
+		fileNames = dialog.selectedFiles();
+	
+	QStringList::Iterator file = fileNames.begin();
+	while(file != fileNames.end()) {
+		//std::cout << "File library: '" << (*file).toStdString() << "'" << std::endl;
+		fileName = *file;
+		++file;
+		//std::cout << "Will open: '" << fileName.toStdString() << "'" << std::endl;
+		//fileName = QFileDialog::getOpenFileName(this, "~", );
+		
+		if (!(fileName.isEmpty())) {
+			
+			media_cycle->importDirectory((char*) fileName.toStdString().c_str(), 0);
+			//media_cycle->normalizeFeatures();
+			//media_cycle->libraryContentChanged();
+			std::cout << "File library imported" << std::endl;
+			// XS do this only after loading all files (it was in the while loop) !
+			// XS for CF: in ImageCycle I put "libraryContentChanged" inside updateLibrary
+			media_cycle->libraryContentChanged();
+			this->updateLibrary();
+		}	
+	}	
 }
 
 void ACAudioGardenOsgQt::on_pushButtonRecenter_clicked()

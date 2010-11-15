@@ -280,12 +280,23 @@ void ACImageCycleOsgQt::loadMediaDirectory(){
 
 void ACImageCycleOsgQt::loadMediaFiles(){
 	QString fileName;
-	
 	QFileDialog dialog(this,"Open MediaCycle Image File(s)");
-	dialog.setDefaultSuffix ("png");
-	dialog.setNameFilter("Image Files (*.jpg *.png *.tif *.tiff)");
+	//CF generating supported file extensions from used media I/O libraries and current media type:
+	std::vector<std::string> mediaExt = media_cycle->getExtensionsFromMediaType( media_cycle->getLibrary()->getMediaType() );
+	QString mediaExts = "Supported Extensions (";
+	std::vector<std::string>::iterator mediaIter = mediaExt.begin();
+	for(;mediaIter!=mediaExt.end();++mediaIter){
+		if (mediaIter != mediaExt.begin())
+			mediaExts.append(" ");
+		mediaExts.append("*");
+		mediaExts.append(QString((*mediaIter).c_str()));
+	}		
+	mediaExts.append(")");
+	//dialog.setDefaultSuffix ("png");
+	//dialog.setNameFilter("Image Files (*.jpg *.png *.tif *.tiff)");
+	dialog.setNameFilter(mediaExts);
 	dialog.setFileMode(QFileDialog::ExistingFiles); // ExistingFile(s); "s" is for multiple file handling
-	
+
 	QStringList fileNames;
 	if (dialog.exec())
 		fileNames = dialog.selectedFiles();

@@ -42,6 +42,8 @@ IF ( USE_QT4 )
 	ENDIF ( )
 
 	ADD_DEPENDENCIES(imagecycle-osg-qt mc_image)
+	ADD_DEPENDENCIES(imagecycle-osg-qt mc_segmentation)
+	ADD_DEPENDENCIES(imagecycle-osg-qt mc_visualisation)
 	ADD_DEPENDENCIES(imagecycle-osg-qt mediacycle)
 	ADD_DEPENDENCIES(imagecycle-osg-qt mediacycle-osg)
 	ADD_DEPENDENCIES(imagecycle-osg-qt mediacycle-osg-qt)

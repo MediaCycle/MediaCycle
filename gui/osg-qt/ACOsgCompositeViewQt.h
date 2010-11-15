@@ -1,7 +1,7 @@
 /**
  * @brief ACOsgCompositeViewQt.h
  * @author Christian Frisson
- * @date 01/07/2010
+ * @date 15/11/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -139,6 +139,12 @@ class ACOsgCompositeViewQt : public osgViewer::CompositeViewer, public QGLWidget
 		int septhick; // CF half of the thickness of the border that separates the browser and timeline viewers
 		float sepx,sepy; //CF location (in OSG coordinates) of the border that separates the browser and timeline viewers
 		float refsepy;
+	
+	//MediaBlender specific members:
+	private:
+		int trackdown;
+		int mediaOnTrack;
+		bool track_playing;
 };
 
 #endif

@@ -51,7 +51,7 @@ void ACOsgTrackRenderer::updateMedia(ACMedia* _media)
 
 void ACOsgTrackRenderer::updateMedia(int _media_index)
 {
-	media = NULL;
+	media = media_cycle->getLibrary()->getMedia(_media_index);
 	media_index = _media_index;
 	media_from_lib = true;
 	media_changed = true;

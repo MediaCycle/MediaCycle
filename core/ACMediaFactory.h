@@ -41,27 +41,42 @@
 #include <map>
 #include <string>
 
+#include <boost/algorithm/string.hpp>
+using namespace std;
+using namespace boost;
+
 typedef  std::map<std::string, ACMediaType> filext;
+typedef  std::map<std::string, ACMediaType> mediaplugin;
 
 class ACMediaFactory {
 //private, not protected, since there is no ACImageFactory
 private:
 	// for log(n) search through extensions:
-	static filext file_extensions;
+	static filext available_file_extensions,possible_file_extensions;
 public:
 	ACMediaFactory();
 	~ACMediaFactory();
 	
 	// 2 ways to specify which new media to create:
 	// 1) give file extension
-	static ACMedia* create(std::string file_ext);
+	static ACMedia* create(std::string file_ext);//CF To improve, if extension has been "forgotten" as often in OSX
 	// 2) directly specify which media (e.g. for openLibrary)
 	static ACMedia* create(ACMediaType media_type);
 
 	// 3) copy a media 
 	static ACMedia* create(ACMedia* media);
 
-	static ACMediaType getMediaType(std::string file_ext);
+	static ACMediaType getMediaTypeFromExtension(std::string file_ext);
+	static void listMediaExtensions();
+	static std::vector<std::string> getExtensionsFromMediaType(ACMediaType media_type);// no check in the possible formats list
+	
+private:
+	static bool addFileExtensionSupport(std::string file_ext, ACMediaType media_type);	
+#if defined (USE_SNDFILE)
+	static void addSndFileExtensions();
+#endif
+	static void addOsgFileExtensions();
+	
 };
 
 #endif // _ACMEDIAFACTORY_H

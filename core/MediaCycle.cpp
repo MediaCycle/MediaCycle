@@ -40,6 +40,7 @@ MediaCycle::MediaCycle(ACMediaType aMediaType, string local_directory, string li
 	
 	this->mediaLibrary = 0;
 	this->mediaBrowser = 0;
+	this->mediaFactory = 0;
 	
 	this->forwarddown = 0;
 	this->playkeydown = true;
@@ -53,6 +54,8 @@ MediaCycle::MediaCycle(ACMediaType aMediaType, string local_directory, string li
   
 	this->mediaBrowser = new ACMediaBrowser();
 	this->mediaBrowser->setLibrary(this->mediaLibrary);
+	
+	this->mediaFactory = new ACMediaFactory();
 	
 	this->pluginManager = new ACPluginManager();
 	
@@ -76,6 +79,7 @@ MediaCycle::~MediaCycle() {
 	// XS added delete for variables whose new is in constructor
 	delete this->mediaLibrary;
 	delete this->mediaBrowser;
+	delete this->mediaFactory;
 	delete this->pluginManager;
     stopTcpServer(); // will delete this->networkSocket;
 }

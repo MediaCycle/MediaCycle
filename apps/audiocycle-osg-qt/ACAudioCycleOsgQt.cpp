@@ -294,12 +294,24 @@ void ACAudioCycleOsgQt::loadMediaDirectory(){
 
 void ACAudioCycleOsgQt::loadMediaFiles(){
 	QString fileName;
-	
 	QFileDialog dialog(this,"Open AudioCycle Media File(s)");
-	dialog.setDefaultSuffix ("wav");
-	dialog.setNameFilter("Media Files (*.wav *.aif)");
+	//CF generating supported file extensions from used media I/O libraries and current media type:
+	std::vector<std::string> mediaExt = media_cycle->getExtensionsFromMediaType( media_cycle->getLibrary()->getMediaType() );
+	QString mediaExts = "Supported Extensions (";
+	std::vector<std::string>::iterator mediaIter = mediaExt.begin();
+	for(;mediaIter!=mediaExt.end();++mediaIter){
+		if (mediaIter != mediaExt.begin())
+			mediaExts.append(" ");
+		mediaExts.append("*");
+		mediaExts.append(QString((*mediaIter).c_str()));
+	}		
+	mediaExts.append(")");
+	//dialog.setDefaultSuffix ("wav");
+	//dialog.setNameFilter("Supported Audio Files (*.wav *.aif)");
+	dialog.setNameFilter(mediaExts);
 	dialog.setFileMode(QFileDialog::ExistingFiles); // ExistingFile(s); "s" is for multiple file handling
 	
+
 	QStringList fileNames;
 	if (dialog.exec())
 		fileNames = dialog.selectedFiles();
@@ -318,12 +330,12 @@ void ACAudioCycleOsgQt::loadMediaFiles(){
 			//media_cycle->normalizeFeatures();
 			//media_cycle->libraryContentChanged();
 			std::cout << "File library imported" << std::endl;
+			// XS do this only after loading all files (it was in the while loop) !
+			// XS for CF: in ImageCycle I put "libraryContentChanged" inside updateLibrary
+			media_cycle->libraryContentChanged();
+			this->updateLibrary();
 		}	
 	}
-	// XS do this only after loading all files (it was in the while loop) !
-	// XS for CF: in ImageCycle I put "libraryContentChanged" inside updateLibrary
-	media_cycle->libraryContentChanged();
-	this->updateLibrary();
 }
 
 void ACAudioCycleOsgQt::configureCheckBoxes(){

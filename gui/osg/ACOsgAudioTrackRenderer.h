@@ -37,6 +37,7 @@
 #define __ACOSG_AUDIO_TRACK_RENDERER_H__
 
 #include "ACOsgTrackRenderer.h"
+#include "ACAudio.h"
 
 using namespace std;
 using namespace osg;

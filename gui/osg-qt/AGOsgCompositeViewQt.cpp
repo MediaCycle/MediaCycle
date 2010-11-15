@@ -191,6 +191,9 @@ void AGOsgCompositeViewQt::keyPressEvent( QKeyEvent* event )
 			media_cycle->setForwardDown(1);
 			forwarddown = 1;
 			break;
+		case Qt::Key_C:	
+			media_cycle->setCameraRecenter();
+			break;
 		case Qt::Key_G:
 			selectgrains = true;
 			break;
@@ -200,9 +203,6 @@ void AGOsgCompositeViewQt::keyPressEvent( QKeyEvent* event )
 		case Qt::Key_M:	
 			media_cycle->muteAllSources();
 			break;	
-		case Qt::Key_C:	
-			media_cycle->setCameraRecenter();
-			break;
 		case Qt::Key_P:
 			selectrhythmpattern = true;
 			break;	

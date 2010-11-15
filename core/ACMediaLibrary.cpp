@@ -162,7 +162,7 @@ int ACMediaLibrary::importFile(std::string _filename, ACPluginManager *acpl, boo
 	//CF early check in video files for audio and video streams, towards ACMediaDocuments
 	// from http://www.inb.uni-luebeck.de/~boehme/using_libavcodec.html
 	// and http://www.inb.uni-luebeck.de/~boehme/libavcodec_update.html
-	ACMediaType fileMediaType = ACMediaFactory::getMediaType(extension);
+	ACMediaType fileMediaType = ACMediaFactory::getMediaTypeFromExtension(extension);
 	ACMedia* media;
 	if (media_type == MEDIA_TYPE_VIDEO || media_type == MEDIA_TYPE_AUDIO) {
 		if (fileMediaType == MEDIA_TYPE_VIDEO) {			

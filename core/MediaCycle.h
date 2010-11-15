@@ -112,6 +112,7 @@ public:
 	ACMediaNode &getMediaNode(int i);
 	string getMediaFileName(int i);
 	int getMediaType(int i);
+	std::vector<std::string> getExtensionsFromMediaType(ACMediaType media_type){return mediaFactory->getExtensionsFromMediaType(media_type);};
 	int getThumbnailWidth(int i);
 	int getThumbnailHeight(int i);
 	int getWidth(int i);
@@ -206,6 +207,7 @@ private:
 	string local_directory;
 	string libname;
 	ACMediaLibrary *mediaLibrary;
+	ACMediaFactory *mediaFactory;
 	ACMediaBrowser *mediaBrowser;
 	ACNetworkSocketServer *networkSocket;
 	ACPluginManager *pluginManager;

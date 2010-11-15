@@ -91,11 +91,15 @@ void ACOsgAudioTrackRenderer::waveformGeode() {
 	//int media_index = track_index; // or media_cycle->getBrowser()->getMediaTrack(track_index).getMediaId(); 
 	if (media_from_lib && media_cycle->getBrowser()->getMode() == AC_MODE_NEIGHBORS)
 		media_index = media_cycle->getBrowser()->getUserLog()->getMediaIdFromNodeId(media_index);//CF can waveformGeode() occur more than once, once media_index is set?
-	
+
+//CF was for AudioGarden
+/*	
 	if (media_from_lib)
-		width = media_cycle->getThumbnailWidth(media_index);//CF instead of track_index
+		width = media_cycle->getThumbnailWidth(media_index);
 	else
 		width = media->getThumbnailWidth(); //CF media should be non-null
+*/
+	width = ((ACAudio*) media)->getNFrames() / ((ACAudio*) media)->getSampleRate();
 	
 	std::cout << "Number of points of the waveform: " << width << std::endl;
 	width = width / 2;
@@ -103,11 +107,15 @@ void ACOsgAudioTrackRenderer::waveformGeode() {
 	zoom_x = 5.0*240.0/width;// CF autosizefit possible only when displaying one track
 	translate_x = -(width * xstep * zoom_x)/2; // CF autocenter possible only when displaying one track
 
+//CF was for AudioGarden
+/*
 	if (media_from_lib)
 		thumbnail = (float*)media_cycle->getThumbnailPtr(media_index);//CF instead of track_index
 	else
 		thumbnail = (float*)media->getThumbnailPtr();
-		
+*/
+	thumbnail = ((ACAudio*) media)->getMonoSamples();//CF with ACMediaDocuments, stereo tracks should be two different ACMedias
+			
 	// samples vertices
 	vertices = new Vec3Array(2*width+2);
 	for(i=0; i<width; i++) {

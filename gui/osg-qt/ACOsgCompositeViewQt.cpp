@@ -42,11 +42,12 @@
 ACOsgCompositeViewQt::ACOsgCompositeViewQt( QWidget * parent, const char * name, const QGLWidget * shareWidget, WindowFlags f):
 	QGLWidget(parent, shareWidget, f),
 	mousedown(0), zoomdown(0), forwarddown(0), autoplaydown(0),rotationdown(0),
-	borderdown(0), transportdown(0),
+	borderdown(0), transportdown(0), 
 	refx(0.0f), refy(0.0f),
 	refcamx(0.0f), refcamy(0.0f),
 	refzoom(0.0f),refrotation(0.0f),
-	septhick(5),sepx(0.0f),sepy(0.0f),refsepy(0.0f)
+	septhick(5),sepx(0.0f),sepy(0.0f),refsepy(0.0f),
+	trackdown(0),mediaOnTrack(-1),track_playing(false)
 {
 	osg_view = new osgViewer::GraphicsWindowEmbedded(0,0,width(),height());
 	setFocusPolicy(Qt::StrongFocus);// CF instead of ClickFocus
@@ -179,12 +180,15 @@ void ACOsgCompositeViewQt::keyPressEvent( QKeyEvent* event )
 
 	switch( event->key() )
 	{
-		case Qt::Key_Z:
-			zoomdown = 1;
-			break;
 		case Qt::Key_A:
 			media_cycle->setForwardDown(1);
 			forwarddown = 1;
+			break;
+		case Qt::Key_C:	
+			media_cycle->setCameraRecenter();
+			break;	
+		case Qt::Key_M:	
+			media_cycle->muteAllSources();
 			break;
 		case Qt::Key_Q:
 			media_cycle->setAutoPlay(1);
@@ -193,13 +197,17 @@ void ACOsgCompositeViewQt::keyPressEvent( QKeyEvent* event )
 		case Qt::Key_R:
 			rotationdown = 1;
 			break;
-		case Qt::Key_M:	
-			media_cycle->muteAllSources();
+		case Qt::Key_T:
+			trackdown = 1;
+			break;	
+		case Qt::Key_Z:
+			zoomdown = 1;
 			break;
 		case Qt::Key_Space:
 			if ( (media_cycle) && (media_cycle->hasBrowser()) && (timeline_renderer->getTrack(0)!=NULL) ) {
 				transportdown = 1;
 				media_cycle->getBrowser()->toggleSourceActivity( timeline_renderer->getTrack(0)->getMediaIndex() );
+				track_playing = track_playing ? false : true; //CF toggling
 			}	
 			break;
 		default:
@@ -218,6 +226,7 @@ void ACOsgCompositeViewQt::keyReleaseEvent( QKeyEvent* event )
 	media_cycle->setAutoPlay(0);
 	rotationdown = 0;
 	transportdown = 0;
+	trackdown = 0;
 }
 
 void ACOsgCompositeViewQt::mousePressEvent( QMouseEvent* event )
@@ -292,7 +301,7 @@ void ACOsgCompositeViewQt::mouseMoveEvent( QMouseEvent* event )
 		}
 		else
 		{	
-			if ( (forwarddown == 0)) 
+			if ( (forwarddown == 0) && (trackdown == 0)) 
 			{
 				if ( (event->y() >= height() - ( browser_view->getCamera()->getViewport()->height() + browser_view->getCamera()->getViewport()->y() ) ) && (event->y() <= height() - ( browser_view->getCamera()->getViewport()->y() + septhick) ))
 				{
@@ -338,7 +347,7 @@ void ACOsgCompositeViewQt::mouseReleaseEvent( QMouseEvent* event )
 	
 	if ( (media_cycle) && (media_cycle->hasBrowser()))
 	{
-		if ( (forwarddown==1))
+		if ( (forwarddown==1)|| (trackdown == 1) )
 		{	
 			int loop = media_cycle->getClickedNode();
 			std::cout << "node " << loop << " selected" << std::endl;
@@ -347,29 +356,72 @@ void ACOsgCompositeViewQt::mouseReleaseEvent( QMouseEvent* event )
 			
 			if(loop >= 0)
 			{
-	
-				// XSCF 250310 added these 3
-				// XS 260810 put this "if" first otherwise we store the next state
-				if (media_cycle->getBrowser()->getMode() == AC_MODE_CLUSTERS)
-					media_cycle->storeNavigationState();
+				if (forwarddown==1)
+				{
+					// XSCF 250310 added these 3
+					// XS 260810 put this "if" first otherwise we store the next state
+					if (media_cycle->getBrowser()->getMode() == AC_MODE_CLUSTERS)
+						media_cycle->storeNavigationState();
+					
+					if (media_cycle->getBrowser()->getMode() == AC_MODE_CLUSTERS)
+						media_cycle->incrementLoopNavigationLevels(loop);
+					media_cycle->setReferenceNode(loop);
+					
+					
+					//			media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
+					//			media_cycle->getBrowser()->setState(AC_CHANGING);
+					
+					media_cycle->updateDisplay(true); //XS250310 was: media_cycle->updateClusters(true);
+					// XSCF 250310 removed this:
+					// media_cycle->updateNeighborhoods();
+					//	media_cycle->updateClusters(false);// CF was true, equivalent to what's following
+					
+					//				// remainders from updateClusters(true)
+					//				media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
+					//				media_cycle->getBrowser()->setState(AC_CHANGING);
+				}
+				else if (trackdown == 1)
+				{
+					if (mediaOnTrack != -1)
+						this->getBrowserRenderer()->resetNodeColor(mediaOnTrack);
+					
+					mediaOnTrack = loop;
+					if (mediaOnTrack != -1)
+						this->getBrowserRenderer()->changeNodeColor(mediaOnTrack, Vec4(1.0,1.0,1.0,1.0));//CF color the node of the media on track in white
+					
+					if ( timeline_renderer->getTrack(0)!=NULL )
+					{
+						
+						if (sepy==0)
+						{
+							sepy = height()/4;// CF browser/timeline proportions at startup
+							browser_view->getCamera()->setGraphicsContext(this->getGraphicsWindow());
+							browser_view->getCamera()->setViewport(new osg::Viewport(0,sepy,width(),height()-sepy)); // CF: for OSG y=0 is on the bottom, for Qt on the top
+							browser_view->getCamera()->setProjectionMatrixAsPerspective(45.0f, static_cast<double>(width())/static_cast<double>(height()-sepy), 0.001f, 10.0f);
+							browser_view->getCamera()->getViewMatrix().makeIdentity();
+							browser_view->getCamera()->setViewMatrixAsLookAt(Vec3(0,0,0.8), Vec3(0,0,0), Vec3(0,1,0));
+							//browser_view->getCamera()->setClearColor(Vec4f(0.0,0.0,0.0,0.0));
+							
+							//timeline_view->getCamera()->setClearColor(Vec4f(0.0,0.0,0.0,0.0));
+							timeline_view->getCamera()->setClearColor(Vec4f(0.14,0.14,0.28,1.0));
+							timeline_view->getCamera()->setGraphicsContext(this->getGraphicsWindow());
+							timeline_view->getCamera()->setViewport(new osg::Viewport(0,0,width(),sepy));
+							timeline_view->getCamera()->setProjectionMatrixAsPerspective(45.0f, 1.0f, 0.001f, 10.0f);//static_cast<double>(width())/static_cast<double>(sepy), 0.001f, 10.0f);
+							timeline_view->getCamera()->getViewMatrix().makeIdentity();
+							timeline_view->getCamera()->setViewMatrixAsLookAt(Vec3(0,0,0.8), Vec3(0,0,0), Vec3(0,1,0));
+							media_cycle->setNeedsDisplay(true);
+						}	
+						/*
+						if (track_playing) {
+							media_cycle->getBrowser()->toggleSourceActivity( timeline_renderer->getTrack(0)->getMediaIndex() );
+							track_playing = false;
+						}	
+						*/
+						this->getTimelineRenderer()->getTrack(0)->updateMedia( loop ); //media_cycle->getLibrary()->getMedia(loop) );
+						media_cycle->setNeedsDisplay(true);
+					}
+				}
 				
-				if (media_cycle->getBrowser()->getMode() == AC_MODE_CLUSTERS)
-					media_cycle->incrementLoopNavigationLevels(loop);
-				media_cycle->setReferenceNode(loop);
-				
-				
-				//			media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
-				//			media_cycle->getBrowser()->setState(AC_CHANGING);
-				
-				media_cycle->updateDisplay(true); //XS250310 was: media_cycle->updateClusters(true);
-				// XSCF 250310 removed this:
-				// media_cycle->updateNeighborhoods();
-				//	media_cycle->updateClusters(false);// CF was true, equivalent to what's following
-				
-				//				// remainders from updateClusters(true)
-				//				media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
-				//				media_cycle->getBrowser()->setState(AC_CHANGING);
-				media_cycle->setNeedsDisplay(true);
 			}
 		}	
 		media_cycle->setClickedNode(-1);

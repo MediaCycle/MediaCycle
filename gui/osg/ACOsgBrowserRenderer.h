@@ -125,7 +125,7 @@ public:
 		
 	double getTime();
 		
-	void setMediaCycle(MediaCycle *media_cycle) { this->media_cycle = media_cycle; };
+	void setMediaCycle(MediaCycle *media_cycle){ this->media_cycle = media_cycle; };
 	//void setLayoutPlugin(ACPlugin* acpl){mLayoutPlugin=acpl;};
 	//void setLayout(ACOsgBrowserLayoutType _type){layout_type = _type;}
 	Group *getShapes() 	{ return group.get(); };

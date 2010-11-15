@@ -36,6 +36,7 @@ IF ( USE_QT4 )
 	ENDIF ( )
 
 	ADD_DEPENDENCIES(videocycle-simple-qt mc_video)
+	ADD_DEPENDENCIES(videocycle-simple-qt mc_segmentation)
 	ADD_DEPENDENCIES(videocycle-simple-qt mediacycle)
 	ADD_DEPENDENCIES(videocycle-simple-qt mediacycle-osg)
 	ADD_DEPENDENCIES(videocycle-simple-qt mediacycle-osg-qt)
