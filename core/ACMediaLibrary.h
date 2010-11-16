@@ -86,7 +86,7 @@ public:
 	long getSynthesisID(){return synthesisID;};
 	void setSynthesisID(long _id){synthesisID = _id;};
 	
-	void normalizeFeatures();
+	void normalizeFeatures(int needsNormalize=1);
 	void denormalizeFeatures();
 	void calculateStats();
 
@@ -111,6 +111,9 @@ public:
 
 	// XS TODO: add pthreads
 	//	void* p_importSingleFile(void *arg);
+	
+	int scanDirectories(vector<string> _path, int _recursive, std::vector<string>& filenames);
+	
 private:
 	void deleteAllMedia();
 	int scanDirectory(std::string _path, int _recursive, std::vector<string>& filenames);

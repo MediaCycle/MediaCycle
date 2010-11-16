@@ -34,11 +34,12 @@
 #import "ACOsgBrowserViewCocoa.h"
 #import "ACOsgViewNodeCocoa.h"
 
+/*
 struct ACOsgBrowserViewData
 {
 	ACOsgBrowserRenderer renderer;
 };
- 
+*/
 
 @implementation ACOsgBrowserViewCocoa
 
@@ -64,6 +65,7 @@ struct ACOsgBrowserViewData
 	media_cycle = _media_cycle;
 	////_privateData->renderer.setMediaCycle(media_cycle);//CF
 	renderer->setMediaCycle(media_cycle);//CF
+	renderer_hud->setMediaCycle(media_cycle);
 	event_handler = new ACOsgBrowserEventHandler;
 	event_handler->setMediaCycle(media_cycle);
 	[self addEventHandler:(event_handler)];
@@ -73,7 +75,8 @@ struct ACOsgBrowserViewData
 {	
 	//NSLog(@"initCommonACBrowserOsgView");
 	////_privateData = new ACOsgBrowserViewData();
-		renderer = new ACOsgBrowserRenderer();//CF
+	renderer = new ACOsgBrowserRenderer();//CF
+	renderer_hud = new ACOsgHUDRenderer();
 	//_privateData->renderer.setMediaCycle(media_cycle);
 	
 	// to get multisample, we have to do it by code...
@@ -427,28 +430,37 @@ struct ACOsgBrowserViewData
 	renderer->prepareNodes();
 	renderer->prepareLabels();
 		
+	renderer_hud->preparePointers();
+		
 	//[self setNode:_privateData->renderer.getShapes()];//CF
 	[self setNode:renderer->getShapes()];//CF	
+	[self addCamera:renderer_hud->getCamera()];
 	}
 }
 
 - (void)updateTransformsFromBrowser:(double)frac
 {
 	int closest_node;
-	
+
 	osgViewer::Viewer* view = [self viewer];
 	
 	@synchronized(self)
 	{
-	// get screen coordinates
-	////closest_node = _privateData->renderer.computeScreenCoordinates(view, frac);//CF
-	closest_node = renderer->computeScreenCoordinates(view, frac);//CF
-	media_cycle->setClosestNode(closest_node);
-	// recompute scene graph	
-	////_privateData->renderer.updateNodes(frac); // animation time in [0,1] //CF
-	////_privateData->renderer.updateLabels(frac); //CF
-	renderer->updateNodes(frac); // animation time in [0,1] //CF
-	renderer->updateLabels(frac);//CF
+		// SD 2010 OCT
+		renderer->prepareNodes();
+		renderer->prepareLabels();
+		renderer_hud->preparePointers();
+		
+		// get screen coordinates
+		////closest_node = _privateData->renderer.computeScreenCoordinates(view, frac);//CF
+		closest_node = renderer->computeScreenCoordinates(view, frac);//CF
+		media_cycle->setClosestNode(closest_node);
+		// recompute scene graph	
+		////_privateData->renderer.updateNodes(frac); // animation time in [0,1] //CF
+		////_privateData->renderer.updateLabels(frac); //CF
+		renderer->updateNodes(frac); // animation time in [0,1] //CF
+		renderer->updateLabels(frac);//CF		
+		renderer_hud->updatePointers(view);
 	}
 }
 

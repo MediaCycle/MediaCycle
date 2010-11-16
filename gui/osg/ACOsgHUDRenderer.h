@@ -33,14 +33,15 @@
  *
  */
 
-#ifndef __ACOSG_BROWSER_RENDERER_H__
-#define __ACOSG_BROWSER_RENDERER_H__
+#ifndef __ACOSG_HUD_RENDERER_H__
+#define __ACOSG_HUD_RENDERER_H__
 
 #include "MediaCycle.h"
 
 #include "ACOsgMediaRenderer.h"
 //#include "ACOsgLayoutRenderer.h"
 #include "ACOsgNodeLinkRenderer.h"
+#include "ACOsgPointerRenderer.h"
 
 #include <osgDB/ReadFile>
 //#include <osgDB/WriteFile>
@@ -78,69 +79,29 @@
 using namespace std;
 using namespace osg;
 
-class ACOsgBrowserRenderer {
+class ACOsgHUDRenderer {
 protected:
 	MediaCycle				*media_cycle;
+	ref_ptr<osg::Camera>				 camera;
 	ref_ptr<Group>				 group;
-	ref_ptr<Group>				 media_group;
-	ref_ptr<Group>				 link_group;
-	ref_ptr<Group>				 label_group;
-	vector<ACOsgMediaRenderer*>  node_renderer;
-	vector<ACOsgNodeLinkRenderer*>  link_renderer;
-	vector<ACOsgMediaRenderer*>  label_renderer;
-	//ACOsgLayoutRenderer*		layout_renderer;
-	//vector<bool>				 media_selected;
-	vector<float>				 distance_mouse;
-	//ACPlugin* mLayoutPlugin;
-	//ACOsgLayoutType layout_type;
-	int displayed_nodes;
-
-	// SD - Results from centralized request to MediaCycle - GLOBAL
-	double						media_cycle_time;
-	double						media_cycle_prevtime;
-	double						media_cycle_deltatime;
-	float						media_cycle_zoom;
-	float						media_cycle_angle;
-	int							media_cycle_mode;
-	int							media_cycle_global_navigation_level;
+	ref_ptr<Group>				 pointer_group;
+	vector<ACOsgPointerRenderer*>  pointer_renderer;
 	
-	// SD - Results from centralized request to MediaCycle - NODE SPECIFIC
-	ACMediaNode					media_cycle_node;
-	bool						media_cycle_isdisplayed;
-	ACPoint						media_cycle_current_pos;
-	ACPoint						media_cycle_view_pos;
-	ACPoint						media_cycle_next_pos;
-	int							media_cycle_navigation_level;
-	int							media_cycle_activity;
-	int							node_index;
-	int							media_index;
-	int							prev_media_index;	
-	std::string					media_cycle_filename;
-	
-	int nodes_prepared;
+	// SD - Results from centralized request to MediaCycle
+	ACPoint						media_cycle_pointer_current_pos;
 	
 public:
-	ACOsgBrowserRenderer();
-	~ACOsgBrowserRenderer() {};
+	ACOsgHUDRenderer();
+	~ACOsgHUDRenderer() {};
 		
 	double getTime();
 		
-	void setMediaCycle(MediaCycle *media_cycle){ this->media_cycle = media_cycle; };
-	//void setLayoutPlugin(ACPlugin* acpl){mLayoutPlugin=acpl;};
-	//void setLayout(ACOsgBrowserLayoutType _type){layout_type = _type;}
-	Group *getShapes() 	{ return group.get(); };
-	
-	void prepareNodes(int start=0);
-	void updateNodes(double ratio=0.0);
+	void setMediaCycle(MediaCycle *media_cycle);
 
-	void prepareLabels(int start=0);
-	void updateLabels(double ratio=0.0);
-			
-	int computeScreenCoordinates(osgViewer::View* view, double ratio=0.0); //CF: use osgViewer::Viewer* for simple Viewers
-	vector<float> getDistanceMouse() { return distance_mouse; };
-	
-	void changeNodeColor(int _node, Vec4 _color){node_renderer[_node]->changeNodeColor(_color);}
-	void resetNodeColor(int _node){node_renderer[_node]->resetNodeColor();}
+	Camera* getCamera();
+		
+	void preparePointers();
+	void updatePointers(osgViewer::Viewer* viewer);
 };
 
 #endif

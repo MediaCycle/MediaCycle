@@ -37,6 +37,7 @@
 //#import "ACOsgViewNodeCocoa.h"
 #include <MediaCycle.h>
 #import "ACOsgBrowserRenderer.h"
+#import "ACOsgHUDRenderer.h"
 
 ////struct ACOsgBrowserViewData;//CF
 
@@ -45,7 +46,8 @@
 	
 	MediaCycle				*media_cycle;
 	ACOsgBrowserEventHandler *event_handler;
-	ACOsgBrowserRenderer *renderer; //CF
+	ACOsgBrowserRenderer	*renderer; //CF
+	ACOsgHUDRenderer		*renderer_hud; //SD
 
 	int mousedown, zoomdown, forwarddown, autoplaydown;
 	float refx, refy;
@@ -64,6 +66,8 @@
 - (void)updateTransformsFromBrowser:(double)frac;
 
 - (ACOsgBrowserRenderer*) renderer;
+
+- (ACOsgBrowserRenderer*) renderer_hud;
 
 //CF workaround due to issues with accessing C++ pointer through Objective-C functions...
 - (float) getMouseDistanceAtNode:(int)closest_node;

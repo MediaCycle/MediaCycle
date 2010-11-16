@@ -32,9 +32,21 @@
 
 #include "MediaCycle.h"
 
+#include <omp.h>
+
 #include <fstream>
 using std::ofstream;
 using std::ifstream;
+
+static double getTime() {
+	
+    struct timeval tv = {0, 0};
+    struct timezone tz = {0, 0};
+    
+    gettimeofday(&tv, &tz);
+    
+    return (double)tv.tv_sec + tv.tv_usec / 1000000.0;
+}
 
 MediaCycle::MediaCycle(ACMediaType aMediaType, string local_directory, string libname) {
 	
@@ -60,6 +72,8 @@ MediaCycle::MediaCycle(ACMediaType aMediaType, string local_directory, string li
 	this->pluginManager = new ACPluginManager();
 	
 	this->config_file = "";
+	
+	this->prevLibrarySize = 0;
 	// Test Labels
 /*	ACPoint p;
 	p.x = -0.1; p.y = 0.0; p.z = 0.01;
@@ -69,6 +83,57 @@ MediaCycle::MediaCycle(ACMediaType aMediaType, string local_directory, string li
 	p.x = 0.0; p.y = 0.1; p.z = 0.01;
 	this->mediaBrowser->setLabel(2, "Label-3", p);
  */
+
+	/*
+	int nthreads, tid, NumberOfProcs;
+
+	NumberOfProcs = omp_get_num_procs();
+	printf("\nWorking on %d Processors",NumberOfProcs);
+	
+	omp_set_num_threads(NumberOfProcs);
+	
+#pragma omp parallel private(tid)
+	{
+		tid = omp_get_thread_num();
+		printf("\nWoohoo from thread : %d", tid);
+		if (tid==0){
+			nthreads = omp_get_num_threads();
+			printf("\nMaster says : There is %d out there!", nthreads);
+		}
+	}
+	printf("\n");
+	// No more threads
+
+	*/
+	
+	/*
+	double t1 = getTime();
+	int s = 500000;
+	float *x = new float[s];
+	
+	for (unsigned int i=0; i<s; i++) {
+		
+		x[i] = rand();
+		x[i] = cos(sin(cos(sin(cos(sin(cos(sin(x[i]))))))));
+		
+	}
+
+	double t2 = getTime();
+	
+	printf("TTT - %f\n",float(t2-t1));
+	
+	t1 = getTime();
+	
+#pragma omp parallel for
+	for (unsigned int i=0; i<s; i++) {		
+		x[i] = rand();
+		x[i] = cos(sin(cos(sin(cos(sin(cos(sin(x[i]))))))));
+	}
+	
+	t2 = getTime();
+
+	printf("TTT - %f\n",float(t2-t1));
+	 */
 }
 
 MediaCycle::MediaCycle(const MediaCycle& orig) {
@@ -236,6 +301,90 @@ int MediaCycle::processTcpMessage(char* buffer, int l, char **buffer_send, int *
 }
 
 // == Media Library
+
+void *threadImport(void *import_thread_arg) {
+	
+	((MediaCycle*)import_thread_arg)->importDirectories();
+}
+
+int MediaCycle::importDirectoriesThreaded(vector<string> directories, int recursive, bool forward_order, bool doSegment) {
+	
+	import_directories = directories;
+	import_recursive = recursive;
+	import_forward_order = forward_order;
+	import_doSegment = doSegment;
+	
+	pthread_attr_init(&import_thread_attr);
+	import_thread_arg = (void*)this;
+	pthread_create(&import_thread, &import_thread_attr, &threadImport, import_thread_arg);
+	pthread_attr_destroy(&import_thread_attr);
+	//pthread_cancel(import_thread_arg); // SD will destroy itseld when function returns
+}
+
+int MediaCycle::importDirectories() {
+	
+	return importDirectories(import_directories, import_recursive, import_forward_order, import_doSegment);
+}
+
+int MediaCycle::importDirectories(vector<string> directories, int recursive, bool forward_order, bool doSegment) {
+
+	float prevLibrarySizeMultiplier = 2;
+	int needsNormalizeAndCluster;
+	vector<string> filenames;
+	
+	// SD TODO - need to check if files where not alrady scanned before
+		
+	mediaLibrary->scanDirectories(directories, recursive, filenames);
+	
+	int tid;
+	int n;
+	unsigned int i = 0;
+	double t1, t2;
+	
+	omp_set_num_threads(2);
+
+	t1 = getTime();
+		
+	n = filenames.size();
+	
+/*
+#pragma omp parallel for
+	for (i=0; i<10; i++) {
+		int x = 1;
+	}
+*/	
+	
+	for (i=0;i<n;i++) {
+		
+		mediaLibrary->importFile(filenames[i], this->pluginManager, doSegment);
+		
+		needsNormalizeAndCluster = 0;
+		if ( (mediaLibrary->getSize() >= int(prevLibrarySizeMultiplier * prevLibrarySize))
+			|| (i==filenames.size()-1) ) {
+			needsNormalizeAndCluster = 1;
+			prevLibrarySize = mediaLibrary->getSize();
+		}		
+		
+		//needsNormalizeAndCluster = 1;
+		
+		normalizeFeatures(needsNormalizeAndCluster); // actually just calls mediaLibrary->normalizeFeatures();
+		
+		libraryContentChanged(needsNormalizeAndCluster); // actually just calls mediaBrowser->libraryContentChanged();
+		
+
+	}
+		
+	t2 = getTime();
+	
+	printf("TTT - %f\n",float(t2-t1));
+	
+		
+	//}
+	
+	filenames.empty();
+	
+	//[self updatedLibrary];
+}
 
 int MediaCycle::importDirectory(string path, int recursive, bool forward_order, bool doSegment) {
 // XS import = import + some processing 
@@ -427,13 +576,13 @@ float MediaCycle::getWeight(int i){return mediaBrowser->getWeight(i);}
 void MediaCycle::setForwardDown(int i) { forwarddown = i; }
 
 // == Features
-void MediaCycle::normalizeFeatures() { mediaLibrary->normalizeFeatures(); }
+void MediaCycle::normalizeFeatures(int needsNormalize) { mediaLibrary->normalizeFeatures(needsNormalize); }
 // void MediaCycle::openLibrary(string path) { mediaLibrary->openLibrary(path); }		// discontinued SD 2010 sep
-void MediaCycle::libraryContentChanged() { mediaBrowser->libraryContentChanged(); }
+void MediaCycle::libraryContentChanged(int needsNormalizeAndCluster) { mediaBrowser->libraryContentChanged(needsNormalizeAndCluster); }
 //void MediaCycle::saveAsLibrary(string path) {mediaLibrary->saveAsLibrary(path); }
 void MediaCycle::saveACLLibrary(string path) {mediaLibrary->saveACLLibrary(path); }
 void MediaCycle::saveMCSLLibrary(string path) {mediaLibrary->saveMCSLLibrary(path); }
-void MediaCycle::cleanLibrary() { mediaLibrary->cleanLibrary(); }
+void MediaCycle::cleanLibrary() { prevLibrarySize=0; mediaLibrary->cleanLibrary(); }
 // Get Features Vector (identified by feature_name) in media i 
 vector<float> MediaCycle::getFeaturesVectorInMedia(int i, string feature_name) {
 	ACMedia* lmedia;
@@ -452,6 +601,15 @@ int MediaCycle::setSourceCursor(int lid, int frame_pos) {
 	return mediaBrowser->setSourceCursor(lid, frame_pos);
 }
 void MediaCycle::muteAllSources() { mediaBrowser->muteAllSources(); }
+
+// == POINTERS on VIEW
+int MediaCycle::getPointerSize() {
+	return mediaBrowser->getPointerSize();
+}
+
+ACPointer& MediaCycle::getPointer(int i) {
+	return mediaBrowser->getPointer(i);
+} 
 
 // == LABELS on VIEW
 int MediaCycle::getLabelSize() { return mediaBrowser->getLabelSize(); }
@@ -495,8 +653,8 @@ void MediaCycle::hoverObjectCallback(int pid) {
 	// XS duh ?
 }
 
-void MediaCycle::hoverCallback(float x, float y) {
-	mediaBrowser->setHoverLoop(-1, x, y);		
+void MediaCycle::hoverCallback(float xx, float yy) {
+	mediaBrowser->setHoverLoop(-1, xx, yy);		
 }
 
 

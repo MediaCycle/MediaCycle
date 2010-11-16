@@ -55,6 +55,27 @@ ACOsgBrowserRenderer::ACOsgBrowserRenderer()
 	group->addChild(link_group.get());
 	
 	nodes_prepared = 0;
+	
+	/*
+	std::string ffmpegLib = osgDB::Registry::instance()->createLibraryNameForExtension("ffmpeg");
+	
+	osgDB::Registry::LoadStatus ffmpegStatus = osgDB::Registry::instance()->loadLibrary(ffmpegLib);
+	
+	std::string qtLib = osgDB::Registry::instance()->createLibraryNameForExtension("qt");
+	
+	osgDB::Registry::LoadStatus qtStatus = osgDB::Registry::instance()->loadLibrary(qtLib); 
+	
+	std::cout << "OSG supports the following extensions:" << std::endl;
+	osgDB::Registry::ReaderWriterList readerWriterList = osgDB::Registry::instance()->getReaderWriterList();
+	for (int r=0; r<readerWriterList.size();r++)
+	{
+		osgDB::ReaderWriter::FormatDescriptionMap fDM = readerWriterList[r]->supportedExtensions();
+		osgDB::ReaderWriter::FormatDescriptionMap::iterator iter = fDM.begin();
+		for(;iter!=fDM.end();++iter)
+			std::cout << "-- (*." << iter->first << ") "<< iter->second << std::endl;
+	}
+	 */
+	
 }
 
 double ACOsgBrowserRenderer::getTime() {
@@ -103,68 +124,63 @@ void ACOsgBrowserRenderer::prepareNodes(int _start) {
 			media_group->removeChild(node_renderer[i]->getNode());
 			delete node_renderer[i];
 		}
+		node_renderer.resize(n);
 	}
-
-	if (link_renderer.size()>n){//media_cycle->getBrowser()->getLayout() == AC_LAYOUT_TYPE_NODELINK && ) {
-		for (int i=n;i<link_renderer.size();i++) {
-			link_group->removeChild(link_renderer[i]->getLink());
-			delete link_renderer[i];
-		}
-	}
+	else if (node_renderer.size()<n) {
 		
-	node_renderer.resize(n);
-	//if (media_cycle->getBrowser()->getLayout() == AC_LAYOUT_TYPE_NODELINK)
-	link_renderer.resize(n);
-	distance_mouse.resize(n);
-	
-	for (int i=start;i<n;i++) {
-		media_type = media_cycle->getMediaType(i);
-		switch (media_type) {
-			case MEDIA_TYPE_AUDIO:
-				node_renderer[i] = new ACOsgAudioRenderer();
-				break;
-			case MEDIA_TYPE_IMAGE:
-				#if !defined (APPLE_IOS)
-				node_renderer[i] = new ACOsgImageRenderer();
-				#endif//CF APPLE_IOS
-				break;
-			case MEDIA_TYPE_VIDEO:
-				#if !defined (APPLE_IOS)
-				node_renderer[i] = new ACOsgVideoRenderer();
-				#endif//CF APPLE_IOS
-				break;
-			case MEDIA_TYPE_3DMODEL:
-				node_renderer[i] = new ACOsg3DModelRenderer();
-				break;
-			case MEDIA_TYPE_TEXT:
-				node_renderer[i] = new ACOsgTextRenderer();
-				break;
-			default:
-				node_renderer[i] = NULL;
-				break;
-		}
-		if (node_renderer[i] != NULL) {
-						
-			node_renderer[i]->setMediaCycle(media_cycle);
-			node_renderer[i]->setNodeIndex(i);
+		node_renderer.resize(n);
+		//if (media_cycle->getBrowser()->getLayout() == AC_LAYOUT_TYPE_NODELINK)
+		link_renderer.resize(n);
+		distance_mouse.resize(n);
+		
+		for (int i=start;i<n;i++) {
+			media_type = media_cycle->getMediaType(i);
+			switch (media_type) {
+				case MEDIA_TYPE_AUDIO:
+					node_renderer[i] = new ACOsgAudioRenderer();
+					break;
+				case MEDIA_TYPE_IMAGE:
+#if !defined (APPLE_IOS)
+					node_renderer[i] = new ACOsgImageRenderer();
+#endif//CF APPLE_IOS
+					break;
+				case MEDIA_TYPE_VIDEO:
+#if !defined (APPLE_IOS)
+					node_renderer[i] = new ACOsgVideoRenderer();
+#endif//CF APPLE_IOS
+					break;
+				case MEDIA_TYPE_3DMODEL:
+					node_renderer[i] = new ACOsg3DModelRenderer();
+					break;
+				case MEDIA_TYPE_TEXT:
+					node_renderer[i] = new ACOsgTextRenderer();
+					break;
+				default:
+					node_renderer[i] = NULL;
+					break;
+			}
+			if (node_renderer[i] != NULL) {
+				
+				node_renderer[i]->setMediaCycle(media_cycle);
+				node_renderer[i]->setNodeIndex(i);
+				
+				media_cycle_node = media_cycle->getMediaNode(i);
+				node_index = node_renderer[i]->getNodeIndex();
+				media_index = node_index; 
+				if (media_cycle_mode == AC_MODE_NEIGHBORS)
+					media_index = media_cycle->getBrowser()->getUserLog()->getMediaIdFromNodeId(node_index);	
+				if (media_index<0)
+					media_index = 0;
+				media_cycle_filename = media_cycle->getMediaFileName(media_index);
+				node_renderer[i]->setMediaIndex(media_index);
+				node_renderer[i]->setFilename(media_cycle_filename);
+				
+				// node_renderer[i]->setActivity(0);
+				node_renderer[i]->prepareNodes();
+				media_group->addChild(node_renderer[i]->getNode());
+			}
 			
-			media_cycle_node = media_cycle->getMediaNode(i);
-			node_index = node_renderer[i]->getNodeIndex();
-			media_index = node_index; 
-			if (media_cycle_mode == AC_MODE_NEIGHBORS)
-				media_index = media_cycle->getBrowser()->getUserLog()->getMediaIdFromNodeId(node_index);	
-			if (media_index<0)
-				media_index = 0;
-			media_cycle_filename = media_cycle->getMediaFileName(media_index);
-			node_renderer[i]->setMediaIndex(media_index);
-			node_renderer[i]->setFilename(media_cycle_filename);
-
-			// node_renderer[i]->setActivity(0);
-			node_renderer[i]->prepareNodes();
-			media_group->addChild(node_renderer[i]->getNode());
-		}
-		
-		//if (media_cycle->getBrowser()->getLayout() == AC_LAYOUT_TYPE_NODELINK) {
+			//if (media_cycle->getBrowser()->getLayout() == AC_LAYOUT_TYPE_NODELINK) {
 			link_renderer[i] = new ACOsgNodeLinkRenderer();
 			if (link_renderer[i]) {
 				link_renderer[i]->setMediaCycle(media_cycle);
@@ -173,13 +189,24 @@ void ACOsgBrowserRenderer::prepareNodes(int _start) {
 				link_renderer[i]->prepareLinks();
 				link_group->addChild(link_renderer[i]->getLink());
 			}
-		//}	
+			//}	
+		}
 	}
+
+	
+	if (link_renderer.size()>n){//media_cycle->getBrowser()->getLayout() == AC_LAYOUT_TYPE_NODELINK && ) {
+		for (int i=n;i<link_renderer.size();i++) {
+			link_group->removeChild(link_renderer[i]->getLink());
+			delete link_renderer[i];
+		}
+		link_renderer.resize(n);
+	}
+		
 	/*
-	layout_renderer = new ACOsgLayoutRenderer();
-	layout_renderer->setMediaCycle(media_cycle); 
-	group->addChild(layout_renderer->getGroup());
-	layout_renderer->prepareLayout(start);
+	 layout_renderer = new ACOsgLayoutRenderer();
+	 layout_renderer->setMediaCycle(media_cycle); 
+	 group->addChild(layout_renderer->getGroup());
+	 layout_renderer->prepareLayout(start);
 	 */
 	if ((n-start)>0)
 		nodes_prepared = 1;
@@ -397,6 +424,9 @@ int ACOsgBrowserRenderer::computeScreenCoordinates(osgViewer::View* view, double
 	double alpha = 0.99;
 	double omr;
 	
+	media_cycle->getMouse(&mx, &my);
+	//printf ("MOUSE: %f %f\n", mx, my);
+
 	for(int i=0; i<n; i++) {
 		
 		ACMediaNode &attribute = media_cycle->getMediaNode(i);
@@ -460,9 +490,7 @@ int ACOsgBrowserRenderer::computeScreenCoordinates(osgViewer::View* view, double
 		
 		modelPoint = Vec3(x,y,z);
 		screenPoint = modelPoint * VPM;
-				
-		media_cycle->getMouse(&mx, &my);
-		
+						
 		// compute distance between mouse and media element in view
 		distance_mouse[i] = sqrt((screenPoint[0]-mx)*(screenPoint[0]-mx)+(screenPoint[1]-my)*(screenPoint[1]-my));
 		node_renderer[i]->setDistanceMouse(distance_mouse[i]);

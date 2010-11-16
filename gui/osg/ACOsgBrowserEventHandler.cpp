@@ -43,8 +43,8 @@ void ACOsgBrowserEventHandler::hover_object_callback(int pid) {
 	media_cycle->hoverObjectCallback(pid);
 }
 
-void ACOsgBrowserEventHandler::hover_callback(float x, float y) {
-	media_cycle->hoverCallback(x, y);
+void ACOsgBrowserEventHandler::hover_callback(float xx, float yy) {
+	media_cycle->hoverCallback(xx, yy);
 }
 	
 bool ACOsgBrowserEventHandler::handle(const osgGA::GUIEventAdapter& ea,osgGA::GUIActionAdapter& aa)
@@ -111,13 +111,15 @@ void ACOsgBrowserEventHandler::pick(osgViewer::View* view, const osgGA::GUIEvent
 	float yy = ea.getYnormalized();
 	
 	//printf("pick (%f, %f)\n", x, y);
-	
+		
+	//printf ("MOUSE: %f %f\n", x, y);
+
 	if(hover) {
 		// SD TODO - OSG computeIntersections seems to crash often - avoid doing it while howering
 		hover_callback(xx, yy);
 		return;
 	}
-
+	
 	if (view->computeIntersections(x,y,intersections))
 	{
 		// printf("got intersections\n");

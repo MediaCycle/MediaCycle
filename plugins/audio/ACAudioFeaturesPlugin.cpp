@@ -52,6 +52,27 @@ ACAudioFeaturesPlugin::ACAudioFeaturesPlugin() {
 ACAudioFeaturesPlugin::~ACAudioFeaturesPlugin() {
 }
 
+/*
+static starpu_codelet cl = {
+	.where = STARPU_CPU,
+	.cpu_func = cpu_func,
+	.nbuffers = 2
+}
+
+static void cpu_func(void _*descr[], void *cl_args) {
+	(ACAudioFeaturesPlugin*)cl_args.plugin->calculate(audio_data, theMedia, returndescriptor);
+}
+
+std::vector<ACMediaFeatures*> ACAudioFeaturesPlugin::calculate_starpu(vector<ACMediaData*> audio_data, vector<ACMedia*> theMedia) {
+	// create job list
+	for () {
+	}
+ 
+	// return vector of decriptors
+ 
+	// check that calculate is thread safe
+}
+*/
 
 std::vector<ACMediaFeatures*> ACAudioFeaturesPlugin::calculate(ACMediaData* audio_data, ACMedia* theMedia) {
 

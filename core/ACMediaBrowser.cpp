@@ -143,6 +143,8 @@ ACMediaBrowser::ACMediaBrowser() {
 	pthread_mutexattr_destroy(&activity_update_mutex_attr);
 	
 	prevLibrarySize = 0;
+	
+	mPointerAttributes.resize(1);
 }
 
 ACMediaBrowser::~ACMediaBrowser() {
@@ -156,7 +158,7 @@ int ACMediaBrowser::getLabelSize() {
 }
 
 void ACMediaBrowser::addLabel(string text, ACPoint pos) {
-	ACLabelAttribute tmpLbl;
+	ACLabel tmpLbl;
 	tmpLbl.text = text;
 	tmpLbl.size = 1.0;
 	tmpLbl.pos = pos;
@@ -496,13 +498,19 @@ void ACMediaBrowser::setMode(ACBrowserMode _mode)
 	mMode = _mode;
 }
 
-int ACMediaBrowser::setHoverLoop(int lid, float mx, float my)
+int ACMediaBrowser::setHoverLoop(int lid, float mxx, float myy)
 {
 	int loop_id;
 	
-	mousex = mx;
-	mousey = my;
+	mousex = mxx;
+	mousey = myy;
 	
+	ACPoint p;
+	p.x = mxx; p.y = myy; p.z = 0.0;
+	if (mPointerAttributes.size()>0) {
+		mPointerAttributes[0].setCurrentPosition(p);
+	}
+
 	// In this case, the loops to be played wil be selected according to distance from the mouse pointer in the view
 	// audio_cycle->getAudioFeedback()->createDynamicSourcesWithPosition();
 	
@@ -538,7 +546,7 @@ void ACMediaBrowser::randomizeNodePositions(){
 }
 
 // XS TODO change this name into something non-passive.
-void ACMediaBrowser::libraryContentChanged() {
+void ACMediaBrowser::libraryContentChanged(int needsCluster) {
 	// update initial positions 
 	// previously: resize other vector structures dependent on loop count.
 	
@@ -615,7 +623,7 @@ void ACMediaBrowser::libraryContentChanged() {
 //	updateNextPositions();		
 //	setNeedsDisplay(true);
 	// into:
-	updateDisplay(true);
+	updateDisplay(true, needsCluster);
 	
 	prevLibrarySize = mLibrary->getSize();
 }
@@ -798,10 +806,11 @@ void ACMediaBrowser::initClusterCenters(){
 // mClusterCenters
 // mLoopAttributes -> ACMediaNode
 //CF do we need an extra level of tests along the browsing mode (render inactive during AC_MODE_NEIGHBORS?)
-void ACMediaBrowser::updateClusters(bool animate){
+void ACMediaBrowser::updateClusters(bool animate, int needsCluster) {
+	
 	if (mClustersMethodPlugin==NULL && mVisPlugin==NULL){//CF no plugin set, factory settings
 		std::cout << "updateNextPositions : Cluster KMeans (default)" << std::endl;
-		updateClustersKMeans(animate);
+		updateClustersKMeans(animate, needsCluster);
 	}	
 	else{
 		initClusterCenters();
@@ -842,7 +851,8 @@ void ACMediaBrowser::updateNeighborhoods(){
 }
 
 //CF do we need an extra level of tests along the browsing mode and plugin types?
-void ACMediaBrowser::updateNextPositions(){
+void ACMediaBrowser::updateNextPositions() {
+	
 	switch ( mMode ){
 		case AC_MODE_CLUSTERS:
 			if (mClustersPosPlugin==NULL && mVisPlugin==NULL) {
@@ -886,7 +896,8 @@ void ACMediaBrowser::updateNextPositions(){
 // . removed assert size
 // . included ACMediaNode 
 // XS 230810 removed inv_weight (not used)
-void ACMediaBrowser::updateClustersKMeans(bool animate) {
+void ACMediaBrowser::updateClustersKMeans(bool animate, int needsCluster) {
+	
 	int i,j,d,f;
 	
 	if(mLibrary == NULL) {
@@ -897,131 +908,81 @@ void ACMediaBrowser::updateClustersKMeans(bool animate) {
 		cerr << "<ACMediaBrowser::updateClustersKMeans> : empty Media Library " << endl;
 		return;
 	}
-
+	
 	int object_count = mLibrary->getSize();
 	
 	// XS note: problem if all media don't have the same number of features
 	//          but we suppose it is not going to happen
 	int feature_count = mLibrary->getMedia(0)->getNumberOfFeaturesVectors();
-		
+	
 	vector< int > 			cluster_counts;
 	vector<vector<vector <float> > >cluster_accumulators; // cluster, feature, desc
 	vector< float > 		cluster_distances; // for computation
-	
-	// picking random object as initial cluster center
-	srand(15);
+
 	mClusterCenters.resize(mClusterCount);
 	cluster_counts.resize(mClusterCount);
 	cluster_accumulators.resize(mClusterCount);
 	cluster_distances.resize(mClusterCount);
-	
-	for(i=0; i<mClusterCount; i++)
-	{
-		mClusterCenters[i].resize(feature_count);
-		cluster_accumulators[i].resize(feature_count);
 		
-		// initialize cluster center with a randomly chosen object
-		int r = rand() % object_count;
-		// SD OCT 2010 - for gradual appearance of media to be more stable
-		r = i % object_count;
-		int l = 100;
+	// Estimate Cluster Centers
+	if (needsCluster) {
+
+		// picking random object as initial cluster center
+		srand(15);
 		
-		// TODO SD - Avoid selecting the same twice
-		while(l--)
-		{
-			if(this->getMediaNode(r).getNavigationLevel() >= mNavigationLevel) break;
-			else r = rand() % object_count;
-		}
-		
-		// couldn't find center in this nav level...
-		if(l <= 0) return;
-		
-		for(f=0; f<feature_count; f++)
-		{
-			// XS again, what if all media don't have the same number of features ?
-			int desc_count = mLibrary->getMedia(0)->getFeaturesVector(f)->getSize();
+		// initialize cluster centers
+		for(i=0; i<mClusterCount; i++) {
 			
-			mClusterCenters[i][f].resize(desc_count);
-			cluster_accumulators[i][f].resize(desc_count);
+			mClusterCenters[i].resize(feature_count);
+			cluster_accumulators[i].resize(feature_count);
 			
-			for(d=0; d<desc_count; d++)
+			// initialize cluster center with a randomly chosen object
+			int r = rand() % object_count;
+			// SD OCT 2010 - for gradual appearance of media to be more stable
+			r = i % object_count;
+			int l = 100;
+			
+			// TODO SD - Avoid selecting the same twice
+			while(l--)
 			{
-				mClusterCenters[i][f][d] = mLibrary->getMedia(r)->getFeaturesVector(f)->getFeatureElement(d);
-				
-				//printf("cluster  %d center: %f\n", i, mClusterCenters[i][f][d]);
+				if(this->getMediaNode(r).getNavigationLevel() >= mNavigationLevel) break;
+				else r = rand() % object_count;
 			}
-		}
-	}
-	
-	int n_iterations = 20, it;
-	
-	printf("feature weights:");
-	for (unsigned int fw=0; fw < mFeatureWeights.size(); fw++)
-		printf("%f ", mFeatureWeights[fw]);
-	printf("\n");
-	
-	// applying a few K-means iterations
-	for(it = 0; it < n_iterations; it++)
-	{
-		// reset accumulators and counts
-		for(i=0; i<mClusterCount; i++)
-		{
-			cluster_counts[i] = 0;
+			
+			// couldn't find center in this nav level...
+			if(l <= 0) return;
+			
 			for(f=0; f<feature_count; f++)
 			{
 				// XS again, what if all media don't have the same number of features ?
 				int desc_count = mLibrary->getMedia(0)->getFeaturesVector(f)->getSize();
 				
+				mClusterCenters[i][f].resize(desc_count);
+				cluster_accumulators[i][f].resize(desc_count);
+				
 				for(d=0; d<desc_count; d++)
 				{
-					cluster_accumulators[i][f][d] = 0.0;
+					mClusterCenters[i][f][d] = mLibrary->getMedia(r)->getFeaturesVector(f)->getFeatureElement(d);
+					
+					//printf("cluster  %d center: %f\n", i, mClusterCenters[i][f][d]);
 				}
 			}
 		}
 		
-		for(i=0; i<object_count; i++)
-		{
-			// check if we should include this object
-			// note: the following "if" skips to next i if true.
-			if(this->getMediaNode(i).getNavigationLevel() < mNavigationLevel) continue;
-			
-			// compute distance between this object and every cluster
-			for(j=0; j<mClusterCount; j++)
-			{
-				cluster_distances[j] = 0;
-				cluster_distances[j] = compute_distance(mLibrary->getMedia(i)->getAllFeaturesVectors(), mClusterCenters[j], mFeatureWeights, false);
-				
-				//printf("distance cluster %d to object %d = %f\n", j, i,  cluster_distances[j]);
-			}
-			
-			
-			// pick the one with smallest distance
-			int jmin;
-			
-			jmin = min_element(cluster_distances.begin(), cluster_distances.end()) - cluster_distances.begin();
-			
-			// update accumulator and counts
-			
-			cluster_counts[jmin]++;
-			this->getMediaNode(i).setClusterId (jmin);
-			for(f=0; f<feature_count; f++)
-			{
-				// XS again, what if all media don't have the same number of features ?
-				int desc_count = mLibrary->getMedia(0)->getFeaturesVector(f)->getSize();
-				
-				for(d=0; d<desc_count; d++)
-				{
-					cluster_accumulators[jmin][f][d] += mLibrary->getMedia(i)->getFeaturesVector(f)->getFeatureElement(d);
-				}
-			}
-		}
+		int n_iterations = 20, it;
 		
-		//printf("%fs, K-means it: %d\n", TiGetTime(), it);
-		// get new centers from accumulators
-		for(j=0; j<mClusterCount; j++)
+		printf("feature weights:");
+		for (unsigned int fw=0; fw < mFeatureWeights.size(); fw++)
+			printf("%f ", mFeatureWeights[fw]);
+		printf("\n");
+		
+		// applying a few K-means iterations
+		for(it = 0; it < n_iterations; it++)
 		{
-			if(cluster_counts[j] > 0)
+			// reset accumulators and counts
+			for(i=0; i<mClusterCount; i++)
 			{
+				cluster_counts[i] = 0;
 				for(f=0; f<feature_count; f++)
 				{
 					// XS again, what if all media don't have the same number of features ?
@@ -1029,29 +990,96 @@ void ACMediaBrowser::updateClustersKMeans(bool animate) {
 					
 					for(d=0; d<desc_count; d++)
 					{
-						mClusterCenters[j][f][d] = cluster_accumulators[j][f][d] / (float)cluster_counts[j];
+						cluster_accumulators[i][f][d] = 0.0;
 					}
 				}
 			}
 			
-			//printf("\tcluster %d count = %d\n", j, cluster_counts[j]); 
+			for(i=0; i<object_count; i++)
+			{
+				// check if we should include this object
+				// note: the following "if" skips to next i if true.
+				if(this->getMediaNode(i).getNavigationLevel() < mNavigationLevel) continue;
+				
+				// compute distance between this object and every cluster
+				for(j=0; j<mClusterCount; j++)
+				{
+					cluster_distances[j] = 0;
+					cluster_distances[j] = compute_distance(mLibrary->getMedia(i)->getAllFeaturesVectors(), mClusterCenters[j], mFeatureWeights, false);
+					
+					//printf("distance cluster %d to object %d = %f\n", j, i,  cluster_distances[j]);
+				}
+				
+				
+				// pick the one with smallest distance
+				int jmin;
+				
+				jmin = min_element(cluster_distances.begin(), cluster_distances.end()) - cluster_distances.begin();
+				
+				// update accumulator and counts
+				
+				cluster_counts[jmin]++;
+				
+				// SD 2010 OCT - see below
+				//this->getMediaNode(i).setClusterId (jmin);
+				
+				for(f=0; f<feature_count; f++)
+				{
+					// XS again, what if all media don't have the same number of features ?
+					int desc_count = mLibrary->getMedia(0)->getFeaturesVector(f)->getSize();
+					
+					for(d=0; d<desc_count; d++)
+					{
+						cluster_accumulators[jmin][f][d] += mLibrary->getMedia(i)->getFeaturesVector(f)->getFeatureElement(d);
+					}
+				}
+			}
+			
+			//printf("%fs, K-means it: %d\n", TiGetTime(), it);
+			// get new centers from accumulators
+			for(j=0; j<mClusterCount; j++)
+			{
+				if(cluster_counts[j] > 0)
+				{
+					for(f=0; f<feature_count; f++)
+					{
+						// XS again, what if all media don't have the same number of features ?
+						int desc_count = mLibrary->getMedia(0)->getFeaturesVector(f)->getSize();
+						
+						for(d=0; d<desc_count; d++)
+						{
+							mClusterCenters[j][f][d] = cluster_accumulators[j][f][d] / (float)cluster_counts[j];
+						}
+					}
+				}
+				
+				//printf("\tcluster %d count = %d\n", j, cluster_counts[j]); 
+			}
 		}
 	}
 	
-	// AM : TODO move this out of core (it's GUI related)
-	if(animate)
-	{
-		// SD 2010 OCT
-		/*
-		updateNextPositions();
-		//commitPositions();
+	// Assign Samples to Clusters
+	for(i=0; i<object_count; i++) {
 		
-		setState(AC_CHANGING);
-		 */
+		// check if we should include this object
+		if(this->getMediaNode(i).getNavigationLevel() < mNavigationLevel) continue;
+		
+		// compute distance between this object and every cluster
+		for(j=0; j<mClusterCount; j++) {
+			
+			cluster_distances[j] = 0;
+			cluster_distances[j] = compute_distance(mLibrary->getMedia(i)->getAllFeaturesVectors(), mClusterCenters[j], mFeatureWeights, false);
+		}		
+		
+		// pick the one with smallest distance
+		int jmin;		
+		jmin = min_element(cluster_distances.begin(), cluster_distances.end()) - cluster_distances.begin();
+		
+		// assign cluster
+		this->getMediaNode(i).setClusterId(jmin);
 	}
+	
 }
-
-
 
 void ACMediaBrowser::setReferenceNode(int index)
 {
@@ -1062,7 +1090,8 @@ void ACMediaBrowser::setReferenceNode(int index)
 
 // AM : TODO move this out of core (it's GUI related)
 // CF : it should be a core positions component (as opposed to plugin loaded at runtime)
-void ACMediaBrowser::updateNextPositionsPropeller(){
+void ACMediaBrowser::updateNextPositionsPropeller() {
+	
 	std::cout << "ACMediaBrowser::updateNextPositionsPropeller" <<std::endl;
 
 	if (mLibrary->isEmpty() ) return;
@@ -1080,7 +1109,8 @@ void ACMediaBrowser::updateNextPositionsPropeller(){
 	// XS loop on MediaNodes.
 	// each MediaNode has a MediaId by which we can access the Media
 	
-	for (ACMediaNodes::iterator node = mLoopAttributes.begin(); node != mLoopAttributes.end(); ++node){
+	for (ACMediaNodes::iterator node = mLoopAttributes.begin(); node != mLoopAttributes.end(); ++node) {
+		
 		int ci = (*node).getClusterId();
 
 		// SD TODO - test both approaches
@@ -1347,6 +1377,14 @@ ACMediaNode& ACMediaBrowser::getMediaNode(int i) {
 	return mLoopAttributes[i];
 }
 
+int ACMediaBrowser::getPointerSize() {
+	return mPointerAttributes.size();
+}
+
+ACPointer& ACMediaBrowser::getPointer(int i) {
+	return mPointerAttributes[i];
+} 
+
 // CF prepareNodes ? (cf. OSG)
 void ACMediaBrowser::initializeNodes(ACBrowserMode _mode) { // default = AC_MODE_CLUSTERS
 	// makes an ACMediaNode for each Media in the library
@@ -1385,12 +1423,12 @@ void ACMediaBrowser::initializeNodes(ACBrowserMode _mode) { // default = AC_MODE
 
 // XS 260310 new way to manage update of clusters, positions, neighborhoods, ...
 // SD 2010 OCT - removed severa lines of codes, as was duplicate with updateClusters and updateNextPositions
-void ACMediaBrowser::updateDisplay(bool animate) {
+void ACMediaBrowser::updateDisplay(bool animate, int needsCluster) {
 	
 	switch ( mMode ){
 		case AC_MODE_CLUSTERS:
 			
-			updateClusters(animate);
+			updateClusters(animate, needsCluster);
 			
 			updateNextPositions();
 			
@@ -1417,7 +1455,9 @@ void ACMediaBrowser::updateDisplay(bool animate) {
 
 //CF to debug with all scenarios! Plugins and OSG (tree nodes should not be colored) might need some tweaking...
 void ACMediaBrowser::switchMode(ACBrowserMode _mode){
+
 	double t = getTime();
+
 	switch ( mMode ){
 		case AC_MODE_CLUSTERS:
 			switch ( _mode ){
@@ -1429,6 +1469,7 @@ void ACMediaBrowser::switchMode(ACBrowserMode _mode){
 						//CF do we have to reset the referent node? mUserLog->addRootNode( mReferenceNode , 0); //CF change click
 						//(2nd arg)!, use LastClickedNode instead of ReferenceNode?
 						//CF 1) bring the nodes to the center
+
 						ACPoint p;
 						for (ACMediaNodes::iterator node = mLoopAttributes.begin(); node != mLoopAttributes.end(); ++node){	
 							//(*node).setDisplayed (false);
@@ -1535,6 +1576,7 @@ bool ACMediaBrowser::changeNeighborsMethodPlugin(ACPlugin* acpl)
 {
 	bool success = false;
 	double t = getTime();
+	
 	switch ( mMode ){
 		case AC_MODE_CLUSTERS:
 			this->setNeighborsMethodPlugin(acpl);

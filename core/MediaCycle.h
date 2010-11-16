@@ -70,6 +70,9 @@ public:
     int processTcpMessage(char* buffer, int l, char **buffer_send, int *l_send);     // Process incoming requests (addfile, getknn, ...)
 
     // == Media Library
+	int importDirectories();
+	int importDirectories(vector<string> paths, int recursive, bool forward_order=true, bool doSegment=false);
+	int importDirectoriesThreaded(vector<string> paths, int recursive, bool forward_order=true, bool doSegment=false);
     int importDirectory(std::string path, int recursive, bool forward_order=true, bool doSegment=false);
 	int importACLLibrary(std::string path);
 	int importMCSLLibrary(std::string path);//CF 31/05/2010 temporary MediaCycle Segmented Library (MCSL) for AudioGarden, adding a parentID for segments to the initial ACL, awaiting approval
@@ -155,9 +158,9 @@ public:
 	bool getPlayKeyDown(){return playkeydown;};
 	
 	// == Features
-	void normalizeFeatures();
+	void normalizeFeatures(int needsNormalize=1);
 	void openLibrary(string path);
-	void libraryContentChanged();
+	void libraryContentChanged(int needsNormalizeAndCluster=1);
 	//	void saveAsLibrary(string path);
 	void saveACLLibrary(string path);
 	void saveMCSLLibrary(string path);//CF 31/05/2010 temporary MediaCycle Segmented Library (MCSL) for AudioGarden, adding a parentID for segments to the initial ACL, awaiting approval
@@ -168,10 +171,14 @@ public:
 	vector<float> getWeightVector();
 	float getWeight(int i);
 	
+	// == Pointers
+	int getPointerSize();
+	ACPointer& getPointer(int i);
+	
 	// == LABELS on VIEW
  	int getLabelSize();
 	string getLabelText(int i);
-	ACPoint getLabelPos(int i);
+	ACPoint getLabelPos(int i);	
 	
 	// == Playing time stamp
 	int setSourceCursor(int lid, int frame_pos);
@@ -185,7 +192,7 @@ public:
 	// == callbacks
 	void pickedObjectCallback(int pid);
 	void hoverObjectCallback(int pid);
-	void hoverCallback(float x, float y);
+	void hoverCallback(float xx, float yy);
 
 	// == NEW, replaces updateClusters and updateNeighborhoods
 	void updateDisplay(bool animate);
@@ -213,7 +220,19 @@ private:
 	ACPluginManager *pluginManager;
 	string config_file;
 	
+	int prevLibrarySize;
+	
 	bool mNeedsDisplay;
+	
+	// Media Import Thread
+	pthread_t	   import_thread;
+	pthread_attr_t import_thread_attr;
+	void* import_thread_arg;
+	vector<string> import_directories;
+	int import_recursive;
+	bool import_forward_order;
+	bool import_doSegment;
+	
 };
 
 #endif	/* _MEDIACYCLE_H */

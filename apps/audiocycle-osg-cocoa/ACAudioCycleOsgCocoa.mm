@@ -297,6 +297,8 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 		// Enable the selection of directories in the dialog.
 		[openDlg setCanChooseDirectories:YES];
 		
+		std::vector<string> directories;
+	
 		// Display the dialog.  If the OK button was pressed,
 		// process the files.
 		if ( [openDlg runModalForDirectory:nil file:nil] == NSOKButton )
@@ -310,19 +312,16 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 			{
 				NSString* path = [paths objectAtIndex:count];
 				
-				// Do something with the filename
-				// SD TODO - Ask user for confirmation and display progress bar....
-				media_cycle->importDirectory((string)[path UTF8String], 1);
-				
-				// with this function call here, do not import twice!!!
-				media_cycle->normalizeFeatures();
-				media_cycle->libraryContentChanged();
-				[self updatedLibrary];
-				//usleep(2000000);
-			}			
+				directories.push_back((string)[path UTF8String]);
+			}
+			
+			media_cycle->importDirectoriesThreaded(directories, 1);
+			
+			directories.empty();
 		}
 		
-		
+		//[self updatedLibrary];
+	
 	//}
 }
 
@@ -396,7 +395,7 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 		media_cycle->cleanLibrary(); // XS instead of getImageLibrary CHECK THIS
 		media_cycle->cleanUserLog();
 		media_cycle->libraryContentChanged();
-		[self updatedLibrary];
+		//[self updatedLibrary];
 	}
 }
 

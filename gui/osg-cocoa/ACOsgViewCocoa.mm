@@ -73,6 +73,7 @@
 #include <osg/Texture2D>
 #include <osgDB/ReadFile> 
 #include <osgViewer/Viewer>
+#include <osgViewer/CompositeViewer>
 #include <osgViewer/ViewerEventHandlers>
 #include <osg/PositionAttitudeTransform>
 #include <osgGA/TrackballManipulator>
@@ -135,15 +136,15 @@ class MEViewer : public Viewer
 
 struct ACOsgViewCocoaData
 {
-	ref_ptr<MEViewer> 		viewer;
+	ref_ptr<MEViewer>				viewer;
 	observer_ptr<GraphicsWindow> 	window;
 	
 	ref_ptr<Group>			parent;
 	ref_ptr<Node>			externalNode;
+	
+	Camera					**externalCameras;
+	int						nViews;
 };
-
-
-
 
 extern "C" CVReturn MEDisplayLinkCallback (
 				CVDisplayLinkRef displayLink,
@@ -180,6 +181,7 @@ static NSDate *gReferenceDate = nil;
 - (void)initCommonACOsgViewCocoa
 {
 	_osgViewData = new ACOsgViewCocoaData();
+	_osgViewData->nViews = 0;
 	assert(_osgViewData);
 	
 	Group *parent = new Group();
@@ -223,8 +225,6 @@ static NSDate *gReferenceDate = nil;
 	CVDisplayLinkRelease(_displayLink);
 	
 	delete _osgViewData;
-	
-	
 	
 	[super dealloc];
 }
@@ -300,7 +300,6 @@ static NSDate *gReferenceDate = nil;
 	NSPoint res = [self convertPoint:p fromView:nil];
 	NSSize s = [self bounds].size;
 	
-	
 	res.y = s.height - res.y;
 	
 	return res;
@@ -311,6 +310,7 @@ static NSDate *gReferenceDate = nil;
 	assert(_osgViewData);
 }
 
+/*
 - (void)prepareOpenGL
 {
 	//NSLog(@"prepareOpenGL : context = 0x%x",[self openGLContext]);
@@ -324,14 +324,14 @@ static NSDate *gReferenceDate = nil;
 	
 	//[[self window] setAcceptsMouseMovedEvents:YES];
 	
-	/*[[self openGLContext] makeCurrentContext];
-	osg::DisplaySettings * ds = osg::DisplaySettings::instance();
-	ds->setNumMultiSamples(4);
+	//[[self openGLContext] makeCurrentContext];
+	//osg::DisplaySettings * ds = osg::DisplaySettings::instance();
+	//ds->setNumMultiSamples(4);
 	
-	ref_ptr< DisplaySettings > displaySettings = new DisplaySettings;
-	displaySettings->setNumMultiSamples(4);
-	_osgViewData->viewer->setDisplaySettings( displaySettings.get() );
-	*/
+	//ref_ptr< DisplaySettings > displaySettings = new DisplaySettings;
+	//displaySettings->setNumMultiSamples(4);
+	//_osgViewData->viewer->setDisplaySettings( displaySettings.get() );
+	
 	_osgViewData->window = _osgViewData->viewer->setUpViewerAsEmbeddedInWindow(100,100,bounds.width, bounds.height);
 
 	//_osgViewData->window->setDisplaySettings( displaySettings.get() );
@@ -344,6 +344,9 @@ static NSDate *gReferenceDate = nil;
 	assert(_osgViewData->parent.valid());
 	
 	_osgViewData->viewer->setSceneData(_osgViewData->parent.get());
+	
+	// SD OSG HERE //
+	
 	//_osgViewData->viewer->setCameraManipulator(new osgGA::TrackballManipulator);
 	_osgViewData->viewer->addEventHandler(new osgViewer::StatsHandler);
 	
@@ -353,6 +356,43 @@ static NSDate *gReferenceDate = nil;
 	[self createDisplayLink];
 	//CVDisplayLinkStart(_displayLink);
 	
+}
+*/
+
+- (void)prepareOpenGL
+{
+	if(_openGLPrepared) return;
+	[super prepareOpenGL];
+	_openGLPrepared = YES;
+	
+	NSSize bounds = [self bounds].size;
+		
+	_osgViewData->window = _osgViewData->viewer->setUpViewerAsEmbeddedInWindow(100,100,bounds.width, bounds.height);
+		
+	_osgViewData->viewer->addEventHandler(new osgViewer::StatsHandler);
+	
+	assert(_osgViewData->parent.valid());
+	
+	_osgViewData->viewer->setSceneData(_osgViewData->parent.get());
+	
+	_osgViewData->viewer->addEventHandler(new osgViewer::StatsHandler);
+		
+	if (_osgViewData->nViews) {
+		osgViewer::Viewer::Windows windows;
+		_osgViewData->viewer->getWindows(windows);
+		for (int i=0; i<_osgViewData->nViews; i++) {			
+			_osgViewData->externalCameras[i]->setGraphicsContext(windows[0]);
+			_osgViewData->externalCameras[i]->setViewport(0,0,windows[0]->getTraits()->width, windows[0]->getTraits()->height);
+			//_osgViewData->externalCameras[i]->setViewport(0,0,1,1);
+			_osgViewData->externalCameras[i]->setProjectionMatrix(osg::Matrix::ortho2D(0,windows[0]->getTraits()->width,0,windows[0]->getTraits()->height));
+			//_osgViewData->externalCameras[i]->setProjectionMatrix(osg::Matrix::ortho2D(0,1,0,1));
+			_osgViewData->viewer->addSlave(_osgViewData->externalCameras[i], false);			
+		}
+	}
+		
+	_osgViewData->viewer->realize();
+	
+	[self createDisplayLink];	
 }
 
 - (void)reshape
@@ -364,6 +404,11 @@ static NSDate *gReferenceDate = nil;
 	{
 		_osgViewData->window->resized(_osgViewData->window->getTraits()->x, _osgViewData->window->getTraits()->y, w, h);
 		_osgViewData->window->getEventQueue()->windowResize(_osgViewData->window->getTraits()->x, _osgViewData->window->getTraits()->y, w, h );
+		for (int i=0; i<_osgViewData->nViews; i++) {	
+			_osgViewData->externalCameras[i]->setViewport(0,0,w,h);
+			_osgViewData->externalCameras[i]->setProjectionMatrix(osg::Matrix::ortho2D(0,w,0,h));
+			//_osgViewData->externalCameras[i]->setProjectionMatrix(osg::Matrix::ortho2D(0,1,0,1));
+		}
 	}
 }
 
@@ -433,6 +478,7 @@ static NSDate *gReferenceDate = nil;
 	else bindex = 2;
 */	
 	NSPoint event_location = [event locationInWindow];
+
 	NSPoint local_point = [self osgConvertPoint:event_location];
 	int x = local_point.x, y = local_point.y;
 	
@@ -620,7 +666,28 @@ static NSDate *gReferenceDate = nil;
 	_osgViewData->externalNode = node;
 	_osgViewData->parent->addChild(_osgViewData->externalNode.get());
 	
-	[self drawRect:[self bounds]];
+	//[self drawRect:[self bounds]];
+	//[self setNeedsDisplay:YES];
+}
+
+- (void)addCamera:(Camera*)newCamera
+{
+	int i;
+	Camera	**local_cameras;
+	
+	local_cameras = new Camera*[_osgViewData->nViews+1];
+	
+	for (i=0;i<_osgViewData->nViews;i++) {
+		local_cameras[i] = _osgViewData->externalCameras[i];
+	}
+	local_cameras[i] = newCamera;
+	
+	delete _osgViewData->externalCameras;
+	_osgViewData->externalCameras = local_cameras;
+	
+	_osgViewData->nViews++;
+	
+	//[self drawRect:[self bounds]];
 	//[self setNeedsDisplay:YES];
 }
 

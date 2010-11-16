@@ -131,13 +131,6 @@ void ACMediaLibrary::cleanLibrary() {
 	mediaID = 0; // index of the next one to be inserted (= the number of media already imported); not -1
 }
 
-void ACMediaLibrary::cleanStats() {
-	cout << "cleaning features mean and stdev"<< endl;
-	mean_features.clear();
-	stdev_features.clear();
-}
-
-
 // this same function is used to import a whole directory, a single file or a list of files.
 // it uses scanDirectory to construct a vector (filenames) containing the files to be analyzed.
 int ACMediaLibrary::importDirectory(std::string _path, int _recursive, ACPluginManager *acpl, bool forward_order, bool doSegment) {
@@ -154,6 +147,7 @@ int ACMediaLibrary::importDirectory(std::string _path, int _recursive, ACPluginM
 }
 
 int ACMediaLibrary::importFile(std::string _filename, ACPluginManager *acpl, bool doSegment) {
+	
 	string extension;
 	std::vector<ACMedia*> mediaSegments;
 
@@ -244,6 +238,14 @@ int ACMediaLibrary::importFile(std::string _filename, ACPluginManager *acpl, boo
 	}
 	
 }
+
+int ACMediaLibrary::scanDirectories(std::vector<string> _paths, int _recursive, std::vector<string>& filenames) {
+
+	for (unsigned int i=0; i<_paths.size(); i++) {
+		scanDirectory(_paths[i], _recursive, filenames);
+	}
+}
+	
 // construct a vector (filenames) containing the files in a given directory (_path).
 // when "recursive" is turned on, it will scan subdirectories too 
 int ACMediaLibrary::scanDirectory(std::string _path, int _recursive, std::vector<string>& filenames) {
@@ -554,6 +556,12 @@ bool ACMediaLibrary::isEmpty() {
 	return false;
 }
 
+void ACMediaLibrary::cleanStats() {
+	cout << "cleaning features mean and stdev"<< endl;
+	mean_features.clear();
+	stdev_features.clear();
+}
+
 void ACMediaLibrary::calculateStats() {
 	if ( isEmpty() ) return;
 	int n = this->getSize() ;
@@ -606,7 +614,9 @@ void ACMediaLibrary::calculateStats() {
 	}
 }
 
-void ACMediaLibrary::normalizeFeatures() {
+void ACMediaLibrary::normalizeFeatures(int needsNormalize) {
+	
+	int start;
 	
 	ACMediaFeatures* feature;
 	cout << "normalizing features" << endl;
@@ -618,14 +628,23 @@ void ACMediaLibrary::normalizeFeatures() {
 	}
 	else {
 		// *subsequent* normalization
-		denormalizeFeatures();
-		calculateStats();
+		if (needsNormalize) {
+			denormalizeFeatures();
+			calculateStats();
+		}
 	}
 	
 	unsigned int i,j,k;
 	unsigned int n = this->getSize() ;
 	
-	for(i=0; i<n; i++){
+	if (needsNormalize) {
+		start = 0;
+	}
+	else {
+		start = index_last_normalized+1;
+	}
+	
+	for(i=start; i<n; i++){
 		ACMedia* item = media_library[i];
 		for(j=0; j<mean_features.size(); j++) {
 			feature = item->getFeaturesVector(j);

@@ -57,11 +57,6 @@ inline float ACRandom() { return ((float)rand()) / (float)((1LL<<31)-1L); }
 
 using namespace std;
 
-// XS 110310 added this to make the transition towards tree instead of vector
-// could even be a class ?
-typedef vector<ACMediaNode> ACMediaNodes;
-
-
 enum ACBrowserState {
 	AC_IDLE=0,
 	AC_CHANGING=1
@@ -94,13 +89,35 @@ struct ACNavigationState
 	vector<float> 		mFeatureWeights;
 };
 
-struct ACLabelAttribute {
+struct ACLabel {
 	string		text;
 	float		size;
 	ACPoint		pos;
 	bool		isDisplayed;
-	ACLabelAttribute() : isDisplayed(true) {}
+	ACLabel() : isDisplayed(true) {}
 };
+
+class ACPointer {
+	
+private:
+	ACPoint 	currentPos;
+	string		text;
+	
+public:
+	ACPointer() {};
+	~ACPointer() {};
+	
+	void setCurrentPosition(ACPoint p) { currentPos = p; } ;
+	ACPoint getCurrentPosition() { return currentPos; } ;
+	void setText(string t) { text = t; } ;
+	string getText() { return text; } ;
+};
+
+// XS 110310 added this to make the transition towards tree instead of vector
+// could even be a class ?
+typedef vector<ACMediaNode> ACMediaNodes;
+typedef vector<ACLabel> ACLabels;
+typedef vector<ACPointer> ACPointers;
 
 class ACMediaBrowser {
 	
@@ -112,7 +129,7 @@ public:
 	ACMediaLibrary *getLibrary() { return mLibrary; };
 
 	// call this when the number of loops changes in the library
-	void libraryContentChanged();
+	void libraryContentChanged(int needsCluster=1);
 	
 	// handy library to just assign random positions to items
 	void randomizeNodePositions();
@@ -212,10 +229,14 @@ public:
 	// XS TODO: define this one
 	void initializeNodes(ACBrowserMode _mode = AC_MODE_CLUSTERS); 	
 	
+	// == Pointers
+	int getPointerSize();
+	ACPointer& getPointer(int i);
+	
 	// == Labels 
 	void setClickedLabel(int ilabel);
 	int getClickedLabel()					{return mClickedLabel; };
-
+	
 	// = States : AC_ IDLE or AC_CHANGING (i.e., from current to next position)
 	double getFrac() const {return mFrac;} // fraction between current and next position
 	ACBrowserState getState() const {return mState;};
@@ -227,7 +248,7 @@ public:
 	// interaction with mouse
 	void getMouse(float *mx, float *my) { *mx = mousex; *my = mousey; };
 	int setSourceCursor(int lid, int frame_pos);
-	int setHoverLoop(int lid, float x, float y);
+	int setHoverLoop(int lid, float mxx, float myy);
 	
 	ACBrowserLayout getLayout();
 	void setLayout(ACBrowserLayout _layout);
@@ -254,7 +275,7 @@ public:
 	string getLabelText(int i);
 	ACPoint getLabelPos(int i);
 	
-	const vector<ACLabelAttribute> &getLabelAttributes() const { return mLabelAttributes; }; 
+	const vector<ACLabel> &getLabelAttributes() const { return mLabelAttributes; }; 
 	void setLabelPosition(int loop_id, float x, float y, float z=0);
 	int getNumberOfDisplayedLabels();
 	void setNumberOfDisplayedLabels(int nd);
@@ -278,7 +299,7 @@ public:
 	ACUserLog* getUserLog(){return mUserLog;};
 
 	// == XS 260310 new way to manage update of clusters, positions, neighborhoods, ...
-	void updateDisplay(bool animate=false);//, bool neighborhoods=true);
+	void updateDisplay(bool animate=false, int needsCluster=1);//, bool neighborhoods=true);
 	
 	// CF switch navigation mode while navigating
 	void switchMode(ACBrowserMode _mode);
@@ -288,12 +309,12 @@ public:
 	// update positions based on current clustering
 
 	// == Cluster Mode 
-	void updateClusters(bool animate = false);
+	void updateClusters(bool animate=false, int needsCluster=1);
 	// default cluster : 
 	// - neighborhood = Kmeans
 	// - position = propeller
 	void updateNextPositionsPropeller();
-	void updateClustersKMeans(bool animate);
+	void updateClustersKMeans(bool animate, int needsCluster=1);
 
 	// == Neighbors Mode ==
 	void updateNeighborhoods();
@@ -336,13 +357,14 @@ protected:
 	// XS TODO 1 generalize to tree
 	// XS TODO 2 make this vector of pointers
 	ACMediaNodes mLoopAttributes; 
+	ACPointers   mPointerAttributes;
 	
 	int nbDisplayedLoops;
 	
 	float mousex;
 	float mousey;
 	
-	vector <ACLabelAttribute>	mLabelAttributes;
+	ACLabels	mLabelAttributes;
 	int nbDisplayedLabels;
 	int mClickedLabel;
 	
