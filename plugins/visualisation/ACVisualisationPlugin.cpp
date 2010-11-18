@@ -1,7 +1,7 @@
 /**
  * @brief ACVisualisationPlugin.cpp
- * @author Stéphane Dupont
- * @date 05/11/2010
+ * @author Alexis Moinet
+ * @date 18/11/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -288,8 +288,8 @@ mat ACVisualisationPlugin::updateNextPositionsInit(mat &desc_m, int nbVideoDispl
 		mat tmp_m = tmpDesc_m;
 		//tmp_m = tmpDesc_m - repmat(center_m.row(i), tmpDesc_m.n_rows, 1);
 		//tmp_m = tmp_m/repmat(max(abs(tmp_m)), tmp_m.n_rows, 1) * clusterSpread_v(i);
-		tmp_m.col(0) = clusterSpread_v(i) * cos(2*math::pi() * clusterid2_m/nbClusters) + randn<colvec>(tmp_m.n_rows);
-		tmp_m.col(1) = clusterSpread_v(i) * sin(2*math::pi() * clusterid2_m/nbClusters) + randn<colvec>(tmp_m.n_rows);
+		tmp_m.col(0) = clusterSpread_v(i) * cos(2*arma::math::pi() * clusterid2_m/nbClusters) + randn<colvec>(tmp_m.n_rows);
+		tmp_m.col(1) = clusterSpread_v(i) * sin(2*arma::math::pi() * clusterid2_m/nbClusters) + randn<colvec>(tmp_m.n_rows);
 		for (int k=0; k < tmpDesc_m.n_rows; k++)
 			// The clusters are displayed usiing the two first dimensions of desc_m
 			posDisp_m.row(pos_v(k)) = clusterCenterDisp_m.row(clusterid_m(pos_v(k))) + tmp_m.submat(k,0,k,1);
@@ -478,7 +478,7 @@ mat ACVisualisationPlugin::updateNextPositionsItemClicked(mat &desc_m, int nbVid
 	double angle;
 	//	mat posDispOk_m(toDisplay_v.n_rows,2);
 	for (int k=0; k<desc_m.n_rows; k++){
-		angle = ACRandom()*(math::pi())/2;
+		angle = ACRandom()*(arma::math::pi())/2;
 		tmpSort_v = sort_index(conv_to<rowvec>::from(desc_m.row(k)));
 		posDisp_m(k,0) = pow(distDesc_v(k)+.005,2)*cos(angle) * clusterCenterDisp_m(tmpSort_v(0),0);
 		posDisp_m(k,1) = pow(distDesc_v(k)+.005,2)*sin(angle) * clusterCenterDisp_m(tmpSort_v(0),1);

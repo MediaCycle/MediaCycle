@@ -1,7 +1,7 @@
 /**
  * @brief ACVisPluginAudiogarden.cpp
- * @author Stéphane Dupont
- * @date 05/11/2010
+ * @author Alexis Moinet
+ * @date 18/11/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -72,7 +72,7 @@ void ACVisPluginAudiogarden::updateNextPositions(ACMediaBrowser* mediaBrowser){
 	mat posDisp_m(libSize, 2);
 	colvec r_v(libSize);
 	colvec theta_v = rand<colvec>(libSize);
-	theta_v.ones(libSize); //theta_v * 2 * math::pi();
+	theta_v.ones(libSize); //theta_v * 2 * arma::math::pi();
   vector<ACMedia*> loops =  mediaBrowser->getLibrary()->getAllMedia();	
 	for (int i=0; i<libSize; i++){
 		r_v(i) = 1./log(1+loops[i]->getDuration());
@@ -88,7 +88,7 @@ void ACVisPluginAudiogarden::updateNextPositions(ACMediaBrowser* mediaBrowser){
 	mat proj_m;
 	princomp(coef_m, proj_m, desc_m);
 	theta_v = proj_m.col(0);
-	theta_v = (theta_v - min(theta_v))/(max(theta_v)-min(theta_v)) * 2 * math::pi();
+	theta_v = (theta_v - min(theta_v))/(max(theta_v)-min(theta_v)) * 2 * arma::math::pi();
 	//	std::cout << theta_v << std::endl;
 
 	

@@ -355,7 +355,7 @@ string fillOutputBuffer(ACMediaLibrary* media_library, ACMediaBrowser* media_bro
 	sbuffer_send += onlab.str();
 	
 	// loop on all labels to see which ones to send out
-	const vector<ACLabelAttribute> label_attributes = media_browser->getLabelAttributes();
+	const vector<ACLabel> label_attributes = media_browser->getLabelAttributes();
 	int chk_labels=0;
 	for (int i=0; i< n_labels; i++){
 		if (label_attributes[i].isDisplayed){

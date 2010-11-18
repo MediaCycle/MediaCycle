@@ -1,7 +1,7 @@
 /**
  * @brief cart2pol.h
- * @author Damien Tardieu
- * @date 11/03/2010
+ * @author Alexis Moinet
+ * @date 18/11/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -50,17 +50,17 @@ int cart2pol(const Col<eT>& x_v, const Col<eT>& y_v, Col<eT> &th_v, Col<eT> &r_v
 			if (y_v(i)==0)
 				th_v(i) = 0;
 			else if (y_v(i)>0)
-				th_v(i) = math::pi()/2;
+				th_v(i) = arma::math::pi()/2;
 			else // if (y_v(i)<0)
-				th_v(i) = math::pi()/2 *3;
+				th_v(i) = arma::math::pi()/2 *3;
 		else
 			if (x_v(i) < 0)
-				th_v(i) = atan(y_v(i)/x_v(i)) + math::pi();
+				th_v(i) = atan(y_v(i)/x_v(i)) + arma::math::pi();
 			else // if (x_v(i) > 0)
 				if (y_v(i) >= 0)
 					th_v(i) = atan(y_v(i)/x_v(i));
 				else //if (y_v(i) < 0)
-					th_v(i) = atan(y_v(i)/x_v(i)) + 2* math::pi();
+					th_v(i) = atan(y_v(i)/x_v(i)) + 2* arma::math::pi();
 	}
 	r_v = sqrt(square(x_v)+square(y_v));
 	

@@ -1,7 +1,7 @@
 /**
  * @brief tukeywin.h
- * @author Damien Tardieu
- * @date 29/06/2010
+ * @author Alexis Moinet
+ * @date 18/11/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -70,9 +70,9 @@ inline colvec tukeywin(int n, float r=.5){
 			int tl = (int)(per*(n-1))+1;
 			int th = n-tl+1;
 			// Window is defined in three sections: taper, constant, taper
-			window_v.rows(0,tl-1) = ((1+cos(math::pi()/per*(t.rows(0,tl-1) - per)))/2);
+			window_v.rows(0,tl-1) = ((1+cos(arma::math::pi()/per*(t.rows(0,tl-1) - per)))/2);
 			window_v.rows(tl, th-2) = ones(th-tl-1,1);
-			window_v.rows(th-1,n-1) = ((1+cos(math::pi()/per*(t.rows(th-1, n-1) - 1 + per)))/2);
+			window_v.rows(th-1,n-1) = ((1+cos(arma::math::pi()/per*(t.rows(th-1, n-1) - 1 + per)))/2);
 			//w = [ ((1+cos(pi/per*(t(1:tl) - per)))/2);  ones(th-tl-1,1); ((1+cos(pi/per*(t(th:end) - 1 + per)))/2)];
 		}
 	}

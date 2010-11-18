@@ -1,7 +1,7 @@
 /**
  * @brief blackman.h
- * @author Damien Tardieu
- * @date 11/03/2010
+ * @author Alexis Moinet
+ * @date 18/11/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -41,7 +41,7 @@ inline colvec blackman(int L){
 	double a1=1.0/2;
 	double a2=alpha/2;
 	colvec n_v = linspace<colvec>(0, L-1, L);
-	window_v = a0 - a1 * cos(2*math::pi() * n_v / (double)(L-1)) + a2*cos(4*math::pi()*n_v/(double)(L-1));
+	window_v = a0 - a1 * cos(2*arma::math::pi() * n_v / (double)(L-1)) + a2*cos(4*arma::math::pi()*n_v/(double)(L-1));
 	return window_v;
 }
 

@@ -1,7 +1,7 @@
 /**
  * @brief ACPosPlugAudioGardenFlower.cpp
- * @author Stéphane Dupont
- * @date 05/11/2010
+ * @author Alexis Moinet
+ * @date 18/11/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -72,7 +72,7 @@ void ACPosPlugAudioGardenFlower::updateNextPositions(ACMediaBrowser* mediaBrowse
 	mat posDisp_m(libSize, 2);
 	colvec r_v(libSize);
 	colvec theta_v = rand<colvec>(libSize);
-	theta_v.ones(libSize); //theta_v * 2 * math::pi();
+	theta_v.ones(libSize); //theta_v * 2 * arma::math::pi();
   vector<ACMedia*> loops =  mediaBrowser->getLibrary()->getAllMedia();	
 
 	featureList.push_back("Mean of MFCC");
@@ -104,7 +104,7 @@ void ACPosPlugAudioGardenFlower::updateNextPositions(ACMediaBrowser* mediaBrowse
 	for (long i=0; i<posParents.size(); i++){
 		tmpSegments = loops[posParents[i]]->getAllSegments();
 		for (int j=0; j<tmpSegments.size(); j++){
-			angle = (2*math::pi() / (float) tmpSegments.size()) * (float) j + (math::pi()/2);
+			angle = (2*arma::math::pi() / (float) tmpSegments.size()) * (float) j + (arma::math::pi()/2);
 			posDisp_m(tmpSegments[j]->getId(),0) = .01 * cos(angle) + posDisp_m(posParents[i],0);
 			posDisp_m(tmpSegments[j]->getId(),1) = .01 * sin(angle) + posDisp_m(posParents[i],1);
 			std::cout << "angle = " << angle << std::endl;			

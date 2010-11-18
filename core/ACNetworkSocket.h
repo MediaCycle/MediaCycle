@@ -65,6 +65,7 @@ typedef int SOCKET;
 
 #define BUFSIZE 512
 
+//AM : causes a warning when compiling greta plugin because Psyclone already defines SOCKET_ERROR -1
 #define SOCKET_ERROR (-1)
 typedef struct sockaddr_in SOCKADDR_IN;
 typedef int PORT;
@@ -161,3 +162,4 @@ private:
 #endif
 
 #endif  // _ACNETWORKSOCKET_H_
+
