@@ -107,18 +107,7 @@ public:
 	// image reduced to a size appropriate for analysis 
 	IplImage* getImage(){return imgp;}
 	int scaleImage(IplImage* img, float _scale=0.0);
-	
-//	// channels
-//	int splitChannels(string col="BGR");
-//	void removeChannels(); 
-//	IplImage* getChannel(int i);
-	
-//	// FFT
-//	void computeFFT2D(string col="BGR"); // or HSV 
-//	void computeFFT2D_complex(string col="BGR"); // or HSV 
-//	void computeFFT2D_centered(string col="BGR"); // or HSV 
-//	fftw_complex** getFFT2D(){return fft;}
-	
+		
 	// computation of features
 	virtual void computeHuMoments(int thresh = 0){};
 	virtual void computeFourierPolarMoments(int RadialBins=5, int AngularBins=8){};
@@ -145,9 +134,6 @@ public:
 	void showInNewWindow(const string); // new window created
 	void closeNewWindow(const string); // new window deleted
 
-//	void showFFTInWindow(const string);
-//	void showFFTComplexInWindow(const string);
-
 	//I/O
 //	void dumpContractionIndex(std::ostream &odump);
 //	void dumpBoundingBoxRatio(std::ostream &odump);
@@ -172,15 +158,6 @@ protected:
 	
 	// original image size (image not stored in memory)
 	int original_width, original_height;
-
-//	// channels
-//	IplImage *channel_img[3];
-//	bool HAS_CHANNELS;
-	
-	// FFT
-//	fftw_complex *fft[3]; // one per channel
-//	fftw_complex *fft_bw; // on grayscale image
-//	bool HAS_FFT;
 	
 	// features
 	vector <float> color_moments;

@@ -1,7 +1,7 @@
 /**
  * @brief ACOsgBrowserViewQT.h
- * @author Christian Frisson
- * @date 03/06/2010
+ * @author Xavier Siebert
+ * @date 22/11/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -94,7 +94,7 @@ class ACOsgBrowserViewQT : public osgViewer::Viewer, public QGLWidget
 		virtual void paintGL();
 	
     protected:
-        void init();
+ //       void init();
         virtual void resizeGL( int width, int height );
 		virtual void updateGL();
         virtual void keyPressEvent( QKeyEvent* event );

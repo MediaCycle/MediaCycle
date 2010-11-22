@@ -80,12 +80,13 @@ const string ghostlist[ndancers] = {
 "Bru_211#1", "Bru_218#1", "Bru_218#2", "Bru_224#1", "Bru_302#2", "Bru_313#2", "Bru_320#1"
 };
 
-//const string videodir = "/Users/xavier/numediart/Project7.3-DancersCycle/VideosSmall/Test/";
-const string videodir = "/Users/xavier/numediart/Project10.1-Borderlands/2010_4_prox_alpa/";
+const string videodir = "/Users/xavier/numediart/Project7.3-DancersCycle/VideosSmall/TestSmallSize/";
+//const string videodir = "/Users/xavier/numediart/Project10.1-Borderlands/2010_4_prox_alpa/";
 
 // const string videodir = "/Users/xavier/numediart/Project7.3-DancersCycle/Recordings_Raffinerie_0709/FrontShots/";
 
-const string video_plugin_path = "/Users/xavier/development/Fall09/ticore-app/Applications/Numediart/MediaCycle/src/Builds/darwin-xcode/plugins/video/Debug/";
+const string video_plugin_path = "/Users/xavier/development/workingDirectory/ticore-app/Applications/Numediart/MediaCycle/src/Builds/mac/plugins/video/Debug/";
+const string audio_plugin_path = "/Users/xavier/development/workingDirectory/ticore-app/Applications/Numediart/MediaCycle/src/Builds/mac/plugins/audio/Debug/";
 
 void get_all_images(){
 //	for (int i=0;i<ndancers;i++){	
@@ -245,8 +246,8 @@ void test_all_videos_top_front(std::string mypath){
 
 void test_read_write_video(std::string full_video_path){
 	ACVideoAnalysis* V = new ACVideoAnalysis(full_video_path);
-	string file_out = "/Users/xavier/tmp/toto.avi";
-	V->saveInFile (file_out, 0);
+	string file_out = "/Users/xavier/tmp/toto.mov";
+	V->saveVideoThumnbailInFile (file_out,640,480,0,5);
 	delete V;
 }
 
@@ -457,6 +458,16 @@ void test_show_fft(std::string full_video_path){
 
 }
 
+void test_Thomas(){
+	MediaCycle* mediacycle;
+	mediacycle = new MediaCycle(MEDIA_TYPE_AUDIO);
+//	mediacycle->addPlugin(video_plugin_path+"mc_audio.dylib");
+	mediacycle->importACLLibrary("/Users/xavier/Desktop/ThomasIsrael-Sons/short/extraitsxaviercleans/second_try-atm+mus.acl");
+	mediacycle->getLibrary()->saveSorted("/Users/xavier/Desktop/ThomasIsrael-Sons/short/extraitsxaviercleans/second_try-atm+mus_sorted.acl");
+	delete mediacycle;	
+	
+}
+
 int main(int argc, char** argv) {
 	cout << "Using Opencv " << CV_VERSION << "(" << CV_MAJOR_VERSION << "." << CV_MINOR_VERSION  << "." <<  CV_SUBMINOR_VERSION << ")" << endl;	
 
@@ -467,7 +478,8 @@ int main(int argc, char** argv) {
 	//test_bg_substraction("Bru_105#2");
 	// test_bg_substraction("Bru_203#2");
 	//test_browse("Bru_105#2");
-	// test_video_plugin("Bru_105#2");
+	test_read_write_video(videodir+"Front/001011.mov");
+//	test_optical_flow(videodir+"Front/001011.mov");
 	//test_video_plugin("001011");
 	//test_video_plugin_acl_save("001011");
 	//test_all_videos_top_front(videodir);
@@ -485,10 +497,11 @@ int main(int argc, char** argv) {
 	
 //	test_show_fft("/Users/xavier/numediart/Project10.1-Borderlands/2010_4rgb_alpha/10151.mov");
 
-	test_video_similarity_histogram("/Users/xavier/numediart/Project10.1-Borderlands/2010_4rgb_alpha/10151.mov",
-						  "/Users/xavier/numediart/Project10.1-Borderlands/2010_4rgb_alpha/20102.mov");
+//	test_video_similarity_histogram("/Users/xavier/numediart/Project10.1-Borderlands/2010_4rgb_alpha/10151.mov",
+//						  "/Users/xavier/numediart/Project10.1-Borderlands/2010_4rgb_alpha/20102.mov");
 
-//	vector<float> ci = V->getContractionIndices();
+//	test_Thomas();
+	//	vector<float> ci = V->getContractionIndices();
 //	vector<double> dci;
 //	for (int i=0; i< ci.size(); i++) {
 //		dci[i] = (double) ci[i];

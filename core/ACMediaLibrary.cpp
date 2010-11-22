@@ -136,12 +136,22 @@ void ACMediaLibrary::cleanLibrary() {
 int ACMediaLibrary::importDirectory(std::string _path, int _recursive, ACPluginManager *acpl, bool forward_order, bool doSegment) {
 	std::vector<string> filenames;
 
-	scanDirectory(_path, _recursive, filenames);
-		
-	for (unsigned int i=0; i<filenames.size(); i++) {
+	int nf = scanDirectory(_path, _recursive, filenames);
+	
+	if (nf < 0) {
+		cerr << "Problem importing directory: " << _path << endl;
+		return -1;
+	}
+	else if (nf == 0) {
+		cout << "Warning : Empty directory: " << _path << endl;
+		return 0;
+	}
+
+	for (unsigned int i=0; i<filenames.size(); i++){
 		int index = forward_order ? i : filenames.size()-1-i;//CF if reverse order (not forward_order), segments in subdirs are added to the library after the source recording
 		this->importFile(filenames[index], acpl, doSegment );
 	}
+	
 	std::cout << "Library size : " << this->getSize() << std::endl;
 	return 1;
 }
@@ -213,6 +223,7 @@ int ACMediaLibrary::importFile(std::string _filename, ACPluginManager *acpl, boo
 	cout << "extension:" << extension << endl; 		
 	if (media == NULL) {
 		cout << "extension unknown, skipping " << _filename << " ... " << endl;
+		return 0;
 	}
 	else {
 		// This has to be done before segmentation to have proper id
@@ -236,7 +247,7 @@ int ACMediaLibrary::importFile(std::string _filename, ACPluginManager *acpl, boo
 			}
 		}
 	}
-	
+	return 1;
 }
 
 int ACMediaLibrary::scanDirectories(std::vector<string> _paths, int _recursive, std::vector<string>& filenames) {
@@ -248,6 +259,11 @@ int ACMediaLibrary::scanDirectories(std::vector<string> _paths, int _recursive, 
 	
 // construct a vector (filenames) containing the files in a given directory (_path).
 // when "recursive" is turned on, it will scan subdirectories too 
+// return values :
+//    1 = it found files
+//    0 = empty
+//   -1 = directory not found
+
 int ACMediaLibrary::scanDirectory(std::string _path, int _recursive, std::vector<string>& filenames) {
 	
 	fs::path full_path( fs::initial_path<fs::path>() );
@@ -255,7 +271,7 @@ int ACMediaLibrary::scanDirectory(std::string _path, int _recursive, std::vector
 	full_path = fs::system_complete( fs::path( _path, fs::native ) );
 	
 	if ( !fs::exists( full_path ) )	{
-		printf("File or directory not found: %s\n", full_path.native_file_string().c_str());
+		cout << "File or directory not found: " << full_path.native_file_string() << endl;
 		return -1;
 	}
 	
@@ -277,6 +293,7 @@ int ACMediaLibrary::scanDirectory(std::string _path, int _recursive, std::vector
 		// put it in the vector of files to be analyzed
 		filenames.push_back(_path);
 	}
+	if (filenames.size() == 0) return 0;
 	return 1;
 }
 
@@ -592,7 +609,7 @@ void ACMediaLibrary::calculateStats() {
 		}
 	}
 	
-	// before: divide by N --> biased variance estimator
+	// before: divide by n --> biased variance estimator
 	// now : divide by (n-1) -- unless n=1
 	int nn;
 	if (n==1) nn = n;
@@ -686,22 +703,27 @@ void ACMediaLibrary::denormalizeFeatures() {
 // -------------------------------------------------------------------------
 // XS custom for Thomas Isreal videos : features sorted, along with filename
 void ACMediaLibrary::saveSorted(string output_file){
-	//XS dirty, supposes you save feature number 0 -- should be generalized !
+	//XS dirty -- should be generalized !
 	ofstream out(output_file.c_str()); 
-	
-	const int nfeat=1;
-	
+
+	const int nfeat=10;
 	std::vector<std::pair<float, int> > f[nfeat];
 	
 	for (int i=0; i< this->getSize() ;i++) {
-		out << i << " : " << media_library[i]->getFileName() << endl;
-		for (int j=0; j< nfeat ;j++) {
-			out << media_library[i]->getFeaturesVector(0)->getFeatureElement(j) << endl;
-			f[j].push_back (std::pair<float, int> (media_library[i]->getFeaturesVector(0)->getFeatureElement(j), i));
+		out << i+1 << " : " << media_library[i]->getFileName() << endl;
+		int nfeatv =  media_library[i]->getNumberOfFeaturesVectors();
+		if (nfeatv <= nfeat) {
+			cerr << "problem with custom saveSorted : " << nfeatv << "<=" << nfeat<< endl;
+		}
+		for (int j=0; j< nfeat-1 ;j++) { // XS TODO: this is custom, to skip 0
+			// XS TODO : this will only take first dimension of feature...
+			//int nfeat = media_library[i]->getFeaturesVector(j)->getSize();
+			out << media_library[i]->getFeaturesVector(j+1)->getFeatureElement(0) << endl;
+			f[j].push_back (std::pair<float, int> (media_library[i]->getFeaturesVector(j+1)->getFeatureElement(0), i));
 		}
 	}
 	
-	for (int j=0; j< nfeat ;j++) {
+	for (int j=0; j< nfeat-1 ;j++) {
 		sort (f[j].begin(),f[j].end());
 	}
 	std::vector<std::pair<float, int> >::const_iterator itr;
@@ -716,11 +738,15 @@ void ACMediaLibrary::saveSorted(string output_file){
 	//	}
 	for (int i=0; i<this->getSize() ;i++) {
 		out << f[0][i].first << "\t" << f[0][i].second << "\t" << 
-		//		f[1][i].first << "\t" << f[1][i].second << "\t" <<
-		//		f[2][i].first << "\t" << f[2][i].second << "\t" << 
-		//		f[3][i].first << "\t" << f[3][i].second << "\t" << 
-		//		f[4][i].first << "\t" << f[4][i].second << "\t" << 
-		//		f[5][i].first << "\t" << f[5][i].second << "\t" <<  
+				f[1][i].first << "\t" << f[1][i].second << "\t" <<
+				f[2][i].first << "\t" << f[2][i].second << "\t" << 
+				f[3][i].first << "\t" << f[3][i].second << "\t" << 
+				f[4][i].first << "\t" << f[4][i].second << "\t" << 
+				f[5][i].first << "\t" << f[5][i].second << "\t" <<  
+				f[6][i].first << "\t" << f[6][i].second << "\t" <<  
+				f[7][i].first << "\t" << f[7][i].second << "\t" <<  
+				f[8][i].first << "\t" << f[8][i].second << "\t" <<  
+//				f[9][i].first << "\t" << f[9][i].second << "\t" <<  
 		endl;
 	}
 	out.close();

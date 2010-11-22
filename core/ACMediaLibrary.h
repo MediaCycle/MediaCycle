@@ -93,9 +93,8 @@ public:
 	std::vector< std::vector<double> > getMeanFeatures() {return mean_features;};
 	std::vector< std::vector<double> > getStdevFeatures() {return stdev_features;};
 	
-	// XS removed default id ?
+	// XS300810 removedmedia id from call to importDirectory and added importFile
 	int importDirectory(std::string _path, int recursive,  ACPluginManager *acpl=NULL, bool forward_order=true, bool doSegment=false);
-	// XS new 300810
 	int importFile(std::string _filename, ACPluginManager *acpl=NULL, bool doSegment=false);
 
 	//int openLibrary(std::string _path, bool aInitLib=false); // SD 2010 sep discontinued

@@ -35,6 +35,7 @@
 #ifndef _ACMEDIA_TYPE_H
 #define _ACMEDIA_TYPE_H
 
+
 enum ACMediaType {
 	MEDIA_TYPE_NONE,   // when type is not defined yet
 	MEDIA_TYPE_AUDIO,
@@ -45,5 +46,6 @@ enum ACMediaType {
 	MEDIA_TYPE_MIXED,  // for (future...) interface mixing media
 	MEDIA_TYPE_ALL     // for plugins valid for all media
 };
+
 
 #endif // _ACMEDIA_TYPE_H

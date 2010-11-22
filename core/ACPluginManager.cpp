@@ -44,6 +44,9 @@ ACPluginManager::~ACPluginManager() {
 
 /*
  * Adds a plugin to the manager's list
+ * return values:
+ *   -1 if it encountered a problem loading
+ *    1 if things went smoothly
  */
 int ACPluginManager::add(std::string aPluginPath) {
     DynamicLibrary *lib;
@@ -52,27 +55,49 @@ int ACPluginManager::add(std::string aPluginPath) {
         return -1;
     }
 
+	cout << "adding Plugin Library : " << aPluginPath << endl;
+	
     ACPluginLibrary *acpl = new ACPluginLibrary(lib);
 	acpl->initialize(); //useless
-
+	acpl->setLibraryPath(aPluginPath);
+	
     mPluginLibrary.push_back(acpl);
 
-    return 0;
+    return 1;
 }
 
-int ACPluginManager::remove(std::string aPluginPath) {
-    //TODO find aPluginPath
-    return 0;
+/*
+ * Removes a plugin (specified by its file name) from the manager's list
+ * return values:
+ *   -1 if it encountered a problem (e.g., could not find the plugin library)
+ *    1 if it removed the plugin library
+ */
+
+int ACPluginManager::remove(std::string _lpath) {
+	vector<ACPluginLibrary *> ::iterator iter;
+	bool found_library_in_path = false;
+	for (iter = this->mPluginLibrary.begin(); iter != this->mPluginLibrary.end(); iter++) {
+		if ((*iter)->getLibraryPath() == _lpath) {
+			delete *iter;
+			cout << "removing Plugin Library : " << _lpath << endl;
+			found_library_in_path = true;
+		}
+	}
+	if (!found_library_in_path){
+		cout << "could not find Plugin Library in path: " << _lpath << endl;
+		return -1;
+	}
+    return 1;
 }
 
 int ACPluginManager::removeAll() {
-    //TODO iterator through mLibrary
     for (int i=0;i<this->mPluginLibrary.size();i++)
         delete(this->mPluginLibrary[i]);
     this->mPluginLibrary.clear();
     return 0;
 }
 
+// returns the plugin whose name matches aPluginName among all the plugin libraries
 ACPlugin *ACPluginManager::getPlugin(std::string aPluginName) {
     ACPlugin *result = NULL;
     for (unsigned int k=0;k<this->mPluginLibrary.size();k++) {
@@ -83,6 +108,20 @@ ACPlugin *ACPluginManager::getPlugin(std::string aPluginName) {
     }
 
     return result;
+}
+
+// returns the plugin library whose name matches _lpath
+// NB: plugins are identified by names
+//     plugins libraries are identified by path
+ACPluginLibrary *ACPluginManager::getPluginLibrary(string _lpath){
+	vector<ACPluginLibrary *> ::iterator iter;
+	for (iter = this->mPluginLibrary.begin(); iter != this->mPluginLibrary.end(); iter++) {
+		if ((*iter)->getLibraryPath() == _lpath) {
+			cout << "found Plugin Library : " << _lpath << endl;
+			return *iter;
+		}
+	}
+	return NULL; 
 }
 
 void ACPluginManager::dump() {
@@ -178,4 +217,3 @@ void ACPluginLibrary::dump() {
         cout << "plugin #" << k << ": " << this->mPlugins[k]->getName() << endl;
     }
 }
-

@@ -49,8 +49,8 @@
 
 using namespace std;
 
-//string image_dir = "/Users/xavier/numediart/Project10.1-Borderlands/Images/";
-string image_dir = "/Users/xavier/Pictures/letters/";
+string image_dir = "/Users/xavier/numediart/Project10.1-Borderlands/Images/";
+//string image_dir = "/Users/xavier/Pictures/letters/";
 //string image_dir = "/Users/xavier/Pictures/bw_tests/";
 //string image_dir = "/Users/xavier/Pictures/101_ObjectCategories/beaver/";
 string acl_dir = "/Users/xavier/Desktop/acl_tmp/";
@@ -109,12 +109,12 @@ void testcolor(string sim1, string sim2){
 void testFFT(string sim1){
 	string f1=image_dir+sim1;
 	ACBWImageAnalysis* Im1 = new ACBWImageAnalysis(f1);
-//	Im1->showInNewWindow("image");
-//	Im1->computeFFT2D_complex();
-	Im1->computeFourierPolarMoments(5, 8);
+	Im1->showInNewWindow("image");
+	Im1->computeFFT2D_complex();
+//	Im1->computeFourierPolarMoments(5, 8);
 //	Im1->dumpFourierPolarMoments(cout);
 
-//	Im1->showFFTComplexInWindow("fft");
+	Im1->showFFTComplexInWindow("fft");
 //	Im1->closeNewWindow("image");
 	delete Im1;
 }
@@ -216,6 +216,7 @@ void testMakePGM(string sim1){
 	delete Im1;
 }
 
+
 int main(int argc, char** argv) {
 	cout << "Using Opencv " << CV_VERSION << "(" << CV_MAJOR_VERSION << "." << CV_MINOR_VERSION  << "." <<  CV_SUBMINOR_VERSION << ")" << endl;	
 	// testshapes("beaver/image_0001.jpg", "beaver/image_0012.jpg");
@@ -234,10 +235,10 @@ int main(int argc, char** argv) {
 
 //	displayrect();
 
-		cout << "-------- M ------------" << endl;
- 		testFFT ("M.png");
-		cout << "-------- Mt ------------" << endl;
-		testFFT  ("Mt.png");
+//		cout << "-------- M ------------" << endl;
+// 		testFFT ("M.png");
+//		cout << "-------- Mt ------------" << endl;
+//		testFFT  ("Mt.png");
 
 //		cout << "-------- W ------------" << endl;
 // 		testFourierMellin ("W.png");
@@ -258,7 +259,8 @@ int main(int argc, char** argv) {
 //		cout << "-------- Os ------------" << endl;
 // 		testFourierMellin ("Os.png");
 		
-		
+		testFFT ("10151-100-flipV.jpg");
+
 //		cout << "-------- 10151-100 ------------" << endl;
 // 		testFourierMellin ("10151-100.png");
 //		cout << "-------- 10151-250 ------------" << endl;

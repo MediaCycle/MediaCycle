@@ -74,7 +74,6 @@ ACMedia::~ACMedia() {
 // works for binary too, the stream deals with it
 void ACMedia::saveACL(ofstream &library_file, int mcsl) {
 	
-	unsigned int i, j;
 	int n_features;
 	int n_features_elements;	
 	int nn;
@@ -89,7 +88,7 @@ void ACMedia::saveACL(ofstream &library_file, int mcsl) {
 	if (mcsl) {
 		library_file << parentid << endl; 
 		library_file << this->getAllSegments().size() << endl;
-		for (int i=0; i < this->getAllSegments().size(); i++){
+		for (unsigned int i=0; i < this->getAllSegments().size(); i++){
 			library_file << this->getSegment(i)->getId() << "\t";
 		}
 		library_file << endl;
@@ -99,13 +98,13 @@ void ACMedia::saveACL(ofstream &library_file, int mcsl) {
 	
 	n_features = features_vectors.size();
 	library_file << n_features << endl;
-	for (i=0; i<features_vectors.size();i++) {
+	for (unsigned int i=0; i<features_vectors.size();i++) {
 		n_features_elements = features_vectors[i]->getSize();
 		nn = features_vectors[i]->getNeedsNormalization();
 		library_file << features_vectors[i]->getName() << endl;
 		library_file << nn << endl;
 		library_file << n_features_elements << endl;
-		for (j=0; j<n_features_elements; j++) {
+		for (int j=0; j<n_features_elements; j++) {
 			library_file << features_vectors[i]->getFeatureElement(j)  << "\t"; // XS instead of [i][j]
 		}
 		library_file << endl;
@@ -119,7 +118,6 @@ void ACMedia::saveACL(ofstream &library_file, int mcsl) {
 // return value is used in ACMediaLibrary::openACLLibrary
 int ACMedia::loadACL(ifstream &library_file, int mcsl) {
 	
-	int i, j;
 	int n_features;
 	int n_features_elements = 0;	
 	int nn;

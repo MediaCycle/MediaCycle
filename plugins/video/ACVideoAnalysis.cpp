@@ -165,7 +165,7 @@ int ACVideoAnalysis::initialize(){
 	//	cout << "codec : " << videocodec << endl;
 #endif // VERBOSE
 	
-	return init_ok; // to be consistent with MycolorImage::SetImageFile : returns 0 if works
+	return init_ok; // to be consistent with MycolorImage::SetImageFile : returns 0 if problem
 }
 
 float ACVideoAnalysis::getDuration(){
@@ -178,12 +178,16 @@ float ACVideoAnalysis::getDuration(){
 }
 
 IplImage* ACVideoAnalysis::getNextFrame(){
-	if(!cvGrabFrame(capture)){              // capture a frame
+	// returns a pointer to the next frame of the video (called capture in OpenCV)
+	// this is done in 2 steps in the OpenCV jargon: cvGrabFrame + cvRetrieveFrame
+	// keeps an "independent" (non-OpenCV) record of the frame number (frame_counter)
+
+	if(!cvGrabFrame(capture)){      // attemps to capture a frame
 		cerr << "<ACVideoAnalysis::getNextFrame> Could not find frame..." << endl;
 		return NULL;
 	}
 	IplImage* tmp;
-	tmp = cvRetrieveFrame(capture);           // retrieve the captured frame
+	tmp = cvRetrieveFrame(capture);  // retrieve the captured frame
 	frame_counter++;
 	return tmp;
 }
@@ -274,7 +278,7 @@ void ACVideoAnalysis::histogramEqualize(const IplImage* bg_img) {
 	return;
 }
 
-//void ACVideoAnalysis::histogramEqualize(const IplImage* const bg_img) {
+//void ACVideoAnalysis::histogramEqualizeUL(const IplImage* const bg_img) {
 //	// bg_img should not be modified
 //	// Set up images
 //	// Show original
@@ -1608,7 +1612,7 @@ void ACVideoAnalysis::browseInWindow(string title, bool has_win){
 
 void ACVideoAnalysis::saveInFile (string fileout, int nskip){
 	// CV_FOURCC('M','J','P','G')
-	CvVideoWriter* video_writer = cvCreateVideoWriter( fileout.c_str(), -1, fps, cvSize(width,height) );  // "-1" pops up a nice GUI 
+	CvVideoWriter* video_writer = cvCreateVideoWriter( fileout.c_str(), -1, fps, cvSize(width,height) );  // "-1" pops up a nice GUI (Windows only)
 	IplImage* img = 0;
 	rewind();
 	for(int i = nskip; i < nframes-1; i++){
@@ -1622,23 +1626,29 @@ void ACVideoAnalysis::saveInFile (string fileout, int nskip){
 	cvReleaseVideoWriter(&video_writer); 
 }
 
-void ACVideoAnalysis::resizeAndSaveInFile (string fileout, int nskip, int w, int h){
-	// CV_FOURCC('M','J','P','G')
-	CvVideoWriter* video_writer = cvCreateVideoWriter( fileout.c_str(),  CV_FOURCC('M','J','P','G'), fps, cvSize(w,h) );  // "-1" pops up a nice GUI 
+void ACVideoAnalysis::saveVideoThumnbailInFile (string fileout, int _w, int _h, int _nskip, int _istep){
+	// saves in fileout a video (i.e., not an image) thumnail consisting of frames from the video 
+	// format : CV_FOURCC('M','J','P','G')
+	// optionally:
+	//   - reduced to size wxh
+	//   - skips the first nskip frames
+	//   - by steps of istep frames
+	
+	CvVideoWriter* video_writer = cvCreateVideoWriter( fileout.c_str(),  CV_FOURCC('M','J','P','G'), fps, cvSize(_w,_h) );
 	IplImage* img = 0;
 	rewind();
-	cvSetCaptureProperty(capture, CV_CAP_PROP_POS_FRAMES, nskip); 	
-	IplImage* img_sm = cvCreateImage(cvSize (w, h), depth, 3); // 3 = nb channels
-	for(int i = nskip; i < nframes-1; i++){
+	IplImage* img_sm = cvCreateImage(cvSize (_w, _h), depth, 3); // XS TODO : 3 = nb channels -- generealize
+	for(int i = _nskip; i < nframes-1; i+=_istep){
+		// XS TODO: getFrame(i) that checks bounds -- instead of the following 2 lines
+		cvSetCaptureProperty(capture, CV_CAP_PROP_POS_FRAMES, i); 	
 		img = getNextFrame();
+		if( !img ) {
+			cout << "end of movie (aka The End)" << endl;
+			break;
+		}
 		// SD TODO - This is stange cvCreateImage creates image wit as a widthStep of 152
-		// thumb->align = 1;
 		cvResize(img, img_sm, CV_INTER_CUBIC); // OR LINEAR
 		cvWriteFrame(video_writer, img_sm);  
-		if( !img ) {
-			break;
-			cout << "end of movie (aka The End)" << endl;
-		}
 	}
 	cvReleaseImage(&img_sm);
 	cvReleaseVideoWriter(&video_writer); 

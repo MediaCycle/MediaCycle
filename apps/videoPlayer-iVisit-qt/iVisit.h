@@ -1,10 +1,10 @@
 /*
- *  main.cpp
- *  tryxcodeqt
+ *  iVisit.h
+ *  MediaCycle
  *
  *  @author Xavier Siebert
- *  @date 29/12/08
- *  @copyright (c) 2008 – UMONS - Numediart
+ *  @date 6/09/10
+ *  @copyright (c) 2010 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
  *  licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -32,15 +32,49 @@
  *
  */
 
-#include <QtGui/QApplication>
+#ifndef IVISIT_H
+#define IVISIT_H
 
-#include "VideoCycle.h"
-#include <iostream>
-using namespace std;
+#include <QtGui>
+#include "ui_iVisit.h"
+#include "mediaplayer.h"
 
-int main(int argc, char* argv[]) {
-		QApplication app(argc, argv);
-		VideoCycle toto;
-		toto.show();
-		return app.exec();
-}
+class iVisit : public QMainWindow {
+	Q_OBJECT
+
+public slots: // or private ? or protected ?
+	void testButton();
+	
+public:
+	iVisit(QWidget *parent = 0);
+	~iVisit();
+	void setupPlayers();
+	void seekVideos(int t1, int t2);
+
+private:
+	MediaPlayer *mp1;
+	MediaPlayer *mp2;
+
+	Ui::iVisitMainWindow iVui;
+	
+};
+
+// from http://www.qtcentre.org/archive/index.php/t-29236.html
+class MainForm : public QWidget { 
+	Q_OBJECT
+public:
+	MainForm();
+	~MainForm();
+	void setVideoApp(iVisit* _videoApp);
+
+private:
+	QGraphicsScene* scene;
+	QGraphicsView* view;
+	iVisit* videoApp;
+
+protected slots:
+	void LoadImage();
+	void mousePressEvent( QMouseEvent *e );
+};
+
+#endif // IVISIT_H

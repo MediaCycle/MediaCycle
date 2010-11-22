@@ -32,7 +32,7 @@
 
 #include "MediaCycle.h"
 
-#include <omp.h>
+//#include <omp.h>
 
 #include <fstream>
 using std::ofstream;
@@ -341,7 +341,7 @@ int MediaCycle::importDirectories(vector<string> directories, int recursive, boo
 	unsigned int i = 0;
 	double t1, t2;
 	
-	omp_set_num_threads(2);
+//	omp_set_num_threads(2);
 
 	t1 = getTime();
 		
@@ -390,6 +390,9 @@ int MediaCycle::importDirectory(string path, int recursive, bool forward_order, 
 // XS import = import + some processing 
 	cout << "MediaCycle: importing directory: " << path << endl;	
 	int ok = 0;
+	if (this->pluginManager == NULL){
+		cout << "no analysis plugins were loaded. you will need to load a plugin to use the application." << endl;
+	}
 	ok = this->mediaLibrary->importDirectory(path, recursive, this->pluginManager, forward_order, doSegment);
 	// XS normalizing automatically is a problem, for example if we load a bunch of files instead of a directory,
 	//    it should not normalize after each file.
@@ -707,7 +710,7 @@ void MediaCycle::dumpNavigationLevel(){
 }
 									
 void MediaCycle::dumpLoopNavigationLevels(){
-	int nl = this->getBrowser()->getNumberOfMediaNodes();
+	int nl = this->getNumberOfMediaNodes();
 	cout << "loops nav lev for :" << endl;
 	for (int i=0; i < nl; i++){
 		cout << this->getBrowser()->getMediaNode(i).getNavigationLevel() << " ";

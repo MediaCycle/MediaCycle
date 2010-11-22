@@ -111,16 +111,18 @@ public:
 	float getStart(){return this->start;};
 	float getEnd(){return this->end;};
 	
-	// I/O -- these are media-specific (at least for the moment...) 
+	// I/O -- common part
 
 	void saveACL(std::ofstream &library_file, int mcsl=0);
 	int loadACL(std::ifstream &library_file, int mcsl=0);
 	void saveMCSL(std::ofstream &library_file); //CF 31/05/2010 temporary MediaCycle Segmented Library (MCSL) for AudioGarden, adding a parentID for segments to the initial ACL, awaiting approval
 	int loadMCSL(std::ifstream &library_file); //CF 31/05/2010 temporary MediaCycle Segmented Library (MCSL) for AudioGarden, adding a parentID for segments to the initial ACL, awaiting approval
 
+	// I/O -- media-specific part
+
 	virtual void saveACLSpecific(std::ofstream &library_file) {}
 	virtual int loadACLSpecific(std::ifstream &library_file) {return -1;}
-	virtual ACMediaData* extractData(std::string filename) {}
+	virtual ACMediaData* extractData(std::string filename) {ACMediaData* dummy; return dummy;}
 	
 	virtual int import(std::string _path, int _mid=0, ACPluginManager *acpl=NULL);
 

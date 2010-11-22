@@ -37,7 +37,7 @@ IF ( USE_QT4 )
 		#IF ( APPLE )
 		#	ADD_EXECUTABLE(imagecycle-osg-qt ${APP_TYPE} ${MACOSX_BUNDLE_INFO_PLIST} ${imagecycle-osg-qt_SRCS} ${imagecycle-osg-qt_UIS_H} ${imagecycle-osg-qt_MOC_SRCS})
 		#ELSE ()
-			ADD_EXECUTABLE(imagecycle-osg-qt ${imagecycle-osg-qt_SRCS} ${imagecycle-osg-qt_UIS_H} ${imagecycle-osg-qt_MOC_SRCS}  ${settings_SRCS} ${settings_UIS_H} ${settings_MOC_SRCS})
+			ADD_EXECUTABLE(imagecycle-osg-qt ${imagecycle-osg-qt_SRCS} ${imagecycle-osg-qt_UIS_H} ${imagecycle-osg-qt_MOC_SRCS} ${imagecycle-osg-qt_MOC_HDRS} ${settings_SRCS} ${settings_UIS_H} ${settings_MOC_SRCS} ${settings_MOC_HDRS})
 		#ENDIF ()
 	ENDIF ( )
 

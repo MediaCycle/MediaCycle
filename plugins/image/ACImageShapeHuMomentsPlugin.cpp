@@ -86,7 +86,6 @@ std::vector<ACMediaFeatures*> ACImageShapeHuMomentsPlugin::calculate(ACMediaData
 	}
 		
 	delete image;
-	// XS todo : this will destroy ACMediaData* and lead to a double free...
 	return allImageFeatures;
 }
 

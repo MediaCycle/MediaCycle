@@ -53,7 +53,7 @@ public:
 
 	void setThumbnail(IplImage *_thumbnail) { thumbnail = _thumbnail; thumbnail_width = _thumbnail->width; thumbnail_height = _thumbnail->height; }
 	// IplImage* getThumbnail() { return thumbnail; }
-	void* getThumbnailPtr() { return (void*)thumbnail; }
+	void* getThumbnailPtr() { return NULL; } // 
 	int getThumbnailWidth() {return thumbnail_width;}
 	int getThumbnailHeight() {return thumbnail_height;}
 

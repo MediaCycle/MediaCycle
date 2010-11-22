@@ -33,10 +33,15 @@
 
 #include "settings.h"
 
+// This class provides general setting for the *Cycle applications
+// e.g., choose audio/image/video, configure plugins, ...
+
+// constructor : 
+// parent is typically ACImageCycleOsgQt->parent
 SettingsDialog::SettingsDialog(QWidget *parent) : QMainWindow(parent) {
     setupUi(this);
 //    connect(buttonSaveLog, SIGNAL(clicked()), this, SLOT(saveLog()));
-//    connect(buttonSelectFeaturesPlugin, SIGNAL(clicked()), this, SLOT(selectFeaturesPlugins()));
+    connect(pushButtonConfigureFeaturesPlugins, SIGNAL(clicked()), this, SLOT(configureFeaturesPlugins()));
 //    connect(buttonSelectVisualizationPlugin, SIGNAL(clicked()), this, SLOT(selectVisualizationPlugins()));
 //	connect(buttonSaveCurrentSettings, SIGNAL(clicked()), this, SLOT(saveCurrentSettings()));
 	connect(buttonSelectSaveConfigFile, SIGNAL(clicked()), this, SLOT(selectSaveConfigFile()));
@@ -49,9 +54,31 @@ void SettingsDialog::selectSaveConfigFile() {
 	config_file = _configFile.toStdString();
 	lineEditSaveConfigFile->setText(_configFile);
 	lineEditSaveConfigFile->update();
+	
 }
 
 void SettingsDialog::setMediaCycleMainWindow(ACImageCycleOsgQt* _mc) {
 	//XS test
+	test=_mc;
+	this->media_cycle = _mc->getMediaCycle();
+	
 	//_mc->disBonjour() ;
+}
+
+void SettingsDialog::configureFeaturesPlugins(){
+	ACPluginManager *acpl = media_cycle->getPluginManager(); //getPlugins
+	if (acpl) {
+		for (int i=0;i<acpl->getSize();i++) {
+			for (int j=0;j<acpl->getPluginLibrary(i)->getSize();j++) {
+				if (acpl->getPluginLibrary(i)->getPlugin(j)->getPluginType() == PLUGIN_TYPE_FEATURES) {
+					QString s(acpl->getPluginLibrary(i)->getPlugin(j)->getName().c_str());
+					QListWidgetItem * item = new QListWidgetItem(s,listWidgetFeaturesPlugins);
+					item->setCheckState (Qt::Unchecked);
+				}
+			}
+		}
+	}
+	
+	connect(listWidgetFeaturesPlugins, SIGNAL(itemClicked(QListWidgetItem*)),
+			this, SLOT(modifyListItem(QListWidgetItem*)));
 }

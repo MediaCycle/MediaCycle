@@ -112,8 +112,8 @@ void ACColorImageAnalysis::makeBWImage(){
 	else {
 		bw_imgp = cvCreateImage (cvSize (this->getWidth(), this->getHeight()), IPL_DEPTH_8U, 1); 
 		cvCvtColor (imgp, bw_imgp, CV_BGR2GRAY);
+		HAS_BW = true;
 	}
-	HAS_BW = true;
 }
 
 

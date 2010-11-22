@@ -1,0 +1,387 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>ACMediaCycleOsgQt</class>
+ <widget class="QMainWindow" name="ACMediaCycleOsgQt">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>940</width>
+    <height>615</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>800</width>
+    <height>600</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>MediaCycleOsgQt</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QHBoxLayout" name="horizontalLayout">
+    <item>
+     <widget class="QGroupBox" name="groupControls">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>171</width>
+        <height>600</height>
+       </size>
+      </property>
+      <property name="autoFillBackground">
+       <bool>false</bool>
+      </property>
+      <property name="title">
+       <string>Controls</string>
+      </property>
+      <property name="flat">
+       <bool>false</bool>
+      </property>
+      <property name="checkable">
+       <bool>false</bool>
+      </property>
+      <widget class="QGroupBox" name="groupBoxBrowserControls">
+       <property name="geometry">
+        <rect>
+         <x>6</x>
+         <y>30</y>
+         <width>157</width>
+         <height>421</height>
+        </rect>
+       </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="title">
+        <string/>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+       <widget class="QGroupBox" name="groupBoxAutoOrganization">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>225</y>
+          <width>131</width>
+          <height>81</height>
+         </rect>
+        </property>
+        <property name="title">
+         <string/>
+        </property>
+        <widget class="QWidget" name="layoutWidget">
+         <property name="geometry">
+          <rect>
+           <x>4</x>
+           <y>4</y>
+           <width>124</width>
+           <height>81</height>
+          </rect>
+         </property>
+         <layout class="QGridLayout" name="clustersGridLayout">
+          <item row="0" column="0">
+           <widget class="QLabel" name="labelClusters">
+            <property name="text">
+             <string>Clusters</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QSpinBox" name="spinBoxClusters">
+            <property name="minimum">
+             <number>1</number>
+            </property>
+            <property name="maximum">
+             <number>30</number>
+            </property>
+            <property name="value">
+             <number>5</number>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0" colspan="2">
+           <widget class="QSlider" name="sliderClusters">
+            <property name="minimum">
+             <number>1</number>
+            </property>
+            <property name="maximum">
+             <number>50</number>
+            </property>
+            <property name="value">
+             <number>5</number>
+            </property>
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="tickPosition">
+             <enum>QSlider::TicksAbove</enum>
+            </property>
+            <property name="tickInterval">
+             <number>1</number>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </widget>
+       <widget class="QPushButton" name="pushButtonRecenter">
+        <property name="geometry">
+         <rect>
+          <x>33</x>
+          <y>370</y>
+          <width>80</width>
+          <height>28</height>
+         </rect>
+        </property>
+        <property name="toolTip">
+         <string>recenters the current view</string>
+        </property>
+        <property name="text">
+         <string>Recenter</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButtonClean">
+        <property name="geometry">
+         <rect>
+          <x>77</x>
+          <y>0</y>
+          <width>73</width>
+          <height>28</height>
+         </rect>
+        </property>
+        <property name="toolTip">
+         <string>resets everything</string>
+        </property>
+        <property name="text">
+         <string>Clean</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButtonLaunch">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>0</y>
+          <width>85</width>
+          <height>28</height>
+         </rect>
+        </property>
+        <property name="toolTip">
+         <string>shortcut to load acl file (instead of using th menu)</string>
+        </property>
+        <property name="text">
+         <string>Load ACL</string>
+        </property>
+       </widget>
+       <widget class="QGroupBox" name="groupBoxHierarchy">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>320</y>
+          <width>133</width>
+          <height>51</height>
+         </rect>
+        </property>
+        <property name="title">
+         <string>navigate in/out cluster</string>
+        </property>
+        <widget class="QPushButton" name="pushButtonBack">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>20</y>
+           <width>51</width>
+           <height>30</height>
+          </rect>
+         </property>
+         <property name="toolTip">
+          <string>zoom out of this cluster</string>
+         </property>
+         <property name="text">
+          <string>&lt;</string>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="pushButtonForward">
+         <property name="geometry">
+          <rect>
+           <x>80</x>
+           <y>20</y>
+           <width>51</width>
+           <height>31</height>
+          </rect>
+         </property>
+         <property name="toolTip">
+          <string>zoom in  previously computed cluster</string>
+         </property>
+         <property name="text">
+          <string>&gt;</string>
+         </property>
+        </widget>
+       </widget>
+       <widget class="QListWidget" name="featuresListWidget">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>30</y>
+          <width>157</width>
+          <height>186</height>
+         </rect>
+        </property>
+        <property name="toolTip">
+         <string>when loading media files or pre-computed features (acl files), the available features will appear here</string>
+        </property>
+        <property name="autoScroll">
+         <bool>true</bool>
+        </property>
+        <property name="tabKeyNavigation">
+         <bool>false</bool>
+        </property>
+        <property name="movement">
+         <enum>QListView::Static</enum>
+        </property>
+        <property name="viewMode">
+         <enum>QListView::ListMode</enum>
+        </property>
+       </widget>
+      </widget>
+     </widget>
+    </item>
+    <item>
+     <widget class="QGroupBox" name="groupBrowser">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>600</width>
+        <height>600</height>
+       </size>
+      </property>
+      <property name="baseSize">
+       <size>
+        <width>600</width>
+        <height>600</height>
+       </size>
+      </property>
+      <property name="title">
+       <string>Browser</string>
+      </property>
+      <layout class="QGridLayout" name="gridLayout">
+       <item row="0" column="0">
+        <widget class="ACOsgBrowserViewQT" name="browserOsgView" native="true">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="toolTip">
+          <string>media organized by similarity according to selected features</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>940</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menu_File">
+    <property name="title">
+     <string>&amp;File</string>
+    </property>
+    <addaction name="actionLoad_Media_Directory"/>
+    <addaction name="actionLoad_Media_Files"/>
+    <addaction name="actionLoad_ACL"/>
+    <addaction name="separator"/>
+    <addaction name="actionSave_ACL"/>
+    <addaction name="separator"/>
+   </widget>
+   <widget class="QMenu" name="menuConfig">
+    <property name="title">
+     <string>Config</string>
+    </property>
+    <addaction name="actionLoad_Config_File"/>
+    <addaction name="actionSave_Config_File"/>
+    <addaction name="separator"/>
+    <addaction name="actionEdit_Config_File"/>
+    <addaction name="separator"/>
+   </widget>
+   <addaction name="menu_File"/>
+   <addaction name="menuConfig"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionLoad_Media_Directory">
+   <property name="text">
+    <string>Load Media Directory</string>
+   </property>
+  </action>
+  <action name="actionLoad_ACL">
+   <property name="text">
+    <string>Load ACL</string>
+   </property>
+  </action>
+  <action name="actionSave_ACL">
+   <property name="text">
+    <string>Save ACL</string>
+   </property>
+  </action>
+  <action name="actionLoad_Media_Files">
+   <property name="text">
+    <string>Load Media Files</string>
+   </property>
+  </action>
+  <action name="actionLoad_Config_File">
+   <property name="text">
+    <string>Load Config File</string>
+   </property>
+  </action>
+  <action name="actionSave_Config_File">
+   <property name="text">
+    <string>Save Config File</string>
+   </property>
+  </action>
+  <action name="actionEdit_Config_File">
+   <property name="text">
+    <string>Edit Config File</string>
+   </property>
+  </action>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ACOsgBrowserViewQT</class>
+   <extends>QWidget</extends>
+   <header>ACOsgBrowserViewQT.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>

@@ -62,6 +62,11 @@ public:
     DynamicLibrary* getLib() { return this->mLib;};
     void freePlugins();
 	void dump();
+	
+	// store library path, e.g. so that you can remove a whole library 
+	// in the plugin manager by specifying its path
+	void setLibraryPath(string _lpath) {library_path = _lpath;}
+	string getLibraryPath(){return library_path;}
 
     //Plugins factories
     createPluginFactory* create;
@@ -71,6 +76,7 @@ public:
 private:
     DynamicLibrary *mLib;
     vector<ACPlugin *> mPlugins;
+	string library_path;
 };
 
 class ACPluginManager {
@@ -85,7 +91,9 @@ public:
 
     vector<ACPluginLibrary *> getPluginLibrary() { return this->mPluginLibrary;};
     ACPluginLibrary *getPluginLibrary(int i) { return this->mPluginLibrary[i];};
-    int getSize() { return this->mPluginLibrary.size();};
+    ACPluginLibrary *getPluginLibrary(string _lpath) ;
+    
+	int getSize() { return this->mPluginLibrary.size();};
     ACPlugin *getPlugin(std::string aPluginName);
     
 private:

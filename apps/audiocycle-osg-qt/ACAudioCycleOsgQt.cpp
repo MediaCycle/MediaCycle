@@ -220,7 +220,7 @@ void ACAudioCycleOsgQt::loadACLFile(){
 		fileName = *file;
 		++file;
 	}
-	std::cout << "Will open: '" << fileName.toStdString() << "'" << std::endl;
+	//std::cout << "Will open: '" << fileName.toStdString() << "'" << std::endl;
 	//fileName = QFileDialog::getOpenFileName(this, "~", );
 	
 	if (!(fileName.isEmpty())) {
@@ -252,6 +252,7 @@ void ACAudioCycleOsgQt::saveACLFile(){
 	//ui.compositeOsgView->setFocus();
 }
 
+// XS TODO: make sure it works if we add a new directory to the existing library ?
 void ACAudioCycleOsgQt::loadMediaDirectory(){
 	
 	QString selectDir = QFileDialog::getExistingDirectory
@@ -263,33 +264,12 @@ void ACAudioCycleOsgQt::loadMediaDirectory(){
 	 );
 	
 	// XS TODO : check if directory exists
-	// XS : do not separate directory and files in Qt and let MediaCycle handle it
 	
 	media_cycle->importDirectory(selectDir.toStdString(), 1);
-	// with this function call here, do not import twice!!!
-	// XS TODO: what if we add a new directory to the existing library ?
 	media_cycle->normalizeFeatures();
 	media_cycle->libraryContentChanged(); 
 	this->updateLibrary();
 	//ui.compositeOsgView->setFocus();
-	
-	//	QStringList listFilter;
-	//	listFilter << "*.png";
-	//	listFilter << "*.jpg";
-	//	
-	//	QDirIterator dirIterator(selectDir, listFilter ,QDir::Files | QDir::NoSymLinks, QDirIterator::Subdirectories);
-	//	
-	//	// Variable qui contiendra tous les fichiers correspondant à notre recherche
-	//	QStringList fileList; 
-	//	// Tant qu'on n'est pas arrivé à la fin de l'arborescence...
-	//	while(dirIterator.hasNext()) 
-	//	{   
-	//		// ...on va au prochain fichier correspondant à notre filtre
-	//		fileList << dirIterator.next(); 
-	//	}
-	//	for ( QStringList::Iterator it = fileList.begin(); it != fileList.end(); ++it ) {
-	//		cout << (*it).toStdString() << endl;
-	//	}	
 }
 
 void ACAudioCycleOsgQt::loadMediaFiles(){

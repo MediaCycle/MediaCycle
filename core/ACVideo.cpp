@@ -75,6 +75,8 @@ int ACVideo::computeThumbnail(ACMediaData* data_ptr, int w, int h){
 		cerr << "<ACVideo::computeThumbnail> Could not find frame..." << endl;
 		return -1;
 	}
+	
+	//XS use cloneImage, otherwise thumbnail gets destroyed along with cvCapture
 	IplImage* tmp = cvRetrieveFrame(capture);
 	thumbnail = cvCloneImage(tmp);
 	

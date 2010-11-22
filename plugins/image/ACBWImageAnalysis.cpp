@@ -764,7 +764,7 @@ void ACBWImageAnalysis::showFFTComplexInWindow(const std::string title){
 	}
 //	cvNamedWindow(title.c_str() ,CV_WINDOW_AUTOSIZE);
 	cvShowImage(title.c_str(),fftimage);
-//	cvWaitKey(0);
+	cvWaitKey(0);
 	cvReleaseImage(&fftimage);
 //	cvDestroyWindow(title.c_str());
 }

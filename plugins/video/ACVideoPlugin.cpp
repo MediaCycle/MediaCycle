@@ -62,8 +62,9 @@ std::vector<ACMediaFeatures*>  ACVideoPlugin::calculate(std::string aFileName) {
 	string topFilename = changeLastFolder(aFileName,"Top");
 
 	allVideoFeatures = calculateFront(aFileName);
-	topVideoFeatures = calculateTop(topFilename);
-	allVideoFeatures.insert( allVideoFeatures.end(), topVideoFeatures.begin(), topVideoFeatures.end() );
+	// XS tmp removed top
+//	topVideoFeatures = calculateTop(topFilename);
+//	allVideoFeatures.insert( allVideoFeatures.end(), topVideoFeatures.begin(), topVideoFeatures.end() );
 	return allVideoFeatures;
 }
 

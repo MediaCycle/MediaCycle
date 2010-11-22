@@ -80,15 +80,15 @@ public:
 
 	virtual int initialize(){return 0;}
 
-	virtual std::vector<ACMediaFeatures*> calculate(){};
-	virtual std::vector<ACMediaFeatures*> calculate(std::string aFileName){};
-	virtual std::vector<ACMediaFeatures*> calculate(ACMediaData* aData, ACMedia* theMedia){};
+	virtual std::vector<ACMediaFeatures*> calculate(){std::vector<ACMediaFeatures*> dummy; return dummy; };
+	virtual std::vector<ACMediaFeatures*> calculate(std::string aFileName){std::vector<ACMediaFeatures*> dummy; return dummy;};
+	virtual std::vector<ACMediaFeatures*> calculate(ACMediaData* aData, ACMedia* theMedia){std::vector<ACMediaFeatures*> dummy; return dummy;};
 	//XSCF TODO: should the plugin receive MediaCycle ?
 	virtual void updateClusters(ACMediaBrowser*){};
 	virtual void updateNextPositions(ACMediaBrowser*){};
 	virtual void updateNeighborhoods(ACMediaBrowser*){};
 	
-	virtual std::vector<ACMedia*> segment(ACMediaData* audio_data, ACMedia*){};
+	virtual std::vector<ACMedia*> segment(ACMediaData* audio_data, ACMedia*){std::vector<ACMedia*> dummy; return dummy;};
 
 	virtual int start(){return 0;}
 	virtual int stop(){return 0;}

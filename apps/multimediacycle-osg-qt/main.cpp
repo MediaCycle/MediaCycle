@@ -1,10 +1,10 @@
 /*
- *  main.cpp
- *  tryxcodeqt
+ *  ACMultiMediaCycleOsgQt main.cpp
+ *  MediaCycle
  *
  *  @author Xavier Siebert
- *  @date 29/12/08
- *  @copyright (c) 2008 – UMONS - Numediart
+ *  @date 16/02/10
+ *  @copyright (c) 2010 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
  *  licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -32,15 +32,17 @@
  *
  */
 
-#include <QtGui/QApplication>
+#include <QApplication>
+#include <QtGui>
+#include "ACMultiMediaCycleOsgQt.h"
 
-#include "VideoCycle.h"
-#include <iostream>
-using namespace std;
+int main(int argc, char *argv[])
+{
+    QApplication app(argc, argv);
 
-int main(int argc, char* argv[]) {
-		QApplication app(argc, argv);
-		VideoCycle toto;
-		toto.show();
-		return app.exec();
+    ACMultiMediaCycleOsgQt window;
+    window.show();
+
+    return app.exec();
 }
+

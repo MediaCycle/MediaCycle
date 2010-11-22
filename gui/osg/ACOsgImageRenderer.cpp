@@ -43,12 +43,13 @@ const int ACOsgImageRenderer::NCOLORS = 5;
 
 osg::Image* Convert_OpenCV_TO_OSG_IMAGE(IplImage* cvImg)
 {
-	/*
-	cvNamedWindow("T", CV_WINDOW_AUTOSIZE);
-	 cvShowImage("T", cvImg);
-	 cvWaitKey(0);
-	 cvDestroyWindow("T");	
-	 */
+	
+// XS uncomment the following 4 lines for visual debug (e.g., thumbnail)	
+//	cvNamedWindow("T", CV_WINDOW_AUTOSIZE);
+//	cvShowImage("T", cvImg);
+//	cvWaitKey(0);
+//	cvDestroyWindow("T");	
+
 	
 	if(cvImg->nChannels == 3)
 	{
@@ -158,11 +159,7 @@ void ACOsgImageRenderer::imageGeode(int flip, float sizemul, float zoomin) {
 	Geometry *image_geometry;
 	Geometry *border_geometry;
 	Texture2D *image_texture;
-	
-	
-	// XS TODO check this wild cast
-	// SD REQUIRED FOR THUMBNAIL ACImage* my_image = dynamic_cast<ACImage*> ( browser.getLibrary()->getMedia(node_index) );
-	
+		
 	// CF: temporary workaround as the ACUserLog tree and the ACLoopAttributes vector in ACMediaBrowser are not sync'd 
 	int media_index = node_index; // or media_cycle->getBrowser()->getMediaNode(node_index).getMediaId(); 
 	if (media_cycle->getBrowser()->getMode() == AC_MODE_NEIGHBORS)
@@ -247,6 +244,29 @@ void ACOsgImageRenderer::imageGeode(int flip, float sizemul, float zoomin) {
 	}
 	else if (media_type == MEDIA_TYPE_VIDEO)
 	{
+		//std::cout << osgDB::listAllAvailablePlugins() << std::endl;  	
+		
+		//CF forcing to load the OSG FFMpeg plugin, this should be done elsewhere at app launch time
+//		std::cout <<"ACOsgImageRenderer::imageGeode: current media type: " << media_cycle->getLibrary()->getMedia(media_index)->getType() << std::endl;
+//		std::string libName = osgDB::Registry::instance()->createLibraryNameForExtension("qt"); 
+//		
+//		osgDB::Registry::LoadStatus ffmpegStatus = osgDB::Registry::instance()->loadLibrary(libName);
+//		//NOT_LOADED, PREVIOUSLY_LOADED, LOADED 
+//		std::cout << "FFMpeg library status; "<< ffmpegStatus << std::endl;
+//		//osgDB::Registry::instance()->getLibrary(libName);
+//		
+//		osgDB::Registry::ReaderWriterList readerWriterList = osgDB::Registry::instance()->getReaderWriterList();
+//		//osgDB::Registry::ReaderWriterList::iterator rWLIt;
+//		//rWLIt = readerWriterList.begin();
+//		
+//		std::cout << "List of supported extensions: " << std::endl;
+//		for (int r=0; r<readerWriterList.size();r++)
+//		{
+//			osgDB::ReaderWriter::FormatDescriptionMap fDM = readerWriterList[r]->supportedExtensions();
+//			//for (int f=0; f<fDM.size();f++)
+//			//	std::cout << fDM[f] << std::endl;
+//		}	
+		
 		image_image = osgDB::readImageFile(media_cycle_filename);
 	}
 
@@ -336,64 +356,64 @@ void ACOsgImageRenderer::updateNodes(double ratio) {
 	float zpos = 0.001;
 	
 	const ACMediaNode &attribute = media_cycle->getMediaNode(node_index);
-		
-		const ACPoint &p = attribute.getCurrentPosition(), &p2 = attribute.getNextPosition();
-		double omr = 1.0-ratio;
-				
-		Matrix T;
-		Matrix Trotate;
-		Matrix imageT;
-		
-		int media_index = node_index; // or media_cycle->getBrowser()->getMediaNode(node_index).getMediaId(); 
-		if (media_cycle->getBrowser()->getMode() == AC_MODE_NEIGHBORS)
-			media_index = media_cycle->getBrowser()->getUserLog()->getMediaIdFromNodeId(node_index);
-		
-		if (media_index!=prev_media_index) {
-			if(media_node->getNumChildren() == 1) {
-				media_node->removeChild(0, 1);
-			}
-			imageGeode();
-			media_node->addChild(image_transform);
-			prev_media_index = media_index;
+	
+	const ACPoint &p = attribute.getCurrentPosition(), &p2 = attribute.getNextPosition();
+	double omr = 1.0-ratio;
+	
+	Matrix T;
+	Matrix Trotate;
+	Matrix imageT;
+	
+	int media_index = node_index; // or media_cycle->getBrowser()->getMediaNode(node_index).getMediaId(); 
+	if (media_cycle->getBrowser()->getMode() == AC_MODE_NEIGHBORS)
+		media_index = media_cycle->getBrowser()->getUserLog()->getMediaIdFromNodeId(node_index);
+	
+	if (media_index!=prev_media_index) {
+		if(media_node->getNumChildren() == 1) {
+			media_node->removeChild(0, 1);
 		}
-		
-		unsigned int mask = (unsigned int)-1;
-		if(attribute.getNavigationLevel() >= media_cycle->getNavigationLevel()) {
-			image_transform->setNodeMask(mask);
-		}
-		else {
-			image_transform->setNodeMask(0);
-		}
-		
-		z = 0;
-		
-		//	if (border_geode->getDrawable(0)) {
-		//		if (attribute.getActivity()==1) {
-		//			((Geometry*)border_geode->getDrawable(0))->setColorArray(colors2);
-		//		}
-		//		else {
-		//			((Geometry*)border_geode->getDrawable(0))->setColorArray(colors3);
-		//		}
-		//	}
-		
-		float localscale;
-		float maxdistance = 0.2;
-		float maxscale = 3;//1.5;//CF
-		float minscale = 0.6;				
-		// Apply "rotation" to compensate camera rotation
-		x = omr*p.x + ratio*p2.x;
-		y = omr*p.y + ratio*p2.y;
-		localscale = maxscale - distance_mouse * (maxscale - minscale) / maxdistance ;
-		localscale = max(localscale,minscale);
-		if (localscale>minscale) {
-			z += 2*zpos;
-		}
-		else if (attribute.getActivity()==1) {
-			z += zpos;
-		}
-		
-		T.makeTranslate(Vec3(x, y, z)); // omr*p.z + ratio*p2.z));	
-		T =  Matrix::rotate(-media_cycle_angle,Vec3(0.0,0.0,1.0)) * Matrix::scale(localscale/media_cycle_zoom,localscale/media_cycle_zoom,localscale/media_cycle_zoom) * T;
-		media_node->setMatrix(T);
+		imageGeode();
+		media_node->addChild(image_transform);
+		prev_media_index = media_index;
+	}
+	
+	unsigned int mask = (unsigned int)-1;
+	if(attribute.getNavigationLevel() >= media_cycle->getNavigationLevel()) {
+		image_transform->setNodeMask(mask);
+	}
+	else {
+		image_transform->setNodeMask(0);
+	}
+	
+	z = 0;
+	
+	//	if (border_geode->getDrawable(0)) {
+	//		if (attribute.getActivity()==1) {
+	//			((Geometry*)border_geode->getDrawable(0))->setColorArray(colors2);
+	//		}
+	//		else {
+	//			((Geometry*)border_geode->getDrawable(0))->setColorArray(colors3);
+	//		}
+	//	}
+	
+	float localscale;
+	float maxdistance = 0.2;
+	float maxscale = 3;//1.5;//CF
+	float minscale = 0.6;				
+	// Apply "rotation" to compensate camera rotation
+	x = omr*p.x + ratio*p2.x;
+	y = omr*p.y + ratio*p2.y;
+	localscale = maxscale - distance_mouse * (maxscale - minscale) / maxdistance ;
+	localscale = max(localscale,minscale);
+	if (localscale>minscale) {
+		z += 2*zpos;
+	}
+	else if (attribute.getActivity()==1) {
+		z += zpos;
+	}
+	
+	T.makeTranslate(Vec3(x, y, z)); // omr*p.z + ratio*p2.z));	
+	T =  Matrix::rotate(-media_cycle_angle,Vec3(0.0,0.0,1.0)) * Matrix::scale(localscale/media_cycle_zoom,localscale/media_cycle_zoom,localscale/media_cycle_zoom) * T;
+	media_node->setMatrix(T);
 }
 #endif//CF APPLE_IOS

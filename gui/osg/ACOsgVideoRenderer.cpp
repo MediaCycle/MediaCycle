@@ -50,7 +50,7 @@ void ACOsgVideoRenderer::prepareNodes() {
 	
 	float reference_time, time_multiplier;
 	
-	imageGeode(1, 2.0, 1.0);
+	imageGeode(1, 2.0, 1.0); // 1 is for flip -- necessary for video
 	
 	media_node->addChild(image_transform);
 	
@@ -58,7 +58,7 @@ void ACOsgVideoRenderer::prepareNodes() {
 	image_stream->setLoopingMode(ImageStream::LOOPING);
 	
 	reference_time = image_stream->getReferenceTime();
-	reference_time = 30.0;
+	reference_time = 5; //30.0;
 	image_stream->setReferenceTime(reference_time);
 	
 	time_multiplier = image_stream->getTimeMultiplier();

@@ -1,7 +1,7 @@
 /**
  * @brief dct.cpp
- * @author Damien Tardieu
- * @date 11/03/2010
+ * @author Xavier Siebert
+ * @date 22/11/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -62,7 +62,7 @@ mat dct(mat a, int n){
 	mat tmp0_v = "0;";
 	mat tmp1_v = "1;";
 	cx_mat Ic(tmp0_v,tmp1_v);
-	cx_mat ww = trans(exp(-Ic*linspace<rowvec>(0,n-1,n)*math::pi()/(2*n))/sqrt(2*n));
+	cx_mat ww = trans(exp(-Ic*linspace<rowvec>(0,n-1,n)*arma::math::pi()/(2*n))/sqrt(2*n));
 	ww(0) = ww(0) / sqrt(2);
 	
 	y.set_size(aa.n_rows,aa.n_cols);

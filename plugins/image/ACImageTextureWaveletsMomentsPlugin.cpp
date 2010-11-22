@@ -87,7 +87,6 @@ std::vector<ACMediaFeatures*> ACImageTextureWaveletsMomentsPlugin::calculate(ACM
 	}
 	
 	delete image;
-	// XS todo : this will destroy ACMediaData* and lead to a double free...
 	return allImageFeatures;
 }
 

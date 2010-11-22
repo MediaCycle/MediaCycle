@@ -69,8 +69,9 @@ enum ACBrowserLayout {
 };
 
 enum ACBrowserMode {
-	AC_MODE_CLUSTERS=0,
-	AC_MODE_NEIGHBORS=1
+	AC_MODE_NONE=0,
+	AC_MODE_CLUSTERS=1,
+	AC_MODE_NEIGHBORS=2
 };
 
 

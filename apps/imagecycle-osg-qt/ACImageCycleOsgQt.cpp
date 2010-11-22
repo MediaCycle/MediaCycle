@@ -37,12 +37,14 @@
 #include <iostream>
 #include "ACImageCycleOsgQt.h"
 
+// features_known = false : when launching the app we don't know how many features.
+// plugins_scanned = false : nor which plugins are available
+
 ACImageCycleOsgQt::ACImageCycleOsgQt(QWidget *parent)
  : QMainWindow(parent), 
- updatedLibrary(false)
+ library_loaded(false), features_known(false), plugins_scanned(false)
 {
 	ui.setupUi(this); // first thing to do
-	features_known = false; // when launching the app we don't know how many features.
 
 	media_cycle = new MediaCycle(MEDIA_TYPE_IMAGE,"/tmp/","mediacycle.acl");
 	
@@ -61,9 +63,7 @@ ACImageCycleOsgQt::ACImageCycleOsgQt(QWidget *parent)
 	#else
 		media_cycle->addPlugin(QApplication::applicationDirPath().toStdString() + "/../../plugins/image/mc_image.so");
 	#endif
-	
-	//this->configureCheckBoxes();
-	
+		
 	ui.browserOsgView->move(0,20);
 	ui.browserOsgView->setMediaCycle(media_cycle);
 	ui.browserOsgView->prepareFromBrowser();
@@ -79,6 +79,7 @@ ACImageCycleOsgQt::ACImageCycleOsgQt(QWidget *parent)
 	connect(ui.spinBoxClusters, SIGNAL(valueChanged(int)), this, SLOT(spinBoxClustersValueChanged(int)));
 	connect(ui.sliderClusters, SIGNAL(valueChanged(int)), ui.spinBoxClusters , SIGNAL(valueChanged(int)));
 
+	// uses another window for settings (using the class settingsDialog)
 	settingsDialog = new SettingsDialog(parent);
 	settingsDialog->setMediaCycleMainWindow(this);
 
@@ -107,11 +108,11 @@ void ACImageCycleOsgQt::updateLibrary()
 	ui.browserOsgView->prepareFromBrowser();
 	//browserOsgView->setPlaying(true);
 	media_cycle->setNeedsDisplay(true);
-	updatedLibrary = true;
 	
-	//XS new, use this carefully 
-	this->configureCheckBoxes();
+	// do not re-scan the directory for plugins once they have been loaded
+	if (!plugins_scanned) this->configureCheckBoxes();
 	
+	library_loaded = true;
 	ui.browserOsgView->setFocus();
 }
 
@@ -125,7 +126,7 @@ void ACImageCycleOsgQt::on_pushButtonClean_clicked()
 	media_cycle->cleanUserLog();
 	media_cycle->cleanLibrary();
 	this->updateLibrary();
-	//ui.browserOsgView->setFocus();
+	library_loaded = false;
 }	
 
 void ACImageCycleOsgQt::on_pushButtonRecenter_clicked()
@@ -171,7 +172,7 @@ void ACImageCycleOsgQt::spinBoxClustersValueChanged(int _value)
 	ui.sliderClusters->setValue(_value); 	// for synchronous display of values 
 
 	std::cout << "ClusterNumber: " << _value << std::endl;
-	if (updatedLibrary){
+	if (library_loaded){
 		media_cycle->setClusterNumber(_value);
 		// XSCF251003 added this
 		media_cycle->updateDisplay(true); //XS 250310 was: media_cycle->updateClusters(true);
@@ -187,7 +188,8 @@ void ACImageCycleOsgQt::loadACLFile(){
 	QFileDialog dialog(this,"Open ImageCycle Library File(s)");
 	dialog.setDefaultSuffix ("acl");
 	dialog.setNameFilter("ImageCycle Library Files (*.acl)");
-	dialog.setFileMode(QFileDialog::ExistingFile); // change to ExistingFiles for multiple file handling
+	dialog.setFileMode(QFileDialog::ExistingFiles); 
+	// change to ExistingFiles for multiple file handling
 	
 	QStringList fileNames;
 	if (dialog.exec())
@@ -195,26 +197,26 @@ void ACImageCycleOsgQt::loadACLFile(){
 	
 	QStringList::Iterator file = fileNames.begin();
 	while(file != fileNames.end()) {
-		//std::cout << "File library: '" << (*file).toStdString() << "'" << std::endl;
 		fileName = *file;
+		std::cout << "Opening ACL file: '" << fileName.toStdString() << "'" << std::endl;
+		//fileName = QFileDialog::getOpenFileName(this, "~", );
+		
+		if (!(fileName.isEmpty())) {
+			media_cycle->importACLLibrary(fileName.toStdString());
+			std::cout << "File library imported" << std::endl;
+		}	
 		++file;
-	}
-	//std::cout << "Will open: '" << fileName.toStdString() << "'" << std::endl;
-	//fileName = QFileDialog::getOpenFileName(this, "~", );
-	
-	if (!(fileName.isEmpty())) {
-		media_cycle->importACLLibrary((char*) fileName.toStdString().c_str());
-		media_cycle->normalizeFeatures();
-		std::cout << "File library imported" << std::endl;
-		this->updateLibrary();
 	}	
 	
+	// only after loading all ACL files:
+	this->updateLibrary();
+	
+	// already done in media_cycle->importACLLibrary().
+	// media_cycle->normalizeFeatures();
+
 	// XS watch this one...
 	media_cycle->storeNavigationState(); 
-	
-	// XS play
-//	ui.navigationLineEdit->setText(QString::number(media_cycle->getNavigationLevel()));
-	
+		
 	// XS debug
 	media_cycle->dumpNavigationLevel();
 	media_cycle->dumpLoopNavigationLevels() ;
@@ -239,6 +241,7 @@ void ACImageCycleOsgQt::saveACLFile(){
 	//ui.browserOsgView->setFocus();
 }
 
+// XS TODO: make sure it works if we add a new directory to the existing library ?
 void ACImageCycleOsgQt::loadMediaDirectory(){
 
 	QString selectDir = QFileDialog::getExistingDirectory
@@ -249,33 +252,12 @@ void ACImageCycleOsgQt::loadMediaDirectory(){
 	 QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks
 	);
 	
-	// XS TODO : check if directory exists
-	// XS : do not separate directory and files in Qt and let MediaCycle handle it
-	
-	media_cycle->importDirectory(selectDir.toStdString(), 1);
-	// with this function call here, do not import twice!!!
-	// XS TODO: what if we add a new directory to the existing library ?
-	media_cycle->normalizeFeatures();
-	this->updateLibrary();
+	// check if directory exists
+	if (media_cycle->importDirectory(selectDir.toStdString(), 1) > 0){
+		media_cycle->normalizeFeatures();
+		this->updateLibrary();
+	}
 	//ui.browserOsgView->setFocus();
-	
-//	QStringList listFilter;
-//	listFilter << "*.png";
-//	listFilter << "*.jpg";
-//	
-//	QDirIterator dirIterator(selectDir, listFilter ,QDir::Files | QDir::NoSymLinks, QDirIterator::Subdirectories);
-//	
-//	// Variable qui contiendra tous les fichiers correspondant à notre recherche
-//	QStringList fileList; 
-//	// Tant qu'on n'est pas arrivé à la fin de l'arborescence...
-//	while(dirIterator.hasNext()) 
-//	{   
-//		// ...on va au prochain fichier correspondant à notre filtre
-//		fileList << dirIterator.next(); 
-//	}
-//	for ( QStringList::Iterator it = fileList.begin(); it != fileList.end(); ++it ) {
-//		cout << (*it).toStdString() << endl;
-//	}	
 }
 
 void ACImageCycleOsgQt::loadMediaFiles(){
@@ -303,14 +285,13 @@ void ACImageCycleOsgQt::loadMediaFiles(){
 	
 	QStringList::Iterator file = fileNames.begin();
 	while(file != fileNames.end()) {
-		//std::cout << "File library: '" << (*file).toStdString() << "'" << std::endl;
 		fileName = *file;
 		++file;
-		std::cout << "Will open: '" << fileName.toStdString() << "'" << std::endl;
+		std::cout << "Opening: '" << fileName.toStdString() << "'" << std::endl;
 		//fileName = QFileDialog::getOpenFileName(this, "~", );
 	
 		if (!(fileName.isEmpty())) {
-			media_cycle->importDirectory((char*) fileName.toStdString().c_str(), 0);
+			media_cycle->importDirectory(fileName.toStdString(), 0);
 			//media_cycle->normalizeFeatures();
 			//media_cycle->libraryContentChanged(); no, this is in updatelibrary
 			std::cout <<  fileName.toStdString() << " imported" << std::endl;
@@ -329,6 +310,7 @@ void ACImageCycleOsgQt::editConfigFile(){
 void ACImageCycleOsgQt::configureCheckBoxes(){
 	// dynamic config of checkboxes
 	// according to plugins found by plugin manager
+	
 	ACPluginManager *acpl = media_cycle->getPluginManager(); //getPlugins
 	if (acpl) {
 		for (int i=0;i<acpl->getSize();i++) {
@@ -342,6 +324,7 @@ void ACImageCycleOsgQt::configureCheckBoxes(){
 		}
 	}
 	
+	plugins_scanned = true;
 	this->synchronizeFeaturesWeights();
 
 	connect(ui.featuresListWidget, SIGNAL(itemClicked(QListWidgetItem*)),
@@ -368,9 +351,9 @@ void ACImageCycleOsgQt::configureCheckBoxes(){
 	// XS end test -- need to delete !!!
 }
 void ACImageCycleOsgQt::cleanCheckBoxes(){
+	plugins_scanned = false;
 }
 
-// NEW SLOTS
 void ACImageCycleOsgQt::modifyListItem(QListWidgetItem *item)
 {
 	// XS check
@@ -378,7 +361,7 @@ void ACImageCycleOsgQt::modifyListItem(QListWidgetItem *item)
 	cout << ui.featuresListWidget->currentRow() << endl;
 	// end XS check 
 	
-	if (updatedLibrary){
+	if (library_loaded){
 		float w;
 		if (item->checkState() == Qt::Unchecked) w = 0.0;
 		else w = 1.0 ;

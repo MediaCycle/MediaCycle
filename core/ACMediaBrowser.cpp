@@ -858,6 +858,8 @@ void ACMediaBrowser::updateNextPositions() {
 			if (mClustersPosPlugin==NULL && mVisPlugin==NULL) {
 				std::cout << "updateNextPositions : Cluster Propeller (default)" << std::endl;
 				updateNextPositionsPropeller();
+				// XS 151110
+				commitPositions();
 			}	
 			else{
 				if (mClustersPosPlugin){

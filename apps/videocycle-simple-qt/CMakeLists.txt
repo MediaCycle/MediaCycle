@@ -11,14 +11,14 @@ IF ( USE_QT4 )
 		SET(APP_TYPE MACOSX_BUNDLE)
 	ENDIF ( APPLE )
 
-	SET(videocycle-simple-qt_SRCS main.cpp MyGUI.cpp)
-	SET(videocycle-simple-qt_MOC_HDRS MyGUI.h)
+	SET(videocycle-simple-qt_SRCS main.cpp VideoCycle.cpp)
+	SET(videocycle-simple-qt_MOC_HDRS VideoCycle.h)
 	SET(videocycle-simple-qt_UIS VideoCycle.ui)
 
 	# Generates ui_VideoCycle.h
 	QT4_WRAP_UI(videocycle-simple-qt_UIS_H ${videocycle-simple-qt_UIS})
 
-	# Generates moc_MyGUI.cxx 
+	# Generates moc_VideoCycle.cxx 
 	QT4_WRAP_CPP(videocycle-simple-qt_MOC_SRCS ${videocycle-simple-qt_MOC_HDRS})
 
 	# Don't forget to include output directory, otherwise
@@ -31,7 +31,7 @@ IF ( USE_QT4 )
 		#IF ( APPLE )
 		#	ADD_EXECUTABLE(videocycle-simple-qt ${APP_TYPE} ${MACOSX_BUNDLE_INFO_PLIST} ${videocycle-simple-qt_SRCS} ${videocycle-simple-qt_UIS_H} ${videocycle-simple-qt_MOC_SRCS})
 		#ELSE ()
-			ADD_EXECUTABLE(videocycle-simple-qt ${videocycle-simple-qt_SRCS} ${videocycle-simple-qt_UIS_H} ${videocycle-simple-qt_MOC_SRCS} )
+			ADD_EXECUTABLE(videocycle-simple-qt ${videocycle-simple-qt_SRCS} ${videocycle-simple-qt_UIS_H} ${videocycle-simple-qt_MOC_SRCS} ${videocycle-simple-qt_MOC_HDRS})
 		#ENDIF ()
 	ENDIF ( )
 

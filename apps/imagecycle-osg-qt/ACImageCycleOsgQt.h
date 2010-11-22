@@ -44,6 +44,7 @@ using namespace std;
 #include "settings.h" // SettingsDialog
 
 #include "ui_ACImageCycleOsgQt.h"
+// XS TODO: necessary ?
 #include <ACOsgBrowserViewQT.h>
 #include <MediaCycle.h>
 
@@ -65,8 +66,8 @@ class ACImageCycleOsgQt : public QMainWindow
 		
 		// XS test
 		void disBonjour(){cout << "bonjour" << endl;}
-
-	// XS attempt to make dynamic buttons
+		MediaCycle* getMediaCycle() {return media_cycle;}
+		
 	public slots: 
 		virtual void modifyListItem(QListWidgetItem *item);
 		
@@ -88,16 +89,17 @@ class ACImageCycleOsgQt : public QMainWindow
 		void editConfigFile();
 		
 	public:
-		MediaCycle *media_cycle;
 		SettingsDialog *settingsDialog;
 
     private:
         Ui::ACImageCycleOsgQt ui;
-		bool updatedLibrary;
 		void configureCheckBoxes();
 		void cleanCheckBoxes();
 		void synchronizeFeaturesWeights();
 		bool features_known;
+		bool plugins_scanned;
+		bool library_loaded;
+		MediaCycle *media_cycle;
 
 	protected:
 		//ACOsgBrowserViewQT* browserOsgView;

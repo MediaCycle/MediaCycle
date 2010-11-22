@@ -54,6 +54,10 @@ ACMediaFeatures::ACMediaFeatures(){
 ACMediaFeatures::ACMediaFeatures(FeaturesVector V, string myname){
 	// XS TODO:  add checks
 	features_vector = V;
+
+	//XS 151110
+	needs_normalization = 1;
+
 	name = myname;
 	if (V.size() > 0) _computed = true;
 	else cerr << "<ACMediaFeatures Constructor> trying to construct empty media features" << endl;

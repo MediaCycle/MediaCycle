@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>812</width>
-    <height>363</height>
+    <width>851</width>
+    <height>540</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -27,7 +27,7 @@
     </sizepolicy>
    </property>
    <layout class="QGridLayout" name="gridLayout_4">
-    <item row="1" column="0">
+    <item row="0" column="0">
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
        <number>1</number>
@@ -96,7 +96,7 @@
         <item row="1" column="0">
          <widget class="QLabel" name="labelNavigationMode">
           <property name="text">
-           <string>Starting Navigation Mode</string>
+           <string>Browser Mode</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -104,18 +104,18 @@
          </widget>
         </item>
         <item row="1" column="1" colspan="2">
-         <widget class="QComboBox" name="comboNavigationMode">
+         <widget class="QComboBox" name="comboBrowserMode">
           <property name="maxCount">
            <number>100</number>
           </property>
           <item>
            <property name="text">
-            <string>Clusters Mode</string>
+            <string>Clusters</string>
            </property>
           </item>
           <item>
            <property name="text">
-            <string>Vicinity Mode</string>
+            <string>Neighbors</string>
            </property>
           </item>
          </widget>
@@ -157,9 +157,9 @@
          </widget>
         </item>
         <item row="3" column="1">
-         <widget class="QPushButton" name="buttonSaveCurrentSettings">
+         <widget class="QPushButton" name="buttonApplyCurrentSettings">
           <property name="text">
-           <string>Save current settings</string>
+           <string>Apply Current Settings</string>
           </property>
          </widget>
         </item>
@@ -186,39 +186,50 @@
         <item row="0" column="0">
          <widget class="QGroupBox" name="groupBox">
           <property name="title">
-           <string>Features Plugins</string>
+           <string>Features Plugins Libraries</string>
           </property>
           <layout class="QGridLayout" name="gridLayout_5">
+           <item row="0" column="0">
+            <layout class="QHBoxLayout" name="horizontalLayout">
+             <item>
+              <widget class="QPushButton" name="buttonBrowsePluginsLibrary">
+               <property name="text">
+                <string>Browse Plugins Library...</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="lineEditPluginsLibrary">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="buttonAddLibrary">
+               <property name="text">
+                <string>Add to List</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="buttonRemoveLibrary">
+               <property name="text">
+                <string>Remove from List</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
            <item row="1" column="0">
             <widget class="QListWidget" name="listWidgetFeaturesPlugins"/>
            </item>
-           <item row="1" column="1">
-            <widget class="QPushButton" name="pushButtonConfigureFeaturesPlugins">
-             <property name="text">
-              <string>Configure</string>
-             </property>
-            </widget>
-           </item>
           </layout>
-         </widget>
-        </item>
-        <item row="1" column="0">
-         <widget class="QGroupBox" name="groupBox_2">
-          <property name="title">
-           <string>Visualization Plugins</string>
-          </property>
-          <layout class="QGridLayout" name="gridLayout_3">
-           <item row="0" column="0">
-            <widget class="QListWidget" name="listWidgetVisualisationPlugins"/>
-           </item>
-           <item row="0" column="1">
-            <widget class="QPushButton" name="pushButtonLoadVisualizationPlugins">
-             <property name="text">
-              <string>Load Visualization Plugins</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
+          <zorder>layoutWidget</zorder>
+          <zorder>listWidgetFeaturesPlugins</zorder>
          </widget>
         </item>
        </layout>
@@ -269,7 +280,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>812</width>
+     <width>851</width>
      <height>22</height>
     </rect>
    </property>
