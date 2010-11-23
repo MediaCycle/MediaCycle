@@ -198,4 +198,17 @@ void SettingsDialog::on_buttonAddLibrary_clicked(){
 }
 
 void SettingsDialog::on_buttonRemoveLibrary_clicked(){
+//	
+}
+
+void SettingsDialog::on_buttonConfirmPluginsSelection_clicked(){
+	cout << "confirming plugins selection : " << listWidgetFeaturesPlugins->count()<< endl;
+	for (int i=0; i < listWidgetFeaturesPlugins->count(); i++) {
+		// XS TODO: if checkState... (so we only add the selected plugins)
+		cout << listWidgetFeaturesPlugins->item(i)->text().toStdString() << endl;
+		multi_media_cycle->addPluginItem(listWidgetFeaturesPlugins->item(i));
+	}
+	
+	// then the selected plugins get their weights synchronized with MediaCycle
+	multi_media_cycle->synchronizeFeaturesWeights();
 }

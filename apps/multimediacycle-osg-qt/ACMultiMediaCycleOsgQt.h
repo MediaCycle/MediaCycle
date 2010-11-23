@@ -58,21 +58,11 @@ QT_END_NAMESPACE
 class SettingsDialog; // forward declaration; NB: SettingsDialog member has to be a pointer
 
 class ACMultiMediaCycleOsgQt : public QMainWindow {
-	Q_OBJECT
-	
-public:
-	ACMultiMediaCycleOsgQt(QWidget *parent = 0);
-	~ACMultiMediaCycleOsgQt();
-	void updateLibrary();
-	
-	// XS default values for image !
-	void createMediaCycle(ACMediaType _media_type = MEDIA_TYPE_IMAGE, ACBrowserMode _browser_mode = AC_MODE_CLUSTERS);
-	MediaCycle* getMediaCycle() {return media_cycle;}
-	void destroyMediaCycle();
+Q_OBJECT
 	
 public slots: 
-	//	virtual void modifyListItem(QListWidgetItem *item);
-
+	virtual void modifyListItem(QListWidgetItem *item); // XS TODO why virtual again ?
+	
 private slots:
 	//	void on_pushButtonLaunch_clicked(); // loadACLFile
 	//	void on_pushButtonClean_clicked();
@@ -88,15 +78,25 @@ private slots:
 	void loadMediaDirectory();
 	void loadMediaFiles();
 	void editConfigFile();
-	
+
 public:
-	SettingsDialog *settingsDialog;
+	ACMultiMediaCycleOsgQt(QWidget *parent = 0);
+	~ACMultiMediaCycleOsgQt();
+	void updateLibrary();
 	
+	// XS default values for image !
+	void createMediaCycle(ACMediaType _media_type = MEDIA_TYPE_IMAGE, ACBrowserMode _browser_mode = AC_MODE_CLUSTERS);
+	MediaCycle* getMediaCycle() {return media_cycle;}
+	void destroyMediaCycle();
+	void addPluginItem(QListWidgetItem *_item);
+	void synchronizeFeaturesWeights();
+
 private:
 	Ui::ACMediaCycleOsgQt ui;
+	SettingsDialog *settingsDialog;
+
 //	void configureCheckBoxes();
 //	void cleanCheckBoxes();
-//	void synchronizeFeaturesWeights();
 	bool features_known;
 	bool plugins_scanned;
 	bool library_loaded;

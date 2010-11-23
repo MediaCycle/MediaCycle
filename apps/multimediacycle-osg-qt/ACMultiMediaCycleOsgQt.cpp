@@ -63,7 +63,9 @@ ACMultiMediaCycleOsgQt::ACMultiMediaCycleOsgQt(QWidget *parent) : QMainWindow(pa
 	//	connect(ui.actionLoad_ACL, SIGNAL(triggered()), this, SLOT(on_pushButtonLaunch_clicked()));
 	connect(ui.actionSave_ACL, SIGNAL(triggered()), this, SLOT(saveACLFile()));
 	connect(ui.actionEdit_Config_File, SIGNAL(triggered()), this, SLOT(editConfigFile()));
-	//	
+	connect(ui.featuresListWidget, SIGNAL(itemClicked(QListWidgetItem*)),
+            this, SLOT(modifyListItem(QListWidgetItem*)));
+
 	//	// connect spinBox and slider
 	//	connect(ui.spinBoxClusters, SIGNAL(valueChanged(int)), this, SLOT(spinBoxClustersValueChanged(int)));
 	//	connect(ui.sliderClusters, SIGNAL(valueChanged(int)), ui.spinBoxClusters , SIGNAL(valueChanged(int)));
@@ -287,3 +289,50 @@ void ACMultiMediaCycleOsgQt::spinBoxClustersValueChanged(int _value)
 	}
 	//ui.browserOsgView->setFocus();
 }
+
+void ACMultiMediaCycleOsgQt::addPluginItem(QListWidgetItem *_item){
+	cout << "adding item : " << _item->text().toStdString() << endl;
+	QListWidgetItem * new_item = new QListWidgetItem(*_item);
+	ui.featuresListWidget->addItem(new_item);
+}
+
+void ACMultiMediaCycleOsgQt::modifyListItem(QListWidgetItem *item) {
+	// XS check
+	cout << item->text().toStdString() << endl; // isselected...
+	cout << ui.featuresListWidget->currentRow() << endl;
+	// end XS check 
+	
+	if (library_loaded){
+		float w;
+		if (item->checkState() == Qt::Unchecked) w = 0.0;
+		else w = 1.0 ;
+		int f =  ui.featuresListWidget->currentRow(); // index of selected feature
+		media_cycle->setWeight(f,w);
+		media_cycle->updateDisplay(true); 
+		//XS 250310 was: media_cycle->updateClusters(true);
+		// XS250310 removed mediacycle->setNeedsDisplay(true); // now in updateDisplay
+		ui.browserOsgView->updateTransformsFromBrowser(0.0); 
+	}
+}
+
+// synchronize weights with what is loaded in mediacycle
+// note: here weights are 1 or 0 (checkbox).
+// conversion: 0 remains 0, and value > 0 becomes 1.
+void ACMultiMediaCycleOsgQt::synchronizeFeaturesWeights(){
+	vector<float> w = media_cycle->getWeightVector();
+	int nw = w.size();
+	if (ui.featuresListWidget->count() != nw){
+		cerr << "Warning: Checkboxes in GUI do not match Features in MediaCycle" << endl;
+		cerr << ui.featuresListWidget->count() << "!=" << nw << endl;
+		//exit(1);
+	}
+	else {
+		for (int i=0; i< nw; i++){
+			if (w[i]==0) 
+				ui.featuresListWidget->item(i)->setCheckState (Qt::Unchecked);
+			else
+				ui.featuresListWidget->item(i)->setCheckState (Qt::Checked);		
+		}
+	}
+}
+

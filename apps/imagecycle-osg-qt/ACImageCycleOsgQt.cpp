@@ -380,18 +380,17 @@ void ACImageCycleOsgQt::synchronizeFeaturesWeights(){
 	// conversion: 0 remains 0, and value > 0 becomes 1.
 	vector<float> w = media_cycle->getWeightVector();
 	int nw = w.size();
-	// CF cerr makes the application exit, we'd like a warning message instead... temporarily disabled
-	/*if (ui.featuresListWidget->count() != nw){
-		cerr << "Checkboxes in GUI do not match Features in MediaCycle" << endl;
+	if (ui.featuresListWidget->count() != nw){
+		cerr << "Warning: Checkboxes in GUI do not match Features in MediaCycle" << endl;
 		cerr << ui.featuresListWidget->count() << "!=" << nw << endl;
-		exit(1);
+		//exit(1);
 	}
-	else {*/
+	else {
 		for (int i=0; i< nw; i++){
 			if (w[i]==0) 
 				ui.featuresListWidget->item(i)->setCheckState (Qt::Unchecked);
 			else
 				ui.featuresListWidget->item(i)->setCheckState (Qt::Checked);		
 		}
-	/*}*/ //
+	}
 }

@@ -188,7 +188,7 @@
           <property name="title">
            <string>Features Plugins Libraries</string>
           </property>
-          <layout class="QGridLayout" name="gridLayout_5">
+          <layout class="QGridLayout" name="gridLayout_3">
            <item row="0" column="0">
             <layout class="QHBoxLayout" name="horizontalLayout">
              <item>
@@ -208,28 +208,37 @@
                </property>
               </widget>
              </item>
+            </layout>
+           </item>
+           <item row="1" column="0">
+            <layout class="QHBoxLayout" name="horizontalLayout_2">
              <item>
               <widget class="QPushButton" name="buttonAddLibrary">
                <property name="text">
-                <string>Add to List</string>
+                <string>Add Plugins of this Library</string>
                </property>
               </widget>
              </item>
              <item>
               <widget class="QPushButton" name="buttonRemoveLibrary">
                <property name="text">
-                <string>Remove from List</string>
+                <string>Remove Plugins of this Library</string>
                </property>
               </widget>
              </item>
             </layout>
            </item>
-           <item row="1" column="0">
+           <item row="2" column="0">
             <widget class="QListWidget" name="listWidgetFeaturesPlugins"/>
            </item>
+           <item row="3" column="0">
+            <widget class="QPushButton" name="buttonConfirmPluginsSelection">
+             <property name="text">
+              <string>Confirm Plugins Selection</string>
+             </property>
+            </widget>
+           </item>
           </layout>
-          <zorder>layoutWidget</zorder>
-          <zorder>listWidgetFeaturesPlugins</zorder>
          </widget>
         </item>
        </layout>

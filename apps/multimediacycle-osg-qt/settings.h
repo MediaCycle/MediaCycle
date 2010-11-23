@@ -67,6 +67,7 @@ private slots:
 	void on_buttonBrowsePluginsLibrary_clicked();
 	void on_buttonAddLibrary_clicked();
 	void on_buttonRemoveLibrary_clicked();
+	void on_buttonConfirmPluginsSelection_clicked();
 
 //    void loadFromSettings();
 
