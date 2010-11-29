@@ -64,8 +64,8 @@ public:
 	static ACMedia* create(ACMediaType media_type);
 
 	// 3) copy a media 
-	static ACMedia* create(ACMedia* media);
-
+	static ACMedia* create(ACMedia* media);//CF we don't want this, data duplication!
+	
 	static ACMediaType getMediaTypeFromExtension(std::string file_ext);
 	static void listMediaExtensions();
 	static std::vector<std::string> getExtensionsFromMediaType(ACMediaType media_type);// no check in the possible formats list

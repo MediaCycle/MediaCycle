@@ -939,7 +939,7 @@ bool ACAudioFeedback::processAudioEngineNew()
 			alGetSourcei(loop_sources[count], AL_BUFFERS_PROCESSED, &buffer_processed_1);
 			
 			if (add_buffers) {
-				printf ("Synchro buffers %d, %d, %d - %d, %d\n", count, buffer_queued, buffer_processed, buffer_queued_1, buffer_processed_1);
+				//printf ("Synchro buffers %d, %d, %d - %d, %d\n", count, buffer_queued, buffer_processed, buffer_queued_1, buffer_processed_1);//CF
 			}
 			
 		}
@@ -949,7 +949,7 @@ bool ACAudioFeedback::processAudioEngineNew()
 	}
 	
 	if (add_buffers && active_loops_counted) {
-		printf ("========================================\n");
+		//printf ("========================================\n");//CF
 	}	
 	
 	return (active_loops_counted >=1 ? true : false);

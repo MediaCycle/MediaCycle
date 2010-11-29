@@ -434,7 +434,7 @@ struct ACOsgBrowserViewData
 		
 	//[self setNode:_privateData->renderer.getShapes()];//CF
 	[self setNode:renderer->getShapes()];//CF	
-	[self addCamera:renderer_hud->getCamera()];
+	//[self addCamera:renderer_hud->getCamera()];
 	}
 }
 

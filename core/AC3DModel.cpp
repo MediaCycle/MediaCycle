@@ -52,12 +52,21 @@ AC3DModel::~AC3DModel() {
 	
 }
 
+void AC3DModel::setData(osg::Node* _data)
+{
+	if (data->getMediaType()==MEDIA_TYPE_NONE)
+		data = new ACMediaData(MEDIA_TYPE_3DMODEL);	
+	else
+		data->setMediaType(MEDIA_TYPE_3DMODEL);
+	data->set3DModelData(_data);
+}
+
 ACMediaData* AC3DModel::extractData(string fname) {
 	
 	osg::Node* local_model_ptr;
 	osg::ComputeBoundsVisitor cbv;
 	
-	ACMediaData* model_data = new ACMediaData(fname, MEDIA_TYPE_3DMODEL);
+	ACMediaData* model_data = new ACMediaData(MEDIA_TYPE_3DMODEL,fname);
 	
 	local_model_ptr = model_data->get3DModelData();
 	local_model_ptr->accept( cbv );

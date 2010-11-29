@@ -61,7 +61,7 @@ ACAudio::ACAudio() : ACMedia() {
 	waveform = NULL;
 }
 
-ACAudio::ACAudio(const ACAudio& m, bool reduced) : ACMedia(m) {
+ACAudio::ACAudio(const ACAudio& m, bool reduce) : ACMedia(m) {
 	media_type = MEDIA_TYPE_AUDIO;
 	db = m.db;
 	bpm = m.bpm;
@@ -71,7 +71,7 @@ ACAudio::ACAudio(const ACAudio& m, bool reduced) : ACMedia(m) {
 	acid_type = m.acid_type;
 	sample_rate = m.sample_rate;
 	channels = m.channels;
-	if (!reduced){
+	if (!reduce){
 		waveformLength = m.waveformLength;
 		waveform = new float[waveformLength];
 		for (int i=0; i<waveformLength; i++){
@@ -82,7 +82,7 @@ ACAudio::ACAudio(const ACAudio& m, bool reduced) : ACMedia(m) {
 
 ACAudio::~ACAudio() {
 	// XS added this on 4/11/2009 to clean up memory
-	if (waveform) delete [] waveform;	
+	if (waveform) delete [] waveform;
 }
 
 int ACAudio::getSampleStart(){
@@ -147,6 +147,20 @@ int ACAudio::loadACLSpecific(ifstream &library_file) {
 	return 1;
 }
 
+void ACAudio::setData(float* _data,float _sample_number, int _sr,int _channels) {
+	if (data->getMediaType()==MEDIA_TYPE_NONE)
+		data = new ACMediaData(MEDIA_TYPE_AUDIO);	
+	else
+		data->setMediaType(MEDIA_TYPE_AUDIO);
+
+	data->setAudioData(_data,_sample_number);
+	this->channels = _channels;
+	this->sample_rate = _sr;
+	
+	this->start=0;
+	this->end=_sample_number/(float) _sr/(float) _channels;
+}
+
 ACMediaData* ACAudio::extractData(string fname) {
 	
 	SF_INFO sfinfo;
@@ -168,53 +182,98 @@ ACMediaData* ACAudio::extractData(string fname) {
 	std::cout << "Duration of the segment : " << this->getDuration() << std::endl;
 	std::cout << "Number of frame of the segment : " << this->getNFrames() << std::endl;
 // 	sf_readf_float(testFile, data, sfinfo.frames);
-	ACMediaData* audio_data = new ACMediaData(fname, MEDIA_TYPE_AUDIO);
+	ACMediaData* audio_data = new ACMediaData(MEDIA_TYPE_AUDIO,fname);
  	this->computeWaveform(audio_data->getAudioData());
-	sf_close(testFile);
+	sf_close(testFile);/*
+	if(persistent_data){
+		if(!data)
+			data = new ACMediaData(MEDIA_TYPE_AUDIO,fname);
+	}*/
 	return audio_data;
 }
 
 float* ACAudio::getSamples(){
-	SF_INFO sfinfo;
-	SNDFILE* testFile;
-	if (! (testFile = sf_open (this->getFileName().c_str(), SFM_READ, &sfinfo))){  
-		/* Open failed so print an error message. */
-		printf ("Not able to open input file %s.\n", this->getFileName().c_str()) ;
-		/* Print the error message from libsndfile. */
-		puts (sf_strerror (NULL)) ;
-		return  NULL;
-	}
+	if (data->getMediaType()==MEDIA_TYPE_AUDIO){
+		return data->getAudioData();
+	}	
+	else{
+		SF_INFO sfinfo;
+		SNDFILE* testFile;
+		if (! (testFile = sf_open (this->getFileName().c_str(), SFM_READ, &sfinfo))){  
+			/* Open failed so print an error message. */
+			printf ("Not able to open input file %s.\n", this->getFileName().c_str()) ;
+			/* Print the error message from libsndfile. */
+			puts (sf_strerror (NULL)) ;
+			return  NULL;
+		}
+		sample_rate = sfinfo.samplerate;
+		channels = sfinfo.channels;
+		if (this->getSampleStart() < 0)
+			this->setSampleStart(0);
+		if (this->getSampleEnd() < 0)
+			this->setSampleEnd(sfinfo.frames);
 
-	float* data = new float[(long) this->getNFrames() * this->getChannels()];
+		float* _data = new float[(long) this->getNFrames() * this->getChannels()];
 
-	sf_seek(testFile, this->getSampleStart(), SEEK_SET);
-	sf_readf_float(testFile, data, this->getNFrames());
-	sf_close(testFile);
-	return data;
+		sf_seek(testFile, this->getSampleStart(), SEEK_SET);
+		sf_readf_float(testFile, _data, this->getNFrames());
+		sf_close(testFile);
+		if (persistent_data){
+			data = new ACMediaData(MEDIA_TYPE_AUDIO);
+			data->setAudioData(_data,this->getNFrames());
+		}	
+		return _data;
+	}	
 }
 
 float* ACAudio::getMonoSamples(){
-	SF_INFO sfinfo;
-	SNDFILE* testFile;
-	if (! (testFile = sf_open (this->getFileName().c_str(), SFM_READ, &sfinfo))){  
-		/* Open failed so print an error message. */
-		printf ("Not able to open input file %s.\n", this->getFileName().c_str()) ;
-		/* Print the error message from libsndfile. */
-		puts (sf_strerror (NULL)) ;
-		return  NULL;
-	}
-	
-	float* tmpdata = new float[(long) this->getNFrames() * this->getChannels()];
-	float* data = new float[(long) this->getNFrames()];
-	
-	sf_seek(testFile, this->getSampleStart(), SEEK_SET);
-	sf_readf_float(testFile, tmpdata, this->getNFrames());
-	sf_close(testFile);
-	
-	for (long i = 0; i< this->getNFrames(); i++){
-		data[i] = tmpdata[i*this->getChannels()];
-	}
-	return data;
+	if (data->getMediaType()==MEDIA_TYPE_AUDIO){
+		float* _data = new float[(long) this->getNFrames()];
+		float* _tmpdata  = data->getAudioData();
+		long i;
+		for (i = 0; i< this->getNFrames(); i++){
+			_data[i] = _tmpdata[i*this->getChannels()];
+		}
+		std::cout << "i data" << i << std::endl;
+		return _data;
+	}	
+	else{	
+		SF_INFO sfinfo;
+		SNDFILE* testFile;
+		if (! (testFile = sf_open (this->getFileName().c_str(), SFM_READ, &sfinfo))){  
+			/* Open failed so print an error message. */
+			printf ("Not able to open input file %s.\n", this->getFileName().c_str()) ;
+			/* Print the error message from libsndfile. */
+			puts (sf_strerror (NULL)) ;
+			return  NULL;
+		}
+		
+		sample_rate = sfinfo.samplerate;
+		channels = sfinfo.channels;
+		if (this->getSampleStart() < 0)
+			this->setSampleStart(0);
+		if (this->getSampleEnd() < 0)
+			this->setSampleEnd(sfinfo.frames);
+		
+		float* tmpdata = new float[(long) this->getNFrames() * this->getChannels()];
+		float* _data = new float[(long) this->getNFrames()];
+		
+		sf_seek(testFile, this->getSampleStart(), SEEK_SET);
+		sf_readf_float(testFile, tmpdata, this->getNFrames());
+		sf_close(testFile);
+		
+		if (persistent_data){
+			data = new ACMediaData(MEDIA_TYPE_AUDIO);
+			data->setAudioData(tmpdata,this->getNFrames());
+		}
+		
+		long i;
+		for (i = 0; i< this->getNFrames(); i++){
+			_data[i] = tmpdata[i*this->getChannels()];
+		}
+		std::cout << "i file" << i << std::endl;
+		return _data;
+	}	
 }
 
 

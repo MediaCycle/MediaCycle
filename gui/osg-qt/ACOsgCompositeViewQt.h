@@ -1,7 +1,7 @@
 /**
  * @brief ACOsgCompositeViewQt.h
  * @author Christian Frisson
- * @date 15/11/2010
+ * @date 29/11/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -87,6 +87,7 @@ using Qt::WindowFlags;
 #include <ACOsgBrowserRenderer.h>
 #include <ACOsgBrowserEventHandler.h>
 #include <ACOsgTimelineRenderer.h>
+#include <ACOsgTimelineControlsRenderer.h>
 
 class ACOsgCompositeViewQt : public osgViewer::CompositeViewer, public QGLWidget
 {
@@ -99,6 +100,7 @@ class ACOsgCompositeViewQt : public osgViewer::CompositeViewer, public QGLWidget
 
     protected:
         void init();
+		virtual void initializeGL();
         virtual void resizeGL( int width, int height );
 		virtual void updateGL();
         virtual void keyPressEvent( QKeyEvent* event );
@@ -114,8 +116,10 @@ class ACOsgCompositeViewQt : public osgViewer::CompositeViewer, public QGLWidget
 		ACOsgBrowserRenderer *browser_renderer;
 		ACOsgBrowserEventHandler *event_handler;
 		ACOsgTimelineRenderer *timeline_renderer;
+		ACOsgTimelineControlsRenderer *timeline_controls_renderer;
 		osgViewer::View* browser_view;
 		osgViewer::View* timeline_view;
+		osgViewer::View* timeline_controls_view;
 
 	public:
 		// needs to be called when loops are added or removed
@@ -129,6 +133,7 @@ class ACOsgCompositeViewQt : public osgViewer::CompositeViewer, public QGLWidget
 		void updateTransformsFromTimeline( double frac);
 		ACOsgBrowserRenderer* getBrowserRenderer(){return browser_renderer;};
 		ACOsgTimelineRenderer* getTimelineRenderer(){return timeline_renderer;};
+		ACOsgTimelineControlsRenderer* getTimelineControlsRenderer(){return timeline_controls_renderer;};
 	
 	private:
 		int mousedown, zoomdown, forwarddown, autoplaydown, rotationdown;
@@ -137,8 +142,10 @@ class ACOsgCompositeViewQt : public osgViewer::CompositeViewer, public QGLWidget
 		float refcamx, refcamy;
 		float refzoom, refrotation;
 		int septhick; // CF half of the thickness of the border that separates the browser and timeline viewers
-		float sepx,sepy; //CF location (in OSG coordinates) of the border that separates the browser and timeline viewers
+		float sepy; //CF location (in OSG coordinates) of the border that separates the browser and timeline viewers
 		float refsepy;
+		int controls_width;
+		int screen_width;
 	
 	//MediaBlender specific members:
 	private:

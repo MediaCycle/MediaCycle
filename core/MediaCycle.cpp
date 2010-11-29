@@ -32,7 +32,9 @@
 
 #include "MediaCycle.h"
 
-//#include <omp.h>
+#ifdef USE_OPENMP
+#include <omp.h>
+#endif
 
 #include <fstream>
 using std::ofstream;
@@ -341,8 +343,9 @@ int MediaCycle::importDirectories(vector<string> directories, int recursive, boo
 	unsigned int i = 0;
 	double t1, t2;
 	
-//	omp_set_num_threads(2);
-
+	#ifdef USE_OPENMP
+	omp_set_num_threads(2);
+	#endif
 	t1 = getTime();
 		
 	n = filenames.size();

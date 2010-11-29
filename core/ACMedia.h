@@ -58,12 +58,13 @@ protected:
 	char  **text_tags;
 	char  **hyper_links;
 	std::vector<ACMedia*> segments;//CF
-	
 	float start, end; // seconds
+	bool persistent_data; // true if data and thumbnail are kept in virtual memory
+	ACMediaData* data;
 	
 public:
 	ACMedia();
-	ACMedia(const ACMedia&);
+	ACMedia(const ACMedia&, bool reduce = true);
 	virtual ~ACMedia();
 
 	ACMediaType getMediaType() {return media_type;};
@@ -99,7 +100,13 @@ public:
 //	virtual int computeThumbnail(std::string fname="", int w=0, int h=0){}
 //	virtual int computeThumbnail(ACMediaData* data_ptr, int w=0, int h=0){}
 
-	// accessors -- these should not be redefined for each media
+	// data
+	void setDataPersistence(bool persistence){persistent_data=persistence;}
+	bool getDataPersistence(){return persistent_data;}
+	void setData(ACMediaData* _data){data = _data;}
+	ACMediaData* getData(){return data;}
+		
+		// accessors -- these should not be redefined for each media
 	int getWidth() {return width;}
 	int getHeight() {return height;}
 	void setWidth(int w) {width=w;}

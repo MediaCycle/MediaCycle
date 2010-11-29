@@ -57,6 +57,9 @@ public:
 	int getThumbnailWidth() {return thumbnail_width;}
 	int getThumbnailHeight() {return thumbnail_height;}
 
+	CvCapture* getData(){return data->getVideoData();}
+	void setData(CvCapture* _data);
+	
 	ACMediaData* extractData(std::string fname);
 	
 private:	

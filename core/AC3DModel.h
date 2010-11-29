@@ -55,6 +55,9 @@ public:
 	
 	void* getThumbnailPtr() { return 0; }
 	
+	osg::Node* getData(){return data->get3DModelData();}
+	void setData(osg::Node* _data);
+	
 private:	
 	
 	vector<float> center;

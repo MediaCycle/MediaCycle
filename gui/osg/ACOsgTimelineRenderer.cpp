@@ -36,7 +36,7 @@
 #include "ACOsgTimelineRenderer.h"
 #include "ACOsgAudioTrackRenderer.h"
 
-ACOsgTimelineRenderer::ACOsgTimelineRenderer() {
+ACOsgTimelineRenderer::ACOsgTimelineRenderer(): screen_width(0) {
 	track_renderer.resize(0);
 	group = new Group();
 	track_group = new Group();
@@ -65,6 +65,7 @@ void ACOsgTimelineRenderer::prepareTracks(int start) {
 		switch (media_type) {
 			case MEDIA_TYPE_AUDIO:
 				track_renderer[i] = new ACOsgAudioTrackRenderer();
+				track_renderer[i]->setScreenWidth(screen_width);
 				break;
 		/*		
 			case MEDIA_TYPE_VIDEO:
@@ -96,6 +97,16 @@ void ACOsgTimelineRenderer::updateTracks(double ratio) {
 	for (unsigned int i=0;i<track_renderer.size();i++) {
 		track_renderer[i]->updateTracks(ratio);
 	}
+}
+
+void ACOsgTimelineRenderer::updateScreenWidth(int _screen_width)
+{
+	if ( screen_width != _screen_width){
+		this->screen_width = _screen_width;
+		for (unsigned int i=0;i<track_renderer.size();i++) {
+			track_renderer[i]->updateScreenWidth(_screen_width);
+		}
+	}	
 }
 
 int ACOsgTimelineRenderer::computeScreenCoordinates(osgViewer::View* view, double ratio) //CF: use osgViewer::Viewer* for the simple Viewer

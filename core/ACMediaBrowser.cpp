@@ -1111,6 +1111,8 @@ void ACMediaBrowser::updateNextPositionsPropeller() {
 	// XS loop on MediaNodes.
 	// each MediaNode has a MediaId by which we can access the Media
 	
+	float maxr = 0.0f;
+	
 	for (ACMediaNodes::iterator node = mLoopAttributes.begin(); node != mLoopAttributes.end(); ++node) {
 		
 		int ci = (*node).getClusterId();
@@ -1135,8 +1137,11 @@ void ACMediaBrowser::updateNextPositionsPropeller() {
 		//printf("computed next position: theta:%f,r=%f,  (%f %f %f)\n", theta, r, p.x, p.y, p.z);//CF free the console
 		double t = getTime();
 		(*node).setNextPosition(p, t);
+		
+		maxr = max(maxr,p.x);
+		maxr = max(maxr,p.y);
 	}
-	
+	std::cout << "Max prop: " << maxr << std::endl;
 	// printf("PROPELER \n");
 	
 	setNeedsDisplay(true);
@@ -1517,8 +1522,11 @@ void ACMediaBrowser::switchMode(ACBrowserMode _mode){
 						p.z = 0;
 						(*node).setNextPosition(p, t);
 					}
+					/* CF
 					this->setState(AC_CHANGING);
 					this->setNeedsDisplay(true);
+					 */
+					this->updateDisplay(true);
 					
 					//CF 2) Recreate the user log, links should thus disappear
 					delete mUserLog;

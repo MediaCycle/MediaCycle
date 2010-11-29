@@ -219,8 +219,15 @@ int ACMediaLibrary::importFile(std::string _filename, ACPluginManager *acpl, boo
 		}
 	}
 	
-	media = ACMediaFactory::create(extension);
-	cout << "extension:" << extension << endl; 		
+	if (media_type == fileMediaType){
+		media = ACMediaFactory::create(extension);
+		cout << "extension:" << extension << endl; 	
+	}
+	else {
+		cout << "other media type, skipping " << _filename << " ... " << endl;
+		return 0;
+	}
+
 	if (media == NULL) {
 		cout << "extension unknown, skipping " << _filename << " ... " << endl;
 		return 0;

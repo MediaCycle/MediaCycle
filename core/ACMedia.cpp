@@ -45,9 +45,11 @@ ACMedia::ACMedia() {
 	start = -1;
 	end = -1;
 	features_vectors.resize(0);
+	persistent_data = false;
+	data = new ACMediaData(MEDIA_TYPE_NONE);
 }
 
-ACMedia::ACMedia(const ACMedia& m){
+ACMedia::ACMedia(const ACMedia& m, bool reduce){
 	media_type = m.media_type;
 	mid = -1;
 	width = m.width;
@@ -57,6 +59,20 @@ ACMedia::ACMedia(const ACMedia& m){
 	start = m.start;
 	end = m.end;
 	features_vectors.resize(0);	
+	persistent_data = !reduce;
+	if (persistent_data){
+		if (m.media_type != MEDIA_TYPE_NONE){
+			if( m.data->getMediaType() != MEDIA_TYPE_NONE){// if m.data contains data
+				data->copyData(m.data);
+			}
+			else {
+				data = new ACMediaData(m.media_type,m.filename);
+			}
+		}
+		//else we dont have any data to copy
+	}
+	else
+		data = new ACMediaData(MEDIA_TYPE_NONE);
 }
 
 ACMedia::~ACMedia() { 
@@ -66,7 +82,8 @@ ACMedia::~ACMedia() {
 	for (iter = features_vectors.begin(); iter != features_vectors.end(); iter++) {
 		delete *iter;//needed erase call destructor of pointer (i.e. none since it's just a pointer) not of pointee ACMediaFeatures
 		//features_vectors.erase(iter); //will cause segfault. besides the vector is automatically emptied, no need to erase.
-	}	
+	}
+	if (data) delete data;
 }
 
 // C++ version

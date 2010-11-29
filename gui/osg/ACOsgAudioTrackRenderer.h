@@ -64,6 +64,9 @@ class ACOsgAudioTrackRenderer : public ACOsgTrackRenderer {
 
 	private:
 		int displayed_media_index;
+		float zpos;
+		double xstep, ylim;
+		float xspan, yspan;
 };
 
 #endif

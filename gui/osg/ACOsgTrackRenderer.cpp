@@ -36,7 +36,7 @@
 #include "ACOsgTrackRenderer.h"
 
 ACOsgTrackRenderer::ACOsgTrackRenderer()
-: track_index(-1),media_index(-1),media_from_lib(true),media_changed(false)
+: track_index(-1),media_index(-1),media_from_lib(true),media_changed(false),screen_width(0),screen_width_changed(false)
 {
 	track_node = new MatrixTransform();
 }
@@ -63,4 +63,14 @@ void ACOsgTrackRenderer::clearMedia()
 	media_index = -1;
 	media_from_lib = true;
 	media_changed = true;
+}
+
+void ACOsgTrackRenderer::updateScreenWidth(int _screen_width)
+{
+	if ( screen_width != _screen_width){
+		this->screen_width = _screen_width;
+		screen_width_changed = true;
+		this->updateTracks();
+		screen_width_changed = false;
+	}	
 }

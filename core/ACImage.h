@@ -59,6 +59,9 @@ public:
 	int getThumbnailHeight() {return thumbnail_height;}
 	void* getThumbnailPtr() { return (void*)thumbnail; }
 	
+	IplImage* getData(){return data->getImageData();}
+	void setData(IplImage* _data);
+	
 	ACMediaData* extractData(std::string fname);
 		
 private:	

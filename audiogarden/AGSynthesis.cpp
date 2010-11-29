@@ -1,7 +1,7 @@
 /**
  * @brief AGSynthesis.cpp
  * @author Christian Frisson
- * @date 11/10/2010
+ * @date 29/11/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -370,7 +370,7 @@ colvec AGSynthesis::extractSamples(ACAudio* audioGrain){
 	for (long i = 0; i< audioGrain->getNFrames(); i++){
 		selG_v[i] = audioSamples[i*audioGrain->getChannels()];
 	}
-	delete [] audioSamples;
+	if (audioSamples) delete [] audioSamples;
 	return selG_v;
 }
 
@@ -393,6 +393,6 @@ bool AGSynthesis::saveAsWav(string path){
 
 void AGSynthesis::resetSound()
 {
-	delete[] synthesisSound;
+	if (synthesisLength>0) delete[] synthesisSound;
 	synthesisLength = 0;
 }	

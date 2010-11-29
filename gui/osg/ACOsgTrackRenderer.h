@@ -69,18 +69,23 @@ protected:
 	ACMedia* media;
 	bool media_from_lib;
 	bool media_changed;
+	int screen_width;
+	bool screen_width_changed;
 	
 public:
 	ACOsgTrackRenderer();
 	virtual ~ACOsgTrackRenderer() {};
 
 	void setMediaCycle(MediaCycle *_media_cycle) { this->media_cycle = _media_cycle; };
+	//void setRenderer(MediaCycle *_media_cycle) { this->media_cycle = _media_cycle; };
 	void setTrackIndex(int _track_index) { this->track_index = _track_index; };
 	void setMediaIndex(int _media_index) { this->media_index = _media_index; };
 	int getMediaIndex() { return media_index; }
 	void updateMedia(ACMedia* _media);
 	void updateMedia(int _media_index);
 	void clearMedia();
+	void setScreenWidth(int _screen_width){screen_width = _screen_width;}
+	void updateScreenWidth(int _screen_width);
 	ACMedia* getMedia(){return media;}
 	void setDistanceMouse(float _distance_mouse) { this->distance_mouse = _distance_mouse; };
 	//void setActivity(int _media_activity) { this->media_activity = _media_activity; }
@@ -88,6 +93,9 @@ public:
 	
 	virtual void prepareTracks()=0;
 	virtual void updateTracks(double ratio=0.0)=0;
+	
+	//virtual bool addRangeSegment(float begin, float end)=0;
+	//virtual bool removeRangeSegment(float begin, float end)=0;
 	
 };
 

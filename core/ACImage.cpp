@@ -127,11 +127,21 @@ int ACImage::checkHeight(int h){
 // returns a pointer to the data contained in the image
 // AND computes a thumbnail at the same time.
 ACMediaData* ACImage::extractData(string fname){
-	ACMediaData* image_data = new ACMediaData(fname, MEDIA_TYPE_IMAGE);
+	ACMediaData* image_data = new ACMediaData(MEDIA_TYPE_IMAGE,fname);
 	computeThumbnail(image_data, thumbnail_width , thumbnail_height);
 	width = thumbnail_width;
 	height = thumbnail_height;
 	return image_data;
+}
+
+void ACImage::setData(IplImage* _data){
+	if (data->getMediaType()==MEDIA_TYPE_NONE)
+		data = new ACMediaData(MEDIA_TYPE_IMAGE);	
+	else
+		data->setMediaType(MEDIA_TYPE_IMAGE);
+	data->setImageData(_data);
+	this->height = _data->height;
+	this->width = _data->width;
 }
 
 void ACImage::saveACLSpecific(ofstream &library_file) {

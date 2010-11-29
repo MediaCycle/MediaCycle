@@ -52,7 +52,7 @@ class ACAudio : public ACMedia {
 	// is this too much already ?
 public:
 	ACAudio();
-	ACAudio(const ACAudio&, bool reduced);
+	ACAudio(const ACAudio&, bool reduce = true);
 
 	~ACAudio();
   
@@ -66,6 +66,9 @@ public:
 	int getThumbnailHeight() {return 0;} // width in thumbnail frames, not samples
 	int getWidth() {return getSampleEnd();}
 	int getHeight() {return 0;}
+	
+	float* getData(){return data->getAudioData();}
+	void setData(float* _data,float _sample_number=0 ,int _sr=44100,int _channels=1);
 	
 	ACMediaData* extractData(std::string fname);
 	

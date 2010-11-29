@@ -45,6 +45,7 @@ using std::endl;
 
 ACMediaData::ACMediaData() { 
 	audio_ptr = NULL;
+	audio_frames = 0;
 #if !defined (APPLE_IOS)	
 	image_ptr = NULL;
 	video_ptr = NULL;
@@ -52,35 +53,37 @@ ACMediaData::ACMediaData() {
 	model_ptr = NULL;
 }
 
-ACMediaData::ACMediaData(string _fname, ACMediaType _type) { 
+ACMediaData::ACMediaData(ACMediaType _type,string _fname) { 
 	audio_ptr = NULL;
 #if !defined (APPLE_IOS)		
 	image_ptr = NULL;
 	video_ptr = NULL;
 #endif//CF APPLE_IOS	
 	model_ptr = NULL;
-	file_name=_fname;
 	media_type = _type;
-	switch (_type) {
-		case MEDIA_TYPE_AUDIO :
-			readAudioData(_fname);
-			break;
-		case MEDIA_TYPE_IMAGE :
-#if !defined (APPLE_IOS)			
-			readImageData(_fname);
-#endif//CF APPLE_IOS		
-			break;
-		case MEDIA_TYPE_VIDEO :
-#if !defined (APPLE_IOS)				
-			readVideoData(_fname);
-#endif//CF APPLE_IOS			
-			break;
-		case MEDIA_TYPE_3DMODEL :
-			read3DModelData(_fname);
-			break;
-		default:
-			break;
-	}
+	if(_fname!=""){
+		file_name=_fname;
+		switch (_type) {
+			case MEDIA_TYPE_AUDIO :
+				readAudioData(_fname);
+				break;
+			case MEDIA_TYPE_IMAGE :
+	#if !defined (APPLE_IOS)
+				readImageData(_fname);
+	#endif//CF APPLE_IOS		
+				break;
+			case MEDIA_TYPE_VIDEO :
+	#if !defined (APPLE_IOS)
+				readVideoData(_fname);
+	#endif//CF APPLE_IOS			
+				break;
+			case MEDIA_TYPE_3DMODEL :
+				read3DModelData(_fname);
+				break;
+			default:
+				break;
+		}
+	}	
 }
 
 ACMediaData::~ACMediaData() { 
@@ -90,10 +93,6 @@ ACMediaData::~ACMediaData() {
 	if (video_ptr != NULL) cvReleaseCapture(&video_ptr);
 #endif//CF APPLE_IOS
 	if (model_ptr != NULL) { model_ptr->unref(); model_ptr=0; }
-}
-
-void ACMediaData::setAudioData(float* data){
-	audio_ptr = data;
 }
 
 void ACMediaData::readAudioData(string _fname){ 
@@ -108,8 +107,19 @@ void ACMediaData::readAudioData(string _fname){
 		exit(1);
 	}
 	audio_ptr = new float[(long) sfinfo.frames * sfinfo.channels];
+	audio_frames = sfinfo.frames;
 	sf_readf_float(testFile, audio_ptr, sfinfo.frames);
 	sf_close(testFile);
+}
+
+void ACMediaData::setAudioData(float* _data, float _sample_number){
+	audio_frames = _sample_number;
+	audio_ptr = (float *)malloc( _sample_number * sizeof( float ));
+	memcpy(audio_ptr,_data,audio_frames* sizeof( float ));
+	if( !audio_ptr ) {
+		// Either the video does not exist, or it uses a codec OpenCV does not support. 
+		cerr << "<ACMediaData::setAudioData> Could not set data" << endl;
+	}
 }
 
 #if !defined (APPLE_IOS)
@@ -126,6 +136,15 @@ void ACMediaData::readImageData(string _fname){
 	}
 }
 
+void ACMediaData::setImageData(IplImage* _data){
+	cvCopy(_data,image_ptr);		
+	if( !image_ptr ) {
+		// Either the video does not exist, or it uses a codec OpenCV does not support. 
+		cerr << "<ACMediaData::setImageData> Could not set data" << endl;
+	}
+	
+}
+
 void ACMediaData::readVideoData(string _fname){
 	video_ptr = cvCreateFileCapture(_fname.c_str());		
 	if( !video_ptr ) {
@@ -133,6 +152,15 @@ void ACMediaData::readVideoData(string _fname){
 		cerr << "<ACMediaData::readImageData> Could not initialize capturing from file " << _fname << endl;
 	}
 
+}
+
+void ACMediaData::setVideoData(CvCapture* _data){
+	cvCopy(_data,video_ptr);		
+	if( !video_ptr ) {
+		// Either the video does not exist, or it uses a codec OpenCV does not support. 
+		cerr << "<ACMediaData::setVideoData> Could not set data" << endl;
+	}
+	
 }
 #endif//CF APPLE_IOS
 
@@ -147,7 +175,32 @@ void ACMediaData::read3DModelData(string _fname){
      }
 }
 
-osg::Node* ACMediaData::get3DModelData() {
-
-	return model_ptr;
-}
+bool ACMediaData::copyData(ACMediaData* m){
+	bool success = false;
+	switch (media_type) {
+		case MEDIA_TYPE_AUDIO :
+			audio_ptr = (float *)malloc( m->getAudioLength() * sizeof( float ));
+			memcpy(audio_ptr,m->getAudioData(),m->getAudioLength()* sizeof( float ));
+			success=true;
+			break;
+		case MEDIA_TYPE_IMAGE :
+#if !defined (APPLE_IOS)
+			cvCopy(m->getImageData(),image_ptr);
+			success=true;
+#endif//CF APPLE_IOS		
+			break;
+		case MEDIA_TYPE_VIDEO :
+#if !defined (APPLE_IOS)
+			cvCopy(m->getVideoData(),video_ptr);
+			success=true;
+#endif//CF APPLE_IOS			
+			break;
+		case MEDIA_TYPE_3DMODEL :
+			model_ptr = dynamic_cast<osg::Node*>( m->get3DModelData()->clone(osg::CopyOp::DEEP_COPY_ALL));
+			success=true;
+			break;
+		default:
+			break;
+	}
+	return success;
+}	

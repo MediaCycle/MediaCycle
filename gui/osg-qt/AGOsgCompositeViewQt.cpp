@@ -39,6 +39,7 @@
 
 #include "AGOsgCompositeViewQt.h"
 #include <cmath>
+#include <QDesktopWidget>
 
 AGOsgCompositeViewQt::AGOsgCompositeViewQt( QWidget * parent, const char * name, const QGLWidget * shareWidget, WindowFlags f):
 	QGLWidget(parent, shareWidget, f),
@@ -47,7 +48,7 @@ AGOsgCompositeViewQt::AGOsgCompositeViewQt( QWidget * parent, const char * name,
 	refx(0.0f), refy(0.0f),
 	refcamx(0.0f), refcamy(0.0f),
 	refzoom(0.0f),refrotation(0.0f),
-	septhick(5),sepx(0.0f),sepy(0.0f),refsepy(0.0f),
+	septhick(5),sepx(0.0f),sepy(0.0f),refsepy(0.0f),screen_width(0),
 	selectedRhythmPattern(-1),
 	autosynth(false),track_playing(false)
 {
@@ -76,6 +77,11 @@ AGOsgCompositeViewQt::AGOsgCompositeViewQt( QWidget * parent, const char * name,
 	
 	//this->setAttribute(Qt::WA_Hover, true);
 	setMouseTracking(true); //CF necessary for the hover callback
+	
+	// Audio waveforms
+	screen_width = QApplication::desktop()->screenGeometry().width();
+	std::cout << screen_width << std::endl;
+	timeline_renderer->setScreenWidth(screen_width);
 }
 
 void AGOsgCompositeViewQt::setMediaCycle(MediaCycle* _media_cycle)
@@ -111,6 +117,20 @@ void AGOsgCompositeViewQt::setMediaCycle(MediaCycle* _media_cycle)
 	synth->setMediaCycle(media_cycle);
 }
 
+void AGOsgCompositeViewQt::initializeGL()
+{/*
+  if (getGraphicsWindow()->isRealized()) {
+  
+  unsigned int _screen_width, _screen_height;
+  if ( screen_width != _screen_width){
+  _screen_width = timeline_view->getCamera()->getGraphicsContext()->getTraits()->width;
+  std::cout << "Initial width: " << _screen_width << std::endl;
+  //this->screen_width = _screen_width;
+  //timeline_renderer->updateScreenWidth(_screen_width);
+  }	
+  }*/
+}
+
 void AGOsgCompositeViewQt::resizeGL( int width, int height )
 {
 	//std::cout << "height() " << browser_view->getCamera()->getViewport()->height()+timeline_view->getCamera()->getViewport()->height() << " height " << height << std::endl;
@@ -124,6 +144,19 @@ void AGOsgCompositeViewQt::resizeGL( int width, int height )
 	browser_view->getCamera()->setProjectionMatrixAsPerspective(45.0f, static_cast<double>(width)/static_cast<double>(height-sepy), 0.001f, 10.0f);
 	timeline_view->getCamera()->setViewport(new osg::Viewport(0,0,width,sepy));
 	timeline_view->getCamera()->setProjectionMatrixAsPerspective(45.0f, 1.0f, 0.001f, 10.0f);//static_cast<double>(width())/static_cast<double>(sepy), 0.001f, 10.0f);}
+
+	/*
+	 if (getGraphicsWindow()->isRealized()) {
+	 
+	 unsigned int _screen_width, _screen_height;
+	 if ( screen_width != _screen_width){
+	 _screen_width = timeline_view->getCamera()->getGraphicsContext()->getTraits()->width;
+	 std::cout << "Updating width: " << _screen_width << std::endl;
+	 this->screen_width = _screen_width;
+	 timeline_renderer->updateScreenWidth(_screen_width);
+	 }	
+	 }
+	 */
 }
 
 // CF to do: understand paintGL vs updateGL to use them more correctly
@@ -511,14 +544,13 @@ void AGOsgCompositeViewQt::synthesize()
 		}	
 		
 		// Synthesize
-		this->getSynth()->compute(this->getSelectedRhythmPattern(), media_cycle->getBrowser()->getSelectedNodes());
-		this->getSynth()->saveAsWav("./synthesis.wav");
+		synth->compute(this->getSelectedRhythmPattern(), media_cycle->getBrowser()->getSelectedNodes());
+		//synth->saveAsWav("./synthesis.wav");
 		// Display the synthesis
 		delete synthAudio;
 		synthAudio = new ACAudio();
-		synthAudio->setStart(0);
-		synthAudio->setEnd(this->getSynth()->getLength()/44100 );
-		synthAudio->computeWaveform( this->getSynth()->getSound()  );
+		synthAudio->setData(synth->getSound(),synth->getLength());
+		//synthAudio->computeWaveform( this->getSynth()->getSound()  );
 		this->getTimelineRenderer()->getTrack(0)->updateMedia( synthAudio ); //media_cycle->getLibrary()->getMedia(loop) );
 		media_cycle->setNeedsDisplay(true);
 		

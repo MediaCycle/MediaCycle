@@ -92,7 +92,7 @@ int ACVideo::computeThumbnail(ACMediaData* data_ptr, int w, int h){
 
 ACMediaData* ACVideo::extractData(string _fname){
 	// XS todo : store the default header (16 below) size somewhere...
-	ACMediaData* video_data = new ACMediaData(_fname, MEDIA_TYPE_VIDEO);
+	ACMediaData* video_data = new ACMediaData(MEDIA_TYPE_VIDEO,_fname);
 	computeThumbnail(video_data, 16, 16);
 	width = thumbnail_width;
 	height = thumbnail_height;
@@ -106,6 +106,23 @@ ACMediaData* ACVideo::extractData(string _fname){
 	else end = nframes;
 
 	return video_data;
+}
+
+void ACVideo::setData(CvCapture* _data){
+	if (data->getMediaType()==MEDIA_TYPE_NONE)
+		data = new ACMediaData(MEDIA_TYPE_VIDEO);	
+	else
+		data->setMediaType(MEDIA_TYPE_VIDEO);
+	data->setVideoData(_data);
+	
+	width = (int) cvGetCaptureProperty(_data, CV_CAP_PROP_FRAME_WIDTH);
+	height = (int) cvGetCaptureProperty(_data, CV_CAP_PROP_FRAME_HEIGHT);
+	
+	int fps     = (int) cvGetCaptureProperty(capture, CV_CAP_PROP_FPS);
+	int nframes = (int) cvGetCaptureProperty(capture,  CV_CAP_PROP_FRAME_COUNT);
+	start = 0.0;
+	if (fps != 0) end = nframes * 1.0/fps;
+	else end = nframes;
 }
 
 void ACVideo::saveACLSpecific(ofstream &library_file) {

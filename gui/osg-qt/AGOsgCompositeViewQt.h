@@ -1,7 +1,7 @@
 /**
  * @brief AGOsgCompositeViewQt.h
  * @author Christian Frisson
- * @date 09/07/2010
+ * @date 29/11/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -104,6 +104,7 @@ class AGOsgCompositeViewQt : public osgViewer::CompositeViewer, public QGLWidget
 
     protected:
         void init();
+		virtual void initializeGL();
         virtual void resizeGL( int width, int height );
 		virtual void updateGL();
         virtual void keyPressEvent( QKeyEvent* event );
@@ -149,6 +150,7 @@ class AGOsgCompositeViewQt : public osgViewer::CompositeViewer, public QGLWidget
 		int septhick; // CF half of the thickness of the border that separates the browser and timeline viewers
 		float sepx,sepy; //CF location (in OSG coordinates) of the border that separates the browser and timeline viewers
 		float refsepy;
+		int screen_width;
 	
 	//AudioGarden specific members:
 	private:
