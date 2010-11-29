@@ -397,7 +397,7 @@ ENDIF ( USE_OPENGL )
 		IF (OSG_FFMPEG_PLUGIN)
 			MESSAGE("-- Found FFmpeg plugin for OSG: ${OSG_FFMPEG_PLUGIN}")
 		ELSE()
-			MESSAGE(FATAL_ERROR "Couldn't find FFmpeg plugin for OSG.")
+			MESSAGE(FATAL_ERROR "Couldn't find FFmpeg plugin for OSG. OSG 2.8.3 or above is needed")
 		ENDIF()
 
 		SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUSE_OSG")
@@ -605,3 +605,4 @@ IF (STARPU_FOUND)
 ELSE (STARPU_FOUND)
 	MESSAGE("StarPU not found, support disabled.")
 ENDIF (STARPU_FOUND)
+
