@@ -118,8 +118,8 @@ void ACVideo::setData(CvCapture* _data){
 	width = (int) cvGetCaptureProperty(_data, CV_CAP_PROP_FRAME_WIDTH);
 	height = (int) cvGetCaptureProperty(_data, CV_CAP_PROP_FRAME_HEIGHT);
 	
-	int fps     = (int) cvGetCaptureProperty(capture, CV_CAP_PROP_FPS);
-	int nframes = (int) cvGetCaptureProperty(capture,  CV_CAP_PROP_FRAME_COUNT);
+	int fps     = (int) cvGetCaptureProperty(_data, CV_CAP_PROP_FPS);
+	int nframes = (int) cvGetCaptureProperty(_data,  CV_CAP_PROP_FRAME_COUNT);
 	start = 0.0;
 	if (fps != 0) end = nframes * 1.0/fps;
 	else end = nframes;
