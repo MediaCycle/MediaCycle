@@ -8,7 +8,7 @@ IF ( USE_OPENAL )
 	ADD_DEPENDENCIES(audioengine mediacycle)
 	TARGET_LINK_LIBRARIES(audioengine mediacycle)
 	IF ( NOT APPLE )
-		TARGET_LINK_LIBRARIES(audioengine ${ALUT_LIBRARY} ${OPENAL_LIBRARY} pthread)
+		TARGET_LINK_LIBRARIES(audioengine ${OPENAL_LIBRARY} pthread)#${ALUT_LIBRARY}
 		IF ( WIN32 )
 			TARGET_LINK_LIBRARIES(audioengine ws2_32)
 		ENDIF ( WIN32 )

@@ -1,5 +1,5 @@
 IF ( APPLE_IOS_DEV OR APPLE_IOS_SIM OR APPLE_IOS_XCODE )
-	IF (OPENAL_FOUND AND ALUT_FOUND)
+	IF (OPENAL_FOUND)# AND ALUT_FOUND)
 		set(NAME audiocycle-osg-ipad)
 
 		FILE(GLOB SRC *.m *.mm)
@@ -20,7 +20,7 @@ IF ( APPLE_IOS_DEV OR APPLE_IOS_SIM OR APPLE_IOS_XCODE )
 		TARGET_LINK_LIBRARIES(audiocycle-osg-ipad OpenThreads osg osgDB osgGA osgUtil osgViewer)
 		TARGET_LINK_LIBRARIES(audiocycle-osg-ipad mediacycle-osg)
 		TARGET_LINK_LIBRARIES(audiocycle-osg-ipad audioengine)
-		TARGET_LINK_LIBRARIES(audiocycle-osg-ipad ${ALUT_LIBRARY})
+		#TARGET_LINK_LIBRARIES(audiocycle-osg-ipad ${ALUT_LIBRARY})
 
 		# Dirty osgPlugins hack
 		IF( APPLE_IOS_DEV OR APPLE_IOS_SIM )
@@ -37,5 +37,5 @@ IF ( APPLE_IOS_DEV OR APPLE_IOS_SIM OR APPLE_IOS_XCODE )
 			COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/../../../data/audio/zero-g-pro-pack_a/Brass\ Elements/Brass\ 076\ BPM/* ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}-iphonesimulator/audiocycle-osg-ipad.app/
 			COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/Resources/* ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}-iphonesimulator/audiocycle-osg-ipad.app/ 
 		)
-	ENDIF (OPENAL_FOUND AND ALUT_FOUND)
+	ENDIF (OPENAL_FOUND)# AND ALUT_FOUND)
 ENDIF ( APPLE_IOS_DEV OR APPLE_IOS_SIM OR APPLE_IOS_XCODE )

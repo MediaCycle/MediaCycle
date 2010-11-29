@@ -37,15 +37,15 @@
 #if defined(__APPLE__)
 	#include <OpenAL/al.h>
 	#include <OpenAL/alc.h>
-	#if defined(APPLE_LEOPARD)
+	/*#if defined(APPLE_LEOPARD)
 		#include <MyOpenALSupport.h>//CF
 	#else
 		#include <AL/alut.h>//CF
-	#endif
+	#endif*/
 #else
 	#include <AL/al.h>
 	#include <AL/alc.h>
-	#include <AL/alut.h>
+	//#include <AL/alut.h>
 #endif
 
 #include <sys/time.h>

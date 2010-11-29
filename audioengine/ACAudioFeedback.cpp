@@ -1857,7 +1857,7 @@ int ACAudioFeedback::createSourceWithPosition(int loop_id, float x, float y, flo
 	// local_acid_type = 2;
 	
 	data = 0;
-	
+	/*
 	// CF Cross-platform ALUT attempt...
 	#ifdef WIN32 
 		//data = alutLoadMemoryFromFile (loop_file, &format, &size, (ALfloat*) &freq);
@@ -1882,6 +1882,13 @@ int ACAudioFeedback::createSourceWithPosition(int loop_id, float x, float y, flo
 		ALboolean al_bool;
 		alutLoadWAVFile((ALbyte *) loop_file, &format, &data, &size,&freq, &al_bool);
 	#endif
+	*/
+	
+	int samplesize = ((ACAudio*) media_cycle->getLibrary()->getMedia(loop_id))->getNFrames();
+	float* dataf;// = new float[samplesize];
+	dataf = ((ACAudio*) media_cycle->getLibrary()->getMedia(loop_id))->getSamples();
+	size = samplesize * sizeof(float);
+	freq = ((ACAudio*) media_cycle->getLibrary()->getMedia(loop_id))->getSampleRate();
 	
 	// Convert to single channel (mono). OpenAl stereo sources are not spatialized indeed.
 	// DT: To make sample_start and end actually work
@@ -1890,9 +1897,9 @@ int ACAudioFeedback::createSourceWithPosition(int loop_id, float x, float y, flo
 	//	int sample_end;
 	int sample_start = ((ACAudio*) media_cycle->getLibrary()->getMedia(loop_id))->getSampleStart();
 	int sample_end = ((ACAudio*) media_cycle->getLibrary()->getMedia(loop_id))->getSampleEnd();
-	int sample_size;
-	//int sample_size = sample_end - sample_start;
+	int sample_size = sample_size = sample_end - sample_start;
 	
+	/*
 	switch (format) {
 	case AL_FORMAT_MONO16:
 		sample_size = size/2;
@@ -1904,19 +1911,28 @@ int ACAudioFeedback::createSourceWithPosition(int loop_id, float x, float y, flo
 		sample_size = size/4;
 		break;
 	}
-
-	//sample_end = sample_size + sample_start;
-	//size = sample_size;
+	 */
+	int channels = ((ACAudio*) media_cycle->getLibrary()->getMedia(loop_id))->getChannels();
+	
 	int segment_size = sample_end - sample_start;
 	datashort = new short[segment_size];
-	datas = (short*)data;
-	if (format ==  AL_FORMAT_STEREO16) {
+	
+	//datas = (short*)data;
+	datas = new short[sample_size*channels];
+	for (int s=0;s<sample_size*channels;s++){
+		datas[s] = (short)(dataf[s]*0x7FFF);
+	}	
+	delete[] dataf;
+	
+	//if (format ==  AL_FORMAT_STEREO16) {
+	if (channels == 2) {
 		for (count=sample_start;count<sample_end;count++) {
 			datashort[count-sample_start] = (datas[2*count]+datas[2*count+1])/2;
 		}
-		format = AL_FORMAT_MONO16;
+		//format = AL_FORMAT_MONO16;
 	}
-	else if (format ==  AL_FORMAT_MONO16) {
+	//else if (format ==  AL_FORMAT_MONO16) {*/
+	else if (channels == 1) {
 		for (count=sample_start;count<sample_end;count++) {
 			datashort[count-sample_start] = (datas[count]);
 		}

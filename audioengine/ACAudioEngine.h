@@ -92,20 +92,21 @@ public:
 	void setListenerVelocity(float velocity, float *x_velocity, float *z_velocity){feedback->setListenerVelocity(velocity, x_velocity, z_velocity);}
 	
 	// OpenAL create and delete buffer and sources
-	int getLoopId(int slot){feedback->getLoopId(slot);}
-	int getLoopSlot(int loop_id){feedback->getLoopSlot(loop_id);}
-	int createSource(int loop_id){feedback->createSource(loop_id);}
-	int createSourceWithPosition(int loop_id, float x, float y, float z){feedback->createSourceWithPosition(loop_id, x, y, z);}
-	int deleteSource(int loop_id){feedback->deleteSource(loop_id);}
-	int setSourcePosition(int loop_id, float x, float y, float z){feedback->setSourcePosition(loop_id, x, y, z);}	
+	int getLoopId(int slot){return feedback->getLoopId(slot);}
+	int getLoopSlot(int loop_id){return feedback->getLoopSlot(loop_id);}
+	int createSource(int loop_id){return feedback->createSource(loop_id);}
+	int createSourceWithPosition(int loop_id, float x, float y, float z){return feedback->createSourceWithPosition(loop_id, x, y, z);}
+	int deleteSource(int loop_id){return feedback->deleteSource(loop_id);}
+	int setSourcePosition(int loop_id, float x, float y, float z){return feedback->setSourcePosition(loop_id, x, y, z);}	
+	
 	
 	// other (less crucial) effects possible with OpenAL
-	int setSourcePitch(int loop_id, float pitch){feedback->setSourcePitch(loop_id, pitch);}
-	int setSourceGain(int loop_id, float gain){feedback->setSourceGain(loop_id,gain);}
-	int setSourceRolloffFactor(int loop_id, float rolloff_factor){feedback->setSourceRolloffFactor(loop_id, rolloff_factor);} // use by distance attenuation model
-	int setSourceReferenceDistance(int loop_id, float reference_distance){feedback->setSourceReferenceDistance(loop_id, reference_distance);}
-	int setSourceMaxDistance(int loop_id, float max_distance){feedback->setSourceMaxDistance(loop_id, max_distance);}
-	int setSourceVelocity(int loop_id, float velocity){feedback->setSourceVelocity(loop_id, velocity);} 
+	int setSourcePitch(int loop_id, float pitch){return feedback->setSourcePitch(loop_id, pitch);}
+	int setSourceGain(int loop_id, float gain){return feedback->setSourceGain(loop_id,gain);}
+	int setSourceRolloffFactor(int loop_id, float rolloff_factor){return feedback->setSourceRolloffFactor(loop_id, rolloff_factor);} // use by distance attenuation model
+	int setSourceReferenceDistance(int loop_id, float reference_distance){return feedback->setSourceReferenceDistance(loop_id, reference_distance);}
+	int setSourceMaxDistance(int loop_id, float max_distance){return feedback->setSourceMaxDistance(loop_id, max_distance);}
+	int setSourceVelocity(int loop_id, float velocity){return feedback->setSourceVelocity(loop_id, velocity);} 
 	
 	// Devices
 	void printDeviceList();//{feedback->printDeviceList();}
@@ -121,7 +122,7 @@ public:
 	void stopAudioEngine(){feedback->stopAudioEngine();}
 	
 	// Recorder
-	bool initCapture(const char* deviceName = NULL){recorder->initCapture(deviceName);}
+	bool initCapture(const char* deviceName = NULL){return recorder->initCapture(deviceName);}
 	void startCapture(){recorder->startCapture();}
 	void stopCapture(){recorder->stopCapture();}
 	
