@@ -9,7 +9,7 @@
 		<object class="NSMutableArray" key="IBDocument.EditedObjectIDs">
 			<bool key="EncodedWithXMLCoder">YES</bool>
 			<integer value="29"/>
-			<integer value="2727"/>
+			<integer value="2728"/>
 		</object>
 		<object class="NSArray" key="IBDocument.PluginDependencies">
 			<bool key="EncodedWithXMLCoder">YES</bool>
@@ -2976,8 +2976,8 @@
 					<string>{{531, 891}, {197, 73}}</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<reference ref="5"/>
-					<string>{{5, 123}, {1130, 618}}</string>
-					<string>{{5, 123}, {1130, 618}}</string>
+					<string>{{92, 138}, {1130, 618}}</string>
+					<string>{{92, 138}, {1130, 618}}</string>
 					<reference ref="5"/>
 					<reference ref="5"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
@@ -3171,6 +3171,22 @@
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">
 				<bool key="EncodedWithXMLCoder">YES</bool>
+				<object class="IBPartialClassDescription">
+					<string key="className">ACOsgBrowserViewCocoa</string>
+					<string key="superclassName">TiCocoaOsgView</string>
+					<object class="IBClassDescriptionSource" key="sourceIdentifier">
+						<string key="majorKey">IBProjectSource</string>
+						<string key="minorKey">../../gui/osg-cocoa/ACOsgBrowserViewCocoa.h</string>
+					</object>
+				</object>
+				<object class="IBPartialClassDescription">
+					<string key="className">ACOsgBrowserViewCocoa</string>
+					<string key="superclassName">TiCocoaOsgView</string>
+					<object class="IBClassDescriptionSource" key="sourceIdentifier">
+						<string key="majorKey">IBUserSource</string>
+						<string key="minorKey"/>
+					</object>
+				</object>
 				<object class="IBPartialClassDescription">
 					<string key="className">ACAudioCycleOsgCocoa</string>
 					<string key="superclassName">NSObject</string>
@@ -3416,7 +3432,7 @@
 					</object>
 					<object class="IBClassDescriptionSource" key="sourceIdentifier">
 						<string key="majorKey">IBProjectSource</string>
-						<string key="minorKey">../../apps/audiocycle-osg-cocoa/ACAudioCycleOsgCocoa.h</string>
+						<string key="minorKey">../../apps/videocycle-osg-cocoa/ACAudioCycleOsgCocoa.h</string>
 					</object>
 				</object>
 				<object class="IBPartialClassDescription">
@@ -3452,22 +3468,6 @@
 							<string>NSButton</string>
 						</object>
 					</object>
-					<object class="IBClassDescriptionSource" key="sourceIdentifier">
-						<string key="majorKey">IBUserSource</string>
-						<string key="minorKey"/>
-					</object>
-				</object>
-				<object class="IBPartialClassDescription">
-					<string key="className">ACOsgBrowserViewCocoa</string>
-					<string key="superclassName">TiCocoaOsgView</string>
-					<object class="IBClassDescriptionSource" key="sourceIdentifier">
-						<string key="majorKey">IBProjectSource</string>
-						<string key="minorKey">../../gui/osg-cocoa/ACOsgBrowserViewCocoa.h</string>
-					</object>
-				</object>
-				<object class="IBPartialClassDescription">
-					<string key="className">ACOsgBrowserViewCocoa</string>
-					<string key="superclassName">TiCocoaOsgView</string>
 					<object class="IBClassDescriptionSource" key="sourceIdentifier">
 						<string key="majorKey">IBUserSource</string>
 						<string key="minorKey"/>
