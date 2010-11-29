@@ -175,29 +175,43 @@ void ACMediaData::read3DModelData(string _fname){
      }
 }
 
+void ACMediaData::set3DModelData(osg::ref_ptr< osg::Node > _data)
+{
+	model_ptr = dynamic_cast<osg::Node*>( _data->clone(osg::CopyOp::DEEP_COPY_ALL));		
+	if( !model_ptr ) {
+		// Either the video does not exist, or it uses a codec OpenCV does not support. 
+		cerr << "<ACMediaData::set3DModelData> Could not set data" << endl;
+	}
+	
+}	
+
 bool ACMediaData::copyData(ACMediaData* m){
 	bool success = false;
 	switch (media_type) {
 		case MEDIA_TYPE_AUDIO :
 			audio_ptr = (float *)malloc( m->getAudioLength() * sizeof( float ));
 			memcpy(audio_ptr,m->getAudioData(),m->getAudioLength()* sizeof( float ));
-			success=true;
+			if( audio_ptr )
+				success=true;
 			break;
 		case MEDIA_TYPE_IMAGE :
 #if !defined (APPLE_IOS)
 			cvCopy(m->getImageData(),image_ptr);
-			success=true;
+			if( image_ptr )
+				success=true;
 #endif//CF APPLE_IOS		
 			break;
 		case MEDIA_TYPE_VIDEO :
 #if !defined (APPLE_IOS)
 			cvCopy(m->getVideoData(),video_ptr);
-			success=true;
+			if( video_ptr )
+				success=true;
 #endif//CF APPLE_IOS			
 			break;
 		case MEDIA_TYPE_3DMODEL :
 			model_ptr = dynamic_cast<osg::Node*>( m->get3DModelData()->clone(osg::CopyOp::DEEP_COPY_ALL));
-			success=true;
+			if( model_ptr )
+				success=true;
 			break;
 		default:
 			break;
