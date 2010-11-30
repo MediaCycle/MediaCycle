@@ -1,7 +1,7 @@
 /**
  * @brief VideoCycle.h
- * @author Xavier Siebert
- * @date 23/11/2010
+ * @author Alexis Moinet
+ * @date 30/11/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -32,7 +32,7 @@
 #ifndef MYGUI_H
 #define MYGUI_H
 
-#include <QtGui/QMainwindow>
+#include <QtGui/QMainWindow>
 #include <QtGui/QLabel>
 #include <QtGui/QLineEdit>
 
