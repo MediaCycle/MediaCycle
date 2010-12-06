@@ -45,28 +45,39 @@ using namespace osg;
 class ACOsgAudioTrackRenderer : public ACOsgTrackRenderer {
 	
 	protected:
-		Geode* waveform_geode;
-		Geode* curser_geode;
-		MatrixTransform* curser_transform;
+		Geode* summary_waveform_geode;
+		Geode* summary_cursor_geode;
+		osg::ref_ptr<osg::MatrixTransform> summary_cursor_transform;
 		Geode* track_geode;
-		
-		void waveformGeode();
-		void curserGeode();
+		osg::ref_ptr<osg::MatrixTransform> selection_begin_transform;
+		osg::ref_ptr<osg::MatrixTransform> selection_zone_transform;
+		osg::ref_ptr<osg::MatrixTransform> selection_end_transform;
+		Geode* selection_begin_geode;
+		Geode* selection_end_geode;
+		Geode* selection_zone_geode;
+		Geode* playback_waveform_geode;
+			
+		void selectionWaveformGeode();
+		void selectionCursorGeode();
 		void trackGeode();
+		void selectionBeginGeode();
+		void selectionZoneGeode();
+		void selectionEndGeode();
+		void playbackWaveformGeode();
 		
-		float zoom_x, zoom_y, translate_x;
+		float zoom_x, zoom_y, track_left_x;
+		float summary_center_y,summary_height;
+		float playback_center_y,playback_height;
+		float* samples;
+		int samples_hop_threshold; // above: envelope with quads, below: envelope with line loop
+		int samples_n_threshold; // above: envelope with quads, below: envelope with line loop
 		
 	public:
 		ACOsgAudioTrackRenderer();
 		~ACOsgAudioTrackRenderer();
 		void prepareTracks();
 		void updateTracks(double ratio=0.0);
-
-	private:
-		int displayed_media_index;
-		float zpos;
-		double xstep, ylim;
-		float xspan, yspan;
+		
 };
 
 #endif

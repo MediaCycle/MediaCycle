@@ -56,6 +56,7 @@ private:
 	int 		clusterId; //cluster index
 	int			active;  // playing or not - and in which mode
 	int			cursor;
+	int			frame;
 	int 		navigationLevel; // initially all set to zero, while traversing, only the one incremented are kept
 	int			hover;
 	bool		displayed;
@@ -85,6 +86,7 @@ public:
 	// previsously in ACLoopAttribute:
 	int getClusterId() const {return clusterId;}
 	int getCursor() const {return cursor;}
+	int getCurrentFrame() const {return frame;}
 	int getNavigationLevel() const {return navigationLevel;}
 	int getActivity() const {return active;}
 	ACPoint getCurrentPosition() const {return currentPos;}
@@ -109,6 +111,7 @@ public:
 	void setActivity(int _act){active = _act;}
 	void setClusterId(int _cid) { clusterId=_cid ;}
 	void setCursor(int _cid) { cursor=_cid ;}
+	void setCurrentFrame(int _cid) { frame=_cid ;}
 	void setNavigationLevel(int _nl) {navigationLevel = _nl;}
 	void setHover(int _h){hover = _h;}
 

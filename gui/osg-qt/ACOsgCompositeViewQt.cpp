@@ -47,7 +47,7 @@ ACOsgCompositeViewQt::ACOsgCompositeViewQt( QWidget * parent, const char * name,
 	refx(0.0f), refy(0.0f),
 	refcamx(0.0f), refcamy(0.0f),
 	refzoom(0.0f),refrotation(0.0f),
-	septhick(5),sepy(0.0f),refsepy(0.0f),controls_width(50),screen_width(0),
+	septhick(5),sepy(0.0f),refsepy(0.0f),controls_width(0),screen_width(0),
 	trackdown(0),mediaOnTrack(-1),track_playing(false)
 {
 	osg_view = new osgViewer::GraphicsWindowEmbedded(0,0,width(),height());
@@ -98,9 +98,9 @@ void ACOsgCompositeViewQt::setMediaCycle(MediaCycle* _media_cycle)
 	//browser_view->getCamera()->setClearColor(Vec4f(0.0,0.0,0.0,0.0));
 	this->addView(browser_view);
 	
-	event_handler = new ACOsgBrowserEventHandler;
-	event_handler->setMediaCycle(media_cycle);
-	browser_view->addEventHandler(event_handler); // CF ((osgViewer::Viewer*) (this))->addEventHandler for the simple Viewer
+	browser_event_handler = new ACOsgBrowserEventHandler;
+	browser_event_handler->setMediaCycle(media_cycle);
+	browser_view->addEventHandler(browser_event_handler); // CF ((osgViewer::Viewer*) (this))->addEventHandler for the simple Viewer
 	
 	timeline_view = new osgViewer::View;
 	//timeline_view->getCamera()->setClearColor(Vec4f(0.0,0.0,0.0,0.0));
@@ -128,9 +128,14 @@ void ACOsgCompositeViewQt::setMediaCycle(MediaCycle* _media_cycle)
 	 */
 	this->addView(timeline_view);
 	
+	timeline_event_handler = new ACOsgTimelineEventHandler;
+	timeline_event_handler->setMediaCycle(media_cycle);
+	timeline_view->addEventHandler(timeline_event_handler); // CF ((osgViewer::Viewer*) (this))->addEventHandler for the simple Viewer
+	timeline_event_handler->setRenderer(timeline_renderer);
+	
 	timeline_controls_view = new osgViewer::View;
 	//timeline_controls_view->getCamera()->setClearColor(Vec4f(0.0,0.0,0.0,0.0));
-	timeline_controls_view->getCamera()->setClearColor(Vec4f(1.14,0.14,0.28,1.0));
+	timeline_controls_view->getCamera()->setClearColor(Vec4f(1.0f,0.14f,0.28f,0.2f));
 	timeline_controls_view->getCamera()->setGraphicsContext(this->getGraphicsWindow());
 	timeline_controls_view->getCamera()->setViewport(new osg::Viewport(0,0,controls_width,sepy));
 	timeline_controls_view->getCamera()->setProjectionMatrixAsPerspective(45.0f, 1.0f, 0.001f, 10.0f);//static_cast<double>(width())/static_cast<double>(sepy), 0.001f, 10.0f);

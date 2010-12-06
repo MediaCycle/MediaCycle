@@ -84,8 +84,8 @@ void ACOsgAudioTrackControlsRenderer::prepareControls() {
 	
 	trackGeode();
 	track_node->addChild(track_geode);
-	((ShapeDrawable*)track_geode->getDrawable(0))->setColor(Vec4(0.2,0.2,0.4,1.0));
-	std::cout << "track_node_addChild(track_geode)" << std::endl;
+	((ShapeDrawable*)track_geode->getDrawable(0))->setColor(Vec4(1.0f,0.0f,0.0f,0.1f));
+	//std::cout << "track_node_addChild(track_geode)" << std::endl;
 	
 }
 

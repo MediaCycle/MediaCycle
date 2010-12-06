@@ -606,6 +606,9 @@ vector<float> MediaCycle::getFeaturesVectorInMedia(int i, string feature_name) {
 int MediaCycle::setSourceCursor(int lid, int frame_pos) {
 	return mediaBrowser->setSourceCursor(lid, frame_pos);
 }
+int MediaCycle::setCurrentFrame(int lid, int frame_pos) {
+	return mediaBrowser->setCurrentFrame(lid, frame_pos);	
+}	
 void MediaCycle::muteAllSources() { mediaBrowser->muteAllSources(); }
 
 // == POINTERS on VIEW

@@ -71,7 +71,15 @@ protected:
 	bool media_changed;
 	int screen_width;
 	bool screen_width_changed;
-	
+	float selection_begin_pos,selection_end_pos;
+	bool selection_begin_pos_changed,selection_end_pos_changed;
+	int displayed_media_index;
+	float zpos;
+	double xstep, ylim;
+	float xspan, yspan;
+	float playback_min_width;
+	float selection_sensing_width;
+	void initSelection();
 public:
 	ACOsgTrackRenderer();
 	virtual ~ACOsgTrackRenderer() {};
@@ -96,7 +104,14 @@ public:
 	
 	//virtual bool addRangeSegment(float begin, float end)=0;
 	//virtual bool removeRangeSegment(float begin, float end)=0;
-	
+	void setSelectionBegin(float begin);
+	void setSelectionEnd(float end);
+	float getSelectionBegin();
+	float getSelectionEnd();
+	/*void setSelectionZoneWidth(float _width);
+	float getSelectionZoneWidth();
+	void setSelectionZoneCenter(float center);
+	float getSelectionZoneCenter();*/
 };
 
 #endif

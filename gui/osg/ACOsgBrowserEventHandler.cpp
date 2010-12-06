@@ -85,7 +85,7 @@ bool ACOsgBrowserEventHandler::handle(const osgGA::GUIEventAdapter& ea,osgGA::GU
 		}
 		case(GUIEventAdapter::MOVE):
 		{
-			//printf("mouse moved\n");
+			//printf("mouse moved in browser\n");
 			osgViewer::View* view = dynamic_cast<osgViewer::View*>(&aa);
 			if (view) pick(view, ea, true);
 			return false;

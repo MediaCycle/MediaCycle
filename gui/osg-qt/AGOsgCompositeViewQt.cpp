@@ -114,6 +114,11 @@ void AGOsgCompositeViewQt::setMediaCycle(MediaCycle* _media_cycle)
 	timeline_view->getCamera()->setViewMatrixAsLookAt(Vec3(0,0,0.8), Vec3(0,0,0), Vec3(0,1,0));
 	this->addView(timeline_view);
 	
+	timeline_event_handler = new ACOsgTimelineEventHandler;
+	timeline_event_handler->setMediaCycle(media_cycle);
+	timeline_view->addEventHandler(timeline_event_handler); // CF ((osgViewer::Viewer*) (this))->addEventHandler for the simple Viewer
+	timeline_event_handler->setRenderer(timeline_renderer);
+	
 	synth->setMediaCycle(media_cycle);
 }
 

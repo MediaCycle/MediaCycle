@@ -227,7 +227,7 @@ float* ACAudio::getSamples(){
 }
 
 float* ACAudio::getMonoSamples(){
-	if (data->getMediaType()==MEDIA_TYPE_AUDIO){
+	if (data && data->getMediaType()==MEDIA_TYPE_AUDIO){
 		float* _data = new float[(long) this->getNFrames()];
 		float* _tmpdata  = data->getAudioData();
 		long i;
@@ -271,6 +271,7 @@ float* ACAudio::getMonoSamples(){
 		for (i = 0; i< this->getNFrames(); i++){
 			_data[i] = tmpdata[i*this->getChannels()];
 		}
+		delete[] tmpdata;
 		std::cout << "i file" << i << std::endl;
 		return _data;
 	}	

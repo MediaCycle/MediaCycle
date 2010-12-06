@@ -64,7 +64,8 @@ void ACMediaNode::init(long int _nodeId, long int _mediaId){ // (0,0) by default
 
 	clusterId = 0;
 	active = 0;
-	cursor = 0; 
+	cursor = 0;
+	frame = 0;
 	navigationLevel = 0;
 	hover = 0;
 	displayed = true;

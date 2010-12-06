@@ -172,6 +172,7 @@ public:
 	
 	// Playing time stamp
 	int setSourceCursor(int lid, int frame_pos);
+	int setCurrentFrame(int lid, int frame_pos);
 	
 	// Update audio engine sources
 	void setNeedsActivityUpdateLock(int i);

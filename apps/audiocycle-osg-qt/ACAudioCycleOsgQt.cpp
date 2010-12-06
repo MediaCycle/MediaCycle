@@ -57,7 +57,7 @@ ACAudioCycleOsgQt::ACAudioCycleOsgQt(QWidget *parent)
 			build_type = "Debug";
 		#endif
 		int vizplugloaded = media_cycle->addPlugin("../../../plugins/visualisation/" + build_type + "/mc_visualisation.dylib");
-		if ( vizplugloaded == 0 )
+		if ( vizplugloaded == 1 )
 		{
 			//CF this should be on a separate function or even on a mediacycle-(osg-)qt class
 			ACPluginManager *acpl = media_cycle->getPluginManager();

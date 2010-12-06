@@ -1291,6 +1291,7 @@ void ACAudioFeedback::processAudioEngineSamplePosition(int _loop_slot, int *_pre
 		frame_pos = (float)*_sample_pos / (float) output_sample_rate / 0.01 / (100.0 / 76.0); // SD TODO - hop size should be used.... 
 	}
 	media_cycle->setSourceCursor(loop_id, frame_pos);
+	media_cycle->setCurrentFrame(loop_id, *_sample_pos);
 }
 
 // SD TODO - should be passed a pointer to the loop samples to make the engine separate from ACAudioFeedback
@@ -1779,9 +1780,8 @@ int ACAudioFeedback::createSourceWithPosition(int loop_id, float x, float y, flo
 
 	int count;
 	int loop_slot;
-	
-	ALenum  error = AL_NO_ERROR;
-	ALenum  format;
+	/*ALenum  error = AL_NO_ERROR;
+	ALenum  format;*/
 	ALvoid* data;
 	short*  datashort, *datashort2;
 	short*	datas;
@@ -1918,6 +1918,8 @@ int ACAudioFeedback::createSourceWithPosition(int loop_id, float x, float y, flo
 	datashort = new short[segment_size];
 	
 	//datas = (short*)data;
+	// CF not so optimized
+	/*
 	datas = new short[sample_size*channels];
 	for (int s=0;s<sample_size*channels;s++){
 		datas[s] = (short)(dataf[s]*0x7FFF);
@@ -1931,12 +1933,28 @@ int ACAudioFeedback::createSourceWithPosition(int loop_id, float x, float y, flo
 		}
 		//format = AL_FORMAT_MONO16;
 	}
-	//else if (format ==  AL_FORMAT_MONO16) {*/
+	//else if (format ==  AL_FORMAT_MONO16) {
 	else if (channels == 1) {
 		for (count=sample_start;count<sample_end;count++) {
 			datashort[count-sample_start] = (datas[count]);
 		}
+	}*/
+	
+	//CF more optimized, removed one "for loop"
+	//if (format ==  AL_FORMAT_STEREO16) {
+	if (channels == 2) {
+		for (count=sample_start;count<sample_end;count++) {
+			datashort[count-sample_start] = ((short)(dataf[2*count]*0x7FFF)+(short)(dataf[2*count+1]*0x7FFF))/2;
+		}
+		//format = AL_FORMAT_MONO16;
 	}
+	//else if (format ==  AL_FORMAT_MONO16) {
+	else if (channels == 1) {
+		for (count=sample_start;count<sample_end;count++) {
+			datashort[count-sample_start] = ((short)(dataf[count]*0x7FFF));
+		}
+	}
+	delete[] dataf;
 	
 	// Normalization to same pitch using resampling
 	// This will allow a demo with a phase vocoder

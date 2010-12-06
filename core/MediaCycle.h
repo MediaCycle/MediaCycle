@@ -182,6 +182,7 @@ public:
 	
 	// == Playing time stamp
 	int setSourceCursor(int lid, int frame_pos);
+	int setCurrentFrame(int lid, int frame_pos);
 	void muteAllSources();
 
 	// == Update audio engine sources

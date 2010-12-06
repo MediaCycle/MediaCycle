@@ -249,6 +249,7 @@ public:
 	// interaction with mouse
 	void getMouse(float *mx, float *my) { *mx = mousex; *my = mousey; };
 	int setSourceCursor(int lid, int frame_pos);
+	int setCurrentFrame(int lid, int frame_pos);
 	int setHoverLoop(int lid, float mxx, float myy);
 	
 	ACBrowserLayout getLayout();

@@ -1,7 +1,7 @@
 /**
  * @brief AGOsgCompositeViewQt.h
  * @author Christian Frisson
- * @date 29/11/2010
+ * @date 06/12/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -90,6 +90,7 @@ using Qt::WindowFlags;
 #include <ACOsgBrowserRenderer.h>
 #include <ACOsgBrowserEventHandler.h>
 #include <ACOsgTimelineRenderer.h>
+#include <ACOsgTimelineEventHandler.h>
 
 #include <ACAudioEngine.h>
 
@@ -120,6 +121,7 @@ class AGOsgCompositeViewQt : public osgViewer::CompositeViewer, public QGLWidget
 		ACOsgBrowserRenderer *browser_renderer;
 		ACOsgBrowserEventHandler *event_handler;
 		ACOsgTimelineRenderer *timeline_renderer;
+		ACOsgTimelineEventHandler *timeline_event_handler;
 		osgViewer::View* browser_view;
 		osgViewer::View* timeline_view;
 	

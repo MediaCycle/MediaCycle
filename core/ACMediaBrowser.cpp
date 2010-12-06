@@ -529,7 +529,9 @@ int ACMediaBrowser::setHoverLoop(int lid, float mxx, float myy)
 int ACMediaBrowser::setSourceCursor(int lid, int frame_pos) {
 	this->getMediaNode(lid).setCursor(frame_pos);
 }
-
+int ACMediaBrowser::setCurrentFrame(int lid, int frame_pos) {
+	this->getMediaNode(lid).setCurrentFrame(frame_pos);
+}
 void ACMediaBrowser::randomizeNodePositions(){
 	if(mLibrary == NULL) return;
 	double t = getTime();
@@ -1130,7 +1132,9 @@ void ACMediaBrowser::updateNextPositionsPropeller() {
 		dt /= 3.0;
 		theta += dt;
 		
+		//p.x = 4*sin(theta)*r;//CF dirty trick to optimize the space, waiting for better ;)
 		p.x = sin(theta)*r;
+		//p.y = 4*cos(theta)*r;//CF dirty trick to optimize the space, waiting for better ;)
 		p.y = cos(theta)*r;
 		p.z = 0.0;
 		
