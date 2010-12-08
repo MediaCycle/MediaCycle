@@ -1,7 +1,7 @@
 /**
  * @brief armadillo-test.cpp
- * @author Damien Tardieu
- * @date 07/07/2010
+ * @author Christian Frisson
+ * @date 08/12/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -51,7 +51,7 @@ int main(){
 	std::cout << seed + 3 << std::endl;
 	srand ( seed * 3 );
 	for (int i =0; i<3; i++){
-		//colvec q = rand<rowvec>(10);
+		//colvec q = randu<rowvec>(10);
 		std::cout << trans(randperm(10)) << std::endl;
 	}
 	//	std::cout << ACRandom() << std::endl;

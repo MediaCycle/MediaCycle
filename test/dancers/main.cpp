@@ -448,7 +448,7 @@ void startOrRedrawRandom(MediaCycle *mediacycle, int nbVideo, char **buffer_send
 	media_browser->setClickedLabel(-1);
 
 	// using armadillo to get nbVideo random ids among all videos:
-	colvec  q       = rand<colvec>(n_loops);
+	colvec  q       = randu<colvec>(n_loops);
 	ucolvec indices = sort_index(q);
 	ucolvec trunc_indices = indices.rows(0,nbVideo-1);
 	//cout << trunc_indices << endl;
