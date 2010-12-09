@@ -245,6 +245,8 @@ bool Gnuplot::get_program_path(const string pname)
     list<string> ls;
     char *path;
 
+	// XS hack for the path
+	setenv("PATH","/opt/local/bin",1);
     path = getenv("PATH");
 	if (!path)
       {

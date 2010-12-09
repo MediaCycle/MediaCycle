@@ -117,10 +117,9 @@ std::vector<ACMediaFeatures*> ACAudioGardenFeaturesPlugin::calculate(ACMediaData
 	std::cout << "emaIdx = " << emaIdx << std::endl;
 
 	
-	float start_sec = descmf[edIdx]->getValue(0, 1);;
-	float stop_sec =  descmf[edIdx]->getValue(0, 2);
-
-	//	desc.push_back(descmf[loudIdx]->temporalModel(start_sec, stop_sec));
+	//float start_sec = descmf[edIdx]->getValue(0, 1);;
+	//float stop_sec =  descmf[edIdx]->getValue(0, 2);
+	//desc.push_back(descmf[loudIdx]->temporalModel(start_sec, stop_sec));
 	//desc.push_back(descmf[edIdx]->mean());
 	
 	desc.push_back(descmf[edIdx]->mean());

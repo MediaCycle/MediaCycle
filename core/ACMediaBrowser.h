@@ -47,6 +47,9 @@
 #include <sys/time.h>
 #include <pthread.h>
 
+#include <string>
+#include <map>
+
 inline float ACRandom() { return ((float)rand()) / (float)((1LL<<31)-1L); }
 
 #include "ACEuclideanDistance.h"
@@ -74,6 +77,13 @@ enum ACBrowserMode {
 	AC_MODE_NEIGHBORS=2
 };
 
+typedef std::map<std::string, ACBrowserMode > stringToBrowserModeConverter;
+const stringToBrowserModeConverter::value_type _initb[] = {
+stringToBrowserModeConverter::value_type("", AC_MODE_NONE), \
+stringToBrowserModeConverter::value_type("Clusters", AC_MODE_CLUSTERS), \
+stringToBrowserModeConverter::value_type("Neighbors", AC_MODE_NEIGHBORS)
+};
+const stringToBrowserModeConverter stringToBrowserMode(_initb, _initb + sizeof _initb / sizeof *_initb);
 
 //
 //enum ACNavigationStateType
@@ -168,6 +178,7 @@ public:
 	std::vector<float> getWeightVector(){return mFeatureWeights;};
 	void setFeatureWeights(vector<float> &weights);
 	float getWeight(int i);
+	void initializeFeatureWeights();
 	
 	// filtering
 	void setFilterIn();

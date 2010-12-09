@@ -1,7 +1,7 @@
 /**
  * @brief armadillo-test.cpp
- * @author Christian Frisson
- * @date 08/12/2010
+ * @author Xavier Siebert
+ * @date 09/12/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -42,9 +42,9 @@ using namespace arma;
 
 int main(){
 
-	int a;
-	int L = 10000;
-	int D = 1;
+//	int a;
+//	int L = 10000;
+//	int D = 1;
 	int t0 = clock();
 	std::cout << t0  << std::endl;
 	int seed = t0 - (int)(t0/1000)*1000;

@@ -33,26 +33,17 @@
  */
 
 #include "ACMultiMediaCycleOsgQt.h"
+#include <fstream>
+#include <iomanip> // for setw
+#include <cstdlib> // for atoi
 
 ACMultiMediaCycleOsgQt::ACMultiMediaCycleOsgQt(QWidget *parent) : QMainWindow(parent), 
- features_known(false), plugins_scanned(false),library_loaded(false)
+ features_known(false), plugins_scanned(false),library_loaded(false), config_file("")
 {
 	ui.setupUi(this); // first thing to do
 	this->media_type = MEDIA_TYPE_NONE;
 	this->browser_mode = AC_MODE_NONE;
 	this->media_cycle = NULL;
-	
-#if defined(__APPLE__)
-	std::string build_type ("Release");
-#ifdef USE_DEBUG
-	build_type = "Debug";
-#endif
-	//	media_cycle->addPlugin(QApplication::applicationDirPath().toStdString() + "/../../../plugins/image/" + build_type + "/mc_image.dylib");
-	//#elif defined (__WIN32__)
-	//	media_cycle->addPlugin(QApplication::applicationDirPath().toStdString() + "\..\..\plugins\image\mc_image.dll");
-	//#else
-	//	media_cycle->addPlugin(QApplication::applicationDirPath().toStdString() + "/../../plugins/image/mc_image.so");
-#endif
 	
 	ui.browserOsgView->move(0,20);
 	//	ui.browserOsgView->prepareFromBrowser();
@@ -60,9 +51,13 @@ ACMultiMediaCycleOsgQt::ACMultiMediaCycleOsgQt(QWidget *parent) : QMainWindow(pa
 	
 	connect(ui.actionLoad_Media_Directory, SIGNAL(triggered()), this, SLOT(loadMediaDirectory()));
 	connect(ui.actionLoad_Media_Files, SIGNAL(triggered()), this, SLOT(loadMediaFiles()));
-	//	connect(ui.actionLoad_ACL, SIGNAL(triggered()), this, SLOT(on_pushButtonLaunch_clicked()));
 	connect(ui.actionSave_ACL, SIGNAL(triggered()), this, SLOT(saveACLFile()));
 	connect(ui.actionEdit_Config_File, SIGNAL(triggered()), this, SLOT(editConfigFile()));
+	connect(ui.actionSave_Config_File, SIGNAL(triggered()), this, SLOT(saveConfigFile()));
+	connect(ui.actionLoad_Config_File, SIGNAL(triggered()), this, SLOT(loadConfigFile()));
+
+	connect(ui.comboDefaultSettings, SIGNAL(currentIndexChanged(const QString &)), this, SLOT(comboDefaultSettingsChanged()));
+
 	connect(ui.featuresListWidget, SIGNAL(itemClicked(QListWidgetItem*)),
             this, SLOT(modifyListItem(QListWidgetItem*)));
 
@@ -71,7 +66,7 @@ ACMultiMediaCycleOsgQt::ACMultiMediaCycleOsgQt(QWidget *parent) : QMainWindow(pa
 	//	connect(ui.sliderClusters, SIGNAL(valueChanged(int)), ui.spinBoxClusters , SIGNAL(valueChanged(int)));
 	//	
 	
-	// uses another window for settings (using the class settingsDialog)
+	// uses another window for settings = editing the config file
 	settingsDialog = new SettingsDialog(parent);
 	settingsDialog->setMediaCycleMainWindow(this);
 	
@@ -167,6 +162,7 @@ void ACMultiMediaCycleOsgQt::loadMediaDirectory(){
 		cerr << "first define the type of application" << endl;
 		return;
 	}
+	statusBar()->showMessage(tr("Loading Directory..."), 0);
 	
 	QString selectDir = QFileDialog::getExistingDirectory
 	(
@@ -181,7 +177,7 @@ void ACMultiMediaCycleOsgQt::loadMediaDirectory(){
 		media_cycle->normalizeFeatures();
 		this->updateLibrary();
 	}
-	//ui.browserOsgView->setFocus();
+	statusBar()->showMessage(tr("Directory Loaded."), 2000);
 }
 
 void ACMultiMediaCycleOsgQt::loadMediaFiles(){
@@ -231,11 +227,93 @@ void ACMultiMediaCycleOsgQt::loadMediaFiles(){
 }
 
 void ACMultiMediaCycleOsgQt::editConfigFile(){
-	cout << "Editing config file with GUI..." << endl;
+	cout << "Editing config file with Setting Dialog GUI..." << endl;
 	settingsDialog->show();
 	settingsDialog->setFocus();
 }
 
+void ACMultiMediaCycleOsgQt::loadConfigFile(){
+	QFileDialog dialog(this,"Open Config File");
+	dialog.setDefaultSuffix ("config");
+	dialog.setNameFilter("Config Files (*.config)");
+	dialog.setFileMode(QFileDialog::ExistingFile); 
+	
+	QStringList fileNames;
+	if (dialog.exec())
+		fileNames = dialog.selectedFiles();
+	QStringList::Iterator file = fileNames.begin();
+	QString fileName  = *file;
+	this->config_file = fileName.toStdString();
+	cout << "Loading config file from Setting Dialog GUI : " << this->config_file << endl;
+	ifstream load_config_file(this->config_file.c_str());
+	
+	string comment;
+		
+	string s_media_type;
+	std::getline(load_config_file, s_media_type, '|');
+	getline(load_config_file, comment);
+	this->media_type = ACMediaType (atoi(s_media_type.c_str()));
+	cout << "media type : " << this->media_type << endl;
+	
+	string s_browser_mode;
+	getline(load_config_file, s_browser_mode, '|');
+	getline(load_config_file, comment);
+	this->browser_mode = ACBrowserMode (atoi(s_browser_mode.c_str()));
+	cout << "browser mode : " << this->browser_mode << endl;
+	
+	this->createMediaCycle(this->media_type, this->browser_mode);
+
+	// rstrip : strips the white spaces or tabs that can appear at the right of the name
+	string splugin, splugin_rstrip;
+	while(!std::getline(load_config_file, splugin, '|').eof()) {
+		cout << "plugin : " << splugin << endl;
+		splugin_rstrip= this->rstrip(splugin);
+		this->addPluginsLibrary(splugin_rstrip);
+		if (getline(load_config_file, comment).eof()) break;
+	}
+	
+	// XS TODO: add ACL file, ...
+	// structure the load/save with XML.
+	load_config_file.close();
+
+}
+
+//http://doc.qt.nokia.com/qt-maemo-4.6/mainwindows-application.html
+//Saving a file is very similar to loading one. Here, the QFile::Text flag ensures that on Windows, "\n" is converted into "\r\n" to conform to the Windows convension.
+bool ACMultiMediaCycleOsgQt::saveFile(const QString &fileName) {
+	QFile file(fileName);
+	if (!file.open(QFile::WriteOnly | QFile::Text)) {
+		QMessageBox::warning(this, tr("Application"),
+							 tr("Cannot write file %1:\n%2.")
+							 .arg(fileName)
+							 .arg(file.errorString()));
+		return false;
+	}
+	
+	
+	this->config_file = fileName.toStdString();
+	ofstream save_config_file (this->config_file.c_str());
+	
+	save_config_file << setw(20) << this->media_type   << " | type of media" << endl;
+	save_config_file << setw(20) << this->browser_mode << " | browsing mode" << endl;
+	
+	vector<string>::iterator iter;
+	for (iter = plugins_libraries.begin(); iter != plugins_libraries.end(); iter++) {
+		save_config_file << (*iter) << " | plugins library " << endl;
+	}
+	
+	statusBar()->showMessage(tr("File saved"), 2000);
+	return true;
+}
+
+bool ACMultiMediaCycleOsgQt::saveConfigFile(){
+
+	QString _configFile = QFileDialog::getSaveFileName(this);
+	if (_configFile.isEmpty())
+		return false;
+	
+	return saveFile(_configFile);
+}
 
 void ACMultiMediaCycleOsgQt::updateLibrary(){
 	if (media_cycle == NULL) {
@@ -321,9 +399,17 @@ void ACMultiMediaCycleOsgQt::modifyListItem(QListWidgetItem *item) {
 void ACMultiMediaCycleOsgQt::synchronizeFeaturesWeights(){
 	vector<float> w = media_cycle->getWeightVector();
 	int nw = w.size();
-	if (ui.featuresListWidget->count() != nw){
+	if (nw==0){
+		cout << "features not yet computed from plugins; setting all weights to 0" << endl;
+		for (int i=0; i< ui.featuresListWidget->count(); i++){
+			ui.featuresListWidget->item(i)->setCheckState (Qt::Unchecked);
+		}
+		return;
+	}
+	else if (ui.featuresListWidget->count() != nw){
 		cerr << "Warning: Checkboxes in GUI do not match Features in MediaCycle" << endl;
 		cerr << ui.featuresListWidget->count() << "!=" << nw << endl;
+		return;
 		//exit(1);
 	}
 	else {
@@ -335,4 +421,89 @@ void ACMultiMediaCycleOsgQt::synchronizeFeaturesWeights(){
 		}
 	}
 }
+
+// adds the plugins in _library pth via mediaCycle's pluginManager
+// keeps track of the plugins added by the Settings Dialog
+void  ACMultiMediaCycleOsgQt::addPluginsLibrary(string _library){
+	if (this->media_cycle->addPlugin(_library)){
+		this->plugins_libraries.push_back(_library);
+	}
+}
+
+//Return copies of a string with whitespace removed from the right
+//http://www2.warwick.ac.uk/fac/sci/physics/research/epp/people/andrew_bennieston/computing/cpp/
+
+std::string ACMultiMediaCycleOsgQt::rstrip(const std::string& s){
+	std::string::size_type p = s.find_last_not_of(" \n\r\t");
+	return std::string(s, 0, p+1);
+}
+
+// load default ("vintage") config for different media.
+// 1) creates media_cycle (destroying any previous settings)
+// 2) loads default features plugins
+// XS assumes for the moment that viewing mmode is clusters 
+void ACMultiMediaCycleOsgQt::loadDefaultConfig(ACMediaType _media_type, ACBrowserMode _browser_mode){
+	string smedia = "none";
+	switch (_media_type) {
+		case MEDIA_TYPE_AUDIO:
+			smedia="audio";
+			break;
+		case MEDIA_TYPE_IMAGE:
+			smedia="image";
+			break;
+		case MEDIA_TYPE_VIDEO:
+			smedia="video";
+			break;
+		default:
+			break;
+	} 
+	if (smedia=="none"){
+		cerr <<"need to define media type"<< endl;
+		return;
+	}
+	if (media_cycle) destroyMediaCycle();
+	createMediaCycle(_media_type, _browser_mode);
+
+	std::string s_plugin;
+	std::string s_path = QApplication::applicationDirPath().toStdString();
+	
+#if defined(__APPLE__)
+	std::string build_type ("Release");
+#ifdef USE_DEBUG
+	build_type = "Debug";
+#endif //USE_DEBUG
+	s_plugin = s_path + "/../../../plugins/"+ smedia + "/" + build_type + "/mc_" + smedia +".dylib";
+	// common to all media, but only for mac...
+	media_cycle->addPlugin(s_path + "../../../plugins/visualisation/" + build_type + "/mc_visualisation.dylib");
+#elif defined (__WIN32__)
+	s_plugin = s_path + "\..\..\plugins\\" + smedia + "\mc_image.dll";
+#else
+	s_plugin = s_path + "/../../plugins/"+smedia+"/mc_image.so";
+#endif
+	
+	media_cycle->addPlugin(s_plugin);
+}
+
+
+void ACMultiMediaCycleOsgQt::comboDefaultSettingsChanged(){
+	string mt = ui.comboDefaultSettings->currentText().toStdString();
+	
+	// custom settings = edit config file
+	if (mt == "Custom"){
+		cout << "editing configuration file" << endl;
+		this->editConfigFile();
+		return;
+	};
+		
+	// default settings : find the right media
+	stringToMediaTypeConverter::const_iterator iterm = stringToMediaType.find(mt);
+	if( iterm == stringToMediaType.end() ) {
+		cout << " media type not found : " << iterm->first << endl;
+		return;
+	}
+	ACMediaType new_media_type = iterm->second;
+	cout << iterm->first << " - corresponding media type code : " << new_media_type << endl;
+	this->loadDefaultConfig(new_media_type);
+}
+
 

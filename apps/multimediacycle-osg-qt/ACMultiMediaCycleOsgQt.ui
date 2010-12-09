@@ -56,7 +56,7 @@
       <widget class="QGroupBox" name="groupBoxBrowserControls">
        <property name="geometry">
         <rect>
-         <x>6</x>
+         <x>3</x>
          <y>30</y>
          <width>157</width>
          <height>421</height>
@@ -77,10 +77,10 @@
        <widget class="QGroupBox" name="groupBoxAutoOrganization">
         <property name="geometry">
          <rect>
-          <x>10</x>
-          <y>225</y>
-          <width>131</width>
-          <height>81</height>
+          <x>12</x>
+          <y>255</y>
+          <width>133</width>
+          <height>66</height>
          </rect>
         </property>
         <property name="title">
@@ -92,7 +92,7 @@
            <x>4</x>
            <y>4</y>
            <width>124</width>
-           <height>81</height>
+           <height>65</height>
           </rect>
          </property>
          <layout class="QGridLayout" name="clustersGridLayout">
@@ -157,38 +157,6 @@
          <string>Recenter</string>
         </property>
        </widget>
-       <widget class="QPushButton" name="pushButtonClean">
-        <property name="geometry">
-         <rect>
-          <x>77</x>
-          <y>0</y>
-          <width>73</width>
-          <height>28</height>
-         </rect>
-        </property>
-        <property name="toolTip">
-         <string>resets everything</string>
-        </property>
-        <property name="text">
-         <string>Clean</string>
-        </property>
-       </widget>
-       <widget class="QPushButton" name="pushButtonLaunch">
-        <property name="geometry">
-         <rect>
-          <x>0</x>
-          <y>0</y>
-          <width>85</width>
-          <height>28</height>
-         </rect>
-        </property>
-        <property name="toolTip">
-         <string>shortcut to load acl file (instead of using th menu)</string>
-        </property>
-        <property name="text">
-         <string>Load ACL</string>
-        </property>
-       </widget>
        <widget class="QGroupBox" name="groupBoxHierarchy">
         <property name="geometry">
          <rect>
@@ -234,30 +202,91 @@
          </property>
         </widget>
        </widget>
-       <widget class="QListWidget" name="featuresListWidget">
+       <widget class="QPushButton" name="pushButtonClean">
         <property name="geometry">
          <rect>
-          <x>0</x>
-          <y>30</y>
-          <width>157</width>
-          <height>186</height>
+          <x>39</x>
+          <y>220</y>
+          <width>78</width>
+          <height>32</height>
          </rect>
         </property>
         <property name="toolTip">
-         <string>when loading media files or pre-computed features (acl files), the available features will appear here</string>
+         <string>resets everything</string>
         </property>
-        <property name="autoScroll">
-         <bool>true</bool>
+        <property name="text">
+         <string>Clean</string>
         </property>
-        <property name="tabKeyNavigation">
-         <bool>false</bool>
+       </widget>
+       <widget class="QWidget" name="">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>0</y>
+          <width>157</width>
+          <height>216</height>
+         </rect>
         </property>
-        <property name="movement">
-         <enum>QListView::Static</enum>
-        </property>
-        <property name="viewMode">
-         <enum>QListView::ListMode</enum>
-        </property>
+        <layout class="QGridLayout" name="gridLayout_2">
+         <item row="0" column="0">
+          <widget class="QComboBox" name="comboDefaultSettings">
+           <item>
+            <property name="text">
+             <string>-- Config --</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Custom</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Audio</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Image</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Video</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>3DModel</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Mixed</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QListWidget" name="featuresListWidget">
+           <property name="toolTip">
+            <string>when loading media files or pre-computed features (acl files), the available features will appear here</string>
+           </property>
+           <property name="autoScroll">
+            <bool>true</bool>
+           </property>
+           <property name="tabKeyNavigation">
+            <bool>false</bool>
+           </property>
+           <property name="movement">
+            <enum>QListView::Static</enum>
+           </property>
+           <property name="viewMode">
+            <enum>QListView::ListMode</enum>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </widget>
       </widget>
      </widget>

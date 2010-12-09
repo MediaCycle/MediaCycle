@@ -32,26 +32,7 @@
  */
 
 #include "settings.h"
-#include "ACMediaTypes.h"
 
-// initialize static class variable
-const stringToMediaTypeConverter::value_type _initm[] = {
-stringToMediaTypeConverter::value_type("Audio", MEDIA_TYPE_AUDIO), \
-stringToMediaTypeConverter::value_type("Image", MEDIA_TYPE_IMAGE), \
-stringToMediaTypeConverter::value_type("Video", MEDIA_TYPE_VIDEO), \
-stringToMediaTypeConverter::value_type("3DModel",MEDIA_TYPE_3DMODEL), \
-stringToMediaTypeConverter::value_type("Text",MEDIA_TYPE_TEXT), \
-stringToMediaTypeConverter::value_type("Mixed", MEDIA_TYPE_MIXED), \
-stringToMediaTypeConverter::value_type("All", MEDIA_TYPE_ALL)
-};
-
-const stringToBrowserModeConverter::value_type _initb[] = {
-stringToBrowserModeConverter::value_type("Clusters", AC_MODE_CLUSTERS), \
-stringToBrowserModeConverter::value_type("Neighbors", AC_MODE_NEIGHBORS)
-};
-
-const stringToMediaTypeConverter SettingsDialog::stringToMediaType(_initm, _initm + sizeof _initm / sizeof *_initm);
-const stringToBrowserModeConverter SettingsDialog::stringToBrowserMode(_initb, _initb + sizeof _initb / sizeof *_initb);
 
 // This class provides general setting for the *Cycle applications
 // e.g., choose audio/image/video, configure plugins, ...
@@ -72,8 +53,7 @@ SettingsDialog::SettingsDialog(QWidget *parent) : QMainWindow(parent) {
 //    connect(buttonSaveLog, SIGNAL(clicked()), this, SLOT(saveLog()));
 //    connect(pushButtonConfigureFeaturesPlugins, SIGNAL(clicked()), this, SLOT(configureFeaturesPlugins()));
 //    connect(buttonSelectVisualizationPlugin, SIGNAL(clicked()), this, SLOT(selectVisualizationPlugins()));
-//	connect(buttonSaveCurrentSettings, SIGNAL(clicked()), this, SLOT(saveCurrentSettings()));
-	connect(buttonSelectSaveConfigFile, SIGNAL(clicked()), this, SLOT(selectSaveConfigFile()));
+	connect(buttonSaveConfigFile, SIGNAL(clicked()), this, SLOT(saveConfigFile()));
 	connect(comboMediaType, SIGNAL(currentIndexChanged(const QString &)), this, SLOT(comboMediaTypeValueChanged()));
 	connect(comboBrowserMode, SIGNAL(currentIndexChanged(const QString &)), this, SLOT(comboBrowserModeValueChanged()));
 }
@@ -85,14 +65,11 @@ void SettingsDialog::setMediaCycleMainWindow(ACMultiMediaCycleOsgQt* _mc) {
 	this->media_cycle = _mc->getMediaCycle();
 }
 
+
 // ----- SLOTS -----
 
-void SettingsDialog::selectSaveConfigFile() {
-	QString _configFile = QFileDialog::getOpenFileName();
-	// TODO: try/catch
-	config_file = _configFile.toStdString();
-	lineEditSaveConfigFile->setText(_configFile);
-	lineEditSaveConfigFile->update();
+bool SettingsDialog::saveConfigFile() {
+	return (multi_media_cycle->saveConfigFile());
 }
 
 void SettingsDialog::configureFeaturesPlugins(){
@@ -132,6 +109,7 @@ void SettingsDialog::on_buttonBrowsePluginsLibrary_clicked(){
 	if (dialog.exec())
 		fileNames = dialog.selectedFiles();
 	
+	// should be only on file
 	QStringList::Iterator file = fileNames.begin();
 	QString fileName  = *file;
 	this->plugins_library = fileName.toStdString();
@@ -142,19 +120,19 @@ void SettingsDialog::on_buttonBrowsePluginsLibrary_clicked(){
 void SettingsDialog::on_buttonApplyCurrentSettings_clicked(){
 	stringToMediaTypeConverter::const_iterator iterm = stringToMediaType.find(this->media_type);
 	if( iterm == stringToMediaType.end() ) {
-		cout << " media type not found : " << iterm->first << endl;
+		cout << " media type not found : " << this->media_type << endl;
 		return;
 	}
 	ACMediaType new_media_type = iterm->second;
-	cout << "corresponding media type code : " << new_media_type << endl;
+	cout << iterm->first << " - corresponding media type code : " << new_media_type << endl;
 	
 	stringToBrowserModeConverter::const_iterator iterb = stringToBrowserMode.find(this->browser_mode);
 	if( iterb == stringToBrowserMode.end() ) {
-		cout << " browser mode not found : " << iterb->first << endl;
+		cout << " browser mode not found : " << this->browser_mode << endl;
 		return;
 	}
 	ACBrowserMode new_browser_mode = iterb->second;
-	cout << "corresponding browser mode code : " << new_browser_mode << endl;
+	cout << iterb->first << " - corresponding browser mode code : " << new_browser_mode << endl;
 	
 	if (this->media_cycle != NULL) {
 		// clean the current media_cycle that was used by the ACMultiMediaCycleOsgQt app.
@@ -166,7 +144,7 @@ void SettingsDialog::on_buttonApplyCurrentSettings_clicked(){
 
 }
 
-void SettingsDialog::on_buttonAddLibrary_clicked(){
+void SettingsDialog::on_buttonAddPluginsLibrary_clicked(){
 	if (media_cycle == NULL) {
 		cout << "load media_cycle first" << endl;
 		return;
@@ -188,16 +166,16 @@ void SettingsDialog::on_buttonAddLibrary_clicked(){
 	vector<ACPlugin *> plug = plib->getPlugins();
 	
 	for (iter = plug.begin(); iter != plug.end(); iter++) {
-		
 		QString s((*iter)->getName().c_str());
 		QListWidgetItem * item = new QListWidgetItem(s,listWidgetFeaturesPlugins);
 		item->setCheckState (Qt::Unchecked);
 	}
 	
-	
+	// keep track of all libraries added
+	this->multi_media_cycle->addPluginsLibrary(this->plugins_library);
 }
 
-void SettingsDialog::on_buttonRemoveLibrary_clicked(){
+void SettingsDialog::on_buttonRemovePluginsLibrary_clicked(){
 //	
 }
 
@@ -206,7 +184,9 @@ void SettingsDialog::on_buttonConfirmPluginsSelection_clicked(){
 	for (int i=0; i < listWidgetFeaturesPlugins->count(); i++) {
 		// XS TODO: if checkState... (so we only add the selected plugins)
 		cout << listWidgetFeaturesPlugins->item(i)->text().toStdString() << endl;
-		multi_media_cycle->addPluginItem(listWidgetFeaturesPlugins->item(i));
+		if (listWidgetFeaturesPlugins->item(i)->checkState() == Qt::Checked){
+			multi_media_cycle->addPluginItem(listWidgetFeaturesPlugins->item(i));
+		}
 	}
 	
 	// then the selected plugins get their weights synchronized with MediaCycle

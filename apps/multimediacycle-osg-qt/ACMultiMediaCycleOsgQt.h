@@ -62,9 +62,9 @@ Q_OBJECT
 	
 public slots: 
 	virtual void modifyListItem(QListWidgetItem *item); // XS TODO why virtual again ?
+	bool saveConfigFile();
 	
 private slots:
-	//	void on_pushButtonLaunch_clicked(); // loadACLFile
 	//	void on_pushButtonClean_clicked();
 	//	void on_pushButtonRecenter_clicked();
 	//	void on_pushButtonBack_clicked();
@@ -72,12 +72,15 @@ private slots:
 	//	
 	void spinBoxClustersValueChanged(int _value);
 	void on_sliderClusters_sliderReleased();
+	void comboDefaultSettingsChanged(); 
+
 	//	
 	void loadACLFile();
 	void saveACLFile();		
 	void loadMediaDirectory();
 	void loadMediaFiles();
 	void editConfigFile();
+	void loadConfigFile();
 
 public:
 	ACMultiMediaCycleOsgQt(QWidget *parent = 0);
@@ -90,6 +93,9 @@ public:
 	void destroyMediaCycle();
 	void addPluginItem(QListWidgetItem *_item);
 	void synchronizeFeaturesWeights();
+	
+	void addPluginsLibrary(string _library);
+	void loadDefaultConfig(ACMediaType _media_type = MEDIA_TYPE_IMAGE, ACBrowserMode _browser_mode = AC_MODE_CLUSTERS);
 
 private:
 	Ui::ACMediaCycleOsgQt ui;
@@ -103,5 +109,11 @@ private:
 	MediaCycle *media_cycle;
 	ACMediaType media_type;
 	ACBrowserMode browser_mode;
+	string config_file;	
+	vector<string> plugins_libraries;
+	
+	bool saveFile(const QString& _filename);
+	
+	std::string rstrip(const std::string& s);
 };
 #endif

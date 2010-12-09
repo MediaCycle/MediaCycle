@@ -42,16 +42,15 @@
 #include "ACMultiMediaCycleOsgQt.h"
 #include "MediaCycle.h"
 
+#include "ACMediaTypes.h" // for ACMediaType
+#include "ACMediaBrowser.h" // for ACBrowserMode
+
 #include <map>
 #include <string>
 using std::string;
 
 // forward declaration
 class ACMultiMediaCycleOsgQt;
-
-// conversion between MediaTypes and text string (e.g., to be used in the labels for the gui)
-typedef std::map<std::string, ACMediaType> stringToMediaTypeConverter;
-typedef std::map<std::string, ACBrowserMode > stringToBrowserModeConverter;
 
 class SettingsDialog : public QMainWindow, private Ui::SettingsDialog
 {
@@ -65,25 +64,22 @@ public:
 private slots:
 	void on_buttonApplyCurrentSettings_clicked();
 	void on_buttonBrowsePluginsLibrary_clicked();
-	void on_buttonAddLibrary_clicked();
-	void on_buttonRemoveLibrary_clicked();
+	void on_buttonAddPluginsLibrary_clicked();
+	void on_buttonRemovePluginsLibrary_clicked();
 	void on_buttonConfirmPluginsSelection_clicked();
 
-//    void loadFromSettings();
-
- //   void saveLog();
  //   void selectVisualizationPlugins();
- //   void saveCurrentSettings();
-	void selectSaveConfigFile();
+	bool saveConfigFile();
 	void configureFeaturesPlugins();
 	void comboMediaTypeValueChanged(); 
 	void comboBrowserModeValueChanged(); 
 
+// suggestion: may be add a way to save settings (like sliders positions, ...) ?
+	//   void loadSettings();
+	//   void saveSettings();
+
 private:
-	static const stringToMediaTypeConverter stringToMediaType;
-	static const stringToBrowserModeConverter stringToBrowserMode;
 //	Ui::SettingsDialog ui;
-	string config_file;	
 	ACMultiMediaCycleOsgQt* multi_media_cycle;
 	MediaCycle* media_cycle;
 	

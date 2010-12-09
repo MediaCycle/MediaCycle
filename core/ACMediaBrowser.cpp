@@ -185,6 +185,8 @@ ACPoint ACMediaBrowser::getLabelPos(int i) {
 	return mLabelAttributes[i].pos;
 }
 
+// goes to the previous navigation state
+// for the moment, it only makes sense in the AC_MODE_CLUSTERS
 void ACMediaBrowser::goBack()
 {
 #ifdef VERBOSE
@@ -192,21 +194,17 @@ void ACMediaBrowser::goBack()
 #endif // VERBOSE
 	
 	if (getMode() == AC_MODE_CLUSTERS){
-		if (mBackwardNavigationStates.size() > 0) { // XS: was 1
-			// XS way
+		if (mBackwardNavigationStates.size() > 0) { 
 			mForwardNavigationStates.push_back(this->getCurrentNavigationState());
 			setCurrentNavigationState(mBackwardNavigationStates.back());
 			mBackwardNavigationStates.pop_back();
-			
-//			mForwardNavigationStates.push_back(mBackwardNavigationStates.back());
-//			mBackwardNavigationStates.pop_back();	
-//			setCurrentNavigationState(mBackwardNavigationStates.back());
-			// XSCF 250310 added this
 			this->updateDisplay(true);
 		}
 	}	
 }
 
+// goes to the next navigation state
+// for the moment, it only makes sense in the AC_MODE_CLUSTERS
 void ACMediaBrowser::goForward()
 {
 #ifdef VERBOSE
@@ -215,25 +213,19 @@ void ACMediaBrowser::goForward()
 	
 	if (getMode() == AC_MODE_CLUSTERS){
 		if (mForwardNavigationStates.size() > 0) {
-			// XS way
 			mBackwardNavigationStates.push_back(this->getCurrentNavigationState());
 			setCurrentNavigationState(mForwardNavigationStates.back());
 			mForwardNavigationStates.pop_back();
-			
-//			mBackwardNavigationStates.push_back(mForwardNavigationStates.back());
-//			mForwardNavigationStates.pop_back();		
-//			setCurrentNavigationState(mBackwardNavigationStates.back());
-			// XSCF 250310 added this
 			this->updateDisplay(true);
 		}
 	}	
 }
 
+// e.g., user does 'a' + left-click
+// so we zoom into cluster, but must keep track of the previous state
+// if there was a list of forward states, we will overwrite it (no branching)
+// previously = (sort of) pushNavigationState, which was ambiguous
 void ACMediaBrowser::storeNavigationState(){
-	// e.g., user does 'a' + left-click
-	// so we zoom into cluster, but must keep track of the previous state
-	// if there was a list of forward states, we will overwrite it (no branching)
-	// previously = (sort of) pushNavigationState, which was ambiguous
 	mForwardNavigationStates.clear();
 	mBackwardNavigationStates.push_back(getCurrentNavigationState());
 	
@@ -288,10 +280,6 @@ void ACMediaBrowser::setWeight(int i, float weight) {
 	std::cout << "mFeatureWeights = " << mFeatureWeights[1] << std::endl;
 	std::cout << "mFeatureWeights = " << mFeatureWeights[2] << std::endl;
 #endif // VERBOSE
-
-	// XSCF 250310 removed this
-	// updateClusters(true); 
-	// setNeedsDisplay(true);
 }
 
 float ACMediaBrowser::getWeight(int i){
@@ -310,9 +298,6 @@ void ACMediaBrowser::setClusterNumber(int n)
 		mClusterCount = n;
 	else
 		std::cerr << "<ACMediaBrowser::setClusterNumber> : n has to be > 0" << std::endl;
-	// XSCF 250310 removed this
-//	updateClusters(true);
-//	setNeedsDisplay(true);
 }
 
 void ACMediaBrowser::setClickedNode(int inode){
@@ -450,7 +435,7 @@ void ACMediaBrowser::incrementLoopNavigationLevels(int loopIndex) {
 		}
 	}
 
-// I just don't get why this is here: 
+// XS I just don't get why this is here: 
 	mNavigationLevel++;
 }
 
@@ -472,10 +457,6 @@ void ACMediaBrowser::setCurrentNavigationState(ACNavigationState state)
 	mReferenceNode = state.mReferenceNode;
 	mNavigationLevel = state.mNavigationLevel;
 	mFeatureWeights = state.mFeatureWeights;
-	
-	// XSCF 250310 removed this
-//	updateNeighborhoods();
-//	updateClusters(true);
 }
 
 ACBrowserLayout ACMediaBrowser::getLayout()
@@ -583,41 +564,33 @@ void ACMediaBrowser::libraryContentChanged(int needsCluster) {
 	
 	// XS TODO randomize positions only at the beginning...
 	if ( mMode == AC_MODE_CLUSTERS && (librarySize>prevLibrarySize) ) {//(mVisPlugin==NULL && mPosPlugin==NULL) {	
-	double t = getTime();
-	ACPoint p;
-	for (ACMediaNodes::iterator node = mLoopAttributes.begin()+prevLibrarySize; node != mLoopAttributes.end(); ++node){
+		double t = getTime();
+		ACPoint p;
+		for (ACMediaNodes::iterator node = mLoopAttributes.begin()+prevLibrarySize; node != mLoopAttributes.end(); ++node){
 			/*
-			(*node).setCurrentPosition (ACRandom(), 
-										ACRandom(), 
-										ACRandom() / 10.0);
-			(*node).setNextPosition ((*node).getCurrentPositionX() + ACRandom() / 100.0,
-									 (*node).getCurrentPositionY() + ACRandom() / 100.0, 
-									 (*node).getCurrentPositionZ() + ACRandom() / 100.0);
+			 (*node).setCurrentPosition (ACRandom(), 
+			 ACRandom(), 
+			 ACRandom() / 10.0);
+			 (*node).setNextPosition ((*node).getCurrentPositionX() + ACRandom() / 100.0,
+			 (*node).getCurrentPositionY() + ACRandom() / 100.0, 
+			 (*node).getCurrentPositionZ() + ACRandom() / 100.0);
 			 */
-		p.x = 0;
-		p.y = 0;
-		p.z = 0;
+			p.x = 0;
+			p.y = 0;
+			p.z = 0;
 		    (*node).setNextPosition (p, t);
 			(*node).setCurrentPosition (p);
 			(*node).setDisplayed (true);
 		}
-
+		
 	}
 	
 	//mFrac = 0.0f; //CF
 	//this->updateState(); //CF
 	//setNeedsDisplay(true);//CF
 	
-	// XS what if all media don't have the same number of features as the first one ?
-	int fc = mLibrary->getMedia(0)->getNumberOfFeaturesVectors();
-	mFeatureWeights.resize(fc);
+	this->initializeFeatureWeights();
 	
-	// XS if (config_file)...
-	printf("setting all feature weights to 1.0 (count=%d)\n", (int) mFeatureWeights.size());
-	for(int i=0; i<fc; i++) {
-		mFeatureWeights[i] = 0.0;//SD temporary hack before config filing
-	}
-	mFeatureWeights[0] = 1.0;//SD temporary hack before config filing
 
 	// XS 250310 cleaned these 4:
 //	updateNeighborhoods();
@@ -630,7 +603,21 @@ void ACMediaBrowser::libraryContentChanged(int needsCluster) {
 	prevLibrarySize = mLibrary->getSize();
 }
 
+// temporary "hack" before config filing
+// sets first feature weight to 1, others to 0
+// assumes all media have the same number of features (as the first one)
+void ACMediaBrowser::initializeFeatureWeights(){
 	
+	int fc = mLibrary->getMedia(0)->getNumberOfFeaturesVectors();
+	mFeatureWeights.resize(fc);
+	
+	// XS if (config_file)...
+	printf("setting all feature weights to 1.0 (count=%d)\n", (int) mFeatureWeights.size());
+	for(int i=0; i<fc; i++) {
+		mFeatureWeights[i] = 0.0;	}
+	mFeatureWeights[0] = 1.0;
+}
+
 // SD - Brute Force KNN
 // SD TODO - Different kNN algorithms should have their own classes
 int ACMediaBrowser::getKNN(int id, vector<int> &ids, int k) {

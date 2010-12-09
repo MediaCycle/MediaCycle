@@ -35,6 +35,8 @@
 #ifndef _ACMEDIA_TYPE_H
 #define _ACMEDIA_TYPE_H
 
+#include <string>
+#include <map>
 
 enum ACMediaType {
 	MEDIA_TYPE_NONE,   // when type is not defined yet
@@ -47,5 +49,21 @@ enum ACMediaType {
 	MEDIA_TYPE_ALL     // for plugins valid for all media
 };
 
+// conversion between MediaTypes and text string (e.g., to be used in the labels for the gui)
+typedef std::map<std::string, ACMediaType> stringToMediaTypeConverter;
+
+// initialize static class variable
+const stringToMediaTypeConverter::value_type _initm[] = {
+stringToMediaTypeConverter::value_type("", MEDIA_TYPE_NONE), \
+stringToMediaTypeConverter::value_type("Audio", MEDIA_TYPE_AUDIO), \
+stringToMediaTypeConverter::value_type("Image", MEDIA_TYPE_IMAGE), \
+stringToMediaTypeConverter::value_type("Video", MEDIA_TYPE_VIDEO), \
+stringToMediaTypeConverter::value_type("3DModel",MEDIA_TYPE_3DMODEL), \
+stringToMediaTypeConverter::value_type("Text",MEDIA_TYPE_TEXT), \
+stringToMediaTypeConverter::value_type("Mixed", MEDIA_TYPE_MIXED), \
+stringToMediaTypeConverter::value_type("All", MEDIA_TYPE_ALL)
+};
+
+const stringToMediaTypeConverter stringToMediaType(_initm, _initm + sizeof _initm / sizeof *_initm);
 
 #endif // _ACMEDIA_TYPE_H

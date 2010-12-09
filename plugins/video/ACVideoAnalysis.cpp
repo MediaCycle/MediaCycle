@@ -62,7 +62,7 @@ using namespace std;
 #endif //  VISUAL_CHECK_GNUPLOT
 
 // ----------- uncomment this to get visual display using highgui and verbose -----
-//#define VISUAL_CHECK
+#define VISUAL_CHECK
 //#define VERBOSE
 // ----------- class constants
 const int ACVideoAnalysis::ystar = 150; // 220

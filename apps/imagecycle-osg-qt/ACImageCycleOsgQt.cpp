@@ -42,7 +42,7 @@
 
 ACImageCycleOsgQt::ACImageCycleOsgQt(QWidget *parent)
  : QMainWindow(parent), 
- library_loaded(false), features_known(false), plugins_scanned(false)
+  features_known(false), library_loaded(false), plugins_scanned(false)
 {
 	ui.setupUi(this); // first thing to do
 

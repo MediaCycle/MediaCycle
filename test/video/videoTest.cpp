@@ -80,7 +80,7 @@ const string ghostlist[ndancers] = {
 "Bru_211#1", "Bru_218#1", "Bru_218#2", "Bru_224#1", "Bru_302#2", "Bru_313#2", "Bru_320#1"
 };
 
-const string videodir = "/Users/xavier/numediart/Project7.3-DancersCycle/VideosSmall/TestSmallSize/";
+const string videodir = "/Users/xavier/numediart/Project7.3-DancersCycle/VideosSmall/TestSmallSize/Front/";
 //const string videodir = "/Users/xavier/numediart/Project10.1-Borderlands/2010_4_prox_alpa/";
 
 // const string videodir = "/Users/xavier/numediart/Project7.3-DancersCycle/Recordings_Raffinerie_0709/FrontShots/";
@@ -138,8 +138,8 @@ void test_med_ave(std::string dancer){
 }
 
 void test_med_noblob(std::string dancer){
-	string movie_file= videodir+"H264/"+dancer+".mov";
-	string median_file= videodir+"median/"+dancer+"_med-test-noblob.jpg";
+	string movie_file= videodir+dancer+".mov";
+	string median_file= videodir+dancer+"_med-test-noblob.jpg";
 	ACVideoAnalysis* V = new ACVideoAnalysis(movie_file);
 	clock_t t0=clock();
 	V->computeMedianNoBlobImage(median_file);
@@ -472,13 +472,13 @@ int main(int argc, char** argv) {
 	cout << "Using Opencv " << CV_VERSION << "(" << CV_MAJOR_VERSION << "." << CV_MINOR_VERSION  << "." <<  CV_SUBMINOR_VERSION << ")" << endl;	
 
 	// get_all_images();
-	// test_med_ave("Bru_105#2");
+	test_med_noblob("001011");
 	// test_med_noblob("Bru_203#1");
 	//test_histogram_equalize("Bru_105#2");
 	//test_bg_substraction("Bru_105#2");
 	// test_bg_substraction("Bru_203#2");
 	//test_browse("Bru_105#2");
-	test_read_write_video(videodir+"Front/001011.mov");
+	//test_read_write_video(videodir+"Front/001011.mov");
 //	test_optical_flow(videodir+"Front/001011.mov");
 	//test_video_plugin("001011");
 	//test_video_plugin_acl_save("001011");
