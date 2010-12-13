@@ -1,7 +1,7 @@
 /**
  * @brief ACOsgCompositeViewQt.h
  * @author Christian Frisson
- * @date 06/12/2010
+ * @date 13/12/2010
  * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -90,6 +90,8 @@ using Qt::WindowFlags;
 #include <ACOsgTimelineControlsRenderer.h>
 #include <ACOsgTimelineEventHandler.h>
 
+#include <ACAudioEngine.h>
+
 class ACOsgCompositeViewQt : public osgViewer::CompositeViewer, public QGLWidget
 {
 	public:
@@ -122,6 +124,7 @@ class ACOsgCompositeViewQt : public osgViewer::CompositeViewer, public QGLWidget
 		osgViewer::View* browser_view;
 		osgViewer::View* timeline_view;
 		osgViewer::View* timeline_controls_view;
+		ACAudioEngine *audio_engine;
 
 	public:
 		// needs to be called when loops are added or removed
@@ -136,6 +139,7 @@ class ACOsgCompositeViewQt : public osgViewer::CompositeViewer, public QGLWidget
 		ACOsgBrowserRenderer* getBrowserRenderer(){return browser_renderer;};
 		ACOsgTimelineRenderer* getTimelineRenderer(){return timeline_renderer;};
 		ACOsgTimelineControlsRenderer* getTimelineControlsRenderer(){return timeline_controls_renderer;};
+		void setAudioEngine(ACAudioEngine *engine){audio_engine=engine;if(timeline_event_handler)timeline_event_handler->setAudioEngine(engine);}
 	
 	private:
 		int mousedown, zoomdown, forwarddown, autoplaydown, rotationdown;

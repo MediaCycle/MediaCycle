@@ -1160,6 +1160,19 @@ void ACAudioFeedback::setScrub(float scrub) {
 	}
 }
 
+void ACAudioFeedback::setSkip(int loop_id, int frame)
+{
+	/*int loop_slot;	
+	ALuint	loop_source;
+	loop_slot = getLoopSlot(loop_id);
+	if (loop_slot!=-1) {
+		loop_source = loop_sources[loop_slot];
+		ALint current_pos;
+		alGetSourcei(loop_source, AL_SAMPLE_OFFSET,&current_pos);
+		alSourcei(loop_source, AL_SAMPLE_OFFSET, frame - current_pos);
+	}*/
+}
+
 // SD TODO - should be passed to this funciton: the buffer size + time code + normalize time code to buffer size + controler positions
 void ACAudioFeedback::processAudioEngineSamplePosition(int _loop_slot, int *_prev_sample_pos, int *_sample_pos, int *_sample_pos_limit)
 {

@@ -4,6 +4,7 @@
 
 	ADD_LIBRARY(mediacycle-osg STATIC ${SRC} ${HDR})
 	ADD_DEPENDENCIES(mediacycle-osg mediacycle)
+	ADD_DEPENDENCIES(mediacycle-osg audioengine)
 
 	TARGET_LINK_LIBRARIES(mediacycle-osg mediacycle)
 	TARGET_LINK_LIBRARIES(mediacycle-osg osg osgDB osgGA osgViewer osgText)
@@ -13,6 +14,7 @@
 	ENDIF ( MINGW )#OR APPLE_IOS_DEV OR APPLE_IOS_SIM )
 	TARGET_LINK_LIBRARIES(mediacycle-osg ${OPENGL_LIBRARIES})
 	TARGET_LINK_LIBRARIES(mediacycle-osg ${Boost_SYSTEM_LIBRARY})
+	TARGET_LINK_LIBRARIES(mediacycle-osg audioengine)
 
 	IF (APPLE_IOS_DEV OR APPLE_IOS_SIM OR APPLE_IOS_XCODE)
 		TARGET_LINK_LIBRARIES(mediacycle-osg cv cvaux)

@@ -79,6 +79,8 @@ ACOsgCompositeViewQt::ACOsgCompositeViewQt( QWidget * parent, const char * name,
 	screen_width = QApplication::desktop()->screenGeometry().width();
 	std::cout << screen_width << std::endl;
 	timeline_renderer->setScreenWidth(screen_width);
+	
+	audio_engine = NULL;
 }
 
 void ACOsgCompositeViewQt::setMediaCycle(MediaCycle* _media_cycle)
@@ -433,7 +435,7 @@ void ACOsgCompositeViewQt::mouseReleaseEvent( QMouseEvent* event )
 	
 	if ( (media_cycle) && (media_cycle->hasBrowser()))
 	{
-		if ( (forwarddown==1)|| (trackdown == 1) )
+		if ( (forwarddown==1) || (trackdown == 1) )
 		{	
 			int loop = media_cycle->getClickedNode();
 			std::cout << "node " << loop << " selected" << std::endl;

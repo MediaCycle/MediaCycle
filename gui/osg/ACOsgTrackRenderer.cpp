@@ -46,6 +46,7 @@ ACOsgTrackRenderer::ACOsgTrackRenderer()
 	yspan = 0.64f;
 	xspan = 0.64f;
 	selection_sensing_width = xspan/200;
+	manual_selection = false;
 	this->initSelection();
 }
 
@@ -97,10 +98,10 @@ void ACOsgTrackRenderer::updateScreenWidth(int _screen_width)
 
 void ACOsgTrackRenderer::setSelectionBegin(float begin)
 {
-	if (begin > selection_end_pos - playback_min_width)//min section width -> magic number to refine
+	/*if (begin > selection_end_pos - playback_min_width)//min section width -> magic number to refine
 		begin = selection_end_pos - playback_min_width;
-	else if (begin < -xspan/2.0f)
-		begin = -xspan/2.0f;
+	if (begin < -xspan/2.0f)
+		begin = -xspan/2.0f;*/
 		
 	this->selection_begin_pos = begin;
 	selection_begin_pos_changed=true;
@@ -109,10 +110,10 @@ void ACOsgTrackRenderer::setSelectionBegin(float begin)
 
 void ACOsgTrackRenderer::setSelectionEnd(float end)
 {
-	if (end < selection_begin_pos + playback_min_width)//min section width -> magic number to refine
+	/*if (end < selection_begin_pos + playback_min_width)//min section width -> magic number to refine
 		end = selection_begin_pos + playback_min_width;
-	else if (end > xspan/2.0f)
-		end = xspan/2.0f;
+	if (end > xspan/2.0f)
+		end = xspan/2.0f;*/
 	
 	this->selection_end_pos = end;
 	selection_end_pos_changed=true;

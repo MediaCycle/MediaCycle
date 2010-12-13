@@ -79,6 +79,7 @@ protected:
 	float xspan, yspan;
 	float playback_min_width;
 	float selection_sensing_width;
+	bool manual_selection;
 	void initSelection();
 public:
 	ACOsgTrackRenderer();
@@ -112,6 +113,7 @@ public:
 	float getSelectionZoneWidth();
 	void setSelectionZoneCenter(float center);
 	float getSelectionZoneCenter();*/
+	void setManualSelection(bool manual){this->manual_selection=manual;}
 };
 
 #endif

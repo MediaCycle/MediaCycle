@@ -120,8 +120,9 @@ ACAudioCycleOsgQt::ACAudioCycleOsgQt(QWidget *parent)
 	osc_feedback = NULL;
 	osc_browser = NULL;
 	
-	ui.compositeOsgView->move(0,20);
+	//ui.compositeOsgView->move(0,20);
 	ui.compositeOsgView->setMediaCycle(media_cycle);
+	ui.compositeOsgView->setAudioEngine(audio_engine);
 	ui.compositeOsgView->prepareFromBrowser();
 	ui.compositeOsgView->prepareFromTimeline();
 	//compositeOsgView->setPlaying(true);

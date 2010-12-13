@@ -111,6 +111,7 @@ public:
 
 	// Scrub/Scratch control
 	void setScrub(float scrub);
+	void setSkip(int loop_id, int frame);
 	
 	// Synchro and Scale modes
 	void setLoopSynchroMode(int _loop_id, ACAudioEngineSynchroMode _synchro_mode);

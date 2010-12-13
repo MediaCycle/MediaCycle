@@ -50,6 +50,7 @@ ACOsgAudioTrackRenderer::ACOsgAudioTrackRenderer() {
 	playback_height = (yspan-2*yspan/8.0f)/2.0f;//[0;yspan/2.0f]
 	samples_hop_threshold = 10;
 	samples_n_threshold = screen_width*15;
+	samples = NULL;
 }
 
 ACOsgAudioTrackRenderer::~ACOsgAudioTrackRenderer() {
@@ -89,7 +90,6 @@ ACOsgAudioTrackRenderer::~ACOsgAudioTrackRenderer() {
 }
 
 void ACOsgAudioTrackRenderer::selectionWaveformGeode() {
-	
 	int i;
 	
 	int width;
@@ -366,19 +366,16 @@ void ACOsgAudioTrackRenderer::selectionWaveformGeode() {
 	
 	summary_waveform_geode->addDrawable(samples_geometry);
 	//summary_waveform_geode->addDrawable(border_geometry);
-	//summary_waveform_geode->addDrawable(frame_geometry);
+	summary_waveform_geode->addDrawable(frame_geometry);
 	summary_waveform_geode->addDrawable(baseline_geometry);
 	
 	//sprintf(name, "some audio element");
-	summary_waveform_geode->setUserData(new ACRefId(track_index,"track waveform"));
+	summary_waveform_geode->setUserData(new ACRefId(track_index,"track summary waveform"));
 	//summary_waveform_geode->setName(name);
 	summary_waveform_geode->ref();	
 }
 
 void ACOsgAudioTrackRenderer::selectionCursorGeode() {
-	
-	float czpos = 0.01f;
-	
 	StateSet *state;
 	
 	Vec3Array* vertices;
@@ -392,10 +389,10 @@ void ACOsgAudioTrackRenderer::selectionCursorGeode() {
 	summary_cursor_geometry = new Geometry();
 	
 	vertices = new Vec3Array(2);
-	/*(*vertices)[0] = Vec3(track_left_x + 0, ((summary_center_y - summary_height)+xstep) * zoom_y, czpos+0.00005);
-	(*vertices)[1] = Vec3(track_left_x + 0, ((summary_center_y + summary_height)-xstep) * zoom_y, czpos+0.00005);*/
-	(*vertices)[0] = Vec3((selection_end_pos+selection_begin_pos)/2.0f, ((summary_center_y - summary_height)+xstep) * zoom_y, czpos+0.00005);
-	(*vertices)[1] = Vec3((selection_end_pos+selection_begin_pos)/2.0f, ((summary_center_y + summary_height)-xstep) * zoom_y, czpos+0.00005);
+	/*(*vertices)[0] = Vec3(track_left_x + 0, ((summary_center_y - summary_height)+xstep) * zoom_y, zpos+0.00005);
+	(*vertices)[1] = Vec3(track_left_x + 0, ((summary_center_y + summary_height)-xstep) * zoom_y, zpos+0.00005);*/
+	(*vertices)[0] = Vec3((selection_end_pos+selection_begin_pos)/2.0f, ((summary_center_y - summary_height)+xstep) * zoom_y, zpos+0.00005);
+	(*vertices)[1] = Vec3((selection_end_pos+selection_begin_pos)/2.0f, ((summary_center_y + summary_height)-xstep) * zoom_y, zpos+0.00005);
 	summary_cursor_geometry->setVertexArray(vertices);
 	
 	Vec4 summary_cursor_color(0.2f, 0.9f, 0.2f, 0.9f);	
@@ -430,17 +427,14 @@ void ACOsgAudioTrackRenderer::selectionCursorGeode() {
 	summary_cursor_transform.get()->addChild(summary_cursor_geode);
 	
 	//sprintf(name, "some audio element");
-	summary_cursor_transform.get()->setUserData(new ACRefId(track_index,"track cursor transform"));
 	//summary_cursor_transform->setName(name);
 	summary_cursor_transform->ref();
-	summary_cursor_geode->setUserData(new ACRefId(track_index,"track cursor geode"));
+	summary_cursor_geode->setUserData(new ACRefId(track_index,"track cursor"));
 	//summary_cursor_geode->setName(name);
 	summary_cursor_geode->ref();
 }
 
 void ACOsgAudioTrackRenderer::selectionZoneGeode() {
-	float czpos = 0.01f;
-	
 	StateSet *state;
 	
 	Vec3Array* vertices;	
@@ -461,18 +455,18 @@ void ACOsgAudioTrackRenderer::selectionZoneGeode() {
 	
 	//border vertices
 	vertices = new Vec3Array(5);
-	(*vertices)[0] = Vec3(selection_begin_pos, (summary_center_y - summary_height) * zoom_y, czpos);
-	(*vertices)[1] = Vec3(selection_end_pos, ((summary_center_y - summary_height)+xstep) * zoom_y, czpos);
-	(*vertices)[2] = Vec3(selection_end_pos, ((summary_center_y + summary_height)-xstep) * zoom_y, czpos);
-	(*vertices)[3] = Vec3(selection_begin_pos, (summary_center_y + summary_height) * zoom_y, czpos);
-	(*vertices)[4] = Vec3(selection_begin_pos, (summary_center_y - summary_height) * zoom_y, czpos);
+	(*vertices)[0] = Vec3(selection_begin_pos, (summary_center_y - summary_height) * zoom_y, zpos);
+	(*vertices)[1] = Vec3(selection_end_pos, ((summary_center_y - summary_height)+xstep) * zoom_y, zpos);
+	(*vertices)[2] = Vec3(selection_end_pos, ((summary_center_y + summary_height)-xstep) * zoom_y, zpos);
+	(*vertices)[3] = Vec3(selection_begin_pos, (summary_center_y + summary_height) * zoom_y, zpos);
+	(*vertices)[4] = Vec3(selection_begin_pos, (summary_center_y - summary_height) * zoom_y, zpos);
 	selection_zone_border_geometry->setVertexArray(vertices);
 	
 	vertices = new Vec3Array(4);
-	(*vertices)[0] = Vec3(selection_begin_pos+selection_sensing_width, (summary_center_y - summary_height) * zoom_y, czpos);
-	(*vertices)[1] = Vec3(selection_end_pos-selection_sensing_width, (summary_center_y - summary_height) * zoom_y, czpos);
-	(*vertices)[2] = Vec3(selection_end_pos-selection_sensing_width, (summary_center_y + summary_height) * zoom_y, czpos);
-	(*vertices)[3] = Vec3(selection_begin_pos+selection_sensing_width, (summary_center_y + summary_height) * zoom_y, czpos);
+	(*vertices)[0] = Vec3(selection_begin_pos+selection_sensing_width, (summary_center_y - summary_height) * zoom_y, zpos);
+	(*vertices)[1] = Vec3(selection_end_pos-selection_sensing_width, (summary_center_y - summary_height) * zoom_y, zpos);
+	(*vertices)[2] = Vec3(selection_end_pos-selection_sensing_width, (summary_center_y + summary_height) * zoom_y, zpos);
+	(*vertices)[3] = Vec3(selection_begin_pos+selection_sensing_width, (summary_center_y + summary_height) * zoom_y, zpos);
 	selection_zone_frame_geometry->setVertexArray(vertices);
 	
 	/*
@@ -543,17 +537,14 @@ void ACOsgAudioTrackRenderer::selectionZoneGeode() {
 	selection_zone_transform.get()->addChild(selection_zone_geode);
 	
 	//sprintf(name, "some audio element");
-	selection_zone_transform.get()->setUserData(new ACRefId(track_index,"track selection zone transform"));
 	//selection_transform->setName(name);
 	selection_zone_transform->ref();
-	selection_zone_geode->setUserData(new ACRefId(track_index,"track selection zone geode"));
+	selection_zone_geode->setUserData(new ACRefId(track_index,"track selection zone"));
 	//summary_cursor_geode->setName(name);
 	selection_zone_geode->ref();
 }
 
 void ACOsgAudioTrackRenderer::selectionBeginGeode() {
-	float czpos = 0.01f;
-	
 	StateSet *state;
 	
 	Vec3Array* vertices;	
@@ -571,10 +562,10 @@ void ACOsgAudioTrackRenderer::selectionBeginGeode() {
 	track_left_x = -((width+1) * xstep * zoom_x)/2; // CF autocenter possible only when displaying one track
 		
 	vertices = new Vec3Array(4);
-	(*vertices)[0] = Vec3(selection_begin_pos, (summary_center_y - summary_height) * zoom_y, czpos);
-	(*vertices)[1] = Vec3(selection_begin_pos+selection_sensing_width, (summary_center_y - summary_height) * zoom_y, czpos);
-	(*vertices)[2] = Vec3(selection_begin_pos+selection_sensing_width, (summary_center_y + summary_height) * zoom_y, czpos);
-	(*vertices)[3] = Vec3(selection_begin_pos, (summary_center_y + summary_height) * zoom_y, czpos);
+	(*vertices)[0] = Vec3(selection_begin_pos, (summary_center_y - summary_height) * zoom_y, zpos);
+	(*vertices)[1] = Vec3(selection_begin_pos+selection_sensing_width, (summary_center_y - summary_height) * zoom_y, zpos);
+	(*vertices)[2] = Vec3(selection_begin_pos+selection_sensing_width, (summary_center_y + summary_height) * zoom_y, zpos);
+	(*vertices)[3] = Vec3(selection_begin_pos, (summary_center_y + summary_height) * zoom_y, zpos);
 	selection_begin_geometry->setVertexArray(vertices);
 	
 	//Vec4 color(0.0f, 1.0f, 0.0f, 1.0f);	
@@ -619,17 +610,14 @@ void ACOsgAudioTrackRenderer::selectionBeginGeode() {
 	selection_begin_transform.get()->addChild(selection_begin_geode);
 	
 	//sprintf(name, "some audio element");
-	selection_begin_transform.get()->setUserData(new ACRefId(track_index,"track selection begin transform"));
 	//selection_begin_transform->setName(name);
 	selection_begin_transform->ref();
-	selection_begin_geode->setUserData(new ACRefId(track_index,"track selection begin geode"));
+	selection_begin_geode->setUserData(new ACRefId(track_index,"track selection begin"));
 	//summary_cursor_geode->setName(name);
 	selection_begin_geode->ref();
 }	
 
 void ACOsgAudioTrackRenderer::selectionEndGeode() {
-	float czpos = 0.01f;
-	
 	StateSet *state;
 	
 	Vec3Array* vertices;	
@@ -647,10 +635,10 @@ void ACOsgAudioTrackRenderer::selectionEndGeode() {
 	track_left_x = -((width+1) * xstep * zoom_x)/2; // CF autocenter possible only when displaying one track
 	
 	vertices = new Vec3Array(4);
-	(*vertices)[0] = Vec3(selection_end_pos-selection_sensing_width, (summary_center_y - summary_height) * zoom_y, czpos);
-	(*vertices)[1] = Vec3(selection_end_pos, (summary_center_y - summary_height) * zoom_y, czpos);
-	(*vertices)[2] = Vec3(selection_end_pos, (summary_center_y + summary_height) * zoom_y, czpos);
-	(*vertices)[3] = Vec3(selection_end_pos-selection_sensing_width, (summary_center_y + summary_height) * zoom_y, czpos);
+	(*vertices)[0] = Vec3(selection_end_pos-selection_sensing_width, (summary_center_y - summary_height) * zoom_y, zpos);
+	(*vertices)[1] = Vec3(selection_end_pos, (summary_center_y - summary_height) * zoom_y, zpos);
+	(*vertices)[2] = Vec3(selection_end_pos, (summary_center_y + summary_height) * zoom_y, zpos);
+	(*vertices)[3] = Vec3(selection_end_pos-selection_sensing_width, (summary_center_y + summary_height) * zoom_y, zpos);
 	selection_end_geometry->setVertexArray(vertices);
 	
 	//Vec4 color(0.0f, 1.0f, 0.0f, 1.0f);	
@@ -695,16 +683,14 @@ void ACOsgAudioTrackRenderer::selectionEndGeode() {
 	selection_end_transform.get()->addChild(selection_end_geode);
 	
 	//sprintf(name, "some audio element");
-	selection_end_transform.get()->setUserData(new ACRefId(track_index,"track selection end transform"));
 	//selection_end_transform->setName(name);
 	selection_end_transform->ref();
-	selection_end_geode->setUserData(new ACRefId(track_index,"track selection end geode"));
+	selection_end_geode->setUserData(new ACRefId(track_index,"track selection end"));
 	//summary_cursor_geode->setName(name);
 	selection_end_geode->ref();
 }	
 
 void ACOsgAudioTrackRenderer::playbackWaveformGeode() {
-	
 	int i;
 	
 	int width;
@@ -750,15 +736,27 @@ void ACOsgAudioTrackRenderer::playbackWaveformGeode() {
 			thumbnail = new float[2 * width];
 			k = (int)( ((ACAudio*) media)->getNFrames() *(selection_begin_pos+xspan/2.0f)/xspan);
 			for (i=0; i< width; i++) {
-				thumbnail[i] = samples[k];//0;
-				thumbnail[i+width] = samples[k];//0;
+				if ((k < 0)||(k>((ACAudio*) media)->getNFrames())){
+					thumbnail[i] = 0.0f;
+					thumbnail[i+width] = 0.0f;
+				}
+				else{	
+					thumbnail[i] = samples[k];//0;
+					thumbnail[i+width] = samples[k];//0;
+				}	
 				for (j=k;j<k+n_samples_hop;j++) {
-					if ((samples[j])> thumbnail[i]) {
-						thumbnail[i] = samples[j];
+					if ((j<0)||(k>((ACAudio*) media)->getNFrames())){
+						thumbnail[i] = 0.0f;
+						thumbnail[i+width] = 0.0f;
 					}
-					if ( samples[j] < thumbnail[i+width] ) {
-						thumbnail[i+width] = samples[j];
-					}
+					else {
+						if ((samples[j])> thumbnail[i]) {
+							thumbnail[i] = samples[j];
+						}
+						if ( samples[j] < thumbnail[i+width] ) {
+							thumbnail[i+width] = samples[j];
+						}
+					}					
 				}
 				if (thumbnail[i] < thumbnail[i+width])
 					std::cout << "Mismatch at " << i << std::endl;
@@ -770,21 +768,24 @@ void ACOsgAudioTrackRenderer::playbackWaveformGeode() {
 			thumbnail = new float[width];
 			k = (int)( ((ACAudio*) media)->getNFrames() *(selection_begin_pos+xspan/2.0f)/xspan);
 			for (i=0; i< width; i++) {
-				thumbnail[i]=samples[k+i];
+				if (k+i<0)
+					thumbnail[i]=0.0f;
+				else	
+					thumbnail[i]=samples[k+i];
 			}	
 		}
 		
-		std::cout << "Number of" << std::endl;
+		/*std::cout << "Number of" << std::endl;
 		std::cout << "  pixels of width: " << width << std::endl;
 		std::cout << "  signal frames: " << ((ACAudio*) media)->getNFrames() << std::endl;
 		std::cout << "  playback frames: " << (((ACAudio*) media)->getNFrames()) * (selection_end_pos-selection_begin_pos)/xspan << std::endl;
-		std::cout << "  hop'ed samples: " << n_samples_hop << " (hop: " << hop <<")"<< std::endl;
+		std::cout << "  hop'ed samples: " << n_samples_hop << " (hop: " << hop <<")"<< std::endl;*/
 		
 		zoom_x = xspan/xstep/width;// CF autosizefit possible only when displaying one track
 		track_left_x = -((width) * xstep * zoom_x)/2; // CF autocenter possible only when displaying one track
 		
 		//if (n_samples_hop > samples_hop_threshold){
-		if (n_playback_samples > samples_n_threshold){
+		/*if (n_playback_samples > samples_n_threshold){
 			// envelope with quads
 			vertices = new Vec3Array(4*(width-1));
 			for(i=0; i<width; i++) {
@@ -794,7 +795,7 @@ void ACOsgAudioTrackRenderer::playbackWaveformGeode() {
 				(*vertices)[4*i+3] = Vec3(track_left_x + i * xstep * zoom_x, playback_center_y + playback_height * thumbnail[i+width] * zoom_y, zpos);
 			}
 		}
-		else if (n_samples_hop >= 1){
+		else */if (n_samples_hop >= 1){
 			//envelope
 			vertices = new Vec3Array(2*width);
 			for(i=0; i<width; i++) {
@@ -842,14 +843,14 @@ void ACOsgAudioTrackRenderer::playbackWaveformGeode() {
 	
 	if (screen_width !=0){
 		//if (n_samples_hop > samples_hop_threshold){
-		if (n_playback_samples > samples_n_threshold){	
+		/*if (n_playback_samples > samples_n_threshold){	
 			//envelope with quads
 			line_p = new DrawElementsUInt(PrimitiveSet::QUADS, 4*(width+1));
 			for(i=0; i<4*(width+1); i++) {
 				line_p->push_back(i);
 			}
 		}
-		else if (n_samples_hop >= 1){
+		else */if (n_samples_hop >= 1){
 			//envelope 
 			line_p = new DrawElementsUInt(PrimitiveSet::LINE_LOOP, 2*width); //POLYGON or LINE_LOOP
 			for(i=0; i<2*width; i++) {
@@ -952,7 +953,6 @@ void ACOsgAudioTrackRenderer::playbackWaveformGeode() {
 }
 
 void ACOsgAudioTrackRenderer::trackGeode() {
-	
 	StateSet *state;
 	
 	track_geode = new Geode();
@@ -981,7 +981,23 @@ void ACOsgAudioTrackRenderer::prepareTracks() {
 }
 
 void ACOsgAudioTrackRenderer::updateTracks(double ratio) {	
-	Matrix curserT;
+	if (!manual_selection && media && media_from_lib) 
+	{
+		if (media_index > -1)
+		{
+			const ACMediaNode &attribute = media_cycle->getMediaNode(media_index);
+			if ( attribute.getActivity()==1) 
+			{	
+				float selection_width = selection_end_pos-selection_begin_pos;
+				float selection_pos = -xspan/2.0f + (float) attribute.getCurrentFrame() / (float)(((ACAudio*) media)->getNFrames())*xspan;
+				this->setSelectionBegin(selection_pos - selection_width/2.0f);
+				this->setSelectionEnd(selection_pos + selection_width/2.0f);
+			}
+		}
+	}
+	//manual_selection = false;
+	
+	//Matrix curserT;
 	if (media_changed || screen_width_changed)
 	{
 		//track_node->removeChild(summary_cursor_transform.get());
@@ -1005,9 +1021,9 @@ void ACOsgAudioTrackRenderer::updateTracks(double ratio) {
 	if (media){
 		if (media_changed)
 		{	
-			if (samples) delete[] samples;
+			if (samples) delete samples;
 			samples = ((ACAudio*) media)->getMonoSamples();
-			//playback_min_width = screen_width*xspan/(((ACAudio*) media)->getNFrames()); // one frame per pixel
+			playback_min_width = screen_width*xspan/(((ACAudio*) media)->getNFrames()); // one frame per pixel
 		}	
 		if (media_changed || screen_width_changed)
 		{

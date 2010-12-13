@@ -40,46 +40,35 @@
 #include <osgViewer/View>
 #include "ACRefId.h"
 
-#include <osgManipulator/CommandManager>
-#include <osgManipulator/TabBoxDragger>
-#include <osgManipulator/TabPlaneDragger>
-#include <osgManipulator/TabPlaneTrackballDragger>
-#include <osgManipulator/TrackballDragger>
-#include <osgManipulator/Translate1DDragger>
-#include <osgManipulator/Translate2DDragger>
-#include <osgManipulator/TranslateAxisDragger>
-#include <osgManipulator/Dragger>
-
 #include "MediaCycle.h"
 #include "ACOsgTimelineRenderer.h"
+
+#include <ACAudioEngine.h>
 
 using namespace osgGA;
 
 class ACOsgTimelineEventHandler : public GUIEventHandler {
-public: 
+	public: 
+		ACOsgTimelineEventHandler();
+		virtual ~ACOsgTimelineEventHandler() {};
+		
+		void setMediaCycle(MediaCycle *_media_cycle){this->media_cycle = _media_cycle;}
+		void setRenderer(ACOsgTimelineRenderer* _renderer){this->renderer = _renderer;}
+		bool handle(const osgGA::GUIEventAdapter& ea,osgGA::GUIActionAdapter& aa);
 	
-	ACOsgTimelineEventHandler();
-	virtual ~ACOsgTimelineEventHandler() {};
+		void setAudioEngine(ACAudioEngine *engine){audio_engine=engine;}
 	
-	void setMediaCycle(MediaCycle *_media_cycle){this->media_cycle = _media_cycle;}
-	void setRenderer(ACOsgTimelineRenderer* _renderer){this->renderer = _renderer;}
-	bool handle(const osgGA::GUIEventAdapter& ea,osgGA::GUIActionAdapter& aa);
-
-	void pick(osgViewer::View* view, const osgGA::GUIEventAdapter& ea, bool hover);
+	protected:
+		void pick(osgViewer::View* view, const osgGA::GUIEventAdapter& ea, bool hover);
 	
-protected:
-	void picked_object_callback(int); 
-	void hover_object_callback(int);
-	void hover_callback(float, float);
-	
-	MediaCycle *media_cycle;
-	ACOsgTimelineRenderer *renderer;
-	
-	bool selecting_zone;
-	bool selecting_ends;
-	ACRefId* selection;
-	float selection_begin,selection_end;
-	float pushed_x;
+	private:
+		MediaCycle *media_cycle;
+		ACOsgTimelineRenderer *renderer;
+		ACAudioEngine *audio_engine;
+		bool selecting_zone,selecting_zone_begin,selecting_zone_end,selecting_summary_waveform;
+		ACRefId* selection;
+		float selection_begin,selection_end;
+		float pushed_x;
 };
 
 #endif // AC_OSG_TIMELINE_EVENT_HANDLER_H
