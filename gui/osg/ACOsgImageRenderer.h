@@ -54,7 +54,7 @@ protected:
 	Vec4Array* colors2;
 	Vec4Array* colors3;
 	
-	Image *image_image;
+	Image* image_image;
 	Geode* image_geode;
 	Geode* border_geode;
 	MatrixTransform* image_transform;

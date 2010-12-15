@@ -41,60 +41,6 @@
 
 const int ACOsgImageRenderer::NCOLORS = 5;
 
-osg::Image* Convert_OpenCV_TO_OSG_IMAGE(IplImage* cvImg)
-{
-	
-// XS uncomment the following 4 lines for visual debug (e.g., thumbnail)	
-//	cvNamedWindow("T", CV_WINDOW_AUTOSIZE);
-//	cvShowImage("T", cvImg);
-//	cvWaitKey(0);
-//	cvDestroyWindow("T");	
-
-	
-	if(cvImg->nChannels == 3)
-	{
-		// Flip image from top-left to bottom-left origin
-		if(cvImg->origin == 0) {
-			cvConvertImage(cvImg , cvImg, CV_CVTIMG_FLIP);
-			cvImg->origin = 1;
-		}
-		
-		// Convert from BGR to RGB color format
-		//printf("Color format %s\n",cvImg->colorModel);
-		if ( !strcmp(cvImg->channelSeq,"BGR") ) {
-			cvCvtColor( cvImg, cvImg, CV_BGR2RGB );
-		}
-		
-		osg::Image* osgImg = new osg::Image();
-		
-		/*temp_data = new unsigned char[cvImg->width * cvImg->height * cvImg->nChannels];
-		 for (i=0;i<cvImg->height;i++) {
-		 memcpy( (char*)temp_data + i*cvImg->width*cvImg->nChannels, (char*)(cvImg->imageData) + i*(cvImg->widthStep), cvImg->width*cvImg->nChannels);
-		 }*/
-		
-		osgImg->setImage(
-						 cvImg->width, //s
-						 cvImg->height, //t
-						 3, //r
-						 3, //GLint internalTextureformat, (GL_LINE_STRIP, 0x0003)
-						 6407, // GLenum pixelFormat, (GL_RGB, 0x1907)
-						 5121, // GLenum type, (GL_UNSIGNED_BYTE, 0x1401)
-						 (unsigned char*)(cvImg->imageData), // unsigned char* data
-						 //temp_data,
-						 osg::Image::NO_DELETE, // AllocationMode mode (shallow copy)
-						 1);//int packing=1); (???)
-		
-		//printf("Conversion completed\n");
-		return osgImg;
-	}
-	// XS TODO : what happens with BW images ?
-	else {
-		printf("Unrecognized image type");
-		return 0;
-	}
-	
-}
-
 ACOsgImageRenderer::ACOsgImageRenderer() {
 	
 	image_image = 0; image_geode = 0; border_geode = 0; image_transform = 0;
@@ -147,7 +93,8 @@ void ACOsgImageRenderer::imageGeode(int flip, float sizemul, float zoomin) {
 	xlim *=sizemul;
 	
 	int width, height;
-	IplImage *thumbnail;
+	//IplImage* thumbnail;
+	osg::Image* thumbnail;
 	std::string thumbnail_filename;
 	
 	StateSet *state;
@@ -168,8 +115,9 @@ void ACOsgImageRenderer::imageGeode(int flip, float sizemul, float zoomin) {
 	if (media_index<0)
 		media_index = 0;
 	
-	width = media_cycle->getWidth(media_index);//CF instead of node_index
-	height = media_cycle->getHeight(media_index);//CF instead of node_index
+	width = media_cycle->getThumbnailWidth(media_index);//CF instead of node_index
+	height = media_cycle->getThumbnailHeight(media_index);//CF instead of node_index
+	std::cout << "Geode with (thumbnail) width " <<  width << " and height " << height << std::endl;
 	
 	image_transform = new MatrixTransform();
 	
@@ -228,7 +176,9 @@ void ACOsgImageRenderer::imageGeode(int flip, float sizemul, float zoomin) {
 	//image_image = osgDB::readImageFile(thumbnail_filename);
 	
 	// XS TODO : what's the problem with thumbnail ?
-	thumbnail = (IplImage*)media_cycle->getThumbnailPtr(media_index);
+	//thumbnail = (IplImage*)media_cycle->getThumbnailPtr(media_index);
+	thumbnail = (osg::Image*)media_cycle->getThumbnailPtr(media_index);
+	
 	//ACMedia* med = media_cycle->getLibrary()->getMedia(media_index);//CF
 	//thumbnail = med->getThumbnail();//CF
 
@@ -236,7 +186,8 @@ void ACOsgImageRenderer::imageGeode(int flip, float sizemul, float zoomin) {
 	if (media_type == MEDIA_TYPE_IMAGE)
 	{	
 		if (thumbnail) {
-			image_image = Convert_OpenCV_TO_OSG_IMAGE(thumbnail);
+			//image_image = ACImage::Convert_OpenCV_TO_OSG_IMAGE(thumbnail);
+			image_image = thumbnail;
 		}
 		else {
 			thumbnail_filename = media_cycle->getThumbnailFileName(media_index);//CF instead of node_index

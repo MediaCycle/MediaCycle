@@ -53,7 +53,8 @@ public:
 	void saveACLSpecific(ofstream &library_file);
 	int loadACLSpecific(ifstream &library_file);
 
-	void setThumbnail(IplImage *_thumbnail) { thumbnail = _thumbnail; thumbnail_width = _thumbnail->width; thumbnail_height = _thumbnail->height; }
+	//void setThumbnail(osg::Image* _thumbnail) { thumbnail = _thumbnail; thumbnail_width = _thumbnail->width; thumbnail_height = _thumbnail->height; }
+	void setThumbnail(osg::Image* _thumbnail) { thumbnail = _thumbnail; thumbnail_width = _thumbnail->s(); thumbnail_height = _thumbnail->t(); }
 	// IplImage* getThumbnail() { return thumbnail; }
 	int getThumbnailWidth() {return thumbnail_width;}
 	int getThumbnailHeight() {return thumbnail_height;}
@@ -63,18 +64,20 @@ public:
 	void setData(IplImage* _data);
 	
 	ACMediaData* extractData(std::string fname);
+	
+	osg::Image* Convert_OpenCV_TO_OSG_IMAGE(IplImage* cvImg);
 		
 private:	
-	static const int default_thumbnail_width, default_thumbnail_height;
+	static const int default_thumbnail_width, default_thumbnail_height, default_thumbnail_area;
 	char  *thumbnail_filename;
 	int thumbnail_width, thumbnail_height; 
-	IplImage *thumbnail;
+	osg::Image* thumbnail;
 	
 	int computeThumbnail(string _fname, int w=0, int h=0);
 	int computeThumbnail(ACMediaData* data_ptr, int w=0, int h=0);
 	int checkWidth(int w);
 	int checkHeight(int h);
-
+	void computeThumbnailSize();
 };
 
 #endif//CF APPLE_IOS

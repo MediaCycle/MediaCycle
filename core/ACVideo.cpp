@@ -40,6 +40,11 @@
 #include <fstream>
 using namespace std;
 
+// ----------- class constants
+const int ACVideo:: default_thumbnail_width = 64;
+const int ACVideo:: default_thumbnail_height = 64;
+const int ACVideo:: default_thumbnail_area = 4096;
+
 ACVideo::ACVideo() : ACMedia() {
 	media_type = MEDIA_TYPE_VIDEO;
 	thumbnail = 0;
@@ -60,13 +65,9 @@ ACVideo::ACVideo(const ACVideo& m) : ACMedia(m) {
 }	
 
 int ACVideo::computeThumbnail(ACMediaData* data_ptr, int w, int h){
-	if (w <=0 || h <=0){
-		cerr << "<ACImage::computeThumbnail> dimensions should be positive: " << w << " x " << h << endl;
-		return -1;
-	}
-	
+	this->computeThumbnailSize();
 	CvCapture* capture = data_ptr->getVideoData();
-	
+		
 	// take thumbnail in the middle of the video...
 	int nframes = (int) cvGetCaptureProperty(capture,  CV_CAP_PROP_FRAME_COUNT);
 	cvSetCaptureProperty(capture, CV_CAP_PROP_POS_FRAMES, nframes/2); 	
@@ -84,20 +85,18 @@ int ACVideo::computeThumbnail(ACMediaData* data_ptr, int w, int h){
 		cerr << "<ACVideo::computeThumbnail> problem creating thumbnail" << endl;
 		return -1;
 	}
-	thumbnail_width = w;
-	thumbnail_height = h;
-	
 	return 1;
 }
 
 ACMediaData* ACVideo::extractData(string _fname){
 	// XS todo : store the default header (16 below) size somewhere...
 	ACMediaData* video_data = new ACMediaData(MEDIA_TYPE_VIDEO,_fname);
-	computeThumbnail(video_data, 16, 16);
-	width = thumbnail_width;
-	height = thumbnail_height;
-
 	CvCapture* capture = video_data->getVideoData();
+	width = (int) cvGetCaptureProperty(capture, CV_CAP_PROP_FRAME_WIDTH);
+	height = (int) cvGetCaptureProperty(capture, CV_CAP_PROP_FRAME_HEIGHT);
+	this->computeThumbnailSize();
+	computeThumbnail(video_data, 16, 16);
+
 	int fps     = (int) cvGetCaptureProperty(capture, CV_CAP_PROP_FPS);
 	int nframes = (int) cvGetCaptureProperty(capture,  CV_CAP_PROP_FRAME_COUNT);
 	
@@ -117,6 +116,7 @@ void ACVideo::setData(CvCapture* _data){
 	
 	width = (int) cvGetCaptureProperty(_data, CV_CAP_PROP_FRAME_WIDTH);
 	height = (int) cvGetCaptureProperty(_data, CV_CAP_PROP_FRAME_HEIGHT);
+	this->computeThumbnailSize();
 	
 	int fps     = (int) cvGetCaptureProperty(_data, CV_CAP_PROP_FPS);
 	int nframes = (int) cvGetCaptureProperty(_data,  CV_CAP_PROP_FRAME_COUNT);
@@ -142,7 +142,28 @@ int ACVideo::loadACLSpecific(ifstream &library_file) {
 	int n_features = 0;
 	library_file >> n_features; 
 
+	// Old bug with image size set to thumbnail size
+	if ((width == 16)&&(height == 16)){
+		CvCapture* tmp = cvCreateFileCapture(filename.c_str());	
+		width = (int) cvGetCaptureProperty(tmp, CV_CAP_PROP_FRAME_WIDTH);
+		height = (int) cvGetCaptureProperty(tmp, CV_CAP_PROP_FRAME_HEIGHT);
+		cvReleaseCapture(&tmp);
+		if ((width != 16)&&(height != 16))// if the image size isn't actually 64x64
+			std::cout << "Please re-save your ACL library, old format with corrupted video size." << std::endl;
+	}
+	this->computeThumbnailSize();
 	return 1;
+}
+
+void ACVideo::computeThumbnailSize(){
+	if ((width !=0) && (height!=0)){
+		float scale = sqrt((float)default_thumbnail_area/((float)width*(float)height));
+		thumbnail_width = (int)(width*scale);
+		thumbnail_height = (int)(height*scale);
+	}
+	else {
+		std::cerr << "Video dimensions not set." << std::endl;
+	}
 }
 
 /*

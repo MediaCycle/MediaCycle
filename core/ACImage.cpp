@@ -44,9 +44,9 @@ using std::ofstream;
 using std::ifstream;
 
 // ----------- class constants
-const int ACImage:: default_thumbnail_width = 64;
-const int ACImage:: default_thumbnail_height = 64;
-
+const int ACImage:: default_thumbnail_width = 128;
+const int ACImage:: default_thumbnail_height = 128;
+const int ACImage:: default_thumbnail_area = 16384;
 
 //------------------------------------------------------------------
 
@@ -59,44 +59,103 @@ ACImage::ACImage() : ACMedia() {
 
 ACImage::~ACImage() {
 	if (thumbnail) {
-		cvReleaseImage(&thumbnail);
+		//cvReleaseImage(&thumbnail);
 		thumbnail = 0;
 	}
+}
+
+osg::Image* ACImage::Convert_OpenCV_TO_OSG_IMAGE(IplImage* cvImg)
+{
+	
+	// XS uncomment the following 4 lines for visual debug (e.g., thumbnail)	
+	//	cvNamedWindow("T", CV_WINDOW_AUTOSIZE);
+	//	cvShowImage("T", cvImg);
+	//	cvWaitKey(0);
+	//	cvDestroyWindow("T");	
+	
+	
+	if(cvImg->nChannels == 3)
+	{
+		// Flip image from top-left to bottom-left origin
+		if(cvImg->origin == 0) {
+			cvConvertImage(cvImg , cvImg, CV_CVTIMG_FLIP);
+			cvImg->origin = 1;
+		}
+		
+		// Convert from BGR to RGB color format
+		//printf("Color format %s\n",cvImg->colorModel);
+		if ( !strcmp(cvImg->channelSeq,"BGR") ) {
+			cvCvtColor( cvImg, cvImg, CV_BGR2RGB );
+		}
+		
+		osg::Image* osgImg = new osg::Image();
+		
+		/*temp_data = new unsigned char[cvImg->width * cvImg->height * cvImg->nChannels];
+		 for (i=0;i<cvImg->height;i++) {
+		 memcpy( (char*)temp_data + i*cvImg->width*cvImg->nChannels, (char*)(cvImg->imageData) + i*(cvImg->widthStep), cvImg->width*cvImg->nChannels);
+		 }*/
+		
+		osgImg->setImage(
+						 cvImg->width, //s
+						 cvImg->height, //t
+						 1, //r //CF needs to be 1 otherwise scaleImage can't be used
+						 3, //GLint internalTextureformat, (GL_LINE_STRIP, 0x0003)
+						 6407, // GLenum pixelFormat, (GL_RGB, 0x1907)
+						 5121, // GLenum type, (GL_UNSIGNED_BYTE, 0x1401)
+						 (unsigned char*)(cvImg->imageData), // unsigned char* data
+						 //temp_data,
+						 osg::Image::NO_DELETE, // AllocationMode mode (shallow copy)
+						 1);//int packing=1); (???)
+		
+		//printf("Conversion completed\n");
+		return osgImg;
+	}
+	// XS TODO : what happens with BW images ?
+	else {
+		printf("Unrecognized image type");
+		return 0;
+	}
+	
 }
 
 // XS: when we load from file, there is no need to have a pointer to the data passed to the plugin
 // XS TODO check this; could combine the following 2 methods...
 int ACImage::computeThumbnail(string _fname, int w, int h){
-	thumbnail_width = this->checkWidth(w);
-	thumbnail_height = this->checkHeight(h);
+	this->computeThumbnailSize();
 
-	IplImage* imgp_full = cvLoadImage(_fname.c_str(), CV_LOAD_IMAGE_COLOR);	
-	thumbnail = cvCreateImage(cvSize (thumbnail_width, thumbnail_height), imgp_full->depth, imgp_full->nChannels);
-	cvResize(imgp_full, thumbnail, CV_INTER_CUBIC);
+	IplImage* cvImg = cvLoadImage(_fname.c_str(), CV_LOAD_IMAGE_COLOR);	
+	/*thumbnail = cvCreateImage(cvSize (thumbnail_width, thumbnail_height), imgp_full->depth, imgp_full->nChannels);
+	cvResize(imgp_full, thumbnail, CV_INTER_CUBIC);*/
+	
+	thumbnail = Convert_OpenCV_TO_OSG_IMAGE(cvImg);
+	thumbnail->scaleImage(thumbnail_width,thumbnail_height, 1);
 	
 	if (!thumbnail){
 		cerr << "<ACImage::computeThumbnail> problem creating thumbnail" << endl;
 		return -1;
 	}
-	cvReleaseImage(&imgp_full); // because  cvLoadImage == new()
+	//cvReleaseImage(&cvImg); // because  cvLoadImage == new()
 	return 1;
 }
 
 
 int ACImage::computeThumbnail(ACMediaData* data_ptr, int w, int h){
-	thumbnail_width = this->checkWidth(w);
-	thumbnail_height = this->checkHeight(h);
+	this->computeThumbnailSize();
 
-	IplImage* imgp_full = data_ptr->getImageData();
-	thumbnail = cvCreateImage(cvSize (thumbnail_width, thumbnail_height), imgp_full->depth, imgp_full->nChannels);
+	IplImage* cvImg = data_ptr->getImageData();
+	/*thumbnail = cvCreateImage(cvSize (thumbnail_width, thumbnail_height), imgp_full->depth, imgp_full->nChannels);
 	cvResize(imgp_full, thumbnail, CV_INTER_CUBIC);
-
+*/
+	
+	thumbnail = Convert_OpenCV_TO_OSG_IMAGE(cvImg);
+	thumbnail->scaleImage(thumbnail_width,thumbnail_height, 1);
+	
 	if (!thumbnail){
 		cerr << "<ACImage::computeThumbnail> problem creating thumbnail" << endl;
 		return -1;
 	}
 
-	// *NOT* cvReleaseImage(&imgp_full); // because there is no new, we just access data_ptr->getImageData();
+	// *NOT* cvReleaseImage(&cvImg); // because there is no new, we just access data_ptr->getImageData();
 	return 1;
 }
 
@@ -124,13 +183,25 @@ int ACImage::checkHeight(int h){
 	return h;
 }
 
+void ACImage::computeThumbnailSize(){
+	if ((width !=0) && (height!=0)){
+		float scale = sqrt((float)default_thumbnail_area/((float)width*(float)height));
+		thumbnail_width = (int)(width*scale);
+		thumbnail_height = (int)(height*scale);
+	}
+	else {
+		std::cerr << "Image dimensions not set." << std::endl;
+	}
+}	
+
 // returns a pointer to the data contained in the image
 // AND computes a thumbnail at the same time.
 ACMediaData* ACImage::extractData(string fname){
 	ACMediaData* image_data = new ACMediaData(MEDIA_TYPE_IMAGE,fname);
+	width = image_data->getImageData()->width;
+	height = image_data->getImageData()->height;
+	this->computeThumbnailSize();
 	computeThumbnail(image_data, thumbnail_width , thumbnail_height);
-	width = thumbnail_width;
-	height = thumbnail_height;
 	return image_data;
 }
 
@@ -142,6 +213,7 @@ void ACImage::setData(IplImage* _data){
 	data->setImageData(_data);
 	this->height = _data->height;
 	this->width = _data->width;
+	this->computeThumbnailSize();
 }
 
 void ACImage::saveACLSpecific(ofstream &library_file) {
@@ -154,11 +226,21 @@ int ACImage::loadACLSpecific(ifstream &library_file) {
 	library_file >> width;
 	library_file >> height;
 	
+	// Old bug with image size set to thumbnail size
+	if ((width == 64)&&(height == 64)){
+		IplImage* tmp = cvLoadImage(filename.c_str(), CV_LOAD_IMAGE_COLOR);	
+		width=tmp->width;
+		height=tmp->height;
+		cvReleaseImage(&tmp);
+		if ((width != 64)&&(height != 64))// if the image size isn't actually 64x64
+			std::cout << "Please re-save your ACL library, old format with corrupted image size." << std::endl;
+	}
+
+	this->computeThumbnailSize();
 	if (computeThumbnail(filename, height, width) != 1){
 		cerr << "<ACImage::loadACLSpecific> : problem computing thumbnail" << endl;
 		return 0;
 	}
-	
 	return 1;
 }
 #endif//CF APPLE_IOS APPLE_IOS

@@ -62,12 +62,14 @@ public:
 	
 	ACMediaData* extractData(std::string fname);
 	
-private:	
+private:
+	static const int default_thumbnail_width, default_thumbnail_height, default_thumbnail_area;
 	char  *thumbnail_filename;
 	int thumbnail_width, thumbnail_height;
 	IplImage *thumbnail;
 	
 	int computeThumbnail(ACMediaData* data_ptr, int w=0, int h=0);
+	void computeThumbnailSize();
 };
 #endif//CF APPLE_IOS
 #endif // ACVIDEO_H

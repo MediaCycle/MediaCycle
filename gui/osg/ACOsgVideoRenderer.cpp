@@ -84,8 +84,6 @@ void ACOsgVideoRenderer::prepareNodes() {
 	image_stream = dynamic_cast<osg::ImageStream*>(image_image);
 	image_stream->setLoopingMode(ImageStream::LOOPING);
 	
-	std::cout << "Image valid? " << image_image->valid() << " and stream valid? " << image_stream->valid() << std::endl;
-	
 	//CF hack to make the first frame appear, the test might not be accurate
 	st = getTime();
 	// version 1, done while preparing nodes, maybe more blocking for the GUI
@@ -95,7 +93,7 @@ void ACOsgVideoRenderer::prepareNodes() {
 	image_stream->pause();
 	image_stream->rewind();
 	double en = getTime();
-	std::cout << "Refresh time: " << en-st << std::endl;
+	//std::cout << "Refresh time: " << en-st << std::endl;
 	// version 2, done thru updating nodes, maybe less precise
 	/*initializing = true;
 	image_stream->play();*/
@@ -115,14 +113,12 @@ void ACOsgVideoRenderer::updateNodes(double ratio) {
 			image_stream->pause();
 			image_stream->rewind();
 			double en = getTime();
-			std::cout << "Refresh time: " << en-st << std::endl;
+			//std::cout << "Refresh time: " << en-st << std::endl;
 			initializing = false;
 		}
 	}	
 	else{
 		const ACMediaNode &attribute = media_cycle->getMediaNode(node_index);
-		
-		//std::cout << "Image translucent? " << image_image->isImageTranslucent() << std::endl;
 		
 		osg::ImageStream::StreamStatus streamStatus = image_stream->getStatus();
 		
