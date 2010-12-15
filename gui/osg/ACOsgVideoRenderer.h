@@ -41,11 +41,14 @@
 #include "ACOsgBrowserRenderer.h"
 #include "ACOsgImageRenderer.h"
 
+#include <osg/ImageSequence>
+
 using namespace std;
 using namespace osg;
 
 class ACOsgVideoRenderer : public ACOsgImageRenderer  {
 protected:
+	//ImageSequence* image_stream;
 	ImageStream* image_stream;
 	
 public:
@@ -53,6 +56,9 @@ public:
 	~ACOsgVideoRenderer();
 	void prepareNodes();
 	void updateNodes(double ratio=0.0);
+private:
+	bool initializing;
+	double st;
 };
 
 #endif//CF APPLE_IOS

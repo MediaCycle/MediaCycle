@@ -204,6 +204,7 @@ void ACOsgImageRenderer::imageGeode(int flip, float sizemul, float zoomin) {
 	state->setMode(GL_LIGHTING, osg::StateAttribute::PROTECTED | osg::StateAttribute::OFF );
 	state->setMode(GL_BLEND, StateAttribute::ON);
 	state->setMode(GL_LINE_SMOOTH, StateAttribute::ON);
+	//state->setRenderingHint(osg::StateSet::TRANSPARENT_BIN); //CF from OSG's examples/osgmovie.cpp, doesn't solve the transparent first frame for video geodes
 	
 	// Texture Coordinates
 	texcoord = new Vec2Array;
@@ -276,7 +277,8 @@ void ACOsgImageRenderer::imageGeode(int flip, float sizemul, float zoomin) {
 	state = image_geometry->getOrCreateStateSet();
 	state->setTextureAttribute(0, image_texture);
 	state->setTextureMode(0, GL_TEXTURE_2D, osg::StateAttribute::ON);
-	
+	//state->setRenderingHint(osg::StateSet::TRANSPARENT_BIN); //CF from OSG's examples/osgmovie.cpp, doesn't solve the transparent first frame for video geodes
+		
 	image_geometry->setColorArray(colors);
 	image_geometry->setColorBinding(Geometry::BIND_OVERALL);
 	

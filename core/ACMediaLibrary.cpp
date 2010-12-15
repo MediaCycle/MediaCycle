@@ -205,7 +205,7 @@ int ACMediaLibrary::importFile(std::string _filename, ACPluginManager *acpl, boo
 			if(videoStreams == 0)
 				std::cout << "Didn't find any video stream." << std::endl;
 			else
-				std::cout << "Found " << videoStreams << " video streams." << std::endl;
+				std::cout << "Found " << videoStreams << " video stream(s)." << std::endl;
 			
 			// Count audio streams
 			audioStreams=0;
@@ -215,7 +215,7 @@ int ACMediaLibrary::importFile(std::string _filename, ACPluginManager *acpl, boo
 			if(audioStreams == 0)
 				std::cout << "Didn't find any audio stream" << std::endl;
 			else
-				std::cout << "Found " << audioStreams << " audio streams." << std::endl;	
+				std::cout << "Found " << audioStreams << " audio stream(s)." << std::endl;	
 		}
 	}
 	

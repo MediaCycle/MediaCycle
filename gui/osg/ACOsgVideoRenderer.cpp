@@ -37,13 +37,41 @@
 
 #if !defined (APPLE_IOS)
 
+static double getTime()
+{
+    struct timeval tv = {0, 0};
+    struct timezone tz = {0, 0};
+    
+    gettimeofday(&tv, &tz);
+    
+    return (double)tv.tv_sec + tv.tv_usec / 1000000.0;
+}
+
+
 ACOsgVideoRenderer::ACOsgVideoRenderer() {
 	
 	image_stream = 0;
+	initializing = false;
+	st = 0.0f;
 }
 
 ACOsgVideoRenderer::~ACOsgVideoRenderer() {
-	
+	osg::ImageStream::StreamStatus streamStatus = image_stream->getStatus();
+	switch (streamStatus) {
+		case osg::ImageStream::INVALID:
+			//std::cout << "Image stream invalid status" << std::endl;
+			break;
+		case osg::ImageStream::PLAYING:
+			image_stream->pause();
+			break;
+		case osg::ImageStream::PAUSED:
+			break;
+		case osg::ImageStream::REWINDING:
+			//std::cout << "Image stream rewinding" << std::endl;
+			break;
+		default:
+			break;
+	}
 }
 
 void ACOsgVideoRenderer::prepareNodes() {
@@ -53,30 +81,69 @@ void ACOsgVideoRenderer::prepareNodes() {
 	imageGeode(1, 2.0, 1.0); // 1 is for flip -- necessary for video
 	
 	media_node->addChild(image_transform);
-	
 	image_stream = dynamic_cast<osg::ImageStream*>(image_image);
 	image_stream->setLoopingMode(ImageStream::LOOPING);
 	
-	reference_time = image_stream->getReferenceTime();
-	reference_time = 5; //30.0;
-	image_stream->setReferenceTime(reference_time);
+	std::cout << "Image valid? " << image_image->valid() << " and stream valid? " << image_stream->valid() << std::endl;
 	
-	time_multiplier = image_stream->getTimeMultiplier();
-	image_stream->setTimeMultiplier(time_multiplier);
- 
+	//CF hack to make the first frame appear, the test might not be accurate
+	st = getTime();
+	// version 1, done while preparing nodes, maybe more blocking for the GUI
+	initializing = false;
+	while (image_image->isImageTranslucent())
+		image_stream->play();
+	image_stream->pause();
+	image_stream->rewind();
+	double en = getTime();
+	std::cout << "Refresh time: " << en-st << std::endl;
+	// version 2, done thru updating nodes, maybe less precise
+	/*initializing = true;
+	image_stream->play();*/
+	//hack end	
+
+	/*std::cout << "Reference time: "<<image_stream->getReferenceTime()<<std::endl;
+	std::cout << "Time multiplier: "<<image_stream->getTimeMultiplier()<<std::endl;
+	std::cout << "Image stream length " << image_stream->getLength() << std::endl;*/
 }
 
 void ACOsgVideoRenderer::updateNodes(double ratio) {
 		
 	ACOsgImageRenderer::updateNodes();
 
-	const ACMediaNode &attribute = media_cycle->getMediaNode(node_index);
-	
-	if (attribute.getActivity()==1) {
-		image_stream->play();
-	}
-	else {
-		image_stream->pause();
-	}
+	if (initializing){
+		if (!(image_image->isImageTranslucent())){
+			image_stream->pause();
+			image_stream->rewind();
+			double en = getTime();
+			std::cout << "Refresh time: " << en-st << std::endl;
+			initializing = false;
+		}
+	}	
+	else{
+		const ACMediaNode &attribute = media_cycle->getMediaNode(node_index);
+		
+		//std::cout << "Image translucent? " << image_image->isImageTranslucent() << std::endl;
+		
+		osg::ImageStream::StreamStatus streamStatus = image_stream->getStatus();
+		
+		switch (streamStatus) {
+			case osg::ImageStream::INVALID:
+				std::cout << "Image stream invalid status" << std::endl;
+				break;
+			case osg::ImageStream::PLAYING:
+				if (attribute.getActivity()==0)
+					image_stream->pause();
+				break;
+			case osg::ImageStream::PAUSED:
+				if (attribute.getActivity()==1)
+					image_stream->play();
+				break;
+			case osg::ImageStream::REWINDING:
+				std::cout << "Image stream rewinding" << std::endl;
+				break;
+			default:
+				break;
+		}
+	}	
 }
 #endif//CF APPLE_IOS
