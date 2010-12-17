@@ -82,6 +82,7 @@ protected:
 	vector<ACOsgTrackRenderer*>  track_renderer;
 	vector<float>				 distance_mouse;
 	int screen_width;
+	float height,width;
 
 public:
 	ACOsgTimelineRenderer();
@@ -90,13 +91,17 @@ public:
 	void setMediaCycle(MediaCycle *media_cycle) { this->media_cycle = media_cycle; };
 	Group *getShapes() 	{ return group.get(); };
 	ACOsgTrackRenderer* getTrack(int number){if ( (number>=0) && (number<track_renderer.size()) ) return track_renderer[number];}
-	//bool addTrack(int position,ACMediaType media_type = -1);
+	bool addTrack(int media_index);
+	int getNumberOfTracks(){return track_renderer.size();}
 	
 	void prepareTracks(int start=0);
 	void updateTracks(double ratio=0.0);
 	void setScreenWidth(int _screen_width){screen_width = _screen_width;}
+	//void setHeight(float _height){height = _height;}
 	void updateScreenWidth(int _screen_width);
-
+	void updateSize(float _width,float _height);
+	void setSize(int _width,float _height){width = _width;height = _height;}
+	
 	int computeScreenCoordinates(osgViewer::View* view, double ratio=0.0); //CF: use osgViewer::Viewer* for simple Viewers
 	vector<float> getDistanceMouse() { return distance_mouse; };
 };

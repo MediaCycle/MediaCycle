@@ -36,6 +36,7 @@
 #if !defined (APPLE_IOS)
 
 #include "ACOsgImageRenderer.h"
+#include "ACVideo.h"
 
 #define IMAGE_BORDER
 
@@ -77,7 +78,7 @@ ACOsgImageRenderer::~ACOsgImageRenderer() {
 	//if (image_image) { delete image_image->data(); }
 }
 
-void ACOsgImageRenderer::imageGeode(int flip, float sizemul, float zoomin) {
+void ACOsgImageRenderer::imageGeode(bool flip, float sizemul, float zoomin) {
 	
 	int i;
 	
@@ -175,16 +176,12 @@ void ACOsgImageRenderer::imageGeode(int flip, float sizemul, float zoomin) {
 	//thumbnail_filename = media_cycle->getMediaFileName(media_index);//CF instead of node_index
 	//image_image = osgDB::readImageFile(thumbnail_filename);
 	
-	// XS TODO : what's the problem with thumbnail ?
-	//thumbnail = (IplImage*)media_cycle->getThumbnailPtr(media_index);
-	thumbnail = (osg::Image*)media_cycle->getThumbnailPtr(media_index);
-	
-	//ACMedia* med = media_cycle->getLibrary()->getMedia(media_index);//CF
-	//thumbnail = med->getThumbnail();//CF
-
 	ACMediaType media_type = media_cycle->getLibrary()->getMedia(media_index)->getType();
 	if (media_type == MEDIA_TYPE_IMAGE)
 	{	
+		// XS TODO : what's the problem with thumbnail ?
+		thumbnail = (osg::Image*)media_cycle->getThumbnailPtr(media_index);
+		
 		if (thumbnail) {
 			//image_image = ACImage::Convert_OpenCV_TO_OSG_IMAGE(thumbnail);
 			image_image = thumbnail;
@@ -193,37 +190,15 @@ void ACOsgImageRenderer::imageGeode(int flip, float sizemul, float zoomin) {
 			thumbnail_filename = media_cycle->getThumbnailFileName(media_index);//CF instead of node_index
 			image_image = osgDB::readImageFile(thumbnail_filename);
 		}
+		image_texture = new Texture2D;
+		image_texture->setImage(image_image);
+		
 	}
 	else if (media_type == MEDIA_TYPE_VIDEO)
 	{
-		//std::cout << osgDB::listAllAvailablePlugins() << std::endl;  	
-		
-		//CF forcing to load the OSG FFMpeg plugin, this should be done elsewhere at app launch time
-//		std::cout <<"ACOsgImageRenderer::imageGeode: current media type: " << media_cycle->getLibrary()->getMedia(media_index)->getType() << std::endl;
-//		std::string libName = osgDB::Registry::instance()->createLibraryNameForExtension("qt"); 
-//		
-//		osgDB::Registry::LoadStatus ffmpegStatus = osgDB::Registry::instance()->loadLibrary(libName);
-//		//NOT_LOADED, PREVIOUSLY_LOADED, LOADED 
-//		std::cout << "FFMpeg library status; "<< ffmpegStatus << std::endl;
-//		//osgDB::Registry::instance()->getLibrary(libName);
-//		
-//		osgDB::Registry::ReaderWriterList readerWriterList = osgDB::Registry::instance()->getReaderWriterList();
-//		//osgDB::Registry::ReaderWriterList::iterator rWLIt;
-//		//rWLIt = readerWriterList.begin();
-//		
-//		std::cout << "List of supported extensions: " << std::endl;
-//		for (int r=0; r<readerWriterList.size();r++)
-//		{
-//			osgDB::ReaderWriter::FormatDescriptionMap fDM = readerWriterList[r]->supportedExtensions();
-//			//for (int f=0; f<fDM.size();f++)
-//			//	std::cout << fDM[f] << std::endl;
-//		}	
-		
-		image_image = osgDB::readImageFile(media_cycle_filename);
+		image_texture = (osg::Texture2D*)(media_cycle->getLibrary()->getMedia(media_index)->getThumbnailPtr());		
 	}
 
-	image_texture = new Texture2D;
-	image_texture->setImage(image_image);
 	//image_texture->setUnRefImageDataAfterApply(true);
 	state = image_geometry->getOrCreateStateSet();
 	state->setTextureAttribute(0, image_texture);
@@ -282,8 +257,10 @@ void ACOsgImageRenderer::imageGeode(int flip, float sizemul, float zoomin) {
 	//sprintf(name, "some audio element");
 	image_geode->setUserData(new ACRefId(node_index));
 	//waveform_geode->setName(name);
+#ifdef IMAGE_BORDER	
 	image_geode->ref();	
-	border_geode->ref();	
+	border_geode->ref();
+#endif	
 }
 
 void ACOsgImageRenderer::prepareNodes() {

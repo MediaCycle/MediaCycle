@@ -70,7 +70,9 @@ protected:
 	bool media_from_lib;
 	bool media_changed;
 	int screen_width;
+	float width,height;
 	bool screen_width_changed;
+	bool width_changed,height_changed;
 	float selection_begin_pos,selection_end_pos;
 	bool selection_begin_pos_changed,selection_end_pos_changed;
 	int displayed_media_index;
@@ -95,6 +97,8 @@ public:
 	void clearMedia();
 	void setScreenWidth(int _screen_width){screen_width = _screen_width;}
 	void updateScreenWidth(int _screen_width);
+	void setSize(int _width,float _height){width = _width;height = _height;}
+	void updateSize(int _width,float _height);
 	ACMedia* getMedia(){return media;}
 	void setDistanceMouse(float _distance_mouse) { this->distance_mouse = _distance_mouse; };
 	//void setActivity(int _media_activity) { this->media_activity = _media_activity; }

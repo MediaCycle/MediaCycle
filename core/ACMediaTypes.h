@@ -45,6 +45,7 @@ enum ACMediaType {
 	MEDIA_TYPE_VIDEO,
 	MEDIA_TYPE_3DMODEL,
 	MEDIA_TYPE_TEXT,
+	MEDIA_TYPE_SENSORDATA,
 	MEDIA_TYPE_MIXED,  // for (future...) interface mixing media
 	MEDIA_TYPE_ALL     // for plugins valid for all media
 };

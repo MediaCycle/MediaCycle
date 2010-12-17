@@ -49,6 +49,7 @@ ACAudioCycleOsgQt::ACAudioCycleOsgQt(QWidget *parent)
 {
 	ui.setupUi(this); // first thing to do
 	media_cycle = new MediaCycle(MEDIA_TYPE_AUDIO,"/tmp/","mediacycle.acl");
+	//media_cycle = new MediaCycle(MEDIA_TYPE_VIDEO,"/tmp/","mediacycle.acl");
 	
 	// XS TODO fichier de configuration
 	#if defined(__APPLE__)
@@ -64,7 +65,7 @@ ACAudioCycleOsgQt::ACAudioCycleOsgQt(QWidget *parent)
 			if (acpl) {
 				for (int i=0;i<acpl->getSize();i++) {
 					for (int j=0;j<acpl->getPluginLibrary(i)->getSize();j++) {
-						//if (acpl->getPluginLibrary(i)->getPlugin(j)->getMediaType() == MEDIA_TYPE_AUDIO) {
+						//if (acpl->getPluginLibrary(i)->getPlugin(j)->getMediaType() == media_cycle->getLibrary()->getMediaType()) {
 						if (acpl->getPluginLibrary(i)->getPlugin(j)->getPluginType() == PLUGIN_TYPE_CLUSTERS_METHOD) {
 							//CF on the first detected Clusters Method plugin
 							if (ui.comboBoxClustersMethod->count() == 1 && ui.comboBoxClustersMethod->currentText().toStdString() == "KMeans (default)") {
@@ -108,7 +109,10 @@ ACAudioCycleOsgQt::ACAudioCycleOsgQt(QWidget *parent)
 				}
 			}
 		}
-		media_cycle->addPlugin("../../../plugins/audio/" + build_type + "/mc_audio.dylib");	
+		if (media_cycle->getLibrary()->getMediaType() == MEDIA_TYPE_AUDIO)
+			media_cycle->addPlugin("../../../plugins/audio/" + build_type + "/mc_audio.dylib");	
+		else if  (media_cycle->getLibrary()->getMediaType() == MEDIA_TYPE_VIDEO)
+			media_cycle->addPlugin("../../../plugins/video/" + build_type + "/mc_video.dylib");	
 		media_cycle->addPlugin("../../../plugins/segmentation/" + build_type + "/mc_segmentation.dylib");	
 	#endif
 
@@ -206,9 +210,9 @@ void ACAudioCycleOsgQt::on_pushButtonClean_clicked()
 void ACAudioCycleOsgQt::loadACLFile(){
 	QString fileName;
 	
-	QFileDialog dialog(this,"Open AudioCycle Library File(s)");
+	QFileDialog dialog(this,"Open MediaCycle Library File(s)");
 	dialog.setDefaultSuffix ("acl");
-	dialog.setNameFilter("AudioCycle Library Files (*.acl)");
+	dialog.setNameFilter("MediaCycle Library Files (*.acl)");
 	dialog.setFileMode(QFileDialog::ExistingFile); // change to ExistingFiles for multiple file handling
 	
 	QStringList fileNames;
@@ -275,7 +279,7 @@ void ACAudioCycleOsgQt::loadMediaDirectory(){
 
 void ACAudioCycleOsgQt::loadMediaFiles(){
 	QString fileName;
-	QFileDialog dialog(this,"Open AudioCycle Media File(s)");
+	QFileDialog dialog(this,"Open MediaCycle Media File(s)");
 	//CF generating supported file extensions from used media I/O libraries and current media type:
 	std::vector<std::string> mediaExt = media_cycle->getExtensionsFromMediaType( media_cycle->getLibrary()->getMediaType() );
 	QString mediaExts = "Supported Extensions (";
@@ -326,11 +330,11 @@ void ACAudioCycleOsgQt::configureCheckBoxes(){
 	if (acpl) {
 		for (int i=0;i<acpl->getSize();i++) {
 			for (int j=0;j<acpl->getPluginLibrary(i)->getSize();j++) {
-				if (acpl->getPluginLibrary(i)->getPlugin(j)->getPluginType() == PLUGIN_TYPE_FEATURES && acpl->getPluginLibrary(i)->getPlugin(j)->getMediaType() == MEDIA_TYPE_AUDIO) {
+				if (acpl->getPluginLibrary(i)->getPlugin(j)->getPluginType() == PLUGIN_TYPE_FEATURES && acpl->getPluginLibrary(i)->getPlugin(j)->getMediaType() == media_cycle->getLibrary()->getMediaType()) {
 					QString s(acpl->getPluginLibrary(i)->getPlugin(j)->getName().c_str());
 					QListWidgetItem * item = new QListWidgetItem(s,ui.featuresListWidget);
 					item->setCheckState (Qt::Unchecked);
-					std::cout << "Using audio feature extraction plugin: " << acpl->getPluginLibrary(i)->getPlugin(j)->getName() << std::endl;
+					std::cout << "Using feature extraction plugin: " << acpl->getPluginLibrary(i)->getPlugin(j)->getName() << std::endl;
 				}
 			}
 		}

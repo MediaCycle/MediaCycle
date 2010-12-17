@@ -41,6 +41,9 @@
 #include "ACMedia.h"
 #include <string>
 
+#include <osg/ImageStream>
+#include <osg/Texture2D>
+
 class ACVideo: public ACMedia {
 	// contains the *minimal* information about a video
 public:
@@ -51,11 +54,12 @@ public:
 	void saveACLSpecific(ofstream &library_file);
 	int loadACLSpecific(ifstream &library_file);
 
-	void setThumbnail(IplImage *_thumbnail) { thumbnail = _thumbnail; thumbnail_width = _thumbnail->width; thumbnail_height = _thumbnail->height; }
-	// IplImage* getThumbnail() { return thumbnail; }
-	void* getThumbnailPtr() { return NULL; } // 
+	//void setThumbnail(IplImage *_thumbnail) { thumbnail = _thumbnail; thumbnail_width = _thumbnail->width; thumbnail_height = _thumbnail->height; }
+	osg::Image* getThumbnail() { return thumbnail; }
+	void* getThumbnailPtr() { return (void*)image_texture;}//thumbnail; } // 
 	int getThumbnailWidth() {return thumbnail_width;}
 	int getThumbnailHeight() {return thumbnail_height;}
+	void* getStream() {return(void*) image_stream;}
 
 	CvCapture* getData(){return data->getVideoData();}
 	void setData(CvCapture* _data);
@@ -64,11 +68,12 @@ public:
 	
 private:
 	static const int default_thumbnail_width, default_thumbnail_height, default_thumbnail_area;
-	char  *thumbnail_filename;
 	int thumbnail_width, thumbnail_height;
-	IplImage *thumbnail;
+	osg::ImageStream* image_stream;	
+	osg::Image* thumbnail;
+	osg::Texture2D* image_texture;
 	
-	int computeThumbnail(ACMediaData* data_ptr, int w=0, int h=0);
+	int computeThumbnail(int w=0, int h=0);
 	void computeThumbnailSize();
 };
 #endif//CF APPLE_IOS

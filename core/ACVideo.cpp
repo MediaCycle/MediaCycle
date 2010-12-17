@@ -35,9 +35,8 @@
 #if !defined (APPLE_IOS)
 
 #include "ACVideo.h"
+#include <iostream>
 
-#include <string>
-#include <fstream>
 using namespace std;
 
 // ----------- class constants
@@ -53,7 +52,25 @@ ACVideo::ACVideo() : ACMedia() {
 }	
 
 ACVideo::~ACVideo() {
-	cvReleaseImage(&thumbnail);
+	//cvReleaseImage(&thumbnail);
+	/*if (image_stream){
+		osg::ImageStream::StreamStatus streamStatus = image_stream->getStatus();
+		switch (streamStatus) {
+			case osg::ImageStream::INVALID:
+				//std::cout << "Image stream invalid status" << std::endl;
+				break;
+			case osg::ImageStream::PLAYING:
+				image_stream->pause();
+				break;
+			case osg::ImageStream::PAUSED:
+				break;
+			case osg::ImageStream::REWINDING:
+				//std::cout << "Image stream rewinding" << std::endl;
+				break;
+			default:
+				break;
+		}
+	}*/	
 }
 
 ACVideo::ACVideo(const ACVideo& m) : ACMedia(m) {
@@ -64,12 +81,12 @@ ACVideo::ACVideo(const ACVideo& m) : ACMedia(m) {
 	// Should I copy the thumbnail ?
 }	
 
-int ACVideo::computeThumbnail(ACMediaData* data_ptr, int w, int h){
+int ACVideo::computeThumbnail(int w, int h){
 	this->computeThumbnailSize();
-	CvCapture* capture = data_ptr->getVideoData();
+	//CvCapture* capture = data_ptr->getVideoData();
 		
 	// take thumbnail in the middle of the video...
-	int nframes = (int) cvGetCaptureProperty(capture,  CV_CAP_PROP_FRAME_COUNT);
+	/*int nframes = (int) cvGetCaptureProperty(capture,  CV_CAP_PROP_FRAME_COUNT);
 	cvSetCaptureProperty(capture, CV_CAP_PROP_POS_FRAMES, nframes/2); 	
 	
 	if(!cvGrabFrame(capture)){
@@ -79,12 +96,30 @@ int ACVideo::computeThumbnail(ACMediaData* data_ptr, int w, int h){
 	
 	//XS use cloneImage, otherwise thumbnail gets destroyed along with cvCapture
 	IplImage* tmp = cvRetrieveFrame(capture);
-	thumbnail = cvCloneImage(tmp);
+	thumbnail = cvCloneImage(tmp);*/
+	
+	// Loading the movie with OSG
+	osg::Image* thumbnail = osgDB::readImageFile(filename);
+	//thumbnail->scaleImage(thumbnail_width,thumbnail_height,1);
+	thumbnail->setAllocationMode(osg::Image::NO_DELETE);
 	
 	if (!thumbnail){
 		cerr << "<ACVideo::computeThumbnail> problem creating thumbnail" << endl;
 		return -1;
 	}
+	
+	// Saving the video as texture for transmission
+	image_texture = new osg::Texture2D;
+	image_texture->setImage(thumbnail);
+	
+	// Converting the video as preloaded stream to transmit the same instance to multiple recipient with unified playback controls
+	image_stream = dynamic_cast<osg::ImageStream*>(thumbnail);
+	image_stream->setLoopingMode(osg::ImageStream::LOOPING);
+	while (thumbnail->isImageTranslucent())
+		image_stream->play();
+	image_stream->pause();
+	image_stream->rewind();
+	
 	return 1;
 }
 
@@ -95,7 +130,7 @@ ACMediaData* ACVideo::extractData(string _fname){
 	width = (int) cvGetCaptureProperty(capture, CV_CAP_PROP_FRAME_WIDTH);
 	height = (int) cvGetCaptureProperty(capture, CV_CAP_PROP_FRAME_HEIGHT);
 	this->computeThumbnailSize();
-	computeThumbnail(video_data, 16, 16);
+	computeThumbnail(16, 16);
 
 	int fps     = (int) cvGetCaptureProperty(capture, CV_CAP_PROP_FPS);
 	int nframes = (int) cvGetCaptureProperty(capture,  CV_CAP_PROP_FRAME_COUNT);
@@ -134,8 +169,9 @@ void ACVideo::saveACLSpecific(ofstream &library_file) {
 }
 
 int ACVideo::loadACLSpecific(ifstream &library_file) {
-
-	library_file >> filename_thumbnail;
+	std::string ghost;//CF somebody please explain me why this is required!
+	getline(library_file, ghost, '\n');//CF somebody please explain me why this is required!
+	getline(library_file, filename_thumbnail, '\n');
 	library_file >> end;
 	library_file >> width;
 	library_file >> height;
@@ -152,6 +188,10 @@ int ACVideo::loadACLSpecific(ifstream &library_file) {
 			std::cout << "Please re-save your ACL library, old format with corrupted video size." << std::endl;
 	}
 	this->computeThumbnailSize();
+	if (computeThumbnail(height, width) != 1){
+		cerr << "<ACVideo::loadACLSpecific> : problem computing thumbnail" << endl;
+		return 0;
+	}
 	return 1;
 }
 
@@ -257,7 +297,7 @@ int ACVideo::load(FILE* library_file) { // was loadLoop
 		ret = fscanf(library_file, "%d", &n_features);
 		
 		thumbnail_height = 180/2;
-		thumbnail_width = 320/2;
+		 _width = 320/2;
 		width = 320/2;
 		height = 180/2;	
 

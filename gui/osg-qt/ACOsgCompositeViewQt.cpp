@@ -145,35 +145,36 @@ void ACOsgCompositeViewQt::setMediaCycle(MediaCycle* _media_cycle)
 	timeline_controls_view->getCamera()->setViewMatrixAsLookAt(Vec3(0,0,0.8), Vec3(0,0,0), Vec3(0,1,0));
 	this->addView(timeline_controls_view);
 	
+	timeline_renderer->updateSize(width(),sepy);
 }
 
 void ACOsgCompositeViewQt::initializeGL()
-{/*
-	if (getGraphicsWindow()->isRealized()) {
-		
+{
+	/*if (getGraphicsWindow()->isRealized()) {
 		unsigned int _screen_width, _screen_height;
 		if ( screen_width != _screen_width){
 			_screen_width = timeline_view->getCamera()->getGraphicsContext()->getTraits()->width;
 			std::cout << "Initial width: " << _screen_width << std::endl;
 			//this->screen_width = _screen_width;
 			//timeline_renderer->updateScreenWidth(_screen_width);
-		}	
+		}
 	}*/
 }
 
-void ACOsgCompositeViewQt::resizeGL( int width, int height )
+void ACOsgCompositeViewQt::resizeGL( int w, int h )
 {
 	//std::cout << "height() " << browser_view->getCamera()->getViewport()->height()+timeline_view->getCamera()->getViewport()->height() << " height " << height << std::endl;
 	float prevheight = browser_view->getCamera()->getViewport()->height()+timeline_view->getCamera()->getViewport()->height();
-	sepy *= height/prevheight;
+	sepy *= h/prevheight;
+	timeline_renderer->updateSize(width(),sepy);
 	
-	osg_view->getEventQueue()->windowResize(0, 0, width, height );
-	osg_view->resized(0,0,width,height);
+	osg_view->getEventQueue()->windowResize(0, 0, w, h);
+	osg_view->resized(0,0,w,h);
 		
-	browser_view->getCamera()->setViewport(new osg::Viewport(0,sepy,width,height-sepy));
-	browser_view->getCamera()->setProjectionMatrixAsPerspective(45.0f, static_cast<double>(width)/static_cast<double>(height-sepy), 0.001f, 10.0f);
+	browser_view->getCamera()->setViewport(new osg::Viewport(0,sepy,w,h-sepy));
+	browser_view->getCamera()->setProjectionMatrixAsPerspective(45.0f, static_cast<double>(w)/static_cast<double>(h-sepy), 0.001f, 10.0f);
 
-	timeline_view->getCamera()->setViewport(new osg::Viewport(controls_width,0,width-controls_width,sepy));
+	timeline_view->getCamera()->setViewport(new osg::Viewport(controls_width,0,w-controls_width,sepy));
 	//perspect
 	timeline_view->getCamera()->setProjectionMatrixAsPerspective(45.0f, 1.0f, 0.001f, 10.0f);//static_cast<double>(width())/static_cast<double>(sepy), 0.001f, 10.0f);}
 	//orth2D
@@ -249,7 +250,6 @@ void ACOsgCompositeViewQt::updateGL()
 		 */
 		timeline_controls_view->getCamera()->setViewport(new osg::Viewport(0,0,controls_width,sepy));
 		timeline_controls_view->getCamera()->setProjectionMatrixAsPerspective(45.0f, 1.0f, 0.001f, 10.0f);//static_cast<double>(width())/static_cast<double>(sepy), 0.001f, 10.0f);
-		
 	}
 	
 	this->updateTransformsFromBrowser(frac);
@@ -386,6 +386,7 @@ void ACOsgCompositeViewQt::mouseMoveEvent( QMouseEvent* event )
 				else if ( y<septhick )
 					sepy = height()-septhick;
 			}
+			timeline_renderer->updateSize(width(),sepy);
 		}
 		else
 		{	
@@ -477,12 +478,15 @@ void ACOsgCompositeViewQt::mouseReleaseEvent( QMouseEvent* event )
 					if (mediaOnTrack != -1)
 						this->getBrowserRenderer()->changeNodeColor(mediaOnTrack, Vec4(1.0,1.0,1.0,1.0));//CF color the node of the media on track in white
 					
-					if ( timeline_renderer->getTrack(0)!=NULL )
-					{
+					
+						
+					/*if ( timeline_renderer->getTrack(0)!=NULL )
+					{*/
 						
 						if (sepy==0)
 						{
 							sepy = height()/4;// CF browser/timeline proportions at startup
+							timeline_renderer->updateSize(width(),sepy);
 							browser_view->getCamera()->setGraphicsContext(this->getGraphicsWindow());
 							browser_view->getCamera()->setViewport(new osg::Viewport(0,sepy,width(),height()-sepy)); // CF: for OSG y=0 is on the bottom, for Qt on the top
 							browser_view->getCamera()->setProjectionMatrixAsPerspective(45.0f, static_cast<double>(width())/static_cast<double>(height()-sepy), 0.001f, 10.0f);
@@ -521,10 +525,14 @@ void ACOsgCompositeViewQt::mouseReleaseEvent( QMouseEvent* event )
 							track_playing = false;
 							}	
 						*/
-						this->getTimelineRenderer()->getTrack(0)->updateMedia( loop ); //media_cycle->getLibrary()->getMedia(loop) );
+						if (timeline_renderer->getNumberOfTracks()==0){
+							this->getTimelineRenderer()->addTrack(loop);
+						}
+						else
+							this->getTimelineRenderer()->getTrack(0)->updateMedia( loop ); //media_cycle->getLibrary()->getMedia(loop) );
 						this->getTimelineControlsRenderer()->getControls(0)->updateMedia( loop ); //media_cycle->getLibrary()->getMedia(loop) );
 						media_cycle->setNeedsDisplay(true);
-					}
+					//}
 				}
 				
 			}

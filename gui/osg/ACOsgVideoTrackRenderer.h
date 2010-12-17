@@ -1,11 +1,11 @@
 /*
- *  ACOsgBrowserRenderer.h
+ *  ACOsgVideoTrackRenderer.h
  *  MediaCycle
  *
- *  @author Stéphane Dupont
- *  @date 24/08/09
+ *  @author Christian Frisson
+ *  @date 13/12/10
  *
- *  @copyright (c) 2009 – UMONS - Numediart
+ *  @copyright (c) 2010 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
  *  licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -33,28 +33,42 @@
  *
  */
 
-#ifndef __ACOSG_VIDEO_RENDERER_H__
-#define __ACOSG_VIDEO_RENDERER_H__
+#ifndef __ACOSG_VIDEO_TRACK_RENDERER_H__
+#define __ACOSG_VIDEO_TRACK_RENDERER_H__
 
 #if !defined (APPLE_IOS)
 
 #include "ACOsgBrowserRenderer.h"
-#include "ACOsgImageRenderer.h"
-#include <osg/ImageSequence>
+//#include "ACOsgImageRenderer.h"
+#include "ACOsgTrackRenderer.h"
 
 using namespace std;
 using namespace osg;
 
-class ACOsgVideoRenderer : public ACOsgImageRenderer  {
+class ACOsgVideoTrackRenderer : public ACOsgTrackRenderer {
 protected:
-	ImageStream* image_stream;
-	ImageSequence* image_sequence;
+	ImageStream* video_stream;
+	
+	float zoom_x, zoom_y, track_left_x;
+	float summary_center_y,summary_height;
+	float playback_center_y,playback_height;
+	
+	static const int NCOLORS ;
+	Vec4Array* colors;
+	Vec4Array* colors2;
+	Vec4Array* colors3;
+	
+	Geode* playback_geode;
+	Geode* border_geode;
+	MatrixTransform* playback_transform;
+	
+	void playbackGeode();
 	
 public:
-	ACOsgVideoRenderer();
-	~ACOsgVideoRenderer();
-	void prepareNodes();
-	void updateNodes(double ratio=0.0);
+	ACOsgVideoTrackRenderer();
+	~ACOsgVideoTrackRenderer();
+	void prepareTracks();
+	void updateTracks(double ratio=0.0);
 };
 
 #endif//CF APPLE_IOS
