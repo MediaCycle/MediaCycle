@@ -61,14 +61,16 @@ void AC3DModel::setData(osg::Node* _data)
 	data->set3DModelData(_data);
 }
 
-ACMediaData* AC3DModel::extractData(string fname) {
+//ACMediaData* AC3DModel::extractData(string fname) {
+void AC3DModel::extractData(string fname) {
 	
 	osg::Node* local_model_ptr;
 	osg::ComputeBoundsVisitor cbv;
 	
-	ACMediaData* model_data = new ACMediaData(MEDIA_TYPE_3DMODEL,fname);
+	//ACMediaData* model_data = new ACMediaData(MEDIA_TYPE_3DMODEL,fname);
+	data = new ACMediaData(MEDIA_TYPE_3DMODEL,fname);
 	
-	local_model_ptr = model_data->get3DModelData();
+	local_model_ptr = data->get3DModelData();
 	local_model_ptr->accept( cbv );
 	const osg::BoundingBox bb( cbv.getBoundingBox() );
 	osg::Vec3 ext( bb._max - bb._min );
@@ -79,7 +81,7 @@ ACMediaData* AC3DModel::extractData(string fname) {
 	center[0] = bb.center().x(); center[1] = bb.center().y(); center[2] = bb.center().z();
 	extent[0] = ext.x(); extent[1] = ext.y(); extent[2] = ext.z();
 		
-	return model_data;
+	//return model_data;
 }
 
 void AC3DModel::saveACLSpecific(ofstream &library_file) {

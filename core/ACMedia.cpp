@@ -156,6 +156,7 @@ int ACMedia::loadACL(ifstream &library_file, int mcsl) {
 	}
 	
 	getline(library_file, filename, '\n');
+	//std::cout << "Filename " << filename << std::endl;
 	
 	if (!filename.empty()) {
 		
@@ -243,8 +244,9 @@ int ACMedia::import(std::string _path, int _mid, ACPluginManager *acpl ) {
 	
 	// get info about width, height, thumbnail, ...
 	// and return a pointer to the data
-	ACMediaData* data_ptr = this->extractData(this->getFileName());
-	if (data_ptr==NULL){
+	//ACMediaData* data_ptr = this->extractData(this->getFileName());
+	this->extractData(this->getFileName());
+	if (data==NULL){
 		import_ok = 0;
 		cerr << "<ACMedia::import> failed accessing data for media number: " << _mid << endl;
 		return 0;
@@ -261,7 +263,7 @@ int ACMedia::import(std::string _path, int _mid, ACPluginManager *acpl ) {
 					
 					//vector<ACMediaFeatures*> afv = plugin->calculate(this->getFileName());
 					cout << "Computing features using plugin : " << plugin->getName() << std::endl;
-					vector<ACMediaFeatures*> afv = plugin->calculate(data_ptr, this);
+					vector<ACMediaFeatures*> afv = plugin->calculate(data, this);
 					
 					//another option :
 					//ACMediaFeatures *af = acpl->getPluginLibrary(i)->calculate(j,this->getFileName());
@@ -285,15 +287,17 @@ int ACMedia::import(std::string _path, int _mid, ACPluginManager *acpl ) {
 			}
 		}
 	}
-	delete data_ptr;
+	//delete data_ptr;
+	//delete data;
 	return import_ok;
 }
 
 int ACMedia::segment(ACPluginManager *acpl ) {
 	int import_ok = 1;
 	
-	ACMediaData* data_ptr = this->extractData(this->getFileName());
-	if (data_ptr==NULL){
+	//ACMediaData* data_ptr = this->extractData(this->getFileName());
+	//data = this->extractData(this->getFileName());// done by extractData
+	if (data==NULL){
 		import_ok = 0;
 		cerr << "<ACMedia::import> failed accessing data for media number: " << this->getId() << endl;
 		return 0;
@@ -307,7 +311,7 @@ int ACMedia::segment(ACPluginManager *acpl ) {
 					ACPlugin* plugin =  acpl->getPluginLibrary(i)->getPlugin(j);
 					
 					cout << "Segmenting media using plugin : " << plugin->getName() << std::endl;
-					vector<ACMedia*> afv = plugin->segment(data_ptr, this);
+					vector<ACMedia*> afv = plugin->segment(data, this);
 					
 					if (afv.size()==0){
 						import_ok = 0;
@@ -323,7 +327,7 @@ int ACMedia::segment(ACPluginManager *acpl ) {
 			}
 		}
 	}
-	delete data_ptr;
+	//delete data_ptr;
 	return import_ok;
 }
 

@@ -42,6 +42,8 @@
 #include "ACMedia.h"
 #include <string>
 
+#include <osg/Texture2D>
+
 // -----------------------------------
 
 class ACImage: public ACMedia {
@@ -55,23 +57,26 @@ public:
 
 	//void setThumbnail(osg::Image* _thumbnail) { thumbnail = _thumbnail; thumbnail_width = _thumbnail->width; thumbnail_height = _thumbnail->height; }
 	void setThumbnail(osg::Image* _thumbnail) { thumbnail = _thumbnail; thumbnail_width = _thumbnail->s(); thumbnail_height = _thumbnail->t(); }
-	// IplImage* getThumbnail() { return thumbnail; }
+	osg::Image* getThumbnail() { return thumbnail; }
 	int getThumbnailWidth() {return thumbnail_width;}
 	int getThumbnailHeight() {return thumbnail_height;}
-	void* getThumbnailPtr() { return (void*)thumbnail; }
+	void* getThumbnailPtr() { return (void*)image_texture; }
 	
 	IplImage* getData(){return data->getImageData();}
 	void setData(IplImage* _data);
 	
-	ACMediaData* extractData(std::string fname);
-	
-	osg::Image* Convert_OpenCV_TO_OSG_IMAGE(IplImage* cvImg);
+	//ACMediaData* extractData(std::string fname);
+	void extractData(std::string fname);
+
+	//osg::Image* Convert_OpenCV_TO_OSG_IMAGE(IplImage* cvImg);
+	void Convert_OpenCV_TO_OSG_IMAGE(IplImage* cvImg);
 		
 private:	
 	static const int default_thumbnail_width, default_thumbnail_height, default_thumbnail_area;
 	char  *thumbnail_filename;
 	int thumbnail_width, thumbnail_height; 
 	osg::Image* thumbnail;
+	osg::Texture2D* image_texture;
 	
 	int computeThumbnail(string _fname, int w=0, int h=0);
 	int computeThumbnail(ACMediaData* data_ptr, int w=0, int h=0);

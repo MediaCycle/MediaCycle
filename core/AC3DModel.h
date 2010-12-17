@@ -51,7 +51,8 @@ public:
 	void saveACLSpecific(ofstream &library_file);
 	int loadACLSpecific(ifstream &library_file);
 	
-	ACMediaData* extractData(std::string fname);
+	//ACMediaData* extractData(std::string fname);
+	void extractData(std::string fname);
 	
 	void* getThumbnailPtr() { return 0; }
 	

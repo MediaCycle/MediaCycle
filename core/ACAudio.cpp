@@ -161,7 +161,8 @@ void ACAudio::setData(float* _data,float _sample_number, int _sr,int _channels) 
 	this->end=_sample_number/(float) _sr/(float) _channels;
 }
 
-ACMediaData* ACAudio::extractData(string fname) {
+//ACMediaData* ACAudio::extractData(string fname) {
+void ACAudio::extractData(string fname) {
 	
 	SF_INFO sfinfo;
 	SNDFILE* testFile;
@@ -170,7 +171,7 @@ ACMediaData* ACAudio::extractData(string fname) {
 		printf ("Not able to open input file %s.\n", fname.c_str()) ;
 		/* Print the error message from libsndfile. */
 		puts (sf_strerror (NULL)) ;
-		return  NULL;
+		//return  NULL;
 	}
 	sample_rate = sfinfo.samplerate;
 	channels = sfinfo.channels;
@@ -182,14 +183,15 @@ ACMediaData* ACAudio::extractData(string fname) {
 	std::cout << "Duration of the segment : " << this->getDuration() << std::endl;
 	std::cout << "Number of frame of the segment : " << this->getNFrames() << std::endl;
 // 	sf_readf_float(testFile, data, sfinfo.frames);
-	ACMediaData* audio_data = new ACMediaData(MEDIA_TYPE_AUDIO,fname);
- 	this->computeWaveform(audio_data->getAudioData());
+	//ACMediaData* audio_data = new ACMediaData(MEDIA_TYPE_AUDIO,fname);
+	data = new ACMediaData(MEDIA_TYPE_AUDIO,fname);
+ 	this->computeWaveform(data->getAudioData());
 	sf_close(testFile);/*
 	if(persistent_data){
 		if(!data)
 			data = new ACMediaData(MEDIA_TYPE_AUDIO,fname);
 	}*/
-	return audio_data;
+	//return audio_data;
 }
 
 float* ACAudio::getSamples(){

@@ -64,7 +64,8 @@ public:
 	CvCapture* getData(){return data->getVideoData();}
 	void setData(CvCapture* _data);
 	
-	ACMediaData* extractData(std::string fname);
+	//ACMediaData* extractData(std::string fname);
+	void extractData(std::string fname);
 	
 private:
 	static const int default_thumbnail_width, default_thumbnail_height, default_thumbnail_area;

@@ -118,7 +118,7 @@ void ACOsgImageRenderer::imageGeode(bool flip, float sizemul, float zoomin) {
 	
 	width = media_cycle->getThumbnailWidth(media_index);//CF instead of node_index
 	height = media_cycle->getThumbnailHeight(media_index);//CF instead of node_index
-	std::cout << "Geode with (thumbnail) width " <<  width << " and height " << height << std::endl;
+	//std::cout << "Geode with (thumbnail) width " <<  width << " and height " << height << std::endl;
 	
 	image_transform = new MatrixTransform();
 	
@@ -180,8 +180,8 @@ void ACOsgImageRenderer::imageGeode(bool flip, float sizemul, float zoomin) {
 	if (media_type == MEDIA_TYPE_IMAGE)
 	{	
 		// XS TODO : what's the problem with thumbnail ?
-		thumbnail = (osg::Image*)media_cycle->getThumbnailPtr(media_index);
-		
+		//thumbnail = (osg::Image*)media_cycle->getThumbnailPtr(media_index);
+		/*
 		if (thumbnail) {
 			//image_image = ACImage::Convert_OpenCV_TO_OSG_IMAGE(thumbnail);
 			image_image = thumbnail;
@@ -191,14 +191,15 @@ void ACOsgImageRenderer::imageGeode(bool flip, float sizemul, float zoomin) {
 			image_image = osgDB::readImageFile(thumbnail_filename);
 		}
 		image_texture = new Texture2D;
-		image_texture->setImage(image_image);
-		
+		image_texture->setImage(image_image);*/
+		image_texture = (osg::Texture2D*)(media_cycle->getLibrary()->getMedia(media_index)->getThumbnailPtr());
 	}
 	else if (media_type == MEDIA_TYPE_VIDEO)
 	{
-		image_texture = (osg::Texture2D*)(media_cycle->getLibrary()->getMedia(media_index)->getThumbnailPtr());		
+		image_texture = (osg::Texture2D*)(media_cycle->getLibrary()->getMedia(media_index)->getThumbnailPtr());
 	}
-
+	image_texture->setResizeNonPowerOfTwoHint(false); 
+	
 	//image_texture->setUnRefImageDataAfterApply(true);
 	state = image_geometry->getOrCreateStateSet();
 	state->setTextureAttribute(0, image_texture);

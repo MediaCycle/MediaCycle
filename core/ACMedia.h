@@ -129,7 +129,8 @@ public:
 
 	virtual void saveACLSpecific(std::ofstream &library_file) {}
 	virtual int loadACLSpecific(std::ifstream &library_file) {return -1;}
-	virtual ACMediaData* extractData(std::string filename) {ACMediaData* dummy; return dummy;}
+	//virtual ACMediaData* extractData(std::string filename) {ACMediaData* dummy; return dummy;}
+	virtual void extractData(std::string filename) {}
 	
 	virtual int import(std::string _path, int _mid=0, ACPluginManager *acpl=NULL);
 

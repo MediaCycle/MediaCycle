@@ -98,6 +98,8 @@ int ACVideo::computeThumbnail(int w, int h){
 	IplImage* tmp = cvRetrieveFrame(capture);
 	thumbnail = cvCloneImage(tmp);*/
 	
+	//CF we should compute the following in a separate thread
+	
 	// Loading the movie with OSG
 	osg::Image* thumbnail = osgDB::readImageFile(filename);
 	//thumbnail->scaleImage(thumbnail_width,thumbnail_height,1);
@@ -123,10 +125,12 @@ int ACVideo::computeThumbnail(int w, int h){
 	return 1;
 }
 
-ACMediaData* ACVideo::extractData(string _fname){
+//ACMediaData* ACVideo::extractData(string _fname){
+void ACVideo::extractData(string _fname){
 	// XS todo : store the default header (16 below) size somewhere...
-	ACMediaData* video_data = new ACMediaData(MEDIA_TYPE_VIDEO,_fname);
-	CvCapture* capture = video_data->getVideoData();
+	//ACMediaData* video_data = new ACMediaData(MEDIA_TYPE_VIDEO,_fname);
+	data = new ACMediaData(MEDIA_TYPE_VIDEO,_fname);
+	CvCapture* capture = data->getVideoData();
 	width = (int) cvGetCaptureProperty(capture, CV_CAP_PROP_FRAME_WIDTH);
 	height = (int) cvGetCaptureProperty(capture, CV_CAP_PROP_FRAME_HEIGHT);
 	this->computeThumbnailSize();
@@ -139,7 +143,7 @@ ACMediaData* ACVideo::extractData(string _fname){
 	if (fps != 0) end = nframes * 1.0/fps;
 	else end = nframes;
 
-	return video_data;
+	//return video_data;
 }
 
 void ACVideo::setData(CvCapture* _data){

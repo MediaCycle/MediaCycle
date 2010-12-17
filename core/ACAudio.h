@@ -70,7 +70,8 @@ public:
 	float* getData(){return data->getAudioData();}
 	void setData(float* _data,float _sample_number=0 ,int _sr=44100,int _channels=1);
 	
-	ACMediaData* extractData(std::string fname);
+	//ACMediaData* extractData(std::string fname);
+	void extractData(std::string fname);
 	
 	void setSampleRate(int _sample_rate) { sample_rate = _sample_rate; }
 	int getSampleRate() { return sample_rate; }
