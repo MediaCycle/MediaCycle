@@ -105,6 +105,7 @@ public:
 	bool getDataPersistence(){return persistent_data;}
 	void setData(ACMediaData* _data){data = _data;}
 	ACMediaData* getData(){return data;}
+	void deleteData(){if (!persistent_data) delete data;}
 		
 		// accessors -- these should not be redefined for each media
 	int getWidth() {return width;}

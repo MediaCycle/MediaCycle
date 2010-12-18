@@ -83,7 +83,7 @@ ACMedia::~ACMedia() {
 		delete *iter;//needed erase call destructor of pointer (i.e. none since it's just a pointer) not of pointee ACMediaFeatures
 		//features_vectors.erase(iter); //will cause segfault. besides the vector is automatically emptied, no need to erase.
 	}
-	if (data) delete data;
+	//if (data) delete data;
 }
 
 // C++ version
@@ -287,7 +287,6 @@ int ACMedia::import(std::string _path, int _mid, ACPluginManager *acpl ) {
 			}
 		}
 	}
-	//delete data_ptr;
 	//delete data;
 	return import_ok;
 }
@@ -327,7 +326,7 @@ int ACMedia::segment(ACPluginManager *acpl ) {
 			}
 		}
 	}
-	//delete data_ptr;
+	//delete data;
 	return import_ok;
 }
 

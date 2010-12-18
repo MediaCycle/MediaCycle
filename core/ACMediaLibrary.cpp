@@ -253,6 +253,7 @@ int ACMediaLibrary::importFile(std::string _filename, ACPluginManager *acpl, boo
 				}
 			}
 		}
+		media->deleteData();
 	}
 	return 1;
 }
