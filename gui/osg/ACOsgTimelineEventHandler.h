@@ -65,7 +65,7 @@ class ACOsgTimelineEventHandler : public GUIEventHandler {
 		MediaCycle *media_cycle;
 		ACOsgTimelineRenderer *renderer;
 		ACAudioEngine *audio_engine;
-		bool selecting_zone,selecting_zone_begin,selecting_zone_end,selecting_summary_waveform;
+		bool selecting_zone,selecting_zone_begin,selecting_zone_end,selecting_summary_waveform,selecting_summary_frames;
 		ACRefId* selection;
 		float selection_begin,selection_end;
 		float pushed_x;

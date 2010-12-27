@@ -65,7 +65,7 @@ ACImage::~ACImage() {
 	}
 }
 
-osg::Image* ACImage::Convert_OpenCV_TO_OSG_IMAGE(IplImage* cvImg)
+osg::Image* Convert_OpenCV_TO_OSG_IMAGE(IplImage* cvImg)
 {
 	
 	// XS uncomment the following 4 lines for visual debug (e.g., thumbnail)	

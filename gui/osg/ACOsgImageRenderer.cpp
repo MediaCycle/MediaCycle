@@ -75,11 +75,11 @@ ACOsgImageRenderer::~ACOsgImageRenderer() {
 	if (image_geode) { image_geode->unref(); image_geode=0; }
 	if (border_geode) { border_geode->unref(); border_geode=0; }
 	if (image_transform) { image_transform->unref(); image_transform=0; }
-	//if (image_image) { delete image_image->data(); }
 }
 
 void ACOsgImageRenderer::imageGeode(bool flip, float sizemul, float zoomin) {
 	
+	std::cout << "Do we flip the image geode? " << flip << std::endl;
 	int i;
 	
 	double xstep = 0.0005;

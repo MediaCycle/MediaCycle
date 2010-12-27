@@ -287,6 +287,7 @@ int ACMedia::import(std::string _path, int _mid, ACPluginManager *acpl ) {
 			}
 		}
 	}
+	std::cout << "Features calculated" << std::endl;
 	//delete data;
 	return import_ok;
 }

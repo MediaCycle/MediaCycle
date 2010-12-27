@@ -48,8 +48,8 @@ ACAudioCycleOsgQt::ACAudioCycleOsgQt(QWidget *parent)
 : QMainWindow(parent), library_loaded(false)
 {
 	ui.setupUi(this); // first thing to do
-	media_cycle = new MediaCycle(MEDIA_TYPE_AUDIO,"/tmp/","mediacycle.acl");
-	//media_cycle = new MediaCycle(MEDIA_TYPE_VIDEO,"/tmp/","mediacycle.acl");
+	//media_cycle = new MediaCycle(MEDIA_TYPE_AUDIO,"/tmp/","mediacycle.acl");
+	media_cycle = new MediaCycle(MEDIA_TYPE_VIDEO,"/tmp/","mediacycle.acl");
 	
 	// XS TODO fichier de configuration
 	#if defined(__APPLE__)
@@ -179,7 +179,7 @@ void ACAudioCycleOsgQt::updateLibrary()
 	// media_cycle->pushNavigationState();  XS 250810 removed
 	//media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
 	media_cycle->getBrowser()->setState(AC_CHANGING);
-	
+	media_cycle->getBrowser()->updateNextPositions();
 	ui.compositeOsgView->prepareFromBrowser();
 	ui.compositeOsgView->prepareFromTimeline();
 	//ui.compositeOsgView->setPlaying(true);
@@ -187,7 +187,7 @@ void ACAudioCycleOsgQt::updateLibrary()
 	library_loaded = true;
 	
 	//XS new, use this carefully 
-	this->configureCheckBoxes();
+	this->configureCheckBoxes();//CF debug, might call prepareNodes twice
 	
 	ui.compositeOsgView->setFocus();
 }

@@ -63,8 +63,8 @@ class ACOsgTrackRenderer {
 protected:
 	MediaCycle* media_cycle;
 	MatrixTransform* track_node;
+	
 	int track_index, media_index;
-	float distance_mouse;
 	// int	media_activity;
 	ACMedia* media;
 	bool media_from_lib;
@@ -73,8 +73,8 @@ protected:
 	float width,height;
 	bool screen_width_changed;
 	bool width_changed,height_changed;
-	float selection_begin_pos,selection_end_pos;
-	bool selection_begin_pos_changed,selection_end_pos_changed;
+	float selection_begin_pos,selection_end_pos,selection_center_pos;
+	bool selection_begin_pos_changed,selection_end_pos_changed,selection_center_pos_changed;
 	int displayed_media_index;
 	float zpos;
 	double xstep, ylim;
@@ -100,7 +100,6 @@ public:
 	void setSize(int _width,float _height){width = _width;height = _height;}
 	void updateSize(int _width,float _height);
 	ACMedia* getMedia(){return media;}
-	void setDistanceMouse(float _distance_mouse) { this->distance_mouse = _distance_mouse; };
 	//void setActivity(int _media_activity) { this->media_activity = _media_activity; }
 	MatrixTransform* getTrack() { return track_node; };
 	
@@ -114,9 +113,9 @@ public:
 	float getSelectionBegin();
 	float getSelectionEnd();
 	/*void setSelectionZoneWidth(float _width);
-	float getSelectionZoneWidth();
-	void setSelectionZoneCenter(float center);
-	float getSelectionZoneCenter();*/
+	float getSelectionZoneWidth();*/
+	void setSelectionCenter(float center);
+	float getSelectionCenter();
 	void setManualSelection(bool manual){this->manual_selection=manual;}
 };
 

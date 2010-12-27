@@ -38,7 +38,9 @@
 #include "ACAudio.h"
 
 ACOsgTimelineEventHandler::ACOsgTimelineEventHandler()
-: media_cycle(0),renderer(0),selecting_zone(false),selecting_zone_begin(false),selecting_zone_end(false),selecting_summary_waveform(false),selection(0),
+: media_cycle(0),renderer(0),
+selecting_zone(false),selecting_zone_begin(false),selecting_zone_end(false),
+selecting_summary_waveform(false),selecting_summary_frames(false),selection(0),
 selection_begin(0.0f),selection_end(0.0f),pushed_x(0.0f)
 {
 	audio_engine = NULL;
@@ -53,7 +55,7 @@ bool ACOsgTimelineEventHandler::handle(const osgGA::GUIEventAdapter& ea,osgGA::G
 	float pos = xx;
 	if (xx>1) pos=1.0f;
 	if (xx<-1) pos=-1.0f;
-	float xspan = 0.65f; // magic number, track width in OSG coordinates, see ACOsgAudioTrackRenderer
+	float xspan = 0.666f; // magic number, track width in OSG coordinates, see ACOsgAudioTrackRenderer
 	
 	switch(ea.getEventType())
 	{
@@ -63,7 +65,8 @@ bool ACOsgTimelineEventHandler::handle(const osgGA::GUIEventAdapter& ea,osgGA::G
 			osgViewer::View* view = dynamic_cast<osgViewer::View*>(&aa);
 			if (view){
 				pick(view,ea,false);
-				// Skipping/Moving the selection zone to the mouse position
+				
+				// Skipping/Moving the selection zone to the mouse position (audio tracks)
 				if(selecting_summary_waveform){
 					// Audio feedback
 					/*int mediaID = renderer->getTrack(selection->getID())->getMedia()->getId();
@@ -86,6 +89,11 @@ bool ACOsgTimelineEventHandler::handle(const osgGA::GUIEventAdapter& ea,osgGA::G
 					renderer->getTrack(selection->getID())->setSelectionBegin(xspan*pos/2.0f-selection_width/2.0f);
 					renderer->getTrack(selection->getID())->setSelectionEnd(xspan*pos/2.0f+selection_width/2.0f);
 				}
+				
+				// Skipping/Moving the current frame to the mouse position (video tracks)
+				if (selecting_summary_frames){
+					renderer->getTrack(selection->getID())->setSelectionCenter(xspan*pos/2.0f);
+				}	
 			}	
 			return false;
 		}
@@ -95,19 +103,21 @@ bool ACOsgTimelineEventHandler::handle(const osgGA::GUIEventAdapter& ea,osgGA::G
 			/*osgViewer::View* view = dynamic_cast<osgViewer::View*>(&aa);
 			if (view) pick(view,ea,false);*/
 			
-			//Resizing the selection zone by moving its left boundary
+			//Resizing the selection zone by moving its left boundary (audio tracks)
 			if (selecting_zone_begin){
 				renderer->getTrack(selection->getID())->setSelectionBegin(xspan*pos/2.0f);
 				renderer->getTrack(selection->getID())->setSelectionEnd(selection_end-(xspan*pos/2.0f-selection_begin));
 				//std::cout << "Moving begin geode of track " << selection->getID() << std::endl;
 			}
-			//Resizing the selection zone by moving its right boundary
+			
+			//Resizing the selection zone by moving its right boundary (audio tracks)
 			else if(selecting_zone_end){
 				renderer->getTrack(selection->getID())->setSelectionBegin(selection_begin-(xspan*pos/2.0f-selection_end));
 				renderer->getTrack(selection->getID())->setSelectionEnd(xspan*pos/2.0f);
 				//std::cout << "Moving end geode of track " << selection->getID() << std::endl;
 			}
-			//Moving the selection zone
+			
+			//Moving the selection zone (audio tracks)
 			else if(selecting_zone){
 				if ( (selection_begin+xspan*(pos-pushed_x)/2.0f > -xspan/2.0f) && (selection_end+xspan*(pos-pushed_x)/2.0f < xspan/2.0f)){//selection can't slide out the screen
 					// Audio feedback
@@ -127,6 +137,11 @@ bool ACOsgTimelineEventHandler::handle(const osgGA::GUIEventAdapter& ea,osgGA::G
 					renderer->getTrack(selection->getID())->setSelectionBegin(selection_begin+xspan*(pos-pushed_x)/2.0f);
 					renderer->getTrack(selection->getID())->setSelectionEnd(selection_end+xspan*(pos-pushed_x)/2.0f);
 				}	
+			}
+			
+			// Moving the current frame to the mouse position (video tracks)
+			if (selecting_summary_frames){
+				renderer->getTrack(selection->getID())->setSelectionCenter(xspan*pos/2.0f);
 			}	
 			return false;
 		}
@@ -209,7 +224,7 @@ void ACOsgTimelineEventHandler::pick(osgViewer::View* view, const osgGA::GUIEven
 				{
 					ACRefId *rid = (ACRefId*)hitr->nodePath.back()->getUserData();
 					//std::cout << "  Widget " << rid->getName() << " with object id " << rid->object_id << std::endl;
-					if ((rid->getName()=="track selection begin")||(rid->getName()=="track selection end")||(rid->getName()=="track selection zone")||(rid->getName()=="track summary waveform"))
+					if ((rid->getName()=="track selection begin")||(rid->getName()=="track selection end")||(rid->getName()=="track selection zone")||(rid->getName()=="track summary waveform")||(rid->getName()=="track summary frames"))
 					{
 						switch(ea.getEventType())
 						{
@@ -219,7 +234,8 @@ void ACOsgTimelineEventHandler::pick(osgViewer::View* view, const osgGA::GUIEven
 								if (rid->getName()=="track selection begin") selecting_zone_begin = true;
 								else if (rid->getName()=="track selection end") selecting_zone_end = true;
 								else if (rid->getName()=="track selection zone") selecting_zone = true;
-								else if (rid->getName()=="track summary waveform") selecting_summary_waveform = true;								
+								else if (rid->getName()=="track summary waveform") selecting_summary_waveform = true;
+								else if (rid->getName()=="track summary frames") selecting_summary_frames = true;
 								selection = rid;
 								selection_begin = renderer->getTrack(selection->getID())->getSelectionBegin();
 								selection_end = renderer->getTrack(selection->getID())->getSelectionEnd();
@@ -244,6 +260,7 @@ void ACOsgTimelineEventHandler::pick(osgViewer::View* view, const osgGA::GUIEven
 								selecting_zone_begin = false;
 								selecting_zone_end = false;
 								selecting_summary_waveform = false;
+								selecting_summary_frames = false;
 								selection = 0;
 								selection_begin = 0.0f;
 								selection_end = 0.0f;

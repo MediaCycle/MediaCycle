@@ -53,7 +53,6 @@ bool ACOsgTimelineRenderer::addTrack(int media_index){
 	switch (media_type) {
 		case MEDIA_TYPE_AUDIO:
 			track_renderer.resize(n+1);
-			distance_mouse.resize(n+1);
 			track_renderer[n] = new ACOsgAudioTrackRenderer();
 			track_renderer[n]->setScreenWidth(screen_width);
 			track_renderer[n]->setSize(width,height);
@@ -68,7 +67,6 @@ bool ACOsgTimelineRenderer::addTrack(int media_index){
 		case MEDIA_TYPE_VIDEO:
 #if !defined (APPLE_IOS)
 			track_renderer.resize(n+1);
-			distance_mouse.resize(n+1);
 			track_renderer[n] = new ACOsgVideoTrackRenderer();
 			track_renderer[n]->setScreenWidth(screen_width);
 			track_renderer[n]->setSize(width,height);
@@ -108,7 +106,6 @@ void ACOsgTimelineRenderer::prepareTracks(int start) {
 	}
 
 	track_renderer.resize(n);
-	distance_mouse.resize(n);
 	
 	for (int i=start;i<n;i++) {
 		media_type = media_cycle->getMediaType(i);
@@ -216,15 +213,6 @@ int ACOsgTimelineRenderer::computeScreenCoordinates(osgViewer::View* view, doubl
 		screenPoint = modelPoint * VPM;
 				
 		media_cycle->getMouse(&mx, &my);
-		
-		// compute distance between mouse and media element in view
-		distance_mouse[i] = sqrt((screenPoint[0]-mx)*(screenPoint[0]-mx)+(screenPoint[1]-my)*(screenPoint[1]-my));
-		track_renderer[i]->setDistanceMouse(distance_mouse[i]);
-	
-		if (distance_mouse[i]<closest_distance) {
-			closest_distance = distance_mouse[i];
-			closest_track = i;
-		}
 	}	
 	
 	return closest_track;

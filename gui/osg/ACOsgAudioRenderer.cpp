@@ -201,7 +201,7 @@ void ACOsgAudioRenderer::curserGeode() {
 	curser_geometry->setColorArray(curser_colors);
 	curser_geometry->setColorBinding(Geometry::BIND_OVERALL);
 
-	line_p = new DrawElementsUInt(PrimitiveSet::LINES, 3);	
+	line_p = new DrawElementsUInt(PrimitiveSet::LINES, 2);	
 	(*line_p)[0] = 0;
 	(*line_p)[1] = 1;	
 	curser_geometry->addPrimitiveSet(line_p);

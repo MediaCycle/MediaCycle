@@ -43,27 +43,7 @@ ACOsgVideoRenderer::ACOsgVideoRenderer() {
 }
 
 ACOsgVideoRenderer::~ACOsgVideoRenderer() {
-	/*if (image_stream){
-		osg::ImageStream::StreamStatus streamStatus = image_stream->getStatus();
-		switch (streamStatus) {
-			case osg::ImageStream::INVALID:
-				//std::cout << "Image stream invalid status" << std::endl;
-				break;
-			case osg::ImageStream::PLAYING:
-				image_stream->pause();
-				break;
-			case osg::ImageStream::PAUSED:
-				break;
-			case osg::ImageStream::REWINDING:
-				//std::cout << "Image stream rewinding" << std::endl;
-				break;
-			default:
-				break;
-		}
-	}*/	
-	/*if (image_geode) { image_geode->unref(); image_geode=0; }
-	if (border_geode) { border_geode->unref(); border_geode=0; }
-	if (image_transform) { image_transform->unref(); image_transform=0; }*/
+	if (image_stream) image_stream->quit();
 }
 
 void ACOsgVideoRenderer::prepareNodes() {

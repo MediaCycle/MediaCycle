@@ -71,6 +71,7 @@ ACVideo::~ACVideo() {
 				break;
 		}
 	}*/	
+	if (data) delete data;
 }
 
 ACVideo::ACVideo(const ACVideo& m) : ACMedia(m) {
@@ -117,12 +118,21 @@ int ACVideo::computeThumbnail(int w, int h){
 	// Converting the video as preloaded stream to transmit the same instance to multiple recipient with unified playback controls
 	image_stream = dynamic_cast<osg::ImageStream*>(thumbnail);
 	image_stream->setLoopingMode(osg::ImageStream::LOOPING);
-	while (thumbnail->isImageTranslucent())
-		image_stream->play();
-	image_stream->pause();
-	image_stream->rewind();
+	
+	// Hack to display a first valid frame, quite long!
+	//while (thumbnail->isImageTranslucent())
+	//	image_stream->play();
+	//image_stream->pause();
+	//image_stream->rewind();
 	
 	return 1;
+}
+
+CvCapture* ACVideo::getData()
+{
+	if (data->getMediaType()!=MEDIA_TYPE_VIDEO)
+		this->extractData(this->filename);
+	return data->getVideoData();
 }
 
 //ACMediaData* ACVideo::extractData(string _fname){

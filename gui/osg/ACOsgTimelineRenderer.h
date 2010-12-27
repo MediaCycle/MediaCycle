@@ -80,7 +80,6 @@ protected:
 	ref_ptr<Group>				 group;
 	ref_ptr<Group>				 track_group;
 	vector<ACOsgTrackRenderer*>  track_renderer;
-	vector<float>				 distance_mouse;
 	int screen_width;
 	float height,width;
 
@@ -103,7 +102,6 @@ public:
 	void setSize(int _width,float _height){width = _width;height = _height;}
 	
 	int computeScreenCoordinates(osgViewer::View* view, double ratio=0.0); //CF: use osgViewer::Viewer* for simple Viewers
-	vector<float> getDistanceMouse() { return distance_mouse; };
 };
 
 #endif

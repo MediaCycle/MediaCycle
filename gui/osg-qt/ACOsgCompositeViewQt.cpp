@@ -569,7 +569,6 @@ void ACOsgCompositeViewQt::prepareFromTimeline()
 	//setMouseTracking(false); //CF necessary for the hover callback
 	timeline_renderer->prepareTracks(); 
 	timeline_view->setSceneData(timeline_renderer->getShapes());
-	//timeline_view->setSceneData(osgDB::readNodeFile("cessnafire.osg"));
 	timeline_controls_renderer->prepareControls(); 
 	timeline_controls_view->setSceneData(timeline_controls_renderer->getShapes());
 }

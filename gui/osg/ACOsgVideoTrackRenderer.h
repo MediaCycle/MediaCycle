@@ -48,22 +48,31 @@ using namespace osg;
 class ACOsgVideoTrackRenderer : public ACOsgTrackRenderer {
 protected:
 	ImageStream* video_stream;
+	CvCapture* summary_data;
+
+	MatrixTransform* playback_transform;
+	MatrixTransform* frames_transform;
+	osg::ref_ptr<osg::MatrixTransform> cursor_transform;
+	
+	Geode* playback_geode;
+	ref_ptr<Group> frames_group;
+	Geode* frame_geode;
+	Geode* cursor_geode;
+
+	void playbackGeode();
+	void framesGeode();
+	void cursorGeode();
 	
 	float zoom_x, zoom_y, track_left_x;
 	float summary_center_y,summary_height;
-	float playback_center_y,playback_height;
-	
+	float playback_center_y,playback_height,playback_scale;
+	float frame_min_width, frame_n;
+	bool scrubbing;
+
 	static const int NCOLORS ;
 	Vec4Array* colors;
 	Vec4Array* colors2;
 	Vec4Array* colors3;
-	
-	Geode* playback_geode;
-	Geode* border_geode;
-	MatrixTransform* playback_transform;
-	
-	void playbackGeode();
-	
 public:
 	ACOsgVideoTrackRenderer();
 	~ACOsgVideoTrackRenderer();

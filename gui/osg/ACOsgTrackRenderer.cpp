@@ -36,15 +36,16 @@
 #include "ACOsgTrackRenderer.h"
 
 ACOsgTrackRenderer::ACOsgTrackRenderer()
-: track_index(-1),media_index(-1),media_from_lib(true),media_changed(false),screen_width(0),screen_width_changed(false),height(0.0f),width_changed(false),height_changed(false)
+: track_index(-1),media_index(-1),media_from_lib(true),media_changed(false),
+screen_width(0),width(0.0f),height(0.0f),screen_width_changed(false),width_changed(false),height_changed(false)
 {
 	track_node = new MatrixTransform();
 	displayed_media_index = -1;
 	// Magic numbers!
 	zpos = 0.01f;
 	xstep = 0.0005f;
-	yspan = 0.64f;
-	xspan = 0.64f;
+	yspan = 0.666f;
+	xspan = 0.666f;
 	selection_sensing_width = xspan/200;
 	manual_selection = false;
 	this->initSelection();
@@ -55,8 +56,10 @@ void ACOsgTrackRenderer::initSelection()
 	playback_min_width = yspan/10;
 	selection_begin_pos = -xspan/2.0f;// arbitrarily at 1/4 of the width from the left
 	selection_end_pos = -xspan/2.0f + playback_min_width;// arbitrarily at 3/4 of the width from the left
+	selection_center_pos = 0.0f;
 	selection_begin_pos_changed = false;
 	selection_end_pos_changed = false;
+	selection_center_pos_changed = false;
 }
 
 void ACOsgTrackRenderer::updateMedia(ACMedia* _media)
@@ -115,10 +118,11 @@ void ACOsgTrackRenderer::setSelectionBegin(float begin)
 		begin = selection_end_pos - playback_min_width;
 	if (begin < -xspan/2.0f)
 		begin = -xspan/2.0f;*/
-		
+	
+	this->selection_center_pos += (begin - this->selection_begin_pos)/2.0f;
 	this->selection_begin_pos = begin;
 	selection_begin_pos_changed=true;
-		
+	selection_center_pos_changed=true;
 }
 
 void ACOsgTrackRenderer::setSelectionEnd(float end)
@@ -127,9 +131,11 @@ void ACOsgTrackRenderer::setSelectionEnd(float end)
 		end = selection_begin_pos + playback_min_width;
 	if (end > xspan/2.0f)
 		end = xspan/2.0f;*/
-	
+
+	this->selection_center_pos += (end - this->selection_end_pos)/2.0f;
 	this->selection_end_pos = end;
 	selection_end_pos_changed=true;
+	selection_center_pos_changed=true;
 }
 
 float ACOsgTrackRenderer::getSelectionBegin()
@@ -141,21 +147,22 @@ float ACOsgTrackRenderer::getSelectionEnd()
 {
 	return this->selection_end_pos;
 }
-/*
-void ACOsgTrackRenderer::setSelectionZoneCenter(float center)
+
+void ACOsgTrackRenderer::setSelectionCenter(float center)
 {
-	float previous_center = (selection_end_pos + selection_begin_pos)/2.0f;
-	selection_begin_pos += center - previous_center;
-	selection_end_pos += center - previous_center; 
+	selection_begin_pos += center - selection_center_pos;
+	selection_end_pos += center - selection_center_pos; 
+	selection_center_pos = center;
 	selection_begin_pos_changed=true;
 	selection_end_pos_changed=true;
+	selection_center_pos_changed=true;
 }
 
-float ACOsgTrackRenderer::getSelectionZoneCenter()
+float ACOsgTrackRenderer::getSelectionCenter()
 {
-	return (selection_end_pos + selection_begin_pos)/2.0f;
+	return selection_center_pos;
 }
-
+/*
 void ACOsgTrackRenderer::setSelectionZoneWidth(float _width)
 {
 	float previous_width = selection_end_pos - selection_begin_pos;

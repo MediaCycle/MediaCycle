@@ -46,6 +46,8 @@
 
 // -----------------------------------
 
+osg::Image* Convert_OpenCV_TO_OSG_IMAGE(IplImage* cvImg);
+
 class ACImage: public ACMedia {
 	// contains the *minimal* information about an image
 public:
@@ -67,8 +69,6 @@ public:
 	
 	//ACMediaData* extractData(std::string fname);
 	void extractData(std::string fname);
-
-	osg::Image* Convert_OpenCV_TO_OSG_IMAGE(IplImage* cvImg);
 		
 private:	
 	static const int default_thumbnail_width, default_thumbnail_height, default_thumbnail_area;
