@@ -42,7 +42,7 @@
 // sampling_rate = n if we skip n frames in the analysis (1 = don't skip any)
 // bic_thresh = threshold for the BIC under which there is no segment detected
 // jump_width = number of frames to skip after a step has been detected
-ACBicSegmentationPlugin::ACBicSegmentationPlugin() : lambda(1), sampling_rate(0), Wmin(20), bic_thresh(1.0), jump_width(5){
+ACBicSegmentationPlugin::ACBicSegmentationPlugin() : lambda(1), sampling_rate(1), Wmin(20), bic_thresh(0.5), jump_width(5){
     this->mMediaType = MEDIA_TYPE_ALL;
     this->mPluginType = PLUGIN_TYPE_SEGMENTATION;
     this->mName = "BicSegmentation";
@@ -79,11 +79,17 @@ std::vector<int> ACBicSegmentationPlugin::segment(const vector< vector<float> > 
 
 std::vector<int> ACBicSegmentationPlugin::segment(arma::fmat _M, \
 												  float _lambda, \
-												  int _samplingrate){
-	this->lambda = _lambda;
-	this->sampling_rate = _samplingrate;
+												  int _samplingrate, \
+												  int _Wmin, \
+												  float _bic_thresh, \
+												  int _jump_width ){	
 	this->full_features = _M ; 
 
+	this->lambda = _lambda;
+	this->sampling_rate = _samplingrate;
+	this->Wmin = _Wmin;
+	this->bic_thresh = _bic_thresh;
+	this->jump_width = _jump_width;
 	return (this->_segment());
 }	
 	
@@ -112,6 +118,8 @@ std::vector<int> ACBicSegmentationPlugin::_segment(){
 		seg_f += sampling_rate;
 	}
 	
+	cout << "found " << segments_tmp.size() << " segment(s)" << endl;
+
 	return segments_tmp;
 
 }
@@ -150,20 +158,22 @@ int ACBicSegmentationPlugin::findSingleSegment(int A, int B){
 	float S = detCovariance (A,B);
 	float R = S * N;
 	
-	for (int i=A+1; i<B-1; i++){
+	for (int i=A+1; i<B; i++){
 		N1=i-A;
 		N2=B-i;
 		// XS TODO : use running_stat_vec<type>(true) 
 		S1 = detCovariance (A,i);
 		S2 = detCovariance (i,B);
 		deltaBICi = R - N1*S1 - N2*S2 -lP;
-		
+		//cout << deltaBICi << endl;
 		if ( deltaBICi > max_bic) {
 			// store current maximum = most likely cut
 			max_bic = deltaBICi;
 			imax_bic = i;
 		}
 	}
+	cout << "["<< A << "," << B << "] : Max BIC = " << max_bic << " at " << imax_bic << endl;
+
 	if (max_bic > bic_thresh) {
 		cout << "max bic : " << max_bic << " ; found at time : " << imax_bic << endl;
 	}

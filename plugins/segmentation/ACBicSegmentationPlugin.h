@@ -49,7 +49,8 @@ public:
 	
 	virtual std::vector<ACMedia*> segment(ACMediaData* _data, ACMedia* _theMedia);
 	std::vector<int> segment(const vector< vector<float> > & _allfeatures, float _lambda=1, int _samplingrate=1);
-	std::vector<int> segment(arma::fmat _M, float _lambda=1, int _samplingrate=1);
+	// XS todo: synchronize default values between constructor and segment
+	std::vector<int> segment(arma::fmat _M, float _lambda=1, int _samplingrate=1, int _Wmin=20, float _bic_thresh = 1, int _jump_width=5);
 
 private:
 	int findSingleSegment(int _A, int _B);
