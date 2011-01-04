@@ -42,13 +42,15 @@
 #ifndef MEDIAPLAYER_H
 #define MEDIAPLAYER_H
 
-#include <QtGui/QWidget>
-#include <QtGui/QApplication>
+#include <QtGui>
+
+//#include <QtGui/QWidget>
+//#include <QtGui/QApplication>
 #include <QtCore/QTimerEvent>
-#include <QtGui/QShowEvent>
-#include <QtGui/QIcon>
+//#include <QtGui/QShowEvent>
+//#include <QtGui/QIcon>
 #include <QtCore/QBasicTimer>
-#include <QtGui/QAction>
+//#include <QtGui/QAction>
 
 #include <phonon/audiooutput.h>
 #include <phonon/backendcapabilities.h>
@@ -131,6 +133,10 @@ public slots:
     void scaleChanged(QAction *);
     void aspectChanged(QAction *);
 
+	//XS add
+	void spinBoxTimerValueChanged(int _value);
+	void sliderValueChanged(int _value);
+
 private slots:
     void setAspect(int);
     void setScale(int);
@@ -169,6 +175,11 @@ private:
     QDialog *settingsDialog;
     Ui_settings *ui;
     QAction *m_fullScreenAction;
+	
+	// XS add
+	QLabel *fileLabel;
+	QSpinBox *spinBoxTimer;
+	// end XS
 	
     QWidget m_videoWindow;
     Phonon::MediaObject m_MediaObject;

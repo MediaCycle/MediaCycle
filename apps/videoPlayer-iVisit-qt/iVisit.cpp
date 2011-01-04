@@ -42,7 +42,11 @@ using namespace std;
 iVisit::iVisit(QWidget *parent) : QMainWindow(parent) {
 	iVui.setupUi(this); // first thing to do
 	
-	connect(iVui.pushButton, SIGNAL(clicked()), this, SLOT(testButton()));
+//	connect(iVui.pushButton, SIGNAL(clicked()), this, SLOT(testButton()));
+	connect(iVui.radioButton_I1, SIGNAL(toggled(bool)), this, SLOT(testI1()));
+	connect(iVui.radioButton_I2, SIGNAL(toggled(bool)), this, SLOT(testI2()));
+	connect(iVui.radioButton_I3, SIGNAL(toggled(bool)), this, SLOT(testI3()));
+	connect(iVui.radioButton_I4, SIGNAL(toggled(bool)), this, SLOT(testI4()));
 
 }
 
@@ -52,26 +56,51 @@ iVisit::~iVisit() {
 }
 
 void iVisit::setupPlayers(){
-	QString s1("");
+	QString s1("/Users/xavier/numediart/Project10.1-Borderlands/2010_4rgb_alpha/10151.mov");
 	mp1 = new MediaPlayer(s1,false,iVui.frame1);
 	mp1->setParent(iVui.frame1);
 	mp1->show();
 	
-	QString s2("");
+	QString s2("/Users/xavier/numediart/Project10.1-Borderlands/2010_4rgb_alpha/20102.mov");
 	mp2 = new MediaPlayer(s2,false,iVui.frame2);
 	mp2->show();
-	cout <<"done" << endl;
+
+	testI1();
 }
 
 void iVisit::seekVideos(int t1, int t2){
-	// XS todo add tests !
-	mp1->seekTime(t1*40);
-	mp2->seekTime(t2*40);
+	// XS todo add tests (e.g., videos loaded)
+//	mp1->playPause();
+//	mp2->playPause();
+
+	this->mp1->seekTime(t1*40);
+	this->mp2->seekTime(t2*40);
 }
 
 // SLOTS 
 void iVisit::testButton(){
-	this->seekVideos(1,1);
+	cout << "testing : (298,184)" << endl;
+	this->seekVideos(298,184);
+}
+
+void iVisit::testI1(){
+	cout << "testing : (600,100)" << endl;
+	this->seekVideos(600,100);
+}
+
+void iVisit::testI2(){
+	cout << "testing : (1500,800)" << endl;
+	this->seekVideos(1500,800);
+}
+
+void iVisit::testI3(){
+	cout << "testing : (100,1000)" << endl;
+	this->seekVideos(100,1000);
+}
+
+void iVisit::testI4(){
+	cout << "testing : (820,100)" << endl;
+	this->seekVideos(820,100);
 }
 
 
@@ -98,24 +127,22 @@ void MainForm::LoadImage() {
 	QString filename = QFileDialog::getOpenFileName(0, "Open Image", "", "Images (*.jpg;*.jpeg;*.bmp;*.png)");
 	QImage img(filename);
 	
-	QRgb value;
-	value = qRgb(0, 0, 0); // 0xff7aa327
-	img.setColor(0, value);
+//	QRgb value;
+//	value = qRgb(0, 0, 0); // 0xff7aa327
+//	img.setColor(0, value);
 
-	for (int i=0; i<50;i++){
-		for (int j=0; j<500;j++){
-			img.setPixel(i, j, 0);
-		}
-	}
+//	for (int i=0; i<50;i++){
+//		for (int j=0; j<500;j++){
+//			img.setPixel(i, j, 0);
+//		}
+//	}
 	
 	if (!img.isNull()) {
-		QGraphicsPixmapItem* pi = scene->addPixmap(QPixmap::fromImage(img));
-		pi->setFlag(QGraphicsItem::ItemIsMovable,false);
-		pi->setFlag(QGraphicsItem::ItemIsSelectable,false);
-		pi->setPos(0,0);
+		QGraphicsPixmapItem* pix = scene->addPixmap(QPixmap::fromImage(img));
+		pix->setFlag(QGraphicsItem::ItemIsMovable,false);
+		pix->setFlag(QGraphicsItem::ItemIsSelectable,false);
+		pix->setPos(0,0);
 	}
-	
-	
 }
 
 void MainForm::setVideoApp(iVisit* _videoApp){
@@ -123,7 +150,6 @@ void MainForm::setVideoApp(iVisit* _videoApp){
 }
 
 void MainForm::mousePressEvent( QMouseEvent *e ){
-	videoApp->seekVideos( e->x() , e->y() );
-
 	cout << "click: " <<  e->x() << " - " << e->y() << endl;
+	videoApp->seekVideos( int(e->x()) , int(e->y()) );
 }

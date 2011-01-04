@@ -44,7 +44,11 @@ class iVisit : public QMainWindow {
 
 public slots: // or private ? or protected ?
 	void testButton();
-	
+	void testI1();
+	void testI2();
+	void testI3();
+	void testI4();
+
 public:
 	iVisit(QWidget *parent = 0);
 	~iVisit();

@@ -39,7 +39,6 @@
 **
 ***************************************************************************/
 
-#include <QtGui>
 
 #define SLIDER_RANGE 8
 
@@ -47,8 +46,22 @@
 #include "ui_settings.h"
 #include "ui_iVisit.h"
 
+#include <iostream>
+
 // XS to display time as frames instead of hh::mm::ss
 #define USE_FPS
+
+// in Qt 4.7 ?
+//static QString chopPath(const QString &path)
+//{
+//    int idx = path.findRev("/");
+//    if (idx == -1)
+//        idx = path.findRev(QDir::separator());
+//    if (idx == -1)
+//        return path;
+//    return path.mid(idx + 1);
+//}
+
 
 MediaVideoWidget::MediaVideoWidget(MediaPlayer *player, QWidget *parent) :
     Phonon::VideoWidget(parent), m_player(player), m_action(this)
@@ -169,10 +182,11 @@ m_hasSmallScreen(hasSmallScreen)
 	this->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 	// end XS
 	
-    setWindowTitle(tr("Media Player"));
+    setWindowTitle(tr("iVisit Media Player"));
     setContextMenuPolicy(Qt::CustomContextMenu);
     m_videoWidget->setContextMenuPolicy(Qt::CustomContextMenu);
-	
+	m_videoWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
     QSize buttonSize(34, 28);
 	
     QPushButton *openButton = new QPushButton(this);
@@ -199,7 +213,18 @@ m_hasSmallScreen(hasSmallScreen)
 	
     slider = new Phonon::SeekSlider(this);
     slider->setMediaObject(&m_MediaObject);
+	slider->setOrientation(Qt::Horizontal);
+	
     volume = new Phonon::VolumeSlider(&m_AudioOutput);
+	
+	// XS add
+	fileLabel = new QLabel(this);
+    fileLabel->setAcceptDrops(false);
+    fileLabel->setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
+    fileLabel->setLineWidth(2);
+    fileLabel->setAutoFillBackground(true);
+	
+	// end XS
 	
     QVBoxLayout *vLayout = new QVBoxLayout(this);
     vLayout->setContentsMargins(8, 8, 8, 8);    
@@ -226,7 +251,7 @@ m_hasSmallScreen(hasSmallScreen)
     info->setPalette(palette);
     info->setText(tr("<center>No media</center>"));
 	
-    volume->setFixedWidth(120);
+    volume->setFixedWidth(100);
 	
     layout->addWidget(openButton);
     layout->addWidget(rewindButton);
@@ -245,18 +270,35 @@ m_hasSmallScreen(hasSmallScreen)
     
     timeLabel = new QLabel(this);
     progressLabel = new QLabel(this);
+	
+	//XS add
+	spinBoxTimer = new QSpinBox(this);
+
+	slider->setSingleStep (500);
+	
+	//std::cout << "step : " << slider->singleStep () << "   " << std::endl;
+	//
+	
     QWidget *sliderPanel = new QWidget(this);
     QHBoxLayout *sliderLayout = new QHBoxLayout();
     sliderLayout->addWidget(slider);
-    sliderLayout->addWidget(timeLabel);    
+//    sliderLayout->addWidget(timeLabel);    
     sliderLayout->addWidget(progressLabel);    
+	//XS add
+	sliderLayout->addWidget(spinBoxTimer);    
+	//
+	
     sliderLayout->setContentsMargins(0, 0, 0, 0);
     sliderPanel->setLayout(sliderLayout);
+	
+	//XS add
+	vLayout->addWidget(fileLabel);
+	// end XS
 	
     buttonPanelLayout->addWidget(sliderPanel);
     buttonPanelLayout->setContentsMargins(0, 0, 0, 0);
 #ifdef Q_OS_MAC
-    layout->setSpacing(4);
+	layout->setSpacing(4);
     buttonPanelLayout->setSpacing(0);
     info->setMinimumHeight(100);
     info->setFont(QFont("verdana", 15));
@@ -328,6 +370,7 @@ m_hasSmallScreen(hasSmallScreen)
     QAction *settingsAction = fileMenu->addAction(tr("&Settings..."));
 	
     // Setup signal connections:
+	// -------------------------
     connect(rewindButton, SIGNAL(clicked()), this, SLOT(rewind()));
     //connect(openButton, SIGNAL(clicked()), this, SLOT(openFile()));
     openButton->setMenu(fileMenu);
@@ -344,11 +387,15 @@ m_hasSmallScreen(hasSmallScreen)
     connect(&m_MediaObject, SIGNAL(metaDataChanged()), this, SLOT(updateInfo()));
     connect(&m_MediaObject, SIGNAL(totalTimeChanged(qint64)), this, SLOT(updateTime()));
     connect(&m_MediaObject, SIGNAL(tick(qint64)), this, SLOT(updateTime()));
+
     connect(&m_MediaObject, SIGNAL(finished()), this, SLOT(finished()));
     connect(&m_MediaObject, SIGNAL(stateChanged(Phonon::State,Phonon::State)), this, SLOT(stateChanged(Phonon::State,Phonon::State)));
     connect(&m_MediaObject, SIGNAL(bufferStatus(int)), this, SLOT(bufferStatus(int)));
     connect(&m_MediaObject, SIGNAL(hasVideoChanged(bool)), this, SLOT(hasVideoChanged(bool)));
-	
+
+	connect(spinBoxTimer, SIGNAL(valueChanged(int)), this, SLOT(spinBoxTimerValueChanged(int)));
+	//connect(slider, SIGNAL(valueChanged(int)), this, SLOT(sliderValueChanged(int)));
+
     rewindButton->setEnabled(false);
     playButton->setEnabled(false);
     setAcceptDrops(true);
@@ -358,7 +405,7 @@ m_hasSmallScreen(hasSmallScreen)
 	
     if (!filePath.isEmpty())
         setFile(filePath);
-    resize(minimumSizeHint());
+    //resize(minimumSizeHint());
 	
 }
 
@@ -682,6 +729,12 @@ void MediaPlayer::setFile(const QString &fileName)
     setWindowTitle(fileName.right(fileName.length() - fileName.lastIndexOf('/') - 1));
     m_MediaObject.setCurrentSource(Phonon::MediaSource(fileName));
     m_MediaObject.play();
+	
+	spinBoxTimer->setMinimum(0);
+	spinBoxTimer->setMaximum(m_MediaObject.totalTime()/40);
+
+	// XS try: m_MediaObject.setTickInterval(100);
+	this->playPause();
 }
 
 void MediaPlayer::setLocation(const QString& location)
@@ -726,9 +779,12 @@ void MediaPlayer::openFile()
             m_MediaObject.enqueue(Phonon::MediaSource(fileNames[i]));
     }
 	info->setText(fileName);
-
+	
+	// XS add
+	fileLabel->setText(fileName.right(fileName.length() - fileName.lastIndexOf('/') - 1));
+	// end XS
+	
     forwardButton->setEnabled(m_MediaObject.queue().size() > 0);
-	//	m_MediaObject.seek(10);
 }
 
 void MediaPlayer::bufferStatus(int percent)
@@ -857,7 +913,9 @@ void MediaPlayer::updateTime()
     }
 #endif // USE_FPS
 	
+	std::cout << "should change timer to : " << nframe << std::endl;
     timeLabel->setText(timeString);
+	this->spinBoxTimer->setValue(nframe);
 }
 
 void MediaPlayer::rewind()
@@ -975,4 +1033,15 @@ void MediaPlayer::seekTime(int t){
 	//XS TODO: add tests on t
 	m_MediaObject.seek(t);
 }
+
+void MediaPlayer::spinBoxTimerValueChanged(int _value){
+	std::cout << "Spinbox - Going to frame number: " << _value << std::endl;
+	this->seekTime(_value*40);
+}
+
+void MediaPlayer::sliderValueChanged(int _value){
+	std::cout << "Slider - Going to frame number: " << _value << std::endl;
+}
+
+
 

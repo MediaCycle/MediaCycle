@@ -52,7 +52,8 @@ int main(int argc, char *argv[])
 {
 	QApplication app(argc, argv);
 	app.connect(&app, SIGNAL(lastWindowClosed()), &app, SLOT(quit()));
-	
+	app.setApplicationName("numediart - iVisit");
+
 	MainForm form;
 	form.setGeometry(100,100,800,600);
 	form.show();
@@ -60,7 +61,8 @@ int main(int argc, char *argv[])
 	iVisit myApp;
 	myApp.show();
 	myApp.setupPlayers();
-		
+	
+	form.setVideoApp(&myApp);
 	return app.exec();
 }
 

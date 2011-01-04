@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>982</width>
+    <width>1200</width>
     <height>722</height>
    </rect>
   </property>
@@ -75,24 +75,11 @@
        </sizepolicy>
       </property>
       <property name="title">
-       <string>Videos</string>
+       <string>Videos Intersections</string>
       </property>
       <layout class="QGridLayout" name="gridLayout">
        <item row="0" column="0">
-        <layout class="QHBoxLayout" name="horizontalLayout_2">
-         <item>
-          <widget class="QLineEdit" name="lineEdit1"/>
-         </item>
-         <item>
-          <widget class="QSpinBox" name="spinBox1"/>
-         </item>
-         <item>
-          <widget class="QLineEdit" name="lineEdit2"/>
-         </item>
-         <item>
-          <widget class="QSpinBox" name="spinBox2"/>
-         </item>
-        </layout>
+        <layout class="QHBoxLayout" name="horizontalLayout_2"/>
        </item>
        <item row="1" column="0">
         <widget class="QScrollArea" name="scrollArea">
@@ -110,15 +97,15 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>909</width>
+            <width>1144</width>
             <height>91</height>
            </rect>
           </property>
           <layout class="QGridLayout" name="gridLayout_2">
            <item row="0" column="0">
-            <widget class="QRadioButton" name="radioButton">
+            <widget class="QRadioButton" name="radioButton_I1">
              <property name="text">
-              <string>intersection 1</string>
+              <string>I1 (600,100)</string>
              </property>
              <property name="checked">
               <bool>true</bool>
@@ -126,30 +113,23 @@
             </widget>
            </item>
            <item row="0" column="1">
-            <widget class="QRadioButton" name="radioButton_3">
+            <widget class="QRadioButton" name="radioButton_I3">
              <property name="text">
-              <string>intersection 3</string>
+              <string>I3 (100,1000)</string>
              </property>
             </widget>
            </item>
            <item row="1" column="0">
-            <widget class="QRadioButton" name="radioButton_2">
+            <widget class="QRadioButton" name="radioButton_I2">
              <property name="text">
-              <string>intersection 2</string>
+              <string>I2 (1500,800)</string>
              </property>
             </widget>
            </item>
            <item row="1" column="1">
-            <widget class="QRadioButton" name="radioButton_4">
+            <widget class="QRadioButton" name="radioButton_I4">
              <property name="text">
-              <string>intersection 4</string>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="0">
-            <widget class="QPushButton" name="pushButton">
-             <property name="text">
-              <string>test</string>
+              <string>I4 (820, 100)</string>
              </property>
             </widget>
            </item>
@@ -167,7 +147,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>982</width>
+     <width>1200</width>
      <height>22</height>
     </rect>
    </property>
