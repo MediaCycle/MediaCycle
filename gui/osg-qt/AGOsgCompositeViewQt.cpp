@@ -256,18 +256,24 @@ void AGOsgCompositeViewQt::keyPressEvent( QKeyEvent* event )
 			{
 				transportdown = 1;
 				
-				if (track_playing)
-				{	
-					audio_engine->getFeedback()->stopExtSource();
-					//audio_engine->getFeedback()->deleteExtSource();
-				}	
-				else
-				{	
-					//media_cycle->getBrowser()->toggleSourceActivity( timeline_renderer->getTrack(0)->getMediaIndex() );
-					audio_engine->getFeedback()->loopExtSource();
-					//usleep(2000000);//CF 2 sec, j'arrive!
-				}	
-				track_playing = track_playing ? false : true; //CF toggling
+				int mIx = timeline_renderer->getTrack(0)->getMediaIndex();
+				if (mIx == -1){
+					if (track_playing)
+					{	
+						audio_engine->getFeedback()->stopExtSource();
+						//audio_engine->getFeedback()->deleteExtSource();
+					}	
+					else
+					{	
+						//media_cycle->getBrowser()->toggleSourceActivity( timeline_renderer->getTrack(0)->getMediaIndex() );
+						audio_engine->getFeedback()->loopExtSource();
+						//usleep(2000000);//CF 2 sec, j'arrive!
+					}	
+					track_playing = track_playing ? false : true; //CF toggling
+				}
+				else {
+					media_cycle->getBrowser()->toggleSourceActivity( mIx );
+				}
 			}
 			break;
 		case Qt::Key_Z:
@@ -466,8 +472,10 @@ void AGOsgCompositeViewQt::mouseReleaseEvent( QMouseEvent* event )
 					if (timeline_renderer->getNumberOfTracks()==0){
 						this->getTimelineRenderer()->addTrack(loop);
 					}
+					else
+						this->getTimelineRenderer()->getTrack(0)->updateMedia(loop);
 					
-					if ( timeline_renderer->getTrack(0)!=NULL )
+					/*if ( timeline_renderer->getTrack(0)!=NULL )
 					{
 						if (track_playing) {
 							audio_engine->getFeedback()->stopExtSource();
@@ -486,7 +494,8 @@ void AGOsgCompositeViewQt::mouseReleaseEvent( QMouseEvent* event )
 						this->getTimelineRenderer()->getTrack(0)->updateMedia( synthAudio ); //media_cycle->getLibrary()->getMedia(loop) );
 						delete[] tempBuffer;
 						media_cycle->setNeedsDisplay(true);
-					}
+					}*/
+					media_cycle->setNeedsDisplay(true);
 				}
 				else if (selectgrains == true)
 				{
