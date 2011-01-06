@@ -1,8 +1,8 @@
 /**
  * @brief main.cpp
- * @author Damien Tardieu
- * @date 07/07/2010
- * @copyright (c) 2010 – UMONS - Numediart
+ * @author Jerome Urbain
+ * @date 06/01/2011
+ * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -37,6 +37,9 @@
 #include "ACMediaTimedFeature.h"
 #include <unistd.h>
 #include <sys/stat.h>
+#include "ACAudio.h"
+#include "ACMediaData.h"
+#include "ACAudioSegmentationPlugin.h"
 
 void usage(string myname){        
 	cerr << endl;
@@ -100,6 +103,9 @@ std::string descAbbreviation(std::string descName){
 	}
 	if (descName == "Energy Modulation Frequency"){
 		abbrev = "emf";
+	}
+        if (descName == "Burst Segmentation"){
+		abbrev = "bs";
 	}
 	return abbrev;
 }
@@ -187,7 +193,17 @@ int main(int argc, char** argv){
 	data = new float[(long) sfinfo.frames*sfinfo.channels];
 	std::cout << "Read " << sf_read_float(testFile, data, sfinfo.frames*sfinfo.channels) << " frames" << std::endl;
 	desc = computeFeatures(data, sfinfo.samplerate, sfinfo.channels, sfinfo.frames, mfccNbChannels, mfccNb, windowSize, 	extendSoundLimits);
-	
+
+        /*ACMediaData ACMD;
+        ACMD.setAudioData(data);
+        ACAudio ACM;
+        ACM.import(filename);
+        ACAudioSegmentationPlugin r;
+        ACAudioSegmentationPlugin ACASP;
+        ACASP.segment(&ACMD, &ACM);*/
+
+
+
 	std::string descFileName;
 	int posSep = filename.find_last_of("/\\");
 	int posDot = filename.find_last_of(".");
@@ -228,6 +244,9 @@ int main(int argc, char** argv){
 	for (int i=0; i<desc.size(); i++){
 		delete desc[i];
 	}
+
+        
+
 	delete [] data;
 	sf_close(testFile);
 }

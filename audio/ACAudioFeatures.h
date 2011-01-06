@@ -1,8 +1,8 @@
 /**
  * @brief ACAudioFeatures.h
- * @author Damien Tardieu
- * @date 22/06/2010
- * @copyright (c) 2010 – UMONS - Numediart
+ * @author Jerome Urbain
+ * @date 06/01/2011
+ * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -81,5 +81,6 @@ double loudness(colvec x_v, mat melfilter_m);
 double logAttackTime(colvec ener_v, int sr_hz);
 rowvec effectiveDuration(colvec time_v, colvec loud_v);
 rowvec mfcc(colvec x_v, mat melfilter_m, int mfccNb);
+colvec burstBoundaries(colvec split_v, colvec time_v, float minBurstDur);
 
 #endif

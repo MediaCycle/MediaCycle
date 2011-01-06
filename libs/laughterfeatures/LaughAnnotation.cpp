@@ -163,10 +163,15 @@ void LaughAnnotation::calculateStats( void )
    for( vector< AnnotationLabel >::iterator iAL = labels.begin();
         iAL < labels.end(); iAL++ )
    {
-      double startTime = (*iAL).getStartTime();
-      double endTime = (*iAL).getEndTime();;
+       double timeThisLaugh; //JU..
+       AnnotationLabel t=(*iAL);  //JU...
+       double startTime=t.getStartTime();
+       double endTime=t.getEndTime();
+      //double startTime = (*iAL).getStartTime(); JU...
+      //double endTime = (*iAL).getEndTime();; JU...
       char lastLabel = label;   // store the last label for logic
-      label = (*iAL).getLabel();;
+      label=t.getLabel();
+      //label = (*iAL).getLabel();; JU...
 
       // collect information to be able to calculate statistics
 
@@ -201,7 +206,8 @@ void LaughAnnotation::calculateStats( void )
             // increment the laugh counts
             ++nFramesLaugh;
             ++nFramesLaughInThisSection;
-            double timeThisLaugh = endTime - startTime;
+            //double timeThisLaugh = endTime - startTime; JU...
+            timeThisLaugh = endTime - startTime;  //JU
             totalTimeLaugh += timeThisLaugh;
             timeOfSectionLaugh += timeThisLaugh;
             if ( !frameExtendsSection )
