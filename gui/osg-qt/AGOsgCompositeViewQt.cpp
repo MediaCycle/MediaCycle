@@ -462,7 +462,11 @@ void AGOsgCompositeViewQt::mouseReleaseEvent( QMouseEvent* event )
 					selectedRhythmPattern = loop;
 					if (selectedRhythmPattern != -1)
 						this->getBrowserRenderer()->changeNodeColor(selectedRhythmPattern, Vec4(1.0,1.0,1.0,1.0));//CF color the rhythm pattern in white
-			
+					
+					if (timeline_renderer->getNumberOfTracks()==0){
+						this->getTimelineRenderer()->addTrack(loop);
+					}
+					
 					if ( timeline_renderer->getTrack(0)!=NULL )
 					{
 						if (track_playing) {

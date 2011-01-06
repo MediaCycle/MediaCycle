@@ -169,12 +169,13 @@ void ACAudioGardenOsgQt::updateLibrary()
 	// media_cycle->pushNavigationState(); // XS250810 removed
 	//media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
 	media_cycle->getBrowser()->setState(AC_CHANGING);
-	
+	media_cycle->getBrowser()->updateNextPositions();
 	ui.compositeOsgView->prepareFromBrowser();
 	ui.compositeOsgView->prepareFromTimeline();
 	//ui.compositeOsgView->setPlaying(true);
 	media_cycle->setNeedsDisplay(true);
 	library_loaded = true;
+	
 	ui.compositeOsgView->setFocus();
 }
 
@@ -215,7 +216,7 @@ void ACAudioGardenOsgQt::loadACLFile(){
 	//fileName = QFileDialog::getOpenFileName(this, "~", );
 	
 	if (!(fileName.isEmpty())) {
-		int size = media_cycle->importACLLibrary((char*) fileName.toStdString().c_str());
+		int size = media_cycle->importACLLibrary(fileName.toStdString());
 		if (size > 0) {
 			media_cycle->normalizeFeatures();
 			media_cycle->libraryContentChanged();
@@ -689,7 +690,7 @@ void ACAudioGardenOsgQt::processOscMessage(const char* tagName)
 		float xmove = x*cos(-angle)-y*sin(-angle);
 		float ymove = y*cos(-angle)+x*sin(-angle);
 		media_cycle->setCameraPosition(xmove/2/zoom , ymove/2/zoom); // norm [-1;1] = 2 (instead of 100 from mediacycle-osg)
-		media_cycle->setNeedsDisplay(1);
+		media_cycle->setNeedsDisplay(true);
 	}
 	else if(strcasecmp(tagName, "/audiocycle/1/browser/1/hover/xy") == 0)
 	{
@@ -707,7 +708,7 @@ void ACAudioGardenOsgQt::processOscMessage(const char* tagName)
 			osc_feedback->messageEnd();
 			osc_feedback->messageSend();
 		}	
-		//media_cycle->setNeedsDisplay(1);
+		media_cycle->setNeedsDisplay(true);
 	}
 	else if(strcasecmp(tagName, "/audiocycle/1/browser/1/move/zoom") == 0)
 	{
@@ -715,14 +716,14 @@ void ACAudioGardenOsgQt::processOscMessage(const char* tagName)
 		osc_browser->readFloat(mOscReceiver, &zoom);
 		//zoom = zoom*600/50; // refzoom +
 		media_cycle->setCameraZoom((float)zoom);
-		media_cycle->setNeedsDisplay(1);
+		media_cycle->setNeedsDisplay(true);
 	}
 	else if(strcasecmp(tagName, "/audiocycle/1/browser/1/move/angle") == 0)
 	{
 		float angle;//, refangle = media_cycle->getCameraRotation();
 		osc_browser->readFloat(mOscReceiver, &angle);
 		media_cycle->setCameraRotation((float)angle);
-		media_cycle->setNeedsDisplay(1);
+		media_cycle->setNeedsDisplay(true);
 	}
 	else if(strcasecmp(tagName, "/audiocycle/1/browser/library/load") == 0)
 	{
@@ -731,17 +732,10 @@ void ACAudioGardenOsgQt::processOscMessage(const char* tagName)
 		osc_browser->readString(mOscReceiver, lib_path, 500); // wrong magic number!
 		std::cout << "Importing file library '" << lib_path << "'..." << std::endl;
 		media_cycle->importACLLibrary(lib_path); // XS instead of getImageLibrary CHECK THIS
-		//updateLibrary();
+		media_cycle->normalizeFeatures();
+		media_cycle->libraryContentChanged();
 		std::cout << "File library imported" << std::endl;
-		media_cycle->setReferenceNode(0);
-		// XSCF 250310 added these 3
-		// media_cycle->pushNavigationState(); // XS 250810 removed
-		media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
-		media_cycle->getBrowser()->setState(AC_CHANGING);
-		
-		ui.compositeOsgView->prepareFromBrowser();
-		media_cycle->setNeedsDisplay(true);
-		library_loaded = true;
+		this->updateLibrary();
 	}
 	else if(strcasecmp(tagName, "/audiocycle/1/browser/library/clear") == 0)
 	{
@@ -800,7 +794,7 @@ void ACAudioGardenOsgQt::processOscMessage(const char* tagName)
 			//media_cycle->pickedObjectCallback(-1);
 			audio_engine->setLoopSynchroMode(node, ACAudioEngineSynchroModeManual);
 			audio_engine->setLoopScaleMode(node, ACAudioEngineScaleModeVocode);
-			audio_engine->setScrub((float)scrub*10000); // temporary hack to scrub between 0 an 1
+			audio_engine->setScrub((float)scrub*100); // temporary hack to scrub between 0 an 1
 		}
 	}
 	else if(strcasecmp(tagName, "/audiocycle/1/player/1/pitch") == 0)
