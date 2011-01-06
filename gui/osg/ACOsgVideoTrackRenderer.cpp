@@ -65,7 +65,7 @@ ACOsgVideoTrackRenderer::ACOsgVideoTrackRenderer() {
 	playback_height = yspan/2.0f;//[0;yspan]
 	playback_scale = 0.5f;
 	playback_geode = 0; playback_transform = 0;
-	frame_min_width = 32;
+	frame_min_width = 64;
 	frame_n = 1;
 	selection_center_pos = -xspan/2.0f;
 	selection_begin_pos = selection_center_pos;

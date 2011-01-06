@@ -494,6 +494,11 @@ void ACMediaFactory::addOsgFileExtensions(){
 					
 			}	
 		}
-		osgDB::Registry::instance()->closeLibrary(pluginInstance);
+		if (*pluginIter == "ffmpeg")
+			std::cout << "Using FFmpeg plugin for OSG" << std::endl;
+		else if (*pluginIter == "qt")
+			std::cout << "Using Quicktime plugin for OSG" << std::endl;
+		else
+			osgDB::Registry::instance()->closeLibrary(pluginInstance);
 	}
 }

@@ -40,6 +40,16 @@
 #include "ACOsg3DModelRenderer.h"
 #include "ACOsgTextRenderer.h"
 
+#include <osgDB/Registry>
+#include <osgDB/ReaderWriter>
+#include <osgDB/FileNameUtils>
+#include <osgDB/ReaderWriter>
+#include <osgDB/PluginQuery>
+
+#include "boost/filesystem.hpp"   // includes all needed Boost.Filesystem declarations
+#include "boost/filesystem/operations.hpp"
+#include "boost/filesystem/path.hpp"
+
 ACOsgBrowserRenderer::ACOsgBrowserRenderer()
 : displayed_nodes(0)
 {
@@ -92,19 +102,19 @@ void ACOsgBrowserRenderer::prepareNodes(int _start) {
 	
 	// CF checking for available OSG video plugins, everytime the library content changes
 	// when we'll be able to the media type on the fly, this test will be relocated at app startup
-	if (media_cycle->getLibrary()->getMediaType() == MEDIA_TYPE_VIDEO) {
+	/*if (media_cycle->getLibrary()->getMediaType() == MEDIA_TYPE_VIDEO) {
 		 
 		//CF forcing to load the OSG FFMpeg plugin
 		std::string ffmpegLib = osgDB::Registry::instance()->createLibraryNameForExtension("ffmpeg"); 
 		osgDB::Registry::LoadStatus ffmpegStatus = osgDB::Registry::instance()->loadLibrary(ffmpegLib);
 		std::string qtLib = osgDB::Registry::instance()->createLibraryNameForExtension("qt"); 
 		osgDB::Registry::LoadStatus qtStatus = osgDB::Registry::instance()->loadLibrary(qtLib);
-		
-		if (ffmpegStatus == osgDB::Registry::NOT_LOADED && qtStatus == osgDB::Registry::NOT_LOADED) {
+		if (ffmpegStatus == osgDB::Registry::NOT_LOADED){// && qtStatus == osgDB::Registry::NOT_LOADED) {
 			std::cout << "No video plugin for OSG could be loaded, videos can't be visualized." << std::endl;
 			exit(0);//too harsh maybe?
-		}	
-	}
+		}
+		
+	}*/
 	
 	int media_type;
 	int start;

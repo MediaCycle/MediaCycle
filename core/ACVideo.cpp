@@ -104,7 +104,7 @@ int ACVideo::computeThumbnail(int w, int h){
 	// Loading the movie with OSG
 	osg::Image* thumbnail = osgDB::readImageFile(filename);
 	//thumbnail->scaleImage(thumbnail_width,thumbnail_height,1);
-	thumbnail->setAllocationMode(osg::Image::NO_DELETE);
+	//thumbnail->setAllocationMode(osg::Image::NO_DELETE);
 	
 	if (!thumbnail){
 		cerr << "<ACVideo::computeThumbnail> problem creating thumbnail" << endl;
