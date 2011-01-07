@@ -15,10 +15,5 @@
 	TARGET_LINK_LIBRARIES(mediacycle-osg ${OPENGL_LIBRARIES})
 	TARGET_LINK_LIBRARIES(mediacycle-osg ${Boost_SYSTEM_LIBRARY})
 	TARGET_LINK_LIBRARIES(mediacycle-osg audioengine)
-
-	IF (APPLE_IOS_DEV OR APPLE_IOS_SIM OR APPLE_IOS_XCODE)
-		TARGET_LINK_LIBRARIES(mediacycle-osg cv cvaux)
-	ELSE()
-		TARGET_LINK_LIBRARIES(mediacycle-osg cv cvaux highgui)
-	ENDIF()
+	TARGET_LINK_LIBRARIES(mediacycle-osg ${OpenCV_LIBRARIES})
 #ENDIF ( USE_OSG )
