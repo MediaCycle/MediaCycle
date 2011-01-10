@@ -36,6 +36,7 @@
 #include <string>
 #include <iostream>
 #include <fstream>
+#include <cstdlib>  //JU: for exit
 using namespace std;
 
 // constants---------------------------------------------------------

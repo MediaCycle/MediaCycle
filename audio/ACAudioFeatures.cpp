@@ -1,8 +1,8 @@
 /**
  * @brief ACAudioFeatures.cpp
  * @author Jerome Urbain
- * @date 22/09/2010
- * @copyright (c) 2010 – UMONS - Numediart
+ * @date 06/01/2011
+ * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -55,7 +55,8 @@ enum desc_idx{
 	LOG_ATTACK_TIME,
 	ENERGY_MODULATION_FREQUENCY,
 	ENERGY_MODULATION_AMPLITUDE,
-	MODULATION
+        MODULATION,
+        BURSTS
 };
 
 ACMediaTimedFeature* computeFeature(float* data, string featureName, int samplerate, int nchannels, long length, int mfccNbChannels, int mfccNb, int windowSize, 	bool extendSoundLimits){
@@ -85,6 +86,7 @@ std::vector<ACMediaTimedFeature*> computeFeatures(float* data, int samplerate, i
 	descList.push_back("Log Attack Time");
 	descList.push_back("Energy Modulation Frequency");
 	descList.push_back("Energy Modulation Amplitude");
+        //descList.push_back("Burst Segmentation");
 	desc_amtf = computeFeatures(data, descList, samplerate, nchannels, length, mfccNbChannels, mfccNb, windowSize, extendSoundLimits);	
 	descList.clear();
 	return desc_amtf;
@@ -118,7 +120,7 @@ std::vector<ACMediaTimedFeature*> computeFeatures(float* data, vector<string> de
 	descMap["Log Attack Time"] = LOG_ATTACK_TIME;
 	descMap["Energy Modulation Frequency"] = ENERGY_MODULATION_FREQUENCY;
 	descMap["Energy Modulation Amplitude"] = ENERGY_MODULATION_AMPLITUDE;
-
+        descMap["Burst Segmentation"] = BURSTS;
 	
 	int fftSize=windowSize*2;
 	int hopSize = windowSize /8;
@@ -315,6 +317,12 @@ std::vector<ACMediaTimedFeature*> computeFeatures(float* data, vector<string> de
 		case DDMFCC:
 			desc.push_back(mfcc_tf->delta()->delta());
 			break;
+                case BURSTS:
+                        colvec BoundaryIndex_v;
+                        BoundaryIndex_v=burstBoundaries(loud_v,time_v,0.125);
+                        desc.push_back(new ACMediaTimedFeature(conv_to<fcolvec>::from(time_v), conv_to<fmat>::from(BoundaryIndex_v), std::string("BurstBoundaries")));
+                       break;
+
 // 		case MODULATION: // Added to the list if any modulation feature is required
 // 			mat modFr_m;
 // 			mat modAmp_m;
@@ -471,6 +479,43 @@ rowvec effectiveDuration(colvec time_v, colvec loud_v){
 	ed_v(2) = stop_sec;
 	ed_v(3) = ed_sp;
 	return ed_v;
+}
+
+colvec burstBoundaries(colvec split_v, colvec time_v, float minBurstDur){
+    int i=1, k, Nbursts=0;
+    int Nvalues=(int)time_v.n_elem;
+    colvec BB_v=zeros<colvec>(Nvalues);
+    bool candidate;
+    while(time_v(i)<minBurstDur){
+        i++;
+    }
+    while(time_v(i)<time_v(Nvalues-1)+time_v(0)-minBurstDur&&i<Nvalues-2){
+        candidate=true;
+        k=i-1;
+        while(k>0&&time_v(k)+minBurstDur>=time_v(i)){
+            if(split_v(k)<=split_v(i))
+            {
+                candidate=false;
+                break;
+            }
+            k--;
+        }
+        k=i+1;
+        while(k<Nvalues-1&&time_v(k)-minBurstDur<=time_v(i)){
+            if(split_v(k)<=split_v(i))
+            {
+                candidate=false;
+                break;
+            }
+            k++;
+        }
+        if(candidate){
+            BB_v(i)=1;
+        }
+
+        i++;
+    }
+    return BB_v;
 }
 
 int resample(float* datain, SF_INFO *sfinfo, float* dataout, SF_INFO* sfinfoout){
