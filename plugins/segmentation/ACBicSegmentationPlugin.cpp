@@ -163,7 +163,7 @@ int ACBicSegmentationPlugin::findSingleSegment(int A, int B){
         {
             return 0;
         }
-	float R = S * log(N) * 0.5; // JU: added log
+	float R = log(S) * N * 0.5; // JU: added log
 	
 	for (int i=A+2; i<B; i++){ //JU: modified indexes so as to have at least 2 frames for each test
 		N1=i-A;
