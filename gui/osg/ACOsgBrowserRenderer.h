@@ -81,10 +81,10 @@ using namespace osg;
 class ACOsgBrowserRenderer {
 protected:
 	MediaCycle				*media_cycle;
-	ref_ptr<Group>				 group;
-	ref_ptr<Group>				 media_group;
-	ref_ptr<Group>				 link_group;
-	ref_ptr<Group>				 label_group;
+	Group*				 group;
+	Group*				 media_group;
+	Group*				 link_group;
+	Group*				 label_group;
 	vector<ACOsgMediaRenderer*>  node_renderer;
 	vector<ACOsgNodeLinkRenderer*>  link_renderer;
 	vector<ACOsgMediaRenderer*>  label_renderer;
@@ -128,7 +128,7 @@ public:
 	void setMediaCycle(MediaCycle *media_cycle){ this->media_cycle = media_cycle; };
 	//void setLayoutPlugin(ACPlugin* acpl){mLayoutPlugin=acpl;};
 	//void setLayout(ACOsgBrowserLayoutType _type){layout_type = _type;}
-	Group *getShapes() 	{ return group.get(); };
+	Group *getShapes() 	{ return group; };
 	
 	void prepareNodes(int start=0);
 	void updateNodes(double ratio=0.0);

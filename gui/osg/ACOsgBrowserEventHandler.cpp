@@ -58,6 +58,11 @@ bool ACOsgBrowserEventHandler::handle(const osgGA::GUIEventAdapter& ea,osgGA::GU
 			if (view) pick(view,ea,false);
 			return false;
 		}    
+		case(osgGA::GUIEventAdapter::RELEASE):
+		{
+			//printf("event RELEASE: aa=%x\n", &aa);
+			return false;
+		}  
 		case(osgGA::GUIEventAdapter::KEYDOWN):
 		{
 			std::cout << "Key (OSG) '" << (char)ea.getKey() << "'" << std::endl;
@@ -76,20 +81,57 @@ bool ACOsgBrowserEventHandler::handle(const osgGA::GUIEventAdapter& ea,osgGA::GU
 		{		
 			return false;
 		}    
-		case(GUIEventAdapter::FRAME):
+		case(osgGA::GUIEventAdapter::FRAME):
 		{
 			//XS : not used, was in RS code
 			//render_callback();
 			
 			return false;
 		}
-		case(GUIEventAdapter::MOVE):
+		case(osgGA::GUIEventAdapter::MOVE):
 		{
 			//printf("mouse moved in browser\n");
 			osgViewer::View* view = dynamic_cast<osgViewer::View*>(&aa);
 			if (view) pick(view, ea, true);
 			return false;
 		}
+		case(osgGA::GUIEventAdapter::DRAG):
+		{
+			//printf("mouse dragged in browser\n");
+			// SD NOTE - On 2D touch devices, there is no such thing as a move
+			// So pointer move has to be handled here
+#if defined(APPLE_IOS)
+			osgViewer::View* view = dynamic_cast<osgViewer::View*>(&aa);
+			if (view) pick(view, ea, true);
+#endif
+			return false;
+		}
+		case(osgGA::GUIEventAdapter::DOUBLECLICK):
+		{
+			return false;
+		}
+		case(osgGA::GUIEventAdapter::RESIZE):
+		{
+			return false;
+		}
+#if !defined(APPLE_IOS)
+		case(osgGA::GUIEventAdapter::SCROLLUP):
+		{
+			return false;
+		}
+		case(osgGA::GUIEventAdapter::SCROLLDOWN):
+		{
+			return false;
+		}
+		case(osgGA::GUIEventAdapter::SCROLLLEFT):
+		{
+			return false;
+		}
+		case(osgGA::GUIEventAdapter::SCROLLRIGHT):
+		{
+			return false;
+		}
+#endif
 		default:
 		{	
 			//printf("received event: %d\n", ea.getEventType());

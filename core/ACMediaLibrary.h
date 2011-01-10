@@ -60,6 +60,7 @@ protected:
 	long synthesisID;
 	// XS new 300810
 	int mediaID; // mid of the media currently being imported. by default, starts at 0 and is incremented after each import.
+	std::string media_path;
 	
 public:
 	ACMediaLibrary();
@@ -100,6 +101,8 @@ public:
 	//int openLibrary(std::string _path, bool aInitLib=false); // SD 2010 sep discontinued
 //	void saveAsLibrary(std::string _path);
 	// C++ versions
+	int setPath(std::string path);
+	std::string getPath() { return media_path; };
 	int openACLLibrary(std::string _path, bool aInitLib=false);
 	int openMCSLLibrary(std::string _path, bool aInitLib=false);//CF 31/05/2010 temporary MediaCycle Segmented Library (MCSL) for AudioGarden, adding a parentID for segments to the initial ACL, awaiting approval
 	int saveACLLibrary(std::string _path);

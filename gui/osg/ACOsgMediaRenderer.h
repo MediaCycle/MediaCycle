@@ -45,6 +45,8 @@
 #include <osg/Group>
 #include <osg/ShapeDrawable>
 #include <osg/MatrixTransform>
+#include <osg/PositionAttitudeTransform>
+#include <osg/AutoTransform>
 #include <osg/BlendFunc>
 #include <osg/BlendColor>
 #include <osg/Texture2D>
@@ -56,13 +58,20 @@
 
 #include "ACRefId.h"
 
+#define AUTO_TRANSFORM
+
 using namespace std;
 using namespace osg;
 
 class ACOsgMediaRenderer {
 protected:
 	MediaCycle* media_cycle;
+	Group* local_group;
+#ifdef AUTO_TRANSFORM
+	AutoTransform* media_node;
+#else
 	MatrixTransform* media_node;
+#endif
 	int node_index;
 	float distance_mouse;
 	// int	media_activity;
@@ -98,7 +107,7 @@ public:
 	void setNodeIndex(int _node_index) { this->node_index = _node_index; };
 	void setDistanceMouse(float _distance_mouse) { this->distance_mouse = _distance_mouse; };
 	//void setActivity(int _media_activity) { this->media_activity = _media_activity; }
-	MatrixTransform* getNode() { return media_node; };
+	Group* getNode() { return local_group; };
 	int	getNodeIndex() { return node_index; };
 	
 	virtual void prepareNodes()=0;

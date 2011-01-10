@@ -4,6 +4,7 @@
  *
  *  @author Christian Frisson
  *  @date 26/10/10
+ *  @author Stéphane Dupont
  *
  *  @copyright (c) 2010 – UMONS - Numediart
  *  
@@ -35,38 +36,21 @@
  *  http://github.com/stmh/osg/tree/iphone
  */
 
-#include "osgPlugins.h"
-
-#include <osgDB/ReadFile>
-#include <osg/MatrixTransform>
-#include <osgViewer/Viewer>
-
-#include <MediaCycle.h>
-#include <ACOsgBrowserRenderer.h>
-#include <ACOsgBrowserEventHandler.h>
-#include <ACAudioEngine.h>
-
 #import <UIKit/UIKit.h>
 
+@class ACAudioCycleOsgiPadController;
 
 @interface ACAudioCycleOsgiPad : NSObject <UIApplicationDelegate, UIAccelerometerDelegate> {
 
+	UIWindow* window; //main application window
+	ACAudioCycleOsgiPadController *viewController;
+	
 	UIAccelerationValue		accel[3];
 	
-	osg::ref_ptr<osgViewer::Viewer> _viewer;
-	osg::ref_ptr<osg::MatrixTransform> _root;
-	
-	MediaCycle				*media_cycle;
-	ACAudioEngine			*audio_engine;
-	ACOsgBrowserEventHandler *event_handler;
-	ACOsgBrowserRenderer *renderer;
-	osg::ref_ptr<osgViewer::GraphicsWindowEmbedded> osg_view;
 }
 
-- (void)updateScene;
-- (void)prepareFromBrowser;
-- (void)updateTransformsFromBrowser:(double)frac;
-- (void)updatedLibrary;
+@property (nonatomic, retain) IBOutlet UIWindow *window;
+@property (nonatomic, retain) IBOutlet ACAudioCycleOsgiPadController *viewController;
 
 @end
 

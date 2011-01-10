@@ -46,7 +46,12 @@ class ACOsgAudioRenderer : public ACOsgMediaRenderer {
 protected:
 	Geode* waveform_geode;
 	Geode* curser_geode;
+
+#ifdef AUTO_TRANSFORM
+	AutoTransform* curser_transform;
+#else
 	MatrixTransform* curser_transform;
+#endif
 	Geode* entry_geode;
 	
 	void waveformGeode();

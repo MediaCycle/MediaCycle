@@ -328,6 +328,7 @@ static NSDate *gReferenceDate = nil;
 	//osg::DisplaySettings * ds = osg::DisplaySettings::instance();
 	//ds->setNumMultiSamples(4);
 	
+ 
 	//ref_ptr< DisplaySettings > displaySettings = new DisplaySettings;
 	//displaySettings->setNumMultiSamples(4);
 	//_osgViewData->viewer->setDisplaySettings( displaySettings.get() );

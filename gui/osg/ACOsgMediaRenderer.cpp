@@ -36,10 +36,18 @@
 #include "ACOsgMediaRenderer.h"
 
 ACOsgMediaRenderer::ACOsgMediaRenderer() {
+	local_group = new Group(); 
+#ifdef AUTO_TRANSFORM
+	media_node = new AutoTransform();
+#else
 	media_node = new MatrixTransform();
+#endif
 	node_color = Vec4(1,1,0.5,1); //CF seminal yellow
 	user_defined_color = false;
 	initialized = 0;
+	media_node->ref();
+	local_group->ref();
+	local_group->addChild(media_node);
 }
 
 void ACOsgMediaRenderer::setDeltaTime(double media_cycle_deltatime) {

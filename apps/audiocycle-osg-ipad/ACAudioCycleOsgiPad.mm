@@ -4,6 +4,7 @@
  *
  *  @author Christian Frisson
  *  @date 26/10/10
+ *  @author Stéphane Dupont
  *
  *  @copyright (c) 2010 – UMONS - Numediart
  *  
@@ -36,10 +37,7 @@
  */
 
 #import "ACAudioCycleOsgiPad.h"
-#include <osgGA/TrackballManipulator>
-#include <osgGA/MultiTouchTrackballManipulator>
-#include <osg/ShapeDrawable>
-#include <osg/DisplaySettings>
+#import "ACAudioCycleOsgiPadController.h"
 
 #define kAccelerometerFrequency		30.0 // Hz
 #define kFilteringFactor			0.1
@@ -47,158 +45,77 @@
 
 @implementation ACAudioCycleOsgiPad
 
-//
-//Called once app has finished launching, create the viewer then realize. Can't call viewer->run as will 
-//block the final inialization of the windowing system
-//
-- (void)applicationDidFinishLaunching:(UIApplication *)application {
-    
-    osg::setNotifyLevel(osg::INFO);
-	
-	_root = new osg::MatrixTransform();	
-    
-    // try msaa. available for iOS >= 4.0
-    osg::DisplaySettings* settings = osg::DisplaySettings::instance();
-    settings->setNumMultiSamples(4);
-	
-	unsigned int w(640);
-	unsigned int h(480);
-	osg::GraphicsContext::WindowingSystemInterface* wsi = osg::GraphicsContext::getWindowingSystemInterface();
-	if (wsi) {
-		wsi->getScreenResolution(0, w, h);
-	}
-	
-	_viewer = new osgViewer::Viewer();
-	
-	osg_view = new osgViewer::GraphicsWindowEmbedded(0,0,w,h);
-	
-	 _viewer->getCamera()->setViewport(new osg::Viewport(0.0f,0.0f,w,h));
-	 _viewer->getCamera()->setProjectionMatrixAsPerspective(45.0f, _viewer->getCamera()->getViewport()->aspectRatio(), 0.001f, 10.0f);
-	 _viewer->getCamera()->getViewMatrix().makeIdentity();
-	 _viewer->getCamera()->setViewMatrixAsLookAt(Vec3(0.0f,0.0f,1.0f), Vec3(0.0f,0.0f,0.0f), Vec3(0.0f,1.0f,0.0f));
-	
-	// CF debug this
-	//_viewer->getCamera()->setGraphicsContext(wsi->getGraphicsWindow());//CF!!!!!! check
-	 
-	renderer = new ACOsgBrowserRenderer();
-	
-	media_cycle = new MediaCycle(MEDIA_TYPE_AUDIO,"/tmp/","mediacycle.acl");
+@synthesize window;
+@synthesize viewController;
 
+
+- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {    
+    
+    // Override point for customization after application launch.
 	
-	renderer->setMediaCycle(media_cycle);
-	event_handler = new ACOsgBrowserEventHandler;
-	event_handler->setMediaCycle(media_cycle);
-	_viewer->addEventHandler(event_handler);
-	
-	_viewer->setThreadingModel(osgViewer::Viewer::SingleThreaded);//SingleThreaded DrawThreadPerContext
-	_viewer->realize();
-	
-	osg::setNotifyLevel(osg::INFO);
-	
-	[NSTimer scheduledTimerWithTimeInterval:1.0/30.0 target:self selector:@selector(updateScene) userInfo:nil repeats:YES]; 
-	
+    // Add the view controller's view to the window and display.
+    [self.window addSubview:viewController.view];
+    [self.window makeKeyAndVisible];
+
 	//Configure and start accelerometer
 	[[UIAccelerometer sharedAccelerometer] setUpdateInterval:(1.0 / kAccelerometerFrequency)];
 	[[UIAccelerometer sharedAccelerometer] setDelegate:self];
 	
-	audio_engine = new ACAudioEngine();
-	audio_engine->setMediaCycle(media_cycle);
-	
-	media_cycle->setClusterNumber(5);
+	return YES;
 }
-
-
-//
-//Timer called function to update our scene and render the viewer
-//
-- (void)updateScene {
-	
-	//std::cout<<"Update scene" << std::endl;
-	 double frac = 0.0;
-	 
-	 if(media_cycle && media_cycle->hasBrowser())
-	 {
-	 media_cycle->updateState();
-	 frac = media_cycle->getFrac();
-	 }
-	 
-	 if (!media_cycle->getNeedsDisplay()) {
-	 return;
-	 }
-
-	//CF debug the commented parts
-	/*
-	 if(_viewer->getCamera() && media_cycle && media_cycle->hasBrowser())
-	 {
-	 
-	 float x=0.0f, y=0.0f, zoom, angle;
-	 float upx, upy;
-	 
-	 zoom = media_cycle->getCameraZoom();
-	 angle = media_cycle->getCameraRotation();
-	 media_cycle->getCameraPosition(x, y);
-	 upx = cos(-angle+PI/2);
-	 upy = sin(-angle+PI/2);		
-	 
-	 _viewer->getCamera()->setViewMatrixAsLookAt(Vec3(x*1.0,y*1.0,0.8 / zoom), Vec3(x*1.0,y*1.0,0), Vec3(upx, upy, 0));
-	 }
-	 */
-	
-	/*
-	 [self updateTransformsFromBrowser:frac];
-	 */
-	 
-	/*
-
-	if (media_cycle && media_cycle->hasBrowser() && media_cycle->getBrowser()->getState() == AC_CHANGING) {
-		if (media_cycle->getNeedsDisplay()) {
-			[self updateTransformsFromBrowser:media_cycle->getFrac()];
-		}
-	}
-	*/
-	
-	_viewer->frame();
-	
-	
-	media_cycle->setNeedsDisplay(false);
-}
-
 
 - (void)applicationWillResignActive:(UIApplication *)application {
+    /*
+     Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
+     Use this method to pause ongoing tasks, disable timers, and throttle down OpenGL ES frame rates. Games should use this method to pause the game.
+     */
+}
 
+
+- (void)applicationDidEnterBackground:(UIApplication *)application {
+    /*
+     Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later. 
+     If your application supports background execution, called instead of applicationWillTerminate: when the user quits.
+     */
+}
+
+
+- (void)applicationWillEnterForeground:(UIApplication *)application {
+    /*
+     Called as part of  transition from the background to the inactive state: here you can undo many of the changes made on entering the background.
+     */
 }
 
 
 - (void)applicationDidBecomeActive:(UIApplication *)application {
-
-
-	[self prepareFromBrowser];
-	media_cycle->setNeedsDisplay(true);
-	
-	//NSString *filePath = [[NSBundle mainBundle] pathForResource:@"zero-g-pro-pack-small-mc-ipad" ofType:@"acl"];  
-	NSString *filePath = [[NSBundle mainBundle] pathForResource:@"dummy-ipad" ofType:@"acl"];  
-	media_cycle->importACLLibrary((string)[filePath UTF8String]);
-	media_cycle->normalizeFeatures();
-	media_cycle->libraryContentChanged();
-	[self updatedLibrary];
-	
-	//CF: for the moment, there's just a grey node, the following needs be debugged:
-	/*
-	[self updateTransformsFromBrowser:0];
-	media_cycle->setNeedsDisplay(true);
-	[self updateScene];
-	  */
+    /*
+     Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
+     */
 }
 
 
--(void)applicationWillTerminate:(UIApplication *)application{
-	delete event_handler;
-	delete renderer;
-	delete audio_engine;
-	delete media_cycle;
-	_root = NULL;
-	_viewer = NULL;
-} 
+- (void)applicationWillTerminate:(UIApplication *)application {
+    /*
+     Called when the application is about to terminate.
+     See also applicationDidEnterBackground:.
+     */
+}
+
+#pragma mark -
+#pragma mark Memory management
+
+- (void)applicationDidReceiveMemoryWarning:(UIApplication *)application {
+    /*
+     Free up as much memory as possible by purging cached data objects that can be recreated (or reloaded from disk) later.
+     */
+}
+
+
+- (void)dealloc {
+    [viewController release];
+    [window release];
+    [super dealloc];
+}
 
 //
 //Accelorometer
@@ -209,57 +126,6 @@
 	accel[0] = acceleration.x * kFilteringFactor + accel[0] * (1.0 - kFilteringFactor);
 	accel[1] = acceleration.y * kFilteringFactor + accel[1] * (1.0 - kFilteringFactor);
 	accel[2] = acceleration.z * kFilteringFactor + accel[2] * (1.0 - kFilteringFactor);
-}
-
-- (void)prepareFromBrowser
-{
-	renderer->prepareNodes();
-	renderer->prepareLabels();
-		
-	//CF Cocoa style
-	//[self setNode:_privateData->renderer.getShapes()];//CF
-	//[self setNode:renderer->getShapes()];//C
-		
-	//CF Qt style
-	_viewer->setSceneData(renderer->getShapes());//CF	
-	
-	//CF Thomas Hogarth style
-	//_root->addChild(renderer->getShapes());
-	//_viewer->setSceneData(_root.get());
-}
-
-- (void)updateTransformsFromBrowser:(double)frac
-{
-	int closest_node;
-	// get screen coordinates
-	closest_node = renderer->computeScreenCoordinates(_viewer, frac);//CF
-	media_cycle->setClosestNode(closest_node);
-	// recompute scene graph	
-	renderer->updateNodes(frac); // animation time in [0,1] //CF
-	renderer->updateLabels(frac);//CF
-}
-
-- (void)updatedLibrary
-{	
-
-	media_cycle->setReferenceNode(0);//CF we want to debug the view and positions using the same layout at each relaunch!
-	
-	media_cycle->getBrowser()->setState(AC_CHANGING);
-	media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
-	
-	[self prepareFromBrowser];
-	media_cycle->setNeedsDisplay(true);
-	
-	
-}
-- (void)dealloc {
-	delete event_handler;
-	delete renderer;
-	delete audio_engine;
-	delete media_cycle;
-	_root = NULL;
-	_viewer = NULL;
-	[super dealloc];
 }
 
 @end

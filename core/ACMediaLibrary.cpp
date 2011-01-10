@@ -305,6 +305,10 @@ int ACMediaLibrary::scanDirectory(std::string _path, int _recursive, std::vector
 	return 1;
 }
 
+int ACMediaLibrary::setPath(std::string path) {
+	media_path = path;
+	return 1;
+}
 
 // C++ version
 int ACMediaLibrary::openACLLibrary(std::string _path, bool aInitLib){
@@ -333,7 +337,12 @@ int ACMediaLibrary::openACLLibrary(std::string _path, bool aInitLib){
 	do {
 		local_media = ACMediaFactory::create(media_type);
 		if (local_media != NULL) {
-			ret = local_media->loadACL(library_file);
+			if (!media_path.empty()) {
+				ret = local_media->loadACL(media_path, library_file);
+			}
+			else {
+				ret = local_media->loadACL("", library_file);
+			}
 			if (ret) {
 				//std::cout << "Media Library Size : " << this->getSize() << std::endl;//CF free the console
 				media_library.push_back(local_media);

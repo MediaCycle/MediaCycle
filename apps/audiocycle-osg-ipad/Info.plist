@@ -7,7 +7,7 @@
 	<key>CFBundleDisplayName</key>
 	<string>audiocycle-osg-ipad</string>
 	<key>CFBundleExecutable</key>
-	<string>audiocycle-osg-ipad</string>
+	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIconFile</key>
 	<string>icon.png</string>
 	<key>CFBundleIdentifier</key>
@@ -37,5 +37,7 @@
 		<integer>1</integer>
 		<integer>2</integer>
 	</array>
+	<key>NSMainNibFile</key>
+	<string>MainWindowiPad</string>
 </dict>
 </plist>

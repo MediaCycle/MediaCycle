@@ -35,9 +35,9 @@
 #ifndef _ACMEDIADATA_H
 #define _ACMEDIADATA_H
 
+#include "ACOpenCVInclude.h"
 #include "ACMediaTypes.h"
 #include <sndfile.h>
-#include "ACOpenCVInclude.h"
 #include <osgDB/ReadFile>
 #include <osg/ComputeBoundsVisitor>
 #include <string>

@@ -133,7 +133,7 @@ void ACMedia::saveACL(ofstream &library_file, int mcsl) {
 // returns 0 if error (trying to open empty file, failed making thumbnail, ...)
 // returns 1 if fine
 // return value is used in ACMediaLibrary::openACLLibrary
-int ACMedia::loadACL(ifstream &library_file, int mcsl) {
+int ACMedia::loadACL(std::string media_path, ifstream &library_file, int mcsl) {
 	
 	int n_features;
 	int n_features_elements = 0;	
@@ -156,7 +156,9 @@ int ACMedia::loadACL(ifstream &library_file, int mcsl) {
 	}
 	
 	getline(library_file, filename, '\n');
-	//std::cout << "Filename " << filename << std::endl;
+	if (!media_path.empty() && !filename.empty()) {
+		filename = media_path + "/" + filename;
+	}
 	
 	if (!filename.empty()) {
 		
@@ -208,7 +210,7 @@ void ACMedia::saveMCSL(ofstream &library_file) {
 }
 
 int ACMedia::loadMCSL(ifstream &library_file) {
-	return loadACL(library_file, 1);
+	return loadACL("", library_file, 1);
 }
 
 ACMediaFeatures* ACMedia::getFeaturesVector(int i){ 

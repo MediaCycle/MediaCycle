@@ -57,12 +57,16 @@ ACOsgBrowserRenderer::ACOsgBrowserRenderer()
 	link_renderer.resize(0);
 	label_renderer.resize(0);
 	group = new Group();
+	group->ref();
 	media_group = new Group();
+	media_group->ref();
 	label_group = new Group();
+	label_group->ref();
 	link_group = new Group();
-	group->addChild(label_group.get());		// SD TODO - check this get(), was needed to compile on OSG v2.4 (used by AM)
-	group->addChild(media_group.get());
-	group->addChild(link_group.get());
+	link_group->ref();
+	group->addChild(label_group);		// SD TODO - check this get(), was needed to compile on OSG v2.4 (used by AM)
+	group->addChild(media_group);
+	group->addChild(link_group);
 	
 	nodes_prepared = 0;
 	
@@ -191,6 +195,8 @@ void ACOsgBrowserRenderer::prepareNodes(int _start) {
 			}
 			
 			//if (media_cycle->getBrowser()->getLayout() == AC_LAYOUT_TYPE_NODELINK) {
+			// SD
+			/*
 			link_renderer[i] = new ACOsgNodeLinkRenderer();
 			if (link_renderer[i]) {
 				link_renderer[i]->setMediaCycle(media_cycle);
@@ -199,11 +205,12 @@ void ACOsgBrowserRenderer::prepareNodes(int _start) {
 				link_renderer[i]->prepareLinks();
 				link_group->addChild(link_renderer[i]->getLink());
 			}
+			 */
 			//}	
 		}
 	}
 
-	
+	/*
 	if (link_renderer.size()>n){//media_cycle->getBrowser()->getLayout() == AC_LAYOUT_TYPE_NODELINK && ) {
 		for (int i=n;i<link_renderer.size();i++) {
 			link_group->removeChild(link_renderer[i]->getLink());
@@ -211,7 +218,8 @@ void ACOsgBrowserRenderer::prepareNodes(int _start) {
 		}
 		link_renderer.resize(n);
 	}
-		
+	 */
+	
 	/*
 	 layout_renderer = new ACOsgLayoutRenderer();
 	 layout_renderer->setMediaCycle(media_cycle); 
@@ -224,7 +232,6 @@ void ACOsgBrowserRenderer::prepareNodes(int _start) {
 
 void ACOsgBrowserRenderer::updateNodes(double ratio) {
 	
-
 	if (!nodes_prepared) {
 		return;
 	}
@@ -355,11 +362,14 @@ void ACOsgBrowserRenderer::updateNodes(double ratio) {
 		layout_renderer->updateLayout(ratio);
 	*/
 	//CF or visible and updated only if AC_LAYOUT_TYPE_NODELINK
+	// SD
+	/*
 	if (media_cycle->getBrowser()->getLayout() == AC_LAYOUT_TYPE_NODELINK) {
 		for (unsigned int i=0;i<link_renderer.size();i++) {
 			link_renderer[i]->updateLinks(ratio);
 		}
 	}
+	 */
 }
 
 void ACOsgBrowserRenderer::prepareLabels(int start) {

@@ -272,7 +272,7 @@ ACAudioFeedback::ACAudioFeedback(ALCdevice* _device)
 	device = _device;
 	createOpenAL();
 #ifdef OPENAL_STREAM_MODE
-	createAudioEngine(44100, 512, 3);
+	createAudioEngine(44100, 2048, 3);
 	setTimeSignature(4, 4);
 #endif
 	ext_loop_length = 0;

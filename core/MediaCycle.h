@@ -74,6 +74,7 @@ public:
 	int importDirectories(vector<string> paths, int recursive, bool forward_order=true, bool doSegment=false);
 	int importDirectoriesThreaded(vector<string> paths, int recursive, bool forward_order=true, bool doSegment=false);
     int importDirectory(std::string path, int recursive, bool forward_order=true, bool doSegment=false);
+	int setPath(string path);
 	int importACLLibrary(std::string path);
 	int importMCSLLibrary(std::string path);//CF 31/05/2010 temporary MediaCycle Segmented Library (MCSL) for AudioGarden, adding a parentID for segments to the initial ACL, awaiting approval
     // int importLibrary(std::string path); // SD 2010 sep discontinued

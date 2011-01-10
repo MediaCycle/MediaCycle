@@ -93,14 +93,25 @@ void ACOsgTextRenderer::prepareNodes() {
 
 void ACOsgTextRenderer::updateNodes(double ratio) {
 		
+	float x, y, z;
+	
 	Matrix T;
 	Matrix Trotate;
 	
 	osg::Vec4 textColor(0.9f,0.9f,0.9f,0.9f);
 	//((ShapeDrawable*)text_geode->getDrawable(0))->setColor(textColor);
 	
-	T.makeTranslate(Vec3(pos.x, pos.y, pos.z));
-	text->setText( text_string );
+	x = pos.x;
+	y = pos.y;
+	z = pos.z;
 	
-	media_node->setMatrix(T);	
+	T.makeTranslate(Vec3(x, y, z));
+	text->setText( text_string );
+
+#ifdef AUTO_TRANSFORM
+	media_node->setPosition(Vec3(x,y,z));
+#else
+	media_node->setMatrix(T);
+#endif
+
 }

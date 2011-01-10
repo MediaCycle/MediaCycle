@@ -1,11 +1,9 @@
-PROJECT(MediaCycle)
-
 # add some find scripts
 # SET(CMAKE_USE_RELATIVE_PATHS YES)
 SET(CMAKE_MODULE_PATH "${MediaCycle_SOURCE_DIR}/CMakeModules")
 MESSAGE ( "modules in " ${CMAKE_MODULE_PATH} )
 
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 2.6.2)
 #MESSAGE(${CMAKE_VERSION})
 
 IF(COMMAND cmake_policy)
@@ -16,6 +14,15 @@ IF(COMMAND cmake_policy)
 		cmake_policy(SET CMP0014 NEW)
 	ENDIF ( )
 ENDIF(COMMAND cmake_policy)
+
+#if(APPLE_IOS_DEV OR APPLE_IOS_SIM)
+# Force gcc <= 4.2 on iPhone
+include(CMakeForceCompiler)
+CMAKE_FORCE_C_COMPILER(gcc-4.2 GNU)
+CMAKE_FORCE_CXX_COMPILER(gcc-4.2 GNU)
+#endif()
+
+PROJECT(MediaCycle)
 
 # Checking Apple OSX versions
 IF (APPLE)
@@ -155,19 +162,19 @@ IF ( APPLE )
 			LINK_DIRECTORIES( "${CMAKE_INSTALL_PREFIX}/lib" )
 		ENDIF()
 		IF ( APPLE_IOS_XCODE )
-			# Basic iPhone SDK detection (we need v. 3.2 currently, 4.1 unsupported)
-			IF(EXISTS /Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS3.2.sdk)
+			# Basic iPhone SDK detection (we need v. 4.2 currently, 4.1 unsupported)
+			IF(EXISTS /Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS4.2.sdk)
 				SET(iPhoneOS_SDK_FOUND TRUE)
 			ENDIF()
-			IF(EXISTS /Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator3.2.sdk)
+			IF(EXISTS /Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator4.2.sdk)
 				SET(iPhoneSimulator_SDK_FOUND TRUE)
 			ENDIF()
 			IF (iPhoneOS_SDK_FOUND AND iPhoneSimulator_SDK_FOUND)
-				MESSAGE("Found iPhone SDK v.3.2")
-				set(iPhoneOS_SDK_ROOT "/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS3.2.sdk")
-				set(iPhoneSimulator_SDK_ROOT "/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator3.2.sdk")
-				set(iPhoneOS_DEPS_ROOT "/opt/ios/device/3.2")
-				set(iPhoneSimulator_DEPS_ROOT "/opt/ios/simulator/3.2")
+				MESSAGE("Found iPhone SDK v.4.2")
+				set(iPhoneOS_SDK_ROOT "/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS4.2.sdk")
+				set(iPhoneSimulator_SDK_ROOT "/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator4.2.sdk")
+				set(iPhoneOS_DEPS_ROOT "/opt/ios/device/4.2")
+				set(iPhoneSimulator_DEPS_ROOT "/opt/ios/simulator/4.2")
 
   				# Force gcc <= 4.2 on iPhone
   				include(CMakeForceCompiler)
@@ -186,16 +193,16 @@ IF ( APPLE )
 				SET(OpenCV_ROOT_DIR "${iPhoneSimulator_DEPS_ROOT}")
 
 				# Set build variables
-				set(CMAKE_OSX_SYSROOT iphoneos3.2)
+				set(CMAKE_OSX_SYSROOT iphoneos4.2)
 				set(CMAKE_OSX_DEPLOYMENT_TARGET "")
 				set(CMAKE_OSX_ARCHITECTURES "$(ARCHS_UNIVERSAL_IPHONE_OS)")
 				set(CMAKE_EXE_LINKER_FLAGS "-framework Foundation -framework CoreGraphics -framework QuartzCore -framework UIKit")
-				set(XCODE_ATTRIBUTE_SDKROOT iphoneos3.2)
+				set(XCODE_ATTRIBUTE_SDKROOT iphoneos4.2)
 				set(MACOSX_BUNDLE_GUI_IDENTIFIER "com.yourcompany.\${PRODUCT_NAME:rfc1034identifier}")
 				add_definitions(-fno-regmove)
 				remove_definitions(-msse)
 			ELSE()
-				MESSAGE(FATAL_ERROR "iPhone SDK v.3.2 required")
+				MESSAGE(FATAL_ERROR "iPhone SDK v.4.2 required")
 			ENDIF()
 		ENDIF()
 	ELSE()
@@ -388,7 +395,7 @@ ENDIF ( USE_OPENGL )
 
 		# FFmpeg plugin check
 		STRING(REPLACE "include" "lib" OSG_LIBRARY_DIR ${OSG_INCLUDE_DIR}) #CF check NOT MINGW Windows systems, might be under "bin" instead of "lib"
-		FILE(GLOB OSG_FFMPEG_PLUGIN ${OSG_LIBRARY_DIR}/osgPlugins-*/osgdb_ffmpeg*)
+		FILE(GLOB OSG_FFMPEG_PLUGIN ${OSG_LIBRARY_DIR}/osgPlugins-*/*osgdb_ffmpeg*)
 		IF (OSG_FFMPEG_PLUGIN)
 			MESSAGE("-- Found FFmpeg plugin for OSG: ${OSG_FFMPEG_PLUGIN}")
 		ELSE()

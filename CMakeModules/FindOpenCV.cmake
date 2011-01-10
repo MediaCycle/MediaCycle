@@ -175,7 +175,7 @@ FIND_PATH(OpenCV_LEGACY_INCLUDE_DIR
 # some are optionally, some may not exist on Linux
 #
 FIND_LIBRARY(OpenCV_CV_LIBRARY   
-  NAMES cv opencv
+  NAMES cv opencv opencv_core opencv_legacy
   PATHS ${OpenCV_ROOT_DIR}  
   PATH_SUFFIXES  ${OpenCV_LIBDIR_SUFFIXES} )
 FIND_LIBRARY(OpenCV_CVAUX_LIBRARY

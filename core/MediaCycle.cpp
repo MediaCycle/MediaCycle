@@ -404,6 +404,12 @@ int MediaCycle::importDirectory(string path, int recursive, bool forward_order, 
 	return ok;
 }
 
+int MediaCycle::setPath(string path) {
+	int ok = 0;
+	ok = this->mediaLibrary->setPath(path);
+	return ok;
+}
+
 int MediaCycle::importACLLibrary(string path) {
 // XS import = open + some processing 
 	cout << "MediaCycle: importing library: " << path << endl;

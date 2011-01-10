@@ -33,9 +33,10 @@ else
 	SDK_VERSION="$4"
 fi
 
-IPHONEOS_VERSION_MIN="3.2"
+IPHONEOS_VERSION_MIN="3.0"
 DEVELOPER_ROOT="/Developer/Platforms/${TARGET_SDK_NAME}.platform/Developer"
 SDK_ROOT="${DEVELOPER_ROOT}/SDKs/${TARGET_SDK_NAME}${SDK_VERSION}.sdk"
+SDK_REF="${DEVELOPER_ROOT}/SDKs/${TARGET_SDK_NAME}${SDK_VERSION}.sdk"
 
 if [ ! -d "$SDK_ROOT" ]; then
 	echo "iOS SDK Version ${SDK_VERSION} is not found, please select iOS version you have."
@@ -79,10 +80,11 @@ echo ""
 
 if [ "$TARGET_SDK" = "device" ]; then
 	FLAGS="-miphoneos-version-min=${IPHONEOS_VERSION_MIN}"
-	ARCH="armv6"
-	#CMAKE_OPTIONS="-D ENABLE_SSE=OFF -D ENABLE_SSE2=OFF"
+	ARCH="armv6;armv7"
+	MAKE_OPTIONS="-D ENABLE_SSE=OFF -D ENABLE_SSE2=OFF"
 else
 	FLAGS="-mno-thumb -arch i386 -pipe -no-cpp-precomp -fobjc-abi-version=2 -fobjc-legacy-dispatch"
+	#FLAGS="-arch i386 -fobjc-abi-version=2 -fobjc-legacy-dispatch"
 	ARCH="i386"
 	#CMAKE_OPTIONS='-D CMAKE_OSX_DEPLOYMENT_TARGET="10.6"'
 fi
@@ -92,6 +94,7 @@ env \
 	CXXFLAGS="${FLAGS}" \
 	LDFLAGS="${FLAGS}" \
 cmake \
+	-G Xcode \
 	-D CMAKE_BUILD_TYPE=Release \
 	-D USE_QT4=OFF \
 	-D USE_COCOA=OFF \
@@ -105,9 +108,9 @@ cmake \
 	-D BUILD_PLUGINS=OFF \
 	-D USE_AUDIOGARDEN=OFF \
 	-D USE_SDIF=OFF \
-	-D IOS_DEV="${IOS_DEV_VALUE}" \
-	-D IOS_SIM="${IOS_SIM_VALUE}" \
-	-D CMAKE_OSX_SYSROOT="${SDK_ROOT}" \
+	-D APPLE_IOS_DEV="${IOS_DEV_VALUE}" \
+	-D APPLE_IOS_SIM="${IOS_SIM_VALUE}" \
+	-D CMAKE_OSX_SYSROOT="${SDK_REF}" \
 	-D CMAKE_OSX_ARCHITECTURES="${ARCH}" \
 	-D CMAKE_INSTALL_PREFIX="${INSTALL_PREFIX}" \
 	-D CMAKE_FIND_ROOT_PATH="${INSTALL_PREFIX}" \
@@ -115,8 +118,8 @@ cmake \
 	-D CMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY \
 	-D CMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY \
 	-D CMAKE_VERBOSE_MAKEFILE=TRUE \
-	-D CMAKE_C_COMPILER="${DEVELOPER_ROOT}/usr/bin/gcc-4.2" \
-	-D CMAKE_CXX_COMPILER="${DEVELOPER_ROOT}/usr/bin/g++-4.2" \
+	-D CMAKE_C_COMPILER="${DEVELOPER_ROOT}/usr/bin/gcc" \
+	-D CMAKE_CXX_COMPILER="${DEVELOPER_ROOT}/usr/bin/g++" \
 	${CMAKE_OPTIONS} \
 	"${MediaCycle_ROOT}" \
 	&& echo "" \
