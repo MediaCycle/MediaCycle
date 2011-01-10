@@ -108,12 +108,14 @@ std::vector<int> ACBicSegmentationPlugin::_segment(){
 	int seg_f = Wmin;
 	std::vector<int> segments_tmp;
 
+
+
 	while (seg_f < int (this->full_features.n_cols)) {
 		int s = this->findSingleSegment(seg_i, seg_f);
 		if (s > 0) {
 			segments_tmp.push_back(s);
 			seg_i = s + jump_width;
-			seg_f = seg_i + Wmin;
+			seg_f = seg_i + Wmin; // JU: I believe we should always take all the frames in the BIC criterion (so, +1) even if we prevent for having segments shorter than Wmin: the first frames of the segment are relevant for its statistical modelling, hence finiding the segment end.
 		}
 		seg_f += sampling_rate;
 	}
@@ -138,7 +140,8 @@ int ACBicSegmentationPlugin::findSingleSegment(int A, int B){
 		std::cout << "<ACBicSegmentationPlugin::findSingleSegment> : limits  must be positive !" << std::endl;
 		return -1;
 	}
-		
+
+
 	float max_bic = bic_thresh;
 	int imax_bic = 0;
 	float deltaBICi = 0.0;
@@ -156,17 +159,28 @@ int ACBicSegmentationPlugin::findSingleSegment(int A, int B){
 	float S1 = 0.0;
 	float S2 = 0.0;
 	float S = detCovariance (A,B);
-	float R = S * N;
+        if(!S)  //JU: added return in case all frames are identic.
+        {
+            return 0;
+        }
+	float R = S * log(N) * 0.5; // JU: added log
 	
-	for (int i=A+1; i<B; i++){
+	for (int i=A+2; i<B; i++){ //JU: modified indexes so as to have at least 2 frames for each test
 		N1=i-A;
 		N2=B-i;
 		// XS TODO : use running_stat_vec<type>(true) 
-		S1 = detCovariance (A,i);
+		S1 = detCovariance (A,i-1);  // JU: i-1 so frame i is not in both sides...
+                if(!S1)                     // JU: added "protection" for case successive frames are identic (then covariance is zero, log is infinite...)
+                {
+                    if(!detCovariance(A,i))
+                    {
+                        continue;
+                    }
+                }
 		S2 = detCovariance (i,B);
-		deltaBICi = R - N1*S1 - N2*S2 -lP;
+		deltaBICi = R - N1*log(S1)*0.5 - N2*log(S2)*0.5 -lP; // Ju: added log
 		//cout << deltaBICi << endl;
-		if ( deltaBICi > max_bic) {
+		if (deltaBICi > max_bic) {
 			// store current maximum = most likely cut
 			max_bic = deltaBICi;
 			imax_bic = i;
@@ -177,9 +191,18 @@ int ACBicSegmentationPlugin::findSingleSegment(int A, int B){
 	if (max_bic > bic_thresh) {
 		cout << "max bic : " << max_bic << " ; found at time : " << imax_bic << endl;
 	}
+        int discard_borders=5;
+        if(imax_bic<A+discard_borders||imax_bic>B-discard_borders) // JU: preventing from segmenting close to the borders of the BIC window: should we keep it, it should become an argument of the class
+        {
+            return 0;
+        }
 	return imax_bic;
 }
 
 float ACBicSegmentationPlugin::detCovariance(int _cinf, int _csup){
-	return arma::det (arma::cov(this->full_features.cols(_cinf, _csup)));
+    //arma::fmat M=this->full_features.cols(_cinf,_csup);
+    //M.print();
+    //float p=arma::det (arma::cov(arma::trans(this->full_features.cols(_cinf, _csup))));
+    //cout << "det(" << _cinf <<',' << _csup << "): " << p << endl;
+	return arma::det (arma::cov(arma::trans(this->full_features.cols(_cinf, _csup)))); // Ju: added trans
 }
