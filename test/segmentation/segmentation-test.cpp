@@ -1,7 +1,7 @@
 /**
  * @brief segmentation-test.cpp
  * @author Jerome Urbain
- * @date 10/01/2011
+ * @date 12/01/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -37,6 +37,7 @@
 #include "MediaCycle.h"
 
 #include "ACBicSegmentationPlugin.h"
+#include "ACSelfSimSegmentationPlugin.h"
 #include "gnuplot_i.hpp"
 #include "Armadillo-utils.h" 
 
@@ -228,10 +229,86 @@ void test_multiple_bic(int n){
         char c;
         cin >> c;
 
-	delete P;
-
 	delete P;	
 }
+
+
+void test_multiple_selfsim(int n){
+	arma::fmat M;
+	M.set_size(n,100);
+        float tmp;
+
+        srand ( time(NULL) );
+
+
+        for (int k=0; k<n; k++)
+        {
+            tmp=100*double(rand())/RAND_MAX;
+            for (int i=0; i<30; i++){
+                    M(k,i)= tmp+5*double(rand())/RAND_MAX;
+            }
+            tmp=100*double(rand())/RAND_MAX;
+            for (int i=30; i<50; i++){
+                    M(k,i)= tmp+5*double(rand())/RAND_MAX;
+            }
+            tmp=100*double(rand())/RAND_MAX;
+            for (int i=50; i<80; i++){
+                    M(k,i)= tmp+5*double(rand())/RAND_MAX;
+            }
+            tmp=100*double(rand())/RAND_MAX;
+            for (int i=80; i<100; i++){
+                    M(k,i)= tmp+5*double(rand())/RAND_MAX;
+            }
+        }
+
+
+	M.print();
+
+	ACSelfSimSegmentationPlugin* P = new ACSelfSimSegmentationPlugin();
+	clock_t start = clock();
+	//default: float _SelfSimThresh=0.8, _L=8, _Wmin=8, KernelType=SELFSIMSTEP, KernelDistance=COSINE;
+
+	std::vector<int> seg = P->segment(M, 0.01, 16, 10, SELFSIMGAUSSIAN, MANHATTAN);
+
+	std::cout << " -- end multiple self sim segmentation --" << std::endl;
+	std::cout << "Time elapsed (segmentation alone): " << ((double)clock() - start) / CLOCKS_PER_SEC << std::endl;
+
+	//plotting in gnuplot
+
+
+	std::vector<double> seg_d (seg.begin(), seg.end());
+	std::vector<double> seg_i; // segments heights
+	for (int i = 0; i< int(seg_d.size()); i++){
+		seg_i.push_back(100);
+	}
+
+	Gnuplot g1 = Gnuplot("lines");
+	g1.reset_plot();
+
+        vector<double> m;
+        char buffer[3];
+        for(int p=0; p <n; p++)
+        {
+            m.clear();
+            for (unsigned int i=0; i< M.n_cols; i++) {
+		m.push_back( (double) M(p,i) );
+            }
+
+            g1.plot_x(m,"M");
+        }
+
+	// plotting segments
+	g1.set_style("impulses");
+	if (seg_d.size() > 0)
+		g1.plot_xy(seg_d,seg_i, "segments");
+
+	 cout << "Enter char to exit" << endl;
+        char c;
+        cin >> c;
+
+	delete P;
+}
+
 
 void test_bic_from_file(std::string _dir, std::string _fname){
 	ifstream data_file;
@@ -303,7 +380,7 @@ int main(int argc, char *argv[]){
                 n=atoi(argv[1]);
             }
         }
-        test_multiple_bic(n);
+        test_multiple_selfsim(n);
 
        // string sdir = "/Users/xavier/numediart/Project11.1-MediaBlender/results/";
 //	test_bic_from_file ( sdir, "Video10151.txt" );
