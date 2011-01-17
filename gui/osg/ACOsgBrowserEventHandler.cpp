@@ -115,21 +115,31 @@ bool ACOsgBrowserEventHandler::handle(const osgGA::GUIEventAdapter& ea,osgGA::GU
 			return false;
 		}
 #if !defined(APPLE_IOS)
-		case(osgGA::GUIEventAdapter::SCROLLUP):
+		case(osgGA::GUIEventAdapter::SCROLL):
 		{
-			return false;
-		}
-		case(osgGA::GUIEventAdapter::SCROLLDOWN):
-		{
-			return false;
-		}
-		case(osgGA::GUIEventAdapter::SCROLLLEFT):
-		{
-			return false;
-		}
-		case(osgGA::GUIEventAdapter::SCROLLRIGHT):
-		{
-			return false;
+			switch(ea.getScrollingMotion()) {
+				case(osgGA::GUIEventAdapter::SCROLL_UP):
+				{
+					return false;
+				}
+				case(osgGA::GUIEventAdapter::SCROLL_DOWN):
+				{
+					return false;
+				}
+				case(osgGA::GUIEventAdapter::SCROLL_LEFT):
+				{
+					return false;
+				}
+				case(osgGA::GUIEventAdapter::SCROLL_RIGHT):
+				{
+					return false;
+				}
+				default:
+				{
+					//printf("received event of type 'scroll': %d\n", ea.getScrollingMotion());
+					return false;
+				}
+			}
 		}
 #endif
 		default:

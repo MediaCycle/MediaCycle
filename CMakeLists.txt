@@ -1,3 +1,5 @@
+PROJECT(MediaCycle)
+
 # add some find scripts
 # SET(CMAKE_USE_RELATIVE_PATHS YES)
 SET(CMAKE_MODULE_PATH "${MediaCycle_SOURCE_DIR}/CMakeModules")
@@ -15,14 +17,12 @@ IF(COMMAND cmake_policy)
 	ENDIF ( )
 ENDIF(COMMAND cmake_policy)
 
-#if(APPLE_IOS_DEV OR APPLE_IOS_SIM)
-# Force gcc <= 4.2 on iPhone
-include(CMakeForceCompiler)
-CMAKE_FORCE_C_COMPILER(gcc-4.2 GNU)
-CMAKE_FORCE_CXX_COMPILER(gcc-4.2 GNU)
-#endif()
-
-PROJECT(MediaCycle)
+IF (APPLE_IOS_DEV OR APPLE_IOS_SIM)
+	# Force gcc <= 4.2 on iPhone
+	include(CMakeForceCompiler)
+	CMAKE_FORCE_C_COMPILER(gcc-4.2 GNU)
+	CMAKE_FORCE_CXX_COMPILER(gcc-4.2 GNU)
+ENDIF ()
 
 # Checking Apple OSX versions
 IF (APPLE)
