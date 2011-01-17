@@ -41,7 +41,7 @@
 
 #include "MediaCycle.h"
 #include "ACVideoAnalysis.h"
-#include "ACVideoPlugin.h"
+#include "ACVideoDancersPlugin.h"
 
 #include "gnuplot_i.hpp"
 
@@ -188,7 +188,7 @@ void test_browse(std::string movie_file){
 void test_video_plugin(std::string dancer){
 	clock_t t0=clock();
 	string movie_file= videodir+"Front/"+dancer+".mov";
-	ACVideoPlugin* P = new ACVideoPlugin();
+	ACVideoDancersPlugin* P = new ACVideoDancersPlugin();
 	std::vector<ACMediaFeatures*> F = P->calculate(movie_file);
 	cout << "computed " << F.size() << " features" << endl;
 	for (unsigned int i=0; i<F.size(); i++){

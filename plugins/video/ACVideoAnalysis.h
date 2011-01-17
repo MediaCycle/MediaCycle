@@ -105,7 +105,7 @@ public:
 	void computeFourierMellinMoments(); // without background subtraction
 	void computeImageHistograms(int w=10, int h=10); // image histogram, turned into a 1D vector
 
-	// features accessors (to be called by ACVideoPlugin)
+	// features accessors (to be called by ACVideoDancersPlugin)
 	std::vector<blob_center> getMergedBlobsTrajectory() {return blob_centers;}
 	std::vector<blob_center> getMergedBlobsSpeeds() {return blob_speeds;}
 	std::vector<blob_center> getNormalizedMergedBlobsTrajectory();
