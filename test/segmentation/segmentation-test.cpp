@@ -1,7 +1,7 @@
 /**
  * @brief segmentation-test.cpp
  * @author Jerome Urbain
- * @date 12/01/2011
+ * @date 17/01/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -309,6 +309,110 @@ void test_multiple_selfsim(int n){
 	delete P;
 }
 
+void test_segmentation_from_laughter_file(std::string filename)
+{
+	SF_INFO sfinfo;
+	SNDFILE* testFile;
+	float* data;
+
+	int bflag, ch, fd;
+	int mfccNbChannels = 32;
+	int mfccNb = 13;
+	int windowSize = 512; 	
+	bool extendSoundLimits = false;
+
+	bflag = 0;
+
+	
+	std::cout << "-----------------------------------------" << std::endl;
+	std::cout << "Sound file : " << filename << std::endl;
+	std::cout << "Window size : " << windowSize << std::endl;
+	std::cout << "Number of MFCC channels : " << mfccNbChannels << std::endl;
+	std::cout << "Number of MFCC : " << mfccNb << std::endl;
+	
+	if (! (testFile = sf_open (filename.c_str(), SFM_READ, &sfinfo))){  
+		/* Open failed so print an error message. */
+		printf ("Not able to open input file %s\n", filename.c_str()) ;
+		/* Print the error message from libsndfile. */
+		puts (sf_strerror (NULL)) ;
+		return;
+	}
+	
+	std::vector<ACMediaTimedFeature*> desc;
+	std::cout << "Length : " << sfinfo.frames << std::endl;
+	std::cout << "Sampling Rate : " << sfinfo.samplerate << std::endl;
+	std::cout << "Channels : " << sfinfo.channels << std::endl;
+	data = new float[(long) sfinfo.frames*sfinfo.channels];
+	std::cout << "Read " << sf_read_float(testFile, data, sfinfo.frames*sfinfo.channels) << " frames" << std::endl;
+	desc = computeFeatures(data, sfinfo.samplerate, sfinfo.channels, sfinfo.frames, mfccNbChannels, mfccNb, windowSize, 	extendSoundLimits);
+
+    
+        //segmentation
+        ACBicSegmentationPlugin* P = new ACBicSegmentationPlugin();
+	clock_t start = clock();
+	//default: lambda(1), sampling_rate(1), Wmin(20), bic_thresh(0.5), jump_width(5)
+
+	std::vector<int> seg = P->segment(desc, 1, 5, 15, -1000, 0);
+        
+        /*ACSelfSimSegmentationPlugin* P = new ACSelfSimSegmentationPlugin();
+	clock_t start = clock();
+	//default: float _SelfSimThresh=0.8, _L=8, _Wmin=8, KernelType=SELFSIMSTEP, KernelDistance=COSINE;
+	std::vector<int> seg = P->segment(desc, 0.01, 32, 25, SELFSIMGAUSSIAN, COSINE);*/
+
+	std::cout << " -- end multiple self sim segmentation --" << std::endl;
+	std::cout << "Time elapsed (segmentation alone): " << ((double)clock() - start) / CLOCKS_PER_SEC << std::endl;
+
+	//plotting in gnuplot
+        arma::fmat M=P->get_features();
+        int n=M.n_rows;
+        arma::fcolvec t=desc[0]->getTime();
+        std::vector<double> temps;
+        for (int i=0; i<t.n_elem;i++)
+        {
+            temps.push_back(t(i));
+        }
+	std::vector<double> seg_d;
+        
+        for (int i=0; i<seg.size();i++)
+        {
+            seg_d.push_back(t[seg[i]]);
+        }
+	std::vector<double> seg_i; // segments heights
+	for (int i = 0; i< int(seg_d.size()); i++){
+		seg_i.push_back(n+5);
+	}
+
+        
+
+	Gnuplot g1 = Gnuplot("lines");
+	g1.reset_plot();
+
+        vector<double> m;
+        //char buffer[3];
+        arma::fcolvec maxval=arma::max(arma::abs(M),1);
+        for(int p=0; p <n; p++)
+        {
+            m.clear();
+            //maxval=arma::max(arma::abs(M.row(p)));
+            for (unsigned int i=0; i< M.n_cols; i++) {
+		m.push_back(p+ (double) M(p,i) / maxval(p));
+            }
+
+            g1.plot_xy(temps, m, "M");
+        }
+
+	// plotting segments
+	g1.set_style("impulses");
+	if (seg_d.size() > 0)
+		g1.plot_xy(seg_d,seg_i, "segments");
+
+	 cout << "Enter char to exit" << endl;
+        char c;
+        cin >> c;
+
+	delete P;
+}
+
 
 void test_bic_from_file(std::string _dir, std::string _fname){
 	ifstream data_file;
@@ -380,7 +484,9 @@ int main(int argc, char *argv[]){
                 n=atoi(argv[1]);
             }
         }
-        test_multiple_selfsim(n);
+
+        test_segmentation_from_laughter_file("/home/jerome/NetBeansProjects/MediaCycle/3_619609_621620.wav");
+        //test_multiple_selfsim(n);
 
        // string sdir = "/Users/xavier/numediart/Project11.1-MediaBlender/results/";
 //	test_bic_from_file ( sdir, "Video10151.txt" );

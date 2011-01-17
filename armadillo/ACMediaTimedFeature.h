@@ -144,4 +144,6 @@ public:
 
 };
 
+arma::fmat vectorACMTF2fmat(std::vector <ACMediaTimedFeature*> _ACMTF);
+
 #endif

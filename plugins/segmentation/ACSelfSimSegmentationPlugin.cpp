@@ -85,7 +85,29 @@ std::vector<int> ACSelfSimSegmentationPlugin::segment(arma::fmat _M, float _Self
         this->DistanceType=_D;
 
 	return (this->_segment());
-}	
+}
+
+std::vector<int> ACSelfSimSegmentationPlugin::segment(ACMediaTimedFeature* _ACMTF, float _SelfSimThresh, int _L, int _Wmin, SelfSimKernelType _T, SelfSimDistance _D){
+	this->SelfSimThresh = _SelfSimThresh;
+        this->Wmin = _Wmin;
+        this->L=_L;
+	this->full_features = _ACMTF->getValue();
+        this->KernelType=_T;
+        this->DistanceType=_D;
+
+	return (this->_segment());
+}
+
+std::vector<int> ACSelfSimSegmentationPlugin::segment(std::vector <ACMediaTimedFeature*> _ACMTF, float _SelfSimThresh, int _L, int _Wmin, SelfSimKernelType _T, SelfSimDistance _D){
+	this->SelfSimThresh = _SelfSimThresh;
+        this->Wmin = _Wmin;
+        this->L=_L;
+	this->full_features = arma::trans(vectorACMTF2fmat(_ACMTF));
+        this->KernelType=_T;
+        this->DistanceType=_D;
+
+	return (this->_segment());
+}
 	
 //supposes we have defined:
 // - this->lambda = _lambda;
@@ -140,7 +162,7 @@ std::vector<int> ACSelfSimSegmentationPlugin::_segment(){
             }
             //novelty(i)*=2/sumkernel;
             novelty(i)/=sumkernel;
-            cout << "frame: " << i << "normalized novelty: " << novelty(i) << endl;
+            //cout << "frame: " << i << "normalized novelty: " << novelty(i) << endl;
         }
 
         //find novelty peaks:
@@ -177,8 +199,8 @@ std::vector<int> ACSelfSimSegmentationPlugin::_segment(){
 arma::fmat ACSelfSimSegmentationPlugin::buildKernel()
 {
     arma::fmat kernel;
-     if (2*(int(L/2))!=L) {
-            printf("the size of the kernel (L=%u) is a multile of 2\n", L);
+     if (2*(int(L/2))!=L) { // maybe we can accept odd numbers
+            printf("the size of the kernel (L=%u) must be an even number\n", L);
             L=2*(int(L/2));
             printf("L was modified to: %u\n", L);
         }

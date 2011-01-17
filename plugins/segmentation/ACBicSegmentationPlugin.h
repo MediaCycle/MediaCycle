@@ -37,6 +37,7 @@
 
 #include "Armadillo-utils.h" 
 #include "MediaCycle.h"
+#include "ACMediaTimedFeature.h"
 
 class ACBicSegmentationPlugin : public ACPlugin {
 public:
@@ -51,6 +52,9 @@ public:
 	std::vector<int> segment(const vector< vector<float> > & _allfeatures, float _lambda=1, int _samplingrate=1);
 	// XS todo: synchronize default values between constructor and segment
 	std::vector<int> segment(arma::fmat _M, float _lambda=1, int _samplingrate=1, int _Wmin=20, float _bic_thresh = 1, int _jump_width=5);
+        std::vector<int> segment(std::vector <ACMediaTimedFeature*> _ACMTF, float _lambda=1, int _samplingrate=1, int _Wmin=20, float _bic_thresh = 1, int _jump_width=5);
+
+        arma::fmat get_features() {return full_features;}; //JU: added to ease the visualization during the tests
 
 private:
 	int findSingleSegment(int _A, int _B);

@@ -776,6 +776,51 @@ float ACMediaTimedFeature::dist(fmat vector1, fmat vector2, int mode)
     return distM(0,0);
 }
 
+arma::fmat vectorACMTF2fmat(std::vector <ACMediaTimedFeature*> _ACMTF)
+{
+    int i, n_ACMTF, n_rows=_ACMTF[0]->getLength(), n_cols=0;
+    arma::fmat features_m;
+    for(i=0;i<_ACMTF.size();i++)
+    {
+        //cout << "Feature: " << _ACMTF[i]->getName() << "; Nframes: " << _ACMTF[i]->getLength() << "; Size: " << _ACMTF[i]->getDim() << endl;
+        n_cols+=_ACMTF[i]->getDim();
+        if(_ACMTF[i]->getLength() > n_rows)
+        {
+            n_rows=_ACMTF[i]->getLength();
+            //cout << "WARNING: ALL features do not have the same number of frames!!!" << endl;
+        }
+    }
+    //features_m.zeros(n_rows,n_cols);
+    cout << "Full matrix: Nrows: " << n_rows << "; n_cols: " << n_cols << endl;
+
+    if(_ACMTF[0]->getLength()<n_rows)
+    {
+        arma::fmat tmp;
+        tmp.zeros(n_rows-_ACMTF[0]->getLength(),_ACMTF[0]->getDim());
+        features_m=arma::join_cols(tmp,_ACMTF[0]->getValue());
+    }
+    else
+    {
+        features_m=_ACMTF[0]->getValue();
+    }
+   for(i=1;i<_ACMTF.size();i++)
+   {
+        if(_ACMTF[i]->getLength()<n_rows)
+        {
+            cout << "WARNING: ALL features do not have the same number of frames!!! " << n_rows-_ACMTF[i]->getLength() << " zero rows added at the beginning of feature: " << _ACMTF[i]->getName() << endl;
+            arma::fmat tmp;
+            tmp.zeros(n_rows-_ACMTF[i]->getLength(),_ACMTF[i]->getDim());
+            features_m=arma::join_rows(features_m,arma::join_cols(tmp,_ACMTF[i]->getValue()));
+        }
+        else
+        {
+            features_m=arma::join_rows(features_m,_ACMTF[i]->getValue());
+        }
+   }
+
+    return features_m;
+}
+
 
 #ifdef USE_SDIF
 int ACMediaTimedFeature::saveAsSdif(const char *name){

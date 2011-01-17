@@ -91,7 +91,23 @@ std::vector<int> ACBicSegmentationPlugin::segment(arma::fmat _M, \
 	this->bic_thresh = _bic_thresh;
 	this->jump_width = _jump_width;
 	return (this->_segment());
-}	
+}
+
+std::vector<int> ACBicSegmentationPlugin::segment(std::vector <ACMediaTimedFeature*> _ACMTF, \
+												  float _lambda, \
+												  int _samplingrate, \
+												  int _Wmin, \
+												  float _bic_thresh, \
+												  int _jump_width ){
+	this->full_features = arma::trans(vectorACMTF2fmat(_ACMTF)) ;
+
+	this->lambda = _lambda;
+	this->sampling_rate = _samplingrate;
+	this->Wmin = _Wmin;
+	this->bic_thresh = _bic_thresh;
+	this->jump_width = _jump_width;
+	return (this->_segment());
+}
 	
 //supposes we have defined:
 // - this->lambda = _lambda;
