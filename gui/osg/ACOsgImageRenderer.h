@@ -59,7 +59,7 @@ protected:
 	Geode* border_geode;
 	MatrixTransform* image_transform;
 	
-	void imageGeode(bool flip=false, float sizemul=1.0, float zoomin=1.0);
+	void imageGeode(bool flip=true, float sizemul=1.0, float zoomin=1.0);
 	
 public:
 	ACOsgImageRenderer();
