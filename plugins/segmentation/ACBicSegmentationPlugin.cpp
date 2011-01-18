@@ -42,7 +42,7 @@
 // sampling_rate = n if we skip n frames in the analysis (1 = don't skip any)
 // bic_thresh = threshold for the BIC under which there is no segment detected
 // jump_width = number of frames to skip after a step has been detected
-ACBicSegmentationPlugin::ACBicSegmentationPlugin() : lambda(1), sampling_rate(1), Wmin(20), bic_thresh(0.5), jump_width(5){
+ACBicSegmentationPlugin::ACBicSegmentationPlugin() : lambda(1), sampling_rate(1), Wmin(20), bic_thresh(0.5), jump_width(5), discard_borders(5){
     this->mMediaType = MEDIA_TYPE_ALL;
     this->mPluginType = PLUGIN_TYPE_SEGMENTATION;
     this->mName = "BicSegmentation";
@@ -82,7 +82,8 @@ std::vector<int> ACBicSegmentationPlugin::segment(arma::fmat _M, \
 												  int _samplingrate, \
 												  int _Wmin, \
 												  float _bic_thresh, \
-												  int _jump_width ){	
+												  int _jump_width, \
+                                                                                                  int _discard_borders  ){
 	this->full_features = _M ; 
 
 	this->lambda = _lambda;
@@ -90,6 +91,7 @@ std::vector<int> ACBicSegmentationPlugin::segment(arma::fmat _M, \
 	this->Wmin = _Wmin;
 	this->bic_thresh = _bic_thresh;
 	this->jump_width = _jump_width;
+        this->discard_borders=_discard_borders;
 	return (this->_segment());
 }
 
@@ -98,7 +100,8 @@ std::vector<int> ACBicSegmentationPlugin::segment(std::vector <ACMediaTimedFeatu
 												  int _samplingrate, \
 												  int _Wmin, \
 												  float _bic_thresh, \
-												  int _jump_width ){
+												  int _jump_width, \
+                                                                                                  int _discard_borders){
 	this->full_features = arma::trans(vectorACMTF2fmat(_ACMTF)) ;
 
 	this->lambda = _lambda;
@@ -106,7 +109,40 @@ std::vector<int> ACBicSegmentationPlugin::segment(std::vector <ACMediaTimedFeatu
 	this->Wmin = _Wmin;
 	this->bic_thresh = _bic_thresh;
 	this->jump_width = _jump_width;
+        this->discard_borders=_discard_borders;
 	return (this->_segment());
+}
+
+std::vector<int> ACBicSegmentationPlugin::segmentDAC(arma::fmat _M, \
+												  float _lambda, \
+												  int _Wmin, \
+												  float _bic_thresh, \
+                                                                                                  int _discard_borders, \
+                                                                                                  float _bic_thresh_DAC){
+	this->full_features = _M ;
+
+	this->lambda = _lambda;
+	this->Wmin = _Wmin;
+	this->bic_thresh = _bic_thresh;
+        this->discard_borders=_discard_borders;
+        this->bic_thresh_DAC=_bic_thresh_DAC;
+	return (this->_segmentDAC());
+}
+
+std::vector<int> ACBicSegmentationPlugin::segmentDAC(std::vector <ACMediaTimedFeature*> _ACMTF, \
+												  float _lambda, \
+												  int _Wmin, \
+												  float _bic_thresh, \
+                                                                                                  int _discard_borders, \
+                                                                                                  float _bic_thresh_DAC){
+	this->full_features = arma::trans(vectorACMTF2fmat(_ACMTF)) ;
+
+	this->lambda = _lambda;
+	this->Wmin = _Wmin;
+	this->bic_thresh = _bic_thresh;
+        this->discard_borders=_discard_borders;
+        this->bic_thresh_DAC=_bic_thresh_DAC;
+	return (this->_segmentDAC());
 }
 	
 //supposes we have defined:
@@ -158,8 +194,8 @@ int ACBicSegmentationPlugin::findSingleSegment(int A, int B){
 	}
 
 
-	float max_bic = bic_thresh;
-	int imax_bic = 0;
+	max_bic = bic_thresh;
+	imax_bic = 0;
 	float deltaBICi = 0.0;
 
 	// standard notations cf. papers on BIC e.g., ..
@@ -207,7 +243,7 @@ int ACBicSegmentationPlugin::findSingleSegment(int A, int B){
 	if (max_bic > bic_thresh) {
 		cout << "max bic : " << max_bic << " ; found at time : " << imax_bic << endl;
 	}
-        int discard_borders=5;
+        
         if(imax_bic<A+discard_borders||imax_bic>B-discard_borders) // JU: preventing from segmenting close to the borders of the BIC window: should we keep it, it should become an argument of the class
         {
             return 0;
@@ -220,5 +256,92 @@ float ACBicSegmentationPlugin::detCovariance(int _cinf, int _csup){
     //M.print();
     //float p=arma::det (arma::cov(arma::trans(this->full_features.cols(_cinf, _csup))));
     //cout << "det(" << _cinf <<',' << _csup << "): " << p << endl;
-	return arma::det (arma::cov(arma::trans(this->full_features.cols(_cinf, _csup)))); // Ju: added trans
+	return arma::det (arma::cov(arma::trans(this->full_features.cols(_cinf, _csup)))); // JU: added trans
+}
+
+
+std::vector<int> ACBicSegmentationPlugin::_segmentDAC(){
+    segments_begin_i.clear();
+    _segmentDAC(0,this->full_features.n_cols-1);
+    return segments_begin_i;
+}
+
+void ACBicSegmentationPlugin::_segmentDAC(int begin_i, int end_i){
+   //1) if window smaller than Nmin, return
+    if(end_i-begin_i<Wmin)
+    {
+        return;
+    }
+
+    //2) find maximum Bic in window
+    bool BIC_POSITIVE=false;
+    int position;
+    this->findSingleSegment(begin_i,end_i);
+    if(imax_bic<begin_i+Wmin/2||imax_bic>end_i-Wmin/2)
+    {
+        return;
+    }
+
+
+    if(max_bic>bic_thresh_DAC&&imax_bic>0)
+    {
+        BIC_POSITIVE=true;
+    }
+    position=imax_bic;
+
+    // 3) divide and solve sub-instances
+    if(position>0)
+    {
+        _segmentDAC(begin_i,position-1);
+        _segmentDAC(position, end_i);
+    }
+
+    // 4) Combine and validate segment
+    if(BIC_POSITIVE)
+    {
+        segments_begin_i.push_back(position);
+    }
+    else
+    {
+        // find borders of analysis
+        int b=begin_i, e=end_i;
+        for(int i=0;i<segments_begin_i.size();i++)
+        {
+            if(segments_begin_i[i]<position&&segments_begin_i[i]>b)
+            {
+                b=segments_begin_i[i];
+            }
+            if(segments_begin_i[i]>position&&segments_begin_i[i]<e)
+            {
+                e=segments_begin_i[i]-1;
+            }
+        }
+        // compute BIC value at "position", inside window [b,e]. If result > bic_thresh_combine, validate segmentation at "position"
+        if(computeBIC(b,e,position)>bic_thresh_DAC)
+        {
+            segments_begin_i.push_back(position);
+        }
+    }
+
+
+}
+
+float ACBicSegmentationPlugin::computeBIC(int begin_i, int end_i, int position){
+        int N = end_i-begin_i+1;
+	int N1 = position-begin_i;
+	int N2 = end_i-position+1;
+        if(N<=0||N1<=0||N2<=0)
+        {
+            return (-1.0/0.0); // returning -Inf on purpose...
+        }
+	int d=this->full_features.n_rows;
+
+	float P = .5 * (d + .5 * d * (d+1)) * log(N);
+	float lP = lambda * P;
+
+	float S = detCovariance (begin_i,end_i);
+        float S1 = detCovariance (begin_i, position-1);
+        float S2 = detCovariance (position, end_i);
+
+        return (N*log(S)*0.5 - N1*log(S1)*0.5 - N2*log(S2)*0.5 -lP);
 }

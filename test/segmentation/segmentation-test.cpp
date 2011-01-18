@@ -1,7 +1,7 @@
 /**
  * @brief segmentation-test.cpp
  * @author Jerome Urbain
- * @date 17/01/2011
+ * @date 18/01/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -189,9 +189,11 @@ void test_multiple_bic(int n){
 	
 	ACBicSegmentationPlugin* P = new ACBicSegmentationPlugin();
 	clock_t start = clock();
-	//default: lambda(1), sampling_rate(1), Wmin(20), bic_thresh(0.5), jump_width(5)
+	//default: lambda(1), sampling_rate(1), Wmin(20), bic_thresh(0.5), jump_width(5), discard_borders(5)
 
-	std::vector<int> seg = P->segment(M, 1, 5, 15, 0, 0);
+	//std::vector<int> seg = P->segment(M, 1, 5, 15, 0, 0);
+        //default: lambda=1, Wmin=20, bic_thresh(-Inf), discard_borders(0), bic_thresh_DAC(0)
+        std::vector<int> seg = P->segmentDAC(M, 1, 15, -1.0/0.0, 0, 0);
 
 	std::cout << " -- end multiple bic segmentation --" << std::endl;
 	std::cout << "Time elapsed (segmentation alone): " << ((double)clock() - start) / CLOCKS_PER_SEC << std::endl;
@@ -348,16 +350,17 @@ void test_segmentation_from_laughter_file(std::string filename)
 
     
         //segmentation
-        ACBicSegmentationPlugin* P = new ACBicSegmentationPlugin();
+        /*ACBicSegmentationPlugin* P = new ACBicSegmentationPlugin();
 	clock_t start = clock();
 	//default: lambda(1), sampling_rate(1), Wmin(20), bic_thresh(0.5), jump_width(5)
 
-	std::vector<int> seg = P->segment(desc, 1, 5, 15, -1000, 0);
+	//std::vector<int> seg = P->segment(desc, 1, 5, 15, -1000, 0);
+        std::vector<int> seg = P->segmentDAC(desc, 1, 15, -1.0/0.0, 0, 0);*/
         
-        /*ACSelfSimSegmentationPlugin* P = new ACSelfSimSegmentationPlugin();
+        ACSelfSimSegmentationPlugin* P = new ACSelfSimSegmentationPlugin();
 	clock_t start = clock();
 	//default: float _SelfSimThresh=0.8, _L=8, _Wmin=8, KernelType=SELFSIMSTEP, KernelDistance=COSINE;
-	std::vector<int> seg = P->segment(desc, 0.01, 32, 25, SELFSIMGAUSSIAN, COSINE);*/
+	std::vector<int> seg = P->segment(desc, 0.01, 32, 25, SELFSIMGAUSSIAN, COSINE);
 
 	std::cout << " -- end multiple self sim segmentation --" << std::endl;
 	std::cout << "Time elapsed (segmentation alone): " << ((double)clock() - start) / CLOCKS_PER_SEC << std::endl;
@@ -485,6 +488,7 @@ int main(int argc, char *argv[]){
             }
         }
 
+        //test_multiple_bic(n);
         test_segmentation_from_laughter_file("/home/jerome/NetBeansProjects/MediaCycle/3_619609_621620.wav");
         //test_multiple_selfsim(n);
 
