@@ -35,16 +35,16 @@
 #if !defined (APPLE_IOS)
 
 #include "ACVideo.h"
-#include <iostream>
 
-using namespace std;
+#include <osg/ImageUtils>
 
 // ----------- class constants
 const int ACVideo:: default_thumbnail_width = 64;
 const int ACVideo:: default_thumbnail_height = 64;
 const int ACVideo:: default_thumbnail_area = 4096;
 
-ACVideo::ACVideo() : ACMedia() {
+ACVideo::ACVideo() : ACMedia()
+{
 	media_type = MEDIA_TYPE_VIDEO;
 	thumbnail = 0;
 	thumbnail_width = 0;
@@ -71,6 +71,7 @@ ACVideo::~ACVideo() {
 				break;
 		}
 	}*/	
+	
 	if (data) delete data;
 }
 
@@ -189,8 +190,8 @@ int ACVideo::loadACLSpecific(ifstream &library_file) {
 	library_file >> end;
 	library_file >> width;
 	library_file >> height;
-	int n_features = 0;
-	library_file >> n_features; 
+	//int n_features = 0;//CF done in ACMedia
+	//library_file >> n_features;//CF done in ACMedia
 
 	// Old bug with image size set to thumbnail size
 	if ((width == 16)&&(height == 16)){
@@ -202,6 +203,7 @@ int ACVideo::loadACLSpecific(ifstream &library_file) {
 			std::cout << "Please re-save your ACL library, old format with corrupted video size." << std::endl;
 	}
 	this->computeThumbnailSize();
+	
 	if (computeThumbnail(height, width) != 1){
 		cerr << "<ACVideo::loadACLSpecific> : problem computing thumbnail" << endl;
 		return 0;

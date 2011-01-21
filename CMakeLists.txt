@@ -17,12 +17,12 @@ IF(COMMAND cmake_policy)
 	ENDIF ( )
 ENDIF(COMMAND cmake_policy)
 
-IF (APPLE_IOS_DEV OR APPLE_IOS_SIM)
-	# Force gcc <= 4.2 on iPhone
-	include(CMakeForceCompiler)
-	CMAKE_FORCE_C_COMPILER(gcc-4.2 GNU)
-	CMAKE_FORCE_CXX_COMPILER(gcc-4.2 GNU)
-ENDIF ()
+#if(APPLE_IOS_DEV OR APPLE_IOS_SIM)
+# Force gcc <= 4.2 on iPhone
+include(CMakeForceCompiler)
+CMAKE_FORCE_C_COMPILER(gcc-4.2 GNU)
+CMAKE_FORCE_CXX_COMPILER(gcc-4.2 GNU)
+#endif()
 
 # Checking Apple OSX versions
 IF (APPLE)

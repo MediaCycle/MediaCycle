@@ -75,6 +75,7 @@ private:
 	osg::Texture2D* image_texture;
 	
 	int computeThumbnail(int w=0, int h=0);
+	int computeSlitScan(int frame_in, int frame_out);
 	void computeThumbnailSize();
 };
 #endif//CF APPLE_IOS

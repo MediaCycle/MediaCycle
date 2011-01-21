@@ -135,7 +135,7 @@ void ACMedia::saveACL(ofstream &library_file, int mcsl) {
 // return value is used in ACMediaLibrary::openACLLibrary
 int ACMedia::loadACL(std::string media_path, ifstream &library_file, int mcsl) {
 	
-	int n_features;
+	int n_features = 0;
 	int n_features_elements = 0;	
 	int nn;
 	string tab;
@@ -304,7 +304,7 @@ int ACMedia::segment(ACPluginManager *acpl ) {
 		cerr << "<ACMedia::import> failed accessing data for media number: " << this->getId() << endl;
 		return 0;
 	}
-	
+	/*
 	if (acpl) {
 		for (int i=0;i<acpl->getSize();i++) {
 			for (int j=0;j<acpl->getPluginLibrary(i)->getSize();j++) {
@@ -328,7 +328,7 @@ int ACMedia::segment(ACPluginManager *acpl ) {
 				}
 			}
 		}
-	}
+	}*/
 	//delete data;
 	return import_ok;
 }

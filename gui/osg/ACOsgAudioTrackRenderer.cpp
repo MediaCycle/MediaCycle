@@ -370,7 +370,7 @@ void ACOsgAudioTrackRenderer::selectionWaveformGeode() {
 	summary_waveform_geode->addDrawable(baseline_geometry);
 	
 	//sprintf(name, "some audio element");
-	summary_waveform_geode->setUserData(new ACRefId(track_index,"track summary waveform"));
+	summary_waveform_geode->setUserData(new ACRefId(track_index,"audio track summary waveform"));
 	//summary_waveform_geode->setName(name);
 	summary_waveform_geode->ref();	
 }
@@ -429,7 +429,7 @@ void ACOsgAudioTrackRenderer::selectionCursorGeode() {
 	//sprintf(name, "some audio element");
 	//summary_cursor_transform->setName(name);
 	summary_cursor_transform->ref();
-	summary_cursor_geode->setUserData(new ACRefId(track_index,"track cursor"));
+	summary_cursor_geode->setUserData(new ACRefId(track_index,"audio track cursor"));
 	//summary_cursor_geode->setName(name);
 	summary_cursor_geode->ref();
 }
@@ -947,7 +947,7 @@ void ACOsgAudioTrackRenderer::playbackWaveformGeode() {
 	playback_waveform_geode->addDrawable(cursor_geometry);
 	
 	//sprintf(name, "some audio element");
-	playback_waveform_geode->setUserData(new ACRefId(track_index,"track playback waveform"));
+	playback_waveform_geode->setUserData(new ACRefId(track_index,"audio track playback waveform"));
 	//playback_waveform_geode->setName(name);
 	playback_waveform_geode->ref();	
 }

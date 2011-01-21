@@ -56,6 +56,18 @@
 
 #include "ACRefId.h"
 
+enum ACAudioSummaryType {
+	AC_AUDIO_SUMMARY_NONE=0,
+	AC_AUDIO_SUMMARY_WAVEFORM=1,
+	AC_AUDIO_SUMMARY_RECTIFIED=2
+};
+
+enum ACVideoSummaryType {
+	AC_VIDEO_SUMMARY_NONE=0,
+	AC_VIDEO_SUMMARY_KEYFRAMES=1,
+	AC_VIDEO_SUMMARY_SLIT_SCAN=2
+};
+
 using namespace std;
 using namespace osg;
 
@@ -117,6 +129,9 @@ public:
 	void setSelectionCenter(float center);
 	float getSelectionCenter();
 	void setManualSelection(bool manual){this->manual_selection=manual;}
+	
+	virtual void setSummaryType(ACVideoSummaryType type){};
+	virtual ACVideoSummaryType getSummaryType(){return AC_VIDEO_SUMMARY_NONE;}
 };
 
 #endif

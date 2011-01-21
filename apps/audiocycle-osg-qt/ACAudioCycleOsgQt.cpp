@@ -48,8 +48,7 @@ ACAudioCycleOsgQt::ACAudioCycleOsgQt(QWidget *parent)
 : QMainWindow(parent), library_loaded(false)
 {
 	ui.setupUi(this); // first thing to do
-	//media_cycle = new MediaCycle(MEDIA_TYPE_AUDIO,"/tmp/","mediacycle.acl");
-	media_cycle = new MediaCycle(MEDIA_TYPE_VIDEO,"/tmp/","mediacycle.acl");
+	media_cycle = new MediaCycle(MEDIA_TYPE_AUDIO,"/tmp/","mediacycle.acl");
 	
 	// XS TODO fichier de configuration
 	#if defined(__APPLE__)
@@ -109,11 +108,8 @@ ACAudioCycleOsgQt::ACAudioCycleOsgQt(QWidget *parent)
 				}
 			}
 		}
-		if (media_cycle->getLibrary()->getMediaType() == MEDIA_TYPE_AUDIO)
-			media_cycle->addPlugin("../../../plugins/audio/" + build_type + "/mc_audio.dylib");	
-		else if  (media_cycle->getLibrary()->getMediaType() == MEDIA_TYPE_VIDEO)
-			media_cycle->addPlugin("../../../plugins/video/" + build_type + "/mc_video.dylib");	
-		media_cycle->addPlugin("../../../plugins/segmentation/" + build_type + "/mc_segmentation.dylib");	
+		media_cycle->addPlugin("../../../plugins/audio/" + build_type + "/mc_audio.dylib");	
+		//media_cycle->addPlugin("../../../plugins/segmentation/" + build_type + "/mc_segmentation.dylib");	
 	#endif
 
 	audio_engine = new ACAudioEngine();
@@ -135,7 +131,7 @@ ACAudioCycleOsgQt::ACAudioCycleOsgQt(QWidget *parent)
 	connect(ui.actionLoad_Media_Files, SIGNAL(triggered()), this, SLOT(loadMediaFiles()));
 	connect(ui.actionLoad_ACL, SIGNAL(triggered()), this, SLOT(on_pushButtonLaunch_clicked()));
 	connect(ui.actionSave_ACL, SIGNAL(triggered()), this, SLOT(saveACLFile()));
-
+	
 	this->show();
 	
 	#ifdef USE_APPLE_MULTITOUCH

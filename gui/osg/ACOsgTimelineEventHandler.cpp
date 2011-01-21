@@ -224,7 +224,7 @@ void ACOsgTimelineEventHandler::pick(osgViewer::View* view, const osgGA::GUIEven
 				{
 					ACRefId *rid = (ACRefId*)hitr->nodePath.back()->getUserData();
 					//std::cout << "  Widget " << rid->getName() << " with object id " << rid->object_id << std::endl;
-					if ((rid->getName()=="track selection begin")||(rid->getName()=="track selection end")||(rid->getName()=="track selection zone")||(rid->getName()=="track summary waveform")||(rid->getName()=="track summary frames"))
+					if ((rid->getName()=="track selection begin")||(rid->getName()=="track selection end")||(rid->getName()=="track selection zone")||(rid->getName()=="audio track summary waveform")||(rid->getName()=="video track summary frames")||(rid->getName()=="video track summary slit-scan"))
 					{
 						switch(ea.getEventType())
 						{
@@ -234,8 +234,9 @@ void ACOsgTimelineEventHandler::pick(osgViewer::View* view, const osgGA::GUIEven
 								if (rid->getName()=="track selection begin") selecting_zone_begin = true;
 								else if (rid->getName()=="track selection end") selecting_zone_end = true;
 								else if (rid->getName()=="track selection zone") selecting_zone = true;
-								else if (rid->getName()=="track summary waveform") selecting_summary_waveform = true;
-								else if (rid->getName()=="track summary frames") selecting_summary_frames = true;
+								else if (rid->getName()=="audio track summary waveform") selecting_summary_waveform = true;
+								else if (rid->getName()=="video track summary frames") selecting_summary_frames = true;
+								else if (rid->getName()=="video track summary slit-scan") selecting_summary_frames = true;
 								selection = rid;
 								selection_begin = renderer->getTrack(selection->getID())->getSelectionBegin();
 								selection_end = renderer->getTrack(selection->getID())->getSelectionEnd();

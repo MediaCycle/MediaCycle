@@ -78,7 +78,10 @@ ACOsgImageRenderer::~ACOsgImageRenderer() {
 }
 
 void ACOsgImageRenderer::imageGeode(bool flip, float sizemul, float zoomin) {
-	
+	ACMediaType media_type = media_cycle->getLibrary()->getMedia(media_index)->getType();
+	if (media_type == MEDIA_TYPE_VIDEO)
+		flip=true; //CF this hides a huger bug, to be tracked down (imageGeode created twice sometimes at video ACL import)(media_type == MEDIA_TYPE_IMAGE)
+		
 	std::cout << "Do we flip the image geode? " << flip << std::endl;
 	int i;
 	
@@ -176,7 +179,7 @@ void ACOsgImageRenderer::imageGeode(bool flip, float sizemul, float zoomin) {
 	//thumbnail_filename = media_cycle->getMediaFileName(media_index);//CF instead of node_index
 	//image_image = osgDB::readImageFile(thumbnail_filename);
 	
-	ACMediaType media_type = media_cycle->getLibrary()->getMedia(media_index)->getType();
+	//ACMediaType media_type = media_cycle->getLibrary()->getMedia(media_index)->getType();
 	if (media_type == MEDIA_TYPE_IMAGE)
 	{	
 		// XS TODO : what's the problem with thumbnail ?

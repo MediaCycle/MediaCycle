@@ -58,7 +58,7 @@
 
 #include "ACRefId.h"
 
-#define AUTO_TRANSFORM
+//#define AUTO_TRANSFORM
 
 using namespace std;
 using namespace osg;

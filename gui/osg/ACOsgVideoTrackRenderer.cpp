@@ -54,6 +54,240 @@
  }
  
 
+#include <osg/ImageUtils>
+#include <osgDB/WriteFile>
+
+int ACOsgVideoSlitScanThread::convert(AVPicture *dst, int dst_pix_fmt, AVPicture *src,
+					 int src_pix_fmt, int src_width, int src_height)
+{
+    osg::Timer_t startTick = osg::Timer::instance()->tick();
+	//#ifdef USE_SWSCALE
+    //if (m_swscale_ctx==0)
+    //{
+	struct SwsContext * m_swscale_ctx = sws_getContext(src_width, src_height, (PixelFormat) src_pix_fmt,
+													   src_width, src_height, (PixelFormat) dst_pix_fmt,
+													   /*SWS_BILINEAR*/ SWS_BICUBIC, NULL, NULL, NULL);
+    //}
+    OSG_INFO<<"Using sws_scale ";
+    int result =  sws_scale(m_swscale_ctx,
+                            (src->data), (src->linesize), 0, src_height,
+                            (dst->data), (dst->linesize));
+	/*#else
+	 OSG_INFO<<"Using img_convert ";
+	 int result = img_convert(dst, dst_pix_fmt, src,
+	 src_pix_fmt, src_width, src_height);
+	 #endif*/
+    osg::Timer_t endTick = osg::Timer::instance()->tick();
+    OSG_INFO<<" time = "<<osg::Timer::instance()->delta_m(startTick,endTick)<<"ms"<<std::endl;
+    return result;
+}
+
+void ACOsgVideoSlitScanThread::yuva420pToRgba(AVPicture * const dst, AVPicture * const src, int width, int height)
+{
+    convert(dst, PIX_FMT_RGB32, src, m_context->pix_fmt, width, height);
+    const size_t bpp = 4;
+    uint8_t * a_dst = dst->data[0] + 3;
+    for (int h = 0; h < height; ++h) {
+        const uint8_t * a_src = src->data[3] + h * src->linesize[3];
+        for (int w = 0; w < width; ++w) {
+            *a_dst = *a_src;
+            a_dst += bpp;
+            a_src += 1;
+        }
+    }
+}
+
+// Using OpenCV, frame jitter
+/*int ACOsgVideoSlitScanThread::computeSlitScan(int frame_in, int frame_out){
+	CvCapture* video = getData();
+	int total_frames = (int) cvGetCaptureProperty(video,CV_CAP_PROP_FRAME_COUNT);
+
+	if (frame_in<0 || frame_in>total_frames) frame_in = 0;
+	if (frame_out<0 || frame_out>total_frames) frame_out = total_frames;
+
+	cvSetCaptureProperty(video,CV_CAP_PROP_POS_FRAMES,(double)frame_in);
+
+	//IplImage* slit_scan;
+	for (int f=frame_in;f<frame_out;f++){
+		//cvSetCaptureProperty(video,CV_CAP_PROP_POS_FRAMES,(double)f);
+		if(!cvGrabFrame(video)){
+			cerr << "<ACVideo::computeSlitScan> Could not find frame..." << endl;
+		}
+		else{
+			IplImage* frame = cvRetrieveFrame(video);
+			//if(f==frame_in)
+			//	slit_scan = cvCreateImage( cvSize(frame_out-frame_in, height), frame->depth, frame->nChannels );
+			int ff = (int) cvGetCaptureProperty(video,CV_CAP_PROP_POS_FRAMES);
+			if (ff!=f) cout << "Mismatch at frame " << ff << " instead of " << f << " (offset:" << ff-f << ")" << endl;
+		}	
+	}
+}*/
+
+int ACOsgVideoSlitScanThread::computeSlitScan(){
+	
+	double slit_in = getTime();
+	
+	AVFormatContext *pFormatCtx;
+    unsigned int             i, videoStreams,videoStream;
+	AVPacket        packet;
+    int             frameFinished;
+	
+    // Register all formats and codecs
+    av_register_all();
+	
+    // Open video file
+	if(av_open_input_file(&pFormatCtx, filename.c_str(), NULL, 0, NULL)!=0){
+		std::cerr << "Couldn't open file" << std::endl;
+		return -1;
+	}
+	
+	// Retrieve stream information
+	if(av_find_stream_info(pFormatCtx)<0){
+		std::cerr << "Couldn't find stream information" << std::endl;
+		return -1;
+	}
+	
+	// Dump information about file onto standard error
+	//dump_format(pFormatCtx, 0, filename.c_str(), false);
+	
+	// Count video streams
+	videoStreams=0;
+	for(i=0; i<pFormatCtx->nb_streams; i++)
+		if(pFormatCtx->streams[i]->codec->codec_type==CODEC_TYPE_VIDEO)
+			videoStreams++;
+	if(videoStreams == 0)
+		std::cout << "Didn't find any video stream." << std::endl;
+	else
+		std::cout << "Found " << videoStreams << " video stream(s)." << std::endl;
+	
+	// Find the first video stream
+	if (videoStreams>0){
+		
+		videoStream=-1;
+		for(i=0; i<pFormatCtx->nb_streams; i++)
+			if(pFormatCtx->streams[i]->codec->codec_type==CODEC_TYPE_VIDEO)
+			{
+				videoStream=i;
+				break;
+			}
+		
+		// osgFFMpeg FFmpegDecoderVideo::open
+		
+		AVStream* m_stream = pFormatCtx->streams[videoStream];
+		m_context = m_stream->codec;
+		
+		// Trust the video size given at this point
+		// (avcodec_open seems to sometimes return a 0x0 size)
+		int width = m_context->width;
+		int height = m_context->height;
+		
+		// Find the decoder for the video stream
+		AVCodec* m_codec = avcodec_find_decoder(m_context->codec_id);
+		
+		if (m_codec == 0)
+			throw std::runtime_error("avcodec_find_decoder() failed");
+		
+		// Open codec
+		if (avcodec_open(m_context, m_codec) < 0)
+			throw std::runtime_error("avcodec_open() failed");
+		
+		// Allocate video frame
+		AVFrame* m_frame=avcodec_alloc_frame();
+		
+		// Allocate converted RGB frame
+		AVFrame* m_frame_rgba=avcodec_alloc_frame();
+		std::vector<uint8_t> m_buffer_rgba;
+		m_buffer_rgba.resize(avpicture_get_size(PIX_FMT_RGB32, width, height));
+		
+		// Assign appropriate parts of the buffer to image planes in m_frame_rgba
+		avpicture_fill((AVPicture *) m_frame_rgba, &(m_buffer_rgba)[0], PIX_FMT_RGB32, width, height);
+		
+		// Back to FFmpeg tuto
+		
+		// Video stream properties
+		float frame_rate = av_q2d(m_stream->r_frame_rate);
+		float duration = (float)(pFormatCtx->duration)/AV_TIME_BASE;
+		int nb_frames =  m_stream->nb_frames; //CF alternative: pFormatCtx->streams[videoStream]->nb_index_entries or duration/frame_rate for corrupted files?
+		
+		double slit_mid = getTime();
+		
+		int frames_processed = 0;
+		slit_scan = new osg::Image; 
+		slit_scan->allocateImage(nb_frames, height, 1, GL_RGBA, GL_UNSIGNED_BYTE);
+		
+		while(av_read_frame(pFormatCtx, &packet)>=0)
+		{
+			// Is this a packet from the video stream?
+			if(packet.stream_index==videoStream)
+			{
+				// Decode video frame
+				avcodec_decode_video(m_context, m_frame, &frameFinished,packet.data, packet.size);
+				
+				// Did we get a video frame?
+				if(frameFinished)
+				{
+					//std::cout << "Processing frame " << m_context->frame_number << " / " << nb_frames << std::endl;
+					AVPicture * const src = (AVPicture *) m_frame;
+					AVPicture * const dst = (AVPicture *) m_frame_rgba;
+					
+					// Assign appropriate parts of the buffer to image planes in m_frame_rgba
+					avpicture_fill((AVPicture *) m_frame_rgba, &(m_buffer_rgba)[0], PIX_FMT_RGB32, width, height);
+					
+					// Convert YUVA420p (i.e. YUV420p plus alpha channel) using our own routine
+					if (m_context->pix_fmt == PIX_FMT_YUVA420P)
+						yuva420pToRgba(dst, src, width, height);
+					else
+						convert(dst, PIX_FMT_RGB32, src, m_context->pix_fmt, width, height);
+					
+					osg::Image* frame = new osg::Image();
+					frame->setOrigin(osg::Image::TOP_LEFT);
+					frame->setImage(
+									width,height, 1, GL_RGBA, GL_BGRA, GL_UNSIGNED_BYTE,
+									const_cast<unsigned char *>( &((m_buffer_rgba)[0])), osg::Image::NO_DELETE
+									);
+					frame->flipVertical();
+					
+					osg::copyImage(frame,
+								   (float)width/2.0f,//int  	src_s,
+								   0,//int  	src_t,
+								   0,//int  	src_r,
+								   1,//int  	width,
+								   height,//int  	height,
+								   1,//int  	depth,
+								   slit_scan,
+								   m_context->frame_number,//int  	dest_s,
+								   0,//int  	dest_t,
+								   0,//int  	dest_r,
+								   false//bool  	doRescale = false	 
+								   );
+					
+					frames_processed++;
+				}
+			}
+			// Free the packet that was allocated by av_read_frame
+			av_free_packet(&packet);
+		}
+		
+		// Free the RGB image
+		m_buffer_rgba.empty();
+		av_free(m_frame_rgba);
+		
+		// Free the YUV frame
+		av_free(m_frame);
+		
+		// Close the codec
+		avcodec_close(m_context);
+		
+		double slit_end = getTime();
+		std::cout << "Slit-scanning took " << slit_end-slit_mid << " after " << slit_mid-slit_in << " of init " << std::endl;
+		std::cout << "Missed " << nb_frames - frames_processed << " frames over " << nb_frames << std::endl;
+		//sosgDB::writeImageFile(*slit_scan,std::string("/Users/christianfrisson/test.jpg"));
+	}
+	// Close the video file
+	av_close_input_file(pFormatCtx);
+	return 1;
+}	
+
 ACOsgVideoTrackRenderer::ACOsgVideoTrackRenderer() {
 	video_stream = 0;
 	//summary_stream = 0;
@@ -85,12 +319,22 @@ ACOsgVideoTrackRenderer::ACOsgVideoTrackRenderer() {
 	
 	frames_transform = new MatrixTransform();
 	frames_group = new Group();
+	slit_scan_transform = new MatrixTransform();
+	
+	slit_scanner = new ACOsgVideoSlitScanThread();
+	
+	track_summary_type = AC_VIDEO_SUMMARY_KEYFRAMES;
+	
+	slit_scan_changed = false;
 }
 
 ACOsgVideoTrackRenderer::~ACOsgVideoTrackRenderer() {
+	if (slit_scanner->isRunning()) slit_scanner->cancel();
 	if (video_stream) video_stream->quit();
 	if (playback_geode) { playback_geode->unref(); playback_geode=0; }
-	if (playback_transform) { playback_transform->unref(); playback_transform=0; }
+	if (playback_transform) { playback_transform->unref(); playback_transform=0;}
+	if (slit_scan_geode) { slit_scan_geode->unref(); slit_scan_geode=0; }
+	if (slit_scan_transform) { slit_scan_transform->unref(); slit_scan_transform=0;}
 	if (cursor_geode) {	cursor_geode->unref(); cursor_geode=0; }
 }
 
@@ -155,6 +399,70 @@ void ACOsgVideoTrackRenderer::playbackGeode() {
 		playback_geode->setUserData(new ACRefId(track_index,"video track"));
 	}
 }
+	
+void ACOsgVideoTrackRenderer::slitScanGeode() {
+	StateSet *state;
+	Vec3Array* vertices;
+	Vec2Array* texcoord;
+	Geometry *slit_scan_geometry;
+	Texture2D *slit_scan_texture;
+	
+	//slit_scan_transform = new MatrixTransform();
+	slit_scan_geode = new Geode();
+	slit_scan_geometry = new Geometry();	
+	
+	double imagey = yspan/2.0f;
+	double imagex = xspan/2.0f;
+	
+	vertices = new Vec3Array(4);
+	(*vertices)[0] = Vec3(-imagex, -imagey, 0.0f);
+	(*vertices)[1] = Vec3(imagex, -imagey, 0.0f);
+	(*vertices)[2] = Vec3(imagex, imagey, 0.0f);
+	(*vertices)[3] = Vec3(-imagex, imagey, 0.0f);
+	slit_scan_geometry->setVertexArray(vertices);
+	
+	// Primitive Set
+	DrawElementsUInt *poly = new DrawElementsUInt(PrimitiveSet::QUADS, 4);
+	poly->push_back(0);
+	poly->push_back(1);
+	poly->push_back(2);
+	poly->push_back(3);
+	slit_scan_geometry->addPrimitiveSet(poly);
+	
+	// State Set
+	state = slit_scan_geode->getOrCreateStateSet();
+	state->setMode(GL_LIGHTING, osg::StateAttribute::PROTECTED | osg::StateAttribute::OFF );
+	state->setMode(GL_BLEND, StateAttribute::ON);
+	state->setMode(GL_LINE_SMOOTH, StateAttribute::ON);
+	
+	// Texture Coordinates
+	texcoord = new Vec2Array;
+	float a = 0.0;
+	float b = 1.0-a;
+	bool flip = true;
+	texcoord->push_back(osg::Vec2(a, flip ? b : a));
+	texcoord->push_back(osg::Vec2(b, flip ? b : a));
+	texcoord->push_back(osg::Vec2(b, flip ? a : b));
+	texcoord->push_back(osg::Vec2(a, flip ? a : b));
+	slit_scan_geometry->setTexCoordArray(0, texcoord);	
+	
+	if (slit_scanner->computed()){
+		slit_scan_texture = new osg::Texture2D;
+		slit_scan_texture->setResizeNonPowerOfTwoHint(false);
+		slit_scan_texture->setImage(slit_scanner->getImage());
+		//playback_texture->setUnRefImageDataAfterApply(true);
+		state = slit_scan_geometry->getOrCreateStateSet();
+		state->setTextureAttribute(0, slit_scan_texture);
+		state->setTextureMode(0, GL_TEXTURE_2D, osg::StateAttribute::ON);
+		slit_scan_geometry->setColorArray(colors);
+		slit_scan_geometry->setColorBinding(Geometry::BIND_OVERALL);
+		slit_scan_geode->addDrawable(slit_scan_geometry);
+		slit_scan_transform->addChild(slit_scan_geode);
+		slit_scan_transform->ref();
+		slit_scan_geode->setUserData(new ACRefId(track_index,"video track summary slit-scan"));
+	}
+	
+}	
 
 void ACOsgVideoTrackRenderer::cursorGeode() {
 	StateSet *state;	
@@ -280,7 +588,7 @@ void ACOsgVideoTrackRenderer::framesGeode() {
 			//summary_geometry->setColorArray(colors[0]);
 			frame_geometry->setColorBinding(Geometry::BIND_OVERALL);
 			frame_geode->addDrawable(frame_geometry);
-			frame_geode->setUserData(new ACRefId(track_index,"track summary frames"));
+			frame_geode->setUserData(new ACRefId(track_index,"video track summary frames"));
 		}
 		frame_geode->ref();
 		frames_group->addChild(frame_geode);
@@ -299,8 +607,12 @@ void ACOsgVideoTrackRenderer::prepareTracks() {
 void ACOsgVideoTrackRenderer::updateTracks(double ratio) {
 	if (media_changed)
 	{
-		track_node->removeChild(playback_geode);
+		track_node->removeChild(playback_transform);
 		if (media){
+			slit_scanner->reset();
+			slit_scanner->setFileName(media->getFileName());
+			slit_scanner->startThread();
+			slit_scan_changed = true;
 		
 			playbackGeode();
 			track_node->addChild(playback_transform);
@@ -319,7 +631,7 @@ void ACOsgVideoTrackRenderer::updateTracks(double ratio) {
 		}	
 		//track_node->addChild(playback_geode);
 	}
-	
+
 	static Vec4 colors[2];
 	static bool colors_ready = false;
 	
@@ -334,14 +646,26 @@ void ACOsgVideoTrackRenderer::updateTracks(double ratio) {
 		float w = (float)(media_cycle->getWidth(media_index));
 		float h = (float)(media_cycle->getHeight(media_index));
 		
-		if (frame_n != floor(width/frame_min_width)){
-			double summary_start = getTime();
-			std::cout << "Generating frames... ";
-			track_node->removeChild(frames_transform);
-			frames_transform->removeChild(frames_group);
-			framesGeode();
+		track_node->removeChild(frames_transform);
+		track_node->removeChild(slit_scan_transform);
+		if (track_summary_type == AC_VIDEO_SUMMARY_SLIT_SCAN && slit_scanner->computed()){
+			if (slit_scan_changed){
+				std::cout << "Using slit-scan" << std::endl;
+				slit_scan_transform->removeChild(slit_scan_geode);
+				slitScanGeode();
+				slit_scan_changed = false;
+			}	
+			track_node->addChild(slit_scan_transform);
+		}
+		else {
+			if (frame_n != floor(width/frame_min_width)){
+				double summary_start = getTime();
+				std::cout << "Generating frames... ";
+				frames_transform->removeChild(frames_group);
+				framesGeode();
+				std::cout << getTime()-summary_start << " sec." << std::endl;
+			}
 			track_node->addChild(frames_transform);
-			std::cout << getTime()-summary_start << " sec." << std::endl;
 		}
 				
 		Matrix T;
@@ -365,7 +689,10 @@ void ACOsgVideoTrackRenderer::updateTracks(double ratio) {
 			//std::cout << "video fits view width" << std::endl;
 		}
 		playback_transform->setMatrix(T);
-		frames_transform->setMatrix(G);
+		if (track_summary_type == AC_VIDEO_SUMMARY_SLIT_SCAN && slit_scanner->computed())
+			slit_scan_transform->setMatrix(G);
+		else 
+			frames_transform->setMatrix(G);
 		//cursor_transform->setMatrix(G);
 	}
 	
