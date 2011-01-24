@@ -74,6 +74,7 @@ AGOsgCompositeViewQt::AGOsgCompositeViewQt( QWidget * parent, const char * name,
 	timeline_renderer = new ACOsgTimelineRenderer();
 	
 	synth = new AGSynthesis();
+	synthAudio = NULL;
 	
 	//this->setAttribute(Qt::WA_Hover, true);
 	setMouseTracking(true); //CF necessary for the hover callback
@@ -565,7 +566,7 @@ void AGOsgCompositeViewQt::synthesize()
 		synth->compute(this->getSelectedRhythmPattern(), media_cycle->getBrowser()->getSelectedNodes());
 		//synth->saveAsWav("./synthesis.wav");
 		// Display the synthesis
-		delete synthAudio;
+		if (synthAudio) delete synthAudio;
 		synthAudio = new ACAudio();
 		synthAudio->setData(synth->getSound(),synth->getLength());
 		//synthAudio->computeWaveform( this->getSynth()->getSound()  );
