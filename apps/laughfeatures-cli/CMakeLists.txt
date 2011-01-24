@@ -5,10 +5,11 @@ IF (USE_LAUGHFEAT)
 
 	ADD_EXECUTABLE(laughfeatures-cli ${SRC} ${HDR})
 
-	ADD_DEPENDENCIES(laughfeatures-cli armadillo-utils audiofeatures mc_audio mc_segmentation)
-	INCLUDE_DIRECTORIES(. ../../armadillo ../../audio ../../plugins/segmentation)
+	INCLUDE_DIRECTORIES(. ../../core ../../armadillo ../../audio ../../plugins/segmentation)
 
-	TARGET_LINK_LIBRARIES(laughfeatures-cli audiofeatures ${SNDFILE_LIBRARY} ${SAMPLERATE_LIBRARY})
+	ADD_DEPENDENCIES(laughfeatures-cli mediacycle armadillo-utils audiofeatures mc_audio mc_segmentation)
+
+	TARGET_LINK_LIBRARIES(laughfeatures-cli mediacycle audiofeatures ${SNDFILE_LIBRARY} ${SAMPLERATE_LIBRARY})
 
 	INSTALL(TARGETS laughfeatures-cli RUNTIME DESTINATION bin)
 

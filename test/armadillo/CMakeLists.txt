@@ -3,8 +3,9 @@
 
 	ADD_EXECUTABLE(armadillo-test ${SRC} ${HDR})
 
-	ADD_DEPENDENCIES(armadillo-test armadillo-utils)
-	INCLUDE_DIRECTORIES(. ../../armadillo ../../ ../../fftooura)
+	INCLUDE_DIRECTORIES(. ../core ../../armadillo ../../ ../../fftooura)
 
-	TARGET_LINK_LIBRARIES(armadillo-test ${SNDFILE_LIBRARY} ${SAMPLERATE_LIBRARY} atlas lapack blas armadillo-utils)
+	ADD_DEPENDENCIES(armadillo-test mediacycle armadillo-utils)
+
+	TARGET_LINK_LIBRARIES(armadillo-test mediacycle ${SNDFILE_LIBRARY} ${SAMPLERATE_LIBRARY} atlas lapack blas armadillo-utils)
 	INSTALL(TARGETS armadillo-test RUNTIME DESTINATION bin)

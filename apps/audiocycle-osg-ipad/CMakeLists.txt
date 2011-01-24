@@ -5,7 +5,7 @@ IF ( APPLE_IOS_DEV OR APPLE_IOS_SIM OR APPLE_IOS_XCODE )
 		FILE(GLOB SRC *.m *.mm *.xib)
 		FILE(GLOB HDR *.h)
 
-		INCLUDE_DIRECTORIES(. ../../gui/osg)
+		INCLUDE_DIRECTORIES(. ../../core ../../gui/osg)
 
 		SET(APP_TYPE MACOSX_BUNDLE)
 		ADD_EXECUTABLE(audiocycle-osg-ipad ${APP_TYPE} ${MACOSX_BUNDLE_INFO_PLIST} ${SRC} ${HDR})

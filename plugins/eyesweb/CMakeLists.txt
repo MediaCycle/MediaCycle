@@ -5,7 +5,7 @@ IF ( ARMADILLO_FOUND )
 	SET(PLUGIN_NAME "eyesweb")
 	SET(TARGET_NAME "${PLUGIN_PREFIX}${PLUGIN_NAME}")
 
-	INCLUDE_DIRECTORIES(. ../../armadillo)
+	INCLUDE_DIRECTORIES(. ../../core ../../armadillo)
 
 	ADD_LIBRARY(${TARGET_NAME} SHARED ${SRC} ${HDR})
 	ADD_DEPENDENCIES(${TARGET_NAME} mediacycle armadillo armadillo-utils)

@@ -60,7 +60,7 @@
 
 #include <osg/Node>
 #include <osgGA/GUIEventHandler>
-#include <osgGA/MatrixManipulator>
+//#include <osgGA/MatrixManipulator>
 #include <osgViewer/Viewer>
 
 // we separate C++ declaration from regular Obj-C
@@ -68,7 +68,7 @@
 
 - (void)setNode:(osg::Node*)node;
 - (void)addEventHandler:(osgGA::GUIEventHandler*)eventHandler;
-- (void)setCameraManipulator:(osgGA::MatrixManipulator*)manipulator;
+//- (void)setCameraManipulator:(osgGA::MatrixManipulator*)manipulator;
 - (osg::Camera*)camera;
 - (osgViewer::Viewer*)viewer;
 

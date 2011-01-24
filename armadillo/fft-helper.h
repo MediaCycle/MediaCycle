@@ -1,8 +1,8 @@
 /**
  * @brief fft-helper.h
- * @author Damien Tardieu
- * @date 11/03/2010
- * @copyright (c) 2010 – UMONS - Numediart
+ * @author Christian Frisson
+ * @date 24/01/2011
+ * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -34,7 +34,7 @@
 
 #include "Armadillo-utils.h"
 
-#include "fftsg.h"
+#include <fftsg.h>
 
 // fft 1D for column vector
 cx_mat fft_helper(mat x_m, int n);

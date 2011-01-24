@@ -2,7 +2,7 @@ IF ( APPLE AND USE_COCOA AND USE_OSC AND OPENAL_FOUND)
 	FILE(GLOB SRC *.m *.mm *.nib)
 	FILE(GLOB HDR *.h)
 
-	INCLUDE_DIRECTORIES(. ../../gui/osg ../../gui/osg-cocoa)
+	INCLUDE_DIRECTORIES(. ../../core ../../gui/osg ../../gui/osg-cocoa)
 	INCLUDE_DIRECTORIES(../../io/osc ../../io/osc/oscpack)
 
 	SET(APP_TYPE MACOSX_BUNDLE)

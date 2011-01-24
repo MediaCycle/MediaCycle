@@ -8,7 +8,7 @@ IF ( ARMADILLO_FOUND )
 	ADD_LIBRARY(${TARGET_NAME} SHARED ${SRC} ${HDR})
 	ADD_DEPENDENCIES(${TARGET_NAME} mediacycle mc_image armadillo-utils)
 
-	INCLUDE_DIRECTORIES(. ../image/blobs ../image ../image/gabor ../../armadillo)
+	INCLUDE_DIRECTORIES(. ../../core ../image/blobs ../image ../image/gabor ../../armadillo)
 
 	SET_TARGET_PROPERTIES(${TARGET_NAME} PROPERTIES PREFIX ${PLUGIN_PREFIX})
 	SET_TARGET_PROPERTIES(${TARGET_NAME} PROPERTIES OUTPUT_NAME ${PLUGIN_NAME})

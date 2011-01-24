@@ -697,11 +697,12 @@ static NSDate *gReferenceDate = nil;
 	_osgViewData->viewer->addEventHandler(eventHandler);
 }
 
+/*
 - (void)setCameraManipulator:(osgGA::MatrixManipulator*)manipulator
 {
 	_osgViewData->viewer->setCameraManipulator(manipulator);
 }
-
+*/
 - (osg::Camera*)camera
 {
 	return _osgViewData->viewer->getCamera();

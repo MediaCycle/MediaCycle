@@ -7,6 +7,14 @@ IF ( USE_OSG AND FFMPEG_FOUND )
 	#gsl - uncomment if needed
 	#TARGET_LINK_LIBRARIES(mediacycle gsl gslcblas)
 
+	INCLUDE_DIRECTORIES(../armadillo ../fftooura)
+	ADD_DEPENDENCIES(mediacycle armadillo-utils)
+	TARGET_LINK_LIBRARIES(mediacycle armadillo-utils)
+
+	IF ( SDIF_FOUND )
+		TARGET_LINK_LIBRARIES(armadillo-utils sdif)
+	ENDIF ( )
+
 	#others
 	IF ( MINGW )
 		TARGET_LINK_LIBRARIES(mediacycle sndfile FLAC vorbisenc vorbis m ogg pthread wsock32 ws2_32) # CF: should be detected in main CMakeLists.txt

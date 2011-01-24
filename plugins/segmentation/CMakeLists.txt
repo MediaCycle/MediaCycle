@@ -6,7 +6,7 @@ IF (USE_AUDIOFEAT)
 	SET(PLUGIN_NAME "segmentation")
 	SET(TARGET_NAME "${PLUGIN_PREFIX}${PLUGIN_NAME}")
 
-	INCLUDE_DIRECTORIES(. ../../armadillo ../../audio ../../fftooura)
+	INCLUDE_DIRECTORIES(. ../../core ../../armadillo ../../audio ../../fftooura)
 
 	ADD_LIBRARY(${TARGET_NAME} SHARED ${SRC} ${HDR})
 	ADD_DEPENDENCIES(${TARGET_NAME} mediacycle armadillo armadillo-utils audiofeatures)
