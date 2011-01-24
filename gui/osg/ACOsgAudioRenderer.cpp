@@ -230,13 +230,14 @@ void ACOsgAudioRenderer::waveformGeode() {
 	frame_geometry->setColorBinding(Geometry::BIND_OVERALL);
 	
 	state = waveform_geode->getOrCreateStateSet();
-	state->setMode(GL_LIGHTING, osg::StateAttribute::PROTECTED | osg::StateAttribute::OFF );
-	//state->setMode(GL_LIGHTING, osg::StateAttribute::ON );
 	state->setMode(GL_BLEND, StateAttribute::ON);
 	state->setMode(GL_NORMALIZE, osg::StateAttribute::ON);	
-#if !defined(APPLE_IOS)
+#if defined(APPLE_IOS)
+	state->setMode(GL_LIGHTING, osg::StateAttribute::PROTECTED | osg::StateAttribute::OFF );
+#else
+	state->setMode(GL_LIGHTING, osg::StateAttribute::ON );
 	state->setMode(GL_LINE_SMOOTH, StateAttribute::ON); //CF not supported by OpenGL ES 2...
-#endif		
+#endif	
 	//state->setAttribute(new LineWidth(1.0));
 		
 	waveform_geode->addDrawable(samples_geometry);
@@ -313,10 +314,12 @@ void ACOsgAudioRenderer::curserGeode() {
 	//state->setAttribute(new LineWidth(2.0));
 	
 	state = curser_geode->getOrCreateStateSet();
-	state->setMode(GL_LIGHTING, osg::StateAttribute::PROTECTED | osg::StateAttribute::OFF );
 	state->setMode(GL_BLEND, StateAttribute::ON);
 	state->setMode(GL_NORMALIZE, osg::StateAttribute::ON);
-#if !defined(APPLE_IOS)
+#if defined(APPLE_IOS)
+	state->setMode(GL_LIGHTING, osg::StateAttribute::PROTECTED | osg::StateAttribute::OFF );
+#else
+	state->setMode(GL_LIGHTING, osg::StateAttribute::ON );
 	state->setMode(GL_LINE_SMOOTH, StateAttribute::ON); //CF not supported by OpenGL ES 2...
 #endif		
 	/*
@@ -354,16 +357,19 @@ void ACOsgAudioRenderer::entryGeode() {
 	
 	state = entry_geode->getOrCreateStateSet();
 	state->setMode(GL_NORMALIZE, osg::StateAttribute::ON);	
-	state->setMode(GL_LIGHTING, osg::StateAttribute::PROTECTED | osg::StateAttribute::OFF );
-	//state->setMode(GL_LIGHTING, osg::StateAttribute::ON );
-	//state->setMode(GL_BLEND, StateAttribute::ON);
 	
+#if defined(APPLE_IOS)	
+	state->setMode(GL_LIGHTING, osg::StateAttribute::PROTECTED | osg::StateAttribute::OFF );
+	entry_geode->addDrawable(new osg::ShapeDrawable(new osg::Box(osg::Vec3(0.0f,0.0f,0.0f),0.1), hints)); //draws a square // Vintage AudioCycle
+#else	
+	state->setMode(GL_LIGHTING, osg::StateAttribute::ON );
+	state->setMode(GL_BLEND, StateAttribute::ON);
 	//entry_geode->addDrawable(new osg::ShapeDrawable(new osg::Box(osg::Vec3(0.0f,0.0f,0.0f),0.1), hints)); //draws a square // Vintage AudioCycle
-	//entry_geode->addDrawable(new osg::ShapeDrawable(new osg::Sphere(osg::Vec3(0.0f,0.0f,0.0f),localsize), hints)); // draws a sphere // MultiMediaCycle
-	entry_geode->addDrawable(new osg::ShapeDrawable(new osg::Box(osg::Vec3(0.0f,0.0f,0.0f),localsize), hints)); // draws a sphere // MultiMediaCycle
+	entry_geode->addDrawable(new osg::ShapeDrawable(new osg::Sphere(osg::Vec3(0.0f,0.0f,0.0f),localsize), hints)); // draws a sphere // MultiMediaCycle
 	//entry_geode->addDrawable(new osg::ShapeDrawable(new osg::Cylinder(osg::Vec3(0.0f,0.0f,0.0f),0.01, 0.0f), hints)); // draws a disc
 	//entry_geode->addDrawable(new osg::ShapeDrawable(new osg::Capsule(osg::Vec3(0.0f,0.0f,0.0f),0.01, 0.005f), hints)); // draws a sphere
 	//sprintf(name, "some audio element");
+#endif	
 	entry_geode->setUserData(new ACRefId(node_index));
 	//entry_geode->setName(name);
 	entry_geode->ref();	

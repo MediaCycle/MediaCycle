@@ -58,7 +58,9 @@
 
 #include "ACRefId.h"
 
-//#define AUTO_TRANSFORM
+#if defined(APPLE_IOS)
+	#define AUTO_TRANSFORM
+#endif 
 
 using namespace std;
 using namespace osg;
