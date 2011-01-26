@@ -455,6 +455,7 @@ void ACAudioGardenOsgQt::on_comboBoxClustersPositions_activated(const QString & 
 {
 	std::cout << "Clusters Positions: " << text.toStdString() << std::endl;
 	media_cycle->changeClustersPositionsPlugin(text.toStdString());
+	ui.compositeOsgView->setFocus();
 }
 
 void ACAudioGardenOsgQt::on_pushButtonMuteAll_clicked()
