@@ -177,7 +177,8 @@ const filext::value_type _init[] = {
 	filext::value_type(".xine", MEDIA_TYPE_VIDEO), \
 	
 	// from libsndfile 1.0.21
-	filext::value_type(".aiff", MEDIA_TYPE_AUDIO), \
+	filext::value_type(".aif", MEDIA_TYPE_AUDIO), \
+	filext::value_type(".aiff", MEDIA_TYPE_AUDIO), \	
 	filext::value_type(".au", MEDIA_TYPE_AUDIO), \
 	filext::value_type(".avr", MEDIA_TYPE_AUDIO), \
 	filext::value_type(".caf", MEDIA_TYPE_AUDIO), \
@@ -397,12 +398,17 @@ void ACMediaFactory::addSndFileExtensions(){
 		info.format = m ;
 		sf_command (NULL, SFC_GET_FORMAT_MAJOR, &info, sizeof (info)) ;
 		
-		addFileExtensionSupport(std::string(".") + std::string(info.extension),MEDIA_TYPE_AUDIO);
+		std::string ext =  std::string(info.extension);
+		if (ext == "aif" || ext == "aiff"){
+			addFileExtensionSupport(".aif",MEDIA_TYPE_AUDIO);
+			addFileExtensionSupport(".aiff",MEDIA_TYPE_AUDIO);
+		}	
+		else 
+			addFileExtensionSupport(std::string(".") + ext,MEDIA_TYPE_AUDIO);
 		
 		//CF the following could be used to add format metadata
 		/*		
 		printf ("%s  (extension \"%s\")\n", info.name, info.extension) ;
-
 		format = info.format ;
 		for (s = 0 ; s < subtype_count ; s++)
 		{	info.format = s ;
