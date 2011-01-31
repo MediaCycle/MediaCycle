@@ -39,6 +39,8 @@
 #include "ACOsgVideoTrackRenderer.h"
 #endif
 
+using namespace osg;
+
 ACOsgTimelineRenderer::ACOsgTimelineRenderer(): screen_width(0), height(0.0f) {
 	track_renderer.resize(0);
 	group = new Group();

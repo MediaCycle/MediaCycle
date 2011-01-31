@@ -51,6 +51,8 @@
 // XS for sorting:
 #include <algorithm>
 
+namespace fs = boost::filesystem;
+
 #define VERBOSE
 
 // CF FFmpeg for checking audio/video channels in containers
@@ -85,13 +87,11 @@ void* p_importSingleFile(void *arg){
 
 ACMediaLibrary::ACMediaLibrary() {
 	this->cleanLibrary();
-	this->cleanStats();
 	media_type = MEDIA_TYPE_NONE;
 }
 
 ACMediaLibrary::ACMediaLibrary(ACMediaType aMediaType) {
 	this->cleanLibrary();
-	this->cleanStats();
 	media_type = aMediaType;
 	
 	// Register all formats and codecs from FFmpeg
@@ -133,7 +133,11 @@ void ACMediaLibrary::cleanLibrary() {
 
 // this same function is used to import a whole directory, a single file or a list of files.
 // it uses scanDirectory to construct a vector (filenames) containing the files to be analyzed.
-int ACMediaLibrary::importDirectory(std::string _path, int _recursive, ACPluginManager *acpl, bool forward_order, bool doSegment) {
+// return values:
+//	-1 if error
+//  0 if empty directory (or no media of the required type found)
+//	> 0 if no error (returns the number of files found)
+int ACMediaLibrary::importDirectory(std::string _path, int _recursive, ACPluginManager *acpl, bool forward_order, bool doSegment, bool _save_timed_feat) {
 	std::vector<string> filenames;
 
 	int nf = scanDirectory(_path, _recursive, filenames);
@@ -147,78 +151,35 @@ int ACMediaLibrary::importDirectory(std::string _path, int _recursive, ACPluginM
 		return 0;
 	}
 
+	// XS todo make this more flexible
+	// here we force the plugins to save timed features for segmentation
+	// they could also segment on-the-fly while calculating features (as in audioSegmentationPlugin)
+	if (doSegment) _save_timed_feat = true;
+	
 	for (unsigned int i=0; i<filenames.size(); i++){
 		int index = forward_order ? i : filenames.size()-1-i;//CF if reverse order (not forward_order), segments in subdirs are added to the library after the source recording
-		this->importFile(filenames[index], acpl, doSegment );
+		this->importFile(filenames[index], acpl, doSegment, _save_timed_feat );
 	}
 	
 	std::cout << "Library size : " << this->getSize() << std::endl;
-	return 1;
+	return this->getSize(); 
 }
 
-int ACMediaLibrary::importFile(std::string _filename, ACPluginManager *acpl, bool doSegment) {
-	
-	string extension;
-	std::vector<ACMedia*> mediaSegments;
 
-	extension = fs::extension(_filename);
+// import single file :
+// computes features (= "import" media) using FEATURES plugins available in the plugin Manager
+// doSegment = true : uses SEGMENTATION plugins on-the-fly
+// save_timedfeat = true : save the timedFeatures on the disk
+int ACMediaLibrary::importFile(std::string _filename, ACPluginManager *acpl, bool doSegment, bool _save_timed_feat) {
 	
-	//CF early check in video files for audio and video streams, towards ACMediaDocuments
-	// from http://www.inb.uni-luebeck.de/~boehme/using_libavcodec.html
-	// and http://www.inb.uni-luebeck.de/~boehme/libavcodec_update.html
+	string extension = fs::extension(_filename);
+	
 	ACMediaType fileMediaType = ACMediaFactory::getMediaTypeFromExtension(extension);
 	ACMedia* media;
-	if (media_type == MEDIA_TYPE_VIDEO || media_type == MEDIA_TYPE_AUDIO) {
-		if (fileMediaType == MEDIA_TYPE_VIDEO) {			
-			AVFormatContext *pFormatCtx;
-			int             i, videoStreams, audioStreams;
-			/*
-			AVCodecContext  *pCodecCtx;
-			AVCodec         *pCodec;
-			AVFrame         *pFrame; 
-			AVFrame         *pFrameRGB;
-			AVPacket        packet;
-			int             frameFinished;
-			int             numBytes;
-			uint8_t         *buffer;
-			*/
-			// Open video file
-			if(av_open_input_file(&pFormatCtx, _filename.c_str(), NULL, 0, NULL)!=0){
-				std::cout << "Couldn't open file" << std::endl;
-				return 0; 
-			}
+
+	//this->testFFMPEG(_filename);
 	
-			// Retrieve stream information
-			if(av_find_stream_info(pFormatCtx)<0){
-				std::cout << "Couldn't find stream information" << std::endl;
-				return 0;
-			}
-			
-			// Dump information about file onto standard error
-			dump_format(pFormatCtx, 0, _filename.c_str(), false);
-			
-			// Count video streams
-			videoStreams=0;
-			for(i=0; i<pFormatCtx->nb_streams; i++)
-				if(pFormatCtx->streams[i]->codec->codec_type==CODEC_TYPE_VIDEO)
-					videoStreams++;
-			if(videoStreams == 0)
-				std::cout << "Didn't find any video stream." << std::endl;
-			else
-				std::cout << "Found " << videoStreams << " video stream(s)." << std::endl;
-			
-			// Count audio streams
-			audioStreams=0;
-			for(i=0; i<pFormatCtx->nb_streams; i++)
-				if(pFormatCtx->streams[i]->codec->codec_type==CODEC_TYPE_AUDIO)
-					audioStreams++;
-			if(audioStreams == 0)
-				std::cout << "Didn't find any audio stream" << std::endl;
-			else
-				std::cout << "Found " << audioStreams << " audio stream(s)." << std::endl;	
-		}
-	}
-	
+	// XS TODO: do we want to check the media type of the whole library (= impose a unique one)?
 	if (media_type == fileMediaType){
 		media = ACMediaFactory::create(extension);
 		cout << "extension:" << extension << endl; 	
@@ -233,8 +194,8 @@ int ACMediaLibrary::importFile(std::string _filename, ACPluginManager *acpl, boo
 		return 0;
 	}
 	else {
-		// This has to be done before segmentation to have proper id
-		if (media->import(_filename, this->getMediaID(), acpl)){
+		// import has to be done before segmentation to have proper id.
+		if (media->import(_filename, this->getMediaID(), acpl, _save_timed_feat)){
 			this->addMedia(media);
 #ifdef VERBOSE
 			cout << "imported " << _filename << " with mid = " <<  this->getMediaID() << endl;
@@ -245,8 +206,10 @@ int ACMediaLibrary::importFile(std::string _filename, ACPluginManager *acpl, boo
 		if (doSegment){
 			// segments are created without id 
 			media->segment(acpl);
+			std::vector<ACMedia*> mediaSegments;
 			mediaSegments = media->getAllSegments();
 			for (unsigned int i = 0; i < mediaSegments.size(); i++){
+				// for the segments we do not save (again) timedFeatures
 				if (mediaSegments[i]->import(_filename, this->getMediaID(), acpl)){
 					this->addMedia(mediaSegments[i]);
 					this->incrementMediaID();
@@ -259,16 +222,19 @@ int ACMediaLibrary::importFile(std::string _filename, ACPluginManager *acpl, boo
 }
 
 int ACMediaLibrary::scanDirectories(std::vector<string> _paths, int _recursive, std::vector<string>& filenames) {
-
+	// XS TODO
+	// int cnt = 0;
 	for (unsigned int i=0; i<_paths.size(); i++) {
+		// cnt += ...
 		scanDirectory(_paths[i], _recursive, filenames);
 	}
+	// return cnt;
 }
 	
 // construct a vector (filenames) containing the files in a given directory (_path).
 // when "recursive" is turned on, it will scan subdirectories too 
 // return values :
-//    1 = it found files
+//    1 = it found files -- 	//XS TODO : return filenames.size()
 //    0 = empty
 //   -1 = directory not found
 
@@ -301,6 +267,8 @@ int ACMediaLibrary::scanDirectory(std::string _path, int _recursive, std::vector
 		// put it in the vector of files to be analyzed
 		filenames.push_back(_path);
 	}
+	
+	//XS TODO : return filenames.size()
 	if (filenames.size() == 0) return 0;
 	return 1;
 }
@@ -526,7 +494,7 @@ int ACMediaLibrary::openLibrary(std::string _path, bool aInitLib){
  */
 
 int ACMediaLibrary::addMedia(ACMedia *aMedia) {
-    //TODO remove media_type check
+    // XS TODO remove media_type check
     // mediacycle should be able to manage a mix of any media
     // instead of only medias of one type
 	if (aMedia != NULL){
@@ -633,7 +601,7 @@ void ACMediaLibrary::calculateStats() {
 	else nn = n-1;
 	
 	for(j=0; j<(int)mean_features.size(); j++) {
-		printf("feature %d\n", j);
+		cout << "calculating stats for feature" << j << endl;
 		for(k=0; k<(int)mean_features[j].size(); k++) {
 			mean_features[j][k] /= n;
 			stdev_features[j][k] /= n;
@@ -767,5 +735,68 @@ void ACMediaLibrary::saveSorted(string output_file){
 		endl;
 	}
 	out.close();
+}
+
+
+// -------------------------------------------------------------------------
+// test 
+int ACMediaLibrary::testFFMPEG(std::string _filename){	
+	//CF early check in video files for audio and video streams, towards ACMediaDocuments
+	// from http://www.inb.uni-luebeck.de/~boehme/using_libavcodec.html
+	// and http://www.inb.uni-luebeck.de/~boehme/libavcodec_update.html
+
+	string extension = fs::extension(_filename);
+	ACMediaType fileMediaType = ACMediaFactory::getMediaTypeFromExtension(extension);
+	
+	if (media_type == MEDIA_TYPE_VIDEO || media_type == MEDIA_TYPE_AUDIO) {
+		if (fileMediaType == MEDIA_TYPE_VIDEO) {			
+			AVFormatContext *pFormatCtx;
+			int             i, videoStreams, audioStreams;
+			/*
+			AVCodecContext  *pCodecCtx;
+			AVCodec         *pCodec;
+			AVFrame         *pFrame; 
+			AVFrame         *pFrameRGB;
+			AVPacket        packet;
+			int             frameFinished;
+			int             numBytes;
+			uint8_t         *buffer;
+			*/
+			// Open video file
+			if(av_open_input_file(&pFormatCtx, _filename.c_str(), NULL, 0, NULL)!=0){
+				std::cout << "Couldn't open file" << std::endl;
+				return 0; 
+			}
+	
+			// Retrieve stream information
+			if(av_find_stream_info(pFormatCtx)<0){
+				std::cout << "Couldn't find stream information" << std::endl;
+				return 0;
+			}
+			
+			// Dump information about file onto standard error
+			dump_format(pFormatCtx, 0, _filename.c_str(), false);
+			
+			// Count video streams
+			videoStreams=0;
+			for(i=0; i<pFormatCtx->nb_streams; i++)
+				if(pFormatCtx->streams[i]->codec->codec_type==CODEC_TYPE_VIDEO)
+					videoStreams++;
+			if(videoStreams == 0)
+				std::cout << "Didn't find any video stream." << std::endl;
+			else
+				std::cout << "Found " << videoStreams << " video stream(s)." << std::endl;
+			
+			// Count audio streams
+			audioStreams=0;
+			for(i=0; i<pFormatCtx->nb_streams; i++)
+				if(pFormatCtx->streams[i]->codec->codec_type==CODEC_TYPE_AUDIO)
+					audioStreams++;
+			if(audioStreams == 0)
+				std::cout << "Didn't find any audio stream" << std::endl;
+			else
+				std::cout << "Found " << audioStreams << " audio stream(s)." << std::endl;	
+		}
+	}
 }
 

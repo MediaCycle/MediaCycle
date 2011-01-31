@@ -52,6 +52,7 @@ ACMultiMediaCycleOsgQt::ACMultiMediaCycleOsgQt(QWidget *parent) : QMainWindow(pa
 	connect(ui.actionLoad_Media_Directory, SIGNAL(triggered()), this, SLOT(loadMediaDirectory()));
 	connect(ui.actionLoad_Media_Files, SIGNAL(triggered()), this, SLOT(loadMediaFiles()));
 	connect(ui.actionSave_ACL, SIGNAL(triggered()), this, SLOT(saveACLFile()));
+	connect(ui.actionLoad_ACL, SIGNAL(triggered()), this, SLOT(loadACLFile()));
 	connect(ui.actionEdit_Config_File, SIGNAL(triggered()), this, SLOT(editConfigFile()));
 	connect(ui.actionSave_Config_File, SIGNAL(triggered()), this, SLOT(saveConfigFile()));
 	connect(ui.actionLoad_Config_File, SIGNAL(triggered()), this, SLOT(loadConfigFile()));
@@ -69,6 +70,12 @@ ACMultiMediaCycleOsgQt::ACMultiMediaCycleOsgQt(QWidget *parent) : QMainWindow(pa
 	// uses another window for settings = editing the config file
 	settingsDialog = new SettingsDialog(parent);
 	settingsDialog->setMediaCycleMainWindow(this);
+	
+	// progress bar
+	//pb = new QProgressBar(statusBar());
+	//	pb->setTextVisible(false);
+	//	pb->hide();
+	//	statusBar()->addPermanentWidget(pb);
 	
 	this->show();
 }
@@ -94,6 +101,7 @@ void ACMultiMediaCycleOsgQt::destroyMediaCycle(){
 	delete media_cycle;
 }
 
+// XS in theory one could select multiple ACL files and concatenate them (not tested yet)
 void ACMultiMediaCycleOsgQt::loadACLFile(){
 	if (media_cycle == NULL) {
 		cerr << "first define the type of application" << endl;
@@ -123,7 +131,7 @@ void ACMultiMediaCycleOsgQt::loadACLFile(){
 		}	
 		++file;
 	}	
-	
+		
 	// only after loading all ACL files:
 	this->updateLibrary();
 	
@@ -159,11 +167,13 @@ void ACMultiMediaCycleOsgQt::saveACLFile(){
 // XS TODO: make sure it works if we add a new directory to the existing library ?
 void ACMultiMediaCycleOsgQt::loadMediaDirectory(){
 	if (media_cycle == NULL) {
+		int warn_button = QMessageBox::warning(this, "Error", 
+											   "First define the type of application");
 		cerr << "first define the type of application" << endl;
 		return;
 	}
 	statusBar()->showMessage(tr("Loading Directory..."), 0);
-	
+
 	QString selectDir = QFileDialog::getExistingDirectory
 	(
 	 this, 
@@ -172,16 +182,50 @@ void ACMultiMediaCycleOsgQt::loadMediaDirectory(){
 	 QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks
 	 );
 	
-	// check if directory exists
-	if (media_cycle->importDirectory(selectDir.toStdString(), 1) > 0){
+	// check if the user wants segments
+	bool do_segments = false;
+	bool forward_order = true; // only make it false for AudioGarden where media have been presegmented and segments have special names
+	int recursive = 1;	
+	
+	int seg_button = QMessageBox::question(this,
+									   tr("Segmentation"),
+									   tr("Do you want to segment the media ?"),
+									   QMessageBox::Yes | QMessageBox::No);
+	if (seg_button == QMessageBox::Yes) {
+		// XS TODO: check that segmentation algorithms exist
+		do_segments = true;
+	}
+	
+// XS TODO to use progress bar, we need to import files one by one...
+// so split the importdDirectory into scanDirectory + importFile
+//	pb->show();
+//	pb->setRange(0, 100);
+//	pb->setValue(2);
+	int res = media_cycle->importDirectory(selectDir.toStdString(), recursive, forward_order, do_segments);
+	int warn_button = 0;
+	if (res > 0){
+		statusBar()->showMessage(tr("Directory Imported."), 2000);
 		media_cycle->normalizeFeatures();
+		statusBar()->showMessage(tr("Features Normalized."), 2000);
 		this->updateLibrary();
 	}
-	statusBar()->showMessage(tr("Directory Loaded."), 2000);
+	else if (res==0) {
+		warn_button = QMessageBox::warning(this, "Warning", 
+											   "Empty Directory"); //, <#const QString button0Text#>, <#const QString button1Text#>, <#const QString button2Text#>, <#int defaultButtonNumber#>, <#int escapeButtonNumber#>);
+
+	}
+	else  {
+		warn_button = QMessageBox::warning(this, "Error", 
+											   "Problem Importing Directory"); //, <#const QString button0Text#>, <#const QString button1Text#>, <#const QString button2Text#>, <#int defaultButtonNumber#>, <#int escapeButtonNumber#>);
+	}
+	statusBar()->clearMessage();
+
 }
 
 void ACMultiMediaCycleOsgQt::loadMediaFiles(){
 	if (media_cycle == NULL) {
+		int warn_button = QMessageBox::warning(this, "Error", 
+										   "First define the type of application");
 		cerr << "first define the type of application" << endl;
 		return;
 	}
@@ -474,11 +518,11 @@ void ACMultiMediaCycleOsgQt::loadDefaultConfig(ACMediaType _media_type, ACBrowse
 #endif //USE_DEBUG
 	s_plugin = s_path + "/../../../plugins/"+ smedia + "/" + build_type + "/mc_" + smedia +".dylib";
 	// common to all media, but only for mac...
-	media_cycle->addPlugin(s_path + "../../../plugins/visualisation/" + build_type + "/mc_visualisation.dylib");
+	media_cycle->addPlugin(s_path + "/../../../plugins/visualisation/" + build_type + "/mc_visualisation.dylib");
 #elif defined (__WIN32__)
-	s_plugin = s_path + "\..\..\plugins\\" + smedia + "\mc_image.dll";
+	s_plugin = s_path + "\..\..\plugins\\" + smedia + "\mc_"+smedia+".dll";
 #else
-	s_plugin = s_path + "/../../plugins/"+smedia+"/mc_image.so";
+	s_plugin = s_path + "/../../plugins/"+smedia+"/mc_"+smedia+".so";
 #endif
 	
 	media_cycle->addPlugin(s_plugin);
@@ -506,4 +550,11 @@ void ACMultiMediaCycleOsgQt::comboDefaultSettingsChanged(){
 	this->loadDefaultConfig(new_media_type);
 }
 
+void ACMultiMediaCycleOsgQt::on_pushButtonClean_clicked()
+{
+	this->media_cycle->cleanLibrary();
+	this->media_cycle->cleanUserLog(); // XS or cleanBrowser ?
+	this->updateLibrary();
+	library_loaded = false;
+}	
 

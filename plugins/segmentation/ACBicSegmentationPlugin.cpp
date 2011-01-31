@@ -53,16 +53,59 @@ ACBicSegmentationPlugin::ACBicSegmentationPlugin() : lambda(1), sampling_rate(1)
 ACBicSegmentationPlugin::~ACBicSegmentationPlugin() {
 }
 
+// remember :
+// - ACMediaData* _data = the full information about a media (e.g. whole image) that usually gets deleted by MC after analysis
+// - ACMedia* _theMedia = what remains from the media after import (e.g. features + thumbnail...)
+// here we mostly need _theMedia but this structure is compatible with ACAudioSegmentationPlugin
+
 std::vector<ACMedia*> ACBicSegmentationPlugin::segment(ACMediaData* _data, ACMedia* _theMedia) {
-// XS TODO
-	cout <<"todo" << endl;
+// XS TODO : how to set _lambda, _sampling_rate from MediaCycle's GUI ?
+// could add a .ui file with the segmentation plugin to set the options ?
+	
+	std::vector<ACMediaFeatures*> _allfeatures = _theMedia->getAllFeaturesVectors();
+	int c = _allfeatures.size();
+	int l = _allfeatures[0]->getSize();
+	this->full_features = arma::fmat((int) c, (int) l); 
+	for ( int Itime=0; Itime< c; Itime++){
+		for ( int Idim=0; Idim<l; Idim++){
+			this->full_features(Itime, Idim) = _allfeatures[Itime]->getFeatureElement(Idim);
+		}
+	}
+	
+	// get the limits BETWEEN segments as integers
+	// usually does not contain 0 nor the last index
+	std::vector<int> segments_limits = this->_segment();
+
+	//transform them into ACMedia*
+	vector<ACMedia*> segments;
+
+	int Nseg = segments_limits.size();
+	if (Nseg == 0) {
+		cerr << "< ACBicSegmentationPlugin::segment> : no segments" << endl;
+		return segments; // XS check this
+	}
+	
+	// add the beginning of first segment (0)
+//	if (segments_limits[0] != 0) segments_limits.push_front(0);
+//	if (segments_limits[Nseg] !=
+		
+
+//	for (int i = 0; i < seg_m.n_rows; i++){
+//		ACMedia* media = ACMediaFactory::create(theAudio);
+//		media->setParentId(theMedia->getId());
+//		media->setStart(seg_m(i,0));
+//		media->setEnd(seg_m(i,1));
+//		segments.push_back(media);
+//	}
+	
+	return segments;
 }
 
 std::vector<int> ACBicSegmentationPlugin::segment(const vector< vector<float> > & _allfeatures, \
 												  float _lambda, \
 												  int _samplingrate){
 	this->lambda = _lambda;
-	this->sampling_rate = _samplingrate;
+	if (_samplingrate >0) this->sampling_rate = _samplingrate;
 	
 	// transforming vector< vector<> > into fmat
 	int c = _allfeatures.size();
@@ -151,7 +194,7 @@ std::vector<int> ACBicSegmentationPlugin::segmentDAC(std::vector <ACMediaTimedFe
 // - this->full_features = _M ; 
 
 std::vector<int> ACBicSegmentationPlugin::_segment(){
-	// XS test most significant segment (only one)
+	// XS test most significant segment (only one):
 	// this->findSingleSegment(0,this->full_features.n_cols-1);
 	
 	// growing window algorithm (NB not efficient if long uniform segments)
@@ -160,22 +203,22 @@ std::vector<int> ACBicSegmentationPlugin::_segment(){
 	int seg_f = Wmin;
 	std::vector<int> segments_tmp;
 
-
-
 	while (seg_f < int (this->full_features.n_cols)) {
 		int s = this->findSingleSegment(seg_i, seg_f);
-		if (s > 0) {
+		if (s >= seg_i){ 
+			// segment found
 			segments_tmp.push_back(s);
-			seg_i = s + jump_width;
-			seg_f = seg_i + Wmin; // JU: I believe we should always take all the frames in the BIC criterion (so, +1) even if we prevent for having segments shorter than Wmin: the first frames of the segment are relevant for its statistical modelling, hence finiding the segment end.
+			seg_i = s + jump_width; // JU: I believe we should always take all the frames in the BIC criterion (so, +1) even if we prevent for having segments shorter than Wmin: the first frames of the segment are relevant for its statistical modelling, hence finiding the segment end.
+			seg_f = seg_i + Wmin; 
 		}
-		seg_f += sampling_rate;
+		else
+			// segment not yet found
+			seg_f += sampling_rate;
 	}
 	
 	cout << "found " << segments_tmp.size() << " segment(s)" << endl;
 
 	return segments_tmp;
-
 }
 
 
@@ -192,10 +235,9 @@ int ACBicSegmentationPlugin::findSingleSegment(int A, int B){
 		std::cout << "<ACBicSegmentationPlugin::findSingleSegment> : limits  must be positive !" << std::endl;
 		return -1;
 	}
-
-
-	max_bic = bic_thresh;
-	imax_bic = 0;
+		
+	float max_bic = bic_thresh;
+	int imax_bic = 0;
 	float deltaBICi = 0.0;
 
 	// standard notations cf. papers on BIC e.g., ..
@@ -211,26 +253,15 @@ int ACBicSegmentationPlugin::findSingleSegment(int A, int B){
 	float S1 = 0.0;
 	float S2 = 0.0;
 	float S = detCovariance (A,B);
-        if(!S)  //JU: added return in case all frames are identic.
-        {
-            return 0;
-        }
-	float R = log(S) * N * 0.5; // JU: added log
+ 	float R = S * N ; 
 	
 	for (int i=A+2; i<B; i++){ //JU: modified indexes so as to have at least 2 frames for each test
 		N1=i-A;
 		N2=B-i;
 		// XS TODO : use running_stat_vec<type>(true) 
-		S1 = detCovariance (A,i-1);  // JU: i-1 so frame i is not in both sides...
-                if(!S1)                     // JU: added "protection" for case successive frames are identic (then covariance is zero, log is infinite...)
-                {
-                    if(!detCovariance(A,i))
-                    {
-                        continue;
-                    }
-                }
+		S1 = detCovariance (A,i-1); // i-1 so frame i is not in both sides...
 		S2 = detCovariance (i,B);
-		deltaBICi = R - N1*log(S1)*0.5 - N2*log(S2)*0.5 -lP; // Ju: added log
+		deltaBICi = R - N1*S1 - N2*S2 -lP;
 		//cout << deltaBICi << endl;
 		if (deltaBICi > max_bic) {
 			// store current maximum = most likely cut
@@ -252,11 +283,14 @@ int ACBicSegmentationPlugin::findSingleSegment(int A, int B){
 }
 
 float ACBicSegmentationPlugin::detCovariance(int _cinf, int _csup){
-    //arma::fmat M=this->full_features.cols(_cinf,_csup);
-    //M.print();
-    //float p=arma::det (arma::cov(arma::trans(this->full_features.cols(_cinf, _csup))));
-    //cout << "det(" << _cinf <<',' << _csup << "): " << p << endl;
-	return arma::det (arma::cov(arma::trans(this->full_features.cols(_cinf, _csup)))); // JU: added trans
+	//double d = abs(arma::det (arma::cov(this->full_features.cols(_cinf, _csup))));
+	double d = abs(arma::det (arma::cov(arma::trans(this->full_features.cols(_cinf, _csup)))));
+	double ld;
+	if (d > 0) 
+		ld = log(d)/2.0;
+	else
+		ld = 0;
+	return float(ld);
 }
 
 

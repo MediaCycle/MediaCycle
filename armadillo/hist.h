@@ -1,8 +1,8 @@
 /**
  * @brief hist.h
- * @author Damien Tardieu
- * @date 11/03/2010
- * @copyright (c) 2010 – UMONS - Numediart
+ * @author Xavier Siebert
+ * @date 31/01/2011
+ * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -29,16 +29,17 @@
  * <mailto:avre@umons.ac.be>
 */
 
-#include "Armadillo-utils.h"
 
 #ifndef HIST_H 
 #define HIST_H
 
+#include "Armadillo-utils.h"
+
 template<typename eT>
-umat hist(const Mat<eT>& A_m, int nbrBin, float minE, float maxE){
-  umat resultHist = zeros<umat>(nbrBin,A_m.n_cols);   //final result
-  Col<eT> binWidth(A_m.n_cols);                                 //one bin width for every column of the data file
-  Mat<eT> binEdge(nbrBin+1,A_m.n_cols);           //edge values of the bins, one column vector for each data column
+arma::umat hist(const arma::Mat<eT>& A_m, int nbrBin, float minE, float maxE){
+  arma::umat resultHist = arma::zeros<arma::umat>(nbrBin,A_m.n_cols);   //final result
+  arma::Col<eT> binWidth(A_m.n_cols);                                 //one bin width for every column of the data file
+  arma::Mat<eT> binEdge(nbrBin+1,A_m.n_cols);           //edge values of the bins, one column vector for each data column
   double minA, maxA;
   if (minE == 0 && maxE == 0)   //user did not specify min and max values of the histogram (commom case)
     {
@@ -58,7 +59,7 @@ umat hist(const Mat<eT>& A_m, int nbrBin, float minE, float maxE){
     }
   else    //user specified min and max values of the histogram
     {
-      fcolvec binEdgeV = fcolvec(nbrBin+1);        
+      arma::fcolvec binEdgeV = arma::fcolvec(nbrBin+1);        
       float binWidthS = (maxE - minE)/nbrBin;
 
       for (int j=0;j<binEdgeV.n_rows-1;j++)

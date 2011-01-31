@@ -36,6 +36,8 @@
 #include "ACOsgTimelineControlsRenderer.h"
 #include "ACOsgAudioTrackControlsRenderer.h"
 
+using namespace osg;
+
 ACOsgTimelineControlsRenderer::ACOsgTimelineControlsRenderer() {
 	track_renderer.resize(0);
 	group = new Group();

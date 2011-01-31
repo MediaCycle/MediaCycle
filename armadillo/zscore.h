@@ -1,8 +1,8 @@
 /**
  * @brief zscore.h
- * @author Damien Tardieu
- * @date 11/03/2010
- * @copyright (c) 2010 – UMONS - Numediart
+ * @author Xavier Siebert
+ * @date 31/01/2011
+ * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -29,18 +29,19 @@
  * <mailto:avre@umons.ac.be>
 */
 
-#include "Armadillo-utils.h"
 
 #ifndef ZSCORE_H
 #define ZSCORE_H
 
+#include "Armadillo-utils.h"
+
 template<typename eT>
-const Mat<eT> zscore(const Mat<eT>& x, int dim=0){
-	Mat<eT> z(x.n_rows, x.n_cols);
+const arma::Mat<eT> zscore(const arma::Mat<eT>& x, int dim=0){
+	arma::Mat<eT> z(x.n_rows, x.n_cols);
 	if (x.n_elem == 0)
 		return z;
-	Mat<eT> mu = mean(x,dim);
-	Mat<eT> sigma = stddev(x, 0, dim);
+	arma::Mat<eT> mu = mean(x,dim);
+	arma::Mat<eT> sigma = stddev(x, 0, dim);
 	for (int i=0; i<sigma.n_rows; i++)
 		for (int j=0; j<sigma.n_cols; j++)
 			if (sigma(i,j)==0)

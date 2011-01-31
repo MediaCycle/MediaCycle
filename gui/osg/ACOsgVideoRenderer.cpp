@@ -36,6 +36,8 @@
 #include "ACOsgVideoRenderer.h"
 #include "ACVideo.h"
 
+using namespace osg;
+
 #if !defined (APPLE_IOS)
 
 ACOsgVideoRenderer::ACOsgVideoRenderer() {

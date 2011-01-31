@@ -56,7 +56,7 @@ ACImageShapeFourierPolarMomentsPlugin::ACImageShapeFourierPolarMomentsPlugin() {
 ACImageShapeFourierPolarMomentsPlugin::~ACImageShapeFourierPolarMomentsPlugin() {
 }
 
-std::vector<ACMediaFeatures*>  ACImageShapeFourierPolarMomentsPlugin::calculate(std::string aFileName) {
+std::vector<ACMediaFeatures*>  ACImageShapeFourierPolarMomentsPlugin::calculate(std::string aFileName, bool _save_timed_feat) {
 	cout << "calculating Shape (FourierPolar) Moments from file name..." << endl;
 	ACColorImageAnalysis* image = new ACColorImageAnalysis(aFileName);
 	std::vector<ACMediaFeatures*> allImageFeatures;
@@ -89,7 +89,7 @@ std::vector<ACMediaFeatures*> ACImageShapeFourierPolarMomentsPlugin::calculate(A
 	return allImageFeatures;
 }
 
-std::vector<ACMediaFeatures*> ACImageShapeFourierPolarMomentsPlugin::calculate(ACMediaData* _aData, ACMedia* _theMedia){
+std::vector<ACMediaFeatures*> ACImageShapeFourierPolarMomentsPlugin::calculate(ACMediaData* _aData, ACMedia* _theMedia, bool _save_timed_feat){
 	return this->calculate(_aData);
 	// no need for ACMedia here...
 };

@@ -285,7 +285,7 @@ int MediaCycle::processTcpMessage(char* buffer, int l, char **buffer_send, int *
 			*buffer_send = new char[13+thumbnail_size]; 
 			strcpy(*buffer_send, "getthumbnail ");
 			thumbnail_file = fopen(thumbnail_filename.c_str(),"r");
-			size_t st = fread((*buffer_send)+13, 1, thumbnail_size, thumbnail_file);
+			//size_t st = fread((*buffer_send)+13, 1, thumbnail_size, thumbnail_file);
 			fclose(thumbnail_file);
 			*l_send = 13+thumbnail_size;
 		}
@@ -338,7 +338,6 @@ int MediaCycle::importDirectories(vector<string> directories, int recursive, boo
 		
 	mediaLibrary->scanDirectories(directories, recursive, filenames);
 	
-	int tid;
 	int n;
 	unsigned int i = 0;
 	double t1, t2;

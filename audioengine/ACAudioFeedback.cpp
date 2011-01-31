@@ -1910,7 +1910,7 @@ int ACAudioFeedback::createSourceWithPosition(int loop_id, float x, float y, flo
 	//	int sample_end;
 	int sample_start = ((ACAudio*) media_cycle->getLibrary()->getMedia(loop_id))->getSampleStart();
 	int sample_end = ((ACAudio*) media_cycle->getLibrary()->getMedia(loop_id))->getSampleEnd();
-	int sample_size = sample_size = sample_end - sample_start;
+	int sample_size = sample_end - sample_start;
 	
 	/*
 	switch (format) {

@@ -1,8 +1,8 @@
 /**
  * @brief fft2.cpp
- * @author Cecile Picard
- * @date 08/07/2010
- * @copyright (c) 2010 – UMONS - Numediart
+ * @author Xavier Siebert
+ * @date 31/01/2011
+ * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -31,6 +31,8 @@
 
 #include "fft2.h"
 #include "fftsg2d.h"
+
+using namespace arma;
 
 cx_mat fft2(mat x_m, int nrows, int ncols){
 

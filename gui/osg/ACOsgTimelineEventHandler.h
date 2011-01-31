@@ -45,9 +45,9 @@
 
 #include <ACAudioEngine.h>
 
-using namespace osgGA;
+//using namespace osgGA;
 
-class ACOsgTimelineEventHandler : public GUIEventHandler {
+class ACOsgTimelineEventHandler : public  osgGA::GUIEventHandler {
 	public: 
 		ACOsgTimelineEventHandler();
 		virtual ~ACOsgTimelineEventHandler() {};

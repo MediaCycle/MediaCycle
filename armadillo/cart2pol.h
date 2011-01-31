@@ -1,8 +1,8 @@
 /**
  * @brief cart2pol.h
- * @author Alexis Moinet
- * @date 18/11/2010
- * @copyright (c) 2010 – UMONS - Numediart
+ * @author Xavier Siebert
+ * @date 31/01/2011
+ * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -29,13 +29,14 @@
  * <mailto:avre@umons.ac.be>
 */
 
-#include "Armadillo-utils.h"
 
 #ifndef CART2POL_H 
 #define CART2POL_H
 
+#include "Armadillo-utils.h"
+
 template<typename eT>
-int cart2pol(const Col<eT>& x_v, const Col<eT>& y_v, Col<eT> &th_v, Col<eT> &r_v){
+int cart2pol(const arma::Col<eT>& x_v, const arma::Col<eT>& y_v, arma::Col<eT> &th_v, arma::Col<eT> &r_v){
 	// Angle between 0 and 2*pi
 	if (x_v.n_elem != y_v.n_elem){
 		std::cerr << "Error : x and y must be the same length" << std::endl;

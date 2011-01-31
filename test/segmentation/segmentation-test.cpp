@@ -1,7 +1,7 @@
 /**
  * @brief segmentation-test.cpp
- * @author Jerome Urbain
- * @date 18/01/2011
+ * @author Xavier Siebert
+ * @date 31/01/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -43,7 +43,7 @@
 
 const string videodir = "/Users/xavier/numediart/Project7.3-DancersCycle/VideosSmall/TestSmallSize/";
 
-void test_single_bic(){
+void test_single_bic(std::string _dir, std::string _fname){
 	arma::fmat M;
 	M.set_size(1,100);
 	for (int i=0; i<30; i++){
@@ -60,7 +60,7 @@ void test_single_bic(){
 	//default: lambda(1), sampling_rate(1), Wmin(20), bic_thresh(0.5), jump_width(5)
 	ACBicSegmentationPlugin* P = new ACBicSegmentationPlugin();
 	clock_t start = clock();
-	std::vector<int> seg  = P->segment(M, 1, 1, 20, 0, 5);
+	std::vector<int> seg  = P->segment(M, 1, 1, 20, 1, 5);
 	std::cout << "Time elapsed (segmentation alone): " << ((double)clock() - start) / CLOCKS_PER_SEC << std::endl;
 
 	//plotting in gnuplot
@@ -83,6 +83,17 @@ void test_single_bic(){
 	g1.set_style("impulses");
 	if (seg_d.size() > 0)
 		g1.plot_xy(seg_d,seg_i, "segments");
+	
+	// for output in postscript file:
+	// uncomment the following lines for output in terminal
+	g1.cmd("set terminal postscript eps") ;
+	string fout = "set output \""+_dir+_fname+"\"";
+    g1.cmd(fout.c_str()) ;
+	g1.cmd("replot");
+	// 
+	
+
+	sleep(1);
 
         cout << "Enter char to exit" << endl;
         char c;
@@ -91,27 +102,27 @@ void test_single_bic(){
 	delete P;	
 }
 
-void test_double_bic(){
+void test_double_bic(std::string _dir, std::string _fname){
 	arma::fmat M;
 	M.set_size(2,100);
-	for (int i=0; i<30; i++){
-		M(0,i)= 5+double(rand())/RAND_MAX;
+	for (int i=0; i<20; i++){
+		M(0,i)= 20 +double(rand())/RAND_MAX;
 	}
-	for (int i=30; i<80; i++){
-		M(0,i)= 10+double(rand())/RAND_MAX;
+	for (int i=20; i<80; i++){
+		M(0,i)= 16 +double(rand())/RAND_MAX;
 	}
 	for (int i=80; i<100; i++){
-		M(0,i)= 20+double(rand())/RAND_MAX;
+		M(0,i)= 10 +double(rand())/RAND_MAX;
 	}
 	
 	for (int i=0; i<30; i++){
-		M(1,i)= 5+double(rand())/RAND_MAX;
+		M(1,i)= 19 +double(rand())/RAND_MAX;
 	}
-	for (int i=30; i<80; i++){
-		M(1,i)= 10+double(rand())/RAND_MAX;
+	for (int i=30; i<70; i++){
+		M(1,i)= 15 +double(rand())/RAND_MAX;
 	}
-	for (int i=80; i<100; i++){
-		M(1,i)= 20+double(rand())/RAND_MAX;
+	for (int i=70; i<100; i++){
+		M(1,i)= 9 +double(rand())/RAND_MAX;
 	}
 	
 	M.print();
@@ -120,7 +131,7 @@ void test_double_bic(){
 	clock_t start = clock();
 	//default: lambda(1), sampling_rate(1), Wmin(20), bic_thresh(0.5), jump_width(5)
 
-	std::vector<int> seg = P->segment(M, 1, 1, 15, 0, 5);
+	std::vector<int> seg = P->segment(M, 1, 1, 15, 2, 5);
 
 	std::cout << " -- end double bic segmentation --" << std::endl;
 	std::cout << "Time elapsed (segmentation alone): " << ((double)clock() - start) / CLOCKS_PER_SEC << std::endl;
@@ -142,6 +153,7 @@ void test_double_bic(){
 	
 	Gnuplot g1 = Gnuplot("lines");
 	g1.reset_plot();
+	
 	g1.plot_x(m0,"M0");
 	g1.plot_x(m1,"M1");
 	
@@ -149,12 +161,18 @@ void test_double_bic(){
 	g1.set_style("impulses");
 	if (seg_d.size() > 0)
 		g1.plot_xy(seg_d,seg_i, "segments");
+	
+	// for output in postscript file:
+	// uncomment the following lines for output in terminal
+	g1.cmd("set terminal postscript eps") ;
+	string fout = "set output \""+_dir+_fname+"\"";
+    g1.cmd(fout.c_str()) ;
+    g1.cmd("replot") ;
+	// 
 
 	 cout << "Enter char to exit" << endl;
         char c;
         cin >> c;
-
-	delete P;
 
 	delete P;	
 }
@@ -455,20 +473,20 @@ void test_bic_from_file(std::string _dir, std::string _fname){
 
 	//default: lambda(1), sampling_rate(1), Wmin(20), bic_thresh(0.5), jump_width(5)
 	clock_t start = clock();
-	std::vector<int> seg = P->segment(M, 1, 1, 20, 0, 5);
+	std::vector<int> seg = P->segment(M, 1, 1, 20, 50, 5);
 	std::cout << "Time elapsed (segmentation alone): " << ((double)clock() - start) / CLOCKS_PER_SEC << std::endl;
 
 	std::vector<double> seg_d (seg.begin(), seg.end());
 	std::vector<double> seg_i;
 	for (int i = 0; i< int(seg_d.size()); i++){
-		seg_i.push_back(2*moy);
+		seg_i.push_back(3*moy);
 	}		
 	delete P;	
 	Gnuplot g1 = Gnuplot("lines");
-	g1.cmd("set terminal postscript") ;
+//	g1.cmd("set terminal postscript") ;
 	g1.reset_plot();
-	string fout = "set output \""+_dir+_fname+"_segments.ps\"";
-    g1.cmd(fout.c_str()) ;
+//	string fout = "set output \""+_dir+_fname+"_segments.ps\"";
+//    g1.cmd(fout.c_str()) ;
 	g1.plot_x(m,"data");
 	g1.set_style("impulses");
 	g1.plot_xy(seg_d,seg_i, "segments");
@@ -477,24 +495,25 @@ void test_bic_from_file(std::string _dir, std::string _fname){
 
 int main(int argc, char *argv[]){
 	cout << "testing BIC segmentation" << endl;
-	//test_single_bic();
-	//test_double_bic();
-        int n=2;
-        if(argc>1)
-        {
-            if(atoi(argv[1])>0)
-            {
-                n=atoi(argv[1]);
-            }
-        }
+	//string sdir = "/Users/xavier/numediart/Project11.1-MediaBlender/results/";
+	string sdir = "/Users/xavier/tmp/";
+	//test_single_bic(sdir,"segment_1D.eps");
+	//test_double_bic(sdir,"segment_2D_mix.eps");
 
-        //test_multiple_bic(n);
-        test_segmentation_from_laughter_file("/home/jerome/NetBeansProjects/MediaCycle/3_619609_621620.wav");
-        //test_multiple_selfsim(n);
+//	int n=2;
+//	if(argc>1)
+//	{
+//		if(atoi(argv[1])>0)
+//		{
+//			n=atoi(argv[1]);
+//		}
+//	}
+//	test_multiple_bic(n);
 
-       // string sdir = "/Users/xavier/numediart/Project11.1-MediaBlender/results/";
 //	test_bic_from_file ( sdir, "Video10151.txt" );
-	
+	test_bic_from_file ( sdir, "arma_mtf_test.txt" );
+//	test_segmentation_from_laughter_file("/home/jerome/NetBeansProjects/MediaCycle/3_619609_621620.wav");
+
 	return 0;
 }
 

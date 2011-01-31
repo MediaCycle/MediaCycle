@@ -1,7 +1,7 @@
 /**
  * @brief ifft2.h
- * @author Christian Frisson
- * @date 24/01/2011
+ * @author Xavier Siebert
+ * @date 31/01/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -29,18 +29,19 @@
  * <mailto:avre@umons.ac.be>
 */
 
-#include "Armadillo-utils.h"
-//#include "fftsg_h.c"
-#include <fftsg2d.h>
 
 #ifndef IFFT2_H 
 #define IFFT2_H
+
+#include "Armadillo-utils.h"
+//#include "fftsg_h.c"
+#include <fftsg2d.h>
 
 /////////////////////////////////////
 // IFFT2
 /////////////////////////////////////
 
-mat ifft2(cx_mat x_m, int nrows, int ncols);
-mat ifft2(cx_mat x_m);
+arma::mat ifft2(arma::cx_mat x_m, int nrows, int ncols);
+arma::mat ifft2(arma::cx_mat x_m);
 
 #endif

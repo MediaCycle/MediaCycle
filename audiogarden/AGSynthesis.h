@@ -1,8 +1,8 @@
 /**
  * @brief AGSynthesis.h
- * @author Christian Frisson
- * @date 09/07/2010
- * @copyright (c) 2010 – UMONS - Numediart
+ * @author Xavier Siebert
+ * @date 31/01/2011
+ * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -43,8 +43,6 @@
 #include <map>
 #include "MediaCycle.h"
 
-using namespace arma;
-
 enum AGMethod{
 	AG_METHOD_SIMPLE=0,
 	AG_METHOD_SQUEEZED=1,
@@ -62,7 +60,7 @@ class AGSynthesis {
 	AGSynthesis();
 	~AGSynthesis(){};
 	bool compute(long targetId, std::vector<long> garinIds);
-	bool compute(long targetId, set<int> selectedNodes);
+	bool compute(long targetId, std::set<int> selectedNodes);
 	
 	AGMethod getMethod(){return method;};
 	void setMethod(AGMethod met){this->method=met;};
@@ -77,7 +75,7 @@ class AGSynthesis {
 
 	void setMediaCycle(MediaCycle* mc){this->mediacycle = mc;};
 
-	bool saveAsWav(string);
+	bool saveAsWav(std::string);
 	
 	void resetSound();
 	
@@ -92,9 +90,9 @@ class AGSynthesis {
 	float randomness;
 	float threshold;
 	
-	colvec extractSamples(ACAudio* audioGrain);
-	mat extractDescMatrix(ACMediaLibrary* lib, string featureName, std::vector<long> mediaIds);
-	mat extractDescMatrix(ACMediaLibrary* lib, std::vector<string> featureList, std::vector<long> mediaIds);
+	arma::colvec extractSamples(ACAudio* audioGrain);
+	arma::mat extractDescMatrix(ACMediaLibrary* lib, std::string featureName, std::vector<long> mediaIds);
+	arma::mat extractDescMatrix(ACMediaLibrary* lib, std::vector<string> featureList, std::vector<long> mediaIds);
 };
 
 #endif

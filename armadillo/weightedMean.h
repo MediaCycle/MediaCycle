@@ -1,8 +1,8 @@
 /**
  * @brief weightedMean.h
- * @author Damien Tardieu
- * @date 11/03/2010
- * @copyright (c) 2010 – UMONS - Numediart
+ * @author Xavier Siebert
+ * @date 31/01/2011
+ * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -29,16 +29,17 @@
  * <mailto:avre@umons.ac.be>
 */
 
-#include "Armadillo-utils.h"
 
 #ifndef WEIGHTEDMEAN_H
 #define WEIGHTEDMEAN_H
 
+#include "Armadillo-utils.h"
+
 template<typename eT>
-const Row<eT> weightedMean(const Col<eT>& in_v, const Col<eT>& weight_v){
+const arma::Row<eT> weightedMean(const arma::Col<eT>& in_v, const arma::Col<eT>& weight_v){
 	float sumWeight = as_scalar(sum(weight_v));
-	Col<eT> weightN_v = weight_v / sumWeight;
-	Row<eT> tmp_m = trans(weightN_v) * in_v;
+	arma::Col<eT> weightN_v = weight_v / sumWeight;
+	arma::Row<eT> tmp_m = trans(weightN_v) * in_v;
 	return tmp_m;
 }
 

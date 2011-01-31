@@ -76,16 +76,13 @@
 
 //#include "ACPlugin.h"
 
-using namespace std;
-using namespace osg;
-
 class ACOsgHUDRenderer {
 protected:
 	MediaCycle				*media_cycle;
-	ref_ptr<osg::Camera>				 camera;
-	ref_ptr<Group>				 group;
-	ref_ptr<Group>				 pointer_group;
-	vector<ACOsgPointerRenderer*>  pointer_renderer;
+	osg::ref_ptr<osg::Camera>				 camera;
+	osg::ref_ptr<osg::Group>				 group;
+	osg::ref_ptr<osg::Group>				 pointer_group;
+	std::vector<ACOsgPointerRenderer*>  pointer_renderer;
 	
 	// SD - Results from centralized request to MediaCycle
 	ACPoint						media_cycle_pointer_current_pos;
@@ -98,7 +95,7 @@ public:
 		
 	void setMediaCycle(MediaCycle *media_cycle);
 
-	Camera* getCamera();
+	osg::Camera* getCamera();
 		
 	void preparePointers();
 	void updatePointers(osgViewer::Viewer* viewer);

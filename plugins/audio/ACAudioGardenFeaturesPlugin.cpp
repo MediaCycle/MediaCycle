@@ -53,7 +53,7 @@ ACAudioGardenFeaturesPlugin::~ACAudioGardenFeaturesPlugin() {
 }
 
 
-std::vector<ACMediaFeatures*> ACAudioGardenFeaturesPlugin::calculate(ACMediaData* audio_data, ACMedia* theMedia) {
+std::vector<ACMediaFeatures*> ACAudioGardenFeaturesPlugin::calculate(ACMediaData* audio_data, ACMedia* theMedia, bool _save_timed_feat) {
 	int mfccNbChannels = 16;
 	int mfccNb = 13;
 	int windowSize = 1024; 	

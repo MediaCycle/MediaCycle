@@ -39,6 +39,7 @@
 
 using std::cerr;
 using std::endl;
+using std::string;
 
 // ACMediaData is not base class, it works for all media types
 // XS note: this does not seem optimal, because we need to change many things upong adding one new media type
@@ -53,7 +54,7 @@ ACMediaData::ACMediaData() {
 	model_ptr = NULL;
 }
 
-ACMediaData::ACMediaData(ACMediaType _type,string _fname) { 
+ACMediaData::ACMediaData(ACMediaType _type, std::string _fname) { 
 	audio_ptr = NULL;
 #if !defined (APPLE_IOS)		
 	image_ptr = NULL;

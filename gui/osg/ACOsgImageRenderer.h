@@ -41,25 +41,22 @@
 #include "ACOsgMediaRenderer.h"
 #include "ACOpenCVInclude.h"
 
-using namespace std;
-using namespace osg;
-
 //osg::Image* Convert_OpenCV_TO_OSG_IMAGE(IplImage* cvImg);
 
 class ACOsgImageRenderer : public ACOsgMediaRenderer  {
 protected:
 	
 	static const int NCOLORS ;
-	Vec4Array* colors;
-	Vec4Array* colors2;
-	Vec4Array* colors3;
+	osg::Vec4Array* colors;
+	osg::Vec4Array* colors2;
+	osg::Vec4Array* colors3;
 	
-	Image* image_image;
-	Geode* image_geode;
-	Geode* border_geode;
-	MatrixTransform* image_transform;
+	osg::Image* image_image;
+	osg::Geode* image_geode;
+	osg::Geode* border_geode;
+	osg::MatrixTransform* image_transform;
 	
-	void imageGeode(bool flip=true, float sizemul=1.0, float zoomin=1.0);
+	void imageGeode(bool flip=false, float sizemul=1.0, float zoomin=1.0);
 	
 public:
 	ACOsgImageRenderer();

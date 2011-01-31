@@ -40,6 +40,8 @@
 
 #include "BlobResult.h" // Main blob library include (in plugin/image/blobs)
 #include "ACImageAnalysis.h"
+#include "ACMediaData.h"
+
 #include <fstream>
 #include <cmath>
 
@@ -49,6 +51,8 @@ class ACVideoAnalysis {
 public:
     ACVideoAnalysis();
     ACVideoAnalysis(const std::string &filename);
+	ACVideoAnalysis(ACMediaData* media_data);
+
     ~ACVideoAnalysis();
 	
 	// general I/O, settings
@@ -70,8 +74,10 @@ public:
 
 	bool isTrajectoryComputed(){return HAS_TRAJECTORY;}
 	bool areBlobsComputed(){return HAS_BLOBS;}
+	
 	// utilities
 	IplImage* getNextFrame();
+	IplImage* getFrame(int i);
 	IplImage* computeAverageImage(int nskip = 0, int nread = 0, int njump = -1, std::string s =""); 
 	IplImage* computeMedianImage(int nskip = 0, int nread = 0, int njump = -1, std::string s =""); 
 	IplImage* computeMedianNoBlobImage(std::string s ="",IplImage *first_guess=NULL);
@@ -85,11 +91,13 @@ public:
 	void histogramEqualize(const IplImage* bg_img);
 	
 	// raw features computation
+	//   - on blobs
 	void computeBlobs(IplImage* bg_img=NULL, int bg_thesh=10, int big_blob=200, int small_blob=0);
 	void computeBlobsInteractively(IplImage* bg_img=NULL, bool merge_blobs=false, int bg_thesh=20, int big_blob=200, int small_blob=0);
 	void computeBlobsUL(IplImage* bg_img=NULL, bool merge_blobs=true, int big_blob=200, int small_blob=0);
+	//   - general (not on blobs)
 	void computeOpticalFlow();
-	void computeFrameAbsoluteDifferences();
+	void computeGlobalPixelsSpeed();
 
 	// features manipulation
 	void mergeBlobs(float blob_dist = 0);
@@ -98,7 +106,8 @@ public:
 //	void computeCellOccupation(int nx, int ny);
 	void computeContractionIndices();
 	void computeBoundingBoxRatios();
-	void computePixelSpeed();
+	void computeBlobPixelSpeed();
+	void computeGlobalPixelSpeed();
 	void computeHuMoments(int tresh=0);
 	void computeHuMoments(IplImage* bg_img, int tresh=0); // with background subtraction
 	void computeFourierPolarMoments(int RadialBins=5, int AngularBins=8); // without background subtraction
@@ -112,10 +121,14 @@ public:
 	std::vector<blob_center> getNormalizedMergedBlobsSpeeds();
 
 	std::vector<float> getContractionIndices() {return contraction_indices;}
-	std::vector<float> getPixelSpeeds() {return pixel_speeds;}
+	std::vector<float> getBlobPixelsSpeeds() {return blob_pixel_speeds;}
+	std::vector<float> getGlobalPixelsSpeeds() {return global_pixel_speeds;}
 	std::vector<float> getBoundingBoxRatios() {return bounding_box_ratios;}
 	std::vector<float> getDummyTimeStamps(int nsize);
-	std::vector<float> getTimeStamps();
+	std::vector<float> getBlobsTimeStamps();
+	std::vector<float> getGlobalTimeStamps();
+	std::vector<float> getGlobalFrameStamps();
+
 	// XS or float* (dim 7)
 	std::vector<vector<float> > getRawMoments() {return raw_moments;}
 	std::vector<vector<float> > getHuMoments() {return hu_moments;}
@@ -153,10 +166,11 @@ public:
 private:
 	std::string file_name;
 	std::string color_model; // "BGR" or "HSV" : these are already in IPLimage, but not used in OpenCV (see manual !)
-	IplImage* thumbnail;
+//	IplImage* thumbnail;
 	
 	CvCapture* capture ;
 	int frame_counter;
+	bool FROM_FILE; // true if capture initialized from file (then it has to be deleted afterwards)
 	
 	bool HAS_TRAJECTORY;
 	bool HAS_BLOBS;
@@ -172,12 +186,14 @@ private:
 	std::vector<float> all_blobs_frame_stamps;
 
 	std::vector<blob_center> blob_centers;
-	std::vector<blob_center> blob_speeds; 
+	std::vector<blob_center> blob_speeds; // speed of center of blob
+	std::vector<float> blob_pixel_speeds; // pixel-per-pixel speed in blob
+
 	std::vector<float> contraction_indices;
 	std::vector<float> bounding_box_ratios;
 	std::vector<float> bounding_box_heights;
 	std::vector<float> bounding_box_widths;
-	std::vector<float> pixel_speeds;
+	std::vector<float> global_pixel_speeds;  // pixel-per-pixel speed in whole image
 	std::vector<float> interest_points;
 
 	std::vector<vector<float> > raw_moments;

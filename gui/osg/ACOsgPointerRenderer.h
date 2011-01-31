@@ -1,8 +1,8 @@
 /**
  * @brief ACOsgPointerRenderer.h
- * @author Stéphane Dupont
- * @date 16/11/2010
- * @copyright (c) 2010 – UMONS - Numediart
+ * @author Xavier Siebert
+ * @date 31/01/2011
+ * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -36,9 +36,6 @@
 #include <osgText/Font>
 #include <osgText/Text>
 
-using namespace std;
-using namespace osg;
-
 class ACOsgPointerRenderer : public ACOsgMediaRenderer {
 	
 protected:
@@ -46,14 +43,14 @@ protected:
 	osg::ref_ptr<osgText::Font> font;
 	osg::ref_ptr<osgText::Text> text;
 
-	Geode* text_geode;
-	Geode* pointer_geode;
-	MatrixTransform* pointer_transform;
+	osg::Geode* text_geode;
+	osg::Geode* pointer_geode;
+	osg::MatrixTransform* pointer_transform;
 	
 	void textGeode();
 	void pointerGeode();
 	
-	string text_string;
+	std::string text_string;
 	ACPoint pos;
 	
 public:
@@ -61,7 +58,7 @@ public:
 	~ACOsgPointerRenderer();
 	void prepareNodes();
 	void updateNodes(double ratio=0.0);
-	void setText(string text) {text_string = text;}
+	void setText(std::string text) {text_string = text;}
 	void setPos(ACPoint p) {pos = p;}
 };
 

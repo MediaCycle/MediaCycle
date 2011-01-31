@@ -44,8 +44,6 @@
 #include <string>
 #include <cstring>
 #include <sys/stat.h>
-using namespace std;
-
 
 class ACAudio : public ACMedia {
 	// contains the *minimal* information about an audio
@@ -56,8 +54,8 @@ public:
 
 	~ACAudio();
   
-	void saveACLSpecific(ofstream &library_file);
-	int loadACLSpecific(ifstream &library_file);
+	void saveACLSpecific(std::ofstream &library_file);
+	int loadACLSpecific(std::ifstream &library_file);
 	
 	//void import(std::string _path); // XS 240210 : migrated to ACMedia
 	void saveThumbnail(std::string _path);

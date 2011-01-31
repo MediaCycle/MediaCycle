@@ -1,8 +1,8 @@
 /**
  * @brief findpeaks.h
- * @author Damien Tardieu
- * @date 11/03/2010
- * @copyright (c) 2010 – UMONS - Numediart
+ * @author Xavier Siebert
+ * @date 31/01/2011
+ * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -29,19 +29,20 @@
  * <mailto:avre@umons.ac.be>
 */
 
-#include "Armadillo-utils.h"
 
 #ifndef FINDPEAKS_H
 #define FINDPEAKS_H
 
+#include "Armadillo-utils.h"
+
 template<typename eT>
-icolvec findpeaks(const Col<eT>& Data, long Pd){
+arma::icolvec findpeaks(const arma::Col<eT>& Data, long Pd){
 	long m = 0;                  // counter for peaks found
 	long L = Data.n_rows;
 
 	long j = 0;
-	Col<eT> pks  = zeros< Col<eT> >(Data.n_rows);
-	icolvec locs = zeros<icolvec>(Data.n_rows);
+	arma::Col<eT> pks  = arma:: zeros< arma::Col<eT> >(Data.n_rows);
+	arma::icolvec locs = arma:: zeros<arma::icolvec>(Data.n_rows);
 
 	// First, the "Pd" neighbors, on either side, of the current data point are
 	// found. Then the current data point is compared with these "Pd" neighbors
@@ -64,7 +65,7 @@ icolvec findpeaks(const Col<eT>& Data, long Pd){
     endR = std::min(L-1,j+ Pd);   
     
     // create neighbor data set
-    Col<eT> temp = Data.rows(endL,endR); 
+    arma::Col<eT> temp = Data.rows(endL,endR); 
    
     // set current data point to -Inf in the neighbor data set
     temp(j-endL) = min(temp)-1;

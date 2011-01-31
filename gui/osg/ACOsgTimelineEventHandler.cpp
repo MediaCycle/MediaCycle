@@ -152,7 +152,7 @@ bool ACOsgTimelineEventHandler::handle(const osgGA::GUIEventAdapter& ea,osgGA::G
 			if (view) pick(view,ea,false);
 			return false;
 		}
-		case(GUIEventAdapter::MOVE):
+		case(osgGA::GUIEventAdapter::MOVE):
 		{
 			//printf("TIMELINE MOVE (%f, %f) (%f, %f) \n", x, y, xx, yy);
 			/*osgViewer::View* view = dynamic_cast<osgViewer::View*>(&aa);
@@ -175,7 +175,7 @@ bool ACOsgTimelineEventHandler::handle(const osgGA::GUIEventAdapter& ea,osgGA::G
 		{		
 			return false;
 		}*/
-		case(GUIEventAdapter::FRAME):
+		case(osgGA::GUIEventAdapter::FRAME):
 		{
 			//XS : not used, was in RS code
 			//render_callback();

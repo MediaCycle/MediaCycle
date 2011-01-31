@@ -38,6 +38,8 @@
 #include "ACOsgImageRenderer.h"
 #include "ACVideo.h"
 
+using namespace osg;
+
 #define IMAGE_BORDER
 
 const int ACOsgImageRenderer::NCOLORS = 5;
@@ -98,7 +100,7 @@ void ACOsgImageRenderer::imageGeode(bool flip, float sizemul, float zoomin) {
 	
 	int width, height;
 	//IplImage* thumbnail;
-	osg::Image* thumbnail;
+	//osg::Image* thumbnail;
 	std::string thumbnail_filename;
 	
 	StateSet *state;

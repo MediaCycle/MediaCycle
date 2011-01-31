@@ -35,6 +35,7 @@
 // XS: this was named ACVideoPlugin before
 // on 17/01/2011 it was changed to ACVideoDancersPlugin 
 // because it is very specific to the Dancers! project
+// it requires the videos to be in two folders (Front, Top) corresponding to shots from the 2 cameras
 
 #ifndef _ACVIDEODANCERSPLUGIN_H
 #define	_ACVIDEODANCERSPLUGIN_H
@@ -67,7 +68,7 @@ private:
 	ACMediaFeatures* calculateMeanSpeedOfTrajectory(ACVideoAnalysis* video);
 //	ACMediaFeatures* calculateMostOccupiedCell(ACVideoAnalysis* video);
 	ACMediaFeatures* calculateMeanBoundingBoxRatio(ACVideoAnalysis* video);
-	ACMediaFeatures* calculateMeanPixelSpeed(ACVideoAnalysis* video);
+	ACMediaFeatures* calculateMeanBlobPixelsSpeed(ACVideoAnalysis* video);
 };
 
 #endif	/* _ACVIDEODANCERSPLUGIN_H */

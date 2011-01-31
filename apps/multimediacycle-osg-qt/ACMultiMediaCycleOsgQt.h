@@ -41,7 +41,6 @@
 
 #include <iostream>
 #include <string.h>
-using namespace std;
 
 #include <QtGui>
 #include "settings.h" // SettingsDialog
@@ -65,7 +64,7 @@ public slots:
 	bool saveConfigFile();
 	
 private slots:
-	//	void on_pushButtonClean_clicked();
+	void on_pushButtonClean_clicked();
 	//	void on_pushButtonRecenter_clicked();
 	//	void on_pushButtonBack_clicked();
 	//	void on_pushButtonForward_clicked();
@@ -94,13 +93,13 @@ public:
 	void addPluginItem(QListWidgetItem *_item);
 	void synchronizeFeaturesWeights();
 	
-	void addPluginsLibrary(string _library);
+	void addPluginsLibrary(std::string _library);
 	void loadDefaultConfig(ACMediaType _media_type = MEDIA_TYPE_IMAGE, ACBrowserMode _browser_mode = AC_MODE_CLUSTERS);
 
 private:
 	Ui::ACMediaCycleOsgQt ui;
 	SettingsDialog *settingsDialog;
-
+//	QProgressBar *pb;
 //	void configureCheckBoxes();
 //	void cleanCheckBoxes();
 	bool features_known;
@@ -109,8 +108,8 @@ private:
 	MediaCycle *media_cycle;
 	ACMediaType media_type;
 	ACBrowserMode browser_mode;
-	string config_file;	
-	vector<string> plugins_libraries;
+	std::string config_file;	
+	std::vector<std::string> plugins_libraries;
 	
 	bool saveFile(const QString& _filename);
 	

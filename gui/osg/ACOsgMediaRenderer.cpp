@@ -34,6 +34,7 @@
  */
 
 #include "ACOsgMediaRenderer.h"
+using namespace osg;
 
 ACOsgMediaRenderer::ACOsgMediaRenderer() {
 	local_group = new Group(); 

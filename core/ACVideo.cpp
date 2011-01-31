@@ -38,6 +38,9 @@
 
 #include <osg/ImageUtils>
 
+#include <iostream>
+using namespace std;
+
 // ----------- class constants
 const int ACVideo:: default_thumbnail_width = 64;
 const int ACVideo:: default_thumbnail_height = 64;

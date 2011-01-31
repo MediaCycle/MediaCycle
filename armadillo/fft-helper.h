@@ -1,7 +1,7 @@
 /**
  * @brief fft-helper.h
- * @author Christian Frisson
- * @date 24/01/2011
+ * @author Xavier Siebert
+ * @date 31/01/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -32,12 +32,12 @@
 #ifndef FFT_HELPER_H
 #define FFT_HELPER_H
 
-#include "Armadillo-utils.h"
-
 #include <fftsg.h>
 
+#include "Armadillo-utils.h"
+
 // fft 1D for column vector
-cx_mat fft_helper(mat x_m, int n);
+arma::cx_mat fft_helper(arma::mat x_m, int n);
 
 
 #endif

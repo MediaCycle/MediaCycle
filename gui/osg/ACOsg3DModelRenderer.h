@@ -42,22 +42,19 @@
 #include <osg/PolygonMode>
 #include <osg/ShapeDrawable>
 
-using namespace std;
-using namespace osg;
-
 class ACOsg3DModelRenderer : public ACOsgMediaRenderer  {
 protected:
 		
-	Vec4Array* colors_off;
-	Vec4Array* colors_on;
+	osg::Vec4Array* colors_off;
+	osg::Vec4Array* colors_on;
 	double modelangle;
-	vector<float> media_cycle_center;
-	vector<float> media_cycle_extent;
+	std::vector<float> media_cycle_center;
+	std::vector<float> media_cycle_extent;
 	
-	Node* model_node;
-	Geode* border_geode;
-	MatrixTransform* acti_transform;
-	MatrixTransform* norm_transform;
+	osg::Node* model_node;
+	osg::Geode* border_geode;
+	osg::MatrixTransform* acti_transform;
+	osg::MatrixTransform* norm_transform;
 	
 	void modelGeode();
 	void borderGeode();

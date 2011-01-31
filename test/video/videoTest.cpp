@@ -42,10 +42,13 @@
 #include "MediaCycle.h"
 #include "ACVideoAnalysis.h"
 #include "ACVideoDancersPlugin.h"
+#include "ACVideoPixelSpeedPlugin.h"
+#include "ACMediaTimedFeature.h"
 
 #include "gnuplot_i.hpp"
 
 using namespace std;
+using namespace arma;
 
 const int ndancers=141;
 const string dancerslist[ndancers] = {
@@ -185,7 +188,7 @@ void test_browse(std::string movie_file){
 	delete V;
 }
 
-void test_video_plugin(std::string dancer){
+void test_video_dancers_plugin(std::string dancer){
 	clock_t t0=clock();
 	string movie_file= videodir+"Front/"+dancer+".mov";
 	ACVideoDancersPlugin* P = new ACVideoDancersPlugin();
@@ -206,7 +209,7 @@ void test_video_plugin(std::string dancer){
 	cout<<"Test Video Plugin execution time: " << (t1-t0)/CLOCKS_PER_SEC << " s." << endl;	
 }
 
-void test_video_plugin_acl_save(std::string dancer){
+void test_video_dancers_plugin_acl_save(std::string dancer){
 	string movie_file= videodir+"Front/"+dancer+".mov";
 	string acl_file = videodir+"Test/"+dancer+"-cpp.acl";
 
@@ -217,6 +220,39 @@ void test_video_plugin_acl_save(std::string dancer){
 	mediacycle->saveACLLibrary(acl_file);
 	delete mediacycle;	
 }
+
+void test_video_pixel_speed_plugin(std::string movie_file){
+	clock_t t0=clock();
+	ACVideoPixelSpeedPlugin* P = new ACVideoPixelSpeedPlugin();
+	bool save_timed_features = true;
+	cout << "1) compute features and saves timedFeatures on disk" << endl;
+	cout << "---------------------------------------------------" << endl;
+
+	std::vector<ACMediaFeatures*> F = P->calculate(movie_file, save_timed_features);
+	cout << "computed " << F.size() << " features :" << endl;
+	for (unsigned int i=0; i<F.size(); i++){
+		cout << "-- Feature " << i << " : " << F[i]->getName() << endl;
+		F[i]->dump();
+	}
+	
+	cout << "2) read timedFeatures from disk" << endl;
+	cout << "-------------------------------" << endl;
+
+	ACMediaTimedFeature* FT = P->getTimedFeatures();
+	FT->dump();
+	
+	// clean up
+	std::vector<ACMediaFeatures*>::iterator iter; 
+	for (iter = F.begin(); iter != F.end(); iter++) { 
+		delete *iter; 
+	}
+	delete P;	
+	delete FT;
+	
+	clock_t t1=clock();
+	cout<<"Test Video Plugin execution time: " << (t1-t0)/CLOCKS_PER_SEC << " s." << endl;	
+}
+
 
 void test_blobs(std::string dancer){
 	string movie_file= videodir+dancer+".mov"; //+"Front/"+dancer+".mov";
@@ -251,9 +287,9 @@ void test_read_write_video(std::string full_video_path){
 	delete V;
 }
 
-void test_frame_diff(std::string full_video_path){
+void test_global_pixel_speed(std::string full_video_path){
 	ACVideoAnalysis* V = new ACVideoAnalysis(full_video_path);
-	V->computeFrameAbsoluteDifferences();
+	V->computeGlobalPixelsSpeed();
 	delete V;
 }
 
@@ -280,7 +316,7 @@ void test_video_features(std::string full_video_path, string bg_img_file=""){
 	// may be using imageanalysis...
 	
 	//***
-//	V->computePixelSpeed(); -- weird 
+//	V->computeBlobPixelSpeed(); -- weird 
 	//***
 //	V->computeMergedBlobsSpeeds();
 //	V->dumpTrajectory(cout);
@@ -472,7 +508,7 @@ int main(int argc, char** argv) {
 	cout << "Using Opencv " << CV_VERSION << "(" << CV_MAJOR_VERSION << "." << CV_MINOR_VERSION  << "." <<  CV_SUBMINOR_VERSION << ")" << endl;	
 
 	// get_all_images();
-	test_med_noblob("001011");
+	// test_med_noblob("001011");
 	// test_med_noblob("Bru_203#1");
 	//test_histogram_equalize("Bru_105#2");
 	//test_bg_substraction("Bru_105#2");
@@ -480,14 +516,14 @@ int main(int argc, char** argv) {
 	//test_browse("Bru_105#2");
 	//test_read_write_video(videodir+"Front/001011.mov");
 //	test_optical_flow(videodir+"Front/001011.mov");
-	//test_video_plugin("001011");
-	//test_video_plugin_acl_save("001011");
+	//test_video_dancers_plugin("001011");
+	//test_video_dancers_plugin_acl_save("001011");
 	//test_all_videos_top_front(videodir);
 //	test_blobs("001011");
 
 	// christian graupner videos
 	//test_blobs("10151");
-	//test_frame_diff("/Users/xavier/numediart/Project10.1-Borderlands/2010_4_prox_alpa/10151.mov");
+	test_video_pixel_speed_plugin("/Users/xavier/numediart/Project10.1-Borderlands/2010_4_prox_alpa/10151.mov");
 	// 10603
 //	test_video_hu_moments("/Users/xavier/numediart/Project10.1-Borderlands/2010_4rgb_alpha/10151.mov",
 //						"/Users/xavier/numediart/Project10.1-Borderlands/bg/bg_blue.png");

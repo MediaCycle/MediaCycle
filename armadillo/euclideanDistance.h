@@ -36,15 +36,15 @@
 #include "Armadillo-utils.h"
 
 template<typename eT>
-const Mat<eT> euclideanDistance(const Mat<eT>& A, const Mat<eT>& B){
+const arma::Mat<eT> euclideanDistance(const arma::Mat<eT>& A, const arma::Mat<eT>& B){
 	if (A.n_cols != B.n_cols){
 		std::cerr << "A and B should be of the same dimensionality" << std::endl;
 		exit(1);
 	}
-	Mat<eT> AA = sum(A % A, 1); 
-	Mat<eT> BB = sum(B % B, 1); 
-	Mat<eT> AB = A*trans(B); 
-	Mat<eT> D = sqrt(abs(repmat(AA, 1, BB.n_rows) + repmat(trans(BB), AA.n_rows, 1) - 2*AB));
+	arma::Mat<eT> AA = arma::sum(A % A, 1); 
+	arma::Mat<eT> BB = arma::sum(B % B, 1); 
+	arma::Mat<eT> AB = A*arma::trans(B); 
+	arma::Mat<eT> D = sqrt(abs(arma::repmat(AA, 1, BB.n_rows) + repmat(arma::trans(BB), AA.n_rows, 1) - 2*AB));
 	return D;
 }
 

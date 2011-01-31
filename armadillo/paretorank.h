@@ -1,8 +1,8 @@
 /**
  * @brief paretorank.h
- * @author Christian Frisson
- * @date 07/09/2010
- * @copyright (c) 2010 – UMONS - Numediart
+ * @author Xavier Siebert
+ * @date 31/01/2011
+ * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -29,23 +29,24 @@
  * <mailto:avre@umons.ac.be>
 */
 
-#include "Armadillo-utils.h"
 
 #ifndef PARETORANK_H
 #define PARETORANK_H
 
+#include "Armadillo-utils.h"
+
 template<typename eT>
-ucolvec paretorank(Mat<eT> X, int maxRank, int minNbItems){
+arma::ucolvec paretorank(arma::Mat<eT> X, int maxRank, int minNbItems){
 	// careful : the case were to lines are the same is not handled 
 	int row = X.n_rows;
-	ucolvec front_v(row);
-	ucolvec rank_v;
+	arma::ucolvec front_v(row);
+	arma::ucolvec rank_v;
 	int currentRank = 1;
-	ucolvec posFront_v;
-	imat pos_v = linspace<imat>(0, row-1, row);
-	Mat<eT> oldX;
+	arma::ucolvec posFront_v;
+	arma::imat pos_v = arma::linspace<arma::imat>(0, row-1, row);
+	arma::Mat<eT> oldX;
 	int tmpIdx = 0;
-	imat oldPos_v;
+	arma::imat oldPos_v;
 	int itemRanked = 0;
 	
 	rank_v.zeros(row);
@@ -62,7 +63,7 @@ ucolvec paretorank(Mat<eT> X, int maxRank, int minNbItems){
 		currentRank = currentRank+1;
 		oldX = X;
 		oldPos_v = pos_v;
-		X.set_size(oldX.n_rows - as_scalar(sum(front_v)), X.n_cols);
+		X.set_size(oldX.n_rows - arma::as_scalar(arma::sum(front_v)), X.n_cols);
 		pos_v.set_size(oldX.n_rows - sum(front_v), 1);
 		tmpIdx = 0;
 		for (int iFront=0; iFront < front_v.n_rows; iFront++){

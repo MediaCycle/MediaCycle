@@ -1,8 +1,8 @@
 /**
  * @brief ACVisualisationPlugin.h
  * @author Xavier Siebert
- * @date 24/02/2010
- * @copyright (c) 2010 – UMONS - Numediart
+ * @date 31/01/2011
+ * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -35,8 +35,6 @@
 #include "ACMediaBrowser.h"
 #include "ACMediaTimedFeature.h"
 
-using namespace arma;
-
 #ifndef _ACVISUALISATIONPLUGIN_
 #define _ACVISUALISATIONPLUGIN_
 
@@ -51,12 +49,12 @@ public:
 
   virtual void updateClusters(ACMediaBrowser* );
   virtual void updateNextPositions(ACMediaBrowser* );
-	mat updateNextPositionsItemClicked(mat &desc_m, int nbVideoDisplay, int itemClicked, ucolvec &toDisplay_v, mat &labelPos_m, ucolvec &labelIdx_v, colvec &labelValue_v);
-	mat updateNextPositionsItemClicked2(mat &desc_m, int nbVideoDisplay, int itemClicked, ucolvec &toDisplay_v, mat &labelPos_m, ucolvec &labelIdx_v, colvec &labelValue_v);
-	mat updateNextPositionsItemClicked3(mat &desc_m, int nbVideoDisplay, int itemClicked, ucolvec &toDisplay_v, mat &labelPos_m, ucolvec &labelIdx_v, colvec &labelValue_v);
-	mat updateNextPositionsInit(mat &desc_m, int nbVideoDisplay, ucolvec &toDisplay_v, mat &labelPos_m, ucolvec &labelIdx_v, colvec &labelValue_v);
-	mat updateNextPositionsInit2(mat &desc_m, int nbVideoDisplay, ucolvec &toDisplay_v, mat &labelPos_m, ucolvec &labelIdx_v, colvec &labelValue_v);
-	mat extractDescMatrix(ACMediaBrowser* mediaBrowser, int nbActiveFeatures, vector<string> &featureNames, mat &descD_m);
+	arma::mat updateNextPositionsItemClicked(arma::mat &desc_m, int nbVideoDisplay, int itemClicked, arma::ucolvec &toDisplay_v, arma::mat &labelPos_m, arma::ucolvec &labelIdx_v, arma::colvec &labelValue_v);
+	arma::mat updateNextPositionsItemClicked2(arma::mat &desc_m, int nbVideoDisplay, int itemClicked, arma::ucolvec &toDisplay_v, arma::mat &labelPos_m, arma::ucolvec &labelIdx_v, arma::colvec &labelValue_v);
+	arma::mat updateNextPositionsItemClicked3(arma::mat &desc_m, int nbVideoDisplay, int itemClicked, arma::ucolvec &toDisplay_v, arma::mat &labelPos_m, arma::ucolvec &labelIdx_v, arma::colvec &labelValue_v);
+	arma::mat updateNextPositionsInit(arma::mat &desc_m, int nbVideoDisplay, arma::ucolvec &toDisplay_v, arma::mat &labelPos_m, arma::ucolvec &labelIdx_v, arma::colvec &labelValue_v);
+	arma::mat updateNextPositionsInit2(arma::mat &desc_m, int nbVideoDisplay, arma::ucolvec &toDisplay_v, arma::mat &labelPos_m, arma::ucolvec &labelIdx_v, arma::colvec &labelValue_v);
+	arma::mat extractDescMatrix(ACMediaBrowser* mediaBrowser, int nbActiveFeatures, std::vector<std::string> &featureNames, arma::mat &descD_m);
   virtual int start() {return 0;};
   virtual int stop() {return 0;};
 protected:

@@ -1,8 +1,8 @@
 /**
  * @brief dct.cpp
  * @author Xavier Siebert
- * @date 22/11/2010
- * @copyright (c) 2010 – UMONS - Numediart
+ * @date 31/01/2011
+ * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -30,6 +30,8 @@
 */
 
 #include "dct.h"
+
+using namespace arma;
 
 mat dct(mat a, int n){
 	

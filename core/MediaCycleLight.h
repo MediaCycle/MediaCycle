@@ -41,8 +41,6 @@
 #include <vector>
 //#include <ACPlugin.h>
 
-using namespace std;
-
 #include <ACMediaTypes.h>
 #include <ACMediaNode.h>
 
@@ -72,11 +70,11 @@ enum MCActionType {
 	MC_ACTION_GETTHUMBNAIL
 };
 
-static void tcp_callback(const char *buffer, int l, char **buffer_send, int *l_send, void *userData);
+//static void tcp_callback(const char *buffer, int l, char **buffer_send, int *l_send, void *userData);
 
 class MediaCycle {
 public:
-    MediaCycle(ACMediaType aMediaType, string local_directory="",string libname="");
+    MediaCycle(ACMediaType aMediaType, std::string local_directory="",std::string libname="");
     MediaCycle(const MediaCycle& orig);
     ~MediaCycle();
 
@@ -97,15 +95,15 @@ public:
     int getKNN(int id, std::vector<int> &ids, int k);
 
     // Thumbnail
-    string getThumbnailFileName(int id);
+    std::string getThumbnailFileName(int id);
 
-    string getLocalDirectoryPath() {return local_directory;}
-    string getLibName() {return libname;}
+    std::string getLocalDirectoryPath() {return local_directory;}
+    std::string getLibName() {return libname;}
  	
 	// API REQUIRED BY VISUAL and GUI
 	// 
 	int getLibrarySize();
-	string getMediaFileName(int i);
+	std::string getMediaFileName(int i);
 	int getMediaType(int i);
 	int getThumbnailWidth(int i);
 	int getThumbnailHeight(int i);
@@ -135,10 +133,10 @@ public:
 	void setCameraRecenter();
 	// 
 	void normalizeFeatures();
-	void openLibrary(string path);
+	void openLibrary(std::string path);
 	void libraryContentChanged();
-	//	void saveAsLibrary(string path);
-	void saveACLLibrary(string path);
+	//	void saveAsLibrary(std::string path);
+	void saveACLLibrary(std::string path);
 	void cleanLibrary();
 	void goBack();
 	void goForward();
@@ -157,18 +155,18 @@ public:
 	void muteAllSources();
 	//
 	void* hasBrowser();
-	void setVisualisationPlugin(string pluginName);
-	void setNeighborhoodsMethodPlugin(string pluginName);
-	void setPositionsPlugin(string pluginName);
+	void setVisualisationPlugin(std::string pluginName);
+	void setNeighborhoodsMethodPlugin(std::string pluginName);
+	void setPositionsPlugin(std::string pluginName);
 	//	int addPlugin(std::string aPluginPath);
 	
 	// LABELS on VIEW
 	int getLabelSize();
-	string getLabelText(int i);
+	std::string getLabelText(int i);
 	ACPoint getLabelPos(int i);
 
 	// Get Features
-	vector<float> getFeaturesVectorInMedia(int i, string feature_name);
+	std::vector<float> getFeaturesVectorInMedia(int i, std::string feature_name);
 	
 	// Playing time stamp
 	int setSourceCursor(int lid, int frame_pos);
@@ -177,14 +175,14 @@ public:
 	// Update audio engine sources
 	void setNeedsActivityUpdateLock(int i);
 	void setNeedsActivityUpdateRemoveMedia();	
-	vector<int>* getNeedsActivityUpdateMedia();
+	std::vector<int>* getNeedsActivityUpdateMedia();
 	
 private:
 	int forwarddown;
 	int port;
     int max_connections;
-    string local_directory;
-    string libname;
+    std::string local_directory;
+    std::string libname;
 	int ah1n1[4];
 };
 

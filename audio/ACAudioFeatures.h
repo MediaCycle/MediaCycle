@@ -1,7 +1,7 @@
 /**
  * @brief ACAudioFeatures.h
- * @author Jerome Urbain
- * @date 06/01/2011
+ * @author Xavier Siebert
+ * @date 31/01/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -39,10 +39,8 @@
 #include <vector>
 #include "ACMediaTimedFeature.h"
 
-using namespace arma;
-
 ACMediaTimedFeature* computeFeature(float* data, 
-																		 string featureName, 
+									std::string featureName, 
 																		 int samplerate, 
 																		 int nchannels, 
 																		 long length,
@@ -51,7 +49,7 @@ ACMediaTimedFeature* computeFeature(float* data,
 																		 int windowSize=512, 	
 																		 bool extendSoundLimits = false); 
 std::vector<ACMediaTimedFeature*> computeFeatures(float* data, 
-																									 vector<string> descList, 
+												  std::vector<std::string> descList, 
 																									 int samplerate, 
 																									 int nchannels, 
 																									 long length, 
@@ -69,18 +67,18 @@ std::vector<ACMediaTimedFeature*> computeFeatures(float* data,
 																									 bool extendSoundLimits = false); 
 
 int resample(float* datain, SF_INFO *sfinfo, float* dataout, SF_INFO* sfinfoout);
-double spectralCentroid(colvec x_v);
-double spectralSpread(colvec x_v);
-rowvec spectralFlatness(colvec x_v, int fftSize, int sr_hz);
-double spectralVariation(colvec, colvec);
-double spectralFlux(colvec x_v, colvec xPrev_v);
-double zcr(colvec frame_v, int sr_hz, int frameSize);
-double spectralDecrease(colvec x_v);
-double energyRMS(colvec frame_v);
-double loudness(colvec x_v, mat melfilter_m);
-double logAttackTime(colvec ener_v, int sr_hz);
-rowvec effectiveDuration(colvec time_v, colvec loud_v);
-rowvec mfcc(colvec x_v, mat melfilter_m, int mfccNb);
-colvec burstBoundaries(colvec split_v, colvec time_v, float minBurstDur);
+double spectralCentroid(arma::colvec x_v);
+double spectralSpread(arma::colvec x_v);
+arma::rowvec spectralFlatness(arma::colvec x_v, int fftSize, int sr_hz);
+double spectralVariation(arma::colvec, arma::colvec);
+double spectralFlux(arma::colvec x_v, arma::colvec xPrev_v);
+double zcr(arma::colvec frame_v, int sr_hz, int frameSize);
+double spectralDecrease(arma::colvec x_v);
+double energyRMS(arma::colvec frame_v);
+double loudness(arma::colvec x_v, arma::mat melfilter_m);
+double logAttackTime(arma::colvec ener_v, int sr_hz);
+arma::rowvec effectiveDuration(arma::colvec time_v, arma::colvec loud_v);
+arma::rowvec mfcc(arma::colvec x_v, arma::mat melfilter_m, int mfccNb);
+arma::colvec burstBoundaries(arma::colvec split_v, arma::colvec time_v, float minBurstDur);
 
 #endif

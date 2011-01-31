@@ -37,7 +37,7 @@
 #include <vector>
 #include <string>
 
-// to check if file exist
+// to check if file exist or do directory manipulations
 #include "boost/filesystem.hpp"
 namespace fs = boost::filesystem;
 using std::cout;
@@ -143,8 +143,8 @@ std::vector<ACMediaFeatures*>  ACVideoDancersPlugin::calculateFront(std::string 
 		cerr << "<ACVideoDancersPlugin::calculate> : NULL mean bounding box ratio feature" << endl;
 	}
 
-	cout << "calculateMeanPixelSpeed" << endl;
-	ACMediaFeatures* videoMeanPixelSpeed = this->calculateMeanPixelSpeed(video);
+	cout << "calculateMeanBlobPixelsSpeed" << endl;
+	ACMediaFeatures* videoMeanPixelSpeed = this->calculateMeanBlobPixelsSpeed(video);
 	if (videoMeanPixelSpeed != NULL){
 		allVideoFeatures.push_back(videoMeanPixelSpeed);
 	}
@@ -164,7 +164,7 @@ ACMediaFeatures* ACVideoDancersPlugin::calculateMeanOfTrajectory(ACVideoAnalysis
 	video->computeBlobs();
 	video->computeMergedBlobsTrajectory(0);
 	//
-	ACMediaTimedFeature *trajectory_mtf = new ACMediaTimedFeature(video->getTimeStamps(), video->getNormalizedMergedBlobsTrajectory(), "trajectory");
+	ACMediaTimedFeature *trajectory_mtf = new ACMediaTimedFeature(video->getBlobsTimeStamps(), video->getNormalizedMergedBlobsTrajectory(), "trajectory");
 	ACMediaFeatures* trajectory_mf = trajectory_mtf->mean(); // will do "new" and set name
 
 	// XS TEST
@@ -177,7 +177,7 @@ ACMediaFeatures* ACVideoDancersPlugin::calculateStdOfTrajectory(ACVideoAnalysis*
 	if (!video->areBlobsComputed()) video->computeBlobsUL();
 	if (!video->isTrajectoryComputed()) video->computeMergedBlobsTrajectory(0);
 
-	ACMediaTimedFeature *trajectory_mtf = new ACMediaTimedFeature(video->getTimeStamps(), video->getNormalizedMergedBlobsTrajectory(), "trajectory");
+	ACMediaTimedFeature *trajectory_mtf = new ACMediaTimedFeature(video->getBlobsTimeStamps(), video->getNormalizedMergedBlobsTrajectory(), "trajectory");
 	ACMediaFeatures* trajectory_mf = trajectory_mtf->std();
 	delete trajectory_mtf;
 	return trajectory_mf;
@@ -187,7 +187,7 @@ ACMediaFeatures* ACVideoDancersPlugin::calculateMaxOfTrajectory(ACVideoAnalysis*
 	if (!video->areBlobsComputed()) video->computeBlobsUL();
 	if (!video->isTrajectoryComputed()) video->computeMergedBlobsTrajectory(0);
 	
-	ACMediaTimedFeature *trajectory_mtf = new ACMediaTimedFeature(video->getTimeStamps(), video->getNormalizedMergedBlobsTrajectory(), "trajectory");
+	ACMediaTimedFeature *trajectory_mtf = new ACMediaTimedFeature(video->getBlobsTimeStamps(), video->getNormalizedMergedBlobsTrajectory(), "trajectory");
 	ACMediaFeatures* trajectory_mf = trajectory_mtf->max();
 	delete trajectory_mtf;
 	return trajectory_mf;
@@ -198,7 +198,7 @@ ACMediaFeatures* ACVideoDancersPlugin::calculateContractionIndex(ACVideoAnalysis
 	if (!video->isTrajectoryComputed()) video->computeMergedBlobsTrajectory(0);
 	video->computeContractionIndices();
 
-	ACMediaTimedFeature* ci_mtf = new ACMediaTimedFeature(video->getTimeStamps(), video->getContractionIndices(), "contraction index");
+	ACMediaTimedFeature* ci_mtf = new ACMediaTimedFeature(video->getBlobsTimeStamps(), video->getContractionIndices(), "contraction index");
 	ACMediaFeatures* contractionIndex = ci_mtf->mean();
 	delete ci_mtf;
 	return contractionIndex;
@@ -209,7 +209,7 @@ ACMediaFeatures* ACVideoDancersPlugin::calculateMeanSpeedOfTrajectory(ACVideoAna
 	if (!video->isTrajectoryComputed()) video->computeMergedBlobsTrajectory(0);
 	
 	video->computeMergedBlobsSpeeds(0);
-	ACMediaTimedFeature *trajectory_mtf = new ACMediaTimedFeature(video->getTimeStamps(), video->getNormalizedMergedBlobsSpeeds(), "speed");
+	ACMediaTimedFeature *trajectory_mtf = new ACMediaTimedFeature(video->getBlobsTimeStamps(), video->getNormalizedMergedBlobsSpeeds(), "speed");
 	ACMediaFeatures* trajectory_mf = trajectory_mtf->mean();
 	delete trajectory_mtf;
 	return trajectory_mf;
@@ -219,7 +219,7 @@ ACMediaFeatures* ACVideoDancersPlugin::calculateMeanSpeedOfTrajectory(ACVideoAna
 //ACMediaFeatures* ACVideoDancersPlugin::calculateMostOccupiedCell(ACVideoAnalysis* video){
 //	if (!video->areBlobsComputed()) video->computeBlobsUL();
 //	if (!video->isTrajectoryComputed()) video->computeNormalizedMergedBlobsTrajectory(0);
-//	ACMediaTimedFeature *trajectory_mtf = new ACMediaTimedFeature(video->getTimeStamps(), video->getNormalizedMergedBlobsTrajectory(), "trajectory");
+//	ACMediaTimedFeature *trajectory_mtf = new ACMediaTimedFeature(video->getBlobsTimeStamps(), video->getNormalizedMergedBlobsTrajectory(), "trajectory");
 //	mat hist_m = hist3(trajectory_mtf->getValue(), 10, 10);
 //	
 //	// XS TODO -- this is not correct
@@ -235,16 +235,16 @@ ACMediaFeatures* ACVideoDancersPlugin::calculateMeanBoundingBoxRatio(ACVideoAnal
 	if (!video->isTrajectoryComputed()) video->computeMergedBlobsTrajectory(0);
 	
 	video->computeBoundingBoxRatios();
-	ACMediaTimedFeature *trajectory_mtf = new ACMediaTimedFeature(video->getTimeStamps(), video->getBoundingBoxRatios(), "bounding box ratios");
+	ACMediaTimedFeature *trajectory_mtf = new ACMediaTimedFeature(video->getBlobsTimeStamps(), video->getBoundingBoxRatios(), "bounding box ratios");
 	ACMediaFeatures* trajectory_mf = trajectory_mtf->mean();
 	delete trajectory_mtf;
 	return trajectory_mf;
 }
 
-ACMediaFeatures* ACVideoDancersPlugin::calculateMeanPixelSpeed(ACVideoAnalysis* video){
-	video->computePixelSpeed();
-	vector<float> t = video->getTimeStamps();
-	vector<float> s = video->getPixelSpeeds();
+ACMediaFeatures* ACVideoDancersPlugin::calculateMeanBlobPixelsSpeed(ACVideoAnalysis* video){
+	video->computeBlobPixelSpeed();
+	vector<float> t = video->getBlobsTimeStamps();
+	vector<float> s = video->getBlobPixelsSpeeds();
 	
 	ACMediaTimedFeature* ps_mtf = new ACMediaTimedFeature(t,s, "pixel speed");
 	ACMediaFeatures* pixel_speed = ps_mtf->mean();

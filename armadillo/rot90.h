@@ -1,8 +1,8 @@
 /**
  * @brief rot90.h
- * @author Damien Tardieu
- * @date 11/03/2010
- * @copyright (c) 2010 – UMONS - Numediart
+ * @author Xavier Siebert
+ * @date 31/01/2011
+ * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -29,12 +29,12 @@
  * <mailto:avre@umons.ac.be>
 */
 
-#include "Armadillo-utils.h"
 
 #ifndef ROT90_H
 #define ROT90_H
 
+#include "Armadillo-utils.h"
 
-mat rot90(mat A_m, int k);
+arma::mat rot90(arma::mat A_m, int k);
 
 #endif

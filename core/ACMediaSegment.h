@@ -38,11 +38,9 @@
 
 #include <armadillo>
 
-using namespace arma;
-
 class ACMediaSegment{
  protected:
-  fvec time_m;
+	arma::fvec time_m;
   
  public:
   float getNextSegment(float time);

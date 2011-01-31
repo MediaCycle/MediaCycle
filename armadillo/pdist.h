@@ -1,8 +1,8 @@
 /**
  * @brief pdist.h
- * @author Damien Tardieu
- * @date 11/03/2010
- * @copyright (c) 2010 – UMONS - Numediart
+ * @author Xavier Siebert
+ * @date 31/01/2011
+ * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -29,11 +29,12 @@
  * <mailto:avre@umons.ac.be>
 */
 
-#include "Armadillo-utils.h"
 
 #ifndef PDIST_H
 #define PDIST_H
 
-mat pdist(mat data);
+#include "Armadillo-utils.h"
+
+arma::mat pdist(arma::mat data);
 
 #endif

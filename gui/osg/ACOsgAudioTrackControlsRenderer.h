@@ -39,13 +39,10 @@
 #include "ACOsgTrackControlsRenderer.h"
 #include "ACAudio.h"
 
-using namespace std;
-using namespace osg;
-
 class ACOsgAudioTrackControlsRenderer : public ACOsgTrackControlsRenderer {
 	
 	protected:
-		Geode* track_geode;
+		osg::Geode* track_geode;
 		
 		void trackGeode();
 		

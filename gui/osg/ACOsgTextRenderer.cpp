@@ -35,6 +35,8 @@
 
 #include "ACOsgTextRenderer.h"
 
+using namespace osg;
+
 ACOsgTextRenderer::ACOsgTextRenderer() {
 
 	text_geode = 0;

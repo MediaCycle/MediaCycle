@@ -42,13 +42,10 @@
 #include "ACOsgImageRenderer.h"
 #include <osg/ImageSequence>
 
-using namespace std;
-using namespace osg;
-
 class ACOsgVideoRenderer : public ACOsgImageRenderer  {
 protected:
-	ImageStream* image_stream;
-	ImageSequence* image_sequence;
+	osg::ImageStream* image_stream;
+	osg::ImageSequence* image_sequence;
 	
 public:
 	ACOsgVideoRenderer();

@@ -1,8 +1,8 @@
 /**
  * @brief ACNeighborhoodsPluginPareto.h
- * @author Damien Tardieu
- * @date 22/05/2010
- * @copyright (c) 2010 – UMONS - Numediart
+ * @author Xavier Siebert
+ * @date 31/01/2011
+ * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -49,7 +49,7 @@ public:
 	void updateNextPositions(ACMediaBrowser* ){};//not implemented
 	virtual void updateNeighborhoods(ACMediaBrowser* );
 protected:
-	mat extractDescMatrix(ACMediaBrowser* mediaBrowser, int descId);
+	arma::mat extractDescMatrix(ACMediaBrowser* mediaBrowser, int descId);
 	long lastClickedNodeId;
 };
 

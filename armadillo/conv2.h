@@ -1,8 +1,8 @@
 /**
  * @brief conv2.h
- * @author Damien Tardieu
- * @date 11/03/2010
- * @copyright (c) 2010 – UMONS - Numediart
+ * @author Xavier Siebert
+ * @date 31/01/2011
+ * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -35,7 +35,7 @@
 #include "Armadillo-utils.h"
 
 
-mat conv2(mat A_m, mat B_m, std::string mode);
-mat conv2(mat A_m, mat B_m);
+arma::mat conv2(arma::mat A_m, arma::mat B_m, std::string mode);
+arma::mat conv2(arma::mat A_m, arma::mat B_m);
 
 #endif

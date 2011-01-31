@@ -71,15 +71,12 @@
 
 //#include "ACPlugin.h"
 
-using namespace std;
-using namespace osg;
-
 class ACOsgTimelineRenderer {
 protected:
 	MediaCycle				*media_cycle;
-	ref_ptr<Group>				 group;
-	ref_ptr<Group>				 track_group;
-	vector<ACOsgTrackRenderer*>  track_renderer;
+	osg::ref_ptr<osg::Group>				 group;
+	osg::ref_ptr<osg::Group>				 track_group;
+	std::vector<ACOsgTrackRenderer*>  track_renderer;
 	int screen_width;
 	float height,width;
 
@@ -88,7 +85,7 @@ public:
 	~ACOsgTimelineRenderer() {};
 		
 	void setMediaCycle(MediaCycle *media_cycle) { this->media_cycle = media_cycle; };
-	Group *getShapes() 	{ return group.get(); };
+	osg::Group *getShapes() 	{ return group.get(); };
 	ACOsgTrackRenderer* getTrack(int number){if ( (number>=0) && (number<track_renderer.size()) ) return track_renderer[number];}
 	bool addTrack(int media_index);
 	int getNumberOfTracks(){return track_renderer.size();}

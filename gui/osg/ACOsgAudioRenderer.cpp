@@ -35,6 +35,8 @@
 
 #include "ACOsgAudioRenderer.h"
 
+using namespace osg;
+
 ACOsgAudioRenderer::ACOsgAudioRenderer() {
 
 	waveform_geode = 0; curser_geode = 0; curser_transform = 0; entry_geode = 0;

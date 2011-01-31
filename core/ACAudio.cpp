@@ -40,9 +40,10 @@
 
 using std::vector;
 using std::string;
-
 using std::ofstream;
 using std::ifstream;
+using std::endl;
+
 
 ACAudio::ACAudio() : ACMedia() {
     media_type = MEDIA_TYPE_AUDIO;

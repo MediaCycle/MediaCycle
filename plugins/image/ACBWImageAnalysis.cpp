@@ -282,7 +282,6 @@ void ACBWImageAnalysis::computeHuMoments(int thresh){
 	else {
 		cvMoments (imgp, &myRawmoments);
 	}
-	double momo[7];
 	
 	// XS tried opencv 2.0 version of Hu Moments to see if it's any better
 	// cv::HuMoments(myRawmoments, momo); 
@@ -567,8 +566,8 @@ void ACBWImageAnalysis::computeFourierPolarMoments(int RadialBins, int AngularBi
 		}
 	}
 	
-	const double rmin = Rmax/10;
-	const double rmax = Rmax;
+//	const double rmin = Rmax/10;
+//	const double rmax = Rmax;
 	
 	// XS debug
 	// cout << "resolution limits : " << rmin << " - " << rmax << endl;

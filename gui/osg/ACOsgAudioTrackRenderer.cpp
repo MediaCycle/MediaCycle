@@ -37,6 +37,8 @@
 
 #include <osgGA/GUIEventHandler>
 
+using namespace osg;
+
 ACOsgAudioTrackRenderer::ACOsgAudioTrackRenderer() {
 	
 	summary_waveform_geode = 0; summary_cursor_geode = 0; summary_cursor_transform = 0; track_geode = 0;

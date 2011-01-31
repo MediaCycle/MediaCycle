@@ -1,8 +1,8 @@
 /**
  * @brief paretofront.h
- * @author Damien Tardieu
- * @date 11/03/2010
- * @copyright (c) 2010 – UMONS - Numediart
+ * @author Xavier Siebert
+ * @date 31/01/2011
+ * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -29,19 +29,20 @@
  * <mailto:avre@umons.ac.be>
 */
 
-#include "Armadillo-utils.h"
 
 #ifndef PARETOFRONT_H 
 #define PARETOFRONT_H
 
+#include "Armadillo-utils.h"
+
 template<typename eT>
-ucolvec paretofront(const Mat<eT>& M){
+arma::ucolvec paretofront(const arma::Mat<eT>& M){
 	unsigned int t,s,i,j,j1,j2;
 	bool coldominatedflag;
 	int col = M.n_cols;
 	int row = M.n_rows;
-	ucolvec front;
-	ucolvec checklist(row);
+	arma::ucolvec front;
+	arma::ucolvec checklist(row);
 	front.zeros(row,1);
 	for(t = 0; t<row; t++) checklist[t] = 1;
 	for(s = 0; s<row; s++) {

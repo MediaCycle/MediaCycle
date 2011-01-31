@@ -1,8 +1,8 @@
 /**
  * @brief ACVisPlugin2Desc.h
- * @author Damien Tardieu
- * @date 05/05/2010
- * @copyright (c) 2010 – UMONS - Numediart
+ * @author Xavier Siebert
+ * @date 31/01/2011
+ * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -35,7 +35,6 @@
 #include "ACMediaBrowser.h"
 #include "ACMediaTimedFeature.h"
 
-using namespace arma;
 
 #ifndef _ACVISPLUGIN2DESC_
 #define _ACVISPLUGIN2DESC_
@@ -50,7 +49,7 @@ public:
 /* 	std::vector<ACMediaFeatures*> calculate(ACMediaData* _data){} */
 /*   virtual void updateClusters(ACMediaBrowser* ); */
   virtual void updateNextPositions(ACMediaBrowser* );
-	void extractDescMatrix(ACMediaBrowser* mediaBrowser, mat& desc_m, vector<string> &featureNames);
+	void extractDescMatrix(ACMediaBrowser* mediaBrowser, arma::mat& desc_m, std::vector<std::string> &featureNames);
   virtual int start() {return 0;};
   virtual int stop() {return 0;};
 protected:

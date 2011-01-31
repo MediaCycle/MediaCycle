@@ -75,22 +75,19 @@
 
 //#include "ACPlugin.h"
 
-using namespace std;
-using namespace osg;
-
 class ACOsgBrowserRenderer {
 protected:
 	MediaCycle				*media_cycle;
-	Group*				 group;
-	Group*				 media_group;
-	Group*				 link_group;
-	Group*				 label_group;
-	vector<ACOsgMediaRenderer*>  node_renderer;
-	vector<ACOsgNodeLinkRenderer*>  link_renderer;
-	vector<ACOsgMediaRenderer*>  label_renderer;
+	osg::Group*				 group;
+	osg::Group*				 media_group;
+	osg::Group*				 link_group;
+	osg::Group*				 label_group;
+	std::vector<ACOsgMediaRenderer*>  node_renderer;
+	std::vector<ACOsgNodeLinkRenderer*>  link_renderer;
+	std::vector<ACOsgMediaRenderer*>  label_renderer;
 	//ACOsgLayoutRenderer*		layout_renderer;
 	//vector<bool>				 media_selected;
-	vector<float>				 distance_mouse;
+	std::vector<float>				 distance_mouse;
 	//ACPlugin* mLayoutPlugin;
 	//ACOsgLayoutType layout_type;
 	int displayed_nodes;
@@ -139,7 +136,7 @@ public:
 	int computeScreenCoordinates(osgViewer::View* view, double ratio=0.0); //CF: use osgViewer::Viewer* for simple Viewers
 	vector<float> getDistanceMouse() { return distance_mouse; };
 	
-	void changeNodeColor(int _node, Vec4 _color){node_renderer[_node]->changeNodeColor(_color);}
+	void changeNodeColor(int _node, osg::Vec4 _color){node_renderer[_node]->changeNodeColor(_color);}
 	void resetNodeColor(int _node){node_renderer[_node]->resetNodeColor();}
 };
 

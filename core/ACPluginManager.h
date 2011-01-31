@@ -43,8 +43,6 @@
 #include <map>
 #include <vector>
 
-using namespace std;
-
 class ACPluginLibrary {
 public:
     ACPluginLibrary(DynamicLibrary *aLib);
@@ -53,9 +51,9 @@ public:
     
     //this is not necessary since getPlugin(i) gives direct access to plugins
     //and their functions.
-    vector<ACMediaFeatures*> calculate(int aPluginIndex, string aFileName);
+	std::vector<ACMediaFeatures*> calculate(int aPluginIndex, std::string aFileName);
 
-    vector<ACPlugin *> getPlugins() {return this->mPlugins;};
+    std::vector<ACPlugin *> getPlugins() {return this->mPlugins;};
     ACPlugin *getPlugin(int i) {return this->mPlugins[i];};
     ACPlugin *getPlugin(std::string aPluginName);
     int getSize() {return this->mPlugins.size();};
@@ -65,8 +63,8 @@ public:
 	
 	// store library path, e.g. so that you can remove a whole library 
 	// in the plugin manager by specifying its path
-	void setLibraryPath(string _lpath) {library_path = _lpath;}
-	string getLibraryPath(){return library_path;}
+	void setLibraryPath(std::string _lpath) {library_path = _lpath;}
+	std::string getLibraryPath(){return library_path;}
 
     //Plugins factories
     createPluginFactory* create;
@@ -75,8 +73,8 @@ public:
 
 private:
     DynamicLibrary *mLib;
-    vector<ACPlugin *> mPlugins;
-	string library_path;
+    std::vector<ACPlugin *> mPlugins;
+	std::string library_path;
 };
 
 class ACPluginManager {
@@ -89,15 +87,15 @@ public:
     int removeAll();
 	void dump();
 
-    vector<ACPluginLibrary *> getPluginLibrary() { return this->mPluginLibrary;};
+    std::vector<ACPluginLibrary *> getPluginLibrary() { return this->mPluginLibrary;};
     ACPluginLibrary *getPluginLibrary(int i) { return this->mPluginLibrary[i];};
-    ACPluginLibrary *getPluginLibrary(string _lpath) ;
+    ACPluginLibrary *getPluginLibrary(std::string _lpath) ;
     
 	int getSize() { return this->mPluginLibrary.size();};
     ACPlugin *getPlugin(std::string aPluginName);
     
 private:
-    vector<ACPluginLibrary *> mPluginLibrary;
+    std::vector<ACPluginLibrary *> mPluginLibrary;
 };
 
 #endif	/* _ACPLUGINMANAGER_H */

@@ -1,8 +1,8 @@
 /**
  * @brief hist3.h
- * @author Damien Tardieu
- * @date 11/03/2010
- * @copyright (c) 2010 – UMONS - Numediart
+ * @author Xavier Siebert
+ * @date 31/01/2011
+ * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -29,21 +29,22 @@
  * <mailto:avre@umons.ac.be>
 */
 
-#include "Armadillo-utils.h"
 
 #ifndef HIST3_H 
 #define HIST3_H
 
+#include "Armadillo-utils.h"
+
 template<typename eT>
-umat hist3(const Mat<eT>& A_m, int nbrBin0, int nbrBin1, float minE0, float maxE0, float minE1, float maxE1){
+arma::umat hist3(const arma::Mat<eT>& A_m, int nbrBin0, int nbrBin1, float minE0, float maxE0, float minE1, float maxE1){
   if (A_m.n_cols != 2){
     std::cerr<<"Error using hist3 : A_m must be a matrix with two columns." << std::endl;
     exit(1);
   }
-  umat resultHist = zeros<umat>(nbrBin0,nbrBin1);   //final result
-  Col<eT> binWidth(2);                                 //one bin width for every column of the data file
-  Col<eT> binEdge0 = Col<eT>(nbrBin0+1);           //edge values of the bins, one column vector for each data column
-  Col<eT> binEdge1 = Col<eT>(nbrBin1+1);           //edge values of the bins, one column vector for each data column
+  arma::umat resultHist = arma::zeros<arma::umat>(nbrBin0,nbrBin1);   //final result
+  arma::Col<eT> binWidth(2);                                 //one bin width for every column of the data file
+  arma::Col<eT> binEdge0 = arma::Col<eT>(nbrBin0+1);           //edge values of the bins, one column vector for each data column
+  arma::Col<eT> binEdge1 = arma::Col<eT>(nbrBin1+1);           //edge values of the bins, one column vector for each data column
   double minA, maxA;
 
   if (minE0 == 0 && maxE0 == 0){   //user did not specify min and max values of the histogram (commom case)    

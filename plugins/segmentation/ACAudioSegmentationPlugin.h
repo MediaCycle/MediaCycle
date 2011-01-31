@@ -38,7 +38,7 @@
 #include "ACAudioFeatures.h"
 #include "MediaCycle.h"
 
-#include<iostream>
+#include <iostream>
 
 class ACAudioSegmentationPlugin : public ACPlugin {
 public:
@@ -54,6 +54,6 @@ public:
 private:
 };
 
-icolvec FastBIC(fmat audiofeatures_m, float lambda, int samplerate);
+arma::icolvec FastBIC(arma::fmat audiofeatures_m, float lambda, int samplerate);
 
 #endif	/* _ACAUDIOSEGMENTATIONPLUGIN_H */

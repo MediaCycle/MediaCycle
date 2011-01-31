@@ -68,13 +68,10 @@ enum ACVideoSummaryType {
 	AC_VIDEO_SUMMARY_SLIT_SCAN=2
 };
 
-using namespace std;
-using namespace osg;
-
 class ACOsgTrackRenderer {
 protected:
 	MediaCycle* media_cycle;
-	MatrixTransform* track_node;
+	osg::MatrixTransform* track_node;
 	
 	int track_index, media_index;
 	// int	media_activity;
@@ -113,7 +110,7 @@ public:
 	void updateSize(int _width,float _height);
 	ACMedia* getMedia(){return media;}
 	//void setActivity(int _media_activity) { this->media_activity = _media_activity; }
-	MatrixTransform* getTrack() { return track_node; };
+	osg::MatrixTransform* getTrack() { return track_node; };
 	
 	virtual void prepareTracks()=0;
 	virtual void updateTracks(double ratio=0.0)=0;

@@ -1,8 +1,8 @@
 /**
  * @brief ACVisPluginAudiogarden.h
- * @author Damien Tardieu
- * @date 07/07/2010
- * @copyright (c) 2010 – UMONS - Numediart
+ * @author Xavier Siebert
+ * @date 31/01/2011
+ * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -35,8 +35,6 @@
 #include "ACMediaBrowser.h"
 #include "ACMediaTimedFeature.h"
 
-using namespace arma;
-
 #ifndef _ACVISPLUGINAUDIOGARDEN_
 #define _ACVISPLUGINAUDIOGARDEN_
 
@@ -50,8 +48,8 @@ public:
 /* 	std::vector<ACMediaFeatures*> calculate(ACMediaData* _data){} */
 /*   virtual void updateClusters(ACMediaBrowser* ); */
   virtual void updateNextPositions(ACMediaBrowser* );
-	mat extractDescMatrix(ACMediaLibrary* lib, string featureName);
-	mat extractDescMatrix(ACMediaLibrary* lib, std::vector<string> featureList);
+	arma::mat extractDescMatrix(ACMediaLibrary* lib, string featureName);
+	arma::mat extractDescMatrix(ACMediaLibrary* lib, std::vector<string> featureList);
   virtual int start() {return 0;};
   virtual int stop() {return 0;};
 protected:

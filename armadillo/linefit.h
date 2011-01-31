@@ -1,8 +1,8 @@
 /**
  * @brief linefit.h
- * @author Damien Tardieu
- * @date 11/03/2010
- * @copyright (c) 2010 – UMONS - Numediart
+ * @author Xavier Siebert
+ * @date 31/01/2011
+ * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -29,15 +29,16 @@
  * <mailto:avre@umons.ac.be>
 */
 
-#include "Armadillo-utils.h"
 
 #ifndef LINEFIT_H
 #define LINEFIT_H
 
+#include "Armadillo-utils.h"
+
 template<typename eT>
-const Row<eT> linefit(const Col<eT>& x_v, const Col<eT>& y_v){
-	Mat<eT> a = cov(x_v,y_v)/var(x_v);
-	Row<eT> p_v(2);
+const arma::Row<eT> linefit(const arma::Col<eT>& x_v, const arma::Col<eT>& y_v){
+	arma::Mat<eT> a = cov(x_v,y_v)/var(x_v);
+	arma::Row<eT> p_v(2);
 	p_v(0) = a(0,0);
 	p_v(1) = as_scalar(mean(y_v) - mean(x_v) * p_v(0));
 	return p_v;

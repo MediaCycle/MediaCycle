@@ -9,7 +9,7 @@ IF ( APPLE AND USE_COCOA )
 	ADD_DEPENDENCIES(mediacycle-osg-cocoa mediacycle)
 	ADD_DEPENDENCIES(mediacycle-osg-cocoa mediacycle-osg)
 
-	TARGET_LINK_LIBRARIES(mediacycle-osg-cocoa mediacycle)
+	TARGET_LINK_LIBRARIES(mediacycle-osg-cocoa mediacycle armadillo)
 	TARGET_LINK_LIBRARIES(mediacycle-osg-cocoa mediacycle-osg)
 	TARGET_LINK_LIBRARIES(mediacycle-osg-cocoa osg osgDB osgGA osgViewer)
 	TARGET_LINK_LIBRARIES(mediacycle-osg-cocoa ${OPENGL_LIBRARIES})

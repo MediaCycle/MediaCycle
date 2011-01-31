@@ -216,7 +216,7 @@ ACMediaFactory::~ACMediaFactory(){
 }
 
 ACMedia* ACMediaFactory::create(string file_ext){
-	to_lower(file_ext);
+	boost::to_lower(file_ext);
 	filext::iterator iter = available_file_extensions.find(file_ext);
 	if( iter == available_file_extensions.end() ) {
 		return NULL;
@@ -285,8 +285,10 @@ ACMedia* ACMediaFactory::create(ACMedia* media){
 	}
 }
 
+// returns the ACMediaType corresponding to a given file extension
+// or MEDIA_TYPE_NONE if the extension is unknown
 ACMediaType ACMediaFactory::getMediaTypeFromExtension(std::string file_ext){
-	to_lower(file_ext);
+	boost::to_lower(file_ext);
 	filext::iterator iter = available_file_extensions.find(file_ext);
 	if( iter == available_file_extensions.end() ) {
 		return MEDIA_TYPE_NONE;
@@ -361,7 +363,7 @@ std::vector<std::string> ACMediaFactory::getExtensionsFromMediaType(ACMediaType 
 }	
 
 bool ACMediaFactory::addFileExtensionSupport(std::string file_ext,ACMediaType media_type){
-	to_lower(file_ext);
+	boost::to_lower(file_ext);
 	filext::iterator iter = available_file_extensions.find(file_ext);
 	if( iter == available_file_extensions.end() ) {
 		available_file_extensions.insert(available_file_extensions.end(),filext::value_type(file_ext, media_type));

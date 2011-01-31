@@ -42,42 +42,40 @@
 #include <osg/ComputeBoundsVisitor>
 #include <string>
 
-using std::string;
-
 class ACMediaData {
 public:
 	ACMediaData();
-	ACMediaData(ACMediaType _type = MEDIA_TYPE_NONE,string _fname="");
+	ACMediaData(ACMediaType _type = MEDIA_TYPE_NONE,std::string _fname="");
 	~ACMediaData();
 	
-	void readAudioData(string _fname);
+	void readAudioData(std::string _fname);
 	void setAudioData(float* _data, float _sample_number);
 	float* getAudioData() {return audio_ptr;}
 	float getAudioLength() {return audio_frames;}
 	
 #if !defined (APPLE_IOS)
-	void readImageData(string _fname);
+	void readImageData(std::string _fname);
 	void setImageData(IplImage* _data);	
 	IplImage* getImageData() {return image_ptr;}
 	
-	void readVideoData(string _fname);
+	void readVideoData(std::string _fname);
 	void setVideoData(CvCapture* _data);
 	CvCapture* getVideoData() {return video_ptr;}
 #endif	
 
-	void read3DModelData(string _fname);
+	void read3DModelData(std::string _fname);
 	void set3DModelData(osg::ref_ptr< osg::Node > _data);
 	osg::Node* get3DModelData(){return model_ptr;}
 	
-	string getFileName() {return file_name;}
-	void setFileName(string _fname);
+	std::string getFileName() {return file_name;}
+	void setFileName(std::string _fname);
 	ACMediaType getMediaType(){return media_type;}
 	void setMediaType(ACMediaType _media_type){media_type=_media_type;}
 	bool copyData(ACMediaData* m);
 	
 private:
 	ACMediaType media_type;
-	string file_name;
+	std::string file_name;
 	float* audio_ptr;
 	float audio_frames;
 #if !defined (APPLE_IOS)	

@@ -1,8 +1,8 @@
 /**
  * @brief ACPosPlugAudioGardenFlower.h
- * @author Damien Tardieu
- * @date 08/07/2010
- * @copyright (c) 2010 – UMONS - Numediart
+ * @author Xavier Siebert
+ * @date 31/01/2011
+ * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -35,8 +35,6 @@
 #include "ACMediaBrowser.h"
 #include "ACMediaTimedFeature.h"
 
-using namespace arma;
-
 #ifndef _ACPOSPLUGAUDIOGARDENFLOWER_
 #define _ACPOSPLUGAUDIOGARDENFLOWER_
 
@@ -50,8 +48,8 @@ public:
 /* 	std::vector<ACMediaFeatures*> calculate(ACMediaData* _data){} */
 /*   virtual void updateClusters(ACMediaBrowser* ); */
   virtual void updateNextPositions(ACMediaBrowser* );
-	mat extractDescMatrix(ACMediaLibrary* lib, vector<string> featureList, vector<long> mediaIds);
-	mat extractDescMatrix(ACMediaLibrary* lib, string featureName, vector<long> mediaIds);
+	arma::mat extractDescMatrix(ACMediaLibrary* lib, std::vector<std::string> featureList, std::vector<long> mediaIds);
+	arma::mat extractDescMatrix(ACMediaLibrary* lib, std::string featureName, std::vector<long> mediaIds);
 
   virtual int start() {return 0;};
   virtual int stop() {return 0;};

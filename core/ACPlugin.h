@@ -39,17 +39,16 @@
 
 #include "ACMediaTypes.h"
 #include "ACMediaFeatures.h"
+#include "ACMediaTimedFeature.h"
 #include "ACMediaData.h"
+
 //#include "ACOsgBrowserRenderer.h"
 //#include "ACMedia.h"
-/* #include "ACMediaTimedFeature.h" */
 //#include "ACMediaBrowser.h"
 
 class ACMedia;
 class ACMediaBrowser;
-
-using std::vector;
-using std::string;
+class ACMediaTimedFeature;
 
 enum ACPluginType {
 	PLUGIN_TYPE_NONE,
@@ -81,14 +80,18 @@ public:
 	virtual int initialize(){return 0;}
 
 	virtual std::vector<ACMediaFeatures*> calculate(){std::vector<ACMediaFeatures*> dummy; return dummy; };
-	virtual std::vector<ACMediaFeatures*> calculate(std::string aFileName){std::vector<ACMediaFeatures*> dummy; return dummy;};
-	virtual std::vector<ACMediaFeatures*> calculate(ACMediaData* aData, ACMedia* theMedia){std::vector<ACMediaFeatures*> dummy; return dummy;};
+	virtual std::vector<ACMediaFeatures*> calculate(std::string aFileName, bool _save_timed_feat=false){std::vector<ACMediaFeatures*> dummy; return dummy;};
+	virtual std::vector<ACMediaFeatures*> calculate(ACMediaData* aData, ACMedia* theMedia, bool _save_timed_feat=false){std::vector<ACMediaFeatures*> dummy; return dummy;};
 	//XSCF TODO: should the plugin receive MediaCycle ?
 	virtual void updateClusters(ACMediaBrowser*){};
 	virtual void updateNextPositions(ACMediaBrowser*){};
 	virtual void updateNeighborhoods(ACMediaBrowser*){};
 	
-	virtual std::vector<ACMedia*> segment(ACMediaData* audio_data, ACMedia*){std::vector<ACMedia*> dummy; return dummy;};
+	virtual std::vector<ACMedia*> segment(ACMediaData* audio_data, ACMedia*){std::vector<ACMedia*> dummy; return dummy;}
+	
+	// timedFeatures:
+	virtual std::vector<ACMedia*> segment(ACMediaTimedFeature* _mtf){std::vector<ACMedia*> dummy; return dummy;}
+	virtual ACMediaTimedFeature* getTimedFeatures(){return NULL;}
 
 	virtual int start(){return 0;}
 	virtual int stop(){return 0;}
@@ -97,9 +100,9 @@ public:
 
     //virtual int readFile(std::string);
 protected:
-	string mName;
-	string mId;
-	string mDescription;
+	std::string mName;
+	std::string mId;
+	std::string mDescription;
 	ACMediaType mMediaType;
 	ACPluginType mPluginType;
 };
@@ -107,7 +110,7 @@ protected:
 // the types of the class factories
 typedef ACPlugin* createPluginFactory(std::string);
 typedef void destroyPluginFactory(ACPlugin*);
-typedef vector<string> listPluginFactory();
+typedef std::vector<std::string> listPluginFactory();
 
 #endif	/* _ACPLUGIN_H */
 

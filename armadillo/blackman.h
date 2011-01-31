@@ -1,8 +1,8 @@
 /**
  * @brief blackman.h
- * @author Alexis Moinet
- * @date 18/11/2010
- * @copyright (c) 2010 – UMONS - Numediart
+ * @author Xavier Siebert
+ * @date 31/01/2011
+ * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -29,18 +29,19 @@
  * <mailto:avre@umons.ac.be>
 */
 
-#include "Armadillo-utils.h"
 
 #ifndef BLACKMAN_H
 #define BLACKMAN_H
 
-inline colvec blackman(int L){
-	colvec window_v(L);
+#include "Armadillo-utils.h"
+
+inline arma::colvec blackman(int L){
+	arma::colvec window_v(L);
 	double alpha = .16;
 	double a0 = (1-alpha)/2;
 	double a1=1.0/2;
 	double a2=alpha/2;
-	colvec n_v = linspace<colvec>(0, L-1, L);
+	arma::colvec n_v = arma::linspace<arma::colvec>(0, L-1, L);
 	window_v = a0 - a1 * cos(2*arma::math::pi() * n_v / (double)(L-1)) + a2*cos(4*arma::math::pi()*n_v/(double)(L-1));
 	return window_v;
 }

@@ -42,8 +42,6 @@
 //#include "ACOsgImageRenderer.h"
 #include "ACOsgTrackRenderer.h"
 
-using namespace std;
-using namespace osg;
 
 // Slit-scan
 
@@ -121,19 +119,19 @@ public:
 
 class ACOsgVideoTrackRenderer : public ACOsgTrackRenderer {
 protected:
-	ImageStream* video_stream;
+	osg::ImageStream* video_stream;
 	CvCapture* summary_data;
 
-	MatrixTransform* playback_transform;
-	MatrixTransform* frames_transform;
-	MatrixTransform* slit_scan_transform;
+	osg::MatrixTransform* playback_transform;
+	osg::MatrixTransform* frames_transform;
+	osg::MatrixTransform* slit_scan_transform;
 	osg::ref_ptr<osg::MatrixTransform> cursor_transform;
 	
-	Geode* playback_geode;
-	ref_ptr<Group> frames_group;
-	Geode* frame_geode;
-	Geode* slit_scan_geode;
-	Geode* cursor_geode;
+	osg::Geode* playback_geode;
+	osg::ref_ptr<osg::Group> frames_group;
+	osg::Geode* frame_geode;
+	osg::Geode* slit_scan_geode;
+	osg::Geode* cursor_geode;
 
 	void playbackGeode();
 	void framesGeode();
@@ -150,9 +148,9 @@ protected:
 	ACOsgVideoSlitScanThread* slit_scanner;
 
 	static const int NCOLORS ;
-	Vec4Array* colors;
-	Vec4Array* colors2;
-	Vec4Array* colors3;
+	osg::Vec4Array* colors;
+	osg::Vec4Array* colors2;
+	osg::Vec4Array* colors3;
 	
 	ACVideoSummaryType track_summary_type;
 	

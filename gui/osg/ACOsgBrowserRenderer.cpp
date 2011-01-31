@@ -50,6 +50,8 @@
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/path.hpp"
 
+using namespace osg;
+
 ACOsgBrowserRenderer::ACOsgBrowserRenderer()
 : displayed_nodes(0)
 {
@@ -441,7 +443,7 @@ int ACOsgBrowserRenderer::computeScreenCoordinates(osgViewer::View* view, double
 	double t = getTime();
 	double frac;
 	double andur = 1.0;	
-	double alpha = 0.99;
+//	double alpha = 0.99;
 	double omr;
 	
 	media_cycle->getMouse(&mx, &my);

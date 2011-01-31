@@ -34,6 +34,7 @@
  */
 
 #include "ACOsgTrackRenderer.h"
+using namespace osg;
 
 ACOsgTrackRenderer::ACOsgTrackRenderer()
 : track_index(-1),media_index(-1),media_from_lib(true),media_changed(false),

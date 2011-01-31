@@ -33,6 +33,7 @@
  */
 
 #include "ACMedia.h"
+
 #include <iostream>
 #include "ACMediaFactory.h"
 
@@ -83,6 +84,7 @@ ACMedia::~ACMedia() {
 		delete *iter;//needed erase call destructor of pointer (i.e. none since it's just a pointer) not of pointee ACMediaFeatures
 		//features_vectors.erase(iter); //will cause segfault. besides the vector is automatically emptied, no need to erase.
 	}
+	// XS TODO : why is this commented ?
 	//if (data) delete data;
 }
 
@@ -135,7 +137,7 @@ void ACMedia::saveACL(ofstream &library_file, int mcsl) {
 // return value is used in ACMediaLibrary::openACLLibrary
 int ACMedia::loadACL(std::string media_path, ifstream &library_file, int mcsl) {
 	
-	int n_features = 0;
+	int n_features;
 	int n_features_elements = 0;	
 	int nn;
 	string tab;
@@ -147,11 +149,11 @@ int ACMedia::loadACL(std::string media_path, ifstream &library_file, int mcsl) {
 	int nbSegments, segId;
 	
 	if (! library_file.is_open()) {
-		cerr << "<ACAudio::loadACL> : problem loading image from ACL file, it needs to be opened before" << endl;
+		cerr << "<ACMedia::loadACL> : problem loading image from ACL file, it needs to be opened before" << endl;
 		return 0;
 	}		
 	if (!library_file.good()){
-		cerr << "<ACAudio::loadACL> : bad library file" << endl;
+		cerr << "<ACMedia::loadACL> : bad library file" << endl;
 		return 0;
 	}
 	
@@ -236,17 +238,17 @@ ACMediaFeatures* ACMedia::getFeaturesVector(string feature_name) {
 // Calls the plugins and fills in info such as width, height, ...
 // Implemented in ACMedia.cpp, since it is the same for all media
 // Returns 1 if it worked, 0 if it failed
-int ACMedia::import(std::string _path, int _mid, ACPluginManager *acpl ) {
+int ACMedia::import(std::string _path, int _mid, ACPluginManager *acpl, bool _save_timed_feat ) {
 	std::cout << "importing..." << _path << std::endl;
-	this->filename=_path;
+	this->filename = _path;
 	this->filename_thumbnail = _path;
-	int import_ok = 0; // SD
+	int import_ok = 0;
 	
 	if (_mid>=0) this->setId(_mid);
 	
 	// get info about width, height, thumbnail, ...
-	// and return a pointer to the data
-	//ACMediaData* data_ptr = this->extractData(this->getFileName());
+	// and return a pointer to the data (ACMediaData*)
+	// data will be used by the plugin to compute features
 	this->extractData(this->getFileName());
 	if (data==NULL){
 		import_ok = 0;
@@ -259,25 +261,24 @@ int ACMedia::import(std::string _path, int _mid, ACPluginManager *acpl ) {
 	if (acpl) {
 		for (int i=0;i<acpl->getSize();i++) {
 			for (int j=0;j<acpl->getPluginLibrary(i)->getSize();j++) {
+				
 				if (acpl->getPluginLibrary(i)->getPlugin(j)->getMediaType() == this->getType()
 					&& acpl->getPluginLibrary(i)->getPlugin(j)->getPluginType() == PLUGIN_TYPE_FEATURES) {
-					ACPlugin* plugin =  acpl->getPluginLibrary(i)->getPlugin(j);
 					
-					//vector<ACMediaFeatures*> afv = plugin->calculate(this->getFileName());
-					cout << "Computing features using plugin : " << plugin->getName() << std::endl;
-					vector<ACMediaFeatures*> afv = plugin->calculate(data, this);
+					cout << "Computing features using plugin : " << acpl->getPluginLibrary(i)->getPlugin(j)->getName() << std::endl;
+					//plugin->start();
+					vector<ACMediaFeatures*> afv = acpl->getPluginLibrary(i)->getPlugin(j)->calculate(data, this, _save_timed_feat);
 					
-					//another option :
-					//ACMediaFeatures *af = acpl->getPluginLibrary(i)->calculate(j,this->getFileName());
 					if (afv.size()==0){
 						import_ok = 0;
-						cerr << "<ACMedia::import> failed importing feature from plugin: " << plugin->getName() << endl;
+						cerr << "<ACMedia::import> failed importing feature from plugin: " << acpl->getPluginLibrary(i)->getPlugin(j)->getName() << endl;
 					}
 					else {
 						for (unsigned int Iafv=0; Iafv< afv.size() ; Iafv++)
 							this->addFeaturesVector(afv[Iafv]);
 						import_ok = 1;
 					}
+					//plugin->stop();
 				}
 				else {
 					//cerr << "Plugin " << acpl->getPluginLibrary(i)->getPlugin(j)->getName() << " not used here." << endl;
@@ -288,49 +289,113 @@ int ACMedia::import(std::string _path, int _mid, ACPluginManager *acpl ) {
 				}
 			}
 		}
+		std::cout << "Features calculated" << std::endl;
 	}
-	std::cout << "Features calculated" << std::endl;
+	else {
+		cerr << "<ACMedia::import> no features imported -- no plugin manager for media number: " << _mid << endl;
+		import_ok = 0;
+	}
+
 	//delete data;
 	return import_ok;
 }
 
-int ACMedia::segment(ACPluginManager *acpl ) {
-	int import_ok = 1;
-	
-	//ACMediaData* data_ptr = this->extractData(this->getFileName());
-	//data = this->extractData(this->getFileName());// done by extractData
+// segment data (after import !)
+// XS TODO the generic method provided here implies reading MediaTimedFeatures from disk
+// ... but all media don't have timedFeatures
+
+// if _saved_timed_features : we can read them on disk
+// otherwise : hope the plugin will handle it 
+//      ex: in audio : plugin extracts features and then segments
+int ACMedia::segment(ACPluginManager *acpl, bool _saved_timed_features ) {	
+	// check if data have been extracted properly by the import method
 	if (data==NULL){
-		import_ok = 0;
-		cerr << "<ACMedia::import> failed accessing data for media number: " << this->getId() << endl;
-		return 0;
+		cerr << "<ACMedia::segment> failed accessing data for media number: " << this->getId() << endl;
+		return -1;
 	}
-	/*
-	if (acpl) {
+	
+	if (acpl==NULL){
+		cerr << "<ACMedia::segment> missing plugin manager for media number " << this->getId() << endl;
+		return -1;	
+	}
+	
+	int segment_ok = 1;
+	int features_plugins_count = 0;
+	int segmentation_plugins_count = 0;
+		
+	// XS TODO add sanity checks
+	// XS TODO 2 : the double "for" loops are heavy but necessary since we don't know the type of plugin in advance
+	// if we do something like
+	// vector <ACPlugin*> features_plugins
+	// features_plugins.push_back( acpl->getPluginLibrary(i)->getPlugin(j));
+	// then features_plugins[i]->segment() does not call the right segment method...
+	// unless we make plugin a virtual class ?
+	ACMediaTimedFeature* ft_from_disk;
+	
+	if (_saved_timed_features) {
 		for (int i=0;i<acpl->getSize();i++) {
 			for (int j=0;j<acpl->getPluginLibrary(i)->getSize();j++) {
-				if (acpl->getPluginLibrary(i)->getPlugin(j)->getMediaType() == this->getType()
-					&& acpl->getPluginLibrary(i)->getPlugin(j)->getPluginType() == PLUGIN_TYPE_SEGMENTATION) {
-					ACPlugin* plugin =  acpl->getPluginLibrary(i)->getPlugin(j);
-					
-					cout << "Segmenting media using plugin : " << plugin->getName() << std::endl;
-					vector<ACMedia*> afv = plugin->segment(data, this);
-					
+				if ( acpl->getPluginLibrary(i)->getPlugin(j)->getMediaType() == this->getType()){
+					if ( acpl->getPluginLibrary(i)->getPlugin(j)->getPluginType() == PLUGIN_TYPE_FEATURES) {
+						features_plugins_count ++;
+						if (features_plugins_count ==1) {
+							// first plugin : get (implicit "new" done in getTimedFeatures, so you need to delete)
+							ft_from_disk = acpl->getPluginLibrary(i)->getPlugin(j)->getTimedFeatures();
+						}
+						else {
+							// next plugins (hence i=1) : append
+							ft_from_disk->appendTimedFeature(acpl->getPluginLibrary(i)->getPlugin(j)->getTimedFeatures());
+						}
+					}
+				}
+			}
+		}
+		// use all segmentation plugins
+		// XS TODO: check that ft_from_disk is not empty
+		for (int i=0;i<acpl->getSize();i++) {
+			for (int j=0;j<acpl->getPluginLibrary(i)->getSize();j++) {
+				if (acpl->getPluginLibrary(i)->getPlugin(j)->getPluginType() == PLUGIN_TYPE_SEGMENTATION) {
+					segmentation_plugins_count ++;
+					vector<ACMedia*> afv = acpl->getPluginLibrary(i)->getPlugin(j)->segment(ft_from_disk);
 					if (afv.size()==0){
-						import_ok = 0;
-						cerr << "<ACMedia::import> failed importing feature from plugin: " << plugin->getName() << endl;
+						segment_ok = 0;
+						cerr << "<ACMedia::segment> failed importing segments from plugin: " <<  acpl->getPluginLibrary(i)->getPlugin(j)->getName() << endl;
+					}
+					else {
+						for	(unsigned int Iafv=0; Iafv<afv.size(); Iafv++){
+							this->addSegment(afv[Iafv]);
+						}
+						segment_ok = 1;
+					}
+				}
+			}
+		}
+	}
+			
+	// i.e., not _saved_timed_features		
+	else {
+		for (int i=0;i<acpl->getSize();i++) {
+			for (int j=0;j<acpl->getPluginLibrary(i)->getSize();j++) {
+				if (acpl->getPluginLibrary(i)->getPlugin(j)->getPluginType() == PLUGIN_TYPE_SEGMENTATION) {
+					segmentation_plugins_count ++;
+					cout << "Segmenting media using plugin : " << acpl->getPluginLibrary(i)->getPlugin(j)->getName() << std::endl;
+					vector<ACMedia*> afv = acpl->getPluginLibrary(i)->getPlugin(j)->segment(data, this);
+					// the audio plugin does features extraction AND segmentation
+					if (afv.size()==0){
+						segment_ok = 0;
+						cerr << "<ACMedia::segment> failed importing segments from plugin: " <<  acpl->getPluginLibrary(i)->getPlugin(j)->getName() << endl;
 					}
 					else {
 						for (unsigned int Iafv=0; Iafv<afv.size(); Iafv++){
 							this->addSegment(afv[Iafv]);
 						}
-					import_ok = 1;
+						segment_ok = 1;
 					}
 				}
 			}
 		}
-	}*/
-	//delete data;
-	return import_ok;
+	}
+	return segment_ok;
 }
 
 // int ACMedia::segment(){

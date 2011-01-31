@@ -32,6 +32,8 @@
 
 #include "ACPluginManager.h"
 
+using namespace std;
+
 ACPluginManager::ACPluginManager() {
 }
 

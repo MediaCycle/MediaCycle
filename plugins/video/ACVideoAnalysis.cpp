@@ -62,7 +62,7 @@ using namespace std;
 #endif //  VISUAL_CHECK_GNUPLOT
 
 // ----------- uncomment this to get visual display using highgui and verbose -----
-#define VISUAL_CHECK
+//#define VISUAL_CHECK
 //#define VERBOSE
 // ----------- class constants
 const int ACVideoAnalysis::ystar = 150; // 220
@@ -76,14 +76,28 @@ ACVideoAnalysis::ACVideoAnalysis(){
 }
 
 ACVideoAnalysis::ACVideoAnalysis(const string &filename){
-	capture = NULL;
 	clean();
+	FROM_FILE = true;
 	setFileName(filename);
+	capture = cvCreateFileCapture(file_name.c_str());		
 	initialize(); // done here, since we know the file name
 }
 
+// this is normally what plugins should call
+// since they have access to mediadata
+ACVideoAnalysis::ACVideoAnalysis(ACMediaData* media_data){
+	clean();
+	file_name = media_data->getFileName();
+	capture = media_data->getVideoData();
+	initialize();
+}
+
+
 void ACVideoAnalysis::clean(){
-	if (capture) cvReleaseCapture(&capture);
+	// no, we should not release the capture, since it comes from outside.
+	// we don't make "new" capture, we just set a pointer to an existing one (which will be deleted outside)
+//	if (capture != NULL) cvReleaseCapture(&capture);
+	FROM_FILE = false;
 	HAS_TRAJECTORY = false;
 	HAS_BLOBS = false;
 	frame_counter = 0;
@@ -96,7 +110,8 @@ void ACVideoAnalysis::clean(){
 	bounding_box_ratios.clear();
 	bounding_box_heights.clear();
 	bounding_box_widths.clear();	
-	pixel_speeds.clear();
+	blob_pixel_speeds.clear();
+	global_pixel_speeds.clear();
 	interest_points.clear();
 	raw_moments.clear();
 	hu_moments.clear();
@@ -105,6 +120,7 @@ void ACVideoAnalysis::clean(){
 
 	width = height = depth = fps = nframes = 0;
 	threshU = threshL = 0;
+	file_name = "";
 	//	averageHistogram = 0;
 }
 
@@ -116,7 +132,10 @@ ACVideoAnalysis::~ACVideoAnalysis(){
 	// note: the image captured by the device is allocated /released by the capture function. 
 	// There is no need to release it explicitly. only release capture
 	
-	if (capture) cvReleaseCapture(&capture);
+	// release capture only if we created it from file.
+	// otherwise we did not generate a "new" capture !!
+	
+	if (FROM_FILE && capture) cvReleaseCapture(&capture);
 	//	if (averageHistogram) delete averageHistogram;
 }
 
@@ -128,7 +147,6 @@ void ACVideoAnalysis::setFileName(const string &filename){
 
 int ACVideoAnalysis::initialize(){
 	// returns 1 if it worked, 0 if not
-	capture = cvCreateFileCapture(file_name.c_str());		
 	frame_counter = 0; // reset frame counter, to make sure
 	if( !capture ) {
 		// Either the video does not exist, or it uses a codec OpenCV does not support. 
@@ -190,6 +208,16 @@ IplImage* ACVideoAnalysis::getNextFrame(){
 	tmp = cvRetrieveFrame(capture);  // retrieve the captured frame
 	frame_counter++;
 	return tmp;
+}
+
+IplImage* ACVideoAnalysis::getFrame(int i){
+	if (i < 0 || i > nframes) {
+		cerr << "frame index out of bounds: " << i << endl;
+		return NULL;
+	}
+	cvSetCaptureProperty(capture, CV_CAP_PROP_POS_FRAMES, i); 	
+	IplImage* img = getNextFrame();
+	return img;
 }
 
 void ACVideoAnalysis::histogramEqualize(const IplImage* bg_img) {
@@ -1238,10 +1266,10 @@ IplImage* ACVideoAnalysis::computeMedianNoBlobImage(string fsave, IplImage *firs
 	
 }
 
-void ACVideoAnalysis::computePixelSpeed() {
-	// substracts each image from the previous one and sums it all
-	// XS: could add option to calculate just on a segment of the video
-	pixel_speeds.clear();
+// substracts each image with blob from the previous one and sums all pixels of the difference image
+// XS: could add option to calculate just on a segment of the video
+void ACVideoAnalysis::computeBlobPixelSpeed() {
+	blob_pixel_speeds.clear();
 	this->rewind();
 	IplImage *frame = 0;
 	IplImage *tmp_frame = 0;
@@ -1256,7 +1284,7 @@ void ACVideoAnalysis::computePixelSpeed() {
 	//	int height = analysed_video->getHeight();
 	
 	if (nframes < 2){
-		cerr << "<ACVideoSpeedFeatures::calculate> : not enough frames in video : " << \
+		cerr << "<ACVideoAnalysis::computeBlobPixelSpeed> : not enough frames in video : " << \
 		file_name << endl;
 		return;
 	}
@@ -1266,7 +1294,7 @@ void ACVideoAnalysis::computePixelSpeed() {
 	
 	// initial frame
 	tmp_frame = this->getNextFrame();
-	pixel_speeds.push_back(speed); // so that the pixel_speeds vector has the same lenght as the time stamps
+	blob_pixel_speeds.push_back(speed); // so that the blob_pixel_speeds vector has the same lenght as the blob_time_stamps
 	
 	frame = cvCreateImage (cvSize (width, height), IPL_DEPTH_32S, 3);
 	previous_frame = cvCreateImage (cvSize (width, height), IPL_DEPTH_32S, 3);
@@ -1280,8 +1308,6 @@ void ACVideoAnalysis::computePixelSpeed() {
 #endif //VISUAL_CHECK
 	
 	for(unsigned int i = 1; i < all_blobs.size(); i++){ 
-// XS TODO: this is not clean but we calculate only in frames with blobs
-// could also do a setROI on the bounding box ? no since ROI will be different in consecutive frames
 		cvConvert (tmp_frame, previous_frame);
 		tmp_frame = this->getNextFrame();
 		cvConvert (tmp_frame, frame);
@@ -1296,7 +1322,7 @@ void ACVideoAnalysis::computePixelSpeed() {
 		cout << "frame " << i << ": pixel speed = " << speed << endl;
 #endif // VERBOSE
 
-		pixel_speeds.push_back(speed);
+		blob_pixel_speeds.push_back(speed);
 		cvConvert (diff_frames, diff_frames_U);
 #ifdef VISUAL_CHECK
 		cvShowImage ("Input", tmp_frame);
@@ -1319,6 +1345,87 @@ void ACVideoAnalysis::computePixelSpeed() {
 	cvDestroyWindow ("Substraction");
 #endif //VISUAL_CHECK
 }
+
+// substracts each image from the previous one and sums all pixels of the difference image
+// XS: could add option to calculate just on a segment of the video
+void ACVideoAnalysis::computeGlobalPixelSpeed() {
+	global_pixel_speeds.clear();
+	this->rewind();
+	IplImage *frame = 0;
+	IplImage *tmp_frame = 0;
+	IplImage *previous_frame = 0;
+	IplImage *diff_frames = 0;
+	IplImage *diff_frames_U = 0;
+	
+	// XS TODO : check if video has been initialized
+	// e.g. index current_frame
+	// or dimensions...
+	// int width = analysed_video->getWidth();
+	//	int height = analysed_video->getHeight();
+	
+	if (nframes < 2){
+		cerr << "<ACVideoAnalysis::computeGlobalPixelSpeed> : not enough frames in video : " << \
+		file_name << endl;
+		return;
+	}
+	
+	CvScalar sum_diff_frames ;
+	float speed = 0.0;
+	
+	// initial frame
+	tmp_frame = this->getNextFrame();
+	global_pixel_speeds.push_back(speed); // so that the global_pixel_speeds vector has the same lenght as the time_stamps
+	
+	frame = cvCreateImage (cvSize (width, height), IPL_DEPTH_32S, 3);
+	previous_frame = cvCreateImage (cvSize (width, height), IPL_DEPTH_32S, 3);
+	diff_frames = cvCreateImage (cvSize (width, height), IPL_DEPTH_32S, 3);
+	diff_frames_U = cvCreateImage (cvSize (width, height), IPL_DEPTH_8U, 3);
+	cvSetZero (frame);
+	
+#ifdef VISUAL_CHECK
+	cvNamedWindow ("Input", CV_WINDOW_AUTOSIZE);
+	cvNamedWindow ("Subtraction", CV_WINDOW_AUTOSIZE);
+#endif //VISUAL_CHECK
+	
+	for(unsigned int i = 0; i < nframes-1; i++){ 
+		cvConvert (tmp_frame, previous_frame);
+		tmp_frame = this->getNextFrame();
+		cvConvert (tmp_frame, frame);
+		cvAbsDiff (frame, previous_frame, diff_frames);
+		sum_diff_frames = cvSum (diff_frames);
+		speed = 0.0;
+		for(int j = 0; j < 3; j++){
+			speed += sum_diff_frames.val[j];
+		}
+		speed = speed / (4*width*height);
+#ifdef VERBOSE
+		cout << "frame " << i << ": pixel speed = " << speed << endl;
+#endif // VERBOSE
+		
+		global_pixel_speeds.push_back(speed);
+		cvConvert (diff_frames, diff_frames_U);
+#ifdef VISUAL_CHECK
+		cvShowImage ("Input", tmp_frame);
+		cvShowImage ("Substraction", diff_frames_U);
+		cvWaitKey (10);
+#endif //VISUAL_CHECK
+		tmp_frame = this->getNextFrame();
+	}
+	
+	cvReleaseImage (&frame);
+	cvReleaseImage (&previous_frame);
+	cvReleaseImage (&diff_frames);
+	cvReleaseImage (&diff_frames_U);
+	//	cvReleaseImage (&tmp_frame); 
+	// XS !! tmp_frame will be release by cvReleasedCapture in cvAnalyzedVideo
+	// releasing it here will result in "double free" error message
+	
+#ifdef VISUAL_CHECK
+	cvDestroyWindow ("Input");
+	cvDestroyWindow ("Substraction");
+#endif //VISUAL_CHECK
+}
+
 
 void ACVideoAnalysis::computeContractionIndices(){
 	contraction_indices.clear();
@@ -1358,9 +1465,9 @@ void ACVideoAnalysis::computeBoundingBoxRatios(){
 	}
 }
 
-void ACVideoAnalysis::computeFrameAbsoluteDifferences(){
+void ACVideoAnalysis::computeGlobalPixelsSpeed(){
 	// reset the capture to the beginning of the video
-//	this->rewind();
+	this->rewind();
 	IplImage* current_frame  = getNextFrame();
 	IplImage* previous_frame = cvCreateImage( cvGetSize(current_frame), IPL_DEPTH_8U, 3 );;
 	IplImage* diff_frames = cvCreateImage( cvGetSize(current_frame), IPL_DEPTH_8U, 3 );
@@ -1384,7 +1491,7 @@ void ACVideoAnalysis::computeFrameAbsoluteDifferences(){
 		cout << "frame " << ifram << " : diff = " << frame_diff << endl;
 
 	}
-	cvReleaseImage (&current_frame);
+	//cvReleaseImage (&current_frame); // non, sinon double free !
 	cvReleaseImage (&previous_frame);
 	cvReleaseImage (&diff_frames);	
 }
@@ -1487,11 +1594,28 @@ vector<float> ACVideoAnalysis::getDummyTimeStamps(int nsize){
 	return dummy;
 }
 
-vector<float> ACVideoAnalysis::getTimeStamps(){
+vector<float> ACVideoAnalysis::getBlobsTimeStamps(){
 	// XS: I made these FLOAT as in ACMediaFeatures but really it's INT
 	// these are "real" time stamps from cvGetCaptureProperty(capture, CV_CAP_PROP_POS_FRAMES)
 	return all_blobs_time_stamps;
 }
+
+vector<float> ACVideoAnalysis::getGlobalTimeStamps(){
+	vector<float> global_ts;
+	for(int ifram=0; ifram<nframes; ifram++) {
+		global_ts.push_back(ifram*1.0/fps); // in seconds
+	}
+	return global_ts;
+}
+
+vector<float> ACVideoAnalysis::getGlobalFrameStamps(){
+	vector<float> global_fs;
+	for(int ifram=0; ifram<nframes; ifram++) {
+		global_fs.push_back(ifram); // in frame numbers
+	}
+	return global_fs;
+}
+
 
 // ------------------ visual output functions -----------------
 void ACVideoAnalysis::showFrameInWindow(string title, IplImage* frame, bool has_win){
@@ -1639,9 +1763,7 @@ void ACVideoAnalysis::saveVideoThumnbailInFile (string fileout, int _w, int _h, 
 	rewind();
 	IplImage* img_sm = cvCreateImage(cvSize (_w, _h), depth, 3); // XS TODO : 3 = nb channels -- generealize
 	for(int i = _nskip; i < nframes-1; i+=_istep){
-		// XS TODO: getFrame(i) that checks bounds -- instead of the following 2 lines
-		cvSetCaptureProperty(capture, CV_CAP_PROP_POS_FRAMES, i); 	
-		img = getNextFrame();
+		img = getFrame(i);
 		if( !img ) {
 			cout << "end of movie (aka The End)" << endl;
 			break;

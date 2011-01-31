@@ -39,6 +39,8 @@
 #include "ACMediaTypes.h"
 #include "ACPluginManager.h"
 #include "ACMediaData.h"
+#include "ACMediaTimedFeature.h"
+
 #include <string>
 
 class ACMedia {
@@ -57,11 +59,13 @@ protected:
 	std::string filename_thumbnail;
 	char  **text_tags;
 	char  **hyper_links;
-	std::vector<ACMedia*> segments;//CF
+	std::vector<ACMedia*> segments;
 	float start, end; // seconds
 	bool persistent_data; // true if data and thumbnail are kept in virtual memory
 	ACMediaData* data;
 	
+	// XS TODO : add a MediaTimedFeatures member ?
+	// so that we can segment "on-the-fly"
 public:
 	ACMedia();
 	ACMedia(const ACMedia&, bool reduce = true);
@@ -82,7 +86,7 @@ public:
 
 	std::vector<ACMediaFeatures*> &getAllFeaturesVectors() { return features_vectors; }
 	ACMediaFeatures* getFeaturesVector(int i);
-	ACMediaFeatures* getFeaturesVector(string feature_name);
+	ACMediaFeatures* getFeaturesVector(std::string feature_name);
 	int getNumberOfFeaturesVectors() {return features_vectors.size();}
 	void addFeaturesVector(ACMediaFeatures *aFeatures) { this->features_vectors.push_back(aFeatures); }
 	
@@ -92,7 +96,7 @@ public:
 	// thumbnail
 	virtual void* getThumbnailPtr()=0;
 	std::string getThumbnailFileName() { return filename_thumbnail; }
-	void setThumbnailFileName(string ifilename) { filename_thumbnail=ifilename; }
+	void setThumbnailFileName(std::string ifilename) { filename_thumbnail=ifilename; }
 	// the following 2 were re-introduced for audio...
 	virtual int getThumbnailWidth() {return 0;}
 	virtual int getThumbnailHeight() {return 0;}
@@ -107,13 +111,14 @@ public:
 	ACMediaData* getData(){return data;}
 	void deleteData(){if (!persistent_data) delete data;}
 		
-		// accessors -- these should not be redefined for each media
+	// accessors -- these should not be redefined for each media
 	int getWidth() {return width;}
 	int getHeight() {return height;}
 	void setWidth(int w) {width=w;}
 	void setHeight(int h) {height=h;}
 	ACMediaType	getType() {return this->media_type;}	
 	
+	// beginning and end as floats
 	void setStart(float st){this->start = st;};
 	void setEnd(float en){this->end = en;};
 	float getStart(){return this->start;};
@@ -134,11 +139,11 @@ public:
 	//virtual ACMediaData* extractData(std::string filename) {ACMediaData* dummy; return dummy;}
 	virtual void extractData(std::string filename) {}
 	
-	virtual int import(std::string _path, int _mid=0, ACPluginManager *acpl=NULL);
-
-	int segment(ACPluginManager *acpl );
-
-	//	int segment();
+	// FEATURES computation (import) and segmentation (segment)
+	// these methods are virtual, because each media could have a specific segmentation method
+	// ex: audioSegmentationPlugin : also calculates features...
+	virtual int import(std::string _path, int _mid=0, ACPluginManager *acpl=NULL, bool _save_timed_feat=false);
+	virtual int segment(ACPluginManager *acpl, bool _saved_timed_features = false );
 };
 
 #endif // ACMEDIA_H

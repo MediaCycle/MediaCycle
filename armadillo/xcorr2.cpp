@@ -1,8 +1,8 @@
 /**
  * @brief xcorr2.cpp
- * @author Damien Tardieu
- * @date 11/03/2010
- * @copyright (c) 2010 – UMONS - Numediart
+ * @author Xavier Siebert
+ * @date 31/01/2011
+ * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -30,6 +30,7 @@
 */
 
 #include "xcorr2.h"
+using namespace arma;
 
 mat xcorr2(mat A_m, mat B_m){
   mat C_m(A_m.n_rows+B_m.n_rows-1, A_m.n_cols+B_m.n_cols-1); 

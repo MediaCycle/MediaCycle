@@ -39,6 +39,8 @@
 #include <cmath>
 #include <osg/ImageUtils>
 
+using namespace osg;
+
 
 #if !defined (APPLE_IOS)
 

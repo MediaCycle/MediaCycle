@@ -71,23 +71,21 @@
 
 //#include "ACPlugin.h"
 
-using namespace std;
-using namespace osg;
 
 class ACOsgTimelineControlsRenderer {
 protected:
 	MediaCycle				*media_cycle;
-	ref_ptr<Group>				 group;
-	ref_ptr<Group>				 track_group;
-	vector<ACOsgTrackControlsRenderer*>  track_renderer;
-	vector<float>				 distance_mouse;
+	osg::ref_ptr<osg::Group>				 group;
+	osg::ref_ptr<osg::Group>				 track_group;
+	std::vector<ACOsgTrackControlsRenderer*>  track_renderer;
+	std::vector<float>				 distance_mouse;
 
 public:
 	ACOsgTimelineControlsRenderer();
 	~ACOsgTimelineControlsRenderer() {};
 		
 	void setMediaCycle(MediaCycle *media_cycle) { this->media_cycle = media_cycle; };
-	Group *getShapes() 	{ return group.get(); };
+	osg::Group *getShapes() 	{ return group.get(); };
 	ACOsgTrackControlsRenderer* getControls(int number){if ( (number>=0) && (number<track_renderer.size()) ) return track_renderer[number];}
 	//bool addTrack(int position,ACMediaType media_type = -1);
 	
@@ -95,7 +93,7 @@ public:
 	void updateControls(double ratio=0.0);
 
 	int computeScreenCoordinates(osgViewer::View* view, double ratio=0.0); //CF: use osgViewer::Viewer* for simple Viewers
-	vector<float> getDistanceMouse() { return distance_mouse; };
+	std::vector<float> getDistanceMouse() { return distance_mouse; };
 };
 
 #endif

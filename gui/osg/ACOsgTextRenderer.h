@@ -40,22 +40,19 @@
 #include <osgText/Font>
 #include <osgText/Text>
 
-using namespace std;
-using namespace osg;
-
 class ACOsgTextRenderer : public ACOsgMediaRenderer {
 	
 protected:
 	osg::ref_ptr<osgText::Font> font;
 	osg::ref_ptr<osgText::Text> text;
 	
-	Geode* text_geode;
-	Geode* entry_geode;
+	osg::Geode* text_geode;
+	osg::Geode* entry_geode;
 	
 	void textGeode();
 	void entryGeode();
 	
-	string text_string;
+	std::string text_string;
 	ACPoint pos;
 	
 public:
@@ -63,7 +60,7 @@ public:
 	~ACOsgTextRenderer();
 	void prepareNodes();
 	void updateNodes(double ratio=0.0);
-	void setText(string text) {text_string = text;}
+	void setText(std::string text) {text_string = text;}
 	void setPos(ACPoint p) {pos = p;}
 };
 

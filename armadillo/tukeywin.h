@@ -1,8 +1,8 @@
 /**
  * @brief tukeywin.h
- * @author Alexis Moinet
- * @date 18/11/2010
- * @copyright (c) 2010 – UMONS - Numediart
+ * @author Xavier Siebert
+ * @date 31/01/2011
+ * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -51,12 +51,12 @@
 //      N = 64; 
 //      w = tukeywin(N,0.5); 
 
-inline colvec tukeywin(int n, float r=.5){
-	colvec window_v(n);
-	colvec t;
+inline arma::colvec tukeywin(int n, float r=.5){
+	arma::colvec window_v(n);
+	arma::colvec t;
 
 	if (r <= 0){
-    window_v = ones(n,1);
+    window_v = arma::ones(n,1);
 	}
 	else{
 		if (r >= 1){
@@ -64,16 +64,16 @@ inline colvec tukeywin(int n, float r=.5){
 			exit(1);
 		}
 		else{
-			colvec t = linspace<colvec>(0,1,n);
+			arma::colvec t = arma::linspace<arma::colvec>(0,1,n);
 			// Defines period of the taper as 1/2 period of a sine wave.
 			float per = r/2.0; 
 			int tl = (int)(per*(n-1))+1;
 			int th = n-tl+1;
 			// Window is defined in three sections: taper, constant, taper
 			window_v.rows(0,tl-1) = ((1+cos(arma::math::pi()/per*(t.rows(0,tl-1) - per)))/2);
-			window_v.rows(tl, th-2) = ones(th-tl-1,1);
+			window_v.rows(tl, th-2) = arma::ones(th-tl-1,1);
 			window_v.rows(th-1,n-1) = ((1+cos(arma::math::pi()/per*(t.rows(th-1, n-1) - 1 + per)))/2);
-			//w = [ ((1+cos(pi/per*(t(1:tl) - per)))/2);  ones(th-tl-1,1); ((1+cos(pi/per*(t(th:end) - 1 + per)))/2)];
+			//w = [ ((1+cos(pi/per*(t(1:tl) - per)))/2);  arma::ones(th-tl-1,1); ((1+cos(pi/per*(t(th:end) - 1 + per)))/2)];
 		}
 	}
 	return window_v;

@@ -40,13 +40,11 @@
 #ifndef _ACMEDIAFEATURES_H
 #define _ACMEDIAFEATURES_H
 
-#include <iostream>
+//#include <iostream>
 #include <string>
 #include <vector>
 
 #include "ACFeaturesTypes.h"
-
-using std::string;
 
 class ACMediaFeatures  {
 	// ACMediaFeatures is essentially a vector of floats with some extra methods.
@@ -60,8 +58,8 @@ protected:
 	int needs_normalization;
 public:
 	ACMediaFeatures(); // no media given, probably read features from disk
-	ACMediaFeatures(FeaturesVector V, string myname="");
-//	ACMediaFeatures(FeaturesVectorAsDouble V, string myname="");
+	ACMediaFeatures(FeaturesVector V, std::string myname="");
+//	ACMediaFeatures(FeaturesVectorAsDouble V, std::string myname="");
 	virtual ~ACMediaFeatures()  {};
 	//	virtual void calculate(void*) = 0;
 	// the following are common to all features types and should NOT be redefined
@@ -79,11 +77,11 @@ public:
 	int getDiscretizedFeature();
 
 	void dump(); // output in terminal
-	void write(string);  // output in a file -- todo : define format
+	void write(std::string);  // output in a file -- todo : define format
 	// void read() {} // read from file -- cf. plugin ?
 	
-	string getName() {return name;};
-	void setName(string namei) {this->name = namei;};
+	std::string getName() {return name;};
+	void setName(std::string namei) {this->name = namei;};
 
 	void resize(int new_size) { features_vector.resize(new_size); }
 	int getSize();

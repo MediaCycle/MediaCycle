@@ -74,7 +74,7 @@ std::vector<ACMediaFeatures*> ACAudioFeaturesPlugin::calculate_starpu(vector<ACM
 }
 */
 
-std::vector<ACMediaFeatures*> ACAudioFeaturesPlugin::calculate(ACMediaData* audio_data, ACMedia* theMedia) {
+std::vector<ACMediaFeatures*> ACAudioFeaturesPlugin::calculate(ACMediaData* audio_data, ACMedia* theMedia, bool _save_timed_feat) {
 
 	bool extendSoundLimits = true;
 	std::vector<ACMediaTimedFeature*> descmf;

@@ -1,8 +1,8 @@
 /**
  * @brief fft2.h
- * @author Damien Tardieu
- * @date 11/03/2010
- * @copyright (c) 2010 – UMONS - Numediart
+ * @author Xavier Siebert
+ * @date 31/01/2011
+ * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -35,7 +35,7 @@
 #include "Armadillo-utils.h"
 
 
-cx_mat fft2(mat x_m, int nrows, int ncols);
-cx_mat fft2(mat x_m);
+arma::cx_mat fft2(arma::mat x_m, int nrows, int ncols);
+arma::cx_mat fft2(arma::mat x_m);
 
 #endif

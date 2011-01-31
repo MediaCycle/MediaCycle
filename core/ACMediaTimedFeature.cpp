@@ -34,10 +34,12 @@
  */
 
 #include "ACMediaTimedFeature.h"
-#ifdef USE_SDIF
-	#include "sdif.h"
-#endif
 #include "Armadillo-utils.h"
+
+// USE_SDIF is off by default :
+#ifdef USE_SDIF
+#include "sdif.h"
+#endif
 
 using namespace arma;
 using namespace std;
@@ -102,21 +104,6 @@ ACMediaTimedFeature::ACMediaTimedFeature(const vector<float> &time, const vector
 	if (seg_v !=0) this->seg_v = *seg_v;	
 }
 
-// We pass by adresse now
-// ACMediaTimedFeature::ACMediaTimedFeature(vector<float> time, vector< vector<float> > value, string name, vector<float> seg_v){
-//   this->time_v = fcolvec(time.size());
-//   this->value_m = fmat((int) value[0].size(), (int) value.size());
-//   for (int Itime=0; Itime<time.size(); Itime++){
-//     this->time_v(Itime) = time[Itime];
-//     for (int Idim=0; Idim<value.size(); Idim++){
-//       this->value_m(Itime, Idim) = value[Idim][Itime];
-//     }
-//   }
-//   this->name = name;
-//   this->seg_v = seg_v;
-// }
-
-
 // ***
 // XS 06/11/09 : commented this one because confusion in ordering of value 
 // i.e.: columns and rows are inversed compared to previous constructor !
@@ -135,52 +122,6 @@ ACMediaTimedFeature::ACMediaTimedFeature(const vector<float> &time, const vector
 //	//vector< float > seg_v( seg_fp, seg_fp + nBursts );
 //	this->seg_v = seg_v;
 //}
-
-// We pass by adresse now
-// ACMediaTimedFeature::ACMediaTimedFeature(vector<float> time, vector<float> value, string name, vector<float> seg_v){
-//   if (time.size() != value.size()) {
-//     cerr << "Time and value vectors does not have the same size" << endl;
-//     exit(-1);
-//   }
-
-//   this->time_v = fcolvec(time.size());
-//   this->value_m = fmat((int) time.size(),1);
-//   for (int Itime=0; Itime<time.size(); Itime++){
-//     this->time_v(Itime) = time[Itime];
-//     this->value_m(Itime, 1) = value[Itime];
-//   }
-//   this->name = name;
-//   this->seg_v = seg_v;
-// }
-
-void ACMediaTimedFeature::importFromFile(string filename){ //see also readFile
-	fmat tmp_m;
-	tmp_m.load(filename);
-	//  tmp_m.print();
-	this->value_m = tmp_m.cols(1,tmp_m.n_cols-1);
-	this->time_v = tmp_m.col(0);
-}
-
-void ACMediaTimedFeature::importSegmentsFromFile(string filename){
-	ifstream inf(filename.c_str(),ifstream::in);
-	int i=0;
-	float tmp;
-	while (true){
-		inf >> tmp;
-		this->seg_v.push_back(tmp);
-		if (inf.eof()) break;
-		if (i >= 1) //otherwise there is a problem if tmp is equal to 0
-		{
-			if (seg_v[i] < seg_v[i-1]){
-				cerr << "badly formed segments " << endl;
-				exit(-1);
-			}
-			//cout << seg_v.size() << " ; " << seg_v[i] << endl;
-		}
-		i++;
-	}
-	inf.close();
-}
 
 
 fcolvec ACMediaTimedFeature::getTime() {
@@ -279,10 +220,10 @@ double* ACMediaTimedFeature::getTimeAsDouble() {
 }
 
 vector<float> ACMediaTimedFeature::getTimeAsVector() {
-	vector<float> value;
+	vector<float> time;
 	for (int i=0; i<this->getLength(); i++)
-		value.push_back(this->getTime()(i));
-	return value;
+		time.push_back(this->getTime()(i));
+	return time;
 }
 
 
@@ -295,7 +236,7 @@ float ACMediaTimedFeature::getValue(float index, float dim){
 }
 
 vector< vector<float> > ACMediaTimedFeature::getValueAsVector(){
-	// XS duh ?
+	// XS TODO duh ?
 }
 
 void ACMediaTimedFeature::setValue(fmat value_m) {
@@ -597,7 +538,7 @@ ACMediaFeatures* ACMediaTimedFeature::temporalModel(double start_sec, double sto
 		s2 = 0;
 
 	float slopeDiff = s2-s1;
-	float sa, sd;
+	//	float sa, sd;
 	frowvec sm_v(5);
 	if (s1 > 0){ // if the first segment is ascending
 		sm_v(0) = s1; //sa = s1; // slope ascending part
@@ -618,7 +559,7 @@ ACMediaFeatures* ACMediaTimedFeature::temporalModel(double start_sec, double sto
 		std::cout << "Temporal model is not finite" << std::endl;
 		exit(1);
 	}
-
+	
 	string name = "Temporal Model of ";
 	name += this->getName();
 	temporalModel_mf->setName(name);
@@ -626,42 +567,6 @@ ACMediaFeatures* ACMediaTimedFeature::temporalModel(double start_sec, double sto
 		temporalModel_mf->addFeatureElement(sm_v(i)); 
 	}
 	return temporalModel_mf;
-}
-
-int ACMediaTimedFeature::readFile(std::string fileName){
-    fmat data;
-    data.load(fileName, raw_ascii);
-    if(data.n_elem != 0)
-    {
-        this->setTime(data.col(0));          //time information : first column of the file
-        this->setValue(data.cols(1,(data.n_cols)-1));   //data : other columns of the file
-        return 1;
-    }
-    else
-    {
-        cout<<"Error : "<<fileName<< " does not exist"<<endl;
-        return 0;
-    }
-}
-
-void ACMediaTimedFeature::dump(){ // in cout
-	fmat data = this->getValue();
-	data.print();
-}
-
-void ACMediaTimedFeature::dump(string fname){ // in file
-	fmat data = this->getValue();
-	data.save(fname, arma_ascii); // default format = arma_binary
-}
-
-int ACMediaTimedFeature::saveAsTxt(string fname){ // in file
-	fmat data = join_rows(this->getTime(), this->getValue());
-	ofstream library_file (fname.c_str());
-	library_file << this->getName() << endl;
-	library_file << this->getLength() << " " << this->getDim() << endl;
-	library_file << data << endl;
-	library_file.close();
-	return 1;
 }
 
 fmat ACMediaTimedFeature::similarity(int mode)
@@ -776,52 +681,114 @@ float ACMediaTimedFeature::dist(fmat vector1, fmat vector2, int mode)
     return distM(0,0);
 }
 
-arma::fmat vectorACMTF2fmat(std::vector <ACMediaTimedFeature*> _ACMTF)
-{
-    int i, n_ACMTF, n_rows=_ACMTF[0]->getLength(), n_cols=0;
-    arma::fmat features_m;
-    for(i=0;i<_ACMTF.size();i++)
-    {
-        //cout << "Feature: " << _ACMTF[i]->getName() << "; Nframes: " << _ACMTF[i]->getLength() << "; Size: " << _ACMTF[i]->getDim() << endl;
-        n_cols+=_ACMTF[i]->getDim();
-        if(_ACMTF[i]->getLength() > n_rows)
-        {
-            n_rows=_ACMTF[i]->getLength();
-            //cout << "WARNING: ALL features do not have the same number of frames!!!" << endl;
-        }
-    }
-    //features_m.zeros(n_rows,n_cols);
-    cout << "Full matrix: Nrows: " << n_rows << "; n_cols: " << n_cols << endl;
+// XS new 180111
+// concatenate with another timed Feature
+// XS TODO: here I just check that the time vectors have same lenght; must have the same time stamps
+bool ACMediaTimedFeature::appendTimedFeature(ACMediaTimedFeature* B){
+	bool append_ok;
+	if (this->getTime().n_rows != B->getTime().n_rows){
+		append_ok = false;
+	}
+	else {
+		this->setValue( join_rows(this->getValue(),B->getValue()) );
+		append_ok = true;
+	}
+	return append_ok;
+}
 
-    if(_ACMTF[0]->getLength()<n_rows)
+// --------------------------------------------------------------------
+// I/O
+
+int ACMediaTimedFeature::readFile(std::string fileName){
+    fmat data;
+    data.load(fileName, raw_ascii);
+    if(data.n_elem != 0)
     {
-        arma::fmat tmp;
-        tmp.zeros(n_rows-_ACMTF[0]->getLength(),_ACMTF[0]->getDim());
-        features_m=arma::join_cols(tmp,_ACMTF[0]->getValue());
+        this->setTime(data.col(0));          //time information : first column of the file
+        this->setValue(data.cols(1,(data.n_cols)-1));   //data : other columns of the file
+        return 1;
     }
     else
     {
-        features_m=_ACMTF[0]->getValue();
+        cout<<"Error : "<<fileName<< " does not exist"<<endl;
+        return 0;
     }
-   for(i=1;i<_ACMTF.size();i++)
-   {
-        if(_ACMTF[i]->getLength()<n_rows)
-        {
-            cout << "WARNING: ALL features do not have the same number of frames!!! " << n_rows-_ACMTF[i]->getLength() << " zero rows added at the beginning of feature: " << _ACMTF[i]->getName() << endl;
-            arma::fmat tmp;
-            tmp.zeros(n_rows-_ACMTF[i]->getLength(),_ACMTF[i]->getDim());
-            features_m=arma::join_rows(features_m,arma::join_cols(tmp,_ACMTF[i]->getValue()));
-        }
-        else
-        {
-            features_m=arma::join_rows(features_m,_ACMTF[i]->getValue());
-        }
-   }
+}
 
-    return features_m;
+void ACMediaTimedFeature::dump(){ // in cout
+	fmat data = join_rows(this->getTime(), this->getValue());
+	data.print();
+}
+
+//XS new
+bool ACMediaTimedFeature::saveInFile(string _fname, bool _binary){ 
+	bool save_ok;
+	fmat data = join_rows(this->getTime(), this->getValue());
+	if (_binary)
+		save_ok = data.save(_fname, arma_binary); // default format = arma_binary
+	else 
+		save_ok = data.save(_fname, arma_ascii);
+	
+	return save_ok;
+}
+
+//XS new
+bool ACMediaTimedFeature::loadFromFile(string _fname, bool _binary){
+	fmat tmp_m;
+	bool load_ok;
+	if (_binary)
+		load_ok = tmp_m.load(_fname, arma_binary); // default format = arma_binary
+	else 
+		load_ok = tmp_m.load(_fname, arma_ascii);
+	
+	if (load_ok) { 
+		//  tmp_m.print();
+		this->value_m = tmp_m.cols(1,tmp_m.n_cols-1);
+		this->time_v = tmp_m.col(0);
+	}
+	return load_ok;
 }
 
 
+int ACMediaTimedFeature::saveAsTxt(string fname){ // in file
+	fmat data = join_rows(this->getTime(), this->getValue());
+	ofstream library_file (fname.c_str());
+	library_file << this->getName() << endl;
+	library_file << this->getLength() << " " << this->getDim() << endl;
+	library_file << data << endl;
+	library_file.close();
+	return 1;
+}
+
+//deprecated
+void ACMediaTimedFeature::importFromFile(string filename){
+	this->loadFromFile(filename);
+}
+
+void ACMediaTimedFeature::importSegmentsFromFile(string filename){
+	ifstream inf(filename.c_str(),ifstream::in);
+	int i=0;
+	float tmp;
+	while (true){
+		inf >> tmp;
+		this->seg_v.push_back(tmp);
+		if (inf.eof()) break;
+		if (i >= 1) //otherwise there is a problem if tmp is equal to 0
+		{
+			if (seg_v[i] < seg_v[i-1]){
+				cerr << "badly formed segments " << endl;
+				exit(-1);
+			}
+			//cout << seg_v.size() << " ; " << seg_v[i] << endl;
+		}
+		i++;
+	}
+	inf.close();
+}
+
+
+// ------------------------------------------------------------------------
+// by default USE_SDIF is off
 #ifdef USE_SDIF
 int ACMediaTimedFeature::saveAsSdif(const char *name){
 	SdifGenInit ("");
@@ -829,11 +796,11 @@ int ACMediaTimedFeature::saveAsSdif(const char *name){
 	/* Here, you could add some text data to the name-value tables */
 	SdifFWriteGeneralHeader  (file);    /* Write file header information */
 	SdifFWriteAllASCIIChunks (file);    /* Write ASCII header information */
-
+	
 	SdifUInt4 SizeFrameW = 0;
 	int mystream = 1;
-
-
+	
+	
 	for (int t=0; t < this->getLength(); t++){
 		SdifFSetCurrFrameHeader (file, SdifSignatureConst('1', 'F', 'Q', '0'), _SdifUnknownSize, 1, mystream, this->time_v(t));
 		SizeFrameW += SdifFWriteFrameHeader (file);
@@ -857,3 +824,48 @@ int ACMediaTimedFeature::saveAsSdif(const char *name){
 	return 1;
 }
 #endif
+
+arma::fmat vectorACMTF2fmat(std::vector <ACMediaTimedFeature*> _ACMTF)
+{
+    int i, n_ACMTF, n_rows=_ACMTF[0]->getLength(), n_cols=0;
+    arma::fmat features_m;
+    for(i=0;i<_ACMTF.size();i++)
+    {
+        //cout << "Feature: " << _ACMTF[i]->getName() << "; Nframes: " << _ACMTF[i]->getLength() << "; Size: " << _ACMTF[i]->getDim() << endl;
+        n_cols+=_ACMTF[i]->getDim();
+        if(_ACMTF[i]->getLength() > n_rows)
+        {
+            n_rows=_ACMTF[i]->getLength();
+            //cout << "WARNING: ALL features do not have the same number of frames!!!" << endl;
+        }
+    }
+    //features_m.zeros(n_rows,n_cols);
+    cout << "Full matrix: Nrows: " << n_rows << "; n_cols: " << n_cols << endl;
+	
+    if(_ACMTF[0]->getLength()<n_rows)
+    {
+        arma::fmat tmp;
+        tmp.zeros(n_rows-_ACMTF[0]->getLength(),_ACMTF[0]->getDim());
+        features_m=arma::join_cols(tmp,_ACMTF[0]->getValue());
+    }
+    else
+    {
+        features_m=_ACMTF[0]->getValue();
+    }
+	for(i=1;i<_ACMTF.size();i++)
+	{
+        if(_ACMTF[i]->getLength()<n_rows)
+        {
+            cout << "WARNING: ALL features do not have the same number of frames!!! " << n_rows-_ACMTF[i]->getLength() << " zero rows added at the beginning of feature: " << _ACMTF[i]->getName() << endl;
+            arma::fmat tmp;
+            tmp.zeros(n_rows-_ACMTF[i]->getLength(),_ACMTF[i]->getDim());
+            features_m=arma::join_rows(features_m,arma::join_cols(tmp,_ACMTF[i]->getValue()));
+        }
+        else
+        {
+            features_m=arma::join_rows(features_m,_ACMTF[i]->getValue());
+        }
+	}
+	
+    return features_m;
+}

@@ -38,16 +38,14 @@
 #include <osg/ref_ptr>
 #include <string>
 
-using namespace osg;
-
-class ACRefId : public Referenced
+class ACRefId : public osg::Referenced
 	{
 	public:
 		int object_id;
 		std::string object_name;
 		// contains an identifier for each object (= node)
 		
-		ACRefId(int oid=-1, std::string name="") : Referenced(), object_id(oid),object_name(name){};
+		ACRefId(int oid=-1, std::string name="") : osg::Referenced(), object_id(oid),object_name(name){};
 		~ACRefId() {};
 		int getID(){return object_id;}
 		std::string getName(){return object_name;}

@@ -1,8 +1,8 @@
 /**
  * @brief melfilters.h
- * @author Damien Tardieu
- * @date 11/03/2010
- * @copyright (c) 2010 – UMONS - Numediart
+ * @author Xavier Siebert
+ * @date 31/01/2011
+ * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -44,19 +44,19 @@ inline float mel2freq(float M_m){
 	return F_m;
 }
 
-inline mat freq2mel(mat F_m){
-	mat M_m = 2595.0*log10(F_m/700.0+1);
+inline arma::mat freq2mel(arma::mat F_m){
+	arma::mat M_m = 2595.0*log10(F_m/700.0+1);
 	return M_m;
 }
 
-inline mat mel2freq(mat M_m){
-	mat F_m(M_m);
+inline arma::mat mel2freq(arma::mat M_m){
+	arma::mat F_m(M_m);
 	for (int i=0; i < M_m.n_rows; i++ )
 		for (int j=0; j < M_m.n_cols; j++ )
 			F_m(i,j) = mel2freq(M_m(i,j));
 	return F_m;
 }
 
-mat melfilters(int nChannels, int fftSize, int sr_hz);
+arma::mat melfilters(int nChannels, int fftSize, int sr_hz);
 
 #endif

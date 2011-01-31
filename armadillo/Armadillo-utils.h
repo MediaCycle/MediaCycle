@@ -39,8 +39,6 @@
 #include <armadillo>
 #include "cluster.h"
 
-using namespace arma;
-
 #include "max_index.h"
 #include "min_index.h"
 #include "nextpow2.h"

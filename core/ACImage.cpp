@@ -43,6 +43,9 @@ using std::string;
 
 using std::ofstream;
 using std::ifstream;
+using std::cerr;
+using std::cout;
+using std::endl;
 
 // ----------- class constants
 const int ACImage:: default_thumbnail_width = 128;
@@ -168,6 +171,8 @@ int ACImage::computeThumbnail(ACMediaData* data_ptr, int w, int h){
 		return -1;
 	}
 
+	// XS TODO : this is not necessary
+	// tmp above could be the thumbnail !!
 	thumbnail = new osg::Image;
 	thumbnail->allocateImage(tmp->s(), tmp->t(), tmp->r(), GL_RGB, tmp->getDataType());
 	osg::copyImage(tmp, 0, 0, 0, tmp->s(), tmp->t(), tmp->r(),thumbnail, 0, 0, 0, false);

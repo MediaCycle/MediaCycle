@@ -45,20 +45,18 @@
 #include <sys/stat.h>
 #include <time.h>
 
-using namespace std;
-
 enum MCActionType {
 	MC_ACTION_ADDFILE,
 	MC_ACTION_GETKNN,
 	MC_ACTION_GETTHUMBNAIL
 };
 
-static void tcp_callback(char *buffer, int l, char **buffer_send, int *l_send, void *userData);
-//XS TODO: declared static but never defined
+//static void tcp_callback(char *buffer, int l, char **buffer_send, int *l_send, void *userData);
+//XS: removed this, it's in the cpp file -- otherwize declared static but never defined
 
 class MediaCycle {
 public:
-    MediaCycle(ACMediaType aMediaType, string local_directory="",string libname="");
+    MediaCycle(ACMediaType aMediaType, std::string local_directory="", std::string libname="");
     MediaCycle(const MediaCycle& orig);
     virtual ~MediaCycle();
 	bool changeMediaType(ACMediaType aMediaType);
@@ -71,25 +69,25 @@ public:
 
     // == Media Library
 	int importDirectories();
-	int importDirectories(vector<string> paths, int recursive, bool forward_order=true, bool doSegment=false);
-	int importDirectoriesThreaded(vector<string> paths, int recursive, bool forward_order=true, bool doSegment=false);
+	int importDirectories(std::vector<std::string> paths, int recursive, bool forward_order=true, bool doSegment=false);
+	int importDirectoriesThreaded(std::vector<std::string> paths, int recursive, bool forward_order=true, bool doSegment=false);
     int importDirectory(std::string path, int recursive, bool forward_order=true, bool doSegment=false);
-	int setPath(string path);
+	int setPath(std::string path);
 	int importACLLibrary(std::string path);
 	int importMCSLLibrary(std::string path);//CF 31/05/2010 temporary MediaCycle Segmented Library (MCSL) for AudioGarden, adding a parentID for segments to the initial ACL, awaiting approval
     // int importLibrary(std::string path); // SD 2010 sep discontinued
 	int getLibrarySize(); // = getnumberofmedia
 	int getNumberOfMediaNodes();
     ACMediaLibrary* getLibrary() { return mediaLibrary;}
-    string getLocalDirectoryPath() {return local_directory;}
-    string getLibName() {return libname;}
+    std::string getLocalDirectoryPath() {return local_directory;}
+    std::string getLibName() {return libname;}
 
     // == Search by Similarity
-    int getKNN(int id, vector<int> &ids, int k);
-    int getKNN(ACMedia *aMedia, vector<ACMedia *> &result, int k);
+    int getKNN(int id, std::vector<int> &ids, int k);
+    int getKNN(ACMedia *aMedia, std::vector<ACMedia *> &result, int k);
 
     // Thumbnail
-    string getThumbnailFileName(int id);
+    std::string getThumbnailFileName(int id);
 
 	// == Media Browser
     ACMediaBrowser* getBrowser() { return mediaBrowser;}
@@ -100,21 +98,21 @@ public:
 	// Plugins
     int addPlugin(std::string aPluginPath);
 	ACPluginManager* getPluginManager() { return pluginManager;}
-	void setClustersMethodPlugin(string pluginName);
-	void setNeighborsMethodPlugin(string pluginName);
-	void setClustersPositionsPlugin(string pluginName);
-	void setNeighborsPositionsPlugin(string pluginName);
-	void setVisualisationPlugin(string pluginName);
-	void changeClustersMethodPlugin(string pluginName);
-	void changeNeighborsMethodPlugin(string pluginName);
-	void changeClustersPositionsPlugin(string pluginName);
-	void changeNeighborsPositionsPlugin(string pluginName);
-	//void changeVisualisationPlugin(string pluginName);
+	void setClustersMethodPlugin(std::string pluginName);
+	void setNeighborsMethodPlugin(std::string pluginName);
+	void setClustersPositionsPlugin(std::string pluginName);
+	void setNeighborsPositionsPlugin(std::string pluginName);
+	void setVisualisationPlugin(std::string pluginName);
+	void changeClustersMethodPlugin(std::string pluginName);
+	void changeNeighborsMethodPlugin(std::string pluginName);
+	void changeClustersPositionsPlugin(std::string pluginName);
+	void changeNeighborsPositionsPlugin(std::string pluginName);
+	//void changeVisualisationPlugin(std::string pluginName);
 	void dumpPluginsList();
 	
 	// == Media
 	ACMediaNode &getMediaNode(int i);
-	string getMediaFileName(int i);
+	std::string getMediaFileName(int i);
 	int getMediaType(int i);
 	std::vector<std::string> getExtensionsFromMediaType(ACMediaType media_type){return mediaFactory->getExtensionsFromMediaType(media_type);};
 	int getThumbnailWidth(int i);
@@ -160,16 +158,16 @@ public:
 	
 	// == Features
 	void normalizeFeatures(int needsNormalize=1);
-	void openLibrary(string path);
+	void openLibrary(std::string path);
 	void libraryContentChanged(int needsNormalizeAndCluster=1);
-	//	void saveAsLibrary(string path);
-	void saveACLLibrary(string path);
-	void saveMCSLLibrary(string path);//CF 31/05/2010 temporary MediaCycle Segmented Library (MCSL) for AudioGarden, adding a parentID for segments to the initial ACL, awaiting approval
+	//	void saveAsLibrary(std::string path);
+	void saveACLLibrary(std::string path);
+	void saveMCSLLibrary(std::string path);//CF 31/05/2010 temporary MediaCycle Segmented Library (MCSL) for AudioGarden, adding a parentID for segments to the initial ACL, awaiting approval
 	void cleanLibrary();
 	// Get Features Vector (identified by feature_name) in media i 
-	vector<float> getFeaturesVectorInMedia(int i, string feature_name);
+	std::vector<float> getFeaturesVectorInMedia(int i, std::string feature_name);
 	void setWeight(int i, float weight);
-	vector<float> getWeightVector();
+	std::vector<float> getWeightVector();
 	float getWeight(int i);
 	
 	// == Pointers
@@ -178,7 +176,7 @@ public:
 	
 	// == LABELS on VIEW
  	int getLabelSize();
-	string getLabelText(int i);
+	std::string getLabelText(int i);
 	ACPoint getLabelPos(int i);	
 	
 	// == Playing time stamp
@@ -189,7 +187,7 @@ public:
 	// == Update audio engine sources
 	void setNeedsActivityUpdateLock(int i);
 	void setNeedsActivityUpdateRemoveMedia();	
-	vector<int>* getNeedsActivityUpdateMedia();
+	std::vector<int>* getNeedsActivityUpdateMedia();
 
 	// == callbacks
 	void pickedObjectCallback(int pid);
@@ -198,7 +196,7 @@ public:
 
 	// == NEW, replaces updateClusters and updateNeighborhoods
 	void updateDisplay(bool animate);
-	void readConfigFile(string fname);
+	void readConfigFile(std::string fname);
 //	void dumpConfigFile();
 
 	// == User log
@@ -213,14 +211,14 @@ private:
 	bool playkeydown;
 	int port;
 	int max_connections;
-	string local_directory;
-	string libname;
+	std::string local_directory;
+	std::string libname;
 	ACMediaLibrary *mediaLibrary;
 	ACMediaFactory *mediaFactory;
 	ACMediaBrowser *mediaBrowser;
 	ACNetworkSocketServer *networkSocket;
 	ACPluginManager *pluginManager;
-	string config_file;
+	std::string config_file;
 	
 	int prevLibrarySize;
 	
@@ -230,7 +228,7 @@ private:
 	pthread_t	   import_thread;
 	pthread_attr_t import_thread_attr;
 	void* import_thread_arg;
-	vector<string> import_directories;
+	std::vector<std::string> import_directories;
 	int import_recursive;
 	bool import_forward_order;
 	bool import_doSegment;

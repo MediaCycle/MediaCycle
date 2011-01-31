@@ -62,22 +62,19 @@
 	#define AUTO_TRANSFORM
 #endif 
 
-using namespace std;
-using namespace osg;
-
 class ACOsgMediaRenderer {
 protected:
 	MediaCycle* media_cycle;
-	Group* local_group;
+	osg::Group* local_group;
 #ifdef AUTO_TRANSFORM
-	AutoTransform* media_node;
+	osg::AutoTransform* media_node;
 #else
-	MatrixTransform* media_node;
+	osg::MatrixTransform* media_node;
 #endif
 	int node_index;
 	float distance_mouse;
 	// int	media_activity;
-	Vec4 node_color;
+	osg::Vec4 node_color;
 	bool user_defined_color;
 		
 	// GLOBAL
@@ -109,14 +106,14 @@ public:
 	void setNodeIndex(int _node_index) { this->node_index = _node_index; };
 	void setDistanceMouse(float _distance_mouse) { this->distance_mouse = _distance_mouse; };
 	//void setActivity(int _media_activity) { this->media_activity = _media_activity; }
-	Group* getNode() { return local_group; };
+	osg::Group* getNode() { return local_group; };
 	int	getNodeIndex() { return node_index; };
 	
 	virtual void prepareNodes()=0;
 	virtual void updateNodes(double ratio=0.0)=0;
 	
-	void changeNodeColor(Vec4 _color){node_color = _color; user_defined_color = true;}
-	void resetNodeColor(){node_color = Vec4(1,1,0.5,1); user_defined_color = false;}
+	void changeNodeColor(osg::Vec4 _color){node_color = _color; user_defined_color = true;}
+	void resetNodeColor(){node_color = osg::Vec4(1,1,0.5,1); user_defined_color = false;}
 	
 	void setDeltaTime(double media_cycle_deltatime);
 	void setZoomAngle(float media_cycle_zoom, float media_cycle_angle);

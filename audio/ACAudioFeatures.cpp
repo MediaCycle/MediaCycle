@@ -1,7 +1,7 @@
 /**
  * @brief ACAudioFeatures.cpp
- * @author Jerome Urbain
- * @date 06/01/2011
+ * @author Xavier Siebert
+ * @date 31/01/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -38,6 +38,12 @@
 #include "Armadillo-utils.h"
 #include <vector>
 #include <map>
+
+using std::vector;
+using std::string;
+using std::map;
+
+using namespace arma;
 
 enum desc_idx{
 	SPECTRAL_CENTROID,

@@ -1,8 +1,8 @@
 /**
  * @brief ACNeighborhoodsPluginEuclidean.cpp
- * @author Christian Frisson
- * @date 02/07/2010
- * @copyright (c) 2010 – UMONS - Numediart
+ * @author Xavier Siebert
+ * @date 31/01/2011
+ * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -30,8 +30,9 @@
 */
 
 #include "ACNeighborhoodsPluginEuclidean.h"
+#include "Armadillo-utils.h"
 
-//using namespace arma;
+using namespace arma;
 using namespace std;
 
 ACNeighborhoodsPluginEuclidean::ACNeighborhoodsPluginEuclidean() {

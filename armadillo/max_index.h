@@ -1,8 +1,8 @@
 /**
  * @brief max_index.h
- * @author Damien Tardieu
- * @date 11/03/2010
- * @copyright (c) 2010 – UMONS - Numediart
+ * @author Xavier Siebert
+ * @date 31/01/2011
+ * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -29,22 +29,22 @@
  * <mailto:avre@umons.ac.be>
 */
 
-#include "Armadillo-utils.h"
-
 #ifndef MAX_INDEX_H 
 #define MAX_INDEX_H
 
+#include "Armadillo-utils.h"
+
 template<typename eT>
-unsigned long max_index(const Col<eT>& A_v){
-	ucolvec Asort_v;
-	Asort_v = sort_index(A_v, 1);
+unsigned long max_index(const arma::Col<eT>& A_v){
+	arma::ucolvec Asort_v;
+	Asort_v = arma::sort_index(A_v, 1);
 	return Asort_v(0);
 }
 
 template<typename eT>
-unsigned long max_index(const Row<eT>& A_v){
-	urowvec Asort_v;
-	Asort_v = sort_index(A_v, 1);
+unsigned long max_index(const arma::Row<eT>& A_v){
+	arma::urowvec Asort_v;
+	Asort_v = arma::sort_index(A_v, 1);
 	return Asort_v(0);
 }
 

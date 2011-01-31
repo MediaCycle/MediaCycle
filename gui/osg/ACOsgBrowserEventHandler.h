@@ -42,9 +42,9 @@
 
 #include "MediaCycle.h"
 
-using namespace osgGA;
+//using namespace osgGA;
 
-class ACOsgBrowserEventHandler : public GUIEventHandler {
+class ACOsgBrowserEventHandler : public osgGA::GUIEventHandler {
 public: 
 	
 	ACOsgBrowserEventHandler() { media_cycle = 0; };

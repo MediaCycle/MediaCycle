@@ -37,6 +37,8 @@
 
 #include <osgGA/GUIEventHandler>
 
+using namespace osg;
+
 ACOsgAudioTrackControlsRenderer::ACOsgAudioTrackControlsRenderer() {
 	
 	track_geode = 0;

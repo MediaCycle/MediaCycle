@@ -42,8 +42,6 @@
 #include <string>
 
 #include <boost/algorithm/string.hpp>
-using namespace std;
-using namespace boost;
 
 typedef  std::map<std::string, ACMediaType> filext;
 typedef  std::map<std::string, ACMediaType> mediaplugin;

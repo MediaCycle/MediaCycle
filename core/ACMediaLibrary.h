@@ -46,7 +46,6 @@
 #include "ACPluginManager.h"
 
 #include "boost/filesystem.hpp"
-namespace fs = boost::filesystem;
 
 class ACMediaLibrary {
 	// these methods are common to all media.
@@ -94,9 +93,8 @@ public:
 	std::vector< std::vector<double> > getMeanFeatures() {return mean_features;};
 	std::vector< std::vector<double> > getStdevFeatures() {return stdev_features;};
 	
-	// XS300810 removedmedia id from call to importDirectory and added importFile
-	int importDirectory(std::string _path, int recursive,  ACPluginManager *acpl=NULL, bool forward_order=true, bool doSegment=false);
-	int importFile(std::string _filename, ACPluginManager *acpl=NULL, bool doSegment=false);
+	int importDirectory(std::string _path, int recursive,  ACPluginManager *acpl=NULL, bool forward_order=true, bool doSegment=false, bool _save_timed_feat=false);
+	int importFile(std::string _filename, ACPluginManager *acpl=NULL, bool doSegment=false, bool _save_timed_feat = false);
 
 	//int openLibrary(std::string _path, bool aInitLib=false); // SD 2010 sep discontinued
 //	void saveAsLibrary(std::string _path);
@@ -114,11 +112,12 @@ public:
 	// XS TODO: add pthreads
 	//	void* p_importSingleFile(void *arg);
 	
-	int scanDirectories(vector<string> _path, int _recursive, std::vector<string>& filenames);
+	int scanDirectories(std::vector<std::string> _path, int _recursive, std::vector<std::string>& filenames);
+	int testFFMPEG(std::string _filename);
 	
 private:
 	void deleteAllMedia();
-	int scanDirectory(std::string _path, int _recursive, std::vector<string>& filenames);
+	int scanDirectory(std::string _path, int _recursive, std::vector<std::string>& filenames);
 	void incrementMediaID(){mediaID++ ;}
 	int getMediaID(){return mediaID ;}
 

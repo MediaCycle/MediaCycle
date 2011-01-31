@@ -51,6 +51,7 @@
 #include <armadillo> // for sort(rand())
 #include <ctime> // for timing with clock()
 using namespace std;
+using namespace arma;
 
 static void dancers_tcp_callback(char *buffer, int l, char **buffer_send, int *l_send, void *userData); 
 int processTcpMessageFromInstallation(MediaCycle *that, char *buffer, int l, char **buffer_send, int *l_send); 

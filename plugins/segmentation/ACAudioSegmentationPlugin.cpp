@@ -38,6 +38,7 @@
 #include <vector>
 #include <string>
 #include "Armadillo-utils.h" 
+using namespace arma;
 
 ACAudioSegmentationPlugin::ACAudioSegmentationPlugin() {
     //vars herited from ACPlugin

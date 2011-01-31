@@ -1,8 +1,8 @@
 /**
  * @brief diff.h
- * @author Damien Tardieu
- * @date 05/05/2010
- * @copyright (c) 2010 – UMONS - Numediart
+ * @author Xavier Siebert
+ * @date 31/01/2011
+ * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -29,14 +29,15 @@
  * <mailto:avre@umons.ac.be>
 */
 
-#include "Armadillo-utils.h"
 
 #ifndef DIFF_H
 #define DIFF_H
 
+#include "Armadillo-utils.h"
+
 template<typename eT>
-const Mat<eT> diff(const Mat<eT>& A_m, int n=1, int dim=0){
-  Mat<eT> R_m;
+const arma::Mat<eT> diff(const arma::Mat<eT>& A_m, int n=1, int dim=0){
+  arma::Mat<eT> R_m;
 	if (dim == 0)
 		R_m = A_m.rows(1,A_m.n_rows-1) - A_m.rows(0,A_m.n_rows-2);
 	else

@@ -39,6 +39,7 @@
 #include <osgDB/ReadFile>
 #include <osg/ComputeBoundsVisitor>
 #include <string>
+#include <iostream>
 
 // -----------------------------------
 
@@ -48,8 +49,8 @@ public:
 	AC3DModel();
 	~AC3DModel();
 	
-	void saveACLSpecific(ofstream &library_file);
-	int loadACLSpecific(ifstream &library_file);
+	void saveACLSpecific(std::ofstream &library_file);
+	int loadACLSpecific(std::ifstream &library_file);
 	
 	//ACMediaData* extractData(std::string fname);
 	void extractData(std::string fname);
@@ -61,8 +62,8 @@ public:
 	
 private:	
 	
-	vector<float> center;
-	vector<float> extent;
+	std::vector<float> center;
+	std::vector<float> extent;
 };
 
 #endif // AC3DMODEL_H

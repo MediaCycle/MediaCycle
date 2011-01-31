@@ -611,11 +611,11 @@ void ACMediaBrowser::initializeFeatureWeights(){
 	int fc = mLibrary->getMedia(0)->getNumberOfFeaturesVectors();
 	mFeatureWeights.resize(fc);
 	
-	// XS if (config_file)...
+	// XS TODO if (config_file)...
 	printf("setting all feature weights to 1.0 (count=%d)\n", (int) mFeatureWeights.size());
 	for(int i=0; i<fc; i++) {
 		mFeatureWeights[i] = 0.0;	}
-	mFeatureWeights[1] = 1.0;
+	mFeatureWeights[0] = 1.0;
 }
 
 // SD - Brute Force KNN

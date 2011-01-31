@@ -43,6 +43,7 @@ using std::cout;
 using std::endl;
 using std::ofstream;
 using std::vector;
+using std::string;
 
 ACMediaFeatures::ACMediaFeatures(){
 	//XS TODO: is this flag still necessary ?

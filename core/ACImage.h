@@ -41,6 +41,7 @@
 #include "ACOpenCVInclude.h"
 #include "ACMedia.h"
 #include <string>
+#include <iostream>
 
 #include <osg/Texture2D>
 
@@ -54,8 +55,8 @@ public:
 	ACImage();
 	~ACImage();
 	
-	void saveACLSpecific(ofstream &library_file);
-	int loadACLSpecific(ifstream &library_file);
+	void saveACLSpecific(std::ofstream &library_file);
+	int loadACLSpecific(std::ifstream &library_file);
 
 	//void setThumbnail(osg::Image* _thumbnail) { thumbnail = _thumbnail; thumbnail_width = _thumbnail->width; thumbnail_height = _thumbnail->height; }
 	void setThumbnail(osg::Image* _thumbnail) { thumbnail = _thumbnail; thumbnail_width = _thumbnail->s(); thumbnail_height = _thumbnail->t(); }
@@ -77,7 +78,7 @@ private:
 	osg::Image* thumbnail;
 	osg::Texture2D* image_texture;
 	
-	int computeThumbnail(string _fname, int w=0, int h=0);
+	int computeThumbnail(std::string _fname, int w=0, int h=0);
 	int computeThumbnail(ACMediaData* data_ptr, int w=0, int h=0);
 	int checkWidth(int w);
 	int checkHeight(int h);

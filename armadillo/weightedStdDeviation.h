@@ -1,8 +1,8 @@
 /**
  * @brief weightedStdDeviation.h
- * @author Damien Tardieu
- * @date 11/03/2010
- * @copyright (c) 2010 – UMONS - Numediart
+ * @author Xavier Siebert
+ * @date 31/01/2011
+ * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -29,20 +29,21 @@
  * <mailto:avre@umons.ac.be>
 */
 
-#include "Armadillo-utils.h"
 
 #ifndef WEIGHTEDSTDDEVIATION_H
 #define WEIGHTEDSTDDEVIATION_H
 
+#include "Armadillo-utils.h"
+
 template<typename eT>
-const Row<eT> weightedStdDeviation(const Mat<eT>& x_m, const Col<eT>& weight_v){
+const arma::Row<eT> weightedStdDeviation(const arma::Mat<eT>& x_m, const arma::Col<eT>& weight_v){
 	//	long L = x_m.n_rows;
-	Col<eT> weightN_v	= weight_v/as_scalar(sum(weight_v));
-	Mat<eT> m	= trans(x_m) * weightN_v;
-	Mat<eT> xc_m	= trans(x_m) - repmat(m, 1, x_m.n_rows);
+	arma::Col<eT> weightN_v	= weight_v/as_scalar(sum(weight_v));
+	arma::Mat<eT> m	= trans(x_m) * weightN_v;
+	arma::Mat<eT> xc_m	= trans(x_m) - repmat(m, 1, x_m.n_rows);
 	
-	Row<eT> m2	= square(xc_m) * weightN_v;
-	Row<eT> sm2	= sqrt( m2 );
+	arma::Row<eT> m2	= square(xc_m) * weightN_v;
+	arma::Row<eT> sm2	= sqrt( m2 );
 	
 	return sm2;
 }

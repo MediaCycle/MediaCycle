@@ -35,6 +35,8 @@
 
 #include "ACOsg3DModelRenderer.h"
 
+using namespace osg;
+
 ACOsg3DModelRenderer::ACOsg3DModelRenderer() {
 	
 	modelangle = 0;
@@ -242,15 +244,15 @@ void ACOsg3DModelRenderer::updateNodes(double ratio) {
 	acti_transform->setMatrix(actiT);
 	
 	// rotation and scale to compensate camera rotation and to implement mouse motion
-	Matrix globalT;
-	globalT = Matrix::rotate(-media_cycle_angle, Vec3(0.0,0.0,1.0))
-				* Matrix::scale(localscale/media_cycle_zoom,localscale/media_cycle_zoom,localscale/media_cycle_zoom)
-				* Matrix::translate(Vec3(x, y, z));
 #ifdef AUTO_TRANSFORM
 	media_node->setPosition(Vec3(x,y,z));
 	media_node->setRotation(Quat(0.0, 0.0, 1.0, -media_cycle_angle));
 	media_node->setScale(Vec3(localscale/media_cycle_zoom,localscale/media_cycle_zoom,localscale/media_cycle_zoom));	
 #else
+	Matrix globalT;
+	globalT = Matrix::rotate(-media_cycle_angle, Vec3(0.0,0.0,1.0))
+	* Matrix::scale(localscale/media_cycle_zoom,localscale/media_cycle_zoom,localscale/media_cycle_zoom)
+	* Matrix::translate(Vec3(x, y, z));
 	media_node->setMatrix(globalT);
 #endif
 }
