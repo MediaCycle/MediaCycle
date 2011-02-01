@@ -48,9 +48,20 @@ ACBicSegmentationPlugin::ACBicSegmentationPlugin() : lambda(1), sampling_rate(1)
     this->mName = "BicSegmentation";
     this->mDescription = "BicSegmentation plugin";
     this->mId = "";
+// equivalently	setParameters(1, 1, 20, 0.5, 5, 5)
 }
 
 ACBicSegmentationPlugin::~ACBicSegmentationPlugin() {
+}
+
+void ACBicSegmentationPlugin::setParameters(float _lambda, int _samplingrate, int _Wmin, float _bic_thresh, int _jump_width, int _discard_borders){
+	this->lambda = _lambda;
+	this->sampling_rate = _samplingrate;
+	this->Wmin = _Wmin;
+	this->bic_thresh = _bic_thresh;
+	this->jump_width = _jump_width;
+	this->discard_borders=_discard_borders;
+	
 }
 
 // remember :
@@ -58,67 +69,67 @@ ACBicSegmentationPlugin::~ACBicSegmentationPlugin() {
 // - ACMedia* _theMedia = what remains from the media after import (e.g. features + thumbnail...)
 // here we mostly need _theMedia but this structure is compatible with ACAudioSegmentationPlugin
 
-std::vector<ACMedia*> ACBicSegmentationPlugin::segment(ACMediaData* _data, ACMedia* _theMedia) {
-// XS TODO : how to set _lambda, _sampling_rate from MediaCycle's GUI ?
-// could add a .ui file with the segmentation plugin to set the options ?
-	
-	std::vector<ACMediaFeatures*> _allfeatures = _theMedia->getAllFeaturesVectors();
-	int c = _allfeatures.size();
-	int l = _allfeatures[0]->getSize();
-	this->full_features = arma::fmat((int) c, (int) l); 
-	for ( int Itime=0; Itime< c; Itime++){
-		for ( int Idim=0; Idim<l; Idim++){
-			this->full_features(Itime, Idim) = _allfeatures[Itime]->getFeatureElement(Idim);
-		}
-	}
-	
-	// get the limits BETWEEN segments as integers
-	// usually does not contain 0 nor the last index
-	std::vector<int> segments_limits = this->_segment();
-
-	//transform them into ACMedia*
-	vector<ACMedia*> segments;
-
-	int Nseg = segments_limits.size();
-	if (Nseg == 0) {
-		cerr << "< ACBicSegmentationPlugin::segment> : no segments" << endl;
-		return segments; // XS check this
-	}
-	
-	// add the beginning of first segment (0)
-//	if (segments_limits[0] != 0) segments_limits.push_front(0);
-//	if (segments_limits[Nseg] !=
-		
-
-//	for (int i = 0; i < seg_m.n_rows; i++){
-//		ACMedia* media = ACMediaFactory::create(theAudio);
-//		media->setParentId(theMedia->getId());
-//		media->setStart(seg_m(i,0));
-//		media->setEnd(seg_m(i,1));
-//		segments.push_back(media);
+//std::vector<ACMedia*> ACBicSegmentationPlugin::segment(ACMediaData* _data, ACMedia* _theMedia) {
+//// XS TODO : how to set _lambda, _sampling_rate from MediaCycle's GUI ?
+//// could add a .ui file with the segmentation plugin to set the options ?
+//	
+//	std::vector<ACMediaFeatures*> _allfeatures = _theMedia->getAllFeaturesVectors();
+//	int c = _allfeatures.size();
+//	int l = _allfeatures[0]->getSize();
+//	this->full_features = arma::fmat((int) c, (int) l); 
+//	for ( int Itime=0; Itime< c; Itime++){
+//		for ( int Idim=0; Idim<l; Idim++){
+//			this->full_features(Itime, Idim) = _allfeatures[Itime]->getFeatureElement(Idim);
+//		}
 //	}
-	
-	return segments;
-}
-
-std::vector<int> ACBicSegmentationPlugin::segment(const vector< vector<float> > & _allfeatures, \
-												  float _lambda, \
-												  int _samplingrate){
-	this->lambda = _lambda;
-	if (_samplingrate >0) this->sampling_rate = _samplingrate;
-	
-	// transforming vector< vector<> > into fmat
-	int c = _allfeatures.size();
-	int l = _allfeatures[0].size();
-	this->full_features = arma::fmat((int) c, (int) l); 
-	for ( int Itime=0; Itime< c; Itime++){
-		for ( int Idim=0; Idim<l; Idim++){
-			this->full_features(Itime, Idim) = _allfeatures[Itime][Idim];
-		}
-	}
-	
-	return (this->_segment());
-}
+//	
+//	// get the limits BETWEEN segments as integers
+//	// usually does not contain 0 nor the last index
+//	std::vector<int> segments_limits = this->_segment();
+//
+//	//transform them into ACMedia*
+//	vector<ACMedia*> segments;
+//
+//	int Nseg = segments_limits.size();
+//	if (Nseg == 0) {
+//		cerr << "< ACBicSegmentationPlugin::segment> : no segments" << endl;
+//		return segments; // XS check this
+//	}
+//	
+//	// add the beginning of first segment (0)
+////	if (segments_limits[0] != 0) segments_limits.push_front(0);
+////	if (segments_limits[Nseg] !=
+//		
+//
+////	for (int i = 0; i < seg_m.n_rows; i++){
+////		ACMedia* media = ACMediaFactory::create(theAudio);
+////		media->setParentId(theMedia->getId());
+////		media->setStart(seg_m(i,0));
+////		media->setEnd(seg_m(i,1));
+////		segments.push_back(media);
+////	}
+//	
+//	return segments;
+//}
+//
+//std::vector<int> ACBicSegmentationPlugin::segment(const vector< vector<float> > & _allfeatures, \
+//												  float _lambda, \
+//												  int _samplingrate){
+//	this->lambda = _lambda;
+//	if (_samplingrate >0) this->sampling_rate = _samplingrate;
+//	
+//	// transforming vector< vector<> > into fmat
+//	int c = _allfeatures.size();
+//	int l = _allfeatures[0].size();
+//	this->full_features = arma::fmat((int) c, (int) l); 
+//	for ( int Itime=0; Itime< c; Itime++){
+//		for ( int Idim=0; Idim<l; Idim++){
+//			this->full_features(Itime, Idim) = _allfeatures[Itime][Idim];
+//		}
+//	}
+//	
+//	return (this->_segment());
+//}
 
 std::vector<int> ACBicSegmentationPlugin::segment(arma::fmat _M, \
 												  float _lambda, \
@@ -126,17 +137,58 @@ std::vector<int> ACBicSegmentationPlugin::segment(arma::fmat _M, \
 												  int _Wmin, \
 												  float _bic_thresh, \
 												  int _jump_width, \
-                                                                                                  int _discard_borders  ){
+												  int _discard_borders  ){
 	this->full_features = _M ; 
-
+	
 	this->lambda = _lambda;
 	this->sampling_rate = _samplingrate;
 	this->Wmin = _Wmin;
 	this->bic_thresh = _bic_thresh;
 	this->jump_width = _jump_width;
-        this->discard_borders=_discard_borders;
+	this->discard_borders=_discard_borders;
 	return (this->_segment());
 }
+
+
+std::vector<ACMedia*> ACBicSegmentationPlugin::segment(ACMediaTimedFeature* _MTF, ACMedia* _theMedia){
+	//XS TODO: not efficient to transpose !! 
+	// make this more coherent
+	this->full_features = arma::trans (_MTF -> getValue());
+	
+	// get the limits BETWEEN segments as integers
+	// usually does not contain 0 nor the last index
+	std::vector<int> segments_limits = this->_segment();
+	
+	//transform them into ACMedia*
+	vector<ACMedia*> segments;
+	
+	int Nseg = segments_limits.size();
+	if (Nseg == 0) {
+			cerr << "< ACBicSegmentationPlugin::segment> : no segments" << endl;
+			return segments; // XS check this
+	}
+		
+	// the beginning of first segment should be zero
+	// no push_front for vectors (only for list)
+	if (segments_limits[0] != 0) {
+		vector<int>::iterator it;
+		it = segments_limits.begin();
+		it = segments_limits.insert ( it , 0 );
+		Nseg++;
+	}			
+	
+	for (int i = 0; i < Nseg-1; i++){
+		//make sur the segment from the media have the proper type
+		ACMedia* media = ACMediaFactory::create(_theMedia);
+		media->setParentId(_theMedia->getId());
+		media->setStart(segments_limits[i]);
+		media->setEnd(segments_limits[i+1]);
+		segments.push_back(media);
+	}
+		
+	return segments;
+}
+
 
 std::vector<int> ACBicSegmentationPlugin::segment(std::vector <ACMediaTimedFeature*> _ACMTF, \
 												  float _lambda, \
@@ -144,15 +196,15 @@ std::vector<int> ACBicSegmentationPlugin::segment(std::vector <ACMediaTimedFeatu
 												  int _Wmin, \
 												  float _bic_thresh, \
 												  int _jump_width, \
-                                                                                                  int _discard_borders){
+												  int _discard_borders){
 	this->full_features = arma::trans(vectorACMTF2fmat(_ACMTF)) ;
-
+	
 	this->lambda = _lambda;
 	this->sampling_rate = _samplingrate;
 	this->Wmin = _Wmin;
 	this->bic_thresh = _bic_thresh;
 	this->jump_width = _jump_width;
-        this->discard_borders=_discard_borders;
+	this->discard_borders=_discard_borders;
 	return (this->_segment());
 }
 

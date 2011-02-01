@@ -50,7 +50,7 @@ ACOsgVideoRenderer::~ACOsgVideoRenderer() {
 
 void ACOsgVideoRenderer::prepareNodes() {
 	
-	float reference_time, time_multiplier;
+//	float reference_time, time_multiplier;
 	
 	imageGeode(true, 2.0, 1.0); // true is for flip -- necessary for video
 	

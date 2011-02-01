@@ -84,7 +84,7 @@ void ACOsgAudioRenderer::waveformGeode() {
 	StateSet *state;
 	
 	Vec3Array* vertices;
-	Vec3Array* normals;
+//	Vec3Array* normals;
 	
 	Geometry *samples_geometry;
 	Geometry *frame_geometry;
@@ -416,7 +416,7 @@ void ACOsgAudioRenderer::updateNodes(double ratio) {
 	const ACMediaNode &attribute = media_cycle->getMediaNode(node_index);
 
 	Matrix T;
-	Matrix *T2;
+//	Matrix *T2;
 	Matrix Trotate;
 	Matrix curserT;
 	

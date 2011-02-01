@@ -74,19 +74,19 @@ public:
 
 private:
 	std::vector<int> _segment();
-
+	
 	int Wmin; 
 	float SelfSimThresh;
-        int L; //size of the kernel
-        SelfSimKernelType KernelType;
-        SelfSimDistance DistanceType;
-
+	int L; //size of the kernel
+	SelfSimKernelType KernelType;
+	SelfSimDistance DistanceType;
+	
 	arma::fmat full_features;
-
-        arma::fmat buildKernel();
-        double computeDistance(int _a, int _b);
-
-        //arma::fmat vectorACMTF2fmat(std::vector <ACMediaTimedFeature*> _ACMTF);
+	
+	arma::fmat buildKernel();
+	double computeDistance(int _a, int _b);
+	
+	//arma::fmat vectorACMTF2fmat(std::vector <ACMediaTimedFeature*> _ACMTF);
 };
 
 

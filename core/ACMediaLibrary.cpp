@@ -205,7 +205,7 @@ int ACMediaLibrary::importFile(std::string _filename, ACPluginManager *acpl, boo
 		// SD TODO - Is this correct?
 		if (doSegment){
 			// segments are created without id 
-			media->segment(acpl);
+			media->segment(acpl, _save_timed_feat);
 			std::vector<ACMedia*> mediaSegments;
 			mediaSegments = media->getAllSegments();
 			for (unsigned int i = 0; i < mediaSegments.size(); i++){
@@ -387,6 +387,9 @@ int ACMediaLibrary::openMCSLLibrary(std::string _path, bool aInitLib){
 	return file_count;
 }
 
+int ACMediaLibrary::openXMLLibrary(std::string _path, bool aInitLib){
+}
+
 // C++ version
 int ACMediaLibrary::saveACLLibrary(std::string _path){
 #ifdef SAVE_LOOP_BIN
@@ -404,6 +407,11 @@ int ACMediaLibrary::saveACLLibrary(std::string _path){
 	}
 	library_file.close();
 	normalizeFeatures();
+}
+
+int ACMediaLibrary::saveXMLLibrary(std::string _path){
+//	TiXmlDocument doc( filename.c_str() );
+//	library_file << 
 }
 
 //CF 31/05/2010 temporary MediaCycle Segmented Library (MCSL) for AudioGarden, adding a parentID for segments to the initial ACL, awaiting approval
@@ -665,7 +673,8 @@ void ACMediaLibrary::denormalizeFeatures() {
 	cout << "denormalizing features" << endl;
 	if ( isEmpty() || index_last_normalized<0) return; // Ju: added index_last_normalized<0 to avoid segmentation fault under linux, I believe caused by the fact i is declared as unsigned int while index_last_normalized is int, so it messed up in the for loop
 	
-	unsigned int i,j,k;
+	unsigned int j,k;
+	int i;
 	
 	// XS denormalize only those that have been normalized (duh),
 	// so n is NOT the full library size !

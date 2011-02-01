@@ -61,6 +61,12 @@ ACImage::ACImage() : ACMedia() {
 	thumbnail_height = 0;	
 }
 
+// copy-constructor, used for example to generate fragments
+ACImage::ACImage(const ACImage& m, bool reduce) : ACMedia(m) {
+	media_type = MEDIA_TYPE_IMAGE;
+	// ... XS TODO
+}
+
 ACImage::~ACImage() {
 	if (thumbnail) {
 		//cvReleaseImage(&thumbnail);

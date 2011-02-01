@@ -337,6 +337,8 @@ int ACMedia::segment(ACPluginManager *acpl, bool _saved_timed_features ) {
 			for (int j=0;j<acpl->getPluginLibrary(i)->getSize();j++) {
 				if ( acpl->getPluginLibrary(i)->getPlugin(j)->getMediaType() == this->getType()){
 					if ( acpl->getPluginLibrary(i)->getPlugin(j)->getPluginType() == PLUGIN_TYPE_FEATURES) {
+						cout << "Collecting saved features using plugin : " << acpl->getPluginLibrary(i)->getPlugin(j)->getName() << std::endl;
+
 						features_plugins_count ++;
 						if (features_plugins_count ==1) {
 							// first plugin : get (implicit "new" done in getTimedFeatures, so you need to delete)
@@ -350,13 +352,19 @@ int ACMedia::segment(ACPluginManager *acpl, bool _saved_timed_features ) {
 				}
 			}
 		}
-		// use all segmentation plugins
+		
+		// DEBUG
+		ft_from_disk->dump();
+		
+		// should not use all segmentation plugins -- choose one using menu !!	
 		// XS TODO: check that ft_from_disk is not empty
 		for (int i=0;i<acpl->getSize();i++) {
 			for (int j=0;j<acpl->getPluginLibrary(i)->getSize();j++) {
 				if (acpl->getPluginLibrary(i)->getPlugin(j)->getPluginType() == PLUGIN_TYPE_SEGMENTATION) {
+					cout << "Segmenting features using plugin : " << acpl->getPluginLibrary(i)->getPlugin(j)->getName() << std::endl;
+
 					segmentation_plugins_count ++;
-					vector<ACMedia*> afv = acpl->getPluginLibrary(i)->getPlugin(j)->segment(ft_from_disk);
+					vector<ACMedia*> afv = acpl->getPluginLibrary(i)->getPlugin(j)->segment(ft_from_disk, this);
 					if (afv.size()==0){
 						segment_ok = 0;
 						cerr << "<ACMedia::segment> failed importing segments from plugin: " <<  acpl->getPluginLibrary(i)->getPlugin(j)->getName() << endl;

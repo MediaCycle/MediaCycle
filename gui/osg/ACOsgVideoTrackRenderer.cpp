@@ -207,8 +207,8 @@ int ACOsgVideoSlitScanThread::computeSlitScan(){
 		// Back to FFmpeg tuto
 		
 		// Video stream properties
-		float frame_rate = av_q2d(m_stream->r_frame_rate);
-		float duration = (float)(pFormatCtx->duration)/AV_TIME_BASE;
+		//float frame_rate = av_q2d(m_stream->r_frame_rate);
+		//float duration = (float)(pFormatCtx->duration)/AV_TIME_BASE;
 		int nb_frames =  m_stream->nb_frames; //CF alternative: pFormatCtx->streams[videoStream]->nb_index_entries or duration/frame_rate for corrupted files?
 		
 		double slit_mid = getTime();

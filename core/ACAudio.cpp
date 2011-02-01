@@ -82,7 +82,6 @@ ACAudio::ACAudio(const ACAudio& m, bool reduce) : ACMedia(m) {
 }
 
 ACAudio::~ACAudio() {
-	// XS added this on 4/11/2009 to clean up memory
 	if (waveform) delete [] waveform;
 }
 

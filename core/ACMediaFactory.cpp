@@ -178,7 +178,7 @@ const filext::value_type _init[] = {
 	
 	// from libsndfile 1.0.21
 	filext::value_type(".aif", MEDIA_TYPE_AUDIO), \
-	filext::value_type(".aiff", MEDIA_TYPE_AUDIO), \	
+	filext::value_type(".aiff", MEDIA_TYPE_AUDIO), \
 	filext::value_type(".au", MEDIA_TYPE_AUDIO), \
 	filext::value_type(".avr", MEDIA_TYPE_AUDIO), \
 	filext::value_type(".caf", MEDIA_TYPE_AUDIO), \

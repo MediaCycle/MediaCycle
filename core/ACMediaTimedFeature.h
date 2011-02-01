@@ -50,7 +50,6 @@
 #include <armadillo>
 #include <vector>
 #include "ACMediaFeatures.h"
-//#include "Armadillo-utils.h"
 
 class ACMediaTimedFeature {
 	// Class describing feature that are time stamped
@@ -136,11 +135,10 @@ public:
 	void importFromFile(std::string filename);
 	void importSegmentsFromFile(std::string filename);
 
-
-	void dump();
 	//XS new
 	bool saveInFile(std::string _fname, bool _binary = true);
 	bool loadFromFile(std::string _fname, bool _binary = true);
+	void dump(); // in terminal
 
 	// SDIF is a library developed at IRCAM
 	#ifdef USE_SDIF

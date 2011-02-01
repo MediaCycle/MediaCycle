@@ -508,23 +508,32 @@ void ACMultiMediaCycleOsgQt::loadDefaultConfig(ACMediaType _media_type, ACBrowse
 	if (media_cycle) destroyMediaCycle();
 	createMediaCycle(_media_type, _browser_mode);
 
-	std::string s_plugin;
+	// -- media-specific features plugin + generic segmentation and visualisation plugins--
+	std::string f_plugin, s_plugin, v_plugin;
 	std::string s_path = QApplication::applicationDirPath().toStdString();
 	
 #if defined(__APPLE__)
 	std::string build_type ("Release");
-#ifdef USE_DEBUG
+	#ifdef USE_DEBUG
 	build_type = "Debug";
-#endif //USE_DEBUG
-	s_plugin = s_path + "/../../../plugins/"+ smedia + "/" + build_type + "/mc_" + smedia +".dylib";
-	// common to all media, but only for mac...
-	media_cycle->addPlugin(s_path + "/../../../plugins/visualisation/" + build_type + "/mc_visualisation.dylib");
-#elif defined (__WIN32__)
-	s_plugin = s_path + "\..\..\plugins\\" + smedia + "\mc_"+smedia+".dll";
-#else
-	s_plugin = s_path + "/../../plugins/"+smedia+"/mc_"+smedia+".so";
-#endif
+	#endif //USE_DEBUG
 	
+	f_plugin = s_path + "/../../../plugins/"+ smedia + "/" + build_type + "/mc_" + smedia +".dylib";
+	v_plugin = s_path + "/../../../plugins/visualisation/" + build_type + "/mc_visualisation.dylib";
+	s_plugin = s_path + "/../../../plugins/segmentation/" + build_type + "/mc_segmentation.dylib";
+
+	// common to all media, but only for mac...
+#elif defined (__WIN32__)
+	f_plugin = s_path + "\..\..\..\plugins\\" + smedia + "\mc_"+smedia+".dll";
+	v_plugin = s_path + "/../../../plugins/visualisation/" + build_type + "/mc_visualisation.dll";
+	s_plugin = s_path + "/../../../plugins/segmentation/" + build_type + "/mc_segmentation.dll";
+#else
+	f_plugin = s_path + "/../../../plugins/"+smedia+"/mc_"+smedia+".so";
+	v_plugin = s_path + "/../../../plugins/visualisation/" + build_type + "/mc_visualisation.so";
+	s_plugin = s_path + "/../../../plugins/segmentation/" + build_type + "/mc_segmentation.so";
+#endif
+	media_cycle->addPlugin(f_plugin);
+	media_cycle->addPlugin(v_plugin);
 	media_cycle->addPlugin(s_plugin);
 }
 

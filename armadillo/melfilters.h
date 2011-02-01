@@ -1,7 +1,7 @@
 /**
  * @brief melfilters.h
  * @author Xavier Siebert
- * @date 31/01/2011
+ * @date 01/02/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -51,8 +51,8 @@ inline arma::mat freq2mel(arma::mat F_m){
 
 inline arma::mat mel2freq(arma::mat M_m){
 	arma::mat F_m(M_m);
-	for (int i=0; i < M_m.n_rows; i++ )
-		for (int j=0; j < M_m.n_cols; j++ )
+	for (unsigned int i=0; i < M_m.n_rows; i++ )
+		for (unsigned int j=0; j < M_m.n_cols; j++ )
 			F_m(i,j) = mel2freq(M_m(i,j));
 	return F_m;
 }

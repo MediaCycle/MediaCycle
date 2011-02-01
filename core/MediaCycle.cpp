@@ -339,7 +339,7 @@ int MediaCycle::importDirectories(vector<string> directories, int recursive, boo
 	mediaLibrary->scanDirectories(directories, recursive, filenames);
 	
 	int n;
-	unsigned int i = 0;
+	int i = 0;
 	double t1, t2;
 	
 	#ifdef USE_OPENMP

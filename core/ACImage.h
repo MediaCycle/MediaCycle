@@ -54,7 +54,8 @@ class ACImage: public ACMedia {
 public:
 	ACImage();
 	~ACImage();
-	
+	ACImage(const ACImage&, bool reduce = true);
+
 	void saveACLSpecific(std::ofstream &library_file);
 	int loadACLSpecific(std::ifstream &library_file);
 

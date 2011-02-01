@@ -87,10 +87,11 @@ public:
 	virtual void updateNextPositions(ACMediaBrowser*){};
 	virtual void updateNeighborhoods(ACMediaBrowser*){};
 	
+	// e.g., for audioSegmentationPLugin
 	virtual std::vector<ACMedia*> segment(ACMediaData* audio_data, ACMedia*){std::vector<ACMedia*> dummy; return dummy;}
 	
-	// timedFeatures:
-	virtual std::vector<ACMedia*> segment(ACMediaTimedFeature* _mtf){std::vector<ACMedia*> dummy; return dummy;}
+	// timedFeatures: e.g., for BicSegmentationPlugin
+	virtual std::vector<ACMedia*> segment(ACMediaTimedFeature* _mtf, ACMedia*){std::vector<ACMedia*> dummy; return dummy;}
 	virtual ACMediaTimedFeature* getTimedFeatures(){return NULL;}
 
 	virtual int start(){return 0;}

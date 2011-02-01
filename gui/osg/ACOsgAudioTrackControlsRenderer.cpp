@@ -92,7 +92,7 @@ void ACOsgAudioTrackControlsRenderer::prepareControls() {
 }
 
 void ACOsgAudioTrackControlsRenderer::updateControls(double ratio) {
-	double xstep = 0.00025;
+	//double xstep = 0.00025;
 	/*	
 	 ACPoint p,p2;//CF dummy
 	 p.x = p.y = p.z = p2.x = p2.y = p2.z = 0.0f; // CF dummy

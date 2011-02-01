@@ -93,8 +93,10 @@ int ACPluginManager::remove(std::string _lpath) {
 }
 
 int ACPluginManager::removeAll() {
-    for (int i=0;i<this->mPluginLibrary.size();i++)
-        delete(this->mPluginLibrary[i]);
+	vector<ACPluginLibrary *> ::iterator iter;
+	for (iter = this->mPluginLibrary.begin(); iter != this->mPluginLibrary.end(); iter++) {
+		delete *iter;
+	}
     this->mPluginLibrary.clear();
     return 0;
 }

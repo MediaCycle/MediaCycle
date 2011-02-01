@@ -106,6 +106,9 @@ public:
 	int saveACLLibrary(std::string _path);
 	int saveMCSLLibrary(std::string _path);//CF 31/05/2010 temporary MediaCycle Segmented Library (MCSL) for AudioGarden, adding a parentID for segments to the initial ACL, awaiting approval
 	
+	int openXMLLibrary(std::string _path, bool aInitLib=false);
+	int saveXMLLibrary(std::string _path);
+
 	//XS special for Thomas Israel
 	void saveSorted(std::string ouput_file);	
 
