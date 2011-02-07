@@ -42,7 +42,6 @@
 //#include "ACOsgImageRenderer.h"
 #include "ACOsgTrackRenderer.h"
 
-
 // Slit-scan
 
 //FFmpeg
@@ -124,23 +123,29 @@ protected:
 
 	osg::MatrixTransform* playback_transform;
 	osg::MatrixTransform* frames_transform;
+	osg::MatrixTransform* segments_transform;
 	osg::MatrixTransform* slit_scan_transform;
 	osg::ref_ptr<osg::MatrixTransform> cursor_transform;
 	
 	osg::Geode* playback_geode;
 	osg::ref_ptr<osg::Group> frames_group;
 	osg::Geode* frame_geode;
+	osg::ref_ptr<osg::Group> segments_group;
+	std::vector< osg::Geode* > segments_geodes;
+	//osg::Geode* segments_geodes;
 	osg::Geode* slit_scan_geode;
 	osg::Geode* cursor_geode;
 
 	void playbackGeode();
 	void framesGeode();
+	void segmentsGeode();
 	void slitScanGeode();
 	void cursorGeode();
 	
 	float zoom_x, zoom_y, track_left_x;
 	float summary_center_y,summary_height;
 	float playback_center_y,playback_height,playback_scale;
+	float segments_center_y,segments_height;
 	float frame_min_width, frame_n;
 	bool scrubbing;
 	bool slit_scan_changed;
@@ -153,6 +158,8 @@ protected:
 	osg::Vec4Array* colors3;
 	
 	ACVideoSummaryType track_summary_type;
+	
+	int segments_number;
 	
 public:
 	ACOsgVideoTrackRenderer();

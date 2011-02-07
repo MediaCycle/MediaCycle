@@ -39,6 +39,7 @@
 #include <cmath>
 #include <osg/ImageUtils>
 
+using namespace std;
 using namespace osg;
 
 
@@ -295,10 +296,13 @@ ACOsgVideoTrackRenderer::ACOsgVideoTrackRenderer() {
 	//summary_stream = 0;
 	zoom_x = 1.0; zoom_y = 1.0;
 	track_left_x = 0.0;
-	summary_center_y = -yspan/2.0f+yspan/8.0f; //[-yspan/2.0f;yspan/2.0f]
 	summary_height = yspan/8.0f;//[0;yspan/2.0f]
-	playback_center_y = yspan/4.0f; //[-yspan/2.0f;yspan/2.0f]
-	playback_height = yspan/2.0f;//[0;yspan]
+	segments_height = yspan/16.0f;//[0;yspan/2.0f]
+	playback_height = yspan/2.0f - summary_height - segments_height; //yspan/2.0f;//[0;yspan/2.0f]
+	summary_center_y = -yspan/2.0f + summary_height + segments_height;//-yspan/2.0f+yspan/8.0f; //[-yspan/2.0f;yspan/2.0f]
+	segments_center_y = -yspan/2.0f + segments_height; 
+	playback_center_y = -yspan/2.0f + summary_height + segments_height + playback_height; //yspan/4.0f; //[-yspan/2.0f;yspan/2.0f]
+
 	playback_scale = 0.5f;
 	playback_geode = 0; playback_transform = 0;
 	frame_min_width = 64;
@@ -321,13 +325,18 @@ ACOsgVideoTrackRenderer::ACOsgVideoTrackRenderer() {
 	
 	frames_transform = new MatrixTransform();
 	frames_group = new Group();
-	slit_scan_transform = new MatrixTransform();
 	
+	segments_transform = new MatrixTransform();
+	segments_group = new Group();
+	
+	slit_scan_transform = new MatrixTransform();
 	slit_scanner = new ACOsgVideoSlitScanThread();
 	
 	track_summary_type = AC_VIDEO_SUMMARY_KEYFRAMES;
 	
 	slit_scan_changed = false;
+	
+	segments_number = 0;
 }
 
 ACOsgVideoTrackRenderer::~ACOsgVideoTrackRenderer() {
@@ -338,6 +347,7 @@ ACOsgVideoTrackRenderer::~ACOsgVideoTrackRenderer() {
 	if (slit_scan_geode) { slit_scan_geode->unref(); slit_scan_geode=0; }
 	if (slit_scan_transform) { slit_scan_transform->unref(); slit_scan_transform=0;}
 	if (cursor_geode) {	cursor_geode->unref(); cursor_geode=0; }
+	if (segments_transform) { segments_transform->unref(); segments_transform=0;}	
 }
 
 void ACOsgVideoTrackRenderer::playbackGeode() {
@@ -600,10 +610,54 @@ void ACOsgVideoTrackRenderer::framesGeode() {
 	frames_transform->ref();
 }
 
+void ACOsgVideoTrackRenderer::segmentsGeode() {
+	segments_group->removeChildren(0,	segments_group->getNumChildren());
+	int segments_n = media->getNumberOfSegments();
+	StateSet *state;
+	
+	float media_length = media->getEnd() - media->getStart();
+	
+	for (int s=0;s<segments_n;s++){
+		segments_geodes.resize(segments_geodes.size()+1);
+		segments_geodes[s] = new Geode;
+		TessellationHints *hints = new TessellationHints();
+		hints->setDetailRatio(0.0);
+		
+		state = segments_geodes[s]->getOrCreateStateSet();
+		state->setMode(GL_NORMALIZE, osg::StateAttribute::ON);	
+		state->setMode(GL_DEPTH_TEST,osg::StateAttribute::OFF);
+		state->setMode(GL_LIGHTING, osg::StateAttribute::PROTECTED | osg::StateAttribute::OFF );
+		state->setMode(GL_BLEND, StateAttribute::ON);
+		//state->setMode(GL_LINE_SMOOTH, StateAttribute::ON);
+		
+		Vec4 segment_color;
+		if ( (float)s/2.0f != s/2) // odd segment index
+			segment_color = Vec4(0.0f, 0.0f, 1.0f, 1.0f);
+		else // even segment index
+			segment_color = Vec4(1.0f, 0.0f, 0.0f, 1.0f);
+		Vec4Array* segment_colors = new Vec4Array;
+		segment_colors->push_back(segment_color);
+
+		segments_geodes[s]->addDrawable(new osg::ShapeDrawable(new osg::Box(osg::Vec3(-xspan/2.0f+ (media->getSegment(s)->getStart()+media->getSegment(s)->getEnd())/2.0f*xspan/media_length,0.0f,0.0f),(media->getSegment(s)->getEnd()-media->getSegment(s)->getStart())*xspan/media_length,yspan,0.0f), hints));
+		//std::cout << "Segment " << s << " start " << media->getSegment(s)->getStart()/media_length << " end " << media->getSegment(s)->getEnd()/media_length << " width " << (media->getSegment(s)->getEnd()-media->getSegment(s)->getStart())/media_length << std::endl;
+		((ShapeDrawable*)(segments_geodes[s])->getDrawable(0))->setColor(segment_color);
+		segments_geodes[s]->setUserData(new ACRefId(track_index,"video track segments"));
+		segments_geodes[s]->ref();
+		segments_group->addChild(segments_geodes[s]);
+	}	
+	if(segments_n>0){
+		segments_group->ref();
+		segments_transform->addChild(segments_group);
+		segments_transform->ref();
+	}	
+}
+
 void ACOsgVideoTrackRenderer::prepareTracks() {
 	playback_geode = 0;
 	cursor_transform = 0;
 	cursor_geode = 0;
+	//segments_transform = 0;//CF EXEC_BAD_ACCESS
+	//segments_geodes = 0;//CF EXEC_BAD_ACCESS
 }
 
 void ACOsgVideoTrackRenderer::updateTracks(double ratio) {
@@ -630,8 +684,26 @@ void ACOsgVideoTrackRenderer::updateTracks(double ratio) {
 			double summary_data_in = getTime();
 			summary_data = ((ACVideo*)(media_cycle->getLibrary()->getMedia(media_index)))->getData();
 			std::cout << getTime()-summary_data_in << " sec." << std::endl;
+			
+			//CF: dummy segments
+			/*if (media->getNumberOfSegments()==0){
+				for (int s=0;s<4;s++){
+					ACMedia* seg = ACMediaFactory::create(media);
+					seg->setParentId(media->getId());
+					media->addSegment(seg);//dummy
+				}	
+				float media_start = media->getStart();
+				float media_end = media->getEnd();
+				media->getSegment(0)->setStart(media_start);
+				media->getSegment(0)->setEnd((media_end-media_start)/4.0f);
+				media->getSegment(1)->setStart((media_end-media_start)/4.0f);
+				media->getSegment(1)->setEnd(3*(media_end-media_start)/8.0f);
+				media->getSegment(2)->setStart(3*(media_end-media_start)/8.0f);
+				media->getSegment(2)->setEnd((media_end-media_start)/2.0f);
+				media->getSegment(3)->setStart((media_end-media_start)/2.0f);
+				media->getSegment(3)->setEnd(media_end);
+			}*/
 		}	
-		//track_node->addChild(playback_geode);
 	}
 
 	static Vec4 colors[2];
@@ -649,6 +721,7 @@ void ACOsgVideoTrackRenderer::updateTracks(double ratio) {
 		float h = (float)(media_cycle->getHeight(media_index));
 		
 		track_node->removeChild(frames_transform);
+		track_node->removeChild(segments_transform);
 		track_node->removeChild(slit_scan_transform);
 		if (track_summary_type == AC_VIDEO_SUMMARY_SLIT_SCAN && slit_scanner->computed()){
 			if (slit_scan_changed){
@@ -660,6 +733,7 @@ void ACOsgVideoTrackRenderer::updateTracks(double ratio) {
 			track_node->addChild(slit_scan_transform);
 		}
 		else {
+			
 			if (frame_n != floor(width/frame_min_width)){
 				double summary_start = getTime();
 				std::cout << "Generating frames... ";
@@ -669,33 +743,58 @@ void ACOsgVideoTrackRenderer::updateTracks(double ratio) {
 			}
 			track_node->addChild(frames_transform);
 		}
-				
-		Matrix T;
-		Matrix G;
-
-		summary_height = yspan*(h/height * width/w/frame_n);
-		playback_scale = (yspan-summary_height)/yspan;
-		playback_height = height * playback_scale;
-		playback_center_y = yspan/2.0f-(yspan-summary_height)/2.0f;
-				
-		G.makeTranslate(0.0f,-yspan/2.0f+summary_height/2.0f,0.0f);
-		G = Matrix::scale(1.0f,summary_height/yspan,1.0f)*G;
 		
-		T.makeTranslate(0.0f,playback_center_y,0.0f);
+		if (media){
+			if (media->getNumberOfSegments()>0 && segments_number != media->getNumberOfSegments()){
+				//if (frame_n != floor(width/frame_min_width)){
+				double segments_start = getTime();
+				std::cout << "Generating segments... ";
+				segments_transform->removeChild(segments_group);
+				segmentsGeode();
+				std::cout << getTime()-segments_start << " sec." << std::endl;
+				segments_number = media->getNumberOfSegments();
+			}	
+		}
+		if (media->getNumberOfSegments()>0) track_node->addChild(segments_transform);
+				
+		Matrix playback_matrix,summary_matrix,segments_matrix;
+		
+		if (media->getNumberOfSegments()>0){
+			// Stacked playback + summary + segments 
+			summary_height = yspan*(h/height * width/w/frame_n);
+			playback_scale = (yspan-summary_height-segments_height)/yspan;
+			playback_height = height * playback_scale;
+			playback_center_y = yspan/2.0f-(yspan-summary_height-segments_height)/2.0f;
+			summary_matrix.makeTranslate(0.0f,-yspan/2.0f+summary_height/2.0f+segments_height,0.0f);
+			summary_matrix = Matrix::scale(1.0f,summary_height/yspan,1.0f)*summary_matrix;
+			segments_matrix.makeTranslate(0.0f,-yspan/2.0f+segments_height/2.0f,0.0f);
+			segments_matrix = Matrix::scale(1.0f,segments_height/yspan,1.0f)*segments_matrix;
+		}
+		else {
+			// Overlapped summary + segments, stacked with playback
+			summary_height = yspan*(h/height * width/w/frame_n);
+			playback_scale = (yspan-summary_height)/yspan;
+			playback_height = height * playback_scale;
+			playback_center_y = yspan/2.0f-(yspan-summary_height)/2.0f;
+			summary_matrix.makeTranslate(0.0f,-yspan/2.0f+summary_height/2.0f,0.0f);
+			summary_matrix = Matrix::scale(1.0f,summary_height/yspan,1.0f)*summary_matrix;
+		}
+		playback_matrix.makeTranslate(0.0f,playback_center_y,0.0f);
 		if (w/h*playback_height/width<1.0f){ // video fits view height
-			T = Matrix::scale(w/h*playback_height/width,playback_scale,1.0f)*T;
+			playback_matrix = Matrix::scale(w/h*playback_height/width,playback_scale,1.0f)*playback_matrix;
 			//std::cout << "video fits view height" << std::endl;
 		}
 		else{ //if (h/w*width/playback_height<1.0f) // video fits view width 
-			T = Matrix::scale(1.0f,h/w*width/height,1.0f)*T;
+			playback_matrix = Matrix::scale(1.0f,h/w*width/height,1.0f)*playback_matrix;
 			//std::cout << "video fits view width" << std::endl;
 		}
-		playback_transform->setMatrix(T);
+		playback_transform->setMatrix(playback_matrix);
 		if (track_summary_type == AC_VIDEO_SUMMARY_SLIT_SCAN && slit_scanner->computed())
-			slit_scan_transform->setMatrix(G);
-		else 
-			frames_transform->setMatrix(G);
-		//cursor_transform->setMatrix(G);
+			slit_scan_transform->setMatrix(summary_matrix);
+		else {
+			frames_transform->setMatrix(summary_matrix);
+		}
+		if (media->getNumberOfSegments()>0) segments_transform->setMatrix(segments_matrix);
 	}
 	
 	track_node->removeChild(cursor_transform.get());
@@ -710,7 +809,7 @@ void ACOsgVideoTrackRenderer::updateTracks(double ratio) {
 	if (media){
 		if (video_stream){
 			if (height != 0.0f && width != 0.0f){
-				Matrix cursorT;
+				Matrix cursor_matrix;
 				osg::ImageStream::StreamStatus streamStatus = video_stream->getStatus();
 				if (manual_selection){
 					video_stream->seek((selection_center_pos/(xspan/2.0f)+1)/2.0f*video_stream->getLength());
@@ -730,9 +829,17 @@ void ACOsgVideoTrackRenderer::updateTracks(double ratio) {
 						selection_end_pos = selection_center_pos;
 					}
 				}
-				cursorT.makeTranslate(selection_center_pos,-yspan/2.0f+summary_height/2.0f,0.0f);	
-				cursorT = Matrix::scale(1.0f,summary_height/yspan,1.0f)*cursorT;
-				cursor_transform->setMatrix(cursorT);
+				if (media->getNumberOfSegments()>0){
+					// Stacked playback + summary + segments 
+					cursor_matrix.makeTranslate(selection_center_pos,-yspan/2.0f+summary_height/2.0f+segments_height/2.0f,0.0f);	
+					cursor_matrix = Matrix::scale(1.0f,(summary_height+segments_height)/yspan,1.0f)*cursor_matrix;
+				}
+				else {
+					// Overlapped summary + segments, stacked with playback
+					cursor_matrix.makeTranslate(selection_center_pos,-yspan/2.0f+summary_height/2.0f,0.0f);	
+					cursor_matrix = Matrix::scale(1.0f,summary_height/yspan,1.0f)*cursor_matrix;
+				}	
+				cursor_transform->setMatrix(cursor_matrix);
 			}	
 		}
 			

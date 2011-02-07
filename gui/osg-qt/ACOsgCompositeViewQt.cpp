@@ -77,7 +77,6 @@ ACOsgCompositeViewQt::ACOsgCompositeViewQt( QWidget * parent, const char * name,
 	
 	// Audio waveforms
 	screen_width = QApplication::desktop()->screenGeometry().width();
-	std::cout << screen_width << std::endl;
 	timeline_renderer->setScreenWidth(screen_width);
 	
 	audio_engine = NULL;

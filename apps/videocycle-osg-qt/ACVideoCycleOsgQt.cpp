@@ -491,6 +491,7 @@ void ACVideoCycleOsgQt::on_comboBoxVideoSummary_activated(const QString & text)
 		for (int track=0; track<tracks;track++)
 			ui.compositeOsgView->getTimelineRenderer()->getTrack(track)->setSummaryType(type);
 	}
+	ui.compositeOsgView->setFocus();
 }	
 
 void ACVideoCycleOsgQt::on_pushButtonControlStart_clicked()

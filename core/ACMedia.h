@@ -83,6 +83,7 @@ public:
 	//void removeSegment(ACMedia* _segment){segments.erase(_segment);}//CF wow, tricky
 	std::vector<ACMedia*> &getAllSegments() { return segments; }
 	ACMedia* getSegment(int i) { return segments[i]; }
+	int getNumberOfSegments(){return segments.size();}
 
 	std::vector<ACMediaFeatures*> &getAllFeaturesVectors() { return features_vectors; }
 	ACMediaFeatures* getFeaturesVector(int i);
