@@ -48,13 +48,15 @@ void test_audio_library(string file_name){
 	media_cycle->importACLLibrary(file_name);
 	cout << "Library Size = " << media_cycle->getLibrarySize() << endl;
 
-	cout << "-------------------------------------------------------" << endl;
-	cout << "Test Writing ACL file (old C version)" << endl;
-	media_cycle->saveACLLibrary("_testold_"+file_name);		// SD ?
+//	cout << "-------------------------------------------------------" << endl;
+//	cout << "Test Writing ACL file (new CPP version): _testnew_"+file_name << endl;
+//	media_cycle->saveACLLibrary("_testnew_"+file_name);
+//	cout << "-------------------------------------------------------" << endl;
 
+	//XS TODO : this is tmp testing
 	cout << "-------------------------------------------------------" << endl;
-	cout << "Test Writing ACL file (new CPP version): _testnew_"+file_name << endl;
-	media_cycle->saveACLLibrary("_testnew_"+file_name);
+	cout << "Test Writing XML file :"+ file_name+".xml" << endl;
+	media_cycle->getLibrary()->saveXMLLibrary(file_name+".xml");
 	cout << "-------------------------------------------------------" << endl;
 }
 
@@ -73,15 +75,21 @@ void test_audio_visualisation_plugins(){
 	delete media_cycle;
 }
 
-void test_config_file(){
+void test_audio_config_file(){
 	MediaCycle* media_cycle = new MediaCycle(MEDIA_TYPE_AUDIO,"/tmp/","mediacycle.acl");
 	media_cycle->readConfigFile("/Users/xavier/development/Fall09/ticore-app/Applications/Numediart/MediaCycle/mediacycle.config2");
 //	media_cycle->dumpConfigFile();
 	delete media_cycle;
 }
 
+void test_image_config_file(){
+	MediaCycle* media_cycle = new MediaCycle(MEDIA_TYPE_AUDIO,"/tmp/","mediacycle.acl");
+	media_cycle->readConfigFile("/Users/xavier/development/Fall09/ticore-app/Applications/Numediart/MediaCycle/mediacycle.config2");
+	//	media_cycle->dumpConfigFile();
+	delete media_cycle;
+}
+
 int main(int, char **) {
 	cout << "tests" << endl;
-	//test_audio_library("/usr/local/share/mediacycle/audio/test.acl");
-	test_config_file();
+	test_audio_library("/usr/local/share/mediacycle/data/audio/zero-g-pro-pack-small-mc.acl");
 }

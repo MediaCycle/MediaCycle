@@ -1,7 +1,7 @@
 /**
  * @brief modulation.cpp
  * @author Xavier Siebert
- * @date 31/01/2011
+ * @date 09/02/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -34,7 +34,7 @@ using namespace arma;
 
 void modulation(colvec xi_v, int fs, mat &modFr_m, mat &modAmp_m, colvec &modTime_v){
 
-	int oldfs = fs;
+//	int oldfs = fs;
 	rowvec freqBandHz_v = "4 50;";
 	double fmax = 50;
 	double fmin = 4;
@@ -49,12 +49,12 @@ void modulation(colvec xi_v, int fs, mat &modFr_m, mat &modAmp_m, colvec &modTim
 
 	int windowsize = pow(2.0, (int)nextpow2(2/fmin * fs));
 	int hopsize = windowsize/4;
-	int mlag = (2/fmin * fs)+1;
+//	int mlag = (2/fmin * fs)+1;
 	colvec fenetre_v = blackman(windowsize);
 	double norma = sum(fenetre_v);
 	int fftsize = pow(2.0, (nextpow2(windowsize)+1));
-	int fmin_bin = fmin * fftsize / fs;
-	int fmax_bin = fmax * fftsize / fs;
+//	int fmin_bin = fmin * fftsize / fs;
+//	int fmax_bin = fmax * fftsize / fs;
 	rowvec freqBand_v = freqBandHz_v  * fftsize / fs;	
 	long nbFrames = std::max((long)(xi_v.n_elem-windowsize)/hopsize+1, (long)1);
 	colvec frame_v = colvec(windowsize);

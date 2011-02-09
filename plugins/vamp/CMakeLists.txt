@@ -6,7 +6,7 @@ IF ( USE_VAMP )
 	SET(PLUGIN_NAME "vamp")
 	SET(TARGET_NAME "${PLUGIN_PREFIX}${PLUGIN_NAME}")
 
-	INCLUDE_DIRECTORIES(. ../../core ../../armadillo ../../vamp-plugin-interface ../../lib/vamp-plugin-sdk)
+	INCLUDE_DIRECTORIES(. ../../core ../../armadillo ../../vamp-plugin-interface ../../lib/vamp-plugin-sdk ../../tinyxml)
 
 	ADD_LIBRARY(${TARGET_NAME} SHARED ${SRC} ${HDR})
 	ADD_DEPENDENCIES(${TARGET_NAME} mediacycle armadillo-utils vamp-plugin-interface)

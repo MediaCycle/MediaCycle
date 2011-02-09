@@ -83,7 +83,7 @@ std::vector<ACMediaFeatures*> ACAudioFeaturesPlugin::calculate(ACMediaData* audi
 	ACAudio* theAudio = (ACAudio*) theMedia;
 	
 	float* data = new float[theAudio->getNFrames() * theAudio->getChannels()];
-	long index = 0;
+//	long index = 0;
 	
 	// SD replaced loop by more efficient memcpy
 	memcpy(data, audio_data->getAudioData()+theAudio->getSampleStart()*theAudio->getChannels(),

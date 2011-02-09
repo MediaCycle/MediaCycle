@@ -48,6 +48,9 @@
 #include "ACMediaLibrary.h"
 #include "ACMediaFactory.h"
 
+#include <sstream>
+#include "tinyxml.h"
+
 // XS for sorting:
 #include <algorithm>
 
@@ -126,9 +129,11 @@ void ACMediaLibrary::cleanLibrary() {
 	cleanStats();
 	deleteAllMedia();
 	index_last_normalized = -1;
-	media_library.resize(0);
 	synthesisID = -1;
 	mediaID = 0; // index of the next one to be inserted (= the number of media already imported); not -1
+	media_path ="";
+	// XS leave the media type as is, suppose we'll keep loading the same type of media
+	// (not this:) media_type=MEDIA_TYPE_NONE;
 }
 
 // this same function is used to import a whole directory, a single file or a list of files.
@@ -221,6 +226,7 @@ int ACMediaLibrary::importFile(std::string _filename, ACPluginManager *acpl, boo
 	return 1;
 }
 
+// XS TODO return value
 int ACMediaLibrary::scanDirectories(std::vector<string> _paths, int _recursive, std::vector<string>& filenames) {
 	// XS TODO
 	// int cnt = 0;
@@ -387,10 +393,14 @@ int ACMediaLibrary::openMCSLLibrary(std::string _path, bool aInitLib){
 	return file_count;
 }
 
+// XS TODO return value
+
 int ACMediaLibrary::openXMLLibrary(std::string _path, bool aInitLib){
 }
 
 // C++ version
+// XS TODO return value
+
 int ACMediaLibrary::saveACLLibrary(std::string _path){
 #ifdef SAVE_LOOP_BIN
 	ofstream library_file (_path.c_str(), ios::binary);
@@ -409,12 +419,46 @@ int ACMediaLibrary::saveACLLibrary(std::string _path){
 	normalizeFeatures();
 }
 
+// XS TODO return value
 int ACMediaLibrary::saveXMLLibrary(std::string _path){
-//	TiXmlDocument doc( filename.c_str() );
-//	library_file << 
+	// we save UNnormalized features
+	denormalizeFeatures();
+
+	TiXmlDocument doc;  
+    TiXmlDeclaration * decl = new TiXmlDeclaration( "1.0", "", "" );  
+    doc.LinkEndChild( decl );  
+	
+    TiXmlElement * title = new TiXmlElement( "MediaCycle" );  
+    doc.LinkEndChild( title );  
+	
+ //   TiXmlText * text = new TiXmlText( "Header" );  
+//    title->LinkEndChild( text );  
+	
+    TiXmlElement * element2 = new TiXmlElement( "Number of Media" );  
+    title->LinkEndChild( element2 );  
+	int n_loops = this->getSize();
+	std::string s_loops;
+	std::stringstream tmp;
+	tmp << n_loops;
+	s_loops = tmp.str();
+	
+    TiXmlText * text2 = new TiXmlText( s_loops );  
+    element2->LinkEndChild( text2 );  
+	
+    TiXmlElement * element3 = new TiXmlElement( "Medias" );  
+    title->LinkEndChild( element3 );  
+	
+	for(int i=0; i<n_loops; i++) {
+		media_library[i]->saveXML(element3);
+	}
+
+	// normalize features again
+	normalizeFeatures();
+	doc.SaveFile("/Users/xavier/tmp/xmlTest.xml");
 }
 
 //CF 31/05/2010 temporary MediaCycle Segmented Library (MCSL) for AudioGarden, adding a parentID for segments to the initial ACL, awaiting approval
+// XS TODO return value
 int ACMediaLibrary::saveMCSLLibrary(std::string _path){
 #ifdef SAVE_LOOP_BIN
 	ofstream library_file (_path.c_str(), ios::binary);
@@ -558,6 +602,8 @@ bool ACMediaLibrary::isEmpty() {
 	// XS assumes each item has same number of features
 	// and each feature has the same number of floats in its vector
 	
+	// XS TODO do we really want to check both together ? 
+	// we could have loaded media without (yet) features...
 	int number_of_features = media_library[0]->getNumberOfFeaturesVectors();
 	if (number_of_features <= 0) {
 		cout << "no features in vector [0]" << endl;

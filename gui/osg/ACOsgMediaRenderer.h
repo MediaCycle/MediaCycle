@@ -100,7 +100,7 @@ protected:
 	
 public:
 	ACOsgMediaRenderer();
-	virtual ~ACOsgMediaRenderer() {};
+	virtual ~ACOsgMediaRenderer();
 
 	void setMediaCycle(MediaCycle *_media_cycle) { this->media_cycle = _media_cycle; };
 	void setNodeIndex(int _node_index) { this->node_index = _node_index; };

@@ -48,7 +48,8 @@ SettingsDialog::SettingsDialog(QWidget *parent) : QMainWindow(parent) {
 	this->media_type = comboMediaType->currentText().toStdString();
 	this->browser_mode = comboBrowserMode->currentText().toStdString();
 	
-	this->media_type = this->browser_mode = this->plugins_library = "";
+	//this->media_type = this->browser_mode = 
+	this->plugins_library = "";
 	
 //    connect(buttonSaveLog, SIGNAL(clicked()), this, SLOT(saveLog()));
 //    connect(pushButtonConfigureFeaturesPlugins, SIGNAL(clicked()), this, SLOT(configureFeaturesPlugins()));
@@ -60,9 +61,34 @@ SettingsDialog::SettingsDialog(QWidget *parent) : QMainWindow(parent) {
 
 // tells the settings dialog which application it will set up
 // use a handy pointer directly to mediacycle too.
-void SettingsDialog::setMediaCycleMainWindow(ACMultiMediaCycleOsgQt* _mc) {
-	this->multi_media_cycle = _mc;
-	this->media_cycle = _mc->getMediaCycle();
+void SettingsDialog::setMediaCycleMainWindow(ACMultiMediaCycleOsgQt* _mcw) {
+	this->multi_media_cycle = _mcw;
+	this->media_cycle = _mcw->getMediaCycle();
+	
+	// XS  TODO : find a way to tell settings what type of media the user choose e.g. in the default config
+//	if (this->media_cycle != NULL) {
+//		this->browser_mode = this->media_cycle->getBrowserMode();
+//		this->media_type = this->media_cycle->getMediaType();
+//	}
+	//this->plugins_library = _mcw->getPluginsLibrary();
+}
+
+
+void SettingsDialog::setMediaCycle(MediaCycle* _mc) {
+	this->media_cycle = _mc;
+}
+
+bool SettingsDialog::setMediaType(string _mt) {
+	QString _smt = QString::fromStdString(_mt);
+	// test if _mt is 
+	int index = comboMediaType->findText(_smt);
+	if (index < 0) {
+		cerr << "<SettingsDialog::setMediaType> : media type not found" << _mt << endl;
+		return false;
+	}
+	comboMediaType->setCurrentIndex(index);
+	this->media_type = _mt;
+	return true;
 }
 
 
@@ -93,12 +119,12 @@ void SettingsDialog::configureFeaturesPlugins(){
 
 void SettingsDialog::comboMediaTypeValueChanged(){
 	this->media_type = comboMediaType->currentText().toStdString();
-	cout << "(if you press Apply) media type will change to : " << this->media_type << endl;
+//	cout << "(if you press Apply) media type will change to : " << this->media_type << endl;
 }
 
 void SettingsDialog::comboBrowserModeValueChanged(){
 	this->browser_mode = comboBrowserMode->currentText().toStdString();
-	cout << "(if you press Apply) browser mode will change to : " << this->browser_mode << endl;
+//	cout << "(if you press Apply) browser mode will change to : " << this->browser_mode << endl;
 }
 
 void SettingsDialog::on_buttonBrowsePluginsLibrary_clicked(){

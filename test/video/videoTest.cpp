@@ -513,7 +513,8 @@ int main(int argc, char** argv) {
 	//test_histogram_equalize("Bru_105#2");
 	//test_bg_substraction("Bru_105#2");
 	// test_bg_substraction("Bru_203#2");
-	//test_browse("Bru_105#2");
+	test_browse("/usr/local/share/mediacycle/data/video/001011.mov");
+	//test_browse("/Users/xavier/numediart/Project11.1-MediaBlender/test/video/elephantsdream-480-h264-st-aac.mov");
 	//test_read_write_video(videodir+"Front/001011.mov");
 //	test_optical_flow(videodir+"Front/001011.mov");
 	//test_video_dancers_plugin("001011");
@@ -523,7 +524,7 @@ int main(int argc, char** argv) {
 
 	// christian graupner videos
 	//test_blobs("10151");
-	test_video_pixel_speed_plugin("/Users/xavier/numediart/Project10.1-Borderlands/2010_4_prox_alpa/10151.mov");
+	//test_video_pixel_speed_plugin("/Users/xavier/numediart/Project10.1-Borderlands/2010_4_prox_alpa/10151.mov");
 	// 10603
 //	test_video_hu_moments("/Users/xavier/numediart/Project10.1-Borderlands/2010_4rgb_alpha/10151.mov",
 //						"/Users/xavier/numediart/Project10.1-Borderlands/bg/bg_blue.png");

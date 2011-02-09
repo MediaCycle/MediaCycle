@@ -92,43 +92,18 @@ ACMediaBrowser::ACMediaBrowser() {
 	mCenterOffsetX = mViewWidth / 2;
 	mCenterOffsetZ = mViewHeight / 2;
 	
-	// XS TODO put the following in a separate function, since it's called by libraryContentChanged too !
-	
-	mCameraPosition[0] = 0.0;
-	mCameraPosition[1] = 0.0;
-	mCameraZoom = 1.0;
-	mCameraAngle = 0.0;
-	
-	mClickedNode = -1;
-	mClickedLabel = -1;
-	mClosestNode = -1;
-	mReferenceNode = 0; //CF ugly, could be -1
-	mLastSelectedNode = -1;
+	mUserLog = NULL;
+	this->clean();	
 
-	mClusterCount = 5;
-	mNavigationLevel = 0;
-	
-	mState = AC_IDLE;
-	mLayout = AC_LAYOUT_TYPE_NONE;
-	mMode = AC_MODE_CLUSTERS;
-	
+	// XS TODO 1 this assumes cluster mode !
+	// XS TODO 2 define const : 
+	mClusterCount = 5; 
+		
 	// SD 2010 OCT
 	/*
 	mRefTime = getTime();
 	mFrac = 0.0;
 	*/
-	
-	mousex = 0.0;
-	mousey = 0.0;
-	
-	auto_play = 0;
-	auto_play_toggle = 0;
-	
-	mLabelAttributes.resize(0); // XS leave it like this or also make a tree ?
-	nbDisplayedLabels = 0;
-	
-//	mLoopAttributes.resize(0); // XS TODO make this a tree
-	nbDisplayedLoops = 20;
 	
 	mClustersMethodPlugin = NULL;
 	mNeighborsMethodPlugin = NULL;
@@ -141,9 +116,8 @@ ACMediaBrowser::ACMediaBrowser() {
 	pthread_mutexattr_init(&activity_update_mutex_attr);
 	pthread_mutex_init(&activity_update_mutex, &activity_update_mutex_attr);
 	pthread_mutexattr_destroy(&activity_update_mutex_attr);
-	
-	prevLibrarySize = 0;
-	
+		
+	// XS TODO please explain this one : why 1, not 0 ?
 	mPointerAttributes.resize(1);
 }
 
@@ -151,6 +125,33 @@ ACMediaBrowser::~ACMediaBrowser() {
 	// XS TODO delete mLoopAttributes if vector of pointers <*>
 	pthread_mutex_destroy(&activity_update_mutex);
 	delete mUserLog;
+}
+
+void ACMediaBrowser::clean(){
+	prevLibrarySize = 0;
+	auto_play = 0;
+	auto_play_toggle = 0;
+	
+	mState = AC_IDLE;
+	mLayout = AC_LAYOUT_TYPE_NONE;
+	mMode = AC_MODE_CLUSTERS; // XS why not NONE ?
+	
+	mLabelAttributes.clear(); // XS leave it like this or also make a tree ?
+	nbDisplayedLabels = 0;
+	
+	// XS TODO clear
+	mLoopAttributes.clear(); // XS TODO make this a tree ;delete mLoopAttributes if vector of pointers <*>
+	nbDisplayedLoops = 0; // XS TODO: check this : 20 was vintage from Dancers!?
+	
+	mFeatureWeights.clear();
+	
+	this->resetNavigation();
+	this->resetCamera();
+	
+	if (mUserLog) {
+		mUserLog->dump();
+		mUserLog->clean();
+	}
 }
 
 int ACMediaBrowser::getLabelSize() {
@@ -394,6 +395,27 @@ int ACMediaBrowser::getNumberOfDisplayedLabels(){
 	return nbDisplayedLabels;
 }
 
+// XS TODO getsize; this should be the same as mLibrary->getSize(), but this way it is more similar to getNumberOfLabels 
+// CF not true in non-explatory mode (one loop can be displayed more than once at a time)
+int ACMediaBrowser::getNumberOfMediaNodes(){
+	long _n = -1;
+	switch (mMode){
+		case AC_MODE_CLUSTERS:
+			_n = mLoopAttributes.size();
+			break;
+		case AC_MODE_NEIGHBORS:
+			_n = mUserLog->getSize();
+			break;
+		default:
+			cerr << "unknown browser mode: " << mMode << endl;
+			break;
+	}		
+	//std::cout << "mLoopAttributes.size() " << mLoopAttributes.size() << " mUserLog->getSize() " << mUserLog->getSize() << std::endl;
+	_n = mLoopAttributes.size();//CF this is not normal, inconsistency in OSG
+	return _n;
+	
+} // XS TODO getsize; this should be the same as mLibrary->getSize(), but this way it is more similar to getNumberOfLabels // CF not true in non-explatory mode (one loop can be displayed more than once at a time)
+
 void ACMediaBrowser::setNumberOfDisplayedLoops(int nd){
 	if (nd < 0 || nd > this->getLibrary()->getSize())
 		cerr << "<ACMediaBrowser::setNumberOfDisplayedLoops> : too many loops to display: " << nd << endl;
@@ -406,13 +428,6 @@ void ACMediaBrowser::setNumberOfDisplayedLabels(int nd){
 		cerr << "<ACMediaBrowser::setNumberOfDisplayedLabels> : too many labels to display: " << nd << endl;
 	else
 		nbDisplayedLabels = nd;
-}
-
-void ACMediaBrowser::resetLoopNavigationLevels(int l) {
-	// default : l=0
-	for (ACMediaNodes::iterator node = mLoopAttributes.begin(); node != mLoopAttributes.end(); ++node){
-		(*node).setNavigationLevel (l);
-	}	
 }
 
 void ACMediaBrowser::incrementLoopNavigationLevels(int loopIndex) {
@@ -507,12 +522,16 @@ int ACMediaBrowser::setHoverLoop(int lid, float mxx, float myy)
 }
 
 
+// XS TODO return value
 int ACMediaBrowser::setSourceCursor(int lid, int frame_pos) {
 	this->getMediaNode(lid).setCursor(frame_pos);
 }
+
+// XS TODO return value
 int ACMediaBrowser::setCurrentFrame(int lid, int frame_pos) {
 	this->getMediaNode(lid).setCurrentFrame(frame_pos);
 }
+
 void ACMediaBrowser::randomizeNodePositions(){
 	if(mLibrary == NULL) return;
 	double t = getTime();
@@ -529,36 +548,20 @@ void ACMediaBrowser::randomizeNodePositions(){
 }
 
 // XS TODO change this name into something non-passive.
+// update initial positions 
+// previously: resize other vector structures dependent on loop count.
 void ACMediaBrowser::libraryContentChanged(int needsCluster) {
-	// update initial positions 
-	// previously: resize other vector structures dependent on loop count.
+	if(mLibrary == NULL) return; // put this first otherwize getsize does not work !
 	
-	int librarySize;
-	librarySize = mLibrary->getSize();
+	int librarySize = mLibrary->getSize();
 	
 	// XS 150310 TODO: check this one
 	initializeNodes(mMode);
 
-	if(mLibrary == NULL) return;
-	else if(mLibrary->isEmpty()) {
-		
-		// Reset the browser settings when cleaning the library
-		mCameraPosition[0] = 0.0;
-		mCameraPosition[1] = 0.0;
-		mCameraZoom = 1.0;
-		mCameraAngle = 0.0;
-		
-		//CF we need more than setCameraRecenter()
-		mClickedNode = -1;
-		mClickedLabel = -1;
-		mClosestNode = -1;
-		mLastSelectedNode = -1;
-		//mClusterCount = 5; //CF might be previously set by apps
-		mNavigationLevel = 0;
-		
-		resetLoopNavigationLevels();
-		
-		setNeedsDisplay(true);
+	if(mLibrary->isEmpty()) {
+		this->resetCamera();
+		this->resetNavigation();
+		this->setNeedsDisplay(true);
 		return;
 	}
 	
@@ -1138,13 +1141,6 @@ void ACMediaBrowser::updateNextPositionsPropeller() {
 	setNeedsDisplay(true);
 }
 
-void ACMediaBrowser::commitPositions()
-{	
-	for (ACMediaNodes::iterator node = mLoopAttributes.begin(); node != mLoopAttributes.end(); ++node){
-		(*node).commitPosition();
-	}
-}
-
 void ACMediaBrowser::setState(ACBrowserState state)
 {
 	if(mState == AC_IDLE)
@@ -1243,6 +1239,7 @@ int ACMediaBrowser::toggleSourceActivity(float _x, float _y)
 // XS new 150310
 // . toggleSourceActivity is in fact in ACMediaNode now
 // . browser takes care of threads
+// XS TODO return value
 int ACMediaBrowser::toggleSourceActivity(ACMediaNode &node, int _activity) {
 	node.toggleActivity(_activity);
 	std::cout << "Toggle Activity of media : " << node.getMediaId() << " to " << _activity << std::endl;
@@ -1329,7 +1326,7 @@ void ACMediaBrowser::setClosestNode(int _node_id) {
 	
 int ACMediaBrowser::muteAllSources()
 {
-	// XS TODO iterator
+	// XS TODO iterator + return value
 	for (int node_id=0;node_id<mLibrary->getSize();node_id++) {
 		//if (mLoopAttributes[node_id].getActivity() >= 1) {
 			// SD TODO - audio engine
@@ -1692,3 +1689,45 @@ bool ACMediaBrowser::changeVisualisationPlugin(ACPlugin* acpl)
 	return success;
 }
 */
+
+
+// -- private methods 
+void ACMediaBrowser::resetNavigation() {
+	this->resetLoopNavigationLevels(0);
+	mClickedNode = -1;
+	mClickedLabel = -1;
+	mClosestNode = -1;
+	mSelectedNodes.clear();
+	mLastSelectedNode = -1;
+	mNavigationLevel = 0;		
+	mReferenceNode = 0; //CF ugly, could be -1
+	mBackwardNavigationStates.clear();
+	mForwardNavigationStates.clear();
+	mClusterCenters.clear();
+}
+
+void ACMediaBrowser::resetLoopNavigationLevels(int l) {
+	// default : l=0
+	for (ACMediaNodes::iterator node = mLoopAttributes.begin(); node != mLoopAttributes.end(); ++node){
+		(*node).setNavigationLevel (l);
+	}	
+}
+
+void ACMediaBrowser::resetCamera() {
+	//CF we need more than setCameraRecenter()
+	mCameraPosition[0] = 0.0;
+	mCameraPosition[1] = 0.0;
+	mCameraZoom = 1.0;
+	mCameraAngle = 0.0;
+	mousex = 0.0;
+	mousey = 0.0;
+}
+
+void ACMediaBrowser::commitPositions()
+{	
+	for (ACMediaNodes::iterator node = mLoopAttributes.begin(); node != mLoopAttributes.end(); ++node){
+		(*node).commitPosition();
+	}
+}
+
+

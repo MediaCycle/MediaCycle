@@ -483,7 +483,7 @@ void ACOsgAudioRenderer::updateNodes(double ratio) {
 			}
 			
 			//CF nodes colored along their relative cluster on in Clusters Mode 
-			if (media_cycle->getMode() == AC_MODE_CLUSTERS)
+			if (media_cycle->getBrowserMode() == AC_MODE_CLUSTERS)
 				((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(colors[attribute.getClusterId()%NCOLORS]);
 			else
 				((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(colors[0]);

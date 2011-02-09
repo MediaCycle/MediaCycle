@@ -96,7 +96,7 @@ bool ACOsgTimelineRenderer::addTrack(int media_index){
 
 void ACOsgTimelineRenderer::prepareTracks(int start) {
 
-	int media_type;
+	ACMediaType media_type;
 	int n = 0;
 	
 	// XS are these tests necessary ?

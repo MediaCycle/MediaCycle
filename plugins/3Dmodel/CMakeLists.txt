@@ -4,7 +4,7 @@ FILE(GLOB HDR *.hpp *.h)
 SET(PLUGIN_NAME "3Dmodel")
 SET(TARGET_NAME "${PLUGIN_PREFIX}${PLUGIN_NAME}")
 
-INCLUDE_DIRECTORIES(. ../../core)
+INCLUDE_DIRECTORIES(. ../../core ../../tinyxml)
 
 ADD_LIBRARY(${TARGET_NAME} SHARED ${SRC} ${HDR})
 ADD_DEPENDENCIES(${TARGET_NAME} mediacycle OpenThreads osg osgDB osgGA)

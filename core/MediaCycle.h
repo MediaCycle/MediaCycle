@@ -58,7 +58,9 @@ class MediaCycle {
 public:
     MediaCycle(ACMediaType aMediaType, std::string local_directory="", std::string libname="");
     MediaCycle(const MediaCycle& orig);
-    virtual ~MediaCycle();
+    virtual ~MediaCycle();	
+	void clean();
+
 	bool changeMediaType(ACMediaType aMediaType);
 
 	// == TCP
@@ -92,8 +94,9 @@ public:
 	// == Media Browser
     ACMediaBrowser* getBrowser() { return mediaBrowser;}
 	void* hasBrowser();
-	ACBrowserMode getMode();
-	void setMode(ACBrowserMode _mode);
+	ACBrowserMode getBrowserMode();
+	void setBrowserMode(ACBrowserMode _mode);
+	void cleanBrowser() { mediaBrowser->clean(); }
 
 	// Plugins
     int addPlugin(std::string aPluginPath);
@@ -113,8 +116,9 @@ public:
 	// == Media
 	ACMediaNode &getMediaNode(int i);
 	std::string getMediaFileName(int i);
-	int getMediaType(int i);
-	std::vector<std::string> getExtensionsFromMediaType(ACMediaType media_type){return mediaFactory->getExtensionsFromMediaType(media_type);};
+	ACMediaType getMediaType(int i);
+	ACMediaType getMediaType() {return mediaLibrary->getMediaType();}
+	std::vector<std::string> getExtensionsFromMediaType(ACMediaType media_type){return mediaFactory->getExtensionsFromMediaType(media_type);}
 	int getThumbnailWidth(int i);
 	int getThumbnailHeight(int i);
 	int getWidth(int i);
@@ -153,8 +157,8 @@ public:
 	void goForward();
 	void setClusterNumber(int n);
 	void setForwardDown(int i);
-	void setPlayKeyDown(bool i){playkeydown = i;};
-	bool getPlayKeyDown(){return playkeydown;};
+//	void setPlayKeyDown(bool i){playkeydown = i;};
+//	bool getPlayKeyDown(){return playkeydown;};
 	
 	// == Features
 	void normalizeFeatures(int needsNormalize=1);
@@ -206,9 +210,13 @@ public:
 	void dumpNavigationLevel();
 	void dumpLoopNavigationLevels();
 
+	// == testing 
+	void testThreads();
+	void testLabels();
+	
 private:
 	int forwarddown;
-	bool playkeydown;
+//	bool playkeydown;
 	int port;
 	int max_connections;
 	std::string local_directory;

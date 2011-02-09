@@ -50,7 +50,7 @@ ACImageCycleOsgQt::ACImageCycleOsgQt(QWidget *parent)
 	
 	// XS TODO detect if fichier de configuration
 	// if not, set default options
-	media_cycle->setMode(AC_MODE_CLUSTERS);
+	media_cycle->setBrowserMode(AC_MODE_CLUSTERS);
 
 	#if defined(__APPLE__)
 		std::string build_type ("Release");
@@ -222,9 +222,7 @@ void ACImageCycleOsgQt::loadACLFile(){
 	media_cycle->dumpLoopNavigationLevels() ;
 }
 
-void ACImageCycleOsgQt::saveACLFile(){
-	cout << "Saving ACL File..." << endl;
-	
+void ACImageCycleOsgQt::saveACLFile(){	
 	QString fileName = QFileDialog::getSaveFileName(this, tr("Save as MediaCycle Library"),"",tr("MediaCycle Library (*.acl)"));
 	QFile file(fileName);
 	
@@ -235,7 +233,7 @@ void ACImageCycleOsgQt::saveACLFile(){
 	} 
 	else {
 		string acl_file = fileName.toStdString();
-		cout << "saving ACL file: " << acl_file << endl;
+		cout << "Saving ACL file: " << acl_file << endl;
 		media_cycle->saveACLLibrary(acl_file);
 	}
 	//ui.browserOsgView->setFocus();
@@ -351,6 +349,9 @@ void ACImageCycleOsgQt::configureCheckBoxes(){
 	// XS end test -- need to delete !!!
 }
 void ACImageCycleOsgQt::cleanCheckBoxes(){
+	// XS TODO: does this clear the list ?
+	ui.featuresListWidget->clear();
+
 	plugins_scanned = false;
 }
 

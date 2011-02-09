@@ -5,7 +5,7 @@ IF (USE_LAUGHFEAT)
 
 	ADD_EXECUTABLE(laughfeatures-cli ${SRC} ${HDR})
 
-	INCLUDE_DIRECTORIES(. ../../core ../../armadillo ../../audio ../../plugins/segmentation)
+	INCLUDE_DIRECTORIES(. ../../core ../../armadillo ../../audio ../../plugins/segmentation ../../tinyxml)
 
 	ADD_DEPENDENCIES(laughfeatures-cli mediacycle armadillo-utils audiofeatures mc_audio mc_segmentation)
 

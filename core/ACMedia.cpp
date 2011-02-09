@@ -130,6 +130,40 @@ void ACMedia::saveACL(ofstream &library_file, int mcsl) {
 	}	
 }
 
+void ACMedia::saveXML(TiXmlElement* _medias){
+	TiXmlElement* media;
+	media = new TiXmlElement( "Window" );  
+	_medias->LinkEndChild( media );  
+	media->SetAttribute("FileName", filename);
+	media->SetAttribute("MediaID", mid);
+	
+	saveXMLSpecific(media);
+	
+	int n_features = features_vectors.size();
+	media->SetAttribute("NumberOfFeatures", n_features);
+	
+	for (unsigned int i=0; i<features_vectors.size();i++) {
+		int n_features_elements = features_vectors[i]->getSize();
+		int nn = features_vectors[i]->getNeedsNormalization();
+		TiXmlElement* mediaf = new TiXmlElement( "Feature" );  
+		media->LinkEndChild( mediaf );  
+		mediaf->SetAttribute("FeatureName", features_vectors[i]->getName());
+		mediaf->SetAttribute("NeedsNormalization", nn);
+		mediaf->SetAttribute("NumberOfFeatureElements",n_features_elements);
+		for (int j=0; j<n_features_elements; j++) {
+			TiXmlElement* mediafe = new TiXmlElement( "Element" );  
+			mediaf->LinkEndChild( mediafe );  
+			std::string s;
+			std::stringstream tmp;
+			tmp << j;
+			s = tmp.str();
+			
+			mediafe->SetDoubleAttribute(s.c_str(), features_vectors[i]->getFeatureElement(j));
+		}
+		
+	}
+}
+
 // C++ version
 // loads from an existing (i.e. already opened) acl file
 // returns 0 if error (trying to open empty file, failed making thumbnail, ...)

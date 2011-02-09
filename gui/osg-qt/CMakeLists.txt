@@ -4,7 +4,7 @@ IF ( USE_QT4 )
 	FILE(GLOB SRC *.cpp)
 	FILE(GLOB HDR *.h)
 
-	INCLUDE_DIRECTORIES(. ../osg)
+	INCLUDE_DIRECTORIES(. ../osg ../../tinyxml)
 	IF ( USE_AUDIOGARDEN AND USE_QT4 AND USE_OSG AND USE_OSC AND USE_OPENAL )
 		INCLUDE_DIRECTORIES(. ../../armadillo ../../audio ../../ ../../fftooura ../../audiogarden)
 	ENDIF()

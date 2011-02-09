@@ -104,7 +104,7 @@ public:
 	// 
 	int getLibrarySize();
 	std::string getMediaFileName(int i);
-	int getMediaType(int i);
+	ACMediaType getMediaType(int i);
 	int getThumbnailWidth(int i);
 	int getThumbnailHeight(int i);
 	int getWidth(int i);

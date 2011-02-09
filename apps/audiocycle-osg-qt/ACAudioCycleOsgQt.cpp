@@ -234,9 +234,7 @@ void ACAudioCycleOsgQt::loadACLFile(){
 	//ui.compositeOsgView->setFocus();
 }
 
-void ACAudioCycleOsgQt::saveACLFile(){
-	cout << "Saving ACL File..." << endl;
-	
+void ACAudioCycleOsgQt::saveACLFile(){	
 	QString fileName = QFileDialog::getSaveFileName(this, tr("Save as MediaCycle Library"),"",tr("MediaCycle Library (*.acl)"));
 	QFile file(fileName);
 	
@@ -247,7 +245,7 @@ void ACAudioCycleOsgQt::saveACLFile(){
 	} 
 	else {
 		string acl_file = fileName.toStdString();
-		cout << "saving ACL file: " << acl_file << endl;
+		cout << "Saving ACL file: " << acl_file << endl;
 		media_cycle->saveACLLibrary(acl_file);
 	}
 	//ui.compositeOsgView->setFocus();

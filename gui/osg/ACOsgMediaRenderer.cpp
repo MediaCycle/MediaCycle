@@ -51,6 +51,11 @@ ACOsgMediaRenderer::ACOsgMediaRenderer() {
 	local_group->addChild(media_node);
 }
 
+ACOsgMediaRenderer::~ACOsgMediaRenderer() {
+	media_node->unref();
+	local_group->unref();
+}
+
 void ACOsgMediaRenderer::setDeltaTime(double media_cycle_deltatime) {
 	this->media_cycle_deltatime = media_cycle_deltatime;
 }

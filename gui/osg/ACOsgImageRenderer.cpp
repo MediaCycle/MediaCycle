@@ -73,7 +73,6 @@ ACOsgImageRenderer::~ACOsgImageRenderer() {
 //	delete colors;
 //	delete colors2;
 //	delete colors3;
-	
 	if (image_geode) { image_geode->unref(); image_geode=0; }
 	if (border_geode) { border_geode->unref(); border_geode=0; }
 	if (image_transform) { image_transform->unref(); image_transform=0; }
@@ -163,6 +162,13 @@ void ACOsgImageRenderer::imageGeode(bool flip, float sizemul, float zoomin) {
 	// Texture Coordinates
 	texcoord = new Vec2Array;
 	
+// XS TODO!!
+//http://lists.openscenegraph.org/pipermail/osg-users-openscenegraph.org/2009-August/032147.html
+//	other ways of flipping:	
+//	* use osg::Image's flipVertical()
+//	* just flip the texture coordinates
+	
+	
 	float a = (1.0-(1.0/zoomin)) / 2.0;
 	float b = 1.0-a;
 	texcoord->push_back(osg::Vec2(a, flip ? b : a));
@@ -205,6 +211,8 @@ void ACOsgImageRenderer::imageGeode(bool flip, float sizemul, float zoomin) {
 	}
 	image_texture->setResizeNonPowerOfTwoHint(false); 
 	
+	// XS TODO add this line?
+	// http://groups.google.com/group/osg-users/browse_thread/thread/f623b62f62e39473?pli=1
 	//image_texture->setUnRefImageDataAfterApply(true);
 	state = image_geometry->getOrCreateStateSet();
 	state->setTextureAttribute(0, image_texture);

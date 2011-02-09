@@ -42,6 +42,7 @@
 #include "ACMediaTimedFeature.h"
 
 #include <string>
+#include "tinyxml.h"
 
 class ACMedia {
 	// contains the minimal information about a media
@@ -69,7 +70,7 @@ protected:
 public:
 	ACMedia();
 	ACMedia(const ACMedia&, bool reduce = true);
-	virtual ~ACMedia();
+	virtual ~ACMedia(); // make this virtual to ensure that destructors of derived classes will be called
 
 	ACMediaType getMediaType() {return media_type;};
 	void setId(int _id) {mid = _id;} // SD TODO - should check for duplicate id?
@@ -128,6 +129,8 @@ public:
 	// I/O -- common part
 
 	void saveACL(std::ofstream &library_file, int mcsl=0);
+	void saveXML(TiXmlElement * _medias);
+
 	//int loadACL(std::ifstream &library_file, int mcsl=0);
 	int loadACL(std::string media_path, std::ifstream &library_file, int mcsl=0);
 	void saveMCSL(std::ofstream &library_file); //CF 31/05/2010 temporary MediaCycle Segmented Library (MCSL) for AudioGarden, adding a parentID for segments to the initial ACL, awaiting approval
@@ -136,6 +139,7 @@ public:
 	// I/O -- media-specific part
 
 	virtual void saveACLSpecific(std::ofstream &library_file) {}
+	virtual void saveXMLSpecific(TiXmlElement* _media) {}
 	virtual int loadACLSpecific(std::ifstream &library_file) {return -1;}
 	//virtual ACMediaData* extractData(std::string filename) {ACMediaData* dummy; return dummy;}
 	virtual void extractData(std::string filename) {}

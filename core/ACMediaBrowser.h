@@ -136,6 +136,8 @@ public:
 	ACMediaBrowser();
 	~ACMediaBrowser();
 	
+	void clean();
+	
 	void setLibrary(ACMediaLibrary *lib) { mLibrary = lib; };
 	ACMediaLibrary *getLibrary() { return mLibrary; };
 
@@ -191,7 +193,6 @@ public:
 	void setClusterCenter(int clusterIdx, vector< vector<float> >);
 	void initClusterCenters();
 	// XS TODO clean level / state ...
-	void resetLoopNavigationLevels(int l=0);
 	void incrementLoopNavigationLevels(int loopIndex);
 	int getNavigationLevel()				{ return mNavigationLevel; };
 	ACNavigationState getCurrentNavigationState();
@@ -220,25 +221,7 @@ public:
 	void setLoopAttributesActive(int loop_id, int value) { this->getMediaNode(loop_id).setActivity(value); };
 	int getNumberOfDisplayedLoops();
 	void setNumberOfDisplayedLoops(int nd);
-	int getNumberOfMediaNodes(){
-		long _n = -1;
-		switch (mMode){
-			case AC_MODE_CLUSTERS:
-				_n = mLoopAttributes.size();
-				break;
-			case AC_MODE_NEIGHBORS:
-				_n = mUserLog->getSize();
-				break;
-			default:
-				cerr << "unknown browser mode: " << mMode << endl;
-				break;
-		}		
-		//std::cout << "mLoopAttributes.size() " << mLoopAttributes.size() << " mUserLog->getSize() " << mUserLog->getSize() << std::endl;
-		_n = mLoopAttributes.size();//CF this is not normal, inconsistency in OSG
-		return _n;
-	
-	} // XS TODO getsize; this should be the same as mLibrary->getSize(), but this way it is more similar to getNumberOfLabels // CF not true in non-explatory mode (one loop can be displayed more than once at a time)
-	// XS TODO: define this one
+	int getNumberOfMediaNodes();	
 	void initializeNodes(ACBrowserMode _mode = AC_MODE_CLUSTERS); 	
 	
 	// == Pointers
@@ -254,8 +237,6 @@ public:
 	ACBrowserState getState() const {return mState;};
 	void setState(ACBrowserState state);
 	void updateState();
-	// next positions -> current positions
-	void commitPositions();
 	
 	// interaction with mouse
 	void getMouse(float *mx, float *my) { *mx = mousex; *my = mousey; };
@@ -316,8 +297,16 @@ public:
 	
 	// CF switch navigation mode while navigating
 	void switchMode(ACBrowserMode _mode);
-	
-//XS this should be private when we use updateDisplay
+
+private: // better not let the ouside world know about internal cooking
+	void resetNavigation();
+	void resetLoopNavigationLevels(int l=0);
+	void resetCamera();
+	// next positions -> current positions
+	void commitPositions();
+
+//XS TODO the update() methods should be private
+// all what is needed from outside is *updateDisplay*
 public:
 	// update positions based on current clustering
 
@@ -335,7 +324,7 @@ public:
 	void updateNextPositions();
 
 protected:
-	ACMediaLibrary *mLibrary; 
+	ACMediaLibrary *mLibrary; // just a pointer to the library, no "new"
 	// state management
 	double 				mRefTime;
 	double 				mFrac;

@@ -43,6 +43,9 @@ distribution.
 #define DEBUG
 #endif
 
+//XS 02/02/11
+#define TIXML_USE_STL
+
 #ifdef TIXML_USE_STL
 	#include <string>
  	#include <iostream>

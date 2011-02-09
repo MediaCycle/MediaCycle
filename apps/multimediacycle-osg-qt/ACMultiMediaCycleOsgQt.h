@@ -65,15 +65,14 @@ public slots:
 	
 private slots:
 	void on_pushButtonClean_clicked();
-	//	void on_pushButtonRecenter_clicked();
-	//	void on_pushButtonBack_clicked();
-	//	void on_pushButtonForward_clicked();
-	//	
+	void on_pushButtonRecenter_clicked();
+	void on_pushButtonBack_clicked();
+	void on_pushButtonForward_clicked();
+		
 	void spinBoxClustersValueChanged(int _value);
 	void on_sliderClusters_sliderReleased();
 	void comboDefaultSettingsChanged(); 
 
-	//	
 	void loadACLFile();
 	void saveACLFile();		
 	void loadMediaDirectory();
@@ -86,7 +85,7 @@ public:
 	~ACMultiMediaCycleOsgQt();
 	void updateLibrary();
 	
-	// XS default values for image !
+	// XS TODO: default values for image -- is this correct ?
 	void createMediaCycle(ACMediaType _media_type = MEDIA_TYPE_IMAGE, ACBrowserMode _browser_mode = AC_MODE_CLUSTERS);
 	MediaCycle* getMediaCycle() {return media_cycle;}
 	void destroyMediaCycle();
@@ -97,11 +96,11 @@ public:
 	void loadDefaultConfig(ACMediaType _media_type = MEDIA_TYPE_IMAGE, ACBrowserMode _browser_mode = AC_MODE_CLUSTERS);
 
 private:
+	// variables
+	
 	Ui::ACMediaCycleOsgQt ui;
 	SettingsDialog *settingsDialog;
 //	QProgressBar *pb;
-//	void configureCheckBoxes();
-//	void cleanCheckBoxes();
 	bool features_known;
 	bool plugins_scanned;
 	bool library_loaded;
@@ -111,8 +110,12 @@ private:
 	std::string config_file;	
 	std::vector<std::string> plugins_libraries;
 	
+	// methods
+	void configureCheckBoxes();
+	void cleanCheckBoxes();
 	bool saveFile(const QString& _filename);
-	
 	std::string rstrip(const std::string& s);
+	void showError(std::string s);
+	bool hasMediaCycle();
 };
 #endif

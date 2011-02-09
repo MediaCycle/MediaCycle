@@ -5,6 +5,7 @@
 	ADD_LIBRARY(mediacycle-osg STATIC ${SRC} ${HDR})
 	ADD_DEPENDENCIES(mediacycle-osg mediacycle)
 	ADD_DEPENDENCIES(mediacycle-osg audioengine)
+	INCLUDE_DIRECTORIES(. ../../tinyxml)
 
 	TARGET_LINK_LIBRARIES(mediacycle-osg mediacycle)
 	TARGET_LINK_LIBRARIES(mediacycle-osg osg osgDB osgGA osgViewer osgText)

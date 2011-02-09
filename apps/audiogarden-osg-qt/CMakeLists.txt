@@ -7,7 +7,7 @@ IF ( USE_AUDIOGARDEN AND USE_QT4 AND USE_OSG AND USE_OSC AND OPENAL_FOUND )
 
 	INCLUDE_DIRECTORIES(. ../../gui/osg ../../gui/osg-qt)
 	INCLUDE_DIRECTORIES(../../io/osc ../../io/osc/oscpack)
-	INCLUDE_DIRECTORIES(. ../../armadillo ../../audio ../../ ../../fftooura ../../audiogarden)
+	INCLUDE_DIRECTORIES(. ../../armadillo ../../audio ../../ ../../fftooura ../../audiogarden ../../tinyxml)
 
 	IF ( USE_APPLE_MULTITOUCH )
 		INCLUDE_DIRECTORIES( ../../io/applemultitouch)

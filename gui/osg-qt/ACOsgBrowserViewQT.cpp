@@ -35,13 +35,15 @@
 
 #include "ACOsgBrowserViewQT.h"
 #include <cmath>
+using namespace osg;
+
 
 ACOsgBrowserViewQT::ACOsgBrowserViewQT( QWidget * parent, const char * name, const QGLWidget * shareWidget, WindowFlags f):
-	QGLWidget(parent, shareWidget, f),
+	QGLWidget(parent, shareWidget, f), media_cycle(NULL),
 	mousedown(0), zoomdown(0), forwarddown(0), autoplaydown(0),rotationdown(0),
 	refx(0.0f), refy(0.0f),
 	refcamx(0.0f), refcamy(0.0f),
-	refzoom(0.0f),refrotation(0.0f), media_cycle(NULL)
+	refzoom(0.0f),refrotation(0.0f)
 {
 	osg_view = new osgViewer::GraphicsWindowEmbedded(0,0,width(),height());
 	setFocusPolicy(Qt::StrongFocus);// CF instead of ClickFocus
@@ -72,6 +74,20 @@ ACOsgBrowserViewQT::ACOsgBrowserViewQT( QWidget * parent, const char * name, con
 	setMouseTracking(true); //CF necessary for the hover callback
 }
 
+ACOsgBrowserViewQT::~ACOsgBrowserViewQT(){
+	this->clean();
+	delete renderer;
+	delete event_handler;
+}
+
+
+void ACOsgBrowserViewQT::clean(){
+	mousedown = zoomdown = forwarddown = autoplaydown = rotationdown = 0;
+	refx =  refy = refcamx = refcamy = refzoom = refrotation = 0.0f;
+	renderer->clean();
+	this->updateGL();
+}	
+	
 void ACOsgBrowserViewQT::setMediaCycle(MediaCycle* _media_cycle)
 {
 	media_cycle = _media_cycle;

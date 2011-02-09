@@ -7,9 +7,9 @@ IF ( USE_OSG AND FFMPEG_FOUND )
 	#gsl - uncomment if needed
 	#TARGET_LINK_LIBRARIES(mediacycle gsl gslcblas)
 
-	INCLUDE_DIRECTORIES(../armadillo ../fftooura)
-	ADD_DEPENDENCIES(mediacycle armadillo-utils)
-	TARGET_LINK_LIBRARIES(mediacycle armadillo-utils)
+	INCLUDE_DIRECTORIES(../armadillo ../fftooura ../tinyxml)
+	ADD_DEPENDENCIES(mediacycle armadillo-utils tinyxml)
+	TARGET_LINK_LIBRARIES(mediacycle armadillo-utils tinyxml)
 
 	IF ( SDIF_FOUND )
 		TARGET_LINK_LIBRARIES(armadillo-utils sdif)

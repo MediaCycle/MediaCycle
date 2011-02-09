@@ -5,7 +5,7 @@ IF ( USE_QT4 AND USE_OSG AND USE_OSC AND OPENAL_FOUND )
 	FILE(GLOB SRC *.cpp)
 	FILE(GLOB HDR *.h)
 
-	INCLUDE_DIRECTORIES(. ../../core ../../gui/osg ../../gui/osg-qt)
+	INCLUDE_DIRECTORIES(. ../../core ../../gui/osg ../../gui/osg-qt ../../tinyxml)
 	INCLUDE_DIRECTORIES(../../io/osc ../../io/osc/oscpack)
 
 	IF ( USE_APPLE_MULTITOUCH )

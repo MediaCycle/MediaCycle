@@ -2,8 +2,7 @@
  *  ACMediaUserLog.cpp
  *  MediaCycle
  *
- *  @author Stéphane Dupont, Damien Tardieu
- *  @date 25/02/10
+ *  Created by St�phane Dupont, Damien Tardieu on 25/02/10.
  *  Filled by Christian Frisson on 12/03/2010
  *  XS 150310 removed ACUserNode, replaced by ACMediaNode (see separate file)
  *  @copyright (c) 2010 – UMONS - Numediart
@@ -104,6 +103,7 @@ void ACUserLog::clickNode(long int _nodeId, long int _clickTime) {
 	mLastClickedNodeId = _nodeId;
 }
 
+// XS TODO return value
 ACMediaNode& ACUserLog::getNodeFromId(long int _nodeId) {
 	if ((_nodeId >=0) && (_nodeId <= mNodeId)){
 		tree<ACMediaNode>::iterator node = userLogTree.begin();		
@@ -301,8 +301,8 @@ int ACUserLog::getNthChildAtNodeId(long int _nodeId,long int _nthChild)
 
 void ACUserLog::clean()
 {
-	mNodeId = 0;
-	mLastClickedNodeId = -1;
-	userLogTree.clear(); //CF erases all nodes, what about the root?
-	std::cout << "Is the tree empty? " << userLogTree.empty() << std::endl;
+	this->mNodeId = 0;
+	this->mLastClickedNodeId = -1;
+	if (this->userLogTree.size()>0) this->userLogTree.clear(); //CF erases all nodes, what about the root?
+	//std::cout << "Is the tree empty? " << userLogTree.empty() << std::endl;
 }	

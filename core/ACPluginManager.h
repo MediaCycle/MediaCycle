@@ -84,7 +84,7 @@ public:
     virtual ~ACPluginManager();
     int add(std::string aPluginPath);
     int remove(std::string aPluginPath);
-    int removeAll();
+    int clean();
 	void dump();
 
     std::vector<ACPluginLibrary *> getPluginLibrary() { return this->mPluginLibrary;};

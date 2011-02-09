@@ -1,8 +1,8 @@
 /**
  * @brief ACOsgBrowserViewQT.h
  * @author Xavier Siebert
- * @date 22/11/2010
- * @copyright (c) 2010 – UMONS - Numediart
+ * @date 09/02/2011
+ * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -86,43 +86,44 @@ using Qt::WindowFlags;
 
 class ACOsgBrowserViewQT : public osgViewer::Viewer, public QGLWidget
 {
-	public:
-        ACOsgBrowserViewQT( QWidget * parent = 0, const char * name = 0, const QGLWidget * shareWidget = 0, WindowFlags f = 0 );
-		virtual ~ACOsgBrowserViewQT() {};
-		osgViewer::GraphicsWindow* getGraphicsWindow() { return osg_view.get(); }
-		const osgViewer::GraphicsWindow* getGraphicsWindow() const { return osg_view.get(); }
-		virtual void paintGL();
+public:
+	ACOsgBrowserViewQT( QWidget * parent = 0, const char * name = 0, const QGLWidget * shareWidget = 0, WindowFlags f = 0 );
+	virtual ~ACOsgBrowserViewQT();
+	void clean();
+	osgViewer::GraphicsWindow* getGraphicsWindow() { return osg_view.get(); }
+	const osgViewer::GraphicsWindow* getGraphicsWindow() const { return osg_view.get(); }
+	virtual void paintGL();
 	
-    protected:
- //       void init();
-        virtual void resizeGL( int width, int height );
-		virtual void updateGL();
-        virtual void keyPressEvent( QKeyEvent* event );
-        virtual void keyReleaseEvent( QKeyEvent* event );
-        virtual void mousePressEvent( QMouseEvent* event );
-        virtual void mouseReleaseEvent( QMouseEvent* event );
-        virtual void mouseMoveEvent( QMouseEvent* event );
-        osg::ref_ptr<osgViewer::GraphicsWindowEmbedded> osg_view;
-        QTimer _timer;
-
-	private:
-		MediaCycle *media_cycle;
-		ACOsgBrowserRenderer *renderer;
-		ACOsgBrowserEventHandler *event_handler;
-
-	public:
-		// needs to be called when loops are added or removed
-		void prepareFromBrowser();
-		// needs to be called when loops positions are changed
-		void updateTransformsFromBrowser( double frac);
-		void setMediaCycle(MediaCycle* _media_cycle);
-		ACOsgBrowserRenderer* getRenderer(){return renderer;};
-
-	private:
-		int mousedown, zoomdown, forwarddown, autoplaydown, rotationdown;
-		float refx, refy;
-		float refcamx, refcamy;
-		float refzoom, refrotation;
+protected:
+	//       void init();
+	virtual void resizeGL( int width, int height );
+	virtual void updateGL();
+	virtual void keyPressEvent( QKeyEvent* event );
+	virtual void keyReleaseEvent( QKeyEvent* event );
+	virtual void mousePressEvent( QMouseEvent* event );
+	virtual void mouseReleaseEvent( QMouseEvent* event );
+	virtual void mouseMoveEvent( QMouseEvent* event );
+	osg::ref_ptr<osgViewer::GraphicsWindowEmbedded> osg_view;
+	QTimer _timer;
+	
+private:
+	MediaCycle *media_cycle;
+	ACOsgBrowserRenderer *renderer;
+	ACOsgBrowserEventHandler *event_handler;
+	
+public:
+	// needs to be called when loops are added or removed
+	void prepareFromBrowser();
+	// needs to be called when loops positions are changed
+	void updateTransformsFromBrowser( double frac);
+	void setMediaCycle(MediaCycle* _media_cycle);
+	ACOsgBrowserRenderer* getRenderer(){return renderer;};
+	
+private:
+	int mousedown, zoomdown, forwarddown, autoplaydown, rotationdown;
+	float refx, refy;
+	float refcamx, refcamy;
+	float refzoom, refrotation;
 };
 
 #endif

@@ -2,6 +2,8 @@
    Test program for TinyXML.
 */
 
+//XS 020211
+#define TIXML_USE_STL
 
 #ifdef TIXML_USE_STL
 	#include <iostream>

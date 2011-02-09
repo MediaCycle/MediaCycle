@@ -51,13 +51,9 @@ static double getTime() {
 }
 
 MediaCycle::MediaCycle(ACMediaType aMediaType, string local_directory, string libname) {
-	
-	this->mediaLibrary = 0;
-	this->mediaBrowser = 0;
-	this->mediaFactory = 0;
-	
+		
 	this->forwarddown = 0;
-	this->playkeydown = true;
+//	this->playkeydown = true;
 
 	this->local_directory = local_directory;
 	this->libname = libname;
@@ -76,66 +72,6 @@ MediaCycle::MediaCycle(ACMediaType aMediaType, string local_directory, string li
 	this->config_file = "";
 	
 	this->prevLibrarySize = 0;
-	// Test Labels
-/*	ACPoint p;
-	p.x = -0.1; p.y = 0.0; p.z = 0.01;
-	this->mediaBrowser->setLabel(0, "Label-1", p);
-	p.x = 0.2; p.y = 0.0; p.z = 0.01;
-	this->mediaBrowser->setLabel(1, "Label-2", p);
-	p.x = 0.0; p.y = 0.1; p.z = 0.01;
-	this->mediaBrowser->setLabel(2, "Label-3", p);
- */
-
-	/*
-	int nthreads, tid, NumberOfProcs;
-
-	NumberOfProcs = omp_get_num_procs();
-	printf("\nWorking on %d Processors",NumberOfProcs);
-	
-	omp_set_num_threads(NumberOfProcs);
-	
-#pragma omp parallel private(tid)
-	{
-		tid = omp_get_thread_num();
-		printf("\nWoohoo from thread : %d", tid);
-		if (tid==0){
-			nthreads = omp_get_num_threads();
-			printf("\nMaster says : There is %d out there!", nthreads);
-		}
-	}
-	printf("\n");
-	// No more threads
-
-	*/
-	
-	/*
-	double t1 = getTime();
-	int s = 500000;
-	float *x = new float[s];
-	
-	for (unsigned int i=0; i<s; i++) {
-		
-		x[i] = rand();
-		x[i] = cos(sin(cos(sin(cos(sin(cos(sin(x[i]))))))));
-		
-	}
-
-	double t2 = getTime();
-	
-	printf("TTT - %f\n",float(t2-t1));
-	
-	t1 = getTime();
-	
-#pragma omp parallel for
-	for (unsigned int i=0; i<s; i++) {		
-		x[i] = rand();
-		x[i] = cos(sin(cos(sin(cos(sin(cos(sin(x[i]))))))));
-	}
-	
-	t2 = getTime();
-
-	printf("TTT - %f\n",float(t2-t1));
-	 */
 }
 
 MediaCycle::MediaCycle(const MediaCycle& orig) {
@@ -149,6 +85,28 @@ MediaCycle::~MediaCycle() {
 	delete this->mediaFactory;
 	delete this->pluginManager;
     stopTcpServer(); // will delete this->networkSocket;
+}
+
+void MediaCycle::clean(){
+	this->prevLibrarySize = 0;
+	this->forwarddown = 0;
+	this->local_directory = "";
+	this->libname = "";
+	this->config_file = "";
+
+	this->prevLibrarySize = 0;
+	this->mNeedsDisplay = false;
+	
+	this->import_recursive = 0;
+	this->import_forward_order = false;
+	this->import_doSegment = false;
+	
+	this->port = 0;
+	this->max_connections = 0;
+	
+	this->mediaLibrary->cleanLibrary();
+	this->mediaBrowser->clean();
+	this->pluginManager->clean();
 }
 
 bool MediaCycle::changeMediaType(ACMediaType aMediaType)
@@ -187,12 +145,14 @@ int MediaCycle::startTcpServer(int aPort, int aMaxConnections, ACNetworkSocketSe
     return -1;
 }
 
+// XS TODO return value
 int MediaCycle::stopTcpServer() {
      if (this->networkSocket) {
         this->networkSocket->stop();
         delete this->networkSocket;
     }
 }
+
 //AM TODO processTcpMessage must be moved outside of MediaCycle main class
 int MediaCycle::processTcpMessage(char* buffer, int l, char **buffer_send, int *l_send)
 {
@@ -309,6 +269,7 @@ void *threadImport(void *import_thread_arg) {
 	((MediaCycle*)import_thread_arg)->importDirectories();
 }
 
+// XS TODO return value
 int MediaCycle::importDirectoriesThreaded(vector<string> directories, int recursive, bool forward_order, bool doSegment) {
 	
 	import_directories = directories;
@@ -327,6 +288,8 @@ int MediaCycle::importDirectories() {
 	
 	return importDirectories(import_directories, import_recursive, import_forward_order, import_doSegment);
 }
+
+// XS TODO return value
 
 int MediaCycle::importDirectories(vector<string> directories, int recursive, bool forward_order, bool doSegment) {
 
@@ -474,8 +437,8 @@ string MediaCycle::getThumbnailFileName(int id) {
 
 // Media Browser
 void* MediaCycle::hasBrowser() { return mediaBrowser; }
-ACBrowserMode MediaCycle::getMode() {return mediaBrowser->getMode();}
-void MediaCycle::setMode(ACBrowserMode _mode) {mediaBrowser->setMode(_mode);}
+ACBrowserMode MediaCycle::getBrowserMode() {return mediaBrowser->getMode();}
+void MediaCycle::setBrowserMode(ACBrowserMode _mode) {mediaBrowser->setMode(_mode);}
 
 // Plugins
 int MediaCycle::addPlugin(string aPluginPath) {
@@ -538,7 +501,7 @@ void MediaCycle::dumpPluginsList(){this->pluginManager->dump();}
 // == Media
 ACMediaNode& MediaCycle::getMediaNode(int i) { return (mediaBrowser->getMediaNode(i)); } 
 string MediaCycle::getMediaFileName(int i) { return mediaLibrary->getMedia(i)->getFileName(); }
-int MediaCycle::getMediaType(int i) { return mediaLibrary->getMedia(i)->getType(); }
+ACMediaType MediaCycle::getMediaType(int i) { return mediaLibrary->getMedia(i)->getType(); }
 int MediaCycle::getThumbnailWidth(int i) { return mediaLibrary->getMedia(i)->getThumbnailWidth(); }
 int MediaCycle::getThumbnailHeight(int i) { return mediaLibrary->getMedia(i)->getThumbnailHeight(); }
 int MediaCycle::getWidth(int i) { return mediaLibrary->getMedia(i)->getWidth(); }
@@ -709,7 +672,7 @@ void MediaCycle::readConfigFile(string _fname) {
 }
 
 // == user log
-
+// XS 030211 deprecated; applications should call cleanBrowser()
 void MediaCycle::cleanUserLog() { 
   mediaBrowser->getUserLog()->clean(); 
 }
@@ -728,4 +691,71 @@ void MediaCycle::dumpLoopNavigationLevels(){
 	}
 	cout << endl;
 }
+
+// == testing
+void MediaCycle::testThreads(){
+	/*
+	 int nthreads, tid, NumberOfProcs;
+	 
+	 NumberOfProcs = omp_get_num_procs();
+	 printf("\nWorking on %d Processors",NumberOfProcs);
+	 
+	 omp_set_num_threads(NumberOfProcs);
+	 
+	 #pragma omp parallel private(tid)
+	 {
+	 tid = omp_get_thread_num();
+	 printf("\nWoohoo from thread : %d", tid);
+	 if (tid==0){
+	 nthreads = omp_get_num_threads();
+	 printf("\nMaster says : There is %d out there!", nthreads);
+	 }
+	 }
+	 printf("\n");
+	 // No more threads
+	 
+	 */
+	
+	/*
+	 double t1 = getTime();
+	 int s = 500000;
+	 float *x = new float[s];
+	 
+	 for (unsigned int i=0; i<s; i++) {
+	 
+	 x[i] = rand();
+	 x[i] = cos(sin(cos(sin(cos(sin(cos(sin(x[i]))))))));
+	 
+	 }
+	 
+	 double t2 = getTime();
+	 
+	 printf("TTT - %f\n",float(t2-t1));
+	 
+	 t1 = getTime();
+	 
+	 #pragma omp parallel for
+	 for (unsigned int i=0; i<s; i++) {		
+	 x[i] = rand();
+	 x[i] = cos(sin(cos(sin(cos(sin(cos(sin(x[i]))))))));
+	 }
+	 
+	 t2 = getTime();
+	 
+	 printf("TTT - %f\n",float(t2-t1));
+	 */	
+}
+
+void MediaCycle::testLabels(){
+	// Test Labels
+	ACPoint p;
+	p.x = -0.1; p.y = 0.0; p.z = 0.01;
+	this->mediaBrowser->setLabel(0, "Label-1", p);
+	p.x = 0.2; p.y = 0.0; p.z = 0.01;
+	this->mediaBrowser->setLabel(1, "Label-2", p);
+	p.x = 0.0; p.y = 0.1; p.z = 0.01;
+	this->mediaBrowser->setLabel(2, "Label-3", p);
+}
+
+
 

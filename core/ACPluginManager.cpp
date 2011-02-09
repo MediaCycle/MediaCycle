@@ -41,7 +41,7 @@ ACPluginManager::ACPluginManager(const ACPluginManager& orig) {
 }
 
 ACPluginManager::~ACPluginManager() {
-// XS TODO: this->removeAll() ???
+	this->clean();
 }
 
 /*
@@ -92,10 +92,10 @@ int ACPluginManager::remove(std::string _lpath) {
     return 1;
 }
 
-int ACPluginManager::removeAll() {
+int ACPluginManager::clean() {
 	vector<ACPluginLibrary *> ::iterator iter;
 	for (iter = this->mPluginLibrary.begin(); iter != this->mPluginLibrary.end(); iter++) {
-		delete *iter;
+		delete *iter; // this will delete plugins from each library too
 	}
     this->mPluginLibrary.clear();
     return 0;
@@ -173,19 +173,11 @@ int ACPluginLibrary::initialize()
         } else {
             return -1;
         }
-//         string dataFile = "/Users/dtardieu/data/DANCERS/Video/Front/Bru_102#2.mov";
-//         //plugin->calculate(dataFile);
-//         ACMediaFeatures *mediaFeatures = plugin->calculate(dataFile);
-        /*
         //operations on the plugin
-        string pluginID = plugin->getIdentifier();
-        plugin->initialize();
-        ACMediaFeatures *af = plugin->calculate("/home/alexis/Programmation/TiCore-app/Applications/Numediart/MediaCycle/src/plugins/eyesweb/BruT_108#2-test.ew.txt");
-        //af->dump();
-        //plugin->calculate();
-
-        destroy(plugin);
-        */
+        //string pluginID = plugin->getIdentifier();
+        //plugin->initialize();
+		//destroy(plugin);
+        
     }
     return 0;
 }
@@ -196,6 +188,7 @@ vector<ACMediaFeatures*> ACPluginLibrary::calculate(int aPluginIndex,string aFil
     //return getPlugin(aPluginIndex)->calculate(aFileName);
 }
 
+// clean
 void ACPluginLibrary::freePlugins() {
     //TODO ? replace with iterator
     for (int i=this->mPlugins.size()-1;i>=0;i--) {

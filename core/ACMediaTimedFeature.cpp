@@ -235,6 +235,7 @@ float ACMediaTimedFeature::getValue(float index, float dim){
 	return this->value_m(index, dim);
 }
 
+// XS TODO return value
 vector< vector<float> > ACMediaTimedFeature::getValueAsVector(){
 	// XS TODO duh ?
 }

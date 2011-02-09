@@ -47,7 +47,6 @@
 
 #include <map>
 #include <string>
-using std::string;
 
 // forward declaration
 class ACMultiMediaCycleOsgQt;
@@ -60,6 +59,8 @@ public:
     SettingsDialog(QWidget *parent = 0);
 	virtual ~SettingsDialog(){};
 	void setMediaCycleMainWindow(ACMultiMediaCycleOsgQt* _mc); 
+	void setMediaCycle(MediaCycle* _mc);
+	bool setMediaType(std::string _mt);
 
 private slots:
 	void on_buttonApplyCurrentSettings_clicked();
@@ -84,9 +85,9 @@ private:
 	MediaCycle* media_cycle;
 	
 	// parameters set by the comboBoxes in GUI
-	string media_type;
-	string browser_mode;
-	string plugins_library;
+	std::string media_type;
+	std::string browser_mode;
+	std::string plugins_library;
 };
 
 #endif // SETTINGS_H

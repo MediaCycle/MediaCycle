@@ -81,15 +81,17 @@ ACMultiMediaCycleOsgQt::ACMultiMediaCycleOsgQt(QWidget *parent) : QMainWindow(pa
 }
 
 ACMultiMediaCycleOsgQt::~ACMultiMediaCycleOsgQt(){
+	this->destroyMediaCycle();
 }
 
 // creates a MediaCycle object (containing the whole application)
 // with the appropriate type (audio/image/video/text/mixed/composite/...)
 void ACMultiMediaCycleOsgQt::createMediaCycle(ACMediaType _media_type, ACBrowserMode _browser_mode){
-	media_cycle = new MediaCycle(_media_type,"/tmp/","mediacycle.acl");
-	ui.browserOsgView->setMediaCycle(media_cycle);	
-	
-	// keep track locall of the media and browser modes
+	this->media_cycle = new MediaCycle(_media_type,"/tmp/","mediacycle.acl");
+	ui.browserOsgView->setMediaCycle(this->media_cycle);	
+	this->settingsDialog->setMediaCycle(this->media_cycle);
+
+	// keep track locally of the media and browser modes
 	this->media_type = _media_type;
 	this->browser_mode = _browser_mode;
 }
@@ -147,7 +149,6 @@ void ACMultiMediaCycleOsgQt::saveACLFile(){
 		cerr << "first define the type of application" << endl;
 		return;
 	}
-	cout << "Saving ACL File..." << endl;
 	
 	QString fileName = QFileDialog::getSaveFileName(this, tr("Save as MediaCycle Library"),"",tr("MediaCycle Library (*.acl)"));
 	QFile file(fileName);
@@ -166,12 +167,7 @@ void ACMultiMediaCycleOsgQt::saveACLFile(){
 
 // XS TODO: make sure it works if we add a new directory to the existing library ?
 void ACMultiMediaCycleOsgQt::loadMediaDirectory(){
-	if (media_cycle == NULL) {
-		int warn_button = QMessageBox::warning(this, "Error", 
-											   "First define the type of application");
-		cerr << "first define the type of application" << endl;
-		return;
-	}
+	if (! hasMediaCycle()) return; 
 	statusBar()->showMessage(tr("Loading Directory..."), 0);
 
 	QString selectDir = QFileDialog::getExistingDirectory
@@ -223,12 +219,7 @@ void ACMultiMediaCycleOsgQt::loadMediaDirectory(){
 }
 
 void ACMultiMediaCycleOsgQt::loadMediaFiles(){
-	if (media_cycle == NULL) {
-		int warn_button = QMessageBox::warning(this, "Error", 
-										   "First define the type of application");
-		cerr << "first define the type of application" << endl;
-		return;
-	}
+	if (! hasMediaCycle()) return; 
 
 	QString fileName;
 	QFileDialog dialog(this,"Open MediaCycle Image File(s)");
@@ -273,6 +264,7 @@ void ACMultiMediaCycleOsgQt::loadMediaFiles(){
 void ACMultiMediaCycleOsgQt::editConfigFile(){
 	cout << "Editing config file with Setting Dialog GUI..." << endl;
 	settingsDialog->show();
+	settingsDialog->setMediaCycleMainWindow(this);
 	settingsDialog->setFocus();
 }
 
@@ -360,10 +352,7 @@ bool ACMultiMediaCycleOsgQt::saveConfigFile(){
 }
 
 void ACMultiMediaCycleOsgQt::updateLibrary(){
-	if (media_cycle == NULL) {
-		cerr << "first define the type of application" << endl;
-		return;
-	}	
+	if (! hasMediaCycle()) return; 
 	media_cycle->libraryContentChanged(); 	
 	media_cycle->setReferenceNode(0);
 	// XSCF 250310 added these 3
@@ -371,6 +360,7 @@ void ACMultiMediaCycleOsgQt::updateLibrary(){
 	//media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
 	
 	// XS TODO this is sooo ugly:
+	// XS TODO updateBrowser()
 	media_cycle->getBrowser()->setState(AC_CHANGING);
 	
 	ui.browserOsgView->prepareFromBrowser();
@@ -384,21 +374,14 @@ void ACMultiMediaCycleOsgQt::updateLibrary(){
 	ui.browserOsgView->setFocus();
 }
 
+// for synchronous display of values 
 void ACMultiMediaCycleOsgQt::on_sliderClusters_sliderReleased(){
-	// for synchronous display of values 
-	if (media_cycle == NULL) {
-		cerr << "first define the type of application" << endl;
-		return;
-	}	
+	if (! hasMediaCycle()) return; 
 	ui.spinBoxClusters->setValue(ui.sliderClusters->value());
 }
 
-void ACMultiMediaCycleOsgQt::spinBoxClustersValueChanged(int _value)
-{
-	if (media_cycle == NULL) {
-		cerr << "first define the type of application" << endl;
-		return;
-	}	
+void ACMultiMediaCycleOsgQt::spinBoxClustersValueChanged(int _value){
+	if (! hasMediaCycle()) return; 
 	
 	ui.sliderClusters->setValue(_value); 	// for synchronous display of values 
 	std::cout << "ClusterNumber: " << _value << std::endl;
@@ -441,6 +424,7 @@ void ACMultiMediaCycleOsgQt::modifyListItem(QListWidgetItem *item) {
 // note: here weights are 1 or 0 (checkbox).
 // conversion: 0 remains 0, and value > 0 becomes 1.
 void ACMultiMediaCycleOsgQt::synchronizeFeaturesWeights(){
+	if (! hasMediaCycle()) return; 
 	vector<float> w = media_cycle->getWeightVector();
 	int nw = w.size();
 	if (nw==0){
@@ -469,6 +453,7 @@ void ACMultiMediaCycleOsgQt::synchronizeFeaturesWeights(){
 // adds the plugins in _library pth via mediaCycle's pluginManager
 // keeps track of the plugins added by the Settings Dialog
 void  ACMultiMediaCycleOsgQt::addPluginsLibrary(string _library){
+	if (! hasMediaCycle()) return; 
 	if (this->media_cycle->addPlugin(_library)){
 		this->plugins_libraries.push_back(_library);
 	}
@@ -557,13 +542,102 @@ void ACMultiMediaCycleOsgQt::comboDefaultSettingsChanged(){
 	ACMediaType new_media_type = iterm->second;
 	cout << iterm->first << " - corresponding media type code : " << new_media_type << endl;
 	this->loadDefaultConfig(new_media_type);
+	
+	// telling the setting dialog what we have done
+	this->settingsDialog->setMediaType(mt);
+	
 }
 
-void ACMultiMediaCycleOsgQt::on_pushButtonClean_clicked()
-{
+void ACMultiMediaCycleOsgQt::on_pushButtonClean_clicked() {
+	if (! hasMediaCycle()) return; 
+//	this->media_cycle->cleanUserLog(); //use cleanBrowser instead
+
 	this->media_cycle->cleanLibrary();
-	this->media_cycle->cleanUserLog(); // XS or cleanBrowser ?
-	this->updateLibrary();
-	library_loaded = false;
+	this->media_cycle->cleanBrowser();
+
+//	this->updateLibrary(); // XS TODO : or cleanLibrary, so we don't call libraryContentChanged each time
+	this->cleanCheckBoxes();
+	this->library_loaded = false;
+	ui.browserOsgView->clean();
+	ui.browserOsgView->setFocus();
+	
+
 }	
+
+void ACMultiMediaCycleOsgQt::on_pushButtonRecenter_clicked() {
+	if (! hasMediaCycle()) return; 
+	this->media_cycle->setCameraRecenter();
+}	
+
+void ACMultiMediaCycleOsgQt::on_pushButtonBack_clicked() {
+	if (! hasMediaCycle()) return; 
+	this->media_cycle->goBack();
+	this->synchronizeFeaturesWeights();
+	//	ui.navigationLineEdit->setText(QString::number(media_cycle->getNavigationLevel()));
+	
+	// XS debug
+	this->media_cycle->dumpNavigationLevel() ;
+	this->media_cycle->dumpLoopNavigationLevels() ;
+}
+
+void ACMultiMediaCycleOsgQt::on_pushButtonForward_clicked() {
+	if (! hasMediaCycle()) return; 
+
+	this->media_cycle->goForward();
+	this->synchronizeFeaturesWeights();
+	
+	//	ui.navigationLineEdit->setText(QString::number(media_cycle->getNavigationLevel()));
+	
+	// XS debug
+	this->media_cycle->dumpNavigationLevel() ;
+	this->media_cycle->dumpLoopNavigationLevels() ;
+}
+
+void ACMultiMediaCycleOsgQt::configureCheckBoxes(){
+	// dynamic config of checkboxes
+	// according to plugins found by plugin manager
+	
+	ACPluginManager *acpl = this->media_cycle->getPluginManager(); //getPlugins
+	if (acpl) {
+		for (int i=0;i<acpl->getSize();i++) {
+			for (int j=0;j<acpl->getPluginLibrary(i)->getSize();j++) {
+				if (acpl->getPluginLibrary(i)->getPlugin(j)->getPluginType() == PLUGIN_TYPE_FEATURES && acpl->getPluginLibrary(i)->getPlugin(j)->getMediaType() == this->media_type) {
+					QString s(acpl->getPluginLibrary(i)->getPlugin(j)->getName().c_str());
+					QListWidgetItem * item = new QListWidgetItem(s,ui.featuresListWidget);
+					item->setCheckState (Qt::Unchecked);
+				}
+			}
+		}
+	}
+	
+	plugins_scanned = true;
+	this->synchronizeFeaturesWeights();
+	
+	connect(ui.featuresListWidget, SIGNAL(itemClicked(QListWidgetItem*)),
+            this, SLOT(modifyListItem(QListWidgetItem*)));
+	
+}
+
+// XS TODO define when this is called, really clean
+void ACMultiMediaCycleOsgQt::cleanCheckBoxes(){
+	// XS TODO: does this clear the list ?
+	ui.featuresListWidget->clear();
+	plugins_scanned = false;
+}
+
+void  ACMultiMediaCycleOsgQt::showError(std::string s){
+	int warn_button;
+	const QString qs = QString::fromStdString(s);
+	warn_button = QMessageBox::warning(this, "Error", qs);
+	cerr << s << endl;
+}
+
+bool ACMultiMediaCycleOsgQt::hasMediaCycle(){
+	if (media_cycle == NULL) {
+		this->showError ("First define the type of application");
+		return false;
+	}
+	return true;
+}
+
 

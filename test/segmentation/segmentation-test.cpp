@@ -1,7 +1,7 @@
 /**
  * @brief segmentation-test.cpp
  * @author Xavier Siebert
- * @date 31/01/2011
+ * @date 09/02/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -229,7 +229,7 @@ void test_multiple_bic(int n){
 	g1.reset_plot();
         
         vector<double> m;
-        char buffer[3];
+ //       char buffer[3];
         for(int p=0; p <n; p++)
         {
             m.clear();
@@ -306,7 +306,7 @@ void test_multiple_selfsim(int n){
 	g1.reset_plot();
 
         vector<double> m;
-        char buffer[3];
+ //       char buffer[3];
         for(int p=0; p <n; p++)
         {
             m.clear();

@@ -4,7 +4,7 @@ IF ( USE_APPLE_MULTITOUCH )
 	FILE(GLOB SRC *.cpp)
 	FILE(GLOB HDR *.h)
 
-	INCLUDE_DIRECTORIES(. ../../)
+	INCLUDE_DIRECTORIES(. ../../ ../../tinyxml)
 
 	ADD_LIBRARY(mediacycle-io-applemultitouch STATIC ${SRC} ${HDR})
 

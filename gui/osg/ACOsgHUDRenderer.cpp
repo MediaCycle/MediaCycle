@@ -34,6 +34,7 @@
  */
 
 #include "ACOsgHUDRenderer.h"
+using namespace osg;
 
 ACOsgHUDRenderer::ACOsgHUDRenderer()
 {

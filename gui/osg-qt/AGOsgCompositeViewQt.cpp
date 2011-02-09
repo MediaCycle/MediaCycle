@@ -41,6 +41,8 @@
 #include <cmath>
 #include <QDesktopWidget>
 
+using namespace osg;
+
 AGOsgCompositeViewQt::AGOsgCompositeViewQt( QWidget * parent, const char * name, const QGLWidget * shareWidget, WindowFlags f):
 	QGLWidget(parent, shareWidget, f),
 	mousedown(0), zoomdown(0), forwarddown(0), autoplaydown(0),rotationdown(0),

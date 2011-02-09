@@ -56,22 +56,19 @@
 
 #include "ACRefId.h"
 
-using namespace std;
-using namespace osg;
-
 class ACOsgNodeLinkRenderer {
 public:	
 	void setMediaCycle(MediaCycle *_media_cycle) { this->media_cycle = _media_cycle; };
 	void setNodeIndex(int _node_index) { this->node_index = _node_index; };
 	void setDistanceMouse(float _distance_mouse) { this->distance_mouse = _distance_mouse; };
-	MatrixTransform* getLink() { return link_node; };
+	osg::MatrixTransform* getLink() { return link_node; };
 protected:
 	MediaCycle* media_cycle;
-	MatrixTransform* link_node;
+	osg::MatrixTransform* link_node;
 	int node_index;
 	float distance_mouse;	
 protected:
-	Geode* link_geode;	
+	osg::Geode* link_geode;	
 	void linkGeode(double to_x, double to_y);
 public:
 	ACOsgNodeLinkRenderer();

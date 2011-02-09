@@ -38,7 +38,6 @@
 
 #include <iostream>
 #include <string.h>
-using namespace std;
 
 #include <QtGui>
 #include "settings.h" // SettingsDialog
@@ -65,14 +64,14 @@ class ACImageCycleOsgQt : public QMainWindow
 		void updateLibrary();
 		
 		// XS test
-		void disBonjour(){cout << "bonjour" << endl;}
+		void disBonjour(){std::cout << "bonjour" << std::endl;}
 		MediaCycle* getMediaCycle() {return media_cycle;}
 		
 	public slots: 
 		virtual void modifyListItem(QListWidgetItem *item);
 		
 	private slots:
-        /* InsÃ©rez les prototypes de vos slots personnalisÃ©s ici */
+        /* InsŽrez les prototypes de vos slots personnalisŽs ici */
 		void on_pushButtonLaunch_clicked(); // loadACLFile
 		void on_pushButtonClean_clicked();
 		void on_pushButtonRecenter_clicked();

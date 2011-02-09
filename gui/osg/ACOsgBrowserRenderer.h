@@ -41,6 +41,7 @@
 #include "ACOsgMediaRenderer.h"
 //#include "ACOsgLayoutRenderer.h"
 #include "ACOsgNodeLinkRenderer.h"
+#include "ACOsgTextRenderer.h"
 
 #include <osgDB/ReadFile>
 //#include <osgDB/WriteFile>
@@ -84,13 +85,13 @@ protected:
 	osg::Group*				 label_group;
 	std::vector<ACOsgMediaRenderer*>  node_renderer;
 	std::vector<ACOsgNodeLinkRenderer*>  link_renderer;
-	std::vector<ACOsgMediaRenderer*>  label_renderer;
+	std::vector<ACOsgTextRenderer*>  label_renderer; // XS was MediaRenderer
 	//ACOsgLayoutRenderer*		layout_renderer;
 	//vector<bool>				 media_selected;
 	std::vector<float>				 distance_mouse;
 	//ACPlugin* mLayoutPlugin;
 	//ACOsgLayoutType layout_type;
-	int displayed_nodes;
+	//int displayed_nodes;
 
 	// SD - Results from centralized request to MediaCycle - GLOBAL
 	double						media_cycle_time;
@@ -119,13 +120,14 @@ protected:
 public:
 	ACOsgBrowserRenderer();
 	~ACOsgBrowserRenderer() {};
-		
+	void clean();
+	
 	double getTime();
 		
 	void setMediaCycle(MediaCycle *media_cycle){ this->media_cycle = media_cycle; };
 	//void setLayoutPlugin(ACPlugin* acpl){mLayoutPlugin=acpl;};
 	//void setLayout(ACOsgBrowserLayoutType _type){layout_type = _type;}
-	Group *getShapes() 	{ return group; };
+	osg::Group *getShapes() 	{ return group; };
 	
 	void prepareNodes(int start=0);
 	void updateNodes(double ratio=0.0);
@@ -134,10 +136,18 @@ public:
 	void updateLabels(double ratio=0.0);
 			
 	int computeScreenCoordinates(osgViewer::View* view, double ratio=0.0); //CF: use osgViewer::Viewer* for simple Viewers
-	vector<float> getDistanceMouse() { return distance_mouse; };
+	std::vector<float> getDistanceMouse() { return distance_mouse; };
 	
 	void changeNodeColor(int _node, osg::Vec4 _color){node_renderer[_node]->changeNodeColor(_color);}
 	void resetNodeColor(int _node){node_renderer[_node]->resetNodeColor();}
+
+private:
+	bool removeNodes(int _first=0, int _last=0);
+	bool addNodes(int _first=0, int _last=0);
+	bool removeLinks(int _first=0, int _last=0);
+	bool removeLabels(int _first=0, int _last=0);
+	bool addLabels(int _first=0, int _last=0);
+
 };
 
 #endif

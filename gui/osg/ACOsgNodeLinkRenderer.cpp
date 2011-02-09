@@ -34,6 +34,7 @@
  */
 
 #include "ACOsgNodeLinkRenderer.h"
+using namespace osg;
 
 ACOsgNodeLinkRenderer::ACOsgNodeLinkRenderer() {
 	link_node = new MatrixTransform();

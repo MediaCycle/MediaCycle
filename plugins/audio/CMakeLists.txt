@@ -6,7 +6,7 @@ IF (USE_AUDIOFEAT)
 	SET(PLUGIN_NAME "audio")
 	SET(TARGET_NAME "${PLUGIN_PREFIX}${PLUGIN_NAME}")
 
-	INCLUDE_DIRECTORIES(. ../../core ../../armadillo ../../audio)
+	INCLUDE_DIRECTORIES(. ../../core ../../armadillo ../../audio ../../tinyxml)
 
 	ADD_LIBRARY(${TARGET_NAME} SHARED ${SRC} ${HDR})
 	ADD_DEPENDENCIES(${TARGET_NAME} mediacycle armadillo armadillo-utils audiofeatures OpenThreads osg osgDB)

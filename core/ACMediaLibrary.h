@@ -2,8 +2,7 @@
  *  ACMediaLibrary.h
  *  MediaCycle
  *
- *  @author Stéphane Dupont
- *  @date 21/10/08
+ *  Created by St�phane Dupont on 21/10/08.
  *  @author Xavier Siebert
  *
  *  @copyright (c) 2008 – UMONS - Numediart
@@ -57,7 +56,6 @@ protected:
 	std::vector< std::vector<double> > mean_features, stdev_features;
 	int index_last_normalized; // last item whose features have been normalized
 	long synthesisID;
-	// XS new 300810
 	int mediaID; // mid of the media currently being imported. by default, starts at 0 and is incremented after each import.
 	std::string media_path;
 	
@@ -67,7 +65,6 @@ public:
 	~ACMediaLibrary();
 	bool changeMediaType(ACMediaType aMediaType);
 	void cleanLibrary();
-	void cleanStats();
 	
 	bool isEmpty();
 	ACMediaType getMediaType(){return media_type;};
@@ -116,13 +113,14 @@ public:
 	//	void* p_importSingleFile(void *arg);
 	
 	int scanDirectories(std::vector<std::string> _path, int _recursive, std::vector<std::string>& filenames);
-	int testFFMPEG(std::string _filename);
 	
 private:
 	void deleteAllMedia();
+	void cleanStats();
 	int scanDirectory(std::string _path, int _recursive, std::vector<std::string>& filenames);
 	void incrementMediaID(){mediaID++ ;}
 	int getMediaID(){return mediaID ;}
+	int testFFMPEG(std::string _filename);
 
 };
 

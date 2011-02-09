@@ -3,7 +3,7 @@
 
 	ADD_EXECUTABLE(armadillo-test ${SRC} ${HDR})
 
-	INCLUDE_DIRECTORIES(. ../core ../../armadillo ../../ ../../fftooura)
+	INCLUDE_DIRECTORIES(. ../core ../../armadillo ../../ ../../fftooura ../../tinyxml)
 
 	ADD_DEPENDENCIES(armadillo-test mediacycle armadillo-utils)
 
