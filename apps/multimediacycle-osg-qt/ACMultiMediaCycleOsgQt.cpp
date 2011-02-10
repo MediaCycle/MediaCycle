@@ -649,12 +649,11 @@ void ACMultiMediaCycleOsgQt::loadDefaultConfig(ACMediaType _media_type, ACBrowse
 	std::string f_plugin, s_plugin, v_plugin;
 	std::string s_path = QApplication::applicationDirPath().toStdString();
 	
-#if defined(__APPLE__)
 	std::string build_type ("Release");
-	#ifdef USE_DEBUG
+#ifdef USE_DEBUG
 	build_type = "Debug";
-	#endif //USE_DEBUG
-	
+#endif //USE_DEBUG
+#if defined(__APPLE__)	
 	f_plugin = s_path + "/../../../plugins/"+ smedia + "/" + build_type + "/mc_" + smedia +".dylib";
 	v_plugin = s_path + "/../../../plugins/visualisation/" + build_type + "/mc_visualisation.dylib";
 	s_plugin = s_path + "/../../../plugins/segmentation/" + build_type + "/mc_segmentation.dylib";

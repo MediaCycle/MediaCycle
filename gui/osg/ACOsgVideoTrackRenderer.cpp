@@ -38,27 +38,23 @@
 #include "ACImage.h"
 #include <cmath>
 #include <osg/ImageUtils>
+#include <osgDB/WriteFile>
 
 using namespace std;
 using namespace osg;
 
-
 #if !defined (APPLE_IOS)
 
+static double getTime()
+{
+    struct timeval tv = {0, 0};
+    struct timezone tz = {0, 0};
 
- static double getTime()
- {
- struct timeval tv = {0, 0};
- struct timezone tz = {0, 0};
- 
- gettimeofday(&tv, &tz);
- 
- return (double)tv.tv_sec + tv.tv_usec / 1000000.0;
- }
- 
+    gettimeofday(&tv, &tz);
 
-#include <osg/ImageUtils>
-#include <osgDB/WriteFile>
+    return (double)tv.tv_sec + tv.tv_usec / 1000000.0;
+}
+
 
 int ACOsgVideoSlitScanThread::convert(AVPicture *dst, int dst_pix_fmt, AVPicture *src,
 					 int src_pix_fmt, int src_width, int src_height)
@@ -846,3 +842,4 @@ void ACOsgVideoTrackRenderer::updateTracks(double ratio) {
 	}		
 }
 #endif//CF APPLE_IOS
+
