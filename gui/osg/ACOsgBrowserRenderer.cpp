@@ -432,7 +432,7 @@ int ACOsgBrowserRenderer::computeScreenCoordinates(osgViewer::View* view, double
 bool ACOsgBrowserRenderer::removeNodes(int _first, int _last){
 	bool ok = false;
 	if (_first < 0 || _last > node_renderer.size() || _last < _first){
-		cerr << "<ACOsgBrowserRenderer::removeNodes> : wrong index / out of bouds : " << _first << " - " << _last  << endl;
+		cerr << "<ACOsgBrowserRenderer::removeNodes> : wrong index / out of bounds : " << _first << " - " << _last  << endl;
 		ok = false;
 	}	
 	// (default) remove ALL nodes
@@ -459,7 +459,7 @@ bool ACOsgBrowserRenderer::removeNodes(int _first, int _last){
 bool ACOsgBrowserRenderer::addNodes(int _first, int _last){
 	bool ok = false;
 	if (_first < 0 || _last < _first){
-		cerr << "<ACOsgBrowserRenderer::addNodes> : wrong index / out of bouds : " << _first << " - " << _last  << endl;
+		cerr << "<ACOsgBrowserRenderer::addNodes> : wrong index / out of bounds : " << _first << " - " << _last  << endl;
 		ok = false;
 	}	
 	else {
@@ -556,7 +556,7 @@ bool ACOsgBrowserRenderer::addNodes(int _first, int _last){
 bool ACOsgBrowserRenderer::removeLinks(int _first, int _last){
 	bool ok = false;
 	if (_first < 0 || _last > link_renderer.size() || _last < _first){
-		cerr << "<ACOsgBrowserRenderer::removeLinks> : wrong index / out of bouds : " << _first << " - " << _last  << endl;
+		cerr << "<ACOsgBrowserRenderer::removeLinks> : wrong index / out of bounds : " << _first << " - " << _last  << endl;
 		ok = false;
 	}	
 	// (default) remove ALL nodes
@@ -584,7 +584,7 @@ bool ACOsgBrowserRenderer::removeLinks(int _first, int _last){
 bool ACOsgBrowserRenderer::removeLabels(int _first, int _last){
 	bool ok = false;
 	if (_first < 0 || _last > label_renderer.size() || _last < _first){
-		cerr << "<ACOsgBrowserRenderer::removeLabels> : wrong index / out of bouds : " << _first << " - " << _last  << endl;
+		cerr << "<ACOsgBrowserRenderer::removeLabels> : wrong index / out of bounds : " << _first << " - " << _last  << endl;
 		ok = false;
 	}	
 	// (default) remove ALL nodes
@@ -611,7 +611,7 @@ bool ACOsgBrowserRenderer::removeLabels(int _first, int _last){
 bool ACOsgBrowserRenderer::addLabels(int _first, int _last){
 	bool ok = false;
 	if (_first < 0 || _last < _first){
-		cerr << "<ACOsgBrowserRenderer::addLabels> : wrong index / out of bouds : " << _first << " - " << _last  << endl;
+		cerr << "<ACOsgBrowserRenderer::addLabels> : wrong index / out of bounds : " << _first << " - " << _last  << endl;
 		ok = false;
 	}	
 	else {

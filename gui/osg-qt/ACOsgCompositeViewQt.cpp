@@ -43,7 +43,7 @@
 using namespace osg;
 
 ACOsgCompositeViewQt::ACOsgCompositeViewQt( QWidget * parent, const char * name, const QGLWidget * shareWidget, WindowFlags f):
-	QGLWidget(parent, shareWidget, f),
+	QGLWidget(parent, shareWidget, f), media_cycle(NULL),audio_engine(NULL),
 	mousedown(0), zoomdown(0), forwarddown(0), autoplaydown(0),rotationdown(0),
 	borderdown(0), transportdown(0), 
 	refx(0.0f), refy(0.0f),
@@ -82,16 +82,9 @@ ACOsgCompositeViewQt::ACOsgCompositeViewQt( QWidget * parent, const char * name,
 	timeline_renderer->setScreenWidth(screen_width);
 	
 	audio_engine = NULL;
-}
-
-void ACOsgCompositeViewQt::setMediaCycle(MediaCycle* _media_cycle)
-{
-	media_cycle = _media_cycle;
-	browser_renderer->setMediaCycle(media_cycle);
-	timeline_renderer->setMediaCycle(media_cycle);
-	timeline_controls_renderer->setMediaCycle(media_cycle);	
 	
-	sepy = height()/4;// CF browser/timeline proportions at startup
+	//
+	sepy = 0;//height()/4;// CF browser/timeline proportions at startup
 	browser_view = new osgViewer::View;
 	browser_view->getCamera()->setGraphicsContext(this->getGraphicsWindow());
 	browser_view->getCamera()->setViewport(new osg::Viewport(0,sepy,width(),height()-sepy)); // CF: for OSG y=0 is on the bottom, for Qt on the top
@@ -100,10 +93,6 @@ void ACOsgCompositeViewQt::setMediaCycle(MediaCycle* _media_cycle)
 	browser_view->getCamera()->setViewMatrixAsLookAt(Vec3(0,0,0.8), Vec3(0,0,0), Vec3(0,1,0));
 	//browser_view->getCamera()->setClearColor(Vec4f(0.0,0.0,0.0,0.0));
 	this->addView(browser_view);
-	
-	browser_event_handler = new ACOsgBrowserEventHandler;
-	browser_event_handler->setMediaCycle(media_cycle);
-	browser_view->addEventHandler(browser_event_handler); // CF ((osgViewer::Viewer*) (this))->addEventHandler for the simple Viewer
 	
 	timeline_view = new osgViewer::View;
 	//timeline_view->getCamera()->setClearColor(Vec4f(0.0,0.0,0.0,0.0));
@@ -115,26 +104,7 @@ void ACOsgCompositeViewQt::setMediaCycle(MediaCycle* _media_cycle)
 	timeline_view->getCamera()->setProjectionMatrixAsPerspective(45.0f, 1.0f, 0.001f, 10.0f);//static_cast<double>(width())/static_cast<double>(sepy), 0.001f, 10.0f);
 	timeline_view->getCamera()->getViewMatrix().makeIdentity();
 	timeline_view->getCamera()->setViewMatrixAsLookAt(Vec3(0,0,0.8), Vec3(0,0,0), Vec3(0,1,0));
-	//orth2D
-	/*
-	// set the projection matrix
-    timeline_view->getCamera()->setProjectionMatrix(osg::Matrix::ortho2D(0,width(),0,sepy));
-    // set the view matrix    
-    //timeline_view->getCamera()->setReferenceFrame(osg::Transform::ABSOLUTE_RF);
-    timeline_view->getCamera()->setViewMatrix(osg::Matrix::identity());
-    // only clear the depth buffer
-    //timeline_view->getCamera()->setClearMask(GL_DEPTH_BUFFER_BIT);
-    // draw subgraph after main camera view.
-    //timeline_view->getCamera()->setRenderOrder(osg::Camera::POST_RENDER);
-    // we don't want the camera to grab event focus from the viewers main camera(s).
-    //"timeline_view->getCamera()->setAllowEventFocus(false);
-	 */
 	this->addView(timeline_view);
-	
-	timeline_event_handler = new ACOsgTimelineEventHandler;
-	timeline_event_handler->setMediaCycle(media_cycle);
-	timeline_view->addEventHandler(timeline_event_handler); // CF ((osgViewer::Viewer*) (this))->addEventHandler for the simple Viewer
-	timeline_event_handler->setRenderer(timeline_renderer);
 	
 	timeline_controls_view = new osgViewer::View;
 	//timeline_controls_view->getCamera()->setClearColor(Vec4f(0.0,0.0,0.0,0.0));
@@ -147,6 +117,88 @@ void ACOsgCompositeViewQt::setMediaCycle(MediaCycle* _media_cycle)
 	this->addView(timeline_controls_view);
 	
 	timeline_renderer->updateSize(width(),sepy);
+}
+
+ACOsgCompositeViewQt::~ACOsgCompositeViewQt(){
+	this->clean();
+	delete browser_renderer;
+	delete browser_event_handler;
+	delete timeline_renderer;
+	delete timeline_event_handler;
+	delete timeline_controls_renderer;
+}
+
+void ACOsgCompositeViewQt::clean(){
+	mousedown = zoomdown = forwarddown = autoplaydown = rotationdown = 0;
+	refx =  refy = refcamx = refcamy = refzoom = refrotation = 0.0f;
+	browser_renderer->clean();
+	timeline_renderer->clean();
+	this->updateGL();
+}
+
+void ACOsgCompositeViewQt::setMediaCycle(MediaCycle* _media_cycle)
+{
+	media_cycle = _media_cycle;
+	browser_renderer->setMediaCycle(media_cycle);
+	timeline_renderer->setMediaCycle(media_cycle);
+	timeline_controls_renderer->setMediaCycle(media_cycle);	
+	/*
+	 sepy = 0;//height()/4;// CF browser/timeline proportions at startup
+	 browser_view = new osgViewer::View;
+	 browser_view->getCamera()->setGraphicsContext(this->getGraphicsWindow());
+	 browser_view->getCamera()->setViewport(new osg::Viewport(0,sepy,width(),height()-sepy)); // CF: for OSG y=0 is on the bottom, for Qt on the top
+	 browser_view->getCamera()->setProjectionMatrixAsPerspective(45.0f, static_cast<double>(width())/static_cast<double>(height()-sepy), 0.001f, 10.0f);
+	 browser_view->getCamera()->getViewMatrix().makeIdentity();
+	 browser_view->getCamera()->setViewMatrixAsLookAt(Vec3(0,0,0.8), Vec3(0,0,0), Vec3(0,1,0));
+	 //browser_view->getCamera()->setClearColor(Vec4f(0.0,0.0,0.0,0.0));
+	 this->addView(browser_view);*/
+	
+	browser_event_handler = new ACOsgBrowserEventHandler;
+	browser_event_handler->setMediaCycle(media_cycle);
+	browser_view->addEventHandler(browser_event_handler); // CF ((osgViewer::Viewer*) (this))->addEventHandler for the simple Viewer
+	
+	/*timeline_view = new osgViewer::View;
+	 //timeline_view->getCamera()->setClearColor(Vec4f(0.0,0.0,0.0,0.0));
+	 timeline_view->getCamera()->setClearColor(Vec4f(0.14,0.14,0.28,1.0));
+	 timeline_view->getCamera()->setGraphicsContext(this->getGraphicsWindow());
+	 timeline_view->getCamera()->setViewport(new osg::Viewport(controls_width,0,width()-controls_width,sepy));
+	 
+	 //perspect
+	 timeline_view->getCamera()->setProjectionMatrixAsPerspective(45.0f, 1.0f, 0.001f, 10.0f);//static_cast<double>(width())/static_cast<double>(sepy), 0.001f, 10.0f);
+	 timeline_view->getCamera()->getViewMatrix().makeIdentity();
+	 timeline_view->getCamera()->setViewMatrixAsLookAt(Vec3(0,0,0.8), Vec3(0,0,0), Vec3(0,1,0));*/
+	//orth2D
+	/*
+	 // set the projection matrix
+	 timeline_view->getCamera()->setProjectionMatrix(osg::Matrix::ortho2D(0,width(),0,sepy));
+	 // set the view matrix    
+	 //timeline_view->getCamera()->setReferenceFrame(osg::Transform::ABSOLUTE_RF);
+	 timeline_view->getCamera()->setViewMatrix(osg::Matrix::identity());
+	 // only clear the depth buffer
+	 //timeline_view->getCamera()->setClearMask(GL_DEPTH_BUFFER_BIT);
+	 // draw subgraph after main camera view.
+	 //timeline_view->getCamera()->setRenderOrder(osg::Camera::POST_RENDER);
+	 // we don't want the camera to grab event focus from the viewers main camera(s).
+	 //"timeline_view->getCamera()->setAllowEventFocus(false);
+	 */
+	/*this->addView(timeline_view);*/
+	
+	timeline_event_handler = new ACOsgTimelineEventHandler;
+	timeline_event_handler->setMediaCycle(media_cycle);
+	timeline_view->addEventHandler(timeline_event_handler); // CF ((osgViewer::Viewer*) (this))->addEventHandler for the simple Viewer
+	timeline_event_handler->setRenderer(timeline_renderer);
+	/*
+	 timeline_controls_view = new osgViewer::View;
+	 //timeline_controls_view->getCamera()->setClearColor(Vec4f(0.0,0.0,0.0,0.0));
+	 timeline_controls_view->getCamera()->setClearColor(Vec4f(1.0f,0.14f,0.28f,0.2f));
+	 timeline_controls_view->getCamera()->setGraphicsContext(this->getGraphicsWindow());
+	 timeline_controls_view->getCamera()->setViewport(new osg::Viewport(0,0,controls_width,sepy));
+	 timeline_controls_view->getCamera()->setProjectionMatrixAsPerspective(45.0f, 1.0f, 0.001f, 10.0f);//static_cast<double>(width())/static_cast<double>(sepy), 0.001f, 10.0f);
+	 timeline_controls_view->getCamera()->getViewMatrix().makeIdentity();
+	 timeline_controls_view->getCamera()->setViewMatrixAsLookAt(Vec3(0,0,0.8), Vec3(0,0,0), Vec3(0,1,0));
+	 this->addView(timeline_controls_view);
+	 
+	 timeline_renderer->updateSize(width(),sepy);*/	
 }
 
 void ACOsgCompositeViewQt::initializeGL()
@@ -164,56 +216,62 @@ void ACOsgCompositeViewQt::initializeGL()
 
 void ACOsgCompositeViewQt::resizeGL( int w, int h )
 {
-	//std::cout << "height() " << browser_view->getCamera()->getViewport()->height()+timeline_view->getCamera()->getViewport()->height() << " height " << height << std::endl;
-	float prevheight = browser_view->getCamera()->getViewport()->height()+timeline_view->getCamera()->getViewport()->height();
-	sepy *= h/prevheight;
-	timeline_renderer->updateSize(width(),sepy);
+	if (isRealized()){
+		//std::cout << "height() " << browser_view->getCamera()->getViewport()->height()+timeline_view->getCamera()->getViewport()->height() << " height " << height << std::endl;
+		float prevheight = browser_view->getCamera()->getViewport()->height()+timeline_view->getCamera()->getViewport()->height();
+		sepy *= h/prevheight;
+		timeline_renderer->updateSize(width(),sepy);
+	}	
 	
 	osg_view->getEventQueue()->windowResize(0, 0, w, h);
 	osg_view->resized(0,0,w,h);
-		
-	browser_view->getCamera()->setViewport(new osg::Viewport(0,sepy,w,h-sepy));
-	browser_view->getCamera()->setProjectionMatrixAsPerspective(45.0f, static_cast<double>(w)/static_cast<double>(h-sepy), 0.001f, 10.0f);
+	
+	if (isRealized()){
+		browser_view->getCamera()->setViewport(new osg::Viewport(0,sepy,w,h-sepy));
+		browser_view->getCamera()->setProjectionMatrixAsPerspective(45.0f, static_cast<double>(w)/static_cast<double>(h-sepy), 0.001f, 10.0f);
 
-	timeline_view->getCamera()->setViewport(new osg::Viewport(controls_width,0,w-controls_width,sepy));
-	//perspect
-	timeline_view->getCamera()->setProjectionMatrixAsPerspective(45.0f, 1.0f, 0.001f, 10.0f);//static_cast<double>(width())/static_cast<double>(sepy), 0.001f, 10.0f);}
-	//orth2D
-	/*
-    timeline_view->getCamera()->setProjectionMatrix(osg::Matrix::ortho2D(0,width,0,sepy));
-    timeline_view->getCamera()->setViewMatrix(osg::Matrix::identity());
-	 */
-	timeline_controls_view->getCamera()->setViewport(new osg::Viewport(0,0,controls_width,sepy));
-	timeline_controls_view->getCamera()->setProjectionMatrixAsPerspective(45.0f, 1.0f, 0.001f, 10.0f);//static_cast<double>(width())/static_cast<double>(sepy), 0.001f, 10.0f);}
+		timeline_view->getCamera()->setViewport(new osg::Viewport(controls_width,0,w-controls_width,sepy));
+		//perspect
+		timeline_view->getCamera()->setProjectionMatrixAsPerspective(45.0f, 1.0f, 0.001f, 10.0f);//static_cast<double>(width())/static_cast<double>(sepy), 0.001f, 10.0f);}
+		//orth2D
+		/*
+		timeline_view->getCamera()->setProjectionMatrix(osg::Matrix::ortho2D(0,width,0,sepy));
+		timeline_view->getCamera()->setViewMatrix(osg::Matrix::identity());
+		 */
+		timeline_controls_view->getCamera()->setViewport(new osg::Viewport(0,0,controls_width,sepy));
+		timeline_controls_view->getCamera()->setProjectionMatrixAsPerspective(45.0f, 1.0f, 0.001f, 10.0f);//static_cast<double>(width())/static_cast<double>(sepy), 0.001f, 10.0f);}
 
-	/*
-	 if (getGraphicsWindow()->isRealized()) {
-	 
-		 unsigned int _screen_width, _screen_height;
-		 if ( screen_width != _screen_width){
-			 _screen_width = timeline_view->getCamera()->getGraphicsContext()->getTraits()->width;
-			 std::cout << "Updating width: " << _screen_width << std::endl;
-			 this->screen_width = _screen_width;
-			 timeline_renderer->updateScreenWidth(_screen_width);
-		 }	
-	 }
-	 */
-
+		/*
+		 if (getGraphicsWindow()->isRealized()) {
+		 
+			 unsigned int _screen_width, _screen_height;
+			 if ( screen_width != _screen_width){
+				 _screen_width = timeline_view->getCamera()->getGraphicsContext()->getTraits()->width;
+				 std::cout << "Updating width: " << _screen_width << std::endl;
+				 this->screen_width = _screen_width;
+				 timeline_renderer->updateScreenWidth(_screen_width);
+			 }	
+		 }
+		 */
+	}	
 }
 
 // CF to do: understand paintGL vs updateGL to use them more correctly
 void ACOsgCompositeViewQt::paintGL()
 {
+	frame(); // put this first otherwise we don't get a clean background in the browser
+	if (media_cycle == NULL) return;
+	
 	//CF to improve, we want to know if the view is being animated to force a frequent refresh of the positions:
-	if (media_cycle->getBrowser()->getState() == AC_CHANGING)
+	if (media_cycle && media_cycle->hasBrowser() && media_cycle->getBrowser()->getState() == AC_CHANGING)
 		updateTransformsFromBrowser(media_cycle->getFrac());
-	frame();
 }
 
 // called according to timer
 void ACOsgCompositeViewQt::updateGL()
 {
 	double frac = 0.0;
+	if (media_cycle == NULL) return;
 	
 	if(media_cycle && media_cycle->hasBrowser())
 	{
@@ -265,6 +323,7 @@ void ACOsgCompositeViewQt::updateGL()
 
 void ACOsgCompositeViewQt::keyPressEvent( QKeyEvent* event )
 {
+	if (media_cycle == NULL) return;
 	osg_view->getEventQueue()->keyPress( (osgGA::GUIEventAdapter::KeySymbol) *(event->text().toAscii().data() ) );
 
 	switch( event->key() )
@@ -306,6 +365,7 @@ void ACOsgCompositeViewQt::keyPressEvent( QKeyEvent* event )
 
 void ACOsgCompositeViewQt::keyReleaseEvent( QKeyEvent* event )
 {
+	if (media_cycle == NULL) return;
 	osg_view->getEventQueue()->keyRelease( (osgGA::GUIEventAdapter::KeySymbol) *(event->text().toAscii().data() ) );
 
 	zoomdown = 0;
@@ -320,6 +380,7 @@ void ACOsgCompositeViewQt::keyReleaseEvent( QKeyEvent* event )
 
 void ACOsgCompositeViewQt::mousePressEvent( QMouseEvent* event )
 {
+	if (media_cycle == NULL) return;
     int button = 0;
 	mousedown = 1;
     switch(event->button())
@@ -358,6 +419,7 @@ void ACOsgCompositeViewQt::mousePressEvent( QMouseEvent* event )
 
 void ACOsgCompositeViewQt::mouseMoveEvent( QMouseEvent* event )
 {
+	if (media_cycle == NULL) return;
 	int button = 0;
     switch(event->button())
     {
@@ -424,6 +486,7 @@ void ACOsgCompositeViewQt::mouseMoveEvent( QMouseEvent* event )
 
 void ACOsgCompositeViewQt::mouseReleaseEvent( QMouseEvent* event )
 {
+	if (media_cycle == NULL) return;
     int button = 0;
     switch(event->button())
     {
@@ -556,6 +619,7 @@ void ACOsgCompositeViewQt::prepareFromBrowser()
 
 void ACOsgCompositeViewQt::updateTransformsFromBrowser( double frac)
 {
+	if (media_cycle == NULL) return;
 	int closest_node;	
 	// get screen coordinates
 	closest_node = browser_renderer->computeScreenCoordinates(browser_view, frac);
@@ -577,6 +641,7 @@ void ACOsgCompositeViewQt::prepareFromTimeline()
 
 void ACOsgCompositeViewQt::updateTransformsFromTimeline( double frac)
 {
+	if (media_cycle == NULL) return;
 	//int closest_track;	
 	// get screen coordinates
 	/////////closest_track = timeline_renderer->computeScreenCoordinates(timeline_view, frac); //CF this instead of browser_view for the the simple Viewer

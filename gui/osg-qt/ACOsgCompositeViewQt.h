@@ -1,8 +1,8 @@
 /**
  * @brief ACOsgCompositeViewQt.h
  * @author Christian Frisson
- * @date 13/12/2010
- * @copyright (c) 2010 – UMONS - Numediart
+ * @date 10/02/2011
+ * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -96,7 +96,8 @@ class ACOsgCompositeViewQt : public osgViewer::CompositeViewer, public QGLWidget
 {
 	public:
         ACOsgCompositeViewQt( QWidget * parent = 0, const char * name = 0, const QGLWidget * shareWidget = 0, WindowFlags f = 0 );
-		virtual ~ACOsgCompositeViewQt() {};
+		virtual ~ACOsgCompositeViewQt();
+		void clean();
 		osgViewer::GraphicsWindow* getGraphicsWindow() { return osg_view.get(); }
 		const osgViewer::GraphicsWindow* getGraphicsWindow() const { return osg_view.get(); }
 		virtual void paintGL();

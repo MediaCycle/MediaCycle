@@ -46,8 +46,15 @@
 #include "settings.h" // SettingsDialog
 
 #include "ui_ACMultiMediaCycleOsgQt.h"
-#include <ACOsgBrowserViewQT.h>
+#include <ACOsgCompositeViewQt.h>
 #include <MediaCycle.h>
+#include <ACAudioEngine.h>
+
+// Dock Widgets
+/*#include <ACMediaConfigDockWidgetQt.h>
+#include <ACBrowserControlsClustersNeighborsDockWidgetQt.h>*/
+#include <ACAudioControlsDockWidgetQt.h>
+#include <ACVideoControlsDockWidgetQt.h>
 
 // FORWARD DECLARATIONS
 QT_BEGIN_NAMESPACE
@@ -59,27 +66,42 @@ class SettingsDialog; // forward declaration; NB: SettingsDialog member has to b
 class ACMultiMediaCycleOsgQt : public QMainWindow {
 Q_OBJECT
 	
-public slots: 
+public slots:
+	// Config
 	virtual void modifyListItem(QListWidgetItem *item); // XS TODO why virtual again ?
 	bool saveConfigFile();
+	void editConfigFile();
+	void loadConfigFile();
+	void comboDefaultSettingsChanged(); 
 	
 private slots:
-	void on_pushButtonClean_clicked();
-	void on_pushButtonRecenter_clicked();
-	void on_pushButtonBack_clicked();
-	void on_pushButtonForward_clicked();
-		
-	void spinBoxClustersValueChanged(int _value);
-	void on_sliderClusters_sliderReleased();
-	void comboDefaultSettingsChanged(); 
+	// Controls
+	void syncControlToggleWithDocks();
 
+	// Library controls
 	void loadACLFile();
 	void saveACLFile();		
 	void loadMediaDirectory();
 	void loadMediaFiles();
-	void editConfigFile();
-	void loadConfigFile();
+	//void on_pushButtonLaunch_clicked();
+	void on_pushButtonClean_clicked();
+	
+	// Browser controls
+	void on_pushButtonRecenter_clicked();
+	void on_pushButtonBack_clicked();
+	void on_pushButtonForward_clicked();
+	//void on_radioButtonClusters_toggled();
 
+	// Clustering controls
+	void spinBoxClustersValueChanged(int _value);
+	void on_sliderClusters_sliderReleased();
+	//void on_comboBoxClustersMethod_activated(const QString & text);//CF or (int index);} 
+	//void on_comboBoxClustersPositions_activated(const QString & text);//CF or (int index);} 
+
+	// Neighborhoods controls
+	//void on_comboBoxNeighborsMethod_activated(const QString & text);//CF or (int index);} 
+	//void on_comboBoxNeighborsPositions_activated(const QString & text);//CF or (int index);} 
+	
 public:
 	ACMultiMediaCycleOsgQt(QWidget *parent = 0);
 	~ACMultiMediaCycleOsgQt();
@@ -109,6 +131,16 @@ private:
 	ACBrowserMode browser_mode;
 	std::string config_file;	
 	std::vector<std::string> plugins_libraries;
+	
+	ACAudioEngine *audio_engine;
+	
+	// Dock Widgets
+	/*ACMediaConfigDockWidgetQt* mediaConfig;
+	ACBrowserControlsClustersNeighborsDockWidgetQt browserControls;*/
+	ACAudioControlsDockWidgetQt* audioControls;
+	ACVideoControlsDockWidgetQt* videoControls;
+	vector<int> lastDocksVisibilities; //state stored before hiding all docks with the toggle
+	bool wasControlsToggleChecked;
 	
 	// methods
 	void configureCheckBoxes();

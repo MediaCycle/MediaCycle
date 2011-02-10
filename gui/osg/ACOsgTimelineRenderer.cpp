@@ -48,6 +48,10 @@ ACOsgTimelineRenderer::ACOsgTimelineRenderer(): screen_width(0), height(0.0f) {
 	group->addChild(track_group.get());
 }
 
+void ACOsgTimelineRenderer::clean(){
+	this->removeTracks();
+}
+
 bool ACOsgTimelineRenderer::addTrack(int media_index){
 	int n = track_renderer.size();
 	ACMediaType media_type = media_cycle->getLibrary()->getMedia(media_index)->getType();
@@ -173,6 +177,36 @@ void ACOsgTimelineRenderer::updateSize(float _width,float _height)
 		}
 	}
 }	
+
+// private methods
+
+// Clean up properly by calling destructor of each *
+bool ACOsgTimelineRenderer::removeTracks(int _first, int _last){
+	bool ok = false;
+	if (_first < 0 || _last > track_renderer.size() || _last < _first){
+		cerr << "<ACOsgTimelineRenderer::removeTracks> : wrong index / out of bounds : " << _first << " - " << _last  << endl;
+		ok = false;
+	}	
+	// (default) remove ALL tracks
+	else if (_first == 0 && _last==0) {
+		std::vector<ACOsgTrackRenderer*>::iterator iterm; 
+		for (iterm = track_renderer.begin(); iterm != track_renderer.end(); iterm++) { 
+			track_group->removeChild((*iterm)->getTrack());
+			delete *iterm; 
+		}
+		track_renderer.clear();	
+		ok = true;
+	}
+	else {
+		for (int i=_first;i<_last;i++) {
+			track_group->removeChild(track_renderer[i]->getTrack());
+			delete track_renderer[i];
+		}
+		track_renderer.resize(_first);
+		ok = true;		
+	}
+	return ok;
+}
 
 int ACOsgTimelineRenderer::computeScreenCoordinates(osgViewer::View* view, double ratio) //CF: use osgViewer::Viewer* for the simple Viewer
 {		

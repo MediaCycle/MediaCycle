@@ -83,6 +83,7 @@ protected:
 public:
 	ACOsgTimelineRenderer();
 	~ACOsgTimelineRenderer() {};
+	void clean();
 		
 	void setMediaCycle(MediaCycle *media_cycle) { this->media_cycle = media_cycle; };
 	osg::Group *getShapes() 	{ return group.get(); };
@@ -97,6 +98,9 @@ public:
 	void updateScreenWidth(int _screen_width);
 	void updateSize(float _width,float _height);
 	void setSize(int _width,float _height){width = _width;height = _height;}
+	
+private:	
+	bool removeTracks(int _first=0, int _last=0);
 	
 	int computeScreenCoordinates(osgViewer::View* view, double ratio=0.0); //CF: use osgViewer::Viewer* for simple Viewers
 };

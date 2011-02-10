@@ -44,10 +44,32 @@ ACMultiMediaCycleOsgQt::ACMultiMediaCycleOsgQt(QWidget *parent) : QMainWindow(pa
 	this->media_type = MEDIA_TYPE_NONE;
 	this->browser_mode = AC_MODE_NONE;
 	this->media_cycle = NULL;
+	this->audio_engine = NULL;
 	
-	ui.browserOsgView->move(0,20);
-	//	ui.browserOsgView->prepareFromBrowser();
+	//ui.compositeOsgView->move(0,20);
+	//	ui.compositeOsgView->prepareFromBrowser();
 	//browserOsgView->setPlaying(true);
+	
+	// Docks
+	//////mediaConfig = new ACMediaConfigDockWidgetQt();
+	//////this->addDockWidget(Qt::LeftDockWidgetArea,mediaConfig);
+	/////connect(comboDefaultSettings, SIGNAL(currentIndexChanged(const QString &)), this, SLOT(comboDefaultSettingsChanged()));
+	connect(ui.comboDefaultSettings, SIGNAL(currentIndexChanged(const QString &)), this, SLOT(comboDefaultSettingsChanged()));
+	///////browserControls = new ACBrowserControlsClustersNeighborsDockWidgetQt();
+	///////this->addDockWidget(Qt::LeftDockWidgetArea,browserControls);
+	audioControls = new ACAudioControlsDockWidgetQt();
+	audioControls->setVisible(false);
+	videoControls = new ACVideoControlsDockWidgetQt();
+	videoControls->setVisible(false);
+	//////lastDocksVisibilities.resize(3); //docks: Media Config, Browser, OSC
+	lastDocksVisibilities.resize(2); //docks: Media Config, Browser
+	for (int d=0; d<lastDocksVisibilities.size();d++)
+		lastDocksVisibilities[d] = 1;
+	connect(ui.actionShow_Hide_Controls, SIGNAL(triggered()), this, SLOT(syncControlToggleWithDocks()));
+	connect(ui.dockWidgetMediaConfig, SIGNAL(visibilityChanged(bool)), this, SLOT(syncControlToggleWithDocks()));
+	connect(ui.dockWidgetBrowser, SIGNAL(visibilityChanged(bool)), this, SLOT(syncControlToggleWithDocks()));
+	//////connect(ui.dockWidgetOSC, SIGNAL(visibilityChanged(bool)), this, SLOT(syncControlToggleWithDocks()));
+	wasControlsToggleChecked = true;
 	
 	connect(ui.actionLoad_Media_Directory, SIGNAL(triggered()), this, SLOT(loadMediaDirectory()));
 	connect(ui.actionLoad_Media_Files, SIGNAL(triggered()), this, SLOT(loadMediaFiles()));
@@ -56,11 +78,10 @@ ACMultiMediaCycleOsgQt::ACMultiMediaCycleOsgQt(QWidget *parent) : QMainWindow(pa
 	connect(ui.actionEdit_Config_File, SIGNAL(triggered()), this, SLOT(editConfigFile()));
 	connect(ui.actionSave_Config_File, SIGNAL(triggered()), this, SLOT(saveConfigFile()));
 	connect(ui.actionLoad_Config_File, SIGNAL(triggered()), this, SLOT(loadConfigFile()));
+	
+	connect(ui.actionClean, SIGNAL(triggered()), this, SLOT(on_pushButtonClean_clicked()));
 
-	connect(ui.comboDefaultSettings, SIGNAL(currentIndexChanged(const QString &)), this, SLOT(comboDefaultSettingsChanged()));
-
-	connect(ui.featuresListWidget, SIGNAL(itemClicked(QListWidgetItem*)),
-            this, SLOT(modifyListItem(QListWidgetItem*)));
+	connect(ui.featuresListWidget, SIGNAL(itemClicked(QListWidgetItem*)),this, SLOT(modifyListItem(QListWidgetItem*)));
 
 	//	// connect spinBox and slider
 	//	connect(ui.spinBoxClusters, SIGNAL(valueChanged(int)), this, SLOT(spinBoxClustersValueChanged(int)));
@@ -88,18 +109,28 @@ ACMultiMediaCycleOsgQt::~ACMultiMediaCycleOsgQt(){
 // with the appropriate type (audio/image/video/text/mixed/composite/...)
 void ACMultiMediaCycleOsgQt::createMediaCycle(ACMediaType _media_type, ACBrowserMode _browser_mode){
 	this->media_cycle = new MediaCycle(_media_type,"/tmp/","mediacycle.acl");
-	ui.browserOsgView->setMediaCycle(this->media_cycle);	
+	ui.compositeOsgView->setMediaCycle(this->media_cycle);	
 	this->settingsDialog->setMediaCycle(this->media_cycle);
 
 	// keep track locally of the media and browser modes
 	this->media_type = _media_type;
 	this->browser_mode = _browser_mode;
+	
+	audio_engine = new ACAudioEngine();
+	audio_engine->setMediaCycle(media_cycle);
+	ui.compositeOsgView->setAudioEngine(audio_engine);
+	
+	audioControls->setMediaCycle(media_cycle);
+	audioControls->setAudioEngine(audio_engine);
+	videoControls->setMediaCycle(media_cycle);
+	videoControls->setOsgView(ui.compositeOsgView);
 }
 
 // destroys the MediaCycle object (containing the whole application)
 // it should leave an empty blue frame, just as lauch time
 void ACMultiMediaCycleOsgQt::destroyMediaCycle(){
 	// XS TODO : remove it from the graphics ?
+	if (audio_engine) delete audio_engine;
 	delete media_cycle;
 }
 
@@ -351,6 +382,106 @@ bool ACMultiMediaCycleOsgQt::saveConfigFile(){
 	return saveFile(_configFile);
 }
 
+void ACMultiMediaCycleOsgQt::syncControlToggleWithDocks(){
+	int docksVisibilitiesSum = 0;
+	docksVisibilitiesSum += ui.dockWidgetMediaConfig->isVisible();
+	docksVisibilitiesSum += ui.dockWidgetBrowser->isVisible();
+	//docksVisibilitiesSum += ui.dockWidgetOSC->isVisible();
+	switch (media_type) {
+		case MEDIA_TYPE_AUDIO:
+			docksVisibilitiesSum += audioControls->isVisible();
+			break;
+		case MEDIA_TYPE_IMAGE:
+			break;
+		case MEDIA_TYPE_VIDEO:
+			docksVisibilitiesSum += videoControls->isVisible();
+			break;
+		default:
+			break;
+	}
+	
+	int lastDocksVisibilitiesSum = 0;
+	for (int d=0; d<lastDocksVisibilities.size();d++)
+		lastDocksVisibilitiesSum += lastDocksVisibilities[d];
+	
+	bool controlsToEnable = ui.actionShow_Hide_Controls->isChecked();
+	
+	if (controlsToEnable){
+		if (docksVisibilitiesSum == 0 && lastDocksVisibilitiesSum == 1 && wasControlsToggleChecked){
+			ui.actionShow_Hide_Controls->setChecked(false);
+		}
+		else if (lastDocksVisibilitiesSum == 0 && !wasControlsToggleChecked){
+			ui.dockWidgetMediaConfig->setVisible(true);
+			ui.dockWidgetBrowser->setVisible(true);
+			//ui.dockWidgetOSC->setVisible(true);
+			switch (media_type) {
+				case MEDIA_TYPE_AUDIO:
+					audioControls->setVisible(true);
+					break;
+				case MEDIA_TYPE_IMAGE:
+					break;
+				case MEDIA_TYPE_VIDEO:
+					videoControls->setVisible(true);
+					break;
+				default:
+					break;
+			}
+		}	
+		else {
+			if (!wasControlsToggleChecked){
+				ui.dockWidgetMediaConfig->setVisible((bool)(lastDocksVisibilities[0]));
+				ui.dockWidgetBrowser->setVisible((bool)(lastDocksVisibilities[1]));
+				//ui.dockWidgetOSC->setVisible((bool)(lastDocksVisibilities[2]));
+				switch (media_type) {
+					case MEDIA_TYPE_AUDIO:
+						audioControls->setVisible((bool)(lastDocksVisibilities[2]));
+						break;
+					case MEDIA_TYPE_IMAGE:
+						break;
+					case MEDIA_TYPE_VIDEO:
+						videoControls->setVisible((bool)(lastDocksVisibilities[2]));
+						break;
+					default:
+						break;
+				}
+			}
+		}
+		lastDocksVisibilities[0]=ui.dockWidgetMediaConfig->isVisible();
+		lastDocksVisibilities[1]=ui.dockWidgetBrowser->isVisible();
+		//lastDocksVisibilities[2]=ui.dockWidgetOSC->isVisible();
+		switch (media_type) {
+			case MEDIA_TYPE_AUDIO:
+				lastDocksVisibilities[2]=audioControls->isVisible();
+				break;
+			case MEDIA_TYPE_IMAGE:
+				break;
+			case MEDIA_TYPE_VIDEO:
+				lastDocksVisibilities[2]=videoControls->isVisible();
+				break;
+			default:
+				break;
+		}
+	}
+	else {
+		ui.dockWidgetMediaConfig->setVisible(false);
+		ui.dockWidgetBrowser->setVisible(false);
+		//ui.dockWidgetOSC->setVisible(false);
+		switch (media_type) {
+			case MEDIA_TYPE_AUDIO:
+				audioControls->setVisible(false);
+				break;
+			case MEDIA_TYPE_IMAGE:
+				break;
+			case MEDIA_TYPE_VIDEO:
+				videoControls->setVisible(false);
+				break;
+			default:
+				break;
+		}
+	}
+	wasControlsToggleChecked = ui.actionShow_Hide_Controls->isChecked();
+}	
+
 void ACMultiMediaCycleOsgQt::updateLibrary(){
 	if (! hasMediaCycle()) return; 
 	media_cycle->libraryContentChanged(); 	
@@ -363,7 +494,8 @@ void ACMultiMediaCycleOsgQt::updateLibrary(){
 	// XS TODO updateBrowser()
 	media_cycle->getBrowser()->setState(AC_CHANGING);
 	
-	ui.browserOsgView->prepareFromBrowser();
+	ui.compositeOsgView->prepareFromBrowser();
+	ui.compositeOsgView->prepareFromTimeline();
 	//browserOsgView->setPlaying(true);
 	media_cycle->setNeedsDisplay(true);
 	
@@ -371,7 +503,7 @@ void ACMultiMediaCycleOsgQt::updateLibrary(){
 //	if (!plugins_scanned) this->configureCheckBoxes();
 	
 	library_loaded = true;
-	ui.browserOsgView->setFocus();
+	ui.compositeOsgView->setFocus();
 }
 
 // for synchronous display of values 
@@ -390,9 +522,9 @@ void ACMultiMediaCycleOsgQt::spinBoxClustersValueChanged(int _value){
 		// XSCF251003 added this
 		media_cycle->updateDisplay(true); //XS 250310 was: media_cycle->updateClusters(true);
 		// XS 310310 removed media_cycle->setNeedsDisplay(true); // now in updateDisplay
-		ui.browserOsgView->updateTransformsFromBrowser(1.0);
+		ui.compositeOsgView->updateTransformsFromBrowser(1.0);
 	}
-	//ui.browserOsgView->setFocus();
+	//ui.compositeOsgView->setFocus();
 }
 
 void ACMultiMediaCycleOsgQt::addPluginItem(QListWidgetItem *_item){
@@ -416,7 +548,7 @@ void ACMultiMediaCycleOsgQt::modifyListItem(QListWidgetItem *item) {
 		media_cycle->updateDisplay(true); 
 		//XS 250310 was: media_cycle->updateClusters(true);
 		// XS250310 removed mediacycle->setNeedsDisplay(true); // now in updateDisplay
-		ui.browserOsgView->updateTransformsFromBrowser(0.0); 
+		ui.compositeOsgView->updateTransformsFromBrowser(0.0); 
 	}
 }
 
@@ -472,20 +604,40 @@ std::string ACMultiMediaCycleOsgQt::rstrip(const std::string& s){
 // 2) loads default features plugins
 // XS assumes for the moment that viewing mmode is clusters 
 void ACMultiMediaCycleOsgQt::loadDefaultConfig(ACMediaType _media_type, ACBrowserMode _browser_mode){
+	disconnect(audioControls, SIGNAL(visibilityChanged(bool)), this, SLOT(syncControlToggleWithDocks()));
+	disconnect(videoControls, SIGNAL(visibilityChanged(bool)), this, SLOT(syncControlToggleWithDocks()));
+	this->removeDockWidget(audioControls);
+	this->removeDockWidget(videoControls);
 	string smedia = "none";
 	switch (_media_type) {
 		case MEDIA_TYPE_AUDIO:
 			smedia="audio";
+			this->addDockWidget(Qt::LeftDockWidgetArea,audioControls);
+			lastDocksVisibilities.resize(3); //docks: Media Config, Browser, audioControls
+			for (int d=0; d<lastDocksVisibilities.size();d++)
+				lastDocksVisibilities[d] = 1;
+			connect(audioControls, SIGNAL(visibilityChanged(bool)), this, SLOT(syncControlToggleWithDocks()));
+			audioControls->show();
 			break;
 		case MEDIA_TYPE_IMAGE:
 			smedia="image";
+			lastDocksVisibilities.resize(2); //docks: Media Config, Browser
+			for (int d=0; d<lastDocksVisibilities.size();d++)
+				lastDocksVisibilities[d] = 1;
 			break;
 		case MEDIA_TYPE_VIDEO:
 			smedia="video";
+			this->addDockWidget(Qt::LeftDockWidgetArea,videoControls);
+			lastDocksVisibilities.resize(3); //docks: Media Config, Browser, videoControls
+			for (int d=0; d<lastDocksVisibilities.size();d++)
+				lastDocksVisibilities[d] = 1;
+			connect(videoControls, SIGNAL(visibilityChanged(bool)), this, SLOT(syncControlToggleWithDocks()));
+			videoControls->show();
 			break;
 		default:
 			break;
 	} 
+	
 	if (smedia=="none"){
 		cerr <<"need to define media type"<< endl;
 		return;
@@ -558,8 +710,8 @@ void ACMultiMediaCycleOsgQt::on_pushButtonClean_clicked() {
 //	this->updateLibrary(); // XS TODO : or cleanLibrary, so we don't call libraryContentChanged each time
 	this->cleanCheckBoxes();
 	this->library_loaded = false;
-	ui.browserOsgView->clean();
-	ui.browserOsgView->setFocus();
+	ui.compositeOsgView->clean();
+	ui.compositeOsgView->setFocus();
 	
 
 }	

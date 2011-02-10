@@ -35,8 +35,8 @@
 
 #include "ACOsgBrowserViewQT.h"
 #include <cmath>
-using namespace osg;
 
+using namespace osg;
 
 ACOsgBrowserViewQT::ACOsgBrowserViewQT( QWidget * parent, const char * name, const QGLWidget * shareWidget, WindowFlags f):
 	QGLWidget(parent, shareWidget, f), media_cycle(NULL),
@@ -79,7 +79,6 @@ ACOsgBrowserViewQT::~ACOsgBrowserViewQT(){
 	delete renderer;
 	delete event_handler;
 }
-
 
 void ACOsgBrowserViewQT::clean(){
 	mousedown = zoomdown = forwarddown = autoplaydown = rotationdown = 0;

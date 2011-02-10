@@ -344,7 +344,7 @@ ACOsgVideoTrackRenderer::~ACOsgVideoTrackRenderer() {
 	if (video_stream) video_stream->quit();
 	if (playback_geode) { playback_geode->unref(); playback_geode=0; }
 	if (playback_transform) { playback_transform->unref(); playback_transform=0;}
-	if (slit_scan_geode) { slit_scan_geode->unref(); slit_scan_geode=0; }
+	//if (slit_scan_geode) { slit_scan_geode->unref(); slit_scan_geode=0; }
 	if (slit_scan_transform) { slit_scan_transform->unref(); slit_scan_transform=0;}
 	if (cursor_geode) {	cursor_geode->unref(); cursor_geode=0; }
 	if (segments_transform) { segments_transform->unref(); segments_transform=0;}	
