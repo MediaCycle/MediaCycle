@@ -76,8 +76,13 @@ public:
     int importDirectory(std::string path, int recursive, bool forward_order=true, bool doSegment=false);
 	int setPath(std::string path);
 	int importACLLibrary(std::string path);
+	int importXMLLibrary(std::string path);
 	int importMCSLLibrary(std::string path);//CF 31/05/2010 temporary MediaCycle Segmented Library (MCSL) for AudioGarden, adding a parentID for segments to the initial ACL, awaiting approval
-    // int importLibrary(std::string path); // SD 2010 sep discontinued
+	void libraryContentChanged(int needsNormalizeAndCluster=1);
+	void saveACLLibrary(std::string path);
+	void saveXMLLibrary(std::string path);
+	void saveMCSLLibrary(std::string path);//CF 31/05/2010 temporary MediaCycle Segmented Library (MCSL) for AudioGarden, adding a parentID for segments to the initial ACL, awaiting approval
+	void cleanLibrary();
 	int getLibrarySize(); // = getnumberofmedia
 	int getNumberOfMediaNodes();
     ACMediaLibrary* getLibrary() { return mediaLibrary;}
@@ -162,13 +167,6 @@ public:
 	
 	// == Features
 	void normalizeFeatures(int needsNormalize=1);
-	void openLibrary(std::string path);
-	void libraryContentChanged(int needsNormalizeAndCluster=1);
-	//	void saveAsLibrary(std::string path);
-	void saveACLLibrary(std::string path);
-	void saveMCSLLibrary(std::string path);//CF 31/05/2010 temporary MediaCycle Segmented Library (MCSL) for AudioGarden, adding a parentID for segments to the initial ACL, awaiting approval
-	void cleanLibrary();
-	// Get Features Vector (identified by feature_name) in media i 
 	std::vector<float> getFeaturesVectorInMedia(int i, std::string feature_name);
 	void setWeight(int i, float weight);
 	std::vector<float> getWeightVector();

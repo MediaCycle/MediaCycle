@@ -396,6 +396,49 @@ int ACMediaLibrary::openMCSLLibrary(std::string _path, bool aInitLib){
 // XS TODO return value
 
 int ACMediaLibrary::openXMLLibrary(std::string _path, bool aInitLib){
+	TiXmlDocument doc( _path.c_str() );
+	try {
+		if (!doc.LoadFile( ))
+			throw runtime_error("bad parse");
+		//		doc.Print( stdout );
+	} catch (const exception& e) {
+		cout << e.what( ) << "\n";
+		return EXIT_FAILURE;
+    }	
+	
+	if (aInitLib) {
+		cleanLibrary();
+	}
+	
+	TiXmlHandle docHandle(&doc);
+	TiXmlHandle rootHandle = docHandle.FirstChildElement( "MediaCycle" );
+	// read the "header" information 
+	TiXmlText* nMediaText=rootHandle.FirstChild( "NumberOfMedia" ).FirstChild().Text();
+	string nof = nMediaText->ValueStr();
+	std::stringstream tmp;
+	int n_loops;
+	tmp << nof;
+	tmp >> n_loops;
+
+	TiXmlElement* pMediaNode=rootHandle.FirstChild( "Medias" ).FirstChild().Element();
+	// loop over all medias
+	int cnt=0;
+	for( pMediaNode; pMediaNode; pMediaNode=pMediaNode->NextSiblingElement()) {
+		ACMediaType typ;
+		int typi=0;
+		pMediaNode->QueryIntAttribute("MediaType", &typi);
+		typ = (ACMediaType) typi;
+		ACMedia* local_media = ACMediaFactory::create(typ);
+		local_media->loadXML(pMediaNode);
+		media_library.push_back(local_media);
+		cnt++;
+	}
+	// consistency check
+	if (cnt != n_loops){
+		cerr << "<ACMediaLibrary::openXMLLibrary>: inconsistent number of media"<< endl;
+		return -1;
+	}
+	return n_loops;
 }
 
 // C++ version
@@ -423,7 +466,7 @@ int ACMediaLibrary::saveACLLibrary(std::string _path){
 int ACMediaLibrary::saveXMLLibrary(std::string _path){
 	// we save UNnormalized features
 	denormalizeFeatures();
-
+	
 	TiXmlDocument doc;  
     TiXmlDeclaration * decl = new TiXmlDeclaration( "1.0", "", "" );  
     doc.LinkEndChild( decl );  
@@ -434,7 +477,7 @@ int ACMediaLibrary::saveXMLLibrary(std::string _path){
  //   TiXmlText * text = new TiXmlText( "Header" );  
 //    title->LinkEndChild( text );  
 	
-    TiXmlElement * element2 = new TiXmlElement( "Number of Media" );  
+    TiXmlElement * element2 = new TiXmlElement( "NumberOfMedia" );  
     title->LinkEndChild( element2 );  
 	int n_loops = this->getSize();
 	std::string s_loops;
@@ -448,13 +491,14 @@ int ACMediaLibrary::saveXMLLibrary(std::string _path){
     TiXmlElement * element3 = new TiXmlElement( "Medias" );  
     title->LinkEndChild( element3 );  
 	
+	// XS TODO iterator
 	for(int i=0; i<n_loops; i++) {
 		media_library[i]->saveXML(element3);
 	}
 
 	// normalize features again
 	normalizeFeatures();
-	doc.SaveFile("/Users/xavier/tmp/xmlTest.xml");
+	doc.SaveFile( _path.c_str());
 }
 
 //CF 31/05/2010 temporary MediaCycle Segmented Library (MCSL) for AudioGarden, adding a parentID for segments to the initial ACL, awaiting approval

@@ -372,14 +372,30 @@ int MediaCycle::setPath(string path) {
 	return ok;
 }
 
+void MediaCycle::libraryContentChanged(int needsNormalizeAndCluster) { mediaBrowser->libraryContentChanged(needsNormalizeAndCluster); }
+void MediaCycle::saveACLLibrary(string path) {mediaLibrary->saveACLLibrary(path); }
+void MediaCycle::saveXMLLibrary(string path) {mediaLibrary->saveXMLLibrary(path); }
+void MediaCycle::saveMCSLLibrary(string path) {mediaLibrary->saveMCSLLibrary(path); }
+void MediaCycle::cleanLibrary() { prevLibrarySize=0; mediaLibrary->cleanLibrary(); }
+
 int MediaCycle::importACLLibrary(string path) {
 // XS import = open + some processing 
-	cout << "MediaCycle: importing library: " << path << endl;
+	cout << "MediaCycle: importing ACL library: " << path << endl;
 	int ok = 0;
-	// Xs debug ACL
 	ok = this->mediaLibrary->openACLLibrary(path);
 	if (ok>=1) this->mediaLibrary->normalizeFeatures();
-	//	XS TODO this->mediaBrowser->libraryContentChanged();	
+	//	XS TODO ? this->mediaBrowser->libraryContentChanged();	
+	return ok;
+	
+}
+
+int MediaCycle::importXMLLibrary(string path) {
+	// XS import = open + some processing 
+	cout << "MediaCycle: importing XML library: " << path << endl;
+	int ok = 0;
+	ok = this->mediaLibrary->openXMLLibrary(path);
+	if (ok>=1) this->mediaLibrary->normalizeFeatures();
+	//	XS TODO ? this->mediaBrowser->libraryContentChanged();	
 	return ok;
 	
 }
@@ -551,12 +567,6 @@ void MediaCycle::setForwardDown(int i) { forwarddown = i; }
 
 // == Features
 void MediaCycle::normalizeFeatures(int needsNormalize) { mediaLibrary->normalizeFeatures(needsNormalize); }
-// void MediaCycle::openLibrary(string path) { mediaLibrary->openLibrary(path); }		// discontinued SD 2010 sep
-void MediaCycle::libraryContentChanged(int needsNormalizeAndCluster) { mediaBrowser->libraryContentChanged(needsNormalizeAndCluster); }
-//void MediaCycle::saveAsLibrary(string path) {mediaLibrary->saveAsLibrary(path); }
-void MediaCycle::saveACLLibrary(string path) {mediaLibrary->saveACLLibrary(path); }
-void MediaCycle::saveMCSLLibrary(string path) {mediaLibrary->saveMCSLLibrary(path); }
-void MediaCycle::cleanLibrary() { prevLibrarySize=0; mediaLibrary->cleanLibrary(); }
 // Get Features Vector (identified by feature_name) in media i 
 vector<float> MediaCycle::getFeaturesVectorInMedia(int i, string feature_name) {
 	ACMedia* lmedia;

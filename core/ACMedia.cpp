@@ -132,8 +132,9 @@ void ACMedia::saveACL(ofstream &library_file, int mcsl) {
 
 void ACMedia::saveXML(TiXmlElement* _medias){
 	TiXmlElement* media;
-	media = new TiXmlElement( "Window" );  
+	media = new TiXmlElement( "Media" );  
 	_medias->LinkEndChild( media );  
+	media->SetAttribute("MediaType", media_type);
 	media->SetAttribute("FileName", filename);
 	media->SetAttribute("MediaID", mid);
 	
@@ -150,16 +151,24 @@ void ACMedia::saveXML(TiXmlElement* _medias){
 		mediaf->SetAttribute("FeatureName", features_vectors[i]->getName());
 		mediaf->SetAttribute("NeedsNormalization", nn);
 		mediaf->SetAttribute("NumberOfFeatureElements",n_features_elements);
+		std::string s;
+		std::stringstream tmp;
 		for (int j=0; j<n_features_elements; j++) {
-			TiXmlElement* mediafe = new TiXmlElement( "Element" );  
-			mediaf->LinkEndChild( mediafe );  
-			std::string s;
-			std::stringstream tmp;
-			tmp << j;
-			s = tmp.str();
-			
-			mediafe->SetDoubleAttribute(s.c_str(), features_vectors[i]->getFeatureElement(j));
+			tmp << features_vectors[i]->getFeatureElement(j) << " " ;
 		}
+		s = tmp.str();
+		TiXmlText* mediafe = new TiXmlText(s.c_str());
+		mediaf->LinkEndChild( mediafe );  
+
+//		for (int j=0; j<n_features_elements; j++) {
+//			TiXmlElement* mediafe = new TiXmlElement( "Element" );  
+//			std::string s;
+//			std::stringstream tmp;
+//			tmp << j;
+//			s = tmp.str();
+//			mediafe->SetDoubleAttribute(s.c_str(), features_vectors[i]->getFeatureElement(j));
+//			mediaf->LinkEndChild( mediafe );  
+//		}
 		
 	}
 }
@@ -216,6 +225,8 @@ int ACMedia::loadACL(std::string media_path, ifstream &library_file, int mcsl) {
 		library_file >> n_features;	
 		getline(library_file, tab);
 		
+		// XS TODO are all these [i], [j] safe ?
+		// seems so but could write it differently
 		for (int i=0; i<n_features;i++) {
 			mediaFeatures = new ACMediaFeatures();
 			features_vectors.push_back(mediaFeatures);
@@ -248,6 +259,64 @@ void ACMedia::saveMCSL(ofstream &library_file) {
 int ACMedia::loadMCSL(ifstream &library_file) {
 	return loadACL("", library_file, 1);
 }
+
+void ACMedia::loadXML(TiXmlElement* _pMediaNode){
+	const char *pName=_pMediaNode->Attribute("FileName");
+	if (pName) 
+		this->setFileName(pName);
+	else
+		this->setFileName("");
+	
+	int mid=0;
+	_pMediaNode->QueryIntAttribute("MediaID", &mid); // If this fails, original value is left as-is
+	this->setId(mid);
+	
+	// XS TODO
+	if (!loadXMLSpecific(_pMediaNode)) {
+		//  ** do something clever
+		return; // -1
+	}		
+	
+	int nf=0;
+	_pMediaNode->QueryIntAttribute("NumberOfFeatures", &nf);
+	
+	//	TiXmlNode* featureNode = 0;
+	//	TiXmlElement* featureElement = 0;
+	TiXmlHandle _pMediaNodeHandle(_pMediaNode);
+	
+	int count = 0;
+	TiXmlElement* featureElement = _pMediaNodeHandle.FirstChild( "Feature" ).Element();
+	TiXmlText* featureElementsAsText;
+	ACMediaFeatures* mediaFeatures;
+	for( featureElement; featureElement; featureElement = featureElement->NextSiblingElement() ) {
+		mediaFeatures = new ACMediaFeatures();
+		int nfe=0;
+		int nno=0;
+		featureElement->QueryIntAttribute("NumberOfFeatureElements", &nfe);
+		featureElement->QueryIntAttribute("NeedsNormalization", &nno);
+		string featureName =featureElement->Attribute("FeatureName");
+		featureElementsAsText=featureElement->FirstChild()->ToText();
+		string fes = featureElementsAsText->ValueStr();
+		std::stringstream fess;
+		fess << fes;
+		for (int j=0; j<nfe; j++) {
+			// XS TODO add test
+			float f;
+			fess >> f;
+			mediaFeatures->addFeatureElement(f);
+		}
+		// XS TODO segments
+
+		mediaFeatures->setComputed();
+		mediaFeatures->setName(featureName);
+		features_vectors.push_back(mediaFeatures);
+		count++;
+	}
+	
+	// consistency check
+	if (count != nf) cerr << "<ACMedia::loadXML> inconsistent number of features" << endl;
+}
+
 
 ACMediaFeatures* ACMedia::getFeaturesVector(int i){ 
 	if (i < int(features_vectors.size()) )

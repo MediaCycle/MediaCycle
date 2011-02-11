@@ -81,6 +81,8 @@ private slots:
 	// Library controls
 	void loadACLFile();
 	void saveACLFile();		
+	void loadXMLFile();
+	void saveXMLFile();		
 	void loadMediaDirectory();
 	void loadMediaFiles();
 	//void on_pushButtonLaunch_clicked();

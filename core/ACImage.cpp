@@ -230,6 +230,7 @@ void ACImage::computeThumbnailSize(){
 // AND computes a thumbnail at the same time.
 //ACMediaData* ACImage::extractData(string fname){
 void ACImage::extractData(string fname){
+	// XS TODO test if data->getImageData is not NULL
 	data = new ACMediaData(MEDIA_TYPE_IMAGE,fname);
 	width = data->getImageData()->width;
 	height = data->getImageData()->height;
@@ -260,14 +261,14 @@ int ACImage::loadACLSpecific(ifstream &library_file) {
 	library_file >> height;
 	
 	// Old bug with image size set to thumbnail size
-	if ((width == 64)&&(height == 64)){
-		IplImage* tmp = cvLoadImage(filename.c_str(), CV_LOAD_IMAGE_COLOR);	
-		width=tmp->width;
-		height=tmp->height;
-		cvReleaseImage(&tmp);
-		if ((width != 64)&&(height != 64))// if the image size isn't actually 64x64
-			std::cout << "Please re-save your ACL library, old format with corrupted image size." << std::endl;
-	}
+//	if ((width == 64)&&(height == 64)){
+//		IplImage* tmp = cvLoadImage(filename.c_str(), CV_LOAD_IMAGE_COLOR);	
+//		width=tmp->width;
+//		height=tmp->height;
+//		cvReleaseImage(&tmp);
+//		if ((width != 64)&&(height != 64))// if the image size isn't actually 64x64
+//			std::cout << "Please re-save your ACL library, old format with corrupted image size." << std::endl;
+//	}
 
 	data = new ACMediaData(MEDIA_TYPE_IMAGE,filename);
 	
@@ -278,4 +279,30 @@ int ACImage::loadACLSpecific(ifstream &library_file) {
 	}
 	return 1;
 }
+
+void ACImage::saveXMLSpecific(TiXmlElement* _media){
+	_media->SetAttribute("Width", width);
+	_media->SetAttribute("Height", height);
+}
+
+int ACImage::loadXMLSpecific(TiXmlElement* _pMediaNode){
+	// XS TODO add checks
+	int w=0;
+	_pMediaNode->QueryIntAttribute("Width", &w);
+	int h=0;
+	_pMediaNode->QueryIntAttribute("Height", &h);
+	this->width = w;
+	this->height = h;
+	
+	data = new ACMediaData(MEDIA_TYPE_IMAGE,filename);
+	
+	this->computeThumbnailSize();
+	if (computeThumbnail(data, thumbnail_width , thumbnail_height) != 1){
+		cerr << "<ACImage::loadXMLSpecific> : problem computing thumbnail" << endl;
+		return 0;
+	}
+	return 1;
+	
+}
+
 #endif//CF APPLE_IOS APPLE_IOS

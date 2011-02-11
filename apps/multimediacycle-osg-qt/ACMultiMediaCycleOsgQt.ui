@@ -80,8 +80,10 @@
     <addaction name="actionLoad_Media_Directory"/>
     <addaction name="actionLoad_Media_Files"/>
     <addaction name="actionLoad_ACL"/>
+    <addaction name="actionLoad_XML"/>
     <addaction name="separator"/>
     <addaction name="actionSave_ACL"/>
+    <addaction name="actionSave_XML"/>
     <addaction name="separator"/>
    </widget>
    <widget class="QMenu" name="menuConfig">
@@ -739,6 +741,16 @@
   <action name="actionEdit_Config_File">
    <property name="text">
     <string>Edit Config File</string>
+   </property>
+  </action>
+  <action name="actionLoad_XML">
+   <property name="text">
+    <string>Load XML</string>
+   </property>
+  </action>
+  <action name="actionSave_XML">
+   <property name="text">
+    <string>Save XML</string>
    </property>
   </action>
  </widget>

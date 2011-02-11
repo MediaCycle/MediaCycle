@@ -94,6 +94,7 @@ public:
 	
 	std::string getFileName() { return filename; }
 	void setFileName(std::string s) { filename = s; }
+	void setFileName(const char* c) { std::string s(c); filename = s; }
 
 	// thumbnail
 	virtual void* getThumbnailPtr()=0;
@@ -129,10 +130,12 @@ public:
 	// I/O -- common part
 
 	void saveACL(std::ofstream &library_file, int mcsl=0);
-	void saveXML(TiXmlElement * _medias);
+	void saveXML(TiXmlElement* _medias);
 
 	//int loadACL(std::ifstream &library_file, int mcsl=0);
 	int loadACL(std::string media_path, std::ifstream &library_file, int mcsl=0);
+	void loadXML(TiXmlElement* _pMediaNode);
+
 	void saveMCSL(std::ofstream &library_file); //CF 31/05/2010 temporary MediaCycle Segmented Library (MCSL) for AudioGarden, adding a parentID for segments to the initial ACL, awaiting approval
 	int loadMCSL(std::ifstream &library_file); //CF 31/05/2010 temporary MediaCycle Segmented Library (MCSL) for AudioGarden, adding a parentID for segments to the initial ACL, awaiting approval
 
@@ -141,6 +144,8 @@ public:
 	virtual void saveACLSpecific(std::ofstream &library_file) {}
 	virtual void saveXMLSpecific(TiXmlElement* _media) {}
 	virtual int loadACLSpecific(std::ifstream &library_file) {return -1;}
+	virtual int loadXMLSpecific(TiXmlElement* _pMediaNode) {return -1;}
+
 	//virtual ACMediaData* extractData(std::string filename) {ACMediaData* dummy; return dummy;}
 	virtual void extractData(std::string filename) {}
 	

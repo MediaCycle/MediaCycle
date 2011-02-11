@@ -75,6 +75,8 @@ ACMultiMediaCycleOsgQt::ACMultiMediaCycleOsgQt(QWidget *parent) : QMainWindow(pa
 	connect(ui.actionLoad_Media_Files, SIGNAL(triggered()), this, SLOT(loadMediaFiles()));
 	connect(ui.actionSave_ACL, SIGNAL(triggered()), this, SLOT(saveACLFile()));
 	connect(ui.actionLoad_ACL, SIGNAL(triggered()), this, SLOT(loadACLFile()));
+	connect(ui.actionSave_XML, SIGNAL(triggered()), this, SLOT(saveXMLFile()));
+	connect(ui.actionLoad_XML, SIGNAL(triggered()), this, SLOT(loadXMLFile()));
 	connect(ui.actionEdit_Config_File, SIGNAL(triggered()), this, SLOT(editConfigFile()));
 	connect(ui.actionSave_Config_File, SIGNAL(triggered()), this, SLOT(saveConfigFile()));
 	connect(ui.actionLoad_Config_File, SIGNAL(triggered()), this, SLOT(loadConfigFile()));
@@ -193,6 +195,67 @@ void ACMultiMediaCycleOsgQt::saveACLFile(){
 		string acl_file = fileName.toStdString();
 		cout << "saving ACL file: " << acl_file << endl;
 		media_cycle->saveACLLibrary(acl_file);
+	}
+}
+
+// XS in theory one could select multiple XML files and concatenate them (not tested yet)
+void ACMultiMediaCycleOsgQt::loadXMLFile(){
+	if (media_cycle == NULL) {
+		cerr << "first define the type of application" << endl;
+		return;
+	}
+	
+	QString fileName;	
+	QFileDialog dialog(this,"Open XML Library File(s)");
+	dialog.setDefaultSuffix ("xml");
+	dialog.setNameFilter("Library Files (*.xml)");
+	dialog.setFileMode(QFileDialog::ExistingFiles); 
+	// changed to ExistingFiles for multiple file handling
+	
+	QStringList fileNames;
+	if (dialog.exec())
+		fileNames = dialog.selectedFiles();
+	
+	QStringList::Iterator file = fileNames.begin();
+	while(file != fileNames.end()) {
+		fileName = *file;
+		std::cout << "Opening XML file: '" << fileName.toStdString() << "'" << std::endl;
+		
+		if (!(fileName.isEmpty())) {
+			media_cycle->importXMLLibrary(fileName.toStdString());
+			std::cout << "XML file imported" << std::endl;
+		}	
+		++file;
+	}	
+	
+	// only after loading all XML files:
+	this->updateLibrary();
+	
+	media_cycle->storeNavigationState(); 
+	
+	// XS debug
+	media_cycle->dumpNavigationLevel();
+	media_cycle->dumpLoopNavigationLevels() ;
+}
+
+void ACMultiMediaCycleOsgQt::saveXMLFile(){
+	if (media_cycle == NULL) {
+		cerr << "first define the type of application" << endl;
+		return;
+	}
+	
+	QString fileName = QFileDialog::getSaveFileName(this, tr("Save as XML Library"),"",tr("MediaCycle XML Library (*.xml)"));
+	QFile file(fileName);
+	
+	if (!file.open(QIODevice::WriteOnly)) {
+		QMessageBox::warning(this,
+							 tr("File error"),
+							 tr("Failed to open\n%1").arg(fileName));
+	} 
+	else {
+		string acl_file = fileName.toStdString();
+		cout << "saving XML file: " << acl_file << endl;
+		media_cycle->saveXMLLibrary(acl_file);
 	}
 }
 
