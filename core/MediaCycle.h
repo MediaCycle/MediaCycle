@@ -104,7 +104,8 @@ public:
 	void cleanBrowser() { mediaBrowser->clean(); }
 
 	// Plugins
-    int addPlugin(std::string aPluginPath);
+    int addPluginLibrary(std::string aPluginPath);
+    int removePluginLibrary(std::string aPluginPath);
 	ACPluginManager* getPluginManager() { return pluginManager;}
 	void setClustersMethodPlugin(std::string pluginName);
 	void setNeighborsMethodPlugin(std::string pluginName);

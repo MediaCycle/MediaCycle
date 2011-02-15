@@ -56,7 +56,9 @@ public:
   
 	void saveACLSpecific(std::ofstream &library_file);
 	int loadACLSpecific(std::ifstream &library_file);
-	
+	void saveXMLSpecific(TiXmlElement* _media);
+	int loadXMLSpecific(TiXmlElement* _pMediaNode);
+
 	//void import(std::string _path); // XS 240210 : migrated to ACMedia
 	void saveThumbnail(std::string _path);
 	void* getThumbnailPtr() { return (void*)waveform; }

@@ -38,6 +38,16 @@
        </attribute>
        <layout class="QGridLayout" name="gridLayout">
         <item row="0" column="0">
+         <widget class="QPushButton" name="buttonXMLConfigFile">
+          <property name="text">
+           <string>XML Config File...</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1" colspan="2">
+         <widget class="QLineEdit" name="lineEditXMLConfigFile"/>
+        </item>
+        <item row="1" column="0">
          <widget class="QLabel" name="labelMediaType">
           <property name="text">
            <string>Media Type</string>
@@ -47,7 +57,7 @@
           </property>
          </widget>
         </item>
-        <item row="0" column="1" colspan="2">
+        <item row="1" column="2" colspan="2">
          <widget class="QComboBox" name="comboMediaType">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -82,7 +92,7 @@
           </item>
          </widget>
         </item>
-        <item row="0" column="3">
+        <item row="1" column="4">
          <spacer name="horizontalSpacer">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
@@ -98,7 +108,7 @@
           </property>
          </spacer>
         </item>
-        <item row="1" column="0">
+        <item row="2" column="0">
          <widget class="QLabel" name="labelNavigationMode">
           <property name="text">
            <string>Browser Mode</string>
@@ -108,7 +118,7 @@
           </property>
          </widget>
         </item>
-        <item row="1" column="1" colspan="2">
+        <item row="2" column="2" colspan="2">
          <widget class="QComboBox" name="comboBrowserMode">
           <property name="maxCount">
            <number>100</number>
@@ -130,7 +140,7 @@
           </item>
          </widget>
         </item>
-        <item row="1" column="3">
+        <item row="2" column="4">
          <spacer name="horizontalSpacer_3">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
@@ -146,14 +156,14 @@
           </property>
          </spacer>
         </item>
-        <item row="2" column="1" colspan="2">
+        <item row="3" column="2" colspan="2">
          <widget class="QPushButton" name="buttonApplyCurrentSettings">
           <property name="text">
            <string>Apply Current Settings</string>
           </property>
          </widget>
         </item>
-        <item row="3" column="1">
+        <item row="4" column="2">
          <spacer>
           <property name="orientation">
            <enum>Qt::Vertical</enum>
@@ -162,6 +172,19 @@
            <size>
             <width>391</width>
             <height>262</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="0" column="4">
+         <spacer name="horizontalSpacer_2">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
            </size>
           </property>
          </spacer>
@@ -178,60 +201,78 @@
           <property name="title">
            <string>Features Plugins Libraries</string>
           </property>
-          <layout class="QGridLayout" name="gridLayout_3">
-           <item row="0" column="0">
-            <layout class="QHBoxLayout" name="horizontalLayout">
-             <item>
-              <widget class="QPushButton" name="buttonBrowsePluginsLibrary">
-               <property name="text">
-                <string>Browse Plugins Library...</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QLineEdit" name="lineEditPluginsLibrary">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="dragEnabled">
-                <bool>true</bool>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-           <item row="1" column="0">
-            <layout class="QHBoxLayout" name="horizontalLayout_2">
-             <item>
-              <widget class="QPushButton" name="buttonAddPluginsLibrary">
-               <property name="text">
-                <string>Add Plugins of this Library</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QPushButton" name="buttonRemovePluginsLibrary">
-               <property name="text">
-                <string>Remove Plugins of this Library</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-           <item row="2" column="0">
-            <widget class="QListWidget" name="listWidgetFeaturesPlugins"/>
-           </item>
-           <item row="3" column="0">
-            <widget class="QPushButton" name="buttonConfirmPluginsSelection">
-             <property name="text">
-              <string>Confirm Plugins Selection</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
+          <widget class="QPushButton" name="buttonConfirmPluginsSelection">
+           <property name="geometry">
+            <rect>
+             <x>9</x>
+             <y>418</y>
+             <width>204</width>
+             <height>32</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Confirm Plugins Selection</string>
+           </property>
+          </widget>
+          <widget class="QWidget" name="">
+           <property name="geometry">
+            <rect>
+             <x>9</x>
+             <y>38</y>
+             <width>826</width>
+             <height>376</height>
+            </rect>
+           </property>
+           <layout class="QHBoxLayout" name="horizontalLayout">
+            <item>
+             <layout class="QVBoxLayout" name="verticalLayout">
+              <item>
+               <spacer name="verticalSpacer">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>20</width>
+                  <height>103</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item>
+               <widget class="QPushButton" name="buttonAddPluginsLibrary">
+                <property name="text">
+                 <string>Add Plugins Library...</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="buttonRemovePluginsLibrary">
+                <property name="text">
+                 <string>Remove Selection</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <spacer name="verticalSpacer_2">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>20</width>
+                  <height>108</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <widget class="QTreeView" name="treeViewPluginsLibrairies"/>
+            </item>
+           </layout>
+          </widget>
          </widget>
         </item>
        </layout>
@@ -263,9 +304,6 @@
             <string>Save in Config File...</string>
            </property>
           </widget>
-         </item>
-         <item row="0" column="1">
-          <widget class="QLineEdit" name="lineEdit"/>
          </item>
          <item row="1" column="1">
           <widget class="QListWidget" name="listWidget"/>

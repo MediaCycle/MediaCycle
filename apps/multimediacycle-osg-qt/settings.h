@@ -37,10 +37,18 @@
 
 #include <QDialog>
 #include <QtGui>
+#include <QDomDocument>
+
+#include "pluginsTreeItem.h"
+#include "pluginsTreeModel.h"
+
 #include "ui_settings.h"
 
 #include "ACMultiMediaCycleOsgQt.h"
 #include "MediaCycle.h"
+
+//#include "writeDomXml.h"
+//#include "readDomXml.h"
 
 #include "ACMediaTypes.h" // for ACMediaType
 #include "ACMediaBrowser.h" // for ACBrowserMode
@@ -57,23 +65,38 @@ class SettingsDialog : public QMainWindow, private Ui::SettingsDialog
 
 public:
     SettingsDialog(QWidget *parent = 0);
-	virtual ~SettingsDialog(){};
+	virtual ~SettingsDialog();
 	void setMediaCycleMainWindow(ACMultiMediaCycleOsgQt* _mc); 
 	void setMediaCycle(MediaCycle* _mc);
 	bool setMediaType(std::string _mt);
+private:
+	bool setXMLMediaType(QString _qmt);
+	bool setXMLBrowserMode(QString _qbm);
+	void addPluginsFromLibrary(QString _fileName);//, QListViewItem* _item);
+//XS TODO
+	//void removePluginsFromLibrary(QString _fileName);
+
+//XS TODO : features + viz
+	//bool addXMLPlugin();
+public slots:
+    void updateActions();
 
 private slots:
 	void on_buttonApplyCurrentSettings_clicked();
-	void on_buttonBrowsePluginsLibrary_clicked();
+//	void on_buttonBrowsePluginsLibrary_clicked();
 	void on_buttonAddPluginsLibrary_clicked();
-	void on_buttonRemovePluginsLibrary_clicked();
+//XS TODO
+	//void on_buttonRemovePluginsLibrary_clicked();
 	void on_buttonConfirmPluginsSelection_clicked();
 
  //   void selectVisualizationPlugins();
 	bool saveConfigFile();
-	void configureFeaturesPlugins();
+	bool writeXMLConfigFile();
+	bool readXMLConfigFile();
+//	void configureFeaturesPlugins();
 	void comboMediaTypeValueChanged(); 
 	void comboBrowserModeValueChanged(); 
+	void removePluginRow(); 
 
 // suggestion: may be add a way to save settings (like sliders positions, ...) ?
 	//   void loadSettings();
@@ -87,7 +110,16 @@ private:
 	// parameters set by the comboBoxes in GUI
 	std::string media_type;
 	std::string browser_mode;
-	std::string plugins_library;
+//	std::string plugins_library;
+	
+	// for XML I/O
+	QDomDocument doc; 
+	QDomElement configFile; 
+	QFile file; 
+	QTextStream out; 
+	
+	// for plugins tree view
+	pluginsTreeModel* ptm;
 };
 
 #endif // SETTINGS_H

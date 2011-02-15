@@ -22,6 +22,7 @@ if(APPLE)#if(APPLE_IOS_DEV OR APPLE_IOS_SIM)
 	include(CMakeForceCompiler)
 	CMAKE_FORCE_C_COMPILER(gcc-4.2 GNU)
 	CMAKE_FORCE_CXX_COMPILER(gcc-4.2 GNU)
+	set(CMAKE_XCODE_ATTRIBUTE_GCC_VERSION "4.2")
 endif()
 
 # Checking Apple OSX versions

@@ -1,10 +1,10 @@
 /*
- *  ACMultiMediaCycleOsgQt main.cpp
+ *  pluginsTreeItem.h
  *  MediaCycle
  *
  *  @author Xavier Siebert
- *  @date 16/02/10
- *  @copyright (c) 2010 – UMONS - Numediart
+ *  @date 14/02/11
+ *  @copyright (c) 2011 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
  *  licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -32,21 +32,36 @@
  *
  */
 
-#include <QApplication>
-#include <QStringListModel>
-#include <QListView>
+#ifndef PLUGINSTREEITEM_H
+#define PLUGINSTREEITEM_H
 
-#include <QApplication>
-#include <QtGui>
-#include "ACMultiMediaCycleOsgQt.h"
+#include <QList>
+#include <QVariant>
+#include <QVector>
 
-int main(int argc, char *argv[])
-{
-    QApplication app(argc, argv);
+class pluginsTreeItem {
+public:
+	pluginsTreeItem(const QVector<QVariant> &data, pluginsTreeItem *parent = 0);
+	~pluginsTreeItem();
+	
+	void appendChild(pluginsTreeItem *child);
+	
+	int childCount() const;
+	int columnCount() const;
+	QVariant data(int column) const;
+	
+	bool insertChildren(int position, int count, int columns);
+    bool removeChildren(int position, int count);
+    bool removeColumns(int position, int columns);
+    int childNumber() const;
+	
+	int row() const;
+	pluginsTreeItem *parent();
+	pluginsTreeItem *child(int number);
 
-    ACMultiMediaCycleOsgQt window;
-    window.show();
-
-    return app.exec();
-}
-
+private:
+	QList<pluginsTreeItem*> childItems;
+    QVector<QVariant> itemData;
+	pluginsTreeItem *parentItem;
+};
+#endif //PLUGINSTREEITEM_H

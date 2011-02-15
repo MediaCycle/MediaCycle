@@ -10,12 +10,16 @@ IF ( USE_QT4 AND USE_OSG AND USE_OSC AND OPENAL_FOUND )
 		SET(APP_TYPE MACOSX_BUNDLE)
 	ENDIF ( APPLE )
 
+	# QT-XML
+	SET(QT_USE_QTXML TRUE)
+	include( ${QT_USE_FILE} )
+
 	SET(multimediacycle-osg-qt_SRCS main.cpp ACMultiMediaCycleOsgQt.cpp)
 	SET(multimediacycle-osg-qt_MOC_HDRS ACMultiMediaCycleOsgQt.h)
 	SET(multimediacycle-osg-qt_UIS ACMultiMediaCycleOsgQt.ui)
 
-	SET(settings_SRCS settings.cpp)
-	SET(settings_MOC_HDRS settings.h)
+	SET(settings_SRCS settings.cpp pluginsTreeModel.cpp pluginsTreeItem.cpp)
+	SET(settings_MOC_HDRS settings.h pluginsTreeModel.h pluginsTreeItem.h)
 	SET(settings_UIS settings.ui)
 
 	# Generates ui_ACMultiMediaCycleOsgQt.h  and ui_settings.h

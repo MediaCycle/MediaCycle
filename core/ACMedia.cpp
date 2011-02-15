@@ -151,6 +151,8 @@ void ACMedia::saveXML(TiXmlElement* _medias){
 		mediaf->SetAttribute("FeatureName", features_vectors[i]->getName());
 		mediaf->SetAttribute("NeedsNormalization", nn);
 		mediaf->SetAttribute("NumberOfFeatureElements",n_features_elements);
+
+		// keep feature elements separated by a " "
 		std::string s;
 		std::stringstream tmp;
 		for (int j=0; j<n_features_elements; j++) {

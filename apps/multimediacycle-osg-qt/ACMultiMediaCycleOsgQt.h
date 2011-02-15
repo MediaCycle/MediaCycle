@@ -117,6 +117,8 @@ public:
 	void synchronizeFeaturesWeights();
 	
 	void addPluginsLibrary(std::string _library);
+	void removePluginsLibrary(std::string _library);
+
 	void loadDefaultConfig(ACMediaType _media_type = MEDIA_TYPE_IMAGE, ACBrowserMode _browser_mode = AC_MODE_CLUSTERS);
 
 private:

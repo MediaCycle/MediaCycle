@@ -116,7 +116,7 @@ void ACAudio::saveACLSpecific(ofstream &library_file) {
 	library_file << sample_rate << endl;
 	library_file << channels << endl;
 	library_file << this->getSampleStart() << endl;
-	library_file << getSampleEnd() << endl;
+	library_file << this->getSampleEnd() << endl;
 	library_file << waveformLength << endl;
 	for (i=0; i<waveformLength; i++) {
 		library_file << waveform[i] << " ";
@@ -146,6 +146,59 @@ int ACAudio::loadACLSpecific(ifstream &library_file) {
 	
 	return 1;
 }
+
+void ACAudio::saveXMLSpecific(TiXmlElement* _media){
+	_media->SetAttribute("SamplingRate", sample_rate);
+	_media->SetAttribute("Channels", channels);
+	_media->SetAttribute("SampleStart",this->getSampleStart());
+	_media->SetAttribute("SampleEnd",this->getSampleEnd());
+	_media->SetAttribute("waveformLength",waveformLength);
+	// XS TODO add tests
+
+	// waveform
+	TiXmlElement* mediawf = new TiXmlElement( "Waveform" );  
+	std::string s;
+	std::stringstream tmp;
+	for (int j=0; j<waveformLength; j++) {
+		tmp << waveform[j] << " " ;
+	}
+	s = tmp.str();
+	TiXmlText* mediawft = new TiXmlText(s.c_str());
+	mediawf->LinkEndChild( mediawft );  
+	_media->LinkEndChild( mediawf );  
+
+}
+
+int ACAudio::loadXMLSpecific(TiXmlElement* _pMediaNode){
+	// XS TODO add checks
+	_pMediaNode->QueryIntAttribute("SamplingRate", &this->sample_rate);
+	_pMediaNode->QueryIntAttribute("Channels", &this->channels);
+	int sample_start, sample_end;
+	_pMediaNode->QueryIntAttribute("SampleStart",&sample_start);
+	_pMediaNode->QueryIntAttribute("SampleEnd",&sample_end);
+	this->setSampleStart(sample_start);
+	this->setSampleEnd(sample_end);
+	
+	_pMediaNode->QueryIntAttribute("waveformLength",&waveformLength);
+	waveform = new float[waveformLength];
+
+	TiXmlElement* waveformElement = _pMediaNode->FirstChildElement( "Waveform" );
+	TiXmlText*  waveformElementsAsText = waveformElement->ToText();
+	string wfs = waveformElementsAsText->ValueStr();
+	std::stringstream wfss;
+	wfss << wfs;
+	for (int j=0; j<waveformLength; j++) {
+		// XS TODO add test
+		wfss >> waveform[j];
+	}
+	
+// XS TODO note : for image we have this:
+//data = new ACMediaData(MEDIA_TYPE_IMAGE,filename);
+// here we compute the waveform	
+	return 1;
+	
+}
+
 
 void ACAudio::setData(float* _data,float _sample_number, int _sr,int _channels) {
 	if (data->getMediaType()==MEDIA_TYPE_NONE)

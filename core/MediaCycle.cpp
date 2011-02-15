@@ -457,8 +457,12 @@ ACBrowserMode MediaCycle::getBrowserMode() {return mediaBrowser->getMode();}
 void MediaCycle::setBrowserMode(ACBrowserMode _mode) {mediaBrowser->setMode(_mode);}
 
 // Plugins
-int MediaCycle::addPlugin(string aPluginPath) {
+int MediaCycle::addPluginLibrary(string aPluginPath) {
     return this->pluginManager->add(aPluginPath);
+}
+
+int MediaCycle::removePluginLibrary(string aPluginPath) {
+    return this->pluginManager->remove(aPluginPath);
 }
 
 void MediaCycle::setClustersMethodPlugin(string pluginName){

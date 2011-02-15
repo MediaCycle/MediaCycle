@@ -649,8 +649,19 @@ void ACMultiMediaCycleOsgQt::synchronizeFeaturesWeights(){
 // keeps track of the plugins added by the Settings Dialog
 void  ACMultiMediaCycleOsgQt::addPluginsLibrary(string _library){
 	if (! hasMediaCycle()) return; 
-	if (this->media_cycle->addPlugin(_library)){
+	if (this->media_cycle->addPluginLibrary(_library)){
 		this->plugins_libraries.push_back(_library);
+		cout << "added plugin " << _library << endl;
+	}
+}
+
+void  ACMultiMediaCycleOsgQt::removePluginsLibrary(string _library){
+	if (! hasMediaCycle()) return; 
+	if (this->media_cycle->removePluginLibrary(_library)){
+		vector<string>::iterator f = std::find(this->plugins_libraries.begin(), this->plugins_libraries.end(), _library);
+		  if( f != this->plugins_libraries.end() )
+			  this->plugins_libraries.erase(f);
+		cout << "erased plugin " << _library << endl;
 	}
 }
 
@@ -731,9 +742,9 @@ void ACMultiMediaCycleOsgQt::loadDefaultConfig(ACMediaType _media_type, ACBrowse
 	v_plugin = s_path + "/../../../plugins/visualisation/" + build_type + "/mc_visualisation.so";
 	s_plugin = s_path + "/../../../plugins/segmentation/" + build_type + "/mc_segmentation.so";
 #endif
-	media_cycle->addPlugin(f_plugin);
-	media_cycle->addPlugin(v_plugin);
-	media_cycle->addPlugin(s_plugin);
+	media_cycle->addPluginLibrary(f_plugin);
+	media_cycle->addPluginLibrary(v_plugin);
+	media_cycle->addPluginLibrary(s_plugin);
 }
 
 
