@@ -46,10 +46,6 @@
 
 #include "ACMultiMediaCycleOsgQt.h"
 #include "MediaCycle.h"
-
-//#include "writeDomXml.h"
-//#include "readDomXml.h"
-
 #include "ACMediaTypes.h" // for ACMediaType
 #include "ACMediaBrowser.h" // for ACBrowserMode
 
@@ -72,10 +68,7 @@ public:
 private:
 	bool setXMLMediaType(QString _qmt);
 	bool setXMLBrowserMode(QString _qbm);
-	void addPluginsFromLibrary(QString _fileName);//, QListViewItem* _item);
-//XS TODO
-	//void removePluginsFromLibrary(QString _fileName);
-
+	void addPluginsFromLibrary(QString _fileName);
 //XS TODO : features + viz
 	//bool addXMLPlugin();
 public slots:
@@ -83,16 +76,13 @@ public slots:
 
 private slots:
 	void on_buttonApplyCurrentSettings_clicked();
-//	void on_buttonBrowsePluginsLibrary_clicked();
 	void on_buttonAddPluginsLibrary_clicked();
-//XS TODO
-	//void on_buttonRemovePluginsLibrary_clicked();
 	void on_buttonConfirmPluginsSelection_clicked();
 
  //   void selectVisualizationPlugins();
-	bool saveConfigFile();
-	bool writeXMLConfigFile();
-	bool readXMLConfigFile();
+	bool saveConfigFile(std::string _filename);
+	bool writeXMLConfigFile(std::string _filename);
+	bool readXMLConfigFile(std::string _filename);
 //	void configureFeaturesPlugins();
 	void comboMediaTypeValueChanged(); 
 	void comboBrowserModeValueChanged(); 
@@ -103,7 +93,6 @@ private slots:
 	//   void saveSettings();
 
 private:
-//	Ui::SettingsDialog ui;
 	ACMultiMediaCycleOsgQt* multi_media_cycle;
 	MediaCycle* media_cycle;
 	

@@ -49,7 +49,8 @@ public:
 	int childCount() const;
 	int columnCount() const;
 	QVariant data(int column) const;
-	
+	bool setData(int column, const QVariant &value);
+
 	bool insertChildren(int position, int count, int columns);
     bool removeChildren(int position, int count);
     bool removeColumns(int position, int columns);

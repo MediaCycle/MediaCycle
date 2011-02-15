@@ -61,18 +61,25 @@ QVariant pluginsTreeItem::data(int column) const {
     return itemData.value(column);
 }
 
+
+
 pluginsTreeItem *pluginsTreeItem::parent() {
     return parentItem;
 }
 
-pluginsTreeItem *pluginsTreeItem::child(int number)
-{
+pluginsTreeItem *pluginsTreeItem::child(int number) {
     return childItems.value(number);
 }
 
+bool pluginsTreeItem::setData(int column, const QVariant &value) {
+    if (column < 0 || column >= itemData.size())
+        return false;
+	
+    itemData[column] = value;
+    return true;
+}
 
-bool pluginsTreeItem::removeChildren(int position, int count)
-{
+bool pluginsTreeItem::removeChildren(int position, int count) {
     if (position < 0 || position + count > childItems.size())
         return false;
 	

@@ -64,7 +64,9 @@ public:
                     const QModelIndex &parent = QModelIndex());
     bool removeRows(int position, int rows,
                     const QModelIndex &parent = QModelIndex());
-	
+	bool setData(const QModelIndex &index, const QVariant &value,
+                 int role = Qt::EditRole);
+
 	// XS 
 	void addRow(pluginsTreeItem *row);
 	pluginsTreeItem* getRootItem() {return rootItem;}

@@ -40,7 +40,7 @@
 pluginsTreeModel::pluginsTreeModel(QObject *parent) 
 : QAbstractItemModel(parent) {
     QVector<QVariant> rootData;
-    rootData << "Plugin Name";
+    rootData << "Plugin Name" << "Slider Number";
     rootItem = new pluginsTreeItem(rootData);
 }
 
@@ -75,11 +75,27 @@ QVariant pluginsTreeModel::data(const QModelIndex &index, int role) const{
     return item->data(index.column());
 }
 
+bool pluginsTreeModel::setData(const QModelIndex &index, const QVariant &value,
+                        int role)
+{
+    if (role != Qt::EditRole)
+        return false;
+	
+    pluginsTreeItem *item = getItem(index);
+    bool result = item->setData(index.column(), value);
+	
+    if (result)
+        emit dataChanged(index, index);
+	
+    return result;
+}
+
+
 Qt::ItemFlags pluginsTreeModel::flags(const QModelIndex &index) const{
     if (!index.isValid())
         return 0;
 	
-    return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
+    return Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 }
 
 QVariant pluginsTreeModel::headerData(int section, Qt::Orientation orientation,

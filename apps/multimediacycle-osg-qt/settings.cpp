@@ -1,7 +1,9 @@
 /* 
  * File:   settings.cpp
  * Author: xavier
- * inspired from Qt's "browser" example
+ * Inspiration sources :
+ *   - Qt's "browser" example
+ *   - Qt's "Editable Tree Model" example
  *
  * @date 31/03/10
  * @copyright (c) 2010 – UMONS - Numediart
@@ -46,9 +48,9 @@ SettingsDialog::SettingsDialog(QWidget *parent) : QMainWindow(parent) {
 	this->media_cycle = NULL;
 	this->ptm = new pluginsTreeModel();
 	treeViewPluginsLibrairies->setModel(this->ptm);
+	for (int column = 0; column < ptm->columnCount(); ++column)
+        treeViewPluginsLibrairies->resizeColumnToContents(column);
 
-
-	
 	this->media_type = comboMediaType->currentText().toStdString();
 	this->browser_mode = comboBrowserMode->currentText().toStdString();
 		
@@ -66,6 +68,7 @@ SettingsDialog::SettingsDialog(QWidget *parent) : QMainWindow(parent) {
 }
 
 SettingsDialog::~SettingsDialog(){
+	// this should also delete the children of the root node
 	delete this->ptm;
 }
 
@@ -116,18 +119,17 @@ bool SettingsDialog::setMediaType(string _mt) {
 
 // ----- SLOTS -----
 
-bool SettingsDialog::saveConfigFile() {
+bool SettingsDialog::saveConfigFile(std::string _filename) {
 	// XS TEST
-	this->writeXMLConfigFile();
+	this->writeXMLConfigFile(_filename);
 	return true;
 //	return (multi_media_cycle->saveConfigFile());
 }
 
-bool SettingsDialog::writeXMLConfigFile() {
+bool SettingsDialog::writeXMLConfigFile(std::string _filename) {
 	configFile = doc.createElement("MediaCycleConfig"); //creation de la balise 
 	doc.appendChild(configFile); //filiation de la balise
-	std::string s = "/Users/xavier/tmp/mesures.xml";
-	QString qs = QString::fromStdString(s);
+	QString qs = QString::fromStdString(_filename);
 	
 	file.setFileName(qs); 
 	if (!file.open(QIODevice::WriteOnly)) //ouverture du fichier de sauvegarde 
@@ -161,8 +163,9 @@ bool SettingsDialog::writeXMLConfigFile() {
 	
 }
 
-bool SettingsDialog::readXMLConfigFile() {
-	QFile file("/Users/xavier/tmp/mesures.xml"); 
+bool SettingsDialog::readXMLConfigFile(std::string _filename) {
+	QString qs = QString::fromStdString(_filename);
+	QFile file(qs); 
 	if (!file.open(QIODevice::ReadOnly)) 
 		return false; 
 	if (!doc.setContent(&file)) {   //établit le document XML à  
@@ -275,7 +278,7 @@ void SettingsDialog::on_buttonApplyCurrentSettings_clicked(){
 
 }
 
-void SettingsDialog::addPluginsFromLibrary(QString _fileName){//, QListViewItem* _item){
+void SettingsDialog::addPluginsFromLibrary(QString _fileName){
 	if (media_cycle == NULL) {
 		cout << "load media_cycle first" << endl;
 		return;
@@ -295,7 +298,7 @@ void SettingsDialog::addPluginsFromLibrary(QString _fileName){//, QListViewItem*
 	
 	// add library item
 	QVector<QVariant> libraryData;
-	libraryData << _fileName;
+	libraryData << _fileName << " - ";
 	pluginsTreeItem* libraryItem = new pluginsTreeItem(libraryData, ptm->getRootItem());
 
 	// add plugins from this library as children
@@ -305,20 +308,27 @@ void SettingsDialog::addPluginsFromLibrary(QString _fileName){//, QListViewItem*
 	
 	QStringList plugin_list;
 	
+	// gives a new slider ID to each feature.
+	// then the user can manually adapt it
+	// XS TODO: add tests for this, the user can't put any number of sliders!
+	int p=ptm->rowCount();
 	for (iter = plug.begin(); iter != plug.end(); iter++) {
 		string s = (*iter)->getName().c_str();
 		QString ss = QString::fromStdString( s );
+		QString sid = QString::number(p);
 		QVector<QVariant> pluginData;
-		pluginData << ss;
+		pluginData << ss << p;
 		pluginsTreeItem* pluginItem = new pluginsTreeItem(pluginData, libraryItem);
 		libraryItem->appendChild(pluginItem);
-
-//		QListViewItem *a = new QListViewItem( _item, s );		
-//		QListWidgetItem * item = new QListWidgetItem(s,listWidgetFeaturesPlugins);
+		p++;
 //		item->setCheckState (Qt::Unchecked);
 	}
 	
 	ptm->addRow(libraryItem);
+//	for (int column = 0; column < ptm->columnCount(); ++column)
+//        treeViewPluginsLibrairies->resizeColumnToContents(column);
+
+	// XS TODO: do this at the end, after selection is made.
 	// keep track of all libraries added
 	this->multi_media_cycle->addPluginsLibrary(plugins_library);
 }
