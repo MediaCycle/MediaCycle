@@ -56,8 +56,8 @@ int main(int argc, char** argv) {
 		build_type = "Debug";
 #endif
 		
-		mediacycle->addPlugin("../../../plugins/audio/" + build_type + "/mc_audio.dylib");
-		mediacycle->addPlugin("../../../plugins/segmentation/" + build_type + "/mc_segmentation.dylib");
+		mediacycle->addPluginLibrary("../../../plugins/audio/" + build_type + "/mc_audio.dylib");
+		mediacycle->addPluginLibrary("../../../plugins/segmentation/" + build_type + "/mc_segmentation.dylib");
 	
 		//mediacycle->importDirectory("/Users/dtardieu/data/AudioCycleProPackTest/zero-g-pro-pack_b/Super Funk/Funkmachine-E/", 1);
 		//mediacycle->importDirectory("/Users/dtardieu/data/test/testEnv/",1);

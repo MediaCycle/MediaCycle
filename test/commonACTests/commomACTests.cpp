@@ -73,8 +73,8 @@ void test_audio_visualisation_plugins(){
 	cout << "Test Plugins" << endl;
 	std::string build_type ("Release");
 	build_type = "Debug";
-	media_cycle->addPlugin("../../../plugins/audio/" + build_type + "/mc_audiofeatures.dylib");	
-	media_cycle->addPlugin("../../../plugins/visualisation/" + build_type + "/mc_visualisation.dylib");
+	media_cycle->addPluginLibrary("../../../plugins/audio/" + build_type + "/mc_audiofeatures.dylib");
+	media_cycle->addPluginLibrary("../../../plugins/visualisation/" + build_type + "/mc_visualisation.dylib");
 	media_cycle->dumpPluginsList();
 
 	delete media_cycle;

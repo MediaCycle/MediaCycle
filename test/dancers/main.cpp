@@ -86,7 +86,7 @@ int main(int argc, char** argv) {
 	cout<<"new MediaCycle"<<endl;
 	MediaCycle* mediacycle;
 	mediacycle = new MediaCycle(MEDIA_TYPE_VIDEO);
-	if (mediacycle->addPlugin (visPluginFilename) < 0){
+	if (mediacycle->addPluginLibrary (visPluginFilename) < 0){
 		cerr << "<MediaCycle-Dancers main> could not add Plugin: " << visPluginFilename << endl;
 		return EXIT_FAILURE;
 	}

@@ -61,7 +61,7 @@ ACImageCycleOsgQt::ACImageCycleOsgQt(QWidget *parent)
 	#elif defined (__WIN32__)
 		media_cycle->addPlugin(QApplication::applicationDirPath().toStdString() + "\..\..\plugins\image\mc_image.dll");
 	#else
-		media_cycle->addPlugin(QApplication::applicationDirPath().toStdString() + "/../../plugins/image/mc_image.so");
+		media_cycle->addPluginLibrary(QApplication::applicationDirPath().toStdString() + "/../../plugins/image/mc_image.so");
 	#endif
 		
 	ui.browserOsgView->move(0,20);

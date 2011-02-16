@@ -155,7 +155,7 @@ void testoneimage(string sim1){
 	string f2=acl_dir+sim1.substr(0, tmp + 1)+"acl";
 	MediaCycle* mediacycle;
 	mediacycle = new MediaCycle(MEDIA_TYPE_IMAGE);
-	mediacycle->addPlugin("/Users/xavier/development/Fall09/ticore-app/Applications/Numediart/MediaCycle/src/Builds/darwin-xcode/plugins/image/Debug/mc_image.dylib");
+	mediacycle->addPluginLibrary("/Users/xavier/development/Fall09/ticore-app/Applications/Numediart/MediaCycle/src/Builds/darwin-xcode/plugins/image/Debug/mc_image.dylib");
 	mediacycle->importDirectory(f1,0);
 	mediacycle->saveACLLibrary(f2);
 	delete mediacycle;
