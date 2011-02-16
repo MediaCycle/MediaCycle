@@ -57,9 +57,9 @@ ACImageCycleOsgQt::ACImageCycleOsgQt(QWidget *parent)
 		#ifdef USE_DEBUG
 			build_type = "Debug";
 		#endif
-		media_cycle->addPlugin(QApplication::applicationDirPath().toStdString() + "/../../../plugins/image/" + build_type + "/mc_image.dylib");
+		media_cycle->addPluginLibrary(QApplication::applicationDirPath().toStdString() + "/../../../plugins/image/" + build_type + "/mc_image.dylib");
 	#elif defined (__WIN32__)
-		media_cycle->addPlugin(QApplication::applicationDirPath().toStdString() + "\..\..\plugins\image\mc_image.dll");
+		media_cycle->addPluginLibrary(QApplication::applicationDirPath().toStdString() + "\..\..\plugins\image\mc_image.dll");
 	#else
 		media_cycle->addPluginLibrary(QApplication::applicationDirPath().toStdString() + "/../../plugins/image/mc_image.so");
 	#endif

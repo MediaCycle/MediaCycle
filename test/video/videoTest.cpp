@@ -497,7 +497,7 @@ void test_show_fft(std::string full_video_path){
 void test_Thomas(){
 	MediaCycle* mediacycle;
 	mediacycle = new MediaCycle(MEDIA_TYPE_AUDIO);
-//	mediacycle->addPlugin(video_plugin_path+"mc_audio.dylib");
+//	mediacycle->addPluginLibrary(video_plugin_path+"mc_audio.dylib");
 	mediacycle->importACLLibrary("/Users/xavier/Desktop/ThomasIsrael-Sons/short/extraitsxaviercleans/second_try-atm+mus.acl");
 	mediacycle->getLibrary()->saveSorted("/Users/xavier/Desktop/ThomasIsrael-Sons/short/extraitsxaviercleans/second_try-atm+mus_sorted.acl");
 	delete mediacycle;	

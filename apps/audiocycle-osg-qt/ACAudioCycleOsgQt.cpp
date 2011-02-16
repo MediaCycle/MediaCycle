@@ -56,7 +56,7 @@ ACAudioCycleOsgQt::ACAudioCycleOsgQt(QWidget *parent)
 		#ifdef USE_DEBUG
 			build_type = "Debug";
 		#endif
-		int vizplugloaded = media_cycle->addPlugin("../../../plugins/visualisation/" + build_type + "/mc_visualisation.dylib");
+		int vizplugloaded = media_cycle->addPluginLibrary("../../../plugins/visualisation/" + build_type + "/mc_visualisation.dylib");
 		if ( vizplugloaded == 1 )
 		{
 			//CF this should be on a separate function or even on a mediacycle-(osg-)qt class
@@ -108,8 +108,8 @@ ACAudioCycleOsgQt::ACAudioCycleOsgQt(QWidget *parent)
 				}
 			}
 		}
-		media_cycle->addPlugin("../../../plugins/audio/" + build_type + "/mc_audio.dylib");	
-		//media_cycle->addPlugin("../../../plugins/segmentation/" + build_type + "/mc_segmentation.dylib");	
+		media_cycle->addPluginLibrary("../../../plugins/audio/" + build_type + "/mc_audio.dylib");	
+		//media_cycle->addPluginLibrary("../../../plugins/segmentation/" + build_type + "/mc_segmentation.dylib");	
 	#endif
 
 	audio_engine = new ACAudioEngine();

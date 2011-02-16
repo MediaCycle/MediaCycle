@@ -56,9 +56,9 @@ int main(int argc, char** argv) {
 	mediacycle = new MediaCycle(MEDIA_TYPE_AUDIO, "/home/alexis/Work/eNTERFACE/eNTERFACE09/JMUI/", "avlc-lib.acl");
 	//mediacycle = new MediaCycle(MEDIA_TYPE_AUDIO,"/home/alexis/Work/eNTERFACE/eNTERFACE09/AVLC/test/","avlc-lib.acl");
 	//mediacycle = new MediaCycle(MEDIA_TYPE_AUDIO,"/home/alexis/Work/eNTERFACE/eNTERFACE09/AVLC/","avlc-lib-20090806-1.acl");
-	//mediacycle->addPlugin("/home/alexis/Programmation/TiCore-app/Applications/Numediart/MediaCycle/src/Builds/linux-x86/plugins/eyesweb/mc_eyesweb.so");
-	//mediacycle->addPlugin("/home/alexis/Programmation/TiCore-app/Applications/Numediart/MediaCycle/src/Builds/linux-x86/plugins/greta/mc_greta.so");
-	//mediacycle->addPlugin("/home/alexis/Programmation/TiCore-app/Applications/Numediart/MediaCycle/src/Builds/linux-x86/plugins/audioanalysis/mc_audioanalysis.so");
+	//mediacycle->addPluginLibrary("/home/alexis/Programmation/TiCore-app/Applications/Numediart/MediaCycle/src/Builds/linux-x86/plugins/eyesweb/mc_eyesweb.so");
+	//mediacycle->addPluginLibrary("/home/alexis/Programmation/TiCore-app/Applications/Numediart/MediaCycle/src/Builds/linux-x86/plugins/greta/mc_greta.so");
+	//mediacycle->addPluginLibrary("/home/alexis/Programmation/TiCore-app/Applications/Numediart/MediaCycle/src/Builds/linux-x86/plugins/audioanalysis/mc_audioanalysis.so");
 
 	cout << "setCulsterN" << endl;
 	mediacycle->getBrowser()->setClusterNumber(1);
