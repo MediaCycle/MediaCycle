@@ -34,10 +34,18 @@
  */
 
 #include "ACOsgBrowserRenderer.h"
-#include "ACOsgAudioRenderer.h"
+#if defined (SUPPORT_AUDIO)
+	#include "ACOsgAudioRenderer.h"
+#endif //defined (SUPPORT_AUDIO)
+#if defined (SUPPORT_IMAGE)
 #include "ACOsgImageRenderer.h"
+#endif //defined (SUPPORT_IMAGE)
+#if defined (SUPPORT_VIDEO)
 #include "ACOsgVideoRenderer.h"
+#endif //defined (SUPPORT_VIDEO)
+#if defined (SUPPORT_3DMODEL)
 #include "ACOsg3DModelRenderer.h"
+#endif //defined (SUPPORT_3DMODEL)
 //#include "ACOsgTextRenderer.h"
 
 #include <osgDB/Registry>
@@ -473,23 +481,29 @@ bool ACOsgBrowserRenderer::addNodes(int _first, int _last){
 			media_type = media_cycle->getMediaType(i);
 			switch (media_type) {
 				case MEDIA_TYPE_AUDIO:
+					#if defined (SUPPORT_AUDIO)
 					node_renderer[i] = new ACOsgAudioRenderer();
+					#endif //defined (SUPPORT_AUDIO)
 					break;
 				case MEDIA_TYPE_IMAGE:
-#if !defined (APPLE_IOS)
+					#if defined (SUPPORT_IMAGE)
 					node_renderer[i] = new ACOsgImageRenderer();
-#endif//CF APPLE_IOS
+					#endif //defined (SUPPORT_IMAGE)
 					break;
 				case MEDIA_TYPE_VIDEO:
-#if !defined (APPLE_IOS)
+					#if defined (SUPPORT_VIDEO)
 					node_renderer[i] = new ACOsgVideoRenderer();
-#endif//CF APPLE_IOS
+					#endif //defined (SUPPORT_VIDEO)
 					break;
 				case MEDIA_TYPE_3DMODEL:
+					#if defined (SUPPORT_3DMODEL)
 					node_renderer[i] = new ACOsg3DModelRenderer();
+					#endif //defined (SUPPORT_3DMODEL)
 					break;
 				case MEDIA_TYPE_TEXT:
+					#if defined (SUPPORT_TEXT)
 					node_renderer[i] = new ACOsgTextRenderer();
+					#endif //defined (SUPPORT_TEXT)
 					break;
 				default:
 					node_renderer[i] = NULL;

@@ -1,9 +1,8 @@
+SET(PLUGIN_NAME "greta")
+SET(TARGET_NAME "${PLUGIN_PREFIX}${PLUGIN_NAME}")
 IF ( USE_PSYCLONE )
     FILE(GLOB SRC *.cpp *.c)
     FILE(GLOB HDR *.hpp *.h)
-
-    SET(PLUGIN_NAME "greta")
-	SET(TARGET_NAME "${PLUGIN_PREFIX}${PLUGIN_NAME}")
 
 # NB: linux only for now, should work with OSX as well, won't work with windows (what is the install path on win32 ?)
 # this supposes that cpp AIR plug is installed. (see http://www.mindmakers.org/projects/Psyclone/)
@@ -29,5 +28,8 @@ IF ( USE_PSYCLONE )
     TARGET_LINK_LIBRARIES(${TARGET_NAME} CoreLibrary)
     TARGET_LINK_LIBRARIES(${TARGET_NAME} pthread dl)
 
-    INSTALL(TARGETS ${TARGET_NAME} LIBRARY DESTINATION lib/${PROJECT_NAME})
-ENDIF ( USE_PSYCLONE )
+    #INSTALL(TARGETS ${TARGET_NAME} LIBRARY DESTINATION lib/${PROJECT_NAME})
+	MESSAGE("[X] ${TARGET_NAME}")
+ELSE()
+	MESSAGE("[ ] ${TARGET_NAME}")
+ENDIF()

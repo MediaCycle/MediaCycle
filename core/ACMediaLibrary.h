@@ -121,7 +121,9 @@ private:
 	int scanDirectory(std::string _path, int _recursive, std::vector<std::string>& filenames);
 	void incrementMediaID(){mediaID++ ;}
 	int getMediaID(){return mediaID ;}
-	int testFFMPEG(std::string _filename);
+	#if defined(SUPPORT_VIDEO)
+		int testFFMPEG(std::string _filename);
+	#endif //defined (SUPPORT_IMAGE OR SUPPORT_VIDEO)
 
 };
 

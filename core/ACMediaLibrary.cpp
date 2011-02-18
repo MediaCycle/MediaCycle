@@ -58,6 +58,7 @@ namespace fs = boost::filesystem;
 
 #define VERBOSE
 
+#if defined(SUPPORT_VIDEO)
 // CF FFmpeg for checking audio/video channels in containers
 extern "C" {
 	#include <libavcodec/avcodec.h>
@@ -67,6 +68,7 @@ extern "C" {
 	#include <stdlib.h>
 	#include <stdbool.h>
 }
+#endif //defined (SUPPORT_VIDEO)
 
 using namespace std;
 // to save library items in binary format, uncomment the following line:
@@ -97,8 +99,10 @@ ACMediaLibrary::ACMediaLibrary(ACMediaType aMediaType) {
 	this->cleanLibrary();
 	media_type = aMediaType;
 	
+	#if defined(SUPPORT_VIDEO)
 	// Register all formats and codecs from FFmpeg
 	av_register_all();
+	#endif //defined (SUPPORT_VIDEO)
 }
 
 ACMediaLibrary::~ACMediaLibrary(){
@@ -191,6 +195,8 @@ int ACMediaLibrary::importFile(std::string _filename, ACPluginManager *acpl, boo
 	}
 	else {
 		cout << "other media type, skipping " << _filename << " ... " << endl;
+		cout << "-> media_type " << media_type << " ... " << endl;
+		cout << "-> fileMediaType " << fileMediaType << " ... " << endl;
 		return 0;
 	}
 
@@ -839,6 +845,7 @@ void ACMediaLibrary::saveSorted(string output_file){
 
 // -------------------------------------------------------------------------
 // test 
+#if defined(SUPPORT_VIDEO)
 int ACMediaLibrary::testFFMPEG(std::string _filename){	
 	//CF early check in video files for audio and video streams, towards ACMediaDocuments
 	// from http://www.inb.uni-luebeck.de/~boehme/using_libavcodec.html
@@ -898,4 +905,4 @@ int ACMediaLibrary::testFFMPEG(std::string _filename){
 		}
 	}
 }
-
+#endif //defined (SUPPORT_VIDEO)

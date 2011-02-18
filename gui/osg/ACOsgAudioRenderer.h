@@ -36,6 +36,8 @@
 #ifndef __ACOSG_AUDIO_RENDERER_H__
 #define __ACOSG_AUDIO_RENDERER_H__
 
+#if defined (SUPPORT_AUDIO)
+
 #include "ACOsgMediaRenderer.h"
 
 class ACOsgAudioRenderer : public ACOsgMediaRenderer {
@@ -62,4 +64,5 @@ public:
 	void updateNodes(double ratio=0.0);
 };
 
+#endif //defined (SUPPORT_AUDIO)
 #endif

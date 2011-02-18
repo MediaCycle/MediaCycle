@@ -33,6 +33,7 @@
  *
  */
 
+#if defined (SUPPORT_AUDIO)
 #include "ACOsgAudioTrackControlsRenderer.h"
 
 #include <osgGA/GUIEventHandler>
@@ -128,3 +129,4 @@ void ACOsgAudioTrackControlsRenderer::updateControls(double ratio) {
 	
 	//track_node->setMatrix(T);
 }
+#endif //defined (SUPPORT_AUDIO)

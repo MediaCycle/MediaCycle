@@ -1,3 +1,4 @@
+IF(SUPPORT_AUDIO AND USE_AUDIOGARDEN)
 	FILE(GLOB SRC *.cpp *.c)
 	FILE(GLOB HDR *.hpp *.h)
 
@@ -10,3 +11,7 @@
 	TARGET_LINK_LIBRARIES(audiogarden-test mediacycle audiofeatures audiogarden ${SNDFILE_LIBRARY} ${SAMPLERATE_LIBRARY})
 
 	INSTALL(TARGETS audiogarden-test RUNTIME DESTINATION bin)
+	MESSAGE("[X] audiogarden")
+ELSE()
+	MESSAGE("[ ] audiogarden")
+ENDIF()

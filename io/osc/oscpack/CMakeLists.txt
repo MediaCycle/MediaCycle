@@ -6,6 +6,5 @@ ADD_LIBRARY(oscpack STATIC ${oscpack_SRC} ${oscpack_HDR})
 IF ( MINGW )
 	TARGET_LINK_LIBRARIES(oscpack winmm ws2_32) # CF: should be detected in main CMakeLists.txt wsock32
 ENDIF ( MINGW )
-INSTALL(TARGETS oscpack ARCHIVE DESTINATION lib)
-#INSTALL(FILES ${oscpack_HDR} DESTINATION include/TiCore/Io/Osc)
+#INSTALL(TARGETS oscpack ARCHIVE DESTINATION lib)
 ENDIF ( USE_OSC )

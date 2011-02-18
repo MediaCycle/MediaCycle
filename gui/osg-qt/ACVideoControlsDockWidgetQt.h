@@ -43,20 +43,22 @@
 #include "ui_ACVideoControlsDockWidgetQt.h"
 #include <MediaCycle.h>
 #include <ACOsgCompositeViewQt.h>
-#include <ACAudioEngine.h>
 
 class ACVideoControlsDockWidgetQt : public QDockWidget {
 Q_OBJECT
-	
+
+//#if defined (SUPPORT_VIDEO)// don't use it!
 private slots:
 	// Video controls
 	void on_pushButtonMuteAll_clicked();
 	void on_comboBoxVideoSummary_activated(const QString & text);
+//#endif //defined (SUPPORT_VIDEO)
 	
 public:
 	ACVideoControlsDockWidgetQt(QWidget *parent = 0);
 	~ACVideoControlsDockWidgetQt();
-	
+
+#if defined (SUPPORT_VIDEO)	
 	void setMediaCycle(MediaCycle* _media_cycle){ media_cycle = _media_cycle;}
 	MediaCycle* getMediaCycle() {return media_cycle;}
 	void setOsgView(ACOsgCompositeViewQt* _osg_view){ osg_view = _osg_view;}
@@ -66,5 +68,6 @@ private:
 	Ui::ACVideoControlsDockWidgetQt ui;
 	MediaCycle* media_cycle;
 	ACOsgCompositeViewQt* osg_view;
+#endif //defined (SUPPORT_VIDEO)	
 };
 #endif

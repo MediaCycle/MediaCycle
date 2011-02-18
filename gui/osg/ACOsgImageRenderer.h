@@ -36,12 +36,10 @@
 #ifndef __ACOSG_IMAGE_RENDERER_H__
 #define __ACOSG_IMAGE_RENDERER_H__
 
-#if !defined (APPLE_IOS)
+#if defined (SUPPORT_IMAGE) || defined (SUPPORT_VIDEO)
 
 #include "ACOsgMediaRenderer.h"
 #include "ACOpenCVInclude.h"
-
-//osg::Image* Convert_OpenCV_TO_OSG_IMAGE(IplImage* cvImg);
 
 class ACOsgImageRenderer : public ACOsgMediaRenderer  {
 protected:
@@ -65,5 +63,5 @@ public:
 	void updateNodes(double ratio=0.0);
 };
 
-#endif//CF APPLE_IOS
+#endif //defined (SUPPORT_IMAGE) || defined (SUPPORT_VIDEO)
 #endif

@@ -43,7 +43,10 @@
 using namespace osg;
 
 ACOsgCompositeViewQt::ACOsgCompositeViewQt( QWidget * parent, const char * name, const QGLWidget * shareWidget, WindowFlags f):
-	QGLWidget(parent, shareWidget, f), media_cycle(NULL),audio_engine(NULL),
+	QGLWidget(parent, shareWidget, f), media_cycle(NULL),
+	#if defined (SUPPORT_AUDIO)
+		audio_engine(NULL),
+	#endif //defined (SUPPORT_AUDIO)
 	mousedown(0), zoomdown(0), forwarddown(0), autoplaydown(0),rotationdown(0),
 	borderdown(0), transportdown(0), 
 	refx(0.0f), refy(0.0f),
@@ -80,8 +83,9 @@ ACOsgCompositeViewQt::ACOsgCompositeViewQt( QWidget * parent, const char * name,
 	// Audio waveforms
 	screen_width = QApplication::desktop()->screenGeometry().width();
 	timeline_renderer->setScreenWidth(screen_width);
-	
-	audio_engine = NULL;
+	#if defined (SUPPORT_AUDIO)
+		audio_engine = NULL;
+	#endif //defined (SUPPORT_AUDIO)
 	
 	//
 	sepy = 0;//height()/4;// CF browser/timeline proportions at startup
@@ -594,7 +598,7 @@ void ACOsgCompositeViewQt::mouseReleaseEvent( QMouseEvent* event )
 						}
 						else
 							this->getTimelineRenderer()->getTrack(0)->updateMedia( loop ); //media_cycle->getLibrary()->getMedia(loop) );
-						this->getTimelineControlsRenderer()->getControls(0)->updateMedia( loop ); //media_cycle->getLibrary()->getMedia(loop) );
+						//this->getTimelineControlsRenderer()->getControls(0)->updateMedia( loop ); //media_cycle->getLibrary()->getMedia(loop) );
 						media_cycle->setNeedsDisplay(true);
 					//}
 				}
@@ -648,5 +652,5 @@ void ACOsgCompositeViewQt::updateTransformsFromTimeline( double frac)
 	////////media_cycle->setClosestNode(closest_node);
 	// recompute scene graph	
 	timeline_renderer->updateTracks(frac); // animation starts at 0.0 and ends at 1.0
-	timeline_controls_renderer->updateControls(frac); // animation starts at 0.0 and ends at 1.0
+	//timeline_controls_renderer->updateControls(frac); // animation starts at 0.0 and ends at 1.0
 }

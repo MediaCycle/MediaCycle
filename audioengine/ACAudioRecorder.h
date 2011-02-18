@@ -41,15 +41,9 @@
 #if defined(__APPLE__)
 	#include <OpenAL/al.h>
 	#include <OpenAL/alc.h>
-	/*#if defined(__x86_64__)
-		#include <AL/alut.h>//CF
-	#else
-		#include <MyOpenALSupport.h>//CF
-	#endif*/
 #else
 	#include <AL/al.h>
 	#include <AL/alc.h>
-	//#include <AL/alut.h>
 #endif
 #include <sndfile.h>
 #include <ctime>

@@ -43,7 +43,15 @@
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
-
+	
+	// Hack for Apple *.app bundles not to load installed Qt Frameworks
+	#ifdef Q_WS_MAC
+	QDir dir(QApplication::applicationDirPath());
+	dir.cdUp();
+	dir.cd("Plugins");
+	QApplication::setLibraryPaths(QStringList(dir.absolutePath()));
+	#endif
+	
     ACMultiMediaCycleOsgQt window;
     window.show();
 

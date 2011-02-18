@@ -48,13 +48,19 @@
 #include "ui_ACMultiMediaCycleOsgQt.h"
 #include <ACOsgCompositeViewQt.h>
 #include <MediaCycle.h>
-#include <ACAudioEngine.h>
+#if defined (SUPPORT_AUDIO)
+	#include <ACAudioEngine.h>
+#endif //defined (SUPPORT_AUDIO)
 
 // Dock Widgets
 /*#include <ACMediaConfigDockWidgetQt.h>
 #include <ACBrowserControlsClustersNeighborsDockWidgetQt.h>*/
-#include <ACAudioControlsDockWidgetQt.h>
-#include <ACVideoControlsDockWidgetQt.h>
+#if defined (SUPPORT_AUDIO)
+	#include <ACAudioControlsDockWidgetQt.h>
+#endif //defined (SUPPORT_AUDIO)
+#if defined (SUPPORT_VIDEO)
+	#include <ACVideoControlsDockWidgetQt.h>
+#endif //defined (SUPPORT_VIDEO)
 
 // FORWARD DECLARATIONS
 QT_BEGIN_NAMESPACE
@@ -135,14 +141,18 @@ private:
 	ACBrowserMode browser_mode;
 	std::string config_file;	
 	std::vector<std::string> plugins_libraries;
-	
-	ACAudioEngine *audio_engine;
-	
+	#if defined (SUPPORT_AUDIO)
+		ACAudioEngine *audio_engine;
+	#endif //defined (SUPPORT_AUDIO)
 	// Dock Widgets
 	/*ACMediaConfigDockWidgetQt* mediaConfig;
 	ACBrowserControlsClustersNeighborsDockWidgetQt browserControls;*/
-	ACAudioControlsDockWidgetQt* audioControls;
+	#if defined (SUPPORT_AUDIO)
+		ACAudioControlsDockWidgetQt* audioControls;
+	#endif //defined (SUPPORT_AUDIO)
+	#if defined (SUPPORT_VIDEO)
 	ACVideoControlsDockWidgetQt* videoControls;
+	#endif //defined (SUPPORT_VIDEO)
 	vector<int> lastDocksVisibilities; //state stored before hiding all docks with the toggle
 	bool wasControlsToggleChecked;
 	

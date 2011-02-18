@@ -33,6 +33,7 @@
  *
  */
 
+#if defined (SUPPORT_AUDIO)
 #ifndef __ACOSG_AUDIO_TRACK_RENDERER_H__
 #define __ACOSG_AUDIO_TRACK_RENDERER_H__
 
@@ -78,3 +79,4 @@ class ACOsgAudioTrackRenderer : public ACOsgTrackRenderer {
 };
 
 #endif
+#endif //defined (SUPPORT_AUDIO)

@@ -1,8 +1,8 @@
 /**
  * @brief AGOsgCompositeViewQt.h
  * @author Christian Frisson
- * @date 06/12/2010
- * @copyright (c) 2010 – UMONS - Numediart
+ * @date 18/02/2011
+ * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -68,6 +68,8 @@
 //  a MediaCycle browser and multitrack timeline viewer 
 //  customized for AudioGarden
 //
+
+#ifdef USE_AUDIOGARDEN
 
 #include "AGSynthesis.h"
 
@@ -173,4 +175,5 @@ class AGOsgCompositeViewQt : public osgViewer::CompositeViewer, public QGLWidget
 		void stopSound();
 };
 
+#endif
 #endif

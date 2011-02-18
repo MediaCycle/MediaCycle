@@ -45,41 +45,57 @@ using std::string;
 // XS note: this does not seem optimal, because we need to change many things upong adding one new media type
 
 ACMediaData::ACMediaData() { 
+	#if defined (SUPPORT_AUDIO)
 	audio_ptr = NULL;
 	audio_frames = 0;
-#if !defined (APPLE_IOS)	
+	#endif //defined (SUPPORT_AUDIO)
+	#if defined (SUPPORT_IMAGE) || defined (SUPPORT_VIDEO)
 	image_ptr = NULL;
+	#endif //defined (SUPPORT_IMAGE) || defined (SUPPORT_VIDEO)
+	#if defined (SUPPORT_VIDEO)
 	video_ptr = NULL;
-#endif//CF APPLE_IOS
+	#endif //defined (SUPPORT_VIDEO)
+	#if defined (SUPPORT_3DMODEL)
 	model_ptr = NULL;
+	#endif //defined (SUPPORT_3DMODEL)
 }
 
-ACMediaData::ACMediaData(ACMediaType _type, std::string _fname) { 
+ACMediaData::ACMediaData(ACMediaType _type, std::string _fname) {
+	#if defined (SUPPORT_AUDIO)
 	audio_ptr = NULL;
-#if !defined (APPLE_IOS)		
+	#endif //defined (SUPPORT_AUDIO)
+	#if defined (SUPPORT_IMAGE) || defined (SUPPORT_VIDEO)
 	image_ptr = NULL;
+	#endif //defined (SUPPORT_IMAGE) || defined (SUPPORT_VIDEO)
+	#if defined (SUPPORT_VIDEO)
 	video_ptr = NULL;
-#endif//CF APPLE_IOS	
+	#endif //defined (SUPPORT_VIDEO)
+	#if defined (SUPPORT_3DMODEL)
 	model_ptr = NULL;
+	#endif //defined (SUPPORT_3DMODEL)
 	media_type = _type;
 	if(_fname!=""){
 		file_name=_fname;
 		switch (_type) {
 			case MEDIA_TYPE_AUDIO :
+				#if defined (SUPPORT_AUDIO)
 				readAudioData(_fname);
+				#endif //defined (SUPPORT_AUDIO)
 				break;
 			case MEDIA_TYPE_IMAGE :
-	#if !defined (APPLE_IOS)
+				#if defined (SUPPORT_IMAGE) || defined (SUPPORT_VIDEO)
 				readImageData(_fname);
-	#endif//CF APPLE_IOS		
+				#endif //defined (SUPPORT_IMAGE) || defined (SUPPORT_VIDEO)
 				break;
 			case MEDIA_TYPE_VIDEO :
-	#if !defined (APPLE_IOS)
+				#if defined (SUPPORT_VIDEO)
 				readVideoData(_fname);
-	#endif//CF APPLE_IOS			
+				#endif //defined (SUPPORT_VIDEO)
 				break;
 			case MEDIA_TYPE_3DMODEL :
+				#if defined (SUPPORT_3DMODEL)
 				read3DModelData(_fname);
+				#endif //defined (SUPPORT_3DMODEL)
 				break;
 			default:
 				break;
@@ -87,17 +103,23 @@ ACMediaData::ACMediaData(ACMediaType _type, std::string _fname) {
 	}	
 }
 
-ACMediaData::~ACMediaData() { 
+ACMediaData::~ACMediaData() {
+#if defined (SUPPORT_AUDIO)
 	if (audio_ptr != NULL) delete [] audio_ptr;
-#if !defined (APPLE_IOS)
+#endif //defined (SUPPORT_AUDIO)
+#if defined (SUPPORT_IMAGE) || defined (SUPPORT_VIDEO)
 	if (image_ptr != NULL) cvReleaseImage(&image_ptr);
+#endif //defined (SUPPORT_IMAGE) || defined (SUPPORT_VIDEO)
+#if defined (SUPPORT_VIDEO)
 	if (video_ptr != NULL) cvReleaseCapture(&video_ptr);
-#endif//CF APPLE_IOS
+#endif //defined (SUPPORT_VIDEO)
+#if defined (SUPPORT_3DMODEL)
 	if (model_ptr != NULL) { model_ptr->unref(); model_ptr=0; }
+#endif //defined (SUPPORT_3DMODEL)
 }
 
+#if defined (SUPPORT_AUDIO)
 void ACMediaData::readAudioData(string _fname){ 
-	
 	SF_INFO sfinfo;
 	SNDFILE* testFile;
 	if (! (testFile = sf_open (_fname.c_str(), SFM_READ, &sfinfo))){  
@@ -122,8 +144,9 @@ void ACMediaData::setAudioData(float* _data, float _sample_number){
 		cerr << "<ACMediaData::setAudioData> Could not set data" << endl;
 	}
 }
+#endif //defined (SUPPORT_AUDIO)
 
-#if !defined (APPLE_IOS)
+#if defined (SUPPORT_IMAGE) || defined (SUPPORT_VIDEO)
 void ACMediaData::readImageData(string _fname){ 
 	image_ptr = cvLoadImage(_fname.c_str(), CV_LOAD_IMAGE_COLOR);	
 	try {
@@ -145,7 +168,9 @@ void ACMediaData::setImageData(IplImage* _data){
 	}
 	
 }
+#endif //defined (SUPPORT_IMAGE) || defined (SUPPORT_VIDEO)
 
+#if defined (SUPPORT_VIDEO)
 void ACMediaData::readVideoData(string _fname){
 	video_ptr = cvCreateFileCapture(_fname.c_str());		
 	if( !video_ptr ) {
@@ -163,8 +188,9 @@ void ACMediaData::setVideoData(CvCapture* _data){
 	}
 	
 }
-#endif//CF APPLE_IOS
+#endif //defined (SUPPORT_VIDEO)
 
+#if defined (SUPPORT_3DMODEL)
 void ACMediaData::read3DModelData(string _fname){ 
 	
 	if (model_ptr != NULL) { model_ptr->unref(); model_ptr=0; }
@@ -184,35 +210,40 @@ void ACMediaData::set3DModelData(osg::ref_ptr< osg::Node > _data)
 		cerr << "<ACMediaData::set3DModelData> Could not set data" << endl;
 	}
 	
-}	
+}
+#endif //defined (SUPPORT_3DMODEL)
 
 bool ACMediaData::copyData(ACMediaData* m){
 	bool success = false;
 	switch (media_type) {
 		case MEDIA_TYPE_AUDIO :
+			#if defined (SUPPORT_AUDIO)
 			audio_ptr = (float *)malloc( m->getAudioLength() * sizeof( float ));
 			memcpy(audio_ptr,m->getAudioData(),m->getAudioLength()* sizeof( float ));
 			if( audio_ptr )
 				success=true;
+			#endif //defined (SUPPORT_AUDIO)
 			break;
 		case MEDIA_TYPE_IMAGE :
-#if !defined (APPLE_IOS)
+			#if defined (SUPPORT_IMAGE) || defined (SUPPORT_VIDEO)
 			cvCopy(m->getImageData(),image_ptr);
 			if( image_ptr )
 				success=true;
-#endif//CF APPLE_IOS		
+			#endif //defined (SUPPORT_IMAGE) || defined (SUPPORT_VIDEO)
 			break;
 		case MEDIA_TYPE_VIDEO :
-#if !defined (APPLE_IOS)
+			#if defined (SUPPORT_VIDEO)
 			cvCopy(m->getVideoData(),video_ptr);
 			if( video_ptr )
 				success=true;
-#endif//CF APPLE_IOS			
+			#endif //defined (SUPPORT_VIDEO)
 			break;
 		case MEDIA_TYPE_3DMODEL :
+			#if defined (SUPPORT_3DMODEL)
 			model_ptr = dynamic_cast<osg::Node*>( m->get3DModelData()->clone(osg::CopyOp::DEEP_COPY_ALL));
 			if( model_ptr )
 				success=true;
+			#endif //defined (SUPPORT_3DMODEL)
 			break;
 		default:
 			break;

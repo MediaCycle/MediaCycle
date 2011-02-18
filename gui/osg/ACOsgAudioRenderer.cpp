@@ -33,6 +33,8 @@
  *
  */
 
+#if defined (SUPPORT_AUDIO)
+
 #include "ACOsgAudioRenderer.h"
 
 using namespace osg;
@@ -517,3 +519,4 @@ void ACOsgAudioRenderer::updateNodes(double ratio) {
 #endif
 
 }
+#endif //defined (SUPPORT_AUDIO)

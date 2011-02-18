@@ -33,12 +33,11 @@
  *
  */
 
+#if defined (SUPPORT_VIDEO)
 #include "ACOsgVideoRenderer.h"
 #include "ACVideo.h"
 
 using namespace osg;
-
-#if !defined (APPLE_IOS)
 
 ACOsgVideoRenderer::ACOsgVideoRenderer() {
 	image_stream = 0;
@@ -89,4 +88,4 @@ void ACOsgVideoRenderer::updateNodes(double ratio) {
 			break;
 	}
 }
-#endif//CF APPLE_IOS
+#endif //defined (SUPPORT_VIDEO)

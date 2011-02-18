@@ -35,9 +35,7 @@
 #ifndef ACIMAGE_H
 #define ACIMAGE_H
 
-#if defined (APPLE_IOS)//CF ugly
-#else
-
+#if defined (SUPPORT_IMAGE) || defined (SUPPORT_VIDEO) 
 #include "ACOpenCVInclude.h"
 #include "ACMedia.h"
 #include <string>
@@ -48,7 +46,9 @@
 // -----------------------------------
 
 osg::Image* Convert_OpenCV_TO_OSG_IMAGE(IplImage* cvImg);
+#endif //defined (SUPPORT_IMAGE) || defined (SUPPORT_VIDEO)
 
+#if defined (SUPPORT_IMAGE)
 class ACImage: public ACMedia {
 	// contains the *minimal* information about an image
 public:
@@ -88,5 +88,5 @@ private:
 	void computeThumbnailSize();
 };
 
-#endif//CF APPLE_IOS
+#endif //defined (SUPPORT_IMAGE)
 #endif // ACIMAGE_H

@@ -1,13 +1,17 @@
-FILE(GLOB SRC *.cpp *.c)
-FILE(GLOB HDR *.hpp *.h)
+IF (BUILD_CLIS)
 
-ADD_EXECUTABLE(mediacycle-cli ${SRC} ${HDR})
-ADD_DEPENDENCIES(mediacycle-cli mediacycle)
-#ADD_DEPENDENCIES(mediacycle-cli audiogarden)
-#INCLUDE_DIRECTORIES(. ../audiogarden)
-INCLUDE_DIRECTORIES(. ../fftooura ../armadillo ../tinyxml)
+	FILE(GLOB SRC *.cpp *.c)
+	FILE(GLOB HDR *.hpp *.h)
 
-TARGET_LINK_LIBRARIES(mediacycle-cli mediacycle tinyxml)
-#TARGET_LINK_LIBRARIES(mediacycle-cli audiogarden)
+	ADD_EXECUTABLE(mediacycle-cli ${SRC} ${HDR})
+	ADD_DEPENDENCIES(mediacycle-cli mediacycle)
+	#ADD_DEPENDENCIES(mediacycle-cli audiogarden)
+	#INCLUDE_DIRECTORIES(. ../audiogarden)
+	INCLUDE_DIRECTORIES(. ../fftooura ../armadillo ../tinyxml)
 
-INSTALL(TARGETS mediacycle-cli RUNTIME DESTINATION bin)
+	TARGET_LINK_LIBRARIES(mediacycle-cli mediacycle tinyxml)
+	#TARGET_LINK_LIBRARIES(mediacycle-cli audiogarden)
+
+	INSTALL(TARGETS mediacycle-cli RUNTIME DESTINATION bin)
+
+ENDIF (BUILD_CLIS)

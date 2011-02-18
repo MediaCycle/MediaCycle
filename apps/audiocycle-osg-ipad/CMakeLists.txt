@@ -1,5 +1,6 @@
-IF ( APPLE_IOS_DEV OR APPLE_IOS_SIM OR APPLE_IOS_XCODE )
-	IF (OPENAL_FOUND)# AND ALUT_FOUND)
+SET(TARGET_NAME "audiocycle-osg-ipad")
+IF(APPLE_IOS_DEV OR APPLE_IOS_SIM OR APPLE_IOS_XCODE)
+	IF (SUPPORT_AUDIO AND OPENAL_FOUND)
 		set(NAME audiocycle-osg-ipad)
 
 		FILE(GLOB SRC *.m *.mm *.xib)
@@ -19,10 +20,9 @@ IF ( APPLE_IOS_DEV OR APPLE_IOS_SIM OR APPLE_IOS_XCODE )
 
 		set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -framework AudioToolbox -framework CoreGraphics -framework CoreFoundation -framework Foundation -framework QuartzCore -framework UIKit -framework OpenGLES -framework OpenAL")
 		TARGET_LINK_LIBRARIES(audiocycle-osg-ipad mediacycle)
-		TARGET_LINK_LIBRARIES(audiocycle-osg-ipad OpenThreads osg osgDB osgGA osgUtils osgViewer)
+		TARGET_LINK_LIBRARIES(audiocycle-osg-ipad ${OPENSCENEGRAPH_LIBRARIES})
 		TARGET_LINK_LIBRARIES(audiocycle-osg-ipad mediacycle-osg)
 		TARGET_LINK_LIBRARIES(audiocycle-osg-ipad audioengine)
-		#TARGET_LINK_LIBRARIES(audiocycle-osg-ipad ${ALUT_LIBRARY})
 
 		# Dirty osgPlugins hack
 		IF( APPLE_IOS_DEV OR APPLE_IOS_SIM )
@@ -40,5 +40,8 @@ IF ( APPLE_IOS_DEV OR APPLE_IOS_SIM OR APPLE_IOS_XCODE )
 			#COMMAND cp /AudioCycleProPackTest/zero-g-pro-pack_*/*/*/* ${CMAKE_CURRENT_BINARY_DIR}/Release/audiocycle-osg-ipad.app/
 			COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/Resources/* ${CMAKE_CURRENT_BINARY_DIR}/Release/audiocycle-osg-ipad.app/ 
 		)
-	ENDIF (OPENAL_FOUND)# AND ALUT_FOUND)
-ENDIF ( APPLE_IOS_DEV OR APPLE_IOS_SIM OR APPLE_IOS_XCODE )
+	ENDIF()
+	MESSAGE("[X] ${TARGET_NAME}")
+ELSE()
+	MESSAGE("[ ] ${TARGET_NAME}")
+ENDIF()

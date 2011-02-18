@@ -37,7 +37,9 @@
 
 #include "ACOpenCVInclude.h"
 #include "ACMediaTypes.h"
+#if defined (SUPPORT_AUDIO)
 #include <sndfile.h>
+#endif //defined (SUPPORT_AUDIO)
 #include <osgDB/ReadFile>
 #include <osg/ComputeBoundsVisitor>
 #include <string>
@@ -48,24 +50,30 @@ public:
 	ACMediaData(ACMediaType _type = MEDIA_TYPE_NONE,std::string _fname="");
 	~ACMediaData();
 	
+	#if defined (SUPPORT_AUDIO)
 	void readAudioData(std::string _fname);
 	void setAudioData(float* _data, float _sample_number);
 	float* getAudioData() {return audio_ptr;}
 	float getAudioLength() {return audio_frames;}
-	
-#if !defined (APPLE_IOS)
+	#endif //defined (SUPPORT_AUDIO)
+
+	#if defined (SUPPORT_IMAGE) || defined (SUPPORT_VIDEO)
 	void readImageData(std::string _fname);
 	void setImageData(IplImage* _data);	
 	IplImage* getImageData() {return image_ptr;}
+	#endif //defined (SUPPORT_IMAGE) || defined (SUPPORT_VIDEO)
 	
+	#if defined (SUPPORT_VIDEO)
 	void readVideoData(std::string _fname);
 	void setVideoData(CvCapture* _data);
 	CvCapture* getVideoData() {return video_ptr;}
-#endif	
+	#endif //defined (SUPPORT_VIDEO)
 
+	#if defined (SUPPORT_3DMODEL)
 	void read3DModelData(std::string _fname);
 	void set3DModelData(osg::ref_ptr< osg::Node > _data);
 	osg::Node* get3DModelData(){return model_ptr;}
+	#endif //defined (SUPPORT_3DMODEL)
 	
 	std::string getFileName() {return file_name;}
 	void setFileName(std::string _fname);
@@ -76,13 +84,19 @@ public:
 private:
 	ACMediaType media_type;
 	std::string file_name;
+	#if defined (SUPPORT_AUDIO)
 	float* audio_ptr;
 	float audio_frames;
-#if !defined (APPLE_IOS)	
+	#endif //defined (SUPPORT_AUDIO)
+	#if defined (SUPPORT_IMAGE) || defined (SUPPORT_VIDEO)
 	IplImage* image_ptr;
+	#endif //defined (SUPPORT_IMAGE) || defined (SUPPORT_VIDEO)
+	#if defined (SUPPORT_VIDEO)
 	CvCapture* video_ptr;
-#endif	
+	#endif //defined (SUPPORT_VIDEO)
+	#if defined (SUPPORT_3DMODEL)
 	osg::Node* model_ptr;
+	#endif //defined (SUPPORT_3DMODEL)
 };
 
 #endif  // ACMEDIADATA_H

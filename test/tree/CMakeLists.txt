@@ -11,3 +11,4 @@ TARGET_LINK_LIBRARIES(tree-test mediacycle)
 
 INSTALL(TARGETS tree-test RUNTIME DESTINATION bin)
 
+MESSAGE("[X] tree")

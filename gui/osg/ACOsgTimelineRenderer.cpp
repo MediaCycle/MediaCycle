@@ -34,10 +34,12 @@
  */
 
 #include "ACOsgTimelineRenderer.h"
+#if defined (SUPPORT_AUDIO)
 #include "ACOsgAudioTrackRenderer.h"
-#if !defined (APPLE_IOS)
+#endif //defined (SUPPORT_AUDIO)
+#if defined (SUPPORT_VIDEO)
 #include "ACOsgVideoTrackRenderer.h"
-#endif
+#endif //defined (SUPPORT_VIDEO)
 
 using namespace osg;
 
@@ -58,6 +60,7 @@ bool ACOsgTimelineRenderer::addTrack(int media_index){
 	
 	switch (media_type) {
 		case MEDIA_TYPE_AUDIO:
+			#if defined (SUPPORT_AUDIO)
 			track_renderer.resize(n+1);
 			track_renderer[n] = new ACOsgAudioTrackRenderer();
 			track_renderer[n]->setScreenWidth(screen_width);
@@ -69,9 +72,10 @@ bool ACOsgTimelineRenderer::addTrack(int media_index){
 				track_renderer[n]->prepareTracks();
 				track_group->addChild(track_renderer[n]->getTrack());
 			}
+			#endif //defined (SUPPORT_AUDIO)
 			break;
 		case MEDIA_TYPE_VIDEO:
-#if !defined (APPLE_IOS)
+			#if defined (SUPPORT_VIDEO)
 			track_renderer.resize(n+1);
 			track_renderer[n] = new ACOsgVideoTrackRenderer();
 			track_renderer[n]->setScreenWidth(screen_width);
@@ -83,7 +87,7 @@ bool ACOsgTimelineRenderer::addTrack(int media_index){
 				track_renderer[n]->prepareTracks();
 				track_group->addChild(track_renderer[n]->getTrack());
 			}
-#endif
+			#endif //defined (SUPPORT_VIDEO)
 			break;
 			/*		
 			 case MEDIA_TYPE_SENSORDATA:
@@ -117,16 +121,18 @@ void ACOsgTimelineRenderer::prepareTracks(int start) {
 		media_type = media_cycle->getMediaType(i);
 		switch (media_type) {
 			case MEDIA_TYPE_AUDIO:
+				#if defined (SUPPORT_AUDIO)
 				track_renderer[i] = new ACOsgAudioTrackRenderer();
 				track_renderer[i]->setScreenWidth(screen_width);
 				track_renderer[i]->setSize(width,height);
+				#endif //defined (SUPPORT_AUDIO)
 				break;
 			case MEDIA_TYPE_VIDEO:
-				#if !defined (APPLE_IOS)
+				#if defined (SUPPORT_VIDEO)
 				track_renderer[i] = new ACOsgVideoTrackRenderer();
 				track_renderer[i]->setScreenWidth(screen_width);
 				track_renderer[i]->setSize(width,height);
-				#endif
+				#endif //defined (SUPPORT_VIDEO)
 				break;
 		/*		
 			case MEDIA_TYPE_SENSORDATA:

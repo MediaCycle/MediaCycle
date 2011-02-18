@@ -33,6 +33,7 @@
  *
  */
 
+#if defined (SUPPORT_AUDIO)
 #include "ACOsgAudioTrackRenderer.h"
 
 #include <osgGA/GUIEventHandler>
@@ -1076,3 +1077,4 @@ void ACOsgAudioTrackRenderer::updateTracks(double ratio) {
 	}
 	*/ 
 }
+#endif //defined (SUPPORT_AUDIO)

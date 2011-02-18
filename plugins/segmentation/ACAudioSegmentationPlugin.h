@@ -35,8 +35,10 @@
 #ifndef _ACAUDIOSEGMENTATIONPLUGIN_H
 #define	_ACAUDIOSEGMENTATIONPLUGIN_H
 
-#include "ACAudioFeatures.h"
-#include "MediaCycle.h"
+#if defined (SUPPORT_AUDIO) and defined (USE_AUDIOFEAT)
+
+#include <ACAudioFeatures.h>
+#include <MediaCycle.h>
 
 #include <iostream>
 
@@ -56,4 +58,5 @@ private:
 
 arma::icolvec FastBIC(arma::fmat audiofeatures_m, float lambda, int samplerate);
 
+#endif //defined (SUPPORT_AUDIO) and defined (USE_AUDIOFEAT)
 #endif	/* _ACAUDIOSEGMENTATIONPLUGIN_H */

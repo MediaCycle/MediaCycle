@@ -1,5 +1,5 @@
 /*
- *  ACImage[loop].cpp
+ *  ACImage.cpp
  *  MediaCycle
  *
  *  @author Xavier Siebert
@@ -32,7 +32,7 @@
  *
  */
 
-#if !defined (APPLE_IOS)
+#if defined (SUPPORT_IMAGE) || defined (SUPPORT_VIDEO) 
 
 #include "ACImage.h"
 #include <fstream>
@@ -46,33 +46,6 @@ using std::ifstream;
 using std::cerr;
 using std::cout;
 using std::endl;
-
-// ----------- class constants
-const int ACImage:: default_thumbnail_width = 128;
-const int ACImage:: default_thumbnail_height = 128;
-const int ACImage:: default_thumbnail_area = 16384;
-
-//------------------------------------------------------------------
-
-ACImage::ACImage() : ACMedia() {
-	media_type = MEDIA_TYPE_IMAGE;
-	thumbnail = 0;
-	thumbnail_width = 0;
-	thumbnail_height = 0;	
-}
-
-// copy-constructor, used for example to generate fragments
-ACImage::ACImage(const ACImage& m, bool reduce) : ACMedia(m) {
-	media_type = MEDIA_TYPE_IMAGE;
-	// ... XS TODO
-}
-
-ACImage::~ACImage() {
-	if (thumbnail) {
-		//cvReleaseImage(&thumbnail);
-		thumbnail = 0;
-	}
-}
 
 osg::Image* Convert_OpenCV_TO_OSG_IMAGE(IplImage* cvImg)
 {
@@ -127,6 +100,37 @@ osg::Image* Convert_OpenCV_TO_OSG_IMAGE(IplImage* cvImg)
 		return 0;
 	}
 	
+}
+
+#endif //defined (SUPPORT_IMAGE) || defined (SUPPORT_VIDEO) 
+
+#if defined (SUPPORT_IMAGE)
+
+// ----------- class constants
+const int ACImage:: default_thumbnail_width = 128;
+const int ACImage:: default_thumbnail_height = 128;
+const int ACImage:: default_thumbnail_area = 16384;
+
+//------------------------------------------------------------------
+
+ACImage::ACImage() : ACMedia() {
+	media_type = MEDIA_TYPE_IMAGE;
+	thumbnail = 0;
+	thumbnail_width = 0;
+	thumbnail_height = 0;	
+}
+
+// copy-constructor, used for example to generate fragments
+ACImage::ACImage(const ACImage& m, bool reduce) : ACMedia(m) {
+	media_type = MEDIA_TYPE_IMAGE;
+	// ... XS TODO
+}
+
+ACImage::~ACImage() {
+	if (thumbnail) {
+		//cvReleaseImage(&thumbnail);
+		thumbnail = 0;
+	}
 }
 
 // XS: when we load from file, there is no need to have a pointer to the data passed to the plugin
@@ -304,5 +308,4 @@ int ACImage::loadXMLSpecific(TiXmlElement* _pMediaNode){
 	return 1;
 	
 }
-
-#endif//CF APPLE_IOS APPLE_IOS
+#endif //defined (SUPPORT_IMAGE)

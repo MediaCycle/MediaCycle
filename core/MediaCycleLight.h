@@ -89,7 +89,7 @@ public:
 	int importACLLibrary(std::string path);
     int importLibrary(std::string path);
     // Plugins
-    int addPlugin(std::string aPluginPath);
+    int addPluginLibrary(std::string aPluginPath);
 
     // Search by Similarity
     int getKNN(int id, std::vector<int> &ids, int k);
@@ -158,7 +158,7 @@ public:
 	void setVisualisationPlugin(std::string pluginName);
 	void setNeighborhoodsMethodPlugin(std::string pluginName);
 	void setPositionsPlugin(std::string pluginName);
-	//	int addPlugin(std::string aPluginPath);
+	//	int addPluginLibrary(std::string aPluginPath);
 	
 	// LABELS on VIEW
 	int getLabelSize();

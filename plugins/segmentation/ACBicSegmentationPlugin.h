@@ -35,9 +35,9 @@
 #ifndef _ACBICSEGMENTATIONPLUGIN_H
 #define	_ACBICSEGMENTATIONPLUGIN_H
 
-#include "Armadillo-utils.h" 
-#include "MediaCycle.h"
-#include "ACMediaTimedFeature.h"
+#include <Armadillo-utils.h> 
+#include <MediaCycle.h>
+#include <ACMediaTimedFeature.h>
 
 class ACBicSegmentationPlugin : public ACPlugin {
 public:

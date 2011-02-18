@@ -36,8 +36,9 @@
 #ifndef __ACOSG_VIDEO_RENDERER_H__
 #define __ACOSG_VIDEO_RENDERER_H__
 
-#if !defined (APPLE_IOS)
+#if defined (SUPPORT_VIDEO)
 
+#include "ACOsgMediaRenderer.h"
 #include "ACOsgBrowserRenderer.h"
 #include "ACOsgImageRenderer.h"
 #include <osg/ImageSequence>
@@ -54,5 +55,5 @@ public:
 	void updateNodes(double ratio=0.0);
 };
 
-#endif//CF APPLE_IOS
+#endif //defined (SUPPORT_VIDEO)
 #endif

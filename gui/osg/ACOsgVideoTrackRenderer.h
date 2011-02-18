@@ -36,7 +36,7 @@
 #ifndef __ACOSG_VIDEO_TRACK_RENDERER_H__
 #define __ACOSG_VIDEO_TRACK_RENDERER_H__
 
-#if !defined (APPLE_IOS)
+#if defined (SUPPORT_VIDEO)
 
 #include "ACOsgBrowserRenderer.h"
 //#include "ACOsgImageRenderer.h"
@@ -171,5 +171,5 @@ public:
 	ACVideoSummaryType getSummaryType(){return this->track_summary_type;}
 };
 
-#endif//CF APPLE_IOS
+#endif //defined (SUPPORT_VIDEO)
 #endif

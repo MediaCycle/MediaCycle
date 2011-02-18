@@ -35,6 +35,8 @@
 //  customized for AudioGarden
 //
 
+#ifdef USE_AUDIOGARDEN
+
 #define PI 3.1415926535897932384626433832795f
 
 #include "AGOsgCompositeViewQt.h"
@@ -613,3 +615,5 @@ void AGOsgCompositeViewQt::stopSound()
 		track_playing = false;
 	}
 }
+
+#endif

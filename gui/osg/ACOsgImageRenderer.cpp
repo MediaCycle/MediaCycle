@@ -33,7 +33,7 @@
  *
  */
 
-#if !defined (APPLE_IOS)
+#if defined (SUPPORT_IMAGE) || defined (SUPPORT_VIDEO)
 
 #include "ACOsgImageRenderer.h"
 #include "ACVideo.h"
@@ -368,4 +368,4 @@ void ACOsgImageRenderer::updateNodes(double ratio) {
 #endif //AUTO_TRANSFORM
 
 }
-#endif//CF APPLE_IOS
+#endif //defined (SUPPORT_IMAGE) || defined (SUPPORT_VIDEO)

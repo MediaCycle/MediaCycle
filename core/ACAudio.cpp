@@ -31,7 +31,7 @@
  *  <mailto:avre@umons.ac.be>
  *
  */
-
+#if defined (SUPPORT_AUDIO)
 #include "ACAudio.h"
 #include <sndfile.h>
 //#include "ACAnalysedAudio.h"
@@ -388,3 +388,4 @@ void ACAudio::computeWaveform(const float* samples_v) {
 	}
 	waveformLength *= 2;
 }
+#endif //defined (SUPPORT_AUDIO)

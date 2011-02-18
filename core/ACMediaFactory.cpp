@@ -33,11 +33,20 @@
  */
 
 #include "ACMediaFactory.h"
-#include "ACImage.h"
+#if defined (SUPPORT_AUDIO)
 #include "ACAudio.h"
+#endif //defined (SUPPORT_AUDIO)
+#if defined (SUPPORT_IMAGE)
+#include "ACImage.h"
+#endif //defined (SUPPORT_IMAGE)
+#if defined (SUPPORT_VIDEO)
 #include "ACVideo.h"
+#endif //defined (SUPPORT_VIDEO)
+#if defined (SUPPORT_3DMODEL)
 #include "AC3DModel.h"
+#endif //defined (SUPPORT_3DMODEL)
 
+#if defined (SUPPORT_AUDIO)
 #if defined (USE_SNDFILE)
 #include	<stdio.h>
 #include	<stdlib.h>
@@ -45,12 +54,15 @@
 #include	<math.h>
 #include	<sndfile.h>
 #endif
+#endif //defined (SUPPORT_AUDIO)
 
+#if defined (SUPPORT_3DMODEL)
 #include <osgDB/Registry>
 #include <osgDB/ReaderWriter>
 #include <osgDB/FileNameUtils>
 #include <osgDB/ReaderWriter>
 #include <osgDB/PluginQuery>
+#endif //defined (SUPPORT_3DMODEL)
 
 #include "boost/filesystem.hpp"   // includes all needed Boost.Filesystem declarations
 #include "boost/filesystem/operations.hpp"
@@ -205,10 +217,12 @@ filext ACMediaFactory::possible_file_extensions(_init, _init + sizeof _init / si
 
 
 ACMediaFactory::ACMediaFactory(){
-#if defined (USE_SNDFILE)
-	addSndFileExtensions();
-#endif
-	addOsgFileExtensions();
+	#if defined (SUPPORT_AUDIO)
+		addSndFileExtensions();
+	#endif //defined (SUPPORT_AUDIO)
+	#if defined (SUPPORT_IMAGE) || defined(SUPPORT_VIDEO) || defined(SUPPORT_3DMODEL)
+		addOsgFileExtensions();
+	#endif //defined (SUPPORT_IMAGE OR SUPPORT_VIDEO) || defined(SUPPORT_3DMODEL)
 	listMediaExtensions();
 }
 
@@ -228,20 +242,24 @@ ACMedia* ACMediaFactory::create(string file_ext){
 ACMedia* ACMediaFactory::create(ACMediaType media_type){
 	switch (media_type) {
 		case MEDIA_TYPE_AUDIO:
+			#if defined (SUPPORT_AUDIO)
 			return new ACAudio;
+			#endif //defined (SUPPORT_AUDIO)
 			break;
 		case MEDIA_TYPE_IMAGE:
-#if !defined (APPLE_IOS)				
+			#if defined (SUPPORT_IMAGE)
 			return new ACImage;
-#endif//CF APPLE_IOS			
+			#endif //defined (SUPPORT_IMAGE)
 			break;
 		case MEDIA_TYPE_VIDEO:
-#if !defined (APPLE_IOS)				
+			#if defined (SUPPORT_VIDEO)
 			return new ACVideo;
-#endif//CF APPLE_IOS			
+			#endif //defined (SUPPORT_VIDEO)
 			break;
 		case MEDIA_TYPE_3DMODEL:
+			#if defined (SUPPORT_3DMODEL)
 			return new AC3DModel;
+			#endif //defined (SUPPORT_3DMODEL)
 			break;
 		default:
 			return NULL;
@@ -252,37 +270,66 @@ ACMedia* ACMediaFactory::create(ACMediaType media_type){
 ACMedia* ACMediaFactory::create(ACMedia* media){
 	switch (media->getMediaType()) {
 		case MEDIA_TYPE_AUDIO:
-		{
-			ACAudio* audio = (ACAudio*) media;
-			return new ACAudio(*audio,true);
+			#if defined (SUPPORT_AUDIO)
+			return new ACAudio(*((ACAudio*) media));
+			#endif //defined (SUPPORT_AUDIO)
 			break;
-		}
 		case MEDIA_TYPE_IMAGE:
-		{
-#if !defined (APPLE_IOS)				
-			ACImage* image = (ACImage*) media;
-			return new ACImage(*image);
-#endif//CF APPLE_IOS			
+			#if defined (SUPPORT_IMAGE)
+			return new ACImage(*((ACImage*) media));
+			#endif //defined (SUPPORT_IMAGE)
 			break;
-		}
 		case MEDIA_TYPE_VIDEO:
-		{
-#if !defined (APPLE_IOS)				
-			ACVideo* video = (ACVideo*) media;
-			return new ACVideo(*video);
-#endif//CF APPLE_IOS			
+			#if defined (SUPPORT_VIDEO)
+			return new ACVideo(*((ACVideo*) media));
+			#endif //defined (SUPPORT_VIDEO)
 			break;
-		}
 		case MEDIA_TYPE_3DMODEL:
-		{
-			AC3DModel* model = (AC3DModel*) media;
-			return new AC3DModel(*model);
+			#if defined (SUPPORT_3DMODEL)
+			return new AC3DModel(*((AC3DModel*) media));
+			#endif //defined (SUPPORT_3DMODEL)
 			break;
-		}
 		default:
 			return NULL;
 			break;
 	}
+	/*
+	switch (media->getMediaType()) {
+		#if defined (SUPPORT_AUDIO)
+		case MEDIA_TYPE_AUDIO:
+			
+				ACAudio* audio = (ACAudio*) media;
+				return new ACAudio(*audio,true);
+			
+			break;
+		#endif //defined (SUPPORT_AUDIO)
+		#if defined (SUPPORT_IMAGE)	
+		case MEDIA_TYPE_IMAGE:
+			
+				ACImage* image = (ACImage*) media;
+				return new ACImage(*image);
+			
+				break;
+		#endif //defined (SUPPORT_IMAGE)	
+		#if defined (SUPPORT_VIDEO)	
+		case MEDIA_TYPE_VIDEO:
+			
+				ACVideo* video = (ACVideo*) media;
+				return new ACVideo(*video);
+			
+				break;
+		#endif //defined (SUPPORT_VIDEO)	
+		#if defined (SUPPORT_3DMODEL)
+		case MEDIA_TYPE_3DMODEL:
+			AC3DModel* model = (AC3DModel*) media;
+			return new AC3DModel(*model);
+			break;
+		#endif //defined (SUPPORT_3DMODEL)
+		default:
+			return NULL;
+			break;
+	}
+	 */
 }
 
 // returns the ACMediaType corresponding to a given file extension
@@ -302,19 +349,29 @@ void ACMediaFactory::listMediaExtensions(){
 	for(;iter!=available_file_extensions.end();++iter){
 		switch (iter->second){
 			case MEDIA_TYPE_AUDIO:
+				#if defined (SUPPORT_AUDIO)
 				audioExt.push_back(iter->first);
+				#endif //defined (SUPPORT_AUDIO)
 				break;
 			case MEDIA_TYPE_IMAGE:
+				#if defined (SUPPORT_IMAGE)
 				imageExt.push_back(iter->first);
+				#endif //defined (SUPPORT_IMAGE)
 				break;
 			case MEDIA_TYPE_VIDEO:
+				#if defined (SUPPORT_VIDEO)
 				videoExt.push_back(iter->first);
+				#endif //defined (SUPPORT_VIDEO)
 				break;
 			case MEDIA_TYPE_3DMODEL:
+				#if defined (SUPPORT_3DMODEL)
 				model3dExt.push_back(iter->first);
+				#endif //defined (SUPPORT_3DMODEL)
 				break;
 			case MEDIA_TYPE_TEXT:
+				#if defined (SUPPORT_TEXT)
 				textExt.push_back(iter->first);
+				#endif //defined (SUPPORT_TEXT)
 				break;
 			default:
 				break;
@@ -322,35 +379,45 @@ void ACMediaFactory::listMediaExtensions(){
 	}	
 	std::cout << "Supported media types: " << std::endl;
 	
+	#if defined (SUPPORT_AUDIO)
 	std::cout << "-- audio:";
 	std::vector<std::string>::iterator audioIter = audioExt.begin();
 	for(;audioIter!=audioExt.end();++audioIter)
 		std::cout << " " << (*audioIter);
 	std::cout << std::endl;
+	#endif //defined (SUPPORT_AUDIO)
 	
+	#if defined (SUPPORT_IMAGE)
 	std::cout << "-- image:";
 	std::vector<std::string>::iterator imageIter = imageExt.begin();
 	for(;imageIter!=imageExt.end();++imageIter)
 		std::cout << " " << (*imageIter);
 	std::cout << std::endl;
+	#endif //defined (SUPPORT_IMAGE)
 	
+	#if defined (SUPPORT_VIDEO)
 	std::cout << "-- video:";
 	std::vector<std::string>::iterator videoIter = videoExt.begin();
 	for(;videoIter!=videoExt.end();++videoIter)
 		std::cout << " " << (*videoIter);
 	std::cout << std::endl;
+	#endif //defined (SUPPORT_VIDEO)
 	
+	#if defined (SUPPORT_3DMODEL)
 	std::cout << "-- 3D models:";
 	std::vector<std::string>::iterator model3dIter = model3dExt.begin();
 	for(;model3dIter!=model3dExt.end();++model3dIter)
 		std::cout << " " << (*model3dIter);
 	std::cout << std::endl;
+	#endif //defined (SUPPORT_3DMODEL)
 	
+	#if defined (SUPPORT_TEXT)
 	std::cout << "-- text:";
 	std::vector<std::string>::iterator textIter = textExt.begin();
 	for(;textIter!=textExt.end();++textIter)
 		std::cout << " " << (*textIter);
 	std::cout << std::endl;
+	#endif //defined (SUPPORT_TEXT)
 }
 
 std::vector<std::string> ACMediaFactory::getExtensionsFromMediaType(ACMediaType media_type){
@@ -374,7 +441,7 @@ bool ACMediaFactory::addFileExtensionSupport(std::string file_ext,ACMediaType me
 	}
 }
 
-#if defined (USE_SNDFILE)
+#if defined (SUPPORT_AUDIO)
 void ACMediaFactory::addSndFileExtensions(){
 	//CF ripped from sndfile's examples/list_formats.c
 	SF_FORMAT_INFO	info ;
@@ -425,8 +492,9 @@ void ACMediaFactory::addSndFileExtensions(){
 		*/ 
 	} ;
 }	
-#endif
+#endif //defined (SUPPORT_AUDIO)
 
+#if defined (SUPPORT_IMAGE) || defined(SUPPORT_VIDEO) || defined(SUPPORT_3DMODEL)
 void ACMediaFactory::addOsgFileExtensions(){
 
 	// Create a list of plugin names manually, since osgDB::listAllAvailablePlugins won't work (under Apple Snow Leopard):
@@ -439,12 +507,13 @@ void ACMediaFactory::addOsgFileExtensions(){
 	 //osgDB::outputPluginDetails(std::cout,*pluginIter);
 	 }
 	 */
-	std::vector<std::string> pluginNames;
+	
+	std::vector<std::string> pluginNames;// CF enable for debug mode
 	osgDB::FilePathList libList = osgDB::Registry::instance()->getLibraryFilePathList();
 	osgDB::FilePathList::iterator libIter = libList.begin();
 	//std::cout << "OSG plugins: " << std::endl;// CF enable for debug mode
 	for(;libIter!=libList.end();++libIter){
-		//std::cout << "\t" << (*libIter) << " " << std::endl;
+		//std::cout << "\t" << (*libIter) << " " << std::endl;// CF enable for debug mode
 		if (fs::exists(*libIter)){
 			fs::directory_iterator end_iter;
 			for ( fs::directory_iterator dir_itr( *libIter );dir_itr != end_iter; ++dir_itr )
@@ -460,11 +529,10 @@ void ACMediaFactory::addOsgFileExtensions(){
 						//std::cout << plugin << std::endl;
 						pluginNames.push_back(plugin);
 					}	
-					//std::cout << fs::basename(dir_itr->path().filename()) << "\n";
+					//std::cout << fs::basename(dir_itr->path().filename()) << "\n";// CF enable for debug mode
 				}
 			}
 		}
-		//osgDB::outputPluginDetails(std::cout,*pluginIter);
 	}
 	
 	//CF force-load each OSG plugin 
@@ -472,6 +540,7 @@ void ACMediaFactory::addOsgFileExtensions(){
 	std::vector<std::string>::iterator pluginIter = pluginNames.begin();
 	osgDB::Registry::instance()->closeAllLibraries();
 	for(;pluginIter!=pluginNames.end();++pluginIter){
+		//osgDB::outputPluginDetails(std::cout,*pluginIter);// CF enable for debug mode
 		std::string pluginInstance = osgDB::Registry::instance()->createLibraryNameForExtension(*pluginIter); 
 		osgDB::Registry::LoadStatus pluginStatus = osgDB::Registry::instance()->loadLibrary(pluginInstance);
 		
@@ -508,3 +577,4 @@ void ACMediaFactory::addOsgFileExtensions(){
 			osgDB::Registry::instance()->closeLibrary(pluginInstance);
 	}
 }
+#endif //defined (SUPPORT_IMAGE) || defined (SUPPORT_VIDEO) || defined(SUPPORT_3DMODEL)

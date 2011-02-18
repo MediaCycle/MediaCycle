@@ -32,12 +32,14 @@
  *
  */
 
+#if defined (SUPPORT_AUDIO) and defined (USE_AUDIOFEAT)
+
 #include "ACAudioSegmentationPlugin.h"
-#include "ACAudio.h"
+#include <ACAudio.h>
 
 #include <vector>
 #include <string>
-#include "Armadillo-utils.h" 
+#include <Armadillo-utils.h> 
 using namespace arma;
 
 ACAudioSegmentationPlugin::ACAudioSegmentationPlugin() {
@@ -171,4 +173,4 @@ icolvec FastBIC(fmat audiofeatures_m, float lambda, int samplerate)
     
     return segment_v;
 }
-
+#endif //defined (SUPPORT_AUDIO) and defined (USE_AUDIOFEAT)

@@ -34,8 +34,9 @@
  */
 
 #include "ACOsgTimelineControlsRenderer.h"
-#include "ACOsgAudioTrackControlsRenderer.h"
-
+#if defined (SUPPORT_AUDIO)
+	#include "ACOsgAudioTrackControlsRenderer.h"
+#endif //defined (SUPPORT_AUDIO)
 using namespace osg;
 
 ACOsgTimelineControlsRenderer::ACOsgTimelineControlsRenderer() {
@@ -66,7 +67,9 @@ void ACOsgTimelineControlsRenderer::prepareControls(int start) {
 		media_type = MEDIA_TYPE_AUDIO;//media_cycle->getMediaType(i);
 		switch (media_type) {
 			case MEDIA_TYPE_AUDIO:
+				#if defined (SUPPORT_AUDIO)
 				track_renderer[i] = new ACOsgAudioTrackControlsRenderer();
+				#endif //defined (SUPPORT_AUDIO)
 				break;
 		/*		
 			case MEDIA_TYPE_VIDEO:

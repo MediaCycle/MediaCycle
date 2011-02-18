@@ -42,11 +42,15 @@
 
 #include "ui_ACAudioControlsDockWidgetQt.h"
 #include <MediaCycle.h>
+
+#if defined (SUPPORT_AUDIO)
 #include <ACAudioEngine.h>
+#endif //defined (SUPPORT_AUDIO)
 
 class ACAudioControlsDockWidgetQt : public QDockWidget {
 Q_OBJECT
-	
+
+//#if defined (SUPPORT_AUDIO) // don't use it!
 private slots:
 	// Audio controls
 	void on_pushButtonMuteAll_clicked();
@@ -56,11 +60,13 @@ private slots:
 	void on_pushButtonQueryReplay_clicked();
 	void on_pushButtonQueryKeep_clicked();
 	void on_pushButtonQueryReferent_clicked();	
+//#endif //defined (SUPPORT_AUDIO)
 
 public:
 	ACAudioControlsDockWidgetQt(QWidget *parent = 0);
 	~ACAudioControlsDockWidgetQt();
-	
+
+#if defined (SUPPORT_AUDIO)
 	void setMediaCycle(MediaCycle* _media_cycle){ media_cycle = _media_cycle;}
 	MediaCycle* getMediaCycle() {return media_cycle;}
 	void setAudioEngine(ACAudioEngine* _audio_engine){ audio_engine = _audio_engine;}
@@ -70,5 +76,6 @@ private:
 	Ui::ACAudioControlsDockWidgetQt ui;
 	MediaCycle *media_cycle;
 	ACAudioEngine *audio_engine;
+#endif //defined (SUPPORT_AUDIO)	
 };
 #endif

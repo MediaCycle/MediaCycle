@@ -44,23 +44,51 @@ ACMultiMediaCycleOsgQt::ACMultiMediaCycleOsgQt(QWidget *parent) : QMainWindow(pa
 	this->media_type = MEDIA_TYPE_NONE;
 	this->browser_mode = AC_MODE_NONE;
 	this->media_cycle = NULL;
-	this->audio_engine = NULL;
-	
+	#if defined (SUPPORT_AUDIO)
+		this->audio_engine = NULL;
+	#endif //defined (SUPPORT_AUDIO)
 	//ui.compositeOsgView->move(0,20);
 	//	ui.compositeOsgView->prepareFromBrowser();
 	//browserOsgView->setPlaying(true);
 	
+	// Apple bundled *.app, just look for bundled osg plugins 
+	#ifndef USE_DEBUG 
+	#if defined __APPLE__ and not defined (XCODE)
+		QDir dir(QApplication::applicationDirPath());
+		dir.cdUp();
+		dir.cd("PlugIns");
+		osgDB::Registry::instance()->setLibraryFilePathList(dir.absolutePath().toStdString());
+	#endif
+	#endif
+	
 	// Docks
 	//////mediaConfig = new ACMediaConfigDockWidgetQt();
 	//////this->addDockWidget(Qt::LeftDockWidgetArea,mediaConfig);
+	#if defined (SUPPORT_AUDIO)
+		ui.comboDefaultSettings->addItem(QString("Audio"));
+	#endif //defined (SUPPORT_AUDIO)
+	#if defined (SUPPORT_IMAGE)
+		ui.comboDefaultSettings->addItem(QString("Image"));
+	#endif //defined (SUPPORT_IMAGE)
+	#if defined (SUPPORT_VIDEO)
+		ui.comboDefaultSettings->addItem(QString("Video"));
+	#endif //defined (SUPPORT_VIDEO)
+	#if defined (SUPPORT_3DMODEL)
+		ui.comboDefaultSettings->addItem(QString("3DModel"));
+	#endif //defined (SUPPORT_3DMODEL)
+	ui.comboDefaultSettings->addItem(QString("Mixed"));
 	/////connect(comboDefaultSettings, SIGNAL(currentIndexChanged(const QString &)), this, SLOT(comboDefaultSettingsChanged()));
 	connect(ui.comboDefaultSettings, SIGNAL(currentIndexChanged(const QString &)), this, SLOT(comboDefaultSettingsChanged()));
 	///////browserControls = new ACBrowserControlsClustersNeighborsDockWidgetQt();
 	///////this->addDockWidget(Qt::LeftDockWidgetArea,browserControls);
-	audioControls = new ACAudioControlsDockWidgetQt();
-	audioControls->setVisible(false);
-	videoControls = new ACVideoControlsDockWidgetQt();
-	videoControls->setVisible(false);
+	#if defined (SUPPORT_AUDIO)
+		audioControls = new ACAudioControlsDockWidgetQt(this);
+		audioControls->setVisible(false);
+	#endif //defined (SUPPORT_AUDIO)
+	#if defined (SUPPORT_VIDEO)
+		videoControls = new ACVideoControlsDockWidgetQt(this);
+		this->addDockWidget(Qt::LeftDockWidgetArea,videoControls);
+	#endif //defined (SUPPORT_VIDEO)
 	//////lastDocksVisibilities.resize(3); //docks: Media Config, Browser, OSC
 	lastDocksVisibilities.resize(2); //docks: Media Config, Browser
 	for (int d=0; d<lastDocksVisibilities.size();d++)
@@ -118,21 +146,26 @@ void ACMultiMediaCycleOsgQt::createMediaCycle(ACMediaType _media_type, ACBrowser
 	this->media_type = _media_type;
 	this->browser_mode = _browser_mode;
 	
-	audio_engine = new ACAudioEngine();
-	audio_engine->setMediaCycle(media_cycle);
-	ui.compositeOsgView->setAudioEngine(audio_engine);
-	
-	audioControls->setMediaCycle(media_cycle);
-	audioControls->setAudioEngine(audio_engine);
-	videoControls->setMediaCycle(media_cycle);
-	videoControls->setOsgView(ui.compositeOsgView);
+	#if defined (SUPPORT_AUDIO)
+		audio_engine = new ACAudioEngine();
+		audio_engine->setMediaCycle(media_cycle);
+		ui.compositeOsgView->setAudioEngine(audio_engine);
+		audioControls->setMediaCycle(media_cycle);
+		audioControls->setAudioEngine(audio_engine);
+	#endif //defined (SUPPORT_AUDIO)
+	#if defined (SUPPORT_VIDEO)
+		videoControls->setMediaCycle(media_cycle);
+		videoControls->setOsgView(ui.compositeOsgView);
+	#endif //defined (SUPPORT_VIDEO)
 }
 
 // destroys the MediaCycle object (containing the whole application)
 // it should leave an empty blue frame, just as lauch time
 void ACMultiMediaCycleOsgQt::destroyMediaCycle(){
 	// XS TODO : remove it from the graphics ?
-	if (audio_engine) delete audio_engine;
+	#if defined (SUPPORT_AUDIO)
+		if (audio_engine) delete audio_engine;
+	#endif //defined (SUPPORT_AUDIO)
 	delete media_cycle;
 }
 
@@ -452,12 +485,16 @@ void ACMultiMediaCycleOsgQt::syncControlToggleWithDocks(){
 	//docksVisibilitiesSum += ui.dockWidgetOSC->isVisible();
 	switch (media_type) {
 		case MEDIA_TYPE_AUDIO:
+			#if defined (SUPPORT_AUDIO)
 			docksVisibilitiesSum += audioControls->isVisible();
+			#endif //defined (SUPPORT_AUDIO)
 			break;
 		case MEDIA_TYPE_IMAGE:
 			break;
 		case MEDIA_TYPE_VIDEO:
+			#if defined (SUPPORT_VIDEO)
 			docksVisibilitiesSum += videoControls->isVisible();
+			#endif //defined (SUPPORT_VIDEO)
 			break;
 		default:
 			break;
@@ -479,12 +516,16 @@ void ACMultiMediaCycleOsgQt::syncControlToggleWithDocks(){
 			//ui.dockWidgetOSC->setVisible(true);
 			switch (media_type) {
 				case MEDIA_TYPE_AUDIO:
+					#if defined (SUPPORT_AUDIO)
 					audioControls->setVisible(true);
+					#endif //defined (SUPPORT_AUDIO)
 					break;
 				case MEDIA_TYPE_IMAGE:
 					break;
 				case MEDIA_TYPE_VIDEO:
+					#if defined (SUPPORT_VIDEO)
 					videoControls->setVisible(true);
+					#endif //defined (SUPPORT_VIDEO)
 					break;
 				default:
 					break;
@@ -497,12 +538,16 @@ void ACMultiMediaCycleOsgQt::syncControlToggleWithDocks(){
 				//ui.dockWidgetOSC->setVisible((bool)(lastDocksVisibilities[2]));
 				switch (media_type) {
 					case MEDIA_TYPE_AUDIO:
+						#if defined (SUPPORT_AUDIO)
 						audioControls->setVisible((bool)(lastDocksVisibilities[2]));
+						#endif //defined (SUPPORT_AUDIO)
 						break;
 					case MEDIA_TYPE_IMAGE:
 						break;
 					case MEDIA_TYPE_VIDEO:
+						#if defined (SUPPORT_VIDEO)
 						videoControls->setVisible((bool)(lastDocksVisibilities[2]));
+						#endif //defined (SUPPORT_VIDEO)
 						break;
 					default:
 						break;
@@ -514,12 +559,16 @@ void ACMultiMediaCycleOsgQt::syncControlToggleWithDocks(){
 		//lastDocksVisibilities[2]=ui.dockWidgetOSC->isVisible();
 		switch (media_type) {
 			case MEDIA_TYPE_AUDIO:
+				#if defined (SUPPORT_AUDIO)
 				lastDocksVisibilities[2]=audioControls->isVisible();
+				#endif //defined (SUPPORT_AUDIO)
 				break;
 			case MEDIA_TYPE_IMAGE:
 				break;
 			case MEDIA_TYPE_VIDEO:
+				#if defined (SUPPORT_VIDEO)
 				lastDocksVisibilities[2]=videoControls->isVisible();
+				#endif //defined (SUPPORT_VIDEO)
 				break;
 			default:
 				break;
@@ -531,12 +580,16 @@ void ACMultiMediaCycleOsgQt::syncControlToggleWithDocks(){
 		//ui.dockWidgetOSC->setVisible(false);
 		switch (media_type) {
 			case MEDIA_TYPE_AUDIO:
+				#if defined (SUPPORT_AUDIO)
 				audioControls->setVisible(false);
+				#endif //defined (SUPPORT_AUDIO)
 				break;
 			case MEDIA_TYPE_IMAGE:
 				break;
 			case MEDIA_TYPE_VIDEO:
+				#if defined (SUPPORT_VIDEO)
 				videoControls->setVisible(false);
+				#endif //defined (SUPPORT_VIDEO)
 				break;
 			default:
 				break;
@@ -678,20 +731,26 @@ std::string ACMultiMediaCycleOsgQt::rstrip(const std::string& s){
 // 2) loads default features plugins
 // XS assumes for the moment that viewing mmode is clusters 
 void ACMultiMediaCycleOsgQt::loadDefaultConfig(ACMediaType _media_type, ACBrowserMode _browser_mode){
-	disconnect(audioControls, SIGNAL(visibilityChanged(bool)), this, SLOT(syncControlToggleWithDocks()));
-	disconnect(videoControls, SIGNAL(visibilityChanged(bool)), this, SLOT(syncControlToggleWithDocks()));
-	this->removeDockWidget(audioControls);
-	this->removeDockWidget(videoControls);
+	#if defined (SUPPORT_AUDIO)
+		disconnect(audioControls, SIGNAL(visibilityChanged(bool)), this, SLOT(syncControlToggleWithDocks()));
+		this->removeDockWidget(audioControls);
+	#endif //defined (SUPPORT_AUDIO)
+	#if defined (SUPPORT_VIDEO)
+		disconnect(videoControls, SIGNAL(visibilityChanged(bool)), this, SLOT(syncControlToggleWithDocks()));
+		this->removeDockWidget(videoControls);
+	#endif //defined (SUPPORT_VIDEO)
 	string smedia = "none";
 	switch (_media_type) {
 		case MEDIA_TYPE_AUDIO:
-			smedia="audio";
-			this->addDockWidget(Qt::LeftDockWidgetArea,audioControls);
-			lastDocksVisibilities.resize(3); //docks: Media Config, Browser, audioControls
-			for (int d=0; d<lastDocksVisibilities.size();d++)
-				lastDocksVisibilities[d] = 1;
-			connect(audioControls, SIGNAL(visibilityChanged(bool)), this, SLOT(syncControlToggleWithDocks()));
-			audioControls->show();
+			#if defined (SUPPORT_AUDIO)
+				smedia="audio";
+				this->addDockWidget(Qt::LeftDockWidgetArea,audioControls);
+				lastDocksVisibilities.resize(3); //docks: Media Config, Browser, audioControls
+				for (int d=0; d<lastDocksVisibilities.size();d++)
+					lastDocksVisibilities[d] = 1;
+				connect(audioControls, SIGNAL(visibilityChanged(bool)), this, SLOT(syncControlToggleWithDocks()));
+				audioControls->show();
+			#endif //defined (SUPPORT_AUDIO)
 			break;
 		case MEDIA_TYPE_IMAGE:
 			smedia="image";
@@ -700,13 +759,15 @@ void ACMultiMediaCycleOsgQt::loadDefaultConfig(ACMediaType _media_type, ACBrowse
 				lastDocksVisibilities[d] = 1;
 			break;
 		case MEDIA_TYPE_VIDEO:
-			smedia="video";
-			this->addDockWidget(Qt::LeftDockWidgetArea,videoControls);
-			lastDocksVisibilities.resize(3); //docks: Media Config, Browser, videoControls
-			for (int d=0; d<lastDocksVisibilities.size();d++)
-				lastDocksVisibilities[d] = 1;
-			connect(videoControls, SIGNAL(visibilityChanged(bool)), this, SLOT(syncControlToggleWithDocks()));
-			videoControls->show();
+			#if defined (SUPPORT_VIDEO)
+				smedia="video";
+				this->addDockWidget(Qt::LeftDockWidgetArea,videoControls);
+				lastDocksVisibilities.resize(3); //docks: Media Config, Browser, videoControls
+				for (int d=0; d<lastDocksVisibilities.size();d++)
+					lastDocksVisibilities[d] = 1;
+				connect(videoControls, SIGNAL(visibilityChanged(bool)), this, SLOT(syncControlToggleWithDocks()));
+				videoControls->show();
+			#endif //defined (SUPPORT_VIDEO)
 			break;
 		default:
 			break;
@@ -727,10 +788,16 @@ void ACMultiMediaCycleOsgQt::loadDefaultConfig(ACMediaType _media_type, ACBrowse
 #ifdef USE_DEBUG
 	build_type = "Debug";
 #endif //USE_DEBUG
-#if defined(__APPLE__)	
-	f_plugin = s_path + "/../../../plugins/"+ smedia + "/" + build_type + "/mc_" + smedia +".dylib";
-	v_plugin = s_path + "/../../../plugins/visualisation/" + build_type + "/mc_visualisation.dylib";
-	s_plugin = s_path + "/../../../plugins/segmentation/" + build_type + "/mc_segmentation.dylib";
+#if defined(__APPLE__)
+	#if not defined (USE_DEBUG) and not defined (XCODE)
+		f_plugin = "@executable_path/../MacOS/mc_" + smedia +".dylib";
+		v_plugin = "@executable_path/../MacOS/mc_visualisation.dylib";
+		s_plugin = "@executable_path/../MacOS/mc_segmentation.dylib";
+	#else
+		f_plugin = s_path + "/../../../../../../plugins/"+ smedia + "/" + build_type + "/mc_" + smedia +".dylib";
+		v_plugin = s_path + "/../../../../../../plugins/visualisation/" + build_type + "/mc_visualisation.dylib";
+		s_plugin = s_path + "/../../../../../../plugins/segmentation/" + build_type + "/mc_segmentation.dylib";
+	#endif
 
 	// common to all media, but only for mac...
 #elif defined (__WIN32__)

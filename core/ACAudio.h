@@ -33,8 +33,7 @@
  *
  */
 
-
-
+#if defined (SUPPORT_AUDIO)
 
 #ifndef ACAUDIO_H
 #define ACAUDIO_H
@@ -115,3 +114,4 @@ private:
 
 
 #endif // ACAUDIO_H
+#endif //defined (SUPPORT_AUDIO)

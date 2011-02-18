@@ -43,7 +43,9 @@
 #include "MediaCycle.h"
 #include "ACOsgTimelineRenderer.h"
 
-#include <ACAudioEngine.h>
+#if defined (SUPPORT_AUDIO)
+	#include <ACAudioEngine.h>
+#endif //defined (SUPPORT_AUDIO)
 
 //using namespace osgGA;
 
@@ -55,8 +57,9 @@ class ACOsgTimelineEventHandler : public  osgGA::GUIEventHandler {
 		void setMediaCycle(MediaCycle *_media_cycle){this->media_cycle = _media_cycle;}
 		void setRenderer(ACOsgTimelineRenderer* _renderer){this->renderer = _renderer;}
 		bool handle(const osgGA::GUIEventAdapter& ea,osgGA::GUIActionAdapter& aa);
-	
-		void setAudioEngine(ACAudioEngine *engine){audio_engine=engine;}
+		#if defined (SUPPORT_AUDIO)
+			void setAudioEngine(ACAudioEngine *engine){audio_engine=engine;}
+		#endif //defined (SUPPORT_AUDIO)	
 	
 	protected:
 		void pick(osgViewer::View* view, const osgGA::GUIEventAdapter& ea, bool hover);
@@ -64,7 +67,9 @@ class ACOsgTimelineEventHandler : public  osgGA::GUIEventHandler {
 	private:
 		MediaCycle *media_cycle;
 		ACOsgTimelineRenderer *renderer;
-		ACAudioEngine *audio_engine;
+		#if defined (SUPPORT_AUDIO)
+			ACAudioEngine *audio_engine;
+		#endif //defined (SUPPORT_AUDIO)	
 		bool selecting_zone,selecting_zone_begin,selecting_zone_end,selecting_summary_waveform,selecting_summary_frames;
 		ACRefId* selection;
 		float selection_begin,selection_end;

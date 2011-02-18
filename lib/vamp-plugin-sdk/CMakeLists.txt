@@ -1,4 +1,4 @@
-IF ( USE_VAMP )
+IF(SUPPORT_AUDIO AND USE_VAMP)
 	FILE(GLOB DIRLIST * )
 
 	FOREACH(LIBDIR ${DIRLIST})
@@ -6,4 +6,7 @@ IF ( USE_VAMP )
   	      ADD_SUBDIRECTORY(${LIBDIR})
   	  ENDIF()
 	ENDFOREACH()
+	MESSAGE("[X] vamp plugin SDK")
+ELSE()
+	MESSAGE("[ ] vamp plugin SDK")
 ENDIF()

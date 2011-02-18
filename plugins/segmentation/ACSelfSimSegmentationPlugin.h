@@ -38,7 +38,7 @@
 #include "Armadillo-utils.h" 
 #include "MediaCycle.h"
 #include "ACMediaTimedFeature.h"
-#include "ACAudioFeatures.h"
+//#include "ACAudioFeatures.h"
 
 #ifndef PI
 #define PI 3.14159265
@@ -67,10 +67,9 @@ public:
 	virtual std::vector<ACMedia*> segment(ACMediaData* _data, ACMedia* _theMedia);
 	std::vector<int> segment(const vector< vector<float> > & _allfeatures, float _SelfSimThresh=0.8, int _L=8, int _Wmin=8, SelfSimKernelType _T=SELFSIMSTEP, SelfSimDistance _D=COSINE);
 	std::vector<int> segment(arma::fmat _M, float _SelfSimThresh=0.8, int _L=8, int _Wmin=8, SelfSimKernelType _T=SELFSIMSTEP, SelfSimDistance _D=COSINE);
-        std::vector<int> segment(ACMediaTimedFeature* _ACMTF, float _SelfSimThresh=0.8, int _L=8, int _Wmin=8, SelfSimKernelType _T=SELFSIMSTEP, SelfSimDistance _D=COSINE);
-        std::vector<int> segment(std::vector <ACMediaTimedFeature*> _ACMTF, float _SelfSimThresh=0.8, int _L=8, int _Wmin=8, SelfSimKernelType _T=SELFSIMSTEP, SelfSimDistance _D=COSINE);
-        arma::fmat get_features() {return full_features;};
-
+    std::vector<int> segment(ACMediaTimedFeature* _ACMTF, float _SelfSimThresh=0.8, int _L=8, int _Wmin=8, SelfSimKernelType _T=SELFSIMSTEP, SelfSimDistance _D=COSINE);
+    std::vector<int> segment(std::vector <ACMediaTimedFeature*> _ACMTF, float _SelfSimThresh=0.8, int _L=8, int _Wmin=8, SelfSimKernelType _T=SELFSIMSTEP, SelfSimDistance _D=COSINE);
+    arma::fmat get_features() {return full_features;};
 
 private:
 	std::vector<int> _segment();

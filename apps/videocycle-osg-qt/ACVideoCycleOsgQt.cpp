@@ -113,17 +113,11 @@ ACVideoCycleOsgQt::ACVideoCycleOsgQt(QWidget *parent)
 		ui.comboBoxVideoSummary->setEnabled(true);
 	#endif
 
-	audio_engine = new ACAudioEngine();
-	audio_engine->setMediaCycle(media_cycle);
-	audio_engine->printDeviceList();
-	audio_engine->printCaptureDeviceList();
-	
 	osc_feedback = NULL;
 	osc_browser = NULL;
 	
 	//ui.compositeOsgView->move(0,20);
 	ui.compositeOsgView->setMediaCycle(media_cycle);
-	ui.compositeOsgView->setAudioEngine(audio_engine);
 	ui.compositeOsgView->prepareFromBrowser();
 	ui.compositeOsgView->prepareFromTimeline();
 	//compositeOsgView->setPlaying(true);
@@ -159,7 +153,6 @@ ACVideoCycleOsgQt::~ACVideoCycleOsgQt()
 	
 	delete osc_browser;
 	delete osc_feedback;//osc_feedback destructor calls ACOscFeedback::release()
-	delete audio_engine;
 	delete media_cycle;
 	//delete mOscReceiver;
 	//delete mOscFeeder;
@@ -640,64 +633,6 @@ void ACVideoCycleOsgQt::processOscMessage(const char* tagName)
 	else if(strcasecmp(tagName, "/audiocycle/1/player/1/muteall") == 0)
 	{	
 		media_cycle->muteAllSources();
-	}
-	else if(strcasecmp(tagName, "/audiocycle/1/player/1/bpm") == 0)
-	{
-		float bpm;
-		osc_browser->readFloat(mOscReceiver, &bpm);
-		
-		//int node = media_cycle->getClickedNode();
-		//int node = media_cycle->getClosestNode();
-		int node = media_cycle->getLastSelectedNode();
-		
-		if (node > -1)
-		{
-			audio_engine->setLoopSynchroMode(node, ACAudioEngineSynchroModeAutoBeat);
-			audio_engine->setLoopScaleMode(node, ACAudioEngineScaleModeResample);
-			audio_engine->setBPM((float)bpm);
-		}
-	}	
-	else if(strcasecmp(tagName, "/audiocycle/1/player/1/scrub") == 0)
-	{
-		float scrub;
-		osc_browser->readFloat(mOscReceiver, &scrub);
-		
-		//int node = media_cycle->getClickedNode();
-		//int node = media_cycle->getClosestNode();
-		int node = media_cycle->getLastSelectedNode();
-		
-		if (node > -1)
-		{
-			//media_cycle->pickedObjectCallback(-1);
-			audio_engine->setLoopSynchroMode(node, ACAudioEngineSynchroModeManual);
-			audio_engine->setLoopScaleMode(node, ACAudioEngineScaleModeResample);//ACAudioEngineScaleModeVocode
-			audio_engine->setScrub((float)scrub*100); // temporary hack to scrub between 0 an 1
-		}
-	}
-	else if(strcasecmp(tagName, "/audiocycle/1/player/1/pitch") == 0)
-	{
-		float pitch;
-		osc_browser->readFloat(mOscReceiver, &pitch);
-		
-		//int node = media_cycle->getClickedNode();
-		//int node = media_cycle->getClosestNode();
-		int node = media_cycle->getLastSelectedNode();
-		
-		if (node > -1)
-		{
-			/*
-			 if (!is_pitching)
-			 {	
-			 is_pitching = true;
-			 is_scrubing = false;
-			 */ 
-			//media_cycle->pickedObjectCallback(-1);
-			audio_engine->setLoopSynchroMode(node, ACAudioEngineSynchroModeAutoBeat);
-			audio_engine->setLoopScaleMode(node, ACAudioEngineScaleModeResample);
-			//}
-			audio_engine->setSourcePitch(node, (float) pitch); 
-		}
-		
 	}
 	else if(strcasecmp(tagName, "/audiocycle/1/browser/recluster") == 0)
 	{		

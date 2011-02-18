@@ -1,7 +1,7 @@
 /**
  * @brief ACOsgCompositeViewQt.h
  * @author Christian Frisson
- * @date 10/02/2011
+ * @date 18/02/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -90,7 +90,9 @@ using Qt::WindowFlags;
 #include <ACOsgTimelineControlsRenderer.h>
 #include <ACOsgTimelineEventHandler.h>
 
-#include <ACAudioEngine.h>
+#if defined (SUPPORT_AUDIO)
+	#include <ACAudioEngine.h>
+#endif //defined (SUPPORT_AUDIO)
 
 class ACOsgCompositeViewQt : public osgViewer::CompositeViewer, public QGLWidget
 {
@@ -125,7 +127,9 @@ class ACOsgCompositeViewQt : public osgViewer::CompositeViewer, public QGLWidget
 		osgViewer::View* browser_view;
 		osgViewer::View* timeline_view;
 		osgViewer::View* timeline_controls_view;
-		ACAudioEngine *audio_engine;
+		#if defined (SUPPORT_AUDIO)
+			ACAudioEngine *audio_engine;
+		#endif //defined (SUPPORT_AUDIO)
 
 	public:
 		// needs to be called when loops are added or removed
@@ -140,7 +144,9 @@ class ACOsgCompositeViewQt : public osgViewer::CompositeViewer, public QGLWidget
 		ACOsgBrowserRenderer* getBrowserRenderer(){return browser_renderer;};
 		ACOsgTimelineRenderer* getTimelineRenderer(){return timeline_renderer;};
 		ACOsgTimelineControlsRenderer* getTimelineControlsRenderer(){return timeline_controls_renderer;};
-		void setAudioEngine(ACAudioEngine *engine){audio_engine=engine;if(timeline_event_handler)timeline_event_handler->setAudioEngine(engine);}
+		#if defined (SUPPORT_AUDIO)
+			void setAudioEngine(ACAudioEngine *engine){audio_engine=engine;if(timeline_event_handler)timeline_event_handler->setAudioEngine(engine);}
+		#endif //defined (SUPPORT_AUDIO)
 	
 	private:
 		int mousedown, zoomdown, forwarddown, autoplaydown, rotationdown;

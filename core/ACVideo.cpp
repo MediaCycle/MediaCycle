@@ -32,7 +32,7 @@
  *
  */
 
-#if !defined (APPLE_IOS)
+#if defined (SUPPORT_VIDEO)
 
 #include "ACVideo.h"
 
@@ -345,4 +345,4 @@ int ACVideo::load(FILE* library_file) { // was loadLoop
 	}
 }
 */
-#endif//CF APPLE_IOS
+#endif //defined (SUPPORT_VIDEO)

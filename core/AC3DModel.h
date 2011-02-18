@@ -32,6 +32,7 @@
  *
  */
 
+#if defined (SUPPORT_3DMODEL)
 #ifndef AC3DMODEL_H
 #define AC3DMODEL_H
 
@@ -67,3 +68,4 @@ private:
 };
 
 #endif // AC3DMODEL_H
+#endif// defined (SUPPORT_3DMODEL)

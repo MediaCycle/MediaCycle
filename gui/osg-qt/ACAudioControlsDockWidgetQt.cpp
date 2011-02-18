@@ -36,17 +36,22 @@
 
 ACAudioControlsDockWidgetQt::ACAudioControlsDockWidgetQt(QWidget *parent) : QDockWidget(parent)
 {
+	#if defined (SUPPORT_AUDIO)
 	ui.setupUi(this); // first thing to do
 	this->media_cycle = NULL;
 	this->audio_engine = NULL;	
 	this->show();
+	#endif //defined (SUPPORT_AUDIO)
 }
 
 ACAudioControlsDockWidgetQt::~ACAudioControlsDockWidgetQt(){
+	#if defined (SUPPORT_AUDIO)
 	//delete audio_engine;
 	//delete media_cycle;
+	#endif //defined (SUPPORT_AUDIO)
 }
 
+#if defined (SUPPORT_AUDIO)
 void ACAudioControlsDockWidgetQt::on_pushButtonMuteAll_clicked()
 {
 	if (media_cycle)
@@ -102,3 +107,4 @@ void ACAudioControlsDockWidgetQt::on_pushButtonQueryReferent_clicked()
 {
 	
 }
+#endif //defined (SUPPORT_AUDIO)

@@ -35,7 +35,9 @@
 #include "ACOsgTimelineEventHandler.h"
 #include <iostream>
 #include <sstream>
-#include "ACAudio.h"
+#if defined (SUPPORT_AUDIO)
+	#include "ACAudio.h"
+#endif //defined (SUPPORT_AUDIO)
 
 ACOsgTimelineEventHandler::ACOsgTimelineEventHandler()
 : media_cycle(0),renderer(0),
@@ -43,7 +45,9 @@ selecting_zone(false),selecting_zone_begin(false),selecting_zone_end(false),
 selecting_summary_waveform(false),selecting_summary_frames(false),selection(0),
 selection_begin(0.0f),selection_end(0.0f),pushed_x(0.0f)
 {
-	audio_engine = NULL;
+	#if defined (SUPPORT_AUDIO)
+		audio_engine = NULL;
+	#endif //defined (SUPPORT_AUDIO)
 }
 
 bool ACOsgTimelineEventHandler::handle(const osgGA::GUIEventAdapter& ea,osgGA::GUIActionAdapter& aa)
@@ -73,11 +77,13 @@ bool ACOsgTimelineEventHandler::handle(const osgGA::GUIEventAdapter& ea,osgGA::G
 					if (mediaID > -1){
 						if (media_cycle->getLibrary()->getMedia(mediaID)->getType() == MEDIA_TYPE_AUDIO){
 							//std::cout << "Skipping to frame: " << (int)((pos+1.0f)*((ACAudio*) media_cycle->getLibrary()->getMedia(mediaID))->getNFrames()) << std::endl;
+							#if defined (SUPPORT_AUDIO)		
 							if(audio_engine){
 								audio_engine->setLoopSynchroMode(mediaID, ACAudioEngineSynchroModeAutoBeat);
 								audio_engine->setLoopScaleMode(mediaID, ACAudioEngineScaleModeResample);
 								audio_engine->setScrub(pos+1.0f);
 							}
+							#endif //defined (SUPPORT_AUDIO)
 						}	
 					}*/
 					// Visual feedback
@@ -125,12 +131,14 @@ bool ACOsgTimelineEventHandler::handle(const osgGA::GUIEventAdapter& ea,osgGA::G
 					if (mediaID > -1){
 						if (media_cycle->getLibrary()->getMedia(mediaID)->getType() == MEDIA_TYPE_AUDIO){
 							//std::cout << "Skipping to frame: " << (int)((pos+1.0f)*((ACAudio*) media_cycle->getLibrary()->getMedia(mediaID))->getNFrames()) << std::endl;
+							#if defined (SUPPORT_AUDIO)
 							if(audio_engine){
 								audio_engine->setLoopSynchroMode(mediaID, ACAudioEngineSynchroModeAutoBeat);
 								audio_engine->setLoopScaleMode(mediaID, ACAudioEngineScaleModeResample);
 								//audio_engine->setScrub((int)((pos+1.0f)*((ACAudio*) media_cycle->getLibrary()->getMedia(mediaID))->getNFrames())); 
 								audio_engine->setScrub(pos+1.0f);
 							}
+							#endif //defined (SUPPORT_AUDIO)
 						}	
 					}*/
 					// Visual feedback
@@ -252,8 +260,10 @@ void ACOsgTimelineEventHandler::pick(osgViewer::View* view, const osgGA::GUIEven
 									int mediaID = renderer->getTrack(selection->getID())->getMedia()->getId();
 									if (mediaID > -1){
 										if (media_cycle->getLibrary()->getMedia(mediaID)->getType() == MEDIA_TYPE_AUDIO){
+											#if defined (SUPPORT_AUDIO)
 												audio_engine->setLoopSynchroMode(mediaID, ACAudioEngineSynchroModeAutoBeat);
 												audio_engine->setLoopScaleMode(mediaID, ACAudioEngineScaleModeResample);
+											#endif //defined (SUPPORT_AUDIO)
 										}
 									}
 								}	

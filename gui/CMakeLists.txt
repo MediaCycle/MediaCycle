@@ -1,5 +1,4 @@
 IF ( USE_OSG )
-	MESSAGE("GUI : osg enabled")
 	ADD_SUBDIRECTORY(osg)
 	IF ( USE_QT4 )
 		ADD_SUBDIRECTORY(osg-qt)

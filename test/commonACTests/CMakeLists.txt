@@ -8,3 +8,5 @@ INCLUDE_DIRECTORIES(. ../../core ../../tinyxml)
 TARGET_LINK_LIBRARIES(commonAC-test mediacycle)
 
 INSTALL(TARGETS commonAC-test RUNTIME DESTINATION bin)
+
+MESSAGE("[X] common mediacycle")

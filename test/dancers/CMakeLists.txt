@@ -1,4 +1,4 @@
-IF ( ARMADILLO_FOUND )
+IF(SUPPORT_VIDEO AND ARMADILLO_FOUND )
 	FILE(GLOB SRC *.cpp *.c)
 	FILE(GLOB HDR *.hpp *.h)
 
@@ -15,7 +15,8 @@ IF ( ARMADILLO_FOUND )
 	INCLUDE_DIRECTORIES(. ../../tinyxml ../../armadillo ../../fftooura)
 
 	INSTALL(TARGETS mediacycle-dancers RUNTIME DESTINATION bin)
-ELSE ( ARMADILLO_FOUND )
-	MESSAGE ("Not building DANCERS! app: armadillo with BLAS/LAPACK support required.")
-ENDIF ( ARMADILLO_FOUND )
+	MESSAGE("[X] dancers")
+ELSE()
+	MESSAGE("[ ] dancers")
+ENDIF()
 

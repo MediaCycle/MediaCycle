@@ -35,7 +35,7 @@
 #ifndef ACVIDEO_H
 #define ACVIDEO_H
 
-#if !defined (APPLE_IOS)
+#if defined (SUPPORT_VIDEO)
 
 #include "ACOpenCVInclude.h"
 #include "ACMedia.h"
@@ -78,5 +78,5 @@ private:
 	int computeSlitScan(int frame_in, int frame_out);
 	void computeThumbnailSize();
 };
-#endif//CF APPLE_IOS
+#endif //defined (SUPPORT_VIDEO)
 #endif // ACVIDEO_H

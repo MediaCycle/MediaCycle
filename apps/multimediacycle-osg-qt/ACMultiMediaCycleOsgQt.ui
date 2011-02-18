@@ -194,31 +194,6 @@
        <string>Custom</string>
       </property>
      </item>
-     <item>
-      <property name="text">
-       <string>Audio</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>Image</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>Video</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>3DModel</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>Mixed</string>
-      </property>
-     </item>
     </widget>
    </widget>
   </widget>

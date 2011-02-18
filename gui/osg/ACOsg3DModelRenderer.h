@@ -36,6 +36,8 @@
 #ifndef __ACOSG_3DMODEL_RENDERER_H__
 #define __ACOSG_3DMODEL_RENDERER_H__
 
+#if defined (SUPPORT_3DMODEL)
+
 #include "ACOsgMediaRenderer.h"
 
 #include <osg/Geometry>
@@ -69,4 +71,5 @@ public:
 	void updateNodes(double ratio=0.0);
 };
 
+#endif //defined (SUPPORT_3DMODEL)
 #endif

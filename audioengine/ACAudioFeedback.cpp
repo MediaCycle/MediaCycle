@@ -1870,32 +1870,6 @@ int ACAudioFeedback::createSourceWithPosition(int loop_id, float x, float y, flo
 	// local_acid_type = 2;
 	
 	data = 0;
-	/*
-	// CF Cross-platform ALUT attempt...
-	#ifdef WIN32 
-		//data = alutLoadMemoryFromFile (loop_file, &format, &size, (ALfloat*) &freq);
-		ALboolean al_bool;
-		alutLoadWAVFile(loop_file, &format, &data, &size, &freq, &al_bool); 
-	#elif defined(__APPLE__)
-		#if defined(APPLE_LEOPARD)
-			// TODO SD - This is OS-X specific. Should be changed.
-			CFStringRef fileName = CFStringCreateWithCString(kCFAllocatorDefault, (const char*)(loop_file), kCFStringEncodingUTF8);
-			CFStringRef fileNameEscaped = CFURLCreateStringByAddingPercentEscapes(NULL, fileName, NULL, NULL, kCFStringEncodingUTF8);
-			CFURLRef	fileURL = CFURLCreateWithString(NULL, fileNameEscaped, NULL);	
-			data = MyGetOpenALAudioData(fileURL, &size, &format, &freq);
-			CFRelease(fileURL);
-			CFRelease(fileNameEscaped);
-			CFRelease(fileName);
-			//CF by this (working!): alutLoadWAVFile(loop_file, &format, &data, &size, &freq);
-		#else	
-			//data = alutLoadMemoryFromFile (loop_file, &format, &size, (ALfloat*) &freq);
-			alutLoadWAVFile(loop_file, &format, &data, &size, &freq);
-		#endif
-	#else 
-		ALboolean al_bool;
-		alutLoadWAVFile((ALbyte *) loop_file, &format, &data, &size,&freq, &al_bool);
-	#endif
-	*/
 	
 	int samplesize = ((ACAudio*) media_cycle->getLibrary()->getMedia(loop_id))->getNFrames();
 	float* dataf;// = new float[samplesize];

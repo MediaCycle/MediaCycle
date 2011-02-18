@@ -1,40 +1,51 @@
-IF ( USE_OSG AND FFMPEG_FOUND )
-	FILE(GLOB SRC *.cpp *.c)
-	FILE(GLOB HDR *.hpp *.h)
+FILE(GLOB SRC *.cpp *.c)
+FILE(GLOB HDR *.hpp *.h)
 
-	ADD_LIBRARY(mediacycle STATIC ${SRC} ${HDR})
+ADD_LIBRARY(mediacycle STATIC ${SRC} ${HDR})
 
-	#gsl - uncomment if needed
-	#TARGET_LINK_LIBRARIES(mediacycle gsl gslcblas)
+#gsl - uncomment if needed
+#TARGET_LINK_LIBRARIES(mediacycle gsl gslcblas)
 
-	INCLUDE_DIRECTORIES(../armadillo ../fftooura ../tinyxml)
-	ADD_DEPENDENCIES(mediacycle armadillo-utils tinyxml)
-	TARGET_LINK_LIBRARIES(mediacycle armadillo-utils tinyxml)
+INCLUDE_DIRECTORIES(../armadillo ../fftooura ../tinyxml)
+ADD_DEPENDENCIES(mediacycle armadillo-utils tinyxml)
+TARGET_LINK_LIBRARIES(mediacycle armadillo-utils tinyxml)
+IF (APPLE)
+	TARGET_LINK_LIBRARIES(mediacycle stdc++)# CF otherwise "make package" fails
+ENDIF(APPLE)
+	
+TARGET_LINK_LIBRARIES(armadillo-utils)
+IF ( SDIF_FOUND )
+	TARGET_LINK_LIBRARIES(sdif)
+ENDIF ( )
 
-	IF ( SDIF_FOUND )
-		TARGET_LINK_LIBRARIES(armadillo-utils sdif)
-	ENDIF ( )
+#others
+IF(SUPPORT_AUDIO)
+	TARGET_LINK_LIBRARIES(mediacycle sndfile)
+ENDIF()
+TARGET_LINK_LIBRARIES(mediacycle pthread)
+IF ( MINGW )
+	IF(SUPPORT_AUDIO)
+		TARGET_LINK_LIBRARIES(mediacycle FLAC vorbisenc vorbis m ogg)
+	ENDIF()
+	TARGET_LINK_LIBRARIES(mediacycle wsock32 ws2_32) # CF: should be detected in main CMakeLists.txt
+ENDIF ( MINGW )
 
-	#others
-	IF ( MINGW )
-		TARGET_LINK_LIBRARIES(mediacycle sndfile FLAC vorbisenc vorbis m ogg pthread wsock32 ws2_32) # CF: should be detected in main CMakeLists.txt
-	ELSE ( MINGW )
-		TARGET_LINK_LIBRARIES(mediacycle sndfile pthread)
-	ENDIF ( MINGW )
-
-	#OpenCV
+#OpenCV
+IF(SUPPORT_VIDEO OR SUPPORT_IMAGE)
 	TARGET_LINK_LIBRARIES(mediacycle ${OpenCV_LIBRARIES})
-
-
-	TARGET_LINK_LIBRARIES(mediacycle ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_GRAPH_LIBRARY})
+ENDIF()
+TARGET_LINK_LIBRARIES(mediacycle ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_GRAPH_LIBRARY})
+IF(SUPPORT_VIDEO)
 	TARGET_LINK_LIBRARIES(mediacycle ${FFMPEG_LIBRARIES} ${FFMPEG_LIBSWSCALE_LIBRARIES})
+ENDIF()
 
-	# OSG for 3D Models
-	TARGET_LINK_LIBRARIES(mediacycle osg osgDB OpenThreads)
+# OSG for 3D Models and/or ffmpeg plugin checkup
+IF(SUPPORT_3DMODEL OR SUPPORT_IMAGE OR SUPPORT_VIDEO)
+	TARGET_LINK_LIBRARIES(mediacycle ${OPENSCENEGRAPH_CORE_LIBRARIES})
+ENDIF()
 
-	# this might require some path adaptation for Windows
-	# (e.g. set cmake_install_prefix to the good value for Windows )
-	# OSX is probably ok with installing lib in /usr/local/lib/
-	##INSTALL(TARGETS mediacycle LIBRARY DESTINATION lib)
-	##INSTALL(FILES ${HDR} DESTINATION include/mediacycle)
-ENDIF ( USE_OSG AND FFMPEG_FOUND )
+# this might require some path adaptation for Windows
+# (e.g. set cmake_install_prefix to the good value for Windows )
+# OSX is probably ok with installing lib in /usr/local/lib/
+##INSTALL(TARGETS mediacycle LIBRARY DESTINATION lib)
+##INSTALL(FILES ${HDR} DESTINATION include/mediacycle)

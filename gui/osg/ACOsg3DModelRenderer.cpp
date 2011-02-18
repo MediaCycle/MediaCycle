@@ -33,6 +33,8 @@
  *
  */
 
+#if defined (SUPPORT_3DMODEL)
+
 #include "ACOsg3DModelRenderer.h"
 
 using namespace osg;
@@ -256,3 +258,5 @@ void ACOsg3DModelRenderer::updateNodes(double ratio) {
 	media_node->setMatrix(globalT);
 #endif
 }
+
+#endif //defined (SUPPORT_3DMODEL)

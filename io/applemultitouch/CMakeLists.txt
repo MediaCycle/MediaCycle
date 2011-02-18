@@ -1,4 +1,3 @@
-MESSAGE("io/applemultitouch")
 IF ( USE_APPLE_MULTITOUCH )
 
 	FILE(GLOB SRC *.cpp)
@@ -12,5 +11,7 @@ IF ( USE_APPLE_MULTITOUCH )
 	TARGET_LINK_LIBRARIES(mediacycle-io-applemultitouch mediacycle)
 
 	# add "/System/Library/PrivateFrameworks/MultitouchSupport.framework/MultitouchSupport" to your application's CMAKE_EXE_LINKER_FLAGS
-
-ENDIF ( USE_APPLE_MULTITOUCH )
+	MESSAGE("[X] mediacycle-io-applemultitouch")
+ELSE()
+	MESSAGE("[ ] mediacycle-io-applemultitouch")
+ENDIF()

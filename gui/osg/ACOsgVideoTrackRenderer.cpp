@@ -35,7 +35,7 @@
 
 #include "ACOsgVideoTrackRenderer.h"
 #include "ACVideo.h"
-#include "ACImage.h"
+//#include "ACImage.h"
 #include <cmath>
 #include <osg/ImageUtils>
 #include <osgDB/WriteFile>
@@ -43,7 +43,61 @@
 using namespace std;
 using namespace osg;
 
-#if !defined (APPLE_IOS)
+#if defined (SUPPORT_VIDEO)
+
+osg::Image* Convert_OpenCV_2_osg_Image(IplImage* cvImg)
+{
+	// XS uncomment the following 4 lines for visual debug (e.g., thumbnail)	
+	//	cvNamedWindow("T", CV_WINDOW_AUTOSIZE);
+	//	cvShowImage("T", cvImg);
+	//	cvWaitKey(0);
+	//	cvDestroyWindow("T");	
+	
+	
+	if(cvImg->nChannels == 3)
+	{
+		// Flip image from top-left to bottom-left origin
+		if(cvImg->origin == 0) {
+			cvConvertImage(cvImg , cvImg, CV_CVTIMG_FLIP);
+			cvImg->origin = 1;
+		}
+		
+		// Convert from BGR to RGB color format
+		//printf("Color format %s\n",cvImg->colorModel);
+		if ( !strcmp(cvImg->channelSeq,"BGR") ) {
+			cvCvtColor( cvImg, cvImg, CV_BGR2RGB );
+		}
+		
+		osg::Image* osgImg = new osg::Image();
+		
+		/*temp_data = new unsigned char[cvImg->width * cvImg->height * cvImg->nChannels];
+		 for (i=0;i<cvImg->height;i++) {
+		 memcpy( (char*)temp_data + i*cvImg->width*cvImg->nChannels, (char*)(cvImg->imageData) + i*(cvImg->widthStep), cvImg->width*cvImg->nChannels);
+		 }*/
+		
+		osgImg->setImage(
+						 cvImg->width, //s
+						 cvImg->height, //t
+						 1, //r //CF needs to be 1 otherwise scaleImage can't be used
+						 3, //GLint internalTextureformat, (GL_LINE_STRIP, 0x0003)
+						 6407, // GLenum pixelFormat, (GL_RGB, 0x1907)
+						 5121, // GLenum type, (GL_UNSIGNED_BYTE, 0x1401)
+						 (unsigned char*)(cvImg->imageData), // unsigned char* data
+						 //temp_data,
+						 osg::Image::NO_DELETE, // AllocationMode mode (shallow copy)
+						 1);//int packing=1); (???)
+		
+		//printf("Conversion completed\n");
+		return osgImg;
+	}
+	// XS TODO : what happens with BW images ?
+	else {
+		cerr << "Unrecognized image type" << endl;
+		//printf("Unrecognized image type");
+		return 0;
+	}
+	
+}
 
 static double getTime()
 {
@@ -539,7 +593,7 @@ void ACOsgVideoTrackRenderer::framesGeode() {
 		else {
 			IplImage* tmp = cvRetrieveFrame(summary_data);
 			
-			osg::Image* tmposg = Convert_OpenCV_TO_OSG_IMAGE(tmp);
+			osg::Image* tmposg = Convert_OpenCV_2_osg_Image(tmp);
 			osg::Image* thumbnail = new osg::Image;
 			thumbnail->allocateImage(tmposg->s(), tmposg->t(), tmposg->r(), GL_RGB, tmposg->getDataType());
 			osg::copyImage(tmposg, 0, 0, 0, tmposg->s(), tmposg->t(), tmposg->r(),thumbnail, 0, 0, 0, false);
@@ -841,5 +895,4 @@ void ACOsgVideoTrackRenderer::updateTracks(double ratio) {
 			
 	}		
 }
-#endif//CF APPLE_IOS
-
+#endif //defined (SUPPORT_VIDEO)

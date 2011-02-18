@@ -30,6 +30,8 @@
  * <mailto:avre@umons.ac.be>
  */
 
+#if defined (SUPPORT_IMAGE) || defined(SUPPORT_VIDEO)
+
 #ifndef ACOPENCVINCLUDE_H
 #define	ACOPENCVINCLUDE_H
 
@@ -70,3 +72,5 @@
 //};
 //#endif
 #endif	/* ACOPENCVINCLUDE_H */
+
+#endif //defined (SUPPORT_IMAGE) || defined(SUPPORT_VIDEO)

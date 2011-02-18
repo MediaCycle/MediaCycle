@@ -32,6 +32,7 @@
  *
  */
 
+#if defined (SUPPORT_3DMODEL)
 #include "AC3DModel.h"
 #include <fstream>
 
@@ -105,3 +106,4 @@ int AC3DModel::loadACLSpecific(ifstream &library_file) {
 		
 	return 1;
 }
+#endif //defined (SUPPORT_3DMODEL)

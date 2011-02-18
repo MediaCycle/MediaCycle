@@ -36,17 +36,22 @@
 
 ACVideoControlsDockWidgetQt::ACVideoControlsDockWidgetQt(QWidget *parent) : QDockWidget(parent)
 {
+	#if defined (SUPPORT_VIDEO)
 	ui.setupUi(this); // first thing to do
 	this->media_cycle = NULL;
 	this->osg_view = NULL;
 	ui.comboBoxVideoSummary->setEnabled(true);
 	this->show();
+	#endif //defined (SUPPORT_VIDEO)
 }
 
 ACVideoControlsDockWidgetQt::~ACVideoControlsDockWidgetQt(){
+	#if defined (SUPPORT_VIDEO)
 	//delete media_cycle;
+	#endif //defined (SUPPORT_VIDEO)
 }
 
+#if defined (SUPPORT_VIDEO)
 void ACVideoControlsDockWidgetQt::on_pushButtonMuteAll_clicked()
 {
 	//media_cycle->muteAllSources();
@@ -67,3 +72,4 @@ void ACVideoControlsDockWidgetQt::on_comboBoxVideoSummary_activated(const QStrin
 		osg_view->setFocus();
 	}
 }
+#endif //defined (SUPPORT_VIDEO)

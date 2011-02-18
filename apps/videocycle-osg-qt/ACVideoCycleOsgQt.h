@@ -44,7 +44,6 @@ using namespace std;
 #include "ui_ACVideoCycleOsgQt.h"
 #include <ACOsgCompositeViewQt.h>
 #include <MediaCycle.h>
-#include <ACAudioEngine.h>
 #include <ACOscBrowser.h>
 #include <ACOscFeedback.h>
 #ifdef USE_APPLE_MULTITOUCH
@@ -107,7 +106,6 @@ class ACVideoCycleOsgQt : public QMainWindow
 		MediaCycle *media_cycle;
 	
     private:
-		ACAudioEngine *audio_engine;
 		ACOscBrowser *osc_browser;
 		ACOscFeedback *osc_feedback;
 		#ifdef USE_APPLE_MULTITOUCH

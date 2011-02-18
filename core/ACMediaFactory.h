@@ -70,11 +70,12 @@ public:
 	
 private:
 	static bool addFileExtensionSupport(std::string file_ext, ACMediaType media_type);	
-#if defined (USE_SNDFILE)
-	static void addSndFileExtensions();
-#endif
-	static void addOsgFileExtensions();
-	
+	#if defined (SUPPORT_AUDIO)
+		static void addSndFileExtensions();
+	#endif //defined (SUPPORT_AUDIO)
+	#if defined (SUPPORT_IMAGE) || defined(SUPPORT_VIDEO) || defined(SUPPORT_3DMODEL)
+		static void addOsgFileExtensions();
+	#endif //defined (SUPPORT_IMAGE OR SUPPORT_VIDEO) || defined(SUPPORT_3DMODEL)
 };
 
 #endif // _ACMEDIAFACTORY_H
