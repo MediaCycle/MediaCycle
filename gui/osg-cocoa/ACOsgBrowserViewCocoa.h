@@ -31,13 +31,17 @@
 //  <mailto:avre@umons.ac.be>
 //
 
+// Warning: include C++ headers first, then import objective-c/c++ headers
+#include <MediaCycle.h>
+#include <ACOsgBrowserRenderer.h>
+#include <ACOsgHUDRenderer.h>
+#include <ACOsgBrowserEventHandler.h>
+
 #import <Cocoa/Cocoa.h>
 #import "ACOsgViewCocoa.h"
-#import <ACOsgBrowserEventHandler.h>
+
 //#import "ACOsgViewNodeCocoa.h"
-#include <MediaCycle.h>
-#import "ACOsgBrowserRenderer.h"
-#import "ACOsgHUDRenderer.h"
+
 
 ////struct ACOsgBrowserViewData;//CF
 

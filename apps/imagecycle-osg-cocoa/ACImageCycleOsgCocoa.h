@@ -32,15 +32,13 @@
  *
 */
 
-#import <Cocoa/Cocoa.h>
-
-//#include <Io/TiOscReceiver.h>
-#import <ACOsgBrowserViewCocoa.h>
+// Warning: include C++ headers first, then import objective-c/c++ headers
 #include <MediaCycle.h>
-//#include <ACAudioEngine.h>
-//#include <ACOscBrowser.h>
 #include <ACOscBrowser.h>
 #include <ACOscFeedback.h>
+
+#import <Cocoa/Cocoa.h>
+#import <ACOsgBrowserViewCocoa.h>
 
 @interface ACImageCycleOsgCocoa : NSObject {
 	

@@ -17,7 +17,14 @@ IF(SUPPORT_IMAGE AND APPLE AND USE_COCOA AND USE_OSC)
 	ADD_DEPENDENCIES(imagecycle-osg-cocoa mc_image)
 	ADD_DEPENDENCIES(imagecycle-osg-cocoa mc_segmentation)
 	set_target_properties(imagecycle-osg-cocoa PROPERTIES MACOSX_BUNDLE_INFO_PLIST ${CMAKE_SOURCE_DIR}/apps/imagecycle-osg-cocoa/Info.plist)
-	set_source_files_properties(MainMenu.nib PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+	set_source_files_properties(MainMenu.nib PROPERTIES MACOSX_PACKAGE_LOCATION Resources) # doesn't seem to work if compiling outside XCode
+	IF(NOT XCODE)
+		add_custom_command(
+    			TARGET imagecycle-osg-cocoa
+   			POST_BUILD
+			COMMAND cp -R ${CMAKE_CURRENT_SOURCE_DIR}/MainMenu.nib ${CMAKE_CURRENT_BINARY_DIR}/imagecycle-osg-cocoa.app/Contents/Resources/
+		)
+	ENDIF()
 	TARGET_LINK_LIBRARIES(imagecycle-osg-cocoa mediacycle)
 	TARGET_LINK_LIBRARIES(imagecycle-osg-cocoa mediacycle-osg)
 	TARGET_LINK_LIBRARIES(imagecycle-osg-cocoa mediacycle-osg-cocoa)

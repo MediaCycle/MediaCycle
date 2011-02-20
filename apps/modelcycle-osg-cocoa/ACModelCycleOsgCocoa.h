@@ -1,6 +1,6 @@
 /*
  *  ACController.h
- *  AudioCycle
+ *  ModelCycle
  *
  *  @author Stéphane Dupont
  *  @date 21/10/08
@@ -32,15 +32,13 @@
  *
 */
 
-#import <Cocoa/Cocoa.h>
-
-//#include <Io/TiOscReceiver.h>
-#import <ACOsgBrowserViewCocoa.h>
+// Warning: include C++ headers first, then import objective-c/c++ headers
 #include <MediaCycle.h>
-#include <ACAudioEngine.h>
-//#include <ACOscBrowser.h>
 #include <ACOscBrowser.h>
 #include <ACOscFeedback.h>
+
+#import <Cocoa/Cocoa.h>
+#import <ACOsgBrowserViewCocoa.h>
 
 // Tags of the Text items in the dialog boxes
 enum	{
@@ -54,10 +52,9 @@ enum	{
 	kVelocitySpeedEditTextItem	= 4002
 };
 
-@interface ACAudioCycleOsgCocoa : NSObject {
+@interface ACModelCycleOsgCocoa : NSObject {
 	
 	MediaCycle				*media_cycle;
-	ACAudioEngine			*audio_engine;
 	ACOscBrowser			*osc_browser;
 	ACOscFeedback			*osc_feedback;
 	ACOscBrowserRef			mOscReceiver;
@@ -155,11 +152,7 @@ enum	{
 - (IBAction)	setOpen:(id)inSender;
 - (IBAction)	setSaveAs:(id)inSender;
 
-- (IBAction)	setEngineStart:(id)inSender;
-- (IBAction)	setEngineStop:(id)inSender;
-
 - (IBAction)	setCleanLibrary:(id)inSender;
-- (IBAction)	setMuteAllSources:(id)inSender;
 
 // Context/Listener Controls
 - (IBAction)	setListenerGainSlider:(id)inSender;

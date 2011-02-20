@@ -135,9 +135,9 @@ struct ACOsgBrowserViewData
 	//NSLog(@"ACImageBrowserOsgView's prepareOpenGL (0x%x)", self);
 	//NSLog(@"pixelFormat : %@", [self pixelFormat]);
 	[super prepareOpenGL];
-	[self setCameraManipulator:NULL];
+	//[self setCameraManipulator:NULL];
 	
-	Camera *camera = [self camera];
+	osg::Camera *camera = [self camera];
 	
 	if(camera)
 	{
@@ -150,7 +150,7 @@ struct ACOsgBrowserViewData
 							 );*/
 		camera->getViewMatrix().makeIdentity();
 		//camera->setViewMatrixAsLookAt(eye, dir, up);
-		camera->setViewMatrixAsLookAt(Vec3(0,0,0.8), Vec3(0,0,0), Vec3(0,1,0));
+		camera->setViewMatrixAsLookAt(osg::Vec3(0,0,0.8), osg::Vec3(0,0,0), osg::Vec3(0,1,0));
 	}
 	else
 	{
@@ -175,7 +175,7 @@ struct ACOsgBrowserViewData
 		return;
 	}	
 	
-	Camera *camera = [self camera];
+	osg::Camera *camera = [self camera];
 	
 	if(camera && media_cycle)
 	{
@@ -190,7 +190,7 @@ struct ACOsgBrowserViewData
 		upx = cos(-angle+pi/2);
 		upy = sin(-angle+pi/2);		
 		
-		camera->setViewMatrixAsLookAt(Vec3(x*1.0,y*1.0,0.8 / zoom), Vec3(x*1.0,y*1.0,0), Vec3(upx, upy, 0));
+		camera->setViewMatrixAsLookAt(osg::Vec3(x*1.0,y*1.0,0.8 / zoom), osg::Vec3(x*1.0,y*1.0,0), osg::Vec3(upx, upy, 0));
 	}
 	
 	[self updateTransformsFromBrowser:frac];

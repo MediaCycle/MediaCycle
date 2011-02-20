@@ -58,6 +58,7 @@
 //  <mailto:avre@umons.ac.be>
 //
 
+// Warning: include C++ headers first, then import objective-c/c++ headers
 #import <Cocoa/Cocoa.h>
 #import <CoreVideo/CoreVideo.h>
 

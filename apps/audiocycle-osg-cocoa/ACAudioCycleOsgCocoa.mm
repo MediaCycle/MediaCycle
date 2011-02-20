@@ -35,7 +35,7 @@
  *
  */
 
-#include<iostream>
+#include <iostream>
 #import <ACAudioCycleOsgCocoa.h>
 
 ////
@@ -134,7 +134,7 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 	#endif
 	
 	// XSCF 250310 added these 3
-	if (media_cycle->getMode() == AC_MODE_CLUSTERS) {
+	if (media_cycle->getBrowser()->getMode() == AC_MODE_CLUSTERS) {
 		//media_cycle->pushNavigationState();
 		media_cycle->setWeight(0, [mWeight1Check floatValue]);
 		media_cycle->setWeight(1, [mWeight2Check floatValue]);
@@ -163,11 +163,11 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 	#ifdef USE_DEBUG
 		build_type = "Debug";
 	#endif
-	//media_cycle->addPlugin("../../../plugins/video/" + build_type + "/mc_video.dylib");
-	media_cycle->addPlugin("../../../plugins/audio/" + build_type + "/mc_audio.dylib");
-	media_cycle->addPlugin("../../../plugins/segmentation/" + build_type + "/mc_segmentation.dylib");
-	int vizplugloaded = media_cycle->addPlugin("../../../plugins/visualisation/" + build_type + "/mc_visualisation.dylib");
-	//int vizplugloaded = media_cycle->addPlugin("/dupont/development/workdir-new/ticore-app/Applications/Numediart/MediaCycle/src/Builds/darwin-x86/plugins/visualisation/" + build_type + "/mc_visualisation.dylib");
+	//media_cycle->addPluginLibrary("../../../plugins/video/" + build_type + "/mc_video.dylib");
+	media_cycle->addPluginLibrary("../../../plugins/audio/" + build_type + "/mc_audio.dylib");
+	media_cycle->addPluginLibrary("../../../plugins/segmentation/" + build_type + "/mc_segmentation.dylib");
+	int vizplugloaded = media_cycle->addPluginLibrary("../../../plugins/visualisation/" + build_type + "/mc_visualisation.dylib");
+	//int vizplugloaded = media_cycle->addPluginLibrary("/dupont/development/workdir-new/ticore-app/Applications/Numediart/MediaCycle/src/Builds/darwin-x86/plugins/visualisation/" + build_type + "/mc_visualisation.dylib");
 	if ( vizplugloaded == 0 )
 	{
 		//CF this should be on a separate function or even on a mediacycle-(osg-)cocoa class
@@ -524,7 +524,7 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 	else {
 		media_cycle->setWeight(0, 0);
 	}
-	if ( media_cycle->getMode() == AC_MODE_CLUSTERS )
+	if ( media_cycle->getBrowser()->getMode() == AC_MODE_CLUSTERS )
 		media_cycle->updateDisplay(true);
 }
 
@@ -537,7 +537,7 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 	else {
 		media_cycle->setWeight(1, 0);
 	}
-	if ( media_cycle->getMode() == AC_MODE_CLUSTERS )
+	if ( media_cycle->getBrowser()->getMode() == AC_MODE_CLUSTERS )
 		media_cycle->updateDisplay(true);
 }
 
@@ -550,7 +550,7 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 	else {
 		media_cycle->setWeight(2, 0);
 	}
-	if ( media_cycle->getMode() == AC_MODE_CLUSTERS )
+	if ( media_cycle->getBrowser()->getMode() == AC_MODE_CLUSTERS )
 		media_cycle->updateDisplay(true);
 }
 
@@ -559,7 +559,7 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 	float	value = [inSender floatValue];
 	
 	media_cycle->setWeight(0, value);
-	if ( media_cycle->getMode() == AC_MODE_CLUSTERS )
+	if ( media_cycle->getBrowser()->getMode() == AC_MODE_CLUSTERS )
 		media_cycle->updateDisplay(true); //XS 250310 was: media_cycle->updateClusters(true);
 	// XS 310310 removed media_cycle->setNeedsDisplay(true); // now in updateDisplay
 
@@ -570,7 +570,7 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 	float	value = [inSender floatValue];
 	
 	media_cycle->setWeight(1, value);
-	if ( media_cycle->getMode() == AC_MODE_CLUSTERS )
+	if ( media_cycle->getBrowser()->getMode() == AC_MODE_CLUSTERS )
 		media_cycle->updateDisplay(true); //XS 250310 was: media_cycle->updateClusters(true);
 	// XS 310310 removed media_cycle->setNeedsDisplay(true); // now in updateDisplay
 
@@ -581,7 +581,7 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 	float	value = [inSender floatValue];
 	
 	media_cycle->setWeight(2, value);
-	if ( media_cycle->getMode() == AC_MODE_CLUSTERS )
+	if ( media_cycle->getBrowser()->getMode() == AC_MODE_CLUSTERS )
 		media_cycle->updateDisplay(true); //XS 250310 was: media_cycle->updateClusters(true);
 	// XS 310310 removed media_cycle->setNeedsDisplay(true); // now in updateDisplay
 
@@ -593,7 +593,7 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 	
 	media_cycle->setClusterNumber(value);
 	// XSCF251003 added this
-	if ( media_cycle->getMode() == AC_MODE_CLUSTERS )
+	if ( media_cycle->getBrowser()->getMode() == AC_MODE_CLUSTERS )
 		media_cycle->updateDisplay(true); //XS 250310 was: media_cycle->updateClusters(true);
 	// XS 310310 removed media_cycle->setNeedsDisplay(true); // now in updateDisplay
 	

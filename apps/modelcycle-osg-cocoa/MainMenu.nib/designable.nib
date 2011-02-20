@@ -1,11 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<archive type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="7.03">
+<archive type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="7.10">
 	<data>
 		<int key="IBDocument.SystemTarget">1050</int>
-		<string key="IBDocument.SystemVersion">9L31a</string>
-		<string key="IBDocument.InterfaceBuilderVersion">677</string>
-		<string key="IBDocument.AppKitVersion">949.54</string>
-		<string key="IBDocument.HIToolboxVersion">353.00</string>
+		<string key="IBDocument.SystemVersion">10J567</string>
+		<string key="IBDocument.InterfaceBuilderVersion">823</string>
+		<string key="IBDocument.AppKitVersion">1038.35</string>
+		<string key="IBDocument.HIToolboxVersion">462.00</string>
+		<object class="NSMutableDictionary" key="IBDocument.PluginVersions">
+			<string key="NS.key.0">com.apple.InterfaceBuilder.CocoaPlugin</string>
+			<string key="NS.object.0">823</string>
+		</object>
 		<object class="NSMutableArray" key="IBDocument.EditedObjectIDs">
 			<bool key="EncodedWithXMLCoder">YES</bool>
 			<integer value="29"/>
@@ -16,13 +20,8 @@
 			<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 		</object>
 		<object class="NSMutableDictionary" key="IBDocument.Metadata">
-			<bool key="EncodedWithXMLCoder">YES</bool>
-			<object class="NSArray" key="dict.sortedKeys">
-				<bool key="EncodedWithXMLCoder">YES</bool>
-			</object>
-			<object class="NSMutableArray" key="dict.values">
-				<bool key="EncodedWithXMLCoder">YES</bool>
-			</object>
+			<string key="NS.key.0">PluginDependencyRecalculationVersion</string>
+			<integer value="1" key="NS.object.0"/>
 		</object>
 		<object class="NSMutableArray" key="IBDocument.RootObjects" id="362906817">
 			<bool key="EncodedWithXMLCoder">YES</bool>
@@ -81,7 +80,7 @@
 								</object>
 								<object class="NSMenuItem" id="519169594">
 									<reference key="NSMenu" ref="23035655"/>
-									<string type="base64-UTF8" key="NSTitle">UHJlZmVyZW5jZXPigKY</string>
+									<string key="NSTitle">Preferences…</string>
 									<string key="NSKeyEquiv">,</string>
 									<int key="NSKeyEquivModMask">1048576</int>
 									<int key="NSMnemonicLoc">2147483647</int>
@@ -203,7 +202,7 @@
 								</object>
 								<object class="NSMenuItem" id="1046500090">
 									<reference key="NSMenu" ref="25933250"/>
-									<string type="base64-UTF8" key="NSTitle">T3BlbuKApg</string>
+									<string key="NSTitle">Open…</string>
 									<string key="NSKeyEquiv">o</string>
 									<int key="NSKeyEquivModMask">1048576</int>
 									<int key="NSMnemonicLoc">2147483647</int>
@@ -283,7 +282,7 @@
 								</object>
 								<object class="NSMenuItem" id="419607031">
 									<reference key="NSMenu" ref="25933250"/>
-									<string type="base64-UTF8" key="NSTitle">U2F2ZSBBc+KApg</string>
+									<string key="NSTitle">Save As…</string>
 									<string key="NSKeyEquiv">S</string>
 									<int key="NSKeyEquivModMask">1048576</int>
 									<int key="NSMnemonicLoc">2147483647</int>
@@ -310,7 +309,7 @@
 								</object>
 								<object class="NSMenuItem" id="842722098">
 									<reference key="NSMenu" ref="25933250"/>
-									<string type="base64-UTF8" key="NSTitle">UGFnZSBTZXR1cOKApg</string>
+									<string key="NSTitle">Page Setup…</string>
 									<string key="NSKeyEquiv">P</string>
 									<int key="NSKeyEquivModMask">1048576</int>
 									<int key="NSMnemonicLoc">2147483647</int>
@@ -319,7 +318,7 @@
 								</object>
 								<object class="NSMenuItem" id="150697155">
 									<reference key="NSMenu" ref="25933250"/>
-									<string type="base64-UTF8" key="NSTitle">UHJpbnTigKY</string>
+									<string key="NSTitle">Print…</string>
 									<string key="NSKeyEquiv">p</string>
 									<int key="NSKeyEquivModMask">1048576</int>
 									<int key="NSMnemonicLoc">2147483647</int>
@@ -390,7 +389,7 @@
 				<string key="NSName">_NSMainMenu</string>
 			</object>
 			<object class="NSCustomObject" id="97547699">
-				<string key="NSClassName">ACAudioCycleOsgCocoa</string>
+				<string key="NSClassName">ACModelCycleOsgCocoa</string>
 			</object>
 			<object class="NSUserDefaultsController" id="78115597">
 				<bool key="NSSharedInstance">YES</bool>
@@ -400,12 +399,12 @@
 				<int key="NSWindowBacking">2</int>
 				<string key="NSWindowRect">{{50, 238}, {1130, 618}}</string>
 				<int key="NSWTFlags">813170688</int>
-				<string key="NSWindowTitle">AudioCycle</string>
+				<string key="NSWindowTitle">ModelCycle</string>
 				<string key="NSWindowClass">NSWindow</string>
 				<object class="NSMutableString" key="NSViewClass">
 					<characters key="NS.bytes">View</characters>
 				</object>
-				<string key="NSWindowContentMaxSize">{3.40282e+38, 3.40282e+38}</string>
+				<string key="NSWindowContentMaxSize">{1.79769e+308, 1.79769e+308}</string>
 				<object class="NSView" key="NSWindowView" id="87705116">
 					<reference key="NSNextResponder"/>
 					<int key="NSvFlags">256</int>
@@ -443,7 +442,7 @@
 																<string key="NSContents">Rhythm</string>
 																<object class="NSFont" key="NSSupport" id="26">
 																	<string key="NSName">LucidaGrande</string>
-																	<double key="NSSize">1.100000e+01</double>
+																	<double key="NSSize">11</double>
 																	<int key="NSfFlags">3100</int>
 																</object>
 																<reference key="NSControlView" ref="286767713"/>
@@ -561,14 +560,14 @@
 																<string key="NSContents"/>
 																<object class="NSFont" key="NSSupport">
 																	<string key="NSName">Helvetica</string>
-																	<double key="NSSize">1.200000e+01</double>
+																	<double key="NSSize">12</double>
 																	<int key="NSfFlags">16</int>
 																</object>
 																<reference key="NSControlView" ref="602500849"/>
-																<double key="NSMaxValue">1.200000e+01</double>
-																<double key="NSMinValue">3.000000e+00</double>
-																<double key="NSValue">5.000000e+00</double>
-																<double key="NSAltIncValue">0.000000e+00</double>
+																<double key="NSMaxValue">12</double>
+																<double key="NSMinValue">3</double>
+																<double key="NSValue">5</double>
+																<double key="NSAltIncValue">0.0</double>
 																<int key="NSNumberOfTickMarks">10</int>
 																<int key="NSTickMarkPosition">1</int>
 																<bool key="NSAllowsTickMarkValuesOnly">YES</bool>
@@ -587,7 +586,7 @@
 																<string key="NSContents">Number:</string>
 																<object class="NSFont" key="NSSupport" id="22">
 																	<string key="NSName">LucidaGrande</string>
-																	<double key="NSSize">9.000000e+00</double>
+																	<double key="NSSize">9</double>
 																	<int key="NSfFlags">3614</int>
 																</object>
 																<reference key="NSControlView" ref="295296542"/>
@@ -597,7 +596,7 @@
 																	<string key="NSColorName">controlColor</string>
 																	<object class="NSColor" key="NSColor">
 																		<int key="NSColorSpace">3</int>
-																		<bytes key="NSWhite">MC42NjY2NjY2OQA</bytes>
+																		<bytes key="NSWhite">MC42NjY2NjY2NjY3AA</bytes>
 																	</object>
 																</object>
 																<object class="NSColor" key="NSTextColor" id="449027607">
@@ -638,7 +637,7 @@
 																<int key="NSCellFlags2">2048</int>
 																<object class="NSFont" key="NSSupport" id="531151656">
 																	<string key="NSName">LucidaGrande</string>
-																	<double key="NSSize">1.300000e+01</double>
+																	<double key="NSSize">13</double>
 																	<int key="NSfFlags">1044</int>
 																</object>
 																<reference key="NSControlView" ref="937986451"/>
@@ -729,7 +728,7 @@
 												<object class="NSMutableArray" key="NSSegmentImages">
 													<bool key="EncodedWithXMLCoder">YES</bool>
 													<object class="NSSegmentItem">
-														<double key="NSSegmentItemWidth">5.700000e+01</double>
+														<double key="NSSegmentItemWidth">57</double>
 														<string key="NSSegmentItemLabel">History</string>
 														<int key="NSSegmentItemImageScaling">0</int>
 													</object>
@@ -1086,7 +1085,7 @@
 																<string key="NSContents"/>
 																<object class="NSFont" key="NSSupport" id="45338824">
 																	<string key="NSName">LucidaGrande</string>
-																	<double key="NSSize">1.000000e+01</double>
+																	<double key="NSSize">10</double>
 																	<int key="NSfFlags">2843</int>
 																</object>
 																<reference key="NSControlView" ref="303107687"/>
@@ -1278,7 +1277,7 @@
 							<object class="NSTextFieldCell" key="NSTitleCell">
 								<int key="NSCellFlags">67239424</int>
 								<int key="NSCellFlags2">0</int>
-								<string key="NSContents">Audio</string>
+								<string key="NSContents">Model</string>
 								<reference key="NSSupport" ref="26"/>
 								<reference key="NSBackgroundColor" ref="767397043"/>
 								<object class="NSColor" key="NSTextColor">
@@ -1329,20 +1328,20 @@
 													<int key="NSCellFlags2">0</int>
 													<object class="NSFont" key="NSSupport">
 														<string key="NSName">LucidaGrande</string>
-														<double key="NSSize">1.300000e+01</double>
+														<double key="NSSize">13</double>
 														<int key="NSfFlags">16</int>
 													</object>
 													<reference key="NSControlView" ref="1017043609"/>
 													<object class="NSMutableArray" key="NSSegmentImages">
 														<bool key="EncodedWithXMLCoder">YES</bool>
 														<object class="NSSegmentItem">
-															<double key="NSSegmentItemWidth">8.000000e+01</double>
+															<double key="NSSegmentItemWidth">80</double>
 															<string key="NSSegmentItemLabel">Clusters</string>
 															<bool key="NSSegmentItemSelected">YES</bool>
 															<int key="NSSegmentItemImageScaling">0</int>
 														</object>
 														<object class="NSSegmentItem">
-															<double key="NSSegmentItemWidth">7.600000e+01</double>
+															<double key="NSSegmentItemWidth">76</double>
 															<string key="NSSegmentItemLabel">Neighbors</string>
 															<int key="NSSegmentItemTag">1</int>
 															<int key="NSSegmentItemImageScaling">0</int>
@@ -1423,7 +1422,7 @@
 					<reference key="NSSuperview"/>
 				</object>
 				<string key="NSScreenRect">{{0, 0}, {1440, 878}}</string>
-				<string key="NSMaxSize">{3.40282e+38, 3.40282e+38}</string>
+				<string key="NSMaxSize">{1.79769e+308, 1.79769e+308}</string>
 			</object>
 		</object>
 		<object class="IBObjectContainer" key="IBDocument.Objects">
@@ -1837,7 +1836,7 @@
 						<int key="objectID">-2</int>
 						<reference key="object" ref="781028251"/>
 						<reference key="parent" ref="0"/>
-						<string type="base64-UTF8" key="objectName">RmlsZSdzIE93bmVyA</string>
+						<string key="objectName">File's Owner</string>
 					</object>
 					<object class="IBObjectRecord">
 						<int key="objectID">-1</int>
@@ -2725,10 +2724,8 @@
 			</object>
 			<object class="NSMutableDictionary" key="flattenedProperties">
 				<bool key="EncodedWithXMLCoder">YES</bool>
-				<object class="NSMutableArray" key="dict.sortedKeys">
+				<object class="NSArray" key="dict.sortedKeys">
 					<bool key="EncodedWithXMLCoder">YES</bool>
-					<string>-1.IBPluginDependency</string>
-					<string>-2.IBPluginDependency</string>
 					<string>-3.IBPluginDependency</string>
 					<string>-3.ImportedFromIB2</string>
 					<string>129.IBPluginDependency</string>
@@ -2759,7 +2756,6 @@
 					<string>196.ImportedFromIB2</string>
 					<string>197.IBPluginDependency</string>
 					<string>197.ImportedFromIB2</string>
-					<string>206.IBPluginDependency</string>
 					<string>206.ImportedFromIB2</string>
 					<string>23.IBPluginDependency</string>
 					<string>23.ImportedFromIB2</string>
@@ -2767,6 +2763,7 @@
 					<string>24.IBPluginDependency</string>
 					<string>24.ImportedFromIB2</string>
 					<string>2727.IBEditorWindowLastContentRect</string>
+					<string>2727.IBPluginDependency</string>
 					<string>2727.IBWindowTemplateEditedContentRect</string>
 					<string>2727.ImportedFromIB2</string>
 					<string>2727.NSWindowTemplate.visibleAtLaunch</string>
@@ -2938,156 +2935,152 @@
 				<object class="NSMutableArray" key="dict.values">
 					<bool key="EncodedWithXMLCoder">YES</bool>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<boolean value="YES" id="5"/>
+					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<reference ref="5"/>
+					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<reference ref="5"/>
+					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<reference ref="5"/>
+					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<reference ref="5"/>
+					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<reference ref="5"/>
+					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<reference ref="5"/>
+					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<reference ref="5"/>
+					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<reference ref="5"/>
+					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<reference ref="5"/>
+					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<reference ref="5"/>
+					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<reference ref="5"/>
+					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<reference ref="5"/>
+					<boolean value="YES"/>
+					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<reference ref="5"/>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<reference ref="5"/>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<reference ref="5"/>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<reference ref="5"/>
+					<boolean value="YES"/>
 					<string>{{531, 891}, {197, 73}}</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<reference ref="5"/>
-					<string>{{5, 123}, {1130, 618}}</string>
-					<string>{{5, 123}, {1130, 618}}</string>
-					<reference ref="5"/>
-					<reference ref="5"/>
+					<boolean value="YES"/>
+					<string>{{236, 309}, {1130, 618}}</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<reference ref="5"/>
+					<string>{{236, 309}, {1130, 618}}</string>
+					<boolean value="YES"/>
+					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<reference ref="5"/>
+					<boolean value="YES"/>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<boolean value="YES"/>
 					<string>{{536, 736}, {237, 20}}</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<reference ref="5"/>
+					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<reference ref="5"/>
+					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<reference ref="5"/>
+					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<reference ref="5"/>
+					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<reference ref="5"/>
+					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<reference ref="5"/>
+					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<reference ref="5"/>
+					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<reference ref="5"/>
+					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<reference ref="5"/>
+					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<reference ref="5"/>
+					<boolean value="YES"/>
 					<string>{{648, 503}, {204, 233}}</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<reference ref="5"/>
+					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<reference ref="5"/>
+					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<reference ref="5"/>
+					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<reference ref="5"/>
+					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<reference ref="5"/>
+					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<reference ref="5"/>
+					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<reference ref="5"/>
+					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<reference ref="5"/>
+					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<reference ref="5"/>
+					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<reference ref="5"/>
+					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<reference ref="5"/>
+					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<reference ref="5"/>
+					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<reference ref="5"/>
+					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<reference ref="5"/>
+					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<reference ref="5"/>
+					<boolean value="YES"/>
 					<string>{{548, 663}, {235, 183}}</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<reference ref="5"/>
+					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<reference ref="5"/>
+					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<reference ref="5"/>
+					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<reference ref="5"/>
+					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<reference ref="5"/>
+					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<reference ref="5"/>
+					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<reference ref="5"/>
+					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<reference ref="5"/>
+					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<reference ref="5"/>
+					<boolean value="YES"/>
 					<string>ACOsgBrowserViewCocoa</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<reference ref="5"/>
+					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<reference ref="5"/>
+					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<reference ref="5"/>
+					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<reference ref="5"/>
+					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<reference ref="5"/>
+					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<reference ref="5"/>
+					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<reference ref="5"/>
+					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<reference ref="5"/>
+					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<reference ref="5"/>
+					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<reference ref="5"/>
+					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<reference ref="5"/>
+					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<reference ref="5"/>
+					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<reference ref="5"/>
+					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<reference ref="5"/>
+					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<reference ref="5"/>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
@@ -3105,22 +3098,24 @@
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<integer value="1" id="9"/>
-					<reference ref="9"/>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<integer value="1"/>
+					<integer value="1"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<reference ref="5"/>
+					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<reference ref="5"/>
+					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<reference ref="5"/>
+					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<reference ref="5"/>
+					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
@@ -3143,14 +3138,12 @@
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<reference ref="5"/>
+					<boolean value="YES"/>
 				</object>
 			</object>
 			<object class="NSMutableDictionary" key="unlocalizedProperties">
 				<bool key="EncodedWithXMLCoder">YES</bool>
-				<object class="NSArray" key="dict.sortedKeys">
-					<bool key="EncodedWithXMLCoder">YES</bool>
-				</object>
+				<reference key="dict.sortedKeys" ref="0"/>
 				<object class="NSMutableArray" key="dict.values">
 					<bool key="EncodedWithXMLCoder">YES</bool>
 				</object>
@@ -3158,9 +3151,7 @@
 			<nil key="activeLocalization"/>
 			<object class="NSMutableDictionary" key="localizations">
 				<bool key="EncodedWithXMLCoder">YES</bool>
-				<object class="NSArray" key="dict.sortedKeys">
-					<bool key="EncodedWithXMLCoder">YES</bool>
-				</object>
+				<reference key="dict.sortedKeys" ref="0"/>
 				<object class="NSMutableArray" key="dict.values">
 					<bool key="EncodedWithXMLCoder">YES</bool>
 				</object>
@@ -3172,11 +3163,11 @@
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">
 				<bool key="EncodedWithXMLCoder">YES</bool>
 				<object class="IBPartialClassDescription">
-					<string key="className">ACAudioCycleOsgCocoa</string>
+					<string key="className">ACModelCycleOsgCocoa</string>
 					<string key="superclassName">NSObject</string>
 					<object class="NSMutableDictionary" key="actions">
 						<bool key="EncodedWithXMLCoder">YES</bool>
-						<object class="NSMutableArray" key="dict.sortedKeys">
+						<object class="NSArray" key="dict.sortedKeys">
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<string>setAddToLibrary:</string>
 							<string>setBPMSlider:</string>
@@ -3289,9 +3280,283 @@
 							<string>id</string>
 						</object>
 					</object>
+					<object class="NSMutableDictionary" key="actionInfosByName">
+						<bool key="EncodedWithXMLCoder">YES</bool>
+						<object class="NSArray" key="dict.sortedKeys">
+							<bool key="EncodedWithXMLCoder">YES</bool>
+							<string>setAddToLibrary:</string>
+							<string>setBPMSlider:</string>
+							<string>setBackButton:</string>
+							<string>setBookmarkButton:</string>
+							<string>setBrowserMode:</string>
+							<string>setCameraRecenter:</string>
+							<string>setCleanLibrary:</string>
+							<string>setClusterNumberSlider:</string>
+							<string>setClustersMethodPopUpButton:</string>
+							<string>setClustersPositionsPopUpButton:</string>
+							<string>setDistanceModelPU:</string>
+							<string>setDopplerFactorSlider:</string>
+							<string>setEngineStart:</string>
+							<string>setEngineStop:</string>
+							<string>setFilterInButton:</string>
+							<string>setFilterOutButton:</string>
+							<string>setFilterSuggestButton:</string>
+							<string>setForwardButton:</string>
+							<string>setHistoryButton:</string>
+							<string>setKeySlider:</string>
+							<string>setListenerDirectionSlider:</string>
+							<string>setListenerElevationSlider:</string>
+							<string>setListenerGainSlider:</string>
+							<string>setListenerVelocitySlider:</string>
+							<string>setMuteAllSources:</string>
+							<string>setNeighborsMethodPopUpButton:</string>
+							<string>setNeighborsPositionsPopUpButton:</string>
+							<string>setNeighboursModeRadio:</string>
+							<string>setOpen:</string>
+							<string>setOscControlIp:</string>
+							<string>setOscControlPort:</string>
+							<string>setOscControlStatus:</string>
+							<string>setOscFeedbackIp:</string>
+							<string>setOscFeedbackPort:</string>
+							<string>setOscFeedbackStatus:</string>
+							<string>setPosXSlider:</string>
+							<string>setPosYSlider:</string>
+							<string>setRenderChannelsCheckbox:</string>
+							<string>setRenderQualityCheckbox:</string>
+							<string>setSaveAs:</string>
+							<string>setScrubSlider:</string>
+							<string>setSpeedOfSoundSlider:</string>
+							<string>setTagButton:</string>
+							<string>setWeight1Check:</string>
+							<string>setWeight1Slider:</string>
+							<string>setWeight2Check:</string>
+							<string>setWeight2Slider:</string>
+							<string>setWeight3Check:</string>
+							<string>setWeight3Slider:</string>
+							<string>setWeightHarmonyButton:</string>
+							<string>setWeightRhythmButton:</string>
+							<string>setWeightTimbreButton:</string>
+							<string>setZoomSlider:</string>
+						</object>
+						<object class="NSMutableArray" key="dict.values">
+							<bool key="EncodedWithXMLCoder">YES</bool>
+							<object class="IBActionInfo">
+								<string key="name">setAddToLibrary:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">setBPMSlider:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">setBackButton:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">setBookmarkButton:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">setBrowserMode:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">setCameraRecenter:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">setCleanLibrary:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">setClusterNumberSlider:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">setClustersMethodPopUpButton:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">setClustersPositionsPopUpButton:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">setDistanceModelPU:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">setDopplerFactorSlider:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">setEngineStart:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">setEngineStop:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">setFilterInButton:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">setFilterOutButton:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">setFilterSuggestButton:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">setForwardButton:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">setHistoryButton:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">setKeySlider:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">setListenerDirectionSlider:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">setListenerElevationSlider:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">setListenerGainSlider:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">setListenerVelocitySlider:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">setMuteAllSources:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">setNeighborsMethodPopUpButton:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">setNeighborsPositionsPopUpButton:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">setNeighboursModeRadio:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">setOpen:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">setOscControlIp:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">setOscControlPort:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">setOscControlStatus:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">setOscFeedbackIp:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">setOscFeedbackPort:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">setOscFeedbackStatus:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">setPosXSlider:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">setPosYSlider:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">setRenderChannelsCheckbox:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">setRenderQualityCheckbox:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">setSaveAs:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">setScrubSlider:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">setSpeedOfSoundSlider:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">setTagButton:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">setWeight1Check:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">setWeight1Slider:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">setWeight2Check:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">setWeight2Slider:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">setWeight3Check:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">setWeight3Slider:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">setWeightHarmonyButton:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">setWeightRhythmButton:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">setWeightTimbreButton:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">setZoomSlider:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+						</object>
+					</object>
 					<object class="NSMutableDictionary" key="outlets">
 						<bool key="EncodedWithXMLCoder">YES</bool>
-						<object class="NSMutableArray" key="dict.sortedKeys">
+						<object class="NSArray" key="dict.sortedKeys">
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<string>browser_osg_view</string>
 							<string>mALCCaptureDefaultDeviceName</string>
@@ -3414,17 +3679,316 @@
 							<string>NSSlider</string>
 						</object>
 					</object>
+					<object class="NSMutableDictionary" key="toOneOutletInfosByName">
+						<bool key="EncodedWithXMLCoder">YES</bool>
+						<object class="NSArray" key="dict.sortedKeys">
+							<bool key="EncodedWithXMLCoder">YES</bool>
+							<string>browser_osg_view</string>
+							<string>mALCCaptureDefaultDeviceName</string>
+							<string>mALCDefaultDeviceName</string>
+							<string>mALCExtensionList</string>
+							<string>mALExtensionList</string>
+							<string>mALVersion</string>
+							<string>mBPMSlider</string>
+							<string>mBackButton</string>
+							<string>mBookmarkButton</string>
+							<string>mBrowserMode</string>
+							<string>mClusterNumberSlider</string>
+							<string>mClustersMethodPopUpButton</string>
+							<string>mClustersPositionsPopUpButton</string>
+							<string>mDistanceModelPopup</string>
+							<string>mDopplerFactor</string>
+							<string>mDopplerFactorSlider</string>
+							<string>mFilterInButton</string>
+							<string>mFilterOutButton</string>
+							<string>mFilterSuggestButton</string>
+							<string>mForwardButton</string>
+							<string>mHistoryButton</string>
+							<string>mKeySlider</string>
+							<string>mListenerDirectionSlider</string>
+							<string>mListenerElevation</string>
+							<string>mListenerElevationSlider</string>
+							<string>mListenerGain</string>
+							<string>mListenerGainSlider</string>
+							<string>mListenerVelocityScaler</string>
+							<string>mListenerVelocityScalerSlider</string>
+							<string>mListenerXPos</string>
+							<string>mListenerXVelocity</string>
+							<string>mListenerZPos</string>
+							<string>mListenerZVelocity</string>
+							<string>mNeighborsMethodPopUpButton</string>
+							<string>mNeighborsPositionsPopUpButton</string>
+							<string>mOscControlIp</string>
+							<string>mOscControlPort</string>
+							<string>mOscControlStatus</string>
+							<string>mOscFeedbackIp</string>
+							<string>mOscFeedbackPort</string>
+							<string>mOscFeedbackStatus</string>
+							<string>mPosXSlider</string>
+							<string>mPosYSlider</string>
+							<string>mRenderChannelsCheckbox</string>
+							<string>mRenderQualityCheckbox</string>
+							<string>mSpeedOfSound</string>
+							<string>mSpeedOfSoundSlider</string>
+							<string>mTagButton</string>
+							<string>mWeight1Check</string>
+							<string>mWeight1Slider</string>
+							<string>mWeight2Check</string>
+							<string>mWeight2Slider</string>
+							<string>mWeight3Check</string>
+							<string>mWeight3Slider</string>
+							<string>mWeightHarmonySlider</string>
+							<string>mWeightRhythmSlider</string>
+							<string>mWeightTimbreSlider</string>
+							<string>mZoomSlider</string>
+						</object>
+						<object class="NSMutableArray" key="dict.values">
+							<bool key="EncodedWithXMLCoder">YES</bool>
+							<object class="IBToOneOutletInfo">
+								<string key="name">browser_osg_view</string>
+								<string key="candidateClassName">ACOsgBrowserViewCocoa</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">mALCCaptureDefaultDeviceName</string>
+								<string key="candidateClassName">NSTextField</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">mALCDefaultDeviceName</string>
+								<string key="candidateClassName">NSTextField</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">mALCExtensionList</string>
+								<string key="candidateClassName">NSTextField</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">mALExtensionList</string>
+								<string key="candidateClassName">NSTextField</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">mALVersion</string>
+								<string key="candidateClassName">NSTextField</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">mBPMSlider</string>
+								<string key="candidateClassName">NSSlider</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">mBackButton</string>
+								<string key="candidateClassName">NSButton</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">mBookmarkButton</string>
+								<string key="candidateClassName">NSButton</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">mBrowserMode</string>
+								<string key="candidateClassName">NSSegmentedControl</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">mClusterNumberSlider</string>
+								<string key="candidateClassName">NSSlider</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">mClustersMethodPopUpButton</string>
+								<string key="candidateClassName">NSPopUpButton</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">mClustersPositionsPopUpButton</string>
+								<string key="candidateClassName">NSPopUpButton</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">mDistanceModelPopup</string>
+								<string key="candidateClassName">NSPopUpButton</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">mDopplerFactor</string>
+								<string key="candidateClassName">NSTextField</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">mDopplerFactorSlider</string>
+								<string key="candidateClassName">NSSlider</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">mFilterInButton</string>
+								<string key="candidateClassName">NSButton</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">mFilterOutButton</string>
+								<string key="candidateClassName">NSButton</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">mFilterSuggestButton</string>
+								<string key="candidateClassName">NSButton</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">mForwardButton</string>
+								<string key="candidateClassName">NSButton</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">mHistoryButton</string>
+								<string key="candidateClassName">NSButton</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">mKeySlider</string>
+								<string key="candidateClassName">NSSlider</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">mListenerDirectionSlider</string>
+								<string key="candidateClassName">NSSlider</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">mListenerElevation</string>
+								<string key="candidateClassName">NSTextField</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">mListenerElevationSlider</string>
+								<string key="candidateClassName">NSSlider</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">mListenerGain</string>
+								<string key="candidateClassName">NSTextField</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">mListenerGainSlider</string>
+								<string key="candidateClassName">NSSlider</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">mListenerVelocityScaler</string>
+								<string key="candidateClassName">NSTextField</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">mListenerVelocityScalerSlider</string>
+								<string key="candidateClassName">NSSlider</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">mListenerXPos</string>
+								<string key="candidateClassName">NSTextField</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">mListenerXVelocity</string>
+								<string key="candidateClassName">NSTextField</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">mListenerZPos</string>
+								<string key="candidateClassName">NSTextField</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">mListenerZVelocity</string>
+								<string key="candidateClassName">NSTextField</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">mNeighborsMethodPopUpButton</string>
+								<string key="candidateClassName">NSPopUpButton</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">mNeighborsPositionsPopUpButton</string>
+								<string key="candidateClassName">NSPopUpButton</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">mOscControlIp</string>
+								<string key="candidateClassName">NSTextField</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">mOscControlPort</string>
+								<string key="candidateClassName">NSTextField</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">mOscControlStatus</string>
+								<string key="candidateClassName">NSButton</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">mOscFeedbackIp</string>
+								<string key="candidateClassName">NSTextField</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">mOscFeedbackPort</string>
+								<string key="candidateClassName">NSTextField</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">mOscFeedbackStatus</string>
+								<string key="candidateClassName">NSButton</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">mPosXSlider</string>
+								<string key="candidateClassName">NSSlider</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">mPosYSlider</string>
+								<string key="candidateClassName">NSSlider</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">mRenderChannelsCheckbox</string>
+								<string key="candidateClassName">NSButton</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">mRenderQualityCheckbox</string>
+								<string key="candidateClassName">NSButton</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">mSpeedOfSound</string>
+								<string key="candidateClassName">NSTextField</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">mSpeedOfSoundSlider</string>
+								<string key="candidateClassName">NSSlider</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">mTagButton</string>
+								<string key="candidateClassName">NSButton</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">mWeight1Check</string>
+								<string key="candidateClassName">NSButton</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">mWeight1Slider</string>
+								<string key="candidateClassName">NSSlider</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">mWeight2Check</string>
+								<string key="candidateClassName">NSButton</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">mWeight2Slider</string>
+								<string key="candidateClassName">NSSlider</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">mWeight3Check</string>
+								<string key="candidateClassName">NSButton</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">mWeight3Slider</string>
+								<string key="candidateClassName">NSSlider</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">mWeightHarmonySlider</string>
+								<string key="candidateClassName">NSSlider</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">mWeightRhythmSlider</string>
+								<string key="candidateClassName">NSSlider</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">mWeightTimbreSlider</string>
+								<string key="candidateClassName">NSSlider</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">mZoomSlider</string>
+								<string key="candidateClassName">NSSlider</string>
+							</object>
+						</object>
+					</object>
 					<object class="IBClassDescriptionSource" key="sourceIdentifier">
 						<string key="majorKey">IBProjectSource</string>
-						<string key="minorKey">../../apps/audiocycle-osg-cocoa/ACAudioCycleOsgCocoa.h</string>
+						<string key="minorKey">../../apps/audiocycle-osg-cocoa/ACModelCycleOsgCocoa.h</string>
 					</object>
 				</object>
 				<object class="IBPartialClassDescription">
-					<string key="className">ACAudioCycleOsgCocoa</string>
+					<string key="className">ACModelCycleOsgCocoa</string>
 					<string key="superclassName">NSObject</string>
 					<object class="NSMutableDictionary" key="actions">
 						<bool key="EncodedWithXMLCoder">YES</bool>
-						<object class="NSMutableArray" key="dict.sortedKeys">
+						<object class="NSArray" key="dict.sortedKeys">
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<string>setOscIp:</string>
 							<string>setOscPort:</string>
@@ -3437,9 +4001,33 @@
 							<string>id</string>
 						</object>
 					</object>
+					<object class="NSMutableDictionary" key="actionInfosByName">
+						<bool key="EncodedWithXMLCoder">YES</bool>
+						<object class="NSArray" key="dict.sortedKeys">
+							<bool key="EncodedWithXMLCoder">YES</bool>
+							<string>setOscIp:</string>
+							<string>setOscPort:</string>
+							<string>setOscStatus:</string>
+						</object>
+						<object class="NSMutableArray" key="dict.values">
+							<bool key="EncodedWithXMLCoder">YES</bool>
+							<object class="IBActionInfo">
+								<string key="name">setOscIp:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">setOscPort:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">setOscStatus:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+						</object>
+					</object>
 					<object class="NSMutableDictionary" key="outlets">
 						<bool key="EncodedWithXMLCoder">YES</bool>
-						<object class="NSMutableArray" key="dict.sortedKeys">
+						<object class="NSArray" key="dict.sortedKeys">
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<string>mOscIp</string>
 							<string>mOscPort</string>
@@ -3450,6 +4038,30 @@
 							<string>NSTextField</string>
 							<string>NSTextField</string>
 							<string>NSButton</string>
+						</object>
+					</object>
+					<object class="NSMutableDictionary" key="toOneOutletInfosByName">
+						<bool key="EncodedWithXMLCoder">YES</bool>
+						<object class="NSArray" key="dict.sortedKeys">
+							<bool key="EncodedWithXMLCoder">YES</bool>
+							<string>mOscIp</string>
+							<string>mOscPort</string>
+							<string>mOscStatus</string>
+						</object>
+						<object class="NSMutableArray" key="dict.values">
+							<bool key="EncodedWithXMLCoder">YES</bool>
+							<object class="IBToOneOutletInfo">
+								<string key="name">mOscIp</string>
+								<string key="candidateClassName">NSTextField</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">mOscPort</string>
+								<string key="candidateClassName">NSTextField</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">mOscStatus</string>
+								<string key="candidateClassName">NSButton</string>
+							</object>
 						</object>
 					</object>
 					<object class="IBClassDescriptionSource" key="sourceIdentifier">
@@ -3499,7 +4111,36 @@
 			</object>
 		</object>
 		<int key="IBDocument.localizationMode">0</int>
+		<string key="IBDocument.TargetRuntimeIdentifier">IBCocoaFramework</string>
+		<object class="NSMutableDictionary" key="IBDocument.PluginDeclaredDependencies">
+			<string key="NS.key.0">com.apple.InterfaceBuilder.CocoaPlugin.macosx</string>
+			<integer value="1050" key="NS.object.0"/>
+		</object>
+		<object class="NSMutableDictionary" key="IBDocument.PluginDeclaredDevelopmentDependencies">
+			<string key="NS.key.0">com.apple.InterfaceBuilder.CocoaPlugin.InterfaceBuilder3</string>
+			<integer value="3000" key="NS.object.0"/>
+		</object>
+		<bool key="IBDocument.PluginDeclaredDependenciesTrackSystemTargetVersion">YES</bool>
 		<string key="IBDocument.LastKnownRelativeProjectPath">../../Builds/darwin-xcode/MediaCycle.xcodeproj</string>
 		<int key="IBDocument.defaultPropertyAccessControl">3</int>
+		<object class="NSMutableDictionary" key="IBDocument.LastKnownImageSizes">
+			<bool key="EncodedWithXMLCoder">YES</bool>
+			<object class="NSArray" key="dict.sortedKeys">
+				<bool key="EncodedWithXMLCoder">YES</bool>
+				<string>NSGoLeftTemplate</string>
+				<string>NSGoRightTemplate</string>
+				<string>NSMenuCheckmark</string>
+				<string>NSMenuMixedState</string>
+				<string>NSSwitch</string>
+			</object>
+			<object class="NSMutableArray" key="dict.values">
+				<bool key="EncodedWithXMLCoder">YES</bool>
+				<string>{9, 9}</string>
+				<string>{9, 9}</string>
+				<string>{9, 8}</string>
+				<string>{7, 2}</string>
+				<string>{15, 15}</string>
+			</object>
+		</object>
 	</data>
 </archive>

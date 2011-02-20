@@ -81,7 +81,6 @@
 using namespace osg;
 using namespace osgViewer;
 
-
 @interface NSObject (OSGRedraw)
 - (void)requestRedraw;
 - (void)requestContinuousUpdate:(BOOL)val;
@@ -703,6 +702,7 @@ static NSDate *gReferenceDate = nil;
 	_osgViewData->viewer->setCameraManipulator(manipulator);
 }
 */
+
 - (osg::Camera*)camera
 {
 	return _osgViewData->viewer->getCamera();
