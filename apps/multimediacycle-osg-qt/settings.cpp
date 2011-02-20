@@ -119,10 +119,9 @@ bool SettingsDialog::setMediaType(string _mt) {
 
 // ----- SLOTS -----
 
-bool SettingsDialog::saveConfigFile(std::string _filename) {
+bool SettingsDialog::saveConfigFile() {
 	// XS TEST
-	this->writeXMLConfigFile(_filename);
-	return true;
+	return  this->writeXMLConfigFile(lineEditXMLConfigFile->text().toStdString());
 //	return (multi_media_cycle->saveConfigFile());
 }
 
@@ -136,8 +135,10 @@ bool SettingsDialog::writeXMLConfigFile(std::string _filename) {
 		return false; //en ecriture 
 	out.setDevice(&file); //association du flux au fichier 
 	
-	this->setXMLMediaType(comboMediaType->currentText());
-	this->setXMLBrowserMode(comboBrowserMode->currentText());
+	if(!(this->setXMLMediaType(comboMediaType->currentText())));
+	   return false;
+	if(!(this->setXMLBrowserMode(comboBrowserMode->currentText())));
+		return false;
 //	QString qpl = QString::fromStdString(_pl);
 	
 //	QDomElement mesure = doc.createElement("mesure"); 
@@ -160,7 +161,7 @@ bool SettingsDialog::writeXMLConfigFile(std::string _filename) {
 	//sauvegarde dans le flux (2 espaces de décalage dans l’arborescence) 
 	doc.save(out,2);    
 	file.close(); 
-	
+	return true;
 }
 
 bool SettingsDialog::readXMLConfigFile(std::string _filename) {
@@ -400,7 +401,7 @@ bool SettingsDialog::setXMLMediaType(QString _qmt){
 	configFile.appendChild( e_mt); 
 	QDomText t_mt = doc.createTextNode(_qmt); 
 	e_mt.appendChild(t_mt);
-
+	return true;
 }
 
 bool SettingsDialog::setXMLBrowserMode(QString _qbm){
@@ -410,7 +411,7 @@ bool SettingsDialog::setXMLBrowserMode(QString _qbm){
 	configFile.appendChild( e_bm); 
 	QDomText t_bm = doc.createTextNode(_qbm); 
 	e_bm.appendChild(t_bm);
-	
+	return true;	
 }
 
 void SettingsDialog::updateActions(){

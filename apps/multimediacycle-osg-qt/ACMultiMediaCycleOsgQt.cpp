@@ -38,7 +38,7 @@
 #include <cstdlib> // for atoi
 
 ACMultiMediaCycleOsgQt::ACMultiMediaCycleOsgQt(QWidget *parent) : QMainWindow(parent), 
- features_known(false), plugins_scanned(false),library_loaded(false), config_file("")
+ features_known(false), plugins_scanned(false),config_file("")
 {
 	ui.setupUi(this); // first thing to do
 	this->media_type = MEDIA_TYPE_NONE;
@@ -47,9 +47,6 @@ ACMultiMediaCycleOsgQt::ACMultiMediaCycleOsgQt(QWidget *parent) : QMainWindow(pa
 	#if defined (SUPPORT_AUDIO)
 		this->audio_engine = NULL;
 	#endif //defined (SUPPORT_AUDIO)
-	//ui.compositeOsgView->move(0,20);
-	//	ui.compositeOsgView->prepareFromBrowser();
-	//browserOsgView->setPlaying(true);
 	
 	// Apple bundled *.app, just look for bundled osg plugins 
 	#ifndef USE_DEBUG 
@@ -60,63 +57,15 @@ ACMultiMediaCycleOsgQt::ACMultiMediaCycleOsgQt(QWidget *parent) : QMainWindow(pa
 		osgDB::Registry::instance()->setLibraryFilePathList(dir.absolutePath().toStdString());
 	#endif
 	#endif
-	
-	// Docks
-	//////mediaConfig = new ACMediaConfigDockWidgetQt();
-	//////this->addDockWidget(Qt::LeftDockWidgetArea,mediaConfig);
-	#if defined (SUPPORT_AUDIO)
-		ui.comboDefaultSettings->addItem(QString("Audio"));
-	#endif //defined (SUPPORT_AUDIO)
-	#if defined (SUPPORT_IMAGE)
-		ui.comboDefaultSettings->addItem(QString("Image"));
-	#endif //defined (SUPPORT_IMAGE)
-	#if defined (SUPPORT_VIDEO)
-		ui.comboDefaultSettings->addItem(QString("Video"));
-	#endif //defined (SUPPORT_VIDEO)
-	#if defined (SUPPORT_3DMODEL)
-		ui.comboDefaultSettings->addItem(QString("3DModel"));
-	#endif //defined (SUPPORT_3DMODEL)
-	ui.comboDefaultSettings->addItem(QString("Mixed"));
-	/////connect(comboDefaultSettings, SIGNAL(currentIndexChanged(const QString &)), this, SLOT(comboDefaultSettingsChanged()));
-	connect(ui.comboDefaultSettings, SIGNAL(currentIndexChanged(const QString &)), this, SLOT(comboDefaultSettingsChanged()));
-	///////browserControls = new ACBrowserControlsClustersNeighborsDockWidgetQt();
-	///////this->addDockWidget(Qt::LeftDockWidgetArea,browserControls);
-	#if defined (SUPPORT_AUDIO)
-		audioControls = new ACAudioControlsDockWidgetQt(this);
-		audioControls->setVisible(false);
-	#endif //defined (SUPPORT_AUDIO)
-	#if defined (SUPPORT_VIDEO)
-		videoControls = new ACVideoControlsDockWidgetQt(this);
-		this->addDockWidget(Qt::LeftDockWidgetArea,videoControls);
-	#endif //defined (SUPPORT_VIDEO)
-	//////lastDocksVisibilities.resize(3); //docks: Media Config, Browser, OSC
-	lastDocksVisibilities.resize(2); //docks: Media Config, Browser
-	for (int d=0; d<lastDocksVisibilities.size();d++)
-		lastDocksVisibilities[d] = 1;
+
+	// Dock Widgets
+	dockWidgets.resize(0);
+	dockWidgetFactory = new ACDockWidgetFactoryQt();
+	lastDocksVisibilities.resize(0);
 	connect(ui.actionShow_Hide_Controls, SIGNAL(triggered()), this, SLOT(syncControlToggleWithDocks()));
-	connect(ui.dockWidgetMediaConfig, SIGNAL(visibilityChanged(bool)), this, SLOT(syncControlToggleWithDocks()));
-	connect(ui.dockWidgetBrowser, SIGNAL(visibilityChanged(bool)), this, SLOT(syncControlToggleWithDocks()));
-	//////connect(ui.dockWidgetOSC, SIGNAL(visibilityChanged(bool)), this, SLOT(syncControlToggleWithDocks()));
-	wasControlsToggleChecked = true;
-	
-	connect(ui.actionLoad_Media_Directory, SIGNAL(triggered()), this, SLOT(loadMediaDirectory()));
-	connect(ui.actionLoad_Media_Files, SIGNAL(triggered()), this, SLOT(loadMediaFiles()));
-	connect(ui.actionSave_ACL, SIGNAL(triggered()), this, SLOT(saveACLFile()));
-	connect(ui.actionLoad_ACL, SIGNAL(triggered()), this, SLOT(loadACLFile()));
-	connect(ui.actionSave_XML, SIGNAL(triggered()), this, SLOT(saveXMLFile()));
-	connect(ui.actionLoad_XML, SIGNAL(triggered()), this, SLOT(loadXMLFile()));
-	connect(ui.actionEdit_Config_File, SIGNAL(triggered()), this, SLOT(editConfigFile()));
-	connect(ui.actionSave_Config_File, SIGNAL(triggered()), this, SLOT(saveConfigFile()));
-	connect(ui.actionLoad_Config_File, SIGNAL(triggered()), this, SLOT(loadConfigFile()));
-	
-	connect(ui.actionClean, SIGNAL(triggered()), this, SLOT(on_pushButtonClean_clicked()));
-
-	connect(ui.featuresListWidget, SIGNAL(itemClicked(QListWidgetItem*)),this, SLOT(modifyListItem(QListWidgetItem*)));
-
-	//	// connect spinBox and slider
-	//	connect(ui.spinBoxClusters, SIGNAL(valueChanged(int)), this, SLOT(spinBoxClustersValueChanged(int)));
-	//	connect(ui.sliderClusters, SIGNAL(valueChanged(int)), ui.spinBoxClusters , SIGNAL(valueChanged(int)));
-	//	
+	wasControlsToggleChecked = ui.actionShow_Hide_Controls->isChecked();//true;
+		
+	aboutDialogFactory = new ACAboutDialogFactoryQt();
 	
 	// uses another window for settings = editing the config file
 	settingsDialog = new SettingsDialog(parent);
@@ -128,6 +77,8 @@ ACMultiMediaCycleOsgQt::ACMultiMediaCycleOsgQt(QWidget *parent) : QMainWindow(pa
 	//	pb->hide();
 	//	statusBar()->addPermanentWidget(pb);
 	
+	aboutDialog = NULL;
+		
 	this->show();
 }
 
@@ -150,13 +101,15 @@ void ACMultiMediaCycleOsgQt::createMediaCycle(ACMediaType _media_type, ACBrowser
 		audio_engine = new ACAudioEngine();
 		audio_engine->setMediaCycle(media_cycle);
 		ui.compositeOsgView->setAudioEngine(audio_engine);
-		audioControls->setMediaCycle(media_cycle);
-		audioControls->setAudioEngine(audio_engine);
 	#endif //defined (SUPPORT_AUDIO)
-	#if defined (SUPPORT_VIDEO)
-		videoControls->setMediaCycle(media_cycle);
-		videoControls->setOsgView(ui.compositeOsgView);
-	#endif //defined (SUPPORT_VIDEO)
+
+	for (int d=0;d<dockWidgets.size();d++){
+		dockWidgets[d]->setMediaCycle(media_cycle);
+		#if defined (SUPPORT_AUDIO)
+			dockWidgets[d]->setAudioEngine(audio_engine);
+		#endif //defined (SUPPORT_AUDIO)
+		dockWidgets[d]->setOsgView(ui.compositeOsgView);
+	}	
 }
 
 // destroys the MediaCycle object (containing the whole application)
@@ -170,7 +123,7 @@ void ACMultiMediaCycleOsgQt::destroyMediaCycle(){
 }
 
 // XS in theory one could select multiple ACL files and concatenate them (not tested yet)
-void ACMultiMediaCycleOsgQt::loadACLFile(){
+void ACMultiMediaCycleOsgQt::on_actionLoad_ACL_triggered(bool checked){
 	if (media_cycle == NULL) {
 		cerr << "first define the type of application" << endl;
 		return;
@@ -210,7 +163,7 @@ void ACMultiMediaCycleOsgQt::loadACLFile(){
 	media_cycle->dumpLoopNavigationLevels() ;
 }
 
-void ACMultiMediaCycleOsgQt::saveACLFile(){
+void ACMultiMediaCycleOsgQt::on_actionSave_ACL_triggered(bool checked){
 	if (media_cycle == NULL) {
 		cerr << "first define the type of application" << endl;
 		return;
@@ -232,7 +185,7 @@ void ACMultiMediaCycleOsgQt::saveACLFile(){
 }
 
 // XS in theory one could select multiple XML files and concatenate them (not tested yet)
-void ACMultiMediaCycleOsgQt::loadXMLFile(){
+void ACMultiMediaCycleOsgQt::on_actionLoad_XML_triggered(bool checked){
 	if (media_cycle == NULL) {
 		cerr << "first define the type of application" << endl;
 		return;
@@ -271,7 +224,7 @@ void ACMultiMediaCycleOsgQt::loadXMLFile(){
 	media_cycle->dumpLoopNavigationLevels() ;
 }
 
-void ACMultiMediaCycleOsgQt::saveXMLFile(){
+void ACMultiMediaCycleOsgQt::on_actionSave_XML_triggered(bool checked){
 	if (media_cycle == NULL) {
 		cerr << "first define the type of application" << endl;
 		return;
@@ -293,7 +246,7 @@ void ACMultiMediaCycleOsgQt::saveXMLFile(){
 }
 
 // XS TODO: make sure it works if we add a new directory to the existing library ?
-void ACMultiMediaCycleOsgQt::loadMediaDirectory(){
+void ACMultiMediaCycleOsgQt::on_actionLoad_Media_Directory_triggered(bool checked){
 	if (! hasMediaCycle()) return; 
 	statusBar()->showMessage(tr("Loading Directory..."), 0);
 
@@ -345,7 +298,7 @@ void ACMultiMediaCycleOsgQt::loadMediaDirectory(){
 
 }
 
-void ACMultiMediaCycleOsgQt::loadMediaFiles(){
+void ACMultiMediaCycleOsgQt::on_actionLoad_Media_Files_triggered(bool checked){
 	if (! hasMediaCycle()) return; 
 
 	QString fileName;
@@ -388,14 +341,14 @@ void ACMultiMediaCycleOsgQt::loadMediaFiles(){
 	this->updateLibrary();
 }
 
-void ACMultiMediaCycleOsgQt::editConfigFile(){
+void ACMultiMediaCycleOsgQt::on_actionEdit_Config_File_triggered(bool checked){
 	cout << "Editing config file with Setting Dialog GUI..." << endl;
 	settingsDialog->show();
 	settingsDialog->setMediaCycleMainWindow(this);
 	settingsDialog->setFocus();
 }
 
-void ACMultiMediaCycleOsgQt::loadConfigFile(){
+void ACMultiMediaCycleOsgQt::on_actionLoad_Config_File_triggered(bool checked){
 	QFileDialog dialog(this,"Open Config File");
 	dialog.setDefaultSuffix ("config");
 	dialog.setNameFilter("Config Files (*.config)");
@@ -469,35 +422,76 @@ bool ACMultiMediaCycleOsgQt::saveFile(const QString &fileName) {
 	return true;
 }
 
-bool ACMultiMediaCycleOsgQt::saveConfigFile(){
+void ACMultiMediaCycleOsgQt::on_actionSave_Config_File_triggered(bool checked){
 
 	QString _configFile = QFileDialog::getSaveFileName(this);
-	if (_configFile.isEmpty())
+	if (!_configFile.isEmpty())
+		saveFile(_configFile);
+}
+
+bool ACMultiMediaCycleOsgQt::addControlDock(ACAbstractDockWidgetQt* dock)
+{
+	if (dock == NULL){
+		std::cerr << "Invalid dock widget" << std::endl;
 		return false;
+	}	
 	
-	return saveFile(_configFile);
+	if (dock->getMediaType() == MEDIA_TYPE_NONE && dock->getClassName()==""){
+		std::cerr << "Invalid dock widget type" << std::endl;
+		return false;
+	}
+	
+	for (int d=0;d<dockWidgets.size();d++){
+		if (dock->getClassName() == dockWidgets[d]->getClassName()){
+			std::cerr << "Dock widget type already added" << std::endl;
+			return false;
+		}
+		
+	}
+
+	if (dock->getClassName() == "ACBrowserControlsClustersNeighborsDockWidgetQt" || dock->getClassName() == "ACBrowserControlsClustersDockWidgetQt"){
+		for (int d=0;d<dockWidgets.size();d++){
+			if (dockWidgets[d]->getClassName() == "ACBrowserControlsClustersNeighborsDockWidgetQt" || dockWidgets[d]->getClassName() == "ACBrowserControlsClustersDockWidgetQt"){
+				std::cerr << "Only one browser control dock widget for clusters and/or neighbors can be added." << std::endl;
+				return false;
+			}	
+		}	
+	}
+	
+	dockWidgets.resize(dockWidgets.size()+1);
+	lastDocksVisibilities.resize(lastDocksVisibilities.size()+1);
+	
+	dockWidgets[dockWidgets.size()-1]=dock;
+	
+	if( dock->getMediaType() == MEDIA_TYPE_ALL || dock->getMediaType() == media_type ){
+		lastDocksVisibilities[lastDocksVisibilities.size()-1]=1;
+		this->addDockWidget(Qt::LeftDockWidgetArea,dockWidgets[dockWidgets.size()-1]);
+		dockWidgets[dockWidgets.size()-1]->setVisible(true);
+		connect(dockWidgets[dockWidgets.size()-1], SIGNAL(visibilityChanged(bool)), this, SLOT(syncControlToggleWithDocks()));
+	}	
+	else {
+		lastDocksVisibilities[lastDocksVisibilities.size()-1]=0;
+		dockWidgets[dockWidgets.size()-1]->setVisible(false);
+	}
+	
+	if (dockWidgets[dockWidgets.size()-1]->getClassName()=="ACMediaConfigDockWidgetQt"){
+		//CF ugly, use signals?
+		connect(((ACMediaConfigDockWidgetQt*)dockWidgets[dockWidgets.size()-1])->getComboDefaultSettings(), SIGNAL(currentIndexChanged(const QString &)), this, SLOT(comboDefaultSettingsChanged()));
+	}	
+	return true;
+}
+
+bool ACMultiMediaCycleOsgQt::addControlDock(std::string dock_type)
+{
+	this->addControlDock(dockWidgetFactory->createDockWidget(this,dock_type));
 }
 
 void ACMultiMediaCycleOsgQt::syncControlToggleWithDocks(){
 	int docksVisibilitiesSum = 0;
-	docksVisibilitiesSum += ui.dockWidgetMediaConfig->isVisible();
-	docksVisibilitiesSum += ui.dockWidgetBrowser->isVisible();
-	//docksVisibilitiesSum += ui.dockWidgetOSC->isVisible();
-	switch (media_type) {
-		case MEDIA_TYPE_AUDIO:
-			#if defined (SUPPORT_AUDIO)
-			docksVisibilitiesSum += audioControls->isVisible();
-			#endif //defined (SUPPORT_AUDIO)
-			break;
-		case MEDIA_TYPE_IMAGE:
-			break;
-		case MEDIA_TYPE_VIDEO:
-			#if defined (SUPPORT_VIDEO)
-			docksVisibilitiesSum += videoControls->isVisible();
-			#endif //defined (SUPPORT_VIDEO)
-			break;
-		default:
-			break;
+
+	for (int d=0;d<dockWidgets.size();d++){
+		if (dockWidgets[d]->getMediaType() == media_type || dockWidgets[d]->getMediaType() == MEDIA_TYPE_ALL)
+			docksVisibilitiesSum += dockWidgets[d]->isVisible();
 	}
 	
 	int lastDocksVisibilitiesSum = 0;
@@ -511,92 +505,56 @@ void ACMultiMediaCycleOsgQt::syncControlToggleWithDocks(){
 			ui.actionShow_Hide_Controls->setChecked(false);
 		}
 		else if (lastDocksVisibilitiesSum == 0 && !wasControlsToggleChecked){
-			ui.dockWidgetMediaConfig->setVisible(true);
-			ui.dockWidgetBrowser->setVisible(true);
-			//ui.dockWidgetOSC->setVisible(true);
-			switch (media_type) {
-				case MEDIA_TYPE_AUDIO:
-					#if defined (SUPPORT_AUDIO)
-					audioControls->setVisible(true);
-					#endif //defined (SUPPORT_AUDIO)
-					break;
-				case MEDIA_TYPE_IMAGE:
-					break;
-				case MEDIA_TYPE_VIDEO:
-					#if defined (SUPPORT_VIDEO)
-					videoControls->setVisible(true);
-					#endif //defined (SUPPORT_VIDEO)
-					break;
-				default:
-					break;
+			for (int d=0;d<dockWidgets.size();d++){
+				if (dockWidgets[d]->getMediaType() == media_type || dockWidgets[d]->getMediaType() == MEDIA_TYPE_ALL)
+					dockWidgets[d]->setVisible(true);
 			}
+			
 		}	
 		else {
 			if (!wasControlsToggleChecked){
-				ui.dockWidgetMediaConfig->setVisible((bool)(lastDocksVisibilities[0]));
-				ui.dockWidgetBrowser->setVisible((bool)(lastDocksVisibilities[1]));
-				//ui.dockWidgetOSC->setVisible((bool)(lastDocksVisibilities[2]));
-				switch (media_type) {
-					case MEDIA_TYPE_AUDIO:
-						#if defined (SUPPORT_AUDIO)
-						audioControls->setVisible((bool)(lastDocksVisibilities[2]));
-						#endif //defined (SUPPORT_AUDIO)
-						break;
-					case MEDIA_TYPE_IMAGE:
-						break;
-					case MEDIA_TYPE_VIDEO:
-						#if defined (SUPPORT_VIDEO)
-						videoControls->setVisible((bool)(lastDocksVisibilities[2]));
-						#endif //defined (SUPPORT_VIDEO)
-						break;
-					default:
-						break;
+				for (int d=0;d<dockWidgets.size();d++){
+					if (dockWidgets[d]->getMediaType() == media_type || dockWidgets[d]->getMediaType() == MEDIA_TYPE_ALL)
+						dockWidgets[d]->setVisible((bool)(lastDocksVisibilities[d]));
 				}
 			}
 		}
-		lastDocksVisibilities[0]=ui.dockWidgetMediaConfig->isVisible();
-		lastDocksVisibilities[1]=ui.dockWidgetBrowser->isVisible();
-		//lastDocksVisibilities[2]=ui.dockWidgetOSC->isVisible();
-		switch (media_type) {
-			case MEDIA_TYPE_AUDIO:
-				#if defined (SUPPORT_AUDIO)
-				lastDocksVisibilities[2]=audioControls->isVisible();
-				#endif //defined (SUPPORT_AUDIO)
-				break;
-			case MEDIA_TYPE_IMAGE:
-				break;
-			case MEDIA_TYPE_VIDEO:
-				#if defined (SUPPORT_VIDEO)
-				lastDocksVisibilities[2]=videoControls->isVisible();
-				#endif //defined (SUPPORT_VIDEO)
-				break;
-			default:
-				break;
+		for (int d=0;d<dockWidgets.size();d++){
+			if (dockWidgets[d]->getMediaType() == media_type || dockWidgets[d]->getMediaType() == MEDIA_TYPE_ALL)
+				lastDocksVisibilities[d]=dockWidgets[d]->isVisible();
 		}
 	}
 	else {
-		ui.dockWidgetMediaConfig->setVisible(false);
-		ui.dockWidgetBrowser->setVisible(false);
-		//ui.dockWidgetOSC->setVisible(false);
-		switch (media_type) {
-			case MEDIA_TYPE_AUDIO:
-				#if defined (SUPPORT_AUDIO)
-				audioControls->setVisible(false);
-				#endif //defined (SUPPORT_AUDIO)
-				break;
-			case MEDIA_TYPE_IMAGE:
-				break;
-			case MEDIA_TYPE_VIDEO:
-				#if defined (SUPPORT_VIDEO)
-				videoControls->setVisible(false);
-				#endif //defined (SUPPORT_VIDEO)
-				break;
-			default:
-				break;
+		for (int d=0;d<dockWidgets.size();d++){
+			if (dockWidgets[d]->getMediaType() == media_type || dockWidgets[d]->getMediaType() == MEDIA_TYPE_ALL)
+				dockWidgets[d]->setVisible(false);
 		}
 	}
 	wasControlsToggleChecked = ui.actionShow_Hide_Controls->isChecked();
 }	
+
+bool ACMultiMediaCycleOsgQt::addAboutDialog(ACAbstractAboutDialogQt* dialog)
+{
+	if (dialog == NULL){
+		std::cerr << "Invalid about dialog" << std::endl;
+		return false;
+	}	
+	
+	aboutDialog = dialog;
+	
+	return true;
+}
+
+bool ACMultiMediaCycleOsgQt::addAboutDialog(std::string about_type)
+{
+	this->addAboutDialog(aboutDialogFactory->createAboutDialog(this,about_type));
+}
+
+void ACMultiMediaCycleOsgQt::on_actionHelpAbout_triggered(bool checked) {
+	if (aboutDialog==0)
+		aboutDialog = new ACAboutDialogQt(this);
+	aboutDialog->show();
+}
 
 void ACMultiMediaCycleOsgQt::updateLibrary(){
 	if (! hasMediaCycle()) return; 
@@ -616,86 +574,31 @@ void ACMultiMediaCycleOsgQt::updateLibrary(){
 	media_cycle->setNeedsDisplay(true);
 	
 	// do not re-scan the directory for plugins once they have been loaded
-//	if (!plugins_scanned) this->configureCheckBoxes();
+	if (!plugins_scanned)
+	{	
+		//CF ugly, use signals?
+		for (int d=0;d<dockWidgets.size();d++){
+			if (dockWidgets[d]->getClassName() == "ACBrowserControlsClustersNeighborsDockWidgetQt")
+				((ACBrowserControlsClustersNeighborsDockWidgetQt*)dockWidgets[d])->configureCheckBoxes();
+			if (dockWidgets[d]->getClassName() == "ACBrowserControlsClustersDockWidgetQt")
+				((ACBrowserControlsClustersDockWidgetQt*)dockWidgets[d])->configureCheckBoxes();
+		}
+	}	
 	
-	library_loaded = true;
 	ui.compositeOsgView->setFocus();
-}
-
-// for synchronous display of values 
-void ACMultiMediaCycleOsgQt::on_sliderClusters_sliderReleased(){
-	if (! hasMediaCycle()) return; 
-	ui.spinBoxClusters->setValue(ui.sliderClusters->value());
-}
-
-void ACMultiMediaCycleOsgQt::spinBoxClustersValueChanged(int _value){
-	if (! hasMediaCycle()) return; 
-	
-	ui.sliderClusters->setValue(_value); 	// for synchronous display of values 
-	std::cout << "ClusterNumber: " << _value << std::endl;
-	if (library_loaded){
-		media_cycle->setClusterNumber(_value);
-		// XSCF251003 added this
-		media_cycle->updateDisplay(true); //XS 250310 was: media_cycle->updateClusters(true);
-		// XS 310310 removed media_cycle->setNeedsDisplay(true); // now in updateDisplay
-		ui.compositeOsgView->updateTransformsFromBrowser(1.0);
-	}
-	//ui.compositeOsgView->setFocus();
 }
 
 void ACMultiMediaCycleOsgQt::addPluginItem(QListWidgetItem *_item){
 	cout << "adding item : " << _item->text().toStdString() << endl;
 	QListWidgetItem * new_item = new QListWidgetItem(*_item);
-	ui.featuresListWidget->addItem(new_item);
-}
-
-void ACMultiMediaCycleOsgQt::modifyListItem(QListWidgetItem *item) {
-	// XS check
-	cout << item->text().toStdString() << endl; // isselected...
-	cout << ui.featuresListWidget->currentRow() << endl;
-	// end XS check 
-	
-	if (library_loaded){
-		float w;
-		if (item->checkState() == Qt::Unchecked) w = 0.0;
-		else w = 1.0 ;
-		int f =  ui.featuresListWidget->currentRow(); // index of selected feature
-		media_cycle->setWeight(f,w);
-		media_cycle->updateDisplay(true); 
-		//XS 250310 was: media_cycle->updateClusters(true);
-		// XS250310 removed mediacycle->setNeedsDisplay(true); // now in updateDisplay
-		ui.compositeOsgView->updateTransformsFromBrowser(0.0); 
+	//CF ugly, use signals?
+	for (int d=0;d<dockWidgets.size();d++){
+		if (dockWidgets[d]->getClassName() == "ACBrowserControlsClustersNeighborsDockWidgetQt")
+			((ACBrowserControlsClustersNeighborsDockWidgetQt*)dockWidgets[d])->getFeaturesListWidget()->addItem(new_item);
+		if (dockWidgets[d]->getClassName() == "ACBrowserControlsClustersDockWidgetQt")
+			((ACBrowserControlsClustersDockWidgetQt*)dockWidgets[d])->getFeaturesListWidget()->addItem(new_item);
 	}
-}
-
-// synchronize weights with what is loaded in mediacycle
-// note: here weights are 1 or 0 (checkbox).
-// conversion: 0 remains 0, and value > 0 becomes 1.
-void ACMultiMediaCycleOsgQt::synchronizeFeaturesWeights(){
-	if (! hasMediaCycle()) return; 
-	vector<float> w = media_cycle->getWeightVector();
-	int nw = w.size();
-	if (nw==0){
-		cout << "features not yet computed from plugins; setting all weights to 0" << endl;
-		for (int i=0; i< ui.featuresListWidget->count(); i++){
-			ui.featuresListWidget->item(i)->setCheckState (Qt::Unchecked);
-		}
-		return;
-	}
-	else if (ui.featuresListWidget->count() != nw){
-		cerr << "Warning: Checkboxes in GUI do not match Features in MediaCycle" << endl;
-		cerr << ui.featuresListWidget->count() << "!=" << nw << endl;
-		return;
-		//exit(1);
-	}
-	else {
-		for (int i=0; i< nw; i++){
-			if (w[i]==0) 
-				ui.featuresListWidget->item(i)->setCheckState (Qt::Unchecked);
-			else
-				ui.featuresListWidget->item(i)->setCheckState (Qt::Checked);		
-		}
-	}
+	//////ui.featuresListWidget->addItem(new_item);
 }
 
 // adds the plugins in _library pth via mediaCycle's pluginManager
@@ -726,57 +629,78 @@ std::string ACMultiMediaCycleOsgQt::rstrip(const std::string& s){
 	return std::string(s, 0, p+1);
 }
 
+// synchronize weights with what is loaded in mediacycle
+// note: here weights are 1 or 0 (checkbox).
+// conversion: 0 remains 0, and value > 0 becomes 1.
+void ACMultiMediaCycleOsgQt::synchronizeFeaturesWeights(){
+	//CF ugly, use signals?
+	for (int d=0;d<dockWidgets.size();d++){
+		if (dockWidgets[d]->getClassName() == "ACBrowserControlsClustersNeighborsDockWidgetQt")
+			((ACBrowserControlsClustersNeighborsDockWidgetQt*)dockWidgets[d])->synchronizeFeaturesWeights();
+		if (dockWidgets[d]->getClassName() == "ACBrowserControlsClustersDockWidgetQt")
+			((ACBrowserControlsClustersDockWidgetQt*)dockWidgets[d])->synchronizeFeaturesWeights();
+	}
+}	
+
 // load default ("vintage") config for different media.
 // 1) creates media_cycle (destroying any previous settings)
 // 2) loads default features plugins
 // XS assumes for the moment that viewing mmode is clusters 
 void ACMultiMediaCycleOsgQt::loadDefaultConfig(ACMediaType _media_type, ACBrowserMode _browser_mode){
-	#if defined (SUPPORT_AUDIO)
-		disconnect(audioControls, SIGNAL(visibilityChanged(bool)), this, SLOT(syncControlToggleWithDocks()));
-		this->removeDockWidget(audioControls);
-	#endif //defined (SUPPORT_AUDIO)
-	#if defined (SUPPORT_VIDEO)
-		disconnect(videoControls, SIGNAL(visibilityChanged(bool)), this, SLOT(syncControlToggleWithDocks()));
-		this->removeDockWidget(videoControls);
-	#endif //defined (SUPPORT_VIDEO)
+	for (int d=0;d<dockWidgets.size();d++){
+		if (dockWidgets[d]->getMediaType() == MEDIA_TYPE_ALL || dockWidgets[d]->getMediaType() == _media_type){
+			if (this->dockWidgetArea(dockWidgets[d]) == Qt::NoDockWidgetArea){
+				this->addDockWidget(Qt::LeftDockWidgetArea,dockWidgets[d]);
+				dockWidgets[d]->show();
+				lastDocksVisibilities[d]=1;
+				connect(dockWidgets[d], SIGNAL(visibilityChanged(bool)), this, SLOT(syncControlToggleWithDocks()));
+			}	
+		}
+		else {
+			disconnect(dockWidgets[d], SIGNAL(visibilityChanged(bool)), this, SLOT(syncControlToggleWithDocks()));
+			if (this->dockWidgetArea(dockWidgets[d]) == Qt::LeftDockWidgetArea){
+				this->removeDockWidget(dockWidgets[d]);
+			}	
+			lastDocksVisibilities[d]=0;
+		}	
+	}
+
 	string smedia = "none";
 	switch (_media_type) {
+		case MEDIA_TYPE_3DMODEL:
+			#if defined (SUPPORT_3DMODEL)
+			smedia="3Dmodel";
+			#endif //defined (SUPPORT_3DMODEL)
+			break;	
 		case MEDIA_TYPE_AUDIO:
 			#if defined (SUPPORT_AUDIO)
-				smedia="audio";
-				this->addDockWidget(Qt::LeftDockWidgetArea,audioControls);
-				lastDocksVisibilities.resize(3); //docks: Media Config, Browser, audioControls
-				for (int d=0; d<lastDocksVisibilities.size();d++)
-					lastDocksVisibilities[d] = 1;
-				connect(audioControls, SIGNAL(visibilityChanged(bool)), this, SLOT(syncControlToggleWithDocks()));
-				audioControls->show();
+			smedia="audio";
 			#endif //defined (SUPPORT_AUDIO)
 			break;
 		case MEDIA_TYPE_IMAGE:
+			#if defined (SUPPORT_IMAGE)
 			smedia="image";
-			lastDocksVisibilities.resize(2); //docks: Media Config, Browser
-			for (int d=0; d<lastDocksVisibilities.size();d++)
-				lastDocksVisibilities[d] = 1;
+			#endif //defined (SUPPORT_IMAGE)
 			break;
 		case MEDIA_TYPE_VIDEO:
 			#if defined (SUPPORT_VIDEO)
-				smedia="video";
-				this->addDockWidget(Qt::LeftDockWidgetArea,videoControls);
-				lastDocksVisibilities.resize(3); //docks: Media Config, Browser, videoControls
-				for (int d=0; d<lastDocksVisibilities.size();d++)
-					lastDocksVisibilities[d] = 1;
-				connect(videoControls, SIGNAL(visibilityChanged(bool)), this, SLOT(syncControlToggleWithDocks()));
-				videoControls->show();
+			smedia="video";
 			#endif //defined (SUPPORT_VIDEO)
 			break;
 		default:
 			break;
-	} 
+	}
 	
 	if (smedia=="none"){
 		cerr <<"need to define media type"<< endl;
 		return;
 	}
+	/*if (_media_type == MEDIA_TYPE_NONE || _media_type == MEDIA_TYPE_MIXED || _media_type == MEDIA_TYPE_ALL){
+		cerr <<"need to define media type"<< endl;
+		return;
+	}*/
+
+	
 	if (media_cycle) destroyMediaCycle();
 	createMediaCycle(_media_type, _browser_mode);
 
@@ -789,7 +713,7 @@ void ACMultiMediaCycleOsgQt::loadDefaultConfig(ACMediaType _media_type, ACBrowse
 	build_type = "Debug";
 #endif //USE_DEBUG
 #if defined(__APPLE__)
-	#if not defined (USE_DEBUG) and not defined (XCODE)
+	#if not defined (USE_DEBUG) and not defined (XCODE) // needs "make install" to be ran to work
 		f_plugin = "@executable_path/../MacOS/mc_" + smedia +".dylib";
 		v_plugin = "@executable_path/../MacOS/mc_visualisation.dylib";
 		s_plugin = "@executable_path/../MacOS/mc_segmentation.dylib";
@@ -816,31 +740,34 @@ void ACMultiMediaCycleOsgQt::loadDefaultConfig(ACMediaType _media_type, ACBrowse
 
 
 void ACMultiMediaCycleOsgQt::comboDefaultSettingsChanged(){
-	string mt = ui.comboDefaultSettings->currentText().toStdString();
-	
-	// custom settings = edit config file
-	if (mt == "Custom"){
-		cout << "editing configuration file" << endl;
-		this->editConfigFile();
-		return;
-	};
+	for (int d=0;d<dockWidgets.size();d++){
+		if (dockWidgets[d]->getClassName()=="ACMediaConfigDockWidgetQt"){
+			string mt = ((ACMediaConfigDockWidgetQt*)dockWidgets[d])->getComboDefaultSettings()->currentText().toStdString();
 		
-	// default settings : find the right media
-	stringToMediaTypeConverter::const_iterator iterm = stringToMediaType.find(mt);
-	if( iterm == stringToMediaType.end() ) {
-		cout << " media type not found : " << iterm->first << endl;
-		return;
+			// custom settings = edit config file
+			if (mt == "Custom"){
+				cout << "editing configuration file" << endl;
+				this->on_actionEdit_Config_File_triggered(true);
+				return;
+			};
+				
+			// default settings : find the right media
+			stringToMediaTypeConverter::const_iterator iterm = stringToMediaType.find(mt);
+			if( iterm == stringToMediaType.end() ) {
+				cout << " media type not found : " << iterm->first << endl;
+				return;
+			}
+			ACMediaType new_media_type = iterm->second;
+			cout << iterm->first << " - corresponding media type code : " << new_media_type << endl;
+			this->loadDefaultConfig(new_media_type);
+			
+			// telling the setting dialog what we have done
+			this->settingsDialog->setMediaType(mt);
+		}	
 	}
-	ACMediaType new_media_type = iterm->second;
-	cout << iterm->first << " - corresponding media type code : " << new_media_type << endl;
-	this->loadDefaultConfig(new_media_type);
-	
-	// telling the setting dialog what we have done
-	this->settingsDialog->setMediaType(mt);
-	
 }
 
-void ACMultiMediaCycleOsgQt::on_pushButtonClean_clicked() {
+void ACMultiMediaCycleOsgQt::on_actionClean_triggered(bool checked) {
 	if (! hasMediaCycle()) return; 
 //	this->media_cycle->cleanUserLog(); //use cleanBrowser instead
 
@@ -848,74 +775,23 @@ void ACMultiMediaCycleOsgQt::on_pushButtonClean_clicked() {
 	this->media_cycle->cleanBrowser();
 
 //	this->updateLibrary(); // XS TODO : or cleanLibrary, so we don't call libraryContentChanged each time
-	this->cleanCheckBoxes();
-	this->library_loaded = false;
+	
+	//was cleanCheckBoxes()
+	for (int d=0;d<dockWidgets.size();d++){
+		if (dockWidgets[d]->getClassName() == "ACBrowserControlsClustersNeighborsDockWidgetQt") {
+			// XS TODO: does this clear the list ?
+			((ACBrowserControlsClustersNeighborsDockWidgetQt*)dockWidgets[d])->cleanCheckBoxes();
+		}
+		if (dockWidgets[d]->getClassName() == "ACBrowserControlsClustersDockWidgetQt") {
+			// XS TODO: does this clear the list ?
+			((ACBrowserControlsClustersDockWidgetQt*)dockWidgets[d])->cleanCheckBoxes();
+		}
+	}	
+	plugins_scanned = false;
+	
 	ui.compositeOsgView->clean();
 	ui.compositeOsgView->setFocus();
-	
-
 }	
-
-void ACMultiMediaCycleOsgQt::on_pushButtonRecenter_clicked() {
-	if (! hasMediaCycle()) return; 
-	this->media_cycle->setCameraRecenter();
-}	
-
-void ACMultiMediaCycleOsgQt::on_pushButtonBack_clicked() {
-	if (! hasMediaCycle()) return; 
-	this->media_cycle->goBack();
-	this->synchronizeFeaturesWeights();
-	//	ui.navigationLineEdit->setText(QString::number(media_cycle->getNavigationLevel()));
-	
-	// XS debug
-	this->media_cycle->dumpNavigationLevel() ;
-	this->media_cycle->dumpLoopNavigationLevels() ;
-}
-
-void ACMultiMediaCycleOsgQt::on_pushButtonForward_clicked() {
-	if (! hasMediaCycle()) return; 
-
-	this->media_cycle->goForward();
-	this->synchronizeFeaturesWeights();
-	
-	//	ui.navigationLineEdit->setText(QString::number(media_cycle->getNavigationLevel()));
-	
-	// XS debug
-	this->media_cycle->dumpNavigationLevel() ;
-	this->media_cycle->dumpLoopNavigationLevels() ;
-}
-
-void ACMultiMediaCycleOsgQt::configureCheckBoxes(){
-	// dynamic config of checkboxes
-	// according to plugins found by plugin manager
-	
-	ACPluginManager *acpl = this->media_cycle->getPluginManager(); //getPlugins
-	if (acpl) {
-		for (int i=0;i<acpl->getSize();i++) {
-			for (int j=0;j<acpl->getPluginLibrary(i)->getSize();j++) {
-				if (acpl->getPluginLibrary(i)->getPlugin(j)->getPluginType() == PLUGIN_TYPE_FEATURES && acpl->getPluginLibrary(i)->getPlugin(j)->getMediaType() == this->media_type) {
-					QString s(acpl->getPluginLibrary(i)->getPlugin(j)->getName().c_str());
-					QListWidgetItem * item = new QListWidgetItem(s,ui.featuresListWidget);
-					item->setCheckState (Qt::Unchecked);
-				}
-			}
-		}
-	}
-	
-	plugins_scanned = true;
-	this->synchronizeFeaturesWeights();
-	
-	connect(ui.featuresListWidget, SIGNAL(itemClicked(QListWidgetItem*)),
-            this, SLOT(modifyListItem(QListWidgetItem*)));
-	
-}
-
-// XS TODO define when this is called, really clean
-void ACMultiMediaCycleOsgQt::cleanCheckBoxes(){
-	// XS TODO: does this clear the list ?
-	ui.featuresListWidget->clear();
-	plugins_scanned = false;
-}
 
 void  ACMultiMediaCycleOsgQt::showError(std::string s){
 	int warn_button;

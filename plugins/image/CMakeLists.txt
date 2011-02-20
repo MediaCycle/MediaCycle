@@ -1,9 +1,8 @@
+SET(PLUGIN_NAME "image")
+SET(TARGET_NAME "${PLUGIN_PREFIX}${PLUGIN_NAME}")
 IF(SUPPORT_IMAGE OR SUPPORT_VIDEO)
 	FILE(GLOB SRC *.cpp *.c ./blobs/*.cpp ./gabor/*.cpp)
 	FILE(GLOB HDR *.hpp *.h ./blobs/*.h ./gabor/*.h)
-
-	SET(PLUGIN_NAME "image")
-	SET(TARGET_NAME "${PLUGIN_PREFIX}${PLUGIN_NAME}")
 
 	ADD_LIBRARY(${TARGET_NAME} SHARED ${SRC} ${HDR})
 	ADD_DEPENDENCIES(${TARGET_NAME} mediacycle)

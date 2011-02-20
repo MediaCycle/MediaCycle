@@ -39,11 +39,11 @@ IF(USE_QT4 AND USE_OSG AND USE_OSC AND OPENAL_FOUND)
 	ELSE ()
 		IF ( APPLE )
 			# set how it shows up in the Info.plist file
-  			SET(MACOSX_BUNDLE_ICON_FILE AudioGarden.icns) 
+  			SET(MACOSX_BUNDLE_ICON_FILE MultiMediaCycle.icns) 
   			# set where in the bundle to put the icns file
-  			SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_SOURCE_DIR}/../audiogarden-osg-qt/AudioGarden.icns PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+  			SET_SOURCE_FILES_PROPERTIES(${CMAKE_SOURCE_DIR}/data/icons/MultiMediaCycle.icns PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
   			# include the icns file in the target
-  			SET(multimediacycle-osg-qt_SRCS ${multimediacycle-osg-qt_SRCS} ${CMAKE_CURRENT_SOURCE_DIR}/../audiogarden-osg-qt/AudioGarden.icns)
+  			SET(multimediacycle-osg-qt_SRCS ${multimediacycle-osg-qt_SRCS} ${CMAKE_SOURCE_DIR}/data/icons/MultiMediaCycle.icns)
 
 			ADD_EXECUTABLE(multimediacycle-osg-qt ${APP_TYPE} ${MACOSX_BUNDLE_INFO_PLIST} ${multimediacycle-osg-qt_SRCS} ${multimediacycle-osg-qt_UIS_H} ${multimediacycle-osg-qt_MOC_SRCS} ${settings_SRCS} ${settings_UIS_H} ${settings_MOC_SRCS} ${settings_MOC_HDRS})
 		ELSE ()
@@ -61,27 +61,15 @@ IF(USE_QT4 AND USE_OSG AND USE_OSC AND OPENAL_FOUND)
 	IF(SUPPORT_AUDIO)
 		ADD_DEPENDENCIES(multimediacycle-osg-qt audioengine)
 		ADD_DEPENDENCIES(multimediacycle-osg-qt mc_audio)
-		IF(APPLE)
-			#TARGET_LINK_LIBRARIES(multimediacycle-osg-qt mc_audio) # hack to get the plugin copied into the app bundle on OSX
-		ENDIF()
 	ENDIF()
 	IF(SUPPORT_IMAGE OR SUPPORT_VIDEO)
 		ADD_DEPENDENCIES(multimediacycle-osg-qt mc_image)
-		IF(APPLE)
-			#TARGET_LINK_LIBRARIES(multimediacycle-osg-qt mc_video) # hack to get the plugin copied into the app bundle on OSX
-		ENDIF()
 	ENDIF()
 	IF(SUPPORT_VIDEO)
 		ADD_DEPENDENCIES(multimediacycle-osg-qt mc_video)
-		IF(APPLE)
-			#TARGET_LINK_LIBRARIES(multimediacycle-osg-qt mc_video) # hack to get the plugin copied into the app bundle on OSX
-		ENDIF()
 	ENDIF()
 	IF(SUPPORT_3DMODEL)
 		ADD_DEPENDENCIES(multimediacycle-osg-qt mc_3Dmodel)
-		IF(APPLE)
-			#TARGET_LINK_LIBRARIES(multimediacycle-osg-qt mc_3Dmodel) # hack to get the plugin copied into the app bundle on OSX
-		ENDIF()
 	ENDIF()
 	ADD_DEPENDENCIES(multimediacycle-osg-qt mc_segmentation)
 	ADD_DEPENDENCIES(multimediacycle-osg-qt mc_visualisation)
@@ -91,7 +79,7 @@ IF(USE_QT4 AND USE_OSG AND USE_OSC AND OPENAL_FOUND)
 	ENDIF()
 
 	#IF ( APPLE )
-	#	set_target_properties(multimediacycle-osg-qt PROPERTIES MACOSX_BUNDLE_INFO_PLIST ${CMAKE_SOURCE_DIR}/gui/osg-qt/Info.plist)
+	#	set_target_properties(multimediacycle-osg-qt PROPERTIES MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/Info.plist)
 	#	set_source_files_properties(PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
 	#ENDIF ( APPLE )
 
@@ -124,6 +112,7 @@ IF(USE_QT4 AND USE_OSG AND USE_OSC AND OPENAL_FOUND)
 		ENDIF()		
 
 		SET(PROGNAME "multimediacycle-osg-qt")
+		SET(WITH_QT4 ON)
 		INCLUDE (${CMAKE_SOURCE_DIR}/CMakeModules/ConfigureAppleBundle.cmake)
 	ENDIF(APPLE AND NOT USE_DEBUG)
 

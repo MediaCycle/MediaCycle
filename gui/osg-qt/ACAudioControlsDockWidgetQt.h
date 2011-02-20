@@ -3,8 +3,8 @@
  *  MediaCycle
  *
  *  @author Christian Frisson
- *  @date 8/11/11
- *  @copyright (c) 2010 – UMONS - Numediart
+ *  @date 8/01/11
+ *  @copyright (c) 2011 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
  *  licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -38,16 +38,12 @@
 #include <iostream>
 #include <string.h>
 
-#include <QtGui>
+#include "ACAbstractDockWidgetQt.h"
 
 #include "ui_ACAudioControlsDockWidgetQt.h"
 #include <MediaCycle.h>
 
-#if defined (SUPPORT_AUDIO)
-#include <ACAudioEngine.h>
-#endif //defined (SUPPORT_AUDIO)
-
-class ACAudioControlsDockWidgetQt : public QDockWidget {
+class ACAudioControlsDockWidgetQt : public ACAbstractDockWidgetQt {
 Q_OBJECT
 
 //#if defined (SUPPORT_AUDIO) // don't use it!
@@ -67,15 +63,8 @@ public:
 	~ACAudioControlsDockWidgetQt();
 
 #if defined (SUPPORT_AUDIO)
-	void setMediaCycle(MediaCycle* _media_cycle){ media_cycle = _media_cycle;}
-	MediaCycle* getMediaCycle() {return media_cycle;}
-	void setAudioEngine(ACAudioEngine* _audio_engine){ audio_engine = _audio_engine;}
-	ACAudioEngine* getAudioEngine() {return audio_engine;}
-	
 private:
 	Ui::ACAudioControlsDockWidgetQt ui;
-	MediaCycle *media_cycle;
-	ACAudioEngine *audio_engine;
 #endif //defined (SUPPORT_AUDIO)	
 };
 #endif

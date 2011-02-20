@@ -95,8 +95,15 @@
     <addaction name="separator"/>
     <addaction name="actionEdit_Config_File"/>
    </widget>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>Help</string>
+    </property>
+    <addaction name="actionHelpAbout"/>
+   </widget>
    <addaction name="menu_File"/>
    <addaction name="menuConfig"/>
+   <addaction name="menuHelp"/>
   </widget>
   <widget class="QToolBar" name="toolbar">
    <property name="sizePolicy">
@@ -143,518 +150,6 @@
    <addaction name="actionClean"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
-  <widget class="QDockWidget" name="dockWidgetMediaConfig">
-   <property name="sizePolicy">
-    <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-     <horstretch>250</horstretch>
-     <verstretch>75</verstretch>
-    </sizepolicy>
-   </property>
-   <property name="minimumSize">
-    <size>
-     <width>250</width>
-     <height>75</height>
-    </size>
-   </property>
-   <property name="maximumSize">
-    <size>
-     <width>250</width>
-     <height>75</height>
-    </size>
-   </property>
-   <property name="features">
-    <set>QDockWidget::DockWidgetClosable</set>
-   </property>
-   <property name="allowedAreas">
-    <set>Qt::LeftDockWidgetArea</set>
-   </property>
-   <property name="windowTitle">
-    <string>Media Configuration</string>
-   </property>
-   <attribute name="dockWidgetArea">
-    <number>1</number>
-   </attribute>
-   <widget class="QWidget" name="dockWidgetContents">
-    <widget class="QComboBox" name="comboDefaultSettings">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>10</y>
-       <width>231</width>
-       <height>26</height>
-      </rect>
-     </property>
-     <item>
-      <property name="text">
-       <string>-- Config --</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>Custom</string>
-      </property>
-     </item>
-    </widget>
-   </widget>
-  </widget>
-  <widget class="QDockWidget" name="dockWidgetBrowser">
-   <property name="minimumSize">
-    <size>
-     <width>250</width>
-     <height>425</height>
-    </size>
-   </property>
-   <property name="maximumSize">
-    <size>
-     <width>250</width>
-     <height>425</height>
-    </size>
-   </property>
-   <property name="features">
-    <set>QDockWidget::DockWidgetClosable</set>
-   </property>
-   <property name="allowedAreas">
-    <set>Qt::LeftDockWidgetArea</set>
-   </property>
-   <property name="windowTitle">
-    <string>Browser Controls</string>
-   </property>
-   <attribute name="dockWidgetArea">
-    <number>1</number>
-   </attribute>
-   <widget class="QWidget" name="dockWidgetContents">
-    <widget class="QPushButton" name="pushButtonLaunch">
-     <property name="geometry">
-      <rect>
-       <x>30</x>
-       <y>330</y>
-       <width>80</width>
-       <height>28</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Launch</string>
-     </property>
-    </widget>
-    <widget class="QRadioButton" name="radioButtonClusters">
-     <property name="geometry">
-      <rect>
-       <x>120</x>
-       <y>290</y>
-       <width>81</width>
-       <height>20</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <pointsize>10</pointsize>
-      </font>
-     </property>
-     <property name="text">
-      <string>Clusters</string>
-     </property>
-     <property name="checked">
-      <bool>true</bool>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="pushButtonBack">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>360</y>
-       <width>61</width>
-       <height>31</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>&lt;</string>
-     </property>
-    </widget>
-    <widget class="QGroupBox" name="groupBoxNeighbors">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>220</y>
-       <width>231</width>
-       <height>71</height>
-      </rect>
-     </property>
-     <property name="title">
-      <string>Neighbors Mode</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignCenter</set>
-     </property>
-     <widget class="QLabel" name="labelNeighborsMethod">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>20</y>
-        <width>54</width>
-        <height>18</height>
-       </rect>
-      </property>
-      <property name="font">
-       <font>
-        <pointsize>10</pointsize>
-       </font>
-      </property>
-      <property name="text">
-       <string>Neighbors</string>
-      </property>
-     </widget>
-     <widget class="QLabel" name="labelNeighborsPositions">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>40</y>
-        <width>54</width>
-        <height>18</height>
-       </rect>
-      </property>
-      <property name="font">
-       <font>
-        <pointsize>10</pointsize>
-       </font>
-      </property>
-      <property name="text">
-       <string>Positions:</string>
-      </property>
-     </widget>
-     <widget class="QComboBox" name="comboBoxNeighborsPositions">
-      <property name="enabled">
-       <bool>false</bool>
-      </property>
-      <property name="geometry">
-       <rect>
-        <x>60</x>
-        <y>40</y>
-        <width>161</width>
-        <height>26</height>
-       </rect>
-      </property>
-      <property name="font">
-       <font>
-        <pointsize>10</pointsize>
-       </font>
-      </property>
-      <item>
-       <property name="text">
-        <string>None available</string>
-       </property>
-      </item>
-     </widget>
-     <widget class="QComboBox" name="comboBoxNeighborsMethod">
-      <property name="enabled">
-       <bool>false</bool>
-      </property>
-      <property name="geometry">
-       <rect>
-        <x>60</x>
-        <y>20</y>
-        <width>161</width>
-        <height>26</height>
-       </rect>
-      </property>
-      <property name="font">
-       <font>
-        <pointsize>10</pointsize>
-       </font>
-      </property>
-      <item>
-       <property name="text">
-        <string>None available</string>
-       </property>
-      </item>
-     </widget>
-    </widget>
-    <widget class="QGroupBox" name="groupBoxSimilarity">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>0</y>
-       <width>231</width>
-       <height>111</height>
-      </rect>
-     </property>
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="title">
-      <string>Similarity</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignCenter</set>
-     </property>
-     <widget class="QListWidget" name="featuresListWidget">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>30</y>
-        <width>211</width>
-        <height>71</height>
-       </rect>
-      </property>
-      <property name="toolTip">
-       <string>when loading media files or pre-computed features (acl files), the available features will appear here</string>
-      </property>
-      <property name="autoScroll">
-       <bool>true</bool>
-      </property>
-      <property name="tabKeyNavigation">
-       <bool>false</bool>
-      </property>
-      <property name="movement">
-       <enum>QListView::Static</enum>
-      </property>
-      <property name="viewMode">
-       <enum>QListView::ListMode</enum>
-      </property>
-     </widget>
-    </widget>
-    <widget class="QPushButton" name="pushButtonForward">
-     <property name="geometry">
-      <rect>
-       <x>170</x>
-       <y>360</y>
-       <width>61</width>
-       <height>31</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>&gt;</string>
-     </property>
-    </widget>
-    <widget class="QRadioButton" name="radioButtonNeighbors">
-     <property name="geometry">
-      <rect>
-       <x>120</x>
-       <y>310</y>
-       <width>81</width>
-       <height>20</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <pointsize>10</pointsize>
-      </font>
-     </property>
-     <property name="text">
-      <string>Neighbors</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="labelChosenMode">
-     <property name="geometry">
-      <rect>
-       <x>40</x>
-       <y>300</y>
-       <width>71</width>
-       <height>18</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <pointsize>10</pointsize>
-      </font>
-     </property>
-     <property name="text">
-      <string>Chosen mode:</string>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="pushButtonClean">
-     <property name="geometry">
-      <rect>
-       <x>130</x>
-       <y>330</y>
-       <width>80</width>
-       <height>28</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Clean</string>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="pushButtonRecenter">
-     <property name="geometry">
-      <rect>
-       <x>80</x>
-       <y>360</y>
-       <width>81</width>
-       <height>28</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Recenter</string>
-     </property>
-    </widget>
-    <widget class="QGroupBox" name="groupBoxClusters">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>110</y>
-       <width>231</width>
-       <height>111</height>
-      </rect>
-     </property>
-     <property name="title">
-      <string>Clusters Mode</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignCenter</set>
-     </property>
-     <widget class="QLabel" name="labelClustersNumber">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>30</y>
-        <width>54</width>
-        <height>18</height>
-       </rect>
-      </property>
-      <property name="font">
-       <font>
-        <pointsize>10</pointsize>
-       </font>
-      </property>
-      <property name="text">
-       <string>Number</string>
-      </property>
-     </widget>
-     <widget class="QComboBox" name="comboBoxClustersMethod">
-      <property name="enabled">
-       <bool>false</bool>
-      </property>
-      <property name="geometry">
-       <rect>
-        <x>60</x>
-        <y>60</y>
-        <width>161</width>
-        <height>26</height>
-       </rect>
-      </property>
-      <property name="font">
-       <font>
-        <pointsize>10</pointsize>
-       </font>
-      </property>
-      <item>
-       <property name="text">
-        <string>KMeans (default)</string>
-       </property>
-      </item>
-     </widget>
-     <widget class="QLabel" name="labelClustersMethod">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>60</y>
-        <width>54</width>
-        <height>18</height>
-       </rect>
-      </property>
-      <property name="font">
-       <font>
-        <pointsize>10</pointsize>
-       </font>
-      </property>
-      <property name="text">
-       <string>Clustering</string>
-      </property>
-     </widget>
-     <widget class="QLabel" name="labelClustersPositions">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>80</y>
-        <width>54</width>
-        <height>18</height>
-       </rect>
-      </property>
-      <property name="font">
-       <font>
-        <pointsize>10</pointsize>
-       </font>
-      </property>
-      <property name="text">
-       <string>Positions:</string>
-      </property>
-     </widget>
-     <widget class="QComboBox" name="comboBoxClustersPositions">
-      <property name="enabled">
-       <bool>false</bool>
-      </property>
-      <property name="geometry">
-       <rect>
-        <x>60</x>
-        <y>80</y>
-        <width>161</width>
-        <height>26</height>
-       </rect>
-      </property>
-      <property name="font">
-       <font>
-        <pointsize>10</pointsize>
-       </font>
-      </property>
-      <item>
-       <property name="text">
-        <string>Propeller (default)</string>
-       </property>
-      </item>
-     </widget>
-     <widget class="QSpinBox" name="spinBoxClusters">
-      <property name="geometry">
-       <rect>
-        <x>60</x>
-        <y>30</y>
-        <width>41</width>
-        <height>25</height>
-       </rect>
-      </property>
-      <property name="minimum">
-       <number>1</number>
-      </property>
-      <property name="maximum">
-       <number>30</number>
-      </property>
-      <property name="value">
-       <number>5</number>
-      </property>
-     </widget>
-     <widget class="QSlider" name="sliderClusters">
-      <property name="geometry">
-       <rect>
-        <x>110</x>
-        <y>30</y>
-        <width>111</width>
-        <height>31</height>
-       </rect>
-      </property>
-      <property name="minimum">
-       <number>1</number>
-      </property>
-      <property name="maximum">
-       <number>10</number>
-      </property>
-      <property name="value">
-       <number>5</number>
-      </property>
-      <property name="orientation">
-       <enum>Qt::Horizontal</enum>
-      </property>
-      <property name="tickPosition">
-       <enum>QSlider::TicksAbove</enum>
-      </property>
-      <property name="tickInterval">
-       <number>1</number>
-      </property>
-     </widget>
-    </widget>
-   </widget>
-  </widget>
   <action name="actionLoad_Media_Directory">
    <property name="text">
     <string>Load Media Directory</string>
@@ -665,7 +160,7 @@
   </action>
   <action name="actionLoad_ACL">
    <property name="text">
-    <string>Load ACL</string>
+    <string>Load Library</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+O</string>
@@ -673,7 +168,10 @@
   </action>
   <action name="actionSave_ACL">
    <property name="text">
-    <string>Save ACL</string>
+    <string>Save Library</string>
+   </property>
+   <property name="toolTip">
+    <string>Save Library</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+S</string>
@@ -697,10 +195,16 @@
    <property name="text">
     <string>Controls</string>
    </property>
+   <property name="shortcut">
+    <string>Alt+Tab</string>
+   </property>
   </action>
   <action name="actionClean">
    <property name="text">
     <string>Clean</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Del</string>
    </property>
   </action>
   <action name="actionLoad_Config_File">
@@ -726,6 +230,14 @@
   <action name="actionSave_XML">
    <property name="text">
     <string>Save XML</string>
+   </property>
+  </action>
+  <action name="actionHelpAbout">
+   <property name="text">
+    <string>About</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+@</string>
    </property>
   </action>
  </widget>

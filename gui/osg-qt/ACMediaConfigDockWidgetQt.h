@@ -1,5 +1,5 @@
 /*
- *  ACVideoControlsDockWidgetQt.h
+ *  ACMediaConfigDockWidgetQt.h
  *  MediaCycle
  *
  *  @author Christian Frisson
@@ -32,35 +32,30 @@
  *
  */
 
-#ifndef HEADER_ACVIDEOCONTROLSDOCKWIDGETQT
-#define HEADER_ACVIDEOCONTROLSDOCKWIDGETQT
+#ifndef HEADER_ACMEDIACONFIGDOCKWIDGETQT
+#define HEADER_ACMEDIACONFIGDOCKWIDGETQT
 
 #include <iostream>
 #include <string.h>
 
 #include "ACAbstractDockWidgetQt.h"
 
-#include "ui_ACVideoControlsDockWidgetQt.h"
+#include "ui_ACMediaConfigDockWidgetQt.h"
 #include <MediaCycle.h>
-#include <ACOsgCompositeViewQt.h>
 
-class ACVideoControlsDockWidgetQt : public ACAbstractDockWidgetQt {
+class ACMediaConfigDockWidgetQt : public ACAbstractDockWidgetQt {
 Q_OBJECT
-
-//#if defined (SUPPORT_VIDEO)// don't use it!
+	
 private slots:
-	// Video controls
-	void on_pushButtonMuteAll_clicked();
-	void on_comboBoxVideoSummary_activated(const QString & text);
-//#endif //defined (SUPPORT_VIDEO)
+	// ...
+	//void comboDefaultSettingsChanged(); 
 	
 public:
-	ACVideoControlsDockWidgetQt(QWidget *parent = 0);
-	~ACVideoControlsDockWidgetQt();
-
-#if defined (SUPPORT_VIDEO)	
+	ACMediaConfigDockWidgetQt(QWidget *parent = 0);
+	~ACMediaConfigDockWidgetQt(){};
+	QComboBox* getComboDefaultSettings(){return ui.comboDefaultSettings;}
+	
 private:
-	Ui::ACVideoControlsDockWidgetQt ui;
-#endif //defined (SUPPORT_VIDEO)	
+	Ui::ACMediaConfigDockWidgetQt ui;
 };
 #endif

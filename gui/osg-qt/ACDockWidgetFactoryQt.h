@@ -1,9 +1,9 @@
 /*
- *  ACVideoControlsDockWidgetQt.h
+ *  ACDockWidgetFactoryQt.h
  *  MediaCycle
  *
  *  @author Christian Frisson
- *  @date 8/01/11
+ *  @date 20/02/11
  *  @copyright (c) 2011 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
@@ -32,35 +32,24 @@
  *
  */
 
-#ifndef HEADER_ACVIDEOCONTROLSDOCKWIDGETQT
-#define HEADER_ACVIDEOCONTROLSDOCKWIDGETQT
-
-#include <iostream>
-#include <string.h>
+#ifndef ACDOCKWIDGETFACTORYQT_H
+#define ACDOCKWIDGETFACTORYQT_H
 
 #include "ACAbstractDockWidgetQt.h"
+#if defined (SUPPORT_AUDIO)
+#include "ACAudioControlsDockWidgetQt.h"
+#endif //defined (SUPPORT_AUDIO)
+#include "ACBrowserControlsClustersDockWidgetQt.h"
+#include "ACBrowserControlsClustersNeighborsDockWidgetQt.h"
+#include "ACMediaConfigDockWidgetQt.h"
+#if defined (SUPPORT_VIDEO)
+#include "ACVideoControlsDockWidgetQt.h"
+#endif //defined (SUPPORT_VIDEO)
 
-#include "ui_ACVideoControlsDockWidgetQt.h"
-#include <MediaCycle.h>
-#include <ACOsgCompositeViewQt.h>
-
-class ACVideoControlsDockWidgetQt : public ACAbstractDockWidgetQt {
-Q_OBJECT
-
-//#if defined (SUPPORT_VIDEO)// don't use it!
-private slots:
-	// Video controls
-	void on_pushButtonMuteAll_clicked();
-	void on_comboBoxVideoSummary_activated(const QString & text);
-//#endif //defined (SUPPORT_VIDEO)
-	
+class ACDockWidgetFactoryQt{
 public:
-	ACVideoControlsDockWidgetQt(QWidget *parent = 0);
-	~ACVideoControlsDockWidgetQt();
-
-#if defined (SUPPORT_VIDEO)	
-private:
-	Ui::ACVideoControlsDockWidgetQt ui;
-#endif //defined (SUPPORT_VIDEO)	
+	ACDockWidgetFactoryQt(){};
+	~ACDockWidgetFactoryQt(){};
+	ACAbstractDockWidgetQt* createDockWidget(QWidget *parent = 0,std::string dock_type="");
 };
-#endif
+#endif // ACDOCKWIDGETFACTORYQT_H

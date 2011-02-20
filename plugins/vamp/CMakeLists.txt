@@ -1,10 +1,9 @@
+SET(PLUGIN_NAME "vamp")
+SET(TARGET_NAME "${PLUGIN_PREFIX}${PLUGIN_NAME}")
 IF(SUPPORT_AUDIO AND USE_VAMP)
 
 	FILE(GLOB SRC *.cpp *.c)
 	FILE(GLOB HDR *.hpp *.h)
-
-	SET(PLUGIN_NAME "vamp")
-	SET(TARGET_NAME "${PLUGIN_PREFIX}${PLUGIN_NAME}")
 
 	INCLUDE_DIRECTORIES(. ../../core ../../armadillo ../../vamp-plugin-interface ../../lib/vamp-plugin-sdk ../../tinyxml)
 

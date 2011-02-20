@@ -1,7 +1,7 @@
 /**
  * @brief ACOsgCompositeViewQt.h
  * @author Christian Frisson
- * @date 18/02/2011
+ * @date 20/02/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -147,6 +147,8 @@ class ACOsgCompositeViewQt : public osgViewer::CompositeViewer, public QGLWidget
 		#if defined (SUPPORT_AUDIO)
 			void setAudioEngine(ACAudioEngine *engine){audio_engine=engine;if(timeline_event_handler)timeline_event_handler->setAudioEngine(engine);}
 		#endif //defined (SUPPORT_AUDIO)
+		bool isLibraryLoaded(){return library_loaded;}
+		void setLibraryLoaded(bool load_status){library_loaded = load_status;}
 	
 	private:
 		int mousedown, zoomdown, forwarddown, autoplaydown, rotationdown;
@@ -159,6 +161,7 @@ class ACOsgCompositeViewQt : public osgViewer::CompositeViewer, public QGLWidget
 		float refsepy;
 		int controls_width;
 		int screen_width;
+		bool library_loaded;
 	
 	//MediaBlender specific members:
 	private:

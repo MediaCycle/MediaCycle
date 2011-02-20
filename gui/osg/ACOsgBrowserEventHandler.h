@@ -35,12 +35,12 @@
 #ifndef _ACMEDIABROWEROSGEVENTHANDLER_H
 #define _ACMEDIABROWEROSGEVENTHANDLER_H
 
-#include <cstdio>
+//#include <cstdio>
 #include <osgGA/GUIEventHandler>
 #include <osgViewer/View>
 #include "ACRefId.h"
 
-#include "MediaCycle.h"
+#include <MediaCycle.h>
 
 //using namespace osgGA;
 
@@ -48,7 +48,7 @@ class ACOsgBrowserEventHandler : public osgGA::GUIEventHandler {
 public: 
 	
 	ACOsgBrowserEventHandler() { media_cycle = 0; };
-	virtual ~ACOsgBrowserEventHandler() {};
+	virtual ~ACOsgBrowserEventHandler() {media_cycle = 0;};
 	
 	void setMediaCycle(MediaCycle *_media_cycle) { this->media_cycle = _media_cycle; };
 	

@@ -53,14 +53,9 @@
 #endif //defined (SUPPORT_AUDIO)
 
 // Dock Widgets
-/*#include <ACMediaConfigDockWidgetQt.h>
-#include <ACBrowserControlsClustersNeighborsDockWidgetQt.h>*/
-#if defined (SUPPORT_AUDIO)
-	#include <ACAudioControlsDockWidgetQt.h>
-#endif //defined (SUPPORT_AUDIO)
-#if defined (SUPPORT_VIDEO)
-	#include <ACVideoControlsDockWidgetQt.h>
-#endif //defined (SUPPORT_VIDEO)
+#include <ACDockWidgetFactoryQt.h>
+
+#include <ACAboutDialogFactoryQt.h>
 
 // FORWARD DECLARATIONS
 QT_BEGIN_NAMESPACE
@@ -74,41 +69,25 @@ Q_OBJECT
 	
 public slots:
 	// Config
-	virtual void modifyListItem(QListWidgetItem *item); // XS TODO why virtual again ?
-	bool saveConfigFile();
-	void editConfigFile();
-	void loadConfigFile();
+	void on_actionSave_Config_File_triggered(bool checked);
+	void on_actionEdit_Config_File_triggered(bool checked);
+	void on_actionLoad_Config_File_triggered(bool checked);
 	void comboDefaultSettingsChanged(); 
 	
 private slots:
 	// Controls
 	void syncControlToggleWithDocks();
-
-	// Library controls
-	void loadACLFile();
-	void saveACLFile();		
-	void loadXMLFile();
-	void saveXMLFile();		
-	void loadMediaDirectory();
-	void loadMediaFiles();
-	//void on_pushButtonLaunch_clicked();
-	void on_pushButtonClean_clicked();
 	
-	// Browser controls
-	void on_pushButtonRecenter_clicked();
-	void on_pushButtonBack_clicked();
-	void on_pushButtonForward_clicked();
-	//void on_radioButtonClusters_toggled();
+	// Library controls
+	void on_actionLoad_ACL_triggered(bool checked);
+	void on_actionSave_ACL_triggered(bool checked);		
+	void on_actionLoad_XML_triggered(bool checked);
+	void on_actionSave_XML_triggered(bool checked);	
+	void on_actionLoad_Media_Directory_triggered(bool checked);
+	void on_actionLoad_Media_Files_triggered(bool checked);
+	void on_actionClean_triggered(bool checked);
 
-	// Clustering controls
-	void spinBoxClustersValueChanged(int _value);
-	void on_sliderClusters_sliderReleased();
-	//void on_comboBoxClustersMethod_activated(const QString & text);//CF or (int index);} 
-	//void on_comboBoxClustersPositions_activated(const QString & text);//CF or (int index);} 
-
-	// Neighborhoods controls
-	//void on_comboBoxNeighborsMethod_activated(const QString & text);//CF or (int index);} 
-	//void on_comboBoxNeighborsPositions_activated(const QString & text);//CF or (int index);} 
+	void on_actionHelpAbout_triggered(bool checked);
 	
 public:
 	ACMultiMediaCycleOsgQt(QWidget *parent = 0);
@@ -117,25 +96,30 @@ public:
 	
 	// XS TODO: default values for image -- is this correct ?
 	void createMediaCycle(ACMediaType _media_type = MEDIA_TYPE_IMAGE, ACBrowserMode _browser_mode = AC_MODE_CLUSTERS);
-	MediaCycle* getMediaCycle() {return media_cycle;}
 	void destroyMediaCycle();
+	MediaCycle* getMediaCycle() {return media_cycle;}
+	ACMediaType getMediaType() {return media_type;}
 	void addPluginItem(QListWidgetItem *_item);
-	void synchronizeFeaturesWeights();
-	
 	void addPluginsLibrary(std::string _library);
 	void removePluginsLibrary(std::string _library);
-
 	void loadDefaultConfig(ACMediaType _media_type = MEDIA_TYPE_IMAGE, ACBrowserMode _browser_mode = AC_MODE_CLUSTERS);
-
+	void synchronizeFeaturesWeights();
+	
+	// Controls
+	bool addControlDock(ACAbstractDockWidgetQt* dock);
+	bool addControlDock(std::string dock_type);
+	
+	// Controls
+	bool addAboutDialog(ACAbstractAboutDialogQt* dock);
+	bool addAboutDialog(std::string about_type);
+	
 private:
 	// variables
-	
 	Ui::ACMediaCycleOsgQt ui;
 	SettingsDialog *settingsDialog;
 //	QProgressBar *pb;
 	bool features_known;
 	bool plugins_scanned;
-	bool library_loaded;
 	MediaCycle *media_cycle;
 	ACMediaType media_type;
 	ACBrowserMode browser_mode;
@@ -144,21 +128,17 @@ private:
 	#if defined (SUPPORT_AUDIO)
 		ACAudioEngine *audio_engine;
 	#endif //defined (SUPPORT_AUDIO)
+	
 	// Dock Widgets
-	/*ACMediaConfigDockWidgetQt* mediaConfig;
-	ACBrowserControlsClustersNeighborsDockWidgetQt browserControls;*/
-	#if defined (SUPPORT_AUDIO)
-		ACAudioControlsDockWidgetQt* audioControls;
-	#endif //defined (SUPPORT_AUDIO)
-	#if defined (SUPPORT_VIDEO)
-	ACVideoControlsDockWidgetQt* videoControls;
-	#endif //defined (SUPPORT_VIDEO)
 	vector<int> lastDocksVisibilities; //state stored before hiding all docks with the toggle
 	bool wasControlsToggleChecked;
+	vector<ACAbstractDockWidgetQt*> dockWidgets;
+	ACDockWidgetFactoryQt* dockWidgetFactory;
+	
+	ACAboutDialogFactoryQt* aboutDialogFactory;
+	ACAbstractAboutDialogQt* aboutDialog;
 	
 	// methods
-	void configureCheckBoxes();
-	void cleanCheckBoxes();
 	bool saveFile(const QString& _filename);
 	std::string rstrip(const std::string& s);
 	void showError(std::string s);

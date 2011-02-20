@@ -73,14 +73,14 @@ private:
 	//bool addXMLPlugin();
 public slots:
     void updateActions();
-
+	void on_buttonConfirmPluginsSelection_clicked();
+	
 private slots:
 	void on_buttonApplyCurrentSettings_clicked();
 	void on_buttonAddPluginsLibrary_clicked();
-	void on_buttonConfirmPluginsSelection_clicked();
 
  //   void selectVisualizationPlugins();
-	bool saveConfigFile(std::string _filename);
+	bool saveConfigFile();
 	bool writeXMLConfigFile(std::string _filename);
 	bool readXMLConfigFile(std::string _filename);
 //	void configureFeaturesPlugins();

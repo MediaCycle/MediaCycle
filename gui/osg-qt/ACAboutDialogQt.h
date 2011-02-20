@@ -1,9 +1,9 @@
 /*
- *  ACVideoControlsDockWidgetQt.h
+ *  ACAboutDialogQt.h
  *  MediaCycle
  *
  *  @author Christian Frisson
- *  @date 8/01/11
+ *  @date 18/02/11
  *  @copyright (c) 2011 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
@@ -32,35 +32,27 @@
  *
  */
 
-#ifndef HEADER_ACVIDEOCONTROLSDOCKWIDGETQT
-#define HEADER_ACVIDEOCONTROLSDOCKWIDGETQT
+#ifndef ACABOUTDIALOGQT_H
+#define ACABOUTDIALOGQT_H
 
 #include <iostream>
 #include <string.h>
 
-#include "ACAbstractDockWidgetQt.h"
+#include "ACAbstractAboutDialogQt.h"
 
-#include "ui_ACVideoControlsDockWidgetQt.h"
-#include <MediaCycle.h>
-#include <ACOsgCompositeViewQt.h>
+#include "ui_ACAboutDialogQt.h"
 
-class ACVideoControlsDockWidgetQt : public ACAbstractDockWidgetQt {
+class ACAboutDialogQt : public ACAbstractAboutDialogQt { 
 Q_OBJECT
 
-//#if defined (SUPPORT_VIDEO)// don't use it!
-private slots:
-	// Video controls
-	void on_pushButtonMuteAll_clicked();
-	void on_comboBoxVideoSummary_activated(const QString & text);
-//#endif //defined (SUPPORT_VIDEO)
-	
 public:
-	ACVideoControlsDockWidgetQt(QWidget *parent = 0);
-	~ACVideoControlsDockWidgetQt();
+	ACAboutDialogQt( QWidget* parent = 0);
+    ~ACAboutDialogQt(){}
 
-#if defined (SUPPORT_VIDEO)	
 private:
-	Ui::ACVideoControlsDockWidgetQt ui;
-#endif //defined (SUPPORT_VIDEO)	
+	Ui::ACAboutDialogQt ui;
+	void updateLicenses();
+	void updateTeam();
 };
-#endif
+
+#endif // ACABOUTDIALOGQT_H

@@ -1,9 +1,9 @@
 /*
- *  ACVideoControlsDockWidgetQt.h
+ *  ACDockWidgetFactoryQt.cpp
  *  MediaCycle
  *
  *  @author Christian Frisson
- *  @date 8/01/11
+ *  @date 20/02/11
  *  @copyright (c) 2011 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
@@ -32,35 +32,17 @@
  *
  */
 
-#ifndef HEADER_ACVIDEOCONTROLSDOCKWIDGETQT
-#define HEADER_ACVIDEOCONTROLSDOCKWIDGETQT
+#include "ACDockWidgetFactoryQt.h"
 
-#include <iostream>
-#include <string.h>
-
-#include "ACAbstractDockWidgetQt.h"
-
-#include "ui_ACVideoControlsDockWidgetQt.h"
-#include <MediaCycle.h>
-#include <ACOsgCompositeViewQt.h>
-
-class ACVideoControlsDockWidgetQt : public ACAbstractDockWidgetQt {
-Q_OBJECT
-
-//#if defined (SUPPORT_VIDEO)// don't use it!
-private slots:
-	// Video controls
-	void on_pushButtonMuteAll_clicked();
-	void on_comboBoxVideoSummary_activated(const QString & text);
-//#endif //defined (SUPPORT_VIDEO)
-	
-public:
-	ACVideoControlsDockWidgetQt(QWidget *parent = 0);
-	~ACVideoControlsDockWidgetQt();
-
-#if defined (SUPPORT_VIDEO)	
-private:
-	Ui::ACVideoControlsDockWidgetQt ui;
-#endif //defined (SUPPORT_VIDEO)	
-};
-#endif
+ACAbstractDockWidgetQt* ACDockWidgetFactoryQt::createDockWidget(QWidget *parent,std::string dock_type) {
+	if (dock_type == "MCBrowserControlsClusters") {return new ACBrowserControlsClustersDockWidgetQt(parent);}
+	#if defined (SUPPORT_AUDIO)
+	else if (dock_type == "MCAudioControls") {return new ACAudioControlsDockWidgetQt(parent);}
+	#endif //defined (SUPPORT_AUDIO)
+	else if (dock_type == "MCBrowserControlsClustersNeighbors") {return new ACBrowserControlsClustersNeighborsDockWidgetQt(parent);}
+	else if (dock_type == "MCMediaConfig") {return new ACMediaConfigDockWidgetQt(parent);}
+	#if defined (SUPPORT_VIDEO)
+	else if (dock_type == "MCVideoControls") {return new ACVideoControlsDockWidgetQt(parent);}
+	#endif //defined (SUPPORT_VIDEO)
+	else return NULL;
+}

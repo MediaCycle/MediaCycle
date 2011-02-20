@@ -22,17 +22,18 @@ INSTALL(TARGETS ${PROGNAME}
 #--------------------------------------------------------------------------------
 # Install needed Qt plugins by copying directories from the qt installation
 # One can cull what gets copied by using 'REGEX "..." EXCLUDE'
-INSTALL(DIRECTORY "${QT_PLUGINS_DIR}/imageformats" DESTINATION ${plugin_dest_dir}/plugins COMPONENT Runtime)
+IF(WITH_QT4)
+	INSTALL(DIRECTORY "${QT_PLUGINS_DIR}/imageformats" DESTINATION ${plugin_dest_dir}/plugins COMPONENT Runtime)
+ENDIF()
 
 #--------------------------------------------------------------------------------
 # install a qt.conf file
 # this inserts some cmake code into the install script to write the file
-INSTALL(CODE "
-    file(WRITE \"\${CMAKE_INSTALL_PREFIX}/${qtconf_dest_dir}/qt.conf\" \"[Paths]\nPlugins = plugins\")
-    " COMPONENT Runtime)
-##CF: Write inside:
-#[Paths]
-#Plugins = plugins
+IF(WITH_QT4)
+	INSTALL(CODE "
+ 	   file(WRITE \"\${CMAKE_INSTALL_PREFIX}/${qtconf_dest_dir}/qt.conf\" \"[Paths]\nPlugins = plugins\")
+ 	   " COMPONENT Runtime)
+ENDIF()
 
 #--------------------------------------------------------------------------------
 # Install needed MC plugins
@@ -133,7 +134,7 @@ IF(APPLE)
 			ENDIF()
 		ENDIF()
 	ENDIF()
-	IF(SUPPORT_TEXT AND USE_TEXT)
+	#IF(SUPPORT_TEXT AND USE_TEXT)
 		set(I_OSG_PLUG_TEXT 0)
 		foreach(OSGPLUGIN_TEXT ${OSGPLUGINS_TEXT})
 			math(EXPR I_OSG_PLUG_TEXT ${I_OSG_PLUG_TEXT}+1)
@@ -153,7 +154,7 @@ IF(APPLE)
 				SET(OSGPLUGINS "${OSGPLUGINS}" "${OSGPLUGINS_TEXT}")
 			ENDIF()
 		ENDIF()
-	ENDIF()
+	#ENDIF()
 
 ENDIF()
 #--------------------------------------------------------------------------------

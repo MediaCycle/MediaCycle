@@ -1,5 +1,5 @@
 /*
- *  ACVideoControlsDockWidgetQt.h
+ *  ACBrowserControlsClustersDockWidgetQt.h
  *  MediaCycle
  *
  *  @author Christian Frisson
@@ -32,35 +32,46 @@
  *
  */
 
-#ifndef HEADER_ACVIDEOCONTROLSDOCKWIDGETQT
-#define HEADER_ACVIDEOCONTROLSDOCKWIDGETQT
+#ifndef HEADER_ACBROWSERCONTROLSCLUSTERSDOCKWIDGETQT
+#define HEADER_ACBROWSERCONTROLSCLUSTERSDOCKWIDGETQT
 
 #include <iostream>
 #include <string.h>
 
 #include "ACAbstractDockWidgetQt.h"
 
-#include "ui_ACVideoControlsDockWidgetQt.h"
+#include "ui_ACBrowserControlsClustersDockWidgetQt.h"
 #include <MediaCycle.h>
-#include <ACOsgCompositeViewQt.h>
 
-class ACVideoControlsDockWidgetQt : public ACAbstractDockWidgetQt {
+class ACBrowserControlsClustersDockWidgetQt : public ACAbstractDockWidgetQt {
 Q_OBJECT
-
-//#if defined (SUPPORT_VIDEO)// don't use it!
-private slots:
-	// Video controls
-	void on_pushButtonMuteAll_clicked();
-	void on_comboBoxVideoSummary_activated(const QString & text);
-//#endif //defined (SUPPORT_VIDEO)
+	
+	public slots:
+	virtual void modifyListItem(QListWidgetItem *item); // XS TODO why virtual again ?
+	
+	private slots:
+	// Browser controls
+	void on_pushButtonRecenter_clicked();
+	void on_pushButtonBack_clicked();
+	void on_pushButtonForward_clicked();
+	
+	// Clustering controls
+	void on_spinBoxClusters_valueChanged(int _value);
+	void on_sliderClusters_sliderReleased();
+	//void on_comboBoxClustersMethod_activated(const QString & text);//CF or (int index);} 
+	//void on_comboBoxClustersPositions_activated(const QString & text);//CF or (int index);} 
 	
 public:
-	ACVideoControlsDockWidgetQt(QWidget *parent = 0);
-	~ACVideoControlsDockWidgetQt();
-
-#if defined (SUPPORT_VIDEO)	
+	ACBrowserControlsClustersDockWidgetQt(QWidget *parent = 0);
+	~ACBrowserControlsClustersDockWidgetQt(){};
+	
 private:
-	Ui::ACVideoControlsDockWidgetQt ui;
-#endif //defined (SUPPORT_VIDEO)	
+	Ui::ACBrowserControlsClustersDockWidgetQt ui;
+	
+public:
+	void synchronizeFeaturesWeights();
+	void configureCheckBoxes();
+	void cleanCheckBoxes();
+	QListWidget* getFeaturesListWidget(){return ui.featuresListWidget;}
 };
 #endif

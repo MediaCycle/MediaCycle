@@ -53,6 +53,20 @@ int main(int argc, char *argv[])
 	#endif
 	
     ACMultiMediaCycleOsgQt window;
+	
+	// Adding palettes
+	window.addControlDock("MCMediaConfig");
+	window.addControlDock("MCBrowserControlsClusters");//"MCBrowserControlsClustersNeighbors");
+	#if defined (SUPPORT_AUDIO)
+		window.addControlDock("MCAudioControls");
+	#endif //defined (SUPPORT_AUDIO)
+	#if defined (SUPPORT_VIDEO)
+		window.addControlDock("MCVideoControls");				 
+	#endif //defined (SUPPORT_VIDEO)
+	
+	// Changing the about dialog (not necessary if standard MediaCycle app)
+	//window.addAboutDialog("MediaCycle");
+	
     window.show();
 
     return app.exec();

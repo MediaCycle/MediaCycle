@@ -1,5 +1,5 @@
 /*
- *  ACVideoControlsDockWidgetQt.h
+ *  ACMediaConfigDockWidgetQt.cpp
  *  MediaCycle
  *
  *  @author Christian Frisson
@@ -32,35 +32,27 @@
  *
  */
 
-#ifndef HEADER_ACVIDEOCONTROLSDOCKWIDGETQT
-#define HEADER_ACVIDEOCONTROLSDOCKWIDGETQT
+#include "ACMediaConfigDockWidgetQt.h"
 
-#include <iostream>
-#include <string.h>
-
-#include "ACAbstractDockWidgetQt.h"
-
-#include "ui_ACVideoControlsDockWidgetQt.h"
-#include <MediaCycle.h>
-#include <ACOsgCompositeViewQt.h>
-
-class ACVideoControlsDockWidgetQt : public ACAbstractDockWidgetQt {
-Q_OBJECT
-
-//#if defined (SUPPORT_VIDEO)// don't use it!
-private slots:
-	// Video controls
-	void on_pushButtonMuteAll_clicked();
-	void on_comboBoxVideoSummary_activated(const QString & text);
-//#endif //defined (SUPPORT_VIDEO)
+ACMediaConfigDockWidgetQt::ACMediaConfigDockWidgetQt(QWidget *parent)
+: ACAbstractDockWidgetQt(parent, MEDIA_TYPE_ALL,"ACMediaConfigDockWidgetQt")
+{
+	ui.setupUi(this); // first thing to do
 	
-public:
-	ACVideoControlsDockWidgetQt(QWidget *parent = 0);
-	~ACVideoControlsDockWidgetQt();
-
-#if defined (SUPPORT_VIDEO)	
-private:
-	Ui::ACVideoControlsDockWidgetQt ui;
-#endif //defined (SUPPORT_VIDEO)	
-};
-#endif
+	// Media types
+	#if defined (SUPPORT_AUDIO)
+		ui.comboDefaultSettings->addItem(QString("Audio"));
+	#endif //defined (SUPPORT_AUDIO)
+	#if defined (SUPPORT_IMAGE)
+		ui.comboDefaultSettings->addItem(QString("Image"));
+	#endif //defined (SUPPORT_IMAGE)
+	#if defined (SUPPORT_VIDEO)
+		ui.comboDefaultSettings->addItem(QString("Video"));
+	#endif //defined (SUPPORT_VIDEO)
+	#if defined (SUPPORT_3DMODEL)
+		ui.comboDefaultSettings->addItem(QString("3DModel"));
+	#endif //defined (SUPPORT_3DMODEL)
+	ui.comboDefaultSettings->addItem(QString("Mixed"));
+	
+	this->show();
+}

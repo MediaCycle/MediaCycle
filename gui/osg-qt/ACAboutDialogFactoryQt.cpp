@@ -1,9 +1,9 @@
 /*
- *  ACVideoControlsDockWidgetQt.h
+ *  ACAboutDialogFactoryQt.cpp
  *  MediaCycle
  *
  *  @author Christian Frisson
- *  @date 8/01/11
+ *  @date 20/02/11
  *  @copyright (c) 2011 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
@@ -32,35 +32,12 @@
  *
  */
 
-#ifndef HEADER_ACVIDEOCONTROLSDOCKWIDGETQT
-#define HEADER_ACVIDEOCONTROLSDOCKWIDGETQT
+#include "ACAboutDialogFactoryQt.h"
 
-#include <iostream>
-#include <string.h>
-
-#include "ACAbstractDockWidgetQt.h"
-
-#include "ui_ACVideoControlsDockWidgetQt.h"
-#include <MediaCycle.h>
-#include <ACOsgCompositeViewQt.h>
-
-class ACVideoControlsDockWidgetQt : public ACAbstractDockWidgetQt {
-Q_OBJECT
-
-//#if defined (SUPPORT_VIDEO)// don't use it!
-private slots:
-	// Video controls
-	void on_pushButtonMuteAll_clicked();
-	void on_comboBoxVideoSummary_activated(const QString & text);
-//#endif //defined (SUPPORT_VIDEO)
-	
-public:
-	ACVideoControlsDockWidgetQt(QWidget *parent = 0);
-	~ACVideoControlsDockWidgetQt();
-
-#if defined (SUPPORT_VIDEO)	
-private:
-	Ui::ACVideoControlsDockWidgetQt ui;
-#endif //defined (SUPPORT_VIDEO)	
-};
-#endif
+ACAbstractAboutDialogQt* ACAboutDialogFactoryQt::createAboutDialog(QWidget *parent,std::string about_type) {
+	if (about_type == "" || about_type == "MediaCycle") {return new ACAboutDialogQt(parent);}
+	/*#if defined (USE_AUDIOGARDEN)
+	else if (about_type == "AudioGarden") {return new AGAboutDialogQt(parent);}
+	#endif //defined (USE_AUDIOGARDEN)*/
+	else return NULL;
+}

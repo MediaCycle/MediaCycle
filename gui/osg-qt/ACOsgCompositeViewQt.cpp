@@ -53,6 +53,7 @@ ACOsgCompositeViewQt::ACOsgCompositeViewQt( QWidget * parent, const char * name,
 	refcamx(0.0f), refcamy(0.0f),
 	refzoom(0.0f),refrotation(0.0f),
 	septhick(5),sepy(0.0f),refsepy(0.0f),controls_width(0),screen_width(0),
+	library_loaded(false),
 	trackdown(0),mediaOnTrack(-1),track_playing(false)
 {
 	osg_view = new osgViewer::GraphicsWindowEmbedded(0,0,width(),height());
@@ -121,14 +122,17 @@ ACOsgCompositeViewQt::ACOsgCompositeViewQt( QWidget * parent, const char * name,
 	this->addView(timeline_controls_view);
 	
 	timeline_renderer->updateSize(width(),sepy);
+	
+	browser_event_handler = NULL;
+	timeline_event_handler = NULL;
 }
 
 ACOsgCompositeViewQt::~ACOsgCompositeViewQt(){
 	this->clean();
 	delete browser_renderer;
-	delete browser_event_handler;
+	if (browser_event_handler) delete browser_event_handler;
 	delete timeline_renderer;
-	delete timeline_event_handler;
+	if (timeline_event_handler) delete timeline_event_handler;
 	delete timeline_controls_renderer;
 }
 
@@ -138,6 +142,7 @@ void ACOsgCompositeViewQt::clean(){
 	browser_renderer->clean();
 	timeline_renderer->clean();
 	this->updateGL();
+	library_loaded = false;
 }
 
 void ACOsgCompositeViewQt::setMediaCycle(MediaCycle* _media_cycle)
@@ -618,6 +623,7 @@ void ACOsgCompositeViewQt::prepareFromBrowser()
 	browser_renderer->prepareNodes(); 
 	browser_renderer->prepareLabels();
 	browser_view->setSceneData(browser_renderer->getShapes());
+	library_loaded = true;
 }
 
 
