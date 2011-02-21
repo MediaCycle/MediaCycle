@@ -38,7 +38,6 @@
 #include "Armadillo-utils.h" 
 #include "MediaCycle.h"
 #include "ACMediaTimedFeature.h"
-//#include "ACAudioFeatures.h"
 
 #ifndef PI
 #define PI 3.14159265
