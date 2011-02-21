@@ -40,6 +40,14 @@
 #include <cmath>
 #include <QDesktopWidget>
 
+#include "boost/filesystem.hpp"   // includes all needed Boost.Filesystem declarations
+#include "boost/filesystem/operations.hpp"
+#include "boost/filesystem/path.hpp"
+
+#include <sstream>
+
+namespace fs = boost::filesystem;
+
 using namespace osg;
 
 ACOsgCompositeViewQt::ACOsgCompositeViewQt( QWidget * parent, const char * name, const QGLWidget * shareWidget, WindowFlags f):
@@ -48,6 +56,7 @@ ACOsgCompositeViewQt::ACOsgCompositeViewQt( QWidget * parent, const char * name,
 		audio_engine(NULL),
 	#endif //defined (SUPPORT_AUDIO)
 	mousedown(0), zoomdown(0), forwarddown(0), autoplaydown(0),rotationdown(0),
+	finddown(0),infodown(0),opendown(0),
 	borderdown(0), transportdown(0), 
 	refx(0.0f), refy(0.0f),
 	refcamx(0.0f), refcamy(0.0f),
@@ -125,6 +134,8 @@ ACOsgCompositeViewQt::ACOsgCompositeViewQt( QWidget * parent, const char * name,
 	
 	browser_event_handler = NULL;
 	timeline_event_handler = NULL;
+	
+	hud_renderer = new ACOsgHUDRenderer();
 }
 
 ACOsgCompositeViewQt::~ACOsgCompositeViewQt(){
@@ -208,6 +219,8 @@ void ACOsgCompositeViewQt::setMediaCycle(MediaCycle* _media_cycle)
 	 this->addView(timeline_controls_view);
 	 
 	 timeline_renderer->updateSize(width(),sepy);*/	
+	
+	hud_renderer->setMediaCycle(media_cycle);
 }
 
 void ACOsgCompositeViewQt::initializeGL()
@@ -343,10 +356,19 @@ void ACOsgCompositeViewQt::keyPressEvent( QKeyEvent* event )
 			break;
 		case Qt::Key_C:	
 			media_cycle->setCameraRecenter();
-			break;	
+			break;
+		case Qt::Key_F:	
+			finddown = 1;
+			break;		
+		case Qt::Key_I:	
+			infodown = 1;
+			break;		
 		case Qt::Key_M:	
 			media_cycle->muteAllSources();
 			break;
+		case Qt::Key_O:	
+			opendown = 1;
+			break;		
 		case Qt::Key_Q:
 			media_cycle->setAutoPlay(1);
 			autoplaydown = 1;
@@ -383,6 +405,9 @@ void ACOsgCompositeViewQt::keyReleaseEvent( QKeyEvent* event )
 	autoplaydown = 0;
 	media_cycle->setAutoPlay(0);
 	rotationdown = 0;
+	finddown = 0;
+	infodown = 0;
+	opendown = 0;
 	transportdown = 0;
 	trackdown = 0;
 }
@@ -462,6 +487,13 @@ void ACOsgCompositeViewQt::mouseMoveEvent( QMouseEvent* event )
 		}
 		else
 		{	
+			if (infodown == 1)
+			{
+				int closest_node = media_cycle->getClosestNode();
+				if (closest_node > -1)
+					std::cout << "Closest node: " << closest_node << std::endl;
+			}	
+			
 			if ( (forwarddown == 0) && (trackdown == 0)) 
 			{
 				if ( (event->y() >= height() - ( browser_view->getCamera()->getViewport()->height() + browser_view->getCamera()->getViewport()->y() ) ) && (event->y() <= height() - ( browser_view->getCamera()->getViewport()->y() + septhick) ))
@@ -509,7 +541,7 @@ void ACOsgCompositeViewQt::mouseReleaseEvent( QMouseEvent* event )
 	
 	if ( (media_cycle) && (media_cycle->hasBrowser()))
 	{
-		if ( (forwarddown==1) || (trackdown == 1) )
+		if ( (finddown == 1) || (opendown == 1) || (forwarddown==1) || (trackdown == 1) )
 		{	
 			int loop = media_cycle->getClickedNode();
 			std::cout << "node " << loop << " selected" << std::endl;
@@ -518,10 +550,33 @@ void ACOsgCompositeViewQt::mouseReleaseEvent( QMouseEvent* event )
 			
 			if(loop >= 0)
 			{
-				if (forwarddown==1)
+				
+				if (finddown == 1)
+				{
+					#if defined (__APPLE__)
+						std::stringstream command;
+						//command << "open " << fs::path(media_cycle->getLibrary()->getMedia(loop)->getFileName()).parent_path();// opens the containing directory using the Finder
+						command << "open -R '" << media_cycle->getLibrary()->getMedia(loop)->getFileName() << "'" ;// opens the containing directory using the Finder and highlights the file!
+						system(command.str().c_str());
+					#endif //defined (__APPLE__)
+				}
+				else if (opendown == 1)
+				{
+					#if defined (__APPLE__)
+						std::stringstream command;
+						ACMediaType _media_type = media_cycle->getLibrary()->getMedia(loop)->getMediaType();
+						if (_media_type == MEDIA_TYPE_IMAGE || _media_type == MEDIA_TYPE_VIDEO)
+							command << "open -a Preview '";
+						else 
+							command << "open -R '"; // no iTunes for audio! 3Dmodel default applications?
+						command << media_cycle->getLibrary()->getMedia(loop)->getFileName() << "'" ; 
+						system(command.str().c_str());
+					#endif //defined (__APPLE__)
+				}	
+				else if (forwarddown==1)
 				{
 					// XSCF 250310 added these 3
-					// XS 260810 put this "if" first otherwise we store the next state
+					// XS 260810 put this "if" first other+wise we store the next state
 					if (media_cycle->getBrowser()->getMode() == AC_MODE_CLUSTERS)
 						media_cycle->storeNavigationState();
 					
@@ -607,7 +662,6 @@ void ACOsgCompositeViewQt::mouseReleaseEvent( QMouseEvent* event )
 						media_cycle->setNeedsDisplay(true);
 					//}
 				}
-				
 			}
 		}	
 		media_cycle->setClickedNode(-1);
@@ -622,6 +676,7 @@ void ACOsgCompositeViewQt::prepareFromBrowser()
 	//setMouseTracking(false); //CF necessary for the hover callback
 	browser_renderer->prepareNodes(); 
 	browser_renderer->prepareLabels();
+	hud_renderer->preparePointers();
 	browser_view->setSceneData(browser_renderer->getShapes());
 	library_loaded = true;
 }
@@ -637,6 +692,7 @@ void ACOsgCompositeViewQt::updateTransformsFromBrowser( double frac)
 	// recompute scene graph	
 	browser_renderer->updateNodes(frac); // animation starts at 0.0 and ends at 1.0
 	browser_renderer->updateLabels(frac);
+	////hud_renderer->updatePointers(browser_view);
 }
 
 void ACOsgCompositeViewQt::prepareFromTimeline()

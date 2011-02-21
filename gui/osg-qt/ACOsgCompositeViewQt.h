@@ -1,7 +1,7 @@
 /**
  * @brief ACOsgCompositeViewQt.h
  * @author Christian Frisson
- * @date 20/02/2011
+ * @date 21/02/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -90,6 +90,8 @@ using Qt::WindowFlags;
 #include <ACOsgTimelineControlsRenderer.h>
 #include <ACOsgTimelineEventHandler.h>
 
+#include <ACOsgHUDRenderer.h>
+
 #if defined (SUPPORT_AUDIO)
 	#include <ACAudioEngine.h>
 #endif //defined (SUPPORT_AUDIO)
@@ -124,6 +126,7 @@ class ACOsgCompositeViewQt : public osgViewer::CompositeViewer, public QGLWidget
 		ACOsgTimelineRenderer *timeline_renderer;
 		ACOsgTimelineEventHandler *timeline_event_handler;
 		ACOsgTimelineControlsRenderer *timeline_controls_renderer;
+		ACOsgHUDRenderer *hud_renderer;
 		osgViewer::View* browser_view;
 		osgViewer::View* timeline_view;
 		osgViewer::View* timeline_controls_view;
@@ -152,6 +155,7 @@ class ACOsgCompositeViewQt : public osgViewer::CompositeViewer, public QGLWidget
 	
 	private:
 		int mousedown, zoomdown, forwarddown, autoplaydown, rotationdown;
+		int finddown, infodown, opendown;
 		int borderdown, transportdown;
 		float refx, refy;
 		float refcamx, refcamy;

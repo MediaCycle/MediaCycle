@@ -17,10 +17,8 @@ IF ( USE_QT4 )
 	ENDIF()
 
 	FILE(GLOB mediacycle-osg-qt_UIS *.ui)
-	SET(mediacycle-osg-qt_SRCS "${mediacycle-osg-qt_UIS}")
-	STRING(REPLACE ".ui" ".cpp" mediacycle-osg-qt_SRCS "${mediacycle-osg-qt_SRCS}")
-	SET(mediacycle-osg-qt_MOC_HDRS "${mediacycle-osg-qt_UIS}")
-	STRING(REPLACE ".ui" ".h" mediacycle-osg-qt_MOC_HDRS "${mediacycle-osg-qt_MOC_HDRS}")
+	STRING(REPLACE ".ui" ".cpp" mediacycle-osg-qt_SRCS "${mediacycle-osg-qt_UIS}")
+	STRING(REPLACE ".ui" ".h" mediacycle-osg-qt_MOC_HDRS "${mediacycle-osg-qt_UIS}")
 
 	# Generates ui_ACAudioControlsDockWidgetQt.h and ui_ACVideooControlsDockWidgetQt.h 
 	QT4_WRAP_UI(mediacycle-osg-qt_UIS_H ${mediacycle-osg-qt_UIS})
