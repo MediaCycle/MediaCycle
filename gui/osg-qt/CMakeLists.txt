@@ -43,7 +43,7 @@ IF ( USE_QT4 )
 	ENDIF()
 	ADD_DEPENDENCIES(mediacycle-osg-qt mediacycle-io-osc)
 	ADD_DEPENDENCIES(mediacycle-osg-qt oscpack)
-	IF ( USE_AUDIOGARDEN AND USE_QT4 AND USE_OSG AND USE_OSC AND USE_OPENAL )
+	IF ( USE_AUDIOGARDEN AND USE_QT4 AND USE_OSG AND USE_OSC AND ( USE_OPENAL OR USE_PORTAUDIO) )
 		ADD_DEPENDENCIES(mediacycle-osg-qt armadillo-utils audiofeatures audiogarden)
 	ENDIF()
 

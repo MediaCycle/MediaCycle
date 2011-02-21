@@ -40,10 +40,17 @@
 #include "ACAudioFeedback.h"
 #include "ACAudioRecorder.h"
 
+#define SAMPLERATE 44100
+#if defined USE_OPENAL
+#define BUFFERSIZE 1024
+#elif defined USE_PORTAUDIO
+#define BUFFERSIZE 64
+#endif
+
 class ACAudioEngine {
 	
 public:
-	ACAudioEngine();
+	ACAudioEngine(int samplerate = SAMPLERATE, int buffersize = BUFFERSIZE);
 	~ACAudioEngine();
 	
 	// MediaCycle to query database and browser
@@ -53,15 +60,30 @@ public:
 private:
 	ACAudioFeedback* feedback;
 	ACAudioRecorder* recorder;
+	int audio_samplerate;
+	int audio_buffersize;
+#ifdef USE_OPENAL
 	ALCdevice* device;
+#endif
+#ifdef USE_PORTAUDIO
+	PaStream *stream;
+	PaStreamCallback *audio_callback;
+	void *audio_userdata;
+#endif
 	
 public:	
 	ACAudioFeedback* getFeedback(){return feedback;}
 	ACAudioRecorder* getRecorder(){return recorder;}
 	
 	// OpenAL init and delete
+#ifdef USE_OPENAL
 	void createOpenAL();
 	void deleteOpenAL();
+#endif
+#ifdef USE_PORTAUDIO
+	void createPAStream();
+	void deletePAStream();
+#endif
 	
 	// OpenAL general settings
 	void setListenerGain(float gain){feedback->setListenerGain(gain);}

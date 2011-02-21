@@ -37,18 +37,78 @@
 //DT : to have access to the media/audio functions
 #include "ACAudio.h"
 
-ACAudioEngine::ACAudioEngine()
+#ifdef USE_PORTAUDIO
+int threadAudioEngineCallbackFunction(const void *inputBuffer, void *outputBuffer,
+									  unsigned long framesPerBuffer,
+									  const PaStreamCallbackTimeInfo* timeInfo,
+									  PaStreamCallbackFlags statusFlags,
+									  void *userData )
 {
+	ACAudioEngine *localengine;
+	localengine = (ACAudioEngine*)userData;
+	short *localbuffer = (short*)outputBuffer;
+	short *outputbuffer;
+	
+	if ( !(localengine->getFeedback()) ) {
+		return 0;
+	}
+	
+	unsigned int i;
+	//float *in = (float*)inputBuffer;
+	//float *out = (float*)outputBuffer;
+	
+	/*
+	if () {
+		localengine->getFeedback()->threadAudioEngineInit();
+	}
+	*/
+	
+	localengine->getFeedback()->threadAudioEngineFrame();
+	
+	outputbuffer = localengine->getFeedback()->getOutputBufferMixed();
+	
+	// recover mixed signal here and send to pa stream
+	for( i=0; i<framesPerBuffer; i++ ) {
+		localbuffer[i] = outputbuffer[i];
+		// SD TODO - take care of stereo and multiple channels, not ready yet
+	}	
+	
+    return 0;
+}
+#endif
+
+ACAudioEngine::ACAudioEngine(int samplerate, int buffersize)
+{
+	feedback = 0;
+	recorder = 0;
+	
+	audio_samplerate = samplerate;
+	audio_buffersize = buffersize;
+	
+#ifdef USE_OPENAL
 	createOpenAL();
-	feedback = new ACAudioFeedback(device);
-	recorder = new ACAudioRecorder(device);
+	feedback = new ACAudioFeedback(device, audio_samplerate, audio_buffersize);
+	recorder = new ACAudioRecorder(device, audio_samplerate, audio_buffersize);
+#endif
+#ifdef USE_PORTAUDIO
+	audio_callback = threadAudioEngineCallbackFunction;
+	audio_userdata = this;
+	createPAStream();
+	feedback = new ACAudioFeedback(stream, audio_samplerate, audio_buffersize);
+	recorder = new ACAudioRecorder(stream, audio_samplerate, audio_buffersize);
+#endif
 }
 
 ACAudioEngine::~ACAudioEngine()
 {
 	delete feedback;
 	delete recorder;
+#ifdef USE_OPENAL
 	deleteOpenAL();
+#endif
+#ifdef USE_PORTAUDIO
+	deletePAStream();
+#endif
 }
 
 void ACAudioEngine::setMediaCycle(MediaCycle *media_cycle)
@@ -58,6 +118,7 @@ void ACAudioEngine::setMediaCycle(MediaCycle *media_cycle)
 	recorder->setMediaCycle(media_cycle);	
 }
 
+#ifdef USE_OPENAL
 void ACAudioEngine::createOpenAL()
 {
 	device = NULL;
@@ -87,9 +148,79 @@ void ACAudioEngine::deleteOpenAL()
 	 //Close device
 	 alcCloseDevice(device);
 }
+#endif
+#ifdef USE_PORTAUDIO
+void ACAudioEngine::createPAStream()
+{
+	PaError err = paNoError;
+	PaStreamParameters outputParameters;
+	
+	/* -- initialize PortAudio -- */
+    err = Pa_Initialize();
+    if( err != paNoError )
+		std::cerr <<  "PortAudio error: " << Pa_GetErrorText( err ) << std::endl;
+	
+	
+    /* -- setup input and output -- */
+    outputParameters.device = Pa_GetDefaultOutputDevice(); // default output device
+    outputParameters.channelCount = 1;
+    outputParameters.sampleFormat = paInt16;
+    outputParameters.suggestedLatency = Pa_GetDeviceInfo( outputParameters.device )->defaultHighOutputLatency;
+    outputParameters.hostApiSpecificStreamInfo = NULL;
+	
+    /* -- setup stream -- */
+    err = Pa_OpenStream(&stream,
+						NULL, //no input
+						&outputParameters,
+						audio_samplerate,
+						audio_buffersize,
+						paClipOff,      // we won't output out of range samples so don't bother clipping them
+						audio_callback, // no callback, use blocking API
+						audio_userdata); // no callback, so no callback userData
+    /*
+	err = Pa_OpenStream(&stream,
+						NULL, //no input
+						&outputParameters,
+						44100,
+						32,
+						paClipOff,      // we won't output out of range samples so don't bother clipping them
+						NULL, // no callback, use blocking API
+						NULL ); // no callback, so no callback userData
+	 */
+	
+    if( err != paNoError )
+		printf(  "PortAudio error: %s\n", Pa_GetErrorText( err ) );
+	
+    /* -- start stream -- */
+    err = Pa_StartStream( stream );
+    if( err != paNoError )
+		printf(  "PortAudio error: %s\n", Pa_GetErrorText( err ) );
+}
+
+void ACAudioEngine::deletePAStream()
+{
+	PaError err = paNoError;
+	/* -- Now we stop the stream -- */
+    err = Pa_StopStream( stream );
+    if( err != paNoError )
+		printf(  "PortAudio error: %s\n", Pa_GetErrorText( err ) );
+	
+    /* -- don't forget to cleanup! -- */
+    err = Pa_CloseStream( stream );
+    if( err != paNoError )
+		printf(  "PortAudio error: %s\n", Pa_GetErrorText( err ) );
+	
+    err = Pa_Terminate();
+	if( err != paNoError )
+		printf(  "PortAudio error: %s\n", Pa_GetErrorText( err ) );
+	
+	std::cout << "PortAudio closed" << std::endl;
+}
+#endif
 
 void ACAudioEngine::printDeviceList()
 {
+#ifdef USE_OPENAL
     const ALCchar* deviceList = alcGetString(NULL, ALC_DEVICE_SPECIFIER);
 	
     if (deviceList)
@@ -103,11 +234,33 @@ void ACAudioEngine::printDeviceList()
     }
 	else
 		std::cout << "No compliant audio device available" << std::endl;
+#endif
+#ifdef USE_PORTAUDIO
+	int numDevices, i;
+	const   PaDeviceInfo *deviceInfo;
+	
+    numDevices = Pa_GetDeviceCount();
+    if( numDevices < 0 )
+    {
+        std::cout << "ERROR: Pa_CountDevices returned 0x" << numDevices << std::endl;
+    }
+	
+	if (numDevices) {
+		for( i=0; i<numDevices; i++ )
+		{
+			deviceInfo = Pa_GetDeviceInfo( i );
+			std::cout << "Audio device available: " << deviceInfo->name << std::endl;
+		}
+	} else {
+		std::cout << "No compliant audio device available" << std::endl;
+	}
+#endif
 }
 
 void ACAudioEngine::getDeviceList(std::vector<std::string>& devices)
 {
     devices.clear();	
+#ifdef USE_OPENAL
     const ALCchar* deviceList = alcGetString(NULL, ALC_DEVICE_SPECIFIER);
 	
     if (deviceList)
@@ -118,10 +271,26 @@ void ACAudioEngine::getDeviceList(std::vector<std::string>& devices)
             deviceList += strlen(deviceList) + 1;
         }
     }
+#endif
+#ifdef USE_PORTAUDIO
+	int numDevices, i;
+	const   PaDeviceInfo *deviceInfo;
+	
+    numDevices = Pa_GetDeviceCount();
+	
+	if (numDevices) {
+		for( i=0; i<numDevices; i++ )
+		{
+			deviceInfo = Pa_GetDeviceInfo( i );
+			devices.push_back(deviceInfo->name);
+		}
+	}
+#endif
 }
 
 void ACAudioEngine::printCaptureDeviceList()
 {
+#ifdef USE_OPENAL
     const ALCchar* deviceList = alcGetString(NULL, ALC_CAPTURE_DEVICE_SPECIFIER);
 	
     if (deviceList)
@@ -135,5 +304,9 @@ void ACAudioEngine::printCaptureDeviceList()
     }
 	else
 		std::cout << "No compliant audio capture device available" << std::endl;
+#endif
+#ifdef USE_PORTAUDIO
+	std::cout << "Audio capture device available: not implemented yet (using portaudio)" << std::endl;
+#endif
 }
 

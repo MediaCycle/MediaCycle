@@ -34,12 +34,17 @@
 
 #include "MediaCycle.h"
 
+#ifdef USE_OPENAL
 #if defined(__APPLE__)
 	#include <OpenAL/al.h>
 	#include <OpenAL/alc.h>
 #else
 	#include <AL/al.h>
 	#include <AL/alc.h>
+#endif
+#endif
+#ifdef USE_PORTAUDIO
+#include <portaudio.h>
 #endif
 
 #include <sys/time.h>
@@ -49,8 +54,10 @@
 #define DEG2RAD(x) (0.0174532925 * (x))
 #define RAD2DEG(x) (57.295779578 * (x))
 
+#ifdef USE_OPENAL
 #define OPENAL_STREAM_MODE
 //#define OPENAL_STATIC_MODE
+#endif
 
 typedef enum {
 	ACAudioEngineSynchroModeNone				= 0,
@@ -83,7 +90,12 @@ public:
 class ACAudioFeedback : public ACMediaFeedback {
 	
 public:
-	ACAudioFeedback(ALCdevice* _device);
+#ifdef USE_OPENAL
+	ACAudioFeedback(ALCdevice* _device, int samplerate, int buffersize);
+#endif
+#ifdef USE_PORTAUDIO
+	ACAudioFeedback(PaStream *_stream, int samplerate, int buffersize);
+#endif
 	~ACAudioFeedback();
 	
 	// MediaCycle to query database and browser
@@ -150,7 +162,13 @@ public:
 	void printDeviceList();
 	void getDeviceList(std::vector<std::string>& devices);
 	 */
+#ifdef USE_OPENAL
 	void setDevice(ALCdevice* _device){device = _device;}
+#endif
+	void threadAudioEngineInit();
+	void threadAudioEngineFrame();
+	short *getOutputBufferMixed();
+	
 private:
 	// Table for interpreting time-signatures
 	int		n_time_signatures;
@@ -168,12 +186,14 @@ private:
 	float	mAngle;
 	float	mListenerDirection;
 	float	mVelocityScaler;
+#ifdef USE_OPENAL
 	// OpenAL source variables
 	// SD TODO - port this to structure created by RS 
 	ALuint* loop_buffers;
 	ALuint* loop_sources;
 	ALuint	ext_loop_source;
 	ALuint ext_loop_buffer;
+#endif
 	int ext_loop_length;
 	int*	loop_ids;
 	float*  use_bpm;
@@ -185,9 +205,17 @@ private:
 	int timeCodeDone; 
 	
 	// OpenAL init and delete
+#ifdef USE_OPENAL
 	ALCdevice		*device;
 	void createOpenAL();
 	void deleteOpenAL();
+#endif
+#ifdef USE_PORTAUDIO
+	PaStream		*stream;
+	// SD - check those two
+	void createPAStream();
+	void deletePAStream();
+#endif
 	
 	/////////////////////////////////////////////////////////////////////////////
 
@@ -232,10 +260,17 @@ private:
 	double	audio_engine_wakeup_time;
 	double	audio_engine_current_time;
 	double	audio_engine_current_time_2;
-	double	audio_engine_fire_time;
+	//double	audio_engine_fire_time;
 	short*	 output_buffer;
+	short*	 output_buffer_mixed;
 	short**  loop_buffers_audio_engine;
+#ifdef USE_OPENAL
 	ALuint** loop_buffers_audio_engine_stream;
+#endif
+#ifdef USE_PORTAUDIO
+	unsigned int loop_buffers_audio_engine_stream;
+#endif
+	int slow_refresh;
 	int*	 prev_sample_pos;
 	int*	 current_buffer;
         int*     current_buffer_unqueue;
@@ -254,16 +289,20 @@ private:
 	// ...
 	FILE *timing;
 	
+	int audio_samplerate;
+	int audio_buffersize;
+	
 	// Audio Engine Functions
 	void createAudioEngine(int _output_sample_rate, int _output_buffer_size, int _output_num_buffers);
 	void deleteAudioEngine();
-	void threadAudioEngineInit();
 	void timeCodeAudioEngine(int n_samples);
+#ifdef USE_OPENAL
 	bool processAudioEngine();
+#endif
+	void processAudioEngineMix();
 	bool processAudioEngineNew();
 	void processAudioUpdate();
 	void processAudioEngineSamplePosition(int _loop_slot, int *_prev_sample_pos, int *_sample_pos, int *_sample_pos_limit);
 	void processAudioEngineResynth(int _loop_slot, int _prev_sample_pos, int _sample_pos, int _sample_pos_limit, short *_output_buffer);
 	void setMIDITimeCode();
-	
 };

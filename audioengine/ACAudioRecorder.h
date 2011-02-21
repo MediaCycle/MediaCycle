@@ -38,6 +38,7 @@
 
 #include "MediaCycle.h"
 
+#ifdef USE_OPENAL
 #if defined(__APPLE__)
 	#include <OpenAL/al.h>
 	#include <OpenAL/alc.h>
@@ -45,6 +46,11 @@
 	#include <AL/al.h>
 	#include <AL/alc.h>
 #endif
+#endif
+#ifdef USE_PORTAUDIO
+#include <portaudio.h>
+#endif
+
 #include <sndfile.h>
 #include <ctime>
 #include <iomanip>
@@ -57,7 +63,12 @@
 class ACAudioRecorder {
 	
 public:
-	ACAudioRecorder(ALCdevice* _device):isRecording(false){device = _device;}
+#ifdef USE_OPENAL
+	ACAudioRecorder(ALCdevice* _device, int samplerate, int buffersize):isRecording(false) {audio_samplerate = samplerate; audio_buffersize = buffersize; device = _device;}
+#endif
+#ifdef USE_PORTAUDIO
+	ACAudioRecorder(PaStream * _stream, int samplerate, int buffersize):isRecording(false) {audio_samplerate = samplerate; audio_buffersize = buffersize; stream = _stream;}
+#endif
 	~ACAudioRecorder(){};
 	
 	// MediaCycle to query database and browser
@@ -65,8 +76,13 @@ public:
 	void setMediaCycle(MediaCycle *media_cycle) { this->media_cycle = media_cycle; };
 	
 private:
+#ifdef USE_OPENAL
 	ALCdevice* device;
 	ALCdevice* captureDevice;
+#endif
+#ifdef USE_PORTAUDIO
+	PaStream *stream;
+#endif
 	bool isRecording;
 
 public:
@@ -78,11 +94,24 @@ public:
 	void stopCapture();
 	void threadCaptureEngine();
 	void threadCaptureUpdate();	
+#ifdef USE_OPENAL
 	void saveSound(const std::string& filename, const std::vector<ALshort>& samples);
+#endif
+#ifdef USE_PORTAUDIO
+	void saveSound(const std::string& filename, const std::vector<short>& samples);
+#endif
 	
 private:
-	std::vector<ALshort> samples;
 	
+	int audio_samplerate;
+	int audio_buffersize;
+
+#ifdef USE_OPENAL
+	std::vector<ALshort> samples;
+#endif
+#ifdef USE_PORTAUDIO
+	std::vector<short> samples;
+#endif
 	pthread_t	   capture_engine;
 	pthread_attr_t capture_engine_attr;
 	void* capture_engine_arg;

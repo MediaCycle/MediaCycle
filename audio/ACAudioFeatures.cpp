@@ -1,7 +1,7 @@
 /**
  * @brief ACAudioFeatures.cpp
- * @author Xavier Siebert
- * @date 31/01/2011
+ * @author Stéphane Dupont
+ * @date 21/02/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -405,11 +405,16 @@ double spectralVariation(colvec x_v, colvec xPrev_v){
 	double sv;
 	//XS-SD 240810: typo || not | ; added lim parameter
 	double lim = 1e-5;
+	double tmp;
 	if (sum(x_v) < lim || sum(xPrev_v) < lim){
 		sv = 1;
 	}	
 	else{
 		sv = as_scalar(abs(cor(x_v, xPrev_v)));
+	}
+	// SD 070211
+	if ( (sv<0) || (sv>1) ) {
+		sv = 1;
 	}
 	return sv;
 }
