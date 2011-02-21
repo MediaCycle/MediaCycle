@@ -55,10 +55,6 @@ OPTION(USE_OPENGL "Use OpenGL" ON)
 #OPTION(USE_OSG "Use OSG" ON) # Currently required in the core for 3D models
 SET(USE_OSG ON)
 OPTION(USE_OPENAL "Use OpenAL" ON)
-#SET(USE_OPENAL ON)
-#IF ( NOT APPLE_LEOPARD )
-#	OPTION(USE_ALUT "Use ALUT" ON)
-#ENDIF ( )
 OPTION(USE_PORTAUDIO "Use PortAudio" OFF)
 IF ( NOT APPLE_IOS_DEV AND NOT APPLE_IOS_SIM AND NOT APPLE_IOS_XCODE )
 	IF(APPLE)
@@ -136,6 +132,9 @@ IF (APPLE_IOS_XCODE AND NOT(${CMAKE_VERSION} STREQUAL "2.8.0"))
 	MESSAGE(FATAL_ERROR "Generating an XCode project for iPhone OS works with CMake v. 2.8.0 only (2.8.2 produces corrupted project files).")
 ENDIF()
 IF( APPLE_IOS_DEV OR APPLE_IOS_SIM OR APPLE_IOS_XCODE )
+	SET(SUPPORT_IMAGE OFF) # Problem with OpenCV highgui
+	SET(SUPPORT_VIDEO OFF) # Problem with OpenCV highgui
+
 	IF( APPLE_IOS_DEV AND APPLE_IOS_SIM )
 		MESSAGE(FATAL_ERROR "Cross-compile for iPhone OS Device OR Simulator at one time!")
 	ENDIF()
@@ -161,7 +160,7 @@ IF ( UNIX OR APPLE )
 
 	set(CPACK_PACKAGE_NAME "${CMAKE_PROJECT_NAME}")
 	set(CPACK_PACKAGE_VERSION "${PROJECT_VERSION}")
-	set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "MediaCycle...")
+	#set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "MediaCycle...")
 	set(CPACK_PACKAGE_CONTACT "http://numediart.org/")
 	set(CPACK_SOURCE_IGNORE_FILES
 		"^${PROJECT_SOURCE_DIR}/Builds/"
@@ -169,7 +168,7 @@ IF ( UNIX OR APPLE )
 		"^${PROJECT_SOURCE_DIR}/test/"
 		"^${PROJECT_SOURCE_DIR}/apps/*-cli/"
 	)
-	#set(CPACK_PACKAGE_EXECUTABLES "multimediacycle-osg-qt") #should contain pairs of <executable> and <icon name>
+	#set(CPACK_PACKAGE_EXECUTABLES "multimediacycle-osg-qt" "MultiMediaCycle.icns") #should contain pairs of <executable> and <icon name>
 	#set(CPACK_PACKAGE_ARCHITECTURE i386)
 	IF (APPLE)
 		#set(CPACK_BUNDLE_NAME "MC")
@@ -179,7 +178,7 @@ IF ( UNIX OR APPLE )
 	ENDIF()
 	SET(CPACK_PACKAGE_VENDOR "numediart")
 	# For more see http://www.cmake.org/Wiki/CMake:Packaging_With_CPack
-	INCLUDE(CPack)
+	#INCLUDE(CPack)
 ENDIF ( UNIX OR APPLE )
 
 IF ( WIN32 )
@@ -585,8 +584,8 @@ IF ( USE_COCOA )
 	ENDIF ( APPLE )
 ENDIF ( USE_COCOA )
 
-# OpenAL
-IF(USE_OPENAL)
+# OpenAL and Portaudio
+IF(USE_OPENAL OR USE_PORTAUDIO)
 	IF( APPLE_IOS_DEV OR APPLE_IOS_SIM )
 		IF(EXISTS ${CMAKE_OSX_SYSROOT}/System/Library/Frameworks/OpenAL.framework)
 			SET(OPENAL_FOUND TRUE)
@@ -594,10 +593,33 @@ IF(USE_OPENAL)
 	ELSEIF ( APPLE_IOS_XCODE )
 		IF(EXISTS ${iPhoneSimulator_SDK_ROOT}/System/Library/Frameworks/OpenAL.framework)
 			SET(OPENAL_FOUND TRUE)
-		ENDIF()	
+		ELSE()
+			FIND_PACKAGE( OpenAL )
+		ENDIF()
 	ELSE()
 		FIND_PACKAGE( OpenAL )
 	ENDIF()
+	FIND_PACKAGE ( Portaudio )
+ENDIF()
+
+# Since for now OpenAL support is more advanced than PortAudio support
+IF(USE_OPENAL AND USE_PORTAUDIO)
+	SET(USE_PORTAUDIO OFF)
+ENDIF()
+
+# Fallback situation 1
+IF(NOT USE_OPENAL AND USE_PORTAUDIO AND OPENAL_FOUND AND NOT PORTAUDIO_FOUND)
+	SET(USE_OPENAL ON)
+	SET(USE_PORTAUDIO OFF)
+ENDIF()
+
+# Fallback situation 2
+IF(USE_OPENAL AND NOT USE_PORTAUDIO AND NOT OPENAL_FOUND AND PORTAUDIO_FOUND)
+	SET(USE_OPENAL OFF)
+	SET(USE_PORTAUDIO ON)
+ENDIF()
+
+IF(USE_OPENAL)
 	IF ( OPENAL_FOUND )
 		MESSAGE ( "Found OpenAL" )
 		SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUSE_OPENAL")
@@ -607,28 +629,20 @@ IF(USE_OPENAL)
 			INCLUDE_DIRECTORIES( ${OPENAL_INCLUDE_DIR})
 		ENDIF()
 		ADD_LIB_LINKED_DIR(${OPENAL_LIBRARY})
-	ELSE ( OPENAL_FOUND)
-		MESSAGE(FATAL_ERROR "OpenAL requested but not found.")
-	ENDIF ( OPENAL_FOUND )
-ELSEIF ( USE_PORTAUDIO )
-#portaudio
-	SET(USE_AUDIO ON)
-	FIND_PACKAGE ( Portaudio )
+	ELSE ()
+		MESSAGE(FATAL_ERROR "OpenAL requested but not found (audioengine).")
+	ENDIF ()
+ENDIF ()
+IF(USE_PORTAUDIO)
 	IF (PORTAUDIO_FOUND)
 		MESSAGE ("PortAudio found")
-		SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUSE_PORTAUDIO -DUSE_AUDIO")
-		SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DUSE_PORTAUDIO -DUSE_AUDIO")
+		SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUSE_PORTAUDIO")
+		SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DUSE_PORTAUDIO")
 		INCLUDE_DIRECTORIES(${PORTAUDIO_INCLUDE_DIRS})
-		INCLUDE_DIRECTORIES(audioengine)
-		SUBDIRS(audioengine)
-	ELSE ( PORTAUDIO_FOUND )
-		MESSAGE(FATAL_ERROR "PortAudio requested but not found (audioengine)")
-	ENDIF (PORTAUDIO_FOUND)
-ENDIF ( USE_OPENAL )
-
-IF(SUPPORT_AUDIO AND SNDFILE_FOUND AND (OPENAL_FOUND OR PORTAUDIO_FOUND) )
-	SUBDIRS(audioengine)
-	INCLUDE_DIRECTORIES(audioengine)
+		ADD_LIB_LINKED_DIR(${PORTAUDIO_LIBRARIES})
+	ELSE()
+		MESSAGE(FATAL_ERROR "PortAudio requested but not found (audioengine).")
+	ENDIF()
 ENDIF()
 
 # Armadillo
@@ -795,13 +809,21 @@ IF ( UNIX )
 	SET(OpenCV_ROOT_DIR "/usr")#CF
 ENDIF ( UNIX )
 
+# audioengine
+IF(SUPPORT_AUDIO AND SNDFILE_FOUND AND (OPENAL_FOUND OR PORTAUDIO_FOUND))
+	SUBDIRS(audioengine)
+	INCLUDE_DIRECTORIES(audioengine)
+ELSE()
+	MESSAGE("[ ] audioengine")
+ENDIF()
+
 # OSC
 IF ( USE_OSC )
 	INCLUDE_DIRECTORIES(io)
 	SUBDIRS(io)
 ENDIF ( USE_OSC )
 
-# Libraries
+# audiogarden
 IF (USE_AUDIOGARDEN)
 	#SUBDIRS( ../../../../../audiogarden/ )#syncing with Cecile Picard's mercurial repository
 	SUBDIRS(audiogarden)
