@@ -3,7 +3,6 @@ PROJECT(MediaCycle)
 # add some find scripts
 # SET(CMAKE_USE_RELATIVE_PATHS YES)
 SET(CMAKE_MODULE_PATH "${MediaCycle_SOURCE_DIR}/CMakeModules")
-MESSAGE ( "modules in " ${CMAKE_MODULE_PATH} )
 
 INCLUDE(${MediaCycle_SOURCE_DIR}/CMakeModules/FindLinkedDirectories.cmake)
 
@@ -784,6 +783,16 @@ IF (STARPU_FOUND)
 ELSE (STARPU_FOUND)
 	MESSAGE("StarPU not found, support disabled.")
 ENDIF (STARPU_FOUND)
+
+# Torch3
+FIND_PACKAGE ( Torch3 )
+IF (TORCH3_FOUND)
+	MESSAGE("Torch3 found.")
+	INCLUDE_DIRECTORIES(${TORCH3_INCLUDE_DIR} ${TORCH3_INCLUDE_DIR}/torch)
+	ADD_LINKED_DIRECTORY(${TORCH3_LINK_DIRECTORIES})
+ELSE (TORCH3_FOUND)
+	MESSAGE("Torch3 not found.")
+ENDIF (TORCH3_FOUND)
 
 ######################
 # INTERNAL LIBRARIES #
