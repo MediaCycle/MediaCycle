@@ -1,7 +1,7 @@
 /**
  * @brief segmentation-test.cpp
- * @author Xavier Siebert
- * @date 09/02/2011
+ * @author Alexis Moinet
+ * @date 21/02/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -39,7 +39,8 @@
 #include "ACBicSegmentationPlugin.h"
 #include "ACSelfSimSegmentationPlugin.h"
 #include "gnuplot_i.hpp"
-#include "Armadillo-utils.h" 
+#include "Armadillo-utils.h"
+#include "ACAudioFeatures.h"
 
 const string videodir = "/Users/xavier/numediart/Project7.3-DancersCycle/VideosSmall/TestSmallSize/";
 
