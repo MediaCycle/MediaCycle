@@ -78,6 +78,9 @@ void ACAboutDialogQt::updateLicenses(){
 	#if defined (USE_VAMP)
 		html.append ("<li><a href=\"http://vamp-plugins.org\">Vamp plugin SDK</a>: BSD License</li>");
 	#endif //defined (USE_VAMP)
+	#if defined (USE_TORCH3)
+		html.append ("<li><a href=\"http://www.torch.ch\">Torch3</a>: BSD License</li>");
+	#endif //defined (USE_TORCH3)
 	html.append ("</ul>");
 	ui.multiLineEditLicenses->document()->setHtml(html);			 
 }
