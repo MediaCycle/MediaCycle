@@ -51,6 +51,14 @@ ACVideoDancersPlugin::ACVideoDancersPlugin() {
     this->mName = "Video";
     this->mDescription = "Video plugin";
     this->mId = "";
+	this->mDescriptorsList.push_back("(Front) Mean Contraction Index");
+	this->mDescriptorsList.push_back("(Front) Mean Bounding Box Ratio");
+	this->mDescriptorsList.push_back("(Front) Mean Blobs Pixel Speed (Energy)");
+	this->mDescriptorsList.push_back("(Top) Mean Position (x,y) ");
+	this->mDescriptorsList.push_back("(Top) Std Position (x,y) ");
+	this->mDescriptorsList.push_back("(Top) Max Position (x,y) ");
+	this->mDescriptorsList.push_back("(Top) Mean Speed (x,y) ");
+
 }
 
 ACVideoDancersPlugin::~ACVideoDancersPlugin() {

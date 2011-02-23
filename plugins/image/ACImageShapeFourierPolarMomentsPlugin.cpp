@@ -51,6 +51,8 @@ ACImageShapeFourierPolarMomentsPlugin::ACImageShapeFourierPolarMomentsPlugin() {
     this->mName = "Shape FP Moments";
     this->mDescription = "Image Shape Fourier Polar Moments plugin";
     this->mId = "";
+	this->mDescriptorsList.push_back("Shape Fourier Polar Moments");
+
 }
 
 ACImageShapeFourierPolarMomentsPlugin::~ACImageShapeFourierPolarMomentsPlugin() {

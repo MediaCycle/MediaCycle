@@ -47,6 +47,21 @@ ACAudioFeaturesPlugin::ACAudioFeaturesPlugin() {
     this->mName = "AudioFeatures";
     this->mDescription = "AudioFeatures plugin";
     this->mId = "";
+	this->mDescriptorsList.push_back("Spectral Centroid");
+	this->mDescriptorsList.push_back("Spectral Spread");
+	this->mDescriptorsList.push_back("Spectral Variation");
+	this->mDescriptorsList.push_back("Spectral Flatness");
+	this->mDescriptorsList.push_back("Spectral Flux");
+	this->mDescriptorsList.push_back("Spectral Decrease");
+	this->mDescriptorsList.push_back("MFCC");
+	this->mDescriptorsList.push_back("DMFCC");
+	this->mDescriptorsList.push_back("DDMFCC");
+	this->mDescriptorsList.push_back("Zero Crossing Rate");
+	this->mDescriptorsList.push_back("Energy");
+	this->mDescriptorsList.push_back("Loudness");
+	this->mDescriptorsList.push_back("Log Attack Time");
+	this->mDescriptorsList.push_back("Energy Modulation Frequency");
+	this->mDescriptorsList.push_back("Energy Modulation Amplitude");
 }
 
 ACAudioFeaturesPlugin::~ACAudioFeaturesPlugin() {

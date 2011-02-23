@@ -1390,6 +1390,10 @@ void ACVideoAnalysis::computeGlobalPixelSpeed() {
 	for(unsigned int i = 0; i < nframes-1; i++){ 
 		cvConvert (tmp_frame, previous_frame);
 		tmp_frame = this->getNextFrame();
+		//
+		int toto = cvGetCaptureProperty(capture, CV_CAP_PROP_POS_FRAMES); 	
+		cout << toto << endl;
+		//
 		cvConvert (tmp_frame, frame);
 		cvAbsDiff (frame, previous_frame, diff_frames);
 		sum_diff_frames = cvSum (diff_frames);
@@ -1409,7 +1413,7 @@ void ACVideoAnalysis::computeGlobalPixelSpeed() {
 		cvShowImage ("Substraction", diff_frames_U);
 		cvWaitKey (10);
 #endif //VISUAL_CHECK
-		tmp_frame = this->getNextFrame();
+		//tmp_frame = this->getNextFrame();
 	}
 	
 	cvReleaseImage (&frame);

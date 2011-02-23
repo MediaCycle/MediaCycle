@@ -51,6 +51,8 @@ ACImageShapeHuMomentsPlugin::ACImageShapeHuMomentsPlugin() {
     this->mName = "Shape Hu Moments";
     this->mDescription = "Image Shape Hu Moments plugin";
     this->mId = "";
+	this->mDescriptorsList.push_back("Shape Hu Moments");
+
 }
 
 ACImageShapeHuMomentsPlugin::~ACImageShapeHuMomentsPlugin() {

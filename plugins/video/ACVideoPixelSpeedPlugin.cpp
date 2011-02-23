@@ -50,7 +50,8 @@ ACVideoPixelSpeedPlugin::ACVideoPixelSpeedPlugin() {
     this->mName = "Video Pixel Speed";
     this->mDescription = "Pixel_Speed";
     this->mId = "";
-	
+	this->mDescriptorsList.push_back("Pixel Speed");
+
 	//other vars
 	this->videoAn = NULL;
 	this->mtf_file_name = "";

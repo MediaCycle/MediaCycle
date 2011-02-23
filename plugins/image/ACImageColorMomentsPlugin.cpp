@@ -48,6 +48,8 @@ ACImageColorMomentsPlugin::ACImageColorMomentsPlugin() {
     this->mName = "Color Moments";
     this->mDescription = "Image Color Moments plugin";
     this->mId = "";
+	this->mDescriptorsList.push_back("Color Moments");
+
 }
 
 ACImageColorMomentsPlugin::~ACImageColorMomentsPlugin() {

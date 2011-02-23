@@ -51,6 +51,7 @@ ACImageTextureWaveletsMomentsPlugin::ACImageTextureWaveletsMomentsPlugin() {
     this->mName = "Texture Gabor";
     this->mDescription = "Image Texture Moments plugin";
     this->mId = "";
+	this->mDescriptorsList.push_back("Texture Gabor Moments");
 }
 
 ACImageTextureWaveletsMomentsPlugin::~ACImageTextureWaveletsMomentsPlugin() {
