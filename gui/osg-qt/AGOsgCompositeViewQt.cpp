@@ -520,6 +520,7 @@ void AGOsgCompositeViewQt::prepareFromBrowser()
 	//setMouseTracking(false); //CF necessary for the hover callback
 	browser_renderer->prepareNodes(); 
 	browser_renderer->prepareLabels();
+	
 	browser_view->setSceneData(browser_renderer->getShapes());
 }
 
@@ -527,6 +528,10 @@ void AGOsgCompositeViewQt::prepareFromBrowser()
 void AGOsgCompositeViewQt::updateTransformsFromBrowser( double frac)
 {
 	int closest_node;	
+	
+	browser_renderer->prepareNodes(); 
+	browser_renderer->prepareLabels();
+
 	// get screen coordinates
 	closest_node = browser_renderer->computeScreenCoordinates(browser_view, frac);
 	media_cycle->setClosestNode(closest_node);

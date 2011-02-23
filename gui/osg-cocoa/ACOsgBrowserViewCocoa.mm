@@ -428,8 +428,7 @@ struct ACOsgBrowserViewData
 	/////_privateData->renderer.prepareNodes();//CF
 	////_privateData->renderer.prepareLabels();//CF
 	renderer->prepareNodes();
-	renderer->prepareLabels();
-		
+	renderer->prepareLabels();		
 	renderer_hud->preparePointers();
 		
 	//[self setNode:_privateData->renderer.getShapes()];//CF

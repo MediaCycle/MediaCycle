@@ -92,7 +92,9 @@ private slots:
 public:
 	ACMultiMediaCycleOsgQt(QWidget *parent = 0);
 	~ACMultiMediaCycleOsgQt();
+	
 	void updateLibrary();
+	void updatePluginDock();
 	
 	// XS TODO: default values for image -- is this correct ?
 	void createMediaCycle(ACMediaType _media_type = MEDIA_TYPE_IMAGE, ACBrowserMode _browser_mode = AC_MODE_CLUSTERS);
@@ -112,6 +114,9 @@ public:
 	// Controls
 	bool addAboutDialog(ACAbstractAboutDialogQt* dock);
 	bool addAboutDialog(std::string about_type);
+	
+	// Callback
+	void mediacycleCallback(char* message);
 	
 private:
 	// variables

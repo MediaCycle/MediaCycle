@@ -54,6 +54,8 @@ enum MCActionType {
 //static void tcp_callback(char *buffer, int l, char **buffer_send, int *l_send, void *userData);
 //XS: removed this, it's in the cpp file -- otherwize declared static but never defined
 
+typedef void (*ACMediaCycleCallback)(char* message, void *userData);
+
 class MediaCycle {
 public:
     MediaCycle(ACMediaType aMediaType, std::string local_directory="", std::string libname="");
@@ -69,6 +71,9 @@ public:
     int stopTcpServer();
     int processTcpMessage(char* buffer, int l, char **buffer_send, int *l_send);     // Process incoming requests (addfile, getknn, ...)
 
+	// == Callback - SD to be replaced by OSC/UDP communication
+	int setCallback(ACMediaCycleCallback mediacycle_callback, void* user_data);
+	
     // == Media Library
 	int importDirectories();
 	int importDirectories(std::vector<std::string> paths, int recursive, bool forward_order=true, bool doSegment=false);
@@ -239,6 +244,9 @@ private:
 	int import_recursive;
 	bool import_forward_order;
 	bool import_doSegment;
+	
+	ACMediaCycleCallback mediacycle_callback;
+	void* mediacycle_callback_data;
 	
 };
 

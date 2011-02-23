@@ -262,11 +262,18 @@ int MediaCycle::processTcpMessage(char* buffer, int l, char **buffer_send, int *
 	return 0;
 }
 
+// == Callback - SD to be replaced by OSC/UDP communication
+
 // == Media Library
 
 void *threadImport(void *import_thread_arg) {
 	
 	((MediaCycle*)import_thread_arg)->importDirectories();
+}
+
+int MediaCycle::setCallback(ACMediaCycleCallback mediacycle_callback, void* user_data) {
+	this->mediacycle_callback = mediacycle_callback;
+	this->mediacycle_callback_data = user_data;
 }
 
 // XS TODO return value
@@ -293,6 +300,10 @@ int MediaCycle::importDirectories() {
 
 int MediaCycle::importDirectories(vector<string> directories, int recursive, bool forward_order, bool doSegment) {
 
+	int ok = 0;
+	
+	mediacycle_callback("loaddirstart",mediacycle_callback_data);
+	
 	float prevLibrarySizeMultiplier = 2;
 	int needsNormalizeAndCluster;
 	vector<string> filenames;
@@ -321,7 +332,7 @@ int MediaCycle::importDirectories(vector<string> directories, int recursive, boo
 	
 	for (i=0;i<n;i++) {
 		
-		mediaLibrary->importFile(filenames[i], this->pluginManager, doSegment);
+		ok += mediaLibrary->importFile(filenames[i], this->pluginManager, doSegment);
 		
 		needsNormalizeAndCluster = 0;
 		if ( (mediaLibrary->getSize() >= int(prevLibrarySizeMultiplier * prevLibrarySize))
@@ -341,12 +352,16 @@ int MediaCycle::importDirectories(vector<string> directories, int recursive, boo
 		
 	t2 = getTime();
 	
-	printf("TTT - %f\n",float(t2-t1));
+	//printf("TTT - %f\n",float(t2-t1));
 	
 		
 	//}
 	
 	filenames.empty();
+	
+	mediacycle_callback("loaddirfinish",mediacycle_callback_data);
+
+	return ok;
 	
 	//[self updatedLibrary];
 }

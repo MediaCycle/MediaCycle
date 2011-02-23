@@ -37,6 +37,23 @@
 #include <iomanip> // for setw
 #include <cstdlib> // for atoi
 
+static void mediacycle_callback(char* message, void *user_data) {
+	
+	ACMultiMediaCycleOsgQt *application = (ACMultiMediaCycleOsgQt*)user_data;
+	
+	application->mediacycleCallback(message);
+}
+
+void ACMultiMediaCycleOsgQt::mediacycleCallback(char* message) {
+	if (message=="loaddirstart") {
+		statusBar()->showMessage(tr("Loading Directory..."), 0);
+	}
+	
+	if (message=="loaddirfinish") {
+		statusBar()->clearMessage();
+	}
+}
+
 ACMultiMediaCycleOsgQt::ACMultiMediaCycleOsgQt(QWidget *parent) : QMainWindow(parent), 
  features_known(false), plugins_scanned(false),config_file("")
 {
@@ -89,8 +106,13 @@ ACMultiMediaCycleOsgQt::~ACMultiMediaCycleOsgQt(){
 // creates a MediaCycle object (containing the whole application)
 // with the appropriate type (audio/image/video/text/mixed/composite/...)
 void ACMultiMediaCycleOsgQt::createMediaCycle(ACMediaType _media_type, ACBrowserMode _browser_mode){
+
 	this->media_cycle = new MediaCycle(_media_type,"/tmp/","mediacycle.acl");
+	media_cycle->setCallback(mediacycle_callback, (void*)this);
+
 	ui.compositeOsgView->setMediaCycle(this->media_cycle);	
+	// SD
+	ui.compositeOsgView->prepareFromBrowser();
 	this->settingsDialog->setMediaCycle(this->media_cycle);
 
 	// keep track locally of the media and browser modes
@@ -247,9 +269,13 @@ void ACMultiMediaCycleOsgQt::on_actionSave_XML_triggered(bool checked){
 
 // XS TODO: make sure it works if we add a new directory to the existing library ?
 void ACMultiMediaCycleOsgQt::on_actionLoad_Media_Directory_triggered(bool checked){
+	
+	std::vector<string> directories;
+	
 	if (! hasMediaCycle()) return; 
-	statusBar()->showMessage(tr("Loading Directory..."), 0);
 
+	updatePluginDock();
+	
 	QString selectDir = QFileDialog::getExistingDirectory
 	(
 	 this, 
@@ -277,7 +303,26 @@ void ACMultiMediaCycleOsgQt::on_actionLoad_Media_Directory_triggered(bool checke
 //	pb->show();
 //	pb->setRange(0, 100);
 //	pb->setValue(2);
-	int res = media_cycle->importDirectory(selectDir.toStdString(), recursive, forward_order, do_segments);
+	
+	directories.push_back((string)selectDir.toStdString());
+	
+	//int res = media_cycle->importDirectory(selectDir.toStdString(), recursive, forward_order, do_segments);
+	
+	media_cycle->importDirectoriesThreaded(directories, recursive, forward_order, do_segments);
+
+	directories.empty();
+	
+	//usleep(2000000);
+	//media_cycle->setReferenceNode(0);
+	//ui.compositeOsgView->prepareFromBrowser();
+	//ui.compositeOsgView->prepareFromTimeline();
+	//media_cycle->setNeedsDisplay(true);
+	//ui.compositeOsgView->setFocus();
+	
+	//this->updateLibrary();
+	
+	// SD not working with threaded version
+	/*
 	int warn_button = 0;
 	if (res > 0){
 		statusBar()->showMessage(tr("Directory Imported."), 2000);
@@ -295,12 +340,18 @@ void ACMultiMediaCycleOsgQt::on_actionLoad_Media_Directory_triggered(bool checke
 											   "Problem Importing Directory"); //, <#const QString button0Text#>, <#const QString button1Text#>, <#const QString button2Text#>, <#int defaultButtonNumber#>, <#int escapeButtonNumber#>);
 	}
 	statusBar()->clearMessage();
+	*/
 
 }
 
 void ACMultiMediaCycleOsgQt::on_actionLoad_Media_Files_triggered(bool checked){
+	
+	std::vector<string> directories;
+	
 	if (! hasMediaCycle()) return; 
 
+	updatePluginDock();
+	
 	QString fileName;
 	QFileDialog dialog(this,"Open MediaCycle Image File(s)");
 	//CF generating supported file extensions from used media I/O libraries and current media type:
@@ -331,14 +382,21 @@ void ACMultiMediaCycleOsgQt::on_actionLoad_Media_Files_triggered(bool checked){
 		//fileName = QFileDialog::getOpenFileName(this, "~", );
 		
 		if (!(fileName.isEmpty())) {
-			media_cycle->importDirectory(fileName.toStdString(), 0);
+			directories.push_back((string)fileName.toStdString());
+			//media_cycle->importDirectory(fileName.toStdString(), 0);
 			//media_cycle->normalizeFeatures();
 			//media_cycle->libraryContentChanged(); no, this is in updatelibrary
-			std::cout <<  fileName.toStdString() << " imported" << std::endl;
+			//std::cout <<  fileName.toStdString() << " imported" << std::endl;
 		}
 	}
+	
+	media_cycle->importDirectoriesThreaded(directories, 0);
+	
+	directories.empty();
+	
 	// XS do this only after loading all files (it was in the while loop) !
-	this->updateLibrary();
+	// SD not needed anymore
+	//this->updateLibrary();
 }
 
 void ACMultiMediaCycleOsgQt::on_actionEdit_Config_File_triggered(bool checked){
@@ -588,6 +646,20 @@ void ACMultiMediaCycleOsgQt::updateLibrary(){
 	ui.compositeOsgView->setFocus();
 }
 
+void ACMultiMediaCycleOsgQt::updatePluginDock() {
+	// do not re-scan the directory for plugins once they have been loaded
+	if (!plugins_scanned)
+	{	
+		//CF ugly, use signals?
+		for (int d=0;d<dockWidgets.size();d++){
+			if (dockWidgets[d]->getClassName() == "ACBrowserControlsClustersNeighborsDockWidgetQt")
+				((ACBrowserControlsClustersNeighborsDockWidgetQt*)dockWidgets[d])->configureCheckBoxes();
+			if (dockWidgets[d]->getClassName() == "ACBrowserControlsClustersDockWidgetQt")
+				((ACBrowserControlsClustersDockWidgetQt*)dockWidgets[d])->configureCheckBoxes();
+		}
+	}		
+}
+	
 void ACMultiMediaCycleOsgQt::addPluginItem(QListWidgetItem *_item){
 	cout << "adding item : " << _item->text().toStdString() << endl;
 	QListWidgetItem * new_item = new QListWidgetItem(*_item);

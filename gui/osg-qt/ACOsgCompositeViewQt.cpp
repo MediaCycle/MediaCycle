@@ -285,7 +285,8 @@ void ACOsgCompositeViewQt::paintGL()
 	if (media_cycle == NULL) return;
 	
 	//CF to improve, we want to know if the view is being animated to force a frequent refresh of the positions:
-	if (media_cycle && media_cycle->hasBrowser() && media_cycle->getBrowser()->getState() == AC_CHANGING)
+	//SD 2010feb22 to allow auto update whith threaded import
+	//if (media_cycle && media_cycle->hasBrowser() && media_cycle->getBrowser()->getState() == AC_CHANGING)
 		updateTransformsFromBrowser(media_cycle->getFrac());
 }
 
@@ -677,6 +678,7 @@ void ACOsgCompositeViewQt::prepareFromBrowser()
 	browser_renderer->prepareNodes(); 
 	browser_renderer->prepareLabels();
 	hud_renderer->preparePointers();
+	
 	browser_view->setSceneData(browser_renderer->getShapes());
 	library_loaded = true;
 }
@@ -685,7 +687,13 @@ void ACOsgCompositeViewQt::prepareFromBrowser()
 void ACOsgCompositeViewQt::updateTransformsFromBrowser( double frac)
 {
 	if (media_cycle == NULL) return;
+	
 	int closest_node;	
+	
+	browser_renderer->prepareNodes();
+	browser_renderer->prepareLabels();
+	hud_renderer->preparePointers();
+	
 	// get screen coordinates
 	closest_node = browser_renderer->computeScreenCoordinates(browser_view, frac);
 	media_cycle->setClosestNode(closest_node);
