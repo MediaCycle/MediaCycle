@@ -57,7 +57,7 @@ SettingsDialog::SettingsDialog(QWidget *parent) : QMainWindow(parent) {
 //    connect(buttonSaveLog, SIGNAL(clicked()), this, SLOT(saveLog()));
 //    connect(pushButtonConfigureFeaturesPlugins, SIGNAL(clicked()), this, SLOT(configureFeaturesPlugins()));
 //    connect(buttonSelectVisualizationPlugin, SIGNAL(clicked()), this, SLOT(selectVisualizationPlugins()));
-	connect(buttonSaveConfigFile, SIGNAL(clicked()), this, SLOT(saveConfigFile()));
+//	connect(buttonSaveConfigFile, SIGNAL(clicked()), this, SLOT(saveConfigFile()));
 	connect(comboMediaType, SIGNAL(currentIndexChanged(const QString &)), this, SLOT(comboMediaTypeValueChanged()));
 	connect(comboBrowserMode, SIGNAL(currentIndexChanged(const QString &)), this, SLOT(comboBrowserModeValueChanged()));
     connect(buttonRemovePluginsLibrary, SIGNAL(clicked()), this, SLOT(removePluginRow()));
@@ -119,11 +119,12 @@ bool SettingsDialog::setMediaType(string _mt) {
 
 // ----- SLOTS -----
 
-bool SettingsDialog::saveConfigFile() {
-	// XS TEST
-	return  this->writeXMLConfigFile(lineEditXMLConfigFile->text().toStdString());
-//	return (multi_media_cycle->saveConfigFile());
-}
+//bool SettingsDialog::saveConfigFile(std::string _filename) {
+//	// XS TEST
+//	this->writeXMLConfigFile(_filename);
+//	return true;
+////	return (multi_media_cycle->saveConfigFile());
+//}
 
 bool SettingsDialog::writeXMLConfigFile(std::string _filename) {
 	configFile = doc.createElement("MediaCycleConfig"); //creation de la balise 

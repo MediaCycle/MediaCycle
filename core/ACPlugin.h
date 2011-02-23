@@ -76,6 +76,7 @@ public:
 	std::string getDescription() {return this->mDescription;}
 	ACMediaType getMediaType() {return this->mMediaType;}
 	ACPluginType getPluginType() {return this->mPluginType;}
+	std::vector<std::string> getDescriptorsList() {return this->mDescriptorsList;}
 
 	virtual int initialize(){return 0;}
 
@@ -106,6 +107,7 @@ protected:
 	std::string mDescription;
 	ACMediaType mMediaType;
 	ACPluginType mPluginType;
+	std::vector<std::string> mDescriptorsList;
 };
 
 // the types of the class factories

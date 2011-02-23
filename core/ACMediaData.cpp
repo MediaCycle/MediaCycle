@@ -62,6 +62,7 @@ ACMediaData::ACMediaData() {
 
 ACMediaData::ACMediaData(ACMediaType _type, std::string _fname) {
 	#if defined (SUPPORT_AUDIO)
+	audio_frames = 0;
 	audio_ptr = NULL;
 	#endif //defined (SUPPORT_AUDIO)
 	#if defined (SUPPORT_IMAGE) || defined (SUPPORT_VIDEO)

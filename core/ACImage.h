@@ -45,7 +45,7 @@
 
 // -----------------------------------
 
-osg::Image* Convert_OpenCV_TO_OSG_IMAGE(IplImage* cvImg);
+osg::ref_ptr<osg::Image>  Convert_OpenCV_TO_OSG_IMAGE(IplImage* cvImg);
 #endif //defined (SUPPORT_IMAGE) || defined (SUPPORT_VIDEO)
 
 #if defined (SUPPORT_IMAGE)
@@ -78,8 +78,8 @@ private:
 	static const int default_thumbnail_width, default_thumbnail_height, default_thumbnail_area;
 	char  *thumbnail_filename;
 	int thumbnail_width, thumbnail_height; 
-	osg::Image* thumbnail;
-	osg::Texture2D* image_texture;
+	osg::ref_ptr<osg::Image> thumbnail;
+	osg::ref_ptr<osg::Texture2D> image_texture;
 	
 	int computeThumbnail(std::string _fname, int w=0, int h=0);
 	int computeThumbnail(ACMediaData* data_ptr, int w=0, int h=0);

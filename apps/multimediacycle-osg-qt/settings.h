@@ -80,7 +80,7 @@ private slots:
 	void on_buttonAddPluginsLibrary_clicked();
 
  //   void selectVisualizationPlugins();
-	bool saveConfigFile();
+//	bool saveConfigFile(std::string _filename);
 	bool writeXMLConfigFile(std::string _filename);
 	bool readXMLConfigFile(std::string _filename);
 //	void configureFeaturesPlugins();

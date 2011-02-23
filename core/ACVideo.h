@@ -53,6 +53,8 @@ public:
 	
 	void saveACLSpecific(std::ofstream &library_file);
 	int loadACLSpecific(std::ifstream &library_file);
+	void saveXMLSpecific(TiXmlElement* _media);
+	int loadXMLSpecific(TiXmlElement* _pMediaNode);
 
 	//void setThumbnail(IplImage *_thumbnail) { thumbnail = _thumbnail; thumbnail_width = _thumbnail->width; thumbnail_height = _thumbnail->height; }
 	osg::Image* getThumbnail() { return thumbnail; }

@@ -74,8 +74,8 @@ ACVideo::~ACVideo() {
 				break;
 		}
 	}*/	
-	
-	if (data) delete data;
+// XS TODO  pas 2x (déjà ds ACMedia)	
+//	if (data) delete data;
 }
 
 ACVideo::ACVideo(const ACVideo& m) : ACMedia(m) {
@@ -205,7 +205,6 @@ int ACVideo::loadACLSpecific(ifstream &library_file) {
 		if ((width != 16)&&(height != 16))// if the image size isn't actually 64x64
 			std::cout << "Please re-save your ACL library, old format with corrupted video size." << std::endl;
 	}
-	this->computeThumbnailSize();
 	
 	if (computeThumbnail(height, width) != 1){
 		cerr << "<ACVideo::loadACLSpecific> : problem computing thumbnail" << endl;
@@ -213,6 +212,36 @@ int ACVideo::loadACLSpecific(ifstream &library_file) {
 	}
 	return 1;
 }
+
+void ACVideo::saveXMLSpecific(TiXmlElement* _media){
+	_media->SetAttribute("thumbnailFileName", filename_thumbnail);
+	_media->SetDoubleAttribute("Duration", this->getDuration());
+	_media->SetAttribute("Width", width);
+	_media->SetAttribute("Height", height);
+}
+
+int ACVideo::loadXMLSpecific(TiXmlElement* _pMediaNode){
+	// XS TODO add checks
+	filename_thumbnail = _pMediaNode->Attribute("thumbnailFileName");
+	double t=0;
+	_pMediaNode->QueryDoubleAttribute("Duration", &t);
+	// XS TODO is duration always end-start ?
+	int w=0;
+	_pMediaNode->QueryIntAttribute("Width", &w);
+	int h=0;
+	_pMediaNode->QueryIntAttribute("Height", &h);
+	this->width = w;
+	this->height = h;
+	
+	data = new ACMediaData(MEDIA_TYPE_IMAGE,filename);
+	
+	if (computeThumbnail(width, height) != 1){
+		cerr << "<ACVideo::loadXMLSpecific> : problem computing thumbnail" << endl;
+		return 0;
+	}
+	return 1;	
+}
+
 
 void ACVideo::computeThumbnailSize(){
 	if ((width !=0) && (height!=0)){
