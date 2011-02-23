@@ -47,7 +47,8 @@ ACMedia::ACMedia() {
 	end = -1;
 	features_vectors.resize(0);
 	persistent_data = false;
-	data = new ACMediaData(MEDIA_TYPE_NONE);
+	data = NULL;
+//	data = new ACMediaData(MEDIA_TYPE_NONE);
 }
 
 ACMedia::ACMedia(const ACMedia& m, bool reduce){
@@ -61,6 +62,8 @@ ACMedia::ACMedia(const ACMedia& m, bool reduce){
 	end = m.end;
 	features_vectors.resize(0);	
 	persistent_data = !reduce;
+	data = NULL;
+
 	if (persistent_data){
 		if (m.media_type != MEDIA_TYPE_NONE){
 			if( m.data->getMediaType() != MEDIA_TYPE_NONE){// if m.data contains data
@@ -72,8 +75,8 @@ ACMedia::ACMedia(const ACMedia& m, bool reduce){
 		}
 		//else we dont have any data to copy
 	}
-	else
-		data = new ACMediaData(MEDIA_TYPE_NONE);
+//	else
+//		data = new ACMediaData(MEDIA_TYPE_NONE);
 }
 
 ACMedia::~ACMedia() { 
@@ -84,9 +87,20 @@ ACMedia::~ACMedia() {
 		delete *iter;//needed erase call destructor of pointer (i.e. none since it's just a pointer) not of pointee ACMediaFeatures
 		//features_vectors.erase(iter); //will cause segfault. besides the vector is automatically emptied, no need to erase.
 	}
-	// XS TODO : why is this commented ?
-	//if (data) delete data;
+	// XS TODO : why was this commented ?
+	if (data!=NULL) {
+		delete data;
+		data = NULL;
+	};
 }
+
+void ACMedia::deleteData(){
+	if (!persistent_data){
+		delete data;
+		data = NULL;
+	}
+}
+
 
 // C++ version
 // writes in an existing (i.e. already opened) acl file
@@ -160,19 +174,26 @@ void ACMedia::saveXML(TiXmlElement* _medias){
 		}
 		s = tmp.str();
 		TiXmlText* mediafe = new TiXmlText(s.c_str());
-		mediaf->LinkEndChild( mediafe );  
-
-//		for (int j=0; j<n_features_elements; j++) {
-//			TiXmlElement* mediafe = new TiXmlElement( "Element" );  
-//			std::string s;
-//			std::stringstream tmp;
-//			tmp << j;
-//			s = tmp.str();
-//			mediafe->SetDoubleAttribute(s.c_str(), features_vectors[i]->getFeatureElement(j));
-//			mediaf->LinkEndChild( mediafe );  
-//		}
-		
+		mediaf->LinkEndChild( mediafe );  		
 	}
+	
+	media->SetAttribute("NumberOfSegments", this->getNumberOfSegments());
+
+	// saves info about segments (if any) : beginning, end, ID
+	// the parent ID of the segment is the ID of the current media
+	for (unsigned int i=0; i<this->getNumberOfSegments();i++) {
+		TiXmlElement* seg = new TiXmlElement( "Segment" );  
+		media->LinkEndChild( seg );  
+		seg->SetAttribute("Start", this->getSegment(i)->getStart());
+		seg->SetAttribute("End", this->getSegment(i)->getEnd());
+		std::string s;
+		std::stringstream tmp;
+		tmp << this->getSegment(i)->getId();
+		s = tmp.str();
+		TiXmlText* segID = new TiXmlText(s.c_str());
+		seg->LinkEndChild( segID );  		
+	}
+	
 }
 
 // C++ version

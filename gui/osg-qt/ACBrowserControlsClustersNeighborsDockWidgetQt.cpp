@@ -165,8 +165,9 @@ void ACBrowserControlsClustersNeighborsDockWidgetQt::configureCheckBoxes(){
 	
 }
 
-// XS TODO define when this is called, really clean
 void ACBrowserControlsClustersNeighborsDockWidgetQt::cleanCheckBoxes(){
-	// XS TODO: does this clear the list ?
-	 ui.featuresListWidget->clear();
+	for(int i = 0; i < ui.featuresListWidget->count(); i++)
+		delete ui.featuresListWidget->takeItem(i);
+
+	ui.featuresListWidget->clear();
 }
