@@ -53,7 +53,7 @@ PORT open_server(int iport, int count)
 	WSAStartup(MAKEWORD(1,1), &wsda);
 #endif
 	
-	if ((s_listen = (PORT)socket(AF_INET, SOCK_STREAM, 0)) == SOCKET_ERROR)
+	if ((s_listen = (PORT)socket(AF_INET, SOCK_STREAM, 0)) == AC_SOCKET_ERROR)
 		//throw_error(SocketServerError, "open_server: call to 'socket' failed.\n");
 		return -1;
 	
@@ -70,11 +70,11 @@ PORT open_server(int iport, int count)
 		setsockopt(s_listen, SOL_SOCKET, SO_REUSEADDR, &auth, sizeof(int));
 	#endif
 	
-	if (bind(s_listen, (struct sockaddr*)&addr, sizeof(addr)) == SOCKET_ERROR)
+	if (bind(s_listen, (struct sockaddr*)&addr, sizeof(addr)) == AC_SOCKET_ERROR)
 		//throw_error(SocketServerError, "open_server: call to 'bind' failed.\n");
 		return -1;
 	
-	if (listen(s_listen, count) == SOCKET_ERROR)
+	if (listen(s_listen, count) == AC_SOCKET_ERROR)
 		//throw_error(SocketServerError, "open_server: call to 'listen' failed.\n");
 		return -1;
 
@@ -85,7 +85,7 @@ PORT open_server(int iport, int count)
 	/*fprintf(stdout, "Waiting for client to connect ...\n");
 	 
 	 i_addr_len = sizeof(remote_addr);
-	 if ((s_client = accept(s_listen, (struct sockaddr*)&remote_addr, &i_addr_len)) == SOCKET_ERROR)
+	 if ((s_client = accept(s_listen, (struct sockaddr*)&remote_addr, &i_addr_len)) == AC_SOCKET_ERROR)
 	 throw_error(SocketServerError, "open_server: call to 'accept' failed.\n");
 	 
 	 fprintf(stdout, "%s connected\n", inet_ntoa(remote_addr.sin_addr));
@@ -110,7 +110,7 @@ SOCKET wait_connection(PORT p)
 	fprintf(stdout, "Waiting for client to connect ...\n");
 	
 	i_addr_len = sizeof(remote_addr);
-	if ((s = accept((SOCKET)p, (struct sockaddr*)&remote_addr, (socklen_t*)&i_addr_len)) == SOCKET_ERROR) {
+	if ((s = accept((SOCKET)p, (struct sockaddr*)&remote_addr, (socklen_t*)&i_addr_len)) == AC_SOCKET_ERROR) {
 		//throw_error(SocketServerError, "wait_connection: call to 'accept' failed.\n");
 		fprintf(stdout, "connection problem\n");
 		return -1;
@@ -144,14 +144,14 @@ int server_receive(char *buf, int size, SOCKET s, unsigned int time_out)
 	read = 0;
 	do {
 		ret = select(s+1, &rfds, 0, 0, pto);
-		if (ret == SOCKET_ERROR) {
+		if (ret == AC_SOCKET_ERROR) {
 			//throw_error(SocketServerError, "server_send: call to 'select' failed.\n");
 			return -1;
 		}
 		
 		if (FD_ISSET(s, &rfds)) {
 			ret = recv(s, buf + read, size - read, 0);
-			if (ret == SOCKET_ERROR) {
+			if (ret == AC_SOCKET_ERROR) {
 				//throw_error(SocketServerError, "server_receive: call to 'recv' failed.\n");
 				return -1;
 			}
@@ -175,7 +175,7 @@ int server_send(char *buf, int size, SOCKET s)
 	int ret;
 	
 	ret = send(s, buf, size, 0);
-	if (ret == SOCKET_ERROR)
+	if (ret == AC_SOCKET_ERROR)
 		//throw_error(SocketServerError, "server_send: call to 'send' failed.\n");
 		return -1;
 	
@@ -294,7 +294,7 @@ SOCKET open_client(int iport, char *ip_address)
 	for (i = 0; i < 25; i++) { // time out 25 x 200ms = 5s 
 		fprintf(stdout, ".");
 		sleep(0.2);
-		if (connect(s, (SOCKADDR*)&addr, sizeof(addr)) == SOCKET_ERROR)
+		if (connect(s, (SOCKADDR*)&addr, sizeof(addr)) == AC_SOCKET_ERROR)
 			continue;
 		else {
 			fprintf(stdout, "\rConnected to %s                    \n", inet_ntoa(addr.sin_addr));
@@ -305,7 +305,7 @@ SOCKET open_client(int iport, char *ip_address)
 	// throw_error(SocketClientError, "open_client: time out ! Unable to connect to %s.\n", inet_ntoa(addr.sin_addr));
 	error_message();
 	
-	return SOCKET_ERROR;
+	return AC_SOCKET_ERROR;
 }
 
 void close_client(SOCKET s)
@@ -320,7 +320,7 @@ int client_send(char *buf, int size, SOCKET s)
 {
 	int ret;
 	ret = send(s, buf, size, 0);
-	if (ret == SOCKET_ERROR) {
+	if (ret == AC_SOCKET_ERROR) {
 		// throw_error(SocketClientError, "client_send: call to 'send' failed.\n");
 		error_message();
 	}
@@ -343,14 +343,14 @@ int client_receive(char *buf, int size, SOCKET s, unsigned int time_out)
 	ret = 0;
 	read = 0;
 	do {
-		if (select(s+1, &rfds, 0, 0, pto) == SOCKET_ERROR) {
+		if (select(s+1, &rfds, 0, 0, pto) == AC_SOCKET_ERROR) {
 			//	throw_error(SocketClientError, "server_send: call to 'select' failed.\n");
 			error_message();
 		}
 		
 		if (FD_ISSET(s, &rfds)) {
 			ret = recv(s, buf + read, size - read, 0);
-			if (ret == SOCKET_ERROR) {
+			if (ret == AC_SOCKET_ERROR) {
 				//	throw_error(SocketClientError, "server_receive: call to 'recv' failed.\n");
 				error_message();
 			}

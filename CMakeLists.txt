@@ -598,7 +598,9 @@ IF(SUPPORT_AUDIO AND (USE_OPENAL OR USE_PORTAUDIO))
 	ELSE()
 		FIND_PACKAGE( OpenAL )
 	ENDIF()
-	FIND_PACKAGE ( Portaudio )
+	IF ( USE_PORTAUDIO )
+		FIND_PACKAGE ( Portaudio )
+	ENDIF()
 ENDIF()
 
 # Since for now OpenAL support is more advanced than PortAudio support

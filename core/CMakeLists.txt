@@ -15,7 +15,7 @@ ENDIF(APPLE)
 	
 TARGET_LINK_LIBRARIES(armadillo-utils)
 IF ( SDIF_FOUND )
-	TARGET_LINK_LIBRARIES(sdif)
+	TARGET_LINK_LIBRARIES(mediacycle sdif)
 ENDIF ( )
 
 #others
