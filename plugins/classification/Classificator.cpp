@@ -58,7 +58,7 @@ Classificator::Classificator(CrossValidationType _CTV, int train_number, string 
     saveFile->printf("----- Classification results ----- %s\n", ctime(&rawtime));
     saveClassifierOutputs=NULL;
     
-    if (_the_seed == -1){
+    if (_the_seed < 0){
         Random::seed();
     }
     else{
@@ -240,8 +240,11 @@ int Classificator::test_svm(int degree, float param1, float param2, float accura
 
     // KFold
 
-    KFold k(&trainer, nFolds);
-    k.crossValidate(data, NULL, &measurers);
+    char b[200];
+    sprintf(b, "/media/Data/CompToux/cough_classification/SVM_outputs/%sSVM%s.txt", dataName.c_str(), ctime(&rawtime));
+    DiskXFile *svm_outputs=new(allocator) DiskXFile(b,"a");
+    KFoldSaveOutputs k(&trainer, nFolds);
+    k.crossValidateJay(data, svm_outputs, nClasses, NULL, &measurers);
 
     return 0;
 }

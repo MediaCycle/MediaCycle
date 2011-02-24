@@ -172,17 +172,32 @@ void KFoldSaveOutputs::crossValidateJay(DataSet *data, DiskXFile *saveOutputs, i
         data->setExample(p);
         trainer->machine->forward(data->inputs);
         sum=0;
+        targetClass[p]=0;
         
-        for(q=0;q<nClasses;q++)
+        for(q=0;q<data->n_targets;q++)
         {
-            if((int)data->targets->frames[0][q]) // works if class encoded in one-hot-format
+            if(data->n_targets>1)
             {
-                targetClass[p]=q;
+                if((int)data->targets->frames[0][q]) // works if class encoded in one-hot-format
+                {
+                    targetClass[p]=q;
+                }
+            }
+            else
+            {
+                targetClass[p]=_biggerthanzero(data->targets->frames[0][0]);
             }
             if(q==0)
             {
                 maxval[p]=trainer->machine->outputs->frames[0][q];
-                computedClass[p]=0;
+                if(data->n_targets>1) // MLP case with one-hot format
+                {
+                    computedClass[p]=0;
+                }
+                else  //SVM case
+                {
+                    computedClass[p]=_biggerthanzero(trainer->machine->outputs->frames[0][q]);
+                }
             }
             else
             {
@@ -193,9 +208,9 @@ void KFoldSaveOutputs::crossValidateJay(DataSet *data, DiskXFile *saveOutputs, i
                 }
             }
             saveOutputs->printf("%e ",trainer->machine->outputs->frames[0][q]);
-            sum+=exp(trainer->machine->outputs->frames[0][q]);
+            //sum+=exp(trainer->machine->outputs->frames[0][q]);
         }
-        saveOutputs->printf("%f %d %d %d\n", sum, computedClass[p], targetClass[p], test_subsets[i][p]);
+        saveOutputs->printf("%d %d %d\n", computedClass[p], targetClass[p], test_subsets[i][p]);
     }
     _computeConfMat(targetClass, computedClass, nClasses, n_test_subsets[i], true);
 
@@ -219,7 +234,7 @@ void KFoldSaveOutputs::crossValidateJay(DataSet *data, DiskXFile *saveOutputs, i
   }
 }
 
-int KFoldSaveOutputs::_printConfMat(int** confusion, int n_classes)
+int KFoldSaveOutputs::_printConfMat(int* confusion, int n_classes)
 {
     int i,k, tot=0;
     float accuracy=0;
@@ -229,43 +244,54 @@ int KFoldSaveOutputs::_printConfMat(int** confusion, int n_classes)
         for(k=0;k<n_classes;k++)
         {
             //saveFile->printf("%d ", confusion[i][k]);
-            tot+=confusion[i][k];
-            message("ComputedClass %d; TargetClass %d; N:%d", i, k, confusion[i][k]);
+            tot+=confusion[i*n_classes+k];
+            message("ComputedClass %d; TargetClass %d; N:%d", i, k, confusion[i*n_classes+k]);
+         
         }
+        accuracy+=confusion[i*n_classes+i];
         //saveFile->printf("\n");
-        accuracy+=confusion[i][i];
+       
     }
     accuracy/=tot;
     message("Global accuracy: %f", 100*accuracy);
     //saveFile->printf("Global accuracy: %f\n", 100*accuracy);
 }
 
+int KFoldSaveOutputs::_biggerthanzero(real v)
+{
+    if(v>=0)
+    {
+        return 1;
+    }
+    else
+    {
+        return 0; // so that we can print a confusion matrix
+    }
+}
+
+
 int KFoldSaveOutputs::_computeConfMat(int* targets, int* computed, int n_classes, int n_frames, bool print)
 {
-    Allocator *a= new Allocator;
-    int** confmat;
+
+    Allocator a;
+    int *confmat=new int[n_classes*n_classes];
+    //int** confmat;
     int i, k, m;
     float accuracy=0;
-    confmat=(int**)a->alloc(n_classes*sizeof(int*));
-    for(i=0;i<n_classes;i++)
+    for(i=0;i<n_classes*n_classes;i++)
     {
-        confmat[i]=(int*)a->alloc(n_classes*sizeof(int));
-        for(k=0;k<n_classes;k++)
-        {
-            confmat[i][k]=0;
+            confmat[i]=0;
 
-        }
     }
     for(m=0;m<n_frames;m++)
     {
-            confmat[computed[m]][targets[m]]++;
+            confmat[(computed[m]*n_classes)+targets[m]]++;
     }
     if(print)
     {
         _printConfMat(confmat,n_classes);
     }
-
-    delete a;
+    delete[] confmat;
 }
 
 KFoldSaveOutputs::~KFoldSaveOutputs()
@@ -273,5 +299,8 @@ KFoldSaveOutputs::~KFoldSaveOutputs()
 }
 
 }
+
+
+
 
 

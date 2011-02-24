@@ -86,7 +86,8 @@ class KFoldSaveOutputs : public Object
     virtual ~KFoldSaveOutputs();
 
     int _computeConfMat(int* targets, int* computed, int n_classes, int n_frames, bool print=true);
-    int _printConfMat(int** confusion, int nClasses);
+    int _printConfMat(int* confusion, int nClasses);
+    int _biggerthanzero(real v);
 };
 
 }
