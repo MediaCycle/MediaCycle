@@ -46,24 +46,26 @@ using std::endl;
 
 
 ACAudio::ACAudio() : ACMedia() {
-    media_type = MEDIA_TYPE_AUDIO;
+	this->init();
+}
+
+void ACAudio::init() {
+	media_type = MEDIA_TYPE_AUDIO;
+    channels = 0;
+	sample_rate = 0;	
+	waveformLength = 0;
+	waveform = 0;
     features_vectors.resize(0);
-    db = 0;
-    bpm = 0;
+    db = 0.0f;
+    bpm = 0.0f;
     time_signature_num = 0;
     time_signature_den = 0;
     key = 0;
     acid_type = 0;
-    sample_rate = 44100;
-    channels = 1;
-//     sample_start = 0;
-//     sample_end = 0;
-    waveformLength = 0;
-	waveform = NULL;
 }
 
-ACAudio::ACAudio(const ACAudio& m, bool reduce) : ACMedia(m) {
-	media_type = MEDIA_TYPE_AUDIO;
+ACAudio::ACAudio(const ACAudio& m, bool reduce) : ACMedia(m){
+	this->init();
 	db = m.db;
 	bpm = m.bpm;
 	time_signature_num = m.time_signature_num;
@@ -156,42 +158,55 @@ void ACAudio::saveXMLSpecific(TiXmlElement* _media){
 	// XS TODO add tests
 
 	// waveform
-	TiXmlElement* mediawf = new TiXmlElement( "Waveform" );  
-	std::string s;
-	std::stringstream tmp;
-	for (int j=0; j<waveformLength; j++) {
-		tmp << waveform[j] << " " ;
-	}
-	s = tmp.str();
-	TiXmlText* mediawft = new TiXmlText(s.c_str());
-	mediawf->LinkEndChild( mediawft );  
-	_media->LinkEndChild( mediawf );  
-
+	if (waveform ) {
+		TiXmlElement* mediawf = new TiXmlElement( "Waveform" );  
+		std::string s;
+		std::stringstream tmp;
+		for (int j=0; j<waveformLength; j++) {
+			tmp << waveform[j] << " " ;
+		}
+		s = tmp.str();
+		TiXmlText* mediawft = new TiXmlText(s.c_str());
+		mediawf->LinkEndChild( mediawft );  
+		_media->LinkEndChild( mediawf );
+	}						  
 }
 
 int ACAudio::loadXMLSpecific(TiXmlElement* _pMediaNode){
+	int sample_start, sample_end;
 	// XS TODO add checks
 	_pMediaNode->QueryIntAttribute("SamplingRate", &this->sample_rate);
 	_pMediaNode->QueryIntAttribute("Channels", &this->channels);
-	int sample_start, sample_end;
+
 	_pMediaNode->QueryIntAttribute("SampleStart",&sample_start);
 	_pMediaNode->QueryIntAttribute("SampleEnd",&sample_end);
+
+	
 	this->setSampleStart(sample_start);
 	this->setSampleEnd(sample_end);
+	string wfs = "";
 	
 	_pMediaNode->QueryIntAttribute("waveformLength",&waveformLength);
-	waveform = new float[waveformLength];
-
-	TiXmlElement* waveformElement = _pMediaNode->FirstChildElement( "Waveform" );
-	TiXmlText*  waveformElementsAsText = waveformElement->ToText();
-	string wfs = waveformElementsAsText->ValueStr();
-	std::stringstream wfss;
-	wfss << wfs;
-	for (int j=0; j<waveformLength; j++) {
-		// XS TODO add test
-		wfss >> waveform[j];
-	}
 	
+	TiXmlElement* waveformElement = _pMediaNode->FirstChildElement( "Waveform" );
+	if (waveformElement) {
+		TiXmlText*  waveformElementsAsText = waveformElement->FirstChild()->ToText();
+
+		wfs = waveformElementsAsText->ValueStr();
+		
+		waveform = new float[waveformLength];
+
+
+		if (wfs.size() > 0) {
+			std::stringstream wfss;
+			wfss << wfs;
+			for (int j=0; j<waveformLength; j++) {
+				// XS TODO add test
+				wfss >> waveform[j];
+			}
+		}
+	}	
+
 // XS TODO note : for image we have this:
 //data = new ACMediaData(MEDIA_TYPE_IMAGE,filename);
 // here we compute the waveform	
@@ -201,11 +216,12 @@ int ACAudio::loadXMLSpecific(TiXmlElement* _pMediaNode){
 
 
 void ACAudio::setData(float* _data,float _sample_number, int _sr,int _channels) {
-	if (data->getMediaType()==MEDIA_TYPE_NONE)
+	/*if (data->getMediaType()==MEDIA_TYPE_NONE)
 		data = new ACMediaData(MEDIA_TYPE_AUDIO);	
 	else
-		data->setMediaType(MEDIA_TYPE_AUDIO);
-
+		data->setMediaType(MEDIA_TYPE_AUDIO);*/
+	if (data == 0)
+		data = new ACMediaData(MEDIA_TYPE_AUDIO);
 	data->setAudioData(_data,_sample_number);
 	this->channels = _channels;
 	this->sample_rate = _sr;
@@ -223,8 +239,8 @@ void ACAudio::extractData(string fname) {
 		/* Open failed so print an error message. */
 		printf ("Not able to open input file %s.\n", fname.c_str()) ;
 		/* Print the error message from libsndfile. */
-		puts (sf_strerror (NULL)) ;
-		//return  NULL;
+		puts (sf_strerror (0)) ;
+		//return  0;
 	}
 	sample_rate = sfinfo.samplerate;
 	channels = sfinfo.channels;
@@ -248,7 +264,7 @@ void ACAudio::extractData(string fname) {
 }
 
 float* ACAudio::getSamples(){
-	if (data->getMediaType()==MEDIA_TYPE_AUDIO){
+	if (data && data->getMediaType()==MEDIA_TYPE_AUDIO){
 		return data->getAudioData();
 	}	
 	else{
@@ -258,8 +274,8 @@ float* ACAudio::getSamples(){
 			/* Open failed so print an error message. */
 			printf ("Not able to open input file %s.\n", this->getFileName().c_str()) ;
 			/* Print the error message from libsndfile. */
-			puts (sf_strerror (NULL)) ;
-			return  NULL;
+			puts (sf_strerror (0)) ;
+			return  0;
 		}
 		sample_rate = sfinfo.samplerate;
 		channels = sfinfo.channels;
@@ -299,8 +315,8 @@ float* ACAudio::getMonoSamples(){
 			/* Open failed so print an error message. */
 			printf ("Not able to open input file %s.\n", this->getFileName().c_str()) ;
 			/* Print the error message from libsndfile. */
-			puts (sf_strerror (NULL)) ;
-			return  NULL;
+			puts (sf_strerror (0)) ;
+			return  0;
 		}
 		
 		sample_rate = sfinfo.samplerate;
@@ -357,35 +373,38 @@ void ACAudio::saveThumbnail(std::string _path) {
 
 
 void ACAudio::computeWaveform(const float* samples_v) {
-	int i, j, k;
-	int n_samples_hop;
-	float hop = 0.02f;
-	int minWaveformLength = 200;
-	
-	waveformLength = ((float)getNFrames() / (float)sample_rate) / (hop);
-	waveformLength--;
-	
-	if (waveformLength < minWaveformLength){
-		waveformLength = minWaveformLength;
-		hop =  ((float)getNFrames() / (float)sample_rate) / (float)(waveformLength);
-	}
-	n_samples_hop = hop * sample_rate;
-	
-	waveform = new float[2 * waveformLength];
-	k = 0;
-	for (i=0; i< 2*waveformLength-1; i=i+2) {
-		waveform[i] = 0;
-		waveform[i+1] = 0;
-		for (j=k;j<k+n_samples_hop;j++) {
- 			if ((samples_v[channels*j])< waveform[i]) {
-				waveform[i] = samples_v[channels*j];
-			}
-			if ( samples_v[channels*j] > waveform[i+1] ) {
-				waveform[i+1] = samples_v[channels*j];
-			}
+	//CF to do: waveform for segments
+	if (this->parentid == -1){
+		int i, j, k;
+		int n_samples_hop;
+		float hop = 0.02f;
+		int minWaveformLength = 200;
+		
+		waveformLength = ((float)getNFrames() / (float)sample_rate) / (hop);
+		waveformLength--;
+		
+		if (waveformLength < minWaveformLength){
+			waveformLength = minWaveformLength;
+			hop =  ((float)getNFrames() / (float)sample_rate) / (float)(waveformLength);
 		}
-		k += n_samples_hop;
-	}
-	waveformLength *= 2;
+		n_samples_hop = hop * sample_rate;
+		
+		waveform = new float[2 * waveformLength];
+		k = 0;
+		for (i=0; i< 2*waveformLength-1; i=i+2) {
+			waveform[i] = 0;
+			waveform[i+1] = 0;
+			for (j=k;j<k+n_samples_hop;j++) {
+				if ((samples_v[channels*j])< waveform[i]) {
+					waveform[i] = samples_v[channels*j];
+				}
+				if ( samples_v[channels*j] > waveform[i+1] ) {
+					waveform[i+1] = samples_v[channels*j];
+				}
+			}
+			k += n_samples_hop;
+		}
+		waveformLength *= 2;
+	}	
 }
 #endif //defined (SUPPORT_AUDIO)

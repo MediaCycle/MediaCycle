@@ -136,7 +136,7 @@ public:
 	void getDeviceList(std::vector<std::string>& devices);//{feedback->getDeviceList(devices);}
 	void printCaptureDeviceList();//{recorder->printDeviceList();}
 	void getCaptureDeviceList(std::vector<std::string>& devices){recorder->getCaptureDeviceList(devices);}
-	bool isCaptureAvailable(const char* deviceName = NULL){return recorder->isCaptureAvailable(deviceName);}
+	bool isCaptureAvailable(const char* deviceName = 0){return recorder->isCaptureAvailable(deviceName);}
 	
 	// Feedback Engine
 	void threadAudioEngine(){feedback->threadAudioEngine();}
@@ -145,7 +145,7 @@ public:
 	void stopAudioEngine(){feedback->stopAudioEngine();}
 	
 	// Recorder
-	bool initCapture(const char* deviceName = NULL){return recorder->initCapture(deviceName);}
+	bool initCapture(const char* deviceName = 0){return recorder->initCapture(deviceName);}
 	void startCapture(){recorder->startCapture();}
 	void stopCapture(){recorder->stopCapture();}
 	

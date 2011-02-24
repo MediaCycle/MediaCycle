@@ -64,11 +64,11 @@ std::vector<ACMediaFeatures*>  ACImageShapeHuMomentsPlugin::calculate(std::strin
 	std::vector<ACMediaFeatures*> allImageFeatures;
 
 	ACMediaFeatures* imageShapeFeatures = this->calculateHuMoments(image);
-	if (imageShapeFeatures != NULL){
+	if (imageShapeFeatures != 0){
 		allImageFeatures.push_back(imageShapeFeatures);
 	}
 	else{
-		cerr << "<ACImageShapeHuMomentsPlugin::calculate> : NULL shape feature" << endl;
+		cerr << "<ACImageShapeHuMomentsPlugin::calculate> : no shape feature" << endl;
 	}
 	delete image;
 	return allImageFeatures;
@@ -80,11 +80,11 @@ std::vector<ACMediaFeatures*> ACImageShapeHuMomentsPlugin::calculate(ACMediaData
 	std::vector<ACMediaFeatures*> allImageFeatures;
 	
 	ACMediaFeatures* imageShapeFeatures = this->calculateHuMoments(image);
-	if (imageShapeFeatures != NULL){
+	if (imageShapeFeatures != 0){
 		allImageFeatures.push_back(imageShapeFeatures);
 	}
 	else{
-		cerr << "<ACImageShapeHuMomentsPlugin::calculate> : NULL shape feature" << endl;
+		cerr << "<ACImageShapeHuMomentsPlugin::calculate> : no shape feature" << endl;
 	}
 		
 	delete image;

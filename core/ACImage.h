@@ -45,7 +45,7 @@
 
 // -----------------------------------
 
-osg::ref_ptr<osg::Image>  Convert_OpenCV_TO_OSG_IMAGE(IplImage* cvImg);
+osg::ref_ptr<osg::Image> Convert_OpenCV_TO_OSG_IMAGE(IplImage* cvImg);
 #endif //defined (SUPPORT_IMAGE) || defined (SUPPORT_VIDEO)
 
 #if defined (SUPPORT_IMAGE)
@@ -61,9 +61,10 @@ public:
 	void saveXMLSpecific(TiXmlElement* _media);
 	int loadXMLSpecific(TiXmlElement* _pMediaNode);
 
-	//void setThumbnail(osg::Image* _thumbnail) { thumbnail = _thumbnail; thumbnail_width = _thumbnail->width; thumbnail_height = _thumbnail->height; }
-	void setThumbnail(osg::Image* _thumbnail) { thumbnail = _thumbnail; thumbnail_width = _thumbnail->s(); thumbnail_height = _thumbnail->t(); }
-	osg::Image* getThumbnail() { return thumbnail; }
+	//void setThumbnail(osg::ref_ptr<osg::Image> _thumbnail) { thumbnail = _thumbnail; thumbnail_width = _thumbnail->width; thumbnail_height = _thumbnail->height; }
+	void setThumbnail(osg::ref_ptr<osg::Image> _thumbnail) { thumbnail = _thumbnail; thumbnail_width = _thumbnail->s(); thumbnail_height = _thumbnail->t(); }
+	osg::ref_ptr<osg::Image> getThumbnail() { return thumbnail; }
+	osg::ref_ptr<osg::Texture2D> getTexture() { return image_texture; }
 	int getThumbnailWidth() {return thumbnail_width;}
 	int getThumbnailHeight() {return thumbnail_height;}
 	void* getThumbnailPtr() { return (void*)image_texture; }
@@ -74,7 +75,8 @@ public:
 	//ACMediaData* extractData(std::string fname);
 	void extractData(std::string fname);
 		
-private:	
+private:
+	void init();
 	static const int default_thumbnail_width, default_thumbnail_height, default_thumbnail_area;
 	char  *thumbnail_filename;
 	int thumbnail_width, thumbnail_height; 

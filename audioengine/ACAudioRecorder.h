@@ -64,18 +64,19 @@ class ACAudioRecorder {
 	
 public:
 #ifdef USE_OPENAL
-	ACAudioRecorder(ALCdevice* _device, int samplerate, int buffersize):isRecording(false) {audio_samplerate = samplerate; audio_buffersize = buffersize; device = _device;}
+	ACAudioRecorder(ALCdevice* _device, int samplerate, int buffersize);
 #endif
 #ifdef USE_PORTAUDIO
-	ACAudioRecorder(PaStream * _stream, int samplerate, int buffersize):isRecording(false) {audio_samplerate = samplerate; audio_buffersize = buffersize; stream = _stream;}
+	ACAudioRecorder(PaStream * _stream, int samplerate, int buffersize);
 #endif
-	~ACAudioRecorder(){};
+	~ACAudioRecorder();
 	
 	// MediaCycle to query database and browser
 	MediaCycle				*media_cycle;
 	void setMediaCycle(MediaCycle *media_cycle) { this->media_cycle = media_cycle; };
 	
 private:
+	void init();
 #ifdef USE_OPENAL
 	ALCdevice* device;
 	ALCdevice* captureDevice;
@@ -87,8 +88,8 @@ private:
 
 public:
 	void getCaptureDeviceList(std::vector<std::string>& devices);
-	bool isCaptureAvailable(const char* deviceName = NULL);
-	bool initCapture(const char* deviceName = NULL);
+	bool isCaptureAvailable(const char* deviceName = 0);
+	bool initCapture(const char* deviceName = 0);
 	void shutdownCapture();	
 	void startCapture();	
 	void stopCapture();

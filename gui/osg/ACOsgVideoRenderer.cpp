@@ -55,7 +55,7 @@ void ACOsgVideoRenderer::prepareNodes() {
 		imageGeode(true, 2.0, 1.0); // true is for flip -- necessary for video
 		media_node->addChild(image_transform);
 	}
-	image_stream = (ImageStream*)(((ACVideo*)(media_cycle->getLibrary()->getMedia(media_index)))->getStream());
+	image_stream = ((ACVideo*)(media_cycle->getLibrary()->getMedia(media_index)))->getStream();
 	std::cout << "Movie length " << image_stream->getLength() << " and framerate "<< image_stream->getFrameRate() << std::endl;
 	
 	// Hack to display a first valid frame,

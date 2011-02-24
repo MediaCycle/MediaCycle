@@ -45,7 +45,7 @@ using namespace osg;
 
 #if defined (SUPPORT_VIDEO)
 
-osg::Image* Convert_OpenCV_2_osg_Image(IplImage* cvImg)
+osg::ref_ptr<osg::Image> Convert_OpenCV_2_osg_Image(IplImage* cvImg)
 {
 	// XS uncomment the following 4 lines for visual debug (e.g., thumbnail)	
 	//	cvNamedWindow("T", CV_WINDOW_AUTOSIZE);
@@ -68,7 +68,7 @@ osg::Image* Convert_OpenCV_2_osg_Image(IplImage* cvImg)
 			cvCvtColor( cvImg, cvImg, CV_BGR2RGB );
 		}
 		
-		osg::Image* osgImg = new osg::Image();
+		osg::ref_ptr<osg::Image> osgImg = new osg::Image();
 		
 		/*temp_data = new unsigned char[cvImg->width * cvImg->height * cvImg->nChannels];
 		 for (i=0;i<cvImg->height;i++) {
@@ -119,7 +119,7 @@ int ACOsgVideoSlitScanThread::convert(AVPicture *dst, int dst_pix_fmt, AVPicture
     //{
 	struct SwsContext * m_swscale_ctx = sws_getContext(src_width, src_height, (PixelFormat) src_pix_fmt,
 													   src_width, src_height, (PixelFormat) dst_pix_fmt,
-													   /*SWS_BILINEAR*/ SWS_BICUBIC, NULL, NULL, NULL);
+													   /*SWS_BILINEAR*/ SWS_BICUBIC, 0, 0, 0);
     //}
     OSG_INFO<<"Using sws_scale ";
     int result =  sws_scale(m_swscale_ctx,
@@ -189,7 +189,7 @@ int ACOsgVideoSlitScanThread::computeSlitScan(){
     av_register_all();
 	
     // Open video file
-	if(av_open_input_file(&pFormatCtx, filename.c_str(), NULL, 0, NULL)!=0){
+	if(av_open_input_file(&pFormatCtx, filename.c_str(), 0, 0, 0)!=0){
 		std::cerr << "Couldn't open file" << std::endl;
 		return -1;
 	}
@@ -292,7 +292,7 @@ int ACOsgVideoSlitScanThread::computeSlitScan(){
 					else
 						convert(dst, PIX_FMT_RGB32, src, m_context->pix_fmt, width, height);
 					
-					osg::Image* frame = new osg::Image();
+					osg::ref_ptr<osg::Image> frame = new osg::Image();
 					frame->setOrigin(osg::Image::TOP_LEFT);
 					frame->setImage(
 									width,height, 1, GL_RGBA, GL_BGRA, GL_UNSIGNED_BYTE,
@@ -342,8 +342,14 @@ int ACOsgVideoSlitScanThread::computeSlitScan(){
 }	
 
 ACOsgVideoTrackRenderer::ACOsgVideoTrackRenderer() {
+	//ACOsgTrackRenderer
+	selection_center_pos = -xspan/2.0f;
+	selection_begin_pos = selection_center_pos;
+	selection_end_pos = selection_center_pos;
+	
 	video_stream = 0;
-	//summary_stream = 0;
+	summary_data = 0;
+	
 	zoom_x = 1.0; zoom_y = 1.0;
 	track_left_x = 0.0;
 	summary_height = yspan/8.0f;//[0;yspan/2.0f]
@@ -352,15 +358,14 @@ ACOsgVideoTrackRenderer::ACOsgVideoTrackRenderer() {
 	summary_center_y = -yspan/2.0f + summary_height + segments_height;//-yspan/2.0f+yspan/8.0f; //[-yspan/2.0f;yspan/2.0f]
 	segments_center_y = -yspan/2.0f + segments_height; 
 	playback_center_y = -yspan/2.0f + summary_height + segments_height + playback_height; //yspan/4.0f; //[-yspan/2.0f;yspan/2.0f]
-
 	playback_scale = 0.5f;
-	playback_geode = 0; playback_transform = 0;
+	
+	playback_geode = 0; 
+	playback_transform = 0;
+	scrubbing = false;
+	
 	frame_min_width = 64;
 	frame_n = 1;
-	selection_center_pos = -xspan/2.0f;
-	selection_begin_pos = selection_center_pos;
-	selection_end_pos = selection_center_pos;
-	scrubbing = false;
 	
 	Vec4 color(1.0f, 1.0f, 1.0f, 0.9f);	
 	Vec4 color2(0.2f, 0.8f, 0.2f, 1.0f);	
@@ -368,7 +373,6 @@ ACOsgVideoTrackRenderer::ACOsgVideoTrackRenderer() {
 	colors = new Vec4Array;
 	colors2 = new Vec4Array;
 	colors3 = new Vec4Array;
-	
 	colors->push_back(color);		
 	colors2->push_back(color2);	
 	colors3->push_back(color3);	
@@ -390,14 +394,23 @@ ACOsgVideoTrackRenderer::ACOsgVideoTrackRenderer() {
 }
 
 ACOsgVideoTrackRenderer::~ACOsgVideoTrackRenderer() {
-	if (slit_scanner->isRunning()) slit_scanner->cancel();
-	if (video_stream) video_stream->quit();
-	if (playback_geode) { playback_geode->unref(); playback_geode=0; }
-	if (playback_transform) { playback_transform->unref(); playback_transform=0;}
-	//if (slit_scan_geode) { slit_scan_geode->unref(); slit_scan_geode=0; }
-	if (slit_scan_transform) { slit_scan_transform->unref(); slit_scan_transform=0;}
-	if (cursor_geode) {	cursor_geode->unref(); cursor_geode=0; }
-	if (segments_transform) { segments_transform->unref(); segments_transform=0;}	
+	if (slit_scanner){
+		if (slit_scanner->isRunning()) slit_scanner->cancel();
+		delete slit_scanner; slit_scanner=0;}
+	if (video_stream) {video_stream->quit(); video_stream=0;}
+	if (playback_geode) { //ref_ptr//playback_geode->unref();
+		playback_geode=0; }
+	if (playback_transform) { //ref_ptr//playback_transform->unref();
+		playback_transform=0;}
+	if (slit_scan_geode) { //ref_ptr//slit_scan_geode->unref();
+	slit_scan_geode=0; }
+	if (slit_scan_transform) { //ref_ptr//slit_scan_transform->unref();
+		slit_scan_transform=0;}
+	if (cursor_geode) {	//ref_ptr//cursor_geode->unref();
+		cursor_geode=0; }
+	if (segments_transform) { //ref_ptr//segments_transform->unref();
+		segments_transform=0;}	
+	if(summary_data) {summary_data=0;} //{cvReleaseCapture(&summary_data);} // no! ACVideo does it!
 }
 
 void ACOsgVideoTrackRenderer::playbackGeode() {
@@ -447,7 +460,7 @@ void ACOsgVideoTrackRenderer::playbackGeode() {
 	playback_geometry->setTexCoordArray(0, texcoord);	
 	
 	if (media_index > -1){
-		playback_texture = (osg::Texture2D*)(media_cycle->getLibrary()->getMedia(media_index)->getThumbnailPtr());
+		playback_texture = ((ACVideo*)(media_cycle->getLibrary()->getMedia(media_index)))->getTexture();
 		playback_texture->setResizeNonPowerOfTwoHint(false);
 		//playback_texture->setUnRefImageDataAfterApply(true);
 		state = playback_geometry->getOrCreateStateSet();
@@ -457,7 +470,7 @@ void ACOsgVideoTrackRenderer::playbackGeode() {
 		playback_geometry->setColorBinding(Geometry::BIND_OVERALL);
 		playback_geode->addDrawable(playback_geometry);
 		playback_transform->addChild(playback_geode);
-		playback_transform->ref();
+		//ref_ptr//playback_transform->ref();
 		playback_geode->setUserData(new ACRefId(track_index,"video track"));
 	}
 }
@@ -520,7 +533,7 @@ void ACOsgVideoTrackRenderer::slitScanGeode() {
 		slit_scan_geometry->setColorBinding(Geometry::BIND_OVERALL);
 		slit_scan_geode->addDrawable(slit_scan_geometry);
 		slit_scan_transform->addChild(slit_scan_geode);
-		slit_scan_transform->ref();
+		//ref_ptr//slit_scan_transform->ref();
 		slit_scan_geode->setUserData(new ACRefId(track_index,"video track summary slit-scan"));
 	}
 	
@@ -542,7 +555,7 @@ void ACOsgVideoTrackRenderer::cursorGeode() {
 	cursor_geometry->setVertexArray(vertices);
 	
 	Vec4 cursor_color(0.2f, 0.9f, 0.2f, 0.9f);	
-	Vec4Array* cursor_colors = new Vec4Array;
+	osg::ref_ptr<osg::Vec4Array> cursor_colors = new Vec4Array;
 	cursor_colors->push_back(cursor_color);		
 	cursor_geometry->setColorArray(cursor_colors);
 	cursor_geometry->setColorBinding(Geometry::BIND_OVERALL);
@@ -566,9 +579,9 @@ void ACOsgVideoTrackRenderer::cursorGeode() {
 	
 	cursor_geode->addDrawable(cursor_geometry);
 	cursor_transform->addChild(cursor_geode);
-	cursor_transform->ref();
+	//ref_ptr//cursor_transform->ref();
 	cursor_geode->setUserData(new ACRefId(track_index,"video track cursor"));
-	cursor_geode->ref();
+	//ref_ptr//cursor_geode->ref();
 }
 
 void ACOsgVideoTrackRenderer::framesGeode() {
@@ -593,8 +606,8 @@ void ACOsgVideoTrackRenderer::framesGeode() {
 		else {
 			IplImage* tmp = cvRetrieveFrame(summary_data);
 			
-			osg::Image* tmposg = Convert_OpenCV_2_osg_Image(tmp);
-			osg::Image* thumbnail = new osg::Image;
+			osg::ref_ptr<osg::Image> tmposg = Convert_OpenCV_2_osg_Image(tmp);
+			osg::ref_ptr<osg::Image> thumbnail = new osg::Image;
 			thumbnail->allocateImage(tmposg->s(), tmposg->t(), tmposg->r(), GL_RGB, tmposg->getDataType());
 			osg::copyImage(tmposg, 0, 0, 0, tmposg->s(), tmposg->t(), tmposg->r(),thumbnail, 0, 0, 0, false);
 			
@@ -652,12 +665,12 @@ void ACOsgVideoTrackRenderer::framesGeode() {
 			frame_geode->addDrawable(frame_geometry);
 			frame_geode->setUserData(new ACRefId(track_index,"video track summary frames"));
 		}
-		frame_geode->ref();
+		//ref_ptr//frame_geode->ref();
 		frames_group->addChild(frame_geode);
 	}
-	frames_group->ref();
+	//ref_ptr//frames_group->ref();
 	frames_transform->addChild(frames_group);
-	frames_transform->ref();
+	//ref_ptr//frames_transform->ref();
 }
 
 void ACOsgVideoTrackRenderer::segmentsGeode() {
@@ -685,20 +698,20 @@ void ACOsgVideoTrackRenderer::segmentsGeode() {
 			segment_color = Vec4(0.0f, 0.0f, 1.0f, 1.0f);
 		else // even segment index
 			segment_color = Vec4(1.0f, 0.0f, 0.0f, 1.0f);
-		Vec4Array* segment_colors = new Vec4Array;
+		osg::ref_ptr<osg::Vec4Array> segment_colors = new Vec4Array;
 		segment_colors->push_back(segment_color);
 
 		segments_geodes[s]->addDrawable(new osg::ShapeDrawable(new osg::Box(osg::Vec3(-xspan/2.0f+ (media->getSegment(s)->getStart()+media->getSegment(s)->getEnd())/2.0f*xspan/media_length,0.0f,0.0f),(media->getSegment(s)->getEnd()-media->getSegment(s)->getStart())*xspan/media_length,yspan,0.0f), hints));
 		//std::cout << "Segment " << s << " start " << media->getSegment(s)->getStart()/media_length << " end " << media->getSegment(s)->getEnd()/media_length << " width " << (media->getSegment(s)->getEnd()-media->getSegment(s)->getStart())/media_length << std::endl;
 		((ShapeDrawable*)(segments_geodes[s])->getDrawable(0))->setColor(segment_color);
 		segments_geodes[s]->setUserData(new ACRefId(track_index,"video track segments"));
-		segments_geodes[s]->ref();
+		//ref_ptr//segments_geodes[s]->ref();
 		segments_group->addChild(segments_geodes[s]);
 	}	
 	if(segments_n>0){
-		segments_group->ref();
+		//ref_ptr//segments_group->ref();
 		segments_transform->addChild(segments_group);
-		segments_transform->ref();
+		//ref_ptr//segments_transform->ref();
 	}	
 }
 
@@ -715,18 +728,31 @@ void ACOsgVideoTrackRenderer::updateTracks(double ratio) {
 	{
 		track_node->removeChild(playback_transform);
 		if (media){
+			if (slit_scanner){
+				if (slit_scanner->isRunning()) slit_scanner->cancel();
+				delete slit_scanner; slit_scanner=0;
+				slit_scanner = new ACOsgVideoSlitScanThread();
+			}
+			playback_geode=0;
+			playback_transform=0;
+			slit_scan_geode=0;
+			cursor_geode=0;
+			if(summary_data) {summary_data=0;} //{cvReleaseCapture(&summary_data);} // no! ACVideo does it!
+			if (video_stream) {video_stream->quit();}
+			video_stream=0;	
+		
 			slit_scanner->reset();
 			slit_scanner->setFileName(media->getFileName());
 			slit_scanner->startThread();
 			slit_scan_changed = true;
-		
+			
 			playbackGeode();
 			track_node->addChild(playback_transform);
 			
 			//if (video_stream) delete video_stream;
 			std::cout << "Getting video stream... ";
 			double video_stream_in = getTime();
-			video_stream = (ImageStream*)(((ACVideo*)(media_cycle->getLibrary()->getMedia(media_index)))->getStream());
+			video_stream = ((ACVideo*)(media_cycle->getLibrary()->getMedia(media_index)))->getStream();
 			std::cout << getTime()-video_stream_in << " sec." << std::endl;
 			
 			//if (summary_data) delete summary_data;
@@ -784,7 +810,7 @@ void ACOsgVideoTrackRenderer::updateTracks(double ratio) {
 		}
 		else {
 			
-			if (frame_n != floor(width/frame_min_width)){
+			if (frame_n != floor(width/frame_min_width) || media_changed){
 				double summary_start = getTime();
 				std::cout << "Generating frames... ";
 				frames_transform->removeChild(frames_group);
@@ -794,7 +820,7 @@ void ACOsgVideoTrackRenderer::updateTracks(double ratio) {
 			track_node->addChild(frames_transform);
 		}
 		
-		if (media){
+		if (media && media_changed){
 			if (media->getNumberOfSegments()>0 && segments_number != media->getNumberOfSegments()){
 				//if (frame_n != floor(width/frame_min_width)){
 				double segments_start = getTime();

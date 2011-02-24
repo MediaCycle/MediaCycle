@@ -71,7 +71,7 @@ enum ACVideoSummaryType {
 class ACOsgTrackRenderer {
 protected:
 	MediaCycle* media_cycle;
-	osg::MatrixTransform* track_node;
+	osg::ref_ptr<osg::MatrixTransform> track_node;
 	
 	int track_index, media_index;
 	// int	media_activity;
@@ -82,16 +82,22 @@ protected:
 	float width,height;
 	bool screen_width_changed;
 	bool width_changed,height_changed;
-	float selection_begin_pos,selection_end_pos,selection_center_pos;
-	bool selection_begin_pos_changed,selection_end_pos_changed,selection_center_pos_changed;
 	int displayed_media_index;
+	
+	// Magic numbers!
 	float zpos;
 	double xstep, ylim;
 	float xspan, yspan;
-	float playback_min_width;
 	float selection_sensing_width;
+	
 	bool manual_selection;
+	
+	// (re)init
+	float playback_min_width;
+	float selection_begin_pos,selection_end_pos,selection_center_pos;
+	bool selection_begin_pos_changed,selection_end_pos_changed,selection_center_pos_changed;
 	void initSelection();
+
 public:
 	ACOsgTrackRenderer();
 	virtual ~ACOsgTrackRenderer() {};
@@ -110,7 +116,7 @@ public:
 	void updateSize(int _width,float _height);
 	ACMedia* getMedia(){return media;}
 	//void setActivity(int _media_activity) { this->media_activity = _media_activity; }
-	osg::MatrixTransform* getTrack() { return track_node; };
+	osg::ref_ptr<osg::MatrixTransform> getTrack() { return track_node; };
 	
 	virtual void prepareTracks()=0;
 	virtual void updateTracks(double ratio=0.0)=0;

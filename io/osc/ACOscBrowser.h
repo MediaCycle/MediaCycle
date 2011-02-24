@@ -47,7 +47,7 @@ public:
 	ACOscBrowser(){};
 	~ACOscBrowser(){};
 	
-	// pass NULL to receive from any host
+	// pass 0 to receive from any host
 	ACOscBrowserRef create(const char *hostname, int port);
 	void release(ACOscBrowserRef aReceiver);
 	

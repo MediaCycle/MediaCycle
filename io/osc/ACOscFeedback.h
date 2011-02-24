@@ -51,7 +51,7 @@ struct OpaqSender
 	osc::OutboundPacketStream 	*oscStream;
 	UdpTransmitSocket		*oscSocket;
 	
-	OpaqSender() : oscStream(NULL), oscSocket(NULL) {}
+	OpaqSender() : oscStream(0), oscSocket(0) {}
 };
 
 class ACOscFeedback {

@@ -81,7 +81,7 @@ public:
         {
             OpenThreads::Thread::YieldCurrentThread();
         }
-		if (m_context) avcodec_close(m_context);
+		if (m_context) {avcodec_close(m_context); m_context = 0;}
     }
 	
     void run(void)
@@ -99,17 +99,17 @@ public:
     }
 	
 	private:
-		osg::Image* slit_scan;
+		osg::ref_ptr<osg::Image> slit_scan;
 		AVCodecContext* m_context;
 		bool _done;
 		std::string filename;
-	osg::NotifySeverity notify_level;
+		osg::NotifySeverity notify_level;
 	protected:
 		int convert(AVPicture *dst, int dst_pix_fmt, AVPicture *src,int src_pix_fmt, int src_width, int src_height);
 		void yuva420pToRgba(AVPicture * const dst, AVPicture * const src, int width, int height);
 		int computeSlitScan();
 	public:
-		osg::Image* getImage(){if (_done) return slit_scan; else return NULL;}
+		osg::ref_ptr<osg::Image> getImage(){if (_done) return slit_scan; else return 0;}
 		void setFileName(std::string _filename){filename = _filename;}
 		std::string getFileName(){return filename;}
 		void reset(){_done=false;}
@@ -118,23 +118,23 @@ public:
 
 class ACOsgVideoTrackRenderer : public ACOsgTrackRenderer {
 protected:
-	osg::ImageStream* video_stream;
+	osg::ref_ptr<osg::ImageStream>video_stream;
 	CvCapture* summary_data;
 
-	osg::MatrixTransform* playback_transform;
-	osg::MatrixTransform* frames_transform;
-	osg::MatrixTransform* segments_transform;
-	osg::MatrixTransform* slit_scan_transform;
+	osg::ref_ptr<osg::MatrixTransform> playback_transform;
+	osg::ref_ptr<osg::MatrixTransform> frames_transform;
+	osg::ref_ptr<osg::MatrixTransform> segments_transform;
+	osg::ref_ptr<osg::MatrixTransform> slit_scan_transform;
 	osg::ref_ptr<osg::MatrixTransform> cursor_transform;
 	
-	osg::Geode* playback_geode;
+	osg::ref_ptr<osg::Geode> playback_geode;
 	osg::ref_ptr<osg::Group> frames_group;
-	osg::Geode* frame_geode;
+	osg::ref_ptr<osg::Geode> frame_geode;
 	osg::ref_ptr<osg::Group> segments_group;
-	std::vector< osg::Geode* > segments_geodes;
-	//osg::Geode* segments_geodes;
-	osg::Geode* slit_scan_geode;
-	osg::Geode* cursor_geode;
+	std::vector< osg::ref_ptr<osg::Geode> > segments_geodes;
+	//osg::ref_ptr<osg::Geode> segments_geodes;
+	osg::ref_ptr<osg::Geode> slit_scan_geode;
+	osg::ref_ptr<osg::Geode> cursor_geode;
 
 	void playbackGeode();
 	void framesGeode();
@@ -153,9 +153,9 @@ protected:
 	ACOsgVideoSlitScanThread* slit_scanner;
 
 	static const int NCOLORS ;
-	osg::Vec4Array* colors;
-	osg::Vec4Array* colors2;
-	osg::Vec4Array* colors3;
+	osg::ref_ptr<osg::Vec4Array> colors;
+	osg::ref_ptr<osg::Vec4Array> colors2;
+	osg::ref_ptr<osg::Vec4Array> colors3;
 	
 	ACVideoSummaryType track_summary_type;
 	

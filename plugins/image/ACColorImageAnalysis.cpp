@@ -75,11 +75,11 @@ ACColorImageAnalysis::ACColorImageAnalysis(IplImage* img, string _cmode) : ACIma
 }
 
 void ACColorImageAnalysis::reset(){
-	imgp = NULL;
-	bw_imgp = NULL;
+	imgp = 0;
+	bw_imgp = 0;
 	for (int i=0; i<3 ; i++) { 
-		channel_img[i] = NULL;
-		fft[i] = NULL;
+		channel_img[i] = 0;
+		fft[i] = 0;
 	}
 	HAS_CHANNELS = HAS_FFT = HAS_BW = false;
 	original_width = original_height = 0;
@@ -87,18 +87,18 @@ void ACColorImageAnalysis::reset(){
 }
 
 void ACColorImageAnalysis::clean(){
-	if (imgp != NULL) cvReleaseImage(&imgp);
-	if (bw_imgp != NULL) cvReleaseImage(&bw_imgp);
+	if (imgp != 0) cvReleaseImage(&imgp);
+	if (bw_imgp != 0) cvReleaseImage(&bw_imgp);
 	if (HAS_CHANNELS) {
 		for (int i=0; i<3 ; i++) { 
-			if (channel_img[i] != NULL) cvReleaseImage (&channel_img[i]); 
+			if (channel_img[i] != 0) cvReleaseImage (&channel_img[i]); 
 		}
 	}
 	// XS TODO refine this !
 	// HAS_COLOR_FFT
 	if (HAS_FFT) {
 		for (int i=0; i<3 ; i++) { 
-			if (fft[i] != NULL) fftw_free (fft[i]);
+			if (fft[i] != 0) fftw_free (fft[i]);
 		}
 	}
 }
@@ -122,7 +122,7 @@ int ACColorImageAnalysis::splitChannels(std::string cmode){ // or HSV
 	int width = this->getWidth();
 	int depth = this->getDepth();
 
-	if (imgp == NULL){
+	if (imgp == 0){
 		cerr << " <ACColorImageAnalysis::SplitChannels> : no image loaded yet " << endl;
 		return 0;
 	}
@@ -136,7 +136,7 @@ int ACColorImageAnalysis::splitChannels(std::string cmode){ // or HSV
 			// regular split on image that had not been split before
 			for (int i = 0; i < 3; i++)
 				channel_img[i] = cvCreateImage (cvSize (width, height), depth, 1);
-			cvSplit (imgp, channel_img[0], channel_img[1], channel_img[2], NULL); 
+			cvSplit (imgp, channel_img[0], channel_img[1], channel_img[2], 0); 
 			HAS_CHANNELS = true;
 			return 1;
 		}
@@ -163,7 +163,7 @@ int ACColorImageAnalysis::splitChannels(std::string cmode){ // or HSV
 		}
 		for (int i = 0; i < 3; i++)
 			channel_img[i] = cvCreateImage (cvSize (width, height), depth, 1);
-		cvSplit (tmp_im, channel_img[0], channel_img[1], channel_img[2], NULL); 
+		cvSplit (tmp_im, channel_img[0], channel_img[1], channel_img[2], 0); 
 		HAS_CHANNELS = true;
 		cvReleaseImage( &tmp_im );
 		return 1;
@@ -172,13 +172,13 @@ int ACColorImageAnalysis::splitChannels(std::string cmode){ // or HSV
 
 IplImage* ACColorImageAnalysis::getChannel(int i){
 	if (!HAS_CHANNELS) splitChannels(); // default : RGB	
-	if (imgp == NULL){
+	if (imgp == 0){
 		cerr << " <ACColorImageAnalysis::SplitChannels> : no image loaded yet " << endl;
-		return NULL;
+		return 0;
 	}
 	if (i > this->getNumberOfChannels()-1 || i < 0) {
 		cerr << "channel index out of range" << endl;
-		return NULL;
+		return 0;
 	}
 	return channel_img[i];
 }

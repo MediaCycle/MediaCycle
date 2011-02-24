@@ -164,7 +164,7 @@ Based on Alan J. Miller's median.f90 routine.
 
 /* ********************************************************************** */
 
-static const double* sortdata = NULL; /* used in the quicksort algorithm */
+static const double* sortdata = 0; /* used in the quicksort algorithm */
 
 /* ---------------------------------------------------------------------- */
 
@@ -202,17 +202,17 @@ static double* getrank (int n, double data[])
  * the same value get the same rank, equal to the average of the ranks had the
  * elements different values. The ranks are returned as a newly allocated
  * array that should be freed by the calling routine. If getrank fails due to
- * a memory allocation error, it returns NULL.
+ * a memory allocation error, it returns 0.
  */
 { int i;
   double* rank;
   int* index;
   rank = (double*)malloc(n*sizeof(double));
-  if (!rank) return NULL;
+  if (!rank) return 0;
   index = (int*)malloc(n*sizeof(int));
   if (!index)
   { free(rank);
-    return NULL;
+    return 0;
   }
   /* Call sort to get an index table */
   sort (n, data, index);
@@ -262,8 +262,8 @@ makedatamask(int nrows, int ncols, double*** pdata, int*** pmask)
     *pmask = mask;
     return 1;
   }
-  *pdata = NULL;
-  *pmask = NULL;
+  *pdata = 0;
+  *pmask = 0;
   nrows = i;
   for (i = 0; i < nrows; i++)
   { free(data[i]);
@@ -1403,7 +1403,7 @@ static double(*setmetric(char dist))
     case 'k': return &kendall;
     default: return &euclid;
   }
-  return NULL; /* Never get here */
+  return 0; /* Never get here */
 }
 
 /* *********************************************************************  */
@@ -2049,7 +2049,7 @@ kmeans(int nclusters, int nrows, int ncolumns, double** data, int** mask,
 
   /* We save the clustering solution periodically and check if it reappears */
   int* saved = (int*)malloc(nelements*sizeof(int));
-  if (saved==NULL) return -1;
+  if (saved==0) return -1;
 
   *error = DBL_MAX;
 
@@ -2154,7 +2154,7 @@ kmedians(int nclusters, int nrows, int ncolumns, double** data, int** mask,
 
   /* We save the clustering solution periodically and check if it reappears */
   int* saved = (int*)malloc(nelements*sizeof(int));
-  if (saved==NULL) return -1;
+  if (saved==0) return -1;
 
   *error = DBL_MAX;
 
@@ -2333,7 +2333,7 @@ number of clusters is larger than the number of elements being clustered,
   int i;
   int ok;
   int* tclusterid;
-  int* mapping = NULL;
+  int* mapping = 0;
   double** cdata;
   int** cmask;
   int* counts;
@@ -2481,7 +2481,7 @@ to 0. If kmedoids fails due to a memory allocation error, ifound is set to -1.
 
   /* We save the clustering solution periodically and check if it reappears */
   saved = (int*)malloc(nelements*sizeof(int));
-  if (saved==NULL) return;
+  if (saved==0) return;
 
   centroids = (int*)malloc(nclusters*sizeof(int));
   if(!centroids)
@@ -2600,7 +2600,7 @@ parameter transpose is set to a nonzero value, the distances between the columns
 (microarrays) are calculated, otherwise distances between the rows (genes) are
 calculated.
 If sufficient space in memory cannot be allocated to store the distance matrix,
-the routine returns a NULL pointer, and all memory allocated so far for the
+the routine returns a 0 pointer, and all memory allocated so far for the
 distance matrix is freed.
 
 
@@ -2658,21 +2658,21 @@ when microarrays are being clustered.
     (int, double**, double**, int**, int**, const double[], int, int, int) =
        setmetric(dist);
 
-  if (n < 2) return NULL;
+  if (n < 2) return 0;
 
   /* Set up the ragged array */
   matrix = (double**)malloc(n*sizeof(double*));
-  if(matrix==NULL) return NULL; /* Not enough memory available */
-  matrix[0] = NULL;
+  if(matrix==0) return 0; /* Not enough memory available */
+  matrix[0] = 0;
   /* The zeroth row has zero columns. We allocate it anyway for convenience.*/
   for (i = 1; i < n; i++)
   { matrix[i] = (double*)malloc(i*sizeof(double));
-    if (matrix[i]==NULL) break; /* Not enough memory available */
+    if (matrix[i]==0) break; /* Not enough memory available */
   }
   if (i < n) /* break condition encountered */
   { j = i;
     for (i = 1; i < j; i++) free(matrix[i]);
-    return NULL;
+    return 0;
   }
 
   /* Calculate the distances and save them in the ragged array */
@@ -2751,7 +2751,7 @@ Return value
 The function returns a pointer to a newly allocated array containing the
 calculated weights for the rows (if transpose==0) or columns (if
 transpose==1). If not enough memory could be allocated to store the
-weights array, the function returns NULL.
+weights array, the function returns 0.
 
 ========================================================================
 */
@@ -2765,7 +2765,7 @@ weights array, the function returns NULL.
        setmetric(dist);
 
   double* result = (double*)malloc(nelements*sizeof(double));
-  if (!result) return NULL;
+  if (!result) return 0;
   memset(result, 0, nelements*sizeof(double));
 
   for (i = 0; i < nelements; i++)
@@ -2924,7 +2924,7 @@ hierarchical clustering solution consisting of nelements-1 nodes. Depending on
 whether genes (rows) or microarrays (columns) were clustered, nelements is
 equal to nrows or ncolumns. See src/cluster.h for a description of the Node
 structure.
-If a memory error occurs, pclcluster returns NULL.
+If a memory error occurs, pclcluster returns 0.
 ========================================================================
 */
 { int i, j;
@@ -2942,16 +2942,16 @@ If a memory error occurs, pclcluster returns NULL.
   double** newdata;
   int** newmask;
   int* distid = (int*)malloc(nelements*sizeof(int));
-  if(!distid) return NULL;
+  if(!distid) return 0;
   result = (Node*)malloc(nnodes*sizeof(Node));
   if(!result)
   { free(distid);
-    return NULL;
+    return 0;
   }
   if(!makedatamask(nelements, ndata, &newdata, &newmask))
   { free(result);
     free(distid);
-    return NULL; 
+    return 0; 
   }
 
   for (i = 0; i < nelements; i++) distid[i] = i;
@@ -3100,7 +3100,7 @@ distmatrix (input) double**
 The distance matrix. If the distance matrix is passed by the calling routine
 treecluster, it is used by pslcluster to speed up the clustering calculation.
 The pslcluster routine does not modify the contents of distmatrix, and does
-not deallocate it. If distmatrix is NULL, the pairwise distances are calculated
+not deallocate it. If distmatrix is 0, the pairwise distances are calculated
 by the pslcluster routine from the gene expression data (the data and mask
 arrays) and stored in temporary arrays. If distmatrix is passed, the original
 gene expression data (specified by the data and mask arguments) are not needed
@@ -3115,7 +3115,7 @@ hierarchical clustering solution consisting of nelements-1 nodes. Depending on
 whether genes (rows) or microarrays (columns) were clustered, nelements is
 equal to nrows or ncolumns. See src/cluster.h for a description of the Node
 structure.
-If a memory error occurs, pslcluster returns NULL.
+If a memory error occurs, pslcluster returns 0.
 
 ========================================================================
 */
@@ -3127,24 +3127,24 @@ If a memory error occurs, pslcluster returns NULL.
   int* index;
   Node* result;
   temp = (double*)malloc(nnodes*sizeof(double));
-  if(!temp) return NULL;
+  if(!temp) return 0;
   index = (int*)malloc(nelements*sizeof(int));
   if(!index)
   { free(temp);
-    return NULL;
+    return 0;
   }
   vector = (int*)malloc(nnodes*sizeof(int));
   if(!vector)
   { free(index);
     free(temp);
-    return NULL;
+    return 0;
   }
   result = (Node*)malloc(nelements*sizeof(Node));
   if(!result)
   { free(vector);
     free(index);
     free(temp);
-    return NULL;
+    return 0;
   }
 
   for (i = 0; i < nnodes; i++) vector[i] = i;
@@ -3242,7 +3242,7 @@ hierarchical clustering solution consisting of nelements-1 nodes. Depending on
 whether genes (rows) or microarrays (columns) were clustered, nelements is
 equal to nrows or ncolumns. See src/cluster.h for a description of the Node
 structure.
-If a memory error occurs, pmlcluster returns NULL.
+If a memory error occurs, pmlcluster returns 0.
 ========================================================================
 */
 { int j;
@@ -3251,11 +3251,11 @@ If a memory error occurs, pmlcluster returns NULL.
   Node* result;
 
   clusterid = (int*)malloc(nelements*sizeof(int));
-  if(!clusterid) return NULL;
+  if(!clusterid) return 0;
   result = (Node*)malloc((nelements-1)*sizeof(Node));
   if (!result)
   { free(clusterid);
-    return NULL;
+    return 0;
   }
 
   /* Setup a list specifying to which cluster a gene belongs */
@@ -3317,7 +3317,7 @@ hierarchical clustering solution consisting of nelements-1 nodes. Depending on
 whether genes (rows) or microarrays (columns) were clustered, nelements is
 equal to nrows or ncolumns. See src/cluster.h for a description of the Node
 structure.
-If a memory error occurs, palcluster returns NULL.
+If a memory error occurs, palcluster returns 0.
 ========================================================================
 */
 { int j;
@@ -3327,17 +3327,17 @@ If a memory error occurs, palcluster returns NULL.
   Node* result;
 
   clusterid = (int*)malloc(nelements*sizeof(int));
-  if(!clusterid) return NULL;
+  if(!clusterid) return 0;
   number = (int*)malloc(nelements*sizeof(int));
   if(!number)
   { free(clusterid);
-    return NULL;
+    return 0;
   }
   result = (Node*)malloc((nelements-1)*sizeof(Node));
   if (!result)
   { free(clusterid);
     free(number);
-    return NULL;
+    return 0;
   }
 
   /* Setup a list specifying to which cluster a gene belongs, and keep track
@@ -3405,7 +3405,7 @@ The treecluster routine performs hierarchical clustering using pairwise
 single-, maximum-, centroid-, or average-linkage, as defined by method, on a
 given set of gene expression data, using the distance metric given by dist.
 If successful, the function returns a pointer to a newly allocated Tree struct
-containing the hierarchical clustering solution, and NULL if a memory error
+containing the hierarchical clustering solution, and 0 if a memory error
 occurs. The pointer should be freed by the calling routine to prevent memory
 leaks.
 
@@ -3471,21 +3471,21 @@ hierarchical clustering solution consisting of nelements-1 nodes. Depending on
 whether genes (rows) or microarrays (columns) were clustered, nelements is
 equal to nrows or ncolumns. See src/cluster.h for a description of the Node
 structure.
-If a memory error occurs, treecluster returns NULL.
+If a memory error occurs, treecluster returns 0.
 
 ========================================================================
 */
-{ Node* result = NULL;
+{ Node* result = 0;
   const int nelements = (transpose==0) ? nrows : ncolumns;
-  const int ldistmatrix = (distmatrix==NULL && method!='s') ? 1 : 0;
+  const int ldistmatrix = (distmatrix==0 && method!='s') ? 1 : 0;
 
-  if (nelements < 2) return NULL;
+  if (nelements < 2) return 0;
 
   /* Calculate the distance matrix if the user didn't give it */
   if(ldistmatrix)
   { distmatrix =
       distancematrix(nrows, ncolumns, data, mask, weight, dist, transpose);
-    if (!distmatrix) return NULL; /* Insufficient memory */
+    if (!distmatrix) return 0; /* Insufficient memory */
   }
 
   switch(method)
@@ -3867,14 +3867,14 @@ celldata (output) double[nxgrid][nygrid][ncolumns] if transpose==0;
                   double[nxgrid][nygrid][nrows]    if tranpose==1
 The gene expression data for each node (cell) in the 2D grid. This can be
 interpreted as the centroid for the cluster corresponding to that cell. If
-celldata is NULL, then the centroids are not returned. If celldata is not
-NULL, enough space should be allocated to store the centroid data before callingsomcluster.
+celldata is 0, then the centroids are not returned. If celldata is not
+0, enough space should be allocated to store the centroid data before callingsomcluster.
 
 clusterid (output), int[nrows][2]    if transpose==0;
                     int[ncolumns][2] if transpose==1
 For each item (gene or microarray) that is clustered, the coordinates of the
-cell in the 2D grid to which the item was assigned. If clusterid is NULL, the
-cluster assignments are not returned. If clusterid is not NULL, enough memory
+cell in the 2D grid to which the item was assigned. If clusterid is 0, the
+cluster assignments are not returned. If clusterid is not 0, enough memory
 should be allocated to store the clustering information before calling
 somcluster.
 
@@ -3883,7 +3883,7 @@ somcluster.
 { const int nobjects = (transpose==0) ? nrows : ncolumns;
   const int ndata = (transpose==0) ? ncolumns : nrows;
   int i,j;
-  const int lcelldata = (celldata==NULL) ? 0 : 1;
+  const int lcelldata = (celldata==0) ? 0 : 1;
 
   if (nobjects < 2) return;
 

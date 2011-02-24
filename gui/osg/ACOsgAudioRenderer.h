@@ -39,23 +39,28 @@
 #if defined (SUPPORT_AUDIO)
 
 #include "ACOsgMediaRenderer.h"
+#include <osgText/Font>
+#include <osgText/Text>
 
 class ACOsgAudioRenderer : public ACOsgMediaRenderer {
 	
 protected:
-	osg::Geode* waveform_geode;
-	osg::Geode* curser_geode;
+	osg::ref_ptr<osg::Geode> waveform_geode;
+	osg::ref_ptr<osg::Geode> curser_geode;
+	osg::ref_ptr<osg::Geode> metadata_geode;
+	osg::ref_ptr<osgText::Text> metadata;
 
 #ifdef AUTO_TRANSFORM
-	osg::AutoTransform* curser_transform;
+	osg::ref_ptr<osg::AutoTransform> curser_transform;
 #else
-	osg::MatrixTransform* curser_transform;
+	osg::ref_ptr<osg::MatrixTransform> curser_transform;
 #endif
-	osg::Geode* entry_geode;
+	osg::ref_ptr<osg::Geode> entry_geode;
 	
 	void waveformGeode();
 	void curserGeode();
 	void entryGeode();
+	void metadataGeode();
 	
 public:
 	ACOsgAudioRenderer();

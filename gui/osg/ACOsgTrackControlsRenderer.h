@@ -59,7 +59,7 @@
 class ACOsgTrackControlsRenderer {
 protected:
 	MediaCycle* media_cycle;
-	osg::MatrixTransform* track_node;
+	osg::ref_ptr<osg::MatrixTransform> track_node;
 	int track_index, media_index;
 	float distance_mouse;
 	// int	media_activity;
@@ -81,7 +81,7 @@ public:
 	ACMedia* getMedia(){return media;}
 	void setDistanceMouse(float _distance_mouse) { this->distance_mouse = _distance_mouse; };
 	//void setActivity(int _media_activity) { this->media_activity = _media_activity; }
-	osg::MatrixTransform* getControls() { return track_node; };
+	osg::ref_ptr<osg::MatrixTransform> getControls() { return track_node; };
 	
 	virtual void prepareControls()=0;
 	virtual void updateControls(double ratio=0.0)=0;

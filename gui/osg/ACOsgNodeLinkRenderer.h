@@ -61,14 +61,14 @@ public:
 	void setMediaCycle(MediaCycle *_media_cycle) { this->media_cycle = _media_cycle; };
 	void setNodeIndex(int _node_index) { this->node_index = _node_index; };
 	void setDistanceMouse(float _distance_mouse) { this->distance_mouse = _distance_mouse; };
-	osg::MatrixTransform* getLink() { return link_node; };
+	osg::ref_ptr<osg::MatrixTransform> getLink() { return link_node; };
 protected:
 	MediaCycle* media_cycle;
-	osg::MatrixTransform* link_node;
+	osg::ref_ptr<osg::MatrixTransform> link_node;
 	int node_index;
 	float distance_mouse;	
 protected:
-	osg::Geode* link_geode;	
+	osg::ref_ptr<osg::Geode> link_geode;	
 	void linkGeode(double to_x, double to_y);
 public:
 	ACOsgNodeLinkRenderer();

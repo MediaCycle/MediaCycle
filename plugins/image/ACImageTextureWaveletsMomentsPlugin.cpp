@@ -63,11 +63,11 @@ std::vector<ACMediaFeatures*>  ACImageTextureWaveletsMomentsPlugin::calculate(st
 	std::vector<ACMediaFeatures*> allImageFeatures;
 
 	ACMediaFeatures* imageTextureFeatures = this->calculateHuMoments(image);
-	if (imageTextureFeatures != NULL){
+	if (imageTextureFeatures != 0){
 		allImageFeatures.push_back(imageTextureFeatures);
 	}
 	else{
-		cerr << "<ACImageTextureWaveletsMomentsPlugin::calculate> : NULL texture feature" << endl;
+		cerr << "<ACImageTextureWaveletsMomentsPlugin::calculate> : no texture feature" << endl;
 	}
 	
 	delete image;
@@ -80,11 +80,11 @@ std::vector<ACMediaFeatures*> ACImageTextureWaveletsMomentsPlugin::calculate(ACM
 	std::vector<ACMediaFeatures*> allImageFeatures;
 	
 	ACMediaFeatures* imageTextureFeatures = this->calculateHuMoments(image);
-	if (imageTextureFeatures != NULL){
+	if (imageTextureFeatures != 0){
 		allImageFeatures.push_back(imageTextureFeatures);
 	}
 	else{
-		cerr << "<ACImageTextureWaveletsMomentsPlugin::calculate> : NULL texture feature" << endl;
+		cerr << "<ACImageTextureWaveletsMomentsPlugin::calculate> : no texture feature" << endl;
 	}
 	
 	delete image;

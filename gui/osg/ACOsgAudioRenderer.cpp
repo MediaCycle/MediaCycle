@@ -36,31 +36,48 @@
 #if defined (SUPPORT_AUDIO)
 
 #include "ACOsgAudioRenderer.h"
+#include <ACAudio.h>
+
+#include "boost/filesystem.hpp"   // includes all needed Boost.Filesystem declarations
+#include "boost/filesystem/operations.hpp"
+#include "boost/filesystem/path.hpp"
+
+#include <sstream>
+
+namespace fs = boost::filesystem;
 
 using namespace osg;
 
 ACOsgAudioRenderer::ACOsgAudioRenderer() {
-
-	waveform_geode = 0; curser_geode = 0; curser_transform = 0; entry_geode = 0;
+	waveform_geode = 0;
+	curser_geode = 0; 
+	metadata_geode = 0;	
+	metadata = 0;	
+	curser_transform = 0; 
+	entry_geode = 0; 
 }
 
 ACOsgAudioRenderer::~ACOsgAudioRenderer() {
 	// media_node->removeChild(0,1);
 	if 	(waveform_geode) {
-		waveform_geode->unref();
+		//ref_ptr//waveform_geode->unref();
 		waveform_geode=0;
 	}
 	if 	(curser_geode) {
-		curser_geode->unref();
+		//ref_ptr//curser_geode->unref();
 		curser_geode=0;
 	}
 	if 	(curser_transform) {
-		curser_transform->unref();
+		//ref_ptr//curser_transform->unref();
 		curser_transform=0;
 	}
 	if 	(entry_geode) {
-		entry_geode->unref();
+		//ref_ptr//entry_geode->unref();
 		entry_geode=0;
+	}
+	if 	(metadata_geode) {
+		//ref_ptr//metadata_geode->unref();
+		metadata_geode=0;
 	}
 }
 
@@ -217,7 +234,7 @@ void ACOsgAudioRenderer::waveformGeode() {
 	/////////////////////////
 	
 	Vec4 color(0.9f, 0.9f, 0.9f, 0.9f);	
-	Vec4Array* colors = new Vec4Array;
+	osg::ref_ptr<osg::Vec4Array> colors = new Vec4Array;
 	colors->push_back(color);
 	
 	samples_geometry->setColorArray(colors);
@@ -250,12 +267,63 @@ void ACOsgAudioRenderer::waveformGeode() {
 	waveform_geode->addDrawable(frame_geometry);
 	
 	waveform_geode->setUserData(new ACRefId(node_index));
-	samples_geometry->ref();
-	frame_geometry->ref();
-	border_geometry->ref(); 
-	axis_geometry->ref(); 
-	waveform_geode->ref();	
+	//ref_ptr//samples_geometry->ref();
+	//ref_ptr//frame_geometry->ref();
+	//ref_ptr//border_geometry->ref(); 
+	//ref_ptr//axis_geometry->ref(); 
+	//ref_ptr//waveform_geode->ref();	
 }
+
+void ACOsgAudioRenderer::metadataGeode() {
+	
+	osg::Vec4 textColor(0.9f,0.9f,0.9f,1.0f);
+	float textCharacterSize = 80.0f; // 10 pixels ? // broken with OSG v2.9.11??
+	
+	metadata_geode = new Geode();
+	
+	metadata = new osgText::Text;
+	//font = osgText::readFontFile("fonts/arial.ttf");
+	//text->setFont( font.get() );
+	metadata->setColor(textColor);
+	metadata->setCharacterSizeMode( osgText::Text::SCREEN_COORDS );
+	metadata->setCharacterSize(textCharacterSize);
+	metadata->setPosition(osg::Vec3(0,0.025,0.04));
+	//	text->setPosition(osg::Vec3(pos.x,pos.y,pos.z));
+	metadata->setLayout(osgText::Text::LEFT_TO_RIGHT);
+	metadata->setFontResolution(64,64);
+	//metadata->setAlignment( osgText::Text::CENTER_CENTER );
+	//metadata->setAxisAlignment( osgText::Text::SCREEN );
+	
+	metadata->setDrawMode(osgText::Text::TEXT);// osgText::Text::BOUNDINGBOX, osgText::Text::ALIGNMENT
+	
+	
+	// CF: temporary workaround as the ACUserLog tree and the ACLoopAttributes vector in ACMediaBrowser are not sync'd 
+	int media_index = node_index; // or media_cycle->getBrowser()->getMediaNode(node_index).getMediaId(); 
+	if (media_cycle->getBrowser()->getMode() == AC_MODE_NEIGHBORS)
+		media_index = media_cycle->getBrowser()->getUserLog()->getMediaIdFromNodeId(node_index);
+	
+	ACAudio* media = (ACAudio*)(media_cycle->getLibrary()->getMedia(media_index));
+	std::stringstream content;
+	content << 
+	//"Filename: " << 
+	fs::basename(media->getFileName());
+	/*	<< std::endl
+		<< "Duration: " << media->getDuration();*/
+		
+	metadata->setText( content.str() );
+	
+	//state = text_geode->getOrCreateStateSet();
+	//state->setMode(GL_LIGHTING, osg::StateAttribute::PROTECTED | osg::StateAttribute::OFF );
+	//state->setMode(GL_BLEND, StateAttribute::ON);
+	//state->setMode(GL_LINE_SMOOTH, StateAttribute::ON);
+	
+	//TODO check this .get() (see also ACOsgBrowserRenderer.cpp)
+	//".get()" is necessary for compilation under linux (OSG v2.4)
+	metadata_geode->addDrawable(metadata.get());
+	
+	//ref_ptr//metadata_geode->ref();	
+	
+}	
 
 void ACOsgAudioRenderer::curserGeode() {
 	
@@ -309,7 +377,7 @@ void ACOsgAudioRenderer::curserGeode() {
 	curser_geometry->addPrimitiveSet(line_p);	
 	
 	Vec4 curser_color(0.2f, 0.9f, 0.2f, 0.9f);	
-	Vec4Array* curser_colors = new Vec4Array;
+	osg::ref_ptr<osg::Vec4Array> curser_colors = new Vec4Array;
 	curser_colors->push_back(curser_color);		
 	curser_geometry->setColorArray(curser_colors);
 	curser_geometry->setColorBinding(Geometry::BIND_OVERALL);
@@ -341,10 +409,10 @@ void ACOsgAudioRenderer::curserGeode() {
 	//sprintf(name, "some audio element");
 	curser_transform->setUserData(new ACRefId(node_index));
 	//curser_transform->setName(name);
-	curser_transform->ref();
+	//ref_ptr//curser_transform->ref();
 	curser_geode->setUserData(new ACRefId(node_index));
 	//curser_geode->setName(name);
-	curser_geode->ref();
+	//ref_ptr//curser_geode->ref();
 }
 
 void ACOsgAudioRenderer::entryGeode() {
@@ -376,7 +444,7 @@ void ACOsgAudioRenderer::entryGeode() {
 #endif	
 	entry_geode->setUserData(new ACRefId(node_index));
 	//entry_geode->setName(name);
-	entry_geode->ref();	
+	//ref_ptr//entry_geode->ref();	
 	
 }
 
@@ -386,6 +454,7 @@ void ACOsgAudioRenderer::prepareNodes() {
 	curser_transform = 0;
 	curser_geode = 0;
 	entry_geode = 0;
+	metadata_geode = 0;
 	
 	//waveformGeode();
 	//curserGeode();
@@ -457,10 +526,17 @@ void ACOsgAudioRenderer::updateNodes(double ratio) {
 			if (curser_transform == 0) {
 				curserGeode();
 			}
+			if (metadata_geode == 0) {
+				metadataGeode();
+			}
 			
-			if(media_node->getNumChildren() == 1 && media_node->getChild(0) == entry_geode) {
+			//if(media_node->getNumChildren() > 0 && media_node->getChild(0) == entry_geode) {
+			if(media_node->getNumChildren() !=3 ) {// waveform + curser + metadata
 				//waveform_geode->setNodeMask(-1);
-				media_node->setChild(0, waveform_geode);
+				media_node->removeChild(entry_geode);
+				media_node->addChild(waveform_geode);
+				//media_node->setChild(0, waveform_geode);
+				media_node->addChild(metadata_geode);
 				media_node->addChild(curser_transform);
 			}
 			
@@ -476,12 +552,14 @@ void ACOsgAudioRenderer::updateNodes(double ratio) {
 			T =  Matrix::rotate(-media_cycle_angle,Vec3(0.0,0.0,1.0)) * Matrix::scale(localscale/media_cycle_zoom,localscale/media_cycle_zoom,localscale/media_cycle_zoom) * T;
 		}
 		else {
-			if(media_node->getNumChildren() == 2) {
-				media_node->setChild(0, entry_geode);
-				media_node->removeChild(1, 1);
-			}
-			else if (media_node->getNumChildren() == 1 && media_node->getChild(0) == waveform_geode) {
-				media_node->setChild(0, entry_geode);
+			//if(media_node->getNumChildren() == 3) {
+			if(media_node->getNumChildren() != 1) { // entry_geode
+				media_node->removeChild(waveform_geode);
+				media_node->removeChild(metadata_geode);
+				media_node->removeChild(curser_transform);
+				media_node->addChild(entry_geode);
+				//media_node->setChild(0, entry_geode);
+				//media_node->removeChild(1, 1);
 			}
 			
 			//CF nodes colored along their relative cluster on in Clusters Mode 

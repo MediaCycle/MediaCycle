@@ -53,6 +53,7 @@ class ACOsgTimelineEventHandler : public  osgGA::GUIEventHandler {
 	public: 
 		ACOsgTimelineEventHandler();
 		virtual ~ACOsgTimelineEventHandler() {};
+		void clean();
 		
 		void setMediaCycle(MediaCycle *_media_cycle){this->media_cycle = _media_cycle;}
 		void setRenderer(ACOsgTimelineRenderer* _renderer){this->renderer = _renderer;}

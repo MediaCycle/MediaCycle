@@ -73,7 +73,7 @@ int ACPositionsPluginRadialTreeLayout::initialize() {
 void ACPositionsPluginRadialTreeLayout::updateNextPositions(ACMediaBrowser* _mediaBrowser) {
 	std::cout << "ACPositionsPluginRadialTreeLayout::updateNextPositions" << std::endl;
 
-	if (mediaBrowser == NULL){
+	if (mediaBrowser == 0){
 		mediaBrowser = _mediaBrowser;
 	}
 	if (!(mediaBrowser->getUserLog()->isEmpty()))

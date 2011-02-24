@@ -1,7 +1,7 @@
 /**
  * @brief fft-helper.cpp
- * @author Xavier Siebert
- * @date 31/01/2011
+ * @author Christian Frisson
+ * @date 24/02/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -65,7 +65,7 @@ using namespace arma;
 cx_mat fft_helper(mat x_m, int n){
 	//  std::cout << "Calling fft helper" << std::endl;
   // n : fft size
-  double* x_db = NULL;
+  double* x_db = 0;
   cx_mat y_m;
   mat real_m(n,1);
   mat imag_m(n,1);

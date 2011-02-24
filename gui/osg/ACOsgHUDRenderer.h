@@ -95,10 +95,10 @@ public:
 		
 	void setMediaCycle(MediaCycle *media_cycle);
 
-	osg::Camera* getCamera();
+	osg::ref_ptr<osg::Camera> getCamera();
 		
 	void preparePointers();
-	void updatePointers(osgViewer::Viewer* viewer);
+	void updatePointers(osgViewer::Viewer* viewer);//(osgViewr::View* viewer);
 };
 
 #endif

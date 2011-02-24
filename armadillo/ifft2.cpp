@@ -1,7 +1,7 @@
 /**
  * @brief ifft2.cpp
- * @author Xavier Siebert
- * @date 31/01/2011
+ * @author Christian Frisson
+ * @date 24/02/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -114,7 +114,7 @@ mat ifft2(cx_mat x_m, int nrows, int ncols){
   
 
 
-  rdft2d(nrows, ncols, -1, x_db, NULL, ip, w);
+  rdft2d(nrows, ncols, -1, x_db, 0, ip, w);
   
   for (int i=0; i<nrows; i++)
     for (int j=0; j<ncols; j++)

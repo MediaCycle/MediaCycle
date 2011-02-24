@@ -63,7 +63,7 @@ class DynamicLibrary
         typedef void*   PROC_ADDRESS;
         
         /** returns a pointer to a DynamicLibrary object on successfully
-          * opening of library returns NULL on failure.
+          * opening of library returns 0 on failure.
           */
         static DynamicLibrary* loadLibrary(const std::string& libraryName);
 
@@ -85,17 +85,17 @@ class DynamicLibrary
         static HANDLE getLibraryHandle( const std::string& libraryName);
         
         /** disallow default constructor.*/
-	DynamicLibrary() { _handle = NULL; };
+	DynamicLibrary() { _handle = 0; };
         /** disallow copy constructor.*/
 	DynamicLibrary(const DynamicLibrary&) { };
         /** disallow copy operator.*/
 	DynamicLibrary& operator = (const DynamicLibrary&) { return *this; };
 
         /** Disallow public construction so that users have to go
-          * through loadLibrary() above which returns NULL on
+          * through loadLibrary() above which returns 0 on
           * failure, a valid DynamicLibrary object on success.
           */
-	DynamicLibrary(const std::string& name) {_name = name; _handle = NULL;};
+	DynamicLibrary(const std::string& name) {_name = name; _handle = 0;};
         DynamicLibrary(const std::string& name,HANDLE handle);
         ~DynamicLibrary();
 

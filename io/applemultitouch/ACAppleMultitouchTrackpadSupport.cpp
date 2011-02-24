@@ -1,8 +1,8 @@
 /**
  * @brief ACAppleMultitouchTrackpadSupport.cpp
  * @author Christian Frisson
- * @date 02/04/2010
- * @copyright (c) 2010 – UMONS - Numediart
+ * @date 24/02/2011
+ * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -94,6 +94,6 @@ void ACAppleMultitouchTrackpadSupport::stop()
 		MTUnregisterContactFrameCallback(dev, callback);
 		MTDeviceStop(dev);
 		MTDeviceRelease(dev);
-		dev = NULL;
+		dev = 0;
 	}
 }

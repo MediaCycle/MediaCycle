@@ -60,7 +60,7 @@ void ACOsgTrackControlsRenderer::updateMedia(int _media_index)
 
 void ACOsgTrackControlsRenderer::clearMedia()
 {
-	media = NULL;
+	media = 0;
 	media_index = -1;
 	media_from_lib = true;
 	media_changed = true;

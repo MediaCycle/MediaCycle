@@ -178,5 +178,9 @@ INSTALL(CODE "
 # To Create a package, one can run "cpack -G DragNDrop CPackConfig.cmake" on Mac OS X
 # where CPackConfig.cmake is created by including CPack
 # And then there's ways to customize this as well
+set(CPACK_PACKAGE_NAME "${PROGNAME}")
+set(CPACK_BUNDLE_NAME "${PROGNAME}")
 set(CPACK_BINARY_DRAGNDROP ON)
-include(CPack)
+set(CPACK_PACKAGE_EXECUTABLES "multimediacycle-osg-qt" "MultiMediaCycle.icns") #should contain pairs of <executable> and <icon name>
+#set(CPACK_GENERATOR "PackageMaker;OSXX11")
+#include(CPack)

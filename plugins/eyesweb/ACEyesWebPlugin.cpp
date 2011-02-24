@@ -23,7 +23,7 @@ ACEyesWebPlugin::~ACEyesWebPlugin()
 }
 
 vector<ACMediaFeatures*> ACEyesWebPlugin::calculate()
-// TODO XS : do we really want this to return NULL ?
+// TODO XS : do we really want this to return 0 ?
 {
   vector<ACMediaFeatures*> raf;
   raf.resize(0);
@@ -133,7 +133,7 @@ vector<ACMediaFeatures*> ACEyesWebPlugin::calculate(std::string fileName){
 //   imagefeatures_m.load(dataFile2, raw_ascii);
 //   if (imagefeatures_m.n_elem == 0)
 //     {
-//       mMediaFeatures = NULL;
+//       mMediaFeatures = 0;
 //       return mMediaFeatures;
 //     }
 //   //mediaTimedFeatures->getValue().print("Value : ");

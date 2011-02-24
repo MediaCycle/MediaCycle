@@ -46,14 +46,18 @@ using std::endl;
 //------------------------------------------------------------------
 
 AC3DModel::AC3DModel() : ACMedia() {
-	media_type = MEDIA_TYPE_3DMODEL;
+	this->init();
 }
+
+void AC3DModel::init() {
+	media_type = MEDIA_TYPE_3DMODEL;
+}	
 
 AC3DModel::~AC3DModel() {
 	
 }
 
-void AC3DModel::setData(osg::Node* _data)
+void AC3DModel::setData(osg::ref_ptr<osg::Node> _data)
 {
 	if (data->getMediaType()==MEDIA_TYPE_NONE)
 		data = new ACMediaData(MEDIA_TYPE_3DMODEL);	
@@ -65,7 +69,7 @@ void AC3DModel::setData(osg::Node* _data)
 //ACMediaData* AC3DModel::extractData(string fname) {
 void AC3DModel::extractData(string fname) {
 	
-	osg::Node* local_model_ptr;
+	osg::ref_ptr<osg::Node> local_model_ptr = 0;
 	osg::ComputeBoundsVisitor cbv;
 	
 	//ACMediaData* model_data = new ACMediaData(MEDIA_TYPE_3DMODEL,fname);

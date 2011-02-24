@@ -64,8 +64,10 @@ void ACAboutDialogQt::updateLicenses(){
 	#if defined (SUPPORT_AUDIO)
 		html.append ("<li><a href=\"http://www.mega-nerd.com/SRC/\">libsamplerate</a>: GPL License</li>");
 		html.append ("<li><a href=\"http://www.mega-nerd.com/libsndfile/\">libsndfile</a>: LGPL (or GPL) License</li>");
+	#endif //defined (SUPPORT_AUDIO)	
+	#if defined (SUPPORT_AUDIO) || defined (USE_OPENAL)	
 		html.append ("<li><a href=\"http://kcat.strangesoft.net/openal.html\">OpenAL-soft</a>: LPGL License</li>");
-	#endif //defined (SUPPORT_AUDIO)
+	#endif //defined (SUPPORT_AUDIO) || defined (USE_OPENAL)
 	#if defined (SUPPORT_VIDEO) || defined (SUPPORT_IMAGE)
 		html.append ("<li><a href=\"http://opencv.willowgarage.com\">OpenCV</a>: BSD License</li>");
 	#endif //defined (SUPPORT_VIDEO) || defined (SUPPORT_IMAGE)
@@ -73,6 +75,9 @@ void ACAboutDialogQt::updateLicenses(){
 	#if defined (USE_OSC)
 		html.append ("<li><a href=\"http://code.google.com/p/oscpack/\">oscpack</a>: MIT License</li>");
 	#endif //defined (USE_OSC)
+	#if defined (SUPPORT_AUDIO) || defined (USE_PORTAUDIO)	
+		html.append ("<li><a href=\"http://www.portaudio.com\">PortAudio</a>: MIT License</li>");
+	#endif //defined (SUPPORT_AUDIO) || defined (USE_PORTAUDIO)
 	html.append ("<li><a href=\"http://qt.nokia.com\">Qt</a>: LGPL License</li>");
 	html.append ("<li><a href=\"http://sourceforge.net/projects/tinyxml\">TinyXML</a>: zlib/libpng License</li>");
 	#if defined (USE_VAMP)

@@ -43,17 +43,17 @@
 class ACOsgAudioTrackRenderer : public ACOsgTrackRenderer {
 	
 	protected:
-		osg::Geode* summary_waveform_geode;
-		osg::Geode* summary_cursor_geode;
+		osg::ref_ptr<osg::Geode> summary_waveform_geode;
+		osg::ref_ptr<osg::Geode> summary_cursor_geode;
 		osg::ref_ptr<osg::MatrixTransform> summary_cursor_transform;
-		osg::Geode* track_geode;
+		osg::ref_ptr<osg::Geode> track_geode;
 		osg::ref_ptr<osg::MatrixTransform> selection_begin_transform;
 		osg::ref_ptr<osg::MatrixTransform> selection_zone_transform;
 		osg::ref_ptr<osg::MatrixTransform> selection_end_transform;
-		osg::Geode* selection_begin_geode;
-		osg::Geode* selection_end_geode;
-		osg::Geode* selection_zone_geode;
-		osg::Geode* playback_waveform_geode;
+		osg::ref_ptr<osg::Geode> selection_begin_geode;
+		osg::ref_ptr<osg::Geode> selection_end_geode;
+		osg::ref_ptr<osg::Geode> selection_zone_geode;
+		osg::ref_ptr<osg::Geode> playback_waveform_geode;
 			
 		void selectionWaveformGeode();
 		void selectionCursorGeode();

@@ -79,10 +79,10 @@
 class ACOsgBrowserRenderer {
 protected:
 	MediaCycle				*media_cycle;
-	osg::Group*				 group;
-	osg::Group*				 media_group;
-	osg::Group*				 link_group;
-	osg::Group*				 label_group;
+	osg::ref_ptr<osg::Group>				 group;
+	osg::ref_ptr<osg::Group>				 media_group;
+	osg::ref_ptr<osg::Group>				 link_group;
+	osg::ref_ptr<osg::Group>				 label_group;
 	std::vector<ACOsgMediaRenderer*>  node_renderer;
 	std::vector<ACOsgNodeLinkRenderer*>  link_renderer;
 	std::vector<ACOsgTextRenderer*>  label_renderer; // XS was MediaRenderer
@@ -119,7 +119,7 @@ protected:
 	
 public:
 	ACOsgBrowserRenderer();
-	~ACOsgBrowserRenderer() {};
+	~ACOsgBrowserRenderer();
 	void clean();
 	
 	double getTime();
@@ -127,7 +127,7 @@ public:
 	void setMediaCycle(MediaCycle *media_cycle){ this->media_cycle = media_cycle; };
 	//void setLayoutPlugin(ACPlugin* acpl){mLayoutPlugin=acpl;};
 	//void setLayout(ACOsgBrowserLayoutType _type){layout_type = _type;}
-	osg::Group *getShapes() 	{ return group; };
+	osg::ref_ptr<osg::Group> getShapes() 	{ return group; };
 	
 	void prepareNodes(int start=0);
 	void updateNodes(double ratio=0.0);

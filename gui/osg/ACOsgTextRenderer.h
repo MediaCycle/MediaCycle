@@ -46,8 +46,8 @@ protected:
 	osg::ref_ptr<osgText::Font> font;
 	osg::ref_ptr<osgText::Text> text;
 	
-	osg::Geode* text_geode;
-	osg::Geode* entry_geode;
+	osg::ref_ptr<osg::Geode> text_geode;
+	osg::ref_ptr<osg::Geode> entry_geode;
 	
 	void textGeode();
 	void entryGeode();

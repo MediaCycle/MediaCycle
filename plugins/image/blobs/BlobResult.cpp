@@ -309,7 +309,7 @@ CBlobResult CBlobResult::operator+( const CBlobResult& source ) const
 */
 void CBlobResult::AddBlob( CBlob *blob )
 {
-	if( blob != NULL )
+	if( blob != 0 )
 		m_blobs.push_back( new CBlob( blob ) );
 }
 

@@ -82,38 +82,38 @@ std::vector<ACMediaFeatures*>  ACVideoPlugin::calculateTop(std::string aFileName
 
 	cout << "calculateMeanOfTrajectory" << endl;
 	ACMediaFeatures* videoMeanTrajectory = this->calculateMeanOfTrajectory(video);
-	if (videoMeanTrajectory != NULL){
+	if (videoMeanTrajectory != 0){
 		allVideoFeatures.push_back(videoMeanTrajectory);
 	}
 	else{
-		cerr << "<ACVideoPlugin::calculate> : NULL mean feature" << endl;
+		cerr << "<ACVideoPlugin::calculate> : no mean feature" << endl;
 	}
 
 	cout << "calculateStdOfTrajectory" << endl;
 	ACMediaFeatures* videoStdTrajectory = this->calculateStdOfTrajectory(video);
-	if (videoStdTrajectory != NULL){
+	if (videoStdTrajectory != 0){
 		allVideoFeatures.push_back(videoStdTrajectory);
 	}
 	else{
-		cerr << "<ACVideoPlugin::calculate> : NULL std feature" << endl;
+		cerr << "<ACVideoPlugin::calculate> : no std feature" << endl;
 	}
 
 	cout << "calculateMaxOfTrajectory" << endl;
 	ACMediaFeatures* videoMaxTrajectory = this->calculateMaxOfTrajectory(video);
-	if (videoMaxTrajectory != NULL){
+	if (videoMaxTrajectory != 0){
 		allVideoFeatures.push_back(videoMaxTrajectory);
 	}
 	else{
-		cerr << "<ACVideoPlugin::calculate> : NULL max feature" << endl;
+		cerr << "<ACVideoPlugin::calculate> : no max feature" << endl;
 	}
 
 	cout << "calculateMeanSpeedOfTrajectory" << endl;
 	ACMediaFeatures* videoMeanSpeedTrajectory = this->calculateMeanSpeedOfTrajectory(video);
-	if (videoMeanSpeedTrajectory != NULL){
+	if (videoMeanSpeedTrajectory != 0){
 		allVideoFeatures.push_back(videoMeanSpeedTrajectory);
 	}
 	else{
-		cerr << "<ACVideoPlugin::calculate> : NULL speed feature" << endl;
+		cerr << "<ACVideoPlugin::calculate> : no speed feature" << endl;
 	}
 		
 	delete video;
@@ -127,29 +127,29 @@ std::vector<ACMediaFeatures*>  ACVideoPlugin::calculateFront(std::string aFileNa
 
 	cout << "calculateContractionIndex" << endl;
 	ACMediaFeatures* videoContractionIndex = this->calculateContractionIndex(video);
-	if (videoContractionIndex != NULL){
+	if (videoContractionIndex != 0){
 		allVideoFeatures.push_back(videoContractionIndex);
 	}
 	else{
-		cerr << "<ACVideoPlugin::calculate> : NULL mean ci feature" << endl;
+		cerr << "<ACVideoPlugin::calculate> : no mean ci feature" << endl;
 	}
 
 	cout << "calculateMeanBoundingBoxRatio" << endl;
 	ACMediaFeatures* videoMeanBoundingBoxRatio = this->calculateMeanBoundingBoxRatio(video);
-	if (videoMeanBoundingBoxRatio != NULL){
+	if (videoMeanBoundingBoxRatio != 0){
 		allVideoFeatures.push_back(videoMeanBoundingBoxRatio);
 	}
 	else{
-		cerr << "<ACVideoPlugin::calculate> : NULL mean bounding box ratio feature" << endl;
+		cerr << "<ACVideoPlugin::calculate> : no mean bounding box ratio feature" << endl;
 	}
 
 	cout << "calculateMeanPixelSpeed" << endl;
 	ACMediaFeatures* videoMeanPixelSpeed = this->calculateMeanPixelSpeed(video);
-	if (videoMeanPixelSpeed != NULL){
+	if (videoMeanPixelSpeed != 0){
 		allVideoFeatures.push_back(videoMeanPixelSpeed);
 	}
 	else{
-		cerr << "<ACVideoPlugin::calculate> : NULL mean bounding box ratio feature" << endl;
+		cerr << "<ACVideoPlugin::calculate> : no mean bounding box ratio feature" << endl;
 	}
 		
 	delete video;

@@ -38,13 +38,17 @@
 using namespace osg;
 
 ACOsgTextRenderer::ACOsgTextRenderer() {
-
 	text_geode = 0;
+	text_string = "";
+	pos.x = 0;
+	pos.y = 0;
+	pos.z = 0;
 }
 
 ACOsgTextRenderer::~ACOsgTextRenderer() {
 	
-	if 	(text_geode) { text_geode->unref(); text_geode=0; }
+	if 	(text_geode) { //ref_ptr//text_geode->unref();
+		text_geode=0; }
 }
 
 void ACOsgTextRenderer::textGeode() {
@@ -81,7 +85,7 @@ void ACOsgTextRenderer::textGeode() {
 	//".get()" is necessary for compilation under linux (OSG v2.4)
 	text_geode->addDrawable(text.get());
 	
-	text_geode->ref();	
+	//ref_ptr//text_geode->ref();	
 }
 
 void ACOsgTextRenderer::prepareNodes() {

@@ -49,6 +49,7 @@ public:
 	
 	ACOsgBrowserEventHandler() { media_cycle = 0; };
 	virtual ~ACOsgBrowserEventHandler() {media_cycle = 0;};
+	void clean(){media_cycle = 0;};
 	
 	void setMediaCycle(MediaCycle *_media_cycle) { this->media_cycle = _media_cycle; };
 	

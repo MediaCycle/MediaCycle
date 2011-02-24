@@ -114,15 +114,20 @@ const int ACImage:: default_thumbnail_area = 16384;
 //------------------------------------------------------------------
 
 ACImage::ACImage() : ACMedia() {
+	this->init();
+}
+
+void ACImage::init() {
 	media_type = MEDIA_TYPE_IMAGE;
+	thumbnail_filename = 0;
 	thumbnail = 0;
 	thumbnail_width = 0;
-	thumbnail_height = 0;	
-}
+	thumbnail_height = 0;
+}	
 
 // copy-constructor, used for example to generate fragments
 ACImage::ACImage(const ACImage& m, bool reduce) : ACMedia(m) {
-	media_type = MEDIA_TYPE_IMAGE;
+	this->init();
 	// ... XS TODO
 }
 
@@ -247,7 +252,7 @@ void ACImage::computeThumbnailSize(){
 // AND computes a thumbnail at the same time.
 //ACMediaData* ACImage::extractData(string fname){
 void ACImage::extractData(string fname){
-	// XS TODO test if data->getImageData is not NULL
+	// XS TODO test if data->getImageData is not 0
 	data = new ACMediaData(MEDIA_TYPE_IMAGE,fname);
 	width = data->getImageData()->width;
 	height = data->getImageData()->height;
@@ -257,11 +262,12 @@ void ACImage::extractData(string fname){
 }
 
 void ACImage::setData(IplImage* _data){
-	// XS TODO what if _data is void ?
-	if (data->getMediaType()==MEDIA_TYPE_NONE)
+	/*if (data->getMediaType()==MEDIA_TYPE_NONE)
 		data = new ACMediaData(MEDIA_TYPE_IMAGE);	
 	else
-		data->setMediaType(MEDIA_TYPE_IMAGE);
+		data->setMediaType(MEDIA_TYPE_IMAGE);*/
+	if (data == 0)
+		data = new ACMediaData(MEDIA_TYPE_IMAGE);
 	data->setImageData(_data);
 	this->height = _data->height;
 	this->width = _data->width;

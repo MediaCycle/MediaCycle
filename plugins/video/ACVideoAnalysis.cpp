@@ -70,7 +70,7 @@ const int ACVideoAnalysis::ystar = 150; // 220
 
  
 ACVideoAnalysis::ACVideoAnalysis(){
-	capture = NULL;
+	capture = 0;
 	clean();
 	// NOT initialized, has to be done from outside after setting file name
 }
@@ -96,7 +96,7 @@ ACVideoAnalysis::ACVideoAnalysis(ACMediaData* media_data){
 void ACVideoAnalysis::clean(){
 	// no, we should not release the capture, since it comes from outside.
 	// we don't make "new" capture, we just set a pointer to an existing one (which will be deleted outside)
-//	if (capture != NULL) cvReleaseCapture(&capture);
+//	if (capture != 0) cvReleaseCapture(&capture);
 	FROM_FILE = false;
 	HAS_TRAJECTORY = false;
 	HAS_BLOBS = false;
@@ -202,7 +202,7 @@ IplImage* ACVideoAnalysis::getNextFrame(){
 
 	if(!cvGrabFrame(capture)){      // attemps to capture a frame
 		cerr << "<ACVideoAnalysis::getNextFrame> Could not find frame..." << endl;
-		return NULL;
+		return 0;
 	}
 	IplImage* tmp;
 	tmp = cvRetrieveFrame(capture);  // retrieve the captured frame
@@ -213,7 +213,7 @@ IplImage* ACVideoAnalysis::getNextFrame(){
 IplImage* ACVideoAnalysis::getFrame(int i){
 	if (i < 0 || i > nframes) {
 		cerr << "frame index out of bounds: " << i << endl;
-		return NULL;
+		return 0;
 	}
 	cvSetCaptureProperty(capture, CV_CAP_PROP_POS_FRAMES, i); 	
 	IplImage* img = getNextFrame();
@@ -221,9 +221,9 @@ IplImage* ACVideoAnalysis::getFrame(int i){
 }
 
 void ACVideoAnalysis::histogramEqualize(const IplImage* bg_img) {
-	if (bg_img == NULL){
+	if (bg_img == 0){
 		bg_img = this->computeMedianImage();
-		if (bg_img == NULL){
+		if (bg_img == 0){
 			cerr << "<ACVideoAnalysis::histogramEqualize>: error computing median bg image" << endl;
 		}
 		// reset the capture to the beginning of the video
@@ -433,9 +433,9 @@ void ACVideoAnalysis::computeBlobs(IplImage* bg_img, int bg_thresh, int big_blob
 	all_blobs_time_stamps.clear();	// just to make sure...
 	all_blobs_frame_stamps.clear();	// just to make sure...
 
-	if (bg_img == NULL){
+	if (bg_img == 0){
 		bg_img = this->computeMedianImage();
-		if (bg_img == NULL){
+		if (bg_img == 0){
 			cerr << "<ACVideoAnalysis::computeBlobs>: error computing average image" << endl;
 		}
 		// reset the capture to the beginning of the video
@@ -467,7 +467,7 @@ void ACVideoAnalysis::computeBlobs(IplImage* bg_img, int bg_thresh, int big_blob
 		cvCvtColor(frame, bwImage,CV_BGR2GRAY);
 		cvThreshold(bwImage, bitImage, bg_thresh,255,CV_THRESH_BINARY_INV);
 		CBlobResult blobs;
-		blobs = CBlobResult( bitImage, NULL, 255 ); // find blobs in image
+		blobs = CBlobResult( bitImage, 0, 255 ); // find blobs in image
 		blobs.Filter( blobs, B_EXCLUDE, CBlobGetArea(), B_LESS, big_blob );
 		// XS for dancers we only stored when there was a blob
 		
@@ -522,9 +522,9 @@ void ACVideoAnalysis::computeBlobsInteractively(IplImage* bg_img, bool merge_blo
 	vector<double> ci;
 #endif //VISUAL_CHECK_GNUPLOT
 	
-	if (bg_img == NULL){
+	if (bg_img == 0){
 		bg_img = this->computeMedianImage();
-		if (bg_img == NULL){
+		if (bg_img == 0){
 			cerr << "<ACVideoAnalysis::computeBlobsInteractively>: error computing average image" << endl;
 		}
 		// reset the capture to the beginning of the video
@@ -546,8 +546,8 @@ void ACVideoAnalysis::computeBlobsInteractively(IplImage* bg_img, bool merge_blo
 	cvMoveWindow("BW", 700, 400);
 	cvNamedWindow( "BLOBS", CV_WINDOW_AUTOSIZE);
 	cvMoveWindow("BLOBS", 50, 400);	
-	cvCreateTrackbar("Biggest Blob","BLOBS", &slider_big_blob, 1000 ,NULL);
-	cvCreateTrackbar("Threshold","BLOBS",&slider_bg_thresh,255,NULL);
+	cvCreateTrackbar("Biggest Blob","BLOBS", &slider_big_blob, 1000 ,0);
+	cvCreateTrackbar("Threshold","BLOBS",&slider_bg_thresh,255,0);
 	
 	IplImage* frame;
 	// 1 channel temporary images
@@ -568,7 +568,7 @@ void ACVideoAnalysis::computeBlobsInteractively(IplImage* bg_img, bool merge_blo
 		cvDilate(bitImage, bitImage);
 		cvErode(bitImage, bitImage);
 		
-		blobs = CBlobResult( bitImage, NULL, 255 );
+		blobs = CBlobResult( bitImage, 0, 255 );
 		blobs.Filter( blobs, B_EXCLUDE, CBlobGetArea(), B_INSIDE,  slider_big_blob );
 		all_blobs.push_back(blobs);
 		int _frame_number = cvGetCaptureProperty(capture, CV_CAP_PROP_POS_FRAMES);
@@ -637,15 +637,15 @@ void ACVideoAnalysis::computeBlobsUL(IplImage* bg_img, bool merge_blobs, int big
 	all_blobs.clear();
 	all_blobs_time_stamps.clear();	// just to make sure...
 	all_blobs_frame_stamps.clear();	// just to make sure...
-	if (bg_img == NULL || threshU ==0 || threshL ==0){
-		if (bg_img == NULL){
+	if (bg_img == 0 || threshU ==0 || threshL ==0){
+		if (bg_img == 0){
 			cout << "No bg image provided for ACVideoAnalysis::computeBlobsUL. Computing Median" << endl;
 		}
 		else{
 			cout << "No bg threshold provided for ACVideoAnalysis::computeBlobsUL. Computing it from Median" << endl;
 		}
 		bg_img = this->computeMedianImage();
-		if (bg_img == NULL){
+		if (bg_img == 0){
 			cerr << "<ACVideoAnalysis::computeBlobsInteractively>: error computing average image" << endl;
 		}
 		// reset the capture to the beginning of the video
@@ -697,7 +697,7 @@ void ACVideoAnalysis::computeBlobsUL(IplImage* bg_img, bool merge_blobs, int big
 		cvSetImageROI(bitImage, cvRect(0,0,width,height));	
 		
 		// tried this to smooth the blob, but it removes too much of the blob
-		// cvMorphologyEx( bitImage, bitImage, NULL, NULL, CV_MOP_CLOSE, 2);
+		// cvMorphologyEx( bitImage, bitImage, 0, 0, CV_MOP_CLOSE, 2);
 		//cvSmooth(bitImage, bitImage, CV_MEDIAN, 3, 5);
 		
 		// does not work:
@@ -705,7 +705,7 @@ void ACVideoAnalysis::computeBlobsUL(IplImage* bg_img, bool merge_blobs, int big
 		//		cvConvertImage(r_avg_img, bitImage);
 		
 		CBlobResult blobs;
-		blobs = CBlobResult( bitImage, NULL, 255 ); // find blobs in image
+		blobs = CBlobResult( bitImage, 0, 255 ); // find blobs in image
 		blobs.Filter( blobs, B_EXCLUDE, CBlobGetArea(), B_LESS, big_blob );
 
 // XS for dancers we only stored when there was a blob
@@ -958,7 +958,7 @@ IplImage* ACVideoAnalysis::computeAverageImage(int nskip, int nread, int njump, 
 	if (nskip + nread > nframes) {
 		cerr << " <ACVideoAnalysis::computeAverageImage>: not enough frames in video. reduce number of frames to skip and/or to average" << endl;
 		cerr << "nframes = " << nframes << "; nskip = " << nskip <<  "; nread = " << nread << "; njump = " << njump << endl; 
-		return NULL;
+		return 0;
 	}
 	if (nread ==0) nread = nframes-nskip;
 	if (njump == -1) njump = 50;		// default values
@@ -1031,7 +1031,7 @@ IplImage* ACVideoAnalysis::computeMedianImage(int nskip, int nread, int njump, s
 	if (nskip + nread > nframes) {
 		cerr << " <ACVideoAnalysis::computeMedianImage>: not enough frames in video. reduce number of frames to skip and/or to average" << endl;
 		cerr << "nframes = " << nframes << "; nskip = " << nskip <<  "; nread = " << nread << "; njump = " << njump << endl; 
-		return NULL;
+		return 0;
 	}
 	
 	if (nread ==0) nread = nframes-nskip;
@@ -1174,11 +1174,11 @@ IplImage* ACVideoAnalysis::computeMedianNoBlobImage(string fsave, IplImage *firs
 		threshU = 3;
 		threshL = 14;
 		// XS end
-		computeBlobsUL(first_guess); // could be NULL, in which case aprox median is calculated
+		computeBlobsUL(first_guess); // could be 0, in which case aprox median is calculated
 	}
 	if (all_blobs_time_stamps.size() != all_blobs.size()) {
 		cerr << "<ACVideoAnalysis::computeMedianNoBlobImage> : time stamp problem" << endl;
-		return NULL;
+		return 0;
 	}
 	
 	int nbins = 256;
@@ -1626,7 +1626,7 @@ void ACVideoAnalysis::showFrameInWindow(string title, IplImage* frame, bool has_
 	// by default has_win = true, we don't make a new window for each frame !
 	if (not has_win)
 		cvNamedWindow(title.c_str(), CV_WINDOW_AUTOSIZE);
-	if (frame != NULL) {
+	if (frame != 0) {
 		cvShowImage(title.c_str(), frame); 
 		cvWaitKey(20);           // wait 20 ms, necesary to display properly.
 	}
@@ -1694,7 +1694,7 @@ void ACVideoAnalysis::showFFTInWindow(string title, bool has_win){
 // ----------- for "fancy" browsing
 
 int        g_slider_position = 0; 
-CvCapture* g_capture         = NULL;
+CvCapture* g_capture         = 0;
 
 void onTrackbarSlide(int pos) { 
 	cvSetCaptureProperty(g_capture, CV_CAP_PROP_POS_FRAMES, pos); 
@@ -1963,7 +1963,7 @@ void ACVideoAnalysis::test_match_shapes(ACVideoAnalysis *V2, IplImage* bg_img){
 //			CBlob *currentBlob;
 //			
 //			// find blobs in image
-//			blobs = CBlobResult( bitImage, NULL, 255 );
+//			blobs = CBlobResult( bitImage, 0, 255 );
 //			blobs.Filter( blobs, B_EXCLUDE, CBlobGetArea(), B_LESS,  slider_big_blob );
 //			
 //			// XS  test

@@ -39,7 +39,7 @@
 using namespace osg;
 
 ACOsgBrowserViewQT::ACOsgBrowserViewQT( QWidget * parent, const char * name, const QGLWidget * shareWidget, WindowFlags f):
-	QGLWidget(parent, shareWidget, f), media_cycle(NULL),
+	QGLWidget(parent, shareWidget, f), media_cycle(0),
 	mousedown(0), zoomdown(0), forwarddown(0), autoplaydown(0),rotationdown(0),
 	refx(0.0f), refy(0.0f),
 	refcamx(0.0f), refcamy(0.0f),
@@ -109,7 +109,7 @@ void ACOsgBrowserViewQT::resizeGL( int width, int height )
 void ACOsgBrowserViewQT::paintGL()
 {
 	frame(); // put this first otherwise we don't get a clean background in the browser
-	if (media_cycle == NULL) return;
+	if (media_cycle == 0) return;
 
 	//CF to improve, we want to know if the view is being animated to force a frequent refresh of the positions:
 	if (media_cycle->getBrowser()->getState() == AC_CHANGING)
@@ -120,7 +120,7 @@ void ACOsgBrowserViewQT::paintGL()
 void ACOsgBrowserViewQT::updateGL()
 {
 	double frac = 0.0;
-	if (media_cycle == NULL) return;
+	if (media_cycle == 0) return;
 
 	if (media_cycle->hasBrowser())
 	{
@@ -166,7 +166,7 @@ void ACOsgBrowserViewQT::updateGL()
 
 void ACOsgBrowserViewQT::keyPressEvent( QKeyEvent* event )
 {
-	if (media_cycle == NULL) return;
+	if (media_cycle == 0) return;
 	osg_view->getEventQueue()->keyPress( (osgGA::GUIEventAdapter::KeySymbol) *(event->text().toAscii().data() ) );
 	//std::cout << "Key (Qt) " << event->text().toAscii().data() << std::endl; 
 	switch( event->key() )
@@ -195,7 +195,7 @@ void ACOsgBrowserViewQT::keyPressEvent( QKeyEvent* event )
 
 void ACOsgBrowserViewQT::keyReleaseEvent( QKeyEvent* event )
 {
-	if (media_cycle == NULL) return;
+	if (media_cycle == 0) return;
 
 	osg_view->getEventQueue()->keyRelease( (osgGA::GUIEventAdapter::KeySymbol) *(event->text().toAscii().data() ) );
 
@@ -209,7 +209,7 @@ void ACOsgBrowserViewQT::keyReleaseEvent( QKeyEvent* event )
 
 void ACOsgBrowserViewQT::mousePressEvent( QMouseEvent* event )
 {
-	if (media_cycle == NULL) return;
+	if (media_cycle == 0) return;
 
     int button = 0;
 	mousedown = 1;
@@ -234,7 +234,7 @@ void ACOsgBrowserViewQT::mousePressEvent( QMouseEvent* event )
 
 void ACOsgBrowserViewQT::mouseMoveEvent( QMouseEvent* event )
 {
-	if (media_cycle == NULL) return;
+	if (media_cycle == 0) return;
 
 	int button = 0;
     switch(event->button())
@@ -278,7 +278,7 @@ void ACOsgBrowserViewQT::mouseMoveEvent( QMouseEvent* event )
 
 void ACOsgBrowserViewQT::mouseReleaseEvent( QMouseEvent* event )
 {
-	if (media_cycle == NULL) return;
+	if (media_cycle == 0) return;
 
     int button = 0;
     switch(event->button())
@@ -344,7 +344,7 @@ void ACOsgBrowserViewQT::prepareFromBrowser()
 
 void ACOsgBrowserViewQT::updateTransformsFromBrowser( double frac)
 {
-	if (media_cycle == NULL) return;
+	if (media_cycle == 0) return;
 
 	int closest_node;	
 	// get screen coordinates

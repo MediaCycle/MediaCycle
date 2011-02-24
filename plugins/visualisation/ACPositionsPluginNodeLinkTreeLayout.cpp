@@ -87,7 +87,7 @@ void ACPositionsPluginNodeLinkTreeLayout::updateNextPositions(ACMediaBrowser* _m
 	std::cout << "ACPositionsPluginNodeLinkTreeLayout::updateNextPositions" << std::endl;
 	//std::cout << "UserLogTree: is empty " << _mediaBrowser->getUserLog()->isEmpty() << " size " << _mediaBrowser->getUserLog()->getSize() << " max depth " << _mediaBrowser->getUserLog()->getMaxDepth() << " last clicked node " << _mediaBrowser->getUserLog()->getLastClickedNodeId() << std::endl;
 
-	if (mediaBrowser == NULL){
+	if (mediaBrowser == 0){
 		mediaBrowser = _mediaBrowser;
 	}
 	if (!(mediaBrowser->getUserLog()->isEmpty()))
@@ -128,7 +128,7 @@ void ACPositionsPluginNodeLinkTreeLayout::updateNextPositions(ACMediaBrowser* _m
 		
 		// do second pass - assign layout positions
 		//std::cout << "ACPositionsPluginNodeLinkTreeLayout::updateNextPositions: secondWalk"<< std::endl;
-		this->secondWalk(0, NULL, -rp->getPrelim(), 0);
+		this->secondWalk(0, 0, -rp->getPrelim(), 0);
 		
 		ACPoint p;
 		for(int n=0; n<mediaBrowser->getUserLog()->getSize(); n++)

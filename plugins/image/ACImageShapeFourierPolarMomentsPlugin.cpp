@@ -64,11 +64,11 @@ std::vector<ACMediaFeatures*>  ACImageShapeFourierPolarMomentsPlugin::calculate(
 	std::vector<ACMediaFeatures*> allImageFeatures;
 
 	ACMediaFeatures* imageShapeFeatures = this->calculateFourierPolarMoments(image);
-	if (imageShapeFeatures != NULL){
+	if (imageShapeFeatures != 0){
 		allImageFeatures.push_back(imageShapeFeatures);
 	}
 	else{
-		cerr << "<ACImageShapeFourierPolarMomentsPlugin::calculate> : NULL shape feature" << endl;
+		cerr << "<ACImageShapeFourierPolarMomentsPlugin::calculate> : no shape feature" << endl;
 	}
 	delete image;
 	return allImageFeatures;
@@ -80,11 +80,11 @@ std::vector<ACMediaFeatures*> ACImageShapeFourierPolarMomentsPlugin::calculate(A
 	std::vector<ACMediaFeatures*> allImageFeatures;
 	
 	ACMediaFeatures* imageShapeFeatures = this->calculateFourierPolarMoments(image);
-	if (imageShapeFeatures != NULL){
+	if (imageShapeFeatures != 0){
 		allImageFeatures.push_back(imageShapeFeatures);
 	}
 	else{
-		cerr << "<ACImageShapeFourierPolarMomentsPlugin::calculate> : NULL shape feature" << endl;
+		cerr << "<ACImageShapeFourierPolarMomentsPlugin::calculate> : no shape feature" << endl;
 	}
 		
 	delete image;

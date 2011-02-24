@@ -67,9 +67,9 @@
 
 char *getmem (const size_t leng, const size_t size)
 {
-   char *p = NULL;
+   char *p = 0;
 
-   if ((p = (char *)calloc(leng, size)) == NULL){
+   if ((p = (char *)calloc(leng, size)) == 0){
       fprintf(stderr, "Cannot allocate memory!\n");
       exit(3);
    }

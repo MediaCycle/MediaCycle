@@ -93,7 +93,7 @@ public:
 	
 	// timedFeatures: e.g., for BicSegmentationPlugin
 	virtual std::vector<ACMedia*> segment(ACMediaTimedFeature* _mtf, ACMedia*){std::vector<ACMedia*> dummy; return dummy;}
-	virtual ACMediaTimedFeature* getTimedFeatures(){return NULL;}
+	virtual ACMediaTimedFeature* getTimedFeatures(){return 0;}
 
 	virtual int start(){return 0;}
 	virtual int stop(){return 0;}

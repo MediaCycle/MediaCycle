@@ -47,16 +47,16 @@
 class ACOsg3DModelRenderer : public ACOsgMediaRenderer  {
 protected:
 		
-	osg::Vec4Array* colors_off;
-	osg::Vec4Array* colors_on;
+	osg::ref_ptr<osg::Vec4Array> colors_off;
+	osg::ref_ptr<osg::Vec4Array> colors_on;
 	double modelangle;
 	std::vector<float> media_cycle_center;
 	std::vector<float> media_cycle_extent;
 	
-	osg::Node* model_node;
-	osg::Geode* border_geode;
-	osg::MatrixTransform* acti_transform;
-	osg::MatrixTransform* norm_transform;
+	osg::ref_ptr<osg::Node> model_node;
+	osg::ref_ptr<osg::Geode> border_geode;
+	osg::ref_ptr<osg::MatrixTransform> acti_transform;
+	osg::ref_ptr<osg::MatrixTransform> norm_transform;
 	
 	void modelGeode();
 	void borderGeode();

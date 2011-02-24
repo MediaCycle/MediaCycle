@@ -44,8 +44,8 @@
 SettingsDialog::SettingsDialog(QWidget *parent) : QMainWindow(parent) {
     setupUi(this);
 
-	this->multi_media_cycle = NULL;
-	this->media_cycle = NULL;
+	this->multi_media_cycle = 0;
+	this->media_cycle = 0;
 	this->ptm = new pluginsTreeModel();
 	treeViewPluginsLibrairies->setModel(this->ptm);
 	for (int column = 0; column < ptm->columnCount(); ++column)
@@ -92,7 +92,7 @@ void SettingsDialog::setMediaCycleMainWindow(ACMultiMediaCycleOsgQt* _mcw) {
 	this->media_cycle = _mcw->getMediaCycle();
 	
 	// XS  TODO : find a way to tell settings what type of media the user choose e.g. in the default config
-//	if (this->media_cycle != NULL) {
+//	if (this->media_cycle != 0) {
 //		this->browser_mode = this->media_cycle->getBrowserMode();
 //		this->media_type = this->media_cycle->getMediaType();
 //	}
@@ -270,7 +270,7 @@ void SettingsDialog::on_buttonApplyCurrentSettings_clicked(){
 	ACBrowserMode new_browser_mode = iterb->second;
 	cout << iterb->first << " - corresponding browser mode code : " << new_browser_mode << endl;
 	
-	if (this->media_cycle != NULL) {
+	if (this->media_cycle != 0) {
 		// clean the current media_cycle that was used by the ACMultiMediaCycleOsgQt app.
 		this->multi_media_cycle->destroyMediaCycle();
 	}
@@ -281,7 +281,7 @@ void SettingsDialog::on_buttonApplyCurrentSettings_clicked(){
 }
 
 void SettingsDialog::addPluginsFromLibrary(QString _fileName){
-	if (media_cycle == NULL) {
+	if (media_cycle == 0) {
 		cout << "load media_cycle first" << endl;
 		return;
 	}
@@ -293,7 +293,7 @@ void SettingsDialog::addPluginsFromLibrary(QString _fileName){
 	}
 	
 	ACPluginLibrary* plib = acpl->getPluginLibrary(plugins_library);
-	if (plib == NULL) {
+	if (plib == 0) {
 		cout << "Problem loading plugins library: " << plugins_library << endl;
 		return;
 	}
@@ -348,7 +348,7 @@ void SettingsDialog::addPluginsFromLibrary(QString _fileName){
 //}
 
 //void SettingsDialog::removePluginsFromLibrary(QString _fileName){
-//	if (media_cycle == NULL) {
+//	if (media_cycle == 0) {
 //		cout << "load media_cycle first" << endl;
 //		return;
 //	}
@@ -356,7 +356,7 @@ void SettingsDialog::addPluginsFromLibrary(QString _fileName){
 //	ACPluginManager *acpl = media_cycle->getPluginManager();
 //	
 //	ACPluginLibrary* plib = acpl->getPluginLibrary(plugins_library);
-//	if (plib == NULL) {
+//	if (plib == 0) {
 //		cout << "Problem finding plugins from library: " << plugins_library << endl;
 //		return;
 //	}

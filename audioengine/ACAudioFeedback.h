@@ -228,7 +228,7 @@ private:
 	/////////////////////////////////////////////////////////////////////////////
 	
 	// Audio Engine thread
-	pthread_t	   audio_engine;
+	pthread_t	   audio_engine_t;
 	pthread_attr_t audio_engine_attr;
 	
 	pthread_t	   audio_update;

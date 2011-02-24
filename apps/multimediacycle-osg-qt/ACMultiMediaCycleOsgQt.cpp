@@ -60,9 +60,9 @@ ACMultiMediaCycleOsgQt::ACMultiMediaCycleOsgQt(QWidget *parent) : QMainWindow(pa
 	ui.setupUi(this); // first thing to do
 	this->media_type = MEDIA_TYPE_NONE;
 	this->browser_mode = AC_MODE_NONE;
-	this->media_cycle = NULL;
+	this->media_cycle = 0;
 	#if defined (SUPPORT_AUDIO)
-		this->audio_engine = NULL;
+		this->audio_engine = 0;
 	#endif //defined (SUPPORT_AUDIO)
 	
 	// Apple bundled *.app, just look for bundled osg plugins 
@@ -94,7 +94,7 @@ ACMultiMediaCycleOsgQt::ACMultiMediaCycleOsgQt(QWidget *parent) : QMainWindow(pa
 	//	pb->hide();
 	//	statusBar()->addPermanentWidget(pb);
 	
-	aboutDialog = NULL;
+	aboutDialog = 0;
 		
 	this->show();
 }
@@ -120,9 +120,11 @@ void ACMultiMediaCycleOsgQt::createMediaCycle(ACMediaType _media_type, ACBrowser
 	this->browser_mode = _browser_mode;
 	
 	#if defined (SUPPORT_AUDIO)
+	if (_media_type == MEDIA_TYPE_AUDIO){
 		audio_engine = new ACAudioEngine();
 		audio_engine->setMediaCycle(media_cycle);
 		ui.compositeOsgView->setAudioEngine(audio_engine);
+	}	
 	#endif //defined (SUPPORT_AUDIO)
 
 	for (int d=0;d<dockWidgets.size();d++){
@@ -146,7 +148,7 @@ void ACMultiMediaCycleOsgQt::destroyMediaCycle(){
 
 // XS in theory one could select multiple ACL files and concatenate them (not tested yet)
 void ACMultiMediaCycleOsgQt::on_actionLoad_ACL_triggered(bool checked){
-	if (media_cycle == NULL) {
+	if (media_cycle == 0) {
 		cerr << "first define the type of application" << endl;
 		return;
 	}
@@ -186,7 +188,7 @@ void ACMultiMediaCycleOsgQt::on_actionLoad_ACL_triggered(bool checked){
 }
 
 void ACMultiMediaCycleOsgQt::on_actionSave_ACL_triggered(bool checked){
-	if (media_cycle == NULL) {
+	if (media_cycle == 0) {
 		cerr << "first define the type of application" << endl;
 		return;
 	}
@@ -208,7 +210,7 @@ void ACMultiMediaCycleOsgQt::on_actionSave_ACL_triggered(bool checked){
 
 // XS in theory one could select multiple XML files and concatenate them (not tested yet)
 void ACMultiMediaCycleOsgQt::on_actionLoad_XML_triggered(bool checked){
-	if (media_cycle == NULL) {
+	if (media_cycle == 0) {
 		cerr << "first define the type of application" << endl;
 		return;
 	}
@@ -247,7 +249,7 @@ void ACMultiMediaCycleOsgQt::on_actionLoad_XML_triggered(bool checked){
 }
 
 void ACMultiMediaCycleOsgQt::on_actionSave_XML_triggered(bool checked){
-	if (media_cycle == NULL) {
+	if (media_cycle == 0) {
 		cerr << "first define the type of application" << endl;
 		return;
 	}
@@ -353,7 +355,7 @@ void ACMultiMediaCycleOsgQt::on_actionLoad_Media_Files_triggered(bool checked){
 	updatePluginDock();
 	
 	QString fileName;
-	QFileDialog dialog(this,"Open MediaCycle Image File(s)");
+	QFileDialog dialog(this,"Open MediaCycle Media File(s)");
 	//CF generating supported file extensions from used media I/O libraries and current media type:
 	std::vector<std::string> mediaExt = media_cycle->getExtensionsFromMediaType( media_cycle->getLibrary()->getMediaType() );
 	QString mediaExts = "Supported Extensions (";
@@ -390,9 +392,25 @@ void ACMultiMediaCycleOsgQt::on_actionLoad_Media_Files_triggered(bool checked){
 		}
 	}
 	
-	media_cycle->importDirectoriesThreaded(directories, 0);
-	
-	directories.empty();
+	if (!(directories.empty())){
+		
+		// check if the user wants segments
+		bool do_segments = false;
+		bool forward_order = true; // only make it false for AudioGarden where media have been presegmented and segments have special names
+		int recursive = 1;	
+		
+		int seg_button = QMessageBox::question(this,
+											   tr("Segmentation"),
+											   tr("Do you want to segment the media ?"),
+											   QMessageBox::Yes | QMessageBox::No);
+		if (seg_button == QMessageBox::Yes) {
+			// XS TODO: check that segmentation algorithms exist
+			do_segments = true;
+		}
+		
+		media_cycle->importDirectoriesThreaded(directories, recursive, forward_order, do_segments);
+		directories.empty();
+	}	
 	
 	// XS do this only after loading all files (it was in the while loop) !
 	// SD not needed anymore
@@ -489,7 +507,7 @@ void ACMultiMediaCycleOsgQt::on_actionSave_Config_File_triggered(bool checked){
 
 bool ACMultiMediaCycleOsgQt::addControlDock(ACAbstractDockWidgetQt* dock)
 {
-	if (dock == NULL){
+	if (dock == 0){
 		std::cerr << "Invalid dock widget" << std::endl;
 		return false;
 	}	
@@ -593,7 +611,7 @@ void ACMultiMediaCycleOsgQt::syncControlToggleWithDocks(){
 
 bool ACMultiMediaCycleOsgQt::addAboutDialog(ACAbstractAboutDialogQt* dialog)
 {
-	if (dialog == NULL){
+	if (dialog == 0){
 		std::cerr << "Invalid about dialog" << std::endl;
 		return false;
 	}	
@@ -873,7 +891,7 @@ void  ACMultiMediaCycleOsgQt::showError(std::string s){
 }
 
 bool ACMultiMediaCycleOsgQt::hasMediaCycle(){
-	if (media_cycle == NULL) {
+	if (media_cycle == 0) {
 		this->showError ("First define the type of application");
 		return false;
 	}

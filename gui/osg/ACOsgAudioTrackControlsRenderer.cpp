@@ -49,15 +49,16 @@ ACOsgAudioTrackControlsRenderer::ACOsgAudioTrackControlsRenderer() {
 	displayed_media_index = -1;
 	// Magic numbers!
 	zpos = 0.01f;
-	xstep = 0.0005f;
-	yspan = 0.6f;
+	xstep = 0.0005;
+	ylim = 0.0;
 	xspan = 0.65f;
+	yspan = 0.6f;
 }
 
 ACOsgAudioTrackControlsRenderer::~ACOsgAudioTrackControlsRenderer() {
 	// track_node->removeChild(0,1);
 	if 	(track_geode) {
-		track_geode->unref();
+		//ref_ptr//track_geode->unref();
 		track_geode=0;
 	}
 }
@@ -78,7 +79,7 @@ void ACOsgAudioTrackControlsRenderer::trackGeode() {
 	//sprintf(name, "some audio element");
 	//track_geode->setUserData(new ACRefId(media_index));
 	//track_geode->setName(name);
-	track_geode->ref();	
+	//ref_ptr//track_geode->ref();	
 }
 
 void ACOsgAudioTrackControlsRenderer::prepareControls() {

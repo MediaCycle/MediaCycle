@@ -91,14 +91,16 @@ public:
 	std::vector< std::vector<double> > getMeanFeatures() {return mean_features;};
 	std::vector< std::vector<double> > getStdevFeatures() {return stdev_features;};
 	
-	int importDirectory(std::string _path, int recursive,  ACPluginManager *acpl=NULL, bool forward_order=true, bool doSegment=false, bool _save_timed_feat=false);
-	int importFile(std::string _filename, ACPluginManager *acpl=NULL, bool doSegment=false, bool _save_timed_feat = false);
+	int importDirectory(std::string _path, int recursive,  ACPluginManager *acpl=0, bool forward_order=true, bool doSegment=false, bool _save_timed_feat=false);
+	int importFile(std::string _filename, ACPluginManager *acpl=0, bool doSegment=false, bool _save_timed_feat = false);
 
 	//int openLibrary(std::string _path, bool aInitLib=false); // SD 2010 sep discontinued
 //	void saveAsLibrary(std::string _path);
 	// C++ versions
 	int setPath(std::string path);
 	std::string getPath() { return media_path; };
+	//int parseACLLibrary(std::string _path, bool aInitLib=false);
+	//int parseXMLLibrary(std::string _path, bool aInitLib=false);
 	int openACLLibrary(std::string _path, bool aInitLib=false);
 	int openMCSLLibrary(std::string _path, bool aInitLib=false);//CF 31/05/2010 temporary MediaCycle Segmented Library (MCSL) for AudioGarden, adding a parentID for segments to the initial ACL, awaiting approval
 	int saveACLLibrary(std::string _path);

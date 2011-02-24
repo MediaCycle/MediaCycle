@@ -45,36 +45,29 @@ using std::string;
 // XS note: this does not seem optimal, because we need to change many things upong adding one new media type
 
 ACMediaData::ACMediaData() { 
-	#if defined (SUPPORT_AUDIO)
-	audio_ptr = NULL;
-	audio_frames = 0;
-	#endif //defined (SUPPORT_AUDIO)
-	#if defined (SUPPORT_IMAGE) || defined (SUPPORT_VIDEO)
-	image_ptr = NULL;
-	#endif //defined (SUPPORT_IMAGE) || defined (SUPPORT_VIDEO)
-	#if defined (SUPPORT_VIDEO)
-	video_ptr = NULL;
-	#endif //defined (SUPPORT_VIDEO)
-	#if defined (SUPPORT_3DMODEL)
-	model_ptr = NULL;
-	#endif //defined (SUPPORT_3DMODEL)
+	this->init();
 }
 
-ACMediaData::ACMediaData(ACMediaType _type, std::string _fname) {
+void ACMediaData::init() {
+	media_type = MEDIA_TYPE_NONE;
+	file_name = "";
 	#if defined (SUPPORT_AUDIO)
-	audio_frames = 0;
-	audio_ptr = NULL;
+		audio_ptr = 0;
+		audio_frames = 0;
 	#endif //defined (SUPPORT_AUDIO)
 	#if defined (SUPPORT_IMAGE) || defined (SUPPORT_VIDEO)
-	image_ptr = NULL;
+		image_ptr = 0;
 	#endif //defined (SUPPORT_IMAGE) || defined (SUPPORT_VIDEO)
 	#if defined (SUPPORT_VIDEO)
-	video_ptr = NULL;
+		video_ptr = 0;
 	#endif //defined (SUPPORT_VIDEO)
 	#if defined (SUPPORT_3DMODEL)
-	model_ptr = NULL;
+		model_ptr = 0;
 	#endif //defined (SUPPORT_3DMODEL)
-	media_type = _type;
+}	
+
+ACMediaData::ACMediaData(ACMediaType _type, std::string _fname) {
+	this->init();
 	if(_fname!=""){
 		file_name=_fname;
 		switch (_type) {
@@ -106,16 +99,18 @@ ACMediaData::ACMediaData(ACMediaType _type, std::string _fname) {
 
 ACMediaData::~ACMediaData() {
 #if defined (SUPPORT_AUDIO)
-	if (audio_ptr != NULL) delete [] audio_ptr;
+	if (audio_ptr != 0) delete [] audio_ptr;
 #endif //defined (SUPPORT_AUDIO)
 #if defined (SUPPORT_IMAGE) || defined (SUPPORT_VIDEO)
-	if (image_ptr != NULL) cvReleaseImage(&image_ptr);
+	if (image_ptr != 0) cvReleaseImage(&image_ptr);
 #endif //defined (SUPPORT_IMAGE) || defined (SUPPORT_VIDEO)
 #if defined (SUPPORT_VIDEO)
-	if (video_ptr != NULL) cvReleaseCapture(&video_ptr);
+	if (video_ptr != 0) cvReleaseCapture(&video_ptr);
 #endif //defined (SUPPORT_VIDEO)
 #if defined (SUPPORT_3DMODEL)
-	if (model_ptr != NULL) { model_ptr->unref(); model_ptr=0; }
+	if (model_ptr != 0) { 
+		//ref_ptr//model_ptr->unref();
+		model_ptr=0; }
 #endif //defined (SUPPORT_3DMODEL)
 }
 
@@ -127,7 +122,7 @@ void ACMediaData::readAudioData(string _fname){
 		/* Open failed so print an error message. */
 		printf ("Not able to open input file %s.\n", _fname.c_str()) ;
 		/* Print the error message from libsndfile. */
-		puts (sf_strerror (NULL)) ;
+		puts (sf_strerror (0)) ;
 		exit(1);
 	}
 	audio_ptr = new float[(long) sfinfo.frames * sfinfo.channels];
@@ -194,16 +189,17 @@ void ACMediaData::setVideoData(CvCapture* _data){
 #if defined (SUPPORT_3DMODEL)
 void ACMediaData::read3DModelData(string _fname){ 
 	
-	if (model_ptr != NULL) { model_ptr->unref(); model_ptr=0; }
+	if (model_ptr != 0) { //ref_ptr//model_ptr->unref(); 
+		model_ptr=0; }
 	
 	model_ptr = osgDB::readNodeFile(_fname);
-	model_ptr->ref();
-    if( model_ptr == NULL ) {
+	//ref_ptr//model_ptr->ref();
+    if( model_ptr == 0 ) {
 		cerr << "<ACMediaData::read3DModelData> file can not be read !" << endl;
      }
 }
 
-void ACMediaData::set3DModelData(osg::ref_ptr< osg::Node > _data)
+void ACMediaData::set3DModelData(osg::ref_ptr<osg::Node> _data)
 {
 	model_ptr = dynamic_cast<osg::Node*>( _data->clone(osg::CopyOp::DEEP_COPY_ALL));		
 	if( !model_ptr ) {

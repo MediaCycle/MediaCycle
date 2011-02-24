@@ -39,12 +39,14 @@ using namespace osg;
 ACOsgNodeLinkRenderer::ACOsgNodeLinkRenderer() {
 	link_node = new MatrixTransform();
 	link_geode = 0;
+	node_index = -1;
+	distance_mouse = 0.0f;
 }
 
 ACOsgNodeLinkRenderer::~ACOsgNodeLinkRenderer() {
 	link_node = new MatrixTransform();
 	if 	(link_geode) {
-		link_geode->unref();
+		//ref_ptr//link_geode->unref();
 		link_geode=0;
 	}
 }
@@ -74,7 +76,7 @@ void ACOsgNodeLinkRenderer::linkGeode(double to_x, double to_y) {
 	link_geometry->setVertexArray(vertices);
 	
 	Vec4 color (1,1,0.5,1);
-	Vec4Array* colors = new Vec4Array;
+	osg::ref_ptr<osg::Vec4Array> colors = new Vec4Array;
 	colors->push_back(color);
 
 	line_p = new DrawElementsUInt(PrimitiveSet::LINES, 2);	
@@ -96,7 +98,7 @@ void ACOsgNodeLinkRenderer::linkGeode(double to_x, double to_y) {
 	state->setAttribute(new LineWidth(0.5));
 
 	link_geode->addDrawable(link_geometry);
-	link_geode->ref();	
+	//ref_ptr//link_geode->ref();	
 }
 
 void ACOsgNodeLinkRenderer::prepareLinks() {
@@ -128,7 +130,7 @@ void ACOsgNodeLinkRenderer::updateLinks(double ratio) {
 	if (link_node->getNumChildren() == 1) {
 		if (link_geode) {
 			link_node->removeChild(0,1);
-			link_geode->unref();
+			//ref_ptr//link_geode->unref();
 		}
 	}
 	

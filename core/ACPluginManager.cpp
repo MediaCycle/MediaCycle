@@ -103,7 +103,7 @@ int ACPluginManager::clean() {
 
 // returns the plugin whose name matches aPluginName among all the plugin libraries
 ACPlugin *ACPluginManager::getPlugin(std::string aPluginName) {
-    ACPlugin *result = NULL;
+    ACPlugin *result = 0;
     for (unsigned int k=0;k<this->mPluginLibrary.size();k++) {
         result = this->mPluginLibrary[k]->getPlugin(aPluginName);
         if (result) {
@@ -125,7 +125,7 @@ ACPluginLibrary *ACPluginManager::getPluginLibrary(string _lpath){
 			return *iter;
 		}
 	}
-	return NULL; 
+	return 0; 
 }
 
 void ACPluginManager::dump() {
@@ -205,7 +205,7 @@ ACPlugin *ACPluginLibrary::getPlugin(std::string aPluginName) {
         }
     }
 
-    return NULL;
+    return 0;
 }
 
 void ACPluginLibrary::dump() {

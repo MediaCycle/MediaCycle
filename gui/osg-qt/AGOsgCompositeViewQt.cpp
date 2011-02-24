@@ -78,7 +78,7 @@ AGOsgCompositeViewQt::AGOsgCompositeViewQt( QWidget * parent, const char * name,
 	timeline_renderer = new ACOsgTimelineRenderer();
 	
 	synth = new AGSynthesis();
-	synthAudio = NULL;
+	synthAudio = 0;
 	
 	//this->setAttribute(Qt::WA_Hover, true);
 	setMouseTracking(true); //CF necessary for the hover callback
@@ -256,7 +256,7 @@ void AGOsgCompositeViewQt::keyPressEvent( QKeyEvent* event )
 			rotationdown = 1;
 			break;
 		case Qt::Key_Space:
-			if ( (media_cycle) && (media_cycle->hasBrowser()) && (timeline_renderer->getTrack(0)!=NULL) )
+			if ( (media_cycle) && (media_cycle->hasBrowser()) && (timeline_renderer->getTrack(0)!=0) )
 			{
 				transportdown = 1;
 				
@@ -479,7 +479,7 @@ void AGOsgCompositeViewQt::mouseReleaseEvent( QMouseEvent* event )
 					else
 						this->getTimelineRenderer()->getTrack(0)->updateMedia(loop);
 					
-					/*if ( timeline_renderer->getTrack(0)!=NULL )
+					/*if ( timeline_renderer->getTrack(0)!=0 )
 					{
 						if (track_playing) {
 							audio_engine->getFeedback()->stopExtSource();

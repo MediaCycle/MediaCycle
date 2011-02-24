@@ -45,8 +45,7 @@
 
 class ACOsgVideoRenderer : public ACOsgImageRenderer  {
 protected:
-	osg::ImageStream* image_stream;
-	osg::ImageSequence* image_sequence;
+	osg::ref_ptr<osg::ImageStream> image_stream;
 	
 public:
 	ACOsgVideoRenderer();

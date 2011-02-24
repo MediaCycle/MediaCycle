@@ -36,7 +36,8 @@
 #if defined (SUPPORT_IMAGE) || defined (SUPPORT_VIDEO)
 
 #include "ACOsgImageRenderer.h"
-#include "ACVideo.h"
+#include <ACImage.h>
+#include <ACVideo.h>
 
 using namespace osg;
 
@@ -73,9 +74,12 @@ ACOsgImageRenderer::~ACOsgImageRenderer() {
 //	delete colors;
 //	delete colors2;
 //	delete colors3;
-	if (image_geode) { image_geode->unref(); image_geode=0; }
-	if (border_geode) { border_geode->unref(); border_geode=0; }
-	if (image_transform) { image_transform->unref(); image_transform=0; }
+	if (image_geode) { //ref_ptr//image_geode->unref();
+		image_geode=0; }
+	if (border_geode) { //ref_ptr//border_geode->unref();
+		border_geode=0; }
+	if (image_transform) { //ref_ptr//image_transform->unref(); 
+		image_transform=0; }
 }
 
 void ACOsgImageRenderer::imageGeode(bool flip, float sizemul, float zoomin) {
@@ -99,7 +103,7 @@ void ACOsgImageRenderer::imageGeode(bool flip, float sizemul, float zoomin) {
 	
 	int width, height;
 	//IplImage* thumbnail;
-	//osg::Image* thumbnail;
+	//osg::ref_ptr<osg::Image> thumbnail;
 	std::string thumbnail_filename;
 	
 	StateSet *state;
@@ -175,7 +179,6 @@ void ACOsgImageRenderer::imageGeode(bool flip, float sizemul, float zoomin) {
 	texcoord->push_back(osg::Vec2(b, flip ? b : a));
 	texcoord->push_back(osg::Vec2(b, flip ? a : b));
 	texcoord->push_back(osg::Vec2(a, flip ? a : b));
-	
 	image_geometry->setTexCoordArray(0, texcoord);	
 	
 	// Texture State (image)
@@ -191,7 +194,7 @@ void ACOsgImageRenderer::imageGeode(bool flip, float sizemul, float zoomin) {
 	if (media_type == MEDIA_TYPE_IMAGE)
 	{	
 		// XS TODO : what's the problem with thumbnail ?
-		//thumbnail = (osg::Image*)media_cycle->getThumbnailPtr(media_index);
+		//thumbnail = (osg::ref_ptr<osg::Image>)media_cycle->getThumbnailPtr(media_index);
 		/*
 		if (thumbnail) {
 			//image_image = ACImage::Convert_OpenCV_TO_OSG_IMAGE(thumbnail);
@@ -203,11 +206,12 @@ void ACOsgImageRenderer::imageGeode(bool flip, float sizemul, float zoomin) {
 		}
 		image_texture = new Texture2D;
 		image_texture->setImage(image_image);*/
-		image_texture = (osg::Texture2D*)(media_cycle->getLibrary()->getMedia(media_index)->getThumbnailPtr());
+		
+		image_texture = ((ACImage*)(media_cycle->getLibrary()->getMedia(media_index)))->getTexture();
 	}
 	else if (media_type == MEDIA_TYPE_VIDEO)
 	{
-		image_texture = (osg::Texture2D*)(media_cycle->getLibrary()->getMedia(media_index)->getThumbnailPtr());
+		image_texture = ((ACVideo*)(media_cycle->getLibrary()->getMedia(media_index)))->getTexture();
 	}
 	image_texture->setResizeNonPowerOfTwoHint(false); 
 	
@@ -217,8 +221,7 @@ void ACOsgImageRenderer::imageGeode(bool flip, float sizemul, float zoomin) {
 	state = image_geometry->getOrCreateStateSet();
 	state->setTextureAttribute(0, image_texture);
 	state->setTextureMode(0, GL_TEXTURE_2D, osg::StateAttribute::ON);
-	//state->setRenderingHint(osg::StateSet::TRANSPARENT_BIN); //CF from OSG's examples/osgmovie.cpp, doesn't solve the transparent first frame for video geodes
-		
+	
 	image_geometry->setColorArray(colors);
 	image_geometry->setColorBinding(Geometry::BIND_OVERALL);
 	
@@ -227,6 +230,24 @@ void ACOsgImageRenderer::imageGeode(bool flip, float sizemul, float zoomin) {
 	image_transform->addChild(image_geode);
 	
 #ifdef IMAGE_BORDER
+	/*
+	//CF alternate version
+	state->setRenderingHint(osg::StateSet::TRANSPARENT_BIN); //CF from OSG's examples/osgmovie.cpp, doesn't solve the transparent first frame for video geodes
+	state->setMode(GL_BLEND,osg::StateAttribute::ON);
+	
+	osg::Vec3Array* normals = new osg::Vec3Array(1);
+    (*normals)[0].set(-1.0f,0.0f,0.0f);
+    image_geometry->setNormalArray(normals);
+    image_geometry->setNormalBinding(osg::Geometry::BIND_OVERALL);
+	
+	image_texture->setDataVariance(osg::Object::DYNAMIC); // protect from being optimized away as static state.
+	//image_texture->setBorderColor(osg::Vec4(0.4f, 0.4f, 0.4f, 1.0f));
+	image_texture->setBorderColor(osg::Vec4(1.0f, 0.0f, 0.0f, 1.0f));
+	//image_texture->setBorderWidth(1.5);
+	image_texture->setWrap(osg::Texture2D::WRAP_S,osg::Texture2D::CLAMP_TO_BORDER);
+	image_texture->setWrap(osg::Texture2D::WRAP_T,osg::Texture2D::CLAMP_TO_BORDER);
+	//CF alternate version end
+	*/
 	
 	border_geode = new Geode();
 	border_geometry = new Geometry();	
@@ -267,13 +288,14 @@ void ACOsgImageRenderer::imageGeode(bool flip, float sizemul, float zoomin) {
 	//sprintf(name, "some audio element");
 	image_transform->setUserData(new ACRefId(node_index));
 	//curser_transform->setName(name);
-	image_transform->ref();
+	//ref_ptr//image_transform->ref();
 	//sprintf(name, "some audio element");
 	image_geode->setUserData(new ACRefId(node_index));
 	//waveform_geode->setName(name);
 #ifdef IMAGE_BORDER	
-	image_geode->ref();	
-	border_geode->ref();
+	//CF no need for alternate version
+	//ref_ptr//image_geode->ref();	
+	//ref_ptr//border_geode->ref();
 #endif	
 }
 

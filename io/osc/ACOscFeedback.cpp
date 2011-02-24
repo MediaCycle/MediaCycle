@@ -65,7 +65,7 @@ void ACOscFeedback::release()
 		if (sender->oscSocket)
 			delete sender->oscSocket;
 		delete sender;
-		sender = NULL;
+		sender = 0;
 	}
 }
 

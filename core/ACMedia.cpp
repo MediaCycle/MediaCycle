@@ -39,6 +39,10 @@
 
 using namespace std;
 ACMedia::ACMedia() { 
+	this->init();
+}
+
+void ACMedia::init() { 
 	mid = -1;
 	parentid = -1;	
 	width = 0;
@@ -47,26 +51,22 @@ ACMedia::ACMedia() {
 	end = -1;
 	features_vectors.resize(0);
 	persistent_data = false;
-	data = NULL;
-//	data = new ACMediaData(MEDIA_TYPE_NONE);
+	data = 0; // new ACMediaData(MEDIA_TYPE_NONE);
 }
 
-ACMedia::ACMedia(const ACMedia& m, bool reduce){
+ACMedia::ACMedia(const ACMedia& m, bool reduce) {
+	this->init();	
 	media_type = m.media_type;
-	mid = -1;
 	width = m.width;
 	height = m.height;
 	filename = m.filename;
 	filename_thumbnail = m.filename_thumbnail;
 	start = m.start;
 	end = m.end;
-	features_vectors.resize(0);	
 	persistent_data = !reduce;
-	data = NULL;
-
 	if (persistent_data){
-		if (m.media_type != MEDIA_TYPE_NONE){
-			if( m.data->getMediaType() != MEDIA_TYPE_NONE){// if m.data contains data
+		if (m.media_type == 0){ //if (m.media_type != MEDIA_TYPE_NONE){
+			if( m.data != 0){//if( m.data->getMediaType() != MEDIA_TYPE_NONE){// if m.data contains data
 				data->copyData(m.data);
 			}
 			else {
@@ -75,8 +75,8 @@ ACMedia::ACMedia(const ACMedia& m, bool reduce){
 		}
 		//else we dont have any data to copy
 	}
-//	else
-//		data = new ACMediaData(MEDIA_TYPE_NONE);
+	//else
+	//	data = new ACMediaData(MEDIA_TYPE_NONE); // already through init();
 }
 
 ACMedia::~ACMedia() { 
@@ -87,17 +87,14 @@ ACMedia::~ACMedia() {
 		delete *iter;//needed erase call destructor of pointer (i.e. none since it's just a pointer) not of pointee ACMediaFeatures
 		//features_vectors.erase(iter); //will cause segfault. besides the vector is automatically emptied, no need to erase.
 	}
-	// XS TODO : why was this commented ?
-	if (data!=NULL) {
-		delete data;
-		data = NULL;
-	};
+	// XS TODO : why is this commented ?
+	//if (data) delete data;
 }
 
 void ACMedia::deleteData(){
 	if (!persistent_data){
 		delete data;
-		data = NULL;
+		data = 0;
 	}
 }
 
@@ -203,16 +200,16 @@ void ACMedia::saveXML(TiXmlElement* _medias){
 // return value is used in ACMediaLibrary::openACLLibrary
 int ACMedia::loadACL(std::string media_path, ifstream &library_file, int mcsl) {
 	
-	int n_features;
+	int n_features = 0;
 	int n_features_elements = 0;	
-	int nn;
-	string tab;
+	int nn = 0;
+	string tab = "";
 	
-	ACMediaFeatures* mediaFeatures;
-	string featureName;
-	float local_feature;
+	ACMediaFeatures* mediaFeatures = 0;
+	string featureName  = "";
+	float local_feature = 0;
 	
-	int nbSegments, segId;
+	int nbSegments(0), segId(0);
 	
 	if (! library_file.is_open()) {
 		cerr << "<ACMedia::loadACL> : problem loading image from ACL file, it needs to be opened before" << endl;
@@ -347,7 +344,7 @@ ACMediaFeatures* ACMedia::getFeaturesVector(int i){
 	else {
 		std::cerr << "ACMedia::getFeaturesVector : out of bounds " << i << " > " << features_vectors.size() << std::endl;
 	}
-	return NULL;
+	return 0;
 }
 
 ACMediaFeatures* ACMedia::getFeaturesVector(string feature_name) { 
@@ -369,14 +366,13 @@ int ACMedia::import(std::string _path, int _mid, ACPluginManager *acpl, bool _sa
 	this->filename = _path;
 	this->filename_thumbnail = _path;
 	int import_ok = 0;
-	
 	if (_mid>=0) this->setId(_mid);
 	
 	// get info about width, height, thumbnail, ...
 	// and return a pointer to the data (ACMediaData*)
 	// data will be used by the plugin to compute features
 	this->extractData(this->getFileName());
-	if (data==NULL){
+	if (data==0){
 		import_ok = 0;
 		cerr << "<ACMedia::import> failed accessing data for media number: " << _mid << endl;
 		return 0;
@@ -435,12 +431,12 @@ int ACMedia::import(std::string _path, int _mid, ACPluginManager *acpl, bool _sa
 //      ex: in audio : plugin extracts features and then segments
 int ACMedia::segment(ACPluginManager *acpl, bool _saved_timed_features ) {	
 	// check if data have been extracted properly by the import method
-	if (data==NULL){
+	if (data==0){
 		cerr << "<ACMedia::segment> failed accessing data for media number: " << this->getId() << endl;
 		return -1;
 	}
 	
-	if (acpl==NULL){
+	if (acpl==0){
 		cerr << "<ACMedia::segment> missing plugin manager for media number " << this->getId() << endl;
 		return -1;	
 	}
@@ -456,7 +452,7 @@ int ACMedia::segment(ACPluginManager *acpl, bool _saved_timed_features ) {
 	// features_plugins.push_back( acpl->getPluginLibrary(i)->getPlugin(j));
 	// then features_plugins[i]->segment() does not call the right segment method...
 	// unless we make plugin a virtual class ?
-	ACMediaTimedFeature* ft_from_disk;
+	ACMediaTimedFeature* ft_from_disk = 0;
 	
 	if (_saved_timed_features) {
 		for (int i=0;i<acpl->getSize();i++) {
@@ -480,7 +476,8 @@ int ACMedia::segment(ACPluginManager *acpl, bool _saved_timed_features ) {
 		}
 		
 		// DEBUG
-		ft_from_disk->dump();
+		if(ft_from_disk)
+			ft_from_disk->dump();
 		
 		// should not use all segmentation plugins -- choose one using menu !!	
 		// XS TODO: check that ft_from_disk is not empty

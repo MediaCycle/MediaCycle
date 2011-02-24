@@ -1,7 +1,7 @@
 /**
  * @brief ACAudioFeatures.cpp
- * @author Stéphane Dupont
- * @date 21/02/2011
+ * @author Christian Frisson
+ * @date 24/02/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -561,7 +561,7 @@ int resample(float* datain, SF_INFO *sfinfo, float* dataout, SF_INFO* sfinfoout)
 // 		/* Open failed so print an error message. */
 // 		printf ("Not able to open input file %s.\n", "test.aiff") ;
 // 		/* Print the error message from libsndfile. */
-// 		puts (sf_strerror (NULL)) ;
+// 		puts (sf_strerror (0)) ;
 // 		return  1 ;
 // 	}
 // 	sf_write_float(outFile, dataout, outFrames);

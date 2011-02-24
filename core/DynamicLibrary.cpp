@@ -58,7 +58,7 @@ DynamicLibrary::~DynamicLibrary()
 
 DynamicLibrary* DynamicLibrary::loadLibrary(const std::string& libraryName) //!= Loadlibrary (see getLibraryHandle() )
 {
-    HANDLE handle = NULL;
+    HANDLE handle = 0;
     /*
 	 std::string fullLibraryName = osgDB::findLibraryFile(libraryName);
 	 if (!fullLibraryName.empty()) handle = getLibraryHandle( fullLibraryName );    // try the lib we have found
@@ -69,18 +69,18 @@ DynamicLibrary* DynamicLibrary::loadLibrary(const std::string& libraryName) //!=
     // else no lib found so report errors.
     else { cout << "DynamicLibrary::failed loading \""<<libraryName<<"\""<<std::endl; }
 	
-    return NULL;
+    return 0;
 }
 
 DynamicLibrary::HANDLE DynamicLibrary::getLibraryHandle( const std::string& libraryName)
 {
-    HANDLE handle = NULL;
+    HANDLE handle = 0;
 	
 #if defined(WIN32) && !defined(__CYGWIN__)
     handle = LoadLibrary( libraryName.c_str() );
 #elif defined(__APPLE__) && defined(APPLE_PRE_10_3)
     NSObjectFileImage image;
-    // NSModule os_handle = NULL;
+    // NSModule os_handle = 0;
     if (NSCreateObjectFileImageFromFile(libraryName.c_str(), &image) == NSObjectFileImageSuccess) {
         // os_handle = NSLinkModule(image, libraryName.c_str(), TRUE);
         handle = NSLinkModule(image, libraryName.c_str(), TRUE);
@@ -102,7 +102,7 @@ DynamicLibrary::HANDLE DynamicLibrary::getLibraryHandle( const std::string& libr
     localLibraryName = libraryName;
 	
     handle = dlopen( localLibraryName.c_str(), RTLD_LAZY | RTLD_GLOBAL);
-    if( handle == NULL )
+    if( handle == 0 )
     {
         if (fileExists(localLibraryName))
         {
@@ -121,7 +121,7 @@ DynamicLibrary::HANDLE DynamicLibrary::getLibraryHandle( const std::string& libr
 
 DynamicLibrary::PROC_ADDRESS DynamicLibrary::getProcAddress(const std::string& procName)
 {
-    if (_handle==NULL) return NULL;
+    if (_handle==0) return 0;
 #if defined(WIN32) && !defined(__CYGWIN__)
     return (DynamicLibrary::PROC_ADDRESS)GetProcAddress( (HMODULE)_handle,
 														procName.c_str() );
@@ -132,7 +132,7 @@ DynamicLibrary::PROC_ADDRESS DynamicLibrary::getProcAddress(const std::string& p
     symbol = NSLookupSymbolInModule(static_cast<NSModule>(_handle), temp.c_str());
     return NSAddressOfSymbol(symbol);
 #elif defined(__hpux__)
-    void* result = NULL;
+    void* result = 0;
     if (shl_findsym (reinterpret_cast<shl_t*>(&_handle), procName.c_str(), TYPE_PROCEDURE, result) == 0)
     {
         return result;
@@ -141,7 +141,7 @@ DynamicLibrary::PROC_ADDRESS DynamicLibrary::getProcAddress(const std::string& p
     {
         cout << "DynamicLibrary::failed looking up " << procName << std::endl;
         cout << "DynamicLibrary::error " << strerror(errno) << std::endl;
-        return NULL;
+        return 0;
     }
 #else // other unix
     void* sym = dlsym( _handle,  procName.c_str() );

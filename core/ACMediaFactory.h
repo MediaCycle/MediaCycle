@@ -70,6 +70,7 @@ public:
 	
 private:
 	static bool addFileExtensionSupport(std::string file_ext, ACMediaType media_type);	
+	void addPossibleFileExtensions();
 	#if defined (SUPPORT_AUDIO)
 		static void addSndFileExtensions();
 	#endif //defined (SUPPORT_AUDIO)

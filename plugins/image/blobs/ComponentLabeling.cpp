@@ -38,7 +38,7 @@ inline unsigned char GET_IMAGE_PIXEL( IplImage *image, CvPoint p )
 
 inline bool GET_IMAGEMASK_PIXEL( IplImage *mask, CvPoint p )
 {
-	if( mask != NULL )
+	if( mask != 0 )
 		return ((unsigned char)*(mask->imageData + p.x + p.y *mask->widthStep)) > 0;
 	else
 		return true;
@@ -77,7 +77,7 @@ inline void ASSIGN_VISITED( CvPoint p, bool *visitedPoints, int imageWidth  )
 - FUNCIONALITAT: Calcula els components binaris (blobs) d'una imatge amb connectivitat a 8
 - PARÀMETRES:
 	- inputImage: image to segment (pixel values different than blobColor are treated as background)
-	- maskImage: if not NULL, all the pixels equal to 0 in mask are skipped in input image
+	- maskImage: if not 0, all the pixels equal to 0 in mask are skipped in input image
 	- backgroundColor: color of background (ignored pixels)
 	- blobs: blob vector destination
 - RESULTAT:

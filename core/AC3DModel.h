@@ -58,11 +58,11 @@ public:
 	
 	void* getThumbnailPtr() { return 0; }
 	
-	osg::Node* getData(){return data->get3DModelData();}
-	void setData(osg::Node* _data);
+	osg::ref_ptr<osg::Node> getData(){return data->get3DModelData();}
+	void setData(osg::ref_ptr<osg::Node> _data);
 	
 private:	
-	
+	void init();
 	std::vector<float> center;
 	std::vector<float> extent;
 };

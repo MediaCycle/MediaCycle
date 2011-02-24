@@ -107,7 +107,7 @@ class CBlobGetExterior: public COperadorBlob
 public:
 	CBlobGetExterior()
 	{
-		m_mask = NULL;
+		m_mask = 0;
 		m_xBorder = false;
 		m_yBorder = false;
 	}
@@ -137,7 +137,7 @@ class CBlobGetMean: public COperadorBlob
 public:
 	CBlobGetMean()
 	{
-		m_image = NULL;
+		m_image = 0;
 	}
 	CBlobGetMean( IplImage *image )
 	{
@@ -164,7 +164,7 @@ class CBlobGetStdDev: public COperadorBlob
 public:
 	CBlobGetStdDev()
 	{
-		m_image = NULL;
+		m_image = 0;
 	}
 	CBlobGetStdDev( IplImage *image )
 	{
@@ -469,7 +469,7 @@ class CBlobGetExternPerimeter: public COperadorBlob
 public:
 	CBlobGetExternPerimeter()
 	{
-		m_mask = NULL;
+		m_mask = 0;
 		m_xBorder = false;
 		m_yBorder = false;
 	}
@@ -501,7 +501,7 @@ class CBlobGetExternPerimeterRatio: public COperadorBlob
 public:
 	CBlobGetExternPerimeterRatio()
 	{
-		m_mask = NULL;
+		m_mask = 0;
 		m_xBorder = false;
 		m_yBorder = false;
 	}
@@ -536,7 +536,7 @@ class CBlobGetExternHullPerimeterRatio: public COperadorBlob
 public:
 	CBlobGetExternHullPerimeterRatio()
 	{
-		m_mask = NULL;
+		m_mask = 0;
 		m_xBorder = false;
 		m_yBorder = false;
 	}

@@ -116,22 +116,22 @@ void ACImageAnalysis::check_imgp(){
 }
 
 int ACImageAnalysis::getWidth() {
-	if (imgp == NULL) return 0;
+	if (imgp == 0) return 0;
 	return imgp->width;
 }
 
 int ACImageAnalysis::getHeight() {
-	if (imgp == NULL) return 0;
+	if (imgp == 0) return 0;
 	return imgp->height;
 }
 
 int ACImageAnalysis::getDepth() {
-	if (imgp == NULL) return 0;
+	if (imgp == 0) return 0;
 	return imgp->depth;
 }
 
 int ACImageAnalysis::getNumberOfChannels(){	
-	if (imgp == NULL) return 0;
+	if (imgp == 0) return 0;
 	return imgp->nChannels;
 }
 
@@ -193,7 +193,7 @@ void ACImageAnalysis::closeNewWindow(const std::string title){
 }
 
 int ACImageAnalysis::saveInFile (string filename){
-	if(imgp == NULL) return 0;
+	if(imgp == 0) return 0;
 	const char *filename_char = filename.c_str();
 	if( cvSaveImage(filename_char, imgp )) {
 		cout << filename << " has been written successfully." << endl;

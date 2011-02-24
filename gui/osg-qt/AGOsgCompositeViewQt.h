@@ -1,7 +1,7 @@
 /**
  * @brief AGOsgCompositeViewQt.h
  * @author Christian Frisson
- * @date 18/02/2011
+ * @date 24/02/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -124,8 +124,8 @@ class AGOsgCompositeViewQt : public osgViewer::CompositeViewer, public QGLWidget
 		ACOsgBrowserEventHandler *event_handler;
 		ACOsgTimelineRenderer *timeline_renderer;
 		ACOsgTimelineEventHandler *timeline_event_handler;
-		osgViewer::View* browser_view;
-		osgViewer::View* timeline_view;
+		osg::ref_ptr<osgViewer::View> browser_view;
+		osg::ref_ptr<osgViewer::View> timeline_view;
 	
 		ACAudioEngine *audio_engine;
 

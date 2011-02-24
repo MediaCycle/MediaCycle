@@ -39,5 +39,5 @@ ACAbstractAboutDialogQt* ACAboutDialogFactoryQt::createAboutDialog(QWidget *pare
 	/*#if defined (USE_AUDIOGARDEN)
 	else if (about_type == "AudioGarden") {return new AGAboutDialogQt(parent);}
 	#endif //defined (USE_AUDIOGARDEN)*/
-	else return NULL;
+	else return 0;
 }

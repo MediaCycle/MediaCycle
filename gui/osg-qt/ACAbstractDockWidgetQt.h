@@ -51,10 +51,10 @@ class ACAbstractDockWidgetQt : public QDockWidget {
 	
 public:
 	ACAbstractDockWidgetQt(QWidget *parent = 0, ACMediaType _media_type = MEDIA_TYPE_NONE, std::string _class_name = "")
-		: QDockWidget(parent), media_type(_media_type),class_name(_class_name),media_cycle(NULL),osg_view(NULL)
+		: QDockWidget(parent), media_type(_media_type),class_name(_class_name),media_cycle(0),osg_view(0)
 	{
 		#if defined (SUPPORT_AUDIO)
-		audio_engine = NULL;
+		audio_engine = 0;
 		#endif //defined (SUPPORT_AUDIO)
 	};
     ~ACAbstractDockWidgetQt(){};

@@ -56,10 +56,10 @@ int OPENAL_NUM_BUFFERS = 32;
 typedef ALvoid	AL_APIENTRY	(*alMacOSXRenderChannelCountProcPtr) (const ALint value);
 ALvoid  alMacOSXRenderChannelCountProc(const ALint value)
 {
-	static	alMacOSXRenderChannelCountProcPtr	proc = NULL;
+	static	alMacOSXRenderChannelCountProcPtr	proc = 0;
     
-    if (proc == NULL) {
-        proc = (alMacOSXRenderChannelCountProcPtr) alcGetProcAddress(NULL, (const ALCchar*) "alMacOSXRenderChannelCount");
+    if (proc == 0) {
+        proc = (alMacOSXRenderChannelCountProcPtr) alcGetProcAddress(0, (const ALCchar*) "alMacOSXRenderChannelCount");
     }
     
     if (proc)
@@ -72,10 +72,10 @@ ALvoid  alMacOSXRenderChannelCountProc(const ALint value)
 typedef ALvoid	AL_APIENTRY	(*alcMacOSXRenderingQualityProcPtr) (const ALint value);
 ALvoid  alcMacOSXRenderingQualityProc(const ALint value)
 {
-	static	alcMacOSXRenderingQualityProcPtr	proc = NULL;
+	static	alcMacOSXRenderingQualityProcPtr	proc = 0;
     
-    if (proc == NULL) {
-        proc = (alcMacOSXRenderingQualityProcPtr) alcGetProcAddress(NULL, (const ALCchar*) "alcMacOSXRenderingQuality");
+    if (proc == 0) {
+        proc = (alcMacOSXRenderingQualityProcPtr) alcGetProcAddress(0, (const ALCchar*) "alcMacOSXRenderingQuality");
     }
     
     if (proc)
@@ -196,20 +196,20 @@ void ACAudioFeedback::createOpenAL()
 	int count;
 	
 	ALenum			error;
-	ALCcontext		*newContext = NULL;
-	//ALCdevice		*device = NULL;//CF promoted to class member
+	ALCcontext		*newContext = 0;
+	//ALCdevice		*device = 0;//CF promoted to class member
 		
 /*	
 	// SD TODO - Allow the user to select the device, and probably the speaker configuration (stereo, 5.1...)
-	// Create a new OpenAL Device: NULL -> default output device
-	device = alcOpenDevice(NULL);
+	// Create a new OpenAL Device: 0 -> default output device
+	device = alcOpenDevice(0);
 */
-	if (device != NULL)
+	if (device != 0)
 	{
 		// Create a new OpenAL Context
 		newContext = alcCreateContext(device, 0);//CF make this choosable
 		
-		if (newContext != NULL)
+		if (newContext != 0)
 		{
 			// Make the new context the Current OpenAL Context
 			alcMakeContextCurrent(newContext);
@@ -365,7 +365,7 @@ void ACAudioFeedback::createAudioEngine(int _output_sample_rate, int _output_buf
 	
 #ifdef USE_OPENAL
 	audio_engine_arg = (void*)this;
-	pthread_create(&audio_engine, &audio_engine_attr, &threadAudioEngineFunction, audio_engine_arg);
+	pthread_create(&audio_engine_t, &audio_engine_attr, &threadAudioEngineFunction, audio_engine_arg);
 	pthread_attr_destroy(&audio_engine_attr);
 #endif
 	
@@ -386,7 +386,7 @@ void ACAudioFeedback::deleteAudioEngine()
 	
 // 	// SD TODO - Clear Buffers
 // 	//
- 	pthread_cancel(audio_engine);
+ 	pthread_cancel(audio_engine_t);
 	pthread_cancel(audio_update);
 // 	pthread_mutex_destroy(&audio_engine_mutex);
 // 	pthread_cond_destroy(&audio_engine_cond);
@@ -1522,7 +1522,7 @@ void ACAudioFeedback::setLoopSynchroMode(int _loop_id, ACAudioEngineSynchroMode 
 	int _loop_slot = getLoopSlot(_loop_id); 
 	if (_loop_slot != -1)
 	{	
-		if (loop_synchro_mode != NULL)
+		if (loop_synchro_mode != 0)
 		{	
 			loop_synchro_mode[_loop_slot] = _synchro_mode;
 		}	
@@ -1535,7 +1535,7 @@ void ACAudioFeedback::setLoopScaleMode(int _loop_id, ACAudioEngineScaleMode _sca
 	int _loop_slot = getLoopSlot(_loop_id); 
 	if (_loop_slot != -1)
 	{	
-		if (loop_scale_mode != NULL)
+		if (loop_scale_mode != 0)
 		{	
 			loop_scale_mode[_loop_slot] = _scale_mode;
 		}	
@@ -1809,7 +1809,7 @@ int ACAudioFeedback::createSourceWithPosition(int loop_id, float x, float y, flo
 		loop_synchro_mode[loop_slot] = ACAudioEngineSynchroModeNone;
 	}
 	
-	//pv[loop_slot] = pv_complex_curses_init2(datashort,size,freq,NULL,1.0,0,2048,512,3,2); //hard-coded
+	//pv[loop_slot] = pv_complex_curses_init2(datashort,size,freq,0,1.0,0,2048,512,3,2); //hard-coded
 	setSamples(&(tpv[loop_slot]),(short*)datashort,(int)size,(int)freq);
 	initPV(&(tpv[loop_slot]));
 	setWinsize(&(tpv[loop_slot]),tpv_winsize);
@@ -2057,7 +2057,7 @@ void ACAudioFeedback::setListenerGain(float gain)
 void ACAudioFeedback::setRenderChannels(int channels)
 {	
 	//CF UInt32
-	unsigned int setting = (channels == 0) ? alcGetEnumValue(NULL, "ALC_RENDER_CHANNEL_COUNT_MULTICHANNEL") : alcGetEnumValue(NULL, "ALC_RENDER_CHANNEL_COUNT_STEREO");
+	unsigned int setting = (channels == 0) ? alcGetEnumValue(0, "ALC_RENDER_CHANNEL_COUNT_MULTICHANNEL") : alcGetEnumValue(0, "ALC_RENDER_CHANNEL_COUNT_STEREO");
 	// TODO SD - Check wether this allows to support multichannel (f.i. 5.1) rendering
 #if defined(__APPLE__)
 	alMacOSXRenderChannelCountProc((const ALint) setting);
@@ -2067,7 +2067,7 @@ void ACAudioFeedback::setRenderChannels(int channels)
 void ACAudioFeedback::setRenderQuality(int quality)
 {
 	//CF UInt32
-	unsigned int setting = (quality == 0) ? alcGetEnumValue(NULL, "ALC_SPATIAL_RENDERING_QUALITY_LOW") : alcGetEnumValue(NULL, "ALC_SPATIAL_RENDERING_QUALITY_HIGH");
+	unsigned int setting = (quality == 0) ? alcGetEnumValue(0, "ALC_SPATIAL_RENDERING_QUALITY_LOW") : alcGetEnumValue(0, "ALC_SPATIAL_RENDERING_QUALITY_HIGH");
 	// TODO SD - This will activate OS-X specific extension for HRTF.
 #if defined(__APPLE__)
 	alcMacOSXRenderingQualityProc((const ALint) setting);
@@ -2260,7 +2260,7 @@ int ACAudioFeedback::setSourceVelocity(int loop_id, float velocity)
  if( 0 == machThread )
  machThread = mach_thread_self();
  
- if( NULL != isTimeshare )
+ if( 0 != isTimeshare )
  {
  structItemCount = THREAD_EXTENDED_POLICY_COUNT;
  result = thread_policy_get( machThread, THREAD_EXTENDED_POLICY,
@@ -2271,7 +2271,7 @@ int ACAudioFeedback::setSourceVelocity(int loop_id, float velocity)
  return result;
  }
  
- if( NULL != priority )
+ if( 0 != priority )
  {
  fetchDefaults = false;
  structItemCount = THREAD_PRECEDENCE_POLICY_COUNT;

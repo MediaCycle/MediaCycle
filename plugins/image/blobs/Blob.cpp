@@ -27,7 +27,7 @@ CBlob::CBlob()
 	m_externPerimeter = m_meanGray = m_stdDevGray = -1;
 	m_boundingBox.width = -1;
 	m_ellipse.size.width = -1;
-	m_storage = NULL;
+	m_storage = 0;
 	m_id = -1;
 }
 CBlob::CBlob( t_labelType id, CvPoint startPoint, CvSize originalImageSize )
@@ -44,15 +44,15 @@ CBlob::CBlob( t_labelType id, CvPoint startPoint, CvSize originalImageSize )
 //! Copy constructor
 CBlob::CBlob( const CBlob &src )
 {
-	m_storage = NULL;
+	m_storage = 0;
 	*this = src;
 }
 
 CBlob::CBlob( const CBlob *src )
 {
-	if (src != NULL )
+	if (src != 0 )
 	{
-		m_storage = NULL;
+		m_storage = 0;
 		*this = *src;
 	}
 }
@@ -142,7 +142,7 @@ void CBlob::AddInternalContour( const CBlobContour &newContour )
 //! Shows if the blob has associated information
 bool CBlob::IsEmpty()
 {
-	return GetExternalContour()->m_contour == NULL;
+	return GetExternalContour()->m_contour == 0;
 }
 
 /**
@@ -237,7 +237,7 @@ int	CBlob::Exterior(IplImage *mask, bool xBorder /* = true */, bool yBorder /* =
 - FUNCI”: ExternPerimeter
 - FUNCIONALITAT: Get extern perimeter (perimeter touching image borders)
 - PAR¿METRES:
-	- maskImage: if != NULL, counts maskImage black pixels as external pixels and contour points touching
+	- maskImage: if != 0, counts maskImage black pixels as external pixels and contour points touching
 				 them are counted as external contour points.
 	- xBorder: true to consider blobs touching horizontal borders as extern
 	- yBorder: true to consider blobs touching vertical borders as extern
@@ -273,7 +273,7 @@ double CBlob::ExternPerimeter( IplImage *maskImage, bool xBorder /* = true */, b
 	m_externPerimeter = 0;
 
 	// there are contour pixels?
-	if( externContour == NULL )
+	if( externContour == 0 )
 	{
 		return m_externPerimeter;
 	}
@@ -301,7 +301,7 @@ double CBlob::ExternPerimeter( IplImage *maskImage, bool xBorder /* = true */, b
 		}
 		else
 		{
-			if( maskImage != NULL )
+			if( maskImage != 0 )
 			{
 				// verify if some of 8-connected neighbours is black in mask
 				char *pMask;
@@ -676,7 +676,7 @@ void CBlob::FillBlob( IplImage *imatge, CvScalar color, int offsetX /*=0*/, int 
 */
 t_PointList CBlob::GetConvexHull()
 {
-	CvSeq *convexHull = NULL;
+	CvSeq *convexHull = 0;
 
 	if( m_externalContour.GetContourPoints() )
 		convexHull = cvConvexHull2( m_externalContour.GetContourPoints(), m_storage,

@@ -459,7 +459,13 @@ struct ACOsgBrowserViewData
 		////_privateData->renderer.updateLabels(frac); //CF
 		renderer->updateNodes(frac); // animation time in [0,1] //CF
 		renderer->updateLabels(frac);//CF		
+		
 		renderer_hud->updatePointers(view);
+		/*
+		osgViewer::ViewerBase::Views views;
+		bool have_views;
+		view->getViews(views,have_views);
+		renderer_hud->updatePointers(views[0]);*/
 	}
 }
 

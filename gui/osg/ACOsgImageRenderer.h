@@ -45,14 +45,14 @@ class ACOsgImageRenderer : public ACOsgMediaRenderer  {
 protected:
 	
 	static const int NCOLORS ;
-	osg::Vec4Array* colors;
-	osg::Vec4Array* colors2;
-	osg::Vec4Array* colors3;
+	osg::ref_ptr<osg::Vec4Array> colors;
+	osg::ref_ptr<osg::Vec4Array> colors2;
+	osg::ref_ptr<osg::Vec4Array> colors3;
 	
-	osg::Image* image_image;
-	osg::Geode* image_geode;
-	osg::Geode* border_geode;
-	osg::MatrixTransform* image_transform;
+	osg::ref_ptr<osg::Image> image_image;
+	osg::ref_ptr<osg::Geode> image_geode;
+	osg::ref_ptr<osg::Geode> border_geode;
+	osg::ref_ptr<osg::MatrixTransform> image_transform;
 	
 	void imageGeode(bool flip=false, float sizemul=1.0, float zoomin=1.0);
 	

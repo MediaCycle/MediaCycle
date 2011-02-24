@@ -62,11 +62,11 @@ std::vector<ACMediaFeatures*>  ACImageColorMomentsPlugin::calculate(std::string 
 	std::vector<ACMediaFeatures*> allImageFeatures;
 
 	ACMediaFeatures* imageColorFeatures = this->calculateColorFeatures(image);
-	if (imageColorFeatures != NULL){
+	if (imageColorFeatures != 0){
 		allImageFeatures.push_back(imageColorFeatures);
 	}
 	else{
-		cerr << "<ACImageColorMomentsPlugin::calculate> : NULL color feature" << endl;
+		cerr << "<ACImageColorMomentsPlugin::calculate> : no color feature" << endl;
 	}
 		
 	delete image;
@@ -82,11 +82,11 @@ std::vector<ACMediaFeatures*> ACImageColorMomentsPlugin::calculate(ACMediaData* 
 	std::vector<ACMediaFeatures*> allImageFeatures;
 	
 	ACMediaFeatures* imageColorFeatures = this->calculateColorFeatures(image);
-	if (imageColorFeatures != NULL){
+	if (imageColorFeatures != 0){
 		allImageFeatures.push_back(imageColorFeatures);
 	}
 	else{
-		cerr << "<ACImageColorMomentsPlugin::calculate> : NULL color feature" << endl;
+		cerr << "<ACImageColorMomentsPlugin::calculate> : no color feature" << endl;
 	}
 		
 	delete image;

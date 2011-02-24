@@ -65,11 +65,11 @@
 class ACOsgMediaRenderer {
 protected:
 	MediaCycle* media_cycle;
-	osg::Group* local_group;
+	osg::ref_ptr<osg::Group>  local_group;
 #ifdef AUTO_TRANSFORM
-	osg::AutoTransform* media_node;
+	osg::ref_ptr<osg::AutoTransform> media_node;
 #else
-	osg::MatrixTransform* media_node;
+	osg::ref_ptr<osg::MatrixTransform> media_node;
 #endif
 	int node_index;
 	float distance_mouse;
@@ -106,7 +106,7 @@ public:
 	void setNodeIndex(int _node_index) { this->node_index = _node_index; };
 	void setDistanceMouse(float _distance_mouse) { this->distance_mouse = _distance_mouse; };
 	//void setActivity(int _media_activity) { this->media_activity = _media_activity; }
-	osg::Group* getNode() { return local_group; };
+	osg::ref_ptr<osg::Group>  getNode() { return local_group; };
 	int	getNodeIndex() { return node_index; };
 	
 	virtual void prepareNodes()=0;

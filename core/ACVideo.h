@@ -57,11 +57,12 @@ public:
 	int loadXMLSpecific(TiXmlElement* _pMediaNode);
 
 	//void setThumbnail(IplImage *_thumbnail) { thumbnail = _thumbnail; thumbnail_width = _thumbnail->width; thumbnail_height = _thumbnail->height; }
-	osg::Image* getThumbnail() { return thumbnail; }
+	osg::ref_ptr<osg::Image> getThumbnail() { return thumbnail; }
+	osg::ref_ptr<osg::Texture2D> getTexture() { return image_texture; }
 	void* getThumbnailPtr() { return (void*)image_texture;}//thumbnail; } // 
 	int getThumbnailWidth() {return thumbnail_width;}
 	int getThumbnailHeight() {return thumbnail_height;}
-	void* getStream() {return(void*) image_stream;}
+	osg::ref_ptr<osg::ImageStream> getStream() {return image_stream;}
 
 	CvCapture* getData();//{return data->getVideoData();}
 	void setData(CvCapture* _data);
@@ -70,11 +71,12 @@ public:
 	void extractData(std::string fname);
 	
 private:
+	void init();	
 	static const int default_thumbnail_width, default_thumbnail_height, default_thumbnail_area;
 	int thumbnail_width, thumbnail_height;
-	osg::ImageStream* image_stream;	
-	osg::Image* thumbnail;
-	osg::Texture2D* image_texture;
+	osg::ref_ptr<osg::ImageStream>image_stream;	
+	osg::ref_ptr<osg::Image> thumbnail;
+	osg::ref_ptr<osg::Texture2D> image_texture;
 	
 	int computeThumbnail(int w=0, int h=0);
 	int computeSlitScan(int frame_in, int frame_out);

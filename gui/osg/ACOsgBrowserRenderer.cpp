@@ -64,13 +64,13 @@ ACOsgBrowserRenderer::ACOsgBrowserRenderer()
 //: displayed_nodes(0)
 {
 	group = new Group();
-	group->ref();
+	//ref_ptr//group->ref();
 	media_group = new Group();
-	media_group->ref();
-	label_group = new Group();
-	label_group->ref();
+	//ref_ptr//media_group->ref();
 	link_group = new Group();
-	link_group->ref();
+	//ref_ptr//link_group->ref();
+	label_group = new Group();
+	//ref_ptr//label_group->ref();
 	group->addChild(label_group);		// SD TODO - check this get(), was needed to compile on OSG v2.4 (used by AM)
 	group->addChild(media_group);
 	group->addChild(link_group);
@@ -98,14 +98,46 @@ ACOsgBrowserRenderer::ACOsgBrowserRenderer()
 	 */
 }
 
+ACOsgBrowserRenderer::~ACOsgBrowserRenderer(){
+	this->removeNodes();
+	this->removeLinks();
+	this->removeLabels();	
+}	
+
 void ACOsgBrowserRenderer::clean(){
+	// SD - Results from centralized request to MediaCycle - GLOBAL
+	media_cycle_time = 0.0;
+	media_cycle_prevtime = 0.0;
+	media_cycle_deltatime = 0.0;
+	media_cycle_zoom = 0.0f;
+	media_cycle_angle = 0.0f;
+	media_cycle_mode = 0;
+	media_cycle_global_navigation_level = 0;
+	
+	// SD - Results from centralized request to MediaCycle - NODE SPECIFIC
+	media_cycle_node = ACMediaNode();
+	media_cycle_isdisplayed = false;
+	media_cycle_current_pos.x = 0;
+	media_cycle_current_pos.y = 0;
+	media_cycle_current_pos.z = 0;
+	media_cycle_view_pos.x = 0;
+	media_cycle_view_pos.y = 0;
+	media_cycle_view_pos.z = 0;
+	media_cycle_next_pos.x = 0;
+	media_cycle_next_pos.y = 0;
+	media_cycle_next_pos.z = 0;
+	media_cycle_navigation_level = 0;
+	media_cycle_activity = 0;
+	node_index = -1;
+	media_index = -1;
+	prev_media_index = -1;	
+	media_cycle_filename = "";
 	distance_mouse.clear();
 	nodes_prepared = 0;
 	this->removeNodes();
 	this->removeLinks();
-	this->removeLabels();	
+	this->removeLabels();
 }
-
 
 double ACOsgBrowserRenderer::getTime() {
 	struct timeval  tv = {0, 0};
@@ -205,10 +237,10 @@ void ACOsgBrowserRenderer::updateNodes(double ratio) {
 				node_renderer[i] = new ACOsgTextRenderer();
 				break;
 			default:
-				node_renderer[i] = NULL;
+				node_renderer[i] = 0;
 				break;
 		}
-		if (node_renderer[i] != NULL) {
+		if (node_renderer[i] != 0) {
 			node_renderer[i]->setMediaCycle(media_cycle);
 			node_renderer[i]->setNodeIndex(i);
 			// node_renderer[i]->setActivity(0);
@@ -506,10 +538,10 @@ bool ACOsgBrowserRenderer::addNodes(int _first, int _last){
 					#endif //defined (SUPPORT_TEXT)
 					break;
 				default:
-					node_renderer[i] = NULL;
+					node_renderer[i] = 0;
 					break;
 			}
-			if (node_renderer[i] != NULL) {
+			if (node_renderer[i] != 0) {
 				
 				node_renderer[i]->setMediaCycle(media_cycle);
 				node_renderer[i]->setNodeIndex(i);

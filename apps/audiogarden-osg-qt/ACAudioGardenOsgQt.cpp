@@ -110,8 +110,8 @@ ACAudioGardenOsgQt::ACAudioGardenOsgQt(QWidget *parent)
 	audio_engine->setMediaCycle(media_cycle);
 	audio_engine->printDeviceList();
 
-	osc_feedback = NULL;
-	osc_browser = NULL;
+	osc_feedback = 0;
+	osc_browser = 0;
 	
 	ui.compositeOsgView->move(0,-20);
 	ui.compositeOsgView->setMediaCycle(media_cycle);
@@ -728,7 +728,7 @@ void ACAudioGardenOsgQt::processOscMessage(const char* tagName)
 	}
 	else if(strcasecmp(tagName, "/audiocycle/1/browser/library/load") == 0)
 	{
-		char *lib_path = NULL;
+		char *lib_path = 0;
 		lib_path = new char[500]; // wrong magic number!
 		osc_browser->readString(mOscReceiver, lib_path, 500); // wrong magic number!
 		std::cout << "Importing file library '" << lib_path << "'..." << std::endl;

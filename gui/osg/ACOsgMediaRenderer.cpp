@@ -45,15 +45,41 @@ ACOsgMediaRenderer::ACOsgMediaRenderer() {
 #endif
 	node_color = Vec4(1,1,0.5,1); //CF seminal yellow
 	user_defined_color = false;
+	
+	// SD - Results from centralized request to MediaCycle - GLOBAL
+	media_cycle_deltatime = 0.0;
+	media_cycle_zoom = 0.0f;
+	media_cycle_angle = 0.0f;
+	media_cycle_mode = 0;
+	media_cycle_global_navigation_level = 0;
+	
+	// SD - Results from centralized request to MediaCycle - NODE SPECIFIC
+	media_cycle_isdisplayed = false;
+	media_cycle_current_pos.x = 0;
+	media_cycle_current_pos.y = 0;
+	media_cycle_current_pos.z = 0;
+	media_cycle_view_pos.x = 0;
+	media_cycle_view_pos.y = 0;
+	media_cycle_view_pos.z = 0;
+	media_cycle_next_pos.x = 0;
+	media_cycle_next_pos.y = 0;
+	media_cycle_next_pos.z = 0;
+	media_cycle_navigation_level = 0;
+	media_cycle_activity = 0;
+	media_cycle_filename = "";
+	media_index = -1;
+	prev_media_index = -1;	
+
 	initialized = 0;
-	media_node->ref();
-	local_group->ref();
+	frac = 0.0f;
+	//ref_ptr//media_node->ref();
+	//ref_ptr//local_group->ref();
 	local_group->addChild(media_node);
 }
 
 ACOsgMediaRenderer::~ACOsgMediaRenderer() {
-	media_node->unref();
-	local_group->unref();
+	//ref_ptr//media_node->unref();
+	//ref_ptr//local_group->unref();
 }
 
 void ACOsgMediaRenderer::setDeltaTime(double media_cycle_deltatime) {

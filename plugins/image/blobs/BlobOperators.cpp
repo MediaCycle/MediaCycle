@@ -453,8 +453,8 @@ void RegistraTotsOperadors( t_OperadorBlobFactory &fabricaOperadorsBlob )
 	fabricaOperadorsBlob.Register( CBlobGetRoughness().GetNom(), Type2Type<CBlobGetRoughness>());
 
 	// blob color
-	fabricaOperadorsBlob.Register( CBlobGetMean(NULL).GetNom(), Type2Type<CBlobGetMean>());
-	fabricaOperadorsBlob.Register( CBlobGetStdDev(NULL).GetNom(), Type2Type<CBlobGetStdDev>());
+	fabricaOperadorsBlob.Register( CBlobGetMean(0).GetNom(), Type2Type<CBlobGetMean>());
+	fabricaOperadorsBlob.Register( CBlobGetStdDev(0).GetNom(), Type2Type<CBlobGetStdDev>());
 
 	// extern pixels
 	fabricaOperadorsBlob.Register( CBlobGetExternPerimeterRatio().GetNom(), Type2Type<CBlobGetExternPerimeterRatio>());

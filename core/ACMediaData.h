@@ -72,7 +72,7 @@ public:
 	#if defined (SUPPORT_3DMODEL)
 	void read3DModelData(std::string _fname);
 	void set3DModelData(osg::ref_ptr< osg::Node > _data);
-	osg::Node* get3DModelData(){return model_ptr;}
+	osg::ref_ptr<osg::Node> get3DModelData(){return model_ptr;}
 	#endif //defined (SUPPORT_3DMODEL)
 	
 	std::string getFileName() {return file_name;}
@@ -82,6 +82,7 @@ public:
 	bool copyData(ACMediaData* m);
 	
 private:
+	void init();
 	ACMediaType media_type;
 	std::string file_name;
 	#if defined (SUPPORT_AUDIO)
@@ -95,7 +96,7 @@ private:
 	CvCapture* video_ptr;
 	#endif //defined (SUPPORT_VIDEO)
 	#if defined (SUPPORT_3DMODEL)
-	osg::Node* model_ptr;
+	osg::ref_ptr<osg::Node> model_ptr;
 	#endif //defined (SUPPORT_3DMODEL)
 };
 

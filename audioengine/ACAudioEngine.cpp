@@ -101,14 +101,15 @@ ACAudioEngine::ACAudioEngine(int samplerate, int buffersize)
 
 ACAudioEngine::~ACAudioEngine()
 {
-	delete feedback;
-	delete recorder;
 #ifdef USE_OPENAL
 	deleteOpenAL();
 #endif
 #ifdef USE_PORTAUDIO
 	deletePAStream();
 #endif
+	if (feedback) {delete feedback; feedback = 0;}
+	if (recorder) {delete recorder; recorder = 0;}
+	media_cycle = 0;
 }
 
 void ACAudioEngine::setMediaCycle(MediaCycle *media_cycle)
@@ -121,16 +122,16 @@ void ACAudioEngine::setMediaCycle(MediaCycle *media_cycle)
 #ifdef USE_OPENAL
 void ACAudioEngine::createOpenAL()
 {
-	device = NULL;
+	device = 0;
 	// SD TODO - Allow the user to select the device, and probably the speaker configuration (stereo, 5.1...)
-	// Create a new OpenAL Device: NULL -> default output device
-	device = alcOpenDevice(NULL);
+	// Create a new OpenAL Device: 0 -> default output device
+	device = alcOpenDevice(0);
 }
 
 void ACAudioEngine::deleteOpenAL()
 {
-	 ALCcontext	*context = NULL;
-	 //ALCdevice	*device = NULL;//CF
+	 ALCcontext	*context = 0;
+	 //ALCdevice	*device = 0;//CF
 	 //ALuint		*returnedNames;
 	// SD TODO - Check this and remove comments
 	/*
@@ -166,11 +167,11 @@ void ACAudioEngine::createPAStream()
     outputParameters.channelCount = 1;
     outputParameters.sampleFormat = paInt16;
     outputParameters.suggestedLatency = Pa_GetDeviceInfo( outputParameters.device )->defaultHighOutputLatency;
-    outputParameters.hostApiSpecificStreamInfo = NULL;
+    outputParameters.hostApiSpecificStreamInfo = 0;
 	
     /* -- setup stream -- */
     err = Pa_OpenStream(&stream,
-						NULL, //no input
+						0, //no input
 						&outputParameters,
 						audio_samplerate,
 						audio_buffersize,
@@ -179,13 +180,13 @@ void ACAudioEngine::createPAStream()
 						audio_userdata); // no callback, so no callback userData
     /*
 	err = Pa_OpenStream(&stream,
-						NULL, //no input
+						0, //no input
 						&outputParameters,
 						44100,
 						32,
 						paClipOff,      // we won't output out of range samples so don't bother clipping them
-						NULL, // no callback, use blocking API
-						NULL ); // no callback, so no callback userData
+						0, // no callback, use blocking API
+						0 ); // no callback, so no callback userData
 	 */
 	
     if( err != paNoError )
@@ -221,7 +222,7 @@ void ACAudioEngine::deletePAStream()
 void ACAudioEngine::printDeviceList()
 {
 #ifdef USE_OPENAL
-    const ALCchar* deviceList = alcGetString(NULL, ALC_DEVICE_SPECIFIER);
+    const ALCchar* deviceList = alcGetString(0, ALC_DEVICE_SPECIFIER);
 	
     if (deviceList)
     {
@@ -261,7 +262,7 @@ void ACAudioEngine::getDeviceList(std::vector<std::string>& devices)
 {
     devices.clear();	
 #ifdef USE_OPENAL
-    const ALCchar* deviceList = alcGetString(NULL, ALC_DEVICE_SPECIFIER);
+    const ALCchar* deviceList = alcGetString(0, ALC_DEVICE_SPECIFIER);
 	
     if (deviceList)
     {
@@ -291,7 +292,7 @@ void ACAudioEngine::getDeviceList(std::vector<std::string>& devices)
 void ACAudioEngine::printCaptureDeviceList()
 {
 #ifdef USE_OPENAL
-    const ALCchar* deviceList = alcGetString(NULL, ALC_CAPTURE_DEVICE_SPECIFIER);
+    const ALCchar* deviceList = alcGetString(0, ALC_CAPTURE_DEVICE_SPECIFIER);
 	
     if (deviceList)
     {

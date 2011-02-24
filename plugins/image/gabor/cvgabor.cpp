@@ -27,8 +27,8 @@ using namespace std;
 CvGabor::CvGabor() {
     bInitialised = false;
     bKernel = false;
-	Real = NULL;
-	Imag = NULL;
+	Real = 0;
+	Imag = 0;
 }
 
 CvGabor::~CvGabor() {
@@ -70,8 +70,8 @@ void CvGabor::Init(double dPhi, int iNu, double dSigma, double dF){
     F = dF; 
 	
 	// XS TODO : if initialized...
-	if(Real!=NULL) cvReleaseMat( &Real );
-	if(Imag!=NULL) cvReleaseMat( &Imag );
+	if(Real!=0) cvReleaseMat( &Real );
+	if(Imag!=0) cvReleaseMat( &Imag );
 	
 	Width = SetMaskWidth();
     Real = cvCreateMat( Width, Width, CV_32FC1);
@@ -131,8 +131,8 @@ void CvGabor::CreateKernel() {
 			} 
 		}
 		bKernel = true;
-		cvCopy(mReal, Real, NULL);
-		cvCopy(mImag, Imag, NULL);
+		cvCopy(mReal, Real, 0);
+		cvCopy(mImag, Imag, 0);
 		cvReleaseMat( &mReal );
 		cvReleaseMat( &mImag );
 	}
@@ -142,7 +142,7 @@ IplImage* CvGabor::get_image(int Type) {
 	// XS TODO : this is not good style
     if(!HasKernel()) { 
 		perror("Error: the Gabor kernel has not been created in get_image()!\n");
-		return NULL;
+		return 0;
     }
     else {  
 		IplImage* pImage;
@@ -157,7 +157,7 @@ IplImage* CvGabor::get_image(int Type) {
 		switch(Type)
 		{
 			case 1:  //Real
-				cvCopy( (CvMat*)Real, (CvMat*)kernel, NULL );
+				cvCopy( (CvMat*)Real, (CvMat*)kernel, 0 );
 				for (int i = 0; i < rows; i++) {
 					for (int j = 0; j < cols; j++) {
 						ve = cvGetReal2D((CvMat*)kernel, i, j);
@@ -166,7 +166,7 @@ IplImage* CvGabor::get_image(int Type) {
 				}
 				break;
 			case 2:  //Imag
-				cvCopy( (CvMat*)Imag, (CvMat*)kernel, NULL );
+				cvCopy( (CvMat*)Imag, (CvMat*)kernel, 0 );
 				for (int i = 0; i < rows; i++) {
 					for (int j = 0; j < cols; j++) {
 						ve = cvGetReal2D((CvMat*)kernel, i, j);
@@ -182,7 +182,7 @@ IplImage* CvGabor::get_image(int Type) {
 				break;
 		}
 		
-		cvNormalize((IplImage*)pImage, (IplImage*)pImage, 0, 255, CV_MINMAX, NULL );
+		cvNormalize((IplImage*)pImage, (IplImage*)pImage, 0, 255, CV_MINMAX, 0 );
 		cvConvertScaleAbs( (IplImage*)pImage, (IplImage*)newimage, 1, 0 );
 		cvReleaseMat(&kernel);
 		cvReleaseImage(&pImage);
@@ -198,9 +198,9 @@ long CvGabor::GetMaskWidth() {
 	return Width;
 }
 
-// returns gabor kernel, as pointer to matrix structure, or NULL on failure.
+// returns gabor kernel, as pointer to matrix structure, or 0 on failure.
 CvMat* CvGabor::get_matrix(int Type) {
-    if (!HasKernel()) {perror("Error: the gabor kernel has not been created!\n"); return NULL;}
+    if (!HasKernel()) {perror("Error: the gabor kernel has not been created!\n"); return 0;}
     switch (Type)
     {
 		case CV_GABOR_REAL:
@@ -210,10 +210,10 @@ CvMat* CvGabor::get_matrix(int Type) {
 			return Imag;
 			break;
 		case CV_GABOR_MAG:
-			return NULL;
+			return 0;
 			break;
 		case CV_GABOR_PHASE:
-			return NULL;
+			return 0;
 			break;
     }
 }
@@ -222,7 +222,7 @@ CvMat* CvGabor::get_matrix(int Type) {
 void CvGabor::output_file(const char *filename, int Type) {
 	IplImage *pImage;
 	pImage = get_image(Type);
-	if(pImage != NULL) {
+	if(pImage != 0) {
 		if( cvSaveImage(filename, pImage )) printf("%s has been written successfully!\n", filename);
 		else printf("Error: writting %s has failed!\n", filename);
 	}

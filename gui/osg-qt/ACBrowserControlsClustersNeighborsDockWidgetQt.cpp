@@ -63,12 +63,12 @@ void ACBrowserControlsClustersNeighborsDockWidgetQt::modifyListItem(QListWidgetI
 }
 
 void ACBrowserControlsClustersNeighborsDockWidgetQt::on_pushButtonRecenter_clicked() {
-	if (media_cycle==NULL) return; 
+	if (media_cycle==0) return; 
 	this->media_cycle->setCameraRecenter();
 }	
 
 void ACBrowserControlsClustersNeighborsDockWidgetQt::on_pushButtonBack_clicked() {
-	if (media_cycle==NULL) return; 
+	if (media_cycle==0) return; 
 	this->media_cycle->goBack();
 	this->synchronizeFeaturesWeights();
 	//	ui.navigationLineEdit->setText(QString::number(media_cycle->getNavigationLevel()));
@@ -79,7 +79,7 @@ void ACBrowserControlsClustersNeighborsDockWidgetQt::on_pushButtonBack_clicked()
 }
 
 void ACBrowserControlsClustersNeighborsDockWidgetQt::on_pushButtonForward_clicked() {
-	if (media_cycle==NULL) return; 
+	if (media_cycle==0) return; 
 	
 	this->media_cycle->goForward();
 	this->synchronizeFeaturesWeights();
@@ -92,7 +92,7 @@ void ACBrowserControlsClustersNeighborsDockWidgetQt::on_pushButtonForward_clicke
 }
 
 void ACBrowserControlsClustersNeighborsDockWidgetQt::on_spinBoxClusters_valueChanged(int _value){
-	if (media_cycle==NULL && osg_view == NULL) return; 
+	if (media_cycle==0 && osg_view == 0) return; 
 	
 	ui.sliderClusters->setValue(_value); 	// for synchronous display of values 
 	std::cout << "ClusterNumber: " << _value << std::endl;
@@ -108,7 +108,7 @@ void ACBrowserControlsClustersNeighborsDockWidgetQt::on_spinBoxClusters_valueCha
 
 // for synchronous display of values 
 void ACBrowserControlsClustersNeighborsDockWidgetQt::on_sliderClusters_sliderReleased(){
-	if (media_cycle == NULL) return; 
+	if (media_cycle == 0) return; 
 	ui.spinBoxClusters->setValue(ui.sliderClusters->value());
 }
 
@@ -116,7 +116,7 @@ void ACBrowserControlsClustersNeighborsDockWidgetQt::on_sliderClusters_sliderRel
 // note: here weights are 1 or 0 (checkbox).
 // conversion: 0 remains 0, and value > 0 becomes 1.
 void ACBrowserControlsClustersNeighborsDockWidgetQt::synchronizeFeaturesWeights(){
-	if (media_cycle == NULL) return; 
+	if (media_cycle == 0) return; 
 	vector<float> w = media_cycle->getWeightVector();
 	int nw = w.size();
 	if (nw==0){
@@ -145,7 +145,7 @@ void ACBrowserControlsClustersNeighborsDockWidgetQt::synchronizeFeaturesWeights(
 void ACBrowserControlsClustersNeighborsDockWidgetQt::configureCheckBoxes(){
 	// dynamic config of checkboxes
 	// according to plugins found by plugin manager
-	if (media_cycle == NULL) return;
+	if (media_cycle == 0) return;
 	ACPluginManager *acpl = this->media_cycle->getPluginManager(); //getPlugins
 	if (acpl) {
 		for (int i=0;i<acpl->getSize();i++) {

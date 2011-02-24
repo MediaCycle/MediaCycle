@@ -48,6 +48,11 @@ const int ACVideo:: default_thumbnail_area = 4096;
 
 ACVideo::ACVideo() : ACMedia()
 {
+	this->init();
+}	
+
+void ACVideo::init()
+{
 	media_type = MEDIA_TYPE_VIDEO;
 	thumbnail = 0;
 	thumbnail_width = 0;
@@ -55,6 +60,7 @@ ACVideo::ACVideo() : ACMedia()
 }	
 
 ACVideo::~ACVideo() {
+	if (image_stream) image_stream->quit();	
 	//cvReleaseImage(&thumbnail);
 	/*if (image_stream){
 		osg::ImageStream::StreamStatus streamStatus = image_stream->getStatus();
@@ -79,7 +85,7 @@ ACVideo::~ACVideo() {
 }
 
 ACVideo::ACVideo(const ACVideo& m) : ACMedia(m) {
-	media_type = MEDIA_TYPE_VIDEO;
+	this->init();	
 	thumbnail = m.thumbnail;
 	thumbnail_width = m.thumbnail_width;
 	thumbnail_height = m.thumbnail_height;
@@ -106,7 +112,7 @@ int ACVideo::computeThumbnail(int w, int h){
 	//CF we should compute the following in a separate thread
 	
 	// Loading the movie with OSG
-	osg::Image* thumbnail = osgDB::readImageFile(filename);
+	osg::ref_ptr<osg::Image> thumbnail = osgDB::readImageFile(filename);
 	//thumbnail->scaleImage(thumbnail_width,thumbnail_height,1);
 	//thumbnail->setAllocationMode(osg::Image::NO_DELETE);
 	
@@ -120,7 +126,7 @@ int ACVideo::computeThumbnail(int w, int h){
 	image_texture->setImage(thumbnail);
 	
 	// Converting the video as preloaded stream to transmit the same instance to multiple recipient with unified playback controls
-	image_stream = dynamic_cast<osg::ImageStream*>(thumbnail);
+	image_stream = dynamic_cast<osg::ImageStream*>(thumbnail.get());
 	image_stream->setLoopingMode(osg::ImageStream::LOOPING);
 	
 	// Hack to display a first valid frame, quite long!
@@ -134,8 +140,9 @@ int ACVideo::computeThumbnail(int w, int h){
 
 CvCapture* ACVideo::getData()
 {
-	if (data->getMediaType()!=MEDIA_TYPE_VIDEO)
-		this->extractData(this->filename);
+	if (data == 0) {
+		data = new ACMediaData(MEDIA_TYPE_VIDEO,filename);
+	}	
 	return data->getVideoData();
 }
 
@@ -143,28 +150,26 @@ CvCapture* ACVideo::getData()
 void ACVideo::extractData(string _fname){
 	// XS todo : store the default header (16 below) size somewhere...
 	//ACMediaData* video_data = new ACMediaData(MEDIA_TYPE_VIDEO,_fname);
-	data = new ACMediaData(MEDIA_TYPE_VIDEO,_fname);
-	CvCapture* capture = data->getVideoData();
+	this->filename = _fname;
+	CvCapture* capture = this->getData();
 	width = (int) cvGetCaptureProperty(capture, CV_CAP_PROP_FRAME_WIDTH);
 	height = (int) cvGetCaptureProperty(capture, CV_CAP_PROP_FRAME_HEIGHT);
-	this->computeThumbnailSize();
-	computeThumbnail(16, 16);
-
 	int fps     = (int) cvGetCaptureProperty(capture, CV_CAP_PROP_FPS);
 	int nframes = (int) cvGetCaptureProperty(capture,  CV_CAP_PROP_FRAME_COUNT);
-	
 	start = 0.0;
 	if (fps != 0) end = nframes * 1.0/fps;
 	else end = nframes;
-
-	//return video_data;
+	this->computeThumbnailSize();
+	computeThumbnail(16, 16);
 }
 
 void ACVideo::setData(CvCapture* _data){
-	if (data->getMediaType()==MEDIA_TYPE_NONE)
+	/*if (data->getMediaType()==MEDIA_TYPE_NONE)
 		data = new ACMediaData(MEDIA_TYPE_VIDEO);	
 	else
-		data->setMediaType(MEDIA_TYPE_VIDEO);
+		data->setMediaType(MEDIA_TYPE_VIDEO);*/
+	if (data == 0)
+		data = new ACMediaData(MEDIA_TYPE_VIDEO);	
 	data->setVideoData(_data);
 	
 	width = (int) cvGetCaptureProperty(_data, CV_CAP_PROP_FRAME_WIDTH);

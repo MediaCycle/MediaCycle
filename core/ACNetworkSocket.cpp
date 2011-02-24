@@ -135,7 +135,7 @@ int server_receive(char *buf, int size, SOCKET s, unsigned int time_out)
 	
 	to.tv_sec = 0;
 	to.tv_usec = time_out;
-	pto = (time_out == 0) ? NULL : &to;
+	pto = (time_out == 0) ? 0 : &to;
 	
 	FD_ZERO(&rfds);
 	FD_SET(s, &rfds);
@@ -143,7 +143,7 @@ int server_receive(char *buf, int size, SOCKET s, unsigned int time_out)
 	ret = 0;
 	read = 0;
 	do {
-		ret = select(s+1, &rfds, NULL, NULL, pto);
+		ret = select(s+1, &rfds, 0, 0, pto);
 		if (ret == SOCKET_ERROR) {
 			//throw_error(SocketServerError, "server_send: call to 'select' failed.\n");
 			return -1;
@@ -282,8 +282,8 @@ SOCKET open_client(int iport, char *ip_address)
 	
 	if (addr.sin_addr.s_addr == INADDR_NONE)
     {
-		host = NULL;
-		if ((host = gethostbyname(ip_address)) == NULL) {
+		host = 0;
+		if ((host = gethostbyname(ip_address)) == 0) {
 			// throw_error(SocketClientError, "open_client: unknown host: %s\n", ip_address);
 			error_message();
 		}
@@ -335,7 +335,7 @@ int client_receive(char *buf, int size, SOCKET s, unsigned int time_out)
 	struct timeval *pto;
 	
 	to.tv_sec = time_out;
-	pto = (time_out == 0) ? NULL : &to;
+	pto = (time_out == 0) ? 0 : &to;
 	
 	FD_ZERO(&rfds);
 	FD_SET(s, &rfds);
@@ -343,7 +343,7 @@ int client_receive(char *buf, int size, SOCKET s, unsigned int time_out)
 	ret = 0;
 	read = 0;
 	do {
-		if (select(s+1, &rfds, NULL, NULL, pto) == SOCKET_ERROR) {
+		if (select(s+1, &rfds, 0, 0, pto) == SOCKET_ERROR) {
 			//	throw_error(SocketClientError, "server_send: call to 'select' failed.\n");
 			error_message();
 		}

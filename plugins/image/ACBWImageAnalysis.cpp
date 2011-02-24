@@ -106,17 +106,17 @@ ACBWImageAnalysis::ACBWImageAnalysis(IplImage* img){
 }
 
 void ACBWImageAnalysis::reset(){
-	imgp = NULL;
-	fft = NULL;
+	imgp = 0;
+	fft = 0;
 	HAS_FFT = false;
 	original_width = original_height = 0;
 	file_name = color_model = "";
 }
 
 void ACBWImageAnalysis::clean(){
-	if (imgp != NULL) cvReleaseImage(&imgp);
+	if (imgp != 0) cvReleaseImage(&imgp);
 	if (HAS_FFT) {
-		if (fft != NULL) fftw_free (fft);
+		if (fft != 0) fftw_free (fft);
 	}
 }
 
@@ -265,7 +265,7 @@ void ACBWImageAnalysis::computeFFT2D_centered (){
 void ACBWImageAnalysis::computeHuMoments(int thresh){
 	hu_moments.clear();
 	raw_moments.clear();
-	if (imgp == NULL){
+	if (imgp == 0){
 		cerr << " <ACBWImageAnalysis::computeHuMoments() error> missing image !" << endl;
 		return;
 	}
@@ -312,7 +312,7 @@ void ACBWImageAnalysis::computeHuMoments(int thresh){
 void ACBWImageAnalysis::computeContourHuMoments(int thresh){ 
 	contour_hu_moments.clear();
 	
-	if (imgp == NULL){
+	if (imgp == 0){
 		cerr << " <ACBWImageAnalysis::computeContourHuMoments() error> missing image !" << endl;
 		return;
 	}
@@ -341,7 +341,7 @@ void ACBWImageAnalysis::computeContourHuMoments(int thresh){
 
 void ACBWImageAnalysis::computeGaborMoments(int mumax, int numax){ // default 7, 5
 	gabor_moments.clear();
-	if (imgp == NULL) {
+	if (imgp == 0) {
 		cerr << " <ACBWImageAnalysis::computeGaborMoments() error> missing image !" << endl;
 		return;
 	}

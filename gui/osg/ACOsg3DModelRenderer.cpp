@@ -52,8 +52,8 @@ ACOsg3DModelRenderer::ACOsg3DModelRenderer() {
 	colors_off->push_back(color_off);	
 	colors_on->push_back(color_on);		
 	
-	colors_on->ref();
-	colors_off->ref();
+	//ref_ptr//colors_on->ref();
+	//ref_ptr//colors_off->ref();
 	
 	model_node = 0; border_geode = 0; acti_transform = 0; norm_transform = 0;
 	
@@ -63,25 +63,30 @@ ACOsg3DModelRenderer::ACOsg3DModelRenderer() {
 
 ACOsg3DModelRenderer::~ACOsg3DModelRenderer() {
 	
-	if (model_node) { model_node->unref(); model_node=0; }
-	if (border_geode) { border_geode->unref(); border_geode=0; }
-	if (acti_transform) { acti_transform->unref(); acti_transform = 0; }
-	if (norm_transform) { norm_transform->unref(); norm_transform = 0; }
+	if (model_node) { //ref_ptr//model_node->unref(); 
+		model_node=0; }
+	if (border_geode) { //ref_ptr//border_geode->unref(); 
+		border_geode=0; }
+	if (acti_transform) { //ref_ptr//acti_transform->unref(); 
+		acti_transform = 0; }
+	if (norm_transform) { //ref_ptr//norm_transform->unref(); 
+		norm_transform = 0; }
 	
-	colors_on->unref();
-	colors_off->unref();
+	//ref_ptr//colors_on->unref();
+	//ref_ptr//colors_off->unref();
 }
 
 void ACOsg3DModelRenderer::modelGeode() {
 	
-	if (model_node) { model_node->unref(); model_node=0; }
+	if (model_node) { //ref_ptr//model_node->unref(); 
+		model_node=0; }
 
 	model_node = osgDB::readNodeFile(media_cycle_filename);		
 	osg::StateSet* ss = model_node->getOrCreateStateSet();
 	ss->setMode( GL_BLEND, osg::StateAttribute::ON );
 	ss->setMode(GL_NORMALIZE, osg::StateAttribute::ON);
 	
-	model_node->ref();	
+	//ref_ptr//model_node->ref();	
 	
 	osg::ComputeBoundsVisitor cbv;
 	model_node->accept( cbv );
@@ -97,7 +102,8 @@ void ACOsg3DModelRenderer::modelGeode() {
 
 void ACOsg3DModelRenderer::borderGeode() {
 	
-	if (border_geode) { border_geode->unref(); border_geode=0; }
+	if (border_geode) { //ref_ptr//border_geode->unref();
+		border_geode=0; }
 	
 	Box* box = new Box(Vec3(media_cycle_center[0], media_cycle_center[1], media_cycle_center[2]),
 					   media_cycle_extent[0], media_cycle_extent[1], media_cycle_extent[2]);	
@@ -112,14 +118,14 @@ void ACOsg3DModelRenderer::borderGeode() {
 	ss->setMode( GL_LIGHTING, osg::StateAttribute::OFF );
 	
 	border_geode->addDrawable(border_drawable);	
-	border_geode->ref();
+	//ref_ptr//border_geode->ref();
 }
 
 void ACOsg3DModelRenderer::normTransform() {
 
 	if (!norm_transform) {
 		norm_transform = new MatrixTransform();
-		norm_transform->ref();
+		//ref_ptr//norm_transform->ref();
 	}
 	if (norm_transform->getNumChildren() == 2) {
 		norm_transform->removeChild(0, 2);
@@ -154,10 +160,11 @@ void ACOsg3DModelRenderer::prepareNodes() {
 			normTransform();
 			border_geode->setUserData(new ACRefId(node_index));
 			
-			if (acti_transform) { acti_transform->unref(); acti_transform = 0; }
+			if (acti_transform) { //ref_ptr//acti_transform->unref(); 
+				acti_transform = 0; }
 			
 			acti_transform = new MatrixTransform();
-			acti_transform->ref();
+			//ref_ptr//acti_transform->ref();
 			//acti_transform->setUserData(new ACRefId(node_index));	// SD TODO - media index?
 			acti_transform->addChild(norm_transform);
 			media_node->addChild(acti_transform);
@@ -175,11 +182,12 @@ void ACOsg3DModelRenderer::updateNodes(double ratio) {
 		normTransform();
 		border_geode->setUserData(new ACRefId(node_index));
 		
-		if (acti_transform) { acti_transform->unref(); acti_transform = 0; }
+		if (acti_transform) { //ref_ptr//acti_transform->unref(); 
+			acti_transform = 0; }
 		
 		// SD TODO - need to be removed, noramlly done in prepareNodes
 		acti_transform = new MatrixTransform();
-		acti_transform->ref();
+		//ref_ptr//acti_transform->ref();
 		//acti_transform->setUserData(new ACRefId(node_index));	// SD TODO - media index?
 		acti_transform->addChild(norm_transform);
 		media_node->addChild(acti_transform);

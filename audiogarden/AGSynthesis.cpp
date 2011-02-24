@@ -1,8 +1,8 @@
 /**
  * @brief AGSynthesis.cpp
  * @author Christian Frisson
- * @date 29/11/2010
- * @copyright (c) 2010 – UMONS - Numediart
+ * @date 24/02/2011
+ * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -383,7 +383,7 @@ bool AGSynthesis::saveAsWav(string path){
 	
 	if (! (testFile = sf_open (path.c_str(), SFM_WRITE, &sfinfo))){  
 		printf ("Not able to open input file %s.\n", "synthesis.wav") ;
-		puts (sf_strerror (NULL)) ;
+		puts (sf_strerror (0)) ;
 		return false;
 	}
 	sf_writef_float  (testFile, synthesisSound, synthesisLength);

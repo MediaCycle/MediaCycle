@@ -200,11 +200,17 @@ int ACMediaLibrary::importFile(std::string _filename, ACPluginManager *acpl, boo
 		return 0;
 	}
 
-	if (media == NULL) {
+	if (media == 0) {
 		cout << "extension unknown, skipping " << _filename << " ... " << endl;
 		return 0;
 	}
 	else {
+		
+		// XS todo make this more flexible
+		// here we force the plugins to save timed features for segmentation
+		// they could also segment on-the-fly while calculating features (as in audioSegmentationPlugin)
+		if (doSegment) _save_timed_feat = true;
+		
 		// import has to be done before segmentation to have proper id.
 		if (media->import(_filename, this->getMediaID(), acpl, _save_timed_feat)){
 			this->addMedia(media);
@@ -215,6 +221,7 @@ int ACMediaLibrary::importFile(std::string _filename, ACPluginManager *acpl, boo
 		}
 		// SD TODO - Is this correct?
 		if (doSegment){
+			
 			// segments are created without id 
 			media->segment(acpl, _save_timed_feat);
 			std::vector<ACMedia*> mediaSegments;
@@ -315,8 +322,11 @@ int ACMediaLibrary::openACLLibrary(std::string _path, bool aInitLib){
 	}
 	//media_library.resize(0);
 	do {
+		//ACMediaType local_media_type = getMediaTypeFromExtension(std::string file_ext);
+		
+		
 		local_media = ACMediaFactory::create(media_type);
-		if (local_media != NULL) {
+		if (local_media != 0) {
 			if (!media_path.empty()) {
 				ret = local_media->loadACL(media_path, library_file);
 			}
@@ -382,7 +392,7 @@ int ACMediaLibrary::openMCSLLibrary(std::string _path, bool aInitLib){
 	//media_library.resize(0);
 	do {
 		local_media = ACMediaFactory::create(media_type);
-		if (local_media != NULL) {
+		if (local_media != 0) {
 			ret = local_media->loadMCSL(library_file);
 			if (ret) {
 				//std::cout << "Media Library Size : " << this->getSize() << std::endl;//CF free the console
@@ -551,7 +561,7 @@ int ACMediaLibrary::openLibrary(std::string _path, bool aInitLib){
 		//media_library.resize(0); //no reason to be here if no reset asked. resize to 0 when calling cleanLibrary()
 		do {
 			local_media = ACMediaFactory::create(media_type);
-			if (local_media != NULL) {
+			if (local_media != 0) {
 				ret = local_media->load(library_file);
 				if (ret) {
 					// problem if id is -1 (==default value) --> this corrects the problem (used temporarily in avlaughtercycle where all ids were -1
@@ -599,7 +609,7 @@ int ACMediaLibrary::addMedia(ACMedia *aMedia) {
     // XS TODO remove media_type check
     // mediacycle should be able to manage a mix of any media
     // instead of only medias of one type
-	if (aMedia != NULL){
+	if (aMedia != 0){
 		if (aMedia->getType() == this->media_type) {
 			this->media_library.push_back(aMedia);
 			return 0;
@@ -618,7 +628,7 @@ ACMedia* ACMediaLibrary::getMedia(int i){
 	}
 	else {
 		cerr << "<ACMediaLibrary::getMedia> index out of bounds: " << i << endl;
-		return NULL;
+		return 0;
 	}
 }
 
@@ -696,6 +706,7 @@ void ACMediaLibrary::calculateStats() {
 				
 			}
 		}
+		std::cout << "Media " << i << std::endl;
 	}
 	
 	// before: divide by n --> biased variance estimator
@@ -869,7 +880,7 @@ int ACMediaLibrary::testFFMPEG(std::string _filename){
 			uint8_t         *buffer;
 			*/
 			// Open video file
-			if(av_open_input_file(&pFormatCtx, _filename.c_str(), NULL, 0, NULL)!=0){
+			if(av_open_input_file(&pFormatCtx, _filename.c_str(), 0, 0, 0)!=0){
 				std::cout << "Couldn't open file" << std::endl;
 				return 0; 
 			}

@@ -43,7 +43,15 @@ ACOsgTimelineControlsRenderer::ACOsgTimelineControlsRenderer() {
 	track_renderer.resize(0);
 	group = new Group();
 	track_group = new Group();
-	group->addChild(track_group.get());
+	group->addChild(track_group);//group->addChild(track_group.get());
+}
+
+ACOsgTimelineControlsRenderer::~ACOsgTimelineControlsRenderer(){
+	this->removeControls();
+}
+
+void ACOsgTimelineControlsRenderer::clean(){
+	this->removeControls();
 }
 
 void ACOsgTimelineControlsRenderer::prepareControls(int start) {
@@ -81,10 +89,10 @@ void ACOsgTimelineControlsRenderer::prepareControls(int start) {
 			//... ;-)
 		*/
 			default:
-				track_renderer[i] = NULL;
+				track_renderer[i] = 0;
 				break;
 		}
-		if (track_renderer[i] != NULL) {
+		if (track_renderer[i] != 0) {
 			track_renderer[i]->setMediaCycle(media_cycle);
 			track_renderer[i]->setTrackIndex(i);
 			//track_renderer[i]->setMediaIndex(0);//CF dumb

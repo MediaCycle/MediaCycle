@@ -67,6 +67,9 @@ protected:
 	
 	// XS TODO : add a MediaTimedFeatures member ?
 	// so that we can segment "on-the-fly"
+private:
+	void init();
+	
 public:
 	ACMedia();
 	ACMedia(const ACMedia&, bool reduce = true);
@@ -152,7 +155,7 @@ public:
 	// FEATURES computation (import) and segmentation (segment)
 	// these methods are virtual, because each media could have a specific segmentation method
 	// ex: audioSegmentationPlugin : also calculates features...
-	virtual int import(std::string _path, int _mid=0, ACPluginManager *acpl=NULL, bool _save_timed_feat=false);
+	virtual int import(std::string _path, int _mid=0, ACPluginManager *acpl=0, bool _save_timed_feat=false);
 	virtual int segment(ACPluginManager *acpl, bool _saved_timed_features = false );
 };
 

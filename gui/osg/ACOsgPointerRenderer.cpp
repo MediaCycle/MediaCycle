@@ -1,7 +1,7 @@
 /**
  * @brief ACOsgPointerRenderer.cpp
- * @author Xavier Siebert
- * @date 31/01/2011
+ * @author Christian Frisson
+ * @date 24/02/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -38,6 +38,7 @@ ACOsgPointerRenderer::ACOsgPointerRenderer() {
 	pos.x = 0;
 	pos.y = 0;
 	pos.z = 0;
+	text_string = "";
 	text_geode = 0;
 	pointer_geode = 0;
 	pointer_transform = 0;
@@ -45,9 +46,12 @@ ACOsgPointerRenderer::ACOsgPointerRenderer() {
 
 ACOsgPointerRenderer::~ACOsgPointerRenderer() {
 	
-	if 	(text_geode) { text_geode->unref(); text_geode=0; }
-	if 	(pointer_geode) { pointer_geode->unref(); pointer_geode=0; }
-	if  (pointer_transform) { pointer_transform->unref(); pointer_transform=0; }
+	if 	(text_geode) { //ref_ptr//text_geode->unref();
+		text_geode=0; }
+	if 	(pointer_geode) { //ref_ptr//pointer_geode->unref(); 
+		pointer_geode=0; }
+	if  (pointer_transform) { //ref_ptr//pointer_transform->unref(); 
+		pointer_transform=0; }
 }
 
 void ACOsgPointerRenderer::textGeode() {
@@ -56,7 +60,7 @@ void ACOsgPointerRenderer::textGeode() {
 	float textCharacterSize = 96.0f; // 10 pixels ? 
 	
 	text_geode = new Geode();
-	text_geode->ref();	
+	//ref_ptr//text_geode->ref();	
 	
 	text = new osgText::Text;
 	text->setColor(textColor);
@@ -77,13 +81,13 @@ void ACOsgPointerRenderer::textGeode() {
 void ACOsgPointerRenderer::pointerGeode() {
 	
 	Vec4 color(1.0f, 1.0f, 1.0f, 0.33f);	
-	Vec4Array *colors = new Vec4Array;
+	osg::ref_ptr<osg::Vec4Array> colors = new Vec4Array;
 	colors->push_back(color);		
 	
 	StateSet *state;
 
 	pointer_geode = new Geode();
-	pointer_geode->ref();	
+	//ref_ptr//pointer_geode->ref();	
 
 	state = pointer_geode->getOrCreateStateSet();
 	state->setMode(GL_NORMALIZE, osg::StateAttribute::ON);	
@@ -102,7 +106,7 @@ void ACOsgPointerRenderer::prepareNodes() {
 	pointerGeode();
 	
 	pointer_transform = new MatrixTransform();
-	pointer_transform->ref();
+	//ref_ptr//pointer_transform->ref();
 	pointer_transform->addChild(text_geode);
 	pointer_transform->addChild(pointer_geode);
 	

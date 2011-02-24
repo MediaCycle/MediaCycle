@@ -80,10 +80,10 @@ public:
 	IplImage* getFrame(int i);
 	IplImage* computeAverageImage(int nskip = 0, int nread = 0, int njump = -1, std::string s =""); 
 	IplImage* computeMedianImage(int nskip = 0, int nread = 0, int njump = -1, std::string s =""); 
-	IplImage* computeMedianNoBlobImage(std::string s ="",IplImage *first_guess=NULL);
+	IplImage* computeMedianNoBlobImage(std::string s ="",IplImage *first_guess=0);
 	void backgroundSubstraction(IplImage* bg_img, int nskip=0, std::string cmode="BGR");
 	// blob detection could be per channel or in color image
-	//	void detectBlobs(int ichannel=0, std::string cmode="HSV", IplImage* bg_img=NULL, int bg_thesh=40, int big_blob=200, int small_blob=0);
+	//	void detectBlobs(int ichannel=0, std::string cmode="HSV", IplImage* bg_img=0, int bg_thesh=40, int big_blob=200, int small_blob=0);
 	void trimBlank(IplImage* bg_img);
 	int getFirstFrameMove();
 	
@@ -92,9 +92,9 @@ public:
 	
 	// raw features computation
 	//   - on blobs
-	void computeBlobs(IplImage* bg_img=NULL, int bg_thesh=10, int big_blob=200, int small_blob=0);
-	void computeBlobsInteractively(IplImage* bg_img=NULL, bool merge_blobs=false, int bg_thesh=20, int big_blob=200, int small_blob=0);
-	void computeBlobsUL(IplImage* bg_img=NULL, bool merge_blobs=true, int big_blob=200, int small_blob=0);
+	void computeBlobs(IplImage* bg_img=0, int bg_thesh=10, int big_blob=200, int small_blob=0);
+	void computeBlobsInteractively(IplImage* bg_img=0, bool merge_blobs=false, int bg_thesh=20, int big_blob=200, int small_blob=0);
+	void computeBlobsUL(IplImage* bg_img=0, bool merge_blobs=true, int big_blob=200, int small_blob=0);
 	//   - general (not on blobs)
 	void computeOpticalFlow();
 	void computeGlobalPixelsSpeed();
@@ -151,7 +151,7 @@ public:
 	void showInWindow(std::string="VIDEO", bool has_win=false);
 	void showFFTInWindow(std::string="VIDEO", bool has_win=false);
 
-	void showFrameInWindow(std::string="VIDEO", IplImage* frame=NULL, bool has_win=true);
+	void showFrameInWindow(std::string="VIDEO", IplImage* frame=0, bool has_win=true);
 //	void onTrackbarSlide(int pos); 
 	void browseInWindow(std::string="VIDEO", bool has_win=false);
 	// ?	void showBlobsInWindow(std::string="VIDEO", bool has_win=false);

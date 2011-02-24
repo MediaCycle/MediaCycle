@@ -65,7 +65,7 @@ MediaCycle::MediaCycle(ACMediaType aMediaType, string local_directory, string li
 	this->mediaBrowser = new ACMediaBrowser();
 	this->mediaBrowser->setLibrary(this->mediaLibrary);
 	
-	this->mediaFactory = new ACMediaFactory();
+	this->mediaFactory = new ACMediaFactory(); //
 	
 	this->pluginManager = new ACPluginManager();
 	
@@ -81,9 +81,13 @@ MediaCycle::MediaCycle(const MediaCycle& orig) {
 MediaCycle::~MediaCycle() {
 	// XS added delete for variables whose new is in constructor
 	delete this->mediaLibrary;
+	this->mediaLibrary = 0;
 	delete this->mediaBrowser;
+	this->mediaBrowser = 0;
 	delete this->mediaFactory;
+	this->mediaFactory = 0;
 	delete this->pluginManager;
+	this->pluginManager = 0;
     stopTcpServer(); // will delete this->networkSocket;
 }
 
@@ -370,7 +374,7 @@ int MediaCycle::importDirectory(string path, int recursive, bool forward_order, 
 // XS import = import + some processing 
 	cout << "MediaCycle: importing directory: " << path << endl;	
 	int ok = 0;
-	if (this->pluginManager == NULL){
+	if (this->pluginManager == 0){
 		cout << "no analysis plugins were loaded. you will need to load a plugin to use the application." << endl;
 	}
 	ok = this->mediaLibrary->importDirectory(path, recursive, this->pluginManager, forward_order, doSegment);
@@ -660,7 +664,8 @@ void MediaCycle::hoverObjectCallback(int pid) {
 }
 
 void MediaCycle::hoverCallback(float xx, float yy) {
-	mediaBrowser->setHoverLoop(-1, xx, yy);		
+	if (this->mediaBrowser)
+		mediaBrowser->setHoverLoop(-1, xx, yy);		
 }
 
 

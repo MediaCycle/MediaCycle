@@ -82,11 +82,11 @@ protected:
 
 public:
 	ACOsgTimelineRenderer();
-	~ACOsgTimelineRenderer() {};
+	~ACOsgTimelineRenderer();
 	void clean();
 		
 	void setMediaCycle(MediaCycle *media_cycle) { this->media_cycle = media_cycle; };
-	osg::Group *getShapes() 	{ return group.get(); };
+	osg::ref_ptr<osg::Group> getShapes() 	{ return group.get(); };
 	ACOsgTrackRenderer* getTrack(int number){if ( (number>=0) && (number<track_renderer.size()) ) return track_renderer[number];}
 	bool addTrack(int media_index);
 	int getNumberOfTracks(){return track_renderer.size();}

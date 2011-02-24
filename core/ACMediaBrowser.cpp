@@ -92,7 +92,7 @@ ACMediaBrowser::ACMediaBrowser() {
 	mCenterOffsetX = mViewWidth / 2;
 	mCenterOffsetZ = mViewHeight / 2;
 	
-	mUserLog = NULL;
+	mUserLog = 0;
 	this->clean();	
 
 	// XS TODO 1 this assumes cluster mode !
@@ -105,11 +105,11 @@ ACMediaBrowser::ACMediaBrowser() {
 	mFrac = 0.0;
 	*/
 	
-	mClustersMethodPlugin = NULL;
-	mNeighborsMethodPlugin = NULL;
-	mClustersPosPlugin = NULL;
-	mNeighborsPosPlugin = NULL;
-	mVisPlugin = NULL;
+	mClustersMethodPlugin = 0;
+	mNeighborsMethodPlugin = 0;
+	mClustersPosPlugin = 0;
+	mNeighborsPosPlugin = 0;
+	mVisPlugin = 0;
 	
 	mUserLog = new ACUserLog();
 	
@@ -533,7 +533,7 @@ int ACMediaBrowser::setCurrentFrame(int lid, int frame_pos) {
 }
 
 void ACMediaBrowser::randomizeNodePositions(){
-	if(mLibrary == NULL) return;
+	if(mLibrary == 0) return;
 	double t = getTime();
 	ACPoint p;
 	for (ACMediaNodes::iterator node = mLoopAttributes.begin(); node != mLoopAttributes.end(); ++node){
@@ -551,7 +551,7 @@ void ACMediaBrowser::randomizeNodePositions(){
 // update initial positions 
 // previously: resize other vector structures dependent on loop count.
 void ACMediaBrowser::libraryContentChanged(int needsCluster) {
-	if(mLibrary == NULL) return; // put this first otherwize getsize does not work !
+	if(mLibrary == 0) return; // put this first otherwize getsize does not work !
 	
 	int librarySize = mLibrary->getSize();
 	
@@ -566,7 +566,7 @@ void ACMediaBrowser::libraryContentChanged(int needsCluster) {
 	}
 	
 	// XS TODO randomize positions only at the beginning...
-	if ( mMode == AC_MODE_CLUSTERS && (librarySize>prevLibrarySize) ) {//(mVisPlugin==NULL && mPosPlugin==NULL) {	
+	if ( mMode == AC_MODE_CLUSTERS && (librarySize>prevLibrarySize) ) {//(mVisPlugin==0 && mPosPlugin==0) {	
 		double t = getTime();
 		ACPoint p;
 		for (ACMediaNodes::iterator node = mLoopAttributes.begin()+prevLibrarySize; node != mLoopAttributes.end(); ++node){
@@ -631,7 +631,7 @@ int ACMediaBrowser::getKNN(int id, vector<int> &ids, int k) {
 	double min_distance, max_distance;
 	int kcount;
 	
-	if(mLibrary == NULL) return -1; 
+	if(mLibrary == 0) return -1; 
 	
 	// XS TODO simplify this
 	vector<ACMedia*> loops = mLibrary->getAllMedia();
@@ -702,7 +702,7 @@ int ACMediaBrowser::getKNN(ACMedia *aMedia, vector<ACMedia *> &result, int k) {
     double min_distance, max_distance;
     int kcount;
 	
-    if (mLibrary == NULL) return -1;
+    if (mLibrary == 0) return -1;
 	
 	// XS TODO simplify this (same as above)
     vector<ACMedia*> loops = mLibrary->getAllMedia();
@@ -800,7 +800,7 @@ void ACMediaBrowser::initClusterCenters(){
 //CF do we need an extra level of tests along the browsing mode (render inactive during AC_MODE_NEIGHBORS?)
 void ACMediaBrowser::updateClusters(bool animate, int needsCluster) {
 	
-	if (mClustersMethodPlugin==NULL && mVisPlugin==NULL){//CF no plugin set, factory settings
+	if (mClustersMethodPlugin==0 && mVisPlugin==0){//CF no plugin set, factory settings
 		std::cout << "updateNextPositions : Cluster KMeans (default)" << std::endl;
 		updateClustersKMeans(animate, needsCluster);
 	}	
@@ -828,7 +828,7 @@ void ACMediaBrowser::updateClusters(bool animate, int needsCluster) {
 
 //CF do we need an extra level of tests along the browsing mode (render inactive during AC_MODE_CLUSTERS?)
 void ACMediaBrowser::updateNeighborhoods(){
-	if (mNeighborsMethodPlugin==NULL && mVisPlugin==NULL)
+	if (mNeighborsMethodPlugin==0 && mVisPlugin==0)
 		std::cout << "No neighboorhood method plugin set" << std::endl; // CF: waiting for a factory one!
 	else{
 		if (mNeighborsMethodPlugin){
@@ -847,7 +847,7 @@ void ACMediaBrowser::updateNextPositions() {
 	
 	switch ( mMode ){
 		case AC_MODE_CLUSTERS:
-			if (mClustersPosPlugin==NULL && mVisPlugin==NULL) {
+			if (mClustersPosPlugin==0 && mVisPlugin==0) {
 				std::cout << "updateNextPositions : Cluster Propeller (default)" << std::endl;
 				updateNextPositionsPropeller();
 				// XS 151110
@@ -865,7 +865,7 @@ void ACMediaBrowser::updateNextPositions() {
 			}
 			break;
 		case AC_MODE_NEIGHBORS:
-			if (mNeighborsPosPlugin==NULL && mVisPlugin==NULL)
+			if (mNeighborsPosPlugin==0 && mVisPlugin==0)
 				std::cout << "No neighboorhood positions plugin set" << std::endl; // CF: waiting for a factory one!
 			else{
 				if (mNeighborsPosPlugin){
@@ -894,8 +894,8 @@ void ACMediaBrowser::updateClustersKMeans(bool animate, int needsCluster) {
 	
 	int i,j,d,f;
 	
-	if(mLibrary == NULL) {
-		cerr << "<ACMediaBrowser::updateClustersKMeans> : Media Library NULL" << endl;
+	if(mLibrary == 0) {
+		cerr << "<ACMediaBrowser::updateClustersKMeans> : Media Library 0" << endl;
 		return;
 	}
 	else if(mLibrary->isEmpty()) {
@@ -1443,7 +1443,7 @@ void ACMediaBrowser::updateDisplay(bool animate, int needsCluster) {
 	this->setNeedsDisplay(true);
 	
 	// TODO: SD/XS check this
-//	if (mGridPlugin != NULL){
+//	if (mGridPlugin != 0){
 //		mGridPlugin->setProximityGrid();
 //	}
 }
@@ -1550,7 +1550,7 @@ bool ACMediaBrowser::changeClustersMethodPlugin(ACPlugin* acpl)
 				this->setClustersMethodPlugin(acpl);
 			}	
 			else
-				mClustersMethodPlugin = NULL;
+				mClustersMethodPlugin = 0;
 			if (getLibrary()->getSize() > 0)
 				this->updateDisplay(true);
 			success = true;
@@ -1560,7 +1560,7 @@ bool ACMediaBrowser::changeClustersMethodPlugin(ACPlugin* acpl)
 				this->setClustersMethodPlugin(acpl);
 			}	
 			else
-				mClustersMethodPlugin = NULL;
+				mClustersMethodPlugin = 0;
 			success = true;
 			break;
 		default:
@@ -1598,7 +1598,7 @@ bool ACMediaBrowser::changeNeighborsMethodPlugin(ACPlugin* acpl)
 			
 			//CF 3) Change the plugin and update the display, it will make the reference node appear:
 			this->setNeighborsMethodPlugin(acpl);
-			if (mNeighborsPosPlugin != NULL && getLibrary()->getSize() > 0)
+			if (mNeighborsPosPlugin != 0 && getLibrary()->getSize() > 0)
 			{	
 				this->updateDisplay(true);
 			
@@ -1624,7 +1624,7 @@ bool ACMediaBrowser::changeClustersPositionsPlugin(ACPlugin* acpl)
 				this->setClustersPositionsPlugin(acpl);
 			}	
 			else
-				mClustersPosPlugin = NULL;
+				mClustersPosPlugin = 0;
 			if (getLibrary()->getSize() > 0){
 				setState(AC_CHANGING);
 				if (acpl) 
@@ -1638,7 +1638,7 @@ bool ACMediaBrowser::changeClustersPositionsPlugin(ACPlugin* acpl)
 			if (acpl)
 				this->setClustersPositionsPlugin(acpl);
 			else
-				mClustersPosPlugin = NULL;
+				mClustersPosPlugin = 0;
 			success = true;
 			break;
 		default:
@@ -1658,7 +1658,7 @@ bool ACMediaBrowser::changeNeighborsPositionsPlugin(ACPlugin* acpl)
 			break;
 		case AC_MODE_NEIGHBORS:	
 			this->setNeighborsPositionsPlugin(acpl);
-			if (mNeighborsMethodPlugin != NULL && getLibrary()->getSize() > 0){
+			if (mNeighborsMethodPlugin != 0 && getLibrary()->getSize() > 0){
 				setState(AC_CHANGING);
 				mNeighborsPosPlugin->updateNextPositions(this);
 			}

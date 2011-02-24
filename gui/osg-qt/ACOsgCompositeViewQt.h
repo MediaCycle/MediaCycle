@@ -1,7 +1,7 @@
 /**
  * @brief ACOsgCompositeViewQt.h
  * @author Christian Frisson
- * @date 21/02/2011
+ * @date 24/02/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -101,9 +101,9 @@ class ACOsgCompositeViewQt : public osgViewer::CompositeViewer, public QGLWidget
 	public:
         ACOsgCompositeViewQt( QWidget * parent = 0, const char * name = 0, const QGLWidget * shareWidget = 0, WindowFlags f = 0 );
 		virtual ~ACOsgCompositeViewQt();
-		void clean();
-		osgViewer::GraphicsWindow* getGraphicsWindow() { return osg_view.get(); }
-		const osgViewer::GraphicsWindow* getGraphicsWindow() const { return osg_view.get(); }
+		void clean(bool updategl=true);
+		osgViewer::GraphicsWindow* getGraphicsWindow() { return osg_view; }//.get(); }
+		const osgViewer::GraphicsWindow* getGraphicsWindow() const { return osg_view; }//.get(); }
 		virtual void paintGL();
 
     protected:
@@ -127,9 +127,9 @@ class ACOsgCompositeViewQt : public osgViewer::CompositeViewer, public QGLWidget
 		ACOsgTimelineEventHandler *timeline_event_handler;
 		ACOsgTimelineControlsRenderer *timeline_controls_renderer;
 		ACOsgHUDRenderer *hud_renderer;
-		osgViewer::View* browser_view;
-		osgViewer::View* timeline_view;
-		osgViewer::View* timeline_controls_view;
+		osg::ref_ptr<osgViewer::View> browser_view;
+		osg::ref_ptr<osgViewer::View> timeline_view;
+		osg::ref_ptr<osgViewer::View> timeline_controls_view;
 		#if defined (SUPPORT_AUDIO)
 			ACAudioEngine *audio_engine;
 		#endif //defined (SUPPORT_AUDIO)

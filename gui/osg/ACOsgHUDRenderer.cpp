@@ -38,6 +38,10 @@ using namespace osg;
 
 ACOsgHUDRenderer::ACOsgHUDRenderer()
 {
+	media_cycle_pointer_current_pos.x = 0;
+	media_cycle_pointer_current_pos.y = 0;
+	media_cycle_pointer_current_pos.z = 0;
+	
 	// create a camera to set up the projection and model view matrices, and the subgraph to draw in the HUD
     camera = new osg::Camera;
     // set the projection matrix
@@ -55,7 +59,7 @@ ACOsgHUDRenderer::ACOsgHUDRenderer()
 	pointer_renderer.resize(0);
 	group = new Group();
 	pointer_group = new Group();
-	group->addChild(pointer_group.get());
+	group->addChild(pointer_group);//group->addChild(pointer_group.get());
 	
 	camera->addChild(group);
 }
@@ -72,7 +76,7 @@ void ACOsgHUDRenderer::setMediaCycle(MediaCycle *media_cycle) {
 	this->media_cycle = media_cycle;
 }
 
-Camera* ACOsgHUDRenderer::getCamera() {
+osg::ref_ptr<osg::Camera> ACOsgHUDRenderer::getCamera() {
 
 	return camera.get();
 }
@@ -107,12 +111,13 @@ void ACOsgHUDRenderer::preparePointers() {
 	}
 }
 
-void ACOsgHUDRenderer::updatePointers(osgViewer::Viewer* view) {
+void ACOsgHUDRenderer::updatePointers(osgViewer::Viewer* view) {//(osgViewer::View* view) {
 	
 	int w, h;
 	
 	h = 1; w = 1;
-				
+	
+	
 	osgViewer::Viewer::Windows windows;
 	
 	if (view->isRealized()) {
@@ -120,7 +125,12 @@ void ACOsgHUDRenderer::updatePointers(osgViewer::Viewer* view) {
 		w = windows[0]->getTraits()->width;
 		h = windows[0]->getTraits()->height;
 	}
-
+	/* 
+	 if (view->getViewerBase()->isRealized()) {
+		 w = view->getCamera()->getViewport()->width();
+		 h = view->getCamera()->getViewport()->height();
+	 }
+	*/	 
 	for (unsigned int i=0;i<pointer_renderer.size();i++) {		
 		media_cycle_pointer_current_pos = (media_cycle->getPointer(i)).getCurrentPosition();
 		//printf ("POINTER: %f %f\n", media_cycle_pointer_current_pos.x, media_cycle_pointer_current_pos.y);

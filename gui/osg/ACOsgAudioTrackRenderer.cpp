@@ -53,41 +53,41 @@ ACOsgAudioTrackRenderer::ACOsgAudioTrackRenderer() {
 	playback_height = (yspan-2*yspan/8.0f)/2.0f;//[0;yspan/2.0f]
 	samples_hop_threshold = 10;
 	samples_n_threshold = screen_width*15;
-	samples = NULL;
+	samples = 0;
 }
 
 ACOsgAudioTrackRenderer::~ACOsgAudioTrackRenderer() {
 	// track_node->removeChild(0,1);
 	if 	(summary_waveform_geode) {
-		summary_waveform_geode->unref();
+		//ref_ptr//summary_waveform_geode->unref();
 		summary_waveform_geode=0;
 	}
 	if 	(summary_cursor_geode) {
-		summary_cursor_geode->unref();
+		//ref_ptr//summary_cursor_geode->unref();
 		summary_cursor_geode=0;
 	}
 	if 	(summary_cursor_transform) {
-		summary_cursor_transform->unref();
+		//ref_ptr//summary_cursor_transform->unref();
 		summary_cursor_transform=0;
 	}
 	if 	(track_geode) {
-		track_geode->unref();
+		//ref_ptr//track_geode->unref();
 		track_geode=0;
 	}
 	if 	(selection_begin_geode) {
-		selection_begin_geode->unref();
+		//ref_ptr//selection_begin_geode->unref();
 		selection_begin_geode=0;
 	}
 	if 	(selection_zone_geode) {
-		selection_zone_geode->unref();
+		//ref_ptr//selection_zone_geode->unref();
 		selection_zone_geode=0;
 	}
 	if 	(selection_end_geode) {
-		selection_end_geode->unref();
+		//ref_ptr//selection_end_geode->unref();
 		selection_end_geode=0;
 	}
 	if 	(playback_waveform_geode) {
-		playback_waveform_geode->unref();
+		//ref_ptr//playback_waveform_geode->unref();
 		playback_waveform_geode=0;
 	}
 }
@@ -284,7 +284,7 @@ void ACOsgAudioTrackRenderer::selectionWaveformGeode() {
 	baseline_geometry->setVertexArray(vertices);
 	
 	Vec4 color(0.9f, 0.9f, 0.9f, 0.9f);	
-	Vec4Array* colors = new Vec4Array;
+	osg::ref_ptr<osg::Vec4Array> colors = new Vec4Array;
 	colors->push_back(color);
 	
 
@@ -375,7 +375,7 @@ void ACOsgAudioTrackRenderer::selectionWaveformGeode() {
 	//sprintf(name, "some audio element");
 	summary_waveform_geode->setUserData(new ACRefId(track_index,"audio track summary waveform"));
 	//summary_waveform_geode->setName(name);
-	summary_waveform_geode->ref();	
+	//ref_ptr//summary_waveform_geode->ref();	
 }
 
 void ACOsgAudioTrackRenderer::selectionCursorGeode() {
@@ -399,7 +399,7 @@ void ACOsgAudioTrackRenderer::selectionCursorGeode() {
 	summary_cursor_geometry->setVertexArray(vertices);
 	
 	Vec4 summary_cursor_color(0.2f, 0.9f, 0.2f, 0.9f);	
-	Vec4Array* summary_cursor_colors = new Vec4Array;
+	osg::ref_ptr<osg::Vec4Array> summary_cursor_colors = new Vec4Array;
 	summary_cursor_colors->push_back(summary_cursor_color);		
 	summary_cursor_geometry->setColorArray(summary_cursor_colors);
 	summary_cursor_geometry->setColorBinding(Geometry::BIND_OVERALL);
@@ -431,10 +431,10 @@ void ACOsgAudioTrackRenderer::selectionCursorGeode() {
 	
 	//sprintf(name, "some audio element");
 	//summary_cursor_transform->setName(name);
-	summary_cursor_transform->ref();
+	//ref_ptr//summary_cursor_transform->ref();
 	summary_cursor_geode->setUserData(new ACRefId(track_index,"audio track cursor"));
 	//summary_cursor_geode->setName(name);
-	summary_cursor_geode->ref();
+	//ref_ptr//summary_cursor_geode->ref();
 }
 
 void ACOsgAudioTrackRenderer::selectionZoneGeode() {
@@ -493,7 +493,7 @@ void ACOsgAudioTrackRenderer::selectionZoneGeode() {
 	selection_zone_frame_geometry->addPrimitiveSet(line_p);
 	
 	Vec4 color(0.0f, 0.0f, 0.0f, 0.2f);	
-	Vec4Array* colors = new Vec4Array;
+	osg::ref_ptr<osg::Vec4Array> colors = new Vec4Array;
 	colors->push_back(color);
 	
 	selection_zone_frame_geometry->setColorArray(colors);
@@ -541,10 +541,10 @@ void ACOsgAudioTrackRenderer::selectionZoneGeode() {
 	
 	//sprintf(name, "some audio element");
 	//selection_transform->setName(name);
-	selection_zone_transform->ref();
+	//ref_ptr//selection_zone_transform->ref();
 	selection_zone_geode->setUserData(new ACRefId(track_index,"track selection zone"));
 	//summary_cursor_geode->setName(name);
-	selection_zone_geode->ref();
+	//ref_ptr//selection_zone_geode->ref();
 }
 
 void ACOsgAudioTrackRenderer::selectionBeginGeode() {
@@ -573,7 +573,7 @@ void ACOsgAudioTrackRenderer::selectionBeginGeode() {
 	
 	//Vec4 color(0.0f, 1.0f, 0.0f, 1.0f);	
 	Vec4 color(1.0f, 0.0f, 0.0f, 0.4f);	
-	Vec4Array* colors = new Vec4Array;
+	osg::ref_ptr<osg::Vec4Array> colors = new Vec4Array;
 	colors->push_back(color);
 
 	line_p = new DrawElementsUInt(PrimitiveSet::QUADS, 4);
@@ -614,10 +614,10 @@ void ACOsgAudioTrackRenderer::selectionBeginGeode() {
 	
 	//sprintf(name, "some audio element");
 	//selection_begin_transform->setName(name);
-	selection_begin_transform->ref();
+	//ref_ptr//selection_begin_transform->ref();
 	selection_begin_geode->setUserData(new ACRefId(track_index,"track selection begin"));
 	//summary_cursor_geode->setName(name);
-	selection_begin_geode->ref();
+	//ref_ptr//selection_begin_geode->ref();
 }	
 
 void ACOsgAudioTrackRenderer::selectionEndGeode() {
@@ -646,7 +646,7 @@ void ACOsgAudioTrackRenderer::selectionEndGeode() {
 	
 	//Vec4 color(0.0f, 1.0f, 0.0f, 1.0f);	
 	Vec4 color(1.0f, 0.0f, 0.0f, 0.4f);
-	Vec4Array* colors = new Vec4Array;
+	osg::ref_ptr<osg::Vec4Array> colors = new Vec4Array;
 	colors->push_back(color);
 	
 	line_p = new DrawElementsUInt(PrimitiveSet::QUADS, 4);
@@ -687,10 +687,10 @@ void ACOsgAudioTrackRenderer::selectionEndGeode() {
 	
 	//sprintf(name, "some audio element");
 	//selection_end_transform->setName(name);
-	selection_end_transform->ref();
+	//ref_ptr//selection_end_transform->ref();
 	selection_end_geode->setUserData(new ACRefId(track_index,"track selection end"));
 	//summary_cursor_geode->setName(name);
-	selection_end_geode->ref();
+	//ref_ptr//selection_end_geode->ref();
 }	
 
 void ACOsgAudioTrackRenderer::playbackWaveformGeode() {
@@ -890,7 +890,7 @@ void ACOsgAudioTrackRenderer::playbackWaveformGeode() {
 	cursor_geometry->addPrimitiveSet(line_p);
 	
 	Vec4 color(0.9f, 0.9f, 0.9f, 0.9f);	
-	Vec4Array* colors = new Vec4Array;
+	osg::ref_ptr<osg::Vec4Array> colors = new Vec4Array;
 	colors->push_back(color);
 	samples_geometry->setColorArray(colors);
 	samples_geometry->setColorBinding(Geometry::BIND_OVERALL);//BIND_OFF, BIND_OVERALL, BIND_PER_PRIMITIVE_SET, BIND_PER_PRIMITIVE,BIND_PER_VERTEX 
@@ -952,7 +952,7 @@ void ACOsgAudioTrackRenderer::playbackWaveformGeode() {
 	//sprintf(name, "some audio element");
 	playback_waveform_geode->setUserData(new ACRefId(track_index,"audio track playback waveform"));
 	//playback_waveform_geode->setName(name);
-	playback_waveform_geode->ref();	
+	//ref_ptr//playback_waveform_geode->ref();	
 }
 
 void ACOsgAudioTrackRenderer::trackGeode() {
@@ -969,7 +969,7 @@ void ACOsgAudioTrackRenderer::trackGeode() {
 	
 	track_geode->addDrawable(new osg::ShapeDrawable(new osg::Box(osg::Vec3(0.0f,0.0f,0.0f),xspan,yspan,0.0), hints)); //draws a square // Vintage AudioCycle
 	//track_geode->setName(name);
-	track_geode->ref();	
+	//ref_ptr//track_geode->ref();	
 }
 
 void ACOsgAudioTrackRenderer::prepareTracks() {

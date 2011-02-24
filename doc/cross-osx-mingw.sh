@@ -1,21 +1,21 @@
 # Cross-compiling requires CMake 2.6 or newer. To cross-compile, first modify
 # this file to set the proper settings and paths. Then use it from build/ like:
-# cmake .. -DCMAKE_TOOLCHAIN_FILE=../cross-mingw.txt /
-#          -DCMAKE_INSTALL_PREFIX=.../mingw-cross-env/usr/i686-pc-mingw32/
-# Please adapt the CMAKE_INSTALL_PREFIX path to your installation,
-# for instance: /opt/local/mingw-cross-env/
+# cmake ../.. -DCMAKE_TOOLCHAIN_FILE=../../doc/doc/cross-mingw.sh /
+#          -DCMAKE_INSTALL_PREFIX=/opt/mingw-cross-env/usr/i686-pc-mingw32
 SET(MINGW_CROSS_ENV ${CMAKE_INSTALL_PREFIX}/../..)
 SET(MINGW_PREFIX ${CMAKE_INSTALL_PREFIX})
+set(MINGW_CROSS_BIN ${CMAKE_INSTALL_PREFIX}/../bin)
 
 # the name of the target operating system
 SET(CMAKE_SYSTEM_NAME Windows)
 SET(BUILD_SHARED_LIBS OFF)
 
 # which compilers to use for C and C++
-SET(CMAKE_C_COMPILER i686-pc-mingw32-gcc)
-SET(CMAKE_CXX_COMPILER i686-pc-mingw32-g++)
-SET(CMAKE_Fortran_COMPILER i686-pc-mingw32-gfortran)
-SET(CMAKE_RANLIB i686-pc-mingw32-ranlib)
+SET(CMAKE_C_COMPILER ${MINGW_CROSS_BIN}/i686-pc-mingw32-gcc)
+SET(CMAKE_CXX_COMPILER ${MINGW_CROSS_BIN}/i686-pc-mingw32-g++)
+SET(CMAKE_Fortran_COMPILER ${MINGW_CROSS_BIN}/i686-pc-mingw32-gfortran)
+SET(CMAKE_RANLIB ${MINGW_CROSS_BIN}/i686-pc-mingw32-ranlib)
+SET(CMAKE_AR ${MINGW_CROSS_BIN}/i686-pc-mingw32-ar)
 
 # here is the target environment located
 SET(CMAKE_FIND_ROOT_PATH ${MINGW_PREFIX})
@@ -29,7 +29,6 @@ set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 
 # FindQt4.cmake querys qmake to get information:
-set(MINGW_BIN    ${MINGW_CROSS_ENV}/usr/bin/)
 set(QT_BINARY_DIR   ${MINGW_PREFIX}/bin)
 set(QT_LIBRARY_DIR  ${MINGW_PREFIX}/lib)
 set(QT_QTCORE_INCLUDE_DIR ${MINGW_PREFIX}/include/QtCore)
@@ -48,7 +47,7 @@ set(OpenCV_ROOT_DIR ${MINGW_PREFIX})
 # Setting PKG_CONFIG_LIBDIR sets the default search directory, but we have to
 # set PKG_CONFIG_PATH as well to prevent pkg-config falling back to the host's
 # path.
-SET(PKG_CONFIG_EXECUTABLE i686-pc-mingw32-pkg-config)
+SET(PKG_CONFIG_EXECUTABLE ${MINGW_CROSS_BIN}/i686-pc-mingw32-pkg-config)
 set(ENV{PKG_CONFIG_LIBDIR} ${CMAKE_FIND_ROOT_PATH}/lib/pkgconfig)
 set(ENV{PKG_CONFIG_PATH} ${CMAKE_FIND_ROOT_PATH}/lib/pkgconfig)
 set(INSTALL_PREFIX ${CMAKE_FIND_ROOT_PATH})

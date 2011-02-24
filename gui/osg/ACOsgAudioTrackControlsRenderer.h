@@ -43,7 +43,7 @@
 class ACOsgAudioTrackControlsRenderer : public ACOsgTrackControlsRenderer {
 	
 	protected:
-		osg::Geode* track_geode;
+		osg::ref_ptr<osg::Geode> track_geode;
 		
 		void trackGeode();
 		

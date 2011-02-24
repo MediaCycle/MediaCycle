@@ -36,19 +36,23 @@
 #include <iostream>
 
 void ACOsgBrowserEventHandler::picked_object_callback(int pid) {
+	if (media_cycle == 0) return;
 	media_cycle->pickedObjectCallback(pid);
 }
 
 void ACOsgBrowserEventHandler::hover_object_callback(int pid) {
+	if (media_cycle == 0) return;
 	media_cycle->hoverObjectCallback(pid);
 }
 
 void ACOsgBrowserEventHandler::hover_callback(float xx, float yy) {
+	if (media_cycle == 0) return;
 	media_cycle->hoverCallback(xx, yy);
 }
 	
 bool ACOsgBrowserEventHandler::handle(const osgGA::GUIEventAdapter& ea,osgGA::GUIActionAdapter& aa)
 {
+	if (media_cycle == 0) return false;
 	switch(ea.getEventType())
 	{
 		case(osgGA::GUIEventAdapter::PUSH):
@@ -65,7 +69,9 @@ bool ACOsgBrowserEventHandler::handle(const osgGA::GUIEventAdapter& ea,osgGA::GU
 		}  
 		case(osgGA::GUIEventAdapter::KEYDOWN):
 		{
-			std::cout << "Key (OSG) '" << (char)ea.getKey() << "'" << std::endl;
+			#if defined (USE_DEBUG)
+				std::cout << "Key (OSG) '" << (char)ea.getKey() << "'" << std::endl;
+			#endif //defined (USE_DEBUG)
 /*
 			switch( ea.getKey() )
 			{
@@ -152,6 +158,7 @@ bool ACOsgBrowserEventHandler::handle(const osgGA::GUIEventAdapter& ea,osgGA::GU
 
 void ACOsgBrowserEventHandler::pick(osgViewer::View* view, const osgGA::GUIEventAdapter& ea, bool hover)
 {
+	if (media_cycle == 0) return;
 	osgUtil::LineSegmentIntersector::Intersections intersections;
 	//osgUtil::PolytopeIntersector::Intersections intersections;
 	
@@ -221,7 +228,8 @@ void ACOsgBrowserEventHandler::pick(osgViewer::View* view, const osgGA::GUIEvent
 
 /*
 void ACImageBrowserOsgEventHandler::pick(osgViewer::View* view, const osgGA::GUIEventAdapter& ea, bool hover)
-{	
+{
+	if (media_cycle == 0) return;
 	std::string gdlist="";
 	float x = ea.getXnormalized();
 	float y = ea.getYnormalized();

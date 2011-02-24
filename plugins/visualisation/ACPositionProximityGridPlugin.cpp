@@ -60,7 +60,7 @@ ACPositionProximityGridPlugin::~ACPositionProximityGridPlugin() {
 void ACPositionProximityGridPlugin::updateNextPositions(ACMediaBrowser* _mediaBrowser) {
 	std::cout << "ACPositionProximityGridPlugin::updateNextPositions" << std::endl;
 	
-	if (mediaBrowser == NULL){
+	if (mediaBrowser == 0){
 		mediaBrowser = _mediaBrowser;
 	}
 	

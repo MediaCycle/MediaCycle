@@ -66,7 +66,7 @@ struct OpaqReceiver
 	
 	osc::ReceivedMessageArgumentStream *argStream; // valid only within the callback
 	
-	OpaqReceiver() : oscListener(NULL), oscSocket(NULL), started(false), userData(NULL), callback(NULL)
+	OpaqReceiver() : oscListener(0), oscSocket(0), started(false), userData(0), callback(0)
 	{
 		//mutex = PTHREAD_MUTEX_INITIALIZER;
 	}
@@ -89,7 +89,7 @@ protected:
 				
 				mReceiver->argStream = &args;
 				mReceiver->callback(mReceiver, message.AddressPattern(), mReceiver->userData);
-				mReceiver->argStream = NULL;
+				mReceiver->argStream = 0;
 			}
 		}
 		catch( osc::Exception& e ){
@@ -111,7 +111,7 @@ void* osc_thread(void *arg)
 	receiver->oscSocket->Run();
 	//	printf("Stopped\n");
 	
-	return NULL;
+	return 0;
 }
 
 ACOscBrowserRef ACOscBrowser::create(const char *hostname, int port)
@@ -122,7 +122,7 @@ ACOscBrowserRef ACOscBrowser::create(const char *hostname, int port)
 	
 	receiver->oscListener = new ACPacketListener(receiver);
 	
-	if(hostname == NULL)
+	if(hostname == 0)
 		receiver->oscSocket = new UdpListeningReceiveSocket(IpEndpointName(IpEndpointName::ANY_ADDRESS, port ), receiver->oscListener);
 	else
 		receiver->oscSocket = new UdpListeningReceiveSocket(IpEndpointName(hostname, port ), receiver->oscListener);
@@ -157,7 +157,7 @@ void ACOscBrowser::stop(ACOscBrowserRef aReceiver)
 	if(!receiver->started) return;
 	
 	receiver->oscSocket->AsynchronousBreak();
-	pthread_join(receiver->pthread, NULL);
+	pthread_join(receiver->pthread, 0);
 }
 
 
@@ -204,7 +204,7 @@ void ACOscBrowser::readString(ACOscBrowserRef aReceiver, char *aVal, int maxlen)
 	assert(receiver->argStream);
 	assert(aVal);
 	
-	const char *string = NULL;
+	const char *string = 0;
 	
 	*receiver->argStream >> string;
 	

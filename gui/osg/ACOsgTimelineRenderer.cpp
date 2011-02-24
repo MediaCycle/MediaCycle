@@ -47,7 +47,11 @@ ACOsgTimelineRenderer::ACOsgTimelineRenderer(): screen_width(0), height(0.0f) {
 	track_renderer.resize(0);
 	group = new Group();
 	track_group = new Group();
-	group->addChild(track_group.get());
+	group->addChild(track_group);//group->addChild(track_group.get());
+}
+
+ACOsgTimelineRenderer::~ACOsgTimelineRenderer(){
+	this->removeTracks();
 }
 
 void ACOsgTimelineRenderer::clean(){
@@ -65,7 +69,7 @@ bool ACOsgTimelineRenderer::addTrack(int media_index){
 			track_renderer[n] = new ACOsgAudioTrackRenderer();
 			track_renderer[n]->setScreenWidth(screen_width);
 			track_renderer[n]->setSize(width,height);
-			if (track_renderer[n] != NULL) {
+			if (track_renderer[n] != 0) {
 				track_renderer[n]->setMediaCycle(media_cycle);
 				track_renderer[n]->setTrackIndex(n);
 				track_renderer[n]->updateMedia(media_index);
@@ -80,7 +84,7 @@ bool ACOsgTimelineRenderer::addTrack(int media_index){
 			track_renderer[n] = new ACOsgVideoTrackRenderer();
 			track_renderer[n]->setScreenWidth(screen_width);
 			track_renderer[n]->setSize(width,height);
-			if (track_renderer[n] != NULL) {
+			if (track_renderer[n] != 0) {
 				track_renderer[n]->setMediaCycle(media_cycle);
 				track_renderer[n]->setTrackIndex(n);
 				track_renderer[n]->updateMedia(media_index);
@@ -96,7 +100,7 @@ bool ACOsgTimelineRenderer::addTrack(int media_index){
 			 //... ;-)
 			 */
 		default:
-			track_renderer[n] = NULL;
+			track_renderer[n] = 0;
 			break;
 	}
 	
@@ -141,10 +145,10 @@ void ACOsgTimelineRenderer::prepareTracks(int start) {
 			//... ;-)
 		*/
 			default:
-				track_renderer[i] = NULL;
+				track_renderer[i] = 0;
 				break;
 		}
-		if (track_renderer[i] != NULL) {
+		if (track_renderer[i] != 0) {
 			track_renderer[i]->setMediaCycle(media_cycle);
 			track_renderer[i]->setTrackIndex(i);
 			//track_renderer[i]->setMediaIndex(0);//CF dumb

@@ -88,20 +88,20 @@ int setCurrentSampleToNext(TiPhaseVocoder *tpv) {
 
 int initPV(TiPhaseVocoder *tpv){
     setCurrentSample(tpv,0.0);//might want to add an offset here ?
-    tpv->hanning = NULL;
-    tpv->dphase = NULL;
-    tpv->leftFFT.re = NULL;
-    tpv->leftFFT.im = NULL;
-    tpv->rightFFT.re = NULL;
-    tpv->rightFFT.im = NULL;
-    tpv->outputFFT.re = NULL;
-    tpv->outputFFT.im = NULL;
-    //tpv->tmpoutput = NULL;
-    tpv->output = NULL;
-    tpv->outputAmplitude = NULL;
-    tpv->outputPhase = NULL;
+    tpv->hanning = 0;
+    tpv->dphase = 0;
+    tpv->leftFFT.re = 0;
+    tpv->leftFFT.im = 0;
+    tpv->rightFFT.re = 0;
+    tpv->rightFFT.im = 0;
+    tpv->outputFFT.re = 0;
+    tpv->outputFFT.im = 0;
+    //tpv->tmpoutput = 0;
+    tpv->output = 0;
+    tpv->outputAmplitude = 0;
+    tpv->outputPhase = 0;
     tpv->bufferPos = 0;
-    tpv->buffer = NULL;
+    tpv->buffer = 0;
     tpv->currentFrame = -100;
     return 0;
 }
@@ -170,7 +170,7 @@ int TiFreePhaseVocoder(TiPhaseVocoder *tpv) {
 int getCurrentFrame(TiPhaseVocoder *tpv,int flagResetPhase) {
     double tmppos;
     int currentFrame, nsamples, result, k;
-    short *tmpdata = NULL;
+    short *tmpdata = 0;
     FILE *logf;
 
     tmppos = tpv->currentSample/tpv->hopSize;

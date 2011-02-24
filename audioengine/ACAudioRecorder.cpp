@@ -38,13 +38,54 @@
 //DT : to have access to the media/audio functions
 #include "ACAudio.h"
 
+#ifdef USE_OPENAL
+ACAudioRecorder::ACAudioRecorder(ALCdevice* _device, int samplerate, int buffersize)
+{
+	this->init();
+	if (_device) device = _device; else device = 0;
+	captureDevice = 0;
+	audio_samplerate = samplerate; 
+	audio_buffersize = buffersize; 
+}
+#endif
+#ifdef USE_PORTAUDIO
+ACAudioRecorder::ACAudioRecorder(PaStream * _stream, int samplerate, int buffersize)
+{
+	this->init();
+	if (_stream) stream = _stream; else stream = 0;
+	audio_samplerate = samplerate; 
+	audio_buffersize = buffersize; 
+}
+#endif
+
+void ACAudioRecorder::init()
+{
+	media_cycle = 0; 
+	isRecording = false;
+	audio_samplerate = 0; 
+	audio_buffersize = 0; 
+}	
+
+ACAudioRecorder::~ACAudioRecorder(){ 
+	media_cycle = 0; 
+#ifdef USE_OPENAL	
+	//if (device) {delete device;}
+	device = 0;
+	//if (captureDevice) {delete captureDevice; }
+	captureDevice = 0;
+#endif//def USE_OPENAL		
+#ifdef USE_PORTAUDIO
+	if (stream) {delete stream; stream = 0;}
+#endif	
+}
+
 void ACAudioRecorder::getCaptureDeviceList(std::vector<std::string>& devices)
 {
     // Empty the list
     devices.clear();
 #ifdef USE_OPENAL
     // Get the available capture devices
-    const ALCchar* deviceList = alcGetString(NULL, ALC_CAPTURE_DEVICE_SPECIFIER);
+    const ALCchar* deviceList = alcGetString(0, ALC_CAPTURE_DEVICE_SPECIFIER);
 	
     if (deviceList)
     {
@@ -64,7 +105,7 @@ void ACAudioRecorder::getCaptureDeviceList(std::vector<std::string>& devices)
 bool ACAudioRecorder::isCaptureAvailable(const char* deviceName)
 {
 #ifdef USE_OPENAL
-	if (device != NULL)
+	if (device != 0)
 	{
 		// Make sure that audio recording is supported by the soundcard
 		if (alcIsExtensionPresent(device, "ALC_EXT_CAPTURE") == AL_FALSE)
@@ -89,7 +130,7 @@ bool ACAudioRecorder::isCaptureAvailable(const char* deviceName)
 bool ACAudioRecorder::initCapture(const char* deviceName)
 {
 #ifdef USE_OPENAL
-	if (device != NULL)
+	if (device != 0)
 	{
 		// Make sure that audio recording is supported by the soundcard
 		if (alcIsExtensionPresent(device, "ALC_EXT_CAPTURE") == AL_FALSE)
@@ -134,7 +175,7 @@ void *threadCaptureEngineFunction(void *_capture_engine_arg)
 void ACAudioRecorder::startCapture()
 {
 #ifdef USE_OPENAL
-	initCapture(NULL);//CF could be switched somewhere else, so as to specify the capture device
+	initCapture(0);//CF could be switched somewhere else, so as to specify the capture device
 	
     // Starting the capture OpenAL-wise
     alcCaptureStart(captureDevice);

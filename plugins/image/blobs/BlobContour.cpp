@@ -10,10 +10,10 @@ CBlobContour::CBlobContour()
 	m_startPoint.y = 0;
 	m_area = -1;
 	m_perimeter = -1;
-	m_contourPoints = NULL;
+	m_contourPoints = 0;
 	m_moments.m00 = -1;
-	m_contour = NULL;
-	m_parentStorage = NULL;
+	m_contour = 0;
+	m_parentStorage = 0;
 }
 CBlobContour::CBlobContour(CvPoint startPoint, CvMemStorage *storage )
 {
@@ -25,7 +25,7 @@ CBlobContour::CBlobContour(CvPoint startPoint, CvMemStorage *storage )
 
 	m_parentStorage = storage;
 
-	m_contourPoints = NULL;
+	m_contourPoints = 0;
 
 	// contour sequence: must be compatible with opencv functions
 	m_contour = cvCreateSeq( CV_SEQ_ELTYPE_CODE | CV_SEQ_KIND_CURVE | CV_SEQ_FLAG_CLOSED,
@@ -38,7 +38,7 @@ CBlobContour::CBlobContour(CvPoint startPoint, CvMemStorage *storage )
 //! Copy constructor
 CBlobContour::CBlobContour( CBlobContour *source )
 {
-	if (source != NULL )
+	if (source != 0 )
 	{
 		*this = *source;
 	}
@@ -47,8 +47,8 @@ CBlobContour::CBlobContour( CBlobContour *source )
 CBlobContour::~CBlobContour()
 {
 	// let parent blob deallocate all contour and contour point memory
-	m_contour = NULL;
-	m_contourPoints = NULL;
+	m_contour = 0;
+	m_contourPoints = 0;
 }
 
 
@@ -110,12 +110,12 @@ void CBlobContour::ResetChainCode()
 	if( m_contour )
 	{
 		cvClearSeq( m_contour );
-		m_contour = NULL;
+		m_contour = 0;
 	}
 	if( m_contourPoints )
 	{
 		cvClearSeq( m_contourPoints );
-		m_contourPoints = NULL;
+		m_contourPoints = 0;
 	}
 }
 
@@ -208,12 +208,12 @@ double CBlobContour::GetMoment(int p, int q)
 t_PointList CBlobContour::GetContourPoints()
 {
 	// it is calculated?
-	if( m_contourPoints != NULL )
+	if( m_contourPoints != 0 )
 		return m_contourPoints;
 
-	if ( m_contour == NULL || m_contour->total <= 0 )
+	if ( m_contour == 0 || m_contour->total <= 0 )
 	{
-		return NULL;
+		return 0;
 	}
 
 	CvSeq *tmpPoints;

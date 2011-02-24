@@ -40,22 +40,34 @@
 #endif //defined (SUPPORT_AUDIO)
 
 ACOsgTimelineEventHandler::ACOsgTimelineEventHandler()
-: media_cycle(0),renderer(0),
-selecting_zone(false),selecting_zone_begin(false),selecting_zone_end(false),
-selecting_summary_waveform(false),selecting_summary_frames(false),selection(0),
-selection_begin(0.0f),selection_end(0.0f),pushed_x(0.0f)
+: renderer(0)
 {
-	#if defined (SUPPORT_AUDIO)
-		audio_engine = NULL;
-	#endif //defined (SUPPORT_AUDIO)
+	this->clean();
 }
+
+void ACOsgTimelineEventHandler::clean(){
+	media_cycle = 0;
+	selecting_zone = false;
+	selecting_zone_begin = false;
+	selecting_zone_end = false;
+	selecting_summary_waveform = false;
+	selecting_summary_frames = false;
+	selection = 0;
+	selection_begin = 0.0f;
+	selection_end = 0.0f;
+	pushed_x = 0.0f;
+	#if defined (SUPPORT_AUDIO)
+		audio_engine = 0;
+	#endif //defined (SUPPORT_AUDIO)
+}	
 
 bool ACOsgTimelineEventHandler::handle(const osgGA::GUIEventAdapter& ea,osgGA::GUIActionAdapter& aa)
 {
-	float x = ea.getX();
-	float y = ea.getY();
+	if (media_cycle == 0) return false;
+	//float x = ea.getX();
+	//float y = ea.getY();
 	float xx = ea.getXnormalized();
-	float yy = ea.getYnormalized();
+	//float yy = ea.getYnormalized();
 	float pos = xx;
 	if (xx>1) pos=1.0f;
 	if (xx<-1) pos=-1.0f;
@@ -200,12 +212,13 @@ bool ACOsgTimelineEventHandler::handle(const osgGA::GUIEventAdapter& ea,osgGA::G
 
 void ACOsgTimelineEventHandler::pick(osgViewer::View* view, const osgGA::GUIEventAdapter& ea, bool hover)
 {
+	if (media_cycle == 0) return;
 	osgUtil::LineSegmentIntersector::Intersections intersections;
 	
 	float x = ea.getX();
 	float y = ea.getY();
-	float xx = ea.getXnormalized();
-	float yy = ea.getYnormalized();
+	//float xx = ea.getXnormalized();
+	//float yy = ea.getYnormalized();
 	//printf("pick (%f, %f)\n", x, y);
 	//printf ("MOUSE: %f %f\n", x, y);
 /*	
@@ -213,7 +226,7 @@ void ACOsgTimelineEventHandler::pick(osgViewer::View* view, const osgGA::GUIEven
 	{
 */
 	osg::ref_ptr< osgUtil::LineSegmentIntersector > picker = new osgUtil::LineSegmentIntersector(osgUtil::Intersector::WINDOW, x, y);
-    osgUtil::IntersectionVisitor iv(picker.get());
+    osgUtil::IntersectionVisitor iv(picker);
     view->getCamera()->accept(iv);
     if (picker->containsIntersections())
     {

@@ -44,7 +44,7 @@ public:
 
 	bool IsEmpty()
 	{
-		return m_contour == NULL || m_contour->total == 0;
+		return m_contour == 0 || m_contour->total == 0;
 	}
 
 	//! Return all contour points

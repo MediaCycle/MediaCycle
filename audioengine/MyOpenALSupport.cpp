@@ -49,8 +49,8 @@ void* MyGetOpenALAudioData(CFURLRef inFileURL, ALsizei *outDataSize, ALenum *out
 	SInt64							theFileLengthInFrames = 0;
 	AudioStreamBasicDescription		theFileFormat;
 	UInt32							thePropertySize = sizeof(theFileFormat);
-	ExtAudioFileRef					extRef = NULL;
-	void*							theData = NULL;
+	ExtAudioFileRef					extRef = 0;
+	void*							theData = 0;
 	AudioStreamBasicDescription		theOutputFormat;
 
 	// Open a file with ExtAudioFileOpen()
@@ -107,7 +107,7 @@ void* MyGetOpenALAudioData(CFURLRef inFileURL, ALsizei *outDataSize, ALenum *out
 		{ 
 			// failure
 			free (theData);
-			theData = NULL; // make sure to return NULL
+			theData = 0; // make sure to return 0
 			printf("MyGetOpenALAudioData: ExtAudioFileRead FAILED, Error = %ld\n", err); goto Exit;
 		}	
 	}

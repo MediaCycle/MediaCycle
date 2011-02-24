@@ -51,7 +51,7 @@ ACImageHistogram::ACImageHistogram(IplImage* img, string _cmode, int _size, int 
 	IplImage *channel_img[3];
 	for (int i = 0; i < 3; i++)
 		channel_img[i] = cvCreateImage (cvSize (img->width, img->height), img->depth, 1);
-	cvSplit (img, channel_img[0], channel_img[1], channel_img[2], NULL); 
+	cvSplit (img, channel_img[0], channel_img[1], channel_img[2], 0); 
 
 	initialize(channel_img, _cmode, _size, _norm);
 
@@ -92,7 +92,7 @@ void ACImageHistogram::initialize(IplImage** channel_img, string _cmode, int _si
 		float *ranges [2];
 		*ranges = range[i];
 		hist[i] = cvCreateHist (1, &size, CV_HIST_ARRAY, ranges, 1);
-		cvCalcHist (&channel_img[i], hist[i], 0, NULL);
+		cvCalcHist (&channel_img[i], hist[i], 0, 0);
 		cvNormalizeHist (hist[i], norm);
 	}
 }
@@ -171,7 +171,7 @@ void ACImageHistogram::show(string wname) {
 CvHistogram* ACImageHistogram::getChannel(int i){
 	if (i < 0 || i > 2){
 		cerr << " <ACImageHistogram::GetChannel> : wrong index " << endl;
-		return NULL;
+		return 0;
 	}
 	return hist[i];
 }
@@ -237,7 +237,7 @@ void ACImageHistogram::computeMoments(int highest_order){
 double* ACImageHistogram::getMoment(int i){ // i starts at 1
 	if (i <= 0 || i > moments.size()){
 		cerr << "<ACImageHistogram::getMoment> invalid moment index:" << i << endl;
-		return NULL;
+		return 0;
 	}
 	return moments[i-1];
 }

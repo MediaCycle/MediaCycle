@@ -44,5 +44,5 @@ ACAbstractDockWidgetQt* ACDockWidgetFactoryQt::createDockWidget(QWidget *parent,
 	#if defined (SUPPORT_VIDEO)
 	else if (dock_type == "MCVideoControls") {return new ACVideoControlsDockWidgetQt(parent);}
 	#endif //defined (SUPPORT_VIDEO)
-	else return NULL;
+	else return 0;
 }

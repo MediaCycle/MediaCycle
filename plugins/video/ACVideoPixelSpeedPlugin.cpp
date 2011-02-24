@@ -53,7 +53,7 @@ ACVideoPixelSpeedPlugin::ACVideoPixelSpeedPlugin() {
 	this->mDescriptorsList.push_back("Pixel Speed");
 
 	//other vars
-	this->videoAn = NULL;
+	this->videoAn = 0;
 	this->mtf_file_name = "";
 }
 
@@ -62,7 +62,7 @@ ACVideoPixelSpeedPlugin::~ACVideoPixelSpeedPlugin() {
 }
 
 void ACVideoPixelSpeedPlugin::clean(){
-	if (videoAn != NULL)
+	if (videoAn != 0)
 		delete videoAn;
 }
 
@@ -105,11 +105,11 @@ std::vector<ACMediaFeatures*> ACVideoPixelSpeedPlugin::_calculate(std::string aF
 ACMediaTimedFeature* ACVideoPixelSpeedPlugin::getTimedFeatures(){
 	if (mtf_file_name == ""){
         cout << "<ACVideoPixelSpeedPlugin::getTimedFeatures> : missing file name "<<endl;
-		return NULL;
+		return 0;
 	}
 	ACMediaTimedFeature* ps_mtf = new ACMediaTimedFeature();
 	if (ps_mtf->loadFromFile(mtf_file_name) <= 0){
-		return NULL;
+		return 0;
 	}
 	return ps_mtf;
 }

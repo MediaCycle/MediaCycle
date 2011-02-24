@@ -50,9 +50,11 @@ class ACAudio : public ACMedia {
 public:
 	ACAudio();
 	ACAudio(const ACAudio&, bool reduce = true);
-
 	~ACAudio();
-  
+private:
+	void init();
+	
+public:	
 	void saveACLSpecific(std::ofstream &library_file);
 	int loadACLSpecific(std::ifstream &library_file);
 	void saveXMLSpecific(TiXmlElement* _media);
