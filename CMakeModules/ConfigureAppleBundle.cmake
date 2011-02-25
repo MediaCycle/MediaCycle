@@ -172,7 +172,7 @@ INSTALL(CODE "
       \"\${CMAKE_INSTALL_PREFIX}/${plugin_dest_dir}/plugins/*${CMAKE_SHARED_LIBRARY_SUFFIX}\")
     include(BundleUtilities)
     #fixup_bundle(\"${APPS}\" \"\${QTPLUGINS}\" \"${LINKED_DIRECTORIES}\")
-    fixup_bundle(\"${APPS}\" \"${MCPLUGINS};${OSGPLUGINS}\" \"${LINKED_DIRECTORIES}\")
+    fixup_bundle(\"${APPS}\" \"${MCPLUGINS};${OSGPLUGINS};${QTPLUGINS}\" \"${LINKED_DIRECTORIES}\")
     " COMPONENT Runtime)
 
 # To Create a package, one can run "cpack -G DragNDrop CPackConfig.cmake" on Mac OS X

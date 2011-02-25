@@ -430,10 +430,10 @@ ENDIF()
 			ENDIF ( PKG_CONFIG_FOUND )
 		ENDIF ( WIN32 )# OR APPLE_IOS_XCODE OR APPLE_IOS_DEV OR APPLE_IOS_SIM )
 
-		# osg plugins check
+		# OSG plugins check (required at least for text display in apps)
 		STRING(REPLACE "include" "lib" OSG_LIBRARY_DIR ${OSG_INCLUDE_DIR}) #CF check NOT MINGW Windows systems, might be under "bin" instead of "lib"
 		IF(SUPPORT_VIDEO)
-			FILE(GLOB OSG_FFMPEG_PLUGIN ${OSG_LIBRARY_DIR}/osgPlugins-*/*osgdb_ffmpeg*)
+			FILE(GLOB OSG_FFMPEG_PLUGIN ${OSG_LIBRARY_DIR}/osgPlugins-*/*osgdb_ffmpeg* ${OSG_LIBRARY_DIR}/../osgPlugins-*/*osgdb_ffmpeg*)
 			IF (OSG_FFMPEG_PLUGIN)
 				MESSAGE("-- Found FFmpeg plugin for OSG: ${OSG_FFMPEG_PLUGIN}")
 			ELSE()
@@ -450,11 +450,39 @@ ENDIF()
 			ADD_LIB_LINKED_DIR(${OSGUTIL_LIBRARY})
 			MESSAGE("-- Found gui OpenSceneGraph libraries: ${OPENSCENEGRAPH_LIBRARIES}")
 		ENDIF()
-
-		FILE(GLOB OSG_PLUGINS ${OSG_LIBRARY_DIR}/osgPlugins-*/*osgdb_*)
+		
+		FILE(GLOB OSG_PLUGINS ${OSG_LIBRARY_DIR}/osgPlugins-*/*osgdb_* ${OSG_LIBRARY_DIR}/../osgPlugins-*/*osgdb_*)
+		IF(APPLE AND BUILD_APPS)
+			IF(EXISTS /opt/local/bin/port)#CF do a proper check
+				SET(MACPORTS_FOUND ON)
+			ENDIF()
+			SET(DYLD_LIBRARY_PATH $ENV{DYLD_LIBRARY_PATH})
+			FILE(GLOB CORRECT_OSG_PLUGINS_PATH
+				~/Library/Application\ Support/OpenSceneGraph/PlugIns/osgPlugins-*
+				/Library/Application\ Support/OpenSceneGraph/PlugIns/osgPlugins-*
+				/Network/Library/Application\ Support/OpenSceneGraph/PlugIns/osgPlugins-*
+			)
+			FILE(GLOB INCORRECT_OSG_PLUGINS_PATH
+				/opt/local/lib/osgPlugins-*
+				/usr/local/lib/osgPlugins-*
+				/usr/lib/osgPlugins-*
+			)# OSG wont find these unless DYLD_LIBRARY_PATH is set, but it conflicts with MacPorts...
+			STRING(REPLACE "/osgPlugins-*" "" INCORRECT_OSG_PLUGINS_PREFIX "${INCORRECT_OSG_PLUGINS_PATH}")
+			IF(INCORRECT_OSG_PLUGINS_PATH AND NOT DYLD_LIBRARY_PATH AND NOT CORRECT_OSG_PLUGINS_PATH)
+				IF(MACPORTS_FOUND)
+					MESSAGE(FATAL_ERROR "Please first copy your most recent OSG plugins folder ${INCORRECT_OSG_PLUGINS_PATH}")
+					MESSAGE(FATAL_ERROR "as ~/Library/Application\ Support/OpenSceneGraph/PlugIns/osgPlugins-*")
+					MESSAGE(FATAL_ERROR "or /Library/Application\ Support/OpenSceneGraph/PlugIns/osgPlugins-*")
+				ELSE()
+					STRING(REPLACE ";" ":" INCORRECT_OSG_PLUGINS_PREFIX "${INCORRECT_OSG_PLUGINS_PREFIX}")
+					MESSAGE(FATAL_ERROR "Please first add to your ~/.profile: export DYLD_LIBRARY_PATH=\$DYLD_LIBRARY_PATH:${INCORRECT_OSG_PLUGINS_PREFIX}")
+					MESSAGE(FATAL_ERROR "and run: source ~/.profile")
+				ENDIF()
+			ENDIF()
+		ENDIF()
 		SET(OSG_PLUGINS_3DMODEL "3dc;3ds;ac3d;bsp;dae;dw;dxf;fbx;geo;Inventor;ive;logo;lwo;lws;md2;obj;ogr;Openflight;osg;pfb;shp;stl;vrml;x")
-		SET(OSG_PLUGINS_IMAGE "bmp;dds;gdal;gif;hdr;imageio;jp2;jpeg;Openflight;pic;png;pnm;rgb;tga;tiff")
-		SET(OSG_PLUGINS_VIDEO "ffmpeg;quicktime;xine")
+		SET(OSG_PLUGINS_IMAGE "bmp;dds;gdal;gif;hdr;imageio;jp2;jpeg;Openflight;pic;png;pnm;qt;QTKit;rgb;tga;tiff")
+		SET(OSG_PLUGINS_VIDEO "ffmpeg;qt;QTKit;xine")
 		SET(OSG_PLUGINS_TEXT "freetype;txf")
 		MESSAGE("OSG plugins:")
 		set(N_OSG_PLUG_3DMODEL 0)
@@ -598,9 +626,7 @@ IF(SUPPORT_AUDIO AND (USE_OPENAL OR USE_PORTAUDIO))
 	ELSE()
 		FIND_PACKAGE( OpenAL )
 	ENDIF()
-	IF ( USE_PORTAUDIO )
-		FIND_PACKAGE ( Portaudio )
-	ENDIF()
+	FIND_PACKAGE ( Portaudio )
 ENDIF()
 
 # Since for now OpenAL support is more advanced than PortAudio support

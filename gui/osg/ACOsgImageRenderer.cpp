@@ -182,31 +182,10 @@ void ACOsgImageRenderer::imageGeode(bool flip, float sizemul, float zoomin) {
 	image_geometry->setTexCoordArray(0, texcoord);	
 	
 	// Texture State (image)
-	// image_image = osgDB::readImageFile("/dupont/databases/Bark.0000.jpg");
-	// Use pre-computed thumbnail instead
-	// SD REQUIRED
-	
-	// SD TODO - thumbnailing has issues (image colors changed) because bug in opencv?
-	//thumbnail_filename = media_cycle->getMediaFileName(media_index);//CF instead of node_index
-	//image_image = osgDB::readImageFile(thumbnail_filename);
 	
 	//ACMediaType media_type = media_cycle->getLibrary()->getMedia(media_index)->getType();
 	if (media_type == MEDIA_TYPE_IMAGE)
 	{	
-		// XS TODO : what's the problem with thumbnail ?
-		//thumbnail = (osg::ref_ptr<osg::Image>)media_cycle->getThumbnailPtr(media_index);
-		/*
-		if (thumbnail) {
-			//image_image = ACImage::Convert_OpenCV_TO_OSG_IMAGE(thumbnail);
-			image_image = thumbnail;
-		}
-		else {
-			thumbnail_filename = media_cycle->getThumbnailFileName(media_index);//CF instead of node_index
-			image_image = osgDB::readImageFile(thumbnail_filename);
-		}
-		image_texture = new Texture2D;
-		image_texture->setImage(image_image);*/
-		
 		image_texture = ((ACImage*)(media_cycle->getLibrary()->getMedia(media_index)))->getTexture();
 	}
 	else if (media_type == MEDIA_TYPE_VIDEO)

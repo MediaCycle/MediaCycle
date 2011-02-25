@@ -67,7 +67,7 @@ extern "C" {
 
 #include <osg/Notify>
 
-
+#ifdef USE_SLIT_SCAN
 class ACOsgVideoSlitScanThread : public OpenThreads::Thread {
 public:
 	
@@ -115,6 +115,7 @@ public:
 		void reset(){_done=false;}
 		bool computed(){return _done;}
 };
+#endif//def USE_SLIT_SCAN
 
 class ACOsgVideoTrackRenderer : public ACOsgTrackRenderer {
 protected:
@@ -124,7 +125,6 @@ protected:
 	osg::ref_ptr<osg::MatrixTransform> playback_transform;
 	osg::ref_ptr<osg::MatrixTransform> frames_transform;
 	osg::ref_ptr<osg::MatrixTransform> segments_transform;
-	osg::ref_ptr<osg::MatrixTransform> slit_scan_transform;
 	osg::ref_ptr<osg::MatrixTransform> cursor_transform;
 	
 	osg::ref_ptr<osg::Geode> playback_geode;
@@ -133,13 +133,11 @@ protected:
 	osg::ref_ptr<osg::Group> segments_group;
 	std::vector< osg::ref_ptr<osg::Geode> > segments_geodes;
 	//osg::ref_ptr<osg::Geode> segments_geodes;
-	osg::ref_ptr<osg::Geode> slit_scan_geode;
 	osg::ref_ptr<osg::Geode> cursor_geode;
-
+	
 	void playbackGeode();
 	void framesGeode();
 	void segmentsGeode();
-	void slitScanGeode();
 	void cursorGeode();
 	
 	float zoom_x, zoom_y, track_left_x;
@@ -148,10 +146,15 @@ protected:
 	float segments_center_y,segments_height;
 	float frame_min_width, frame_n;
 	bool scrubbing;
-	bool slit_scan_changed;
 	
+	#ifdef USE_SLIT_SCAN
+	osg::ref_ptr<osg::MatrixTransform> slit_scan_transform;
+	osg::ref_ptr<osg::Geode> slit_scan_geode;
+	void slitScanGeode();
+	bool slit_scan_changed;
 	ACOsgVideoSlitScanThread* slit_scanner;
-
+	#endif//def USE_SLIT_SCAN
+	
 	static const int NCOLORS ;
 	osg::ref_ptr<osg::Vec4Array> colors;
 	osg::ref_ptr<osg::Vec4Array> colors2;

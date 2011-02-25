@@ -186,7 +186,7 @@ const filext::value_type _init[] = {
 	filext::value_type(".mp4", MEDIA_TYPE_VIDEO), \
 	filext::value_type(".mpg", MEDIA_TYPE_VIDEO), \
 	filext::value_type(".mpv", MEDIA_TYPE_VIDEO), \
-	filext::value_type(".ogg", MEDIA_TYPE_VIDEO), \
+//	filext::value_type(".ogg", MEDIA_TYPE_VIDEO), \ //can be, put audio files are more frequent
 	filext::value_type(".sav", MEDIA_TYPE_VIDEO), \
 	filext::value_type(".sdp", MEDIA_TYPE_VIDEO), \
 	filext::value_type(".swf", MEDIA_TYPE_VIDEO), \
@@ -205,6 +205,7 @@ const filext::value_type _init[] = {
 	filext::value_type(".mat", MEDIA_TYPE_AUDIO), \
 	filext::value_type(".mpc", MEDIA_TYPE_AUDIO), \
 	filext::value_type(".oga", MEDIA_TYPE_AUDIO), \
+	filext::value_type(".ogg", MEDIA_TYPE_AUDIO), \	
 	filext::value_type(".paf", MEDIA_TYPE_AUDIO), \
 	filext::value_type(".pvf", MEDIA_TYPE_AUDIO), \
 	filext::value_type(".raw", MEDIA_TYPE_AUDIO), \
@@ -222,22 +223,13 @@ filext ACMediaFactory::possible_file_extensions(_init, _init + sizeof _init / si
 
 
 ACMediaFactory::ACMediaFactory(){
-	#if defined (SUPPORT_AUDIO)
-		addSndFileExtensions();
-	#endif //defined (SUPPORT_AUDIO)
-	#if defined (SUPPORT_IMAGE) || defined(SUPPORT_VIDEO) || defined(SUPPORT_3DMODEL)
-		addOsgFileExtensions();
-	#endif //defined (SUPPORT_IMAGE OR SUPPORT_VIDEO) || defined(SUPPORT_3DMODEL)
-	//addPossibleFileExtensions();
+	//CF we should make sure this isn't done for each ACMediaFactory instance, but done at least once...
+	addAvailableFileExtensions();
+	//addPossibleFileExtensions(); //use this instead of the above if library extensions parsing doesn't work
 	listMediaExtensions();
 }
 
 ACMediaFactory::~ACMediaFactory(){
-	// Normally associated with Method 3) from ddOsgFileExtensions()
-	// Crashes on Snow Leopard... the OSG GUI might be using some of these at the same time
-	/*#if defined (SUPPORT_IMAGE) || defined(SUPPORT_VIDEO) || defined(SUPPORT_3DMODEL)
-		osgDB::Registry::instance()->closeAllLibraries();
-	#endif //defined (SUPPORT_IMAGE OR SUPPORT_VIDEO) || defined(SUPPORT_3DMODEL)*/
 }
 
 ACMedia* ACMediaFactory::create(string file_ext){
@@ -466,6 +458,15 @@ void ACMediaFactory::addPossibleFileExtensions(){
 	}	
 }
 
+void ACMediaFactory::addAvailableFileExtensions(){
+	#if defined (SUPPORT_AUDIO)
+		addSndFileExtensions();
+	#endif //defined (SUPPORT_AUDIO)
+	#if defined (SUPPORT_IMAGE) || defined(SUPPORT_VIDEO) || defined(SUPPORT_3DMODEL)
+		addOsgFileExtensions();
+	#endif //defined (SUPPORT_IMAGE OR SUPPORT_VIDEO) || defined(SUPPORT_3DMODEL)
+}	
+
 std::vector<std::string> ACMediaFactory::getExtensionsFromMediaType(ACMediaType media_type){
 	std::vector<std::string> mediaExt;
 	filext::iterator iter = available_file_extensions.begin();
@@ -514,9 +515,14 @@ void ACMediaFactory::addSndFileExtensions(){
 		sf_command (0, SFC_GET_FORMAT_MAJOR, &info, sizeof (info)) ;
 		
 		std::string ext =  std::string(info.extension);
+		//std::cout << "-- " << ext << std::endl;
 		if (ext == "aif" || ext == "aiff"){
 			addFileExtensionSupport(".aif",MEDIA_TYPE_AUDIO);
 			addFileExtensionSupport(".aiff",MEDIA_TYPE_AUDIO);
+		}
+		else if (ext == "oga"){
+			addFileExtensionSupport(".oga",MEDIA_TYPE_AUDIO);
+			addFileExtensionSupport(".ogg",MEDIA_TYPE_AUDIO);
 		}	
 		else 
 			addFileExtensionSupport(std::string(".") + ext,MEDIA_TYPE_AUDIO);
@@ -542,168 +548,37 @@ void ACMediaFactory::addSndFileExtensions(){
 
 #if defined (SUPPORT_IMAGE) || defined(SUPPORT_VIDEO) || defined(SUPPORT_3DMODEL)
 void ACMediaFactory::addOsgFileExtensions(){
+	#ifdef PARSE_OSG_PLUGINS_VERBOSE
 	std::cout << "Gathering media file extensions from OSG plugins..." << std::endl;
-	
-	// Method 1) Forcing loading the FFmpeg plugins first loads more extensions below....
-	osgDB::ReaderWriter* readerWriter = 0;
-	
-	readerWriter = osgDB::Registry::instance()->getReaderWriterForExtension("ffmpeg");
-	#ifdef PARSE_OSG_PLUGINS_VERBOSE
-	if (readerWriter)
-		std::cout<< "[X] ffmpeg" <<std::endl;
-	else
-		std::cout<<"[ ] ffmpeg" << std::endl;
 	#endif//def PARSE_OSG_PLUGINS_VERBOSE
-	//this->addFileExtensionSupport(iter->first,iter->second);
-
-	// Method 1b) Works on Snow Leopard but loads a partial list of extensions....
-	// Forcing loading the FFmpeg plugins first loads more extensions....
-	filext::iterator iter = possible_file_extensions.begin();
-	for(;iter!=possible_file_extensions.end();++iter){
-		switch (iter->second){
-			case MEDIA_TYPE_AUDIO:
-				break;
-			case MEDIA_TYPE_IMAGE:
-				#if defined (SUPPORT_IMAGE)
-				goto parse;
-				#else
-				break;
-				#endif //defined (SUPPORT_IMAGE)
-			case MEDIA_TYPE_VIDEO:
-				#if defined (SUPPORT_VIDEO)
-				goto parse;
-				#else
-				break;
-				#endif //defined (SUPPORT_VIDEO)
-			case MEDIA_TYPE_3DMODEL:
-				#if defined (SUPPORT_3DMODEL)
-				goto parse;
-				#else
-				break;
-				#endif //defined (SUPPORT_3DMODEL)
-			case MEDIA_TYPE_TEXT:
-				#if defined (SUPPORT_TEXT)
-				goto parse;
-				#else
-				break;
-				#endif //defined (SUPPORT_TEXT)
-			default:
-				break;
-			parse:
-				readerWriter = osgDB::Registry::instance()->getReaderWriterForExtension(iter->first.substr(1));
-				if (readerWriter)
-				{	
-					#ifdef PARSE_OSG_PLUGINS_VERBOSE
-					std::cout<< "[X] " << iter->first.substr(1)<<std::endl;
-					#endif//def PARSE_OSG_PLUGINS_VERBOSE
-					addFileExtensionSupport(iter->first,iter->second);
-				}
-				else 
+	
+	// Ripped from applications/osgconv, method for "--plugins"
+	osgDB::FileNameList plugins = osgDB::listAllAvailablePlugins();
+	for(osgDB::FileNameList::iterator itr = plugins.begin();
+		itr != plugins.end();
+		++itr)
+	{
+		#ifdef PARSE_OSG_PLUGINS_VERBOSE
+		std::cout<<"-- Plugin "<<*itr<<std::endl;
+		#endif//def PARSE_OSG_PLUGINS_VERBOSE;
+		// Ripped from osgDB/PluginQuery.cpp, osgDB::outputPluginDetails
+		osgDB::ReaderWriterInfoList infoList;
+		if (osgDB::queryPlugin(*itr, infoList))
+		{
+			for(osgDB::ReaderWriterInfoList::iterator rwi_itr = infoList.begin();
+				rwi_itr != infoList.end();
+				++rwi_itr)
+			{
+				osgDB::ReaderWriterInfo& info = *(*rwi_itr);
+				osgDB::ReaderWriter::FormatDescriptionMap::iterator fdm_itr;				
+				for(fdm_itr = info.extensions.begin();
+					fdm_itr != info.extensions.end();
+					++fdm_itr)
 				{
 					#ifdef PARSE_OSG_PLUGINS_VERBOSE
-					std::cout<<"[ ] " << iter->first.substr(1)<<std::endl;
+					std::cout<<"    extensions : ."<<fdm_itr->first<<" ("<<fdm_itr->second<<")"<<std::endl;
 					#endif//def PARSE_OSG_PLUGINS_VERBOSE
-				}	
-				break;
-		}	
-	}	
-	
-/*
-	// Method 2) Broken on Snow Leopard, OSG 2.9.10...
-	osgDB::Registry::ReaderWriterList rlist = osgDB::Registry::instance()->getReaderWriterList();
-	osgDB::Registry::ReaderWriterList::iterator rlistIter = rlist.begin();
-	for(;rlistIter!=rlist.end();++rlistIter){
-		osgDB::ReaderWriter::FormatDescriptionMap se = (*rlistIter)->supportedExtensions();
-		osgDB::ReaderWriter::FormatDescriptionMap::iterator seiter = se.begin();
-		for(;seiter!=se.end();++seiter){
-			#ifdef PARSE_OSG_PLUGINS_VERBOSE
-				std::cout << "Supported extension " << seiter->first << " " << seiter->second << std::endl;
-			#endif//def PARSE_OSG_PLUGINS_VERBOSE
-		}	
-	}
-*/	
-	// Method 3) Works on Snow Leopard but loads all plugins and causes problems....
-	// First, create a list of plugin names manually
-/*
-	osgDB::FileNameList pluginList = osgDB::listAllAvailablePlugins();
-	osgDB::FileNameList::iterator pluginIter = pluginList.begin();
-	std::cout << "OSG plugins: " << std::endl;
-	for(;pluginIter!=pluginList.end();++pluginIter){
-		std::cout << (*pluginIter) << " ";
-		//osgDB::outputPluginDetails(std::cout,*pluginIter);
-	}
-
-	// Second, parse all plugins:
-	std::vector<std::string> pluginNames;
-	osgDB::FilePathList libList = osgDB::Registry::instance()->getLibraryFilePathList();
-	osgDB::FilePathList::iterator libIter = libList.begin();
-	#ifdef PARSE_OSG_PLUGINS_VERBOSE
-		std::cout << "OSG plugins: " << std::endl;
-	#endif//def PARSE_OSG_PLUGINS_VERBOSE
-	for(;libIter!=libList.end();++libIter){
-		#ifdef PARSE_OSG_PLUGINS_VERBOSE
-			std::cout << "\t" << (*libIter) << " " << std::endl;
-		#endif//def PARSE_OSG_PLUGINS_VERBOSE
-		if (fs::exists(*libIter)){
-			fs::directory_iterator end_iter;
-			for ( fs::directory_iterator dir_itr( *libIter );dir_itr != end_iter; ++dir_itr )
-			{
-				if ( fs::is_regular_file( dir_itr->status() ) )
-				{
-					std::string plugin = fs::basename(dir_itr->path().filename());
-					std::string prefix = "osgdb_";// CF check if used in all platforms for OSG
-					size_t found = plugin.find(prefix);
-
-					if (found!=string::npos){
-						plugin.replace(plugin.find(prefix),prefix.length(),"");
-						#ifdef PARSE_OSG_PLUGINS_VERBOSE
-							std::cout << "  -- " << plugin << std::endl;
-						#endif//def PARSE_OSG_PLUGINS_VERBOSE
-						pluginNames.push_back(plugin);
-					}	
-					#ifdef PARSE_OSG_PLUGINS_VERBOSE
-						//std::cout << fs::basename(dir_itr->path().filename()) << "\n";
-					#endif//def PARSE_OSG_PLUGINS_VERBOSE
-				}
-			}
-		}
-	}
-	
-	// Third, force-load each OSG plugin
-	#ifdef PARSE_OSG_PLUGINS_VERBOSE
-		std::cout << "OSG supports the following extensions:" << std::endl;
-	#endif//def PARSE_OSG_PLUGINS_VERBOSE
-	std::vector<std::string>::iterator pluginIter = pluginNames.begin();
-	osgDB::Registry::instance()->closeAllLibraries();
-	for(;pluginIter!=pluginNames.end();++pluginIter){
-		#ifdef PARSE_OSG_PLUGINS_VERBOSE
-			//osgDB::outputPluginDetails(std::cout,*pluginIter);
-		#endif//def PARSE_OSG_PLUGINS_VERBOSE
-		std::string pluginInstance = osgDB::Registry::instance()->createLibraryNameForExtension(*pluginIter); 
-		osgDB::Registry::LoadStatus pluginStatus = osgDB::Registry::NOT_LOADED;
-		try {
-			pluginStatus = osgDB::Registry::instance()->loadLibrary(pluginInstance);
-		}
-		catch ( osgDB::Registry::LoadStatus& wrongPluginStatus){
-			std::cerr << "\t " << (*pluginIter) << " plugin: couldn't load (status: "<< wrongPluginStatus << ")" << std::endl;
-		}
-		
-		if (pluginStatus != osgDB::Registry::NOT_LOADED) {
-			#ifdef PARSE_OSG_PLUGINS_VERBOSE
-				std::cout << "\t " << (*pluginIter) << " plugin:" << std::endl;
-			#endif//def PARSE_OSG_PLUGINS_VERBOSE
-			osgDB::Registry::ReaderWriterList readerWriterList = osgDB::Registry::instance()->getReaderWriterList();
-			for (int r=0; r<readerWriterList.size();r++)
-			{
-				// TODO deal with osgbd_pfb 
-				
-				osgDB::ReaderWriter::FormatDescriptionMap fDM = readerWriterList[r]->supportedExtensions();
-				osgDB::ReaderWriter::FormatDescriptionMap::iterator iter = fDM.begin();
-				for(;iter!=fDM.end();++iter){
-					#ifdef PARSE_OSG_PLUGINS_VERBOSE
-						std::cout << "\t\t -- (*." << iter->first << ") "<< iter->second << std::endl;
-					#endif//def PARSE_OSG_PLUGINS_VERBOSE
-					std::string ext = "."+ iter->first;
+					std::string ext = std::string(".") + fdm_itr->first;
 					// First check if already listed in available file extensions:
 					filext::iterator available_iter = available_file_extensions.find(ext);
 					if( available_iter == available_file_extensions.end() ) {
@@ -714,29 +589,14 @@ void ACMediaFactory::addOsgFileExtensions(){
 							available_file_extensions.insert(available_file_extensions.end(),filext::value_type(ext, possible_iter->second));
 						}	
 					}
-				}	
 					
-			}	
-		}
-*/ 
-/*		
-		// Normally associated with Method 3)
-		// Crashes on Snow Leopard... the OSG GUI might be using some of these at the same time
-/* 
-		#ifdef SNOW_LEOPARD
-			//CF this is a hack to keep video OSG plugins alive, should be opened done on the GUI instead
-			if (*pluginIter == "ffmpeg" || *pluginIter == "qt" || *pluginIter == "imageio")
-				std::cout << "Using " << *pluginIter << " plugin for OSG" << std::endl;
-			else
-				osgDB::Registry::instance()->closeLibrary(pluginInstance);
-		#else //SNOW_LEOPARD
-			osgDB::Registry::instance()->closeLibrary(pluginInstance);
-		#endif//def SNOW_LEOPARD
-*/
-/*	
+					
+				}
+			}
+		}	
 	}
-*/ 
+	#ifdef PARSE_OSG_PLUGINS_VERBOSE
 	std::cout << "Gathering media file extensions from OSG plugins... done" << std::endl;
-
+	#endif//def PARSE_OSG_PLUGINS_VERBOSE
 }
 #endif //defined (SUPPORT_IMAGE) || defined (SUPPORT_VIDEO) || defined(SUPPORT_3DMODEL)

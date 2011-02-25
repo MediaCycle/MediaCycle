@@ -37,6 +37,9 @@
 #include "ACMediaData.h"
 #include <iostream>
 
+#include <osgDB/ReaderWriter>
+#include "boost/filesystem.hpp"
+
 using std::cerr;
 using std::endl;
 using std::string;
@@ -191,6 +194,12 @@ void ACMediaData::read3DModelData(string _fname){
 	
 	if (model_ptr != 0) { //ref_ptr//model_ptr->unref(); 
 		model_ptr=0; }
+	
+	std::cout << boost::filesystem::extension(_fname);
+	osgDB::ReaderWriter* readerWriter = osgDB::Registry::instance()->getReaderWriterForExtension(boost::filesystem::extension(_fname).substr(1));
+	if (!readerWriter){
+		cerr << "<ACMediaData::read3DModelData> problem loading file, no OSG plugin available" << endl;
+	}
 	
 	model_ptr = osgDB::readNodeFile(_fname);
 	//ref_ptr//model_ptr->ref();

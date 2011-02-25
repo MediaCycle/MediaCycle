@@ -69,7 +69,8 @@ public:
 	static std::vector<std::string> getExtensionsFromMediaType(ACMediaType media_type);// no check in the possible formats list
 	
 private:
-	static bool addFileExtensionSupport(std::string file_ext, ACMediaType media_type);	
+	static bool addFileExtensionSupport(std::string file_ext, ACMediaType media_type);
+	void addAvailableFileExtensions();
 	void addPossibleFileExtensions();
 	#if defined (SUPPORT_AUDIO)
 		static void addSndFileExtensions();

@@ -43,6 +43,9 @@
 using namespace std;
 using namespace osg;
 
+// ----------- uncomment this to compute and visualize a slit scan
+//#define USE_SLIT_SCAN
+
 #if defined (SUPPORT_VIDEO)
 
 osg::ref_ptr<osg::Image> Convert_OpenCV_2_osg_Image(IplImage* cvImg)
@@ -109,7 +112,7 @@ static double getTime()
     return (double)tv.tv_sec + tv.tv_usec / 1000000.0;
 }
 
-
+#ifdef USE_SLIT_SCAN
 int ACOsgVideoSlitScanThread::convert(AVPicture *dst, int dst_pix_fmt, AVPicture *src,
 					 int src_pix_fmt, int src_width, int src_height)
 {
@@ -151,32 +154,62 @@ void ACOsgVideoSlitScanThread::yuva420pToRgba(AVPicture * const dst, AVPicture *
 }
 
 // Using OpenCV, frame jitter
-/*int ACOsgVideoSlitScanThread::computeSlitScan(int frame_in, int frame_out){
-	CvCapture* video = getData();
+int ACOsgVideoSlitScanThread::computeSlitScan(){
+	CvCapture* video = cvCreateFileCapture(filename.c_str());
+	if ( !video) {
+		cerr << "<ACVideoTrackRenderer::computeSlitScan> Could not open video..." << endl;
+		return 0;
+	}	
+	
 	int total_frames = (int) cvGetCaptureProperty(video,CV_CAP_PROP_FRAME_COUNT);
-
-	if (frame_in<0 || frame_in>total_frames) frame_in = 0;
-	if (frame_out<0 || frame_out>total_frames) frame_out = total_frames;
-
-	cvSetCaptureProperty(video,CV_CAP_PROP_POS_FRAMES,(double)frame_in);
+	int width = (int) cvGetCaptureProperty(video, CV_CAP_PROP_FRAME_WIDTH);
+	int height = (int) cvGetCaptureProperty(video, CV_CAP_PROP_FRAME_HEIGHT);
+	
+	//cvSetCaptureProperty(video,CV_CAP_PROP_POS_FRAMES,(double)frame_in);
 
 	//IplImage* slit_scan;
-	for (int f=frame_in;f<frame_out;f++){
+	for (int f=0;f<total_frames;f++){
 		//cvSetCaptureProperty(video,CV_CAP_PROP_POS_FRAMES,(double)f);
 		if(!cvGrabFrame(video)){
-			cerr << "<ACVideo::computeSlitScan> Could not find frame..." << endl;
+			cerr << "<ACVideoTrackRenderer::computeSlitScan> Could not find frame..." << endl;
 		}
 		else{
-			IplImage* frame = cvRetrieveFrame(video);
+			IplImage* openCVframe = cvRetrieveFrame(video);
 			//if(f==frame_in)
 			//	slit_scan = cvCreateImage( cvSize(frame_out-frame_in, height), frame->depth, frame->nChannels );
 			int ff = (int) cvGetCaptureProperty(video,CV_CAP_PROP_POS_FRAMES);
 			if (ff!=f) cout << "Mismatch at frame " << ff << " instead of " << f << " (offset:" << ff-f << ")" << endl;
+			
+			osg::ref_ptr<osg::Image> frame = Convert_OpenCV_2_osg_Image(openCVframe);
+			if (!frame){
+				cerr << "<ACVideoTrackRenderer::computeSlitScan> problem converting from OpenCV to OSG" << endl;
+				return 0;
+			}
+			else{
+				frame->setOrigin(osg::Image::TOP_LEFT);
+				frame->flipVertical();
+				
+				osg::copyImage(frame,
+							   (float)width/2.0f,//int  	src_s,
+							   0,//int  	src_t,
+							   0,//int  	src_r,
+							   1,//int  	width,
+							   height,//int  	height,
+							   1,//int  	depth,
+							   slit_scan,
+							   f,//int  	dest_s,
+							   0,//int  	dest_t,
+							   0,//int  	dest_r,
+							   false//bool  	doRescale = false	 
+							   );
+			}
 		}	
 	}
-}*/
+	return 1;
+}
 
-int ACOsgVideoSlitScanThread::computeSlitScan(){
+// Using FFmpeg
+/*int ACOsgVideoSlitScanThread::computeSlitScan(){
 	
 	double slit_in = getTime();
 	
@@ -339,9 +372,12 @@ int ACOsgVideoSlitScanThread::computeSlitScan(){
 	// Close the video file
 	av_close_input_file(pFormatCtx);
 	return 1;
-}	
+}
+*/ 
 
-ACOsgVideoTrackRenderer::ACOsgVideoTrackRenderer() {
+#endif//def USE_SLIT_SCAN
+
+ACOsgVideoTrackRenderer::ACOsgVideoTrackRenderer() : ACOsgTrackRenderer() {
 	//ACOsgTrackRenderer
 	selection_center_pos = -xspan/2.0f;
 	selection_begin_pos = selection_center_pos;
@@ -383,29 +419,32 @@ ACOsgVideoTrackRenderer::ACOsgVideoTrackRenderer() {
 	segments_transform = new MatrixTransform();
 	segments_group = new Group();
 	
+	#ifdef USE_SLIT_SCAN
 	slit_scan_transform = new MatrixTransform();
 	slit_scanner = new ACOsgVideoSlitScanThread();
+	slit_scan_changed = false;
+	#endif//def USE_SLIT_SCAN
 	
 	track_summary_type = AC_VIDEO_SUMMARY_KEYFRAMES;
-	
-	slit_scan_changed = false;
 	
 	segments_number = 0;
 }
 
 ACOsgVideoTrackRenderer::~ACOsgVideoTrackRenderer() {
+	#ifdef USE_SLIT_SCAN
 	if (slit_scanner){
 		if (slit_scanner->isRunning()) slit_scanner->cancel();
 		delete slit_scanner; slit_scanner=0;}
+	if (slit_scan_geode) { //ref_ptr//slit_scan_geode->unref();
+		slit_scan_geode=0; }
+	if (slit_scan_transform) { //ref_ptr//slit_scan_transform->unref();
+		slit_scan_transform=0;}
+	#endif//def USE_SLIT_SCAN
 	if (video_stream) {video_stream->quit(); video_stream=0;}
 	if (playback_geode) { //ref_ptr//playback_geode->unref();
 		playback_geode=0; }
 	if (playback_transform) { //ref_ptr//playback_transform->unref();
 		playback_transform=0;}
-	if (slit_scan_geode) { //ref_ptr//slit_scan_geode->unref();
-	slit_scan_geode=0; }
-	if (slit_scan_transform) { //ref_ptr//slit_scan_transform->unref();
-		slit_scan_transform=0;}
 	if (cursor_geode) {	//ref_ptr//cursor_geode->unref();
 		cursor_geode=0; }
 	if (segments_transform) { //ref_ptr//segments_transform->unref();
@@ -474,7 +513,8 @@ void ACOsgVideoTrackRenderer::playbackGeode() {
 		playback_geode->setUserData(new ACRefId(track_index,"video track"));
 	}
 }
-	
+
+#ifdef USE_SLIT_SCAN
 void ACOsgVideoTrackRenderer::slitScanGeode() {
 	StateSet *state;
 	Vec3Array* vertices;
@@ -538,6 +578,7 @@ void ACOsgVideoTrackRenderer::slitScanGeode() {
 	}
 	
 }	
+#endif//def USE_SLIT_SCAN
 
 void ACOsgVideoTrackRenderer::cursorGeode() {
 	StateSet *state;	
@@ -728,23 +769,28 @@ void ACOsgVideoTrackRenderer::updateTracks(double ratio) {
 	{
 		track_node->removeChild(playback_transform);
 		if (media){
+			#ifdef USE_SLIT_SCAN
 			if (slit_scanner){
 				if (slit_scanner->isRunning()) slit_scanner->cancel();
 				delete slit_scanner; slit_scanner=0;
 				slit_scanner = new ACOsgVideoSlitScanThread();
 			}
+			slit_scan_geode=0;			
+			#endif//def USE_SLIT_SCAN
+			
 			playback_geode=0;
 			playback_transform=0;
-			slit_scan_geode=0;
 			cursor_geode=0;
 			if(summary_data) {summary_data=0;} //{cvReleaseCapture(&summary_data);} // no! ACVideo does it!
 			if (video_stream) {video_stream->quit();}
 			video_stream=0;	
 		
+			#ifdef USE_SLIT_SCAN
 			slit_scanner->reset();
 			slit_scanner->setFileName(media->getFileName());
 			slit_scanner->startThread();
-			slit_scan_changed = true;
+			slit_scan_changed = true;*/
+			#endif//def USE_SLIT_SCAN
 			
 			playbackGeode();
 			track_node->addChild(playback_transform);
@@ -798,6 +844,7 @@ void ACOsgVideoTrackRenderer::updateTracks(double ratio) {
 		
 		track_node->removeChild(frames_transform);
 		track_node->removeChild(segments_transform);
+		#ifdef USE_SLIT_SCAN
 		track_node->removeChild(slit_scan_transform);
 		if (track_summary_type == AC_VIDEO_SUMMARY_SLIT_SCAN && slit_scanner->computed()){
 			if (slit_scan_changed){
@@ -809,7 +856,7 @@ void ACOsgVideoTrackRenderer::updateTracks(double ratio) {
 			track_node->addChild(slit_scan_transform);
 		}
 		else {
-			
+		#endif//def USE_SLIT_SCAN	
 			if (frame_n != floor(width/frame_min_width) || media_changed){
 				double summary_start = getTime();
 				std::cout << "Generating frames... ";
@@ -818,7 +865,9 @@ void ACOsgVideoTrackRenderer::updateTracks(double ratio) {
 				std::cout << getTime()-summary_start << " sec." << std::endl;
 			}
 			track_node->addChild(frames_transform);
+		#ifdef USE_SLIT_SCAN	
 		}
+		#endif//def USE_SLIT_SCAN
 		
 		if (media && media_changed){
 			if (media->getNumberOfSegments()>0 && segments_number != media->getNumberOfSegments()){
@@ -865,11 +914,15 @@ void ACOsgVideoTrackRenderer::updateTracks(double ratio) {
 			//std::cout << "video fits view width" << std::endl;
 		}
 		playback_transform->setMatrix(playback_matrix);
+		#ifdef USE_SLIT_SCAN
 		if (track_summary_type == AC_VIDEO_SUMMARY_SLIT_SCAN && slit_scanner->computed())
 			slit_scan_transform->setMatrix(summary_matrix);
 		else {
+		#endif//def USE_SLIT_SCAN	
 			frames_transform->setMatrix(summary_matrix);
+		#ifdef USE_SLIT_SCAN	
 		}
+		#endif//def USE_SLIT_SCAN
 		if (media->getNumberOfSegments()>0) segments_transform->setMatrix(segments_matrix);
 	}
 	

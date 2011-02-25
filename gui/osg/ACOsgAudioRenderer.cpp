@@ -39,10 +39,12 @@
 #include <ACAudio.h>
 
 #include "boost/filesystem.hpp"   // includes all needed Boost.Filesystem declarations
-#include "boost/filesystem/operations.hpp"
-#include "boost/filesystem/path.hpp"
+//#include "boost/filesystem/operations.hpp"
+//#include "boost/filesystem/path.hpp"
 
 #include <sstream>
+
+#include <osg/Version>
 
 namespace fs = boost::filesystem;
 
@@ -276,9 +278,14 @@ void ACOsgAudioRenderer::waveformGeode() {
 
 void ACOsgAudioRenderer::metadataGeode() {
 	
+	std::string osg_version = std::string(osgGetVersion());
+	
 	osg::Vec4 textColor(0.9f,0.9f,0.9f,1.0f);
 	float textCharacterSize = 80.0f; // 10 pixels ? // broken with OSG v2.9.11??
-	
+	//if (osg_version == "2.9.11")	
+	#if OSG_MIN_VERSION_REQUIRED(2,9,11)
+		textCharacterSize = 12.0f;
+	#endif
 	metadata_geode = new Geode();
 	
 	metadata = new osgText::Text;
@@ -290,7 +297,12 @@ void ACOsgAudioRenderer::metadataGeode() {
 	metadata->setPosition(osg::Vec3(0,0.025,0.04));
 	//	text->setPosition(osg::Vec3(pos.x,pos.y,pos.z));
 	metadata->setLayout(osgText::Text::LEFT_TO_RIGHT);
-	metadata->setFontResolution(64,64);
+	//if (osg_version == "2.9.11") 
+	#if OSG_MIN_VERSION_REQUIRED(2,9,11)
+		metadata->setFontResolution(12,12);
+	#else 
+		metadata->setFontResolution(64,64);
+	#endif
 	//metadata->setAlignment( osgText::Text::CENTER_CENTER );
 	//metadata->setAxisAlignment( osgText::Text::SCREEN );
 	

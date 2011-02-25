@@ -37,6 +37,8 @@
 #include "ACVideo.h"
 
 #include <osg/ImageUtils>
+#include <osgDB/ReaderWriter>
+#include "boost/filesystem.hpp"
 
 #include <iostream>
 using namespace std;
@@ -112,6 +114,13 @@ int ACVideo::computeThumbnail(int w, int h){
 	//CF we should compute the following in a separate thread
 	
 	// Loading the movie with OSG
+	std::cout << boost::filesystem::extension(filename);
+	osgDB::ReaderWriter* readerWriter = osgDB::Registry::instance()->getReaderWriterForExtension(boost::filesystem::extension(filename).substr(1));
+	if (!readerWriter){
+		cerr << "<ACVideo::computeThumbnail> problem loading file, no OSG plugin available" << endl;
+		return -1;
+	}
+
 	osg::ref_ptr<osg::Image> thumbnail = osgDB::readImageFile(filename);
 	//thumbnail->scaleImage(thumbnail_width,thumbnail_height,1);
 	//thumbnail->setAllocationMode(osg::Image::NO_DELETE);
