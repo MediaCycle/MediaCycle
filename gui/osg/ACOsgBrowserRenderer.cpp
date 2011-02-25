@@ -101,7 +101,8 @@ ACOsgBrowserRenderer::ACOsgBrowserRenderer()
 ACOsgBrowserRenderer::~ACOsgBrowserRenderer(){
 	this->removeNodes();
 	this->removeLinks();
-	this->removeLabels();	
+	this->removeLabels();
+	media_cycle = 0;
 }	
 
 void ACOsgBrowserRenderer::clean(){

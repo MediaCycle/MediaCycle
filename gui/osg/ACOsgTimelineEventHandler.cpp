@@ -40,13 +40,13 @@
 #endif //defined (SUPPORT_AUDIO)
 
 ACOsgTimelineEventHandler::ACOsgTimelineEventHandler()
-: renderer(0)
+: renderer(0), media_cycle(0)
 {
 	this->clean();
 }
 
 void ACOsgTimelineEventHandler::clean(){
-	media_cycle = 0;
+	//media_cycle = 0;
 	selecting_zone = false;
 	selecting_zone_begin = false;
 	selecting_zone_end = false;
@@ -83,7 +83,7 @@ bool ACOsgTimelineEventHandler::handle(const osgGA::GUIEventAdapter& ea,osgGA::G
 				pick(view,ea,false);
 				
 				// Skipping/Moving the selection zone to the mouse position (audio tracks)
-				if(selecting_summary_waveform){
+ 				if(selecting_summary_waveform){
 					// Audio feedback
 					/*int mediaID = renderer->getTrack(selection->getID())->getMedia()->getId();
 					if (mediaID > -1){

@@ -156,6 +156,7 @@ ACOsgCompositeViewQt::~ACOsgCompositeViewQt(){
 	//if (timeline_event_handler) delete timeline_event_handler;
 	timeline_event_handler = 0;
 	delete timeline_controls_renderer;
+	media_cycle = 0;
 }
 
 void ACOsgCompositeViewQt::clean(bool updategl){
