@@ -40,6 +40,7 @@
 
 #include <map>
 #include <string>
+#include <vector>
 
 #include <boost/algorithm/string.hpp>
 
@@ -47,37 +48,57 @@ typedef  std::map<std::string, ACMediaType> filext;
 typedef  std::map<std::string, ACMediaType> mediaplugin;
 
 class ACMediaFactory {
-//private, not protected, since there is no ACImageFactory
-private:
-	// for log(n) search through extensions:
-	static filext available_file_extensions,possible_file_extensions;
-public:
-	ACMediaFactory();
-	~ACMediaFactory();
-	
-	// 2 ways to specify which new media to create:
-	// 1) give file extension
-	static ACMedia* create(std::string file_ext);//CF To improve, if extension has been "forgotten" as often in OSX
-	// 2) directly specify which media (e.g. for openLibrary)
-	static ACMedia* create(ACMediaType media_type);
+	//private, not protected, since there is no ACImageFactory
+	private:
+		// for log(n) search through extensions:
+		static filext available_file_extensions,known_file_extensions,unchecked_file_extensions,used_file_extensions;
+		
+	public:
+		static ACMediaFactory* getInstance();
 
-	// 3) copy a media 
-	static ACMedia* create(ACMedia* media);//CF we don't want this, data duplication!
+	protected:	
+		///
+		/// The constructor isn't public to ensure we keep one instance only of this class (singleton)
+		/// that shouldn't member of other classes, instead:
+		/// - call ACMediaFactory::getInstance(); to initialize available extensions at a strategic point 
+		///  (application or media library init), 
+		///  or these will be initialized at the first public member query. 
+		/// - access ACMediaFactory each public method method() thru ACMediaFactory::getInstance()->method()
+		/// 
+		ACMediaFactory();
+		virtual ~ACMediaFactory();
 	
-	static ACMediaType getMediaTypeFromExtension(std::string file_ext);
-	static void listMediaExtensions();
-	static std::vector<std::string> getExtensionsFromMediaType(ACMediaType media_type);// no check in the possible formats list
+	public:	
+		// 2 ways to specify which new media to create:
 	
-private:
-	static bool addFileExtensionSupport(std::string file_ext, ACMediaType media_type);
-	void addAvailableFileExtensions();
-	void addPossibleFileExtensions();
-	#if defined (SUPPORT_AUDIO)
-		static void addSndFileExtensions();
-	#endif //defined (SUPPORT_AUDIO)
-	#if defined (SUPPORT_IMAGE) || defined(SUPPORT_VIDEO) || defined(SUPPORT_3DMODEL)
-		static void addOsgFileExtensions();
-	#endif //defined (SUPPORT_IMAGE OR SUPPORT_VIDEO) || defined(SUPPORT_3DMODEL)
+		// 1) give file extension
+		ACMedia* create(std::string file_ext);//CF To improve, if extension has been "forgotten" as often in OSX
+		// 2) directly specify which media (e.g. for openLibrary)
+		ACMedia* create(ACMediaType media_type);
+
+		// 3) copy a media 
+		ACMedia* create(ACMedia* media);//CF we don't want this, data duplication!
+		
+		ACMediaType getMediaTypeFromExtension(std::string file_ext);
+		std::vector<std::string> getExtensionsFromMediaType(ACMediaType media_type);// no check in the possible formats list
+		void listSupportedMediaExtensions();
+		void listUncheckedMediaExtensions();
+		bool useAvailableFileExtensions();
+		filext getAvailableFileExtensions(){return available_file_extensions;}
+		filext getUncheckedFileExtensions(){return unchecked_file_extensions;}
+	
+	private:
+		void listMediaExtensions(filext _list);
+		void checkAvailableFileExtensions();
+		void useKnownFileExtensions();
+		bool addAvailableFileExtensionSupport(std::string file_ext, ACMediaType media_type);
+		void checkAvailableFileExtensionSupport(std::string file_ext, ACMediaType media_type = MEDIA_TYPE_NONE);
+		#if defined (SUPPORT_AUDIO)
+			void addAvailableSndFileExtensions();
+		#endif //defined (SUPPORT_AUDIO)
+		#if defined (SUPPORT_IMAGE) || defined(SUPPORT_VIDEO) || defined(SUPPORT_3DMODEL)
+			void addAvailableOsgFileExtensions();
+		#endif //defined (SUPPORT_IMAGE OR SUPPORT_VIDEO) || defined(SUPPORT_3DMODEL)
 };
 
 #endif // _ACMEDIAFACTORY_H

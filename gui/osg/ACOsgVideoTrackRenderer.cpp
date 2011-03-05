@@ -810,7 +810,7 @@ void ACOsgVideoTrackRenderer::updateTracks(double ratio) {
 			//CF: dummy segments
 			/*if (media->getNumberOfSegments()==0){
 				for (int s=0;s<4;s++){
-					ACMedia* seg = ACMediaFactory::create(media);
+					ACMedia* seg = ACMediaFactory::getInstance()->create(media);
 					seg->setParentId(media->getId());
 					media->addSegment(seg);//dummy
 				}	

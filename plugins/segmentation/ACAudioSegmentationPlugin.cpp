@@ -136,7 +136,7 @@ std::vector<ACMedia*> ACAudioSegmentationPlugin::segment(ACMediaData* audio_data
 	vector<ACMedia*> segments;
 
 	for (int i = 0; i < seg_m.n_rows; i++){
-		ACMedia* media = ACMediaFactory::create(theAudio);
+		ACMedia* media = ACMediaFactory::getInstance()->create(theAudio);
 		media->setParentId(theMedia->getId());
 		media->setStart(seg_m(i,0));
 		media->setEnd(seg_m(i,1));

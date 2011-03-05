@@ -102,7 +102,7 @@ void ACBicSegmentationPlugin::setParameters(float _lambda, int _samplingrate, in
 //		
 //
 ////	for (int i = 0; i < seg_m.n_rows; i++){
-////		ACMedia* media = ACMediaFactory::create(theAudio);
+////		ACMedia* media = ACMediaFactory::getInstance()->create(theAudio);
 ////		media->setParentId(theMedia->getId());
 ////		media->setStart(seg_m(i,0));
 ////		media->setEnd(seg_m(i,1));
@@ -179,7 +179,7 @@ std::vector<ACMedia*> ACBicSegmentationPlugin::segment(ACMediaTimedFeature* _MTF
 	
 	for (int i = 0; i < Nseg-1; i++){
 		//make sur the segment from the media have the proper type
-		ACMedia* media = ACMediaFactory::create(_theMedia);
+		ACMedia* media = ACMediaFactory::getInstance()->create(_theMedia);
 		media->setParentId(_theMedia->getId());
 		media->setStart(segments_limits[i]);
 		media->setEnd(segments_limits[i+1]);

@@ -95,7 +95,7 @@ int main(int argc, char** argv) {
 	amf->dump();
 	cout << "creating media" << endl;
 	ACMedia* local_media;
-	local_media = ACMediaFactory::create(MEDIA_TYPE_AUDIO);
+	local_media = ACMediaFactory::getInstance()->create(MEDIA_TYPE_AUDIO);
 	local_media->addFeatures(amf);
 	cout << "done" << endl;
 	cout<<"getKNN"<<endl;
@@ -341,7 +341,7 @@ int processTcpMessageFromSSI(MediaCycle *that, char *buffer, int l, char **buffe
 
 	cout << "creating media" << endl;
 	ACMedia* local_media;
-	local_media = ACMediaFactory::create(MEDIA_TYPE_AUDIO);
+	local_media = ACMediaFactory::getInstance()->create(MEDIA_TYPE_AUDIO);
 	local_media->addFeaturesVector(mediaFeatures);
 	cout << "done" << endl;
 

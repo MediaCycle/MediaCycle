@@ -133,7 +133,7 @@ public:
 	void setMediaType(ACMediaType _mt);
 	bool changeMediaType(ACMediaType aMediaType);
 	
-	std::vector<std::string> getExtensionsFromMediaType(ACMediaType media_type){return mediaFactory->getExtensionsFromMediaType(media_type);}
+	std::vector<std::string> getExtensionsFromMediaType(ACMediaType media_type){return ACMediaFactory::getInstance()->getExtensionsFromMediaType(media_type);}
 	int getThumbnailWidth(int i);
 	int getThumbnailHeight(int i);
 	int getWidth(int i);
@@ -237,7 +237,6 @@ private:
 	std::string local_directory;
 	std::string libname;
 	ACMediaLibrary *mediaLibrary;
-	ACMediaFactory *mediaFactory;
 	ACMediaBrowser *mediaBrowser;
 	ACNetworkSocketServer *networkSocket;
 	ACPluginManager *pluginManager;

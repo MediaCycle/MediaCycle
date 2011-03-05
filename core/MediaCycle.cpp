@@ -60,12 +60,12 @@ MediaCycle::MediaCycle(ACMediaType aMediaType, string local_directory, string li
 	
 	this->networkSocket	= 0;
 	
+	ACMediaFactory::getInstance(); // this populates the available file extensions if not called before
+	
 	this->mediaLibrary = new ACMediaLibrary(aMediaType);
   
 	this->mediaBrowser = new ACMediaBrowser();
 	this->mediaBrowser->setLibrary(this->mediaLibrary);
-	
-	this->mediaFactory = new ACMediaFactory(); //
 	
 	this->pluginManager = new ACPluginManager();
 	
@@ -85,8 +85,6 @@ MediaCycle::~MediaCycle() {
 	this->mediaLibrary = 0;
 	delete this->mediaBrowser;
 	this->mediaBrowser = 0;
-	delete this->mediaFactory;
-	this->mediaFactory = 0;
 	delete this->pluginManager;
 	this->pluginManager = 0;
     stopTcpServer(); // will delete this->networkSocket;

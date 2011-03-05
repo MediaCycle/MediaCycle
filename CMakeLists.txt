@@ -121,6 +121,15 @@ IF(NOT SUPPORT_AUDIO AND NOT SUPPORT_IMAGE AND NOT SUPPORT_VIDEO AND NOT SUPPORT
 	MESSAGE(FATAL_ERROR "You need to enable support for at least one media type!")
 ENDIF()
 
+######################
+#     OS SPECIFIC    #
+######################
+
+# Apple issues
+IF(APPLE AND NOT APPLE_IOS_XCODE AND NOT APPLE_IOS_SIM AND NOT APPLE_IOS_XCODE)
+	SET(CMAKE_OSX_ARCHITECTURES "i386" CACHE STRING "Building for i386 (FFmpeg and QTKit support currently broken on Snow Leopard)" FORCE)
+ENDIF()
+
 # iOS DEVEL SPECIFIC
 IF (APPLE_IOS_DEV OR APPLE_IOS_SIM)
 	IF ( ${CMAKE_VERSION} STRLESS "2.8.2")
@@ -432,14 +441,14 @@ ENDIF()
 
 		# OSG plugins check (required at least for text display in apps)
 		STRING(REPLACE "include" "lib" OSG_LIBRARY_DIR ${OSG_INCLUDE_DIR}) #CF check NOT MINGW Windows systems, might be under "bin" instead of "lib"
-		IF(SUPPORT_VIDEO)
-			FILE(GLOB OSG_FFMPEG_PLUGIN ${OSG_LIBRARY_DIR}/osgPlugins-*/*osgdb_ffmpeg* ${OSG_LIBRARY_DIR}/../osgPlugins-*/*osgdb_ffmpeg*)
-			IF (OSG_FFMPEG_PLUGIN)
-				MESSAGE("-- Found FFmpeg plugin for OSG: ${OSG_FFMPEG_PLUGIN}")
-			ELSE()
-				MESSAGE(FATAL_ERROR "Couldn't find FFmpeg plugin for OSG. OSG 2.8.3 or above is needed")
-			ENDIF()
-		ENDIF(SUPPORT_VIDEO)
+		#IF(SUPPORT_VIDEO)
+		#	FILE(GLOB OSG_FFMPEG_PLUGIN ${OSG_LIBRARY_DIR}/osgPlugins-*/*osgdb_ffmpeg*)
+		#	IF (OSG_FFMPEG_PLUGIN)
+		#		MESSAGE("-- Found FFmpeg plugin for OSG: ${OSG_FFMPEG_PLUGIN}")
+		#	ELSE()
+		#		MESSAGE(FATAL_ERROR "Couldn't find FFmpeg plugin for OSG. OSG 2.8.3 or above is needed")
+		#	ENDIF()
+		#ENDIF(SUPPORT_VIDEO)
 		
 		IF(SUPPORT_3DMODEL OR SUPPORT_IMAGE OR SUPPORT_VIDEO)
 			MESSAGE("-- Found core OpenSceneGraph libraries: ${OPENSCENEGRAPH_CORE_LIBRARIES}")
@@ -451,33 +460,40 @@ ENDIF()
 			MESSAGE("-- Found gui OpenSceneGraph libraries: ${OPENSCENEGRAPH_LIBRARIES}")
 		ENDIF()
 		
-		FILE(GLOB OSG_PLUGINS ${OSG_LIBRARY_DIR}/osgPlugins-*/*osgdb_* ${OSG_LIBRARY_DIR}/../osgPlugins-*/*osgdb_*)
-		IF(APPLE AND BUILD_APPS)
+		FILE(GLOB OSG_PLUGINS ${OSG_LIBRARY_DIR}/osgPlugins-${OPENSCENEGRAPH_VERSION}/*osgdb_*)
+		IF(APPLE)
 			IF(EXISTS /opt/local/bin/port)#CF do a proper check
 				SET(MACPORTS_FOUND ON)
 			ENDIF()
 			SET(DYLD_LIBRARY_PATH $ENV{DYLD_LIBRARY_PATH})
 			FILE(GLOB CORRECT_OSG_PLUGINS_PATH
-				~/Library/Application\ Support/OpenSceneGraph/PlugIns/osgPlugins-*
-				/Library/Application\ Support/OpenSceneGraph/PlugIns/osgPlugins-*
-				/Network/Library/Application\ Support/OpenSceneGraph/PlugIns/osgPlugins-*
+				~/Library/Application\ Support/OpenSceneGraph/PlugIns/osgPlugins-${OPENSCENEGRAPH_VERSION}
+				/Library/Application\ Support/OpenSceneGraph/PlugIns/osgPlugins-${OPENSCENEGRAPH_VERSION}
+				/Network/Library/Application\ Support/OpenSceneGraph/PlugIns/osgPlugins-${OPENSCENEGRAPH_VERSION}
 			)
 			FILE(GLOB INCORRECT_OSG_PLUGINS_PATH
-				/opt/local/lib/osgPlugins-*
-				/usr/local/lib/osgPlugins-*
-				/usr/lib/osgPlugins-*
+				/opt/local/lib/osgPlugins-${OPENSCENEGRAPH_VERSION}
+				/usr/local/lib/osgPlugins-${OPENSCENEGRAPH_VERSION}
+				/usr/lib/osgPlugins-${OPENSCENEGRAPH_VERSION}
 			)# OSG wont find these unless DYLD_LIBRARY_PATH is set, but it conflicts with MacPorts...
 			STRING(REPLACE "/osgPlugins-*" "" INCORRECT_OSG_PLUGINS_PREFIX "${INCORRECT_OSG_PLUGINS_PATH}")
 			IF(INCORRECT_OSG_PLUGINS_PATH AND NOT DYLD_LIBRARY_PATH AND NOT CORRECT_OSG_PLUGINS_PATH)
 				IF(MACPORTS_FOUND)
 					MESSAGE(FATAL_ERROR "Please first copy your most recent OSG plugins folder ${INCORRECT_OSG_PLUGINS_PATH}")
-					MESSAGE(FATAL_ERROR "as ~/Library/Application\ Support/OpenSceneGraph/PlugIns/osgPlugins-*")
-					MESSAGE(FATAL_ERROR "or /Library/Application\ Support/OpenSceneGraph/PlugIns/osgPlugins-*")
+					MESSAGE(FATAL_ERROR "as ~/Library/Application\ Support/OpenSceneGraph/PlugIns/osgPlugins-${OPENSCENEGRAPH_VERSION}")
+					MESSAGE(FATAL_ERROR "or /Library/Application\ Support/OpenSceneGraph/PlugIns/osgPlugins-${OPENSCENEGRAPH_VERSION}")
 				ELSE()
 					STRING(REPLACE ";" ":" INCORRECT_OSG_PLUGINS_PREFIX "${INCORRECT_OSG_PLUGINS_PREFIX}")
 					MESSAGE(FATAL_ERROR "Please first add to your ~/.profile: export DYLD_LIBRARY_PATH=\$DYLD_LIBRARY_PATH:${INCORRECT_OSG_PLUGINS_PREFIX}")
 					MESSAGE(FATAL_ERROR "and run: source ~/.profile")
 				ENDIF()
+			ENDIF()
+			IF(CORRECT_OSG_PLUGINS_PATH AND NOT OSG_PLUGINS)
+				FILE(GLOB OSG_PLUGINS
+					~/Library/Application\ Support/OpenSceneGraph/PlugIns/osgPlugins-${OPENSCENEGRAPH_VERSION}/*osgdb_*
+					/Library/Application\ Support/OpenSceneGraph/PlugIns/osgPlugins-${OPENSCENEGRAPH_VERSION}/*osgdb_*
+					/Network/Library/Application\ Support/OpenSceneGraph/PlugIns/osgPlugins-${OPENSCENEGRAPH_VERSION}/*osgdb_*
+				)
 			ENDIF()
 		ENDIF()
 		SET(OSG_PLUGINS_3DMODEL "3dc;3ds;ac3d;bsp;dae;dw;dxf;fbx;geo;Inventor;ive;logo;lwo;lws;md2;obj;ogr;Openflight;osg;pfb;shp;stl;vrml;x")

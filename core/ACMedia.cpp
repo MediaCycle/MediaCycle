@@ -553,7 +553,7 @@ int ACMedia::segment(ACPluginManager *acpl, bool _saved_timed_features ) {
 
 // int ACMedia::segment(){
 // 	for (int i = 0; i < 4; i++){
-// 		ACMedia* media = ACMediaFactory::create(this);
+// 		ACMedia* media = ACMediaFactory::getInstance()->create(this);
 // 		media->setParentId(this->mid);
 // 		media->setStart(this->start + ((float)i/4.0) * this->getDuration());
 // 		media->setEnd(this->start + ((float)(i+1)/4.0) * this->getDuration()-.01);

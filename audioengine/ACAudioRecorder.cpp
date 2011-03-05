@@ -67,7 +67,7 @@ void ACAudioRecorder::init()
 }	
 
 ACAudioRecorder::~ACAudioRecorder(){ 
-	media_cycle = 0; 
+	//if (media_cycle) media_cycle = 0; 
 #ifdef USE_OPENAL	
 	//if (device) {delete device;}
 	device = 0;

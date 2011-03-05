@@ -124,7 +124,7 @@ ACMediaBrowser::ACMediaBrowser() {
 ACMediaBrowser::~ACMediaBrowser() {
 	// XS TODO delete mLoopAttributes if vector of pointers <*>
 	pthread_mutex_destroy(&activity_update_mutex);
-	delete mUserLog;
+	if (mUserLog) delete mUserLog;
 }
 
 void ACMediaBrowser::clean(){

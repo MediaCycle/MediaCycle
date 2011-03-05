@@ -7,7 +7,7 @@ IF(SUPPORT_AUDIO AND USE_VAMP)
 	ADD_DEPENDENCIES(vamp-simple-host vamp-simple-hostsdk)
 	INCLUDE_DIRECTORIES(. ../../lib/vamp-plugin-sdk)
 
-	TARGET_LINK_LIBRARIES(vamp-simple-host vamp-hostsdk vamp-sdk ${SNDFILE_LIBRARY} dl)
+	TARGET_LINK_LIBRARIES(vamp-simple-host vamp-hostsdk vamp-sdk ${SNDFILE_LIBRARY} dl stdc++)
 	MESSAGE("[X] vamp-simple-host")
 ELSE()
 	MESSAGE("[ ] vamp-simple-host")

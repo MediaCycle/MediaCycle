@@ -173,14 +173,14 @@ int ACMediaLibrary::importFile(std::string _filename, ACPluginManager *acpl, boo
 	
 	string extension = fs::extension(_filename);
 	
-	ACMediaType fileMediaType = ACMediaFactory::getMediaTypeFromExtension(extension);
+	ACMediaType fileMediaType = ACMediaFactory::getInstance()->getMediaTypeFromExtension(extension);
 	ACMedia* media;
 
 	//this->testFFMPEG(_filename);
 	
 	// XS TODO: do we want to check the media type of the whole library (= impose a unique one)?
 	if (media_type == fileMediaType){
-		media = ACMediaFactory::create(extension);
+		media = ACMediaFactory::getInstance()->create(extension);
 		cout << "extension:" << extension << endl; 	
 	}
 	else {
@@ -312,7 +312,7 @@ int ACMediaLibrary::openACLLibrary(std::string _path, bool aInitLib){
 	}
 	//media_library.resize(0);
 	do {
-		local_media = ACMediaFactory::create(media_type);
+		local_media = ACMediaFactory::getInstance()->create(media_type);
 		if (local_media != 0) {
 			if (!media_path.empty()) {
 				ret = local_media->loadACL(media_path, library_file);
@@ -378,7 +378,7 @@ int ACMediaLibrary::openMCSLLibrary(std::string _path, bool aInitLib){
 	}
 	//media_library.resize(0);
 	do {
-		local_media = ACMediaFactory::create(media_type);
+		local_media = ACMediaFactory::getInstance()->create(media_type);
 		if (local_media != 0) {
 			ret = local_media->loadMCSL(library_file);
 			if (ret) {
@@ -434,7 +434,7 @@ int ACMediaLibrary::openCoreXMLLibrary(TiXmlHandle _rootHandle){
 		int typi=0;
 		pMediaNode->QueryIntAttribute("MediaType", &typi);
 		typ = (ACMediaType) typi;
-		ACMedia* local_media = ACMediaFactory::create(typ);
+		ACMedia* local_media = ACMediaFactory::getInstance()->create(typ);
 		local_media->loadXML(pMediaNode);
 		media_library.push_back(local_media);
 		cnt++;
@@ -802,7 +802,7 @@ int ACMediaLibrary::testFFMPEG(std::string _filename){
 	// and http://www.inb.uni-luebeck.de/~boehme/libavcodec_update.html
 
 	string extension = fs::extension(_filename);
-	ACMediaType fileMediaType = ACMediaFactory::getMediaTypeFromExtension(extension);
+	ACMediaType fileMediaType = ACMediaFactory::getInstance()->getMediaTypeFromExtension(extension);
 	
 	if (media_type == MEDIA_TYPE_VIDEO || media_type == MEDIA_TYPE_AUDIO) {
 		if (fileMediaType == MEDIA_TYPE_VIDEO) {			

@@ -97,6 +97,12 @@ ACMultiMediaCycleOsgQt::ACMultiMediaCycleOsgQt(QWidget *parent) : QMainWindow(pa
 	//	statusBar()->addPermanentWidget(pb);
 	
 	aboutDialog = 0;
+
+	// This is required to populate the available file extensions list at startup
+	// until we clean mediacycle instead of deleting/creating it at every media type change.
+	ACMediaFactory::getInstance();
+	// Since it is time consuming, we might want to add a splash screen with progress bar at startup?
+	
 	this->activateWindow();
 	this->show();
 	
@@ -176,7 +182,7 @@ void ACMultiMediaCycleOsgQt::createMediaCycle(ACMediaType _media_type, ACBrowser
 void ACMultiMediaCycleOsgQt::destroyMediaCycle(){
 	// XS TODO : remove it from the graphics ?
 	#if defined (SUPPORT_AUDIO)
-		if (audio_engine) delete audio_engine;
+		if (audio_engine) {delete audio_engine; audio_engine = 0;}
 	#endif //defined (SUPPORT_AUDIO)
 	delete media_cycle;
 }

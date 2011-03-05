@@ -675,7 +675,7 @@ void readLibraryXml(MediaCycle* mediacycle, std::string filename){
 	string tmpFeature;
 	for( node = items->FirstChild("v"); node; node = node->NextSibling() ){
 		int currIdx = 0;
-		ACMedia* local_media = ACMediaFactory::create(MEDIA_TYPE_VIDEO);
+		ACMedia* local_media = ACMediaFactory::getInstance()->create(MEDIA_TYPE_VIDEO);
 		tmpFeature = node->FirstChild()->Value();
 		for (int i=0; i < descDims.size(); i++) {
 			ACMediaFeatures* mediaFeatures = new ACMediaFeatures();
