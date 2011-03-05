@@ -139,7 +139,6 @@ void ACMediaBrowser::clean(){
 	mLabelAttributes.clear(); // XS leave it like this or also make a tree ?
 	nbDisplayedLabels = 0;
 	
-	// XS TODO clear
 	mLoopAttributes.clear(); // XS TODO make this a tree ;delete mLoopAttributes if vector of pointers <*>
 	nbDisplayedLoops = 0; // XS TODO: check this : 20 was vintage from Dancers!?
 	
@@ -277,9 +276,9 @@ void ACMediaBrowser::setWeight(int i, float weight) {
 	mFeatureWeights[i] = weight;
 
 #ifdef VERBOSE
-	std::cout << "mFeatureWeights = " << mFeatureWeights[0] << std::endl;
-	std::cout << "mFeatureWeights = " << mFeatureWeights[1] << std::endl;
-	std::cout << "mFeatureWeights = " << mFeatureWeights[2] << std::endl;
+	for (unsigned int i=0; i<mFeatureWeights.size(); i++){
+		std::cout << "mFeatureWeights["<<i<<"] = " << mFeatureWeights[i] << std::endl;
+	}
 #endif // VERBOSE
 }
 

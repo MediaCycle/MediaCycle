@@ -15,7 +15,7 @@ extern "C" ACPlugin* create(std::string namePlugin) {
 	if (namePlugin == "ACBicSegmentationPlugin") {return new ACBicSegmentationPlugin();}
 //	else if (namePlugin == "ACSelfSimSegmentationPlugin") {return new ACBicSegmentationPlugin();}
 	std::cout << "unknown Plugin Type, returning NULL" << namePlugin << std::endl;
-	return NULL;
+	return 0;
 }
 
 extern "C" void destroy(ACPlugin* d) {

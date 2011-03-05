@@ -64,6 +64,7 @@ protected:
 	float start, end; // seconds
 	bool persistent_data; // true if data and thumbnail are kept in virtual memory
 	ACMediaData* data;
+	bool features_saved_xml;
 	
 	// XS TODO : add a MediaTimedFeatures member ?
 	// so that we can segment "on-the-fly"
@@ -131,7 +132,8 @@ public:
 	float getEnd(){return this->end;};
 	
 	// I/O -- common part
-
+	
+	void fixWhiteSpace(std::string &str);
 	void saveACL(std::ofstream &library_file, int mcsl=0);
 	void saveXML(TiXmlElement* _medias);
 

@@ -34,6 +34,9 @@
 
 #include "ACDockWidgetFactoryQt.h"
 
+// XS watch out, here the dock_types start with "MC"
+// BUT the dock's names start with "AC"
+
 ACAbstractDockWidgetQt* ACDockWidgetFactoryQt::createDockWidget(QWidget *parent,std::string dock_type) {
 	if (dock_type == "MCBrowserControlsClusters") {return new ACBrowserControlsClustersDockWidgetQt(parent);}
 	#if defined (SUPPORT_AUDIO)

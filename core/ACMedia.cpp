@@ -35,6 +35,8 @@
 #include "ACMedia.h"
 
 #include <iostream>
+#include <algorithm>
+
 #include "ACMediaFactory.h"
 
 using namespace std;
@@ -52,6 +54,7 @@ void ACMedia::init() {
 	features_vectors.resize(0);
 	persistent_data = false;
 	data = 0; // new ACMediaData(MEDIA_TYPE_NONE);
+	features_saved_xml = false;
 }
 
 ACMedia::ACMedia(const ACMedia& m, bool reduce) {
@@ -142,12 +145,14 @@ void ACMedia::saveACL(ofstream &library_file, int mcsl) {
 }
 
 void ACMedia::saveXML(TiXmlElement* _medias){
+	if ( features_saved_xml || _medias == NULL) return; 
 	TiXmlElement* media;
 	media = new TiXmlElement( "Media" );  
 	_medias->LinkEndChild( media );  
-	media->SetAttribute("MediaType", media_type);
-	media->SetAttribute("FileName", filename);
 	media->SetAttribute("MediaID", mid);
+	media->SetAttribute("MediaType", media_type);
+	
+	media->SetAttribute("FileName", filename);
 	
 	saveXMLSpecific(media);
 	
@@ -178,7 +183,7 @@ void ACMedia::saveXML(TiXmlElement* _medias){
 
 	// saves info about segments (if any) : beginning, end, ID
 	// the parent ID of the segment is the ID of the current media
-	for (unsigned int i=0; i<this->getNumberOfSegments();i++) {
+	for (int i=0; i<this->getNumberOfSegments();i++) {
 		TiXmlElement* seg = new TiXmlElement( "Segment" );  
 		media->LinkEndChild( seg );  
 		seg->SetAttribute("Start", this->getSegment(i)->getStart());
@@ -190,7 +195,7 @@ void ACMedia::saveXML(TiXmlElement* _medias){
 		TiXmlText* segID = new TiXmlText(s.c_str());
 		seg->LinkEndChild( segID );  		
 	}
-	
+	features_saved_xml = true;
 }
 
 // C++ version
@@ -280,12 +285,29 @@ int ACMedia::loadMCSL(ifstream &library_file) {
 	return loadACL("", library_file, 1);
 }
 
+// converts white spaces in string : " " -> "\ "
+// so that the file name is read properly afterwards
+void ACMedia::fixWhiteSpace (std::string &str) {
+    std::string temp;
+    for (unsigned int i = 0; i < str.length(); i++){
+        if (str[i] == ' ') 
+			temp += "\\ ";
+        else
+			temp += str[i];
+	}
+    str = temp;
+}
+
 void ACMedia::loadXML(TiXmlElement* _pMediaNode){
-	const char *pName=_pMediaNode->Attribute("FileName");
-	if (pName) 
-		this->setFileName(pName);
-	else
-		this->setFileName("");
+//	const char *pName=_pMediaNode->Attribute("FileName");
+	// no need for char*; string should work since we defined TIXML_USE_STL
+	string pName ="";
+	pName = _pMediaNode->Attribute("FileName");
+	// this requires #include <algorithm>
+	//if (pName!="")
+	//	replace(pName.begin(), pName.end(), " ", "\ ");
+	fixWhiteSpace(pName);
+	this->setFileName(pName);
 	
 	int mid=0;
 	_pMediaNode->QueryIntAttribute("MediaID", &mid); // If this fails, original value is left as-is
@@ -361,7 +383,7 @@ ACMediaFeatures* ACMedia::getFeaturesVector(string feature_name) {
 // Calls the plugins and fills in info such as width, height, ...
 // Implemented in ACMedia.cpp, since it is the same for all media
 // Returns 1 if it worked, 0 if it failed
-int ACMedia::import(std::string _path, int _mid, ACPluginManager *acpl, bool _save_timed_feat ) {
+int ACMedia::import(std::string _path, int _mid, ACPluginManager *acpl, bool _save_timed_feat) {
 	std::cout << "importing..." << _path << std::endl;
 	this->filename = _path;
 	this->filename_thumbnail = _path;
@@ -417,8 +439,8 @@ int ACMedia::import(std::string _path, int _mid, ACPluginManager *acpl, bool _sa
 		cerr << "<ACMedia::import> no features imported -- no plugin manager for media number: " << _mid << endl;
 		import_ok = 0;
 	}
-
-	//delete data;
+		
+	//delete data; <--- this is managed from outside (media->deleteData)
 	return import_ok;
 }
 

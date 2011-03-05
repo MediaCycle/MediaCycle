@@ -49,7 +49,6 @@
 #include "ACMediaFactory.h"
 
 #include <sstream>
-#include "tinyxml.h"
 
 // XS for sorting:
 #include <algorithm>
@@ -73,22 +72,6 @@ extern "C" {
 using namespace std;
 // to save library items in binary format, uncomment the following line:
 // #define SAVE_LOOP_BIN
-
-// XS pthread needs a single argument to the function to be multithreaded
-// so put them all in a struct
-struct pthread_input
-{
-	ACMedia* media;
-	string filename;
-	int id;
-	ACPluginManager *acpl;
-};
-
-void* p_importSingleFile(void *arg){
-	struct pthread_input *data =(struct pthread_input *)arg;
-	cout << data->filename << " ; " <<  data->id << " ; plugin size : " << data->acpl->getSize() << endl;
-	data->media->import(data->filename, data->id, data->acpl);
-}
 
 ACMediaLibrary::ACMediaLibrary() {
 	this->cleanLibrary();
@@ -146,11 +129,10 @@ void ACMediaLibrary::cleanLibrary() {
 //	-1 if error
 //  0 if empty directory (or no media of the required type found)
 //	> 0 if no error (returns the number of files found)
-int ACMediaLibrary::importDirectory(std::string _path, int _recursive, ACPluginManager *acpl, bool forward_order, bool doSegment, bool _save_timed_feat) {
+int ACMediaLibrary::importDirectory(std::string _path, int _recursive, ACPluginManager *acpl, bool forward_order, bool doSegment, bool _save_timed_feat, TiXmlElement* _medias) {
 	std::vector<string> filenames;
+ 	int nf = scanDirectory(_path, _recursive, filenames);
 
-	int nf = scanDirectory(_path, _recursive, filenames);
-	
 	if (nf < 0) {
 		cerr << "Problem importing directory: " << _path << endl;
 		return -1;
@@ -167,7 +149,7 @@ int ACMediaLibrary::importDirectory(std::string _path, int _recursive, ACPluginM
 	
 	for (unsigned int i=0; i<filenames.size(); i++){
 		int index = forward_order ? i : filenames.size()-1-i;//CF if reverse order (not forward_order), segments in subdirs are added to the library after the source recording
-		this->importFile(filenames[index], acpl, doSegment, _save_timed_feat );
+		this->importFile(filenames[index], acpl, doSegment, _save_timed_feat, _medias );
 	}
 	
 	std::cout << "Library size : " << this->getSize() << std::endl;
@@ -179,7 +161,15 @@ int ACMediaLibrary::importDirectory(std::string _path, int _recursive, ACPluginM
 // computes features (= "import" media) using FEATURES plugins available in the plugin Manager
 // doSegment = true : uses SEGMENTATION plugins on-the-fly
 // save_timedfeat = true : save the timedFeatures on the disk
-int ACMediaLibrary::importFile(std::string _filename, ACPluginManager *acpl, bool doSegment, bool _save_timed_feat) {
+int ACMediaLibrary::importFile(std::string _filename, ACPluginManager *acpl, bool doSegment, bool _save_timed_feat, TiXmlElement* _medias) {
+	// check if file has already been imported.
+	// XS TODO: isn't this going to be too heavy when library size gets large ?
+	// may be add a flag to (in)activate the test ?
+	int is_present = this->getMediaIndex(_filename);
+	if (is_present >= 0) {
+		cout << "<ACMediaLibrary::importFile> skipping "<< _filename << " : media already present at position " << is_present << endl;
+		return 0;
+	}
 	
 	string extension = fs::extension(_filename);
 	
@@ -194,34 +184,25 @@ int ACMediaLibrary::importFile(std::string _filename, ACPluginManager *acpl, boo
 		cout << "extension:" << extension << endl; 	
 	}
 	else {
-		cout << "other media type, skipping " << _filename << " ... " << endl;
+		cout << "<ACMediaLibrary::importFile> other media type, skipping " << _filename << " ... " << endl;
 		cout << "-> media_type " << media_type << " ... " << endl;
 		cout << "-> fileMediaType " << fileMediaType << " ... " << endl;
 		return 0;
 	}
-
+	
 	if (media == 0) {
-		cout << "extension unknown, skipping " << _filename << " ... " << endl;
+		cout << "<ACMediaLibrary::importFile> extension unknown, skipping " << _filename << " ... " << endl;
 		return 0;
 	}
-	else {
-		
-		// XS todo make this more flexible
-		// here we force the plugins to save timed features for segmentation
-		// they could also segment on-the-fly while calculating features (as in audioSegmentationPlugin)
-		if (doSegment) _save_timed_feat = true;
-		
-		// import has to be done before segmentation to have proper id.
-		if (media->import(_filename, this->getMediaID(), acpl, _save_timed_feat)){
-			this->addMedia(media);
+	// import has to be done before segmentation to have proper id.
+	else if (media->import(_filename, this->getMediaID(), acpl, _save_timed_feat)){
+		this->addMedia(media);
 #ifdef VERBOSE
-			cout << "imported " << _filename << " with mid = " <<  this->getMediaID() << endl;
+		cout << "imported " << _filename << " with mid = " <<  this->getMediaID() << endl;
 #endif // VERBOSE
-			this->incrementMediaID();
-		}
+		this->incrementMediaID();
 		// SD TODO - Is this correct?
 		if (doSegment){
-			
 			// segments are created without id 
 			media->segment(acpl, _save_timed_feat);
 			std::vector<ACMedia*> mediaSegments;
@@ -234,8 +215,17 @@ int ACMediaLibrary::importFile(std::string _filename, ACPluginManager *acpl, boo
 				}
 			}
 		}
-		media->deleteData();
 	}
+	else {
+		cout << "<ACMediaLibrary::importFile> problem importing " << _filename << " ... " << endl;
+		return 0;
+
+	}		
+	// appending current media (if imported properly) to the project's XML file 
+	media->saveXML(_medias);
+	
+	// deleting the data that have been used for analysis, keep media small.
+	media->deleteData();
 	return 1;
 }
 
@@ -322,9 +312,6 @@ int ACMediaLibrary::openACLLibrary(std::string _path, bool aInitLib){
 	}
 	//media_library.resize(0);
 	do {
-		//ACMediaType local_media_type = getMediaTypeFromExtension(std::string file_ext);
-		
-		
 		local_media = ACMediaFactory::create(media_type);
 		if (local_media != 0) {
 			if (!media_path.empty()) {
@@ -428,15 +415,18 @@ int ACMediaLibrary::openXMLLibrary(std::string _path, bool aInitLib){
 	
 	TiXmlHandle docHandle(&doc);
 	TiXmlHandle rootHandle = docHandle.FirstChildElement( "MediaCycle" );
-	// read the "header" information 
-	TiXmlText* nMediaText=rootHandle.FirstChild( "NumberOfMedia" ).FirstChild().Text();
+	this->openCoreXMLLibrary(rootHandle);
+}
+
+int ACMediaLibrary::openCoreXMLLibrary(TiXmlHandle _rootHandle){
+	TiXmlText* nMediaText=_rootHandle.FirstChild( "NumberOfMedia" ).FirstChild().Text();
 	string nof = nMediaText->ValueStr();
 	std::stringstream tmp;
 	int n_loops;
 	tmp << nof;
 	tmp >> n_loops;
-
-	TiXmlElement* pMediaNode=rootHandle.FirstChild( "Medias" ).FirstChild().Element();
+	
+	TiXmlElement* pMediaNode=_rootHandle.FirstChild( "Medias" ).FirstChild().Element();
 	// loop over all medias
 	int cnt=0;
 	for( pMediaNode; pMediaNode; pMediaNode=pMediaNode->NextSiblingElement()) {
@@ -449,17 +439,18 @@ int ACMediaLibrary::openXMLLibrary(std::string _path, bool aInitLib){
 		media_library.push_back(local_media);
 		cnt++;
 	}
-	// consistency check
+	// consistency check (XS TODO quits the app -> exceptions )
 	if (cnt != n_loops){
 		cerr << "<ACMediaLibrary::openXMLLibrary>: inconsistent number of media"<< endl;
+		cerr << "n_loops = " << n_loops << "; cnt = " << cnt << endl;
 		return -1;
 	}
 	return n_loops;
+	
 }
 
 // C++ version
 // XS TODO return value
-
 int ACMediaLibrary::saveACLLibrary(std::string _path){
 #ifdef SAVE_LOOP_BIN
 	ofstream library_file (_path.c_str(), ios::binary);
@@ -483,38 +474,41 @@ int ACMediaLibrary::saveXMLLibrary(std::string _path){
 	// we save UNnormalized features
 	denormalizeFeatures();
 	
-	TiXmlDocument doc;  
-    TiXmlDeclaration * decl = new TiXmlDeclaration( "1.0", "", "" );  
-    doc.LinkEndChild( decl );  
+	TiXmlDocument MC_doc;  
+    TiXmlDeclaration* MC_decl = new TiXmlDeclaration( "1.0", "", "" );  
+    MC_doc.LinkEndChild( MC_decl );  
 	
-    TiXmlElement * title = new TiXmlElement( "MediaCycle" );  
-    doc.LinkEndChild( title );  
+    TiXmlElement* MC_e_root = new TiXmlElement( "MediaCycle" );  
+    MC_doc.LinkEndChild( MC_e_root );  
 	
- //   TiXmlText * text = new TiXmlText( "Header" );  
-//    title->LinkEndChild( text );  
-	
-    TiXmlElement * element2 = new TiXmlElement( "NumberOfMedia" );  
-    title->LinkEndChild( element2 );  
+	TiXmlElement* MC_e_medias = new TiXmlElement( "Medias" );  
+    MC_e_root->LinkEndChild( MC_e_medias );  
+
+	this->saveCoreXMLLibrary(MC_e_root, MC_e_medias);
+
+	// normalize features again
+	normalizeFeatures();
+	MC_doc.SaveFile( _path.c_str());
+}
+
+// no headers, just media information
+// can be called from MediaCycle's saveXML
+int ACMediaLibrary::saveCoreXMLLibrary( TiXmlElement* _MC_e_root, TiXmlElement* _MC_e_medias ){
+    TiXmlElement* MC_e_number_of_medias = new TiXmlElement( "NumberOfMedia" );  
+    _MC_e_root->LinkEndChild( MC_e_number_of_medias );  
 	int n_loops = this->getSize();
 	std::string s_loops;
 	std::stringstream tmp;
 	tmp << n_loops;
 	s_loops = tmp.str();
 	
-    TiXmlText * text2 = new TiXmlText( s_loops );  
-    element2->LinkEndChild( text2 );  
-	
-    TiXmlElement * element3 = new TiXmlElement( "Medias" );  
-    title->LinkEndChild( element3 );  
-	
+    TiXmlText* MC_t_nm = new TiXmlText( s_loops );  
+    MC_e_number_of_medias->LinkEndChild( MC_t_nm );  
+		
 	// XS TODO iterator
 	for(int i=0; i<n_loops; i++) {
-		media_library[i]->saveXML(element3);
+		media_library[i]->saveXML(_MC_e_medias);
 	}
-
-	// normalize features again
-	normalizeFeatures();
-	doc.SaveFile( _path.c_str());
 }
 
 //CF 31/05/2010 temporary MediaCycle Segmented Library (MCSL) for AudioGarden, adding a parentID for segments to the initial ACL, awaiting approval
@@ -540,70 +534,6 @@ int ACMediaLibrary::saveMCSLLibrary(std::string _path){
 	library_file.close();
 	normalizeFeatures();
 }
-
-/* SD 2010 sep discontinued
-int ACMediaLibrary::openLibrary(std::string _path, bool aInitLib){
-	// this does not re-initialize the media_library
-	// but appends new media to it.
-	// except if aInitLib is set to true
-	int ret, file_count=0;
-	
-	FILE *library_file = fopen(_path.c_str(),"r");
-	setlocale(LC_NUMERIC, "C");//correct problem with fscanf caused by Qt (cannot read floating point string without it)
-	//if the file exists
-	if (library_file) {
-		ACMedia* local_media;
-		// --TODO-- ???  how does it know which type of media ?
-		// have to be set up  at some point using setMediaType()
-		if (aInitLib) {
-			cleanLibrary();
-		}
-		//media_library.resize(0); //no reason to be here if no reset asked. resize to 0 when calling cleanLibrary()
-		do {
-			local_media = ACMediaFactory::create(media_type);
-			if (local_media != 0) {
-				ret = local_media->load(library_file);
-				if (ret) {
-					// problem if id is -1 (==default value) --> this corrects the problem (used temporarily in avlaughtercycle where all ids were -1
-					//if (local_media->getId() < 0)
-					//	local_media->setId(media_library.size());//this is not reliable if the library file lists a mix of audio files w/ and w/o an id. maybe we should set the id only here
-					//std::cout << "Media Library Size : " << this->getSize() << std::endl;//CF free the console
-					media_library.push_back(local_media);
-					file_count++;
-					
-				}
-			}
-			else {
-				std::cout<<"openLibrary : Wrong Media Type" <<std::endl;
-			}
-			
-		}
-		while (ret>0);
-		
-		fclose(library_file);
-	}
-	
-	return file_count;
-}
-*/
-
-/* void ACMediaLibrary::saveAsLibrary(string _path) {
-	
-	int n_loops = this->getSize();
-	
-	FILE *library_file = fopen(_path.c_str(),"w");
-	
-	// we save UNnormalized features
-	denormalizeFeatures();
-	for(int i=0; i<n_loops; i++) {
-		// --TODO-- ???  how does it know which type of media ?
-		// have to be set up  at some point using setMediaType()
-		media_library[i]->save(library_file);
-	}
-	fclose(library_file);
-	normalizeFeatures();
-}
- */
 
 int ACMediaLibrary::addMedia(ACMedia *aMedia) {
     // XS TODO remove media_type check
@@ -641,6 +571,16 @@ int ACMediaLibrary::deleteMedia(int i){
 		cerr << "<ACMediaLibrary::deleteMedia> index out of bounds: " << i << endl;
 		return -1;
 	}
+}
+
+int ACMediaLibrary::getMediaIndex(std::string media_file_name){
+	for (int i=0;i<this->getSize();i++) {
+		if (media_file_name==media_library[i]->getFileName()) {
+			return media_library[i]->getId();
+		}
+	}
+	return -1;
+	
 }
 
 std::string ACMediaLibrary::getThumbnailFileName(int id) {
@@ -706,7 +646,6 @@ void ACMediaLibrary::calculateStats() {
 				
 			}
 		}
-		std::cout << "Media " << i << std::endl;
 	}
 	
 	// before: divide by n --> biased variance estimator

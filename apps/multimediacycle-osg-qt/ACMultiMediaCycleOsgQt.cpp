@@ -55,12 +55,15 @@ void ACMultiMediaCycleOsgQt::mediacycleCallback(char* message) {
 }
 
 ACMultiMediaCycleOsgQt::ACMultiMediaCycleOsgQt(QWidget *parent) : QMainWindow(parent), 
- features_known(false), plugins_scanned(false),config_file("")
+ features_known(false), plugins_scanned(false)
 {
 	ui.setupUi(this); // first thing to do
 	this->media_type = MEDIA_TYPE_NONE;
 	this->browser_mode = AC_MODE_NONE;
 	this->media_cycle = 0;
+	this->config_file_xml = "";
+	this->project_directory = QApplication::applicationDirPath().append(QDir::separator()).toStdString();
+	
 	#if defined (SUPPORT_AUDIO)
 		this->audio_engine = 0;
 	#endif //defined (SUPPORT_AUDIO)
@@ -85,8 +88,7 @@ ACMultiMediaCycleOsgQt::ACMultiMediaCycleOsgQt(QWidget *parent) : QMainWindow(pa
 	aboutDialogFactory = new ACAboutDialogFactoryQt();
 	
 	// uses another window for settings = editing the config file
-	settingsDialog = new SettingsDialog(parent);
-	settingsDialog->setMediaCycleMainWindow(this);
+	settingsDialog = new SettingsDialog(this);
 	
 	// progress bar
 	//pb = new QProgressBar(statusBar());
@@ -95,12 +97,45 @@ ACMultiMediaCycleOsgQt::ACMultiMediaCycleOsgQt(QWidget *parent) : QMainWindow(pa
 	//	statusBar()->addPermanentWidget(pb);
 	
 	aboutDialog = 0;
-		
+	this->activateWindow();
 	this->show();
+	
+	// tries to read settings from previous run
+	// if it does not find any, use default (centered) geometry
 }
 
 ACMultiMediaCycleOsgQt::~ACMultiMediaCycleOsgQt(){
 	this->destroyMediaCycle();
+	delete settingsDialog;
+	delete aboutDialogFactory;
+	delete dockWidgetFactory;
+}
+
+void ACMultiMediaCycleOsgQt::configureSettings(){
+	if (this->readQSettings()){
+		QMessageBox msgBox;
+		msgBox.setText("Launching MediaCycle.");
+		msgBox.setInformativeText("Do you want to load your media settings from previous session ?");
+		msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+		msgBox.setDefaultButton(QMessageBox::No);
+		msgBox.setDetailedText ("GUI settings (window size, ...) are loaded automatically. Here you can load MediaCycle settings (media type, browser mode, ...).");
+		int ret = msgBox.exec();
+		switch (ret) {
+			case QMessageBox::Yes:
+				// config file normally in readSettings...
+				this->readXMLConfig(this->config_file_xml);
+				this->configureDockWidgets(this->media_type);
+				break;
+			case QMessageBox::No:
+				// then dock widgets will be configured afterwards (in updateLibrary)
+				break;
+			default:
+				// should never be reached
+				break;
+		}
+	}
+	else 
+		this->setDefaultQSettings();
 }
 
 // creates a MediaCycle object (containing the whole application)
@@ -210,33 +245,85 @@ void ACMultiMediaCycleOsgQt::on_actionSave_ACL_triggered(bool checked){
 
 // XS in theory one could select multiple XML files and concatenate them (not tested yet)
 void ACMultiMediaCycleOsgQt::on_actionLoad_XML_triggered(bool checked){
-	if (media_cycle == 0) {
-		cerr << "first define the type of application" << endl;
-		return;
-	}
-	
-	QString fileName;	
-	QFileDialog dialog(this,"Open XML Library File(s)");
-	dialog.setDefaultSuffix ("xml");
-	dialog.setNameFilter("Library Files (*.xml)");
-	dialog.setFileMode(QFileDialog::ExistingFiles); 
-	// changed to ExistingFiles for multiple file handling
-	
-	QStringList fileNames;
-	if (dialog.exec())
-		fileNames = dialog.selectedFiles();
-	
-	QStringList::Iterator file = fileNames.begin();
-	while(file != fileNames.end()) {
+	this->readXMLConfig();
+}
+
+void ACMultiMediaCycleOsgQt::readXMLConfig(string _filename){
+	if (_filename==""){
+		QString fileName;	
+		QFileDialog dialog(this,"Open XML Library File(s)");
+		dialog.setDefaultSuffix ("xml");
+		dialog.setNameFilter("Library Files (*.xml)");
+		dialog.setFileMode(QFileDialog::ExistingFile); 	// change to ExistingFiles for multiple file handling
+		QStringList fileNames;
+		if (dialog.exec())
+			fileNames = dialog.selectedFiles();
+		QStringList::Iterator file = fileNames.begin();
+		// only one file !
+		// while(file != fileNames.end()) {
 		fileName = *file;
-		std::cout << "Opening XML file: '" << fileName.toStdString() << "'" << std::endl;
+		_filename=fileName.toStdString();
 		
-		if (!(fileName.isEmpty())) {
-			media_cycle->importXMLLibrary(fileName.toStdString());
-			std::cout << "XML file imported" << std::endl;
-		}	
-		++file;
+		// std::cout << "Opening XML file: '" << fileName.toStdString() << "'" << std::endl;
+		
+//		if (!(fileName.isEmpty())) {
+//			media_cycle->importXMLLibrary(fileName.toStdString());
+//			std::cout << "XML file imported" << std::endl;
+//		}	
+		//++file;
 	}	
+	
+	// XS TODO add tests !!
+	std::cout << "Opening XML config file: '" << _filename << std::endl;
+
+	// 1) read header info
+	//TiXmlHandle rootHandle = this->readXMLConfigHeader(_filename);
+	if (_filename=="") return;
+	TiXmlDocument doc( _filename.c_str() );
+	try {
+		if (!doc.LoadFile( ))
+			throw runtime_error("error reading XML file");
+	} catch (const exception& e) {
+		cout << e.what( ) << "\n";
+		exit(1);
+    }	
+	
+	TiXmlHandle docHandle(&doc);
+	TiXmlHandle rootHandle = docHandle.FirstChildElement( "MediaCycle" );
+	
+	// XS TODO browser mode and media type as string instead of enum
+	TiXmlText* browserModeText=rootHandle.FirstChild( "BrowserMode" ).FirstChild().Text();
+	std::stringstream tmp;
+	// XS TODO if (browserModeText)
+	tmp << browserModeText->ValueStr();
+	int bm; // ACBrowserMode
+	tmp >> bm;
+	this->setBrowserMode(ACBrowserMode (bm));
+	
+	TiXmlText* mediaTypeText=rootHandle.FirstChild( "MediaType" ).FirstChild().Text();
+	std::stringstream tmp2;
+	tmp2 << mediaTypeText->ValueStr();
+	int mt; //ACMediaType
+	tmp2 >> mt;
+	this->setMediaType(ACMediaType(mt));	
+	
+	// XS TODO only creat if it did not exist yet -- otherwise change media type
+	// 2) create an instance of mediacycle
+	if (this->media_cycle){ 
+		this->media_cycle->changeMediaType(this->media_type);
+		this->media_cycle->changeBrowserMode(this->browser_mode);
+	}
+	else
+		createMediaCycle(this->media_type, this->browser_mode);
+
+	//this->configureDockWidgets(this->media_type);
+
+	// 3) read the meat of this instance
+	media_cycle->readXMLConfigFileCore(rootHandle);
+	media_cycle->readXMLConfigFilePlugins(rootHandle);
+
+	// XS ---- TEST ----
+	media_cycle->normalizeFeatures(1);
 	
 	// only after loading all XML files:
 	this->updateLibrary();
@@ -244,28 +331,74 @@ void ACMultiMediaCycleOsgQt::on_actionLoad_XML_triggered(bool checked){
 	media_cycle->storeNavigationState(); 
 	
 	// XS debug
-	media_cycle->dumpNavigationLevel();
-	media_cycle->dumpLoopNavigationLevels() ;
+	//media_cycle->dumpNavigationLevel();
+	//media_cycle->dumpLoopNavigationLevels() ;
 }
 
+// read in informationnecessary to create an instance of MediaCycle
+// i.e. browser mode, media type, ...
+//TiXmlHandle ACMultiMediaCycleOsgQt::readXMLConfigHeader(string _fname){
+//	// XS TODO: this is not great, it's the same code as in MediaCycle
+//	if (_fname=="") return 0;
+//	TiXmlDocument doc( _fname.c_str() );
+//	try {
+//		if (!doc.LoadFile( ))
+//			throw runtime_error("error reading XML file");
+//	} catch (const exception& e) {
+//		cout << e.what( ) << "\n";
+//		exit(1);
+//    }	
+//	
+//	TiXmlHandle docHandle(&doc);
+//	TiXmlHandle rootHandle = docHandle.FirstChildElement( "MediaCycle" );
+//	
+//	// XS TODO browser mode and media type as string instead of enum
+//	TiXmlText* browserModeText=rootHandle.FirstChild( "BrowserMode" ).FirstChild().Text();
+//	std::stringstream tmp;
+//	tmp << browserModeText->ValueStr();
+//	int bm; // ACBrowserMode
+//	tmp >> bm;
+//	this->setBrowserMode(ACBrowserMode (bm));
+//	
+//	TiXmlText* mediaTypeText=rootHandle.FirstChild( "MediaType" ).FirstChild().Text();
+//	std::stringstream tmp2;
+//	tmp2 << mediaTypeText->ValueStr();
+//	int mt; //ACMediaType
+//	tmp2 >> mt;
+//	this->setMediaType(ACMediaType(mt));
+//	return rootHandle;
+//}
+
 void ACMultiMediaCycleOsgQt::on_actionSave_XML_triggered(bool checked){
+	// XS TODO what is the use of checked ?
+	this->writeXMLConfig();
+}
+
+// this saves the XML file "as is" 
+// ex: the user quits when all features have'nt been computed yet
+// XS TODO make sure this is fine
+void ACMultiMediaCycleOsgQt::writeXMLConfig(string _filename){
 	if (media_cycle == 0) {
 		cerr << "first define the type of application" << endl;
 		return;
 	}
 	
-	QString fileName = QFileDialog::getSaveFileName(this, tr("Save as XML Library"),"",tr("MediaCycle XML Library (*.xml)"));
-	QFile file(fileName);
-	
-	if (!file.open(QIODevice::WriteOnly)) {
-		QMessageBox::warning(this,
-							 tr("File error"),
-							 tr("Failed to open\n%1").arg(fileName));
-	} 
 	else {
-		string acl_file = fileName.toStdString();
-		cout << "saving XML file: " << acl_file << endl;
-		media_cycle->saveXMLLibrary(acl_file);
+		if (_filename=="") {
+			QString fileName = QFileDialog::getSaveFileName(this, tr("Save Config as XML Library"),"",tr("MediaCycle XML Library (*.xml)"));
+			QFile file(fileName);
+			
+			if (!file.open(QIODevice::WriteOnly)) {
+				QMessageBox::warning(this,
+									 tr("File error"),
+									 tr("Failed to open\n%1").arg(fileName));
+			} 
+			else {
+				_filename = fileName.toStdString();
+				cout << "saving config in XML file: " << _filename << endl;
+				media_cycle->saveXMLConfigFile(_filename);
+			}			
+		}
 	}
 }
 
@@ -276,16 +409,17 @@ void ACMultiMediaCycleOsgQt::on_actionLoad_Media_Directory_triggered(bool checke
 	
 	if (! hasMediaCycle()) return; 
 
-	updatePluginDock();
+//	configurePluginDock();
 	
 	QString selectDir = QFileDialog::getExistingDirectory
 	(
-	 this, 
+	this, 
 	 tr("Open Directory"),
 	 "",
 	 QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks
 	 );
 	
+	if (selectDir=="") return; // e.g. the user pressed "cancel"
 	// check if the user wants segments
 	bool do_segments = false;
 	bool forward_order = true; // only make it false for AudioGarden where media have been presegmented and segments have special names
@@ -308,9 +442,11 @@ void ACMultiMediaCycleOsgQt::on_actionLoad_Media_Directory_triggered(bool checke
 	
 	directories.push_back((string)selectDir.toStdString());
 	
+	// non - threaded version
 	//int res = media_cycle->importDirectory(selectDir.toStdString(), recursive, forward_order, do_segments);
 	
 	media_cycle->importDirectoriesThreaded(directories, recursive, forward_order, do_segments);
+//	media_cycle->importDirectories(directories, recursive, forward_order, do_segments);
 
 	directories.empty();
 	
@@ -321,10 +457,13 @@ void ACMultiMediaCycleOsgQt::on_actionLoad_Media_Directory_triggered(bool checke
 	//media_cycle->setNeedsDisplay(true);
 	//ui.compositeOsgView->setFocus();
 	
-	//this->updateLibrary();
+	this->updateLibrary();
 	
 	// SD not working with threaded version
 	/*
+
+	
+	int res = media_cycle->importDirectory(selectDir.toStdString(), recursive, forward_order, do_segments, element3);
 	int warn_button = 0;
 	if (res > 0){
 		statusBar()->showMessage(tr("Directory Imported."), 2000);
@@ -352,7 +491,7 @@ void ACMultiMediaCycleOsgQt::on_actionLoad_Media_Files_triggered(bool checked){
 	
 	if (! hasMediaCycle()) return; 
 
-	updatePluginDock();
+	configurePluginDock();
 	
 	QString fileName;
 	QFileDialog dialog(this,"Open MediaCycle Media File(s)");
@@ -381,7 +520,6 @@ void ACMultiMediaCycleOsgQt::on_actionLoad_Media_Files_triggered(bool checked){
 		fileName = *file;
 		++file;
 		std::cout << "Opening: '" << fileName.toStdString() << "'" << std::endl;
-		//fileName = QFileDialog::getOpenFileName(this, "~", );
 		
 		if (!(fileName.isEmpty())) {
 			directories.push_back((string)fileName.toStdString());
@@ -425,84 +563,27 @@ void ACMultiMediaCycleOsgQt::on_actionEdit_Config_File_triggered(bool checked){
 }
 
 void ACMultiMediaCycleOsgQt::on_actionLoad_Config_File_triggered(bool checked){
-	QFileDialog dialog(this,"Open Config File");
-	dialog.setDefaultSuffix ("config");
-	dialog.setNameFilter("Config Files (*.config)");
-	dialog.setFileMode(QFileDialog::ExistingFile); 
-	
-	QStringList fileNames;
-	if (dialog.exec())
-		fileNames = dialog.selectedFiles();
-	QStringList::Iterator file = fileNames.begin();
-	QString fileName  = *file;
-	this->config_file = fileName.toStdString();
-	cout << "Loading config file from Setting Dialog GUI : " << this->config_file << endl;
-	ifstream load_config_file(this->config_file.c_str());
-	
-	string comment;
-		
-	string s_media_type;
-	std::getline(load_config_file, s_media_type, '|');
-	getline(load_config_file, comment);
-	this->media_type = ACMediaType (atoi(s_media_type.c_str()));
-	cout << "media type : " << this->media_type << endl;
-	
-	string s_browser_mode;
-	getline(load_config_file, s_browser_mode, '|');
-	getline(load_config_file, comment);
-	this->browser_mode = ACBrowserMode (atoi(s_browser_mode.c_str()));
-	cout << "browser mode : " << this->browser_mode << endl;
-	
-	this->createMediaCycle(this->media_type, this->browser_mode);
+// XS TODO : no !!! should just load the XML with features and everything.
 
-	// rstrip : strips the white spaces or tabs that can appear at the right of the name
-	string splugin, splugin_rstrip;
-	while(!std::getline(load_config_file, splugin, '|').eof()) {
-		cout << "plugin : " << splugin << endl;
-		splugin_rstrip= this->rstrip(splugin);
-		this->addPluginsLibrary(splugin_rstrip);
-		if (getline(load_config_file, comment).eof()) break;
-	}
+//	QFileDialog dialog(this,"Open Config File");
+//	dialog.setDefaultSuffix ("config");
+//	dialog.setNameFilter("Config Files (*.config)");
+//	dialog.setFileMode(QFileDialog::ExistingFile); 
+//	
+//	QStringList fileNames;
+//	if (dialog.exec())
+//		fileNames = dialog.selectedFiles();
+//	QStringList::Iterator file = fileNames.begin(); // only ONE file in fact !
+//	QString fileName  = *file;
+//	this->config_file_xml = fileName.toStdString();
+//	cout << "Loading config file from Setting Dialog GUI : " << this->config_file << endl;
+//	ifstream load_config_file(this->config_file.c_str());
 	
-	// XS TODO: add ACL file, ...
-	// structure the load/save with XML.
-	load_config_file.close();
-
 }
 
-//http://doc.qt.nokia.com/qt-maemo-4.6/mainwindows-application.html
-//Saving a file is very similar to loading one. Here, the QFile::Text flag ensures that on Windows, "\n" is converted into "\r\n" to conform to the Windows convension.
-bool ACMultiMediaCycleOsgQt::saveFile(const QString &fileName) {
-	QFile file(fileName);
-	if (!file.open(QFile::WriteOnly | QFile::Text)) {
-		QMessageBox::warning(this, tr("Application"),
-							 tr("Cannot write file %1:\n%2.")
-							 .arg(fileName)
-							 .arg(file.errorString()));
-		return false;
-	}
-	
-	
-	this->config_file = fileName.toStdString();
-	ofstream save_config_file (this->config_file.c_str());
-	
-	save_config_file << setw(20) << this->media_type   << " | type of media" << endl;
-	save_config_file << setw(20) << this->browser_mode << " | browsing mode" << endl;
-	
-	vector<string>::iterator iter;
-	for (iter = plugins_libraries.begin(); iter != plugins_libraries.end(); iter++) {
-		save_config_file << (*iter) << " | plugins library " << endl;
-	}
-	
-	statusBar()->showMessage(tr("File saved"), 2000);
-	return true;
-}
 
 void ACMultiMediaCycleOsgQt::on_actionSave_Config_File_triggered(bool checked){
-
-	QString _configFile = QFileDialog::getSaveFileName(this);
-	if (!_configFile.isEmpty())
-		saveFile(_configFile);
+	// XS TODO :  should just save the XML with features and everything.
 }
 
 bool ACMultiMediaCycleOsgQt::addControlDock(ACAbstractDockWidgetQt* dock)
@@ -534,6 +615,7 @@ bool ACMultiMediaCycleOsgQt::addControlDock(ACAbstractDockWidgetQt* dock)
 		}	
 	}
 	
+	//XS TODO check indices -- or use push_back
 	dockWidgets.resize(dockWidgets.size()+1);
 	lastDocksVisibilities.resize(lastDocksVisibilities.size()+1);
 	
@@ -648,40 +730,33 @@ void ACMultiMediaCycleOsgQt::updateLibrary(){
 	ui.compositeOsgView->prepareFromTimeline();
 	//browserOsgView->setPlaying(true);
 	media_cycle->setNeedsDisplay(true);
-	
-	// do not re-scan the directory for plugins once they have been loaded
-	if (!plugins_scanned)
-	{	
-		//CF ugly, use signals?
-		for (int d=0;d<dockWidgets.size();d++){
-			if (dockWidgets[d]->getClassName() == "ACBrowserControlsClustersNeighborsDockWidgetQt")
-				((ACBrowserControlsClustersNeighborsDockWidgetQt*)dockWidgets[d])->configureCheckBoxes();
-			if (dockWidgets[d]->getClassName() == "ACBrowserControlsClustersDockWidgetQt")
-				((ACBrowserControlsClustersDockWidgetQt*)dockWidgets[d])->configureCheckBoxes();
-		}
-	}	
-	
+
+	this->configurePluginDock();
+
 	ui.compositeOsgView->setFocus();
 }
 
-void ACMultiMediaCycleOsgQt::updatePluginDock() {
+void ACMultiMediaCycleOsgQt::configurePluginDock() {
 	// do not re-scan the directory for plugins once they have been loaded
 	if (!plugins_scanned)
 	{	
 		//CF ugly, use signals?
+		// XS TODO change this
 		for (int d=0;d<dockWidgets.size();d++){
 			if (dockWidgets[d]->getClassName() == "ACBrowserControlsClustersNeighborsDockWidgetQt")
 				((ACBrowserControlsClustersNeighborsDockWidgetQt*)dockWidgets[d])->configureCheckBoxes();
 			if (dockWidgets[d]->getClassName() == "ACBrowserControlsClustersDockWidgetQt")
 				((ACBrowserControlsClustersDockWidgetQt*)dockWidgets[d])->configureCheckBoxes();
 		}
-	}		
+	}
+	plugins_scanned = true;
 }
 	
 void ACMultiMediaCycleOsgQt::addPluginItem(QListWidgetItem *_item){
 	cout << "adding item : " << _item->text().toStdString() << endl;
 	QListWidgetItem * new_item = new QListWidgetItem(*_item);
 	//CF ugly, use signals?
+	// XS TODO change this
 	for (int d=0;d<dockWidgets.size();d++){
 		if (dockWidgets[d]->getClassName() == "ACBrowserControlsClustersNeighborsDockWidgetQt")
 			((ACBrowserControlsClustersNeighborsDockWidgetQt*)dockWidgets[d])->getFeaturesListWidget()->addItem(new_item);
@@ -732,12 +807,15 @@ void ACMultiMediaCycleOsgQt::synchronizeFeaturesWeights(){
 	}
 }	
 
-// load default ("vintage") config for different media.
-// 1) creates media_cycle (destroying any previous settings)
-// 2) loads default features plugins
-// XS assumes for the moment that viewing mmode is clusters 
-void ACMultiMediaCycleOsgQt::loadDefaultConfig(ACMediaType _media_type, ACBrowserMode _browser_mode){
+// XS TODO this is a temporary solution -- very ugly
+// XS TODO change dockwidgets class !!
+void ACMultiMediaCycleOsgQt::configureDockWidgets(ACMediaType _media_type){
+//	int index_media = (int)_media_type + 1; // XS change this -- will not work if items in different order!!!
 	for (int d=0;d<dockWidgets.size();d++){
+//		if (dockWidgets[d]->getClassName() == "ACMediaConfigDockWidgetQt"){
+//			((ACMediaConfigDockWidgetQt*)dockWidgets[d])->getComboDefaultSettings()->setCurrentIndex(index_media);
+//		}
+
 		if (dockWidgets[d]->getMediaType() == MEDIA_TYPE_ALL || dockWidgets[d]->getMediaType() == _media_type){
 			if (this->dockWidgetArea(dockWidgets[d]) == Qt::NoDockWidgetArea){
 				this->addDockWidget(Qt::LeftDockWidgetArea,dockWidgets[d]);
@@ -754,6 +832,14 @@ void ACMultiMediaCycleOsgQt::loadDefaultConfig(ACMediaType _media_type, ACBrowse
 			lastDocksVisibilities[d]=0;
 		}	
 	}
+}
+
+// load default ("vintage") config for different media.
+// 1) creates media_cycle (destroying any previous settings)
+// 2) loads default features plugins
+// XS assumes for the moment that viewing mmode is clusters 
+void ACMultiMediaCycleOsgQt::loadDefaultConfig(ACMediaType _media_type, ACBrowserMode _browser_mode){
+	this->configureDockWidgets(_media_type);
 
 	string smedia = "none";
 	switch (_media_type) {
@@ -789,10 +875,13 @@ void ACMultiMediaCycleOsgQt::loadDefaultConfig(ACMediaType _media_type, ACBrowse
 		cerr <<"need to define media type"<< endl;
 		return;
 	}*/
-
 	
-	if (media_cycle) destroyMediaCycle();
-	createMediaCycle(_media_type, _browser_mode);
+	if (this->media_cycle){ 
+		this->media_cycle->changeMediaType(_media_type);
+		this->media_cycle->changeBrowserMode(_browser_mode);
+	}
+	else
+		createMediaCycle(_media_type, _browser_mode);
 
 	// -- media-specific features plugin + generic segmentation and visualisation plugins--
 	std::string f_plugin, s_plugin, v_plugin;
@@ -869,11 +958,9 @@ void ACMultiMediaCycleOsgQt::on_actionClean_triggered(bool checked) {
 	//was cleanCheckBoxes()
 	for (int d=0;d<dockWidgets.size();d++){
 		if (dockWidgets[d]->getClassName() == "ACBrowserControlsClustersNeighborsDockWidgetQt") {
-			// XS TODO: does this clear the list ?
 			((ACBrowserControlsClustersNeighborsDockWidgetQt*)dockWidgets[d])->cleanCheckBoxes();
 		}
 		if (dockWidgets[d]->getClassName() == "ACBrowserControlsClustersDockWidgetQt") {
-			// XS TODO: does this clear the list ?
 			((ACBrowserControlsClustersDockWidgetQt*)dockWidgets[d])->cleanCheckBoxes();
 		}
 	}	
@@ -898,4 +985,84 @@ bool ACMultiMediaCycleOsgQt::hasMediaCycle(){
 	return true;
 }
 
+void ACMultiMediaCycleOsgQt::closeEvent(QCloseEvent *event) {
+	// XS - SD TOOD : stop threads
+	this->writeQSettings();
+	QMessageBox msgBox;
+	msgBox.setText("Quitting Application.");
+	msgBox.setInformativeText("Do you want to save your media settings and features ?");
+	msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+	msgBox.setDefaultButton(QMessageBox::Save);
+	msgBox.setDetailedText ("GUI settings (window size, ...) are saved automatically. Here you can save MediaCycle settings (media type, browser mode, ...).");
+	int ret = msgBox.exec();
+	bool really_quit = true;
+	switch (ret) {
+		case QMessageBox::Save:
+			this->writeXMLConfig(this->config_file_xml);
+			break;
+		case QMessageBox::Discard:
+			break;
+		case QMessageBox::Cancel:
+			really_quit = false;
+			break;
+		default:
+			// should never be reached
+			break;
+	}
+	if (really_quit) {
+		QMainWindow::closeEvent(event);		
+		qDebug("closed application window properly");
+	}
+	else {
+		event->ignore();
+		qDebug("Continuing Application");
+	}
+}
 
+// platform-independent way of reading settings
+// ("numediart", "MediaCycle") must be the same as in writeSettings
+// The second argument to QSettings::value() is optional and specifies a default value for the setting if there exists none.
+bool ACMultiMediaCycleOsgQt::readQSettings() {
+	QSettings settings("numediart", "MediaCycle");
+	QPoint pos = settings.value("pos").toPoint(); //, QPoint(200, 200)).toPoint();
+	QSize size = settings.value("size").toSize(); //, QSize(400, 400)).toSize();
+	QString scf = settings.value("configFile").toString(); 
+	bool has_settings = true;
+	if (size.isEmpty()) { // e.g. we did settings.clear() or run the app for the 1st time
+		has_settings = false;
+	}
+	else{
+		this->resize(size);
+		this->move(pos);	
+		this->config_file_xml = scf.toStdString();
+//		this->restoreState(settings.value("windowState").toByteArray());
+		has_settings = true;
+	}
+	return has_settings;
+}
+
+// platform-independent way of saving settings
+// ("numediart", "MediaCycle") must be the same as in readSettings
+bool ACMultiMediaCycleOsgQt::writeQSettings() {
+	//QSettings settings(QApplication::applicationDirPath().append(QDir::separator()).append("settings.ini"),
+	//				   QSettings::NativeFormat);
+	QSettings settings("numediart", "MediaCycle");
+	settings.setValue("pos", pos());
+	settings.setValue("size", size());
+	//QString scf = QString::fromStdString(this->config_file_xml);
+	settings.setValue("configFile", QVariant(QString::fromStdString(this->config_file_xml)));
+//	settings.setValue("windowState", saveState());
+}
+
+void ACMultiMediaCycleOsgQt::clearQSettings() {
+	QSettings settings("numediart", "MediaCycle");
+	settings.clear();
+}
+void ACMultiMediaCycleOsgQt::setDefaultQSettings() {	
+	this->setGeometry( QStyle::alignedRect(
+										   Qt::LeftToRight,
+										   Qt::AlignCenter,
+										   this->size(),
+										   qApp->desktop()->availableGeometry()
+										   ));
+}

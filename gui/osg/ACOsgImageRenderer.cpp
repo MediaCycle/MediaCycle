@@ -71,6 +71,7 @@ ACOsgImageRenderer::ACOsgImageRenderer() {
 }
 
 ACOsgImageRenderer::~ACOsgImageRenderer() {
+	// smart pointers (ref_ptr) will take care of garbage collection
 //	delete colors;
 //	delete colors2;
 //	delete colors3;

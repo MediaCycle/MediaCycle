@@ -45,6 +45,8 @@
 #include <sys/stat.h>
 #include <time.h>
 
+#include "tinyxml.h"
+
 enum MCActionType {
 	MC_ACTION_ADDFILE,
 	MC_ACTION_GETKNN,
@@ -63,8 +65,6 @@ public:
     virtual ~MediaCycle();	
 	void clean();
 
-	bool changeMediaType(ACMediaType aMediaType);
-
 	// == TCP
     int startTcpServer(int port=12345, int max_connections=5);
     int startTcpServer(int port, int max_connections,ACNetworkSocketServerCallback aCallback);
@@ -78,7 +78,7 @@ public:
 	int importDirectories();
 	int importDirectories(std::vector<std::string> paths, int recursive, bool forward_order=true, bool doSegment=false);
 	int importDirectoriesThreaded(std::vector<std::string> paths, int recursive, bool forward_order=true, bool doSegment=false);
-    int importDirectory(std::string path, int recursive, bool forward_order=true, bool doSegment=false);
+    int importDirectory(std::string path, int recursive, bool forward_order=true, bool doSegment=false, TiXmlElement* _medias = 0);
 	int setPath(std::string path);
 	int importACLLibrary(std::string path);
 	int importXMLLibrary(std::string path);
@@ -106,6 +106,7 @@ public:
 	void* hasBrowser();
 	ACBrowserMode getBrowserMode();
 	void setBrowserMode(ACBrowserMode _mode);
+	bool changeBrowserMode(ACBrowserMode _mode);
 	void cleanBrowser() { mediaBrowser->clean(); }
 
 	// Plugins
@@ -129,6 +130,9 @@ public:
 	std::string getMediaFileName(int i);
 	ACMediaType getMediaType(int i);
 	ACMediaType getMediaType() {return mediaLibrary->getMediaType();}
+	void setMediaType(ACMediaType _mt);
+	bool changeMediaType(ACMediaType aMediaType);
+	
 	std::vector<std::string> getExtensionsFromMediaType(ACMediaType media_type){return mediaFactory->getExtensionsFromMediaType(media_type);}
 	int getThumbnailWidth(int i);
 	int getThumbnailHeight(int i);
@@ -204,8 +208,15 @@ public:
 
 	// == NEW, replaces updateClusters and updateNeighborhoods
 	void updateDisplay(bool animate);
-	void readConfigFile(std::string fname);
-//	void dumpConfigFile();
+	
+	// == config (in XMl !!)
+	TiXmlHandle readXMLConfigFileHeader(std::string _fname="");
+	int readXMLConfigFileCore(TiXmlHandle rootHandle);
+	int readXMLConfigFilePlugins(TiXmlHandle rootHandle);
+
+	int readXMLConfigFile(std::string _fname="");
+	void saveXMLConfigFile(std::string _fname="");
+	void setConfigFile(std::string _fname){config_file_xml = _fname;}
 
 	// == User log
 	void cleanUserLog();
@@ -230,8 +241,11 @@ private:
 	ACMediaBrowser *mediaBrowser;
 	ACNetworkSocketServer *networkSocket;
 	ACPluginManager *pluginManager;
-	std::string config_file;
 	
+	// settings and features XML
+	std::string config_file_xml;
+	TiXmlElement* MC_e_medias; // xml node to hook up medias  
+
 	int prevLibrarySize;
 	
 	bool mNeedsDisplay;

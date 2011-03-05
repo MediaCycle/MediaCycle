@@ -1,7 +1,7 @@
 /**
  * @brief AGSynthesis.cpp
- * @author Christian Frisson
- * @date 24/02/2011
+ * @author Xavier Siebert
+ * @date 05/03/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -329,8 +329,8 @@ mat AGSynthesis::extractDescMatrix(ACMediaLibrary* lib, vector<string> featureLi
 mat AGSynthesis::extractDescMatrix(ACMediaLibrary* lib, string featureName, vector<long> mediaIds){
   vector<ACMedia*> loops = lib->getAllMedia();
   int nbMedia = loops.size(); 
-	int featDim;
-	int totalDim = 0;
+//	int featDim;
+//	int totalDim = 0;
 	int featureId = 0;
 	int featureSize = 0;
 

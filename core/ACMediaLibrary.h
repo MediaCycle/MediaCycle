@@ -44,6 +44,7 @@
 #include "ACMedia.h"
 #include "ACMediaFactory.h"
 #include "ACPluginManager.h"
+#include "tinyxml.h"
 
 #include "boost/filesystem.hpp"
 
@@ -78,7 +79,7 @@ public:
 	int addMedia(ACMedia *aMedia);
 	ACMedia* getMedia(int i);
 	int deleteMedia(int i);
-	
+	int getMediaIndex(std::string media_file_name);
 	std::string getThumbnailFileName(int i);
 
 	long getSynthesisID(){return synthesisID;};
@@ -91,12 +92,10 @@ public:
 	std::vector< std::vector<double> > getMeanFeatures() {return mean_features;};
 	std::vector< std::vector<double> > getStdevFeatures() {return stdev_features;};
 	
-	int importDirectory(std::string _path, int recursive,  ACPluginManager *acpl=0, bool forward_order=true, bool doSegment=false, bool _save_timed_feat=false);
-	int importFile(std::string _filename, ACPluginManager *acpl=0, bool doSegment=false, bool _save_timed_feat = false);
+	int importDirectory(std::string _path, int recursive,  ACPluginManager *acpl=0, bool forward_order=true, bool doSegment=false, bool _save_timed_feat=false, TiXmlElement* _medias = 0);
+	int importFile(std::string _filename, ACPluginManager *acpl=0, bool doSegment=false, bool _save_timed_feat = false, TiXmlElement* _medias = 0);
 
-	//int openLibrary(std::string _path, bool aInitLib=false); // SD 2010 sep discontinued
-//	void saveAsLibrary(std::string _path);
-	// C++ versions
+	// I/O (C++ version; plain C version discontinued sep 2010)
 	int setPath(std::string path);
 	std::string getPath() { return media_path; };
 	//int parseACLLibrary(std::string _path, bool aInitLib=false);
@@ -107,13 +106,12 @@ public:
 	int saveMCSLLibrary(std::string _path);//CF 31/05/2010 temporary MediaCycle Segmented Library (MCSL) for AudioGarden, adding a parentID for segments to the initial ACL, awaiting approval
 	
 	int openXMLLibrary(std::string _path, bool aInitLib=false);
+	int openCoreXMLLibrary(TiXmlHandle _rootHandle);
 	int saveXMLLibrary(std::string _path);
+	int saveCoreXMLLibrary( TiXmlElement* _MC_e_root, TiXmlElement* _MC_e_medias);
 
 	//XS special for Thomas Israel
 	void saveSorted(std::string ouput_file);	
-
-	// XS TODO: add pthreads
-	//	void* p_importSingleFile(void *arg);
 	
 	int scanDirectories(std::vector<std::string> _path, int _recursive, std::vector<std::string>& filenames);
 	

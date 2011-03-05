@@ -69,8 +69,9 @@ MediaCycle::MediaCycle(ACMediaType aMediaType, string local_directory, string li
 	
 	this->pluginManager = new ACPluginManager();
 	
-	this->config_file = "";
-	
+	this->config_file_xml = "";
+	this->MC_e_medias = new TiXmlElement("Medias");
+		
 	this->prevLibrarySize = 0;
 }
 
@@ -89,6 +90,10 @@ MediaCycle::~MediaCycle() {
 	delete this->pluginManager;
 	this->pluginManager = 0;
     stopTcpServer(); // will delete this->networkSocket;
+	
+	// XS TODO ?  automatically save features and session in config_file_xml
+	//delete MC_e_medias;
+	MC_e_medias=0;
 }
 
 void MediaCycle::clean(){
@@ -96,7 +101,7 @@ void MediaCycle::clean(){
 	this->forwarddown = 0;
 	this->local_directory = "";
 	this->libname = "";
-	this->config_file = "";
+	this->config_file_xml = "";
 
 	this->prevLibrarySize = 0;
 	this->mNeedsDisplay = false;
@@ -112,11 +117,6 @@ void MediaCycle::clean(){
 	this->mediaBrowser->clean();
 	this->pluginManager->clean();
 }
-
-bool MediaCycle::changeMediaType(ACMediaType aMediaType)
-{
-	return this->mediaLibrary->changeMediaType(aMediaType);
-}	
 
 // == TCP
 static void tcp_callback(char *buffer, int l, char **buffer_send, int *l_send, void *userData)
@@ -266,12 +266,10 @@ int MediaCycle::processTcpMessage(char* buffer, int l, char **buffer_send, int *
 	return 0;
 }
 
-// == Callback - SD to be replaced by OSC/UDP communication
-
-// == Media Library
+// == Callback - SD to be replaced by OSC/UDP communication 
+// (XS or Observer Pattern...)
 
 void *threadImport(void *import_thread_arg) {
-	
 	((MediaCycle*)import_thread_arg)->importDirectories();
 }
 
@@ -279,6 +277,9 @@ int MediaCycle::setCallback(ACMediaCycleCallback mediacycle_callback, void* user
 	this->mediacycle_callback = mediacycle_callback;
 	this->mediacycle_callback_data = user_data;
 }
+
+// == Media Library
+
 
 // XS TODO return value
 int MediaCycle::importDirectoriesThreaded(vector<string> directories, int recursive, bool forward_order, bool doSegment) {
@@ -296,14 +297,12 @@ int MediaCycle::importDirectoriesThreaded(vector<string> directories, int recurs
 }
 
 int MediaCycle::importDirectories() {
-	
 	return importDirectories(import_directories, import_recursive, import_forward_order, import_doSegment);
 }
 
 // XS TODO return value
 
 int MediaCycle::importDirectories(vector<string> directories, int recursive, bool forward_order, bool doSegment) {
-
 	int ok = 0;
 	
 	mediacycle_callback("loaddirstart",mediacycle_callback_data);
@@ -336,7 +335,7 @@ int MediaCycle::importDirectories(vector<string> directories, int recursive, boo
 	
 	for (i=0;i<n;i++) {
 		
-		ok += mediaLibrary->importFile(filenames[i], this->pluginManager, doSegment);
+		ok += mediaLibrary->importFile(filenames[i], this->pluginManager, doSegment, doSegment, MC_e_medias);
 		
 		needsNormalizeAndCluster = 0;
 		if ( (mediaLibrary->getSize() >= int(prevLibrarySizeMultiplier * prevLibrarySize))
@@ -350,15 +349,11 @@ int MediaCycle::importDirectories(vector<string> directories, int recursive, boo
 		normalizeFeatures(needsNormalizeAndCluster); // actually just calls mediaLibrary->normalizeFeatures();
 		
 		libraryContentChanged(needsNormalizeAndCluster); // actually just calls mediaBrowser->libraryContentChanged();
-		
-
 	}
 		
 	t2 = getTime();
 	
 	//printf("TTT - %f\n",float(t2-t1));
-	
-		
 	//}
 	
 	filenames.empty();
@@ -366,18 +361,17 @@ int MediaCycle::importDirectories(vector<string> directories, int recursive, boo
 	mediacycle_callback("loaddirfinish",mediacycle_callback_data);
 
 	return ok;
-	
 	//[self updatedLibrary];
 }
 
-int MediaCycle::importDirectory(string path, int recursive, bool forward_order, bool doSegment) {
+int MediaCycle::importDirectory(string path, int recursive, bool forward_order, bool doSegment,TiXmlElement* _medias) {
 // XS import = import + some processing 
 	cout << "MediaCycle: importing directory: " << path << endl;	
 	int ok = 0;
 	if (this->pluginManager == 0){
 		cout << "no analysis plugins were loaded. you will need to load a plugin to use the application." << endl;
 	}
-	ok = this->mediaLibrary->importDirectory(path, recursive, this->pluginManager, forward_order, doSegment);
+	ok = this->mediaLibrary->importDirectory(path, recursive, this->pluginManager, forward_order, doSegment, _medias);
 	// XS normalizing automatically is a problem, for example if we load a bunch of files instead of a directory,
 	//    it should not normalize after each file.
 	// XS TODO ? if (ok>=1) this->mediaLibrary->normalizeFeatures();
@@ -475,6 +469,13 @@ void* MediaCycle::hasBrowser() { return mediaBrowser; }
 ACBrowserMode MediaCycle::getBrowserMode() {return mediaBrowser->getMode();}
 void MediaCycle::setBrowserMode(ACBrowserMode _mode) {mediaBrowser->setMode(_mode);}
 
+bool MediaCycle::changeBrowserMode(ACBrowserMode _mode){
+// XS TODO : this is temporary
+// must find a good way to change browsing mode, this switch is clumsy
+	this->mediaBrowser->switchMode(_mode);
+	return true;
+};
+
 // Plugins
 int MediaCycle::addPluginLibrary(string aPluginPath) {
     return this->pluginManager->add(aPluginPath);
@@ -541,6 +542,21 @@ void MediaCycle::dumpPluginsList(){this->pluginManager->dump();}
 ACMediaNode& MediaCycle::getMediaNode(int i) { return (mediaBrowser->getMediaNode(i)); } 
 string MediaCycle::getMediaFileName(int i) { return mediaLibrary->getMedia(i)->getFileName(); }
 ACMediaType MediaCycle::getMediaType(int i) { return mediaLibrary->getMedia(i)->getType(); }
+void MediaCycle::setMediaType(ACMediaType mt) {mediaLibrary->setMediaType(mt); }
+bool MediaCycle::changeMediaType(ACMediaType aMediaType) {
+	bool changeMe = true ;
+	if (aMediaType == this->getMediaType()) 
+		// nothing to change
+		changeMe = false;
+	else{
+		this->clean();
+		this->mediaLibrary->changeMediaType(aMediaType); // XS TODO check
+		this->setMediaType(aMediaType);
+	}
+	return changeMe;
+}	
+
+
 int MediaCycle::getThumbnailWidth(int i) { return mediaLibrary->getMedia(i)->getThumbnailWidth(); }
 int MediaCycle::getThumbnailHeight(int i) { return mediaLibrary->getMedia(i)->getThumbnailHeight(); }
 int MediaCycle::getWidth(int i) { return mediaLibrary->getMedia(i)->getWidth(); }
@@ -668,42 +684,148 @@ void MediaCycle::hoverCallback(float xx, float yy) {
 		mediaBrowser->setHoverLoop(-1, xx, yy);		
 }
 
-
 // == NEW
 void MediaCycle::updateDisplay(bool _animate) { mediaBrowser->updateDisplay(_animate);}
 
-void MediaCycle::readConfigFile(string _fname) {
-	ifstream library_file;
-	library_file.open(_fname.c_str());
-	if (!library_file.good()){
-		cerr << "<MediaCycle::readConfigFile> : bad config file" << endl;
-	}
-	
-	int aMediaType;
-	library_file >> aMediaType; // ex: MEDIA_TYPE_IMAGE  // type of media
-	
-	cout << aMediaType << endl;
-	
-	int aBrowserMode;
-	library_file >> aBrowserMode; // ex: AC_MODE_CLUSTERS // navigation mode
-	cout << aBrowserMode << endl;
+TiXmlHandle MediaCycle::readXMLConfigFileHeader(string _fname) {
+	if (_fname=="") return 0;
+	TiXmlDocument doc( _fname.c_str() );
+	try {
+		if (!doc.LoadFile( ))
+			throw runtime_error("error reading XML file");
+	} catch (const exception& e) {
+		cout << e.what( ) << "\n";
+		exit(1);
+		//return EXIT_FAILURE;
+    }	
 
-	string features_plugin_directory; 
-	library_file >> features_plugin_directory;  //ex:  /Users/xavier/development/Fall09/ticore-app/Applications/Numediart/MediaCycle/src/Builds/darwin-xcode/plugins/image/Debug/mc_image.dylib   // directory with plugins
-	cout << features_plugin_directory << endl;
+	TiXmlHandle docHandle(&doc);
+	TiXmlHandle rootHandle = docHandle.FirstChildElement( "MediaCycle" );
+	
+	// XS TODO browser mode and media type as string instead of enum
+	TiXmlText* browserModeText=rootHandle.FirstChild( "BrowserMode" ).FirstChild().Text();
+	std::stringstream tmp;
+	tmp << browserModeText->ValueStr();
+	int bm; // ACBrowserMode
+	tmp >> bm;
+	this->setBrowserMode(ACBrowserMode (bm));
+	
+	TiXmlText* mediaTypeText=rootHandle.FirstChild( "MediaType" ).FirstChild().Text();
+	std::stringstream tmp2;
+	tmp2 << mediaTypeText->ValueStr();
+	int mt; //ACMediaType
+	tmp2 >> mt;
+	this->setMediaType(ACMediaType(mt));	
+	return rootHandle;
+}
 
-	int n_active_features; // ex:	3 // number of sliders
-	library_file >> n_active_features;
-	cout << n_active_features << endl;
+// XS TODO return value, tests
+int MediaCycle::readXMLConfigFileCore(TiXmlHandle _rootHandle) {
+	this->mediaLibrary->openCoreXMLLibrary(_rootHandle);
+}
 
-	vector<string> v_feat;
-	for (int i=0; i<n_active_features; i++) {
-		string tmp;
-		library_file >> tmp; //ex: ACImageColorMomentsPlugin // plugins for 1st sliders
-		v_feat.push_back(tmp);
-		cout << tmp << endl;
+// XS TODO return value, tests
+int MediaCycle::readXMLConfigFilePlugins(TiXmlHandle _rootHandle) {
+	if (!this->pluginManager) this->pluginManager = new ACPluginManager();
+	
+	TiXmlElement* MC_e_features_plugin_manager = _rootHandle.FirstChild("PluginsManager").ToElement();
+	int nb_plugins_lib=0;
+	MC_e_features_plugin_manager->QueryIntAttribute("NumberOfPluginsLibraries", &nb_plugins_lib); 
+	
+	TiXmlElement* pluginLibraryNode=MC_e_features_plugin_manager->FirstChild()->ToElement();
+	for( pluginLibraryNode; pluginLibraryNode; pluginLibraryNode=pluginLibraryNode->NextSiblingElement()) {
+		string libraryName = pluginLibraryNode->Attribute("LibraryPath");
+		int lib_size=0;
+		pluginLibraryNode->QueryIntAttribute("NumberOfPlugins", &lib_size); 
+		this->pluginManager->add(libraryName);
+		
+		//		for (int i=0;i<pluginManager->getSize();i++) {
+		//			for (int j=0;j<pluginManager->getPluginLibrary(i)->getSize();j++) {
+		//				
+		//				if (pluginManager->getPluginLibrary(i)->getPlugin(j)->getMediaType() == this->getMediaType()
+		//					&& pluginManager->getPluginLibrary(i)->getPlugin(j)->getPluginType() == PLUGIN_TYPE_FEATURES) {
+		//					TiXmlElement* MC_e_features_plugin = new TiXmlElement( "FeaturesPlugin" );  
+		//					MC_e_features_plugin_manager->LinkEndChild( MC_e_features_plugin );  
+		//					std::stringstream tmp_p;
+		//					tmp_p << pluginManager->getPluginLibrary(i)->getPlugin(j)->getName() ;
+		//					TiXmlText* MC_t_pm = new TiXmlText( tmp_p.str() );  
+		//					MC_e_features_plugin->LinkEndChild( MC_t_pm );  
+		//				}
+		//			}
+		//		}
+		//		
 	}
 }
+
+// XS TODO return value, tests
+int MediaCycle::readXMLConfigFile(string _fname) {
+	TiXmlHandle rootHandle = readXMLConfigFileHeader (_fname);
+	this->readXMLConfigFileCore (rootHandle);
+}
+
+// XS TODO check if features normalized ?
+// XS TODO what else to put in the config ?
+// XS TODO separate in header/core/plugins ?
+void MediaCycle::saveXMLConfigFile(string _fname) {		
+	// or set it to config_file_xml ?
+	TiXmlDocument MC_doc;
+    TiXmlDeclaration* MC_decl = new TiXmlDeclaration( "1.0", "", "" );  
+    MC_doc.LinkEndChild( MC_decl );  
+	
+    TiXmlElement* MC_e_root = new TiXmlElement( "MediaCycle" );  
+    MC_doc.LinkEndChild( MC_e_root );  
+	
+	// "header"
+	TiXmlElement* MC_e_browser_mode = new TiXmlElement( "BrowserMode" );  
+    MC_e_root->LinkEndChild( MC_e_browser_mode );  
+	// XS  TODO get it as text e.g. this->getBrowserModeAsString()
+	std::stringstream tmp_bm;
+	tmp_bm << this->getBrowserMode();
+	TiXmlText* MC_t_bm = new TiXmlText( tmp_bm.str() );  
+    MC_e_browser_mode->LinkEndChild( MC_t_bm );  
+	
+	TiXmlElement* MC_e_media_type = new TiXmlElement( "MediaType" );  
+    MC_e_root->LinkEndChild( MC_e_media_type );  
+	// XS  TODO get it as text e.g. this->getMediaTypeAsString()
+	std::stringstream tmp_mt;
+	tmp_mt << this->getMediaType();
+	TiXmlText* MC_t_mt = new TiXmlText( tmp_mt.str() );  
+    MC_e_media_type->LinkEndChild( MC_t_mt );  
+	
+	// "medias and features"
+	// XS TODO: will the number of media be correct ?
+	this->mediaLibrary->saveCoreXMLLibrary(MC_e_root, MC_e_medias);
+	MC_e_root->LinkEndChild( MC_e_medias );  
+
+	// "plugins"
+	// XS TODO put this in a method getPluginsNames(blabla)
+	if (pluginManager) {
+		TiXmlElement* MC_e_features_plugin_manager = new TiXmlElement( "PluginsManager" );  
+		MC_e_root->LinkEndChild( MC_e_features_plugin_manager );  
+		int n_librarires = pluginManager->getSize();
+		MC_e_features_plugin_manager->SetAttribute("NumberOfPluginsLibraries", n_librarires);
+		for (int i=0; i<n_librarires; i++) {
+			TiXmlElement* MC_e_features_plugin_library = new TiXmlElement( "PluginsLibrary" );  
+			MC_e_features_plugin_manager->LinkEndChild( MC_e_features_plugin_library );
+			int n_plugins = pluginManager->getPluginLibrary(i)->getSize();
+			MC_e_features_plugin_library->SetAttribute("NumberOfPlugins", n_plugins);
+			MC_e_features_plugin_library->SetAttribute("LibraryPath", pluginManager->getPluginLibrary(i)->getLibraryPath());
+			for (int j=0; j<n_plugins; j++) {	
+				TiXmlElement* MC_e_features_plugin = new TiXmlElement( "FeaturesPlugin" );  
+				MC_e_features_plugin_library->LinkEndChild( MC_e_features_plugin );  
+				std::stringstream tmp_p;
+				tmp_p << pluginManager->getPluginLibrary(i)->getPlugin(j)->getName() ;
+				TiXmlText* MC_t_pm = new TiXmlText( tmp_p.str() );  
+				MC_e_features_plugin->LinkEndChild( MC_t_pm );  
+			}
+		}
+	}
+	
+	MC_doc.SaveFile(_fname.c_str());
+	cout << "saved XML config : " << _fname << endl;
+
+}
+
 
 // == user log
 // XS 030211 deprecated; applications should call cleanBrowser()

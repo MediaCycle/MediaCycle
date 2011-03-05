@@ -1390,10 +1390,6 @@ void ACVideoAnalysis::computeGlobalPixelSpeed() {
 	for(unsigned int i = 0; i < nframes-1; i++){ 
 		cvConvert (tmp_frame, previous_frame);
 		tmp_frame = this->getNextFrame();
-		//
-		int toto = cvGetCaptureProperty(capture, CV_CAP_PROP_POS_FRAMES); 	
-		cout << toto << endl;
-		//
 		cvConvert (tmp_frame, frame);
 		cvAbsDiff (frame, previous_frame, diff_frames);
 		sum_diff_frames = cvSum (diff_frames);
@@ -1492,7 +1488,9 @@ void ACVideoAnalysis::computeGlobalPixelsSpeed(){
 			frame_diff += sum_diff_frames.val[j];
 		}
 		frame_diff = frame_diff / (4*width*height);
+#ifdef VERBOSE
 		cout << "frame " << ifram << " : diff = " << frame_diff << endl;
+#endif //VERBOSE
 
 	}
 	//cvReleaseImage (&current_frame); // non, sinon double free !

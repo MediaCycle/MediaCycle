@@ -37,7 +37,6 @@
 
 #include <QDialog>
 #include <QtGui>
-#include <QDomDocument>
 
 #include "pluginsTreeItem.h"
 #include "pluginsTreeModel.h"
@@ -60,37 +59,33 @@ class SettingsDialog : public QMainWindow, private Ui::SettingsDialog
     Q_OBJECT
 
 public:
-    SettingsDialog(QWidget *parent = 0);
+    SettingsDialog(ACMultiMediaCycleOsgQt* _mc);
 	virtual ~SettingsDialog();
 	void setMediaCycleMainWindow(ACMultiMediaCycleOsgQt* _mc); 
 	void setMediaCycle(MediaCycle* _mc);
 	bool setMediaType(std::string _mt);
+	
+	// Close Event define what to do when window is closed
+	void closeEvent(QCloseEvent *event);
+
 private:
-	bool setXMLMediaType(QString _qmt);
-	bool setXMLBrowserMode(QString _qbm);
-	void addPluginsFromLibrary(QString _fileName);
-//XS TODO : features + viz
-	//bool addXMLPlugin();
+	void addPluginsFromLibrary(QString _fileName);	
+	void readSettings();
+	void writeSettings();
+	void applyCurrentSettings();
+
 public slots:
     void updateActions();
-	void on_buttonConfirmPluginsSelection_clicked();
 	
 private slots:
-	void on_buttonApplyCurrentSettings_clicked();
 	void on_buttonAddPluginsLibrary_clicked();
+	void on_buttonProjectDirectory_clicked();
 
  //   void selectVisualizationPlugins();
-//	bool saveConfigFile(std::string _filename);
-	bool writeXMLConfigFile(std::string _filename);
-	bool readXMLConfigFile(std::string _filename);
 //	void configureFeaturesPlugins();
 	void comboMediaTypeValueChanged(); 
 	void comboBrowserModeValueChanged(); 
 	void removePluginRow(); 
-
-// suggestion: may be add a way to save settings (like sliders positions, ...) ?
-	//   void loadSettings();
-	//   void saveSettings();
 
 private:
 	ACMultiMediaCycleOsgQt* multi_media_cycle;
@@ -99,14 +94,11 @@ private:
 	// parameters set by the comboBoxes in GUI
 	std::string media_type;
 	std::string browser_mode;
+	std::string project_directory;
+	std::string xml_config_file;
+	
 //	std::string plugins_library;
-	
-	// for XML I/O
-	QDomDocument doc; 
-	QDomElement configFile; 
-	QFile file; 
-	QTextStream out; 
-	
+		
 	// for plugins tree view
 	pluginsTreeModel* ptm;
 };

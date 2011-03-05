@@ -66,8 +66,8 @@ class ACOsgTimelineEventHandler : public  osgGA::GUIEventHandler {
 		void pick(osgViewer::View* view, const osgGA::GUIEventAdapter& ea, bool hover);
 	
 	private:
-		MediaCycle *media_cycle;
 		ACOsgTimelineRenderer *renderer;
+		MediaCycle *media_cycle;
 		#if defined (SUPPORT_AUDIO)
 			ACAudioEngine *audio_engine;
 		#endif //defined (SUPPORT_AUDIO)	

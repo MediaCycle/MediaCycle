@@ -205,7 +205,7 @@ const filext::value_type _init[] = {
 	filext::value_type(".mat", MEDIA_TYPE_AUDIO), \
 	filext::value_type(".mpc", MEDIA_TYPE_AUDIO), \
 	filext::value_type(".oga", MEDIA_TYPE_AUDIO), \
-	filext::value_type(".ogg", MEDIA_TYPE_AUDIO), \	
+	filext::value_type(".ogg", MEDIA_TYPE_AUDIO), \
 	filext::value_type(".paf", MEDIA_TYPE_AUDIO), \
 	filext::value_type(".pvf", MEDIA_TYPE_AUDIO), \
 	filext::value_type(".raw", MEDIA_TYPE_AUDIO), \

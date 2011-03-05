@@ -41,12 +41,18 @@
 
 // constructor : 
 // parent is typically ACMultiMediaCycleOsgQt->parent
-SettingsDialog::SettingsDialog(QWidget *parent) : QMainWindow(parent) {
+SettingsDialog::SettingsDialog(ACMultiMediaCycleOsgQt* _mc) : QMainWindow() {
     setupUi(this);
 
-	this->multi_media_cycle = 0;
-	this->media_cycle = 0;
+	this->multi_media_cycle = _mc;
+	
+	if (_mc) {
+		this->media_cycle = _mc->getMediaCycle() ;
+	}
 	this->ptm = new pluginsTreeModel();
+	this->project_directory="/tmp";
+	this->xml_config_file="MCconfig.xml";
+
 	treeViewPluginsLibrairies->setModel(this->ptm);
 	for (int column = 0; column < ptm->columnCount(); ++column)
         treeViewPluginsLibrairies->resizeColumnToContents(column);
@@ -54,10 +60,10 @@ SettingsDialog::SettingsDialog(QWidget *parent) : QMainWindow(parent) {
 	this->media_type = comboMediaType->currentText().toStdString();
 	this->browser_mode = comboBrowserMode->currentText().toStdString();
 		
-//    connect(buttonSaveLog, SIGNAL(clicked()), this, SLOT(saveLog()));
-//    connect(pushButtonConfigureFeaturesPlugins, SIGNAL(clicked()), this, SLOT(configureFeaturesPlugins()));
+	lineEditProjectDirectory->setText(QString::fromStdString(this->project_directory));
+	lineEditXMLConfigFile ->setText(QString::fromStdString(this->xml_config_file));
+
 //    connect(buttonSelectVisualizationPlugin, SIGNAL(clicked()), this, SLOT(selectVisualizationPlugins()));
-//	connect(buttonSaveConfigFile, SIGNAL(clicked()), this, SLOT(saveConfigFile()));
 	connect(comboMediaType, SIGNAL(currentIndexChanged(const QString &)), this, SLOT(comboMediaTypeValueChanged()));
 	connect(comboBrowserMode, SIGNAL(currentIndexChanged(const QString &)), this, SLOT(comboBrowserModeValueChanged()));
     connect(buttonRemovePluginsLibrary, SIGNAL(clicked()), this, SLOT(removePluginRow()));
@@ -65,6 +71,8 @@ SettingsDialog::SettingsDialog(QWidget *parent) : QMainWindow(parent) {
             SIGNAL(selectionChanged(const QItemSelection &,
                                     const QItemSelection &)),
             this, SLOT(updateActions()));
+	this->activateWindow();
+	this->readSettings();
 }
 
 SettingsDialog::~SettingsDialog(){
@@ -119,94 +127,6 @@ bool SettingsDialog::setMediaType(string _mt) {
 
 // ----- SLOTS -----
 
-//bool SettingsDialog::saveConfigFile(std::string _filename) {
-//	// XS TEST
-//	this->writeXMLConfigFile(_filename);
-//	return true;
-////	return (multi_media_cycle->saveConfigFile());
-//}
-
-bool SettingsDialog::writeXMLConfigFile(std::string _filename) {
-	configFile = doc.createElement("MediaCycleConfig"); //creation de la balise 
-	doc.appendChild(configFile); //filiation de la balise
-	QString qs = QString::fromStdString(_filename);
-	
-	file.setFileName(qs); 
-	if (!file.open(QIODevice::WriteOnly)) //ouverture du fichier de sauvegarde 
-		return false; //en ecriture 
-	out.setDevice(&file); //association du flux au fichier 
-	
-	if(!(this->setXMLMediaType(comboMediaType->currentText())));
-	   return false;
-	if(!(this->setXMLBrowserMode(comboBrowserMode->currentText())));
-		return false;
-//	QString qpl = QString::fromStdString(_pl);
-	
-//	QDomElement mesure = doc.createElement("mesure"); 
-//	configFile.appendChild(mesure); //filiation de la balise “mesure” 
-//	mesure.setAttribute("numero",n); //creation de l’attribut “numero” 
-//	//creation de la balise “tension” 
-//	QDomElement tension = doc.createElement("tension"); 
-//	mesure.appendChild(tension); //filiation de la balise “tension” 
-//	//creation de la balise “frequence” 
-//	QDomElement frequence = doc.createElement("frequence"); 
-//	mesure.appendChild(frequence); //filiation de la balise “frequence” 
-//	QDomText t1 = doc.createTextNode(t); //création de la donnée t1 
-//	tension.appendChild(t1); //filiation du noeud “t1” 
-//	QDomText f1 = doc.createTextNode(f); //création de la donnée f1 
-//	frequence.appendChild(f1); //filiation du noeud “f1” 
-	
-	// finish by adding the proper XML header
-	QDomNode noeud = doc.createProcessingInstruction("xml","version=\"1.0\""); 
-	doc.insertBefore(noeud,doc.firstChild()); 
-	//sauvegarde dans le flux (2 espaces de décalage dans l’arborescence) 
-	doc.save(out,2);    
-	file.close(); 
-	return true;
-}
-
-bool SettingsDialog::readXMLConfigFile(std::string _filename) {
-	QString qs = QString::fromStdString(_filename);
-	QFile file(qs); 
-	if (!file.open(QIODevice::ReadOnly)) 
-		return false; 
-	if (!doc.setContent(&file)) {   //établit le document XML à  
-		file.close(); //partir des données du fichier (hiérarchie, etc) 
-		return false; 
-	} 
-	file.close(); 
-	
-	int i=0; 
-	QString affichage; 
-	QDomNodeList tab; 
-	QDomElement mesure; 
-	QDomNode n; 
-	QMessageBox a(0); 
-	QDomElement racine = doc.documentElement(); //renvoie la balise racine 
-	QDomNode noeud = racine.firstChild(); //renvoie la 1ère balise « mesure » 
-	while(!noeud.isNull()) { 
-		//convertit le nœud en élément pour utiliser les 
-		//méthodes tagName() et attribute() 
-		mesure = noeud.toElement();
-		//vérifie la présence de la balise « mesure » 
-		if (mesure.tagName() == "mesure") 
-		{ 
-			affichage = mesure.attribute("numero"); //récupère l’attribut 
-			tab = mesure.childNodes(); //crée un tableau des enfants de « mesure » 
-			for(i=0;i<tab.length();i++) 
-			{ 
-				//pour chaque enfant, on extrait la donnée et on concatène 
-				n = tab.item(i); 
-				affichage = affichage + " " + n.firstChild().toText().data(); 
-			} 
-			a.setText(affichage); //affichage dans un QMessageBox 
-			a.exec(); 
-		} 
-		noeud = noeud.nextSibling(); //passe à la “mesure” suivante 
-	} 
-	
-}
-
 //void SettingsDialog::configureFeaturesPlugins(){
 //	ACPluginManager *acpl = media_cycle->getPluginManager(); //getPlugins
 //	if (acpl) {
@@ -253,7 +173,7 @@ void SettingsDialog::on_buttonAddPluginsLibrary_clicked(){
 	}
 }
 
-void SettingsDialog::on_buttonApplyCurrentSettings_clicked(){
+void SettingsDialog::applyCurrentSettings(){
 	stringToMediaTypeConverter::const_iterator iterm = stringToMediaType.find(this->media_type);
 	if( iterm == stringToMediaType.end() ) {
 		cout << " media type not found : " << this->media_type << endl;
@@ -270,14 +190,29 @@ void SettingsDialog::on_buttonApplyCurrentSettings_clicked(){
 	ACBrowserMode new_browser_mode = iterb->second;
 	cout << iterb->first << " - corresponding browser mode code : " << new_browser_mode << endl;
 	
-	if (this->media_cycle != 0) {
-		// clean the current media_cycle that was used by the ACMultiMediaCycleOsgQt app.
-		this->multi_media_cycle->destroyMediaCycle();
-	}
+	this->media_cycle->changeMediaType(new_media_type);
+	this->media_cycle->changeBrowserMode(new_browser_mode);
 	
-	this->multi_media_cycle->createMediaCycle(new_media_type, new_browser_mode);
-	this->media_cycle = this->multi_media_cycle->getMediaCycle();
+	// clean the current media_cycle that was used by the ACMultiMediaCycleOsgQt app.
+	// XS TODO : destroy MC only if media type changed...
+//	this->multi_media_cycle->destroyMediaCycle();	
+//	this->multi_media_cycle->createMediaCycle(new_media_type, new_browser_mode);
+//	this->media_cycle = this->multi_media_cycle->getMediaCycle();
 
+	// XS TODO sync variables with MC (+already save XML ?)
+}
+
+void SettingsDialog::on_buttonProjectDirectory_clicked(){
+	QString default_dir = QString::fromStdString(this->project_directory);
+	QString selectDir = QFileDialog::getExistingDirectory
+	(
+	 this, 
+	 tr("Open Directory"),
+	 default_dir,
+	 QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks
+	 );
+	
+	if (selectDir=="") return; // e.g. the user pressed "cancel"	
 }
 
 void SettingsDialog::addPluginsFromLibrary(QString _fileName){
@@ -380,7 +315,7 @@ void SettingsDialog::addPluginsFromLibrary(QString _fileName){
 //	this->multi_media_cycle->removePluginsLibrary(plugins_library);
 //}
 
-void SettingsDialog::on_buttonConfirmPluginsSelection_clicked(){
+//void SettingsDialog::on_buttonConfirmPluginsSelection_clicked(){
 //	cout << "confirming plugins selection : " << listWidgetFeaturesPlugins->count()<< endl;
 //	for (int i=0; i < listWidgetFeaturesPlugins->count(); i++) {
 //		// XS TODO: if checkState... (so we only add the selected plugins)
@@ -391,33 +326,41 @@ void SettingsDialog::on_buttonConfirmPluginsSelection_clicked(){
 //	}
 	
 	// then the selected plugins get their weights synchronized with MediaCycle
-	multi_media_cycle->synchronizeFeaturesWeights();
-}
-
-
-bool SettingsDialog::setXMLMediaType(QString _qmt){
-	// XS TODO test if media type has already been added to XML
-	// if yes, change it
-	QDomElement e_mt = doc.createElement("MediaType"); 
-	configFile.appendChild( e_mt); 
-	QDomText t_mt = doc.createTextNode(_qmt); 
-	e_mt.appendChild(t_mt);
-	return true;
-}
-
-bool SettingsDialog::setXMLBrowserMode(QString _qbm){
-	// XS TODO test if browser mode has already been added to XML
-	// if yes, change it
-	QDomElement e_bm = doc.createElement("BrowserMode"); 
-	configFile.appendChild( e_bm); 
-	QDomText t_bm = doc.createTextNode(_qbm); 
-	e_bm.appendChild(t_bm);
-	return true;	
-}
+//	multi_media_cycle->synchronizeFeaturesWeights();
+//}
 
 void SettingsDialog::updateActions(){
     bool hasSelection = !treeViewPluginsLibrairies->selectionModel()->selection().isEmpty();
     buttonRemovePluginsLibrary->setEnabled(hasSelection);
 }
+
+void SettingsDialog::closeEvent(QCloseEvent *event) {
+	this->writeSettings();
+	QMainWindow::closeEvent(event);		
+	cout << "closed settings window properly" << endl;
+}
+
+void SettingsDialog::readSettings() {
+	QSettings settings(QSettings::UserScope, "numediart", "MediaCycleSettings");
+	
+	
+	QPoint pos = settings.value("pos").toPoint(); //, QPoint(200, 200)).toPoint();
+	QSize size = settings.value("size").toSize(); //, QSize(400, 400)).toSize();
+	this->resize(size);
+	this->move(pos);	
+	this->restoreState(settings.value("windowState").toByteArray());
+}
+
+void SettingsDialog::writeSettings() {
+	//QSettings settings(QApplication::applicationDirPath().append(QDir::separator()).append("settings.ini"),
+	//				   QSettings::NativeFormat);
+	
+	QSettings settings(QSettings::UserScope, "numediart", "MediaCycleSettings");
+	settings.setValue("pos", pos());
+	settings.setValue("size", size());
+	//settings.setValue("geometry", saveGeometry());
+	settings.setValue("windowState", saveState());
+}
+
 
 

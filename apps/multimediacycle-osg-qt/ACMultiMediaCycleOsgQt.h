@@ -46,8 +46,10 @@
 #include "settings.h" // SettingsDialog
 
 #include "ui_ACMultiMediaCycleOsgQt.h"
+
 #include <ACOsgCompositeViewQt.h>
 #include <MediaCycle.h>
+
 #if defined (SUPPORT_AUDIO)
 	#include <ACAudioEngine.h>
 #endif //defined (SUPPORT_AUDIO)
@@ -69,7 +71,7 @@ Q_OBJECT
 	
 public slots:
 	// Config
-	void on_actionSave_Config_File_triggered(bool checked);
+	void on_actionSave_Config_File_triggered(bool checked); // settings
 	void on_actionEdit_Config_File_triggered(bool checked);
 	void on_actionLoad_Config_File_triggered(bool checked);
 	void comboDefaultSettingsChanged(); 
@@ -81,7 +83,7 @@ private slots:
 	// Library controls
 	void on_actionLoad_ACL_triggered(bool checked);
 	void on_actionSave_ACL_triggered(bool checked);		
-	void on_actionLoad_XML_triggered(bool checked);
+	void on_actionLoad_XML_triggered(bool checked); // features
 	void on_actionSave_XML_triggered(bool checked);	
 	void on_actionLoad_Media_Directory_triggered(bool checked);
 	void on_actionLoad_Media_Files_triggered(bool checked);
@@ -96,6 +98,10 @@ public:
 	void updateLibrary();
 	void updatePluginDock();
 	
+	void setBrowserMode(ACBrowserMode _mode){this->browser_mode=_mode;}
+	void setMediaType(ACMediaType _mt){this->media_type = _mt;}
+
+
 	// XS TODO: default values for image -- is this correct ?
 	void createMediaCycle(ACMediaType _media_type = MEDIA_TYPE_IMAGE, ACBrowserMode _browser_mode = AC_MODE_CLUSTERS);
 	void destroyMediaCycle();
@@ -111,13 +117,19 @@ public:
 	bool addControlDock(ACAbstractDockWidgetQt* dock);
 	bool addControlDock(std::string dock_type);
 	
-	// Controls
 	bool addAboutDialog(ACAbstractAboutDialogQt* dock);
 	bool addAboutDialog(std::string about_type);
 	
 	// Callback
 	void mediacycleCallback(char* message);
 	
+	// Close Event
+	void closeEvent(QCloseEvent *event);
+	
+	// settings and dock (XS  TODO change dock)
+	void configureSettings();
+	void configurePluginDock();
+
 private:
 	// variables
 	Ui::ACMediaCycleOsgQt ui;
@@ -128,7 +140,9 @@ private:
 	MediaCycle *media_cycle;
 	ACMediaType media_type;
 	ACBrowserMode browser_mode;
-	std::string config_file;	
+	std::string config_file_xml;	
+	std::string project_directory;	
+
 	std::vector<std::string> plugins_libraries;
 	#if defined (SUPPORT_AUDIO)
 		ACAudioEngine *audio_engine;
@@ -139,12 +153,20 @@ private:
 	bool wasControlsToggleChecked;
 	vector<ACAbstractDockWidgetQt*> dockWidgets;
 	ACDockWidgetFactoryQt* dockWidgetFactory;
+	void configureDockWidgets(ACMediaType _media_type);
 	
 	ACAboutDialogFactoryQt* aboutDialogFactory;
 	ACAbstractAboutDialogQt* aboutDialog;
 	
 	// methods
-	bool saveFile(const QString& _filename);
+	bool readQSettings();
+	bool writeQSettings();
+	void setDefaultQSettings();
+	void clearQSettings();
+
+	void readXMLConfig(std::string _filename="");
+//	TiXmlHandle readXMLConfigHeader(std::string _filename="");
+	void writeXMLConfig(std::string _filename="");
 	std::string rstrip(const std::string& s);
 	void showError(std::string s);
 	bool hasMediaCycle();

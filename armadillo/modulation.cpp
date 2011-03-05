@@ -1,7 +1,7 @@
 /**
  * @brief modulation.cpp
  * @author Xavier Siebert
- * @date 09/02/2011
+ * @date 05/03/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -36,7 +36,7 @@ void modulation(colvec xi_v, int fs, mat &modFr_m, mat &modAmp_m, colvec &modTim
 
 //	int oldfs = fs;
 	rowvec freqBandHz_v = "4 50;";
-	double fmax = 50;
+//	double fmax = 50;
 	double fmin = 4;
 	
 // 	if (fs > 4*fmax && fs > 100){

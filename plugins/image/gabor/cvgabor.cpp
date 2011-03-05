@@ -345,8 +345,10 @@ double* CvGabor::getMeanAndStdevs(IplImage *src) {
 	CvMat *imat = cvCreateMat(src->width, src->height, CV_32FC1);
 	
 // CV_GABOR_MAG -- XS TODO : speed this up ?!
-	cvFilter2D( (CvMat*)mat, (CvMat*)rmat, (CvMat*)Real, cvPoint( (Width-1)/2, (Width-1)/2));
-	cvFilter2D( (CvMat*)mat, (CvMat*)imat, (CvMat*)Imag, cvPoint( (Width-1)/2, (Width-1)/2));
+	int wtf = (Width-1)/2;
+	CvPoint p = cvPoint(wtf, wtf);
+	cvFilter2D( (CvMat*)mat, (CvMat*)rmat, (CvMat*)Real, p);
+	cvFilter2D( (CvMat*)mat, (CvMat*)imat, (CvMat*)Imag, p);
 	cvPow(rmat,rmat,2); 
 	cvPow(imat,imat,2);
 	cvAdd(imat,rmat,mat); 

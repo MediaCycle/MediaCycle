@@ -82,14 +82,14 @@ void test_audio_visualisation_plugins(){
 
 void test_audio_config_file(){
 	MediaCycle* media_cycle = new MediaCycle(MEDIA_TYPE_AUDIO,"/tmp/","mediacycle.acl");
-	media_cycle->readConfigFile("/Users/xavier/development/Fall09/ticore-app/Applications/Numediart/MediaCycle/mediacycle.config2");
+	media_cycle->readXMLConfigFile("/Users/xavier/development/Fall09/ticore-app/Applications/Numediart/MediaCycle/mediacycle.config2");
 //	media_cycle->dumpConfigFile();
 	delete media_cycle;
 }
 
 void test_image_config_file(){
 	MediaCycle* media_cycle = new MediaCycle(MEDIA_TYPE_AUDIO,"/tmp/","mediacycle.acl");
-	media_cycle->readConfigFile("/Users/xavier/development/Fall09/ticore-app/Applications/Numediart/MediaCycle/mediacycle.config2");
+	media_cycle->readXMLConfigFile("/Users/xavier/development/Fall09/ticore-app/Applications/Numediart/MediaCycle/mediacycle.config2");
 	//	media_cycle->dumpConfigFile();
 	delete media_cycle;
 }
