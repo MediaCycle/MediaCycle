@@ -150,22 +150,6 @@ double ACOsgBrowserRenderer::getTime() {
 // adds/removes nodes to the node_renderer
 void ACOsgBrowserRenderer::prepareNodes(int _start) {
 	
-	// CF checking for available OSG video plugins, everytime the library content changes
-	// when we'll be able to the media type on the fly, this test will be relocated at app startup
-	/*if (media_cycle->getLibrary()->getMediaType() == MEDIA_TYPE_VIDEO) {
-	 
-	 //CF forcing to load the OSG FFMpeg plugin
-	 std::string ffmpegLib = osgDB::Registry::instance()->createLibraryNameForExtension("ffmpeg"); 
-	 osgDB::Registry::LoadStatus ffmpegStatus = osgDB::Registry::instance()->loadLibrary(ffmpegLib);
-	 std::string qtLib = osgDB::Registry::instance()->createLibraryNameForExtension("qt"); 
-	 osgDB::Registry::LoadStatus qtStatus = osgDB::Registry::instance()->loadLibrary(qtLib);
-	 if (ffmpegStatus == osgDB::Registry::NOT_LOADED){// && qtStatus == osgDB::Registry::NOT_LOADED) {
-	 std::cout << "No video plugin for OSG could be loaded, videos can't be visualized." << std::endl;
-	 exit(0);//too harsh maybe?
-	 }
-	 
-	 }*/
-	
 	int start;
 	
 	int n = media_cycle->getNumberOfMediaNodes(); //XS was: getLibrarySize(); 

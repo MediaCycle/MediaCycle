@@ -58,9 +58,13 @@ ACOsgImageRenderer::ACOsgImageRenderer() {
 
 	colors->push_back(color);		
 	colors2->push_back(color2);	
-	colors3->push_back(color3);	
-
+	colors3->push_back(color3);
 	
+	image_image = 0;
+	image_geode = 0;
+	border_geode = 0;
+	image_transform = 0;
+
 // was in updateNodes but not used...
 //		colors[0] = Vec4(0.2,0.6,0.2,1);
 //		colors[1] = Vec4(0.4,0.4,0.4,1);
@@ -86,9 +90,7 @@ ACOsgImageRenderer::~ACOsgImageRenderer() {
 void ACOsgImageRenderer::imageGeode(bool flip, float sizemul, float zoomin) {
 	ACMediaType media_type = media_cycle->getLibrary()->getMedia(media_index)->getType();
 	if (media_type == MEDIA_TYPE_VIDEO)
-		flip=true; //CF this hides a huger bug, to be tracked down (imageGeode created twice sometimes at video ACL import)(media_type == MEDIA_TYPE_IMAGE)
-		
-	std::cout << "Do we flip the image geode? " << flip << std::endl;
+		flip=true;
 	int i;
 	
 	double xstep = 0.0005;
@@ -315,7 +317,8 @@ void ACOsgImageRenderer::updateNodes(double ratio) {
 		if(media_node->getNumChildren() == 1) {
 			media_node->removeChild(0, 1);
 		}
-		imageGeode();
+		if (!image_geode)
+			imageGeode();
 		media_node->addChild(image_transform);
 		prev_media_index = media_index;
 	}
