@@ -40,7 +40,10 @@ IF (APPLE)
 	ENDIF()
 ENDIF()
 
-# OPTIONS
+######################
+#       OPTIONS      #
+######################
+
 OPTION(SUPPORT_AUDIO "Support audio media" ON)
 OPTION(SUPPORT_IMAGE "Support image media" ON)
 OPTION(SUPPORT_VIDEO "Support video media" ON)
@@ -124,6 +127,12 @@ ENDIF()
 ######################
 #     OS SPECIFIC    #
 ######################
+
+# OS-SPECIFIC SUBPROJECTS COMPILATION
+IF(UNIX)
+	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
+	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+ENDIF(UNIX)
 
 # Apple issues
 IF(APPLE AND NOT APPLE_IOS_XCODE AND NOT APPLE_IOS_SIM AND NOT APPLE_IOS_XCODE)
@@ -714,33 +723,22 @@ IF (ARMADILLO_FOUND)
 	INCLUDE_DIRECTORIES(${ARMADILLO_INCLUDE_DIR})
 	ADD_LIB_LINKED_DIR(${ARMADILLO_LIBRARY})
 	#INCLUDE_DIRECTORIES(armadillo)
-	#SUBDIRS(armadillo)
+	#add_subdirectory(armadillo)
 ELSE (ARMADILLO_FOUND)
 	MESSAGE(FATAL_ERROR "Armadillo not found.")
 ENDIF (ARMADILLO_FOUND)
 
 # libsamplerate
-IF(SUPPORT_AUDIO)
-FIND_PACKAGE ( Samplerate )
-IF (SAMPLERATE_FOUND)
+IF(SUPPORT_AUDIO AND USE_AUDIOFEAT)
+FIND_PACKAGE ( Samplerate REQUIRED )
+IF(SAMPLERATE_FOUND)
 	MESSAGE("libsamplerate found.")
+	INCLUDE_DIRECTORIES(${SAMPLERATE_INCLUDE_DIR})
 	ADD_LINKED_DIRECTORY(${SAMPLERATE_LINK_DIRECTORIES})
-ELSE (SAMPLERATE_FOUND)
+ELSE(SAMPLERATE_FOUND)
 	MESSAGE("libsamplerate not found.")
-ENDIF (SAMPLERATE_FOUND)
-
-IF ( ARMADILLO_FOUND AND SAMPLERATE_FOUND AND USE_AUDIOFEAT )
-	MESSAGE("Building audio features plugin/lib/cli.")
-	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUSE_AUDIOFEAT")
-	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DUSE_AUDIOFEAT")
-	INCLUDE_DIRECTORIES(${SNDFILE_INCLUDE_DIR} ${SAMPLERATE_INCLUDE_DIR})
-	INCLUDE_DIRECTORIES(audio)
-	SUBDIRS(audio)
-ELSE ( )
-	MESSAGE("Not building audio features plugin/lib/cli.")
-	SET(USE_AUDIOFEAT OFF)
-ENDIF ( )
-ENDIF(SUPPORT_AUDIO)
+ENDIF(SAMPLERATE_FOUND)
+ENDIF()
 
 # FFTW3
 IF(SUPPORT_IMAGE OR SUPPORT_VIDEO)
@@ -770,14 +768,14 @@ IF ( USE_SDIF )
 ENDIF ()
 
 # MATIO (added by ccl)
-#FIND_PACKAGE ( MATIO )
-#IF (MATIO_FOUND)
-#    MESSAGE("libmatio found.")
-#    INCLUDE_DIRECTORIES(${MATIO_INCLUDE_DIR})
-#	ADD_LIB_LINKED_DIR(${MATIO_LIBRARY})
-#ELSE (MATIO_FOUND)
-#    MESSAGE("libmatio not found.")
-#ENDIF (MATIO_FOUND) 
+FIND_PACKAGE ( MATIO )
+IF (MATIO_FOUND)
+    MESSAGE("libmatio found.")
+    INCLUDE_DIRECTORIES(${MATIO_INCLUDE_DIR})
+    ADD_LIB_LINKED_DIR(${MATIO_LIBRARY})
+ELSE (MATIO_FOUND)
+    MESSAGE("libmatio not found.")
+ENDIF (MATIO_FOUND) 
 
 IF (APPLE)
 	IF (NOT APPLE_IOS_DEV AND NOT APPLE_IOS_SIM AND NOT APPLE_IOS_XCODE )
@@ -823,7 +821,7 @@ IF (STARPU_FOUND)
 	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DUSE_STARPU")
 	INCLUDE_DIRECTORIES(${STARPU_INCLUDE_DIR})
 	ADD_LINKED_DIRECTORY(${STARPU_LINK_DIRECTORIES})
-	#SUBDIRS()
+	#add_subdirectory(...)
 ELSE (STARPU_FOUND)
 	MESSAGE("StarPU not found, support disabled.")
 ENDIF (STARPU_FOUND)
@@ -850,50 +848,63 @@ IF(WIN32 OR MINGW)
 	ENDIF()
 ENDIF()
 
+IF(SUPPORT_AUDIO AND ARMADILLO_FOUND AND SNDFILE_FOUND AND SAMPLERATE_FOUND AND USE_AUDIOFEAT)
+	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUSE_AUDIOFEAT")
+	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DUSE_AUDIOFEAT")
+ELSE()
+	SET(USE_AUDIOFEAT OFF)
+ENDIF()
+
+IF(SUPPORT_AUDIO AND USE_AUDIOFEAT AND USE_AUDIOGARDEN)
+	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUSE_AUDIOGARDEN")
+	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DUSE_AUDIOGARDEN")
+ENDIF()
+
 ######################
 # INTERNAL LIBRARIES #
 ######################
 MESSAGE("\nInternal libraries:")
 
-# OS-SPECIFIC SUBPROJECTS COMPILATION
-IF ( WIN32 )
-	INCLUDE_DIRECTORIES(. armadillo core)
-	SUBDIRS(armadillo core tinyxml gui)
-ELSE ( WIN32 )
-	IF( APPLE_IOS_DEV OR APPLE_IOS_SIM OR APPLE_IOS_XCODE )
-		INCLUDE_DIRECTORIES(. armadillo core)
-		SUBDIRS(armadillo core tinyxml gui fftooura lib)	
-	ELSE()
-		INCLUDE_DIRECTORIES(. armadillo core tinyxml gnuplot_i)
-		SUBDIRS(armadillo core tinyxml cli gui fftooura gnuplot_i lib vamp-plugin-interface)		
-	ENDIF()
-ENDIF ( WIN32 )
-IF ( UNIX )
-	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
-	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
-	SET(OpenCV_ROOT_DIR "/usr")#CF
-ENDIF ( UNIX )
+INCLUDE_DIRECTORIES(. armadillo fftooura core tinyxml gnuplot_i)
 
-# audioengine
+# First internal core dependencies:
+add_subdirectory(armadillo)
+add_subdirectory(fftooura)
+add_subdirectory(tinyxml)
+add_subdirectory(gnuplot_i)
+add_subdirectory(lib) # with tree required by core
+
+# MediaCycle core library
+add_subdirectory(core)
+
+# audioengine (currently required by gui and osc)
 IF(SUPPORT_AUDIO AND SNDFILE_FOUND AND (OPENAL_FOUND OR PORTAUDIO_FOUND))
-	SUBDIRS(audioengine)
 	INCLUDE_DIRECTORIES(audioengine)
+	add_subdirectory(audioengine)
 ELSE()
 	MESSAGE("[ ] audioengine")
 ENDIF()
 
-# OSC
-IF ( USE_OSC )
-	INCLUDE_DIRECTORIES(io)
-	SUBDIRS(io)
-ENDIF ( USE_OSC )
+# OSC and Apple multitouch trackpad support (not ready)
+INCLUDE_DIRECTORIES(io)
+add_subdirectory(io)
 
-# audiogarden
-IF (USE_AUDIOGARDEN)
-	#SUBDIRS( ../../../../../audiogarden/ )#syncing with Cecile Picard's mercurial repository
-	SUBDIRS(audiogarden)
-	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUSE_AUDIOGARDEN")
-	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DUSE_AUDIOGARDEN")
+# gui (requires core, audioengine, optionally osc)
+add_subdirectory(gui)
+
+# audiofeatures (required by some apps and plugins)
+IF(SUPPORT_AUDIO AND ARMADILLO_FOUND AND SNDFILE_FOUND AND SAMPLERATE_FOUND AND USE_AUDIOFEAT)
+	add_subdirectory(audio)
+ENDIF()
+
+# vamp-plugin-interface (required by some plugins and tests)
+IF(SUPPORT_AUDIO AND USE_VAMP)
+	add_subdirectory(vamp-plugin-interface)
+ENDIF()
+
+# audiogarden audio synthesis library (required by audiogarden apps and plugins)
+IF(SUPPORT_AUDIO AND USE_AUDIOGARDEN AND USE_AUDIOFEAT)
+	add_subdirectory(audiogarden)
 ELSE()
 	MESSAGE("[ ] audiogarden synthesis")
 ENDIF()
@@ -902,9 +913,9 @@ ENDIF()
 #       PLUGINS      #
 ######################
 
-IF ( BUILD_PLUGINS )
-	SUBDIRS(plugins)
-ENDIF ( BUILD_PLUGINS )
+IF(BUILD_PLUGINS)
+	add_subdirectory(plugins)
+ENDIF(BUILD_PLUGINS)
 
 IF(SUPPORT_3DMODEL)
 	ADD_LINKED_DIRECTORY("${CMAKE_BINARY_DIR}/plugins/3Dmodel")
@@ -934,17 +945,38 @@ ADD_LINKED_DIRECTORY("${CMAKE_BINARY_DIR}/plugins/visualisation")
 #         APPS       #
 ######################
 
-IF ( BUILD_APPS )
+add_subdirectory(cli)
+
+IF(BUILD_APPS)
 	INCLUDE_DIRECTORIES(apps)
-	SUBDIRS(apps)
-ENDIF ( BUILD_APPS )
+	add_subdirectory(apps)
+ENDIF(BUILD_APPS)
+
+IF(USE_AUDIOGARDEN AND USE_AUDIOFEAT)
+	# Syncing with Cecile Picard's mercurial repository
+	FILE(GLOB AUDIOGARDEN_REPO ../../../../../audiogarden)
+	IF(AUDIOGARDEN_REPO)
+		FILE(GLOB AUDIOGARDEN_REPO_CLI_DIRS ../../../../../audiogarden/audiogarden-*-cli)
+		FOREACH(AUDIOGARDEN_REPO_CLI_DIR ${AUDIOGARDEN_REPO_CLI_DIRS})
+			IF(IS_DIRECTORY ${AUDIOGARDEN_REPO_CLI_DIR})
+				GET_FILENAME_COMPONENT(AUDIOGARDEN_REPO_CLI_DIR_NAME ${AUDIOGARDEN_REPO_CLI_DIR} NAME)
+				add_subdirectory( ../../../../../audiogarden/${AUDIOGARDEN_REPO_CLI_DIR_NAME} apps/${AUDIOGARDEN_REPO_CLI_DIR_NAME})
+			ENDIF()
+		ENDFOREACH()
+		IF(NOT AUDIOGARDEN_REPO_CLI_DIRS)
+			MESSAGE("[ ] audiogarden-clis (check if your clone of Cecile Picard's audiogarden repository contains audiogarden-*-cli directories)")
+		ENDIF()
+	ELSE()
+		MESSAGE("[ ] audiogarden-clis (optionally clone Cecile Picard's audiogarden repository: https://bitbucket.org/cclpic/audiogarden on the same root dir as for ticore-app)")
+	ENDIF()	
+ENDIF()
 
 ######################
 #        TESTS       #
 ######################
 
 IF ( BUILD_TESTS )
-	SUBDIRS(test)
+	add_subdirectory(test)
 ENDIF ( BUILD_TESTS )
 
 ##MESSAGE("LINKED_DIRECTORIES: ${LINKED_DIRECTORIES}")
