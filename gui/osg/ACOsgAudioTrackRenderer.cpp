@@ -250,7 +250,7 @@ void ACOsgAudioTrackRenderer::selectionWaveformGeode() {
 		samples_geometry->setVertexArray(vertices);*/
 		
 		// envelope with quads
-		vertices = new Vec3Array(4*(width-1));
+		vertices = new Vec3Array(4*(width));
 		for(i=0; i<width; i++) {
 			(*vertices)[4*i] = Vec3(track_left_x + i * xstep * zoom_x, summary_center_y + summary_height * thumbnail[i] * zoom_y, zpos);
 			(*vertices)[4*i+1] = Vec3(track_left_x + (i+1) * xstep * zoom_x, summary_center_y + summary_height * thumbnail[i+1] * zoom_y, zpos);
