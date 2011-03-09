@@ -6,7 +6,6 @@ SET(CMAKE_MODULE_PATH "${MediaCycle_SOURCE_DIR}/CMakeModules")
 SET(MediaCycle_VERSION 0.1pre)
 
 INCLUDE(${MediaCycle_SOURCE_DIR}/CMakeModules/FindLinkedDirectories.cmake)
-#SET(MediaCycle_SOURCE_DIR ${MediaCycle_SOURCE_DIR})#for doxygen
 
 cmake_minimum_required(VERSION 2.6.2)
 #MESSAGE(${CMAKE_VERSION})
@@ -1061,18 +1060,10 @@ IF(BUILD_DOCUMENTATION)
     )
     # copy the logo to documentations target folder
     #CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/data/icons/MediaCycle.png
-    #   ${PROJECT_BINARY_DIR}/doc/OpenSceneGraphReferenceDocs/.png COPYONLY
+    #   ${PROJECT_BINARY_DIR}/doc/MediaCycleReferenceDocs/MediaCycle.png COPYONLY
     #)
     #INSTALL(FILES ${PROJECT_BINARY_DIR}/doc/${PROJECT_NAME}ReferenceDocs-${MediaCycle_VERSION}.chm DESTINATION doc OPTIONAL COMPONENT mediacycle-doc)
     INSTALL(DIRECTORY ${PROJECT_BINARY_DIR}/doc/MediaCycleReferenceDocs DESTINATION doc COMPONENT mediacycle-doc)
-
-    # Process our other doxyfiles but don't create targets for these
-    #CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/doc/Doxyfiles/all_Doxyfile
-    #    ${PROJECT_BINARY_DIR}/doc/all_Doxyfile)
-    #CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/doc/Doxyfiles/auto_Doxyfile
-    #    ${PROJECT_BINARY_DIR}/doc/auto_Doxyfile)
-    #CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/doc/Doxyfiles/core_Doxyfile
-    #    ${PROJECT_BINARY_DIR}/doc/core_Doxyfile)
     
     # This creates a new target to build documentation.
     # It runs ${DOXYGEN} which is the full path and executable to
