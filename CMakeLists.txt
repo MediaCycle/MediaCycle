@@ -3,11 +3,17 @@ PROJECT(MediaCycle)
 # add some find scripts
 # SET(CMAKE_USE_RELATIVE_PATHS YES)
 SET(CMAKE_MODULE_PATH "${MediaCycle_SOURCE_DIR}/CMakeModules")
+SET(MediaCycle_VERSION 0.1pre)
 
 INCLUDE(${MediaCycle_SOURCE_DIR}/CMakeModules/FindLinkedDirectories.cmake)
+#SET(MediaCycle_SOURCE_DIR ${MediaCycle_SOURCE_DIR})#for doxygen
 
 cmake_minimum_required(VERSION 2.6.2)
 #MESSAGE(${CMAKE_VERSION})
+
+IF(${PROJECT_BINARY_DIR} EQUAL ${PROJECT_SOURCE_DIR})
+MESSAGE(FATAL_ERROR "In-source building forbidden: create a "Builds" subdirectory itself containing a directory describing your system and architecture.")
+ENDIF()
 
 IF(COMMAND cmake_policy)
 	IF ( ${CMAKE_VERSION} STRLESS "2.8.0")
@@ -75,6 +81,7 @@ ENDIF()
 OPTION(BUILD_APPS "Build apps" ON)
 OPTION(BUILD_CLIS "Build command-line interface applications" ON)	
 OPTION(USE_SDIF "Use SDIF" OFF)
+OPTION(BUILD_DOCUMENTATION "Build MediaCycle reference documentation using doxygen (use: make DoxygenDoc)" OFF)
 
 ######################
 #     MEDIA TYPES    #
@@ -981,3 +988,99 @@ ENDIF ( BUILD_TESTS )
 
 ##MESSAGE("LINKED_DIRECTORIES: ${LINKED_DIRECTORIES}")
 ##MESSAGE("CMAKE_SHARED_MODULE_SUFFIX: ${CMAKE_SHARED_MODULE_SUFFIX}")
+
+######################
+#   DOCUMENTATION    #
+######################
+# To build the documentation, you will have to enable it
+# and then do "make documentation".
+IF(BUILD_DOCUMENTATION)
+
+    FIND_PACKAGE(UnixCommands REQUIRED)
+    FIND_PACKAGE(Doxygen REQUIRED)
+    FIND_PACKAGE(Gnuplot REQUIRED)
+    FIND_PACKAGE(HTMLHelp REQUIRED)
+    FIND_PACKAGE(Perl REQUIRED)
+    FIND_PACKAGE(Wget REQUIRED)
+
+    # Warning: doxygen doesn't confuse YES/NO and ON/OFF like CMake does	
+    SET(GENERATE_LATEX NO)
+    FIND_PACKAGE(LATEX)
+    IF(PDFLATEX_COMPILER)
+        SET(GENERATE_LATEX YES)
+    ENDIF()
+
+    IF(DOT)
+        SET(HAVE_DOT YES)
+    ELSE()
+        SET(HAVE_DOT NO)
+        MESSAGE(FATAL_ERROR "Graphviz dot missing.")
+    ENDIF()
+
+    SET(CALL_GRAPH NO)# if set to YES, a graphical call graph is drawn for each function showing the functions that the function directly or indirectly calls.
+    SET(CALLER_GRAPH NO)# if set to YES, a graphical caller graph is drawn for each function showing the functions that the function is directly or indirectly called by. 
+    OPTION(DOCUMENTATION_GRAPH_FUNCTION_CALLS "Enable graphical call/callers graphs for each function that the functions calls/are called by." OFF)
+    IF(DOCUMENTATION_GRAPH_FUNCTION_CALLS)
+        SET(CALL_GRAPH YES)
+        SET(CALLER_GRAPH YES)
+    ENDIF()
+
+    OPTION(DOCUMENTATION_HTML_HELP "Build the HTML Help file (CHM)." OFF)
+    OPTION(DOCUMENTATION_HTML_TARZ "Build a compressed tar archive of the HTML doc." OFF)
+
+    OPTION(BUILD_REF_DOCS_SEARCHENGINE "Enable doxygen's search engine (requires that documentation to be installed on a php enabled web server)" ON)
+    IF(BUILD_REF_DOCS_SEARCHENGINE)
+        SET(SEARCHENGINE YES)
+    ELSE()
+        SET(SEARCHENGINE NO)
+    ENDIF()
+
+    OPTION(BUILD_REF_DOCS_TAGFILE "Generate a tag file named mediacycle.tag on the documentation web server" OFF)
+    IF(BUILD_REF_DOCS_TAGFILE)
+        SET(GENERATE_TAGFILE "${CMAKE_BINARY_DIR}/doc/MediaCycleReferenceDocs/mediacycle.tag")
+    ELSE()
+        SET(GENERATE_TAGFILE "")
+    ENDIF()
+    
+    # If html help generation was requested. DOCUMENTATION_HTML_HELP is defined by Documentation.cmake
+    SET(GENERATE_HTMLHELP "NO")
+    IF(DOCUMENTATION_HTML_HELP)
+        # on windows Documentation.cmake finds the html help workshop fi it exists. On u*ix we might have it with wine but no way to point it out
+        IF(NOT WIN32)
+            SET(HTML_HELP_COMPILER "" CACHE FILEPATH "Enter location of the HTML help compiler to let doxygen compile html")
+            MARK_AS_ADVANCED(HTML_HELP_COMPILER)
+        ENDIF()
+        # this var sets a proper value in .doxygen files when coniguring them below
+        SET(GENERATE_HTMLHELP "YES")
+    endif()
+  
+    # This processes our doxyfile.cmake and substitutes paths to generate
+    # a final Doxyfile
+    CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/doc/Doxyfiles/doxyfile.cmake
+        ${PROJECT_BINARY_DIR}/doc/mediacycle.doxyfile
+    )
+    # copy the logo to documentations target folder
+    #CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/data/icons/MediaCycle.png
+    #   ${PROJECT_BINARY_DIR}/doc/OpenSceneGraphReferenceDocs/.png COPYONLY
+    #)
+    #INSTALL(FILES ${PROJECT_BINARY_DIR}/doc/${PROJECT_NAME}ReferenceDocs-${MediaCycle_VERSION}.chm DESTINATION doc OPTIONAL COMPONENT mediacycle-doc)
+    INSTALL(DIRECTORY ${PROJECT_BINARY_DIR}/doc/MediaCycleReferenceDocs DESTINATION doc COMPONENT mediacycle-doc)
+
+    # Process our other doxyfiles but don't create targets for these
+    #CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/doc/Doxyfiles/all_Doxyfile
+    #    ${PROJECT_BINARY_DIR}/doc/all_Doxyfile)
+    #CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/doc/Doxyfiles/auto_Doxyfile
+    #    ${PROJECT_BINARY_DIR}/doc/auto_Doxyfile)
+    #CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/doc/Doxyfiles/core_Doxyfile
+    #    ${PROJECT_BINARY_DIR}/doc/core_Doxyfile)
+    
+    # This creates a new target to build documentation.
+    # It runs ${DOXYGEN} which is the full path and executable to
+    # Doxygen on your system.
+    # It runs the final generated Doxyfile against it.
+    # The DOT_PATH is substituted into the Doxyfile.
+    ADD_CUSTOM_TARGET(documentation ${DOXYGEN}
+        ${PROJECT_BINARY_DIR}/doc/mediacycle.doxyfile
+    )
+ENDIF(BUILD_DOCUMENTATION)
+
