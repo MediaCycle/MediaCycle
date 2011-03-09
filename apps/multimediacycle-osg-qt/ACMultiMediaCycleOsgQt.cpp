@@ -914,9 +914,9 @@ void ACMultiMediaCycleOsgQt::loadDefaultConfig(ACMediaType _media_type, ACBrowse
 	v_plugin = s_path + "/../../../plugins/visualisation/" + build_type + "/mc_visualisation.dll";
 	s_plugin = s_path + "/../../../plugins/segmentation/" + build_type + "/mc_segmentation.dll";
 #else
-	f_plugin = s_path + "/../../../plugins/"+smedia+"/mc_"+smedia+".so";
-	v_plugin = s_path + "/../../../plugins/visualisation/" + build_type + "/mc_visualisation.so";
-	s_plugin = s_path + "/../../../plugins/segmentation/" + build_type + "/mc_segmentation.so";
+	f_plugin = s_path + "/../../plugins/"+smedia+"/mc_"+smedia+".so";
+	v_plugin = s_path + "/../../plugins/visualisation/mc_visualisation.so";
+	s_plugin = s_path + "/../../plugins/segmentation/mc_segmentation.so";
 #endif
 	media_cycle->addPluginLibrary(f_plugin);
 	media_cycle->addPluginLibrary(v_plugin);

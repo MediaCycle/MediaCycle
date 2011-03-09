@@ -82,7 +82,7 @@ using namespace std;
 // filext members are static and thus have to be initialized outside class
 const filext::value_type _ini[] = {};
 
-#ifdef USE_DEBUG
+#if defined USE_DEBUG && defined __APPLE__
 #include "ACMediaFactoryDebug.cpp"
 #else
 /// List of media file extensions available on the current running system and MediaCycle distribution.
