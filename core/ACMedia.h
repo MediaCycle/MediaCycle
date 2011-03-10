@@ -42,7 +42,7 @@
 #include "ACMediaTimedFeature.h"
 
 #include <string>
-#include "tinyxml.h"
+#include <tinyxml.h>
 
 class ACMedia {
 	// contains the minimal information about a media

@@ -4,9 +4,6 @@ IF(SUPPORT_VIDEO AND USE_QT4)
 	FILE(GLOB SRC *.cpp)
 	FILE(GLOB HDR *.h)
 
-#	INCLUDE_DIRECTORIES(. ../../gui/osg ../../gui/osg-qt)
-	INCLUDE_DIRECTORIES(../../plugins/image ../../plugins/video)
-
 #	set(QT_PHONON_LIBRARY phonon)
 #	set(PHONON_LIBS
 #		${QT_PHONON_LIBRARY}

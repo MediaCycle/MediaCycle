@@ -6,8 +6,6 @@ IF(APPLE_IOS_DEV OR APPLE_IOS_SIM OR APPLE_IOS_XCODE)
 		FILE(GLOB SRC *.m *.mm *.xib)
 		FILE(GLOB HDR *.h)
 
-		INCLUDE_DIRECTORIES(. ../../core ../../gui/osg)
-
 		SET(APP_TYPE MACOSX_BUNDLE)
 		ADD_EXECUTABLE(audiocycle-osg-ipad ${APP_TYPE} ${MACOSX_BUNDLE_INFO_PLIST} ${SRC} ${HDR})
 
@@ -26,9 +24,9 @@ IF(APPLE_IOS_DEV OR APPLE_IOS_SIM OR APPLE_IOS_XCODE)
 
 		# Dirty osgPlugins hack
 		IF( APPLE_IOS_DEV OR APPLE_IOS_SIM )
-			set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -L${CMAKE_INSTALL_PREFIX}/lib/osgPlugins-2.9.11/ -losgdb_osg -losgdb_imageio -lz -lbz2")
+			set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -L${CMAKE_INSTALL_PREFIX}/lib/osgPlugins-${OPENSCENEGRAPH_VERSION}/ -losgdb_osg -losgdb_imageio -lz -lbz2")
 		ELSEIF( APPLE_IOS_XCODE )
-			set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -L${iPhoneSimulator_DEPS_ROOT}/lib/osgPlugins-2.9.11/ -losgdb_osg -losgdb_imageio -lz -lbz2")
+			set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -L${iPhoneSimulator_DEPS_ROOT}/lib/osgPlugins-${OPENSCENEGRAPH_VERSION}/ -losgdb_osg -losgdb_imageio -lz -lbz2")
 		ENDIF()
 
 		add_custom_command(

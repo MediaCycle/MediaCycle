@@ -6,11 +6,6 @@ SET(TARGET_NAME "${PLUGIN_PREFIX}${PLUGIN_NAME}")
 
 ADD_LIBRARY(${TARGET_NAME} SHARED ${SRC} ${HDR})
 
-INCLUDE_DIRECTORIES(. ../../armadillo ../../fftooura ../../tinyxml ../../core) 
-IF (SUPPORT_AUDIO AND USE_AUDIOFEAT)
-	INCLUDE_DIRECTORIES(../../audio)
-ENDIF()
-
 ADD_DEPENDENCIES(${TARGET_NAME} mediacycle fftooura armadillo armadillo-utils)
 IF (SUPPORT_AUDIO AND USE_AUDIOFEAT)
 	ADD_DEPENDENCIES(${TARGET_NAME} mediacycle audiofeatures)

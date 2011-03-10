@@ -3,9 +3,6 @@ IF(SUPPORT_IMAGE AND USE_QT4)
 	FILE(GLOB SRC *.cpp)
 	FILE(GLOB HDR *.h)
 
-	INCLUDE_DIRECTORIES(. ../../gui/osg ../../gui/osg-qt ../../tinyxml)
-	INCLUDE_DIRECTORIES(../../plugins/image)
-
 	IF ( APPLE )
 		SET(APP_TYPE MACOSX_BUNDLE)
 	ENDIF ( APPLE )

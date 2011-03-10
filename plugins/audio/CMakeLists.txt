@@ -5,8 +5,6 @@ IF(SUPPORT_AUDIO AND USE_AUDIOFEAT)
 	FILE(GLOB SRC *.cpp *.c)
 	FILE(GLOB HDR *.hpp *.h)
 
-	INCLUDE_DIRECTORIES(. ../../core ../../armadillo ../../audio ../../tinyxml)
-
 	ADD_LIBRARY(${TARGET_NAME} SHARED ${SRC} ${HDR})
 	ADD_DEPENDENCIES(${TARGET_NAME} mediacycle armadillo-utils audiofeatures)
 

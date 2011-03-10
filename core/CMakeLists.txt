@@ -26,7 +26,6 @@ ENDIF()
 #gsl - uncomment if needed
 #TARGET_LINK_LIBRARIES(mediacycle gsl gslcblas)
 
-INCLUDE_DIRECTORIES(../armadillo ../fftooura ../tinyxml)
 ADD_DEPENDENCIES(mediacycle armadillo-utils tinyxml)
 IF(APPLE AND USE_DEBUG)
 ADD_DEPENDENCIES(mediacycle mediafactorygenerator)

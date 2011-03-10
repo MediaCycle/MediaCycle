@@ -1,8 +1,6 @@
 SET(TARGET_NAME "multimediacycle-osg-qt")
 IF(USE_QT4 AND USE_OSG AND USE_OSC AND ( OPENAL_FOUND OR PORTAUDIO_FOUND ) )
 
-	INCLUDE_DIRECTORIES(. ../../gui/osg ../../gui/osg-qt ../../tinyxml)
-
 	IF ( APPLE )
 		SET(APP_TYPE MACOSX_BUNDLE)
 	ELSE()
@@ -30,7 +28,7 @@ IF(USE_QT4 AND USE_OSG AND USE_OSC AND ( OPENAL_FOUND OR PORTAUDIO_FOUND ) )
 
 	# Don't forget to include output directory, otherwise
 	# the UI file won't be wrapped!
-	include_directories(${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_BINARY_DIR}/gui/osg-qt)
+	include_directories(${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_BINARY_DIR}/libs/gui-osg-qt)
 
 	IF ( WIN32 )
 		ADD_EXECUTABLE(multimediacycle-osg-qt WIN32 ${multimediacycle-osg-qt_SRCS} ${multimediacycle-osg-qt_UIS_H} ${multimediacycle-osg-qt_MOC_SRCS} ${settings_SRCS} ${settings_UIS_H} ${settings_MOC_SRCS} ${settings_MOC_HDRS} ${settings_HS})

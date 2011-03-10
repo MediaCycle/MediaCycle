@@ -85,21 +85,10 @@ WARN_LOGFILE           =
 # configuration options related to the input files
 #---------------------------------------------------------------------------
 INPUT                  = ${MediaCycle_SOURCE_DIR}/apps \
-                         ${MediaCycle_SOURCE_DIR}/armadillo \
-                         ${MediaCycle_SOURCE_DIR}/audio \
-                         ${MediaCycle_SOURCE_DIR}/audioengine \
-                         ${MediaCycle_SOURCE_DIR}/cli \
                          ${MediaCycle_SOURCE_DIR}/core \
-                         ${MediaCycle_SOURCE_DIR}/fftooura \
-                         ${MediaCycle_SOURCE_DIR}/gnuplot_i \
-                         ${MediaCycle_SOURCE_DIR}/gui \
-                         ${MediaCycle_SOURCE_DIR}/io \
-                         ${MediaCycle_SOURCE_DIR}/lib \
+                         ${MediaCycle_SOURCE_DIR}/libs \
                          ${MediaCycle_SOURCE_DIR}/plugins \
-                         ${MediaCycle_SOURCE_DIR}/test \
-                         ${MediaCycle_SOURCE_DIR}/tinyxml \
-                         ${MediaCycle_SOURCE_DIR}/vamp-plugin-interface \
-                         ${MediaCycle_SOURCE_DIR}/doc/Doxyfiles/auto_Mainpage
+                         ${MediaCycle_SOURCE_DIR}/tests
 INPUT_ENCODING         = UTF-8
 FILE_PATTERNS          = *.h \
                          *.cpp \
@@ -108,16 +97,8 @@ RECURSIVE              = YES
 EXCLUDE                = .hg
 EXCLUDE_SYMLINKS       = NO
 EXCLUDE_PATTERNS       += */.hg/*
-EXCLUDE_PATTERNS       += */fftooura/*
-EXCLUDE_PATTERNS       += */gnuplot_i/*
-EXCLUDE_PATTERNS       += */oscpack/*
-EXCLUDE_PATTERNS       += */tree/*
-EXCLUDE_PATTERNS       += */vamp-plugin-sdk/vamp/*
-EXCLUDE_PATTERNS       += */vamp-hostsdk/*
-EXCLUDE_PATTERNS       += */vamp-sdk/*
 EXCLUDE_PATTERNS       += */image/blobs/*
 EXCLUDE_PATTERNS       += */image/gabor/*
-EXCLUDE_PATTERNS       += */tinyxml/*
 EXCLUDE_SYMBOLS        = 
 EXAMPLE_PATH           = 
 EXAMPLE_PATTERNS       = 

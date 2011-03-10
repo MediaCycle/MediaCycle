@@ -1,3 +1,0 @@
-# Dummy file so that CMake won't complain...
-FILE(GLOB HDR *.hpp *.h)
-INCLUDE_DIRECTORIES(.)

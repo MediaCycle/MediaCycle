@@ -44,9 +44,9 @@
 #include "ACMedia.h"
 #include "ACMediaFactory.h"
 #include "ACPluginManager.h"
-#include "tinyxml.h"
+#include <tinyxml.h>
 
-#include "boost/filesystem.hpp"
+#include <boost/filesystem.hpp>
 
 class ACMediaLibrary {
 	// these methods are common to all media.

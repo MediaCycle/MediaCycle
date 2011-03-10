@@ -8,7 +8,6 @@ IF (SUPPORT_AUDIO AND USE_AUDIOFEAT AND BUILD_CLIS)
 
 	ADD_DEPENDENCIES(audiofeatures-cli mediacycle armadillo-utils audiofeatures)
 	ADD_DEPENDENCIES(audiofeatures-cli mc_audio mc_segmentation)
-	INCLUDE_DIRECTORIES(. ../core ../../armadillo ../../audio)
 
 	TARGET_LINK_LIBRARIES(audiofeatures-cli mediacycle audiofeatures ${SNDFILE_LIBRARY} ${SAMPLERATE_LIBRARY})
 

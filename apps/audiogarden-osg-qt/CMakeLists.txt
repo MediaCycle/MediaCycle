@@ -3,14 +3,6 @@ IF (SUPPORT_AUDIO AND USE_AUDIOGARDEN AND USE_QT4 AND USE_OSG AND USE_OSC AND ( 
 	FILE(GLOB SRC *.cpp)
 	FILE(GLOB HDR *.h)
 
-	INCLUDE_DIRECTORIES(. ../../gui/osg ../../gui/osg-qt)
-	INCLUDE_DIRECTORIES(../../io/osc ../../io/osc/oscpack)
-	INCLUDE_DIRECTORIES(. ../../armadillo ../../audio ../../ ../../fftooura ../../audiogarden ../../tinyxml)
-
-	IF ( USE_APPLE_MULTITOUCH )
-		INCLUDE_DIRECTORIES( ../../io/applemultitouch)
-	ENDIF ( USE_APPLE_MULTITOUCH )
-
 	IF ( APPLE )
 		SET(APP_TYPE MACOSX_BUNDLE)
 	ENDIF ( APPLE )
@@ -52,7 +44,7 @@ IF (SUPPORT_AUDIO AND USE_AUDIOGARDEN AND USE_QT4 AND USE_OSG AND USE_OSC AND ( 
 		ADD_DEPENDENCIES(audiogarden-osg-qt mediacycle-io-applemultitouch)
 	ENDIF ( USE_APPLE_MULTITOUCH )
 
-	ADD_DEPENDENCIES(audiogarden-osg-qt armadillo-utils audiofeatures audiogarden)
+	ADD_DEPENDENCIES(audiogarden-osg-qt armadillo-utils audiofeatures audiogarden-synthesis)
 
 	#IF ( APPLE )
 	#	set_target_properties(audiogarden-osg-qt PROPERTIES MACOSX_BUNDLE_INFO_PLIST ${CMAKE_SOURCE_DIR}/gui/osg-qt/Info.plist)
@@ -66,7 +58,7 @@ IF (SUPPORT_AUDIO AND USE_AUDIOGARDEN AND USE_QT4 AND USE_OSG AND USE_OSC AND ( 
 	TARGET_LINK_LIBRARIES(audiogarden-osg-qt mediacycle-io-osc)
 	#TARGET_LINK_LIBRARIES(audiogarden-osg-qt oscpack)
 	TARGET_LINK_LIBRARIES(audiogarden-osg-qt audioengine)
-	TARGET_LINK_LIBRARIES(audiogarden-osg-qt audiofeatures audiogarden ${SNDFILE_LIBRARY} ${SAMPLERATE_LIBRARY})
+	TARGET_LINK_LIBRARIES(audiogarden-osg-qt audiofeatures audiogarden-synthesis ${SNDFILE_LIBRARY} ${SAMPLERATE_LIBRARY})
 	#TARGET_LINK_LIBRARIES(audiogarden-osg-qt ${OPENAL_LIBRARY})
 	#TARGET_LINK_LIBRARIES(audiogarden-osg-qt ${OPENGL_LIBRARIES}
 	#TARGET_LINK_LIBRARIES(audiogarden-osg-qt ${Boost_SYSTEM_LIBRARY})

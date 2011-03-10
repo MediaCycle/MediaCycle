@@ -41,7 +41,7 @@
 #include <iostream>
 #include <vector>
 
-#include "lib/tree/tree.hh"
+#include <tree.hh>
 #include "ACMediaNode.h"
 
 using namespace std;

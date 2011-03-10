@@ -80,7 +80,7 @@ ENDIF()
 OPTION(BUILD_APPS "Build apps" ON)
 OPTION(BUILD_CLIS "Build command-line interface applications" ON)	
 OPTION(USE_SDIF "Use SDIF" OFF)
-OPTION(BUILD_DOCUMENTATION "Build MediaCycle reference documentation using doxygen (use: make DoxygenDoc)" OFF)
+OPTION(BUILD_DOCUMENTATION "Build MediaCycle reference documentation using doxygen (use: make documentation)" OFF)
 
 ######################
 #     MEDIA TYPES    #
@@ -187,9 +187,6 @@ IF ( UNIX OR APPLE )
 	set(CPACK_PACKAGE_CONTACT "http://numediart.org/")
 	set(CPACK_SOURCE_IGNORE_FILES
 		"^${PROJECT_SOURCE_DIR}/Builds/"
-		"^${PROJECT_SOURCE_DIR}/cli/"
-		"^${PROJECT_SOURCE_DIR}/test/"
-		"^${PROJECT_SOURCE_DIR}/apps/*-cli/"
 	)
 	#set(CPACK_PACKAGE_EXECUTABLES "multimediacycle-osg-qt" "MultiMediaCycle.icns") #should contain pairs of <executable> and <icon name>
 	#set(CPACK_PACKAGE_ARCHITECTURE i386)
@@ -205,8 +202,6 @@ IF ( UNIX OR APPLE )
 ENDIF ( UNIX OR APPLE )
 
 IF ( WIN32 )
-	SET(BUILD_TESTS OFF)
-	SET(BUILD_PLUGINS OFF)
 	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D_CRT_SECURE_NO_DEPRECATE")
 	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_CRT_SECURE_NO_DEPRECATE")
 	SET(BUILD_SHARED_LIBS OFF)
@@ -286,11 +281,11 @@ ELSE ( USE_DEBUG )
 	SET(CMAKE_VERBOSE_MAKEFILE ON)#CF
 ENDIF ( USE_DEBUG )
 
-######################
-# EXTERNAL LIBRARIES #
-######################
+#########################
+# EXTERNAL DEPENDENCIES #
+#########################
 
-MESSAGE("\nEternal libraries:")
+MESSAGE("\nExternal libraries:")
 #Threads
 FIND_PACKAGE ( Threads )
 
@@ -728,8 +723,6 @@ IF (ARMADILLO_FOUND)
 	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DUSE_ARMADILLO")
 	INCLUDE_DIRECTORIES(${ARMADILLO_INCLUDE_DIR})
 	ADD_LIB_LINKED_DIR(${ARMADILLO_LIBRARY})
-	#INCLUDE_DIRECTORIES(armadillo)
-	#add_subdirectory(armadillo)
 ELSE (ARMADILLO_FOUND)
 	MESSAGE(FATAL_ERROR "Armadillo not found.")
 ENDIF (ARMADILLO_FOUND)
@@ -866,60 +859,53 @@ IF(SUPPORT_AUDIO AND USE_AUDIOFEAT AND USE_AUDIOGARDEN)
 	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DUSE_AUDIOGARDEN")
 ENDIF()
 
+#########################
+# INTERNAL DEPENDENCIES #
+#########################
+
+MESSAGE("\nInternal dependencies:")
+
+FILE(GLOB 3RD_PARTY_DIRS 3rdparty/*)
+FOREACH(3RD_PARTY_DIR ${3RD_PARTY_DIRS})
+    IF(IS_DIRECTORY ${3RD_PARTY_DIR})
+        INCLUDE_DIRECTORIES(${3RD_PARTY_DIR})
+    ENDIF()
+ENDFOREACH()
+add_subdirectory(3rdparty)
+
 ######################
 # INTERNAL LIBRARIES #
 ######################
 MESSAGE("\nInternal libraries:")
 
-INCLUDE_DIRECTORIES(. armadillo fftooura core tinyxml gnuplot_i)
+# First, the armadillo-utils
+INCLUDE_DIRECTORIES(libs/armadillo-utils)
+add_subdirectory(libs/armadillo-utils)
 
-# First internal core dependencies:
-add_subdirectory(armadillo)
-add_subdirectory(fftooura)
-add_subdirectory(tinyxml)
-add_subdirectory(gnuplot_i)
-add_subdirectory(lib) # with tree required by core
-
-# MediaCycle core library
+# Second, the MediaCycle core library
+INCLUDE_DIRECTORIES(core)
 add_subdirectory(core)
 
-# audioengine (currently required by gui and osc)
-IF(SUPPORT_AUDIO AND SNDFILE_FOUND AND (OPENAL_FOUND OR PORTAUDIO_FOUND))
-	INCLUDE_DIRECTORIES(audioengine)
-	add_subdirectory(audioengine)
-ELSE()
-	MESSAGE("[ ] audioengine")
-ENDIF()
-
-# OSC and Apple multitouch trackpad support (not ready)
-INCLUDE_DIRECTORIES(io)
-add_subdirectory(io)
-
-# gui (requires core, audioengine, optionally osc)
-add_subdirectory(gui)
-
-# audiofeatures (required by some apps and plugins)
-IF(SUPPORT_AUDIO AND ARMADILLO_FOUND AND SNDFILE_FOUND AND SAMPLERATE_FOUND AND USE_AUDIOFEAT)
-	add_subdirectory(audio)
-ENDIF()
-
-# vamp-plugin-interface (required by some plugins and tests)
-IF(SUPPORT_AUDIO AND USE_VAMP)
-	add_subdirectory(vamp-plugin-interface)
-ENDIF()
-
-# audiogarden audio synthesis library (required by audiogarden apps and plugins)
-IF(SUPPORT_AUDIO AND USE_AUDIOGARDEN AND USE_AUDIOFEAT)
-	add_subdirectory(audiogarden)
-ELSE()
-	MESSAGE("[ ] audiogarden synthesis")
-ENDIF()
+# Third, internal libraries:
+FILE(GLOB LIB_DIRS libs/*)
+FOREACH(LIB_DIR ${LIB_DIRS})
+    IF(IS_DIRECTORY ${LIB_DIR})
+        INCLUDE_DIRECTORIES(${LIB_DIR})
+    ENDIF()
+ENDFOREACH()
+add_subdirectory(libs)
 
 ######################
 #       PLUGINS      #
 ######################
 
 IF(BUILD_PLUGINS)
+    FILE(GLOB PLUGIN_DIRS plugins/*)
+    FOREACH(PLUGIN_DIR ${PLUGIN_DIRS})
+        IF(IS_DIRECTORY ${PLUGIN_DIR})
+           INCLUDE_DIRECTORIES(${PLUGIN_DIR})
+        ENDIF()
+    ENDFOREACH()
 	add_subdirectory(plugins)
 ENDIF(BUILD_PLUGINS)
 
@@ -951,10 +937,7 @@ ADD_LINKED_DIRECTORY("${CMAKE_BINARY_DIR}/plugins/visualisation")
 #         APPS       #
 ######################
 
-add_subdirectory(cli)
-
 IF(BUILD_APPS)
-	INCLUDE_DIRECTORIES(apps)
 	add_subdirectory(apps)
 ENDIF(BUILD_APPS)
 
@@ -982,7 +965,7 @@ ENDIF()
 ######################
 
 IF ( BUILD_TESTS )
-	add_subdirectory(test)
+	add_subdirectory(tests)
 ENDIF ( BUILD_TESTS )
 
 ##MESSAGE("LINKED_DIRECTORIES: ${LINKED_DIRECTORIES}")
@@ -1018,7 +1001,7 @@ IF(BUILD_DOCUMENTATION)
 
     SET(CALL_GRAPH NO)# if set to YES, a graphical call graph is drawn for each function showing the functions that the function directly or indirectly calls.
     SET(CALLER_GRAPH NO)# if set to YES, a graphical caller graph is drawn for each function showing the functions that the function is directly or indirectly called by. 
-    OPTION(DOCUMENTATION_GRAPH_FUNCTION_CALLS "Enable graphical call/callers graphs for each function that the functions calls/are called by." OFF)
+    OPTION(DOCUMENTATION_GRAPH_FUNCTION_CALLS "Enable graphical call/callers graphs for each function that the functions calls/are called by." ON)
     IF(DOCUMENTATION_GRAPH_FUNCTION_CALLS)
         SET(CALL_GRAPH YES)
         SET(CALLER_GRAPH YES)

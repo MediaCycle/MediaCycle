@@ -3,11 +3,8 @@ IF(SUPPORT_VIDEO AND USE_QT4 AND USE_OSG AND USE_OSC AND OPENAL_FOUND)
 	FILE(GLOB SRC *.cpp)
 	FILE(GLOB HDR *.h)
 
-	INCLUDE_DIRECTORIES(. ../../gui/osg ../../gui/osg-qt ../../tinyxml)
-	INCLUDE_DIRECTORIES(../../io/osc ../../io/osc/oscpack)
-
 	IF ( USE_APPLE_MULTITOUCH )
-		INCLUDE_DIRECTORIES( ../../io/applemultitouch)
+		INCLUDE_DIRECTORIES( ../../libs/io-applemultitouch)
 	ENDIF ( USE_APPLE_MULTITOUCH )
 
 	IF ( APPLE )

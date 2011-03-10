@@ -3,9 +3,6 @@ IF(SUPPORT_VIDEO AND APPLE AND USE_COCOA AND USE_OSC AND OPENAL_FOUND)
 	FILE(GLOB SRC *.m *.mm *.nib)
 	FILE(GLOB HDR *.h)
 
-	INCLUDE_DIRECTORIES(. ../../core ../../gui/osg ../../gui/osg-cocoa)
-	INCLUDE_DIRECTORIES(../../io/osc ../../io/osc/oscpack)
-
 	SET(APP_TYPE MACOSX_BUNDLE)
 	ADD_EXECUTABLE(videocycle-osg-cocoa ${APP_TYPE} ${MACOSX_BUNDLE_INFO_PLIST} ${SRC} ${HDR})
 	ADD_DEPENDENCIES(videocycle-osg-cocoa mediacycle)
