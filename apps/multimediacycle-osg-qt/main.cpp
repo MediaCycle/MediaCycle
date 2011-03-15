@@ -52,29 +52,37 @@ int main(int argc, char *argv[])
 	QApplication::setLibraryPaths(QStringList(dir.absolutePath()));
 	#endif
 	
-    ACMultiMediaCycleOsgQt window;
-	
-	// Adding palettes
-	window.addControlDock("MCMediaConfig");
-	window.addControlDock("MCBrowserControlsClusters");//"MCBrowserControlsClustersNeighbors");
-	#if defined (SUPPORT_AUDIO)
+	ACMultiMediaCycleOsgQt window;
+	try {
+		// Adding palettes
+		window.addControlDock("MCMediaConfig");
+		window.addControlDock("MCBrowserControlsClusters");//"MCBrowserControlsClustersNeighbors");
+#if defined (SUPPORT_AUDIO)
 		window.addControlDock("MCAudioControls");
-	#endif //defined (SUPPORT_AUDIO)
-	#if defined (SUPPORT_VIDEO)
+#endif //defined (SUPPORT_AUDIO)
+#if defined (SUPPORT_VIDEO)
 		window.addControlDock("MCVideoControls");				 
-	#endif //defined (SUPPORT_VIDEO)
-	
-	// XS TODO
-	// this has to be called after dock controls have been added
-	// do we need to put all this code here ?
-	window.configureSettings();
-	
-//	window.configurePluginDock();
-
-	// Changing the about dialog (not necessary if standard MediaCycle app)
-	//window.addAboutDialog("MediaCycle");
-	
-    window.show();
+#endif //defined (SUPPORT_VIDEO)
+		
+		// XS TODO
+		// this has to be called after dock controls have been added
+		// do we need to put all this code here ?
+		window.configureSettings();
+		
+		//	window.configurePluginDock();
+		
+		// Changing the about dialog (not necessary if standard MediaCycle app)
+		//window.addAboutDialog("MediaCycle");
+		
+		window.show();
+		
+	}
+	catch (const exception& e) {
+		cout << "** caught exception in main : " << e.what() << endl;
+	}
+	catch (...){
+		cout << "** caught undetermined exception in main" << endl;
+	}
 	
 	// variables used in QSettings 
 	// see http://doc.qt.nokia.com/latest/qsettings.html#details

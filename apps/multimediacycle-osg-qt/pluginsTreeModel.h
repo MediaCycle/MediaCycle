@@ -70,11 +70,9 @@ public:
 	// XS 
 	void addRow(pluginsTreeItem *row);
 	pluginsTreeItem* getRootItem() {return rootItem;}
-
-private:
-//	void setupModelData(const QStringList &lines, pluginsTreeItem *parent);
 	pluginsTreeItem *getItem(const QModelIndex &index) const;
 
+private:
 	pluginsTreeItem *rootItem;
 };
 

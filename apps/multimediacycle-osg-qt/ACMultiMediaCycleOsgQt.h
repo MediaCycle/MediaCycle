@@ -71,9 +71,7 @@ Q_OBJECT
 	
 public slots:
 	// Config
-	void on_actionSave_Config_File_triggered(bool checked); // settings
 	void on_actionEdit_Config_File_triggered(bool checked);
-	void on_actionLoad_Config_File_triggered(bool checked);
 	void comboDefaultSettingsChanged(); 
 	
 private slots:
@@ -101,15 +99,18 @@ public:
 	void setBrowserMode(ACBrowserMode _mode){this->browser_mode=_mode;}
 	void setMediaType(ACMediaType _mt){this->media_type = _mt;}
 
-
 	// XS TODO: default values for image -- is this correct ?
 	void createMediaCycle(ACMediaType _media_type = MEDIA_TYPE_IMAGE, ACBrowserMode _browser_mode = AC_MODE_CLUSTERS);
 	void destroyMediaCycle();
 	MediaCycle* getMediaCycle() {return media_cycle;}
 	ACMediaType getMediaType() {return media_type;}
-	void addPluginItem(QListWidgetItem *_item);
-	void addPluginsLibrary(std::string _library);
-	void removePluginsLibrary(std::string _library);
+//	void addPluginItem(QListWidgetItem *_item);
+	bool addPluginLibrary(std::string _library);
+	bool removePluginLibrary(std::string _library);
+	ACPluginLibrary* getPluginLibrary (std::string _library);
+
+	bool removePluginFromLibrary(std::string _plugin_name, std::string _library_path);
+
 	void loadDefaultConfig(ACMediaType _media_type = MEDIA_TYPE_IMAGE, ACBrowserMode _browser_mode = AC_MODE_CLUSTERS);
 	void synchronizeFeaturesWeights();
 	
@@ -163,12 +164,14 @@ private:
 	bool writeQSettings();
 	void setDefaultQSettings();
 	void clearQSettings();
+	void clean();
 
-	void readXMLConfig(std::string _filename="");
+	bool readXMLConfig(std::string _filename="");
 //	TiXmlHandle readXMLConfigHeader(std::string _filename="");
 	void writeXMLConfig(std::string _filename="");
 	std::string rstrip(const std::string& s);
 	void showError(std::string s);
+	void showError(const exception& e);
 	bool hasMediaCycle();
 };
 #endif

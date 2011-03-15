@@ -178,7 +178,7 @@ public:
 	// 0 of features
 	void setWeight(int i, float weight);
 	std::vector<float> getWeightVector(){return mFeatureWeights;};
-	void setFeatureWeights(vector<float> &weights);
+//	void setFeatureWeights(vector<float> &weights);
 	float getWeight(int i);
 	void initializeFeatureWeights();
 	

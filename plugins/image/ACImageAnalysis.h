@@ -94,7 +94,7 @@ public:
 	virtual void reset(){};
 	virtual void clean(){};
 	void setFileName(const string &filename);
-	int saveInFile(string fileout); // XS TODO: void in video
+	bool saveInFile(string fileout); 
 	
 	//accessors 
 	int getWidth() ;

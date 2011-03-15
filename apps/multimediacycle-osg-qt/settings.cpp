@@ -43,22 +43,28 @@
 // parent is typically ACMultiMediaCycleOsgQt->parent
 SettingsDialog::SettingsDialog(ACMultiMediaCycleOsgQt* _mc) : QMainWindow() {
     setupUi(this);
-
+	
+	if (_mc ==0){
+		cerr << "undefined multimediacycle application" << endl;
+		return;
+	}
+		
 	this->multi_media_cycle = _mc;
 	
-	if (_mc) {
-		this->media_cycle = _mc->getMediaCycle() ;
-	}
 	this->ptm = new pluginsTreeModel();
 	this->project_directory="/tmp";
 	this->xml_config_file="MCconfig.xml";
 
 	treeViewPluginsLibrairies->setModel(this->ptm);
+
+	// resize first column to fit the plugin's path
+	// XS TODO: shorten the path by stripping directory ?
 	for (int column = 0; column < ptm->columnCount(); ++column)
         treeViewPluginsLibrairies->resizeColumnToContents(column);
-
-	this->media_type = comboMediaType->currentText().toStdString();
-	this->browser_mode = comboBrowserMode->currentText().toStdString();
+	
+	// XS TODO: non, get it from _mc
+//	this->media_type = comboMediaType->currentText().toStdString();
+//	this->browser_mode = comboBrowserMode->currentText().toStdString();
 		
 	lineEditProjectDirectory->setText(QString::fromStdString(this->project_directory));
 	lineEditXMLConfigFile ->setText(QString::fromStdString(this->xml_config_file));
@@ -66,7 +72,6 @@ SettingsDialog::SettingsDialog(ACMultiMediaCycleOsgQt* _mc) : QMainWindow() {
 //    connect(buttonSelectVisualizationPlugin, SIGNAL(clicked()), this, SLOT(selectVisualizationPlugins()));
 	connect(comboMediaType, SIGNAL(currentIndexChanged(const QString &)), this, SLOT(comboMediaTypeValueChanged()));
 	connect(comboBrowserMode, SIGNAL(currentIndexChanged(const QString &)), this, SLOT(comboBrowserModeValueChanged()));
-    connect(buttonRemovePluginsLibrary, SIGNAL(clicked()), this, SLOT(removePluginRow()));
     connect(treeViewPluginsLibrairies->selectionModel(),
             SIGNAL(selectionChanged(const QItemSelection &,
                                     const QItemSelection &)),
@@ -80,24 +85,10 @@ SettingsDialog::~SettingsDialog(){
 	delete this->ptm;
 }
 
-void SettingsDialog::removePluginRow() {
-    QModelIndex index = treeViewPluginsLibrairies->selectionModel()->currentIndex();
-    QAbstractItemModel *model = treeViewPluginsLibrairies->model();
-    if (model->removeRow(index.row(), index.parent())){
-		cout << "removed selected row" << endl;
-		updateActions();
-	}
-	else {
-		cout << "failed removing selected row" << endl;
-	}
-}
-
-
 // tells the settings dialog which application it will set up
 // use a handy pointer directly to mediacycle too.
 void SettingsDialog::setMediaCycleMainWindow(ACMultiMediaCycleOsgQt* _mcw) {
 	this->multi_media_cycle = _mcw;
-	this->media_cycle = _mcw->getMediaCycle();
 	
 	// XS  TODO : find a way to tell settings what type of media the user choose e.g. in the default config
 //	if (this->media_cycle != 0) {
@@ -107,22 +98,48 @@ void SettingsDialog::setMediaCycleMainWindow(ACMultiMediaCycleOsgQt* _mcw) {
 }
 
 
-void SettingsDialog::setMediaCycle(MediaCycle* _mc) {
-	this->media_cycle = _mc;
+MediaCycle* SettingsDialog::getMediaCycle() {
+	MediaCycle* _mc = 0;
+	if (!this->multi_media_cycle)
+		// XS TODO add error message ?
+		_mc = 0;
+	else 
+		_mc = this->multi_media_cycle->getMediaCycle();
+	return _mc;
 }
 
-bool SettingsDialog::setMediaType(string _mt) {
-	QString _smt = QString::fromStdString(_mt);
-	// test if _mt is 
-	int index = comboMediaType->findText(_smt);
-	if (index < 0) {
-		cerr << "<SettingsDialog::setMediaType> : media type not found" << _mt << endl;
-		return false;
-	}
-	comboMediaType->setCurrentIndex(index);
-	this->media_type = _mt;
-	return true;
+bool SettingsDialog::changeMediaType(ACMediaType _mt){
+	MediaCycle* _mc = this->getMediaCycle();
+	bool ok = false;
+	if (!_mc) 
+		ok = false;
+	else
+		ok = _mc->changeMediaType(_mt);
+	return ok;
 }
+
+bool SettingsDialog::changeBrowserMode(ACBrowserMode _bm){
+	MediaCycle* _mc = this->getMediaCycle();
+	bool ok = false;
+	if (!_mc) 
+		ok = false;
+	else
+		ok = _mc->changeBrowserMode(_bm);
+	return ok;
+}
+
+//bool SettingsDialog::setMediaType(string _mt) {
+//	QString _smt = QString::fromStdString(_mt);
+//	// test if _mt is among the options
+//	int index = comboMediaType->findText(_smt);
+//	if (index < 0) {
+//		cerr << "<SettingsDialog::setMediaType> : media type not found" << _mt << endl;
+//		return false;
+//	}
+//	comboMediaType->setCurrentIndex(index);
+//	this->media_type = _mt;
+//	return true;
+//}
 
 
 // ----- SLOTS -----
@@ -146,17 +163,49 @@ bool SettingsDialog::setMediaType(string _mt) {
 //}
 
 
+// changes will take effect when we close the settings window
 void SettingsDialog::comboMediaTypeValueChanged(){
-	this->media_type = comboMediaType->currentText().toStdString();
-//	cout << "(if you press Apply) media type will change to : " << this->media_type << endl;
+	string s_media_type = comboMediaType->currentText().toStdString() ;
+	stringToMediaTypeConverter::const_iterator iterm = stringToMediaType.find(s_media_type);
+	if( iterm == stringToMediaType.end() ) {
+		cout << " media type not found : " << s_media_type << endl;
+		return;
+	}
+	else {
+		this->media_type = iterm->second;
+//		cout << iterm->first << " - corresponding media type code : " << new_media_type << endl;
+	}
 }
 
+// changes will take effect when we close the settings window
 void SettingsDialog::comboBrowserModeValueChanged(){
-	this->browser_mode = comboBrowserMode->currentText().toStdString();
-//	cout << "(if you press Apply) browser mode will change to : " << this->browser_mode << endl;
+	string s_browser_mode = comboBrowserMode->currentText().toStdString();
+	stringToBrowserModeConverter::const_iterator iterb = stringToBrowserMode.find(s_browser_mode);
+	if( iterb == stringToBrowserMode.end() ) {
+		cout << " browser mode not found : " << s_browser_mode << endl;
+		return;
+	}
+	else {
+		this->browser_mode = iterb->second;
+//		cout << iterb->first << " - corresponding browser mode code : " << new_browser_mode << endl;
+	}
 }
 
-void SettingsDialog::on_buttonAddPluginsLibrary_clicked(){
+void SettingsDialog::on_buttonAddPluginLibrary_clicked(){
+	// if media_cycle has not been instantiated yet, 
+	// it creates one (if media_type and browser_mode have been defined)
+	try{	
+		if (this->getMediaCycle() == 0) {
+			if (this->getMediaType() > 0 && this->getBrowserMode() > 0) 
+				this->multi_media_cycle->createMediaCycle(this->getMediaType(), this->getBrowserMode());
+			else 
+				throw runtime_error("define media type and browser mode first");
+		}
+	}catch (const exception& e) {
+		this->showError(e);
+		return;
+	}	
+	
 	QString pluginsLibraryFileName;
 	QFileDialog	dialog(this, tr("Browse Plugins Library"),"",tr("Plugins Library (*.*)"));
 	dialog.setFileMode(QFileDialog::ExistingFile);
@@ -173,38 +222,44 @@ void SettingsDialog::on_buttonAddPluginsLibrary_clicked(){
 	}
 }
 
-void SettingsDialog::applyCurrentSettings(){
-	stringToMediaTypeConverter::const_iterator iterm = stringToMediaType.find(this->media_type);
-	if( iterm == stringToMediaType.end() ) {
-		cout << " media type not found : " << this->media_type << endl;
-		return;
+// removes any row of plugins in the "table" (list of tree items)
+void SettingsDialog::on_buttonRemovePluginLibrary_clicked() {
+    const QModelIndex index = treeViewPluginsLibrairies->selectionModel()->currentIndex();
+    QAbstractItemModel *model = treeViewPluginsLibrairies->model();
+	
+	// remove associated plugin or plugin library...
+	if (index.parent().row() == -1){ 
+		// then it's a whole library
+		string pl = ptm->data(index, Qt::DisplayRole).toString().toStdString();
+		cout << "removing plugin library : "<< pl << endl;
+		this->multi_media_cycle->removePluginLibrary(pl);
 	}
-	ACMediaType new_media_type = iterm->second;
-	cout << iterm->first << " - corresponding media type code : " << new_media_type << endl;
-	
-	stringToBrowserModeConverter::const_iterator iterb = stringToBrowserMode.find(this->browser_mode);
-	if( iterb == stringToBrowserMode.end() ) {
-		cout << " browser mode not found : " << this->browser_mode << endl;
-		return;
+	else{ 
+		// then it's a single plugin, not a whole library
+		string pl = ptm->data(index, Qt::DisplayRole).toString().toStdString();
+		cout << "removing plugin : "<< pl << endl;
+		string pll = ptm->data(index.parent(), Qt::DisplayRole).toString().toStdString();
+		cout << "from library : "<< pll << endl;
+		this->multi_media_cycle->removePluginFromLibrary(pl,pll);
 	}
-	ACBrowserMode new_browser_mode = iterb->second;
-	cout << iterb->first << " - corresponding browser mode code : " << new_browser_mode << endl;
 	
-	this->media_cycle->changeMediaType(new_media_type);
-	this->media_cycle->changeBrowserMode(new_browser_mode);
-	
-	// clean the current media_cycle that was used by the ACMultiMediaCycleOsgQt app.
-	// XS TODO : destroy MC only if media type changed...
-//	this->multi_media_cycle->destroyMediaCycle();	
-//	this->multi_media_cycle->createMediaCycle(new_media_type, new_browser_mode);
-//	this->media_cycle = this->multi_media_cycle->getMediaCycle();
+    if (model->removeRow(index.row(), index.parent())){
+		cout << "removed selected row" << endl;
+		updateActions();
+	}
+	else {
+		cout << "failed removing selected row" << endl;
+	}
+}
 
-	// XS TODO sync variables with MC (+already save XML ?)
+void SettingsDialog::applyCurrentSettings(){	
+	this->changeMediaType(this->media_type);
+	this->changeBrowserMode(this->browser_mode);
 }
 
 void SettingsDialog::on_buttonProjectDirectory_clicked(){
 	QString default_dir = QString::fromStdString(this->project_directory);
-	QString selectDir = QFileDialog::getExistingDirectory
+	QString select_dir = QFileDialog::getExistingDirectory
 	(
 	 this, 
 	 tr("Open Directory"),
@@ -212,23 +267,49 @@ void SettingsDialog::on_buttonProjectDirectory_clicked(){
 	 QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks
 	 );
 	
-	if (selectDir=="") return; // e.g. the user pressed "cancel"	
+	if (select_dir=="") return; // e.g. the user pressed "cancel"
+	else {
+		lineEditProjectDirectory->setText(select_dir);
+		this->project_directory=select_dir.toStdString();
+	}
 }
 
+void SettingsDialog::on_buttonXMLConfigFile_clicked(){
+	QString default_file = QString::fromStdString(this->xml_config_file);
+	QString select_file = QFileDialog::getSaveFileName(this, tr("Open File"),
+													   QString::fromStdString(this->project_directory),
+													   tr("xml config file (*.xml)"));
+	if (select_file=="") return; // e.g. the user pressed "cancel"
+	else {
+		lineEditXMLConfigFile->setText(select_file);
+		this->xml_config_file=select_file.toStdString();
+	}
+}
+
+
 void SettingsDialog::addPluginsFromLibrary(QString _fileName){
-	if (media_cycle == 0) {
-		cout << "load media_cycle first" << endl;
+	// if media_cycle has not been instantiated yet, shows error
+	// should have been done before calling this method
+	try{	
+		if (this->getMediaCycle() == 0) {
+			throw runtime_error("missing MediaCycle");
+		}
+	} catch (const exception& e) {
+		this->showError(e);
 		return;
-	}
-	string plugins_library = _fileName.toStdString();
-	ACPluginManager *acpl = media_cycle->getPluginManager();
-	if (acpl->add(plugins_library) <=0 ){
-		cerr << "Problem adding Plugins Library : " << plugins_library<< endl;
-		return;
-	}
+	}	
 	
-	ACPluginLibrary* plib = acpl->getPluginLibrary(plugins_library);
+	string plugins_library = _fileName.toStdString();
+	try {
+		this->multi_media_cycle->addPluginLibrary(plugins_library);
+	} catch (const exception& e) {
+		this->showError(e);
+		return;
+	}
+		
+	ACPluginLibrary* plib = this->multi_media_cycle->getPluginLibrary(plugins_library);
 	if (plib == 0) {
+		// XS TODO showerror
 		cout << "Problem loading plugins library: " << plugins_library << endl;
 		return;
 	}
@@ -262,15 +343,12 @@ void SettingsDialog::addPluginsFromLibrary(QString _fileName){
 	}
 	
 	ptm->addRow(libraryItem);
-//	for (int column = 0; column < ptm->columnCount(); ++column)
-//        treeViewPluginsLibrairies->resizeColumnToContents(column);
+	treeViewPluginsLibrairies->resizeColumnToContents(0);
+	treeViewPluginsLibrairies->expandAll();
 
-	// XS TODO: do this at the end, after selection is made.
-	// keep track of all libraries added
-	this->multi_media_cycle->addPluginsLibrary(plugins_library);
 }
 
-//void SettingsDialog::on_buttonRemovePluginsLibrary_clicked(){
+//void SettingsDialog::on_buttonRemovePluginLibrary_clicked(){
 //	QListWidgetItem *curitem = listWidgetPluginsLibraries->currentItem();
 //	
 //	if (curitem) {
@@ -278,7 +356,7 @@ void SettingsDialog::addPluginsFromLibrary(QString _fileName){
 //		int r = listWidgetPluginsLibraries->row(curitem);
 //		listWidgetPluginsLibraries->takeItem(r);
 //		delete curitem;
-//		this->multi_media_cycle->removePluginsLibrary(pluginLibraryName);
+//		this->multi_media_cycle->removePluginLibrary(pluginLibraryName);
 //	}	
 //}
 
@@ -312,30 +390,19 @@ void SettingsDialog::addPluginsFromLibrary(QString _fileName){
 //	}
 //	
 //	// keep track of all libraries added
-//	this->multi_media_cycle->removePluginsLibrary(plugins_library);
-//}
-
-//void SettingsDialog::on_buttonConfirmPluginsSelection_clicked(){
-//	cout << "confirming plugins selection : " << listWidgetFeaturesPlugins->count()<< endl;
-//	for (int i=0; i < listWidgetFeaturesPlugins->count(); i++) {
-//		// XS TODO: if checkState... (so we only add the selected plugins)
-//		cout << listWidgetFeaturesPlugins->item(i)->text().toStdString() << endl;
-//		if (listWidgetFeaturesPlugins->item(i)->checkState() == Qt::Checked){
-//			multi_media_cycle->addPluginItem(listWidgetFeaturesPlugins->item(i));
-//		}
-//	}
-	
-	// then the selected plugins get their weights synchronized with MediaCycle
-//	multi_media_cycle->synchronizeFeaturesWeights();
+//	this->multi_media_cycle->removePluginLibrary(plugins_library);
 //}
 
 void SettingsDialog::updateActions(){
     bool hasSelection = !treeViewPluginsLibrairies->selectionModel()->selection().isEmpty();
-    buttonRemovePluginsLibrary->setEnabled(hasSelection);
+    buttonRemovePluginLibrary->setEnabled(hasSelection);
 }
 
 void SettingsDialog::closeEvent(QCloseEvent *event) {
-	this->writeSettings();
+	// MediaCycle settins (important !)
+	this->applyCurrentSettings();
+	// GUI-related settings ("cosmetic")
+	this->writeSettings(); 
 	QMainWindow::closeEvent(event);		
 	cout << "closed settings window properly" << endl;
 }
@@ -362,5 +429,15 @@ void SettingsDialog::writeSettings() {
 	settings.setValue("windowState", saveState());
 }
 
+void SettingsDialog::showError(std::string s){
+	int warn_button;
+	const QString qs = QString::fromStdString(s);
+	warn_button = QMessageBox::warning(this, "Error", qs);
+	cerr << s << endl;
+}
+
+void SettingsDialog::showError(const exception& e) {
+	this->showError(e.what());
+}
 
 

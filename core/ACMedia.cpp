@@ -299,64 +299,144 @@ void ACMedia::fixWhiteSpace (std::string &str) {
 }
 
 void ACMedia::loadXML(TiXmlElement* _pMediaNode){
-//	const char *pName=_pMediaNode->Attribute("FileName");
-	// no need for char*; string should work since we defined TIXML_USE_STL
+//  const char *pName=_pMediaNode->Attribute("FileName");
+//  XS: no need for char*; string should work since we defined TIXML_USE_STL
+	if (!_pMediaNode)
+		throw runtime_error("corrupted XML file");
+
 	string pName ="";
 	pName = _pMediaNode->Attribute("FileName");
-	// this requires #include <algorithm>
-	//if (pName!="")
-	//	replace(pName.begin(), pName.end(), " ", "\ ");
-	fixWhiteSpace(pName);
-	this->setFileName(pName);
+	if (pName == "")
+		throw runtime_error("corrupted XML file, no filename");
+	else {
+		fixWhiteSpace(pName);
+		this->setFileName(pName);
+	}
 	
-	int mid=0;
+	int mid=-1;
 	_pMediaNode->QueryIntAttribute("MediaID", &mid); // If this fails, original value is left as-is
-	this->setId(mid);
+	if (mid < 0)
+		throw runtime_error("corrupted XML file, wrong media ID");
+	else
+		this->setId(mid);
 	
-	// XS TODO
+	// loadXMLSpecific should throw an exception if a problem occured 
+	// but to make sure we'll throw one as well if return value is wrong
 	if (!loadXMLSpecific(_pMediaNode)) {
-		//  ** do something clever
-		return; // -1
+		throw runtime_error("corrupted XML file, problem with loadXMLSpecific");
 	}		
 	
-	int nf=0;
+	int nf=-1;
 	_pMediaNode->QueryIntAttribute("NumberOfFeatures", &nf);
 	
-	//	TiXmlNode* featureNode = 0;
-	//	TiXmlElement* featureElement = 0;
+	if (nf < 0)
+		throw runtime_error("corrupted XML file, wrong number of features");
+	else if (nf ==0)
+		// XS TODO could this happen without it being an error?
+		// if not, put <= in the test above
+		cout << "loading media with no features" << endl;
+		
 	TiXmlHandle _pMediaNodeHandle(_pMediaNode);
 	
-	int count = 0;
+	int count_f = 0;
 	TiXmlElement* featureElement = _pMediaNodeHandle.FirstChild( "Feature" ).Element();
-	TiXmlText* featureElementsAsText;
+	if (!featureElement)
+		throw runtime_error("corrupted XML file, error reading features");
+	TiXmlText* featureElementsAsText = 0;
 	ACMediaFeatures* mediaFeatures;
 	for( featureElement; featureElement; featureElement = featureElement->NextSiblingElement() ) {
 		mediaFeatures = new ACMediaFeatures();
-		int nfe=0;
-		int nno=0;
+		int nfe=-1;
+		int nno=-1;
 		featureElement->QueryIntAttribute("NumberOfFeatureElements", &nfe);
+		if (nfe < 0)
+			throw runtime_error("corrupted XML file, wrong number of feature elements");
 		featureElement->QueryIntAttribute("NeedsNormalization", &nno);
-		string featureName =featureElement->Attribute("FeatureName");
+		if (nno < 0)
+			throw runtime_error("corrupted XML file, wrong normalization flag");
+		string featureName = "";
+		featureName = featureElement->Attribute("FeatureName");
+		if (featureName == "")
+			throw runtime_error("corrupted XML file, empty feature name");
 		featureElementsAsText=featureElement->FirstChild()->ToText();
-		string fes = featureElementsAsText->ValueStr();
+		if (!featureElementsAsText)
+			throw runtime_error("corrupted XML file, error reading feature elements");
+		string fes = "";
+		fes = featureElementsAsText->ValueStr();
+		if (fes == "")
+			throw runtime_error("corrupted XML file, error reading feature elements");
 		std::stringstream fess;
 		fess << fes;
-		for (int j=0; j<nfe; j++) {
-			// XS TODO add test
-			float f;
-			fess >> f;
-			mediaFeatures->addFeatureElement(f);
+		try {
+			for (int j=0; j<nfe; j++) {
+				// XS TODO add test
+				float f;
+				fess >> f;
+				mediaFeatures->addFeatureElement(f);
+			}
 		}
-		// XS TODO segments
-
+		catch (...) {
+			// attempt to catch potential problems and group them
+			throw runtime_error("corrupted XML file, error reading feature elements");
+		}
 		mediaFeatures->setComputed();
 		mediaFeatures->setName(featureName);
 		features_vectors.push_back(mediaFeatures);
-		count++;
+		count_f++;
 	}
 	
-	// consistency check
-	if (count != nf) cerr << "<ACMedia::loadXML> inconsistent number of features" << endl;
+	// consistency check for features
+	if (count_f != nf) 
+		throw runtime_error("<ACMedia::loadXML> inconsistent number of features");
+
+	// --- segments --- 
+	int ns = -1;
+	_pMediaNode->QueryIntAttribute("NumberOfSegments", &ns);
+
+	TiXmlElement* segmentElement = _pMediaNodeHandle.FirstChild( "Segment" ).Element();
+	TiXmlText* segmentIDElementsAsText = 0;
+	int count_s = 0;
+	
+	for( segmentElement; segmentElement; segmentElement = segmentElement->NextSiblingElement() ) {
+		ACMedia* segment_media = ACMediaFactory::getInstance()->create(this->getMediaType());
+		int n_start=-1;
+		int n_end=-1;
+		segmentElement->QueryIntAttribute("Start", &n_start);
+		if (n_start < 0) {
+			delete segment_media;
+			throw runtime_error("corrupted XML file, wrong segment start");
+		}
+		segment_media->setStart(n_start);
+
+		segmentElement->QueryIntAttribute("End", &n_end);
+		if (n_end < 0){
+			delete segment_media;
+			throw runtime_error("corrupted XML file, wrong segment end");
+		}
+		segment_media->setEnd(n_end);
+
+		segmentIDElementsAsText=segmentElement->FirstChild()->ToText();
+		if (!segmentIDElementsAsText){
+			delete segment_media;
+			throw runtime_error("corrupted XML file, wrong segment ID");
+		}
+		string mid_s = "";
+		mid_s = segmentIDElementsAsText->ValueStr();
+		std::stringstream mid_ss;
+		mid_ss << mid_s;
+		int midi = -1;
+		mid_ss >> midi;
+		if (midi <0){
+			delete segment_media;
+			throw runtime_error("corrupted XML file, wrong segment ID");
+		}
+		segment_media->setId(midi);
+		count_s++;
+	}
+	// consistency check for segments
+	if (count_s != ns) 
+		throw runtime_error("<ACMedia::loadXML> inconsistent number of segments");
+	
 }
 
 

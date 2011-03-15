@@ -62,9 +62,7 @@ public:
     SettingsDialog(ACMultiMediaCycleOsgQt* _mc);
 	virtual ~SettingsDialog();
 	void setMediaCycleMainWindow(ACMultiMediaCycleOsgQt* _mc); 
-	void setMediaCycle(MediaCycle* _mc);
-	bool setMediaType(std::string _mt);
-	
+		
 	// Close Event define what to do when window is closed
 	void closeEvent(QCloseEvent *event);
 
@@ -73,27 +71,33 @@ private:
 	void readSettings();
 	void writeSettings();
 	void applyCurrentSettings();
+	MediaCycle* getMediaCycle();
+	bool changeMediaType(ACMediaType _mt);
+	bool changeBrowserMode(ACBrowserMode _bm);
+	ACMediaType getMediaType() const {return media_type;}
+	ACBrowserMode getBrowserMode()const {return browser_mode;}
+	void showError(std::string s);
+	void showError(const exception& e);
 
 public slots:
     void updateActions();
 	
-private slots:
-	void on_buttonAddPluginsLibrary_clicked();
+//private slots:
+	void on_buttonAddPluginLibrary_clicked();
 	void on_buttonProjectDirectory_clicked();
-
+	void on_buttonXMLConfigFile_clicked();
+	void on_buttonRemovePluginLibrary_clicked();
  //   void selectVisualizationPlugins();
 //	void configureFeaturesPlugins();
 	void comboMediaTypeValueChanged(); 
 	void comboBrowserModeValueChanged(); 
-	void removePluginRow(); 
 
 private:
 	ACMultiMediaCycleOsgQt* multi_media_cycle;
-	MediaCycle* media_cycle;
 	
 	// parameters set by the comboBoxes in GUI
-	std::string media_type;
-	std::string browser_mode;
+	ACMediaType media_type;
+	ACBrowserMode	browser_mode;
 	std::string project_directory;
 	std::string xml_config_file;
 	

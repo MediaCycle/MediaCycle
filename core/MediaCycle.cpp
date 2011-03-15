@@ -80,7 +80,6 @@ MediaCycle::MediaCycle(const MediaCycle& orig) {
 }
 
 MediaCycle::~MediaCycle() {
-	// XS added delete for variables whose new is in constructor
 	delete this->mediaLibrary;
 	this->mediaLibrary = 0;
 	delete this->mediaBrowser;
@@ -89,8 +88,6 @@ MediaCycle::~MediaCycle() {
 	this->pluginManager = 0;
     stopTcpServer(); // will delete this->networkSocket;
 	
-	// XS TODO ?  automatically save features and session in config_file_xml
-	//delete MC_e_medias;
 	MC_e_medias=0;
 }
 
@@ -372,8 +369,7 @@ int MediaCycle::importDirectory(string path, int recursive, bool forward_order, 
 	ok = this->mediaLibrary->importDirectory(path, recursive, this->pluginManager, forward_order, doSegment, _medias);
 	// XS normalizing automatically is a problem, for example if we load a bunch of files instead of a directory,
 	//    it should not normalize after each file.
-	// XS TODO ? if (ok>=1) this->mediaLibrary->normalizeFeatures();
-	// XS TODO ? this->mediaBrowser->libraryContentChanged();	
+	// if (ok>=1) this->mediaLibrary->normalizeFeatures();
 	return ok;
 }
 
@@ -395,7 +391,6 @@ int MediaCycle::importACLLibrary(string path) {
 	int ok = 0;
 	ok = this->mediaLibrary->openACLLibrary(path);
 	if (ok>=1) this->mediaLibrary->normalizeFeatures();
-	//	XS TODO ? this->mediaBrowser->libraryContentChanged();	
 	return ok;
 	
 }
@@ -406,7 +401,6 @@ int MediaCycle::importXMLLibrary(string path) {
 	int ok = 0;
 	ok = this->mediaLibrary->openXMLLibrary(path);
 	if (ok>=1) this->mediaLibrary->normalizeFeatures();
-	//	XS TODO ? this->mediaBrowser->libraryContentChanged();	
 	return ok;
 	
 }
@@ -424,7 +418,6 @@ int MediaCycle::importMCSLLibrary(string path) {
 		}
 	}
 	if (ok>=1) this->mediaLibrary->normalizeFeatures();
-	//	XS TODO this->mediaBrowser->libraryContentChanged();	
 	return ok;
 }
 
@@ -435,7 +428,6 @@ int MediaCycle::importLibrary(string path) {
 	int ok = 0;
 	ok = this->mediaLibrary->openLibrary(path);
 	if (ok>=1) this->mediaLibrary->normalizeFeatures();
-	//	XS TODO this->mediaBrowser->libraryContentChanged();	
 	return ok;
 }
 */
@@ -475,12 +467,20 @@ bool MediaCycle::changeBrowserMode(ACBrowserMode _mode){
 };
 
 // Plugins
-int MediaCycle::addPluginLibrary(string aPluginPath) {
-    return this->pluginManager->add(aPluginPath);
+int MediaCycle::addPluginLibrary(string aPluginLibraryPath) {
+    return this->pluginManager->addLibrary(aPluginLibraryPath);
 }
 
-int MediaCycle::removePluginLibrary(string aPluginPath) {
-    return this->pluginManager->remove(aPluginPath);
+int MediaCycle::removePluginLibrary(string aPluginLibraryPath) {
+    return this->pluginManager->removeLibrary(aPluginLibraryPath);
+}
+
+ACPluginLibrary* MediaCycle::getPluginLibrary(string aPluginLibraryPath) const{
+	return this->pluginManager->getPluginLibrary(aPluginLibraryPath);
+}
+
+bool MediaCycle::removePluginFromLibrary(std::string _plugin_name, std::string _library_path){
+	return this->pluginManager->removePluginFromLibrary(_plugin_name, _library_path);
 }
 
 void MediaCycle::setClustersMethodPlugin(string pluginName){
@@ -735,7 +735,7 @@ int MediaCycle::readXMLConfigFilePlugins(TiXmlHandle _rootHandle) {
 		string libraryName = pluginLibraryNode->Attribute("LibraryPath");
 		int lib_size=0;
 		pluginLibraryNode->QueryIntAttribute("NumberOfPlugins", &lib_size); 
-		this->pluginManager->add(libraryName);
+		this->pluginManager->addLibrary(libraryName);
 		
 		//		for (int i=0;i<pluginManager->getSize();i++) {
 		//			for (int j=0;j<pluginManager->getPluginLibrary(i)->getSize();j++) {
@@ -803,7 +803,7 @@ void MediaCycle::saveXMLConfigFile(string _fname) {
 		int n_librarires = pluginManager->getSize();
 		MC_e_features_plugin_manager->SetAttribute("NumberOfPluginsLibraries", n_librarires);
 		for (int i=0; i<n_librarires; i++) {
-			TiXmlElement* MC_e_features_plugin_library = new TiXmlElement( "PluginsLibrary" );  
+			TiXmlElement* MC_e_features_plugin_library = new TiXmlElement( "PluginLibrary" );  
 			MC_e_features_plugin_manager->LinkEndChild( MC_e_features_plugin_library );
 			int n_plugins = pluginManager->getPluginLibrary(i)->getSize();
 			MC_e_features_plugin_library->SetAttribute("NumberOfPlugins", n_plugins);

@@ -45,23 +45,23 @@ ACPluginManager::~ACPluginManager() {
 }
 
 /*
- * Adds a plugin to the manager's list
+ * Adds a plugin LIBRARY to the manager's list
  * return values:
  *   -1 if it encountered a problem loading
  *    1 if things went smoothly
  */
-int ACPluginManager::add(std::string aPluginPath) {
+int ACPluginManager::addLibrary(std::string aPluginLibraryPath) {
     DynamicLibrary *lib;
 
-    if ( !(lib = DynamicLibrary::loadLibrary(aPluginPath)) ) {
+    if ( !(lib = DynamicLibrary::loadLibrary(aPluginLibraryPath)) ) {
         return -1;
     }
 
-	cout << "adding Plugin Library : " << aPluginPath << endl;
+	cout << "adding Plugin Library : " << aPluginLibraryPath << endl;
 	
     ACPluginLibrary *acpl = new ACPluginLibrary(lib);
 	acpl->initialize(); //useless
-	acpl->setLibraryPath(aPluginPath);
+	acpl->setLibraryPath(aPluginLibraryPath);
 	
     mPluginLibrary.push_back(acpl);
 
@@ -69,13 +69,13 @@ int ACPluginManager::add(std::string aPluginPath) {
 }
 
 /*
- * Removes a plugin (specified by its file name) from the manager's list
+ * Removes a plugin LIBRARY (specified by its file name) from the manager's list
  * return values:
  *   -1 if it encountered a problem (e.g., could not find the plugin library)
  *    1 if it removed the plugin library
  */
 
-int ACPluginManager::remove(std::string _lpath) {
+int ACPluginManager::removeLibrary(std::string _lpath) {
 	vector<ACPluginLibrary *> ::iterator iter;
 	bool found_library_in_path = false;
 	for (iter = this->mPluginLibrary.begin(); iter != this->mPluginLibrary.end(); iter++) {
@@ -91,6 +91,18 @@ int ACPluginManager::remove(std::string _lpath) {
 	}
     return 1;
 }
+
+bool ACPluginManager::removePluginFromLibrary(std::string _plugin_name, std::string _library_path){
+	bool found_plugin = false;
+	vector<ACPluginLibrary *> ::iterator iter;
+	for (iter = this->mPluginLibrary.begin(); iter != this->mPluginLibrary.end(); iter++) {
+		if ((*iter)->getLibraryPath() == _library_path) {
+			found_plugin = (*iter)->removePlugin(_plugin_name);
+		}
+	}
+	return found_plugin;
+}
+
 
 int ACPluginManager::clean() {
 	vector<ACPluginLibrary *> ::iterator iter;
@@ -198,14 +210,28 @@ void ACPluginLibrary::freePlugins() {
 }
 
 ACPlugin *ACPluginLibrary::getPlugin(std::string aPluginName) {
-
-    for (unsigned int k=0;k<this->mPlugins.size();k++) {
+	for (unsigned int k=0;k<this->mPlugins.size();k++) {
         if (this->mPlugins[k]->getName() == aPluginName) {
             return this->mPlugins[k];
         }
     }
-
+	
     return 0;
+}
+
+bool ACPluginLibrary::removePlugin(std::string aPluginName){
+	bool found_plugin = false;
+	vector<ACPlugin*> ::iterator iter;
+
+	for (iter = this->mPlugins.begin(); iter != this->mPlugins.end(); iter++) {
+        if ((*iter)->getName() == aPluginName) {
+			this->mPlugins.erase(iter);
+			destroy(*iter);
+			found_plugin = true;
+			break;
+        }
+    }
+	return found_plugin;
 }
 
 void ACPluginLibrary::dump() {

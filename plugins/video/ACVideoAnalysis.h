@@ -61,7 +61,7 @@ public:
 	void setFileName(const std::string &filename);
 	int initialize();
 	void saveVideoThumnbailInFile(string fileout, int w=320, int h=240, int nskip=0, int istep=1);
-	void saveInFile(std::string fileout, int nskip = 0);
+	bool saveInFile(std::string fileout, int nskip = 0);
 
 	//accessors 
 	inline int getWidth() {return width;}

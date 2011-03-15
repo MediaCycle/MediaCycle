@@ -92,7 +92,9 @@ public:
 	int getNumberOfMediaNodes();
     ACMediaLibrary* getLibrary() { return mediaLibrary;}
     std::string getLocalDirectoryPath() {return local_directory;}
-    std::string getLibName() {return libname;}
+
+	// XS TODO this is obsolete (acl)
+ 	std::string getLibName() {return libname;}
 
     // == Search by Similarity
     int getKNN(int id, std::vector<int> &ids, int k);
@@ -110,9 +112,14 @@ public:
 	void cleanBrowser() { mediaBrowser->clean(); }
 
 	// Plugins
-    int addPluginLibrary(std::string aPluginPath);
-    int removePluginLibrary(std::string aPluginPath);
+    int addPluginLibrary(std::string aPluginLibraryPath);
+    int removePluginLibrary(std::string aPluginLibraryPath);
 	ACPluginManager* getPluginManager() { return pluginManager;}
+	ACPluginLibrary* getPluginLibrary(std::string aPluginLibraryPath) const;
+	bool removePluginFromLibrary(std::string _plugin_name, std::string _library_path);
+
+	
+	// XS TODO do we want so many methods ?
 	void setClustersMethodPlugin(std::string pluginName);
 	void setNeighborsMethodPlugin(std::string pluginName);
 	void setClustersPositionsPlugin(std::string pluginName);

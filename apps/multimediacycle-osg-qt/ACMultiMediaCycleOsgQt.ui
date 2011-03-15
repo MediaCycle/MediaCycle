@@ -90,9 +90,6 @@
     <property name="title">
      <string>Config</string>
     </property>
-    <addaction name="actionLoad_Config_File"/>
-    <addaction name="actionSave_Config_File"/>
-    <addaction name="separator"/>
     <addaction name="actionEdit_Config_File"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
@@ -207,12 +204,12 @@
     <string>Ctrl+Del</string>
    </property>
   </action>
-  <action name="actionLoad_Config_File">
+  <action name="actionLoad_XML_2">
    <property name="text">
     <string>Load Config File</string>
    </property>
   </action>
-  <action name="actionSave_Config_File">
+  <action name="actionSave_XML_2">
    <property name="text">
     <string>Save Config File</string>
    </property>

@@ -56,6 +56,9 @@ public:
     std::vector<ACPlugin *> getPlugins() {return this->mPlugins;};
     ACPlugin *getPlugin(int i) {return this->mPlugins[i];};
     ACPlugin *getPlugin(std::string aPluginName);
+	
+	bool removePlugin(std::string aPluginName);
+
     int getSize() {return this->mPlugins.size();};
     DynamicLibrary* getLib() { return this->mLib;};
     void freePlugins();
@@ -82,8 +85,9 @@ public:
     ACPluginManager();
     ACPluginManager(const ACPluginManager& orig);
     virtual ~ACPluginManager();
-    int add(std::string aPluginPath);
-    int remove(std::string aPluginPath);
+    int addLibrary(std::string aPluginLibraryPath);
+    int removeLibrary(std::string aPluginLibraryPath);
+	bool removePluginFromLibrary(std::string _plugin_name, std::string _library_path);
     int clean();
 	void dump();
 

@@ -38,14 +38,7 @@
 #include <fstream>
 #include <osg/ImageUtils>
 
-using std::vector;
-using std::string;
-
-using std::ofstream;
-using std::ifstream;
-using std::cerr;
-using std::cout;
-using std::endl;
+using namespace std;
 
 osg::ref_ptr<osg::Image> Convert_OpenCV_TO_OSG_IMAGE(IplImage* cvImg)
 {
@@ -309,22 +302,28 @@ void ACImage::saveXMLSpecific(TiXmlElement* _media){
 	_media->SetAttribute("Height", height);
 }
 
+
 int ACImage::loadXMLSpecific(TiXmlElement* _pMediaNode){
-	// XS TODO add checks
-	int w=0;
+	int w=-1;
+	int h=-1;
+
 	_pMediaNode->QueryIntAttribute("Width", &w);
-	int h=0;
+	if (w < 0)
+		throw runtime_error("corrupted XML file, wrong image width");
+	else
+		this->width = w;
+
 	_pMediaNode->QueryIntAttribute("Height", &h);
-	this->width = w;
-	this->height = h;
+	if (h < 0)
+		throw runtime_error("corrupted XML file, wrong image height");
+	else
+		this->height = h;
 	
 	data = new ACMediaData(MEDIA_TYPE_IMAGE,filename);
 	
-//	this->computeThumbnailSize();
-	if (computeThumbnail(data, thumbnail_width , thumbnail_height) != 1){
-		cerr << "<ACImage::loadXMLSpecific> : problem computing thumbnail" << endl;
-		return 0;
-	}
+	if (computeThumbnail(data, thumbnail_width , thumbnail_height) != 1)
+		throw runtime_error("<ACImage::loadXMLSpecific> : problem computing thumbnail");
+
 	return 1;	
 }
 #endif //defined (SUPPORT_IMAGE)

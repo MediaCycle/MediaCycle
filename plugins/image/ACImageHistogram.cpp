@@ -143,7 +143,6 @@ void ACImageHistogram::show() {
 	cvWaitKey(0);
 	cvReleaseImage(&hist_img);
 	cvDestroyWindow("Histogram");
-	// XS TODO : this does not destroy the window properly ?!
 }
 
 void ACImageHistogram::show(string wname) {

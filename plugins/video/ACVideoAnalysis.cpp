@@ -1736,8 +1736,10 @@ void ACVideoAnalysis::browseInWindow(string title, bool has_win){
 
 // ------------------ file output functions -----------------
 
-void ACVideoAnalysis::saveInFile (string fileout, int nskip){
+bool ACVideoAnalysis::saveInFile (string fileout, int nskip){
 	// CV_FOURCC('M','J','P','G')
+	bool ok = true;
+	if (this->getNumberOfFrames() <=0) ok = false;
 	CvVideoWriter* video_writer = cvCreateVideoWriter( fileout.c_str(), -1, fps, cvSize(width,height) );  // "-1" pops up a nice GUI (Windows only)
 	IplImage* img = 0;
 	rewind();
@@ -1750,6 +1752,7 @@ void ACVideoAnalysis::saveInFile (string fileout, int nskip){
 		}
 	}
 	cvReleaseVideoWriter(&video_writer); 
+	return ok;
 }
 
 void ACVideoAnalysis::saveVideoThumnbailInFile (string fileout, int _w, int _h, int _nskip, int _istep){

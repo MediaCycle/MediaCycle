@@ -192,18 +192,19 @@ void ACImageAnalysis::closeNewWindow(const std::string title){
 	cvDestroyWindow(title.c_str());
 }
 
-int ACImageAnalysis::saveInFile (string filename){
-	if(imgp == 0) return 0;
+bool ACImageAnalysis::saveInFile (string filename){
+	if(imgp == 0) return false;
 	const char *filename_char = filename.c_str();
+	bool ok = false;
 	if( cvSaveImage(filename_char, imgp )) {
 		cout << filename << " has been written successfully." << endl;
-		return 1;	
+		ok = true;	
 	}
 	else { 
 		cout << "error writing " << filename << endl;
-		return -1;
+		ok = false;
 	}
-	return 0;
+	return ok;
 }
 
 

@@ -98,6 +98,8 @@ bool ACMediaLibrary::changeMediaType(ACMediaType aMediaType){
 		return true;
 	}
 	else {
+		// can't change mediatype of a library which is already loaded
+		// need to clean library first (from elsewhere, e.g., from the app)
 		return false;
 	}
 }	
@@ -396,8 +398,6 @@ int ACMediaLibrary::openMCSLLibrary(std::string _path, bool aInitLib){
 	return file_count;
 }
 
-// XS TODO return value
-
 int ACMediaLibrary::openXMLLibrary(std::string _path, bool aInitLib){
 	TiXmlDocument doc( _path.c_str() );
 	try {
@@ -405,7 +405,7 @@ int ACMediaLibrary::openXMLLibrary(std::string _path, bool aInitLib){
 			throw runtime_error("bad parse");
 		//		doc.Print( stdout );
 	} catch (const exception& e) {
-		cout << e.what( ) << "\n";
+		cout << e.what( ) << endl;
 		return EXIT_FAILURE;
     }	
 	
@@ -414,39 +414,58 @@ int ACMediaLibrary::openXMLLibrary(std::string _path, bool aInitLib){
 	}
 	
 	TiXmlHandle docHandle(&doc);
+	// XS TODO ? make rootHandle a pointer ?
 	TiXmlHandle rootHandle = docHandle.FirstChildElement( "MediaCycle" );
-	this->openCoreXMLLibrary(rootHandle);
+	try {
+		this->openCoreXMLLibrary(rootHandle);
+	}
+	catch (const exception& e) {
+		cout << e.what( ) << endl;
+		return EXIT_FAILURE;
+    }
+	return EXIT_SUCCESS;
 }
 
 int ACMediaLibrary::openCoreXMLLibrary(TiXmlHandle _rootHandle){
 	TiXmlText* nMediaText=_rootHandle.FirstChild( "NumberOfMedia" ).FirstChild().Text();
-	string nof = nMediaText->ValueStr();
 	std::stringstream tmp;
-	int n_loops;
-	tmp << nof;
-	tmp >> n_loops;
-	
-	TiXmlElement* pMediaNode=_rootHandle.FirstChild( "Medias" ).FirstChild().Element();
-	// loop over all medias
-	int cnt=0;
-	for( pMediaNode; pMediaNode; pMediaNode=pMediaNode->NextSiblingElement()) {
-		ACMediaType typ;
-		int typi=0;
-		pMediaNode->QueryIntAttribute("MediaType", &typi);
-		typ = (ACMediaType) typi;
-		ACMedia* local_media = ACMediaFactory::getInstance()->create(typ);
-		local_media->loadXML(pMediaNode);
-		media_library.push_back(local_media);
-		cnt++;
+	int n_loops=0;
+
+	if (!nMediaText) 
+		throw runtime_error("corrupted XML file, no number of media");
+	else {
+		string nof = nMediaText->ValueStr();
+		tmp << nof;
+		tmp >> n_loops;
 	}
-	// consistency check (XS TODO quits the app -> exceptions )
-	if (cnt != n_loops){
-		cerr << "<ACMediaLibrary::openXMLLibrary>: inconsistent number of media"<< endl;
-		cerr << "n_loops = " << n_loops << "; cnt = " << cnt << endl;
-		return -1;
+	TiXmlElement* pMediaNode=_rootHandle.FirstChild( "Medias" ).FirstChild().Element();
+	if (!pMediaNode) 
+		throw runtime_error("corrupted XML file, no medias");
+	else {
+		// loop over all medias
+		int cnt=0;
+		for( pMediaNode; pMediaNode; pMediaNode=pMediaNode->NextSiblingElement()) {
+			ACMediaType typ;
+			int typi = -1;
+			pMediaNode->QueryIntAttribute("MediaType", &typi);
+			if (typi < 0)
+				throw runtime_error("corrupted XML file, wrong media type");
+			else {
+				typ = (ACMediaType) typi;
+				ACMedia* local_media = ACMediaFactory::getInstance()->create(typ);
+				local_media->loadXML(pMediaNode);
+				media_library.push_back(local_media);
+				cnt++;
+			}
+		}
+		// consistency check (XS TODO quits the app -> exceptions )
+		if (cnt != n_loops){
+			cerr << "<ACMediaLibrary::openXMLLibrary>: inconsistent number of media"<< endl;
+			cerr << "n_loops = " << n_loops << "; cnt = " << cnt << endl;
+			return -1;
+		}
 	}
 	return n_loops;
-	
 }
 
 // C++ version
@@ -476,7 +495,8 @@ int ACMediaLibrary::saveXMLLibrary(std::string _path){
 	
 	TiXmlDocument MC_doc;  
     TiXmlDeclaration* MC_decl = new TiXmlDeclaration( "1.0", "", "" );  
-    MC_doc.LinkEndChild( MC_decl );  
+    
+	MC_doc.LinkEndChild( MC_decl );  
 	
     TiXmlElement* MC_e_root = new TiXmlElement( "MediaCycle" );  
     MC_doc.LinkEndChild( MC_e_root );  
@@ -492,7 +512,7 @@ int ACMediaLibrary::saveXMLLibrary(std::string _path){
 }
 
 // no headers, just media information
-// can be called from MediaCycle's saveXML
+// can be called from MediaCycle's saveXML or from the app via mediaCycle
 int ACMediaLibrary::saveCoreXMLLibrary( TiXmlElement* _MC_e_root, TiXmlElement* _MC_e_medias ){
     TiXmlElement* MC_e_number_of_medias = new TiXmlElement( "NumberOfMedia" );  
     _MC_e_root->LinkEndChild( MC_e_number_of_medias );  
