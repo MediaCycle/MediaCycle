@@ -1,109 +1,44 @@
-# - Try to find Portaudio
-# Once done this will define
+# - Find PORTAUDIO
+# Find the native PORTAUDIO includes and library
+# This module defines
+#  PORTAUDIO_INCLUDE_DIR, where to find jpeglib.h, etc.
+#  PORTAUDIO_LIBRARIES, the libraries needed to use PORTAUDIO.
+#  PORTAUDIO_FOUND, If false, do not try to use PORTAUDIO.
+# also defined, but not for general use are
+#  PORTAUDIO_LIBRARY, where to find the PORTAUDIO library.
+
+#=============================================================================
+# Copyright 2001-2009 Kitware, Inc.
 #
-#  PORTAUDIO_FOUND - system has Portaudio
-#  PORTAUDIO_INCLUDE_DIRS - the Portaudio include directory
-#  PORTAUDIO_LIBRARIES - Link these to use Portaudio
-#  PORTAUDIO_DEFINITIONS - Compiler switches required for using Portaudio
-#  PORTAUDIO_VERSION - Portaudio version
+# Distributed under the OSI-approved BSD License (the "License");
+# see accompanying file Copyright.txt for details.
 #
-#  Copyright (c) 2006 Andreas Schneider <mail@cynapses.org>
-#
-# Redistribution and use is allowed according to the terms of the New BSD license.
-# For details see the accompanying COPYING-CMAKE-SCRIPTS file.
-#
+# This software is distributed WITHOUT ANY WARRANTY; without even the
+# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the License for more information.
+#=============================================================================
+# (To distributed this file outside of CMake, substitute the full
+#  License text for the above reference.)
 
-# AM (numediart) : original file found at http://zi.fi/cmake/Modules/FindPortaudio.cmake
+FIND_PATH(PORTAUDIO_INCLUDE_DIR portaudio.h)
 
+SET(PORTAUDIO_NAMES ${PORTAUDIO_NAMES} portaudio)
+FIND_LIBRARY(PORTAUDIO_LIBRARY NAMES ${PORTAUDIO_NAMES} )
 
-if (PORTAUDIO_LIBRARIES AND PORTAUDIO_INCLUDE_DIRS)
-  # in cache already
-  set(PORTAUDIO_FOUND TRUE)
-else (PORTAUDIO_LIBRARIES AND PORTAUDIO_INCLUDE_DIRS)
-  if (NOT WIN32)
-   include(FindPkgConfig)
-   pkg_check_modules(PORTAUDIO2 portaudio-2.0)
-  endif (NOT WIN32)
+# handle the QUIETLY and REQUIRED arguments and set PORTAUDIO_FOUND to TRUE if 
+# all listed variables are TRUE
+INCLUDE(FindPackageHandleStandardArgs)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(PORTAUDIO DEFAULT_MSG PORTAUDIO_LIBRARY PORTAUDIO_INCLUDE_DIR)
 
-  if (PORTAUDIO2_FOUND)
-    set(PORTAUDIO_INCLUDE_DIRS
-      ${PORTAUDIO2_INCLUDE_DIRS}
-    )
-    if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-      set(PORTAUDIO_LIBRARIES "${PORTAUDIO2_LIBRARY_DIRS}/lib${PORTAUDIO2_LIBRARIES}.dylib")
-    else (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-      set(PORTAUDIO_LIBRARIES
-        ${PORTAUDIO2_LIBRARIES}
-      )
-    endif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-    set(PORTAUDIO_VERSION
-      19
-    )
-    set(PORTAUDIO_FOUND TRUE)
-  else (PORTAUDIO2_FOUND)
-    find_path(PORTAUDIO_INCLUDE_DIR
-      NAMES
-        portaudio.h
-      PATHS
-        /usr/include
-        /usr/local/include
-        /opt/local/include
-        /sw/include
-    )
-   
-    find_library(PORTAUDIO_LIBRARY
-      NAMES
-        portaudio
-      PATHS
-        /usr/lib
-        /usr/local/lib
-        /opt/local/lib
-        /sw/lib
-    )
-   
-    find_path(PORTAUDIO_LIBRARY_DIR
-      NAMES
-        portaudio
-      PATHS
-        /usr/lib
-        /usr/local/lib
-        /opt/local/lib
-        /sw/lib
-    )
-   
-    set(PORTAUDIO_INCLUDE_DIRS
-      ${PORTAUDIO_INCLUDE_DIR}
-    )
-    set(PORTAUDIO_LIBRARIES
-      ${PORTAUDIO_LIBRARY}
-    )
-   
-    set(PORTAUDIO_LIBRARY_DIRS
-      ${PORTAUDIO_LIBRARY_DIR}
-    )
-   
-    set(PORTAUDIO_VERSION
-      18
-    )
-   
-    if (PORTAUDIO_INCLUDE_DIRS AND PORTAUDIO_LIBRARIES)
-       set(PORTAUDIO_FOUND TRUE)
-    endif (PORTAUDIO_INCLUDE_DIRS AND PORTAUDIO_LIBRARIES)
-   
-    if (PORTAUDIO_FOUND)
-      if (NOT Portaudio_FIND_QUIETLY)
-        message(STATUS "Found Portaudio: ${PORTAUDIO_LIBRARIES}")
-      endif (NOT Portaudio_FIND_QUIETLY)
-    else (PORTAUDIO_FOUND)
-      if (Portaudio_FIND_REQUIRED)
-        message(FATAL_ERROR "Could not find Portaudio")
-      endif (Portaudio_FIND_REQUIRED)
-    endif (PORTAUDIO_FOUND)
-  endif (PORTAUDIO2_FOUND)
+IF(PORTAUDIO_FOUND)
+  SET(PORTAUDIO_LIBRARIES ${PORTAUDIO_LIBRARY})
+  GET_FILENAME_COMPONENT(PORTAUDIO_LINK_DIRECTORIES ${PORTAUDIO_LIBRARY} PATH)
+ENDIF(PORTAUDIO_FOUND)
 
+# Deprecated declarations.
+SET (NATIVE_PORTAUDIO_INCLUDE_PATH ${PORTAUDIO_INCLUDE_DIR} )
+IF(PORTAUDIO_LIBRARY)
+  GET_FILENAME_COMPONENT (NATIVE_PORTAUDIO_LIB_PATH ${PORTAUDIO_LIBRARY} PATH)
+ENDIF(PORTAUDIO_LIBRARY)
 
-  # show the PORTAUDIO_INCLUDE_DIRS and PORTAUDIO_LIBRARIES variables only in the advanced view
-  mark_as_advanced(PORTAUDIO_INCLUDE_DIRS PORTAUDIO_LIBRARIES)
-
-endif (PORTAUDIO_LIBRARIES AND PORTAUDIO_INCLUDE_DIRS)
-
+MARK_AS_ADVANCED(PORTAUDIO_LIBRARY PORTAUDIO_INCLUDE_DIR PORTAUDIO_LINK_DIRECTORIES)
