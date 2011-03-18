@@ -76,11 +76,14 @@ namespace fs = boost::filesystem;
 
 using namespace std;
 
-// ----------- uncomment this parse OSG plugins in verbose mode
+// ----------- uncomment this to parse OSG plugins in verbose mode
 //#define PARSE_OSG_PLUGINS_VERBOSE
 
+// ----------- uncomment this to parse sndfile formats in verbose mode
+//#define PARSE_SNDFILE_FORMATS_VERBOSE
+
 // filext members are static and thus have to be initialized outside class
-const filext::value_type _ini[] = {};
+/*const filext::value_type _ini[] = {};
 
 #if defined USE_DEBUG && defined __APPLE__
 #include "ACMediaFactoryDebug.cpp"
@@ -97,6 +100,7 @@ filext ACMediaFactory::unchecked_file_extensions(_uini, _uini + sizeof _uini / s
 
 /// List of media file extensions possibly in use by MediaCycle
 filext ACMediaFactory::used_file_extensions(_ini, _ini + sizeof _ini / sizeof *_ini);
+*/
 
 /// List of known media file extensions associated to MediaCycle media types.
 /// We can complement them by checking the list of unchecked media file extensions
@@ -129,7 +133,7 @@ const filext::value_type _init[] = {
 	filext::value_type(".stl", MEDIA_TYPE_3DMODEL), \
 	filext::value_type(".wrl", MEDIA_TYPE_3DMODEL), \
 	filext::value_type(".x", MEDIA_TYPE_3DMODEL), \
-	
+
 	// from http://www.openscenegraph.org/projects/osg/wiki/Support/UserGuides/Plugins
 	filext::value_type(".bmp", MEDIA_TYPE_IMAGE), \
 	filext::value_type(".bmpf", MEDIA_TYPE_IMAGE), \
@@ -187,7 +191,7 @@ const filext::value_type _init[] = {
 	filext::value_type(".tif", MEDIA_TYPE_IMAGE), \
 	filext::value_type(".tiff", MEDIA_TYPE_IMAGE), \
 	filext::value_type(".xbm", MEDIA_TYPE_IMAGE), \
-	
+
 	// from http://www.openscenegraph.org/projects/osg/wiki/Support/UserGuides/Plugins
 	// and OSG 2.9.11
 	filext::value_type(".3gp", MEDIA_TYPE_VIDEO), \
@@ -209,7 +213,7 @@ const filext::value_type _init[] = {
 	filext::value_type(".wmv", MEDIA_TYPE_VIDEO), \
 	filext::value_type(".xine", MEDIA_TYPE_VIDEO), \
 	filext::value_type(".xvid", MEDIA_TYPE_VIDEO), \
-	
+
 	// from libsndfile 1.0.21
 	filext::value_type(".aif", MEDIA_TYPE_AUDIO), \
 	filext::value_type(".aiff", MEDIA_TYPE_AUDIO), \
@@ -238,16 +242,20 @@ const filext::value_type _init[] = {
 };
 filext ACMediaFactory::known_file_extensions(_init, _init + sizeof _init / sizeof *_init);
 
+// Global static pointer used to ensure a single instance of the class.
+ACMediaFactory* ACMediaFactory::instance = NULL;
+
 ACMediaFactory* ACMediaFactory::getInstance()
 {
-    static ACMediaFactory* instance = new ACMediaFactory;
+    if(!instance)
+        instance = new ACMediaFactory;
     return instance;
 }
 
 ACMediaFactory::ACMediaFactory(){
 	if (available_file_extensions.size()==0){
 		checkAvailableFileExtensions();
-	}	
+	}
 	useAvailableFileExtensions();
 	//useKnownFileExtensions(); //use this instead of the above if library extensions parsing doesn't work
 	listSupportedMediaExtensions();
@@ -257,6 +265,8 @@ ACMediaFactory::ACMediaFactory(){
 }
 
 ACMediaFactory::~ACMediaFactory(){
+	if(!instance)
+        delete instance;
 }
 
 ACMedia* ACMediaFactory::create(string file_ext){
@@ -266,7 +276,7 @@ ACMedia* ACMediaFactory::create(string file_ext){
 		return 0;
 	}
 	ACMediaType m = iter->second;
-	return ACMediaFactory::create(m); 
+	return ACMediaFactory::create(m);
 }
 
 ACMedia* ACMediaFactory::create(ACMediaType media_type){
@@ -327,28 +337,28 @@ ACMedia* ACMediaFactory::create(ACMedia* media){
 	switch (media->getMediaType()) {
 		#if defined (SUPPORT_AUDIO)
 		case MEDIA_TYPE_AUDIO:
-			
+
 				ACAudio* audio = (ACAudio*) media;
 				return new ACAudio(*audio,true);
-			
+
 			break;
 		#endif //defined (SUPPORT_AUDIO)
-		#if defined (SUPPORT_IMAGE)	
+		#if defined (SUPPORT_IMAGE)
 		case MEDIA_TYPE_IMAGE:
-			
+
 				ACImage* image = (ACImage*) media;
 				return new ACImage(*image);
-			
+
 				break;
-		#endif //defined (SUPPORT_IMAGE)	
-		#if defined (SUPPORT_VIDEO)	
+		#endif //defined (SUPPORT_IMAGE)
+		#if defined (SUPPORT_VIDEO)
 		case MEDIA_TYPE_VIDEO:
-			
+
 				ACVideo* video = (ACVideo*) media;
 				return new ACVideo(*video);
-			
+
 				break;
-		#endif //defined (SUPPORT_VIDEO)	
+		#endif //defined (SUPPORT_VIDEO)
 		#if defined (SUPPORT_3DMODEL)
 		case MEDIA_TYPE_3DMODEL:
 			AC3DModel* model = (AC3DModel*) media;
@@ -418,8 +428,8 @@ void ACMediaFactory::listMediaExtensions(filext _extensions){
 				break;
 			default:
 				break;
-		}	
-	}	
+		}
+	}
 
 	#if defined (SUPPORT_AUDIO)
 	if (audioExt.size()>0){
@@ -428,9 +438,9 @@ void ACMediaFactory::listMediaExtensions(filext _extensions){
 		for(;audioIter!=audioExt.end();++audioIter)
 			std::cout << " " << (*audioIter);
 		std::cout << std::endl;
-	}	
+	}
 	#endif //defined (SUPPORT_AUDIO)
-	
+
 	#if defined (SUPPORT_IMAGE)
 	if (imageExt.size()>0){
 		std::cout << "-- image:";
@@ -438,9 +448,9 @@ void ACMediaFactory::listMediaExtensions(filext _extensions){
 		for(;imageIter!=imageExt.end();++imageIter)
 			std::cout << " " << (*imageIter);
 		std::cout << std::endl;
-	}	
+	}
 	#endif //defined (SUPPORT_IMAGE)
-	
+
 	#if defined (SUPPORT_VIDEO)
 	if (videoExt.size()>0){
 		std::cout << "-- video:";
@@ -448,9 +458,9 @@ void ACMediaFactory::listMediaExtensions(filext _extensions){
 		for(;videoIter!=videoExt.end();++videoIter)
 			std::cout << " " << (*videoIter);
 		std::cout << std::endl;
-	}	
+	}
 	#endif //defined (SUPPORT_VIDEO)
-	
+
 	#if defined (SUPPORT_3DMODEL)
 	if (model3dExt.size()>0){
 		std::cout << "-- 3D models:";
@@ -458,9 +468,9 @@ void ACMediaFactory::listMediaExtensions(filext _extensions){
 		for(;model3dIter!=model3dExt.end();++model3dIter)
 			std::cout << " " << (*model3dIter);
 		std::cout << std::endl;
-	}	
+	}
 	#endif //defined (SUPPORT_3DMODEL)
-	
+
 	#if defined (SUPPORT_TEXT)
 	if (textExt.size()>0){
 		std::cout << "-- text:";
@@ -468,16 +478,16 @@ void ACMediaFactory::listMediaExtensions(filext _extensions){
 		for(;textIter!=textExt.end();++textIter)
 			std::cout << " " << (*textIter);
 		std::cout << std::endl;
-	}	
+	}
 	#endif //defined (SUPPORT_TEXT)
-	
+
 	if (otherExt.size()>0){
 		std::cout << "-- undetermined:";
 		std::vector<std::string>::iterator otherIter = otherExt.begin();
 		for(;otherIter!=otherExt.end();++otherIter)
 			std::cout << " " << (*otherIter);
 		std::cout << std::endl;
-	}	
+	}
 }
 
 bool ACMediaFactory::useAvailableFileExtensions(){
@@ -485,7 +495,7 @@ bool ACMediaFactory::useAvailableFileExtensions(){
 		used_file_extensions.clear();
 		used_file_extensions=available_file_extensions;
 		return true;
-	}	
+	}
 	else {
 		return false;
 	}
@@ -496,8 +506,8 @@ void ACMediaFactory::useKnownFileExtensions(){
 	if (known_file_extensions.size()>0){
 		used_file_extensions.clear();
 		used_file_extensions=known_file_extensions;
-	}	
-		
+	}
+
 	/*
 	filext::iterator iter = known_file_extensions.begin();
 	for(;iter!=known_file_extensions.end();++iter){
@@ -529,7 +539,7 @@ void ACMediaFactory::useKnownFileExtensions(){
 				break;
 			default:
 				break;
-		}	
+		}
 	}
 	 */
 }
@@ -541,7 +551,7 @@ void ACMediaFactory::checkAvailableFileExtensions(){
 	#if defined (SUPPORT_IMAGE) || defined(SUPPORT_VIDEO) || defined(SUPPORT_3DMODEL)
 		addAvailableOsgFileExtensions();
 	#endif //defined (SUPPORT_IMAGE OR SUPPORT_VIDEO) || defined(SUPPORT_3DMODEL)
-}	
+}
 
 std::vector<std::string> ACMediaFactory::getExtensionsFromMediaType(ACMediaType media_type){
 	std::vector<std::string> mediaExt;
@@ -550,7 +560,7 @@ std::vector<std::string> ACMediaFactory::getExtensionsFromMediaType(ACMediaType 
 		if (iter->second == media_type )
 			mediaExt.push_back(iter->first);
 	return mediaExt;
-}	
+}
 
 bool ACMediaFactory::addAvailableFileExtensionSupport(std::string file_ext,ACMediaType media_type){
 	boost::to_lower(file_ext);
@@ -568,7 +578,7 @@ void ACMediaFactory::checkAvailableFileExtensionSupport(std::string file_ext,ACM
 	// First check if already listed in available file extensions:
 	filext::iterator available_iter = available_file_extensions.find(file_ext);
 	if( available_iter == available_file_extensions.end() ) {
-		
+
 		// Second check if already listed in possible file extensions:
 		filext::iterator possible_iter = known_file_extensions.find(file_ext);
 		if( possible_iter != known_file_extensions.end() ) {
@@ -586,12 +596,15 @@ void ACMediaFactory::checkAvailableFileExtensionSupport(std::string file_ext,ACM
 
 #if defined (SUPPORT_AUDIO)
 void ACMediaFactory::addAvailableSndFileExtensions(){
+	#ifdef PARSE_SNDFILE_FORMATS_VERBOSE
+	std::cout << "Gathering audio file extensions from sndfile..." << std::endl;
+	#endif//def PARSE_OSG_PLUGINS_VERBOSE
 	//CF ripped from sndfile's examples/list_formats.c
 	SF_FORMAT_INFO	info ;
 	SF_INFO 		sfinfo ;
 	char buffer [128] ;
 	int format, major_count, subtype_count, m, s;
-	
+
 	memset (&sfinfo, 0, sizeof (sfinfo));
 	buffer [0] = 0 ;
 	sf_command (0, SFC_GET_LIB_VERSION, buffer, sizeof (buffer));
@@ -600,46 +613,55 @@ void ACMediaFactory::addAvailableSndFileExtensions(){
 		//exit (1);
 	} ;
 	//printf ("Adding libsnfile supported extension, version : %s\n\n", buffer);// CF enable for debug mode
-	
+
 	sf_command (0, SFC_GET_FORMAT_MAJOR_COUNT, &major_count, sizeof (int)) ;
 	sf_command (0, SFC_GET_FORMAT_SUBTYPE_COUNT, &subtype_count, sizeof (int)) ;
-	
+
 	sfinfo.channels = 1 ;
 	for (m = 0 ; m < major_count ; m++)
-	{	
+	{
 		info.format = m ;
 		sf_command (0, SFC_GET_FORMAT_MAJOR, &info, sizeof (info)) ;
-		
+
 		std::string ext =  std::string(".") + std::string(info.extension);
 
 		if (ext == ".aif" || ext == ".aiff"){
 			addAvailableFileExtensionSupport(".aif",MEDIA_TYPE_AUDIO);
 			addAvailableFileExtensionSupport(".aiff",MEDIA_TYPE_AUDIO);
+			#ifdef PARSE_SNDFILE_FORMATS_VERBOSE
+			std::cout << "ACMediaFactory: adding sndfile extensions .aiff and .aif" << std::endl;
+			#endif//def PARSE_SNDFILE_FORMATS_VERBOSE
 		}
 		else if (ext == ".oga"){
 			addAvailableFileExtensionSupport(".oga",MEDIA_TYPE_AUDIO);
 			addAvailableFileExtensionSupport(".ogg",MEDIA_TYPE_AUDIO);
-		}	
-		else 
+			#ifdef PARSE_SNDFILE_FORMATS_VERBOSE
+			std::cout << "ACMediaFactory: adding sndfile extensions .oga and .ogg" << std::endl;
+			#endif//def PARSE_SNDFILE_FORMATS_VERBOSE
+		}
+		else{
 			checkAvailableFileExtensionSupport(ext,MEDIA_TYPE_AUDIO);
-		
+			#ifdef PARSE_SNDFILE_FORMATS_VERBOSE
+			std::cout << "ACMediaFactory: adding sndfile extension " << ext << std::endl;
+			#endif//def PARSE_SNDFILE_FORMATS_VERBOSE
+		}
 		//CF the following could be used to add format metadata
-		/*		
+		/*
 		printf ("%s  (extension \"%s\")\n", info.name, info.extension) ;
 		format = info.format ;
 		for (s = 0 ; s < subtype_count ; s++)
 		{	info.format = s ;
 			sf_command (0, SFC_GET_FORMAT_SUBTYPE, &info, sizeof (info)) ;
-			
+
 			format = (format & SF_FORMAT_TYPEMASK) | info.format ;
-			
+
 			sfinfo.format = format ;
 			if (sf_format_check (&sfinfo))
 				printf ("   %s\n", info.name) ;
 		} ;
-		*/ 
+		*/
 	} ;
-}	
+}
 #endif //defined (SUPPORT_AUDIO)
 
 #if defined (SUPPORT_IMAGE) || defined(SUPPORT_VIDEO) || defined(SUPPORT_3DMODEL)
@@ -647,7 +669,7 @@ void ACMediaFactory::addAvailableOsgFileExtensions(){
 	#ifdef PARSE_OSG_PLUGINS_VERBOSE
 	std::cout << "Gathering media file extensions from OSG plugins..." << std::endl;
 	#endif//def PARSE_OSG_PLUGINS_VERBOSE
-	
+
 	// Ripped from applications/osgconv, method for "--formats"
 	osgDB::FileNameList plugins = osgDB::listAllAvailablePlugins();
 	for(osgDB::FileNameList::iterator itr = plugins.begin();
@@ -666,7 +688,7 @@ void ACMediaFactory::addAvailableOsgFileExtensions(){
 				++rwi_itr)
 			{
 				osgDB::ReaderWriterInfo& info = *(*rwi_itr);
-				osgDB::ReaderWriter::FormatDescriptionMap::iterator fdm_itr;				
+				osgDB::ReaderWriter::FormatDescriptionMap::iterator fdm_itr;
 				for(fdm_itr = info.extensions.begin();
 					fdm_itr != info.extensions.end();
 					++fdm_itr)
@@ -678,7 +700,7 @@ void ACMediaFactory::addAvailableOsgFileExtensions(){
 					checkAvailableFileExtensionSupport(ext,MEDIA_TYPE_NONE);
 				}
 			}
-		}	
+		}
 	}
 	#ifdef PARSE_OSG_PLUGINS_VERBOSE
 	std::cout << "Gathering media file extensions from OSG plugins... done" << std::endl;

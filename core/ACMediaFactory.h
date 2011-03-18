@@ -51,34 +51,36 @@ class ACMediaFactory {
 	//private, not protected, since there is no ACImageFactory
 	private:
 		// for log(n) search through extensions:
-		static filext available_file_extensions,known_file_extensions,unchecked_file_extensions,used_file_extensions;
-		
+		static filext known_file_extensions;
+		filext available_file_extensions,unchecked_file_extensions,used_file_extensions;
+
 	public:
 		static ACMediaFactory* getInstance();
 
-	protected:	
+	protected:
 		///
 		/// The constructor isn't public to ensure we keep one instance only of this class (singleton)
 		/// that shouldn't member of other classes, instead:
-		/// - call ACMediaFactory::getInstance(); to initialize available extensions at a strategic point 
-		///  (application or media library init), 
-		///  or these will be initialized at the first public member query. 
+		/// - call ACMediaFactory::getInstance(); to initialize available extensions at a strategic point
+		///  (application or media library init),
+		///  or these will be initialized at the first public member query.
 		/// - access ACMediaFactory each public method method() thru ACMediaFactory::getInstance()->method()
-		/// 
+		///
 		ACMediaFactory();
 		virtual ~ACMediaFactory();
-	
-	public:	
+		static ACMediaFactory* instance;
+
+	public:
 		// 2 ways to specify which new media to create:
-	
+
 		// 1) give file extension
 		ACMedia* create(std::string file_ext);//CF To improve, if extension has been "forgotten" as often in OSX
 		// 2) directly specify which media (e.g. for openLibrary)
 		ACMedia* create(ACMediaType media_type);
 
-		// 3) copy a media 
+		// 3) copy a media
 		ACMedia* create(ACMedia* media);//CF we don't want this, data duplication!
-		
+
 		ACMediaType getMediaTypeFromExtension(std::string file_ext);
 		std::vector<std::string> getExtensionsFromMediaType(ACMediaType media_type);// no check in the possible formats list
 		void listSupportedMediaExtensions();
@@ -86,7 +88,7 @@ class ACMediaFactory {
 		bool useAvailableFileExtensions();
 		filext getAvailableFileExtensions(){return available_file_extensions;}
 		filext getUncheckedFileExtensions(){return unchecked_file_extensions;}
-	
+
 	private:
 		void listMediaExtensions(filext _list);
 		void checkAvailableFileExtensions();
