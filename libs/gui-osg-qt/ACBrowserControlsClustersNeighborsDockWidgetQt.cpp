@@ -74,8 +74,8 @@ void ACBrowserControlsClustersNeighborsDockWidgetQt::on_pushButtonBack_clicked()
 	//	ui.navigationLineEdit->setText(QString::number(media_cycle->getNavigationLevel()));
 	
 	// XS debug
-	this->media_cycle->dumpNavigationLevel() ;
-	this->media_cycle->dumpLoopNavigationLevels() ;
+//	this->media_cycle->dumpNavigationLevel() ;
+//	this->media_cycle->dumpLoopNavigationLevels() ;
 }
 
 void ACBrowserControlsClustersNeighborsDockWidgetQt::on_pushButtonForward_clicked() {
@@ -87,8 +87,8 @@ void ACBrowserControlsClustersNeighborsDockWidgetQt::on_pushButtonForward_clicke
 	//	ui.navigationLineEdit->setText(QString::number(media_cycle->getNavigationLevel()));
 	
 	// XS debug
-	this->media_cycle->dumpNavigationLevel() ;
-	this->media_cycle->dumpLoopNavigationLevels() ;
+//	this->media_cycle->dumpNavigationLevel() ;
+//	this->media_cycle->dumpLoopNavigationLevels() ;
 }
 
 void ACBrowserControlsClustersNeighborsDockWidgetQt::on_spinBoxClusters_valueChanged(int _value){
@@ -142,26 +142,25 @@ void ACBrowserControlsClustersNeighborsDockWidgetQt::synchronizeFeaturesWeights(
 	}	
 }
 
+// cut and paste from void ACBrowserControlsClustersDockWidgetQt::configureCheckBoxes()
 void ACBrowserControlsClustersNeighborsDockWidgetQt::configureCheckBoxes(){
 	// dynamic config of checkboxes
-	// according to plugins found by plugin manager
+	// according to plugins actually used to compute the features
 	if (media_cycle == 0) return;
-	ACPluginManager *acpl = this->media_cycle->getPluginManager(); //getPlugins
-	if (acpl) {
-		for (int i=0;i<acpl->getSize();i++) {
-			for (int j=0;j<acpl->getPluginLibrary(i)->getSize();j++) {
-				if (acpl->getPluginLibrary(i)->getPlugin(j)->getPluginType() == PLUGIN_TYPE_FEATURES && acpl->getPluginLibrary(i)->getPlugin(j)->getMediaType() == media_cycle->getLibrary()->getMediaType()) {
-					QString s(acpl->getPluginLibrary(i)->getPlugin(j)->getName().c_str());
-					QListWidgetItem * item = new QListWidgetItem(s,ui.featuresListWidget);
-					item->setCheckState (Qt::Unchecked);
-				}
-			}
-		}
+	
+	vector<string> plugins_list = this->media_cycle->getListOfActivePlugins();
+	vector<string> ::iterator list_iter;
+	
+	for (list_iter = plugins_list.begin(); list_iter != plugins_list.end(); list_iter++) {
+		QString s((*list_iter).c_str());
+		QListWidgetItem * item = new QListWidgetItem(s,ui.featuresListWidget);
+		item->setCheckState (Qt::Unchecked);
 	}
+	
 	this->synchronizeFeaturesWeights();
-
+	
 	connect(ui.featuresListWidget, SIGNAL(itemClicked(QListWidgetItem*)),
-	this, SLOT(modifyListItem(QListWidgetItem*)));
+			this, SLOT(modifyListItem(QListWidgetItem*)));
 	
 }
 

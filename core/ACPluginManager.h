@@ -88,6 +88,8 @@ public:
     int addLibrary(std::string aPluginLibraryPath);
     int removeLibrary(std::string aPluginLibraryPath);
 	bool removePluginFromLibrary(std::string _plugin_name, std::string _library_path);
+	std::vector<std::string> getListOfPlugins();
+	
     int clean();
 	void dump();
 

@@ -460,6 +460,14 @@ ACMediaFeatures* ACMedia::getFeaturesVector(string feature_name) {
 	return 0;
 }
 
+std::vector<std::string> ACMedia::getListOfFeaturesPlugins(){
+	std::vector<std::string> plugins_list;
+	for (int i=0; i<getNumberOfFeaturesVectors(); i++){
+		plugins_list.push_back(features_vectors[i]->getName());
+	}
+	return plugins_list;
+}
+
 // Calls the plugins and fills in info such as width, height, ...
 // Implemented in ACMedia.cpp, since it is the same for all media
 // Returns 1 if it worked, 0 if it failed

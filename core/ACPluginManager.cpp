@@ -103,6 +103,18 @@ bool ACPluginManager::removePluginFromLibrary(std::string _plugin_name, std::str
 	return found_plugin;
 }
 
+std::vector<std::string> ACPluginManager::getListOfPlugins(){
+	std::vector<std::string> plugins_list;	
+	vector<ACPluginLibrary *> ::iterator lib_iter;
+	vector<ACPlugin*> ::iterator plug_iter;
+
+	for (lib_iter = this->mPluginLibrary.begin(); lib_iter != this->mPluginLibrary.end(); lib_iter++) {
+		for (plug_iter = (*lib_iter)->getPlugins().begin(); plug_iter != (*lib_iter)->getPlugins().end(); plug_iter++) {
+			plugins_list.push_back((*plug_iter)->getName());
+		}
+	}
+	return plugins_list;
+}
 
 int ACPluginManager::clean() {
 	vector<ACPluginLibrary *> ::iterator iter;

@@ -88,6 +88,8 @@ public:
 	void normalizeFeatures(int needsNormalize=1);
 	void denormalizeFeatures();
 	void calculateStats();
+	
+	std::vector<std::string> getListOfActivePlugins();
 
 	std::vector< std::vector<double> > getMeanFeatures() {return mean_features;};
 	std::vector< std::vector<double> > getStdevFeatures() {return stdev_features;};

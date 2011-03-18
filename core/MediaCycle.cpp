@@ -483,6 +483,14 @@ bool MediaCycle::removePluginFromLibrary(std::string _plugin_name, std::string _
 	return this->pluginManager->removePluginFromLibrary(_plugin_name, _library_path);
 }
 
+std::vector<std::string> MediaCycle::getListOfPlugins(){
+	return this->pluginManager->getListOfPlugins();
+}
+
+std::vector<std::string> MediaCycle::getListOfActivePlugins(){
+	return this->mediaLibrary->getListOfActivePlugins();
+}
+
 void MediaCycle::setClustersMethodPlugin(string pluginName){
 	ACPlugin* clustersPlugin = this->getPluginManager()->getPlugin(pluginName);
 	this->getBrowser()->setClustersMethodPlugin(clustersPlugin);

@@ -78,6 +78,8 @@ SettingsDialog::SettingsDialog(ACMultiMediaCycleOsgQt* _mc) : QMainWindow() {
             this, SLOT(updateActions()));
 	this->activateWindow();
 	this->readSettings();
+	// keep the settings window on top of the app's window
+	//this->setWindowFlags(Qt::WindowStaysOnTopHint);
 }
 
 SettingsDialog::~SettingsDialog(){

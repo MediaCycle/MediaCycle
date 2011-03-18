@@ -211,6 +211,7 @@ int ACMediaLibrary::importFile(std::string _filename, ACPluginManager *acpl, boo
 			mediaSegments = media->getAllSegments();
 			for (unsigned int i = 0; i < mediaSegments.size(); i++){
 				// for the segments we do not save (again) timedFeatures
+				// XS TODO but we should not re-calculate them either !
 				if (mediaSegments[i]->import(_filename, this->getMediaID(), acpl)){
 					this->addMedia(mediaSegments[i]);
 					this->incrementMediaID();
@@ -758,6 +759,16 @@ void ACMediaLibrary::denormalizeFeatures() {
 	}
 	index_last_normalized = -1;
 	cleanStats();
+}
+
+// returns the list of plugins that have been used to calculate the mediafeatures for media[0]
+std::vector<std::string> ACMediaLibrary::getListOfActivePlugins(){
+	std::vector<std::string> plugins_list;
+	if (this->getSize() ==0) 
+		plugins_list.clear();
+	else 
+		plugins_list = this->getMedia(0)->getListOfFeaturesPlugins();
+	return plugins_list;
 }
 
 // -------------------------------------------------------------------------

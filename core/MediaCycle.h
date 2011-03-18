@@ -117,8 +117,9 @@ public:
 	ACPluginManager* getPluginManager() { return pluginManager;}
 	ACPluginLibrary* getPluginLibrary(std::string aPluginLibraryPath) const;
 	bool removePluginFromLibrary(std::string _plugin_name, std::string _library_path);
+	std::vector<std::string> getListOfPlugins();
+	std::vector<std::string> getListOfActivePlugins();
 
-	
 	// XS TODO do we want so many methods ?
 	void setClustersMethodPlugin(std::string pluginName);
 	void setNeighborsMethodPlugin(std::string pluginName);

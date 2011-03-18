@@ -95,6 +95,7 @@ public:
 	ACMediaFeatures* getFeaturesVector(std::string feature_name);
 	int getNumberOfFeaturesVectors() {return features_vectors.size();}
 	void addFeaturesVector(ACMediaFeatures *aFeatures) { this->features_vectors.push_back(aFeatures); }
+	std::vector<std::string> getListOfFeaturesPlugins();
 	
 	std::string getFileName() { return filename; }
 	void setFileName(std::string s) { filename = s; }

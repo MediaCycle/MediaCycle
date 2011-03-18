@@ -347,7 +347,7 @@ bool ACMultiMediaCycleOsgQt::readXMLConfig(string _filename){
 }
 
 void ACMultiMediaCycleOsgQt::on_actionSave_XML_triggered(bool checked){
-	// XS TODO what is the use of checked (in argument above) ?
+	// XS TODO what is the use of "checked" (in argument above) ?
 	this->writeXMLConfig();
 }
 
@@ -925,6 +925,10 @@ void ACMultiMediaCycleOsgQt::clean(){
 			((ACBrowserControlsClustersDockWidgetQt*)dockWidgets[d])->cleanCheckBoxes();
 		}
 	}	
+	
+	// XS TODO : remove the boxes specific to the media that was loaded
+	// e.g. ACAudioControlDockWidgets
+	// modify the DockWidget's API to allow this
 	plugins_scanned = false;
 	
 	ui.compositeOsgView->clean();
