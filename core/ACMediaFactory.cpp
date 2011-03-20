@@ -32,7 +32,6 @@
  *
  */
 
-#include "ACMediaFactory.h"
 #if defined (SUPPORT_AUDIO)
 #include "ACAudio.h"
 #endif //defined (SUPPORT_AUDIO)
@@ -82,25 +81,11 @@ using namespace std;
 // ----------- uncomment this to parse sndfile formats in verbose mode
 //#define PARSE_SNDFILE_FORMATS_VERBOSE
 
-// filext members are static and thus have to be initialized outside class
-/*const filext::value_type _ini[] = {};
-
-#if defined USE_DEBUG && defined __APPLE__
+#if defined USE_DEBUG// && defined __APPLE__
 #include "ACMediaFactoryDebug.cpp"
 #else
-/// List of media file extensions available on the current running system and MediaCycle distribution.
-const filext::value_type _mini[] = {};
-filext ACMediaFactory::available_file_extensions(_mini, _mini + sizeof _mini / sizeof *_mini);
-
-/// List of unchecked media file extensions, available on the current running system and MediaCycle distribution,
-/// but not listed on the possible extensions so far.
-const filext::value_type _uini[] = {};
-filext ACMediaFactory::unchecked_file_extensions(_uini, _uini + sizeof _uini / sizeof *_uini);
+#include "ACMediaFactory.h"
 #endif
-
-/// List of media file extensions possibly in use by MediaCycle
-filext ACMediaFactory::used_file_extensions(_ini, _ini + sizeof _ini / sizeof *_ini);
-*/
 
 /// List of known media file extensions associated to MediaCycle media types.
 /// We can complement them by checking the list of unchecked media file extensions
@@ -265,7 +250,7 @@ ACMediaFactory::ACMediaFactory(){
 }
 
 ACMediaFactory::~ACMediaFactory(){
-	if(!instance)
+	if(instance)
         delete instance;
 }
 

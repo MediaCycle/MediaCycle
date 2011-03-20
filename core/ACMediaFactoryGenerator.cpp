@@ -42,7 +42,7 @@
 using namespace std;
 
 int main(int argc, char **argv){
-	
+
 	// initialize available extensions
 	ACMediaFactory::getInstance();
 	ofstream generated_cpp_file;
@@ -53,7 +53,7 @@ int main(int argc, char **argv){
 		std::cout << "Can't open file..." << std::endl;
 	else {
 		generated_cpp_file << "#include \"ACMediaFactory.h\"" << endl;
-		generated_cpp_file << "const filext::value_type _mini[] = {";
+		generated_cpp_file << "filext::value_type _mini[] = {";
 		filext avail_ext = ACMediaFactory::getInstance()->getAvailableFileExtensions();
 		filext::iterator avail_iter = avail_ext.begin();
 		for(;avail_iter!=avail_ext.end();avail_iter++){
@@ -64,20 +64,8 @@ int main(int argc, char **argv){
 				generated_cpp_file << endl << "filext::value_type(\"" << avail_iter->first << "\", " << iterm->second << ")";
 			}
 		}
-		generated_cpp_file << endl << "};" << endl << "filext ACMediaFactory::available_file_extensions(_mini, _mini + sizeof _mini / sizeof *_mini);" << endl; 
+		generated_cpp_file << endl << "};" << endl << "filext ACMediaFactory::available_file_extensions(_mini, _mini + sizeof _mini / sizeof *_mini);" << endl;
 		generated_cpp_file << endl;
-		generated_cpp_file << "const filext::value_type _uini[] = {";
-		filext unchk_ext = ACMediaFactory::getInstance()->getUncheckedFileExtensions();
-		filext::iterator unchk_iter = unchk_ext.begin();
-		for(;unchk_iter!=unchk_ext.end();unchk_iter++){
-			mediaTypeToEnumNameConverter::const_iterator iterm = mediaTypeToEnumName.find(unchk_iter->second);
-			if( unchk_iter != unchk_ext.begin() )
-				generated_cpp_file << ", \\";
-			if( iterm != mediaTypeToEnumName.end() ) {
-				generated_cpp_file << endl << "filext::value_type(\"" << unchk_iter->first << "\", " << iterm->second << ")";
-			}
-		}
-		generated_cpp_file << endl << "};" << endl << "filext ACMediaFactory::unchecked_file_extensions(_uini, _uini + sizeof _uini / sizeof *_uini);" << endl; 
 		generated_cpp_file.close();
 	}
 	return 0;

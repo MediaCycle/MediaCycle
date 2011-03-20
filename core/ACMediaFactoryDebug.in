@@ -1,5 +1,1 @@
 #include "ACMediaFactory.h"
-const filext::value_type _mini[] = {};
-filext ACMediaFactory::available_file_extensions(_mini, _mini + sizeof _mini / sizeof *_mini);
-const filext::value_type _uini[] = {};
-filext ACMediaFactory::unchecked_file_extensions(_uini, _uini + sizeof _uini / sizeof *_uini);
