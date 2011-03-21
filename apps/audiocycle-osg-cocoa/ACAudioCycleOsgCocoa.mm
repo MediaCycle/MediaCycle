@@ -36,7 +36,7 @@
  */
 
 #include <iostream>
-#import <ACAudioCycleOsgCocoa.h>
+#import "ACAudioCycleOsgCocoa.h"
 
 ////
 @interface ACAudioCycleOsgCocoa ()

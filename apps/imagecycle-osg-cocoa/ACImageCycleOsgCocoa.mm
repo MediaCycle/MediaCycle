@@ -36,7 +36,7 @@
  */
 
 #include <iostream>
-#import <ACImageCycleOsgCocoa.h>
+#import "ACImageCycleOsgCocoa.h"
 
 ////
 @interface ACImageCycleOsgCocoa ()
