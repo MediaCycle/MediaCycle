@@ -52,7 +52,7 @@ class ACMediaFactory {
 	private:
 		// for log(n) search through extensions:
 		static filext known_file_extensions;
-		#if defined USE_DEBUG
+		#if defined (USE_DEBUG)
 		static filext available_file_extensions;
 		#else
 		filext available_file_extensions;

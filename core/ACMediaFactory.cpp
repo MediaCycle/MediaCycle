@@ -81,7 +81,7 @@ using namespace std;
 // ----------- uncomment this to parse sndfile formats in verbose mode
 //#define PARSE_SNDFILE_FORMATS_VERBOSE
 
-#if defined USE_DEBUG// && defined __APPLE__
+#if defined (USE_DEBUG)// && defined (__APPLE__)
 #include "ACMediaFactoryDebug.cpp"
 #else
 #include "ACMediaFactory.h"
