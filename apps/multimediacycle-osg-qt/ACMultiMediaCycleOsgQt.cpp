@@ -115,6 +115,10 @@ ACMultiMediaCycleOsgQt::~ACMultiMediaCycleOsgQt(){
 	delete settingsDialog;
 	delete aboutDialogFactory;
 	delete dockWidgetFactory;
+    vector<ACAbstractDockWidgetQt*>::iterator dwiter;
+    for (dwiter=dockWidgets.begin(); dwiter!=dockWidgets.end(); dwiter++)
+        delete *dwiter;
+    if (aboutDialog) delete aboutDialog;
 }
 
 // tries to read settings from previous run
@@ -878,6 +882,15 @@ void ACMultiMediaCycleOsgQt::loadDefaultConfig(ACMediaType _media_type, ACBrowse
 	media_cycle->addPluginLibrary(f_plugin);
 	media_cycle->addPluginLibrary(v_plugin);
 	media_cycle->addPluginLibrary(s_plugin);
+
+    //CF sorry XD, I need position plugins to debug the segmentation!
+    for (int d=0; d<dockWidgets.size(); d++)
+    {
+        if (dockWidgets[d]->getClassName()=="ACBrowserControlsClustersDockWidgetQt")
+        {
+            ((ACBrowserControlsClustersDockWidgetQt*)dockWidgets[d])->updatePluginLists();
+        }
+    }
 }
 
 

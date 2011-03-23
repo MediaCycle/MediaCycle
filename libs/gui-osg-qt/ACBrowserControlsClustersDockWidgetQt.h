@@ -45,7 +45,7 @@
 
 class ACBrowserControlsClustersDockWidgetQt : public ACAbstractDockWidgetQt {
 Q_OBJECT
-	
+
 public slots:
 	virtual void modifyListItem(QListWidgetItem *item); // XS TODO why virtual again ?
 
@@ -54,24 +54,25 @@ private slots:
 	void on_pushButtonRecenter_clicked();
 	void on_pushButtonBack_clicked();
 	void on_pushButtonForward_clicked();
-	
+
 	// Clustering controls
 	void on_spinBoxClusters_valueChanged(int _value);
 	void on_sliderClusters_sliderReleased();
-	//void on_comboBoxClustersMethod_activated(const QString & text);//CF or (int index);} 
-	//void on_comboBoxClustersPositions_activated(const QString & text);//CF or (int index);} 
-	
+	void on_comboBoxClustersMethod_activated(const QString & text);//CF or (int index);}
+	void on_comboBoxClustersPositions_activated(const QString & text);//CF or (int index);}
+
 public:
 	ACBrowserControlsClustersDockWidgetQt(QWidget *parent = 0);
 	~ACBrowserControlsClustersDockWidgetQt(){};
-	
+
 private:
 	Ui::ACBrowserControlsClustersDockWidgetQt ui;
-	
+
 public:
 	void synchronizeFeaturesWeights();
 	void configureCheckBoxes();
 	void cleanCheckBoxes();
+	void updatePluginLists();
 	QListWidget* getFeaturesListWidget(){return ui.featuresListWidget;}
 };
 #endif

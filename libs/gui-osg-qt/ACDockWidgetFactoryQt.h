@@ -49,7 +49,7 @@
 class ACDockWidgetFactoryQt{
 public:
 	ACDockWidgetFactoryQt(){};
-	~ACDockWidgetFactoryQt(){};
+	virtual ~ACDockWidgetFactoryQt(){};
 	ACAbstractDockWidgetQt* createDockWidget(QWidget *parent = 0,std::string dock_type="");
 };
 #endif // ACDOCKWIDGETFACTORYQT_H

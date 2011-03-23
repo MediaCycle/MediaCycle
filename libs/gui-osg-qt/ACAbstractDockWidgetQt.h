@@ -57,7 +57,7 @@ public:
 		audio_engine = 0;
 		#endif //defined (SUPPORT_AUDIO)
 	};
-    ~ACAbstractDockWidgetQt(){};
+    virtual ~ACAbstractDockWidgetQt(){};
 	
 	void setMediaType(ACMediaType _media_type){this->media_type=_media_type;}
 	ACMediaType getMediaType(){return this->media_type;}
