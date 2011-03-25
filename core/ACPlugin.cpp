@@ -63,10 +63,3 @@ ACSegmentationPlugin::ACSegmentationPlugin()
 	
 }
 
-
-ACNeighborhoodsPlugin::ACNeighborhoodsPlugin() {
-	
-	this->mPluginType=mPluginType|PLUGIN_TYPE_NEIGHBORS_METHOD;
-	
-    //local vars
-}
