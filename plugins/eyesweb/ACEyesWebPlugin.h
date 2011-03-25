@@ -45,14 +45,14 @@
 #include "ACMediaTimedFeature.h"
 #include "ACMediaData.h"
 
-class ACEyesWebPlugin : public ACPlugin {
+class ACEyesWebPlugin : public ACFeaturesPlugin {
 public:
     ACEyesWebPlugin();
     ~ACEyesWebPlugin();
-    virtual std::vector<ACMediaFeatures*> calculate();
-    virtual std::vector<ACMediaFeatures*> calculate(std::string aFileName);
-	std::vector<ACMediaFeatures*> calculate(ACMediaData* _data){}
-
+	
+	
+	virtual std::vector<ACMediaFeatures*> calculate(std::string aFileName, bool _save_timed_feat=false);
+	virtual std::vector<ACMediaFeatures*> calculate(ACMediaData* _data, ACMedia* theMedia, bool _save_timed_feat=false);
     std::string extractDirectory(std::string path);
     std::string extractFilename(std::string path);
     std::string changeExtension(std::string path, std::string ext);

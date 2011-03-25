@@ -42,7 +42,7 @@
 
 #include <iostream>
 
-class ACAudioSegmentationPlugin : public ACPlugin {
+class ACAudioSegmentationPlugin : public ACSegmentationPlugin {
 public:
 	ACAudioSegmentationPlugin();
 	~ACAudioSegmentationPlugin();
@@ -53,6 +53,7 @@ public:
 
 	virtual std::vector<ACMedia*> segment(ACMediaData* _data, ACMedia*);
 	
+	virtual std::vector<ACMedia*> segment(ACMediaTimedFeature* _mtf, ACMedia*){};
 private:
 };
 

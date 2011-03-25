@@ -22,13 +22,6 @@ ACEyesWebPlugin::~ACEyesWebPlugin()
 {
 }
 
-vector<ACMediaFeatures*> ACEyesWebPlugin::calculate()
-// TODO XS : do we really want this to return 0 ?
-{
-  vector<ACMediaFeatures*> raf;
-  raf.resize(0);
-  return raf;
-}
 
 string ACEyesWebPlugin::extractDirectory(string path)
 {
@@ -87,7 +80,7 @@ string ACEyesWebPlugin::changeLastFolder(string path, string folder)
     return dir.substr(0,index+1) + folder + sep + extractFilename(path);
 }
 
-vector<ACMediaFeatures*> ACEyesWebPlugin::calculate(std::string fileName){
+vector<ACMediaFeatures*> ACEyesWebPlugin::calculate(std::string fileName, bool _save_timed_feat){
   ACMediaTimedFeature *mediaTimedFeatures = new ACMediaTimedFeature();
   //fileName = video path (.mov, .avi, ...)
   string dataFile = changeExtension(changeLastFolder(fileName,"analyse/Front"),".ew.txt");
@@ -149,4 +142,9 @@ vector<ACMediaFeatures*> ACEyesWebPlugin::calculate(std::string fileName){
   return featureVec;
 }
 
+std::vector<ACMediaFeatures*> ACEyesWebPlugin::calculate(ACMediaData* _data, ACMedia* theMedia, bool _save_timed_feat)
+{
+	std::vector<ACMediaFeatures*>  featureVec;
+	return featureVec;
+}
 

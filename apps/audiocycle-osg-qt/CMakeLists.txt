@@ -45,7 +45,7 @@ IF ( SUPPORT_AUDIO AND USE_QT4 AND USE_OSG AND USE_OSC AND ( OPENAL_FOUND OR POR
 	ADD_DEPENDENCIES(audiocycle-osg-qt mc_visualisation)
 	ADD_DEPENDENCIES(audiocycle-osg-qt mc_audio)
 	ADD_DEPENDENCIES(audiocycle-osg-qt mc_segmentation)
-	ADD_DEPENDENCIES(audiocycle-osg-qt mc_video)
+	#ADD_DEPENDENCIES(audiocycle-osg-qt mc_video)
 	IF ( USE_APPLE_MULTITOUCH )
 		ADD_DEPENDENCIES(audiocycle-osg-qt mediacycle-io-applemultitouch)
 	ENDIF ( USE_APPLE_MULTITOUCH )

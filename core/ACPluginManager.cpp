@@ -208,7 +208,7 @@ int ACPluginLibrary::initialize()
 
 vector<ACMediaFeatures*> ACPluginLibrary::calculate(int aPluginIndex,string aFileName)
 {
-    return this->mPlugins[aPluginIndex]->calculate(aFileName);
+    return dynamic_cast<ACFeaturesPlugin*>(this->mPlugins[aPluginIndex])->calculate(aFileName);
     //return getPlugin(aPluginIndex)->calculate(aFileName);
 }
 

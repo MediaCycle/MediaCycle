@@ -6,7 +6,7 @@ IF(USE_DEBUG)#(APPLE AND USE_DEBUG)
 	execute_process(COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/ACMediaFactoryDebug.in ${CMAKE_CURRENT_BINARY_DIR}/ACMediaFactoryDebug.cpp)
 
 	# add the executable that will do the generation
-	ADD_EXECUTABLE(mediafactorygenerator AC3DModel.cpp AC3DModel.h ACAudio.cpp ACAudio.h ACFeaturesTypes.h ACImage.cpp ACImage.h ACMedia.cpp ACMedia.h ACMediaData.cpp ACMediaData.h ACMediaFactory.cpp ACMediaFactory.h ACMediaFactoryGenerator.cpp ACMediaFeatures.cpp ACMediaFeatures.h ACMediaSegment.cpp ACMediaSegment.h ACMediaTimedFeature.cpp ACMediaTimedFeature.h ACMediaTypes.h ACOpenCVInclude.h ACPlugin.h ACPluginManager.cpp ACPluginManager.h ACVideo.cpp ACVideo.h DynamicLibrary.cpp DynamicLibrary.h)
+	ADD_EXECUTABLE(mediafactorygenerator AC3DModel.cpp AC3DModel.h ACAudio.cpp ACAudio.h ACFeaturesTypes.h ACImage.cpp ACImage.h ACMedia.cpp ACMedia.h ACMediaData.cpp ACMediaData.h ACMediaFactory.cpp ACMediaFactory.h ACMediaFactoryGenerator.cpp ACMediaFeatures.cpp ACMediaFeatures.h ACMediaSegment.cpp ACMediaSegment.h ACMediaTimedFeature.cpp ACMediaTimedFeature.h ACMediaTypes.h ACOpenCVInclude.h ACPlugin.cpp ACPlugin.h ACPluginManager.cpp ACPluginManager.h ACVideo.cpp ACVideo.h DynamicLibrary.cpp DynamicLibrary.h)
 	GET_TARGET_PROPERTY(MEDIA_FACTORY_GENERATOR mediafactorygenerator LOCATION)
 	ADD_CUSTOM_COMMAND(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/ACMediaFactoryDebug.cpp
 		COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/ACMediaFactoryDebug.in ${CMAKE_CURRENT_BINARY_DIR}/ACMediaFactoryDebug.cpp

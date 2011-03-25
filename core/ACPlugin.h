@@ -50,65 +50,76 @@ class ACMedia;
 class ACMediaBrowser;
 class ACMediaTimedFeature;
 
-enum ACPluginType {
-	PLUGIN_TYPE_NONE,
-	PLUGIN_TYPE_FEATURES,
-	PLUGIN_TYPE_SEGMENTATION,
-	PLUGIN_TYPE_SERVER,
-	PLUGIN_TYPE_CLIENT,	
-	PLUGIN_TYPE_CLUSTERS_METHOD,//CF updateClusters
-	PLUGIN_TYPE_CLUSTERS_POSITIONS,//CF updatePositions for the Clusters mode
-	PLUGIN_TYPE_CLUSTERS_PIPELINE,//CF updateClusters and updatePositions for the Clusters mode
-	PLUGIN_TYPE_NEIGHBORS_METHOD,//CF updateNeighborhoods
-	PLUGIN_TYPE_NEIGHBORS_POSITIONS,//CF updatePositions for the Neighbors mode
-	PLUGIN_TYPE_NEIGHBORS_PIPELINE,//CF updateNeighborhoods and updatePositions for the Neighbors mode
-	PLUGIN_TYPE_ANYMODE_POSITIONS,//CF updatePositions for the Clusters or Neighbors modes
-	PLUGIN_TYPE_ALLMODES_PIPELINE//CF updateClusters and updateNeighborhoods and updatePositions for both modes
-};
+typedef		unsigned int ACPluginType;
+#define		PLUGIN_TYPE_NONE				0x0000
+#define		PLUGIN_TYPE_FEATURES			0x0001
+#define		PLUGIN_TYPE_SEGMENTATION		0x0002
+#define		PLUGIN_TYPE_SERVER				0x0004
+#define		PLUGIN_TYPE_CLIENT				0x0008	
+#define		PLUGIN_TYPE_CLUSTERS_METHOD		0x0010//CF updateClusters
+#define		PLUGIN_TYPE_CLUSTERS_POSITIONS	0x0020//CF updatePositions for the Clusters mode
+#define		PLUGIN_TYPE_CLUSTERS_PIPELINE	0x0040//CF updateClusters and updatePositions for the Clusters mode
+#define		PLUGIN_TYPE_NEIGHBORS_METHOD	0x0080//CF updateNeighborhoods
+#define		PLUGIN_TYPE_NEIGHBORS_POSITIONS	0x0100//CF updatePositions for the Neighbors mode
+#define		PLUGIN_TYPE_NEIGHBORS_PIPELINE	0x0200//CF updateNeighborhoods and updatePositions for the Neighbors mode
+#define		PLUGIN_TYPE_ANYMODE_POSITIONS	0x0400//CF updatePositions for the Clusters or Neighbors modes
+#define		PLUGIN_TYPE_ALLMODES_PIPELINE	0x0800//CF updateClusters and updateNeighborhoods and updatePositions for both modes
+
 
 class ACPlugin {
 public:
-	ACPlugin() {}
+	ACPlugin();
+	bool isPlugintype(ACPluginType pType);
 	virtual ~ACPlugin() {mName.clear(); mDescription.clear(); mId.clear();}
 	std::string getName() {return this->mName;}
-	//virtual std::string getName() const = 0; -> error !
 	std::string getIdentifier() {return this->mId;}
 	std::string getDescription() {return this->mDescription;}
 	ACMediaType getMediaType() {return this->mMediaType;}
 	ACPluginType getPluginType() {return this->mPluginType;}
-	std::vector<std::string> getDescriptorsList() {return this->mDescriptorsList;}
 
-	virtual int initialize(){return 0;}
 
-	virtual std::vector<ACMediaFeatures*> calculate(){std::vector<ACMediaFeatures*> dummy; return dummy; };
-	virtual std::vector<ACMediaFeatures*> calculate(std::string aFileName, bool _save_timed_feat=false){std::vector<ACMediaFeatures*> dummy; return dummy;};
-	virtual std::vector<ACMediaFeatures*> calculate(ACMediaData* aData, ACMedia* theMedia, bool _save_timed_feat=false){std::vector<ACMediaFeatures*> dummy; return dummy;};
-	//XSCF TODO: should the plugin receive MediaCycle ?
+		//XSCF TODO: should the plugin receive MediaCycle ?
 	virtual void updateClusters(ACMediaBrowser*){};
 	virtual void updateNextPositions(ACMediaBrowser*){};
 	virtual void updateNeighborhoods(ACMediaBrowser*){};
 	
 	// e.g., for audioSegmentationPLugin
-	virtual std::vector<ACMedia*> segment(ACMediaData* audio_data, ACMedia*){std::vector<ACMedia*> dummy; return dummy;}
 	
 	// timedFeatures: e.g., for BicSegmentationPlugin
-	virtual std::vector<ACMedia*> segment(ACMediaTimedFeature* _mtf, ACMedia*){std::vector<ACMedia*> dummy; return dummy;}
-	virtual ACMediaTimedFeature* getTimedFeatures(){return 0;}
 
-	virtual int start(){return 0;}
-	virtual int stop(){return 0;}
-	//virtual void prepareLayout(ACOsgBrowserRenderer*, int start){};
-	//virtual void updateLayout(ACOsgBrowserRenderer*, double ratio){};
-
-    //virtual int readFile(std::string);
 protected:
 	std::string mName;
 	std::string mId;
 	std::string mDescription;
 	ACMediaType mMediaType;
 	ACPluginType mPluginType;
+};
+
+
+class ACFeaturesPlugin: public ACPlugin
+{
+protected:
+	ACFeaturesPlugin();
+	
+public:
+	virtual std::vector<ACMediaFeatures*> calculate(std::string aFileName, bool _save_timed_feat=false)=0;
+	virtual std::vector<ACMediaFeatures*> calculate(ACMediaData* aData, ACMedia* theMedia, bool _save_timed_feat=false)=0;
+	virtual ACMediaTimedFeature* getTimedFeatures(){return 0;}
+	std::vector<std::string> getDescriptorsList() {return this->mDescriptorsList;}
+protected:	
 	std::vector<std::string> mDescriptorsList;
 };
+
+class ACSegmentationPlugin:public ACPlugin
+{
+protected:
+public:
+	ACSegmentationPlugin();
+	virtual std::vector<ACMedia*> segment(ACMediaTimedFeature* _mtf, ACMedia*)=0;
+	virtual std::vector<ACMedia*> segment(ACMediaData* audio_data, ACMedia*)=0;
+
+};
+
 
 // the types of the class factories
 typedef ACPlugin* createPluginFactory(std::string);

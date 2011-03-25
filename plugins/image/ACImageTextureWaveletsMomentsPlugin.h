@@ -41,7 +41,7 @@
 
 #include<iostream>
 
-class ACImageTextureWaveletsMomentsPlugin : public ACPlugin {
+class ACImageTextureWaveletsMomentsPlugin : public ACFeaturesPlugin {
 public:
     ACImageTextureWaveletsMomentsPlugin();
     ~ACImageTextureWaveletsMomentsPlugin();

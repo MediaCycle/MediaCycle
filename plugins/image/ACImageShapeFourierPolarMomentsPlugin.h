@@ -41,7 +41,7 @@
 
 #include<iostream>
 
-class ACImageShapeFourierPolarMomentsPlugin : public ACPlugin {
+class ACImageShapeFourierPolarMomentsPlugin : public ACFeaturesPlugin {
 public:
     ACImageShapeFourierPolarMomentsPlugin();
     ~ACImageShapeFourierPolarMomentsPlugin();

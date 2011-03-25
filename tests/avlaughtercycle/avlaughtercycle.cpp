@@ -372,7 +372,7 @@ int processTcpMessageFromSSI(MediaCycle *that, char *buffer, int l, char **buffe
 		that->getKNN(local_media, result, 1);
 
 		if (result.size() > 0) {
-			ACPlugin *greta = that->getPluginManager()->getPlugin("Greta");
+			ACFeaturesPlugin *greta = dynamic_cast<ACFeaturesPlugin*>( that->getPluginManager()->getPlugin("Greta"));
 			if (greta) {
 				//filename extension is removed in greta
 				cout << "Sent to Greta : " << result[0]->getFileName() << endl;

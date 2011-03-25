@@ -1,8 +1,8 @@
 /**
  * @brief AC3DModelFeaturesPlugin.cpp
- * @author Stéphane Dupont
- * @date 20/09/2010
- * @copyright (c) 2010 – UMONS - Numediart
+ * @author Thierry Ravet
+ * @date 25/03/2011
+ * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -38,7 +38,6 @@
 AC3DModelFeaturesPlugin::AC3DModelFeaturesPlugin() {
 	
     this->mMediaType = MEDIA_TYPE_3DMODEL;
-    this->mPluginType = PLUGIN_TYPE_FEATURES;
     this->mName = "3DModelFeatures";
     this->mDescription = "3DModelFeatures plugin";
     this->mId = "";
@@ -48,7 +47,13 @@ AC3DModelFeaturesPlugin::~AC3DModelFeaturesPlugin() {
 	
 }
 
-std::vector<ACMediaFeatures*> AC3DModelFeaturesPlugin::calculate(ACMediaData* model_data, ACMedia* theMedia) {
+std::vector<ACMediaFeatures*> AC3DModelFeaturesPlugin::calculate(std::string aFileName, bool _save_timed_feat)
+{
+	std::vector<ACMediaFeatures*> Fake;
+	return Fake;
+	
+}
+std::vector<ACMediaFeatures*> AC3DModelFeaturesPlugin::calculate(ACMediaData* model_data, ACMedia* theMedia, bool _save_timed_feat) {
 	
 	osg::Node* local_model_ptr;
 	ACMediaFeatures* desc_bounding_box_ratio;

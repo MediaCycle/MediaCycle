@@ -40,16 +40,11 @@
 
 #include<iostream>
 
-class ACAudioGardenFeaturesPlugin : public ACPlugin {
+class ACAudioGardenFeaturesPlugin : public ACFeaturesPlugin {
 public:
 	ACAudioGardenFeaturesPlugin();
 	~ACAudioGardenFeaturesPlugin();
-	
-	virtual int initialize(){return 1;};
-	virtual int start(){return 1;};
-	virtual int stop(){return 1;};
 
-	virtual std::vector<ACMediaFeatures*> calculate(){};
 	virtual std::vector<ACMediaFeatures*> calculate(std::string aFileName, bool _save_timed_feat=false){};
 	virtual std::vector<ACMediaFeatures*> calculate(ACMediaData* _data, ACMedia*, bool _save_timed_feat=false);
 	

@@ -109,7 +109,7 @@ ACAudioCycleOsgQt::ACAudioCycleOsgQt(QWidget *parent)
 			}
 		}
 		media_cycle->addPluginLibrary("../../../plugins/audio/" + build_type + "/mc_audio.dylib");	
-		//media_cycle->addPluginLibrary("../../../plugins/segmentation/" + build_type + "/mc_segmentation.dylib");	
+		media_cycle->addPluginLibrary("../../../plugins/segmentation/" + build_type + "/mc_segmentation.dylib");	
 	#endif
 
 	audio_engine = new ACAudioEngine();

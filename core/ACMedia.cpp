@@ -499,8 +499,14 @@ int ACMedia::import(std::string _path, int _mid, ACPluginManager *acpl, bool _sa
 					
 					cout << "Computing features using plugin : " << acpl->getPluginLibrary(i)->getPlugin(j)->getName() << std::endl;
 					//plugin->start();
-					vector<ACMediaFeatures*> afv = acpl->getPluginLibrary(i)->getPlugin(j)->calculate(data, this, _save_timed_feat);
-					
+					ACFeaturesPlugin* localPlugin=dynamic_cast<ACFeaturesPlugin*>( acpl->getPluginLibrary(i)->getPlugin(j));
+					vector<ACMediaFeatures*> afv;
+					if (localPlugin!=NULL)
+						afv =localPlugin->calculate(data, this, _save_timed_feat);
+					else {
+						cerr << "<ACMedia::import> failed plugin access failed "<< acpl->getPluginLibrary(i)->getPlugin(j)->getName() << endl;
+					}
+
 					if (afv.size()==0){
 						import_ok = 0;
 						cerr << "<ACMedia::import> failed importing feature from plugin: " << acpl->getPluginLibrary(i)->getPlugin(j)->getName() << endl;
@@ -573,12 +579,24 @@ int ACMedia::segment(ACPluginManager *acpl, bool _saved_timed_features ) {
 
 						features_plugins_count ++;
 						if (features_plugins_count ==1) {
+							ACFeaturesPlugin* localPlugin=dynamic_cast<ACFeaturesPlugin*>( acpl->getPluginLibrary(i)->getPlugin(j));
+							if (localPlugin!=NULL)
+								ft_from_disk = localPlugin->getTimedFeatures();
+							else 
+							{
+								cerr << "<ACMedia::import> failed plugin access failed "<< acpl->getPluginLibrary(i)->getPlugin(j)->getName() << endl;
+							}
 							// first plugin : get (implicit "new" done in getTimedFeatures, so you need to delete)
-							ft_from_disk = acpl->getPluginLibrary(i)->getPlugin(j)->getTimedFeatures();
 						}
 						else {
 							// next plugins (hence i=1) : append
-							ft_from_disk->appendTimedFeature(acpl->getPluginLibrary(i)->getPlugin(j)->getTimedFeatures());
+							ACFeaturesPlugin* localPlugin=dynamic_cast<ACFeaturesPlugin*>( acpl->getPluginLibrary(i)->getPlugin(j));
+							if (localPlugin!=NULL)
+								ft_from_disk->appendTimedFeature(localPlugin->getTimedFeatures());
+							else 
+							{
+								cerr << "<ACMedia::import> failed plugin access failed "<< acpl->getPluginLibrary(i)->getPlugin(j)->getName() << endl;
+							}
 						}
 					}
 				}
@@ -597,7 +615,7 @@ int ACMedia::segment(ACPluginManager *acpl, bool _saved_timed_features ) {
 					cout << "Segmenting features using plugin : " << acpl->getPluginLibrary(i)->getPlugin(j)->getName() << std::endl;
 
 					segmentation_plugins_count ++;
-					vector<ACMedia*> afv = acpl->getPluginLibrary(i)->getPlugin(j)->segment(ft_from_disk, this);
+					vector<ACMedia*> afv = dynamic_cast<ACSegmentationPlugin*>(acpl->getPluginLibrary(i)->getPlugin(j))->segment(ft_from_disk, this);
 					if (afv.size()==0){
 						segment_ok = 0;
 						cerr << "<ACMedia::segment> failed importing segments from plugin: " <<  acpl->getPluginLibrary(i)->getPlugin(j)->getName() << endl;
@@ -620,7 +638,7 @@ int ACMedia::segment(ACPluginManager *acpl, bool _saved_timed_features ) {
 				if (acpl->getPluginLibrary(i)->getPlugin(j)->getPluginType() == PLUGIN_TYPE_SEGMENTATION) {
 					segmentation_plugins_count ++;
 					cout << "Segmenting media using plugin : " << acpl->getPluginLibrary(i)->getPlugin(j)->getName() << std::endl;
-					vector<ACMedia*> afv = acpl->getPluginLibrary(i)->getPlugin(j)->segment(data, this);
+					vector<ACMedia*> afv =dynamic_cast<ACSegmentationPlugin*>( acpl->getPluginLibrary(i)->getPlugin(j))->segment(data, this);
 					// the audio plugin does features extraction AND segmentation
 					if (afv.size()==0){
 						segment_ok = 0;

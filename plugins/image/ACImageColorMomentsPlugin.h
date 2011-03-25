@@ -41,7 +41,7 @@
 
 #include<iostream>
 
-class ACImageColorMomentsPlugin : public ACPlugin {
+class ACImageColorMomentsPlugin : public ACFeaturesPlugin {
 public:
     ACImageColorMomentsPlugin();
     ~ACImageColorMomentsPlugin();

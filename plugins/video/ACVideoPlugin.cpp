@@ -56,7 +56,7 @@ ACVideoPlugin::ACVideoPlugin() {
 ACVideoPlugin::~ACVideoPlugin() {
 }
 
-std::vector<ACMediaFeatures*>  ACVideoPlugin::calculate(std::string aFileName) {
+std::vector<ACMediaFeatures*>  ACVideoPlugin::calculate(std::string aFileName, bool _save_timed_feat) {
 	std::vector<ACMediaFeatures*> allVideoFeatures;
 	std::vector<ACMediaFeatures*> topVideoFeatures;
 	string topFilename = changeLastFolder(aFileName,"Top");
@@ -68,7 +68,7 @@ std::vector<ACMediaFeatures*>  ACVideoPlugin::calculate(std::string aFileName) {
 	return allVideoFeatures;
 }
 
-std::vector<ACMediaFeatures*> ACVideoPlugin::calculate(ACMediaData* video_data, ACMedia* theMedia) {
+std::vector<ACMediaFeatures*> ACVideoPlugin::calculate(ACMediaData* video_data, ACMedia* theMedia, bool _save_timed_feat) {
 	string file_name_front = video_data -> getFileName();
 	vector<ACMediaFeatures*> tmp = this->calculate(file_name_front);
 	return tmp;

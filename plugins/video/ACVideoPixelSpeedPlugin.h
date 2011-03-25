@@ -43,7 +43,7 @@
 #include<iostream>
 #include <string>
 
-class ACVideoPixelSpeedPlugin : public ACPlugin {
+class ACVideoPixelSpeedPlugin : public ACFeaturesPlugin {
 public:
     ACVideoPixelSpeedPlugin();
     ~ACVideoPixelSpeedPlugin();

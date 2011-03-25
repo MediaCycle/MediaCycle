@@ -54,7 +54,7 @@ enum SelfSimDistance {// actually it will be the inverse of a distance: the larg
     MANHATTAN
 };
 
-class ACSelfSimSegmentationPlugin : public ACPlugin {
+class ACSelfSimSegmentationPlugin : public ACSegmentationPlugin {
 public:
 	ACSelfSimSegmentationPlugin();
 	~ACSelfSimSegmentationPlugin();
@@ -69,7 +69,8 @@ public:
     std::vector<int> segment(ACMediaTimedFeature* _ACMTF, float _SelfSimThresh=0.8, int _L=8, int _Wmin=8, SelfSimKernelType _T=SELFSIMSTEP, SelfSimDistance _D=COSINE);
     std::vector<int> segment(std::vector <ACMediaTimedFeature*> _ACMTF, float _SelfSimThresh=0.8, int _L=8, int _Wmin=8, SelfSimKernelType _T=SELFSIMSTEP, SelfSimDistance _D=COSINE);
     arma::fmat get_features() {return full_features;};
-
+	
+	virtual std::vector<ACMedia*> segment(ACMediaTimedFeature* _mtf, ACMedia*){};
 private:
 	std::vector<int> _segment();
 	

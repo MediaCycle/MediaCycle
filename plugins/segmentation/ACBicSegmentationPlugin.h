@@ -39,7 +39,7 @@
 #include <MediaCycle.h>
 #include <ACMediaTimedFeature.h>
 
-class ACBicSegmentationPlugin : public ACPlugin {
+class ACBicSegmentationPlugin : public ACSegmentationPlugin {
 public:
 	ACBicSegmentationPlugin();
 	~ACBicSegmentationPlugin();
@@ -62,7 +62,7 @@ public:
 	
 	arma::fmat get_features() {return full_features;}; //JU: added to ease the visualization during the tests
 	
-	
+	virtual std::vector<ACMedia*> segment(ACMediaData* audio_data, ACMedia*){};
 	
 private:
 	int findSingleSegment(int _A, int _B);

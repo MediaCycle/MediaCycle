@@ -1,8 +1,8 @@
 /**
  * @brief AC3DModelFeaturesPlugin.h
- * @author Stéphane Dupont
- * @date 20/09/2010
- * @copyright (c) 2010 – UMONS - Numediart
+ * @author Thierry Ravet
+ * @date 25/03/2011
+ * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -36,7 +36,7 @@
 
 #include<iostream>
 
-class AC3DModelFeaturesPlugin : public ACPlugin {
+class AC3DModelFeaturesPlugin : public ACFeaturesPlugin {
 public:
 	AC3DModelFeaturesPlugin();
 	~AC3DModelFeaturesPlugin();
@@ -45,9 +45,8 @@ public:
 	virtual int start(){return 1;};
 	virtual int stop(){return 1;};
 
-	virtual std::vector<ACMediaFeatures*> calculate(){};
-	virtual std::vector<ACMediaFeatures*> calculate(std::string aFileName){};
-	virtual std::vector<ACMediaFeatures*> calculate(ACMediaData* _data, ACMedia*);
+	virtual std::vector<ACMediaFeatures*> calculate(std::string aFileName, bool _save_timed_feat=false);
+	virtual std::vector<ACMediaFeatures*> calculate(ACMediaData* _Data, ACMedia* theMedia, bool _save_timed_feat=false);
 	
 private:
 };

@@ -41,7 +41,7 @@
 
 #include<iostream>
 
-class ACImageShapeHuMomentsPlugin : public ACPlugin {
+class ACImageShapeHuMomentsPlugin : public ACFeaturesPlugin {
 public:
     ACImageShapeHuMomentsPlugin();
     ~ACImageShapeHuMomentsPlugin();

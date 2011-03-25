@@ -43,10 +43,10 @@
 ACAudioFeaturesPlugin::ACAudioFeaturesPlugin() {
     //vars herited from ACPlugin
     this->mMediaType = MEDIA_TYPE_AUDIO;
-    this->mPluginType = PLUGIN_TYPE_FEATURES;
     this->mName = "AudioFeatures";
     this->mDescription = "AudioFeatures plugin";
     this->mId = "";
+	this->mPluginType=mPluginType;
 	this->mDescriptorsList.push_back("Spectral Centroid");
 	this->mDescriptorsList.push_back("Spectral Spread");
 	this->mDescriptorsList.push_back("Spectral Variation");
