@@ -41,6 +41,9 @@ ENDIF(APPLE)
 	
 IF ( SDIF_FOUND )
 	TARGET_LINK_LIBRARIES(mediacycle sdif)
+	IF(USE_DEBUG)#(APPLE AND USE_DEBUG)
+		TARGET_LINK_LIBRARIES(mediafactorygenerator sdif)
+	ENDIF()
 ENDIF ( )
 
 #others
