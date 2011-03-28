@@ -31,9 +31,8 @@
  */
 
 #ifndef _ACPLUGIN_H
-#define	_ACPLUGIN_H
+#define _ACPLUGIN_H
 
-#include <iostream>
 #include <string>
 #include <vector>
 

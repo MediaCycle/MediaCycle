@@ -35,7 +35,8 @@
 
 
 #include "ACPlugin.h"
-
+#include <iostream>
+using std::cout;
 
 ACPlugin::ACPlugin()
 {
@@ -52,7 +53,6 @@ ACFeaturesPlugin::ACFeaturesPlugin()
 {
 	cout<<"ACPlugin feature Constructor\n";
 	this->mPluginType=mPluginType|PLUGIN_TYPE_FEATURES;
-	
 }
 
 
@@ -60,6 +60,5 @@ ACSegmentationPlugin::ACSegmentationPlugin()
 {
 	cout<<"ACPlugin segmentation Constructor\n";
 	this->mPluginType=mPluginType|PLUGIN_TYPE_SEGMENTATION;
-	
 }
 
