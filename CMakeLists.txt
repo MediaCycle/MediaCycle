@@ -807,7 +807,7 @@ ENDIF()
 
 
 # StarPU http://runtime.bordeaux.inria.fr/StarPU/
-FIND_PACKAGE ( StarPU )
+#FIND_PACKAGE ( StarPU )
 IF (STARPU_FOUND)
 	MESSAGE("StarPU found in ${STARPU_INCLUDE_DIR}.")
 	#INCLUDE (CheckIncludeFiles)
