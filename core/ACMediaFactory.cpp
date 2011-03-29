@@ -237,8 +237,8 @@ ACMediaFactory::ACMediaFactory(){
 	if (available_file_extensions.size()==0){
 		checkAvailableFileExtensions();
 	}
-	//useAvailableFileExtensions();
-	useKnownFileExtensions(); //use this instead of the above if library extensions parsing doesn't work
+	useAvailableFileExtensions();
+	//useKnownFileExtensions(); //TRY (but don't commit) this instead of the above if library extensions parsing doesn't work, for debugging
 	listSupportedMediaExtensions();
 	#ifdef USE_DEBUG
 	listUncheckedMediaExtensions();
