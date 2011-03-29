@@ -7,7 +7,6 @@ IF(SUPPORT_AUDIO AND USE_AUDIOFEAT)
 
 	TARGET_LINK_LIBRARIES(mediacycle-avlc mediacycle)
 
-	INSTALL(TARGETS mediacycle-avlc RUNTIME DESTINATION bin)
 	MESSAGE("[X] avlaughtercycle")
 ELSE()
 	MESSAGE("[ ] avlaughtercycle")

@@ -6,6 +6,4 @@ ADD_DEPENDENCIES(commonAC-test mediacycle)
 
 TARGET_LINK_LIBRARIES(commonAC-test mediacycle)
 
-INSTALL(TARGETS commonAC-test RUNTIME DESTINATION bin)
-
 MESSAGE("[X] common mediacycle")

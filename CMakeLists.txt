@@ -171,35 +171,15 @@ ENDIF()
 
 SET(PLUGIN_PREFIX "mc_")
 # SET(PLUGIN_SUFFIX ".mcp") #change OS-dependent extension (so, dll, dylib) to a fixed one (.mcp)
-
-# PACKAGING WITH CPack
-IF ( UNIX OR APPLE )
-	# To package do the following:
-	# cmake ../.. -DBUILD_CLIS=OFF -DBUILD_TESTS=OFF -DBUILD_PLUGINS=OFF -DBUILD_SHARED_LIBS=ON -DCPACK_BINARY_DEB:BOOL=on
-	# make package -j2
-	#to build packages, use: make package
-	SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "numediart")
-	INCLUDE(InstallRequiredSystemLibraries)
-
-	set(CPACK_PACKAGE_NAME "${CMAKE_PROJECT_NAME}")
-	set(CPACK_PACKAGE_VERSION "${PROJECT_VERSION}")
-	#set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "MediaCycle...")
-	set(CPACK_PACKAGE_CONTACT "http://numediart.org/")
-	set(CPACK_SOURCE_IGNORE_FILES
-		"^${PROJECT_SOURCE_DIR}/Builds/"
-	)
-	#set(CPACK_PACKAGE_EXECUTABLES "multimediacycle-osg-qt" "MultiMediaCycle.icns") #should contain pairs of <executable> and <icon name>
-	#set(CPACK_PACKAGE_ARCHITECTURE i386)
-	IF (APPLE)
-		#set(CPACK_BUNDLE_NAME "MC")
-		set(CPACK_GENERATOR "DragNDrop")#set(CPACK_GENERATOR "PackageMaker;OSXX11")
-	ELSE()
-		set(CPACK_GENERATOR "TBZ2")
-	ENDIF()
-	SET(CPACK_PACKAGE_VENDOR "numediart")
-	# For more see http://www.cmake.org/Wiki/CMake:Packaging_With_CPack
-	#INCLUDE(CPack)
-ENDIF ( UNIX OR APPLE )
+IF(APPLE) # assuming all are dynamic libraries for now
+    SET(PLUGIN_SUFFIX "dylib") 
+ELSE()
+    IF(UNIX)
+        SET(PLUGIN_SUFFIX "so") # since CMAKE_SHARED_LIBRARY_PREFIX returns "lib" on Ubuntu
+    ELSE()
+        SET(PLUGIN_SUFFIX "dll")
+    ENDIF()
+ENDIF()
 
 IF ( WIN32 )
 	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D_CRT_SECURE_NO_DEPRECATE")
@@ -1060,4 +1040,13 @@ IF(BUILD_DOCUMENTATION)
         ${PROJECT_BINARY_DIR}/doc/mediacycle.doxyfile
     )
 ENDIF(BUILD_DOCUMENTATION)
+
+# In case we want to make a framework distribution:
+#IF(QT4_FOUND AND USE_QT4) SET(WITH_QT4 ON) ENDIF()
+#IF(SUPPORT_AUDIO) SET(USE_AUDIO ON) ENDIF()
+#IF(SUPPORT_IMAGE) SET(USE_IMAGE ON) ENDIF()
+#IF(SUPPORT_VIDEO) SET(USE_VIDEO ON) ENDIF() 
+#IF(SUPPORT_3DMODEL) SET(USE_3DMODEL ON) ENDIF()
+#IF(SUPPORT_TEXT) SET(USE_TEXT ON) ENDIF()
+#INCLUDE (${CMAKE_SOURCE_DIR}/CMakeModules/CreatePackage.cmake)
 

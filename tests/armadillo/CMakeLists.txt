@@ -10,5 +10,4 @@
 		TARGET_LINK_LIBRARIES(armadillo-test ${SNDFILE_LIBRARY} ${SAMPLERATE_LIBRARY})
 	ENDIF()
 	TARGET_LINK_LIBRARIES(armadillo-test atlas lapack blas armadillo-utils)
-	INSTALL(TARGETS armadillo-test RUNTIME DESTINATION bin)
 	MESSAGE("[X] armadillo")

@@ -8,7 +8,6 @@ IF(SUPPORT_AUDIO AND USE_AUDIOGARDEN)
 
 	TARGET_LINK_LIBRARIES(audiogarden-test mediacycle audiofeatures audiogarden-synthesis ${SNDFILE_LIBRARY} ${SAMPLERATE_LIBRARY})
 
-	INSTALL(TARGETS audiogarden-test RUNTIME DESTINATION bin)
 	MESSAGE("[X] audiogarden")
 ELSE()
 	MESSAGE("[ ] audiogarden")

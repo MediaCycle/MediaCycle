@@ -12,7 +12,6 @@ IF(SUPPORT_VIDEO AND ARMADILLO_FOUND )
 	TARGET_LINK_LIBRARIES(mediacycle-dancers mediacycle)
 	TARGET_LINK_LIBRARIES(mediacycle-dancers tinyxml armadillo-utils)
 
-	INSTALL(TARGETS mediacycle-dancers RUNTIME DESTINATION bin)
 	MESSAGE("[X] dancers")
 ELSE()
 	MESSAGE("[ ] dancers")

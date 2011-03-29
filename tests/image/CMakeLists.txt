@@ -10,7 +10,6 @@ IF(SUPPORT_IMAGE)
 
 	TARGET_LINK_LIBRARIES(image-test mediacycle mc_image)
 
-	INSTALL(TARGETS image-test RUNTIME DESTINATION bin)
 	MESSAGE("[X] image")
 ELSE()
 	MESSAGE("[ ] image")

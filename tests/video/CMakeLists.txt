@@ -10,7 +10,6 @@ IF(SUPPORT_VIDEO)
 
 	TARGET_LINK_LIBRARIES(video-test mediacycle ${PLUGIN_PREFIX}video)
 
-	INSTALL(TARGETS video-test RUNTIME DESTINATION bin)
 	MESSAGE("[X] video")
 ELSE()
 	MESSAGE("[ ] video")

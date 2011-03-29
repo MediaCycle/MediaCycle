@@ -9,8 +9,6 @@ IF (BUILD_CLIS)
 
 	TARGET_LINK_LIBRARIES(mediacycle-cli mediacycle tinyxml)
 
-	INSTALL(TARGETS mediacycle-cli RUNTIME DESTINATION bin)
-
 	MESSAGE("[X] ${TARGET_NAME}")
 ELSE()
 	MESSAGE("[ ] ${TARGET_NAME}")
