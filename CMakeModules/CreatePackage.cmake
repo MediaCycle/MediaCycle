@@ -125,8 +125,11 @@ IF(UNIX)
                 list(APPEND UBUNTU_DEPS "libatlas3gf-base" "liblapack3gf" "libblas3gf")# "libarmadillo0")
             ENDIF()
 
-            # OpenSceneGraph, fake since we now require 2.9.1x, while 10.04 has 2.8.1, 10.10 2.8.3 and 11.04 2.8.3
-            #list(APPEND UBUNTU_DEPS "libopenscenegraph65" "openscenegraph")
+            # OpenSceneGraph (10.04 has 2.8.1, 10.10 2.8.3 and 11.04 2.8.3)
+            list(APPEND UBUNTU_DEPS "libopenscenegraph65" "openscenegraph")
+            IF(WITH_QT4) # dirty test to check if we're packaging a GUI application under Ubuntu
+                INSTALL(FILES ${CMAKE_BINARY_DIR}/3rdparty/osg_ffmpeg/osg_ffmpeg.so DESTINATION lib/osgPlugins-${OPENSCENEGRAPH_VERSION})
+            ENDIF()
 
             # Qt4 libqtcore4 and libqtgui4 are package for kubuntu, libqt4-core and libqt4-gui for ubuntu
             IF(USE_QT4 AND WITH_QT4)

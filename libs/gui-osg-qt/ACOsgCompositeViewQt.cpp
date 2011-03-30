@@ -146,8 +146,8 @@ ACOsgCompositeViewQt::ACOsgCompositeViewQt( QWidget * parent, const char * name,
 }
 
 ACOsgCompositeViewQt::~ACOsgCompositeViewQt(){
-	browser_view->removeEventHandler(browser_event_handler); // reqs OSG >= 2.9.x
-	timeline_view->removeEventHandler(timeline_event_handler); // reqs OSG >= 2.9.x
+	//browser_view->removeEventHandler(browser_event_handler); // reqs OSG >= 2.9.x and shouldn't be necessary
+	//timeline_view->removeEventHandler(timeline_event_handler); // reqs OSG >= 2.9.x and shouldn't be necessary
 	this->clean(false);
 	delete browser_renderer;
 	//if (browser_event_handler) delete browser_event_handler;

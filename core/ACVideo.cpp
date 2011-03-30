@@ -115,7 +115,11 @@ int ACVideo::computeThumbnail(int w, int h){
 	
 	// Loading the movie with OSG
 	std::cout << boost::filesystem::extension(filename);
-	osgDB::ReaderWriter* readerWriter = osgDB::Registry::instance()->getReaderWriterForExtension(boost::filesystem::extension(filename).substr(1));
+	/// prerequisites for loading OSG media files, 2 alternatives
+	/// 1) standard procedure: checking for a plugin that can open the format of the media file
+	//osgDB::ReaderWriter* readerWriter = osgDB::Registry::instance()->getReaderWriterForExtension(boost::filesystem::extension(filename).substr(1));
+	/// 2) hack: forcing the use of the ffmpeg plugin by checking the plugin that can open the ffmpeg format (most probably the ffmpeg plugin)
+	osgDB::ReaderWriter* readerWriter = osgDB::Registry::instance()->getReaderWriterForExtension("ffmpeg");
 	if (!readerWriter){
 		cerr << "<ACVideo::computeThumbnail> problem loading file, no OSG plugin available" << endl;
 		return -1;

@@ -789,7 +789,7 @@ void ACOsgVideoTrackRenderer::updateTracks(double ratio) {
 			slit_scanner->reset();
 			slit_scanner->setFileName(media->getFileName());
 			slit_scanner->startThread();
-			slit_scan_changed = true;*/
+			slit_scan_changed = true;
 			#endif//def USE_SLIT_SCAN
 			
 			playbackGeode();
@@ -808,9 +808,10 @@ void ACOsgVideoTrackRenderer::updateTracks(double ratio) {
 			std::cout << getTime()-summary_data_in << " sec." << std::endl;
 			
 			//CF: dummy segments
-			/*if (media->getNumberOfSegments()==0){
+			if (media->getNumberOfSegments()==0){
+                std::cout << "Dummy segments" << std::endl;
 				for (int s=0;s<4;s++){
-					ACMedia* seg = ACMediaFactory::getInstance()->create(media);
+					ACMedia* seg = ACMediaFactory::getInstance().create(media);
 					seg->setParentId(media->getId());
 					media->addSegment(seg);//dummy
 				}	
@@ -824,7 +825,9 @@ void ACOsgVideoTrackRenderer::updateTracks(double ratio) {
 				media->getSegment(2)->setEnd((media_end-media_start)/2.0f);
 				media->getSegment(3)->setStart((media_end-media_start)/2.0f);
 				media->getSegment(3)->setEnd(media_end);
-			}*/
+			}
+            else
+                std::cout << media->getNumberOfSegments() << " segments" << std::endl;
 		}	
 	}
 
