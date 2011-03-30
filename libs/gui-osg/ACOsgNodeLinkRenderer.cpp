@@ -62,9 +62,9 @@ void ACOsgNodeLinkRenderer::linkGeode(double to_x, double to_y) {
 	StateSet *state;
 	
 	Vec3Array* vertices;	
-	DrawElementsUInt* line_p;
+	osg::ref_ptr<DrawElementsUInt> line_p;
 	
-	Geometry *link_geometry;
+	osg::ref_ptr<Geometry> link_geometry;
 	
 	link_geode = new Geode();
 	link_geometry = new Geometry();

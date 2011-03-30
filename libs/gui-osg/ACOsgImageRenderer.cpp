@@ -112,11 +112,11 @@ void ACOsgImageRenderer::imageGeode(bool flip, float sizemul, float zoomin) {
 	StateSet *state;
 	
 	Vec3Array* vertices;
-	DrawElementsUInt* line_p;
+	osg::ref_ptr<DrawElementsUInt> line_p;
 	Vec2Array* texcoord;
 	
-	Geometry *image_geometry;
-	Geometry *border_geometry;
+	osg::ref_ptr<Geometry> image_geometry;
+	osg::ref_ptr<Geometry> border_geometry;
 	Texture2D *image_texture;
 		
 	// CF: temporary workaround as the ACUserLog tree and the ACLoopAttributes vector in ACMediaBrowser are not sync'd 
@@ -152,7 +152,7 @@ void ACOsgImageRenderer::imageGeode(bool flip, float sizemul, float zoomin) {
 	image_geometry->setVertexArray(vertices);
 	
 	// Primitive Set
-	DrawElementsUInt *poly = new DrawElementsUInt(PrimitiveSet::QUADS, 4);
+	osg::ref_ptr<DrawElementsUInt> poly = new DrawElementsUInt(PrimitiveSet::QUADS, 4);
 	poly->push_back(0);
 	poly->push_back(1);
 	poly->push_back(2);

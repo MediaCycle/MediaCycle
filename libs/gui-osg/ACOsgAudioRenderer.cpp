@@ -107,10 +107,10 @@ void ACOsgAudioRenderer::waveformGeode() {
 	Vec3Array* vertices;
 //	Vec3Array* normals;
 	
-	Geometry *samples_geometry;
-	Geometry *frame_geometry;
-	Geometry *border_geometry;
-	Geometry *axis_geometry;
+	osg::ref_ptr<Geometry> samples_geometry;
+	osg::ref_ptr<Geometry> frame_geometry;
+	osg::ref_ptr<Geometry> border_geometry;
+	osg::ref_ptr<Geometry> axis_geometry;
 	
 	waveform_geode = new Geode();
 	samples_geometry = new Geometry();
@@ -161,7 +161,7 @@ void ACOsgAudioRenderer::waveformGeode() {
 	vertices->push_back(Vec3(0.0, ylim, zpos));
 	frame_geometry->setVertexArray(vertices);
 	/*
-	DrawElementsUInt *poly = new DrawElementsUInt(PrimitiveSet::QUADS, 0);
+	osg::ref_ptr<DrawElementsUInt> poly = new DrawElementsUInt(PrimitiveSet::QUADS, 0);
 	poly->push_back(0);
 	poly->push_back(1);
 	poly->push_back(2);
@@ -351,7 +351,7 @@ void ACOsgAudioRenderer::curserGeode() {
 	
 	DrawElementsUShort* line_p;
 	
-	Geometry *curser_geometry;
+	osg::ref_ptr<Geometry> curser_geometry;
 
 #ifdef AUTO_TRANSFORM
 	curser_transform = new AutoTransform();

@@ -456,7 +456,7 @@ void ACOsgVideoTrackRenderer::playbackGeode() {
 	StateSet *state;
 	Vec3Array* vertices;
 	Vec2Array* texcoord;
-	Geometry *playback_geometry;
+	osg::ref_ptr<Geometry> playback_geometry;
 	Texture2D *playback_texture;
 	
 	playback_transform = new MatrixTransform();
@@ -474,7 +474,7 @@ void ACOsgVideoTrackRenderer::playbackGeode() {
 	playback_geometry->setVertexArray(vertices);
 	
 	// Primitive Set
-	DrawElementsUInt *poly = new DrawElementsUInt(PrimitiveSet::QUADS, 4);
+	osg::ref_ptr<DrawElementsUInt> poly = new DrawElementsUInt(PrimitiveSet::QUADS, 4);
 	poly->push_back(0);
 	poly->push_back(1);
 	poly->push_back(2);
@@ -519,7 +519,7 @@ void ACOsgVideoTrackRenderer::slitScanGeode() {
 	StateSet *state;
 	Vec3Array* vertices;
 	Vec2Array* texcoord;
-	Geometry *slit_scan_geometry;
+	osg::ref_ptr<Geometry> slit_scan_geometry;
 	Texture2D *slit_scan_texture;
 	
 	//slit_scan_transform = new MatrixTransform();
@@ -537,7 +537,7 @@ void ACOsgVideoTrackRenderer::slitScanGeode() {
 	slit_scan_geometry->setVertexArray(vertices);
 	
 	// Primitive Set
-	DrawElementsUInt *poly = new DrawElementsUInt(PrimitiveSet::QUADS, 4);
+	osg::ref_ptr<DrawElementsUInt> poly = new DrawElementsUInt(PrimitiveSet::QUADS, 4);
 	poly->push_back(0);
 	poly->push_back(1);
 	poly->push_back(2);
@@ -583,8 +583,8 @@ void ACOsgVideoTrackRenderer::slitScanGeode() {
 void ACOsgVideoTrackRenderer::cursorGeode() {
 	StateSet *state;	
 	Vec3Array* vertices;
-	DrawElementsUInt* line_p;
-	Geometry *cursor_geometry;
+	osg::ref_ptr<DrawElementsUInt> line_p;
+	osg::ref_ptr<Geometry> cursor_geometry;
 	
 	cursor_transform = new MatrixTransform();
 	cursor_geode = new Geode();
@@ -655,7 +655,7 @@ void ACOsgVideoTrackRenderer::framesGeode() {
 			StateSet *state;
 			Vec3Array* vertices;
 			Vec2Array* texcoord;
-			Geometry *frame_geometry;
+			osg::ref_ptr<Geometry> frame_geometry;
 			Texture2D *frame_texture = new osg::Texture2D;
 			frame_texture->setImage(thumbnail);
 			frame_texture->setResizeNonPowerOfTwoHint(false);
@@ -674,7 +674,7 @@ void ACOsgVideoTrackRenderer::framesGeode() {
 			frame_geometry->setVertexArray(vertices);
 			
 			// Primitive Set
-			DrawElementsUInt *poly = new DrawElementsUInt(PrimitiveSet::QUADS, 4);
+			osg::ref_ptr<DrawElementsUInt> poly = new DrawElementsUInt(PrimitiveSet::QUADS, 4);
 			poly->push_back(0);
 			poly->push_back(1);
 			poly->push_back(2);

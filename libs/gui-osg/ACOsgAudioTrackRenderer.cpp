@@ -101,12 +101,12 @@ void ACOsgAudioTrackRenderer::selectionWaveformGeode() {
 	StateSet *state;
 	
 	Vec3Array* vertices;	
-	DrawElementsUInt* line_p;
+	osg::ref_ptr<DrawElementsUInt> line_p;
 	
-	Geometry *samples_geometry;
-	Geometry *frame_geometry;
-	Geometry *border_geometry;
-	Geometry *baseline_geometry;
+	osg::ref_ptr<Geometry> samples_geometry;
+	osg::ref_ptr<Geometry> frame_geometry;
+	osg::ref_ptr<Geometry> border_geometry;
+	osg::ref_ptr<Geometry> baseline_geometry;
 	
 	summary_waveform_geode = new Geode();
 	samples_geometry = new Geometry();
@@ -319,7 +319,7 @@ void ACOsgAudioTrackRenderer::selectionWaveformGeode() {
 	}
 	border_geometry->addPrimitiveSet(line_p);
 	
-	DrawElementsUInt *poly = new DrawElementsUInt(PrimitiveSet::QUADS, 4);
+	osg::ref_ptr<DrawElementsUInt> poly = new DrawElementsUInt(PrimitiveSet::QUADS, 4);
 	poly->push_back(0);
 	poly->push_back(1);
 	poly->push_back(2);
@@ -383,9 +383,9 @@ void ACOsgAudioTrackRenderer::selectionCursorGeode() {
 	
 	Vec3Array* vertices;
 	
-	DrawElementsUInt* line_p;
+	osg::ref_ptr<DrawElementsUInt> line_p;
 	
-	Geometry *summary_cursor_geometry;
+	osg::ref_ptr<Geometry> summary_cursor_geometry;
 	
 	summary_cursor_transform = new MatrixTransform();
 	summary_cursor_geode = new Geode();
@@ -441,10 +441,10 @@ void ACOsgAudioTrackRenderer::selectionZoneGeode() {
 	StateSet *state;
 	
 	Vec3Array* vertices;	
-	DrawElementsUInt* line_p;
+	osg::ref_ptr<DrawElementsUInt> line_p;
 	
-	Geometry *selection_zone_border_geometry;
-	Geometry *selection_zone_frame_geometry;
+	osg::ref_ptr<Geometry> selection_zone_border_geometry;
+	osg::ref_ptr<Geometry> selection_zone_frame_geometry;
 	
 	selection_zone_geode = new Geode();
 	selection_zone_border_geometry = new Geometry();
@@ -551,9 +551,9 @@ void ACOsgAudioTrackRenderer::selectionBeginGeode() {
 	StateSet *state;
 	
 	Vec3Array* vertices;	
-	DrawElementsUInt* line_p;
+	osg::ref_ptr<DrawElementsUInt> line_p;
 	
-	Geometry *selection_begin_geometry;
+	osg::ref_ptr<Geometry> selection_begin_geometry;
 	
 	selection_begin_geode = new Geode();
 	selection_begin_geometry = new Geometry();
@@ -624,9 +624,9 @@ void ACOsgAudioTrackRenderer::selectionEndGeode() {
 	StateSet *state;
 	
 	Vec3Array* vertices;	
-	DrawElementsUInt* line_p;
+	osg::ref_ptr<DrawElementsUInt> line_p;
 	
-	Geometry *selection_end_geometry;
+	osg::ref_ptr<Geometry> selection_end_geometry;
 	
 	selection_end_geode = new Geode();
 	selection_end_geometry = new Geometry();
@@ -702,13 +702,13 @@ void ACOsgAudioTrackRenderer::playbackWaveformGeode() {
 	StateSet *state;
 	
 	Vec3Array* vertices;	
-	DrawElementsUInt* line_p;
+	osg::ref_ptr<DrawElementsUInt> line_p;
 	
-	Geometry *samples_geometry;
-	Geometry *frame_geometry;
-	Geometry *border_geometry;
-	Geometry *baseline_geometry;
-	Geometry *cursor_geometry;
+	osg::ref_ptr<Geometry> samples_geometry;
+	osg::ref_ptr<Geometry> frame_geometry;
+	osg::ref_ptr<Geometry> border_geometry;
+	osg::ref_ptr<Geometry> baseline_geometry;
+	osg::ref_ptr<Geometry> cursor_geometry;
 	
 	playback_waveform_geode = new Geode();
 	samples_geometry = new Geometry();
@@ -877,7 +877,7 @@ void ACOsgAudioTrackRenderer::playbackWaveformGeode() {
 	}
 	border_geometry->addPrimitiveSet(line_p);
 	
-	DrawElementsUInt *poly = new DrawElementsUInt(PrimitiveSet::QUADS, 4);
+	osg::ref_ptr<DrawElementsUInt> poly = new DrawElementsUInt(PrimitiveSet::QUADS, 4);
 	poly->push_back(0);
 	poly->push_back(1);
 	poly->push_back(2);
