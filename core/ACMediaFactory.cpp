@@ -223,15 +223,7 @@ const filext::value_type _init[] = {
 };
 filext ACMediaFactory::known_file_extensions(_init, _init + sizeof _init / sizeof *_init);
 
-// Global static pointer used to ensure a single instance of the class.
-ACMediaFactory* ACMediaFactory::instance = NULL;
-
-ACMediaFactory* ACMediaFactory::getInstance()
-{
-    if(!instance)
-        instance = new ACMediaFactory;
-    return instance;
-}
+boost::once_flag ACMediaFactory::once_flag = BOOST_ONCE_INIT;
 
 ACMediaFactory::ACMediaFactory(){
 	if (available_file_extensions.size()==0){
@@ -246,8 +238,6 @@ ACMediaFactory::ACMediaFactory(){
 }
 
 ACMediaFactory::~ACMediaFactory(){
-	if(instance)
-        delete instance;
 }
 
 ACMedia* ACMediaFactory::create(string file_ext){

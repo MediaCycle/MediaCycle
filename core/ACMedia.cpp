@@ -398,7 +398,7 @@ void ACMedia::loadXML(TiXmlElement* _pMediaNode){
 	int count_s = 0;
 	
 	for( segmentElement; segmentElement; segmentElement = segmentElement->NextSiblingElement() ) {
-		ACMedia* segment_media = ACMediaFactory::getInstance()->create(this->getMediaType());
+		ACMedia* segment_media = ACMediaFactory::getInstance().create(this->getMediaType());
 		int n_start=-1;
 		int n_end=-1;
 		segmentElement->QueryIntAttribute("Start", &n_start);

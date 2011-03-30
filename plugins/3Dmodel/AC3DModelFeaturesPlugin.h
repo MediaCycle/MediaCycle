@@ -1,7 +1,7 @@
 /**
  * @brief AC3DModelFeaturesPlugin.h
- * @author Thierry Ravet
- * @date 25/03/2011
+ * @author Christian Frisson
+ * @date 30/03/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -32,7 +32,7 @@
 #ifndef _AC3DMODELFEATURESPLUGIN_H
 #define	_AC3DMODELFEATURESPLUGIN_H
 
-#include "MediaCycle.h"
+#include <MediaCycle.h>
 
 #include<iostream>
 

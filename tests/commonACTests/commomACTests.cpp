@@ -177,7 +177,7 @@ void test_XML(){
 		int typi=0;
 		pMediaNode->QueryIntAttribute("MediaType", &typi);
 		typ = (ACMediaType) typi;
-		ACMedia* local_media = ACMediaFactory::getInstance()->create(typ);
+		ACMedia* local_media = ACMediaFactory::getInstance().create(typ);
 		local_media->loadXML(pMediaNode);
 	}
 

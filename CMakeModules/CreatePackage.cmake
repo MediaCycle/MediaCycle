@@ -109,13 +109,13 @@ IF(UNIX)
 
             # Boost
             IF("${LSB_DISTRIB}" MATCHES "Ubuntu10.04")
-                SET(UBUNTU_DEPS "libboost-serialization1.40.0" "libboost-system1.40.0" "libboost-filesystem1.40.0" "libboost-graph1.40.0")
+                SET(UBUNTU_DEPS "libboost-serialization1.40.0" "libboost-system1.40.0" "libboost-filesystem1.40.0" "libboost-graph1.40.0" "libboost-thread1.40.0")
             ENDIF()
             IF("${LSB_DISTRIB}" MATCHES "Ubuntu10.10")
-                SET(UBUNTU_DEPS "libboost-serialization1.40.0|libboost-serialization1.42.0" "libboost-system1.40.0|libboost-system1.42.0" "libboost-filesystem1.40.0|libboost-filesystem1.42.0" "libboost-graph1.40.0|libboost-graph1.42.0")
+                SET(UBUNTU_DEPS "libboost-serialization1.40.0|libboost-serialization1.42.0" "libboost-system1.40.0|libboost-system1.42.0" "libboost-filesystem1.40.0|libboost-filesystem1.42.0" "libboost-graph1.40.0|libboost-graph1.42.0" "libboost-thread1.40.0|libboost-thread1.42.0")
             ENDIF()
             IF("${LSB_DISTRIB}" MATCHES "Ubuntu11.04")
-                SET(UBUNTU_DEPS "libboost-serialization1.42.0" "libboost-system1.42.0" "libboost-filesystem1.42.0" "libboost-graph1.42.0")
+                SET(UBUNTU_DEPS "libboost-serialization1.42.0" "libboost-system1.42.0" "libboost-filesystem1.42.0" "libboost-graph1.42.0" "libboost-thread1.42.0")
             ENDIF()
 
             # Armadillo, fake for 10.xx since we now require > 1.x, while 10.04 has 0.8.0-1, 10.10 0.9.8-1, 11.04 0.9.52 (March 2011)

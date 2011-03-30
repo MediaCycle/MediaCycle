@@ -179,7 +179,7 @@ std::vector<ACMedia*> ACBicSegmentationPlugin::segment(ACMediaTimedFeature* _MTF
 	
 	for (int i = 0; i < Nseg-1; i++){
 		//make sur the segment from the media have the proper type
-		ACMedia* media = ACMediaFactory::getInstance()->create(_theMedia);
+		ACMedia* media = ACMediaFactory::getInstance().create(_theMedia);
 		media->setParentId(_theMedia->getId());
 		media->setStart(segments_limits[i]);
 		media->setEnd(segments_limits[i+1]);

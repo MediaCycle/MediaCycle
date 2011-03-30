@@ -43,11 +43,17 @@
 #include <vector>
 
 #include <boost/algorithm/string.hpp>
+#include <boost/utility.hpp>
+#include <boost/thread/once.hpp>
+#include <boost/scoped_ptr.hpp>
 
 typedef  std::map<std::string, ACMediaType> filext;
 typedef  std::map<std::string, ACMediaType> mediaplugin;
 
-class ACMediaFactory {
+// Possibly thread-safe boost-powered singleton inspired from:
+// http://www.boostcookbook.com/Recipe:/1235044
+
+class ACMediaFactory : private boost::noncopyable {
 	//private, not protected, since there is no ACImageFactory
 	private:
 		// for log(n) search through extensions:
@@ -55,7 +61,21 @@ class ACMediaFactory {
 		filext available_file_extensions,unchecked_file_extensions,used_file_extensions;
 
 	public:
-		static ACMediaFactory* getInstance();
+		static ACMediaFactory & getInstance(){
+			boost::call_once(call_once,once_flag);
+			return get_instance();
+		}
+
+	private:
+		static boost::once_flag once_flag;
+		static ACMediaFactory & get_instance(){
+			static ACMediaFactory instance;
+			return instance;
+		}
+
+		static void call_once(){
+			get_instance();
+		}
 
 	protected:
 		///
@@ -68,7 +88,7 @@ class ACMediaFactory {
 		///
 		ACMediaFactory();
 		virtual ~ACMediaFactory();
-		static ACMediaFactory* instance;
+		//static ACMediaFactory* instance;
 
 	public:
 		// 2 ways to specify which new media to create:
