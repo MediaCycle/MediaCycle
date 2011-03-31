@@ -1026,6 +1026,10 @@ bool ACAudioFeedback::processAudioEngine()
 
 void ACAudioFeedback::setScrub(float scrub) {
 	
+	#ifdef USE_DEBUG
+	std::cout << "ACAudioFeedback::setScrub " << scrub << std::endl;
+	#endif
+	
 	float alpha;
 	float local_scrub_speed;
 	float delta_time;
@@ -1091,7 +1095,6 @@ void ACAudioFeedback::processAudioEngineSamplePosition(int _loop_slot, int *_pre
 	// audio_loop = media_cycle->getAudioLibrary()->getMedia(loop_id);
 	size = use_sample_end[_loop_slot] - use_sample_start[_loop_slot];
 		
-	
 	// DT : made sample_start and end actually useful
 	int sample_start = ((ACAudio*) media_cycle->getLibrary()->getMedia(loop_id))->getSampleStart();
 	int sample_end = ((ACAudio*) media_cycle->getLibrary()->getMedia(loop_id))->getSampleEnd();
@@ -1161,8 +1164,8 @@ void ACAudioFeedback::processAudioEngineSamplePosition(int _loop_slot, int *_pre
 		case ACAudioEngineSynchroModeManual:
 			reached_end = 0;
 			reached_begin = 0;
-			//*_sample_pos = (int)(scrub_pos * size / 100);
-			*_sample_pos = prev_sample_pos[_loop_slot] + (output_buffer_size)*scrub_speed;
+			//*_sample_pos = (int)(scrub_pos * size / 100);// no inertia
+			*_sample_pos = prev_sample_pos[_loop_slot] + (output_buffer_size)*scrub_speed;//inertia
 			*_sample_pos_limit = size;
 			while (*_sample_pos>=size) {
 				reached_end = 1;
@@ -1208,6 +1211,9 @@ void ACAudioFeedback::processAudioEngineSamplePosition(int _loop_slot, int *_pre
 	}
 	media_cycle->setSourceCursor(loop_id, frame_pos);
 	media_cycle->setCurrentFrame(loop_id, *_sample_pos);
+	#ifdef USE_DEBUG
+	//std::cout << "ACAudioFeedback::processAudioEngineSamplePosition: " << *_sample_pos << std::endl;
+	#endif
 }
 
 // SD TODO - should be passed a pointer to the loop samples to make the engine separate from ACAudioFeedback
@@ -1525,6 +1531,9 @@ void ACAudioFeedback::setLoopSynchroMode(int _loop_id, ACAudioEngineSynchroMode 
 		if (loop_synchro_mode != 0)
 		{	
 			loop_synchro_mode[_loop_slot] = _synchro_mode;
+			#ifdef USE_DEBUG
+			std::cout << "ACAudioFeedback::setLoopSynchroMode: " << _synchro_mode << std::endl;
+			#endif
 		}	
 	}
 	//else {//some error message?};
@@ -1538,6 +1547,9 @@ void ACAudioFeedback::setLoopScaleMode(int _loop_id, ACAudioEngineScaleMode _sca
 		if (loop_scale_mode != 0)
 		{	
 			loop_scale_mode[_loop_slot] = _scale_mode;
+			#ifdef USE_DEBUG
+			std::cout << "ACAudioFeedback::setLoopScaleMode " << _scale_mode << std::endl;
+			#endif
 		}	
 	}
 	//else {//some error message?};
