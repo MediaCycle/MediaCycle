@@ -65,17 +65,17 @@ void ACAboutDialogQt::updateLicenses(){
 		html.append ("<li><a href=\"http://www.mega-nerd.com/SRC/\">libsamplerate</a>: GPL License</li>");
 		html.append ("<li><a href=\"http://www.mega-nerd.com/libsndfile/\">libsndfile</a>: LGPL (or GPL) License</li>");
 	#endif //defined (SUPPORT_AUDIO)	
-	#if defined (SUPPORT_AUDIO) || defined (USE_OPENAL)	
+	#if defined (SUPPORT_AUDIO) && defined (USE_OPENAL)	
 		html.append ("<li><a href=\"http://kcat.strangesoft.net/openal.html\">OpenAL-soft</a>: LPGL License</li>");
 	#endif //defined (SUPPORT_AUDIO) || defined (USE_OPENAL)
-	#if defined (SUPPORT_VIDEO) || defined (SUPPORT_IMAGE)
+	#if defined (SUPPORT_VIDEO) && defined (SUPPORT_IMAGE)
 		html.append ("<li><a href=\"http://opencv.willowgarage.com\">OpenCV</a>: BSD License</li>");
 	#endif //defined (SUPPORT_VIDEO) || defined (SUPPORT_IMAGE)
 	html.append ("<li><a href=\"http://www.openscenegraph.org\">OpenSceneGraph</a>: OpenSceneGraph Public License based on the LGPL License</li>");
 	#if defined (USE_OSC)
 		html.append ("<li><a href=\"http://code.google.com/p/oscpack/\">oscpack</a>: MIT License</li>");
 	#endif //defined (USE_OSC)
-	#if defined (SUPPORT_AUDIO) || defined (USE_PORTAUDIO)	
+	#if defined (SUPPORT_AUDIO) && defined (USE_PORTAUDIO)	
 		html.append ("<li><a href=\"http://www.portaudio.com\">PortAudio</a>: MIT License</li>");
 	#endif //defined (SUPPORT_AUDIO) || defined (USE_PORTAUDIO)
 	html.append ("<li><a href=\"http://qt.nokia.com\">Qt</a>: LGPL License</li>");
@@ -97,11 +97,13 @@ void ACAboutDialogQt::updateTeam(){
 	html.append ("<li>Christian Frisson</li>");
 	html.append ("<li>Sidi Ahmed Mahmoudi</li>");
 	html.append ("<li>Alexis Moinet</li>");
-	//html.append ("<li>Thierry Ravet</li>");
+	html.append ("<li>Thierry Ravet</li>");
 	html.append ("<li>Xavier Siebert</li>");
 	html.append ("<li>J&eacute;r&ocirc;me Urbain</li>");
 	html.append ("</ul><br/>Among past contributors:<ul>");
+	html.append ("<li>Julien Dubois</li>");
 	html.append ("<li>Thomas Dubuisson</li>");
+	html.append ("<li>Rapha&euml;l Sebbe</li>");
 	html.append ("<li>Damien Tardieu</li>");
 	html.append ("</ul>");
 	ui.multiLineEditTeam->document()->setHtml(html);
