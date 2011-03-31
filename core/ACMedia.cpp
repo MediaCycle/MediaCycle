@@ -157,13 +157,15 @@ void ACMedia::saveXML(TiXmlElement* _medias){
 	saveXMLSpecific(media);
 	
 	int n_features = features_vectors.size();
-	media->SetAttribute("NumberOfFeatures", n_features);
-	
-	for (unsigned int i=0; i<features_vectors.size();i++) {
+	TiXmlElement* features = new TiXmlElement( "Features" );  
+	features->SetAttribute("NumberOfFeatures", n_features);
+	media->LinkEndChild( features );  
+
+	for (unsigned int i=0; i<n_features; i++) {
 		int n_features_elements = features_vectors[i]->getSize();
 		int nn = features_vectors[i]->getNeedsNormalization();
 		TiXmlElement* mediaf = new TiXmlElement( "Feature" );  
-		media->LinkEndChild( mediaf );  
+		features->LinkEndChild( mediaf );  
 		mediaf->SetAttribute("FeatureName", features_vectors[i]->getName());
 		mediaf->SetAttribute("NeedsNormalization", nn);
 		mediaf->SetAttribute("NumberOfFeatureElements",n_features_elements);
@@ -179,13 +181,15 @@ void ACMedia::saveXML(TiXmlElement* _medias){
 		mediaf->LinkEndChild( mediafe );  		
 	}
 	
-	media->SetAttribute("NumberOfSegments", this->getNumberOfSegments());
+	TiXmlElement* segments = new TiXmlElement( "Segments" );  
+	media->LinkEndChild( segments );  
+	segments->SetAttribute("NumberOfSegments", this->getNumberOfSegments());
 
 	// saves info about segments (if any) : beginning, end, ID
 	// the parent ID of the segment is the ID of the current media
 	for (int i=0; i<this->getNumberOfSegments();i++) {
 		TiXmlElement* seg = new TiXmlElement( "Segment" );  
-		media->LinkEndChild( seg );  
+		segments->LinkEndChild( seg );  
 		seg->SetAttribute("Start", this->getSegment(i)->getStart());
 		seg->SetAttribute("End", this->getSegment(i)->getEnd());
 		std::string s;
@@ -325,9 +329,15 @@ void ACMedia::loadXML(TiXmlElement* _pMediaNode){
 	if (!loadXMLSpecific(_pMediaNode)) {
 		throw runtime_error("corrupted XML file, problem with loadXMLSpecific");
 	}		
+			
+	TiXmlHandle _pMediaNodeHandle(_pMediaNode);
 	
+	int count_f = 0;
+	TiXmlElement* featuresElement = _pMediaNodeHandle.FirstChild( "Features" ).Element();
+	if (!featuresElement)
+		throw runtime_error("corrupted XML file, no features");	
 	int nf=-1;
-	_pMediaNode->QueryIntAttribute("NumberOfFeatures", &nf);
+	featuresElement->QueryIntAttribute("NumberOfFeatures", &nf);
 	
 	if (nf < 0)
 		throw runtime_error("corrupted XML file, wrong number of features");
@@ -335,11 +345,8 @@ void ACMedia::loadXML(TiXmlElement* _pMediaNode){
 		// XS TODO could this happen without it being an error?
 		// if not, put <= in the test above
 		cout << "loading media with no features" << endl;
-		
-	TiXmlHandle _pMediaNodeHandle(_pMediaNode);
 	
-	int count_f = 0;
-	TiXmlElement* featureElement = _pMediaNodeHandle.FirstChild( "Feature" ).Element();
+	TiXmlElement* featureElement = _pMediaNodeHandle.FirstChild( "Features" ).FirstChild( "Feature" ).Element();
 	if (!featureElement)
 		throw runtime_error("corrupted XML file, error reading features");
 	TiXmlText* featureElementsAsText = 0;
@@ -390,53 +397,59 @@ void ACMedia::loadXML(TiXmlElement* _pMediaNode){
 		throw runtime_error("<ACMedia::loadXML> inconsistent number of features");
 
 	// --- segments --- 
-	int ns = -1;
-	_pMediaNode->QueryIntAttribute("NumberOfSegments", &ns);
 
-	TiXmlElement* segmentElement = _pMediaNodeHandle.FirstChild( "Segment" ).Element();
-	TiXmlText* segmentIDElementsAsText = 0;
-	int count_s = 0;
-	
-	for( segmentElement; segmentElement; segmentElement = segmentElement->NextSiblingElement() ) {
-		ACMedia* segment_media = ACMediaFactory::getInstance().create(this->getMediaType());
-		int n_start=-1;
-		int n_end=-1;
-		segmentElement->QueryIntAttribute("Start", &n_start);
-		if (n_start < 0) {
-			delete segment_media;
-			throw runtime_error("corrupted XML file, wrong segment start");
-		}
-		segment_media->setStart(n_start);
+	// allow an XML without segments.
+	TiXmlElement* segmentsElement = _pMediaNodeHandle.FirstChild( "Segments" ).Element();
+	if (featuresElement) {
+		int ns = -1;
+		segmentsElement->QueryIntAttribute("NumberOfSegments", &ns);
+		if (ns < 0)
+			throw runtime_error("corrupted XML file, <segments> present, but no segments");
 
-		segmentElement->QueryIntAttribute("End", &n_end);
-		if (n_end < 0){
-			delete segment_media;
-			throw runtime_error("corrupted XML file, wrong segment end");
+		TiXmlElement* segmentElement = _pMediaNodeHandle.FirstChild( "Segments" ).FirstChild( "Segment" ).Element();
+		TiXmlText* segmentIDElementsAsText = 0;
+		int count_s = 0;
+		
+		for( segmentElement; segmentElement; segmentElement = segmentElement->NextSiblingElement() ) {
+			ACMedia* segment_media = ACMediaFactory::getInstance().create(this->getMediaType());
+			int n_start=-1;
+			int n_end=-1;
+			segmentElement->QueryIntAttribute("Start", &n_start);
+			if (n_start < 0) {
+				delete segment_media;
+				throw runtime_error("corrupted XML file, wrong segment start");
+			}
+			segment_media->setStart(n_start);
+			
+			segmentElement->QueryIntAttribute("End", &n_end);
+			if (n_end < 0){
+				delete segment_media;
+				throw runtime_error("corrupted XML file, wrong segment end");
+			}
+			segment_media->setEnd(n_end);
+			
+			segmentIDElementsAsText=segmentElement->FirstChild()->ToText();
+			if (!segmentIDElementsAsText){
+				delete segment_media;
+				throw runtime_error("corrupted XML file, wrong segment ID");
+			}
+			string mid_s = "";
+			mid_s = segmentIDElementsAsText->ValueStr();
+			std::stringstream mid_ss;
+			mid_ss << mid_s;
+			int midi = -1;
+			mid_ss >> midi;
+			if (midi <0){
+				delete segment_media;
+				throw runtime_error("corrupted XML file, wrong segment ID");
+			}
+			segment_media->setId(midi);
+			count_s++;
 		}
-		segment_media->setEnd(n_end);
-
-		segmentIDElementsAsText=segmentElement->FirstChild()->ToText();
-		if (!segmentIDElementsAsText){
-			delete segment_media;
-			throw runtime_error("corrupted XML file, wrong segment ID");
-		}
-		string mid_s = "";
-		mid_s = segmentIDElementsAsText->ValueStr();
-		std::stringstream mid_ss;
-		mid_ss << mid_s;
-		int midi = -1;
-		mid_ss >> midi;
-		if (midi <0){
-			delete segment_media;
-			throw runtime_error("corrupted XML file, wrong segment ID");
-		}
-		segment_media->setId(midi);
-		count_s++;
+		// consistency check for segments
+		if (count_s != ns) 
+			throw runtime_error("<ACMedia::loadXML> inconsistent number of segments");
 	}
-	// consistency check for segments
-	if (count_s != ns) 
-		throw runtime_error("<ACMedia::loadXML> inconsistent number of segments");
-	
 }
 
 
@@ -493,7 +506,6 @@ int ACMedia::import(std::string _path, int _mid, ACPluginManager *acpl, bool _sa
 	if (acpl) {
 		for (int i=0;i<acpl->getSize();i++) {
 			for (int j=0;j<acpl->getPluginLibrary(i)->getSize();j++) {
-				
 				if (acpl->getPluginLibrary(i)->getPlugin(j)->getMediaType() == this->getType()
 					&& acpl->getPluginLibrary(i)->getPlugin(j)->getPluginType() == PLUGIN_TYPE_FEATURES) {
 					
@@ -630,7 +642,9 @@ int ACMedia::segment(ACPluginManager *acpl, bool _saved_timed_features ) {
 			}
 		}
 	}
-			
+	
+	// XS TODO change me!!
+	// this is very spefic to the audio segmentation plugin...
 	// i.e., not _saved_timed_features		
 	else {
 		for (int i=0;i<acpl->getSize();i++) {
