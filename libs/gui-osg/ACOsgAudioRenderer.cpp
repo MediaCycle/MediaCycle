@@ -278,11 +278,8 @@ void ACOsgAudioRenderer::waveformGeode() {
 
 void ACOsgAudioRenderer::metadataGeode() {
 	
-	std::string osg_version = std::string(osgGetVersion());
-	
 	osg::Vec4 textColor(0.9f,0.9f,0.9f,1.0f);
 	float textCharacterSize = 80.0f; // 10 pixels ? // broken with OSG v2.9.11??
-	//if (osg_version == "2.9.11")	
 	#if OSG_MIN_VERSION_REQUIRED(2,9,11)
 		textCharacterSize = 12.0f;
 	#endif
@@ -297,7 +294,6 @@ void ACOsgAudioRenderer::metadataGeode() {
 	metadata->setPosition(osg::Vec3(0,0.025,0.04));
 	//	text->setPosition(osg::Vec3(pos.x,pos.y,pos.z));
 	metadata->setLayout(osgText::Text::LEFT_TO_RIGHT);
-	//if (osg_version == "2.9.11") 
 	#if OSG_MIN_VERSION_REQUIRED(2,9,11)
 		metadata->setFontResolution(12,12);
 	#else 
@@ -316,11 +312,9 @@ void ACOsgAudioRenderer::metadataGeode() {
 	
 	ACAudio* media = (ACAudio*)(media_cycle->getLibrary()->getMedia(media_index));
 	std::stringstream content;
-	content << 
-	//"Filename: " << 
-	fs::basename(media->getFileName());
-	/*	<< std::endl
-		<< "Duration: " << media->getDuration();*/
+	content << fs::basename(media->getFileName());
+	if (media->getParentId()>-1)// in case of segments
+		content << "(segment with media ID" << media->getId() << ")";
 		
 	metadata->setText( content.str() );
 	
@@ -331,7 +325,7 @@ void ACOsgAudioRenderer::metadataGeode() {
 	
 	//TODO check this .get() (see also ACOsgBrowserRenderer.cpp)
 	//".get()" is necessary for compilation under linux (OSG v2.4)
-	metadata_geode->addDrawable(metadata.get());
+	metadata_geode->addDrawable(metadata);
 	
 	//ref_ptr//metadata_geode->ref();	
 	

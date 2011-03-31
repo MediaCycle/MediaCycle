@@ -50,13 +50,12 @@ using namespace osg;
 
 osg::ref_ptr<osg::Image> Convert_OpenCV_2_osg_Image(IplImage* cvImg)
 {
-	// XS uncomment the following 4 lines for visual debug (e.g., thumbnail)	
+	// XS uncomment the following 4 lines for visual debug (e.g., thumbnail)
 	//	cvNamedWindow("T", CV_WINDOW_AUTOSIZE);
 	//	cvShowImage("T", cvImg);
 	//	cvWaitKey(0);
-	//	cvDestroyWindow("T");	
-	
-	
+	//	cvDestroyWindow("T");
+
 	if(cvImg->nChannels == 3)
 	{
 		// Flip image from top-left to bottom-left origin
@@ -64,20 +63,20 @@ osg::ref_ptr<osg::Image> Convert_OpenCV_2_osg_Image(IplImage* cvImg)
 			cvConvertImage(cvImg , cvImg, CV_CVTIMG_FLIP);
 			cvImg->origin = 1;
 		}
-		
+
 		// Convert from BGR to RGB color format
 		//printf("Color format %s\n",cvImg->colorModel);
 		if ( !strcmp(cvImg->channelSeq,"BGR") ) {
 			cvCvtColor( cvImg, cvImg, CV_BGR2RGB );
 		}
-		
+
 		osg::ref_ptr<osg::Image> osgImg = new osg::Image();
-		
+
 		/*temp_data = new unsigned char[cvImg->width * cvImg->height * cvImg->nChannels];
 		 for (i=0;i<cvImg->height;i++) {
 		 memcpy( (char*)temp_data + i*cvImg->width*cvImg->nChannels, (char*)(cvImg->imageData) + i*(cvImg->widthStep), cvImg->width*cvImg->nChannels);
 		 }*/
-		
+
 		osgImg->setImage(
 						 cvImg->width, //s
 						 cvImg->height, //t
@@ -89,7 +88,7 @@ osg::ref_ptr<osg::Image> Convert_OpenCV_2_osg_Image(IplImage* cvImg)
 						 //temp_data,
 						 osg::Image::NO_DELETE, // AllocationMode mode (shallow copy)
 						 1);//int packing=1); (???)
-		
+
 		//printf("Conversion completed\n");
 		return osgImg;
 	}
@@ -99,7 +98,6 @@ osg::ref_ptr<osg::Image> Convert_OpenCV_2_osg_Image(IplImage* cvImg)
 		//printf("Unrecognized image type");
 		return 0;
 	}
-	
 }
 
 static double getTime()
@@ -159,12 +157,12 @@ int ACOsgVideoSlitScanThread::computeSlitScan(){
 	if ( !video) {
 		cerr << "<ACVideoTrackRenderer::computeSlitScan> Could not open video..." << endl;
 		return 0;
-	}	
-	
+	}
+
 	int total_frames = (int) cvGetCaptureProperty(video,CV_CAP_PROP_FRAME_COUNT);
 	int width = (int) cvGetCaptureProperty(video, CV_CAP_PROP_FRAME_WIDTH);
 	int height = (int) cvGetCaptureProperty(video, CV_CAP_PROP_FRAME_HEIGHT);
-	
+
 	//cvSetCaptureProperty(video,CV_CAP_PROP_POS_FRAMES,(double)frame_in);
 
 	//IplImage* slit_scan;
@@ -179,7 +177,7 @@ int ACOsgVideoSlitScanThread::computeSlitScan(){
 			//	slit_scan = cvCreateImage( cvSize(frame_out-frame_in, height), frame->depth, frame->nChannels );
 			int ff = (int) cvGetCaptureProperty(video,CV_CAP_PROP_POS_FRAMES);
 			if (ff!=f) cout << "Mismatch at frame " << ff << " instead of " << f << " (offset:" << ff-f << ")" << endl;
-			
+
 			osg::ref_ptr<osg::Image> frame = Convert_OpenCV_2_osg_Image(openCVframe);
 			if (!frame){
 				cerr << "<ACVideoTrackRenderer::computeSlitScan> problem converting from OpenCV to OSG" << endl;
@@ -188,7 +186,7 @@ int ACOsgVideoSlitScanThread::computeSlitScan(){
 			else{
 				frame->setOrigin(osg::Image::TOP_LEFT);
 				frame->flipVertical();
-				
+
 				osg::copyImage(frame,
 							   (float)width/2.0f,//int  	src_s,
 							   0,//int  	src_t,
@@ -200,10 +198,10 @@ int ACOsgVideoSlitScanThread::computeSlitScan(){
 							   f,//int  	dest_s,
 							   0,//int  	dest_t,
 							   0,//int  	dest_r,
-							   false//bool  	doRescale = false	 
+							   false//bool  	doRescale = false
 							   );
 			}
-		}	
+		}
 	}
 	return 1;
 }
@@ -344,7 +342,7 @@ int ACOsgVideoSlitScanThread::computeSlitScan(){
 								   m_context->frame_number,//int  	dest_s,
 								   0,//int  	dest_t,
 								   0,//int  	dest_r,
-								   false//bool  	doRescale = false	 
+								   false//bool  	doRescale = false
 								   );
 					
 					frames_processed++;
@@ -775,7 +773,7 @@ void ACOsgVideoTrackRenderer::updateTracks(double ratio) {
 				delete slit_scanner; slit_scanner=0;
 				slit_scanner = new ACOsgVideoSlitScanThread();
 			}
-			slit_scan_geode=0;			
+			slit_scan_geode=0;
 			#endif//def USE_SLIT_SCAN
 			
 			playback_geode=0;
@@ -808,7 +806,7 @@ void ACOsgVideoTrackRenderer::updateTracks(double ratio) {
 			std::cout << getTime()-summary_data_in << " sec." << std::endl;
 			
 			//CF: dummy segments
-			if (media->getNumberOfSegments()==0){
+			/*if (media->getNumberOfSegments()==0){
                 std::cout << "Dummy segments" << std::endl;
 				for (int s=0;s<4;s++){
 					ACMedia* seg = ACMediaFactory::getInstance().create(media);
@@ -827,7 +825,7 @@ void ACOsgVideoTrackRenderer::updateTracks(double ratio) {
 				media->getSegment(3)->setEnd(media_end);
 			}
             else
-                std::cout << media->getNumberOfSegments() << " segments" << std::endl;
+                std::cout << media->getNumberOfSegments() << " segments" << std::endl;*/
 		}	
 	}
 
@@ -929,14 +927,14 @@ void ACOsgVideoTrackRenderer::updateTracks(double ratio) {
 		if (media->getNumberOfSegments()>0) segments_transform->setMatrix(segments_matrix);
 	}
 	
-	track_node->removeChild(cursor_transform.get());
+	track_node->removeChild(cursor_transform);
 	if (media_changed)
 	{
 		selection_center_pos = -xspan/2.0f;
 		cursorGeode();
 		media_changed = false;
 	}
-	track_node->addChild(cursor_transform.get());
+	track_node->addChild(cursor_transform);
 	
 	if (media){
 		if (video_stream){

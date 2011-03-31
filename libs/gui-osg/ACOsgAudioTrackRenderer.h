@@ -54,7 +54,11 @@ class ACOsgAudioTrackRenderer : public ACOsgTrackRenderer {
 		osg::ref_ptr<osg::Geode> selection_end_geode;
 		osg::ref_ptr<osg::Geode> selection_zone_geode;
 		osg::ref_ptr<osg::Geode> playback_waveform_geode;
-			
+
+        osg::ref_ptr<osg::MatrixTransform> segments_transform;
+        osg::ref_ptr<osg::Group> segments_group;
+	    std::vector< osg::ref_ptr<osg::Geode> > segments_geodes;
+
 		void selectionWaveformGeode();
 		void selectionCursorGeode();
 		void trackGeode();
@@ -62,6 +66,7 @@ class ACOsgAudioTrackRenderer : public ACOsgTrackRenderer {
 		void selectionZoneGeode();
 		void selectionEndGeode();
 		void playbackWaveformGeode();
+	    void segmentsGeode();
 		
 		float zoom_x, zoom_y, track_left_x;
 		float summary_center_y,summary_height;
@@ -69,6 +74,8 @@ class ACOsgAudioTrackRenderer : public ACOsgTrackRenderer {
 		float* samples;
 		int samples_hop_threshold; // above: envelope with quads, below: envelope with line loop
 		int samples_n_threshold; // above: envelope with quads, below: envelope with line loop
+        float segments_center_y,segments_height;
+	    int segments_number;
 		
 	public:
 		ACOsgAudioTrackRenderer();

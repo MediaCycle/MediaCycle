@@ -44,11 +44,13 @@ class ACRefId : public osg::Referenced
 		int object_id;
 		std::string object_name;
 		// contains an identifier for each object (= node)
-		
+
 		ACRefId(int oid=-1, std::string name="") : osg::Referenced(), object_id(oid),object_name(name){};
+		ACRefId(const ACRefId& src) : osg::Referenced(), object_id(src.object_id),object_name(src.object_name){};//{object_id = src.object_id;object_name = src.object_name;}
 		~ACRefId() {};
-		int getID(){return object_id;}
-		std::string getName(){return object_name;}
+		ACRefId& operator=(ACRefId &src){this->object_id = src.getRefId();this->object_name = src.getRefName();}
+		int getRefId(){return object_id;}
+		std::string getRefName(){return object_name;}
 	};
 
 #endif

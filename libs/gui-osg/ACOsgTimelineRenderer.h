@@ -37,6 +37,9 @@
 #define __ACOSG_TIMELINE_RENDERER_H__
 
 #include "MediaCycle.h"
+#if defined (SUPPORT_AUDIO)
+#include <ACAudioEngine.h>
+#endif //defined (SUPPORT_AUDIO)
 
 #include "ACOsgTrackRenderer.h"
 
@@ -74,6 +77,9 @@
 class ACOsgTimelineRenderer {
 protected:
 	MediaCycle				*media_cycle;
+	#if defined (SUPPORT_AUDIO)
+		ACAudioEngine *audio_engine;
+	#endif //defined (SUPPORT_AUDIO)
 	osg::ref_ptr<osg::Group>				 group;
 	osg::ref_ptr<osg::Group>				 track_group;
 	std::vector<ACOsgTrackRenderer*>  track_renderer;
@@ -84,13 +90,16 @@ public:
 	ACOsgTimelineRenderer();
 	~ACOsgTimelineRenderer();
 	void clean();
-		
+
 	void setMediaCycle(MediaCycle *media_cycle) { this->media_cycle = media_cycle; };
-	osg::ref_ptr<osg::Group> getShapes() 	{ return group.get(); };
+	#if defined (SUPPORT_AUDIO)
+		void setAudioEngine(ACAudioEngine *engine){audio_engine=engine;}
+	#endif //defined (SUPPORT_AUDIO)
+	osg::ref_ptr<osg::Group> getShapes() 	{ return group; };
 	ACOsgTrackRenderer* getTrack(int number){if ( (number>=0) && (number<track_renderer.size()) ) return track_renderer[number];}
 	bool addTrack(int media_index);
 	int getNumberOfTracks(){return track_renderer.size();}
-	
+
 	void prepareTracks(int start=0);
 	void updateTracks(double ratio=0.0);
 	void setScreenWidth(int _screen_width){screen_width = _screen_width;}
@@ -98,10 +107,10 @@ public:
 	void updateScreenWidth(int _screen_width);
 	void updateSize(float _width,float _height);
 	void setSize(int _width,float _height){width = _width;height = _height;}
-	
-private:	
+
+private:
 	bool removeTracks(int _first=0, int _last=0);
-	
+
 	int computeScreenCoordinates(osgViewer::View* view, double ratio=0.0); //CF: use osgViewer::Viewer* for simple Viewers
 };
 

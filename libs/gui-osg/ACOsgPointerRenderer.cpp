@@ -1,7 +1,7 @@
 /**
  * @brief ACOsgPointerRenderer.cpp
  * @author Christian Frisson
- * @date 24/02/2011
+ * @date 31/03/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -75,7 +75,7 @@ void ACOsgPointerRenderer::textGeode() {
 	text->setText( text_string );
 	//text->setText( "POINTER" );
 	
-	text_geode->addDrawable(text.get());
+	text_geode->addDrawable(text);
 }
 
 void ACOsgPointerRenderer::pointerGeode() {

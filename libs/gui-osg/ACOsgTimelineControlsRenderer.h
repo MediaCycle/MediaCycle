@@ -86,7 +86,7 @@ public:
 	void clean();	
 		
 	void setMediaCycle(MediaCycle *media_cycle) { this->media_cycle = media_cycle; };
-	osg::ref_ptr<osg::Group> getShapes() 	{ return group.get(); };
+	osg::ref_ptr<osg::Group> getShapes() 	{ return group; };
 	ACOsgTrackControlsRenderer* getControls(int number){if ( (number>=0) && (number<track_renderer.size()) ) return track_renderer[number];}
 	//bool addControl(int position,ACMediaType media_type = -1);
 	

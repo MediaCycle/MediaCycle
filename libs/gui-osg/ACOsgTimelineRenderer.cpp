@@ -43,11 +43,11 @@
 
 using namespace osg;
 
-ACOsgTimelineRenderer::ACOsgTimelineRenderer(): screen_width(0), height(0.0f) {
+ACOsgTimelineRenderer::ACOsgTimelineRenderer(): media_cycle(0), audio_engine(0), screen_width(0), height(0.0f) {
 	track_renderer.resize(0);
 	group = new Group();
 	track_group = new Group();
-	group->addChild(track_group);//group->addChild(track_group.get());
+	group->addChild(track_group);//group->addChild(track_group);
 }
 
 ACOsgTimelineRenderer::~ACOsgTimelineRenderer(){
@@ -71,6 +71,7 @@ bool ACOsgTimelineRenderer::addTrack(int media_index){
 			track_renderer[n]->setSize(width,height);
 			if (track_renderer[n] != 0) {
 				track_renderer[n]->setMediaCycle(media_cycle);
+				track_renderer[n]->setAudioEngine(audio_engine);
 				track_renderer[n]->setTrackIndex(n);
 				track_renderer[n]->updateMedia(media_index);
 				track_renderer[n]->prepareTracks();
@@ -127,6 +128,7 @@ void ACOsgTimelineRenderer::prepareTracks(int start) {
 			case MEDIA_TYPE_AUDIO:
 				#if defined (SUPPORT_AUDIO)
 				track_renderer[i] = new ACOsgAudioTrackRenderer();
+				track_renderer[n]->setAudioEngine(audio_engine);
 				track_renderer[i]->setScreenWidth(screen_width);
 				track_renderer[i]->setSize(width,height);
 				#endif //defined (SUPPORT_AUDIO)

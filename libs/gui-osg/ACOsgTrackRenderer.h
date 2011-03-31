@@ -37,6 +37,9 @@
 #define __ACOSG_TRACK_RENDERER_H__
 
 #include "MediaCycle.h"
+#if defined (SUPPORT_AUDIO)
+#include <ACAudioEngine.h>
+#endif //defined (SUPPORT_AUDIO)
 
 #include <osg/ref_ptr>
 #include <osg/Geometry>
@@ -71,6 +74,9 @@ enum ACVideoSummaryType {
 class ACOsgTrackRenderer {
 protected:
 	MediaCycle* media_cycle;
+	#if defined (SUPPORT_AUDIO)
+		ACAudioEngine *audio_engine;
+	#endif //defined (SUPPORT_AUDIO)
 	osg::ref_ptr<osg::MatrixTransform> track_node;
 	
 	int track_index, media_index;
@@ -103,6 +109,9 @@ public:
 	virtual ~ACOsgTrackRenderer() {};
 
 	void setMediaCycle(MediaCycle *_media_cycle) { this->media_cycle = _media_cycle; };
+	#if defined (SUPPORT_AUDIO)
+		void setAudioEngine(ACAudioEngine *engine){audio_engine=engine;}
+	#endif //defined (SUPPORT_AUDIO)
 	//void setRenderer(MediaCycle *_media_cycle) { this->media_cycle = _media_cycle; };
 	void setTrackIndex(int _track_index) { this->track_index = _track_index; };
 	void setMediaIndex(int _media_index) { this->media_index = _media_index; };
