@@ -45,10 +45,15 @@ public:
 	ACAudioFeaturesPlugin();
 	~ACAudioFeaturesPlugin();
 
-	virtual std::vector<ACMediaFeatures*> calculate(std::string aFileName, bool _save_timed_feat=false){};
+	virtual std::vector<ACMediaFeatures*> calculate(std::string aFileName, bool _save_timed_feat=false);
 	virtual std::vector<ACMediaFeatures*> calculate(ACMediaData* _data, ACMedia*, bool _save_timed_feat=false);
-	
+
+	std::string getSavedFileName(){return mtf_file_name;}
+	ACMediaTimedFeature* getTimedFeatures();
 private:
+	std::vector<ACMediaFeatures*> _calculate(std::string aFileName="", ACMediaData* audio_data = 0, ACMedia* theMedia = 0, bool _save_timed_feat=false);
+	//void clean();
+	std::string mtf_file_name; // file in which features have been saved
 };
 
 #endif	/* _ACAUDIOFEATURESPLUGIN_H */

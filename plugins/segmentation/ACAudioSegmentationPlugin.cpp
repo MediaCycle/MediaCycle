@@ -39,7 +39,7 @@
 
 #include <vector>
 #include <string>
-#include <Armadillo-utils.h> 
+#include <Armadillo-utils.h>
 using namespace arma;
 
 ACAudioSegmentationPlugin::ACAudioSegmentationPlugin() {
@@ -49,19 +49,24 @@ ACAudioSegmentationPlugin::ACAudioSegmentationPlugin() {
     this->mName = "AudioSegmentation";
     this->mDescription = "AudioSegmentation plugin";
     this->mId = "";
+    this->method = 0;
 }
 
 ACAudioSegmentationPlugin::~ACAudioSegmentationPlugin() {
 }
 
+std::vector<ACMedia*> ACAudioSegmentationPlugin::segment(ACMediaTimedFeature* _MTF, ACMedia* _theMedia){
+	method = 0; //CF temp hack, forcing Energy, since it's saved as file from ACAudioFeaturesPlugin
+	return this->_segment( _MTF, _theMedia);
+}
+
 
 std::vector<ACMedia*> ACAudioSegmentationPlugin::segment(ACMediaData* audio_data, ACMedia* theMedia) {
-	int mfccNbChannels = 16;
-	int mfccNb = 13;
-	int windowSize = 512; 	
+	int mfccNbChannels = 16;//CF unused, should be in occurences of computeFeature below
+	int mfccNb = 13; // CF idem
+	int windowSize = 512; // CF idem
 	bool extendSoundLimits = true;
 	std::vector<ACMediaFeatures*> desc;
-	//	int sr = ((ACAudio*)theMedia)->getSampleRate();
 	ACAudio* theAudio = (ACAudio*) theMedia;
 	ACMediaTimedFeature* desc_mf;
 	float* data = new float[theAudio->getNFrames() * theAudio->getChannels()];
@@ -73,30 +78,55 @@ std::vector<ACMedia*> ACAudioSegmentationPlugin::segment(ACMediaData* audio_data
 			index++;
 		}
 	}
-	int method=0;
+
+	switch (method){
+	case 0:{ //AudioGarden
+		desc_mf = computeFeature(data, "Energy", theAudio->getSampleRate(), theAudio->getChannels(), theAudio->getNFrames(), 16, 13, 1024, extendSoundLimits);
+		break;
+	}
+	case 1:{
+		desc_mf = computeFeature(data, "Spectral Flux", theAudio->getSampleRate(), theAudio->getChannels(), theAudio->getNFrames(), 16, 13, 1024*2, extendSoundLimits);
+		break;
+	}
+	case 2:{ //FASTBIC
+		desc_mf = computeFeature(data, "MFCC", theAudio->getSampleRate(), theAudio->getChannels(), theAudio->getNFrames(), 16, 13, 1024*2, false);
+		break;
+	}
+	default:
+		std::cerr << "Error : Wrong method" << std::endl;
+		exit(1);
+	}
+
+	vector<ACMedia*> segments = this->_segment(desc_mf,theMedia);
+	//delete[] data;
+	return segments;
+}
+
+std::vector<ACMedia*> ACAudioSegmentationPlugin::_segment(ACMediaTimedFeature* desc_mf, ACMedia* theMedia) {
+	ACAudio* theAudio = (ACAudio*) theMedia;
 	icolvec peaks_v;
 	fcolvec time_v;
 	fcolvec desc_v;
 	fmat desc_m;
 	switch (method){
-	case 0:{
-		desc_mf = computeFeature(data, "Energy", theAudio->getSampleRate(), theAudio->getChannels(), theAudio->getNFrames(), 16, 13, 1024, extendSoundLimits);
+	case 0:{ //AudioGarden
+		//desc_mf = computeFeature(data, "Energy", theAudio->getSampleRate(), theAudio->getChannels(), theAudio->getNFrames(), 16, 13, 1024, extendSoundLimits);
 		desc_v = conv_to<fcolvec>::from(-desc_mf->getValue());
 		time_v = desc_mf->getTime();
 		peaks_v = findpeaks(desc_v, 10);
 		break;
 	}
 	case 1:{
-		desc_mf = computeFeature(data, "Spectral Flux", theAudio->getSampleRate(), theAudio->getChannels(), theAudio->getNFrames(), 16, 13, 1024*2, extendSoundLimits);
+		//desc_mf = computeFeature(data, "Spectral Flux", theAudio->getSampleRate(), theAudio->getChannels(), theAudio->getNFrames(), 16, 13, 1024*2, extendSoundLimits);
 		desc_v = conv_to<fcolvec>::from(desc_mf->delta()->getValue());
 		time_v = desc_mf->getTime();
 		peaks_v = findpeaks(desc_v, min((unsigned int) 10, desc_v.n_elem-1));		
 		break;
 	}
-        case 2:{ //FASTBIC
-                desc_mf = computeFeature(data, "MFCC", theAudio->getSampleRate(), theAudio->getChannels(), theAudio->getNFrames(), 16, 13, 1024*2, false);
-                peaks_v=FastBIC(desc_mf->getValue(), 2, theAudio->getSampleRate());
-                break;
+	case 2:{ //FASTBIC
+		//desc_mf = computeFeature(data, "MFCC", theAudio->getSampleRate(), theAudio->getChannels(), theAudio->getNFrames(), 16, 13, 1024*2, false);
+		peaks_v=FastBIC(desc_mf->getValue(), 2, theAudio->getSampleRate());
+		break;
         }
 	default:
 		std::cerr << "Error : Wrong method" << std::endl;
@@ -146,7 +176,7 @@ std::vector<ACMedia*> ACAudioSegmentationPlugin::segment(ACMediaData* audio_data
 // 	for(int i=0; i < (long) theAudio->getNFrames() * theAudio->getChannels(); i++){
 // 		output<<data[i]<<endl;
 // 	}
-	delete[] data;
+	//delete[] data;//CF moved to segment(ACMediaData*,ACMedia*)
 	return segments;
 }
 

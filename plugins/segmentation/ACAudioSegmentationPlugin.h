@@ -46,15 +46,17 @@ class ACAudioSegmentationPlugin : public ACSegmentationPlugin {
 public:
 	ACAudioSegmentationPlugin();
 	~ACAudioSegmentationPlugin();
-	
+
 	virtual int initialize(){return 1;};
 	virtual int start(){return 1;};
 	virtual int stop(){return 1;};
 
 	virtual std::vector<ACMedia*> segment(ACMediaData* _data, ACMedia*);
-	
-	virtual std::vector<ACMedia*> segment(ACMediaTimedFeature* _mtf, ACMedia*){};
+	std::vector<ACMedia*> segment(ACMediaTimedFeature* _MTF, ACMedia* _theMedia);
+
 private:
+	std::vector<ACMedia*> _segment(ACMediaTimedFeature* _MTF, ACMedia* _theMedia);
+	int method;
 };
 
 arma::icolvec FastBIC(arma::fmat audiofeatures_m, float lambda, int samplerate);

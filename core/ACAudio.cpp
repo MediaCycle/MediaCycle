@@ -250,8 +250,13 @@ void ACAudio::extractData(string fname) {
 	if (this->getSampleEnd() < 0)
 		this->setSampleEnd(sfinfo.frames);	
 
-	std::cout << "Duration of the segment : " << this->getDuration() << std::endl;
-	std::cout << "Number of frame of the segment : " << this->getNFrames() << std::endl;
+	std::string seg_level;
+	if (getParentId()==-1) //CF before a proper way exists to check if an ACMedia is a file or segment
+		seg_level = "file";
+	else
+		seg_level = "segment";
+	std::cout << "Duration of the "<< seg_level <<" : " << this->getDuration() << std::endl;
+	std::cout << "Number of frames of the "<< seg_level <<" : " << this->getNFrames() << std::endl;
 // 	sf_readf_float(testFile, data, sfinfo.frames);
 	//ACMediaData* audio_data = new ACMediaData(MEDIA_TYPE_AUDIO,fname);
 	data = new ACMediaData(MEDIA_TYPE_AUDIO,fname);

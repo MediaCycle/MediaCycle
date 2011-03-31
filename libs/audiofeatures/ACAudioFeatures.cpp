@@ -1,7 +1,7 @@
 /**
  * @brief ACAudioFeatures.cpp
  * @author Christian Frisson
- * @date 10/03/2011
+ * @date 31/03/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -99,7 +99,7 @@ std::vector<ACMediaTimedFeature*> computeFeatures(float* data, int samplerate, i
 }
 
 std::vector<ACMediaTimedFeature*> computeFeatures(float* data, vector<string> descList, int samplerate, int nchannels, long length, int mfccNbChannels, int mfccNb, int windowSize, 	bool extendSoundLimits){
-	
+
 	if ((mfccNbChannels & (mfccNbChannels-1)) != 0){
 		std::cerr << "Number of mfcc channels should be a power of two" << std::endl;
 		exit(1);
@@ -127,7 +127,7 @@ std::vector<ACMediaTimedFeature*> computeFeatures(float* data, vector<string> de
 	descMap["Energy Modulation Frequency"] = ENERGY_MODULATION_FREQUENCY;
 	descMap["Energy Modulation Amplitude"] = ENERGY_MODULATION_AMPLITUDE;
         descMap["Burst Segmentation"] = BURSTS;
-	
+
 	int fftSize=windowSize*2;
 	int hopSize = windowSize /8;
 	float * dataout;
@@ -154,7 +154,7 @@ std::vector<ACMediaTimedFeature*> computeFeatures(float* data, vector<string> de
 			signal_v(i+windowSize/2) = dataout[i*nchannels];
 		for (long i = 0; i < windowSize/2; i++)
 			signal_v(i+sfinfo2.frames+windowSize/2 - 1) = 0;
-	}		
+	}
 	else{
 		signal_v.set_size(sfinfo2.frames);
 		for (long i = 0; i < sfinfo2.frames; i++)
@@ -172,7 +172,7 @@ std::vector<ACMediaTimedFeature*> computeFeatures(float* data, vector<string> de
 	long nbFrames = (long)(signal_v.n_elem-windowSize)/hopSize+1;
 	int env_fs = (int) sr_hz/hopSize;
 	mat melfilter_m;
-	std::vector<ACMediaTimedFeature*> desc;	
+	std::vector<ACMediaTimedFeature*> desc;
 
 	colvec sc_v(nbFrames);
 	colvec ss_v(nbFrames);
@@ -190,15 +190,18 @@ std::vector<ACMediaTimedFeature*> computeFeatures(float* data, vector<string> de
 	rowvec ed_v;
 	melfilter_m = melfilters(mfccNbChannels, fftSize, sr_hz);
 // 	std::vector<ACMediaTimedFeature> descVec;
-	
+
 // 	descVec[1] = new ACMediaTimedFeature(nbFrames, 1, "sc");
 
 	long index=0;
 	// 	std::cout << "signal length = " << sfinfo2.frames << std::endl;
 	// 	std::cout << "signal length = " << signal_v.n_elem << std::endl;
 	// 	std::cout << "nbFrames = " << nbFrames << std::endl;
-	
+
 	for (long i=0; i < signal_v.n_elem-windowSize; i = i+hopSize){
+		#ifdef USE_DEBUG
+		std::cout << "ACAudioFeatures: computing features on bin " << (float)i/(float)hopSize << "/" << (int)((float)(signal_v.n_elem-windowSize)/(float)hopSize) << "\r" << std::flush; //CF won't work if multithreaded/parallelized
+		#endif
 		time_v(index) = ((double)i+((double)windowSize*(1.0-(double)extendSoundLimits))/2.0)/(double)sr_hz;
 		frame_v = signal_v.rows(i,i+windowSize-1);
 		frameW_v = signal_v.rows(i,i+windowSize-1)%window_v;
@@ -208,7 +211,7 @@ std::vector<ACMediaTimedFeature*> computeFeatures(float* data, vector<string> de
 
 		for (int iDesc = 0; iDesc < descList.size(); iDesc++){
 			switch (descMap[descList[iDesc]]) {
-			case SPECTRAL_CENTROID: 
+			case SPECTRAL_CENTROID:
 				sc_v(index) = spectralCentroid(frameFFTabs2_v)*b2f;
 				break;
 			case SPECTRAL_SPREAD:
@@ -243,12 +246,12 @@ std::vector<ACMediaTimedFeature*> computeFeatures(float* data, vector<string> de
 		index++;
 		prevFrameFFTabs_v = frameFFTabs2_v;
 	}
-	
+
 	ACMediaTimedFeature* mfcc_tf;
-	
+
 	for (int iDesc = 0; iDesc < descList.size(); iDesc++){
 		switch (descMap[descList[iDesc]]) {
-		case SPECTRAL_CENTROID: 
+		case SPECTRAL_CENTROID:
 			if (!sc_v.is_finite() ){
 				std::cout << "sc_v is not finite" << std::endl;
 				exit(1);
@@ -377,7 +380,7 @@ double spectralSpread(colvec x_v){
 	else{
 		colvec in_v = linspace<colvec>(0, x_v.n_rows-1, x_v.n_rows);
 		ss_v = weightedStdDeviation(in_v, x_v);
-	}		
+	}
 	return ss_v(0);
 }
 
@@ -387,8 +390,8 @@ rowvec spectralFlatness(colvec x_v, int fftSize, int sr_hz){
 	float f2b = (float)fftSize/(float)sr_hz;
 	urowvec band_bin_v;
 	band_bin_v = conv_to<urowvec>::from(band_hz_v * f2b);
-	
-	colvec fftBand_v; 
+
+	colvec fftBand_v;
 	for (int iBand = 0; iBand < band_bin_v.n_elem-1; iBand++){
 		fftBand_v = x_v.rows(band_bin_v(iBand), band_bin_v(iBand+1)-1);
 		if (sum(fftBand_v) == 0){
@@ -408,7 +411,7 @@ double spectralVariation(colvec x_v, colvec xPrev_v){
 //	double tmp;
 	if (sum(x_v) < lim || sum(xPrev_v) < lim){
 		sv = 1;
-	}	
+	}
 	else{
 		sv = as_scalar(abs(cor(x_v, xPrev_v)));
 	}
@@ -557,7 +560,7 @@ int resample(float* datain, SF_INFO *sfinfo, float* dataout, SF_INFO* sfinfoout)
 	// 	std::cout << outFrames << std::endl;
 
 // 	SNDFILE* outFile;
-// 	if (! (outFile = sf_open ("./test.aiff", SFM_WRITE, &sfinfo2))){  
+// 	if (! (outFile = sf_open ("./test.aiff", SFM_WRITE, &sfinfo2))){
 // 		/* Open failed so print an error message. */
 // 		printf ("Not able to open input file %s.\n", "test.aiff") ;
 // 		/* Print the error message from libsndfile. */
