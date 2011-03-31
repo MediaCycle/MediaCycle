@@ -37,6 +37,11 @@
 #include <iomanip> // for setw
 #include <cstdlib> // for atoi
 
+// ----------- class constants
+// number of directories above which to lauch thread.
+const int ACMultiMediaCycleOsgQt::n_dir_for_threading = 10;
+// -----------
+
 static void mediacycle_callback(char* message, void *user_data) {
 	
 	ACMultiMediaCycleOsgQt *application = (ACMultiMediaCycleOsgQt*)user_data;
@@ -281,19 +286,14 @@ bool ACMultiMediaCycleOsgQt::readXMLConfig(string _filename){
 
 	// 1) read header info
 	//TiXmlHandle rootHandle = this->readXMLConfigHeader(_filename);
-	if (_filename=="") 			
-		throw runtime_error("bad XML file name");
-
-	TiXmlDocument doc( _filename.c_str() );
 	try {
+		if (_filename=="") 			
+			throw runtime_error("bad XML file name");
+		
+		TiXmlDocument doc( _filename.c_str() );
 		if (!doc.LoadFile( ))
 			throw runtime_error("error reading XML file");
-	} catch (const exception& e) {
-		this->showError(e);
-		return false;
-    }	
-	
-	try{
+
 		TiXmlHandle docHandle(&doc);
 		TiXmlHandle rootHandle = docHandle.FirstChildElement( "MediaCycle" );
 // XS TODO make roothandle a pointer and check this
@@ -384,8 +384,6 @@ void ACMultiMediaCycleOsgQt::on_actionLoad_Media_Directory_triggered(bool checke
 	std::vector<string> directories;
 	
 	if (! hasMediaCycle()) return; 
-
-//	configurePluginDock();
 	
 	QString select_dir = QFileDialog::getExistingDirectory
 	(
@@ -395,20 +393,17 @@ void ACMultiMediaCycleOsgQt::on_actionLoad_Media_Directory_triggered(bool checke
 	 QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks
 	 );
 	
-	if (select_dir=="") return; // e.g. the user pressed "cancel"
+	if (select_dir=="") 
+		return; // e.g. the user pressed "cancel"
+	else 
+		directories.push_back((string)select_dir.toStdString());
+
+	
 	// check if the user wants segments
-	bool do_segments = false;
+	bool do_segments = this->doSegments();
 	bool forward_order = true; // only make it false for AudioGarden where media have been presegmented and segments have special names
 	int recursive = 1;	
-	
-	int seg_button = QMessageBox::question(this,
-									   tr("Segmentation"),
-									   tr("Do you want to segment the media ?"),
-									   QMessageBox::Yes | QMessageBox::No);
-	if (seg_button == QMessageBox::Yes) {
-		// XS TODO: check that segmentation algorithms exist
-		do_segments = true;
-	}
+
 	
 // XS TODO to use progress bar, we need to import files one by one...
 // so split the importdDirectory into scanDirectory + importFile
@@ -416,31 +411,18 @@ void ACMultiMediaCycleOsgQt::on_actionLoad_Media_Directory_triggered(bool checke
 //	pb->setRange(0, 100);
 //	pb->setValue(2);
 	
-	directories.push_back((string)select_dir.toStdString());
-	
-	// non - threaded version
-	//int res = media_cycle->importDirectory(select_dir.toStdString(), recursive, forward_order, do_segments);
-
 	// XS TODO threaded version not working for images.
 //	media_cycle->importDirectoriesThreaded(directories, recursive, forward_order, do_segments);
 	media_cycle->importDirectories(directories, recursive, forward_order, do_segments);
 
 	directories.empty();
-	
-	//usleep(2000000);
-	//media_cycle->setReferenceNode(0);
-	//ui.compositeOsgView->prepareFromBrowser();
-	//ui.compositeOsgView->prepareFromTimeline();
-	//media_cycle->setNeedsDisplay(true);
-	//ui.compositeOsgView->setFocus();
-	
+
 	this->updateLibrary();
 	
 	// SD not working with threaded version
 	/*
 
 	
-	int res = media_cycle->importDirectory(select_dir.toStdString(), recursive, forward_order, do_segments, element3);
 	int warn_button = 0;
 	if (res > 0){
 		statusBar()->showMessage(tr("Directory Imported."), 2000);
@@ -467,8 +449,6 @@ void ACMultiMediaCycleOsgQt::on_actionLoad_Media_Files_triggered(bool checked){
 	std::vector<string> directories;
 	
 	if (! hasMediaCycle()) return; 
-
-	configurePluginDock();
 	
 	QString fileName;
 	QFileDialog dialog(this,"Open MediaCycle Media File(s)");
@@ -504,26 +484,37 @@ void ACMultiMediaCycleOsgQt::on_actionLoad_Media_Files_triggered(bool checked){
 	if (!(directories.empty())){
 		
 		// check if the user wants segments
-		bool do_segments = false;
+		bool do_segments = this->doSegments();
 		bool forward_order = true; // only make it false for AudioGarden where media have been presegmented and segments have special names
 		int recursive = 1;	
 		
-		int seg_button = QMessageBox::question(this,
-											   tr("Segmentation"),
-											   tr("Do you want to segment the media ?"),
-											   QMessageBox::Yes | QMessageBox::No);
-		if (seg_button == QMessageBox::Yes) {
-			// XS TODO: check that segmentation algorithms exist
-			do_segments = true;
-		}
+		// not necessary to thread if only few files.
+		if (directories.size() > n_dir_for_threading)
+			media_cycle->importDirectoriesThreaded(directories, recursive, forward_order, do_segments);
+		else
+			media_cycle->importDirectories(directories, recursive, forward_order, do_segments);
 		
-		media_cycle->importDirectoriesThreaded(directories, recursive, forward_order, do_segments);
 		directories.empty();
+		
+		// XS do this only after loading all files (it was in the while loop) !
+		// SD not needed anymore
+		this->updateLibrary();
 	}	
-	
-	// XS do this only after loading all files (it was in the while loop) !
-	// SD not needed anymore
-	//this->updateLibrary();
+
+}
+
+bool ACMultiMediaCycleOsgQt::doSegments(){
+	bool do_segments = false;
+
+	int seg_button = QMessageBox::question(this,
+									   tr("Segmentation"),
+									   tr("Do you want to segment the media ?"),
+									   QMessageBox::Yes | QMessageBox::No);
+	if (seg_button == QMessageBox::Yes) {
+	// XS TODO: check that segmentation algorithms exist
+		do_segments = true;
+	}
+	return do_segments;
 }
 
 void ACMultiMediaCycleOsgQt::on_actionEdit_Config_File_triggered(bool checked){
@@ -663,12 +654,10 @@ void ACMultiMediaCycleOsgQt::on_actionHelpAbout_triggered(bool checked) {
 
 void ACMultiMediaCycleOsgQt::updateLibrary(){
 	if (! hasMediaCycle()) return; 
-	media_cycle->libraryContentChanged(); 	
+	// XS TODO updateLibrary()
+	media_cycle->libraryContentChanged(); 
+
 	media_cycle->setReferenceNode(0);
-	// XSCF 250310 added these 3
-	// media_cycle->pushNavigationState(); // XS 250810 removed this
-	//media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
-	
 	// XS TODO this is sooo ugly:
 	// XS TODO updateBrowser()
 	media_cycle->getBrowser()->setState(AC_CHANGING);

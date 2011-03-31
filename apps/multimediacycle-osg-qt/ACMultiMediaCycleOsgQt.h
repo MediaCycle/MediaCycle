@@ -132,6 +132,7 @@ public:
 	void configurePluginDock();
 
 private:
+	static const int n_dir_for_threading;	
 	// variables
 	Ui::ACMediaCycleOsgQt ui;
 	SettingsDialog *settingsDialog;
@@ -165,7 +166,8 @@ private:
 	void setDefaultQSettings();
 	void clearQSettings();
 	void clean();
-
+	bool doSegments();
+	
 	bool readXMLConfig(std::string _filename="");
 //	TiXmlHandle readXMLConfigHeader(std::string _filename="");
 	void writeXMLConfig(std::string _filename="");
