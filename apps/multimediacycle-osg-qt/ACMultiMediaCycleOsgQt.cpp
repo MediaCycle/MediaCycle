@@ -111,7 +111,16 @@ ACMultiMediaCycleOsgQt::ACMultiMediaCycleOsgQt(QWidget *parent) : QMainWindow(pa
 	// to make window appear on top of others.
 	this->activateWindow();
 	this->show();
-		
+
+	// Debugging accentuated media filenames
+	#ifdef USE_DEBUG
+	qDebug() << "System Locale name:"      << QLocale::system().name();
+	qDebug() << "Qt codecForCStrings:" << QTextCodec::codecForCStrings();
+	qDebug() << "Qt codecForLocale:"   << QTextCodec::codecForLocale()->name();
+	if (!QTextCodec::codecForCStrings())
+		QTextCodec::setCodecForCStrings(QTextCodec::codecForName("UTF-8"));//CF hack for CF to load accents
+	#endif
+
 	// XS reminder: need to call configureSettings from the application main.
 }
 
@@ -229,13 +238,15 @@ void ACMultiMediaCycleOsgQt::on_actionLoad_ACL_triggered(bool checked){
 	}	
 		
 	// only after loading all ACL files:
-	this->updateLibrary();
-	media_cycle->storeNavigationState(); 
+	if  (!fileNames.isEmpty()){
+		this->updateLibrary();
+		media_cycle->storeNavigationState();
 	
-#ifdef USE_DEBUG
-	media_cycle->dumpNavigationLevel();
-	media_cycle->dumpLoopNavigationLevels() ;
-#endif // USE_DEBUG
+		#ifdef USE_DEBUG
+		media_cycle->dumpNavigationLevel();
+		media_cycle->dumpLoopNavigationLevels() ;
+		#endif // USE_DEBUG
+	}
 }
 
 void ACMultiMediaCycleOsgQt::on_actionSave_ACL_triggered(bool checked){
@@ -243,7 +254,7 @@ void ACMultiMediaCycleOsgQt::on_actionSave_ACL_triggered(bool checked){
 	
 	QString fileName = QFileDialog::getSaveFileName(this, tr("Save as MediaCycle Library"),"",tr("MediaCycle Library (*.acl)"));
 	QFile file(fileName);
-	
+	if (fileName.isEmpty()) return; // e.g. the user pressed "cancel"
 	if (!file.open(QIODevice::WriteOnly)) {
 		QMessageBox::warning(this,
 							 tr("File error"),
@@ -287,13 +298,12 @@ bool ACMultiMediaCycleOsgQt::readXMLConfig(string _filename){
 	// 1) read header info
 	//TiXmlHandle rootHandle = this->readXMLConfigHeader(_filename);
 	try {
-		if (_filename=="") 			
+		if (_filename=="")
 			throw runtime_error("bad XML file name");
-		
+	
 		TiXmlDocument doc( _filename.c_str() );
 		if (!doc.LoadFile( ))
 			throw runtime_error("error reading XML file");
-
 		TiXmlHandle docHandle(&doc);
 		TiXmlHandle rootHandle = docHandle.FirstChildElement( "MediaCycle" );
 // XS TODO make roothandle a pointer and check this
@@ -398,12 +408,11 @@ void ACMultiMediaCycleOsgQt::on_actionLoad_Media_Directory_triggered(bool checke
 	else 
 		directories.push_back((string)select_dir.toStdString());
 
-	
+
 	// check if the user wants segments
 	bool do_segments = this->doSegments();
 	bool forward_order = true; // only make it false for AudioGarden where media have been presegmented and segments have special names
 	int recursive = 1;	
-
 	
 // XS TODO to use progress bar, we need to import files one by one...
 // so split the importdDirectory into scanDirectory + importFile
@@ -416,7 +425,7 @@ void ACMultiMediaCycleOsgQt::on_actionLoad_Media_Directory_triggered(bool checke
 	media_cycle->importDirectories(directories, recursive, forward_order, do_segments);
 
 	directories.empty();
-
+	
 	this->updateLibrary();
 	
 	// SD not working with threaded version
@@ -493,7 +502,7 @@ void ACMultiMediaCycleOsgQt::on_actionLoad_Media_Files_triggered(bool checked){
 			media_cycle->importDirectoriesThreaded(directories, recursive, forward_order, do_segments);
 		else
 			media_cycle->importDirectories(directories, recursive, forward_order, do_segments);
-		
+
 		directories.empty();
 		
 		// XS do this only after loading all files (it was in the while loop) !
@@ -655,7 +664,7 @@ void ACMultiMediaCycleOsgQt::on_actionHelpAbout_triggered(bool checked) {
 void ACMultiMediaCycleOsgQt::updateLibrary(){
 	if (! hasMediaCycle()) return; 
 	// XS TODO updateLibrary()
-	media_cycle->libraryContentChanged(); 
+	media_cycle->libraryContentChanged();
 
 	media_cycle->setReferenceNode(0);
 	// XS TODO this is sooo ugly:
