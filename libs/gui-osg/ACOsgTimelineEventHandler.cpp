@@ -172,7 +172,7 @@ bool ACOsgTimelineEventHandler::handle(const osgGA::GUIEventAdapter& ea,osgGA::G
 							#if defined (SUPPORT_AUDIO)
 							if(audio_engine){
 								audio_engine->setLoopSynchroMode(mediaID, ACAudioEngineSynchroModeManual);
-								audio_engine->setLoopScaleMode(mediaID, ACAudioEngineScaleModeNone);
+								audio_engine->setLoopScaleMode(mediaID, ACAudioEngineScaleModeVocode);
 								//audio_engine->setScrub((int)((pos+1.0f)*((ACAudio*) media_cycle->getLibrary()->getMedia(mediaID))->getNFrames())); 
 								audio_engine->setScrub(100.0f*(pos+1.0f)/2.0f);
 							}

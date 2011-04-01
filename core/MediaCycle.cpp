@@ -370,6 +370,11 @@ int MediaCycle::importDirectory(string path, int recursive, bool forward_order, 
 	// XS normalizing automatically is a problem, for example if we load a bunch of files instead of a directory,
 	//    it should not normalize after each file.
 	// if (ok>=1) this->mediaLibrary->normalizeFeatures();
+	
+	normalizeFeatures(1); // actually just calls mediaLibrary->normalizeFeatures();
+	
+	libraryContentChanged(1); // actually just calls mediaBrowser->libraryContentChanged();
+	
 	return ok;
 }
 

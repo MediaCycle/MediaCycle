@@ -358,17 +358,10 @@ void ACOsgAudioRenderer::curserGeode() {
 
 	/////////////////////////
 	//curser vertices
-	/*
-	 vertices = new Vec3Array(2);
-	(*vertices)[0] = Vec3(0, -ylim+xstep, zpos+0.00005);
-	(*vertices)[1] = Vec3(0, ylim-xstep, zpos+0.00005);	
-	curser_geometry->setVertexArray(vertices);
-	line_p = new DrawElementsUInt(PrimitiveSet::LINES, 3);	
-	(*line_p)[0] = 0;
-	(*line_p)[1] = 1;	
-	curser_geometry->addPrimitiveSet(line_p);
-	*/
+
+#if defined(APPLE_IOS)
 	//curser vertices for triangle strip
+	// SD TODO - This works on iPad, but disturbing aliasing effects appear
 	vertices = new Vec3Array(4);
 	(*vertices)[0] = Vec3(0-xstep*afac/2.0, -ylim, zpos+0.00005);
 	(*vertices)[1] = Vec3(0+xstep*afac/2.0, -ylim, zpos+0.00005);
@@ -381,22 +374,32 @@ void ACOsgAudioRenderer::curserGeode() {
 	line_p->push_back(1);
 	line_p->push_back(2);
 	curser_geometry->addPrimitiveSet(line_p);	
+#else
+	// SD TODO - This does not work on iPad, altough it should.
+	 vertices = new Vec3Array(2);
+	(*vertices)[0] = Vec3(0, -ylim+xstep, zpos+0.00005);
+	(*vertices)[1] = Vec3(0, ylim-xstep, zpos+0.00005);	
+	curser_geometry->setVertexArray(vertices);
+	line_p = new DrawElementsUShort(PrimitiveSet::LINES, 3);	
+	(*line_p)[0] = 0;
+	(*line_p)[1] = 1;	
+	curser_geometry->addPrimitiveSet(line_p);
+#endif
 	
 	Vec4 curser_color(0.2f, 0.9f, 0.2f, 0.9f);	
 	osg::ref_ptr<osg::Vec4Array> curser_colors = new Vec4Array;
 	curser_colors->push_back(curser_color);		
 	curser_geometry->setColorArray(curser_colors);
 	curser_geometry->setColorBinding(Geometry::BIND_OVERALL);
-	
-	//state = curser_geometry->getOrCreateStateSet();
-	//state->setAttribute(new LineWidth(2.0));
-	
+		
 	state = curser_geode->getOrCreateStateSet();
 	state->setMode(GL_BLEND, StateAttribute::ON);
-	state->setMode(GL_NORMALIZE, osg::StateAttribute::ON);
+	
 #if defined(APPLE_IOS)
 	state->setMode(GL_LIGHTING, osg::StateAttribute::PROTECTED | osg::StateAttribute::OFF );
 #else
+	state = curser_geometry->getOrCreateStateSet();
+	state->setAttribute(new LineWidth(2.0));
 	state->setMode(GL_LIGHTING, osg::StateAttribute::ON );
 	state->setMode(GL_LINE_SMOOTH, StateAttribute::ON); //CF not supported by OpenGL ES 2...
 #endif		

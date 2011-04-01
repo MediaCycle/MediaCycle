@@ -520,7 +520,6 @@ int ACMediaBrowser::setHoverLoop(int lid, float mxx, float myy)
 	return 1;
 }
 
-
 // XS TODO return value
 int ACMediaBrowser::setSourceCursor(int lid, int frame_pos) {
 	this->getMediaNode(lid).setCursor(frame_pos);

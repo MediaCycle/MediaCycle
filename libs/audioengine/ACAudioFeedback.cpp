@@ -1164,8 +1164,8 @@ void ACAudioFeedback::processAudioEngineSamplePosition(int _loop_slot, int *_pre
 		case ACAudioEngineSynchroModeManual:
 			reached_end = 0;
 			reached_begin = 0;
-			//*_sample_pos = (int)(scrub_pos * size / 100);// no inertia
-			*_sample_pos = prev_sample_pos[_loop_slot] + (output_buffer_size)*scrub_speed;//inertia
+			*_sample_pos = (int)(scrub_pos * size);// no inertia
+			//*_sample_pos = prev_sample_pos[_loop_slot] + (output_buffer_size)*scrub_speed;//inertia
 			*_sample_pos_limit = size;
 			while (*_sample_pos>=size) {
 				reached_end = 1;
@@ -1267,7 +1267,7 @@ void ACAudioFeedback::processAudioEngineResynth(int _loop_slot, int _prev_sample
 				float *os;
 				kk = 0;
 				//int niter = output_buffer_size / 512;
-				int niter = output_buffer_size / 512; //tpv[_loop_slot].hopSize;
+				int niter = output_buffer_size / (tpv_winsize / 4); //tpv[_loop_slot].hopSize;
 				
 				pv_currentsample[_loop_slot] = prev_sample_pos[_loop_slot];
 				
@@ -1276,31 +1276,16 @@ void ACAudioFeedback::processAudioEngineResynth(int _loop_slot, int _prev_sample
 				if (local_pos>=0) {
 									
 				for (i=0;i<niter;i++) {
-					// SD TODO - VOCODER CALL
-					// First test using the numediart audioskimming code - not conclusive (too slow)
-					/*
-					pv_complex_change_rate_pitch (pv[_loop_slot],bpm_ratio,pitch_ratio);
-					play_hopsyn_curses (pv[_loop_slot],&(pv_currentsample[_loop_slot]),0,size);
-					os = (float *) pv[_loop_slot]->hop_out_buffer;
-					for(k=0;k<512;k++) {
-						_output_buffer[kk++] = *(os+k); //hard-coded but not correct
-					}  
-					*/
-					// Second try with new Alexis vocoder
-					tpv[_loop_slot].speed = bpm_ratio;
-					if (0) //local_pos<4096)
-						getCurrentFrame(&(tpv[_loop_slot]),1);
-					else
-						getCurrentFrame(&(tpv[_loop_slot]),0);
-					//setCurrentSampleToNext(&(tpv[_loop_slot]));
-					if (1)
-						//setCurrentSample(&(tpv[_loop_slot]),pv_currentsample[_loop_slot]);
-						//setCurrentSample(&(tpv[_loop_slot]),local_pos);
-						setCurrentSample(&(tpv[_loop_slot]),local_pos);
-					else
-						setCurrentSampleToNext(&(tpv[_loop_slot]));
 					
-					local_pos_f += bpm_ratio*512; //bpm_ratio;
+					tpv[_loop_slot].speed = bpm_ratio;
+					
+					getCurrentFrame(&(tpv[_loop_slot]),0);
+					setCurrentSample(&(tpv[_loop_slot]),local_pos);
+					
+					//getCurrentFrame(&(tpv[_loop_slot]),1);
+					//setCurrentSampleToNext(&(tpv[_loop_slot]));
+					
+					local_pos_f += bpm_ratio * (tpv_winsize / 4); //bpm_ratio;
 					if (local_pos_f>=size) {
 						local_pos_f -= size;
 					}
@@ -1309,14 +1294,13 @@ void ACAudioFeedback::processAudioEngineResynth(int _loop_slot, int _prev_sample
 					}
 					local_pos = floor(local_pos_f);
 					
-					// other possibilitty
-					// int setCurrentSample(TiPhaseVocoder *tpv,double value) ;
 					doOLA(&(tpv[_loop_slot]));
+					
 					startbuffer = tpv[_loop_slot].bufferPos - tpv[_loop_slot].hopSize;
 					if (startbuffer >= 0) {
 						//datapointer = tpv.buffer+startbuffer; tpv.hopSize;
 						for(k=0;k<tpv[_loop_slot].hopSize;k++) {
-							_output_buffer[kk++] = *((double*)tpv[_loop_slot].buffer+startbuffer+k)/2;
+							_output_buffer[kk++] = *((double*)tpv[_loop_slot].buffer+startbuffer+k); ///2;
 						}
 					}
 					else {
@@ -1324,11 +1308,11 @@ void ACAudioFeedback::processAudioEngineResynth(int _loop_slot, int _prev_sample
 						//if (tpv.bufferPos > 0)
 						//	tpv.buffer; tpv.bufferPos;	
 						for(k=0;k<-startbuffer;k++) {
-							_output_buffer[kk++] = *((double*)tpv[_loop_slot].buffer+startbuffer+tpv[_loop_slot].winSize+k)/2;
+							_output_buffer[kk++] = *((double*)tpv[_loop_slot].buffer+startbuffer+tpv[_loop_slot].winSize+k); ///2;
 						}	
 						if (tpv[_loop_slot].bufferPos > 0) {
 							for(k=0;k<tpv[_loop_slot].bufferPos;k++) {
-								_output_buffer[kk++] = *((double*)tpv[_loop_slot].buffer+k)/2;
+								_output_buffer[kk++] = *((double*)tpv[_loop_slot].buffer+k); ///2;
 							}
 						}
 					}

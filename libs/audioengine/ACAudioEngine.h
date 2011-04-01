@@ -44,7 +44,7 @@
 #if defined USE_OPENAL
 #define BUFFERSIZE 1024
 #elif defined USE_PORTAUDIO
-#define BUFFERSIZE 64
+#define BUFFERSIZE 1024
 #endif
 
 class ACAudioEngine {
