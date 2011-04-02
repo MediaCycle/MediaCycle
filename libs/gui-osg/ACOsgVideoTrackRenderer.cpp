@@ -33,6 +33,9 @@
  *
  */
 
+// ----------- uncomment this to compute and visualize a slit scan
+#define USE_SLIT_SCAN
+
 #include "ACOsgVideoTrackRenderer.h"
 #include "ACVideo.h"
 //#include "ACImage.h"
@@ -40,11 +43,10 @@
 #include <osg/ImageUtils>
 #include <osgDB/WriteFile>
 
+#include <osg/Version>
+
 using namespace std;
 using namespace osg;
-
-// ----------- uncomment this to compute and visualize a slit scan
-//#define USE_SLIT_SCAN
 
 #if defined (SUPPORT_VIDEO)
 
@@ -122,7 +124,9 @@ int ACOsgVideoSlitScanThread::convert(AVPicture *dst, int dst_pix_fmt, AVPicture
 													   src_width, src_height, (PixelFormat) dst_pix_fmt,
 													   /*SWS_BILINEAR*/ SWS_BICUBIC, 0, 0, 0);
     //}
+    #if OSG_MIN_VERSION_REQUIRED(2,9,11)
     OSG_INFO<<"Using sws_scale ";
+    #endif
     int result =  sws_scale(m_swscale_ctx,
                             (src->data), (src->linesize), 0, src_height,
                             (dst->data), (dst->linesize));
@@ -132,7 +136,9 @@ int ACOsgVideoSlitScanThread::convert(AVPicture *dst, int dst_pix_fmt, AVPicture
 	 src_pix_fmt, src_width, src_height);
 	 #endif*/
     osg::Timer_t endTick = osg::Timer::instance()->tick();
+    #if OSG_MIN_VERSION_REQUIRED(2,9,11)
     OSG_INFO<<" time = "<<osg::Timer::instance()->delta_m(startTick,endTick)<<"ms"<<std::endl;
+    #endif
     return result;
 }
 
@@ -150,7 +156,7 @@ void ACOsgVideoSlitScanThread::yuva420pToRgba(AVPicture * const dst, AVPicture *
         }
     }
 }
-
+/*
 // Using OpenCV, frame jitter
 int ACOsgVideoSlitScanThread::computeSlitScan(){
 	CvCapture* video = cvCreateFileCapture(filename.c_str());
@@ -205,9 +211,9 @@ int ACOsgVideoSlitScanThread::computeSlitScan(){
 	}
 	return 1;
 }
-
+*/
 // Using FFmpeg
-/*int ACOsgVideoSlitScanThread::computeSlitScan(){
+int ACOsgVideoSlitScanThread::computeSlitScan(){
 	
 	double slit_in = getTime();
 	
@@ -371,7 +377,7 @@ int ACOsgVideoSlitScanThread::computeSlitScan(){
 	av_close_input_file(pFormatCtx);
 	return 1;
 }
-*/ 
+
 
 #endif//def USE_SLIT_SCAN
 

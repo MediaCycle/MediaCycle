@@ -49,8 +49,8 @@ ACOsgAudioTrackRenderer::ACOsgAudioTrackRenderer() : ACOsgTrackRenderer() {
 	//zoom_x = 10.0; zoom_y = 6.0;
 	zoom_x = 1.0; zoom_y = 1.0;
 	track_left_x = 0.0;
-	summary_height = yspan/8.0f; // values [0;yspan/2.0f]
-	segments_height = yspan/8.0f; // values [0;yspan/2.0f]
+	summary_height = yspan/16.0f; // values [0;yspan/2.0f]
+	segments_height = yspan/16.0f; // values [0;yspan/2.0f]
 	playback_height = yspan/2.0f - summary_height ; // yspan/2.0f - summary_height - segments_height; // (yspan-2*yspan/8.0f)/2.0f; // values [0;yspan/2.0f]
 	summary_center_y = -yspan/2.0f + summary_height; // -yspan/2.0f + summary_height + segments_height; //-yspan/2.0f+yspan/8.0f; // values [-yspan/2.0f;yspan/2.0f]
 	segments_center_y = -yspan/2.0f + segments_height;
@@ -204,7 +204,7 @@ void ACOsgAudioTrackRenderer::selectionWaveformGeode() {
 			thumbnail = new float[width];
 			int k = 0;
 			for (int i=0; i< width; i++) {
-				if (k+i<0)
+				if ((k+i<0)||(k+i>=width))
 					thumbnail[i]=0.0f;
 				else	
 					thumbnail[i]=samples[k+i];
@@ -598,7 +598,7 @@ void ACOsgAudioTrackRenderer::selectionBeginGeode() {
 	selection_begin_geometry->setVertexArray(vertices);
 
 	//Vec4 color(0.0f, 1.0f, 0.0f, 1.0f);
-	Vec4 color(1.0f, 0.0f, 0.0f, 0.4f);
+	Vec4 color(0.2f, 0.9f, 0.2f, 0.9f);//(1.0f, 0.0f, 0.0f, 0.4f);
 	osg::ref_ptr<osg::Vec4Array> colors = new Vec4Array;
 	colors->push_back(color);
 
@@ -671,7 +671,7 @@ void ACOsgAudioTrackRenderer::selectionEndGeode() {
 	selection_end_geometry->setVertexArray(vertices);
 
 	//Vec4 color(0.0f, 1.0f, 0.0f, 1.0f);
-	Vec4 color(1.0f, 0.0f, 0.0f, 0.4f);
+	Vec4 color(0.2f, 0.9f, 0.2f, 0.9f);//(1.0f, 0.0f, 0.0f, 0.4f);
 	osg::ref_ptr<osg::Vec4Array> colors = new Vec4Array;
 	colors->push_back(color);
 
@@ -797,7 +797,7 @@ void ACOsgAudioTrackRenderer::playbackWaveformGeode() {
 			thumbnail = new float[width];
 			int k = (int)( n_frames *(selection_begin_pos+xspan/2.0f)/xspan);
 			for (int i=0; i< width; i++) {
-				if (k+i<0)
+				if ((k+i<0)||(k+i>=width))
 					thumbnail[i]=0.0f;
 				else	
 					thumbnail[i]=samples[k+i];
@@ -1036,11 +1036,19 @@ void ACOsgAudioTrackRenderer::segmentsGeode() {
 		state->setMode(GL_BLEND, StateAttribute::ON);
 		//state->setMode(GL_LINE_SMOOTH, StateAttribute::ON);
 
+		/*
+		// AudioRenderer colors
+		colors[0] = Vec4(1,1,0.5,1);
+		colors[1] = Vec4(1,0.5,1,1);
+		colors[2] = Vec4(0.5,1,1,1);
+		colors[3] = Vec4(1,0.5,0.5,1);
+		colors[4] = Vec4(0.5,1,0.5,1);*/
+
 		Vec4 segment_color;
 		if ( (float)s/2.0f != s/2) // odd segment index
-			segment_color = Vec4(0.0f, 0.0f, 1.0f, 1.0f);
+			segment_color = Vec4(1,1,0.5,0.5f);//Vec4(0.0f, 0.0f, 1.0f, 1.0f);
 		else // even segment index
-			segment_color = Vec4(1.0f, 0.0f, 0.0f, 1.0f);
+			segment_color = Vec4(1,0.5,1,0.5f);//Vec4(1.0f, 0.0f, 0.0f, 1.0f);
 		osg::ref_ptr<osg::Vec4Array> segment_colors = new Vec4Array;
 		segment_colors->push_back(segment_color);
 
