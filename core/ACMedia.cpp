@@ -54,7 +54,7 @@ void ACMedia::init() {
 	features_vectors.resize(0);
 	persistent_data = false;
 	data = 0; // new ACMediaData(MEDIA_TYPE_NONE);
-	features_saved_xml = false;
+	//features_saved_xml = false;
 }
 
 ACMedia::ACMedia(const ACMedia& m, bool reduce) {
@@ -145,7 +145,8 @@ void ACMedia::saveACL(ofstream &library_file, int mcsl) {
 }
 
 void ACMedia::saveXML(TiXmlElement* _medias){
-	if ( features_saved_xml || _medias == NULL) return; 
+	//if ( features_saved_xml || _medias == NULL) return; 
+	if (_medias == NULL) return; 
 	TiXmlElement* media;
 	media = new TiXmlElement( "Media" );  
 	_medias->LinkEndChild( media );  
@@ -199,7 +200,7 @@ void ACMedia::saveXML(TiXmlElement* _medias){
 		TiXmlText* segID = new TiXmlText(s.c_str());
 		seg->LinkEndChild( segID );  		
 	}
-	features_saved_xml = true;
+	//features_saved_xml = true;
 }
 
 // C++ version

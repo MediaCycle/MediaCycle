@@ -1,9 +1,9 @@
 <?php
 /**
  * @brief config.php
- * @author Alexis Moinet
- * @date 24/11/2009
- * @copyright (c) 2009 – UMONS - Numediart
+ * @author Stéphane Dupont
+ * @date 05/04/2011
+ * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -52,9 +52,10 @@ $gConfig["sitename"] = "LaughterCycle";
 $gConfig["minpasswordlength"] = 6;
 $gConfig["nlastfilesplayed"] = 7;//how many file do we display in the "last files played" column
 $gConfig["nlastcomments"] = 5;//how many comments do we display in the "last comments" column
-$gConfig["filepath"] = "/var/www/LCimages/";//where are the waveform XML files (to display the audio waveforms in the flash player)
+//$gConfig["filepath"] = "/var/www/LCimages/";//where are the waveform XML files (to display the audio waveforms in the flash player)
+$gConfig["filepath"] = "/var/mediacycle/";//where are the waveform XML files (to display the audio waveforms in the flash player)
 $gConfig["fileurl"] = $_SERVER['SERVER_ADDR'] . "/LCimages/";//where are they in a http://myserver/mypath fashion
-$gConfig["fileextensions"] = array("mp3","flv"); //we accept mp3 and flv at upload
+$gConfig["fileextensions"] = array("mp3","flv","wav"); //we accept mp3 and flv at upload
 $gConfig["streampath"] = "/opt/red5/red5/dist/webapps/oflaDemo/streams/"; // when recording with the flash application on the website, where are the recording stored ? There they're
 
 /*
@@ -67,7 +68,8 @@ $gConfig["mediacycle"]["enable"] = true;
 //ip address of a mediacycle server (in our case it is always local range (192.168.*.*), but it can be any IP
 //$gConfig["mediacycle"]["ip"] = "192.168.1.153";
 //$gConfig["mediacycle"]["ip"] = "169.254.49.254";
-$gConfig["mediacycle"]["ip"] = "192.168.3.168";
+//$gConfig["mediacycle"]["ip"] = "192.168.3.168";
+$gConfig["mediacycle"]["ip"] = "localhost";
 
 //listening port of the mediacycle server
 $gConfig["mediacycle"]["port"] = "12345";

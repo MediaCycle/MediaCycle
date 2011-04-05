@@ -1,9 +1,9 @@
 <?php
 /**
  * @brief MediaCycle.php
- * @author Alexis Moinet
- * @date 25/11/2009
- * @copyright (c) 2009 – UMONS - Numediart
+ * @author Stéphane Dupont
+ * @date 05/04/2011
+ * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -92,12 +92,12 @@ class MediaCycle {
         //I think it's worth it to first check whether it's needed
         $raw = "";
         if ($gConfig["mediacycle"]["enable"]) {
-            $filename = $gConfig["filepath"] . $file->getName() . ".wav";
-            $raw = file_get_contents($filename, FILE_BINARY);
+            //$filename = $gConfig["filepath"] . $file->getName(); // . ".wav";
+            //$raw = file_get_contents($filename, FILE_BINARY);
         }
 
         $command = "addfile";
-        $params = array($file->getId(),$file->getName().".wav",$raw);
+        $params = array($file->getId(),$gConfig["filepath"] . $file->getName(),$raw);
 
         $answer = self::askMediaCycle($command, $params);
 
@@ -127,7 +127,7 @@ class MediaCycle {
         global $gConfig;
 
         $command = "savelibrary";
-        $params = array($gConfig["mediacycle"]["libraryname"]);
+        $params = array($gConfig["filepath"].$gConfig["mediacycle"]["libraryname"]);
 
         $answer = self::askMediaCycle($command, $params);
 

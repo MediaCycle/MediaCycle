@@ -1,7 +1,7 @@
 /**
  * @brief main.cpp
  * @author Stéphane Dupont
- * @date 01/04/2011
+ * @date 05/04/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -56,7 +56,7 @@ int processTcpMessageFromClient(MediaCycle *that, char* buffer, int l, char **bu
 	int ret, i;
 	string sbuffer, subbuffer, path, fullpath, sbuffer_send;
 	int bufpos1, bufpos2;
-	int id, k;
+	int id, lid, k;
 	vector<int> ids;
 	
 	printf ("Processing TCP message of length %d: %s", l, buffer);
@@ -104,20 +104,31 @@ int processTcpMessageFromClient(MediaCycle *that, char* buffer, int l, char **bu
 		*buffer_send = (char*)(sbuffer_send).c_str();
 		*l_send = sbuffer_send.length();
 	}
-	// load lirbrary from file - to be implemented
+	// load library from file
 	else if (subbuffer == "loadlibrary") {
-		*buffer_send = 0;
-		*l_send = 0;
+		bufpos1 = bufpos2+1;
+		path = sbuffer.substr(bufpos1);
+		fullpath = path;
+		that->cleanLibrary();
+		that->importXMLLibrary(fullpath);
+		ret = 1;
+		osstream << "loadlibrary " << ret;
+		sbuffer_send = osstream.str();
+		*buffer_send = (char*)(sbuffer_send).c_str();
+		*l_send = sbuffer_send.length();		
 	}
 	// get k most similar items
 	else if (subbuffer == "getknn") {
 		bufpos1 = bufpos2+1;
 		path = sbuffer.substr(bufpos1);
 		sscanf(path.c_str(), "%d %d", &id, &k);
+		id--;
 		ret = that->getKNN(id, ids, k);
 		osstream << "getknn " << ret;
 		for (i=0;i<ret;i++) {
-			osstream << " " << ids[i];
+			lid = ids[i];
+			lid++;
+			osstream << " " << lid;
 		}
 		sbuffer_send = osstream.str();
 		*buffer_send = (char*)(sbuffer_send).c_str();
@@ -128,6 +139,7 @@ int processTcpMessageFromClient(MediaCycle *that, char* buffer, int l, char **bu
 		bufpos1 = bufpos2+1;
 		path = sbuffer.substr(bufpos1);
 		sscanf(path.c_str(), "%d", &id);
+		id--;
 		thumbnail_filename = that->getThumbnailFileName(id);
 		if (thumbnail_filename!="") {
 			stat(thumbnail_filename.c_str(), &file_status);
@@ -144,16 +156,20 @@ int processTcpMessageFromClient(MediaCycle *that, char* buffer, int l, char **bu
 			*l_send = 0;
 		}
 	}
-	// modify feature weights - to be implemented
-	else if (subbuffer == "setweight") {
-		*buffer_send = 0;
-		*l_send = 0;
-	}
 	// set number of cluster of media
 	else if (subbuffer == "setclusternumber") {
-		*buffer_send = 0;
-		*l_send = 0;
+		bufpos1 = bufpos2+1;
+		path = sbuffer.substr(bufpos1);
+		sscanf(path.c_str(), "%d", &k);
+		that->setClusterNumber(k);
+		osstream << "setclusternumber " << ret;
+		sbuffer_send = osstream.str();
+		*buffer_send = (char*)(sbuffer_send).c_str();
+		*l_send = sbuffer_send.length();
 	}
+	
+	// TO BE DONE
+	/*
 	// get media cluster centers (f.i. 1 representative image from each cluster)
 	else if (subbuffer == "getclustercentroids") {
 		*buffer_send = 0;
@@ -161,42 +177,111 @@ int processTcpMessageFromClient(MediaCycle *that, char* buffer, int l, char **bu
 	}
 	// dig deeper into one cluster (f.i. when user select a cluster and want to see more details of it)
 	else if (subbuffer == "navigateforward") {
-		*buffer_send = 0;
-		*l_send = 0;
+		that->goForward();
+		osstream << "navigateforward " << ret;
+		sbuffer_send = osstream.str();
+		*buffer_send = (char*)(sbuffer_send).c_str();
+		*l_send = sbuffer_send.length();
 	}
 	// move back to previous level of hierarchy
 	else if (subbuffer == "navigateback") {
-		*buffer_send = 0;
-		*l_send = 0;
+		that->goBack();
+		osstream << "navigateback " << ret;
+		sbuffer_send = osstream.str();
+		*buffer_send = (char*)(sbuffer_send).c_str();
+		*l_send = sbuffer_send.length();
+	}	
+	// modify feature weights - to be implemented
+	else if (subbuffer == "setweight") {
+		
 	}
+	*/
 	
 	return 0;
 }
 
 int main(int argc, char** argv) {
     
-	MediaCycle *mediacycle;
+	MediaCycle *media_cycle;
  
-    cout<<"new MediaCycle"<<endl;
+	ACMediaType _media_type = MEDIA_TYPE_AUDIO;
+	
+	media_cycle = new MediaCycle(_media_type,"/tmp/","mediacycle.acl");
+	
+ 	string smedia = "none";
+	switch (_media_type) {
+		case MEDIA_TYPE_3DMODEL:
+#if defined (SUPPORT_3DMODEL)
+			smedia="3Dmodel";
+#endif //defined (SUPPORT_3DMODEL)
+			break;	
+		case MEDIA_TYPE_AUDIO:
+#if defined (SUPPORT_AUDIO)
+			smedia="audio";
+#endif //defined (SUPPORT_AUDIO)
+			break;
+		case MEDIA_TYPE_IMAGE:
+#if defined (SUPPORT_IMAGE)
+			smedia="image";
+#endif //defined (SUPPORT_IMAGE)
+			break;
+		case MEDIA_TYPE_VIDEO:
+#if defined (SUPPORT_VIDEO)
+			smedia="video";
+#endif //defined (SUPPORT_VIDEO)
+			break;
+		default:
+			break;
+	}
+
+	// -- media-specific features plugin + generic segmentation and visualisation plugins--
+	std::string f_plugin, s_plugin, v_plugin;
+	
+	char c_path[2048];
+	// use the function to get the path
+	getcwd(c_path, 2048);
+	std::string s_path = c_path;
 	
 	std::string build_type ("Release");
 #ifdef USE_DEBUG
 	build_type = "Debug";
+#endif //USE_DEBUG
+	
+#if defined(__APPLE__)
+#if not defined (USE_DEBUG) and not defined (XCODE) // needs "make install" to be ran to work
+	f_plugin = "@executable_path/../MacOS/mc_" + smedia +".dylib";
+	v_plugin = "@executable_path/../MacOS/mc_visualisation.dylib";
+	s_plugin = "@executable_path/../MacOS/mc_segmentation.dylib";
+#else
+	f_plugin = s_path + "/../../../plugins/"+ smedia + "/" + build_type + "/mc_" + smedia +".dylib";
+	v_plugin = s_path + "/../../../plugins/visualisation/" + build_type + "/mc_visualisation.dylib";
+	s_plugin = s_path + "/../../../plugins/segmentation/" + build_type + "/mc_segmentation.dylib";
+#endif
+	// common to all media, but only for mac...
+#elif defined (__WIN32__)
+	f_plugin = s_path + "\..\..\..\plugins\\" + smedia + "\mc_"+smedia+".dll";
+	v_plugin = s_path + "/../../../plugins/visualisation/" + build_type + "/mc_visualisation.dll";
+	s_plugin = s_path + "/../../../plugins/segmentation/" + build_type + "/mc_segmentation.dll";
+#else
+#if not defined (USE_DEBUG) // needs "make package" to be ran to work
+	f_plugin = "/usr/lib/mc_"+smedia+".so";
+	v_plugin = "/usr/lib/mc_visualisation.so";
+	s_plugin = "/usr/lib/mc_segmentation.so";
+#else
+	f_plugin = s_path + "/../../plugins/"+smedia+"/mc_"+smedia+".so";
+	v_plugin = s_path + "/../../plugins/visualisation/mc_visualisation.so";
+	s_plugin = s_path + "/../../plugins/segmentation/mc_segmentation.so";
+#endif
 #endif
 	
-	mediacycle = new MediaCycle(MEDIA_TYPE_AUDIO, "/tmp/", "mediacycle.acl");
-	mediacycle->addPluginLibrary("../../../plugins/audio/" + build_type + "/mc_audio.dylib");
+	media_cycle->addPluginLibrary(f_plugin);
+	media_cycle->addPluginLibrary(v_plugin);
+	//media_cycle->addPluginLibrary(s_plugin);
 	
-	//mediacycle = new MediaCycle(MEDIA_TYPE_IMAGE, "/tmp/", "mediacycle.acl");
-	//mediacycle->addPluginLibrary("../../plugins/image/" + build_type + "/mc_image.dylib");
-	
-	mediacycle->addPluginLibrary("../../../plugins/segmentation/" + build_type + "/mc_segmentation.dylib");
-	mediacycle->addPluginLibrary("../../../plugins/visualisation/" + build_type + "/mc_visualisation.dylib");
-	
-	// check if needed
-	//mediacycle->getBrowser()->setClusterNumber(10);
+	// SD - check if needed
+	// mediacyclesetClusterNumber(10);
 
-	mediacycle->startTcpServer(12345, 5, mediacycle_tcp_callback);
+	media_cycle->startTcpServer(12345, 5, mediacycle_tcp_callback);
 	
     cout.flush();
   
@@ -204,7 +289,7 @@ int main(int argc, char** argv) {
         sleep(30);
     }
 
-    delete mediacycle;
+    delete media_cycle;
 	
     return (EXIT_SUCCESS);
 }
