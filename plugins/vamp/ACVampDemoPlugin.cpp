@@ -43,7 +43,7 @@
 ACVampDemoPlugin::ACVampDemoPlugin() {
     //vars herited from ACPlugin
     this->mMediaType = MEDIA_TYPE_AUDIO;
-    this->mPluginType = PLUGIN_TYPE_FEATURES;
+   // this->mPluginType = PLUGIN_TYPE_FEATURES;
     this->mName = "Vamp";
     this->mDescription = "Vamp plugin";
     this->mId = "";
@@ -53,7 +53,7 @@ ACVampDemoPlugin::~ACVampDemoPlugin() {
 }
 
 
-std::vector<ACMediaFeatures*> ACVampDemoPlugin::calculate(ACMediaData* audio_data, ACMedia* theMedia) {
+std::vector<ACMediaFeatures*> ACVampDemoPlugin::calculate(ACMediaData* audio_data, ACMedia* theMedia, bool _save_timed_feat) {
 	std::vector<ACMediaTimedFeature*> descmf;
 	std::vector<ACMediaFeatures*> desc;
 	//	int sr = ((ACAudio*)theMedia)->getSampleRate();

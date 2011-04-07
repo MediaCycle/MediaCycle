@@ -1,7 +1,7 @@
 /**
  * @brief ACVisualisationPlugin.h
- * @author Xavier Siebert
- * @date 31/01/2011
+ * @author Thierry Ravet
+ * @date 07/04/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -38,16 +38,12 @@
 #ifndef _ACVISUALISATIONPLUGIN_
 #define _ACVISUALISATIONPLUGIN_
 
-class ACVisualisationPlugin : public ACPlugin {
+class ACVisualisationPlugin : public ACPositionsPlugin {
 public:
   ACVisualisationPlugin();
   ~ACVisualisationPlugin();
-  virtual int initialize();
-  virtual std::vector<ACMediaFeatures*> calculate();
-  virtual std::vector<ACMediaFeatures*> calculate(std::string aFileName);
-	std::vector<ACMediaFeatures*> calculate(ACMediaData* _data){}
 
-  virtual void updateClusters(ACMediaBrowser* );
+//  virtual void updateClusters(ACMediaBrowser* );
   virtual void updateNextPositions(ACMediaBrowser* );
 	arma::mat updateNextPositionsItemClicked(arma::mat &desc_m, int nbVideoDisplay, int itemClicked, arma::ucolvec &toDisplay_v, arma::mat &labelPos_m, arma::ucolvec &labelIdx_v, arma::colvec &labelValue_v);
 	arma::mat updateNextPositionsItemClicked2(arma::mat &desc_m, int nbVideoDisplay, int itemClicked, arma::ucolvec &toDisplay_v, arma::mat &labelPos_m, arma::ucolvec &labelIdx_v, arma::colvec &labelValue_v);
@@ -55,8 +51,7 @@ public:
 	arma::mat updateNextPositionsInit(arma::mat &desc_m, int nbVideoDisplay, arma::ucolvec &toDisplay_v, arma::mat &labelPos_m, arma::ucolvec &labelIdx_v, arma::colvec &labelValue_v);
 	arma::mat updateNextPositionsInit2(arma::mat &desc_m, int nbVideoDisplay, arma::ucolvec &toDisplay_v, arma::mat &labelPos_m, arma::ucolvec &labelIdx_v, arma::colvec &labelValue_v);
 	arma::mat extractDescMatrix(ACMediaBrowser* mediaBrowser, int nbActiveFeatures, std::vector<std::string> &featureNames, arma::mat &descD_m);
-  virtual int start() {return 0;};
-  virtual int stop() {return 0;};
+
 protected:
 };
 

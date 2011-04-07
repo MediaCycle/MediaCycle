@@ -50,37 +50,38 @@ class ACMediaBrowser;
 class ACMediaTimedFeature;
 
 typedef		unsigned int ACPluginType;
-#define		PLUGIN_TYPE_NONE				0x0000
-#define		PLUGIN_TYPE_FEATURES			0x0001
-#define		PLUGIN_TYPE_SEGMENTATION		0x0002
-#define		PLUGIN_TYPE_SERVER				0x0004
-#define		PLUGIN_TYPE_CLIENT				0x0008	
-#define		PLUGIN_TYPE_CLUSTERS_METHOD		0x0010//CF updateClusters
-#define		PLUGIN_TYPE_CLUSTERS_POSITIONS	0x0020//CF updatePositions for the Clusters mode
-#define		PLUGIN_TYPE_CLUSTERS_PIPELINE	0x0040//CF updateClusters and updatePositions for the Clusters mode
-#define		PLUGIN_TYPE_NEIGHBORS_METHOD	0x0080//CF updateNeighborhoods
-#define		PLUGIN_TYPE_NEIGHBORS_POSITIONS	0x0100//CF updatePositions for the Neighbors mode
-#define		PLUGIN_TYPE_NEIGHBORS_PIPELINE	0x0200//CF updateNeighborhoods and updatePositions for the Neighbors mode
-#define		PLUGIN_TYPE_ANYMODE_POSITIONS	0x0400//CF updatePositions for the Clusters or Neighbors modes
-#define		PLUGIN_TYPE_ALLMODES_PIPELINE	0x0800//CF updateClusters and updateNeighborhoods and updatePositions for both modes
+const ACPluginType	PLUGIN_TYPE_NONE				=	0x0000;
+const ACPluginType	PLUGIN_TYPE_FEATURES			=	0x0001;
+const ACPluginType	PLUGIN_TYPE_SEGMENTATION		=	0x0002;
+const ACPluginType	PLUGIN_TYPE_SERVER				=	0x0004;
+const ACPluginType	PLUGIN_TYPE_CLIENT				=	0x0008;	
+const ACPluginType	PLUGIN_TYPE_CLUSTERS_METHOD		=	0x0010;//CF updateClusters
+const ACPluginType	PLUGIN_TYPE_CLUSTERS_POSITIONS	=	0x0020;//CF updatePositions for the Clusters mode
+const ACPluginType	PLUGIN_TYPE_CLUSTERS_PIPELINE	=	0x0040;//CF updateClusters and updatePositions for the Clusters mode
+const ACPluginType	PLUGIN_TYPE_NEIGHBORS_METHOD	=	0x0080;//CF updateNeighborhoods
+const ACPluginType	PLUGIN_TYPE_NEIGHBORS_POSITIONS	=	0x0100;//CF updatePositions for the Neighbors mode
+const ACPluginType	PLUGIN_TYPE_NEIGHBORS_PIPELINE	=	0x0200;//CF updateNeighborhoods and updatePositions for the Neighbors mode
+const ACPluginType	PLUGIN_TYPE_POSITIONS			=	0x0400;//TR todo 
+const ACPluginType	PLUGIN_TYPE_ANYMODE_POSITIONS	=	0x0800;//CF updatePositions for the Clusters or Neighbors modes
+const ACPluginType	PLUGIN_TYPE_ALLMODES_PIPELINE	=	0x1000;//CF updateClusters and updateNeighborhoods and updatePositions for both modes
 
 
 class ACPlugin {
 public:
 	ACPlugin();
-	bool isPlugintype(ACPluginType pType);
-	virtual ~ACPlugin() {mName.clear(); mDescription.clear(); mId.clear();}
-	std::string getName() {return this->mName;}
-	std::string getIdentifier() {return this->mId;}
-	std::string getDescription() {return this->mDescription;}
-	ACMediaType getMediaType() {return this->mMediaType;}
-	ACPluginType getPluginType() {return this->mPluginType;}
+	bool implementsPluginType(ACPluginType pType);
+	virtual ~ACPlugin() {mName.clear(); mDescription.clear(); mId.clear();};
+	std::string getName() {return this->mName;};
+	std::string getIdentifier() {return this->mId;};
+	std::string getDescription() {return this->mDescription;};
+	ACMediaType getMediaType() {return this->mMediaType;};
+	ACPluginType getPluginType() {return this->mPluginType;};
 
 
 		//XSCF TODO: should the plugin receive MediaCycle ?
-	virtual void updateClusters(ACMediaBrowser*){};
-	virtual void updateNextPositions(ACMediaBrowser*){};
-	virtual void updateNeighborhoods(ACMediaBrowser*){};
+//	virtual void updateClusters(ACMediaBrowser*){};
+//	virtual void updateNextPositions(ACMediaBrowser*){};
+//	virtual void updateNeighborhoods(ACMediaBrowser*){};
 	
 	// e.g., for audioSegmentationPLugin
 	
@@ -95,7 +96,7 @@ protected:
 };
 
 
-class ACFeaturesPlugin: public ACPlugin
+class ACFeaturesPlugin: virtual public ACPlugin
 {
 protected:
 	ACFeaturesPlugin();
@@ -109,7 +110,7 @@ protected:
 	std::vector<std::string> mDescriptorsList;
 };
 
-class ACSegmentationPlugin:public ACPlugin
+class ACSegmentationPlugin: virtual public ACPlugin
 {
 protected:
 public:
@@ -119,6 +120,28 @@ public:
 
 };
 
+class ACNeighborMethodPlugin : virtual public ACPlugin {
+public:
+	ACNeighborMethodPlugin();
+	virtual void updateNeighborhoods(ACMediaBrowser* )=0;
+protected:
+};
+
+
+class ACClusterMethodPlugin : virtual public ACPlugin {
+public:
+	ACClusterMethodPlugin();
+	virtual void updateClusters(ACMediaBrowser*)=0;
+protected:
+};
+
+
+class ACPositionsPlugin : virtual public ACPlugin {
+public:
+	ACPositionsPlugin();
+	virtual void updateNextPositions(ACMediaBrowser* )=0;
+protected:
+};
 
 // the types of the class factories
 typedef ACPlugin* createPluginFactory(std::string);

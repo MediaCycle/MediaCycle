@@ -275,11 +275,11 @@ public:
 	void setNumberOfDisplayedLabels(int nd);
 	int getNumberOfLabels(){return mLabelAttributes.size();}
 
-	void setClustersMethodPlugin(ACPlugin* acpl){mClustersMethodPlugin=acpl;}
-	void setNeighborsMethodPlugin(ACPlugin* acpl){mNeighborsMethodPlugin=acpl;}
-	void setClustersPositionsPlugin(ACPlugin* acpl){mClustersPosPlugin=acpl;}	
-	void setNeighborsPositionsPlugin(ACPlugin* acpl){mNeighborsPosPlugin=acpl;}
-	void setVisualisationPlugin(ACPlugin* acpl){mVisPlugin=acpl;}
+	void setClustersMethodPlugin(ACPlugin* acpl){mClustersMethodPlugin=dynamic_cast<ACClusterMethodPlugin*> (acpl) ;}
+	void setNeighborsMethodPlugin(ACPlugin* acpl){mNeighborsMethodPlugin=dynamic_cast<ACNeighborMethodPlugin*> (acpl);}
+	void setClustersPositionsPlugin(ACPlugin* acpl){mClustersPosPlugin=dynamic_cast<ACPositionsPlugin*> (acpl);}	
+	void setNeighborsPositionsPlugin(ACPlugin* acpl){mNeighborsPosPlugin=dynamic_cast<ACPositionsPlugin*> (acpl);}
+	void setVisualisationPlugin(ACPlugin* acpl){mNoMethodPosPlugin=dynamic_cast<ACPositionsPlugin*> (acpl);}
 	
 	bool changeClustersMethodPlugin(ACPlugin* acpl);
 	bool changeNeighborsMethodPlugin(ACPlugin* acpl);
@@ -381,11 +381,12 @@ protected:
 	int auto_play;
 	int auto_play_toggle;
 
-	ACPlugin* mClustersMethodPlugin;
-	ACPlugin* mNeighborsMethodPlugin;
-	ACPlugin* mClustersPosPlugin;
-	ACPlugin* mNeighborsPosPlugin;
-	ACPlugin* mVisPlugin;
+	ACClusterMethodPlugin* mClustersMethodPlugin;
+	ACNeighborMethodPlugin* mNeighborsMethodPlugin;
+	
+	ACPositionsPlugin* mClustersPosPlugin;
+	ACPositionsPlugin* mNeighborsPosPlugin;
+	ACPositionsPlugin* mNoMethodPosPlugin;
 	
 	ACUserLog* mUserLog;
 	

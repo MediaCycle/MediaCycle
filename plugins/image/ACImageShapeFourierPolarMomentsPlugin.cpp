@@ -47,7 +47,7 @@ using std::endl;
 ACImageShapeFourierPolarMomentsPlugin::ACImageShapeFourierPolarMomentsPlugin() {
     //vars herited from ACPlugin
     this->mMediaType = MEDIA_TYPE_IMAGE;
-    this->mPluginType = PLUGIN_TYPE_FEATURES;
+    //this->mPluginType = PLUGIN_TYPE_FEATURES;
     this->mName = "Shape FP Moments";
     this->mDescription = "Image Shape Fourier Polar Moments plugin";
     this->mId = "";

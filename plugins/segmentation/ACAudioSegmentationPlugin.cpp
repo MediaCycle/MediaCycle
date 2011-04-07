@@ -45,7 +45,7 @@ using namespace arma;
 ACAudioSegmentationPlugin::ACAudioSegmentationPlugin() {
     //vars herited from ACPlugin
     this->mMediaType = MEDIA_TYPE_AUDIO;
-    this->mPluginType = PLUGIN_TYPE_SEGMENTATION;
+   // this->mPluginType = PLUGIN_TYPE_SEGMENTATION;
     this->mName = "AudioSegmentation";
     this->mDescription = "AudioSegmentation plugin";
     this->mId = "";

@@ -1,7 +1,7 @@
 /**
  * @brief ACVisPluginAudiogarden.h
- * @author Xavier Siebert
- * @date 31/01/2011
+ * @author Thierry Ravet
+ * @date 07/04/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -38,11 +38,10 @@
 #ifndef _ACVISPLUGINAUDIOGARDEN_
 #define _ACVISPLUGINAUDIOGARDEN_
 
-class ACVisPluginAudiogarden : public ACPlugin {
+class ACVisPluginAudiogarden : public ACPositionsPlugin {
 public:
   ACVisPluginAudiogarden();
   ~ACVisPluginAudiogarden();
-  virtual int initialize();
 /*   virtual std::vector<ACMediaFeatures*> calculate(); */
 /*   virtual std::vector<ACMediaFeatures*> calculate(std::string aFileName); */
 /* 	std::vector<ACMediaFeatures*> calculate(ACMediaData* _data){} */
@@ -50,8 +49,7 @@ public:
   virtual void updateNextPositions(ACMediaBrowser* );
 	arma::mat extractDescMatrix(ACMediaLibrary* lib, string featureName);
 	arma::mat extractDescMatrix(ACMediaLibrary* lib, std::vector<string> featureList);
-  virtual int start() {return 0;};
-  virtual int stop() {return 0;};
+
 protected:
 };
 

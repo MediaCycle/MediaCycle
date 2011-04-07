@@ -47,7 +47,7 @@ using std::endl;
 ACImageTextureWaveletsMomentsPlugin::ACImageTextureWaveletsMomentsPlugin() {
     //vars herited from ACPlugin
     this->mMediaType = MEDIA_TYPE_IMAGE;
-    this->mPluginType = PLUGIN_TYPE_FEATURES;
+  //  this->mPluginType = PLUGIN_TYPE_FEATURES;
     this->mName = "Texture Gabor";
     this->mDescription = "Image Texture Moments plugin";
     this->mId = "";

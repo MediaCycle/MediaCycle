@@ -1,8 +1,8 @@
 /**
  * @brief ACVisPlugin2Desc.cpp
- * @author Stéphane Dupont
- * @date 05/11/2010
- * @copyright (c) 2010 – UMONS - Numediart
+ * @author Thierry Ravet
+ * @date 07/04/2011
+ * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -42,7 +42,7 @@ ACVisPlugin2Desc::ACVisPlugin2Desc()
     //vars herited from ACPlugin
 	// XS TODO: are these general enough ? can we use this only for video ??
     this->mMediaType = MEDIA_TYPE_VIDEO;
-    this->mPluginType = PLUGIN_TYPE_CLUSTERS_POSITIONS;//CF or PLUGIN_TYPE_ANYMODE_POSITIONS?
+    //this->mPluginType = PLUGIN_TYPE_CLUSTERS_POSITIONS;//CF or PLUGIN_TYPE_ANYMODE_POSITIONS?
     this->mName = "Vis2Desc";
     this->mDescription = "2 features Visualisation plugin";
     this->mId = "";

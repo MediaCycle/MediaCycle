@@ -44,7 +44,7 @@ using std::endl;
 ACImageColorMomentsPlugin::ACImageColorMomentsPlugin() {
     //vars herited from ACPlugin
     this->mMediaType = MEDIA_TYPE_IMAGE;
-    this->mPluginType = PLUGIN_TYPE_FEATURES;
+  //  this->mPluginType = PLUGIN_TYPE_FEATURES;
     this->mName = "Color Moments";
     this->mDescription = "Image Color Moments plugin";
     this->mId = "";

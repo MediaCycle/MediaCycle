@@ -44,7 +44,7 @@
 // jump_width = number of frames to skip after a step has been detected
 ACBicSegmentationPlugin::ACBicSegmentationPlugin() : lambda(1), sampling_rate(1), Wmin(20), bic_thresh(0.5), jump_width(5), discard_borders(5){
     this->mMediaType = MEDIA_TYPE_ALL;
-    this->mPluginType = PLUGIN_TYPE_SEGMENTATION;
+    //this->mPluginType = PLUGIN_TYPE_SEGMENTATION;
     this->mName = "BicSegmentation";
     this->mDescription = "BicSegmentation plugin";
     this->mId = "";

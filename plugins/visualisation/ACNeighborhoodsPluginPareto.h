@@ -1,7 +1,7 @@
 /**
  * @brief ACNeighborhoodsPluginPareto.h
- * @author Xavier Siebert
- * @date 31/01/2011
+ * @author Thierry Ravet
+ * @date 07/04/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -41,12 +41,10 @@
 #ifndef _ACNEIGHBORHOODSPLUGINPARETO_
 #define _ACNEIGHBORHOODSPLUGINPARETO_
 
-class ACNeighborhoodsPluginPareto : public ACPlugin {
+class ACNeighborhoodsPluginPareto : public ACNeighborMethodPlugin {
 public:
   ACNeighborhoodsPluginPareto();
   ~ACNeighborhoodsPluginPareto();
-	void updateClusters(ACMediaBrowser* ){};//not implemented
-	void updateNextPositions(ACMediaBrowser* ){};//not implemented
 	virtual void updateNeighborhoods(ACMediaBrowser* );
 protected:
 	arma::mat extractDescMatrix(ACMediaBrowser* mediaBrowser, int descId);

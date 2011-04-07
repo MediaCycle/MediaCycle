@@ -42,7 +42,7 @@
 
 #include<iostream>
 
-class ACVideoPlugin : public ACPlugin {
+class ACVideoPlugin : public ACFeaturesPlugin {
 public:
     ACVideoPlugin();
     ~ACVideoPlugin();

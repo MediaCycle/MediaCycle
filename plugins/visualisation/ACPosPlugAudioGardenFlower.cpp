@@ -1,8 +1,8 @@
 /**
  * @brief ACPosPlugAudioGardenFlower.cpp
- * @author Christian Frisson
- * @date 08/12/2010
- * @copyright (c) 2010 – UMONS - Numediart
+ * @author Thierry Ravet
+ * @date 07/04/2011
+ * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -42,7 +42,7 @@ ACPosPlugAudioGardenFlower::ACPosPlugAudioGardenFlower()
     //vars herited from ACPlugin
 	// XS TODO: are these general enough ? can we use this only for audio ??
     this->mMediaType = MEDIA_TYPE_AUDIO;
-    this->mPluginType = PLUGIN_TYPE_CLUSTERS_POSITIONS;
+    //this->mPluginType =    this->mPluginType|PLUGIN_TYPE_CLUSTERS_POSITIONS;
     this->mName = "Flower";
     this->mDescription = "Audiogarden Flower Visualisation plugin";
     this->mId = "";
@@ -53,12 +53,12 @@ ACPosPlugAudioGardenFlower::ACPosPlugAudioGardenFlower()
 ACPosPlugAudioGardenFlower::~ACPosPlugAudioGardenFlower()
 {
 }
-
+/*
 int ACPosPlugAudioGardenFlower::initialize()
 {
     std::cout << "ACPosPlugAudioGardenFlower initialized" << std::endl;
     return 0;
-}
+}*/
 
 
 void ACPosPlugAudioGardenFlower::updateNextPositions(ACMediaBrowser* mediaBrowser){

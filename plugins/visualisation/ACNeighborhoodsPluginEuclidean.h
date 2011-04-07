@@ -1,7 +1,7 @@
 /**
  * @brief ACNeighborhoodsPluginEuclidean.h
- * @author Xavier Siebert
- * @date 31/01/2011
+ * @author Thierry Ravet
+ * @date 07/04/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -40,12 +40,10 @@
 #ifndef _ACNEIGHBORHOODSPLUGINEUCLIDEAN_
 #define _ACNEIGHBORHOODSPLUGINEUCLIDEAN_
 
-class ACNeighborhoodsPluginEuclidean : public ACPlugin {
+class ACNeighborhoodsPluginEuclidean : public ACNeighborMethodPlugin {
 public:
   ACNeighborhoodsPluginEuclidean();
   ~ACNeighborhoodsPluginEuclidean();
-	void updateClusters(ACMediaBrowser* ){};//not implemented
-	void updateNextPositions(ACMediaBrowser* ){};//not implemented
 	virtual void updateNeighborhoods(ACMediaBrowser* );
 protected:
 	void extractDescMatrix(ACMediaBrowser* mediaBrowser, arma::mat &desc_m, arma::rowvec &weight_v);

@@ -110,14 +110,12 @@ class ACPositionsPluginTreeNodeParams {
 		void clear();
 };
 
-class ACPositionsPluginNodeLinkTreeLayout : public ACPlugin {
+class ACPositionsPluginNodeLinkTreeLayout : public ACPositionsPlugin {
 	public:
 		ACPositionsPluginNodeLinkTreeLayout();
 		~ACPositionsPluginNodeLinkTreeLayout(){};
-		virtual int initialize();
-		void updateClusters(ACMediaBrowser* ){};//not implemented
+	//	virtual int initialize();
 		void updateNextPositions(ACMediaBrowser* );
-		void updateNeighborhoods(ACMediaBrowser* ){};//not implemented
 		//void prepareLayout(ACOsgBrowserRenderer*, int start){};
 		//void updateLayout(ACOsgBrowserRenderer*, double ratio){};
 	

@@ -11,7 +11,7 @@ ACEyesWebPlugin::ACEyesWebPlugin()
 {
     //vars herited from ACPlugin
     this->mMediaType = MEDIA_TYPE_VIDEO;
-    this->mPluginType = PLUGIN_TYPE_FEATURES;
+   // this->mPluginType = PLUGIN_TYPE_FEATURES;
     this->mName = "EyesWeb";
     this->mDescription = "EyesWeb plugin";
     this->mId = "";

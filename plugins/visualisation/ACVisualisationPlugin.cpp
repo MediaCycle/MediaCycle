@@ -1,8 +1,8 @@
 /**
  * @brief ACVisualisationPlugin.cpp
- * @author Alexis Moinet
- * @date 18/11/2010
- * @copyright (c) 2010 – UMONS - Numediart
+ * @author Thierry Ravet
+ * @date 07/04/2011
+ * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -42,7 +42,6 @@ ACVisualisationPlugin::ACVisualisationPlugin()
     //vars herited from ACPlugin
 	// XS TODO: are these general enough ? can we use this only for video ??
     this->mMediaType = MEDIA_TYPE_VIDEO;
-    this->mPluginType = PLUGIN_TYPE_CLUSTERS_PIPELINE;
     this->mName = "Visualisation";
     this->mDescription = "Visualisation plugin";
     this->mId = "";
@@ -54,27 +53,11 @@ ACVisualisationPlugin::~ACVisualisationPlugin()
 {
 }
 
-int ACVisualisationPlugin::initialize()
-{
-    std::cout << "ACVisualisationPlugin initialized" << std::endl;
-    return 0;
-}
 
-vector<ACMediaFeatures*> ACVisualisationPlugin::calculate(){
-	vector<ACMediaFeatures*> raf;
-	raf.resize(0);
-	return raf;
-}
-
-vector<ACMediaFeatures*> ACVisualisationPlugin::calculate(std::string aFileName) {
-	vector<ACMediaFeatures*> raf;
-	raf.resize(0);
-	return raf;
-}
-
+/*
 void ACVisualisationPlugin::updateClusters(ACMediaBrowser* mediaBrowser){
 	this->updateNextPositions(mediaBrowser);
-}
+}*/
 
 void ACVisualisationPlugin::updateNextPositions(ACMediaBrowser* mediaBrowser){
   int itemClicked, labelClicked;

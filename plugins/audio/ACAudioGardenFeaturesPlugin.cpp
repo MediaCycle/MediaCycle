@@ -43,7 +43,7 @@
 ACAudioGardenFeaturesPlugin::ACAudioGardenFeaturesPlugin() {
     //vars herited from ACPlugin
     this->mMediaType = MEDIA_TYPE_AUDIO;
-    this->mPluginType = PLUGIN_TYPE_FEATURES;
+    //this->mPluginType = PLUGIN_TYPE_FEATURES;
     this->mName = "AudioGardenFeatures";
     this->mDescription = "AudioGarden plugin";
     this->mId = "";

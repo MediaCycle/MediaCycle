@@ -1,7 +1,7 @@
 /**
  * @brief ACVisPluginPCA.h
- * @author Xavier Siebert
- * @date 31/01/2011
+ * @author Thierry Ravet
+ * @date 07/04/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -38,20 +38,15 @@
 #ifndef _ACVISPLUGINPCA_
 #define _ACVISPLUGINPCA_
 
-class ACVisPluginPCA : public ACPlugin {
+class ACVisPluginPCA : public ACPositionsPlugin {
 public:
   ACVisPluginPCA();
   ~ACVisPluginPCA();
-  virtual int initialize();
-  virtual std::vector<ACMediaFeatures*> calculate();
-  virtual std::vector<ACMediaFeatures*> calculate(std::string aFileName);
-	std::vector<ACMediaFeatures*> calculate(ACMediaData* _data){}
 
   virtual void updateClusters(ACMediaBrowser* );
   virtual void updateNextPositions(ACMediaBrowser* );
 	void extractDescMatrix(ACMediaBrowser* mediaBrowser, arma::mat& desc_m, std::vector<std::string> &featureNames);
-  virtual int start() {return 0;};
-  virtual int stop() {return 0;};
+
 protected:
 };
 

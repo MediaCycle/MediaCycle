@@ -41,7 +41,7 @@
 
 #include <iostream>
 
-class ACHuMomentsVideoPlugin : public ACPlugin {
+class ACHuMomentsVideoPlugin : public ACFeaturesPlugin {
 public:
     ACHuMomentsVideoPlugin();
     ~ACHuMomentsVideoPlugin();

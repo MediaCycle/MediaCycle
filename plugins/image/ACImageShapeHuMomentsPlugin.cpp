@@ -47,7 +47,7 @@ using std::endl;
 ACImageShapeHuMomentsPlugin::ACImageShapeHuMomentsPlugin() {
     //vars herited from ACPlugin
     this->mMediaType = MEDIA_TYPE_IMAGE;
-    this->mPluginType = PLUGIN_TYPE_FEATURES;
+    //this->mPluginType = PLUGIN_TYPE_FEATURES;
     this->mName = "Shape Hu Moments";
     this->mDescription = "Image Shape Hu Moments plugin";
     this->mId = "";

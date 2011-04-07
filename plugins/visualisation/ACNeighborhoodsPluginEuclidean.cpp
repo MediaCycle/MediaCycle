@@ -1,7 +1,7 @@
 /**
  * @brief ACNeighborhoodsPluginEuclidean.cpp
- * @author Xavier Siebert
- * @date 31/01/2011
+ * @author Thierry Ravet
+ * @date 07/04/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -37,7 +37,7 @@ using namespace std;
 
 ACNeighborhoodsPluginEuclidean::ACNeighborhoodsPluginEuclidean() {
     this->mMediaType = MEDIA_TYPE_MIXED; // ALL
-    this->mPluginType = PLUGIN_TYPE_NEIGHBORS_METHOD;
+    //this->mPluginType = PLUGIN_TYPE_NEIGHBORS_METHOD;
     this->mName = "EuclideanNeighborhoods";
     this->mDescription = "Plugin for the computation of Euclidean neighborhoods";
     this->mId = "";

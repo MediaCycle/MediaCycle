@@ -505,7 +505,7 @@ int ACMedia::import(std::string _path, int _mid, ACPluginManager *acpl, bool _sa
 	//compute features with available plugins
 	// XS TODO config file
 	if (acpl) {
-		for (int i=0;i<acpl->getSize();i++) {
+		/*for (int i=0;i<acpl->getSize();i++) {
 			for (int j=0;j<acpl->getPluginLibrary(i)->getSize();j++) {
 				if (acpl->getPluginLibrary(i)->getPlugin(j)->getMediaType() == this->getType()
 					&& acpl->getPluginLibrary(i)->getPlugin(j)->getPluginType() == PLUGIN_TYPE_FEATURES) {
@@ -540,7 +540,12 @@ int ACMedia::import(std::string _path, int _mid, ACPluginManager *acpl, bool _sa
 				}
 			}
 		}
-		std::cout << "Features calculated" << std::endl;
+		 std::cout << "Features calculated" << std::endl;*/
+		
+		//TR :new implementation to calculte the feature		
+		this->features_vectors=acpl->getFeaturesPlugins()->calculate(data, this, _save_timed_feat);
+		if (this->features_vectors.size()>0)
+			import_ok = 1;
 	}
 	else {
 		cerr << "<ACMedia::import> no features imported -- no plugin manager for media number: " << _mid << endl;

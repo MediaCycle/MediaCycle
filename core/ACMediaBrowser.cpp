@@ -109,7 +109,7 @@ ACMediaBrowser::ACMediaBrowser() {
 	mNeighborsMethodPlugin = 0;
 	mClustersPosPlugin = 0;
 	mNeighborsPosPlugin = 0;
-	mVisPlugin = 0;
+	mNoMethodPosPlugin = 0;
 	
 	mUserLog = new ACUserLog();
 	
@@ -564,7 +564,7 @@ void ACMediaBrowser::libraryContentChanged(int needsCluster) {
 	}
 	
 	// XS TODO randomize positions only at the beginning...
-	if ( mMode == AC_MODE_CLUSTERS && (librarySize>prevLibrarySize) ) {//(mVisPlugin==0 && mPosPlugin==0) {	
+	if ( mMode == AC_MODE_CLUSTERS && (librarySize>prevLibrarySize) ) {//(mNoMethodPosPlugin==0 && mPosPlugin==0) {	
 		double t = getTime();
 		ACPoint p;
 		for (ACMediaNodes::iterator node = mLoopAttributes.begin()+prevLibrarySize; node != mLoopAttributes.end(); ++node){
@@ -798,7 +798,7 @@ void ACMediaBrowser::initClusterCenters(){
 //CF do we need an extra level of tests along the browsing mode (render inactive during AC_MODE_NEIGHBORS?)
 void ACMediaBrowser::updateClusters(bool animate, int needsCluster) {
 	
-	if (mClustersMethodPlugin==0 && mVisPlugin==0){//CF no plugin set, factory settings
+	if (mClustersMethodPlugin==0 && mNoMethodPosPlugin==0){//CF no plugin set, factory settings
 		std::cout << "updateNextPositions : Cluster KMeans (default)" << std::endl;
 		updateClustersKMeans(animate, needsCluster);
 	}	
@@ -807,9 +807,9 @@ void ACMediaBrowser::updateClusters(bool animate, int needsCluster) {
 		if (mClustersMethodPlugin) { //CF priority on the Clusters Plugin
 			mClustersMethodPlugin->updateClusters(this);
 		}
-		else if (mVisPlugin) {
-			if ( mVisPlugin->getPluginType() == PLUGIN_TYPE_CLUSTERS_PIPELINE || mVisPlugin->getPluginType() == PLUGIN_TYPE_ALLMODES_PIPELINE)
-				mVisPlugin->updateClusters(this);
+		else if (mNoMethodPosPlugin) {
+			if ( mNoMethodPosPlugin->getPluginType() == PLUGIN_TYPE_CLUSTERS_PIPELINE || mNoMethodPosPlugin->getPluginType() == PLUGIN_TYPE_ALLMODES_PIPELINE)
+			{}	//mNoMethodPosPlugin->updateClusters(this);
 			else
 				animate=false;//CF trick to end ACMediaBrowser::updateClusters
 		}
@@ -826,16 +826,16 @@ void ACMediaBrowser::updateClusters(bool animate, int needsCluster) {
 
 //CF do we need an extra level of tests along the browsing mode (render inactive during AC_MODE_CLUSTERS?)
 void ACMediaBrowser::updateNeighborhoods(){
-	if (mNeighborsMethodPlugin==0 && mVisPlugin==0)
+	if (mNeighborsMethodPlugin==0 && mNoMethodPosPlugin==0)
 		std::cout << "No neighboorhood method plugin set" << std::endl; // CF: waiting for a factory one!
 	else{
 		if (mNeighborsMethodPlugin){
 			std::cout << "UpdateNeighborhoods : Plugin" << std::endl;
 			mNeighborsMethodPlugin->updateNeighborhoods(this);
 		}
-		else if (mVisPlugin){
-			if ( mVisPlugin->getPluginType() == PLUGIN_TYPE_NEIGHBORS_PIPELINE || mVisPlugin->getPluginType() == PLUGIN_TYPE_ALLMODES_PIPELINE)
-				mVisPlugin->updateNeighborhoods(this);
+		else if (mNoMethodPosPlugin){
+			if ( mNoMethodPosPlugin->getPluginType() == PLUGIN_TYPE_NEIGHBORS_PIPELINE || mNoMethodPosPlugin->getPluginType() == PLUGIN_TYPE_ALLMODES_PIPELINE)
+			{}//	mNoMethodPosPlugin->updateNeighborhoods(this);
 		}
 	}
 }
@@ -845,7 +845,7 @@ void ACMediaBrowser::updateNextPositions() {
 	
 	switch ( mMode ){
 		case AC_MODE_CLUSTERS:
-			if (mClustersPosPlugin==0 && mVisPlugin==0) {
+			if (mClustersPosPlugin==0 && mNoMethodPosPlugin==0) {
 				std::cout << "updateNextPositions : Cluster Propeller (default)" << std::endl;
 				updateNextPositionsPropeller();
 				// XS 151110
@@ -858,12 +858,12 @@ void ACMediaBrowser::updateNextPositions() {
 				}	
 				else{	
 					std::cout << "updateNextPositions : Visualisation Plugin" << std::endl;
-					mVisPlugin->updateNextPositions(this);
+					mNoMethodPosPlugin->updateNextPositions(this);
 				}	
 			}
 			break;
 		case AC_MODE_NEIGHBORS:
-			if (mNeighborsPosPlugin==0 && mVisPlugin==0)
+			if (mNeighborsPosPlugin==0 && mNoMethodPosPlugin==0)
 				std::cout << "No neighboorhood positions plugin set" << std::endl; // CF: waiting for a factory one!
 			else{
 				if (mNeighborsPosPlugin){
@@ -872,7 +872,7 @@ void ACMediaBrowser::updateNextPositions() {
 				}	
 				else{	
 					std::cout << "updateNextPositions : Visualisation Plugin" << std::endl;
-					mVisPlugin->updateNextPositions(this);
+					mNoMethodPosPlugin->updateNextPositions(this);
 				}	
 			}
 			break;

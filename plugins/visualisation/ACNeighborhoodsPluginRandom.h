@@ -10,12 +10,10 @@
 #ifndef _ACNEIGHBORHOODSPLUGINRANDOM_
 #define _ACNEIGHBORHOODSPLUGINRANDOM_
 
-class ACNeighborhoodsPluginRandom : public ACPlugin {
+class ACNeighborhoodsPluginRandom : public ACNeighborMethodPlugin {
 public:
   ACNeighborhoodsPluginRandom();
   ~ACNeighborhoodsPluginRandom();
-	void updateClusters(ACMediaBrowser* ){};//not implemented
-	void updateNextPositions(ACMediaBrowser* ){};//not implemented
 	virtual void updateNeighborhoods(ACMediaBrowser* );
 protected:
 };

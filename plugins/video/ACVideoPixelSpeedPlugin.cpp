@@ -46,7 +46,7 @@ using std::cerr;
 ACVideoPixelSpeedPlugin::ACVideoPixelSpeedPlugin() {
     //vars herited from ACPlugin
     this->mMediaType = MEDIA_TYPE_VIDEO;
-    this->mPluginType = PLUGIN_TYPE_FEATURES;
+    //this->mPluginType = PLUGIN_TYPE_FEATURES;
     this->mName = "Video Pixel Speed";
     this->mDescription = "Pixel_Speed";
     this->mId = "";

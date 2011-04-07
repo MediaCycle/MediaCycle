@@ -42,7 +42,7 @@
  
 ACSelfSimSegmentationPlugin::ACSelfSimSegmentationPlugin() : L(8), SelfSimThresh(0.8){
     this->mMediaType = MEDIA_TYPE_ALL;
-    this->mPluginType = PLUGIN_TYPE_SEGMENTATION;
+   // this->mPluginType = PLUGIN_TYPE_SEGMENTATION;
     this->mName = "SelfSimSegmentation";
     this->mDescription = "SelfSimSegmentation plugin";
     this->mId = "";

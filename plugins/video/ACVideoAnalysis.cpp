@@ -51,10 +51,6 @@
 #include <sstream>
 #include <cmath> // for fabs
 
-#ifndef APPLE_LEOPARD
-#include "ACFFmpegToOpenCV.h"
-#endif
-
 #include <iomanip>
 using namespace std;
 
@@ -203,9 +199,7 @@ IplImage* ACVideoAnalysis::getNextFrame(){
 	// returns a pointer to the next frame of the video (called capture in OpenCV)
 	// this is done in 2 steps in the OpenCV jargon: cvGrabFrame + cvRetrieveFrame
 	// keeps an "independent" (non-OpenCV) record of the frame number (frame_counter)
-	#ifdef USE_DEBUG
-	std::cout << "ACVideoAnalysis::getNextFrame " << cvGetCaptureProperty(capture, CV_CAP_PROP_POS_FRAMES) << " / " << cvGetCaptureProperty(capture,  CV_CAP_PROP_FRAME_COUNT) << "(fps " << cvGetCaptureProperty(capture, CV_CAP_PROP_FPS) << ")" << std::endl;
-	#endif
+
 	if(!cvGrabFrame(capture)){      // attemps to capture a frame
 		cerr << "<ACVideoAnalysis::getNextFrame> Could not find frame..." << endl;
 		return 0;
@@ -1378,21 +1372,8 @@ void ACVideoAnalysis::computeGlobalPixelSpeed() {
 	CvScalar sum_diff_frames ;
 	float speed = 0.0;
 	
-	#ifdef APPLE_LEOPARD // assuming this is the only OpenCV QuickTime working installation
 	// initial frame
 	tmp_frame = this->getNextFrame();
-	#else
-	ACFFmpegToOpenCV file_cap;
-	int i = 0;
-	file_cap.init(file_name.c_str());
-	tmp_frame = cvCreateImage(cvSize(file_cap.nCols,file_cap.nRows),IPL_DEPTH_8U,3);
-	file_cap.getframe(&tmp_frame);
-	#endif
-
-	#if defined(USE_DEBUG) && defined(APPLE_LEOPARD)
-	std::cout << "ACVideoAnalysis::computeGlobalPixelSpeed " << cvGetCaptureProperty(capture, CV_CAP_PROP_POS_FRAMES) << " / " << cvGetCaptureProperty(capture,  CV_CAP_PROP_FRAME_COUNT) << "(fps " << cvGetCaptureProperty(capture, CV_CAP_PROP_FPS) << ")" << std::endl;
-	#endif
-
 	global_pixel_speeds.push_back(speed); // so that the global_pixel_speeds vector has the same lenght as the time_stamps
 	
 	frame = cvCreateImage (cvSize (width, height), IPL_DEPTH_32S, 3);
@@ -1408,16 +1389,7 @@ void ACVideoAnalysis::computeGlobalPixelSpeed() {
 	
 	for(unsigned int i = 0; i < nframes-1; i++){ 
 		cvConvert (tmp_frame, previous_frame);
-		#ifdef APPLE_LEOPARD
 		tmp_frame = this->getNextFrame();
-		#else
- 		file_cap.getframe(&tmp_frame);
-		#endif
-
-		#if defined(USE_DEBUG) && defined(APPLE_LEOPARD)
-		std::cout << "ACVideoAnalysis::computeGlobalPixelSpeed " << cvGetCaptureProperty(capture, CV_CAP_PROP_POS_FRAMES) << " / " << cvGetCaptureProperty(capture,  CV_CAP_PROP_FRAME_COUNT) << "(fps " << cvGetCaptureProperty(capture, CV_CAP_PROP_FPS) << ")" << std::endl;
-		#endif
-
 		cvConvert (tmp_frame, frame);
 		cvAbsDiff (frame, previous_frame, diff_frames);
 		sum_diff_frames = cvSum (diff_frames);
@@ -1452,10 +1424,6 @@ void ACVideoAnalysis::computeGlobalPixelSpeed() {
 	cvDestroyWindow ("Input");
 	cvDestroyWindow ("Substraction");
 #endif //VISUAL_CHECK
-
-	#ifndef APPLE_LEOPARD
- 	file_cap.closeit();
-	#endif
 }
 
 

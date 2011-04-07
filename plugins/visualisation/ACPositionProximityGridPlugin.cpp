@@ -46,7 +46,7 @@ static double getTime()
 
 ACPositionProximityGridPlugin::ACPositionProximityGridPlugin() {
     this->mMediaType = MEDIA_TYPE_MIXED; // ALL
-    this->mPluginType = PLUGIN_TYPE_NONE;
+   // this->mPluginType = PLUGIN_TYPE_NONE;
     this->mName = "Proximity Grid";
     this->mDescription = "Plugin for Positioning items on a grid";
     this->mId = "";

@@ -1,8 +1,8 @@
 /**
  * @brief ACVisPluginAudiogarden.cpp
- * @author Christian Frisson
- * @date 08/12/2010
- * @copyright (c) 2010 – UMONS - Numediart
+ * @author Thierry Ravet
+ * @date 07/04/2011
+ * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -42,7 +42,7 @@ ACVisPluginAudiogarden::ACVisPluginAudiogarden()
     //vars herited from ACPlugin
 	// XS TODO: are these general enough ? can we use this only for audio ??
     this->mMediaType = MEDIA_TYPE_AUDIO;
-    this->mPluginType = PLUGIN_TYPE_CLUSTERS_POSITIONS;
+    //this->mPluginType = PLUGIN_TYPE_CLUSTERS_POSITIONS;
     this->mName = "Gramophone";
     this->mDescription = "Audiogarden Visualisation plugin";
     this->mId = "";
@@ -54,11 +54,6 @@ ACVisPluginAudiogarden::~ACVisPluginAudiogarden()
 {
 }
 
-int ACVisPluginAudiogarden::initialize()
-{
-    std::cout << "ACVisPluginAudiogarden initialized" << std::endl;
-    return 0;
-}
 
 
 void ACVisPluginAudiogarden::updateNextPositions(ACMediaBrowser* mediaBrowser){

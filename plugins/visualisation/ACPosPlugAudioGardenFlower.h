@@ -1,7 +1,7 @@
 /**
  * @brief ACPosPlugAudioGardenFlower.h
- * @author Xavier Siebert
- * @date 31/01/2011
+ * @author Thierry Ravet
+ * @date 07/04/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -38,22 +38,20 @@
 #ifndef _ACPOSPLUGAUDIOGARDENFLOWER_
 #define _ACPOSPLUGAUDIOGARDENFLOWER_
 
-class ACPosPlugAudioGardenFlower : public ACPlugin {
+class ACPosPlugAudioGardenFlower : public ACPositionsPlugin {
 public:
   ACPosPlugAudioGardenFlower();
   ~ACPosPlugAudioGardenFlower();
-  virtual int initialize();
+//  virtual int initialize();
 /*   virtual std::vector<ACMediaFeatures*> calculate(); */
 /*   virtual std::vector<ACMediaFeatures*> calculate(std::string aFileName); */
 /* 	std::vector<ACMediaFeatures*> calculate(ACMediaData* _data){} */
 /*   virtual void updateClusters(ACMediaBrowser* ); */
   virtual void updateNextPositions(ACMediaBrowser* );
+
+protected:
 	arma::mat extractDescMatrix(ACMediaLibrary* lib, std::vector<std::string> featureList, std::vector<long> mediaIds);
 	arma::mat extractDescMatrix(ACMediaLibrary* lib, std::string featureName, std::vector<long> mediaIds);
-
-  virtual int start() {return 0;};
-  virtual int stop() {return 0;};
-protected:
 };
 
 #endif	/* _ACPOSPLUGAUDIOGARDENFLOWER_ */

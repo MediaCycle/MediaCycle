@@ -1,8 +1,8 @@
 /**
  * @brief ACVisPluginPCA.cpp
- * @author Stéphane Dupont
- * @date 05/11/2010
- * @copyright (c) 2010 – UMONS - Numediart
+ * @author Thierry Ravet
+ * @date 07/04/2011
+ * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -42,7 +42,6 @@ ACVisPluginPCA::ACVisPluginPCA()
     //vars herited from ACPlugin
 	// XS TODO: are these general enough ? can we use this only for video ??
     this->mMediaType = MEDIA_TYPE_VIDEO;
-    this->mPluginType = PLUGIN_TYPE_CLUSTERS_PIPELINE;
     this->mName = "PCAVis";
     this->mDescription = "PCA Visualisation plugin";
     this->mId = "";
@@ -52,24 +51,6 @@ ACVisPluginPCA::ACVisPluginPCA()
 
 ACVisPluginPCA::~ACVisPluginPCA()
 {
-}
-
-int ACVisPluginPCA::initialize()
-{
-    std::cout << "ACVisPluginPCA initialized" << std::endl;
-    return 0;
-}
-
-vector<ACMediaFeatures*> ACVisPluginPCA::calculate(){
-	vector<ACMediaFeatures*> raf;
-	raf.resize(0);
-	return raf;
-}
-
-vector<ACMediaFeatures*> ACVisPluginPCA::calculate(std::string aFileName) {
-	vector<ACMediaFeatures*> raf;
-	raf.resize(0);
-	return raf;
 }
 
 void ACVisPluginPCA::updateClusters(ACMediaBrowser* mediaBrowser){

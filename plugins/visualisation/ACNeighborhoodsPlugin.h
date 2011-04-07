@@ -10,12 +10,10 @@
 #ifndef _ACNEIGHBORHOODSPLUGIN_
 #define _ACNEIGHBORHOODSPLUGIN_
 
-class ACNeighborhoodsPlugin : public ACPlugin {
+class ACNeighborhoodsPlugin : public ACNeighborMethodPlugin {
 public:
   ACNeighborhoodsPlugin();
   ~ACNeighborhoodsPlugin();
-	void updateClusters(ACMediaBrowser* ){};//not implemented
-	void updateNextPositions(ACMediaBrowser* ){};//not implemented
 	virtual void updateNeighborhoods(ACMediaBrowser* );
 protected:
 };

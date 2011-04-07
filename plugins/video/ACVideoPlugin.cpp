@@ -47,7 +47,7 @@ using std::cerr;
 ACVideoPlugin::ACVideoPlugin() {
     //vars herited from ACPlugin
     this->mMediaType = MEDIA_TYPE_VIDEO;
-    this->mPluginType = PLUGIN_TYPE_FEATURES;
+    //this->mPluginType = PLUGIN_TYPE_FEATURES;
     this->mName = "Video";
     this->mDescription = "Video plugin";
     this->mId = "";

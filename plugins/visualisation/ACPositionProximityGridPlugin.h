@@ -38,13 +38,11 @@
 #ifndef _ACPOSITIONSPROXIMITYGRID_
 #define _ACPOSITIONSPROXIMITYGRID_
 
-class ACPositionProximityGridPlugin : public ACPlugin {
+class ACPositionProximityGridPlugin : public ACPositionsPlugin {
 public:
 	ACPositionProximityGridPlugin();
 	~ACPositionProximityGridPlugin();
-	void updateClusters(ACMediaBrowser* ){};//not implemented
 	void updateNextPositions(ACMediaBrowser* );
-	void updateNeighborhoods(ACMediaBrowser* ){};//not implemented
 protected:
 	ACMediaBrowser* mediaBrowser;
 private:

@@ -40,7 +40,7 @@
 
 #include<iostream>
 
-class ACVampDemoPlugin : public ACPlugin {
+class ACVampDemoPlugin : public ACFeaturesPlugin {
 public:
 	ACVampDemoPlugin();
 	~ACVampDemoPlugin();
@@ -50,8 +50,8 @@ public:
 	virtual int stop(){return 1;};
 
 	virtual std::vector<ACMediaFeatures*> calculate(){};
-	virtual std::vector<ACMediaFeatures*> calculate(std::string aFileName){};
-	virtual std::vector<ACMediaFeatures*> calculate(ACMediaData* _data, ACMedia*);
+	virtual std::vector<ACMediaFeatures*> calculate(std::string aFileName, bool _save_timed_feat=false){};
+	virtual std::vector<ACMediaFeatures*> calculate(ACMediaData* _data, ACMedia*, bool _save_timed_feat=false);
 	
 private:
 };

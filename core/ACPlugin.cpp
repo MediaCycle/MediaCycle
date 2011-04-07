@@ -44,7 +44,7 @@ ACPlugin::ACPlugin()
 	this->mPluginType=PLUGIN_TYPE_NONE;
 }
 
-bool ACPlugin::isPlugintype(ACPluginType pType)
+bool ACPlugin::implementsPluginType(ACPluginType pType)
 {
 	return (mPluginType&pType!=0);
 }
@@ -61,4 +61,25 @@ ACSegmentationPlugin::ACSegmentationPlugin()
 	cout<<"ACPlugin segmentation Constructor\n";
 	this->mPluginType=mPluginType|PLUGIN_TYPE_SEGMENTATION;
 }
+ACClusterMethodPlugin::ACClusterMethodPlugin()
+{
+	cout<<"ACPlugin Cluster Constructor\n";
+	this->mPluginType=mPluginType|PLUGIN_TYPE_CLUSTERS_METHOD;
+	
+	
+}
+
+ACNeighborMethodPlugin::ACNeighborMethodPlugin() {
+	
+	this->mPluginType=mPluginType|PLUGIN_TYPE_NEIGHBORS_METHOD;
+	
+    //local vars
+}
+ACPositionsPlugin::ACPositionsPlugin() {
+	
+	this->mPluginType=mPluginType|PLUGIN_TYPE_POSITIONS;
+	
+    //local vars
+}
+
 
