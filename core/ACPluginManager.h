@@ -91,7 +91,7 @@ public:
 	int add(ACPlugin *);
 	int add(ACPluginLibrary *);
 	int update(std::vector<ACPluginLibrary *> PluginLibrary);
-	vector<string> getName(ACMediaType MediaType);
+	std::vector<std::string> getName(ACMediaType MediaType);
 	int getSize(ACMediaType MediaType);
 	void log();
 	
