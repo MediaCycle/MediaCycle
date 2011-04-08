@@ -313,7 +313,7 @@ void ACImageCycleOsgQt::configureCheckBoxes(){
 	if (acpl) {
 		for (int i=0;i<acpl->getSize();i++) {
 			for (int j=0;j<acpl->getPluginLibrary(i)->getSize();j++) {
-				if (acpl->getPluginLibrary(i)->getPlugin(j)->getPluginType() == PLUGIN_TYPE_FEATURES && acpl->getPluginLibrary(i)->getPlugin(j)->getMediaType() == MEDIA_TYPE_IMAGE) {
+				if (acpl->getPluginLibrary(i)->getPlugin(j)->implementsPluginType(PLUGIN_TYPE_FEATURES) && acpl->getPluginLibrary(i)->getPlugin(j)->getMediaType() == MEDIA_TYPE_IMAGE) {
 					QString s(acpl->getPluginLibrary(i)->getPlugin(j)->getName().c_str());
 					QListWidgetItem * item = new QListWidgetItem(s,ui.featuresListWidget);
 					item->setCheckState (Qt::Unchecked);

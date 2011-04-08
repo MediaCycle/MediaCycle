@@ -754,7 +754,7 @@ int MediaCycle::readXMLConfigFilePlugins(TiXmlHandle _rootHandle) {
 		//			for (int j=0;j<pluginManager->getPluginLibrary(i)->getSize();j++) {
 		//				
 		//				if (pluginManager->getPluginLibrary(i)->getPlugin(j)->getMediaType() == this->getMediaType()
-		//					&& pluginManager->getPluginLibrary(i)->getPlugin(j)->getPluginType() == PLUGIN_TYPE_FEATURES) {
+		//					&& pluginManager->getPluginLibrary(i)->getPlugin(j)->implementsPluginType(PLUGIN_TYPE_FEATURES)) {
 		//					TiXmlElement* MC_e_features_plugin = new TiXmlElement( "FeaturesPlugin" );  
 		//					MC_e_features_plugin_manager->LinkEndChild( MC_e_features_plugin );  
 		//					std::stringstream tmp_p;

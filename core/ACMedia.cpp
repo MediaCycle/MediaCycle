@@ -508,7 +508,7 @@ int ACMedia::import(std::string _path, int _mid, ACPluginManager *acpl, bool _sa
 		/*for (int i=0;i<acpl->getSize();i++) {
 			for (int j=0;j<acpl->getPluginLibrary(i)->getSize();j++) {
 				if (acpl->getPluginLibrary(i)->getPlugin(j)->getMediaType() == this->getType()
-					&& acpl->getPluginLibrary(i)->getPlugin(j)->getPluginType() == PLUGIN_TYPE_FEATURES) {
+					&& acpl->getPluginLibrary(i)->getPlugin(j)->implementsPluginType(PLUGIN_TYPE_FEATURES)) {
 					
 					cout << "Computing features using plugin : " << acpl->getPluginLibrary(i)->getPlugin(j)->getName() << std::endl;
 					//plugin->start();
@@ -592,7 +592,7 @@ int ACMedia::segment(ACPluginManager *acpl, bool _saved_timed_features ) {
 		for (int i=0;i<acpl->getSize();i++) {
 			for (int j=0;j<acpl->getPluginLibrary(i)->getSize();j++) {
 				if ( acpl->getPluginLibrary(i)->getPlugin(j)->getMediaType() == this->getType()){
-					if ( acpl->getPluginLibrary(i)->getPlugin(j)->getPluginType() == PLUGIN_TYPE_FEATURES) {
+					if ( acpl->getPluginLibrary(i)->getPlugin(j)->implementsPluginType(PLUGIN_TYPE_FEATURES)) {
 						cout << "Collecting saved features using plugin : " << acpl->getPluginLibrary(i)->getPlugin(j)->getName() << std::endl;
 
 						features_plugins_count ++;
@@ -629,7 +629,7 @@ int ACMedia::segment(ACPluginManager *acpl, bool _saved_timed_features ) {
 		// XS TODO: check that ft_from_disk is not empty
 		for (int i=0;i<acpl->getSize();i++) {
 			for (int j=0;j<acpl->getPluginLibrary(i)->getSize();j++) {
-				if (acpl->getPluginLibrary(i)->getPlugin(j)->getPluginType() == PLUGIN_TYPE_SEGMENTATION) {
+				if (acpl->getPluginLibrary(i)->getPlugin(j)->implementsPluginType(PLUGIN_TYPE_SEGMENTATION)) {
 					cout << "Segmenting features using plugin : " << acpl->getPluginLibrary(i)->getPlugin(j)->getName() << std::endl;
 
 					segmentation_plugins_count ++;
@@ -655,7 +655,7 @@ int ACMedia::segment(ACPluginManager *acpl, bool _saved_timed_features ) {
 	else {
 		for (int i=0;i<acpl->getSize();i++) {
 			for (int j=0;j<acpl->getPluginLibrary(i)->getSize();j++) {
-				if (acpl->getPluginLibrary(i)->getPlugin(j)->getPluginType() == PLUGIN_TYPE_SEGMENTATION) {
+				if (acpl->getPluginLibrary(i)->getPlugin(j)->implementsPluginType(PLUGIN_TYPE_SEGMENTATION)) {
 					segmentation_plugins_count ++;
 					cout << "Segmenting media using plugin : " << acpl->getPluginLibrary(i)->getPlugin(j)->getName() << std::endl;
 					vector<ACMedia*> afv =dynamic_cast<ACSegmentationPlugin*>( acpl->getPluginLibrary(i)->getPlugin(j))->segment(data, this);

@@ -38,7 +38,7 @@
 #ifndef _ACPOSITIONSPROXIMITYGRID_
 #define _ACPOSITIONSPROXIMITYGRID_
 
-class ACPositionProximityGridPlugin : public ACPositionsPlugin {
+class ACPositionProximityGridPlugin : public ACNoMethodPositionsPlugin {
 public:
 	ACPositionProximityGridPlugin();
 	~ACPositionProximityGridPlugin();

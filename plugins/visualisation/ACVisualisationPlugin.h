@@ -1,7 +1,7 @@
 /**
  * @brief ACVisualisationPlugin.h
  * @author Thierry Ravet
- * @date 07/04/2011
+ * @date 08/04/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -38,7 +38,7 @@
 #ifndef _ACVISUALISATIONPLUGIN_
 #define _ACVISUALISATIONPLUGIN_
 
-class ACVisualisationPlugin : public ACPositionsPlugin {
+class ACVisualisationPlugin : public ACNoMethodPositionsPlugin {
 public:
   ACVisualisationPlugin();
   ~ACVisualisationPlugin();

@@ -175,7 +175,7 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 			for (int i=0;i<acpl->getSize();i++) {
 				for (int j=0;j<acpl->getPluginLibrary(i)->getSize();j++) {
 					//if (acpl->getPluginLibrary(i)->getPlugin(j)->getMediaType() == MEDIA_TYPE_AUDIO) {
-					if (acpl->getPluginLibrary(i)->getPlugin(j)->getPluginType() == PLUGIN_TYPE_CLUSTERS_METHOD) {
+					if (acpl->getPluginLibrary(i)->getPlugin(j)->implementsPluginType(PLUGIN_TYPE_CLUSTERS_METHOD)) {
 						//CF on the first detected Clusters Method plugin
 						if ([mClustersMethodPopUpButton numberOfItems] == 1 && [[mClustersMethodPopUpButton titleOfSelectedItem] isEqualToString:@"KMeans (default)"]) {
 							[mClustersMethodPopUpButton setEnabled: YES];
@@ -184,7 +184,7 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 						[mClustersMethodPopUpButton addItemWithTitle:[NSString stringWithCString:acpl->getPluginLibrary(i)->getPlugin(j)->getName().c_str()]];
 
 					}
-					else if (acpl->getPluginLibrary(i)->getPlugin(j)->getPluginType() == PLUGIN_TYPE_CLUSTERS_POSITIONS) {
+					else if (acpl->getPluginLibrary(i)->getPlugin(j)->implementsPluginType(PLUGIN_TYPE_CLUSTERS_POSITIONS)) {
 						//CF on the first detected Clusters Positions plugin
 						if ([mClustersPositionsPopUpButton numberOfItems] == 1 && [[mClustersPositionsPopUpButton titleOfSelectedItem] isEqualToString:@"Propeller (default)"]) {
 							[mClustersPositionsPopUpButton setEnabled: YES];
@@ -193,7 +193,7 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 						[mClustersPositionsPopUpButton addItemWithTitle:[NSString stringWithCString:acpl->getPluginLibrary(i)->getPlugin(j)->getName().c_str()]];
 
 					}
-					else if (acpl->getPluginLibrary(i)->getPlugin(j)->getPluginType() == PLUGIN_TYPE_NEIGHBORS_METHOD) {
+					else if (acpl->getPluginLibrary(i)->getPlugin(j)->implementsPluginType(PLUGIN_TYPE_NEIGHBORS_METHOD)) {
 						//CF on the first detected Neighbors Method plugin
 						if ([mNeighborsMethodPopUpButton numberOfItems] == 1 && [[mNeighborsMethodPopUpButton titleOfSelectedItem] isEqualToString:@"None available"]) {
 							[mNeighborsMethodPopUpButton setEnabled: YES];
@@ -203,7 +203,7 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 						}	
 						[mNeighborsMethodPopUpButton addItemWithTitle:[NSString stringWithCString:acpl->getPluginLibrary(i)->getPlugin(j)->getName().c_str()]];
 					}
-					else if (acpl->getPluginLibrary(i)->getPlugin(j)->getPluginType() == PLUGIN_TYPE_NEIGHBORS_POSITIONS) {
+					else if (acpl->getPluginLibrary(i)->getPlugin(j)->implementsPluginType(PLUGIN_TYPE_NEIGHBORS_POSITIONS)) {
 						//CF on the first detected Neighbors Positions plugin
 						if ([mNeighborsPositionsPopUpButton numberOfItems] == 1 && [[mNeighborsPositionsPopUpButton titleOfSelectedItem] isEqualToString:@"None available"]) {
 							[mNeighborsPositionsPopUpButton setEnabled: YES];

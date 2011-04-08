@@ -277,9 +277,9 @@ public:
 
 	void setClustersMethodPlugin(ACPlugin* acpl){mClustersMethodPlugin=dynamic_cast<ACClusterMethodPlugin*> (acpl) ;}
 	void setNeighborsMethodPlugin(ACPlugin* acpl){mNeighborsMethodPlugin=dynamic_cast<ACNeighborMethodPlugin*> (acpl);}
-	void setClustersPositionsPlugin(ACPlugin* acpl){mClustersPosPlugin=dynamic_cast<ACPositionsPlugin*> (acpl);}	
-	void setNeighborsPositionsPlugin(ACPlugin* acpl){mNeighborsPosPlugin=dynamic_cast<ACPositionsPlugin*> (acpl);}
-	void setVisualisationPlugin(ACPlugin* acpl){mNoMethodPosPlugin=dynamic_cast<ACPositionsPlugin*> (acpl);}
+	void setClustersPositionsPlugin(ACPlugin* acpl){mClustersPosPlugin=dynamic_cast<ACClusterPositionsPlugin*> (acpl);}	
+	void setNeighborsPositionsPlugin(ACPlugin* acpl){mNeighborsPosPlugin=dynamic_cast<ACNeighborPositionsPlugin*> (acpl);}
+	void setVisualisationPlugin(ACPlugin* acpl){mNoMethodPosPlugin=dynamic_cast<ACNoMethodPositionsPlugin*> (acpl);}
 	
 	bool changeClustersMethodPlugin(ACPlugin* acpl);
 	bool changeNeighborsMethodPlugin(ACPlugin* acpl);
@@ -384,9 +384,9 @@ protected:
 	ACClusterMethodPlugin* mClustersMethodPlugin;
 	ACNeighborMethodPlugin* mNeighborsMethodPlugin;
 	
-	ACPositionsPlugin* mClustersPosPlugin;
-	ACPositionsPlugin* mNeighborsPosPlugin;
-	ACPositionsPlugin* mNoMethodPosPlugin;
+	ACClusterPositionsPlugin* mClustersPosPlugin;
+	ACNeighborPositionsPlugin* mNeighborsPosPlugin;
+	ACNoMethodPositionsPlugin* mNoMethodPosPlugin;
 	
 	ACUserLog* mUserLog;
 	

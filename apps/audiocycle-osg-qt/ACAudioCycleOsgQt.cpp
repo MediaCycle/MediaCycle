@@ -65,7 +65,7 @@ ACAudioCycleOsgQt::ACAudioCycleOsgQt(QWidget *parent)
 				for (int i=0;i<acpl->getSize();i++) {
 					for (int j=0;j<acpl->getPluginLibrary(i)->getSize();j++) {
 						//if (acpl->getPluginLibrary(i)->getPlugin(j)->getMediaType() == media_cycle->getLibrary()->getMediaType()) {
-						if (acpl->getPluginLibrary(i)->getPlugin(j)->getPluginType() == PLUGIN_TYPE_CLUSTERS_METHOD) {
+						if (acpl->getPluginLibrary(i)->getPlugin(j)->implementsPluginType(PLUGIN_TYPE_CLUSTERS_METHOD)) {
 							//CF on the first detected Clusters Method plugin
 							if (ui.comboBoxClustersMethod->count() == 1 && ui.comboBoxClustersMethod->currentText().toStdString() == "KMeans (default)") {
 								ui.comboBoxClustersMethod->setEnabled(true);
@@ -74,7 +74,7 @@ ACAudioCycleOsgQt::ACAudioCycleOsgQt(QWidget *parent)
 							ui.comboBoxClustersMethod->addItem(QString(acpl->getPluginLibrary(i)->getPlugin(j)->getName().c_str()));
 							
 						}
-						else if (acpl->getPluginLibrary(i)->getPlugin(j)->getPluginType() == PLUGIN_TYPE_CLUSTERS_POSITIONS) {
+						else if (acpl->getPluginLibrary(i)->getPlugin(j)->implementsPluginType(PLUGIN_TYPE_CLUSTERS_POSITIONS)) {
 							//CF on the first detected Clusters Positions plugin
 							if (ui.comboBoxClustersPositions->count() == 1 && ui.comboBoxClustersPositions->currentText().toStdString() == "Propeller (default)") {
 								ui.comboBoxClustersPositions->setEnabled(true);
@@ -83,7 +83,7 @@ ACAudioCycleOsgQt::ACAudioCycleOsgQt(QWidget *parent)
 							ui.comboBoxClustersPositions->addItem(QString(acpl->getPluginLibrary(i)->getPlugin(j)->getName().c_str()));
 							
 						}
-						else if (acpl->getPluginLibrary(i)->getPlugin(j)->getPluginType() == PLUGIN_TYPE_NEIGHBORS_METHOD) {
+						else if (acpl->getPluginLibrary(i)->getPlugin(j)->implementsPluginType(PLUGIN_TYPE_NEIGHBORS_METHOD)) {
 							//CF on the first detected Neighbors Method plugin
 							if (ui.comboBoxNeighborsMethod->count() == 1 && ui.comboBoxNeighborsMethod->currentText().toStdString() == "None available") {
 								ui.comboBoxNeighborsMethod->setEnabled(true);
@@ -93,7 +93,7 @@ ACAudioCycleOsgQt::ACAudioCycleOsgQt(QWidget *parent)
 							}	
 							ui.comboBoxNeighborsMethod->addItem(QString(acpl->getPluginLibrary(i)->getPlugin(j)->getName().c_str()));
 						}
-						else if (acpl->getPluginLibrary(i)->getPlugin(j)->getPluginType() == PLUGIN_TYPE_NEIGHBORS_POSITIONS) {
+						else if (acpl->getPluginLibrary(i)->getPlugin(j)->implementsPluginType(PLUGIN_TYPE_NEIGHBORS_POSITIONS)) {
 							//CF on the first detected Neighbors Positions plugin
 							if (ui.comboBoxNeighborsPositions->count() == 1 && ui.comboBoxNeighborsPositions->currentText().toStdString() == "None available") {
 								ui.comboBoxNeighborsPositions->setEnabled(true);
@@ -324,7 +324,7 @@ void ACAudioCycleOsgQt::configureCheckBoxes(){
 	if (acpl) {
 		for (int i=0;i<acpl->getSize();i++) {
 			for (int j=0;j<acpl->getPluginLibrary(i)->getSize();j++) {
-				if (acpl->getPluginLibrary(i)->getPlugin(j)->getPluginType() == PLUGIN_TYPE_FEATURES && acpl->getPluginLibrary(i)->getPlugin(j)->getMediaType() == media_cycle->getLibrary()->getMediaType()) {
+				if (acpl->getPluginLibrary(i)->getPlugin(j)->implementsPluginType(PLUGIN_TYPE_FEATURES) && acpl->getPluginLibrary(i)->getPlugin(j)->getMediaType() == media_cycle->getLibrary()->getMediaType()) {
 					QString s(acpl->getPluginLibrary(i)->getPlugin(j)->getName().c_str());
 					QListWidgetItem * item = new QListWidgetItem(s,ui.featuresListWidget);
 					item->setCheckState (Qt::Unchecked);

@@ -110,7 +110,7 @@ class ACPositionsPluginTreeNodeParams {
 		void clear();
 };
 
-class ACPositionsPluginNodeLinkTreeLayout : public ACPositionsPlugin {
+class ACPositionsPluginNodeLinkTreeLayout : public ACNeighborPositionsPlugin {
 	public:
 		ACPositionsPluginNodeLinkTreeLayout();
 		~ACPositionsPluginNodeLinkTreeLayout(){};

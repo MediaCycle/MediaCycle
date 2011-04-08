@@ -46,7 +46,11 @@ ACPlugin::ACPlugin()
 
 bool ACPlugin::implementsPluginType(ACPluginType pType)
 {
-	return (mPluginType&pType!=0);
+	int test=mPluginType&pType;
+	if (test==0)
+		return false;
+	else 
+		return true;
 }
 
 ACFeaturesPlugin::ACFeaturesPlugin()
@@ -78,6 +82,24 @@ ACNeighborMethodPlugin::ACNeighborMethodPlugin() {
 ACPositionsPlugin::ACPositionsPlugin() {
 	
 	this->mPluginType=mPluginType|PLUGIN_TYPE_POSITIONS;
+	
+    //local vars
+}
+ACClusterPositionsPlugin::ACClusterPositionsPlugin() {
+	
+	this->mPluginType=mPluginType|PLUGIN_TYPE_CLUSTERS_POSITIONS;
+	
+    //local vars
+}
+ACNeighborPositionsPlugin::ACNeighborPositionsPlugin() {
+	
+	this->mPluginType=mPluginType|PLUGIN_TYPE_NEIGHBORS_POSITIONS;
+	
+    //local vars
+}
+ACNoMethodPositionsPlugin::ACNoMethodPositionsPlugin() {
+	
+	this->mPluginType=mPluginType|PLUGIN_TYPE_NOMETHOD_POSITIONS;
 	
     //local vars
 }

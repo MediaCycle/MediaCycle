@@ -76,7 +76,7 @@ class ACPositionsPluginRadialTreeNodeParams {
 		double angle;
 };
 
-class ACPositionsPluginRadialTreeLayout : public ACPositionsPlugin {
+class ACPositionsPluginRadialTreeLayout : public ACNeighborPositionsPlugin {
 	public:
 		ACPositionsPluginRadialTreeLayout();
 	~ACPositionsPluginRadialTreeLayout(){};

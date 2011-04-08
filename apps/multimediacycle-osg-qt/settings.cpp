@@ -151,7 +151,7 @@ bool SettingsDialog::changeBrowserMode(ACBrowserMode _bm){
 //	if (acpl) {
 //		for (int i=0;i<acpl->getSize();i++) {
 //			for (int j=0;j<acpl->getPluginLibrary(i)->getSize();j++) {
-//				if (acpl->getPluginLibrary(i)->getPlugin(j)->getPluginType() == PLUGIN_TYPE_FEATURES) {
+//				if (acpl->getPluginLibrary(i)->getPlugin(j)->implementsPluginType(PLUGIN_TYPE_FEATURES)) {
 //					QString s(acpl->getPluginLibrary(i)->getPlugin(j)->getName().c_str());
 //					QListWidgetItem * item = new QListWidgetItem(s,listWidgetFeaturesPlugins);
 //					item->setCheckState (Qt::Unchecked);

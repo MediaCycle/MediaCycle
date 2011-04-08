@@ -808,7 +808,7 @@ void ACMediaBrowser::updateClusters(bool animate, int needsCluster) {
 			mClustersMethodPlugin->updateClusters(this);
 		}
 		else if (mNoMethodPosPlugin) {
-			if ( mNoMethodPosPlugin->getPluginType() == PLUGIN_TYPE_CLUSTERS_PIPELINE || mNoMethodPosPlugin->getPluginType() == PLUGIN_TYPE_ALLMODES_PIPELINE)
+			if ( mNoMethodPosPlugin->implementsPluginType(PLUGIN_TYPE_CLUSTERS_PIPELINE) || mNoMethodPosPlugin->implementsPluginType(PLUGIN_TYPE_ALLMODES_PIPELINE))
 			{}	//mNoMethodPosPlugin->updateClusters(this);
 			else
 				animate=false;//CF trick to end ACMediaBrowser::updateClusters
@@ -834,7 +834,7 @@ void ACMediaBrowser::updateNeighborhoods(){
 			mNeighborsMethodPlugin->updateNeighborhoods(this);
 		}
 		else if (mNoMethodPosPlugin){
-			if ( mNoMethodPosPlugin->getPluginType() == PLUGIN_TYPE_NEIGHBORS_PIPELINE || mNoMethodPosPlugin->getPluginType() == PLUGIN_TYPE_ALLMODES_PIPELINE)
+			if ( mNoMethodPosPlugin->implementsPluginType(PLUGIN_TYPE_NEIGHBORS_PIPELINE) || mNoMethodPosPlugin->implementsPluginType(PLUGIN_TYPE_ALLMODES_PIPELINE))
 			{}//	mNoMethodPosPlugin->updateNeighborhoods(this);
 		}
 	}

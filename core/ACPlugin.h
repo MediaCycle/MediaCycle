@@ -62,7 +62,7 @@ const ACPluginType	PLUGIN_TYPE_NEIGHBORS_METHOD	=	0x0080;//CF updateNeighborhood
 const ACPluginType	PLUGIN_TYPE_NEIGHBORS_POSITIONS	=	0x0100;//CF updatePositions for the Neighbors mode
 const ACPluginType	PLUGIN_TYPE_NEIGHBORS_PIPELINE	=	0x0200;//CF updateNeighborhoods and updatePositions for the Neighbors mode
 const ACPluginType	PLUGIN_TYPE_POSITIONS			=	0x0400;//TR todo 
-const ACPluginType	PLUGIN_TYPE_ANYMODE_POSITIONS	=	0x0800;//CF updatePositions for the Clusters or Neighbors modes
+const ACPluginType	PLUGIN_TYPE_NOMETHOD_POSITIONS	=	0x0800;//CF updatePositions for the Clusters or Neighbors modes
 const ACPluginType	PLUGIN_TYPE_ALLMODES_PIPELINE	=	0x1000;//CF updateClusters and updateNeighborhoods and updatePositions for both modes
 
 
@@ -139,6 +139,28 @@ protected:
 class ACPositionsPlugin : virtual public ACPlugin {
 public:
 	ACPositionsPlugin();
+	virtual void updateNextPositions(ACMediaBrowser* )=0;
+protected:
+};
+
+//TODO TR These three plugin has the same interface but not the same constructor. This should be replaced by a versus without ACMediaBrowser access
+class ACClusterPositionsPlugin : virtual public ACPlugin {
+public:
+	ACClusterPositionsPlugin();
+	virtual void updateNextPositions(ACMediaBrowser* )=0;
+protected:
+};
+
+class ACNeighborPositionsPlugin : virtual public ACPlugin {
+public:
+	ACNeighborPositionsPlugin();
+	virtual void updateNextPositions(ACMediaBrowser* )=0;
+protected:
+};
+
+class ACNoMethodPositionsPlugin : virtual public ACPlugin {
+public:
+	ACNoMethodPositionsPlugin();
 	virtual void updateNextPositions(ACMediaBrowser* )=0;
 protected:
 };

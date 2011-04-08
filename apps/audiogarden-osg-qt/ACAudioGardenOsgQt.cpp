@@ -76,7 +76,7 @@ ACAudioGardenOsgQt::ACAudioGardenOsgQt(QWidget *parent)
 				for (int i=0;i<acpl->getSize();i++) {
 					for (int j=0;j<acpl->getPluginLibrary(i)->getSize();j++) {
 						//if (acpl->getPluginLibrary(i)->getPlugin(j)->getMediaType() == MEDIA_TYPE_AUDIO) {
-						if (acpl->getPluginLibrary(i)->getPlugin(j)->getPluginType() == PLUGIN_TYPE_CLUSTERS_METHOD) {
+						if (acpl->getPluginLibrary(i)->getPlugin(j)->implementsPluginType(PLUGIN_TYPE_CLUSTERS_METHOD)) {
 							//CF on the first detected Clusters Method plugin
 							if (ui.comboBoxClustersMethod->count() == 1 && ui.comboBoxClustersMethod->currentText().toStdString() == "KMeans (default)") {
 								ui.comboBoxClustersMethod->setEnabled(true);
@@ -85,7 +85,7 @@ ACAudioGardenOsgQt::ACAudioGardenOsgQt(QWidget *parent)
 							ui.comboBoxClustersMethod->addItem(QString(acpl->getPluginLibrary(i)->getPlugin(j)->getName().c_str()));
 							
 						}
-						else if (acpl->getPluginLibrary(i)->getPlugin(j)->getPluginType() == PLUGIN_TYPE_CLUSTERS_POSITIONS) {
+						else if (acpl->getPluginLibrary(i)->getPlugin(j)->implementsPluginType(PLUGIN_TYPE_CLUSTERS_POSITIONS)) {
 							//CF on the first detected Clusters Positions plugin
 							if (ui.comboBoxClustersPositions->count() == 1 && ui.comboBoxClustersPositions->currentText().toStdString() == "Propeller (default)") {
 								ui.comboBoxClustersPositions->setEnabled(true);
