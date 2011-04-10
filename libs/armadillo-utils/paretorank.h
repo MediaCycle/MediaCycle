@@ -1,7 +1,7 @@
 /**
  * @brief paretorank.h
- * @author Xavier Siebert
- * @date 31/01/2011
+ * @author Christian Frisson
+ * @date 10/04/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -43,7 +43,11 @@ arma::ucolvec paretorank(arma::Mat<eT> X, int maxRank, int minNbItems){
 	arma::ucolvec rank_v;
 	int currentRank = 1;
 	arma::ucolvec posFront_v;
-	arma::imat pos_v = arma::linspace<arma::imat>(0, row-1, row);
+	#ifdef ARMADILLO_HAVE_RANDU // the linspace prototype changed at the same time randu was introduced, for version 0.9.50
+		arma::imat pos_v = arma::linspace<arma::imat>(0, row-1, row);
+	#else
+		arma::imat pos_v = arma::linspace<arma::imat>(0, row-1, row, 0);
+	#endif
 	arma::Mat<eT> oldX;
 	int tmpIdx = 0;
 	arma::imat oldPos_v;

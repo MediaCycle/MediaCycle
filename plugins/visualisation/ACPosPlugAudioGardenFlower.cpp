@@ -1,7 +1,7 @@
 /**
  * @brief ACPosPlugAudioGardenFlower.cpp
- * @author Thierry Ravet
- * @date 07/04/2011
+ * @author Christian Frisson
+ * @date 10/04/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -71,9 +71,13 @@ void ACPosPlugAudioGardenFlower::updateNextPositions(ACMediaBrowser* mediaBrowse
 	mat desc_m, descD_m;
 	mat posDisp_m(libSize, 2);
 	colvec r_v(libSize);
-	colvec theta_v = randu<colvec>(libSize);
+	#ifdef ARMADILLO_HAVE_RANDU
+		colvec theta_v = arma::randu<colvec>(libSize);
+	#else
+		colvec theta_v = arma::rand<colvec>(libSize);
+	#endif
 	theta_v.ones(libSize); //theta_v * 2 * arma::math::pi();
-  vector<ACMedia*> loops =  mediaBrowser->getLibrary()->getAllMedia();	
+	vector<ACMedia*> loops =  mediaBrowser->getLibrary()->getAllMedia();	
 
 	featureList.push_back("Mean of MFCC");
 	featureList.push_back("Mean of Spectral Flatness");

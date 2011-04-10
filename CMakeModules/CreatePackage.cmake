@@ -118,17 +118,21 @@ IF(UNIX)
                 SET(UBUNTU_DEPS "libboost-serialization1.42.0" "libboost-system1.42.0" "libboost-filesystem1.42.0" "libboost-graph1.42.0" "libboost-thread1.42.0")
             ENDIF()
 
-            # Armadillo, fake for 10.xx since we now require > 1.x, while 10.04 has 0.8.0-1, 10.10 0.9.8-1, 11.04 0.9.52 (March 2011)
-            IF("${LSB_DISTRIB}" MATCHES "Ubuntu11.04")
-                list(APPEND UBUNTU_DEPS "libatlas3gf-base" "liblapack3gf" "libblas3gf" "libarmadillo0")
-            ELSE()
-                list(APPEND UBUNTU_DEPS "libatlas3gf-base" "liblapack3gf" "libblas3gf")# "libarmadillo0")
+            # Armadillo, fake for 10.04 since we now require > 0.9.6, while 10.04 has 0.8.0-1, 10.10 0.9.8-1, 11.04 0.9.52 (March 2011)
+            IF("${LSB_DISTRIB}" MATCHES "Ubuntu10.04")
+                MESSAGE("Warning: the armadillo version might be too low for packaging under Ubuntu 10.04.")
             ENDIF()
+            list(APPEND UBUNTU_DEPS "libatlas3gf-base" "liblapack3gf" "libblas3gf" "libarmadillo0")
 
-            # OpenSceneGraph (10.04 has 2.8.1, 10.10 2.8.3 and 11.04 2.8.3)
-            list(APPEND UBUNTU_DEPS "libopenscenegraph65" "openscenegraph")
+            # OpenSceneGraph, fake for 10.04 since we now require > 2.8.3, while 10.04 has 2.8.1, 10.10 2.8.3 and 11.04 2.8.3)
+            IF("${LSB_DISTRIB}" MATCHES "Ubuntu10.04")
+                list(APPEND UBUNTU_DEPS "libopenscenegraph56" "libopenthreads12")
+                MESSAGE("Warning: the OpenSceneGraph version might be too low for packaging under Ubuntu 10.04.")
+            ELSE()
+                list(APPEND UBUNTU_DEPS "libopenscenegraph65" "libopenthreads13")
+            ENDIF()
             IF(WITH_QT4) # dirty test to check if we're packaging a GUI application under Ubuntu
-                INSTALL(FILES ${CMAKE_BINARY_DIR}/3rdparty/osg_ffmpeg/osg_ffmpeg.so DESTINATION lib/osgPlugins-${OPENSCENEGRAPH_VERSION})
+                INSTALL(FILES ${CMAKE_BINARY_DIR}/3rdparty/osgdb_ffmpeg/osgdb_ffmpeg.so DESTINATION lib/osgPlugins-${OPENSCENEGRAPH_VERSION})
             ENDIF()
 
             # Qt4 libqtcore4 and libqtgui4 are package for kubuntu, libqt4-core and libqt4-gui for ubuntu
@@ -246,7 +250,7 @@ IF(UNIX)
 	# 	ENDIF(NOT CPACK_RPM_PACKAGE_REQUIRES)
 	#  ENDIF("${LSB_DISTRIB}" MATCHES "Fedora")
 	set(CPACK_SYSTEM_NAME "${LSB_DISTRIB}-${CPACK_PACKAGE_ARCHITECTURE}")
-	message(STATUS "Detected ${CPACK_SYSTEM_NAME}. Use make package to build packages (${CPACK_GENERATOR}).")
+	message(STATUS " Detected ${CPACK_SYSTEM_NAME}. Use make package to build packages (${CPACK_GENERATOR}).")
 ENDIF(UNIX)
 
 #From: http://www.cmake.org/Wiki/BundleUtilitiesExample

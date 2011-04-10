@@ -36,6 +36,8 @@
 #include "ACMediaTimedFeature.h"
 #include "Armadillo-utils.h"
 
+#include "boost/filesystem.hpp"
+
 // USE_SDIF is off by default :
 #ifdef USE_SDIF
 #include "sdif.h"
@@ -723,24 +725,51 @@ void ACMediaTimedFeature::dump(){ // in cout
 
 //XS new
 bool ACMediaTimedFeature::saveInFile(string _fname, bool _binary){ 
-	bool save_ok;
+	bool save_ok = false;
 	fmat data = join_rows(this->getTime(), this->getValue());
-	if (_binary)
-		save_ok = data.save(_fname, arma_binary); // default format = arma_binary
-	else 
-		save_ok = data.save(_fname, arma_ascii);
-	
+	if (_binary){
+		#ifdef ARMADILLO_HAVE_RANDU // randu and .save returns were both introduced in version 0.9.50
+			save_ok = data.save(_fname, arma_binary); // default format = arma_binary
+		#else
+			data.save(_fname, arma_binary); // default format = arma_binary
+			if ( boost::filesystem::exists( _fname ) )
+				save_ok = true;
+		#endif
+	}
+	else {
+		#ifdef ARMADILLO_HAVE_RANDU // randu and .save returns were both introduced in version 0.9.50
+			save_ok = data.save(_fname, arma_ascii);
+		#else
+			data.save(_fname, arma_ascii);
+			if ( boost::filesystem::exists( _fname ) )
+				save_ok = true;
+		#endif	
+	}
 	return save_ok;
 }
 
 //XS new
 bool ACMediaTimedFeature::loadFromFile(string _fname, bool _binary){
 	fmat tmp_m;
-	bool load_ok;
-	if (_binary)
-		load_ok = tmp_m.load(_fname, arma_binary); // default format = arma_binary
-	else 
-		load_ok = tmp_m.load(_fname, arma_ascii);
+	bool load_ok = false;
+	if (_binary){
+		#ifdef ARMADILLO_HAVE_RANDU // randu and .save returns were both introduced in version 0.9.50
+			load_ok = tmp_m.load(_fname, arma_binary); // default format = arma_binary
+		#else
+			tmp_m.load(_fname, arma_binary); // default format = arma_binary
+			if ( tmp_m.n_rows > 0 && tmp_m.n_cols > 0 )
+				load_ok = true;
+		#endif
+	}
+	else {
+		#ifdef ARMADILLO_HAVE_RANDU // randu and .save returns were both introduced in version 0.9.50
+			load_ok = tmp_m.load(_fname, arma_ascii);
+		#else
+			tmp_m.load(_fname, arma_ascii);
+			if ( tmp_m.n_rows > 0 && tmp_m.n_cols > 0 )
+				load_ok = true;
+		#endif
+	}
 	
 	if (load_ok) { 
 		//  tmp_m.print();

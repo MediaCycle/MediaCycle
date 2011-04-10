@@ -1,8 +1,8 @@
 /**
  * @brief armadillo-test.cpp
- * @author Xavier Siebert
- * @date 09/12/2010
- * @copyright (c) 2010 – UMONS - Numediart
+ * @author Christian Frisson
+ * @date 10/04/2011
+ * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -51,7 +51,11 @@ int main(){
 	std::cout << seed + 3 << std::endl;
 	srand ( seed * 3 );
 	for (int i =0; i<3; i++){
-		//colvec q = randu<rowvec>(10);
+		#ifdef ARMADILLO_HAVE_RANDU
+			//colvec q = arma::randu<rowvec>(10);
+		#else
+			//colvec q = arma::rand<rowvec>(10);
+		#endif
 		std::cout << trans(randperm(10)) << std::endl;
 	}
 	//	std::cout << ACRandom() << std::endl;

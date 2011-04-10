@@ -449,7 +449,11 @@ void startOrRedrawRandom(MediaCycle *mediacycle, int nbVideo, char **buffer_send
 	media_browser->setClickedLabel(-1);
 
 	// using armadillo to get nbVideo random ids among all videos:
-	colvec  q       = randu<colvec>(n_loops);
+	#ifdef ARMADILLO_HAVE_RANDU
+		colvec q = arma::randu<colvec>(n_loops);
+	#else
+		colvec q = arma::rand<colvec>(n_loops);
+	#endif
 	ucolvec indices = sort_index(q);
 	ucolvec trunc_indices = indices.rows(0,nbVideo-1);
 	//cout << trunc_indices << endl;
