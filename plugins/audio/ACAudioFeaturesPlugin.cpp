@@ -62,6 +62,7 @@ ACAudioFeaturesPlugin::ACAudioFeaturesPlugin() {
 	this->mDescriptorsList.push_back("Log Attack Time");
 	this->mDescriptorsList.push_back("Energy Modulation Frequency");
 	this->mDescriptorsList.push_back("Energy Modulation Amplitude");
+	this->mtf_file_name = "";
 }
 
 ACAudioFeaturesPlugin::~ACAudioFeaturesPlugin() {
@@ -89,8 +90,20 @@ std::vector<ACMediaFeatures*> ACAudioFeaturesPlugin::calculate_starpu(vector<ACM
 }
 */
 
-std::vector<ACMediaFeatures*> ACAudioFeaturesPlugin::calculate(ACMediaData* audio_data, ACMedia* theMedia, bool _save_timed_feat) {
+// added by CF, temp
+std::vector<ACMediaFeatures*> ACAudioFeaturesPlugin::calculate(std::string aFileName, bool _save_timed_feat) {
+	// from file
+	std::cout << " ACAudioFeaturesPlugin::calculate: not implemented" << std::endl;
+	return std::vector<ACMediaFeatures*>();
+}
 
+// CF
+std::vector<ACMediaFeatures*> ACAudioFeaturesPlugin::calculate(ACMediaData* audio_data, ACMedia* theMedia, bool _save_timed_feat) {
+// from MediaData
+return this->_calculate(audio_data->getFileName(),audio_data,theMedia,_save_timed_feat);
+}
+
+std::vector<ACMediaFeatures*> ACAudioFeaturesPlugin::_calculate(std::string aFileName, ACMediaData* audio_data, ACMedia* theMedia, bool _save_timed_feat){
 	bool extendSoundLimits = true;
 	std::vector<ACMediaTimedFeature*> descmf;
 	std::vector<ACMediaFeatures*> desc;
@@ -136,6 +149,17 @@ std::vector<ACMediaFeatures*> ACAudioFeaturesPlugin::calculate(ACMediaData* audi
 	
 	desc.push_back(descmf[nrgIdx]->interpN(10)->toMediaFeatures());
 	
+	// CF WARNING we save only the "Energy" feature that is expected for the AudioSegmentatinPlugin, until we can choose features associated to segmentation plugins
+	if (_save_timed_feat) {
+		// try to keep the convention : _b.mtf = binary ; _t.mtf = ascii text
+		bool save_binary = true;
+		string file_ext = "_b.mtf";
+		string aFileName_noext = theMedia->getFileName().substr(0,theMedia->getFileName().find_last_of('.'));
+		mtf_file_name = aFileName_noext + "_" +this->mDescription + file_ext; // mName instead of mDescription due its the space char, just in case?
+		// CF we're saving the Energy feature as it is used for method 0 in ACAudioSegmentationPlugin...
+		descmf[10]->saveInFile(mtf_file_name, save_binary);//CF just the nth MediaTimeFeature [0] saved!
+	}
+	
 	for (int i=0; i<descmf.size(); i++){
 		delete descmf[i];
 	}
@@ -144,3 +168,15 @@ std::vector<ACMediaFeatures*> ACAudioFeaturesPlugin::calculate(ACMediaData* audi
 	return desc;
 }
 
+// the plugin should know internally where it saved the mtf
+ACMediaTimedFeature* ACAudioFeaturesPlugin::getTimedFeatures(){
+	if (mtf_file_name == ""){
+		cout << "<ACAudioFeaturesPlugin::getTimedFeatures> : missing file name "<<endl;
+	return 0;
+	}
+	ACMediaTimedFeature* ps_mtf = new ACMediaTimedFeature();
+	if (ps_mtf->loadFromFile(mtf_file_name) <= 0){
+		return 0;
+	}
+	return ps_mtf;
+}
