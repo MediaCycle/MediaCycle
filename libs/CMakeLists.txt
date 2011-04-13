@@ -38,6 +38,13 @@ ELSE()
 	MESSAGE("[ ] audiofeatures")
 ENDIF()
 
+# laughterfeatures
+IF(SUPPORT_AUDIO AND SNDFILE_FOUND AND SAMPLERATE_FOUND AND USE_LAUGHFEAT)
+	add_subdirectory(laughterfeatures)
+ELSE()
+	MESSAGE("[ ] laughterfeatures")
+ENDIF()
+
 # audiogarden audio synthesis library (required by audiogarden apps and plugins)
 IF(SUPPORT_AUDIO AND USE_AUDIOGARDEN AND USE_AUDIOFEAT)
 	add_subdirectory(audiogarden-synthesis)

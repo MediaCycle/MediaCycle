@@ -140,7 +140,11 @@ void ACFFmpegToOpenCV::getframe(IplImage ** frame)
             if(packet.stream_index==videoStream)
             {
 				// Decode video frame
+#if (AV_VERSION_INT(52,25,0) < LIBAVCODEC_VERSION_INT)
                 avcodec_decode_video2(pCodecCtx, pFrame, &frameFinished, &packet);
+#else
+                avcodec_decode_video(pCodecCtx, pFrame, &frameFinished, packet.data, packet.size);
+#endif
 
 				// Did we get a video frame?
                 if(frameFinished)
