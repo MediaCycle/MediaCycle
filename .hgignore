@@ -1,0 +1,22 @@
+# use glob syntax.
+syntax: glob
+.svn
+*.pyc
+*~
+.DS_Store
+Builds
+External
+CMakeCache.txt
+cmake.check_cache
+*nbproject*
+*nbbuild*
+*.orig
+*.swf
+*build/linux-x86*
+*src/*.xcodeproj*
+*.o
+\#*
+.\#*
+data/dataset*
+
+# switch to regexp syntax.
