@@ -373,6 +373,7 @@ void ACBWImageAnalysis::computeGaborMoments(int mumax, int numax){ // default 7,
 #endif
 		}
 	}
+	delete gabor;
 }
 
 void ACBWImageAnalysis::computeColorMoments(int n){ 
