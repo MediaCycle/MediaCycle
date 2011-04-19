@@ -47,11 +47,6 @@
 		#include <OpenCV/cxcore.h>
 		#include <OpenCV/highgui.h> // for cvloadimage
     #else
-    // -lcv -lhighgui -lcxcore
-    // I path: /opt/local/include/opencv or /usr/local/include/opencv
-    // L path: /opt/local/lib or /usr/local/lib
-    // as of 05/03/2009, MacPorts (/opt/*) only provides version 1.0
-    // I downloaded 1.1 from SourceForge
 		#ifdef APPLE_IOS //CF in reality, it is because of OpenCV 2.1... test to improve!
 			#include <cv.h>
 			#include <cxcore.h>

@@ -40,6 +40,7 @@
 #include <pthread.h>
 #include <string.h>
 #include <stdio.h>
+#include <iostream>
 
 #include <OscReceivedElements.h>
 #include <OscPacketListener.h>
@@ -94,8 +95,7 @@ protected:
 		}
 		catch( osc::Exception& e ){
 			// any parsing errors such as unexpected argument types, or missing arguments get thrown as exceptions.
-			//std::cout << "error while parsing message: "
-			//	<< message.AddressPattern() << ": " << e.what() << "\n";
+			std::cout << "error while parsing message: " << message.AddressPattern() << ": " << e.what() << "\n";
 		}
 	}
 public:
@@ -136,6 +136,7 @@ void ACOscBrowser::release(ACOscBrowserRef aReceiver)
 	delete receiver->oscListener;
 	delete receiver->oscSocket;
 	delete receiver;
+	receiver = 0;
 }
 
 void ACOscBrowser::start(ACOscBrowserRef aReceiver)

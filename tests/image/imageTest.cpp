@@ -216,6 +216,14 @@ void testMakePGM(string sim1){
 	delete Im1;
 }
 
+void test_import_directory(string dir1, string f2=""){
+	MediaCycle* mediacycle;
+	mediacycle = new MediaCycle(MEDIA_TYPE_IMAGE);
+	mediacycle->addPluginLibrary("/Users/xavier/development/mediacycle-numediart/mediacycle/Builds/mac-10.5/plugins/image/Debug/mc_image.dylib");
+	mediacycle->importDirectory(dir1, 1); // 1 = recursive
+	if (f2!="") mediacycle->saveXMLLibrary(f2);
+	delete mediacycle;
+}
 
 int main(int argc, char** argv) {
 	cout << "Using Opencv " << CV_VERSION << "(" << CV_MAJOR_VERSION << "." << CV_MINOR_VERSION  << "." <<  CV_SUBMINOR_VERSION << ")" << endl;	
@@ -232,6 +240,7 @@ int main(int argc, char** argv) {
 	}
 	else{
 //		makeNumbered("/Users/xavier/Pictures/numbered",2000);
+		test_import_directory("/Volumes/Other Stuff/256_ObjectCategories/part_B", "/Users/xavier/tmp/256_B.xml");
 
 //	displayrect();
 
@@ -259,7 +268,7 @@ int main(int argc, char** argv) {
 //		cout << "-------- Os ------------" << endl;
 // 		testFourierMellin ("Os.png");
 		
-		testFFT ("10151-100-flipV.jpg");
+//		testFFT ("10151-100-flipV.jpg");
 
 //		cout << "-------- 10151-100 ------------" << endl;
 // 		testFourierMellin ("10151-100.png");

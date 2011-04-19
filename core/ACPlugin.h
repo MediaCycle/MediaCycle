@@ -116,7 +116,7 @@ protected:
 public:
 	ACSegmentationPlugin();
 	virtual std::vector<ACMedia*> segment(ACMediaTimedFeature* _mtf, ACMedia*)=0;
-	virtual std::vector<ACMedia*> segment(ACMediaData* audio_data, ACMedia*)=0;
+	virtual std::vector<ACMedia*> segment(ACMediaData* _data, ACMedia*)=0;
 
 };
 

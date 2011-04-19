@@ -49,10 +49,16 @@ public:
 	virtual std::vector<ACMediaFeatures*> calculate(ACMediaData* _data, ACMedia*, bool _save_timed_feat=false);
 
 	std::string getSavedFileName(){return mtf_file_name;}
-	ACMediaTimedFeature* getTimedFeatures();	
+	ACMediaTimedFeature* getTimedFeatures();
+	
+	// XS TODO cut and pas from videoPixelSpeedPlugin
+	// XS TODO re-define the pugins API to avoid this
+	//ACMediaTimedFeature* getTimedFeatures();
+
 private:
 	std::vector<ACMediaFeatures*> _calculate(std::string aFileName="", ACMediaData* audio_data = 0, ACMedia* theMedia = 0, bool _save_timed_feat=false);
 	std::string mtf_file_name; // file in which features have been saved
+	std::vector<std::string> mtf_file_names;
 };
 
 #endif	/* _ACAUDIOFEATURESPLUGIN_H */

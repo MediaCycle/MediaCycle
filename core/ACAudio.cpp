@@ -63,6 +63,7 @@ void ACAudio::init() {
     time_signature_den = 0;
     key = 0;
     acid_type = 0;
+	data=0;
 }
 
 ACAudio::ACAudio(const ACAudio& m, bool reduce) : ACMedia(m){
@@ -181,7 +182,6 @@ int ACAudio::loadXMLSpecific(TiXmlElement* _pMediaNode){
 
 	_pMediaNode->QueryIntAttribute("SampleStart",&sample_start);
 	_pMediaNode->QueryIntAttribute("SampleEnd",&sample_end);
-
 	
 	this->setSampleStart(sample_start);
 	this->setSampleEnd(sample_end);
@@ -192,12 +192,8 @@ int ACAudio::loadXMLSpecific(TiXmlElement* _pMediaNode){
 	TiXmlElement* waveformElement = _pMediaNode->FirstChildElement( "Waveform" );
 	if (waveformElement) {
 		TiXmlText*  waveformElementsAsText = waveformElement->FirstChild()->ToText();
-
-		wfs = waveformElementsAsText->ValueStr();
-		
+		wfs = waveformElementsAsText->ValueStr();		
 		waveform = new float[waveformLength];
-
-
 		if (wfs.size() > 0) {
 			std::stringstream wfss;
 			wfss << wfs;
@@ -209,21 +205,18 @@ int ACAudio::loadXMLSpecific(TiXmlElement* _pMediaNode){
 	}	
 
 // XS TODO note : for image we have this:
-//data = new ACMediaData(MEDIA_TYPE_IMAGE,filename);
-// here we compute the waveform	
+// data = new ACMediaData(MEDIA_TYPE_IMAGE,filename);
+// should we read the file ?
+// here already read the waveform	
 	return 1;
 	
 }
 
 
 void ACAudio::setData(float* _data,float _sample_number, int _sr,int _channels) {
-	/*if (data->getMediaType()==MEDIA_TYPE_NONE)
-		data = new ACMediaData(MEDIA_TYPE_AUDIO);	
-	else
-		data->setMediaType(MEDIA_TYPE_AUDIO);*/
 	if (data == 0)
-		data = new ACMediaData(MEDIA_TYPE_AUDIO);
-	data->setAudioData(_data,_sample_number);
+		data = new ACAudioData();
+	data->setData(_data,_sample_number);
 	this->channels = _channels;
 	this->sample_rate = _sr;
 	
@@ -231,9 +224,7 @@ void ACAudio::setData(float* _data,float _sample_number, int _sr,int _channels) 
 	this->end=_sample_number/(float) _sr/(float) _channels;
 }
 
-//ACMediaData* ACAudio::extractData(string fname) {
 void ACAudio::extractData(string fname) {
-	
 	SF_INFO sfinfo;
 	SNDFILE* testFile;
 	if (! (testFile = sf_open (fname.c_str(), SFM_READ, &sfinfo))){  
@@ -258,20 +249,21 @@ void ACAudio::extractData(string fname) {
 	std::cout << "Duration of the "<< seg_level <<" : " << this->getDuration() << std::endl;
 	std::cout << "Number of frames of the "<< seg_level <<" : " << this->getNFrames() << std::endl;
 // 	sf_readf_float(testFile, data, sfinfo.frames);
-	//ACMediaData* audio_data = new ACMediaData(MEDIA_TYPE_AUDIO,fname);
-	data = new ACMediaData(MEDIA_TYPE_AUDIO,fname);
- 	this->computeWaveform(data->getAudioData());
-	sf_close(testFile);/*
-	if(persistent_data){
-		if(!data)
-			data = new ACMediaData(MEDIA_TYPE_AUDIO,fname);
-	}*/
-	//return audio_data;
+	if (data) delete data; // XS TODO deleteData
+	data = new ACAudioData();
+	data->readData(fname);
+ 	this->computeWaveform(this->getData());
+	sf_close(testFile);
+}
+
+void ACAudio::deleteData(){
+	delete data;
+	data=0;
 }
 
 float* ACAudio::getSamples(){
-	if (data && data->getMediaType()==MEDIA_TYPE_AUDIO){
-		return data->getAudioData();
+	if (data){
+		return this->getData();
 	}	
 	else{
 		SF_INFO sfinfo;
@@ -296,18 +288,14 @@ float* ACAudio::getSamples(){
 		sf_seek(testFile, this->getSampleStart(), SEEK_SET);
 		sf_readf_float(testFile, _data, this->getNFrames());
 		sf_close(testFile);
-		if (persistent_data){
-			data = new ACMediaData(MEDIA_TYPE_AUDIO);
-			data->setAudioData(_data,this->getNFrames());
-		}	
 		return _data;
 	}	
 }
 
 float* ACAudio::getMonoSamples(){
-	if (data && data->getMediaType()==MEDIA_TYPE_AUDIO){
+	if (data){
 		float* _data = new float[(long) this->getNFrames()];
-		float* _tmpdata  = data->getAudioData();
+		float* _tmpdata  = this->getData();
 		long i;
 		for (i = 0; i< this->getNFrames(); i++){
 			_data[i] = _tmpdata[i*this->getChannels()];
@@ -339,12 +327,7 @@ float* ACAudio::getMonoSamples(){
 		sf_seek(testFile, this->getSampleStart(), SEEK_SET);
 		sf_readf_float(testFile, tmpdata, this->getNFrames());
 		sf_close(testFile);
-		
-		if (persistent_data){
-			data = new ACMediaData(MEDIA_TYPE_AUDIO);
-			data->setAudioData(tmpdata,this->getNFrames());
-		}
-		
+				
 		long i;
 		for (i = 0; i< this->getNFrames(); i++){
 			_data[i] = tmpdata[i*this->getChannels()];

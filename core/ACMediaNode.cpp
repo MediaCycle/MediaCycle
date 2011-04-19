@@ -32,6 +32,14 @@
  *
  */
 
+// MediaNode is used to manage the display of a given Media
+// two different ID's:
+// nodeID = ID of the mediaNode (used by MediaBrowser)
+// mediaID = ID of the media (used by MediaLibrary)
+// examples:
+// - AC_MODE_CLUSTERS : nodeID = mediaID if the whole Library is used in the Browser
+// - AC_MODE_NEIGHBORS : nodeID = 0 initially, then only the neighbors will receive a nodeID
+
 #include "ACMediaNode.h"
 
 #ifdef VERBOSE
@@ -45,6 +53,7 @@ ACMediaNode::ACMediaNode(){ // (0,0) by default
 	clickTime.clear(); // CF-XS : not yet clicked when constructed.
 }
 ACMediaNode::ACMediaNode(long int _nodeId, long int _mediaId){ 
+	// have to specify both values, no default values
 	init(_nodeId, _mediaId);
 	clickTime.clear(); // CF-XS : not yet clicked when constructed.
 }

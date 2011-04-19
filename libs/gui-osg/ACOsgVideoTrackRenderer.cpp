@@ -34,7 +34,7 @@
  */
 
 // ----------- uncomment this to compute and visualize a slit scan
-#define USE_SLIT_SCAN
+//#define USE_SLIT_SCAN
 
 #include "ACOsgVideoTrackRenderer.h"
 #include "ACVideo.h"
@@ -142,6 +142,21 @@ int ACOsgVideoSlitScanThread::convert(AVPicture *dst, int dst_pix_fmt, AVPicture
     return result;
 }
 
+void ACOsgVideoSlitScanThread::run(void)
+{
+	std::cout << "Slit-scanning " << filename<< "..." << std::endl;
+	notify_level = osg::getNotifyLevel();
+	osg::setNotifyLevel(osg::WARN);//to remove the copyImage NOTICEs
+	_done = false;
+	if (filename!=""){
+		this->computeSlitScan();
+		_done = true;
+		std::cout << "Done slit-scanning " << filename << "..." <<std::endl;
+	}
+	osg::setNotifyLevel(notify_level);
+}
+
+	
 void ACOsgVideoSlitScanThread::yuva420pToRgba(AVPicture * const dst, AVPicture * const src, int width, int height)
 {
     convert(dst, PIX_FMT_RGB32, src, m_context->pix_fmt, width, height);
@@ -453,7 +468,10 @@ ACOsgVideoTrackRenderer::~ACOsgVideoTrackRenderer() {
 		cursor_geode=0; }
 	if (segments_transform) { //ref_ptr//segments_transform->unref();
 		segments_transform=0;}	
-	if(summary_data) {summary_data=0;} //{cvReleaseCapture(&summary_data);} // no! ACVideo does it!
+	if(summary_data) {
+		cvReleaseCapture(&summary_data);
+		summary_data=0;
+	} // XS TODO ACVideo does not do it!
 }
 
 void ACOsgVideoTrackRenderer::playbackGeode() {
@@ -582,6 +600,7 @@ void ACOsgVideoTrackRenderer::slitScanGeode() {
 	}
 	
 }	
+
 #endif//def USE_SLIT_SCAN
 
 void ACOsgVideoTrackRenderer::cursorGeode() {
@@ -624,9 +643,7 @@ void ACOsgVideoTrackRenderer::cursorGeode() {
 	
 	cursor_geode->addDrawable(cursor_geometry);
 	cursor_transform->addChild(cursor_geode);
-	//ref_ptr//cursor_transform->ref();
 	cursor_geode->setUserData(new ACRefId(track_index,"video track cursor"));
-	//ref_ptr//cursor_geode->ref();
 }
 
 void ACOsgVideoTrackRenderer::framesGeode() {
@@ -802,13 +819,18 @@ void ACOsgVideoTrackRenderer::updateTracks(double ratio) {
 			//if (video_stream) delete video_stream;
 			std::cout << "Getting video stream... ";
 			double video_stream_in = getTime();
-			video_stream = ((ACVideo*)(media_cycle->getLibrary()->getMedia(media_index)))->getStream();
+			ACVideo* tmp_vid = static_cast<ACVideo*>(media_cycle->getLibrary()->getMedia(media_index));
+			// data have been removed, read them again !
+			std::cout << "Extracting Data... ";
+			tmp_vid->extractData(tmp_vid->getFileName());
+
+			video_stream = tmp_vid->getStream();
 			std::cout << getTime()-video_stream_in << " sec." << std::endl;
 			
 			//if (summary_data) delete summary_data;
 			std::cout << "Getting summary data... ";
 			double summary_data_in = getTime();
-			summary_data = ((ACVideo*)(media_cycle->getLibrary()->getMedia(media_index)))->getData();
+			summary_data = tmp_vid->getData();
 			std::cout << getTime()-summary_data_in << " sec." << std::endl;
 			
 			//CF: dummy segments

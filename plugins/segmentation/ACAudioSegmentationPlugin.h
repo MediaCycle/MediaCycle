@@ -46,11 +46,7 @@ class ACAudioSegmentationPlugin : public ACSegmentationPlugin {
 public:
 	ACAudioSegmentationPlugin();
 	~ACAudioSegmentationPlugin();
-
-	virtual int initialize(){return 1;};
-	virtual int start(){return 1;};
-	virtual int stop(){return 1;};
-
+	
 	virtual std::vector<ACMedia*> segment(ACMediaData* _data, ACMedia*);
 	std::vector<ACMedia*> segment(ACMediaTimedFeature* _MTF, ACMedia* _theMedia);
 

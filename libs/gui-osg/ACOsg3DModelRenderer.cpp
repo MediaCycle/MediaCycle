@@ -36,7 +36,7 @@
 #if defined (SUPPORT_3DMODEL)
 
 #include "ACOsg3DModelRenderer.h"
-
+#include <osg/ComputeBoundsVisitor>
 #include <osgDB/ReaderWriter>
 #include "boost/filesystem.hpp"
 

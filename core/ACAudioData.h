@@ -1,10 +1,10 @@
 /*
- *  ACVampDemoPlugin.h
+ *  ACAudioData.h
  *  MediaCycle
  *
  *  @author Xavier Siebert
- *  @date 22/09/09
- *  @copyright (c) 2009 – UMONS - Numediart
+ *  @date 7/04/11
+ *  @copyright (c) 2011 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
  *  licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -32,24 +32,35 @@
  *
  */
 
-#ifndef _ACVAMPDEMOPLUGIN_H
-#define	_ACVAMPDEMOPLUGIN_H
+#ifndef ACAUDIODATA_H
+#define ACAUDIODATA_H
 
-#include "vamp-plugin-interface.h"
-#include "MediaCycle.h"
+#if defined (SUPPORT_AUDIO)
+#include "ACMediaData.h"
+#include <sndfile.h>
 
-#include<iostream>
-
-class ACVampDemoPlugin : public ACFeaturesPlugin {
+class ACAudioData: public ACMediaData {
 public:
-	ACVampDemoPlugin();
-	~ACVampDemoPlugin();
-	
-	virtual std::vector<ACMediaFeatures*> calculate(){};
-	virtual std::vector<ACMediaFeatures*> calculate(std::string aFileName, bool _save_timed_feat=false){};
-	virtual std::vector<ACMediaFeatures*> calculate(ACMediaData* _data, ACMedia*, bool _save_timed_feat=false);
-	
+	ACAudioData();
+	~ACAudioData();
+	ACAudioData(std::string _fname);
+
+	void readData(std::string _fname);
+	virtual void* getData() {return static_cast<void*>(audio_ptr);}
+//	float* getData() {return audio_ptr;}
+	void setData(float* _data, float _sample_number);
+
+protected:
+	virtual void init();
+
 private:
+	float getAudioLength() {return audio_frames;}
+
+	float* audio_ptr;
+	float  audio_frames;
+	
 };
 
-#endif	/* _ACVAMPDEMOPLUGIN_H */
+
+#endif //defined (SUPPORT_AUDIO)
+#endif // ACAUDIODATA_H

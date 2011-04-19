@@ -2,8 +2,7 @@
  *  AC3DModel.cpp
  *  MediaCycle
  *
- *  @author Stéphane Dupont
- *  @date 09/09/10
+ *  Created by St�phane Dupont on 09/09/10.
  *  @copyright (c) 2010 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
@@ -59,23 +58,20 @@ AC3DModel::~AC3DModel() {
 
 void AC3DModel::setData(osg::ref_ptr<osg::Node> _data)
 {
-	if (data->getMediaType()==MEDIA_TYPE_NONE)
-		data = new ACMediaData(MEDIA_TYPE_3DMODEL);	
-	else
-		data->setMediaType(MEDIA_TYPE_3DMODEL);
-	data->set3DModelData(_data);
+	if (data == 0) 
+		data = new AC3DModelData();
+	data->setData(_data);
 }
 
-//ACMediaData* AC3DModel::extractData(string fname) {
 void AC3DModel::extractData(string fname) {
-	
+	if (data) delete data;
+	data = new AC3DModelData();
+	data->readData(fname);
+
 	osg::ref_ptr<osg::Node> local_model_ptr = 0;
 	osg::ComputeBoundsVisitor cbv;
 	
-	//ACMediaData* model_data = new ACMediaData(MEDIA_TYPE_3DMODEL,fname);
-	data = new ACMediaData(MEDIA_TYPE_3DMODEL,fname);
-	
-	local_model_ptr = data->get3DModelData();
+	local_model_ptr = this->getData();
 	local_model_ptr->accept( cbv );
 	const osg::BoundingBox bb( cbv.getBoundingBox() );
 	osg::Vec3 ext( bb._max - bb._min );
@@ -87,6 +83,11 @@ void AC3DModel::extractData(string fname) {
 	extent[0] = ext.x(); extent[1] = ext.y(); extent[2] = ext.z();
 		
 	//return model_data;
+}
+
+void AC3DModel::deleteData(){
+	delete data;
+	data=0;
 }
 
 void AC3DModel::saveACLSpecific(ofstream &library_file) {

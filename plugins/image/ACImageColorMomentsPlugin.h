@@ -38,6 +38,7 @@
 #include "ACColorImageAnalysis.h"
 #include "ACPlugin.h"
 #include "ACMediaFeatures.h"
+#include "ACImageData.h"
 
 #include<iostream>
 

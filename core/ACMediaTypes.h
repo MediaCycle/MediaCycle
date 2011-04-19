@@ -54,7 +54,7 @@ enum ACMediaType {
 typedef std::map<std::string, ACMediaType> stringToMediaTypeConverter;
 
 // initialize static class variable
-const stringToMediaTypeConverter::value_type _initm[] = {
+static const stringToMediaTypeConverter::value_type _initm[] = {
 stringToMediaTypeConverter::value_type("", MEDIA_TYPE_NONE), \
 stringToMediaTypeConverter::value_type("Audio", MEDIA_TYPE_AUDIO), \
 stringToMediaTypeConverter::value_type("Image", MEDIA_TYPE_IMAGE), \
@@ -65,23 +65,23 @@ stringToMediaTypeConverter::value_type("Mixed", MEDIA_TYPE_MIXED), \
 stringToMediaTypeConverter::value_type("All", MEDIA_TYPE_ALL)
 };
 
-const stringToMediaTypeConverter stringToMediaType(_initm, _initm + sizeof _initm / sizeof *_initm);
-
-// conversion between MediaTypes and text string of enum name (e.g., to be used in the labels for the gui)
-typedef std::map<ACMediaType,std::string> mediaTypeToEnumNameConverter;
-
-// initialize static class variable
-const mediaTypeToEnumNameConverter::value_type _inits[] = {
-mediaTypeToEnumNameConverter::value_type(MEDIA_TYPE_NONE,"MEDIA_TYPE_NONE"), \
-mediaTypeToEnumNameConverter::value_type(MEDIA_TYPE_AUDIO,"MEDIA_TYPE_AUDIO"), \
-mediaTypeToEnumNameConverter::value_type(MEDIA_TYPE_IMAGE,"MEDIA_TYPE_IMAGE"), \
-mediaTypeToEnumNameConverter::value_type(MEDIA_TYPE_VIDEO,"MEDIA_TYPE_VIDEO"), \
-mediaTypeToEnumNameConverter::value_type(MEDIA_TYPE_3DMODEL,"MEDIA_TYPE_3DMODEL"), \
-mediaTypeToEnumNameConverter::value_type(MEDIA_TYPE_TEXT,"MEDIA_TYPE_TEXT"), \
-mediaTypeToEnumNameConverter::value_type(MEDIA_TYPE_MIXED,"MEDIA_TYPE_MIXED"), \
-mediaTypeToEnumNameConverter::value_type(MEDIA_TYPE_ALL,"MEDIA_TYPE_ALL")
-};
-
-const mediaTypeToEnumNameConverter mediaTypeToEnumName(_inits, _inits + sizeof _inits / sizeof *_inits);
-
+static const stringToMediaTypeConverter stringToMediaType(_initm, _initm + sizeof _initm / sizeof *_initm);
+//
+//// conversion between MediaTypes and text string of enum name (e.g., to be used in the labels for the gui)
+//typedef std::map<ACMediaType,std::string> mediaTypeToEnumNameConverter;
+//
+//// initialize static class variable
+//static const mediaTypeToEnumNameConverter::value_type _inits[] = {
+//mediaTypeToEnumNameConverter::value_type(MEDIA_TYPE_NONE,"MEDIA_TYPE_NONE"), \
+//mediaTypeToEnumNameConverter::value_type(MEDIA_TYPE_AUDIO,"MEDIA_TYPE_AUDIO"), \
+//mediaTypeToEnumNameConverter::value_type(MEDIA_TYPE_IMAGE,"MEDIA_TYPE_IMAGE"), \
+//mediaTypeToEnumNameConverter::value_type(MEDIA_TYPE_VIDEO,"MEDIA_TYPE_VIDEO"), \
+//mediaTypeToEnumNameConverter::value_type(MEDIA_TYPE_3DMODEL,"MEDIA_TYPE_3DMODEL"), \
+//mediaTypeToEnumNameConverter::value_type(MEDIA_TYPE_TEXT,"MEDIA_TYPE_TEXT"), \
+//mediaTypeToEnumNameConverter::value_type(MEDIA_TYPE_MIXED,"MEDIA_TYPE_MIXED"), \
+//mediaTypeToEnumNameConverter::value_type(MEDIA_TYPE_ALL,"MEDIA_TYPE_ALL")
+//};
+//
+//static const mediaTypeToEnumNameConverter mediaTypeToEnumName(_inits, _inits + sizeof _inits / sizeof *_inits);
+//
 #endif // _ACMEDIA_TYPE_H

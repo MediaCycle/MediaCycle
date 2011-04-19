@@ -66,7 +66,17 @@ ACColorImageAnalysis::ACColorImageAnalysis(const string &filename, string _cmode
 
 ACColorImageAnalysis::ACColorImageAnalysis(IplImage* img, string _cmode) : ACImageAnalysis(){
 	reset();
-	// here the filename is unknown.	
+	// here the filename is unknown
+	scaleImage(img);
+	
+	// XS TODO check color model 
+	color_model="BGR";	
+}
+
+ACColorImageAnalysis::ACColorImageAnalysis(ACMediaData* image_data, string _cmode) : ACImageAnalysis(){
+	reset();
+	setFileName(image_data->getFileName());	
+	IplImage* img = static_cast<IplImage*> (image_data->getData());
 	scaleImage(img);
 	
 	// XS TODO check color model 

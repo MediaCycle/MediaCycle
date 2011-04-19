@@ -1,10 +1,10 @@
 /*
- *  ACVampDemoPlugin.h
+ *  ACVideoColorPlugin.h
  *  MediaCycle
  *
  *  @author Xavier Siebert
- *  @date 22/09/09
- *  @copyright (c) 2009 – UMONS - Numediart
+ *  @date 11/04/11
+ *  @copyright (c) 2011 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
  *  licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -32,24 +32,26 @@
  *
  */
 
-#ifndef _ACVAMPDEMOPLUGIN_H
-#define	_ACVAMPDEMOPLUGIN_H
+#ifndef _ACVIDEOCOLORPLUGIN_H
+#define	_ACVIDEOCOLORPLUGIN_H
+#include "ACVideoAnalysis.h"
+#include "ACPlugin.h"
+#include "ACMediaFeatures.h"
+#include "ACMediaTimedFeature.h"
 
-#include "vamp-plugin-interface.h"
-#include "MediaCycle.h"
-
-#include<iostream>
-
-class ACVampDemoPlugin : public ACFeaturesPlugin {
+//XS TODO : make an ACVideoFeatures Plugin
+// with (ACVideoData *) ACMediaData
+class ACVideoColorPlugin : public ACFeaturesPlugin {
 public:
-	ACVampDemoPlugin();
-	~ACVampDemoPlugin();
-	
-	virtual std::vector<ACMediaFeatures*> calculate(){};
-	virtual std::vector<ACMediaFeatures*> calculate(std::string aFileName, bool _save_timed_feat=false){};
-	virtual std::vector<ACMediaFeatures*> calculate(ACMediaData* _data, ACMedia*, bool _save_timed_feat=false);
-	
-private:
+    ACVideoColorPlugin();
+    ~ACVideoColorPlugin();
+	virtual std::vector<ACMediaFeatures*> calculate(std::string aFileName, bool _save_timed_feat=false);
+	virtual std::vector<ACMediaFeatures*> calculate(ACMediaData* aData, ACMedia* theMedia, bool _save_timed_feat=false);
+//	std::string getSavedFileName(){return mtf_file_name;}
+private:	
+	ACVideoAnalysis* videoAn;
+	std::vector<ACMediaFeatures*> _calculate(std::string aFileName="", bool _save_timed_feat=false);
+	void clean();
 };
 
-#endif	/* _ACVAMPDEMOPLUGIN_H */
+#endif //_ACVIDEOCOLORPLUGIN_H

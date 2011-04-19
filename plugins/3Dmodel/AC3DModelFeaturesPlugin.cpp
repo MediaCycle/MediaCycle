@@ -1,7 +1,7 @@
 /**
  * @brief AC3DModelFeaturesPlugin.cpp
- * @author Thierry Ravet
- * @date 25/03/2011
+ * @author Xavier Siebert
+ * @date 20/04/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -34,6 +34,7 @@
 
 #include <vector>
 #include <string>
+#include <osg/ComputeBoundsVisitor>
 
 AC3DModelFeaturesPlugin::AC3DModelFeaturesPlugin() {
 	
@@ -54,13 +55,22 @@ std::vector<ACMediaFeatures*> AC3DModelFeaturesPlugin::calculate(std::string aFi
 	
 }
 std::vector<ACMediaFeatures*> AC3DModelFeaturesPlugin::calculate(ACMediaData* model_data, ACMedia* theMedia, bool _save_timed_feat) {
-	
-	osg::Node* local_model_ptr;
-	ACMediaFeatures* desc_bounding_box_ratio;
 	std::vector<ACMediaFeatures*> desc;
+//	AC3DModelData* local_model_data = 0;
+//	try{
+//		local_model_data = static_cast <AC3DModelData*> (model_data);
+//		if(! local_model_data) 
+//			throw runtime_error("<AC3DModelFeaturesPlugin::calculate> problem with mediaData cast");
+//	}catch (const exception& e) {
+//		cerr << e.what() << endl;
+//		return desc;
+//	}
+	
+	osg::ref_ptr<osg::Node> local_model_ptr;
+	ACMediaFeatures* desc_bounding_box_ratio;
 	osg::ComputeBoundsVisitor cbv;
 	
-	local_model_ptr = model_data->get3DModelData();
+	local_model_ptr = static_cast< osg::Node* > (model_data->getData());
 	local_model_ptr->accept( cbv );
 	const osg::BoundingBox bb( cbv.getBoundingBox() );
 	osg::Vec3 ext( bb._max - bb._min );	

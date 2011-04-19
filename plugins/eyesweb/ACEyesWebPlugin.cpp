@@ -22,7 +22,6 @@ ACEyesWebPlugin::~ACEyesWebPlugin()
 {
 }
 
-
 string ACEyesWebPlugin::extractDirectory(string path)
 {
     int index = 0;

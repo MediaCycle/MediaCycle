@@ -719,8 +719,10 @@ int ACMediaTimedFeature::readFile(std::string fileName){
 }
 
 void ACMediaTimedFeature::dump(){ // in cout
+	cout << "ACMediaTimedFeature named " << this->getName() << endl;
 	fmat data = join_rows(this->getTime(), this->getValue());
 	data.print();
+	cout << "--------------------------" << endl;
 }
 
 //XS new

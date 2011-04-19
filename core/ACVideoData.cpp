@@ -1,10 +1,10 @@
 /*
- *  ACVampDemoPlugin.h
+ *  ACVideoData.cpp
  *  MediaCycle
  *
  *  @author Xavier Siebert
- *  @date 22/09/09
- *  @copyright (c) 2009 – UMONS - Numediart
+ *  @date 7/04/11
+ *  @copyright (c) 2011 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
  *  licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -32,24 +32,51 @@
  *
  */
 
-#ifndef _ACVAMPDEMOPLUGIN_H
-#define	_ACVAMPDEMOPLUGIN_H
+#if defined (SUPPORT_VIDEO)
 
-#include "vamp-plugin-interface.h"
-#include "MediaCycle.h"
+#include "ACVideoData.h"
+#include <string>
+#include <iostream>
+using std::cerr;
+using std::endl;
+using std::string;
 
-#include<iostream>
+ACVideoData::ACVideoData() { 
+	this->init();
+}
 
-class ACVampDemoPlugin : public ACFeaturesPlugin {
-public:
-	ACVampDemoPlugin();
-	~ACVampDemoPlugin();
-	
-	virtual std::vector<ACMediaFeatures*> calculate(){};
-	virtual std::vector<ACMediaFeatures*> calculate(std::string aFileName, bool _save_timed_feat=false){};
-	virtual std::vector<ACMediaFeatures*> calculate(ACMediaData* _data, ACMedia*, bool _save_timed_feat=false);
-	
-private:
-};
+ACVideoData::ACVideoData(std::string _fname){ 
+	this->init();
+	file_name=_fname;
+	this->readData(_fname);
+}
 
-#endif	/* _ACVAMPDEMOPLUGIN_H */
+void ACVideoData::init() {
+	media_type = MEDIA_TYPE_VIDEO;
+	video_ptr = 0;
+}
+
+ACVideoData::~ACVideoData() {
+	if (video_ptr != 0) cvReleaseCapture(&video_ptr);
+	video_ptr = 0;
+}
+
+void ACVideoData::readData(string _fname){
+	if(_fname=="") return;
+	video_ptr = cvCreateFileCapture(_fname.c_str());		
+	if( !video_ptr ) {
+		// Either the video does not exist, or it uses a codec OpenCV does not support. 
+		cerr << "<ACVideoData::readData> Could not initialize capturing from file " << _fname << endl;
+	}	
+}
+
+void ACVideoData::setData(CvCapture* _data){
+	cvCopy(_data,video_ptr);		
+	if( !video_ptr ) {
+		// Either the video does not exist, or it uses a codec OpenCV does not support. 
+		cerr << "<ACVideoData::setData> Could not set data" << endl;
+	}	
+}
+
+
+#endif //defined (SUPPORT_VIDEO)

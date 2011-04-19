@@ -38,6 +38,7 @@
 // BUT the dock's names start with "AC"
 
 ACAbstractDockWidgetQt* ACDockWidgetFactoryQt::createDockWidget(QWidget *parent,std::string dock_type) {
+	if (dock_type == "MCOSC") {return new ACOSCDockWidgetQt(parent);}
 	if (dock_type == "MCBrowserControlsClusters") {return new ACBrowserControlsClustersDockWidgetQt(parent);}
 	#if defined (SUPPORT_AUDIO)
 	else if (dock_type == "MCAudioControls") {return new ACAudioControlsDockWidgetQt(parent);}

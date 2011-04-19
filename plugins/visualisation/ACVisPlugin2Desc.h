@@ -1,7 +1,7 @@
 /**
  * @brief ACVisPlugin2Desc.h
- * @author Thierry Ravet
- * @date 08/04/2011
+ * @author Xavier Siebert
+ * @date 20/04/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -41,16 +41,11 @@
 
 class ACVisPlugin2Desc : public ACClusterPositionsPlugin {
 public:
-  ACVisPlugin2Desc();
-  ~ACVisPlugin2Desc();
-  virtual int initialize();
-/*   virtual std::vector<ACMediaFeatures*> calculate(); */
-/*   virtual std::vector<ACMediaFeatures*> calculate(std::string aFileName); */
-/* 	std::vector<ACMediaFeatures*> calculate(ACMediaData* _data){} */
-/*   virtual void updateClusters(ACMediaBrowser* ); */
-  virtual void updateNextPositions(ACMediaBrowser* );
+	ACVisPlugin2Desc();
+	~ACVisPlugin2Desc();
+	virtual void updateNextPositions(ACMediaBrowser* );
 	void extractDescMatrix(ACMediaBrowser* mediaBrowser, arma::mat& desc_m, std::vector<std::string> &featureNames);
-
+	
 protected:
 };
 

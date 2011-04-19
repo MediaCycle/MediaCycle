@@ -592,13 +592,6 @@ void ACMediaBrowser::libraryContentChanged(int needsCluster) {
 	
 	this->initializeFeatureWeights();
 	
-
-	// XS 250310 cleaned these 4:
-//	updateNeighborhoods();
-//	updateClusters(false);
-//	updateNextPositions();		
-//	setNeedsDisplay(true);
-	// into:
 	updateDisplay(true, needsCluster);
 	
 	prevLibrarySize = mLibrary->getSize();
@@ -1379,11 +1372,12 @@ ACPointer& ACMediaBrowser::getPointer(int i) {
 } 
 
 // CF prepareNodes ? (cf. OSG)
-void ACMediaBrowser::initializeNodes(ACBrowserMode _mode) { // default = AC_MODE_CLUSTERS
-	// makes an ACMediaNode for each Media in the library
-	
+// makes an ACMediaNode for each Media in the library
+// - AC_MODE_CLUSTERS : nodeID = mediaID if the whole Library is used in the Browser
+// - AC_MODE_NEIGHBORS : nodeID = 0 initially, then only the neighbors will receive a nodeID
+
+void ACMediaBrowser::initializeNodes(ACBrowserMode _mode) { // default = AC_MODE_CLUSTERS	
 	int librarySize;
-	//prevLibrarySize;
 	
 	librarySize = mLibrary->getSize();
 	if (librarySize<prevLibrarySize) {
@@ -1448,14 +1442,13 @@ void ACMediaBrowser::updateDisplay(bool animate, int needsCluster) {
 
 //CF to debug with all scenarios! Plugins and OSG (tree nodes should not be colored) might need some tweaking...
 void ACMediaBrowser::switchMode(ACBrowserMode _mode){
-
+	if (mMode == _mode) return;
+	
 	double t = getTime();
 
 	switch ( mMode ){
 		case AC_MODE_CLUSTERS:
 			switch ( _mode ){
-				case AC_MODE_CLUSTERS:
-					break;
 				case AC_MODE_NEIGHBORS:
 					if ( getLibrary()->getSize() > 0 ) {
 						//CF do we have to clean the navigation states?
@@ -1525,8 +1518,6 @@ void ACMediaBrowser::switchMode(ACBrowserMode _mode){
 						//(*node).setNextPosition(0.0, 0.0, 0.0);
 					}
 					this->updateDisplay(true);
-					break;
-				case AC_MODE_NEIGHBORS:
 					break;
 				default:
 					cerr << "unknown browser mode: " << mMode << endl;

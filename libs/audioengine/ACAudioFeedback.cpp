@@ -2,8 +2,7 @@
  *  ACAudioFeedback.cpp
  *  AudioCycle
  *
- *  @author St√©phane Dupont
- *  @date 21/10/08
+ *  Created by Stéphane Dupont on 21/10/08.
  *  @copyright (c) 2008 ‚Äì UMONS - Numediart
  *  
  *  MediaCycle of University of Mons ‚Äì Numediart institute is 
@@ -43,7 +42,7 @@ int set_my_thread_priority(int priority) {
 	memset(&sp, 0, sizeof(struct sched_param));
     sp.sched_priority=priority;
     if (pthread_setschedparam(pthread_self(), SCHED_RR, &sp)  == -1) {
-        //printf(‚ÄúFailed to change priority.\n‚Äù);
+        //printf(“Failed to change priority.\n”);
         return -1;
     }
     return 0;
@@ -1661,23 +1660,23 @@ int ACAudioFeedback::createSourceWithPosition(int loop_id, float x, float y, flo
 	// local_bpm = 120;
 	// local_key = 65;
 	// local_acid_type = 2;
-
-	int samplesize = ((ACAudio*) media_cycle->getLibrary()->getMedia(loop_id))->getNFrames();
+	ACAudio* tmp_audio_ptr = static_cast<ACAudio*>(media_cycle->getLibrary()->getMedia(loop_id));
+	int samplesize = tmp_audio_ptr->getNFrames();
 	float* dataf;// = new float[samplesize];
-	dataf = ((ACAudio*) media_cycle->getLibrary()->getMedia(loop_id))->getSamples();
+	dataf = tmp_audio_ptr->getSamples();
 	size = samplesize * sizeof(float);
-	freq = ((ACAudio*) media_cycle->getLibrary()->getMedia(loop_id))->getSampleRate();
+	freq = tmp_audio_ptr->getSampleRate();
 	
 	// Convert to single channel (mono). OpenAl stereo sources are not spatialized indeed.
 	// DT: To make sample_start and end actually work
 	//	int sample_size;// = media_cycle->getWidth(loop_id);
 	//	int sample_start = 0;
 	//	int sample_end;
-	int sample_start = ((ACAudio*) media_cycle->getLibrary()->getMedia(loop_id))->getSampleStart();
-	int sample_end = ((ACAudio*) media_cycle->getLibrary()->getMedia(loop_id))->getSampleEnd();
+	int sample_start = tmp_audio_ptr->getSampleStart();
+	int sample_end = tmp_audio_ptr->getSampleEnd();
 	int sample_size = sample_end - sample_start;
 	
-	int channels = ((ACAudio*) media_cycle->getLibrary()->getMedia(loop_id))->getChannels();
+	int channels = tmp_audio_ptr->getChannels();
 	
 	int segment_size = sample_end - sample_start;
 	datashort = new short[segment_size];
@@ -1966,7 +1965,7 @@ int ACAudioFeedback::createExtSource(float* _buffer, int _length){
 	
 	alGenSources(1, &ext_loop_source);
 	
-	// On attache le tampon contenant les √©chantillons audio √† la source
+	// On attache le tampon contenant les échantillons audio à la source
 	alSourcei(ext_loop_source, AL_BUFFER, ext_loop_buffer);
 	alSourcei(ext_loop_source, AL_LOOPING, AL_TRUE);
 	
@@ -2334,7 +2333,7 @@ int ACAudioFeedback::setSourceVelocity(int loop_id, float velocity)
  if ((ret=task_policy_set(mach_task_self(),
  TASK_CATEGORY_POLICY, (thread_policy_t)&tcatpolicy,
  TASK_CATEGORY_POLICY_COUNT)) != KERN_SUCCESS) {
- //fprintf(stderr, ‚Äúset_my_task_policy() failed.\n‚Äù);
+ //fprintf(stderr, “set_my_task_policy() failed.\n”);
  return 0;
  }
  return 1;
@@ -2352,7 +2351,7 @@ int ACAudioFeedback::setSourceVelocity(int loop_id, float velocity)
  if ((ret=thread_policy_set(mach_thread_self(),
  THREAD_TIME_CONSTRAINT_POLICY, (thread_policy_t)&ttcpolicy,
  THREAD_TIME_CONSTRAINT_POLICY_COUNT)) != KERN_SUCCESS) {
- //fprintf(stderr, ‚Äúset_realtime() failed.\n‚Äù);
+ //fprintf(stderr, “set_realtime() failed.\n”);
  return 0;
  }
  return 1;

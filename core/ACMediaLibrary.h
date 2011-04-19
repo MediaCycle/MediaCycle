@@ -2,8 +2,7 @@
  *  ACMediaLibrary.h
  *  MediaCycle
  *
- *  @author Stéphane Dupont
- *  @date 21/10/08
+ *  Created by St�phane Dupont on 21/10/08.
  *  @author Xavier Siebert
  *
  *  @copyright (c) 2008 – UMONS - Numediart

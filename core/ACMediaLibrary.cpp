@@ -136,7 +136,7 @@ int ACMediaLibrary::importDirectory(std::string _path, int _recursive, ACPluginM
  	int nf = scanDirectory(_path, _recursive, filenames);
 
 	if (nf < 0) {
-		cerr << "Problem importing directory: " << _path << endl;
+		cerr << " <ACMediaLibrary::importDirectory> Problem importing directory: " << _path << endl;
 		return -1;
 	}
 	else if (nf == 0) {
@@ -220,7 +220,7 @@ int ACMediaLibrary::importFile(std::string _filename, ACPluginManager *acpl, boo
 		}
 	}
 	else {
-		cout << "<ACMediaLibrary::importFile> problem importing " << _filename << " ... " << endl;
+		cerr << "<ACMediaLibrary::importFile> problem importing " << _filename << " ... " << endl;
 		return 0;
 
 	}		

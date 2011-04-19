@@ -92,7 +92,7 @@ ACVideoAnalysis::ACVideoAnalysis(const string &filename){
 ACVideoAnalysis::ACVideoAnalysis(ACMediaData* media_data){
 	clean();
 	file_name = media_data->getFileName();
-	capture = media_data->getVideoData();
+	capture = static_cast<CvCapture*>(media_data->getData());
 	initialize();
 }
 
@@ -1389,10 +1389,11 @@ void ACVideoAnalysis::computeGlobalPixelSpeed() {
 	tmp_frame = cvCreateImage(cvSize(file_cap.nCols,file_cap.nRows),IPL_DEPTH_8U,3);
 	file_cap.getframe(&tmp_frame);
 	#endif
-	
+
 	#if defined(USE_DEBUG) && defined(APPLE_LEOPARD)
 	std::cout << "ACVideoAnalysis::computeGlobalPixelSpeed " << cvGetCaptureProperty(capture, CV_CAP_PROP_POS_FRAMES) << " / " << cvGetCaptureProperty(capture, CV_CAP_PROP_FRAME_COUNT) << "(fps " << cvGetCaptureProperty(capture, CV_CAP_PROP_FPS) << ")" << std::endl;
 	#endif
+
 	global_pixel_speeds.push_back(speed); // so that the global_pixel_speeds vector has the same lenght as the time_stamps
 	
 	frame = cvCreateImage (cvSize (width, height), IPL_DEPTH_32S, 3);
@@ -1417,6 +1418,7 @@ void ACVideoAnalysis::computeGlobalPixelSpeed() {
 		#if defined(USE_DEBUG) && defined(APPLE_LEOPARD)
 		std::cout << "ACVideoAnalysis::computeGlobalPixelSpeed " << cvGetCaptureProperty(capture, CV_CAP_PROP_POS_FRAMES) << " / " << cvGetCaptureProperty(capture, CV_CAP_PROP_FRAME_COUNT) << "(fps " << cvGetCaptureProperty(capture, CV_CAP_PROP_FPS) << ")" << std::endl;
 		#endif
+
 		cvConvert (tmp_frame, frame);
 		cvAbsDiff (frame, previous_frame, diff_frames);
 		sum_diff_frames = cvSum (diff_frames);
@@ -1451,8 +1453,9 @@ void ACVideoAnalysis::computeGlobalPixelSpeed() {
 	cvDestroyWindow ("Input");
 	cvDestroyWindow ("Substraction");
 #endif //VISUAL_CHECK
+
 	#ifndef APPLE_LEOPARD
-	file_cap.closeit();
+ 	file_cap.closeit();
 	#endif
 }
 

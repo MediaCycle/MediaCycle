@@ -112,6 +112,8 @@ public:
 	void cleanBrowser() { mediaBrowser->clean(); }
 
 	// Plugins
+	
+	// XS TODO cleanPlugins
     int addPluginLibrary(std::string aPluginLibraryPath);
     int removePluginLibrary(std::string aPluginLibraryPath);
 	ACPluginManager* getPluginManager() { return pluginManager;}

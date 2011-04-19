@@ -39,6 +39,7 @@
 
 #include "ACOpenCVInclude.h"
 #include "ACMedia.h"
+#include "ACVideoData.h"
 #include <string>
 
 #include <osg/ImageStream>
@@ -64,23 +65,26 @@ public:
 	int getThumbnailHeight() {return thumbnail_height;}
 	osg::ref_ptr<osg::ImageStream> getStream() {return image_stream;}
 
-	CvCapture* getData();//{return data->getVideoData();}
+	CvCapture* getData();//{return data->getData();}
 	void setData(CvCapture* _data);
-	
-	//ACMediaData* extractData(std::string fname);
+	virtual ACMediaData* getMediaData(){return data;}
 	void extractData(std::string fname);
-	
+	virtual void deleteData();
+
 private:
 	void init();	
-	static const int default_thumbnail_width, default_thumbnail_height, default_thumbnail_area;
+	bool computeThumbnail(int w=0, int h=0);
+	int computeSlitScan(int frame_in, int frame_out);
+	bool computeThumbnailSize(int w_, int h_);
+
+private:
+	static const int default_thumbnail_area;
 	int thumbnail_width, thumbnail_height;
 	osg::ref_ptr<osg::ImageStream>image_stream;	
 	osg::ref_ptr<osg::Image> thumbnail;
 	osg::ref_ptr<osg::Texture2D> image_texture;
+	ACVideoData* data;
 	
-	int computeThumbnail(int w=0, int h=0);
-	int computeSlitScan(int frame_in, int frame_out);
-	void computeThumbnailSize();
 };
 #endif //defined (SUPPORT_VIDEO)
 #endif // ACVIDEO_H

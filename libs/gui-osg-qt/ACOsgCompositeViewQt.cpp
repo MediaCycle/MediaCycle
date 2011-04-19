@@ -110,12 +110,12 @@ ACOsgCompositeViewQt::ACOsgCompositeViewQt( QWidget * parent, const char * name,
 	browser_view->getCamera()->setProjectionMatrixAsPerspective(45.0f, static_cast<double>(width())/static_cast<double>(height()-sepy), 0.001f, 10.0f);
 	browser_view->getCamera()->getViewMatrix().makeIdentity();
 	browser_view->getCamera()->setViewMatrixAsLookAt(Vec3(0,0,0.8), Vec3(0,0,0), Vec3(0,1,0));
-	//browser_view->getCamera()->setClearColor(Vec4f(0.0,0.0,0.0,0.0));
+	browser_view->getCamera()->setClearColor(Vec4f(0.0,0.0,0.0,0.0));
 	this->addView(browser_view);
 	
 	timeline_view = new osgViewer::View;
-	//timeline_view->getCamera()->setClearColor(Vec4f(0.0,0.0,0.0,0.0));
-	timeline_view->getCamera()->setClearColor(Vec4f(0.14,0.14,0.28,1.0));
+	timeline_view->getCamera()->setClearColor(Vec4f(0.0,0.0,0.0,0.0));
+	//timeline_view->getCamera()->setClearColor(Vec4f(0.14,0.14,0.28,1.0));
 	timeline_view->getCamera()->setGraphicsContext(this->getGraphicsWindow());
 	timeline_view->getCamera()->setViewport(new osg::Viewport(controls_width,0,width()-controls_width,sepy));
 	
@@ -638,7 +638,7 @@ void ACOsgCompositeViewQt::mouseReleaseEvent( QMouseEvent* event )
     }
     osg_view->getEventQueue()->mouseButtonRelease(event->x(), event->y(), button);
 	
-	if ( (media_cycle) && (media_cycle->hasBrowser()))
+	if (media_cycle->hasBrowser())
 	{
 		if ( (finddown == 1) || (opendown == 1) || (forwarddown==1) || (trackdown == 1) )
 		{	
@@ -674,27 +674,13 @@ void ACOsgCompositeViewQt::mouseReleaseEvent( QMouseEvent* event )
 				}	
 				else if (forwarddown==1)
 				{
-					// XSCF 250310 added these 3
-					// XS 260810 put this "if" first other+wise we store the next state
-					if (media_cycle->getBrowser()->getMode() == AC_MODE_CLUSTERS)
+					if (media_cycle->getBrowser()->getMode() == AC_MODE_CLUSTERS){
+						// store first otherwise we store the next state
 						media_cycle->storeNavigationState();
-					
-					if (media_cycle->getBrowser()->getMode() == AC_MODE_CLUSTERS)
 						media_cycle->incrementLoopNavigationLevels(loop);
+					}
 					media_cycle->setReferenceNode(loop);
-					
-					
-					//			media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
-					//			media_cycle->getBrowser()->setState(AC_CHANGING);
-					
-					media_cycle->updateDisplay(true); //XS250310 was: media_cycle->updateClusters(true);
-					// XSCF 250310 removed this:
-					// media_cycle->updateNeighborhoods();
-					//	media_cycle->updateClusters(false);// CF was true, equivalent to what's following
-					
-					//				// remainders from updateClusters(true)
-					//				media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
-					//				media_cycle->getBrowser()->setState(AC_CHANGING);
+					media_cycle->updateDisplay(true);
 				}
 				else if (trackdown == 1)
 				{
@@ -704,8 +690,6 @@ void ACOsgCompositeViewQt::mouseReleaseEvent( QMouseEvent* event )
 					mediaOnTrack = loop;
 					if (mediaOnTrack != -1)
 						this->getBrowserRenderer()->changeNodeColor(mediaOnTrack, Vec4(1.0,1.0,1.0,1.0));//CF color the node of the media on track in white
-					
-					
 						
 					/*if ( timeline_renderer->getTrack(0)!=0 )
 					{*/
@@ -780,7 +764,8 @@ void ACOsgCompositeViewQt::prepareFromBrowser()
 	library_loaded = true;
 }
 
-
+// XS TODO this is called for instance when click on node
+// check that it does not do too many things
 void ACOsgCompositeViewQt::updateTransformsFromBrowser( double frac)
 {
 	if (media_cycle == 0) return;

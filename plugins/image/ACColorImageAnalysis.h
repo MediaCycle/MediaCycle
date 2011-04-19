@@ -42,7 +42,8 @@ public:
 	ACColorImageAnalysis();
 	ACColorImageAnalysis(const string &filename, string _cmode="BGR");	
 	ACColorImageAnalysis(IplImage*, string _cmode="BGR");
-	
+	ACColorImageAnalysis(ACMediaData* image_data, string _cmode="BGR");
+
     ~ACColorImageAnalysis();
 
 	void reset();

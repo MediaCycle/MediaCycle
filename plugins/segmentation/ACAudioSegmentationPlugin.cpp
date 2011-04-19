@@ -67,14 +67,24 @@ std::vector<ACMedia*> ACAudioSegmentationPlugin::segment(ACMediaData* audio_data
 	int windowSize = 512; // CF idem
 	bool extendSoundLimits = true;
 	std::vector<ACMediaFeatures*> desc;
-	ACAudio* theAudio = (ACAudio*) theMedia;
+	ACAudio* theAudio = 0;
+	vector<ACMedia*> segments;
+	try{
+		theAudio = static_cast<ACAudio*> (theMedia);
+		if(!theAudio) 
+			throw runtime_error("<ACAudioSegmentationPlugin::segment> problem with ACMedia cast");
+	}catch (const exception& e) {
+		cerr << e.what() << endl;
+		return segments;
+	}	
+	
 	ACMediaTimedFeature* desc_mf;
 	float* data = new float[theAudio->getNFrames() * theAudio->getChannels()];
 	long index = 0;
 	
 	for (long i = theAudio->getSampleStart(); i< theAudio->getSampleEnd(); i++){
 		for (long j = 0; j < theAudio->getChannels(); j++){
-			data[index] = audio_data->getAudioData()[i*theAudio->getChannels()+j];
+			data[index] = static_cast<float*>(audio_data->getData())[i*theAudio->getChannels()+j];
 			index++;
 		}
 	}
@@ -97,13 +107,24 @@ std::vector<ACMedia*> ACAudioSegmentationPlugin::segment(ACMediaData* audio_data
 		exit(1);
 	}
 
-	vector<ACMedia*> segments = this->_segment(desc_mf,theMedia);
-	//delete[] data;
+	segments = this->_segment(desc_mf,theMedia);
+	delete[] data; // XS TODO why was this commented ?
 	return segments;
 }
 
 std::vector<ACMedia*> ACAudioSegmentationPlugin::_segment(ACMediaTimedFeature* desc_mf, ACMedia* theMedia) {
-	ACAudio* theAudio = (ACAudio*) theMedia;
+	ACAudio* theAudio = 0;
+	vector<ACMedia*> segments;
+
+	try{
+		theAudio = dynamic_cast <ACAudio*> (theMedia);
+		if(!theAudio) 
+			throw runtime_error("<ACAudioSegmentationPlugin::_segment> problem with mediaData cast");
+	}catch (const exception& e) {
+		cerr << e.what() << endl;
+		return segments;
+	}
+
 	icolvec peaks_v;
 	fcolvec time_v;
 	fcolvec desc_v;
@@ -163,8 +184,6 @@ std::vector<ACMedia*> ACAudioSegmentationPlugin::_segment(ACMediaTimedFeature* d
 
 	//	seg_m.save("seg.txt", arma_ascii);
 	
-	vector<ACMedia*> segments;
-
 	for (int i = 0; i < seg_m.n_rows; i++){
 		ACMedia* media = ACMediaFactory::getInstance().create(theAudio);
 		media->setParentId(theMedia->getId());
@@ -172,11 +191,6 @@ std::vector<ACMedia*> ACAudioSegmentationPlugin::_segment(ACMediaTimedFeature* d
 		media->setEnd(seg_m(i,1));
 		segments.push_back(media);
 	}
-	// 	ofstream output("signal1.txt");
-// 	for(int i=0; i < (long) theAudio->getNFrames() * theAudio->getChannels(); i++){
-// 		output<<data[i]<<endl;
-// 	}
-	//delete[] data;//CF moved to segment(ACMediaData*,ACMedia*)
 	return segments;
 }
 

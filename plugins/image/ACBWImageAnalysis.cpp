@@ -376,6 +376,29 @@ void ACBWImageAnalysis::computeGaborMoments(int mumax, int numax){ // default 7,
 	delete gabor;
 }
 
+//void ACBWImageAnalysis::computeGaborMoments_fft(int numPha_, int numFreq_, uint horizonalMargin_, uint verticalMargin_){ // default 7, 5, 0, 0
+//	gabor_moments.clear();
+//	if (imgp == 0) {
+//		cerr << " <ACBWImageAnalysis::computeGaborMoments() error> missing image !" << endl;
+//		return;
+//	}
+//	
+//	Gabor* gabor = new Gabor(dynamic_cast<ACImageAnalysis*>(this));
+//	gabor->calculate(numPha_, numFreq_, horizonalMargin_, verticalMargin_);
+////DBG(20) << "Gabor feature calculated" << endl;
+////
+////DBG(20) << "Making GaborImage to vector" << endl;
+////double mean, variance;
+////for(uint i=0;i<numPhases*numFrequencies;++i) {
+////	ImageFeature gaborImage=gabor.getImage(i);
+////	normalize(gaborImage);
+////	meanandvariance(gaborImage, mean, variance);
+////	vecfeat[2*i]=mean; vecfeat[2*i+1]=sqrt(variance);
+////}
+//	delete gabor;
+//}
+
+
 void ACBWImageAnalysis::computeColorMoments(int n){ 
 	// XS TODO
 }

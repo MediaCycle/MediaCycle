@@ -38,6 +38,7 @@
 #if defined (SUPPORT_IMAGE) || defined (SUPPORT_VIDEO) 
 #include "ACOpenCVInclude.h"
 #include "ACMedia.h"
+#include "ACImageData.h"
 #include <string>
 #include <iostream>
 
@@ -69,26 +70,27 @@ public:
 	int getThumbnailHeight() {return thumbnail_height;}
 	void* getThumbnailPtr() { return (void*)image_texture; }
 	
-	IplImage* getData(){return data->getImageData();}
+	IplImage* getData(){return static_cast<IplImage*>(data->getData());}
 	void setData(IplImage* _data);
-	
-	//ACMediaData* extractData(std::string fname);
+	virtual ACMediaData* getMediaData(){return data;} // XS TODO : needs dynamic_cast<ACMediaData*> (data) ??
 	void extractData(std::string fname);
-		
+	virtual void deleteData();
+
 private:
 	void init();
-	static const int default_thumbnail_width, default_thumbnail_height, default_thumbnail_area;
-	char  *thumbnail_filename;
+	bool computeThumbnail(std::string _fname, int w=0, int h=0);
+	bool computeThumbnail(ACImageData* data_ptr, int w=0, int h=0);
+	bool computeThumbnail(IplImage* img, int w=0, int h=0);
+	bool computeThumbnailSize(int w_, int h_);
+
+private:
+	static const int default_thumbnail_area;
 	int thumbnail_width, thumbnail_height; 
 	osg::ref_ptr<osg::Image> thumbnail;
 	osg::ref_ptr<osg::Texture2D> image_texture;
+	ACImageData* data;
 	
-	int computeThumbnail(std::string _fname, int w=0, int h=0);
-	int computeThumbnail(ACMediaData* data_ptr, int w=0, int h=0);
-	int checkWidth(int w);
-	int checkHeight(int h);
-	void computeThumbnailSize();
 };
 
-#endif //defined (SUPPORT_IMAGE)
+#endif //defined (SUPPORT_IMAGE || SUPPORT_VIDEO)
 #endif // ACIMAGE_H

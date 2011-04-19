@@ -99,22 +99,30 @@ std::vector<ACMediaFeatures*> ACAudioFeaturesPlugin::calculate(std::string aFile
 
 // CF
 std::vector<ACMediaFeatures*> ACAudioFeaturesPlugin::calculate(ACMediaData* audio_data, ACMedia* theMedia, bool _save_timed_feat) {
-// from MediaData
-return this->_calculate(audio_data->getFileName(),audio_data,theMedia,_save_timed_feat);
+	// from MediaData
+	return this->_calculate(audio_data->getFileName(),audio_data,theMedia,_save_timed_feat);
 }
 
 std::vector<ACMediaFeatures*> ACAudioFeaturesPlugin::_calculate(std::string aFileName, ACMediaData* audio_data, ACMedia* theMedia, bool _save_timed_feat){
 	bool extendSoundLimits = true;
 	std::vector<ACMediaTimedFeature*> descmf;
 	std::vector<ACMediaFeatures*> desc;
-	//	int sr = ((ACAudio*)theMedia)->getSampleRate();
-	ACAudio* theAudio = (ACAudio*) theMedia;
+
+	ACAudio* theAudio = 0;
+
+	try{
+		theAudio = static_cast <ACAudio*> (theMedia);
+		if(!theAudio) 
+			throw runtime_error("<ACAudioFeaturesPlugin::_calculate> problem with ACAudio cast");
+	}catch (const exception& e) {
+		cerr << e.what() << endl;
+		return desc;
+	}
 	
 	float* data = new float[theAudio->getNFrames() * theAudio->getChannels()];
-//	long index = 0;
 	
 	// SD replaced loop by more efficient memcpy
-	memcpy(data, audio_data->getAudioData()+theAudio->getSampleStart()*theAudio->getChannels(),
+	memcpy(data, static_cast<float*>(audio_data->getData())+theAudio->getSampleStart()*theAudio->getChannels(),
 		   (theAudio->getSampleEnd()-theAudio->getSampleStart())*theAudio->getChannels()*sizeof(float));
 	/*
 	for (long i = theAudio->getSampleStart(); i< theAudio->getSampleEnd(); i++){
@@ -132,7 +140,7 @@ std::vector<ACMediaFeatures*> ACAudioFeaturesPlugin::_calculate(std::string aFil
 	
 	descmf = computeFeatures(data, theAudio->getSampleRate(), theAudio->getChannels(), theAudio->getNFrames(),32, 13, 1024, extendSoundLimits);
 	
-	
+	// find the index of the feature named "Energy"
 	int nrgIdx = 0;
 	for (int i=0; i<descmf.size(); i++){
 		if (descmf[i]->getName() == "Energy")
@@ -140,6 +148,7 @@ std::vector<ACMediaFeatures*> ACAudioFeaturesPlugin::_calculate(std::string aFil
 	}
 	std::cout << "nrgIdx = " << nrgIdx << std::endl;
 	
+	// the feature named "Energy" does not need to be normalized
 	for (int i=0; i<descmf.size(); i++){
 		desc.push_back(descmf[i]->mean());
 		if (i==nrgIdx){
@@ -147,6 +156,23 @@ std::vector<ACMediaFeatures*> ACAudioFeaturesPlugin::_calculate(std::string aFil
 		}
 	}
 	
+	// saving timed features on disk (if _save_timed_feat flag is on)
+	// XS TODO add checks
+	if (_save_timed_feat) {
+		// try to keep the convention : _b.mtf = binary ; _t.mtf = ascii text
+		bool save_binary = true;
+		string mtf_file_name; // file(s) in which feature(s) will be saved
+		string file_ext =  "_b.mtf";
+		string aFileName = theMedia->getFileName();
+		string aFileName_noext = aFileName.substr(0,aFileName.find_last_of('.'));
+		for (int i=0; i<descmf.size(); i++){
+			mtf_file_name = aFileName_noext + "_" +descmf[i]->getName() + file_ext;
+			descmf[i]->saveInFile(mtf_file_name, save_binary);
+			mtf_file_names.push_back(mtf_file_name); // keep track of saved features
+		}
+	}
+	
+	// XS TODO wtf ?
 	desc.push_back(descmf[nrgIdx]->interpN(10)->toMediaFeatures());
 	
 	// CF WARNING we save only the "Energy" feature that is expected for the AudioSegmentatinPlugin, until we can choose features associated to segmentation plugins
@@ -171,8 +197,8 @@ std::vector<ACMediaFeatures*> ACAudioFeaturesPlugin::_calculate(std::string aFil
 // the plugin should know internally where it saved the mtf
 ACMediaTimedFeature* ACAudioFeaturesPlugin::getTimedFeatures(){
 	if (mtf_file_name == ""){
-		cout << "<ACAudioFeaturesPlugin::getTimedFeatures> : missing file name "<<endl;
-	return 0;
+        cout << "<ACAudioFeaturesPlugin::getTimedFeatures> : missing file name "<<endl;
+		return 0;
 	}
 	ACMediaTimedFeature* ps_mtf = new ACMediaTimedFeature();
 	if (ps_mtf->loadFromFile(mtf_file_name) <= 0){
@@ -180,3 +206,22 @@ ACMediaTimedFeature* ACAudioFeaturesPlugin::getTimedFeatures(){
 	}
 	return ps_mtf;
 }
+
+
+// XS TODO !!!
+// the plugin should know internally where it saved the mtf 
+// thanks to mtf_file_name
+//ACMediaTimedFeature* ACAudioFeaturesPlugin::getTimedFeatures(){
+//	if (mtf_file_names.size() == 0){
+//        cout << "<ACAudioFeaturesPlugin::getTimedFeatures> : missing file name "<<endl;
+//		return 0;
+//	}
+//	ACMediaTimedFeature* ps_mtf = new ACMediaTimedFeature();
+//	if (ps_mtf->loadFromFile(mtf_file_name) <= 0){
+//		return 0;
+//	}
+//	return ps_mtf;
+//}
+
+
+

@@ -192,6 +192,7 @@ void test_video_dancers_plugin(std::string dancer){
 	clock_t t0=clock();
 	string movie_file= videodir+"Front/"+dancer+".mov";
 	ACVideoDancersPlugin* P = new ACVideoDancersPlugin();
+	// XS TODO use calculate (mediadata) instead
 	std::vector<ACMediaFeatures*> F = P->calculate(movie_file);
 	cout << "computed " << F.size() << " features" << endl;
 	for (unsigned int i=0; i<F.size(); i++){
@@ -228,6 +229,7 @@ void test_video_pixel_speed_plugin(std::string movie_file){
 	cout << "1) compute features and saves timedFeatures on disk" << endl;
 	cout << "---------------------------------------------------" << endl;
 
+	// XS TODO use calculate (mediadata) instead
 	std::vector<ACMediaFeatures*> F = P->calculate(movie_file, save_timed_features);
 	cout << "computed " << F.size() << " features :" << endl;
 	for (unsigned int i=0; i<F.size(); i++){

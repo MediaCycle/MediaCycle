@@ -41,6 +41,7 @@
 #include "ACOsgBrowserRenderer.h"
 //#include "ACOsgImageRenderer.h"
 #include "ACOsgTrackRenderer.h"
+#include "ACOpenCVInclude.h"
 
 // Slit-scan
 
@@ -84,20 +85,8 @@ public:
 		if (m_context) {avcodec_close(m_context); m_context = 0;}
     }
 	
-    void run(void)
-    {
-        std::cout << "Slit-scanning " << filename<< "..." << std::endl;
-		notify_level = osg::getNotifyLevel();
-		osg::setNotifyLevel(osg::WARN);//to remove the copyImage NOTICEs
-		_done = false;
-		if (filename!=""){
-			this->computeSlitScan();
-			_done = true;
-			std::cout << "Done slit-scanning " << filename << "..." <<std::endl;
-		}
-		osg::setNotifyLevel(notify_level);
-    }
-	
+    void run(void);
+		
 	private:
 		osg::ref_ptr<osg::Image> slit_scan;
 		AVCodecContext* m_context;

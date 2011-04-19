@@ -1,7 +1,7 @@
 /**
  * @brief main.cpp
- * @author Jerome Urbain
- * @date 06/01/2011
+ * @author Xavier Siebert
+ * @date 20/04/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -194,8 +194,8 @@ int main(int argc, char** argv){
 	std::cout << "Read " << sf_read_float(testFile, data, sfinfo.frames*sfinfo.channels) << " frames" << std::endl;
 	desc = computeFeatures(data, sfinfo.samplerate, sfinfo.channels, sfinfo.frames, mfccNbChannels, mfccNb, windowSize, 	extendSoundLimits);
 
-        /*ACMediaData ACMD;
-        ACMD.setAudioData(data);
+        /*ACAudioData ACMD;
+        ACMD.setData(data);
         ACAudio ACM;
         ACM.import(filename);
         ACAudioSegmentationPlugin r;

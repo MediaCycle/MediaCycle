@@ -56,6 +56,7 @@ int main(int argc, char *argv[])
 	try {
 		// Adding palettes
 		window.addControlDock("MCMediaConfig");
+		window.addControlDock("MCOSC");				 
 		window.addControlDock("MCBrowserControlsClusters");//"MCBrowserControlsClustersNeighbors");
 #if defined (SUPPORT_AUDIO)
 		window.addControlDock("MCAudioControls");

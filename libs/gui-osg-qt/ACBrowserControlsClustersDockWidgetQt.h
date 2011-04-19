@@ -47,7 +47,7 @@ class ACBrowserControlsClustersDockWidgetQt : public ACAbstractDockWidgetQt {
 Q_OBJECT
 
 public slots:
-	virtual void modifyListItem(QListWidgetItem *item); // XS TODO why virtual again ?
+	virtual void modifyListItem(QListWidgetItem *item);
 
 private slots:
 	// Browser controls

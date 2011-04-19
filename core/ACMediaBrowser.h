@@ -305,9 +305,9 @@ private: // better not let the ouside world know about internal cooking
 	// next positions -> current positions
 	void commitPositions();
 
-//XS TODO the update() methods should be private
+//XS the update() methods should remain private
 // all what is needed from outside is *updateDisplay*
-public:
+private:
 	// update positions based on current clustering
 
 	// == Cluster Mode 
@@ -320,7 +320,7 @@ public:
 
 	// == Neighbors Mode ==
 	void updateNeighborhoods();
-
+public: // XS TODO so far this one is still called from outside
 	void updateNextPositions();
 
 protected:

@@ -38,15 +38,14 @@
 
 #include <osg/ImageUtils>
 #include <osgDB/ReaderWriter>
+#include <osgDB/ReadFile>
 #include "boost/filesystem.hpp"
 
 #include <iostream>
 using namespace std;
 
 // ----------- class constants
-const int ACVideo:: default_thumbnail_width = 64;
-const int ACVideo:: default_thumbnail_height = 64;
-const int ACVideo:: default_thumbnail_area = 4096;
+const int ACVideo:: default_thumbnail_area = 4096; // 64 * 64
 
 ACVideo::ACVideo() : ACMedia()
 {
@@ -59,6 +58,7 @@ void ACVideo::init()
 	thumbnail = 0;
 	thumbnail_width = 0;
 	thumbnail_height = 0;
+	data=0;
 }	
 
 ACVideo::~ACVideo() {
@@ -82,7 +82,7 @@ ACVideo::~ACVideo() {
 				break;
 		}
 	}*/	
-// XS TODO  pas 2x (dÃ©jÃ  ds ACMedia)	
+// XS TODO  pas 2x (dŽjˆ ds ACMedia)	
 //	if (data) delete data;
 }
 
@@ -94,9 +94,11 @@ ACVideo::ACVideo(const ACVideo& m) : ACMedia(m) {
 	// Should I copy the thumbnail ?
 }	
 
-int ACVideo::computeThumbnail(int w, int h){
-	this->computeThumbnailSize();
-	//CvCapture* capture = data_ptr->getVideoData();
+bool ACVideo::computeThumbnail(int w, int h){
+	if (!computeThumbnailSize(w, h)) return false;
+	bool ok = true;
+	// option 1 : use openCV
+	//CvCapture* capture = data_ptr->getData();
 		
 	// take thumbnail in the middle of the video...
 	/*int nframes = (int) cvGetCaptureProperty(capture,  CV_CAP_PROP_FRAME_COUNT);
@@ -113,16 +115,16 @@ int ACVideo::computeThumbnail(int w, int h){
 	
 	//CF we should compute the following in a separate thread
 	
-	// Loading the movie with OSG
+	// option 2 : Loading the movie with OSG
 	std::cout << boost::filesystem::extension(filename);
 	/// prerequisites for loading OSG media files, 2 alternatives
 	/// 1) standard procedure: checking for a plugin that can open the format of the media file
-	//osgDB::ReaderWriter* readerWriter = osgDB::Registry::instance()->getReaderWriterForExtension(boost::filesystem::extension(filename).substr(1));
+	osgDB::ReaderWriter* readerWriter = osgDB::Registry::instance()->getReaderWriterForExtension(boost::filesystem::extension(filename).substr(1));
 	/// 2) hack: forcing the use of the ffmpeg plugin by checking the plugin that can open the ffmpeg format (most probably the ffmpeg plugin)
-	osgDB::ReaderWriter* readerWriter = osgDB::Registry::instance()->getReaderWriterForExtension("ffmpeg");
+	//osgDB::ReaderWriter* readerWriter = osgDB::Registry::instance()->getReaderWriterForExtension("ffmpeg");
 	if (!readerWriter){
 		cerr << "<ACVideo::computeThumbnail> problem loading file, no OSG plugin available" << endl;
-		return -1;
+		return false;
 	}
 
 	osg::ref_ptr<osg::Image> thumbnail = osgDB::readImageFile(filename);
@@ -131,7 +133,7 @@ int ACVideo::computeThumbnail(int w, int h){
 	
 	if (!thumbnail){
 		cerr << "<ACVideo::computeThumbnail> problem creating thumbnail" << endl;
-		return -1;
+		return false;
 	}
 	
 	// Saving the video as texture for transmission
@@ -148,21 +150,23 @@ int ACVideo::computeThumbnail(int w, int h){
 	//image_stream->pause();
 	//image_stream->rewind();
 	
-	return 1;
+	return ok;
 }
 
 CvCapture* ACVideo::getData()
 {
 	if (data == 0) {
-		data = new ACMediaData(MEDIA_TYPE_VIDEO,filename);
+		data = new ACVideoData(filename);
 	}	
-	return data->getVideoData();
+	// XS TODO return value immediately (no tmp) 
+	CvCapture* tmp_debug = 0;
+	tmp_debug = static_cast<CvCapture*> (data->getData());
+	return tmp_debug;
 }
 
 //ACMediaData* ACVideo::extractData(string _fname){
 void ACVideo::extractData(string _fname){
 	// XS todo : store the default header (16 below) size somewhere...
-	//ACMediaData* video_data = new ACMediaData(MEDIA_TYPE_VIDEO,_fname);
 	this->filename = _fname;
 	CvCapture* capture = this->getData();
 	width = (int) cvGetCaptureProperty(capture, CV_CAP_PROP_FRAME_WIDTH);
@@ -172,22 +176,23 @@ void ACVideo::extractData(string _fname){
 	start = 0.0;
 	if (fps != 0) end = nframes * 1.0/fps;
 	else end = nframes;
-	this->computeThumbnailSize();
+	// XS TODO : do this here ??
 	computeThumbnail(16, 16);
 }
 
+void ACVideo::deleteData(){
+	delete data;
+	data=0;
+}
+
 void ACVideo::setData(CvCapture* _data){
-	/*if (data->getMediaType()==MEDIA_TYPE_NONE)
-		data = new ACMediaData(MEDIA_TYPE_VIDEO);	
-	else
-		data->setMediaType(MEDIA_TYPE_VIDEO);*/
 	if (data == 0)
-		data = new ACMediaData(MEDIA_TYPE_VIDEO);	
-	data->setVideoData(_data);
+		data = new ACVideoData();	
+	data->setData(_data);
 	
 	width = (int) cvGetCaptureProperty(_data, CV_CAP_PROP_FRAME_WIDTH);
 	height = (int) cvGetCaptureProperty(_data, CV_CAP_PROP_FRAME_HEIGHT);
-	this->computeThumbnailSize();
+//	this->computeThumbnailSize();
 	
 	int fps     = (int) cvGetCaptureProperty(_data, CV_CAP_PROP_FPS);
 	int nframes = (int) cvGetCaptureProperty(_data,  CV_CAP_PROP_FRAME_COUNT);
@@ -196,14 +201,15 @@ void ACVideo::setData(CvCapture* _data){
 	else end = nframes;
 }
 
+// obsolete + confusing with thumbnail width/height
 void ACVideo::saveACLSpecific(ofstream &library_file) {
-
 	library_file << filename_thumbnail << endl;
 	library_file << this->getDuration() << endl;
 	library_file << width << endl;
 	library_file << height << endl;
 }
 
+// obsolete + confusing with thumbnail width/height
 int ACVideo::loadACLSpecific(ifstream &library_file) {
 	std::string ghost;//CF somebody please explain me why this is required!
 	getline(library_file, ghost, '\n');//CF somebody please explain me why this is required!
@@ -236,32 +242,57 @@ void ACVideo::saveXMLSpecific(TiXmlElement* _media){
 	_media->SetDoubleAttribute("Duration", this->getDuration());
 	_media->SetAttribute("Width", width);
 	_media->SetAttribute("Height", height);
+	_media->SetAttribute("ThumbnailWidth", thumbnail_width);
+	_media->SetAttribute("ThumbnailHeight", thumbnail_height);
 }
 
 int ACVideo::loadXMLSpecific(TiXmlElement* _pMediaNode){
-	// XS TODO add checks
+	int w=-1;
+	int h=-1;
+	int t_w=-1;
+	int t_h=-1;
+
+	// XS TODO is this one necessary ?
 	filename_thumbnail = _pMediaNode->Attribute("thumbnailFileName");
+	
 	double t=0;
 	_pMediaNode->QueryDoubleAttribute("Duration", &t);
 	// XS TODO is duration always end-start ?
-	int w=0;
+
 	_pMediaNode->QueryIntAttribute("Width", &w);
-	int h=0;
+	if (w < 0)
+		throw runtime_error("corrupted XML file, wrong image width");
+	else
+		this->width = w;
+	
 	_pMediaNode->QueryIntAttribute("Height", &h);
-	this->width = w;
-	this->height = h;
+	if (h < 0)
+		throw runtime_error("corrupted XML file, wrong image height");
+	else
+		this->height = h;
 	
-	data = new ACMediaData(MEDIA_TYPE_IMAGE,filename);
+	_pMediaNode->QueryIntAttribute("ThumbnailWidth", &t_w);
+	_pMediaNode->QueryIntAttribute("ThumbnailHeight", &t_h);
 	
-	if (computeThumbnail(width, height) != 1){
-		cerr << "<ACVideo::loadXMLSpecific> : problem computing thumbnail" << endl;
-		return 0;
-	}
+	if (computeThumbnail (t_w , t_h) != 1)
+		throw runtime_error("<ACVideo::loadXMLSpecific> : problem computing thumbnail");
+
+	// not necessary
+	//	data = new ACVideoData(filename);
+	
 	return 1;	
 }
 
-
-void ACVideo::computeThumbnailSize(){
+// cut and paste from ACImage
+// XS TODO should put this in ACSpatialMedia
+bool ACVideo::computeThumbnailSize(int w_, int h_){
+	// we really want a specific (positive) thumbnail size
+	bool ok = true;
+	if ((w_ > 0) && (h_ > 0)) {
+		thumbnail_width = w_;
+		thumbnail_height = h_;
+	}
+	// we just scale the original width and height to the default thumbnail area
 	if ((width !=0) && (height!=0)){
 		float scale = sqrt((float)default_thumbnail_area/((float)width*(float)height));
 		thumbnail_width = (int)(width*scale);
@@ -269,127 +300,9 @@ void ACVideo::computeThumbnailSize(){
 	}
 	else {
 		std::cerr << "Video dimensions not set." << std::endl;
+		ok = false;
 	}
+	return ok;
 }
 
-/*
-void ACVideo::save(FILE* library_file) {
-	int i, j;
-	int n_features;
-	int n_features_elements;
-	
-	fprintf(library_file, "%s\n", filename.c_str());
-	fprintf(library_file, "%s\n", filename_thumbnail.c_str());
-	
-#ifdef SAVE_LOOP_BIN
-	fwrite(&mid,sizeof(int),1,library_file);
-	fwrite(&width,sizeof(int),1,library_file);
-	fwrite(&height,sizeof(int),1,library_file);
-	n_features = features_vectors.size();
-	fwrite(&n_features,sizeof(int),1,library_file);
-	for (i=0; i<features_vectors.size();i++) {
-		n_features_elements = features_vectors[i]->size();
-		fwrite(&n_features_elements,sizeof(int),1,library_file);
-		for (j=0; j<n_features_elements; j++) {
-			value = features_vectors[i]->getFeatureElement(j)); // XS instead of [i][j]
-			fwrite(&value,sizeof(float),1,library_file);
-		}
-	}
-#else
-  fprintf(library_file, "%f\n", end);
-	fprintf(library_file, "%d\n", mid);
-	fprintf(library_file, "%d\n", width);
-	fprintf(library_file, "%d\n", height);
-	n_features = features_vectors.size();
-	fprintf(library_file, "%d\n", n_features);
-	for (i=0; i<features_vectors.size();i++) {
-		n_features_elements = features_vectors[i]->getSize();
-		fprintf(library_file, "%s\n", features_vectors[i]->getName().c_str());
-		fprintf(library_file, "%d\n", n_features_elements);
-		for (j=0; j<n_features_elements; j++) {
-			fprintf(library_file, "%f\t", features_vectors[i]->getFeatureElement(j)); // XS instead of [i][j]
-		}
-		fprintf(library_file, "\n");
-	}
-#endif
-}
-
-int ACVideo::load(FILE* library_file) { // was loadLoop
-	int i, j;
-	int path_size;
-	int n_features;
-	int n_features_elements;
-	char featureName[256];
-	
-	int ret;
-	char *retc;
-	
-	ACMediaFeatures* mediaFeatures;
-	float local_feature;
-	
-	char *file_temp;
-	file_temp = new char[1024];
-	memset(file_temp,0,1024);
-	char *file_temp2;
-	file_temp2 = new char[1024];
-	memset(file_temp2,0,1024);
-	
-	//char file_temp[1024];
-	//memset(file_temp,0,1024);
-	//char file_temp2[1024];
-	//memset(file_temp2,0,1024);
-	
-	retc = fgets(file_temp, 1024, library_file);
-	
-	if (retc) {
-		path_size = strlen(file_temp);
-		this->filename = string(file_temp, path_size-1);
-		if (this->filename.size()==0){
-			cerr << "ACVIdeo : Empty filename" << endl;
-			exit(-1);
-		}
-		retc = fgets(file_temp2, 1024, library_file);
-		path_size = strlen(file_temp2);
-		this->filename_thumbnail = string(file_temp2, path_size-1);
-		if (this->filename_thumbnail.size()==0){
-			cerr << "ACVIdeo : Empty thumbnail filename" << endl;
-			exit(-1);
-		}
-		
-		ret = fscanf(library_file, "%f", &end);
-		ret = fscanf(library_file, "%d", &mid);
-		ret = fscanf(library_file, "%d", &width);
-		ret = fscanf(library_file, "%d", &height);
-		ret = fscanf(library_file, "%d", &n_features);
-		
-		thumbnail_height = 180/2;
-		 _width = 320/2;
-		width = 320/2;
-		height = 180/2;	
-
-		for (i=0; i<n_features;i++) {
-			mediaFeatures = new ACMediaFeatures();
-			features_vectors.push_back(mediaFeatures);
-			features_vectors[i]->setComputed();
-			ret = fscanf(library_file, "%s", featureName);
-			features_vectors[i]->setName(string(featureName));
-			ret = fscanf(library_file, "%d", &n_features_elements);
-			features_vectors[i]->resize(n_features_elements);
-			for (j=0; j<n_features_elements; j++) {
-				ret = fscanf(library_file, "%f", &(local_feature));
-				features_vectors[i]->setFeatureElement(j, local_feature);
-			}
-		}
-		ret = fscanf(library_file, "\n");
-		delete file_temp;
-		delete file_temp2;
-		return 1;
-	}
-	else {
-		delete file_temp;
-		delete file_temp2;
-		return 0;
-	}
-}
-*/
 #endif //defined (SUPPORT_VIDEO)

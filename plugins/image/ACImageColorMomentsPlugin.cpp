@@ -37,9 +37,7 @@
 #include <vector>
 #include <string>
 
-using std::cout;
-using std::cerr;
-using std::endl;
+using namespace std;
 
 ACImageColorMomentsPlugin::ACImageColorMomentsPlugin() {
     //vars herited from ACPlugin
@@ -75,11 +73,21 @@ std::vector<ACMediaFeatures*>  ACImageColorMomentsPlugin::calculate(std::string 
 
 std::vector<ACMediaFeatures*> ACImageColorMomentsPlugin::calculate(ACMediaData* image_data) {
 	cout << "calculating Color Moments from histogram..." << endl;
-	IplImage* image_data_ptr = image_data->getImageData();
-	
-	// XS TODO: which color model ?
-	ACColorImageAnalysis* image = new ACColorImageAnalysis(image_data_ptr);	
 	std::vector<ACMediaFeatures*> allImageFeatures;
+//	ACImageData* local_image_data ;
+//	try{
+//		local_image_data = static_cast <ACImageData*> (image_data);
+//		if(! local_image_data) 
+//			throw runtime_error("<ACImageColorMomentsPlugin::calculate> problem with mediaData cast");
+//	}catch (const exception& e) {
+//		cerr << e.what() << endl;
+//		return allImageFeatures;
+//	}
+//	
+//	IplImage* image_data_ptr = local_image_data->getData();
+
+	// XS TODO: which color model ?
+	ACColorImageAnalysis* image = new ACColorImageAnalysis(image_data);	
 	
 	ACMediaFeatures* imageColorFeatures = this->calculateColorFeatures(image);
 	if (imageColorFeatures != 0){

@@ -1,10 +1,10 @@
 /*
- *  ACVampDemoPlugin.h
+ *  ACImageData.cpp
  *  MediaCycle
  *
  *  @author Xavier Siebert
- *  @date 22/09/09
- *  @copyright (c) 2009 – UMONS - Numediart
+ *  @date 7/04/11
+ *  @copyright (c) 2011 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
  *  licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -32,24 +32,55 @@
  *
  */
 
-#ifndef _ACVAMPDEMOPLUGIN_H
-#define	_ACVAMPDEMOPLUGIN_H
+#if defined (SUPPORT_IMAGE)
+#include "ACImageData.h"
+#include <string>
+#include <iostream>
+using std::cerr;
+using std::endl;
+using std::string;
 
-#include "vamp-plugin-interface.h"
-#include "MediaCycle.h"
 
-#include<iostream>
+ACImageData::ACImageData() { 
+	this->init();
+}
 
-class ACVampDemoPlugin : public ACFeaturesPlugin {
-public:
-	ACVampDemoPlugin();
-	~ACVampDemoPlugin();
-	
-	virtual std::vector<ACMediaFeatures*> calculate(){};
-	virtual std::vector<ACMediaFeatures*> calculate(std::string aFileName, bool _save_timed_feat=false){};
-	virtual std::vector<ACMediaFeatures*> calculate(ACMediaData* _data, ACMedia*, bool _save_timed_feat=false);
-	
-private:
-};
+ACImageData::ACImageData(std::string _fname) { 
+	this->init();
+	file_name=_fname;
+	this->readData(_fname);
+}
 
-#endif	/* _ACVAMPDEMOPLUGIN_H */
+void ACImageData::init() {
+	media_type = MEDIA_TYPE_IMAGE;
+	image_ptr = 0;
+}
+
+ACImageData::~ACImageData() {
+	if (image_ptr != 0) cvReleaseImage(&image_ptr);
+	image_ptr = 0;
+}
+
+void ACImageData::readData(std::string _fname){
+	if(_fname=="") return;
+	image_ptr = cvLoadImage(_fname.c_str(), CV_LOAD_IMAGE_COLOR);	
+	try {
+		if (!image_ptr) {
+			cerr << "Check file name : " << _fname << endl;
+			throw(string(" <ACImageData::readData> CV_LOAD_IMAGE_COLOR : not a color image !"));
+		}
+	}
+	catch (const string& not_image_file) {
+		cerr << not_image_file << endl;
+	}
+}
+
+void ACImageData::setData(IplImage* _data){
+	cvCopy(_data,image_ptr);		
+	if( !image_ptr ) {
+		cerr << "<ACImageData::setData> Could not set data" << endl;
+	}
+}
+
+
+#endif //defined (SUPPORT_IMAGE)

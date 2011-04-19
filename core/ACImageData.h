@@ -1,10 +1,10 @@
 /*
- *  ACVampDemoPlugin.h
+ *  ACImageData.h
  *  MediaCycle
  *
  *  @author Xavier Siebert
- *  @date 22/09/09
- *  @copyright (c) 2009 – UMONS - Numediart
+ *  @date 7/04/11
+ *  @copyright (c) 2011 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
  *  licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -32,24 +32,33 @@
  *
  */
 
-#ifndef _ACVAMPDEMOPLUGIN_H
-#define	_ACVAMPDEMOPLUGIN_H
+#ifndef ACIMAGEDATA_H
+#define ACIMAGEDATA_H
 
-#include "vamp-plugin-interface.h"
-#include "MediaCycle.h"
+#if defined (SUPPORT_IMAGE)
+#include "ACMediaData.h"
+#include "ACOpenCVInclude.h"
+#include "ACMediaTypes.h"
+#include <osgDB/ReadFile>
 
-#include<iostream>
-
-class ACVampDemoPlugin : public ACFeaturesPlugin {
+class ACImageData: public ACMediaData {
 public:
-	ACVampDemoPlugin();
-	~ACVampDemoPlugin();
-	
-	virtual std::vector<ACMediaFeatures*> calculate(){};
-	virtual std::vector<ACMediaFeatures*> calculate(std::string aFileName, bool _save_timed_feat=false){};
-	virtual std::vector<ACMediaFeatures*> calculate(ACMediaData* _data, ACMedia*, bool _save_timed_feat=false);
+	ACImageData();
+	ACImageData(std::string _fname); // XS TODO check this
+	~ACImageData();
+
+	virtual void readData(std::string _fname);
+	virtual void* getData() {return static_cast<void*>(image_ptr);}
+//	virtual IplImage* getData() {return image_ptr;}
+	void setData(IplImage* _data);	
+
+protected:
+	virtual void init();
 	
 private:
+	IplImage* image_ptr;
+	
 };
 
-#endif	/* _ACVAMPDEMOPLUGIN_H */
+#endif //defined (SUPPORT_IMAGE)
+#endif // ACIMAGEDATA_H

@@ -2,8 +2,7 @@
  *  AC3DModel.h
  *  MediaCycle
  *
- *  @author Stéphane Dupont
- *  @date 06/09/10
+ *  Created by St�phane Dupont on 06/09/10.
  *  @copyright (c) 2010 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
@@ -37,7 +36,9 @@
 #define AC3DMODEL_H
 
 #include "ACMedia.h"
-#include <osgDB/ReadFile>
+#include "ACMediaData.h"
+#include "AC3DModelData.h"
+//#include <osgDB/ReadFile>
 #include <osg/ComputeBoundsVisitor>
 #include <string>
 #include <iostream>
@@ -52,19 +53,22 @@ public:
 	
 	void saveACLSpecific(std::ofstream &library_file);
 	int loadACLSpecific(std::ifstream &library_file);
-	
-	//ACMediaData* extractData(std::string fname);
-	void extractData(std::string fname);
-	
+		
 	void* getThumbnailPtr() { return 0; }
 	
-	osg::ref_ptr<osg::Node> getData(){return data->get3DModelData();}
+	osg::ref_ptr<osg::Node> getData(){return static_cast< osg::Node* > (data->getData());}
 	void setData(osg::ref_ptr<osg::Node> _data);
+	virtual ACMediaData* getMediaData(){return data;}
+	void extractData(std::string fname);
+	virtual void deleteData();
 	
 private:	
 	void init();
+	
+private:	
 	std::vector<float> center;
 	std::vector<float> extent;
+	AC3DModelData* data;
 };
 
 #endif // AC3DMODEL_H

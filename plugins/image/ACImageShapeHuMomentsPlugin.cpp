@@ -33,16 +33,14 @@
  */
 
 #include "ACImageShapeHuMomentsPlugin.h"
-
+#include "ACImageData.h"
 #include <vector>
 #include <string>
 
 // to check if file exist
 #include "boost/filesystem.hpp"
 namespace fs = boost::filesystem;
-using std::cout;
-using std::cerr;
-using std::endl;
+using namespace std;
 
 ACImageShapeHuMomentsPlugin::ACImageShapeHuMomentsPlugin() {
     //vars herited from ACPlugin
@@ -76,8 +74,18 @@ std::vector<ACMediaFeatures*>  ACImageShapeHuMomentsPlugin::calculate(std::strin
 
 std::vector<ACMediaFeatures*> ACImageShapeHuMomentsPlugin::calculate(ACMediaData* image_data) {
 	cout << "calculating Shape (Hu) Moments from ACMediaData..." << endl;
-	ACColorImageAnalysis* image = new ACColorImageAnalysis(image_data->getImageData());
 	std::vector<ACMediaFeatures*> allImageFeatures;
+//	ACImageData* local_image_data = 0;
+//	try{
+//		local_image_data = static_cast <ACImageData*> (image_data);
+//		if(! local_image_data) 
+//			throw runtime_error("<ACImageShapeHuMomentsPlugin::calculate> problem with mediaData cast");
+//	}catch (const exception& e) {
+//		cerr << e.what() << endl;
+//		return allImageFeatures;
+//	}
+
+	ACColorImageAnalysis* image = new ACColorImageAnalysis(image_data);	
 	
 	ACMediaFeatures* imageShapeFeatures = this->calculateHuMoments(image);
 	if (imageShapeFeatures != 0){

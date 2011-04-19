@@ -39,7 +39,9 @@
 #include "ACOpenCVInclude.h"
 
 #include "cvgabor.h"
+//#include "gabor.h"
 #include "ACImageHistogram.h"
+#include "ACImageData.h"
 
 // Uses FFTW3 library for FFT
 #include <fftw3.h>

@@ -169,7 +169,7 @@ void ACVideoCycleOsgQt::updateLibrary()
 	// media_cycle->pushNavigationState();  XS 250810 removed
 	//media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
 	media_cycle->getBrowser()->setState(AC_CHANGING);
-	media_cycle->getBrowser()->updateNextPositions();
+//	media_cycle->getBrowser()->updateNextPositions();
 	ui.compositeOsgView->prepareFromBrowser();
 	ui.compositeOsgView->prepareFromTimeline();
 	//ui.compositeOsgView->setPlaying(true);
@@ -615,7 +615,7 @@ void ACVideoCycleOsgQt::processOscMessage(const char* tagName)
 		media_cycle->setReferenceNode(0);
 		// XSCF 250310 added these 3
 		// media_cycle->pushNavigationState();  XS 250810 removed
-		media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
+//		media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
 		media_cycle->getBrowser()->setState(AC_CHANGING);
 		
 		ui.compositeOsgView->prepareFromBrowser();

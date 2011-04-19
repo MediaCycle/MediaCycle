@@ -39,7 +39,7 @@
 #define ACAUDIO_H
 
 #include "ACMedia.h"
-#include "ACMediaFeatures.h"
+#include "ACAudioData.h"
 #include <string>
 #include <cstring>
 #include <sys/stat.h>
@@ -51,6 +51,7 @@ public:
 	ACAudio();
 	ACAudio(const ACAudio&, bool reduce = true);
 	~ACAudio();
+	
 private:
 	void init();
 	
@@ -68,12 +69,12 @@ public:
 	int getWidth() {return getSampleEnd();}
 	int getHeight() {return 0;}
 	
-	float* getData(){return data->getAudioData();}
+	float* getData(){return static_cast<float*> (data->getData());}
 	void setData(float* _data,float _sample_number=0 ,int _sr=44100,int _channels=1);
-	
-	//ACMediaData* extractData(std::string fname);
+	virtual ACMediaData* getMediaData(){return data;}
 	void extractData(std::string fname);
-	
+	virtual void deleteData();
+
 	void setSampleRate(int _sample_rate) { sample_rate = _sample_rate; }
 	int getSampleRate() { return sample_rate; }
 	void setChannels(int _channels) { channels = _channels; }
@@ -112,6 +113,7 @@ private:
 	int time_signature_den;
 	int key;
 	int acid_type;
+	ACAudioData* data;
 };
 
 

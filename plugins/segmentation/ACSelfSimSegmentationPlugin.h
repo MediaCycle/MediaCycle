@@ -59,10 +59,7 @@ public:
 	ACSelfSimSegmentationPlugin();
 	~ACSelfSimSegmentationPlugin();
 	
-	virtual int initialize(){return 1;};
-	virtual int start(){return 1;};
-	virtual int stop(){return 1;};
-	
+	//  XS TODO clean API !!
 	virtual std::vector<ACMedia*> segment(ACMediaData* _data, ACMedia* _theMedia);
 	std::vector<int> segment(const vector< vector<float> > & _allfeatures, float _SelfSimThresh=0.8, int _L=8, int _Wmin=8, SelfSimKernelType _T=SELFSIMSTEP, SelfSimDistance _D=COSINE);
 	std::vector<int> segment(arma::fmat _M, float _SelfSimThresh=0.8, int _L=8, int _Wmin=8, SelfSimKernelType _T=SELFSIMSTEP, SelfSimDistance _D=COSINE);

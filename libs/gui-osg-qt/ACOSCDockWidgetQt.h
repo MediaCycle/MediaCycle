@@ -1,10 +1,10 @@
 /*
- *  ACVampDemoPlugin.h
+ *  ACOSCDockWidgetQt.h
  *  MediaCycle
  *
  *  @author Xavier Siebert
- *  @date 22/09/09
- *  @copyright (c) 2009 – UMONS - Numediart
+ *  @date 05/04/11
+ *  @copyright (c) 2011 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
  *  licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -32,24 +32,39 @@
  *
  */
 
-#ifndef _ACVAMPDEMOPLUGIN_H
-#define	_ACVAMPDEMOPLUGIN_H
+#ifndef HEADER_ACOSCDOCKWIDGETQT
+#define HEADER_ACOSCDOCKWIDGETQT
 
-#include "vamp-plugin-interface.h"
-#include "MediaCycle.h"
+#include <iostream>
+#include <string.h>
 
-#include<iostream>
+#include "ACAbstractDockWidgetQt.h"
+#include "ui_ACOSCDockWidgetQt.h"
+#include <MediaCycle.h>
 
-class ACVampDemoPlugin : public ACFeaturesPlugin {
+#include <ACOscBrowser.h>
+#include <ACOscFeedback.h>
+
+
+class ACOSCDockWidgetQt : public ACAbstractDockWidgetQt {
+Q_OBJECT
+
+private slots:
+	void on_pushButtonControlStart_clicked();
+	void on_pushButtonFeedbackStart_clicked();
+
 public:
-	ACVampDemoPlugin();
-	~ACVampDemoPlugin();
-	
-	virtual std::vector<ACMediaFeatures*> calculate(){};
-	virtual std::vector<ACMediaFeatures*> calculate(std::string aFileName, bool _save_timed_feat=false){};
-	virtual std::vector<ACMediaFeatures*> calculate(ACMediaData* _data, ACMedia*, bool _save_timed_feat=false);
-	
-private:
-};
+	ACOSCDockWidgetQt(QWidget *parent = 0);
+	~ACOSCDockWidgetQt();
 
-#endif	/* _ACVAMPDEMOPLUGIN_H */
+private:
+	Ui::ACOSCDockWidgetQt ui;
+	ACOscBrowser *osc_browser;
+	ACOscFeedback *osc_feedback;
+
+public:
+	void processOscMessage(const char* tagName);
+	ACOscBrowserRef mOscReceiver;
+	
+};
+#endif

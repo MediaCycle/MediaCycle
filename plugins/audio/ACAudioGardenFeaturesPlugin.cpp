@@ -60,9 +60,20 @@ std::vector<ACMediaFeatures*> ACAudioGardenFeaturesPlugin::calculate(ACMediaData
 	bool extendSoundLimits = true;
 	std::vector<ACMediaTimedFeature*> descmf;
 	std::vector<ACMediaFeatures*> desc;
-	//	int sr = ((ACAudio*)theMedia)->getSampleRate();
-	ACAudio* theAudio = (ACAudio*) theMedia;
-	descmf = computeFeatures(audio_data->getAudioData(), theAudio->getSampleRate(), theAudio->getChannels(), theAudio->getNFrames(), 32, 13, 1024, extendSoundLimits);
+	
+	ACAudio* theAudio = 0;
+	
+	try{
+		theAudio = static_cast <ACAudio*> (theMedia);
+		if(!theAudio) 
+			throw runtime_error("<ACAudioGardenFeaturesPlugin::_calculate> problem with ACMedia cast");
+	}catch (const exception& e) {
+		cerr << e.what() << endl;
+		return desc;
+	}
+	
+	descmf = computeFeatures(static_cast<float*>(audio_data->getData()), 
+							 theAudio->getSampleRate(), theAudio->getChannels(), theAudio->getNFrames(), 32, 13, 1024, extendSoundLimits);
 
 	// 	for (int i=0; i<descmf.size(); i++)
 	// 		desc.push_back(descmf[i]->mean());

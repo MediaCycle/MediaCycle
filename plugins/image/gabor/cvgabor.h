@@ -72,8 +72,6 @@ protected:
 private:
     void CreateKernel();
 	void Init(double dPhi, int iNu, double dSigma, double dF);
-
-	
 };
 
 #endif // CVGABOR_H

@@ -40,7 +40,7 @@
 #include "ACMediaFeatures.h"
 #include "ACMediaTimedFeature.h"
 
-#include<iostream>
+#include <vector>
 #include <string>
 
 class ACVideoPixelSpeedPlugin : public ACFeaturesPlugin {

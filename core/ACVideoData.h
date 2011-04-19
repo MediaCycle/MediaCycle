@@ -1,10 +1,10 @@
 /*
- *  ACVampDemoPlugin.h
+ *  ACVideoData.h
  *  MediaCycle
  *
  *  @author Xavier Siebert
- *  @date 22/09/09
- *  @copyright (c) 2009 – UMONS - Numediart
+ *  @date 7/04/11
+ *  @copyright (c) 2011 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
  *  licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -32,24 +32,32 @@
  *
  */
 
-#ifndef _ACVAMPDEMOPLUGIN_H
-#define	_ACVAMPDEMOPLUGIN_H
+#ifndef ACVIDEODATA_H
+#define ACVIDEODATA_H
 
-#include "vamp-plugin-interface.h"
-#include "MediaCycle.h"
+#if defined (SUPPORT_VIDEO)
+#include "ACMediaData.h"
+#include "ACMediaTypes.h"
+#include "ACOpenCVInclude.h"
 
-#include<iostream>
-
-class ACVampDemoPlugin : public ACFeaturesPlugin {
+class ACVideoData: public ACMediaData {
 public:
-	ACVampDemoPlugin();
-	~ACVampDemoPlugin();
-	
-	virtual std::vector<ACMediaFeatures*> calculate(){};
-	virtual std::vector<ACMediaFeatures*> calculate(std::string aFileName, bool _save_timed_feat=false){};
-	virtual std::vector<ACMediaFeatures*> calculate(ACMediaData* _data, ACMedia*, bool _save_timed_feat=false);
-	
+	ACVideoData();
+	~ACVideoData();
+	ACVideoData(std::string _fname);
+
+	void readData(std::string _fname);
+	virtual void* getData() {return static_cast<void*>(video_ptr);}
+//	CvCapture* getData() {return video_ptr;}
+	void setData(CvCapture* _data);
+
+protected:
+	virtual void init();
+
 private:
+	CvCapture* video_ptr;
+
 };
 
-#endif	/* _ACVAMPDEMOPLUGIN_H */
+#endif //defined (SUPPORT_VIDEO)
+#endif // ACVIDEODATA_H

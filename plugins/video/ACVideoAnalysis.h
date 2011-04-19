@@ -40,7 +40,7 @@
 
 #include "BlobResult.h" // Main blob library include (in plugin/image/blobs)
 #include "ACImageAnalysis.h"
-#include "ACMediaData.h"
+#include "ACVideoData.h"
 
 #include <fstream>
 #include <cmath>
@@ -60,7 +60,7 @@ public:
 	void rewind();
 	void setFileName(const std::string &filename);
 	int initialize();
-	void saveVideoThumnbailInFile(string fileout, int w=320, int h=240, int nskip=0, int istep=1);
+	void saveVideoThumnbailInFile(std::string fileout, int w=320, int h=240, int nskip=0, int istep=1);
 	bool saveInFile(std::string fileout, int nskip = 0);
 
 	//accessors 
@@ -130,12 +130,12 @@ public:
 	std::vector<float> getGlobalFrameStamps();
 
 	// XS or float* (dim 7)
-	std::vector<vector<float> > getRawMoments() {return raw_moments;}
-	std::vector<vector<float> > getHuMoments() {return hu_moments;}
+	std::vector<std::vector<float> > getRawMoments() {return raw_moments;}
+	std::vector<std::vector<float> > getHuMoments() {return hu_moments;}
 	std::vector<float> getHuMoment(int i);
-	std::vector<vector<float> > getFourierPolarMoments() {return fourier_polar_moments;}
-	std::vector<vector<float> > getFourierMellinMoments() {return fourier_mellin_moments;}
-	std::vector<vector<float> > getImageHistograms() {return image_histograms;}
+	std::vector<std::vector<float> > getFourierPolarMoments() {return fourier_polar_moments;}
+	std::vector<std::vector<float> > getFourierMellinMoments() {return fourier_mellin_moments;}
+	std::vector<std::vector<float> > getImageHistograms() {return image_histograms;}
 
 	// saves stuff in file
 	void dumpTrajectory(std::ostream &odump);
@@ -158,7 +158,7 @@ public:
 	
 
 	//handy - remove path, keeps only filename
-	string extractFilename(string path);
+	std::string extractFilename(std::string path);
 	
 	// XS tmp tests
 	void test_match_shapes (ACVideoAnalysis *V2, IplImage* bg_img);
@@ -196,11 +196,11 @@ private:
 	std::vector<float> global_pixel_speeds;  // pixel-per-pixel speed in whole image
 	std::vector<float> interest_points;
 
-	std::vector<vector<float> > raw_moments;
-	std::vector<vector<float> > hu_moments;
-	std::vector<vector<float> > fourier_polar_moments;
-	std::vector<vector<float> > fourier_mellin_moments;
-	std::vector<vector<float> > image_histograms;
+	std::vector<std::vector<float> > raw_moments;
+	std::vector<std::vector<float> > hu_moments;
+	std::vector<std::vector<float> > fourier_polar_moments;
+	std::vector<std::vector<float> > fourier_mellin_moments;
+	std::vector<std::vector<float> > image_histograms;
 
 	int width, height, depth, fps, nframes;
 	//	int videocodec;

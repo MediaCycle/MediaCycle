@@ -36,6 +36,8 @@
 #define ACDOCKWIDGETFACTORYQT_H
 
 #include "ACAbstractDockWidgetQt.h"
+#include "ACOSCDockWidgetQt.h"
+
 #if defined (SUPPORT_AUDIO)
 #include "ACAudioControlsDockWidgetQt.h"
 #endif //defined (SUPPORT_AUDIO)

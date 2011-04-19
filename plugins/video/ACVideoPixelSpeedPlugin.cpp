@@ -36,11 +36,8 @@
 
 #include "ACVideoPixelSpeedPlugin.h"
 
-#include <vector>
-
-using std::cout;
-using std::endl;
-using std::cerr;
+#include<iostream>
+using namespace std;
 
 // note : this->mDescription will be used for mtf_file_name
 ACVideoPixelSpeedPlugin::ACVideoPixelSpeedPlugin() {
@@ -74,7 +71,20 @@ std::vector<ACMediaFeatures*>  ACVideoPixelSpeedPlugin::calculate(std::string aF
 
 std::vector<ACMediaFeatures*> ACVideoPixelSpeedPlugin::calculate(ACMediaData* video_data, ACMedia* theMedia, bool _save_timed_feat) {
 	this->clean();
+	std::vector<ACMediaFeatures*> videoFeatures;
+
+//	ACVideoData* local_video_data = 0;
+//	try{
+//		local_video_data = static_cast <ACVideoData*> (video_data);
+//		if(! local_video_data) 
+//			throw runtime_error("<ACVideoPixelSpeedPlugin::calculate> problem with mediaData cast");
+//	}catch (const exception& e) {
+//		cerr << e.what() << endl;
+//		return videoFeatures;
+//	}
+		
 	videoAn = new ACVideoAnalysis(video_data);
+	// XS TODO check this getFileName
 	return this->_calculate(video_data->getFileName(),_save_timed_feat);
 }
 
@@ -86,6 +96,11 @@ std::vector<ACMediaFeatures*> ACVideoPixelSpeedPlugin::_calculate(std::string aF
 	
 	ACMediaTimedFeature* ps_mtf = new ACMediaTimedFeature(t,s, "pixel speed");
 	ACMediaFeatures* pixel_speed = ps_mtf->mean();
+	
+	// XS TODO this will need to be cut and pasted to other plugins
+	// until we re-define the plugins API
+	// saving timed features on disk (if _save_timed_feat flag is on)
+	// XS TODO add checks
 	if (_save_timed_feat) {
 		// try to keep the convention : _b.mtf = binary ; _t.mtf = ascii text
 		bool save_binary = true;
@@ -101,7 +116,8 @@ std::vector<ACMediaFeatures*> ACVideoPixelSpeedPlugin::_calculate(std::string aF
 	return videoFeatures;
 }
 
-// the plugin should know internally where it saved the mtf 
+// the plugin knows internally where it saved the mtf
+// thanks to mtf_file_name
 ACMediaTimedFeature* ACVideoPixelSpeedPlugin::getTimedFeatures(){
 	if (mtf_file_name == ""){
         cout << "<ACVideoPixelSpeedPlugin::getTimedFeatures> : missing file name "<<endl;

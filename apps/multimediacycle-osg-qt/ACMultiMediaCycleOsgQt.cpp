@@ -55,6 +55,7 @@ void ACMultiMediaCycleOsgQt::mediacycleCallback(char* message) {
 	}
 	
 	if (message=="loaddirfinish") {
+		// XS TODO checkboxes
 		statusBar()->clearMessage();
 	}
 }
@@ -421,8 +422,11 @@ void ACMultiMediaCycleOsgQt::on_actionLoad_Media_Directory_triggered(bool checke
 //	pb->setValue(2);
 	
 	// XS TODO threaded version not working for images.
-//	media_cycle->importDirectoriesThreaded(directories, recursive, forward_order, do_segments);
-	media_cycle->importDirectories(directories, recursive, forward_order, do_segments);
+	// not necessary to thread if only few files.
+//	if (directories.size() > n_dir_for_threading)
+//		media_cycle->importDirectoriesThreaded(directories, recursive, forward_order, do_segments);
+//	else
+		media_cycle->importDirectories(directories, recursive, forward_order, do_segments);
 
 	directories.empty();
 	
@@ -965,7 +969,7 @@ void ACMultiMediaCycleOsgQt::showError(const exception& e) {
 	
 bool ACMultiMediaCycleOsgQt::hasMediaCycle(){
 	if (media_cycle == 0) {
-		this->showError ("No MediaCycle Instance");
+		this->showError ("No MediaCycle Instance - Define type of media first");
 		return false;
 	}
 	return true;

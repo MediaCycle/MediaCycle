@@ -1,10 +1,10 @@
 /*
- *  ACVampDemoPlugin.h
+ *  ACVideoColorPlugin.cpp
  *  MediaCycle
  *
  *  @author Xavier Siebert
- *  @date 22/09/09
- *  @copyright (c) 2009 – UMONS - Numediart
+ *  @date 11/04/11
+ *  @copyright (c) 2011 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
  *  licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -32,24 +32,40 @@
  *
  */
 
-#ifndef _ACVAMPDEMOPLUGIN_H
-#define	_ACVAMPDEMOPLUGIN_H
-
-#include "vamp-plugin-interface.h"
-#include "MediaCycle.h"
+#include "ACVideoColorPlugin.h"
 
 #include<iostream>
+using namespace std;
 
-class ACVampDemoPlugin : public ACFeaturesPlugin {
-public:
-	ACVampDemoPlugin();
-	~ACVampDemoPlugin();
+// note : this->mDescription will be used for mtf_file_name
+ACVideoColorPlugin::ACVideoColorPlugin() {
+    //vars herited from ACPlugin
+    this->mMediaType = MEDIA_TYPE_VIDEO;
+    //this->mPluginType = PLUGIN_TYPE_FEATURES;
+    this->mName = "Video Color";
+    this->mDescription = "Color";
+    this->mId = "";
+	this->mDescriptorsList.push_back("Color");
 	
-	virtual std::vector<ACMediaFeatures*> calculate(){};
-	virtual std::vector<ACMediaFeatures*> calculate(std::string aFileName, bool _save_timed_feat=false){};
-	virtual std::vector<ACMediaFeatures*> calculate(ACMediaData* _data, ACMedia*, bool _save_timed_feat=false);
-	
-private:
-};
+	//other vars
+	this->videoAn = 0;
+//	this->mtf_file_name = "";
+}
 
-#endif	/* _ACVAMPDEMOPLUGIN_H */
+ACVideoColorPlugin::~ACVideoColorPlugin() {
+	this->clean();
+}
+
+void ACVideoColorPlugin::clean(){
+	if (videoAn != 0)
+		delete videoAn;
+}
+
+std::vector<ACMediaFeatures*>  ACVideoColorPlugin::calculate(std::string aFileName, bool _save_timed_feat) {
+}
+
+std::vector<ACMediaFeatures*> ACVideoColorPlugin::calculate(ACMediaData* video_data, ACMedia* theMedia, bool _save_timed_feat) {
+}
+
+std::vector<ACMediaFeatures*> ACVideoColorPlugin::_calculate(std::string aFileName, bool _save_timed_feat){
+}

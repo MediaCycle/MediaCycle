@@ -44,13 +44,8 @@ public:
 	ACBicSegmentationPlugin();
 	~ACBicSegmentationPlugin();
 	
-	virtual int initialize(){return 1;};
-	virtual int start(){return 1;};
-	virtual int stop(){return 1;};
-	
-	// we don't really want to segment non-timed-features
-	//virtual std::vector<ACMedia*> segment(ACMediaData* _data, ACMedia* _theMedia);
-	//std::vector<int> segment(const vector< vector<float> > & _allfeatures, float _lambda=1, int _samplingrate=1);
+	//  XS TODO clean API !!
+
 	// XS todo: synchronize default values between constructor and segment
 	std::vector<int> segment(arma::fmat _M, float _lambda=1, int _samplingrate=1, int _Wmin=20, float _bic_thresh = 1, int _jump_width=5, int _discard_borders=5);
 	std::vector<ACMedia*> segment(ACMediaTimedFeature* _MTF, ACMedia* _theMedia);
@@ -62,6 +57,8 @@ public:
 	
 	arma::fmat get_features() {return full_features;}; //JU: added to ease the visualization during the tests
 	
+	//  XS TODO check this one !!
+
 	virtual std::vector<ACMedia*> segment(ACMediaData* audio_data, ACMedia*){};
 	
 private:

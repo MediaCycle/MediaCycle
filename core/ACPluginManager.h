@@ -51,7 +51,7 @@ public:
     
     //this is not necessary since getPlugin(i) gives direct access to plugins
     //and their functions.
-	std::vector<ACMediaFeatures*> calculate(int aPluginIndex, std::string aFileName);
+	//std::vector<ACMediaFeatures*> calculate(int aPluginIndex, std::string aFileName);
 
     std::vector<ACPlugin *> getPlugins() {return this->mPlugins;};
     ACPlugin *getPlugin(int i) {return this->mPlugins[i];};

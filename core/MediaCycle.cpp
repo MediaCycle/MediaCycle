@@ -295,8 +295,6 @@ int MediaCycle::importDirectories() {
 	return importDirectories(import_directories, import_recursive, import_forward_order, import_doSegment);
 }
 
-// XS TODO return value
-
 int MediaCycle::importDirectories(vector<string> directories, int recursive, bool forward_order, bool doSegment) {
 	int ok = 0;
 	
@@ -305,9 +303,7 @@ int MediaCycle::importDirectories(vector<string> directories, int recursive, boo
 	float prevLibrarySizeMultiplier = 2;
 	int needsNormalizeAndCluster;
 	vector<string> filenames;
-	
-	// SD TODO - need to check if files where not alrady scanned before
-		
+			
 	mediaLibrary->scanDirectories(directories, recursive, filenames);
 	
 	int n;
@@ -341,9 +337,8 @@ int MediaCycle::importDirectories(vector<string> directories, int recursive, boo
 		
 		//needsNormalizeAndCluster = 1;
 		
-		normalizeFeatures(needsNormalizeAndCluster); // actually just calls mediaLibrary->normalizeFeatures();
-		
-		libraryContentChanged(needsNormalizeAndCluster); // actually just calls mediaBrowser->libraryContentChanged();
+		normalizeFeatures(needsNormalizeAndCluster);
+		libraryContentChanged(needsNormalizeAndCluster);
 	}
 		
 	t2 = getTime();
@@ -356,25 +351,15 @@ int MediaCycle::importDirectories(vector<string> directories, int recursive, boo
 	mediacycle_callback("loaddirfinish",mediacycle_callback_data);
 
 	return ok;
-	//[self updatedLibrary];
 }
 
 int MediaCycle::importDirectory(string path, int recursive, bool forward_order, bool doSegment,TiXmlElement* _medias) {
-// XS import = import + some processing 
 	cout << "MediaCycle: importing directory: " << path << endl;	
 	int ok = 0;
 	if (this->pluginManager == 0){
 		cout << "no analysis plugins were loaded. you will need to load a plugin to use the application." << endl;
 	}
 	ok = this->mediaLibrary->importDirectory(path, recursive, this->pluginManager, forward_order, doSegment, _medias);
-	// XS normalizing automatically is a problem, for example if we load a bunch of files instead of a directory,
-	//    it should not normalize after each file.
-	// if (ok>=1) this->mediaLibrary->normalizeFeatures();
-	
-	normalizeFeatures(1); // actually just calls mediaLibrary->normalizeFeatures();
-	
-	libraryContentChanged(1); // actually just calls mediaBrowser->libraryContentChanged();
-	
 	return ok;
 }
 
@@ -391,7 +376,7 @@ void MediaCycle::saveMCSLLibrary(string path) {mediaLibrary->saveMCSLLibrary(pat
 void MediaCycle::cleanLibrary() { prevLibrarySize=0; mediaLibrary->cleanLibrary(); }
 
 int MediaCycle::importACLLibrary(string path) {
-// XS import = open + some processing 
+// XS import = open + normalize
 	cout << "MediaCycle: importing ACL library: " << path << endl;
 	int ok = 0;
 	ok = this->mediaLibrary->openACLLibrary(path);
@@ -401,7 +386,7 @@ int MediaCycle::importACLLibrary(string path) {
 }
 
 int MediaCycle::importXMLLibrary(string path) {
-	// XS import = open + some processing 
+// XS import = open + normalize
 	cout << "MediaCycle: importing XML library: " << path << endl;
 	int ok = 0;
 	ok = this->mediaLibrary->openXMLLibrary(path);
@@ -460,6 +445,7 @@ string MediaCycle::getThumbnailFileName(int id) {
 }
 
 // Media Browser
+// XS TODO : this seems wrong:
 void* MediaCycle::hasBrowser() { return mediaBrowser; }
 ACBrowserMode MediaCycle::getBrowserMode() {return mediaBrowser->getMode();}
 void MediaCycle::setBrowserMode(ACBrowserMode _mode) {mediaBrowser->setMode(_mode);}

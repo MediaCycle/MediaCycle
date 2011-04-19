@@ -33,16 +33,14 @@
  */
 
 #include "ACImageShapeFourierPolarMomentsPlugin.h"
-
+#include "ACImageData.h"
 #include <vector>
 #include <string>
 
 // to check if file exist
 #include "boost/filesystem.hpp"
 namespace fs = boost::filesystem;
-using std::cout;
-using std::cerr;
-using std::endl;
+using namespace std;
 
 ACImageShapeFourierPolarMomentsPlugin::ACImageShapeFourierPolarMomentsPlugin() {
     //vars herited from ACPlugin
@@ -76,8 +74,19 @@ std::vector<ACMediaFeatures*>  ACImageShapeFourierPolarMomentsPlugin::calculate(
 
 std::vector<ACMediaFeatures*> ACImageShapeFourierPolarMomentsPlugin::calculate(ACMediaData* image_data) {
 	cout << "calculating Shape (FourierPolar) Moments from ACMediaData..." << endl;
-	ACColorImageAnalysis* image = new ACColorImageAnalysis(image_data->getImageData());
 	std::vector<ACMediaFeatures*> allImageFeatures;
+//	ACImageData* local_image_data = 0;
+//	try{
+//		local_image_data = static_cast <ACImageData*> (image_data);
+//		if(! local_image_data) 
+//			throw runtime_error("<ACImageShapeFourierPolarMomentsPlugin::calculate> problem with mediaData cast");
+//	}catch (const exception& e) {
+//		cerr << e.what() << endl;
+//		return allImageFeatures;
+//	}
+
+	// XS todo check if cast worked
+	ACColorImageAnalysis* image = new ACColorImageAnalysis(image_data);
 	
 	ACMediaFeatures* imageShapeFeatures = this->calculateFourierPolarMoments(image);
 	if (imageShapeFeatures != 0){

@@ -38,7 +38,6 @@
 #include "ACMediaFeatures.h"
 #include "ACMediaTypes.h"
 #include "ACPluginManager.h"
-#include "ACMediaData.h"
 #include "ACMediaTimedFeature.h"
 
 #include <string>
@@ -62,8 +61,7 @@ protected:
 	char  **hyper_links;
 	std::vector<ACMedia*> segments;
 	float start, end; // seconds
-	bool persistent_data; // true if data and thumbnail are kept in virtual memory
-	ACMediaData* data;
+	//bool persistent_data; // true if data and thumbnail are kept in virtual memory
 	//bool features_saved_xml;
 	
 	// XS TODO : add a MediaTimedFeatures member ?
@@ -73,7 +71,7 @@ private:
 	
 public:
 	ACMedia();
-	ACMedia(const ACMedia&, bool reduce = true);
+//	ACMedia(const ACMedia&, bool reduce = true);
 	virtual ~ACMedia(); // make this virtual to ensure that destructors of derived classes will be called
 
 	ACMediaType getMediaType() {return media_type;};
@@ -102,22 +100,21 @@ public:
 	void setFileName(const char* c) { std::string s(c); filename = s; }
 
 	// thumbnail
-	virtual void* getThumbnailPtr()=0;
+	virtual void* getThumbnailPtr()=0; // XS TODO change this
 	std::string getThumbnailFileName() { return filename_thumbnail; }
 	void setThumbnailFileName(std::string ifilename) { filename_thumbnail=ifilename; }
 	// the following 2 were re-introduced for audio...
 	virtual int getThumbnailWidth() {return 0;}
 	virtual int getThumbnailHeight() {return 0;}
 
-//	virtual int computeThumbnail(std::string fname="", int w=0, int h=0){}
-//	virtual int computeThumbnail(ACMediaData* data_ptr, int w=0, int h=0){}
-
 	// data
-	void setDataPersistence(bool persistence){persistent_data=persistence;}
-	bool getDataPersistence(){return persistent_data;}
-	void setData(ACMediaData* _data){data = _data;}
-	ACMediaData* getData(){return data;}
-	void deleteData();
+	virtual void extractData(std::string filename) {}
+
+//	void setDataPersistence(bool persistence){persistent_data=persistence;}
+//	bool getDataPersistence(){return persistent_data;}
+//	void setData(ACMediaData* _data){data = _data;}
+	virtual ACMediaData* getMediaData()=0;
+	virtual void deleteData();
 		
 	// accessors -- these should not be redefined for each media
 	int getWidth() {return width;}
@@ -152,8 +149,6 @@ public:
 	virtual int loadACLSpecific(std::ifstream &library_file) {return -1;}
 	virtual int loadXMLSpecific(TiXmlElement* _pMediaNode) {return -1;}
 
-	//virtual ACMediaData* extractData(std::string filename) {ACMediaData* dummy; return dummy;}
-	virtual void extractData(std::string filename) {}
 	
 	// FEATURES computation (import) and segmentation (segment)
 	// these methods are virtual, because each media could have a specific segmentation method

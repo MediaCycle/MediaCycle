@@ -227,11 +227,11 @@ int ACPluginLibrary::initialize()
     return 0;
 }
 
-vector<ACMediaFeatures*> ACPluginLibrary::calculate(int aPluginIndex,string aFileName)
-{
-    return dynamic_cast<ACFeaturesPlugin*>(this->mPlugins[aPluginIndex])->calculate(aFileName);
-    //return getPlugin(aPluginIndex)->calculate(aFileName);
-}
+//vector<ACMediaFeatures*> ACPluginLibrary::calculate(int aPluginIndex,string aFileName)
+//{
+//    return this->mPlugins[aPluginIndex]->calculate(aFileName);
+//    //return getPlugin(aPluginIndex)->calculate(aFileName);
+//}
 
 // clean
 void ACPluginLibrary::freePlugins() {
@@ -424,7 +424,7 @@ void ACActiveFeaturesPlugins::log()
 {
 	for (map<ACMediaType,std::vector<ACFeaturesPlugin *> > ::iterator iter_map = this->mCurrFeaturePlugin.begin(); iter_map != this->mCurrFeaturePlugin.end(); iter_map++) {
 		for (vector<ACFeaturesPlugin *> ::iterator iter_vec = iter_map->second.begin(); iter_vec != (*iter_map).second.end(); iter_vec++) {
-			cout << "actve plugin for type media" <<"\t"<<(*iter_vec)->getName() <<"\n";
+			cout << "active plugin for type media" <<"\t"<<(*iter_vec)->getName() <<"\n";
 		}
 	}
 	

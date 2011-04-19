@@ -14,7 +14,7 @@ extern "C" ACPlugin* create(std::string namePlugin) {
     if (namePlugin == "ACImageColorMomentsPlugin") {return new ACImageColorMomentsPlugin();}
     if (namePlugin == "ACImageShapeHuMomentsPlugin") {return new ACImageShapeHuMomentsPlugin();}
 //	if (namePlugin == "ACImageShapeFourierPolarMomentsPlugin") {return new ACImageShapeFourierPolarMomentsPlugin();}
-    if (namePlugin == "ACImageTextureWaveletsMomentsPlugin") {return new ACImageTextureWaveletsMomentsPlugin();}
+//    if (namePlugin == "ACImageTextureWaveletsMomentsPlugin") {return new ACImageTextureWaveletsMomentsPlugin();}
 	
 }
 
@@ -28,6 +28,6 @@ extern "C" std::vector<std::string> list() {    //returns a string vector contai
     listPlugin.push_back("ACImageColorMomentsPlugin");
     listPlugin.push_back("ACImageShapeHuMomentsPlugin");
 //	listPlugin.push_back("ACImageShapeFourierPolarMomentsPlugin");
-    listPlugin.push_back("ACImageTextureWaveletsMomentsPlugin");
+//    listPlugin.push_back("ACImageTextureWaveletsMomentsPlugin");
     return listPlugin;
 }
