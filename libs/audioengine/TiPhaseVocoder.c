@@ -232,7 +232,7 @@ int getCurrentFrame(TiPhaseVocoder *tpv,int flagResetPhase) {
 			}
 			
             TiWindowingS2D(tmpdata,tpv->leftFFT.re,tpv->winSize,tpv->hanning);
-            memset(tpv->rightFFT.im,0,tpv->winSize*sizeof(double));
+            memset(tpv->leftFFT.im,0,tpv->winSize*sizeof(double));
 
             fftr(tpv->leftFFT.re,tpv->leftFFT.im,tpv->winSize);
 
@@ -258,7 +258,7 @@ int getCurrentFrame(TiPhaseVocoder *tpv,int flagResetPhase) {
 			}
 			            
 			TiWindowingS2D(tmpdata,tpv->leftFFT.re,tpv->winSize,tpv->hanning);
-            memset(tpv->rightFFT.im,0,tpv->winSize*sizeof(double));
+            memset(tpv->leftFFT.im,0,tpv->winSize*sizeof(double));
 
 /*
             for (k=2044;k<2052;k++)
