@@ -254,13 +254,33 @@ int ACMediaLibrary::scanDirectory(std::string _path, int _recursive, std::vector
 	
 	fs::path full_path( fs::initial_path<fs::path>() );
 	
-	full_path = fs::system_complete( fs::path( _path, fs::native ) );
+// check boost version to adapt for change in boost api	(for boost > 1.46)
+#if BOOST_FILESYSTEM_VERSION >= 3
+	full_path = fs::system_complete( fs::path( _path) );
+	if ( !fs::exists( full_path ) )	{
+		cout << "File or directory not found: " << full_path.string() << endl;
+		return -1;
+	}
+	if ( fs::is_directory( full_path ) ) 	{ // importing directory
+		fs::directory_iterator end_iter;
+		for ( fs::directory_iterator dir_itr( full_path ); dir_itr != end_iter; ++dir_itr ){
+			if ( _recursive && fs::is_directory( dir_itr->path() ) ) {
+				scanDirectory((dir_itr->path()).string(), 1, filenames);
+			}
+			else if ( fs::is_regular( dir_itr->path() ) ){
+				scanDirectory((dir_itr->path()).string(), 0, filenames);
+			}
+			else {
+			}
+		}
+	}
 	
+#else
+	full_path = fs::system_complete( fs::path( _path, fs::native ) );
 	if ( !fs::exists( full_path ) )	{
 		cout << "File or directory not found: " << full_path.native_file_string() << endl;
 		return -1;
 	}
-	
 	if ( fs::is_directory( full_path ) ) 	{ // importing directory
 		fs::directory_iterator end_iter;
 		for ( fs::directory_iterator dir_itr( full_path ); dir_itr != end_iter; ++dir_itr ){
@@ -274,6 +294,8 @@ int ACMediaLibrary::scanDirectory(std::string _path, int _recursive, std::vector
 			}
 		}
 	}
+	
+#endif
 	else { 
 		// encounter a file in the directory
 		// put it in the vector of files to be analyzed

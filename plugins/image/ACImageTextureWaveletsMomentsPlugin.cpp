@@ -62,7 +62,7 @@ std::vector<ACMediaFeatures*>  ACImageTextureWaveletsMomentsPlugin::calculate(st
 	ACColorImageAnalysis* image = new ACColorImageAnalysis(aFileName);
 	std::vector<ACMediaFeatures*> allImageFeatures;
 
-	ACMediaFeatures* imageTextureFeatures = this->calculateHuMoments(image);
+	ACMediaFeatures* imageTextureFeatures = this->calculateGaborMoments(image);
 	if (imageTextureFeatures != 0){
 		allImageFeatures.push_back(imageTextureFeatures);
 	}
@@ -79,7 +79,7 @@ std::vector<ACMediaFeatures*> ACImageTextureWaveletsMomentsPlugin::calculate(ACM
 	ACColorImageAnalysis* image = new ACColorImageAnalysis(image_data->getImageData());
 	std::vector<ACMediaFeatures*> allImageFeatures;
 	
-	ACMediaFeatures* imageTextureFeatures = this->calculateHuMoments(image);
+	ACMediaFeatures* imageTextureFeatures = this->calculateGaborMoments(image);
 	if (imageTextureFeatures != 0){
 		allImageFeatures.push_back(imageTextureFeatures);
 	}
@@ -96,7 +96,7 @@ std::vector<ACMediaFeatures*> ACImageTextureWaveletsMomentsPlugin::calculate(ACM
 	// no need for ACMedia here...
 };
 
-ACMediaFeatures* ACImageTextureWaveletsMomentsPlugin::calculateHuMoments(ACImageAnalysis* image){
+ACMediaFeatures* ACImageTextureWaveletsMomentsPlugin::calculateGaborMoments(ACImageAnalysis* image){
 	image->computeGaborMoments();
 	ACMediaFeatures* gabor_moments = new ACMediaFeatures(image->getGaborMoments(), "Texture");
 	return gabor_moments;	
