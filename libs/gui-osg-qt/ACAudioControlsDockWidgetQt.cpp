@@ -106,4 +106,67 @@ void ACAudioControlsDockWidgetQt::on_pushButtonQueryReferent_clicked()
 {
 	
 }
+
+
+// XS TODO : recuperate these from Audiocycle ?
+
+//void ACAudioCycleOsgQt::on_sliderBPM_valueChanged() //[0;220]
+//{
+//	std::cout << "BPM: " << ui.sliderBPM->value() << std::endl;
+//	//if (library_loaded){
+//	int node = media_cycle->getClickedNode();
+//	if (node > -1)
+//	{
+//		audio_engine->setLoopSynchroMode(node, ACAudioEngineSynchroModeAutoBeat);
+//		audio_engine->setLoopScaleMode(node, ACAudioEngineScaleModeResample);
+//		audio_engine->setBPM(ui.sliderBPM->value());
+//	}
+//	//}
+//	//ui.compositeOsgView->setFocus();
+//}
+//
+//void ACAudioCycleOsgQt::on_sliderPitch_valueChanged() // [50;200]
+//{
+//	std::cout << "Pitch: " << (float) ui.sliderPitch->value()/100.0f << std::endl;
+//	//if (library_loaded){
+//	int node = media_cycle->getClickedNode();
+//	if (node > -1)
+//	{
+//		audio_engine->setLoopSynchroMode(node, ACAudioEngineSynchroModeAutoBeat);
+//		audio_engine->setLoopScaleMode(node, ACAudioEngineScaleModeResample);
+//		audio_engine->setSourcePitch(node, (float) ui.sliderPitch->value()/100.0f); 
+//	}
+//	//}
+//	//ui.compositeOsgView->setFocus();
+//}
+//void ACAudioCycleOsgQt::on_pushButtonQueryRecord_toggled()
+//{
+//	if (ui.pushButtonQueryRecord->isChecked() == 1)
+//	{
+//		if (audio_engine->isCaptureAvailable())
+//		{
+//			ui.pushButtonQueryReplay->setEnabled(false);
+//			ui.pushButtonQueryKeep->setEnabled(false);
+//			ui.pushButtonQueryReferent->setEnabled(false);
+//			std::cout <<"Recording..."<<std::endl;
+//			// CF There is a delay before the recording actually starts: work around with a countdown on a modal window?
+//			audio_engine->startCapture();
+//		}
+//		else
+//			ui.pushButtonQueryRecord->setChecked(true);
+//	}
+//	else
+//	{
+//		if (audio_engine->isCaptureAvailable())
+//		{	
+//			audio_engine->stopCapture();	
+//			std::cout <<"Recording done."<<std::endl;
+//			ui.pushButtonQueryReplay->setEnabled(true);
+//			ui.pushButtonQueryKeep->setEnabled(true);
+//			ui.pushButtonQueryReferent->setEnabled(true);
+//		}	
+//	}	
+//}	
+
+
 #endif //defined (SUPPORT_AUDIO)

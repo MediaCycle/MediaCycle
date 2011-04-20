@@ -172,7 +172,7 @@ void ACMultiMediaCycleOsgQt::configureSettings(){
 // with the appropriate type (audio/image/video/text/mixed/composite/...)
 void ACMultiMediaCycleOsgQt::createMediaCycle(ACMediaType _media_type, ACBrowserMode _browser_mode){
 
-	this->media_cycle = new MediaCycle(_media_type,"/tmp/","mediacycle.acl");
+	this->media_cycle = new MediaCycle(_media_type,"/tmp/","mediacycle.xml");
 	media_cycle->setCallback(mediacycle_callback, (void*)this);
 
 	ui.compositeOsgView->setMediaCycle(this->media_cycle);	
@@ -210,63 +210,6 @@ void ACMultiMediaCycleOsgQt::destroyMediaCycle(){
 	delete media_cycle;
 }
 
-// XS in theory one could select multiple ACL files and concatenate them (not tested yet)
-void ACMultiMediaCycleOsgQt::on_actionLoad_ACL_triggered(bool checked){
-	if (! hasMediaCycle()) return; 
-	
-	QString fileName;	
-	QFileDialog dialog(this,"Open Library File(s)");
-	dialog.setDefaultSuffix ("acl");
-	dialog.setNameFilter("Library Files (*.acl)");
-	dialog.setFileMode(QFileDialog::ExistingFiles); 
-	// changed to ExistingFiles for multiple file handling
-	
-	QStringList fileNames;
-	if (dialog.exec())
-		fileNames = dialog.selectedFiles();
-	
-	QStringList::Iterator file = fileNames.begin();
-	while(file != fileNames.end()) {
-		fileName = *file;
-		std::cout << "Opening ACL file: '" << fileName.toStdString() << "'" << std::endl;
-		//fileName = QFileDialog::getOpenFileName(this, "~", );
-		
-		if (!(fileName.isEmpty())) {
-			media_cycle->importACLLibrary(fileName.toStdString());
-			std::cout << "ACL file imported" << std::endl;
-		}	
-		++file;
-	}	
-		
-	// only after loading all ACL files:
-	if  (!fileNames.isEmpty()){
-		this->updateLibrary();
-		media_cycle->storeNavigationState();
-	
-		#ifdef USE_DEBUG
-		media_cycle->dumpNavigationLevel();
-		media_cycle->dumpLoopNavigationLevels() ;
-		#endif // USE_DEBUG
-	}
-}
-
-void ACMultiMediaCycleOsgQt::on_actionSave_ACL_triggered(bool checked){
-	if (! hasMediaCycle()) return; 
-	
-	QString fileName = QFileDialog::getSaveFileName(this, tr("Save as MediaCycle Library"),"",tr("MediaCycle Library (*.acl)"));
-	QFile file(fileName);
-	if (fileName.isEmpty()) return; // e.g. the user pressed "cancel"
-	if (!file.open(QIODevice::WriteOnly)) {
-		QMessageBox::warning(this,
-							 tr("File error"),
-							 tr("Failed to open\n%1").arg(fileName));
-	} 
-	else {
-		string acl_file = fileName.toStdString();
-		cout << "saving ACL file: " << acl_file << endl;
-		media_cycle->saveACLLibrary(acl_file);
-	}
-}
 
 // XS in theory one could select multiple XML files and concatenate them (not tested yet)
 void ACMultiMediaCycleOsgQt::on_actionLoad_XML_triggered(bool checked){

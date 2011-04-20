@@ -121,6 +121,25 @@ void ACOSCDockWidgetQt::processOscMessage(const char* tagName) {
 //		std::cout << "File library imported" << std::endl;
 //		this->updateLibrary();
 	}
+//	else if(strcasecmp(tagName, "/audiocycle/1/browser/1/hover/xy") == 0)
+//	{
+//		float x = 0.0, y = 0.0;
+//		osc_browser->readFloat(mOscReceiver, &x);
+//		osc_browser->readFloat(mOscReceiver, &y);
+//		
+//		media_cycle->hoverCallback(x,y);
+//		int closest_node = media_cycle->getClosestNode();
+//		float distance = ui.compositeOsgView->getBrowserRenderer()->getDistanceMouse()[closest_node];
+//		if (osc_feedback)
+//		{
+//			osc_feedback->messageBegin("/audiocycle/closest_node_at");
+//			osc_feedback->messageAppendFloat(distance);
+//			osc_feedback->messageEnd();
+//			osc_feedback->messageSend();
+//		}	
+//		media_cycle->setNeedsDisplay(true);
+//	}
+	
 	//std::cout << "End of OSC process messages" << std::endl;
 }
 

@@ -57,7 +57,7 @@ OPTION(SUPPORT_3DMODEL "Support 3D models media" ON)
 OPTION(APPLE_IOS_DEV "Cross-compile for iPhone OS Device" OFF)
 OPTION(APPLE_IOS_SIM "Cross-compile for iPhone OS Simulator" OFF)
 OPTION(APPLE_IOS_XCODE "Generate an XCode project for cross-compiling for the iPhone OS" OFF)
-OPTION(USE_DEBUG "Use Debug" ON)
+OPTION(USE_DEBUG "Use Debug" OFF)
 OPTION(USE_OPENGL "Use OpenGL" ON)
 #OPTION(USE_OSG "Use OSG" ON) # Currently required in the core for 3D models
 SET(USE_OSG ON)

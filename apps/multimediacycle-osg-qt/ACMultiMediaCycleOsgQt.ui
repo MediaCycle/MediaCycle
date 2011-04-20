@@ -140,8 +140,8 @@
    <addaction name="actionShow_Hide_Controls"/>
    <addaction name="actionLoad_Media_Files"/>
    <addaction name="actionLoad_Media_Directory"/>
-   <addaction name="actionLoad_ACL"/>
-   <addaction name="actionSave_ACL"/>
+   <addaction name="actionLoad_XML"/>
+   <addaction name="actionSave_XML"/>
    <addaction name="actionClean"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
@@ -151,25 +151,6 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+O</string>
-   </property>
-  </action>
-  <action name="actionLoad_ACL">
-   <property name="text">
-    <string>Load Library</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+O</string>
-   </property>
-  </action>
-  <action name="actionSave_ACL">
-   <property name="text">
-    <string>Save Library</string>
-   </property>
-   <property name="toolTip">
-    <string>Save Library</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+S</string>
    </property>
   </action>
   <action name="actionLoad_Media_Files">
@@ -202,16 +183,6 @@
     <string>Ctrl+Del</string>
    </property>
   </action>
-  <action name="actionLoad_XML_2">
-   <property name="text">
-    <string>Load Config File</string>
-   </property>
-  </action>
-  <action name="actionSave_XML_2">
-   <property name="text">
-    <string>Save Config File</string>
-   </property>
-  </action>
   <action name="actionEdit_Config_File">
    <property name="enabled">
     <bool>true</bool>
@@ -227,10 +198,22 @@
    <property name="text">
     <string>Load XML</string>
    </property>
+   <property name="toolTip">
+    <string>Load XML library</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
   </action>
   <action name="actionSave_XML">
    <property name="text">
     <string>Save XML</string>
+   </property>
+   <property name="toolTip">
+    <string>Save XML library</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
    </property>
   </action>
   <action name="actionHelpAbout">

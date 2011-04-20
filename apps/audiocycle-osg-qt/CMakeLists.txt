@@ -12,27 +12,36 @@ IF ( SUPPORT_AUDIO AND USE_QT4 AND USE_OSG AND USE_OSC AND ( OPENAL_FOUND OR POR
 		SET(APP_TYPE MACOSX_BUNDLE)
 	ENDIF ( APPLE )
 
-	SET(audiocycle-osg-qt_SRCS main.cpp ACAudioCycleOsgQt.cpp)
-	SET(audiocycle-osg-qt_MOC_HDRS ACAudioCycleOsgQt.h)
-	SET(audiocycle-osg-qt_UIS ACAudioCycleOsgQt.ui)
+	INCLUDE_DIRECTORIES( ../multimediacycle-osg-qt ../../libs/gui-osg-qt)
 
-	# Generates ui_ACAudioCycleOsgQt.h
-	QT4_WRAP_UI(audiocycle-osg-qt_UIS_H ${audiocycle-osg-qt_UIS})
+	SET(multimediacycle-osg-qt_SRCS main.cpp ../multimediacycle-osg-qt/ACMultiMediaCycleOsgQt.cpp)
+	SET(multimediacycle-osg-qt_MOC_HDRS ../multimediacycle-osg-qt/ACMultiMediaCycleOsgQt.h)
+	SET(multimediacycle-osg-qt_UIS ../multimediacycle-osg-qt/ACMultiMediaCycleOsgQt.ui)
 
-	# Generates moc_ACAudioCycleOsgQt.cxx
-	QT4_WRAP_CPP(audiocycle-osg-qt_MOC_SRCS ${audiocycle-osg-qt_MOC_HDRS})
+	SET(settings_SRCS ../multimediacycle-osg-qt/settings.cpp ../multimediacycle-osg-qt/pluginsTreeItem.cpp ../multimediacycle-osg-qt/pluginsTreeModel.cpp)
+	SET(settings_MOC_HDRS ../multimediacycle-osg-qt/settings.h ../multimediacycle-osg-qt/pluginsTreeModel.h) # pluginsTreeItem.h pluginsTreeModel.h)
+	SET(settings_UIS ../multimediacycle-osg-qt/settings.ui)
+	SET(settings_HS ../multimediacycle-osg-qt/pluginsTreeItem.h)
+
+	# Generates ui_ACMultiMediaCycleOsgQt.h  and ui_settings.h
+	QT4_WRAP_UI(multimediacycle-osg-qt_UIS_H ${multimediacycle-osg-qt_UIS})
+	QT4_WRAP_UI(settings_UIS_H ${settings_UIS})
+
+	# Generates moc_ACMultiMediaCycleOsgQt.cxx and moc_settings.cxx
+	QT4_WRAP_CPP(multimediacycle-osg-qt_MOC_SRCS ${multimediacycle-osg-qt_MOC_HDRS})
+	QT4_WRAP_CPP(settings_MOC_SRCS ${settings_MOC_HDRS})
 
 	# Don't forget to include output directory, otherwise
 	# the UI file won't be wrapped!
-	include_directories(${CMAKE_CURRENT_BINARY_DIR})
+	include_directories(${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_BINARY_DIR}/libs/gui-osg-qt)
 
 	IF ( WIN32 )
-		ADD_EXECUTABLE(audiocycle-osg-qt WIN32 ${audiocycle-osg-qt_SRCS} ${audiocycle-osg-qt_UIS_H} ${audiocycle-osg-qt_MOC_SRCS})
+		ADD_EXECUTABLE(audiocycle-osg-qt WIN32 ${multimediacycle-osg-qt_SRCS} ${multimediacycle-osg-qt_UIS_H} ${multimediacycle-osg-qt_MOC_SRCS} ${settings_SRCS} ${settings_UIS_H} ${settings_MOC_SRCS} ${settings_MOC_HDRS} ${settings_HS})
 	ELSE ()
 		IF ( APPLE )
-			ADD_EXECUTABLE(audiocycle-osg-qt ${APP_TYPE} ${MACOSX_BUNDLE_INFO_PLIST} ${audiocycle-osg-qt_SRCS} ${audiocycle-osg-qt_UIS_H} ${audiocycle-osg-qt_MOC_SRCS})
+			ADD_EXECUTABLE(audiocycle-osg-qt ${APP_TYPE} ${MACOSX_BUNDLE_INFO_PLIST} ${multimediacycle-osg-qt_SRCS} ${multimediacycle-osg-qt_UIS_H} ${multimediacycle-osg-qt_MOC_SRCS} ${settings_SRCS} ${settings_UIS_H} ${settings_MOC_SRCS} ${settings_MOC_HDRS} ${settings_HS})
 		ELSE ()
-			ADD_EXECUTABLE(audiocycle-osg-qt ${audiocycle-osg-qt_SRCS} ${audiocycle-osg-qt_UIS_H} ${audiocycle-osg-qt_MOC_SRCS})
+			ADD_EXECUTABLE(audiocycle-osg-qt ${multimediacycle-osg-qt_SRCS} ${multimediacycle-osg-qt_UIS_H} ${multimediacycle-osg-qt_MOC_SRCS} ${settings_SRCS} ${settings_UIS_H} ${settings_MOC_SRCS} ${settings_MOC_HDRS} ${settings_HS})
 		ENDIF ()
 	ENDIF ( )
 
@@ -41,11 +50,11 @@ IF ( SUPPORT_AUDIO AND USE_QT4 AND USE_OSG AND USE_OSC AND ( OPENAL_FOUND OR POR
 	ADD_DEPENDENCIES(audiocycle-osg-qt oscpack)
 	ADD_DEPENDENCIES(audiocycle-osg-qt mediacycle-osg)
 	ADD_DEPENDENCIES(audiocycle-osg-qt mediacycle-osg-qt)
+	ADD_DEPENDENCIES(audiocycle-osg-qt multimediacycle-osg-qt)
 	ADD_DEPENDENCIES(audiocycle-osg-qt audioengine)
 	ADD_DEPENDENCIES(audiocycle-osg-qt mc_visualisation)
 	ADD_DEPENDENCIES(audiocycle-osg-qt mc_audio)
 	ADD_DEPENDENCIES(audiocycle-osg-qt mc_segmentation)
-	#ADD_DEPENDENCIES(audiocycle-osg-qt mc_video)
 	IF ( USE_APPLE_MULTITOUCH )
 		ADD_DEPENDENCIES(audiocycle-osg-qt mediacycle-io-applemultitouch)
 	ENDIF ( USE_APPLE_MULTITOUCH )
@@ -58,6 +67,7 @@ IF ( SUPPORT_AUDIO AND USE_QT4 AND USE_OSG AND USE_OSC AND ( OPENAL_FOUND OR POR
 	TARGET_LINK_LIBRARIES(audiocycle-osg-qt mediacycle)
 	TARGET_LINK_LIBRARIES(audiocycle-osg-qt mediacycle-osg)
 	TARGET_LINK_LIBRARIES(audiocycle-osg-qt mediacycle-osg-qt)
+
 	#TARGET_LINK_LIBRARIES(audiocycle-osg-qt ${OPENSCENEGRAPH_LIBRARIES})
 	TARGET_LINK_LIBRARIES(audiocycle-osg-qt mediacycle-io-osc)
 	#TARGET_LINK_LIBRARIES(audiocycle-osg-qt oscpack)

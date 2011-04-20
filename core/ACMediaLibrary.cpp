@@ -225,7 +225,7 @@ int ACMediaLibrary::importFile(std::string _filename, ACPluginManager *acpl, boo
 
 	}		
 	// appending current media (if imported properly) to the project's XML file 
-	media->saveXML(_medias);
+	//media->saveXML(_medias);
 	
 	// deleting the data that have been used for analysis, keep media small.
 	media->deleteData();

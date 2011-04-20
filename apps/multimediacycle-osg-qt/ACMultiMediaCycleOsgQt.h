@@ -79,8 +79,6 @@ private slots:
 	void syncControlToggleWithDocks();
 	
 	// Library controls
-	void on_actionLoad_ACL_triggered(bool checked);
-	void on_actionSave_ACL_triggered(bool checked);		
 	void on_actionLoad_XML_triggered(bool checked); // features
 	void on_actionSave_XML_triggered(bool checked);	
 	void on_actionLoad_Media_Directory_triggered(bool checked);
