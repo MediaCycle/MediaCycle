@@ -61,10 +61,10 @@ void ACImageAnalysis::setFileName(const string &filename){
 	file_name=filename;	
 }
 
+// returns 1 if it worked, 0 if not
+// original image (imgp_full) reduced to imgp and destroyed
+// works whatever color code, whatever nchannels
 int ACImageAnalysis::scaleImage(IplImage* imgp_full, float _scale){
-	// returns 1 if it worked, 0 if not
-	// original image reduced to imgp and destroyed
-	// works whatever color code, whatever nchannels
 	try {
 		if (!imgp_full) {
 			cerr << "Check file name : " << file_name << endl;

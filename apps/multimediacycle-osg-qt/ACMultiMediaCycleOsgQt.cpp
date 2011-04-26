@@ -452,7 +452,6 @@ void ACMultiMediaCycleOsgQt::on_actionLoad_Media_Files_triggered(bool checked){
 
 		directories.empty();
 		
-		// XS do this only after loading all files (it was in the while loop) !
 		// SD not needed anymore
 		this->updateLibrary();
 	}	
@@ -763,6 +762,10 @@ void ACMultiMediaCycleOsgQt::loadDefaultConfig(ACMediaType _media_type, ACBrowse
 		case MEDIA_TYPE_AUDIO:
 			#if defined (SUPPORT_AUDIO)
 			smedia="audio";
+			// XS TODO (check this) -- after creating new mediacycle instance :
+			// audio_engine->setMediaCycle(media_cycle);
+			// ui.compositeOsgView->setAudioEngine(audio_engine);
+
 			#endif //defined (SUPPORT_AUDIO)
 			break;
 		case MEDIA_TYPE_IMAGE:

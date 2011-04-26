@@ -306,6 +306,14 @@ void ACColorImageAnalysis::computeGaborMoments(int mumax, int numax){ // default
 	delete bw_helper;
 }
 
+void ACColorImageAnalysis::computeGaborMoments_fft(int numPha_, int numFreq_, uint horizonalMargin_, uint verticalMargin_){ // default 7, 5, 0, 0
+	makeBWImage();
+	ACBWImageAnalysis *bw_helper = new ACBWImageAnalysis(this->getBWImage());
+	bw_helper->computeGaborMoments_fft(numPha_, numFreq_, horizonalMargin_, verticalMargin_);
+	gabor_moments = bw_helper->getGaborMoments();
+	delete bw_helper;
+}
+
 void ACColorImageAnalysis::computeColorMoments(int n){
 	// n = number of moments to compute
 	color_moments.clear();

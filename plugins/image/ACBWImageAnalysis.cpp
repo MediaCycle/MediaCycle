@@ -376,27 +376,26 @@ void ACBWImageAnalysis::computeGaborMoments(int mumax, int numax){ // default 7,
 	delete gabor;
 }
 
-//void ACBWImageAnalysis::computeGaborMoments_fft(int numPha_, int numFreq_, uint horizonalMargin_, uint verticalMargin_){ // default 7, 5, 0, 0
-//	gabor_moments.clear();
-//	if (imgp == 0) {
-//		cerr << " <ACBWImageAnalysis::computeGaborMoments() error> missing image !" << endl;
-//		return;
-//	}
-//	
-//	Gabor* gabor = new Gabor(dynamic_cast<ACImageAnalysis*>(this));
-//	gabor->calculate(numPha_, numFreq_, horizonalMargin_, verticalMargin_);
-////DBG(20) << "Gabor feature calculated" << endl;
-////
-////DBG(20) << "Making GaborImage to vector" << endl;
-////double mean, variance;
-////for(uint i=0;i<numPhases*numFrequencies;++i) {
-////	ImageFeature gaborImage=gabor.getImage(i);
-////	normalize(gaborImage);
-////	meanandvariance(gaborImage, mean, variance);
-////	vecfeat[2*i]=mean; vecfeat[2*i+1]=sqrt(variance);
-////}
-//	delete gabor;
-//}
+void ACBWImageAnalysis::computeGaborMoments_fft(int numPha_, int numFreq_, uint horizonalMargin_, uint verticalMargin_){ // default 7, 5, 0, 0
+	gabor_moments.clear();
+	if (imgp == 0) {
+		cerr << " <ACBWImageAnalysis::computeGaborMoments() error> missing image !" << endl;
+		return;
+	}
+	
+	Gabor* gabor = new Gabor(dynamic_cast<ACImageAnalysis*>(this));
+	gabor->calculate(numPha_, numFreq_, horizonalMargin_, verticalMargin_);
+	CvScalar mean, stdev;
+	for(uint i=0;i<numPha_*numFreq_;++i) {
+		IplImage* gaborImage=gabor->getImage(i);
+		cvNormalize((IplImage*)gaborImage, (IplImage*)gaborImage, 0, 255, CV_MINMAX, 0 );
+		cvAvgSdv( gaborImage, &mean, &stdev); 
+		gabor_moments.push_back(mean.val[0]);
+		gabor_moments.push_back(stdev.val[0]);
+		cvReleaseImage(&gaborImage);
+	}
+	delete gabor;
+}
 
 
 void ACBWImageAnalysis::computeColorMoments(int n){ 

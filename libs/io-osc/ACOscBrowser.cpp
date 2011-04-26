@@ -154,7 +154,8 @@ void ACOscBrowser::start(ACOscBrowserRef aReceiver)
 void ACOscBrowser::stop(ACOscBrowserRef aReceiver)
 {
 	OpaqReceiver *receiver = (OpaqReceiver *)aReceiver;
-	
+	if(!receiver) return;
+
 	if(!receiver->started) return;
 	
 	receiver->oscSocket->AsynchronousBreak();

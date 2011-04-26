@@ -64,6 +64,7 @@ ACImageData::~ACImageData() {
 void ACImageData::readData(std::string _fname){
 	if(_fname=="") return;
 	image_ptr = cvLoadImage(_fname.c_str(), CV_LOAD_IMAGE_COLOR);	
+
 	try {
 		if (!image_ptr) {
 			cerr << "Check file name : " << _fname << endl;

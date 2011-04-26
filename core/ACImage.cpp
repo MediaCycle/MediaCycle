@@ -32,72 +32,13 @@
  *
  */
 
-#if defined (SUPPORT_IMAGE) || defined (SUPPORT_VIDEO) 
+#if defined (SUPPORT_IMAGE) 
 
 #include "ACImage.h"
 #include <fstream>
 #include <osg/ImageUtils>
 
 using namespace std;
-
-osg::ref_ptr<osg::Image> Convert_OpenCV_TO_OSG_IMAGE(IplImage* cvImg)
-{
-	
-	// XS uncomment the following 4 lines for visual debug (e.g., thumbnail)	
-	//	cvNamedWindow("T", CV_WINDOW_AUTOSIZE);
-	//	cvShowImage("T", cvImg);
-	//	cvWaitKey(0);
-	//	cvDestroyWindow("T");	
-	
-	
-	if(cvImg->nChannels == 3)
-	{
-		// Flip image from top-left to bottom-left origin
-		if(cvImg->origin == 0) {
-			cvConvertImage(cvImg , cvImg, CV_CVTIMG_FLIP);
-			cvImg->origin = 1;
-		}
-		
-		// Convert from BGR to RGB color format
-		//printf("Color format %s\n",cvImg->colorModel);
-		if ( !strcmp(cvImg->channelSeq,"BGR") ) {
-			cvCvtColor( cvImg, cvImg, CV_BGR2RGB );
-		}
-		
-		osg::ref_ptr<osg::Image> osgImg = new osg::Image();
-		
-//		unsigned char *temp_data = new unsigned char[cvImg->width * cvImg->height * cvImg->nChannels];
-//		 for (int i=0;i<cvImg->height;i++) {
-//		 memcpy( (char*)temp_data + i*cvImg->width*cvImg->nChannels, (char*)(cvImg->imageData) + i*(cvImg->widthStep), cvImg->width*cvImg->nChannels);
-//		 }
-				
-		osgImg->setImage(
-						 cvImg->width, //s
-						 cvImg->height, //t
-						 1, //r //CF needs to be 1 otherwise scaleImage can't be used
-						 3, //GLint internalTextureformat, (GL_LINE_STRIP, 0x0003)
-						 6407, // GLenum pixelFormat, (GL_RGB, 0x1907)
-						 5121, // GLenum type, (GL_UNSIGNED_BYTE, 0x1401)
-						 (unsigned char*)(cvImg->imageData), // unsigned char* data
-						 //temp_data,
-						 osg::Image::NO_DELETE, // AllocationMode mode (shallow copy)
-						 1);//int packing=1); (???)
-		
-		//printf("Conversion completed\n");
-		return osgImg;
-	}
-	// XS TODO : what happens with BW images (or alpha channel) ?
-	else {
-		cerr << "Unrecognized image type" << endl;
-		//printf("Unrecognized image type");
-		return 0;
-	}
-	
-}
-
-#endif //defined (SUPPORT_IMAGE) || defined (SUPPORT_VIDEO) 
-
-#if defined (SUPPORT_IMAGE)
 
 // ----------- class constants
 const int ACImage:: default_thumbnail_area = 16384; // 128*128
@@ -164,19 +105,12 @@ bool ACImage::computeThumbnail(IplImage* img, int w, int h){
 	//cvResize(imgp_full, thumbnail, CV_INTER_CUBIC);
 	
 	// option 2) using OSG -- with ref_ptr to ensure proper garbage collection
-	osg::ref_ptr<osg::Image> tmp = Convert_OpenCV_TO_OSG_IMAGE(img);
-	if (!tmp){
+	this->thumbnail = this->openCVToOSG(img,thumbnail_width,thumbnail_height);
+	if (!thumbnail){
 		cerr << "<ACImage::computeThumbnail> problem converting thumbnail to osg" << endl;
 		ok= false;
 	}
 	else{
-		tmp->scaleImage(thumbnail_width,thumbnail_height, 1);
-		tmp->setAllocationMode(osg::Image::NO_DELETE);	
-
-		thumbnail = new osg::Image;
-		thumbnail->allocateImage(tmp->s(), tmp->t(), tmp->r(), GL_RGB, tmp->getDataType());
-		osg::copyImage(tmp, 0, 0, 0, tmp->s(), tmp->t(), tmp->r(),thumbnail, 0, 0, 0, false);
-	
 		image_texture = new osg::Texture2D;
 		image_texture->setImage(thumbnail);
 	}
@@ -297,4 +231,57 @@ int ACImage::loadXMLSpecific(TiXmlElement* _pMediaNode){
 
 	return 1;	
 }
+
+osg::ref_ptr<osg::Image> ACImage::openCVToOSG(IplImage* cvImg, int sx, int sy) {		
+	if(cvImg->nChannels == 3) {		
+		osg::ref_ptr<osg::Image> osgImg = new osg::Image();
+		
+		// "clean" treatment of cvImg->widthStep
+		unsigned char *temp_data = new unsigned char[cvImg->width * cvImg->height * cvImg->nChannels];
+		for (int i=0;i<cvImg->height;i++) {
+			memcpy( (char*)temp_data + i*cvImg->width*cvImg->nChannels, (char*)(cvImg->imageData) + i*(cvImg->widthStep), cvImg->width*cvImg->nChannels);
+		}
+		
+		// GL_UNSIGNED_BYTE = IPL_DEPTH_8U
+		// GL_BGR = how openCV loaded the image (even if it says RGB...)	
+		int pixel_format = GL_BGR;
+		osgImg->setImage(
+						 cvImg->width, //s
+						 cvImg->height, //t
+						 1, //r //CF needs to be 1 otherwise scaleImage can't be used
+						 3, //GLint internalTextureformat, (GL_LINE_STRIP, 0x0003)
+						 pixel_format, // // GLenum pixelFormat, (GL_RGB, 0x1907)
+						 GL_UNSIGNED_BYTE, //5121, // GLenum type, (GL_UNSIGNED_BYTE, 0x1401)
+						 //(unsigned char*)(cvImg->imageData), // unsigned char* data
+						 temp_data,
+						 osg::Image::NO_DELETE, // AllocationMode mode (shallow copy)
+						 1);//int packing=1); (???)
+		
+		if (cvImg->origin == IPL_ORIGIN_TL) {
+			// usually this is the case
+			osgImg->setOrigin(osg::Image::TOP_LEFT);
+			osgImg->flipVertical();
+		}
+		else
+			osgImg->setOrigin(osg::Image::BOTTOM_LEFT);
+		
+		if (sx>0 && sy >0){
+			osgImg->scaleImage(sx,sy, 1);
+		}
+		// XS uncomment the following 4 lines for visual debug (e.g., thumbnail)	
+//		cvNamedWindow("5", CV_WINDOW_AUTOSIZE);
+//		cvShowImage("5", cvImg);
+//		cvWaitKey(0);
+//		cvDestroyWindow("5");	
+		
+		return osgImg;
+	}
+	// XS TODO : what happens with BW images (or alpha channel) ?
+	else {
+		cerr << "Unrecognized image type : needs 3 channels" << endl;
+		return 0;
+	}
+	
+}
+
 #endif //defined (SUPPORT_IMAGE)

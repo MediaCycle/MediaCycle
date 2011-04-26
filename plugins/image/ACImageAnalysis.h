@@ -39,7 +39,7 @@
 #include "ACOpenCVInclude.h"
 
 #include "cvgabor.h"
-//#include "gabor.h"
+#include "gabor.h"
 #include "ACImageHistogram.h"
 #include "ACImageData.h"
 
@@ -116,6 +116,7 @@ public:
 	virtual void computeFourierMellinMoments(){};
 	virtual void computeContourHuMoments(int thresh = 0){};
 	virtual void computeGaborMoments(int mumax = 7, int numax = 5){};
+	virtual void computeGaborMoments_fft(int numPha_ = 7, int numFreq_ = 5, uint horizonalMargin_ = 0, uint verticalMargin_ = 0){};
 	virtual void computeColorMoments(int n = 4){};
 
 	// features accessors

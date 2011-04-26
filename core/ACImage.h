@@ -35,7 +35,7 @@
 #ifndef ACIMAGE_H
 #define ACIMAGE_H
 
-#if defined (SUPPORT_IMAGE) || defined (SUPPORT_VIDEO) 
+#if defined (SUPPORT_IMAGE) 
 #include "ACOpenCVInclude.h"
 #include "ACMedia.h"
 #include "ACImageData.h"
@@ -46,10 +46,7 @@
 
 // -----------------------------------
 
-osg::ref_ptr<osg::Image> Convert_OpenCV_TO_OSG_IMAGE(IplImage* cvImg);
-#endif //defined (SUPPORT_IMAGE) || defined (SUPPORT_VIDEO)
 
-#if defined (SUPPORT_IMAGE)
 class ACImage: public ACMedia {
 	// contains the *minimal* information about an image
 public:
@@ -82,6 +79,7 @@ private:
 	bool computeThumbnail(ACImageData* data_ptr, int w=0, int h=0);
 	bool computeThumbnail(IplImage* img, int w=0, int h=0);
 	bool computeThumbnailSize(int w_, int h_);
+	osg::ref_ptr<osg::Image> openCVToOSG(IplImage* cvImg, int sx=0, int sy=0);
 
 private:
 	static const int default_thumbnail_area;
@@ -92,5 +90,5 @@ private:
 	
 };
 
-#endif //defined (SUPPORT_IMAGE || SUPPORT_VIDEO)
+#endif //defined (SUPPORT_IMAGE)
 #endif // ACIMAGE_H

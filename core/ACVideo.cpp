@@ -128,6 +128,7 @@ bool ACVideo::computeThumbnail(int w, int h){
 	}
 
 	osg::ref_ptr<osg::Image> thumbnail = osgDB::readImageFile(filename);
+	// XS TODO : needs rescaling !!
 	//thumbnail->scaleImage(thumbnail_width,thumbnail_height,1);
 	//thumbnail->setAllocationMode(osg::Image::NO_DELETE);
 	
