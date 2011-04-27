@@ -38,6 +38,8 @@
 #if defined (SUPPORT_AUDIO)
 #include "ACMediaData.h"
 #include <sndfile.h>
+#include <cstdlib>
+#include <cstring>
 
 class ACAudioData: public ACMediaData {
 public:
