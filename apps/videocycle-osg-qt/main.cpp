@@ -35,15 +35,47 @@
 
 #include <QApplication>
 #include <QtGui>
-#include "ACVideoCycleOsgQt.h"
+#include "ACMultiMediaCycleOsgQt.h"
 
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
 
-    ACVideoCycleOsgQt window;
-    window.show();
+    //ACVideoCycleOsgQt window;
+    //window.show();
 
+	ACMultiMediaCycleOsgQt window;
+	try {
+		// Adding palettes
+		//window.addControlDock("MCMediaConfig");
+		//window.addControlDock("MCOSC");				 
+		window.addControlDock("MCBrowserControlsClusters");//"MCBrowserControlsClustersNeighbors");
+		window.addControlDock("MCVideoControls");
+		
+		// XS TODO
+		// this has to be called after dock controls have been added
+		// do we need to put all this code here ?
+		window.configureSettings();
+		
+		//	window.configurePluginDock();
+		
+		// Changing the about dialog (not necessary if standard MediaCycle app)
+		//window.addAboutDialog("MediaCycle");
+		
+		window.loadDefaultConfig(MEDIA_TYPE_VIDEO);
+		window.show();
+		
+	}
+	catch (const exception& e) {
+		cout << "** caught exception in main : " << e.what() << endl;
+	}
+	catch (...){
+		cout << "** caught undetermined exception in main" << endl;
+	}
+	
+	app.setOrganizationName("numediart");
+	app.setOrganizationDomain("numediart.org");
+	app.setApplicationName("MediaCycle");
+	
     return app.exec();
 }
-

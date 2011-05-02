@@ -1,9 +1,6 @@
 SET(TARGET_NAME "audiocycle-osg-qt")
 IF ( SUPPORT_AUDIO AND USE_QT4 AND USE_OSG AND USE_OSC AND ( OPENAL_FOUND OR PORTAUDIO_FOUND ) )
 
-	FILE(GLOB SRC *.cpp)
-	FILE(GLOB HDR *.h)
-
 	IF ( USE_APPLE_MULTITOUCH )
 		INCLUDE_DIRECTORIES( ../../libs/io-applemultitouch)
 	ENDIF ( USE_APPLE_MULTITOUCH )
@@ -42,8 +39,8 @@ IF ( SUPPORT_AUDIO AND USE_QT4 AND USE_OSG AND USE_OSC AND ( OPENAL_FOUND OR POR
 			ADD_EXECUTABLE(audiocycle-osg-qt ${APP_TYPE} ${MACOSX_BUNDLE_INFO_PLIST} ${multimediacycle-osg-qt_SRCS} ${multimediacycle-osg-qt_UIS_H} ${multimediacycle-osg-qt_MOC_SRCS} ${settings_SRCS} ${settings_UIS_H} ${settings_MOC_SRCS} ${settings_MOC_HDRS} ${settings_HS})
 		ELSE ()
 			ADD_EXECUTABLE(audiocycle-osg-qt ${multimediacycle-osg-qt_SRCS} ${multimediacycle-osg-qt_UIS_H} ${multimediacycle-osg-qt_MOC_SRCS} ${settings_SRCS} ${settings_UIS_H} ${settings_MOC_SRCS} ${settings_MOC_HDRS} ${settings_HS})
-		ENDIF ()
-	ENDIF ( )
+		ENDIF()
+	ENDIF()
 
 	ADD_DEPENDENCIES(audiocycle-osg-qt mediacycle)
 	ADD_DEPENDENCIES(audiocycle-osg-qt mediacycle-io-osc)

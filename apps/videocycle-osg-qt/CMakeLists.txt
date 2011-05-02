@@ -1,7 +1,5 @@
 SET(TARGET_NAME "videocycle-osg-qt")
 IF(SUPPORT_VIDEO AND USE_QT4 AND USE_OSG AND USE_OSC AND OPENAL_FOUND)
-	FILE(GLOB SRC *.cpp)
-	FILE(GLOB HDR *.h)
 
 	IF ( USE_APPLE_MULTITOUCH )
 		INCLUDE_DIRECTORIES( ../../libs/io-applemultitouch)
@@ -11,37 +9,46 @@ IF(SUPPORT_VIDEO AND USE_QT4 AND USE_OSG AND USE_OSC AND OPENAL_FOUND)
 		SET(APP_TYPE MACOSX_BUNDLE)
 	ENDIF ( APPLE )
 
-	SET(videocycle-osg-qt_SRCS main.cpp ACVideoCycleOsgQt.cpp)
-	SET(videocycle-osg-qt_MOC_HDRS ACVideoCycleOsgQt.h)
-	SET(videocycle-osg-qt_UIS ACVideoCycleOsgQt.ui)
+    INCLUDE_DIRECTORIES( ../multimediacycle-osg-qt ../../libs/gui-osg-qt)
+
+	SET(multimediacycle-osg-qt_SRCS main.cpp ../multimediacycle-osg-qt/ACMultiMediaCycleOsgQt.cpp)
+	SET(multimediacycle-osg-qt_MOC_HDRS ../multimediacycle-osg-qt/ACMultiMediaCycleOsgQt.h)
+	SET(multimediacycle-osg-qt_UIS ../multimediacycle-osg-qt/ACMultiMediaCycleOsgQt.ui)
+
+	SET(settings_SRCS ../multimediacycle-osg-qt/settings.cpp ../multimediacycle-osg-qt/pluginsTreeItem.cpp ../multimediacycle-osg-qt/pluginsTreeModel.cpp)
+	SET(settings_MOC_HDRS ../multimediacycle-osg-qt/settings.h ../multimediacycle-osg-qt/pluginsTreeModel.h) # pluginsTreeItem.h pluginsTreeModel.h)
+	SET(settings_UIS ../multimediacycle-osg-qt/settings.ui)
+	SET(settings_HS ../multimediacycle-osg-qt/pluginsTreeItem.h)
 
 	# Generates ui_ACVideoCycleOsgQt.h
-	QT4_WRAP_UI(videocycle-osg-qt_UIS_H ${videocycle-osg-qt_UIS})
+	QT4_WRAP_UI(multimediacycle-osg-qt_UIS_H ${multimediacycle-osg-qt_UIS})
+	QT4_WRAP_UI(settings_UIS_H ${settings_UIS})
 
 	# Generates moc_ACVideoCycleOsgQt.cxx
-	QT4_WRAP_CPP(videocycle-osg-qt_MOC_SRCS ${videocycle-osg-qt_MOC_HDRS})
+	QT4_WRAP_CPP(multimediacycle-osg-qt_MOC_SRCS ${multimediacycle-osg-qt_MOC_HDRS})
+	QT4_WRAP_CPP(settings_MOC_SRCS ${settings_MOC_HDRS})
 
 	# Don't forget to include output directory, otherwise
 	# the UI file won't be wrapped!
-	include_directories(${CMAKE_CURRENT_BINARY_DIR})
+	include_directories(${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_BINARY_DIR}/libs/gui-osg-qt)
 
 	IF ( WIN32 )
-		ADD_EXECUTABLE(videocycle-osg-qt WIN32 ${videocycle-osg-qt_SRCS} ${videocycle-osg-qt_UIS_H} ${videocycle-osg-qt_MOC_SRCS})
+		ADD_EXECUTABLE(videocycle-osg-qt WIN32 ${multimediacycle-osg-qt_SRCS} ${multimediacycle-osg-qt_UIS_H} ${multimediacycle-osg-qt_MOC_SRCS} ${settings_SRCS} ${settings_UIS_H} ${settings_MOC_SRCS} ${settings_MOC_HDRS} ${settings_HS})
 	ELSE ()
 		#IF ( APPLE )
-		#	ADD_EXECUTABLE(videocycle-osg-qt ${APP_TYPE} ${MACOSX_BUNDLE_INFO_PLIST} ${videocycle-osg-qt_SRCS} ${videocycle-osg-qt_UIS_H} ${videocycle-osg-qt_MOC_SRCS})
+		#	ADD_EXECUTABLE(videocycle-osg-qt ${APP_TYPE} ${MACOSX_BUNDLE_INFO_PLIST} ${multimediacycle-osg-qt_SRCS} ${multimediacycle-osg-qt_UIS_H} ${multimediacycle-osg-qt_MOC_SRCS} ${settings_SRCS} ${settings_UIS_H} ${settings_MOC_SRCS} ${settings_MOC_HDRS} ${settings_HS})
 		#ELSE ()
-			ADD_EXECUTABLE(videocycle-osg-qt ${videocycle-osg-qt_SRCS} ${videocycle-osg-qt_UIS_H} ${videocycle-osg-qt_MOC_SRCS})
-		#ENDIF ()
-	ENDIF ( )
+			ADD_EXECUTABLE(videocycle-osg-qt ${multimediacycle-osg-qt_SRCS} ${multimediacycle-osg-qt_UIS_H} ${multimediacycle-osg-qt_MOC_SRCS} ${settings_SRCS} ${settings_UIS_H} ${settings_MOC_SRCS} ${settings_MOC_HDRS} ${settings_HS})
+		#ENDIF()
+	ENDIF()
 
 	ADD_DEPENDENCIES(videocycle-osg-qt mediacycle)
 	ADD_DEPENDENCIES(videocycle-osg-qt mediacycle-io-osc)
 	ADD_DEPENDENCIES(videocycle-osg-qt oscpack)
 	ADD_DEPENDENCIES(videocycle-osg-qt mediacycle-osg)
 	ADD_DEPENDENCIES(videocycle-osg-qt mediacycle-osg-qt)
+	ADD_DEPENDENCIES(videocycle-osg-qt multimediacycle-osg-qt)
 	ADD_DEPENDENCIES(videocycle-osg-qt mc_visualisation)
-	ADD_DEPENDENCIES(videocycle-osg-qt mc_audio)
 	ADD_DEPENDENCIES(videocycle-osg-qt mc_segmentation)
 	ADD_DEPENDENCIES(videocycle-osg-qt mc_video)
 	IF ( USE_APPLE_MULTITOUCH )
