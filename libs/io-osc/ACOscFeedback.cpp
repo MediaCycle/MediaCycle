@@ -39,7 +39,6 @@
 
 #include "ACOscFeedback.h"
 
-//ACOscFeedbackRef
 void ACOscFeedback::create(const char *hostname, int port)
 {
 	sender = new OpaqSender();
@@ -50,13 +49,10 @@ void ACOscFeedback::create(const char *hostname, int port)
 
 	sender->oscStream = new osc::OutboundPacketStream( sender->oscBuffer, IP_MTU_SIZE ); assert(sender->oscStream);
 	sender->oscSocket = new UdpTransmitSocket(host); assert(sender->oscSocket);
-	
-	//return sender;
 }
 
 void ACOscFeedback::release()
 {
-	//sender = (OpaqSender*)aSender; assert(sender);
 	if (sender) {
 		if (sender->oscStream)
 			delete sender->oscStream;
@@ -67,42 +63,34 @@ void ACOscFeedback::release()
 	}
 }
 
-void ACOscFeedback::messageBegin(const char *tag)//ACOscFeedbackRef aSender,const char *tag)
+void ACOscFeedback::messageBegin(const char *tag)
 {
 	assert(tag);
-	//sender = (OpaqSender*)aSender; assert(sender);
-	
 	sender->oscStream->Clear();
 	*sender->oscStream << osc::BeginMessage( tag );
 }
-void ACOscFeedback::messageEnd()//ACOscFeedbackRef aSender)
+
+void ACOscFeedback::messageEnd()
 {	
-	//sender = (OpaqSender*)aSender; assert(sender);
-	
 	*sender->oscStream << osc::EndMessage;
 }
-void ACOscFeedback::messageSend()//ACOscFeedbackRef aSender)
+
+void ACOscFeedback::messageSend()
 {	
-	//sender = (OpaqSender*)aSender; assert(sender);
-	
 	sender->oscSocket->Send( sender->oscStream->Data(), sender->oscStream->Size() );
 }
 
-void ACOscFeedback::messageAppendFloat(float aVal)//ACOscFeedbackRef aSender, float aVal)
+void ACOscFeedback::messageAppendFloat(float aVal)
 {
-	//sender = (OpaqSender*)aSender; assert(sender);
-	
 	*sender->oscStream << aVal;
 }
-void ACOscFeedback::messageAppendInt(int aVal)//ACOscFeedbackRef aSender, int aVal)
+
+void ACOscFeedback::messageAppendInt(int aVal)
 {
-	//sender = (OpaqSender*)aSender; assert(sender);
-	
 	*sender->oscStream << aVal;
 }
-void ACOscFeedback::messageAppendString(const char *aVal)//ACOscFeedbackRef aSender, const char *aVal)
+
+void ACOscFeedback::messageAppendString(const char *aVal)
 {
-	//sender = (OpaqSender*)aSender; assert(sender);
-	
 	*sender->oscStream << aVal;
 }

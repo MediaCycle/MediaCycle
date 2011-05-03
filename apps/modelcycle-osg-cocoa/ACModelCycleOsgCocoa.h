@@ -57,7 +57,6 @@ enum	{
 	MediaCycle				*media_cycle;
 	ACOscBrowser			*osc_browser;
 	ACOscFeedback			*osc_feedback;
-	ACOscBrowserRef			mOscReceiver;
 
 	NSString* osc_control_ip;
 	int osc_control_port;

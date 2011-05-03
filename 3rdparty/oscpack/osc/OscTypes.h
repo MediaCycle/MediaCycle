@@ -40,6 +40,11 @@ namespace osc{
 typedef __int64 int64;
 typedef unsigned __int64 uint64;
 
+#elif defined(__x86_64__) || defined(_M_X64)
+
+typedef long int64;
+typedef unsigned long uint64;
+
 #else
 
 typedef long long int64;
@@ -49,7 +54,7 @@ typedef unsigned long long uint64;
 
 
 
-#ifdef x86_64
+#if defined(__x86_64__) || defined(_M_X64)
 
 typedef signed int int32;
 typedef unsigned int uint32;
@@ -120,12 +125,8 @@ extern MessageTerminator EndMessage;
 struct NilType{
 };
 
-// CF hack so that oscpack's Nil won't break Cocoa's Nil
-#ifdef Nil
-#undef Nil
-#endif
-	
 extern NilType Nil;
+
 
 struct InfinitumType{
 };

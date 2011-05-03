@@ -1,0 +1,6 @@
+This is a fork of oscpack r60 Dec 15, 2010:
+http://code.google.com/p/oscpack/source/detail?r=60
+
+Adaptations:
+* CMakeLists.txt modified to integrate oscpack as third party in MediaCycle
+* osc/OscHostEndianness.h modified to compile in Linux

@@ -37,9 +37,9 @@
 #ifndef _ACOSCFEEDBACK_H_
 #define _ACOSCFEEDBACK_H_
 
-#include <OscOutboundPacketStream.h>
-#include "../../3rdparty/oscpack/UdpSocket.h" // #include <UdpSocket.h> breaks with stk!
-#include <IpEndpointName.h>
+#include <osc/OscOutboundPacketStream.h>
+#include <ip/UdpSocket.h> // #include <UdpSocket.h> breaks with stk!
+#include <ip/IpEndpointName.h>
 
 typedef void *ACOscFeedbackRef;
 
@@ -56,7 +56,7 @@ struct OpaqSender
 
 class ACOscFeedback {
 	public:
-		ACOscFeedback(){};
+		ACOscFeedback(){sender = 0;};
 		~ACOscFeedback(){ release();}
 	
 		void create(const char *hostname, int port);
@@ -67,6 +67,7 @@ class ACOscFeedback {
 		void messageAppendFloat(float aVal);
 		void messageAppendInt(int aVal);
 		void messageAppendString(const char *aval);
+		bool isActive() {if(sender) return true; else return false;}
 	private:
 		OpaqSender *sender;
 };

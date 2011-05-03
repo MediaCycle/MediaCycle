@@ -40,7 +40,7 @@
 
 using namespace std;
 
-static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
+static void osc_callback(const char *tagName, void *userData)
 {
 	ACAudioGardenOsgQt *window = (ACAudioGardenOsgQt*)userData;
 	//printf("osc received tag: %s\n", tagName);
@@ -142,20 +142,23 @@ ACAudioGardenOsgQt::~ACAudioGardenOsgQt()
 {
 	//compositeOsgView->setPlaying(false);
 	if (osc_browser) {
-		osc_browser->stop(mOscReceiver);		
-		//osc_browser->release(mOscReceiver);//should be in destructor ?
+		osc_browser->stop();		
+		osc_browser->release();
+		delete osc_browser;
+		osc_browser = 0;
+	}
+	if (osc_feedback) {
+		osc_feedback->release();
+		delete osc_feedback;
+		osc_feedback = 0;
 	}
 
 	#ifdef USE_APPLE_MULTITOUCH
 		multitouch_trackpad->stop();
 	#endif
 	
-	delete osc_browser;
-	delete osc_feedback;//osc_feedback destructor calls ACOscFeedback::release()
 	delete audio_engine;
 	delete media_cycle;
-	//delete mOscReceiver;
-	//delete mOscFeeder;
 }
 
 void ACAudioGardenOsgQt::updateLibrary()
@@ -611,16 +614,16 @@ void ACAudioGardenOsgQt::on_pushButtonControlStart_clicked()
 	if ( ui.pushButtonControlStart->text().toStdString() == "Start")
 	{	
 		osc_browser = new ACOscBrowser();
-		mOscReceiver = osc_browser->create(ui.lineEditControlIP->text().toStdString().c_str(), ui.lineEditControlPort->text().toInt());
-		osc_browser->setUserData(mOscReceiver, this);
-		osc_browser->setCallback(mOscReceiver, osc_callback);
-		osc_browser->start(mOscReceiver);
+		osc_browser->create(ui.lineEditControlIP->text().toStdString().c_str(), ui.lineEditControlPort->text().toInt());
+		osc_browser->setUserData(this);
+		osc_browser->setCallback(osc_callback);
+		osc_browser->start();
 		ui.pushButtonControlStart->setText("Stop");
 		 
 	}	
 	else if ( ui.pushButtonControlStart->text().toStdString() == "Stop")
 	{	
-		osc_browser->stop(mOscReceiver);
+		osc_browser->stop();
 		ui.pushButtonControlStart->setText("Start");
 	}
 	//ui.compositeOsgView->setFocus();
@@ -638,7 +641,7 @@ void ACAudioGardenOsgQt::on_pushButtonFeedbackStart_clicked()
 	}	
 	else if ( ui.pushButtonFeedbackStart->text().toStdString() == "Stop")
 	{	
-		osc_feedback->release();//mOscFeeder);
+		osc_feedback->release();
 		ui.pushButtonFeedbackStart->setText("Start");
 	}
 	//ui.compositeOsgView->setFocus();
@@ -673,7 +676,7 @@ void ACAudioGardenOsgQt::processOscMessage(const char* tagName)
 	else if(strcasecmp(tagName, "/audiocycle/fullscreen") == 0)
 	{
 		int fullscreen = 0;
-		osc_browser->readInt(mOscReceiver, &fullscreen);
+		osc_browser->readInt(&fullscreen);
 		if (fullscreen == 1)
 			ui.groupControls->hide();
 		else
@@ -683,8 +686,8 @@ void ACAudioGardenOsgQt::processOscMessage(const char* tagName)
 	{
 		float x = 0.0, y = 0.0;
 		media_cycle->getCameraPosition(x,y);
-		osc_browser->readFloat(mOscReceiver, &x);
-		osc_browser->readFloat(mOscReceiver, &y);
+		osc_browser->readFloat(&x);
+		osc_browser->readFloat(&y);
 		
 		float zoom = media_cycle->getCameraZoom();
 		float angle = media_cycle->getCameraRotation();
@@ -696,8 +699,8 @@ void ACAudioGardenOsgQt::processOscMessage(const char* tagName)
 	else if(strcasecmp(tagName, "/audiocycle/1/browser/1/hover/xy") == 0)
 	{
 		float x = 0.0, y = 0.0;
-		osc_browser->readFloat(mOscReceiver, &x);
-		osc_browser->readFloat(mOscReceiver, &y);
+		osc_browser->readFloat(&x);
+		osc_browser->readFloat(&y);
 		
 		media_cycle->hoverCallback(x,y);
 		int closest_node = media_cycle->getClosestNode();
@@ -714,7 +717,7 @@ void ACAudioGardenOsgQt::processOscMessage(const char* tagName)
 	else if(strcasecmp(tagName, "/audiocycle/1/browser/1/move/zoom") == 0)
 	{
 		float zoom;
-		osc_browser->readFloat(mOscReceiver, &zoom);
+		osc_browser->readFloat(&zoom);
 		//zoom = zoom*600/50; // refzoom +
 		media_cycle->setCameraZoom((float)zoom);
 		media_cycle->setNeedsDisplay(true);
@@ -722,7 +725,7 @@ void ACAudioGardenOsgQt::processOscMessage(const char* tagName)
 	else if(strcasecmp(tagName, "/audiocycle/1/browser/1/move/angle") == 0)
 	{
 		float angle;//, refangle = media_cycle->getCameraRotation();
-		osc_browser->readFloat(mOscReceiver, &angle);
+		osc_browser->readFloat(&angle);
 		media_cycle->setCameraRotation((float)angle);
 		media_cycle->setNeedsDisplay(true);
 	}
@@ -730,7 +733,7 @@ void ACAudioGardenOsgQt::processOscMessage(const char* tagName)
 	{
 		char *lib_path = 0;
 		lib_path = new char[500]; // wrong magic number!
-		osc_browser->readString(mOscReceiver, lib_path, 500); // wrong magic number!
+		osc_browser->readString(lib_path, 500); // wrong magic number!
 		std::cout << "Importing file library '" << lib_path << "'..." << std::endl;
 		media_cycle->importACLLibrary(lib_path); // XS instead of getImageLibrary CHECK THIS
 		media_cycle->normalizeFeatures();
@@ -768,7 +771,7 @@ void ACAudioGardenOsgQt::processOscMessage(const char* tagName)
 	else if(strcasecmp(tagName, "/audiocycle/1/player/1/bpm") == 0)
 	{
 		float bpm;
-		osc_browser->readFloat(mOscReceiver, &bpm);
+		osc_browser->readFloat(&bpm);
 		
 		//int node = media_cycle->getClickedNode();
 		//int node = media_cycle->getClosestNode();
@@ -784,7 +787,7 @@ void ACAudioGardenOsgQt::processOscMessage(const char* tagName)
 	else if(strcasecmp(tagName, "/audiocycle/1/player/1/scrub") == 0)
 	{
 		float scrub;
-		osc_browser->readFloat(mOscReceiver, &scrub);
+		osc_browser->readFloat(&scrub);
 		
 		//int node = media_cycle->getClickedNode();
 		//int node = media_cycle->getClosestNode();
@@ -801,7 +804,7 @@ void ACAudioGardenOsgQt::processOscMessage(const char* tagName)
 	else if(strcasecmp(tagName, "/audiocycle/1/player/1/pitch") == 0)
 	{
 		float pitch;
-		osc_browser->readFloat(mOscReceiver, &pitch);
+		osc_browser->readFloat(&pitch);
 		
 		//int node = media_cycle->getClickedNode();
 		//int node = media_cycle->getClosestNode();

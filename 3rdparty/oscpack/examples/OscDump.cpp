@@ -27,24 +27,59 @@
 	CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 	WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-#ifndef INCLUDED_OSCPRINTRECEIVEDELEMENTS_H
-#define INCLUDED_OSCPRINTRECEIVEDELEMENTS_H
 
-#include <iosfwd>
+/*
+    OscDump prints incoming Osc packets. Unlike the Berkeley dumposc program
+    OscDump uses a different printing format which indicates the type of each
+    message argument.
+*/
+
+
+#include <iostream>
 #include <cstring>
+#include <cstdlib>
 
-#ifndef INCLUDED_OSCRECEIVEDELEMENTS_H
-#include "OscReceivedElements.h"
-#endif /* INCLUDED_OSCRECEIVEDELEMENTS_H */
+#include "osc/OscReceivedElements.h"
+#include "osc/OscPrintReceivedElements.h"
+
+#include "ip/UdpSocket.h"
+#include "ip/PacketListener.h"
 
 
-namespace osc{
+class OscDumpPacketListener : public PacketListener{
+public:
+	virtual void ProcessPacket( const char *data, int size, 
+			const IpEndpointName& remoteEndpoint )
+	{
+		std::cout << osc::ReceivedPacket( data, size );
+	}
+};
 
-std::ostream& operator<<( std::ostream & os, const ReceivedPacket& p );
-std::ostream& operator<<( std::ostream & os, const ReceivedMessageArgument& arg );
-std::ostream& operator<<( std::ostream & os, const ReceivedMessage& m );
-std::ostream& operator<<( std::ostream & os, const ReceivedBundle& b );
+int main(int argc, char* argv[])
+{
+	if( argc >= 2 && strcmp( argv[1], "-h" ) == 0 ){
+        std::cout << "usage: OscDump [port]\n";
+        return 0;
+    }
 
-} // namespace osc
+	int port = 7000;
 
-#endif /* INCLUDED_OSCPRINTRECEIVEDELEMENTS_H */
+	if( argc >= 2 )
+		port = atoi( argv[1] );
+
+	OscDumpPacketListener listener;
+    UdpListeningReceiveSocket s(
+            IpEndpointName( IpEndpointName::ANY_ADDRESS, port ),
+            &listener );
+
+	std::cout << "listening for input on port " << port << "...\n";
+	std::cout << "press ctrl-c to end\n";
+
+	s.RunUntilSigInt();
+
+	std::cout << "finishing.\n";	
+
+    return 0;
+}
+
+

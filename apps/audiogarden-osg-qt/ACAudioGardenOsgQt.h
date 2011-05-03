@@ -131,6 +131,5 @@ class ACAudioGardenOsgQt : public QMainWindow
 	
 	public:
 		void processOscMessage(const char* tagName);
-		ACOscBrowserRef mOscReceiver;
 };
 #endif

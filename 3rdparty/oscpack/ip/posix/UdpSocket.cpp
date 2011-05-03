@@ -27,10 +27,7 @@
 	CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 	WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-
-#ifndef _WIN32
-
-#include "UdpSocket.h"
+#include "ip/UdpSocket.h"
 
 #include <vector>
 #include <algorithm>
@@ -51,9 +48,10 @@
 #include <sys/time.h>
 #include <netinet/in.h> // for sockaddr_in
 
-#include "PacketListener.h"
-#include "TimerListener.h"
+#include "ip/PacketListener.h"
+#include "ip/TimerListener.h"
 
+#include<iostream>//CF
 
 #if defined(__APPLE__) && !defined(_SOCKLEN_T)
 // pre system 10.3 didn have socklen_t
@@ -410,6 +408,7 @@ public:
 		struct timeval timeout;
 
 		while( !break_ ){
+			std::cout << "Udp socket running" << std::endl;//CF
 			tempfds = masterfds;
 
 			struct timeval *timeoutPtr = 0;
@@ -546,5 +545,4 @@ void SocketReceiveMultiplexer::AsynchronousBreak()
 {
 	impl_->AsynchronousBreak();
 }
-#endif
 

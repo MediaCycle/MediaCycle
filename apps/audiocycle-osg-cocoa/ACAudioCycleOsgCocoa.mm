@@ -43,7 +43,7 @@
  - (void)processOscMessage:(const char*)tagName;
 @end
  
-static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
+static void osc_callback(const char *tagName, void *userData)
 {
 	ACAudioCycleOsgCocoa *self = (ACAudioCycleOsgCocoa*)userData;
 	//printf("osc received tag: %s\n", tagName);
@@ -63,17 +63,7 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 }
 
 - (void)initCommonACAudioCycleOsgCocoa
-{
-////
-	/*
-	mOscReceiver = TiOscReceiverCreate("localhost", 12345);
-	
-	TiOscReceiverSetUserData(mOscReceiver, self);
-	TiOscReceiverSetCallback(mOscReceiver, osc_callback);
-	
-	TiOscReceiverStart(mOscReceiver);
-	 */
-////	 
+{ 
 }
 
 - init
@@ -89,12 +79,6 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 - (void)dealloc
 {
 	////osc_browser->stop();
-////
-	/*
-	TiOscReceiverStop(mOscReceiver);
-	TiOscReceiverRelease(mOscReceiver);
-	*/
-////
 	
 	[super dealloc];
 }
@@ -403,14 +387,14 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 	if (value == 1)
 	{
 		osc_browser = new ACOscBrowser();
-		mOscReceiver = osc_browser->create((const char*)[osc_control_ip UTF8String], osc_control_port);
-		osc_browser->setUserData(mOscReceiver, self);
-		osc_browser->setCallback(mOscReceiver, osc_callback);
-		osc_browser->start(mOscReceiver);
+		osc_browser->create((const char*)[osc_control_ip UTF8String], osc_control_port);
+		osc_browser->setUserData(self);
+		osc_browser->setCallback(osc_callback);
+		osc_browser->start();
 	}
 	else
 	{
-		osc_browser->stop(mOscReceiver);
+		osc_browser->stop();
 	}
 }
  
@@ -643,8 +627,8 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 	{
 		float x = 0.0, y = 0.0;
 		media_cycle->getCameraPosition(x,y);
-		osc_browser->readFloat(mOscReceiver, &x);
-		osc_browser->readFloat(mOscReceiver, &y);
+		osc_browser->readFloat(&x);
+		osc_browser->readFloat(&y);
 
 		float zoom = media_cycle->getCameraZoom();
 		float angle = media_cycle->getCameraRotation();
@@ -657,8 +641,8 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 	else if(strcasecmp(tagName, "/audiocycle/1/browser/1/hover/xy") == 0)
 	{
 		float x = 0.0, y = 0.0;
-		osc_browser->readFloat(mOscReceiver, &x);
-		osc_browser->readFloat(mOscReceiver, &y);
+		osc_browser->readFloat(&x);
+		osc_browser->readFloat(&y);
 		
 		media_cycle->hoverCallback(x,y);
 		int closest_node = media_cycle->getClosestNode();
@@ -675,9 +659,9 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 	else if(strcasecmp(tagName, "/audiocycle/1/browser/1/move/position") == 0)
 	{
 		float x = 0.0, y = 0.0, z = 0.0;
-		osc_browser->readFloat(mOscReceiver, &x);
-		osc_browser->readFloat(mOscReceiver, &y);
-		osc_browser->readFloat(mOscReceiver, &z);
+		osc_browser->readFloat(&x);
+		osc_browser->readFloat(&y);
+		osc_browser->readFloat(&z);
 		
 		float alpha=0.0;
 		prevz = alpha*prevz + (1-alpha)*z;
@@ -702,7 +686,7 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 	else if(strcasecmp(tagName, "/audiocycle/1/browser/1/move/zoom") == 0)
 	{
 		float zoom;//, refzoom = media_cycle->getCameraZoom();
-		osc_browser->readFloat(mOscReceiver, &zoom);
+		osc_browser->readFloat(&zoom);
 		//zoom = zoom*600/50; // refzoom +
 		media_cycle->setCameraZoom((float)zoom);
 		media_cycle->setNeedsDisplay(1);
@@ -710,7 +694,7 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 	else if(strcasecmp(tagName, "/audiocycle/1/browser/1/move/angle") == 0)
 	{
 		float angle;//, refangle = media_cycle->getCameraRotation();
-		osc_browser->readFloat(mOscReceiver, &angle);
+		osc_browser->readFloat(&angle);
 		media_cycle->setCameraRotation((float)angle);
 		media_cycle->setNeedsDisplay(1);
 	}
@@ -718,7 +702,7 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 	{
 		char *lib_path = NULL;
 		lib_path = new char[500]; // wrong magic number!
-		osc_browser->readString(mOscReceiver, lib_path, 500); // wrong magic number!
+		osc_browser->readString(lib_path, 500); // wrong magic number!
 		std::cout << "Importing file library '" << lib_path << "'..." << std::endl;
 		media_cycle->importACLLibrary(lib_path);
 		media_cycle->normalizeFeatures();
@@ -748,7 +732,7 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 	else if(strcasecmp(tagName, "/audiocycle/1/player/1/bpm") == 0)
 	{
 		float bpm;
-		osc_browser->readFloat(mOscReceiver, &bpm);
+		osc_browser->readFloat(&bpm);
 		
 		//int node = media_cycle->getClickedNode();
 		//int node = media_cycle->getClosestNode();
@@ -764,7 +748,7 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 	else if(strcasecmp(tagName, "/audiocycle/1/player/1/scrub") == 0)
 	{
 		float scrub;
-		osc_browser->readFloat(mOscReceiver, &scrub);
+		osc_browser->readFloat(&scrub);
 		
 		//int node = media_cycle->getClickedNode();
 		//int node = media_cycle->getClosestNode();
@@ -782,7 +766,7 @@ static void osc_callback(ACOscBrowserRef, const char *tagName, void *userData)
 	else if(strcasecmp(tagName, "/audiocycle/1/player/1/pitch") == 0)
 	{
 		float pitch;
-		osc_browser->readFloat(mOscReceiver, &pitch);
+		osc_browser->readFloat(&pitch);
 	
 		//int node = media_cycle->getClickedNode();
 		//int node = media_cycle->getClosestNode();

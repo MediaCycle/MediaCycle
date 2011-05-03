@@ -27,9 +27,7 @@
 	CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 	WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-#ifdef _WIN32
-
-#include "UdpSocket.h"
+#include "ip/UdpSocket.h"
 
 #include <winsock2.h>   // this must come first to prevent errors with MSVC7
 #include <windows.h>
@@ -39,11 +37,14 @@
 #include <algorithm>
 #include <stdexcept>
 #include <assert.h>
-#include <signal.h>
 
-#include "NetworkingUtils.h"
-#include "PacketListener.h"
-#include "TimerListener.h"
+#ifndef WINCE
+#include <signal.h>
+#endif
+
+#include "ip/NetworkingUtils.h"
+#include "ip/PacketListener.h"
+#include "ip/TimerListener.h"
 
 
 typedef int socklen_t;
@@ -284,7 +285,9 @@ extern "C" /*static*/ void InterruptSignalHandler( int );
 /*static*/ void InterruptSignalHandler( int )
 {
 	multiplexerInstanceToAbortWithSigInt_->AsynchronousBreak();
-	signal( SIGINT, SIG_DFL );
+#ifndef WINCE
+    signal( SIGINT, SIG_DFL );
+#endif
 }
 
 
@@ -299,8 +302,12 @@ class SocketReceiveMultiplexer::Implementation{
 
 	double GetCurrentTimeMs() const
 	{
+#ifndef WINCE
 		return timeGetTime(); // FIXME: bad choice if you want to run for more than 40 days
-	}
+#else
+        return 0;
+#endif
+    }
 
 public:
     Implementation()
@@ -505,9 +512,13 @@ void SocketReceiveMultiplexer::RunUntilSigInt()
 {
 	assert( multiplexerInstanceToAbortWithSigInt_ == 0 ); /* at present we support only one multiplexer instance running until sig int */
 	multiplexerInstanceToAbortWithSigInt_ = this;
-	signal( SIGINT, InterruptSignalHandler );
+#ifndef WINCE
+    signal( SIGINT, InterruptSignalHandler );
+#endif
 	impl_->Run();
+#ifndef WINCE
 	signal( SIGINT, SIG_DFL );
+#endif
 	multiplexerInstanceToAbortWithSigInt_ = 0;
 }
 
@@ -520,6 +531,4 @@ void SocketReceiveMultiplexer::AsynchronousBreak()
 {
 	impl_->AsynchronousBreak();
 }
-
-#endif
 

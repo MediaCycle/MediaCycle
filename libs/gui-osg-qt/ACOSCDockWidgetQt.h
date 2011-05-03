@@ -45,7 +45,6 @@
 #include <ACOscBrowser.h>
 #include <ACOscFeedback.h>
 
-
 class ACOSCDockWidgetQt : public ACAbstractDockWidgetQt {
 Q_OBJECT
 
@@ -64,7 +63,5 @@ private:
 
 public:
 	void processOscMessage(const char* tagName);
-	ACOscBrowserRef mOscReceiver;
-	
 };
 #endif

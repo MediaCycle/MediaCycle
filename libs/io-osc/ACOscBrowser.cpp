@@ -36,20 +36,7 @@
 
 #include "ACOscBrowser.h"
 
-#include <assert.h>
-#include <pthread.h>
-#include <string.h>
-#include <stdio.h>
-#include <iostream>
-
-#include <OscReceivedElements.h>
-#include <OscPacketListener.h>
-#include "../../3rdparty/oscpack/UdpSocket.h" // #include <UdpSocket.h> breaks with stk!
-
 using namespace std;
-
-struct OpaqReceiver;
-class ACPacketListener;
 
 struct OpaqReceiver
 {
@@ -61,6 +48,8 @@ struct OpaqReceiver
 	//pthread_mutex_t 		mutex;
 	pthread_t			pthread;
 	pthread_attr_t  		pthread_custom_attr;
+	pthread_t			pthreadudp;
+	pthread_attr_t  		pthreadudp_custom_attr;
 	
 	void				*userData;
 	ACOscBrowserCallback		callback;
@@ -73,123 +62,150 @@ struct OpaqReceiver
 	}
 };
 
-
 class ACPacketListener : public osc::OscPacketListener {
-private:
-	OpaqReceiver *mReceiver;
-	
-protected:
-	virtual void ProcessMessage( const osc::ReceivedMessage& message, const IpEndpointName& remoteEndpoint )
-	{
-		try{
-			assert(mReceiver);
-			
-			if(mReceiver->callback)
-			{
-				osc::ReceivedMessageArgumentStream args = message.ArgumentStream();
+	private:
+		OpaqReceiver *mReceiver;
+		
+	protected:
+		virtual void ProcessMessage( const osc::ReceivedMessage& message, const IpEndpointName& remoteEndpoint )
+		{
+			std::cout << "ProcessMessage" << std::endl;
+			try{
+				assert(mReceiver);
 				
-				mReceiver->argStream = &args;
-				mReceiver->callback(mReceiver, message.AddressPattern(), mReceiver->userData);
-				mReceiver->argStream = 0;
+				if(mReceiver->callback)
+				{
+					osc::ReceivedMessageArgumentStream args = message.ArgumentStream();
+					mReceiver->argStream = &args;
+					mReceiver->callback(message.AddressPattern(), mReceiver->userData);
+					mReceiver->argStream = 0;
+				}
+			}
+			catch( osc::Exception& e ){
+				// any parsing errors such as unexpected argument types, or missing arguments get thrown as exceptions.
+				std::cout << "error while parsing message: " << message.AddressPattern() << ": " << e.what() << "\n";
 			}
 		}
-		catch( osc::Exception& e ){
-			// any parsing errors such as unexpected argument types, or missing arguments get thrown as exceptions.
-			std::cout << "error while parsing message: " << message.AddressPattern() << ": " << e.what() << "\n";
-		}
-	}
-public:
-	ACPacketListener(OpaqReceiver *aReceiver) : osc::OscPacketListener(), mReceiver(aReceiver) {}
+	public:
+		ACPacketListener(OpaqReceiver *aReceiver) : osc::OscPacketListener(), mReceiver(aReceiver) {}
 };
 
+void* udp_thread(void *arg)
+{
+	OpaqReceiver *receiver = (OpaqReceiver *)arg;
+	bool break_ = false;
+	while(!break_)
+		receiver->oscSocket->Run();
+}
 
 void* osc_thread(void *arg)
 {
+	printf("osc thread...\n");
 	OpaqReceiver *receiver = (OpaqReceiver *)arg;
 	printf("Running...\n");
 	
-	receiver->oscSocket->Run();
-	//	printf("Stopped\n");
+	pthread_attr_init(&receiver->pthreadudp_custom_attr);
+	pthread_create(&receiver->pthreadudp, &receiver->pthreadudp_custom_attr, &udp_thread, receiver);
+	
+	//receiver->oscSocket->Run();
+	
+	
+	while(1){
+		std::cout << "receiver" << &receiver << std::endl;
+		usleep(1000000);
+	}
+	printf("Stopped\n");
 	
 	return 0;
 }
 
-ACOscBrowserRef ACOscBrowser::create(const char *hostname, int port)
+
+
+void ACOscBrowser::create(const char *hostname, int port)
 {
-	OpaqReceiver *receiver;
-	
 	receiver = new OpaqReceiver;
-	
 	receiver->oscListener = new ACPacketListener(receiver);
 	
-	if(hostname == 0)
-		receiver->oscSocket = new UdpListeningReceiveSocket(IpEndpointName(IpEndpointName::ANY_ADDRESS, port ), receiver->oscListener);
-	else
-		receiver->oscSocket = new UdpListeningReceiveSocket(IpEndpointName(hostname, port ), receiver->oscListener);
-	
-	return receiver;
-}
-void ACOscBrowser::release(ACOscBrowserRef aReceiver)
-{
-	OpaqReceiver *receiver = (OpaqReceiver *)aReceiver;
-	
-	delete receiver->oscListener;
-	delete receiver->oscSocket;
-	delete receiver;
-	receiver = 0;
+	if(hostname == 0){
+		try{
+			receiver->oscSocket = new UdpListeningReceiveSocket(IpEndpointName(IpEndpointName::ANY_ADDRESS, port ), receiver->oscListener);
+		}
+		catch (const exception& e) {
+			std::cout << "can't connect" << std::endl;
+		}
+	}
+	else {
+		try{
+			receiver->oscSocket = new UdpListeningReceiveSocket(IpEndpointName(hostname, port ), receiver->oscListener);
+		}
+		catch (const exception& e) {
+			std::cout << "can't connect" << std::endl;
+		}
+	}
 }
 
-void ACOscBrowser::start(ACOscBrowserRef aReceiver)
+void ACOscBrowser::release()
 {
-	OpaqReceiver *receiver = (OpaqReceiver *)aReceiver;
-	
+	if(receiver) {
+		if (receiver->oscListener)
+			delete receiver->oscListener;
+		if (receiver->oscSocket)	
+		delete receiver->oscSocket;
+		delete receiver;
+		receiver = 0;
+	}
+}
+
+void ACOscBrowser::start()
+{
 	if(receiver->started) return;
 	
+	//pthread_mutex_init( &receiver->mutex, NULL );
+	
 	pthread_attr_init(&receiver->pthread_custom_attr);
-	pthread_create(&receiver->pthread, &receiver->pthread_custom_attr, &osc_thread, aReceiver);
+	pthread_create(&receiver->pthread, &receiver->pthread_custom_attr, &osc_thread, receiver);
 	
 	return;
 }
 
-void ACOscBrowser::stop(ACOscBrowserRef aReceiver)
+void ACOscBrowser::stop()
 {
-	OpaqReceiver *receiver = (OpaqReceiver *)aReceiver;
 	if(!receiver) return;
 
-	if(!receiver->started) return;
+	//if(!receiver->started) return;
+	
+	pthread_cancel(receiver->pthreadudp);
 	
 	receiver->oscSocket->AsynchronousBreak();
-	pthread_join(receiver->pthread, 0);
+	
+	pthread_cancel(receiver->pthread);//////pthread_join(receiver->pthread, 0);
+	
+	
+	
+	//pthread_mutex_destroy( &receiver->mutex );
 }
 
 
-void ACOscBrowser::setUserData(ACOscBrowserRef aReceiver, void *userData)
+void ACOscBrowser::setUserData(void *userData)
 {
-	OpaqReceiver *receiver = (OpaqReceiver *)aReceiver;
-	
 	receiver->userData = userData;
 }
-void ACOscBrowser::setCallback(ACOscBrowserRef aReceiver, ACOscBrowserCallback callback)
+
+void ACOscBrowser::setCallback(ACOscBrowserCallback callback)
 {
-	OpaqReceiver *receiver = (OpaqReceiver *)aReceiver;
-	
 	receiver->callback = callback;
 }
 
 // these can be called only from the callback
-void ACOscBrowser::readFloat(ACOscBrowserRef aReceiver, float *aVal)
+void ACOscBrowser::readFloat(float *aVal)
 {
-	OpaqReceiver *receiver = (OpaqReceiver *)aReceiver;
-	
 	assert(receiver->argStream);
 	assert(aVal);
 	
 	*receiver->argStream >> *aVal;
 }
-void ACOscBrowser::readInt(ACOscBrowserRef aReceiver, int *aVal)
+void ACOscBrowser::readInt(int *aVal)
 {
-	OpaqReceiver *receiver = (OpaqReceiver *)aReceiver;
-	
 	assert(receiver->argStream);
 	assert(aVal);
 	
@@ -199,10 +215,8 @@ void ACOscBrowser::readInt(ACOscBrowserRef aReceiver, int *aVal)
 	
 	*aVal = val;
 }
-void ACOscBrowser::readString(ACOscBrowserRef aReceiver, char *aVal, int maxlen)
+void ACOscBrowser::readString(char *aVal, int maxlen)
 {	
-	OpaqReceiver *receiver = (OpaqReceiver *)aReceiver;
-	
 	assert(receiver->argStream);
 	assert(aVal);
 	
@@ -212,5 +226,3 @@ void ACOscBrowser::readString(ACOscBrowserRef aReceiver, char *aVal, int maxlen)
 	
 	strncpy(aVal, string, maxlen);
 }
-
-
