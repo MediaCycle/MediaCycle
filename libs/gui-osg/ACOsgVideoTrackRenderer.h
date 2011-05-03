@@ -47,9 +47,14 @@
 
 //FFmpeg
 extern "C" {
+#ifdef __cplusplus
 #define __STDC_CONSTANT_MACROS
+#ifdef _STDINT_H
+#undef _STDINT_H
+#endif
+# include <stdint.h>
+#endif
 #include <errno.h>    // for error codes defined in avformat.h
-#include <stdint.h>
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
 #include <libavdevice/avdevice.h>
