@@ -110,7 +110,7 @@ ACOsgCompositeViewQt::ACOsgCompositeViewQt( QWidget * parent, const char * name,
 	browser_view->getCamera()->setProjectionMatrixAsPerspective(45.0f, static_cast<double>(width())/static_cast<double>(height()-sepy), 0.001f, 10.0f);
 	browser_view->getCamera()->getViewMatrix().makeIdentity();
 	browser_view->getCamera()->setViewMatrixAsLookAt(Vec3(0,0,0.8), Vec3(0,0,0), Vec3(0,1,0));
-	browser_view->getCamera()->setClearColor(Vec4f(0.0,0.0,0.0,0.0));
+	//browser_view->getCamera()->setClearColor(Vec4f(0.0,0.0,0.0,0.0));
 	this->addView(browser_view);
 	
 	timeline_view = new osgViewer::View;
