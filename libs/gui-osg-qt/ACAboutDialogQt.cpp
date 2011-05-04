@@ -44,7 +44,7 @@ ACAboutDialogQt::ACAboutDialogQt( QWidget* parent)
 
 void ACAboutDialogQt::updateLicenses(){
 	QString html;
-	html.append ("The license of the MediaCycle framework is not yet determined. We will opt for a dual commercial/community license soon.<br/><br/>This current release uses the following dependencies:<br/><ul>");
+	html.append ("The license of the MediaCycle framework is not yet determined. We should opt for a dual commercial/community license soon.<br/><br/>This current release uses the following dependencies:<br/><ul>");
 	html.append ("<li><a href=\"http://arma.sourceforge.net\">armadillo</a>: LGPL (or GPL) License</li>");
 	#ifndef __APPLE__ // part of the Accelerate framework
 		html.append ("<li><a href=\"http://www.netlib.org/blas/\">Blas</a>: just requires attribution</li>");
@@ -61,6 +61,9 @@ void ACAboutDialogQt::updateLicenses(){
 	#ifndef __APPLE__ // part of the Accelerate framework
 		html.append ("<li><a href=\"http://www.netlib.org/lapack/\">LAPACK</a>: BSD License</li>");
 	#endif//ndef __APPLE__
+	#if defined (USE_OSC)
+	html.append ("<li><a href=\"http://liblo.sourceforge.net\">liblo</a>: LPGL License</li>");
+	#endif //defined (USE_OSC)
 	#if defined (SUPPORT_AUDIO)
 		html.append ("<li><a href=\"http://www.mega-nerd.com/SRC/\">libsamplerate</a>: GPL License</li>");
 		html.append ("<li><a href=\"http://www.mega-nerd.com/libsndfile/\">libsndfile</a>: LGPL (or GPL) License</li>");
@@ -72,9 +75,6 @@ void ACAboutDialogQt::updateLicenses(){
 		html.append ("<li><a href=\"http://opencv.willowgarage.com\">OpenCV</a>: BSD License</li>");
 	#endif //defined (SUPPORT_VIDEO) || defined (SUPPORT_IMAGE)
 	html.append ("<li><a href=\"http://www.openscenegraph.org\">OpenSceneGraph</a>: OpenSceneGraph Public License based on the LGPL License</li>");
-	#if defined (USE_OSC)
-		html.append ("<li><a href=\"http://code.google.com/p/oscpack/\">oscpack</a>: MIT License</li>");
-	#endif //defined (USE_OSC)
 	#if defined (SUPPORT_AUDIO) && defined (USE_PORTAUDIO)	
 		html.append ("<li><a href=\"http://www.portaudio.com\">PortAudio</a>: MIT License</li>");
 	#endif //defined (SUPPORT_AUDIO) || defined (USE_PORTAUDIO)

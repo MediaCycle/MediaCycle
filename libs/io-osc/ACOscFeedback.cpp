@@ -3,10 +3,9 @@
  *  MediaCycle
  *
  *  @author Christian Frisson
- *  @date 16/02/10
- *  Based on Raphael Sebbe's TiCore Osc implementation from 2007.
+ *  @date 03/04/11
  *
- *  @copyright (c) 2010 – UMONS - Numediart
+ *  @copyright (c) 2011 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
  *  licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -34,63 +33,54 @@
  *
  */
 
-#include <stdlib.h>
-#include <assert.h>
-
 #include "ACOscFeedback.h"
 
 void ACOscFeedback::create(const char *hostname, int port)
 {
-	sender = new OpaqSender();
-
-	IpEndpointName host(hostname , port);
-	char hostIpAddress[ IpEndpointName::ADDRESS_STRING_LENGTH ];
-	host.AddressAsString( hostIpAddress );
-
-	sender->oscStream = new osc::OutboundPacketStream( sender->oscBuffer, IP_MTU_SIZE ); assert(sender->oscStream);
-	sender->oscSocket = new UdpTransmitSocket(host); assert(sender->oscSocket);
+    /* an address to send messages to. sometimes it is better to let the server
+     * pick a port number for you by passing NULL as the last argument */
+	char portchar[6];
+  	sprintf(portchar,"%d",port);
+   	sendto = lo_address_new(hostname, portchar);
 }
 
 void ACOscFeedback::release()
 {
-	if (sender) {
-		if (sender->oscStream)
-			delete sender->oscStream;
-		if (sender->oscSocket)
-			delete sender->oscSocket;
-		delete sender;
-		sender = 0;
+	if (sendto){
+		lo_address_free(sendto);
+		sendto = 0;
 	}
 }
 
-void ACOscFeedback::messageBegin(const char *tag)
+void ACOscFeedback::messageBegin(const char *_tag)
 {
-	assert(tag);
-	sender->oscStream->Clear();
-	*sender->oscStream << osc::BeginMessage( tag );
+	if(message){
+		lo_message_free(message);
+	}
+	message = lo_message_new();
+	tag = _tag;
 }
 
 void ACOscFeedback::messageEnd()
 {	
-	*sender->oscStream << osc::EndMessage;
 }
 
 void ACOscFeedback::messageSend()
 {	
-	sender->oscSocket->Send( sender->oscStream->Data(), sender->oscStream->Size() );
+	lo_send_message (sendto, tag, message);
 }
 
-void ACOscFeedback::messageAppendFloat(float aVal)
+void ACOscFeedback::messageAppendFloat(float val)
 {
-	*sender->oscStream << aVal;
+	lo_message_add_float (message,val);
 }
 
-void ACOscFeedback::messageAppendInt(int aVal)
+void ACOscFeedback::messageAppendInt(int val)
 {
-	*sender->oscStream << aVal;
+	lo_message_add_int32 (message,val);
 }
 
-void ACOscFeedback::messageAppendString(const char *aVal)
+void ACOscFeedback::messageAppendString(const char *val)
 {
-	*sender->oscStream << aVal;
+ 	lo_message_add_string (message, val);
 }

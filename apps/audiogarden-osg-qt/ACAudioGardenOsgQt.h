@@ -130,6 +130,6 @@ class ACAudioGardenOsgQt : public QMainWindow
 		virtual void keyReleaseEvent( QKeyEvent* event );
 	
 	public:
-		void processOscMessage(const char* tagName);
+		int processOscMessage(const char *path, const char *types, lo_arg **argv,int argc);
 };
 #endif

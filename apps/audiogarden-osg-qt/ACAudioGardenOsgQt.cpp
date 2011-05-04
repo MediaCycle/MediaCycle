@@ -40,12 +40,12 @@
 
 using namespace std;
 
-static void osc_callback(const char *tagName, void *userData)
+static int osc_callback(const char *path, const char *types, lo_arg **argv,int argc, void *data, void *user_data)
 {
-	ACAudioGardenOsgQt *window = (ACAudioGardenOsgQt*)userData;
+	ACAudioGardenOsgQt *window = (ACAudioGardenOsgQt*)user_data;
 	//printf("osc received tag: %s\n", tagName);
 	//std::cout << "tagName: " << tagName << std::endl;
-	window->processOscMessage(tagName);
+	return window->processOscMessage(path,types,argv,argc);
 }
 
 ACAudioGardenOsgQt::ACAudioGardenOsgQt(QWidget *parent)
@@ -660,190 +660,224 @@ void ACAudioGardenOsgQt::keyReleaseEvent( QKeyEvent* event )
 	}
 }
 
-void ACAudioGardenOsgQt::processOscMessage(const char* tagName)
+int ACAudioGardenOsgQt::processOscMessage(const char *path, const char *types, lo_arg **argv,int argc)
 {	
-	if(strcasecmp(tagName, "/audiocycle/test") == 0)
+	std::string tag = std::string(path);
+	//std::cout << "OSC message: '" <<  tag << "'" << std::endl;
+	bool ac = (tag.find("/audiocycle",0)!= string::npos);
+	bool mc = (tag.find("/mediacycle",0)!= string::npos);
+	if(!ac && !mc)//we don't process messages not containing /audiocycle or /mediacycle
+		return 1;
+
+	//if(!media_cycle || !this->getOsgView())
+	//	return;
+	
+	if(tag.find("/test",0)!= string::npos)
 	{
 		std::cout << "OSC communication established" << std::endl;
-
+		
 		if (osc_feedback)
 		{
-			osc_feedback->messageBegin("/audiocycle/received");
+			if (ac)
+				osc_feedback->messageBegin("/audiocycle/received");
+			else
+				osc_feedback->messageBegin("/mediacycle/received");	
 			osc_feedback->messageEnd();
 			osc_feedback->messageSend();
 		}
 	}
-	else if(strcasecmp(tagName, "/audiocycle/fullscreen") == 0)
+	else if(tag.find("/fullscreen",0)!= string::npos)
 	{
 		int fullscreen = 0;
-		osc_browser->readInt(&fullscreen);
-		if (fullscreen == 1)
+		fullscreen = argv[0]->i;
+		std::cout << "Fullscreen? " << fullscreen << std::endl;
+		/*if (fullscreen == 1)
 			ui.groupControls->hide();
 		else
-			ui.groupControls->show();		
-	}	
-	else if(strcasecmp(tagName, "/audiocycle/1/browser/1/move/xy") == 0)
-	{
-		float x = 0.0, y = 0.0;
-		media_cycle->getCameraPosition(x,y);
-		osc_browser->readFloat(&x);
-		osc_browser->readFloat(&y);
-		
-		float zoom = media_cycle->getCameraZoom();
-		float angle = media_cycle->getCameraRotation();
-		float xmove = x*cos(-angle)-y*sin(-angle);
-		float ymove = y*cos(-angle)+x*sin(-angle);
-		media_cycle->setCameraPosition(xmove/2/zoom , ymove/2/zoom); // norm [-1;1] = 2 (instead of 100 from mediacycle-osg)
-		media_cycle->setNeedsDisplay(true);
+			ui.groupControls->show();*/	
 	}
-	else if(strcasecmp(tagName, "/audiocycle/1/browser/1/hover/xy") == 0)
+	
+	// BROWSER CONTROLS
+	else if(tag.find("/browser",0)!= string::npos)
 	{
-		float x = 0.0, y = 0.0;
-		osc_browser->readFloat(&x);
-		osc_browser->readFloat(&y);
-		
-		media_cycle->hoverCallback(x,y);
-		int closest_node = media_cycle->getClosestNode();
-		float distance = ui.compositeOsgView->getBrowserRenderer()->getDistanceMouse()[closest_node];
-		if (osc_feedback)
+		if(tag.find("/move",0)!= string::npos)
 		{
-			osc_feedback->messageBegin("/audiocycle/closest_node_at");
-			osc_feedback->messageAppendFloat(distance);
-			osc_feedback->messageEnd();
-			osc_feedback->messageSend();
+			if(tag.find("/xy",0)!= string::npos)
+			{
+				float x = 0.0, y = 0.0;
+				media_cycle->getCameraPosition(x,y);
+				x = argv[0]->f;
+				y = argv[1]->f;
+				
+				float zoom = media_cycle->getCameraZoom();
+				float angle = media_cycle->getCameraRotation();
+				float xmove = x*cos(-angle)-y*sin(-angle);
+				float ymove = y*cos(-angle)+x*sin(-angle);
+				media_cycle->setCameraPosition(xmove/2/zoom , ymove/2/zoom); // norm [-1;1] = 2 (instead of 100 from mediacycle-osg)
+				media_cycle->setNeedsDisplay(true);
+			}
+			else if(tag.find("/zoom",0)!= string::npos)
+			{
+				float zoom = 0.0f;
+				zoom = argv[0]->f;
+				//zoom = zoom*600/50; // refzoom +
+				media_cycle->setCameraZoom((float)zoom);
+				media_cycle->setNeedsDisplay(true);
+			}
+			else if(tag.find("/angle",0)!= string::npos)
+			{
+				float angle = 0.0f;
+				angle = argv[0]->f;
+				media_cycle->setCameraRotation((float)angle);
+				media_cycle->setNeedsDisplay(true);
+			}
+		}
+		else if(tag.find("/hover/xy",0)!= string::npos)
+		{
+			float x = 0.0, y = 0.0;
+			x = argv[0]->f;
+			y = argv[1]->f;
+			
+			media_cycle->hoverCallback(x,y);
+			int closest_node = media_cycle->getClosestNode();
+			float distance = ui.compositeOsgView->getBrowserRenderer()->getDistanceMouse()[closest_node];
+			if (osc_feedback)
+			{
+				osc_feedback->messageBegin("/audiocycle/closest_node_at");
+				osc_feedback->messageAppendFloat(distance);
+				osc_feedback->messageEnd();
+				osc_feedback->messageSend();
+			}	
+			media_cycle->setNeedsDisplay(true);
+		}
+		else if(tag.find("/recenter",0)!= string::npos)
+		{
+			media_cycle->setCameraRecenter();
+		}
+		else if(tag.find("/recluster",0)!= string::npos)
+		{		
+			//int node = media_cycle->getClickedNode();
+			int node = media_cycle->getClosestNode();
+			if (media_cycle->getLibrary()->getSize()>0 && media_cycle->getBrowser()->getMode() == AC_MODE_CLUSTERS && node > -1)
+			{
+				media_cycle->setReferenceNode(node);
+				// media_cycle->pushNavigationState(); XS 250810 removed
+				media_cycle->updateDisplay(true);
+			}
+		}
+		else if(tag.find("/back",0)!= string::npos)
+		{		
+			media_cycle->goBack();
+		}
+		else if(tag.find("/forward",0)!= string::npos)
+		{		
+			media_cycle->goForward();
+		}
+		else if(tag.find("/library/load",0)!= string::npos)
+		{
+			std::cerr << "Library loading thru OSC not yet implemented" << std::endl;
+		}
+		else if(tag.find("/library/clear",0)!= string::npos)
+		{
+			std::cerr << "Library cleaning thru OSC not yet implemented" << std::endl;
+			
+			/*this->media_cycle->cleanLibrary();
+			this->media_cycle->cleanBrowser();
+		
+			//CF make the following accessible from a dock manager
+		
+			//was cleanCheckBoxes()
+			//for (int d=0;d<dockWidgets.size();d++){
+			//	if (dockWidgets[d]->getClassName() == "ACBrowserControlsClustersNeighborsDockWidgetQt") {
+			//		((ACBrowserControlsClustersNeighborsDockWidgetQt*)dockWidgets[d])->cleanCheckBoxes();
+			//	}
+			//	if (dockWidgets[d]->getClassName() == "ACBrowserControlsClustersDockWidgetQt") {
+			//		((ACBrowserControlsClustersDockWidgetQt*)dockWidgets[d])->cleanCheckBoxes();
+			//	}
+			//}	
+		
+			// XS TODO : remove the boxes specific to the media that was loaded
+			// e.g. ACAudioControlDockWidgets
+			// modify the DockWidget's API to allow this
+			//plugins_scanned = false;
+		
+			this->getOsgView()->clean();
+			this->getOsgView()->setFocus();*/
+		}
+	}
+	else if(tag.find("/player",0)!= string::npos)
+	{
+		if (media_cycle->getLibrary()->getMediaType() == MEDIA_TYPE_AUDIO && !audio_engine)
+			return 1;
+		
+		if(tag.find("/playclosestloop",0)!= string::npos)
+		{	
+			media_cycle->pickedObjectCallback(-1);
+		}
+		else if(tag.find("/muteall",0)!= string::npos)
+		{	
+			media_cycle->muteAllSources();
+		}
+		else if(tag.find("/bpm",0)!= string::npos)
+		{
+			float bpm;
+			bpm = argv[0]->f;
+			
+			//int node = media_cycle->getClickedNode();
+			//int node = media_cycle->getClosestNode();
+			int node = media_cycle->getLastSelectedNode();
+			
+			if (node > -1)
+			{
+				audio_engine->setLoopSynchroMode(node, ACAudioEngineSynchroModeAutoBeat);
+				audio_engine->setLoopScaleMode(node, ACAudioEngineScaleModeResample);
+				audio_engine->setBPM((float)bpm);
+			}
 		}	
-		media_cycle->setNeedsDisplay(true);
-	}
-	else if(strcasecmp(tagName, "/audiocycle/1/browser/1/move/zoom") == 0)
-	{
-		float zoom;
-		osc_browser->readFloat(&zoom);
-		//zoom = zoom*600/50; // refzoom +
-		media_cycle->setCameraZoom((float)zoom);
-		media_cycle->setNeedsDisplay(true);
-	}
-	else if(strcasecmp(tagName, "/audiocycle/1/browser/1/move/angle") == 0)
-	{
-		float angle;//, refangle = media_cycle->getCameraRotation();
-		osc_browser->readFloat(&angle);
-		media_cycle->setCameraRotation((float)angle);
-		media_cycle->setNeedsDisplay(true);
-	}
-	else if(strcasecmp(tagName, "/audiocycle/1/browser/library/load") == 0)
-	{
-		char *lib_path = 0;
-		lib_path = new char[500]; // wrong magic number!
-		osc_browser->readString(lib_path, 500); // wrong magic number!
-		std::cout << "Importing file library '" << lib_path << "'..." << std::endl;
-		media_cycle->importACLLibrary(lib_path); // XS instead of getImageLibrary CHECK THIS
-		media_cycle->normalizeFeatures();
-		media_cycle->libraryContentChanged();
-		std::cout << "File library imported" << std::endl;
-		this->updateLibrary();
-	}
-	else if(strcasecmp(tagName, "/audiocycle/1/browser/library/clear") == 0)
-	{
-		media_cycle->cleanLibrary(); // XS instead of getImageLibrary CHECK THIS
-		media_cycle->libraryContentChanged();
-		media_cycle->setReferenceNode(0);
-		// XSCF 250310 added these 3
-		// media_cycle->pushNavigationState(); // XS 250810 removed
-		media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
-		media_cycle->getBrowser()->setState(AC_CHANGING);
-		
-		ui.compositeOsgView->prepareFromBrowser();
-		media_cycle->setNeedsDisplay(true);
-		library_loaded = true;
-	}	
-	else if(strcasecmp(tagName, "/audiocycle/1/browser/recenter") == 0)
-	{
-		media_cycle->setCameraRecenter();
-	}
-	else if(strcasecmp(tagName, "/audiocycle/1/player/1/playclosestloop") == 0)
-	{	
-		media_cycle->pickedObjectCallback(-1);
-	}
-	else if(strcasecmp(tagName, "/audiocycle/1/player/1/muteall") == 0)
-	{	
-		media_cycle->muteAllSources();
-		ui.compositeOsgView->stopSound();
-	}
-	else if(strcasecmp(tagName, "/audiocycle/1/player/1/bpm") == 0)
-	{
-		float bpm;
-		osc_browser->readFloat(&bpm);
-		
-		//int node = media_cycle->getClickedNode();
-		//int node = media_cycle->getClosestNode();
-		int node = media_cycle->getLastSelectedNode();
-		
-		if (node > -1)
+		else if(tag.find("/scrub",0)!= string::npos)
 		{
-			audio_engine->setLoopSynchroMode(node, ACAudioEngineSynchroModeAutoBeat);
-			audio_engine->setLoopScaleMode(node, ACAudioEngineScaleModeResample);
-			audio_engine->setBPM((float)bpm);
+			float scrub;
+			scrub = argv[0]->f;
+			
+			//int node = media_cycle->getClickedNode();
+			//int node = media_cycle->getClosestNode();
+			int node = media_cycle->getLastSelectedNode();
+			
+			if (node > -1)
+			{
+				//media_cycle->pickedObjectCallback(-1);
+				audio_engine->setLoopSynchroMode(node, ACAudioEngineSynchroModeManual);
+				audio_engine->setLoopScaleMode(node, ACAudioEngineScaleModeResample);//ACAudioEngineScaleModeVocode
+				audio_engine->setScrub((float)scrub*100); // temporary hack to scrub between 0 an 1
+			}
 		}
-	}	
-	else if(strcasecmp(tagName, "/audiocycle/1/player/1/scrub") == 0)
-	{
-		float scrub;
-		osc_browser->readFloat(&scrub);
-		
-		//int node = media_cycle->getClickedNode();
-		//int node = media_cycle->getClosestNode();
-		int node = media_cycle->getLastSelectedNode();
-		
-		if (node > -1)
+		else if(tag.find("/pitch",0)!= string::npos)
 		{
-			//media_cycle->pickedObjectCallback(-1);
-			audio_engine->setLoopSynchroMode(node, ACAudioEngineSynchroModeManual);
-			audio_engine->setLoopScaleMode(node, ACAudioEngineScaleModeVocode);
-			audio_engine->setScrub((float)scrub*100); // temporary hack to scrub between 0 an 1
+			float pitch;
+			pitch = argv[0]->f;
+			
+			//int node = media_cycle->getClickedNode();
+			//int node = media_cycle->getClosestNode();
+			int node = media_cycle->getLastSelectedNode();
+			
+			if (node > -1)
+			{
+				/*
+				 if (!is_pitching)
+				 {	
+				 is_pitching = true;
+				 is_scrubing = false;
+				 */ 
+				//media_cycle->pickedObjectCallback(-1);
+				audio_engine->setLoopSynchroMode(node, ACAudioEngineSynchroModeAutoBeat);
+				audio_engine->setLoopScaleMode(node, ACAudioEngineScaleModeResample);
+				//}
+				audio_engine->setSourcePitch(node, (float) pitch); 
+			}
+			
 		}
 	}
-	else if(strcasecmp(tagName, "/audiocycle/1/player/1/pitch") == 0)
-	{
-		float pitch;
-		osc_browser->readFloat(&pitch);
-		
-		//int node = media_cycle->getClickedNode();
-		//int node = media_cycle->getClosestNode();
-		int node = media_cycle->getLastSelectedNode();
-		
-		if (node > -1)
-		{
-			/*
-			 if (!is_pitching)
-			 {	
-			 is_pitching = true;
-			 is_scrubing = false;
-			 */ 
-			//media_cycle->pickedObjectCallback(-1);
-			audio_engine->setLoopSynchroMode(node, ACAudioEngineSynchroModeAutoBeat);
-			audio_engine->setLoopScaleMode(node, ACAudioEngineScaleModeResample);
-			//}
-			audio_engine->setSourcePitch(node, (float) pitch); 
-		}
-		
-	}
-	else if(strcasecmp(tagName, "/audiocycle/1/browser/recluster") == 0)
-	{		
-		//int node = media_cycle->getClickedNode();
-		int node = media_cycle->getClosestNode();
-		if (library_loaded && media_cycle->getBrowser()->getMode() == AC_MODE_CLUSTERS && node > -1)
-		{
-			media_cycle->setReferenceNode(node);
-			//media_cycle->pushNavigationState(); // XS 250810 removed
-			media_cycle->updateDisplay(true);
-		}
-	}
-	else if(strcasecmp(tagName, "/audiocycle/1/browser/back") == 0)
-	{		
-		media_cycle->goBack();
-	}
-	else if(strcasecmp(tagName, "/audiocycle/1/browser/forward") == 0)
-	{		
-		media_cycle->goForward();
-	}	
+
+	return 1;	
 	//std::cout << "End of OSC process messages" << std::endl;
 }

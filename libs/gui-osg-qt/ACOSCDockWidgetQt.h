@@ -40,10 +40,13 @@
 
 #include "ACAbstractDockWidgetQt.h"
 #include "ui_ACOSCDockWidgetQt.h"
+
 #include <MediaCycle.h>
 
+#if defined (USE_OSC)
 #include <ACOscBrowser.h>
 #include <ACOscFeedback.h>
+#endif //defined (USE_OSC)
 
 class ACOSCDockWidgetQt : public ACAbstractDockWidgetQt {
 Q_OBJECT
@@ -58,10 +61,14 @@ public:
 
 private:
 	Ui::ACOSCDockWidgetQt ui;
+#if defined (USE_OSC)	
 	ACOscBrowser *osc_browser;
 	ACOscFeedback *osc_feedback;
 
 public:
-	void processOscMessage(const char* tagName);
+	static int static_mess_handler(const char *path, const char *types, lo_arg **argv,int argc, void *data, void *user_data);
+	int process_mess(const char *path, const char *types, lo_arg **argv,int argc);
+#endif //defined (USE_OSC)
 };
+
 #endif

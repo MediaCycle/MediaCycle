@@ -225,6 +225,6 @@ enum	{
 - (void) myObserver:(NSNotification *)inNotification;
 - (void) awakeFromNib;
 - (void) updatedLibrary;
-- (void) processOscMessage:(const char*) tagName;
+- (int) processOscMessage:(const char*) path withArg2:(const char*) types withArg3:(lo_arg**) argv withArg4:(int) argc;
 
 @end

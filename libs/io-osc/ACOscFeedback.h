@@ -3,10 +3,9 @@
  *  MediaCycle
  *
  *  @author Christian Frisson
- *  @date 16/02/10
- *  Based on Raphael Sebbe's TiCore Osc implementation from 2007.
+ *  @date 03/04/11
  *
- *  @copyright (c) 2010 – UMONS - Numediart
+ *  @copyright (c) 2011 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
  *  licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -37,26 +36,17 @@
 #ifndef _ACOSCFEEDBACK_H_
 #define _ACOSCFEEDBACK_H_
 
-#include <osc/OscOutboundPacketStream.h>
-#include <ip/UdpSocket.h> // #include <UdpSocket.h> breaks with stk!
-#include <ip/IpEndpointName.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+#include <lo/lo.h>
 
 typedef void *ACOscFeedbackRef;
 
-#define IP_MTU_SIZE 1536
-
-struct OpaqSender
-{
-	char				oscBuffer[IP_MTU_SIZE];
-	osc::OutboundPacketStream 	*oscStream;
-	UdpTransmitSocket		*oscSocket;
-	
-	OpaqSender() : oscStream(0), oscSocket(0) {}
-};
-
 class ACOscFeedback {
 	public:
-		ACOscFeedback(){sender = 0;};
+		ACOscFeedback(){sendto=0;message=0;};
 		~ACOscFeedback(){ release();}
 	
 		void create(const char *hostname, int port);
@@ -64,12 +54,13 @@ class ACOscFeedback {
 		void messageBegin(const char *tag);
 		void messageEnd();
 		void messageSend();
-		void messageAppendFloat(float aVal);
-		void messageAppendInt(int aVal);
-		void messageAppendString(const char *aval);
-		bool isActive() {if(sender) return true; else return false;}
+		void messageAppendFloat(float val);
+		void messageAppendInt(int val);
+		void messageAppendString(const char *val);
 	private:
-		OpaqSender *sender;
+		lo_address sendto;
+		lo_message message;
+		const char *tag;
 };
 
 #endif /* _ACOSCFEEDBACK_H_ */

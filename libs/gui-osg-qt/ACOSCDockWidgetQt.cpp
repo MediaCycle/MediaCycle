@@ -35,30 +35,22 @@
 
 #include "ACOSCDockWidgetQt.h"
 
-static void osc_callback(const char *tagName, void *userData)
-{
-	printf("osc receiving tag: %s\n", tagName);
-	ACOSCDockWidgetQt *widget = (ACOSCDockWidgetQt*)userData;
-	//printf("osc received tag: %s\n", tagName);
-	//std::cout << "tagName: " << tagName << std::endl;
-	widget->processOscMessage(tagName);
-	//printf("osc processed tag: %s\n", tagName);
-}
-
 ACOSCDockWidgetQt::ACOSCDockWidgetQt(QWidget *parent)
 : ACAbstractDockWidgetQt(parent, MEDIA_TYPE_ALL,"ACOSCDockWidgetQt")
 {
+	#if defined (USE_OSC)	
 	ui.setupUi(this); // first thing to do
-	this->show();	
+	this->show();
 	osc_browser = 0;
 	osc_feedback = 0;
 	osc_browser = new ACOscBrowser();
 	osc_feedback = new ACOscFeedback();
+	#endif //defined (USE_OSC)	
 }
 
 ACOSCDockWidgetQt::~ACOSCDockWidgetQt(){
+	#if defined (USE_OSC)	
 	if (osc_browser) {
-		osc_browser->stop();		
 		osc_browser->release();
 		delete osc_browser;
 		osc_browser = 0;
@@ -68,8 +60,10 @@ ACOSCDockWidgetQt::~ACOSCDockWidgetQt(){
 		delete osc_feedback;
 		osc_feedback = 0;
 	}
+	#endif //defined (USE_OSC)	
 }
 
+#if defined (USE_OSC)
 void ACOSCDockWidgetQt::on_pushButtonControlStart_clicked() {
 	std::cout << "Control IP: " << ui.lineEditControlIP->text().toStdString() << std::endl;
 	std::cout << "Control Port: " << ui.lineEditControlPort->text().toInt() << std::endl;
@@ -77,7 +71,7 @@ void ACOSCDockWidgetQt::on_pushButtonControlStart_clicked() {
 		osc_browser = new ACOscBrowser();
 		osc_browser->create(ui.lineEditControlIP->text().toStdString().c_str(), ui.lineEditControlPort->text().toInt());
 		osc_browser->setUserData(this);
-		osc_browser->setCallback(osc_callback);
+		osc_browser->setCallback(static_mess_handler);
 		osc_browser->start();
 		ui.pushButtonControlStart->setText("Stop");
 	}	
@@ -109,13 +103,18 @@ void ACOSCDockWidgetQt::on_pushButtonFeedbackStart_clicked() {
 	}
 }	
 
-void ACOSCDockWidgetQt::processOscMessage(const char* tagName) {
-	std::string tag = std::string(tagName);
-	std::cout << "OSC message: '" <<  tag << "'" << std::endl;
+int ACOSCDockWidgetQt::static_mess_handler(const char *path, const char *types, lo_arg **argv,int argc, void *data, void *user_data){
+	ACOSCDockWidgetQt* widget = (ACOSCDockWidgetQt*)user_data;
+	widget->process_mess(path,types,argv,argc);
+}
+
+int ACOSCDockWidgetQt::process_mess(const char *path, const char *types, lo_arg **argv,int argc){	
+	std::string tag = std::string(path);
+	//std::cout << "OSC message: '" <<  tag << "'" << std::endl;
 	bool ac = (tag.find("/audiocycle",0)!= string::npos);
 	bool mc = (tag.find("/mediacycle",0)!= string::npos);
 	if(!ac && !mc)//we don't process messages not containing /audiocycle or /mediacycle
-		return;
+		return 1;
 
 	//if(!media_cycle || !this->getOsgView())
 	//	return;
@@ -124,18 +123,20 @@ void ACOSCDockWidgetQt::processOscMessage(const char* tagName) {
 	{
 		std::cout << "OSC communication established" << std::endl;
 		
-		if (osc_feedback && osc_feedback->isActive())
+		if (osc_feedback)
 		{
-			osc_feedback->messageBegin("/audiocycle/received");
+			if (ac)
+				osc_feedback->messageBegin("/audiocycle/received");
+			else
+				osc_feedback->messageBegin("/mediacycle/received");	
 			osc_feedback->messageEnd();
 			osc_feedback->messageSend();
 		}
-		
 	}
 	else if(tag.find("/fullscreen",0)!= string::npos)
 	{
 		int fullscreen = 0;
-		osc_browser->readInt(&fullscreen);
+		fullscreen = argv[0]->i;
 		std::cout << "Fullscreen? " << fullscreen << std::endl;
 		/*if (fullscreen == 1)
 			ui.groupControls->hide();
@@ -152,8 +153,8 @@ void ACOSCDockWidgetQt::processOscMessage(const char* tagName) {
 			{
 				float x = 0.0, y = 0.0;
 				media_cycle->getCameraPosition(x,y);
-				osc_browser->readFloat(&x);
-				osc_browser->readFloat(&y);
+				x = argv[0]->f;
+				y = argv[1]->f;
 				
 				float zoom = media_cycle->getCameraZoom();
 				float angle = media_cycle->getCameraRotation();
@@ -164,16 +165,16 @@ void ACOSCDockWidgetQt::processOscMessage(const char* tagName) {
 			}
 			else if(tag.find("/zoom",0)!= string::npos)
 			{
-				float zoom;//, refzoom = media_cycle->getCameraZoom();
-				osc_browser->readFloat(&zoom);
+				float zoom = 0.0f;
+				zoom = argv[0]->f;
 				//zoom = zoom*600/50; // refzoom +
 				media_cycle->setCameraZoom((float)zoom);
 				media_cycle->setNeedsDisplay(true);
 			}
 			else if(tag.find("/angle",0)!= string::npos)
 			{
-				float angle;//, refangle = media_cycle->getCameraRotation();
-				osc_browser->readFloat(&angle);
+				float angle = 0.0f;
+				angle = argv[0]->f;
 				media_cycle->setCameraRotation((float)angle);
 				media_cycle->setNeedsDisplay(true);
 			}
@@ -181,13 +182,13 @@ void ACOSCDockWidgetQt::processOscMessage(const char* tagName) {
 		else if(tag.find("/hover/xy",0)!= string::npos)
 		{
 			float x = 0.0, y = 0.0;
-			osc_browser->readFloat(&x);
-			osc_browser->readFloat(&y);
+			x = argv[0]->f;
+			y = argv[1]->f;
 			
 			media_cycle->hoverCallback(x,y);
 			int closest_node = media_cycle->getClosestNode();
 			float distance = this->getOsgView()->getBrowserRenderer()->getDistanceMouse()[closest_node];
-			if (osc_feedback && osc_feedback->isActive())
+			if (osc_feedback)
 			{
 				osc_feedback->messageBegin("/audiocycle/closest_node_at");
 				osc_feedback->messageAppendFloat(distance);
@@ -249,12 +250,12 @@ void ACOSCDockWidgetQt::processOscMessage(const char* tagName) {
 		
 			this->getOsgView()->clean();
 			this->getOsgView()->setFocus();*/
-		}	
+		}
 	}
 	else if(tag.find("/player",0)!= string::npos)
 	{
 		if (media_cycle->getLibrary()->getMediaType() == MEDIA_TYPE_AUDIO && !this->getAudioEngine())
-			return;
+			return 1;
 		
 		if(tag.find("/playclosestloop",0)!= string::npos)
 		{	
@@ -267,7 +268,7 @@ void ACOSCDockWidgetQt::processOscMessage(const char* tagName) {
 		else if(tag.find("/bpm",0)!= string::npos)
 		{
 			float bpm;
-			osc_browser->readFloat(&bpm);
+			bpm = argv[0]->f;
 			
 			//int node = media_cycle->getClickedNode();
 			//int node = media_cycle->getClosestNode();
@@ -283,7 +284,7 @@ void ACOSCDockWidgetQt::processOscMessage(const char* tagName) {
 		else if(tag.find("/scrub",0)!= string::npos)
 		{
 			float scrub;
-			osc_browser->readFloat(&scrub);
+			scrub = argv[0]->f;
 			
 			//int node = media_cycle->getClickedNode();
 			//int node = media_cycle->getClosestNode();
@@ -300,7 +301,7 @@ void ACOSCDockWidgetQt::processOscMessage(const char* tagName) {
 		else if(tag.find("/pitch",0)!= string::npos)
 		{
 			float pitch;
-			osc_browser->readFloat(&pitch);
+			pitch = argv[0]->f;
 			
 			//int node = media_cycle->getClickedNode();
 			//int node = media_cycle->getClosestNode();
@@ -323,5 +324,9 @@ void ACOSCDockWidgetQt::processOscMessage(const char* tagName) {
 			
 		}
 	}
+
+	return 1;	
 	//std::cout << "End of OSC process messages" << std::endl;
 }
+
+#endif //defined (USE_OSC)

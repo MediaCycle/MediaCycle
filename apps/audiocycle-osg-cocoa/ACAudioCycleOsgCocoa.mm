@@ -40,14 +40,14 @@
 
 ////
 @interface ACAudioCycleOsgCocoa ()
- - (void)processOscMessage:(const char*)tagName;
+ - (int)processOscMessage:(const char*) path withArg2:(const char*) types withArg3:(lo_arg**) argv withArg4:(int) argc;
 @end
  
-static void osc_callback(const char *tagName, void *userData)
+static int osc_callback(const char *path, const char *types, lo_arg **argv,int argc, void *data, void *user_data)
 {
-	ACAudioCycleOsgCocoa *self = (ACAudioCycleOsgCocoa*)userData;
-	//printf("osc received tag: %s\n", tagName);
-	[self processOscMessage:tagName];
+	ACAudioCycleOsgCocoa *self = (ACAudioCycleOsgCocoa*)user_data;
+	//printf("osc received tag: %s\n", path);
+	return [self processOscMessage:path withArg2:types withArg3:argv withArg4:argc];
 }
 ////
 
@@ -608,11 +608,11 @@ static void osc_callback(const char *tagName, void *userData)
 	}
 }
 
-- (void)processOscMessage:(const char*)tagName
+- (int)processOscMessage:(const char*) path withArg2:(const char*) types withArg3:(lo_arg**) argv withArg4:(int) argc
 {
 	id pool = [NSAutoreleasePool new];
 
-	if(strcasecmp(tagName, "/audiocycle/test") == 0)
+	if(strcasecmp(path, "/audiocycle/test") == 0)
 	{
 		std::cout << "OSC communication established" << std::endl;
 		
@@ -623,12 +623,12 @@ static void osc_callback(const char *tagName, void *userData)
 			osc_feedback->messageSend();
 		}
 	}
-	else if(strcasecmp(tagName, "/audiocycle/1/browser/1/move/xy") == 0)
+	else if(strcasecmp(path, "/audiocycle/1/browser/1/move/xy") == 0)
 	{
 		float x = 0.0, y = 0.0;
 		media_cycle->getCameraPosition(x,y);
-		osc_browser->readFloat(&x);
-		osc_browser->readFloat(&y);
+		x = argv[0]->f;
+		y = argv[1]->f;
 
 		float zoom = media_cycle->getCameraZoom();
 		float angle = media_cycle->getCameraRotation();
@@ -638,11 +638,11 @@ static void osc_callback(const char *tagName, void *userData)
 		NSLog(@"zoom: %f setCameraPosition: %f %f",zoom,xmove/2/zoom ,ymove/2/zoom);
 		media_cycle->setNeedsDisplay(true);
 	}
-	else if(strcasecmp(tagName, "/audiocycle/1/browser/1/hover/xy") == 0)
+	else if(strcasecmp(path, "/audiocycle/1/browser/1/hover/xy") == 0)
 	{
 		float x = 0.0, y = 0.0;
-		osc_browser->readFloat(&x);
-		osc_browser->readFloat(&y);
+		x = argv[0]->f;
+		y = argv[1]->f;
 		
 		media_cycle->hoverCallback(x,y);
 		int closest_node = media_cycle->getClosestNode();
@@ -656,12 +656,11 @@ static void osc_callback(const char *tagName, void *userData)
 		}
 		media_cycle->setNeedsDisplay(1);
 	}
-	else if(strcasecmp(tagName, "/audiocycle/1/browser/1/move/position") == 0)
+	else if(strcasecmp(path, "/audiocycle/1/browser/1/move/position") == 0)
 	{
 		float x = 0.0, y = 0.0, z = 0.0;
-		osc_browser->readFloat(&x);
-		osc_browser->readFloat(&y);
-		osc_browser->readFloat(&z);
+		x = argv[0]->f;
+		y = argv[1]->f;
 		
 		float alpha=0.0;
 		prevz = alpha*prevz + (1-alpha)*z;
@@ -683,26 +682,26 @@ static void osc_callback(const char *tagName, void *userData)
 		}
 		media_cycle->setNeedsDisplay(1);
 	}
-	else if(strcasecmp(tagName, "/audiocycle/1/browser/1/move/zoom") == 0)
+	else if(strcasecmp(path, "/audiocycle/1/browser/1/move/zoom") == 0)
 	{
 		float zoom;//, refzoom = media_cycle->getCameraZoom();
-		osc_browser->readFloat(&zoom);
+		zoom = argv[0]->f;
 		//zoom = zoom*600/50; // refzoom +
 		media_cycle->setCameraZoom((float)zoom);
 		media_cycle->setNeedsDisplay(1);
 	}
-	else if(strcasecmp(tagName, "/audiocycle/1/browser/1/move/angle") == 0)
+	else if(strcasecmp(path, "/audiocycle/1/browser/1/move/angle") == 0)
 	{
 		float angle;//, refangle = media_cycle->getCameraRotation();
-		osc_browser->readFloat(&angle);
+		angle = argv[0]->f;
 		media_cycle->setCameraRotation((float)angle);
 		media_cycle->setNeedsDisplay(1);
 	}
-	else if(strcasecmp(tagName, "/audiocycle/1/browser/library/load") == 0)
+	else if(strcasecmp(path, "/audiocycle/1/browser/library/load") == 0)
 	{
 		char *lib_path = NULL;
 		lib_path = new char[500]; // wrong magic number!
-		osc_browser->readString(lib_path, 500); // wrong magic number!
+		lib_path = argv[0]->s;
 		std::cout << "Importing file library '" << lib_path << "'..." << std::endl;
 		media_cycle->importACLLibrary(lib_path);
 		media_cycle->normalizeFeatures();
@@ -710,29 +709,29 @@ static void osc_callback(const char *tagName, void *userData)
 		std::cout << "File library imported" << std::endl;
 		[self updatedLibrary]; // change for non-objective-c code
 	}
-	else if(strcasecmp(tagName, "/audiocycle/1/browser/library/clear") == 0)
+	else if(strcasecmp(path, "/audiocycle/1/browser/library/clear") == 0)
 	{
 		media_cycle->cleanLibrary();
 		media_cycle->cleanUserLog();
 		media_cycle->libraryContentChanged();
 		[self updatedLibrary]; // change for non-objective-c code
 	}	
-	else if(strcasecmp(tagName, "/audiocycle/1/browser/recenter") == 0)
+	else if(strcasecmp(path, "/audiocycle/1/browser/recenter") == 0)
 	{
 		media_cycle->setCameraRecenter();
 	}
-	else if(strcasecmp(tagName, "/audiocycle/1/player/1/playclosestloop") == 0)
+	else if(strcasecmp(path, "/audiocycle/1/player/1/playclosestloop") == 0)
 	{	
 		media_cycle->pickedObjectCallback(-1);
 	}
-	else if(strcasecmp(tagName, "/audiocycle/1/player/1/muteall") == 0)
+	else if(strcasecmp(path, "/audiocycle/1/player/1/muteall") == 0)
 	{	
 		media_cycle->muteAllSources();
 	}
-	else if(strcasecmp(tagName, "/audiocycle/1/player/1/bpm") == 0)
+	else if(strcasecmp(path, "/audiocycle/1/player/1/bpm") == 0)
 	{
 		float bpm;
-		osc_browser->readFloat(&bpm);
+		bpm = argv[0]->f;
 		
 		//int node = media_cycle->getClickedNode();
 		//int node = media_cycle->getClosestNode();
@@ -745,10 +744,10 @@ static void osc_callback(const char *tagName, void *userData)
 			audio_engine->setBPM((float)bpm);
 		}
 	}	
-	else if(strcasecmp(tagName, "/audiocycle/1/player/1/scrub") == 0)
+	else if(strcasecmp(path, "/audiocycle/1/player/1/scrub") == 0)
 	{
 		float scrub;
-		osc_browser->readFloat(&scrub);
+		scrub = argv[0]->f;;
 		
 		//int node = media_cycle->getClickedNode();
 		//int node = media_cycle->getClosestNode();
@@ -763,10 +762,10 @@ static void osc_callback(const char *tagName, void *userData)
 			 audio_engine->setScrub((float)scrub*100); // temporary hack to scrub between 0 an 1
 		 }
 	}
-	else if(strcasecmp(tagName, "/audiocycle/1/player/1/pitch") == 0)
+	else if(strcasecmp(path, "/audiocycle/1/player/1/pitch") == 0)
 	{
 		float pitch;
-		osc_browser->readFloat(&pitch);
+		pitch = argv[0]->f;
 	
 		//int node = media_cycle->getClickedNode();
 		//int node = media_cycle->getClosestNode();
@@ -787,7 +786,7 @@ static void osc_callback(const char *tagName, void *userData)
 		}
 		 
 	}
-	else if(strcasecmp(tagName, "/audiocycle/1/browser/recluster") == 0)
+	else if(strcasecmp(path, "/audiocycle/1/browser/recluster") == 0)
 	{		
 		//int node = media_cycle->getClickedNode();
 		int node = media_cycle->getClosestNode();
@@ -798,17 +797,18 @@ static void osc_callback(const char *tagName, void *userData)
 			media_cycle->updateDisplay(true);
 		}
 	}
-	else if(strcasecmp(tagName, "/audiocycle/1/browser/back") == 0)
+	else if(strcasecmp(path, "/audiocycle/1/browser/back") == 0)
 	{		
 		media_cycle->goBack();
 	}
-	else if(strcasecmp(tagName, "/audiocycle/1/browser/forward") == 0)
+	else if(strcasecmp(path, "/audiocycle/1/browser/forward") == 0)
 	{		
 		media_cycle->goForward();
 	}
 	// ...
 	//void setKey(int key);
 	[pool release];
+    return 1;
 }
 ////
 @end

@@ -3,10 +3,9 @@
  *  MediaCycle
  *
  *  @author Christian Frisson
- *  @date 16/02/10
- *  Based on Raphael Sebbe's TiCore Osc implementation from 2007.
+ *  @date 03/04/11
  *
- *  @copyright (c) 2010 – UMONS - Numediart
+ *  @copyright (c) 2011 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
  *  licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -37,27 +36,30 @@
 #ifndef HEADER_ACOSCBROWSER
 #define HEADER_ACOSCBROWSER
 
-#include <assert.h>
-#include <pthread.h>
-#include <string.h>
-#include <stdio.h>
 #include <iostream>
 
-#include <osc/OscReceivedElements.h>
-#include <osc/OscPacketListener.h>
-#include <ip/UdpSocket.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
 
-typedef void (*ACOscBrowserCallback)(const char *tagName, void *userData);
+#include <lo/lo.h>
 
-class ACPacketListener;
-struct OpaqReceiver;
+#include <MediaCycle.h>
 
-// TODO : shouldn't this class have only static functions ?
+#if defined (SUPPORT_AUDIO)
+#include <ACAudioEngine.h>
+#endif //defined (SUPPORT_AUDIO)
+
+typedef int (ACOscBrowserCallback)(const char *path, const char *types, lo_arg **argv,int argc, void *data, void *user_data);
+
 class ACOscBrowser {
-	// We need an opaque type as oscpack definition conflicts with Objective-C definitions.
 	public:
-		ACOscBrowser(){ receiver = 0;};
-		~ACOscBrowser(){ release();};
+		ACOscBrowser(){ 
+			server_thread = 0;
+		};
+		~ACOscBrowser(){ 
+			release();
+		};
 		
 		// pass 0 to receive from any host
 		void create(const char *hostname, int port);
@@ -67,15 +69,36 @@ class ACOscBrowser {
 		void start();
 		void stop();
 		
-		void setUserData(void *userData);
-		void setCallback(ACOscBrowserCallback callback);
+		void setUserData(void *_user_data);
+		void setCallback(ACOscBrowserCallback _callback);
 		
 		// these can be called only from the callback
-		void readFloat(float *aVal);
-		void readInt(int *aVal);
-		void readString(char *aval, int maxlen);
+		void readFloat(float *val);
+		void readInt(int *val);
+		void readString(char *val, int maxlen);
+		
 	private:
-		OpaqReceiver* receiver;
+		lo_server_thread server_thread;
+		void* user_data;
+		ACOscBrowserCallback* callback;
+
+	public:
+		static int static_mess_handler(const char *path, const char *types, lo_arg **argv,int argc, void *data, void *user_data);
+		int process_mess(const char *path, const char *types, lo_arg **argv,int argc);	
+				
+	public:
+		void setMediaCycle(MediaCycle* _media_cycle){ media_cycle = _media_cycle;}
+		MediaCycle* getMediaCycle() {return media_cycle;}
+		#if defined (SUPPORT_AUDIO)
+		void setAudioEngine(ACAudioEngine* _audio_engine){ audio_engine = _audio_engine;}
+		ACAudioEngine* getAudioEngine() {return audio_engine;}
+		#endif //defined (SUPPORT_AUDIO)
+		
+	protected:
+		MediaCycle *media_cycle;
+		#if defined (SUPPORT_AUDIO)
+		ACAudioEngine *audio_engine;
+		#endif //defined (SUPPORT_AUDIO)	
 };
 
 #endif /* _ACOSCBROWSER_H_ */
