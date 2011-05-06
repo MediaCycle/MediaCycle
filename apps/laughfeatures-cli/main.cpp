@@ -1,7 +1,7 @@
 /**
  * @brief main.cpp
- * @author Xavier Siebert
- * @date 20/04/2011
+ * @author Jérôme Urbain
+ * @date 06/05/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -40,6 +40,7 @@
 #include "ACAudio.h"
 #include "ACMediaData.h"
 #include "ACAudioSegmentationPlugin.h"
+#include <armadillo>
 
 void usage(string myname){        
 	cerr << endl;
@@ -77,7 +78,7 @@ std::string descAbbreviation(std::string descName){
 	if (descName == "Spectral Flux"){
 		abbrev = "sf";
 	}	
-	if (descName == "Zero Crossing Rate"){
+	if (descName == "ZCR"){
 		abbrev = "zcr";
 	}	
 	if (descName == "MFCC"){
@@ -107,6 +108,17 @@ std::string descAbbreviation(std::string descName){
         if (descName == "Burst Segmentation"){
 		abbrev = "bs";
 	}
+        if (descName == "ChirpGD"){
+		abbrev = "gd";
+	}
+        if (descName == "F0 and Val"){
+		abbrev = "f0";
+	}
+        if (descName == "HNR"){
+		abbrev = "hnr";
+	}
+
+
 	return abbrev;
 }
 
@@ -218,6 +230,8 @@ int main(int argc, char** argv){
 		rootFileName = filename.substr(posSep+1, posDot-posSep-1);
 		soundDir = filename.substr(0, posSep);
 	}
+        std::string copyRootFileName=rootFileName;
+        std::string copySoundDir=soundDir;
 
 	std::string descDir;
 	if (outDir.size()==0){
@@ -227,6 +241,7 @@ int main(int argc, char** argv){
 		descDir = outDir + rootFileName + "/";
 	}
 
+
 	std::cout << "Features directory : " << descDir << std::endl;
 	std::cout << "-----------------------------------------" << std::endl;
 
@@ -234,6 +249,12 @@ int main(int argc, char** argv){
 	
 	if(!stat(descDir.c_str(),&st) == 0)
 		mkdir(descDir.c_str(), 01777);
+
+        arma::fmat allfeat;
+        allfeat=vectorACMTF2fmat(desc);
+        std::string matname;
+        matname=copySoundDir + "/" + copyRootFileName + ".dat";
+        allfeat.save(matname.c_str(),arma::raw_ascii);
 
 	for (int i=0; i<desc.size(); i++){
 		descFileName = descDir + rootFileName + "." + descAbbreviation(desc[i]->getName()) + ".txt";
@@ -244,6 +265,8 @@ int main(int argc, char** argv){
 	for (int i=0; i<desc.size(); i++){
 		delete desc[i];
 	}
+
+        
 
         
 

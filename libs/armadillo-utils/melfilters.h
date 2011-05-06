@@ -1,7 +1,7 @@
 /**
  * @brief melfilters.h
- * @author Xavier Siebert
- * @date 01/02/2011
+ * @author Jérôme Urbain
+ * @date 06/05/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -58,5 +58,7 @@ inline arma::mat mel2freq(arma::mat M_m){
 }
 
 arma::mat melfilters(int nChannels, int fftSize, int sr_hz);
+
+arma::mat chromafilters(int MinOctave, int MaxOctave, int fftSize, int sr_hz);
 
 #endif

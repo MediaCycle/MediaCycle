@@ -8,7 +8,7 @@ IF(SUPPORT_AUDIO AND USE_LAUGHFEAT AND BUILD_CLIS)
 
 	ADD_DEPENDENCIES(laughfeatures-cli mediacycle armadillo-utils audiofeatures mc_audio mc_segmentation)
 
-	TARGET_LINK_LIBRARIES(laughfeatures-cli mediacycle audiofeatures ${SNDFILE_LIBRARY} ${SAMPLERATE_LIBRARY})
+	TARGET_LINK_LIBRARIES(laughfeatures-cli mediacycle audiofeatures ${SNDFILE_LIBRARY} ${SAMPLERATE_LIBRARY} fftw3)
 
 	MESSAGE("[X] ${TARGET_NAME}")
 ELSE()

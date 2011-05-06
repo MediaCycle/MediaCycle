@@ -1,7 +1,7 @@
 /**
  * @brief ACAudioFeatures.h
- * @author Christian Frisson
- * @date 10/03/2011
+ * @author Jérôme Urbain
+ * @date 06/05/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -38,6 +38,11 @@
 #include <armadillo>
 #include <vector>
 #include <ACMediaTimedFeature.h>
+#include "fftw3.h"
+#include "ifft-helper.h"
+
+
+//#include "round.h"
 
 ACMediaTimedFeature* computeFeature(float* data, 
 									std::string featureName, 
@@ -47,7 +52,9 @@ ACMediaTimedFeature* computeFeature(float* data,
 																		 int mfccNbChannels = 32, 
 																		 int mfccNb = 13, 
 																		 int windowSize=512, 	
-																		 bool extendSoundLimits = false); 
+																		 bool extendSoundLimits = false,
+                                                                                                                                                 int minOctave=2,
+                                                                                                                                                 int maxOctave=7);
 std::vector<ACMediaTimedFeature*> computeFeatures(float* data, 
 												  std::vector<std::string> descList, 
 																									 int samplerate, 
@@ -56,7 +63,9 @@ std::vector<ACMediaTimedFeature*> computeFeatures(float* data,
 																									 int mfccNbChannels = 32, 
 																									 int mfccNb = 13, 
 																									 int windowSize=512, 	
-																									 bool extendSoundLimits = false); 
+																									 bool extendSoundLimits = false,
+                                                                                                                                                                                                         int minOctave=2,
+                                                                                                                                                                                                         int maxOctave=7);
 std::vector<ACMediaTimedFeature*> computeFeatures(float* data, 
 																									 int samplerate, 
 																									 int nchannels, 
@@ -64,7 +73,9 @@ std::vector<ACMediaTimedFeature*> computeFeatures(float* data,
 																									 int mfccNbChannels = 32, 
 																									 int mfccNb = 13, 
 																									 int windowSize=512, 	
-																									 bool extendSoundLimits = false); 
+																									 bool extendSoundLimits = false,
+                                                                                                                                                                                                         int minOctave=2,
+                                                                                                                                                                                                         int maxOctave=7);
 
 int resample(float* datain, SF_INFO *sfinfo, float* dataout, SF_INFO* sfinfoout);
 double spectralCentroid(arma::colvec x_v);
@@ -80,5 +91,16 @@ double logAttackTime(arma::colvec ener_v, int sr_hz);
 arma::rowvec effectiveDuration(arma::colvec time_v, arma::colvec loud_v);
 arma::rowvec mfcc(arma::colvec x_v, arma::mat melfilter_m, int mfccNb);
 arma::colvec burstBoundaries(arma::colvec split_v, arma::colvec time_v, float minBurstDur);
+arma::rowvec chirpGroupDelay(arma::colvec, int, int, float);
+arma::colvec GetLPCresidual(arma::colvec, int);
+arma::mat Abeer_EstimatePitch(arma::colvec, int, int, int);
+arma::rowvec GetHNR(arma::colvec, int, int);
+arma::mat compute_HNR(arma::colvec signal_v, arma::colvec f0, int hopSize, int samplerate, int Nperiods_HNR, arma::mat HNR_m);
+arma::mat compute_pitch(arma::colvec res, int f0min, int f0max, int NiterPitch, int nbFrames, int samplerate, int hopSize);
+arma::colvec levinson(const arma::colvec &R2, int order);
+arma::cx_mat fftw_forward(arma::colvec x_m, int n);
+// ifft 1D for real column vector
+arma::colvec fftw_backward(arma::colvec x_m, int n);
+arma::mat ifft(arma::mat x_m, int n);
 
 #endif

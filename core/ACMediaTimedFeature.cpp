@@ -873,8 +873,15 @@ arma::fmat vectorACMTF2fmat(std::vector <ACMediaTimedFeature*> _ACMTF)
     }
     //features_m.zeros(n_rows,n_cols);
     cout << "Full matrix: Nrows: " << n_rows << "; n_cols: " << n_cols << endl;
-	
-    if(_ACMTF[0]->getLength()<n_rows)
+
+    int p=0;
+    while(_ACMTF[p]->getLength()<n_rows)
+    {
+        p++;
+    }
+    features_m=_ACMTF[p]->getTime();
+
+    /*if(_ACMTF[0]->getLength()<n_rows)
     {
         arma::fmat tmp;
         tmp.zeros(n_rows-_ACMTF[0]->getLength(),_ACMTF[0]->getDim());
@@ -883,8 +890,8 @@ arma::fmat vectorACMTF2fmat(std::vector <ACMediaTimedFeature*> _ACMTF)
     else
     {
         features_m=_ACMTF[0]->getValue();
-    }
-	for(i=1;i<_ACMTF.size();i++)
+    }*/
+	for(i=0;i<_ACMTF.size();i++)
 	{
         if(_ACMTF[i]->getLength()<n_rows)
         {

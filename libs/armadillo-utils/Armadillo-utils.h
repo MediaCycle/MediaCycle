@@ -39,6 +39,9 @@
 #include <armadillo>
 #include "cluster.h"
 
+#include "hanning.h"
+#include "hamming.h"
+
 #include "max_index.h"
 #include "min_index.h"
 #include "nextpow2.h"
@@ -81,6 +84,7 @@
 #include "pdist.h"
 #include "euclideanDistance.h"
 #include "randperm.h"
+
 
 #endif
 /* mat conv2(mat A_m, mat B_m); */
