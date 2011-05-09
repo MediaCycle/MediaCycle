@@ -1,7 +1,7 @@
 /**
  * @brief ACAudioFeatures.cpp
  * @author Jérôme Urbain
- * @date 06/05/2011
+ * @date 09/05/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -64,9 +64,9 @@ enum desc_idx{
 	ENERGY_MODULATION_AMPLITUDE,
         MODULATION,
         BURSTS,
-        CHIRP,
+        /*CHIRP,
         PITCH,
-        HNR,
+        HNR,*/
         CHROMA
 };
 
@@ -97,9 +97,9 @@ std::vector<ACMediaTimedFeature*> computeFeatures(float* data, int samplerate, i
 	descList.push_back("Log Attack Time");
 	descList.push_back("Energy Modulation Frequency");
 	descList.push_back("Energy Modulation Amplitude");
-        descList.push_back("Chirp GD");
+        /*descList.push_back("Chirp GD");
         descList.push_back("F0");
-        descList.push_back("HNR");
+        descList.push_back("HNR");*/
         descList.push_back("CHROMA");
         //descList.push_back("Burst Segmentation");
 	desc_amtf = computeFeatures(data, descList, samplerate, nchannels, length, mfccNbChannels, mfccNb, windowSize, extendSoundLimits);
@@ -136,9 +136,9 @@ std::vector<ACMediaTimedFeature*> computeFeatures(float* data, vector<string> de
 	descMap["Energy Modulation Frequency"] = ENERGY_MODULATION_FREQUENCY;
 	descMap["Energy Modulation Amplitude"] = ENERGY_MODULATION_AMPLITUDE;
         descMap["Burst Segmentation"] = BURSTS;
-        descMap["Chirp GD"] = CHIRP;
+        /*descMap["Chirp GD"] = CHIRP;
         descMap["F0"] = PITCH;
-        descMap["HNR"] = HNR;
+        descMap["HNR"] = HNR;*/
         descMap["CHROMA"] = CHROMA;
 
 	int fftSize=windowSize*2;
@@ -318,14 +318,14 @@ std::vector<ACMediaTimedFeature*> computeFeatures(float* data, vector<string> de
                         case CHROMA:
                                 chroma_m.row(index)= trans(trans(chromafilter_m)*(frameFFTabs2_v));
                                 break;
-                        case CHIRP:
+                        /*case CHIRP:
                             GDspectrogram.row(index)=chirpGroupDelay(frameW_v,fftSize, windowSize, r_chirpGD);
                             break;
                         case PITCH: //!!! HNR requires that too!
                             frameW_h = frame_v%window_hanning;	// % : element-wise multiplication
                             inv=GetLPCresidual(frameW_h,orderLPC);
 			    res.rows(round((double)(i)),round((double)(i))+windowSize-1)=res.rows(round((double)(i)),round((double)(i))+windowSize-1)+inv; //JU: res.cols instead?
-                            break;
+                            break;*/
 			}
 		}
 		index++;
@@ -429,15 +429,9 @@ std::vector<ACMediaTimedFeature*> computeFeatures(float* data, vector<string> de
 			desc.push_back(chroma_tf);
 			break;
 		}
-                case CHIRP:
+                /*case CHIRP:
                 {
-                        /*int nbrZero=round(0.01*ceil((100*(double)windowSize/(2*samplerate))/((double)hopSize/samplerate)));
-                        ChirpGD.rows(0,nbrZero-1)=zeros<colvec>(nbrZero);
-					for (int j=0; j<GDspectrogram.n_rows-2 ;j++){
-						vec1=abs(GDspectrogram.row(j+1)-GDspectrogram.row(j));
-						vec2=abs(GDspectrogram.row(j));
-						ChirpGD(j+nbrZero)=100*sum(vec1)/sum(vec2);
-					}*/
+
                     ChirpGD.row(0)=0;
                         for (int j=0; j<GDspectrogram.n_rows-1 ;j++){ // just changed the "limits: only one 0 at the beginning, and we go to the last frame n_rows-1 instead of n_rows-2
 						vec1=abs(GDspectrogram.row(j+1)-GDspectrogram.row(j));
@@ -458,7 +452,7 @@ std::vector<ACMediaTimedFeature*> computeFeatures(float* data, vector<string> de
                         HNR_m=compute_HNR(signal_v,F0_and_Conf.col(0), hopSize, sr_hz, Nperiods_HNR, HNR_m);
 		        desc.push_back(new ACMediaTimedFeature(conv_to<fcolvec>::from(time_v), conv_to<fmat>::from(HNR_m), std::string("HNR")));
                         break;
-                }
+                }*/
 
 // 		case MODULATION: // Added to the list if any modulation feature is required
 // 			mat modFr_m;
@@ -700,7 +694,7 @@ int resample(float* datain, SF_INFO *sfinfo, float* dataout, SF_INFO* sfinfoout)
 }
 
 
-
+/*
 mat compute_pitch(colvec res, int f0min, int f0max, int NiterPitch, int nbFrames, int samplerate, int hopSize)
 {
         res=res/as_scalar(max(abs(res)));
@@ -825,22 +819,9 @@ rowvec chirpGroupDelay(colvec x_v, int fftSize, int WindowSizeSample, float r){
 	//fft_x_v=fftw_forward(diff_x_v,pow2);
 	fft_x_v=fftw_forward(diff_x_v,diff_x_v.n_elem);
 	abs_fft_x_v=abs(fft_x_v);
-	/*for (int i=0; i<pow2; i=i+2){
-      a(i) = abs_fft_x_v(i/2);
-    }
-	for (int i=3; i<pow2; i=i+2){
-      a(i) = 0;
-    }
-	a(1) = abs_fft_x_v(pow2/2);
-	ifft_tmp=ifft(a,pow2);*/
+
 	ifft_tmp=fftw_backward(abs_fft_x_v,abs_fft_x_v.n_elem);
-	/*for (int i=0; i<=(x_v.n_elem-1)/2; i++){
-		ifft_x_v(i)=ifft_tmp(i);	//test 1
-	}
-	for (int i=0; i<=(x_v.n_elem-1)/2-1; i++){
-		ifft_x_v(x_v.n_elem-i-2) = ifft_tmp(i+1);
-	}
-	zeroPhaseData=real(ifft_x_v);*/
+
 	zeroPhaseData=real(ifft_tmp);
 
 	//chirp z-transform calculation using fft,...multiplication with an exponential function is sufficient
@@ -930,9 +911,6 @@ mat Abeer_EstimatePitch(colvec seg,int fs,int f0min,int f0max){	//METHOD WITH FR
 		Errors(freq-1)=(Spec(freq-1)+Spec(2*freq-1)+Spec(3*freq-1)+Spec(4*freq-1)+Spec(5*freq-1))-(Spec(round((double)(1.5*freq))-1)+Spec(round((double)(2.5*freq))-1)+Spec(round((double)(3.5*freq))-1)+Spec(round((double)(4.5*freq))-1));
 	}
 
-	/*maxi=Errors.max(ind);
-	F0frame=ind+1;
-	ratio1=Errors(ind);*/
         maxi=max(Errors);
         int p=0;
         while(Errors(p)<maxi)
@@ -983,8 +961,7 @@ rowvec GetHNR(colvec x_v, int f0, int fs){
 	for (int k=1; k<=peakinx; k++){
 		ayseg = ay.rows(round((double)(k*N0-N0_delta))-1, round((double)(k*N0+N0_delta)-1));
 		abs_ayseg=abs(ayseg);
-		/*max_val = abs_ayseg.max(ind);
-                ind=ind+1;*/
+
                 int p=0;
                 while(abs_ayseg(p)<max_val)
                 {
@@ -1220,3 +1197,4 @@ mat ifft(mat x_m, int n){
   }
   return y_m;
 }
+*/
