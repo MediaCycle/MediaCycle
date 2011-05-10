@@ -28,7 +28,7 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "KFoldSaveOutputs.h"
-#include "Random.h"
+#include <Random.h>
 
 namespace Torch {
 

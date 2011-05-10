@@ -31,9 +31,10 @@
  */
 
 #include <stdlib.h>
-#include "Classificator.h"
-#include "MatDataSet.h"
-#include "CmdLine.h"
+#include <Classificator.h>
+#include <KFoldSaveOutputs.h>
+#include <MatDataSet.h>
+#include <CmdLine.h>
 #include <string>
 
 using namespace Torch;

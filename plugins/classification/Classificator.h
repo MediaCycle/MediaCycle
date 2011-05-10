@@ -33,50 +33,51 @@
 #ifndef _CLASSIFICATOR_H
 #define	_CLASSIFICATOR_H
 
-
-#include "MatDataSet.h"
-#include "TwoClassFormat.h"
-#include "ClassMeasurer.h"
-#include "MSEMeasurer.h"
-#include "QCTrainer.h"
-#include "CmdLine.h"
-#include "Random.h"
-#include "SVMRegression.h"
-#include "SVMClassification.h"
-#include "KFold.h"
-#include "DiskXFile.h"
-#include "ClassFormatDataSet.h"
-#include "MeanVarNorm.h"
+// Torch3
+#include <MatDataSet.h>
+#include <TwoClassFormat.h>
+#include <ClassMeasurer.h>
+#include <MSEMeasurer.h>
+#include <QCTrainer.h>
+#include <CmdLine.h>
+#include <Random.h>
+#include <SVMRegression.h>
+#include <SVMClassification.h>
+#include <KFold.h>
+#include <DiskXFile.h>
+#include <ClassFormatDataSet.h>
+#include <MeanVarNorm.h>
 #include <string>
 
+#include <ClassNLLCriterion.h>
+#include <MSECriterion.h>
+#include <OneHotClassFormat.h>
+#include <ClassMeasurer.h>
+#include <MSEMeasurer.h>
 
-#include "ClassNLLCriterion.h"
-#include "MSECriterion.h"
-#include "OneHotClassFormat.h"
-#include "ClassMeasurer.h"
-#include "MSEMeasurer.h"
+#include <StochasticGradient.h>
 
-#include "StochasticGradient.h"
-#include "KFold_CompToux.h"
-#include "KFoldSaveOutputs.h"
+#include <ConnectedMachine.h>
+#include <Linear.h>
+#include <Tanh.h>
+#include <Sigmoid.h>
+#include <LogSoftMax.h>
+#include <Random.h>
 
-#include "ConnectedMachine.h"
-#include "Linear.h"
-#include "Tanh.h"
-#include "Sigmoid.h"
-#include "LogSoftMax.h"
-#include "Random.h"
-
-#include "EMTrainer.h"
-#include "DiagonalGMM.h"
-#include "KMeans.h"
-#include "DiskMatDataSet.h"
-#include "NLLMeasurer.h"
+#include <EMTrainer.h>
+#include <DiagonalGMM.h>
+#include <KMeans.h>
+#include <DiskMatDataSet.h>
+#include <NLLMeasurer.h>
 
 #include <time.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include "log_add.h"
+#include <log_add.h>
+
+// Local classes
+//#include "KFold_CompToux.h"
+#include "KFoldSaveOutputs.h"
 
 
 enum CrossValidationType {

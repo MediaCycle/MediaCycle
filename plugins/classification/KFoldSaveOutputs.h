@@ -30,8 +30,8 @@
 #ifndef KFOLD_SAVEOUTPUTS_INC
 #define KFOLD_SAVEOUTPUTS_INC
 
-#include "Trainer.h"
-#include "DiskXFile.h"
+#include <Trainer.h>
+#include <DiskXFile.h>
 
 namespace Torch {
 
