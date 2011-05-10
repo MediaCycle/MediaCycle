@@ -1929,10 +1929,9 @@ return 0;
 	
 }
 
-#ifdef USE_OPENAL
 //CF check bit depth and sampling rate later...
 int ACAudioFeedback::createExtSource(float* _buffer, int _length){
-	
+	#ifdef USE_OPENAL	
 	//pthread_mutex_lock(&audio_engine_mutex);
 	if (ext_loop_length != 0)
 		deleteExtSource();	
@@ -1971,12 +1970,15 @@ int ACAudioFeedback::createExtSource(float* _buffer, int _length){
 	
 	//pthread_mutex_unlock(&audio_engine_mutex);
 	delete[] buffer_short;
-	
+	#else
+	std::cerr << "ACAudioFeedback::createExtSource not yet implemented for the PortAudio backend." << std::endl;
+	#endif	
 	return 0;	
 }	
 
 int ACAudioFeedback::deleteExtSource()
 {
+	#ifdef USE_OPENAL
 	stopExtSource();
 	if (alGetError() != AL_NO_ERROR){
 		std::cerr << "createExtSource, openAL error : " << alGetError() << std::endl;
@@ -1993,31 +1995,39 @@ int ACAudioFeedback::deleteExtSource()
 		exit(1);
 	}
 	ext_loop_length = 0;
+	#else
+	std::cerr << "ACAudioFeedback::deleteExtSource() not yet implemented for the PortAudio backend." << std::endl;
+	#endif	
 	return 0;
 }
 
 void ACAudioFeedback::loopExtSource()
 {
+	#ifdef USE_OPENAL
 	if (ext_loop_length > 0)
 		alSourcePlay(ext_loop_source);
 	if (alGetError() != AL_NO_ERROR){
 		std::cerr << "createExtSource, openAL error : " << alGetError() << std::endl;
 		exit(1);
 	}	
-
+	#else
+	std::cerr << "ACAudioFeedback::loopExtSource() not yet implemented for the PortAudio backend." << std::endl;
+	#endif	
 }	
 
 void ACAudioFeedback::stopExtSource()
 {
+	#ifdef USE_OPENAL
 	if (ext_loop_length > 0)
 		alSourceStop(ext_loop_source);
 	if (alGetError() != AL_NO_ERROR){
 		std::cerr << "createExtSource, openAL error : " << alGetError() << std::endl;
 		exit(1);
 	}	
-	
+	#else
+	std::cerr << "ACAudioFeedback::stopExtSource() not yet implemented for the PortAudio backend." << std::endl;
+	#endif	
 }	
-#endif
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // SD TODO - all the following related to open AL to be ported to other 3D engine?
