@@ -66,10 +66,10 @@ ACOSCDockWidgetQt::~ACOSCDockWidgetQt(){
 #if defined (USE_OSC)
 void ACOSCDockWidgetQt::on_pushButtonControlStart_clicked() {
 	std::cout << "Control IP: " << ui.lineEditControlIP->text().toStdString() << std::endl;
-	std::cout << "Control Port: " << ui.lineEditControlPort->text().toInt() << std::endl;
+	std::cout << "Control Port: " << ui.spinBoxControlPort->value() << std::endl;
 	if ( ui.pushButtonControlStart->text().toStdString() == "Start") {
 		osc_browser = new ACOscBrowser();
-		osc_browser->create(ui.lineEditControlIP->text().toStdString().c_str(), ui.lineEditControlPort->text().toInt());
+		osc_browser->create(ui.lineEditControlIP->text().toStdString().c_str(), ui.spinBoxControlPort->value());
 		osc_browser->setUserData(this);
 		osc_browser->setCallback(static_mess_handler);
 		osc_browser->start();
@@ -86,12 +86,12 @@ void ACOSCDockWidgetQt::on_pushButtonControlStart_clicked() {
 
 void ACOSCDockWidgetQt::on_pushButtonFeedbackStart_clicked() {
 	std::cout << "Feedback IP: " << ui.lineEditFeedbackIP->text().toStdString() << std::endl;
-	std::cout << "Feedback Port: " << ui.lineEditFeedbackPort->text().toInt() << std::endl;
+	std::cout << "Feedback Port: " << ui.spinBoxFeedbackPort->value() << std::endl;
 	if ( ui.pushButtonFeedbackStart->text().toStdString() == "Start") {	
 		osc_feedback = new ACOscFeedback();
-		osc_feedback->create(ui.lineEditFeedbackIP->text().toStdString().c_str(), ui.lineEditFeedbackPort->text().toInt());
+		osc_feedback->create(ui.lineEditFeedbackIP->text().toStdString().c_str(), ui.spinBoxFeedbackPort->value());
 		osc_feedback->messageBegin("test");
-		std::cout << "sending test messages to " << ui.lineEditFeedbackIP->text().toStdString().c_str() << " on port " << ui.lineEditFeedbackPort->text().toInt() << " ..." << endl;
+		std::cout << "sending test messages to " << ui.lineEditFeedbackIP->text().toStdString().c_str() << " on port " << ui.spinBoxFeedbackPort->value() << " ..." << endl;
 		osc_feedback->messageSend();
 		ui.pushButtonFeedbackStart->setText("Stop");
 	}	
