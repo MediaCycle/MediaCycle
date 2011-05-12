@@ -38,7 +38,7 @@
 #include <cstdlib> // for atoi
 
 // ----------- class constants
-// number of directories above which to lauch thread.
+// number of files above which to lauch thread.
 const int ACMultiMediaCycleOsgQt::n_dir_for_threading = 10;
 // -----------
 
@@ -55,7 +55,7 @@ void ACMultiMediaCycleOsgQt::mediacycleCallback(char* message) {
 	}
 	
 	if (message=="loaddirfinish") {
-		// XS TODO checkboxes
+		this->updateLibrary();
 		statusBar()->clearMessage();
 	}
 }
@@ -367,13 +367,12 @@ void ACMultiMediaCycleOsgQt::on_actionLoad_Media_Directory_triggered(bool checke
 	// XS TODO threaded version not working for images.
 	// not necessary to thread if only few files.
 //	if (directories.size() > n_dir_for_threading)
-//		media_cycle->importDirectoriesThreaded(directories, recursive, forward_order, do_segments);
+		media_cycle->importDirectoriesThreaded(directories, recursive, forward_order, do_segments);
 //	else
-		media_cycle->importDirectories(directories, recursive, forward_order, do_segments);
+//		media_cycle->importDirectories(directories, recursive, forward_order, do_segments);
 
 	directories.empty();
 	
-	this->updateLibrary();
 	
 	// SD not working with threaded version
 	/*
@@ -445,17 +444,13 @@ void ACMultiMediaCycleOsgQt::on_actionLoad_Media_Files_triggered(bool checked){
 		int recursive = 1;	
 		
 		// not necessary to thread if only few files.
-		if (directories.size() > n_dir_for_threading)
+//		if (directories.size() > n_dir_for_threading)
 			media_cycle->importDirectoriesThreaded(directories, recursive, forward_order, do_segments);
-		else
-			media_cycle->importDirectories(directories, recursive, forward_order, do_segments);
+//		else
+//			media_cycle->importDirectories(directories, recursive, forward_order, do_segments);
 
 		directories.empty();
-		
-		// SD not needed anymore
-		this->updateLibrary();
-	}	
-
+	}
 }
 
 bool ACMultiMediaCycleOsgQt::doSegments(){
