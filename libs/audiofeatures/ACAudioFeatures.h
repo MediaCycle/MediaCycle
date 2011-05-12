@@ -1,7 +1,7 @@
 /**
  * @brief ACAudioFeatures.h
- * @author Jérôme Urbain
- * @date 09/05/2011
+ * @author Stéphane Dupont
+ * @date 12/05/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -40,7 +40,6 @@
 #include <ACMediaTimedFeature.h>
 //#include "fftw3.h"
 //#include "ifft-helper.h"
-
 
 //#include "round.h"
 

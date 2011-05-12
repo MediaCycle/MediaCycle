@@ -1,5 +1,5 @@
 /**
- * @brief melfilters.h
+ * @brief ACAudioHaitsmaFingerprintPlugin.h
  * @author Stéphane Dupont
  * @date 12/05/2011
  * @copyright (c) 2011 – UMONS - Numediart
@@ -29,58 +29,27 @@
  * <mailto:avre@umons.ac.be>
 */
 
-#ifndef MELFILTERS_H
-#define MELFILTERS_H
+#ifndef _ACAUDIOHAITSMAFINGERPRINTPLUGIN_H
+#define	_ACAUDIOHAITSMAFINGERPRINTPLUGIN_H
 
-#include "Armadillo-utils.h"
+#include "ACAudioFeatures.h"
+#include "MediaCycle.h"
 
-enum window_type {
-	WINDOW_TYPE_RECTANGLE,
-	WINDOW_TYPE_HANNING,
-	WINDOW_TYPE_HAMMING,
-	WINDOW_TYPE_BLACKMANN
+#include<iostream>
+
+class ACAudioHaitsmaFingerprintPlugin : public ACFeaturesPlugin {
+public:
+	ACAudioHaitsmaFingerprintPlugin();
+	~ACAudioHaitsmaFingerprintPlugin();
+
+	virtual std::vector<ACMediaFeatures*> calculate(std::string aFileName, bool _save_timed_feat=false);
+	virtual std::vector<ACMediaFeatures*> calculate(ACMediaData* aData, ACMedia* theMedia, bool _save_timed_feat=false);
+	
+	ACMediaTimedFeature* getTimedFeatures();
+	
+private:
+	std::string mtf_file_name; // file in which features have been saved
+	std::vector<std::string> mtf_file_names;
 };
 
-enum freq_scale {
-	FREQ_SCALE_LIN,
-	FREQ_SCALE_LOG,
-	FREQ_SCALE_BARK,
-	FREQ_SCALE_MEL
-};
-
-enum filter_shape {
-	FILTER_SHAPE_RECTANGLE,
-	FILTER_SHAPE_TRIANGLE,
-	FILTER_SHAPE_TRAPEZE
-};
-
-inline float freq2mel(float F_m){
-	float M_m = 2595.0*std::log10(F_m/700.0+1);
-	return M_m;
-}
-
-inline float mel2freq(float M_m){
-	float F_m = 700 * (pow(10, M_m/2595.0) - 1);
-	return F_m;
-}
-
-inline arma::mat freq2mel(arma::mat F_m){
-	arma::mat M_m = 2595.0*log10(F_m/700.0+1);
-	return M_m;
-}
-
-inline arma::mat mel2freq(arma::mat M_m){
-	arma::mat F_m(M_m);
-	for (unsigned int i=0; i < M_m.n_rows; i++ )
-		for (unsigned int j=0; j < M_m.n_cols; j++ )
-			F_m(i,j) = mel2freq(M_m(i,j));
-	return F_m;
-}
-
-arma::mat melfilters(int nChannels, int fftSize, int sr_hz);
-
-arma::mat chromafilters(int MinOctave, int MaxOctave, int fftSize, int sr_hz);
-
-arma::mat allfilters(int bandNbrs, int freqScale, int filterShape, float minFreq, float maxFreq, int fftSize, int analysisSampleRate);
-
-#endif
+#endif	/* _ACAUDIOHAITSMAFINGERPRINTPLUGIN_H */
