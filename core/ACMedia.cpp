@@ -316,7 +316,9 @@ void ACMedia::loadXML(TiXmlElement* _pMediaNode){
 	if (pName == "")
 		throw runtime_error("corrupted XML file, no filename");
 	else {
-		fixWhiteSpace(pName);
+		#ifdef __APPLE__ //added by CF, white spaces are needed under Ubuntu!
+			fixWhiteSpace(pName);
+		#endif	
 		this->setFileName(pName);
 	}
 	
