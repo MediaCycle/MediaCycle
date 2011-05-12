@@ -56,6 +56,10 @@ private slots:
 	void on_pushButtonQueryReplay_clicked();
 	void on_pushButtonQueryKeep_clicked();
 	void on_pushButtonQueryReferent_clicked();	
+	
+	// Audio visualization
+	void on_comboBoxWaveformBrowser_activated(const QString & text);//CF or (int index);}
+
 //#endif //defined (SUPPORT_AUDIO)
 
 public:

@@ -117,6 +117,8 @@ protected:
 	
 	int nodes_prepared;
 	
+	ACBrowserAudioWaveformType audio_waveform_type;
+	
 public:
 	ACOsgBrowserRenderer();
 	~ACOsgBrowserRenderer();
@@ -140,6 +142,9 @@ public:
 	
 	void changeNodeColor(int _node, osg::Vec4 _color){node_renderer[_node]->changeNodeColor(_color);}
 	void resetNodeColor(int _node){node_renderer[_node]->resetNodeColor();}
+	
+	ACBrowserAudioWaveformType getAudioWaveformType(){return audio_waveform_type;}
+	void setAudioWaveformType(ACBrowserAudioWaveformType _type);
 
 private:
 	bool removeNodes(int _first=0, int _last=0);

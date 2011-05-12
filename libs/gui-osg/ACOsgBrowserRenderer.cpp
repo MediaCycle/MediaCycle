@@ -75,7 +75,6 @@ ACOsgBrowserRenderer::ACOsgBrowserRenderer()
 	group->addChild(media_group);
 	group->addChild(link_group);
 	this->clean();
-
 	
 	/*
 	std::string ffmpegLib = osgDB::Registry::instance()->createLibraryNameForExtension("ffmpeg");
@@ -138,6 +137,8 @@ void ACOsgBrowserRenderer::clean(){
 	this->removeNodes();
 	this->removeLinks();
 	this->removeLabels();
+	
+	audio_waveform_type = AC_BROWSER_AUDIO_WAVEFORM_CLASSIC;
 }
 
 double ACOsgBrowserRenderer::getTime() {
@@ -295,6 +296,7 @@ void ACOsgBrowserRenderer::updateNodes(double ratio) {
 			node_renderer[i]->setActivity(media_cycle_activity);
 			node_renderer[i]->setMediaIndex(media_index);
 			node_renderer[i]->setFilename(media_cycle_filename);
+			node_renderer[i]->setWaveformType(audio_waveform_type);
 			
 			// UPDATE
 			node_renderer[i]->updateNodes(ratio);
@@ -661,5 +663,14 @@ bool ACOsgBrowserRenderer::addLabels(int _first, int _last){
 		}
 	}
 }
-		
-		
+
+void ACOsgBrowserRenderer::setAudioWaveformType(ACBrowserAudioWaveformType _type){
+	if (audio_waveform_type != _type){
+		this->audio_waveform_type = _type;
+		for (unsigned int i=0;i<node_renderer.size();i++) {
+			if (node_renderer[i]->getMediaType() == MEDIA_TYPE_AUDIO)
+				node_renderer[i]->updateWaveformType(_type);
+		}
+		//media_cycle->setNeedsDisplay(true); // done by each waveform
+	}
+}

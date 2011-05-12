@@ -46,7 +46,7 @@ using namespace osg;
 const int ACOsgImageRenderer::NCOLORS = 5;
 
 ACOsgImageRenderer::ACOsgImageRenderer() {
-	
+	media_type = MEDIA_TYPE_IMAGE;
 	image_image = 0; image_geode = 0; border_geode = 0; image_transform = 0;
 	
 	Vec4 color(1.0f, 1.0f, 1.0f, 0.9f);	

@@ -40,6 +40,7 @@
 using namespace osg;
 
 ACOsgVideoRenderer::ACOsgVideoRenderer() {
+	media_type = MEDIA_TYPE_VIDEO;
 	image_stream = 0;
 }
 

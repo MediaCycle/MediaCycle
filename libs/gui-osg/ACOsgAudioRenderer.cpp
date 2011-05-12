@@ -51,12 +51,14 @@ namespace fs = boost::filesystem;
 using namespace osg;
 
 ACOsgAudioRenderer::ACOsgAudioRenderer() {
+	media_type = MEDIA_TYPE_AUDIO;
 	waveform_geode = 0;
 	curser_geode = 0; 
 	metadata_geode = 0;	
 	metadata = 0;	
 	curser_transform = 0; 
-	entry_geode = 0; 
+	entry_geode = 0;
+	waveform_type = AC_BROWSER_AUDIO_WAVEFORM_CLASSIC;
 }
 
 ACOsgAudioRenderer::~ACOsgAudioRenderer() {
@@ -528,19 +530,20 @@ void ACOsgAudioRenderer::updateNodes(double ratio) {
 		//if (0) {	// without waveform
 			localscale = 0.5;
 			
-			if(waveform_geode == 0) {
-			// DT: prevent the display of the waveform
-				waveformGeode();
-			}
-			if (curser_transform == 0) {
-				curserGeode();
-			}
-			if (metadata_geode == 0) {
-				metadataGeode();
+			if(waveform_type != AC_BROWSER_AUDIO_WAVEFORM_NONE){
+				if(waveform_geode == 0 ) {
+					waveformGeode();
+				}
+				if (curser_transform == 0) {
+					curserGeode();
+				}
+				if (metadata_geode == 0) {
+					metadataGeode();
+				}
 			}
 			
 			//if(media_node->getNumChildren() > 0 && media_node->getChild(0) == entry_geode) {
-			if(media_node->getNumChildren() !=3 ) {// waveform + curser + metadata
+			if(media_node->getNumChildren() !=3 && waveform_type != AC_BROWSER_AUDIO_WAVEFORM_NONE) {// waveform + curser + metadata
 				//waveform_geode->setNodeMask(-1);
 				media_node->removeChild(entry_geode);
 				media_node->addChild(waveform_geode);
@@ -548,17 +551,25 @@ void ACOsgAudioRenderer::updateNodes(double ratio) {
 				media_node->addChild(metadata_geode);
 				media_node->addChild(curser_transform);
 			}
+			else if(media_node->getNumChildren() ==3 && waveform_type == AC_BROWSER_AUDIO_WAVEFORM_NONE){// when switching to none mode while waveforms are already displayed
+				media_node->removeChild(waveform_geode);
+				media_node->removeChild(metadata_geode);
+				media_node->removeChild(curser_transform);
+				media_node->addChild(entry_geode);
+			}
 			
-			// curserT.makeTranslate(Vec3(omr*p.x + ratio*p2.x + attribute.curser * xstep * 0.5 / zoom, omr*p.y + ratio*p2.y, 0.0)); // omr*p.z + ratio*p2.z));
-			// curserT =  Matrix::scale(0.5/zoom,0.5/zoom,0.5/zoom) * curserT;
-#ifdef AUTO_TRANSFORM
-			curser_transform->setPosition(Vec3(attribute.getCursor() * xstep, 0.0, 0.0));
-#else
-			curserT.makeTranslate(Vec3(attribute.getCursor() * xstep, 0.0, 0.0)); 
-			curser_transform->setMatrix(curserT);
-#endif
-			
-			T =  Matrix::rotate(-media_cycle_angle,Vec3(0.0,0.0,1.0)) * Matrix::scale(localscale/media_cycle_zoom,localscale/media_cycle_zoom,localscale/media_cycle_zoom) * T;
+			if(waveform_type != AC_BROWSER_AUDIO_WAVEFORM_NONE){
+				// curserT.makeTranslate(Vec3(omr*p.x + ratio*p2.x + attribute.curser * xstep * 0.5 / zoom, omr*p.y + ratio*p2.y, 0.0)); // omr*p.z + ratio*p2.z));
+				// curserT =  Matrix::scale(0.5/zoom,0.5/zoom,0.5/zoom) * curserT;
+				#ifdef AUTO_TRANSFORM
+					curser_transform->setPosition(Vec3(attribute.getCursor() * xstep, 0.0, 0.0));
+				#else
+					curserT.makeTranslate(Vec3(attribute.getCursor() * xstep, 0.0, 0.0)); 
+					curser_transform->setMatrix(curserT);
+				#endif
+				
+				T =  Matrix::rotate(-media_cycle_angle,Vec3(0.0,0.0,1.0)) * Matrix::scale(localscale/media_cycle_zoom,localscale/media_cycle_zoom,localscale/media_cycle_zoom) * T;
+			}
 		}
 		else {
 			//if(media_node->getNumChildren() == 3) {
@@ -605,5 +616,18 @@ void ACOsgAudioRenderer::updateNodes(double ratio) {
 	media_node->setMatrix(T);
 #endif
 
+}
+
+void ACOsgAudioRenderer::setWaveformType(ACBrowserAudioWaveformType _type)
+{
+	waveform_type = _type;
+}
+
+void ACOsgAudioRenderer::updateWaveformType(ACBrowserAudioWaveformType _type)
+{
+	if (waveform_type!=_type){
+		waveform_type = _type;
+		this->updateNodes();
+	}
 }
 #endif //defined (SUPPORT_AUDIO)

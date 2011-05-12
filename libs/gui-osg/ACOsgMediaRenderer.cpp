@@ -37,6 +37,7 @@
 using namespace osg;
 
 ACOsgMediaRenderer::ACOsgMediaRenderer() {
+	media_type = MEDIA_TYPE_NONE;
 	local_group = new Group(); 
 #ifdef AUTO_TRANSFORM
 	media_node = new AutoTransform();

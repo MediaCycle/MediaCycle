@@ -38,6 +38,7 @@
 using namespace osg;
 
 ACOsgTextRenderer::ACOsgTextRenderer() {
+	media_type = MEDIA_TYPE_TEXT;
 	text_geode = 0;
 	text_string = "";
 	pos.x = 0;

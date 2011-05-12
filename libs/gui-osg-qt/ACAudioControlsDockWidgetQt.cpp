@@ -40,6 +40,9 @@ ACAudioControlsDockWidgetQt::ACAudioControlsDockWidgetQt(QWidget *parent)
 	#if defined (SUPPORT_AUDIO)
 	ui.setupUi(this); // first thing to do
 	this->show();
+	#ifndef USE_DEBUG
+	ui.groupBoxQuery->hide();
+	#endif
 	#endif //defined (SUPPORT_AUDIO)
 }
 
@@ -107,6 +110,16 @@ void ACAudioControlsDockWidgetQt::on_pushButtonQueryReferent_clicked()
 	
 }
 
+void ACAudioControlsDockWidgetQt::on_comboBoxWaveformBrowser_activated(const QString & text)
+{
+    if (media_cycle == 0) return;
+    std::cout << "Browser waveform type: " << text.toStdString() << std::endl;
+    if (text == "None")
+    	osg_view->getBrowserRenderer()->setAudioWaveformType(AC_BROWSER_AUDIO_WAVEFORM_NONE);
+    else if (text == "Classic")
+    	osg_view->getBrowserRenderer()->setAudioWaveformType(AC_BROWSER_AUDIO_WAVEFORM_CLASSIC);
+    osg_view->setFocus();	
+}
 
 // XS TODO : recuperate these from Audiocycle ?
 

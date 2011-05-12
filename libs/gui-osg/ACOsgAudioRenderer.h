@@ -62,11 +62,16 @@ protected:
 	void entryGeode();
 	void metadataGeode();
 	
+	ACBrowserAudioWaveformType waveform_type;
+	
 public:
 	ACOsgAudioRenderer();
 	~ACOsgAudioRenderer();
 	void prepareNodes();
 	void updateNodes(double ratio=0.0);
+	ACBrowserAudioWaveformType getWaveformType(){return waveform_type;}
+	void setWaveformType(ACBrowserAudioWaveformType _type);
+	void updateWaveformType(ACBrowserAudioWaveformType _type);
 };
 
 #endif //defined (SUPPORT_AUDIO)

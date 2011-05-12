@@ -62,9 +62,15 @@
 	#define AUTO_TRANSFORM
 #endif 
 
+enum ACBrowserAudioWaveformType {
+	AC_BROWSER_AUDIO_WAVEFORM_NONE=0,
+	AC_BROWSER_AUDIO_WAVEFORM_CLASSIC=1
+};
+
 class ACOsgMediaRenderer {
 protected:
 	MediaCycle* media_cycle;
+	ACMediaType media_type;
 	osg::ref_ptr<osg::Group>  local_group;
 #ifdef AUTO_TRANSFORM
 	osg::ref_ptr<osg::AutoTransform> media_node;
@@ -103,6 +109,7 @@ public:
 	virtual ~ACOsgMediaRenderer();
 
 	void setMediaCycle(MediaCycle *_media_cycle) { this->media_cycle = _media_cycle; };
+	ACMediaType getMediaType(){return media_type;}
 	void setNodeIndex(int _node_index) { this->node_index = _node_index; };
 	void setDistanceMouse(float _distance_mouse) { this->distance_mouse = _distance_mouse; };
 	//void setActivity(int _media_activity) { this->media_activity = _media_activity; }
@@ -136,6 +143,10 @@ public:
 	void setActivity(int media_cycle_activity);
 	void setMediaIndex(int media_index);
 	void setFilename(std::string media_cycle_filename);
+	
+	// Audio-specific
+	virtual void setWaveformType(ACBrowserAudioWaveformType _type){}
+	virtual void updateWaveformType(ACBrowserAudioWaveformType _type){}
 };
 
 #endif
