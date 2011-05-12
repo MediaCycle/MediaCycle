@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="sizePolicy">
-   <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+   <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
@@ -67,7 +67,7 @@
      </rect>
     </property>
     <property name="sizePolicy">
-     <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+     <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
       <horstretch>0</horstretch>
       <verstretch>0</verstretch>
      </sizepolicy>
@@ -86,6 +86,12 @@
        <width>211</width>
        <height>71</height>
       </rect>
+     </property>
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
      </property>
      <property name="toolTip">
       <string>when loading media files or pre-computed features (acl files), the available features will appear here</string>
@@ -156,7 +162,7 @@
      </property>
      <property name="font">
       <font>
-       <pointsize>10</pointsize>
+       <pointsize>8</pointsize>
       </font>
      </property>
      <property name="text">
@@ -169,15 +175,15 @@
      </property>
      <property name="geometry">
       <rect>
-       <x>60</x>
+       <x>70</x>
        <y>60</y>
-       <width>161</width>
+       <width>151</width>
        <height>26</height>
       </rect>
      </property>
      <property name="font">
       <font>
-       <pointsize>10</pointsize>
+       <pointsize>8</pointsize>
       </font>
      </property>
      <item>
@@ -197,7 +203,7 @@
      </property>
      <property name="font">
       <font>
-       <pointsize>10</pointsize>
+       <pointsize>8</pointsize>
       </font>
      </property>
      <property name="text">
@@ -215,11 +221,11 @@
      </property>
      <property name="font">
       <font>
-       <pointsize>10</pointsize>
+       <pointsize>8</pointsize>
       </font>
      </property>
      <property name="text">
-      <string>Positions:</string>
+      <string>Positions</string>
      </property>
     </widget>
     <widget class="QComboBox" name="comboBoxClustersPositions">
@@ -228,15 +234,15 @@
      </property>
      <property name="geometry">
       <rect>
-       <x>60</x>
+       <x>70</x>
        <y>80</y>
-       <width>161</width>
+       <width>151</width>
        <height>26</height>
       </rect>
      </property>
      <property name="font">
       <font>
-       <pointsize>10</pointsize>
+       <pointsize>8</pointsize>
       </font>
      </property>
      <item>
@@ -268,7 +274,7 @@
      <property name="geometry">
       <rect>
        <x>110</x>
-       <y>30</y>
+       <y>20</y>
        <width>111</width>
        <height>31</height>
       </rect>
