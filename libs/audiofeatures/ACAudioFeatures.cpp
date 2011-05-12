@@ -1,6 +1,6 @@
 /**
  * @brief ACAudioFeatures.cpp
- * @author Stéphane Dupont
+ * @author Christian Frisson
  * @date 12/05/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
@@ -330,9 +330,6 @@ std::vector<ACMediaTimedFeature*> computeFeatures(float* data, vector<string> de
 	
 	ACMediaTimedFeature* mfcc_tf;
 	ACMediaTimedFeature* chroma_tf;
-	
-	mfcc_m.print();
-	loud_v.print();
 	
 	for (int iDesc = 0; iDesc < descList.size(); iDesc++){
 		switch (descMap[descList[iDesc]]) {
