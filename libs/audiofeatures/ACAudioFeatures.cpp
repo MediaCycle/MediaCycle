@@ -332,9 +332,6 @@ std::vector<ACMediaTimedFeature*> computeFeatures(float* data, vector<string> de
 	ACMediaTimedFeature* mfcc_tf;
 	ACMediaTimedFeature* chroma_tf;
 	
-	//mfcc_m.print();
-	//loud_v.print();
-	
 	for (int iDesc = 0; iDesc < descList.size(); iDesc++){
 		switch (descMap[descList[iDesc]]) {
 			case SPECTRAL_CENTROID:
