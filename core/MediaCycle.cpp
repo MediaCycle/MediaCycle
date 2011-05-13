@@ -326,7 +326,7 @@ int MediaCycle::importDirectories(vector<string> directories, int recursive, boo
 	
 	for (i=0;i<n;i++) {
 		
-		ok += mediaLibrary->importFile(filenames[i], this->pluginManager, doSegment, doSegment, MC_e_medias);
+		ok += mediaLibrary->importFile(filenames[i], this->pluginManager, doSegment, 1, MC_e_medias);
 		
 		needsNormalizeAndCluster = 0;
 		if ( (mediaLibrary->getSize() >= int(prevLibrarySizeMultiplier * prevLibrarySize))

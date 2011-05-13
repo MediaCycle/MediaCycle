@@ -210,7 +210,7 @@ static int osc_callback(const char *path, const char *types, lo_arg **argv,int a
 
 	osc_feedback = NULL;
 	osc_browser = NULL;
-
+	
 	media_cycle->setClusterNumber([mClusterNumberSlider intValue]);
 	
 	[browser_osg_view setMediaCycle:media_cycle];
@@ -701,7 +701,7 @@ static int osc_callback(const char *path, const char *types, lo_arg **argv,int a
 	{
 		char *lib_path = NULL;
 		lib_path = new char[500]; // wrong magic number!
-		lib_path = argv[0]->s;
+		//lib_path = argv[0]->s;
 		std::cout << "Importing file library '" << lib_path << "'..." << std::endl;
 		media_cycle->importACLLibrary(lib_path);
 		media_cycle->normalizeFeatures();

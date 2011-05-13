@@ -1,7 +1,7 @@
 /**
  * @brief ACAudioHaitsmaFingerprintPlugin.cpp
  * @author Stéphane Dupont
- * @date 12/05/2011
+ * @date 13/05/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -46,9 +46,25 @@ ACAudioHaitsmaFingerprintPlugin::ACAudioHaitsmaFingerprintPlugin() {
 	//this->mPluginType=mPluginType;
 	this->mDescriptorsList.push_back("Haitsma Audio Sub-Fingerprint");
 	this->mtf_file_name = "";
+	
+	audio_fingerprint = new ACAudioFingerprint();
+	audio_fingerprint->setParameters();
+	/*
+	 void setParameters(int analysisSampleRate = 5512.5,
+	 int windowSize = 2048,
+	 int windowShift = 64,
+	 int windowType = WINDOW_TYPE_HANNING,
+	 int minFreq = 200,
+	 int maxFreq = 2000,
+	 int bandNbr = 33,
+	 int filterShape = FILTER_SHAPE_RECTANGLE,
+	 int freqScale = FREQ_SCALE_LOG);
+	 */
 }
 
 ACAudioHaitsmaFingerprintPlugin::~ACAudioHaitsmaFingerprintPlugin() {
+	
+	delete audio_fingerprint;
 }
 
 std::vector<ACMediaFeatures*> ACAudioHaitsmaFingerprintPlugin::calculate(std::string aFileName, bool _save_timed_feat) {
@@ -77,13 +93,17 @@ std::vector<ACMediaFeatures*> ACAudioHaitsmaFingerprintPlugin::calculate(ACMedia
 	memcpy(data, static_cast<float*>(aData->getData())+theAudio->getSampleStart()*theAudio->getChannels(),
 		   (theAudio->getSampleEnd()-theAudio->getSampleStart())*theAudio->getChannels()*sizeof(float));
 	
-	//
-	descmf = computeFeatures(data, theAudio->getSampleRate(), theAudio->getChannels(), theAudio->getNFrames(), 32, 13, 1024, true);
-	//
+	audio_fingerprint->setSampleRate(theAudio->getSampleRate(), theAudio->getChannels());
+	descmf = audio_fingerprint->compute(data, theAudio->getNFrames());
+	//descmf = computeFeatures(data, theAudio->getSampleRate(), theAudio->getChannels(), theAudio->getNFrames(), 32, 13, 1024, true);
+	
+	for (int i=0; i<descmf.size(); i++){
+		desc.push_back(descmf[i]->mean());
+	}
 	
 	if (_save_timed_feat) {
 		// try to keep the convention : _b.mtf = binary ; _t.mtf = ascii text
-		bool save_binary = true;
+		bool save_binary = false;
 		string mtf_file_name; // file(s) in which feature(s) will be saved
 		string file_ext =  "_b.mtf";
 		string aFileName = theMedia->getFileName();

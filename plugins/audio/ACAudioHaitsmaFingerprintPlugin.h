@@ -1,7 +1,7 @@
 /**
  * @brief ACAudioHaitsmaFingerprintPlugin.h
  * @author Stéphane Dupont
- * @date 12/05/2011
+ * @date 13/05/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -33,6 +33,7 @@
 #define	_ACAUDIOHAITSMAFINGERPRINTPLUGIN_H
 
 #include "ACAudioFeatures.h"
+#include "ACAudioFingerprint.h"
 #include "MediaCycle.h"
 
 #include<iostream>
@@ -50,6 +51,8 @@ public:
 private:
 	std::string mtf_file_name; // file in which features have been saved
 	std::vector<std::string> mtf_file_names;
+	
+	ACAudioFingerprint * audio_fingerprint;
 };
 
 #endif	/* _ACAUDIOHAITSMAFINGERPRINTPLUGIN_H */

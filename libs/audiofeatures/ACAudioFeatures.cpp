@@ -1,7 +1,7 @@
 /**
  * @brief ACAudioFeatures.cpp
  * @author Stéphane Dupont
- * @date 12/05/2011
+ * @date 13/05/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -152,8 +152,9 @@ std::vector<ACMediaTimedFeature*> computeFeatures(float* data, vector<string> de
 	sfinfo.frames = length;
 	sfinfo.channels = nchannels;
 	sfinfo.seekable = 1;
-	
 	int sr_hz = 22050;
+	sfinfo2.samplerate = sr_hz;
+	
 	//windowSize = (int)round(0.03*(float)sr_hz); // window size forced to 30ms et shift of 10ms
 	//hopSize = (int)round(0.01*(float)sr_hz);
 	double srcRatio = (double) sr_hz/ (double) samplerate;
@@ -331,8 +332,8 @@ std::vector<ACMediaTimedFeature*> computeFeatures(float* data, vector<string> de
 	ACMediaTimedFeature* mfcc_tf;
 	ACMediaTimedFeature* chroma_tf;
 	
-	mfcc_m.print();
-	loud_v.print();
+	//mfcc_m.print();
+	//loud_v.print();
 	
 	for (int iDesc = 0; iDesc < descList.size(); iDesc++){
 		switch (descMap[descList[iDesc]]) {
@@ -587,7 +588,6 @@ double logAttackTime(colvec ener_v, int sr_hz){
 	return lat;
 }
 
-
 rowvec mfcc(colvec x_v, mat melfilter_m, int mfccNb){
 	//colvec x2_v = log10(trans(melfilter_m)*(x_v+math::eps()));
 	colvec x2_v = log(trans(melfilter_m)*(x_v)+math::eps()); // log as MAtlab does
@@ -654,9 +654,9 @@ colvec burstBoundaries(colvec split_v, colvec time_v, float minBurstDur){
     return BB_v;
 }
 
-int resample(float* datain, SF_INFO *sfinfo, float* dataout, SF_INFO* sfinfoout){
+int resample(float* datain, SF_INFO *sfinfo, float* dataout, SF_INFO* sfinfoout) {
 	SRC_DATA	src_data ;
-	int destSr_hz = 16000;
+	int destSr_hz = sfinfoout->samplerate;
 	double srcRatio = (double) destSr_hz/ (double) sfinfo->samplerate;
 	int inlength =  sfinfo->frames;
 	int outFrames = (int) (inlength * srcRatio + 1);

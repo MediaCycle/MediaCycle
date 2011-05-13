@@ -1,7 +1,7 @@
 /**
  * @brief ACAudioFingerprint.cpp
  * @author Stéphane Dupont
- * @date 12/05/2011
+ * @date 13/05/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -40,52 +40,27 @@ using namespace std;
 
 // SD TODO - functione here to be moved to algorithmic library
 
-int resample(float* datain, SF_INFO *sfinfo, float* dataout, SF_INFO* sfinfoout) {
-	
-	SRC_DATA	src_data ;
-	int destSr_hz = 16000;
-	double srcRatio = (double) destSr_hz/ (double) sfinfo->samplerate;
-	int inlength =  sfinfo->frames;
-	int outFrames = (int) (inlength * srcRatio + 1);
-	//	dataout = new float[outFrames];
-	src_data.end_of_input = 0 ; /* Set this later. */
-	/* Start with zero to force load in while loop. */
-	src_data.input_frames = inlength;
-	src_data.data_in = datain;
-	src_data.data_out = dataout;
-	src_data.src_ratio = srcRatio;
-	src_data.output_frames = outFrames;
-	// SD - SRC_LINEAR to get faster processing, default mode is very slow
-	src_simple(&src_data, SRC_LINEAR, sfinfo->channels);
-	dataout = src_data.data_out;
-	
-	sfinfoout->channels = sfinfo->channels;
-	sfinfoout->format = sfinfo->format;
-	sfinfoout->sections = sfinfo->sections;
-	sfinfoout->seekable = sfinfo->seekable;
-	sfinfoout->frames = outFrames;
-	sfinfoout->samplerate = destSr_hz;
-}
+extern int resample(float* datain, SF_INFO *sfinfo, float* dataout, SF_INFO* sfinfoout);
 
-colvec haitsma(colvec frame_v, colvec prevframe_v, int bandNbr) {
+rowvec haitsma(colvec frame_v, colvec prevframe_v, int bandNbr) {
 	
 	float tmp;
-	colvec tmp_v = colvec(bandNbr);
+	rowvec tmp_v = rowvec(bandNbr-1);
 	for (int i=0;i<bandNbr-1;i++) {
-		tmp = (frame_v[i+1]-frame_v[i])-(frame_v[i+1]-frame_v[i]);
+		tmp = (frame_v(i+1)-frame_v(i))-(prevframe_v(i+1)-prevframe_v(i));
 		if (tmp>0) {
-			tmp_v[i] = 1;
+			tmp_v(i) = 1;
 		}
 		else {
-			tmp_v[i] = 0;
+			tmp_v(i) = 0;
 		}
 	}
+	//tmp_v.print();
+	return tmp_v;
 }
 
-ACAudioFingerprint::ACAudioFingerprint(int _sampleRate, int _nChannels) {
-	
-	sampleRate = _sampleRate;
-	nChannels = _nChannels;
+ACAudioFingerprint::ACAudioFingerprint() {
+
 }
 
 ACAudioFingerprint::~ACAudioFingerprint() {
@@ -166,15 +141,28 @@ std::vector<ACMediaTimedFeature*> ACAudioFingerprint::compute(float *data, long 
 	sfinfo.frames = length;
 	sfinfo.channels = nChannels;
 	sfinfo.seekable = 1;
+	sfinfo2.samplerate = analysisSampleRate;
 	
 	double srcRatio = (double) analysisSampleRate / (double) sampleRate;
 	int outFrames = (int) (length * srcRatio * nChannels + 1);
 	dataout = new float[outFrames];
 	int t = resample(data, &sfinfo, dataout, &sfinfo2);
 	
-	signal_v.set_size(sfinfo2.frames);
-	for (long i = 0; i < sfinfo2.frames; i++) {
-		signal_v(i) = dataout[i*nChannels]; // we keep only channel 1
+	int extendSoundLimits = 1;
+	if (extendSoundLimits){
+		signal_v.set_size(sfinfo2.frames+windowSize);// = colvec(dataout, sfinfo2.frames);
+		for (long i = 0; i < windowSize/2; i++)
+			signal_v(i) = 0;
+		for (long i = 0; i < sfinfo2.frames; i++)
+			signal_v(i+windowSize/2) = dataout[i*nChannels];
+		for (long i = 0; i < windowSize/2; i++)
+			signal_v(i+sfinfo2.frames+windowSize/2 - 1) = 0;
+	}
+	else{
+		signal_v.set_size(sfinfo2.frames);
+		for (long i = 0; i < sfinfo2.frames; i++)
+			signal_v(i) = dataout[i*nChannels]; // we keep only channel 1
+		
 	}
 	delete [] dataout;
 	
@@ -186,7 +174,7 @@ std::vector<ACMediaTimedFeature*> ACAudioFingerprint::compute(float *data, long 
 	
 	long index=0;
 	
-	for (long i=0; i < signal_v.n_elem-windowSize; i = i+windowShift) {
+	for (long i=0; i <= signal_v.n_elem-windowSize; i = i+windowShift) {
 		
 		time_v(index) = ((double)i+((double)windowSize*(1.0))/2.0)/(double)analysisSampleRate;
 		
@@ -197,18 +185,20 @@ std::vector<ACMediaTimedFeature*> ACAudioFingerprint::compute(float *data, long 
 		
 		frameFFTabs_v = abs(fft(frameW_v, fftSize));
 		
-		frameFFTabs2_v = frameFFTabs_v.rows(0,fftSize/2-1);		
+		frameFFTabs2_v = frameFFTabs_v.rows(0,fftSize/2-1);
 		
-		frameFilterBank_v = trans(trans(filterbank_m)*(frameFFTabs2_v));
-				
+		frameFilterBank_v = trans(filterbank_m)*(frameFFTabs2_v) + math::eps();
+			
 		haitsma_m.row(index) = haitsma(frameFilterBank_v, prevFrameFilterBank_v, bandNbr);
 		
-		index++;
-		
 		prevFrameFilterBank_v = frameFilterBank_v;
+		
+		index++;
 	}
 	
-	desc.push_back(new ACMediaTimedFeature(conv_to<fcolvec>::from(time_v), conv_to<fmat>::from(haitsma_m), std::string("Haitsma")));
+	ACMediaTimedFeature* haitsma_tf = new ACMediaTimedFeature(conv_to<fcolvec>::from(time_v), conv_to<fmat>::from(haitsma_m), std::string("Haitsma"));
+
+	desc.push_back(haitsma_tf);
 
 	return desc;
 }

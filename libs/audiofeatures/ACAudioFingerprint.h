@@ -1,7 +1,7 @@
 /**
  * @brief ACAudioFingerprint.h
  * @author Stéphane Dupont
- * @date 12/05/2011
+ * @date 13/05/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -51,7 +51,7 @@ class ACAudioFingerprint {
 
 public:
 	
-	ACAudioFingerprint(int sampleRate, int nChannels);
+	ACAudioFingerprint();
 	~ACAudioFingerprint();
 	
 	void setSampleRate(int sampleRate, int nChannels);

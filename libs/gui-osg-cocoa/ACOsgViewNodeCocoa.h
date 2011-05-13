@@ -69,6 +69,7 @@
 - (void)setNode:(osg::Node*)node;
 - (void)addEventHandler:(osgGA::GUIEventHandler*)eventHandler;
 //- (void)setCameraManipulator:(osgGA::MatrixManipulator*)manipulator;
+- (void)addCamera:(osg::Camera*)newCamera;
 - (osg::Camera*)camera;
 - (osgViewer::Viewer*)viewer;
 

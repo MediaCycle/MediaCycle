@@ -643,7 +643,7 @@ static int osc_callback(const char *path, const char *types, lo_arg **argv,int a
 		y = argv[1]->f;
 		
 		float alpha=0.0;
-		prevz = alpha*prevz + (1-alpha)*z;
+		int prevz = alpha*prevz + (1-alpha)*z;
 		if (prevz>2000) {
 			media_cycle->setAutoPlay(1);
 		}
@@ -681,7 +681,7 @@ static int osc_callback(const char *path, const char *types, lo_arg **argv,int a
 	{
 		char *lib_path = NULL;
 		lib_path = new char[500]; // wrong magic number!
-		lib_path = argv[0]->s;
+		//lib_path = argv[0]->s;
 		std::cout << "Importing file library '" << lib_path << "'..." << std::endl;
 		media_cycle->importACLLibrary(lib_path);
 		media_cycle->normalizeFeatures();
