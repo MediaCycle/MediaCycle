@@ -33,6 +33,8 @@
  */
 
 #include "ACMediaBrowser.h"
+#include <float.h>
+
 using namespace std;
 
 static double getTime()
@@ -1082,8 +1084,9 @@ void ACMediaBrowser::updateNextPositionsPropeller() {
 	if (mLibrary->isEmpty() ) return;
 	if (mReferenceNode < 0 || mReferenceNode >= getNumberOfMediaNodes()) return ;
 
-
+	int ci;
 	float r, theta;
+	double dt;
 	ACPoint p;
 	p.x = p.y = p.z = 0.0;
 	double t = getTime();
@@ -1096,22 +1099,70 @@ void ACMediaBrowser::updateNextPositionsPropeller() {
 	
 	float maxr = 0.0f;
 	
+	float *rmin = new float[mClusterCount];
+	float *rmax = new float[mClusterCount];
+	float *dtmin = new float[mClusterCount];
+	float *dtmax = new float[mClusterCount];
+	
+	for (ci=0;ci<mClusterCount;ci++) {
+		rmin[ci] = FLT_MAX;
+		rmax[ci] = 0;
+		dtmin[ci] = FLT_MAX;
+		dtmax[ci] = 0;
+	}
+	
+	// SD 2011 may - normalization of radius and angle to use full available range
+	for (ACMediaNodes::iterator node = mLoopAttributes.begin(); node != mLoopAttributes.end(); ++node) {
+		
+		ci = (*node).getClusterId();
+		
+		r = compute_distance(mLibrary->getMedia(mReferenceNode)->getAllFeaturesVectors(), 
+							 mLibrary->getMedia((*node).getMediaId())->getAllFeaturesVectors(), 
+							 mFeatureWeights, false) * 10.0;
+		
+		if (r<rmin[ci]) {
+			rmin[ci] = r;
+		}
+		if (r>rmax[ci]) {
+			rmax[ci] = r;
+		}
+		
+		dt = compute_distance(mLibrary->getMedia((*node).getMediaId())->getAllFeaturesVectors(), mClusterCenters[ci], mFeatureWeights, false) / 2.0 * 10.0;
+		
+		if (dt<dtmin[ci]) {
+			dtmin[ci] = dt;
+		}
+		if (dt>dtmax[ci]) {
+			dtmax[ci] = dt;
+		}		
+	}
+	
 	for (ACMediaNodes::iterator node = mLoopAttributes.begin(); node != mLoopAttributes.end(); ++node) {
 		
 		int ci = (*node).getClusterId();
 
 		// SD TODO - test both approaches
-		r=1;
+		// r=1;
 		r = compute_distance(mLibrary->getMedia(mReferenceNode)->getAllFeaturesVectors(), 
 							 mLibrary->getMedia((*node).getMediaId())->getAllFeaturesVectors(), 
 							 mFeatureWeights, false) * 10.0;
-		r /= 100.0;
-		theta = 2*M_PI * ci / (float)mClusterCount;
+		if (rmax[ci]>rmin[ci]) {
+			r = 0.1f + 0.8f * (r - rmin[ci])/(rmax[ci]-rmin[ci]);
+		}
+		else {
+			r = 0.5f;
+		}
+		r /= 4.0f;
 		
-		double dt = 1;
+		// dt = 1;
 		dt = compute_distance(mLibrary->getMedia((*node).getMediaId())->getAllFeaturesVectors(), mClusterCenters[ci], mFeatureWeights, false) / 2.0 * 10.0;
-		dt /= 3.0;
-		theta += dt;
+		if (dtmax[ci]>dtmin[ci]) {
+			dt = 0.1f + 0.8f * (dt - dtmin[ci])/(dtmax[ci]-dtmin[ci]);
+		}
+		else {
+			dt = 0.5f;
+		}
+		theta = (ci + dt) * 2 * M_PI / (float)mClusterCount;
 		
 		//p.x = 4*sin(theta)*r;//CF dirty trick to optimize the space, waiting for better ;)
 		p.x = sin(theta)*r;
@@ -1126,8 +1177,14 @@ void ACMediaBrowser::updateNextPositionsPropeller() {
 		maxr = max(maxr,p.x);
 		maxr = max(maxr,p.y);
 	}
+	
 	std::cout << "Max prop: " << maxr << std::endl;
 	// printf("PROPELER \n");
+	
+	delete rmin;
+	delete rmax;
+	delete dtmin;
+	delete dtmax;
 	
 	setNeedsDisplay(true);
 }
