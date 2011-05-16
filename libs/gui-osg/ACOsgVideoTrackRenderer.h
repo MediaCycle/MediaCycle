@@ -46,23 +46,8 @@
 // Slit-scan
 
 //FFmpeg
-extern "C" {
-#ifdef __cplusplus
-#define __STDC_CONSTANT_MACROS
-#ifdef _STDINT_H
-#undef _STDINT_H
-#endif
-# include <stdint.h>
-#endif
-#include <errno.h>    // for error codes defined in avformat.h
-#include <libavcodec/avcodec.h>
-#include <libavformat/avformat.h>
-#include <libavdevice/avdevice.h>
-#include <libswscale/swscale.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdbool.h>
-}
+#include <ACFFmpegInclude.h>
+
 #include <cassert>
 #include <algorithm>
 #include <vector>
@@ -76,10 +61,10 @@ extern "C" {
 #ifdef USE_SLIT_SCAN
 class ACOsgVideoSlitScanThread : public OpenThreads::Thread {
 public:
-	
+
     ACOsgVideoSlitScanThread()
 	:m_context(0),_done(false),filename(""),notify_level(osg::WARN){}
-	
+
     ~ACOsgVideoSlitScanThread()
     {
         //_done = true;
@@ -89,9 +74,9 @@ public:
         }
 		if (m_context) {avcodec_close(m_context); m_context = 0;}
     }
-	
+
     void run(void);
-		
+
 	private:
 		osg::ref_ptr<osg::Image> slit_scan;
 		AVCodecContext* m_context;
@@ -120,7 +105,7 @@ protected:
 	osg::ref_ptr<osg::MatrixTransform> frames_transform;
 	osg::ref_ptr<osg::MatrixTransform> segments_transform;
 	osg::ref_ptr<osg::MatrixTransform> cursor_transform;
-	
+
 	osg::ref_ptr<osg::Geode> playback_geode;
 	osg::ref_ptr<osg::Group> frames_group;
 	osg::ref_ptr<osg::Geode> frame_geode;
@@ -128,19 +113,19 @@ protected:
 	std::vector< osg::ref_ptr<osg::Geode> > segments_geodes;
 	//osg::ref_ptr<osg::Geode> segments_geodes;
 	osg::ref_ptr<osg::Geode> cursor_geode;
-	
+
 	void playbackGeode();
 	void framesGeode();
 	void segmentsGeode();
 	void cursorGeode();
-	
+
 	float zoom_x, zoom_y, track_left_x;
 	float summary_center_y,summary_height;
 	float playback_center_y,playback_height,playback_scale;
 	float segments_center_y,segments_height;
 	float frame_min_width, frame_n;
 	bool scrubbing;
-	
+
 	#ifdef USE_SLIT_SCAN
 	osg::ref_ptr<osg::MatrixTransform> slit_scan_transform;
 	osg::ref_ptr<osg::Geode> slit_scan_geode;
@@ -148,22 +133,22 @@ protected:
 	bool slit_scan_changed;
 	ACOsgVideoSlitScanThread* slit_scanner;
 	#endif//def USE_SLIT_SCAN
-	
+
 	static const int NCOLORS ;
 	osg::ref_ptr<osg::Vec4Array> colors;
 	osg::ref_ptr<osg::Vec4Array> colors2;
 	osg::ref_ptr<osg::Vec4Array> colors3;
-	
+
 	ACVideoSummaryType track_summary_type;
-	
+
 	int segments_number;
-	
+
 public:
 	ACOsgVideoTrackRenderer();
 	~ACOsgVideoTrackRenderer();
 	void prepareTracks();
 	void updateTracks(double ratio=0.0);
-	
+
 	void setSummaryType(ACVideoSummaryType type){this->track_summary_type = type;}
 	ACVideoSummaryType getSummaryType(){return this->track_summary_type;}
 };

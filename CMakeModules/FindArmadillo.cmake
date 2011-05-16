@@ -49,11 +49,15 @@ MARK_AS_ADVANCED(ARMADILLO_LIBRARY ARMADILLO_INCLUDE_DIR ARMADILLO_LINK_DIRECTOR
 # Try to ascertain the version...
 if(ARMADILLO_INCLUDE_DIR)
     set(_arma_Version_file "${ARMADILLO_INCLUDE_DIR}/armadillo_bits/arma_version.hpp")
-    
     if(EXISTS "${_arma_Version_file}")
-      file(READ "${_arma_Version_file}" _arma_Version_contents)
+        file(READ "${_arma_Version_file}" _arma_Version_contents)
     else()
-      set(_arma_Version_contents "unknown")
+        set(_arma_Version_file "${ARMADILLO_INCLUDE_DIR}/armadillo_bits/version.hpp")
+        if(EXISTS "${_arma_Version_file}")
+            file(READ "${_arma_Version_file}" _arma_Version_contents)
+        else()
+            set(_arma_Version_contents "unknown")
+        endif()
     endif()
 
     string(REGEX MATCH ".*#define ARMA_VERSION_MAJOR[ \t]+[0-9]+.*"
@@ -66,13 +70,6 @@ if(ARMADILLO_INCLUDE_DIR)
         string(REGEX REPLACE ".*#define ARMA_VERSION_PATCH[ \t]+([0-9]+).*"
             "\\1" _arma_VERSION_PATCH ${_arma_Version_contents})
     else()
-        set(_arma_Version_file "${ARMADILLO_INCLUDE_DIR}/armadillo_bits/version.hpp")
-    
-        if(EXISTS "${_arma_Version_file}")
-            file(READ "${_arma_Version_file}" _arma_Version_contents)
-        else()
-            set(_arma_Version_contents "unknown")
-        endif()
         string(REGEX MATCH ".*static const unsigned int major = [0-9]+.*"
         _arma_old_version_defines "${_arma_Version_contents}")
         if(_arma_old_version_defines)

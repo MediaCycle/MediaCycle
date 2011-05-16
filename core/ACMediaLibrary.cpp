@@ -59,21 +59,7 @@ namespace fs = boost::filesystem;
 
 #if defined(SUPPORT_VIDEO)
 // CF FFmpeg for checking audio/video channels in containers
-extern "C" {
-#ifdef __cplusplus
-#define __STDC_CONSTANT_MACROS
-#ifdef _STDINT_H
-#undef _STDINT_H
-#endif
-# include <stdint.h>
-#endif
-	#include <libavcodec/avcodec.h>
-	#include <libavformat/avformat.h>
-	#include <libswscale/swscale.h>
-	#include <stdio.h>
-	#include <stdlib.h>
-	#include <stdbool.h>
-}
+#include <ACFFmpegInclude.h>
 #endif //defined (SUPPORT_VIDEO)
 
 using namespace std;
@@ -88,7 +74,7 @@ ACMediaLibrary::ACMediaLibrary() {
 ACMediaLibrary::ACMediaLibrary(ACMediaType aMediaType) {
 	this->cleanLibrary();
 	media_type = aMediaType;
-	
+
 	#if defined(SUPPORT_VIDEO)
 	// Register all formats and codecs from FFmpeg
 	av_register_all();
@@ -109,15 +95,15 @@ bool ACMediaLibrary::changeMediaType(ACMediaType aMediaType){
 		// need to clean library first (from elsewhere, e.g., from the app)
 		return false;
 	}
-}	
+}
 
 void ACMediaLibrary::deleteAllMedia(){
 	// Clean up properly by calling destructor of each ACMedia*
-	std::vector<ACMedia*>::iterator iter; 
-	for (iter = media_library.begin(); iter != media_library.end(); iter++) { 
-		delete *iter; 
+	std::vector<ACMedia*>::iterator iter;
+	for (iter = media_library.begin(); iter != media_library.end(); iter++) {
+		delete *iter;
 	}
-	media_library.clear();	
+	media_library.clear();
 }
 
 // this is the method to be called when re-initializing
@@ -155,14 +141,14 @@ int ACMediaLibrary::importDirectory(std::string _path, int _recursive, ACPluginM
 	// here we force the plugins to save timed features for segmentation
 	// they could also segment on-the-fly while calculating features (as in audioSegmentationPlugin)
 	if (doSegment) _save_timed_feat = true;
-	
+
 	for (unsigned int i=0; i<filenames.size(); i++){
 		int index = forward_order ? i : filenames.size()-1-i;//CF if reverse order (not forward_order), segments in subdirs are added to the library after the source recording
 		this->importFile(filenames[index], acpl, doSegment, _save_timed_feat, _medias );
 	}
-	
+
 	std::cout << "Library size : " << this->getSize() << std::endl;
-	return this->getSize(); 
+	return this->getSize();
 }
 
 
@@ -179,18 +165,18 @@ int ACMediaLibrary::importFile(std::string _filename, ACPluginManager *acpl, boo
 		cout << "<ACMediaLibrary::importFile> skipping "<< _filename << " : media already present at position " << is_present << endl;
 		return 0;
 	}
-	
+
 	string extension = fs::extension(_filename);
-	
+
 	ACMediaType fileMediaType = ACMediaFactory::getInstance().getMediaTypeFromExtension(extension);
 	ACMedia* media;
 
 	//this->testFFMPEG(_filename);
-	
+
 	// XS TODO: do we want to check the media type of the whole library (= impose a unique one)?
 	if (media_type == fileMediaType){
 		media = ACMediaFactory::getInstance().create(extension);
-		cout << "extension:" << extension << endl; 	
+		cout << "extension:" << extension << endl;
 	}
 	else {
 		cout << "<ACMediaLibrary::importFile> other media type, skipping " << _filename << " ... " << endl;
@@ -198,7 +184,7 @@ int ACMediaLibrary::importFile(std::string _filename, ACPluginManager *acpl, boo
 		cout << "-> fileMediaType " << fileMediaType << " ... " << endl;
 		return 0;
 	}
-	
+
 	if (media == 0) {
 		cout << "<ACMediaLibrary::importFile> extension unknown, skipping " << _filename << " ... " << endl;
 		return 0;
@@ -212,7 +198,7 @@ int ACMediaLibrary::importFile(std::string _filename, ACPluginManager *acpl, boo
 		this->incrementMediaID();
 		// SD TODO - Is this correct?
 		if (doSegment){
-			// segments are created without id 
+			// segments are created without id
 			media->segment(acpl, _save_timed_feat);
 			std::vector<ACMedia*> mediaSegments;
 			mediaSegments = media->getAllSegments();
@@ -230,10 +216,10 @@ int ACMediaLibrary::importFile(std::string _filename, ACPluginManager *acpl, boo
 		cerr << "<ACMediaLibrary::importFile> problem importing " << _filename << " ... " << endl;
 		return 0;
 
-	}		
-	// appending current media (if imported properly) to the project's XML file 
+	}
+	// appending current media (if imported properly) to the project's XML file
 	//media->saveXML(_medias);
-	
+
 	// deleting the data that have been used for analysis, keep media small.
 	media->deleteData();
 	return 1;
@@ -249,18 +235,18 @@ int ACMediaLibrary::scanDirectories(std::vector<string> _paths, int _recursive, 
 	}
 	// return cnt;
 }
-	
+
 // construct a vector (filenames) containing the files in a given directory (_path).
-// when "recursive" is turned on, it will scan subdirectories too 
+// when "recursive" is turned on, it will scan subdirectories too
 // return values :
 //    1 = it found files -- 	//XS TODO : return filenames.size()
 //    0 = empty
 //   -1 = directory not found
 
 int ACMediaLibrary::scanDirectory(std::string _path, int _recursive, std::vector<string>& filenames) {
-	
+
 	fs::path full_path( fs::initial_path<fs::path>() );
-	
+
 // check boost version to adapt for change in boost api	(for boost > 1.46)
 #if BOOST_FILESYSTEM_VERSION >= 3
 	full_path = fs::system_complete( fs::path( _path) );
@@ -281,7 +267,7 @@ int ACMediaLibrary::scanDirectory(std::string _path, int _recursive, std::vector
 			}
 		}
 	}
-	
+
 #else
 	full_path = fs::system_complete( fs::path( _path, fs::native ) );
 	if ( !fs::exists( full_path ) )	{
@@ -301,14 +287,14 @@ int ACMediaLibrary::scanDirectory(std::string _path, int _recursive, std::vector
 			}
 		}
 	}
-	
+
 #endif
-	else { 
+	else {
 		// encounter a file in the directory
 		// put it in the vector of files to be analyzed
 		filenames.push_back(_path);
 	}
-	
+
 	//XS TODO : return filenames.size()
 	if (filenames.size() == 0) return 0;
 	return 1;
@@ -325,10 +311,10 @@ int ACMediaLibrary::openACLLibrary(std::string _path, bool aInitLib){
 	// but appends new media to it.
 	// except if aInitLib is set to true
 	int ret, file_count=0;
-	
+
 	ifstream library_file;
 	library_file.open(_path.c_str());
-	
+
 	if ( ! library_file ) {
 		cerr << "<ACMediaLibrary::openACLLibrary> error reading file " << _path << endl;
 		return 0;
@@ -360,7 +346,7 @@ int ACMediaLibrary::openACLLibrary(std::string _path, bool aInitLib){
 		}
 		else {
 			std::cout<<"<ACMediaLibrary::openACLLibrary> : Wrong Media Type" << std::endl;
-		}		
+		}
 	}
 	while (ret>0);
 	library_file.close();
@@ -373,10 +359,10 @@ int ACMediaLibrary::openMCSLLibrary(std::string _path, bool aInitLib){
 	// but appends new media to it.
 	// except if aInitLib is set to true
 	int ret, file_count=0;
-	
+
 	ifstream library_file;
 	library_file.open(_path.c_str());
-	
+
 	if ( ! library_file ) {
 		cerr << "<ACMediaLibrary::openMCSLLibrary> error reading file " << _path << endl;
 		return 0;
@@ -384,7 +370,7 @@ int ACMediaLibrary::openMCSLLibrary(std::string _path, bool aInitLib){
 	else{
 		cout << "opening " << _path << endl;
 	}
-	
+
 	//CF Header checks
 	std::string type;
 	std::string version;
@@ -393,7 +379,7 @@ int ACMediaLibrary::openMCSLLibrary(std::string _path, bool aInitLib){
 	if ( type != "MediaCycle Segmented Library") {
 		if ( type.find_first_of('/') != string::npos || type.find_first_of('\\') != string::npos) //CF ugly: ACL using path delimiters/special caracters on OSX/Linux (/) or Windows (\)
 			cerr << "<ACMediaLibrary::openMCSLLibrary> wrong library file type: original ACL" << endl;
-		else 
+		else
 			cerr << "<ACMediaLibrary::openMCSLLibrary> wrong library file type: '" << type << "', instead of 'MediaCycle Segmented Library'" << endl;
 		return 0;
 	}
@@ -401,7 +387,7 @@ int ACMediaLibrary::openMCSLLibrary(std::string _path, bool aInitLib){
 		cerr << "<ACMediaLibrary::openMCSLLibrary> unsupported version: v." << version << ", instead of v.0.1" << endl;
 		return 0;
 	}
-	
+
 	ACMedia* local_media;
 	// --TODO-- ???  how does it know which type of media ?
 	// have to be set up  at some point using setMediaType()
@@ -421,7 +407,7 @@ int ACMediaLibrary::openMCSLLibrary(std::string _path, bool aInitLib){
 		}
 		else {
 			std::cout<<"<ACMediaLibrary::openMCSLLibrary> : Wrong Media Type" << std::endl;
-		}		
+		}
 	}
 	while (ret>0);
 	library_file.close();
@@ -437,12 +423,12 @@ int ACMediaLibrary::openXMLLibrary(std::string _path, bool aInitLib){
 	} catch (const exception& e) {
 		cout << e.what( ) << endl;
 		return EXIT_FAILURE;
-    }	
-	
+    }
+
 	if (aInitLib) {
 		cleanLibrary();
 	}
-	
+
 	TiXmlHandle docHandle(&doc);
 	// XS TODO ? make rootHandle a pointer ?
 	TiXmlHandle rootHandle = docHandle.FirstChildElement( "MediaCycle" );
@@ -461,7 +447,7 @@ int ACMediaLibrary::openCoreXMLLibrary(TiXmlHandle _rootHandle){
 	std::stringstream tmp;
 	int n_loops=0;
 
-	if (!nMediaText) 
+	if (!nMediaText)
 		throw runtime_error("corrupted XML file, no number of media");
 	else {
 		string nof = nMediaText->ValueStr();
@@ -469,7 +455,7 @@ int ACMediaLibrary::openCoreXMLLibrary(TiXmlHandle _rootHandle){
 		tmp >> n_loops;
 	}
 	TiXmlElement* pMediaNode=_rootHandle.FirstChild( "Medias" ).FirstChild().Element();
-	if (!pMediaNode) 
+	if (!pMediaNode)
 		throw runtime_error("corrupted XML file, no medias");
 	else {
 		// loop over all medias
@@ -507,7 +493,7 @@ int ACMediaLibrary::saveACLLibrary(std::string _path){
 	ofstream library_file (_path.c_str());
 #endif //SAVE_LOOP_BIN
 	cout << "saving ACL file: " << _path << endl;
-	
+
 	int n_loops = this->getSize();
 	// we save UNnormalized features
 	denormalizeFeatures();
@@ -522,17 +508,17 @@ int ACMediaLibrary::saveACLLibrary(std::string _path){
 int ACMediaLibrary::saveXMLLibrary(std::string _path){
 	// we save UNnormalized features
 	denormalizeFeatures();
-	
-	TiXmlDocument MC_doc;  
-    TiXmlDeclaration* MC_decl = new TiXmlDeclaration( "1.0", "", "" );  
-    
-	MC_doc.LinkEndChild( MC_decl );  
-	
-    TiXmlElement* MC_e_root = new TiXmlElement( "MediaCycle" );  
-    MC_doc.LinkEndChild( MC_e_root );  
-	
-	TiXmlElement* MC_e_medias = new TiXmlElement( "Medias" );  
-    MC_e_root->LinkEndChild( MC_e_medias );  
+
+	TiXmlDocument MC_doc;
+    TiXmlDeclaration* MC_decl = new TiXmlDeclaration( "1.0", "", "" );
+
+	MC_doc.LinkEndChild( MC_decl );
+
+    TiXmlElement* MC_e_root = new TiXmlElement( "MediaCycle" );
+    MC_doc.LinkEndChild( MC_e_root );
+
+	TiXmlElement* MC_e_medias = new TiXmlElement( "Medias" );
+    MC_e_root->LinkEndChild( MC_e_medias );
 
 	this->saveCoreXMLLibrary(MC_e_root, MC_e_medias);
 
@@ -544,17 +530,17 @@ int ACMediaLibrary::saveXMLLibrary(std::string _path){
 // no headers, just media information
 // can be called from MediaCycle's saveXML or from the app via mediaCycle
 int ACMediaLibrary::saveCoreXMLLibrary( TiXmlElement* _MC_e_root, TiXmlElement* _MC_e_medias ){
-    TiXmlElement* MC_e_number_of_medias = new TiXmlElement( "NumberOfMedia" );  
-    _MC_e_root->LinkEndChild( MC_e_number_of_medias );  
+    TiXmlElement* MC_e_number_of_medias = new TiXmlElement( "NumberOfMedia" );
+    _MC_e_root->LinkEndChild( MC_e_number_of_medias );
 	int n_loops = this->getSize();
 	std::string s_loops;
 	std::stringstream tmp;
 	tmp << n_loops;
 	s_loops = tmp.str();
-	
-    TiXmlText* MC_t_nm = new TiXmlText( s_loops );  
-    MC_e_number_of_medias->LinkEndChild( MC_t_nm );  
-		
+
+    TiXmlText* MC_t_nm = new TiXmlText( s_loops );
+    MC_e_number_of_medias->LinkEndChild( MC_t_nm );
+
 	// XS TODO iterator
 	for(int i=0; i<n_loops; i++) {
 		media_library[i]->saveXML(_MC_e_medias);
@@ -570,11 +556,11 @@ int ACMediaLibrary::saveMCSLLibrary(std::string _path){
 	ofstream library_file (_path.c_str());
 #endif //SAVE_LOOP_BIN
 	cout << "saving MCSL file: " << _path << endl;
-	
+
 	//CF Header
-	library_file << "MediaCycle Segmented Library" << endl; 
+	library_file << "MediaCycle Segmented Library" << endl;
 	library_file << 0.1 << endl; //CF v. 0.1 on 31/05/2010, adding parentid to ACL v0.1
-	
+
 	int n_loops = this->getSize();
 	// we save UNnormalized features
 	denormalizeFeatures();
@@ -630,7 +616,7 @@ int ACMediaLibrary::getMediaIndex(std::string media_file_name){
 		}
 	}
 	return -1;
-	
+
 }
 
 std::string ACMediaLibrary::getThumbnailFileName(int id) {
@@ -648,11 +634,11 @@ bool ACMediaLibrary::isEmpty() {
 		cout << "empty library" << endl;
 		return true;
 	}
-	
+
 	// XS assumes each item has same number of features
 	// and each feature has the same number of floats in its vector
-	
-	// XS TODO do we really want to check both together ? 
+
+	// XS TODO do we really want to check both together ?
 	// we could have loaded media without (yet) features...
 	int number_of_features = media_library[0]->getNumberOfFeaturesVectors();
 	if (number_of_features <= 0) {
@@ -672,7 +658,7 @@ void ACMediaLibrary::calculateStats() {
 	if ( isEmpty() ) return;
 	int n = this->getSize() ;
 	int number_of_features = media_library[0]->getNumberOfFeaturesVectors();
-	
+
 	// initialize to zero
 	int i,j,k;
 	for (i=0; i< number_of_features; i++) {
@@ -683,27 +669,27 @@ void ACMediaLibrary::calculateStats() {
 		mean_features.push_back(tmp_vect);
 		stdev_features.push_back(tmp_vect);
 	}
-	
+
 	// computing sums
 	for(i=0; i<n; i++) {
-		ACMedia* item = media_library[i];		
+		ACMedia* item = media_library[i];
 		for(j=0; j<(int)mean_features.size(); j++){
 			for(k=0; k<(int)mean_features[j].size(); k++){
 				double val = item->getFeaturesVector(j)->getFeatureElement(k);
-				
+
 				mean_features[j][k] += val;
 				stdev_features[j][k] += val * val;
-				
+
 			}
 		}
 	}
-	
+
 	// before: divide by n --> biased variance estimator
 	// now : divide by (n-1) -- unless n=1
 	int nn;
 	if (n==1) nn = n;
 	else nn = n-1;
-	
+
 	for(j=0; j<(int)mean_features.size(); j++) {
 		cout << "calculating stats for feature" << j << endl;
 		for(k=0; k<(int)mean_features[j].size(); k++) {
@@ -721,13 +707,13 @@ void ACMediaLibrary::calculateStats() {
 }
 
 void ACMediaLibrary::normalizeFeatures(int needsNormalize) {
-	
+
 	int start;
-	
+
 	ACMediaFeatures* feature;
 	cout << "normalizing features" << endl;
 	if ( isEmpty() )  return;
-	
+
 	if (index_last_normalized < 0) {
 		// *first* normalization
 		calculateStats();
@@ -739,17 +725,17 @@ void ACMediaLibrary::normalizeFeatures(int needsNormalize) {
 			calculateStats();
 		}
 	}
-	
+
 	unsigned int i,j,k;
 	unsigned int n = this->getSize() ;
-	
+
 	if (needsNormalize) {
 		start = 0;
 	}
 	else {
 		start = index_last_normalized+1;
 	}
-	
+
 	for(i=start; i<n; i++){
 		ACMedia* item = media_library[i];
 		for(j=0; j<mean_features.size(); j++) {
@@ -768,13 +754,13 @@ void ACMediaLibrary::normalizeFeatures(int needsNormalize) {
 void ACMediaLibrary::denormalizeFeatures() {
 	cout << "denormalizing features" << endl;
 	if ( isEmpty() || index_last_normalized<0) return; // Ju: added index_last_normalized<0 to avoid segmentation fault under linux, I believe caused by the fact i is declared as unsigned int while index_last_normalized is int, so it messed up in the for loop
-	
+
 	unsigned int j,k;
 	int i;
-	
+
 	// XS denormalize only those that have been normalized (duh),
 	// so n is NOT the full library size !
-	
+
 	for(i=0; i<= index_last_normalized; i++){
 		ACMedia* item = media_library[i];
 		for(j=0; j<mean_features.size(); j++) {
@@ -793,9 +779,9 @@ void ACMediaLibrary::denormalizeFeatures() {
 // returns the list of plugins that have been used to calculate the mediafeatures for media[0]
 std::vector<std::string> ACMediaLibrary::getListOfActivePlugins(){
 	std::vector<std::string> plugins_list;
-	if (this->getSize() ==0) 
+	if (this->getSize() ==0)
 		plugins_list.clear();
-	else 
+	else
 		plugins_list = this->getMedia(0)->getListOfFeaturesPlugins();
 	return plugins_list;
 }
@@ -804,11 +790,11 @@ std::vector<std::string> ACMediaLibrary::getListOfActivePlugins(){
 // XS custom for Thomas Isreal videos : features sorted, along with filename
 void ACMediaLibrary::saveSorted(string output_file){
 	//XS dirty -- should be generalized !
-	ofstream out(output_file.c_str()); 
+	ofstream out(output_file.c_str());
 
 	const int nfeat=10;
 	std::vector<std::pair<float, int> > f[nfeat];
-	
+
 	for (int i=0; i< this->getSize() ;i++) {
 		out << i+1 << " : " << media_library[i]->getFileName() << endl;
 		int nfeatv =  media_library[i]->getNumberOfFeaturesVectors();
@@ -822,7 +808,7 @@ void ACMediaLibrary::saveSorted(string output_file){
 			f[j].push_back (std::pair<float, int> (media_library[i]->getFeaturesVector(j+1)->getFeatureElement(0), i));
 		}
 	}
-	
+
 	for (int j=0; j< nfeat-1 ;j++) {
 		sort (f[j].begin(),f[j].end());
 	}
@@ -837,16 +823,16 @@ void ACMediaLibrary::saveSorted(string output_file){
 	//		out << endl;
 	//	}
 	for (int i=0; i<this->getSize() ;i++) {
-		out << f[0][i].first << "\t" << f[0][i].second << "\t" << 
+		out << f[0][i].first << "\t" << f[0][i].second << "\t" <<
 				f[1][i].first << "\t" << f[1][i].second << "\t" <<
-				f[2][i].first << "\t" << f[2][i].second << "\t" << 
-				f[3][i].first << "\t" << f[3][i].second << "\t" << 
-				f[4][i].first << "\t" << f[4][i].second << "\t" << 
-				f[5][i].first << "\t" << f[5][i].second << "\t" <<  
-				f[6][i].first << "\t" << f[6][i].second << "\t" <<  
-				f[7][i].first << "\t" << f[7][i].second << "\t" <<  
-				f[8][i].first << "\t" << f[8][i].second << "\t" <<  
-//				f[9][i].first << "\t" << f[9][i].second << "\t" <<  
+				f[2][i].first << "\t" << f[2][i].second << "\t" <<
+				f[3][i].first << "\t" << f[3][i].second << "\t" <<
+				f[4][i].first << "\t" << f[4][i].second << "\t" <<
+				f[5][i].first << "\t" << f[5][i].second << "\t" <<
+				f[6][i].first << "\t" << f[6][i].second << "\t" <<
+				f[7][i].first << "\t" << f[7][i].second << "\t" <<
+				f[8][i].first << "\t" << f[8][i].second << "\t" <<
+//				f[9][i].first << "\t" << f[9][i].second << "\t" <<
 		endl;
 	}
 	out.close();
@@ -854,24 +840,24 @@ void ACMediaLibrary::saveSorted(string output_file){
 
 
 // -------------------------------------------------------------------------
-// test 
+// test
 #if defined(SUPPORT_VIDEO)
-int ACMediaLibrary::testFFMPEG(std::string _filename){	
+int ACMediaLibrary::testFFMPEG(std::string _filename){
 	//CF early check in video files for audio and video streams, towards ACMediaDocuments
 	// from http://www.inb.uni-luebeck.de/~boehme/using_libavcodec.html
 	// and http://www.inb.uni-luebeck.de/~boehme/libavcodec_update.html
 
 	string extension = fs::extension(_filename);
 	ACMediaType fileMediaType = ACMediaFactory::getInstance().getMediaTypeFromExtension(extension);
-	
+
 	if (media_type == MEDIA_TYPE_VIDEO || media_type == MEDIA_TYPE_AUDIO) {
-		if (fileMediaType == MEDIA_TYPE_VIDEO) {			
+		if (fileMediaType == MEDIA_TYPE_VIDEO) {
 			AVFormatContext *pFormatCtx;
 			int             i, videoStreams, audioStreams;
 			/*
 			AVCodecContext  *pCodecCtx;
 			AVCodec         *pCodec;
-			AVFrame         *pFrame; 
+			AVFrame         *pFrame;
 			AVFrame         *pFrameRGB;
 			AVPacket        packet;
 			int             frameFinished;
@@ -881,18 +867,18 @@ int ACMediaLibrary::testFFMPEG(std::string _filename){
 			// Open video file
 			if(av_open_input_file(&pFormatCtx, _filename.c_str(), 0, 0, 0)!=0){
 				std::cout << "Couldn't open file" << std::endl;
-				return 0; 
+				return 0;
 			}
-	
+
 			// Retrieve stream information
 			if(av_find_stream_info(pFormatCtx)<0){
 				std::cout << "Couldn't find stream information" << std::endl;
 				return 0;
 			}
-			
+
 			// Dump information about file onto standard error
 			dump_format(pFormatCtx, 0, _filename.c_str(), false);
-			
+
 			// Count video streams
 			videoStreams=0;
 			for(i=0; i<pFormatCtx->nb_streams; i++)
@@ -902,7 +888,7 @@ int ACMediaLibrary::testFFMPEG(std::string _filename){
 				std::cout << "Didn't find any video stream." << std::endl;
 			else
 				std::cout << "Found " << videoStreams << " video stream(s)." << std::endl;
-			
+
 			// Count audio streams
 			audioStreams=0;
 			for(i=0; i<pFormatCtx->nb_streams; i++)
@@ -911,7 +897,7 @@ int ACMediaLibrary::testFFMPEG(std::string _filename){
 			if(audioStreams == 0)
 				std::cout << "Didn't find any audio stream" << std::endl;
 			else
-				std::cout << "Found " << audioStreams << " audio stream(s)." << std::endl;	
+				std::cout << "Found " << audioStreams << " audio stream(s)." << std::endl;
 		}
 	}
 }
