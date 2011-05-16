@@ -2,6 +2,7 @@
 add_subdirectory(fftooura)
 add_subdirectory(tinyxml)
 add_subdirectory(tree)
+add_subdirectory(cwaves)
 
 # Optional dependencies
 add_subdirectory(gnuplot_i)

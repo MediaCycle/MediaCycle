@@ -182,7 +182,8 @@ void ACVideo::extractData(string _fname){
 }
 
 void ACVideo::deleteData(){
-	delete data;
+	if (data)
+		delete data;
 	data=0;
 }
 

@@ -490,6 +490,7 @@ std::vector<std::string> ACMedia::getListOfFeaturesPlugins(){
 // Implemented in ACMedia.cpp, since it is the same for all media
 // Returns 1 if it worked, 0 if it failed
 int ACMedia::import(std::string _path, int _mid, ACPluginManager *acpl, bool _save_timed_feat) {
+	
 	std::cout << "importing..." << _path << std::endl;
 	this->filename = _path;
 	this->filename_thumbnail = _path;

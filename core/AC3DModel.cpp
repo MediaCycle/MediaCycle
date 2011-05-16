@@ -86,7 +86,8 @@ void AC3DModel::extractData(string fname) {
 }
 
 void AC3DModel::deleteData(){
-	delete data;
+	if (data)
+		delete data;
 	data=0;
 }
 

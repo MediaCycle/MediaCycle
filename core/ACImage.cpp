@@ -169,7 +169,8 @@ void ACImage::setData(IplImage* _data){
 }
 
 void ACImage::deleteData(){
-	delete data;
+	if (data)
+		delete data;
 	data=0;
 }
 

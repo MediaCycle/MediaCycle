@@ -212,7 +212,6 @@ int ACAudio::loadXMLSpecific(TiXmlElement* _pMediaNode){
 	
 }
 
-
 void ACAudio::setData(float* _data,float _sample_number, int _sr,int _channels) {
 	if (data == 0)
 		data = new ACAudioData();
@@ -225,6 +224,7 @@ void ACAudio::setData(float* _data,float _sample_number, int _sr,int _channels) 
 }
 
 void ACAudio::extractData(string fname) {
+	
 	SF_INFO sfinfo;
 	SNDFILE* testFile;
 	if (! (testFile = sf_open (fname.c_str(), SFM_READ, &sfinfo))){  
@@ -257,7 +257,8 @@ void ACAudio::extractData(string fname) {
 }
 
 void ACAudio::deleteData(){
-	delete data;
+	if (data)
+		delete data;
 	data=0;
 }
 
