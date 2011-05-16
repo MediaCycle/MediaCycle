@@ -83,22 +83,26 @@ protected:
 	osg::ref_ptr<osg::Group>				 group;
 	osg::ref_ptr<osg::Group>				 pointer_group;
 	std::vector<ACOsgPointerRenderer*>  pointer_renderer;
-	
+
 	// SD - Results from centralized request to MediaCycle
 	ACPoint						media_cycle_pointer_current_pos;
-	
+
 public:
 	ACOsgHUDRenderer();
 	~ACOsgHUDRenderer() {};
-		
+
 	double getTime();
-		
+
 	void setMediaCycle(MediaCycle *media_cycle);
 
 	osg::ref_ptr<osg::Camera> getCamera();
-		
-	void preparePointers();
-	void updatePointers(osgViewer::Viewer* viewer);//(osgViewr::View* viewer);
+
+	void preparePointers(osgViewer::View* view = 0);
+
+	void updatePointers(osgViewer::Viewer* viewer);//Cocoa - simple OSG viewer
+	void updatePointers(osgViewer::View* viewer);//Qt - composite OSG viewer
+private:
+	void updatePointers(int w, int h);//common
 };
 
 #endif

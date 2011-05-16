@@ -1,7 +1,7 @@
 /**
  * @brief ACOsgCompositeViewQt.h
  * @author Christian Frisson
- * @date 31/03/2011
+ * @date 16/05/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -64,8 +64,8 @@
 //  Any other additional authorizations may be asked to avre@umons.ac.be 
 //  <mailto:avre@umons.ac.be>
 //
-//  Qt QGLWidget and OSG CompositeViewer that wraps 
-//  a MediaCycle browser and multitrack timeline viewer 
+//  Qt QGLWidget and OSG CompositeViewer that wraps
+//  a MediaCycle browser and multitrack timeline viewer
 //
 
 #include <osgViewer/Viewer>
@@ -128,11 +128,16 @@ class ACOsgCompositeViewQt : public osgViewer::CompositeViewer, public QGLWidget
 		ACOsgTimelineControlsRenderer *timeline_controls_renderer;
 		ACOsgHUDRenderer *hud_renderer;
 		osg::ref_ptr<osgViewer::View> browser_view;
+		osg::ref_ptr<osgViewer::View> hud_view;
 		osg::ref_ptr<osgViewer::View> timeline_view;
 		osg::ref_ptr<osgViewer::View> timeline_controls_view;
 		#if defined (SUPPORT_AUDIO)
 			ACAudioEngine *audio_engine;
 		#endif //defined (SUPPORT_AUDIO)
+		void updateBrowserView(int width, int height);
+		void updateHUDCamera(int width, int height);
+		void updateTimelineView(int width, int height);
+		void updateTimelineControlsView(int width, int height);
 
 	public:
 		// needs to be called when loops are added or removed
@@ -152,7 +157,7 @@ class ACOsgCompositeViewQt : public osgViewer::CompositeViewer, public QGLWidget
 		#endif //defined (SUPPORT_AUDIO)
 		bool isLibraryLoaded(){return library_loaded;}
 		void setLibraryLoaded(bool load_status){library_loaded = load_status;}
-	
+
 	private:
 		int mousedown, zoomdown, forwarddown, autoplaydown, rotationdown;
 		int finddown, infodown, opendown;
@@ -166,7 +171,7 @@ class ACOsgCompositeViewQt : public osgViewer::CompositeViewer, public QGLWidget
 		int controls_width;
 		int screen_width;
 		bool library_loaded;
-	
+
 	//MediaBlender specific members:
 	private:
 		int trackdown;
