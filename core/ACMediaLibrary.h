@@ -2,7 +2,8 @@
  *  ACMediaLibrary.h
  *  MediaCycle
  *
- *  Created by St�phane Dupont on 21/10/08.
+ *  @author Stéphane Dupont
+ *  @date 21/10/08
  *  @author Xavier Siebert
  *
  *  @copyright (c) 2008 – UMONS - Numediart
@@ -93,8 +94,8 @@ public:
 	std::vector< std::vector<double> > getMeanFeatures() {return mean_features;};
 	std::vector< std::vector<double> > getStdevFeatures() {return stdev_features;};
 	
-	int importDirectory(std::string _path, int recursive,  ACPluginManager *acpl=0, bool forward_order=true, bool doSegment=false, bool _save_timed_feat=false, TiXmlElement* _medias = 0);
-	int importFile(std::string _filename, ACPluginManager *acpl=0, bool doSegment=false, bool _save_timed_feat = false, TiXmlElement* _medias = 0);
+	int importDirectory(std::string _path, int recursive,  ACPluginManager *acpl=0, bool forward_order=true, bool doSegment=false, bool _save_timed_feat=false); //, TiXmlElement* _medias = 0);
+	int importFile(std::string _filename, ACPluginManager *acpl=0, bool doSegment=false, bool _save_timed_feat = false); //, TiXmlElement* _medias = 0);
 
 	// I/O (C++ version; plain C version discontinued sep 2010)
 	int setPath(std::string path);

@@ -298,7 +298,7 @@ void ACMedia::fixWhiteSpace (std::string &str) {
     std::string temp;
     for (unsigned int i = 0; i < str.length(); i++){
         if (str[i] == ' ') 
-			temp += "\\ ";
+			temp.append("\\ ");
         else
 			temp += str[i];
 	}
@@ -316,9 +316,9 @@ void ACMedia::loadXML(TiXmlElement* _pMediaNode){
 	if (pName == "")
 		throw runtime_error("corrupted XML file, no filename");
 	else {
-		#ifdef __APPLE__ //added by CF, white spaces are needed under Ubuntu!
-			fixWhiteSpace(pName);
-		#endif	
+//		#ifdef __APPLE__ //added by CF, white spaces are needed under Ubuntu!
+//			fixWhiteSpace(pName);
+//		#endif	
 		this->setFileName(pName);
 	}
 	

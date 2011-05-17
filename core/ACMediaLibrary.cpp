@@ -124,7 +124,7 @@ void ACMediaLibrary::cleanLibrary() {
 //	-1 if error
 //  0 if empty directory (or no media of the required type found)
 //	> 0 if no error (returns the number of files found)
-int ACMediaLibrary::importDirectory(std::string _path, int _recursive, ACPluginManager *acpl, bool forward_order, bool doSegment, bool _save_timed_feat, TiXmlElement* _medias) {
+int ACMediaLibrary::importDirectory(std::string _path, int _recursive, ACPluginManager *acpl, bool forward_order, bool doSegment, bool _save_timed_feat){ //, TiXmlElement* _medias) {
 	std::vector<string> filenames;
  	int nf = scanDirectory(_path, _recursive, filenames);
 
@@ -144,7 +144,7 @@ int ACMediaLibrary::importDirectory(std::string _path, int _recursive, ACPluginM
 
 	for (unsigned int i=0; i<filenames.size(); i++){
 		int index = forward_order ? i : filenames.size()-1-i;//CF if reverse order (not forward_order), segments in subdirs are added to the library after the source recording
-		this->importFile(filenames[index], acpl, doSegment, _save_timed_feat, _medias );
+		this->importFile(filenames[index], acpl, doSegment, _save_timed_feat); //, _medias );
 	}
 
 	std::cout << "Library size : " << this->getSize() << std::endl;
@@ -156,7 +156,7 @@ int ACMediaLibrary::importDirectory(std::string _path, int _recursive, ACPluginM
 // computes features (= "import" media) using FEATURES plugins available in the plugin Manager
 // doSegment = true : uses SEGMENTATION plugins on-the-fly
 // save_timedfeat = true : save the timedFeatures on the disk
-int ACMediaLibrary::importFile(std::string _filename, ACPluginManager *acpl, bool doSegment, bool _save_timed_feat, TiXmlElement* _medias) {
+int ACMediaLibrary::importFile(std::string _filename, ACPluginManager *acpl, bool doSegment, bool _save_timed_feat){ //, TiXmlElement* _medias) {
 	// check if file has already been imported.
 	// XS TODO: isn't this going to be too heavy when library size gets large ?
 	// may be add a flag to (in)activate the test ?
@@ -217,6 +217,9 @@ int ACMediaLibrary::importFile(std::string _filename, ACPluginManager *acpl, boo
 		return 0;
 
 	}
+	// XS TODO this was an attempt to save on-the-fly each media 
+	// but it does not work well.
+	
 	// appending current media (if imported properly) to the project's XML file
 	//media->saveXML(_medias);
 
@@ -505,6 +508,8 @@ int ACMediaLibrary::saveACLLibrary(std::string _path){
 }
 
 // XS TODO return value
+// this only saves the equivalent of the ACL config
+// (obsolete ??)
 int ACMediaLibrary::saveXMLLibrary(std::string _path){
 	// we save UNnormalized features
 	denormalizeFeatures();

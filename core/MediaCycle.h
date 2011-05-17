@@ -253,7 +253,7 @@ private:
 	
 	// settings and features XML
 	std::string config_file_xml;
-	TiXmlElement* MC_e_medias; // xml node to hook up medias  
+	//TiXmlElement* MC_e_medias; // xml node to hook up medias  
 
 	int prevLibrarySize;
 	

@@ -70,7 +70,7 @@ MediaCycle::MediaCycle(ACMediaType aMediaType, string local_directory, string li
 	this->pluginManager = new ACPluginManager();
 	
 	this->config_file_xml = "";
-	this->MC_e_medias = new TiXmlElement("Medias");
+	//this->MC_e_medias = new TiXmlElement("Medias");
 		
 	this->prevLibrarySize = 0;
 }
@@ -88,7 +88,7 @@ MediaCycle::~MediaCycle() {
 	this->pluginManager = 0;
     stopTcpServer(); // will delete this->networkSocket;
 	
-	MC_e_medias=0;
+	//MC_e_medias=0;
 }
 
 void MediaCycle::clean(){
@@ -288,6 +288,7 @@ int MediaCycle::importDirectoriesThreaded(vector<string> directories, int recurs
 	import_thread_arg = (void*)this;
 	pthread_create(&import_thread, &import_thread_attr, &threadImport, import_thread_arg);
 	pthread_attr_destroy(&import_thread_attr);
+	
 	//pthread_cancel(import_thread_arg); // SD will destroy itseld when function returns
 }
 
@@ -326,7 +327,7 @@ int MediaCycle::importDirectories(vector<string> directories, int recursive, boo
 	
 	for (i=0;i<n;i++) {
 		
-		ok += mediaLibrary->importFile(filenames[i], this->pluginManager, doSegment, 1, MC_e_medias);
+		ok += mediaLibrary->importFile(filenames[i], this->pluginManager, doSegment, 1); //, MC_e_medias);
 		
 		needsNormalizeAndCluster = 0;
 		if ( (mediaLibrary->getSize() >= int(prevLibrarySizeMultiplier * prevLibrarySize))
@@ -791,6 +792,8 @@ void MediaCycle::saveXMLConfigFile(string _fname) {
 	
 	// "medias and features"
 	// XS TODO: will the number of media be correct ?
+	
+	TiXmlElement* MC_e_medias = new TiXmlElement("Medias");		
 	this->mediaLibrary->saveCoreXMLLibrary(MC_e_root, MC_e_medias);
 	MC_e_root->LinkEndChild( MC_e_medias );  
 
@@ -820,7 +823,7 @@ void MediaCycle::saveXMLConfigFile(string _fname) {
 	
 	MC_doc.SaveFile(_fname.c_str());
 	cout << "saved XML config : " << _fname << endl;
-
+	// children of MC_Doc get deleted automatically
 }
 
 
