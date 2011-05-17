@@ -184,9 +184,12 @@ void ACMultiMediaCycleOsgQt::createMediaCycle(ACMediaType _media_type, ACBrowser
 	this->browser_mode = _browser_mode;
 	
 	#if defined (SUPPORT_AUDIO)
+	// XS TODO add checks on existing audio_engine ?
+	// normally should not be any
 	if (_media_type == MEDIA_TYPE_AUDIO){
 		audio_engine = new ACAudioEngine();
 		audio_engine->setMediaCycle(media_cycle);
+		audio_engine->startAudioEngine();
 		ui.compositeOsgView->setAudioEngine(audio_engine);
 	}	
 	#endif //defined (SUPPORT_AUDIO)
@@ -296,6 +299,7 @@ bool ACMultiMediaCycleOsgQt::readXMLConfig(string _filename){
 		// only after loading all XML files:
 		this->updateLibrary();
 		media_cycle->storeNavigationState(); 
+				
 	}
 	catch (const exception& e) {
 		this->showError(e);
@@ -762,10 +766,6 @@ void ACMultiMediaCycleOsgQt::loadDefaultConfig(ACMediaType _media_type, ACBrowse
 		case MEDIA_TYPE_AUDIO:
 			#if defined (SUPPORT_AUDIO)
 			smedia="audio";
-			// XS TODO (check this) -- after creating new mediacycle instance :
-			// audio_engine->setMediaCycle(media_cycle);
-			// ui.compositeOsgView->setAudioEngine(audio_engine);
-
 			#endif //defined (SUPPORT_AUDIO)
 			break;
 		case MEDIA_TYPE_IMAGE:
@@ -877,11 +877,18 @@ void ACMultiMediaCycleOsgQt::on_actionClean_triggered(bool checked) {
 	this->clean();
 }	
 
-void ACMultiMediaCycleOsgQt::clean(){
+void ACMultiMediaCycleOsgQt::clean(bool _updategl){
 	if (! hasMediaCycle()) return; 
+	// need to turn all sounds off before leaving
+	// do this before cleaning library !!
+#if defined (SUPPORT_AUDIO)
+	this->media_cycle->muteAllSources();
+	//audio_engine->stopAudioEngine();
+#endif //defined (SUPPORT_AUDIO)
 	
 	this->media_cycle->cleanLibrary();
 	this->media_cycle->cleanBrowser();
+	
 	
 	//was cleanCheckBoxes()
 	for (int d=0;d<dockWidgets.size();d++){
@@ -898,7 +905,7 @@ void ACMultiMediaCycleOsgQt::clean(){
 	// modify the DockWidget's API to allow this
 	plugins_scanned = false;
 	
-	ui.compositeOsgView->clean();
+	ui.compositeOsgView->clean(_updategl);
 	ui.compositeOsgView->setFocus();
 }
 
@@ -1003,13 +1010,16 @@ void ACMultiMediaCycleOsgQt::setDefaultQSettings() {
 }
 
 void ACMultiMediaCycleOsgQt::changeMediaType(ACMediaType _media_type){
+	// XS TODO turn off current audio engine if switch away from audio
 #if defined (SUPPORT_AUDIO)
 	if (_media_type == MEDIA_TYPE_AUDIO){
 		if (!audio_engine){
 			audio_engine = new ACAudioEngine();
-			audio_engine->setMediaCycle(media_cycle);
-			ui.compositeOsgView->setAudioEngine(audio_engine);
 		}
+		audio_engine->setMediaCycle(media_cycle);
+		audio_engine->startAudioEngine();
+		ui.compositeOsgView->setAudioEngine(audio_engine);
+		
 	}
 #endif //defined (SUPPORT_AUDIO)
 	this->media_cycle->changeMediaType(this->media_type);

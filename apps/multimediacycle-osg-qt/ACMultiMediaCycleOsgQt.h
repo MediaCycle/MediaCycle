@@ -73,6 +73,9 @@ public slots:
 	// Config
 	void on_actionEdit_Config_File_triggered(bool checked);
 	void comboDefaultSettingsChanged(); 
+
+	//SENEFFE ?
+	virtual void loopXML(){};
 	
 private slots:
 	// Controls
@@ -128,6 +131,9 @@ public:
 	// settings and dock (XS  TODO change dock)
 	void configureSettings();
 	void configurePluginDock();
+	bool readXMLConfig(std::string _filename="");
+	void clean(bool _updategl=false);
+	void setDefaultQSettings();
 
 private:
 	static const int n_dir_for_threading;	
@@ -161,12 +167,9 @@ private:
 	// methods
 	bool readQSettings();
 	bool writeQSettings();
-	void setDefaultQSettings();
 	void clearQSettings();
-	void clean();
 	bool doSegments();
 	
-	bool readXMLConfig(std::string _filename="");
 //	TiXmlHandle readXMLConfigHeader(std::string _filename="");
 	void writeXMLConfig(std::string _filename="");
 	std::string rstrip(const std::string& s);
