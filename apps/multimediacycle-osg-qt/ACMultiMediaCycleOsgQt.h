@@ -173,5 +173,6 @@ private:
 	void showError(std::string s);
 	void showError(const exception& e);
 	bool hasMediaCycle();
+	void changeMediaType(ACMediaType _mt);
 };
 #endif

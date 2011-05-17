@@ -243,7 +243,8 @@ bool ACMultiMediaCycleOsgQt::readXMLConfig(string _filename){
 	//TiXmlHandle rootHandle = this->readXMLConfigHeader(_filename);
 	try {
 		if (_filename=="")
-			throw runtime_error("bad XML file name");
+			return false;
+			//throw runtime_error("bad XML file name");
 	
 		TiXmlDocument doc( _filename.c_str() );
 		if (!doc.LoadFile( ))
@@ -279,7 +280,7 @@ bool ACMultiMediaCycleOsgQt::readXMLConfig(string _filename){
 		}
 		// 2) change mediacycle settings accordingly
 		if (this->media_cycle){ 
-			this->media_cycle->changeMediaType(this->media_type);
+			this->changeMediaType(this->media_type);
 			this->media_cycle->changeBrowserMode(this->browser_mode);
 		}
 		else
@@ -315,7 +316,9 @@ void ACMultiMediaCycleOsgQt::writeXMLConfig(string _filename){
 	if (! hasMediaCycle()) return; 
 	else {
 		if (_filename=="") {
+			// no file name supplied, ask for one
 			QString fileName = QFileDialog::getSaveFileName(this, tr("Save Config as XML Library"),"",tr("MediaCycle XML Library (*.xml)"));
+			if (fileName.isEmpty()) return;
 			QFile file(fileName);
 			
 			if (!file.open(QIODevice::WriteOnly)) {
@@ -325,10 +328,11 @@ void ACMultiMediaCycleOsgQt::writeXMLConfig(string _filename){
 			} 
 			else {
 				_filename = fileName.toStdString();
-				cout << "saving config in XML file: " << _filename << endl;
-				media_cycle->saveXMLConfigFile(_filename);
-			}			
+			}
 		}
+		// filename supplied (either as argument or from QMessageBox above)
+		cout << "saving config in XML file: " << _filename << endl;
+		media_cycle->saveXMLConfigFile(_filename);
 	}
 }
 
@@ -456,14 +460,15 @@ void ACMultiMediaCycleOsgQt::on_actionLoad_Media_Files_triggered(bool checked){
 bool ACMultiMediaCycleOsgQt::doSegments(){
 	bool do_segments = false;
 
-	int seg_button = QMessageBox::question(this,
-									   tr("Segmentation"),
-									   tr("Do you want to segment the media ?"),
-									   QMessageBox::Yes | QMessageBox::No);
-	if (seg_button == QMessageBox::Yes) {
-	// XS TODO: check that segmentation algorithms exist
-		do_segments = true;
-	}
+	// XS TODO skip this for SENEFFE
+//	int seg_button = QMessageBox::question(this,
+//									   tr("Segmentation"),
+//									   tr("Do you want to segment the media ?"),
+//									   QMessageBox::Yes | QMessageBox::No);
+//	if (seg_button == QMessageBox::Yes) {
+//	// XS TODO: check that segmentation algorithms exist
+//		do_segments = true;
+//	}
 	return do_segments;
 }
 
@@ -787,7 +792,7 @@ void ACMultiMediaCycleOsgQt::loadDefaultConfig(ACMediaType _media_type, ACBrowse
 	}*/
 	
 	if (this->media_cycle){ 
-		this->media_cycle->changeMediaType(_media_type);
+		this->changeMediaType(_media_type);
 		this->media_cycle->changeBrowserMode(_browser_mode);
 	}
 	else
@@ -995,4 +1000,17 @@ void ACMultiMediaCycleOsgQt::setDefaultQSettings() {
 										   this->size(),
 										   qApp->desktop()->availableGeometry()
 										   ));
+}
+
+void ACMultiMediaCycleOsgQt::changeMediaType(ACMediaType _media_type){
+#if defined (SUPPORT_AUDIO)
+	if (_media_type == MEDIA_TYPE_AUDIO){
+		if (!audio_engine){
+			audio_engine = new ACAudioEngine();
+			audio_engine->setMediaCycle(media_cycle);
+			ui.compositeOsgView->setAudioEngine(audio_engine);
+		}
+	}
+#endif //defined (SUPPORT_AUDIO)
+	this->media_cycle->changeMediaType(this->media_type);
 }
