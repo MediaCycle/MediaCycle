@@ -11,8 +11,8 @@ IF ( SUPPORT_AUDIO AND USE_QT4 AND USE_OSG AND USE_OSC AND ( OPENAL_FOUND OR POR
 
 	INCLUDE_DIRECTORIES( ../multimediacycle-osg-qt ../../libs/gui-osg-qt)
 
-	SET(multimediacycle-osg-qt_SRCS main.cpp ../multimediacycle-osg-qt/ACMultiMediaCycleOsgQt.cpp)
-	SET(multimediacycle-osg-qt_MOC_HDRS ../multimediacycle-osg-qt/ACMultiMediaCycleOsgQt.h)
+	SET(multimediacycle-osg-qt_SRCS main.cpp ACMultiMediaCycleSeneffe.cpp ../multimediacycle-osg-qt/ACMultiMediaCycleOsgQt.cpp)
+	SET(multimediacycle-osg-qt_MOC_HDRS ACMultiMediaCycleSeneffe.h ../multimediacycle-osg-qt/ACMultiMediaCycleOsgQt.h)
 	SET(multimediacycle-osg-qt_UIS ../multimediacycle-osg-qt/ACMultiMediaCycleOsgQt.ui)
 
 	SET(settings_SRCS ../multimediacycle-osg-qt/settings.cpp ../multimediacycle-osg-qt/pluginsTreeItem.cpp ../multimediacycle-osg-qt/pluginsTreeModel.cpp)

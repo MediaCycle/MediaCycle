@@ -43,10 +43,10 @@ int main(int argc, char *argv[])
 	ACMultiMediaCycleSeneffe window;
 	try {
 		// Adding palettes
-		window.addControlDock("MCOSC");				 
+		window.addControlDock("MCOSC");
 		window.addControlDock("MCBrowserControlsClusters");//"MCBrowserControlsClustersNeighbors");
 		window.addControlDock("MCAudioControls");
-		
+
 		window.setDefaultQSettings(); // skip the first dialog about saved settings
 		window.loadDefaultConfig(MEDIA_TYPE_AUDIO);
 		window.show();
@@ -57,13 +57,13 @@ int main(int argc, char *argv[])
 	catch (...){
 		cout << "** caught undetermined exception in main" << endl;
 	}
-	
+
 	window.startLoopXML();
-	
+
 	app.setOrganizationName("numediart");
 	app.setOrganizationDomain("numediart.org");
-	app.setApplicationName("MediaCycle");
-	
+	app.setApplicationName("AudioCycle (Seneffe Demo)");
+
     return app.exec();
 }
 

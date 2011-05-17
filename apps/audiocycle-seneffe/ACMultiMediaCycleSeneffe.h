@@ -40,6 +40,7 @@
 #include <string>
 
 class ACMultiMediaCycleSeneffe: public ACMultiMediaCycleOsgQt {
+Q_OBJECT
 public slots:
 	void loopXML();
 
