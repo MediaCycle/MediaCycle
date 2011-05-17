@@ -381,7 +381,7 @@ void ACMedia::loadXML(TiXmlElement* _pMediaNode){
 		fess << fes;
 		try {
 			for (int j=0; j<nfe; j++) {
-				// XS TODO add test
+				// XS TODO add test on nne
 				float f;
 				fess >> f;
 				mediaFeatures->addFeatureElement(f);
@@ -393,6 +393,7 @@ void ACMedia::loadXML(TiXmlElement* _pMediaNode){
 		}
 		mediaFeatures->setComputed();
 		mediaFeatures->setName(featureName);
+		mediaFeatures->setNeedsNormalization(nno);
 		features_vectors.push_back(mediaFeatures);
 		count_f++;
 	}
