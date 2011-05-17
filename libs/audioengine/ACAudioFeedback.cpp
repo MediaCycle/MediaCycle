@@ -2,7 +2,8 @@
  *  ACAudioFeedback.cpp
  *  AudioCycle
  *
- *  Created by StŽphane Dupont on 21/10/08.
+ *  @author StÃ©phane Dupont
+ *  @date 21/10/08
  *  @copyright (c) 2008 â€“ UMONS - Numediart
  *  
  *  MediaCycle of University of Mons â€“ Numediart institute is 
@@ -42,7 +43,7 @@ int set_my_thread_priority(int priority) {
 	memset(&sp, 0, sizeof(struct sched_param));
     sp.sched_priority=priority;
     if (pthread_setschedparam(pthread_self(), SCHED_RR, &sp)  == -1) {
-        //printf(ÒFailed to change priority.\nÓ);
+        //printf(â€œFailed to change priority.\nâ€);
         return -1;
     }
     return 0;
@@ -1095,8 +1096,12 @@ void ACAudioFeedback::processAudioEngineSamplePosition(int _loop_slot, int *_pre
 	size = use_sample_end[_loop_slot] - use_sample_start[_loop_slot];
 
 	// DT : made sample_start and end actually useful
-	int sample_start = ((ACAudio*) media_cycle->getLibrary()->getMedia(loop_id))->getSampleStart();
-	int sample_end = ((ACAudio*) media_cycle->getLibrary()->getMedia(loop_id))->getSampleEnd();
+	// XS : added tmp_audio_ptr to check if loop exists
+	// XS TODO : what to do if it does not ? (currently just return)
+	ACAudio* tmp_audio_ptr = static_cast<ACAudio*> (media_cycle->getLibrary()->getMedia(loop_id));
+	if (!tmp_audio_ptr) return;
+	int sample_start = tmp_audio_ptr->getSampleStart();
+	int sample_end = tmp_audio_ptr->getSampleEnd();
 	int sample_size = sample_end - sample_start;
 
 	switch (loop_synchro_mode[_loop_slot]) {
@@ -1660,7 +1665,11 @@ int ACAudioFeedback::createSourceWithPosition(int loop_id, float x, float y, flo
 	// local_bpm = 120;
 	// local_key = 65;
 	// local_acid_type = 2;
+
 	ACAudio* tmp_audio_ptr = static_cast<ACAudio*>(media_cycle->getLibrary()->getMedia(loop_id));
+	// XS TODO : what to do if tmp_audio_ptr does not exist ? (currently just return -1)
+	// see remark at the en of this method : what is the return value when it does not work ? (1 is weird !!)
+	if (!tmp_audio_ptr) return -1;
 	int samplesize = tmp_audio_ptr->getNFrames();
 	float* dataf = 0;// = new float[samplesize];
 	dataf = tmp_audio_ptr->getSamples();
@@ -1823,6 +1832,7 @@ int ACAudioFeedback::createSourceWithPosition(int loop_id, float x, float y, flo
 		return 0;
 	}
 	else{
+		// XS TODO do we really want to return 1 if it worked ?
 		std::cerr << "ACAudioFeedback: couldn't create source for loop id " << loop_id << std::endl;
 		return 1;
 	}
@@ -1971,7 +1981,7 @@ int ACAudioFeedback::createExtSource(float* _buffer, int _length){
 
 	alGenSources(1, &ext_loop_source);
 
-	// On attache le tampon contenant les Žchantillons audio ˆ la source
+	// On attache le tampon contenant les Ã©chantillons audio Ã  la source
 	alSourcei(ext_loop_source, AL_BUFFER, ext_loop_buffer);
 	alSourcei(ext_loop_source, AL_LOOPING, AL_TRUE);
 
@@ -2350,7 +2360,7 @@ int ACAudioFeedback::setSourceVelocity(int loop_id, float velocity)
  if ((ret=task_policy_set(mach_task_self(),
  TASK_CATEGORY_POLICY, (thread_policy_t)&tcatpolicy,
  TASK_CATEGORY_POLICY_COUNT)) != KERN_SUCCESS) {
- //fprintf(stderr, Òset_my_task_policy() failed.\nÓ);
+ //fprintf(stderr, â€œset_my_task_policy() failed.\nâ€);
  return 0;
  }
  return 1;
@@ -2368,7 +2378,7 @@ int ACAudioFeedback::setSourceVelocity(int loop_id, float velocity)
  if ((ret=thread_policy_set(mach_thread_self(),
  THREAD_TIME_CONSTRAINT_POLICY, (thread_policy_t)&ttcpolicy,
  THREAD_TIME_CONSTRAINT_POLICY_COUNT)) != KERN_SUCCESS) {
- //fprintf(stderr, Òset_realtime() failed.\nÓ);
+ //fprintf(stderr, â€œset_realtime() failed.\nâ€);
  return 0;
  }
  return 1;
