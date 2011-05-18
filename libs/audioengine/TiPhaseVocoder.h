@@ -59,6 +59,10 @@ extern "C" {
         double currentSample; //double pour éviter l'accumulation d'erreurs d'arrondi
         int flagLoop;
         
+        //Phase locking
+        int lockingMode;
+        int *peaksIndex;
+        
         int winSize;
         int hopSize;
         double speed;//> 1 = faster, 0 < . < 1 = slower, < 0 = backward
@@ -85,8 +89,8 @@ extern "C" {
         int bufferPos;
         double *buffer;
 		
-		// SD
-		short *samples;
+        // SD
+        short *samples;
 
     } TiPhaseVocoder;
 
@@ -97,6 +101,7 @@ int TiWindowingS2D(short *data, double *dataw, int winsize,double *window);
 int setCurrentSample(TiPhaseVocoder *tpv,double value) ;
 int setCurrentSampleToNext(TiPhaseVocoder *tpv) ;
 int initPV(TiPhaseVocoder *tpv);
+int setMode(TiPhaseVocoder *tpv, int mode);
 int setWinsize(TiPhaseVocoder* tpv, int winsize);
 int reallocCOMPLEX(COMPLEXD *x,int size);
 int switchCOMPLEX(COMPLEXD* x, COMPLEXD* y);
@@ -107,12 +112,14 @@ int computeAmplitudeAndPhase(COMPLEXD *complexfft, int nfft);
 int computeDeltaPhase(TiPhaseVocoder *tpv);
 int computeOutputFrame(TiPhaseVocoder *tpv);
 int doOLA(TiPhaseVocoder* tpv);
+int findPeaks(double *data, int *datapeaks, int winsize, int neighbours);
+int findMax(double *data, int winsize, int init);
 int openFile(TiPhaseVocoder* tpv, const char* filename);
 int closeFile(TiPhaseVocoder* tpv);
 
 // SD
 int setSamples(TiPhaseVocoder* tpv, short* datashort, int size, int freq);
-	
+
 #ifdef	__cplusplus
 }
 #endif

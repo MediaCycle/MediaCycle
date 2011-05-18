@@ -32,7 +32,7 @@
 #include "TiPhaseVocoder.h"
 
 double TiGetHanningSample (int k, int winsize) {
-  return ( 0.5 * (1.0 - cos (2.0*M_PI*(double)k/(double)(winsize-1))) );
+  return ( 0.5 * (1.0 - cos (2.0*M_PI*(double)k/(double)(winsize))) );
 }
 
 int TiCreateHanningWindow(double *win,int winsize) {
@@ -103,7 +103,20 @@ int initPV(TiPhaseVocoder *tpv){
     tpv->bufferPos = 0;
     tpv->buffer = 0;
     tpv->currentFrame = -100;
+    tpv->lockingMode = 1;
+    tpv->peaksIndex = 0;
+    
     return 0;
+}
+
+int setLockingMode(TiPhaseVocoder *tpv, int mode) {
+    //adapt boundaries as needed (for now, two possible working modes : 0 and 1)
+    if (mode >=0 && mode < 2) { 
+        tpv->lockingMode = mode;
+        return 0;
+    } else {
+        return -1;
+    }
 }
 
 int setWinsize(TiPhaseVocoder *tpv, int winsize) {
@@ -124,6 +137,10 @@ int setWinsize(TiPhaseVocoder *tpv, int winsize) {
 
         tpv->winSize = winsize;
         tpv->hopSize = (int) winsize/HOPSIZEFACTOR;
+        
+        //peaks for the phase locking
+        //TODO : alloc only if lockingMode==1 (although it is not very memory intensive, one frame of int ...)
+        tpv->peaksIndex = (int *) realloc(tpv->peaksIndex, (tpv->winSize) * sizeof (int));
     }
  
     return 0;
@@ -177,8 +194,8 @@ int getCurrentFrame(TiPhaseVocoder *tpv,int flagResetPhase) {
     currentFrame = (int) tmppos;
     tpv->factor = tmppos - currentFrame;//wheighting factor between leftFrame and rightFrame (0 < . < 1)
     
-	// SD
-	int toread;
+    // SD
+    int toread;
 	
     if (currentFrame != tpv->currentFrame) {
         if (currentFrame == tpv->currentFrame+1) {
@@ -329,56 +346,112 @@ int computeDeltaPhase(TiPhaseVocoder *tpv) {
     return 0;
 }
 int computeOutputFrame(TiPhaseVocoder *tpv) {
-    //NB : ifft(Z) == fft(Z'*j)'*j/NFFT
+	//NB : ifft(Z) == fft(Z'*j)'*j/NFFT
     // z = x+j*y --> Re(ifft(x,y)) = Im(fft(y,x))/NFFT (cf.matlab & SPTK)
-    int k;
-    double complfactor;
+    int k, npeaks, p, pindex, start, stop;
+    double complfactor, globaldphase;
 
     complfactor = 1 - tpv->factor;
     //printf("factor : %g\n",tpv->factor);
     //A*exp(j*P) = z = (x,y) --> (y,x)
-    tpv->outputAmplitude[0] = complfactor * tpv->leftFFT.re[0] + tpv->factor * tpv->rightFFT.re[0];
+
+    //output amplitude computation
+    for (k = 0; k <= tpv->winSize / 2; k++) {
+        // interpolation doesn't seem to improve the result that much on music
+        // TODO: compare w/ vs w/o interpolation for ambient noise
+        tpv->outputAmplitude[k] = complfactor * tpv->leftFFT.re[k] + tpv->factor * tpv->rightFFT.re[k]; //tpv->leftFFT.re[k];//
+    }
+
+    //given amplitude & phase : compute Re and Im part of the fft
     tpv->outputFFT.re[0] = tpv->outputAmplitude[0] * cos(tpv->outputPhase[0]);
     tpv->outputFFT.im[0] = tpv->outputAmplitude[0] * sin(tpv->outputPhase[0]);
 
-    tpv->outputAmplitude[tpv->winSize/2] = complfactor * tpv->leftFFT.re[tpv->winSize/2] + tpv->factor * tpv->rightFFT.re[tpv->winSize/2];
-    tpv->outputFFT.re[tpv->winSize/2] = tpv->outputAmplitude[tpv->winSize/2] * cos(tpv->outputPhase[tpv->winSize/2]);
-    tpv->outputFFT.im[tpv->winSize/2] = tpv->outputAmplitude[tpv->winSize/2] * sin(tpv->outputPhase[tpv->winSize/2]);
+    tpv->outputFFT.re[tpv->winSize / 2] = tpv->outputAmplitude[tpv->winSize / 2] * cos(tpv->outputPhase[tpv->winSize / 2]);
+    tpv->outputFFT.im[tpv->winSize / 2] = tpv->outputAmplitude[tpv->winSize / 2] * sin(tpv->outputPhase[tpv->winSize / 2]);
 
-    for(k=1;k<tpv->winSize/2;k++) {
-        tpv->outputAmplitude[k] = complfactor * tpv->leftFFT.re[k] + tpv->factor * tpv->rightFFT.re[k];
-        //tpv->outputFFT.re[k] = tpv->outputAmplitude[k] * sin(tpv->outputPhase[k]); //!!! sin to get the imaginary part (this is not a mistake)
-        //tpv->outputFFT.im[k] = tpv->outputAmplitude[k] * cos(tpv->outputPhase[k]); // !!! cos to get the real part (this is not a mistake)
+    for (k = 1; k < tpv->winSize / 2; k++) {
         tpv->outputFFT.re[k] = tpv->outputAmplitude[k] * cos(tpv->outputPhase[k]);
         tpv->outputFFT.im[k] = tpv->outputAmplitude[k] * sin(tpv->outputPhase[k]);
-        tpv->outputFFT.re[tpv->winSize-k] = tpv->outputFFT.re[k];
-        tpv->outputFFT.im[tpv->winSize-k] = -tpv->outputFFT.im[k];
-        
+        tpv->outputFFT.re[tpv->winSize - k] = tpv->outputFFT.re[k];
+        tpv->outputFFT.im[tpv->winSize - k] = -tpv->outputFFT.im[k];
+
         //transparent reconstruction :
         //tpv->outputFFT.re[k] = tpv->leftFFT.im[k];
         //tpv->outputFFT.im[k] = tpv->leftFFT.re[k];
     }
 
-    //fft(y,x)
-    //for (k=2044;k<2052;k++)
-    //    printf("fft : %f +i* %f\n",tpv->outputFFT.re[k],tpv->outputFFT.im[k]);
-    //printf("\n");
+    //Get the real data from the symetrical fft
+    ifftr(tpv->outputFFT.re, tpv->outputFFT.im, tpv->winSize);
 
-    ifftr(tpv->outputFFT.re,tpv->outputFFT.im,tpv->winSize);
-    //ifftr(tpv->outputFFT.re,tpv->outputFFT.im,tpv->winSize);
-
-    //for (k=2044;k<2052;k++)
-    //    printf("ifft : %f +i* %f\n",tpv->outputFFT.im[k]/tpv->winSize,tpv->outputFFT.re[k]/tpv->winSize);
-    //printf("\n");
-
-    //Im()/NFFT
-    for(k=0;k<tpv->winSize;k++) {
-        //tpv->output[k] = tpv->outputFFT.im[k]/tpv->winSize;
+    for (k = 0; k < tpv->winSize; k++) {
+        //if division by NFFT is needed, it can be done here (for now it is already done in ifftr)
         tpv->output[k] = tpv->outputFFT.re[k];
     }
+    
+        //output phase computation
+    switch (tpv->lockingMode) {
+        case 0:
+            //normal phase vocoder
+            for (k = 0; k < tpv->winSize / 2 + 1; k++) {
+                tpv->outputPhase[k] += tpv->dphase[k];
+            }
+            break;
+        case 1:
+            //phase-locked vocoder
+            //This phase locking is probably patented : http://www.google.com/patents?id=kaAEAAAAEBAJ
+            //Therefore I suppose it should either be licenced or removed
+            //in any case, it does not improve results when slowing down noisy ambient sound (cf. evs wave files)
+            //so we might as well NOT use it and find some other interesting and patent-free approach
+            npeaks = findPeaks(tpv->outputAmplitude, tpv->peaksIndex, tpv->winSize / 2 + 1, 2);
+            if (npeaks > 0) {
+                p = 0;
+                start = 0;
+                do {
+                    pindex = tpv->peaksIndex[p];
+                    tpv->outputPhase[pindex] += tpv->dphase[pindex];
+                    globaldphase = tpv->outputPhase[pindex] - tpv->leftFFT.im[pindex];
 
-    for(k=0;k<tpv->winSize/2+1;k++) {
-        tpv->outputPhase[k] += tpv->dphase[k];
+                    if (p + 1 < npeaks) {
+                        stop = (tpv->peaksIndex[p + 1] + pindex) / 2;
+                    } else {
+                        stop = tpv->winSize / 2;
+                    }
+
+                    for (k = start; k < pindex; k++) {
+                        tpv->outputPhase[k] = tpv->leftFFT.im[k] + globaldphase;
+                    }
+                    for (k = pindex + 1; k <= stop; k++) {
+                        tpv->outputPhase[k] = tpv->leftFFT.im[k] + globaldphase;
+                    }
+                    start = stop + 1;
+                    p++;
+                } while (stop < tpv->winSize / 2);
+            }
+            break;
+/*      case 2:
+            //hybrid mode (searching for patent/previous art)
+            //this mode eats up 5 more percent of CPU (~4-5% becomes ~10-11% when in use)
+            for (k = 0; k < tpv->winSize - tpv->hopSize; k++) {
+                    tpv->randdata[k] = tpv->randdata[k + tpv->hopSize];
+            }
+            //this part of the code takes more than 5% of CPU (i.e. it *doubles* the CPU usage)
+            //since it's only about generating random numbers + fft + getPhase
+            //we could pre-compute those phase values (e.g. for 5 seconds of noise),
+            //store them in a file and load them whenever needed
+            //(+ loop if sound is longer than 5s)
+            // that has been tested in Matlab and works fine
+            gauss_drand(tpv->randdata + tpv->winSize - tpv->hopSize - 1, tpv->hopSize); //1-2% CPU
+            TiWindowingD2D(tpv->randdata, tpv->randFFT.re, tpv->winSize, tpv->hanning); //1% CPU
+            memset(tpv->randFFT.im, 0, tpv->winSize * sizeof (double)); //~0%
+            fftr(tpv->randFFT.re, tpv->randFFT.im, tpv->winSize); //2-3% CPU
+            computePhase(&tpv->randFFT, tpv->winSize); //<1% CPU
+            for (k = 0; k < tpv->winSize / 2 + 1; k++) {
+                    tpv->outputPhase[k] = tpv->randFFT.im[k];
+            }
+            break;
+ */
+        default:
+            printf("error : invalid mode (%d)\n", tpv->lockingMode);
     }
 
     return 0;
@@ -390,6 +463,63 @@ int resetPhase(TiPhaseVocoder *tpv) {
         tpv->outputPhase[k] = tpv->leftFFT.im[k];
 }
 
+int findPeaks(double *data, int *datapeaks, int winsize, int neighbours) {
+	int start, stop, candidate, p = 0, k = 0, flag = 0;
+
+	//This algorithm can certainly be improved (SOA C/C++ in peak detection ?)
+	while (k < winsize) {
+		start = k - neighbours;
+		stop = k + neighbours;
+		if (start < 0) start = 0;
+		if (stop >= winsize) stop = winsize - 1;
+
+		//slight optimization : if (k < candidate) in previous loop
+		//then we look for max in [candidate-neigh:candidate+neigh]
+		//but the [cand-neigh:candidate] part has already been made
+		//in the previous loop --> flag to avoid redoing the max lookup
+		//gain 0.2s on 100000 iterations (3,1s without vs. 2,9s with)
+		//which means a 6% improvement in time usage (pretty useless ?)
+		if (flag) {
+			candidate = findMax(data + start, stop - start + 1, candidate - start) + start;
+		} else {
+			candidate = findMax(data + start, stop - start + 1, 0) + start;
+		}
+		if (candidate == k) {
+			datapeaks[p++] = k;
+			k += neighbours + 1;
+		} else {
+			if (k < candidate) {
+				k = candidate;
+				flag = 1;
+			} else {
+				k++;
+			}
+		}
+	}
+
+	return p; //returns number of peaks detected
+}
+
+int findMax(double *data, int winsize, int init) {
+	int k, index;
+	double max;
+
+	if (init > 0 && init < winsize) {
+		index = init;
+		max = data[init];
+	} else {
+		index = 0;
+		max = data[0];
+	}
+	for (k = index + 1; k < winsize; k++) {
+		if (data[k] > max) {
+			index = k;
+			max = data[k];
+		}
+	}
+
+	return index;
+}
 
 int doOLA(TiPhaseVocoder *tpv) {
     //the samples generated by this function are located in tpv->buffer[tpv->bufferPos-tpv->hopSize:tpv->bufferPos-1]

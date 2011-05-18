@@ -1809,7 +1809,7 @@ int ACAudioFeedback::createSourceWithPosition(int loop_id, float x, float y, flo
 		//current_buffer[loop_slot] = 0;
 
 		loop_synchro_mode[loop_slot] = ACAudioEngineSynchroModeAutoBeat;
-		loop_scale_mode[loop_slot] = ACAudioEngineScaleModeResample; //CF: the Vocode mode sounds dirty, the Resample mode introduces a click at the beginning
+		loop_scale_mode[loop_slot] = ACAudioEngineScaleModeVocode; //ACAudioEngineScaleModeResample; //CF: the Vocode mode sounds dirty, the Resample mode introduces a click at the beginning
 
 		if (!use_bpm[loop_slot]) {
 			loop_synchro_mode[loop_slot] = ACAudioEngineSynchroModeNone;
