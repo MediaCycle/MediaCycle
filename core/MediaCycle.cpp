@@ -597,6 +597,7 @@ void MediaCycle::goForward() { mediaBrowser->goForward(); }
 void MediaCycle::storeNavigationState() { mediaBrowser->storeNavigationState(); }
 void MediaCycle::setClusterNumber(int n) { mediaBrowser->setClusterNumber(n); }
 void MediaCycle::setWeight(int i, float weight) { mediaBrowser->setWeight(i, weight); }
+void MediaCycle::setWeightVector(std::vector<float> fw) { mediaBrowser->setWeightVector(fw); }
 vector<float> MediaCycle::getWeightVector(){return mediaBrowser->getWeightVector();}
 float MediaCycle::getWeight(int i){return mediaBrowser->getWeight(i);}
 
@@ -714,6 +715,33 @@ TiXmlHandle MediaCycle::readXMLConfigFileHeader(string _fname) {
 	int mt; //ACMediaType
 	tmp2 >> mt;
 	this->setMediaType(ACMediaType(mt));	
+	
+	// features vector weights
+	// XS TODO check that it equals the number of media
+	int n_feat=-1;
+	TiXmlText* FeaturesWeightsText=rootHandle.FirstChild( "FeaturesWeights" ).FirstChild().Text();
+	TiXmlElement* FeaturesWeightsNode=rootHandle.FirstChild( "FeaturesWeights" ).Element();
+	FeaturesWeightsNode->QueryIntAttribute("NumberOfFeatures", &n_feat);
+	if (n_feat < 0)
+		throw runtime_error("corrupted XML file, wrong number of features weights");
+
+	std::stringstream tmp3;
+	tmp3 << FeaturesWeightsText->ValueStr();
+	vector<float> fw;
+	try {
+		for (int j=0; j<n_feat; j++) {
+			// XS TODO add tests !! on number of features
+			float w;
+			tmp3 >> w;
+			fw.push_back(w);
+		}
+		this->setWeightVector(fw);
+	}
+	catch (...) {
+		// attempt to catch potential problems and group them
+		throw runtime_error("corrupted XML file, error reading feature weight");
+	}
+	
 	return rootHandle;
 }
 
@@ -761,7 +789,6 @@ int MediaCycle::readXMLConfigFile(string _fname) {
 	this->readXMLConfigFileCore (rootHandle);
 }
 
-// XS TODO check if features normalized ?
 // XS TODO what else to put in the config ?
 // XS TODO separate in header/core/plugins ?
 void MediaCycle::saveXMLConfigFile(string _fname) {		
@@ -791,8 +818,21 @@ void MediaCycle::saveXMLConfigFile(string _fname) {
     MC_e_media_type->LinkEndChild( MC_t_mt );  
 	
 	// "medias and features"
-	// XS TODO: will the number of media be correct ?
-	
+	TiXmlElement* MC_e_features_weights = new TiXmlElement("FeaturesWeights");		
+    MC_e_root->LinkEndChild( MC_e_features_weights );  
+	vector<float> features_weights = this->getWeightVector();
+	MC_e_features_weights->SetAttribute("NumberOfFeatures", features_weights.size());
+
+	// concatenate feature weights separated by a " "
+	std::string sfw;
+	std::stringstream tmp;
+	for (unsigned int j=0; j<features_weights.size(); j++) {
+		tmp << features_weights[j]<< " " ;
+	}
+	sfw = tmp.str();
+	TiXmlText* MC_t_features_weights = new TiXmlText(sfw.c_str());
+	MC_e_features_weights->LinkEndChild( MC_t_features_weights );  		
+
 	TiXmlElement* MC_e_medias = new TiXmlElement("Medias");		
 	this->mediaLibrary->saveCoreXMLLibrary(MC_e_root, MC_e_medias);
 	MC_e_root->LinkEndChild( MC_e_medias );  

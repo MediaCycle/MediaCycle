@@ -605,6 +605,7 @@ void ACMediaBrowser::libraryContentChanged(int needsCluster) {
 void ACMediaBrowser::initializeFeatureWeights(){
 	
 	int fc = mLibrary->getMedia(0)->getNumberOfFeaturesVectors();
+	if (mFeatureWeights.size() == fc) return; // have been set by config file
 	mFeatureWeights.resize(fc);
 	
 	// XS TODO if (config_file)...

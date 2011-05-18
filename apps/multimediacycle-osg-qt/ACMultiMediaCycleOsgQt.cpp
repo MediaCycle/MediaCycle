@@ -208,7 +208,11 @@ void ACMultiMediaCycleOsgQt::createMediaCycle(ACMediaType _media_type, ACBrowser
 // use with care; there should only be one instance of mediacycle per application
 void ACMultiMediaCycleOsgQt::destroyMediaCycle(){
 	#if defined (SUPPORT_AUDIO)
-		if (audio_engine) {delete audio_engine; audio_engine = 0;}
+		if (audio_engine) {
+			audio_engine->stopAudioEngine(); 
+			delete audio_engine; 
+			audio_engine = 0;
+		}
 	#endif //defined (SUPPORT_AUDIO)
 	delete media_cycle;
 }
@@ -242,6 +246,10 @@ bool ACMultiMediaCycleOsgQt::readXMLConfig(string _filename){
 	
 	std::cout << "Opening XML config file: '" << _filename << std::endl;
 
+	//XS TODO: this is cut and paste from MediaCycle.
+	// the problem is that we have no mediacycle instance
+	// we need to read the XML file first.
+	
 	// 1) read header info
 	//TiXmlHandle rootHandle = this->readXMLConfigHeader(_filename);
 	try {
@@ -281,6 +289,34 @@ bool ACMultiMediaCycleOsgQt::readXMLConfig(string _filename){
 		else{
 			throw runtime_error("corrupted XML file, no media type");
 		}
+		
+		// features vector weights
+		// XS TODO check that it equals the number of media
+		int n_feat=-1;
+		vector<float> fw;
+		
+		TiXmlElement* FeaturesWeightsNode=rootHandle.FirstChild( "FeaturesWeights" ).Element();
+		if (FeaturesWeightsNode) {
+			TiXmlText* FeaturesWeightsText=rootHandle.FirstChild( "FeaturesWeights" ).FirstChild().Text();
+			FeaturesWeightsNode->QueryIntAttribute("NumberOfFeatures", &n_feat);
+			if (n_feat < 0)
+				throw runtime_error("corrupted XML file, wrong number of features weights");
+			std::stringstream tmp3;
+			tmp3 << FeaturesWeightsText->ValueStr();
+			try {
+				for (int j=0; j<n_feat; j++) {
+					// XS TODO add tests !! on number of features
+					float w;
+					tmp3 >> w;
+					fw.push_back(w);
+				}
+			}
+			catch (...) {
+				// attempt to catch potential problems and group them
+				throw runtime_error("corrupted XML file, error reading feature weight");
+			}
+		}
+			
 		// 2) change mediacycle settings accordingly
 		if (this->media_cycle){ 
 			this->changeMediaType(this->media_type);
@@ -288,11 +324,16 @@ bool ACMultiMediaCycleOsgQt::readXMLConfig(string _filename){
 		}
 		else
 			createMediaCycle(this->media_type, this->browser_mode);
-				
+		
+
 		// 3) read the meat of media_cycle (features and plugins)
 		media_cycle->readXMLConfigFileCore(rootHandle);
 		media_cycle->readXMLConfigFilePlugins(rootHandle);
 		
+		// XS TODO check this.
+		// should be overwritten if dimensions do not match
+		media_cycle->setWeightVector(fw);
+
 		// XML features are not normalized, so we force normalization here
 		media_cycle->normalizeFeatures(1);
 		
