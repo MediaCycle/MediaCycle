@@ -103,8 +103,9 @@ int initPV(TiPhaseVocoder *tpv){
     tpv->bufferPos = 0;
     tpv->buffer = 0;
     tpv->currentFrame = -100;
-    tpv->lockingMode = 1;
+    tpv->lockingMode = 0;
     tpv->peaksIndex = 0;
+    tpv->normalizationFactor = 1/1.5;//corresponds to a shift of 1/4 between each hanning-windowed frame. 1/2.0 if shift=1/8
     
     return 0;
 }
@@ -543,11 +544,11 @@ int doOLA(TiPhaseVocoder *tpv) {
     }
 
     for (k=tpv->bufferPos,m=0;k<tpv->winSize;k++,m++) {
-        tpv->buffer[k] += (tpv->output[m]*tpv->hanning[m]);
+        tpv->buffer[k] += (tpv->output[m]*tpv->hanning[m])*tpv->normalizationFactor;
     }
 
     for(k=0;m<tpv->winSize;k++,m++){
-        tpv->buffer[k] += tpv->output[m]*tpv->hanning[m];
+        tpv->buffer[k] += tpv->output[m]*tpv->hanning[m]*tpv->normalizationFactor;
     }
 
     tpv->bufferPos += tpv->hopSize;

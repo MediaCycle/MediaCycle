@@ -1269,6 +1269,8 @@ void ACAudioFeedback::processAudioEngineResynth(int _loop_slot, int _prev_sample
 				int k;
 				int kk;
 				float *os;
+				double tmpsample, thmin=-32768, thmax=32767;
+
 				kk = 0;
 				//int niter = output_buffer_size / 512;
 				int niter = output_buffer_size / (tpv_winsize / 4); //tpv[_loop_slot].hopSize;
@@ -1304,7 +1306,9 @@ void ACAudioFeedback::processAudioEngineResynth(int _loop_slot, int _prev_sample
 					if (startbuffer >= 0) {
 						//datapointer = tpv.buffer+startbuffer; tpv.hopSize;
 						for(k=0;k<tpv[_loop_slot].hopSize;k++) {
-							_output_buffer[kk++] = *((double*)tpv[_loop_slot].buffer+startbuffer+k); ///2;
+							tmpsample = *((double*)tpv[_loop_slot].buffer+startbuffer+k);
+							tmpsample = std::min(std::max(tmpsample, thmin), thmax);
+							_output_buffer[kk++] = (short) tmpsample; ///2;
 						}
 					}
 					else {
@@ -1312,11 +1316,15 @@ void ACAudioFeedback::processAudioEngineResynth(int _loop_slot, int _prev_sample
 						//if (tpv.bufferPos > 0)
 						//	tpv.buffer; tpv.bufferPos;
 						for(k=0;k<-startbuffer;k++) {
-							_output_buffer[kk++] = *((double*)tpv[_loop_slot].buffer+startbuffer+tpv[_loop_slot].winSize+k); ///2;
+							tmpsample = *((double*)tpv[_loop_slot].buffer+startbuffer+k);
+							tmpsample = std::min(std::max(tmpsample, thmin), thmax);
+							_output_buffer[kk++] = (short) tmpsample; ///2;
 						}
 						if (tpv[_loop_slot].bufferPos > 0) {
 							for(k=0;k<tpv[_loop_slot].bufferPos;k++) {
-								_output_buffer[kk++] = *((double*)tpv[_loop_slot].buffer+k); ///2;
+								tmpsample = *((double*)tpv[_loop_slot].buffer+startbuffer+k);
+								tmpsample = std::min(std::max(tmpsample, thmin), thmax);
+								_output_buffer[kk++] = (short) tmpsample; ///2;
 							}
 						}
 					}

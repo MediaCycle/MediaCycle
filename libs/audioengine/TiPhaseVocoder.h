@@ -68,6 +68,7 @@ extern "C" {
         double speed;//> 1 = faster, 0 < . < 1 = slower, < 0 = backward
 
         double factor;// 0<= factor < 1 = currentSample/hopsize - (int) (currentSample/hopsize)
+        double normalizationFactor;
 
         long currentFrame;
         double *hanning;
