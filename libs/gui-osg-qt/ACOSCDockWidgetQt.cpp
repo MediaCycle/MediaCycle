@@ -229,7 +229,7 @@ int ACOSCDockWidgetQt::process_mess(const char *path, const char *types, lo_arg 
 		else if(tag.find("/released",0)!= string::npos)
 		{
 			std::cout << "OSC message: '" << tag << "'" << std::endl;
-			media_cycle->resetPointers();//CF temp: should be removePointer
+			media_cycle->removePointer(id);//CF hack
 			//Ugly
 			osg_view->getHUDRenderer()->preparePointers();
 			media_cycle->setNeedsDisplay(true);
@@ -379,6 +379,8 @@ int ACOSCDockWidgetQt::process_mess(const char *path, const char *types, lo_arg 
 		}
 		else if(tag.find("/muteall",0)!= string::npos)
 		{
+			if(this->getMediaType()==MEDIA_TYPE_AUDIO)
+				media_cycle->resetPointers(); //CF hack dirty!
 			media_cycle->muteAllSources();
 		}
 		else if(tag.find("/bpm",0)!= string::npos)

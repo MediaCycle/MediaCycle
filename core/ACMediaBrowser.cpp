@@ -1152,7 +1152,7 @@ void ACMediaBrowser::updateNextPositionsPropeller() {
 			r = 0.5f;
 		}
 		r /= 2.0f;
-		
+
 		// dt = 1;
 		dt = compute_distance(mLibrary->getMedia((*node).getMediaId())->getAllFeaturesVectors(), mClusterCenters[ci], mFeatureWeights, false) / 2.0 * 10.0;
 		if (dtmax[ci]>dtmin[ci]) {
@@ -1502,6 +1502,17 @@ void ACMediaBrowser::addPointer(int _id) {
 	}
 	else
 		std::cout << "ACMediaBrowser::addPointer: pointer of id " << _id << " already created" << std::endl;
+}
+
+void ACMediaBrowser::removePointer(int _id) {
+	ACPointers::iterator it = mPointerAttributes.find(_id);
+	if (it !=  mPointerAttributes.end()){ //existing
+		//CF do we need first to desactivate the closest node of the pointer to be removed, if in audiohover mode?
+		/*ACMediaNode closest = getMediaNode(it->second->closestNode());
+		if (closest.getActivity() == 2)
+			toggleSourceActivity(closest,0);*/
+		mPointerAttributes.erase(it);
+	}
 }
 
 // CF prepareNodes ? (cf. OSG)

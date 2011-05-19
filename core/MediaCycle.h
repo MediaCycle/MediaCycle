@@ -198,6 +198,7 @@ public:
 	ACPointer* getPointerFromId(int i); // for use when parsing pointers from the ID set by the input device
 	void resetPointers();
 	void addPointer(int p_id);
+	void removePointer(int p_id);
 
 	// == LABELS on VIEW
  	int getLabelSize();

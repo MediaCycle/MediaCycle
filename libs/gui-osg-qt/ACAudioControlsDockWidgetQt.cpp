@@ -56,8 +56,10 @@ ACAudioControlsDockWidgetQt::~ACAudioControlsDockWidgetQt(){
 #if defined (SUPPORT_AUDIO)
 void ACAudioControlsDockWidgetQt::on_pushButtonMuteAll_clicked()
 {
-	if (media_cycle)
+	if (media_cycle){
+		media_cycle->resetPointers();//CF hack dirty
 		media_cycle->muteAllSources();
+	}
 }
 
 void ACAudioControlsDockWidgetQt::on_pushButtonQueryRecord_toggled()
@@ -80,34 +82,34 @@ void ACAudioControlsDockWidgetQt::on_pushButtonQueryRecord_toggled()
 		else
 		{
 			if (audio_engine->isCaptureAvailable())
-			{	
-				audio_engine->stopCapture();	
+			{
+				audio_engine->stopCapture();
 				std::cout <<"Recording done."<<std::endl;
 				ui.pushButtonQueryReplay->setEnabled(true);
 				ui.pushButtonQueryKeep->setEnabled(true);
 				ui.pushButtonQueryReferent->setEnabled(true);
-			}	
-		}	
-	}	
-}	
+			}
+		}
+	}
+}
 
 void ACAudioControlsDockWidgetQt::on_pushButtonQueryReplay_clicked()
 {
-	
+
 }
 
 // Pops up a modal window for saving the query as wavefile and add it to the library
 void ACAudioControlsDockWidgetQt::on_pushButtonQueryKeep_clicked()
 {
 	//...
-	
+
 	//CF then only re-recording can re-enable the keeping
 	ui.pushButtonQueryKeep->setEnabled(false);
 }
 
 void ACAudioControlsDockWidgetQt::on_pushButtonQueryReferent_clicked()
 {
-	
+
 }
 
 void ACAudioControlsDockWidgetQt::on_comboBoxWaveformBrowser_activated(const QString & text)
@@ -118,7 +120,7 @@ void ACAudioControlsDockWidgetQt::on_comboBoxWaveformBrowser_activated(const QSt
     	osg_view->getBrowserRenderer()->setAudioWaveformType(AC_BROWSER_AUDIO_WAVEFORM_NONE);
     else if (text == "Classic")
     	osg_view->getBrowserRenderer()->setAudioWaveformType(AC_BROWSER_AUDIO_WAVEFORM_CLASSIC);
-    osg_view->setFocus();	
+    osg_view->setFocus();
 }
 
 // XS TODO : recuperate these from Audiocycle ?
@@ -147,7 +149,7 @@ void ACAudioControlsDockWidgetQt::on_comboBoxWaveformBrowser_activated(const QSt
 //	{
 //		audio_engine->setLoopSynchroMode(node, ACAudioEngineSynchroModeAutoBeat);
 //		audio_engine->setLoopScaleMode(node, ACAudioEngineScaleModeResample);
-//		audio_engine->setSourcePitch(node, (float) ui.sliderPitch->value()/100.0f); 
+//		audio_engine->setSourcePitch(node, (float) ui.sliderPitch->value()/100.0f);
 //	}
 //	//}
 //	//ui.compositeOsgView->setFocus();
@@ -171,15 +173,15 @@ void ACAudioControlsDockWidgetQt::on_comboBoxWaveformBrowser_activated(const QSt
 //	else
 //	{
 //		if (audio_engine->isCaptureAvailable())
-//		{	
-//			audio_engine->stopCapture();	
+//		{
+//			audio_engine->stopCapture();
 //			std::cout <<"Recording done."<<std::endl;
 //			ui.pushButtonQueryReplay->setEnabled(true);
 //			ui.pushButtonQueryKeep->setEnabled(true);
 //			ui.pushButtonQueryReferent->setEnabled(true);
-//		}	
-//	}	
-//}	
+//		}
+//	}
+//}
 
 
 #endif //defined (SUPPORT_AUDIO)
