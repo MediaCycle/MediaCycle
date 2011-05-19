@@ -48,23 +48,23 @@ int main(int argc, char *argv[])
 	try {
 		// Adding palettes
 		//window.addControlDock("MCMediaConfig");
-		//window.addControlDock("MCOSC");				 
+		window.addControlDock("MCOSC");
 		window.addControlDock("MCBrowserControlsClusters");//"MCBrowserControlsClustersNeighbors");
 		window.addControlDock("MCAudioControls");
-		
+
 		// XS TODO
 		// this has to be called after dock controls have been added
 		// do we need to put all this code here ?
 		window.configureSettings();
-		
+
 		//	window.configurePluginDock();
-		
+
 		// Changing the about dialog (not necessary if standard MediaCycle app)
 		//window.addAboutDialog("MediaCycle");
-		
+
 		window.loadDefaultConfig(MEDIA_TYPE_AUDIO);
 		window.show();
-		
+
 	}
 	catch (const exception& e) {
 		cout << "** caught exception in main : " << e.what() << endl;
@@ -72,11 +72,11 @@ int main(int argc, char *argv[])
 	catch (...){
 		cout << "** caught undetermined exception in main" << endl;
 	}
-	
+
 	app.setOrganizationName("numediart");
 	app.setOrganizationDomain("numediart.org");
-	app.setApplicationName("MediaCycle");
-	
+	app.setApplicationName("AudioCycle");
+
     return app.exec();
 }
 

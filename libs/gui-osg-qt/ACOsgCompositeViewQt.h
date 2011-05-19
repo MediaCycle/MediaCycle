@@ -1,7 +1,7 @@
 /**
  * @brief ACOsgCompositeViewQt.h
  * @author Christian Frisson
- * @date 16/05/2011
+ * @date 19/05/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -150,6 +150,7 @@ class ACOsgCompositeViewQt : public osgViewer::CompositeViewer, public QGLWidget
 		// needs to be called when tracks positions are changed
 		void updateTransformsFromTimeline( double frac);
 		ACOsgBrowserRenderer* getBrowserRenderer(){return browser_renderer;};
+		ACOsgHUDRenderer* getHUDRenderer(){return hud_renderer;};
 		ACOsgTimelineRenderer* getTimelineRenderer(){return timeline_renderer;};
 		ACOsgTimelineControlsRenderer* getTimelineControlsRenderer(){return timeline_controls_renderer;};
 		#if defined (SUPPORT_AUDIO)

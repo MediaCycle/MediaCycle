@@ -1,4 +1,4 @@
-/* 
+/*
  * File:   MediaCycle.h
  * Author: Alexis Moinet
  *
@@ -99,9 +99,9 @@ public:
 
     std::string getLocalDirectoryPath() {return local_directory;}
     std::string getLibName() {return libname;}
- 	
+
 	// API REQUIRED BY VISUAL and GUI
-	// 
+	//
 	int getLibrarySize();
 	std::string getMediaFileName(int i);
 	ACMediaType getMediaType(int i);
@@ -116,8 +116,7 @@ public:
 	float getCameraRotation();
 	const ACMediaNode &getMediaNode(int i);
 	int getNavigationLevel();
-	void getMouse(float *mx, float *my);
-	// 
+	//
 	void updateState();
 	void storeNavigationState();
 	float getFrac();
@@ -131,7 +130,7 @@ public:
 	void getCameraPosition(float &x, float &y);
 	void setCameraZoom(float z);
 	void setCameraRecenter();
-	// 
+	//
 	void normalizeFeatures();
 	void openLibrary(std::string path);
 	void libraryContentChanged();
@@ -143,15 +142,15 @@ public:
 	void setClusterNumber(int n);
 	void setWeight(int i, float weight);
 	void setForwardDown(int i);
-	// 
+	//
 	void setAutoPlay(int i);
 	void setClickedNode(int i);
 	void setClosestNode(int i);
 	int getClosestNode();
-	// 
+	//
 	void pickedObjectCallback(int pid);
 	void hoverObjectCallback(int pid);
-	void hoverCallback(float x, float y);
+	void hoverCallback(float x, float y, int p_id = 0);
 	void muteAllSources();
 	//
 	void* hasBrowser();
@@ -159,7 +158,7 @@ public:
 	void setNeighborhoodsMethodPlugin(std::string pluginName);
 	void setPositionsPlugin(std::string pluginName);
 	//	int addPluginLibrary(std::string aPluginPath);
-	
+
 	// LABELS on VIEW
 	int getLabelSize();
 	std::string getLabelText(int i);
@@ -167,16 +166,16 @@ public:
 
 	// Get Features
 	std::vector<float> getFeaturesVectorInMedia(int i, std::string feature_name);
-	
+
 	// Playing time stamp
 	int setSourceCursor(int lid, int frame_pos);
 	int setCurrentFrame(int lid, int frame_pos);
-	
+
 	// Update audio engine sources
 	void setNeedsActivityUpdateLock(int i);
-	void setNeedsActivityUpdateRemoveMedia();	
+	void setNeedsActivityUpdateRemoveMedia();
 	std::vector<int>* getNeedsActivityUpdateMedia();
-	
+
 private:
 	int forwarddown;
 	int port;

@@ -44,8 +44,8 @@ ACAudioRecorder::ACAudioRecorder(ALCdevice* _device, int samplerate, int buffers
 	this->init();
 	if (_device) device = _device; else device = 0;
 	captureDevice = 0;
-	audio_samplerate = samplerate; 
-	audio_buffersize = buffersize; 
+	audio_samplerate = samplerate;
+	audio_buffersize = buffersize;
 }
 #endif
 #ifdef USE_PORTAUDIO
@@ -53,30 +53,34 @@ ACAudioRecorder::ACAudioRecorder(PaStream * _stream, int samplerate, int buffers
 {
 	this->init();
 	if (_stream) stream = _stream; else stream = 0;
-	audio_samplerate = samplerate; 
-	audio_buffersize = buffersize; 
+	audio_samplerate = samplerate;
+	audio_buffersize = buffersize;
 }
 #endif
 
 void ACAudioRecorder::init()
 {
-	media_cycle = 0; 
+	media_cycle = 0;
 	isRecording = false;
-	audio_samplerate = 0; 
-	audio_buffersize = 0; 
-}	
+	audio_samplerate = 0;
+	audio_buffersize = 0;
+}
 
-ACAudioRecorder::~ACAudioRecorder(){ 
-	//if (media_cycle) media_cycle = 0; 
-#ifdef USE_OPENAL	
+ACAudioRecorder::~ACAudioRecorder(){
+	//if (media_cycle) media_cycle = 0;
+#ifdef USE_OPENAL
 	//if (device) {delete device;}
 	device = 0;
 	//if (captureDevice) {delete captureDevice; }
 	captureDevice = 0;
-#endif//def USE_OPENAL		
+#endif//def USE_OPENAL
 #ifdef USE_PORTAUDIO
-	if (stream) {delete stream; stream = 0;}
-#endif	
+	if (stream)
+	{
+		//delete stream; // crashes
+		stream = 0;
+	}
+#endif
 }
 
 void ACAudioRecorder::getCaptureDeviceList(std::vector<std::string>& devices)
@@ -86,7 +90,7 @@ void ACAudioRecorder::getCaptureDeviceList(std::vector<std::string>& devices)
 #ifdef USE_OPENAL
     // Get the available capture devices
     const ALCchar* deviceList = alcGetString(0, ALC_CAPTURE_DEVICE_SPECIFIER);
-	
+
     if (deviceList)
     {
         // Extract the device names contained in the returned list
@@ -125,7 +129,7 @@ bool ACAudioRecorder::isCaptureAvailable(const char* deviceName)
 #ifdef USE_PORTAUDIO
 	return false;
 #endif
-}		
+}
 
 bool ACAudioRecorder::initCapture(const char* deviceName)
 {
@@ -138,7 +142,7 @@ bool ACAudioRecorder::initCapture(const char* deviceName)
 			std::cerr << "Audio recording is not supported by your system." << std::endl;
 			return false;
 		}
-		
+
 		// Open the device
 		// SD TODO - check this - audio_samplerate twice
 		captureDevice = alcCaptureOpenDevice(deviceName, audio_samplerate, AL_FORMAT_MONO16, audio_samplerate);
@@ -146,7 +150,7 @@ bool ACAudioRecorder::initCapture(const char* deviceName)
 		{
 			std::cerr << "Impossible to open the recording device." << std::endl;
 			return false;
-		}	
+		}
 		return true;
 	}
 	else
@@ -159,13 +163,13 @@ bool ACAudioRecorder::initCapture(const char* deviceName)
 	return false;
 #endif
 }
-	
+
 void ACAudioRecorder::shutdownCapture()
 {
 #ifdef USE_OPENAL
 	alcCaptureCloseDevice(captureDevice);
 #endif
-}	
+}
 
 void *threadCaptureEngineFunction(void *_capture_engine_arg)
 {
@@ -176,7 +180,7 @@ void ACAudioRecorder::startCapture()
 {
 #ifdef USE_OPENAL
 	initCapture(0);//CF could be switched somewhere else, so as to specify the capture device
-	
+
     // Starting the capture OpenAL-wise
     alcCaptureStart(captureDevice);
 
@@ -184,25 +188,25 @@ void ACAudioRecorder::startCapture()
 	samples.resize(0);
 
 	isRecording = true;
-	
+
 	//CF Ripped and adapted from ACAudioFeedback
-	
+
 	pthread_attr_init(&capture_engine_attr);
 	pthread_mutexattr_init(&capture_engine_cond_mutex_attr);
 	/////////// SD TODO - maybe set the process-share attribute which allows other process to see the conditional variable
 	pthread_mutex_init(&capture_engine_cond_mutex, &capture_engine_cond_mutex_attr);
-	pthread_mutexattr_destroy(&capture_engine_cond_mutex_attr);	
+	pthread_mutexattr_destroy(&capture_engine_cond_mutex_attr);
 
 	pthread_condattr_init(&capture_engine_cond_attr);
 	/////////// SD TODO
 	pthread_cond_init(&capture_engine_cond, &capture_engine_cond_attr); //
 	pthread_condattr_destroy(&capture_engine_cond_attr);
-	
+
 	pthread_mutexattr_init(&capture_engine_mutex_attr);
 	/////////// SD TODO - maybe set the process-share attribute which allows other process to see the conditional variable
 	pthread_mutex_init(&capture_engine_mutex, &capture_engine_mutex_attr);
 	pthread_mutexattr_destroy(&capture_engine_mutex_attr);
-	
+
 	capture_engine_arg = (void*)this;
 	pthread_create(&capture_engine, &capture_engine_attr, &threadCaptureEngineFunction, capture_engine_arg);
 	pthread_attr_destroy(&capture_engine_attr);
@@ -211,14 +215,14 @@ void ACAudioRecorder::startCapture()
 }
 
 void ACAudioRecorder::stopCapture()
-{	
+{
 	pthread_cancel(capture_engine);
 	isRecording = false;
 
-#ifdef USE_OPENAL		
+#ifdef USE_OPENAL
 	// Stop the recording
     alcCaptureStop(captureDevice);
-	
+
     // Empty the soundcard buffer containing possible leftover samples
     ALCint samplesAvailable;
     alcGetIntegerv(captureDevice, ALC_CAPTURE_SAMPLES, 1, &samplesAvailable);
@@ -228,17 +232,17 @@ void ACAudioRecorder::stopCapture()
         samples.resize(Start + samplesAvailable);
         alcCaptureSamples(captureDevice, &samples[Start], samplesAvailable);
     }
-	
+
     // Save the samples in an audio file
     saveSound("capture.wav", samples);
-	
+
 	// Empty the samples buffer (could be done later)
 	samples.resize(0);
-	
+
 	// Shutdown capture
     //shutdownCapture();//CF pb: it also disables the sound feedback...
 #endif
-}	
+}
 
 void ACAudioRecorder::threadCaptureEngine()
 {
@@ -248,11 +252,11 @@ void ACAudioRecorder::threadCaptureEngine()
 
 #ifdef USE_OPENAL
 		pthread_mutex_lock(&capture_engine_mutex);
-		
+
         // Retrieve the number of available samples
         ALCint samplesAvailable;
         alcGetIntegerv(captureDevice, ALC_CAPTURE_SAMPLES, 1, &samplesAvailable);
-		
+
         // Read these samples and add them to the vector
         if (samplesAvailable > 0)
         {
@@ -276,14 +280,14 @@ void ACAudioRecorder::saveSound(const std::string& filename, const std::vector<s
 	fileInfo.channels   = 1;
 	fileInfo.samplerate = audio_samplerate;
 	fileInfo.format     = SF_FORMAT_PCM_16 | SF_FORMAT_WAV;
-	
+
 	SNDFILE* file = sf_open(filename.c_str(), SFM_WRITE, &fileInfo);
 	if (!file)
 	{
 		std::cerr << "Impossible to create the audio file." << std::endl;
 		return;
 	}
-	
+
 	sf_write_short(file, &samples[0], samples.size());
 	sf_close(file);
-}	
+}

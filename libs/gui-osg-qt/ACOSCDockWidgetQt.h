@@ -59,9 +59,16 @@ public:
 	ACOSCDockWidgetQt(QWidget *parent = 0);
 	~ACOSCDockWidgetQt();
 
+	void disableControl();
+	void disableFeedback();
+	void setControlPort(int port);
+	void setFeedbackPort(int port);
+	ACOscBrowser* getControlHandler(){return osc_browser;}
+	ACOscFeedback* getFeedbackHandler(){return osc_feedback;}
+
 private:
 	Ui::ACOSCDockWidgetQt ui;
-#if defined (USE_OSC)	
+#if defined (USE_OSC)
 	ACOscBrowser *osc_browser;
 	ACOscFeedback *osc_feedback;
 

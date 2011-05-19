@@ -137,6 +137,8 @@ ACOsgCompositeViewQt::ACOsgCompositeViewQt( QWidget * parent, const char * name,
 	#endif //defined (SUPPORT_AUDIO)
 
 	timeline_renderer->updateSize(width(),sepy);
+
+	osg::setNotifyLevel(osg::WARN);//remove the NaN CullVisitor messages
 }
 
 void ACOsgCompositeViewQt::updateBrowserView(int _width, int _height){
@@ -184,7 +186,6 @@ void ACOsgCompositeViewQt::updateTimelineControlsView(int _width, int _height){
 		timeline_controls_view->getCamera()->setViewMatrixAsLookAt(Vec3(0,0,0.8), Vec3(0,0,0), Vec3(0,1,0));
 	}
 }
-
 
 ACOsgCompositeViewQt::~ACOsgCompositeViewQt(){
 	//browser_view->removeEventHandler(browser_event_handler); // reqs OSG >= 2.9.x and shouldn't be necessary
@@ -449,7 +450,7 @@ void ACOsgCompositeViewQt::mousePressEvent( QMouseEvent* event )
 		{
 			int loop = media_cycle->getClickedNode();
 			std::cout << "node " << loop << " selected" << std::endl;
-			//media_cycle->hoverCallback(event->x(),event->y());
+			//media_cycle->hoverCallback(event->x(),event->y(),0);
 			//int loop = media_cycle->getClosestNode();
 
 			if(loop >= 0)
@@ -585,7 +586,7 @@ void ACOsgCompositeViewQt::mouseMoveEvent( QMouseEvent* event )
 		{
 			if (infodown == 1)
 			{
-				int closest_node = media_cycle->getClosestNode();
+				int closest_node = media_cycle->getClosestNode(); //CF to deprecate: adapt to multiple pointers
 				if (closest_node > -1)
 					std::cout << "Closest node: " << closest_node << std::endl;
 			}
@@ -641,7 +642,7 @@ void ACOsgCompositeViewQt::mouseReleaseEvent( QMouseEvent* event )
 		{
 			int loop = media_cycle->getClickedNode();
 			std::cout << "node " << loop << " selected" << std::endl;
-			//media_cycle->hoverCallback(event->x(),event->y());
+			//media_cycle->hoverCallback(event->x(),event->y(),0);
 			//int loop = media_cycle->getClosestNode();
 
 			if(loop >= 0)
@@ -743,15 +744,17 @@ void ACOsgCompositeViewQt::prepareFromBrowser()
 void ACOsgCompositeViewQt::updateTransformsFromBrowser( double frac)
 {
 	if (media_cycle == 0) return;
-	int closest_node;
 
 	browser_renderer->prepareNodes();
 	browser_renderer->prepareLabels();
 	hud_renderer->preparePointers();
 
 	// get screen coordinates
-	closest_node = browser_renderer->computeScreenCoordinates(browser_view, frac);
-	media_cycle->setClosestNode(closest_node);
+	//int closest_node;//CF to deprecate
+	//closest_node = browser_renderer->computeScreenCoordinates(browser_view, frac);//CF to deprecate
+	//media_cycle->setClosestNode(closest_node);//CF to deprecate
+	browser_renderer->computeScreenCoordinates(browser_view, frac);
+
 	// recompute scene graph
 	browser_renderer->updateNodes(frac); // animation starts at 0.0 and ends at 1.0
 	browser_renderer->updateLabels(frac);

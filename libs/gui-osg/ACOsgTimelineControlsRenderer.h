@@ -78,23 +78,19 @@ protected:
 	osg::ref_ptr<osg::Group>				 group;
 	osg::ref_ptr<osg::Group>				 track_group;
 	std::vector<ACOsgTrackControlsRenderer*>  track_renderer;
-	std::vector<float>				 distance_mouse;
 
 public:
 	ACOsgTimelineControlsRenderer();
 	~ACOsgTimelineControlsRenderer();
-	void clean();	
-		
+	void clean();
+
 	void setMediaCycle(MediaCycle *media_cycle) { this->media_cycle = media_cycle; };
 	osg::ref_ptr<osg::Group> getShapes() 	{ return group; };
 	ACOsgTrackControlsRenderer* getControls(int number){if ( (number>=0) && (number<track_renderer.size()) ) return track_renderer[number];}
 	//bool addControl(int position,ACMediaType media_type = -1);
-	
+
 	void prepareControls(int start=0);
 	void updateControls(double ratio=0.0);
-
-	int computeScreenCoordinates(osgViewer::View* view, double ratio=0.0); //CF: use osgViewer::Viewer* for simple Viewers
-	std::vector<float> getDistanceMouse() { return distance_mouse; };
 
 private:
 	bool removeControls(int _first=0, int _last=0){};

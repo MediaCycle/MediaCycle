@@ -57,19 +57,19 @@ ACOsgBrowserViewQT::ACOsgBrowserViewQT( QWidget * parent, const char * name, con
 	setThreadingModel(osgViewer::Viewer::SingleThreaded);
 	/*
 	CF: other threading models to test are:
-		SingleThreaded 	
-		CullDrawThreadPerContext 	
-		ThreadPerContext 	
-		DrawThreadPerContext 	
-		CullThreadPerCameraDrawThreadPerContext 	
-		ThreadPerCamera 	
+		SingleThreaded
+		CullDrawThreadPerContext
+		ThreadPerContext
+		DrawThreadPerContext
+		CullThreadPerCameraDrawThreadPerContext
+		ThreadPerCamera
 		AutomaticSelection
 	 */
 	connect(&_timer, SIGNAL(timeout()), this, SLOT(updateGL()));
 	_timer.start(10);
 
 	renderer = new ACOsgBrowserRenderer();
-	
+
 	//this->setAttribute(Qt::WA_Hover, true);
 	setMouseTracking(true); //CF necessary for the hover callback
 }
@@ -85,13 +85,13 @@ void ACOsgBrowserViewQT::clean(){
 	refx =  refy = refcamx = refcamy = refzoom = refrotation = 0.0f;
 	renderer->clean();
 	this->updateGL();
-}	
-	
+}
+
 void ACOsgBrowserViewQT::setMediaCycle(MediaCycle* _media_cycle)
 {
 	media_cycle = _media_cycle;
 	renderer->setMediaCycle(media_cycle);
-	
+
 	event_handler = new ACOsgBrowserEventHandler;
 	event_handler->setMediaCycle(media_cycle);
 	((osgViewer::Viewer*) (this))->addEventHandler(event_handler);
@@ -127,23 +127,23 @@ void ACOsgBrowserViewQT::updateGL()
 		media_cycle->updateState();
 		frac = media_cycle->getFrac();
 	}
-	
+
 	if (!media_cycle->getNeedsDisplay()) {
 		return;
 	}
 
 	if(getCamera() && media_cycle->hasBrowser())
 	{
-		
+
 		float x=0.0f, y=0.0f, zoom, angle;
 		float upx, upy;
-		
+
 		zoom = media_cycle->getCameraZoom();
 		angle = media_cycle->getCameraRotation();
 		media_cycle->getCameraPosition(x, y);
 		upx = cos(-angle+PI/2);
-		upy = sin(-angle+PI/2);		
-		
+		upy = sin(-angle+PI/2);
+
 		getCamera()->setViewMatrixAsLookAt(Vec3(x*1.0,y*1.0,0.8 / zoom), Vec3(x*1.0,y*1.0,0), Vec3(upx, upy, 0));
 	}
 	this->updateTransformsFromBrowser(frac);
@@ -151,10 +151,10 @@ void ACOsgBrowserViewQT::updateGL()
 	if (frac >= 0.0 && frac < 1.0 ) {
 		setMouseTracking(false); //CF necessary for the hover callback
 	}
-	else 
-		setMouseTracking(true); 
-	*/ 
-	
+	else
+		setMouseTracking(true);
+	*/
+
 	// calls the base class updateGL
 	QGLWidget::updateGL();
 	//if (frac < 1.0) {
@@ -162,13 +162,13 @@ void ACOsgBrowserViewQT::updateGL()
 	//}
 	//else
 		media_cycle->setNeedsDisplay(false);
-}	
+}
 
 void ACOsgBrowserViewQT::keyPressEvent( QKeyEvent* event )
 {
 	if (media_cycle == 0) return;
 	osg_view->getEventQueue()->keyPress( (osgGA::GUIEventAdapter::KeySymbol) *(event->text().toAscii().data() ) );
-	//std::cout << "Key (Qt) " << event->text().toAscii().data() << std::endl; 
+	//std::cout << "Key (Qt) " << event->text().toAscii().data() << std::endl;
 	switch( event->key() )
 	{
 		case Qt::Key_Z:
@@ -185,11 +185,11 @@ void ACOsgBrowserViewQT::keyPressEvent( QKeyEvent* event )
 		case Qt::Key_R:
 			rotationdown = 1;
 			break;
-		case Qt::Key_M:	
+		case Qt::Key_M:
 			media_cycle->muteAllSources();
 			break;
 		default:
-			break;	
+			break;
 	}
 }
 
@@ -223,7 +223,7 @@ void ACOsgBrowserViewQT::mousePressEvent( QMouseEvent* event )
     }
 
 	osg_view->getEventQueue()->mouseButtonPress(event->x(), event->y(), button);
-	
+
 	refx = event->x();
 	refy = event->y();
 	media_cycle->getCameraPosition(refcamx, refcamy);
@@ -245,15 +245,15 @@ void ACOsgBrowserViewQT::mouseMoveEvent( QMouseEvent* event )
         case(Qt::NoButton): button = 0; break;
         default: button = 0; break;
     }
-	
+
 	osg_view->getEventQueue()->mouseMotion(event->x(), event->y());
 
 	float zoom, angle;
 	float xmove, ymove, xmove2, ymove2;
 	float x, y;
-	x = event->x(); 
+	x = event->x();
 	y = event->y();
-	
+
 	if ( (mousedown==1) && (forwarddown == 0) ) {
 		if ( zoomdown==1 ) {
 			media_cycle->setCameraZoom(refzoom - (y-refy)/50);
@@ -262,14 +262,14 @@ void ACOsgBrowserViewQT::mouseMoveEvent( QMouseEvent* event )
 		else if ( rotationdown==1 ) {
 			float rotation = atan2(-(y-this->height()/2),x-this->width()/2)-atan2(-(refy-this->height()/2),refx-this->width()/2);
 			media_cycle->setCameraRotation(refrotation + rotation);
-		}	
+		}
 		else { // translation
 			zoom = media_cycle->getCameraZoom();
 			angle = media_cycle->getCameraRotation();
 			xmove = (refx-x);
 			ymove =-(refy-y);
 			xmove2 = xmove*cos(-angle)-ymove*sin(-angle);
-			ymove2 = ymove*cos(-angle)+xmove*sin(-angle);		
+			ymove2 = ymove*cos(-angle)+xmove*sin(-angle);
 			media_cycle->setCameraPosition(refcamx + xmove2/800/zoom , refcamy + ymove2/800/zoom);
 		}
 	}
@@ -290,42 +290,42 @@ void ACOsgBrowserViewQT::mouseReleaseEvent( QMouseEvent* event )
         default: button = 0; break;
     }
     osg_view->getEventQueue()->mouseButtonRelease(event->x(), event->y(), button);
-	
+
 	if ( (media_cycle->hasBrowser()))
 	{
 		if ( forwarddown==1 ) // 'a'
-		{	
+		{
 			int loop = media_cycle->getClickedNode();
 			std::cout << "node " << loop << " selected" << std::endl;
-			//media_cycle->hoverCallback(event->x(),event->y());
+			//media_cycle->hoverCallback(event->x(),event->y(),0);
 			//int loop = media_cycle->getClosestNode();
-			
+
 			if(loop >= 0)
 			{
 				// XSCF 250310 added these 3
 				// XS 260810 put this "if" first otherwise we store the next state
 				if (media_cycle->getBrowser()->getMode() == AC_MODE_CLUSTERS)
 					media_cycle->storeNavigationState();
-				
+
 				if (media_cycle->getBrowser()->getMode() == AC_MODE_CLUSTERS)
 					media_cycle->incrementLoopNavigationLevels(loop);
 				media_cycle->setReferenceNode(loop);
-				
+
 
 				//			media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
 				//			media_cycle->getBrowser()->setState(AC_CHANGING);
-				
+
 				media_cycle->updateDisplay(true); //XS250310 was: media_cycle->updateClusters(true);
 				// XSCF 250310 removed this:
 				// media_cycle->updateNeighborhoods();
 				//	media_cycle->updateClusters(false);// CF was true, equivalent to what's following
-				
+
 //				// remainders from updateClusters(true)
 //				media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
 //				media_cycle->getBrowser()->setState(AC_CHANGING);
 				media_cycle->setNeedsDisplay(true);
 			}
-		}	
+		}
 		media_cycle->setClickedNode(-1);
 	}
 	forwarddown = 0;
@@ -336,7 +336,7 @@ void ACOsgBrowserViewQT::mouseReleaseEvent( QMouseEvent* event )
 void ACOsgBrowserViewQT::prepareFromBrowser()
 {
 	//setMouseTracking(false); //CF necessary for the hover callback
-	renderer->prepareNodes(); 
+	renderer->prepareNodes();
 	renderer->prepareLabels();
 	this->setSceneData(renderer->getShapes());
 }
@@ -346,11 +346,11 @@ void ACOsgBrowserViewQT::updateTransformsFromBrowser( double frac)
 {
 	if (media_cycle == 0) return;
 
-	int closest_node;	
+	int closest_node;
 	// get screen coordinates
 	closest_node = renderer->computeScreenCoordinates(this, frac);
 	media_cycle->setClosestNode(closest_node);
-	// recompute scene graph	
+	// recompute scene graph
 	renderer->updateNodes(frac); // animation starts at 0.0 and ends at 1.0
 	renderer->updateLabels(frac);
 }

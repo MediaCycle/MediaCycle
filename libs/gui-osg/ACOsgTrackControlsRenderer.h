@@ -61,12 +61,11 @@ protected:
 	MediaCycle* media_cycle;
 	osg::ref_ptr<osg::MatrixTransform> track_node;
 	int track_index, media_index;
-	float distance_mouse;
 	// int	media_activity;
 	ACMedia* media;
 	bool media_from_lib;
 	bool media_changed;
-	
+
 public:
 	ACOsgTrackControlsRenderer();
 	virtual ~ACOsgTrackControlsRenderer() {};
@@ -79,13 +78,11 @@ public:
 	void updateMedia(int _media_index);
 	void clearMedia();
 	ACMedia* getMedia(){return media;}
-	void setDistanceMouse(float _distance_mouse) { this->distance_mouse = _distance_mouse; };
 	//void setActivity(int _media_activity) { this->media_activity = _media_activity; }
 	osg::ref_ptr<osg::MatrixTransform> getControls() { return track_node; };
-	
+
 	virtual void prepareControls()=0;
 	virtual void updateControls(double ratio=0.0)=0;
-	
 };
 
 #endif

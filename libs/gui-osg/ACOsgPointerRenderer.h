@@ -1,7 +1,7 @@
 /**
  * @brief ACOsgPointerRenderer.h
  * @author Christian Frisson
- * @date 24/02/2011
+ * @date 19/05/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -37,22 +37,22 @@
 #include <osgText/Text>
 
 class ACOsgPointerRenderer : public ACOsgMediaRenderer {
-	
+
 protected:
-	
+
 	osg::ref_ptr<osgText::Font> font;
 	osg::ref_ptr<osgText::Text> text;
 
 	osg::ref_ptr<osg::Geode> text_geode;
 	osg::ref_ptr<osg::Geode> pointer_geode;
 	osg::ref_ptr<osg::MatrixTransform> pointer_transform;
-	
+
 	void textGeode();
 	void pointerGeode();
-	
+
 	std::string text_string;
 	ACPoint pos;
-	
+
 public:
 	ACOsgPointerRenderer();
 	~ACOsgPointerRenderer();

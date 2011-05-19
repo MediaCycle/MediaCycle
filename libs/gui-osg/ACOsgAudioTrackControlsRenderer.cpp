@@ -41,7 +41,7 @@
 using namespace osg;
 
 ACOsgAudioTrackControlsRenderer::ACOsgAudioTrackControlsRenderer() {
-	
+
 	track_geode = 0;
 	//zoom_x = 10.0; zoom_y = 6.0;
 	zoom_x = 1.0; zoom_y = 1.0;
@@ -64,70 +64,35 @@ ACOsgAudioTrackControlsRenderer::~ACOsgAudioTrackControlsRenderer() {
 }
 
 void ACOsgAudioTrackControlsRenderer::trackGeode() {
-	
+
 	StateSet *state;
-	
+
 	track_geode = new Geode();
-	
+
 	TessellationHints *hints = new TessellationHints();
 	hints->setDetailRatio(0.0);
-	
+
 	state = track_geode->getOrCreateStateSet();
-	state->setMode(GL_NORMALIZE, osg::StateAttribute::ON);	
-	
+	state->setMode(GL_NORMALIZE, osg::StateAttribute::ON);
+
 	track_geode->addDrawable(new osg::ShapeDrawable(new osg::Box(osg::Vec3(1.0f,0.0f,0.0f),xspan,yspan,0.0), hints)); //draws a square // Vintage AudioCycle
 	//sprintf(name, "some audio element");
 	//track_geode->setUserData(new ACRefId(media_index));
 	//track_geode->setName(name);
-	//ref_ptr//track_geode->ref();	
+	//ref_ptr//track_geode->ref();
 }
 
 void ACOsgAudioTrackControlsRenderer::prepareControls() {
-	
+
 	track_geode = 0;
-	
+
 	trackGeode();
 	track_node->addChild(track_geode);
 	((ShapeDrawable*)track_geode->getDrawable(0))->setColor(Vec4(1.0f,0.0f,0.0f,0.1f));
 	//std::cout << "track_node_addChild(track_geode)" << std::endl;
-	
+
 }
 
 void ACOsgAudioTrackControlsRenderer::updateControls(double ratio) {
-	//double xstep = 0.00025;
-	/*	
-	 ACPoint p,p2;//CF dummy
-	 p.x = p.y = p.z = p2.x = p2.y = p2.z = 0.0f; // CF dummy
-	 
-	 double omr = 1.0-ratio;
-	 
-	 omr = 1;
-	 ratio = 0;
-	 
-	 float zoom = 1.0f;
-	 float angle = 0.0f;
-	 
-	 Matrix T;
-	 Matrix Trotate;
-	 Matrix curserT;
-	 Matrix waveT;
-	 
-	 float x, y, z;
-	 float localscale;
-	 float maxdistance = 0.2;
-	 float maxscale = 1.5;
-	 float minscale = 0.33;				
-	 // Apply "rotation" to compensate camera rotation
-	 x = omr*p.x + ratio*p2.x;
-	 y = omr*p.y + ratio*p2.y;
-	 z = 0;
-	 T.makeTranslate(Vec3(x, y, z));
-	 localscale = maxscale - distance_mouse * (maxscale - minscale) / maxdistance ;
-	 localscale = max(localscale,minscale);
-	 
-	 localscale = 1.0;//CF
-	 */	
-	
-	//track_node->setMatrix(T);
 }
 #endif //defined (SUPPORT_AUDIO)

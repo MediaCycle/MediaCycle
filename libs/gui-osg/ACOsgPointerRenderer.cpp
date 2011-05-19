@@ -1,7 +1,7 @@
 /**
  * @brief ACOsgPointerRenderer.cpp
  * @author Christian Frisson
- * @date 31/03/2011
+ * @date 19/05/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -34,7 +34,7 @@
 using namespace osg;
 
 ACOsgPointerRenderer::ACOsgPointerRenderer() {
-	
+
 	pos.x = 0;
 	pos.y = 0;
 	pos.z = 0;
@@ -45,81 +45,87 @@ ACOsgPointerRenderer::ACOsgPointerRenderer() {
 }
 
 ACOsgPointerRenderer::~ACOsgPointerRenderer() {
-	
+
 	if 	(text_geode) { //ref_ptr//text_geode->unref();
 		text_geode=0; }
-	if 	(pointer_geode) { //ref_ptr//pointer_geode->unref(); 
+	if 	(pointer_geode) { //ref_ptr//pointer_geode->unref();
 		pointer_geode=0; }
-	if  (pointer_transform) { //ref_ptr//pointer_transform->unref(); 
+	if  (pointer_transform) { //ref_ptr//pointer_transform->unref();
 		pointer_transform=0; }
 }
 
 void ACOsgPointerRenderer::textGeode() {
-	
+
 	Vec4 textColor(0.9f,0.9f,0.9f,0.9f);
-	float textCharacterSize = 96.0f; // 10 pixels ? 
-	
+	float textCharacterSize = 96.0f; // 10 pixels ?
+
 	text_geode = new Geode();
-	//ref_ptr//text_geode->ref();	
-	
+	//ref_ptr//text_geode->ref();
+
 	text = new osgText::Text;
 	text->setColor(textColor);
 	text->setCharacterSizeMode( osgText::Text::SCREEN_COORDS );
 	text->setCharacterSize(textCharacterSize);
-	text->setPosition(osg::Vec3(0,0,0));
+	//text->setPosition(osg::Vec3(0,0,0));
+	text->setPosition(osg::Vec3(0,25,0.0));
 	text->setLayout(osgText::Text::LEFT_TO_RIGHT);
 	text->setFontResolution(64,64);
 	text->setAlignment( osgText::Text::CENTER_CENTER );
 	text->setAxisAlignment( osgText::Text::SCREEN );
-	
+
 	text->setText( text_string );
 	//text->setText( "POINTER" );
-	
+
 	text_geode->addDrawable(text);
+	text_geode->setCullingActive(false);
 }
 
 void ACOsgPointerRenderer::pointerGeode() {
-	
-	Vec4 color(1.0f, 1.0f, 1.0f, 0.33f);	
+
+	Vec4 color(1.0f, 1.0f, 1.0f, 0.33f);
 	osg::ref_ptr<osg::Vec4Array> colors = new Vec4Array;
-	colors->push_back(color);		
-	
+	colors->push_back(color);
+
 	StateSet *state;
 
 	pointer_geode = new Geode();
-	//ref_ptr//pointer_geode->ref();	
+	//ref_ptr//pointer_geode->ref();
 
 	state = pointer_geode->getOrCreateStateSet();
-	state->setMode(GL_NORMALIZE, osg::StateAttribute::ON);	
+	state->setMode(GL_NORMALIZE, osg::StateAttribute::ON);
 	state->setMode(GL_BLEND, StateAttribute::ON);
-	
+
 	osg::Shape* capsule = new osg::Capsule(osg::Vec3(0.0f, 0.0f, 0.0f), 15.0f, 1.0f);
 	osg::ShapeDrawable* capsuleDrawable = new osg::ShapeDrawable(capsule);
 	capsuleDrawable->setColor(color);
-	
+
 	pointer_geode->addDrawable(capsuleDrawable);
+	pointer_geode->setCullingActive(false);
 }
 
 void ACOsgPointerRenderer::prepareNodes() {
 
 	textGeode();
 	pointerGeode();
-	
+
 	pointer_transform = new MatrixTransform();
 	//ref_ptr//pointer_transform->ref();
 	pointer_transform->addChild(text_geode);
 	pointer_transform->addChild(pointer_geode);
-	
+
+	pointer_transform->setCullingActive(false);
+
 	media_node->addChild(pointer_transform);
 }
 
 void ACOsgPointerRenderer::updateNodes(double ratio) {
-		
+
 	Matrix T;
 	Matrix Trotate;
-		
+
 	T.makeTranslate(Vec3(pos.x, pos.y, pos.z));
 	text->setText( text_string );
-	
-	pointer_transform->setMatrix(T);	
+
+	if(pointer_transform)
+		pointer_transform->setMatrix(T);
 }

@@ -61,7 +61,7 @@ void ACOsgTimelineRenderer::clean(){
 bool ACOsgTimelineRenderer::addTrack(int media_index){
 	int n = track_renderer.size();
 	ACMediaType media_type = media_cycle->getLibrary()->getMedia(media_index)->getType();
-	
+
 	switch (media_type) {
 		case MEDIA_TYPE_AUDIO:
 			#if defined (SUPPORT_AUDIO)
@@ -94,7 +94,7 @@ bool ACOsgTimelineRenderer::addTrack(int media_index){
 			}
 			#endif //defined (SUPPORT_VIDEO)
 			break;
-			/*		
+			/*
 			 case MEDIA_TYPE_SENSORDATA:
 			 track_renderer[i] = new ACOsgSensorDataTrackRenderer();
 			 break;
@@ -104,14 +104,14 @@ bool ACOsgTimelineRenderer::addTrack(int media_index){
 			track_renderer[n] = 0;
 			break;
 	}
-	
-}	
+
+}
 
 void ACOsgTimelineRenderer::prepareTracks(int start) {
 
 	ACMediaType media_type;
 	int n = 0;
-	
+
 	// XS are these tests necessary ?
 	if (track_renderer.size()>n) {
 		for (int i=n;i<track_renderer.size();i++) {
@@ -121,7 +121,7 @@ void ACOsgTimelineRenderer::prepareTracks(int start) {
 	}
 
 	track_renderer.resize(n);
-	
+
 	for (int i=start;i<n;i++) {
 		media_type = media_cycle->getMediaType(i);
 		switch (media_type) {
@@ -140,7 +140,7 @@ void ACOsgTimelineRenderer::prepareTracks(int start) {
 				track_renderer[i]->setSize(width,height);
 				#endif //defined (SUPPORT_VIDEO)
 				break;
-		/*		
+		/*
 			case MEDIA_TYPE_SENSORDATA:
 				track_renderer[i] = new ACOsgSensorDataTrackRenderer();
 				break;
@@ -158,12 +158,12 @@ void ACOsgTimelineRenderer::prepareTracks(int start) {
 			track_renderer[i]->prepareTracks();
 			track_group->addChild(track_renderer[i]->getTrack());
 		}
-		
+
 	}
 }
 
 void ACOsgTimelineRenderer::updateTracks(double ratio) {
-	
+
 	for (unsigned int i=0;i<track_renderer.size();i++) {
 		track_renderer[i]->updateTracks(ratio);
 	}
@@ -176,7 +176,7 @@ void ACOsgTimelineRenderer::updateScreenWidth(int _screen_width)
 		for (unsigned int i=0;i<track_renderer.size();i++) {
 			track_renderer[i]->updateScreenWidth(_screen_width);
 		}
-	}	
+	}
 }
 
 void ACOsgTimelineRenderer::updateSize(float _width,float _height)
@@ -188,7 +188,7 @@ void ACOsgTimelineRenderer::updateSize(float _width,float _height)
 			track_renderer[i]->updateSize(_width,_height);
 		}
 	}
-}	
+}
 
 // private methods
 
@@ -198,15 +198,15 @@ bool ACOsgTimelineRenderer::removeTracks(int _first, int _last){
 	if (_first < 0 || _last > track_renderer.size() || _last < _first){
 		cerr << "<ACOsgTimelineRenderer::removeTracks> : wrong index / out of bounds : " << _first << " - " << _last  << endl;
 		ok = false;
-	}	
+	}
 	// (default) remove ALL tracks
 	else if (_first == 0 && _last==0) {
-		std::vector<ACOsgTrackRenderer*>::iterator iterm; 
-		for (iterm = track_renderer.begin(); iterm != track_renderer.end(); iterm++) { 
+		std::vector<ACOsgTrackRenderer*>::iterator iterm;
+		for (iterm = track_renderer.begin(); iterm != track_renderer.end(); iterm++) {
 			track_group->removeChild((*iterm)->getTrack());
-			delete *iterm; 
+			delete *iterm;
 		}
-		track_renderer.clear();	
+		track_renderer.clear();
 		ok = true;
 	}
 	else {
@@ -215,53 +215,7 @@ bool ACOsgTimelineRenderer::removeTracks(int _first, int _last){
 			delete track_renderer[i];
 		}
 		track_renderer.resize(_first);
-		ok = true;		
+		ok = true;
 	}
 	return ok;
-}
-
-int ACOsgTimelineRenderer::computeScreenCoordinates(osgViewer::View* view, double ratio) //CF: use osgViewer::Viewer* for the simple Viewer
-{		
-	int closest_track;
-	float closest_distance;
-	closest_distance = 1000000;
-	closest_track = -1;
-	
-	float x, y, z;
-	float mx, my;
-	
-	int n = 1;// = media_cycle->getLibrarySize(); 	
-	n = track_renderer.size();
-	
-	//osg::Matrix modelModel = view->getModelMatrix();
-	osg::Matrix viewMatrix = view->getCamera()->getViewMatrix();
-	osg::Matrix projectionMatrix = view->getCamera()->getProjectionMatrix();
-	//osg::Matrix window = view->getWindowMatrix();
-	osg::Matrix VPM = viewMatrix * projectionMatrix;
-	
-	// convertpoints in model coordinates to view coordinates
-	// Not necessary to go to screen coordinated because pick function can get normalized mouse coordinates
-	osg::Vec3 modelPoint;
-	osg::Vec3 screenPoint;
-	
-	for(int i=0; i<n; i++) {
-		
-		//const ACMediaNode &attribute = media_cycle->getMediaNode(i);
-		//const ACPoint &p = attribute.getCurrentPosition(), &p2 = attribute.getNextPosition();
-		ACPoint p,p2;
-		p.x = p.y = p.z = p2.x = p2.y = p2.z = 0.0f; // CF dummy
-		//std::cout << "Timeline p " << p.x << p.y << p.z << " p2 " << p2.x << p2.y << p2.z << std::endl;
-		double omr = 1.0-ratio;
-		
-		x = omr*p.x + ratio*p2.x;
-		y = omr*p.y + ratio*p2.y;
-		z = 0;
-		
-		modelPoint = Vec3(x,y,z);
-		screenPoint = modelPoint * VPM;
-				
-		media_cycle->getMouse(&mx, &my);
-	}	
-	
-	return closest_track;
 }

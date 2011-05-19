@@ -1,4 +1,4 @@
-/* 
+/*
  * File:   MediaCycle.h
  * Author: Alexis Moinet
  *
@@ -62,7 +62,7 @@ class MediaCycle {
 public:
     MediaCycle(ACMediaType aMediaType, std::string local_directory="", std::string libname="");
     MediaCycle(const MediaCycle& orig);
-    virtual ~MediaCycle();	
+    virtual ~MediaCycle();
 	void clean();
 
 	// == TCP
@@ -73,7 +73,7 @@ public:
 
 	// == Callback - SD to be replaced by OSC/UDP communication
 	int setCallback(ACMediaCycleCallback mediacycle_callback, void* user_data);
-	
+
     // == Media Library
 	int importDirectories();
 	int importDirectories(std::vector<std::string> paths, int recursive, bool forward_order=true, bool doSegment=false);
@@ -112,7 +112,7 @@ public:
 	void cleanBrowser() { mediaBrowser->clean(); }
 
 	// Plugins
-	
+
 	// XS TODO cleanPlugins
     int addPluginLibrary(std::string aPluginLibraryPath);
     int removePluginLibrary(std::string aPluginLibraryPath);
@@ -134,7 +134,7 @@ public:
 	void changeNeighborsPositionsPlugin(std::string pluginName);
 	//void changeVisualisationPlugin(std::string pluginName);
 	void dumpPluginsList();
-	
+
 	// == Media
 	ACMediaNode &getMediaNode(int i);
 	std::string getMediaFileName(int i);
@@ -142,7 +142,7 @@ public:
 	ACMediaType getMediaType() {return mediaLibrary->getMediaType();}
 	void setMediaType(ACMediaType _mt);
 	bool changeMediaType(ACMediaType aMediaType);
-	
+
 	std::vector<std::string> getExtensionsFromMediaType(ACMediaType media_type){return ACMediaFactory::getInstance().getExtensionsFromMediaType(media_type);}
 	int getThumbnailWidth(int i);
 	int getThumbnailHeight(int i);
@@ -153,9 +153,8 @@ public:
 	void setNeedsDisplay3D(bool _dis);
 	int getNeedsDisplay();
 	void setNeedsDisplay(bool _dis);
-	
+
 	// == view
-	void getMouse(float *mx, float *my);
 	float getCameraZoom();
 	float getCameraRotation();
 	void setCameraRotation(float angle);
@@ -164,12 +163,12 @@ public:
 	void setCameraZoom(float z);
 	void setCameraRecenter();
 	void setAutoPlay(int i);
-	int getClickedNode();
-	void setClickedNode(int i);
-	void setClosestNode(int i);
-	int getClosestNode();
+	int getClickedNode(int p_index = 0);
+	void setClickedNode(int i,int p_index = 0);
+	void setClosestNode(int i,int p_index = 0);
+	int getClosestNode(int p_index = 0);
 	int	getLastSelectedNode();
-	
+
 	// == Cluster Display
 	void updateState();
 	void storeNavigationState();
@@ -184,7 +183,7 @@ public:
 	void setForwardDown(int i);
 //	void setPlayKeyDown(bool i){playkeydown = i;};
 //	bool getPlayKeyDown(){return playkeydown;};
-	
+
 	// == Features
 	void normalizeFeatures(int needsNormalize=1);
 	std::vector<float> getFeaturesVectorInMedia(int i, std::string feature_name);
@@ -192,16 +191,19 @@ public:
 	void setWeightVector(std::vector<float> fw);
 	std::vector<float> getWeightVector();
 	float getWeight(int i);
-	
+
 	// == Pointers
 	int getPointerSize();
-	ACPointer& getPointer(int i);
-	
+	ACPointer* getPointerFromIndex(int i); // for use when parsing pointers incrementally
+	ACPointer* getPointerFromId(int i); // for use when parsing pointers from the ID set by the input device
+	void resetPointers();
+	void addPointer(int p_id);
+
 	// == LABELS on VIEW
  	int getLabelSize();
 	std::string getLabelText(int i);
-	ACPoint getLabelPos(int i);	
-	
+	ACPoint getLabelPos(int i);
+
 	// == Playing time stamp
 	int setSourceCursor(int lid, int frame_pos);
 	int setCurrentFrame(int lid, int frame_pos);
@@ -209,17 +211,17 @@ public:
 
 	// == Update audio engine sources
 	void setNeedsActivityUpdateLock(int i);
-	void setNeedsActivityUpdateRemoveMedia();	
+	void setNeedsActivityUpdateRemoveMedia();
 	std::vector<int>* getNeedsActivityUpdateMedia();
 
 	// == callbacks
 	void pickedObjectCallback(int pid);
 	void hoverObjectCallback(int pid);
-	void hoverCallback(float xx, float yy);
+	void hoverCallback(float xx, float yy, int p_id = 0);
 
 	// == NEW, replaces updateClusters and updateNeighborhoods
 	void updateDisplay(bool animate);
-	
+
 	// == config (in XMl !!)
 	TiXmlHandle readXMLConfigFileHeader(std::string _fname="");
 	int readXMLConfigFileCore(TiXmlHandle rootHandle);
@@ -232,14 +234,14 @@ public:
 	// == User log
 	void cleanUserLog();
 
-	// == Dump / used for Debug 
+	// == Dump / used for Debug
 	void dumpNavigationLevel();
 	void dumpLoopNavigationLevels();
 
-	// == testing 
+	// == testing
 	void testThreads();
 	void testLabels();
-	
+
 private:
 	int forwarddown;
 //	bool playkeydown;
@@ -251,15 +253,15 @@ private:
 	ACMediaBrowser *mediaBrowser;
 	ACNetworkSocketServer *networkSocket;
 	ACPluginManager *pluginManager;
-	
+
 	// settings and features XML
 	std::string config_file_xml;
-	//TiXmlElement* MC_e_medias; // xml node to hook up medias  
+	//TiXmlElement* MC_e_medias; // xml node to hook up medias
 
 	int prevLibrarySize;
-	
+
 	bool mNeedsDisplay;
-	
+
 	// Media Import Thread
 	pthread_t	   import_thread;
 	pthread_attr_t import_thread_attr;
@@ -268,10 +270,10 @@ private:
 	int import_recursive;
 	bool import_forward_order;
 	bool import_doSegment;
-	
+
 	ACMediaCycleCallback mediacycle_callback;
 	void* mediacycle_callback_data;
-	
+
 };
 
 #endif	/* _MEDIACYCLE_H */

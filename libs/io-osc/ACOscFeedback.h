@@ -48,7 +48,7 @@ class ACOscFeedback {
 	public:
 		ACOscFeedback(){sendto=0;message=0;};
 		~ACOscFeedback(){ release();}
-	
+
 		void create(const char *hostname, int port);
 		void release();
 		void messageBegin(const char *tag);
@@ -57,6 +57,7 @@ class ACOscFeedback {
 		void messageAppendFloat(float val);
 		void messageAppendInt(int val);
 		void messageAppendString(const char *val);
+		lo_address getAddress(){return sendto;}
 	private:
 		lo_address sendto;
 		lo_message message;

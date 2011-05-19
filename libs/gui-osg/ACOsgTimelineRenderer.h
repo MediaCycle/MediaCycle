@@ -110,8 +110,6 @@ public:
 
 private:
 	bool removeTracks(int _first=0, int _last=0);
-
-	int computeScreenCoordinates(osgViewer::View* view, double ratio=0.0); //CF: use osgViewer::Viewer* for simple Viewers
 };
 
 #endif

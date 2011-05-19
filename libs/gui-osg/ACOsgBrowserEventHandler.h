@@ -45,23 +45,23 @@
 //using namespace osgGA;
 
 class ACOsgBrowserEventHandler : public osgGA::GUIEventHandler {
-public: 
-	
+public:
+
 	ACOsgBrowserEventHandler() { media_cycle = 0; };
 	virtual ~ACOsgBrowserEventHandler() {media_cycle = 0;};
 	void clean(){};//media_cycle = 0;};
-	
+
 	void setMediaCycle(MediaCycle *_media_cycle) { this->media_cycle = _media_cycle; };
-	
+
 	bool handle(const osgGA::GUIEventAdapter& ea,osgGA::GUIActionAdapter& aa);
 
 	void pick(osgViewer::View* view, const osgGA::GUIEventAdapter& ea, bool hover);
-	
+
 protected:
-	void picked_object_callback(int); 
+	void picked_object_callback(int);
 	void hover_object_callback(int);
-	void hover_callback(float, float);
-	
+	void hover_callback(float, float, int p_id = 0);
+
 	MediaCycle *media_cycle;
 };
 

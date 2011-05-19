@@ -37,19 +37,22 @@
 
 void ACOsgBrowserEventHandler::picked_object_callback(int pid) {
 	if (media_cycle == 0) return;
+	std::cout << "ACOsgBrowserEventHandler::picked_object_callback pid " << pid << std::endl;
 	media_cycle->pickedObjectCallback(pid);
 }
 
 void ACOsgBrowserEventHandler::hover_object_callback(int pid) {
 	if (media_cycle == 0) return;
+	std::cout << "ACOsgBrowserEventHandler::hover_object_callback pid " << pid << std::endl;
 	media_cycle->hoverObjectCallback(pid);
 }
 
-void ACOsgBrowserEventHandler::hover_callback(float xx, float yy) {
+void ACOsgBrowserEventHandler::hover_callback(float xx, float yy, int p_id) {
 	if (media_cycle == 0) return;
-	media_cycle->hoverCallback(xx, yy);
+	//std::cout << "ACOsgBrowserEventHandler::hover_callback x=" << xx << " y=" << yy << std::endl;
+	media_cycle->hoverCallback(xx, yy, p_id);
 }
-	
+
 bool ACOsgBrowserEventHandler::handle(const osgGA::GUIEventAdapter& ea,osgGA::GUIActionAdapter& aa)
 {
 	if (media_cycle == 0) return false;
@@ -61,12 +64,12 @@ bool ACOsgBrowserEventHandler::handle(const osgGA::GUIEventAdapter& ea,osgGA::GU
 			osgViewer::View* view = dynamic_cast<osgViewer::View*>(&aa);
 			if (view) pick(view,ea,false);
 			return false;
-		}    
+		}
 		case(osgGA::GUIEventAdapter::RELEASE):
 		{
 			//printf("event RELEASE: aa=%x\n", &aa);
 			return false;
-		}  
+		}
 		case(osgGA::GUIEventAdapter::KEYDOWN):
 		{
 			#if defined (USE_DEBUG)
@@ -82,16 +85,16 @@ bool ACOsgBrowserEventHandler::handle(const osgGA::GUIEventAdapter& ea,osgGA::GU
 			}
  */
 			return false;
-		} 
+		}
 		case(osgGA::GUIEventAdapter::KEYUP):
-		{		
+		{
 			return false;
-		}    
+		}
 		case(osgGA::GUIEventAdapter::FRAME):
 		{
 			//XS : not used, was in RS code
 			//render_callback();
-			
+			//std::cout << "Browser Event Handler FRAME" << std::endl;
 			return false;
 		}
 		case(osgGA::GUIEventAdapter::MOVE):
@@ -99,6 +102,7 @@ bool ACOsgBrowserEventHandler::handle(const osgGA::GUIEventAdapter& ea,osgGA::GU
 			//printf("mouse moved in browser\n");
 			osgViewer::View* view = dynamic_cast<osgViewer::View*>(&aa);
 			if (view) pick(view, ea, true);
+			//std::cout << "Browser Event Handler MOVE" << std::endl;
 			return false;
 		}
 		case(osgGA::GUIEventAdapter::DRAG):
@@ -149,10 +153,10 @@ bool ACOsgBrowserEventHandler::handle(const osgGA::GUIEventAdapter& ea,osgGA::GU
 		}
 #endif
 		default:
-		{	
-			//printf("received event: %d\n", ea.getEventType());
+		{
+			printf("received event: %d\n", ea.getEventType());
 			return false;
-		}	
+		}
 	}
 }
 
@@ -161,28 +165,29 @@ void ACOsgBrowserEventHandler::pick(osgViewer::View* view, const osgGA::GUIEvent
 	if (media_cycle == 0) return;
 	osgUtil::LineSegmentIntersector::Intersections intersections;
 	//osgUtil::PolytopeIntersector::Intersections intersections;
-	
+
 	std::string gdlist="";
 	float x = ea.getX();
 	float y = ea.getY();
-	
+
 	float xx = ea.getXnormalized();
 	float yy = ea.getYnormalized();
-	
+
 	//printf("pick (%f, %f)\n", x, y);
-		
+
 	//printf ("MOUSE: %f %f\n", x, y);
 
 	if(hover) {
 		// SD TODO - OSG computeIntersections seems to crash often - avoid doing it while howering
-		hover_callback(xx, yy);
+		//CF should we loop on the hover_callback for each pointer?
+		hover_callback(xx, yy, 0);
 		return;
 	}
-	
+
 	if (view->computeIntersections(x,y,intersections))
 	{
-		// printf("got intersections\n");
-		
+		//printf("got intersections\n");
+
 		for(osgUtil::LineSegmentIntersector::Intersections::iterator hitr = intersections.begin();
 		    hitr != intersections.end();
 		    ++hitr)
@@ -192,23 +197,23 @@ void ACOsgBrowserEventHandler::pick(osgViewer::View* view, const osgGA::GUIEvent
 			{
 				// the geodes are identified by name.
 				//os<<"Object \""<<hitr->nodePath.back()->getName()<<"\""<<std::endl;
-				
+
 				if(hitr->nodePath.back()->getUserData())
 				{
 					ACRefId *rid = (ACRefId*)hitr->nodePath.back()->getUserData();
-					
+
 					if(hover) hover_object_callback(rid->object_id);
 					else picked_object_callback(rid->object_id);
 					break ; // only pick the first one
 				}
-				
+
 				//printf("picked %s\n", hitr->nodePath.back()->getName().c_str());
 			}
 			else if (hitr->drawable.valid())
 			{
 				//os<<"Object \""<<hitr->drawable->className()<<"\""<<std::endl;
 			}
-			
+
 			/*os<<"        local coords vertex("<< hitr->getLocalIntersectPoint()<<")"<<"  normal("<<hitr->getLocalIntersectNormal()<<")"<<std::endl;
 			 os<<"        world coords vertex("<< hitr->getWorldIntersectPoint()<<")"<<"  normal("<<hitr->getWorldIntersectNormal()<<")"<<std::endl;*/
 			const osgUtil::LineSegmentIntersector::Intersection::IndexList& vil = hitr->indexList;
@@ -216,14 +221,14 @@ void ACOsgBrowserEventHandler::pick(osgViewer::View* view, const osgGA::GUIEvent
 			{
 				os<<"        vertex indices ["<<i<<"] = "<<vil[i]<<std::endl;
 			}
-			
+
 			gdlist += os.str();
 		}
 	}
 	//setLabel(gdlist);
 }
 
-// SD - Other pick possibilities, exploring Polytope intersector, first idea for zoooming thumbnails, replaced by 
+// SD - Other pick possibilities, exploring Polytope intersector, first idea for zoooming thumbnails, replaced by
 //		computation of distance_mouse
 
 /*
@@ -233,25 +238,25 @@ void ACImageBrowserOsgEventHandler::pick(osgViewer::View* view, const osgGA::GUI
 	std::string gdlist="";
 	float x = ea.getXnormalized();
 	float y = ea.getYnormalized();
-	
+
 	double w(.05), h(.05);
-	
+
 	osgUtil::PolytopeIntersector *picker = new osgUtil::PolytopeIntersector(osgUtil::Intersector::PROJECTION,x-w, y-h, x+w, y+h);
 	osgUtil::IntersectionVisitor iv(picker);
-	view->getCamera()->accept(iv);	
-		
+	view->getCamera()->accept(iv);
+
 	if(hover) hover_callback(x, y);
-	
+
 	if (picker->containsIntersections()) {
-		
+
 		osgUtil::PolytopeIntersector::Intersections intersections = picker->getIntersections();
 		osgUtil::PolytopeIntersector::Intersections::iterator intersection_iter = intersections.begin();
-		
+
 		for (;intersection_iter != intersections.end(); intersection_iter++) {
-			
+
 			if(intersection_iter->nodePath.back()->getUserData()) {
-				
-				ACRefId *rid = (ACRefId*)intersection_iter->nodePath.back()->getUserData();				
+
+				ACRefId *rid = (ACRefId*)intersection_iter->nodePath.back()->getUserData();
 				if(hover)
 					hover_object_callback(rid->object_id, x, y);
 				else

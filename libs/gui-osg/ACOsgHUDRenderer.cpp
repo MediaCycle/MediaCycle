@@ -90,7 +90,8 @@ void ACOsgHUDRenderer::preparePointers(osgViewer::View* view) {
 	if (pointer_renderer.size()>n) {
 
 		for (unsigned int i=n;i<pointer_renderer.size();i++) {
-			pointer_group->removeChild(i, 1);
+			//pointer_group->removeChild(i, 1);
+			pointer_group->removeChild(pointer_renderer[i]->getNode());
 			delete pointer_renderer[i];
 		}
 		pointer_renderer.resize(n);
@@ -104,15 +105,23 @@ void ACOsgHUDRenderer::preparePointers(osgViewer::View* view) {
 			if (pointer_renderer[i]) {
 				pointer_renderer[i]->setMediaCycle(media_cycle);
 				pointer_renderer[i]->setNodeIndex(i);
+				ACPointer* p = media_cycle->getPointerFromIndex(i);
+				if(p){
+					std::string txt = p->getText();
+					pointer_renderer[i]->setText(media_cycle->getPointerFromIndex(i)->getText());
+					std::cout << "Pointer id " << i << " txt " <<  txt << std::endl;
+				}
+				else
+					std::cerr << "ACOsgHUDRenderer::preparePointers: couldn't prepare pointer with index" << i << std::endl;
 				pointer_renderer[i]->prepareNodes();
 				pointer_group->addChild(pointer_renderer[i]->getNode());
 			}
 		}
 	}
 
-	if(view){
+	/*if(view){
 		view->addSlave(this->getCamera(), false);
-	}
+	}*/
 }
 
 
@@ -133,6 +142,7 @@ void ACOsgHUDRenderer::updatePointers(osgViewer::Viewer* view) {
 
 //Qt - composite OSG viewer
 void ACOsgHUDRenderer::updatePointers(osgViewer::View* view) {
+	//this->preparePointers(view);
 
 	int w, h;
 	h = 1; w = 1;
@@ -146,12 +156,18 @@ void ACOsgHUDRenderer::updatePointers(osgViewer::View* view) {
 //Common
 void ACOsgHUDRenderer::updatePointers(int w, int h) {
 	for (unsigned int i=0;i<pointer_renderer.size();i++) {
-		media_cycle_pointer_current_pos = (media_cycle->getPointer(i)).getCurrentPosition();
-		//printf ("POINTER: %f %f\n", media_cycle_pointer_current_pos.x, media_cycle_pointer_current_pos.y);
-		media_cycle_pointer_current_pos.x = (media_cycle_pointer_current_pos.x+1)/2*w;
-		media_cycle_pointer_current_pos.y = (media_cycle_pointer_current_pos.y+1)/2*h;
-		//printf ("POINTER: %f %f\n", media_cycle_pointer_current_pos.x, media_cycle_pointer_current_pos.y);
-	    pointer_renderer[i]->setPos(media_cycle_pointer_current_pos);
-		pointer_renderer[i]->updateNodes();
+		ACPointer* p =0;
+		p = media_cycle->getPointerFromIndex(i);
+		if (p){
+			media_cycle_pointer_current_pos = p->getCurrentPosition();
+			//printf ("POINTER: %f %f\n", media_cycle_pointer_current_pos.x, media_cycle_pointer_current_pos.y);
+			media_cycle_pointer_current_pos.x = (media_cycle_pointer_current_pos.x+1)/2*w;
+			media_cycle_pointer_current_pos.y = (media_cycle_pointer_current_pos.y+1)/2*h;
+			//printf ("POINTER: %f %f\n", media_cycle_pointer_current_pos.x, media_cycle_pointer_current_pos.y);
+			pointer_renderer[i]->setPos(media_cycle_pointer_current_pos);
+			pointer_renderer[i]->updateNodes();
+		}
+		else
+			std::cerr << "ACOsgHUDRenderer::updatePointers pointer at index " << i << " not available" << std::endl;
 	}
 }
