@@ -37,6 +37,8 @@
 //DT : to have access to the media/audio functions
 #include <ACAudio.h>
 
+#define MAX_N_BEATS 16
+
 int set_my_thread_priority(int priority) {
     struct sched_param sp;
 
@@ -138,7 +140,7 @@ ACAudioFeedback::ACAudioFeedback(PaStream *_stream, int samplerate, int buffersi
 		tpv[i].f = 0;
 		tpv[i].samples = 0;
 	}
-	tpv_winsize = 2048;
+	tpv_winsize = 1024; //1024;
 	pv_currentsample = new long int[OPENAL_NUM_BUFFERS];
 
 	// SD - move from createOpenAL
@@ -560,9 +562,9 @@ void ACAudioFeedback::timeCodeAudioEngine(int n_samples) {
 
 	time_from_downbeat += (float)n_samples / output_sample_rate;
 
-	if (time_from_downbeat >= 60.0/active_bpm*4) {
+	if (time_from_downbeat >= 60.0/active_bpm*MAX_N_BEATS) {
 		downbeat_from_start++;
-		time_from_downbeat -= 60.0/active_bpm*4;
+		time_from_downbeat -= 60.0/active_bpm*MAX_N_BEATS;
 	}
 
 	time_from_beat = time_from_downbeat;
@@ -1121,10 +1123,12 @@ void ACAudioFeedback::processAudioEngineSamplePosition(int _loop_slot, int *_pre
 		case ACAudioEngineSynchroModeAutoBeat:
 			if (use_bpm[_loop_slot]) {
 				float nbeats;
+				/*
 				nbeats = ((sample_end-sample_start)/output_sample_rate) / 60.0 * local_bpm;
+				 */
 				*_prev_sample_pos = prev_time_from_downbeat * output_sample_rate * (active_bpm / use_bpm[_loop_slot]);
 				*_sample_pos = time_from_downbeat * output_sample_rate * (active_bpm / use_bpm[_loop_slot]);
-				*_sample_pos_limit = (60.0/active_bpm*4) * output_sample_rate * (active_bpm / use_bpm[_loop_slot]);
+				*_sample_pos_limit = (60.0/active_bpm*MAX_N_BEATS) * output_sample_rate * (active_bpm / use_bpm[_loop_slot]);
 				if (size<*_sample_pos_limit) {
 					*_sample_pos_limit = size;
 				}
@@ -1230,12 +1234,14 @@ void ACAudioFeedback::processAudioEngineResynth(int _loop_slot, int _prev_sample
 	int loop_id;
 	int size;
 	int copied, local_pos, tocopy;
-	float local_pos_f, local_pos_frac;
+	float base_local_pos_f, local_pos_f, local_pos_frac;
 
 	loop_id = loop_ids[_loop_slot];
 	// audio_loop = media_cycle->getAudioLibrary()->getMedia(loop_id);
 	size = use_sample_end[_loop_slot] - use_sample_start[_loop_slot];
 
+	//cout << size;
+	
 	void *source;
 	void *destination;
 
@@ -1247,10 +1253,15 @@ void ACAudioFeedback::processAudioEngineResynth(int _loop_slot, int _prev_sample
 		prev_sample_pos[_loop_slot] = _prev_sample_pos;
 	}
 
+	//cout << size << endl;
+	
 	bpm_ratio = ((float)_sample_pos - (float)prev_sample_pos[_loop_slot]);
 
 	// SD TODO - recover code to implements this
 	// SD TODO - this alsa has to resample to the selected output sample rate, for instance 44.1K
+	
+	// loop_scale_mode[_loop_slot] = ACAudioEngineScaleModeVocode;
+	
 	switch (loop_scale_mode[_loop_slot]) {
 		case ACAudioEngineScaleModeVocode:
 
@@ -1279,25 +1290,32 @@ void ACAudioFeedback::processAudioEngineResynth(int _loop_slot, int _prev_sample
 
 				int startbuffer;
 
+				//cout << "START" << endl;
+				
 				if (local_pos>=0) {
 
 				for (i=0;i<niter;i++) {
 
+					//cout << bpm_ratio << endl;
+					
 					tpv[_loop_slot].speed = bpm_ratio;
 
 					getCurrentFrame(&(tpv[_loop_slot]),0);
-					setCurrentSample(&(tpv[_loop_slot]),local_pos);
+					setCurrentSample(&(tpv[_loop_slot]),local_pos%size);
 
 					//getCurrentFrame(&(tpv[_loop_slot]),1);
 					//setCurrentSampleToNext(&(tpv[_loop_slot]));
 
 					local_pos_f += bpm_ratio * (tpv_winsize / 4); //bpm_ratio;
-					if (local_pos_f>=size) {
+					//cout << "LOC" << local_pos_f << endl;
+					/*if (local_pos_f>=size) {
+						cout << "RESET " << size << " " << tpv_winsize << " " << bpm_ratio << endl; 
+						//tpv[_loop_slot].needResetPhase = 1;
 						local_pos_f -= size;
 					}
 					if (local_pos_f<=0) {
 						local_pos_f = 0;
-					}
+					}*/
 					local_pos = floor(local_pos_f);
 
 					doOLA(&(tpv[_loop_slot]));
@@ -1308,7 +1326,7 @@ void ACAudioFeedback::processAudioEngineResynth(int _loop_slot, int _prev_sample
 						for(k=0;k<tpv[_loop_slot].hopSize;k++) {
 							tmpsample = *((double*)tpv[_loop_slot].buffer+startbuffer+k);
 							tmpsample = std::min(std::max(tmpsample, thmin), thmax);
-							_output_buffer[kk++] = (short) tmpsample; ///2;
+							_output_buffer[kk++] = tmpsample; ///2;
 						}
 					}
 					else {
@@ -1316,15 +1334,15 @@ void ACAudioFeedback::processAudioEngineResynth(int _loop_slot, int _prev_sample
 						//if (tpv.bufferPos > 0)
 						//	tpv.buffer; tpv.bufferPos;
 						for(k=0;k<-startbuffer;k++) {
-							tmpsample = *((double*)tpv[_loop_slot].buffer+startbuffer+k);
+							tmpsample = *((double*)tpv[_loop_slot].buffer+startbuffer+tpv[_loop_slot].winSize+k);
 							tmpsample = std::min(std::max(tmpsample, thmin), thmax);
-							_output_buffer[kk++] = (short) tmpsample; ///2;
+							_output_buffer[kk++] = tmpsample; ///2;
 						}
 						if (tpv[_loop_slot].bufferPos > 0) {
 							for(k=0;k<tpv[_loop_slot].bufferPos;k++) {
-								tmpsample = *((double*)tpv[_loop_slot].buffer+startbuffer+k);
+								tmpsample = *((double*)tpv[_loop_slot].buffer+k);
 								tmpsample = std::min(std::max(tmpsample, thmin), thmax);
-								_output_buffer[kk++] = (short) tmpsample; ///2;
+								_output_buffer[kk++] = tmpsample; ///2;
 							}
 						}
 					}
@@ -1408,33 +1426,43 @@ void ACAudioFeedback::processAudioEngineResynth(int _loop_slot, int _prev_sample
 
 			if (size>0) {
 				local_pos_f = prev_sample_pos[_loop_slot];
+				base_local_pos_f = local_pos_f;
 				/*if (local_pos_f>=size) {
 					local_pos_f -= size;
 				}
 				if (local_pos_f<=0) {
 					local_pos_f = 0;
 				}*/
-				// printf ("%d - %f - %d - %f\n", size, local_pos_f, _sample_pos, bpm_ratio);
+				//printf ("%d - %f - %d - %f\n", size, local_pos_f, _sample_pos, bpm_ratio);
 				local_pos = floor(local_pos_f);
 				local_pos_frac = local_pos_f - local_pos;
 				//if (_sample_pos>=0) {
+				
+				//cout << bpm_ratio << " " << local_pos_f << endl;
+				int pospos;
+				
 				if (local_pos>=0) {
 					for (i=0;i<output_buffer_size;i++) {
-						if (local_pos<size-1) {
-							_output_buffer[i] = (1.0-local_pos_frac)*(float)loop_buffers_audio_engine[_loop_slot][local_pos]
+						if (1) { //local_pos<size-1) {
+							//_output_buffer[i] = (1.0-local_pos_frac)*(float)loop_buffers_audio_engine[_loop_slot][local_pos%size];
+							_output_buffer[i] = (1.0-local_pos_frac)*(float)loop_buffers_audio_engine[_loop_slot][local_pos%size]
 											+(local_pos_frac)*(float)loop_buffers_audio_engine[_loop_slot][(local_pos+1)%size];
 						}
 						else {
 							_output_buffer[i] = 0;
 						}
+						//cout << local_pos%size << endl;
 						//_output_buffer[i] = loop_buffers_audio_engine[_loop_slot][local_pos];
-						local_pos_f += bpm_ratio;
-						if (local_pos_f>=size) {
+						//local_pos_f += bpm_ratio;
+						local_pos_f = base_local_pos_f + (i+1)*bpm_ratio;
+						
+						/*if (local_pos_f>=size) {
 							local_pos_f -= size;
 						}
 						if (local_pos_f<=0) {
 							local_pos_f = 0;
 						}
+						 */
 						local_pos = floor(local_pos_f);
 						local_pos_frac = local_pos_f - local_pos;
 					}
@@ -1655,6 +1683,12 @@ int ACAudioFeedback::createSourceWithPosition(int loop_id, float x, float y, flo
 			local_bpm = (local_feature)[0];
 		}
 	}
+	if (local_bpm<60) {
+		local_bpm = 60;
+	}
+	if (local_bpm>180) {
+		local_bpm = 180;
+	}
 	local_key = 0;
 	local_feature = media_cycle->getFeaturesVectorInMedia(media_id, "acid_key");
 	if ((local_feature).size()) {
@@ -1663,7 +1697,7 @@ int ACAudioFeedback::createSourceWithPosition(int loop_id, float x, float y, flo
 		}
 	}
 	// SD TODO - Acid type not yet used
-	local_acid_type = 0;
+	local_acid_type = 65536;
 	local_feature = media_cycle->getFeaturesVectorInMedia(media_id, "acid_type");
 	if ((local_feature).size()) {
 		if ((local_feature).size()==1) {
@@ -1682,7 +1716,7 @@ int ACAudioFeedback::createSourceWithPosition(int loop_id, float x, float y, flo
 	float* dataf = 0;// = new float[samplesize];
 	dataf = tmp_audio_ptr->getSamples();
 
-	if (dataf){
+	if (dataf) {
 		size = samplesize * sizeof(float);
 		freq = tmp_audio_ptr->getSampleRate();
 
@@ -1734,7 +1768,8 @@ int ACAudioFeedback::createSourceWithPosition(int loop_id, float x, float y, flo
 			resample_ratio = 2.0/(pow(2.0,local_key/12.0));
 			//audio_loop->key += (12-key);
 		}
-		// resample_ratio = 1;
+		
+		//resample_ratio = 1;
 
 		use_bpm[loop_slot] = local_bpm * resample_ratio;
 		use_sample_end[loop_slot] = (int)((float)(sample_end-sample_start) / resample_ratio);
@@ -1816,7 +1851,13 @@ int ACAudioFeedback::createSourceWithPosition(int loop_id, float x, float y, flo
 		prev_sample_pos[loop_slot] = use_sample_start[loop_slot]; // SD TODO
 		//current_buffer[loop_slot] = 0;
 
-		loop_synchro_mode[loop_slot] = ACAudioEngineSynchroModeAutoBeat;
+		if ( (local_acid_type==7) || (local_acid_type==65536) ) {
+			loop_synchro_mode[loop_slot] = ACAudioEngineSynchroModeNone;
+			loop_scale_mode[loop_slot] = ACAudioEngineScaleModeNone;
+		}
+		else {
+			loop_synchro_mode[loop_slot] = ACAudioEngineSynchroModeAutoBeat;
+		}
 		loop_scale_mode[loop_slot] = ACAudioEngineScaleModeVocode; //ACAudioEngineScaleModeResample; //CF: the Vocode mode sounds dirty, the Resample mode introduces a click at the beginning
 
 		if (!use_bpm[loop_slot]) {

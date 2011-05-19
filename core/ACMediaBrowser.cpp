@@ -1153,7 +1153,7 @@ void ACMediaBrowser::updateNextPositionsPropeller() {
 		else {
 			r = 0.5f;
 		}
-		r /= 4.0f;
+		r /= 2.0f;
 		
 		// dt = 1;
 		dt = compute_distance(mLibrary->getMedia((*node).getMediaId())->getAllFeaturesVectors(), mClusterCenters[ci], mFeatureWeights, false) / 2.0 * 10.0;

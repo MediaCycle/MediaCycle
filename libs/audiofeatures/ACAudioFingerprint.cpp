@@ -1,7 +1,7 @@
 /**
  * @brief ACAudioFingerprint.cpp
  * @author Stéphane Dupont
- * @date 13/05/2011
+ * @date 19/05/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -116,6 +116,9 @@ void ACAudioFingerprint::setParameters(int _analysisSampleRate,
 	
 	filterbank_m = allfilters(bandNbr, freqScale, filterShape, minFreq, maxFreq, fftSize, analysisSampleRate);
 	
+	window_v.print();
+	filterbank_m.print();
+	
 	frame_v = colvec(windowSize);
 	frameW_v = colvec(windowSize);
 	frameFFTabs_v = colvec(fftSize);
@@ -124,6 +127,8 @@ void ACAudioFingerprint::setParameters(int _analysisSampleRate,
 	frameFilterBank_v = colvec(bandNbr);
 	prevFrameFilterBank_v = colvec(bandNbr);
 	prevFrameFilterBank_v.zeros(bandNbr);
+	prevprevFrameFilterBank_v = colvec(bandNbr);
+	prevprevFrameFilterBank_v.zeros(bandNbr);
 }
 
 std::vector<ACMediaTimedFeature*> ACAudioFingerprint::computeStream(float *data, long length) {
@@ -154,14 +159,14 @@ std::vector<ACMediaTimedFeature*> ACAudioFingerprint::compute(float *data, long 
 		for (long i = 0; i < windowSize/2; i++)
 			signal_v(i) = 0;
 		for (long i = 0; i < sfinfo2.frames; i++)
-			signal_v(i+windowSize/2) = dataout[i*nChannels];
+			signal_v(i+windowSize/2) = (dataout[i*nChannels]+dataout[i*nChannels+1])/2.0;
 		for (long i = 0; i < windowSize/2; i++)
 			signal_v(i+sfinfo2.frames+windowSize/2 - 1) = 0;
 	}
 	else{
 		signal_v.set_size(sfinfo2.frames);
 		for (long i = 0; i < sfinfo2.frames; i++)
-			signal_v(i) = dataout[i*nChannels]; // we keep only channel 1
+			signal_v(i) = (dataout[i*nChannels]+dataout[i*nChannels+1])/2.0;
 		
 	}
 	delete [] dataout;
@@ -187,9 +192,13 @@ std::vector<ACMediaTimedFeature*> ACAudioFingerprint::compute(float *data, long 
 		
 		frameFFTabs2_v = frameFFTabs_v.rows(0,fftSize/2-1);
 		
+		frameFFTabs2_v = frameFFTabs2_v%frameFFTabs2_v;
+		
 		frameFilterBank_v = trans(filterbank_m)*(frameFFTabs2_v) + math::eps();
 			
 		haitsma_m.row(index) = haitsma(frameFilterBank_v, prevFrameFilterBank_v, bandNbr);
+		
+		prevprevFrameFilterBank_v = prevFrameFilterBank_v;
 		
 		prevFrameFilterBank_v = frameFilterBank_v;
 		

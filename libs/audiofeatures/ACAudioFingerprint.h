@@ -1,7 +1,7 @@
 /**
  * @brief ACAudioFingerprint.h
  * @author Stéphane Dupont
- * @date 13/05/2011
+ * @date 19/05/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -56,6 +56,7 @@ public:
 	
 	void setSampleRate(int sampleRate, int nChannels);
 	
+	/*
 	void setParameters(int analysisSampleRate = 5512.5,
 				  int windowSize = 2048,
 				  int windowShift = 64,
@@ -65,7 +66,18 @@ public:
 				  int bandNbr = 33,
 				  int filterShape = FILTER_SHAPE_RECTANGLE,
 				  int freqScale = FREQ_SCALE_LOG);
-
+	 */
+	
+	void setParameters(int analysisSampleRate = 22050,
+					   int windowSize = 8192,
+					   int windowShift = 256,
+					   int windowType = WINDOW_TYPE_HAMMING,
+					   int minFreq = 200,
+					   int maxFreq = 2000,
+					   int bandNbr = 33,
+					   int filterShape = FILTER_SHAPE_TRIANGLE,
+					   int freqScale = FREQ_SCALE_LOG);
+	
 	std::vector<ACMediaTimedFeature*> computeStream(float *data, long length);
 
 	std::vector<ACMediaTimedFeature*> compute(float *data, long length);	
@@ -96,6 +108,7 @@ private:
 	arma::colvec prevFrameFFTabs2_v;
 	arma::colvec frameFilterBank_v;
 	arma::colvec prevFrameFilterBank_v;
+	arma::colvec prevprevFrameFilterBank_v;
 };										
 												  
 #endif

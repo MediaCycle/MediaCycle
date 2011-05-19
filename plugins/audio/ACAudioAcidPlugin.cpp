@@ -1,7 +1,7 @@
 /**
  * @brief ACAudioAcidPlugin.cpp
  * @author Stéphane Dupont
- * @date 16/05/2011
+ * @date 19/05/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -33,6 +33,7 @@
 #include "ACAudio.h"
 #include <vector>
 #include <string>
+#include <libgen.h>
 
 ACAudioAcidPlugin::ACAudioAcidPlugin() {
 	
@@ -76,6 +77,30 @@ float ACAudioAcidPlugin::getBPM(int acid_type, int _nbeats, int nsamples, int sa
 		BPM = highest_BPM;
 	}
 	return BPM;
+}
+
+void ACAudioAcidPlugin::extractDataWavNotAcid(string fname, int nsamples, int sample_rate) {
+
+	string bpmfilename;
+	FILE *bpmfile;
+	
+	bpmfilename = dirname(strdup(fname.c_str()));
+	bpmfilename = bpmfilename + "/bpm.txt";
+	
+	bpmfile = fopen(bpmfilename.c_str(),"r");
+	if (bpmfile) {
+		fscanf(bpmfile, "%f", &acid_bpm);
+		acid_type = 2;
+	}
+	else {
+		acid_bpm = 0;
+	}
+	
+	if (acid_bpm) {
+		acid_key = 0;
+	}
+	
+	fclose(bpmfile);
 }
 
 void ACAudioAcidPlugin::extractDataWavAcid(string fname, int nsamples, int sample_rate) {
@@ -150,15 +175,19 @@ std::vector<ACMediaFeatures*> ACAudioAcidPlugin::calculate(ACMediaData* aData, A
 		return desc;
 	}
 	
-	acid_type = 65535;
+	// acid_type = 65535;
 	
 	extractDataWavAcid(theAudio->getFileName(), theAudio->getNFrames(), theAudio->getSampleRate());
 	
 	if (acid_type == 65535) {
-		acid_type = 65535;
-		acid_key = 0;
-		acid_nbeats = 0;
-		acid_bpm = 0;
+		
+		extractDataWavNotAcid(theAudio->getFileName(), theAudio->getNFrames(), theAudio->getSampleRate());
+		
+		if (acid_bpm == 0) {
+			acid_key = 0;
+			acid_nbeats = 0;
+			acid_bpm = 0;
+		}
 	}
 	
 	feat = new ACMediaFeatures(); 

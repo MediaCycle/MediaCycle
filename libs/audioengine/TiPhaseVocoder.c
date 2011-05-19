@@ -105,8 +105,10 @@ int initPV(TiPhaseVocoder *tpv){
     tpv->currentFrame = -100;
     tpv->lockingMode = 0;
     tpv->peaksIndex = 0;
+	tpv->needResetPhase = 1;
+
     tpv->normalizationFactor = 1/1.5;//corresponds to a shift of 1/4 between each hanning-windowed frame. 1/2.0 if shift=1/8
-    
+
     return 0;
 }
 
@@ -136,6 +138,12 @@ int setWinsize(TiPhaseVocoder *tpv, int winsize) {
         tpv->outputPhase = (double *) realloc(tpv->outputPhase,winsize*sizeof(double));
         tpv->buffer = (double *) realloc(tpv->buffer,winsize*sizeof(double));
 
+		memset(tpv->dphase, 0, winsize*sizeof(double));
+		memset(tpv->output, 0, winsize*sizeof(double));
+		memset(tpv->outputAmplitude, 0 , winsize*sizeof(double));
+		memset(tpv->outputPhase, 0 , winsize*sizeof(double));
+		memset(tpv->buffer, 0, winsize*sizeof(double));
+		
         tpv->winSize = winsize;
         tpv->hopSize = (int) winsize/HOPSIZEFACTOR;
         
@@ -314,9 +322,11 @@ int getCurrentFrame(TiPhaseVocoder *tpv,int flagResetPhase) {
         tpv->currentFrame = currentFrame;
     }
 
-    if(flagResetPhase)
+    if ( (flagResetPhase) || (tpv->needResetPhase) ) {
         resetPhase(tpv);
-    
+		tpv->needResetPhase = 0;
+	}
+	
     computeOutputFrame(tpv);
 
     if (tmpdata)
@@ -389,7 +399,7 @@ int computeOutputFrame(TiPhaseVocoder *tpv) {
         tpv->output[k] = tpv->outputFFT.re[k];
     }
     
-        //output phase computation
+	//output phase computation
     switch (tpv->lockingMode) {
         case 0:
             //normal phase vocoder
@@ -544,7 +554,7 @@ int doOLA(TiPhaseVocoder *tpv) {
     }
 
     for (k=tpv->bufferPos,m=0;k<tpv->winSize;k++,m++) {
-        tpv->buffer[k] += (tpv->output[m]*tpv->hanning[m])*tpv->normalizationFactor;
+        tpv->buffer[k] += tpv->output[m]*tpv->hanning[m]*tpv->normalizationFactor;
     }
 
     for(k=0;m<tpv->winSize;k++,m++){

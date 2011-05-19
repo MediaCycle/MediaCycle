@@ -1,7 +1,7 @@
 /**
  * @brief ACAudioAcidPlugin.h
  * @author Stéphane Dupont
- * @date 16/05/2011
+ * @date 19/05/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -53,6 +53,7 @@ private:
 	
 	float getBPM(int acid_type, int _nbeats, int nsamples, int sample_rate);
 	void extractDataWavAcid(string fname, int nsamples, int sample_rate);
+	void extractDataWavNotAcid(string fname, int nsamples, int sample_rate);
 		
 	unsigned short	acid_type; 
 	unsigned short	acid_key; 

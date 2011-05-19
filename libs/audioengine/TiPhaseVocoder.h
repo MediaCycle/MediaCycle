@@ -92,6 +92,7 @@ extern "C" {
 		
         // SD
         short *samples;
+		int needResetPhase;
 
     } TiPhaseVocoder;
 

@@ -1,7 +1,7 @@
 /**
  * @brief melfilters.cpp
  * @author Stéphane Dupont
- * @date 12/05/2011
+ * @date 19/05/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -151,6 +151,10 @@ arma::mat allfilters(int bandNbrs, int freqScale, int filterShape, float minFreq
 			break;
 	}
 	
+	// SD TODO - correct triangle so that filter spacing is the same than for rectangle
+	// SD TODO - alow to adjust level of overlap
+	// SD TODO - check sammpl erate conversion, screws up the fingerprint, why?
+	
 	switch (filterShape) {
 		case FILTER_SHAPE_TRIANGLE:
 			chanDist = (minmax(1)-minmax(0))/(bandNbrs+1);
@@ -184,19 +188,27 @@ arma::mat allfilters(int bandNbrs, int freqScale, int filterShape, float minFreq
 	// center_v(nChannels+1) = lmax; // TO CHECK
 	// centerB_v(nChannels+1) = bmax-0.00001; // to ensure no size trouble
 	
+	int overlap = 3;
+	int leftc;
+	int rightc;
+	
 	switch (filterShape) {
 		case FILTER_SHAPE_TRIANGLE:
 			for (int iChan=1; iChan < bandNbrs+1; iChan++) {
-				for (int iBin=centerB_v(iChan-1); iBin <= centerB_v(iChan+1); iBin++) {
-					if ( (iBin > centerB_v(iChan-1)) && (iBin < centerB_v(iChan)) ) {
+				leftc = iChan-overlap;
+				if (leftc<0) { leftc = 0; }
+				rightc = iChan+overlap;
+				if (rightc>bandNbrs+1) { rightc = bandNbrs+1; }
+				for (int iBin=centerB_v(leftc); iBin <= centerB_v(rightc); iBin++) {
+					if ( (iBin > centerB_v(leftc)) && (iBin < centerB_v(iChan)) ) {
 						current = log(iBin/f2b);
 						dist = center_v(iChan) - current;
-						filterbank_m(iBin, iChan-1) = 2*(1-dist/chanDist);
+						filterbank_m(iBin, iChan-1) = 2*(1-dist/(chanDist*overlap));
 					}
-					else if ( (iBin >= centerB_v(iChan)) && (iBin <= centerB_v(iChan+1)) ) {
+					else if ( (iBin >= centerB_v(iChan)) && (iBin <= centerB_v(rightc)) ) {
 						current = log(iBin/f2b);
 						dist = current - center_v(iChan);
-						filterbank_m(iBin, iChan-1) = 2*(1-dist/chanDist);			
+						filterbank_m(iBin, iChan-1) = 2*(1-dist/(chanDist*overlap));			
 					}
 				}
 			}

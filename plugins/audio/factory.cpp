@@ -13,11 +13,11 @@
 //the factories
 
 extern "C" ACPlugin* create(std::string namePlugin) {
-	if (namePlugin == "ACAudioAcidPlugin") {return new ACAudioAcidPlugin();}
 	if (namePlugin == "ACAudioFeaturesPlugin") {return new ACAudioFeaturesPlugin();}
 	//if (namePlugin == "ACAudioHaitsmaFingerprintPlugin") {return new ACAudioHaitsmaFingerprintPlugin();}
 	//if (namePlugin == "ACAudioGardenFeaturesPlugin") {return new ACAudioGardenFeaturesPlugin();}
 	//if (namePlugin == "ACAudioFeaturesChromaRhythmPlugin") {return new ACAudioFeaturesChromaRhythmPlugin();}
+	if (namePlugin == "ACAudioAcidPlugin") {return new ACAudioAcidPlugin();}
 }
 
 extern "C" void destroy(ACPlugin* d) {
@@ -27,10 +27,10 @@ extern "C" void destroy(ACPlugin* d) {
 extern "C" std::vector<std::string> list() {    //returns a string vector containing the plugin names included in the DLL file
     std::vector<std::string> listPlugin;
 	listPlugin.push_back("ACAudioFeaturesPlugin");
-	listPlugin.push_back("ACAudioAcidPlugin");
 	//listPlugin.push_back("ACAudioHaitsmaFingerprintPlugin");
     //listPlugin.push_back("ACAudioGardenFeaturesPlugin");
 	//listPlugin.push_back("ACAudioFeaturesChromaRhythmPlugin");
     //listPlugin.push_back("...");
+	listPlugin.push_back("ACAudioAcidPlugin");
     return listPlugin;
 }
