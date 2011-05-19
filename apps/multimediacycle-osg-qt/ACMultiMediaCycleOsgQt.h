@@ -66,6 +66,12 @@ QT_END_NAMESPACE
 
 class SettingsDialog; // forward declaration; NB: SettingsDialog member has to be a pointer
 
+class ACDetachedMediaBrowserOsgQt : public QMainWindow {
+Q_OBJECT
+public:
+	ACDetachedMediaBrowserOsgQt(QWidget *parent = 0): QMainWindow(parent){};
+};
+
 class ACMultiMediaCycleOsgQt : public QMainWindow {
 Q_OBJECT
 	
@@ -87,8 +93,9 @@ private slots:
 	void on_actionLoad_Media_Directory_triggered(bool checked);
 	void on_actionLoad_Media_Files_triggered(bool checked);
 	void on_actionClean_triggered(bool checked);
-
 	void on_actionHelpAbout_triggered(bool checked);
+	void on_actionDetachBrowser_triggered(bool checked);
+	void on_actionFullscreen_triggered(bool checked);
 	
 public:
 	ACMultiMediaCycleOsgQt(QWidget *parent = 0);
@@ -163,6 +170,7 @@ private:
 	
 	ACAboutDialogFactoryQt* aboutDialogFactory;
 	ACAbstractAboutDialogQt* aboutDialog;
+	QMainWindow* detachedBrowser;
 	
 	// methods
 	bool readQSettings();
@@ -177,5 +185,10 @@ private:
 	void showError(const exception& e);
 	bool hasMediaCycle();
 	void changeMediaType(ACMediaType _mt);
+
+	ACOsgCompositeViewQt* compositeOsgView;
+	QDockWidget* osgViewDock;
+	QWidget* osgViewDockTitleBar;
+	QRect osgViewDockNormalSize;
 };
 #endif

@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>898</width>
-    <height>829</height>
+    <width>466</width>
+    <height>325</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -21,16 +21,19 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>800</width>
-    <height>600</height>
+    <width>466</width>
+    <height>325</height>
    </size>
   </property>
   <property name="windowTitle">
    <string>MediaCycleOsgQt</string>
   </property>
   <widget class="QWidget" name="centralwidget">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="sizePolicy">
-    <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
      <horstretch>0</horstretch>
      <verstretch>0</verstretch>
     </sizepolicy>
@@ -39,29 +42,6 @@
     <property name="margin">
      <number>0</number>
     </property>
-    <item>
-     <widget class="ACOsgCompositeViewQt" name="compositeOsgView" native="true">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="minimumSize">
-       <size>
-        <width>600</width>
-        <height>600</height>
-       </size>
-      </property>
-      <property name="baseSize">
-       <size>
-        <width>600</width>
-        <height>600</height>
-       </size>
-      </property>
-      <layout class="QGridLayout" name="gridLayout"/>
-     </widget>
-    </item>
    </layout>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -69,11 +49,11 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>898</width>
-     <height>22</height>
+     <width>466</width>
+     <height>21</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menu_File">
+   <widget class="QMenu" name="menuFile">
     <property name="title">
      <string>File</string>
     </property>
@@ -96,13 +76,21 @@
     </property>
     <addaction name="actionHelpAbout"/>
    </widget>
-   <addaction name="menu_File"/>
+   <widget class="QMenu" name="menuDisplay">
+    <property name="title">
+     <string>Display</string>
+    </property>
+    <addaction name="actionFullscreen"/>
+    <addaction name="actionDetachBrowser"/>
+   </widget>
+   <addaction name="menuFile"/>
    <addaction name="menuConfig"/>
+   <addaction name="menuDisplay"/>
    <addaction name="menuHelp"/>
   </widget>
   <widget class="QToolBar" name="toolbar">
    <property name="sizePolicy">
-    <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+    <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
      <horstretch>0</horstretch>
      <verstretch>0</verstretch>
     </sizepolicy>
@@ -144,7 +132,14 @@
    <addaction name="actionSave_XML"/>
    <addaction name="actionClean"/>
   </widget>
-  <widget class="QStatusBar" name="statusBar"/>
+  <widget class="QStatusBar" name="statusbar">
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+  </widget>
   <action name="actionLoad_Media_Directory">
    <property name="text">
     <string>Load Media Directory</string>
@@ -224,15 +219,23 @@
     <string>Ctrl+@</string>
    </property>
   </action>
+  <action name="actionFullscreen">
+   <property name="text">
+    <string>Fullscreen</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+F</string>
+   </property>
+  </action>
+  <action name="actionDetachBrowser">
+   <property name="text">
+    <string>Detach Browser</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+D</string>
+   </property>
+  </action>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>ACOsgCompositeViewQt</class>
-   <extends>QWidget</extends>
-   <header>ACOsgCompositeViewQt.h</header>
-   <container>1</container>
-  </customwidget>
- </customwidgets>
  <resources/>
  <connections/>
 </ui>
