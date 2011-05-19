@@ -1,6 +1,6 @@
 /**
  * @brief ACAudioAcidPlugin.cpp
- * @author Stéphane Dupont
+ * @author Alexis Moinet
  * @date 19/05/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
@@ -91,6 +91,7 @@ void ACAudioAcidPlugin::extractDataWavNotAcid(string fname, int nsamples, int sa
 	if (bpmfile) {
 		fscanf(bpmfile, "%f", &acid_bpm);
 		acid_type = 2;
+                fclose(bpmfile);
 	}
 	else {
 		acid_bpm = 0;
@@ -98,9 +99,7 @@ void ACAudioAcidPlugin::extractDataWavNotAcid(string fname, int nsamples, int sa
 	
 	if (acid_bpm) {
 		acid_key = 0;
-	}
-	
-	fclose(bpmfile);
+	}	
 }
 
 void ACAudioAcidPlugin::extractDataWavAcid(string fname, int nsamples, int sample_rate) {
@@ -180,7 +179,7 @@ std::vector<ACMediaFeatures*> ACAudioAcidPlugin::calculate(ACMediaData* aData, A
 	extractDataWavAcid(theAudio->getFileName(), theAudio->getNFrames(), theAudio->getSampleRate());
 	
 	if (acid_type == 65535) {
-		
+
 		extractDataWavNotAcid(theAudio->getFileName(), theAudio->getNFrames(), theAudio->getSampleRate());
 		
 		if (acid_bpm == 0) {
