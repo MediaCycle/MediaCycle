@@ -8,9 +8,6 @@ IF(SUPPORT_VIDEO AND USE_QT4)
 		SET(APP_TYPE MACOSX_BUNDLE)
 	ENDIF ( APPLE )
 
-	SET(QT_USE_PHONON TRUE)
-	include( ${QT_USE_FILE} )
-
 	SET(videocycle-simple-qt_SRCS main.cpp VideoCycle.cpp)
 	SET(videocycle-simple-qt_MOC_HDRS VideoCycle.h)
 	SET(videocycle-simple-qt_UIS VideoCycle.ui)
