@@ -64,7 +64,6 @@ enum	{
 	int osc_feedback_port; 
 	int browser_mode;
 
-	//ACOscBrowser			*osc_browser;
 	//
 	IBOutlet ACOsgBrowserViewCocoa*		browser_osg_view;
 	//
@@ -217,6 +216,5 @@ enum	{
 - (void) myObserver:(NSNotification *)inNotification;
 - (void) awakeFromNib;
 - (void) updatedLibrary;
-- (int) processOscMessage:(const char*) path withArg2:(const char*) types withArg3:(lo_arg**) argv withArg4:(int) argc;
 
 @end

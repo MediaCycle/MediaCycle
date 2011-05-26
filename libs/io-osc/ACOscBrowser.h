@@ -46,6 +46,8 @@
 
 #include <MediaCycle.h>
 
+#include <ACOscFeedback.h>
+
 #if defined (SUPPORT_AUDIO)
 #include <ACAudioEngine.h>
 #endif //defined (SUPPORT_AUDIO)
@@ -55,6 +57,7 @@ typedef int (ACOscBrowserCallback)(const char *path, const char *types, lo_arg *
 class ACOscBrowser {
 	public:
 		ACOscBrowser(){ 
+			osc_feedback = 0;
 			server_thread = 0;
 		};
 		~ACOscBrowser(){ 
@@ -81,6 +84,8 @@ class ACOscBrowser {
 		lo_server_thread server_thread;
 		void* user_data;
 		ACOscBrowserCallback* callback;
+	
+		ACOscFeedback *osc_feedback;
 
 	public:
 		static int static_mess_handler(const char *path, const char *types, lo_arg **argv,int argc, void *data, void *user_data);
@@ -93,6 +98,8 @@ class ACOscBrowser {
 		void setAudioEngine(ACAudioEngine* _audio_engine){ audio_engine = _audio_engine;}
 		ACAudioEngine* getAudioEngine() {return audio_engine;}
 		#endif //defined (SUPPORT_AUDIO)
+		void setFeedback(ACOscFeedback *_osc_feedback){this->osc_feedback = _osc_feedback;}
+		ACOscFeedback* getFeedback(){return this->osc_feedback;}
 		
 	protected:
 		MediaCycle *media_cycle;

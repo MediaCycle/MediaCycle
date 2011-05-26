@@ -63,10 +63,10 @@ public:
 	ACMediaType getMediaType(){return this->media_type;}
 	void setClassName(std::string _class_name){this->class_name=_class_name;}
 	std::string getClassName(){return this->class_name;}
-	void setMediaCycle(MediaCycle* _media_cycle){ media_cycle = _media_cycle;}
+	virtual void setMediaCycle(MediaCycle* _media_cycle){ media_cycle = _media_cycle;}
 	MediaCycle* getMediaCycle() {return media_cycle;}
 	#if defined (SUPPORT_AUDIO)
-	void setAudioEngine(ACAudioEngine* _audio_engine){ audio_engine = _audio_engine;}
+	virtual void setAudioEngine(ACAudioEngine* _audio_engine){ audio_engine = _audio_engine;}
 	ACAudioEngine* getAudioEngine() {return audio_engine;}
 	#endif //defined (SUPPORT_AUDIO)
 	void setOsgView(ACOsgCompositeViewQt* _osg_view){ osg_view = _osg_view;}

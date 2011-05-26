@@ -59,6 +59,7 @@ public:
 	ACOSCDockWidgetQt(QWidget *parent = 0);
 	~ACOSCDockWidgetQt();
 
+#if defined (USE_OSC)	
 	void disableControl();
 	void disableFeedback();
 	void setControlPort(int port);
@@ -66,15 +67,15 @@ public:
 	ACOscBrowser* getControlHandler(){return osc_browser;}
 	ACOscFeedback* getFeedbackHandler(){return osc_feedback;}
 
+	void setMediaCycle(MediaCycle* _media_cycle){media_cycle = _media_cycle; osc_browser->setMediaCycle(_media_cycle);}
+	void setAudioEngine(ACAudioEngine* _audio_engine){ audio_engine = _audio_engine; osc_browser->setAudioEngine(_audio_engine);}
+#endif //defined (USE_OSC)
+
 private:
 	Ui::ACOSCDockWidgetQt ui;
 #if defined (USE_OSC)
 	ACOscBrowser *osc_browser;
 	ACOscFeedback *osc_feedback;
-
-public:
-	static int static_mess_handler(const char *path, const char *types, lo_arg **argv,int argc, void *data, void *user_data);
-	int process_mess(const char *path, const char *types, lo_arg **argv,int argc);
 #endif //defined (USE_OSC)
 };
 
