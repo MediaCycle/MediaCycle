@@ -202,6 +202,16 @@ IF(UNIX)
                 list(APPEND UBUNTU_DEPS "libtorch3c2")
             ENDIF()
 
+	    # liblo
+            IF(USE_OSC AND LIBLO_FOUND)
+                list(APPEND UBUNTU_DEPS "liblo7")
+            ENDIF()
+
+            # clucene
+            IF(CLUCENE_FOUND AND SUPPORT_TEXT AND USE_TEXTFEAT)
+                list(APPEND UBUNTU_DEPS "libclucene0ldbl")
+            ENDIF()
+
             STRING(REGEX REPLACE ";" ", " UBUNTU_DEPS "${UBUNTU_DEPS}")
             #MESSAGE("Ubuntu 10.10 deps: ${UBUNTU_DEPS}")
 			set(CPACK_DEBIAN_PACKAGE_DEPENDS ${UBUNTU_DEPS})
