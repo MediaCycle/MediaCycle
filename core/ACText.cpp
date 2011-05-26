@@ -32,6 +32,7 @@
  *
  */
 
+#if defined (SUPPORT_TEXT)
 #include "ACText.h"
 using namespace std;
 
@@ -74,3 +75,4 @@ void* ACText::getThumbnailPtr(){
 	return NULL;
 
 }
+#endif //defined (SUPPORT_TEXT)

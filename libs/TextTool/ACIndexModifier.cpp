@@ -51,25 +51,30 @@ ACIndexModifier::~ACIndexModifier(void){
 		_CLDELETE(directory);
 }
 
+#ifdef OLD_CLUCENE
+bool ACIndexModifier::getTermFreqVectors(int32_t docNumber, Array<TermFreqVector*>& result){
+	SCOPED_LOCK_MUTEX(directory->THIS_LOCK)
+	assureOpen();
+	createIndexReader();
+	
+	return indexReader->getTermFreqVectors( docNumber, result);
+}
+#else
 CL_NS(util)::ArrayBase<TermFreqVector*>* ACIndexModifier::getTermFreqVectors(int32_t docNumber) {
 	SCOPED_LOCK_MUTEX(directory->THIS_LOCK)
 	assureOpen();
 	createIndexReader();
 	return indexReader->getTermFreqVectors( docNumber);
 }
+#endif
+
 TermFreqVector* ACIndexModifier::getTermFreqVector(int32_t docNumber, const TCHAR* field){
 	SCOPED_LOCK_MUTEX(directory->THIS_LOCK)
 	assureOpen();
 	createIndexReader();
 	return indexReader->getTermFreqVector( docNumber, field);
 }
-/*bool ACIndexModifier::getTermFreqVectors(int32_t docNumber, Array<TermFreqVector*>& result){
-	SCOPED_LOCK_MUTEX(directory->THIS_LOCK)
-	assureOpen();
-	createIndexReader();
-	
-	return indexReader->getTermFreqVectors( docNumber, result);
-}*/
+
 int32_t ACIndexModifier::docFreq(const Term* t){
 	SCOPED_LOCK_MUTEX(directory->THIS_LOCK)
 	assureOpen();

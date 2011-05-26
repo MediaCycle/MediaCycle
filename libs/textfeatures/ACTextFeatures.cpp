@@ -35,24 +35,40 @@
 #include "ACTextFeatures.h"
 
 #include <string.h>
-#include "CLucene/clucene-config.h"
+#include <CLucene/clucene-config.h>
 #include <iostream>
 //#include <TermVector.h>
 
-#include "utf8.h"
+#include <utf8.h>
+
+using namespace std;
+//using namespace lucene::analysis;
+using namespace lucene::index;
+//using namespace lucene::util;
+//using namespace lucene::search;
+
 void getFreqTerm(Array<int32_t> &ret,std::vector<wchar_t *> termsToFind, int32_t nTerms,TermFreqVector* termsFreqBase){
 	int i=0;
 	ret.length = nTerms;
 	ret.values = _CL_NEWARRAY(int32_t,nTerms);
 	int32_t test;
 	test=termsFreqBase->size();
-	
-	const ArrayBase< int32_t > * 	freqTargeted=termsFreqBase->getTermFrequencies ();
-	const ArrayBase<const wchar_t*>* 	termTargeted=termsFreqBase->getTerms ();
+
+	#ifdef OLD_CLUCENE
+		const Array< int32_t > * freqTargeted =termsFreqBase->getTermFrequencies ();
+		const wchar_t** 	termTargeted=termsFreqBase->getTerms ();
+	#else
+		const ArrayBase< int32_t > * 	freqTargeted=termsFreqBase->getTermFrequencies ();
+		const ArrayBase<const wchar_t*>* 	termTargeted=termsFreqBase->getTerms ();
+	#endif
 	int nTermFreq=termsFreqBase->getTermFrequencies()->length;
 	for (int j=0;j<nTermFreq;j++){
 		Term tempTermToFind(_T("contents"),termsToFind[i]);
-		Term tempTermFreq(_T("contents"),termTargeted->values[j]);
+		#ifdef OLD_CLUCENE
+			Term tempTermFreq(_T("contents"),termTargeted[j]);
+		#else
+			Term tempTermFreq(_T("contents"),termTargeted->values[j]);
+		#endif
 		while (tempTermToFind.compareTo(&tempTermFreq)<0){
 			ret.values[i]=0;			
 			i++;
@@ -128,6 +144,8 @@ void extractLuceneFeature(std::vector<float> &output,int32_t docIndex,ACIndexMod
 #else
 //	wprintf(_T("\n"));	
 #endif
-	tf.deleteValues();
+	#ifndef OLD_CLUCENE
+		tf.deleteValues();
+	#endif
 	_CLDELETE(testVect);
 	}

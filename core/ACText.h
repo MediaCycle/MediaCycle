@@ -32,6 +32,7 @@
  *
  */
 
+#if defined (SUPPORT_TEXT)
 
 #ifndef ACTEXT_H
 #define ACTEXT_H
@@ -62,4 +63,5 @@ public:
 	
 	
 };
-#endif
+#endif // ACTEXT_H
+#endif //defined (SUPPORT_TEXT)

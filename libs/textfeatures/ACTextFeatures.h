@@ -38,21 +38,8 @@
 
 #include "ACIndexModifier.h"
 
-using namespace std;
-//using namespace lucene::analysis;
-using namespace lucene::index;
-//using namespace lucene::util;
-//using namespace lucene::search;
 typedef TCHAR* TCHARPTR;
-
-
-
-
-
-
 
 void extractIndexTerms(TCHAR**  &outTerms,int &nbOutTerms,ACIndexModifier* inputIndex);
 void extractLuceneFeature(std::vector<float> &output,int32_t docIndex,ACIndexModifier* inputIndex,std::vector<TCHAR*>  terms,int nbTerms);
-
-
 #endif

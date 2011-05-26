@@ -61,9 +61,13 @@ public:
 	
 	ACIndexModifier(const char* dirName, Analyzer* analyzer, bool create);
 	~ACIndexModifier(void);
-//	bool getTermFreqVectors(int32_t docNumber, Array<TermFreqVector*>& result);
 	
-	CL_NS(util)::ArrayBase<TermFreqVector*>* getTermFreqVectors(int32_t docNumber); 
+	#ifdef OLD_CLUCENE
+		bool getTermFreqVectors(int32_t docNumber, Array<TermFreqVector*>& result);
+	#else
+		CL_NS(util)::ArrayBase<TermFreqVector*>* getTermFreqVectors(int32_t docNumber);
+	#endif
+	
 	TermFreqVector* getTermFreqVector(int32_t docNumber, const TCHAR* field);
 	int32_t docFreq(const Term* t);
 	TermPositions* termPositions();

@@ -50,6 +50,9 @@ void ACAboutDialogQt::updateLicenses(){
 		html.append ("<li><a href=\"http://www.netlib.org/blas/\">Blas</a>: just requires attribution</li>");
 	#endif//ndef __APPLE__
 	html.append ("<li><a href=\"http://www.boost.org\">Boost</a>: Boost Software License (attribution)</li>");
+	#if defined (SUPPORT_TEXT)
+		html.append ("<li><a href=\"http://sourceforge.net/projects/clucene/\">clucene</a>: LGPL License</li>");
+	#endif //defined (SUPPORT_TEXT)
 	#if defined (SUPPORT_VIDEO) || defined (SUPPORT_IMAGE)
 		html.append ("<li><a href=\"http://www.ffmpeg.org\">FFmpeg</a>: LGPL (without GPL and non free codecs)</li>");
 	#endif //defined (SUPPORT_VIDEO) || defined (SUPPORT_IMAGE)

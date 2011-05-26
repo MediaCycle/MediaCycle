@@ -35,6 +35,7 @@
 #ifndef ACTEXTDATA_H
 #define ACTEXTDATA_H
 
+#if defined (SUPPORT_TEXT)
 #include "ACMediaData.h"
 #include <cstdlib>
 #include <cstring>
@@ -58,5 +59,5 @@ private:
 	
 };
 
-
+#endif //defined (SUPPORT_TEXT)
 #endif // ACTEXTDATA_H

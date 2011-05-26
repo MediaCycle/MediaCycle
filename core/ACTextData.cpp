@@ -32,6 +32,7 @@
  *
  */
 
+#if defined (SUPPORT_TEXT)
 #include "ACTextData.h"
 #include <string>
 #include <iostream>
@@ -82,3 +83,4 @@ void ACTextData::setData(string* _data){
 	(*text_ptr)=(*_data);
 }
 
+#endif //defined (SUPPORT_TEXT)
