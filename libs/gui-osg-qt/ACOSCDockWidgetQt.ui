@@ -91,7 +91,7 @@
       </property>
       <property name="font">
        <font>
-        <pointsize>8</pointsize>
+        <pointsize>10</pointsize>
        </font>
       </property>
       <property name="toolTip">
@@ -104,10 +104,10 @@
      <widget class="QPushButton" name="pushButtonControlStart">
       <property name="geometry">
        <rect>
-        <x>180</x>
-        <y>10</y>
-        <width>50</width>
-        <height>31</height>
+        <x>179</x>
+        <y>20</y>
+        <width>41</width>
+        <height>21</height>
        </rect>
       </property>
       <property name="text">
@@ -122,6 +122,11 @@
         <width>61</width>
         <height>23</height>
        </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>10</pointsize>
+       </font>
       </property>
       <property name="maximum">
        <number>99999</number>
@@ -157,7 +162,7 @@
       </property>
       <property name="font">
        <font>
-        <pointsize>8</pointsize>
+        <pointsize>10</pointsize>
        </font>
       </property>
       <property name="text">
@@ -167,10 +172,10 @@
      <widget class="QPushButton" name="pushButtonFeedbackStart">
       <property name="geometry">
        <rect>
-        <x>180</x>
-        <y>10</y>
-        <width>50</width>
-        <height>32</height>
+        <x>179</x>
+        <y>20</y>
+        <width>41</width>
+        <height>21</height>
        </rect>
       </property>
       <property name="text">
@@ -185,6 +190,11 @@
         <width>61</width>
         <height>23</height>
        </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>10</pointsize>
+       </font>
       </property>
       <property name="maximum">
        <number>99999</number>
