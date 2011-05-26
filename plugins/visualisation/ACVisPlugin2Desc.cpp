@@ -1,7 +1,7 @@
 /**
  * @brief ACVisPlugin2Desc.cpp
- * @author Xavier Siebert
- * @date 20/04/2011
+ * @author Thierry Ravet
+ * @date 26/05/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -98,8 +98,8 @@ void ACVisPlugin2Desc::extractDescMatrix(ACMediaBrowser* mediaBrowser, mat& desc
 	// Count nb of feature
 	int nbFeature = loops.back()->getNumberOfFeaturesVectors();
 	for(int f=0; f< nbFeature; f++){
-		featureNames.push_back(loops.back()->getFeaturesVector(f)->getName());
-		featDim = loops.back()->getFeaturesVector(f)->getSize();
+		featureNames.push_back(loops.back()->getPreProcFeaturesVector(f)->getName());
+		featDim = loops.back()->getPreProcFeaturesVector(f)->getSize();
 		for(int d=0; d < featDim; d++){
 			totalDim++;
 		}
@@ -112,9 +112,9 @@ void ACVisPlugin2Desc::extractDescMatrix(ACMediaBrowser* mediaBrowser, mat& desc
     int tmpIdx = 0;
     for(int f=0; f< nbFeature; f++){
 			std::cout << f << std::endl;
-			featDim = loops.back()->getFeaturesVector(f)->getSize();
+			featDim = loops.back()->getPreProcFeaturesVector(f)->getSize();
 			for(int d=0; d < featDim; d++){
-				desc_m(i,tmpIdx) = loops[i]->getFeaturesVector(f)->getFeatureElement(d);
+				desc_m(i,tmpIdx) = loops[i]->getPreProcFeaturesVector(f)->getFeatureElement(d);
 				tmpIdx++;
       }
     }

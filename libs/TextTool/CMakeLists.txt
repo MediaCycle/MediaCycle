@@ -1,0 +1,12 @@
+IF ( CLUCENE_FOUND  )
+#	MESSAGE("Building textTool ")
+	FILE(GLOB SRC *.cpp *.c)
+	FILE(GLOB HDR *.hpp *.h)
+
+	ADD_LIBRARY(textTool STATIC ${SRC} ${HDR})
+
+	TARGET_LINK_LIBRARIES(textTool ${CLUCENE_LIBRARIES})
+	MESSAGE("[X] TextTool")
+ELSE ( CLUCENE_FOUND)
+	MESSAGE("[ ] TextTool")
+ENDIF ( CLUCENE_FOUND )

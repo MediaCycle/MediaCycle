@@ -913,6 +913,11 @@ void ACMultiMediaCycleOsgQt::loadDefaultConfig(ACMediaType _media_type, ACBrowse
 			smedia="video";
 			#endif //defined (SUPPORT_VIDEO)
 			break;
+		case MEDIA_TYPE_TEXT:
+#if defined (SUPPORT_TEXT)
+			smedia="text";
+#endif //defined (SUPPORT_TEXT)
+			break;
 		default:
 			break;
 	}

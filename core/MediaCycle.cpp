@@ -533,6 +533,14 @@ void MediaCycle::changeVisualisationPlugin(string pluginName){
 }
 */
 
+
+void MediaCycle::setPreProcessPlugin(string pluginName){
+	ACPlugin* preProcessPlugin = this->getPluginManager()->getPlugin(pluginName);
+	if (preProcessPlugin!=NULL)
+		this->getLibrary()->setPreProcessPlugin(preProcessPlugin);
+}
+
+
 void MediaCycle::dumpPluginsList(){this->pluginManager->dump();}
 
 // == Media
@@ -609,7 +617,7 @@ vector<float> MediaCycle::getFeaturesVectorInMedia(int i, string feature_name) {
 	ACMediaFeatures* lfeatures;
 	FeaturesVector lfeaturesvector;
 	lmedia = mediaLibrary->getMedia(i);
-	lfeatures = lmedia->getFeaturesVector(feature_name);
+	lfeatures = lmedia->getPreProcFeaturesVector(feature_name);
 	if (lfeatures) {
 		lfeaturesvector = *(lfeatures->getFeaturesVector());
 	}

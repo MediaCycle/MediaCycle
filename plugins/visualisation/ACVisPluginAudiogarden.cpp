@@ -1,7 +1,7 @@
 /**
  * @brief ACVisPluginAudiogarden.cpp
- * @author Xavier Siebert
- * @date 20/04/2011
+ * @author Thierry Ravet
+ * @date 26/05/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -122,12 +122,12 @@ mat ACVisPluginAudiogarden::extractDescMatrix(ACMediaLibrary* lib, string featur
 	int nbFeature = loops.back()->getNumberOfFeaturesVectors();
 
 	for(int f=0; f< nbFeature; f++){
-		if (loops.back()->getFeaturesVector(f)->getName() == featureName){
+		if (loops.back()->getPreProcFeaturesVector(f)->getName() == featureName){
 			featureId = f;
 		}	
 	}
 
-	featureSize = loops.back()->getFeaturesVector(featureId)->getSize();
+	featureSize = loops.back()->getPreProcFeaturesVector(featureId)->getSize();
 	
   mat desc_m(loops.size(),featureSize);
   
@@ -135,7 +135,7 @@ mat ACVisPluginAudiogarden::extractDescMatrix(ACMediaLibrary* lib, string featur
   
   for(int i=0; i<loops.size(); i++) {    
 		for(int d=0; d < featureSize; d++){
-			desc_m(i, d) = loops[i]->getFeaturesVector(featureId)->getFeatureElement(d);
+			desc_m(i, d) = loops[i]->getPreProcFeaturesVector(featureId)->getFeatureElement(d);
 		}
   }
 	return desc_m;

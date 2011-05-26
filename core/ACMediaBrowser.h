@@ -311,6 +311,11 @@ public:
 	// CF switch navigation mode while navigating
 	void switchMode(ACBrowserMode _mode);
 
+	const vector<float> &getFeatureWeights(){return mFeatureWeights;};
+	const int &getClusterCount(){return mClusterCount;};
+	const vector<vector <float> > &getClusterCenter(int i){return mClusterCenters[i];};
+	
+	
 private: // better not let the ouside world know about internal cooking
 	void resetNavigation();
 	void resetLoopNavigationLevels(int l=0);

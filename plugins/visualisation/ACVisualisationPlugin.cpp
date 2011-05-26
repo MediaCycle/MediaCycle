@@ -1,7 +1,7 @@
 /**
  * @brief ACVisualisationPlugin.cpp
  * @author Thierry Ravet
- * @date 07/04/2011
+ * @date 26/05/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -625,7 +625,7 @@ mat ACVisualisationPlugin::extractDescMatrix(ACMediaBrowser* mediaBrowser, int n
 	// Count nb of feature
 	int nbFeature = loops.back()->getNumberOfFeaturesVectors();
 	for(int f=0; f< nbFeature; f++){
-		featDim = loops.back()->getFeaturesVector(f)->getSize();
+		featDim = loops.back()->getPreProcFeaturesVector(f)->getSize();
 		for(int d=0; d < featDim; d++){
 			totalDim++;
 		}
@@ -646,11 +646,11 @@ mat ACVisualisationPlugin::extractDescMatrix(ACMediaBrowser* mediaBrowser, int n
   for(int i=0; i<nbMedia; i++) {    
     int tmpIdx = 0;
     for(int f=0; f< activeFeatures_v.n_elem; f++){
-      featDim = loops.back()->getFeaturesVector(activeFeatures_v(f))->getSize();
-			featureNames.push_back(loops.back()->getFeaturesVector(activeFeatures_v(f))->getName());
+      featDim = loops.back()->getPreProcFeaturesVector(activeFeatures_v(f))->getSize();
+			featureNames.push_back(loops.back()->getPreProcFeaturesVector(activeFeatures_v(f))->getName());
 			for(int d=0; d < featDim; d++){
-				desc_m(i,tmpIdx) = loops[i]->getFeaturesVector(activeFeatures_v(f))->getFeatureElement(d);
-				descD_m(i,tmpIdx) = loops[i]->getFeaturesVector(activeFeatures_v(f))->getDiscretizedFeature();
+				desc_m(i,tmpIdx) = loops[i]->getPreProcFeaturesVector(activeFeatures_v(f))->getFeatureElement(d);
+				descD_m(i,tmpIdx) = loops[i]->getPreProcFeaturesVector(activeFeatures_v(f))->getDiscretizedFeature();
 				tmpIdx++;
       }
     }

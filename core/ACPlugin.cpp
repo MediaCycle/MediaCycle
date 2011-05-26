@@ -104,4 +104,11 @@ ACNoMethodPositionsPlugin::ACNoMethodPositionsPlugin() {
     //local vars
 }
 
+ACPreProcessPlugin::ACPreProcessPlugin() {
+	
+	this->mPluginType=mPluginType|PLUGIN_TYPE_PREPROCESS;
+	
+    //local vars
+}
+
 

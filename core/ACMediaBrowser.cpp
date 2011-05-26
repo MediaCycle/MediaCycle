@@ -65,7 +65,7 @@ static double compute_distance(vector<ACMediaFeatures*> &obj1, vector<ACMediaFea
 }
 
 // this one is mostly used
-// e.g., compute_distance(mLibrary->getMedia(i)->getAllFeaturesVectors(), mClusterCenters[j], mFeatureWeights, false);
+// e.g., compute_distance(mLibrary->getMedia(i)->getAllPreProcFeaturesVectors(), mClusterCenters[j], mFeatureWeights, false);
 
 static double compute_distance(vector<ACMediaFeatures*> &obj1, const vector<vector <float> > &obj2, const vector<float> &weights, bool inverse_features)
 {
@@ -601,9 +601,8 @@ void ACMediaBrowser::libraryContentChanged(int needsCluster) {
 // sets first feature weight to 1, others to 0
 // assumes all media have the same number of features (as the first one)
 void ACMediaBrowser::initializeFeatureWeights(){
-
-	int fc = mLibrary->getMedia(0)->getNumberOfFeaturesVectors();
-	if (mFeatureWeights.size() == fc) return; // have been set by config file
+	
+	int fc = mLibrary->getMedia(0)->getNumberOfPreProcFeaturesVectors();
 	mFeatureWeights.resize(fc);
 
 	// XS TODO if (config_file)...
@@ -628,7 +627,7 @@ int ACMediaBrowser::getKNN(int id, vector<int> &ids, int k) {
 	// XS TODO simplify this
 	vector<ACMedia*> loops = mLibrary->getAllMedia();
 	int object_count = loops.size(); if(object_count == 0) return -1;
-	int feature_count = loops.back()->getNumberOfFeaturesVectors();
+	int feature_count = loops.back()->getNumberOfPreProcFeaturesVectors();
 	assert(mFeatureWeights.size() == feature_count);
 
 	double inv_weight = 0.0;
@@ -652,9 +651,9 @@ int ACMediaBrowser::getKNN(int id, vector<int> &ids, int k) {
 	else return -1;
 
 	distances.resize(object_count);
-
-	for (i=0; i<object_count; i++) {
-		distances[i] = compute_distance(loops[el]->getAllFeaturesVectors(), loops[i]->getAllFeaturesVectors(), mFeatureWeights, false);
+	
+	for (i=0; i<object_count; i++) {		
+		distances[i] = compute_distance(loops[el]->getAllPreProcFeaturesVectors(), loops[i]->getAllPreProcFeaturesVectors(), mFeatureWeights, false);
 		if (distances[i]>max_distance) {
 			max_distance = distances[i];
 		}
@@ -701,7 +700,7 @@ int ACMediaBrowser::getKNN(ACMedia *aMedia, vector<ACMedia *> &result, int k) {
     //assert(loops.size() == mLoopAttributes.size());
     int object_count = loops.size();
     if (object_count == 0) return -1;
-    int feature_count = loops.back()->getNumberOfFeaturesVectors();
+    int feature_count = loops.back()->getNumberOfPreProcFeaturesVectors();
     assert(mFeatureWeights.size() == feature_count);
 
     double inv_weight = 0.0;
@@ -716,7 +715,7 @@ int ACMediaBrowser::getKNN(ACMedia *aMedia, vector<ACMedia *> &result, int k) {
     distances.resize(object_count);
 
     for (i = 0; i < object_count; i++) {
-        distances[i] = compute_distance(aMedia->getAllFeaturesVectors(), loops[i]->getAllFeaturesVectors(), mFeatureWeights, false);
+        distances[i] = compute_distance(aMedia->getAllPreProcFeaturesVectors(), loops[i]->getAllPreProcFeaturesVectors(), mFeatureWeights, false);
         if (distances[i] > max_distance) {
             max_distance = distances[i];
         }
@@ -770,13 +769,13 @@ void ACMediaBrowser::setClusterCenter(int clusterIdx, vector< vector<float> > cl
 
 void ACMediaBrowser::initClusterCenters(){
 	vector<ACMedia*> loops = mLibrary->getAllMedia();
-	int feature_count = loops.back()->getNumberOfFeaturesVectors();
+	int feature_count = loops.back()->getNumberOfPreProcFeaturesVectors();
 	int desc_count;
 	mClusterCenters.resize(mClusterCount);
 	for(int j=0; j<mClusterCount; j++){
 		mClusterCenters[j].resize(feature_count);
 		for(int f=0; f<feature_count; f++){
-			desc_count = loops.back()->getFeaturesVector(f)->getSize();
+			desc_count = loops.back()->getPreProcFeaturesVector(f)->getSize();  
 			mClusterCenters[j][f].resize(desc_count);
 			for(int d=0; d<desc_count; d++){
 				mClusterCenters[j][f][d] = 0;
@@ -849,11 +848,13 @@ void ACMediaBrowser::updateNextPositions() {
 				if (mClustersPosPlugin){
 					std::cout << "updateNextPositions : Cluster Positions Plugin" << std::endl;
 					mClustersPosPlugin->updateNextPositions(this);
-				}
-				else{
+					commitPositions();	
+				}	
+				else{	
 					std::cout << "updateNextPositions : Visualisation Plugin" << std::endl;
 					mNoMethodPosPlugin->updateNextPositions(this);
-				}
+					commitPositions();
+				}	
 			}
 			break;
 		case AC_MODE_NEIGHBORS:
@@ -899,8 +900,8 @@ void ACMediaBrowser::updateClustersKMeans(bool animate, int needsCluster) {
 
 	// XS note: problem if all media don't have the same number of features
 	//          but we suppose it is not going to happen
-	int feature_count = mLibrary->getMedia(0)->getNumberOfFeaturesVectors();
-
+	int feature_count = mLibrary->getMedia(0)->getNumberOfPreProcFeaturesVectors();
+	
 	vector< int > 			cluster_counts;
 	vector<vector<vector <float> > >cluster_accumulators; // cluster, feature, desc
 	vector< float > 		cluster_distances; // for computation
@@ -941,15 +942,15 @@ void ACMediaBrowser::updateClustersKMeans(bool animate, int needsCluster) {
 			for(f=0; f<feature_count; f++)
 			{
 				// XS again, what if all media don't have the same number of features ?
-				int desc_count = mLibrary->getMedia(0)->getFeaturesVector(f)->getSize();
-
+				int desc_count = mLibrary->getMedia(0)->getPreProcFeaturesVector(f)->getSize();
+				
 				mClusterCenters[i][f].resize(desc_count);
 				cluster_accumulators[i][f].resize(desc_count);
 
 				for(d=0; d<desc_count; d++)
 				{
-					mClusterCenters[i][f][d] = mLibrary->getMedia(r)->getFeaturesVector(f)->getFeatureElement(d);
-
+					mClusterCenters[i][f][d] = mLibrary->getMedia(r)->getPreProcFeaturesVector(f)->getFeatureElement(d);
+					
 					//printf("cluster  %d center: %f\n", i, mClusterCenters[i][f][d]);
 				}
 			}
@@ -972,8 +973,8 @@ void ACMediaBrowser::updateClustersKMeans(bool animate, int needsCluster) {
 				for(f=0; f<feature_count; f++)
 				{
 					// XS again, what if all media don't have the same number of features ?
-					int desc_count = mLibrary->getMedia(0)->getFeaturesVector(f)->getSize();
-
+					int desc_count = mLibrary->getMedia(0)->getPreProcFeaturesVector(f)->getSize();
+					
 					for(d=0; d<desc_count; d++)
 					{
 						cluster_accumulators[i][f][d] = 0.0;
@@ -991,8 +992,8 @@ void ACMediaBrowser::updateClustersKMeans(bool animate, int needsCluster) {
 				for(j=0; j<mClusterCount; j++)
 				{
 					cluster_distances[j] = 0;
-					cluster_distances[j] = compute_distance(mLibrary->getMedia(i)->getAllFeaturesVectors(), mClusterCenters[j], mFeatureWeights, false);
-
+					cluster_distances[j] = compute_distance(mLibrary->getMedia(i)->getAllPreProcFeaturesVectors(), mClusterCenters[j], mFeatureWeights, false);
+					
 					//printf("distance cluster %d to object %d = %f\n", j, i,  cluster_distances[j]);
 				}
 
@@ -1012,11 +1013,11 @@ void ACMediaBrowser::updateClustersKMeans(bool animate, int needsCluster) {
 				for(f=0; f<feature_count; f++)
 				{
 					// XS again, what if all media don't have the same number of features ?
-					int desc_count = mLibrary->getMedia(0)->getFeaturesVector(f)->getSize();
-
+					int desc_count = mLibrary->getMedia(0)->getPreProcFeaturesVector(f)->getSize();
+					
 					for(d=0; d<desc_count; d++)
 					{
-						cluster_accumulators[jmin][f][d] += mLibrary->getMedia(i)->getFeaturesVector(f)->getFeatureElement(d);
+						cluster_accumulators[jmin][f][d] += mLibrary->getMedia(i)->getPreProcFeaturesVector(f)->getFeatureElement(d);
 					}
 				}
 			}
@@ -1030,8 +1031,8 @@ void ACMediaBrowser::updateClustersKMeans(bool animate, int needsCluster) {
 					for(f=0; f<feature_count; f++)
 					{
 						// XS again, what if all media don't have the same number of features ?
-						int desc_count = mLibrary->getMedia(0)->getFeaturesVector(f)->getSize();
-
+						int desc_count = mLibrary->getMedia(0)->getPreProcFeaturesVector(f)->getSize();
+						
 						for(d=0; d<desc_count; d++)
 						{
 							mClusterCenters[j][f][d] = cluster_accumulators[j][f][d] / (float)cluster_counts[j];
@@ -1054,9 +1055,9 @@ void ACMediaBrowser::updateClustersKMeans(bool animate, int needsCluster) {
 		for(j=0; j<mClusterCount; j++) {
 
 			cluster_distances[j] = 0;
-			cluster_distances[j] = compute_distance(mLibrary->getMedia(i)->getAllFeaturesVectors(), mClusterCenters[j], mFeatureWeights, false);
-		}
-
+			cluster_distances[j] = compute_distance(mLibrary->getMedia(i)->getAllPreProcFeaturesVectors(), mClusterCenters[j], mFeatureWeights, false);
+		}		
+		
 		// pick the one with smallest distance
 		int jmin;
 		jmin = min_element(cluster_distances.begin(), cluster_distances.end()) - cluster_distances.begin();
@@ -1114,9 +1115,9 @@ void ACMediaBrowser::updateNextPositionsPropeller() {
 	for (ACMediaNodes::iterator node = mLoopAttributes.begin(); node != mLoopAttributes.end(); ++node) {
 
 		ci = (*node).getClusterId();
-
-		r = compute_distance(mLibrary->getMedia(mReferenceNode)->getAllFeaturesVectors(),
-							 mLibrary->getMedia((*node).getMediaId())->getAllFeaturesVectors(),
+		
+		r = compute_distance(mLibrary->getMedia(mReferenceNode)->getAllPreProcFeaturesVectors(), 
+							 mLibrary->getMedia((*node).getMediaId())->getAllPreProcFeaturesVectors(), 
 							 mFeatureWeights, false) * 10.0;
 
 		if (r<rmin[ci]) {
@@ -1125,9 +1126,9 @@ void ACMediaBrowser::updateNextPositionsPropeller() {
 		if (r>rmax[ci]) {
 			rmax[ci] = r;
 		}
-
-		dt = compute_distance(mLibrary->getMedia((*node).getMediaId())->getAllFeaturesVectors(), mClusterCenters[ci], mFeatureWeights, false) / 2.0 * 10.0;
-
+		
+		dt = compute_distance(mLibrary->getMedia((*node).getMediaId())->getAllPreProcFeaturesVectors(), mClusterCenters[ci], mFeatureWeights, false) / 2.0 * 10.0;
+		
 		if (dt<dtmin[ci]) {
 			dtmin[ci] = dt;
 		}
@@ -1141,9 +1142,9 @@ void ACMediaBrowser::updateNextPositionsPropeller() {
 		int ci = (*node).getClusterId();
 
 		// SD TODO - test both approaches
-		// r=1;
-		r = compute_distance(mLibrary->getMedia(mReferenceNode)->getAllFeaturesVectors(),
-							 mLibrary->getMedia((*node).getMediaId())->getAllFeaturesVectors(),
+		r=1;
+		r = compute_distance(mLibrary->getMedia(mReferenceNode)->getAllPreProcFeaturesVectors(), 
+							 mLibrary->getMedia((*node).getMediaId())->getAllPreProcFeaturesVectors(), 
 							 mFeatureWeights, false) * 10.0;
 		if (rmax[ci]>rmin[ci]) {
 			r = 0.1f + 0.8f * (r - rmin[ci])/(rmax[ci]-rmin[ci]);
@@ -1154,7 +1155,7 @@ void ACMediaBrowser::updateNextPositionsPropeller() {
 		r /= 2.0f;
 
 		// dt = 1;
-		dt = compute_distance(mLibrary->getMedia((*node).getMediaId())->getAllFeaturesVectors(), mClusterCenters[ci], mFeatureWeights, false) / 2.0 * 10.0;
+		dt = compute_distance(mLibrary->getMedia((*node).getMediaId())->getAllPreProcFeaturesVectors(), mClusterCenters[ci], mFeatureWeights, false) / 2.0 * 10.0;
 		if (dtmax[ci]>dtmin[ci]) {
 			dt = 0.1f + 0.8f * (dt - dtmin[ci])/(dtmax[ci]-dtmin[ci]);
 		}

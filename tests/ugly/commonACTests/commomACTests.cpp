@@ -124,6 +124,9 @@ void test_multiple_XML(){
 
 int main(int, char **) {
 	cout << "tests" << endl;
+	char t='é';
+	t='ä';
+	t='\'';
 	//test_audio_library("/usr/local/share/mediacycle/data/audio/zero-g-pro-pack-small-mc.xml");
 	test_multiple_XML();
 

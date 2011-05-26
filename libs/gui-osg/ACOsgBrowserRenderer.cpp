@@ -46,7 +46,9 @@
 #if defined (SUPPORT_3DMODEL)
 #include "ACOsg3DModelRenderer.h"
 #endif //defined (SUPPORT_3DMODEL)
-//#include "ACOsgTextRenderer.h"
+#if defined (SUPPORT_TEXT)
+#include "ACOsgTextRenderer.h"
+#endif //defined (SUPPORT_TEXT)
 
 #include <osgDB/Registry>
 #include <osgDB/ReaderWriter>
@@ -514,7 +516,14 @@ bool ACOsgBrowserRenderer::addNodes(int _first, int _last){
 					break;
 				case MEDIA_TYPE_TEXT:
 					#if defined (SUPPORT_TEXT)
+				{
+					string tempStr;
+					tempStr=media_cycle->getMediaFileName(i);
+					size_t indTemp=tempStr.find_last_of("/"),lastTemp=tempStr.length();
+					tempStr=tempStr.substr(indTemp,lastTemp-indTemp);
 					node_renderer[i] = new ACOsgTextRenderer();
+					((ACOsgTextRenderer*)(node_renderer[i]))->setText(tempStr);
+			}
 					#endif //defined (SUPPORT_TEXT)
 					break;
 				default:

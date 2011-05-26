@@ -92,6 +92,10 @@ ACMedia::~ACMedia() {
 		delete *iter;//needed erase call destructor of pointer (i.e. none since it's just a pointer) not of pointee ACMediaFeatures
 		//features_vectors.erase(iter); //will cause segfault. besides the vector is automatically emptied, no need to erase.
 	}
+	for (iter = preproc_features_vectors.begin(); iter != preproc_features_vectors.end(); iter++) {
+		delete *iter;//needed erase call destructor of pointer (i.e. none since it's just a pointer) not of pointee ACMediaFeatures
+		//features_vectors.erase(iter); //will cause segfault. besides the vector is automatically emptied, no need to erase.
+	}
 	// XS TODO : why is this commented ?
 	//if (data) delete data;
 }
@@ -486,6 +490,61 @@ std::vector<std::string> ACMedia::getListOfFeaturesPlugins(){
 	}
 	return plugins_list;
 }
+
+
+ACMediaFeatures* ACMedia::getPreProcFeaturesVector(int i){ 
+	if (i < int(preproc_features_vectors.size()) )
+		return preproc_features_vectors[i]; 
+	else {
+		std::cerr << "ACMedia::getPreProcFeaturesVector : out of bounds " << i << " > " << preproc_features_vectors.size() << std::endl;
+	}
+	return 0;
+}
+
+ACMediaFeatures* ACMedia::getPreProcFeaturesVector(string feature_name) { 
+	int i;
+	for (i=0;i<int(preproc_features_vectors.size());i++) {
+		if (!(feature_name.compare(preproc_features_vectors[i]->getName()))) {
+			return preproc_features_vectors[i];
+		}
+	}
+	std::cerr << "ACMedia::getPreProcFeaturesVector : not found feature named " << feature_name << std::endl;
+	return 0;
+}
+
+std::vector<std::string> ACMedia::getListOfPreProcFeaturesPlugins(){
+	std::vector<std::string> plugins_list;
+	for (int i=0; i<getNumberOfPreProcFeaturesVectors(); i++){
+		plugins_list.push_back(preproc_features_vectors[i]->getName());
+	}
+	return plugins_list;
+}
+void ACMedia::cleanPreProcFeaturesVector(void){
+	
+	std::vector<ACMediaFeatures*>::iterator iter;
+	for (iter=preproc_features_vectors.begin();iter!=preproc_features_vectors.end();iter++){
+		if ((*iter)!=NULL){
+			delete (*iter);
+			(*iter)=NULL;
+		}
+	}
+	preproc_features_vectors.clear();
+	
+//	preproc_features_vectors.
+}
+void ACMedia::defaultPreProcFeatureInit(void){
+	cleanPreProcFeaturesVector();
+	std::vector<ACMediaFeatures*>::iterator iter;
+	for (iter=features_vectors.begin(); iter!=features_vectors.end(); iter++) {
+		ACMediaFeatures *tempFeat=new ACMediaFeatures;
+		tempFeat->setComputed();
+		tempFeat->setNeedsNormalization((*iter)->getNeedsNormalization());
+		tempFeat->setName((*iter)->getName());
+		tempFeat->resize((*iter)->getSize());
+		preproc_features_vectors.push_back(tempFeat);
+	}
+}
+
 
 // Calls the plugins and fills in info such as width, height, ...
 // Implemented in ACMedia.cpp, since it is the same for all media

@@ -1,7 +1,7 @@
 /**
  * @brief ACPosPlugAudioGardenFlower.cpp
- * @author Christian Frisson
- * @date 10/04/2011
+ * @author Thierry Ravet
+ * @date 26/05/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -152,12 +152,12 @@ mat ACPosPlugAudioGardenFlower::extractDescMatrix(ACMediaLibrary* lib, string fe
 	int nbFeature = loops.back()->getNumberOfFeaturesVectors();
 
 	for(int f=0; f< nbFeature; f++){
-		if (loops.back()->getFeaturesVector(f)->getName() == featureName){
+		if (loops.back()->getPreProcFeaturesVector(f)->getName() == featureName){
 			featureId = f;
 		}	
 	}
 
-	featureSize = loops.back()->getFeaturesVector(featureId)->getSize();
+	featureSize = loops.back()->getPreProcFeaturesVector(featureId)->getSize();
 
   mat desc_m(mediaIds.size(),featureSize);
   
@@ -165,7 +165,7 @@ mat ACPosPlugAudioGardenFlower::extractDescMatrix(ACMediaLibrary* lib, string fe
   
   for(int i=0; i<mediaIds.size(); i++) {    
 		for(int d=0; d < featureSize; d++){
-			desc_m(i, d) = loops[mediaIds[i]]->getFeaturesVector(featureId)->getFeatureElement(d);
+			desc_m(i, d) = loops[mediaIds[i]]->getPreProcFeaturesVector(featureId)->getFeatureElement(d);
 		}
   }
 	return desc_m;

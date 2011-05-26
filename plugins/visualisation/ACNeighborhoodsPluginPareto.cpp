@@ -1,7 +1,7 @@
 /**
  * @brief ACNeighborhoodsPluginPareto.cpp
  * @author Thierry Ravet
- * @date 07/04/2011
+ * @date 26/05/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -97,13 +97,13 @@ mat ACNeighborhoodsPluginPareto::extractDescMatrix(ACMediaBrowser* mediaBrowser,
 	int featDim;
 
 	// Count nb of feature
-	featDim = loops.back()->getFeaturesVector(descId)->getSize();
+	featDim = loops.back()->getPreProcFeaturesVector(descId)->getSize();
 	
   mat desc_m(nbMedia, featDim);
   for(int i=0; i<nbMedia; i++) {    
     int tmpIdx = 0;
 		for(int d=0; d < featDim; d++){
-			desc_m(i,d) = loops[i]->getFeaturesVector(descId)->getFeatureElement(d);
+			desc_m(i,d) = loops[i]->getPreProcFeaturesVector(descId)->getFeatureElement(d);
 		}
   }
 	return desc_m;

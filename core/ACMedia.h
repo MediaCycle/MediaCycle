@@ -55,6 +55,7 @@ protected:
 	ACMediaType media_type;
 	int height, width;
 	std::vector<ACMediaFeatures*> features_vectors;
+	std::vector<ACMediaFeatures*> preproc_features_vectors;
 	std::string filename;
 	std::string filename_thumbnail;
 	char  **text_tags;
@@ -87,13 +88,22 @@ public:
 	std::vector<ACMedia*> &getAllSegments() { return segments; }
 	ACMedia* getSegment(int i) { return segments[i]; }
 	int getNumberOfSegments(){return segments.size();}
-
+	
 	std::vector<ACMediaFeatures*> &getAllFeaturesVectors() { return features_vectors; }
 	ACMediaFeatures* getFeaturesVector(int i);
 	ACMediaFeatures* getFeaturesVector(std::string feature_name);
 	int getNumberOfFeaturesVectors() {return features_vectors.size();}
 	void addFeaturesVector(ACMediaFeatures *aFeatures) { this->features_vectors.push_back(aFeatures); }
 	std::vector<std::string> getListOfFeaturesPlugins();
+	
+	std::vector<ACMediaFeatures*> &getAllPreProcFeaturesVectors() { return preproc_features_vectors; }
+	ACMediaFeatures* getPreProcFeaturesVector(int i);
+	ACMediaFeatures* getPreProcFeaturesVector(std::string feature_name);
+	int getNumberOfPreProcFeaturesVectors() {return preproc_features_vectors.size();}
+	void addPreProcFeaturesVector(ACMediaFeatures *aFeatures) { this->preproc_features_vectors.push_back(aFeatures); }
+	std::vector<std::string> getListOfPreProcFeaturesPlugins();
+	void cleanPreProcFeaturesVector(void);
+	void defaultPreProcFeatureInit(void);
 	
 	std::string getFileName() { return filename; }
 	void setFileName(std::string s) { filename = s; }

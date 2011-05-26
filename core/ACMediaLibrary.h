@@ -48,6 +48,7 @@
 
 #include <boost/filesystem.hpp>
 
+
 class ACMediaLibrary {
 	// these methods are common to all media.
 	// there is no need for an AudioLibrary, ImageLibrary, ...
@@ -60,6 +61,8 @@ protected:
 	long synthesisID;
 	int mediaID; // mid of the media currently being imported. by default, starts at 0 and is incremented after each import.
 	std::string media_path;
+	preProcessInfo mPreProcessInfo;
+	ACPreProcessPlugin* mPreProcessPlugin;
 	
 public:
 	ACMediaLibrary();
@@ -116,6 +119,8 @@ public:
 	void saveSorted(std::string ouput_file);	
 	
 	int scanDirectories(std::vector<std::string> _path, int _recursive, std::vector<std::string>& filenames);
+	
+	void setPreProcessPlugin(ACPlugin* acpl);
 	
 private:
 	void deleteAllMedia();

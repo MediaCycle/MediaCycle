@@ -44,6 +44,9 @@
 #if defined (SUPPORT_3DMODEL)
 #include "AC3DModel.h"
 #endif //defined (SUPPORT_3DMODEL)
+#if defined (SUPPORT_TEXT)
+#include "ACText.h"
+#endif //defined (SUPPORT_TEXT)
 
 #if defined (SUPPORT_AUDIO)
 #if defined (USE_SNDFILE)
@@ -219,7 +222,10 @@ const filext::value_type _init[] = {
 	filext::value_type(".w64", MEDIA_TYPE_AUDIO), \
 	filext::value_type(".wav", MEDIA_TYPE_AUDIO), \
 	filext::value_type(".wve", MEDIA_TYPE_AUDIO), \
-	filext::value_type(".xi", MEDIA_TYPE_AUDIO)
+	filext::value_type(".xi", MEDIA_TYPE_AUDIO), \
+	
+	filext::value_type(".txt", MEDIA_TYPE_TEXT) 
+	
 };
 filext ACMediaFactory::known_file_extensions(_init, _init + sizeof _init / sizeof *_init);
 
@@ -235,6 +241,7 @@ ACMediaFactory::ACMediaFactory(){
 	#ifdef USE_DEBUG
 	listUncheckedMediaExtensions();
 	#endif //def USE_DEBUG
+	
 }
 
 ACMediaFactory::~ACMediaFactory(){
@@ -272,6 +279,11 @@ ACMedia* ACMediaFactory::create(ACMediaType media_type){
 			return new AC3DModel();
 			#endif //defined (SUPPORT_3DMODEL)
 			break;
+		case MEDIA_TYPE_TEXT:
+			#if defined (SUPPORT_TEXT)
+			return new ACText();
+			#endif //defined (SUPPORT_TEXT)
+			break;
 		default:
 			return 0;
 			break;
@@ -296,9 +308,14 @@ ACMedia* ACMediaFactory::create(ACMedia* media){
 			#endif //defined (SUPPORT_VIDEO)
 			break;
 		case MEDIA_TYPE_3DMODEL:
-			#if defined (SUPPORT_3DMODEL)
+#if defined (SUPPORT_3DMODEL)
 			return new AC3DModel(*((AC3DModel*) media));
-			#endif //defined (SUPPORT_3DMODEL)
+#endif //defined (SUPPORT_3DMODEL)
+			break;
+		case MEDIA_TYPE_TEXT:
+#if defined (SUPPORT_TEXT)
+			return new ACText(*((ACText*) media));
+#endif //defined (SUPPORT_3DMODEL)
 			break;
 		default:
 			return 0;
@@ -518,10 +535,13 @@ void ACMediaFactory::useKnownFileExtensions(){
 void ACMediaFactory::checkAvailableFileExtensions(){
 	#if defined (SUPPORT_AUDIO)
 		addAvailableSndFileExtensions();
-	#endif //defined (SUPPORT_AUDIO)
-	#if defined (SUPPORT_IMAGE) || defined(SUPPORT_VIDEO) || defined(SUPPORT_3DMODEL)
-		addAvailableOsgFileExtensions();
-	#endif //defined (SUPPORT_IMAGE OR SUPPORT_VIDEO) || defined(SUPPORT_3DMODEL)
+#endif //defined (SUPPORT_AUDIO)
+#if defined (SUPPORT_IMAGE) || defined(SUPPORT_VIDEO) || defined(SUPPORT_3DMODEL)
+	addAvailableOsgFileExtensions();
+#endif //defined (SUPPORT_IMAGE OR SUPPORT_VIDEO) || defined(SUPPORT_3DMODEL)
+#if defined (SUPPORT_TEXT)
+	addAvailableFileExtensionSupport(".txt",MEDIA_TYPE_TEXT);
+#endif //defined (SUPPORT_TEXT )
 }
 
 std::vector<std::string> ACMediaFactory::getExtensionsFromMediaType(ACMediaType media_type){

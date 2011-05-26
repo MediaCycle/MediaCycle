@@ -100,6 +100,7 @@ public:
 
 protected:	
 	std::map<ACMediaType,std::vector<ACFeaturesPlugin *> > mCurrFeaturePlugin;
+	ACPreProcessPlugin* mCurrPreProcessPlugin;
 
 };	
 

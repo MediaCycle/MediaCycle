@@ -133,6 +133,10 @@ public:
 	void changeClustersPositionsPlugin(std::string pluginName);
 	void changeNeighborsPositionsPlugin(std::string pluginName);
 	//void changeVisualisationPlugin(std::string pluginName);
+	
+	
+	void setPreProcessPlugin(string pluginName);
+	
 	void dumpPluginsList();
 
 	// == Media

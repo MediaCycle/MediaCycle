@@ -90,6 +90,7 @@ ACImageCycleOsgQt::ACImageCycleOsgQt(QWidget *parent)
 
 ACImageCycleOsgQt::~ACImageCycleOsgQt()
 {
+	ui.browserOsgView->setMediaCycle(0);
 	delete media_cycle;
 }
 

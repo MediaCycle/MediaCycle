@@ -64,6 +64,7 @@ const ACPluginType	PLUGIN_TYPE_NEIGHBORS_PIPELINE	=	0x0200;//CF updateNeighborho
 const ACPluginType	PLUGIN_TYPE_POSITIONS			=	0x0400;//TR todo 
 const ACPluginType	PLUGIN_TYPE_NOMETHOD_POSITIONS	=	0x0800;//CF updatePositions for the Clusters or Neighbors modes
 const ACPluginType	PLUGIN_TYPE_ALLMODES_PIPELINE	=	0x1000;//CF updateClusters and updateNeighborhoods and updatePositions for both modes
+const ACPluginType	PLUGIN_TYPE_PREPROCESS			=	0x2000;//CF updateClusters and updateNeighborhoods and updatePositions for both modes
 
 
 class ACPlugin {
@@ -164,6 +165,18 @@ public:
 	virtual void updateNextPositions(ACMediaBrowser* )=0;
 protected:
 };
+
+typedef void* preProcessInfo;
+
+class ACPreProcessPlugin : virtual public ACPlugin {
+public:
+	ACPreProcessPlugin();
+	virtual preProcessInfo update(std::vector<ACMedia*> media_library)=0;
+	virtual std::vector<ACMediaFeatures*> apply(preProcessInfo info,ACMedia* theMedia)=0;
+	virtual void freePreProcessInfo(preProcessInfo &info)=0;
+protected:
+};
+
 
 // the types of the class factories
 typedef ACPlugin* createPluginFactory(std::string);

@@ -69,12 +69,15 @@ using namespace std;
 ACMediaLibrary::ACMediaLibrary() {
 	this->cleanLibrary();
 	media_type = MEDIA_TYPE_NONE;
+	mPreProcessPlugin=NULL;
+	mPreProcessInfo=NULL;
 }
 
 ACMediaLibrary::ACMediaLibrary(ACMediaType aMediaType) {
 	this->cleanLibrary();
 	media_type = aMediaType;
-
+	mPreProcessPlugin=NULL;
+	mPreProcessInfo=NULL;
 	#if defined(SUPPORT_VIDEO)
 	// Register all formats and codecs from FFmpeg
 	av_register_all();
@@ -83,6 +86,9 @@ ACMediaLibrary::ACMediaLibrary(ACMediaType aMediaType) {
 
 ACMediaLibrary::~ACMediaLibrary(){
 	this->deleteAllMedia();
+	
+	if (mPreProcessInfo!=NULL)
+		mPreProcessPlugin->freePreProcessInfo(mPreProcessInfo);
 }
 
 bool ACMediaLibrary::changeMediaType(ACMediaType aMediaType){
@@ -209,6 +215,7 @@ int ACMediaLibrary::importFile(std::string _filename, ACPluginManager *acpl, boo
 					this->addMedia(mediaSegments[i]);
 					this->incrementMediaID();
 				}
+				
 			}
 		}
 	}
@@ -343,6 +350,8 @@ int ACMediaLibrary::openACLLibrary(std::string _path, bool aInitLib){
 			}
 			if (ret) {
 				//std::cout << "Media Library Size : " << this->getSize() << std::endl;//CF free the console
+				if (mPreProcessPlugin==NULL)
+					local_media->defaultPreProcFeatureInit();
 				media_library.push_back(local_media);
 				file_count++;
 			}
@@ -404,6 +413,8 @@ int ACMediaLibrary::openMCSLLibrary(std::string _path, bool aInitLib){
 			ret = local_media->loadMCSL(library_file);
 			if (ret) {
 				//std::cout << "Media Library Size : " << this->getSize() << std::endl;//CF free the console
+				if (mPreProcessPlugin==NULL)
+					local_media->defaultPreProcFeatureInit();
 				media_library.push_back(local_media);
 				file_count++;
 			}
@@ -473,6 +484,8 @@ int ACMediaLibrary::openCoreXMLLibrary(TiXmlHandle _rootHandle){
 				typ = (ACMediaType) typi;
 				ACMedia* local_media = ACMediaFactory::getInstance().create(typ);
 				local_media->loadXML(pMediaNode);
+				if (mPreProcessPlugin==NULL)
+					local_media->defaultPreProcFeatureInit();
 				media_library.push_back(local_media);
 				cnt++;
 			}
@@ -582,6 +595,8 @@ int ACMediaLibrary::addMedia(ACMedia *aMedia) {
     // instead of only medias of one type
 	if (aMedia != 0){
 		if (aMedia->getType() == this->media_type) {
+			if (mPreProcessPlugin==NULL)
+				aMedia->defaultPreProcFeatureInit();
 			this->media_library.push_back(aMedia);
 			return 0;
 		} else {
@@ -660,6 +675,7 @@ void ACMediaLibrary::cleanStats() {
 }
 
 void ACMediaLibrary::calculateStats() {
+	cleanStats();
 	if ( isEmpty() ) return;
 	int n = this->getSize() ;
 	int number_of_features = media_library[0]->getNumberOfFeaturesVectors();
@@ -714,23 +730,37 @@ void ACMediaLibrary::calculateStats() {
 void ACMediaLibrary::normalizeFeatures(int needsNormalize) {
 
 	int start;
-
-	ACMediaFeatures* feature;
+	
+	ACMediaFeatures* feature,* featureDest;
 	cout << "normalizing features" << endl;
 	if ( isEmpty() )  return;
 
 	if (index_last_normalized < 0) {
 		// *first* normalization
-		calculateStats();
+		if (mPreProcessPlugin!=NULL){
+			if (mPreProcessInfo!=NULL)
+				mPreProcessPlugin->freePreProcessInfo(mPreProcessInfo);
+			mPreProcessInfo=mPreProcessPlugin->update(media_library);			
+		}
+		else {
+			calculateStats();
+		}
 	}
 	else {
 		// *subsequent* normalization
 		if (needsNormalize) {
-			denormalizeFeatures();
-			calculateStats();
+			// *first* normalization
+			if (mPreProcessPlugin!=NULL){
+				if (mPreProcessInfo!=NULL)
+					mPreProcessPlugin->freePreProcessInfo(mPreProcessInfo);
+				mPreProcessInfo=mPreProcessPlugin->update(media_library);
+			}
+			else {
+//				denormalizeFeatures();
+				calculateStats();
+			}
 		}
-	}
-
+	}	
 	unsigned int i,j,k;
 	unsigned int n = this->getSize() ;
 
@@ -740,19 +770,36 @@ void ACMediaLibrary::normalizeFeatures(int needsNormalize) {
 	else {
 		start = index_last_normalized+1;
 	}
-
-	for(i=start; i<n; i++){
-		ACMedia* item = media_library[i];
-		for(j=0; j<mean_features.size(); j++) {
-			feature = item->getFeaturesVector(j);
-			if (feature->getNeedsNormalization()) {
-				for(k=0; k<mean_features[j].size(); k++) {
-					float old = feature->getFeatureElement(k);
-					feature->setFeatureElement(k, (old - mean_features[j][k]) / ( max(stdev_features[j][k] , 0.00001)));//CF TI_MAX(stdev_features[j][k] , 0.00001)));
+	if (mPreProcessPlugin!=NULL){	
+		for(i=start; i<n; i++){
+			ACMedia* item = media_library[i];
+			item->cleanPreProcFeaturesVector();
+			item->getAllPreProcFeaturesVectors()=mPreProcessPlugin->apply(mPreProcessInfo,item);
+		}		
+	}
+	else {
+		for(i=start; i<n; i++){
+			ACMedia* item = media_library[i];
+			for(j=0; j<mean_features.size(); j++) {
+				feature = item->getFeaturesVector(j);
+				featureDest=item->getPreProcFeaturesVector(j);
+				if (feature->getNeedsNormalization()) {
+					for(k=0; k<mean_features[j].size(); k++) {
+						float old = feature->getFeatureElement(k);
+						featureDest->setFeatureElement(k, (old - mean_features[j][k]) / ( max(stdev_features[j][k] , 0.00001)));//setFeatureElement(k, (old - mean_features[j][k]) / ( max(stdev_features[j][k] , 0.00001)));//CF TI_MAX(stdev_features[j][k] , 0.00001)));
+					}
 				}
+				else {
+					for(k=0; k<mean_features[j].size(); k++) {
+						float old = feature->getFeatureElement(k);
+						featureDest->setFeatureElement(k, old);//setFeatureElement(k, (old - mean_features[j][k]) / ( max(stdev_features[j][k] , 0.00001)));//CF TI_MAX(stdev_features[j][k] , 0.00001)));
+					}
+				}
+
 			}
 		}
 	}
+		
 	index_last_normalized = n-1;
 }
 
@@ -906,4 +953,22 @@ int ACMediaLibrary::testFFMPEG(std::string _filename){
 		}
 	}
 }
+
+
+void ACMediaLibrary::setPreProcessPlugin(ACPlugin* acpl)
+{
+	if (mPreProcessPlugin!=acpl&&mPreProcessInfo!=NULL)
+		mPreProcessPlugin->freePreProcessInfo(mPreProcessInfo);
+	if (acpl==NULL&&mPreProcessPlugin!=NULL)
+	{		
+		mPreProcessPlugin=NULL;
+		std::vector<ACMedia*>::iterator iter;
+		for (iter=media_library.begin();iter!=media_library.end();iter++)
+			(*iter)->defaultPreProcFeatureInit();		
+	}
+	if (acpl!=NULL)
+		if (acpl->implementsPluginType(PLUGIN_TYPE_PREPROCESS))
+			mPreProcessPlugin=dynamic_cast<ACPreProcessPlugin*> (acpl) ;
+}
+
 #endif //defined (SUPPORT_VIDEO)

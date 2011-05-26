@@ -83,6 +83,8 @@ float ACMediaFeatures::getFeatureElement(int i) {
 	return features_vector[i];
 }
 
+
+
 //XS TODO: is often multidimensional...
 int ACMediaFeatures::getDiscretizedFeature(){
   if (this->getSize()>1){
@@ -102,7 +104,6 @@ int ACMediaFeatures::getDiscretizedFeature(){
   }
 }
 
-
 void ACMediaFeatures::setFeatureElement(int i, float f) {
 	if (i >= int(features_vector.size()) || i < 0){
 		cerr << " <ACMediaFeatures::setFeatureElement(int i) error> Invalid Feature Index" << endl;
@@ -114,6 +115,7 @@ void ACMediaFeatures::setFeatureElement(int i, float f) {
 void ACMediaFeatures::addFeatureElement(float f){
 	features_vector.push_back(f);
 }
+
 
 int ACMediaFeatures::getSize() { // XS TODO:  getSize
 	return features_vector.size();

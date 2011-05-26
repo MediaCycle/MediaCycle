@@ -73,7 +73,7 @@ void ACBicSegmentationPlugin::setParameters(float _lambda, int _samplingrate, in
 //// XS TODO : how to set _lambda, _sampling_rate from MediaCycle's GUI ?
 //// could add a .ui file with the segmentation plugin to set the options ?
 //	
-//	std::vector<ACMediaFeatures*> _allfeatures = _theMedia->getAllFeaturesVectors();
+//	std::vector<ACMediaFeatures*> _allfeatures = _theMedia->getAllPreProcFeaturesVectors();
 //	int c = _allfeatures.size();
 //	int l = _allfeatures[0]->getSize();
 //	this->full_features = arma::fmat((int) c, (int) l); 

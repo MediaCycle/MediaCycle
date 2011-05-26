@@ -1,7 +1,7 @@
 /**
  * @brief ACNeighborhoodsPluginEuclidean.cpp
  * @author Thierry Ravet
- * @date 07/04/2011
+ * @date 26/05/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -103,7 +103,7 @@ void ACNeighborhoodsPluginEuclidean::extractDescMatrix(ACMediaBrowser* mediaBrow
 	// Count nb of feature
 	int nbFeature = loops.back()->getNumberOfFeaturesVectors();
 	for(int f=0; f< nbFeature; f++){
-		featDim = loops.back()->getFeaturesVector(f)->getSize();
+		featDim = loops.back()->getPreProcFeaturesVector(f)->getSize();
 		std::cout << "feature weight " << f << " = " << mediaBrowser->getWeight(f) << std::endl;
 		for(int d=0; d < featDim; d++){
 			totalDim++;
@@ -118,9 +118,9 @@ void ACNeighborhoodsPluginEuclidean::extractDescMatrix(ACMediaBrowser* mediaBrow
     int tmpIdx = 0;
     for(int f=0; f< nbFeature; f++){
 			//std::cout << f << std::endl;
-      featDim = loops.back()->getFeaturesVector(f)->getSize();
+      featDim = loops.back()->getPreProcFeaturesVector(f)->getSize();
 			for(int d=0; d < featDim; d++){
-				desc_m(i,tmpIdx) = loops[i]->getFeaturesVector(f)->getFeatureElement(d);
+				desc_m(i,tmpIdx) = loops[i]->getPreProcFeaturesVector(f)->getFeatureElement(d);
 				weight_v(tmpIdx) = mediaBrowser->getWeight(f);
 				tmpIdx++;
       }
