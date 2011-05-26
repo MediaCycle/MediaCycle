@@ -128,11 +128,12 @@ void ACMediaNode::toggleActivity(int type){
 #endif // VERBOSE
 		this->setActivity(type);			
 	}
-	else
+	else{
 #ifdef VERBOSE		
 		cout << "activity node " << nodeId << " set to 0" << endl;
 #endif // VERBOSE
-	this->setActivity(0);
+		this->setActivity(0);
+	}
 }
 
 

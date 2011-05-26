@@ -151,6 +151,7 @@ void ACMediaBrowser::clean(){
 		mUserLog->dump();
 		mUserLog->clean();
 	}
+	this->resetPointers();
 }
 
 int ACMediaBrowser::getLabelSize() {
@@ -499,7 +500,7 @@ int ACMediaBrowser::setHoverLoop(int lid, float mxx, float myy, int p_index)
 
 	ACPoint p;
 	p.x = mxx; p.y = myy; p.z = 0.0;
-	if (mPointerAttributes.size()>=p_index) {
+	if (mPointerAttributes.size()>p_index) {
 		this->getPointerFromIndex(p_index)->setCurrentPosition(p);
 	}
 	else
@@ -1147,7 +1148,7 @@ void ACMediaBrowser::updateNextPositionsPropeller() {
 							 mLibrary->getMedia((*node).getMediaId())->getAllPreProcFeaturesVectors(), 
 							 mFeatureWeights, false) * 10.0;
 		if (rmax[ci]>rmin[ci]) {
-			r = 0.1f + 0.8f * (r - rmin[ci])/(rmax[ci]-rmin[ci]);
+			r = 0.01f + 0.89f * (r - rmin[ci])/(rmax[ci]-rmin[ci]);
 		}
 		else {
 			r = 0.5f;
@@ -1157,7 +1158,7 @@ void ACMediaBrowser::updateNextPositionsPropeller() {
 		// dt = 1;
 		dt = compute_distance(mLibrary->getMedia((*node).getMediaId())->getAllPreProcFeaturesVectors(), mClusterCenters[ci], mFeatureWeights, false) / 2.0 * 10.0;
 		if (dtmax[ci]>dtmin[ci]) {
-			dt = 0.1f + 0.8f * (dt - dtmin[ci])/(dtmax[ci]-dtmin[ci]);
+			dt = -0.3f + 1.6f * (dt - dtmin[ci])/(dtmax[ci]-dtmin[ci]);
 		}
 		else {
 			dt = 0.5f;
@@ -1290,7 +1291,9 @@ int ACMediaBrowser::toggleSourceActivity(float _x, float _y)
 // XS TODO return value
 int ACMediaBrowser::toggleSourceActivity(ACMediaNode &node, int _activity) {
 	node.toggleActivity(_activity);
-	std::cout << "Toggle Activity of media : " << node.getMediaId() << " to " << _activity << std::endl;
+	#ifdef USE_DEBUG // use debug message levels instead
+	//std::cout << "Toggle Activity of media : " << node.getMediaId() << " to " << _activity << std::endl;
+	#endif
 	int mt;
 	mt = mLibrary->getMedia(node.getMediaId())->getType();
 	if (mt == MEDIA_TYPE_AUDIO) {
@@ -1337,12 +1340,16 @@ int ACMediaBrowser::toggleSourceActivity(int lid, int type)
 void ACMediaBrowser::setClosestNode(int _node_id, int p_index) {
 	std::vector<int> hoveredNodes;
 	hoveredNodes.resize(getPointerSize());
-	for (int ps = 0; ps < getPointerSize(); ps++)
+	//std::cout << "hoverNodes ndeId=" << _node_id << " p_index=" << p_index << " : ";
+	for (int ps = 0; ps < getPointerSize(); ps++){
 		hoveredNodes[ps]=getClosestNode(ps);
+		//std::cout << hoveredNodes[ps] << " ";
+	}
+	//std::cout << std::endl;
 
 	int prev_node_id = getClosestNode(p_index);
 
-	mClosestNode = _node_id;//CF to deprecate
+	//mClosestNode = _node_id;//CF to deprecate
 
 	ACPointer* p = 0;
 	p = this->getPointerFromIndex(p_index);
@@ -1375,8 +1382,13 @@ void ACMediaBrowser::setClosestNode(int _node_id, int p_index) {
 				}*/
 				else if ( ((*node).getNodeId()!=_node_id) && ((*node).getActivity() == 2) ) {
 					// set active nodes from 2 to 0
+					int donottoggle = 0;
 					for (int ps = 0; ps < getPointerSize(); ps++){
-						if ( ((*node).getNodeId()!=hoveredNodes[ps]) && ((*node).getActivity() == 2)  )
+						if ( ((*node).getNodeId()==hoveredNodes[ps]) ){
+							donottoggle = 1;
+						}
+					}
+					if ( (!donottoggle)	&& ((*node).getActivity() == 2)  ) {
 							toggleSourceActivity(*node);
 					}
 				}
@@ -1476,10 +1488,10 @@ ACPointer* ACMediaBrowser::getPointerFromIndex(int _index) {
 
 void ACMediaBrowser::resetPointers() {
 	mPointerAttributes.clear();
-	//mPointersActiveNumber = 0;
+	mPointersActiveNumber = 0;
 	//CF this initializes the default mouse as first pointer by default for now, might be changed to none
 	mPointerAttributes.insert(mPointerAttributes.begin(),ACPointers::value_type(0,new ACPointer()));// MC GUI applications require at least 1 mouse pointer
-	mPointerAttributes.begin()->second->setText("mouse");
+	mPointerAttributes.begin()->second->setText("0");
 	mPointersActiveNumber = 1;
 	std::cout << "ACMediaBrowser::resetPointers" << std::endl;
 }
@@ -1499,7 +1511,7 @@ void ACMediaBrowser::addPointer(int _id) {
 
 		// add it to the pointer list (at the end of the process since the pointer size is checked in the OSG view)
 		mPointerAttributes.insert(mPointerAttributes.end(),ACPointers::value_type(_id,p_temp));
-		std::cout << "ACMediaBrowser::addPointer" << _id << "/" << mPointerAttributes.size() << std::endl;
+		//std::cout << "ACMediaBrowser::addPointer" << _id << "/" << mPointerAttributes.size() << std::endl;
 	}
 	else
 		std::cout << "ACMediaBrowser::addPointer: pointer of id " << _id << " already created" << std::endl;

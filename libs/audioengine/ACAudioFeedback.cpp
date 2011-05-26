@@ -176,6 +176,11 @@ ACAudioFeedback::ACAudioFeedback(PaStream *_stream, int samplerate, int buffersi
 	setTimeSignature(4, 4);
 #endif
 	ext_loop_length = 0;
+	
+	resample_ratios = new float[OPENAL_NUM_BUFFERS];
+	for (i=0;i<OPENAL_NUM_BUFFERS;i++) {
+		resample_ratios[i] = 1.0;
+	}
 }
 
 ACAudioFeedback::~ACAudioFeedback()
@@ -1218,8 +1223,7 @@ void ACAudioFeedback::processAudioEngineSamplePosition(int _loop_slot, int *_pre
 		frame_pos = (float)*_sample_pos / (float) output_sample_rate / 0.01 / (100.0 / 76.0); // SD TODO - hop size should be used....
 	}
 	media_cycle->setSourceCursor(loop_id, frame_pos);
-	media_cycle->setCurrentFrame(loop_id, *_sample_pos);
-	#ifdef USE_DEBUG
+	#ifdef USE_DEBUG // use debug message levels instead
 	//std::cout << "ACAudioFeedback::processAudioEngineSamplePosition: " << *_sample_pos << std::endl;
 	#endif
 }
@@ -1302,6 +1306,7 @@ void ACAudioFeedback::processAudioEngineResynth(int _loop_slot, int _prev_sample
 
 					getCurrentFrame(&(tpv[_loop_slot]),0);
 					setCurrentSample(&(tpv[_loop_slot]),local_pos%size);
+					media_cycle->setCurrentFrame(loop_id, (int)(resample_ratios[_loop_slot]*(local_pos%size)));
 
 					//getCurrentFrame(&(tpv[_loop_slot]),1);
 					//setCurrentSampleToNext(&(tpv[_loop_slot]));
@@ -1447,6 +1452,7 @@ void ACAudioFeedback::processAudioEngineResynth(int _loop_slot, int _prev_sample
 							//_output_buffer[i] = (1.0-local_pos_frac)*(float)loop_buffers_audio_engine[_loop_slot][local_pos%size];
 							_output_buffer[i] = (1.0-local_pos_frac)*(float)loop_buffers_audio_engine[_loop_slot][local_pos%size]
 											+(local_pos_frac)*(float)loop_buffers_audio_engine[_loop_slot][(local_pos+1)%size];
+							media_cycle->setCurrentFrame(loop_id, local_pos%size);
 						}
 						else {
 							_output_buffer[i] = 0;
@@ -1490,6 +1496,7 @@ void ACAudioFeedback::processAudioEngineResynth(int _loop_slot, int _prev_sample
 					if (local_pos>=size) {
 						local_pos = 0;
 					}
+					media_cycle->setCurrentFrame(loop_id, local_pos);
 				}
 			}
 			break;
@@ -1768,7 +1775,7 @@ int ACAudioFeedback::createSourceWithPosition(int loop_id, float x, float y, flo
 			resample_ratio = 2.0/(pow(2.0,local_key/12.0));
 			//audio_loop->key += (12-key);
 		}
-		
+		resample_ratios[loop_slot] = resample_ratio;
 		//resample_ratio = 1;
 
 		use_bpm[loop_slot] = local_bpm * resample_ratio;
@@ -1923,19 +1930,25 @@ int ACAudioFeedback::deleteSource(int loop_id)
 
 #ifdef OPENAL_STREAM_MODE
 
-	printf("Loop slot %d\n", loop_slot);
-
+	#ifdef USE_DEBUG // use debug message levels instead
+	//printf("Loop slot %d\n", loop_slot);
+	#endif
+	
 	// Stop source play
 	alSourceStop(loop_sources[loop_slot]);
 	// Detach buffer from source
 	// alSourcei(loop_source, AL_BUFFER, 0);
 
 	alGetSourcei(loop_sources[loop_slot], AL_BUFFERS_QUEUED, &buffer_queued);
-	printf("%d, Queued buffers %d\n", loop_slot, buffer_queued);
+	#ifdef USE_DEBUG // use debug message levels instead
+	//printf("%d, Queued buffers %d\n", loop_slot, buffer_queued);
+	#endif
 
 	alGetSourcei(loop_sources[loop_slot], AL_BUFFERS_PROCESSED, &buffer_processed);
-	printf("%d, Processed buffers %d\n", loop_slot, buffer_processed);
-
+	#ifdef USE_DEBUG // use debug message levels instead
+	//printf("%d, Processed buffers %d\n", loop_slot, buffer_processed);
+	#endif//def USE_DEBUG
+	
 	current = 0;
 	current_unqueue = current_buffer_unqueue[loop_slot];
 	// Unqueue processed buffers
@@ -1971,9 +1984,9 @@ int ACAudioFeedback::deleteSource(int loop_id)
 
 	// has been reserved in createSourceWithPosition, need to delete here
 	delete[] loop_buffers_audio_engine[loop_slot];
-
-	printf("%d, Done - %d - %d \n", loop_slot, active_loops, loop_source);
-
+	#ifdef USE_DEBUG // use debug message levels instead
+	//printf("%d, Done - %d - %d \n", loop_slot, active_loops, loop_source);
+	#endif
 
 #elif OPENAL_STATIC_MODE
 

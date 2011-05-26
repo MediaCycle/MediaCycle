@@ -269,7 +269,6 @@ float* ACAudio::getSamples(){
 	else{
 		SF_INFO sfinfo;
 		SNDFILE* testFile;
-		cout << this->getFileName() << endl;
 		if (! (testFile = sf_open (this->getFileName().c_str(), SFM_READ, &sfinfo))){  
 			/* Open failed so print an error message. */
 			printf ("Not able to open input file %s.\n", this->getFileName().c_str()) ;

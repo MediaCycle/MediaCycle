@@ -219,7 +219,7 @@ int ACOSCDockWidgetQt::process_mess(const char *path, const char *types, lo_arg 
 
 		if(tag.find("/activated",0)!= string::npos)
 		{
-			std::cout << "OSC message: '" << tag << "'" << std::endl;
+			//std::cout << "OSC message: '" << tag << "'" << std::endl;
 			media_cycle->resetPointers();//CF temp: hack, when /released messages aren't received
 			media_cycle->addPointer(id);
 			//Ugly
@@ -228,7 +228,7 @@ int ACOSCDockWidgetQt::process_mess(const char *path, const char *types, lo_arg 
 		}
 		else if(tag.find("/released",0)!= string::npos)
 		{
-			std::cout << "OSC message: '" << tag << "'" << std::endl;
+			//std::cout << "OSC message: '" << tag << "'" << std::endl;
 			media_cycle->removePointer(id);//CF hack
 			//Ugly
 			osg_view->getHUDRenderer()->preparePointers();
@@ -236,7 +236,7 @@ int ACOSCDockWidgetQt::process_mess(const char *path, const char *types, lo_arg 
 		}
 		else if(tag.find("/reset_pointers",0)!= string::npos)
 		{
-			std::cout << "OSC message: '" << tag << "'" << std::endl;
+			//std::cout << "OSC message: '" << tag << "'" << std::endl;
 			media_cycle->resetPointers();
 			//Ugly
 			osg_view->getHUDRenderer()->preparePointers();
@@ -288,9 +288,10 @@ int ACOSCDockWidgetQt::process_mess(const char *path, const char *types, lo_arg 
 				if (media_cycle && media_cycle->getLibrary()->getSize() > 0){
 
 ////////////////Ugly
-		media_cycle->setAutoPlay(1);
+					media_cycle->setAutoPlay(1);
 
-					int closest_node = media_cycle->getClosestNode();
+					//CF hack
+					/*int closest_node = media_cycle->getClosestNode();
 					float distance = this->getOsgView()->getBrowserRenderer()->getDistanceMouse()[closest_node];
 					if (osc_feedback)
 					{
@@ -301,7 +302,7 @@ int ACOSCDockWidgetQt::process_mess(const char *path, const char *types, lo_arg 
 						osc_feedback->messageAppendFloat(distance);
 						osc_feedback->messageEnd();
 						osc_feedback->messageSend();
-					}
+					}*/
 				}
 				//media_cycle->setNeedsDisplay(true);
 			}

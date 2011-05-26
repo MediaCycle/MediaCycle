@@ -141,6 +141,8 @@ public:
 	bool readXMLConfig(std::string _filename="");
 	void clean(bool _updategl=false);
 	void setDefaultQSettings();
+	
+	void useSegmentation(bool _status);
 
 private:
 	static const int n_dir_for_threading;	
@@ -190,5 +192,7 @@ private:
 	QDockWidget* osgViewDock;
 	QWidget* osgViewDockTitleBar;
 	QRect osgViewDockNormalSize;
+	
+	bool use_segmentation;
 };
 #endif

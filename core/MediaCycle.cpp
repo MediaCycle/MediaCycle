@@ -688,7 +688,8 @@ void MediaCycle::pickedObjectCallback(int _nodeId) {
 	int nodeId = _nodeId;
 	if(nodeId < 0) {
 		// clicked close to a node
-		nodeId = getClosestNode();
+		if (getPointerSize() > 0)
+			nodeId = getClosestNode();
 	}
 	mediaBrowser->setClickedNode(nodeId);
 	if (forwarddown == 0){// & playkeydown) {//if (!forwarddown) { //CF forwardown is not a boolean

@@ -194,6 +194,7 @@ private:
 	ALuint	ext_loop_source;
 	ALuint ext_loop_buffer;
 #endif
+	float*  resample_ratios;
 	int ext_loop_length;
 	int*	loop_ids;
 	float*  use_bpm;

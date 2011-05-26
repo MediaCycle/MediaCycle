@@ -219,7 +219,7 @@ public:
 	void dumpSelectedNodes();
 	set<int>& getSelectedNodes(){return mSelectedNodes;}
 	void unselectNodes();
-	int getClosestNode(int p_index = 0) {return mClosestNode; };
+	int getClosestNode(int p_index = 0) {return getPointerFromIndex(p_index)->getClosestNode(); };
 	int	getLastSelectedNode(){return mLastSelectedNode;}
 	void setReferenceNode(int index);
 	int getReferenceNode(){return mReferenceNode;}

@@ -479,7 +479,9 @@ ACMediaFeatures* ACMedia::getFeaturesVector(string feature_name) {
 			return features_vectors[i];
 		}
 	}
+	#ifdef USE_DEBUG // use debug message levels instead
 	std::cerr << "ACMedia::getFeaturesVector : not found feature named " << feature_name << std::endl;
+	#endif
 	return 0;
 }
 

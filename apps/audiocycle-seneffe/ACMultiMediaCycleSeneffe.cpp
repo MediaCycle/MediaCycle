@@ -37,11 +37,51 @@
 ACMultiMediaCycleSeneffe::ACMultiMediaCycleSeneffe() : ACMultiMediaCycleOsgQt() {
 	count = 0;
 	// delay after which we change media_files (if it's ok)
-	attente = 10000; // in ms, so 1 800 000 is for 30 min
+	attente = 1*60*1000; // in ms, so 1 800 000 is for 30 min
+	
+	this->useSegmentation(false);
 
-	XMLfiles.push_back("/usr/local/share/mediacycle/data/audio_all/zero-g-pro-pack_a/Brass Elements/Brass_076_BPM.xml");
-	XMLfiles.push_back("/usr/local/share/mediacycle/data/audio_all/zero-g-pro-pack_a/Brass Elements/Brass_096_BPM.xml");
-	XMLfiles.push_back("/usr/local/share/mediacycle/data/audio_all/zero-g-pro-pack_a/Brass Elements/Brass_100_BPM.xml");
+	//XMLfiles.push_back("/usr/local/share/mediacycle/data/audio_all/zero-g-pro-pack_a/Brass Elements/Brass_076_BPM.xml");
+	//XMLfiles.push_back("/usr/local/share/mediacycle/data/audio_all/zero-g-pro-pack_a/Brass Elements/Brass_096_BPM.xml");
+	//XMLfiles.push_back("/usr/local/share/mediacycle/data/audio_all/zero-g-pro-pack_a/Brass Elements/Brass_100_BPM.xml");
+	XMLfiles.push_back("/numediart/datasets/olpc-sound-samples-v2-xml/AdamKeshen44.xml");
+	XMLfiles.push_back("/numediart/datasets/2011-05-MusicTechMagazine98-new.xml");
+	XMLfiles.push_back("/numediart/datasets/olpc-sound-samples-v2-xml/AdamKeshen44.xml");
+	XMLfiles.push_back("/numediart/datasets/olpc-sound-samples-v2-xml/AkitoVanTroyer44.xml");
+	XMLfiles.push_back("/numediart/datasets/olpc-sound-samples-v2-xml/AndresCabrera44.xml");
+	XMLfiles.push_back("/numediart/datasets/olpc-sound-samples-v2-xml/AndrewSorkin44.xml");
+	XMLfiles.push_back("/numediart/datasets/olpc-sound-samples-v2-xml/AnthonyKozar44.xml");
+	XMLfiles.push_back("/numediart/datasets/olpc-sound-samples-v2-xml/BehindTheGreenDoor-Cecilia-44k.xml");
+	XMLfiles.push_back("/numediart/datasets/olpc-sound-samples-v2-xml/Berklee44Barkovich.xml");
+	XMLfiles.push_back("/numediart/datasets/olpc-sound-samples-v2-xml/Berklee44BoulangerFX.xml");
+	XMLfiles.push_back("/numediart/datasets/olpc-sound-samples-v2-xml/Berklee44Forsyth.xml");
+	XMLfiles.push_back("/numediart/datasets/olpc-sound-samples-v2-xml/Berklee44v1.xml");
+	XMLfiles.push_back("/numediart/datasets/olpc-sound-samples-v2-xml/Berklee44v2.xml");
+	XMLfiles.push_back("/numediart/datasets/olpc-sound-samples-v2-xml/Berklee44v3.xml");
+	XMLfiles.push_back("/numediart/datasets/olpc-sound-samples-v2-xml/Berklee44v4.xml");
+	XMLfiles.push_back("/numediart/datasets/olpc-sound-samples-v2-xml/Berklee44v5.xml");
+	XMLfiles.push_back("/numediart/datasets/olpc-sound-samples-v2-xml/Berklee44v6.xml");
+	XMLfiles.push_back("/numediart/datasets/olpc-sound-samples-v2-xml/Berklee44v7.xml");
+	XMLfiles.push_back("/numediart/datasets/olpc-sound-samples-v2-xml/Berklee44v8.xml");
+	XMLfiles.push_back("/numediart/datasets/olpc-sound-samples-v2-xml/Berklee44v9.xml");
+	XMLfiles.push_back("/numediart/datasets/olpc-sound-samples-v2-xml/Berklee44v10.xml");
+	XMLfiles.push_back("/numediart/datasets/olpc-sound-samples-v2-xml/Berklee44v11.xml");
+	XMLfiles.push_back("/numediart/datasets/olpc-sound-samples-v2-xml/Berklee44v12.xml");
+	XMLfiles.push_back("/numediart/datasets/olpc-sound-samples-v2-xml/Berklee44v13.xml");
+	XMLfiles.push_back("/numediart/datasets/olpc-sound-samples-v2-xml/Berklee44v14.xml");
+	XMLfiles.push_back("/numediart/datasets/olpc-sound-samples-v2-xml/Berklee44v15.xml");
+	XMLfiles.push_back("/numediart/datasets/olpc-sound-samples-v2-xml/Berklee44v16.xml");
+	XMLfiles.push_back("/numediart/datasets/olpc-sound-samples-v2-xml/Boulanger44CsoundBookSelected.xml");
+	XMLfiles.push_back("/numediart/datasets/olpc-sound-samples-v2-xml/Boulanger44CsoundSystemSounds.xml");
+	XMLfiles.push_back("/numediart/datasets/olpc-sound-samples-v2-xml/BoulangerAruba44.xml");
+	XMLfiles.push_back("/numediart/datasets/olpc-sound-samples-v2-xml/BoulangerMarion44.xml");
+	XMLfiles.push_back("/numediart/datasets/olpc-sound-samples-v2-xml/BoulangerPhilip44.xml");
+	XMLfiles.push_back("/numediart/datasets/olpc-sound-samples-v2-xml/BT44.xml");
+	XMLfiles.push_back("/numediart/datasets/olpc-sound-samples-v2-xml/ChenSokolovsky44.xml");
+	XMLfiles.push_back("/numediart/datasets/olpc-sound-samples-v2-xml/ColetteBoulanger44.xml");
+	XMLfiles.push_back("/numediart/datasets/olpc-sound-samples-v2-xml/ColmanOReilly44.xml");
+	XMLfiles.push_back("/numediart/datasets/olpc-sound-samples-v2-xml/Conversations-SlawomirZubrzycki-Piano-44k.xml");
+	
 	timer = new QTimer(this);
 	connect( timer, SIGNAL(timeout()), this, SLOT(loopXML()) );
 }

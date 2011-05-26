@@ -69,11 +69,13 @@ ACMultiMediaCycleOsgQt::ACMultiMediaCycleOsgQt(QWidget *parent) : QMainWindow(pa
 	this->media_cycle = 0;
 	this->config_file_xml = "";
 	this->project_directory = QApplication::applicationDirPath().append(QDir::separator()).toStdString();
-
+	
 	#if defined (SUPPORT_AUDIO)
 		this->audio_engine = 0;
 	#endif //defined (SUPPORT_AUDIO)
 
+	this->use_segmentation = true;
+	
 	// Apple bundled *.app, just look for bundled osg plugins
 	#ifndef USE_DEBUG
 	#if defined __APPLE__ and not defined (XCODE)
@@ -523,15 +525,16 @@ void ACMultiMediaCycleOsgQt::on_actionLoad_Media_Files_triggered(bool checked){
 bool ACMultiMediaCycleOsgQt::doSegments(){
 	bool do_segments = false;
 
-	// XS TODO skip this for SENEFFE
-//	int seg_button = QMessageBox::question(this,
-//									   tr("Segmentation"),
-//									   tr("Do you want to segment the media ?"),
-//									   QMessageBox::Yes | QMessageBox::No);
-//	if (seg_button == QMessageBox::Yes) {
-//	// XS TODO: check that segmentation algorithms exist
-//		do_segments = true;
-//	}
+	if(use_segmentation){
+		int seg_button = QMessageBox::question(this,
+			tr("Segmentation"),
+			tr("Do you want to segment the media ?"),
+			QMessageBox::Yes | QMessageBox::No);
+		if (seg_button == QMessageBox::Yes) {
+			// XS TODO: check that segmentation algorithms exist
+			do_segments = true;
+		}
+	}	
 	return do_segments;
 }
 
@@ -1163,4 +1166,9 @@ void ACMultiMediaCycleOsgQt::changeMediaType(ACMediaType _media_type){
 	}
 #endif //defined (SUPPORT_AUDIO)
 	this->media_cycle->changeMediaType(this->media_type);
+}
+
+void ACMultiMediaCycleOsgQt::useSegmentation(bool _status)
+{
+	use_segmentation = _status;
 }
