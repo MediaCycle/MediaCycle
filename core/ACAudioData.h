@@ -63,6 +63,5 @@ private:
 	
 };
 
-
 #endif //defined (SUPPORT_AUDIO)
 #endif // ACAUDIODATA_H

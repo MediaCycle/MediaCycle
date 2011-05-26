@@ -241,7 +241,7 @@ int ACOSCDockWidgetQt::process_mess(const char *path, const char *types, lo_arg 
 			//Ugly
 			osg_view->getHUDRenderer()->preparePointers();
 			media_cycle->setNeedsDisplay(true);
-			std::cout << "Reset to " << media_cycle->getPointerSize() << " pointer(s)" << std::endl;
+			std::cout << "Reset to " << media_cycle->getNumberOfPointers() << " pointer(s)" << std::endl;
 		}
 		else if(tag.find("/move/xy",0)!= string::npos)
 		{

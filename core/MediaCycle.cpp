@@ -634,8 +634,8 @@ int MediaCycle::setCurrentFrame(int lid, int frame_pos) {
 void MediaCycle::muteAllSources() { mediaBrowser->muteAllSources(); }
 
 // == POINTERS on VIEW
-int MediaCycle::getPointerSize() {
-	return mediaBrowser->getPointerSize();
+int MediaCycle::getNumberOfPointers() {
+	return mediaBrowser->getNumberOfPointers();
 }
 
 ACPointer* MediaCycle::getPointerFromIndex(int i) {
@@ -688,7 +688,7 @@ void MediaCycle::pickedObjectCallback(int _nodeId) {
 	int nodeId = _nodeId;
 	if(nodeId < 0) {
 		// clicked close to a node
-		if (getPointerSize() > 0)
+		if (getNumberOfPointers() > 0)
 			nodeId = getClosestNode();
 	}
 	mediaBrowser->setClickedNode(nodeId);

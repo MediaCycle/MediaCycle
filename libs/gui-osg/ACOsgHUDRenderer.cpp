@@ -83,7 +83,7 @@ osg::ref_ptr<osg::Camera> ACOsgHUDRenderer::getCamera() {
 
 void ACOsgHUDRenderer::preparePointers(osgViewer::View* view) {
 
-	unsigned int n = media_cycle->getPointerSize();
+	unsigned int n = media_cycle->getNumberOfPointers();
 
 	unsigned int prev_size =  pointer_renderer.size();
 

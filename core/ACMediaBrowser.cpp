@@ -1339,9 +1339,9 @@ int ACMediaBrowser::toggleSourceActivity(int lid, int type)
 
 void ACMediaBrowser::setClosestNode(int _node_id, int p_index) {
 	std::vector<int> hoveredNodes;
-	hoveredNodes.resize(getPointerSize());
+	hoveredNodes.resize(getNumberOfPointers());
 	//std::cout << "hoverNodes ndeId=" << _node_id << " p_index=" << p_index << " : ";
-	for (int ps = 0; ps < getPointerSize(); ps++){
+	for (int ps = 0; ps < getNumberOfPointers(); ps++){
 		hoveredNodes[ps]=getClosestNode(ps);
 		//std::cout << hoveredNodes[ps] << " ";
 	}
@@ -1383,7 +1383,7 @@ void ACMediaBrowser::setClosestNode(int _node_id, int p_index) {
 				else if ( ((*node).getNodeId()!=_node_id) && ((*node).getActivity() == 2) ) {
 					// set active nodes from 2 to 0
 					int donottoggle = 0;
-					for (int ps = 0; ps < getPointerSize(); ps++){
+					for (int ps = 0; ps < getNumberOfPointers(); ps++){
 						if ( ((*node).getNodeId()==hoveredNodes[ps]) ){
 							donottoggle = 1;
 						}
@@ -1456,7 +1456,7 @@ ACMediaNode& ACMediaBrowser::getMediaNode(int i) {
 	return mLoopAttributes[i];
 }
 
-int ACMediaBrowser::getPointerSize() {
+int ACMediaBrowser::getNumberOfPointers() {
 	return mPointerAttributes.size();
 }
 

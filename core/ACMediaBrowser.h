@@ -235,7 +235,7 @@ public:
 	void initializeNodes(ACBrowserMode _mode = AC_MODE_CLUSTERS);
 
 	// == Pointers
-	int getPointerSize();
+	int getNumberOfPointers();
 	ACPointer* getPointerFromIndex(int i); // for use when parsing pointers incrementally
 	ACPointer* getPointerFromId(int i); // for use when parsing pointers from the ID set by the input device
 	void resetPointers();
