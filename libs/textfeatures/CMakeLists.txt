@@ -5,7 +5,7 @@ IF ( SUPPORT_TEXT  )
 	ADD_LIBRARY(textfeatures STATIC ${SRC} ${HDR})
 
 	TARGET_LINK_LIBRARIES(textfeatures textTool ${CLUCENE_LIBRARIES} )
-	ADD_DEPENDENCIES(textfeatures mediacycle)
+	ADD_DEPENDENCIES(textfeatures textTool mediacycle)
 
 	MESSAGE("[X] textfeatures")
 ELSE ( SUPPORT_TEXT)
