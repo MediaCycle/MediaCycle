@@ -1,11 +1,11 @@
 /*
- *  ACOsgBrowserRenderer.h
+ *  ACOsgTextRenderer.h
  *  MediaCycle
  *
- *  @author Stéphane Dupont
- *  @date 24/08/09
+ *  @author Christian Frisson and T. Ravet
+ *  @date 26/05/2011
  *
- *  @copyright (c) 2009 – UMONS - Numediart
+ *  @copyright (c) 2011 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
  *  licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -47,16 +47,11 @@ class ACOsgTextRenderer : public ACOsgMediaRenderer {
 protected:
 	osg::ref_ptr<osg::Geode> metadata_geode;
 	osg::ref_ptr<osgText::Text> metadata;
-
-#ifdef AUTO_TRANSFORM
-#else
-#endif
 	osg::ref_ptr<osg::Geode> entry_geode;
 	
 	void entryGeode();
 	void metadataGeode();
-	
-	
+
 public:
 	ACOsgTextRenderer();
 	~ACOsgTextRenderer();

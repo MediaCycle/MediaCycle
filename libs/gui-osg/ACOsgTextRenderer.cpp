@@ -1,11 +1,11 @@
 /*
- *  ACOsgBrowserRenderer.cpp
+ *  ACOsgTextRenderer.cpp
  *  MediaCycle
  *
- *  @author Stéphane Dupont
- *  @date 24/08/09
+ *  @author Christian Frisson and T. Ravet
+ *  @date 26/05/2011
  *
- *  @copyright (c) 2009 – UMONS - Numediart
+ *  @copyright (c) 2011 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
  *  licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -39,8 +39,6 @@
 #include <ACText.h>
 
 #include "boost/filesystem.hpp"   // includes all needed Boost.Filesystem declarations
-//#include "boost/filesystem/operations.hpp"
-//#include "boost/filesystem/path.hpp"
 
 #include <sstream>
 
@@ -58,13 +56,10 @@ ACOsgTextRenderer::ACOsgTextRenderer() {
 }
 
 ACOsgTextRenderer::~ACOsgTextRenderer() {
-	// media_node->removeChild(0,1);
 	if 	(entry_geode) {
-		//ref_ptr//entry_geode->unref();
 		entry_geode=0;
 	}
 	if 	(metadata_geode) {
-		//ref_ptr//metadata_geode->unref();
 		metadata_geode=0;
 	}
 }
@@ -98,21 +93,15 @@ void ACOsgTextRenderer::metadataGeode() {
 
 	metadata->setDrawMode(osgText::Text::TEXT);// osgText::Text::BOUNDINGBOX, osgText::Text::ALIGNMENT
 
-
 	// CF: temporary workaround as the ACUserLog tree and the ACLoopAttributes vector in ACMediaBrowser are not sync'd
 	int media_index = node_index; // or media_cycle->getBrowser()->getMediaNode(node_index).getMediaId();
 	if (media_cycle->getBrowser()->getMode() == AC_MODE_NEIGHBORS)
 		media_index = media_cycle->getBrowser()->getUserLog()->getMediaIdFromNodeId(node_index);
 
-	ACText* media = (ACText*)(media_cycle->getLibrary()->getMedia(media_index));
-
-	string tempStr;
-	tempStr=media_cycle->getMediaFileName(media_index);
-	size_t indTemp=tempStr.find_last_of("/"),lastTemp=tempStr.length();
-	tempStr=tempStr.substr(indTemp,lastTemp-indTemp);
-	
-	
-	metadata->setText( tempStr );
+	string text_filename=media_cycle->getMediaFileName(media_index);
+	size_t indTemp=text_filename.find_last_of("/"),lastTemp=text_filename.length();
+	text_filename=text_filename.substr(indTemp,lastTemp-indTemp);
+	metadata->setText( text_filename );
 
 	//state = text_geode->getOrCreateStateSet();
 	//state->setMode(GL_LIGHTING, osg::StateAttribute::PROTECTED | osg::StateAttribute::OFF );
@@ -122,9 +111,6 @@ void ACOsgTextRenderer::metadataGeode() {
 	//TODO check this .get() (see also ACOsgBrowserRenderer.cpp)
 	//".get()" is necessary for compilation under linux (OSG v2.4)
 	metadata_geode->addDrawable(metadata);
-
-	//ref_ptr//metadata_geode->ref();
-
 }
 
 void ACOsgTextRenderer::entryGeode() {
@@ -157,11 +143,9 @@ void ACOsgTextRenderer::entryGeode() {
 	entry_geode->setUserData(new ACRefId(node_index));
 	//entry_geode->setName(name);
 	//ref_ptr//entry_geode->ref();
-
 }
 
 void ACOsgTextRenderer::prepareNodes() {
-
 	entry_geode = 0;
 	metadata_geode = 0;
 
@@ -169,6 +153,8 @@ void ACOsgTextRenderer::prepareNodes() {
 		entryGeode();
 		media_node->addChild(entry_geode);
 	}
+	if (!metadata_geode)
+		metadataGeode();
 }
 
 void ACOsgTextRenderer::updateNodes(double ratio) {
@@ -194,7 +180,6 @@ void ACOsgTextRenderer::updateNodes(double ratio) {
 	const ACMediaNode &attribute = media_cycle->getMediaNode(node_index);
 
 	Matrix T;
-//	Matrix *T2;
 	Matrix Trotate;
 
 	float x, y, z;
@@ -203,90 +188,53 @@ void ACOsgTextRenderer::updateNodes(double ratio) {
 	float maxscale = 1.5;
 	float minscale = 0.33;
 
-		// SD 2010 OCT - This animation has moved from Browser to Renderer
-		/*
-		const ACPoint &p = attribute.getCurrentPosition(), &p2 = attribute.getNextPosition();
-		double omr = 1.0-ratio;
-		x = omr*p.x + ratio*p2.x;
-		y = omr*p.y + ratio*p2.y;
-		z = 0;
-		*/
-
 	x = media_cycle_view_pos.x;
 	y = media_cycle_view_pos.y;
 	z = 0;
 
-		T.makeTranslate(Vec3(x, y, z));
-		localscale = maxscale - distance_mouse * (maxscale - minscale) / maxdistance ;
-		localscale = max(localscale,minscale);
-		// localscale = 0.5;
+	T.makeTranslate(Vec3(x, y, z));
+	localscale = maxscale - distance_mouse * (maxscale - minscale) / maxdistance ;
+	localscale = max(localscale,minscale);
 
-		if (attribute.getActivity()>=1) {	// with waveform
-		//if (0) {	// without waveform
-			localscale = 0.5;
+	if (attribute.getActivity()>=1) { // 0 inactive, 1 clicked, 2 hover
+		localscale = 0.5;
+		media_node->addChild(metadata_geode);
+	}
+	else {
+		media_node->removeChild(metadata_geode);
 
-
-			//if(media_node->getNumChildren() > 0 && media_node->getChild(0) == entry_geode) {
-			/*if(media_node->getNumChildren() !=3 && waveform_type != AC_BROWSER_AUDIO_WAVEFORM_NONE) {// waveform + curser + metadata
-				//waveform_geode->setNodeMask(-1);
-				media_node->removeChild(entry_geode);
-				media_node->addChild(waveform_geode);
-				//media_node->setChild(0, waveform_geode);
-				media_node->addChild(metadata_geode);
-				media_node->addChild(curser_transform);
-			}
-			else if(media_node->getNumChildren() ==3 && waveform_type == AC_BROWSER_AUDIO_WAVEFORM_NONE){// when switching to none mode while waveforms are already displayed
-				media_node->removeChild(waveform_geode);
-				media_node->removeChild(metadata_geode);
-				media_node->removeChild(curser_transform);
-				media_node->addChild(entry_geode);
-			}*/
-			media_node->addChild(metadata_geode);
-
-		}
-		else {
-			//if(media_node->getNumChildren() == 3) {
-			/*if(media_node->getNumChildren() != 1) { // entry_geode
-				media_node->removeChild(metadata_geode);
-				media_node->addChild(entry_geode);
-				//media_node->setChild(0, entry_geode);
-				//media_node->removeChild(1, 1);
-			}*/
-			media_node->removeChild(metadata_geode);
-
-			//CF nodes colored along their relative cluster on in Clusters Mode
-			if (media_cycle->getBrowserMode() == AC_MODE_CLUSTERS)
-				((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(colors[attribute.getClusterId()%NCOLORS]);
-			else
-				((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(colors[0]);
-
-			if (attribute.isSelected()) {
-				//CF color (multiple) selected nodes in black
-				Vec4 selected_color(0,0,0,1);
-				((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(selected_color);
-			}
-
-			if (user_defined_color)
-				((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(node_color);
-
-			T =  Matrix::rotate(-media_cycle_angle,Vec3(0.0,0.0,1.0)) * Matrix::scale(localscale/media_cycle_zoom,localscale/media_cycle_zoom,localscale/media_cycle_zoom) * T;
+		//CF nodes colored along their relative cluster on in Clusters Mode
+		if (media_cycle->getBrowserMode() == AC_MODE_CLUSTERS)
+			((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(colors[attribute.getClusterId()%NCOLORS]);
+		else
+			((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(colors[0]);
+		if (attribute.isSelected()) {
+			//CF color (multiple) selected nodes in black
+			Vec4 selected_color(0,0,0,1);
+			((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(selected_color);
 		}
 
-		unsigned int mask = (unsigned int)-1;
-		if(attribute.getNavigationLevel() >= media_cycle->getNavigationLevel()) {
-			entry_geode->setNodeMask(mask);
-		}
-		else {
-			entry_geode->setNodeMask(0);
-		}
+		if (user_defined_color)
+			((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(node_color);
 
-#ifdef AUTO_TRANSFORM
-	media_node->setPosition(Vec3(x,y,z));
-	media_node->setRotation(Quat(0.0, 0.0, 1.0, -media_cycle_angle));
-	media_node->setScale(Vec3(localscale/media_cycle_zoom,localscale/media_cycle_zoom,localscale/media_cycle_zoom));
-#else
-	media_node->setMatrix(T);
-#endif
+		T =  Matrix::rotate(-media_cycle_angle,Vec3(0.0,0.0,1.0)) * Matrix::scale(localscale/media_cycle_zoom,localscale/media_cycle_zoom,localscale/media_cycle_zoom) * T;
+	}
+
+	unsigned int mask = (unsigned int)-1;
+	if(attribute.getNavigationLevel() >= media_cycle->getNavigationLevel()) {
+		entry_geode->setNodeMask(mask);
+	}
+	else {
+		entry_geode->setNodeMask(0);
+	}
+
+	#ifdef AUTO_TRANSFORM
+		media_node->setPosition(Vec3(x,y,z));
+		media_node->setRotation(Quat(0.0, 0.0, 1.0, -media_cycle_angle));
+		media_node->setScale(Vec3(localscale/media_cycle_zoom,localscale/media_cycle_zoom,localscale/media_cycle_zoom));
+	#else
+		media_node->setMatrix(T);
+	#endif
 
 }
-#endif //defined (SUPPORT_AUDIO)
+#endif //defined (SUPPORT_TEXT)
