@@ -647,14 +647,18 @@ void ACOsgCompositeViewQt::mouseReleaseEvent( QMouseEvent* event )
 
 			if(loop >= 0)
 			{
-
-				if (finddown == 1)
+			if (finddown == 1)
 				{
 					#if defined (__APPLE__)
 						std::stringstream command;
 						//command << "open " << fs::path(media_cycle->getLibrary()->getMedia(loop)->getFileName()).parent_path();// opens the containing directory using the Finder
 						command << "open -R '" << media_cycle->getLibrary()->getMedia(loop)->getFileName() << "'" ;// opens the containing directory using the Finder and highlights the file!
-						system(command.str().c_str());
+						try {
+							system(command.str().c_str());
+						}
+						catch (const exception& e) {
+							cout << "ACOsgCompositeViewQt: caught exception while trying to open media file " << media_cycle->getLibrary()->getMedia(loop)->getFileName() << " with the OSX Finder: " << e.what() << endl;
+						}
 					#endif //defined (__APPLE__)
 				}
 				else if (opendown == 1)
@@ -664,10 +668,17 @@ void ACOsgCompositeViewQt::mouseReleaseEvent( QMouseEvent* event )
 						ACMediaType _media_type = media_cycle->getLibrary()->getMedia(loop)->getMediaType();
 						if (_media_type == MEDIA_TYPE_IMAGE || _media_type == MEDIA_TYPE_VIDEO)
 							command << "open -a Preview '";
+						else if (_media_type == MEDIA_TYPE_TEXT)
+							command << "open '"; // uses TextEdit or other default text application if customized OS-wide
 						else
 							command << "open -R '"; // no iTunes for audio! 3Dmodel default applications?
 						command << media_cycle->getLibrary()->getMedia(loop)->getFileName() << "'" ;
-						system(command.str().c_str());
+						try {
+							system(command.str().c_str());
+						}	
+						catch (const exception& e) {
+							cout << "ACOsgCompositeViewQt: caught exception while trying to open media file " << media_cycle->getLibrary()->getMedia(loop)->getFileName() << " with the OSX-wide prefered application: " << e.what() << endl;
+						}	
 					#endif //defined (__APPLE__)
 				}
 				else if (forwarddown==1)
