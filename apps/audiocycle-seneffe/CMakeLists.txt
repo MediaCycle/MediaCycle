@@ -44,7 +44,6 @@ IF ( SUPPORT_AUDIO AND USE_QT4 AND USE_OSG AND USE_OSC AND ( OPENAL_FOUND OR POR
 
 	ADD_DEPENDENCIES(audiocycle-seneffe mediacycle)
 	ADD_DEPENDENCIES(audiocycle-seneffe mediacycle-io-osc)
-	ADD_DEPENDENCIES(audiocycle-seneffe oscpack)
 	ADD_DEPENDENCIES(audiocycle-seneffe mediacycle-osg)
 	ADD_DEPENDENCIES(audiocycle-seneffe mediacycle-osg-qt)
 	ADD_DEPENDENCIES(audiocycle-seneffe multimediacycle-osg-qt)
@@ -67,7 +66,6 @@ IF ( SUPPORT_AUDIO AND USE_QT4 AND USE_OSG AND USE_OSC AND ( OPENAL_FOUND OR POR
 
 	#TARGET_LINK_LIBRARIES(audiocycle-seneffe ${OPENSCENEGRAPH_LIBRARIES})
 	TARGET_LINK_LIBRARIES(audiocycle-seneffe mediacycle-io-osc)
-	#TARGET_LINK_LIBRARIES(audiocycle-seneffe oscpack)
 	TARGET_LINK_LIBRARIES(audiocycle-seneffe audioengine)
 	#TARGET_LINK_LIBRARIES(audiocycle-seneffe ${OPENAL_LIBRARY})
 	#TARGET_LINK_LIBRARIES(audiocycle-seneffe ${OPENGL_LIBRARIES})

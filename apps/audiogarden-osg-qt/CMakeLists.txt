@@ -33,7 +33,6 @@ IF (SUPPORT_AUDIO AND USE_AUDIOGARDEN AND USE_QT4 AND USE_OSG AND USE_OSC AND ( 
 
 	ADD_DEPENDENCIES(audiogarden-osg-qt mediacycle)
 	ADD_DEPENDENCIES(audiogarden-osg-qt mediacycle-io-osc)
-	ADD_DEPENDENCIES(audiogarden-osg-qt oscpack)
 	ADD_DEPENDENCIES(audiogarden-osg-qt mediacycle-osg)
 	ADD_DEPENDENCIES(audiogarden-osg-qt mediacycle-osg-qt)
 	ADD_DEPENDENCIES(audiogarden-osg-qt audioengine)
@@ -56,7 +55,6 @@ IF (SUPPORT_AUDIO AND USE_AUDIOGARDEN AND USE_QT4 AND USE_OSG AND USE_OSC AND ( 
 	TARGET_LINK_LIBRARIES(audiogarden-osg-qt mediacycle-osg-qt)
 	#TARGET_LINK_LIBRARIES(audiogarden-osg-qt ${OPENSCENEGRAPH_LIBRARIES})
 	TARGET_LINK_LIBRARIES(audiogarden-osg-qt mediacycle-io-osc)
-	#TARGET_LINK_LIBRARIES(audiogarden-osg-qt oscpack)
 	TARGET_LINK_LIBRARIES(audiogarden-osg-qt audioengine)
 	TARGET_LINK_LIBRARIES(audiogarden-osg-qt audiofeatures audiogarden-synthesis ${SNDFILE_LIBRARY} ${SAMPLERATE_LIBRARY})
 	#TARGET_LINK_LIBRARIES(audiogarden-osg-qt ${OPENAL_LIBRARY})

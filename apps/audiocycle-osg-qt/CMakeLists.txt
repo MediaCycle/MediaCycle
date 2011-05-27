@@ -44,7 +44,6 @@ IF ( SUPPORT_AUDIO AND USE_QT4 AND USE_OSG AND USE_OSC AND ( OPENAL_FOUND OR POR
 
 	ADD_DEPENDENCIES(audiocycle-osg-qt mediacycle)
 	ADD_DEPENDENCIES(audiocycle-osg-qt mediacycle-io-osc)
-	ADD_DEPENDENCIES(audiocycle-osg-qt oscpack)
 	ADD_DEPENDENCIES(audiocycle-osg-qt mediacycle-osg)
 	ADD_DEPENDENCIES(audiocycle-osg-qt mediacycle-osg-qt)
 	ADD_DEPENDENCIES(audiocycle-osg-qt multimediacycle-osg-qt)
@@ -67,7 +66,6 @@ IF ( SUPPORT_AUDIO AND USE_QT4 AND USE_OSG AND USE_OSC AND ( OPENAL_FOUND OR POR
 
 	#TARGET_LINK_LIBRARIES(audiocycle-osg-qt ${OPENSCENEGRAPH_LIBRARIES})
 	TARGET_LINK_LIBRARIES(audiocycle-osg-qt mediacycle-io-osc)
-	#TARGET_LINK_LIBRARIES(audiocycle-osg-qt oscpack)
 	TARGET_LINK_LIBRARIES(audiocycle-osg-qt audioengine)
 	#TARGET_LINK_LIBRARIES(audiocycle-osg-qt ${OPENAL_LIBRARY})
 	#TARGET_LINK_LIBRARIES(audiocycle-osg-qt ${OPENGL_LIBRARIES})

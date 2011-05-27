@@ -49,7 +49,6 @@ IF(USE_QT4 AND USE_OSG AND USE_OSC AND ( OPENAL_FOUND OR PORTAUDIO_FOUND ) )
 
 	ADD_DEPENDENCIES(multimediacycle-osg-qt mediacycle)
 	ADD_DEPENDENCIES(multimediacycle-osg-qt mediacycle-io-osc)
-	ADD_DEPENDENCIES(multimediacycle-osg-qt oscpack)
 	ADD_DEPENDENCIES(multimediacycle-osg-qt mediacycle-osg)
 	ADD_DEPENDENCIES(multimediacycle-osg-qt mediacycle-osg-qt)
 	

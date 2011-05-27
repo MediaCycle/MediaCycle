@@ -3,9 +3,9 @@
  *  MediaCycle
  *
  *  @author Christian Frisson
- *  @date 16/02/10
+ *  @date 27/05/2011
  *
- *  @copyright (c) 2010 – UMONS - Numediart
+ *  @copyright (c) 2011 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
  *  licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -35,14 +35,43 @@
 
 #include <QApplication>
 #include <QtGui>
-#include "ACImageCycleOsgQt.h"
+#include "ACMultiMediaCycleOsgQt.h"
 
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
 
-    ACImageCycleOsgQt window;
-    window.show();
+	ACMultiMediaCycleOsgQt window;
+	try {
+		// Adding palettes
+		//window.addControlDock("MCMediaConfig");
+		window.addControlDock("MCOSC");
+		window.addControlDock("MCBrowserControlsClusters");//"MCBrowserControlsClustersNeighbors");
+
+		// XS TODO
+		// this has to be called after dock controls have been added
+		// do we need to put all this code here ?
+		window.configureSettings();
+
+		//	window.configurePluginDock();
+
+		// Changing the about dialog (not necessary if standard MediaCycle app)
+		//window.addAboutDialog("MediaCycle");
+
+		window.loadDefaultConfig(MEDIA_TYPE_IMAGE);
+		window.show();
+
+	}
+	catch (const exception& e) {
+		cout << "** caught exception in main : " << e.what() << endl;
+	}
+	catch (...){
+		cout << "** caught undetermined exception in main" << endl;
+	}
+
+	app.setOrganizationName("numediart");
+	app.setOrganizationDomain("numediart.org");
+	app.setApplicationName("ImageCycle");
 
     return app.exec();
 }

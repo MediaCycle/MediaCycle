@@ -5,7 +5,7 @@
  *  @author Christian Frisson
  *  @date 16/02/10
  *
- *  @copyright (c) 2010 – UMONS - Numediart
+ *  @copyright (c) 2011 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
  *  licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -41,14 +41,11 @@ int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
 
-    //ACVideoCycleOsgQt window;
-    //window.show();
-
 	ACMultiMediaCycleOsgQt window;
 	try {
 		// Adding palettes
 		//window.addControlDock("MCMediaConfig");
-		//window.addControlDock("MCOSC");				 
+		window.addControlDock("MCOSC");				 
 		window.addControlDock("MCBrowserControlsClusters");//"MCBrowserControlsClustersNeighbors");
 		window.addControlDock("MCVideoControls");
 		
@@ -75,7 +72,7 @@ int main(int argc, char *argv[])
 	
 	app.setOrganizationName("numediart");
 	app.setOrganizationDomain("numediart.org");
-	app.setApplicationName("MediaCycle");
+	app.setApplicationName("VideoCycle");
 	
     return app.exec();
 }

@@ -7,7 +7,6 @@ IF ( SUPPORT_AUDIO AND APPLE AND USE_COCOA AND USE_OSC AND ( OPENAL_FOUND OR POR
 	ADD_EXECUTABLE(audiocycle-osg-cocoa ${APP_TYPE} ${MACOSX_BUNDLE_INFO_PLIST} ${SRC} ${HDR})
 	ADD_DEPENDENCIES(audiocycle-osg-cocoa mediacycle)
 	ADD_DEPENDENCIES(audiocycle-osg-cocoa mediacycle-io-osc)
-	ADD_DEPENDENCIES(audiocycle-osg-cocoa oscpack)
 	ADD_DEPENDENCIES(audiocycle-osg-cocoa mediacycle-osg)
 	ADD_DEPENDENCIES(audiocycle-osg-cocoa mediacycle-osg-cocoa)
 	ADD_DEPENDENCIES(audiocycle-osg-cocoa audioengine)
