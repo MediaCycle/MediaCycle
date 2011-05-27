@@ -52,25 +52,33 @@ ACTextCycleOsgQt::ACTextCycleOsgQt(QWidget *parent)
 	// if not, set default options
 	media_cycle->setBrowserMode(AC_MODE_CLUSTERS);
 
+	std::string s_path = QApplication::applicationDirPath().toStdString();
+	std::string t_plugin;
+	std::string v_plugin;
+
 	#if defined(__APPLE__)
 		std::string build_type ("Release");
 		#ifdef USE_DEBUG
 			build_type = "Debug";
 		#endif
-		media_cycle->addPluginLibrary(QApplication::applicationDirPath().toStdString() + "/../../../plugins/text/" + build_type + "/mc_text.dylib");
+		t_plugin = s_path + "/../../../plugins/text/" + build_type + "/mc_text.dylib";
+		v_plugin = s_path + "/../../../plugins/visualisation/" + build_type + "/mc_visualisation.dylib";
 	#elif defined (__WIN32__)
-		media_cycle->addPluginLibrary(QApplication::applicationDirPath().toStdString() + "\..\..\plugins\text\mc_text.dll");
+		//TODO check '\' or '\\' ?
+		t_plugin = s_path + "\..\..\plugins\text\mc_text.dll";
+		v_plugin = s_path + "\..\..\plugins\visualisation\mc_visualisation.dll";
 	#else
-		media_cycle->addPluginLibrary(QApplication::applicationDirPath().toStdString() + "/../../plugins/text/mc_text.so");
+		t_plugin = s_path + "/../../plugins/text/mc_text.so";
+		v_plugin = s_path + "/../../plugins/visualisation/mc_visualisation.so";
 	#endif
-	
-	std::string s_path = QApplication::applicationDirPath().toStdString();
-	std::string v_plugin;
-	v_plugin = s_path + "/../../../plugins/visualisation/" + build_type + "/mc_visualisation.dylib";
-	std::cout<<v_plugin;
-//	p_plugin = s_path + "/../../../../../../plugins/visualisation/" + build_type + "/mc_visualisation.dylib";
-	media_cycle->addPluginLibrary(v_plugin);
 
+	std::cout<<t_plugin<<std::endl;	
+	std::cout<<v_plugin<<std::endl;
+	media_cycle->addPluginLibrary(t_plugin);
+	media_cycle->addPluginLibrary(v_plugin);
+	
+//	p_plugin = s_path + "/../../../../../../plugins/visualisation/" + build_type + "/mc_visualisation.dylib";
+	
 	media_cycle->setClustersMethodPlugin("ACCosKMeans");
 	media_cycle->setClustersPositionsPlugin("ACCosClustPosition");
 	media_cycle->setPreProcessPlugin("TextFeatures");
