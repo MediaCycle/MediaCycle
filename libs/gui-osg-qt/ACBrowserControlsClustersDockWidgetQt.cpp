@@ -212,6 +212,8 @@ void ACBrowserControlsClustersDockWidgetQt::updatePluginLists()
     ui.comboBoxClustersPositions->clear();
     ui.comboBoxClustersPositions->addItem(QString("Propeller (default)"));
     ui.comboBoxClustersPositions->setEnabled(false);
+	
+	//setPreProcessPlugin
 
     ACPluginManager *acpl = media_cycle->getPluginManager();
     if (acpl)
@@ -230,7 +232,8 @@ void ACBrowserControlsClustersDockWidgetQt::updatePluginLists()
                         //CF default settings: no Clusters Method plugin, use KMeans
                     }
                     ui.comboBoxClustersMethod->addItem(QString(acpl->getPluginLibrary(i)->getPlugin(j)->getName().c_str()));
-
+					
+					//if (media_type == MEDIA_TYPE_TEXT && ui.comboBoxClustersMethod->currentText().toStdString() == "KMeans (default)")
                 }
                 else if (acpl->getPluginLibrary(i)->getPlugin(j)->implementsPluginType(PLUGIN_TYPE_CLUSTERS_POSITIONS))
                 {

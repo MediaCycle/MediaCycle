@@ -67,8 +67,8 @@ public:
 	ACOscBrowser* getControlHandler(){return osc_browser;}
 	ACOscFeedback* getFeedbackHandler(){return osc_feedback;}
 
-	void setMediaCycle(MediaCycle* _media_cycle){media_cycle = _media_cycle; osc_browser->setMediaCycle(_media_cycle);}
-	void setAudioEngine(ACAudioEngine* _audio_engine){ audio_engine = _audio_engine; osc_browser->setAudioEngine(_audio_engine);}
+	void setMediaCycle(MediaCycle* _media_cycle){media_cycle = _media_cycle; if (osc_browser) osc_browser->setMediaCycle(_media_cycle);}
+	void setAudioEngine(ACAudioEngine* _audio_engine){ audio_engine = _audio_engine; if (osc_browser) osc_browser->setAudioEngine(_audio_engine);}
 #endif //defined (USE_OSC)
 
 private:

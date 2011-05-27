@@ -538,6 +538,8 @@ void MediaCycle::setPreProcessPlugin(string pluginName){
 	ACPlugin* preProcessPlugin = this->getPluginManager()->getPlugin(pluginName);
 	if (preProcessPlugin!=NULL)
 		this->getLibrary()->setPreProcessPlugin(preProcessPlugin);
+	else
+		this->getLibrary()->setPreProcessPlugin(0);
 }
 
 

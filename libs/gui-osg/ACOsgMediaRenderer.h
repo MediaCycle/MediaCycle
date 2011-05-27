@@ -104,6 +104,11 @@ protected:
 	bool						initialized;
 	float						frac;
 	
+#if defined(APPLE_IOS)
+	float afac;
+#else
+	float afac;
+#endif
 public:
 	ACOsgMediaRenderer();
 	virtual ~ACOsgMediaRenderer();

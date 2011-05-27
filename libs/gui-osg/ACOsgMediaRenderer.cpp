@@ -70,7 +70,12 @@ ACOsgMediaRenderer::ACOsgMediaRenderer() {
 	media_cycle_filename = "";
 	media_index = -1;
 	prev_media_index = -1;	
-
+	
+#if defined(APPLE_IOS)
+	 afac = 0.5;
+#else
+	 afac = 1.0;
+#endif
 	initialized = 0;
 	frac = 0.0f;
 	//ref_ptr//media_node->ref();

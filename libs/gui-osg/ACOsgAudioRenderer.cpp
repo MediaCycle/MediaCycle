@@ -85,11 +85,6 @@ ACOsgAudioRenderer::~ACOsgAudioRenderer() {
 	}
 }
 
-#if defined(APPLE_IOS)
-	float afac = 0.5;
-#else
-	float afac = 1.0;
-#endif
 
 void ACOsgAudioRenderer::waveformGeode() {
 

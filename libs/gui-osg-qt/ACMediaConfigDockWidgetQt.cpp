@@ -52,6 +52,9 @@ ACMediaConfigDockWidgetQt::ACMediaConfigDockWidgetQt(QWidget *parent)
 	#if defined (SUPPORT_3DMODEL)
 		ui.comboDefaultSettings->addItem(QString("3DModel"));
 	#endif //defined (SUPPORT_3DMODEL)
+	#if defined (SUPPORT_TEXT)
+		ui.comboDefaultSettings->addItem(QString("Text"));
+	#endif //defined (SUPPORT_TEXT)
 	ui.comboDefaultSettings->addItem(QString("Mixed"));
 	
 	this->show();

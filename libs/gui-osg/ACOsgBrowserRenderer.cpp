@@ -49,6 +49,7 @@
 #if defined (SUPPORT_TEXT)
 #include "ACOsgTextRenderer.h"
 #endif //defined (SUPPORT_TEXT)
+#include "ACOsgLabelRenderer.h"
 
 #include <osgDB/Registry>
 #include <osgDB/ReaderWriter>
@@ -517,12 +518,12 @@ bool ACOsgBrowserRenderer::addNodes(int _first, int _last){
 				case MEDIA_TYPE_TEXT:
 					#if defined (SUPPORT_TEXT)
 				{
-					string tempStr;
+					/*string tempStr;
 					tempStr=media_cycle->getMediaFileName(i);
 					size_t indTemp=tempStr.find_last_of("/"),lastTemp=tempStr.length();
-					tempStr=tempStr.substr(indTemp,lastTemp-indTemp);
+					tempStr=tempStr.substr(indTemp,lastTemp-indTemp);*/
 					node_renderer[i] = new ACOsgTextRenderer();
-					((ACOsgTextRenderer*)(node_renderer[i]))->setText(tempStr);
+					//((ACOsgLabelRenderer*)(node_renderer[i]))->setText(tempStr);
 			}
 					#endif //defined (SUPPORT_TEXT)
 					break;
@@ -624,7 +625,7 @@ bool ACOsgBrowserRenderer::removeLabels(int _first, int _last){
 	}
 	// (default) remove ALL nodes
 	else if (_first == 0 && _last==0) {
-		std::vector<ACOsgTextRenderer*>::iterator iterm;
+		std::vector<ACOsgLabelRenderer*>::iterator iterm;
 		for (iterm = label_renderer.begin(); iterm != label_renderer.end(); iterm++) {
 			label_group->removeChild((*iterm)->getNode());
 			delete *iterm;
@@ -653,7 +654,7 @@ bool ACOsgBrowserRenderer::addLabels(int _first, int _last){
 		label_renderer.resize(_last);
 
 		for (unsigned int i=_first;i<_last;i++) {
-			label_renderer[i] = new ACOsgTextRenderer();
+			label_renderer[i] = new ACOsgLabelRenderer();
 			if (label_renderer[i]) {
 				label_renderer[i]->setText(media_cycle->getLabelText(i));
 				label_renderer[i]->setPos(media_cycle->getLabelPos(i));

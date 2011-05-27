@@ -1,9 +1,9 @@
 /*
- *  ACOsgTextRenderer.h
+ *  ACOsgBrowserRenderer.h
  *  MediaCycle
  *
  *  @author Stéphane Dupont
- *  @date 02/11/09
+ *  @date 24/08/09
  *
  *  @copyright (c) 2009 – UMONS - Numediart
  *  
@@ -36,6 +36,8 @@
 #ifndef __ACOSG_TEXT_RENDERER_H__
 #define __ACOSG_TEXT_RENDERER_H__
 
+#if defined (SUPPORT_TEXT)
+
 #include "ACOsgMediaRenderer.h"
 #include <osgText/Font>
 #include <osgText/Text>
@@ -43,25 +45,24 @@
 class ACOsgTextRenderer : public ACOsgMediaRenderer {
 	
 protected:
-	osg::ref_ptr<osgText::Font> font;
-	osg::ref_ptr<osgText::Text> text;
-	
-	osg::ref_ptr<osg::Geode> text_geode;
+	osg::ref_ptr<osg::Geode> metadata_geode;
+	osg::ref_ptr<osgText::Text> metadata;
+
+#ifdef AUTO_TRANSFORM
+#else
+#endif
 	osg::ref_ptr<osg::Geode> entry_geode;
 	
-	void textGeode();
 	void entryGeode();
+	void metadataGeode();
 	
-	std::string text_string;
-	ACPoint pos;
 	
 public:
 	ACOsgTextRenderer();
 	~ACOsgTextRenderer();
 	void prepareNodes();
 	void updateNodes(double ratio=0.0);
-	void setText(std::string text) {text_string = text;}
-	void setPos(ACPoint p) {pos = p;}
 };
 
+#endif //defined (SUPPORT_TEXT)
 #endif

@@ -41,7 +41,7 @@
 #include "ACOsgMediaRenderer.h"
 //#include "ACOsgLayoutRenderer.h"
 #include "ACOsgNodeLinkRenderer.h"
-#include "ACOsgTextRenderer.h"
+#include "ACOsgLabelRenderer.h"
 
 #include <osgDB/ReadFile>
 //#include <osgDB/WriteFile>
@@ -85,7 +85,7 @@ protected:
 	osg::ref_ptr<osg::Group>				 label_group;
 	std::vector<ACOsgMediaRenderer*>  node_renderer;
 	std::vector<ACOsgNodeLinkRenderer*>  link_renderer;
-	std::vector<ACOsgTextRenderer*>  label_renderer; // XS was MediaRenderer
+	std::vector<ACOsgLabelRenderer*>  label_renderer; // XS was MediaRenderer
 	//ACOsgLayoutRenderer*		layout_renderer;
 	//vector<bool>				 media_selected;
 	std::vector<float>				 distance_mouse;

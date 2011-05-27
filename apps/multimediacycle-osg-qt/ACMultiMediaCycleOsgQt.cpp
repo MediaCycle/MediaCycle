@@ -917,9 +917,9 @@ void ACMultiMediaCycleOsgQt::loadDefaultConfig(ACMediaType _media_type, ACBrowse
 			#endif //defined (SUPPORT_VIDEO)
 			break;
 		case MEDIA_TYPE_TEXT:
-#if defined (SUPPORT_TEXT)
+			#if defined (SUPPORT_TEXT)
 			smedia="text";
-#endif //defined (SUPPORT_TEXT)
+			#endif //defined (SUPPORT_TEXT)
 			break;
 		default:
 			break;
@@ -944,7 +944,7 @@ void ACMultiMediaCycleOsgQt::loadDefaultConfig(ACMediaType _media_type, ACBrowse
 	// -- media-specific features plugin + generic segmentation and visualisation plugins--
 	std::string f_plugin, s_plugin, v_plugin;
 	std::string s_path = QApplication::applicationDirPath().toStdString();
-
+	
 	std::string build_type ("Release");
 #ifdef USE_DEBUG
 	build_type = "Debug";
@@ -979,7 +979,14 @@ void ACMultiMediaCycleOsgQt::loadDefaultConfig(ACMediaType _media_type, ACBrowse
 	media_cycle->addPluginLibrary(f_plugin);
 	media_cycle->addPluginLibrary(s_plugin);
 	media_cycle->addPluginLibrary(v_plugin);
-
+	
+	if(smedia == "text"){
+		media_cycle->setPreProcessPlugin("TextFeatures");
+	}
+	else{
+		media_cycle->setPreProcessPlugin("");
+	}	
+	
     //CF sorry XD, I need position plugins to debug the segmentation!
     for (int d=0; d<dockWidgets.size(); d++)
     {

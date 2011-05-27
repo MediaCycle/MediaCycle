@@ -796,10 +796,10 @@ void ACMediaBrowser::updateClusters(bool animate, int needsCluster) {
 		std::cout << "updateNextPositions : Cluster KMeans (default)" << std::endl;
 		updateClustersKMeans(animate, needsCluster);
 	}
-	else{
+	else{//TR TODO cancell the clustering if needCluster ==0
 		initClusterCenters();
 		if (mClustersMethodPlugin) { //CF priority on the Clusters Plugin
-			mClustersMethodPlugin->updateClusters(this);
+			mClustersMethodPlugin->updateClusters(this,needsCluster);
 		}
 		else if (mNoMethodPosPlugin) {
 			if ( mNoMethodPosPlugin->implementsPluginType(PLUGIN_TYPE_CLUSTERS_PIPELINE) || mNoMethodPosPlugin->implementsPluginType(PLUGIN_TYPE_ALLMODES_PIPELINE))

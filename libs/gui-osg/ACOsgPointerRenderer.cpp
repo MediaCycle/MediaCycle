@@ -1,7 +1,7 @@
 /**
  * @brief ACOsgPointerRenderer.cpp
- * @author Christian Frisson
- * @date 19/05/2011
+ * @author Thierry Ravet
+ * @date 27/05/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -31,6 +31,7 @@
 
 #include "ACOsgPointerRenderer.h"
 
+#include <osg/Version>
 using namespace osg;
 
 ACOsgPointerRenderer::ACOsgPointerRenderer() {
@@ -58,6 +59,9 @@ void ACOsgPointerRenderer::textGeode() {
 
 	Vec4 textColor(0.9f,0.9f,0.9f,0.9f);
 	float textCharacterSize = 96.0f; // 10 pixels ?
+	#if OSG_MIN_VERSION_REQUIRED(2,9,11)
+		textCharacterSize = 12.0f;
+	#endif
 
 	text_geode = new Geode();
 	//ref_ptr//text_geode->ref();
@@ -69,7 +73,11 @@ void ACOsgPointerRenderer::textGeode() {
 	//text->setPosition(osg::Vec3(0,0,0));
 	text->setPosition(osg::Vec3(0,25,0.0));
 	text->setLayout(osgText::Text::LEFT_TO_RIGHT);
-	text->setFontResolution(64,64);
+	#if OSG_MIN_VERSION_REQUIRED(2,9,11)
+		text->setFontResolution(12,12);
+	#else
+		text->setFontResolution(64,64);
+	#endif
 	text->setAlignment( osgText::Text::CENTER_CENTER );
 	text->setAxisAlignment( osgText::Text::SCREEN );
 

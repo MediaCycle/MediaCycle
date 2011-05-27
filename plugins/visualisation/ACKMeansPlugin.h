@@ -46,11 +46,12 @@ class ACKMeansPlugin : public ACClusterMethodPlugin {
 public:
 	ACKMeansPlugin();
 	~ACKMeansPlugin();
-	void updateClusters(ACMediaBrowser* );
+	void updateClusters(ACMediaBrowser* mediaBrowser,bool needsCluster=true);//updateClustersKMeans(animate, needsCluster)
 	virtual double compute_distance(vector<ACMediaFeatures*> &, vector<ACMediaFeatures*> &, const vector<float> &, bool )=0;
 	virtual double compute_distance(vector<ACMediaFeatures*> &, const vector<vector <float> > &, const vector<float> &, bool )=0;
+	//	virtual void updateClusters(ACMediaBrowser* mediaBrowser ,bool needsCluster=true)=0;//updateClustersKMeans(animate, needsCluster)
 
-	void updateNextPositions(ACMediaBrowser* );
+//	void updateNextPositions(ACMediaBrowser*  );
 
 	
 private:

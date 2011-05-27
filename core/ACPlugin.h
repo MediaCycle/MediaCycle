@@ -132,7 +132,7 @@ protected:
 class ACClusterMethodPlugin : virtual public ACPlugin {
 public:
 	ACClusterMethodPlugin();
-	virtual void updateClusters(ACMediaBrowser*)=0;
+	virtual void updateClusters(ACMediaBrowser* mediaBrowser ,bool needsCluster=true)=0;//updateClustersKMeans(animate, needsCluster)
 protected:
 };
 
