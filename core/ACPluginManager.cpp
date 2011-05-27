@@ -134,13 +134,13 @@ std::vector<std::string> ACPluginManager::getListOfPlugins(){
 }
 
 int ACPluginManager::clean() {
-
+	
+	this->mActiveFeaturePlugins->clean();
 	vector<ACPluginLibrary *> ::iterator iter;
 	for (iter = this->mPluginLibrary.begin(); iter != this->mPluginLibrary.end(); iter++) {
 		delete *iter; // this will delete plugins from each library too
 	}
     this->mPluginLibrary.clear();
-	this->mActiveFeaturePlugins->clean();
     return 0;
 }
 

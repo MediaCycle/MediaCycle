@@ -1172,7 +1172,7 @@ void ACMultiMediaCycleOsgQt::changeMediaType(ACMediaType _media_type){
 
 	}
 #endif //defined (SUPPORT_AUDIO)
-	this->media_cycle->changeMediaType(this->media_type);
+	this->media_cycle->changeMediaType(_media_type);
 }
 
 void ACMultiMediaCycleOsgQt::useSegmentation(bool _status)
