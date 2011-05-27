@@ -204,7 +204,7 @@ ACMediaFeatures* ACTextFeaturesPlugin::tfCalculate(ACText* pMedia){
 		return NULL;
 	for (int i=0;i<nbTerms;i++)
 		tfValues.push_back(featureTest[i]*indexIdf[i]);
-	ACMediaFeatures* desc=new ACMediaFeatures(tfValues,"TfIdf");
+	ACMediaFeatures* desc=new ACMediaFeatures(tfValues,"Term Frequency-Inverse Document Frequency");
 	desc->setNeedsNormalization(1);
 	return desc;
 }
