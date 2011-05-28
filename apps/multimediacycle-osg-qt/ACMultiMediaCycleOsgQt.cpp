@@ -375,7 +375,7 @@ bool ACMultiMediaCycleOsgQt::readXMLConfig(string _filename){
 		this->showError("Feature extraction plugin(s) now loaded again. Importing media files now enabled.");
 		this->switchFeatureExtraction(true);
 	}
-	
+	this->configureDockWidgets(this->media_type);
 	// no errors occured, no exception caught.
 	return true;
 }
@@ -1045,6 +1045,7 @@ void ACMultiMediaCycleOsgQt::loadDefaultConfig(ACMediaType _media_type, ACBrowse
             ((ACBrowserControlsClustersDockWidgetQt*)dockWidgets[d])->updatePluginLists();
         }
     }
+	this->configureDockWidgets(_media_type);
 }
 
 
