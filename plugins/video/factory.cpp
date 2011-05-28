@@ -15,9 +15,9 @@ extern "C" ACPlugin* create(std::string namePlugin) {
 //    if (namePlugin == "ACVideoDancersPlugin") {return new ACVideoDancersPlugin();}
 #ifdef USE_STARPU //CF: temporary check to enable just this plugin only until we can select them for extraction, others might not have installled StarPU yet
     if (namePlugin == "ACHuMomentsVideoPlugin") {return new ACHuMomentsVideoPlugin();}
-#else
+#endif//#else
 	if (namePlugin == "ACVideoPixelSpeedPlugin") {return new ACVideoPixelSpeedPlugin();}
-#endif
+//#endif
 }
 
 extern "C" void destroy(ACPlugin* d) {
@@ -29,9 +29,9 @@ extern "C" std::vector<std::string> list() {    //returns a string vector contai
 //    listPlugin.push_back("ACVideoDancersPlugin");
 #ifdef USE_STARPU
     listPlugin.push_back("ACHuMomentsVideoPlugin");
-#else
+#endif//#else
     listPlugin.push_back("ACVideoPixelSpeedPlugin");
-#endif
+//#endif
     //listPlugin.push_back("...");
     //listPlugin.push_back("...");
     return listPlugin;

@@ -2,7 +2,7 @@
  *  ACHuMomentsVideoPlugin.h
  *  MediaCycle
  *
- *  @author Sidi Mahmoudi
+ *  @author Sidi Mahmoudi and Xavier Siebert and Christian Frisson
  *  @date 05/01/11
  *  @copyright (c) 2011 – UMONS - Numediart
  *  
@@ -31,23 +31,28 @@
  *  <mailto:avre@umons.ac.be>
  *
  */
-#ifdef USE_STARPU
+
+#if defined(USE_STARPU)
 #ifndef _ACHUMOMENTSVIDEOPLUGIN_H
 #define	_ACHUMOMENTSVIDEOPLUGIN_H
-
-#include "ACPlugin.h"
-#include "ACMediaFeatures.h"
-#include "ACMediaTimedFeature.h"
-
-#include <iostream>
+#include <string>
+#include <vector>
+#include <ACPlugin.h>
+#include <ACMediaFeatures.h>
+#include <ACMediaTimedFeature.h>
 
 class ACHuMomentsVideoPlugin : public ACFeaturesPlugin {
 public:
     ACHuMomentsVideoPlugin();
     ~ACHuMomentsVideoPlugin();
-	//std::vector<ACMediaFeatures*> calculate(std::string aFileName);
-	std::vector<ACMediaFeatures*> calculate(ACMediaData* _data, ACMedia*);
+	std::vector<ACMediaFeatures*> calculate(std::string aFileName, bool _save_timed_feat=false);
+	std::vector<ACMediaFeatures*> calculate(ACMediaData* _data, ACMedia*, bool _save_timed_feat=false);
+	std::string getSavedFileName(){return mtf_file_name;}
+	ACMediaTimedFeature* getTimedFeatures();
+private:
+	std::vector<ACMediaFeatures*> _calculate(std::string aFileName="", bool _save_timed_feat=false);
+	std::string mtf_file_name; // file in which features have been saved	
 };
 
-#endif	/* _ACVIDEOPLUGIN_H */
-#endif
+#endif	/* _ACHUMOMENTSVIDEOPLUGIN_H */
+#endif//defined(USE_STARPU)

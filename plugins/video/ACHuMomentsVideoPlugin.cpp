@@ -2,7 +2,7 @@
  *  ACHuMomentsVideoPlugin.cpp
  *  MediaCycle
  *
- *  @author Sidi Mahmoudi
+ *  @author Sidi Mahmoudi and Xavier Siebert and Christian Frisson
  *  @date 05/01/11
  *  @copyright (c) 2011 – UMONS - Numediart
  *  
@@ -31,11 +31,8 @@
  *  <mailto:avre@umons.ac.be>
  *
  */
-#ifdef USE_STARPU
+#if defined(USE_STARPU)
 #include "ACHuMomentsVideoPlugin.h"
-
-#include <vector>
-#include <string>
 
 #include <stdio.h>
 #include <stdint.h>
@@ -45,14 +42,208 @@
 
 #include <ACOpenCVInclude.h>
 
+#include <iostream>
 using namespace std;
 
 void cpu_codelet(void *descr[], void *_args);
 
+// The old version (05/01/2011) featured the following, uncommented:
+/*
 starpu_codelet cl =
 {
     #if defined(USE_STARPU_CPU)
         .where = STARPU_CPU,
         .cpu_func = cpu_codelet,
     #endif 
-    
+    #endif
+*/ 
+
+ACHuMomentsVideoPlugin::ACHuMomentsVideoPlugin() {
+	//vars herited from ACPlugin
+	this->mMediaType = MEDIA_TYPE_VIDEO;
+	//this->mPluginType = PLUGIN_TYPE_FEATURES;
+	this->mName = "Hu Moments (StarPU)";
+	this->mDescription = "Hu_Moments_StarPU";
+	this->mId = "";
+	this->mDescriptorsList.push_back("Hu Moments (StarPU)");
+	this->mtf_file_name = "";
+	//starpu_init(NULL);
+}
+
+ACHuMomentsVideoPlugin::~ACHuMomentsVideoPlugin() {
+    starpu_shutdown();
+}
+
+void cpu_codelet(void *descr[], void *_args)
+{
+	int l1= 512;
+	int h1= 512;
+
+	float *res = (float *)STARPU_VECTOR_GET_PTR(descr[0]);
+	IplImage* resultat1=cvCreateImage(cvSize(l1,h1),IPL_DEPTH_8U,1);
+	int y,p;
+	for(y = 0; y < (l1*h1); y++)
+	{
+		resultat1->imageData[y] = res[y];
+	}
+
+	cvSmooth(resultat1, resultat1, CV_GAUSSIAN, 3, 7, 3, 0);
+	cvCanny(resultat1, resultat1, 20, 20 * 3, 3);
+	
+	uchar* ddata;
+	ddata = (uchar*) resultat1->imageData;
+
+	for (p = 0; p < (l1*h1); p++)
+	{
+		res[p] = (float) ddata[p];
+	}
+}
+
+std::vector<ACMediaFeatures*>  ACHuMomentsVideoPlugin::calculate(std::string aFileName, bool _save_timed_feat) {
+	return this->_calculate(aFileName,_save_timed_feat);
+}
+
+std::vector<ACMediaFeatures*> ACHuMomentsVideoPlugin::calculate(ACMediaData* _data, ACMedia* theMedia, bool _save_timed_feat) {
+	return this->_calculate(_data->getFileName(),_save_timed_feat);
+}
+
+std::vector<ACMediaFeatures*> ACHuMomentsVideoPlugin::_calculate(std::string aFileName, bool _save_timed_feat){
+    //starpu_init(NULL);
+
+	std::vector<FeaturesVector> desc;
+	ACMediaTimedFeature* descmtf;
+	vector<ACMediaFeatures*> result;
+	vector<float>time_stamps;
+	
+	CvCapture* capture;
+	IplImage *img;
+	IplImage *resultat;
+	IplImage *frame;
+	IplImage *frame1;
+
+	capture = cvCreateFileCapture(aFileName.c_str());
+	int width = cvGetCaptureProperty(capture, CV_CAP_PROP_FRAME_WIDTH);
+	int height = cvGetCaptureProperty(capture, CV_CAP_PROP_FRAME_HEIGHT);
+	resultat = cvCreateImage(cvSize(width, height), IPL_DEPTH_8U, 1);
+	frame1 = cvCreateImage(cvSize(512, 512), IPL_DEPTH_8U, 1);
+	frame = cvCreateImage(cvSize(width, height), IPL_DEPTH_8U, 1);
+
+	int p, n, j;
+	const int area = width*height;
+	float * data_in1 = (float*) malloc(area * sizeof (float));
+	uchar* ddata;
+	int nframe = (int) cvGetCaptureProperty(capture, CV_CAP_PROP_FRAME_COUNT);
+
+	CvMoments myRawmoments;
+	CvHuMoments myHumoments;
+
+	// The newer version (14/04/2011) had the following uncommented
+	//starpu_init(NULL);
+	starpu_data_handle A_handle[nframe];
+
+	starpu_codelet cl;
+	memset (&cl, 0, sizeof(cl));
+
+	#if defined(USE_STARPU_CPU)
+	cl.where |= STARPU_CPU;
+	cl.cpu_func = cpu_codelet,
+	#endif
+		cl.nbuffers = 1;
+	/// end of new version
+	
+	for (j = 0; j < nframe; ++j) {
+		cvSetCaptureProperty(capture, CV_CAP_PROP_POS_FRAMES, j);
+		cvGrabFrame(capture);
+		img = cvRetrieveFrame(capture, 0);
+		cvCvtColor(img, frame, CV_BGR2GRAY);
+		cvResize(frame, frame1, CV_INTER_CUBIC);
+		ddata = (uchar*) frame1->imageData;
+
+		for (p = 0; p < area; p++) {
+			data_in1[p] = (float) ddata[p];
+		}
+
+		starpu_data_handle A_handle;
+		starpu_vector_data_register(&A_handle, 0 /* home node */,(uintptr_t) data_in1, area, sizeof (float));
+		struct starpu_task *task = starpu_task_create();
+		task->cl = &cl;
+		// On remplit les 3 buffers par les handles enregistrés
+
+		task->buffers[0].handle = A_handle;
+		task->buffers[0].mode = STARPU_RW;
+
+		starpu_task_submit(task);
+//		starpu_data_sync_with_mem(A_handle, STARPU_R);//CF this won't compile, to debug!
+
+		// ou starpu_data_acquire
+
+		int x = 0;
+		//for (x = 0; x < (l * h); x++) {//old version
+		for (x = 0; x < (area); x++) {//new version	
+			resultat->imageData[x] = data_in1[x];
+		}
+		cvMoments(resultat, &myRawmoments, 0);
+		cvGetHuMoments(&myRawmoments, &myHumoments);
+
+		FeaturesVector descfv;
+		
+		descfv.push_back((float)myHumoments.hu1);
+		descfv.push_back((float)myHumoments.hu2);
+		descfv.push_back((float)myHumoments.hu3);
+		descfv.push_back((float)myHumoments.hu4);
+		descfv.push_back((float)myHumoments.hu5);
+		descfv.push_back((float)myHumoments.hu6);
+		descfv.push_back((float)myHumoments.hu7);
+
+		#ifdef USE_DEBUG
+			std::cout << "ACHuMomentsVideoPlugin: Frame " << j << "/" << nframe << " Hu Moments:";
+			for (int hm = 0;hm<descfv.size();hm++)
+				std::cout << " " << descfv[hm];
+			std::cout << std::endl;
+		#endif		
+
+		desc.push_back(descfv);
+		time_stamps.push_back(j);
+		descfv.clear();
+	}
+
+	starpu_task_wait_for_all();
+	cvReleaseImage(&frame);
+	cvReleaseImage(&frame1);
+	cvReleaseCapture(&capture);
+
+	descmtf = new ACMediaTimedFeature(time_stamps,desc,"Hu Moments (StarPU)");
+	ACMediaFeatures* tmp = descmtf->mean();
+	result.push_back(tmp);
+	
+	// XS TODO this will need to be cut and pasted to other plugins
+	// until we re-define the plugins API
+	// saving timed features on disk (if _save_timed_feat flag is on)
+	// XS TODO add checks
+	if (_save_timed_feat) {
+		// try to keep the convention : _b.mtf = binary ; _t.mtf = ascii text
+		bool save_binary = true;
+		string file_ext =  "_b.mtf";
+		string aFileName_noext = aFileName.substr(0,aFileName.find_last_of('.'));
+		mtf_file_name = aFileName_noext + "_" +this->mDescription + file_ext;
+		descmtf->saveInFile(mtf_file_name, save_binary);
+	}
+	delete descmtf;
+	return result;
+	//starpu_shutdown();
+}
+
+// the plugin knows internally where it saved the mtf
+// thanks to mtf_file_name
+ACMediaTimedFeature* ACHuMomentsVideoPlugin::getTimedFeatures(){
+	if (mtf_file_name == ""){
+        cout << "<ACHuMomentsVideoPlugin::getTimedFeatures> : missing file name "<<endl;
+		return 0;
+	}
+	ACMediaTimedFeature* ps_mtf = new ACMediaTimedFeature();
+	if (ps_mtf->loadFromFile(mtf_file_name) <= 0){
+		return 0;
+	}
+	return ps_mtf;
+}
+#endif

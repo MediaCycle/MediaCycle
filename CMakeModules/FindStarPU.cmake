@@ -4,6 +4,9 @@
 #  STARPU_INCLUDE_DIR, where to find starpu.h, etc.
 #  STARPU_LIBRARIES, the libraries needed to use STARPU.
 #  STARPU_FOUND, If false, do not try to use STARPU.
+#  STARPU_USE_CPU
+#  STARPU_USE_CUDA
+#  STARPU_USE_OPENCL
 # also defined, but not for general use are
 #  STARPU_LIBRARY, where to find the STARPU library.
 
@@ -34,6 +37,27 @@ FIND_PACKAGE_HANDLE_STANDARD_ARGS(STARPU DEFAULT_MSG STARPU_LIBRARY STARPU_INCLU
 IF(STARPU_FOUND)
   SET(STARPU_LIBRARIES ${STARPU_LIBRARY})
   GET_FILENAME_COMPONENT(STARPU_LINK_DIRECTORIES ${STARPU_LIBRARY} PATH)
+
+  #INCLUDE (CheckIncludeFiles) #CF all of these worked at first, but not anymore lately
+  #CHECK_SYMBOL_EXISTS (STARPU_USE_CPU "starpu_config.h" STARPU_USE_CPU)
+  #CHECK_SYMBOL_EXISTS (STARPU_USE_CUDA "starpu_config.h" STARPU_USE_CUDA)
+  #CHECK_SYMBOL_EXISTS (STARPU_USE_OPENCL "starpu_config.h" STARPU_USE_OPENCL)
+
+  set(starpu_config "${STARPU_INCLUDE_DIR}/starpu_config.h")
+  if(EXISTS "${starpu_config}")
+    file(READ "${starpu_config}" starpu_config_contents)
+    string(REGEX MATCH ".*#define STARPU_USE_CPU 1.*" STARPU_USE_CPU "${starpu_config_contents}")
+    string(REGEX MATCH ".*#define STARPU_USE_CUDA 1.*" STARPU_USE_CUDA "${starpu_config_contents}")
+    string(REGEX MATCH ".*#define STARPU_USE_OPENCL 1.*" STARPU_USE_OPENCL "${starpu_config_contents}")
+    IF(STARPU_USE_CPU)
+      SET(STARPU_USE_CPU ON)
+    ENDIF()
+        IF(STARPU_USE_OPENCL)
+      SET(STARPU_USE_OPENCL ON)
+    ENDIF()
+  else()
+    MESSAGE("Couldn't read StarPU config file")
+  endif()
 ENDIF(STARPU_FOUND)
 
 # Deprecated declarations.
