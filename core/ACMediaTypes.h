@@ -63,7 +63,7 @@ stringToMediaTypeConverter::value_type("Video", MEDIA_TYPE_VIDEO), \
 stringToMediaTypeConverter::value_type("3DModel",MEDIA_TYPE_3DMODEL), \
 stringToMediaTypeConverter::value_type("Text",MEDIA_TYPE_TEXT), \
 stringToMediaTypeConverter::value_type("PDF", MEDIA_TYPE_PDF), \
-stringToMediaTypeConverter::value_type("Sensor data", MEDIA_TYPE_SENSORDATA), \	
+stringToMediaTypeConverter::value_type("Sensor data", MEDIA_TYPE_SENSORDATA), \
 stringToMediaTypeConverter::value_type("Mixed", MEDIA_TYPE_MIXED), \
 stringToMediaTypeConverter::value_type("All", MEDIA_TYPE_ALL)
 };

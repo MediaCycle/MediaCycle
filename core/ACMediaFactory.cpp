@@ -376,6 +376,13 @@ ACMediaType ACMediaFactory::getMediaTypeFromExtension(std::string file_ext){
 	return (ACMediaType)(iter->second);
 }
 
+bool ACMediaFactory::isMediaTypeSegmentable(ACMediaType _media_type){
+	if(_media_type == MEDIA_TYPE_AUDIO || _media_type == MEDIA_TYPE_VIDEO)
+		return true;
+	else
+		return false;
+}
+
 void ACMediaFactory::listSupportedMediaExtensions(){
 	std::cout << "Supported media types: " << std::endl;
 	listMediaExtensions(used_file_extensions);

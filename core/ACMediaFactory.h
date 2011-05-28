@@ -102,6 +102,7 @@ class ACMediaFactory : private boost::noncopyable {
 		ACMedia* create(ACMedia* media);//CF we don't want this, data duplication!
 
 		ACMediaType getMediaTypeFromExtension(std::string file_ext);
+		bool isMediaTypeSegmentable(ACMediaType _media_type);
 		std::vector<std::string> getExtensionsFromMediaType(ACMediaType media_type);// no check in the possible formats list
 		void listSupportedMediaExtensions();
 		void listUncheckedMediaExtensions();

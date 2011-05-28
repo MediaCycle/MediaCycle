@@ -142,8 +142,11 @@ public:
 	void clean(bool _updategl=false);
 	void setDefaultQSettings();
 	
-	void useSegmentation(bool _status);
-
+	void useSegmentationByDefault(bool _status);// derived apps can disable segmentation by default on their main.cpp
+	void switchSegmentation(bool _status);// disable/enable segmentation when (failing) loading segmentation plugins and changing media types
+	void switchFeatureExtraction(bool _status);// disable/enable feature extraction when (failing) loading feature extraction plugins and changing media types
+	void switchPluginVisualizations(bool _status);// disable/enable visualization from plugins when (failing) loading visualization plugins and changing media types
+	
 private:
 	static const int n_dir_for_threading;	
 	// variables
@@ -193,6 +196,6 @@ private:
 	QWidget* osgViewDockTitleBar;
 	QRect osgViewDockNormalSize;
 	
-	bool use_segmentation;
+	bool use_segmentation_current,use_segmentation_default,use_feature_extraction,use_visualization_plugins;
 };
 #endif

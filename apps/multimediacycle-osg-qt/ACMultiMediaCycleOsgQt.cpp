@@ -74,7 +74,10 @@ ACMultiMediaCycleOsgQt::ACMultiMediaCycleOsgQt(QWidget *parent) : QMainWindow(pa
 		this->audio_engine = 0;
 	#endif //defined (SUPPORT_AUDIO)
 
-	this->use_segmentation = true;
+	this->use_segmentation_default = true;
+	this->use_segmentation_current = true;
+	this->use_feature_extraction = true;
+	this->use_visualization_plugins = true;
 	
 	// Apple bundled *.app, just look for bundled osg plugins
 	#ifndef USE_DEBUG
@@ -366,6 +369,13 @@ bool ACMultiMediaCycleOsgQt::readXMLConfig(string _filename){
 		this->showError(e);
 		return false;
 	}
+	
+	ACPluginManager* acpl = media_cycle->getPluginManager();
+	if (acpl->getFeaturesPlugins()->getSize(media_type)>0 && !use_feature_extraction){ // if no feature extraction plugin was loaded before opening the XML and if the XML loaded one
+		this->showError("Feature extraction plugin(s) now loaded again. Importing media files now enabled.");
+		this->switchFeatureExtraction(true);
+	}
+	
 	// no errors occured, no exception caught.
 	return true;
 }
@@ -404,6 +414,11 @@ void ACMultiMediaCycleOsgQt::writeXMLConfig(string _filename){
 // XS TODO: make sure it works if we add a new directory to the existing library ?
 void ACMultiMediaCycleOsgQt::on_actionLoad_Media_Directory_triggered(bool checked){
 
+	if(!use_feature_extraction){
+		this->showError("No feature extraction plugin loaded. Can't import media files.");
+		return;
+	}
+		
 	std::vector<string> directories;
 
 	if (! hasMediaCycle()) return;
@@ -470,6 +485,11 @@ void ACMultiMediaCycleOsgQt::on_actionLoad_Media_Directory_triggered(bool checke
 
 void ACMultiMediaCycleOsgQt::on_actionLoad_Media_Files_triggered(bool checked){
 
+	if(!use_feature_extraction){
+		this->showError("No feature extraction plugin loaded. Can't import media files.");
+		return;
+	}
+	
 	std::vector<string> directories;
 
 	if (! hasMediaCycle()) return;
@@ -525,13 +545,12 @@ void ACMultiMediaCycleOsgQt::on_actionLoad_Media_Files_triggered(bool checked){
 bool ACMultiMediaCycleOsgQt::doSegments(){
 	bool do_segments = false;
 
-	if(use_segmentation){
+	if(use_segmentation_current){
 		int seg_button = QMessageBox::question(this,
 			tr("Segmentation"),
 			tr("Do you want to segment the media ?"),
 			QMessageBox::Yes | QMessageBox::No);
 		if (seg_button == QMessageBox::Yes) {
-			// XS TODO: check that segmentation algorithms exist
 			do_segments = true;
 		}
 	}	
@@ -892,7 +911,7 @@ void ACMultiMediaCycleOsgQt::configureDockWidgets(ACMediaType _media_type){
 // 2) loads default features plugins
 // XS assumes for the moment that viewing mmode is clusters
 void ACMultiMediaCycleOsgQt::loadDefaultConfig(ACMediaType _media_type, ACBrowserMode _browser_mode){
-	this->configureDockWidgets(_media_type);
+	ACMediaType previous_media_type = this->media_type;
 
 	string smedia = "none";
 	switch (_media_type) {
@@ -946,39 +965,70 @@ void ACMultiMediaCycleOsgQt::loadDefaultConfig(ACMediaType _media_type, ACBrowse
 	std::string s_path = QApplication::applicationDirPath().toStdString();
 	
 	std::string build_type ("Release");
-#ifdef USE_DEBUG
-	build_type = "Debug";
-#endif //USE_DEBUG
-#if defined(__APPLE__)
-	#if not defined (USE_DEBUG) and not defined (XCODE) // needs "make install" to be ran to work
-		f_plugin = "@executable_path/../MacOS/mc_" + smedia +".dylib";
-		v_plugin = "@executable_path/../MacOS/mc_visualisation.dylib";
-		s_plugin = "@executable_path/../MacOS/mc_segmentation.dylib";
+	#ifdef USE_DEBUG
+		build_type = "Debug";
+	#endif //USE_DEBUG
+	#if defined(__APPLE__)
+		#if not defined (USE_DEBUG) and not defined (XCODE) // needs "make install" to be ran to work
+			f_plugin = "@executable_path/../MacOS/mc_" + smedia +".dylib";
+			v_plugin = "@executable_path/../MacOS/mc_visualisation.dylib";
+			s_plugin = "@executable_path/../MacOS/mc_segmentation.dylib";
+		#else
+			#if defined(XCODE)
+				f_plugin = s_path + "/../../../../../../plugins/"+ smedia + "/" + build_type + "/mc_" + smedia +".dylib";
+				v_plugin = s_path + "/../../../../../../plugins/visualisation/" + build_type + "/mc_visualisation.dylib";
+				s_plugin = s_path + "/../../../../../../plugins/segmentation/" + build_type + "/mc_segmentation.dylib";
+			#else
+				f_plugin = s_path + "/../../../../../plugins/"+ smedia + "/mc_" + smedia +".dylib";
+				v_plugin = s_path + "/../../../../../plugins/visualisation/mc_visualisation.dylib";
+				s_plugin = s_path + "/../../../../../plugins/segmentation/mc_segmentation.dylib";	
+			#endif
+		#endif
+	#elif defined (__WIN32__)
+		f_plugin = s_path + "\..\..\..\plugins\\" + smedia + "\mc_"+smedia+".dll";
+		v_plugin = s_path + "\..\..\..\plugins\visualisation\\" + build_type + "\mc_visualisation.dll";
+		s_plugin = s_path + "\..\..\..\plugins\segmentation\\" + build_type + "\mc_segmentation.dll";
 	#else
-		f_plugin = s_path + "/../../../../../../plugins/"+ smedia + "/" + build_type + "/mc_" + smedia +".dylib";
-		v_plugin = s_path + "/../../../../../../plugins/visualisation/" + build_type + "/mc_visualisation.dylib";
-		s_plugin = s_path + "/../../../../../../plugins/segmentation/" + build_type + "/mc_segmentation.dylib";
+		#if not defined (USE_DEBUG) // needs "make package" to be ran to work
+			f_plugin = "/usr/lib/mc_"+smedia+".so";
+			v_plugin = "/usr/lib/mc_visualisation.so";
+			s_plugin = "/usr/lib/mc_segmentation.so";
+		#else
+			f_plugin = s_path + "/../../plugins/"+smedia+"/mc_"+smedia+".so";
+			v_plugin = s_path + "/../../plugins/visualisation/mc_visualisation.so";
+			s_plugin = s_path + "/../../plugins/segmentation/mc_segmentation.so";
+		#endif
 	#endif
-
-	// common to all media, but only for mac...
-#elif defined (__WIN32__)
-	f_plugin = s_path + "\..\..\..\plugins\\" + smedia + "\mc_"+smedia+".dll";
-	v_plugin = s_path + "/../../../plugins/visualisation/" + build_type + "/mc_visualisation.dll";
-	s_plugin = s_path + "/../../../plugins/segmentation/" + build_type + "/mc_segmentation.dll";
-#else
-	#if not defined (USE_DEBUG) // needs "make package" to be ran to work
-	    f_plugin = "/usr/lib/mc_"+smedia+".so";
-	    v_plugin = "/usr/lib/mc_visualisation.so";
-	    s_plugin = "/usr/lib/mc_segmentation.so";
-    #else
-	    f_plugin = s_path + "/../../plugins/"+smedia+"/mc_"+smedia+".so";
-	    v_plugin = s_path + "/../../plugins/visualisation/mc_visualisation.so";
-	    s_plugin = s_path + "/../../plugins/segmentation/mc_segmentation.so";
-    #endif
-#endif
-	media_cycle->addPluginLibrary(f_plugin);
-	media_cycle->addPluginLibrary(s_plugin);
-	media_cycle->addPluginLibrary(v_plugin);
+	
+	if(media_cycle->addPluginLibrary(f_plugin) == -1){
+		this->showError("Couldn't load the feature extraction plugin. Importing media files might work only by loading XML library files.");
+		this->switchFeatureExtraction(false);
+	}
+	else{
+		if(!use_feature_extraction){ // if no feature extraction plugin could be loaded before this change of media type
+			this->showError("Feature extraction plugin(s) now loaded again. Importing media files now enabled.");
+		}
+		this->switchFeatureExtraction(true);
+	}	
+	
+	if(this->use_segmentation_default && ACMediaFactory::getInstance().isMediaTypeSegmentable(_media_type)){
+		if(media_cycle->addPluginLibrary(s_plugin) == -1){
+			this->showError("Couldn't load the segmentation plugin. Segmentation disabled.");
+			this->switchSegmentation(false);
+		}
+		else 
+			this->switchSegmentation(true);
+	}
+	else
+		this->switchSegmentation(false);
+	
+	if(media_cycle->addPluginLibrary(v_plugin) == -1){
+		this->showError("Couldn't load the visualization plugin. Default KMeans clustering and Propeller positioning will be used.");
+		this->switchPluginVisualizations(false);
+	}
+	else{
+		this->switchPluginVisualizations(true);
+	}	
 	
 	if(smedia == "text"){
 		media_cycle->setPreProcessPlugin("TextFeatures");
@@ -1175,7 +1225,25 @@ void ACMultiMediaCycleOsgQt::changeMediaType(ACMediaType _media_type){
 	this->media_cycle->changeMediaType(_media_type);
 }
 
-void ACMultiMediaCycleOsgQt::useSegmentation(bool _status)
+void ACMultiMediaCycleOsgQt::useSegmentationByDefault(bool _status)
 {
-	use_segmentation = _status;
+	use_segmentation_default = _status;
+}
+
+void ACMultiMediaCycleOsgQt::switchSegmentation(bool _status)
+{
+	if (use_segmentation_default && ACMediaFactory::getInstance().isMediaTypeSegmentable(media_type) )
+		use_segmentation_current = _status;		
+	else
+		use_segmentation_current = false;
+}
+
+void ACMultiMediaCycleOsgQt::switchFeatureExtraction(bool _status)
+{
+	use_feature_extraction = _status;
+}
+
+void ACMultiMediaCycleOsgQt::switchPluginVisualizations(bool _status)
+{
+	use_visualization_plugins = _status;
 }

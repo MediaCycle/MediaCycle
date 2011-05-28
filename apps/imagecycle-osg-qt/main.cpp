@@ -47,7 +47,8 @@ int main(int argc, char *argv[])
 		//window.addControlDock("MCMediaConfig");
 		window.addControlDock("MCOSC");
 		window.addControlDock("MCBrowserControlsClusters");//"MCBrowserControlsClustersNeighbors");
-
+		window.useSegmentationByDefault(false);
+		
 		// XS TODO
 		// this has to be called after dock controls have been added
 		// do we need to put all this code here ?
