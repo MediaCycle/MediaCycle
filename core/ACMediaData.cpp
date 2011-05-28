@@ -78,6 +78,13 @@ ACMediaData::~ACMediaData() {
 //				success=true;
 //			#endif //defined (SUPPORT_VIDEO)
 //			break;
+//		case MEDIA_TYPE_PDF :
+//			#if defined (SUPPORT_PDF)
+//			//cvCopy(m->getData(),pdf_ptr);
+//			//if( pdf_ptr )
+//			//	success=true;
+//			#endif //defined (SUPPORT_PDF)
+//			break;
 //		case MEDIA_TYPE_3DMODEL :
 //			#if defined (SUPPORT_3DMODEL)
 //			model_ptr = dynamic_cast<osg::Node*>( m->getData()->clone(osg::CopyOp::DEEP_COPY_ALL));

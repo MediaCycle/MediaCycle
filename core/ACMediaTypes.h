@@ -45,6 +45,7 @@ enum ACMediaType {
 	MEDIA_TYPE_VIDEO,
 	MEDIA_TYPE_3DMODEL,
 	MEDIA_TYPE_TEXT,
+	MEDIA_TYPE_PDF,
 	MEDIA_TYPE_SENSORDATA,
 	MEDIA_TYPE_MIXED,  // for (future...) interface mixing media
 	MEDIA_TYPE_ALL     // for plugins valid for all media
@@ -61,6 +62,8 @@ stringToMediaTypeConverter::value_type("Image", MEDIA_TYPE_IMAGE), \
 stringToMediaTypeConverter::value_type("Video", MEDIA_TYPE_VIDEO), \
 stringToMediaTypeConverter::value_type("3DModel",MEDIA_TYPE_3DMODEL), \
 stringToMediaTypeConverter::value_type("Text",MEDIA_TYPE_TEXT), \
+stringToMediaTypeConverter::value_type("PDF", MEDIA_TYPE_PDF), \
+stringToMediaTypeConverter::value_type("Sensor data", MEDIA_TYPE_SENSORDATA), \	
 stringToMediaTypeConverter::value_type("Mixed", MEDIA_TYPE_MIXED), \
 stringToMediaTypeConverter::value_type("All", MEDIA_TYPE_ALL)
 };
@@ -78,6 +81,7 @@ static const stringToMediaTypeConverter stringToMediaType(_initm, _initm + sizeo
 //mediaTypeToEnumNameConverter::value_type(MEDIA_TYPE_VIDEO,"MEDIA_TYPE_VIDEO"), \
 //mediaTypeToEnumNameConverter::value_type(MEDIA_TYPE_3DMODEL,"MEDIA_TYPE_3DMODEL"), \
 //mediaTypeToEnumNameConverter::value_type(MEDIA_TYPE_TEXT,"MEDIA_TYPE_TEXT"), \
+//mediaTypeToEnumNameConverter::value_type(MEDIA_TYPE_PDF,"MEDIA_TYPE_PDF"), \
 //mediaTypeToEnumNameConverter::value_type(MEDIA_TYPE_MIXED,"MEDIA_TYPE_MIXED"), \
 //mediaTypeToEnumNameConverter::value_type(MEDIA_TYPE_ALL,"MEDIA_TYPE_ALL")
 //};

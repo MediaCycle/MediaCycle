@@ -47,7 +47,6 @@ const int ACOsgImageRenderer::NCOLORS = 5;
 
 ACOsgImageRenderer::ACOsgImageRenderer() {
 	media_type = MEDIA_TYPE_IMAGE;
-	image_image = 0; image_geode = 0; border_geode = 0; image_transform = 0;
 	
 	Vec4 color(1.0f, 1.0f, 1.0f, 0.9f);	
 	Vec4 color2(0.2f, 0.8f, 0.2f, 1.0f);	
@@ -79,11 +78,11 @@ ACOsgImageRenderer::~ACOsgImageRenderer() {
 //	delete colors;
 //	delete colors2;
 //	delete colors3;
-	if (image_geode) { //ref_ptr//image_geode->unref();
+	if (image_geode) { 
 		image_geode=0; }
-	if (border_geode) { //ref_ptr//border_geode->unref();
+	if (border_geode) {
 		border_geode=0; }
-	if (image_transform) { //ref_ptr//image_transform->unref(); 
+	if (image_transform) { 
 		image_transform=0; }
 }
 

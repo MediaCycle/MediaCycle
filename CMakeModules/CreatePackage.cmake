@@ -212,6 +212,14 @@ IF(UNIX)
                 list(APPEND UBUNTU_DEPS "libclucene0ldbl")
             ENDIF()
 
+            # PoDoFo
+            IF(PODOFO_FOUND AND SUPPORT_PDF)
+                list(APPEND UBUNTU_DEPS "libpodofo0.8.0")
+		IF("${LSB_DISTRIB}" MATCHES "Ubuntu10.04")
+			MESSAGE(FATAL_ERROR "PoDoFo hadn't been packaged for Ubuntu 10.04.")
+		ENDIF()
+            ENDIF()
+
             STRING(REGEX REPLACE ";" ", " UBUNTU_DEPS "${UBUNTU_DEPS}")
             #MESSAGE("Ubuntu 10.10 deps: ${UBUNTU_DEPS}")
 			set(CPACK_DEBIAN_PACKAGE_DEPENDS ${UBUNTU_DEPS})

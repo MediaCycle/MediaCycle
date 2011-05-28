@@ -47,6 +47,9 @@
 #if defined (SUPPORT_TEXT)
 #include "ACText.h"
 #endif //defined (SUPPORT_TEXT)
+#if defined (SUPPORT_PDF)
+#include "ACPDF.h"
+#endif //defined (SUPPORT_PDF)
 
 #if defined (SUPPORT_AUDIO)
 #if defined (USE_SNDFILE)
@@ -224,6 +227,8 @@ const filext::value_type _init[] = {
 	filext::value_type(".wve", MEDIA_TYPE_AUDIO), \
 	filext::value_type(".xi", MEDIA_TYPE_AUDIO), \
 	
+	filext::value_type(".pdf", MEDIA_TYPE_PDF), \
+	
 	filext::value_type(".txt", MEDIA_TYPE_TEXT) 
 	
 };
@@ -308,14 +313,14 @@ ACMedia* ACMediaFactory::create(ACMedia* media){
 			#endif //defined (SUPPORT_VIDEO)
 			break;
 		case MEDIA_TYPE_3DMODEL:
-#if defined (SUPPORT_3DMODEL)
+			#if defined (SUPPORT_3DMODEL)
 			return new AC3DModel(*((AC3DModel*) media));
-#endif //defined (SUPPORT_3DMODEL)
+			#endif //defined (SUPPORT_3DMODEL)
 			break;
 		case MEDIA_TYPE_TEXT:
-#if defined (SUPPORT_TEXT)
+			#if defined (SUPPORT_TEXT)
 			return new ACText(*((ACText*) media));
-#endif //defined (SUPPORT_3DMODEL)
+			#endif //defined (SUPPORT_TEXT)
 			break;
 		default:
 			return 0;
@@ -382,7 +387,7 @@ void ACMediaFactory::listUncheckedMediaExtensions(){
 }
 
 void ACMediaFactory::listMediaExtensions(filext _extensions){
-	std::vector<std::string> audioExt,imageExt,videoExt,model3dExt,textExt,otherExt;
+	std::vector<std::string> audioExt,imageExt,videoExt,model3dExt,textExt,pdfExt,otherExt;
 	filext::iterator iter = _extensions.begin();
 	for(;iter!=_extensions.end();++iter){
 		switch (iter->second){
@@ -468,6 +473,16 @@ void ACMediaFactory::listMediaExtensions(filext _extensions){
 		std::cout << std::endl;
 	}
 	#endif //defined (SUPPORT_TEXT)
+	
+	#if defined (SUPPORT_PDF)
+	if (pdfExt.size()>0){
+		std::cout << "-- PDF:";
+		std::vector<std::string>::iterator pdfIter = pdfExt.begin();
+		for(;pdfIter!=pdfExt.end();++pdfIter)
+			std::cout << " " << (*pdfIter);
+		std::cout << std::endl;
+	}
+	#endif //defined (SUPPORT_PDF)	
 
 	if (otherExt.size()>0){
 		std::cout << "-- undetermined:";
@@ -541,7 +556,10 @@ void ACMediaFactory::checkAvailableFileExtensions(){
 #endif //defined (SUPPORT_IMAGE OR SUPPORT_VIDEO) || defined(SUPPORT_3DMODEL)
 #if defined (SUPPORT_TEXT)
 	addAvailableFileExtensionSupport(".txt",MEDIA_TYPE_TEXT);
-#endif //defined (SUPPORT_TEXT )
+#endif //defined (SUPPORT_TEXT)
+#if defined (SUPPORT_PDF)
+	//addAvailableFileExtensionSupport(".pdf",MEDIA_TYPE_TEXT); // done by addAvailableOsgFileExtensions();
+#endif //defined (SUPPORT_PDF)	
 }
 
 std::vector<std::string> ACMediaFactory::getExtensionsFromMediaType(ACMediaType media_type){
@@ -655,7 +673,7 @@ void ACMediaFactory::addAvailableSndFileExtensions(){
 }
 #endif //defined (SUPPORT_AUDIO)
 
-#if defined (SUPPORT_IMAGE) || defined(SUPPORT_VIDEO) || defined(SUPPORT_3DMODEL)
+#if defined (SUPPORT_IMAGE) || defined(SUPPORT_VIDEO) || defined(SUPPORT_3DMODEL) || defined(SUPPORT_PDF)
 void ACMediaFactory::addAvailableOsgFileExtensions(){
 	#ifdef PARSE_OSG_PLUGINS_VERBOSE
 	std::cout << "Gathering media file extensions from OSG plugins..." << std::endl;
@@ -697,4 +715,4 @@ void ACMediaFactory::addAvailableOsgFileExtensions(){
 	std::cout << "Gathering media file extensions from OSG plugins... done" << std::endl;
 	#endif//def PARSE_OSG_PLUGINS_VERBOSE
 }
-#endif //defined (SUPPORT_IMAGE) || defined (SUPPORT_VIDEO) || defined(SUPPORT_3DMODEL)
+#endif //defined (SUPPORT_IMAGE) || defined (SUPPORT_VIDEO) || defined(SUPPORT_3DMODEL) || defined(SUPPORT_PDF)

@@ -920,7 +920,7 @@ void ACMultiMediaCycleOsgQt::loadDefaultConfig(ACMediaType _media_type, ACBrowse
 			#if defined (SUPPORT_TEXT)
 			smedia="text";
 			#endif //defined (SUPPORT_TEXT)
-			break;
+			break;	
 		default:
 			break;
 	}
