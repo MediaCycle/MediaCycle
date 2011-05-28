@@ -57,6 +57,10 @@ typedef int (ACOscBrowserCallback)(const char *path, const char *types, lo_arg *
 class ACOscBrowser {
 	public:
 		ACOscBrowser(){ 
+			media_cycle = 0;
+			#if defined (SUPPORT_AUDIO)
+			audio_engine = 0;
+			#endif //defined (SUPPORT_AUDIO)
 			osc_feedback = 0;
 			server_thread = 0;
 		};

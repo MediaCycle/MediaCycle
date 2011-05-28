@@ -43,11 +43,14 @@
 
 using namespace osg;
 
-ACOsgTimelineRenderer::ACOsgTimelineRenderer(): media_cycle(0), audio_engine(0), screen_width(0), height(0.0f) {
+ACOsgTimelineRenderer::ACOsgTimelineRenderer(): media_cycle(0), screen_width(0), height(0.0f) {
+	#if defined (SUPPORT_AUDIO)
+		audio_engine = 0;
+	#endif//defined (SUPPORT_AUDIO)
 	track_renderer.resize(0);
 	group = new Group();
 	track_group = new Group();
-	group->addChild(track_group);//group->addChild(track_group);
+	group->addChild(track_group);
 }
 
 ACOsgTimelineRenderer::~ACOsgTimelineRenderer(){

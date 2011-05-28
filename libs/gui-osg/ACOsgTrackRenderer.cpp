@@ -37,9 +37,12 @@
 using namespace osg;
 
 ACOsgTrackRenderer::ACOsgTrackRenderer()
-: media_cycle(0), audio_engine(0), track_index(-1),media_index(-1),media(0),media_from_lib(true),media_changed(false),
+: media_cycle(0), track_index(-1),media_index(-1),media(0),media_from_lib(true),media_changed(false),
 screen_width(0.0f),width(0.0f),height(0.0f),screen_width_changed(false),width_changed(false),height_changed(false)
 {
+	#ifdef SUPPORT_AUDIO
+		audio_engine = 0;
+	#endif//def SUPPORT_AUDIO
 	track_node = new MatrixTransform();
 	displayed_media_index = -1;
 	// Magic numbers!

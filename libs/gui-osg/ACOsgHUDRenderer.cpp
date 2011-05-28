@@ -118,14 +118,7 @@ void ACOsgHUDRenderer::preparePointers(osgViewer::View* view) {
 			}
 		}
 	}
-
-	/*if(view){
-		view->addSlave(this->getCamera(), false);
-	}*/
 }
-
-
-
 
 //Cocoa - simple OSG viewer
 void ACOsgHUDRenderer::updatePointers(osgViewer::Viewer* view) {
@@ -155,6 +148,7 @@ void ACOsgHUDRenderer::updatePointers(osgViewer::View* view) {
 
 //Common
 void ACOsgHUDRenderer::updatePointers(int w, int h) {
+	
 	for (unsigned int i=0;i<pointer_renderer.size();i++) {
 		ACPointer* p =0;
 		p = media_cycle->getPointerFromIndex(i);
@@ -169,5 +163,5 @@ void ACOsgHUDRenderer::updatePointers(int w, int h) {
 		}
 		else
 			std::cerr << "ACOsgHUDRenderer::updatePointers pointer at index " << i << " not available" << std::endl;
-	}
+	}	
 }

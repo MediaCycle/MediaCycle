@@ -4,7 +4,7 @@
 //
 //  @author Christian Frisson
 //  @date 29/04/10
-//  @copyright (c) 2009 – UMONS - Numediart
+//  @copyright (c) 2010 – UMONS - Numediart
 //  
 //  MediaCycle of University of Mons – Numediart institute is 
 //  licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -228,12 +228,14 @@ void ACOsgCompositeViewQt::setMediaCycle(MediaCycle* _media_cycle)
 	hud_renderer->setMediaCycle(media_cycle);
 }
 
+#if defined (SUPPORT_AUDIO)
 void ACOsgCompositeViewQt::setAudioEngine(ACAudioEngine *engine)
 {
 	audio_engine=engine;
 	if(timeline_renderer)timeline_renderer->setAudioEngine(engine);
 	if(timeline_event_handler)timeline_event_handler->setAudioEngine(engine);
 }
+#endif //defined (SUPPORT_AUDIO)
 
 void ACOsgCompositeViewQt::initializeGL()
 {

@@ -4,6 +4,7 @@
  *
  *  @author Xavier Siebert
  *  @date 05/04/11
+*  Filled by Christian Frisson since 03/05/11.
  *  @copyright (c) 2011 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
@@ -67,8 +68,10 @@ public:
 	ACOscBrowser* getControlHandler(){return osc_browser;}
 	ACOscFeedback* getFeedbackHandler(){return osc_feedback;}
 
-	void setMediaCycle(MediaCycle* _media_cycle){media_cycle = _media_cycle; if (osc_browser) osc_browser->setMediaCycle(_media_cycle);}
-	void setAudioEngine(ACAudioEngine* _audio_engine){ audio_engine = _audio_engine; if (osc_browser) osc_browser->setAudioEngine(_audio_engine);}
+	void setMediaCycle(MediaCycle* _media_cycle);
+	#if defined (SUPPORT_AUDIO)
+	void setAudioEngine(ACAudioEngine* _audio_engine);
+	#endif //defined (SUPPORT_AUDIO)
 #endif //defined (USE_OSC)
 
 private:
@@ -78,5 +81,4 @@ private:
 	ACOscFeedback *osc_feedback;
 #endif //defined (USE_OSC)
 };
-
 #endif

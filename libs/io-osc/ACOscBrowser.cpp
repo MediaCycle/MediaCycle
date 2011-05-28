@@ -317,10 +317,13 @@ int ACOscBrowser::process_mess(const char *path, const char *types, lo_arg **arg
 			//this->getOsgView()->setFocus();
 		}
 	}
-	else if(tag.find("/player",0)!= string::npos && media_cycle && audio_engine)
+
+	else if(tag.find("/player",0)!= string::npos && media_cycle)
 	{
-		if (media_cycle->getLibrary()->getMediaType() == MEDIA_TYPE_AUDIO && !this->getAudioEngine())
+		#if defined (SUPPORT_AUDIO)
+		if(media_cycle->getLibrary()->getMediaType() == MEDIA_TYPE_AUDIO && !this->getAudioEngine())
 			return 1;
+		#endif //defined (SUPPORT_AUDIO)
 		
 		if(tag.find("/playclosestloop",0)!= string::npos)
 		{
@@ -343,9 +346,11 @@ int ACOscBrowser::process_mess(const char *path, const char *types, lo_arg **arg
 			
 			if (node > -1)
 			{
+				#if defined (SUPPORT_AUDIO)
 				audio_engine->setLoopSynchroMode(node, ACAudioEngineSynchroModeAutoBeat);
 				audio_engine->setLoopScaleMode(node, ACAudioEngineScaleModeResample);
 				audio_engine->setBPM((float)bpm);
+				#endif //defined (SUPPORT_AUDIO)
 			}
 		}
 		else if(tag.find("/scrub",0)!= string::npos)
@@ -360,9 +365,11 @@ int ACOscBrowser::process_mess(const char *path, const char *types, lo_arg **arg
 			if (node > -1)
 			{
 				//media_cycle->pickedObjectCallback(-1);
+				#if defined (SUPPORT_AUDIO)
 				audio_engine->setLoopSynchroMode(node, ACAudioEngineSynchroModeManual);
 				audio_engine->setLoopScaleMode(node, ACAudioEngineScaleModeResample);//ACAudioEngineScaleModeVocode
 				audio_engine->setScrub((float)scrub*100); // temporary hack to scrub between 0 an 1
+				#endif //defined (SUPPORT_AUDIO)
 			}
 		}
 		else if(tag.find("/pitch",0)!= string::npos)
@@ -381,10 +388,12 @@ int ACOscBrowser::process_mess(const char *path, const char *types, lo_arg **arg
 				//is_pitching = true;
 				// is_scrubing = false;
 				//media_cycle->pickedObjectCallback(-1);
+				#if defined (SUPPORT_AUDIO)
 				audio_engine->setLoopSynchroMode(node, ACAudioEngineSynchroModeAutoBeat);
 				audio_engine->setLoopScaleMode(node, ACAudioEngineScaleModeResample);
 				//}
 				audio_engine->setSourcePitch(node, (float) pitch);
+				#endif //defined (SUPPORT_AUDIO)
 			}
 			
 		}
