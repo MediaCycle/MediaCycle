@@ -78,6 +78,9 @@ void ACAboutDialogQt::updateLicenses(){
 		html.append ("<li><a href=\"http://opencv.willowgarage.com\">OpenCV</a>: BSD License</li>");
 	#endif //defined (SUPPORT_VIDEO) || defined (SUPPORT_IMAGE)
 	html.append ("<li><a href=\"http://www.openscenegraph.org\">OpenSceneGraph</a>: OpenSceneGraph Public License based on the LGPL License</li>");
+	#if defined (SUPPORT_PDF)
+		html.append ("<li><a href=\"http://podofo.sourceforge.net\">PoDoFo</a>: LPGL License</li>");
+	#endif //defined (SUPPORT_PDF)
 	#if defined (SUPPORT_AUDIO) && defined (USE_PORTAUDIO)	
 		html.append ("<li><a href=\"http://www.portaudio.com\">PortAudio</a>: MIT License</li>");
 	#endif //defined (SUPPORT_AUDIO) || defined (USE_PORTAUDIO)
