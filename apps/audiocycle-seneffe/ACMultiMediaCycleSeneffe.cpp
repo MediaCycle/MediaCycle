@@ -38,8 +38,8 @@ ACMultiMediaCycleSeneffe::ACMultiMediaCycleSeneffe() : ACMultiMediaCycleOsgQt() 
 	count = 0;
 	// delay after which we change media_files (if it's ok)
 	attente = 1*60*1000; // in ms, so 1 800 000 is for 30 min
-	
-	this->useSegmentation(false);
+
+	this->useSegmentationByDefault(false);
 
 	//XMLfiles.push_back("/usr/local/share/mediacycle/data/audio_all/zero-g-pro-pack_a/Brass Elements/Brass_076_BPM.xml");
 	//XMLfiles.push_back("/usr/local/share/mediacycle/data/audio_all/zero-g-pro-pack_a/Brass Elements/Brass_096_BPM.xml");
@@ -81,7 +81,7 @@ ACMultiMediaCycleSeneffe::ACMultiMediaCycleSeneffe() : ACMultiMediaCycleOsgQt() 
 	XMLfiles.push_back("/numediart/datasets/olpc-sound-samples-v2-xml/ColetteBoulanger44.xml");
 	XMLfiles.push_back("/numediart/datasets/olpc-sound-samples-v2-xml/ColmanOReilly44.xml");
 	XMLfiles.push_back("/numediart/datasets/olpc-sound-samples-v2-xml/Conversations-SlawomirZubrzycki-Piano-44k.xml");
-	
+
 	timer = new QTimer(this);
 	connect( timer, SIGNAL(timeout()), this, SLOT(loopXML()) );
 }
@@ -92,7 +92,7 @@ ACMultiMediaCycleSeneffe::~ACMultiMediaCycleSeneffe(){
 
 void ACMultiMediaCycleSeneffe::startLoopXML(){
 	loopXML(); // start first one before time starts so you don't wait for 30 min for the app to run
-	timer->start(attente); 	
+	timer->start(attente);
 }
 
 void ACMultiMediaCycleSeneffe::loopXML(){
@@ -101,6 +101,6 @@ void ACMultiMediaCycleSeneffe::loopXML(){
 	if (count >= XMLfiles.size()) count=0;
 	cout << "opening : " << XMLfiles[count] << endl;
 	this->clean(true);
-	this->readXMLConfig(XMLfiles[count]);	
+	this->readXMLConfig(XMLfiles[count]);
 	count++;
 }
