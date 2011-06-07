@@ -130,7 +130,7 @@ public:
 	bool addAboutDialog(std::string about_type);
 	
 	// Callback
-	void mediacycleCallback(char* message);
+	void mediacycleCallback(const char* message);
 	
 	// Close Event
 	void closeEvent(QCloseEvent *event);
@@ -193,8 +193,11 @@ private:
 
 	ACOsgCompositeViewQt* compositeOsgView;
 	QDockWidget* osgViewDock;
+	QWidget* osgViewDockWidget;
+	QVBoxLayout *osgViewDockLayout;
 	QWidget* osgViewDockTitleBar;
 	QRect osgViewDockNormalSize;
+	QProgressBar* progressBar;
 	
 	bool use_segmentation_current,use_segmentation_default,use_feature_extraction,use_visualization_plugins;
 };

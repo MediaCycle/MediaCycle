@@ -56,7 +56,7 @@ enum MCActionType {
 //static void tcp_callback(char *buffer, int l, char **buffer_send, int *l_send, void *userData);
 //XS: removed this, it's in the cpp file -- otherwize declared static but never defined
 
-typedef void (*ACMediaCycleCallback)(char* message, void *userData);
+typedef void (*ACMediaCycleCallback)(const char* message, void *userData);
 
 class MediaCycle {
 public:

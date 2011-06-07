@@ -42,26 +42,68 @@
 const int ACMultiMediaCycleOsgQt::n_dir_for_threading = 10;
 // -----------
 
-static void mediacycle_callback(char* message, void *user_data) {
+static void mediacycle_callback(const char* message, void *user_data) {
 
 	ACMultiMediaCycleOsgQt *application = (ACMultiMediaCycleOsgQt*)user_data;
 
 	application->mediacycleCallback(message);
 }
 
-void ACMultiMediaCycleOsgQt::mediacycleCallback(char* message) {
+void ACMultiMediaCycleOsgQt::mediacycleCallback(const char* message) {
+	std::string mess = std::string(message);
+	
 	if (message=="loaddirstart") {
 		statusBar()->showMessage(tr("Loading Directory..."), 0);
+		progressBar->reset();
+		progressBar->show();
 	}
 
 	if (message=="loaddirfinish") {
 		this->updateLibrary();
 		statusBar()->clearMessage();
+		progressBar->reset();
+		progressBar->hide();
 	}
+	
+	if(mess.find("importing_media_",0)!=string::npos){
+		// Looking for "importing_media_<media_id>_<dir_size>" patterns
+		// note that this "mess" won't happen with a nicer observer pattern and signals/slots transmitting variable arguments sizes and types
+		int media_id = -1;
+		int dir_size = -1;
+		std::string prefix = ("importing_media_");
+		std::string suffix = ("_");
+		size_t prefix_found = mess.find(prefix,0);
+		if(prefix_found!= string::npos){
+			size_t suffix_found = mess.find(suffix,prefix_found+prefix.size());
+			if (suffix_found!= string::npos){
+				std::string id_string = mess.substr(prefix_found+prefix.size(),suffix_found-(prefix_found+prefix.size()));
+				istringstream id_ss(id_string);
+				if (!(id_ss>>media_id))
+					std::cerr << "ACMediaCycleOsgQt: wrong media id" << std::endl;
+				std::string size_string = mess.substr(suffix_found+suffix.size(),string::npos);
+				istringstream size_ss(size_string);
+				if (!(size_ss>>dir_size))
+					std::cerr << "ACMediaCycleOsgQt: wrong dir size"  << std::endl;
+				if(media_id != -1 && dir_size != -1){
+					std::cout << std::endl << std::endl << "importing media " << media_id << "/" << dir_size << std::endl;
+					if (progressBar){
+						progressBar->setMinimum(0);
+						progressBar->setMaximum(dir_size);
+						progressBar->setValue(media_id+1);// "+1" since it starts at 0
+						progressBar->setFormat("%v/%m");
+						stringstream status_message;
+						status_message << "Loading File " << media_id+1 << "/" << dir_size;
+						statusBar()->showMessage(tr(status_message.str().c_str()), 0);
+					}	
+				}	
+			}
+		}
+	}	
 }
 
 ACMultiMediaCycleOsgQt::ACMultiMediaCycleOsgQt(QWidget *parent) : QMainWindow(parent),
- features_known(false), plugins_scanned(false), detachedBrowser(0)
+	features_known(false), plugins_scanned(false), detachedBrowser(0),
+	aboutDialog(0),compositeOsgView(0),osgViewDock(0),osgViewDockWidget(0),osgViewDockLayout(0),osgViewDockTitleBar(0),progressBar(0)
 {
 	ui.setupUi(this); // first thing to do
 	this->media_type = MEDIA_TYPE_NONE;
@@ -101,37 +143,43 @@ ACMultiMediaCycleOsgQt::ACMultiMediaCycleOsgQt(QWidget *parent) : QMainWindow(pa
 	// uses another window for settings = editing the config file
 	settingsDialog = new SettingsDialog(this);
 
-	// progress bar
-	//pb = new QProgressBar(statusBar());
-	//	pb->setTextVisible(false);
-	//	pb->hide();
-	//	statusBar()->addPermanentWidget(pb);
-
-	aboutDialog = 0;
-
 	// This is required to populate the available file extensions list at startup
 	// until we clean mediacycle instead of deleting/creating it at every media type change.
 	ACMediaFactory::getInstance();
-	// Since it is time consuming, we might want to add a splash screen with progress bar at startup?
-
+	// Since it is time consuming, we might want to add a splash screen with progress bar at startup?	
+	
 	// Docked osg browser
 	ui.centralwidget->hide();
-	compositeOsgView = new ACOsgCompositeViewQt();
-	compositeOsgView->setSizePolicy ( QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding );
+	
+	osgViewDockWidget = new QWidget; // it seems this intermediary widget is required to set a layout to a dock widget
+	osgViewDockLayout = new QVBoxLayout;
+	osgViewDockLayout->setSpacing(0); // no blank space between the progress bar and the osg view
+	osgViewDockLayout->setContentsMargins(0,0,0,0);// no unnecessary corners in the osg view dock widget (this supersedes the OS theme defaults)
+    osgViewDockWidget->setLayout(osgViewDockLayout);
+
 	osgViewDock = new QDockWidget(this);
 	osgViewDock->setSizePolicy ( QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding );
-	osgViewDock->setWidget(compositeOsgView);
+	osgViewDock->setWidget(osgViewDockWidget);
 	osgViewDock->setAllowedAreas(Qt::RightDockWidgetArea);
 	osgViewDock->setFeatures(QDockWidget::DockWidgetFloatable);
 	osgViewDock->setWindowTitle("Browser");
 	this->addDockWidget(Qt::RightDockWidgetArea,osgViewDock);
 	osgViewDockTitleBar = osgViewDock->titleBarWidget();
 	osgViewDockNormalSize = QRect();
+	
+	compositeOsgView = new ACOsgCompositeViewQt();
+	compositeOsgView->setSizePolicy ( QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding );
+	osgViewDockLayout->addWidget(compositeOsgView);
 
+	progressBar = new QProgressBar();		
+	osgViewDockLayout->addWidget(progressBar);
+	
 	// to make window appear on top of others.
 	this->activateWindow();
 	this->show();
-
+	
+	progressBar->hide();	
+	
 	// Debugging accentuated media filenames
 	#ifdef USE_DEBUG
 	qDebug() << "System Locale name:"      << QLocale::system().name();
@@ -158,6 +206,13 @@ ACMultiMediaCycleOsgQt::~ACMultiMediaCycleOsgQt(){
         delete *dwiter;
     if (aboutDialog) delete aboutDialog;
     if (detachedBrowser) delete detachedBrowser;
+	if (progressBar) delete progressBar;
+	if (compositeOsgView) delete compositeOsgView;
+	if (progressBar) delete progressBar;
+	if (osgViewDockLayout) delete osgViewDockLayout;
+	if (osgViewDockWidget) delete osgViewDockWidget;
+	if (osgViewDockTitleBar) delete osgViewDockTitleBar;
+	if (osgViewDock) delete osgViewDock;
 }
 
 // tries to read settings from previous run
@@ -1105,6 +1160,10 @@ void ACMultiMediaCycleOsgQt::clean(bool _updategl){
 	// modify the DockWidget's API to allow this
 	plugins_scanned = false;
 
+	statusBar()->clearMessage();
+	progressBar->reset();
+	progressBar->hide();
+	
 	compositeOsgView->clean(_updategl);
 	compositeOsgView->setFocus();
 }
