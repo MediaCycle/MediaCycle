@@ -198,7 +198,8 @@ void ACOsgTextRenderer::updateNodes(double ratio) {
 
 	if (attribute.getActivity()>=1) { // 0 inactive, 1 clicked, 2 hover
 		localscale = 0.5;
-		media_node->addChild(metadata_geode);
+		if(media_node->getNumChildren() == 1) // only entry_geode so far
+			media_node->addChild(metadata_geode);
 	}
 	else {
 		media_node->removeChild(metadata_geode);
