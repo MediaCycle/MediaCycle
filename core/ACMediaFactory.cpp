@@ -229,7 +229,8 @@ const filext::value_type _init[] = {
 	
 	filext::value_type(".pdf", MEDIA_TYPE_PDF), \
 	
-	filext::value_type(".txt", MEDIA_TYPE_TEXT) 
+	filext::value_type(".txt", MEDIA_TYPE_TEXT) , \
+	filext::value_type(".xml", MEDIA_TYPE_TEXT) 
 	
 };
 filext ACMediaFactory::known_file_extensions(_init, _init + sizeof _init / sizeof *_init);
@@ -563,9 +564,10 @@ void ACMediaFactory::checkAvailableFileExtensions(){
 #endif //defined (SUPPORT_IMAGE OR SUPPORT_VIDEO) || defined(SUPPORT_3DMODEL)
 #if defined (SUPPORT_TEXT)
 	addAvailableFileExtensionSupport(".txt",MEDIA_TYPE_TEXT);
+	addAvailableFileExtensionSupport(".xml",MEDIA_TYPE_TEXT);	
 #endif //defined (SUPPORT_TEXT)
 #if defined (SUPPORT_PDF)
-	//addAvailableFileExtensionSupport(".pdf",MEDIA_TYPE_TEXT); // done by addAvailableOsgFileExtensions();
+	//addAvailableFileExtensionSupport(".pdf",MEDIA_TYPE_PDF); // done by addAvailableOsgFileExtensions();
 #endif //defined (SUPPORT_PDF)	
 }
 

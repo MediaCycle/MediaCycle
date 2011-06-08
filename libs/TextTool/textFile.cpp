@@ -35,16 +35,21 @@
 #include "textFile.h"
 #include <iostream>
 #include <fstream>
+#include "ArchipelReader.h"
 
 string* textFileRead(string filePath){
 	string ext=filePath.substr(filePath.find('.'), filePath.length()-filePath.find('.'));
 	if (ext==string(".txt")) 
 		return txtFileRead(filePath);
+	else
+		if (ext==string(".xml")){
+			archipelReader doc(filePath);
+			return new string(doc.getText());			
+		}
 		else
 			return NULL;
 	//TODO implement other text file type (pdf xml html...)
 	return NULL;
-	 
 }
 
 string *txtFileRead(string filePath){

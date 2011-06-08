@@ -4,6 +4,7 @@ IF ( CLUCENE_FOUND  )
 	FILE(GLOB HDR *.hpp *.h)
 
 	ADD_LIBRARY(textTool STATIC ${SRC} ${HDR})
+	ADD_DEPENDENCIES(textTool tinyxml)
 
 	TARGET_LINK_LIBRARIES(textTool ${CLUCENE_LIBRARIES})
 	MESSAGE("[X] TextTool")

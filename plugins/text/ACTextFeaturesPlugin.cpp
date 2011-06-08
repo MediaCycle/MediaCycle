@@ -221,9 +221,14 @@ std::vector<ACMediaFeatures*> ACTextFeaturesPlugin::calculate(ACMediaData* text_
 	else 
 		mIndexValid=false;
 	std::vector<ACMediaFeatures*> desc;
-	desc.push_back(this->tfCalculate(lMedia));
+	std::vector<float> descVect;
+	descVect.push_back(1.f);
+	ACMediaFeatures* descFeat=new ACMediaFeatures(descVect,"Term Frequency-Inverse Document Frequency");
+	desc.push_back(descFeat);
+	//desc.push_back(this->tfCalculate(lMedia));
 	return desc;
 }
+
 void ACTextFeaturesPlugin::clearIndexTerm(std::vector<wchar_t*> &pIndexTerms){
 	for (int i=0;i<pIndexTerms.size();i++){
 		_CLDELETE(pIndexTerms[i]);

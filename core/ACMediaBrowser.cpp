@@ -125,6 +125,7 @@ ACMediaBrowser::~ACMediaBrowser() {
 	// XS TODO delete mLoopAttributes if vector of pointers <*>
 	pthread_mutex_destroy(&activity_update_mutex);
 	if (mUserLog) delete mUserLog;
+	cleanPointer();
 }
 
 void ACMediaBrowser::clean(){
@@ -1487,6 +1488,10 @@ ACPointer* ACMediaBrowser::getPointerFromIndex(int _index) {
 }
 
 void ACMediaBrowser::resetPointers() {
+	ACPointers::iterator it;
+	for (it=mPointerAttributes.begin();it!=mPointerAttributes.end();it++)
+		if (it->second!=0)
+			delete (it->second);
 	mPointerAttributes.clear();
 	mPointersActiveNumber = 0;
 	//CF this initializes the default mouse as first pointer by default for now, might be changed to none
@@ -1524,9 +1529,20 @@ void ACMediaBrowser::removePointer(int _id) {
 		/*ACMediaNode closest = getMediaNode(it->second->closestNode());
 		if (closest.getActivity() == 2)
 			toggleSourceActivity(closest,0);*/
+		if (it->second!=0)
+			delete (it->second);
 		mPointerAttributes.erase(it);
 	}
 }
+
+void ACMediaBrowser::cleanPointer(void) {
+	ACPointers::iterator it;
+	for (it=mPointerAttributes.begin();it!=mPointerAttributes.end();it++)
+		if (it->second!=0)
+			delete (it->second);
+	mPointerAttributes.clear();
+}
+
 
 // CF prepareNodes ? (cf. OSG)
 // makes an ACMediaNode for each Media in the library

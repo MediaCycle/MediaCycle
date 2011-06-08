@@ -175,11 +175,12 @@ void ACKMeansPlugin::updateClusters(ACMediaBrowser* mediaBrowser,bool needsClust
 				{
 					// XS again, what if all media don't have the same number of features ?
 					int desc_count = library->getMedia(0)->getPreProcFeaturesVector(f)->getSize();
+					meanAccumCompute(library->getMedia(i)->getPreProcFeaturesVector(f),cluster_accumulators[jmin][f]);
 					
-					for(d=0; d<desc_count; d++)
-					{
-						cluster_accumulators[jmin][f][d] += library->getMedia(i)->getPreProcFeaturesVector(f)->getFeatureElement(d);
-					}
+					//for(d=0; d<desc_count; d++)
+					//{
+					//	cluster_accumulators[jmin][f][d] += library->getMedia(i)->getPreProcFeaturesVector(f)->getFeatureElement(d);
+					//}
 				}
 			}
 			

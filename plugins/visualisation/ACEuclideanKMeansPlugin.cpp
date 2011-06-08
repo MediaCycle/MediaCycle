@@ -83,3 +83,13 @@ double ACEuclideanKMeansPlugin::compute_distance(vector<ACMediaFeatures*> &obj1,
 	
 	return dis;
 }
+
+void ACEuclideanKMeansPlugin::meanAccumCompute(ACMediaFeatures*  obj1,vector<float>& obj2){
+	
+	int desc_count=obj1->getSize();
+	for(int d=0; d<desc_count; d++)
+	{
+		obj2[d] += obj1->getFeatureElement(d);
+	}
+
+}

@@ -48,6 +48,7 @@ public:
 	~ACCosKMeansPlugin();
 	double compute_distance(vector<ACMediaFeatures*> &, vector<ACMediaFeatures*> &, const vector<float> &, bool );
 	double compute_distance(vector<ACMediaFeatures*> &, const vector<vector <float> > &, const vector<float> &, bool );
+	void meanAccumCompute(ACMediaFeatures* ,std::vector<float>&);
 	
 	
 	

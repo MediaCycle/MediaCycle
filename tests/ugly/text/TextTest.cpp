@@ -44,12 +44,205 @@
 #include "ACTextFeaturesPlugin.h"
 #include "ACIndexModifier.h"
 
+#include "ArchipelReader.h"
 #include<iostream>
+#include "tinyxml.h"
 
+#include <QtGui>
 using namespace std;
 using namespace lucene::index;
 
+#include "MediaCycle.h"
+const unsigned int NUM_INDENTS_PER_SPACE=2;
+
+const char * getIndent( unsigned int numIndents )
+{
+	static const char * pINDENT="                                      + ";
+	static const unsigned int LENGTH=strlen( pINDENT );
+	unsigned int n=numIndents*NUM_INDENTS_PER_SPACE;
+	if ( n > LENGTH ) n = LENGTH;
+	
+	return &pINDENT[ LENGTH-n ];
+}
+
+// same as getIndent but no "+" at the end
+const char * getIndentAlt( unsigned int numIndents )
+{
+	static const char * pINDENT="                                        ";
+	static const unsigned int LENGTH=strlen( pINDENT );
+	unsigned int n=numIndents*NUM_INDENTS_PER_SPACE;
+	if ( n > LENGTH ) n = LENGTH;
+	
+	return &pINDENT[ LENGTH-n ];
+}
+
+int dump_attribs_to_stdout(TiXmlElement* pElement, unsigned int indent)
+{
+	if ( !pElement ) return 0;
+	
+	TiXmlAttribute* pAttrib=pElement->FirstAttribute();
+	int i=0;
+	int ival;
+	double dval;
+	const char* pIndent=getIndent(indent);
+	printf("\n");
+	while (pAttrib)
+	{
+		printf( "%s%s: value=[%s]", pIndent, pAttrib->Name(), pAttrib->Value());
+		
+		if (pAttrib->QueryIntValue(&ival)==TIXML_SUCCESS)    printf( " int=%d", ival);
+		if (pAttrib->QueryDoubleValue(&dval)==TIXML_SUCCESS) printf( " d=%1.1f", dval);
+		printf( "\n" );
+		i++;
+		pAttrib=pAttrib->Next();
+	}
+	return i;	
+}
+
+void dump_to_stdout( TiXmlNode* pParent, unsigned int indent = 0 )
+{
+	if ( !pParent ) return;
+	
+	TiXmlNode* pChild;
+	TiXmlText* pText;
+	int t = pParent->Type();
+	printf( "%s", getIndent(indent));
+	int num;
+	
+	switch ( t )
+	{
+		case TiXmlNode::DOCUMENT:
+			printf( "Document" );
+			break;
+			
+		case TiXmlNode::ELEMENT:
+			printf( "Element [%s]", pParent->Value() );
+			num=dump_attribs_to_stdout(pParent->ToElement(), indent+1);
+			switch(num)
+		{
+			case 0:  printf( " (No attributes)"); break;
+			case 1:  printf( "%s1 attribute", getIndentAlt(indent)); break;
+			default: printf( "%s%d attributes", getIndentAlt(indent), num); break;
+		}
+			break;
+			
+		case TiXmlNode::COMMENT:
+			printf( "Comment: [%s]", pParent->Value());
+			break;
+			
+		case TiXmlNode::UNKNOWN:
+			printf( "Unknown" );
+			break;
+			
+		case TiXmlNode::TEXT:
+			pText = pParent->ToText();
+			printf( "Text: [%s]", pText->Value() );
+			break;
+			
+		case TiXmlNode::DECLARATION:
+			printf( "Declaration" );
+			break;
+		default:
+			break;
+	}
+	printf( "\n" );
+	for ( pChild = pParent->FirstChild(); pChild != 0; pChild = pChild->NextSibling()) 
+	{
+		dump_to_stdout( pChild, indent+1 );
+	}
+}
+
+// load the named file and dump its structure to STDOUT
+void dump_to_stdout(const char* pFilename)
+{
+	TiXmlDocument doc(pFilename);
+	bool loadOkay = doc.LoadFile();
+	if (loadOkay)
+	{
+		printf("\n%s:\n", pFilename);
+		dump_to_stdout( &doc ); // defined later in the tutorial
+	}
+	else
+	{
+		printf("Failed to load file \"%s\"\n", pFilename);
+	}
+}
+
+
 int main(void){
+	TiXmlDocument doc("EA0236.xml");
+		
+	
+	archipelReader testDoc("EA0236.xml");
+
+	vector<string>::iterator it;
+	
+	std::vector<std::string> testvect=testDoc.getIlot();
+	for (it=testvect.begin();it!=testvect.end();it++)
+		cout << (*it) <<endl;
+	
+	
+	testvect= testDoc.getGlossaire();
+	for (it=testvect.begin();it!=testvect.end();it++)
+		cout << (*it) <<endl;
+	
+	
+	std::string strTest=testDoc.getText();
+	cout << strTest <<endl;
+	
+	strTest=testDoc.getArtist();
+	cout << strTest <<endl;
+
+	strTest=testDoc.getAlbumName();
+	cout << strTest <<endl;
+
+	strTest=testDoc.getReference();
+	cout << strTest <<endl;
+
+	testvect=testDoc.getTrackTitle();
+	for (it=testvect.begin();it!=testvect.end();it++)
+		cout << (*it) <<endl;
+	
+	testvect=testDoc.getTrackPath();
+	for (it=testvect.begin();it!=testvect.end();it++)
+		cout << (*it) <<endl;
+	
+	
+	
+	return 0;
+
+
+	//	testXml.LoadFile(<#FILE *#>, <#TiXmlEncoding encoding#>);
+	std::string f_plugin, s_plugin, v_plugin;
+	std::string smedia="text",build_type="Debug";
+	
+	f_plugin = "../../../../plugins/"+ smedia + "/" + build_type + "/mc_" + smedia +".dylib";
+	v_plugin = "../../../../plugins/visualisation/" + build_type + "/mc_visualisation.dylib";
+	s_plugin = "../../../../plugins/segmentation/" + build_type + "/mc_segmentation.dylib";
+	
+	for (int i=0;i<100;i++){
+		MediaCycle *testMC=new MediaCycle(MEDIA_TYPE_TEXT);
+		
+		if(testMC->addPluginLibrary(f_plugin) == -1){
+			return 0;
+		}
+		if(testMC->addPluginLibrary(v_plugin) == -1){
+			return 0;
+		}
+		if(testMC->addPluginLibrary(s_plugin) == -1){
+			
+			return 0;
+		}
+		testMC->importDirectory("/Users/ravet/Desktop/MediaCycleData/extraitsArticles/",1);
+		testMC->setClustersMethodPlugin("ACCosKMeans");
+		testMC->setClustersPositionsPlugin("ACCosClustPosition");
+		
+		delete testMC;
+		
+		
+	}
+	
+	
 	string 	pathIndex=string("../../../../apps/textcycle-osg-qt/temp");
 	lucene::analysis::SimpleAnalyzer an;
 	ACTextFeaturesPlugin* testPlugin=new ACTextFeaturesPlugin();

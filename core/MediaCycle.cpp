@@ -326,23 +326,20 @@ int MediaCycle::importDirectories(vector<string> directories, int recursive, boo
 
 	for (i=0;i<n;i++) {
 
-		ok += mediaLibrary->importFile(filenames[i], this->pluginManager, doSegment, doSegment); //, MC_e_medias);
-
-		std::stringstream message;
-		message << "importing_media_" << i << "_" <<n;
-		mediacycle_callback(message.str().c_str(),mediacycle_callback_data);
-		
-		needsNormalizeAndCluster = 0;
-		if ( (mediaLibrary->getSize() >= int(prevLibrarySizeMultiplier * prevLibrarySize))
-			|| (i==filenames.size()-1) ) {
-			needsNormalizeAndCluster = 1;
-			prevLibrarySize = mediaLibrary->getSize();
-		}
+		if (mediaLibrary->importFile(filenames[i], this->pluginManager, doSegment, doSegment)){ //, MC_e_medias);
+			ok++;
+			needsNormalizeAndCluster = 0;
+			if ( (mediaLibrary->getSize() >= int(prevLibrarySizeMultiplier * prevLibrarySize))
+				|| (i==filenames.size()-1) ) {
+				needsNormalizeAndCluster = 1;
+				prevLibrarySize = mediaLibrary->getSize();
+			}
 
 		//needsNormalizeAndCluster = 1;
 
-		normalizeFeatures(needsNormalizeAndCluster);
-		libraryContentChanged(needsNormalizeAndCluster);
+			normalizeFeatures(needsNormalizeAndCluster);
+			libraryContentChanged(needsNormalizeAndCluster);
+		}
 	}
 	
 	t2 = getTime();

@@ -241,7 +241,7 @@ public:
 	void resetPointers();
 	void addPointer(int p_id);
 	void removePointer(int p_id);
-
+	void cleanPointer();
 	// == Labels
 	void setClickedLabel(int ilabel);
 	int getClickedLabel()					{return mClickedLabel; };

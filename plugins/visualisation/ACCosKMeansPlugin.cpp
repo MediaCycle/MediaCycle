@@ -88,3 +88,18 @@ double ACCosKMeansPlugin::compute_distance(vector<ACMediaFeatures*> &obj1, const
 	
 	return dis;
 }
+
+void ACCosKMeansPlugin::meanAccumCompute(ACMediaFeatures*  obj1,vector<float>& obj2){
+	
+	float norm=0;
+	int desc_count=obj1->getSize();
+	for(int d=0; d< desc_count; d++)
+	{
+		norm += obj1->getFeatureElement(d);
+	}
+	
+	for(int d=0; d<desc_count; d++)
+	{
+		obj2[d] += obj1->getFeatureElement(d)/norm;
+	}
+}
