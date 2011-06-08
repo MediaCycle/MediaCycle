@@ -326,6 +326,10 @@ int MediaCycle::importDirectories(vector<string> directories, int recursive, boo
 
 	for (i=0;i<n;i++) {
 
+		stringstream callback_message;
+		callback_message << "importing_media_"<<i<<"_"<<n;
+		mediacycle_callback(callback_message.str().c_str(),mediacycle_callback_data);
+
 		if (mediaLibrary->importFile(filenames[i], this->pluginManager, doSegment, doSegment)){ //, MC_e_medias);
 			ok++;
 			needsNormalizeAndCluster = 0;
