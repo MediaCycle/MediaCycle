@@ -890,6 +890,21 @@ void ACMediaLibrary::saveSorted(string output_file){
 	out.close();
 }
 
+void ACMediaLibrary::setPreProcessPlugin(ACPlugin* acpl)
+{
+	if (mPreProcessPlugin!=acpl&&mPreProcessInfo!=NULL)
+		mPreProcessPlugin->freePreProcessInfo(mPreProcessInfo);
+	if (acpl==NULL&&mPreProcessPlugin!=NULL)
+	{		
+		mPreProcessPlugin=NULL;
+		std::vector<ACMedia*>::iterator iter;
+		for (iter=media_library.begin();iter!=media_library.end();iter++)
+			(*iter)->defaultPreProcFeatureInit();		
+	}
+	if (acpl!=NULL)
+		if (acpl->implementsPluginType(PLUGIN_TYPE_PREPROCESS))
+			mPreProcessPlugin=dynamic_cast<ACPreProcessPlugin*> (acpl) ;
+}
 
 // -------------------------------------------------------------------------
 // test
@@ -953,22 +968,4 @@ int ACMediaLibrary::testFFMPEG(std::string _filename){
 		}
 	}
 }
-
-
-void ACMediaLibrary::setPreProcessPlugin(ACPlugin* acpl)
-{
-	if (mPreProcessPlugin!=acpl&&mPreProcessInfo!=NULL)
-		mPreProcessPlugin->freePreProcessInfo(mPreProcessInfo);
-	if (acpl==NULL&&mPreProcessPlugin!=NULL)
-	{		
-		mPreProcessPlugin=NULL;
-		std::vector<ACMedia*>::iterator iter;
-		for (iter=media_library.begin();iter!=media_library.end();iter++)
-			(*iter)->defaultPreProcFeatureInit();		
-	}
-	if (acpl!=NULL)
-		if (acpl->implementsPluginType(PLUGIN_TYPE_PREPROCESS))
-			mPreProcessPlugin=dynamic_cast<ACPreProcessPlugin*> (acpl) ;
-}
-
 #endif //defined (SUPPORT_VIDEO)

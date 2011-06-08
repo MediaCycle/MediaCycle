@@ -135,7 +135,7 @@ public:
 	//void changeVisualisationPlugin(std::string pluginName);
 	
 	
-	void setPreProcessPlugin(string pluginName);
+	void setPreProcessPlugin(std::string pluginName);
 	
 	void dumpPluginsList();
 

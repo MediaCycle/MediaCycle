@@ -12,10 +12,11 @@ SET(BUILD_SHARED_LIBS OFF)
 
 # which compilers to use for C and C++
 SET(CMAKE_C_COMPILER ${MINGW_CROSS_BIN}/i686-pc-mingw32-gcc)
+SET(CMAKE_RC_COMPILER ${MINGW_CROSS_BIN}/i686-pc-mingw32-rcc)
 SET(CMAKE_CXX_COMPILER ${MINGW_CROSS_BIN}/i686-pc-mingw32-g++)
 SET(CMAKE_Fortran_COMPILER ${MINGW_CROSS_BIN}/i686-pc-mingw32-gfortran)
 SET(CMAKE_RANLIB ${MINGW_CROSS_BIN}/i686-pc-mingw32-ranlib)
-SET(CMAKE_AR ${MINGW_CROSS_BIN}/i686-pc-mingw32-ar)
+SET(CMAKE_AR ${MINGW_CROSS_BIN}/i686-pc-mingw32-ar CACHE STRING "AR")
 
 # here is the target environment located
 SET(CMAKE_FIND_ROOT_PATH ${MINGW_PREFIX})
@@ -35,11 +36,11 @@ set(QT_QTCORE_INCLUDE_DIR ${MINGW_PREFIX}/include/QtCore)
 set(QT_QTGUI_INCLUDE_DIR ${MINGW_PREFIX}/include/QtGui)
 set(QT_QTOPENGL_INCLUDE_DIR ${MINGW_PREFIX}/include/QtOpenGL)
 set(QT_MKSPECS_DIR  ${MINGW_PREFIX}/mkspecs)
-set(QT_MOC_EXECUTABLE  ${MINGW_BIN}/i686-pc-mingw32-moc)
-set(QT_QMAKE_EXECUTABLE ${MINGW_BIN}/i686-pc-mingw32-qmake)
-set(QT_UIC_EXECUTABLE  ${MINGW_BIN}/i686-pc-mingw32-uic)
-set(QT_RCC_EXECUTABLE  ${MINGW_BIN}/i686-pc-mingw32-rcc)
-set(QT_RC_EXECUTABLE  ${MINGW_BIN}/i686-pc-mingw32-windres)
+set(QT_MOC_EXECUTABLE  ${MINGW_CROSS_BIN}/i686-pc-mingw32-moc)
+set(QT_QMAKE_EXECUTABLE ${MINGW_CROSS_BIN}/i686-pc-mingw32-qmake)
+set(QT_UIC_EXECUTABLE  ${MINGW_CROSS_BIN}/i686-pc-mingw32-uic)
+set(QT_RCC_EXECUTABLE  ${MINGW_CROSS_BIN}/i686-pc-mingw32-rcc)
+set(QT_RC_EXECUTABLE  ${MINGW_CROSS_BIN}/i686-pc-mingw32-windres)
 
 set(OpenCV_ROOT_DIR ${MINGW_PREFIX})
 

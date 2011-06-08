@@ -1,6 +1,11 @@
 SET(PLUGIN_NAME "image")
 SET(TARGET_NAME "${PLUGIN_PREFIX}${PLUGIN_NAME}")
 IF(SUPPORT_IMAGE OR SUPPORT_VIDEO)
+
+	IF(NOT USE_GNUPLOT_I)
+		MESSAGE(FATAL_ERROR "The mc_image plugin currently requires gnuplot_i. Either install gnuplot_i; or disable plugins or image support; or remove the gnuplot_i dependency on this plugin.")
+	ENDIF()
+
 	FILE(GLOB SRC *.cpp *.c ./blobs/*.cpp ./gabor/*.cpp)
 	FILE(GLOB HDR *.hpp *.h ./blobs/*.h ./gabor/*.h)
 

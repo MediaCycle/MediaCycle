@@ -17,8 +17,6 @@
 //
 ////////////////////////////////////////////
 
-
-
 #include "gnuplot_i.hpp"
 #define PATH_MAXNAMESZ       4096
 

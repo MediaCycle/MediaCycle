@@ -16,6 +16,9 @@ IF(SUPPORT_AUDIO AND (USE_OPENAL OR USE_PORTAUDIO))
 
 	IF(USE_OPENAL)
 		TARGET_LINK_LIBRARIES(audioengine mediacycle  ${OPENAL_LIBRARY})
+		IF(WIN32)
+			TARGET_LINK_LIBRARIES(audioengine winmm uuid) # 2 last from OpenAL pkg config, to improve
+		ENDIF()
 	ENDIF()
 	IF(USE_PORTAUDIO)
 		TARGET_LINK_LIBRARIES(audioengine mediacycle ${PORTAUDIO_LIBRARIES} pthread)

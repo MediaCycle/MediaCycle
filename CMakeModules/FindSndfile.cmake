@@ -1,14 +1,15 @@
 # - Find SNDFILE
 # Find the native SNDFILE includes and library
 # This module defines
-#  SNDFILE_INCLUDE_DIR, where to find jpeglib.h, etc.
+#  SNDFILE_INCLUDE_DIR, where to find sndfile.h, etc.
 #  SNDFILE_LIBRARIES, the libraries needed to use SNDFILE.
 #  SNDFILE_FOUND, If false, do not try to use SNDFILE.
 # also defined, but not for general use are
 #  SNDFILE_LIBRARY, where to find the SNDFILE library.
 
 #=============================================================================
-# Copyright 2001-2009 Kitware, Inc.
+# Author: Christian Frisson
+# Copyright (c) 2001 – UMONS - Numediart
 #
 # Distributed under the OSI-approved BSD License (the "License");
 # see accompanying file Copyright.txt for details.

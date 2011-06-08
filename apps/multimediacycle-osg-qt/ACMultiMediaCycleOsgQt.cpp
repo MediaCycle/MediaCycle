@@ -37,6 +37,10 @@
 #include <iomanip> // for setw
 #include <cstdlib> // for atoi
 
+
+#include <osgViewer/GraphicsWindow>
+USE_GRAPHICSWINDOW()
+
 // ----------- class constants
 // number of files above which to lauch thread.
 const int ACMultiMediaCycleOsgQt::n_dir_for_threading = 10;
@@ -206,7 +210,6 @@ ACMultiMediaCycleOsgQt::~ACMultiMediaCycleOsgQt(){
         delete *dwiter;
     if (aboutDialog) delete aboutDialog;
     if (detachedBrowser) delete detachedBrowser;
-	if (progressBar) delete progressBar;
 	if (compositeOsgView) delete compositeOsgView;
 	if (progressBar) delete progressBar;
 	if (osgViewDockLayout) delete osgViewDockLayout;
@@ -1040,9 +1043,9 @@ void ACMultiMediaCycleOsgQt::loadDefaultConfig(ACMediaType _media_type, ACBrowse
 			#endif
 		#endif
 	#elif defined (__WIN32__)
-		f_plugin = s_path + "\..\..\..\plugins\\" + smedia + "\mc_"+smedia+".dll";
-		v_plugin = s_path + "\..\..\..\plugins\visualisation\\" + build_type + "\mc_visualisation.dll";
-		s_plugin = s_path + "\..\..\..\plugins\segmentation\\" + build_type + "\mc_segmentation.dll";
+		f_plugin = s_path + "\\mc_"+smedia+".dll";
+		v_plugin = s_path + "\\mc_visualisation.dll";
+		s_plugin = s_path + "\\mc_segmentation.dll";
 	#else
 		#if not defined (USE_DEBUG) // needs "make package" to be ran to work
 			f_plugin = "/usr/lib/mc_"+smedia+".so";

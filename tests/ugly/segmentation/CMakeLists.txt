@@ -1,3 +1,4 @@
+IF(USE_GNUPLOT_I)
 	FILE(GLOB SRC *.cpp *.c)
 	FILE(GLOB HDR *.hpp *.h)
 
@@ -7,4 +8,7 @@
 	ADD_DEPENDENCIES(segmentation-test mediacycle mc_segmentation)
 
 	TARGET_LINK_LIBRARIES(segmentation-test mediacycle mc_segmentation gnuplot_i)
+	MESSAGE("[ ] segmentation")
+ELSE()
 	MESSAGE("[X] segmentation")
+ENDIF()

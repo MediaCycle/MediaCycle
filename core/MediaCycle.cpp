@@ -538,7 +538,7 @@ void MediaCycle::changeVisualisationPlugin(string pluginName){
 */
 
 
-void MediaCycle::setPreProcessPlugin(string pluginName){
+void MediaCycle::setPreProcessPlugin(std::string pluginName){
 	ACPlugin* preProcessPlugin = this->getPluginManager()->getPlugin(pluginName);
 	if (preProcessPlugin!=NULL)
 		this->getLibrary()->setPreProcessPlugin(preProcessPlugin);

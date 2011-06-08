@@ -63,6 +63,66 @@
 
 using namespace osg;
 
+#include <osgDB/ReadFile>
+#include <osgUtil/Optimizer>
+#include <osg/CoordinateSystemNode>
+
+#include <osg/Switch>
+#include <osgText/Text>
+
+#include <osgViewer/Viewer>
+#include <osgViewer/ViewerEventHandlers>
+
+#include <osgGA/TrackballManipulator>
+#include <osgGA/FlightManipulator>
+#include <osgGA/DriveManipulator>
+#include <osgGA/KeySwitchMatrixManipulator>
+#include <osgGA/StateSetManipulator>
+#include <osgGA/AnimationPathManipulator>
+#include <osgGA/TerrainManipulator>
+
+#include <iostream>
+
+#include <osgViewer/GraphicsWindow>
+
+#ifdef OSG_LIBRARY_STATIC
+// include the plugins we need
+USE_OSGPLUGIN(ive)
+USE_OSGPLUGIN(osg)
+//USE_OSGPLUGIN(osg2)
+USE_OSGPLUGIN(rgb)
+USE_OSGPLUGIN(OpenFlight)
+USE_OSGPLUGIN(freetype)
+
+/*USE_DOTOSGWRAPPER_LIBRARY(osg)
+USE_DOTOSGWRAPPER_LIBRARY(osgFX)
+USE_DOTOSGWRAPPER_LIBRARY(osgParticle)
+USE_DOTOSGWRAPPER_LIBRARY(osgShadow)
+USE_DOTOSGWRAPPER_LIBRARY(osgSim)
+USE_DOTOSGWRAPPER_LIBRARY(osgTerrain)
+USE_DOTOSGWRAPPER_LIBRARY(osgText)
+USE_DOTOSGWRAPPER_LIBRARY(osgViewer)
+USE_DOTOSGWRAPPER_LIBRARY(osgVolume)
+USE_DOTOSGWRAPPER_LIBRARY(osgWidget)
+
+USE_SERIALIZER_WRAPPER_LIBRARY(osg)
+USE_SERIALIZER_WRAPPER_LIBRARY(osgAnimation)
+USE_SERIALIZER_WRAPPER_LIBRARY(osgFX)
+USE_SERIALIZER_WRAPPER_LIBRARY(osgManipulator)
+USE_SERIALIZER_WRAPPER_LIBRARY(osgParticle)
+USE_SERIALIZER_WRAPPER_LIBRARY(osgShadow)
+USE_SERIALIZER_WRAPPER_LIBRARY(osgSim)
+USE_SERIALIZER_WRAPPER_LIBRARY(osgTerrain)
+USE_SERIALIZER_WRAPPER_LIBRARY(osgText)
+USE_SERIALIZER_WRAPPER_LIBRARY(osgVolume)
+
+// include the platform specific GraphicsWindow implementation.
+USE_GRAPHICSWINDOW()
+//USE_GRAPICSWINDOW_IMPLEMENTATION(Win32)
+//osgViewer::graphicswindowproxy_Win32(graphicswindow_Win32);
+*/
+#endif
+
 ACOsgBrowserRenderer::ACOsgBrowserRenderer()
 //: displayed_nodes(0)
 {

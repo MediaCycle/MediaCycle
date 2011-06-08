@@ -44,6 +44,13 @@
 
 #define TI_MAX(x,y) ((x)>(y)?(x):(y))
 
+//sleep()
+#include <iostream>
+#ifdef __MINGW32__
+#include <windows.h>
+#define sleep(n) Sleep(1000 * n)
+#endif
+
 using namespace std;
 
 static void avlc_tcp_callback(char *buffer, int l, char **buffer_send, int *l_send, void *userData);

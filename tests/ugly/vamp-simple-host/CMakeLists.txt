@@ -6,7 +6,12 @@ IF(SUPPORT_AUDIO AND USE_VAMP)
 
 	ADD_DEPENDENCIES(vamp-simple-host vamp-simple-hostsdk)
 
-	TARGET_LINK_LIBRARIES(vamp-simple-host vamp-hostsdk vamp-sdk ${SNDFILE_LIBRARY} dl stdc++)
+	TARGET_LINK_LIBRARIES(vamp-simple-host vamp-hostsdk vamp-sdk ${SNDFILE_LIBRARY}  stdc++)
+	IF(NOT MINGW)
+		TARGET_LINK_LIBRARIES(vamp-simple-host dl)
+	ELSE()
+		TARGET_LINK_LIBRARIES(vamp-simple-host FLAC vorbisenc vorbis m ogg wsock32 ws2_32)
+	ENDIF()
 	MESSAGE("[X] vamp-simple-host")
 ELSE()
 	MESSAGE("[ ] vamp-simple-host")

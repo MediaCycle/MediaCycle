@@ -1,4 +1,4 @@
-#IF ( USE_OSG )
+IF ( USE_OSG )
 	FILE(GLOB SRC *.cpp)
 	FILE(GLOB HDR *.h)
 
@@ -22,6 +22,6 @@
 		TARGET_LINK_LIBRARIES(mediacycle-osg ${OpenCV_LIBRARIES})
 	ENDIF()
 	MESSAGE("[X] mediacycle-osg")
-#ELSE()
-#	MESSAGE("[ ] mediacycle-osg")
-#ENDIF()
+ELSE()
+	MESSAGE("[ ] mediacycle-osg")
+ENDIF()
