@@ -37,9 +37,10 @@
 #include <iomanip> // for setw
 #include <cstdlib> // for atoi
 
-
+#ifdef OSG_LIBRARY_STATIC
 #include <osgViewer/GraphicsWindow>
 USE_GRAPHICSWINDOW()
+#endif
 
 // ----------- class constants
 // number of files above which to lauch thread.
