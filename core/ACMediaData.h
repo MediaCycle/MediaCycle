@@ -52,12 +52,16 @@ public:
 	void setMediaType(ACMediaType _media_type){media_type=_media_type;}
 //	bool copyData(ACMediaData* m);
 	
+	
+	std::string getLabel(void){return label;}
+	
 protected:
 	virtual void init(); 
 
 protected:
 	ACMediaType media_type;
 	std::string file_name;
+	std::string label;
 };
 
 #endif  // ACMEDIADATA_H

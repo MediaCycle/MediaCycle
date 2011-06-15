@@ -798,7 +798,8 @@ void ACMediaBrowser::updateClusters(bool animate, int needsCluster) {
 		updateClustersKMeans(animate, needsCluster);
 	}
 	else{//TR TODO cancell the clustering if needCluster ==0
-		initClusterCenters();
+		if (needsCluster)
+			initClusterCenters();
 		if (mClustersMethodPlugin) { //CF priority on the Clusters Plugin
 			mClustersMethodPlugin->updateClusters(this,needsCluster);
 		}

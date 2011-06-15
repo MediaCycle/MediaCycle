@@ -170,7 +170,7 @@ void dump_to_stdout(const char* pFilename)
 
 
 int main(void){
-	TiXmlDocument doc("EA0236.xml");
+	/*TiXmlDocument doc("EA0236.xml");
 		
 	
 	archipelReader testDoc("EA0236.xml");
@@ -240,11 +240,13 @@ int main(void){
 		delete testMC;
 		
 		
-	}
+	}*/
 	
 	
 	string 	pathIndex=string("../../../../apps/textcycle-osg-qt/temp");
-	lucene::analysis::SimpleAnalyzer an;
+	//lucene::analysis::SimpleAnalyzer an;
+	//lucene::analysis::StopAnalyzer an("/Users/ravet/Desktop/navimed/TMG_5.0R6/common_words - fr.txt");
+	
 	ACTextFeaturesPlugin* testPlugin=new ACTextFeaturesPlugin();
 	for (int i=0;i<100;i++){
 		vector<ACMedia*> testLib;

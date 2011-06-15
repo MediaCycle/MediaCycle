@@ -53,7 +53,10 @@ using namespace lucene::util;
 using namespace lucene::store;
 using namespace lucene::document;
 
+#include "frenchStopWord.h"
+
 void ACTextFeaturesPlugin::createIndex(void) {
+	
 
 	IndexWriter *lIndex;	
 	bool clearIndex=true;//if we want to keep the index
@@ -62,9 +65,9 @@ void ACTextFeaturesPlugin::createIndex(void) {
 			printf("Index was locked... unlocking it.\n");
 			IndexReader::unlock(pathIndex.c_str());
 		}		
-		lIndex = _CLNEW IndexWriter( pathIndex.c_str(), &an, false);
+		lIndex = _CLNEW IndexWriter( pathIndex.c_str(), an, false);
 	}else{
-		lIndex = _CLNEW IndexWriter( pathIndex.c_str() ,&an, true);
+		lIndex = _CLNEW IndexWriter( pathIndex.c_str() ,an, true);
 	}
 	lIndex->setMaxFieldLength(IndexWriter::DEFAULT_MAX_FIELD_LENGTH);	
 	lIndex->optimize();
@@ -72,7 +75,7 @@ void ACTextFeaturesPlugin::createIndex(void) {
 	
 	_CLDELETE(lIndex);
 //	sleep(1);
-	mIndex= _CLNEW ACIndexModifier( pathIndex.c_str(), &an, false);
+	mIndex= _CLNEW ACIndexModifier( pathIndex.c_str(), an, false);
 	
 	//IndexReader* reader = IndexReader::open(pathIndex);
 	//int64_t ver = mIndex->getCurrentVersion(pathIndex);
@@ -109,7 +112,7 @@ void ACTextFeaturesPlugin::addMedia(ACMediaData* text_data, ACText* theMedia) {
 	strData[lData->size()]=0;
 	//cout << strData << "\n";
 	//doc->add( *_CLNEW Field(_T("path"),strPath, Field::STORE_YES | Field::INDEX_UNTOKENIZED ) );
-	doc->add( *_CLNEW Field(_T("contents"),strData, Field::STORE_YES | Field::INDEX_TOKENIZED | Field::TERMVECTOR_YES) );
+	doc->add( *_CLNEW Field(_T("contents"),strData, Field::STORE_YES | Field::INDEX_TOKENIZED | Field::TERMVECTOR_WITH_POSITIONS) );
 	mIndex->addDocument( doc );
 	_CLDELETE(doc);
 	theMedia->setDocIndex(lIndex);
@@ -138,6 +141,9 @@ ACTextFeaturesPlugin::ACTextFeaturesPlugin() {
     this->mId = "";
 	this->mIndex=NULL;
 	this->mIndexValid=false;
+	//an=new lucene::analysis::SimpleAnalyzer();//
+	an =new lucene::analysis::StopAnalyzer(FRENCH_STOP_WORDS);
+
 	
 #if defined(__APPLE__)
 	//pathIndex=string("/Users/ravet/Desktop/navimed/textMining/lucene/testIndex/");
@@ -155,6 +161,8 @@ ACTextFeaturesPlugin::ACTextFeaturesPlugin() {
 ACTextFeaturesPlugin::~ACTextFeaturesPlugin() {
 	clearIndexTerm(indexTerms);
 	closeIndex();
+	if (an!=0)
+		delete an;
 }
 
 std::vector<wchar_t*> ACTextFeaturesPlugin::indexTermsExtraction(){
@@ -203,7 +211,16 @@ ACMediaFeatures* ACTextFeaturesPlugin::tfCalculate(ACText* pMedia){
 	if (indexIdf.size()!=nbTerms)
 		return NULL;
 	for (int i=0;i<nbTerms;i++)
+	{
 		tfValues.push_back(featureTest[i]*indexIdf[i]);
+		char *tempChar=new char[wcslen(indexTerms[i])+2];
+		
+		mc_wcstoutf8(tempChar,indexTerms[i],wcslen(indexTerms[i])+2);
+		//wprintf(_T("%s"),indexTerms[i]);
+		//if (tfValues[i]!=0.f)
+		//	cout <<tempChar<<"\t"<<tfValues[i]<<endl;
+		delete tempChar;
+	}
 	ACMediaFeatures* desc=new ACMediaFeatures(tfValues,"Term Frequency-Inverse Document Frequency");
 	desc->setNeedsNormalization(1);
 	return desc;
@@ -253,8 +270,11 @@ preProcessInfo ACTextFeaturesPlugin::update(std::vector<ACMedia*> media_library)
 std::vector<ACMediaFeatures*> ACTextFeaturesPlugin::apply(preProcessInfo info,ACMedia* theMedia){
 		
 	ACText* lMedia=(ACText*)theMedia;
+	
+	cout <<theMedia->getFileName()<<endl;
 	std::vector<ACMediaFeatures*> desc;
 	desc.push_back(this->tfCalculate(lMedia));
+	
 	return desc;
 
 }

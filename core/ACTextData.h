@@ -49,7 +49,7 @@ public:
 
 	void readData(std::string _fname);
 	virtual void* getData() {return static_cast<void*>(text_ptr);}
-	void setData(std::string* _data);
+	void setData(std::string* _data);	
 
 protected:
 	virtual void init();

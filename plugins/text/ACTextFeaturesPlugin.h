@@ -77,7 +77,9 @@ protected:
 	ACIndexModifier* mIndex;
 	std::vector<TCHAR*> indexTerms;
 	std::vector<float> indexIdf;
-	lucene::analysis::SimpleAnalyzer an;
+//	lucene::analysis::SimpleAnalyzer* an;
+	lucene::analysis::StopAnalyzer *an;//("/Users/ravet/Desktop/navimed/TMG_5.0R6/common_words - fr.txt");
+
 	string pathIndex;
 };
 

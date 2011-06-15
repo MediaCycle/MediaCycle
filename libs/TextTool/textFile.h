@@ -36,10 +36,10 @@
 #define TEXTFILE_H
 
 #include <string>
-using namespace std;
 
 
-string* textFileRead(string filePath);
+std::string* textFileRead(std::string filePath);
 
-string *txtFileRead(string filePath);
+std::string labelFileRead(std::string filePath);
+std::string *txtFileRead(std::string filePath);
 #endif

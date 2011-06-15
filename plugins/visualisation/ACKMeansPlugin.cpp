@@ -85,6 +85,7 @@ void ACKMeansPlugin::updateClusters(ACMediaBrowser* mediaBrowser,bool needsClust
 		srand(15);
 		statCpt++;
 		srand(clusterCount*statCpt);
+		vector<int> initClust;
 		for(i=0; i<clusterCount; i++)
 		{
 			clusterCenters[i].resize(feature_count);
@@ -97,13 +98,20 @@ void ACKMeansPlugin::updateClusters(ACMediaBrowser* mediaBrowser,bool needsClust
 			// TODO SD - Avoid selecting the same twice
 			while(l--)
 			{
-				if(mediaBrowser->getMediaNode(r).getNavigationLevel() >= navigationLevel) break;
+				
+				bool diffTest=true;
+				for (int k=0;k<min(i,object_count-1);k++)
+					if (initClust[k]==r)
+						diffTest=false;
+				
+				if(diffTest && mediaBrowser->getMediaNode(r).getNavigationLevel() >= navigationLevel) break;
 				else r = rand() % object_count;
 			}
 			
 			// couldn't find center in this nav level...
 			if(l <= 0) return;
 			
+			initClust.push_back(r);
 			for(f=0; f<feature_count; f++)
 			{
 				// XS again, what if all media don't have the same number of features ?
@@ -202,7 +210,7 @@ void ACKMeansPlugin::updateClusters(ACMediaBrowser* mediaBrowser,bool needsClust
 					}
 				}
 				
-				printf("\tcluster %d count = %d\n", j, cluster_counts[j]); 
+				//printf("\tcluster %d count = %d\n", j, cluster_counts[j]); 
 			}
 		}
 		mediaBrowser->initClusterCenters();
@@ -243,5 +251,33 @@ void ACKMeansPlugin::updateClusters(ACMediaBrowser* mediaBrowser,bool needsClust
 		}
 		
 	}
-}
+/*	if (object_count>2)
+	{	
+		float *distTemp=new float[object_count-1],*minLoc=new float[object_count-1],*maxLoc=new float[object_count-1];
+		
+		for (int i=0;i<object_count-1;i++)
+		{ 
+			distTemp[i]=compute_distance(library->getMedia(object_count-1)->getAllPreProcFeaturesVectors(), library->getMedia(i)->getAllPreProcFeaturesVectors(), featureWeights, false);
+	
+		}
+		minLoc[0]=distTemp[0];
+		maxLoc[0]=distTemp[0];
+		int indMin=0;
+		for (int i=1;i<object_count-1;i++)
+		{
+			minLoc[i]=min(minLoc[i-1],distTemp[i]);
+			if (minLoc[i]!=minLoc[i-1])
+				indMin=i;
+			maxLoc[i]=max(minLoc[i-1],distTemp[i]);
+		}
+		string minString=library->getMedia(indMin)->getLabel();
 
+		string prString=library->getMedia(object_count-1)->getLabel();
+		string seString=library->getMedia(object_count-2)->getLabel();
+		string trString=library->getMedia(object_count-3)->getLabel();
+
+		delete distTemp;
+
+	}*/
+	
+}

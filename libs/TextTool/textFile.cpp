@@ -36,6 +36,7 @@
 #include <iostream>
 #include <fstream>
 #include "ArchipelReader.h"
+using namespace std;
 
 string* textFileRead(string filePath){
 	string ext=filePath.substr(filePath.find('.'), filePath.length()-filePath.find('.'));
@@ -50,6 +51,23 @@ string* textFileRead(string filePath){
 			return NULL;
 	//TODO implement other text file type (pdf xml html...)
 	return NULL;
+}
+
+string labelFileRead(string filePath){
+	string ext=filePath.substr(filePath.find('.'), filePath.length()-filePath.find('.'));
+	if (ext==string(".txt")) {
+		size_t indTemp=filePath.find_last_of("/"),lastTemp=filePath.length();
+		return filePath.substr(indTemp,lastTemp-indTemp);
+	}
+	else
+		if (ext==string(".xml")){
+			archipelReader doc(filePath);
+			return (doc.getArtist()+string("/")+doc.getAlbumName()) ;			
+		}
+		else
+			return string("");
+	//TODO implement other text file type (pdf xml html...)
+	return string("");
 }
 
 string *txtFileRead(string filePath){

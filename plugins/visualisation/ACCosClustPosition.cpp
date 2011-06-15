@@ -151,9 +151,9 @@ void ACCosClustPosition::updateNextPositions(ACMediaBrowser* mediaBrowser)
 			
 			//printf("computed next position: theta:%f,r=%f,  (%f %f %f)\n", theta, r, p.x, p.y, p.z);//CF free the console
 			double t = getTime();
-			mediaBrowser->getMediaNode(ind).setCurrentPosition(p);
 			mediaBrowser->getMediaNode(ind).setNextPosition(p, t);
-		}
+	
+	}
 		
 		// printf("PROPELER \n");
 		

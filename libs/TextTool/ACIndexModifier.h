@@ -55,6 +55,7 @@ using namespace lucene::search;
 using namespace std;
 CL_NS_DEF(index)
 
+#define OLD_CLUCENE
 
 class ACIndexModifier : public IndexModifier {
 public:
@@ -72,6 +73,7 @@ public:
 	int32_t docFreq(const Term* t);
 	TermPositions* termPositions();
 	TermPositions* termPositions(Term* term);
+	//bool isOptimized(void);
 };
 
 CL_NS_END

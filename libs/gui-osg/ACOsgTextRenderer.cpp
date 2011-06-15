@@ -70,7 +70,7 @@ void ACOsgTextRenderer::metadataGeode() {
 	osg::Vec4 textColor(0.9f,0.9f,0.9f,1.0f);
 	float textCharacterSize = 80.0f; // 10 pixels ? // broken with OSG v2.9.11??
 	#if OSG_MIN_VERSION_REQUIRED(2,9,11)
-		textCharacterSize = 12.0f;
+		textCharacterSize = 16.0f;
 	#endif
 	metadata_geode = new Geode();
 
@@ -98,10 +98,8 @@ void ACOsgTextRenderer::metadataGeode() {
 	if (media_cycle->getBrowser()->getMode() == AC_MODE_NEIGHBORS)
 		media_index = media_cycle->getBrowser()->getUserLog()->getMediaIdFromNodeId(node_index);
 
-	string text_filename=media_cycle->getMediaFileName(media_index);
-	size_t indTemp=text_filename.find_last_of("/"),lastTemp=text_filename.length();
-	text_filename=text_filename.substr(indTemp,lastTemp-indTemp);
-	metadata->setText( text_filename );
+	string textLabel=media_cycle->getLibrary()->getMedia(media_index)->getLabel();
+	metadata->setText( textLabel );
 
 	//state = text_geode->getOrCreateStateSet();
 	//state->setMode(GL_LIGHTING, osg::StateAttribute::PROTECTED | osg::StateAttribute::OFF );

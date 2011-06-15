@@ -61,10 +61,14 @@ int ACText::loadACLSpecific(ifstream &library_file) {
 }
 
 void ACText::extractData(string fname){
-	if (data)
+	if (data){
 		delete data;
+		data=0;
+	}
 	// XS todo : store the default header (16 or 64 below) size somewhere...
 	 data = new ACTextData(fname);
+	if (data!=0)
+		label=data->getLabel();
 	//computeThumbnail(image_data, 64, 64);
 	//width = thumbnail_width;
 	//height = thumbnail_height;

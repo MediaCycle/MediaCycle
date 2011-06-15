@@ -75,6 +75,14 @@ TermFreqVector* ACIndexModifier::getTermFreqVector(int32_t docNumber, const TCHA
 	return indexReader->getTermFreqVector( docNumber, field);
 }
 
+
+//bool ACIndexModifier::isOptimized(void){
+//	SCOPED_LOCK_MUTEX(directory->THIS_LOCK)
+//	assureOpen();
+//	createIndexReader();
+//	return indexReader->isOptimized();
+//}
+
 int32_t ACIndexModifier::docFreq(const Term* t){
 	SCOPED_LOCK_MUTEX(directory->THIS_LOCK)
 	assureOpen();

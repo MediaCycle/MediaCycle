@@ -58,6 +58,7 @@ protected:
 	std::vector<ACMediaFeatures*> preproc_features_vectors;
 	std::string filename;
 	std::string filename_thumbnail;
+	std::string label;
 	char  **text_tags;
 	char  **hyper_links;
 	std::vector<ACMedia*> segments;
@@ -116,7 +117,10 @@ public:
 	// the following 2 were re-introduced for audio...
 	virtual int getThumbnailWidth() {return 0;}
 	virtual int getThumbnailHeight() {return 0;}
-
+	
+	std::string getLabel(void){return label;}	
+	void getLabel(std::string iLabel){label=iLabel;}
+	
 	// data
 	virtual void extractData(std::string filename) {}
 

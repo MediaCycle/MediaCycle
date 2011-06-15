@@ -53,6 +53,7 @@ extern "C" std::vector<std::string> list() {    //returns a string vector contai
 	listPlugin.push_back("ACVisPluginAudiogarden");
 	listPlugin.push_back("ACPosPlugAudioGardenFlower");
 	listPlugin.push_back("ACPositionsPluginRadialTreeLayout");
+	listPlugin.push_back("ACEuclideanKMeansPlugin");
 	listPlugin.push_back("ACCosKMeansPlugin");
 	listPlugin.push_back("ACCosClustPosition");
 	//listPlugin.push_back("ACPositionsPluginRandom");

@@ -69,6 +69,8 @@ double ACCosDistance::distance(){
 		
 	}
 	if (a==0||b==0)
-		return 0;
-	return 1-(ab/sqrt(a*b));
+		return 1;
+//	return 1-(ab/sqrt(a*b));
+	return ((1.1/(0.1+ab/sqrt(a*b))-1)/10);
+
 }
