@@ -1,18 +1,12 @@
  == NOTES ==
 
 * Do NOT commit any xcode/Visual Studio/name your IDE's project files. (please ?)
-* The CMakeLists.txt files might (will) need to be modified.
-  For instance, right now it supposes that TiCore libs are installed in the PATH
-  and that TiCore header files (TiCore.h, Common/TiMath.h, ...)
-  are located either in the PATH or in /usr/local/include/TiCore/
-  TiCore's Cmake config has been modified to have a "make install" build command
-  that installs TiCore libs and headers files were needed
 
 == CONFIGURATION ==
 
 Linux :
 
-$ mkdir Builds/linux-x86
+$ mkdir -p Builds/linux-x86
 $ cd Builds/linux-x86
 $ cmake ../..
 $ make
@@ -26,7 +20,7 @@ You can then configure an IDE (netbeans, eclipse,...) or use vim, emacs,... as y
 
 MacOSX :
 
-$ mkdir Builds/darwin-x86
+$ mkdir -p Builds/darwin-x86
 $ cd Builds/darwin-x86
 $ cmake ../..
 

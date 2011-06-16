@@ -1139,7 +1139,7 @@ void ACOsgAudioTrackRenderer::updateTracks(double ratio) {
 			std::cout << std::endl;
 
 			//CF: dummy segments for testing
-			/*if (media->getNumberOfSegments()==0){
+			if (media->getNumberOfSegments()==0){
 				for (int s=0;s<4;s++){
 					ACMedia* seg = ACMediaFactory::getInstance().create(media);
 					seg->setParentId(media->getId());
@@ -1155,7 +1155,7 @@ void ACOsgAudioTrackRenderer::updateTracks(double ratio) {
 				media->getSegment(2)->setEnd((media_end-media_start)/2.0f);
 				media->getSegment(3)->setStart((media_end-media_start)/2.0f);
 				media->getSegment(3)->setEnd(media_end);
-			}*/
+			}
 			track_node->removeChild(segments_transform);
 			
             if (media->getNumberOfSegments()>0){//////CF dangerous if a new media has the same number of segments than the previous one:  && segments_number != media->getNumberOfSegments()){

@@ -192,7 +192,9 @@ void ACOsgImageRenderer::imageGeode(bool flip, float sizemul, float zoomin) {
 	}
 	else if (media_type == MEDIA_TYPE_VIDEO)
 	{
+		#ifdef SUPPORT_VIDEO
 		image_texture = ((ACVideo*)(media_cycle->getLibrary()->getMedia(media_index)))->getTexture();
+		#endif//SUPPORT_VIDEO
 	}
 	image_texture->setResizeNonPowerOfTwoHint(false); 
 	

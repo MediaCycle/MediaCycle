@@ -9,6 +9,5 @@ add_subdirectory(gnuplot_i)
 IF(USE_VAMP)
 add_subdirectory(vamp-plugin-sdk)
 ENDIF()
-IF(OSG_FOUND AND FFMPEG_FOUND)
-add_subdirectory(osgdb_ffmpeg)
-ENDIF()
+
+# OSG plugins are added at the end of the project

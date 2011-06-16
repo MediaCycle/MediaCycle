@@ -72,7 +72,7 @@ public:
         {
             OpenThreads::Thread::YieldCurrentThread();
         }
-		if (m_context) {avcodec_close(m_context); m_context = 0;}
+		if (m_context) {m_context = 0;}//avcodec_close(m_context); // done by osg ffmpeg plugin
     }
 
     void run(void);

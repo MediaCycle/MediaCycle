@@ -2,13 +2,18 @@
 
 MESSAGE("\nApplications:")
 
+# Add multimediacycle-osg-qt first to make it the first target (in XCode)
+ADD_SUBDIRECTORY(multimediacycle-osg-qt)
+
 FILE(GLOB DIRLIST * )
 
 FOREACH(APPDIR ${DIRLIST})
     IF(IS_DIRECTORY ${APPDIR})
 	# AudioGarden
 	GET_FILENAME_COMPONENT(APPNAME ${APPDIR} NAME)
-	IF ("${APPDIR}" MATCHES "audiogarden-osg-qt")
+	IF ("${APPDIR}" MATCHES "multimediacycle-osg-qt")
+		# do nothing, it is already imported first to become the first target (in XCode)
+	ELSEIF ("${APPDIR}" MATCHES "audiogarden-osg-qt")
 		IF (USE_AUDIOGARDEN)
 			ADD_SUBDIRECTORY(${APPDIR})
 		ELSE ()

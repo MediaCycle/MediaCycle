@@ -266,7 +266,7 @@ osg::ref_ptr<osg::Image> ACImage::openCVToOSG(IplImage* cvImg, int sx, int sy) {
 		else
 			osgImg->setOrigin(osg::Image::BOTTOM_LEFT);
 		
-		if (sx>0 && sy >0){
+		if (osgImg->valid() && sx>0 && sy >0){
 			osgImg->scaleImage(sx,sy, 1);
 		}
 		// XS uncomment the following 4 lines for visual debug (e.g., thumbnail)	

@@ -103,6 +103,7 @@ class ACMediaFactory : private boost::noncopyable {
 
 		ACMediaType getMediaTypeFromExtension(std::string file_ext);
 		ACMediaType guessMediaTypeFromString(std::string keyword);
+		std::string getNormalCaseStringFromMediaType(ACMediaType media_type);
 		std::string getLowCaseStringFromMediaType(ACMediaType media_type);
 		std::vector< std::string > listAvailableMediaTypes();
 		bool isMediaTypeSegmentable(ACMediaType _media_type);
