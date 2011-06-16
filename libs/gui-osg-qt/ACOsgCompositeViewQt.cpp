@@ -66,7 +66,7 @@ ACOsgCompositeViewQt::ACOsgCompositeViewQt( QWidget * parent, const char * name,
 	refcamx(0.0f), refcamy(0.0f),
 	refzoom(0.0f),refrotation(0.0f),
 	septhick(5),sepy(0.0f),refsepy(0.0f),controls_width(0),screen_width(0),
-	library_loaded(false),
+	library_loaded(false),mouseover(false),
 	trackdown(0),mediaOnTrack(-1),track_playing(false)
 {
 	osg_view = new osgViewer::GraphicsWindowEmbedded(0,0,width(),height());
@@ -298,11 +298,21 @@ void ACOsgCompositeViewQt::paintGL()
 // called according to timer
 void ACOsgCompositeViewQt::updateGL()
 {
+
 	double frac = 0.0;
 	if (media_cycle == 0) return;
 
 	if(media_cycle && media_cycle->hasBrowser())
 	{
+		if(mouseover!=this->underMouse()){
+			if(this->underMouse())//Qt
+				media_cycle->getBrowser()->addMousePointer();
+			else {
+				media_cycle->getBrowser()->removeMousePointer();
+			}
+			//std::cout << "Mouse " << this->underMouse() << std::endl;
+			mouseover=this->underMouse();
+		}	
 		media_cycle->updateState();
 		frac = media_cycle->getFrac();
 	}
@@ -452,7 +462,7 @@ void ACOsgCompositeViewQt::mousePressEvent( QMouseEvent* event )
 		{
 			int loop = media_cycle->getClickedNode();
 			std::cout << "node " << loop << " selected" << std::endl;
-			//media_cycle->hoverCallback(event->x(),event->y(),0);
+			//media_cycle->hoverWithPointerId(event->x(),event->y(),-1);//mouse
 			//int loop = media_cycle->getClosestNode();
 
 			if(loop >= 0)
@@ -552,6 +562,7 @@ void ACOsgCompositeViewQt::mousePressEvent( QMouseEvent* event )
 
 void ACOsgCompositeViewQt::mouseMoveEvent( QMouseEvent* event )
 {
+	
 	if (media_cycle == 0) return;
 	int button = 0;
     switch(event->button())
@@ -644,7 +655,7 @@ void ACOsgCompositeViewQt::mouseReleaseEvent( QMouseEvent* event )
 		{
 			int loop = media_cycle->getClickedNode();
 			std::cout << "node " << loop << " selected" << std::endl;
-			//media_cycle->hoverCallback(event->x(),event->y(),0);
+			//media_cycle->hoverWithPointerId(event->x(),event->y(),-1);//mouse
 			//int loop = media_cycle->getClosestNode();
 
 			if(loop >= 0)

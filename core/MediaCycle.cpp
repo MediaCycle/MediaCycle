@@ -325,7 +325,7 @@ int MediaCycle::importDirectories(vector<string> directories, int recursive, boo
 */
 
 	for (i=0;i<n;i++) {
-
+		
 		stringstream callback_message;
 		callback_message << "importing_media_"<<i<<"_"<<n;
 		mediacycle_callback(callback_message.str().c_str(),mediacycle_callback_data);
@@ -704,13 +704,14 @@ void MediaCycle::pickedObjectCallback(int _nodeId) {
 	}
 }
 
-void MediaCycle::hoverObjectCallback(int pid) {
-	// XS duh ?
+void MediaCycle::hoverWithPointerId(float xx, float yy, int p_id) {
+	if (this->mediaBrowser)
+		mediaBrowser->hoverWithPointerId(xx, yy, p_id);
 }
 
-void MediaCycle::hoverCallback(float xx, float yy, int p_id) {
+void MediaCycle::hoverWithPointerIndex(float xx, float yy, int p_index) {
 	if (this->mediaBrowser)
-		mediaBrowser->setHoverLoop(-1, xx, yy, p_id);
+		mediaBrowser->hoverWithPointerIndex(xx, yy, p_index);
 }
 
 // == NEW

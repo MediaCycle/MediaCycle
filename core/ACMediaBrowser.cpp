@@ -125,7 +125,6 @@ ACMediaBrowser::~ACMediaBrowser() {
 	// XS TODO delete mLoopAttributes if vector of pointers <*>
 	pthread_mutex_destroy(&activity_update_mutex);
 	if (mUserLog) delete mUserLog;
-	cleanPointer();
 }
 
 void ACMediaBrowser::clean(){
@@ -495,31 +494,26 @@ void ACMediaBrowser::setMode(ACBrowserMode _mode)
 	mMode = _mode;
 }
 
-int ACMediaBrowser::setHoverLoop(int lid, float mxx, float myy, int p_index)
+void ACMediaBrowser::hoverWithPointerIndex(float mxx, float myy, int p_index)
 {
-	int loop_id;
-
 	ACPoint p;
 	p.x = mxx; p.y = myy; p.z = 0.0;
-	if (mPointerAttributes.size()>p_index) {
+	if (this->getPointerFromIndex(p_index)) {
 		this->getPointerFromIndex(p_index)->setCurrentPosition(p);
 	}
 	else
-		std::cerr << "ACMediaBrowser::setHoverLoop: wrong pointer id " << p_index << std::endl;
+		std::cerr << "ACMediaBrowser::hoverWithPointerIndex: wrong pointer index " << p_index << std::endl;
+}
 
-	// In this case, the loops to be played wil be selected according to distance from the mouse pointer in the view
-	// audio_cycle->getAudioFeedback()->createDynamicSourcesWithPosition();
-
-	loop_id = lid;
-
-	if ( (loop_id>=0) && (loop_id<getLibrary()->getSize()) ) {
-		//CF this feature is yet unused, since getHover isn't implemented and hover isn't used in ACMediaNode...
-		//this->getMediaNode(loop_id).setHover(1);
+void ACMediaBrowser::hoverWithPointerId(float mxx, float myy, int p_id)
+{
+	ACPoint p;
+	p.x = mxx; p.y = myy; p.z = 0.0;
+	if (this->getPointerFromId(p_id)) {
+		this->getPointerFromId(p_id)->setCurrentPosition(p);
 	}
-	else {
-		return 0;
-	}
-	return 1;
+	else
+		std::cerr << "ACMediaBrowser::hoverWithPointerId: wrong pointer id " << p_id << std::endl;
 }
 
 // XS TODO return value
@@ -1459,16 +1453,28 @@ ACMediaNode& ACMediaBrowser::getMediaNode(int i) {
 }
 
 int ACMediaBrowser::getNumberOfPointers() {
-	return mPointerAttributes.size();
+	return mPointers.size();
 }
 
+ACPointerType ACMediaBrowser::getPointerTypeFromIndex(int _index) {
+	this->getPointerFromIndex(_index)->getType();
+}
+
+ACPointerType ACMediaBrowser::getPointerTypeFromId(int _id) {	
+	this->getPointerFromId(_id)->getType();
+}	
+	
 ACPointer* ACMediaBrowser::getPointerFromId(int _id) {
-	ACPointers::iterator p_attr_it = mPointerAttributes.find(_id);
-	if (p_attr_it ==  mPointerAttributes.end()){ //new pointer
+	ACPointers::iterator p_attr_it = mPointers.find(_id);
+	if (p_attr_it ==  mPointers.end()){ //new pointer
 		this->addPointer(_id);
-		p_attr_it = mPointerAttributes.find(_id);
-		if (p_attr_it ==  mPointerAttributes.end()) std::cerr << "ACMediaBrowser::getPointerFromId: couldn't get pointer with id " << _id << std::endl;
-		return p_attr_it->second;
+		p_attr_it = mPointers.find(_id);
+		if (p_attr_it ==  mPointers.end()) {
+			std::cerr << "ACMediaBrowser::getPointerFromId: couldn't get pointer with id " << _id << std::endl;
+			return 0;
+		}	
+		else
+			return p_attr_it->second;
 	}
 	else {// existing pointer
 		return p_attr_it->second;
@@ -1476,74 +1482,75 @@ ACPointer* ACMediaBrowser::getPointerFromId(int _id) {
 }
 
 ACPointer* ACMediaBrowser::getPointerFromIndex(int _index) {
-	ACPointers::iterator p_attr_it = mPointerAttributes.begin();
+	ACPointers::iterator p_attr_it = mPointers.begin();
 	for(int i=0; i<_index;i++)
 		p_attr_it++;
 
-	if (p_attr_it != mPointerAttributes.end())
+	if (p_attr_it != mPointers.end())
 		return p_attr_it->second;
 	else{
-		std::cerr << "ACMediaBrowser::getPointerFromIndex: wrong pointer index " << _index << "/" << mPointerAttributes.size() << std::endl;
+		std::cerr << "ACMediaBrowser::getPointerFromIndex: wrong pointer index " << _index << "/" << mPointers.size() << std::endl;
 		return 0;
 	}
 }
 
 void ACMediaBrowser::resetPointers() {
 	ACPointers::iterator it;
-	for (it=mPointerAttributes.begin();it!=mPointerAttributes.end();it++)
+	for (it=mPointers.begin();it!=mPointers.end();it++)
 		if (it->second!=0)
 			delete (it->second);
-	mPointerAttributes.clear();
+	
+	mPointers.clear();
 	mPointersActiveNumber = 0;
 	//CF this initializes the default mouse as first pointer by default for now, might be changed to none
-	mPointerAttributes.insert(mPointerAttributes.begin(),ACPointers::value_type(0,new ACPointer()));// MC GUI applications require at least 1 mouse pointer
-	mPointerAttributes.begin()->second->setText("0");
-	mPointersActiveNumber = 1;
-	std::cout << "ACMediaBrowser::resetPointers" << std::endl;
+	/*mPointers.insert(mPointers.begin(),ACPointers::value_type(0,new ACPointer()));// MC GUI applications require at least 1 mouse pointer
+	mPointers.begin()->second->setText("Mouse");
+	mPointers.begin()->second->setType(AC_POINTER_MOUSE);
+	mPointersActiveNumber = 1;*/
+	//std::cout << "ACMediaBrowser::resetPointers" << std::endl;
 }
 
-void ACMediaBrowser::addPointer(int _id) {
-	ACPointers::iterator it = mPointerAttributes.find(_id);
-	if (it ==  mPointerAttributes.end()){ //new pointer
+void ACMediaBrowser::addPointer(int _id,ACPointerType _pointerType) {
+	ACPointers::iterator p_iter = mPointers.find(_id);
+	if (p_iter ==  mPointers.end()){ //new pointer
 		// create the pointer
 		std::stringstream id_ss;
 		id_ss << _id;
-
-		ACPointer* p_temp = new ACPointer();
-		p_temp->setText(id_ss.str());
 
 		// temporarily, if new pointer, others might have died
 		//this->resetPointers();
 
 		// add it to the pointer list (at the end of the process since the pointer size is checked in the OSG view)
-		mPointerAttributes.insert(mPointerAttributes.end(),ACPointers::value_type(_id,p_temp));
-		//std::cout << "ACMediaBrowser::addPointer" << _id << "/" << mPointerAttributes.size() << std::endl;
+		mPointers.insert(mPointers.end(),ACPointers::value_type(_id,new ACPointer(id_ss.str(),_pointerType)));
+		//std::cout << "ACMediaBrowser::addPointer" << _id << "/" << mPointers.size() << std::endl;
 	}
 	else
 		std::cout << "ACMediaBrowser::addPointer: pointer of id " << _id << " already created" << std::endl;
 }
 
 void ACMediaBrowser::removePointer(int _id) {
-	ACPointers::iterator it = mPointerAttributes.find(_id);
-	if (it !=  mPointerAttributes.end()){ //existing
-		//CF do we need first to desactivate the closest node of the pointer to be removed, if in audiohover mode?
-		/*ACMediaNode closest = getMediaNode(it->second->closestNode());
-		if (closest.getActivity() == 2)
-			toggleSourceActivity(closest,0);*/
-		if (it->second!=0)
-			delete (it->second);
-		mPointerAttributes.erase(it);
+	ACPointers::iterator p_iter = mPointers.find(_id);
+	if (p_iter !=  mPointers.end()){ //existing*/
+		if (mLibrary->getSize()>0 && p_iter->second){
+			//CF we need first to desactivate the closest node of the pointer to be removed, if in audiohover mode
+			ACMediaNode closest = getMediaNode(p_iter->second->getClosestNode());
+			if (closest.getActivity() == 2)
+				toggleSourceActivity(closest);
+		}
+		if (p_iter->second)
+			delete p_iter->second;
+		mPointers.erase(p_iter);
 	}
+	this->mNeedsDisplay=true;
 }
 
-void ACMediaBrowser::cleanPointer(void) {
-	ACPointers::iterator it;
-	for (it=mPointerAttributes.begin();it!=mPointerAttributes.end();it++)
-		if (it->second!=0)
-			delete (it->second);
-	mPointerAttributes.clear();
+void ACMediaBrowser::addMousePointer(){
+	this->addPointer(-1, AC_POINTER_MOUSE);
 }
 
+void ACMediaBrowser::removeMousePointer(){
+	this->removePointer(-1);
+}		
 
 // CF prepareNodes ? (cf. OSG)
 // makes an ACMediaNode for each Media in the library

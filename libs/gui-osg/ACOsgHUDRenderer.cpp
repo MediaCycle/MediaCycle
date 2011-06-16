@@ -86,7 +86,20 @@ void ACOsgHUDRenderer::preparePointers(osgViewer::View* view) {
 	unsigned int n = media_cycle->getNumberOfPointers();
 
 	unsigned int prev_size =  pointer_renderer.size();
+	//std::cout << "ACOsgHUDRenderer::preparePointers n " << n << " prev_size " << prev_size << std::endl;
 
+	/*if(n == 1)
+	{
+		if (media_cycle->getPointerFromIndex(0)->getType() == AC_POINTER_MOUSE)
+			std::cout << "ACOsgHUDRenderer::preparePointers mouse yes"<<std::endl;
+		else
+			std::cout << "ACOsgHUDRenderer::preparePointers mouse no"<<std::endl;
+		
+	}	*/
+	if(prev_size == 1 || n==1)
+		pointer_group->removeChildren(0,pointer_group->getNumChildren());
+	
+	
 	if (pointer_renderer.size()>n) {
 
 		for (unsigned int i=n;i<pointer_renderer.size();i++) {
@@ -109,12 +122,16 @@ void ACOsgHUDRenderer::preparePointers(osgViewer::View* view) {
 				if(p){
 					std::string txt = p->getText();
 					pointer_renderer[i]->setText(media_cycle->getPointerFromIndex(i)->getText());
-					std::cout << "Pointer id " << i << " txt " <<  txt << std::endl;
-				}
+					//std::cout << "Pointer id " << i << " txt " <<  txt << std::endl;
+					pointer_renderer[i]->prepareNodes();
+					if( !((prev_size == 1 || n == 1) && p->getType() == AC_POINTER_MOUSE))
+						pointer_group->addChild(pointer_renderer[i]->getNode());
+					//if( ((prev_size == 1 || n == 1) && p->getType() == AC_POINTER_MOUSE))
+					//	pointer_group->removeChildren(0,pointer_group->getNumChildren());
+				}	
 				else
 					std::cerr << "ACOsgHUDRenderer::preparePointers: couldn't prepare pointer with index" << i << std::endl;
-				pointer_renderer[i]->prepareNodes();
-				pointer_group->addChild(pointer_renderer[i]->getNode());
+
 			}
 		}
 	}
@@ -149,6 +166,23 @@ void ACOsgHUDRenderer::updatePointers(osgViewer::View* view) {
 //Common
 void ACOsgHUDRenderer::updatePointers(int w, int h) {
 	
+	unsigned int n = media_cycle->getNumberOfPointers();
+	
+	unsigned int prev_size =  pointer_renderer.size();
+	
+	//std::cout << "ACOsgHUDRenderer::updatePointers n " << n << " prev_size " << prev_size << std::endl;
+	/*if(n == 1)
+	{
+		if (media_cycle->getPointerFromIndex(0)->getType() == AC_POINTER_MOUSE)
+			std::cout << "ACOsgHUDRenderer::updatePointers mouse yes"<<std::endl;
+		else
+			std::cout << "ACOsgHUDRenderer::updatePointers mouse no"<<std::endl;
+		
+	}	*/
+	
+	if(n!=prev_size)
+		this->preparePointers();
+
 	for (unsigned int i=0;i<pointer_renderer.size();i++) {
 		ACPointer* p =0;
 		p = media_cycle->getPointerFromIndex(i);
@@ -159,7 +193,7 @@ void ACOsgHUDRenderer::updatePointers(int w, int h) {
 			media_cycle_pointer_current_pos.y = (media_cycle_pointer_current_pos.y+1)/2*h;
 			//printf ("POINTER: %f %f\n", media_cycle_pointer_current_pos.x, media_cycle_pointer_current_pos.y);
 			pointer_renderer[i]->setPos(media_cycle_pointer_current_pos);
-			pointer_renderer[i]->updateNodes();
+			pointer_renderer[i]->updateNodes();	
 		}
 		else
 			std::cerr << "ACOsgHUDRenderer::updatePointers pointer at index " << i << " not available" << std::endl;

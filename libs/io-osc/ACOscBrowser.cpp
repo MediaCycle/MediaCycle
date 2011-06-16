@@ -167,8 +167,8 @@ int ACOscBrowser::process_mess(const char *path, const char *types, lo_arg **arg
 		
 		if(tag.find("/activated",0)!= string::npos)
 		{
-			//std::cout << "OSC message: '" << tag << "'" << std::endl;
-			media_cycle->resetPointers();//CF temp: hack, when /released messages aren't received
+			std::cout << "OSC message: '" << tag << "'" << std::endl;
+			//media_cycle->resetPointers();//CF temp: hack, when /released messages aren't received
 			media_cycle->addPointer(id);
 			//Ugly
 			//osg_view->getHUDRenderer()->preparePointers();
@@ -176,7 +176,8 @@ int ACOscBrowser::process_mess(const char *path, const char *types, lo_arg **arg
 		}
 		else if(tag.find("/released",0)!= string::npos)
 		{
-			//std::cout << "OSC message: '" << tag << "'" << std::endl;
+			std::cout << "OSC message: '" << tag << "'" << std::endl;
+			media_cycle->setAutoPlay(0);
 			media_cycle->removePointer(id);//CF hack
 			//Ugly
 			//osg_view->getHUDRenderer()->preparePointers();
@@ -184,8 +185,9 @@ int ACOscBrowser::process_mess(const char *path, const char *types, lo_arg **arg
 		}
 		else if(tag.find("/reset_pointers",0)!= string::npos)
 		{
-			//std::cout << "OSC message: '" << tag << "'" << std::endl;
-			media_cycle->resetPointers();
+			std::cout << "OSC message: '" << tag << "'" << std::endl;
+			media_cycle->setAutoPlay(0);
+			//media_cycle->resetPointers();
 			//Ugly
 			//osg_view->getHUDRenderer()->preparePointers();
 			media_cycle->setNeedsDisplay(true);
@@ -227,12 +229,13 @@ int ACOscBrowser::process_mess(const char *path, const char *types, lo_arg **arg
 				x = argv[0]->f;
 				y = argv[1]->f;
 				
-				//media_cycle->hoverCallback(x,y,id);
-				ACPoint p;
+				media_cycle->hoverWithPointerId(x,y,id);
+				/*ACPoint p;
 				p.x = x;
 				p.y = y;
 				p.z = 0;
-				media_cycle->getPointerFromId(id)->setCurrentPosition(p);
+				media_cycle->getPointerFromId(id)->setCurrentPosition(p);*/
+				
 				if (media_cycle && media_cycle->getLibrary()->getSize() > 0){
 					
 					////////////////Ugly
@@ -332,7 +335,7 @@ int ACOscBrowser::process_mess(const char *path, const char *types, lo_arg **arg
 		else if(tag.find("/muteall",0)!= string::npos)
 		{
 			//if(this->getMediaType()==MEDIA_TYPE_AUDIO)
-				media_cycle->resetPointers(); //CF hack dirty!
+			media_cycle->resetPointers(); //CF hack dirty!
 			media_cycle->muteAllSources();
 		}
 		else if(tag.find("/bpm",0)!= string::npos)

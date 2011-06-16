@@ -58,10 +58,6 @@ public:
 	void pick(osgViewer::View* view, const osgGA::GUIEventAdapter& ea, bool hover);
 
 protected:
-	void picked_object_callback(int);
-	void hover_object_callback(int);
-	void hover_callback(float, float, int p_id = 0);
-
 	MediaCycle *media_cycle;
 };
 

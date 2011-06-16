@@ -35,24 +35,6 @@
 #include "ACOsgBrowserEventHandler.h"
 #include <iostream>
 
-void ACOsgBrowserEventHandler::picked_object_callback(int pid) {
-	if (media_cycle == 0) return;
-	std::cout << "ACOsgBrowserEventHandler::picked_object_callback pid " << pid << std::endl;
-	media_cycle->pickedObjectCallback(pid);
-}
-
-void ACOsgBrowserEventHandler::hover_object_callback(int pid) {
-	if (media_cycle == 0) return;
-	std::cout << "ACOsgBrowserEventHandler::hover_object_callback pid " << pid << std::endl;
-	media_cycle->hoverObjectCallback(pid);
-}
-
-void ACOsgBrowserEventHandler::hover_callback(float xx, float yy, int p_id) {
-	if (media_cycle == 0) return;
-	//std::cout << "ACOsgBrowserEventHandler::hover_callback x=" << xx << " y=" << yy << std::endl;
-	media_cycle->hoverCallback(xx, yy, p_id);
-}
-
 bool ACOsgBrowserEventHandler::handle(const osgGA::GUIEventAdapter& ea,osgGA::GUIActionAdapter& aa)
 {
 	if (media_cycle == 0) return false;
@@ -95,6 +77,7 @@ bool ACOsgBrowserEventHandler::handle(const osgGA::GUIEventAdapter& ea,osgGA::GU
 			//XS : not used, was in RS code
 			//render_callback();
 			//std::cout << "Browser Event Handler FRAME" << std::endl;
+			//std::cout << "Mouse move X "<<ea.getX()<<" ["<<ea.getXmin()<<";"<<ea.getXmax()<<"] Y "<< ea.getY()<<" ["<<ea.getYmin()<<";"<<ea.getYmax()<<"]" << std::endl;
 			return false;
 		}
 		case(osgGA::GUIEventAdapter::MOVE):
@@ -103,6 +86,13 @@ bool ACOsgBrowserEventHandler::handle(const osgGA::GUIEventAdapter& ea,osgGA::GU
 			osgViewer::View* view = dynamic_cast<osgViewer::View*>(&aa);
 			if (view) pick(view, ea, true);
 			//std::cout << "Browser Event Handler MOVE" << std::endl;
+			//std::cout << "Mouse move X "<<ea.getX()<<" ["<<ea.getXmin()<<";"<<ea.getXmax()<<"] Y "<< ea.getY()<<" ["<<ea.getYmin()<<";"<<ea.getYmax()<<"]" << std::endl;
+			/*int border = 10; //px
+			if ( ea.getX()>ea.getXmax()-border || ea.getX()<ea.getXmin()+border || ea.getY()>ea.getYmax()-border || ea.getY()<ea.getYmin()+border )
+				std::cout << "Mouse out " << std::endl;
+			else
+				std::cout << "Mouse in " << std::endl;
+			*/
 			return false;
 		}
 		case(osgGA::GUIEventAdapter::DRAG):
@@ -179,8 +169,8 @@ void ACOsgBrowserEventHandler::pick(osgViewer::View* view, const osgGA::GUIEvent
 
 	if(hover) {
 		// SD TODO - OSG computeIntersections seems to crash often - avoid doing it while howering
-		//CF should we loop on the hover_callback for each pointer?
-		hover_callback(xx, yy, 0);
+		//CF should we loop on the hoverWithPointer for each pointer?
+		media_cycle->hoverWithPointerId(xx, yy, -1);//mouse
 		return;
 	}
 
@@ -202,8 +192,8 @@ void ACOsgBrowserEventHandler::pick(osgViewer::View* view, const osgGA::GUIEvent
 				{
 					ACRefId *rid = (ACRefId*)hitr->nodePath.back()->getUserData();
 
-					if(hover) hover_object_callback(rid->object_id);
-					else picked_object_callback(rid->object_id);
+					if(!hover)
+						media_cycle->pickedObjectCallback(rid->object_id);
 					break ; // only pick the first one
 				}
 
@@ -245,7 +235,7 @@ void ACImageBrowserOsgEventHandler::pick(osgViewer::View* view, const osgGA::GUI
 	osgUtil::IntersectionVisitor iv(picker);
 	view->getCamera()->accept(iv);
 
-	if(hover) hover_callback(x, y);
+	if(hover) media_cycle->hoverWithPointerId(x,y,-1);//mouse
 
 	if (picker->containsIntersections()) {
 
@@ -257,10 +247,8 @@ void ACImageBrowserOsgEventHandler::pick(osgViewer::View* view, const osgGA::GUI
 			if(intersection_iter->nodePath.back()->getUserData()) {
 
 				ACRefId *rid = (ACRefId*)intersection_iter->nodePath.back()->getUserData();
-				if(hover)
-					hover_object_callback(rid->object_id, x, y);
-				else
-					picked_object_callback(rid->object_id);
+				if(!hover)
+					media_cycle->pickedObjectCallback(rid->object_id);
 				break ; // only pick the first one
 			}
 		}

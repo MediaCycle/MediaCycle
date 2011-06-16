@@ -435,7 +435,7 @@ void AGOsgCompositeViewQt::mouseReleaseEvent( QMouseEvent* event )
 		{
 			int loop = media_cycle->getClickedNode();
 			std::cout << "node " << loop << " selected" << std::endl;
-			//media_cycle->hoverCallback(event->x(),event->y(),0);
+			//media_cycle->hoverWithPointerId(event->x(),event->y(),-1);//mouse
 			//int loop = media_cycle->getClosestNode();
 
 			if(loop >= 0)

@@ -1,7 +1,7 @@
 /**
  * @brief ACOsgCompositeViewQt.h
  * @author Christian Frisson
- * @date 29/05/2011
+ * @date 16/06/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -172,6 +172,7 @@ class ACOsgCompositeViewQt : public osgViewer::CompositeViewer, public QGLWidget
 		int controls_width;
 		int screen_width;
 		bool library_loaded;
+		bool mouseover;
 
 	//MediaBlender specific members:
 	private:

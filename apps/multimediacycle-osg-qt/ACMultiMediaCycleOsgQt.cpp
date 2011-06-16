@@ -151,8 +151,12 @@ ACMultiMediaCycleOsgQt::ACMultiMediaCycleOsgQt(QWidget *parent) : QMainWindow(pa
 	// This is required to populate the available file extensions list at startup
 	// until we clean mediacycle instead of deleting/creating it at every media type change.
 	ACMediaFactory::getInstance();
-	// Since it is time consuming, we might want to add a splash screen with progress bar at startup?	
-	
+	/*listSupportedMediaExtensions();
+	 #ifdef USE_DEBUG
+	 listUncheckedMediaExtensions();
+	 #endif //def USE_DEBUG*/
+	// Since it is time consuming, we might want to add a splash screen with progress bar at startup?
+
 	// Docked osg browser
 	ui.centralwidget->hide();
 	
@@ -972,36 +976,7 @@ void ACMultiMediaCycleOsgQt::configureDockWidgets(ACMediaType _media_type){
 void ACMultiMediaCycleOsgQt::loadDefaultConfig(ACMediaType _media_type, ACBrowserMode _browser_mode){
 	ACMediaType previous_media_type = this->media_type;
 
-	string smedia = "none";
-	switch (_media_type) {
-		case MEDIA_TYPE_3DMODEL:
-			#if defined (SUPPORT_3DMODEL)
-			smedia="3Dmodel";
-			#endif //defined (SUPPORT_3DMODEL)
-			break;
-		case MEDIA_TYPE_AUDIO:
-			#if defined (SUPPORT_AUDIO)
-			smedia="audio";
-			#endif //defined (SUPPORT_AUDIO)
-			break;
-		case MEDIA_TYPE_IMAGE:
-			#if defined (SUPPORT_IMAGE)
-			smedia="image";
-			#endif //defined (SUPPORT_IMAGE)
-			break;
-		case MEDIA_TYPE_VIDEO:
-			#if defined (SUPPORT_VIDEO)
-			smedia="video";
-			#endif //defined (SUPPORT_VIDEO)
-			break;
-		case MEDIA_TYPE_TEXT:
-			#if defined (SUPPORT_TEXT)
-			smedia="text";
-			#endif //defined (SUPPORT_TEXT)
-			break;	
-		default:
-			break;
-	}
+	string smedia = ACMediaFactory::getInstance().getLowCaseStringFromMediaType(_media_type);
 
 	if (smedia=="none"){
 		this->showError("need to define media type");

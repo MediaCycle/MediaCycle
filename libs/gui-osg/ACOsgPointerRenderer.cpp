@@ -1,7 +1,7 @@
 /**
  * @brief ACOsgPointerRenderer.cpp
- * @author Thierry Ravet
- * @date 27/05/2011
+ * @author Christian Frisson
+ * @date 16/06/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -34,8 +34,8 @@
 #include <osg/Version>
 using namespace osg;
 
-ACOsgPointerRenderer::ACOsgPointerRenderer() {
-
+ACOsgPointerRenderer::ACOsgPointerRenderer()
+{
 	pos.x = 0;
 	pos.y = 0;
 	pos.z = 0;
@@ -43,20 +43,21 @@ ACOsgPointerRenderer::ACOsgPointerRenderer() {
 	text_geode = 0;
 	pointer_geode = 0;
 	pointer_transform = 0;
+	font = 0;
+	text = 0;
 }
 
-ACOsgPointerRenderer::~ACOsgPointerRenderer() {
-
-	if 	(text_geode) { //ref_ptr//text_geode->unref();
-		text_geode=0; }
-	if 	(pointer_geode) { //ref_ptr//pointer_geode->unref();
-		pointer_geode=0; }
-	if  (pointer_transform) { //ref_ptr//pointer_transform->unref();
-		pointer_transform=0; }
+ACOsgPointerRenderer::~ACOsgPointerRenderer()
+{	
+	if (text_geode) text_geode=0;
+	if (pointer_geode) pointer_geode=0;
+	if (pointer_transform) pointer_transform=0;
+	if (font) font = 0;
+	if (text) text = 0;
 }
 
-void ACOsgPointerRenderer::textGeode() {
-
+void ACOsgPointerRenderer::textGeode()
+{
 	Vec4 textColor(0.9f,0.9f,0.9f,0.9f);
 	float textCharacterSize = 96.0f; // 10 pixels ?
 	#if OSG_MIN_VERSION_REQUIRED(2,9,11)
@@ -88,8 +89,8 @@ void ACOsgPointerRenderer::textGeode() {
 	text_geode->setCullingActive(false);
 }
 
-void ACOsgPointerRenderer::pointerGeode() {
-
+void ACOsgPointerRenderer::pointerGeode()
+{
 	Vec4 color(1.0f, 1.0f, 1.0f, 0.33f);
 	osg::ref_ptr<osg::Vec4Array> colors = new Vec4Array;
 	colors->push_back(color);
@@ -111,8 +112,8 @@ void ACOsgPointerRenderer::pointerGeode() {
 	pointer_geode->setCullingActive(false);
 }
 
-void ACOsgPointerRenderer::prepareNodes() {
-
+void ACOsgPointerRenderer::prepareNodes()
+{
 	textGeode();
 	pointerGeode();
 
@@ -123,11 +124,12 @@ void ACOsgPointerRenderer::prepareNodes() {
 
 	pointer_transform->setCullingActive(false);
 
-	media_node->addChild(pointer_transform);
+	if(media_node->getNumChildren() == 0)
+	   media_node->addChild(pointer_transform);
 }
 
-void ACOsgPointerRenderer::updateNodes(double ratio) {
-
+void ACOsgPointerRenderer::updateNodes(double ratio)
+{
 	Matrix T;
 	Matrix Trotate;
 

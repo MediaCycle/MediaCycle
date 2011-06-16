@@ -221,8 +221,8 @@ public:
 
 	// == callbacks
 	void pickedObjectCallback(int pid);
-	void hoverObjectCallback(int pid);
-	void hoverCallback(float xx, float yy, int p_id = 0);
+	void hoverWithPointerId(float xx, float yy, int p_id = -1);
+	void hoverWithPointerIndex(float xx, float yy, int p_index = 0);
 
 	// == NEW, replaces updateClusters and updateNeighborhoods
 	void updateDisplay(bool animate);

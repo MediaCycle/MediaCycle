@@ -1,11 +1,10 @@
 /*
- *  ACOsgBrowserRenderer.h
+ *  ACPointer.h
  *  MediaCycle
  *
- *  @author Stéphane Dupont
- *  @date 24/08/09
- *
- *  @copyright (c) 2009 – UMONS - Numediart
+ *  @author Christian Frisson
+ *  @date 29/05/2011
+ *  @copyright (c) 2011 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
  *  licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -33,35 +32,48 @@
  *
  */
 
-#ifndef __ACOSG_IMAGE_RENDERER_H__
-#define __ACOSG_IMAGE_RENDERER_H__
+#ifndef __ACPOINTER_H__
+#define __ACPOINTER_H__
 
-#if defined (SUPPORT_IMAGE) || defined (SUPPORT_VIDEO)
+#include <vector>
+#include <string>
+#include <map>
 
-#include "ACOsgMediaRenderer.h"
-#include "ACOpenCVInclude.h"
+#include "ACMediaNode.h"  // this contains ACPoint
 
-class ACOsgImageRenderer : public ACOsgMediaRenderer  {
-protected:
-	
-	static const int NCOLORS ;
-	osg::ref_ptr<osg::Vec4Array> colors;
-	osg::ref_ptr<osg::Vec4Array> colors2;
-	osg::ref_ptr<osg::Vec4Array> colors3;
-	
-	osg::ref_ptr<osg::Image> image_image;
-	osg::ref_ptr<osg::Geode> image_geode;
-	osg::ref_ptr<osg::Geode> border_geode;
-	osg::ref_ptr<osg::MatrixTransform> image_transform;
-	
-	void imageGeode(bool flip=false, float sizemul=1.0, float zoomin=1.0);
-	
-public:
-	ACOsgImageRenderer();
-	~ACOsgImageRenderer();	
-	void prepareNodes();
-	void updateNodes(double ratio=0.0);
+enum ACPointerType {
+	AC_POINTER_UNKNOWN=0,
+	AC_POINTER_MOUSE=1, //any other single-pointer device
+	AC_POINTER_FINGER=2, //multi-finger/touch devices such as trackpads
+	AC_POINTER_BODY=3, //using crowd-tracking devices such as the Kinect
 };
 
-#endif //defined (SUPPORT_IMAGE) || defined (SUPPORT_VIDEO)
-#endif
+class ACPointer {
+	
+private:
+	ACPoint currentPos;
+	std::string text;
+	double timeTag;
+	int closestNode;
+	ACPointerType pointerType;
+	
+public:
+	ACPointer(std::string _text="",ACPointerType _pointerType=AC_POINTER_UNKNOWN);
+	~ACPointer(){};
+	
+	void setCurrentPosition(ACPoint p);
+	ACPoint getCurrentPosition();
+	void setText(std::string t);
+	std::string getText();
+	double getTimeTag();
+	void resetTimeTag();
+	int getClosestNode();
+	void setClosestNode(int _closestNode);
+	ACPointerType getType();
+	void setType(ACPointerType _type);
+};
+
+//typedef vector<ACPointer> ACPointers;
+typedef std::map< int, ACPointer* > ACPointers;
+
+#endif //__ACPOINTER_H__

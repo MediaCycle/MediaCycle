@@ -195,9 +195,9 @@ bool ScribbleArea::event(QEvent *event)
 
 						// This does never seem to work on Ubuntu
 						QString mess = QString("/mediacycle/browser/") + QString().setNum(touchPoint.id()) + QString("/released");
-						/*if(oscDockWidget && oscDockWidget->getFeedbackHandler()){
+						if(oscDockWidget && oscDockWidget->getFeedbackHandler()){
 							lo_send(oscDockWidget->getFeedbackHandler()->getAddress(), mess.toStdString().c_str(), "");
-						}*/
+						}
 						std::cout << mess.toStdString() << std::endl;
 					}
 						break;

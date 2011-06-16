@@ -58,6 +58,7 @@ inline float ACRandom() { return ((float)rand()) / (float)((1LL<<31)-1L); }
 #include "ACPlugin.h"
 #include "ACUserLog.h"
 #include "ACMediaNode.h"  // this contains ACPoint
+#include "ACPointer.h"
 
 using namespace std;
 
@@ -111,34 +112,10 @@ struct ACLabel {
 	ACLabel() : isDisplayed(true) {}
 };
 
-class ACPointer {
-
-private:
-	ACPoint 	currentPos;
-	string		text;
-	double		timeTag;
-	int			closestNode;
-
-public:
-	ACPointer() : text(""),timeTag(getTime()),closestNode(-1){ currentPos.x = 0.0f; currentPos.y = 0.0f; currentPos.z = 0.0f; }
-	~ACPointer(){};
-
-	void setCurrentPosition(ACPoint p) { currentPos = p; }
-	ACPoint getCurrentPosition() { return currentPos; }
-	void setText(string t) { text = t; }
-	string getText() { return text; }
-	double getTimeTag() { return timeTag; }
-	void resetTimeTag() { timeTag = getTime(); }
-	int getClosestNode() { return closestNode; }
-	void setClosestNode(int _closestNode) { closestNode = _closestNode; }
-};
-
 // XS 110310 added this to make the transition towards tree instead of vector
 // could even be a class ?
 typedef vector<ACMediaNode> ACMediaNodes;
 typedef vector<ACLabel> ACLabels;
-//typedef vector<ACPointer> ACPointers;
-typedef std::map< int, ACPointer* > ACPointers;
 
 class ACMediaBrowser {
 
@@ -236,12 +213,16 @@ public:
 
 	// == Pointers
 	int getNumberOfPointers();
+	ACPointerType getPointerTypeFromIndex(int i);
+	ACPointerType getPointerTypeFromId(int i);	
 	ACPointer* getPointerFromIndex(int i); // for use when parsing pointers incrementally
 	ACPointer* getPointerFromId(int i); // for use when parsing pointers from the ID set by the input device
 	void resetPointers();
-	void addPointer(int p_id);
+	void addPointer(int p_id,ACPointerType _pointerType=AC_POINTER_UNKNOWN);
 	void removePointer(int p_id);
-	void cleanPointer();
+	void addMousePointer();
+	void removeMousePointer();
+
 	// == Labels
 	void setClickedLabel(int ilabel);
 	int getClickedLabel()					{return mClickedLabel; };
@@ -255,7 +236,8 @@ public:
 	// interaction with pointers
 	int setSourceCursor(int lid, int frame_pos);
 	int setCurrentFrame(int lid, int frame_pos);
-	int setHoverLoop(int lid, float mxx, float myy, int p_id = 0);
+	void hoverWithPointerId(float mxx, float myy, int p_id = -1);
+	void hoverWithPointerIndex(float mxx, float myy, int p_index = 0);
 
 	ACBrowserLayout getLayout();
 	void setLayout(ACBrowserLayout _layout);
@@ -263,7 +245,7 @@ public:
 	void setMode(ACBrowserMode _mode);
 
 	// Quick Browser
-	void setClosestNode(int loop_id, int p_index=0);
+	void setClosestNode(int loop_id, int p_index);
 	void setAutoPlay(int auto_play) { this->auto_play = auto_play; };
 
 	// sources - SD reintroduced 2009 aug 4
@@ -377,7 +359,7 @@ protected:
 	// XS TODO 1 generalize to tree
 	// XS TODO 2 make this vector of pointers
 	ACMediaNodes mLoopAttributes;
-	ACPointers   mPointerAttributes;
+	ACPointers   mPointers;
 	int mPointersActiveNumber;
 
 	int nbDisplayedLoops;

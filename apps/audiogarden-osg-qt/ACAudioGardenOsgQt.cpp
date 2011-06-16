@@ -738,7 +738,7 @@ int ACAudioGardenOsgQt::processOscMessage(const char *path, const char *types, l
 			x = argv[0]->f;
 			y = argv[1]->f;
 
-			media_cycle->hoverCallback(x,y,0);
+			media_cycle->hoverWithPointerId(x,y,-1);//mouse
 			int closest_node = media_cycle->getClosestNode();
 			float distance = ui.compositeOsgView->getBrowserRenderer()->getDistanceMouse()[closest_node];
 			if (osc_feedback)

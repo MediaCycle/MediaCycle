@@ -243,10 +243,10 @@ ACMediaFactory::ACMediaFactory(){
 	}
 	useAvailableFileExtensions();
 	//useKnownFileExtensions(); //TRY (but don't commit) this instead of the above if library extensions parsing doesn't work, for debugging
-	listSupportedMediaExtensions();
+	/*listSupportedMediaExtensions();
 	#ifdef USE_DEBUG
 	listUncheckedMediaExtensions();
-	#endif //def USE_DEBUG
+	#endif //def USE_DEBUG*/
 	
 }
 
@@ -376,6 +376,100 @@ ACMediaType ACMediaFactory::getMediaTypeFromExtension(std::string file_ext){
 	}
 	return (ACMediaType)(iter->second);
 }
+
+ACMediaType ACMediaFactory::guessMediaTypeFromString(std::string keyword){
+	boost::to_lower(keyword);
+	ACMediaType _type;
+	if(keyword == "")//hack to use "else if" between #ifdefs
+		_type = MEDIA_TYPE_NONE;
+	#if defined (SUPPORT_3DMODEL)
+	else if(keyword=="3dmodel")
+		_type = MEDIA_TYPE_3DMODEL;
+	#endif //defined (SUPPORT_3DMODEL)
+	#if defined (SUPPORT_AUDIO)
+	else if(keyword=="audio")
+		_type = MEDIA_TYPE_AUDIO;
+	#endif //defined (SUPPORT_AUDIO)
+	#if defined (SUPPORT_IMAGE)
+	else if(keyword=="image")
+		_type = MEDIA_TYPE_IMAGE;
+	#endif //defined (SUPPORT_IMAGE)
+	#if defined (SUPPORT_VIDEO)
+	else if(keyword=="video")
+		_type = MEDIA_TYPE_VIDEO;
+	#endif //defined (SUPPORT_VIDEO)
+	#if defined (SUPPORT_PDF)
+	else if(keyword=="pdf")
+		_type = MEDIA_TYPE_PDF;
+	#endif //defined (SUPPORT_PDF)
+	#if defined (SUPPORT_TEXT)
+	else if(keyword=="text")
+		_type = MEDIA_TYPE_TEXT;
+	#endif //defined (SUPPORT_TEXT)
+	else
+		_type = MEDIA_TYPE_NONE;
+	return _type;
+}
+
+std::string ACMediaFactory::getLowCaseStringFromMediaType(ACMediaType _media_type){
+	string smedia = "none";// or ""?
+	// use a std::map< ACMediaType, std::string >?
+	switch (_media_type) {
+		case MEDIA_TYPE_3DMODEL:
+			#if defined (SUPPORT_3DMODEL)
+			smedia="3Dmodel";
+			#endif //defined (SUPPORT_3DMODEL)
+			break;
+		case MEDIA_TYPE_AUDIO:
+			#if defined (SUPPORT_AUDIO)
+			smedia="audio";
+			#endif //defined (SUPPORT_AUDIO)
+			break;
+		case MEDIA_TYPE_IMAGE:
+			#if defined (SUPPORT_IMAGE)
+			smedia="image";
+			#endif //defined (SUPPORT_IMAGE)
+			break;
+		case MEDIA_TYPE_VIDEO:
+			#if defined (SUPPORT_VIDEO)
+			smedia="video";
+			#endif //defined (SUPPORT_VIDEO)
+			break;
+		case MEDIA_TYPE_TEXT:
+			#if defined (SUPPORT_TEXT)
+			smedia="text";
+			#endif //defined (SUPPORT_TEXT)
+			break;	
+		default:
+			break;
+	}	
+	return smedia;
+}	
+
+
+std::vector< std::string > ACMediaFactory::listAvailableMediaTypes(){
+	std::vector< std::string > _list;
+	// use a std::map< ACMediaType, std::string >?
+	#if defined (SUPPORT_3DMODEL)
+	_list.push_back("3Dmodel");
+	#endif //defined (SUPPORT_3DMODEL)
+	#if defined (SUPPORT_AUDIO)
+	_list.push_back("audio");
+	#endif //defined (SUPPORT_AUDIO)
+	#if defined (SUPPORT_IMAGE)
+	_list.push_back("image");
+	#endif //defined (SUPPORT_IMAGE)
+	#if defined (SUPPORT_TEXT)
+	_list.push_back("text");
+	#endif //defined (SUPPORT_TEXT)
+	#if defined (SUPPORT_PDF)
+	_list.push_back("pdf");
+	#endif //defined (SUPPORT_PDF)
+	#if defined (SUPPORT_VIDEO)
+	_list.push_back("video");
+	#endif //defined (SUPPORT_VIDEO)
+	return _list;	
+}	
 
 bool ACMediaFactory::isMediaTypeSegmentable(ACMediaType _media_type){
 	if(_media_type == MEDIA_TYPE_AUDIO || _media_type == MEDIA_TYPE_VIDEO)

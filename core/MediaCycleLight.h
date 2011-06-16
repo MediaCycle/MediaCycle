@@ -149,8 +149,8 @@ public:
 	int getClosestNode();
 	//
 	void pickedObjectCallback(int pid);
-	void hoverObjectCallback(int pid);
-	void hoverCallback(float x, float y, int p_id = 0);
+	void hoverWithPointerId(float xx, float yy, int p_id = -1);
+	void hoverWithPointerIndex(float xx, float yy, int p_index = 0);
 	void muteAllSources();
 	//
 	void* hasBrowser();
