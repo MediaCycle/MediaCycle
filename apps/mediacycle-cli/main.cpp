@@ -84,6 +84,7 @@ int processTcpMessageFromClient(MediaCycle *that, char* buffer, int l, char **bu
 		path = sbuffer.substr(bufpos1, bufpos2-bufpos1);
 		bufpos1 = bufpos2+1;
 		fullpath = path;
+		//uncomment to receive the files through tcp (unnecessary if the php website and mediacycle are running on the same host)
 		/*local_file = fopen(fullpath.c_str(),"wb");
 		fwrite((void*)(buffer+bufpos1), 1, l-bufpos1, local_file);
 		fclose(local_file);*/
