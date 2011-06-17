@@ -410,34 +410,33 @@ ACMediaType ACMediaFactory::guessMediaTypeFromString(std::string keyword){
 		_type = MEDIA_TYPE_NONE;
 	return _type;
 }
-
-std::string ACMediaFactory::getLowCaseStringFromMediaType(ACMediaType _media_type){
-	string smedia = "none";// or ""?
+std::string ACMediaFactory::getNormalCaseStringFromMediaType(ACMediaType _media_type){
+	string smedia = "None";// or ""?
 	// use a std::map< ACMediaType, std::string >?
 	switch (_media_type) {
 		case MEDIA_TYPE_3DMODEL:
 			#if defined (SUPPORT_3DMODEL)
-			smedia="3Dmodel";
+			smedia="3DModel";
 			#endif //defined (SUPPORT_3DMODEL)
 			break;
 		case MEDIA_TYPE_AUDIO:
 			#if defined (SUPPORT_AUDIO)
-			smedia="audio";
+			smedia="Audio";
 			#endif //defined (SUPPORT_AUDIO)
 			break;
 		case MEDIA_TYPE_IMAGE:
 			#if defined (SUPPORT_IMAGE)
-			smedia="image";
+			smedia="Image";
 			#endif //defined (SUPPORT_IMAGE)
 			break;
 		case MEDIA_TYPE_VIDEO:
 			#if defined (SUPPORT_VIDEO)
-			smedia="video";
+			smedia="Video";
 			#endif //defined (SUPPORT_VIDEO)
 			break;
 		case MEDIA_TYPE_TEXT:
 			#if defined (SUPPORT_TEXT)
-			smedia="text";
+			smedia="Text";
 			#endif //defined (SUPPORT_TEXT)
 			break;	
 		default:
@@ -446,6 +445,12 @@ std::string ACMediaFactory::getLowCaseStringFromMediaType(ACMediaType _media_typ
 	return smedia;
 }	
 
+std::string ACMediaFactory::getLowCaseStringFromMediaType(ACMediaType _media_type){
+	string smedia = "none";// or ""?
+	smedia = this->getNormalCaseStringFromMediaType(_media_type);
+	boost::to_lower(smedia);
+	return smedia;
+}	
 
 std::vector< std::string > ACMediaFactory::listAvailableMediaTypes(){
 	std::vector< std::string > _list;

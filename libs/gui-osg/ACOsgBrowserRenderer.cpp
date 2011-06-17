@@ -454,54 +454,55 @@ int ACOsgBrowserRenderer::computeScreenCoordinates(osgViewer::View* view, double
 			 printf ("POS: %f, %f, %f\n",p.x,p2.x,frac);
 			 }
 			 */
-
-			if (attribute.getChanged()) {
-				if (node_renderer[i]->getInitialized()) {
-					node_renderer[i]->setCurrentPos(node_renderer[i]->getViewPos());
+			if(node_renderer[i]){
+				if (attribute.getChanged()) {
+					if (node_renderer[i]->getInitialized()) {
+						node_renderer[i]->setCurrentPos(node_renderer[i]->getViewPos());
+					}
+					else {
+						node_renderer[i]->setCurrentPos(attribute.getCurrentPosition());
+						node_renderer[i]->setViewPos(attribute.getCurrentPosition());
+					}
+					node_renderer[i]->setNextPos(attribute.getNextPosition());
+					attribute.setChanged(0);
 				}
-				else {
-					node_renderer[i]->setCurrentPos(attribute.getCurrentPosition());
-					node_renderer[i]->setViewPos(attribute.getCurrentPosition());
+
+				const ACPoint &p = node_renderer[i]->getCurrentPos();
+				const ACPoint &p2 = node_renderer[i]->getNextPos();
+				double refTime = attribute.getNextTime();
+
+				frac = (t-refTime)/andur;
+				if (frac<1) {
+					//frac = CUB_FRAC(frac);
 				}
-				node_renderer[i]->setNextPos(attribute.getNextPosition());
-				attribute.setChanged(0);
-			}
+				frac = TI_CLAMP(frac, 0, 1);
 
-			const ACPoint &p = node_renderer[i]->getCurrentPos();
-			const ACPoint &p2 = node_renderer[i]->getNextPos();
-			double refTime = attribute.getNextTime();
+				omr = 1.0-frac;
+				x = omr*p.x + frac*p2.x;
+				y = omr*p.y + frac*p2.y;
+				z = 0;
 
-			frac = (t-refTime)/andur;
-			if (frac<1) {
-				//frac = CUB_FRAC(frac);
-			}
-			frac = TI_CLAMP(frac, 0, 1);
+				media_cycle_view_pos.x = x;
+				media_cycle_view_pos.y = y;
 
-			omr = 1.0-frac;
-			x = omr*p.x + frac*p2.x;
-			y = omr*p.y + frac*p2.y;
-			z = 0;
+				node_renderer[i]->setFrac(frac);
+				node_renderer[i]->setViewPos(media_cycle_view_pos);
+				//attribute.setViewPosition(media_cycle_view_pos);
 
-			media_cycle_view_pos.x = x;
-			media_cycle_view_pos.y = y;
+				modelPoint = Vec3(x,y,z);
+				screenPoint = modelPoint * VPM;
 
-			node_renderer[i]->setFrac(frac);
-			node_renderer[i]->setViewPos(media_cycle_view_pos);
-			//attribute.setViewPosition(media_cycle_view_pos);
+				// compute distance between mouse and media element in view
+				distance_mouse[i] = sqrt((screenPoint[0]-mx)*(screenPoint[0]-mx)+(screenPoint[1]-my)*(screenPoint[1]-my));
+				node_renderer[i]->setDistanceMouse(distance_mouse[i]);
+				if (media_cycle->getBrowser()->getLayout() == AC_LAYOUT_TYPE_NODELINK)
+					link_renderer[i]->setDistanceMouse(distance_mouse[i]);
 
-			modelPoint = Vec3(x,y,z);
-			screenPoint = modelPoint * VPM;
-
-			// compute distance between mouse and media element in view
-			distance_mouse[i] = sqrt((screenPoint[0]-mx)*(screenPoint[0]-mx)+(screenPoint[1]-my)*(screenPoint[1]-my));
-			node_renderer[i]->setDistanceMouse(distance_mouse[i]);
-			if (media_cycle->getBrowser()->getLayout() == AC_LAYOUT_TYPE_NODELINK)
-				link_renderer[i]->setDistanceMouse(distance_mouse[i]);
-
-			if (distance_mouse[i]<closest_distance) {
-				closest_distance = distance_mouse[i];
-				closest_node = i;
-			}
+				if (distance_mouse[i]<closest_distance) {
+					closest_distance = distance_mouse[i];
+					closest_node = i;
+				}
+			}	
 		}
 		media_cycle->setClosestNode(closest_node,p_index);
 	}

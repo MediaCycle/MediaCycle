@@ -34,7 +34,7 @@
  */
 
 // ----------- uncomment this to compute and visualize a slit scan
-//#define USE_SLIT_SCAN
+#define USE_SLIT_SCAN
 
 #include "ACOsgVideoTrackRenderer.h"
 #include "ACVideo.h"
@@ -427,10 +427,10 @@ ACOsgVideoTrackRenderer::ACOsgVideoTrackRenderer() : ACOsgTrackRenderer() {
 	Vec4 color3(0.4f, 0.4f, 0.4f, 1.0f);	
 	colors = new Vec4Array;
 	colors2 = new Vec4Array;
-	colors3 = new Vec4Array;
+	//colors3 = new Vec4Array;
 	colors->push_back(color);		
 	colors2->push_back(color2);	
-	colors3->push_back(color3);	
+	//colors3->push_back(color3);	
 	
 	frames_transform = new MatrixTransform();
 	frames_group = new Group();
@@ -816,25 +816,20 @@ void ACOsgVideoTrackRenderer::updateTracks(double ratio) {
 			playbackGeode();
 			track_node->addChild(playback_transform);
 			
-			//if (video_stream) delete video_stream;
+			//if (video_stream) video_stream = 0;//delete video_stream;// no, the browser needs it still
 			std::cout << "Getting video stream... ";
 			double video_stream_in = getTime();
-			ACVideo* tmp_vid = static_cast<ACVideo*>(media_cycle->getLibrary()->getMedia(media_index));
-			// data have been removed, read them again !
-			std::cout << "Extracting Data... ";
-			tmp_vid->extractData(tmp_vid->getFileName());
-
-			video_stream = tmp_vid->getStream();
+			video_stream = static_cast<ACVideo*>(media_cycle->getLibrary()->getMedia(media_index))->getStream();
 			std::cout << getTime()-video_stream_in << " sec." << std::endl;
 			
 			//if (summary_data) delete summary_data;
 			std::cout << "Getting summary data... ";
 			double summary_data_in = getTime();
-			summary_data = tmp_vid->getData();
+			summary_data = static_cast<ACVideo*>(media_cycle->getLibrary()->getMedia(media_index))->getData();
 			std::cout << getTime()-summary_data_in << " sec." << std::endl;
 			
 			//CF: dummy segments
-			/*if (media->getNumberOfSegments()==0){
+			if (media->getNumberOfSegments()==0){
                 std::cout << "Dummy segments" << std::endl;
 				for (int s=0;s<4;s++){
 					ACMedia* seg = ACMediaFactory::getInstance().create(media);
@@ -853,7 +848,7 @@ void ACOsgVideoTrackRenderer::updateTracks(double ratio) {
 				media->getSegment(3)->setEnd(media_end);
 			}
             else
-                std::cout << media->getNumberOfSegments() << " segments" << std::endl;*/
+                std::cout << media->getNumberOfSegments() << " segments" << std::endl;
 		}	
 	}
 

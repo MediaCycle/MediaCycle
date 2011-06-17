@@ -977,7 +977,8 @@ void ACMultiMediaCycleOsgQt::loadDefaultConfig(ACMediaType _media_type, ACBrowse
 	ACMediaType previous_media_type = this->media_type;
 
 	string smedia = ACMediaFactory::getInstance().getLowCaseStringFromMediaType(_media_type);
-
+	string sMedia = ACMediaFactory::getInstance().getNormalCaseStringFromMediaType(this->media_type);
+	
 	if (smedia=="none"){
 		this->showError("need to define media type");
 		return;
@@ -986,6 +987,31 @@ void ACMultiMediaCycleOsgQt::loadDefaultConfig(ACMediaType _media_type, ACBrowse
 		cerr <<"need to define media type"<< endl;
 		return;
 	}*/
+	
+	// Testing the presence of FFmpeg plugin for OSG before loading the default config
+	if(_media_type == MEDIA_TYPE_VIDEO){
+		osgDB::ReaderWriter* videoReaderWriter = 0;
+		osgDB::ReaderWriter* pdfReaderWriter = 0;
+		std::string osg_plugin_error ="";
+	
+		if(_media_type == MEDIA_TYPE_VIDEO){
+			videoReaderWriter = osgDB::Registry::instance()->getReaderWriterForExtension("ffmpeg");
+			osg_plugin_error = "The FFmpeg plugin for OpenSceneGraph is not present but necessary for interactive video navigation. Please install it or contact the MediaCycle team.";
+		}
+		if (_media_type == MEDIA_TYPE_VIDEO && !videoReaderWriter){
+			for (int d=0;d<dockWidgets.size();d++){
+				if (dockWidgets[d]->getClassName()=="ACMediaConfigDockWidgetQt"){
+					int comboIndex = ((ACMediaConfigDockWidgetQt*)dockWidgets[d])->getComboDefaultSettings()->findText(QString(sMedia.c_str()));
+					if (comboIndex > -1)
+						((ACMediaConfigDockWidgetQt*)dockWidgets[d])->getComboDefaultSettings()->setCurrentIndex(comboIndex);//stay with the current config without reloading
+					else
+						((ACMediaConfigDockWidgetQt*)dockWidgets[d])->getComboDefaultSettings()->setCurrentIndex(0);//display the startup combo value "-- Config --"
+				}	
+			}
+			this->showError(osg_plugin_error);
+			return;
+		}
+	}
 
 	if (this->media_cycle){
 		this->changeMediaType(_media_type);
@@ -1093,7 +1119,11 @@ void ACMultiMediaCycleOsgQt::comboDefaultSettingsChanged(){
 				cout << "editing configuration file" << endl;
 				this->on_actionEdit_Config_File_triggered(true);
 				return;
-			};
+			}
+			
+			if (mt == "-- Config --"){
+				return;
+			}
 
 			// default settings : find the right media
 			stringToMediaTypeConverter::const_iterator iterm = stringToMediaType.find(mt);
@@ -1103,7 +1133,11 @@ void ACMultiMediaCycleOsgQt::comboDefaultSettingsChanged(){
 			}
 			ACMediaType new_media_type = iterm->second;
 			cout << iterm->first << " - corresponding media type code : " << new_media_type << endl;
-			this->loadDefaultConfig(new_media_type);
+			
+			if (this->media_type != new_media_type)
+				this->loadDefaultConfig(new_media_type);
+			else
+				return;
 		}
 	}
 }
