@@ -2,7 +2,8 @@
  *  ACMediaUserLog.cpp
  *  MediaCycle
  *
- *  Created by St�phane Dupont, Damien Tardieu on 25/02/10.
+ *  @author Stéphane Dupont, Damien Tardieu
+ *  @date 25/02/10
  *  Filled by Christian Frisson on 12/03/2010
  *  XS 150310 removed ACUserNode, replaced by ACMediaNode (see separate file)
  *  @copyright (c) 2010 – UMONS - Numediart

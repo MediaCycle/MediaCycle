@@ -206,7 +206,7 @@ void ACPDF::extractData(string _fname){
 	}
 	else
 	{
-		// We’re looking for the most represented format
+		// We√ïre looking for the most represented format
 		int max=0;
 		for(sIt = sizes.begin();sIt != sizes.end(); ++sIt)
 		{

@@ -2,7 +2,8 @@
  *  AC3DModel.cpp
  *  MediaCycle
  *
- *  Created by St�phane Dupont on 09/09/10.
+ *  @author Stéphane Dupont
+ *  @date 09/09/10
  *  @copyright (c) 2010 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 

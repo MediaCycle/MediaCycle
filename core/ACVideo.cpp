@@ -82,7 +82,7 @@ ACVideo::~ACVideo() {
 				break;
 		}
 	}*/	
-// XS TODO  pas 2x (déjà ds ACMedia)	
+// XS TODO  pas 2x (d√©j√† ds ACMedia)	
 //	if (data) delete data;
 }
 

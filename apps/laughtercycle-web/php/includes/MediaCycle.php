@@ -1,8 +1,8 @@
 <?php
 /**
  * @brief MediaCycle.php
- * @author Stéphane Dupont
- * @date 05/04/2011
+ * @author Alexis Moinet
+ * @date 17/06/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -53,6 +53,9 @@ class MediaCycle {
         foreach ($params as $param) {
             $message .= " " . $param;
         }
+
+        // $message = $message . "\0"; // to be used in case the server expects it
+
         return $message;
     }
     /**
@@ -280,13 +283,20 @@ class SocketClient {
 
     public function send($data) {
         global $gOut;
-        $result = socket_write($this->socket, $data, strlen($data));
-        if (!$result || $result != strlen($data)) {
-            $gOut->nl("Socket : send error : $result/" . strlen($data));
-            return false;
-        }
 
-        return true;
+        while (true) { 
+            $result = socket_write($this->socket, $data, 1024);
+            if ($result === false) {
+                $gOut->nl("Socket : send error : " . socket_strerror(socket_last_error()) );
+                return false;
+            }
+
+            if ($result < strlen($data)) {
+                $data =  substr($data, $result);  
+            } else {
+                return true;
+            }
+        }
     }
 
     public function receive(&$answer) {

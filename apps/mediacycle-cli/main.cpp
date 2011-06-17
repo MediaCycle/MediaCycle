@@ -1,7 +1,7 @@
 /**
  * @brief main.cpp
- * @author Stéphane Dupont
- * @date 05/04/2011
+ * @author Alexis Moinet
+ * @date 17/06/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -58,10 +58,11 @@ int processTcpMessageFromClient(MediaCycle *that, char* buffer, int l, char **bu
 	int bufpos1, bufpos2;
 	int id, lid, k;
 	vector<int> ids;
-	
-	printf ("Processing TCP message of length %d: %s", l, buffer);
 		
 	sbuffer = string(buffer, l);
+
+	printf ("Processing TCP message of length %d: %s\n", l, sbuffer.c_str());
+	
 	bufpos1 = 0;
 	bufpos2 = sbuffer.find(" ");
 	subbuffer = sbuffer.substr(bufpos1, bufpos2-bufpos1);
@@ -83,9 +84,9 @@ int processTcpMessageFromClient(MediaCycle *that, char* buffer, int l, char **bu
 		path = sbuffer.substr(bufpos1, bufpos2-bufpos1);
 		bufpos1 = bufpos2+1;
 		fullpath = path;
-		local_file = fopen(fullpath.c_str(),"wb");
+		/*local_file = fopen(fullpath.c_str(),"wb");
 		fwrite((void*)(buffer+bufpos1), 1, l-bufpos1, local_file);
-		fclose(local_file);
+		fclose(local_file);*/
 		ret = that->importDirectory(fullpath, 0);
 		osstream << "addfile " << ret;
 		sbuffer_send = osstream.str();
