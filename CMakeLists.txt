@@ -1315,7 +1315,7 @@ IF (SUPPORT_VIDEO AND BUILD_APPS AND NOT OSG_FFMPEG_PLUGIN)
 	ELSE()
 		MESSAGE("In a terminal:\n   make osgdb_ffmpeg")
 	ENDIF()
-	MESSAGE("   sudo cp ${CMAKE_BINARY_DIR}/3rdParty/osgdb_ffmpeg/${BUILD_PREFIX}*osgdb_ffmpeg.* ${OSG_LIBRARY_DIR}/osgPlugins-${OPENSCENEGRAPH_VERSION}/")
+	MESSAGE("   sudo cp ${CMAKE_BINARY_DIR}/3rdparty/osgdb_ffmpeg/${BUILD_PREFIX}*osgdb_ffmpeg.* ${OSG_LIBRARY_DIR}/osgPlugins-${OPENSCENEGRAPH_VERSION}/")
 	MESSAGE(" -- WARNING! --\n\n")
 ENDIF()
 
