@@ -44,8 +44,22 @@ using namespace std;
 #include <boost/filesystem.hpp>
 namespace fs = boost::filesystem;
 
+vector<ACMediaType> mediaExtract(ACMediaType lMediaType){
+	unsigned int cpt=lMediaType;
+	unsigned int currMedia=1;
+	vector<ACMediaType> desc;
+	for (cpt=lMediaType;cpt>0;cpt>>=1,currMedia<<=1){
+		if (lMediaType&currMedia)
+		{
+			desc.push_back(currMedia);
+		}
+	}
+	return desc;
+}
+
 ACPluginManager::ACPluginManager() {
 	mActiveFeaturePlugins=new ACActiveFeaturesPlugins;
+	mActiveSegmentPlugins=new ACActiveSegmentPlugins;
 }
 
 ACPluginManager::ACPluginManager(const ACPluginManager& orig) {
@@ -54,7 +68,9 @@ ACPluginManager::ACPluginManager(const ACPluginManager& orig) {
 ACPluginManager::~ACPluginManager() {
 	this->clean();
 	delete mActiveFeaturePlugins;
+	delete mActiveSegmentPlugins;
 	mActiveFeaturePlugins=NULL;
+	mActiveSegmentPlugins=NULL;
 }
 
 /*
@@ -78,6 +94,7 @@ int ACPluginManager::addLibrary(std::string aPluginLibraryPath) {
 	
     mPluginLibrary.push_back(acpl);	
 	this->mActiveFeaturePlugins->update(mPluginLibrary);
+	this->mActiveSegmentPlugins->update(mPluginLibrary);
 	
 
     return 1;
@@ -105,6 +122,7 @@ int ACPluginManager::removeLibrary(std::string _lpath) {
 		return -1;
 	}	
 	this->mActiveFeaturePlugins->update(mPluginLibrary);
+	this->mActiveSegmentPlugins->update(mPluginLibrary);
     return 1;
 }
 
@@ -117,6 +135,7 @@ bool ACPluginManager::removePluginFromLibrary(std::string _plugin_name, std::str
 		}
 	}	
 	this->mActiveFeaturePlugins->update(mPluginLibrary);
+	this->mActiveSegmentPlugins->update(mPluginLibrary);
 	return found_plugin;
 }
 
@@ -136,6 +155,7 @@ std::vector<std::string> ACPluginManager::getListOfPlugins(){
 int ACPluginManager::clean() {
 	
 	this->mActiveFeaturePlugins->clean();
+	this->mActiveSegmentPlugins->clean();
 	vector<ACPluginLibrary *> ::iterator iter;
 	for (iter = this->mPluginLibrary.begin(); iter != this->mPluginLibrary.end(); iter++) {
 		delete *iter; // this will delete plugins from each library too
@@ -181,7 +201,12 @@ void ACPluginManager::dump() {
     }
 }
 
-
+int ACPluginManager::getFeaturesPluginsSize(ACMediaType MediaType){
+	return this->mActiveFeaturePlugins->getSize(MediaType);
+}
+int ACPluginManager::getSegmentPluginsSize(ACMediaType MediaType){
+	return this->mActiveSegmentPlugins->getSize(MediaType);
+}
 /*
  * ACPluginLibrary implementation
  */
@@ -274,10 +299,11 @@ void ACPluginLibrary::dump() {
     }
 }
 
+
 //ACActiveFeaturesPlugins implementation
 
 ACActiveFeaturesPlugins::ACActiveFeaturesPlugins(){
-
+	
 }
 
 
@@ -286,9 +312,10 @@ ACActiveFeaturesPlugins::ACActiveFeaturesPlugins(vector<ACPluginLibrary *> Plugi
 	this->update(PluginLibrary);
 }
 
-ACActiveFeaturesPlugins::~ACActiveFeaturesPlugins(){
-	this->clean();
-}
+//ACActiveFeaturesPlugins::~ACActiveFeaturesPlugins(){
+//	this->clean();
+//}
+/*
 int ACActiveFeaturesPlugins::clean(){
 	for (map<ACMediaType,std::vector<ACFeaturesPlugin *> > ::iterator iter_map = this->mCurrFeaturePlugin.begin(); iter_map != this->mCurrFeaturePlugin.end(); iter_map++) {
 		for (vector<ACFeaturesPlugin *> ::iterator iter_vec = iter_map->second.begin(); iter_vec != (*iter_map).second.end(); iter_vec++) {
@@ -298,7 +325,7 @@ int ACActiveFeaturesPlugins::clean(){
 	}
 	this->mCurrFeaturePlugin.clear(); // to clean
 	
-
+	
 }
 int ACActiveFeaturesPlugins::remove(ACPlugin *pPlugin){
 	ACMediaType mediaType =pPlugin->getMediaType();
@@ -355,14 +382,37 @@ int ACActiveFeaturesPlugins::update(vector<ACPluginLibrary *> PluginLibrary){
 	this->log();
 	return 1;
 }
+ 
+int ACActiveFeaturesPlugins::getSize(ACMediaType MediaType){	
+	return mCurrFeaturePlugin[MediaType].size();
+}
+
+vector<string> ACActiveFeaturesPlugins::getName(ACMediaType MediaType)
+{
+	vector<string> names;
+	for (vector<ACFeaturesPlugin *> ::iterator iter_vec = mCurrFeaturePlugin[MediaType].begin(); iter_vec != mCurrFeaturePlugin[MediaType].end(); iter_vec++) {
+		names.push_back((*iter_vec)->getName());
+	}
+	
+}
+void ACActiveFeaturesPlugins::log()
+{
+	for (map<ACMediaType,std::vector<ACFeaturesPlugin *> > ::iterator iter_map = this->mCurrFeaturePlugin.begin(); iter_map != this->mCurrFeaturePlugin.end(); iter_map++) {
+		for (vector<ACFeaturesPlugin *> ::iterator iter_vec = iter_map->second.begin(); iter_vec != (*iter_map).second.end(); iter_vec++) {
+			cout << "active plugin for type media" <<"\t"<<(*iter_vec)->getName() <<"\n";
+		}
+	}
+	
+} 
+ */
 
 vector<ACMediaFeatures*> ACActiveFeaturesPlugins::calculate(std::string aFileName, bool _save_timed_feat){
-
+	
 	//first step identify the mediatype
 	string extension = fs::extension(aFileName);
 	ACMediaType fileMediaType = ACMediaFactory::getInstance().getMediaTypeFromExtension(extension);
 	vector<ACMediaFeatures*> output;
-	for (vector<ACFeaturesPlugin *> ::iterator iter_vec = mCurrFeaturePlugin[fileMediaType].begin(); iter_vec != mCurrFeaturePlugin[fileMediaType].end(); iter_vec++) {
+	for (vector<ACFeaturesPlugin *> ::iterator iter_vec = mCurrPlugin[fileMediaType].begin(); iter_vec != mCurrPlugin[fileMediaType].end(); iter_vec++) {
 		ACFeaturesPlugin* localPlugin=(*iter_vec);
 		vector<ACMediaFeatures*> afv;
 		if (localPlugin!=NULL)
@@ -386,7 +436,7 @@ vector<ACMediaFeatures*> ACActiveFeaturesPlugins::calculate(std::string aFileNam
 vector<ACMediaFeatures*> ACActiveFeaturesPlugins::calculate(ACMediaData* aData, ACMedia* theMedia, bool _save_timed_feat){
 	ACMediaType mediaType=theMedia->getMediaType();
 	vector<ACMediaFeatures*> output;
-	for (vector<ACFeaturesPlugin *> ::iterator iter_vec = mCurrFeaturePlugin[mediaType].begin(); iter_vec != mCurrFeaturePlugin[mediaType].end(); iter_vec++) {
+	for (vector<ACFeaturesPlugin *> ::iterator iter_vec = mCurrPlugin[mediaType].begin(); iter_vec != mCurrPlugin[mediaType].end(); iter_vec++) {
 		ACFeaturesPlugin* localPlugin=(*iter_vec);
 		vector<ACMediaFeatures*> afv;
 		if (localPlugin!=NULL)
@@ -404,28 +454,199 @@ vector<ACMediaFeatures*> ACActiveFeaturesPlugins::calculate(ACMediaData* aData, 
 		}
 	}
 	return output;
+	
+}
+
+
+ACMediaTimedFeature*  ACActiveFeaturesPlugins::getTimedFeatures(ACMediaType mediaType){
+	ACMediaTimedFeature* output = 0;
+	vector<ACFeaturesPlugin *> ::iterator iter_vec = mCurrPlugin[mediaType].begin();
+	if (iter_vec != mCurrPlugin[mediaType].end()){
+		ACFeaturesPlugin* localPlugin=(*iter_vec);
+		if (localPlugin!=NULL)
+			output = localPlugin->getTimedFeatures();
+		else {
+			cerr << "<ACActiveFeaturesPlugins::getTimedFeatures> failed plugin access failed "<< localPlugin->getName() << endl;
+		}
+		if(output!=NULL){
+			iter_vec++;
+			for (; iter_vec != mCurrPlugin[mediaType].end(); iter_vec++){
+				ACFeaturesPlugin* localPlugin=(*iter_vec);
+				if (localPlugin!=NULL)
+					output->appendTimedFeature( localPlugin->getTimedFeatures());
+				else {
+					cerr << "<ACActiveFeaturesPlugins::getTimedFeatures> failed plugin access failed "<< localPlugin->getName() << endl;
+				}
+			}
+		}
+	}
+	return output;
+}
+
+
+
+
+
+//ACActivePlugins implementation
+template <typename T>
+ACActivePlugins<T>::ACActivePlugins(){
 
 }
 
 
-int ACActiveFeaturesPlugins::getSize(ACMediaType MediaType){	
-	return mCurrFeaturePlugin[MediaType].size();
+template <typename T>
+ACActivePlugins<T>::ACActivePlugins(vector<ACPluginLibrary *> PluginLibrary){
+	this->update(PluginLibrary);
+}
+template <typename T>
+ACActivePlugins<T>::~ACActivePlugins(){
+	this->clean();
+}
+template <typename T>
+int ACActivePlugins<T>::clean(){
+	for (typename map<ACMediaType,std::vector<T*> >::iterator iter_map = this->mCurrPlugin.begin(); iter_map != this->mCurrPlugin.end(); iter_map++) {
+		for (typename vector<T *> ::iterator iter_vec = iter_map->second.begin(); iter_vec != (*iter_map).second.end(); iter_vec++) {
+			*iter_vec=NULL; // this does'nt delete plugins from each library too. We just delete the reference			
+		}
+		iter_map->second.clear();		//to clean
+	}
+	this->mCurrPlugin.clear(); // to clean
 }
 
-vector<string> ACActiveFeaturesPlugins::getName(ACMediaType MediaType)
+template <typename T>
+int ACActivePlugins<T>::remove(ACPlugin *pPlugin){
+	vector<ACMediaType> mediaTypes=mediaExtract(pPlugin->getMediaType());	
+	for (vector<ACMediaType>::iterator mediaType=mediaTypes.begin();mediaType != mediaTypes.end(); mediaType++){
+		for (typename vector<T *> ::iterator iter_vec = mCurrPlugin[*mediaType].begin(); iter_vec != mCurrPlugin[*mediaType].end(); iter_vec++) {
+			if ( (*iter_vec)==pPlugin){
+				mCurrPlugin[*mediaType].erase(iter_vec);
+				if (mCurrPlugin[*mediaType].empty())
+					mCurrPlugin.erase(*mediaType);
+				//return 1;
+			}
+		}
+	}
+	return 1;
+}
+template <typename T>
+int ACActivePlugins<T>::remove(ACPluginLibrary *PluginLibrary){	
+    std::vector<ACPlugin *> plugins= PluginLibrary->getPlugins();
+	for (std::vector<ACPlugin *>::iterator iter=plugins.begin();iter!= plugins.end();iter++)
+		this->remove(*iter);
+	return 1;
+}
+//impossible to add a plugin that is already referenced in the map
+template <typename T>
+int ACActivePlugins<T>::add(ACPlugin *pPlugin){	
+	T *lPlugin=dynamic_cast<T*> (pPlugin);
+	if (lPlugin==NULL)
+		return 0;
+	vector<ACMediaType> mediaTypes=mediaExtract(pPlugin->getMediaType());	
+	for (vector<ACMediaType>::iterator mediaType=mediaTypes.begin();mediaType != mediaTypes.end(); mediaType++){
+		
+		if (pPlugin->mediaTypeSuitable(*mediaType)){
+			for (typename vector<T *> ::iterator iter_vec = mCurrPlugin[*mediaType].begin(); iter_vec != mCurrPlugin[*mediaType].end(); iter_vec++) {
+				if ( (*iter_vec)==lPlugin){
+					//this plugin is already referenced in the container
+					return 0;
+				}
+			}
+			mCurrPlugin[*mediaType].push_back(lPlugin);
+		}
+	}
+	return 1;
+}
+
+template <typename T>
+int ACActivePlugins<T>::add(ACPluginLibrary *PluginLibrary){
+    vector<ACPlugin *> plugins= PluginLibrary->getPlugins();
+	for (std::vector<ACPlugin *>::iterator iter=plugins.begin();iter!= plugins.end();iter++)
+		this->add(*iter);
+	return 1;
+	
+}
+
+template <typename T>
+int ACActivePlugins<T>::update(vector<ACPluginLibrary *> PluginLibrary){
+	
+	this->clean();
+	for (vector<ACPluginLibrary *>::iterator iter =PluginLibrary.begin();iter!=PluginLibrary.end();iter++)
+		this->add(*iter);
+	this->log();
+	return 1;
+}
+
+template <typename T>
+int ACActivePlugins<T>::getSize(ACMediaType MediaType){	
+	return mCurrPlugin[MediaType].size();
+}
+
+template <typename T>
+vector<string> ACActivePlugins<T>::getName(ACMediaType MediaType)
 {
 	vector<string> names;
-	for (vector<ACFeaturesPlugin *> ::iterator iter_vec = mCurrFeaturePlugin[MediaType].begin(); iter_vec != mCurrFeaturePlugin[MediaType].end(); iter_vec++) {
-		names.push_back((*iter_vec)->getName());
+	for (typename vector<T *> ::iterator iter_vec = mCurrPlugin[MediaType].begin(); iter_vec != mCurrPlugin[MediaType].end(); iter_vec++) {
+		names.push_back(((ACPlugin*)(*iter_vec))->getName());
 	}
 	
 }
-void ACActiveFeaturesPlugins::log()
+template <typename T>
+void ACActivePlugins<T>::log()
 {
-	for (map<ACMediaType,std::vector<ACFeaturesPlugin *> > ::iterator iter_map = this->mCurrFeaturePlugin.begin(); iter_map != this->mCurrFeaturePlugin.end(); iter_map++) {
-		for (vector<ACFeaturesPlugin *> ::iterator iter_vec = iter_map->second.begin(); iter_vec != (*iter_map).second.end(); iter_vec++) {
-			cout << "active plugin for type media" <<"\t"<<(*iter_vec)->getName() <<"\n";
+	for (typename map<ACMediaType,std::vector<T *> > ::iterator iter_map = this->mCurrPlugin.begin(); iter_map != this->mCurrPlugin.end(); iter_map++) {
+		for (typename vector<T *> ::iterator iter_vec = iter_map->second.begin(); iter_vec != (*iter_map).second.end(); iter_vec++) {
+			cout << "active plugin for type media" <<"\t"<<((ACPlugin*)(*iter_vec))->getName() <<"\n";
 		}
 	}
 	
+}
+
+
+ACActiveSegmentPlugins::ACActiveSegmentPlugins(std::vector<ACPluginLibrary *> PluginLibrary){
+	this->update(PluginLibrary);
+}
+ACActiveSegmentPlugins::ACActiveSegmentPlugins(){
+}
+
+std::vector<ACMedia*>  ACActiveSegmentPlugins::segment(ACMediaTimedFeature *ft,ACMedia* theMedia){
+
+	bool segment_ok; //TR TODO what's the use of it? 
+	std::vector<ACMedia*> segments;
+	ACMediaType mediaType=theMedia->getMediaType();
+	for (vector<ACSegmentationPlugin *> ::iterator iter_vec = mCurrPlugin[mediaType].begin(); iter_vec != mCurrPlugin[mediaType].end(); iter_vec++) {
+		ACSegmentationPlugin* localPlugin=(*iter_vec);
+		vector<ACMedia*> afv = localPlugin->segment(ft, theMedia);
+		if (afv.size()==0){
+			segment_ok = 0;
+			cerr << "<ACMedia::segment> failed importing segments from plugin: " <<  localPlugin->getName() << endl;
+		}
+		else {
+			for	(unsigned int Iafv=0; Iafv<afv.size(); Iafv++){
+				segments.push_back(afv[Iafv]);
+			}
+			segment_ok = 1;
+		}
+	}
+	return segments;
+}
+std::vector<ACMedia*>  ACActiveSegmentPlugins::segment(ACMediaData* aData,ACMedia* theMedia){
+	
+	bool segment_ok; //TR TODO what's the use of it? 
+	std::vector<ACMedia*> segments;
+	ACMediaType mediaType=theMedia->getMediaType();
+	for (vector<ACSegmentationPlugin *> ::iterator iter_vec = mCurrPlugin[mediaType].begin(); iter_vec != mCurrPlugin[mediaType].end(); iter_vec++) {
+		ACSegmentationPlugin* localPlugin=(*iter_vec);
+		vector<ACMedia*> afv = localPlugin->segment(aData, theMedia);
+		if (afv.size()==0){
+			segment_ok = 0;
+			cerr << "<ACMedia::segment> failed importing segments from plugin: " <<  localPlugin->getName() << endl;
+		}
+		else {
+			for	(unsigned int Iafv=0; Iafv<afv.size(); Iafv++){
+				segments.push_back(afv[Iafv]);
+			}
+			segment_ok = 1;
+		}
+	}
+	return segments;
 }

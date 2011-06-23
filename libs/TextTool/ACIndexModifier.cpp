@@ -44,11 +44,11 @@ ACIndexModifier::ACIndexModifier(const char* dirName, Analyzer* analyzer, bool c
 
 
 ACIndexModifier::~ACIndexModifier(void){
-	if (open) {
-		close();
-	}
-	if (directory!=NULL)
-		_CLDELETE(directory);
+//	if (open) {
+//		close();
+//	}
+//	if (directory!=NULL)
+//		_CLDELETE(directory);
 }
 
 #ifdef OLD_CLUCENE

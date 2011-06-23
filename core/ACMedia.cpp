@@ -53,6 +53,8 @@ void ACMedia::init() {
 	start = -1;
 	end = -1;
 	features_vectors.resize(0);
+	preproc_features_vectors.resize(0);
+	
 //	persistent_data = false;
 	//features_saved_xml = false;
 }
@@ -655,11 +657,11 @@ int ACMedia::segment(ACPluginManager *acpl, bool _saved_timed_features ) {
 	// then features_plugins[i]->segment() does not call the right segment method...
 	// unless we make plugin a virtual class ?
 	ACMediaTimedFeature* ft_from_disk = 0;
-	
+	vector<ACMedia*> afv;
 	if (_saved_timed_features) {
-		for (int i=0;i<acpl->getSize();i++) {
+		/*for (int i=0;i<acpl->getSize();i++) {
 			for (int j=0;j<acpl->getPluginLibrary(i)->getSize();j++) {
-				if ( acpl->getPluginLibrary(i)->getPlugin(j)->getMediaType() == this->getType()){
+				if ( acpl->getPluginLibrary(i)->getPlugin(j)->mediaTypeSuitable(this->getType())){
 					if ( acpl->getPluginLibrary(i)->getPlugin(j)->implementsPluginType(PLUGIN_TYPE_FEATURES)) {
 						cout << "Collecting saved features using plugin : " << acpl->getPluginLibrary(i)->getPlugin(j)->getName() << std::endl;
 
@@ -687,15 +689,16 @@ int ACMedia::segment(ACPluginManager *acpl, bool _saved_timed_features ) {
 					}
 				}
 			}
-		}
 		
+		}*/
+		ft_from_disk=acpl->getFeaturesPlugins()->getTimedFeatures(this->getType());
 		// DEBUG
 		if(ft_from_disk)
 			ft_from_disk->dump();
 		
 		// should not use all segmentation plugins -- choose one using menu !!	
 		// XS TODO: check that ft_from_disk is not empty
-		for (int i=0;i<acpl->getSize();i++) {
+		/*for (int i=0;i<acpl->getSize();i++) {
 			for (int j=0;j<acpl->getPluginLibrary(i)->getSize();j++) {
 				if (acpl->getPluginLibrary(i)->getPlugin(j)->implementsPluginType(PLUGIN_TYPE_SEGMENTATION)) {
 					cout << "Segmenting features using plugin : " << acpl->getPluginLibrary(i)->getPlugin(j)->getName() << std::endl;
@@ -714,14 +717,15 @@ int ACMedia::segment(ACPluginManager *acpl, bool _saved_timed_features ) {
 					}
 				}
 			}
-		}
+		}*/
+		afv=acpl->getSegmentPlugins()->segment(ft_from_disk,this);
 	}
 	
 	// XS TODO change me!!
 	// this is very spefic to the audio segmentation plugin...
 	// i.e., not _saved_timed_features		
 	else {
-		for (int i=0;i<acpl->getSize();i++) {
+		/*for (int i=0;i<acpl->getSize();i++) {
 			for (int j=0;j<acpl->getPluginLibrary(i)->getSize();j++) {
 				if (acpl->getPluginLibrary(i)->getPlugin(j)->implementsPluginType(PLUGIN_TYPE_SEGMENTATION)) {
 					segmentation_plugins_count ++;
@@ -740,7 +744,13 @@ int ACMedia::segment(ACPluginManager *acpl, bool _saved_timed_features ) {
 					}
 				}
 			}
-		}
+		 }*/
+		afv=acpl->getSegmentPlugins()->segment(this->getMediaData(), this);
+		
+		
+	}
+	for (unsigned int Iafv=0; Iafv<afv.size(); Iafv++){
+		this->addSegment(afv[Iafv]);
 	}
 	return segment_ok;
 }

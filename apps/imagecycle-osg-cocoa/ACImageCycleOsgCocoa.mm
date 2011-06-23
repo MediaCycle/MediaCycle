@@ -135,7 +135,7 @@
 		if (acpl) {
 			for (int i=0;i<acpl->getSize();i++) {
 				for (int j=0;j<acpl->getPluginLibrary(i)->getSize();j++) {
-					if (acpl->getPluginLibrary(i)->getPlugin(j)->implementsPluginType(PLUGIN_TYPE_FEATURES) && acpl->getPluginLibrary(i)->getPlugin(j)->getMediaType() == MEDIA_TYPE_IMAGE) {
+					if (acpl->getPluginLibrary(i)->getPlugin(j)->implementsPluginType(PLUGIN_TYPE_FEATURES) && acpl->getPluginLibrary(i)->getPlugin(j)->mediaTypeSuitable(MEDIA_TYPE_IMAGE) ) {
 						std::cout << "Image feature extraction: " << acpl->getPluginLibrary(i)->getPlugin(j)->getName() << std::endl;
 						featureCount++;
 						//CF yuk!

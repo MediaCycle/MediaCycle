@@ -1,9 +1,9 @@
 /*
- *  ACCosKMeansPlugin.cpp
+ *  ACSparseEuclideanKMeansPlugin.cpp
  *  MediaCycle
  *
- *  @author Thierry Ravet
- *  @date 20/10/10
+ *  @author Ravet Thierry
+ *  @date 11/10/2010
  *  @copyright (c) 2010 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
@@ -32,25 +32,21 @@
  *
  */
 
-
-#include "ACCosKMeansPlugin.h"
+#include "ACSparseEuclideanKMeansPlugin.h"
 #include "Armadillo-utils.h"
 
-#include "ACCosDistance.h"
-#include "time.h"
+#include "ACEuclideanDistance.h"
 
-
-
-ACCosKMeansPlugin::ACCosKMeansPlugin() : ACKMeansPlugin() {
-    this->mName = "ACCosKMeans";
-    this->mDescription = "Clustering with Cos Distance";
+ACSparseEuclideanKMeansPlugin::ACSparseEuclideanKMeansPlugin() : ACSparseKMeansPlugin() {
+    this->mName = "ACSparseEuclideanKMeans";
+    this->mDescription = "Clustering with Euclidean Distance";
 }
 
-ACCosKMeansPlugin::~ACCosKMeansPlugin() {
+ACSparseEuclideanKMeansPlugin::~ACSparseEuclideanKMeansPlugin() {
 }
 
 
-double ACCosKMeansPlugin::compute_distance(vector<ACMediaFeatures*> &obj1, vector<ACMediaFeatures*> &obj2, const vector<float> &weights, bool inverse_features)
+double ACSparseEuclideanKMeansPlugin::compute_distance(vector<ACMediaFeatures*> &obj1, vector<ACMediaFeatures*> &obj2, const vector<float> &weights, bool inverse_features)
 {
 	
 	assert(obj1.size() == obj2.size() && obj1.size() == weights.size());
@@ -59,48 +55,36 @@ double ACCosKMeansPlugin::compute_distance(vector<ACMediaFeatures*> &obj1, vecto
 	double dis = 0.0;
 	
 	for (int f=0; f<feature_count; f++) {
-		ACCosDistance* E = new ACCosDistance (obj1[f], obj2[f]);
-		dis += (E->distance()) * (inverse_features?(1.0-weights[f]):weights[f]);
+		ACEuclideanDistance* E = new ACEuclideanDistance (obj1[f], obj2[f]);
+		double tempDist=E->distance();
+		dis += tempDist*tempDist * (inverse_features?(1.0-weights[f]):weights[f]);
 		delete E;
 	}
-	//dis = sqrt(dis);
+	dis = sqrt(dis);
 	
 	return dis;
 }
-double ACCosKMeansPlugin::compute_distance(vector<ACMediaFeatures*> &obj1, const vector<vector <float> > &obj2, const vector<float> &weights, bool inverse_features)
+double ACSparseEuclideanKMeansPlugin::compute_distance(vector<ACMediaFeatures*> &obj1, const vector<vector <float> > &obj2, const vector<float> &weights, bool inverse_features)
 {
-	
-	
-	
 	assert(obj1.size() == obj2.size() && obj1.size() == weights.size());
 	int feature_count = obj1.size();
 	
-	double dis = 0.0;	
+	double dis = 0.0;
 	
 	for (int f=0; f<feature_count; f++) {
-		//ACCosDistance* E = new ACCosDistance (&(obj1[f]->getFeaturesVector()), (FeaturesVector *) &obj2[f]);
+		//ACEuclideanDistance* E = new ACEuclideanDistance (&(obj1[f]->getFeaturesVector()), (FeaturesVector *) &obj2[f]);
 		//FeaturesVector tmp  = obj1[f]->getFeaturesVector();
-		ACCosDistance* E = new ACCosDistance (obj1[f]->getFeaturesVector(),  (FeaturesVector *) &obj2[f]);
-		dis += (E->distance()) * (inverse_features?(1.0-weights[f]):weights[f]);
+		ACEuclideanDistance* E = new ACEuclideanDistance (obj1[f]->getFeaturesVector(),  (FeaturesVector *) &obj2[f]);
+		double tempDist=E->distance();
+		dis += tempDist * tempDist * (inverse_features?(1.0-weights[f]):weights[f]);
 		delete E;
 	}
-	//dis = sqrt(dis);
+	dis = sqrt(dis);
 	
 	return dis;
 }
 
-void ACCosKMeansPlugin::meanAccumCompute(ACMediaFeatures*  obj1,vector<float>& obj2){
-	
-	float norm=0;
-	int desc_count=obj1->getSize();
-	for(int d=0; d< desc_count; d++)
-	{
-		float temp=obj1->getFeatureElement(d);
-		norm += temp*temp;
-	}
-	norm=sqrt(norm);
-	for(int d=0; d<desc_count; d++)
-	{
-		obj2[d] += obj1->getFeatureElement(d)/norm;
-	}
+void ACSparseEuclideanKMeansPlugin::meanAccumCompute(std::vector<ACMediaFeatures*> & obj1,std::vector<std::vector<float> >&obj2){
+
+
 }

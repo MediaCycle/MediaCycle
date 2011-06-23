@@ -434,7 +434,7 @@ bool ACMultiMediaCycleOsgQt::readXMLConfig(string _filename){
 	}
 	
 	ACPluginManager* acpl = media_cycle->getPluginManager();
-	if (acpl->getFeaturesPlugins()->getSize(media_type)>0 && !use_feature_extraction){ // if no feature extraction plugin was loaded before opening the XML and if the XML loaded one
+	if (acpl->getFeaturesPluginsSize(media_type) &&/*acpl->getFeaturesPlugins()->getSize(media_type)>0 &&*/ !use_feature_extraction){ // if no feature extraction plugin was loaded before opening the XML and if the XML loaded one
 		this->showError("Feature extraction plugin(s) now loaded again. Importing media files now enabled.");
 		this->switchFeatureExtraction(true);
 	}
@@ -1035,9 +1035,21 @@ void ACMultiMediaCycleOsgQt::loadDefaultConfig(ACMediaType _media_type, ACBrowse
 			s_plugin = "@executable_path/../MacOS/mc_segmentation.dylib";
 		#else
 			#if defined(XCODE)
-				f_plugin = s_path + "/../../../../../../plugins/"+ smedia + "/" + build_type + "/mc_" + smedia +".dylib";
-				v_plugin = s_path + "/../../../../../../plugins/visualisation/" + build_type + "/mc_visualisation.dylib";
-				s_plugin = s_path + "/../../../../../../plugins/segmentation/" + build_type + "/mc_segmentation.dylib";
+	
+			if(smedia == "text"){
+					f_plugin = s_path + "/../../../../../../plugins/"+ smedia + "_sparse/" + build_type + "/mc_" + smedia +"_sparse.dylib";
+			}
+			else{
+					f_plugin = s_path + "/../../../../../../plugins/"+ smedia + "/" + build_type + "/mc_" + smedia +".dylib";
+			}	
+			
+			if(smedia == "text"){
+					v_plugin = s_path + "/../../../../../../plugins/SparseVisualisation/" + build_type + "/mc_SparseVisualisation.dylib";
+			}
+			else{
+					v_plugin = s_path + "/../../../../../../plugins/visualisation/" + build_type + "/mc_visualisation.dylib";
+			}
+			s_plugin = s_path + "/../../../../../../plugins/segmentation/" + build_type + "/mc_segmentation.dylib";
 			#else
 				f_plugin = s_path + "/../../../../../plugins/"+ smedia + "/mc_" + smedia +".dylib";
 				v_plugin = s_path + "/../../../../../plugins/visualisation/mc_visualisation.dylib";
@@ -1091,7 +1103,7 @@ void ACMultiMediaCycleOsgQt::loadDefaultConfig(ACMediaType _media_type, ACBrowse
 	}	
 	
 	if(smedia == "text"){
-		media_cycle->setPreProcessPlugin("TextFeatures");
+		media_cycle->setPreProcessPlugin("TextFeaturesSparse");
 	}
 	else{
 		media_cycle->setPreProcessPlugin("");

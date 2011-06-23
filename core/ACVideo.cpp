@@ -86,7 +86,7 @@ ACVideo::~ACVideo() {
 //	if (data) delete data;
 }
 
-ACVideo::ACVideo(const ACVideo& m) : ACMedia(m) {
+ACVideo::ACVideo(const ACVideo& m) :ACMedia()/* ACMedia(m)*/ {
 	this->init();	
 	thumbnail = m.thumbnail;
 	thumbnail_width = m.thumbnail_width;

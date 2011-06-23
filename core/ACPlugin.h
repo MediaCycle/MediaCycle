@@ -71,6 +71,7 @@ class ACPlugin {
 public:
 	ACPlugin();
 	bool implementsPluginType(ACPluginType pType);
+	bool mediaTypeSuitable(ACMediaType);
 	virtual ~ACPlugin() {mName.clear(); mDescription.clear(); mId.clear();};
 	std::string getName() {return this->mName;};
 	std::string getIdentifier() {return this->mId;};

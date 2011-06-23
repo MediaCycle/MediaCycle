@@ -1,5 +1,5 @@
 /*
- *  ACCosClustPosition.cpp
+ *  ACSparseCosClustPosition.cpp
  *  MediaCycle
  *
  *  @author Thierry Ravet
@@ -32,9 +32,9 @@
  *
  */
 
-#include "ACCosClustPosition.h"
+#include "ACSparseCosClustPosition.h"
 
-#include "ACCosDistance.h"
+#include "ACSparseCosDistance.h"
 #include "ACMediaLibrary.h"
 
 #include <sys/time.h>
@@ -49,37 +49,58 @@ static double getTime()
     return (double)tv.tv_sec + tv.tv_usec / 1000000.0;
 } 
 
-double ACCosClustPosition::compute_distance(vector<ACMediaFeatures*> &obj1, vector<ACMediaFeatures*> &obj2, const vector<float> &weights, bool inverse_features)
+double ACSparseCosClustPosition::compute_distance(vector<ACMediaFeatures*> &obj1, vector<ACMediaFeatures*> &obj2, const vector<float> &weights, bool inverse_features)
 {
 	
 	assert(obj1.size() == obj2.size() && obj1.size() == weights.size());
-	int feature_count = obj1.size();
+	assert(obj1.size()%3==0 && obj1.size()%3==0);
+	int feature_count = obj1.size()/3;
 	
 	double dis = 0.0;
 	
 	for (int f=0; f<feature_count; f++) {
-		ACCosDistance* E = new ACCosDistance (obj1[f], obj2[f]);
-		dis += (E->distance()) * (inverse_features?(1.0-weights[f]):weights[f]);
+		vector<ACMediaFeatures*>  temp1,temp2;
+		temp1.push_back(obj1[3*f+0] );
+		temp1.push_back(obj1[3*f+1] );
+		temp1.push_back(obj1[3*f+2] );
+		temp2.push_back(obj2[3*f+0] );
+		temp2.push_back(obj2[3*f+1] );
+		temp2.push_back(obj2[3*f+2] );
+		
+		ACSparseCosDistance* E = new ACSparseCosDistance (temp1, temp2);
+		dis += (E->distance()) * (inverse_features?(1.0-weights[3*f]):weights[3*f]);
 		delete E;
 	}
 	//dis = sqrt(dis);
 	
 	return dis;
 }
-double ACCosClustPosition::compute_distance(vector<ACMediaFeatures*> &obj1, const vector<vector <float> > &obj2, const vector<float> &weights, bool inverse_features)
+double ACSparseCosClustPosition::compute_distance(vector<ACMediaFeatures*> &obj1, const vector<vector <float> > &obj2, const vector<float> &weights, bool inverse_features)
 {
 	
 	
 	
 	assert(obj1.size() == obj2.size() && obj1.size() == weights.size());
-	int feature_count = obj1.size();
+	assert(obj1.size() %3==0);
+	
+	int feature_count = obj1.size()/3;
 	
 	double dis = 0.0;	
 	
 	for (int f=0; f<feature_count; f++) {
+		ACSparseVector temp1,temp2;
+		temp1.push_back(*(obj1[3*f+0]->getFeaturesVector() ));
+		temp1.push_back(*(obj1[3*f+1]->getFeaturesVector() ));
+		temp1.push_back(*(obj1[3*f+2]->getFeaturesVector() ));
+		//	for (int i=0;i<temp1[2].size();i++)
+		//		cout << temp1[2][i]<<"\t";
+		//	cout << "\n";
+		temp2.push_back(obj2[3*f+0] );
+		temp2.push_back(obj2[3*f+1] );
+		temp2.push_back(obj2[3*f+2] );
 		//ACCosDistance* E = new ACCosDistance (&(obj1[f]->getFeaturesVector()), (FeaturesVector *) &obj2[f]);
 		//FeaturesVector tmp  = obj1[f]->getFeaturesVector();
-		ACCosDistance* E = new ACCosDistance (obj1[f]->getFeaturesVector(),  (FeaturesVector *) &obj2[f]);
+		ACSparseCosDistance* E = new ACSparseCosDistance (temp1,temp2);
 		dis += (E->distance()) * (inverse_features?(1.0-weights[f]):weights[f]);
 		delete E;
 	}
@@ -88,19 +109,20 @@ double ACCosClustPosition::compute_distance(vector<ACMediaFeatures*> &obj1, cons
 	return dis;
 }
 
-ACCosClustPosition::ACCosClustPosition()
+
+ACSparseCosClustPosition::ACSparseCosClustPosition()
 {
-    this->mName = "ACCosClustPosition";
+    this->mName = "ACSparseCosClustPosition";
     this->mDescription = "Clustering position with Cos Distance";
     //vars herited from ACPlugin
     this->mMediaType = MEDIA_TYPE_ALL;
   //  this->mPluginType = PLUGIN_TYPE_CLUSTERS_POSITIONS;
     this->mId = "";
 }
-ACCosClustPosition::~ACCosClustPosition()
+ACSparseCosClustPosition::~ACSparseCosClustPosition()
 {
 }
-void ACCosClustPosition::updateNextPositions(ACMediaBrowser* mediaBrowser)
+void ACSparseCosClustPosition::updateNextPositions(ACMediaBrowser* mediaBrowser)
 {
 	
 		

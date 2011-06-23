@@ -38,17 +38,31 @@
 #include <string>
 #include <map>
 
-enum ACMediaType {
-	MEDIA_TYPE_NONE,   // when type is not defined yet
-	MEDIA_TYPE_AUDIO,
-	MEDIA_TYPE_IMAGE,
-	MEDIA_TYPE_VIDEO,
-	MEDIA_TYPE_3DMODEL,
-	MEDIA_TYPE_TEXT,
-	MEDIA_TYPE_PDF,
-	MEDIA_TYPE_SENSORDATA,
-	MEDIA_TYPE_MIXED,  // for (future...) interface mixing media
-	MEDIA_TYPE_ALL     // for plugins valid for all media
+typedef		unsigned int ACMediaType;
+const ACMediaType	MEDIA_TYPE_NONE			=	0x0000;
+const ACMediaType	MEDIA_TYPE_AUDIO		=	0x0001;
+const ACMediaType	MEDIA_TYPE_IMAGE		=	0x0002;
+const ACMediaType	MEDIA_TYPE_VIDEO		=	0x0004;
+const ACMediaType	MEDIA_TYPE_3DMODEL		=	0x0008;	
+const ACMediaType	MEDIA_TYPE_TEXT			=	0x0010;
+const ACMediaType	MEDIA_TYPE_PDF			=	0x0020;
+const ACMediaType	MEDIA_TYPE_SENSORDATA	=	0x0040;
+const ACMediaType	MEDIA_TYPE_MIXED		=	0x0080;
+const ACMediaType	MEDIA_TYPE_ALL			=	0xFFFF;
+
+	
+
+enum ACMediaTypeEnum {
+	MEDIA_NONE,   // when type is not defined yet
+	MEDIA_AUDIO,
+	MEDIA_IMAGE,
+	MEDIA_VIDEO,
+	MEDIA_3DMODEL,
+	MEDIA_TEXT,
+	MEDIA_PDF,
+	MEDIA_SENSORDATA,
+	MEDIA_MIXED,  // for (future...) interface mixing media
+	MEDIA_ALL     // for plugins valid for all media
 };
 
 // conversion between MediaTypes and text string (e.g., to be used in the labels for the gui)

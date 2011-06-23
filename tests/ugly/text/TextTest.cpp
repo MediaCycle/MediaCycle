@@ -168,8 +168,21 @@ void dump_to_stdout(const char* pFilename)
 	}
 }
 
+vector<ACMediaType> mediaExtract2(ACMediaType lMediaType){
+	unsigned int cpt=lMediaType;
+	unsigned int currMedia=1;
+	vector<ACMediaType> desc;
+	for (cpt=lMediaType;cpt>0;cpt>>=1,currMedia<<=1){
+		if (lMediaType&currMedia)
+		{
+			desc.push_back(currMedia);
+		}
+	}
+	return desc;
+}
 
 int main(void){
+	vector<ACMediaType> testVect=mediaExtract2(MEDIA_TYPE_AUDIO|MEDIA_TYPE_VIDEO|MEDIA_TYPE_TEXT);
 	/*TiXmlDocument doc("EA0236.xml");
 		
 	

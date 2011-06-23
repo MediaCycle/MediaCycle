@@ -43,6 +43,7 @@
 #include <map>
 #include <vector>
 
+
 class ACPluginLibrary {
 public:
     ACPluginLibrary(DynamicLibrary *aLib);
@@ -80,11 +81,13 @@ private:
 	std::string library_path;
 };
 
-class ACActiveFeaturesPlugins{//TR: this class doesn't allocate memory for plugins. It's just a references container.
+template <typename T> 
+class ACActivePlugins
+{	
 public:
-	ACActiveFeaturesPlugins(std::vector<ACPluginLibrary *> PluginLibrary);
-	ACActiveFeaturesPlugins();
-	~ACActiveFeaturesPlugins();
+	ACActivePlugins(std::vector<ACPluginLibrary *> PluginLibrary);
+	ACActivePlugins();
+	~ACActivePlugins();
 	int clean();
 	int remove(ACPlugin *);
 	int remove(ACPluginLibrary *);
@@ -95,13 +98,60 @@ public:
 	int getSize(ACMediaType MediaType);
 	void log();
 	
+	
+protected:	
+	std::map<ACMediaType,std::vector<T *> > mCurrPlugin;
+//	ACPreProcessPlugin* mCurrPreProcessPlugin;
+};
+
+
+
+class ACActiveFeaturesPlugins:public ACActivePlugins<ACFeaturesPlugin>{//TR: this class doesn't allocate memory for plugins. It's just a references container.
+public:
+	ACActiveFeaturesPlugins(std::vector<ACPluginLibrary *> PluginLibrary);
+	ACActiveFeaturesPlugins();
+	//~ACActiveFeaturesPlugins();
+/*	int clean();
+	int remove(ACPlugin *);
+	int remove(ACPluginLibrary *);
+	int add(ACPlugin *);
+	int add(ACPluginLibrary *);
+	int update(std::vector<ACPluginLibrary *> PluginLibrary);
+	std::vector<std::string> getName(ACMediaType MediaType);
+	int getSize(ACMediaType MediaType);
+	void log();*/
+	
 	std::vector<ACMediaFeatures*> calculate(std::string aFileName, bool _save_timed_feat=false );
 	std::vector<ACMediaFeatures*> calculate(ACMediaData* aData, ACMedia* theMedia, bool _save_timed_feat=false);	
-
+	ACMediaTimedFeature* getTimedFeatures(ACMediaType mediaType);
+	
+	
 protected:	
-	std::map<ACMediaType,std::vector<ACFeaturesPlugin *> > mCurrFeaturePlugin;
-	ACPreProcessPlugin* mCurrPreProcessPlugin;
+//	std::map<ACMediaType,std::vector<ACFeaturesPlugin *> > mCurrFeaturePlugin;
+	//ACPreProcessPlugin* mCurrPreProcessPlugin;
 
+};	
+
+class ACActiveSegmentPlugins:public ACActivePlugins<ACSegmentationPlugin>{//TR: this class doesn't allocate memory for plugins. It's just a references container.
+public:
+	ACActiveSegmentPlugins(std::vector<ACPluginLibrary *> PluginLibrary);
+	ACActiveSegmentPlugins();
+	//~ACActiveSegmentPlugins();
+/*	int clean();
+	int remove(ACPlugin *);
+	int remove(ACPluginLibrary *);
+	int add(ACPlugin *);
+	int add(ACPluginLibrary *);
+	int update(std::vector<ACPluginLibrary *> PluginLibrary);
+	std::vector<std::string> getName(ACMediaType MediaType);
+	int getSize(ACMediaType MediaType);
+	void log();*/
+	
+	std::vector<ACMedia*>  segment(ACMediaTimedFeature *ft,ACMedia* theMedia);
+	std::vector<ACMedia*>  segment(ACMediaData* aData,ACMedia* theMedia);
+	
+	
+protected:		
 };	
 
 
@@ -127,12 +177,17 @@ public:
     ACPlugin *getPlugin(std::string aPluginName);
 	
     ACActiveFeaturesPlugins *getFeaturesPlugins(){return this->mActiveFeaturePlugins;};// returns a container with feature plugins reference 
-
-    
+    int getFeaturesPluginsSize(ACMediaType MediaType);
+	ACActiveSegmentPlugins *getSegmentPlugins(){return this->mActiveSegmentPlugins;};// returns a container with Segment plugins reference 
+    int getSegmentPluginsSize(ACMediaType MediaType);
+	
+	
 private:
+	
     std::vector<ACPluginLibrary *> mPluginLibrary;	
 	
 	ACActiveFeaturesPlugins* mActiveFeaturePlugins;
+	ACActiveSegmentPlugins* mActiveSegmentPlugins;
 };
 
 #endif	/* _ACPLUGINMANAGER_H */

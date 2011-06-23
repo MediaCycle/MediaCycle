@@ -73,3 +73,10 @@ IF(SUPPORT_TEXT)
 ELSE()
 	MESSAGE("[ ] textfeatures")
 ENDIF()
+
+#sparseMatrix for text mining
+IF(SUPPORT_TEXT)
+	add_subdirectory(SparseMatrix)
+ELSE()
+	MESSAGE("[ ] SparseMatrix")
+ENDIF()

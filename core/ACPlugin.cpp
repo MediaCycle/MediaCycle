@@ -42,11 +42,19 @@ ACPlugin::ACPlugin()
 {
 	cout<<"ACPlugin Constructor\n";
 	this->mPluginType=PLUGIN_TYPE_NONE;
+	this->mMediaType=MEDIA_TYPE_NONE;
 }
 
 bool ACPlugin::implementsPluginType(ACPluginType pType)
 {
 	int test=mPluginType&pType;
+	if (test==0)
+		return false;
+	else 
+		return true;
+}
+bool ACPlugin::mediaTypeSuitable(ACMediaType pType){
+	int test=mMediaType&pType;
 	if (test==0)
 		return false;
 	else 
