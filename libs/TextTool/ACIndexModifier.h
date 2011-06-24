@@ -55,7 +55,9 @@ using namespace lucene::search;
 using namespace std;
 CL_NS_DEF(index)
 
+#ifndef OLD_CLUCENE
 #define OLD_CLUCENE
+#endif
 
 class ACIndexModifier : public IndexModifier {
 public:
