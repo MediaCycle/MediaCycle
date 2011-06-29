@@ -45,11 +45,22 @@ archipelReader::archipelReader(const string fileName){
 	
 }
 
+
+
 archipelReader::~archipelReader(void){
 	
 	delete mDoc;
 	
 	
+}
+
+bool archipelReader::isArchipel(){
+	TiXmlHandle docHandle( mDoc );
+	TiXmlHandle child= docHandle.FirstChild("archipel" );
+	if (child.ToNode()==0)
+		return false;
+	else 
+		return true;
 }
 
 vector<string> archipelReader::getIlot(void){
@@ -177,4 +188,15 @@ std::vector<std::string> archipelReader::getTrackPath(void){
 
 	}
 	return ret;
+}
+std::string archipelReader::getThumbPath(void){
+	string ret;
+	TiXmlHandle docHandle( mDoc );
+	TiXmlHandle child= docHandle.FirstChild("archipel" ).FirstChild( "info" ).FirstChild( "thumb" );//.Element();//.Child( "Child", 1 ).ToElement();
+	TiXmlText* textChild;
+	
+	textChild=child.FirstChild().ToText();
+	ret=textChild->ValueStr();
+	return ret;
+	
 }

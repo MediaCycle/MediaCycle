@@ -48,6 +48,7 @@ public:
 	archipelReader(const std::string fileName);
 	~archipelReader();
 	
+	bool isArchipel();
 	std::vector<std::string> getIlot(void);
 	std::vector<std::string> getGlossaire(void);
 	std::string getText(void);
@@ -56,6 +57,7 @@ public:
 	std::string getReference(void);
 	std::vector<std::string> getTrackTitle(void);
 	std::vector<std::string> getTrackPath(void);
+	std::string getThumbPath(void);
 protected:
 	TiXmlDocument *mDoc;
 	std::string mFileName;
