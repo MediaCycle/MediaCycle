@@ -1,13 +1,13 @@
-IF ( CLUCENE_FOUND  )
+IF(CLUCENE_FOUND)
 #	MESSAGE("Building textTool ")
 	FILE(GLOB SRC *.cpp *.c)
 	FILE(GLOB HDR *.hpp *.h)
 
 	ADD_LIBRARY(textTool STATIC ${SRC} ${HDR})
-	ADD_DEPENDENCIES(textTool tinyxml)
+	ADD_DEPENDENCIES(textTool tinyxml archipel)
 
-	TARGET_LINK_LIBRARIES(textTool ${CLUCENE_LIBRARIES})
+	TARGET_LINK_LIBRARIES(textTool ${CLUCENE_LIBRARIES} archipel)
 	MESSAGE("[X] TextTool")
-ELSE ( CLUCENE_FOUND)
+ELSE()
 	MESSAGE("[ ] TextTool")
-ENDIF ( CLUCENE_FOUND )
+ENDIF()
