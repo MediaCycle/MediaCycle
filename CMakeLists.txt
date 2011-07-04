@@ -1091,6 +1091,8 @@ INCLUDE_DIRECTORIES(libs/armadillo-utils)
 add_subdirectory(libs/armadillo-utils)
 
 IF(SUPPORT_TEXT)
+	INCLUDE_DIRECTORIES(libs/archipel)
+	add_subdirectory(libs/archipel)
 	INCLUDE_DIRECTORIES(libs/TextTool)
 	add_subdirectory(libs/TextTool)
 ENDIF(SUPPORT_TEXT)
