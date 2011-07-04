@@ -1,10 +1,10 @@
 /*
- *  ACText.h
+ *  MCMultiMediaXmlReader.h
  *  MediaCycle
  *
  *  @author Thierry Ravet
- *  @date 22/10/10
- *  @copyright (c) 2010 – UMONS - Numediart
+ *  @date 30/06/11
+ *  @copyright (c) 2011 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
  *  licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -32,37 +32,29 @@
  *
  */
 
-#if defined (SUPPORT_TEXT)
 
-#ifndef ACTEXT_H
-#define ACTEXT_H
+#ifndef MCMultiMediaXmlReader_H
+#define	MCMultiMediaXmlReader_H
 
-#include "ACMedia.h"
-#include "ACMediaFeatures.h"
 #include <string>
-#include <cstring>
-#include "ACTextData.h"
-
-class ACText : public ACMedia {
-	// contains the *minimal* information about a text
+#include <vector>
+#include "tinyxml.h"
+class MCMultiMediaXmlReader{
+public:	
+	MCMultiMediaXmlReader(std::string filename);
+	~MCMultiMediaXmlReader();
+	
+	bool isMCMultiMediaXml();
+	std::string getReference();
+	std::string getLabel();
+	unsigned int getNumberOfMedia();
+	std::string getMediaType(unsigned int index);
+	std::string getMediaReference(unsigned int index);
+	std::string getMediaPath(unsigned int index);
 protected:
-	int docIndex;
-	ACTextData* data;
-public:
-	ACText();
-	~ACText();
-	
-	void deleteData();
-	void saveACLSpecific(std::ofstream &library_file);
-	int loadACLSpecific(std::ifstream &library_file);
-	void extractData(std::string fname);
-	ACMediaData* getMediaData(){return data;} // XS TODO : needs dynamic_cast<ACMediaData*> (data) ??;
-	
-	void* getThumbnailPtr();
-	void setDocIndex(int pDocIndex){docIndex=pDocIndex;}
-	int getDocIndex(void){return docIndex;}
-	
-	
+	TiXmlDocument *doc;
+	std::string filename;
+	bool loadOkay;
 };
-#endif // ACTEXT_H
-#endif //defined (SUPPORT_TEXT)
+
+#endif

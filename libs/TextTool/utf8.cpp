@@ -108,7 +108,7 @@ break;							      \
  * mc_wctoutf8:
  * @c: a ISO10646 character code
  * @outbuf: output buffer, must have at least 6 bytes of space.
- *       If %NULL, the length will be computed and returned
+ *       If %0, the length will be computed and returned
  *       and nothing will be written to @outbuf.
  *
  * Converts a single character to UTF-8.

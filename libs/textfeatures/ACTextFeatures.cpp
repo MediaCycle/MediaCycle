@@ -133,7 +133,7 @@ void extractIndexTerms(wchar_t**  &outTerms,int &nbOutTerms,ACIndexModifier* inp
 #endif
 		
 		outTerms[nterms]=chartemp;
-		chartemp=NULL;
+		chartemp=0;
 		//_CLDELETE(tempTerm);
 //		_tprintf(_T("%s\n"),te->term()->text());
 		/* empty */	

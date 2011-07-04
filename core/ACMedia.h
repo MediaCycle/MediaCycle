@@ -90,19 +90,19 @@ public:
 	ACMedia* getSegment(int i) { return segments[i]; }
 	int getNumberOfSegments(){return segments.size();}
 	
-	std::vector<ACMediaFeatures*> &getAllFeaturesVectors() { return features_vectors; }
+	virtual std::vector<ACMediaFeatures*> &getAllFeaturesVectors() { return features_vectors; }
 	ACMediaFeatures* getFeaturesVector(int i);
 	ACMediaFeatures* getFeaturesVector(std::string feature_name);
 	int getNumberOfFeaturesVectors() {return features_vectors.size();}
 	void addFeaturesVector(ACMediaFeatures *aFeatures) { this->features_vectors.push_back(aFeatures); }
-	std::vector<std::string> getListOfFeaturesPlugins();
+	virtual std::vector<std::string> getListOfFeaturesPlugins();
 	
-	std::vector<ACMediaFeatures*> &getAllPreProcFeaturesVectors() { return preproc_features_vectors; }
+	virtual std::vector<ACMediaFeatures*> &getAllPreProcFeaturesVectors() { return preproc_features_vectors; }
 	ACMediaFeatures* getPreProcFeaturesVector(int i);
 	ACMediaFeatures* getPreProcFeaturesVector(std::string feature_name);
 	int getNumberOfPreProcFeaturesVectors() {return preproc_features_vectors.size();}
 	void addPreProcFeaturesVector(ACMediaFeatures *aFeatures) { this->preproc_features_vectors.push_back(aFeatures); }
-	std::vector<std::string> getListOfPreProcFeaturesPlugins();
+	virtual std::vector<std::string> getListOfPreProcFeaturesPlugins();
 	void cleanPreProcFeaturesVector(void);
 	void defaultPreProcFeatureInit(void);
 	
@@ -122,7 +122,7 @@ public:
 	void getLabel(std::string iLabel){label=iLabel;}
 	
 	// data
-	virtual void extractData(std::string filename) {}
+	virtual void extractData(std::string filename) {}//todo bool output to test the import and to continue if a file is not readable
 
 //	void setDataPersistence(bool persistence){persistent_data=persistence;}
 //	bool getDataPersistence(){return persistent_data;}

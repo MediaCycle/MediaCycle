@@ -1030,58 +1030,151 @@ void ACMultiMediaCycleOsgQt::loadDefaultConfig(ACMediaType _media_type, ACBrowse
 	#endif //USE_DEBUG
 	#if defined(__APPLE__)
 		#if not defined (USE_DEBUG) and not defined (XCODE) // needs "make install" to be ran to work
-			f_plugin = "@executable_path/../MacOS/mc_" + smedia +".dylib";
-			v_plugin = "@executable_path/../MacOS/mc_visualisation.dylib";
+			if(smedia == "text"){
+				f_plugin = "@executable_path/../MacOS/mc_" + smedia +"_sparse.dylib";
+				v_plugin = "@executable_path/../MacOS/mc_SparseVisualisation.dylib";
+			}
+			else{
+				f_plugin = "@executable_path/../MacOS/mc_" + smedia +".dylib";
+				v_plugin = "@executable_path/../MacOS/mc_visualisation.dylib";
+			}	
 			s_plugin = "@executable_path/../MacOS/mc_segmentation.dylib";
+
 		#else
 			#if defined(XCODE)
 	
 			if(smedia == "text"){
 					f_plugin = s_path + "/../../../../../../plugins/"+ smedia + "_sparse/" + build_type + "/mc_" + smedia +"_sparse.dylib";
-			}
-			else{
-					f_plugin = s_path + "/../../../../../../plugins/"+ smedia + "/" + build_type + "/mc_" + smedia +".dylib";
-			}	
-			
-			if(smedia == "text"){
 					v_plugin = s_path + "/../../../../../../plugins/SparseVisualisation/" + build_type + "/mc_SparseVisualisation.dylib";
 			}
 			else{
+					f_plugin = s_path + "/../../../../../../plugins/"+ smedia + "/" + build_type + "/mc_" + smedia +".dylib";
 					v_plugin = s_path + "/../../../../../../plugins/visualisation/" + build_type + "/mc_visualisation.dylib";
-			}
+			}	
 			s_plugin = s_path + "/../../../../../../plugins/segmentation/" + build_type + "/mc_segmentation.dylib";
 			#else
-				f_plugin = s_path + "/../../../../../plugins/"+ smedia + "/mc_" + smedia +".dylib";
-				v_plugin = s_path + "/../../../../../plugins/visualisation/mc_visualisation.dylib";
+				if(smedia == "text"){
+					f_plugin = s_path + "/../../../../../plugins/"+ smedia + "/mc_" + smedia +"_sparse.dylib";
+					v_plugin = s_path + "/../../../../../plugins/visualisation/mc_SparseVisualisation.dylib";
+				}
+				else{
+					f_plugin = s_path + "/../../../../../plugins/"+ smedia + "/mc_" + smedia +".dylib";
+					v_plugin = s_path + "/../../../../../plugins/visualisation/mc_visualisation.dylib";
+				}	
 				s_plugin = s_path + "/../../../../../plugins/segmentation/mc_segmentation.dylib";	
 			#endif
 		#endif
 	#elif defined (__WIN32__)
-		f_plugin = s_path + "\\mc_"+smedia+".dll";
-		v_plugin = s_path + "\\mc_visualisation.dll";
+		if(smedia == "text"){
+			f_plugin = s_path + "\\mc_"+smedia+"_sparse.dll";
+			v_plugin = s_path + "\\mc_SparseVisualisation.dll";
+
+		}
+		else{
+			f_plugin = s_path + "\\mc_"+smedia+".dll";
+			v_plugin = s_path + "\\mc_visualisation.dll";
+		}	
+	
 		s_plugin = s_path + "\\mc_segmentation.dll";
 	#else
 		#if not defined (USE_DEBUG) // needs "make package" to be ran to work
-			f_plugin = "/usr/lib/mc_"+smedia+".so";
-			v_plugin = "/usr/lib/mc_visualisation.so";
+	
+			if(smedia == "text"){
+					f_plugin = "/usr/lib/mc_"+smedia+"_sparse.so";
+					v_plugin = "/usr/lib/mc_SparseVisualisation.so";
+			}
+			else{
+				f_plugin = "/usr/lib/mc_"+smedia+".so";
+				v_plugin = "/usr/lib/mc_visualisation.so";
+			}
 			s_plugin = "/usr/lib/mc_segmentation.so";
 		#else
+		if(smedia == "text"){
+			f_plugin = s_path + "/../../plugins/"+smedia+"/mc_"+smedia+"_sparse.so";
+			v_plugin = s_path + "/../../plugins/visualisation/mc_SparseVisualisation.so";
+		}
+		else{
 			f_plugin = s_path + "/../../plugins/"+smedia+"/mc_"+smedia+".so";
 			v_plugin = s_path + "/../../plugins/visualisation/mc_visualisation.so";
+		}
 			s_plugin = s_path + "/../../plugins/segmentation/mc_segmentation.so";
 		#endif
 	#endif
-	
-	if(media_cycle->addPluginLibrary(f_plugin) == -1){
-		this->showError("Couldn't load the feature extraction plugin. Importing media files might work only by loading XML library files.");
-		this->switchFeatureExtraction(false);
-	}
-	else{
-		if(!use_feature_extraction){ // if no feature extraction plugin could be loaded before this change of media type
-			this->showError("Feature extraction plugin(s) now loaded again. Importing media files now enabled.");
+	if (_media_type==MEDIA_TYPE_MIXED){
+		smedia=string("audio");
+		f_plugin = s_path + "/../../../../../../plugins/"+ smedia + "/" + build_type + "/mc_" + smedia +".dylib";
+		if(media_cycle->addPluginLibrary(f_plugin) == -1){
+			this->showError("Couldn't load the feature extraction plugin. Importing media files might work only by loading XML library files.");
+			this->switchFeatureExtraction(false);
 		}
-		this->switchFeatureExtraction(true);
-	}	
+		else{
+			if(!use_feature_extraction){ // if no feature extraction plugin could be loaded before this change of media type
+				this->showError("Feature extraction plugin(s) now loaded again. Importing media files now enabled.");
+			}
+			this->switchFeatureExtraction(true);
+		}
+		smedia=string("text");
+		f_plugin = s_path + "/../../../../../../plugins/"+ smedia + "/" + build_type + "/mc_" + smedia +".dylib";
+		if(media_cycle->addPluginLibrary(f_plugin) == -1){
+			this->showError("Couldn't load the feature extraction plugin. Importing media files might work only by loading XML library files.");
+			this->switchFeatureExtraction(false);
+		}
+		else{
+			if(!use_feature_extraction){ // if no feature extraction plugin could be loaded before this change of media type
+				this->showError("Feature extraction plugin(s) now loaded again. Importing media files now enabled.");
+			}
+			this->switchFeatureExtraction(true);
+		}
+		smedia=string("video");
+		f_plugin = s_path + "/../../../../../../plugins/"+ smedia + "/" + build_type + "/mc_" + smedia +".dylib";
+		if(media_cycle->addPluginLibrary(f_plugin) == -1){
+			this->showError("Couldn't load the feature extraction plugin. Importing media files might work only by loading XML library files.");
+			this->switchFeatureExtraction(false);
+		}
+		else{
+			if(!use_feature_extraction){ // if no feature extraction plugin could be loaded before this change of media type
+				this->showError("Feature extraction plugin(s) now loaded again. Importing media files now enabled.");
+			}
+			this->switchFeatureExtraction(true);
+		}
+		smedia=string("image");
+		f_plugin = s_path + "/../../../../../../plugins/"+ smedia + "/" + build_type + "/mc_" + smedia +".dylib";
+		if(media_cycle->addPluginLibrary(f_plugin) == -1){
+			this->showError("Couldn't load the feature extraction plugin. Importing media files might work only by loading XML library files.");
+			this->switchFeatureExtraction(false);
+		}
+		else{
+			if(!use_feature_extraction){ // if no feature extraction plugin could be loaded before this change of media type
+				this->showError("Feature extraction plugin(s) now loaded again. Importing media files now enabled.");
+			}
+			this->switchFeatureExtraction(true);
+		}
+		smedia=string("3Dmodel");
+		f_plugin = s_path + "/../../../../../../plugins/"+ smedia + "/" + build_type + "/mc_" + smedia +".dylib";
+		if(media_cycle->addPluginLibrary(f_plugin) == -1){
+			this->showError("Couldn't load the feature extraction plugin. Importing media files might work only by loading XML library files.");
+			this->switchFeatureExtraction(false);
+		}
+		else{
+			if(!use_feature_extraction){ // if no feature extraction plugin could be loaded before this change of media type
+				this->showError("Feature extraction plugin(s) now loaded again. Importing media files now enabled.");
+			}
+			this->switchFeatureExtraction(true);
+		}
+		
+	}
+	else {
+		if(media_cycle->addPluginLibrary(f_plugin) == -1){
+			this->showError("Couldn't load the feature extraction plugin. Importing media files might work only by loading XML library files.");
+			this->switchFeatureExtraction(false);
+		}
+		else{
+			if(!use_feature_extraction){ // if no feature extraction plugin could be loaded before this change of media type
+				this->showError("Feature extraction plugin(s) now loaded again. Importing media files now enabled.");
+			}
+			this->switchFeatureExtraction(true);
+		}	
+	}
 	
 	if(this->use_segmentation_default && ACMediaFactory::getInstance().isMediaTypeSegmentable(_media_type)){
 		if(media_cycle->addPluginLibrary(s_plugin) == -1){
@@ -1104,6 +1197,7 @@ void ACMultiMediaCycleOsgQt::loadDefaultConfig(ACMediaType _media_type, ACBrowse
 	
 	if(smedia == "text"){
 		media_cycle->setPreProcessPlugin("TextFeaturesSparse");
+		//media_cycle->setPreProcessPlugin("TextFeatures");
 	}
 	else{
 		media_cycle->setPreProcessPlugin("");

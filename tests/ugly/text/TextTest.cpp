@@ -183,13 +183,15 @@ vector<ACMediaType> mediaExtract2(ACMediaType lMediaType){
 
 int main(void){
 	vector<ACMediaType> testVect=mediaExtract2(MEDIA_TYPE_AUDIO|MEDIA_TYPE_VIDEO|MEDIA_TYPE_TEXT);
+	MediaCycle *testMC=new MediaCycle(MEDIA_TYPE_MIXED);
+	testMC->getLibrary()->importFile(string("/Users/ravet/Desktop/MediaCycleData/testMediaDocument/testMediaDocument.xml"), testMC->getPluginManager(), false, false);
+	return 0;
 	/*TiXmlDocument doc("EA0236.xml");
 		
 	
 	archipelReader testDoc("EA0236.xml");
 
 	vector<string>::iterator it;
-	
 	std::vector<std::string> testvect=testDoc.getIlot();
 	for (it=testvect.begin();it!=testvect.end();it++)
 		cout << (*it) <<endl;

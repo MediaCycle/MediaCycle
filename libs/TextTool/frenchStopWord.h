@@ -201,7 +201,7 @@ static const TCHAR* FRENCH_STOP_WORDS[]  =
 	_T("quelle"),
 	_T("quelles"),
 	_T("sans"),
-	_T("soi"), NULL	
+	_T("soi"), 0	
 };
 
 #endif

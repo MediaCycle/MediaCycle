@@ -53,7 +53,7 @@ ACSparseCosKMeansPlugin::~ACSparseCosKMeansPlugin() {
 double ACSparseCosKMeansPlugin::compute_distance(vector<ACMediaFeatures*> &obj1, vector<ACMediaFeatures*> &obj2, const vector<float> &weights, bool inverse_features)
 {
 	
-	assert(obj1.size() == obj2.size() && obj1.size() == weights.size());
+	assert(obj1.size() == obj2.size() && obj1.size() == weights.size()*3);
 	assert(obj1.size()%3==0 && obj1.size()%3==0);
 	int feature_count = obj1.size()/3;
 	
@@ -69,7 +69,7 @@ double ACSparseCosKMeansPlugin::compute_distance(vector<ACMediaFeatures*> &obj1,
 		temp2.push_back(obj2[3*f+2] );
 		
 		ACSparseCosDistance* E = new ACSparseCosDistance (temp1, temp2);
-		dis += (E->distance()) * (inverse_features?(1.0-weights[3*f]):weights[3*f]);
+		dis += (E->distance()) * (inverse_features?(1.0-weights[f]):weights[f]);
 		delete E;
 	}
 	//dis = sqrt(dis);
@@ -81,7 +81,7 @@ double ACSparseCosKMeansPlugin::compute_distance(vector<ACMediaFeatures*> &obj1,
 	
 	
 	
-	assert(obj1.size() == obj2.size() && obj1.size() == weights.size());
+	assert(obj1.size() == obj2.size() && obj1.size() == weights.size()*3);
 	assert(obj1.size() %3==0);
 
 	int feature_count = obj1.size()/3;

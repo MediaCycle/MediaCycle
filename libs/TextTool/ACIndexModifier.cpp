@@ -47,7 +47,7 @@ ACIndexModifier::~ACIndexModifier(void){
 //	if (open) {
 //		close();
 //	}
-//	if (directory!=NULL)
+//	if (directory!=0)
 //		_CLDELETE(directory);
 }
 

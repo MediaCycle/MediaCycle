@@ -598,7 +598,8 @@ void ACMediaBrowser::libraryContentChanged(int needsCluster) {
 // assumes all media have the same number of features (as the first one)
 void ACMediaBrowser::initializeFeatureWeights(){
 	
-	int fc = mLibrary->getMedia(0)->getNumberOfPreProcFeaturesVectors();
+	//int fc = mLibrary->getMedia(0)->getNumberOfPreProcFeaturesVectors();
+	int fc = mLibrary->getMedia(0)->getNumberOfFeaturesVectors();
 	mFeatureWeights.resize(fc);
 
 	// XS TODO if (config_file)...

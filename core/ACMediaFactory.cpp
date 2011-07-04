@@ -439,6 +439,11 @@ std::string ACMediaFactory::getNormalCaseStringFromMediaType(ACMediaType _media_
 			smedia="Text";
 			#endif //defined (SUPPORT_TEXT)
 			break;	
+		case MEDIA_TYPE_MIXED:
+#if defined (SUPPORT_MULTIMEDIA)
+			smedia="Mixed";
+#endif //defined (SUPPORT_MULTIMEDIA)
+			break;	
 		default:
 			break;
 	}	

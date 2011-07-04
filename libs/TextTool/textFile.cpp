@@ -45,12 +45,27 @@ string* textFileRead(string filePath){
 	else
 		if (ext==string(".xml")){
 			archipelReader doc(filePath);
-			return new string(doc.getText());			
+			if (!doc.isArchipel())
+				return 0;
+			return new string(doc.getText());
+			vector<string> data=doc.getGlossaire();
+			string desc;
+			for (vector<string>::iterator it=data.begin();it!=data.end();it++)
+			{	desc+=(*it);
+				desc+=string(" ");
+			}
+			data=doc.getIlot();
+			for (vector<string>::iterator it=data.begin();it!=data.end();it++)
+			{	desc+=(*it);
+				desc+=string(" ");
+			}
+			string test=doc.getThumbPath();
+			//return new string(desc);
 		}
 		else
-			return NULL;
+			return 0;
 	//TODO implement other text file type (pdf xml html...)
-	return NULL;
+	return 0;
 }
 
 string labelFileRead(string filePath){
@@ -73,7 +88,7 @@ string labelFileRead(string filePath){
 string *txtFileRead(string filePath){
 	fstream inFile(filePath.c_str(), fstream::in);
 	if (!inFile.is_open())
-		return NULL;
+		return 0;
 	string* lOut=new string;
 	do {
 		string stringTemp;
@@ -84,6 +99,6 @@ string *txtFileRead(string filePath){
 		}			
 	}while (!inFile.eof());
 	
-	cout << (*lOut)<< "\n";
+	//cout << (*lOut)<< "\n";
 	return lOut;
 }

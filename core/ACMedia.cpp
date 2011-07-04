@@ -89,15 +89,27 @@ void ACMedia::init() {
 ACMedia::~ACMedia() { 
 	filename.clear();
 	filename_thumbnail.clear();
-	vector<ACMediaFeatures*> ::iterator iter;
+	for (int i=0;i<preproc_features_vectors.size();i++)
+	{
+		delete (preproc_features_vectors[i]);
+		preproc_features_vectors[i]=0;
+	}
+	preproc_features_vectors.clear();
+	for (int i=0;i<features_vectors.size();i++)
+	{
+		delete (features_vectors[i]);
+		features_vectors[i]=0;
+	}
+	features_vectors.clear();
+/*	vector<ACMediaFeatures*> ::iterator iter;
 	for (iter = features_vectors.begin(); iter != features_vectors.end(); iter++) {
-		delete *iter;//needed erase call destructor of pointer (i.e. none since it's just a pointer) not of pointee ACMediaFeatures
+		delete (*iter);//needed erase call destructor of pointer (i.e. none since it's just a pointer) not of pointee ACMediaFeatures
 		//features_vectors.erase(iter); //will cause segfault. besides the vector is automatically emptied, no need to erase.
 	}
 	for (iter = preproc_features_vectors.begin(); iter != preproc_features_vectors.end(); iter++) {
-		delete *iter;//needed erase call destructor of pointer (i.e. none since it's just a pointer) not of pointee ACMediaFeatures
+		delete (*iter);//needed erase call destructor of pointer (i.e. none since it's just a pointer) not of pointee ACMediaFeatures
 		//features_vectors.erase(iter); //will cause segfault. besides the vector is automatically emptied, no need to erase.
-	}
+	}*/
 	// XS TODO : why is this commented ?
 	//if (data) delete data;
 }

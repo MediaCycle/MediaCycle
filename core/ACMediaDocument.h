@@ -38,7 +38,7 @@
 #if defined (SUPPORT_MULTIMEDIA) 
 #include "ACOpenCVInclude.h"
 #include "ACMedia.h"
-#include "ACMediaDocumentData.h"
+//#include "ACMediaDocumentData.h"
 #include <string>
 #include <iostream>
 
@@ -55,6 +55,7 @@ public:
 	ACMediaDocument(const ACMediaDocument&, bool reduce = true);
 
 	
+	int import(std::string _path, int _mid=0, ACPluginManager *acpl=0, bool _save_timed_feat=false);
 	void saveACLSpecific(std::ofstream &library_file);
 	int loadACLSpecific(std::ifstream &library_file);
 	void saveXMLSpecific(TiXmlElement* _media);
@@ -65,28 +66,32 @@ public:
 	int getThumbnailWidth() {return thumbnail_width;}
 	int getThumbnailHeight() {return thumbnail_height;}
 	void* getThumbnailPtr() { return (void*)image_texture; }
-	
-	ACMediaDocumentData* getData(){return static_cast<ACMediaDocumentData*>(data->getData());}
-	void setData(ACMediaDocumentData* _data);
-	virtual ACMediaData* getMediaData(){return data;} // XS TODO : needs dynamic_cast<ACMediaData*> (data) ??
+	ACMediaData* getMediaData(){return 0;};
+//	ACMediaDocumentData* getData(){return static_cast<ACMediaDocumentData*>(data->getData());}
+//	void setData(ACMediaDocumentData* _data);
+//	virtual ACMediaData* getMediaData(){return data;} // XS TODO : needs dynamic_cast<ACMediaData*> (data) ??
 	void extractData(std::string fname);
-	virtual void deleteData();
+//	virtual void deleteData();
 
 private:
 	void init();
 	bool computeThumbnail(std::string _fname, int w=0, int h=0);
-	bool computeThumbnail(ACMediaDocumentData* data_ptr, int w=0, int h=0);
+//	bool computeThumbnail(ACMediaDocumentData* data_ptr, int w=0, int h=0);
 	bool computeThumbnail(IplImage* img, int w=0, int h=0);
 	bool computeThumbnailSize(int w_, int h_);
 	void deleteMedia();
-
 private:
 	int thumbnail_width, thumbnail_height; 
 	osg::ref_ptr<osg::Image> thumbnail;
 	osg::ref_ptr<osg::Texture2D> image_texture;
-	ACMediaDocumentData* data;
-	std::map<ACMediaType ,ACMedia*>	mediaContainer;
-	
+	//ACMediaDocumentData* data; No Need, data are stored in the respective media 
+	std::map<std::string ,ACMedia* >	mediaContainer;
+	static	const int default_thumbnail_area ; // 128*128
+	int mediaID;
+	void incrementMediaID(){mediaID++ ;}
+	int getMediaID(){return mediaID ;}
+	int addMedia(std::string key, ACMedia* media); 
+
 	
 };
 

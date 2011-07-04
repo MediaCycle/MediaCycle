@@ -38,6 +38,11 @@
 #include <fstream>
 #include <osg/ImageUtils>
 
+#include <boost/filesystem.hpp>
+#include "ACMediaFactory.h"
+
+#include "MCMultiMediaXmlReader.h"
+
 using namespace std;
 
 // ----------- class constants
@@ -47,6 +52,72 @@ const int ACMediaDocument:: default_thumbnail_area = 16384; // 128*128
 
 ACMediaDocument::ACMediaDocument() : ACMedia() {
 	this->init();
+	mediaID=0;
+}
+
+int ACMediaDocument::import(std::string _filename, int _mid, ACPluginManager *acpl, bool _save_timed_feat){	
+	filename=_filename;	
+	string extension = boost::filesystem::extension(filename);
+	string path=boost::filesystem::path(_filename).parent_path().string()+string("/");
+
+	if (extension==string(".xml")){
+		//read the xml file. We begin with the Mediacycle xml style
+		MCMultiMediaXmlReader* xmlDoc=new MCMultiMediaXmlReader(filename);
+		label=xmlDoc->getLabel();
+		unsigned int nbMedia=xmlDoc->getNumberOfMedia();
+		for (unsigned int i=0;i<nbMedia; i++){
+			string s_media_type=xmlDoc->getMediaType(i);
+			ACMediaType mediaType;
+			stringToMediaTypeConverter::const_iterator iterm = stringToMediaType.find(s_media_type);
+			
+			if( iterm == stringToMediaType.end() ) {
+				cout << "ACMediaDocument::import media type not found : " << s_media_type << endl;
+				continue;
+			}
+			else {
+				mediaType = iterm->second;
+				//		cout << iterm->first << " - corresponding media type code : " << new_media_type << endl;
+			}
+			string mediaFileName=xmlDoc->getMediaPath(i);
+			
+			string mediaExtension = boost::filesystem::extension(mediaFileName);
+			ACMediaType fileMediaType = ACMediaFactory::getInstance().getMediaTypeFromExtension(mediaExtension);
+			if (fileMediaType!=mediaType){
+				cout << "ACMediaDocument::import other media type, skipping " << s_media_type << endl;
+				continue;
+			}
+			string mediaRef=xmlDoc->getMediaReference(i);
+			ACMedia *media = ACMediaFactory::getInstance().create(mediaExtension);
+			if (media->import(path+mediaFileName, this->getMediaID(), acpl, _save_timed_feat)){
+				if (this->addMedia(mediaRef, media))
+					this->incrementMediaID();
+			}
+			else 
+				delete media;
+		}
+		delete xmlDoc;
+	}
+	else {
+		ACMediaType fileMediaType = ACMediaFactory::getInstance().getMediaTypeFromExtension(extension);
+		if (fileMediaType==MEDIA_TYPE_VIDEO){
+			//create a container with a video and an audio media
+		}
+		else {
+			if (fileMediaType==MEDIA_TYPE_PDF){}
+				//create a container with a text media and some image media
+		}
+
+	}
+}
+
+int ACMediaDocument::addMedia(std::string stringKey, ACMedia* media){
+	pair <ACMediaType,ACMedia*>  temp;
+	if (mediaContainer.find(stringKey)==mediaContainer.end()){
+		mediaContainer[stringKey]=media;
+	}
+	else
+		return 0;
+	return 1;
 }
 
 void ACMediaDocument::init() {
@@ -54,7 +125,6 @@ void ACMediaDocument::init() {
 	thumbnail = 0;
 	thumbnail_width = 0;
 	thumbnail_height = 0;
-	data=0;
 }	
 
 // copy-constructor, used for example to generate fragments
@@ -72,15 +142,11 @@ ACMediaDocument::~ACMediaDocument() {
 // so there is no need to compute a pointer to the data passed to the plugin
 // in this case w and h can be read from XML file
 bool ACMediaDocument::computeThumbnail(string _fname, int w, int h){
-
+	bool ok = true;
+	
 	return ok;
 }
 
-// used in extractData (when features are computed on-the-fly, not read from XML)
-// in this case w=0 and h=0 (generally)
-bool ACMediaDocument::computeThumbnail(ACMediaDocumentData* data_ptr, int w, int h){
-	return ok;
-}
 
 bool ACMediaDocument::computeThumbnail(IplImage* img, int w, int h){
 	bool ok = true;
@@ -88,31 +154,23 @@ bool ACMediaDocument::computeThumbnail(IplImage* img, int w, int h){
 }
 
 bool ACMediaDocument::computeThumbnailSize(int w_, int h_){
+	bool ok = true;
+	
 	return ok;
 }	
 
 void ACMediaDocument::extractData(string fname){
-	computeThumbnail(data, thumbnail_width , thumbnail_height);
+//	computeThumbnail(data, thumbnail_width , thumbnail_height);
 }
 
-void ACMediaDocument::setData(IplImage* _data){
-}
-
-void ACMediaDocument::deleteData(){
-	if (data)
-		delete data;
-	data=0;
-}
 
 void ACMediaDocument::deleteMedia(){
-	map<ACMediaType ,ACMedia*>::iterator iter
-	for (iter=mediaContainer.begin(); iter!=mediaContainer;i++){
-		if (iter->second!=0){
-			deleter iter->second;
-			iter->second=0;
-		}			
+	map<string ,ACMedia* > ::iterator iter;
+	for (iter=mediaContainer.begin(); iter!=mediaContainer.end();iter++){
+		delete (iter->second);
+		iter->second=0;
 	}
-	mediaContainer.clean();
+	mediaContainer.clear();
 	
 		
 }

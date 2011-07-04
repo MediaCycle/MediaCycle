@@ -48,6 +48,8 @@
 #include "ACMediaLibrary.h"
 #include "ACMediaFactory.h"
 
+#include "ACMediaDocument.h"
+
 #include <sstream>
 
 // XS for sorting:
@@ -176,9 +178,25 @@ int ACMediaLibrary::importFile(std::string _filename, ACPluginManager *acpl, boo
 
 	ACMediaType fileMediaType = ACMediaFactory::getInstance().getMediaTypeFromExtension(extension);
 	ACMedia* media;
+#if defined (SUPPORT_MULTIMEDIA) 
 
 	//this->testFFMPEG(_filename);
+	if (media_type==MEDIA_TYPE_MIXED){
+		
+		media=new ACMediaDocument();
+		if (media==0)
+			return 0;
+		else {
+			if (media->import(_filename, this->getMediaID(), acpl)==0)
+				return 0;
+			this->addMedia(media);
+			this->incrementMediaID();
+			return 1;
+		}
 
+
+	}
+#endif	
 	// XS TODO: do we want to check the media type of the whole library (= impose a unique one)?
 	if (media_type == fileMediaType){
 		media = ACMediaFactory::getInstance().create(extension);
