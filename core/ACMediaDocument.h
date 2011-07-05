@@ -54,7 +54,7 @@ public:
 	~ACMediaDocument();
 	ACMediaDocument(const ACMediaDocument&, bool reduce = true);
 
-	
+	int setActiveSubMedia(string mediaName);
 	int import(std::string _path, int _mid=0, ACPluginManager *acpl=0, bool _save_timed_feat=false);
 	void saveACLSpecific(std::ofstream &library_file);
 	int loadACLSpecific(std::ifstream &library_file);
@@ -72,6 +72,19 @@ public:
 //	virtual ACMediaData* getMediaData(){return data;} // XS TODO : needs dynamic_cast<ACMediaData*> (data) ??
 	void extractData(std::string fname);
 //	virtual void deleteData();
+
+	std::vector<ACMediaFeatures*> &getAllFeaturesVectors() { return activeMedia->getAllFeaturesVectors(); };
+	ACMediaFeatures* getFeaturesVector(int i){return activeMedia->getFeaturesVector(i);};
+	ACMediaFeatures* getFeaturesVector(std::string feature_name){return activeMedia->getFeaturesVector(feature_name);};
+	 int getNumberOfFeaturesVectors() {return activeMedia->getNumberOfFeaturesVectors();}
+	std::vector<std::string> getListOfFeaturesPlugins(){return activeMedia->getListOfFeaturesPlugins();};
+	
+	std::vector<ACMediaFeatures*> &getAllPreProcFeaturesVectors() { return activeMedia->getAllPreProcFeaturesVectors(); };
+	 ACMediaFeatures* getPreProcFeaturesVector(int i){ return activeMedia->getPreProcFeaturesVector(i); };
+	 ACMediaFeatures* getPreProcFeaturesVector(std::string feature_name){ return activeMedia->getPreProcFeaturesVector(feature_name); };
+	 int getNumberOfPreProcFeaturesVectors() { return activeMedia->getNumberOfPreProcFeaturesVectors(); };
+	std::vector<std::string> getListOfPreProcFeaturesPlugins(){ return activeMedia->getListOfPreProcFeaturesPlugins(); };
+	void defaultPreProcFeatureInit(void);
 
 private:
 	void init();
@@ -91,6 +104,7 @@ private:
 	void incrementMediaID(){mediaID++ ;}
 	int getMediaID(){return mediaID ;}
 	int addMedia(std::string key, ACMedia* media); 
+	ACMedia* activeMedia;
 
 	
 };

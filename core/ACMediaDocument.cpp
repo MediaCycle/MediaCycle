@@ -53,6 +53,7 @@ const int ACMediaDocument:: default_thumbnail_area = 16384; // 128*128
 ACMediaDocument::ACMediaDocument() : ACMedia() {
 	this->init();
 	mediaID=0;
+	activeMedia=0;
 }
 
 int ACMediaDocument::import(std::string _filename, int _mid, ACPluginManager *acpl, bool _save_timed_feat){	
@@ -108,10 +109,13 @@ int ACMediaDocument::import(std::string _filename, int _mid, ACPluginManager *ac
 		}
 
 	}
+	if (_mid>=0) this->setId(_mid);
+	if (this->mediaContainer.size()>0)
+		activeMedia=(*(mediaContainer.begin())).second;
 }
 
 int ACMediaDocument::addMedia(std::string stringKey, ACMedia* media){
-	pair <ACMediaType,ACMedia*>  temp;
+	
 	if (mediaContainer.find(stringKey)==mediaContainer.end()){
 		mediaContainer[stringKey]=media;
 	}
@@ -119,6 +123,13 @@ int ACMediaDocument::addMedia(std::string stringKey, ACMedia* media){
 		return 0;
 	return 1;
 }
+void ACMediaDocument::defaultPreProcFeatureInit(void){
+	std::map<std::string ,ACMedia* >::iterator it;
+
+	for (it=mediaContainer.begin();it!=mediaContainer.end();it++)
+		it->second->defaultPreProcFeatureInit();
+}
+
 
 void ACMediaDocument::init() {
 	media_type = MEDIA_TYPE_MIXED;
@@ -134,6 +145,7 @@ ACMediaDocument::ACMediaDocument(const ACMediaDocument& m, bool reduce) : ACMedi
 }
 
 ACMediaDocument::~ACMediaDocument() {
+	activeMedia=0;
 	this->deleteData();
 	// the osg pointers should be automatically deleted (ref_ptr)
 }
@@ -163,6 +175,16 @@ void ACMediaDocument::extractData(string fname){
 //	computeThumbnail(data, thumbnail_width , thumbnail_height);
 }
 
+
+
+int ACMediaDocument::setActiveSubMedia(string mediaName){
+	if (mediaContainer.find(mediaName)==mediaContainer.end()){
+		return 0;
+	}
+	else
+		activeMedia=mediaContainer.find(mediaName)->second;
+	return 1;
+}
 
 void ACMediaDocument::deleteMedia(){
 	map<string ,ACMedia* > ::iterator iter;
