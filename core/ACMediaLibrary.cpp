@@ -791,8 +791,10 @@ void ACMediaLibrary::normalizeFeatures(int needsNormalize) {
 	if (mPreProcessPlugin!=NULL){	
 		for(i=start; i<n; i++){
 			ACMedia* item = media_library[i];
+			std::vector<ACMediaFeatures*> tempFeatVect=mPreProcessPlugin->apply(mPreProcessInfo,item);
 			item->cleanPreProcFeaturesVector();
-			item->getAllPreProcFeaturesVectors()=mPreProcessPlugin->apply(mPreProcessInfo,item);
+			item->getAllPreProcFeaturesVectors()=tempFeatVect;
+			tempFeatVect.clear();
 		}		
 	}
 	else {

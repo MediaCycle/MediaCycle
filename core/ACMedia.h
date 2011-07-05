@@ -91,20 +91,21 @@ public:
 	int getNumberOfSegments(){return segments.size();}
 	
 	virtual std::vector<ACMediaFeatures*> &getAllFeaturesVectors() { return features_vectors; }
-	ACMediaFeatures* getFeaturesVector(int i);
-	ACMediaFeatures* getFeaturesVector(std::string feature_name);
-	int getNumberOfFeaturesVectors() {return features_vectors.size();}
+	virtual ACMediaFeatures* getFeaturesVector(int i);
+	virtual ACMediaFeatures* getFeaturesVector(std::string feature_name);
+	virtual int getNumberOfFeaturesVectors() {return features_vectors.size();}
 	void addFeaturesVector(ACMediaFeatures *aFeatures) { this->features_vectors.push_back(aFeatures); }
 	virtual std::vector<std::string> getListOfFeaturesPlugins();
 	
 	virtual std::vector<ACMediaFeatures*> &getAllPreProcFeaturesVectors() { return preproc_features_vectors; }
-	ACMediaFeatures* getPreProcFeaturesVector(int i);
-	ACMediaFeatures* getPreProcFeaturesVector(std::string feature_name);
-	int getNumberOfPreProcFeaturesVectors() {return preproc_features_vectors.size();}
+	virtual ACMediaFeatures* getPreProcFeaturesVector(int i);
+	virtual ACMediaFeatures* getPreProcFeaturesVector(std::string feature_name);
+	virtual int getNumberOfPreProcFeaturesVectors() {return preproc_features_vectors.size();}
 	void addPreProcFeaturesVector(ACMediaFeatures *aFeatures) { this->preproc_features_vectors.push_back(aFeatures); }
 	virtual std::vector<std::string> getListOfPreProcFeaturesPlugins();
+	int replacePreProcFeatures(std::vector<ACMediaFeatures*> newFeatures);
 	void cleanPreProcFeaturesVector(void);
-	void defaultPreProcFeatureInit(void);
+	virtual void defaultPreProcFeatureInit(void);
 	
 	std::string getFileName() { return filename; }
 	void setFileName(std::string s) { filename = s; }

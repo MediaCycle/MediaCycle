@@ -53,6 +53,8 @@ using namespace std;
 using namespace lucene::index;
 
 #include "MediaCycle.h"
+
+#include <ctime>
 const unsigned int NUM_INDENTS_PER_SPACE=2;
 
 const char * getIndent( unsigned int numIndents )
@@ -182,6 +184,16 @@ vector<ACMediaType> mediaExtract2(ACMediaType lMediaType){
 }
 
 int main(void){
+	float test=1,test1=0.f;
+	while (1) {
+		 test=(float)clock();///CLOCKS_PER_SEC;
+		
+		//usleep(1);
+		cout<<test<<endl;
+		test1=test;
+		
+	}
+	
 	vector<ACMediaType> testVect=mediaExtract2(MEDIA_TYPE_AUDIO|MEDIA_TYPE_VIDEO|MEDIA_TYPE_TEXT);
 	MediaCycle *testMC=new MediaCycle(MEDIA_TYPE_MIXED);
 	testMC->getLibrary()->importFile(string("/Users/ravet/Desktop/MediaCycleData/testMediaDocument/testMediaDocument.xml"), testMC->getPluginManager(), false, false);

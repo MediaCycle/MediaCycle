@@ -80,11 +80,13 @@ void ACSparseKMeansPlugin::updateClusters(ACMediaBrowser* mediaBrowser,bool need
 	vector< float > 		cluster_distances; // for computation
 	vector<vector<vector <float> > > clusterCenters; // cluster index, feature index, descriptor index
 	vector<float>			featureWeights=mediaBrowser->getFeatureWeights(); // each value must be in [0,1], important for euclidian distance.
+	vector<int> clusterId;
 	
 	clusterCenters.resize(clusterCount);
 	cluster_counts.resize(clusterCount);
 	cluster_accumulators.resize(clusterCount);
 	cluster_distances.resize(clusterCount);
+	clusterId.resize(object_count);
 	
 	if (needsCluster){
 		
@@ -188,7 +190,8 @@ void ACSparseKMeansPlugin::updateClusters(ACMediaBrowser* mediaBrowser,bool need
 				// update accumulator and counts
 				
 				cluster_counts[jmin]++;
-				mediaBrowser->getMediaNode(i).setClusterId (jmin);
+				clusterId[i]=jmin;
+				//mediaBrowser->getMediaNode(i).setClusterId (jmin);
 				//for(f=0; f<feature_count; f++)
 				//{
 					// XS again, what if all media don't have the same number of features ?

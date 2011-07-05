@@ -535,6 +535,21 @@ std::vector<std::string> ACMedia::getListOfPreProcFeaturesPlugins(){
 	}
 	return plugins_list;
 }
+
+int ACMedia::replacePreProcFeatures(std::vector<ACMediaFeatures*> newFeatures){
+	
+	if (newFeatures.size()!=preproc_features_vectors.size())
+		return 0;
+	for (int i=0;i<newFeatures.size();i++){
+		ACMediaFeatures* tempPtr=preproc_features_vectors[i];
+		preproc_features_vectors[i]=newFeatures[i];
+		if (tempPtr!=0) {
+			delete tempPtr;
+			tempPtr=0;
+		}
+	}
+	return 1;
+}
 void ACMedia::cleanPreProcFeaturesVector(void){
 	
 	std::vector<ACMediaFeatures*>::iterator iter;
