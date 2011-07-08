@@ -191,7 +191,7 @@ void ACSparseKMeansPlugin::updateClusters(ACMediaBrowser* mediaBrowser,bool need
 				
 				cluster_counts[jmin]++;
 				clusterId[i]=jmin;
-				//mediaBrowser->getMediaNode(i).setClusterId (jmin);
+				mediaBrowser->getMediaNode(i).setClusterId (jmin);
 				//for(f=0; f<feature_count; f++)
 				//{
 					// XS again, what if all media don't have the same number of features ?

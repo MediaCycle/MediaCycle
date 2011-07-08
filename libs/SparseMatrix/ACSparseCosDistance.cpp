@@ -38,30 +38,28 @@
 #include <iostream>
 using namespace std;
 
-ACSparseCosDistance::ACSparseCosDistance(const vector<ACMediaFeatures*> &F1,const  vector<ACMediaFeatures*> &F2) : ACSparseDistance( F1, F2) {
-	if (F1.size()==3){
-		V1.push_back((F1[0]->getFeaturesVector()));
-		V1.push_back((F1[1]->getFeaturesVector()));
-		V1.push_back((F1[2]->getFeaturesVector()));
-	}
+ACSparseCosDistance::ACSparseCosDistance(ACMediaFeatures* F1Num,ACMediaFeatures* F1Index,ACMediaFeatures* F1Value,ACMediaFeatures* F2Num,ACMediaFeatures* F2Index,ACMediaFeatures* F2Value)
+:ACSparseDistance( F1Num, F1Index, F1Value, F2Num, F2Index, F2Value){
 
-	if (F2.size()==3){
-		
-		V2.push_back((F2[0]->getFeaturesVector()));
-		V2.push_back((F2[1]->getFeaturesVector()));
-		V2.push_back((F2[2]->getFeaturesVector()));
-	}
 	
+	num1=F1Num->getFeaturesVector();
+	num2=F2Num->getFeaturesVector();
+	index1=F1Index->getFeaturesVector();
+	index2=F2Index->getFeaturesVector();
+	value1=F1Value->getFeaturesVector();
+	value2=F2Value->getFeaturesVector();
 }
 
-ACSparseCosDistance::ACSparseCosDistance( ACSparseVector &F1,  ACSparseVector &F2) : ACSparseDistance( F1, F2) {
+ACSparseCosDistance::ACSparseCosDistance(const FeaturesVector* F1Num,const FeaturesVector* F1Index,const FeaturesVector* F1Value,const FeaturesVector* F2Num,const FeaturesVector* F2Index,const FeaturesVector* F2Value)
+:ACSparseDistance( F1Num, F1Index, F1Value, F2Num, F2Index, F2Value){	
 
-	for (unsigned int i=0;i<F1.size();i++)//;iter!=F1->end();iter++)
-		V1.push_back(&(F1.at(i)));
+	num1=F1Num;
+	num2=F2Num;
+	index1=F1Index;
+	index2=F2Index;
+	value1=F1Value;
+	value2=F2Value;
 	
-	for (unsigned int i=0;i<F2.size();i++)//;iter!=F1->end();iter++)
-		V2.push_back(&(F2.at(i)));	
-	copyVec=true;
 }
 
 ACSparseCosDistance::~ACSparseCosDistance(){
@@ -69,23 +67,20 @@ ACSparseCosDistance::~ACSparseCosDistance(){
 
 double ACSparseCosDistance::distance(){
 	
-	if ((V1.size()!=3 )|| (V2.size()!=3)){
+
+	if (((num1)->size()!=1 )|| ((num2)->size()!=1)){
 		cerr << "<ACSparseCosDistance::distance> : incompatible sparse vector type" << endl;
 		return 0.0;
 	}
-	if (((V1[0])->size()!=1 )|| ((V2[0])->size()!=1)){
+	if ((index1->size()!=value1->size() )|| (index2->size()!=value2->size())){
 		cerr << "<ACSparseCosDistance::distance> : incompatible sparse vector type" << endl;
 		return 0.0;
 	}
-	if ((V1[1]->size()!=V1[2]->size() )|| (V2[1]->size()!=V2[2]->size())){
-		cerr << "<ACSparseCosDistance::distance> : incompatible sparse vector type" << endl;
-		return 0.0;
-	}
-	if ((*V1[0])[0]!=(*V2[0])[0]){
+	if (num1->at(0)!=num2->at(0)){
 		cerr << "<ACSparseCosDistance::distance> : incomparable features" << endl;
 		return 0.0;
 	}
-	int s = (*V1[0])[0];
+	int s = num1->at(0);
 	if (s==0) {
 		cerr << "<ACSparseCosDistance::distance> : empty features" << endl;
 		return 0.0;
@@ -95,30 +90,37 @@ double ACSparseCosDistance::distance(){
 	
 	float a = 0.f, b= 0.f, ab= 0.f ;
 	
-	for (unsigned int i=0;i<V1[2]->size();i++){
-		a+=(*V1[2])[i]*(*V1[2])[i];
+	for (unsigned int i=0;i<value1->size();i++){
+		a+=value1->at(i)*value1->at(i);
 	}
 	a=sqrt(a);
-	for (unsigned int i=0;i<V2[2]->size();i++){
-		b+=(*V2[2])[i]*(*V2[2])[i];
+	
+	for (unsigned int i=0;i<value2->size();i++){
+		b+=value2->at(i)*value2->at(i);
 	}
 	b=sqrt(b);
+	
 //	cout<<V1[2]->size()<<"\t"<<(*V1[0])[0]<<"\t"<<(*V2[0])[0]<<"\t"<<V2[2]->size()<<endl;
-	while ((cpt1<V1[2]->size())&& (cpt2<V2[2]->size())){
+	
+	while ((cpt1<value1->size())&& (cpt2<value2->size())){
 
-		if ((int)(*V1[1])[cpt1]==(int)(*V2[1])[cpt2]) {
-			ab+=((*V1[2])[cpt1])*((*V2[2])[cpt2]);
+		
+		if ((int)index1->at(cpt1)==(int)index2->at(cpt2)) {
+		
+			ab+=(value1->at(cpt1)*value2->at(cpt2));
 	//		cout << cpt1 << "\t"<<(*V1[1])[cpt1] << "\t"<<(*V1[2])[cpt1]<< "\t"<<cpt2 << "\t"<<(*V2[1])[cpt2] << "\t"<<(*V2[2])[cpt2]<<"\n";
 			cpt1++;
 			cpt2++;
 			continue;
 		}
-		if ((*V1[1])[cpt1]<(*V2[1])[cpt2]) {
-	//		cout << cpt1 << "\t"<<(*V1[1])[cpt1] << "\t"<<(*V1[2])[cpt1]<< "\t"<<cpt2 << "\t"<<(*V2[1])[cpt2] << "\t"<<"0"<<"\n";
+		if ((int)index1->at(cpt1)<(int)index2->at(cpt2)) {
+
+		//		cout << cpt1 << "\t"<<(*V1[1])[cpt1] << "\t"<<(*V1[2])[cpt1]<< "\t"<<cpt2 << "\t"<<(*V2[1])[cpt2] << "\t"<<"0"<<"\n";
 			cpt1++;
 			continue;
 		}
-		if ((*V1[1])[cpt1]>(*V2[1])[cpt2]) {
+		if ((int)index1->at(cpt1)>(int)index2->at(cpt2)) {
+			
 			
 	//		cout << cpt1 << "\t"<<(*V1[1])[cpt1] << "\t"<<"0"<< "\t"<<cpt2 << "\t"<<(*V2[1])[cpt2] << "\t"<<(*V2[2])[cpt2]<<"\n";
 			cpt2++;

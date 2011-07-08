@@ -59,15 +59,16 @@ double ACSparseCosClustPosition::compute_distance(vector<ACMediaFeatures*> &obj1
 	double dis = 0.0;
 	
 	for (int f=0; f<feature_count; f++) {
-		vector<ACMediaFeatures*>  temp1,temp2;
+		/*vector<ACMediaFeatures*>  temp1,temp2;
 		temp1.push_back(obj1[3*f+0] );
 		temp1.push_back(obj1[3*f+1] );
 		temp1.push_back(obj1[3*f+2] );
 		temp2.push_back(obj2[3*f+0] );
 		temp2.push_back(obj2[3*f+1] );
 		temp2.push_back(obj2[3*f+2] );
-		
-		ACSparseCosDistance* E = new ACSparseCosDistance (temp1, temp2);
+		*/
+		ACSparseCosDistance* E = new ACSparseCosDistance (obj1[3*f+0]->getFeaturesVector(),obj1[3*f+1]->getFeaturesVector(),obj1[3*f+2]->getFeaturesVector(), 
+														  obj2[3*f+0]->getFeaturesVector(),obj2[3*f+1]->getFeaturesVector(),obj2[3*f+2]->getFeaturesVector());
 		dis += (E->distance()) * (inverse_features?(1.0-weights[f]):weights[f]);
 		delete E;
 	}
@@ -88,19 +89,20 @@ double ACSparseCosClustPosition::compute_distance(vector<ACMediaFeatures*> &obj1
 	double dis = 0.0;	
 	
 	for (int f=0; f<feature_count; f++) {
-		ACSparseVector temp1,temp2;
-		temp1.push_back(*(obj1[3*f+0]->getFeaturesVector() ));
-		temp1.push_back(*(obj1[3*f+1]->getFeaturesVector() ));
-		temp1.push_back(*(obj1[3*f+2]->getFeaturesVector() ));
+	/*	ACSparseVector temp1,temp2;
+		temp1.push_back((obj1[3*f+0]->getFeaturesVector() ));
+		temp1.push_back((obj1[3*f+1]->getFeaturesVector() ));
+		temp1.push_back((obj1[3*f+2]->getFeaturesVector() ));
 		//	for (int i=0;i<temp1[2].size();i++)
 		//		cout << temp1[2][i]<<"\t";
 		//	cout << "\n";
-		temp2.push_back(obj2[3*f+0] );
-		temp2.push_back(obj2[3*f+1] );
-		temp2.push_back(obj2[3*f+2] );
+		temp2.push_back(&(obj2.at(3*f+0)) );
+		temp2.push_back(&(obj2[3*f+1]) );
+		temp2.push_back(&(obj2[3*f+2]) );*/
 		//ACCosDistance* E = new ACCosDistance (&(obj1[f]->getFeaturesVector()), (FeaturesVector *) &obj2[f]);
 		//FeaturesVector tmp  = obj1[f]->getFeaturesVector();
-		ACSparseCosDistance* E = new ACSparseCosDistance (temp1,temp2);
+		ACSparseCosDistance* E = new ACSparseCosDistance (obj1[3*f+0]->getFeaturesVector(),obj1[3*f+1]->getFeaturesVector(),obj1[3*f+2]->getFeaturesVector()
+														  ,&(obj2.at(3*f+0)),&(obj2.at(3*f+1)),&(obj2.at(3*f+2)));
 		dis += (E->distance()) * (inverse_features?(1.0-weights[f]):weights[f]);
 		delete E;
 	}
@@ -148,13 +150,18 @@ void ACSparseCosClustPosition::updateNextPositions(ACMediaBrowser* mediaBrowser)
 	int lNode=mediaBrowser->getNumberOfMediaNodes();
 	const vector<float> lFeatureWeights=mediaBrowser->getFeatureWeights();
 	const float lClusterCount=mediaBrowser->getClusterCount();
+	vector <vector< vector<float> > > lClusterCenters;//=mediaBrowser->getClusterCenter(ci);
+	lClusterCenters.resize(lClusterCount);
+	for (int ci=0;ci<lClusterCount;ci++)
+		lClusterCenters[ci]=mediaBrowser->getClusterCenter(ci);
+
 	for (int ind =0;ind<lNode;ind++)
 	{
 		ACMediaNode node=mediaBrowser->getMediaNode(ind);
 		if(node.getNavigationLevel() < navigationLevel) continue;
 		
 			int ci = node.getClusterId();
-			const vector< vector<float> > lClusterCenters=mediaBrowser->getClusterCenter(ci);
+//			const vector< vector<float> > lClusterCenters=mediaBrowser->getClusterCenter(ci);
 			
 			// SD TODO - test both approaches
 			r=1;
@@ -165,7 +172,7 @@ void ACSparseCosClustPosition::updateNextPositions(ACMediaBrowser* mediaBrowser)
 			theta = 2*M_PI * ci / (float)lClusterCount;
 			
 			double dt = 1;
-			dt = compute_distance(lLibrary->getMedia(node.getMediaId())->getAllPreProcFeaturesVectors(), lClusterCenters, lFeatureWeights, false) / 2.0 * 10.0;
+			dt = compute_distance(lLibrary->getMedia(node.getMediaId())->getAllPreProcFeaturesVectors(), lClusterCenters[ci], lFeatureWeights, false) / 2.0 * 10.0;
 			dt /= 3.0;
 			theta += dt;
 			

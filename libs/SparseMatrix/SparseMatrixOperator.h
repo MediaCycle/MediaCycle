@@ -37,7 +37,7 @@
 #define	_ACSPARSEMATRIXOPERATOR_H
 #include <vector>
 
-typedef std::vector<std::vector<float> > ACSparseVector;
+typedef std::vector<const std::vector<float> *> ACSparseVector;
 
 class SparseMatrixOperator {
 public:
@@ -46,6 +46,7 @@ public:
 	static float norm(const std::vector<float> &a0, const std::vector<float> &a1,const std::vector<float> &a2);
 	static ACSparseVector& fullToSparseVector(std::vector<float> in);
 	static std::vector<float>& SparseToFullVector(ACSparseVector in);
+	static void freeSparseVector(ACSparseVector &in);
 	
 
 };

@@ -50,24 +50,24 @@ ACSparseVector &SparseMatrixOperator::addVectors(std::vector<float> a0,std::vect
 	if ((a1[a1.size()-1]>a0[0])||(b1[b1.size()-1]>b0[0]))
 		return desc;
 	unsigned int cpt1=0,cpt2=0;
-	vector<float> nbTerm,index,values;
-	nbTerm.push_back(a0[0]);
+	vector<float> *nbTerm=new vector<float>,*index=new vector<float>,*values=new vector<float>;
+	nbTerm->push_back(a0[0]);
 	while ((cpt1<a1.size())&&(cpt2<b1.size())){
 		if (a1[cpt1]<b1[cpt2]){
-			index.push_back(a1[cpt1]);
-			values.push_back(a2[cpt1]);
+			index->push_back(a1[cpt1]);
+			values->push_back(a2[cpt1]);
 			cpt1++;
 			continue;
 		}
 		if (a1[cpt1]>b1[cpt2]){
-			index.push_back(b1[cpt2]);
-			values.push_back(b2[cpt2]);
+			index->push_back(b1[cpt2]);
+			values->push_back(b2[cpt2]);
 			cpt2++;
 			continue;
 		}
 		if (a1[cpt1]==b1[cpt2]){
-			index.push_back(a1[cpt1]);
-			values.push_back(a1[cpt1]+b2[cpt2]);
+			index->push_back(a1[cpt1]);
+			values->push_back(a1[cpt1]+b2[cpt2]);
 			cpt1++;
 			cpt2++;
 			continue;
@@ -75,15 +75,15 @@ ACSparseVector &SparseMatrixOperator::addVectors(std::vector<float> a0,std::vect
 	}
 	if (cpt1<a1.size()){
 		while (cpt1<a1.size()) {
-			index.push_back(a1[cpt1]);
-			values.push_back(a2[cpt1]);
+			index->push_back(a1[cpt1]);
+			values->push_back(a2[cpt1]);
 			cpt1++;			
 		}
 	}
 	else {
 		while (cpt2<b1.size()) {
-			index.push_back(b1[cpt2]);
-			values.push_back(b2[cpt2]);
+			index->push_back(b1[cpt2]);
+			values->push_back(b2[cpt2]);
 			cpt2++;			
 		}
 	}
@@ -133,16 +133,16 @@ float SparseMatrixOperator::norm(const  std::vector<float> &a0,const std::vector
 	return desc;
 }
 
-ACSparseVector& fullToSparseVector(std::vector<float> in){
+ACSparseVector& SparseMatrixOperator::fullToSparseVector(std::vector<float> in){
 	ACSparseVector desc;
-	vector<float> nbTerm,index,values;
-	nbTerm.push_back(in.size());
+	vector<float> *nbTerm=new vector<float>,*index=new vector<float>,*values=new vector<float>;
+	nbTerm->push_back(in.size());
 	unsigned int cpt=0;
 	for (vector<float>::iterator iter=in.begin();iter!=in.end();iter++){
 		if ((*iter)!=0.f){
 			
-			index.push_back(cpt);
-			values.push_back(*iter);
+			index->push_back(cpt);
+			values->push_back(*iter);
 			cpt++;
 		}
 	}
@@ -152,30 +152,37 @@ ACSparseVector& fullToSparseVector(std::vector<float> in){
 	return desc;
 }
 
-std::vector<float>& SparseToFullVector(ACSparseVector in){
+std::vector<float>& SparseMatrixOperator::SparseToFullVector(ACSparseVector in){
 	vector<float> desc;
 	if (in.size()!=3)
 		return desc;
-	vector<float> a0=in[0];
-	vector<float> a1=in[1];
-	vector<float> a2=in[2];
+	const vector<float> *a0=in[0];
+	const vector<float> *a1=in[1];
+	const vector<float> *a2=in[2];
 	
-	if ((a0.size()!=1))
+	if ((a0->size()!=1))
 		return desc;
-	if ((a1[a1.size()-1]>a0[0]))
+	if ((a1->at(a1->size()-1)>a0->at(0)))
 		return desc;
-	if (a1.size()!=a2.size())
+	if (a1->size()!=a2->size())
 		return desc;
 	unsigned int cpt=0;
-	vector<float>::iterator iter2=a2.begin();
-	for (vector<float>::iterator iter1=a1.begin();iter1!=a1.end();iter1++,iter2++){
-		for (;cpt<(*iter1);cpt++)
+	for (int i=0;i<a1->size();i++){
+		for (;cpt<a1->at(i);cpt++)
 			desc.push_back(0.f);
-		desc.push_back(*iter2);
-		cpt++;
+		desc.push_back(a2->at(i));
+		cpt++;		
 	}
-	for (;cpt<a0[0];cpt++)
+	for (;cpt<a0->at(0);cpt++)
 		desc.push_back(0);
 	return desc;
 }
 
+void SparseMatrixOperator::freeSparseVector(ACSparseVector &in){
+	if (in.size()!=3)
+		return;
+	delete in[0];
+	delete in[1];
+	delete in[2];
+	in.clear();
+}

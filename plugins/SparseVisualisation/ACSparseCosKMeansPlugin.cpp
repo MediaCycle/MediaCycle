@@ -68,7 +68,8 @@ double ACSparseCosKMeansPlugin::compute_distance(vector<ACMediaFeatures*> &obj1,
 		temp2.push_back(obj2[3*f+1] );
 		temp2.push_back(obj2[3*f+2] );
 		
-		ACSparseCosDistance* E = new ACSparseCosDistance (temp1, temp2);
+		ACSparseCosDistance* E = new ACSparseCosDistance (obj1[3*f+0]->getFeaturesVector(),obj1[3*f+1]->getFeaturesVector(),obj1[3*f+2]->getFeaturesVector(), 
+														  obj2[3*f+0]->getFeaturesVector(),obj2[3*f+1]->getFeaturesVector(),obj2[3*f+2]->getFeaturesVector());
 		dis += (E->distance()) * (inverse_features?(1.0-weights[f]):weights[f]);
 		delete E;
 	}
@@ -90,18 +91,19 @@ double ACSparseCosKMeansPlugin::compute_distance(vector<ACMediaFeatures*> &obj1,
 	
 	for (int f=0; f<feature_count; f++) {
 		ACSparseVector temp1,temp2;
-		temp1.push_back(*(obj1[3*f+0]->getFeaturesVector() ));
-		temp1.push_back(*(obj1[3*f+1]->getFeaturesVector() ));
-		temp1.push_back(*(obj1[3*f+2]->getFeaturesVector() ));
+		temp1.push_back((obj1[3*f+0]->getFeaturesVector() ));
+		temp1.push_back((obj1[3*f+1]->getFeaturesVector() ));
+		temp1.push_back((obj1[3*f+2]->getFeaturesVector() ));
 	//	for (int i=0;i<temp1[2].size();i++)
 	//		cout << temp1[2][i]<<"\t";
 	//	cout << "\n";
-		temp2.push_back(obj2[3*f+0] );
-		temp2.push_back(obj2[3*f+1] );
-		temp2.push_back(obj2[3*f+2] );
+		temp2.push_back(&(obj2.at(3*f+0)) );
+		temp2.push_back(&(obj2.at(3*f+1)) );
+		temp2.push_back(&(obj2.at(3*f+2)) );
 		//ACCosDistance* E = new ACCosDistance (&(obj1[f]->getFeaturesVector()), (FeaturesVector *) &obj2[f]);
 		//FeaturesVector tmp  = obj1[f]->getFeaturesVector();
-		ACSparseCosDistance* E = new ACSparseCosDistance (temp1,temp2);
+		ACSparseCosDistance* E = new ACSparseCosDistance (obj1[3*f+0]->getFeaturesVector(),obj1[3*f+1]->getFeaturesVector(),obj1[3*f+2]->getFeaturesVector()
+														  ,&(obj2.at(3*f+0)),&(obj2.at(3*f+1)),&(obj2.at(3*f+2)));
 		dis += (E->distance()) * (inverse_features?(1.0-weights[f]):weights[f]);
 		delete E;
 	}

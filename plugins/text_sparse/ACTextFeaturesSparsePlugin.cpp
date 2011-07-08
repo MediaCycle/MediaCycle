@@ -213,7 +213,8 @@ vector<ACMediaFeatures*> ACTextFeaturesSparsePlugin::tfCalculate(ACText* pMedia)
 		return desc;
 	nbTotTerms.push_back(nbTerms);
 	int nbFeat=0;
-	for (int i=0;i<nbTerms;i++)
+	int cptZero=0;
+	for (int i=0;i<nbTerms;i++)		
 	{
 		if ((featureTest[i]!=0.f)&&(indexIdf[i]!=0.f)){
 			tfValues.push_back(featureTest[i]*indexIdf[i]);
@@ -225,6 +226,10 @@ vector<ACMediaFeatures*> ACTextFeaturesSparsePlugin::tfCalculate(ACText* pMedia)
 			//cout <<tempChar<<"\t"<<*(tfIndex.end()-1)<<"\t"<<*(tfValues.end()-1)<<endl;
 			delete tempChar;
 		}
+		else {
+			cptZero++;
+		}
+
 		
 	}
 	ACMediaFeatures* desc0=new ACMediaFeatures(nbTotTerms,"Term Frequency-Inverse Document Frequency: number of terms");
@@ -233,6 +238,7 @@ vector<ACMediaFeatures*> ACTextFeaturesSparsePlugin::tfCalculate(ACText* pMedia)
 	desc1->setNeedsNormalization(0);	
 	ACMediaFeatures* desc2=new ACMediaFeatures(tfValues,"Term Frequency-Inverse Document Frequency: Sparse Matrix Values");
 	desc2->setNeedsNormalization(1);
+	cout<<pMedia->getFileName()<<"\t"<<nbTerms<<"\t"<<tfIndex.size()<<"\t"<<tfValues.size()<<endl;
 	desc.push_back(desc0);
 	desc.push_back(desc1);
 	desc.push_back(desc2);
@@ -250,6 +256,7 @@ std::vector<ACMediaFeatures*> ACTextFeaturesSparsePlugin::calculate(ACMediaData*
 	}		
 	else 
 		mIndexValid=false;
+	//sleep(1);
 	std::vector<ACMediaFeatures*> desc;
 	std::vector<float> descVect;
 	descVect.push_back(1.f);
@@ -281,7 +288,8 @@ preProcessInfo ACTextFeaturesSparsePlugin::update(std::vector<ACMedia*> media_li
 }
 
 std::vector<ACMediaFeatures*> ACTextFeaturesSparsePlugin::apply(preProcessInfo info,ACMedia* theMedia){
-		
+	//usleep(100000);
+	
 	ACText* lMedia=(ACText*)theMedia;
 	
 	cout <<theMedia->getFileName()<<endl;

@@ -41,8 +41,8 @@
 class ACSparseCosDistance : public ACSparseDistance {
 public:
 	//	ACSparseCosDistance(){} // not used
-	ACSparseCosDistance(const std::vector<ACMediaFeatures*> &F1,const  std::vector<ACMediaFeatures*> &F2);
-	ACSparseCosDistance( ACSparseVector &F1,  ACSparseVector &F2);
+	ACSparseCosDistance(ACMediaFeatures* F1Num,ACMediaFeatures* F1Index,ACMediaFeatures* F1Value,ACMediaFeatures* F2Num,ACMediaFeatures* F2Index,ACMediaFeatures* F2Value);
+	ACSparseCosDistance(const FeaturesVector* F1Num,const FeaturesVector* F1Index,const FeaturesVector* F1Value,const FeaturesVector* F2Num,const FeaturesVector* F2Index,const FeaturesVector* F2Value);	
 	~ACSparseCosDistance();
 	double distance();
 //	static double distance(std::vector<ACMediaFeatures*>, std::vector<ACMediaFeatures*>);

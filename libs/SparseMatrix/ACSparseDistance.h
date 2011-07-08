@@ -42,10 +42,14 @@
 
 class ACSparseDistance {
 protected:
-	std::vector<std::vector<float > *> V1, V2;
+	const FeaturesVector *num1,*num2;
+	const FeaturesVector *index1,*index2;
+	const FeaturesVector *value1,*value2;
+	
+	
 public:
-	ACSparseDistance(const std::vector<ACMediaFeatures*> &F1,const  std::vector<ACMediaFeatures*> &F2) {};
-	ACSparseDistance( ACSparseVector &F1,  ACSparseVector &F2) {};
+	ACSparseDistance(ACMediaFeatures* F1Num,ACMediaFeatures* F1Index,ACMediaFeatures* F1Value,ACMediaFeatures* F2Num,ACMediaFeatures* F2Index,ACMediaFeatures* F2Value) {};
+	ACSparseDistance(const FeaturesVector* F1Num,const FeaturesVector* F1Index,const FeaturesVector* F1Value,const FeaturesVector* F2Num,const FeaturesVector* F2Index,const FeaturesVector* F2Value) {};
 	virtual ~ACSparseDistance() {};
 	virtual double distance()=0;
 };
