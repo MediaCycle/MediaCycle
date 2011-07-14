@@ -122,8 +122,8 @@ void ACSparseCosKMeansPlugin::meanAccumCompute(std::vector<ACMediaFeatures*> & o
 		vector<float> *a1=obj1[3*i+1]->getFeaturesVector();
 		vector<float> *a2=obj1[3*i+2]->getFeaturesVector();
 		float norm=0.f;
-		for (int i=0;i<a2->size();i++)
-			norm+=(*a2)[i]*(*a2)[i];
+		for (int j=0;j<a2->size();j++)
+			norm+=(*a2)[j]*(*a2)[j];
 		norm=sqrt(norm);
 		int numTerm=obj1[3*i+0]->getFeatureElement(0);
 		obj2[3*i+0].clear();
@@ -172,8 +172,8 @@ void ACSparseCosKMeansPlugin::meanAccumCompute(std::vector<ACMediaFeatures*> & o
 			}
 		}
 		norm=0.f;
-		for (int i=0;i<values->size();i++)
-			norm+=(*values)[i]*(*values)[i];
+		for (int j=0;j<values->size();j++)
+			norm+=(*values)[j]*(*values)[j];
 		norm=sqrt(norm);
 		
 	}
