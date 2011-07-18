@@ -294,6 +294,7 @@ ACMedia* ACMediaFactory::create(ACMediaType media_type){
 			return 0;
 			break;
 	}
+	return 0;
 }
 
 ACMedia* ACMediaFactory::create(ACMedia* media){
@@ -364,6 +365,7 @@ ACMedia* ACMediaFactory::create(ACMedia* media){
 			break;
 	}
 	 */
+	return 0;
 }
 
 // returns the ACMediaType corresponding to a given file extension

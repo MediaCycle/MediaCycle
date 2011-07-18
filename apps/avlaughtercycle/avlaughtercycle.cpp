@@ -89,6 +89,7 @@ int main(int argc, char** argv) {
 	cout << "new media" << endl;
 	ACPlugin *audioanalysis = mediacycle->getPluginManager()->getPlugin("AudioAnalysis");
 	cout << "audioanalysis" << endl;
+	 // XS TODO get data then calculate
 	ACMediaFeatures *amf = audioanalysis->calculate("/home/alexis/Work/eNTERFACE/eNTERFACE09/AVLC/validation/alexis.wav");
 	amf->dump();
 	cout << "normalize" <<endl;
@@ -383,7 +384,8 @@ int processTcpMessageFromSSI(MediaCycle *that, char *buffer, int l, char **buffe
 			if (greta) {
 				//filename extension is removed in greta
 				cout << "Sent to Greta : " << result[0]->getFileName() << endl;
-				greta->calculate(result[0]->getFileName());
+				//XS TODO getData
+				//greta->calculate(result[0]->getFileName());
 			} else {
 				cout << "Greta plugin not found, displaying results here ..." << endl;
 				cout << "*** REQUEST DUMP : " << endl;

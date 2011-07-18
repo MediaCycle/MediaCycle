@@ -64,17 +64,14 @@ void itemClicked(MediaCycle *that, int idVideo, char**, int*);
 void labelClicked(MediaCycle *mediacycle, int idLabel, char **, int*);
 string fillOutputBuffer(ACMediaLibrary* media_library, ACMediaBrowser* media_browser, int nvid);
 
-// string dirpath = "/Users/dtardieu/Desktop/dancers-test/dancers-all.xml";
 string dirpath = "./";
 string xmlpath = dirpath+"dancers-all.xml";
 
 int main(int argc, char** argv) {
 	string configFilename = dirpath+"config.txt";
 	ifstream configIF(configFilename.c_str());
-	cout << "MediaCycle - Dancers - v3" << endl;
-	cout << "MediaCycle - Dancers - v3" << endl;
-	cout << "MediaCycle - Dancers - v3" << endl;
-	cout << "MediaCycle - Dancers - v3" << endl;
+	cout << "MediaCycle - Dancers - v4" << endl;
+	cout << "-------------------------" << endl;
 
 	string libraryFilename, visPluginFilename;
 	configIF >> libraryFilename;

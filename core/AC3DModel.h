@@ -60,7 +60,7 @@ public:
 	osg::ref_ptr<osg::Node> getData(){return static_cast< osg::Node* > (data->getData());}
 	void setData(osg::ref_ptr<osg::Node> _data);
 	virtual ACMediaData* getMediaData(){return data;}
-	void extractData(std::string fname);
+	bool extractData(std::string fname);
 	virtual void deleteData();
 	
 private:	

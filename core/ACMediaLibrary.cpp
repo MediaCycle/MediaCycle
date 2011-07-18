@@ -253,15 +253,13 @@ int ACMediaLibrary::importFile(std::string _filename, ACPluginManager *acpl, boo
 	return 1;
 }
 
-// XS TODO return value
 int ACMediaLibrary::scanDirectories(std::vector<string> _paths, int _recursive, std::vector<string>& filenames) {
-	// XS TODO
-	// int cnt = 0;
+	int cnt = 0;
 	for (unsigned int i=0; i<_paths.size(); i++) {
-		// cnt += ...
-		scanDirectory(_paths[i], _recursive, filenames);
+		int c = scanDirectory(_paths[i], _recursive, filenames) ; // could be -1 if error
+		if (c > 0) cnt += c;
 	}
-	// return cnt;
+	return cnt;
 }
 
 // construct a vector (filenames) containing the files in a given directory (_path).
@@ -540,7 +538,8 @@ int ACMediaLibrary::saveACLLibrary(std::string _path){
 
 // XS TODO return value
 // this only saves the equivalent of the ACL config
-// (obsolete ??)
+// will NOT contain header (browser, plugins, ...) information.
+// (obsolete ? useful ?)
 int ACMediaLibrary::saveXMLLibrary(std::string _path){
 	// we save UNnormalized features
 	denormalizeFeatures();
@@ -928,64 +927,64 @@ void ACMediaLibrary::setPreProcessPlugin(ACPlugin* acpl)
 
 // -------------------------------------------------------------------------
 // test
-#if defined(SUPPORT_VIDEO)
-int ACMediaLibrary::testFFMPEG(std::string _filename){
-	//CF early check in video files for audio and video streams, towards ACMediaDocuments
-	// from http://www.inb.uni-luebeck.de/~boehme/using_libavcodec.html
-	// and http://www.inb.uni-luebeck.de/~boehme/libavcodec_update.html
-
-	string extension = fs::extension(_filename);
-	ACMediaType fileMediaType = ACMediaFactory::getInstance().getMediaTypeFromExtension(extension);
-
-	if (media_type == MEDIA_TYPE_VIDEO || media_type == MEDIA_TYPE_AUDIO) {
-		if (fileMediaType == MEDIA_TYPE_VIDEO) {
-			AVFormatContext *pFormatCtx;
-			int             i, videoStreams, audioStreams;
-			/*
-			AVCodecContext  *pCodecCtx;
-			AVCodec         *pCodec;
-			AVFrame         *pFrame;
-			AVFrame         *pFrameRGB;
-			AVPacket        packet;
-			int             frameFinished;
-			int             numBytes;
-			uint8_t         *buffer;
-			*/
-			// Open video file
-			if(av_open_input_file(&pFormatCtx, _filename.c_str(), 0, 0, 0)!=0){
-				std::cout << "Couldn't open file" << std::endl;
-				return 0;
-			}
-
-			// Retrieve stream information
-			if(av_find_stream_info(pFormatCtx)<0){
-				std::cout << "Couldn't find stream information" << std::endl;
-				return 0;
-			}
-
-			// Dump information about file onto standard error
-			dump_format(pFormatCtx, 0, _filename.c_str(), false);
-
-			// Count video streams
-			videoStreams=0;
-			for(i=0; i<pFormatCtx->nb_streams; i++)
-				if(pFormatCtx->streams[i]->codec->codec_type==CODEC_TYPE_VIDEO)
-					videoStreams++;
-			if(videoStreams == 0)
-				std::cout << "Didn't find any video stream." << std::endl;
-			else
-				std::cout << "Found " << videoStreams << " video stream(s)." << std::endl;
-
-			// Count audio streams
-			audioStreams=0;
-			for(i=0; i<pFormatCtx->nb_streams; i++)
-				if(pFormatCtx->streams[i]->codec->codec_type==CODEC_TYPE_AUDIO)
-					audioStreams++;
-			if(audioStreams == 0)
-				std::cout << "Didn't find any audio stream" << std::endl;
-			else
-				std::cout << "Found " << audioStreams << " audio stream(s)." << std::endl;
-		}
-	}
-}
-#endif //defined (SUPPORT_VIDEO)
+//#if defined(SUPPORT_VIDEO)
+//int ACMediaLibrary::testFFMPEG(std::string _filename){
+//	//CF early check in video files for audio and video streams, towards ACMediaDocuments
+//	// from http://www.inb.uni-luebeck.de/~boehme/using_libavcodec.html
+//	// and http://www.inb.uni-luebeck.de/~boehme/libavcodec_update.html
+//
+//	string extension = fs::extension(_filename);
+//	ACMediaType fileMediaType = ACMediaFactory::getInstance().getMediaTypeFromExtension(extension);
+//
+//	if (media_type == MEDIA_TYPE_VIDEO || media_type == MEDIA_TYPE_AUDIO) {
+//		if (fileMediaType == MEDIA_TYPE_VIDEO) {
+//			AVFormatContext *pFormatCtx;
+//			int             i, videoStreams, audioStreams;
+//			/*
+//			AVCodecContext  *pCodecCtx;
+//			AVCodec         *pCodec;
+//			AVFrame         *pFrame;
+//			AVFrame         *pFrameRGB;
+//			AVPacket        packet;
+//			int             frameFinished;
+//			int             numBytes;
+//			uint8_t         *buffer;
+//			*/
+//			// Open video file
+//			if(av_open_input_file(&pFormatCtx, _filename.c_str(), 0, 0, 0)!=0){
+//				std::cout << "Couldn't open file" << std::endl;
+//				return 0;
+//			}
+//
+//			// Retrieve stream information
+//			if(av_find_stream_info(pFormatCtx)<0){
+//				std::cout << "Couldn't find stream information" << std::endl;
+//				return 0;
+//			}
+//
+//			// Dump information about file onto standard error
+//			dump_format(pFormatCtx, 0, _filename.c_str(), false);
+//
+//			// Count video streams
+//			videoStreams=0;
+//			for(i=0; i<pFormatCtx->nb_streams; i++)
+//				if(pFormatCtx->streams[i]->codec->codec_type==CODEC_TYPE_VIDEO)
+//					videoStreams++;
+//			if(videoStreams == 0)
+//				std::cout << "Didn't find any video stream." << std::endl;
+//			else
+//				std::cout << "Found " << videoStreams << " video stream(s)." << std::endl;
+//
+//			// Count audio streams
+//			audioStreams=0;
+//			for(i=0; i<pFormatCtx->nb_streams; i++)
+//				if(pFormatCtx->streams[i]->codec->codec_type==CODEC_TYPE_AUDIO)
+//					audioStreams++;
+//			if(audioStreams == 0)
+//				std::cout << "Didn't find any audio stream" << std::endl;
+//			else
+//				std::cout << "Found " << audioStreams << " audio stream(s)." << std::endl;
+//		}
+//	}
+//}
+//#endif //defined (SUPPORT_VIDEO)

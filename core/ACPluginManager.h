@@ -50,10 +50,6 @@ public:
     virtual ~ACPluginLibrary();
     int initialize();
     
-    //this is not necessary since getPlugin(i) gives direct access to plugins
-    //and their functions.
-	//std::vector<ACMediaFeatures*> calculate(int aPluginIndex, std::string aFileName);
-
     std::vector<ACPlugin *> getPlugins() {return this->mPlugins;};
     ACPlugin *getPlugin(int i) {return this->mPlugins[i];};
     ACPlugin *getPlugin(std::string aPluginName);
@@ -121,7 +117,7 @@ public:
 	int getSize(ACMediaType MediaType);
 	void log();*/
 	
-	std::vector<ACMediaFeatures*> calculate(std::string aFileName, bool _save_timed_feat=false );
+//	std::vector<ACMediaFeatures*> calculate(std::string aFileName, bool _save_timed_feat=false );
 	std::vector<ACMediaFeatures*> calculate(ACMediaData* aData, ACMedia* theMedia, bool _save_timed_feat=false);	
 	ACMediaTimedFeature* getTimedFeatures(ACMediaType mediaType);
 	

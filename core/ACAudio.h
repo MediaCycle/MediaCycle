@@ -72,7 +72,7 @@ public:
 	float* getData(){return static_cast<float*> (data->getData());}
 	void setData(float* _data,float _sample_number=0 ,int _sr=44100,int _channels=1);
 	virtual ACMediaData* getMediaData(){return data;}
-	void extractData(std::string fname);
+	bool extractData(std::string fname);
 	virtual void deleteData();
 
 	void setSampleRate(int _sample_rate) { sample_rate = _sample_rate; }

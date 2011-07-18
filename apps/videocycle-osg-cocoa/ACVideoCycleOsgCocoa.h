@@ -144,7 +144,10 @@ enum	{
 	IBOutlet NSPopUpButton*			mClustersMethodPopUpButton;
 	IBOutlet NSPopUpButton*			mClustersPositionsPopUpButton;
 	IBOutlet NSPopUpButton*			mNeighborsMethodPopUpButton;
-	IBOutlet NSPopUpButton*			mNeighborsPositionsPopUpButton;	
+	IBOutlet NSPopUpButton*			mNeighborsPositionsPopUpButton;
+	
+	float prevz;
+
 };
 
 // Context/listener Menu

@@ -63,17 +63,12 @@ protected:
 	char  **hyper_links;
 	std::vector<ACMedia*> segments;
 	float start, end; // seconds
-	//bool persistent_data; // true if data and thumbnail are kept in virtual memory
-	//bool features_saved_xml;
-	
-	// XS TODO : add a MediaTimedFeatures member ?
-	// so that we can segment "on-the-fly"
+
 private:
 	void init();
 	
 public:
 	ACMedia();
-//	ACMedia(const ACMedia&, bool reduce = true);
 	virtual ~ACMedia(); // make this virtual to ensure that destructors of derived classes will be called
 
 	ACMediaType getMediaType() {return media_type;};
@@ -123,13 +118,9 @@ public:
 	void getLabel(std::string iLabel){label=iLabel;}
 	
 	// data
-	virtual void extractData(std::string filename) {}//todo bool output to test the import and to continue if a file is not readable
-
-//	void setDataPersistence(bool persistence){persistent_data=persistence;}
-//	bool getDataPersistence(){return persistent_data;}
-//	void setData(ACMediaData* _data){data = _data;}
+	virtual bool extractData(std::string filename) {return false;}
 	virtual ACMediaData* getMediaData()=0;
-	virtual void deleteData();
+	virtual void deleteData(){}
 		
 	// accessors -- these should not be redefined for each media
 	int getWidth() {return width;}
@@ -145,11 +136,10 @@ public:
 	float getEnd(){return this->end;};
 	
 	// I/O -- common part
-	
+	// note : ACL deprecated as of spring 2011
 	void fixWhiteSpace(std::string &str);
 	void saveACL(std::ofstream &library_file, int mcsl=0);
 	void saveXML(TiXmlElement* _medias);
-
 	//int loadACL(std::ifstream &library_file, int mcsl=0);
 	int loadACL(std::string media_path, std::ifstream &library_file, int mcsl=0);
 	void loadXML(TiXmlElement* _pMediaNode);

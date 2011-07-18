@@ -61,13 +61,15 @@ ACPDFData::~ACPDFData() {
 	pdf_ptr = 0;
 }
 
-void ACPDFData::readData(string _fname){
-	if(_fname=="") return;
+bool ACPDFData::readData(string _fname){
+	if(_fname=="") return false;
 	pdf_ptr = new PoDoFo::PdfMemDocument( _fname.c_str() );		
 	if( !pdf_ptr ) {
 		// Either the PDF does not exist, or it uses a codec OpenCV does not support. 
 		cerr << "<ACPDFData::readData> Could not read document from file " << _fname << endl;
+		return false;
 	}
+	return true;
 }
 
 void ACPDFData::setData(PoDoFo::PdfMemDocument* _data){

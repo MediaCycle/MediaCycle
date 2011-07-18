@@ -102,6 +102,9 @@
 	IBOutlet NSPopUpButton*			mClustersPositionsPopUpButton;
 	IBOutlet NSPopUpButton*			mNeighborsMethodPopUpButton;
 	IBOutlet NSPopUpButton*			mNeighborsPositionsPopUpButton;	
+	
+	float prevz;
+
 };
 
 // Context/listener Menu

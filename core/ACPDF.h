@@ -70,7 +70,7 @@ public:
 	PoDoFo::PdfDocument* getData();//{return data->getData();}
 	void setData(PoDoFo::PdfMemDocument* _data);
 	virtual ACMediaData* getMediaData(){return data;}
-	void extractData(std::string fname);
+	bool extractData(std::string fname);
 	virtual void deleteData();
 	
 	int getPageCount(){return page_count;}

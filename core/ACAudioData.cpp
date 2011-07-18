@@ -60,8 +60,8 @@ ACAudioData::~ACAudioData() {
 	if (audio_ptr != 0) delete [] audio_ptr;
 }
 
-void ACAudioData::readData(std::string _fname){ 
-	if(_fname=="")return;
+bool ACAudioData::readData(std::string _fname){ 
+	if(_fname=="")return false;
 	SF_INFO sfinfo;
 	SNDFILE* testFile;
 	if (! (testFile = sf_open (_fname.c_str(), SFM_READ, &sfinfo))){  
@@ -69,12 +69,14 @@ void ACAudioData::readData(std::string _fname){
 		printf ("Not able to open input file %s.\n", _fname.c_str()) ;
 		/* Print the error message from libsndfile. */
 		puts (sf_strerror (0)) ;
-		exit(1);
+		return false;
+		//		exit(1);
 	}
 	audio_ptr = new float[(long) sfinfo.frames * sfinfo.channels];
 	audio_frames = sfinfo.frames;
 	sf_readf_float(testFile, audio_ptr, sfinfo.frames);
 	sf_close(testFile);
+	return true;
 }
 
 void ACAudioData::setData(float* _data, float _sample_number){

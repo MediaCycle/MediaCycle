@@ -54,37 +54,7 @@ void ACMedia::init() {
 	end = -1;
 	features_vectors.resize(0);
 	preproc_features_vectors.resize(0);
-	
-//	persistent_data = false;
-	//features_saved_xml = false;
 }
-
-// not needed here, only in image/audio/...
-//ACMedia::ACMedia(const ACMedia& m, bool reduce) {
-//	this->init();	
-//	media_type = m.media_type;
-//	width = m.width;
-//	height = m.height;
-//	filename = m.filename;
-//	filename_thumbnail = m.filename_thumbnail;
-//	start = m.start;
-//	end = m.end;
-//	persistent_data = !reduce;
-//	if (persistent_data){
-//		if (m.media_type == 0){ //if (m.media_type != MEDIA_TYPE_NONE){
-//			if( m.data != 0){//if( m.data->getMediaType() != MEDIA_TYPE_NONE){// if m.data contains data
-//				data->copyData(m.data);
-//			}
-//			else {
-//				// XS TODO this contradicts init() where data=0
-//				data = new ACMediaData(m.media_type,m.filename);
-//			}
-//		}
-//		//else we dont have any data to copy
-//	}
-//	//else
-//	//	data = new ACMediaData(MEDIA_TYPE_NONE); // already through init();
-//}
 
 ACMedia::~ACMedia() { 
 	filename.clear();
@@ -114,14 +84,6 @@ ACMedia::~ACMedia() {
 	//if (data) delete data;
 }
 
-void ACMedia::deleteData(){
-//	if (!persistent_data){
-//	delete this->getMediaData(); // XS TODO checkme !!
-//	data=0;
-//	}
-}
-
-
 // C++ version
 // writes in an existing (i.e. already opened) acl file
 // works for binary too, the stream deals with it
@@ -136,7 +98,7 @@ void ACMedia::saveACL(ofstream &library_file, int mcsl) {
 	}	
 	
 	library_file << filename << endl;
-	library_file << mid << endl;
+//	library_file << mid << endl;
 	
 	if (mcsl) {
 		library_file << parentid << endl; 
@@ -182,7 +144,7 @@ void ACMedia::saveXML(TiXmlElement* _medias){
 	features->SetAttribute("NumberOfFeatures", n_features);
 	media->LinkEndChild( features );  
 
-	for (unsigned int i=0; i<n_features; i++) {
+	for (int i=0; i<n_features; i++) {
 		int n_features_elements = features_vectors[i]->getSize();
 		int nn = features_vectors[i]->getNeedsNormalization();
 		TiXmlElement* mediaf = new TiXmlElement( "Feature" );  
@@ -560,9 +522,8 @@ void ACMedia::cleanPreProcFeaturesVector(void){
 		}
 	}
 	preproc_features_vectors.clear();
-	
-//	preproc_features_vectors.
 }
+
 void ACMedia::defaultPreProcFeatureInit(void){
 	cleanPreProcFeaturesVector();
 	std::vector<ACMediaFeatures*>::iterator iter;
@@ -591,7 +552,7 @@ int ACMedia::import(std::string _path, int _mid, ACPluginManager *acpl, bool _sa
 	// get info about width, height, mediaData
 	// computes thumbnail, ...
 	// mediaData will be used by the plugin to compute features
-	this->extractData(this->getFileName());
+	if (!this->extractData(this->getFileName())) return 0;
 	if (this->getMediaData()==0){
 		import_ok = 0;
 		cerr << "<ACMedia::import> failed accessing data for media number: " << _mid << endl;
@@ -601,44 +562,7 @@ int ACMedia::import(std::string _path, int _mid, ACPluginManager *acpl, bool _sa
 	//compute features with available plugins
 	// XS TODO config file
 	if (acpl) {
-		/*for (int i=0;i<acpl->getSize();i++) {
-			for (int j=0;j<acpl->getPluginLibrary(i)->getSize();j++) {
-				if (acpl->getPluginLibrary(i)->getPlugin(j)->getMediaType() == this->getType()
-					&& acpl->getPluginLibrary(i)->getPlugin(j)->implementsPluginType(PLUGIN_TYPE_FEATURES)) {
-					
-					cout << "Computing features using plugin : " << acpl->getPluginLibrary(i)->getPlugin(j)->getName() << std::endl;
-					//plugin->start();
-					ACFeaturesPlugin* localPlugin=dynamic_cast<ACFeaturesPlugin*>( acpl->getPluginLibrary(i)->getPlugin(j));
-					vector<ACMediaFeatures*> afv;
-					if (localPlugin!=NULL)
-						afv =localPlugin->calculate(this->getMediaData(), this, _save_timed_feat);
-					else {
-						cerr << "<ACMedia::import> failed plugin access failed "<< acpl->getPluginLibrary(i)->getPlugin(j)->getName() << endl;
-					}
-
-					if (afv.size()==0){
-						import_ok = 0;
-						cerr << "<ACMedia::import> failed importing feature from plugin: " << acpl->getPluginLibrary(i)->getPlugin(j)->getName() << endl;
-					}
-					else {
-						for (unsigned int Iafv=0; Iafv< afv.size() ; Iafv++)
-							this->addFeaturesVector(afv[Iafv]);
-						import_ok = 1;
-					}
-					//plugin->stop();
-				}
-				else {
-					//cerr << "Plugin " << acpl->getPluginLibrary(i)->getPlugin(j)->getName() << " not used here." << endl;
-					//cerr << "acpl->getPluginLibrary(i)->getPlugin(j)->getMediaType(): " << acpl->getPluginLibrary(i)->getPlugin(j)->getMediaType()  << endl;
-					//cerr << "this->getType(): " << this->getType() << endl;
-					//cerr << "acpl->getPluginLibrary(i)->getPlugin(j)->getPluginType(): " << acpl->getPluginLibrary(i)->getPlugin(j)->getPluginType() << endl;
-					//cerr << "PLUGIN_TYPE_FEATURES: "<< PLUGIN_TYPE_FEATURES << endl;
-				}
-			}
-		}
-		 std::cout << "Features calculated" << std::endl;*/
-		
-		//TR :new implementation to calculte the feature
+		//TR : new implementation to calculate the features
 		ACMediaData* local_media_data=dynamic_cast<ACMediaData*>(this->getMediaData());
 		this->features_vectors=acpl->getFeaturesPlugins()->calculate(local_media_data, this, _save_timed_feat);
 		if (this->features_vectors.size()>0)
@@ -706,10 +630,14 @@ int ACMedia::segment(ACPluginManager *acpl, bool _saved_timed_features ) {
 						else {
 							// next plugins (hence i=1) : append
 							ACFeaturesPlugin* localPlugin=dynamic_cast<ACFeaturesPlugin*>( acpl->getPluginLibrary(i)->getPlugin(j));
-							if (localPlugin!=NULL)
-								ft_from_disk->appendTimedFeature(localPlugin->getTimedFeatures());
-							else 
-							{
+							if (localPlugin!=0) {
+								ACMediaTimedFeature* tmp_tf=localPlugin->getTimedFeatures();
+								if (tmp_tf!=0)
+									ft_from_disk->appendTimedFeature(localPlugin->getTimedFeatures());
+								else
+									cerr << "<ACMedia::import> empty timed features for plugin "<< acpl->getPluginLibrary(i)->getPlugin(j)->getName() << endl;
+							}	
+							else {
 								cerr << "<ACMedia::import> failed plugin access failed "<< acpl->getPluginLibrary(i)->getPlugin(j)->getName() << endl;
 							}
 						}

@@ -48,7 +48,7 @@ public:
 	~ACPDFData();
 	ACPDFData(std::string _fname);
 
-	void readData(std::string _fname);
+	bool readData(std::string _fname);
 	virtual void* getData() {return static_cast<void*>(pdf_ptr);}
 //	PoDoFo::PdfDocument* getData() {return pdf_ptr;}
 	void setData(PoDoFo::PdfMemDocument* _data);

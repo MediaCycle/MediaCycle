@@ -70,9 +70,12 @@ MediaCycle::MediaCycle(ACMediaType aMediaType, string local_directory, string li
 	this->pluginManager = new ACPluginManager();
 
 	this->config_file_xml = "";
-	//this->MC_e_medias = new TiXmlElement("Medias");
 
 	this->prevLibrarySize = 0;
+
+	// XS TODO TMP OSC
+//	sendto = lo_address_new("localhost", "12346");
+//	message = 0;
 }
 
 MediaCycle::MediaCycle(const MediaCycle& orig) {
@@ -87,8 +90,6 @@ MediaCycle::~MediaCycle() {
 	delete this->pluginManager;
 	this->pluginManager = 0;
     stopTcpServer(); // will delete this->networkSocket;
-
-	//MC_e_medias=0;
 }
 
 void MediaCycle::clean(){
@@ -144,12 +145,13 @@ int MediaCycle::startTcpServer(int aPort, int aMaxConnections, ACNetworkSocketSe
     return -1;
 }
 
-// XS TODO return value
+// XS TODO return value does not make much sense
 int MediaCycle::stopTcpServer() {
      if (this->networkSocket) {
         this->networkSocket->stop();
         delete this->networkSocket;
     }
+	return 1;
 }
 
 //AM TODO processTcpMessage must be moved outside of MediaCycle main class
@@ -275,8 +277,8 @@ int MediaCycle::setCallback(ACMediaCycleCallback mediacycle_callback, void* user
 
 // == Media Library
 
-
-// XS TODO return value
+// XS TODO return value does not make much sense, should add some test
+// XS TODO this does not seem compatible with Qt GUI
 int MediaCycle::importDirectoriesThreaded(vector<string> directories, int recursive, bool forward_order, bool doSegment) {
 
 	import_directories = directories;
@@ -289,12 +291,16 @@ int MediaCycle::importDirectoriesThreaded(vector<string> directories, int recurs
 	pthread_create(&import_thread, &import_thread_attr, &threadImport, import_thread_arg);
 	pthread_attr_destroy(&import_thread_attr);
 	//pthread_cancel(import_thread_arg); // SD will destroy itseld when function returns
+	return 1;
 }
 
+// to be called from the threaded version
 int MediaCycle::importDirectories() {
 	return importDirectories(import_directories, import_recursive, import_forward_order, import_doSegment);
 }
 
+// scans directories, fills the filenames vector and calls importFile 
+// then normalize the features and updates the library ("libraryContentChanged")
 int MediaCycle::importDirectories(vector<string> directories, int recursive, bool forward_order, bool doSegment) {
 	int ok = 0;
 
@@ -450,8 +456,12 @@ string MediaCycle::getThumbnailFileName(int id) {
 }
 
 // Media Browser
-// XS TODO : this seems wrong:
-void* MediaCycle::hasBrowser() { return mediaBrowser; }
+bool MediaCycle::hasBrowser() { 
+	bool ok = false;
+	if (this->getBrowser()!=0) 
+		ok=true; 
+	return ok; 
+}
 ACBrowserMode MediaCycle::getBrowserMode() {return mediaBrowser->getMode();}
 void MediaCycle::setBrowserMode(ACBrowserMode _mode) {mediaBrowser->setMode(_mode);}
 
@@ -569,7 +579,7 @@ bool MediaCycle::changeMediaType(ACMediaType aMediaType) {
 		changeMe = false;
 	else{
 		this->clean();
-		this->mediaLibrary->changeMediaType(aMediaType); // XS TODO check
+		this->mediaLibrary->changeMediaType(aMediaType);
 		this->setMediaType(aMediaType);
 	}
 	return changeMe;
@@ -639,11 +649,12 @@ vector<float> MediaCycle::getFeaturesVectorInMedia(int i, string feature_name) {
 }
 
 // == Playing time stamp
-int MediaCycle::setSourceCursor(int lid, int frame_pos) {
-	return mediaBrowser->setSourceCursor(lid, frame_pos);
+//XS TODO : add tests before setting values ?
+void MediaCycle::setSourceCursor(int lid, int frame_pos) {
+	mediaBrowser->setSourceCursor(lid, frame_pos);
 }
-int MediaCycle::setCurrentFrame(int lid, int frame_pos) {
-	return mediaBrowser->setCurrentFrame(lid, frame_pos);
+void MediaCycle::setCurrentFrame(int lid, int frame_pos) {
+	mediaBrowser->setCurrentFrame(lid, frame_pos);
 }
 void MediaCycle::muteAllSources() { mediaBrowser->muteAllSources(); }
 
@@ -698,7 +709,7 @@ vector<int>* MediaCycle::getNeedsActivityUpdateMedia() {
 // == callbacks
 
 void MediaCycle::pickedObjectCallback(int _nodeId) {
-	printf("PICKED\n");
+	printf("PICKED\n");	
 	int nodeId = _nodeId;
 	if(nodeId < 0) {
 		// clicked close to a node
@@ -709,6 +720,19 @@ void MediaCycle::pickedObjectCallback(int _nodeId) {
 	if (forwarddown == 0){// & playkeydown) {//if (!forwarddown) { //CF forwardown is not a boolean
 		mediaBrowser->toggleSourceActivity(nodeId);
 	}
+	
+	// XS TODO TMP OSC
+//	if(message){
+//		lo_message_free(message);
+//	}
+//	message = lo_message_new();
+//	//lo_message_add_int32 (message,_nodeId);
+//	string sf = this->getMediaFileName(_nodeId); // XS TODO check if not +1
+//	std::string::size_type p = sf.find_last_of("/");
+//	lo_message_add_string(message,std::string(sf, p+1,sf.size()).c_str());
+//
+//	lo_send_message (sendto, "/mediacyle", message);
+
 }
 
 void MediaCycle::hoverWithPointerId(float xx, float yy, int p_id) {
@@ -721,9 +745,11 @@ void MediaCycle::hoverWithPointerIndex(float xx, float yy, int p_index) {
 		mediaBrowser->hoverWithPointerIndex(xx, yy, p_index);
 }
 
-// == NEW
 void MediaCycle::updateDisplay(bool _animate) { mediaBrowser->updateDisplay(_animate);}
 
+// reads in the XML file :
+// - header information
+// - media, features, segments, ...
 TiXmlHandle MediaCycle::readXMLConfigFileHeader(string _fname) {
 	if (_fname=="") return 0;
 	TiXmlDocument doc( _fname.c_str() );
@@ -739,7 +765,6 @@ TiXmlHandle MediaCycle::readXMLConfigFileHeader(string _fname) {
 	TiXmlHandle docHandle(&doc);
 	TiXmlHandle rootHandle = docHandle.FirstChildElement( "MediaCycle" );
 
-	// XS TODO browser mode and media type as string instead of enum
 	TiXmlText* browserModeText=rootHandle.FirstChild( "BrowserMode" ).FirstChild().Text();
 	std::stringstream tmp;
 	tmp << browserModeText->ValueStr();
@@ -755,7 +780,6 @@ TiXmlHandle MediaCycle::readXMLConfigFileHeader(string _fname) {
 	this->setMediaType(ACMediaType(mt));
 
 	// features vector weights
-	// XS TODO check that it equals the number of media
 	int n_feat=-1;
 	TiXmlText* FeaturesWeightsText=rootHandle.FirstChild( "FeaturesWeights" ).FirstChild().Text();
 	TiXmlElement* FeaturesWeightsNode=rootHandle.FirstChild( "FeaturesWeights" ).Element();

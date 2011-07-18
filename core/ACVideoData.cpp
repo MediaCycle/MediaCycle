@@ -57,20 +57,25 @@ void ACVideoData::init() {
 }
 
 ACVideoData::~ACVideoData() {
-	if (video_ptr != 0) cvReleaseCapture(&video_ptr);
+	delete video_ptr;
 	video_ptr = 0;
 }
 
-void ACVideoData::readData(string _fname){
-	if(_fname=="") return;
-	video_ptr = cvCreateFileCapture(_fname.c_str());		
-	if( !video_ptr ) {
+// creates a pointer (video_ptr) to the beginning of the video
+bool ACVideoData::readData(string _fname){
+	if(_fname=="") return false;
+	video_ptr = new cv::VideoCapture(_fname.c_str());		
+	// check if video successfully opened 
+	if (!video_ptr->isOpened()){ 
 		// Either the video does not exist, or it uses a codec OpenCV does not support. 
 		cerr << "<ACVideoData::readData> Could not initialize capturing from file " << _fname << endl;
+		return false;
 	}	
+	return true;
 }
 
-void ACVideoData::setData(CvCapture* _data){
+// XS TODO check this copy 2.2
+void ACVideoData::setData(cv::VideoCapture* _data){
 	cvCopy(_data,video_ptr);		
 	if( !video_ptr ) {
 		// Either the video does not exist, or it uses a codec OpenCV does not support. 

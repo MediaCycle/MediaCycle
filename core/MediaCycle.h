@@ -47,6 +47,9 @@
 
 #include "tinyxml.h"
 
+//XS TODO TMP OSC
+//#include <lo/lo.h>
+
 enum MCActionType {
 	MC_ACTION_ADDFILE,
 	MC_ACTION_GETKNN,
@@ -105,7 +108,7 @@ public:
 
 	// == Media Browser
     ACMediaBrowser* getBrowser() { return mediaBrowser;}
-	void* hasBrowser();
+	bool hasBrowser();
 	ACBrowserMode getBrowserMode();
 	void setBrowserMode(ACBrowserMode _mode);
 	bool changeBrowserMode(ACBrowserMode _mode);
@@ -210,8 +213,8 @@ public:
 	ACPoint getLabelPos(int i);
 
 	// == Playing time stamp
-	int setSourceCursor(int lid, int frame_pos);
-	int setCurrentFrame(int lid, int frame_pos);
+	void setSourceCursor(int lid, int frame_pos);
+	void setCurrentFrame(int lid, int frame_pos);
 	void muteAllSources();
 
 	// == Update audio engine sources
@@ -261,7 +264,6 @@ private:
 
 	// settings and features XML
 	std::string config_file_xml;
-	//TiXmlElement* MC_e_medias; // xml node to hook up medias
 
 	int prevLibrarySize;
 
@@ -278,7 +280,12 @@ private:
 
 	ACMediaCycleCallback mediacycle_callback;
 	void* mediacycle_callback_data;
-
+	
+// XS TODO TMP OSC
+//	lo_address sendto;
+//	lo_message message;
+//	const char *tag;
+	
 };
 
 #endif	/* _MEDIACYCLE_H */

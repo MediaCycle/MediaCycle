@@ -223,8 +223,7 @@ void ACAudio::setData(float* _data,float _sample_number, int _sr,int _channels) 
 	this->end=_sample_number/(float) _sr/(float) _channels;
 }
 
-void ACAudio::extractData(string fname) {
-	
+bool ACAudio::extractData(string fname) {
 	SF_INFO sfinfo;
 	SNDFILE* testFile;
 	if (! (testFile = sf_open (fname.c_str(), SFM_READ, &sfinfo))){  
@@ -232,7 +231,7 @@ void ACAudio::extractData(string fname) {
 		printf ("Not able to open input file %s.\n", fname.c_str()) ;
 		/* Print the error message from libsndfile. */
 		puts (sf_strerror (0)) ;
-		//return  0;
+		return false;
 	}
 	sample_rate = sfinfo.samplerate;
 	channels = sfinfo.channels;
@@ -251,9 +250,10 @@ void ACAudio::extractData(string fname) {
 // 	sf_readf_float(testFile, data, sfinfo.frames);
 	if (data) delete data; // XS TODO deleteData
 	data = new ACAudioData();
-	data->readData(fname);
+	if (!data->readData(fname)) return false;
  	this->computeWaveform(this->getData());
 	sf_close(testFile);
+	return true;
 }
 
 void ACAudio::deleteData(){

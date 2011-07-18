@@ -171,8 +171,10 @@ bool ACMediaDocument::computeThumbnailSize(int w_, int h_){
 	return ok;
 }	
 
-void ACMediaDocument::extractData(string fname){
+// XS TODO complete this !!
+bool ACMediaDocument::extractData(string fname){
 //	computeThumbnail(data, thumbnail_width , thumbnail_height);
+	return false;
 }
 
 

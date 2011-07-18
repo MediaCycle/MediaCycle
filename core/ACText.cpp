@@ -65,7 +65,7 @@ int ACText::loadACLSpecific(ifstream &library_file) {
 	return 1;
 }
 
-void ACText::extractData(string fname){
+bool ACText::extractData(string fname){
 	if (data){
 		delete data;
 		data=0;
@@ -83,7 +83,7 @@ void ACText::extractData(string fname){
 	//computeThumbnail(image_data, 64, 64);
 	//width = thumbnail_width;
 	//height = thumbnail_height;
-	return;
+	return true;
 }
 
 void* ACText::getThumbnailPtr(){

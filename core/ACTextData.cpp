@@ -65,7 +65,7 @@ ACTextData::~ACTextData() {
 	}
 }
 
-void ACTextData::readData(std::string _fname){ 
+bool ACTextData::readData(std::string _fname){ 
 	if (text_ptr != NULL) {
 		delete text_ptr;
 		text_ptr=0;
@@ -73,12 +73,12 @@ void ACTextData::readData(std::string _fname){
 	text_ptr = textFileRead(_fname);
 	if( text_ptr == NULL) {
 		cerr << "<ACMediaData::readTextData> file can not be read !" << endl;
-		return;
+		return false;
 	}
 	label= labelFileRead(_fname);
 	cout << label<<"\n";
-	//cout << (*text_ptr)<<"\n";
-	return;
+//	cout << (*text_ptr)<<"\n";
+	return true;
 }
 
 void ACTextData::setData(string* _data){

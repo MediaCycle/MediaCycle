@@ -54,7 +54,7 @@ public:
 	~ACMediaDocument();
 	ACMediaDocument(const ACMediaDocument&, bool reduce = true);
 
-	int setActiveSubMedia(string mediaName);
+	int setActiveSubMedia(std::string mediaName);
 	int import(std::string _path, int _mid=0, ACPluginManager *acpl=0, bool _save_timed_feat=false);
 	void saveACLSpecific(std::ofstream &library_file);
 	int loadACLSpecific(std::ifstream &library_file);
@@ -70,7 +70,7 @@ public:
 //	ACMediaDocumentData* getData(){return static_cast<ACMediaDocumentData*>(data->getData());}
 //	void setData(ACMediaDocumentData* _data);
 //	virtual ACMediaData* getMediaData(){return data;} // XS TODO : needs dynamic_cast<ACMediaData*> (data) ??
-	void extractData(std::string fname);
+	bool extractData(std::string fname);
 //	virtual void deleteData();
 
 	std::vector<ACMediaFeatures*> &getAllFeaturesVectors() { return activeMedia->getAllFeaturesVectors(); };

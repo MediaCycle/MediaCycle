@@ -45,7 +45,7 @@ public:
 	~AC3DModelData();
 	AC3DModelData(std::string _fname);
 
-	void readData(std::string _fname);
+	bool readData(std::string _fname);
 //	osg::ref_ptr<osg::Node> getData(){return model_ptr;}
 	virtual void* getData() {return static_cast<void*>(model_ptr);}
 	void setData(osg::ref_ptr< osg::Node > _data);

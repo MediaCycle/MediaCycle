@@ -46,16 +46,16 @@ public:
 	~ACVideoData();
 	ACVideoData(std::string _fname);
 
-	void readData(std::string _fname);
+	bool readData(std::string _fname);
 	virtual void* getData() {return static_cast<void*>(video_ptr);}
 //	CvCapture* getData() {return video_ptr;}
-	void setData(CvCapture* _data);
+	void setData(cv::VideoCapture* _data);
 
 protected:
 	virtual void init();
 
 private:
-	CvCapture* video_ptr;
+	cv::VideoCapture* video_ptr;
 
 };
 

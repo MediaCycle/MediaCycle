@@ -64,10 +64,10 @@ void AC3DModel::setData(osg::ref_ptr<osg::Node> _data)
 	data->setData(_data);
 }
 
-void AC3DModel::extractData(string fname) {
+bool AC3DModel::extractData(string fname) {
 	if (data) delete data;
 	data = new AC3DModelData();
-	data->readData(fname);
+	if (!data->readData(fname)) return false;
 
 	osg::ref_ptr<osg::Node> local_model_ptr = 0;
 	osg::ComputeBoundsVisitor cbv;

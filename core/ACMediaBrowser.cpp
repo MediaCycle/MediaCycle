@@ -516,13 +516,11 @@ void ACMediaBrowser::hoverWithPointerId(float mxx, float myy, int p_id)
 		std::cerr << "ACMediaBrowser::hoverWithPointerId: wrong pointer id " << p_id << std::endl;
 }
 
-// XS TODO return value
-int ACMediaBrowser::setSourceCursor(int lid, int frame_pos) {
+void ACMediaBrowser::setSourceCursor(int lid, int frame_pos) {
 	this->getMediaNode(lid).setCursor(frame_pos);
 }
 
-// XS TODO return value
-int ACMediaBrowser::setCurrentFrame(int lid, int frame_pos) {
+void ACMediaBrowser::setCurrentFrame(int lid, int frame_pos) {
 	this->getMediaNode(lid).setCurrentFrame(frame_pos);
 }
 
@@ -1285,7 +1283,7 @@ int ACMediaBrowser::toggleSourceActivity(float _x, float _y)
 // XS new 150310
 // . toggleSourceActivity is in fact in ACMediaNode now
 // . browser takes care of threads
-// XS TODO return value
+// XS TODO return value makes no sense
 int ACMediaBrowser::toggleSourceActivity(ACMediaNode &node, int _activity) {
 	node.toggleActivity(_activity);
 	#ifdef USE_DEBUG // use debug message levels instead
@@ -1298,6 +1296,7 @@ int ACMediaBrowser::toggleSourceActivity(ACMediaNode &node, int _activity) {
 		setNeedsActivityUpdateAddMedia(node.getMediaId()); // XS previously: loop_id
 		setNeedsActivityUpdateLock(0);
 	}
+	return 1;
 }
 
 // XS deprecated
@@ -1344,7 +1343,7 @@ void ACMediaBrowser::setClosestNode(int _node_id, int p_index) {
 	}
 	//std::cout << std::endl;
 
-	int prev_node_id = getClosestNode(p_index);
+	//int prev_node_id = getClosestNode(p_index);
 
 	//mClosestNode = _node_id;//CF to deprecate
 
@@ -1404,10 +1403,9 @@ void ACMediaBrowser::setClosestNode(int _node_id, int p_index) {
 	}
 }
 
-
+// XS TODO iterator + return value makes no sense
 int ACMediaBrowser::muteAllSources()
 {
-	// XS TODO iterator + return value
 	for (int node_id=0;node_id<mLibrary->getSize();node_id++) {
 		//if (mLoopAttributes[node_id].getActivity() >= 1) {
 			// SD TODO - audio engine
@@ -1421,6 +1419,7 @@ int ACMediaBrowser::muteAllSources()
 
 	setNeedsDisplay(true);
 	// setNeedsActivityUpdate(1);
+	return 1;
 }
 
 // Update audio engine sources
@@ -1458,11 +1457,11 @@ int ACMediaBrowser::getNumberOfPointers() {
 }
 
 ACPointerType ACMediaBrowser::getPointerTypeFromIndex(int _index) {
-	this->getPointerFromIndex(_index)->getType();
+	return this->getPointerFromIndex(_index)->getType();
 }
 
 ACPointerType ACMediaBrowser::getPointerTypeFromId(int _id) {	
-	this->getPointerFromId(_id)->getType();
+	return this->getPointerFromId(_id)->getType();
 }	
 	
 ACPointer* ACMediaBrowser::getPointerFromId(int _id) {

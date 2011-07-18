@@ -75,6 +75,7 @@ ACMediaTimedFeature::ACMediaTimedFeature(fcolvec time_v, fmat value_m, string na
 ACMediaTimedFeature::ACMediaTimedFeature( const vector<float> &time, const vector< vector<float> > &value, string name, const vector<float> *seg_v){
 	if (time.size() != value.size()) {
 		cerr << "<ACMediaTimedFeature::ACMediaTimedFeature> Time and value vectors do not have the same size" << endl;
+		cerr << "time : " << time.size() << " --- " << "value : " << value.size() << endl;
 		exit(-1);
 	}
 	this->time_v = fcolvec(time.size());
@@ -93,6 +94,7 @@ ACMediaTimedFeature::ACMediaTimedFeature(const vector<float> &time, const vector
 	unsigned int ts=time.size();
 	if (ts != value.size()) {
 		cerr << "<ACMediaTimedFeature::ACMediaTimedFeature> Time and value vectors do not have the same size" << endl;
+		cerr << "time : " << time.size() << " --- " << "value : " << value.size() << endl;
 		exit(-1);
 	}
 	

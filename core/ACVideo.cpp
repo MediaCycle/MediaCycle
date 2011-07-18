@@ -119,9 +119,9 @@ bool ACVideo::computeThumbnail(int w, int h){
 	std::cout << boost::filesystem::extension(filename);
 	/// prerequisites for loading OSG media files, 2 alternatives
 	/// 1) standard procedure: checking for a plugin that can open the format of the media file
-	//osgDB::ReaderWriter* readerWriter = osgDB::Registry::instance()->getReaderWriterForExtension(boost::filesystem::extension(filename).substr(1));
+	osgDB::ReaderWriter* readerWriter = osgDB::Registry::instance()->getReaderWriterForExtension(boost::filesystem::extension(filename).substr(1));
 	/// 2) hack: forcing the use of the ffmpeg plugin by checking the plugin that can open the ffmpeg format (most probably the ffmpeg plugin)
-	osgDB::ReaderWriter* readerWriter = osgDB::Registry::instance()->getReaderWriterForExtension("ffmpeg");
+//	osgDB::ReaderWriter* readerWriter = osgDB::Registry::instance()->getReaderWriterForExtension("ffmpeg");
 	if (!readerWriter){
 		cerr << "<ACVideo::computeThumbnail> problem loading file, no OSG plugin available" << endl;
 		return false;
@@ -154,26 +154,27 @@ bool ACVideo::computeThumbnail(int w, int h){
 	return ok;
 }
 
-CvCapture* ACVideo::getData()
+cv::VideoCapture* ACVideo::getData()
 {
 	if (data == 0) {
 		data = new ACVideoData(filename);
 	}	
-	// XS TODO return value immediately (no tmp) 
-	CvCapture* tmp_debug = 0;
-	tmp_debug = static_cast<CvCapture*> (data->getData());
-	return tmp_debug;
+	return static_cast<cv::VideoCapture*> (data->getData());
 }
 
-//ACMediaData* ACVideo::extractData(string _fname){
-void ACVideo::extractData(string _fname){
+//fills in data about the video
+// - capture = pointer to the beginning
+// - height, width
+// - fps = frames per second
+// - nframes = total number of frames in the video
+bool ACVideo::extractData(string _fname){
 	// XS todo : store the default header (16 below) size somewhere...
 	this->filename = _fname;
-	CvCapture* capture = this->getData();
-	width = (int) cvGetCaptureProperty(capture, CV_CAP_PROP_FRAME_WIDTH);
-	height = (int) cvGetCaptureProperty(capture, CV_CAP_PROP_FRAME_HEIGHT);
-	int fps     = (int) cvGetCaptureProperty(capture, CV_CAP_PROP_FPS);
-	int nframes = (int) cvGetCaptureProperty(capture,  CV_CAP_PROP_FRAME_COUNT);
+	cv::VideoCapture* capture = this->getData();
+	width = (int) capture->get(CV_CAP_PROP_FRAME_WIDTH);
+	height = (int) capture->get(CV_CAP_PROP_FRAME_HEIGHT);
+	int fps     = (int) capture->get(CV_CAP_PROP_FPS);
+	int nframes = (int) capture->get(CV_CAP_PROP_FRAME_COUNT);
 	start = 0.0;
 	if (fps != 0) end = nframes * 1.0/fps;
 	else end = nframes;
@@ -187,17 +188,17 @@ void ACVideo::deleteData(){
 	data=0;
 }
 
-void ACVideo::setData(CvCapture* _data){
+void ACVideo::setData(cv::VideoCapture* _data){
 	if (data == 0)
 		data = new ACVideoData();	
 	data->setData(_data);
 	
-	width = (int) cvGetCaptureProperty(_data, CV_CAP_PROP_FRAME_WIDTH);
-	height = (int) cvGetCaptureProperty(_data, CV_CAP_PROP_FRAME_HEIGHT);
+	width = (int) _data->get(CV_CAP_PROP_FRAME_WIDTH);
+	height = (int) _data->get(CV_CAP_PROP_FRAME_HEIGHT);
 //	this->computeThumbnailSize();
 	
-	int fps     = (int) cvGetCaptureProperty(_data, CV_CAP_PROP_FPS);
-	int nframes = (int) cvGetCaptureProperty(_data,  CV_CAP_PROP_FRAME_COUNT);
+	int fps     = (int) _data->get(CV_CAP_PROP_FPS);
+	int nframes = (int) _data->get(CV_CAP_PROP_FRAME_COUNT);
 	start = 0.0;
 	if (fps != 0) end = nframes * 1.0/fps;
 	else end = nframes;
@@ -223,14 +224,15 @@ int ACVideo::loadACLSpecific(ifstream &library_file) {
 	//library_file >> n_features;//CF done in ACMedia
 
 	// Old bug with image size set to thumbnail size
-	if ((width == 16)&&(height == 16)){
-		CvCapture* tmp = cvCreateFileCapture(filename.c_str());	
-		width = (int) cvGetCaptureProperty(tmp, CV_CAP_PROP_FRAME_WIDTH);
-		height = (int) cvGetCaptureProperty(tmp, CV_CAP_PROP_FRAME_HEIGHT);
-		cvReleaseCapture(&tmp);
-		if ((width != 16)&&(height != 16))// if the image size isn't actually 64x64
-			std::cout << "Please re-save your ACL library, old format with corrupted video size." << std::endl;
-	}
+	// XS removed this !
+//	if ((width == 16)&&(height == 16)){
+//		cv::VideoCapture* tmp(filename.c_str());	
+//		width = (int) tmp.get(CV_CAP_PROP_FRAME_WIDTH);
+//		height = (int) tmp.get(CV_CAP_PROP_FRAME_HEIGHT);
+//		tmp.release();
+//		if ((width != 16)&&(height != 16))// if the image size isn't actually 64x64
+//			std::cout << "Please re-save your ACL library, old format with corrupted video size." << std::endl;
+//	}
 	
 	if (computeThumbnail(height, width) != 1){
 		cerr << "<ACVideo::loadACLSpecific> : problem computing thumbnail" << endl;

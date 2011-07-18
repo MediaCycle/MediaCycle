@@ -65,10 +65,10 @@ public:
 	int getThumbnailHeight() {return thumbnail_height;}
 	osg::ref_ptr<osg::ImageStream> getStream() {return image_stream;}
 
-	CvCapture* getData();//{return data->getData();}
-	void setData(CvCapture* _data);
+	cv::VideoCapture* getData();//{return data->getData();}
+	void setData(cv::VideoCapture* _data);
 	virtual ACMediaData* getMediaData(){return data;}
-	void extractData(std::string fname);
+	bool extractData(std::string fname);
 	virtual void deleteData();
 
 private:

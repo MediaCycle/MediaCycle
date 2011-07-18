@@ -88,17 +88,17 @@ static const stringToMediaTypeConverter stringToMediaType(_initm, _initm + sizeo
 //typedef std::map<ACMediaType,std::string> mediaTypeToEnumNameConverter;
 //
 //// initialize static class variable
-//static const mediaTypeToEnumNameConverter::value_type _inits[] = {
-//mediaTypeToEnumNameConverter::value_type(MEDIA_TYPE_NONE,"MEDIA_TYPE_NONE"), \
-//mediaTypeToEnumNameConverter::value_type(MEDIA_TYPE_AUDIO,"MEDIA_TYPE_AUDIO"), \
-//mediaTypeToEnumNameConverter::value_type(MEDIA_TYPE_IMAGE,"MEDIA_TYPE_IMAGE"), \
-//mediaTypeToEnumNameConverter::value_type(MEDIA_TYPE_VIDEO,"MEDIA_TYPE_VIDEO"), \
-//mediaTypeToEnumNameConverter::value_type(MEDIA_TYPE_3DMODEL,"MEDIA_TYPE_3DMODEL"), \
-//mediaTypeToEnumNameConverter::value_type(MEDIA_TYPE_TEXT,"MEDIA_TYPE_TEXT"), \
-//mediaTypeToEnumNameConverter::value_type(MEDIA_TYPE_PDF,"MEDIA_TYPE_PDF"), \
-//mediaTypeToEnumNameConverter::value_type(MEDIA_TYPE_MIXED,"MEDIA_TYPE_MIXED"), \
-//mediaTypeToEnumNameConverter::value_type(MEDIA_TYPE_ALL,"MEDIA_TYPE_ALL")
-//};
+/*static const mediaTypeToEnumNameConverter::value_type _inits[] = {
+mediaTypeToEnumNameConverter::value_type(MEDIA_TYPE_NONE,"MEDIA_TYPE_NONE"), \
+mediaTypeToEnumNameConverter::value_type(MEDIA_TYPE_AUDIO,"MEDIA_TYPE_AUDIO"), \
+mediaTypeToEnumNameConverter::value_type(MEDIA_TYPE_IMAGE,"MEDIA_TYPE_IMAGE"), \
+mediaTypeToEnumNameConverter::value_type(MEDIA_TYPE_VIDEO,"MEDIA_TYPE_VIDEO"), \
+mediaTypeToEnumNameConverter::value_type(MEDIA_TYPE_3DMODEL,"MEDIA_TYPE_3DMODEL"), \
+mediaTypeToEnumNameConverter::value_type(MEDIA_TYPE_TEXT,"MEDIA_TYPE_TEXT"), \
+mediaTypeToEnumNameConverter::value_type(MEDIA_TYPE_PDF,"MEDIA_TYPE_PDF"), \
+mediaTypeToEnumNameConverter::value_type(MEDIA_TYPE_MIXED,"MEDIA_TYPE_MIXED"), \
+mediaTypeToEnumNameConverter::value_type(MEDIA_TYPE_ALL,"MEDIA_TYPE_ALL")
+};*/
 //
 //static const mediaTypeToEnumNameConverter mediaTypeToEnumName(_inits, _inits + sizeof _inits / sizeof *_inits);
 //

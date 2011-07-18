@@ -70,7 +70,7 @@ public:
 	IplImage* getData(){return static_cast<IplImage*>(data->getData());}
 	void setData(IplImage* _data);
 	virtual ACMediaData* getMediaData(){return data;} // XS TODO : needs dynamic_cast<ACMediaData*> (data) ??
-	void extractData(std::string fname);
+	bool extractData(std::string fname);
 	virtual void deleteData();
 
 private:

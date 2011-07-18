@@ -55,7 +55,7 @@ public:
 	void deleteData();
 	void saveACLSpecific(std::ofstream &library_file);
 	int loadACLSpecific(std::ifstream &library_file);
-	void extractData(std::string fname);
+	bool extractData(std::string fname);
 	ACMediaData* getMediaData(){return data;} // XS TODO : needs dynamic_cast<ACMediaData*> (data) ??;
 	
 	void* getThumbnailPtr();

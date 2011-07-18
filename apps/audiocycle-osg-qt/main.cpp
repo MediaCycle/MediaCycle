@@ -40,15 +40,10 @@
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
-
-//   ACAudioCycleOsgQt window;
-//    window.show();
-
 	ACMultiMediaCycleOsgQt window;
 	try {
 		// Adding palettes
-		//window.addControlDock("MCMediaConfig");
-		window.addControlDock("MCOSC");
+		window.addControlDock("MCOSC");				 
 		window.addControlDock("MCBrowserControlsClusters");//"MCBrowserControlsClustersNeighbors");
 		window.addControlDock("MCAudioControls");
 		window.useSegmentationByDefault(true);
@@ -65,7 +60,6 @@ int main(int argc, char *argv[])
 
 		window.loadDefaultConfig(MEDIA_TYPE_AUDIO);
 		window.show();
-
 	}
 	catch (const exception& e) {
 		cout << "** caught exception in main : " << e.what() << endl;

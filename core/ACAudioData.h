@@ -47,7 +47,7 @@ public:
 	~ACAudioData();
 	ACAudioData(std::string _fname);
 
-	void readData(std::string _fname);
+	bool readData(std::string _fname);
 	virtual void* getData() {return static_cast<void*>(audio_ptr);}
 //	float* getData() {return audio_ptr;}
 	void setData(float* _data, float _sample_number);

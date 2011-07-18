@@ -47,7 +47,7 @@ public:
 	ACImageData(std::string _fname); // XS TODO check this
 	~ACImageData();
 
-	virtual void readData(std::string _fname);
+	virtual bool readData(std::string _fname);
 	virtual void* getData() {return static_cast<void*>(image_ptr);}
 //	virtual IplImage* getData() {return image_ptr;}
 	void setData(IplImage* _data);	

@@ -47,7 +47,7 @@ public:
 	~ACTextData();
 	ACTextData(std::string _fname);
 
-	void readData(std::string _fname);
+	bool readData(std::string _fname);
 	virtual void* getData() {return static_cast<void*>(text_ptr);}
 	void setData(std::string* _data);	
 

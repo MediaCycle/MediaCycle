@@ -43,7 +43,7 @@ public:
 	ACMediaData();
 	virtual ~ACMediaData();
 	
-	virtual void readData(std::string _fname){};
+	virtual bool readData(std::string _fname){return false;}
 	virtual void* getData(){return 0;}
 	
 	std::string getFileName() {return file_name;}

@@ -65,19 +65,21 @@ AC3DModelData::~AC3DModelData() {
 	model_ptr=0;	
 }
 
-void AC3DModelData::readData(std::string _fname){ 
-	if(_fname=="")return;
+bool AC3DModelData::readData(std::string _fname){ 
+	if(_fname=="") return false;
 	model_ptr=0;
 	
 	std::cout << boost::filesystem::extension(_fname);
 	osgDB::ReaderWriter* readerWriter = osgDB::Registry::instance()->getReaderWriterForExtension(boost::filesystem::extension(_fname).substr(1));
 	if (!readerWriter){
 		cerr << "<AC3DModelData::readData> problem loading file, no OSG plugin available" << endl;
+		return false;
 	}
 	
 	model_ptr = osgDB::readNodeFile(_fname);
     if( model_ptr == 0 ) {
 		cerr << "<AC3DModelData::readData> file can not be read !" << endl;
+		return false;
 	}
 }
 

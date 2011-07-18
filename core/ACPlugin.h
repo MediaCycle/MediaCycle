@@ -97,14 +97,15 @@ protected:
 	ACPluginType mPluginType;
 };
 
-
+// XS TODO : separate time & space plugins ?
+// getTimedFeatures has no sense for image
 class ACFeaturesPlugin: virtual public ACPlugin
 {
 protected:
 	ACFeaturesPlugin();
 	
 public:
-	virtual std::vector<ACMediaFeatures*> calculate(std::string aFileName, bool _save_timed_feat=false)=0;
+//	virtual std::vector<ACMediaFeatures*> calculate(std::string aFileName, bool _save_timed_feat=false)=0;
 	virtual std::vector<ACMediaFeatures*> calculate(ACMediaData* aData, ACMedia* theMedia, bool _save_timed_feat=false)=0;
 	virtual ACMediaTimedFeature* getTimedFeatures(){return 0;}
 	std::vector<std::string> getDescriptorsList() {return this->mDescriptorsList;}

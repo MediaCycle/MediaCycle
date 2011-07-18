@@ -156,7 +156,7 @@ PoDoFo::PdfDocument* ACPDF::getData()
 }
 
 //ACMediaData* ACPDF::extractData(string _fname){
-void ACPDF::extractData(string _fname){
+bool ACPDF::extractData(string _fname){
 	// XS todo : store the default header (16 below) size somewhere...
 	this->filename = _fname;
 	

@@ -61,8 +61,8 @@ ACImageData::~ACImageData() {
 	image_ptr = 0;
 }
 
-void ACImageData::readData(std::string _fname){
-	if(_fname=="") return;
+bool ACImageData::readData(std::string _fname){
+	if(_fname=="") return false;
 	image_ptr = cvLoadImage(_fname.c_str(), CV_LOAD_IMAGE_COLOR);	
 
 	try {
@@ -73,7 +73,9 @@ void ACImageData::readData(std::string _fname){
 	}
 	catch (const string& not_image_file) {
 		cerr << not_image_file << endl;
+		return false;
 	}
+	return true;
 }
 
 void ACImageData::setData(IplImage* _data){

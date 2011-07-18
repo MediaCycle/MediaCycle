@@ -42,10 +42,7 @@
 USE_GRAPHICSWINDOW()
 #endif
 
-// ----------- class constants
-// number of files above which to lauch thread.
-const int ACMultiMediaCycleOsgQt::n_dir_for_threading = 10;
-// -----------
+// ----------- callbacks
 
 static void mediacycle_callback(const char* message, void *user_data) {
 
@@ -90,7 +87,7 @@ void ACMultiMediaCycleOsgQt::mediacycleCallback(const char* message) {
 				if (!(size_ss>>dir_size))
 					std::cerr << "ACMediaCycleOsgQt: wrong dir size"  << std::endl;
 				if(media_id != -1 && dir_size != -1){
-					std::cout << std::endl << std::endl << "importing media " << media_id << "/" << dir_size << std::endl;
+					std::cout << std::endl << std::endl << "importing media " << media_id << "/" << (dir_size-1) << std::endl;
 					if (progressBar){
 						progressBar->setMinimum(0);
 						progressBar->setMaximum(dir_size);
@@ -105,6 +102,8 @@ void ACMultiMediaCycleOsgQt::mediacycleCallback(const char* message) {
 		}
 	}	
 }
+
+// ----------- 
 
 ACMultiMediaCycleOsgQt::ACMultiMediaCycleOsgQt(QWidget *parent) : QMainWindow(parent),
 	features_known(false), plugins_scanned(false), detachedBrowser(0),
@@ -226,8 +225,7 @@ ACMultiMediaCycleOsgQt::~ACMultiMediaCycleOsgQt(){
 // tries to read settings from previous run
 // if it does not find any, use default (centered) geometry
 void ACMultiMediaCycleOsgQt::configureSettings(){
-	//CF temp disable
-	/*if (this->readQSettings()){
+	if (this->readQSettings()){
 		QMessageBox msgBox;
 		msgBox.setText("Launching MediaCycle.");
 		msgBox.setInformativeText("Do you want to load your media settings from previous session ?");
@@ -253,7 +251,7 @@ void ACMultiMediaCycleOsgQt::configureSettings(){
 		}
 	}
 	else
-		this->setDefaultQSettings();*/
+		this->setDefaultQSettings();
 }
 
 // creates a MediaCycle object (containing the whole application)
@@ -499,27 +497,17 @@ void ACMultiMediaCycleOsgQt::on_actionLoad_Media_Directory_triggered(bool checke
 	else
 		directories.push_back((string)select_dir.toStdString());
 
-
-	// check if the user wants segments
-	bool do_segments = this->doSegments();
-	bool forward_order = true; // only make it false for AudioGarden where media have been presegmented and segments have special names
-	int recursive = 1;
+	if (!(directories.empty())){
+		this->importDirectoriesThreaded(directories);
+		directories.empty();
+	}
+	
 
 // XS TODO to use progress bar, we need to import files one by one...
 // so split the importdDirectory into scanDirectory + importFile
 //	pb->show();
 //	pb->setRange(0, 100);
 //	pb->setValue(2);
-
-	// XS TODO threaded version not working for images.
-	// not necessary to thread if only few files.
-//	if (directories.size() > n_dir_for_threading)
-		media_cycle->importDirectoriesThreaded(directories, recursive, forward_order, do_segments);
-//	else
-//		media_cycle->importDirectories(directories, recursive, forward_order, do_segments);
-
-	directories.empty();
-
 
 	// SD not working with threaded version
 	/*
@@ -545,6 +533,8 @@ void ACMultiMediaCycleOsgQt::on_actionLoad_Media_Directory_triggered(bool checke
 	*/
 
 }
+
+
 
 void ACMultiMediaCycleOsgQt::on_actionLoad_Media_Files_triggered(bool checked){
 
@@ -589,20 +579,42 @@ void ACMultiMediaCycleOsgQt::on_actionLoad_Media_Files_triggered(bool checked){
 	}
 
 	if (!(directories.empty())){
-
-		// check if the user wants segments
-		bool do_segments = this->doSegments();
-		bool forward_order = true; // only make it false for AudioGarden where media have been presegmented and segments have special names
-		int recursive = 1;
-
-		// not necessary to thread if only few files.
-//		if (directories.size() > n_dir_for_threading)
-			media_cycle->importDirectoriesThreaded(directories, recursive, forward_order, do_segments);
-//		else
-//			media_cycle->importDirectories(directories, recursive, forward_order, do_segments);
-
+		this->importDirectoriesThreaded(directories);
 		directories.empty();
 	}
+}
+
+
+// import (threaded or not) moved here instead of in MediaCycle
+// because of problems with Qt and threads
+// e.g., QCoreApplication::sendPostedEvents: Cannot send posted events for objects in another thread
+void ACMultiMediaCycleOsgQt::importDirectoriesThreaded(vector<string> directories) {
+	// check if the user wants segments
+	bool do_segments = this->doSegments();
+	bool forward_order = true; // only make it false for AudioGarden where media have been presegmented and segments have special names
+	int recursive = 1;
+	
+	// XS TODO 
+	// // xs: http://hopf.chem.brandeis.edu/yanglingfa/Qt/threading/index.html
+
+//	// loaddirstart
+//	statusBar()->showMessage(tr("Loading Directory..."), 0);
+//	progressBar->reset();
+//	progressBar->show();
+//	
+//	//loaddirfinish"
+//	this->updateLibrary();
+//	statusBar()->clearMessage();
+//	progressBar->reset();
+//	progressBar->hide();
+	
+	// not necessary to thread if only few files.
+	//		if (directories.size() > n_dir_for_threading)
+	// media_cycle->importDirectoriesThreaded(directories, recursive, forward_order, do_segments);
+	//		else
+				media_cycle->importDirectories(directories, recursive, forward_order, do_segments);
+	
+	
 }
 
 bool ACMultiMediaCycleOsgQt::doSegments(){
@@ -1204,6 +1216,7 @@ void ACMultiMediaCycleOsgQt::loadDefaultConfig(ACMediaType _media_type, ACBrowse
 	}	
 	
     //CF sorry XD, I need position plugins to debug the segmentation!
+	// XS TODO don't test class in OOP !
     for (int d=0; d<dockWidgets.size(); d++)
     {
         if (dockWidgets[d]->getClassName()=="ACBrowserControlsClustersDockWidgetQt")
@@ -1394,6 +1407,7 @@ void ACMultiMediaCycleOsgQt::changeMediaType(ACMediaType _media_type){
 	if (_media_type == MEDIA_TYPE_AUDIO){
 		if (!audio_engine){
 			audio_engine = new ACAudioEngine();
+			media_cycle->setAutoPlay(1);//Seneffe
 		}
 		audio_engine->setMediaCycle(media_cycle);
 		audio_engine->startAudioEngine();

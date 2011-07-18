@@ -62,7 +62,7 @@ inline float ACRandom() { return ((float)rand()) / (float)((1LL<<31)-1L); }
 
 using namespace std;
 
-static double getTime();
+//static double getTime();
 
 enum ACBrowserState {
 	AC_IDLE=0,
@@ -234,8 +234,8 @@ public:
 	void updateState();
 
 	// interaction with pointers
-	int setSourceCursor(int lid, int frame_pos);
-	int setCurrentFrame(int lid, int frame_pos);
+	void setSourceCursor(int lid, int frame_pos);
+	void setCurrentFrame(int lid, int frame_pos);
 	void hoverWithPointerId(float mxx, float myy, int p_id = -1);
 	void hoverWithPointerIndex(float mxx, float myy, int p_index = 0);
 

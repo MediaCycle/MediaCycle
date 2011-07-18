@@ -148,7 +148,6 @@ public:
 	void switchPluginVisualizations(bool _status);// disable/enable visualization from plugins when (failing) loading visualization plugins and changing media types
 	
 private:
-	static const int n_dir_for_threading;	
 	// variables
 	Ui::ACMediaCycleOsgQt ui;
 	SettingsDialog *settingsDialog;
@@ -190,6 +189,8 @@ private:
 	void showError(const exception& e);
 	bool hasMediaCycle();
 	void changeMediaType(ACMediaType _mt);
+
+	void importDirectoriesThreaded(std::vector<std::string> directories);
 
 	ACOsgCompositeViewQt* compositeOsgView;
 	QDockWidget* osgViewDock;

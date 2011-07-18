@@ -252,12 +252,6 @@ int ACPluginLibrary::initialize()
     return 0;
 }
 
-//vector<ACMediaFeatures*> ACPluginLibrary::calculate(int aPluginIndex,string aFileName)
-//{
-//    return this->mPlugins[aPluginIndex]->calculate(aFileName);
-//    //return getPlugin(aPluginIndex)->calculate(aFileName);
-//}
-
 // clean
 void ACPluginLibrary::freePlugins() {
     //TODO ? replace with iterator
@@ -406,32 +400,31 @@ void ACActiveFeaturesPlugins::log()
 } 
  */
 
-vector<ACMediaFeatures*> ACActiveFeaturesPlugins::calculate(std::string aFileName, bool _save_timed_feat){
-	
-	//first step identify the mediatype
-	string extension = fs::extension(aFileName);
-	ACMediaType fileMediaType = ACMediaFactory::getInstance().getMediaTypeFromExtension(extension);
-	vector<ACMediaFeatures*> output;
-	for (vector<ACFeaturesPlugin *> ::iterator iter_vec = mCurrPlugin[fileMediaType].begin(); iter_vec != mCurrPlugin[fileMediaType].end(); iter_vec++) {
-		ACFeaturesPlugin* localPlugin=(*iter_vec);
-		vector<ACMediaFeatures*> afv;
-		if (localPlugin!=NULL)
-			afv =localPlugin->calculate(aFileName, _save_timed_feat);
-		else {
-			cerr << "<ACActiveFeaturesPlugins::calculate> failed plugin access failed "<< localPlugin->getName() << endl;
-		}
-		
-		if (afv.size()==0){
-			cerr << "<ACActiveFeaturesPlugins::calculate> failed computing feature from plugin: " << localPlugin->getName() << endl;
-		}
-		else {
-			for (unsigned int Iafv=0; Iafv< afv.size() ; Iafv++)
-				output.push_back(afv[Iafv]);
-		}
-	}
-	return output;
-	
-}
+//vector<ACMediaFeatures*> ACActiveFeaturesPlugins::calculate(std::string aFileName, bool _save_timed_feat){
+//	//first step identify the mediatype
+//	string extension = fs::extension(aFileName);
+//	ACMediaType fileMediaType = ACMediaFactory::getInstance().getMediaTypeFromExtension(extension);
+//	vector<ACMediaFeatures*> output;
+//	for (vector<ACFeaturesPlugin *> ::iterator iter_vec = mCurrPlugin[fileMediaType].begin(); iter_vec != mCurrPlugin[fileMediaType].end(); iter_vec++) {
+//		ACFeaturesPlugin* localPlugin=(*iter_vec);
+//		vector<ACMediaFeatures*> afv;
+//		if (localPlugin!=NULL)
+//			afv =localPlugin->calculate(aFileName, _save_timed_feat);
+//		else {
+//			cerr << "<ACActiveFeaturesPlugins::calculate> failed plugin access failed "<< localPlugin->getName() << endl;
+//		}
+//		
+//		if (afv.size()==0){
+//			cerr << "<ACActiveFeaturesPlugins::calculate> failed computing feature from plugin: " << localPlugin->getName() << endl;
+//		}
+//		else {
+//			for (unsigned int Iafv=0; Iafv< afv.size() ; Iafv++)
+//				output.push_back(afv[Iafv]);
+//		}
+//	}
+//	return output;
+//	
+//}
 
 vector<ACMediaFeatures*> ACActiveFeaturesPlugins::calculate(ACMediaData* aData, ACMedia* theMedia, bool _save_timed_feat){
 	ACMediaType mediaType=theMedia->getMediaType();
@@ -598,9 +591,7 @@ void ACActivePlugins<T>::log()
 			cout << "active plugin for type media" <<"\t"<<((ACPlugin*)(*iter_vec))->getName() <<"\n";
 		}
 	}
-	
 }
-
 
 ACActiveSegmentPlugins::ACActiveSegmentPlugins(std::vector<ACPluginLibrary *> PluginLibrary){
 	this->update(PluginLibrary);
@@ -609,8 +600,8 @@ ACActiveSegmentPlugins::ACActiveSegmentPlugins(){
 }
 
 std::vector<ACMedia*>  ACActiveSegmentPlugins::segment(ACMediaTimedFeature *ft,ACMedia* theMedia){
-
-	bool segment_ok; //TR TODO what's the use of it? 
+	
+	bool segment_ok; //TR TODO what's the use of it?
 	std::vector<ACMedia*> segments;
 	ACMediaType mediaType=theMedia->getMediaType();
 	for (vector<ACSegmentationPlugin *> ::iterator iter_vec = mCurrPlugin[mediaType].begin(); iter_vec != mCurrPlugin[mediaType].end(); iter_vec++) {
@@ -621,7 +612,7 @@ std::vector<ACMedia*>  ACActiveSegmentPlugins::segment(ACMediaTimedFeature *ft,A
 			cerr << "<ACMedia::segment> failed importing segments from plugin: " <<  localPlugin->getName() << endl;
 		}
 		else {
-			for	(unsigned int Iafv=0; Iafv<afv.size(); Iafv++){
+			for     (unsigned int Iafv=0; Iafv<afv.size(); Iafv++){
 				segments.push_back(afv[Iafv]);
 			}
 			segment_ok = 1;
@@ -631,7 +622,7 @@ std::vector<ACMedia*>  ACActiveSegmentPlugins::segment(ACMediaTimedFeature *ft,A
 }
 std::vector<ACMedia*>  ACActiveSegmentPlugins::segment(ACMediaData* aData,ACMedia* theMedia){
 	
-	bool segment_ok; //TR TODO what's the use of it? 
+	bool segment_ok; //TR TODO what's the use of it?
 	std::vector<ACMedia*> segments;
 	ACMediaType mediaType=theMedia->getMediaType();
 	for (vector<ACSegmentationPlugin *> ::iterator iter_vec = mCurrPlugin[mediaType].begin(); iter_vec != mCurrPlugin[mediaType].end(); iter_vec++) {
@@ -642,7 +633,7 @@ std::vector<ACMedia*>  ACActiveSegmentPlugins::segment(ACMediaData* aData,ACMedi
 			cerr << "<ACMedia::segment> failed importing segments from plugin: " <<  localPlugin->getName() << endl;
 		}
 		else {
-			for	(unsigned int Iafv=0; Iafv<afv.size(); Iafv++){
+			for     (unsigned int Iafv=0; Iafv<afv.size(); Iafv++){
 				segments.push_back(afv[Iafv]);
 			}
 			segment_ok = 1;

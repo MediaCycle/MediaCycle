@@ -34,6 +34,10 @@
  */
 
 #include <QApplication>
+#include <QStringListModel>
+#include <QListView>
+
+#include <QApplication>
 #include <QtGui>
 #include "ACMultiMediaCycleOsgQt.h"
 

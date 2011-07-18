@@ -73,7 +73,15 @@ ACImage::~ACImage() {
 // in this case w and h can be read from XML file
 bool ACImage::computeThumbnail(string _fname, int w, int h){
 	bool ok = true;
-	IplImage* cvImg = cvLoadImage(_fname.c_str(), CV_LOAD_IMAGE_COLOR);	
+	if (_fname == "")
+		ok=false;
+		//throw runtime_error("corrupted XML file, no filename");
+	else {
+//		fixWhiteSpace(_fname);
+		this->setThumbnailFileName(_fname);
+	}
+	IplImage* cvImg;
+	cvImg = cvLoadImage(_fname.c_str(), CV_LOAD_IMAGE_COLOR);	
 	if (!cvImg) ok = false;
 	else {
 		ok = this->computeThumbnail(cvImg, w, h);	
@@ -87,6 +95,7 @@ bool ACImage::computeThumbnail(string _fname, int w, int h){
 bool ACImage::computeThumbnail(ACImageData* data_ptr, int w, int h){
 	bool ok = true;
 	IplImage* cvImg = static_cast<IplImage*>(data_ptr->getData());
+		
 	if (!cvImg) ok = false;
 	else 
 		ok = this->computeThumbnail(cvImg, w, h);
@@ -137,25 +146,31 @@ bool ACImage::computeThumbnailSize(int w_, int h_){
 	return ok;
 }	
 
-void ACImage::extractData(string fname){
+// 1) extracts data 
+// - IplImage
+// - height, width
+// 2) computes thumbnail
+bool ACImage::extractData(string fname){
 	// XS TODO return error message if it did not work
 	if (data) delete data;
 	data = new ACImageData(fname);
 	
 	if (!data) {
 		cerr << "<ACImage::extractData> no data in file: " << fname << endl;
-		return;
+		return false;
 	}
 	IplImage* tmp_im = this->getData();
+	
+	// XS TODO FIX THIS COPYCAT
 	if (!data) {
 		cerr << "<ACImage::extractData> can't extract data from file: " << fname << endl;
-		return;
+		return false;
 	}
 	// original image width
 	width = tmp_im->width;
 	height = tmp_im->height;
 	// thumbnail_width and thumbnail_height are almost always zero
-	computeThumbnail(data, thumbnail_width , thumbnail_height);
+	return computeThumbnail(data, thumbnail_width , thumbnail_height);
 }
 
 void ACImage::setData(IplImage* _data){
@@ -164,8 +179,6 @@ void ACImage::setData(IplImage* _data){
 	data->setData(_data);
 	this->height = _data->height;
 	this->width = _data->width;
-	// XS TODO why here ?
-	//	this->computeThumbnailSize();
 }
 
 void ACImage::deleteData(){

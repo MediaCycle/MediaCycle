@@ -90,7 +90,7 @@ int main(int argc, char *argv[])
 	app.setOrganizationName("numediart");
 	app.setOrganizationDomain("numediart.org");
 	app.setApplicationName("MediaCycle");
-
+	
     return app.exec();
 }
 
