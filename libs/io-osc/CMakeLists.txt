@@ -5,8 +5,8 @@ FILE(GLOB HDR *.h)
 
 	ADD_LIBRARY(mediacycle-io-osc STATIC ${SRC} ${HDR})
 
-	ADD_DEPENDENCIES(mediacycle-io-osc mediacycle mediacycle-osg)
-	TARGET_LINK_LIBRARIES(mediacycle-io-osc mediacycle mediacycle-osg)
+	ADD_DEPENDENCIES(mediacycle-io-osc mediacycle)
+	TARGET_LINK_LIBRARIES(mediacycle-io-osc mediacycle)
 	
 	IF(SUPPORT_AUDIO)
 		ADD_DEPENDENCIES(mediacycle-io-osc audioengine)

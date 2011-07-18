@@ -1,7 +1,7 @@
 /**
  * @brief ACAudioFeatures.cpp
- * @author Stéphane Dupont
- * @date 13/05/2011
+ * @author Xavier Siebert
+ * @date 18/07/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -270,9 +270,9 @@ std::vector<ACMediaTimedFeature*> computeFeatures(float* data, vector<string> de
 	// 	std::cout << "nbFrames = " << nbFrames << std::endl;
 	
 	for (long i=0; i <= signal_v.n_elem-windowSize; i = i+hopSize){
-#ifdef USE_DEBUG
-		std::cout << "ACAudioFeatures: computing features on bin " << (float)i/(float)hopSize << "/" << (int)((float)(signal_v.n_elem-windowSize)/(float)hopSize) << "\r" << std::flush; //CF won't work if multithreaded/parallelized
-#endif
+//#ifdef USE_DEBUG
+//		std::cout << "ACAudioFeatures: computing features on bin " << (float)i/(float)hopSize << "/" << (int)((float)(signal_v.n_elem-windowSize)/(float)hopSize) << "\r" << std::flush; //CF won't work if multithreaded/parallelized
+//#endif
 		time_v(index) = ((double)i+((double)windowSize*(1.0-(double)extendSoundLimits))/2.0)/(double)sr_hz;
 		frame_v = signal_v.rows(i,i+windowSize-1);
 		frameW_v = signal_v.rows(i,i+windowSize-1)%window_v;

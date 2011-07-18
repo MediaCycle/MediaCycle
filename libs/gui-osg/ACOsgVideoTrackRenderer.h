@@ -99,7 +99,7 @@ public:
 class ACOsgVideoTrackRenderer : public ACOsgTrackRenderer {
 protected:
 	osg::ref_ptr<osg::ImageStream>video_stream;
-	CvCapture* summary_data;
+	cv::VideoCapture* summary_data;
 
 	osg::ref_ptr<osg::MatrixTransform> playback_transform;
 	osg::ref_ptr<osg::MatrixTransform> frames_transform;

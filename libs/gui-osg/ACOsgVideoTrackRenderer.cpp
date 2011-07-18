@@ -34,7 +34,7 @@
  */
 
 // ----------- uncomment this to compute and visualize a slit scan
-#define USE_SLIT_SCAN
+//#define USE_SLIT_SCAN
 
 #include "ACOsgVideoTrackRenderer.h"
 #include "ACVideo.h"
@@ -50,7 +50,7 @@ using namespace osg;
 
 #if defined (SUPPORT_VIDEO)
 
-osg::ref_ptr<osg::Image> Convert_OpenCV_2_osg_Image(IplImage* cvImg)
+osg::ref_ptr<osg::Image> Convert_OpenCV_2_osg_Image(cv::Mat cvImg)
 {
 	// XS uncomment the following 4 lines for visual debug (e.g., thumbnail)
 	//	cvNamedWindow("T", CV_WINDOW_AUTOSIZE);
@@ -58,19 +58,19 @@ osg::ref_ptr<osg::Image> Convert_OpenCV_2_osg_Image(IplImage* cvImg)
 	//	cvWaitKey(0);
 	//	cvDestroyWindow("T");
 
-	if(cvImg->nChannels == 3)
+	if(cvImg.channels() == 3)
 	{
 		// Flip image from top-left to bottom-left origin
-		if(cvImg->origin == 0) {
-			cvConvertImage(cvImg , cvImg, CV_CVTIMG_FLIP);
-			cvImg->origin = 1;
-		}
+//		if(cvImg->origin == 0) {
+//			cvConvertImage(cvImg , cvImg, CV_CVTIMG_FLIP);
+//			cvImg->origin = 1;
+//		}
 
 		// Convert from BGR to RGB color format
 		//printf("Color format %s\n",cvImg->colorModel);
-		if ( !strcmp(cvImg->channelSeq,"BGR") ) {
-			cvCvtColor( cvImg, cvImg, CV_BGR2RGB );
-		}
+//		if ( !strcmp(cvImg->channelSeq,"BGR") ) {
+//			cvCvtColor( cvImg, cvImg, CV_BGR2RGB );
+//		}
 
 		osg::ref_ptr<osg::Image> osgImg = new osg::Image();
 
@@ -80,13 +80,13 @@ osg::ref_ptr<osg::Image> Convert_OpenCV_2_osg_Image(IplImage* cvImg)
 		 }*/
 
 		osgImg->setImage(
-						 cvImg->width, //s
-						 cvImg->height, //t
+						 cvImg.cols, //s (witdh)
+						 cvImg.rows, //t (height)
 						 1, //r //CF needs to be 1 otherwise scaleImage can't be used
 						 3, //GLint internalTextureformat, (GL_LINE_STRIP, 0x0003)
 						 6407, // GLenum pixelFormat, (GL_RGB, 0x1907)
 						 5121, // GLenum type, (GL_UNSIGNED_BYTE, 0x1401)
-						 (unsigned char*)(cvImg->imageData), // unsigned char* data
+						 (unsigned char*)(cvImg.data), // unsigned char* data
 						 //temp_data,
 						 osg::Image::NO_DELETE, // AllocationMode mode (shallow copy)
 						 1);//int packing=1); (???)
@@ -173,6 +173,7 @@ void ACOsgVideoSlitScanThread::yuva420pToRgba(AVPicture * const dst, AVPicture *
 }
 /*
 // Using OpenCV, frame jitter
+// XS TODO try with cv::VideoCapture
 int ACOsgVideoSlitScanThread::computeSlitScan(){
 	CvCapture* video = cvCreateFileCapture(filename.c_str());
 	if ( !video) {
@@ -469,7 +470,7 @@ ACOsgVideoTrackRenderer::~ACOsgVideoTrackRenderer() {
 	if (segments_transform) { //ref_ptr//segments_transform->unref();
 		segments_transform=0;}	
 	if(summary_data) {
-		cvReleaseCapture(&summary_data);
+		delete summary_data;
 		summary_data=0;
 	} // XS TODO ACVideo does not do it!
 }
@@ -659,15 +660,13 @@ void ACOsgVideoTrackRenderer::framesGeode() {
 		state = frame_geode->getOrCreateStateSet();
 		state->setMode(GL_NORMALIZE, osg::StateAttribute::ON);	
 		state->setMode(GL_DEPTH_TEST,osg::StateAttribute::OFF);
-		int total_frames = (int) cvGetCaptureProperty( summary_data, CV_CAP_PROP_FRAME_COUNT);
 		
-		cvSetCaptureProperty( summary_data, CV_CAP_PROP_POS_FRAMES, (int)((f+0.5f)*total_frames/(float)frame_n) );// +0.5f means we're taking the center frame as a representative
-		if(!cvGrabFrame(summary_data)){
-			cerr << "<ACVideoTrackRenderer::updateTrack> Could not find frame " << f << endl;
-		}
-		else {
-			IplImage* tmp = cvRetrieveFrame(summary_data);
-			
+		int total_frames = (int) summary_data->get (CV_CAP_PROP_FRAME_COUNT);
+		summary_data->set(CV_CAP_PROP_POS_FRAMES, (int)((f+0.5f)*total_frames/(float)frame_n) );// +0.5f means we're taking the center frame as a representative
+		cv::Mat tmp;
+		*summary_data >> tmp; 
+		if(!tmp.data) break;
+					
 			osg::ref_ptr<osg::Image> tmposg = Convert_OpenCV_2_osg_Image(tmp);
 			osg::ref_ptr<osg::Image> thumbnail = new osg::Image;
 			thumbnail->allocateImage(tmposg->s(), tmposg->t(), tmposg->r(), GL_RGB, tmposg->getDataType());
@@ -726,7 +725,7 @@ void ACOsgVideoTrackRenderer::framesGeode() {
 			frame_geometry->setColorBinding(Geometry::BIND_OVERALL);
 			frame_geode->addDrawable(frame_geometry);
 			frame_geode->setUserData(new ACRefId(track_index,"video track summary frames"));
-		}
+		
 		//ref_ptr//frame_geode->ref();
 		frames_group->addChild(frame_geode);
 	}
@@ -802,6 +801,7 @@ void ACOsgVideoTrackRenderer::updateTracks(double ratio) {
 			playback_geode=0;
 			playback_transform=0;
 			cursor_geode=0;
+			// XS TODO check these release ()
 			if(summary_data) {summary_data=0;} //{cvReleaseCapture(&summary_data);} // no! ACVideo does it!
 			if (video_stream) {video_stream->quit();}
 			video_stream=0;	
@@ -822,6 +822,7 @@ void ACOsgVideoTrackRenderer::updateTracks(double ratio) {
 			video_stream = static_cast<ACVideo*>(media_cycle->getLibrary()->getMedia(media_index))->getStream();
 			std::cout << getTime()-video_stream_in << " sec." << std::endl;
 			
+			// XS TODO summary_data not used here !?
 			//if (summary_data) delete summary_data;
 			std::cout << "Getting summary data... ";
 			double summary_data_in = getTime();

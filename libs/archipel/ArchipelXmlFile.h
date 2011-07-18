@@ -65,5 +65,5 @@
 std::string* ArchipelXmlFileRead(std::string filePath);
 std::string ArchipelLabelFileRead(std::string filePath);
 IplImage*  ArchipelThumbFileRead(std::string filePath);
-string ArchipelGetThumbFileName(std::string filePath);
+std::string ArchipelGetThumbFileName(std::string filePath);
 #endif

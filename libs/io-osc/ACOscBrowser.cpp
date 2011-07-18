@@ -102,7 +102,7 @@ int ACOscBrowser::static_mess_handler(const char *path, const char *types, lo_ar
 
 int ACOscBrowser::process_mess(const char *path, const char *types, lo_arg **argv,int argc){
 	std::string tag = std::string(path);
-	//std::cout << "OSC message: '" << tag << "'" << std::endl;
+	std::cout << "OSC message: '" << tag << "'" << std::endl;
 	bool ac = (tag.find("/audiocycle",0)!= string::npos);
 	bool mc = (tag.find("/mediacycle",0)!= string::npos);
 	if(!ac && !mc)//we don't process messages not containing /audiocycle or /mediacycle
@@ -148,20 +148,9 @@ int ACOscBrowser::process_mess(const char *path, const char *types, lo_arg **arg
 			size_t suffix_found = tag.find(suffix,prefix_found+prefix.size());
 			if (suffix_found!= string::npos){
 				std::string id_string = tag.substr(prefix_found+prefix.size(),suffix_found-(prefix_found+prefix.size()));
-				
-				//id = atoi(id_string.c_str());// can't check errors with this
-				
 				istringstream id_ss(id_string);
 				if (!(id_ss>>id))
 					std::cerr << "ACOSCDockWidgetQt: wrong pointer id" << std::endl;
-				
-				//try{
-				//	id = boost::lexical_cast<int>(id_string);
-				//}
-				//catch(boost::bad_lexical_cast &){
-				//	std::cerr << "ACOSCDockWidgetQt: wrong pointer id" << std::endl;
-				//}
-				//std::cout << "id_string " << id_string << " id " << id << std::endl;
 			}
 		}
 		

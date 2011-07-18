@@ -1,7 +1,7 @@
 /**
  * @brief hanning.h
- * @author Jérôme Urbain
- * @date 09/05/2011
+ * @author Xavier Siebert
+ * @date 18/07/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -33,7 +33,7 @@
 #ifndef HANNING_H
 #define HANNING_H
 
-#include <armadillo>
+#include "Armadillo-utils.h"
 
 inline arma::colvec hanning(int L){
 	arma::colvec window_v(L);
@@ -46,9 +46,9 @@ inline arma::colvec hanning(int L){
 		arma::colvec n_v = arma::linspace<arma::colvec>(1, half, half);
 
 		half_window_v = 0.5*(1 - cos(2*arma::math::pi()*n_v/(L+1))); 
-		rev_half_window_v = flipud(half_window_v);
+		rev_half_window_v = arma::flipud(half_window_v);
 		
-		window_v = join_cols(half_window_v,rev_half_window_v);
+		window_v = arma::join_cols(half_window_v,rev_half_window_v);
 	
 	}
 	else{
@@ -58,8 +58,8 @@ inline arma::colvec hanning(int L){
 		arma::colvec n_v = arma::linspace<arma::colvec>(1, half, half);
 
 		half_window_v = 0.5*(1 - cos(2*arma::math::pi()*n_v/(L+1))); 
-		rev_half_window_v = flipud(half_window_v);
-		window_v = join_cols(half_window_v,rev_half_window_v.rows(1,half-1));
+		rev_half_window_v = arma::flipud(half_window_v);
+		window_v = arma::join_cols(half_window_v,rev_half_window_v.rows(1,half-1));
 
 	}
 	return window_v;

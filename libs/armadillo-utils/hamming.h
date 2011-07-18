@@ -1,7 +1,7 @@
 /**
  * @brief hamming.h
- * @author Jérôme Urbain
- * @date 09/05/2011
+ * @author Xavier Siebert
+ * @date 18/07/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -33,7 +33,7 @@
 #ifndef HAMMING_H
 #define HAMMING_H
 
-#include <armadillo>
+#include "Armadillo-utils.h"
 
 inline arma::colvec hamming(int L){
 	arma::colvec window_v(L);
@@ -48,7 +48,7 @@ inline arma::colvec hamming(int L){
 		half_window_v = 0.54 - 0.46 * cos(2*arma::math::pi()*n_v/(L-1)); 
 		rev_half_window_v = flipud(half_window_v);
 		
-		window_v = join_cols(half_window_v,rev_half_window_v);
+		window_v = arma::join_cols(half_window_v,rev_half_window_v);
 	
 	}
 	else{
@@ -59,7 +59,7 @@ inline arma::colvec hamming(int L){
 
 		half_window_v = 0.54 - 0.46 * cos(2*arma::math::pi()*n_v/(L-1)); 
 		rev_half_window_v = flipud(half_window_v);
-		window_v = join_cols(half_window_v,rev_half_window_v.rows(1,half-1));
+		window_v = arma::join_cols(half_window_v,rev_half_window_v.rows(1,half-1));
 
 	}
 	return window_v;
