@@ -1,9 +1,9 @@
 /*
- *  ACHuMomentsVideoPlugin.h
+ *  ACVideoMotionOrientationPlugin.h
  *  MediaCycle
  *
- *  @author Sidi Mahmoudi and Xavier Siebert and Christian Frisson
- *  @date 05/01/11
+ *  @author Xavier Siebert
+ *  @date 15/07/11
  *  @copyright (c) 2011 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
@@ -32,27 +32,26 @@
  *
  */
 
-#if defined(USE_STARPU)
-#ifndef _ACHUMOMENTSVIDEOPLUGIN_H
-#define	_ACHUMOMENTSVIDEOPLUGIN_H
-#include <string>
-#include <vector>
-#include <ACPlugin.h>
-#include <ACMediaFeatures.h>
-#include <ACMediaTimedFeature.h>
+#ifndef _ACVIDEOMOTIONORIENTATIONPLUGIN_H
+#define	_ACVIDEOMOTIONORIENTATIONPLUGIN_H
+#include "ACVideoAnalysis.h"
+#include "ACPlugin.h"
+#include "ACMediaFeatures.h"
+#include "ACMediaTimedFeature.h"
 
-class ACHuMomentsVideoPlugin : public ACFeaturesPlugin {
+//XS TODO : make an ACVideoFeatures Plugin
+// with (ACVideoData *) ACMediaData
+class ACVideoMotionOrientationPlugin : public ACFeaturesPlugin {
 public:
-    ACHuMomentsVideoPlugin();
-    ~ACHuMomentsVideoPlugin();
-//	std::vector<ACMediaFeatures*> calculate(std::string aFileName, bool _save_timed_feat=false);
-	std::vector<ACMediaFeatures*> calculate(ACMediaData* _data, ACMedia*, bool _save_timed_feat=false);
-	std::string getSavedFileName(){return mtf_file_name;}
-	ACMediaTimedFeature* getTimedFeatures();
-private:
-	std::vector<ACMediaFeatures*> _calculate(std::string aFileName="", bool _save_timed_feat=false);
-	std::string mtf_file_name; // file in which features have been saved	
+    ACVideoMotionOrientationPlugin();
+    ~ACVideoMotionOrientationPlugin();
+	virtual std::vector<ACMediaFeatures*> calculate(ACMediaData* aData, ACMedia* theMedia, bool _save_timed_feat=false);
+//	std::string getSavedFileName(){return mtf_file_name;}
+private:	
+	ACVideoAnalysis* videoAn;
+	void clean();
+	std::string mtf_file_name; // file in which features have been saved
+
 };
 
-#endif	/* _ACHUMOMENTSVIDEOPLUGIN_H */
-#endif//defined(USE_STARPU)
+#endif //_ACVIDEOMOTIONORIENTATIONPLUGIN_H

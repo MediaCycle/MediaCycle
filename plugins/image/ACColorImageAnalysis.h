@@ -42,6 +42,7 @@ public:
 	ACColorImageAnalysis();
 	ACColorImageAnalysis(const string &filename, string _cmode="BGR");	
 	ACColorImageAnalysis(IplImage*, string _cmode="BGR");
+	ACColorImageAnalysis(cv::Mat, string _cmode="BGR");
 	ACColorImageAnalysis(ACMediaData* image_data, string _cmode="BGR");
 
     ~ACColorImageAnalysis();
@@ -52,7 +53,7 @@ public:
 	// channels
 	int splitChannels(string col="BGR");
 	void removeChannels(); 
-	IplImage* getChannel(int i);
+	IplImage** getChannel(int i);
 	
 	// BW
 	void makeBWImage();
@@ -69,9 +70,9 @@ public:
 	void computeFourierPolarMoments(int RadialBins=5, int AngularBins=8);
 	void computeFourierMellinMoments();
 	void computeContourHuMoments(int thresh = 0);
-	void computeGaborMoments(int mumax = 7, int numax = 5);
-	void computeGaborMoments_fft(int numPha_ = 7, int numFreq_ = 5, uint horizonalMargin_ = 0, uint verticalMargin_ = 0);
-	void computeColorMoments(int n = 4);
+	void computeGaborMoments(int mumax = 4, int numax = 2);
+	void computeGaborMoments_fft(int numPha_ = 4, int numFreq_ = 2, uint horizonalMargin_ = 0, uint verticalMargin_ = 0);
+	void computeColorMoments(int n = 4, string cm = "HSV");
 	void computeImageHistogram(int w, int h);
 
 	// visual

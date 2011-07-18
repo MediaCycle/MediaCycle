@@ -60,8 +60,7 @@ public:
 	void rewind();
 	void setFileName(const std::string &filename);
 	int initialize();
-	void saveVideoThumnbailInFile(std::string fileout, int w=320, int h=240, int nskip=0, int istep=1);
-	bool saveInFile(std::string fileout, int nskip = 0);
+	void writeToFile(const std::string &fileout, int w=320, int h=240, int nskip=0, int istep=1);
 
 	//accessors 
 	inline int getWidth() {return width;}
@@ -76,43 +75,47 @@ public:
 	bool areBlobsComputed(){return HAS_BLOBS;}
 	
 	// utilities
-	IplImage* getNextFrame();
-	IplImage* getFrame(int i);
-	IplImage* computeAverageImage(int nskip = 0, int nread = 0, int njump = -1, std::string s =""); 
-	IplImage* computeMedianImage(int nskip = 0, int nread = 0, int njump = -1, std::string s =""); 
-	IplImage* computeMedianNoBlobImage(std::string s ="",IplImage *first_guess=0);
+	cv::Mat getFrame(int i);
+	void setFramePosition(int pos);
+	int getFramePosition();
+
+//	IplImage* computeAverageImage(int nskip = 0, int nread = 0, int njump = -1, std::string s =""); 
+	cv::Mat computeMedianImage(int nskip = 0, int nread = 0, int njump = -1, std::string s =""); 
+//	IplImage* computeMedianNoBlobImage(std::string s ="",IplImage *first_guess=0);
 	void backgroundSubstraction(IplImage* bg_img, int nskip=0, std::string cmode="BGR");
 	// blob detection could be per channel or in color image
 	//	void detectBlobs(int ichannel=0, std::string cmode="HSV", IplImage* bg_img=0, int bg_thesh=40, int big_blob=200, int small_blob=0);
-	void trimBlank(IplImage* bg_img);
-	int getFirstFrameMove();
 	
 	// XS not so useful
-	void histogramEqualize(const IplImage* bg_img);
+	// XS eventually translate into 2.* (started...)
+	//void histogramEqualize(const IplImage* bg_img);
 	
 	// raw features computation
 	//   - on blobs
-	void computeBlobs(IplImage* bg_img=0, int bg_thesh=10, int big_blob=200, int small_blob=0);
-	void computeBlobsInteractively(IplImage* bg_img=0, bool merge_blobs=false, int bg_thesh=20, int big_blob=200, int small_blob=0);
-	void computeBlobsUL(IplImage* bg_img=0, bool merge_blobs=true, int big_blob=200, int small_blob=0);
+	void computeBlobs(const cv::Mat&bg_img=cv::Mat(), int bg_thesh=10, int big_blob=200, int small_blob=0);
+// XS 280611 removed the following one for the moment (migration openCV 2.*)	
+//	void computeBlobsInteractively(IplImage* bg_img=0, bool merge_blobs=false, int bg_thesh=20, int big_blob=200, int small_blob=0);
+	void computeBlobsUL(const cv::Mat& bg_img=cv::Mat(), bool merge_blobs=true, int big_blob=200, int small_blob=0);
 	//   - general (not on blobs)
-	void computeOpticalFlow();
-	void computeGlobalPixelsSpeed();
+//	void computeOpticalFlow();
 
+	void computeContractionIndices();
+	void computeBoundingBoxRatios();
+	void computeBlobPixelSpeed();
+	void computeGlobalPixelsSpeed();
+	void computeColorMoments(int n=4, string cm = "HSV");
+	void computeHuMoments(int tresh=0, cv::Mat bg_img=cv::Mat()); // with background subtraction
+	void computeFourierPolarMoments(int RadialBins=5, int AngularBins=8); // without background subtraction
+	void computeFourierMellinMoments(); // without background subtraction
+	void computeImageHistograms(int w=10, int h=10); // image histogram, turned into a 1D vector
+	void computeGlobalOrientation();
+	
 	// features manipulation
 	void mergeBlobs(float blob_dist = 0);
 	void computeMergedBlobsTrajectory(float blob_dist = 0);
 	void computeMergedBlobsSpeeds(float blob_dist = 0);
 //	void computeCellOccupation(int nx, int ny);
-	void computeContractionIndices();
-	void computeBoundingBoxRatios();
-	void computeBlobPixelSpeed();
-	void computeGlobalPixelSpeed();
-	void computeHuMoments(int tresh=0);
-	void computeHuMoments(IplImage* bg_img, int tresh=0); // with background subtraction
-	void computeFourierPolarMoments(int RadialBins=5, int AngularBins=8); // without background subtraction
-	void computeFourierMellinMoments(); // without background subtraction
-	void computeImageHistograms(int w=10, int h=10); // image histogram, turned into a 1D vector
+
 
 	// features accessors (to be called by ACVideoDancersPlugin)
 	std::vector<blob_center> getMergedBlobsTrajectory() {return blob_centers;}
@@ -124,6 +127,8 @@ public:
 	std::vector<float> getBlobPixelsSpeeds() {return blob_pixel_speeds;}
 	std::vector<float> getGlobalPixelsSpeeds() {return global_pixel_speeds;}
 	std::vector<float> getBoundingBoxRatios() {return bounding_box_ratios;}
+	std::vector<float> getGlobalOrientations(){return global_orientations;}
+
 	std::vector<float> getDummyTimeStamps(int nsize);
 	std::vector<float> getBlobsTimeStamps();
 	std::vector<float> getGlobalTimeStamps();
@@ -135,6 +140,7 @@ public:
 	std::vector<float> getHuMoment(int i);
 	std::vector<std::vector<float> > getFourierPolarMoments() {return fourier_polar_moments;}
 	std::vector<std::vector<float> > getFourierMellinMoments() {return fourier_mellin_moments;}
+	std::vector<std::vector<float> > getColorMoments() {return color_moments;}
 	std::vector<std::vector<float> > getImageHistograms() {return image_histograms;}
 
 	// saves stuff in file
@@ -148,12 +154,13 @@ public:
 	void dumpAll(std::ostream &odump);
 	
 	// for display (ifdef VISUAL_CHECK) using highgui
-	void showInWindow(std::string="VIDEO", bool has_win=false);
-	void showFFTInWindow(std::string="VIDEO", bool has_win=false);
+	void showInWindow(std::string title, bool has_win=false);
+	void showFFTInWindow(std::string title, bool has_win=false);
+	void showFrameInWindow(std::string title, const cv::Mat& frame, bool has_win=true);
 
-	void showFrameInWindow(std::string="VIDEO", IplImage* frame=0, bool has_win=true);
-//	void onTrackbarSlide(int pos); 
-	void browseInWindow(std::string="VIDEO", bool has_win=false);
+	// fancy browsing with trackbar to set position
+	static void onTrackbarSlide(int, void*); // callback needs to be static or global
+	void browseWithTrackbarInWindow(std::string title, bool has_win=false);
 	// ?	void showBlobsInWindow(std::string="VIDEO", bool has_win=false);
 	
 
@@ -168,7 +175,7 @@ private:
 	std::string color_model; // "BGR" or "HSV" : these are already in IPLimage, but not used in OpenCV (see manual !)
 //	IplImage* thumbnail;
 	
-	CvCapture* capture ;
+	cv::VideoCapture* capture ;
 	int frame_counter;
 	bool FROM_FILE; // true if capture initialized from file (then it has to be deleted afterwards)
 	
@@ -195,16 +202,19 @@ private:
 	std::vector<float> bounding_box_widths;
 	std::vector<float> global_pixel_speeds;  // pixel-per-pixel speed in whole image
 	std::vector<float> interest_points;
-
+	std::vector<float> global_orientations;
+	
 	std::vector<std::vector<float> > raw_moments;
 	std::vector<std::vector<float> > hu_moments;
 	std::vector<std::vector<float> > fourier_polar_moments;
 	std::vector<std::vector<float> > fourier_mellin_moments;
+	std::vector<std::vector<float> > color_moments;
+
 	std::vector<std::vector<float> > image_histograms;
 
 	int width, height, depth, fps, nframes;
 	//	int videocodec;
-	
+	int g_slider_position;
 	//	MyHistogram *averageHistogram;
 	
 };

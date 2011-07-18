@@ -1,10 +1,10 @@
 /*
- *  ACVideoPixelSpeedPlugin.cpp
+ *  ACVideoMotionOrientationPlugin.cpp
  *  MediaCycle
  *
  *  @author Xavier Siebert
- *  @date 22/09/09
- *  @copyright (c) 2009 – UMONS - Numediart
+ *  @date 15/07/11
+ *  @copyright (c) 2011 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
  *  licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -32,56 +32,64 @@
  *
  */
 
-//uses ACVideoAnalysis and converts the results into ACMediaFeatures
-
-#include "ACVideoPixelSpeedPlugin.h"
+#include "ACVideoMotionOrientationPlugin.h"
 
 #include<iostream>
 using namespace std;
 
 // note : this->mDescription will be used for mtf_file_name
-ACVideoPixelSpeedPlugin::ACVideoPixelSpeedPlugin() {
-    //vars herited from ACPlugin
+ACVideoMotionOrientationPlugin::ACVideoMotionOrientationPlugin() {
     this->mMediaType = MEDIA_TYPE_VIDEO;
-    //this->mPluginType = PLUGIN_TYPE_FEATURES;
-    this->mName = "Video Pixel Speed";
-    this->mDescription = "Pixel_Speed";
+    this->mName = "Video MotionOrientation";
+    this->mDescription = "MotionOrientation";
     this->mId = "";
-	this->mDescriptorsList.push_back("Pixel Speed");
-
-	//other vars
+	this->mDescriptorsList.push_back("MotionOrientation");
+	
 	this->videoAn = 0;
-	this->mtf_file_name = "";
+//	this->mtf_file_name = "";
 }
 
-ACVideoPixelSpeedPlugin::~ACVideoPixelSpeedPlugin() {
+ACVideoMotionOrientationPlugin::~ACVideoMotionOrientationPlugin() {
 	this->clean();
 }
 
-void ACVideoPixelSpeedPlugin::clean(){
+void ACVideoMotionOrientationPlugin::clean(){
 	if (videoAn != 0)
 		delete videoAn;
 }
 
-//std::vector<ACMediaFeatures*>  ACVideoPixelSpeedPlugin::calculate(std::string aFileName, bool _save_timed_feat) {
-//	this->clean();
-//	videoAn = new ACVideoAnalysis(aFileName);
-//	return this->_calculate(aFileName,_save_timed_feat);
-//}
-
-std::vector<ACMediaFeatures*> ACVideoPixelSpeedPlugin::calculate(ACMediaData* video_data, ACMedia* theMedia, bool _save_timed_feat) {
+// computes global orientation
+// watch out : you can't just do mean() on angles ! (0+360)/2 would give 180
+std::vector<ACMediaFeatures*> ACVideoMotionOrientationPlugin::calculate(ACMediaData* video_data, ACMedia* theMedia, bool _save_timed_feat) {
 	this->clean();
 	std::vector<ACMediaFeatures*> videoFeatures;
-
+	
 	videoAn = new ACVideoAnalysis(video_data);
-	videoAn->computeGlobalPixelsSpeed();
+	videoAn->computeGlobalOrientation();
 	vector<float> t = videoAn->getGlobalTimeStamps();
-	vector<float> s = videoAn->getGlobalPixelsSpeeds();
+	std::vector<float> angles = videoAn->getGlobalOrientations();
+	ACMediaTimedFeature* ps_mtf = new ACMediaTimedFeature(t,angles, "Global Orientations");
+
+	//XS TODO: this could be angular_mean in ACMediaTimedFeatures
+	// special mean for angles !
+	float average_angle=0;
+	float xx=0, yy=0;
+	for (unsigned int i=0; i<angles.size(); i++){
+		float angle = angles[i]*CV_PI/180;
+		xx+=cos(angle);
+		yy+=sin(angle);
+	}
+	if (!(xx==0 && yy==0)) // atan2(0,0) undefined, global_orientation set to 0 in this case
+		average_angle=atan2(yy,xx)*180/CV_PI; // in degrees
+	
+	ACMediaFeatures* mean_mf = new ACMediaFeatures();  
+	mean_mf->setName("Mean of Global Orientations");
+
+	videoFeatures.push_back(mean_mf);
+	return videoFeatures;
+	
+	
 	string aFileName= video_data->getFileName();
-	
-	ACMediaTimedFeature* ps_mtf = new ACMediaTimedFeature(t,s, "pixel speed");
-	ACMediaFeatures* pixel_speed = ps_mtf->mean();
-	
 	// XS TODO this will need to be cut and pasted to other plugins
 	// until we re-define the plugins API
 	// saving timed features on disk (if _save_timed_feat flag is on)
@@ -94,24 +102,8 @@ std::vector<ACMediaFeatures*> ACVideoPixelSpeedPlugin::calculate(ACMediaData* vi
 		mtf_file_name = aFileName_noext + "_" +this->mDescription + file_ext;
 		ps_mtf->saveInFile(mtf_file_name, save_binary);
 	}
-	
-	delete ps_mtf;
-
-	videoFeatures.push_back(pixel_speed);
+		
+	videoFeatures.push_back(mean_mf);
 	return videoFeatures;
+	
 }
-
-// the plugin knows internally where it saved the mtf
-// thanks to mtf_file_name
-ACMediaTimedFeature* ACVideoPixelSpeedPlugin::getTimedFeatures(){
-	if (mtf_file_name == ""){
-        cout << "<ACVideoPixelSpeedPlugin::getTimedFeatures> : missing file name "<<endl;
-		return 0;
-	}
-	ACMediaTimedFeature* ps_mtf = new ACMediaTimedFeature();
-	if (ps_mtf->loadFromFile(mtf_file_name) <= 0){
-		return 0;
-	}
-	return ps_mtf;
-}
-

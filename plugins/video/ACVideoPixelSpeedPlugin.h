@@ -47,13 +47,12 @@ class ACVideoPixelSpeedPlugin : public ACFeaturesPlugin {
 public:
     ACVideoPixelSpeedPlugin();
     ~ACVideoPixelSpeedPlugin();
-	virtual std::vector<ACMediaFeatures*> calculate(std::string aFileName, bool _save_timed_feat=false);
+//	virtual std::vector<ACMediaFeatures*> calculate(std::string aFileName, bool _save_timed_feat=false);
 	virtual std::vector<ACMediaFeatures*> calculate(ACMediaData* aData, ACMedia* theMedia, bool _save_timed_feat=false);
 	std::string getSavedFileName(){return mtf_file_name;}
 	ACMediaTimedFeature* getTimedFeatures();
 private:	
 	ACVideoAnalysis* videoAn;
-	std::vector<ACMediaFeatures*> _calculate(std::string aFileName="", bool _save_timed_feat=false);
 	void clean();
 	std::string mtf_file_name; // file in which features have been saved
 };

@@ -51,16 +51,17 @@ class ACVideoDancersPlugin : public ACFeaturesPlugin {
 public:
     ACVideoDancersPlugin();
     ~ACVideoDancersPlugin();
-	std::vector<ACMediaFeatures*> calculate(std::string aFileName, bool _save_timed_feat=false);
 	std::vector<ACMediaFeatures*> calculate(ACMediaData* _data, ACMedia*, bool _save_timed_feat=false);
 	
+	
+private:
+	std::vector<ACMediaFeatures*> _calculate(std::string aFileName, bool _save_timed_feat=false);
 	std::vector<ACMediaFeatures*>  calculateTop(std::string aFileName);
 	std::vector<ACMediaFeatures*>  calculateFront(std::string aFileName);
 	std::string changeLastFolder(std::string path, std::string folder);
 	std::string extractDirectory(std::string path);
 	std::string extractFilename(std::string path);
 	
-private:
 	ACMediaFeatures* calculateMeanOfTrajectory(ACVideoAnalysis* video);
 	ACMediaFeatures* calculateStdOfTrajectory(ACVideoAnalysis* video);
 	ACMediaFeatures* calculateMaxOfTrajectory(ACVideoAnalysis* video);

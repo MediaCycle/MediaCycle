@@ -138,9 +138,9 @@ void ACBWImageAnalysis::computeFFT2D (){
 	double data_in[area];
 	uchar* ddata;
 	ddata = (uchar*) getImage()->imageData;
+	fftw_plan p = fftw_plan_dft_r2c_2d(height, width, data_in, fft, FFTW_ESTIMATE); 
 	for (int j = 0; j < area; j++)
 		data_in[j] = (double) ddata[j];
-	fftw_plan p = fftw_plan_dft_r2c_2d(height, width, data_in, fft, FFTW_ESTIMATE); 
 	fftw_execute(p);
 	fftw_destroy_plan(p);
 	HAS_FFT = true;
@@ -346,11 +346,29 @@ void ACBWImageAnalysis::computeGaborMoments(int mumax, int numax){ // default 7,
 		return;
 	}
 	CvGabor *gabor = new CvGabor();
+	IplImage* im_src = this->getImage();
+	cv::Size size(im_src->width, im_src->height);
+	cv::Mat src(im_src);	
+	cv::Mat mat(size.height, size.width, CV_32FC1);
+	src.convertTo(mat, CV_32FC1); // invokes mat.create(src->size());
+	
+//	for (int i = 0; i < size.height; i++){	
+//		for (int j = 0; j < size.width; j++){
+//			cout << i << " - " << j << " : " << (int)src.at<char>(i,j) << " ; " << mat.at<float>(i,j) << endl;
+//		}
+//	}
+	
+//	cv::namedWindow("Src0", CV_WINDOW_AUTOSIZE);
+//	cv::imshow("Src0", src);
+//	cv::namedWindow("Mat0", CV_WINDOW_AUTOSIZE);
+//	cv::imshow("Mat0", mat);
+//	cv::waitKey(0);
+//	
 	for (int i = 0; i < mumax; i++){	
 		for (int j = 0; j < numax; j++){
 			gabor->Reset(i,j);
 			double *tmpft = new double[2];
-			tmpft = gabor->getMeanAndStdevs(this->getImage()); // will compute all what's necessary
+			tmpft = gabor->getMeanAndStdevs(mat); // will compute all what's necessary
 			gabor_moments.push_back (tmpft[0]) ;
 			gabor_moments.push_back (tmpft[1]) ;
 			delete [] tmpft;
@@ -389,6 +407,13 @@ void ACBWImageAnalysis::computeGaborMoments_fft(int numPha_, int numFreq_, uint 
 	for(uint i=0;i<numPha_*numFreq_;++i) {
 		IplImage* gaborImage=gabor->getImage(i);
 		cvNormalize((IplImage*)gaborImage, (IplImage*)gaborImage, 0, 255, CV_MINMAX, 0 );
+		//XS test
+		cvNamedWindow("test2", CV_WINDOW_AUTOSIZE);
+		cvShowImage("test2", gaborImage);
+		cvWaitKey(0);
+		cvDestroyWindow("test2");
+		//
+		
 		cvAvgSdv( gaborImage, &mean, &stdev); 
 		gabor_moments.push_back(mean.val[0]);
 		gabor_moments.push_back(stdev.val[0]);
@@ -486,6 +511,11 @@ void ACBWImageAnalysis::computeFourierMellinMoments(){
 		cerr << "Memory allocation problem in fft2d for fft" << endl;
 	}
 	
+	// make the plan before filling in the data
+	// because fftw measures the speed using different pieces of code and has to write to your reserved memory
+	
+	fftw_plan p = fftw_plan_dft_2d(height, width, data_in, fft_lp,  FFTW_BACKWARD, FFTW_ESTIMATE); 
+
 	k = 0;
 	for(int i = 0; i < height ; i++ ) {
 		for( int j = 0 ; j < width ; j++ ) {
@@ -494,7 +524,6 @@ void ACBWImageAnalysis::computeFourierMellinMoments(){
 			k++;
 		}
 	}
-	fftw_plan p = fftw_plan_dft_2d(height, width, data_in, fft_lp,  FFTW_BACKWARD, FFTW_ESTIMATE); 
 	fftw_execute(p);
 	fftw_destroy_plan(p);
 	

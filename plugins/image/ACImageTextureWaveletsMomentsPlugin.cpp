@@ -56,22 +56,22 @@ ACImageTextureWaveletsMomentsPlugin::ACImageTextureWaveletsMomentsPlugin() {
 ACImageTextureWaveletsMomentsPlugin::~ACImageTextureWaveletsMomentsPlugin() {
 }
 
-std::vector<ACMediaFeatures*>  ACImageTextureWaveletsMomentsPlugin::calculate(std::string aFileName, bool _save_timed_feat) {
-	cout << "calculating Texture Moments from wavelets" << endl;
-	ACColorImageAnalysis* image = new ACColorImageAnalysis(aFileName);
-	std::vector<ACMediaFeatures*> allImageFeatures;
-
-	ACMediaFeatures* imageTextureFeatures = this->calculateGaborMoments(image);
-	if (imageTextureFeatures != 0){
-		allImageFeatures.push_back(imageTextureFeatures);
-	}
-	else{
-		cerr << "<ACImageTextureWaveletsMomentsPlugin::calculate> : no texture feature" << endl;
-	}
-	
-	delete image;
-	return allImageFeatures;
-}
+//std::vector<ACMediaFeatures*>  ACImageTextureWaveletsMomentsPlugin::calculate(std::string aFileName, bool _save_timed_feat) {
+//	cout << "calculating Texture Moments from wavelets" << endl;
+//	ACColorImageAnalysis* image = new ACColorImageAnalysis(aFileName);
+//	std::vector<ACMediaFeatures*> allImageFeatures;
+//
+//	ACMediaFeatures* imageTextureFeatures = this->calculateGaborMoments(image);
+//	if (imageTextureFeatures != 0){
+//		allImageFeatures.push_back(imageTextureFeatures);
+//	}
+//	else{
+//		cerr << "<ACImageTextureWaveletsMomentsPlugin::calculate> : no texture feature" << endl;
+//	}
+//	
+//	delete image;
+//	return allImageFeatures;
+//}
 
 std::vector<ACMediaFeatures*> ACImageTextureWaveletsMomentsPlugin::calculate(ACMediaData* image_data) {
 	cout << "calculating Texture Moments from wavelets" << endl;
@@ -105,7 +105,8 @@ std::vector<ACMediaFeatures*> ACImageTextureWaveletsMomentsPlugin::calculate(ACM
 };
 
 ACMediaFeatures* ACImageTextureWaveletsMomentsPlugin::calculateGaborMoments(ACImageAnalysis* image){
-	image->computeGaborMoments_fft();
+	cout << "gabor" << endl;
+	image->computeGaborMoments(4,2); //_fft();
 	ACMediaFeatures* gabor_moments = new ACMediaFeatures(image->getGaborMoments(), "Texture");
 	return gabor_moments;	
 }

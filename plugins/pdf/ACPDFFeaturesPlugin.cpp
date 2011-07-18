@@ -1,7 +1,7 @@
 /**
  * @brief ACPDFFeaturesPlugin.cpp
- * @author Christian Frisson
- * @date 28/05/2011
+ * @author Xavier Siebert
+ * @date 18/07/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -47,12 +47,6 @@ ACPDFFeaturesPlugin::~ACPDFFeaturesPlugin() {
 	
 }
 
-std::vector<ACMediaFeatures*> ACPDFFeaturesPlugin::calculate(std::string aFileName, bool _save_timed_feat)
-{
-	std::vector<ACMediaFeatures*> Fake;
-	return Fake;
-	
-}
 std::vector<ACMediaFeatures*> ACPDFFeaturesPlugin::calculate(ACMediaData* pdf_data, ACMedia* theMedia, bool _save_timed_feat) {
 	std::vector<ACMediaFeatures*> desc;
 	

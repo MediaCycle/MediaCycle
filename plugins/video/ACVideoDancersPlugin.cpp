@@ -58,27 +58,32 @@ ACVideoDancersPlugin::ACVideoDancersPlugin() {
 	this->mDescriptorsList.push_back("(Top) Std Position (x,y) ");
 	this->mDescriptorsList.push_back("(Top) Max Position (x,y) ");
 	this->mDescriptorsList.push_back("(Top) Mean Speed (x,y) ");
-
 }
 
 ACVideoDancersPlugin::~ACVideoDancersPlugin() {
 }
 
-std::vector<ACMediaFeatures*>  ACVideoDancersPlugin::calculate(std::string aFileName, bool _save_timed_feat) {
+std::vector<ACMediaFeatures*>  ACVideoDancersPlugin::_calculate(std::string aFileName, bool _save_timed_feat) {
 	std::vector<ACMediaFeatures*> allVideoFeatures;
 	std::vector<ACMediaFeatures*> topVideoFeatures;
 	string topFilename = changeLastFolder(aFileName,"Top");
 
 	allVideoFeatures = calculateFront(aFileName);
-	// XS tmp removed top
-//	topVideoFeatures = calculateTop(topFilename);
-//	allVideoFeatures.insert( allVideoFeatures.end(), topVideoFeatures.begin(), topVideoFeatures.end() );
+	topVideoFeatures = calculateTop(topFilename);
+	allVideoFeatures.insert( allVideoFeatures.end(), topVideoFeatures.begin(), topVideoFeatures.end() );
 	return allVideoFeatures;
 }
 
+// this is the method called from outside
+// --- FILE ORGANISATION IS VERY SPECIFIC TO THE DANCERS PROJECT ---
+// you have to give the filename of the FRONT video
+// and the corresponding top video must be in a TOP directory, as such:
+// path_to_the_dancers/FRONT/001022.mov
+// path_to_the_dancers/TOP/001022.mov
+// so from the FRONT file it will go ../TOP
 std::vector<ACMediaFeatures*> ACVideoDancersPlugin::calculate(ACMediaData* video_data, ACMedia* theMedia, bool _save_timed_feat) {
 	string file_name_front = video_data -> getFileName();
-	vector<ACMediaFeatures*> tmp = this->calculate(file_name_front);
+	vector<ACMediaFeatures*> tmp = this->_calculate(file_name_front);
 	return tmp;
 }
 
@@ -167,7 +172,6 @@ std::vector<ACMediaFeatures*>  ACVideoDancersPlugin::calculateFront(std::string 
 ACMediaFeatures* ACVideoDancersPlugin::calculateMeanOfTrajectory(ACVideoAnalysis* video){
 	//if (!video->areBlobsComputed()) video->computeBlobsUL();
 	//if (!video->isTrajectoryComputed()) video->computeMergedBlobsTrajectory(0);
-	// XS blobs instead of blobsUL for top
 	// TODO make this more general ?
 	video->computeBlobs();
 	video->computeMergedBlobsTrajectory(0);
@@ -176,13 +180,13 @@ ACMediaFeatures* ACVideoDancersPlugin::calculateMeanOfTrajectory(ACVideoAnalysis
 	ACMediaFeatures* trajectory_mf = trajectory_mtf->mean(); // will do "new" and set name
 
 	// XS TEST
-	// trajectory_mtf->dump("/Users/xavier/Desktop/traj.txt");
+	// trajectory_mtf->dump("Test/traj.txt");
 	delete trajectory_mtf;
 	return trajectory_mf;
 }
 
 ACMediaFeatures* ACVideoDancersPlugin::calculateStdOfTrajectory(ACVideoAnalysis* video){
-	if (!video->areBlobsComputed()) video->computeBlobsUL();
+	if (!video->areBlobsComputed()) video->computeBlobs();
 	if (!video->isTrajectoryComputed()) video->computeMergedBlobsTrajectory(0);
 
 	ACMediaTimedFeature *trajectory_mtf = new ACMediaTimedFeature(video->getBlobsTimeStamps(), video->getNormalizedMergedBlobsTrajectory(), "trajectory");
@@ -192,7 +196,7 @@ ACMediaFeatures* ACVideoDancersPlugin::calculateStdOfTrajectory(ACVideoAnalysis*
 }
 
 ACMediaFeatures* ACVideoDancersPlugin::calculateMaxOfTrajectory(ACVideoAnalysis* video){
-	if (!video->areBlobsComputed()) video->computeBlobsUL();
+	if (!video->areBlobsComputed()) video->computeBlobs();
 	if (!video->isTrajectoryComputed()) video->computeMergedBlobsTrajectory(0);
 	
 	ACMediaTimedFeature *trajectory_mtf = new ACMediaTimedFeature(video->getBlobsTimeStamps(), video->getNormalizedMergedBlobsTrajectory(), "trajectory");
@@ -202,8 +206,9 @@ ACMediaFeatures* ACVideoDancersPlugin::calculateMaxOfTrajectory(ACVideoAnalysis*
 }
 
 ACMediaFeatures* ACVideoDancersPlugin::calculateContractionIndex(ACVideoAnalysis* video){
-	if (!video->areBlobsComputed()) video->computeBlobsUL();
+	if (!video->areBlobsComputed()) video->computeBlobs();
 	if (!video->isTrajectoryComputed()) video->computeMergedBlobsTrajectory(0);
+
 	video->computeContractionIndices();
 
 	ACMediaTimedFeature* ci_mtf = new ACMediaTimedFeature(video->getBlobsTimeStamps(), video->getContractionIndices(), "contraction index");
@@ -213,7 +218,7 @@ ACMediaFeatures* ACVideoDancersPlugin::calculateContractionIndex(ACVideoAnalysis
 }
 
 ACMediaFeatures* ACVideoDancersPlugin::calculateMeanSpeedOfTrajectory(ACVideoAnalysis* video){
-	if (!video->areBlobsComputed()) video->computeBlobsUL();
+	if (!video->areBlobsComputed()) video->computeBlobs();
 	if (!video->isTrajectoryComputed()) video->computeMergedBlobsTrajectory(0);
 	
 	video->computeMergedBlobsSpeeds(0);

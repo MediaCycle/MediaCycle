@@ -54,22 +54,22 @@ ACImageColorMomentsPlugin::~ACImageColorMomentsPlugin() {
 }
 
 
-std::vector<ACMediaFeatures*>  ACImageColorMomentsPlugin::calculate(std::string aFileName, bool _save_timed_feat) {
-	cout << "calculating Color Moments from histogram..." << endl;
-	ACColorImageAnalysis* image = new ACColorImageAnalysis(aFileName);
-	std::vector<ACMediaFeatures*> allImageFeatures;
-
-	ACMediaFeatures* imageColorFeatures = this->calculateColorFeatures(image);
-	if (imageColorFeatures != 0){
-		allImageFeatures.push_back(imageColorFeatures);
-	}
-	else{
-		cerr << "<ACImageColorMomentsPlugin::calculate> : no color feature" << endl;
-	}
-		
-	delete image;
-	return allImageFeatures;
-}
+//std::vector<ACMediaFeatures*>  ACImageColorMomentsPlugin::calculate(std::string aFileName, bool _save_timed_feat) {
+//	cout << "calculating Color Moments from histogram..." << endl;
+//	ACColorImageAnalysis* image = new ACColorImageAnalysis(aFileName);
+//	std::vector<ACMediaFeatures*> allImageFeatures;
+//
+//	ACMediaFeatures* imageColorFeatures = this->calculateColorFeatures(image);
+//	if (imageColorFeatures != 0){
+//		allImageFeatures.push_back(imageColorFeatures);
+//	}
+//	else{
+//		cerr << "<ACImageColorMomentsPlugin::calculate> : no color feature" << endl;
+//	}
+//		
+//	delete image;
+//	return allImageFeatures;
+//}
 
 std::vector<ACMediaFeatures*> ACImageColorMomentsPlugin::calculate(ACMediaData* image_data) {
 	cout << "calculating Color Moments from histogram..." << endl;

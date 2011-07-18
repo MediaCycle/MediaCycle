@@ -77,7 +77,9 @@ IplImage* Gabor::getImage(int layer) {
 	BwImage Im(newimage);
 	for (uint x = 0; x < this->xsize_; x++)
 		for (uint y = 0; y < this->ysize_; y++) {
-			Im[x][y] = (*this)(x, y, layer);
+			double d = (*this)(x, y, layer);
+			Im[x][y] = d;
+			//Im[x][y] = (*this)(x, y, layer);
 		
 		}
 	//XS test
@@ -117,14 +119,15 @@ void Gabor::init(fftw_complex* &bwTransformed) {
 
 	// Allocate memory for temp arrays
 	fftw_complex* bwIn = new fftw_complex[dim];
-	
+	fftw_plan p = fftw_plan_dft_2d(paddedWidth, paddedHeight, bwIn, bwTransformed, FFTW_FORWARD, FFTW_ESTIMATE); 
+
 	// Fill vectors with padded image
 	int xoffset=paddedWidth/2-width/2;
 	int yoffset=paddedHeight/2-height/2;
 	unsigned int idx;
 	
-	for(uint x = 0; x < paddedWidth; x++) {
-		for(uint y = 0; y < paddedHeight; y++) {
+	for(uint y = 0; y < paddedHeight; y++) {
+		for(uint x = 0; x < paddedWidth; x++) {
 			idx = y * paddedWidth + x;
 			bwIn[idx][0] = 0.0;
 			bwIn[idx][1] = 0.0;
@@ -135,22 +138,81 @@ void Gabor::init(fftw_complex* &bwTransformed) {
 	// set the complex arrays for the fourier
 	// transformation accordingly
 	BwImage Im(analysed_image->getImage());
+	
+	cvNamedWindow("0", CV_WINDOW_AUTOSIZE);
+	cvShowImage("0", analysed_image->getImage());
+	cvWaitKey(0);
+	cvDestroyWindow("0");
+	
 	for(uint x = 0; x < width; x++) {
 		for(uint y = 0; y < height; y++) {
 			if ((x < horizontalMargin) || (x >= width - horizontalMargin) ||
 				(y < verticalMargin) || (y >= height - verticalMargin)) {
 				bwValue = 0;
 			} 
-			else
-				bwValue =Im[x-horizontalMargin][y-verticalMargin];
+			else {
+				bwValue =Im[y-verticalMargin][x-horizontalMargin]; // XS TODO x <-> y ??
+			}
 			idx = (y + yoffset) * paddedWidth + (x + xoffset);
 			bwIn[idx][0] = bwValue;
 			bwIn[idx][1] = 0.0;
 		}
 	}
 	
-	fftw_plan p = fftw_plan_dft_2d(paddedWidth, paddedHeight, bwIn, bwTransformed, FFTW_FORWARD, FFTW_ESTIMATE); 
+	
+	//XS TEST
+	IplImage* fftimage  = cvCreateImage(cvSize(paddedWidth,paddedHeight),IPL_DEPTH_8U,1);
+	BwImage Bwfftimage(fftimage);
+	int k=0;
+	for(int x=0; x< paddedWidth; x++){
+		for (int y=0; y< paddedHeight; y++){
+			Bwfftimage[x][y] = bwIn[k][0];
+			k++;
+		}
+	}
+	cvNamedWindow("bwIn", CV_WINDOW_AUTOSIZE);
+	cvShowImage("bwIn", fftimage);
+	cvWaitKey(0);
+	cvReleaseImage(&fftimage);
+	cvDestroyWindow("bwIn");
+	// XS END TEST
+	
 	fftw_execute(p);
+	
+	//XS TEST
+	IplImage* fftimage2  = cvCreateImage(cvSize(paddedWidth,paddedHeight),IPL_DEPTH_8U,1);
+	BwImage Bwfftimage2(fftimage2);
+	k=0;
+	for(int x=0; x< paddedWidth; x++){
+		for (int y=0; y< paddedHeight; y++){
+			Bwfftimage2[x][y] = bwIn[k][0];
+			k++;
+		}
+	}
+	cvNamedWindow("bwIn2", CV_WINDOW_AUTOSIZE);
+	cvShowImage("bwIn2", fftimage2);
+	cvWaitKey(0);
+	cvReleaseImage(&fftimage2);
+	cvDestroyWindow("bwIn2");
+	// XS END TEST
+
+	//XS TEST
+	IplImage* fftimage3  = cvCreateImage(cvSize(paddedWidth,paddedHeight),IPL_DEPTH_32S,1);
+	BwImageFloat Bwfftimage3(fftimage3);
+	k=0;
+	for(int x=0; x< paddedWidth; x++){
+		for (int y=0; y< paddedHeight; y++){
+			Bwfftimage3[x][y] = bwTransformed[k][0];
+			k++;
+		}
+	}
+	cvNamedWindow("bwTransformed", CV_WINDOW_AUTOSIZE);
+	cvShowImage("bwTransformed", fftimage3);
+	cvWaitKey(0);
+	cvReleaseImage(&fftimage3);
+	cvDestroyWindow("bwTransformed");
+	// XS END TEST
+	
 	fftw_destroy_plan(p);
 	
 	delete[] bwIn;
@@ -241,11 +303,43 @@ void Gabor::extractGabor(fftw_complex* bwTransformed) {
 					bwTransformed[y * maxnn + x][1] = (BWtt[0] * filter[1]) + (BWtt[1] * filter[0]); // here was a minus instead of the plus
 				}
 			}
+			//XS TEST
+			IplImage* fftimage3  = cvCreateImage(cvSize(paddedWidth,paddedHeight),IPL_DEPTH_8U,1);
+			BwImage Bwfftimage3(fftimage3);
+			int k=0;
+			for(int x=0; x< paddedWidth; x++){
+				for (int y=0; y< paddedHeight; y++){
+					Bwfftimage3[x][y] = bwTransformed[k][0];
+					k++;
+				}
+			}
+			cvNamedWindow("bwTransformed", CV_WINDOW_AUTOSIZE);
+			cvShowImage("bwTransformed", fftimage3);
+			cvWaitKey(0);
+			cvReleaseImage(&fftimage3);
+			cvDestroyWindow("bwTransformed");
+			// XS END TEST
 			
 			// Fourier-Transformation backwards
 			//fftwnd_one(plan, bwTransformed, bwResult);
 			fftw_execute(p);
-
+			//XS TEST
+			IplImage* fftimage4  = cvCreateImage(cvSize(paddedWidth,paddedHeight),IPL_DEPTH_8U,1);
+			BwImage Bwfftimage4(fftimage3);
+			k=0;
+			for(int x=0; x< paddedWidth; x++){
+				for (int y=0; y< paddedHeight; y++){
+					Bwfftimage4[x][y] = bwResult[k][0];
+					k++;
+				}
+			}
+			cvNamedWindow("bwResult", CV_WINDOW_AUTOSIZE);
+			cvShowImage("bwResult", fftimage4);
+			cvWaitKey(0);
+			cvReleaseImage(&fftimage4);
+			cvDestroyWindow("bwResult");
+			// XS END TEST
+			
 			// Save calculated feature
 			copyToResult(bwResult, aktFreq * numPha + aktPha);
 			

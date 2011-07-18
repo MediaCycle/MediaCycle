@@ -90,19 +90,13 @@ std::vector<ACMediaFeatures*> ACAudioFeaturesPlugin::calculate_starpu(vector<ACM
 }
 */
 
-// added by CF, temp
-std::vector<ACMediaFeatures*> ACAudioFeaturesPlugin::calculate(std::string aFileName, bool _save_timed_feat) {
-	// from file
-	std::cout << " ACAudioFeaturesPlugin::calculate: not implemented" << std::endl;
-	return std::vector<ACMediaFeatures*>();
-}
-
 // CF
 std::vector<ACMediaFeatures*> ACAudioFeaturesPlugin::calculate(ACMediaData* audio_data, ACMedia* theMedia, bool _save_timed_feat) {
 	// from MediaData
 	return this->_calculate(audio_data->getFileName(),audio_data,theMedia,_save_timed_feat);
 }
 
+// private method
 std::vector<ACMediaFeatures*> ACAudioFeaturesPlugin::_calculate(std::string aFileName, ACMediaData* audio_data, ACMedia* theMedia, bool _save_timed_feat){
 	bool extendSoundLimits = true;
 	std::vector<ACMediaTimedFeature*> descmf;
@@ -119,6 +113,7 @@ std::vector<ACMediaFeatures*> ACAudioFeaturesPlugin::_calculate(std::string aFil
 		return desc;
 	}
 	
+	// XS TODO we are copying the data, unnecessary
 	float* data = new float[theAudio->getNFrames() * theAudio->getChannels()];
 	
 	// SD replaced loop by more efficient memcpy

@@ -1,5 +1,5 @@
 /*
- *  ACImageHistogram.h
+ *  ACColorImageHistogram.h
  *  MediaCycle
  *
  *  @author Xavier Siebert
@@ -33,39 +33,42 @@
  */
 
 
-#ifndef _ACIMAGEHISTOGRAM_H
-#define	_ACIMAGEHISTOGRAM_H
+#ifndef _ACCOLORIMAGEHISTOGRAM_H
+#define	_ACCOLORIMAGEHISTOGRAM_H
 
 #include "ACOpenCVInclude.h"
+#include "ACColorImageAnalysis.h"
 
 #include <string>
 #include <vector>
 
-// abstract (pure virtual) class
+// forward declaration
+class ACColorImageAnalysis;
 
-// XS TODO remove these cmode
-class ACImageHistogram{
+class ACColorImageHistogram{
 public:
-	//ACImageHistogram(IplImage** image, std::string cmode= "BGR", int size = 128, int norm = 1); // if image already split in 3
-	ACImageHistogram(IplImage* image, std::string cmode= "BGR", int size = 128, int norm = 1){}; // image still to be splitted
-	virtual ~ACImageHistogram() = 0;
+	ACColorImageHistogram(ACColorImageAnalysis* color_img, std::string _cmode="HSV", int _size = 256, int _norm = 1);
+	ACColorImageHistogram(IplImage* image, std::string _cmode= "BGR", int _size = 256, int _norm = 1); // image still to be splitted
+	~ACColorImageHistogram();
 
-	void initialize(IplImage** image, std::string cmode= "BGR", int size = 128, int norm = 1); 
+	void initialize(IplImage** image, std::string cmode= "BGR", int size = 256, int norm = 1); 
 
-	virtual ACImageHistogram& operator+= (const ACImageHistogram& H){}; 
+	ACColorImageHistogram& operator+= (const ACColorImageHistogram& H); 
 	// XS  NB: You can't overload a relational operator for a pointer type.
-	virtual ACImageHistogram& operator+ (const ACImageHistogram& H){};
+	ACColorImageHistogram& operator+ (const ACColorImageHistogram& H);
 
-	virtual void normalize(const double&){};
-	virtual void show(){};
-	virtual void show(std::string);
-	virtual void dump();
+	void normalize(const double&);
+	void show();
+	void show(std::string);
+	void dump();
 	void dump(std::string);
 	void reset();
-	double compare(ACImageHistogram*);
+	double compare(ACColorImageHistogram*);
 	
+	CvHistogram *getChannel(int);
 	inline int getSize() {return size;}
 	inline int getNorm() {return norm;}
+	float getValue(int,int);
 	void computeStats();
 	void showStats();
 	void computeMoments(int highest_order);
@@ -83,4 +86,4 @@ private:
 	std::string cmode;
 };
 
-#endif	/* _ACIMAGEHISTOGRAM_H */
+#endif	// _ACCOLORIMAGEHISTOGRAM_H

@@ -56,21 +56,21 @@ ACImageShapeFourierPolarMomentsPlugin::ACImageShapeFourierPolarMomentsPlugin() {
 ACImageShapeFourierPolarMomentsPlugin::~ACImageShapeFourierPolarMomentsPlugin() {
 }
 
-std::vector<ACMediaFeatures*>  ACImageShapeFourierPolarMomentsPlugin::calculate(std::string aFileName, bool _save_timed_feat) {
-	cout << "calculating Shape (FourierPolar) Moments from file name..." << endl;
-	ACColorImageAnalysis* image = new ACColorImageAnalysis(aFileName);
-	std::vector<ACMediaFeatures*> allImageFeatures;
-
-	ACMediaFeatures* imageShapeFeatures = this->calculateFourierPolarMoments(image);
-	if (imageShapeFeatures != 0){
-		allImageFeatures.push_back(imageShapeFeatures);
-	}
-	else{
-		cerr << "<ACImageShapeFourierPolarMomentsPlugin::calculate> : no shape feature" << endl;
-	}
-	delete image;
-	return allImageFeatures;
-}
+//std::vector<ACMediaFeatures*>  ACImageShapeFourierPolarMomentsPlugin::calculate(std::string aFileName, bool _save_timed_feat) {
+//	cout << "calculating Shape (FourierPolar) Moments from file name..." << endl;
+//	ACColorImageAnalysis* image = new ACColorImageAnalysis(aFileName);
+//	std::vector<ACMediaFeatures*> allImageFeatures;
+//
+//	ACMediaFeatures* imageShapeFeatures = this->calculateFourierPolarMoments(image);
+//	if (imageShapeFeatures != 0){
+//		allImageFeatures.push_back(imageShapeFeatures);
+//	}
+//	else{
+//		cerr << "<ACImageShapeFourierPolarMomentsPlugin::calculate> : no shape feature" << endl;
+//	}
+//	delete image;
+//	return allImageFeatures;
+//}
 
 std::vector<ACMediaFeatures*> ACImageShapeFourierPolarMomentsPlugin::calculate(ACMediaData* image_data) {
 	cout << "calculating Shape (FourierPolar) Moments from ACMediaData..." << endl;

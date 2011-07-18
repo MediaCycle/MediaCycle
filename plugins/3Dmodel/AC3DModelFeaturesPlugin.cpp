@@ -1,7 +1,7 @@
 /**
  * @brief AC3DModelFeaturesPlugin.cpp
  * @author Xavier Siebert
- * @date 20/04/2011
+ * @date 18/07/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -48,12 +48,6 @@ AC3DModelFeaturesPlugin::~AC3DModelFeaturesPlugin() {
 	
 }
 
-std::vector<ACMediaFeatures*> AC3DModelFeaturesPlugin::calculate(std::string aFileName, bool _save_timed_feat)
-{
-	std::vector<ACMediaFeatures*> Fake;
-	return Fake;
-	
-}
 std::vector<ACMediaFeatures*> AC3DModelFeaturesPlugin::calculate(ACMediaData* model_data, ACMedia* theMedia, bool _save_timed_feat) {
 	std::vector<ACMediaFeatures*> desc;
 //	AC3DModelData* local_model_data = 0;

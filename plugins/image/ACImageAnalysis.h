@@ -40,7 +40,7 @@
 
 #include "cvgabor.h"
 #include "gabor.h"
-#include "ACImageHistogram.h"
+//#include "ACImageHistogram.h"
 #include "ACImageData.h"
 
 // Uses FFTW3 library for FFT
@@ -115,7 +115,7 @@ public:
 	virtual void computeFourierPolarMoments(int RadialBins=5, int AngularBins=8){};
 	virtual void computeFourierMellinMoments(){};
 	virtual void computeContourHuMoments(int thresh = 0){};
-	virtual void computeGaborMoments(int mumax = 7, int numax = 5){};
+	virtual void computeGaborMoments(int mumax = 4, int numax = 2){};
 	virtual void computeGaborMoments_fft(int numPha_ = 7, int numFreq_ = 5, uint horizonalMargin_ = 0, uint verticalMargin_ = 0){};
 	virtual void computeColorMoments(int n = 4){};
 

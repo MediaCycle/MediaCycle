@@ -57,8 +57,8 @@ public:
 	// computation of features
 	void computeHuMoments(int thresh = 0);
 	void computeContourHuMoments(int thresh = 0);
-	void computeGaborMoments(int mumax = 7, int numax = 5);
-	void computeGaborMoments_fft(int numPha_ = 7, int numFreq_ = 5, uint horizonalMargin_ = 0, uint verticalMargin_ = 0);
+	void computeGaborMoments(int mumax = 4, int numax = 2);
+	void computeGaborMoments_fft(int numPha_ = 4, int numFreq_ = 2, uint horizonalMargin_ = 0, uint verticalMargin_ = 0);
 	void computeColorMoments(int n = 4);
 	void computeFourierPolarMoments(int RadialBins=7, int AngularBins=10);
 	void computeFourierMellinMoments();

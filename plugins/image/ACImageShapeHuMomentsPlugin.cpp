@@ -56,21 +56,21 @@ ACImageShapeHuMomentsPlugin::ACImageShapeHuMomentsPlugin() {
 ACImageShapeHuMomentsPlugin::~ACImageShapeHuMomentsPlugin() {
 }
 
-std::vector<ACMediaFeatures*>  ACImageShapeHuMomentsPlugin::calculate(std::string aFileName, bool _save_timed_feat) {
-	cout << "calculating Shape (Hu) Moments from file name..." << endl;
-	ACColorImageAnalysis* image = new ACColorImageAnalysis(aFileName);
-	std::vector<ACMediaFeatures*> allImageFeatures;
-
-	ACMediaFeatures* imageShapeFeatures = this->calculateHuMoments(image);
-	if (imageShapeFeatures != 0){
-		allImageFeatures.push_back(imageShapeFeatures);
-	}
-	else{
-		cerr << "<ACImageShapeHuMomentsPlugin::calculate> : no shape feature" << endl;
-	}
-	delete image;
-	return allImageFeatures;
-}
+//std::vector<ACMediaFeatures*>  ACImageShapeHuMomentsPlugin::calculate(std::string aFileName, bool _save_timed_feat) {
+//	cout << "calculating Shape (Hu) Moments from file name..." << endl;
+//	ACColorImageAnalysis* image = new ACColorImageAnalysis(aFileName);
+//	std::vector<ACMediaFeatures*> allImageFeatures;
+//
+//	ACMediaFeatures* imageShapeFeatures = this->calculateHuMoments(image);
+//	if (imageShapeFeatures != 0){
+//		allImageFeatures.push_back(imageShapeFeatures);
+//	}
+//	else{
+//		cerr << "<ACImageShapeHuMomentsPlugin::calculate> : no shape feature" << endl;
+//	}
+//	delete image;
+//	return allImageFeatures;
+//}
 
 std::vector<ACMediaFeatures*> ACImageShapeHuMomentsPlugin::calculate(ACMediaData* image_data) {
 	cout << "calculating Shape (Hu) Moments from ACMediaData..." << endl;

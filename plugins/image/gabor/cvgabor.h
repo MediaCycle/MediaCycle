@@ -44,18 +44,21 @@ public:
 	void Reset(double dPhi, int iNu, double dSigma = 2*PI, double dF = sqrt(2.0));
 
     bool IsInit();
-    IplImage* get_image(int Type);
+//    IplImage* get_image(int Type);
+	cv::Mat get_image(int Type);
     bool HasKernel();
     long SetMaskWidth();
     long GetMaskWidth();
-    void output_file(const char *filename, int Type);
-    CvMat* get_matrix(int Type);
+//    void output_file(const char *filename, int Type);
+//    CvMat* get_matrix(int Type);
     void show(int Type);
-    void conv_img(IplImage *src, IplImage *dst, int Type);
+//    void conv_img(IplImage *src, IplImage *dst, int Type);
+	void conv_img(cv::Mat src, cv::Mat dst, int Type);
 	CvGabor(int iMu, int iNu);
     void normalize( const CvArr* src, CvArr* dst, double a, double b, int norm_type, const CvArr* mask );
 	
-	double* getMeanAndStdevs(IplImage *src);
+//	double* getMeanAndStdevs(IplImage *src);
+	double* getMeanAndStdevs(cv::Mat src);
 
 protected:
     double Sigma;
@@ -66,8 +69,10 @@ protected:
     bool bInitialised;
     bool bKernel;
     long Width;
-    CvMat *Imag;
-    CvMat *Real;
+//    CvMat *Imag;
+//    CvMat *Real;
+    cv::Mat Imag;
+    cv::Mat Real;
 	
 private:
     void CreateKernel();

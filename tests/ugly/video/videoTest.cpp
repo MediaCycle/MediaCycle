@@ -44,6 +44,8 @@
 #include "ACVideoDancersPlugin.h"
 #include "ACVideoPixelSpeedPlugin.h"
 #include "ACMediaTimedFeature.h"
+#include "ACMedia.h"
+#include "ACVideo.h"
 
 #include "gnuplot_i.hpp"
 
@@ -84,12 +86,16 @@ const string ghostlist[ndancers] = {
 };
 
 const string videodir = "/Users/xavier/numediart/Project7.3-DancersCycle/VideosSmall/TestSmallSize/Front/";
-//const string videodir = "/Users/xavier/numediart/Project10.1-Borderlands/2010_4_prox_alpa/";
 
-// const string videodir = "/Users/xavier/numediart/Project7.3-DancersCycle/Recordings_Raffinerie_0709/FrontShots/";
+//const string video_test_file= "/Users/xavier/Movies/Bre-Room132AnimationFlipBooks925_64kb.mp4";
+//const string video_test_file= "/usr/local/share/mediacycle/data/video/001022.mov";
+const string video_test_file= "/Users/xavier/numediart/Project12.4-13.1-MediaBlender/test/video/elephantsdream-traveling.mov";
+const string tmp_video_file_out = "/Users/xavier/tmp/toto.mov";
 
-const string video_plugin_path = "/Users/xavier/development/workingDirectory/ticore-app/Applications/Numediart/MediaCycle/src/Builds/mac/plugins/video/Debug/";
-const string audio_plugin_path = "/Users/xavier/development/workingDirectory/ticore-app/Applications/Numediart/MediaCycle/src/Builds/mac/plugins/audio/Debug/";
+
+const string dancer_test_file_front = "/Users/xavier/numediart/Project7.3-DancersCycle/VideosSmall/Front/001012.mov";
+const string video_plugin_path = "/Users/xavier/development/mediacycle-numediart/mediacycle/Builds/mac/plugins/video/Debug/";
+const string audio_plugin_path = "/Users/xavier/development/mediacycle-numediart/mediacycle/Builds/mac/plugins/audio/Debug/";
 
 void get_all_images(){
 //	for (int i=0;i<ndancers;i++){	
@@ -107,7 +113,7 @@ void get_all_images(){
 		string first_guess_file= videodir+"median/Bru_101#1_med.jpg";
 		IplImage *first_guess_img = cvLoadImage(first_guess_file.c_str(), CV_LOAD_IMAGE_COLOR);
 
-		IplImage *median_img =	V->computeMedianNoBlobImage(median_file_noblob, first_guess_img);
+//		IplImage *median_img =	V->computeMedianNoBlobImage(median_file_noblob, first_guess_img);
 		clock_t t1=clock();
 		cout<<"Median execution time: " << (t1-t0)/CLOCKS_PER_SEC << " s." << endl;
 //		V->rewind();
@@ -115,41 +121,40 @@ void get_all_images(){
 //		clock_t t2=clock();
 //		cout<<"Average execution time: " << (t2-t1)/CLOCKS_PER_SEC << " s." << endl;	
 		delete V;
-		cvReleaseImage(&median_img);
+//		cvReleaseImage(&median_img);
 		cvReleaseImage(&first_guess_img);
 //		cvReleaseImage(&average_img);		
 	}
 }
 
-void test_med_ave(std::string dancer){
-	string movie_file= videodir+"H264/"+dancer+".mov";
-	string median_file= videodir+"median/"+dancer+"_med-test.jpg";
-	string average_file= videodir+"average/"+dancer+"_ave-test.jpg";
-	cout << movie_file << endl;
+void test_med_ave(std::string movie_file){
+	string median_file= movie_file+"_med-test.jpg";
+	string average_file= movie_file+"_ave-test.jpg";
 	ACVideoAnalysis* V = new ACVideoAnalysis(movie_file);
 	clock_t t0=clock();
-	IplImage *median_img =	V->computeMedianImage(200, 0, 50, median_file);
+	cv::Mat median_img = V->computeMedianImage(200, 0, 50, median_file);
 	clock_t t1=clock();
 	cout<<"Median execution time: " << (t1-t0)/CLOCKS_PER_SEC << " s." << endl;
-	V->rewind();
-	IplImage *average_img =	V->computeAverageImage(200, 0, 50,  average_file);
-	clock_t t2=clock();
-	cout<<"Average execution time: " << (t2-t1)/CLOCKS_PER_SEC << " s." << endl;	
-	delete V;
-	cvReleaseImage(&median_img);
-	cvReleaseImage(&average_img);			
+	cv::namedWindow("BGLOCAL", CV_WINDOW_AUTOSIZE);
+	cv::imshow("BGLOCAL", median_img);
+	cv::waitKey(0);
+//	V->rewind();
+//	IplImage *average_img =	V->computeAverageImage(200, 0, 50,  average_file);
+//	clock_t t2=clock();
+//	cout<<"Average execution time: " << (t2-t1)/CLOCKS_PER_SEC << " s." << endl;	
+//	delete V;
 }
 
-void test_med_noblob(std::string dancer){
-	string movie_file= videodir+dancer+".mov";
-	string median_file= videodir+dancer+"_med-test-noblob.jpg";
-	ACVideoAnalysis* V = new ACVideoAnalysis(movie_file);
-	clock_t t0=clock();
-	V->computeMedianNoBlobImage(median_file);
-	clock_t t1=clock();
-	cout<<"Median no-blob execution time: " << (t1-t0)/CLOCKS_PER_SEC << " s." << endl;
-	delete V;
-}
+//void test_med_noblob(std::string dancer){
+//	string movie_file= videodir+dancer+".mov";
+//	string median_file= videodir+dancer+"_med-test-noblob.jpg";
+//	ACVideoAnalysis* V = new ACVideoAnalysis(movie_file);
+//	clock_t t0=clock();
+//	V->computeMedianNoBlobImage(median_file);
+//	clock_t t1=clock();
+//	cout<<"Median no-blob execution time: " << (t1-t0)/CLOCKS_PER_SEC << " s." << endl;
+//	delete V;
+//}
 
 void test_histogram_equalize(std::string dancer){
 	string movie_file= videodir+"H264/"+dancer+".mov";
@@ -158,7 +163,8 @@ void test_histogram_equalize(std::string dancer){
 	ACVideoAnalysis* V = new ACVideoAnalysis(movie_file);
 	clock_t t0=clock();
 	IplImage *imgp_bg = cvLoadImage(median_file.c_str(), CV_LOAD_IMAGE_COLOR);
-	V->histogramEqualize(imgp_bg);
+	//XS TODO port to 2.*
+	//	V->histogramEqualize(imgp_bg);
 	clock_t t1=clock();
 	cout<<"Hist Equalizer execution time: " << (t1-t0)/CLOCKS_PER_SEC << " s." << endl;	
 	delete V;
@@ -181,19 +187,18 @@ void test_bg_substraction(std::string dancer){
 	cvReleaseImage(&imgp_bg);	
 }
 
-void test_browse(std::string movie_file){
-//	string movie_file= videodir+"H264/"+dancer+".mov";
+void test_browse_trackbar(std::string movie_file){
 	ACVideoAnalysis* V = new ACVideoAnalysis(movie_file);	
-	V->browseInWindow();
+	V->browseWithTrackbarInWindow("test");
 	delete V;
 }
 
-void test_video_dancers_plugin(std::string dancer){
+void test_video_dancers_plugin(std::string dancer_file_front){
 	clock_t t0=clock();
-	string movie_file= videodir+"Front/"+dancer+".mov";
 	ACVideoDancersPlugin* P = new ACVideoDancersPlugin();
-	// XS TODO use calculate (mediadata) instead
-	std::vector<ACMediaFeatures*> F = P->calculate(movie_file);
+	ACMedia* dancer_video = new ACVideo();
+	dancer_video->extractData(dancer_file_front);
+	std::vector<ACMediaFeatures*> F = P->calculate(((ACVideo*)dancer_video)->getMediaData(), dancer_video);
 	cout << "computed " << F.size() << " features" << endl;
 	for (unsigned int i=0; i<F.size(); i++){
 		cout << "-- Feature " << i << " : " << F[i]->getName() << endl;
@@ -222,54 +227,56 @@ void test_video_dancers_plugin_acl_save(std::string dancer){
 	delete mediacycle;	
 }
 
-void test_video_pixel_speed_plugin(std::string movie_file){
-	clock_t t0=clock();
-	ACVideoPixelSpeedPlugin* P = new ACVideoPixelSpeedPlugin();
-	bool save_timed_features = true;
-	cout << "1) compute features and saves timedFeatures on disk" << endl;
-	cout << "---------------------------------------------------" << endl;
+// XS TODO rewrite
+//void test_video_pixel_speed_plugin(std::string movie_file){
+//	clock_t t0=clock();
+//	ACVideoPixelSpeedPlugin* P = new ACVideoPixelSpeedPlugin();
+//	bool save_timed_features = true;
+//	cout << "1) compute features and saves timedFeatures on disk" << endl;
+//	cout << "---------------------------------------------------" << endl;
+//
+//	// XS TODO use calculate (mediadata) instead
+//	std::vector<ACMediaFeatures*> F = P->calculate(movie_file, save_timed_features);
+//	cout << "computed " << F.size() << " features :" << endl;
+//	for (unsigned int i=0; i<F.size(); i++){
+//		cout << "-- Feature " << i << " : " << F[i]->getName() << endl;
+//		F[i]->dump();
+//	}
+//	
+//	cout << "2) read timedFeatures from disk" << endl;
+//	cout << "-------------------------------" << endl;
+//
+//	ACMediaTimedFeature* FT = P->getTimedFeatures();
+//	FT->dump();
+//	
+//	// clean up
+//	std::vector<ACMediaFeatures*>::iterator iter; 
+//	for (iter = F.begin(); iter != F.end(); iter++) { 
+//		delete *iter; 
+//	}
+//	delete P;	
+//	delete FT;
+//	
+//	clock_t t1=clock();
+//	cout<<"Test Video Plugin execution time: " << (t1-t0)/CLOCKS_PER_SEC << " s." << endl;	
+//}
 
-	// XS TODO use calculate (mediadata) instead
-	std::vector<ACMediaFeatures*> F = P->calculate(movie_file, save_timed_features);
-	cout << "computed " << F.size() << " features :" << endl;
-	for (unsigned int i=0; i<F.size(); i++){
-		cout << "-- Feature " << i << " : " << F[i]->getName() << endl;
-		F[i]->dump();
-	}
-	
-	cout << "2) read timedFeatures from disk" << endl;
-	cout << "-------------------------------" << endl;
 
-	ACMediaTimedFeature* FT = P->getTimedFeatures();
-	FT->dump();
-	
-	// clean up
-	std::vector<ACMediaFeatures*>::iterator iter; 
-	for (iter = F.begin(); iter != F.end(); iter++) { 
-		delete *iter; 
-	}
-	delete P;	
-	delete FT;
-	
-	clock_t t1=clock();
-	cout<<"Test Video Plugin execution time: " << (t1-t0)/CLOCKS_PER_SEC << " s." << endl;	
-}
-
-
-void test_blobs(std::string dancer){
-	string movie_file= videodir+dancer+".mov"; //+"Front/"+dancer+".mov";
-	cout << movie_file << endl;
+void test_blobs(std::string movie_file){
 	ACVideoAnalysis* V = new ACVideoAnalysis(movie_file);
 	clock_t t0=clock();
 	
 	// XS TODO tmp hack
-	IplImage *imgp_bg = cvLoadImage("/Users/xavier/numediart/Project10.1-Borderlands/work/bg_black.png", CV_LOAD_IMAGE_COLOR);
-	V->computeBlobs(imgp_bg);
-	
+	//IplImage *imgp_bg = cvLoadImage("/Users/xavier/numediart/Project10.1-Borderlands/work/bg_black.png", CV_LOAD_IMAGE_COLOR);
+	//V->computeBlobs();
+	V->computeBlobsUL();
+	//V->computeMergedBlobsTrajectory();
+	//V->computeMergedBlobsSpeeds();
+
 	clock_t t1=clock();
 	cout<<"Bg Sub execution time: " << (t1-t0)/CLOCKS_PER_SEC << " s." << endl;	
 	delete V;
-	cvReleaseImage(&imgp_bg);
+	//cvReleaseImage(&imgp_bg);
 }
 
 
@@ -282,10 +289,9 @@ void test_all_videos_top_front(std::string mypath){
 	delete mediacycle;	
 }
 
-void test_read_write_video(std::string full_video_path){
+void test_video_read_write(std::string full_video_path, std::string file_out){
 	ACVideoAnalysis* V = new ACVideoAnalysis(full_video_path);
-	string file_out = "/Users/xavier/tmp/toto.mov";
-	V->saveVideoThumnbailInFile (file_out,640,480,0,5);
+	V->writeToFile (file_out,640,480,0,5);
 	delete V;
 }
 
@@ -295,72 +301,54 @@ void test_global_pixel_speed(std::string full_video_path){
 	delete V;
 }
 
-void test_video_features(std::string full_video_path, string bg_img_file=""){
-	// and output to terminal for Borderlands first tests
+// computes all features and output to terminal(cout) or file 
+void test_video_features(std::string full_video_path, std::string bg_img_file=""){
 	ACVideoAnalysis* V = new ACVideoAnalysis(full_video_path);
-	IplImage *bg_img = 0;
+	cv::Mat bg_img;
 	if (bg_img_file != "") {
-		bg_img = cvLoadImage(bg_img_file.c_str(), CV_LOAD_IMAGE_COLOR);
+		bg_img= cv::imread(bg_img_file.c_str());
 		V->computeBlobs(bg_img);	
 	} 
 	else V->computeBlobs();
 	
-	ofstream f("/Users/xavier/numediart/Project10.1-Borderlands/work/BL_blueNoTC-features-FFT.out");
-
-	
+	//ofstream f("/Users/xavier/numediart/Project10.1-Borderlands/work/BL_blueNoTC-features-FFT.out");
 	V->computeMergedBlobsTrajectory(0);
 	V->computeContractionIndices();
 	V->computeBoundingBoxRatios();
-//	V->computeRawMoments();
-	V->computeHuMoments(bg_img); // compute Raw too !
-
-	// XS TODO computeEverything at once !
-	// may be using imageanalysis...
-	
-	//***
-//	V->computeBlobPixelSpeed(); -- weird 
-	//***
-//	V->computeMergedBlobsSpeeds();
+	V->computeHuMoments(0,bg_img); // compute Raw too !
+	V->computeBlobPixelSpeed(); 
+	V->computeMergedBlobsSpeeds();
 //	V->dumpTrajectory(cout);
 //	V->dumpContractionIndices(f);
 //	V->dumpBoundingBoxRatios();
 //	V->dumpBlobSpeed();
 //	ofstream f("/Users/xavier/numediart/Project10.1-Borderlands/work/ALL_PROT2may_1_all_features.out");
 //	V->dumpHuMoments(f);
-	V->dumpAll(f);
-	f.close();	
-	delete V;
-	cvReleaseImage(&bg_img);
 
+	V->dumpAll(cout);
+//	f.close();	
+	delete V;
 }
 
 void test_video_hu_moments(std::string full_video_path, string bg_img_file){
 	ACVideoAnalysis* V = new ACVideoAnalysis(full_video_path);
-	IplImage *bg_img = 0;
 	if (bg_img_file != "") {
-		bg_img = cvLoadImage(bg_img_file.c_str(), CV_LOAD_IMAGE_COLOR);
+		cv::Mat bg_img = cv::imread(bg_img_file.c_str());
+		V->computeHuMoments(0,bg_img);
 	} 
-// XS TODO	else ... 
-	V->computeHuMoments(bg_img);
+	else 	
+		V->computeHuMoments(0);
+
 //	ofstream f("/Users/xavier/numediart/Project10.1-Borderlands/work/10151_hu_moments_contour.out");
-
-	V->dumpHuMoments(cout);
+	V->dumpHuMoments(cout); //(f)
 //	f.close();
-	delete V;
-}
-
-void test_video_raw_moments(std::string full_video_path, string bg_img_file=""){
-	ACVideoAnalysis* V = new ACVideoAnalysis(full_video_path);
-	V->computeHuMoments();
-	ofstream f("/Users/xavier/numediart/Project10.1-Borderlands/work/10151_raw_moments.out");
-	V->dumpRawMoments(f);
-	f.close();
 	delete V;
 }
 
 void test_optical_flow(std::string full_video_path){
 	ACVideoAnalysis* V = new ACVideoAnalysis(full_video_path);
-	V->computeOpticalFlow();
+	//XS TODO port to 2.*
+//	V->computeOpticalFlow();
 	delete V;
 }
 
@@ -368,7 +356,7 @@ void test_video_similarity_hu(std::string full_video_path){
 	ACVideoAnalysis* V = new ACVideoAnalysis(full_video_path);
 	IplImage *bg_img = cvLoadImage("/Users/xavier/numediart/Project10.1-Borderlands/bg/bg_blue.png", CV_LOAD_IMAGE_COLOR);
 
-	V->computeHuMoments(bg_img);
+	V->computeHuMoments(0,bg_img);
 	std::vector< float > M1 = V->getHuMoment(1);
 	
 	ACMediaTimedFeature *trajectory_mtf = new ACMediaTimedFeature(V->getDummyTimeStamps(M1.size()), M1, "test");
@@ -385,8 +373,8 @@ void test_video_similarity_hu(std::string full_video_path1, std::string full_vid
 	ACVideoAnalysis* V2 = new ACVideoAnalysis(full_video_path2);
 	IplImage *bg_img = cvLoadImage("/Users/xavier/numediart/Project10.1-Borderlands/bg/bg_blue.png", CV_LOAD_IMAGE_COLOR);
 
-	V1->computeHuMoments(bg_img,20);
-	V2->computeHuMoments(bg_img,20);
+	V1->computeHuMoments(20, bg_img);
+	V2->computeHuMoments(20, bg_img);
 
 	// NB first hu moment = (0), not (1)
 	std::vector< vector<float> > M1 = V1->getHuMoments();
@@ -506,48 +494,373 @@ void test_Thomas(){
 	
 }
 
-void test_video_2_0(string s){
-	cv::VideoCapture cap; 
-	if (s=="") return;
-	cap.open(s);
-	cout << cap.get(CV_CAP_PROP_FRAME_COUNT) << " frames at " << cap.get(CV_CAP_PROP_FPS) << " frames/second"  << endl;
-	cv::Mat frame; 
-	cv::namedWindow("video", 1); 
-	for(;;) { 
-		cap >> frame; 
-		if(!frame.data) break; 
-		cout << cap.get(CV_CAP_PROP_POS_FRAMES) << " - " << cap.get(CV_CAP_PROP_POS_MSEC) << endl;
-		cv::imshow("video", frame); 
-		if(cv::waitKey(30) >= 0) break; 
+bool test_video_read(string s){
+	bool ok = true;
+	if (s=="") 
+		ok = false;
+	else {
+		cv::VideoCapture* cap = new cv::VideoCapture(s); 
+		cv::Mat frame; 
+		cout << "testing video " << s << " with " << cap->get(CV_CAP_PROP_FRAME_COUNT) << " frames..." << endl;
+#ifdef VISUAL_CHECK
+		cv::namedWindow("video", 1); 
+#endif //VISUAL_CHECK
+		for(int ifram=0; ifram < cap->get(CV_CAP_PROP_FRAME_COUNT)-1; ifram++) { 
+			// -1 appears to be necessary, otherwise we get no data for frame 3227 in video /usr/local/share/mediacycle/data/video/001011.mov, where CV_CAP_PROP_FRAME_COUNT = 3228
+			*cap >> frame; 
+			if(!frame.data) {
+				cerr << "<test_video_read> : no data for frame " << cap->get(CV_CAP_PROP_POS_FRAMES) << " in video " << s << endl;
+				ok = false;
+				break;
+			}
+			else {
+				cout << ifram << " - "<< cap->get(CV_CAP_PROP_POS_FRAMES) << endl;
+				if (ifram != cap->get(CV_CAP_PROP_POS_FRAMES)-1){ // -1 because pointer >> already switched to next frame
+					cerr << "<test_video_read> : inconsistent frame index (" << ifram << " - "<< cap->get(CV_CAP_PROP_POS_FRAMES)-1 << ") in video " << s << endl;
+					ok = false;
+					break;					
+				}
+
+#ifdef VISUAL_CHECK
+//				cout << cap->get(CV_CAP_PROP_POS_FRAMES) << " - " << cap->get(CV_CAP_PROP_POS_MSEC) << endl;
+				cv::imshow("video", frame); 
+				if(cv::waitKey(10) >= 0) break; 
+#endif //VISUAL_CHECK
+			}
+		}
+		delete cap;
 	}
+	return ok;
 }
+
+bool test_video_get_set_position(string s){
+	bool ok = true;
+	if (s=="") 
+		ok = false;
+	else{
+		cv::VideoCapture* cap = new cv::VideoCapture(s); 
+		cout << "testing video " << s << " with " << cap->get(CV_CAP_PROP_FRAME_COUNT) << " frames..." << endl;
+		for (int i=0; i< cap->get(CV_CAP_PROP_FRAME_COUNT); i++){
+			cap->set(CV_CAP_PROP_POS_FRAMES,i);
+			cout << i << ": position set to "<< cap->get(CV_CAP_PROP_POS_FRAMES) << " -" << cap->get(CV_CAP_PROP_POS_MSEC) << endl;
+		}
+		delete cap;
+		
+	}
+	return ok;
+}
+
+bool test_video_width_height(string s){
+	bool ok = true;
+	int width, height;
+	if (s=="") 
+		ok = false;
+	else{
+		cv::VideoCapture* cap = new cv::VideoCapture(s); 
+		cout << "testing video " << s << " with " << cap->get(CV_CAP_PROP_FRAME_COUNT) << " frames..." << endl;
+		width = cap->get(CV_CAP_PROP_FRAME_WIDTH);
+		height = cap->get(CV_CAP_PROP_FRAME_HEIGHT);
+		cout << "frame width : " << width << endl;
+		cout << "frame height : " << height << endl;
+		cout << "getting first frame as matrix..." << endl;
+		cv::Mat tmp_frame;	
+		*cap >> tmp_frame;
+		if(!tmp_frame.data){
+			cerr << " <test_video_width_height> unexpected end of file." << endl;
+			return false;
+		}
+		else {
+			cout << "matrix rows : " << tmp_frame.rows << endl;
+			cout << "matrix columns : " << tmp_frame.cols << endl;
+			if (width != tmp_frame.cols) ok = false;
+			if (height != tmp_frame.rows) ok = false;
+		}			
+		delete cap;
+		cv::Mat other (height, width, CV_8UC3);  // NOT width, height !!
+		cout << "other matrix rows : " << other.rows << endl;
+		cout << "other matrix columns : " << other.cols << endl;
+		if (width != other.cols) ok = false;
+		if (height != other.rows) ok = false;
+	
+		cout << "making other matrix of same dimensions using cv::size..." << endl;
+		cv::Size size = tmp_frame.size();
+		cv::Mat other2 (size.height, size.width, CV_8UC3); // NOT width, height !!
+		cout << "other2 matrix rows : " << other2.rows << endl;
+		cout << "other2 matrix columns : " << other2.cols << endl;
+		if (width != other2.cols) ok = false;
+		if (height != other2.rows) ok = false;
+	}
+	return ok;
+}
+
+bool test_global_orientation(string s){
+	ACVideoAnalysis cap(s); 
+	cap.computeGlobalOrientation();
+}
+
+void test_xml2acl(string s){
+	MediaCycle* mediacycle;
+	mediacycle = new MediaCycle(MEDIA_TYPE_VIDEO);
+	mediacycle->importXMLLibrary(s);
+	mediacycle->saveACLLibrary("/Users/xavier/numediart/Project7.3-DancersCycle/02.acl");
+	delete mediacycle;
+}
+//
+//#include "opencv2/video/tracking.hpp"
+//#include "opencv2/imgproc/imgproc.hpp"
+//#include "opencv2/highgui/highgui.hpp"
+//#include <time.h>
+//#include <stdio.h>
+//#include <ctype.h>
+//
+//// various tracking parameters (in seconds)
+//const double MHI_DURATION = 1;
+//const double MAX_TIME_DELTA = 0.5;
+//const double MIN_TIME_DELTA = 0.05;
+//// number of cyclic frame buffer used for motion detection
+//// (should, probably, depend on FPS)
+//const int N = 4;
+//
+//// ring image buffer
+//IplImage **buf = 0;
+//int last = 0;
+//
+//// temporary images
+//IplImage *mhi = 0; // MHI
+//IplImage *orient = 0; // orientation
+//IplImage *mask = 0; // valid orientation mask
+//IplImage *segmask = 0; // motion segmentation map
+//CvMemStorage* storage = 0; // temporary storage
+//
+//// parameters:
+////  img - input video frame
+////  dst - resultant motion picture
+////  args - optional parameters
+//void  update_mhi( IplImage* img, IplImage* dst, int diff_threshold )
+//{
+//    double timestamp = (double)clock()/CLOCKS_PER_SEC; // get current time in seconds
+//    CvSize size = cvSize(img->width,img->height); // get current frame size
+//    int i, idx1 = last, idx2;
+//    IplImage* silh;
+//    CvSeq* seq;
+//    CvRect comp_rect;
+//    double count;
+//    double angle;
+//    CvPoint center;
+//    double magnitude;
+//    CvScalar color;
+//	
+//    // allocate images at the beginning or
+//    // reallocate them if the frame size is changed
+//    if( !mhi || mhi->width != size.width || mhi->height != size.height ) {
+//        if( buf == 0 ) {
+//            buf = (IplImage**)malloc(N*sizeof(buf[0]));
+//            memset( buf, 0, N*sizeof(buf[0]));
+//        }
+//		
+//        for( i = 0; i < N; i++ ) {
+//            cvReleaseImage( &buf[i] );
+//            buf[i] = cvCreateImage( size, IPL_DEPTH_8U, 1 );
+//            cvZero( buf[i] );
+//        }
+//        cvReleaseImage( &mhi );
+//        cvReleaseImage( &orient );
+//        cvReleaseImage( &segmask );
+//        cvReleaseImage( &mask );
+//		
+//        mhi = cvCreateImage( size, IPL_DEPTH_32F, 1 );
+//        cvZero( mhi ); // clear MHI at the beginning
+//        orient = cvCreateImage( size, IPL_DEPTH_32F, 1 );
+//        segmask = cvCreateImage( size, IPL_DEPTH_32F, 1 );
+//        mask = cvCreateImage( size, IPL_DEPTH_8U, 1 );
+//    }
+//	
+//    cvCvtColor( img, buf[last], CV_BGR2GRAY ); // convert frame to grayscale
+//	
+//    idx2 = (last + 1) % N; // index of (last - (N-1))th frame
+//    last = idx2;
+//	
+//    silh = buf[idx2];
+//    cvAbsDiff( buf[idx1], buf[idx2], silh ); // get difference between frames
+//	
+//    cvThreshold( silh, silh, diff_threshold, 1, CV_THRESH_BINARY ); // and threshold it
+//	cv::Mat silh_mat(silh);
+//	cv::Mat mhi_mat(mhi);
+//	cv::updateMotionHistory( silh_mat, mhi_mat, timestamp, MHI_DURATION ); // update MHI
+//
+////    cvUpdateMotionHistory( silh, mhi, timestamp, MHI_DURATION ); // update MHI
+//	
+//    // convert MHI to blue 8u image
+//    cvCvtScale( mhi, mask, 255./MHI_DURATION,
+//			   (MHI_DURATION - timestamp)*255./MHI_DURATION );
+//    cvZero( dst );
+//    cvMerge( mask, 0, 0, 0, dst );
+//	
+//    // calculate motion gradient orientation and valid orientation mask
+//    cvCalcMotionGradient( mhi, mask, orient, MAX_TIME_DELTA, MIN_TIME_DELTA, 3 );
+//	
+//    if( !storage )
+//        storage = cvCreateMemStorage(0);
+//    else
+//        cvClearMemStorage(storage);
+//	
+//    // segment motion: get sequence of motion components
+//    // segmask is marked motion components map. It is not used further
+//    seq = cvSegmentMotion( mhi, segmask, storage, timestamp, MAX_TIME_DELTA );
+//	
+//    // iterate through the motion components,
+//    // One more iteration (i == -1) corresponds to the whole image (global motion)
+//    for( i = -1; i < seq->total; i++ ) {
+//		
+//        if( i < 0 ) { // case of the whole image
+//            comp_rect = cvRect( 0, 0, size.width, size.height );
+//            color = CV_RGB(255,255,255);
+//            magnitude = 100;
+//        }
+//        else { // i-th motion component
+//            comp_rect = ((CvConnectedComp*)cvGetSeqElem( seq, i ))->rect;
+//            if( comp_rect.width + comp_rect.height < 100 ) // reject very small components
+//                continue;
+//            color = CV_RGB(255,0,0);
+//            magnitude = 30;
+//        }
+//		
+//        // select component ROI
+//        cvSetImageROI( silh, comp_rect );
+//        cvSetImageROI( mhi, comp_rect );
+//        cvSetImageROI( orient, comp_rect );
+//        cvSetImageROI( mask, comp_rect );
+//		
+//        // calculate orientation
+//		angle = cvCalcGlobalOrientation( orient, mask, mhi, timestamp, MHI_DURATION);
+//        angle = 360.0 - angle;  // adjust for images with top-left origin
+//		
+//        count = cvNorm( silh, 0, CV_L1, 0 ); // calculate number of points within silhouette ROI
+//		
+//        cvResetImageROI( mhi );
+//        cvResetImageROI( orient );
+//        cvResetImageROI( mask );
+//        cvResetImageROI( silh );
+//		
+//        // check for the case of little motion
+//        if( count < comp_rect.width*comp_rect.height * 0.05 )
+//            continue;
+//		
+//        // draw a clock with arrow indicating the direction
+//        center = cvPoint( (comp_rect.x + comp_rect.width/2),
+//						 (comp_rect.y + comp_rect.height/2) );
+//		
+//        cvCircle( dst, center, cvRound(magnitude*1.2), color, 3, CV_AA, 0 );
+//        cvLine( dst, center, cvPoint( cvRound( center.x + magnitude*cos(angle*CV_PI/180)),
+//									 cvRound( center.y - magnitude*sin(angle*CV_PI/180))), color, 3, CV_AA, 0 );
+//    }
+//}
+//
+//
+//// direction of motion 
+//int main(int argc, char** argv)
+//{
+//    IplImage* motion = 0;
+//    CvCapture* capture = 0;
+//		
+//	capture = cvCaptureFromFile(video_test_file.c_str());
+//	
+//    if( capture )
+//    {
+//        cvNamedWindow( "Motion", 1 );
+//		
+//        for(;;)
+//        {
+//            IplImage* image = cvQueryFrame( capture );
+//            if( !image )
+//                break;
+//			
+//            if( !motion )
+//            {
+//                motion = cvCreateImage( cvSize(image->width,image->height), 8, 3 );
+//                cvZero( motion );
+//                motion->origin = image->origin;
+//            }
+//			
+//            update_mhi( image, motion, 30 );
+//            cvShowImage( "Motion", motion );
+//			
+//            if( cvWaitKey(10) >= 0 )
+//                break;
+//        }
+//        cvReleaseCapture( &capture );
+//        cvDestroyWindow( "Motion" );
+//    }
+//	
+//    return 0;
+//}
+//
+//
+
+
+
+
+
+
+
 
 int main(int argc, char** argv) {
 	cout << "Using Opencv " << CV_VERSION << "(" << CV_MAJOR_VERSION << "." << CV_MINOR_VERSION  << "." <<  CV_SUBMINOR_VERSION << ")" << endl;	
 
-	// get_all_images();
-	// test_med_noblob("001011");
-	// test_med_noblob("Bru_203#1");
-	//test_histogram_equalize("Bru_105#2");
-	//test_bg_substraction("Bru_105#2");
-	// test_bg_substraction("Bru_203#2");
-	test_video_2_0("/usr/local/share/mediacycle/data/video/001011.mov");
-	//test_browse("/Users/xavier/numediart/Project11.1-MediaBlender/test/video/elephantsdream-480-h264-st-aac.mov");
-	//test_read_write_video(videodir+"Front/001011.mov");
+	// -- TEST 1 -- : read a video
+	//	if (test_video_read(video_test_file))
+	//		cout << "test_video_read OK" << endl;
+	//	else 
+	//		cout << "test_video_read * FAILED *" << endl;
+	
+	// -- TEST 2 -- : set/get video frame position
+	//	if (test_video_get_set_position(video_test_file))
+	//			cout << "test_video_get_set_position OK" << endl;
+	//		else 
+	//			cout << "test_video_get_set_position * FAILED *" << endl;	
+	
+	// -- TEST 3 -- : video and frame width/height
+//	if (test_video_width_height(video_test_file))
+//		cout << "test_video_width_height OK" << endl;
+//	else 
+//		cout << "test_video_width_height * FAILED *" << endl;	
+
+
+// -- (OPTIONAL) VISUAL TESTS -- 
+// VISUAL TEST 1 : browse a video with trackbar and frame numbers
+//	test_browse_trackbar(video_test_file);
+
+// VISUAL TEST 2 : global pixel speed (frame by frame difference)
+//	test_global_pixel_speed(video_test_file);
+	
+// VISUAL TEST 3 : median of a video
+//	test_med_ave(video_test_file);
+
+// VISUAL TEST 4 : blobs in a video
+//	test_blobs(video_test_file);
+
+// VISUAL TEST 5 : global orientation in a video
+	test_global_orientation(video_test_file);
+
+// VISUAL TEST 6 : video read/write
+//	test_video_read_write(video_test_file,tmp_video_file_out);
+
+// -- SPECIFIC TESTS -- 
+// put here tests that require something system specific (e.g. file path, ...)
+	
+// SPECIFIC TEST 1 : dancers plugin
+// requires two files : 
+// * blablabla/FRONT/dancer.mov
+// * blablabla/FRONT/dancer.mov
+//	test_video_dancers_plugin(dancer_test_file_front);
+
+// SPECIFIC TEST 2 : dancers xml->acl conversion
+//	test_xml2acl("/Users/xavier/numediart/Project7.3-DancersCycle/02.xml");
+	
 //	test_optical_flow(videodir+"Front/001011.mov");
 	//test_video_dancers_plugin("001011");
 	//test_video_dancers_plugin_acl_save("001011");
 	//test_all_videos_top_front(videodir);
-//	test_blobs("001011");
-
-	// christian graupner videos
-	//test_blobs("10151");
-//	test_video_pixel_speed_plugin("/Users/xavier/numediart/Project11.1-MediaBlender/test/video/elephantsdream-480-h264-st-aac.mov"); //
-	///Users/xavier/numediart/Project10.1-Borderlands/2010_4_prox_alpa/10151.mov");
-	// 10603
-//	test_video_hu_moments("/Users/xavier/numediart/Project10.1-Borderlands/2010_4rgb_alpha/10151.mov",
-//						"/Users/xavier/numediart/Project10.1-Borderlands/bg/bg_blue.png");
-
 						   
 //	test_video_similarity_fft("/Users/xavier/numediart/Project10.1-Borderlands/2010_4_prox_alpa/10151.mov"); // complete_movies/BL_blueNoTC.mov");
 	
@@ -569,4 +882,5 @@ int main(int argc, char** argv) {
 
 	return (EXIT_SUCCESS);
 }
+ 
 

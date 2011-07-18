@@ -79,67 +79,69 @@ string ACEyesWebPlugin::changeLastFolder(string path, string folder)
     return dir.substr(0,index+1) + folder + sep + extractFilename(path);
 }
 
-vector<ACMediaFeatures*> ACEyesWebPlugin::calculate(std::string fileName, bool _save_timed_feat){
-  ACMediaTimedFeature *mediaTimedFeatures = new ACMediaTimedFeature();
-  //fileName = video path (.mov, .avi, ...)
-  string dataFile = changeExtension(changeLastFolder(fileName,"analyse/Front"),".ew.txt");
-  string dataFile2 = changeExtension(changeLastFolder(fileName,"analyse/Top"),"imagefeatures.txt");
-  //string dataFile = changeExtension(fileName,".txt");
-  const int numDesc = 6;
-  vector<ACMediaFeatures*> featureVec;
-  const std::string descMeanNames[numDesc] = {"xBarycenterMean", "yBarycenterMean", "wRectMean", "hRectMean", "iqomMean", "ciMean"};
-  const std::string descStdNames[numDesc] = {"xBarycenterStd", "yBarycenterStd", "wRectStd", "hRectStd", "iqomStd", "ciStd"};
+// XS TODO : OBSOLETE ?!
 
-  if (mediaTimedFeatures->readFile(dataFile) == 0) {    //the file is missing
-    featureVec.resize(0);
-    return featureVec;
-  }
-  
-  ACMediaFeatures* mMediaFeatures;
-  
-  
-  ACMediaFeatures* meanV = mediaTimedFeatures->mean();   //mean computation    
-  //write meanV in the ACMediaFeature object
-   
-  for (int i=0; i<meanV->getSize(); i++){
-    mMediaFeatures = new ACMediaFeatures();
-    mMediaFeatures->resize(1);
-    mMediaFeatures->setName(descMeanNames[i]);
-    mMediaFeatures->setFeatureElement(0, meanV->getFeatureElement(i));
-    featureVec.push_back(mMediaFeatures);
-  }
-
-  ACMediaFeatures* stdV = mediaTimedFeatures->std();     //std computation
-
-  for (int i=0; i<stdV->getSize(); i++){
-    mMediaFeatures = new ACMediaFeatures();
-    mMediaFeatures->resize(1);
-    mMediaFeatures->setName(descStdNames[i]);
-    mMediaFeatures->setFeatureElement(0,stdV->getFeatureElement(i));
-    featureVec.push_back(mMediaFeatures);
-  }
-
-  //-----------------------------------------------
-
-//   fmat imagefeatures_m;
-//   imagefeatures_m.load(dataFile2, raw_ascii);
-//   if (imagefeatures_m.n_elem == 0)
-//     {
-//       mMediaFeatures = 0;
-//       return mMediaFeatures;
-//     }
-//   //mediaTimedFeatures->getValue().print("Value : ");
-//   mMediaFeatures->resize(mMediaFeatures->size() + imagefeatures_m.n_cols);
-//   for (int i=0; i<imagefeatures_m.n_cols; i++)
-//     mMediaFeatures->setFeatureElement(mMediaFeatures->size()-imagefeatures_m.n_cols+i,imagefeatures_m(0,i));
-
-//   mMediaFeatures->setComputed();
-
-//   mMediaFeatures->dump();
-
-    
-  return featureVec;
-}
+//vector<ACMediaFeatures*> ACEyesWebPlugin::calculate(std::string fileName, bool _save_timed_feat){
+//  ACMediaTimedFeature *mediaTimedFeatures = new ACMediaTimedFeature();
+//  //fileName = video path (.mov, .avi, ...)
+//  string dataFile = changeExtension(changeLastFolder(fileName,"analyse/Front"),".ew.txt");
+//  string dataFile2 = changeExtension(changeLastFolder(fileName,"analyse/Top"),"imagefeatures.txt");
+//  //string dataFile = changeExtension(fileName,".txt");
+//  const int numDesc = 6;
+//  vector<ACMediaFeatures*> featureVec;
+//  const std::string descMeanNames[numDesc] = {"xBarycenterMean", "yBarycenterMean", "wRectMean", "hRectMean", "iqomMean", "ciMean"};
+//  const std::string descStdNames[numDesc] = {"xBarycenterStd", "yBarycenterStd", "wRectStd", "hRectStd", "iqomStd", "ciStd"};
+//
+//  if (mediaTimedFeatures->readFile(dataFile) == 0) {    //the file is missing
+//    featureVec.resize(0);
+//    return featureVec;
+//  }
+//  
+//  ACMediaFeatures* mMediaFeatures;
+//  
+//  
+//  ACMediaFeatures* meanV = mediaTimedFeatures->mean();   //mean computation    
+//  //write meanV in the ACMediaFeature object
+//   
+//  for (int i=0; i<meanV->getSize(); i++){
+//    mMediaFeatures = new ACMediaFeatures();
+//    mMediaFeatures->resize(1);
+//    mMediaFeatures->setName(descMeanNames[i]);
+//    mMediaFeatures->setFeatureElement(0, meanV->getFeatureElement(i));
+//    featureVec.push_back(mMediaFeatures);
+//  }
+//
+//  ACMediaFeatures* stdV = mediaTimedFeatures->std();     //std computation
+//
+//  for (int i=0; i<stdV->getSize(); i++){
+//    mMediaFeatures = new ACMediaFeatures();
+//    mMediaFeatures->resize(1);
+//    mMediaFeatures->setName(descStdNames[i]);
+//    mMediaFeatures->setFeatureElement(0,stdV->getFeatureElement(i));
+//    featureVec.push_back(mMediaFeatures);
+//  }
+//
+//  //-----------------------------------------------
+//
+////   fmat imagefeatures_m;
+////   imagefeatures_m.load(dataFile2, raw_ascii);
+////   if (imagefeatures_m.n_elem == 0)
+////     {
+////       mMediaFeatures = 0;
+////       return mMediaFeatures;
+////     }
+////   //mediaTimedFeatures->getValue().print("Value : ");
+////   mMediaFeatures->resize(mMediaFeatures->size() + imagefeatures_m.n_cols);
+////   for (int i=0; i<imagefeatures_m.n_cols; i++)
+////     mMediaFeatures->setFeatureElement(mMediaFeatures->size()-imagefeatures_m.n_cols+i,imagefeatures_m(0,i));
+//
+////   mMediaFeatures->setComputed();
+//
+////   mMediaFeatures->dump();
+//
+//    
+//  return featureVec;
+//}
 
 std::vector<ACMediaFeatures*> ACEyesWebPlugin::calculate(ACMediaData* _data, ACMedia* theMedia, bool _save_timed_feat)
 {

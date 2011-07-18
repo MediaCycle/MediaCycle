@@ -99,9 +99,9 @@ void cpu_codelet(void *descr[], void *_args)
 	}
 }
 
-std::vector<ACMediaFeatures*>  ACHuMomentsVideoPlugin::calculate(std::string aFileName, bool _save_timed_feat) {
-	return this->_calculate(aFileName,_save_timed_feat);
-}
+//std::vector<ACMediaFeatures*>  ACHuMomentsVideoPlugin::calculate(std::string aFileName, bool _save_timed_feat) {
+//	return this->_calculate(aFileName,_save_timed_feat);
+//}
 
 std::vector<ACMediaFeatures*> ACHuMomentsVideoPlugin::calculate(ACMediaData* _data, ACMedia* theMedia, bool _save_timed_feat) {
 	return this->_calculate(_data->getFileName(),_save_timed_feat);
@@ -115,15 +115,15 @@ std::vector<ACMediaFeatures*> ACHuMomentsVideoPlugin::_calculate(std::string aFi
 	vector<ACMediaFeatures*> result;
 	vector<float>time_stamps;
 	
-	CvCapture* capture;
+	cv::VideoCapture capture;
 	IplImage *img;
 	IplImage *resultat;
 	IplImage *frame;
 	IplImage *frame1;
 
-	capture = cvCreateFileCapture(aFileName.c_str());
-	int width = cvGetCaptureProperty(capture, CV_CAP_PROP_FRAME_WIDTH);
-	int height = cvGetCaptureProperty(capture, CV_CAP_PROP_FRAME_HEIGHT);
+	capture.open(aFileName.c_str());
+	int width = capture.get(CV_CAP_PROP_FRAME_WIDTH);
+	int height = capture.get(CV_CAP_PROP_FRAME_HEIGHT);
 	resultat = cvCreateImage(cvSize(width, height), IPL_DEPTH_8U, 1);
 	frame1 = cvCreateImage(cvSize(512, 512), IPL_DEPTH_8U, 1);
 	frame = cvCreateImage(cvSize(width, height), IPL_DEPTH_8U, 1);
@@ -132,7 +132,7 @@ std::vector<ACMediaFeatures*> ACHuMomentsVideoPlugin::_calculate(std::string aFi
 	const int area = width*height;
 	float * data_in1 = (float*) malloc(area * sizeof (float));
 	uchar* ddata;
-	int nframe = (int) cvGetCaptureProperty(capture, CV_CAP_PROP_FRAME_COUNT);
+	int nframe = (int) capture.get(CV_CAP_PROP_FRAME_COUNT);
 
 	CvMoments myRawmoments;
 	CvHuMoments myHumoments;
@@ -152,7 +152,7 @@ std::vector<ACMediaFeatures*> ACHuMomentsVideoPlugin::_calculate(std::string aFi
 	/// end of new version
 	
 	for (j = 0; j < nframe; ++j) {
-		cvSetCaptureProperty(capture, CV_CAP_PROP_POS_FRAMES, j);
+		capture.set(CV_CAP_PROP_POS_FRAMES, j);
 		cvGrabFrame(capture);
 		img = cvRetrieveFrame(capture, 0);
 		cvCvtColor(img, frame, CV_BGR2GRAY);

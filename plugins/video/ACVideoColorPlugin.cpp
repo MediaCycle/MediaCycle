@@ -61,11 +61,34 @@ void ACVideoColorPlugin::clean(){
 		delete videoAn;
 }
 
-std::vector<ACMediaFeatures*>  ACVideoColorPlugin::calculate(std::string aFileName, bool _save_timed_feat) {
-}
-
+// computes first 4 moments in HSV color space
 std::vector<ACMediaFeatures*> ACVideoColorPlugin::calculate(ACMediaData* video_data, ACMedia* theMedia, bool _save_timed_feat) {
-}
-
-std::vector<ACMediaFeatures*> ACVideoColorPlugin::_calculate(std::string aFileName, bool _save_timed_feat){
+	this->clean();
+	std::vector<ACMediaFeatures*> videoFeatures;
+	
+	videoAn = new ACVideoAnalysis(video_data);
+	videoAn->computeColorMoments(4, "HSV");
+	vector<float> t = videoAn->getGlobalTimeStamps();
+	std::vector<std::vector<float> > s = videoAn->getColorMoments();
+	string aFileName= video_data->getFileName();
+	ACMediaTimedFeature* ps_mtf = new ACMediaTimedFeature(t,s, "color moments");
+	ACMediaFeatures* mean_color_moments = ps_mtf->mean();
+	// XS TODO this will need to be cut and pasted to other plugins
+	// until we re-define the plugins API
+	// saving timed features on disk (if _save_timed_feat flag is on)
+	// XS TODO add checks
+	if (_save_timed_feat) {
+		// try to keep the convention : _b.mtf = binary ; _t.mtf = ascii text
+		bool save_binary = true;
+		string file_ext =  "_b.mtf";
+		string aFileName_noext = aFileName.substr(0,aFileName.find_last_of('.'));
+		mtf_file_name = aFileName_noext + "_" +this->mDescription + file_ext;
+		ps_mtf->saveInFile(mtf_file_name, save_binary);
+	}
+	
+	delete ps_mtf;
+	
+	videoFeatures.push_back(mean_color_moments);
+	return videoFeatures;
+	
 }

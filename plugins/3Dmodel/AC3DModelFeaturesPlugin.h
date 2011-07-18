@@ -1,7 +1,7 @@
 /**
  * @brief AC3DModelFeaturesPlugin.h
- * @author Christian Frisson
- * @date 30/03/2011
+ * @author Xavier Siebert
+ * @date 18/07/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -45,7 +45,6 @@ public:
 	virtual int start(){return 1;};
 	virtual int stop(){return 1;};
 
-	virtual std::vector<ACMediaFeatures*> calculate(std::string aFileName, bool _save_timed_feat=false);
 	virtual std::vector<ACMediaFeatures*> calculate(ACMediaData* _Data, ACMedia* theMedia, bool _save_timed_feat=false);
 	
 private:

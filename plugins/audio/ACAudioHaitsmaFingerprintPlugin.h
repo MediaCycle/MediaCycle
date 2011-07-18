@@ -1,7 +1,7 @@
 /**
  * @brief ACAudioHaitsmaFingerprintPlugin.h
- * @author Stéphane Dupont
- * @date 13/05/2011
+ * @author Xavier Siebert
+ * @date 18/07/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -43,7 +43,6 @@ public:
 	ACAudioHaitsmaFingerprintPlugin();
 	~ACAudioHaitsmaFingerprintPlugin();
 
-	virtual std::vector<ACMediaFeatures*> calculate(std::string aFileName, bool _save_timed_feat=false);
 	virtual std::vector<ACMediaFeatures*> calculate(ACMediaData* aData, ACMedia* theMedia, bool _save_timed_feat=false);
 	
 	ACMediaTimedFeature* getTimedFeatures();

@@ -45,7 +45,7 @@ class ACImageShapeFourierPolarMomentsPlugin : public ACFeaturesPlugin {
 public:
     ACImageShapeFourierPolarMomentsPlugin();
     ~ACImageShapeFourierPolarMomentsPlugin();
-	std::vector<ACMediaFeatures*> calculate(std::string aFileName, bool _save_timed_feat=false);
+//	std::vector<ACMediaFeatures*> calculate(std::string aFileName, bool _save_timed_feat=false);
 	std::vector<ACMediaFeatures*> calculate(ACMediaData* _data);
 	std::vector<ACMediaFeatures*> calculate(ACMediaData* _aData, ACMedia* _theMedia, bool _save_timed_feat=false);
 private:

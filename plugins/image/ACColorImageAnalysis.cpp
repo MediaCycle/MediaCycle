@@ -34,6 +34,7 @@
 
 #include "ACColorImageAnalysis.h"
 #include "ACBWImageAnalysis.h"
+#include "ACColorImageHistogram.h"
 
 #include <iostream>
 #include <cmath>
@@ -55,8 +56,11 @@ ACColorImageAnalysis::ACColorImageAnalysis(const string &filename, string _cmode
 	reset();
 	setFileName(filename);
 	IplImage *imgp_full;
-	if (_cmode == "BGR" || _cmode == "RGB")
+	if (_cmode == "BGR" || _cmode == "RGB"){
 		imgp_full = cvLoadImage(file_name.c_str(), CV_LOAD_IMAGE_COLOR);
+		// XS TODO check this
+		color_model="BGR";
+	}
 	else if (_cmode == "HSV")
 		cout << "XS TODO : load directly in HSV" << endl;
 	
@@ -68,6 +72,17 @@ ACColorImageAnalysis::ACColorImageAnalysis(IplImage* img, string _cmode) : ACIma
 	reset();
 	// here the filename is unknown
 	scaleImage(img);
+	
+	// XS TODO check color model 
+	color_model="BGR";	
+}
+
+ACColorImageAnalysis::ACColorImageAnalysis(cv::Mat img, string _cmode) : ACImageAnalysis(){
+	reset();
+	// here the filename is unknown
+	// XS TODO migrate to 2.3
+	IplImage tmp_img = img;
+	scaleImage(&tmp_img);
 	
 	// XS TODO check color model 
 	color_model="BGR";	
@@ -180,7 +195,7 @@ int ACColorImageAnalysis::splitChannels(std::string cmode){ // or HSV
 	}
 }
 
-IplImage* ACColorImageAnalysis::getChannel(int i){
+IplImage** ACColorImageAnalysis::getChannel(int i){
 	if (!HAS_CHANNELS) splitChannels(); // default : RGB	
 	if (imgp == 0){
 		cerr << " <ACColorImageAnalysis::SplitChannels> : no image loaded yet " << endl;
@@ -190,7 +205,7 @@ IplImage* ACColorImageAnalysis::getChannel(int i){
 		cerr << "channel index out of range" << endl;
 		return 0;
 	}
-	return channel_img[i];
+	return &channel_img[i];
 }
 
 void ACColorImageAnalysis::removeChannels(){
@@ -263,6 +278,9 @@ void ACColorImageAnalysis::computeHuMoments(int thresh){
 	ACBWImageAnalysis *bw_helper = new ACBWImageAnalysis(this->getBWImage());
 	bw_helper->computeHuMoments(thresh);
 	hu_moments = bw_helper->getHuMoments();
+	// XS debug
+	// bw_helper->dumpHuMoments(cout);
+
 	delete bw_helper;
 }
 
@@ -282,6 +300,7 @@ void ACColorImageAnalysis::computeFourierMellinMoments(){
 	delete bw_helper;
 }
 
+// XS TODO: this is BW histogram !
 void ACColorImageAnalysis::computeImageHistogram(int w, int h){ 
 	makeBWImage();
 	ACBWImageAnalysis *bw_helper = new ACBWImageAnalysis(this->getBWImage());
@@ -314,13 +333,16 @@ void ACColorImageAnalysis::computeGaborMoments_fft(int numPha_, int numFreq_, ui
 	delete bw_helper;
 }
 
-void ACColorImageAnalysis::computeColorMoments(int n){
-	// n = number of moments to compute
+// n = number of moments to compute (default n = 4)
+// cm = color model to be used (default cm = "HSV")
+void ACColorImageAnalysis::computeColorMoments(int n, string cm){
 	color_moments.clear();
-	ACImageHistogram* tmp_hist  = new ACImageHistogram(imgp, color_model);
+	//ACColorImageHistogram* tmp_hist  = new ACColorImageHistogram(this, "HSV");
+	// old way:
+	ACColorImageHistogram* tmp_hist  = new ACColorImageHistogram(imgp, "BGR");
 	
 	//tmp_hist->normalize(1);
-	tmp_hist->computeStats();
+	//tmp_hist->computeStats();
 	tmp_hist->computeMoments(n);
 	
 	for (int i=1;i<=n;i++){
@@ -335,7 +357,9 @@ void ACColorImageAnalysis::computeColorMoments(int n){
 	tmp_hist->show();
 #endif // VISUAL_CHECK
 	
-	//	averageHistogram->ShowStats();
+#ifdef VERBOSE
+	tmp_hist->showStats();
+#endif // VERBOSE
 	delete tmp_hist;
 	
 }
