@@ -170,6 +170,47 @@ FIND_PATH(OpenCV_LEGACY_INCLUDE_DIR
   PATHS ${OpenCV_ROOT_DIR} 
   PATH_SUFFIXES ${OpenCV_INCDIR_SUFFIXES} )
 
+# Try to ascertain the version...
+FIND_PATH(OpenCV_CV_VERSION_HPP_DIR
+	NAMES core/version.hpp      
+	PATHS ${OpenCV_ROOT_DIR} 
+	PATH_SUFFIXES ${OpenCV_INCDIR_SUFFIXES} )
+set(_OpenCV_Version_file "${OpenCV_CV_VERSION_HPP_DIR}/core/version.hpp")
+MESSAGE("OpenCV ${_OpenCV_Version_file}")
+if(EXISTS "${_OpenCV_Version_file}")
+       	file(READ "${_OpenCV_Version_file}" _OpenCV_Version_contents)
+	string(REGEX MATCH ".*#define CV_MAJOR_VERSION+    +[0-9]+.*" _OpenCV_new_version_defines "${_OpenCV_Version_contents}")
+	if(_OpenCV_new_version_defines)
+		string(REGEX REPLACE ".*#define CV_MAJOR_VERSION    +([0-9]+).*" "\\1" _OpenCV_VERSION_MAJOR ${_OpenCV_Version_contents})
+      		string(REGEX REPLACE ".*#define CV_MINOR_VERSION    +([0-9]+).*" "\\1" _OpenCV_VERSION_MINOR ${_OpenCV_Version_contents})
+       		string(REGEX REPLACE ".*#define CV_SUBMINOR_VERSION +([0-9]+).*" "\\1" _OpenCV_VERSION_PATCH ${_OpenCV_Version_contents})
+	else()
+       		message(FATAL_ERROR "[ FindOpenCV.cmake:${CMAKE_CURRENT_LIST_LINE} ] " "Failed to parse version number, please report this as a bug")
+       	endif()
+else()
+      	set(_OpenCV_Version_contents "unknown")
+	set(_OpenCV_VERSION_MAJOR "1")
+	set(_OpenCV_VERSION_MINOR "0")
+	set(_OpenCV_VERSION_PATCH "0")
+endif()
+set(OpenCV_VERSION "${_OpenCV_VERSION_MAJOR}.${_OpenCV_VERSION_MINOR}.${_OpenCV_VERSION_PATCH}" CACHE INTERNAL "The version of OpenCV which was detected")
+
+if(OpenCV_FIND_VERSION AND OpenCV_VERSION)
+    if(OpenCV_FIND_VERSION_EXACT)
+        if(NOT OpenCV_VERSION VERSION_EQUAL ${OpenCV_FIND_VERSION})
+            MESSAGE(FATAL_ERROR "OpenCV version found is ${OpenCV_VERSION}, while version needed is exactly ${OpenCV_FIND_VERSION}.")
+        endif()
+    else()
+        # version is too low
+        if(NOT OpenCV_VERSION VERSION_EQUAL ${OpenCV_FIND_VERSION} AND 
+                NOT OpenCV_VERSION VERSION_GREATER ${OpenCV_FIND_VERSION})
+            MESSAGE(FATAL_ERROR "OpenCV version found is ${OpenCV_VERSION}, while version needed is ${OpenCV_FIND_VERSION}.")
+        endif()
+    endif()
+endif()
+
+
+
 #
 # find sbsolute path to all libraries 
 # some are optionally, some may not exist on Linux
