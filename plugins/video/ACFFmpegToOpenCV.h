@@ -8,6 +8,7 @@
  *
  */
 #ifndef APPLE_LEOPARD
+#if defined(SUPPORT_VIDEO) and defined(USE_FFMPEG)
 #ifndef ACFFmpegToOpenCV_H
 #define ACFFmpegToOpenCV_H
 
@@ -55,5 +56,6 @@ public:
     void closeit();
 
 };
+#endif //defined(SUPPORT_VIDEO) and defined(USE_FFMPEG)
 #endif
 #endif

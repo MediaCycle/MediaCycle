@@ -8,6 +8,7 @@
  *
  */
 #ifndef APPLE_LEOPARD
+#if defined(SUPPORT_VIDEO) and defined(USE_FFMPEG)
 #include "ACFFmpegToOpenCV.h"
 #include<iostream>
 
@@ -214,5 +215,6 @@ void ACFFmpegToOpenCV::closeit()
     // Close the video file
     av_close_input_file(pFormatCtx);
 }
+#endif //defined(SUPPORT_VIDEO) and defined(USE_FFMPEG)
 #endif
 

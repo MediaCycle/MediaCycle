@@ -116,7 +116,7 @@ bool ACVideo::computeThumbnail(int w, int h){
 	//CF we should compute the following in a separate thread
 	
 	// option 2 : Loading the movie with OSG
-	std::cout << boost::filesystem::extension(filename);
+	//std::cout << boost::filesystem::extension(filename);
 	/// prerequisites for loading OSG media files, 2 alternatives
 	/// 1) standard procedure: checking for a plugin that can open the format of the media file
 	osgDB::ReaderWriter* readerWriter = osgDB::Registry::instance()->getReaderWriterForExtension(boost::filesystem::extension(filename).substr(1));
@@ -126,6 +126,9 @@ bool ACVideo::computeThumbnail(int w, int h){
 		cerr << "<ACVideo::computeThumbnail> problem loading file, no OSG plugin available" << endl;
 		return false;
 	}
+	else{
+		cout <<"<ACVideo::computeThumbnail> using OSG plugin: "<< readerWriter->className() <<std::endl;
+	}	
 
 	osg::ref_ptr<osg::Image> thumbnail = osgDB::readImageFile(filename);
 	// XS TODO : needs rescaling !!

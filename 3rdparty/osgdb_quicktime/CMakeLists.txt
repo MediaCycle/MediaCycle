@@ -1,0 +1,81 @@
+# Forked OSG QuickTime plugin from version 3.0.0
+
+# From OSG's CMakeLists.txt
+SET(OSG_PLUGINS osgPlugins-${OPENSCENEGRAPH_VERSION})
+
+SET(OSG_PLUGIN_PREFIX "")
+
+IF (CYGWIN)
+    SET(OSG_PLUGIN_PREFIX "cygwin_")
+ENDIF()
+
+IF(MINGW)
+    SET(OSG_PLUGIN_PREFIX "mingw_")
+ENDIF()
+
+SET(OPENSCENEGRAPH_USER_DEFINED_DYNAMIC_OR_STATIC "SHARED")
+SET(DYNAMIC_OPENSCENEGRAPH ON)
+
+# Adapted
+IF(APPLE OR UNIX)
+    SET(OSG_PLUGIN_SUFFIX "so") 
+ELSE()
+    SET(OSG_PLUGIN_SUFFIX "dll")
+ENDIF()
+
+SET(OPENSCENEGRAPH_SONAMES TRUE)
+
+# From OSG's src/osgPlugin/CMakeLists.txt
+SET(CMAKE_SHARED_MODULE_PREFIX ${OSG_PLUGIN_PREFIX})
+
+#IF(MSVC80 OR MSVC90)
+#    IF(NOT OSG_MSVC_GENERATE_PLUGINS_AND_WRAPPERS_MANIFESTS)
+#        SET(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} /MANIFEST:NO")
+#    ENDIF()
+#ENDIF()
+
+SET(TARGET_DEFAULT_PREFIX "osgdb_")
+SET(TARGET_DEFAULT_LABEL_PREFIX "Plugins")
+SET(TARGET_COMMON_LIBRARIES ${OSG_LIBRARY} ${OSGDB_LIBRARY} ${OSGUTIL_LIBRARY} ${OPENTHREADS_LIBRARY})
+
+# From OSG's src/osgPlugin/quicktime/CMakeLists.txt
+IF(WIN32)
+    SET(CMAKE_SHARED_LINKER_FLAGS_DEBUG "${CMAKE_SHARED_LINKER_FLAGS_DEBUG} /NODEFAULTLIB:MSVCRT")
+ENDIF()
+
+INCLUDE_DIRECTORIES(${QUICKTIME_INCLUDE_DIR})
+
+
+SET(TARGET_SRC
+    MovieData.cpp
+    QTUtils.cpp
+    QTLiveUtils.cpp
+    QTImportExport.cpp
+    QuicktimeImageStream.cpp
+    QuicktimeLiveImageStream.cpp
+    ReaderWriterQT.cpp
+)
+
+SET(TARGET_H 
+    MovieData.h
+    QTUtils.h
+    QTLiveUtils.h
+    QTImportExport.h
+    QuicktimeImageStream.h
+    QuicktimeLiveImageStream.h
+)
+
+SET(TARGET_ADDED_LIBRARIES)
+SET(TARGET_LIBRARIES_VARS QUICKTIME_LIBRARY COCOA_LIBRARY)
+
+#### end var setup  ###
+# From OSG's CMakeModules/OsgMacroUtils.cmake
+INCLUDE (${CMAKE_SOURCE_DIR}/CMakeModules/OsgMacroUtils.cmake)
+
+SETUP_PLUGIN(qt)
+
+IF(USE_DEBUG)
+    INSTALL(FILES ${CMAKE_BINARY_DIR}/3rdparty/osg_quicktime/osg_qt.so DESTINATION ${OSG_LIBRARY_DIR}/osgPlugins-${OPENSCENEGRAPH_VERSION})
+ENDIF()
+
+MESSAGE("[X] QuickTime plugin for OpenSceneGraph")

@@ -59,10 +59,10 @@ namespace fs = boost::filesystem;
 
 #define VERBOSE
 
-#if defined(SUPPORT_VIDEO)
+#if defined(SUPPORT_VIDEO) and defined(USE_FFMPEG)
 // CF FFmpeg for checking audio/video channels in containers
 #include <ACFFmpegInclude.h>
-#endif //defined (SUPPORT_VIDEO)
+#endif //defined(SUPPORT_VIDEO) and defined(USE_FFMPEG)
 
 using namespace std;
 // to save library items in binary format, uncomment the following line:
@@ -80,10 +80,10 @@ ACMediaLibrary::ACMediaLibrary(ACMediaType aMediaType) {
 	media_type = aMediaType;
 	mPreProcessPlugin=NULL;
 	mPreProcessInfo=NULL;
-	#if defined(SUPPORT_VIDEO)
+	#if defined(SUPPORT_VIDEO) and defined(USE_FFMPEG)
 	// Register all formats and codecs from FFmpeg
 	av_register_all();
-	#endif //defined (SUPPORT_VIDEO)
+	#endif //defined(SUPPORT_VIDEO) and defined(USE_FFMPEG)
 }
 
 ACMediaLibrary::~ACMediaLibrary(){
@@ -179,7 +179,6 @@ int ACMediaLibrary::importFile(std::string _filename, ACPluginManager *acpl, boo
 	ACMediaType fileMediaType = ACMediaFactory::getInstance().getMediaTypeFromExtension(extension);
 	ACMedia* media;
 #if defined (SUPPORT_MULTIMEDIA) 
-
 	//this->testFFMPEG(_filename);
 	if (media_type==MEDIA_TYPE_MIXED){
 		
@@ -187,70 +186,75 @@ int ACMediaLibrary::importFile(std::string _filename, ACPluginManager *acpl, boo
 		if (media==0)
 			return 0;
 		else {
-			if (media->import(_filename, this->getMediaID(), acpl)==0)
+			int nbMedia = media->import(_filename, this->getMediaID(), acpl);
+			if (nbMedia<=0)
 				return 0;
 			this->addMedia(media);
 			this->incrementMediaID();
+			ACMediaContainer medias = (static_cast<ACMediaDocument*> (media))->getContainer();
+			ACMediaContainer::iterator iter;
+			for ( iter=medias.begin() ; iter!=medias.end(); ++iter ){
+				this->incrementMediaID();
+				this->addMedia(iter->second);
+			}
 			return 1;
 		}
-
-
 	}
 #endif	
-	// XS TODO: do we want to check the media type of the whole library (= impose a unique one)?
-	if (media_type == fileMediaType){
-		media = ACMediaFactory::getInstance().create(extension);
-		cout << "extension:" << extension << endl;
-	}
-	else {
-		cout << "<ACMediaLibrary::importFile> other media type, skipping " << _filename << " ... " << endl;
-		cout << "-> media_type " << media_type << " ... " << endl;
-		cout << "-> fileMediaType " << fileMediaType << " ... " << endl;
-		return 0;
-	}
+		// XS TODO: do we want to check the media type of the whole library (= impose a unique one)?
+		if (media_type == fileMediaType){
+			media = ACMediaFactory::getInstance().create(extension);
+			cout << "extension:" << extension << endl;
+		}
+		else {
+			cout << "<ACMediaLibrary::importFile> other media type, skipping " << _filename << " ... " << endl;
+			cout << "-> media_type " << media_type << " ... " << endl;
+			cout << "-> fileMediaType " << fileMediaType << " ... " << endl;
+			return 0;
+		}
 
-	if (media == 0) {
-		cout << "<ACMediaLibrary::importFile> extension unknown, skipping " << _filename << " ... " << endl;
-		return 0;
-	}
-	// import has to be done before segmentation to have proper id.
-	else if (media->import(_filename, this->getMediaID(), acpl, _save_timed_feat)){
-		this->addMedia(media);
-#ifdef VERBOSE
-		cout << "imported " << _filename << " with mid = " <<  this->getMediaID() << endl;
-#endif // VERBOSE
-		this->incrementMediaID();
-		// SD TODO - Is this correct?
-		if (doSegment){
-			// segments are created without id
-			media->segment(acpl, _save_timed_feat);
-			std::vector<ACMedia*> mediaSegments;
-			mediaSegments = media->getAllSegments();
-			for (unsigned int i = 0; i < mediaSegments.size(); i++){
-				// for the segments we do not save (again) timedFeatures
-				// XS TODO but we should not re-calculate them either !
-				if (mediaSegments[i]->import(_filename, this->getMediaID(), acpl)){
-					this->addMedia(mediaSegments[i]);
-					this->incrementMediaID();
+		if (media == 0) {
+			cout << "<ACMediaLibrary::importFile> extension unknown, skipping " << _filename << " ... " << endl;
+			return 0;
+		}
+		// import has to be done before segmentation to have proper id.
+		else if (media->import(_filename, this->getMediaID(), acpl, _save_timed_feat)){
+			this->addMedia(media);
+	#ifdef VERBOSE
+			cout << "imported " << _filename << " with mid = " <<  this->getMediaID() << endl;
+	#endif // VERBOSE
+			this->incrementMediaID();
+			// SD TODO - Is this correct?
+			if (doSegment){
+				// segments are created without id
+				media->segment(acpl, _save_timed_feat);
+				std::vector<ACMedia*> mediaSegments;
+				mediaSegments = media->getAllSegments();
+				for (unsigned int i = 0; i < mediaSegments.size(); i++){
+					// for the segments we do not save (again) timedFeatures
+					// XS TODO but we should not re-calculate them either !
+					if (mediaSegments[i]->import(_filename, this->getMediaID(), acpl)){
+						this->addMedia(mediaSegments[i]);
+						this->incrementMediaID();
+					}
+					
 				}
-				
 			}
 		}
-	}
-	else {
-		cerr << "<ACMediaLibrary::importFile> problem importing " << _filename << " ... " << endl;
-		return 0;
+		else {
+			cerr << "<ACMediaLibrary::importFile> problem importing " << _filename << " ... " << endl;
+			return 0;
 
-	}
-	// XS TODO this was an attempt to save on-the-fly each media 
-	// but it does not work well.
-	
-	// appending current media (if imported properly) to the project's XML file
-	//media->saveXML(_medias);
+		}
+		// XS TODO this was an attempt to save on-the-fly each media 
+		// but it does not work well.
+		
+		// appending current media (if imported properly) to the project's XML file
+		//media->saveXML(_medias);
 
-	// deleting the data that have been used for analysis, keep media small.
-	media->deleteData();
-	return 1;
+		// deleting the data that have been used for analysis, keep media small.
+		media->deleteData();
+		return 1;
 }
 
 int ACMediaLibrary::scanDirectories(std::vector<string> _paths, int _recursive, std::vector<string>& filenames) {
@@ -611,7 +615,7 @@ int ACMediaLibrary::addMedia(ACMedia *aMedia) {
     // mediacycle should be able to manage a mix of any media
     // instead of only medias of one type
 	if (aMedia != 0){
-		if (aMedia->getType() == this->media_type) {
+		if (aMedia->getType() == this->media_type || this->media_type == MEDIA_TYPE_MIXED) {
 			if (mPreProcessPlugin==NULL)
 				aMedia->defaultPreProcFeatureInit();
 			this->media_library.push_back(aMedia);
@@ -927,7 +931,7 @@ void ACMediaLibrary::setPreProcessPlugin(ACPlugin* acpl)
 
 // -------------------------------------------------------------------------
 // test
-//#if defined(SUPPORT_VIDEO)
+//#if defined(SUPPORT_VIDEO) and defined(USE_FFMPEG)
 //int ACMediaLibrary::testFFMPEG(std::string _filename){
 //	//CF early check in video files for audio and video streams, towards ACMediaDocuments
 //	// from http://www.inb.uni-luebeck.de/~boehme/using_libavcodec.html
@@ -987,4 +991,4 @@ void ACMediaLibrary::setPreProcessPlugin(ACPlugin* acpl)
 //		}
 //	}
 //}
-//#endif //defined (SUPPORT_VIDEO)
+//#endif //defined(SUPPORT_VIDEO) and defined(USE_FFMPEG)

@@ -184,7 +184,7 @@ ACMultiMediaCycleOsgQt::ACMultiMediaCycleOsgQt(QWidget *parent) : QMainWindow(pa
 	
 	// to make window appear on top of others.
 	this->activateWindow();
-	this->show();
+	this->showMaximized();//this->show();
 	
 	progressBar->hide();	
 	
@@ -272,7 +272,7 @@ void ACMultiMediaCycleOsgQt::createMediaCycle(ACMediaType _media_type, ACBrowser
 	#if defined (SUPPORT_AUDIO)
 	// XS TODO add checks on existing audio_engine ?
 	// normally should not be any
-	if (_media_type == MEDIA_TYPE_AUDIO){
+	if (_media_type == MEDIA_TYPE_AUDIO || _media_type == MEDIA_TYPE_MIXED){
 		audio_engine = new ACAudioEngine();
 		audio_engine->setMediaCycle(media_cycle);
 		audio_engine->startAudioEngine();
@@ -1007,8 +1007,12 @@ void ACMultiMediaCycleOsgQt::loadDefaultConfig(ACMediaType _media_type, ACBrowse
 		std::string osg_plugin_error ="";
 	
 		if(_media_type == MEDIA_TYPE_VIDEO){
+			#if defined(USE_FFMPEG)
 			videoReaderWriter = osgDB::Registry::instance()->getReaderWriterForExtension("ffmpeg");
-			osg_plugin_error = "The FFmpeg plugin for OpenSceneGraph is not present but necessary for interactive video navigation. Please install it or contact the MediaCycle team.";
+			#else
+			videoReaderWriter = osgDB::Registry::instance()->getReaderWriterForExtension("mov");
+			#endif
+			osg_plugin_error = "Video plugins for OpenSceneGraph (FFmpeg or QuickTime or QTKit) are absent but necessary for interactive video navigation. Please install it or contact the MediaCycle team.";
 		}
 		if (_media_type == MEDIA_TYPE_VIDEO && !videoReaderWriter){
 			for (int d=0;d<dockWidgets.size();d++){
@@ -1404,7 +1408,7 @@ void ACMultiMediaCycleOsgQt::setDefaultQSettings() {
 void ACMultiMediaCycleOsgQt::changeMediaType(ACMediaType _media_type){
 	// XS TODO turn off current audio engine if switch away from audio
 #if defined (SUPPORT_AUDIO)
-	if (_media_type == MEDIA_TYPE_AUDIO){
+	if (_media_type == MEDIA_TYPE_AUDIO || _media_type == MEDIA_TYPE_MIXED){
 		if (!audio_engine){
 			audio_engine = new ACAudioEngine();
 			media_cycle->setAutoPlay(1);//Seneffe
