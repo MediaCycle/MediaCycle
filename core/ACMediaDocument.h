@@ -46,6 +46,7 @@
 
 // -----------------------------------
 
+typedef std::map<std::string ,ACMedia* > ACMediaContainer;
 
 class ACMediaDocument: public ACMedia {
 	// contains the *minimal* information about an image
@@ -72,6 +73,7 @@ public:
 //	virtual ACMediaData* getMediaData(){return data;} // XS TODO : needs dynamic_cast<ACMediaData*> (data) ??
 	bool extractData(std::string fname);
 //	virtual void deleteData();
+	ACMediaContainer getContainer(){return mediaContainer;}
 
 	std::vector<ACMediaFeatures*> &getAllFeaturesVectors() { return activeMedia->getAllFeaturesVectors(); };
 	ACMediaFeatures* getFeaturesVector(int i){return activeMedia->getFeaturesVector(i);};
@@ -98,15 +100,13 @@ private:
 	osg::ref_ptr<osg::Image> thumbnail;
 	osg::ref_ptr<osg::Texture2D> image_texture;
 	//ACMediaDocumentData* data; No Need, data are stored in the respective media 
-	std::map<std::string ,ACMedia* >	mediaContainer;
+	ACMediaContainer mediaContainer;
 	static	const int default_thumbnail_area ; // 128*128
 	int mediaID;
 	void incrementMediaID(){mediaID++ ;}
 	int getMediaID(){return mediaID ;}
-	int addMedia(std::string key, ACMedia* media); 
+	int addMedia(std::string key, ACMedia* media);
 	ACMedia* activeMedia;
-
-	
 };
 
 #endif //defined (SUPPORT_MULTIMEDIA)

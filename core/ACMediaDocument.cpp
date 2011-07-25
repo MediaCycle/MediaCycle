@@ -58,6 +58,7 @@ ACMediaDocument::ACMediaDocument() : ACMedia() {
 
 int ACMediaDocument::import(std::string _filename, int _mid, ACPluginManager *acpl, bool _save_timed_feat){	
 	filename=_filename;	
+	if (_mid>=0) this->setId(_mid);
 	string extension = boost::filesystem::extension(filename);
 	string path=boost::filesystem::path(_filename).parent_path().string()+string("/");
 
@@ -89,14 +90,18 @@ int ACMediaDocument::import(std::string _filename, int _mid, ACPluginManager *ac
 			}
 			string mediaRef=xmlDoc->getMediaReference(i);
 			ACMedia *media = ACMediaFactory::getInstance().create(mediaExtension);
-			if (media->import(path+mediaFileName, this->getMediaID(), acpl, _save_timed_feat)){
-				if (this->addMedia(mediaRef, media))
-					this->incrementMediaID();
+			if (media->import(path+mediaFileName, this->getMediaID()+i+1, acpl, _save_timed_feat)){
+				if (this->addMedia(mediaRef, media)){
+					//this->incrementMediaID();
+					if(mediaRef=="main")
+						this->activeMedia = media;
+				}	
 			}
 			else 
 				delete media;
 		}
 		delete xmlDoc;
+		return nbMedia;
 	}
 	else {
 		ACMediaType fileMediaType = ACMediaFactory::getInstance().getMediaTypeFromExtension(extension);
