@@ -1,0 +1,11 @@
+--- OpenCVModule.cmake.orig	2011-08-24 20:53:46.000000000 +0200
++++ OpenCVModule.cmake	2011-08-24 19:17:29.000000000 +0200
+@@ -83,7 +83,7 @@
+         DEBUG_POSTFIX "${OPENCV_DEBUG_POSTFIX}"
+         ARCHIVE_OUTPUT_DIRECTORY ${LIBRARY_OUTPUT_PATH}
+         RUNTIME_OUTPUT_DIRECTORY ${EXECUTABLE_OUTPUT_PATH}
+-        INSTALL_NAME_DIR lib
++        INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib"
+         )
+ 
+     add_opencv_precompiled_headers(${the_target})

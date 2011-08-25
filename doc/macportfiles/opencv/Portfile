@@ -1,5 +1,5 @@
 # -*- coding: utf-8; mode: tcl; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- vim:fenc=utf-8:ft=tcl:et:sw=4:ts=4:sts=4
-# $Id: Portfile 82208 2011-08-10 14:20:26Z ryandesign@macports.org $
+# $Id: Portfile 82208 2011-08-24 20:54:26Z christian.frisson@umons.ac.be $
 
 PortSystem                      1.0
 PortGroup                       cmake 1.0
@@ -46,6 +46,14 @@ depends_lib-append              port:zlib \
                                 port:x264 \
                                 port:orc \
                                 port:qt4-mac
+                                #path:lib/libavcodec.dylib:ffmpeg \
+
+# ffmpeg is not universal
+#universal_variant               no
+
+patchfiles                      patch-OpenCVModule.cmake.diff \
+                                patch-modules-highgui-CMakeLists.txt.diff \
+                                patch-modules-gpu-CMakeLists.txt.diff
 
 configure.args-append           -DBUILD_NEW_PYTHON_SUPPORT=OFF \
                                 -DBUILD_EXAMPLES=ON \
@@ -53,6 +61,60 @@ configure.args-append           -DBUILD_NEW_PYTHON_SUPPORT=OFF \
                                 -DWITH_FFMPEG=OFF \
 				-DWITH_QT=ON \
 				-DWITH_OPENNI=ON
+
+# use macros in /usr/include/stdint.h with C++ compiler; see <https://roundup.ffmpeg.org/issue2093>
+#platform darwin {
+#    if {${os.major} <= 9} {
+#        configure.args-append   -DCMAKE_CXX_FLAGS=-D__STDC_CONSTANT_MACROS
+#    }
+#}
+
+#variant dc1394 description {Use libdc1394 for firewire camera. Breaks compatibility with Apple iSight FireWire camera.} {
+#    depends_lib-append          port:libdc1394
+#    configure.args-delete       -DWITH_1394=OFF
+#    configure.args-append       -DWITH_1394=ON
+#    configure.args-append       -DHAVE_1394=ON
+#}
+
+#variant qt4 description {Use experimental qt4 backend for graphical interface.} {
+#    depends_lib-append          port:qt4-mac
+#    configure.args-append       -DWITH_QT=ON
+#}
+
+variant python26 conflicts python27 description {Add Python 2.6 bindings} {
+    depends_lib-append          port:python26
+    configure.args-delete       -DBUILD_NEW_PYTHON_SUPPORT=OFF
+    configure.args-append       -DINSTALL_PYTHON_EXAMPLES=ON \
+                                -DBUILD_NEW_PYTHON_SUPPORT=ON \
+                                -DPYTHON_EXECUTABLE=${prefix}/bin/python2.6 \
+                                -DPYTHON_LIBRARY=${prefix}/lib/libpython2.6.dylib \
+                                -DPYTHON_INCLUDE_DIR=${frameworks_dir}/Python.framework/Versions/2.6/Headers
+    post-patch {
+        reinplace "s|@@PYTHON_PKGD@@|${frameworks_dir}/Python.framework/Versions/2.6/lib/python2.6/site-packages|g" ${worksrcpath}/CMakeLists.txt
+    }
+}
+
+variant python27 conflicts python26 description {Add Python 2.7 bindings} {
+    depends_lib-append          port:python27
+    configure.args-delete       -DBUILD_NEW_PYTHON_SUPPORT=OFF
+    configure.args-append       -DINSTALL_PYTHON_EXAMPLES=ON \
+                                -DBUILD_NEW_PYTHON_SUPPORT=ON \
+                                -DPYTHON_EXECUTABLE=${prefix}/bin/python2.7 \
+                                -DPYTHON_LIBRARY=${prefix}/lib/libpython2.7.dylib \
+                                -DPYTHON_INCLUDE_DIR=${frameworks_dir}/Python.framework/Versions/2.7/Headers
+    post-patch {
+        reinplace "s|@@PYTHON_PKGD@@|${frameworks_dir}/Python.framework/Versions/2.7/lib/python2.7/site-packages|g" ${worksrcpath}/CMakeLists.txt
+    }
+}
+
+variant tbb description {Use Intel TBB} {
+    depends_lib-append          port:tbb
+    configure.args-append       -DWITH_TBB=ON \
+                                -DHAVE_TBB=ON \
+                                -DTBB_INCLUDE_DIRS=${prefix}/include \
+                                -DTBB_LIBRARY_DIRS=${prefix}/lib \
+                                -DOPENCV_LINKER_LIBS="-ltbb -ltbbmalloc"
+}
 
 livecheck.type                  sourceforge
 livecheck.name                  opencvlibrary
