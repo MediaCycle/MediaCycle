@@ -35,11 +35,14 @@
 #include "textFile.h"
 #include <iostream>
 #include <fstream>
-#include "ArchipelReader.h"
+#include <ArchipelReader.h>
 using namespace std;
 
+#include <boost/filesystem.hpp>
+namespace fs = boost::filesystem;
+
 string* textFileRead(string filePath){
-	string ext=filePath.substr(filePath.find('.'), filePath.length()-filePath.find('.'));
+	string ext=fs::extension(filePath);
 	if (ext==string(".txt")) 
 		return txtFileRead(filePath);
 	else
@@ -69,7 +72,7 @@ string* textFileRead(string filePath){
 }
 
 string labelFileRead(string filePath){
-	string ext=filePath.substr(filePath.find('.'), filePath.length()-filePath.find('.'));
+	string ext=fs::extension(filePath);
 	if (ext==string(".txt")) {
 		size_t indTemp=filePath.find_last_of("/"),lastTemp=filePath.length();
 		return filePath.substr(indTemp,lastTemp-indTemp);
