@@ -366,6 +366,9 @@ MESSAGE("\nExternal libraries:")
 #Threads
 FIND_PACKAGE ( Threads )
 
+#Java (for the archipel HTML to XML converter)
+FIND_PACKAGE(Java)
+
 #Boost (serialization + system + filesystem + graph + thread + program_options)
 SET(BOOST_THREAD "thread")
 IF(MINGW OR WIN32)
