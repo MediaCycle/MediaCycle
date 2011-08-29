@@ -116,161 +116,168 @@ void ACOsgAudioRenderer::waveformGeode() {
 	axis_geometry = new Geometry();
 
 	// CF: temporary workaround as the ACUserLog tree and the ACLoopAttributes vector in ACMediaBrowser are not sync'd
-	int media_index = node_index; // or media_cycle->getBrowser()->getMediaNode(node_index).getMediaId();
+	/*int media_index = node_index; // or media_cycle->getBrowser()->getMediaNode(node_index).getMediaId();
 	if (media_cycle->getBrowser()->getMode() == AC_MODE_NEIGHBORS)
-		media_index = media_cycle->getBrowser()->getUserLog()->getMediaIdFromNodeId(node_index);
+		media_index = media_cycle->getBrowser()->getUserLog()->getMediaIdFromNodeId(node_index);*/
 
-	width = media_cycle->getThumbnailWidth(media_index);//CF instead of node_index
-	width = width / 2;
-	thumbnail = (float*)media_cycle->getThumbnailPtr(media_index);//CF instead of node_index
+	if(media){
+	
+		//width = media_cycle->getThumbnailWidth(media_index);//CF instead of node_index
+		width = media->getThumbnailWidth();
+		
+		width = width / 2;
+		
+		//thumbnail = (float*)media_cycle->getThumbnailPtr(media_index);//CF instead of node_index
+		thumbnail = (float*)media->getThumbnailPtr();//CF instead of node_index
+		
+		//////////////////////////
+		// samples vertices
+		vertices = new Vec3Array(2*width+2);
+		for(i=0; i<width; i++) {
+			(*vertices)[2*i] = Vec3(i * xstep, ylim * thumbnail[2*i], zpos);
+			(*vertices)[2*i+1] = Vec3(i * xstep, ylim * thumbnail[2*i+1], zpos);
+		}
+		(*vertices)[2*i] = Vec3(0.0, 0.0, zpos);
+		(*vertices)[2*i+1] = Vec3((i-1) * xstep, 0.0, zpos);
+		samples_geometry->setVertexArray(vertices);
+		/*
+		line_p = new DrawElementsUInt(PrimitiveSet::LINES, 2*width+2);
+		for(i=0; i<width+1; i++) {
+			(*line_p)[2*i] = 2*i;
+			(*line_p)[2*i+1] = 2*i+1;
+		}
+		samples_geometry->addPrimitiveSet(line_p);
+		*/
+		DrawElementsUShort* line_p = new DrawElementsUShort(PrimitiveSet::TRIANGLE_STRIP, 0);
+		for(i=0; i<width; i++) {
+			line_p->push_back(2*i);
+			line_p->push_back(2*i+1);
+		}
+		samples_geometry->addPrimitiveSet(line_p);
 
-	//////////////////////////
-	// samples vertices
-	vertices = new Vec3Array(2*width+2);
-	for(i=0; i<width; i++) {
-		(*vertices)[2*i] = Vec3(i * xstep, ylim * thumbnail[2*i], zpos);
-		(*vertices)[2*i+1] = Vec3(i * xstep, ylim * thumbnail[2*i+1], zpos);
-	}
-	(*vertices)[2*i] = Vec3(0.0, 0.0, zpos);
-	(*vertices)[2*i+1] = Vec3((i-1) * xstep, 0.0, zpos);
-	samples_geometry->setVertexArray(vertices);
-	/*
-	line_p = new DrawElementsUInt(PrimitiveSet::LINES, 2*width+2);
-	for(i=0; i<width+1; i++) {
-		(*line_p)[2*i] = 2*i;
-		(*line_p)[2*i+1] = 2*i+1;
-	}
-	samples_geometry->addPrimitiveSet(line_p);
-	*/
-	DrawElementsUShort* line_p = new DrawElementsUShort(PrimitiveSet::TRIANGLE_STRIP, 0);
-	for(i=0; i<width; i++) {
-		line_p->push_back(2*i);
-		line_p->push_back(2*i+1);
-	}
-	samples_geometry->addPrimitiveSet(line_p);
+		/////////////////////////
+		//frame vertices
+		vertices = new Vec3Array;
+		vertices->push_back(Vec3(0.0, -ylim, zpos));
+		vertices->push_back(Vec3(width * xstep, -ylim, zpos));
+		vertices->push_back(Vec3(width * xstep, ylim, zpos));
+		vertices->push_back(Vec3(0.0, ylim, zpos));
+		frame_geometry->setVertexArray(vertices);
+		/*
+		osg::ref_ptr<DrawElementsUInt> poly = new DrawElementsUInt(PrimitiveSet::QUADS, 0);
+		poly->push_back(0);
+		poly->push_back(1);
+		poly->push_back(2);
+		poly->push_back(3);
+		frame_geometry->addPrimitiveSet(poly);
+		*/
+		DrawElementsUShort *poly = new DrawElementsUShort(PrimitiveSet::TRIANGLE_STRIP, 0);
+		poly->push_back(0);
+		poly->push_back(3);
+		poly->push_back(1);
+		poly->push_back(2);
+		frame_geometry->addPrimitiveSet(poly);
 
-	/////////////////////////
-	//frame vertices
-	vertices = new Vec3Array;
-	vertices->push_back(Vec3(0.0, -ylim, zpos));
-	vertices->push_back(Vec3(width * xstep, -ylim, zpos));
-	vertices->push_back(Vec3(width * xstep, ylim, zpos));
-	vertices->push_back(Vec3(0.0, ylim, zpos));
-	frame_geometry->setVertexArray(vertices);
-	/*
-	osg::ref_ptr<DrawElementsUInt> poly = new DrawElementsUInt(PrimitiveSet::QUADS, 0);
-	poly->push_back(0);
-	poly->push_back(1);
-	poly->push_back(2);
-	poly->push_back(3);
-	frame_geometry->addPrimitiveSet(poly);
-	*/
-	DrawElementsUShort *poly = new DrawElementsUShort(PrimitiveSet::TRIANGLE_STRIP, 0);
-	poly->push_back(0);
-	poly->push_back(3);
-	poly->push_back(1);
-	poly->push_back(2);
-	frame_geometry->addPrimitiveSet(poly);
+		/////////////////////////
+		//border vertices
+		/*
+		vertices = new Vec3Array(5);
+		(*vertices)[0] = Vec3(0, -ylim, zpos);
+		(*vertices)[1] = Vec3(width * xstep, -ylim+xstep, zpos);
+		(*vertices)[2] = Vec3(width * xstep, ylim-xstep, zpos);
+		(*vertices)[3] = Vec3(0, ylim, zpos);
+		(*vertices)[4] = Vec3(0, -ylim, zpos);
+		border_geometry->setVertexArray(vertices);
+		*/
+		//border vertices for triangle strip
+		vertices = new Vec3Array(8);
+		(*vertices)[0] = Vec3(0, -ylim, zpos);
+		(*vertices)[1] = Vec3(width * xstep, -ylim, zpos);
+		(*vertices)[2] = Vec3(width * xstep, ylim, zpos);
+		(*vertices)[3] = Vec3(0, ylim, zpos);
+		(*vertices)[4] = Vec3(0-xstep*afac, -ylim-xstep*afac, zpos);
+		(*vertices)[5] = Vec3(width * xstep+xstep*afac, -ylim-xstep*afac, zpos);
+		(*vertices)[6] = Vec3(width * xstep+xstep*afac, ylim+xstep*afac, zpos);
+		(*vertices)[7] = Vec3(0-xstep*afac, ylim+xstep*afac, zpos);
+		border_geometry->setVertexArray(vertices);
+		/*
+		line_p = new DrawElementsUInt(PrimitiveSet::LINES, 8);
+		for(i=0; i<4; i++) {
+			(*line_p)[2*i] = i;
+			(*line_p)[2*i+1] = i+1;
+		}
+		border_geometry->addPrimitiveSet(line_p); // CF, bounding box temporarily disabled
+		*/
+		line_p = new DrawElementsUShort(PrimitiveSet::TRIANGLE_STRIP, 0);
+		line_p->push_back(0);
+		line_p->push_back(4);
+		line_p->push_back(1);
+		line_p->push_back(5);
+		line_p->push_back(2);
+		line_p->push_back(6);
+		line_p->push_back(3);
+		line_p->push_back(7);
+		line_p->push_back(0);
+		line_p->push_back(4);
+		border_geometry->addPrimitiveSet(line_p); // CF, bounding box temporarily disabled
 
-	/////////////////////////
-	//border vertices
-	/*
-	vertices = new Vec3Array(5);
-	(*vertices)[0] = Vec3(0, -ylim, zpos);
-	(*vertices)[1] = Vec3(width * xstep, -ylim+xstep, zpos);
-	(*vertices)[2] = Vec3(width * xstep, ylim-xstep, zpos);
-	(*vertices)[3] = Vec3(0, ylim, zpos);
-	(*vertices)[4] = Vec3(0, -ylim, zpos);
-	border_geometry->setVertexArray(vertices);
-	*/
-	//border vertices for triangle strip
-	vertices = new Vec3Array(8);
-	(*vertices)[0] = Vec3(0, -ylim, zpos);
-	(*vertices)[1] = Vec3(width * xstep, -ylim, zpos);
-	(*vertices)[2] = Vec3(width * xstep, ylim, zpos);
-	(*vertices)[3] = Vec3(0, ylim, zpos);
-	(*vertices)[4] = Vec3(0-xstep*afac, -ylim-xstep*afac, zpos);
-	(*vertices)[5] = Vec3(width * xstep+xstep*afac, -ylim-xstep*afac, zpos);
-	(*vertices)[6] = Vec3(width * xstep+xstep*afac, ylim+xstep*afac, zpos);
-	(*vertices)[7] = Vec3(0-xstep*afac, ylim+xstep*afac, zpos);
-	border_geometry->setVertexArray(vertices);
-	/*
-	line_p = new DrawElementsUInt(PrimitiveSet::LINES, 8);
-	for(i=0; i<4; i++) {
-		(*line_p)[2*i] = i;
-		(*line_p)[2*i+1] = i+1;
-	}
-	border_geometry->addPrimitiveSet(line_p); // CF, bounding box temporarily disabled
-	*/
-	line_p = new DrawElementsUShort(PrimitiveSet::TRIANGLE_STRIP, 0);
-	line_p->push_back(0);
-	line_p->push_back(4);
-	line_p->push_back(1);
-	line_p->push_back(5);
-	line_p->push_back(2);
-	line_p->push_back(6);
-	line_p->push_back(3);
-	line_p->push_back(7);
-	line_p->push_back(0);
-	line_p->push_back(4);
-	border_geometry->addPrimitiveSet(line_p); // CF, bounding box temporarily disabled
+		/////////////////////////
+		//axis vertices
+		vertices = new Vec3Array(4);
+		(*vertices)[0] = Vec3(0, 0-xstep*afac/2.0, zpos);
+		(*vertices)[1] = Vec3(width * xstep, 0-xstep*afac/2.0, zpos);
+		(*vertices)[2] = Vec3(width * xstep, 0+xstep*afac/2.0, zpos);
+		(*vertices)[3] = Vec3(0, 0+xstep*afac/2.0, zpos);
+		axis_geometry->setVertexArray(vertices);
+		line_p = new DrawElementsUShort(PrimitiveSet::TRIANGLE_STRIP, 0);
+		line_p->push_back(0);
+		line_p->push_back(3);
+		line_p->push_back(1);
+		line_p->push_back(2);
+		axis_geometry->addPrimitiveSet(line_p); // CF, bounding box temporarily disabled
 
-	/////////////////////////
-	//axis vertices
-	vertices = new Vec3Array(4);
-	(*vertices)[0] = Vec3(0, 0-xstep*afac/2.0, zpos);
-	(*vertices)[1] = Vec3(width * xstep, 0-xstep*afac/2.0, zpos);
-	(*vertices)[2] = Vec3(width * xstep, 0+xstep*afac/2.0, zpos);
-	(*vertices)[3] = Vec3(0, 0+xstep*afac/2.0, zpos);
-	axis_geometry->setVertexArray(vertices);
-	line_p = new DrawElementsUShort(PrimitiveSet::TRIANGLE_STRIP, 0);
-	line_p->push_back(0);
-	line_p->push_back(3);
-	line_p->push_back(1);
-	line_p->push_back(2);
-	axis_geometry->addPrimitiveSet(line_p); // CF, bounding box temporarily disabled
+		/////////////////////////
 
-	/////////////////////////
+		Vec4 color(0.9f, 0.9f, 0.9f, 0.9f);
+		osg::ref_ptr<osg::Vec4Array> colors = new Vec4Array;
+		colors->push_back(color);
 
-	Vec4 color(0.9f, 0.9f, 0.9f, 0.9f);
-	osg::ref_ptr<osg::Vec4Array> colors = new Vec4Array;
-	colors->push_back(color);
+		samples_geometry->setColorArray(colors);
+		samples_geometry->setColorBinding(Geometry::BIND_OVERALL);
+		border_geometry->setColorArray(colors);
+		border_geometry->setColorBinding(Geometry::BIND_OVERALL);
+		axis_geometry->setColorArray(colors);
+		axis_geometry->setColorBinding(Geometry::BIND_OVERALL);
+		// osg::Geometry::BIND_PER_VERTEX
 
-	samples_geometry->setColorArray(colors);
-	samples_geometry->setColorBinding(Geometry::BIND_OVERALL);
-	border_geometry->setColorArray(colors);
-	border_geometry->setColorBinding(Geometry::BIND_OVERALL);
-	axis_geometry->setColorArray(colors);
-	axis_geometry->setColorBinding(Geometry::BIND_OVERALL);
-	// osg::Geometry::BIND_PER_VERTEX
+		colors = new Vec4Array(1);
+		(*colors)[0] = Vec4(0.0, 0.0, 0.0, 0.3); //0.3);
+		frame_geometry->setColorArray(colors);
+		frame_geometry->setColorBinding(Geometry::BIND_OVERALL);
 
-	colors = new Vec4Array(1);
-	(*colors)[0] = Vec4(0.0, 0.0, 0.0, 0.3); //0.3);
-	frame_geometry->setColorArray(colors);
-	frame_geometry->setColorBinding(Geometry::BIND_OVERALL);
+		state = waveform_geode->getOrCreateStateSet();
+		state->setMode(GL_BLEND, StateAttribute::ON);
+		state->setMode(GL_NORMALIZE, osg::StateAttribute::ON);
+	#if defined(APPLE_IOS)
+		state->setMode(GL_LIGHTING, osg::StateAttribute::PROTECTED | osg::StateAttribute::OFF );
+	#else
+		state->setMode(GL_LIGHTING, osg::StateAttribute::ON );
+		state->setMode(GL_LINE_SMOOTH, StateAttribute::ON); //CF not supported by OpenGL ES 2...
+	#endif
+		//state->setAttribute(new LineWidth(1.0));
 
-	state = waveform_geode->getOrCreateStateSet();
-	state->setMode(GL_BLEND, StateAttribute::ON);
-	state->setMode(GL_NORMALIZE, osg::StateAttribute::ON);
-#if defined(APPLE_IOS)
-	state->setMode(GL_LIGHTING, osg::StateAttribute::PROTECTED | osg::StateAttribute::OFF );
-#else
-	state->setMode(GL_LIGHTING, osg::StateAttribute::ON );
-	state->setMode(GL_LINE_SMOOTH, StateAttribute::ON); //CF not supported by OpenGL ES 2...
-#endif
-	//state->setAttribute(new LineWidth(1.0));
+		waveform_geode->addDrawable(samples_geometry);
+		waveform_geode->addDrawable(border_geometry);
+		waveform_geode->addDrawable(axis_geometry);
+		waveform_geode->addDrawable(frame_geometry);
 
-	waveform_geode->addDrawable(samples_geometry);
-	waveform_geode->addDrawable(border_geometry);
-	waveform_geode->addDrawable(axis_geometry);
-	waveform_geode->addDrawable(frame_geometry);
-
-	waveform_geode->setUserData(new ACRefId(node_index));
-	//ref_ptr//samples_geometry->ref();
-	//ref_ptr//frame_geometry->ref();
-	//ref_ptr//border_geometry->ref();
-	//ref_ptr//axis_geometry->ref();
-	//ref_ptr//waveform_geode->ref();
+		waveform_geode->setUserData(new ACRefId(node_index));
+		//ref_ptr//samples_geometry->ref();
+		//ref_ptr//frame_geometry->ref();
+		//ref_ptr//border_geometry->ref();
+		//ref_ptr//axis_geometry->ref();
+		//ref_ptr//waveform_geode->ref();
+	}	
 }
 
 void ACOsgAudioRenderer::metadataGeode() {
@@ -303,11 +310,12 @@ void ACOsgAudioRenderer::metadataGeode() {
 
 
 	// CF: temporary workaround as the ACUserLog tree and the ACLoopAttributes vector in ACMediaBrowser are not sync'd
-	int media_index = node_index; // or media_cycle->getBrowser()->getMediaNode(node_index).getMediaId();
-	if (media_cycle->getBrowser()->getMode() == AC_MODE_NEIGHBORS)
-		media_index = media_cycle->getBrowser()->getUserLog()->getMediaIdFromNodeId(node_index);
+	//int media_index = node_index; // or media_cycle->getBrowser()->getMediaNode(node_index).getMediaId();
+	
+	//if (media_cycle->getBrowser()->getMode() == AC_MODE_NEIGHBORS)
+	//	media_index = media_cycle->getBrowser()->getUserLog()->getMediaIdFromNodeId(node_index);
 
-	ACAudio* media = (ACAudio*)(media_cycle->getLibrary()->getMedia(media_index));
+	//ACAudio* media = (ACAudio*)(media_cycle->getLibrary()->getMedia(media_index));
 	std::stringstream content;
 	content << fs::basename(media->getFileName());
 	if (media->getParentId()>-1)// in case of segments
@@ -464,7 +472,8 @@ void ACOsgAudioRenderer::prepareNodes() {
 
 	//waveformGeode();
 	//curserGeode();
-	if  (media_cycle->getMediaNode(node_index).isDisplayed()){
+	//if  (media_cycle->getMediaNode(node_index).isDisplayed()){
+	if (media && media_cycle->getNodeFromMedia(media).isDisplayed()){
 		entryGeode();
 		media_node->addChild(entry_geode);
 	}
@@ -558,10 +567,15 @@ void ACOsgAudioRenderer::updateNodes(double ratio) {
 				// curserT =  Matrix::scale(0.5/zoom,0.5/zoom,0.5/zoom) * curserT;
 				#ifdef AUTO_TRANSFORM
 					//curser_transform->setPosition(Vec3(attribute.getCursor() * xstep, 0.0, 0.0));
-					curser_transform->setPosition(Vec3((float) attribute.getCurrentFrame() / (float)(((ACAudio*) media_cycle->getLibrary()->getMedia(media_index) )->getNFrames()) * media_cycle->getThumbnailWidth(media_index) * xstep, 0.0, 0.0));
+					
+					//curser_transform->setPosition(Vec3((float) attribute.getCurrentFrame() / (float)(((ACAudio*) media_cycle->getLibrary()->getMedia(media_index) )->getNFrames()) * media_cycle->getThumbnailWidth(media_index) * xstep, 0.0, 0.0));
+					curser_transform->setPosition(Vec3((float) attribute.getCurrentFrame() / (float)(((ACAudio*) media )->getNFrames()) * media->getThumbnailWidth() * xstep, 0.0, 0.0));
 				#else
 					//curserT.makeTranslate(Vec3(attribute.getCursor() * xstep, 0.0, 0.0));
-					curserT.makeTranslate(Vec3((float) attribute.getCurrentFrame() / (float)(((ACAudio*) media_cycle->getLibrary()->getMedia(media_index) )->getNFrames()) * media_cycle->getThumbnailWidth(media_index) * xstep, 0.0, 0.0));
+					
+					//curserT.makeTranslate(Vec3((float) attribute.getCurrentFrame() / (float)(((ACAudio*) media_cycle->getLibrary()->getMedia(media_index) )->getNFrames()) * media_cycle->getThumbnailWidth(media_index) * xstep, 0.0, 0.0));
+					curserT.makeTranslate(Vec3((float) attribute.getCurrentFrame() / (float)(((ACAudio*) media )->getNFrames()) * media->getThumbnailWidth() * xstep, 0.0, 0.0));
+				
 					curser_transform->setMatrix(curserT);
 				#endif
 

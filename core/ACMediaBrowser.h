@@ -202,6 +202,7 @@ public:
 	int getReferenceNode(){return mReferenceNode;}
 	const ACMediaNodes	&getLoopAttributes() const { return mLoopAttributes; } 	// XS 100310 is this still necessary ? const ?
 	ACMediaNode &getMediaNode(int i) ; // not const because accesors to MediaNode can modify it
+	ACMediaNode &getNodeFromMedia(ACMedia* _media) ; // not const because accesors to MediaNode can modify it
 	void setNodeNextPosition(int loop_id, ACPoint p);
 	// XS TODO : displayed vs active
 	void setLoopIsDisplayed(int loop_id, bool iIsDisplayed) {this->getMediaNode(loop_id).setDisplayed(iIsDisplayed);}

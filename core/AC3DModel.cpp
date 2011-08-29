@@ -83,7 +83,7 @@ bool AC3DModel::extractData(string fname) {
 	center[0] = bb.center().x(); center[1] = bb.center().y(); center[2] = bb.center().z();
 	extent[0] = ext.x(); extent[1] = ext.y(); extent[2] = ext.z();
 		
-	//return model_data;
+	return true;
 }
 
 void AC3DModel::deleteData(){

@@ -1,11 +1,11 @@
 /*
- *  ACOsgTrackControlsRenderer.cpp
+ *  ACOsgMediaDocumentRenderer.h
  *  MediaCycle
  *
  *  @author Christian Frisson
- *  @date 17/11/10
+ *  @date 29/06/11
  *
- *  @copyright (c) 2010 – UMONS - Numediart
+ *  @copyright (c) 2011 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
  *  licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -33,35 +33,30 @@
  *
  */
 
-#include "ACOsgTrackControlsRenderer.h"
-using namespace osg;
+#ifndef __ACOSG_MULTIMEDIA_RENDERER_H__
+#define __ACOSG_MULTIMEDIA_RENDERER_H__
 
-ACOsgTrackControlsRenderer::ACOsgTrackControlsRenderer()
-: track_index(-1),media_index(-1),media_from_lib(true),media_changed(false)
-{
-	track_node = new MatrixTransform();
-}
+#if defined (SUPPORT_MULTIMEDIA) 
 
-void ACOsgTrackControlsRenderer::updateMedia(ACMedia* _media)
-{
-	media = _media;
-	media_index = -1;
-	media_from_lib = false;
-	media_changed = true;
-}
+#include "ACOsgMediaRenderer.h"
+#include <map>
 
-/*void ACOsgTrackControlsRenderer::updateMedia(int _media_index)
-{
-	media = media_cycle->getLibrary()->getMedia(_media_index);
-	media_index = _media_index;
-	media_from_lib = true;
-	media_changed = true;
-}*/
+typedef std::vector<ACOsgMediaRenderer*> ACOsgMediaRenderers;
 
-void ACOsgTrackControlsRenderer::clearMedia()
-{
-	media = 0;
-	media_index = -1;
-	media_from_lib = true;
-	media_changed = true;
-}
+class ACOsgMediaDocumentRenderer : public ACOsgMediaRenderer {
+	
+protected:
+	ACOsgMediaRenderers media_renderers;
+	osg::ref_ptr<osg::Geode> entry_geode;
+	
+	void entryGeode();	
+public:
+	ACOsgMediaDocumentRenderer();
+	~ACOsgMediaDocumentRenderer();
+	void prepareNodes();
+	void updateNodes(double ratio=0.0);
+};
+
+#endif //defined (SUPPORT_MULTIMEDIA) 
+
+#endif

@@ -75,6 +75,9 @@ bool ACTextData::readData(std::string _fname){
 		cerr << "<ACMediaData::readTextData> file can not be read !" << endl;
 		return false;
 	}
+	else {
+		cout << (*text_ptr)<<"\n";
+	}
 	label= labelFileRead(_fname);
 	cout << label<<"\n";
 //	cout << (*text_ptr)<<"\n";

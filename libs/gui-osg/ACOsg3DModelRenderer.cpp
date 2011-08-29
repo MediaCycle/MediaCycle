@@ -179,14 +179,15 @@ void ACOsg3DModelRenderer::prepareNodes() {
 			acti_transform->addChild(norm_transform);
 			media_node->addChild(acti_transform);
 			
-			prev_media_index = media_index;
+			//prev_media_index = media_index;
 		}
 	}
 }
 
 void ACOsg3DModelRenderer::updateNodes(double ratio) {
 		
-	if ( media_index!=prev_media_index ) {
+	//if ( media_index!=prev_media_index ) {
+	if ( media_changed ) {
 		modelGeode();
 		borderGeode();
 		normTransform();
@@ -202,7 +203,8 @@ void ACOsg3DModelRenderer::updateNodes(double ratio) {
 		acti_transform->addChild(norm_transform);
 		media_node->addChild(acti_transform);
 		
-		prev_media_index = media_index;
+		//prev_media_index = media_index;
+		media_changed = false;
 	}
 	
 	if( media_cycle_navigation_level >=  media_cycle_global_navigation_level ) {

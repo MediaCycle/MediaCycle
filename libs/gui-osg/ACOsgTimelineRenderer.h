@@ -97,7 +97,8 @@ public:
 	#endif //defined (SUPPORT_AUDIO)
 	osg::ref_ptr<osg::Group> getShapes() 	{ return group; };
 	ACOsgTrackRenderer* getTrack(int number){if ( (number>=0) && (number<track_renderer.size()) ) return track_renderer[number];}
-	bool addTrack(int media_index);
+	//bool addTrack(int media_index);
+	bool addTrack(ACMedia* _media);
 	int getNumberOfTracks(){return track_renderer.size();}
 
 	void prepareTracks(int start=0);

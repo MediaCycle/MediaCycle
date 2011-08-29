@@ -87,216 +87,226 @@ ACOsgImageRenderer::~ACOsgImageRenderer() {
 }
 
 void ACOsgImageRenderer::imageGeode(bool flip, float sizemul, float zoomin) {
-	ACMediaType media_type = media_cycle->getLibrary()->getMedia(media_index)->getType();
-	if (media_type == MEDIA_TYPE_VIDEO)
-		flip=true;
-	int i;
-	
-	double xstep = 0.0005;
-	
-	float zpos = 0.02;
-	double ylim = 0.025, xlim = 0.025;
-	double imagex, imagey;
-	
-	double imagesurf;
-	
-	ylim *=sizemul;
-	xlim *=sizemul;
-	
-	int width, height;
-	//IplImage* thumbnail;
-	//osg::ref_ptr<osg::Image> thumbnail;
-	std::string thumbnail_filename;
-	
-	StateSet *state;
-	
-	Vec3Array* vertices;
-	osg::ref_ptr<DrawElementsUInt> line_p;
-	Vec2Array* texcoord;
-	
-	osg::ref_ptr<Geometry> image_geometry;
-	osg::ref_ptr<Geometry> border_geometry;
-	Texture2D *image_texture;
-		
-	// CF: temporary workaround as the ACUserLog tree and the ACLoopAttributes vector in ACMediaBrowser are not sync'd 
-	int media_index = node_index; // or media_cycle->getBrowser()->getMediaNode(node_index).getMediaId(); 
-	if (media_cycle->getBrowser()->getMode() == AC_MODE_NEIGHBORS)
-		media_index = media_cycle->getBrowser()->getUserLog()->getMediaIdFromNodeId(node_index);	
-	
-	if (media_index<0)
-		media_index = 0;
-	
-	width = media_cycle->getThumbnailWidth(media_index);//CF instead of node_index
-	height = media_cycle->getThumbnailHeight(media_index);//CF instead of node_index
-	//std::cout << "Geode with (thumbnail) width " <<  width << " and height " << height << std::endl;
-	
-	image_transform = new MatrixTransform();
-	
-	image_geode = new Geode();
-	image_geometry = new Geometry();	
-
-	zpos = zpos - 0.00001 * node_index;
-	
-	// image vertices
-	float scale;
-	imagesurf = xlim * ylim;
-	scale = sqrt ((float)imagesurf / (width*height));
-	imagex = scale * width;
-	imagey = scale * height;
-	vertices = new Vec3Array(4);
-	(*vertices)[0] = Vec3(-imagex, -imagey, zpos);
-	(*vertices)[1] = Vec3(imagex, -imagey, zpos);
-	(*vertices)[2] = Vec3(imagex, imagey, zpos);
-	(*vertices)[3] = Vec3(-imagex, imagey, zpos);
-	image_geometry->setVertexArray(vertices);
-	
-	// Primitive Set
-	osg::ref_ptr<DrawElementsUInt> poly = new DrawElementsUInt(PrimitiveSet::QUADS, 4);
-	poly->push_back(0);
-	poly->push_back(1);
-	poly->push_back(2);
-	poly->push_back(3);
-	image_geometry->addPrimitiveSet(poly);
-	
-	// State Set
-	state = image_geode->getOrCreateStateSet();
-	state->setMode(GL_LIGHTING, osg::StateAttribute::PROTECTED | osg::StateAttribute::OFF );
-	state->setMode(GL_BLEND, StateAttribute::ON);
-	state->setMode(GL_LINE_SMOOTH, StateAttribute::ON);
-	//state->setRenderingHint(osg::StateSet::TRANSPARENT_BIN); //CF from OSG's examples/osgmovie.cpp, doesn't solve the transparent first frame for video geodes
-	
-	// Texture Coordinates
-	texcoord = new Vec2Array;
-	
-// XS TODO!!
-//http://lists.openscenegraph.org/pipermail/osg-users-openscenegraph.org/2009-August/032147.html
-//	other ways of flipping:	
-//	* use osg::Image's flipVertical()
-//	* just flip the texture coordinates
-	
-	
-	float a = (1.0-(1.0/zoomin)) / 2.0;
-	float b = 1.0-a;
-	texcoord->push_back(osg::Vec2(a, flip ? b : a));
-	texcoord->push_back(osg::Vec2(b, flip ? b : a));
-	texcoord->push_back(osg::Vec2(b, flip ? a : b));
-	texcoord->push_back(osg::Vec2(a, flip ? a : b));
-	image_geometry->setTexCoordArray(0, texcoord);	
-	
-	// Texture State (image)
-	
 	//ACMediaType media_type = media_cycle->getLibrary()->getMedia(media_index)->getType();
-	if (media_type == MEDIA_TYPE_IMAGE)
-	{	
-		image_texture = ((ACImage*)(media_cycle->getLibrary()->getMedia(media_index)))->getTexture();
-	}
-	else if (media_type == MEDIA_TYPE_VIDEO)
-	{
-		#ifdef SUPPORT_VIDEO
-		image_texture = ((ACVideo*)(media_cycle->getLibrary()->getMedia(media_index)))->getTexture();
-		#endif//SUPPORT_VIDEO
-	}
-	image_texture->setResizeNonPowerOfTwoHint(false); 
-	
-	// XS TODO add this line?
-	// http://groups.google.com/group/osg-users/browse_thread/thread/f623b62f62e39473?pli=1
-	//image_texture->setUnRefImageDataAfterApply(true);
-	state = image_geometry->getOrCreateStateSet();
-	state->setTextureAttribute(0, image_texture);
-	state->setTextureMode(0, GL_TEXTURE_2D, osg::StateAttribute::ON);
-	
-	image_geometry->setColorArray(colors);
-	image_geometry->setColorBinding(Geometry::BIND_OVERALL);
-	
-	image_geode->addDrawable(image_geometry);
-	
-	image_transform->addChild(image_geode);
-	
-#ifdef IMAGE_BORDER
-	/*
-	//CF alternate version
-	state->setRenderingHint(osg::StateSet::TRANSPARENT_BIN); //CF from OSG's examples/osgmovie.cpp, doesn't solve the transparent first frame for video geodes
-	state->setMode(GL_BLEND,osg::StateAttribute::ON);
-	
-	osg::Vec3Array* normals = new osg::Vec3Array(1);
-    (*normals)[0].set(-1.0f,0.0f,0.0f);
-    image_geometry->setNormalArray(normals);
-    image_geometry->setNormalBinding(osg::Geometry::BIND_OVERALL);
-	
-	image_texture->setDataVariance(osg::Object::DYNAMIC); // protect from being optimized away as static state.
-	//image_texture->setBorderColor(osg::Vec4(0.4f, 0.4f, 0.4f, 1.0f));
-	image_texture->setBorderColor(osg::Vec4(1.0f, 0.0f, 0.0f, 1.0f));
-	//image_texture->setBorderWidth(1.5);
-	image_texture->setWrap(osg::Texture2D::WRAP_S,osg::Texture2D::CLAMP_TO_BORDER);
-	image_texture->setWrap(osg::Texture2D::WRAP_T,osg::Texture2D::CLAMP_TO_BORDER);
-	//CF alternate version end
-	*/
-	
-	border_geode = new Geode();
-	border_geometry = new Geometry();	
-	
-	// border vertices
-	vertices = new Vec3Array(5);
-	(*vertices)[0] = Vec3(-imagex-xstep, -imagey-xstep, zpos);
-	(*vertices)[1] = Vec3(imagex+xstep, -imagey-xstep, zpos);
-	(*vertices)[2] = Vec3(imagex+xstep, imagey+xstep, zpos);
-	(*vertices)[3] = Vec3(-imagex-xstep, imagey+xstep, zpos);
-	(*vertices)[4] = Vec3(-imagex-xstep, -imagey-xstep, zpos);
-	border_geometry->setVertexArray(vertices);
-	
-	line_p = new DrawElementsUInt(PrimitiveSet::LINES, 8);	
-	for(i=0; i<4; i++) {
-		(*line_p)[2*i] = i;
-		(*line_p)[2*i+1] = i+1;
-	}
-	border_geometry->addPrimitiveSet(line_p);
-	
-	border_geometry->setColorArray(colors3);// XS was : colors2, but (0.4f, 0.4f, 0.4f, 1.0f)
-	border_geometry->setColorBinding(Geometry::BIND_OVERALL);
-	state = border_geometry->getOrCreateStateSet();
-	state->setAttribute(new LineWidth(2.0));
-	
-	state = border_geode->getOrCreateStateSet();
-	state->setMode(GL_LIGHTING, osg::StateAttribute::PROTECTED | osg::StateAttribute::OFF );
-	state->setMode(GL_BLEND, StateAttribute::ON);
-	state->setMode(GL_LINE_SMOOTH, StateAttribute::ON);
-	
-	border_geode->addDrawable(border_geometry);
-	
-	image_transform->addChild(border_geode);
-	
-	//(*colors2)[0] = Vec4(1.0f, 1.0f, 1.0f, 0.5f);
-#endif	
-	
-	//sprintf(name, "some audio element");
-	image_transform->setUserData(new ACRefId(node_index));
-	//curser_transform->setName(name);
-	//ref_ptr//image_transform->ref();
-	//sprintf(name, "some audio element");
-	image_geode->setUserData(new ACRefId(node_index));
-	//waveform_geode->setName(name);
-#ifdef IMAGE_BORDER	
-	//CF no need for alternate version
-	//ref_ptr//image_geode->ref();	
-	//ref_ptr//border_geode->ref();
-#endif	
+	if(media){
+		ACMediaType media_type = media->getType();
+		if (media_type == MEDIA_TYPE_VIDEO)
+			flip=true;
+		int i;
+		
+		double xstep = 0.0005;
+		
+		float zpos = 0.02;
+		double ylim = 0.025, xlim = 0.025;
+		double imagex, imagey;
+		
+		double imagesurf;
+		
+		ylim *=sizemul;
+		xlim *=sizemul;
+		
+		int width, height;
+		//IplImage* thumbnail;
+		//osg::ref_ptr<osg::Image> thumbnail;
+		std::string thumbnail_filename;
+		
+		StateSet *state;
+		
+		Vec3Array* vertices;
+		osg::ref_ptr<DrawElementsUInt> line_p;
+		Vec2Array* texcoord;
+		
+		osg::ref_ptr<Geometry> image_geometry;
+		osg::ref_ptr<Geometry> border_geometry;
+		Texture2D *image_texture;
+			
+		// CF: temporary workaround as the ACUserLog tree and the ACLoopAttributes vector in ACMediaBrowser are not sync'd 
+		/*int media_index = node_index; // or media_cycle->getBrowser()->getMediaNode(node_index).getMediaId(); 
+		if (media_cycle->getBrowser()->getMode() == AC_MODE_NEIGHBORS)
+			media_index = media_cycle->getBrowser()->getUserLog()->getMediaIdFromNodeId(node_index);	
+		
+		if (media_index<0)
+			media_index = 0;*/
+		
+		//width = media_cycle->getThumbnailWidth(media_index);//CF instead of node_index
+		//height = media_cycle->getThumbnailHeight(media_index);//CF instead of node_index
+		width = media->getThumbnailWidth();
+		height = media->getThumbnailHeight();
+
+		//std::cout << "Geode with (thumbnail) width " <<  width << " and height " << height << std::endl;
+		
+		image_transform = new MatrixTransform();
+		
+		image_geode = new Geode();
+		image_geometry = new Geometry();	
+
+		zpos = zpos - 0.00001 * node_index;
+		
+		// image vertices
+		float scale;
+		imagesurf = xlim * ylim;
+		scale = sqrt ((float)imagesurf / (width*height));
+		imagex = scale * width;
+		imagey = scale * height;
+		vertices = new Vec3Array(4);
+		(*vertices)[0] = Vec3(-imagex, -imagey, zpos);
+		(*vertices)[1] = Vec3(imagex, -imagey, zpos);
+		(*vertices)[2] = Vec3(imagex, imagey, zpos);
+		(*vertices)[3] = Vec3(-imagex, imagey, zpos);
+		image_geometry->setVertexArray(vertices);
+		
+		// Primitive Set
+		osg::ref_ptr<DrawElementsUInt> poly = new DrawElementsUInt(PrimitiveSet::QUADS, 4);
+		poly->push_back(0);
+		poly->push_back(1);
+		poly->push_back(2);
+		poly->push_back(3);
+		image_geometry->addPrimitiveSet(poly);
+		
+		// State Set
+		state = image_geode->getOrCreateStateSet();
+		state->setMode(GL_LIGHTING, osg::StateAttribute::PROTECTED | osg::StateAttribute::OFF );
+		state->setMode(GL_BLEND, StateAttribute::ON);
+		state->setMode(GL_LINE_SMOOTH, StateAttribute::ON);
+		//state->setRenderingHint(osg::StateSet::TRANSPARENT_BIN); //CF from OSG's examples/osgmovie.cpp, doesn't solve the transparent first frame for video geodes
+		
+		// Texture Coordinates
+		texcoord = new Vec2Array;
+		
+	// XS TODO!!
+	//http://lists.openscenegraph.org/pipermail/osg-users-openscenegraph.org/2009-August/032147.html
+	//	other ways of flipping:	
+	//	* use osg::Image's flipVertical()
+	//	* just flip the texture coordinates
+		
+		
+		float a = (1.0-(1.0/zoomin)) / 2.0;
+		float b = 1.0-a;
+		texcoord->push_back(osg::Vec2(a, flip ? b : a));
+		texcoord->push_back(osg::Vec2(b, flip ? b : a));
+		texcoord->push_back(osg::Vec2(b, flip ? a : b));
+		texcoord->push_back(osg::Vec2(a, flip ? a : b));
+		image_geometry->setTexCoordArray(0, texcoord);	
+		
+		// Texture State (image)
+		
+		//ACMediaType media_type = media_cycle->getLibrary()->getMedia(media_index)->getType();
+		if (media_type == MEDIA_TYPE_IMAGE)
+		{	
+			//image_texture = ((ACImage*)(media_cycle->getLibrary()->getMedia(media_index)))->getTexture();
+			image_texture = ((ACImage*)media)->getTexture();
+		}
+		else if (media_type == MEDIA_TYPE_VIDEO)
+		{
+			#ifdef SUPPORT_VIDEO
+			//image_texture = ((ACVideo*)(media_cycle->getLibrary()->getMedia(media_index)))->getTexture();
+			image_texture = ((ACVideo*)media)->getTexture();
+			#endif//SUPPORT_VIDEO
+		}
+		image_texture->setResizeNonPowerOfTwoHint(false); 
+		
+		// XS TODO add this line?
+		// http://groups.google.com/group/osg-users/browse_thread/thread/f623b62f62e39473?pli=1
+		//image_texture->setUnRefImageDataAfterApply(true);
+		state = image_geometry->getOrCreateStateSet();
+		state->setTextureAttribute(0, image_texture);
+		state->setTextureMode(0, GL_TEXTURE_2D, osg::StateAttribute::ON);
+		
+		image_geometry->setColorArray(colors);
+		image_geometry->setColorBinding(Geometry::BIND_OVERALL);
+		
+		image_geode->addDrawable(image_geometry);
+		
+		image_transform->addChild(image_geode);
+		
+	#ifdef IMAGE_BORDER
+		/*
+		//CF alternate version
+		state->setRenderingHint(osg::StateSet::TRANSPARENT_BIN); //CF from OSG's examples/osgmovie.cpp, doesn't solve the transparent first frame for video geodes
+		state->setMode(GL_BLEND,osg::StateAttribute::ON);
+		
+		osg::Vec3Array* normals = new osg::Vec3Array(1);
+		(*normals)[0].set(-1.0f,0.0f,0.0f);
+		image_geometry->setNormalArray(normals);
+		image_geometry->setNormalBinding(osg::Geometry::BIND_OVERALL);
+		
+		image_texture->setDataVariance(osg::Object::DYNAMIC); // protect from being optimized away as static state.
+		//image_texture->setBorderColor(osg::Vec4(0.4f, 0.4f, 0.4f, 1.0f));
+		image_texture->setBorderColor(osg::Vec4(1.0f, 0.0f, 0.0f, 1.0f));
+		//image_texture->setBorderWidth(1.5);
+		image_texture->setWrap(osg::Texture2D::WRAP_S,osg::Texture2D::CLAMP_TO_BORDER);
+		image_texture->setWrap(osg::Texture2D::WRAP_T,osg::Texture2D::CLAMP_TO_BORDER);
+		//CF alternate version end
+		*/
+		
+		border_geode = new Geode();
+		border_geometry = new Geometry();	
+		
+		// border vertices
+		vertices = new Vec3Array(5);
+		(*vertices)[0] = Vec3(-imagex-xstep, -imagey-xstep, zpos);
+		(*vertices)[1] = Vec3(imagex+xstep, -imagey-xstep, zpos);
+		(*vertices)[2] = Vec3(imagex+xstep, imagey+xstep, zpos);
+		(*vertices)[3] = Vec3(-imagex-xstep, imagey+xstep, zpos);
+		(*vertices)[4] = Vec3(-imagex-xstep, -imagey-xstep, zpos);
+		border_geometry->setVertexArray(vertices);
+		
+		line_p = new DrawElementsUInt(PrimitiveSet::LINES, 8);	
+		for(i=0; i<4; i++) {
+			(*line_p)[2*i] = i;
+			(*line_p)[2*i+1] = i+1;
+		}
+		border_geometry->addPrimitiveSet(line_p);
+		
+		border_geometry->setColorArray(colors3);// XS was : colors2, but (0.4f, 0.4f, 0.4f, 1.0f)
+		border_geometry->setColorBinding(Geometry::BIND_OVERALL);
+		state = border_geometry->getOrCreateStateSet();
+		state->setAttribute(new LineWidth(2.0));
+		
+		state = border_geode->getOrCreateStateSet();
+		state->setMode(GL_LIGHTING, osg::StateAttribute::PROTECTED | osg::StateAttribute::OFF );
+		state->setMode(GL_BLEND, StateAttribute::ON);
+		state->setMode(GL_LINE_SMOOTH, StateAttribute::ON);
+		
+		border_geode->addDrawable(border_geometry);
+		
+		image_transform->addChild(border_geode);
+		
+		//(*colors2)[0] = Vec4(1.0f, 1.0f, 1.0f, 0.5f);
+	#endif	
+		
+		//sprintf(name, "some audio element");
+		image_transform->setUserData(new ACRefId(node_index));
+		//curser_transform->setName(name);
+		//ref_ptr//image_transform->ref();
+		//sprintf(name, "some audio element");
+		image_geode->setUserData(new ACRefId(node_index));
+		//waveform_geode->setName(name);
+	#ifdef IMAGE_BORDER	
+		//CF no need for alternate version
+		//ref_ptr//image_geode->ref();	
+		//ref_ptr//border_geode->ref();
+	#endif
+	}	
 }
 
 void ACOsgImageRenderer::prepareNodes() {
 	
 	// SD TODO - move this upwards?
-	int media_index = node_index; // or media_cycle->getBrowser()->getMediaNode(node_index).getMediaId(); 
+	/*int media_index = node_index; // or media_cycle->getBrowser()->getMediaNode(node_index).getMediaId(); 
 	if (media_cycle->getBrowser()->getMode() == AC_MODE_NEIGHBORS)
-		media_index = media_cycle->getBrowser()->getUserLog()->getMediaIdFromNodeId(node_index);
+		media_index = media_cycle->getBrowser()->getUserLog()->getMediaIdFromNodeId(node_index);*/
 	
-	if  (media_cycle->getMediaNode(node_index).isDisplayed()) {
+	//if  (media_cycle->getMediaNode(node_index).isDisplayed()) {
+	if (media && media_cycle->getNodeFromMedia(media).isDisplayed()) {
 		if (!image_geode) {
 			imageGeode();
 			media_node->addChild(image_transform);
 		}
 	}
 	
-	prev_media_index = media_index;
+	//prev_media_index = media_index;
+	media_changed = false;
 }
 
 void ACOsgImageRenderer::updateNodes(double ratio) {
@@ -304,24 +314,27 @@ void ACOsgImageRenderer::updateNodes(double ratio) {
 	float x, y, z;
 	float zpos = 0.001;
 	
-	const ACMediaNode &attribute = media_cycle->getMediaNode(node_index);
+	//const ACMediaNode &attribute = media_cycle->getMediaNode(node_index);
+	const ACMediaNode &attribute = media_cycle->getNodeFromMedia(media);
 	
 	const ACPoint &p = attribute.getCurrentPosition(), &p2 = attribute.getNextPosition();
 	double omr = 1.0-ratio;
 	
 	
-	int media_index = node_index; // or media_cycle->getBrowser()->getMediaNode(node_index).getMediaId(); 
+	/*int media_index = node_index; // or media_cycle->getBrowser()->getMediaNode(node_index).getMediaId(); 
 	if (media_cycle->getBrowser()->getMode() == AC_MODE_NEIGHBORS)
-		media_index = media_cycle->getBrowser()->getUserLog()->getMediaIdFromNodeId(node_index);
+		media_index = media_cycle->getBrowser()->getUserLog()->getMediaIdFromNodeId(node_index);*/
 	
-	if (media_index!=prev_media_index) {
+	//if (media_index!=prev_media_index) {
+	if (media_changed) {
 		if(media_node->getNumChildren() == 1) {
 			media_node->removeChild(0, 1);
 		}
 		if (!image_geode)
 			imageGeode();
 		media_node->addChild(image_transform);
-		prev_media_index = media_index;
+		//prev_media_index = media_index;
+		media_changed = false;
 	}
 	
 	unsigned int mask = (unsigned int)-1;

@@ -35,7 +35,7 @@
 
 #include "ACOsgBrowserRenderer.h"
 #if defined (SUPPORT_AUDIO)
-	#include "ACOsgAudioRenderer.h"
+#include "ACOsgAudioRenderer.h"
 #endif //defined (SUPPORT_AUDIO)
 #if defined (SUPPORT_IMAGE)
 #include "ACOsgImageRenderer.h"
@@ -49,6 +49,9 @@
 #if defined (SUPPORT_TEXT)
 #include "ACOsgTextRenderer.h"
 #endif //defined (SUPPORT_TEXT)
+#if defined (SUPPORT_MULTIMEDIA) 
+#include "ACOsgMediaDocumentRenderer.h"
+#endif //defined (SUPPORT_MULTIMEDIA) 
 #include "ACOsgLabelRenderer.h"
 
 #include <osgDB/Registry>
@@ -337,7 +340,10 @@ void ACOsgBrowserRenderer::updateNodes(double ratio) {
 			//node_renderer[i]->setPos(media_cycle_current_pos, media_cycle_next_pos);
 			node_renderer[i]->setNavigation(media_cycle_navigation_level);
 			node_renderer[i]->setActivity(media_cycle_activity);
-			node_renderer[i]->setMediaIndex(media_index);
+			
+			//node_renderer[i]->setMediaIndex(media_index);
+			node_renderer[i]->setMedia(media_cycle->getLibrary()->getMedia(media_index));
+			
 			node_renderer[i]->setFilename(media_cycle_filename);
 			node_renderer[i]->setWaveformType(audio_waveform_type);
 
@@ -581,6 +587,11 @@ bool ACOsgBrowserRenderer::addNodes(int _first, int _last){
 					node_renderer[i] = new ACOsgTextRenderer();
 					#endif //defined (SUPPORT_TEXT)
 					break;
+				case MEDIA_TYPE_MIXED:
+					#if defined (SUPPORT_MULTIMEDIA) 
+					node_renderer[i] = new ACOsgMediaDocumentRenderer();
+					#endif //defined (SUPPORT_MULTIMEDIA) 
+					break;		
 				default:
 					node_renderer[i] = 0;
 					break;
@@ -599,7 +610,10 @@ bool ACOsgBrowserRenderer::addNodes(int _first, int _last){
 				if (media_index<0)
 					media_index = 0;
 				media_cycle_filename = media_cycle->getMediaFileName(media_index);
-				node_renderer[i]->setMediaIndex(media_index);
+				
+				//node_renderer[i]->setMediaIndex(media_index);
+				node_renderer[i]->setMedia(media_cycle->getLibrary()->getMedia(media_index));
+				
 				node_renderer[i]->setFilename(media_cycle_filename);
 
 				// node_renderer[i]->setActivity(0);

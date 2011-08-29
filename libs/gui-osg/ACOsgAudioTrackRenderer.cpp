@@ -107,8 +107,9 @@ void ACOsgAudioTrackRenderer::selectionWaveformGeode() {
 	if (screen_width !=0){
 		// CF: temporary workaround as the ACUserLog tree and the ACLoopAttributes vector in ACMediaBrowser are not sync'd 
 		//int media_index = track_index; // or media_cycle->getBrowser()->getMediaTrack(track_index).getMediaId(); 
-		if (media_from_lib && media_cycle->getBrowser()->getMode() == AC_MODE_NEIGHBORS)
-			media_index = media_cycle->getBrowser()->getUserLog()->getMediaIdFromNodeId(media_index);//CF can selectionWaveformGeode() occur more than once, once media_index is set?
+		
+		//if (media_from_lib && media_cycle->getBrowser()->getMode() == AC_MODE_NEIGHBORS)
+		//	media_index = media_cycle->getBrowser()->getUserLog()->getMediaIdFromNodeId(media_index);//CF can selectionWaveformGeode() occur more than once, once media_index is set?
 
 		//CF std thumbnail, was for AudioGarden
 		/*
@@ -746,8 +747,9 @@ void ACOsgAudioTrackRenderer::playbackWaveformGeode() {
 	if (samples && screen_width !=0){
 		// CF: temporary workaround as the ACUserLog tree and the ACLoopAttributes vector in ACMediaBrowser are not sync'd 
 		//int media_index = track_index; // or media_cycle->getBrowser()->getMediaTrack(track_index).getMediaId(); 
-		if (media_from_lib && media_cycle->getBrowser()->getMode() == AC_MODE_NEIGHBORS)
-			media_index = media_cycle->getBrowser()->getUserLog()->getMediaIdFromNodeId(media_index);//CF can selectionWaveformGeode() occur more than once, once media_index is set?
+		
+		//if (media_from_lib && media_cycle->getBrowser()->getMode() == AC_MODE_NEIGHBORS)
+		//	media_index = media_cycle->getBrowser()->getUserLog()->getMediaIdFromNodeId(media_index);//CF can selectionWaveformGeode() occur more than once, once media_index is set?
 
 		width = screen_width;
 
@@ -1079,11 +1081,13 @@ void ACOsgAudioTrackRenderer::prepareTracks() {
 }
 
 void ACOsgAudioTrackRenderer::updateTracks(double ratio) {
-	if (!manual_selection && media && media_from_lib)
+	if (!manual_selection && media)// && media_from_lib)
 	{
-		if (media_index > -1)
+		//if (media_index > -1)
+		if (media)
 		{
-			const ACMediaNode &attribute = media_cycle->getMediaNode(media_index);
+			//const ACMediaNode &attribute = media_cycle->getMediaNode(media_index);
+			const ACMediaNode &attribute = media_cycle->getNodeFromMedia(media);
 			if ( attribute.getActivity()==1)
 			{
 				float selection_width = selection_end_pos-selection_begin_pos;
@@ -1201,16 +1205,19 @@ void ACOsgAudioTrackRenderer::updateTracks(double ratio) {
 		/*track_node->addChild(selection_zone_geode);
 		track_node->addChild(selection_begin_geode);
 		track_node->addChild(selection_end_geode);*/
-		displayed_media_index = media_index;
+		
+		//displayed_media_index = media_index;
 		media_changed = false;
 	}
 	//CF solve this for media outside lib
 	/*Matrix curserT;
 	if (media_from_lib)
 	{
-		if (media_index > -1)
+		//if (media_index > -1)
+		if(media)
 		{
-			const ACMediaNode &attribute = media_cycle->getMediaNode(media_index);
+			//const ACMediaNode &attribute = media_cycle->getMediaNode(media_index);
+			const ACMediaNode &attribute = media_cycle->getNodeFromMedia(media);
 			if ( attribute.getActivity()==1)
 			{
 				curserT.makeTranslate(Vec3(attribute.getCursor() * xstep/2.0f * screen_width/media->getThumbnailWidth(), 0.0f, 0.0f));			// curserT =  Matrix::scale(0.5/zoom,0.5/zoom,0.5/zoom) * curserT;

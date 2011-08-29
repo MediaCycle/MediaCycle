@@ -182,8 +182,6 @@ bool ACMediaDocument::extractData(string fname){
 	return false;
 }
 
-
-
 int ACMediaDocument::setActiveSubMedia(string mediaName){
 	if (mediaContainer.find(mediaName)==mediaContainer.end()){
 		return 0;

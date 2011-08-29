@@ -569,6 +569,7 @@ void MediaCycle::dumpPluginsList(){this->pluginManager->dump();}
 
 // == Media
 ACMediaNode& MediaCycle::getMediaNode(int i) { return (mediaBrowser->getMediaNode(i)); }
+ACMediaNode& MediaCycle::getNodeFromMedia(ACMedia* _media) { return (mediaBrowser->getNodeFromMedia(_media)); }
 string MediaCycle::getMediaFileName(int i) { return mediaLibrary->getMedia(i)->getFileName(); }
 ACMediaType MediaCycle::getMediaType(int i) { return mediaLibrary->getMedia(i)->getType(); }
 void MediaCycle::setMediaType(ACMediaType mt) {mediaLibrary->setMediaType(mt); }
@@ -709,7 +710,7 @@ vector<int>* MediaCycle::getNeedsActivityUpdateMedia() {
 // == callbacks
 
 void MediaCycle::pickedObjectCallback(int _nodeId) {
-	printf("PICKED\n");	
+	printf("PICKED node id %d\n",_nodeId);
 	int nodeId = _nodeId;
 	if(nodeId < 0) {
 		// clicked close to a node

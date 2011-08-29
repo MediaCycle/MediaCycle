@@ -61,10 +61,12 @@ void ACOsgTimelineRenderer::clean(){
 	this->removeTracks();
 }
 
-bool ACOsgTimelineRenderer::addTrack(int media_index){
+//bool ACOsgTimelineRenderer::addTrack(int media_index){
+bool ACOsgTimelineRenderer::addTrack(ACMedia* _media){
 	int n = track_renderer.size();
-	ACMediaType media_type = media_cycle->getLibrary()->getMedia(media_index)->getType();
-
+	//ACMediaType media_type = media_cycle->getLibrary()->getMedia(media_index)->getType();
+	ACMediaType media_type = _media->getType();
+	
 	switch (media_type) {
 		case MEDIA_TYPE_AUDIO:
 			#if defined (SUPPORT_AUDIO)
@@ -76,7 +78,8 @@ bool ACOsgTimelineRenderer::addTrack(int media_index){
 				track_renderer[n]->setMediaCycle(media_cycle);
 				track_renderer[n]->setAudioEngine(audio_engine);
 				track_renderer[n]->setTrackIndex(n);
-				track_renderer[n]->updateMedia(media_index);
+				//track_renderer[n]->updateMedia(media_index);
+				track_renderer[n]->updateMedia(_media);
 				track_renderer[n]->prepareTracks();
 				track_group->addChild(track_renderer[n]->getTrack());
 			}
@@ -91,7 +94,8 @@ bool ACOsgTimelineRenderer::addTrack(int media_index){
 			if (track_renderer[n] != 0) {
 				track_renderer[n]->setMediaCycle(media_cycle);
 				track_renderer[n]->setTrackIndex(n);
-				track_renderer[n]->updateMedia(media_index);
+				//track_renderer[n]->updateMedia(media_index);
+				track_renderer[n]->updateMedia(_media);
 				track_renderer[n]->prepareTracks();
 				track_group->addChild(track_renderer[n]->getTrack());
 			}

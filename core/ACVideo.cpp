@@ -182,7 +182,7 @@ bool ACVideo::extractData(string _fname){
 	if (fps != 0) end = nframes * 1.0/fps;
 	else end = nframes;
 	// XS TODO : do this here ??
-	computeThumbnail(16, 16);
+	return computeThumbnail(16, 16);
 }
 
 void ACVideo::deleteData(){

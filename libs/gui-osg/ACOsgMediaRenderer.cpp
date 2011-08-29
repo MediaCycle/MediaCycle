@@ -38,6 +38,8 @@ using namespace osg;
 
 ACOsgMediaRenderer::ACOsgMediaRenderer() {
 	media_type = MEDIA_TYPE_NONE;
+	media = 0;
+	media_changed = false;
 	local_group = new Group(); 
 #ifdef AUTO_TRANSFORM
 	media_node = new AutoTransform();
@@ -86,6 +88,7 @@ ACOsgMediaRenderer::ACOsgMediaRenderer() {
 ACOsgMediaRenderer::~ACOsgMediaRenderer() {
 	//ref_ptr//media_node->unref();
 	//ref_ptr//local_group->unref();
+	media = 0;// the core will free media files
 }
 
 void ACOsgMediaRenderer::setDeltaTime(double media_cycle_deltatime) {
@@ -149,8 +152,13 @@ void ACOsgMediaRenderer::setActivity(int media_cycle_activity) {
 	this->media_cycle_activity = media_cycle_activity;
 }
 
-void ACOsgMediaRenderer::setMediaIndex(int media_index) {
+/*void ACOsgMediaRenderer::setMediaIndex(int media_index) {
 	this->media_index = media_index;
+}*/
+
+void ACOsgMediaRenderer::setMedia(ACMedia* _media) {
+	this->media = _media;
+	media_changed = true;
 }
 
 void ACOsgMediaRenderer::setFilename(std::string media_cycle_filename) {

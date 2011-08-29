@@ -75,14 +75,14 @@ void ACOsgTrackRenderer::updateMedia(ACMedia* _media)
 	this->initSelection();
 }
 
-void ACOsgTrackRenderer::updateMedia(int _media_index)
+/*void ACOsgTrackRenderer::updateMedia(int _media_index)
 {
 	media = media_cycle->getLibrary()->getMedia(_media_index);
 	media_index = _media_index;
 	media_from_lib = true;
 	media_changed = true;
 	this->initSelection();
-}
+}*/
 
 void ACOsgTrackRenderer::clearMedia()
 {

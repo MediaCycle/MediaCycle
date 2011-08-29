@@ -234,7 +234,7 @@ bool ACPDF::extractData(string _fname){
 	#endif
 	
 	// XS TODO : do this here ??
-	computeThumbnail(16, 16);
+	return computeThumbnail(16, 16);
 }
 
 void ACPDF::deleteData(){

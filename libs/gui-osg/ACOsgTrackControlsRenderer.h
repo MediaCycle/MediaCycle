@@ -72,10 +72,10 @@ public:
 
 	void setMediaCycle(MediaCycle *_media_cycle) { this->media_cycle = _media_cycle; };
 	void setTrackIndex(int _track_index) { this->track_index = _track_index; };
-	void setMediaIndex(int _media_index) { this->media_index = _media_index; };
+	//void setMediaIndex(int _media_index) { this->media_index = _media_index; };
 	int getMediaIndex() { return media_index; }
 	void updateMedia(ACMedia* _media);
-	void updateMedia(int _media_index);
+	//void updateMedia(int _media_index);
 	void clearMedia();
 	ACMedia* getMedia(){return media;}
 	//void setActivity(int _media_activity) { this->media_activity = _media_activity; }

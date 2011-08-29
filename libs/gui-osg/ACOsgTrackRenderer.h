@@ -114,10 +114,10 @@ public:
 	#endif //defined (SUPPORT_AUDIO)
 	//void setRenderer(MediaCycle *_media_cycle) { this->media_cycle = _media_cycle; };
 	void setTrackIndex(int _track_index) { this->track_index = _track_index; };
-	void setMediaIndex(int _media_index) { this->media_index = _media_index; };
+	//void setMediaIndex(int _media_index) { this->media_index = _media_index; };
 	int getMediaIndex() { return media_index; }
 	void updateMedia(ACMedia* _media);
-	void updateMedia(int _media_index);
+	//void updateMedia(int _media_index);
 	void clearMedia();
 	void setScreenWidth(int _screen_width){screen_width = _screen_width;}
 	void updateScreenWidth(int _screen_width);

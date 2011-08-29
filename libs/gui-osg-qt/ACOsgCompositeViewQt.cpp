@@ -392,7 +392,8 @@ void ACOsgCompositeViewQt::keyPressEvent( QKeyEvent* event )
 		case Qt::Key_Space:
 			if ( (media_cycle) && (media_cycle->hasBrowser()) && (timeline_renderer->getTrack(0)!=0) ) {
 				transportdown = 1;
-				media_cycle->getBrowser()->toggleSourceActivity( timeline_renderer->getTrack(0)->getMediaIndex() );
+				//media_cycle->getBrowser()->toggleSourceActivity( timeline_renderer->getTrack(0)->getMediaIndex() );
+				media_cycle->getBrowser()->toggleSourceActivity( timeline_renderer->getTrack(0)->getMedia()->getId() );
 				track_playing = track_playing ? false : true; //CF toggling
 			}
 			break;
@@ -545,7 +546,8 @@ void ACOsgCompositeViewQt::mousePressEvent( QMouseEvent* event )
 					//	track_playing = false;
 					//	}
 					if (timeline_renderer->getNumberOfTracks()==0){
-						this->getTimelineRenderer()->addTrack(loop);
+						//this->getTimelineRenderer()->addTrack(loop);
+						this->getTimelineRenderer()->addTrack(media_cycle->getLibrary()->getMedia(loop));
 					}
 					else
 						this->getTimelineRenderer()->getTrack(0)->updateMedia( loop ); //media_cycle->getLibrary()->getMedia(loop) );
@@ -735,11 +737,15 @@ void ACOsgCompositeViewQt::mouseReleaseEvent( QMouseEvent* event )
 							}
 						*/
 						if (timeline_renderer->getNumberOfTracks()==0){
-							this->getTimelineRenderer()->addTrack(loop);
+							//this->getTimelineRenderer()->addTrack(loop);
+							this->getTimelineRenderer()->addTrack(media_cycle->getLibrary()->getMedia(loop));
 						}
-						else
-							this->getTimelineRenderer()->getTrack(0)->updateMedia( loop ); //media_cycle->getLibrary()->getMedia(loop) );
-						//this->getTimelineControlsRenderer()->getControls(0)->updateMedia( loop ); //media_cycle->getLibrary()->getMedia(loop) );
+						else {
+							//this->getTimelineRenderer()->getTrack(0)->updateMedia( loop ); //media_cycle->getLibrary()->getMedia(loop) );
+							this->getTimelineRenderer()->getTrack(0)->updateMedia(media_cycle->getLibrary()->getMedia(loop));
+						}	
+						
+							//this->getTimelineControlsRenderer()->getControls(0)->updateMedia( loop ); //media_cycle->getLibrary()->getMedia(loop) );
 						media_cycle->setNeedsDisplay(true);
 					//}
 				}

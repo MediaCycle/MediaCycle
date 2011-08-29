@@ -144,6 +144,7 @@ public:
 
 	// == Media
 	ACMediaNode &getMediaNode(int i);
+	ACMediaNode &getNodeFromMedia(ACMedia* _media);
 	std::string getMediaFileName(int i);
 	ACMediaType getMediaType(int i);
 	ACMediaType getMediaType() {return mediaLibrary->getMediaType();}

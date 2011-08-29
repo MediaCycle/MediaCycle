@@ -1,9 +1,9 @@
 /*
- *  ACOsgTextRenderer.cpp
+ *  ACOsgMediaDocumentRenderer.cpp
  *  MediaCycle
  *
- *  @author Christian Frisson and T. Ravet
- *  @date 26/05/2011
+ *  @author Christian Frisson
+ *  @date 29/06/11
  *
  *  @copyright (c) 2011 – UMONS - Numediart
  *  
@@ -33,12 +33,30 @@
  *
  */
 
-#if defined (SUPPORT_TEXT)
+#if defined (SUPPORT_MULTIMEDIA) 
 
+#include "ACOsgMediaDocumentRenderer.h"
+#include "ACMediaDocument.h"
+
+#if defined (SUPPORT_AUDIO)
+#include "ACOsgAudioRenderer.h"
+#endif //defined (SUPPORT_AUDIO)
+#if defined (SUPPORT_IMAGE)
+#include "ACOsgImageRenderer.h"
+#endif //defined (SUPPORT_IMAGE)
+#if defined (SUPPORT_VIDEO)
+#include "ACOsgVideoRenderer.h"
+#endif //defined (SUPPORT_VIDEO)
+#if defined (SUPPORT_3DMODEL)
+#include "ACOsg3DModelRenderer.h"
+#endif //defined (SUPPORT_3DMODEL)
+#if defined (SUPPORT_TEXT)
 #include "ACOsgTextRenderer.h"
-#include <ACText.h>
+#endif //defined (SUPPORT_TEXT)
 
 #include "boost/filesystem.hpp"   // includes all needed Boost.Filesystem declarations
+//#include "boost/filesystem/operations.hpp"
+//#include "boost/filesystem/path.hpp"
 
 #include <sstream>
 
@@ -48,86 +66,31 @@ namespace fs = boost::filesystem;
 
 using namespace osg;
 
-ACOsgTextRenderer::ACOsgTextRenderer() {
-	media_type = MEDIA_TYPE_AUDIO;
-	metadata_geode = 0;
-	metadata = 0;
+ACOsgMediaDocumentRenderer::ACOsgMediaDocumentRenderer() {
 	entry_geode = 0;
 }
 
-ACOsgTextRenderer::~ACOsgTextRenderer() {
+ACOsgMediaDocumentRenderer::~ACOsgMediaDocumentRenderer() {
 	if 	(entry_geode) {
 		entry_geode=0;
-	}
-	if 	(metadata_geode) {
-		metadata_geode=0;
-	}
+	}	
 }
 
-
-void ACOsgTextRenderer::metadataGeode() {
+void ACOsgMediaDocumentRenderer::entryGeode() {
 	
-	osg::Vec4 textColor(0.9f,0.9f,0.9f,1.0f);
-	float textCharacterSize = 80.0f; // 10 pixels ? // broken with OSG v2.9.11??
-	#if OSG_MIN_VERSION_REQUIRED(2,9,11)
-		textCharacterSize = 16.0f;
-	#endif
-	metadata_geode = new Geode();
-
-	metadata = new osgText::Text;
-	//font = osgText::readFontFile("fonts/arial.ttf");
-	//text->setFont( font.get() );
-	metadata->setColor(textColor);
-	metadata->setCharacterSizeMode( osgText::Text::SCREEN_COORDS );
-	metadata->setCharacterSize(textCharacterSize);
-	metadata->setPosition(osg::Vec3(0,0.025,0.04));
-	//	text->setPosition(osg::Vec3(pos.x,pos.y,pos.z));
-	metadata->setLayout(osgText::Text::LEFT_TO_RIGHT);
-	#if OSG_MIN_VERSION_REQUIRED(2,9,11)
-		metadata->setFontResolution(12,12);
-	#else
-		metadata->setFontResolution(64,64);
-	#endif
-	//metadata->setAlignment( osgText::Text::CENTER_CENTER );
-	//metadata->setAxisAlignment( osgText::Text::SCREEN );
-
-	metadata->setDrawMode(osgText::Text::TEXT);// osgText::Text::BOUNDINGBOX, osgText::Text::ALIGNMENT
-
-	// CF: temporary workaround as the ACUserLog tree and the ACLoopAttributes vector in ACMediaBrowser are not sync'd
-	/*int media_index = node_index; // or media_cycle->getBrowser()->getMediaNode(node_index).getMediaId();
-	if (media_cycle->getBrowser()->getMode() == AC_MODE_NEIGHBORS)
-		media_index = media_cycle->getBrowser()->getUserLog()->getMediaIdFromNodeId(node_index);*/
-
-	//string textLabel=media_cycle->getLibrary()->getMedia(media_index)->getLabel();
-	string textLabel=media->getLabel();
-	
-	metadata->setText( textLabel );
-
-	//state = text_geode->getOrCreateStateSet();
-	//state->setMode(GL_LIGHTING, osg::StateAttribute::PROTECTED | osg::StateAttribute::OFF );
-	//state->setMode(GL_BLEND, StateAttribute::ON);
-	//state->setMode(GL_LINE_SMOOTH, StateAttribute::ON);
-
-	//TODO check this .get() (see also ACOsgBrowserRenderer.cpp)
-	//".get()" is necessary for compilation under linux (OSG v2.4)
-	metadata_geode->addDrawable(metadata);
-}
-
-void ACOsgTextRenderer::entryGeode() {
-
 	StateSet *state;
-
+	
 	float localsize = 0.01;
 	localsize *= afac;
-
+	
 	entry_geode = new Geode();
-
+	
 	TessellationHints *hints = new TessellationHints();
 	hints->setDetailRatio(0.0);
-
+	
 	state = entry_geode->getOrCreateStateSet();
 	state->setMode(GL_NORMALIZE, osg::StateAttribute::ON);
-
+	
 #if defined(APPLE_IOS)
 	state->setMode(GL_LIGHTING, osg::StateAttribute::PROTECTED | osg::StateAttribute::OFF );
 	entry_geode->addDrawable(new osg::ShapeDrawable(new osg::Box(osg::Vec3(0.0f,0.0f,0.0f),0.1), hints)); //draws a square // Vintage TextCycle
@@ -145,29 +108,77 @@ void ACOsgTextRenderer::entryGeode() {
 	//ref_ptr//entry_geode->ref();
 }
 
-void ACOsgTextRenderer::prepareNodes() {
-	entry_geode = 0;
-	metadata_geode = 0;
 
-	//if  (media_cycle->getMediaNode(node_index).isDisplayed()){
+void ACOsgMediaDocumentRenderer::prepareNodes() {
+
+	entry_geode = 0;
+	
 	if  (media && media_cycle->getNodeFromMedia(media).isDisplayed()){
 		entryGeode();
 		media_node->addChild(entry_geode);
 	}
-	if (!metadata_geode)
-		metadataGeode();
+	
+/*	//ACMediaContainer medias = (static_cast<ACMediaDocument*> (media_cycle->getLibrary()->getMedia(media_index)))->getMedias();
+	ACMediaContainer medias = (static_cast<ACMediaDocument*> (media))->getContainer();
+	ACMediaContainer::iterator iter;
+		
+	for ( iter=medias.begin() ; iter!=medias.end(); ++iter ){
+		cout << (*iter).first << " => " << (*iter).second << endl;
+	
+		bool renderer_added = true;
+		switch (iter->second->getType()) {
+			case MEDIA_TYPE_AUDIO:
+				#if defined (SUPPORT_AUDIO)
+				media_renderers.push_back(new ACOsgAudioRenderer());
+				#endif //defined (SUPPORT_AUDIO)
+				break;
+			case MEDIA_TYPE_IMAGE:
+				#if defined (SUPPORT_IMAGE)
+				media_renderers.push_back(new ACOsgImageRenderer());
+				#endif //defined (SUPPORT_IMAGE)
+				break;
+			case MEDIA_TYPE_VIDEO:
+				#if defined (SUPPORT_VIDEO)
+				media_renderers.push_back(new ACOsgVideoRenderer());
+				#endif //defined (SUPPORT_VIDEO)
+				break;
+			case MEDIA_TYPE_3DMODEL:
+				#if defined (SUPPORT_3DMODEL)
+				media_renderers.push_back(new ACOsg3DModelRenderer());
+				#endif //defined (SUPPORT_3DMODEL)
+				break;
+			case MEDIA_TYPE_TEXT:
+				#if defined (SUPPORT_TEXT)
+				media_renderers.push_back(new ACOsgTextRenderer());
+				#endif //defined (SUPPORT_TEXT)
+				break;
+			default:
+				renderer_added = false;
+				break;
+		}
+		
+		if (renderer_added){
+			media_renderers.back()->setMediaCycle(media_cycle);
+			
+			//render_iter->second->setMediaIndex(media_index);//dangerous! before each media of media documents are part of the library
+			media_renderers.back()->setMedia(iter->second);
+						
+			media_renderers.back()->prepareNodes();
+			media_node->addChild(media_renderers.back()->getNode());
+		}
+	}*/
 }
 
-void ACOsgTextRenderer::updateNodes(double ratio) {
-
+void ACOsgMediaDocumentRenderer::updateNodes(double ratio) {
+	
 	double xstep = 0.00025;
-
+	
 	xstep *= afac;
-
-	#define NCOLORS 5
+	
+#define NCOLORS 5
 	static Vec4 colors[NCOLORS];
 	static bool colors_ready = false;
-
+	
 	if(!colors_ready)
 	{
 		colors[0] = Vec4(1,1,0.5,1);
@@ -177,34 +188,30 @@ void ACOsgTextRenderer::updateNodes(double ratio) {
 		colors[4] = Vec4(0.5,1,0.5,1);
 		colors_ready = true;
 	}
-
+	
 	const ACMediaNode &attribute = media_cycle->getMediaNode(node_index);
-
+	
 	Matrix T;
 	Matrix Trotate;
-
+	
 	float x, y, z;
 	float localscale;
 	float maxdistance = 0.2;
 	float maxscale = 1.5;
 	float minscale = 0.33;
-
+	
 	x = media_cycle_view_pos.x;
 	y = media_cycle_view_pos.y;
 	z = 0;
-
+	
 	T.makeTranslate(Vec3(x, y, z));
 	localscale = maxscale - distance_mouse * (maxscale - minscale) / maxdistance ;
 	localscale = max(localscale,minscale);
-
+	
 	if (attribute.getActivity()>=1) { // 0 inactive, 1 clicked, 2 hover
 		localscale = 0.5;
-		if(media_node->getNumChildren() == 1) // only entry_geode so far
-			media_node->addChild(metadata_geode);
 	}
-	else {
-		media_node->removeChild(metadata_geode);
-
+	else {		
 		//CF nodes colored along their relative cluster on in Clusters Mode
 		if (media_cycle->getBrowserMode() == AC_MODE_CLUSTERS)
 			((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(colors[attribute.getClusterId()%NCOLORS]);
@@ -215,13 +222,13 @@ void ACOsgTextRenderer::updateNodes(double ratio) {
 			Vec4 selected_color(0,0,0,1);
 			((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(selected_color);
 		}
-
+		
 		if (user_defined_color)
 			((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(node_color);
-
+		
 		T =  Matrix::rotate(-media_cycle_angle,Vec3(0.0,0.0,1.0)) * Matrix::scale(localscale/media_cycle_zoom,localscale/media_cycle_zoom,localscale/media_cycle_zoom) * T;
 	}
-
+	
 	unsigned int mask = (unsigned int)-1;
 	if(attribute.getNavigationLevel() >= media_cycle->getNavigationLevel()) {
 		entry_geode->setNodeMask(mask);
@@ -229,14 +236,19 @@ void ACOsgTextRenderer::updateNodes(double ratio) {
 	else {
 		entry_geode->setNodeMask(0);
 	}
-
-	#ifdef AUTO_TRANSFORM
-		media_node->setPosition(Vec3(x,y,z));
-		media_node->setRotation(Quat(0.0, 0.0, 1.0, -media_cycle_angle));
-		media_node->setScale(Vec3(localscale/media_cycle_zoom,localscale/media_cycle_zoom,localscale/media_cycle_zoom));
-	#else
-		media_node->setMatrix(T);
-	#endif
-
+	
+#ifdef AUTO_TRANSFORM
+	media_node->setPosition(Vec3(x,y,z));
+	media_node->setRotation(Quat(0.0, 0.0, 1.0, -media_cycle_angle));
+	media_node->setScale(Vec3(localscale/media_cycle_zoom,localscale/media_cycle_zoom,localscale/media_cycle_zoom));
+#else
+	media_node->setMatrix(T);
+#endif
+	
+	/*ACOsgMediaRenderers::iterator render_iter = media_renderers.end();
+	for ( render_iter=media_renderers.begin() ; render_iter!=media_renderers.end(); ++render_iter ){
+		(*render_iter)->updateNodes();
+	}*/
 }
-#endif //defined (SUPPORT_TEXT)
+
+#endif //defined (SUPPORT_MULTIMEDIA) 

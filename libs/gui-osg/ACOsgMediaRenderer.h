@@ -36,7 +36,8 @@
 #ifndef __ACOSG_MEDIA_RENDERER_H__
 #define __ACOSG_MEDIA_RENDERER_H__
 
-#include "MediaCycle.h"
+#include <MediaCycle.h>
+#include <ACMedia.h>
 
 #include <osg/ref_ptr>
 #include <osg/Geometry>
@@ -78,6 +79,8 @@ protected:
 	osg::ref_ptr<osg::MatrixTransform> media_node;
 #endif
 	int node_index;
+	ACMedia* media;
+	bool media_changed;
 	float distance_mouse;
 	// int	media_activity;
 	osg::Vec4 node_color;
@@ -146,7 +149,8 @@ public:
 	
 	void setNavigation(int media_cycle_navigation_level);
 	void setActivity(int media_cycle_activity);
-	void setMediaIndex(int media_index);
+	//void setMediaIndex(int media_index);
+	void setMedia(ACMedia* _media);
 	void setFilename(std::string media_cycle_filename);
 	
 	// Audio-specific

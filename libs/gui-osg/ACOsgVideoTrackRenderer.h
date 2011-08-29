@@ -44,9 +44,10 @@
 #include "ACOpenCVInclude.h"
 
 // Slit-scan
-
+#ifdef USE_FFMPEG
 //FFmpeg
 #include <ACFFmpegInclude.h>
+#endif
 
 #include <cassert>
 #include <algorithm>
@@ -63,7 +64,12 @@ class ACOsgVideoSlitScanThread : public OpenThreads::Thread {
 public:
 
     ACOsgVideoSlitScanThread()
-	:m_context(0),_done(false),filename(""),notify_level(osg::WARN){}
+	:_done(false),filename(""),notify_level(osg::WARN),slit_scan(0)
+	{
+		#ifdef USE_FFMPEG
+		m_context = 0;
+		#endif//def USE_FFMPEG
+	}
 
     ~ACOsgVideoSlitScanThread()
     {
@@ -72,20 +78,26 @@ public:
         {
             OpenThreads::Thread::YieldCurrentThread();
         }
+		#ifdef USE_FFMPEG
 		if (m_context) {m_context = 0;}//avcodec_close(m_context); // done by osg ffmpeg plugin
+		#endif//def USE_FFMPEG
     }
 
     void run(void);
 
 	private:
 		osg::ref_ptr<osg::Image> slit_scan;
+		#ifdef USE_FFMPEG
 		AVCodecContext* m_context;
+		#endif//def USE_FFMPEG
 		bool _done;
 		std::string filename;
 		osg::NotifySeverity notify_level;
 	protected:
+		#ifdef USE_FFMPEG
 		int convert(AVPicture *dst, int dst_pix_fmt, AVPicture *src,int src_pix_fmt, int src_width, int src_height);
 		void yuva420pToRgba(AVPicture * const dst, AVPicture * const src, int width, int height);
+		#endif//def USE_FFMPEG
 		int computeSlitScan();
 	public:
 		osg::ref_ptr<osg::Image> getImage(){if (_done) return slit_scan; else return 0;}
