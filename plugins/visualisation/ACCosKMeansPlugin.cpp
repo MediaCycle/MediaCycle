@@ -69,9 +69,6 @@ double ACCosKMeansPlugin::compute_distance(vector<ACMediaFeatures*> &obj1, vecto
 }
 double ACCosKMeansPlugin::compute_distance(vector<ACMediaFeatures*> &obj1, const vector<vector <float> > &obj2, const vector<float> &weights, bool inverse_features)
 {
-	
-	
-	
 	assert(obj1.size() == obj2.size() && obj1.size() == weights.size());
 	int feature_count = obj1.size();
 	

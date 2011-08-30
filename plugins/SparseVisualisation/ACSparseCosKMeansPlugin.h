@@ -50,7 +50,8 @@ public:
 	double compute_distance(vector<ACMediaFeatures*> &, const vector<vector <float> > &, const vector<float> &, bool );
 	 void meanAccumCompute(std::vector<ACMediaFeatures*> & ,std::vector<std::vector<float> >&);
 	
-	
+	double compute_distance(const vector<vector <float> > &, const vector<vector <float> > &, const vector<float> &, bool );
+
 	
 private:
 };

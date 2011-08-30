@@ -35,7 +35,7 @@
 #include "SparseMatrixOperator.h"
 #include <math.h>
 using namespace std;
-ACSparseVector &SparseMatrixOperator::addVectors(std::vector<float> a0,std::vector<float> a1
+ACSparseVector SparseMatrixOperator::addVectors(std::vector<float> a0,std::vector<float> a1
 													 ,std::vector<float> a2,std::vector<float> b0,
 													 std::vector<float> b1,std::vector<float> b2){
 	
@@ -107,13 +107,18 @@ void SparseMatrixOperator::multipleVectorByScalar(std::vector<float> &out0,std::
 	if (a1.size()!=a2.size())
 		return;
 	//vector<float> nbTerm,index,values;	
+	float tempNorm=0;
 	if (mult!=0.f){
 		vector<float>::iterator iter2=a2.begin();
 		for (vector<float>::iterator iter1=a1.begin();iter1!=a1.end();iter1++,iter2++){
 			out1.push_back(*iter1);
 			out2.push_back((*iter2)*mult);
+			tempNorm+=((*iter2)*mult)*((*iter2)*mult);
+			
 		}
 	}
+	float norm2=sqrt(tempNorm);
+	tempNorm=norm2;
 }
 
 
@@ -133,7 +138,7 @@ float SparseMatrixOperator::norm(const  std::vector<float> &a0,const std::vector
 	return desc;
 }
 
-ACSparseVector& SparseMatrixOperator::fullToSparseVector(std::vector<float> in){
+ACSparseVector SparseMatrixOperator::fullToSparseVector(std::vector<float> in){
 	ACSparseVector desc;
 	vector<float> *nbTerm=new vector<float>,*index=new vector<float>,*values=new vector<float>;
 	nbTerm->push_back(in.size());
@@ -152,7 +157,7 @@ ACSparseVector& SparseMatrixOperator::fullToSparseVector(std::vector<float> in){
 	return desc;
 }
 
-std::vector<float>& SparseMatrixOperator::SparseToFullVector(ACSparseVector in){
+std::vector<float> SparseMatrixOperator::SparseToFullVector(ACSparseVector in){
 	vector<float> desc;
 	if (in.size()!=3)
 		return desc;

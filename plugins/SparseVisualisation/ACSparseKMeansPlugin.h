@@ -47,12 +47,15 @@ class ACSparseKMeansPlugin : public ACClusterMethodPlugin {
 public:
 	ACSparseKMeansPlugin();
 	~ACSparseKMeansPlugin();
+	
+	std::vector<int> initClusterMinMax(ACMediaLibrary * library,int nbNodes,vector<float> weight);
 	void updateClusters(ACMediaBrowser* mediaBrowser,bool needsCluster=true);//updateClustersKMeans(animate, needsCluster)
 	virtual double compute_distance(vector<ACMediaFeatures*> &, vector<ACMediaFeatures*> &, const vector<float> &, bool )=0;
 	virtual double compute_distance(vector<ACMediaFeatures*> &, const vector<vector <float> > &, const vector<float> &, bool )=0;
 	//	virtual void updateClusters(ACMediaBrowser* mediaBrowser ,bool needsCluster=true)=0;//updateClustersKMeans(animate, needsCluster)
 	virtual void meanAccumCompute(std::vector<ACMediaFeatures*> & ,std::vector<std::vector<float> >&)=0;
-	
+	virtual double compute_distance(const vector<vector <float> > &, const vector<vector <float> > &, const vector<float> &, bool ){return 0.f;};
+
 //	void updateNextPositions(ACMediaBrowser*  );
 
 	

@@ -610,9 +610,9 @@ void ACMultiMediaCycleOsgQt::importDirectoriesThreaded(vector<string> directorie
 	
 	// not necessary to thread if only few files.
 	//		if (directories.size() > n_dir_for_threading)
-	// media_cycle->importDirectoriesThreaded(directories, recursive, forward_order, do_segments);
+	 media_cycle->importDirectoriesThreaded(directories, recursive, forward_order, do_segments);
 	//		else
-				media_cycle->importDirectories(directories, recursive, forward_order, do_segments);
+	//			media_cycle->importDirectories(directories, recursive, forward_order, do_segments);
 	
 	
 }
@@ -1007,11 +1007,11 @@ void ACMultiMediaCycleOsgQt::loadDefaultConfig(ACMediaType _media_type, ACBrowse
 		std::string osg_plugin_error ="";
 	
 		if(_media_type == MEDIA_TYPE_VIDEO){
-			#if defined(USE_FFMPEG)
+			//TR #if defined(USE_FFMPEG)
 			videoReaderWriter = osgDB::Registry::instance()->getReaderWriterForExtension("ffmpeg");
-			#else
+			/* TR #else
 			videoReaderWriter = osgDB::Registry::instance()->getReaderWriterForExtension("mov");
-			#endif
+			#endif*/
 			osg_plugin_error = "Video plugins for OpenSceneGraph (FFmpeg or QuickTime or QTKit) are absent but necessary for interactive video navigation. Please install it or contact the MediaCycle team.";
 		}
 		if (_media_type == MEDIA_TYPE_VIDEO && !videoReaderWriter){
@@ -1176,6 +1176,16 @@ void ACMultiMediaCycleOsgQt::loadDefaultConfig(ACMediaType _media_type, ACBrowse
 				this->showError("Feature extraction plugin(s) now loaded again. Importing media files now enabled.");
 			}
 			this->switchFeatureExtraction(true);
+		}
+		//Archipel Plugin
+		string arch_plugin = s_path + "/../../../../../../plugins/archipel/" + build_type + "/mc_archipel.dylib";
+		if(media_cycle->addPluginLibrary(arch_plugin) == -1){
+			this->showError("Couldn't load the archipel data extraction plugin. ");
+			this->switchFeatureExtraction(false);
+		}
+		else{
+			media_cycle->setMediaReaderPlugin("ArchipelReader");
+
 		}
 		
 	}

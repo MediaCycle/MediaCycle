@@ -56,7 +56,7 @@ public:
 	ACMediaDocument(const ACMediaDocument&, bool reduce = true);
 
 	int setActiveSubMedia(std::string mediaName);
-	int import(std::string _path, int _mid=0, ACPluginManager *acpl=0, bool _save_timed_feat=false);
+	virtual int import(std::string _path, int _mid=0, ACPluginManager *acpl=0, bool _save_timed_feat=false);
 	void saveACLSpecific(std::ofstream &library_file);
 	int loadACLSpecific(std::ifstream &library_file);
 	void saveXMLSpecific(TiXmlElement* _media);
@@ -75,13 +75,60 @@ public:
 //	virtual void deleteData();
 	ACMediaContainer getContainer(){return mediaContainer;}
 
-	std::vector<ACMediaFeatures*> &getAllFeaturesVectors() { return activeMedia->getAllFeaturesVectors(); };
-	ACMediaFeatures* getFeaturesVector(int i){return activeMedia->getFeaturesVector(i);};
-	ACMediaFeatures* getFeaturesVector(std::string feature_name){return activeMedia->getFeaturesVector(feature_name);};
-	 int getNumberOfFeaturesVectors() {return activeMedia->getNumberOfFeaturesVectors();}
-	std::vector<std::string> getListOfFeaturesPlugins(){return activeMedia->getListOfFeaturesPlugins();};
+	std::vector<ACMediaFeatures*> &getAllFeaturesVectors() 
+	{
+		if (activeMedia!=0){
 	
-	std::vector<ACMediaFeatures*> &getAllPreProcFeaturesVectors() { return activeMedia->getAllPreProcFeaturesVectors(); };
+			return activeMedia->getAllFeaturesVectors();
+		}
+		else {
+			return tempVect;
+		}
+	};
+	ACMediaFeatures* getFeaturesVector(int i){
+		if (activeMedia!=0){
+			
+			return activeMedia->getFeaturesVector(i);
+		}
+		else {
+			return 0;		
+		}
+	};
+	ACMediaFeatures* getFeaturesVector(std::string feature_name){
+		if (activeMedia!=0){
+			
+			return activeMedia->getFeaturesVector(feature_name);
+		}
+		else {
+			return 0;		
+		}
+	};
+	int getNumberOfFeaturesVectors() {
+		if (activeMedia!=0){
+			return activeMedia->getNumberOfFeaturesVectors();
+		}
+		else {
+			return 0;		
+		}
+	};
+	std::vector<std::string> getListOfFeaturesPlugins(){
+		if (activeMedia!=0){
+			return activeMedia->getListOfFeaturesPlugins();
+		}
+		else {
+			return tempString;		
+		}
+	};
+	
+	std::vector<ACMediaFeatures*> &getAllPreProcFeaturesVectors() { 
+		if (activeMedia!=0){
+			
+		return activeMedia->getAllPreProcFeaturesVectors(); 
+		}
+		else {
+			return tempVect;
+		}
+	};
 	 ACMediaFeatures* getPreProcFeaturesVector(int i){ return activeMedia->getPreProcFeaturesVector(i); };
 	 ACMediaFeatures* getPreProcFeaturesVector(std::string feature_name){ return activeMedia->getPreProcFeaturesVector(feature_name); };
 	 int getNumberOfPreProcFeaturesVectors() { return activeMedia->getNumberOfPreProcFeaturesVectors(); };
@@ -95,7 +142,7 @@ private:
 	bool computeThumbnail(IplImage* img, int w=0, int h=0);
 	bool computeThumbnailSize(int w_, int h_);
 	void deleteMedia();
-private:
+protected:
 	int thumbnail_width, thumbnail_height; 
 	osg::ref_ptr<osg::Image> thumbnail;
 	osg::ref_ptr<osg::Texture2D> image_texture;
@@ -107,6 +154,9 @@ private:
 	int getMediaID(){return mediaID ;}
 	int addMedia(std::string key, ACMedia* media);
 	ACMedia* activeMedia;
+	std::vector<ACMediaFeatures*> tempVect;
+	std::vector<std::string> tempString;
+	
 };
 
 #endif //defined (SUPPORT_MULTIMEDIA)

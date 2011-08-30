@@ -499,6 +499,19 @@ int testDetectFaces(string imageFile){
 }
 
 int main(int argc, char** argv) {
+	
+	
+    MediaCycle* mediacycle;
+    mediacycle = new MediaCycle(MEDIA_TYPE_IMAGE);
+    mediacycle->addPluginLibrary("/Users/ravet/Desktop/ticore/mediacycle/Builds/darwin-xcode/plugins/image/Debug//mc_image.dylib");
+    mediacycle->importDirectory("/Users/ravet/Desktop/MediaCycleData/testImage1/",1);
+    mediacycle->importDirectory("/Users/ravet/Desktop/MediaCycleData/testImage2/",1);
+    mediacycle->saveXMLLibrary("mon_premier.xml");
+    mediacycle->importDirectory("/Users/ravet/Desktop/MediaCycleData/testImage3/",1);
+    mediacycle->importDirectory("/Users/ravet/Desktop/MediaCycleData/testImage4/",1);
+    mediacycle->saveXMLLibrary("mon_deuxième.xml"); 
+	
+	return 0;
 	cout << "Using Opencv " << CV_VERSION << "(" << CV_MAJOR_VERSION << "." << CV_MINOR_VERSION  << "." <<  CV_SUBMINOR_VERSION << ")" << endl;	
 	// testshapes("beaver/image_0001.jpg", "beaver/image_0012.jpg");
 	// testgabor ("beaver/image_0001.jpg", "beaver/image_0012.jpg");

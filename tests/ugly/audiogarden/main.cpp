@@ -45,6 +45,7 @@
 using namespace std;
 
 int main(int argc, char** argv) {
+
     MediaCycle *mediacycle;
     //string libpath("/home/alexis/NetBeansProjects/MediaCycle/lib/Caltech101-a.acl");
 

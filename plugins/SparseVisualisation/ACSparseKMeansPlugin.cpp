@@ -37,6 +37,9 @@
 
 
 static int statCpt=0;
+static int maxNodeInit=10;
+
+
 ACSparseKMeansPlugin::ACSparseKMeansPlugin() {
     //vars herited from ACPlugin
     this->mMediaType = MEDIA_TYPE_TEXT;
@@ -49,6 +52,68 @@ ACSparseKMeansPlugin::ACSparseKMeansPlugin() {
 ACSparseKMeansPlugin::~ACSparseKMeansPlugin() {
 }
 
+std::vector<int> ACSparseKMeansPlugin::initClusterMinMax(ACMediaLibrary * library,int nbNodes,vector<float> weight){
+	//random selection of maxNodeInit*nbNodes in the nodes
+	vector<int> firstSelectedNodes;
+	int object_count = library->getSize();
+
+	if (object_count<=maxNodeInit*nbNodes)
+		for (int i=0;i<object_count;i++)
+			firstSelectedNodes.push_back(i);
+	else{
+		map<int,int> flagVector;
+		for (int i=0;i<object_count;i++)
+			flagVector[i]=0;		
+		int cpt=0,tempCount=object_count;
+		while (cpt<maxNodeInit*nbNodes){
+			int r = rand() % tempCount,cpt2=0;
+			for (int i=0;i<=r;i++)
+			{
+				while (flagVector[i+cpt2]==1){
+					cpt2++;
+					if ((i+cpt2)==object_count)
+						break;
+				}
+				if ((i+cpt2)==object_count)
+					break;
+			}
+			if ((r+cpt2)<object_count)
+				if (flagVector[r+cpt2]==0){
+					flagVector[r+cpt2]=1;
+					cpt++;
+					tempCount--;
+				}
+		}
+		for (int i=0;i<object_count;i++)
+			if (flagVector[i])
+				firstSelectedNodes.push_back(i);
+		
+	}
+	vector<int> ret;
+	int refTemp=rand()%firstSelectedNodes.size();
+	ret.push_back(firstSelectedNodes[refTemp]);
+	for (int i=1;i<nbNodes;i++)
+	{
+		int maxIndex;
+		float maxValue=0;
+		for (int k=0;k<firstSelectedNodes.size();k++){
+			float minValue=1000000000.f;
+			int currNode=firstSelectedNodes[k];
+			for (int j=0;j<i;j++){
+				float tempValue=compute_distance(library->getMedia(ret[j])->getAllPreProcFeaturesVectors(),library->getMedia(currNode)->getAllPreProcFeaturesVectors(),weight,false);
+				if (tempValue<minValue)
+					minValue=tempValue;
+			}
+			if (minValue>maxValue){
+				maxValue=minValue;
+				maxIndex=currNode;
+			}
+		}
+		ret.push_back(maxIndex);
+	}
+	
+	return ret;
+}
 
 void ACSparseKMeansPlugin::updateClusters(ACMediaBrowser* mediaBrowser,bool needsCluster){
 	ACMediaLibrary *library=mediaBrowser->getLibrary();
@@ -88,19 +153,20 @@ void ACSparseKMeansPlugin::updateClusters(ACMediaBrowser* mediaBrowser,bool need
 	cluster_distances.resize(clusterCount);
 	clusterId.resize(object_count);
 	
+	vector<int> initClust;
 	if (needsCluster){
-		
+		initClust=initClusterMinMax(library,clusterCount,featureWeights);
 		// picking random object as initial cluster center
-		srand(15);
+		/*srand(15);
 		statCpt++;
 		srand(clusterCount*statCpt);
-		vector<int> initClust;
+		*/
 		for(i=0; i<clusterCount; i++)
 		{
 			clusterCenters[i].resize(3*feature_count);
 			cluster_accumulators[i].resize(3*feature_count);
 			
-			// initialize cluster center with a randomly chosen object
+		/*	// initialize cluster center with a randomly chosen object
 			int r = rand() % object_count;
 			int l = 100;
 			
@@ -120,7 +186,8 @@ void ACSparseKMeansPlugin::updateClusters(ACMediaBrowser* mediaBrowser,bool need
 			// couldn't find center in this nav level...
 			if(l <= 0) return;
 			
-			initClust.push_back(r);
+			initClust.push_back(r);*/
+			int r=initClust[i];
 			for(f=0; f<3*feature_count; f++)
 			{
 				// XS again, what if all media don't have the same number of features ? TR: we are going to know :-)
@@ -208,10 +275,13 @@ void ACSparseKMeansPlugin::updateClusters(ACMediaBrowser* mediaBrowser,bool need
 			
 			printf("K-means it: %d\n", it);
 			// get new centers from accumulators
+			vector<vector<vector <float> > > prevClusterCenter=clusterCenters;
+			float distCentroid=0.f;
 			for(j=0; j<clusterCount; j++)
 			{
 				if(cluster_counts[j] > 0)
-				{						float mult = 1.f/(float)cluster_counts[j];
+				{						
+					float mult = 1.f/(float)cluster_counts[j];
 					for(f=0; f<feature_count; f++)
 					{
 						// XS again, what if all media don't have the same number of features ?
@@ -220,11 +290,16 @@ void ACSparseKMeansPlugin::updateClusters(ACMediaBrowser* mediaBrowser,bool need
 						SparseMatrixOperator::multipleVectorByScalar(clusterCenters[j][3*f+0],clusterCenters[j][3*f+1],clusterCenters[j][3*f+2],
 																	 cluster_accumulators[j][3*f+0],cluster_accumulators[j][3*f+1],cluster_accumulators[j][3*f+2],
 																	 mult);
+						cout<<clusterCenters[j][3*f+0][0]<<"\t"<<clusterCenters[j][3*f+1].size()<<"\t"<<clusterCenters[j][3*f+2].size()<<endl;
 					}
+					
 				}
+				distCentroid+=compute_distance(clusterCenters[j],prevClusterCenter[j], featureWeights, false);
 				
-				//printf("\tcluster %d count = %d\n", j, cluster_counts[j]); 
+			//	cout <<"\tcluster"<<j<<" count = "<< cluster_counts[j]<<"\t dist = "<<distCentroid<<endl; 
 			}
+			if (distCentroid<1E-6)
+				break;
 		}
 		mediaBrowser->initClusterCenters();
 		

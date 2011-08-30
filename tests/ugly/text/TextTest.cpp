@@ -183,7 +183,40 @@ vector<ACMediaType> mediaExtract2(ACMediaType lMediaType){
 	return desc;
 }
 
+#include "SparseMatrixOperator.h"
 int main(void){
+	
+	ACSparseVector testSVec1,testSVec2,testSVec3;
+	
+	testSVec1.resize(3);	
+	vector<float> *tempVect=new vector<float>;
+	tempVect->push_back(10);
+	testSVec1[0]=tempVect;
+	tempVect=new vector<float>;
+	tempVect->push_back(2);
+	tempVect->push_back(4);
+	testSVec1[1]=tempVect;
+	tempVect= new vector<float>;
+	tempVect->push_back(24);
+	tempVect->push_back(10.5);
+	testSVec1[2]=tempVect;
+
+	testSVec2.resize(3);
+	tempVect=new vector<float>;
+	tempVect->push_back(10);
+	testSVec2[0]=tempVect;
+	tempVect=new vector<float>;
+	tempVect->push_back(2);
+	tempVect->push_back(5);
+	tempVect->push_back(9);
+	testSVec2[1]=tempVect;
+	tempVect= new vector<float>;
+	tempVect->push_back(24);
+	tempVect->push_back(40.5);
+	tempVect->push_back(70.97);
+	testSVec2[2]=tempVect;
+	
+	testSVec3=SparseMatrixOperator::addVectors(*(testSVec1[0]),*(testSVec1[1]),*(testSVec1[2]),*(testSVec2[0]),*(testSVec2[1]),*(testSVec2[2]) );
 	float test=1,test1=0.f;
 	while (1) {
 		 test=(float)clock();///CLOCKS_PER_SEC;

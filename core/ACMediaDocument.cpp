@@ -65,43 +65,50 @@ int ACMediaDocument::import(std::string _filename, int _mid, ACPluginManager *ac
 	if (extension==string(".xml")){
 		//read the xml file. We begin with the Mediacycle xml style
 		MCMultiMediaXmlReader* xmlDoc=new MCMultiMediaXmlReader(filename);
-		label=xmlDoc->getLabel();
-		unsigned int nbMedia=xmlDoc->getNumberOfMedia();
-		for (unsigned int i=0;i<nbMedia; i++){
-			string s_media_type=xmlDoc->getMediaType(i);
-			ACMediaType mediaType;
-			stringToMediaTypeConverter::const_iterator iterm = stringToMediaType.find(s_media_type);
+		if (xmlDoc->isMCMultiMediaXml()){
+				
+			label=xmlDoc->getLabel();
+			unsigned int nbMedia=xmlDoc->getNumberOfMedia();
+			for (unsigned int i=0;i<nbMedia; i++){
+				string s_media_type=xmlDoc->getMediaType(i);
+				ACMediaType mediaType;
+				stringToMediaTypeConverter::const_iterator iterm = stringToMediaType.find(s_media_type);
+				
+				if( iterm == stringToMediaType.end() ) {
+					cout << "ACMediaDocument::import media type not found : " << s_media_type << endl;
+					continue;
+				}
+				else {
+					mediaType = iterm->second;
+					//		cout << iterm->first << " - corresponding media type code : " << new_media_type << endl;
+				}
+				string mediaFileName=xmlDoc->getMediaPath(i);
+				
+				string mediaExtension = boost::filesystem::extension(mediaFileName);
+				ACMediaType fileMediaType = ACMediaFactory::getInstance().getMediaTypeFromExtension(mediaExtension);
+				if (fileMediaType!=mediaType){
+					cout << "ACMediaDocument::import other media type, skipping " << s_media_type << endl;
+					continue;
+				}
+				string mediaRef=xmlDoc->getMediaReference(i);
+				ACMedia *media = ACMediaFactory::getInstance().create(mediaExtension);
+				if (media->import(path+mediaFileName, this->getMediaID()+i+1, acpl, _save_timed_feat)){
+					if (this->addMedia(mediaRef, media)){
+						//this->incrementMediaID();
+						if(mediaRef=="main")
+							this->activeMedia = media;
+					}	
+				}
+				else 
+					delete media;
+				}
+				delete xmlDoc;
+				return nbMedia;
+			}
+		else {
 			
-			if( iterm == stringToMediaType.end() ) {
-				cout << "ACMediaDocument::import media type not found : " << s_media_type << endl;
-				continue;
-			}
-			else {
-				mediaType = iterm->second;
-				//		cout << iterm->first << " - corresponding media type code : " << new_media_type << endl;
-			}
-			string mediaFileName=xmlDoc->getMediaPath(i);
-			
-			string mediaExtension = boost::filesystem::extension(mediaFileName);
-			ACMediaType fileMediaType = ACMediaFactory::getInstance().getMediaTypeFromExtension(mediaExtension);
-			if (fileMediaType!=mediaType){
-				cout << "ACMediaDocument::import other media type, skipping " << s_media_type << endl;
-				continue;
-			}
-			string mediaRef=xmlDoc->getMediaReference(i);
-			ACMedia *media = ACMediaFactory::getInstance().create(mediaExtension);
-			if (media->import(path+mediaFileName, this->getMediaID()+i+1, acpl, _save_timed_feat)){
-				if (this->addMedia(mediaRef, media)){
-					//this->incrementMediaID();
-					if(mediaRef=="main")
-						this->activeMedia = media;
-				}	
-			}
-			else 
-				delete media;
 		}
-		delete xmlDoc;
-		return nbMedia;
+
 	}
 	else {
 		ACMediaType fileMediaType = ACMediaFactory::getInstance().getMediaTypeFromExtension(extension);

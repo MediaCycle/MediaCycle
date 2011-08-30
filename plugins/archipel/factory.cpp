@@ -1,9 +1,9 @@
 /*
- *  SparseMatrixOperator.h
+ *  factory.cpp
  *  MediaCycle
  *
  *  @author Thierry Ravet
- *  @date 21/06/11
+ *  @date 27/07/11
  *  @copyright (c) 2011 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
@@ -33,22 +33,27 @@
  */
 
 
-#ifndef _ACSPARSEMATRIXOPERATOR_H
-#define	_ACSPARSEMATRIXOPERATOR_H
-#include <vector>
+/*
+ *
+ */
 
-typedef std::vector<const std::vector<float> *> ACSparseVector;
+#include "ACPlugin.h"
+//the factories
 
-class SparseMatrixOperator {
-public:
-	static ACSparseVector addVectors(std::vector<float> a0,std::vector<float> a1,std::vector<float> a2,std::vector<float> b0,std::vector<float> b1,std::vector<float> b2);
-	static void multipleVectorByScalar(std::vector<float> &out0,std::vector<float> &out1,std::vector<float> &out2,std::vector<float> a0,std::vector<float> a1,std::vector<float> a2,float mult);
-	static float norm(const std::vector<float> &a0, const std::vector<float> &a1,const std::vector<float> &a2);
-	static ACSparseVector fullToSparseVector(std::vector<float> in);
-	static std::vector<float> SparseToFullVector(ACSparseVector in);
-	static void freeSparseVector(ACSparseVector &in);
+#include "ACArchipelReaderPlugin.h"
+
+extern "C" ACPlugin* create(std::string namePlugin) {
+	if (namePlugin == "ArchipelReaderPlugin") {return new ACArchipelReaderPlugin();}
 	
+}
 
-};
+extern "C" void destroy(ACPlugin* d) {
+    delete d;
+}
 
-#endif
+extern "C" std::vector<std::string> list() {    //returns a string vector containing the plugin names included in the DLL file
+	std::vector<std::string> listPlugin;
+	listPlugin.push_back("ArchipelReaderPlugin");
+	
+	return listPlugin;
+}

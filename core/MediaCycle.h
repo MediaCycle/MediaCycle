@@ -140,6 +140,8 @@ public:
 	
 	void setPreProcessPlugin(std::string pluginName);
 	
+	void setMediaReaderPlugin(std::string pluginName);
+	
 	void dumpPluginsList();
 
 	// == Media

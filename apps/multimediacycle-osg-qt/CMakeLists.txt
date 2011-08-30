@@ -74,6 +74,10 @@ IF(USE_QT4 AND USE_OSG AND USE_OSC )
 		#TARGET_LINK_LIBRARIES(multimediacycle-osg-qt mc_segmentation) # hack to get the plugin copied into the app bundle on OSX
 		#TARGET_LINK_LIBRARIES(multimediacycle-osg-qt mc_visualisation) # hack to get the plugin copied into the app bundle on OSX
 	ENDIF()
+	if (SUPPORT_ARCHIPEL)
+		ADD_DEPENDENCIES(multimediacycle-osg-qt mc_archipel)
+	ENDIF()
+
 
 	#IF ( APPLE )
 	#	set_target_properties(multimediacycle-osg-qt PROPERTIES MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/Info.plist)

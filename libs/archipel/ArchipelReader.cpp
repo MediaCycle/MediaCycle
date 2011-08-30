@@ -183,7 +183,7 @@ std::vector<std::string> archipelReader::getTrackPath(void){
 		textChild=child.Child(i).FirstChild("path").FirstChild().ToText();
 		if (textChild==0)
 			break;
-		ret.push_back(rep+textChild->ValueStr());
+		ret.push_back(textChild->ValueStr());
 		i++;
 
 	}

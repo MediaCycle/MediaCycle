@@ -63,6 +63,7 @@ protected:
 	std::string media_path;
 	preProcessInfo mPreProcessInfo;
 	ACPreProcessPlugin* mPreProcessPlugin;
+	ACMediaReaderPlugin* mReaderPlugin;
 	
 public:
 	ACMediaLibrary();
@@ -121,6 +122,8 @@ public:
 	int scanDirectories(std::vector<std::string> _path, int _recursive, std::vector<std::string>& filenames);
 	
 	void setPreProcessPlugin(ACPlugin* acpl);
+	void setMediaReaderPlugin(ACPlugin* acpl);
+	
 	
 private:
 	void deleteAllMedia();

@@ -1,9 +1,9 @@
 /*
- *  SparseMatrixOperator.h
+ *  ACArchipelReaderPlugin.cpp
  *  MediaCycle
  *
  *  @author Thierry Ravet
- *  @date 21/06/11
+ *  @date 27/07/11
  *  @copyright (c) 2011 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
@@ -32,23 +32,25 @@
  *
  */
 
+#include "ACArchipelReaderPlugin.h"
 
-#ifndef _ACSPARSEMATRIXOPERATOR_H
-#define	_ACSPARSEMATRIXOPERATOR_H
-#include <vector>
+#include "ArchipelMediaDocument.h"
 
-typedef std::vector<const std::vector<float> *> ACSparseVector;
+ACArchipelReaderPlugin::ACArchipelReaderPlugin(){
 
-class SparseMatrixOperator {
-public:
-	static ACSparseVector addVectors(std::vector<float> a0,std::vector<float> a1,std::vector<float> a2,std::vector<float> b0,std::vector<float> b1,std::vector<float> b2);
-	static void multipleVectorByScalar(std::vector<float> &out0,std::vector<float> &out1,std::vector<float> &out2,std::vector<float> a0,std::vector<float> a1,std::vector<float> a2,float mult);
-	static float norm(const std::vector<float> &a0, const std::vector<float> &a1,const std::vector<float> &a2);
-	static ACSparseVector fullToSparseVector(std::vector<float> in);
-	static std::vector<float> SparseToFullVector(ACSparseVector in);
-	static void freeSparseVector(ACSparseVector &in);
+	this->mMediaType = MEDIA_TYPE_MIXED;
+	this->mName = "ArchipelReader";
+	this->mDescription = "ArchipelReader plugin";
+	this->mId = "";
 	
+}
 
-};
 
-#endif
+ACMedia* ACArchipelReaderPlugin::mediaFactory(ACMediaType mediaType){
+	if (mediaType|this->mMediaType)
+		return new ArchipelMediaDocument();
+	else {
+		return 0;
+	}
+
+}

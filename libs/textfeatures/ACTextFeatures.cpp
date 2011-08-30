@@ -46,11 +46,11 @@ using namespace std;
 using namespace lucene::index;
 //using namespace lucene::util;
 //using namespace lucene::search;
-const static int seuil=0.8;
+const static float seuil=0.5;
 
 
 void getFreqTerm(vector<int32_t> &ret,std::vector<wchar_t *> termsToFind, int32_t nTerms,TermFreqVector* termsFreqBase){
-	int i=0;
+	//int i=0;
 	//ret.length = nTerms;
 	//ret.values = _CL_NEWARRAY(int32_t,nTerms);
 	ret.clear();
@@ -135,16 +135,18 @@ void extractIndexTerms(wchar_t**  &outTerms,int &nbOutTerms,ACIndexModifier* inp
 	TermEnum* te = inputIndex->terms();
 	outTerms=new TCHARPTR[nterms];
 	nterms=0;
+	int cptRejectedTerms=0;
 	for (int i = 0; te->next() == true; i++) {
 		
 		Term *tempTerm=te->term(false);
 
 		int tempInt=inputIndex->docFreq(tempTerm);
-		if (nbDoc>4&&tempInt/nbDoc>seuil)
+		if ((nbDoc>4)&&((float)tempInt/nbDoc>seuil))
 		{
 			wchar_t *chartemp=new wchar_t[wcslen(tempTerm->text())+1];
 			wcsncpy(chartemp,tempTerm->text(),wcslen(tempTerm->text())+1);
 			delete chartemp;
+			cptRejectedTerms++;
 			continue;
 			nbDoc=nbDoc;
 		}
@@ -166,6 +168,7 @@ void extractIndexTerms(wchar_t**  &outTerms,int &nbOutTerms,ACIndexModifier* inp
 		
 		nterms++;	
 	} 
+	cout<<"rejected terms:"<<cptRejectedTerms<<endl;
 	nbOutTerms=nterms;
 	_CLDELETE(te);
 	_CLDELETE(te1);	
@@ -177,8 +180,15 @@ void extractLuceneFeature(std::vector<float> &output,int32_t docIndex,ACIndexMod
 		
 	//bool test =inputIndex->isOptimized();
 //		_tprintf(_T("Doc n %d\n"),docIndex);		
-		TermFreqVector* testVect=inputIndex->getTermFreqVector(docIndex,fieldName);
+	TermFreqVector* testVect=inputIndex->getTermFreqVector(docIndex,fieldName);
+	if 	(testVect==0)
+	{
+		for (int i=0;i<nbTerms; i++) {
+			output.push_back(0.f);
+		}
+		return;
 		
+	}
 	getFreqTerm(tf,terms,  nbTerms,testVect);
 	int sum=0;
 	for (int i=0;i<nbTerms; i++) {
@@ -187,8 +197,8 @@ void extractLuceneFeature(std::vector<float> &output,int32_t docIndex,ACIndexMod
 	}
 	for (int i=0;i<nbTerms; i++) {
 		output.push_back((float)tf[i]/sum);
-		char charTemp[1024];
-		mc_wcstoutf8(charTemp,terms[i],1024);
+		//char charTemp[1024];
+		//mc_wcstoutf8(charTemp,terms[i],1024);
 		//if (tf.values[i]!=0.f)
 		//{	
 		//	printf(("%s\t"),charTemp);

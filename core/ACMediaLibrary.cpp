@@ -71,15 +71,17 @@ using namespace std;
 ACMediaLibrary::ACMediaLibrary() {
 	this->cleanLibrary();
 	media_type = MEDIA_TYPE_NONE;
-	mPreProcessPlugin=NULL;
-	mPreProcessInfo=NULL;
+	mPreProcessPlugin=0;
+	mPreProcessInfo=0;
+	mReaderPlugin=0;
 }
 
 ACMediaLibrary::ACMediaLibrary(ACMediaType aMediaType) {
 	this->cleanLibrary();
 	media_type = aMediaType;
-	mPreProcessPlugin=NULL;
-	mPreProcessInfo=NULL;
+	mPreProcessPlugin=0;
+	mPreProcessInfo=0;
+	mReaderPlugin=0;
 	#if defined(SUPPORT_VIDEO) and defined(USE_FFMPEG)
 	// Register all formats and codecs from FFmpeg
 	av_register_all();
@@ -177,12 +179,15 @@ int ACMediaLibrary::importFile(std::string _filename, ACPluginManager *acpl, boo
 	string extension = fs::extension(_filename);
 
 	ACMediaType fileMediaType = ACMediaFactory::getInstance().getMediaTypeFromExtension(extension);
-	ACMedia* media;
+	ACMedia* media=0;
 #if defined (SUPPORT_MULTIMEDIA) 
 	//this->testFFMPEG(_filename);
 	if (media_type==MEDIA_TYPE_MIXED){
+		if (mReaderPlugin!=0)
 		
-		media=new ACMediaDocument();
+			media=mReaderPlugin->mediaFactory(media_type);
+		if (media==0)
+			media=new ACMediaDocument();
 		if (media==0)
 			return 0;
 		else {
@@ -202,59 +207,60 @@ int ACMediaLibrary::importFile(std::string _filename, ACPluginManager *acpl, boo
 	}
 #endif	
 		// XS TODO: do we want to check the media type of the whole library (= impose a unique one)?
-		if (media_type == fileMediaType){
-			media = ACMediaFactory::getInstance().create(extension);
-			cout << "extension:" << extension << endl;
-		}
-		else {
-			cout << "<ACMediaLibrary::importFile> other media type, skipping " << _filename << " ... " << endl;
-			cout << "-> media_type " << media_type << " ... " << endl;
-			cout << "-> fileMediaType " << fileMediaType << " ... " << endl;
-			return 0;
-		}
-
-		if (media == 0) {
-			cout << "<ACMediaLibrary::importFile> extension unknown, skipping " << _filename << " ... " << endl;
-			return 0;
-		}
-		// import has to be done before segmentation to have proper id.
-		else if (media->import(_filename, this->getMediaID(), acpl, _save_timed_feat)){
-			this->addMedia(media);
-	#ifdef VERBOSE
-			cout << "imported " << _filename << " with mid = " <<  this->getMediaID() << endl;
-	#endif // VERBOSE
-			this->incrementMediaID();
-			// SD TODO - Is this correct?
-			if (doSegment){
-				// segments are created without id
-				media->segment(acpl, _save_timed_feat);
-				std::vector<ACMedia*> mediaSegments;
-				mediaSegments = media->getAllSegments();
-				for (unsigned int i = 0; i < mediaSegments.size(); i++){
-					// for the segments we do not save (again) timedFeatures
-					// XS TODO but we should not re-calculate them either !
-					if (mediaSegments[i]->import(_filename, this->getMediaID(), acpl)){
-						this->addMedia(mediaSegments[i]);
-						this->incrementMediaID();
-					}
-					
+		
+	if (media_type == fileMediaType){
+		media = ACMediaFactory::getInstance().create(extension);
+		cout << "extension:" << extension << endl;
+	}
+	else {
+		cout << "<ACMediaLibrary::importFile> other media type, skipping " << _filename << " ... " << endl;
+		cout << "-> media_type " << media_type << " ... " << endl;
+		cout << "-> fileMediaType " << fileMediaType << " ... " << endl;
+		return 0;
+	}
+	
+	if (media == 0) {
+		cout << "<ACMediaLibrary::importFile> extension unknown, skipping " << _filename << " ... " << endl;
+		return 0;
+	}
+	// import has to be done before segmentation to have proper id.
+	else if (media->import(_filename, this->getMediaID(), acpl, _save_timed_feat)){
+		this->addMedia(media);
+#ifdef VERBOSE
+		cout << "imported " << _filename << " with mid = " <<  this->getMediaID() << endl;
+#endif // VERBOSE
+		this->incrementMediaID();
+		// SD TODO - Is this correct?
+		if (doSegment){
+			// segments are created without id
+			media->segment(acpl, _save_timed_feat);
+			std::vector<ACMedia*> mediaSegments;
+			mediaSegments = media->getAllSegments();
+			for (unsigned int i = 0; i < mediaSegments.size(); i++){
+				// for the segments we do not save (again) timedFeatures
+				// XS TODO but we should not re-calculate them either !
+				if (mediaSegments[i]->import(_filename, this->getMediaID(), acpl)){
+					this->addMedia(mediaSegments[i]);
+					this->incrementMediaID();
 				}
+				
 			}
 		}
-		else {
-			cerr << "<ACMediaLibrary::importFile> problem importing " << _filename << " ... " << endl;
-			return 0;
-
-		}
-		// XS TODO this was an attempt to save on-the-fly each media 
-		// but it does not work well.
+	}
+	else {
+		cerr << "<ACMediaLibrary::importFile> problem importing " << _filename << " ... " << endl;
+		return 0;
 		
-		// appending current media (if imported properly) to the project's XML file
-		//media->saveXML(_medias);
-
-		// deleting the data that have been used for analysis, keep media small.
-		media->deleteData();
-		return 1;
+	}
+	// XS TODO this was an attempt to save on-the-fly each media 
+	// but it does not work well.
+	
+	// appending current media (if imported properly) to the project's XML file
+	//media->saveXML(_medias);
+	
+	// deleting the data that have been used for analysis, keep media small.
+	media->deleteData();
+	return 1;
 }
 
 int ACMediaLibrary::scanDirectories(std::vector<string> _paths, int _recursive, std::vector<string>& filenames) {
@@ -532,12 +538,12 @@ int ACMediaLibrary::saveACLLibrary(std::string _path){
 
 	int n_loops = this->getSize();
 	// we save UNnormalized features
-	denormalizeFeatures();
+	//denormalizeFeatures();
 	for(int i=0; i<n_loops; i++) {
 		media_library[i]->saveACL(library_file);
 	}
 	library_file.close();
-	normalizeFeatures();
+	//normalizeFeatures();
 }
 
 // XS TODO return value
@@ -546,7 +552,7 @@ int ACMediaLibrary::saveACLLibrary(std::string _path){
 // (obsolete ? useful ?)
 int ACMediaLibrary::saveXMLLibrary(std::string _path){
 	// we save UNnormalized features
-	denormalizeFeatures();
+	//denormalizeFeatures();
 
 	TiXmlDocument MC_doc;
     TiXmlDeclaration* MC_decl = new TiXmlDeclaration( "1.0", "", "" );
@@ -562,7 +568,7 @@ int ACMediaLibrary::saveXMLLibrary(std::string _path){
 	this->saveCoreXMLLibrary(MC_e_root, MC_e_medias);
 
 	// normalize features again
-	normalizeFeatures();
+	//normalizeFeatures();
 	MC_doc.SaveFile( _path.c_str());
 }
 
@@ -794,8 +800,8 @@ void ACMediaLibrary::normalizeFeatures(int needsNormalize) {
 	if (mPreProcessPlugin!=NULL){	
 		for(i=start; i<n; i++){
 			ACMedia* item = media_library[i];
-			std::vector<ACMediaFeatures*> tempFeatVect=mPreProcessPlugin->apply(mPreProcessInfo,item);
 			item->cleanPreProcFeaturesVector();
+			std::vector<ACMediaFeatures*> tempFeatVect=mPreProcessPlugin->apply(mPreProcessInfo,item);
 			item->getAllPreProcFeaturesVectors()=tempFeatVect;
 			tempFeatVect.clear();
 		}		
@@ -928,6 +934,19 @@ void ACMediaLibrary::setPreProcessPlugin(ACPlugin* acpl)
 		if (acpl->implementsPluginType(PLUGIN_TYPE_PREPROCESS))
 			mPreProcessPlugin=dynamic_cast<ACPreProcessPlugin*> (acpl) ;
 }
+void ACMediaLibrary::setMediaReaderPlugin(ACPlugin* acpl){	
+
+	
+	if (acpl==NULL&&mReaderPlugin!=NULL)
+	{		
+		mReaderPlugin=NULL;
+		
+	}
+	if (acpl!=NULL)
+		if (acpl->implementsPluginType(PLUGIN_TYPE_MEDIAREADER))
+			mReaderPlugin=dynamic_cast<ACMediaReaderPlugin*> (acpl) ;	
+}
+
 
 // -------------------------------------------------------------------------
 // test

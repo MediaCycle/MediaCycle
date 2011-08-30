@@ -65,6 +65,7 @@ const ACPluginType	PLUGIN_TYPE_POSITIONS			=	0x0400;//TR todo
 const ACPluginType	PLUGIN_TYPE_NOMETHOD_POSITIONS	=	0x0800;//CF updatePositions for the Clusters or Neighbors modes
 const ACPluginType	PLUGIN_TYPE_ALLMODES_PIPELINE	=	0x1000;//CF updateClusters and updateNeighborhoods and updatePositions for both modes
 const ACPluginType	PLUGIN_TYPE_PREPROCESS			=	0x2000;//CF updateClusters and updateNeighborhoods and updatePositions for both modes
+const ACPluginType	PLUGIN_TYPE_MEDIAREADER			=	0x4000;//CF updateClusters and updateNeighborhoods and updatePositions for both modes
 
 
 class ACPlugin {
@@ -93,8 +94,8 @@ protected:
 	std::string mName;
 	std::string mId;
 	std::string mDescription;
-	ACMediaType mMediaType;
 	ACPluginType mPluginType;
+	ACMediaType mMediaType;
 };
 
 // XS TODO : separate time & space plugins ?
@@ -179,6 +180,11 @@ public:
 protected:
 };
 
+class ACMediaReaderPlugin:virtual public ACPlugin{
+public:
+	ACMediaReaderPlugin();
+	virtual ACMedia* mediaFactory(ACMediaType mediaType)=0;
+};
 
 // the types of the class factories
 typedef ACPlugin* createPluginFactory(std::string);

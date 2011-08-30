@@ -90,6 +90,8 @@ OPTION(SUPPORT_PDF "Support PDF media" OFF)
 OPTION(SUPPORT_TEXT "Support text media" OFF)
 OPTION(SUPPORT_VIDEO "Support video media" OFF)
 OPTION(SUPPORT_MULTIMEDIA "Support multi media" OFF)
+OPTION(SUPPORT_ARCHIPEL "Support archipel médiathèque" OFF)
+
 
 OPTION(APPLE_IOS_DEV "Cross-compile for iPhone OS Device" OFF)
 OPTION(APPLE_IOS_SIM "Cross-compile for iPhone OS Simulator" OFF)
@@ -137,10 +139,11 @@ IF(SUPPORT_ALL)
 	SET(SUPPORT_3DMODEL ON)
 	SET(SUPPORT_AUDIO ON)
 	SET(SUPPORT_IMAGE ON)
-	SET(SUPPORT_PDF ON)
+	SET(SUPPORT_PDF OFF)
 	SET(SUPPORT_TEXT ON)
 	SET(SUPPORT_VIDEO ON)
 	SET(SUPPORT_MULTIMEDIA ON)
+	SET(SUPPORT_ARCHIPEL ON)
 ENDIF()
 
 IF(SUPPORT_VIDEO)
@@ -396,7 +399,7 @@ ENDIF ( Boost_FOUND )
 # FFmpeg, used as plugin for OSG and OpenCV
 # TODO: if FFmpeg found, check for OSG and OpenCV plugins
 # TODO: replace libsndfile/libsamplerate with FFmpeg for audio?
-IF(SUPPORT_VIDEO)
+IF(SUPPORT_VIDEO AND USE_FFMPEG)
 FIND_PACKAGE( FFmpeg )
 MESSAGE("Looking for FFmpeg libraries.")
 IF(FFMPEG_LIBAVFORMAT_FOUND)
@@ -439,7 +442,7 @@ ELSE()
 		MESSAGE(FATAL_ERROR "Some FFmpeg libraries are missing.")
 	ENDIF()
 ENDIF()
-ENDIF(SUPPORT_VIDEO)
+ENDIF(SUPPORT_VIDEO AND USE_FFMPEG)
 
 IF(CMAKE_COMPILER_IS_GNUCXX)
     # Remove -pedantic flag as it barfs on ffmpeg headers

@@ -118,5 +118,8 @@ ACPreProcessPlugin::ACPreProcessPlugin() {
 	
     //local vars
 }
+ACMediaReaderPlugin::ACMediaReaderPlugin(){
+	this->mPluginType=mPluginType|PLUGIN_TYPE_MEDIAREADER;
 
+}
 
