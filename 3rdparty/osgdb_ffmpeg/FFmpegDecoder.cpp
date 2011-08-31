@@ -29,8 +29,6 @@ FFmpegDecoder::FFmpegDecoder() :
 
 }
 
-
-
 FFmpegDecoder::~FFmpegDecoder()
 {
     close(true);
@@ -50,9 +48,10 @@ bool FFmpegDecoder::open(const std::string & filename, FFmpegParameters* paramet
         
             OSG_NOTICE<<"Attempting to stream "<<filename<<std::endl;
 
+            AVInputFormat *iformat;
+#if LIBAVFORMAT_BUILD < LIBAVFORMAT_BUILD_PARAM2DICT
             AVFormatParameters formatParams;
             memset(&formatParams, 0, sizeof(AVFormatParameters));
-            AVInputFormat *iformat;
 
             formatParams.channel = 0;
             formatParams.standard = 0;
@@ -65,6 +64,24 @@ bool FFmpegDecoder::open(const std::string & filename, FFmpegParameters* paramet
 #endif            
             formatParams.time_base.num = 1;
             formatParams.time_base.den = 30;
+#else /*LIBAVFORMAT_BUILD < LIBAVFORMAT_BUILD_PARAM2DICT*/
+            char buf[1024];
+			AVDictionary *opts = NULL;
+
+            snprintf(buf, sizeof(buf), "%d", 0);
+            av_dict_set(&opts, "channel", buf, 0);
+            snprintf(buf, sizeof(buf), "%d", 0);
+            av_dict_set(&opts, "standard", buf, 0);
+#if 1
+            snprintf(buf, sizeof(buf), "%dx%d", 320, 240);
+            av_dict_set(&opts, "video_size", buf, 0);
+#else
+            snprintf(buf, sizeof(buf), "%dx%d", 640, 480);
+            av_dict_set(&opts, "video_size", buf, 0);
+#endif
+            snprintf(buf, sizeof(buf), "%d/%d", 30, 1);
+            av_dict_set(&opts, "framerate", buf, 0);
+#endif /*LIBAVFORMAT_BUILD < LIBAVFORMAT_BUILD_PARAM2DICT*/
 
             std::string format = "video4linux2";
             iformat = av_find_input_format(format.c_str());
@@ -77,14 +94,19 @@ bool FFmpegDecoder::open(const std::string & filename, FFmpegParameters* paramet
             {
                 OSG_NOTICE<<"Failed to find input format: "<<format<<std::endl;
             }
-
+#if LIBAVFORMAT_BUILD < LIBAVFORMAT_BUILD_PARAM2DICT
             int error = av_open_input_file(&p_format_context, filename.c_str(), iformat, 0, &formatParams);
+#else
+            int error = avformat_open_input(&p_format_context, filename.c_str(), iformat, &opts);
+            av_dict_free(&opts);
+#endif
             if (error != 0)
             {
                 std::string error_str;
                 switch (error)
                 {
-                    //case AVERROR_UNKNOWN: error_str = "AVERROR_UNKNOWN"; break;   // same value as AVERROR_INVALIDDATA
+#if LIBAVUTIL_BUILD < LIBAVUTIL_BUILD_AVERRORFCT           
+                    //case AVERROR_UNKNOWN: error_str = "AVERROR_UNKNOWN"; break;   // same value as AVERROR_INVALIDDATA         
                     case AVERROR_IO: error_str = "AVERROR_IO"; break;
                     case AVERROR_NUMEXPECTED: error_str = "AVERROR_NUMEXPECTED"; break;
                     case AVERROR_INVALIDDATA: error_str = "AVERROR_INVALIDDATA"; break;
@@ -93,18 +115,38 @@ bool FFmpegDecoder::open(const std::string & filename, FFmpegParameters* paramet
                     case AVERROR_NOTSUPP: error_str = "AVERROR_NOTSUPP"; break;
                     case AVERROR_NOENT: error_str = "AVERROR_NOENT"; break;
                     case AVERROR_PATCHWELCOME: error_str = "AVERROR_PATCHWELCOME"; break;
+#else
+                    case AVERROR(EIO): error_str = "AVERROR_IO"; break;
+                    case AVERROR(EDOM): error_str = "AVERROR_NUMEXPECTED"; break;
+                    case AVERROR(EINVAL): error_str = "AVERROR_INVALIDDATA"; break;
+                    case AVERROR(ENOMEM): error_str = "AVERROR_NOMEM"; break;
+                    case AVERROR(EILSEQ): error_str = "AVERROR_NOFMT"; break;
+                    case AVERROR(ENOSYS): error_str = "AVERROR_NOTSUPP"; break;
+                    case AVERROR(ENOENT): error_str = "AVERROR_NOENT"; break;
+                    case (-MKTAG('P','A','W','E')): error_str = "AVERROR_PATCHWELCOME"; break;
+#endif
                     default: error_str = "Unknown error"; break;
                 }
-
+#if LIBAVFORMAT_BUILD < LIBAVFORMAT_BUILD_PARAM2DICT
                 throw std::runtime_error("av_open_input_file() failed : " + error_str);
+#else
+                throw std::runtime_error("avformat_open_input() failed : " + error_str);
+#endif
             }
         }
         else
         {
             AVInputFormat* av_format = (parameters ? parameters->getFormat() : 0);
+#if LIBAVFORMAT_BUILD < LIBAVFORMAT_BUILD_PARAM2DICT
             AVFormatParameters* av_params = (parameters ? parameters->getFormatParameter() : 0);
             if (av_open_input_file(&p_format_context, filename.c_str(), av_format, 0, av_params) !=0 )
                 throw std::runtime_error("av_open_input_file() failed");
+#else
+            AVDictionary *opts2 = (parameters ? parameters->getDictionary() : 0);
+            if (avformat_open_input(&p_format_context, filename.c_str(), av_format, &opts2) !=0 )
+                throw std::runtime_error("avformat_open_input() failed");
+            av_dict_free(&opts2);
+#endif
         }
         
         m_format_context.reset(p_format_context);
@@ -220,7 +262,11 @@ void FFmpegDecoder::findAudioStream()
 {
     for (unsigned int i = 0; i < m_format_context->nb_streams; ++i)
     {
-        if (m_format_context->streams[i]->codec->codec_type == CODEC_TYPE_AUDIO)
+#if LIBAVUTIL_BUILD < LIBAVUTIL_BUILD_CODEC2AVMEDIA
+		if(m_format_context->streams[i]->codec->codec_type == CODEC_TYPE_VIDEO)
+#else
+		if(m_format_context->streams[i]->codec->codec_type == AVMEDIA_TYPE_VIDEO)
+#endif
         {
             m_audio_stream = m_format_context->streams[i];
             m_audio_index = i;
@@ -238,7 +284,11 @@ void FFmpegDecoder::findVideoStream()
 {
     for (unsigned int i = 0; i < m_format_context->nb_streams; ++i)
     {
-        if (m_format_context->streams[i]->codec->codec_type == CODEC_TYPE_VIDEO)
+#if LIBAVUTIL_BUILD < LIBAVUTIL_BUILD_CODEC2AVMEDIA
+		if(m_format_context->streams[i]->codec->codec_type == CODEC_TYPE_VIDEO)
+#else
+		if(m_format_context->streams[i]->codec->codec_type == AVMEDIA_TYPE_VIDEO)
+#endif
         {
             m_video_stream = m_format_context->streams[i];
             m_video_index = i;

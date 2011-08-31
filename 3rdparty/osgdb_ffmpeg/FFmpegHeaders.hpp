@@ -20,6 +20,14 @@
 #endif
 //CF end
 
+//AM FFMPEG > 0.7 compatibility
+//when AVFormatParameter was deprecated for AVDictionary
+#define LIBAVFORMAT_BUILD_PARAM2DICT (53<<16 | 2<<8 | 0)
+//when AVERROR_... was deprecated for AVERROR(e)
+#define LIBAVUTIL_BUILD_AVERRORFCT (50<<16 | 12<<8 | 0) 
+//when CODEC_TYPE_... was deprecated for AVMEDIA_TYPE_...
+#define LIBAVUTIL_BUILD_CODEC2AVMEDIA (50<<16 | 14<<8 | 0) 
+
 extern "C"
 {
 #define __STDC_CONSTANT_MACROS
@@ -28,6 +36,8 @@ extern "C"
 #include <avcodec.h>
 #include <avformat.h>
 #include <avdevice.h>
+#include <imgutils.h>
+#include <parseutils.h>
 
 #ifdef USE_SWSCALE    
     #include <swscale.h>

@@ -151,8 +151,12 @@ inline bool FFmpegDecoder::loop() const
 
 inline double FFmpegDecoder::creation_time() const
 {
-   if(m_format_context) return m_format_context->timestamp;
-   else return HUGE_VAL;
+#if FF_API_TIMESTAMP
+   if(m_format_context) 
+       return m_format_context->timestamp;
+   else 
+#endif
+       return HUGE_VAL;
 }
 
 inline double FFmpegDecoder::duration() const

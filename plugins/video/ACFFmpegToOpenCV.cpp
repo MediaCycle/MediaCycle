@@ -47,7 +47,11 @@ int ACFFmpegToOpenCV::init(const char * file)
 	// Find the first video stream
     videoStream=-1;
     for(i=0; i<pFormatCtx->nb_streams; i++)
-        if(pFormatCtx->streams[i]->codec->codec_type==CODEC_TYPE_VIDEO)
+#if LIBAVUTIL_BUILD < (50<<16 | 14<<8 | 0) 
+		if(pFormatCtx->streams[i]->codec->codec_type==CODEC_TYPE_VIDEO)
+#else
+		if(pFormatCtx->streams[i]->codec->codec_type==AVMEDIA_TYPE_VIDEO)
+#endif
         {
             videoStream=i;
             fr = pFormatCtx->streams[videoStream]->r_frame_rate;

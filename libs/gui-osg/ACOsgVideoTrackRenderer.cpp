@@ -262,12 +262,18 @@ int ACOsgVideoSlitScanThread::computeSlitScan(){
 	
     // Register all formats and codecs
     av_register_all();
-	
+#if LIBAVFORMAT_BUILD < (53<<16 | 2<<8 | 0) 
     // Open video file
 	if(av_open_input_file(&pFormatCtx, filename.c_str(), 0, 0, 0)!=0){
-		std::cerr << "Couldn't open file" << std::endl;
+		std::cerr << "av_open_input_file : Couldn't open file" << std::endl;
 		return -1;
 	}
+#else
+	if(avformat_open_input(&pFormatCtx, filename.c_str(), 0, 0)!=0){
+		std::cerr << "avformat_open_input : Couldn't open file" << std::endl;
+		return -1;
+	}
+#endif
 	
 	// Retrieve stream information
 	if(av_find_stream_info(pFormatCtx)<0){
@@ -281,7 +287,11 @@ int ACOsgVideoSlitScanThread::computeSlitScan(){
 	// Count video streams
 	videoStreams=0;
 	for(i=0; i<pFormatCtx->nb_streams; i++)
+#if LIBAVUTIL_BUILD < (50<<16 | 14<<8 | 0) 
 		if(pFormatCtx->streams[i]->codec->codec_type==CODEC_TYPE_VIDEO)
+#else
+		if(pFormatCtx->streams[i]->codec->codec_type==AVMEDIA_TYPE_VIDEO)
+#endif
 			videoStreams++;
 	if(videoStreams == 0)
 		std::cout << "Didn't find any video stream." << std::endl;
@@ -293,7 +303,11 @@ int ACOsgVideoSlitScanThread::computeSlitScan(){
 		
 		videoStream=-1;
 		for(i=0; i<pFormatCtx->nb_streams; i++)
+#if LIBAVUTIL_BUILD < (50<<16 | 14<<8 | 0) 
 			if(pFormatCtx->streams[i]->codec->codec_type==CODEC_TYPE_VIDEO)
+#else
+			if(pFormatCtx->streams[i]->codec->codec_type==AVMEDIA_TYPE_VIDEO)
+#endif
 			{
 				videoStream=i;
 				break;
@@ -314,11 +328,15 @@ int ACOsgVideoSlitScanThread::computeSlitScan(){
 		
 		if (m_codec == 0)
 			throw std::runtime_error("avcodec_find_decoder() failed");
-		
+#if LIBAVCODEC_BUILD < (53<<16 | 8<<8 | 0) 		
 		// Open codec
 		if (avcodec_open(m_context, m_codec) < 0)
 			throw std::runtime_error("avcodec_open() failed");
-		
+#else
+		// Open codec
+		if (avcodec_open2(m_context, m_codec, NULL) < 0)
+			throw std::runtime_error("avcodec_open2() failed");
+#endif		
 		// Allocate video frame
 		AVFrame* m_frame=avcodec_alloc_frame();
 		
@@ -349,8 +367,16 @@ int ACOsgVideoSlitScanThread::computeSlitScan(){
 			if(packet.stream_index==videoStream)
 			{
 				// Decode video frame
-				avcodec_decode_video(m_context, m_frame, &frameFinished,packet.data, packet.size);
-				
+#if LIBAVCODEC_BUILD < (52<<16 | 23<<8 | 0)
+				avcodec_decode_video(m_context, m_frame, &frameFinished,packet.data, packet.size); // deprecated since 2009-04-07 - r18351 - lavc 52.23.0, totally removed in ffmpeg 0.8
+#else
+				AVPacket avpacket;
+				av_init_packet(&avpacket);
+				avpacket.data = packet.data;
+				avpacket.size = packet.size;
+				avpacket.flags = AV_PKT_FLAG_KEY; //TODO : check that this is needed
+				avcodec_decode_video2(m_context, m_frame, &frameFinished, &avpacket);
+#endif	
 				// Did we get a video frame?
 				if(frameFinished)
 				{
