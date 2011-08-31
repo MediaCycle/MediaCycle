@@ -23,6 +23,48 @@ public class ArchipelData {
 
 	public ArchipelData() {}
 
+	public String trackNumber(String ref, int i) {
+		i += 1;
+		int counter = 0;
+		String out = "";
+		
+	
+		// Double CDs
+		if (ref.equals("XO739I")){//XO739I 101-128 201-208
+			System.out.println("Reference '"+ref+"'");
+			if(i>=1 && i<=28)
+				counter = 100+i; 
+			else if (i>28 && i<=28+8)
+				counter = 200+i-28;
+			out += counter;
+		}
+		else if (ref.equals("HB4755")){//HB4755 301-309 401-410
+			if(i>=1 && i<=9)
+				counter = 300+i; 
+			else if (i>9 && i<=9+10)
+				counter = 400+i-9;
+			out += counter;
+		}
+		else if (ref.equals("XM665D")){//XM665D 101-112 201-211
+			if(i>=1 && i<=12)
+				counter = 100+i; 
+			/*else if (i>12 && i<=12+11)
+				counter = 200+i-12;*/
+			else if (i>12 && i<=12+11)
+				counter = 200+i-12;
+			else if (i==24)//missing track, ugly hack...
+				counter = 101;
+			out += counter;
+		}
+		else {
+			if( i<10)
+				out += "0"+i;
+			else
+				out += i;
+		}
+		return out;
+	}
+	
 	public String printXML() {
 		String out = "<?xml version='1.0' encoding=\"UTF-8\"?>\n";
 		out+="<archipel reference=\""+ref+"\">\n";
@@ -70,7 +112,8 @@ public class ArchipelData {
 			for (int i=0; i<tracksname.size(); i++) {
 				out+="\t<track position=\""+i+"\">\n";
 				out+="\t\t<artist><![CDATA["+tracksartist.get(i)+"]]></artist>\n";
-				out+="\t\t<path><![CDATA["+trackspath.get(i)+"]]></path>\n";
+				//out+="\t\t<path><![CDATA["+trackspath.get(i)+"]]></path>\n";
+				out+="\t\t<path><![CDATA["+ref+"/audio/"+ref+"-"+trackNumber(ref,i)+".ogg]]></path>\n";
 				out+="\t\t<title><![CDATA["+tracksname.get(i)+"]]></title>\n";
 				out+="\t</track>\n";
 			}

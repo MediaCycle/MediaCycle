@@ -1007,11 +1007,11 @@ void ACMultiMediaCycleOsgQt::loadDefaultConfig(ACMediaType _media_type, ACBrowse
 		std::string osg_plugin_error ="";
 	
 		if(_media_type == MEDIA_TYPE_VIDEO){
-			//TR #if defined(USE_FFMPEG)
+			#if defined(USE_FFMPEG)
 			videoReaderWriter = osgDB::Registry::instance()->getReaderWriterForExtension("ffmpeg");
-			/* TR #else
+			#else
 			videoReaderWriter = osgDB::Registry::instance()->getReaderWriterForExtension("mov");
-			#endif*/
+			#endif
 			osg_plugin_error = "Video plugins for OpenSceneGraph (FFmpeg or QuickTime or QTKit) are absent but necessary for interactive video navigation. Please install it or contact the MediaCycle team.";
 		}
 		if (_media_type == MEDIA_TYPE_VIDEO && !videoReaderWriter){

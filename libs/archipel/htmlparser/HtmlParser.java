@@ -49,6 +49,7 @@ public class HtmlParser {
 			String filepath = files[i];
 			XMLElement xml = openHTML(folderpath+filepath);
 			if (xml != null) {
+				System.out.println("xml not null");
 				context = CONTEXT_ALBUM;
 				archipeld = new ArchipelData();
 				String tfolder = filepath.substring(0,filepath.indexOf("."));
@@ -63,6 +64,7 @@ public class HtmlParser {
 					if (printfirstparsing) { System.err.println("PARSING TRACKS"); }
 					XMLElement tracks = openHTML(folderpath+tfolder+"/tracks.html");
 					if (tracks != null) {
+						System.out.println("tracks not null");
 						ms = tracks.getChildrenNamed("body");
 						if (ms.size() > 0) { recursiveNodeParsing(ms.get(0), null); }
 						// all tracks are in, now getting all tracks details
@@ -178,7 +180,7 @@ public class HtmlParser {
 	}
 
 	private boolean isIlot(XMLElement xe) {
-		return searchContentFor(xe, "Îlots:");
+		return searchContentFor(xe, "lots:");
 	}
 
 	private String collectAllContent(XMLElement xe) {
