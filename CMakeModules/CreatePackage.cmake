@@ -274,10 +274,12 @@ ENDIF(UNIX)
 #From: http://www.cmake.org/Wiki/BundleUtilitiesExample
 SET(plugin_dest_dir bin)
 SET(qtconf_dest_dir bin)
+SET(qtframeworks_dest_dir bin)
 SET(APPS "\${CMAKE_INSTALL_PREFIX}/bin/${PROGNAME}")
 IF(APPLE)
   SET(plugin_dest_dir ${PROGNAME}.app/Contents/MacOS)
   SET(qtconf_dest_dir ${PROGNAME}.app/Contents/Resources)
+  SET(qtframeworks_dest_dir ${PROGNAME}.app/Contents/Resources)
   SET(APPS "\${CMAKE_INSTALL_PREFIX}/${PROGNAME}.app")
 ENDIF(APPLE)
 IF(WIN32)
@@ -329,6 +331,8 @@ IF(WITH_QT4)
 	INSTALL(CODE "
  	   file(WRITE \"\${CMAKE_INSTALL_PREFIX}/${qtconf_dest_dir}/qt.conf\" \"[Paths]\nPlugins = plugins\")
  	   " COMPONENT Runtime)
+	# Really ugly, supposing Qt is installed thru MacPorts on Apple
+	INSTALL(DIRECTORY "/opt/local/lib/Resources/qt_menu.nib" DESTINATION ${qtframeworks_dest_dir} COMPONENT Runtime)
 ENDIF()
 ENDIF()
 

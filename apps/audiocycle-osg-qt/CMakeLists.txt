@@ -36,6 +36,13 @@ IF ( SUPPORT_AUDIO AND USE_QT4 AND USE_OSG AND USE_OSC AND ( OPENAL_FOUND OR POR
 		ADD_EXECUTABLE(audiocycle-osg-qt WIN32 ${multimediacycle-osg-qt_SRCS} ${multimediacycle-osg-qt_UIS_H} ${multimediacycle-osg-qt_MOC_SRCS} ${settings_SRCS} ${settings_UIS_H} ${settings_MOC_SRCS} ${settings_MOC_HDRS} ${settings_HS})
 	ELSE ()
 		IF ( APPLE )
+			# set how it shows up in the Info.plist file
+  			SET(MACOSX_BUNDLE_ICON_FILE MultiMediaCycle.icns) 
+  			# set where in the bundle to put the icns file
+  			SET_SOURCE_FILES_PROPERTIES(${CMAKE_SOURCE_DIR}/data/icons/MultiMediaCycle.icns PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+  			# include the icns file in the target
+  			SET(multimediacycle-osg-qt_SRCS ${multimediacycle-osg-qt_SRCS} ${CMAKE_SOURCE_DIR}/data/icons/MultiMediaCycle.icns)
+
 			ADD_EXECUTABLE(audiocycle-osg-qt ${APP_TYPE} ${MACOSX_BUNDLE_INFO_PLIST} ${multimediacycle-osg-qt_SRCS} ${multimediacycle-osg-qt_UIS_H} ${multimediacycle-osg-qt_MOC_SRCS} ${settings_SRCS} ${settings_UIS_H} ${settings_MOC_SRCS} ${settings_MOC_HDRS} ${settings_HS})
 		ELSE ()
 			ADD_EXECUTABLE(audiocycle-osg-qt ${multimediacycle-osg-qt_SRCS} ${multimediacycle-osg-qt_UIS_H} ${multimediacycle-osg-qt_MOC_SRCS} ${settings_SRCS} ${settings_UIS_H} ${settings_MOC_SRCS} ${settings_MOC_HDRS} ${settings_HS})
@@ -89,6 +96,28 @@ IF ( SUPPORT_AUDIO AND USE_QT4 AND USE_OSG AND USE_OSC AND ( OPENAL_FOUND OR POR
 		ENDIF ( USE_APPLE_MULTITOUCH )
 	ENDIF ( APPLE )
 
+	IF(NOT USE_DEBUG AND (APPLE OR UNIX))
+		IF(SUPPORT_AUDIO)
+			SET(USE_AUDIO ON)
+		ENDIF()
+		IF(SUPPORT_IMAGE)
+			SET(USE_IMAGE OFF)
+		ENDIF()
+		IF(SUPPORT_VIDEO)
+			SET(USE_VIDEO OFF)
+		ENDIF()
+		IF(SUPPORT_3DMODEL)
+			SET(USE_3DMODEL OFF)
+		ENDIF()
+		IF(SUPPORT_TEXT)
+			SET(USE_TEXT OFF)
+		ENDIF()	
+
+		SET(PROGNAME "audiocycle-osg-qt")
+        SET(MC_PACKAGE_DESCRIPTION_SUMMARY "MultiMediaCycle allows to organize media files by similarity.")
+		SET(WITH_QT4 ON)
+		INCLUDE (${CMAKE_SOURCE_DIR}/CMakeModules/CreatePackage.cmake)
+	ENDIF()
 	MESSAGE("[X] ${TARGET_NAME}")
 ELSE()
 	MESSAGE("[ ] ${TARGET_NAME}")
