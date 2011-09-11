@@ -1,0 +1,70 @@
+--- src/osgViewer/DarwinUtils.mm.orig	2011-04-19 13:40:22.000000000 +0200
++++ src/osgViewer/DarwinUtils.mm	2011-09-11 16:37:41.000000000 +0200
+@@ -12,6 +12,67 @@
+ #include "DarwinUtils.h"
+ #include <Cocoa/Cocoa.h>
+ 
++#ifdef __MAC_OS_X_VERSION_MIN_REQUIRED  
++#if __MAC_OS_X_VERSION_MIN_REQUIRED >= 1070  
++
++/*  
++ * CGDisplayBitsPerPixel became deprecated in 10.6 and is withdrawn in 10.7  
++ * so I need my own replacement. At present I have noi idea whether this  
++ * patch (basically found from a web-site lukassen.wordpress.com is supported  
++ * under 10.5 or earlier, or what predefines I can count on to detect SDK  
++ * versions and hence only activate it when needed.  
++ * A C Norman, July 2011.  
++ */  
++
++static size_t MyCGDisplayBitsPerPixel(CGDirectDisplayID displayId)  
++{  
++    CGDisplayModeRef mode = CGDisplayCopyDisplayMode(displayId);  
++    if (!mode)  
++    {  
++        OSG_WARN << "CGDisplayCopyDisplayMode returned NULL" << std::endl;  
++        return 0;  
++    }  
++    
++    CFStringRef pixEnc = CGDisplayModeCopyPixelEncoding(mode);  
++    if (!pixEnc)  
++    {  
++        OSG_WARN << "CGDisplayModeCopyPixelEncoding returned NULL" << std::endl;  
++        CGDisplayModeRelease(mode);  
++        return 0;  
++    }  
++    
++    size_t depth = 0;  
++    
++    if (CFStringCompare(pixEnc, CFSTR(IO32BitDirectPixels), kCFCompareCaseInsensitive) == 
++        kCFCompareEqualTo)  
++    {  
++        depth = 32;  
++    }  
++    else if (CFStringCompare(pixEnc, CFSTR(IO16BitDirectPixels), 
++                             kCFCompareCaseInsensitive) == kCFCompareEqualTo)  
++    {  
++        depth = 16;  
++    }  
++    else if (CFStringCompare(pixEnc, CFSTR(IO8BitIndexedPixels), 
++                             kCFCompareCaseInsensitive) == kCFCompareEqualTo)  
++    {  
++        depth = 8;  
++    }  
++    else  
++    {  
++        OSG_WARN << "Unable to match pixel encoding '" << CFStringGetCStringPtr(pixEnc, 
++                                                                                kCFStringEncodingUTF8) << "'" << std::endl;  
++    }  
++    
++    CGDisplayModeRelease(mode);  
++    CFRelease(pixEnc);  
++    return depth;  
++}  
++
++#define CGDisplayBitsPerPixel MyCGDisplayBitsPerPixel  
++#endif  
++#endif 
++
+ @interface MenubarToggler : NSObject {
+ 
+ }
