@@ -1,5 +1,5 @@
 /*
- *  ACMultiMediaCycleSeneffe.h
+ *  ACAudioCycleLoopJam.h
  *  MediaCycle
  *
  *  @author Xavier Siebert
@@ -32,21 +32,21 @@
  *
  */
 
-#ifndef _ACMULTIMEDIACYCLESENEFFE
-#define _ACMULTIMEDIACYCLESENEFFE
+#ifndef _ACAudioCycleLoopJam
+#define _ACAudioCycleLoopJam
 
 #include "ACMultiMediaCycleOsgQt.h"
 #include <vector>
 #include <string>
 
-class ACMultiMediaCycleSeneffe: public ACMultiMediaCycleOsgQt {
+class ACAudioCycleLoopJam: public ACMultiMediaCycleOsgQt {
 Q_OBJECT
 public slots:
 	void loopXML();
 
 public:
-	ACMultiMediaCycleSeneffe();
-	~ACMultiMediaCycleSeneffe();
+	ACAudioCycleLoopJam();
+	~ACAudioCycleLoopJam();
 	void startLoopXML();
 private:
 	int count, attente; 
@@ -55,4 +55,4 @@ private:
 };
 
 
-#endif // _ACMULTIMEDIACYCLESENEFFE
+#endif // _ACAudioCycleLoopJam

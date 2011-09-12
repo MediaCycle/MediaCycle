@@ -125,6 +125,8 @@ ACMultiMediaCycleOsgQt::ACMultiMediaCycleOsgQt(QWidget *parent) : QMainWindow(pa
 	this->use_feature_extraction = true;
 	this->use_visualization_plugins = true;
 	
+	this->auto_connect_osc = false;
+	
 	// Apple bundled *.app, just look for bundled osg plugins
 	#ifndef USE_DEBUG
 	#if defined __APPLE__ and not defined (XCODE)
@@ -667,14 +669,14 @@ bool ACMultiMediaCycleOsgQt::addControlDock(ACAbstractDockWidgetQt* dock)
 			}
 		}
 	}
-
+	
 	//XS TODO check indices -- or use push_back
 	dockWidgets.resize(dockWidgets.size()+1);
 	lastDocksVisibilities.resize(lastDocksVisibilities.size()+1);
 
 	dockWidgets[dockWidgets.size()-1]=dock;
 
-	if( dock->getMediaType() == MEDIA_TYPE_ALL || dock->getMediaType() == media_type ){
+	if( dock->getMediaType() == MEDIA_TYPE_ALL || dock->getMediaType() == media_type || dock->getMediaType() == MEDIA_TYPE_MIXED ){
 		lastDocksVisibilities[lastDocksVisibilities.size()-1]=1;
 		this->addDockWidget(Qt::LeftDockWidgetArea,dockWidgets[dockWidgets.size()-1]);
 		dockWidgets[dockWidgets.size()-1]->setVisible(true);
@@ -689,6 +691,11 @@ bool ACMultiMediaCycleOsgQt::addControlDock(ACAbstractDockWidgetQt* dock)
 		//CF ugly, use signals?
 		connect(((ACMediaConfigDockWidgetQt*)dockWidgets[dockWidgets.size()-1])->getComboDefaultSettings(), SIGNAL(currentIndexChanged(const QString &)), this, SLOT(comboDefaultSettingsChanged()));
 	}
+	
+	if (dockWidgets[dockWidgets.size()-1]->getClassName()=="ACOSCDockWidgetQt" && auto_connect_osc){
+		((ACOSCDockWidgetQt*)dockWidgets[dockWidgets.size()-1])->autoConnect(true);
+	}
+	
 	return true;
 }
 
@@ -701,7 +708,7 @@ void ACMultiMediaCycleOsgQt::syncControlToggleWithDocks(){
 	int docksVisibilitiesSum = 0;
 
 	for (int d=0;d<dockWidgets.size();d++){
-		if (dockWidgets[d]->getMediaType() == media_type || dockWidgets[d]->getMediaType() == MEDIA_TYPE_ALL)
+		if (dockWidgets[d]->getMediaType() == media_type || dockWidgets[d]->getMediaType() == MEDIA_TYPE_ALL || dockWidgets[d]->getMediaType() == MEDIA_TYPE_MIXED)
 			docksVisibilitiesSum += dockWidgets[d]->isVisible();
 	}
 
@@ -717,7 +724,7 @@ void ACMultiMediaCycleOsgQt::syncControlToggleWithDocks(){
 		}
 		else if (lastDocksVisibilitiesSum == 0 && !wasControlsToggleChecked){
 			for (int d=0;d<dockWidgets.size();d++){
-				if (dockWidgets[d]->getMediaType() == media_type || dockWidgets[d]->getMediaType() == MEDIA_TYPE_ALL)
+				if (dockWidgets[d]->getMediaType() == media_type || dockWidgets[d]->getMediaType() == MEDIA_TYPE_ALL || dockWidgets[d]->getMediaType() == MEDIA_TYPE_MIXED)
 					dockWidgets[d]->setVisible(true);
 			}
 
@@ -725,19 +732,19 @@ void ACMultiMediaCycleOsgQt::syncControlToggleWithDocks(){
 		else {
 			if (!wasControlsToggleChecked){
 				for (int d=0;d<dockWidgets.size();d++){
-					if (dockWidgets[d]->getMediaType() == media_type || dockWidgets[d]->getMediaType() == MEDIA_TYPE_ALL)
+					if (dockWidgets[d]->getMediaType() == media_type || dockWidgets[d]->getMediaType() == MEDIA_TYPE_ALL || dockWidgets[d]->getMediaType() == MEDIA_TYPE_MIXED)
 						dockWidgets[d]->setVisible((bool)(lastDocksVisibilities[d]));
 				}
 			}
 		}
 		for (int d=0;d<dockWidgets.size();d++){
-			if (dockWidgets[d]->getMediaType() == media_type || dockWidgets[d]->getMediaType() == MEDIA_TYPE_ALL)
+			if (dockWidgets[d]->getMediaType() == media_type || dockWidgets[d]->getMediaType() == MEDIA_TYPE_ALL || dockWidgets[d]->getMediaType() == MEDIA_TYPE_MIXED)
 				lastDocksVisibilities[d]=dockWidgets[d]->isVisible();
 		}
 	}
 	else {
 		for (int d=0;d<dockWidgets.size();d++){
-			if (dockWidgets[d]->getMediaType() == media_type || dockWidgets[d]->getMediaType() == MEDIA_TYPE_ALL)
+			if (dockWidgets[d]->getMediaType() == media_type || dockWidgets[d]->getMediaType() == MEDIA_TYPE_ALL || dockWidgets[d]->getMediaType() == MEDIA_TYPE_MIXED)
 				dockWidgets[d]->setVisible(false);
 		}
 	}
@@ -963,7 +970,7 @@ void ACMultiMediaCycleOsgQt::configureDockWidgets(ACMediaType _media_type){
 //			((ACMediaConfigDockWidgetQt*)dockWidgets[d])->getComboDefaultSettings()->setCurrentIndex(index_media);
 //		}
 
-		if (dockWidgets[d]->getMediaType() == MEDIA_TYPE_ALL || dockWidgets[d]->getMediaType() == _media_type){
+		if (dockWidgets[d]->getMediaType() == MEDIA_TYPE_ALL || dockWidgets[d]->getMediaType() == _media_type || dockWidgets[d]->getMediaType() == MEDIA_TYPE_MIXED){
 			if (this->dockWidgetArea(dockWidgets[d]) == Qt::NoDockWidgetArea){
 				this->addDockWidget(Qt::LeftDockWidgetArea,dockWidgets[d]);
 				dockWidgets[d]->show();
@@ -1130,6 +1137,8 @@ void ACMultiMediaCycleOsgQt::loadDefaultConfig(ACMediaType _media_type, ACBrowse
 			this->switchFeatureExtraction(true);
 		}
 		smedia=string("text");
+		//media_cycle->setPreProcessPlugin("TextFeaturesSparse");
+		//f_plugin = s_path + "/../../../../../../plugins/"+ smedia + "_sparse/" + build_type + "/mc_" + smedia +"_sparse.dylib";
 		f_plugin = s_path + "/../../../../../../plugins/"+ smedia + "/" + build_type + "/mc_" + smedia +".dylib";
 		if(media_cycle->addPluginLibrary(f_plugin) == -1){
 			this->showError("Couldn't load the feature extraction plugin. Importing media files might work only by loading XML library files.");
@@ -1453,4 +1462,9 @@ void ACMultiMediaCycleOsgQt::switchFeatureExtraction(bool _status)
 void ACMultiMediaCycleOsgQt::switchPluginVisualizations(bool _status)
 {
 	use_visualization_plugins = _status;
+}
+
+void ACMultiMediaCycleOsgQt::autoConnectOSC(bool _status)
+{
+	auto_connect_osc = _status;
 }

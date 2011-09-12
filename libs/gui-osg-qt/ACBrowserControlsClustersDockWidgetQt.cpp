@@ -185,7 +185,15 @@ void ACBrowserControlsClustersDockWidgetQt::configureCheckBoxes()
         QListWidgetItem * item = new QListWidgetItem(s,ui.featuresListWidget);
         item->setCheckState (Qt::Unchecked);
     }
-
+	
+	//CF Automatic feature list height update to be debugged
+	/*
+	ui.featuresListWidget->setMinimumHeight(ui.featuresListWidget->sizeHintForRow(0)*plugins_list.size());
+	ui.featuresListWidget->adjustSize();
+	//ui.groupBoxSimilarity->setMinimumHeight(ui.featuresListWidget->sizeHintForColumn(0));
+	ui.groupBoxSimilarity->adjustSize();
+	*/
+	
     this->synchronizeFeaturesWeights();
 
     connect(ui.featuresListWidget, SIGNAL(itemClicked(QListWidgetItem*)),
@@ -232,7 +240,6 @@ void ACBrowserControlsClustersDockWidgetQt::updatePluginLists()
                         //CF default settings: no Clusters Method plugin, use KMeans
                     }
                     ui.comboBoxClustersMethod->addItem(QString(acpl->getPluginLibrary(i)->getPlugin(j)->getName().c_str()));
-					
 					//if (media_type == MEDIA_TYPE_TEXT && ui.comboBoxClustersMethod->currentText().toStdString() == "KMeans (default)")
                 }
                 else if (acpl->getPluginLibrary(i)->getPlugin(j)->implementsPluginType(PLUGIN_TYPE_CLUSTERS_POSITIONS))
@@ -250,4 +257,22 @@ void ACBrowserControlsClustersDockWidgetQt::updatePluginLists()
             }
         }
     }
+	
+	if(getMediaType() == MEDIA_TYPE_TEXT || getMediaType() == MEDIA_TYPE_MIXED){
+		int comboBoxClustersMethodIndex = ui.comboBoxClustersMethod->findText("ACSparseCosKMeans");
+		if (comboBoxClustersMethodIndex > -1){
+			ui.comboBoxClustersMethod->setCurrentIndex(comboBoxClustersMethodIndex);
+			media_cycle->changeClustersMethodPlugin("ACSparseCosKMeans");
+		}
+		int comboBoxClustersPositionsIndex = ui.comboBoxClustersPositions->findText("ACSparseCosClustPosition");
+		if (comboBoxClustersPositionsIndex > -1){
+			ui.comboBoxClustersPositions->setCurrentIndex(comboBoxClustersPositionsIndex);
+			media_cycle->changeClustersPositionsPlugin("ACSparseCosClustPosition");
+		}
+	}
+	/*else{
+		ui.comboBoxClustersMethod->setCurrentIndex(1);
+		ui.comboBoxClustersPositions->setCurrentIndex(1);
+	}*/
+	
 }

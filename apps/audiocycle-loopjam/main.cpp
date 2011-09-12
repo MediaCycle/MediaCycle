@@ -1,11 +1,10 @@
 /*
- *  ACAudioCycleOsgQt main.cpp
+ *  ACAudioCycleLoopJam main.cpp
  *  MediaCycle
  *
- *  @author Christian Frisson
- *  @date 16/02/10
- *
- *  @copyright (c) 2010 – UMONS - Numediart
+ *  @author Xavier Siebert
+ *  @date 17/05/11
+ *  @copyright (c) 2011 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
  *  licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -35,13 +34,15 @@
 
 #include <QApplication>
 #include <QtGui>
-#include "ACMultiMediaCycleSeneffe.h"
+#include "ACAudioCycleLoopJam.h"
 
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
-	ACMultiMediaCycleSeneffe window;
+	ACAudioCycleLoopJam window;
 	try {
+		window.autoConnectOSC(true); // ugly, to be set before adding palettes
+
 		// Adding palettes
 		window.addControlDock("MCOSC");
 		window.addControlDock("MCBrowserControlsClusters");//"MCBrowserControlsClustersNeighbors");
@@ -50,6 +51,9 @@ int main(int argc, char *argv[])
 		window.setDefaultQSettings(); // skip the first dialog about saved settings
 		window.loadDefaultConfig(MEDIA_TYPE_AUDIO);
 		window.show();
+		
+		window.on_actionFullscreen_triggered(true); // ugly, to be set after the window is show otherwise palettes stay visible...
+
 	}
 	catch (const exception& e) {
 		cout << "** caught exception in main : " << e.what() << endl;
@@ -62,7 +66,7 @@ int main(int argc, char *argv[])
 
 	app.setOrganizationName("numediart");
 	app.setOrganizationDomain("numediart.org");
-	app.setApplicationName("AudioCycle (Seneffe Demo)");
+	app.setApplicationName("LoopJam");
 
     return app.exec();
 }

@@ -59,8 +59,12 @@ private slots:
 public:
 	ACOSCDockWidgetQt(QWidget *parent = 0);
 	~ACOSCDockWidgetQt();
+	
+	void autoConnect(bool _status = true);
 
-#if defined (USE_OSC)	
+#if defined (USE_OSC)
+	void toggleControl(bool _status);
+	void toggleFeedback(bool _status);	
 	void disableControl();
 	void disableFeedback();
 	void setControlPort(int port);
@@ -80,5 +84,6 @@ private:
 	ACOscBrowser *osc_browser;
 	ACOscFeedback *osc_feedback;
 #endif //defined (USE_OSC)
+	bool auto_connect;
 };
 #endif

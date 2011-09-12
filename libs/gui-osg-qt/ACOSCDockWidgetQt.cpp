@@ -44,6 +44,7 @@ ACOSCDockWidgetQt::ACOSCDockWidgetQt(QWidget *parent)
 	osc_browser = 0;
 	osc_feedback = 0;
 	#endif //defined (USE_OSC)
+	auto_connect = false;
 }
 
 ACOSCDockWidgetQt::~ACOSCDockWidgetQt(){
@@ -61,21 +62,24 @@ ACOSCDockWidgetQt::~ACOSCDockWidgetQt(){
 	#endif //defined (USE_OSC)
 }
 
+void ACOSCDockWidgetQt::autoConnect(bool _status)
+{
+	auto_connect = _status;
+}
+
 #if defined (USE_OSC)
-void ACOSCDockWidgetQt::on_pushButtonControlStart_clicked() {
-	std::cout << "Control IP: " << ui.lineEditControlIP->text().toStdString() << std::endl;
-	std::cout << "Control Port: " << ui.spinBoxControlPort->value() << std::endl;
-	if ( ui.pushButtonControlStart->text().toStdString() == "Start") {
+void ACOSCDockWidgetQt::toggleControl(bool _status){
+	if(_status){
 		osc_browser = new ACOscBrowser();
 		osc_browser->create(ui.lineEditControlIP->text().toStdString().c_str(), ui.spinBoxControlPort->value());
 		osc_browser->setMediaCycle(media_cycle);
-		#ifdef SUPPORT_AUDIO
-			osc_browser->setAudioEngine(audio_engine);
-		#endif//def SUPPORT_AUDIO
+	#ifdef SUPPORT_AUDIO
+		osc_browser->setAudioEngine(audio_engine);
+	#endif//def SUPPORT_AUDIO
 		osc_browser->start();
 		ui.pushButtonControlStart->setText("Stop");
 	}
-	else if ( ui.pushButtonControlStart->text().toStdString() == "Stop") {
+	else {
 		osc_browser->stop();
 		osc_browser->release();
 		delete osc_browser;
@@ -84,10 +88,8 @@ void ACOSCDockWidgetQt::on_pushButtonControlStart_clicked() {
 	}
 }
 
-void ACOSCDockWidgetQt::on_pushButtonFeedbackStart_clicked() {
-	std::cout << "Feedback IP: " << ui.lineEditFeedbackIP->text().toStdString() << std::endl;
-	std::cout << "Feedback Port: " << ui.spinBoxFeedbackPort->value() << std::endl;
-	if ( ui.pushButtonFeedbackStart->text().toStdString() == "Start") {
+void ACOSCDockWidgetQt::toggleFeedback(bool _status){
+	if(_status){
 		osc_feedback = new ACOscFeedback();
 		osc_feedback->create(ui.lineEditFeedbackIP->text().toStdString().c_str(), ui.spinBoxFeedbackPort->value());
 		if (osc_browser)
@@ -95,15 +97,37 @@ void ACOSCDockWidgetQt::on_pushButtonFeedbackStart_clicked() {
 		osc_feedback->messageBegin("test");
 		std::cout << "sending test messages to " << ui.lineEditFeedbackIP->text().toStdString().c_str() << " on port " << ui.spinBoxFeedbackPort->value() << " ..." << endl;
 		osc_feedback->messageSend();
-		ui.pushButtonFeedbackStart->setText("Stop");
+		ui.pushButtonFeedbackStart->setText("Stop");	
 	}
-	else if ( ui.pushButtonFeedbackStart->text().toStdString() == "Stop") {
+	else {
 		if (osc_browser)
 			osc_browser->setFeedback(0);
 		osc_feedback->release();
 		delete osc_feedback;
 		osc_feedback = 0;
-		ui.pushButtonFeedbackStart->setText("Start");
+		ui.pushButtonFeedbackStart->setText("Start");		
+	}		
+}
+
+void ACOSCDockWidgetQt::on_pushButtonControlStart_clicked() {
+	std::cout << "Control IP: " << ui.lineEditControlIP->text().toStdString() << std::endl;
+	std::cout << "Control Port: " << ui.spinBoxControlPort->value() << std::endl;
+	if ( ui.pushButtonControlStart->text().toStdString() == "Start") {
+		this->toggleControl(true);
+	}
+	else if ( ui.pushButtonControlStart->text().toStdString() == "Stop") {
+		this->toggleControl(false);
+	}
+}
+
+void ACOSCDockWidgetQt::on_pushButtonFeedbackStart_clicked() {
+	std::cout << "Feedback IP: " << ui.lineEditFeedbackIP->text().toStdString() << std::endl;
+	std::cout << "Feedback Port: " << ui.spinBoxFeedbackPort->value() << std::endl;
+	if ( ui.pushButtonFeedbackStart->text().toStdString() == "Start") {
+		this->toggleFeedback(true);
+	}
+	else if ( ui.pushButtonFeedbackStart->text().toStdString() == "Stop") {
+		this->toggleFeedback(false);
 	}
 }
 
@@ -157,6 +181,10 @@ void ACOSCDockWidgetQt::setMediaCycle(MediaCycle* _media_cycle)
 	media_cycle = _media_cycle; 
 	if(osc_browser)
 		osc_browser->setMediaCycle(_media_cycle);
+	if(auto_connect){
+		this->toggleControl(true);
+		this->toggleFeedback(true);
+	}
 }
 
 #if defined (SUPPORT_AUDIO)

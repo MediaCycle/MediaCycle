@@ -86,7 +86,8 @@ public slots:
 private slots:
 	// Controls
 	void syncControlToggleWithDocks();
-	
+
+public slots:	
 	// Library controls
 	void on_actionLoad_XML_triggered(bool checked); // features
 	void on_actionSave_XML_triggered(bool checked);	
@@ -147,6 +148,8 @@ public:
 	void switchFeatureExtraction(bool _status);// disable/enable feature extraction when (failing) loading feature extraction plugins and changing media types
 	void switchPluginVisualizations(bool _status);// disable/enable visualization from plugins when (failing) loading visualization plugins and changing media types
 	
+	void autoConnectOSC(bool _status = true);
+	
 private:
 	// variables
 	Ui::ACMediaCycleOsgQt ui;
@@ -201,5 +204,6 @@ private:
 	QProgressBar* progressBar;
 	
 	bool use_segmentation_current,use_segmentation_default,use_feature_extraction,use_visualization_plugins;
+	bool auto_connect_osc;
 };
 #endif
