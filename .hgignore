@@ -18,5 +18,14 @@ cmake.check_cache
 \#*
 .\#*
 data/dataset*
+demos/openFrameworks/addons
+demos/openFrameworks/apps
+demos/openFrameworks/libs
+demos/openFrameworks/other
+demos/openFrameworks/readme.txt
+demos/openFrameworks/scripts
+demos/openFrameworks/xcode*
+demos/openFrameworks/numediart/*/*/bin
+demos/openFrameworks/numediart/*/*/build
 
 # switch to regexp syntax.
