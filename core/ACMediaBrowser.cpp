@@ -33,7 +33,7 @@
  */
 
 #include "ACMediaBrowser.h"
-#include <float.h>
+#include <float.h> //FLT_MAX
 
 using namespace std;
 
@@ -647,10 +647,12 @@ int ACMediaBrowser::getKNN(int id, vector<int> &ids, int k) {
 
 	distances.resize(object_count);
 	
-	for (i=0; i<object_count; i++) {		
-		distances[i] = compute_distance(loops[el]->getAllPreProcFeaturesVectors(), loops[i]->getAllPreProcFeaturesVectors(), mFeatureWeights, false);
-		if (distances[i]>max_distance) {
-			max_distance = distances[i];
+	for (i=0; i<object_count; i++) {
+		if(loops[el]->getType() == mLibrary->getMediaType() && loops[i]->getType() == mLibrary->getMediaType()){//CF multimedia compatibility
+			distances[i] = compute_distance(loops[el]->getAllPreProcFeaturesVectors(), loops[i]->getAllPreProcFeaturesVectors(), mFeatureWeights, false);
+			if (distances[i]>max_distance) {
+				max_distance = distances[i];
+			}
 		}
 	}
 	max_distance++;
@@ -710,10 +712,12 @@ int ACMediaBrowser::getKNN(ACMedia *aMedia, vector<ACMedia *> &result, int k) {
     distances.resize(object_count);
 
     for (i = 0; i < object_count; i++) {
-        distances[i] = compute_distance(aMedia->getAllPreProcFeaturesVectors(), loops[i]->getAllPreProcFeaturesVectors(), mFeatureWeights, false);
-        if (distances[i] > max_distance) {
-            max_distance = distances[i];
-        }
+		if(aMedia->getType() == mLibrary->getMediaType() && loops[i]->getType() == mLibrary->getMediaType()){//CF multimedia compatibility
+			distances[i] = compute_distance(aMedia->getAllPreProcFeaturesVectors(), loops[i]->getAllPreProcFeaturesVectors(), mFeatureWeights, false);
+			if (distances[i] > max_distance) {
+				max_distance = distances[i];
+			}
+		}	
     }
     max_distance++;
     //distances[el] = max_distance;
@@ -787,7 +791,7 @@ void ACMediaBrowser::initClusterCenters(){
 void ACMediaBrowser::updateClusters(bool animate, int needsCluster) {
 
 	if (mClustersMethodPlugin==0 && mNoMethodPosPlugin==0){//CF no plugin set, factory settings
-		std::cout << "updateNextPositions : Cluster KMeans (default)" << std::endl;
+		std::cout << "updateClusters : Cluster KMeans (default)" << std::endl;
 		updateClustersKMeans(animate, needsCluster);
 	}
 	else{//TR TODO cancell the clustering if needCluster ==0
@@ -920,20 +924,23 @@ void ACMediaBrowser::updateClustersKMeans(bool animate, int needsCluster) {
 			cluster_accumulators[i].resize(feature_count);
 
 			// initialize cluster center with a randomly chosen object
-			int r = rand() % object_count;
-			// SD OCT 2010 - for gradual appearance of media to be more stable
-			r = i % object_count;
-			int l = 100;
-
-			// TODO SD - Avoid selecting the same twice
-			while(l--)
-			{
-				if(this->getMediaNode(r).getNavigationLevel() >= mNavigationLevel) break;
-				else r = rand() % object_count;
-			}
-
-			// couldn't find center in this nav level...
-			if(l <= 0) return;
+			int r = 0;//CF
+			if(mLibrary->getMediaType() != MEDIA_TYPE_MIXED){//CF
+				r = rand() % object_count;
+				// SD OCT 2010 - for gradual appearance of media to be more stable
+				r = i % object_count;
+				int l = 100;
+				
+				// TODO SD - Avoid selecting the same twice
+				while(l--)
+				{
+					if(this->getMediaNode(r).getNavigationLevel() >= mNavigationLevel) break;
+					else r = rand() % object_count;
+				}
+				
+				// couldn't find center in this nav level...
+				if(l <= 0) return;
+			}	
 
 			for(f=0; f<feature_count; f++)
 			{
@@ -945,7 +952,8 @@ void ACMediaBrowser::updateClustersKMeans(bool animate, int needsCluster) {
 
 				for(d=0; d<desc_count; d++)
 				{
-					mClusterCenters[i][f][d] = mLibrary->getMedia(r)->getPreProcFeaturesVector(f)->getFeatureElement(d);
+					if(mLibrary->getMedia(r)->getType() == mLibrary->getMediaType())//CF
+						mClusterCenters[i][f][d] = mLibrary->getMedia(r)->getPreProcFeaturesVector(f)->getFeatureElement(d);
 					
 					//printf("cluster  %d center: %f\n", i, mClusterCenters[i][f][d]);
 				}
@@ -983,12 +991,12 @@ void ACMediaBrowser::updateClustersKMeans(bool animate, int needsCluster) {
 				// check if we should include this object
 				// note: the following "if" skips to next i if true.
 				if(this->getMediaNode(i).getNavigationLevel() < mNavigationLevel) continue;
-
+				
 				// compute distance between this object and every cluster
 				for(j=0; j<mClusterCount; j++)
 				{
 					cluster_distances[j] = 0;
-					if(mLibrary->getMedia(i)->getType() == mLibrary->getMediaType())//CF
+					if(mLibrary->getMedia(i)->getType() == mLibrary->getMediaType())//CF multimedia compatibility
 						cluster_distances[j] = compute_distance(mLibrary->getMedia(i)->getAllPreProcFeaturesVectors(), mClusterCenters[j], mFeatureWeights, false);
 					
 					
@@ -1015,7 +1023,8 @@ void ACMediaBrowser::updateClustersKMeans(bool animate, int needsCluster) {
 					
 					for(d=0; d<desc_count; d++)
 					{
-						cluster_accumulators[jmin][f][d] += mLibrary->getMedia(i)->getPreProcFeaturesVector(f)->getFeatureElement(d);
+						if(mLibrary->getMedia(i)->getType() == mLibrary->getMediaType())//CF
+							cluster_accumulators[jmin][f][d] += mLibrary->getMedia(i)->getPreProcFeaturesVector(f)->getFeatureElement(d);
 					}
 				}
 				
@@ -1054,7 +1063,7 @@ void ACMediaBrowser::updateClustersKMeans(bool animate, int needsCluster) {
 		for(j=0; j<mClusterCount; j++) {
 
 			cluster_distances[j] = 0;
-			if(mLibrary->getMedia(i)->getType() == mLibrary->getMediaType())
+			if(mLibrary->getMedia(i)->getType() == mLibrary->getMediaType())//CF multimedia compatibility
 				cluster_distances[j] = compute_distance(mLibrary->getMedia(i)->getAllPreProcFeaturesVectors(), mClusterCenters[j], mFeatureWeights, false);
 		}		
 		
@@ -1110,17 +1119,17 @@ void ACMediaBrowser::updateNextPositionsPropeller() {
 		dtmin[ci] = FLT_MAX;
 		dtmax[ci] = 0;
 	}
-
+	
 	// SD 2011 may - normalization of radius and angle to use full available range
 	for (ACMediaNodes::iterator node = mLoopAttributes.begin(); node != mLoopAttributes.end(); ++node) {
-
+				
 		ci = (*node).getClusterId();
 		
-		if(mLibrary->getMedia((*node).getMediaId())->getType() == mLibrary->getMediaType() && mLibrary->getMedia(mReferenceNode)->getType() == mLibrary->getMediaType())//CF
+		if(mLibrary->getMedia((*node).getMediaId())->getType() == mLibrary->getMediaType() && mLibrary->getMedia(mReferenceNode)->getType() == mLibrary->getMediaType()){//CF multimedia compatibility
 			r = compute_distance(mLibrary->getMedia(mReferenceNode)->getAllPreProcFeaturesVectors(), 
 							 mLibrary->getMedia((*node).getMediaId())->getAllPreProcFeaturesVectors(), 
 							 mFeatureWeights, false) * 10.0;
-
+		}
 		if (r<rmin[ci]) {
 			rmin[ci] = r;
 		}
@@ -1128,7 +1137,7 @@ void ACMediaBrowser::updateNextPositionsPropeller() {
 			rmax[ci] = r;
 		}
 		
-		if(mLibrary->getMedia((*node).getMediaId())->getType() == mLibrary->getMediaType())//CF
+		if(mLibrary->getMedia((*node).getMediaId())->getType() == mLibrary->getMediaType())//CF multimedia compatibility
 			dt = compute_distance(mLibrary->getMedia((*node).getMediaId())->getAllPreProcFeaturesVectors(), mClusterCenters[ci], mFeatureWeights, false) / 2.0 * 10.0;
 		
 		if (dt<dtmin[ci]) {
@@ -1158,7 +1167,7 @@ void ACMediaBrowser::updateNextPositionsPropeller() {
 		r /= 2.0f;
 
 		// dt = 1;
-		if(mLibrary->getMedia((*node).getMediaId())->getType() == mLibrary->getMediaType())//CF
+		if(mLibrary->getMedia((*node).getMediaId())->getType() == mLibrary->getMediaType())//CF multimedia compatibility
 			dt = compute_distance(mLibrary->getMedia((*node).getMediaId())->getAllPreProcFeaturesVectors(), mClusterCenters[ci], mFeatureWeights, false) / 2.0 * 10.0;
 		if (dtmax[ci]>dtmin[ci]) {
 			dt = -0.3f + 1.6f * (dt - dtmin[ci])/(dtmax[ci]-dtmin[ci]);
@@ -1912,7 +1921,7 @@ void ACMediaBrowser::commitPositions()
 	for (ACMediaNodes::iterator node = mLoopAttributes.begin(); node != mLoopAttributes.end(); ++node){
 		(*node).commitPosition();
 		if(mLibrary->getMediaType() == MEDIA_TYPE_MIXED)
-			std::cout << "Node " << (*node).getMediaId() << " at position " << (*node).getCurrentPosition().x << " " << (*node).getCurrentPosition().y << " "<< (*node).getCurrentPosition().z << std::endl;
+			std::cout << "Node " << (int)((*node).getMediaId()) << " of media type " << ACMediaFactory::getInstance().getNormalCaseStringFromMediaType( mLibrary->getMedia((*node).getMediaId())->getType() ) << " at position " <<  (*node).getCurrentPosition().x << " " << (*node).getCurrentPosition().y << " "<< (*node).getCurrentPosition().z << std::endl;
 	}
 }
 

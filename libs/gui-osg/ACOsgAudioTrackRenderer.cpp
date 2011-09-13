@@ -1143,26 +1143,27 @@ void ACOsgAudioTrackRenderer::updateTracks(double ratio) {
 			std::cout << std::endl;
 
 			//CF: dummy segments for testing
-			if (media->getNumberOfSegments()==0){
-				for (int s=0;s<4;s++){
-					ACMedia* seg = ACMediaFactory::getInstance().create(media);
-					seg->setParentId(media->getId());
-					media->addSegment(seg);//dummy
+			if(media_cycle->getLibrary()->getMediaType() != MEDIA_TYPE_MIXED){
+				if (media->getNumberOfSegments()==0){
+					for (int s=0;s<4;s++){
+						ACMedia* seg = ACMediaFactory::getInstance().create(media);
+						seg->setParentId(media->getId());
+						media->addSegment(seg);//dummy
+					}
+					float media_start = media->getStart();
+					float media_end = media->getEnd();
+					media->getSegment(0)->setStart(media_start);
+					media->getSegment(0)->setEnd((media_end-media_start)/4.0f);
+					media->getSegment(1)->setStart((media_end-media_start)/4.0f);
+					media->getSegment(1)->setEnd(3*(media_end-media_start)/8.0f);
+					media->getSegment(2)->setStart(3*(media_end-media_start)/8.0f);
+					media->getSegment(2)->setEnd((media_end-media_start)/2.0f);
+					media->getSegment(3)->setStart((media_end-media_start)/2.0f);
+					media->getSegment(3)->setEnd(media_end);
 				}
-				float media_start = media->getStart();
-				float media_end = media->getEnd();
-				media->getSegment(0)->setStart(media_start);
-				media->getSegment(0)->setEnd((media_end-media_start)/4.0f);
-				media->getSegment(1)->setStart((media_end-media_start)/4.0f);
-				media->getSegment(1)->setEnd(3*(media_end-media_start)/8.0f);
-				media->getSegment(2)->setStart(3*(media_end-media_start)/8.0f);
-				media->getSegment(2)->setEnd((media_end-media_start)/2.0f);
-				media->getSegment(3)->setStart((media_end-media_start)/2.0f);
-				media->getSegment(3)->setEnd(media_end);
-			}
-			track_node->removeChild(segments_transform);
-			
-            if (media->getNumberOfSegments()>0){//////CF dangerous if a new media has the same number of segments than the previous one:  && segments_number != media->getNumberOfSegments()){
+				track_node->removeChild(segments_transform);
+			}	
+			if (media->getNumberOfSegments()>0){//////CF dangerous if a new media has the same number of segments than the previous one:  && segments_number != media->getNumberOfSegments()){
 				/////CF track_node->removeChild(segments_transform);
 				//if (frame_n != floor(width/frame_min_width)){
 				//double segments_start = getTime();

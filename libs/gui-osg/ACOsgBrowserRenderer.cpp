@@ -312,44 +312,46 @@ void ACOsgBrowserRenderer::updateNodes(double ratio) {
 
 	for (unsigned int i=0;i<node_renderer.size();i++) {
 
-		media_cycle_node = media_cycle->getMediaNode(i);
-		media_cycle_isdisplayed = media_cycle_node.isDisplayed();
-		media_cycle_current_pos = media_cycle_node.getCurrentPosition();
-		media_cycle_next_pos = media_cycle_node.getNextPosition();
-		media_cycle_navigation_level = media_cycle_node.getNavigationLevel();
-		media_cycle_activity = media_cycle_node.getActivity();
-		node_index = node_renderer[i]->getNodeIndex();
-		media_index = node_index;
-		if (media_cycle_mode == AC_MODE_NEIGHBORS)
-			media_index = media_cycle->getBrowser()->getUserLog()->getMediaIdFromNodeId(node_index);
-		if (media_index<0)
-			media_index = 0;
-		media_cycle_filename = media_cycle->getMediaFileName(media_index);
+		if(node_renderer[i]){
+			media_cycle_node = media_cycle->getMediaNode(i);
+			media_cycle_isdisplayed = media_cycle_node.isDisplayed();
+			media_cycle_current_pos = media_cycle_node.getCurrentPosition();
+			media_cycle_next_pos = media_cycle_node.getNextPosition();
+			media_cycle_navigation_level = media_cycle_node.getNavigationLevel();
+			media_cycle_activity = media_cycle_node.getActivity();
+			node_index = node_renderer[i]->getNodeIndex();
+			media_index = node_index;
+			if (media_cycle_mode == AC_MODE_NEIGHBORS)
+				media_index = media_cycle->getBrowser()->getUserLog()->getMediaIdFromNodeId(node_index);
+			if (media_index<0)
+				media_index = 0;
+			media_cycle_filename = media_cycle->getMediaFileName(media_index);
 
-		if (media_cycle_isdisplayed) {
+			if (media_cycle_isdisplayed) {
 
-			// GLOBAL
-			node_renderer[i]->setDeltaTime(media_cycle_deltatime);
-			node_renderer[i]->setZoomAngle(media_cycle_zoom, media_cycle_angle);
-			node_renderer[i]->setMode(media_cycle_mode);
-			node_renderer[i]->setGlobalNavigation(media_cycle_global_navigation_level);
+				// GLOBAL
+				node_renderer[i]->setDeltaTime(media_cycle_deltatime);
+				node_renderer[i]->setZoomAngle(media_cycle_zoom, media_cycle_angle);
+				node_renderer[i]->setMode(media_cycle_mode);
+				node_renderer[i]->setGlobalNavigation(media_cycle_global_navigation_level);
 
-			// NODE SPECIFIC
-			node_renderer[i]->setIsDisplayed(media_cycle_isdisplayed);
-			// SD 2010 OCT
-			//node_renderer[i]->setPos(media_cycle_current_pos, media_cycle_next_pos);
-			node_renderer[i]->setNavigation(media_cycle_navigation_level);
-			node_renderer[i]->setActivity(media_cycle_activity);
-			
-			//node_renderer[i]->setMediaIndex(media_index);
-			node_renderer[i]->setMedia(media_cycle->getLibrary()->getMedia(media_index));
-			
-			node_renderer[i]->setFilename(media_cycle_filename);
-			node_renderer[i]->setWaveformType(audio_waveform_type);
+				// NODE SPECIFIC
+				node_renderer[i]->setIsDisplayed(media_cycle_isdisplayed);
+				// SD 2010 OCT
+				//node_renderer[i]->setPos(media_cycle_current_pos, media_cycle_next_pos);
+				node_renderer[i]->setNavigation(media_cycle_navigation_level);
+				node_renderer[i]->setActivity(media_cycle_activity);
+				
+				//node_renderer[i]->setMediaIndex(media_index);
+				node_renderer[i]->setMedia(media_cycle->getLibrary()->getMedia(media_index));
+				
+				node_renderer[i]->setFilename(media_cycle_filename);
+				node_renderer[i]->setWaveformType(audio_waveform_type);
 
-			// UPDATE
-			node_renderer[i]->updateNodes(ratio);
-		}
+				// UPDATE
+				node_renderer[i]->updateNodes(ratio);
+			}
+		}	
 	}
 
 	/*
@@ -529,8 +531,10 @@ bool ACOsgBrowserRenderer::removeNodes(int _first, int _last){
 	else if (_first == 0 && _last==0) {
 		std::vector<ACOsgMediaRenderer*>::iterator iterm;
 		for (iterm = node_renderer.begin(); iterm != node_renderer.end(); iterm++) {
-			media_group->removeChild((*iterm)->getNode());
-			delete *iterm;
+			if(*iterm){
+				media_group->removeChild((*iterm)->getNode());
+				delete *iterm;
+			}	
 		}
 		node_renderer.clear();
 		ok = true;
@@ -548,11 +552,14 @@ bool ACOsgBrowserRenderer::removeNodes(int _first, int _last){
 
 bool ACOsgBrowserRenderer::addNodes(int _first, int _last){
 	bool ok = false;
+	
 	if (_first < 0 || _last < _first){
 		cerr << "<ACOsgBrowserRenderer::addNodes> : wrong index / out of bounds : " << _first << " - " << _last  << endl;
 		ok = false;
 	}
 	else {
+		
+		
 		node_renderer.resize(_last);
 		//if (media_cycle->getBrowser()->getLayout() == AC_LAYOUT_TYPE_NODELINK)
 		//link_renderer.resize(_last);
@@ -561,41 +568,47 @@ bool ACOsgBrowserRenderer::addNodes(int _first, int _last){
 		ACMediaType media_type;
 		for (int i=_first;i<_last;i++) {
 			media_type = media_cycle->getMediaType(i);
-			switch (media_type) {
-				case MEDIA_TYPE_AUDIO:
-					#if defined (SUPPORT_AUDIO)
-					node_renderer[i] = new ACOsgAudioRenderer();
-					#endif //defined (SUPPORT_AUDIO)
-					break;
-				case MEDIA_TYPE_IMAGE:
-					#if defined (SUPPORT_IMAGE)
-					node_renderer[i] = new ACOsgImageRenderer();
-					#endif //defined (SUPPORT_IMAGE)
-					break;
-				case MEDIA_TYPE_VIDEO:
-					#if defined (SUPPORT_VIDEO)
-					node_renderer[i] = new ACOsgVideoRenderer();
-					#endif //defined (SUPPORT_VIDEO)
-					break;
-				case MEDIA_TYPE_3DMODEL:
-					#if defined (SUPPORT_3DMODEL)
-					node_renderer[i] = new ACOsg3DModelRenderer();
-					#endif //defined (SUPPORT_3DMODEL)
-					break;
-				case MEDIA_TYPE_TEXT:
-					#if defined (SUPPORT_TEXT)
-					node_renderer[i] = new ACOsgTextRenderer();
-					#endif //defined (SUPPORT_TEXT)
-					break;
-				case MEDIA_TYPE_MIXED:
-					#if defined (SUPPORT_MULTIMEDIA) 
-					node_renderer[i] = new ACOsgMediaDocumentRenderer();
-					#endif //defined (SUPPORT_MULTIMEDIA) 
-					break;		
-				default:
-					node_renderer[i] = 0;
-					break;
+			
+			if(media_cycle->getLibrary()->getMediaType() != MEDIA_TYPE_MIXED || (media_type == MEDIA_TYPE_MIXED||media_type == MEDIA_TYPE_AUDIO) ){
+				switch (media_type) {
+					case MEDIA_TYPE_AUDIO:
+						#if defined (SUPPORT_AUDIO)
+						node_renderer[i] = new ACOsgAudioRenderer();
+						#endif //defined (SUPPORT_AUDIO)
+						break;
+					case MEDIA_TYPE_IMAGE:
+						#if defined (SUPPORT_IMAGE)
+						node_renderer[i] = new ACOsgImageRenderer();
+						#endif //defined (SUPPORT_IMAGE)
+						break;
+					case MEDIA_TYPE_VIDEO:
+						#if defined (SUPPORT_VIDEO)
+						node_renderer[i] = new ACOsgVideoRenderer();
+						#endif //defined (SUPPORT_VIDEO)
+						break;
+					case MEDIA_TYPE_3DMODEL:
+						#if defined (SUPPORT_3DMODEL)
+						node_renderer[i] = new ACOsg3DModelRenderer();
+						#endif //defined (SUPPORT_3DMODEL)
+						break;
+					case MEDIA_TYPE_TEXT:
+						#if defined (SUPPORT_TEXT)
+						node_renderer[i] = new ACOsgTextRenderer();
+						#endif //defined (SUPPORT_TEXT)
+						break;
+					case MEDIA_TYPE_MIXED:
+						#if defined (SUPPORT_MULTIMEDIA) 
+						node_renderer[i] = new ACOsgMediaDocumentRenderer();
+						#endif //defined (SUPPORT_MULTIMEDIA) 
+						break;		
+					default:
+						node_renderer[i] = 0;
+						break;
+				}
 			}
+			else
+				node_renderer[i] = 0;
+				
 			if (node_renderer[i] != 0) {
 
 				node_renderer[i]->setMediaCycle(media_cycle);
@@ -651,7 +664,6 @@ bool ACOsgBrowserRenderer::addNodes(int _first, int _last){
 			 group->addChild(layout_renderer->getGroup());
 			 layout_renderer->prepareLayout(start);
 			 */
-
 		}
 	}
 }

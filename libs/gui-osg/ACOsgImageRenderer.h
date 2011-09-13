@@ -61,6 +61,8 @@ public:
 	~ACOsgImageRenderer();	
 	void prepareNodes();
 	void updateNodes(double ratio=0.0);
+	
+	virtual osg::ref_ptr<osg::Geode> getMainGeode() { return image_geode;}
 };
 
 #endif //defined (SUPPORT_IMAGE) || defined (SUPPORT_VIDEO)

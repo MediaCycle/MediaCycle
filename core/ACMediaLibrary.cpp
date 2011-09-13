@@ -706,37 +706,45 @@ void ACMediaLibrary::calculateStats() {
 	if ( isEmpty() ) return;
 	int n = this->getSize() ;
 	int number_of_features = media_library[0]->getNumberOfFeaturesVectors();
+	int mt = 0; // number of media files of the library that have the same media type as the library (might be different in case of multimedia documents)
 
 	// initialize to zero
 	int i,j,k;
 	for (i=0; i< number_of_features; i++) {
-		vector<double> tmp_vect;
-		for (j=0; j< media_library[0]->getFeaturesVector(i)->getSize(); j++) {
-			tmp_vect.push_back(0.0);
-		}
-		mean_features.push_back(tmp_vect);
-		stdev_features.push_back(tmp_vect);
+		if (media_type != MEDIA_TYPE_MIXED || (media_type == MEDIA_TYPE_MIXED && media_library[i]->getMediaType() == media_type)){ //CF
+			vector<double> tmp_vect;
+			for (j=0; j< media_library[0]->getFeaturesVector(i)->getSize(); j++) {
+				tmp_vect.push_back(0.0);
+			}
+			mean_features.push_back(tmp_vect);
+			stdev_features.push_back(tmp_vect);
+			mt++; //CF
+		}	
 	}
 
 	// computing sums
 	for(i=0; i<n; i++) {
 		ACMedia* item = media_library[i];
-		for(j=0; j<(int)mean_features.size(); j++){
-			for(k=0; k<(int)mean_features[j].size(); k++){
-				double val = item->getFeaturesVector(j)->getFeatureElement(k);
-
-				mean_features[j][k] += val;
-				stdev_features[j][k] += val * val;
-
+		if (item->getMediaType() == this->media_type){ //CF
+			for(j=0; j<(int)mean_features.size(); j++){
+				for(k=0; k<(int)mean_features[j].size(); k++){
+					double val = item->getFeaturesVector(j)->getFeatureElement(k);
+					mean_features[j][k] += val;
+					stdev_features[j][k] += val * val;
+				}
 			}
-		}
+		}	
 	}
 
 	// before: divide by n --> biased variance estimator
 	// now : divide by (n-1) -- unless n=1
-	int nn;
+	/*int nn;
 	if (n==1) nn = n;
-	else nn = n-1;
+	else nn = n-1;*/
+	int nn;
+	if (mt==1) nn = n;
+	else nn = mt-1; 
+	n = mt;//CF
 
 	for(j=0; j<(int)mean_features.size(); j++) {
 		cout << "calculating stats for feature" << j << endl;
@@ -809,23 +817,25 @@ void ACMediaLibrary::normalizeFeatures(int needsNormalize) {
 	else {
 		for(i=start; i<n; i++){
 			ACMedia* item = media_library[i];
-			for(j=0; j<mean_features.size(); j++) {
-				feature = item->getFeaturesVector(j);
-				featureDest=item->getPreProcFeaturesVector(j);
-				if (feature->getNeedsNormalization()) {
-					for(k=0; k<mean_features[j].size(); k++) {
-						float old = feature->getFeatureElement(k);
-						featureDest->setFeatureElement(k, (old - mean_features[j][k]) / ( max(stdev_features[j][k] , 0.00001)));//setFeatureElement(k, (old - mean_features[j][k]) / ( max(stdev_features[j][k] , 0.00001)));//CF TI_MAX(stdev_features[j][k] , 0.00001)));
+			if (item->getMediaType() == this->media_type){ //CF
+				for(j=0; j<mean_features.size(); j++) {
+					feature = item->getFeaturesVector(j);
+					featureDest=item->getPreProcFeaturesVector(j);
+					if (feature->getNeedsNormalization()) {
+						for(k=0; k<mean_features[j].size(); k++) {
+							float old = feature->getFeatureElement(k);
+							featureDest->setFeatureElement(k, (old - mean_features[j][k]) / ( max(stdev_features[j][k] , 0.00001)));//setFeatureElement(k, (old - mean_features[j][k]) / ( max(stdev_features[j][k] , 0.00001)));//CF TI_MAX(stdev_features[j][k] , 0.00001)));
+						}
 					}
-				}
-				else {
-					for(k=0; k<mean_features[j].size(); k++) {
-						float old = feature->getFeatureElement(k);
-						featureDest->setFeatureElement(k, old);//setFeatureElement(k, (old - mean_features[j][k]) / ( max(stdev_features[j][k] , 0.00001)));//CF TI_MAX(stdev_features[j][k] , 0.00001)));
+					else {
+						for(k=0; k<mean_features[j].size(); k++) {
+							float old = feature->getFeatureElement(k);
+							featureDest->setFeatureElement(k, old);//setFeatureElement(k, (old - mean_features[j][k]) / ( max(stdev_features[j][k] , 0.00001)));//CF TI_MAX(stdev_features[j][k] , 0.00001)));
+						}
 					}
-				}
 
-			}
+				}
+			}	
 		}
 	}
 		
@@ -844,14 +854,16 @@ void ACMediaLibrary::denormalizeFeatures() {
 
 	for(i=0; i<= index_last_normalized; i++){
 		ACMedia* item = media_library[i];
-		for(j=0; j<mean_features.size(); j++) {
-			if (item->getFeaturesVector(j)->getNeedsNormalization()) {
-				for(k=0; k<mean_features[j].size(); k++) {
-					float old = item->getFeaturesVector(j)->getFeatureElement(k);
-					item->getFeaturesVector(j)->setFeatureElement(k, old * stdev_features[j][k] + mean_features[j][k]);
+		if (item->getMediaType() == this->media_type){ //CF
+			for(j=0; j<mean_features.size(); j++) {
+				if (item->getFeaturesVector(j)->getNeedsNormalization()) {
+					for(k=0; k<mean_features[j].size(); k++) {
+						float old = item->getFeaturesVector(j)->getFeatureElement(k);
+						item->getFeaturesVector(j)->setFeatureElement(k, old * stdev_features[j][k] + mean_features[j][k]);
+					}
 				}
 			}
-		}
+		}	
 	}
 	index_last_normalized = -1;
 	cleanStats();

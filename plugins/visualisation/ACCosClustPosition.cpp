@@ -136,14 +136,16 @@ void ACCosClustPosition::updateNextPositions(ACMediaBrowser* mediaBrowser)
 			
 			// SD TODO - test both approaches
 			r=1;
-			r = compute_distance(lLibrary->getMedia(lReferenceNode)->getAllPreProcFeaturesVectors(), 
+			if(lLibrary->getMedia(node.getMediaId())->getType() == lLibrary->getMediaType() && lLibrary->getMedia(lReferenceNode)->getType() == lLibrary->getMediaType())//CF multimedia compatibility
+					r = compute_distance(lLibrary->getMedia(lReferenceNode)->getAllPreProcFeaturesVectors(), 
 								 lLibrary->getMedia(node.getMediaId())->getAllPreProcFeaturesVectors(), 
 								 lFeatureWeights, false) ;//* 10.0;
 			//r /= 100.0;
 			theta = 2*M_PI * ci / (float)lClusterCount;
 			
 			double dt = 1;
-			dt = compute_distance(lLibrary->getMedia(node.getMediaId())->getAllPreProcFeaturesVectors(), lClusterCenters, lFeatureWeights, false) / 2.0 * 10.0;
+			if(lLibrary->getMedia(node.getMediaId())->getType() == lLibrary->getMediaType())//CF multimedia compatibility
+				dt = compute_distance(lLibrary->getMedia(node.getMediaId())->getAllPreProcFeaturesVectors(), lClusterCenters, lFeatureWeights, false) / 2.0 * 10.0;
 			dt /= 3.0;
 			theta += dt;
 			

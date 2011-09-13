@@ -316,11 +316,13 @@ private:
 	// default cluster :
 	// - neighborhood = Kmeans
 	// - position = propeller
+	// == Neighbors Mode ==
+	void updateNeighborhoods();
+	
+public:	
 	void updateNextPositionsPropeller();
 	void updateClustersKMeans(bool animate, int needsCluster=1);
 
-	// == Neighbors Mode ==
-	void updateNeighborhoods();
 public: // XS TODO so far this one is still called from outside
 	void updateNextPositions();
 

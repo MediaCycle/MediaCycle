@@ -1,7 +1,7 @@
 /**
  * @brief ACPosPlugAudioGardenFlower.cpp
- * @author Thierry Ravet
- * @date 26/05/2011
+ * @author Christian Frisson
+ * @date 13/09/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -149,15 +149,18 @@ mat ACPosPlugAudioGardenFlower::extractDescMatrix(ACMediaLibrary* lib, string fe
 	int featureId = 0;
 	int featureSize = 0;
 
-	int nbFeature = loops.back()->getNumberOfFeaturesVectors();
+	//int nbFeature = loops.back()->getNumberOfFeaturesVectors();
+	int nbFeature = loops.front()->getNumberOfFeaturesVectors();
 
 	for(int f=0; f< nbFeature; f++){
-		if (loops.back()->getPreProcFeaturesVector(f)->getName() == featureName){
+		//if (loops.back()->getPreProcFeaturesVector(f)->getName() == featureName){
+		if (loops.front()->getPreProcFeaturesVector(f)->getName() == featureName){	
 			featureId = f;
 		}	
 	}
 
-	featureSize = loops.back()->getPreProcFeaturesVector(featureId)->getSize();
+	//featureSize = loops.back()->getPreProcFeaturesVector(featureId)->getSize();
+	featureSize = loops.front()->getPreProcFeaturesVector(featureId)->getSize();
 
   mat desc_m(mediaIds.size(),featureSize);
   
@@ -165,7 +168,9 @@ mat ACPosPlugAudioGardenFlower::extractDescMatrix(ACMediaLibrary* lib, string fe
   
   for(int i=0; i<mediaIds.size(); i++) {    
 		for(int d=0; d < featureSize; d++){
-			desc_m(i, d) = loops[mediaIds[i]]->getPreProcFeaturesVector(featureId)->getFeatureElement(d);
+			//desc_m(i, d) = loops[mediaIds[i]]->getPreProcFeaturesVector(featureId)->getFeatureElement(d);
+			if(loops[mediaIds[i]]->getType() == lib->getMediaType())//CF or //if(loops[mediaIds[i]]->getPreProcFeaturesVector(featureId))
+				desc_m(i, d) = loops[mediaIds[i]]->getPreProcFeaturesVector(featureId)->getFeatureElement(d);
 		}
   }
 	return desc_m;

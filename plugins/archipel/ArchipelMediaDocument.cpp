@@ -63,7 +63,7 @@ int ArchipelMediaDocument::import(std::string _filename, int _mid, ACPluginManag
 			string mediaExtension;
 			ACMediaType fileMediaType;
 			string mediaRef;
-			int i=0;
+			
 			//archipelText
 			mediaRef="main";
 			mediaType=MEDIA_TYPE_TEXT;
@@ -76,16 +76,17 @@ int ArchipelMediaDocument::import(std::string _filename, int _mid, ACPluginManag
 			
 			}
 			media = ACMediaFactory::getInstance().create(mediaExtension);
-			if (media->import(mediaFileName, this->getMediaID()+i+1, acpl, _save_timed_feat)){
+			if (media->import(mediaFileName, this->getId()+nbMedia+1, acpl, _save_timed_feat)){
 				if (this->addMedia(mediaRef, media)){
 					//this->incrementMediaID();
-					if(mediaRef=="main")
-						this->activeMedia = media;
+					//if(mediaRef=="main")
+					//	this->activeMedia = media; //CF text not as active media
 				}	
 			}
 			else 
 				return 0;
 			nbMedia++;
+			
 			//Image
 			mediaRef="covert";
 			mediaType=MEDIA_TYPE_IMAGE;
@@ -98,16 +99,17 @@ int ArchipelMediaDocument::import(std::string _filename, int _mid, ACPluginManag
 				
 			}
 			media = ACMediaFactory::getInstance().create(mediaExtension);
-			if (media->import(mediaFileName, this->getMediaID()+i+1, acpl, _save_timed_feat)){
+			if (media->import(mediaFileName, this->getId()+nbMedia+1, acpl, _save_timed_feat)){
 				if (this->addMedia(mediaRef, media)){
 					//this->incrementMediaID();
-					if(mediaRef=="main")
+					//if(mediaRef=="main") // image as active media
 						this->activeMedia = media;
 				}	
 			}
 			else 
 				return 0;
 			nbMedia++;
+			
 			//tracks
 			vector<string> tracksPaths=xmlDoc->getTrackPath();
 			unsigned int nbTracks=tracksPaths.size();
@@ -122,13 +124,32 @@ int ArchipelMediaDocument::import(std::string _filename, int _mid, ACPluginManag
 				fileMediaType = ACMediaFactory::getInstance().getMediaTypeFromExtension(mediaExtension);
 				
 				if (fileMediaType!=mediaType){
-			
-					cout << "ArchipelMediaDocument::impossible to timport:"<< mediaFileName << endl;
+					cout << "ArchipelMediaDocument::impossible to import:"<< mediaFileName << endl;
 					continue;
-					
 				}
 				media = ACMediaFactory::getInstance().create(mediaExtension);
-				if (media->import(mediaFileName, this->getMediaID()+i+1, acpl, true)){
+				
+				//if (media->import(mediaFileName, this->getId()+nbMedia+1, acpl, true)){
+				//CF until large audio files can be imported, the above line is substituted by:
+				int _aid = this->getId()+nbMedia+1;
+				std::cout << "importing..." << mediaFileName << std::endl;
+				media->setFileName(mediaFileName);
+				media->setThumbnailFileName(mediaFileName);
+				int import_ok = 1;
+				if (_aid>=0) media->setId(_aid);
+				
+				// get info about width, height, mediaData
+				// computes thumbnail, ...
+				// mediaData will be used by the plugin to compute features
+				/*if (!media->extractData(media->getFileName())) return 0;
+				if (media->getMediaData()==0){
+					import_ok = 0;
+					cerr << "<ACMedia::import> failed accessing data for media number: " << _mid << endl;
+					return 0;
+				}*/
+				
+				if(import_ok){//media import substitution ends here
+					this->addSegment(media);
 					if (this->addMedia(mediaRef, media)){
 						//this->incrementMediaID();
 						if(mediaRef=="main")
@@ -140,8 +161,6 @@ int ArchipelMediaDocument::import(std::string _filename, int _mid, ACPluginManag
 				nbMedia++;
 				
 			}
-			
-			
 			
 			/*
 			for (unsigned int i=0;i<nbMedia; i++){
@@ -167,7 +186,7 @@ int ArchipelMediaDocument::import(std::string _filename, int _mid, ACPluginManag
 				}
 				string mediaRef=xmlDoc->getMediaReference(i);
 				ACMedia *media = ACMediaFactory::getInstance().create(mediaExtension);
-				if (media->import(path+mediaFileName, this->getMediaID()+i+1, acpl, _save_timed_feat)){
+				if (media->import(path+mediaFileName, this->getId()+nbMedia+1, acpl, _save_timed_feat)){
 					if (this->addMedia(mediaRef, media)){
 						//this->incrementMediaID();
 						if(mediaRef=="main")
@@ -183,9 +202,5 @@ int ArchipelMediaDocument::import(std::string _filename, int _mid, ACPluginManag
 		else {
 			return 0;
 		}
-
-	
-		
 	}
-		
 }

@@ -122,6 +122,9 @@ public:
 	void setDistanceMouse(float _distance_mouse) { this->distance_mouse = _distance_mouse; };
 	//void setActivity(int _media_activity) { this->media_activity = _media_activity; }
 	osg::ref_ptr<osg::Group>  getNode() { return local_group; };
+	
+	virtual osg::ref_ptr<osg::Geode> getMainGeode() { return new osg::Geode;}
+	
 	int	getNodeIndex() { return node_index; };
 	
 	virtual void prepareNodes()=0;

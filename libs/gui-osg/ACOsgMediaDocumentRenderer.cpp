@@ -73,7 +73,12 @@ ACOsgMediaDocumentRenderer::ACOsgMediaDocumentRenderer() {
 ACOsgMediaDocumentRenderer::~ACOsgMediaDocumentRenderer() {
 	if 	(entry_geode) {
 		entry_geode=0;
-	}	
+	}
+	
+	ACOsgMediaRenderers::iterator render_iter = media_renderers.end();
+	for ( render_iter=media_renderers.begin() ; render_iter!=media_renderers.end(); ++render_iter ){
+		delete (*render_iter);
+	}
 }
 
 void ACOsgMediaDocumentRenderer::entryGeode() {
@@ -118,7 +123,7 @@ void ACOsgMediaDocumentRenderer::prepareNodes() {
 		media_node->addChild(entry_geode);
 	}
 	
-/*	//ACMediaContainer medias = (static_cast<ACMediaDocument*> (media_cycle->getLibrary()->getMedia(media_index)))->getMedias();
+	//ACMediaContainer medias = (static_cast<ACMediaDocument*> (media_cycle->getLibrary()->getMedia(media_index)))->getMedias();
 	ACMediaContainer medias = (static_cast<ACMediaDocument*> (media))->getContainer();
 	ACMediaContainer::iterator iter;
 		
@@ -127,17 +132,18 @@ void ACOsgMediaDocumentRenderer::prepareNodes() {
 	
 		bool renderer_added = true;
 		switch (iter->second->getType()) {
-			case MEDIA_TYPE_AUDIO:
+/*			case MEDIA_TYPE_AUDIO:
 				#if defined (SUPPORT_AUDIO)
 				media_renderers.push_back(new ACOsgAudioRenderer());
 				#endif //defined (SUPPORT_AUDIO)
-				break;
+				break;*/
 			case MEDIA_TYPE_IMAGE:
 				#if defined (SUPPORT_IMAGE)
 				media_renderers.push_back(new ACOsgImageRenderer());
+				media_node->removeChild(entry_geode);
 				#endif //defined (SUPPORT_IMAGE)
 				break;
-			case MEDIA_TYPE_VIDEO:
+/*			case MEDIA_TYPE_VIDEO:
 				#if defined (SUPPORT_VIDEO)
 				media_renderers.push_back(new ACOsgVideoRenderer());
 				#endif //defined (SUPPORT_VIDEO)
@@ -151,7 +157,7 @@ void ACOsgMediaDocumentRenderer::prepareNodes() {
 				#if defined (SUPPORT_TEXT)
 				media_renderers.push_back(new ACOsgTextRenderer());
 				#endif //defined (SUPPORT_TEXT)
-				break;
+				break;*/
 			default:
 				renderer_added = false;
 				break;
@@ -164,9 +170,10 @@ void ACOsgMediaDocumentRenderer::prepareNodes() {
 			media_renderers.back()->setMedia(iter->second);
 						
 			media_renderers.back()->prepareNodes();
-			media_node->addChild(media_renderers.back()->getNode());
+			//media_node->addChild(media_renderers.back()->getNode());
+			media_node->addChild(media_renderers.back()->getMainGeode());
 		}
-	}*/
+	}
 }
 
 void ACOsgMediaDocumentRenderer::updateNodes(double ratio) {
@@ -229,6 +236,19 @@ void ACOsgMediaDocumentRenderer::updateNodes(double ratio) {
 		T =  Matrix::rotate(-media_cycle_angle,Vec3(0.0,0.0,1.0)) * Matrix::scale(localscale/media_cycle_zoom,localscale/media_cycle_zoom,localscale/media_cycle_zoom) * T;
 	}
 	
+	if (attribute.getActivity()>=2){//hover
+		std::vector<ACMedia*> tmpSegments;
+		tmpSegments = media->getAllSegments();
+		for (int j=0; j<tmpSegments.size(); j++)
+			media_cycle->getMediaNode(tmpSegments[j]->getId()).setDisplayed(true);
+	}
+	else {
+		std::vector<ACMedia*> tmpSegments;
+		tmpSegments = media->getAllSegments();
+		for (int j=0; j<tmpSegments.size(); j++)
+			media_cycle->getMediaNode(tmpSegments[j]->getId()).setDisplayed(false);
+	}	
+	
 	unsigned int mask = (unsigned int)-1;
 	if(attribute.getNavigationLevel() >= media_cycle->getNavigationLevel()) {
 		entry_geode->setNodeMask(mask);
@@ -245,10 +265,17 @@ void ACOsgMediaDocumentRenderer::updateNodes(double ratio) {
 	media_node->setMatrix(T);
 #endif
 	
-	/*ACOsgMediaRenderers::iterator render_iter = media_renderers.end();
+	ACOsgMediaRenderers::iterator render_iter = media_renderers.end();
 	for ( render_iter=media_renderers.begin() ; render_iter!=media_renderers.end(); ++render_iter ){
 		(*render_iter)->updateNodes();
-	}*/
+#ifdef AUTO_TRANSFORM
+		(*render_iter)->getNode()->setPosition(Vec3(x,y,z));
+		(*render_iter)->getNode()->setRotation(Quat(0.0, 0.0, 1.0, -media_cycle_angle));
+		(*render_iter)->getNode()->setScale(Vec3(localscale/media_cycle_zoom,localscale/media_cycle_zoom,localscale/media_cycle_zoom));
+#else
+		//(*render_iter)->getNode()->setMatrix(T);
+#endif
+	}
 }
 
 #endif //defined (SUPPORT_MULTIMEDIA) 

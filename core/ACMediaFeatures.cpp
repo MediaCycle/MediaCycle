@@ -46,8 +46,9 @@ using std::vector;
 using std::string;
 
 ACMediaFeatures::ACMediaFeatures(){
+  features_vector = FeaturesVector(0);	
 	//XS TODO: is this flag still necessary ?
-  _computed = false; 
+  _computed = false;
   needs_normalization = 1;
   name = "none";
 }

@@ -100,9 +100,11 @@ std::vector<int> ACSparseKMeansPlugin::initClusterMinMax(ACMediaLibrary * librar
 			float minValue=1000000000.f;
 			int currNode=firstSelectedNodes[k];
 			for (int j=0;j<i;j++){
-				float tempValue=compute_distance(library->getMedia(ret[j])->getAllPreProcFeaturesVectors(),library->getMedia(currNode)->getAllPreProcFeaturesVectors(),weight,false);
-				if (tempValue<minValue)
-					minValue=tempValue;
+				if(library->getMedia(ret[j])->getType() == library->getMediaType() && library->getMedia(currNode)->getType() == library->getMediaType()){//CF multimedia compatibility
+					float tempValue=compute_distance(library->getMedia(ret[j])->getAllPreProcFeaturesVectors(),library->getMedia(currNode)->getAllPreProcFeaturesVectors(),weight,false);
+					if (tempValue<minValue)
+						minValue=tempValue;
+				}	
 			}
 			if (minValue>maxValue){
 				maxValue=minValue;
@@ -198,7 +200,8 @@ void ACSparseKMeansPlugin::updateClusters(ACMediaBrowser* mediaBrowser,bool need
 				
 				for(d=0; d<desc_count; d++)
 				{
-					clusterCenters[i][f][d] = library->getMedia(r)->getPreProcFeaturesVector(f)->getFeatureElement(d);
+					if(library->getMedia(r)->getType() == library->getMediaType())//CF
+						clusterCenters[i][f][d] = library->getMedia(r)->getPreProcFeaturesVector(f)->getFeatureElement(d);
 					
 					//printf("cluster  %d center: %f\n", i, clusterCenters[i][f][d]);
 				}
@@ -243,7 +246,8 @@ void ACSparseKMeansPlugin::updateClusters(ACMediaBrowser* mediaBrowser,bool need
 				for(j=0; j<clusterCount; j++)
 				{
 					cluster_distances[j] = 0;
-					cluster_distances[j] = compute_distance(library->getMedia(i)->getAllPreProcFeaturesVectors(), clusterCenters[j], featureWeights, false);
+					if(library->getMedia(i)->getType() == library->getMediaType())//CF multimedia compatibility
+						cluster_distances[j] = compute_distance(library->getMedia(i)->getAllPreProcFeaturesVectors(), clusterCenters[j], featureWeights, false);
 					
 					//printf("distance cluster %d to object %d = %f\n", j, i,  cluster_distances[j]);
 				}
@@ -263,12 +267,13 @@ void ACSparseKMeansPlugin::updateClusters(ACMediaBrowser* mediaBrowser,bool need
 				//{
 					// XS again, what if all media don't have the same number of features ?
 				//	int desc_count = library->getMedia(0)->getPreProcFeaturesVector(f)->getSize();
-					
-					meanAccumCompute(library->getMedia(i)->getAllPreProcFeaturesVectors(),cluster_accumulators[jmin]);
+					if(library->getMedia(i)->getType() == library->getMediaType())//CF multimedia compatibility
+						meanAccumCompute(library->getMedia(i)->getAllPreProcFeaturesVectors(),cluster_accumulators[jmin]);
 					
 					//for(d=0; d<desc_count; d++)
 					//{
-					//	cluster_accumulators[jmin][f][d] += library->getMedia(i)->getPreProcFeaturesVector(f)->getFeatureElement(d);
+					//	if(library->getMedia(i)->getType() == library->getMediaType())//CF multimedia compatibility
+					//		cluster_accumulators[jmin][f][d] += library->getMedia(i)->getPreProcFeaturesVector(f)->getFeatureElement(d);
 					//}
 				//}
 			}
@@ -327,7 +332,8 @@ void ACSparseKMeansPlugin::updateClusters(ACMediaBrowser* mediaBrowser,bool need
 			for(j=0; j<clusterCount; j++) {
 				
 				cluster_distances[j] = 0;
-				cluster_distances[j] = compute_distance(library->getMedia(i)->getAllPreProcFeaturesVectors(), clusterCenters[j], featureWeights, false);
+				if(library->getMedia(i)->getType() == library->getMediaType())//CF multimedia compatibility
+					cluster_distances[j] = compute_distance(library->getMedia(i)->getAllPreProcFeaturesVectors(), clusterCenters[j], featureWeights, false);
 			}		
 			
 			// pick the one with smallest distance
@@ -344,8 +350,9 @@ void ACSparseKMeansPlugin::updateClusters(ACMediaBrowser* mediaBrowser,bool need
 		float *distTemp=new float[object_count-1],*minLoc=new float[object_count-1],*maxLoc=new float[object_count-1];
 		
 		for (int i=0;i<object_count-1;i++)
-		{ 
-			distTemp[i]=compute_distance(library->getMedia(object_count-1)->getAllPreProcFeaturesVectors(), library->getMedia(i)->getAllPreProcFeaturesVectors(), featureWeights, false);
+		{
+			if(library->getMedia(object_count-1)->getType() == mLibrary->getMediaType() && library->getMedia(i)->getType() == mLibrary->getMediaType())//CF multimedia compatibility
+					distTemp[i]=compute_distance(library->getMedia(object_count-1)->getAllPreProcFeaturesVectors(), library->getMedia(i)->getAllPreProcFeaturesVectors(), featureWeights, false);
 	
 		}
 		minLoc[0]=distTemp[0];
