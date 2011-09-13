@@ -47,6 +47,8 @@
 #include "ACMedia.h"
 #include "ACVideo.h"
 
+#include <ACOpenCVInclude.h>
+
 #include "gnuplot_i.hpp"
 
 using namespace std;
@@ -593,10 +595,12 @@ bool test_video_width_height(string s){
 	return ok;
 }
 
+#if CV_MIN_VERSION_REQUIRED(2,3,1)
 bool test_global_orientation(string s){
 	ACVideoAnalysis cap(s); 
 	cap.computeGlobalOrientation();
 }
+#endif //CV_MIN_VERSION_REQUIRED(2,3,1)
 
 void test_xml2acl(string s){
 	MediaCycle* mediacycle;
@@ -840,8 +844,9 @@ int main(int argc, char** argv) {
 //	test_blobs(video_test_file);
 
 // VISUAL TEST 5 : global orientation in a video
+	#if CV_MIN_VERSION_REQUIRED(2,3,1)
 	test_global_orientation(video_test_file);
-
+	#endif //CV_MIN_VERSION_REQUIRED(2,3,1)
 // VISUAL TEST 6 : video read/write
 //	test_video_read_write(video_test_file,tmp_video_file_out);
 
