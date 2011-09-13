@@ -42,6 +42,8 @@
 #include "ACImageAnalysis.h"
 #include "ACVideoData.h"
 
+#include <ACOpenCVInclude.h>
+
 #include <fstream>
 #include <cmath>
 
@@ -108,8 +110,9 @@ public:
 	void computeFourierPolarMoments(int RadialBins=5, int AngularBins=8); // without background subtraction
 	void computeFourierMellinMoments(); // without background subtraction
 	void computeImageHistograms(int w=10, int h=10); // image histogram, turned into a 1D vector
+	#if CV_MIN_VERSION_REQUIRED(2,3,1)
 	void computeGlobalOrientation();
-	
+	#endif
 	// features manipulation
 	void mergeBlobs(float blob_dist = 0);
 	void computeMergedBlobsTrajectory(float blob_dist = 0);

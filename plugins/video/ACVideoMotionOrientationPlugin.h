@@ -38,6 +38,9 @@
 #include "ACPlugin.h"
 #include "ACMediaFeatures.h"
 #include "ACMediaTimedFeature.h"
+#include <ACOpenCVInclude.h>
+
+#if CV_MIN_VERSION_REQUIRED(2,3,1)
 
 //XS TODO : make an ACVideoFeatures Plugin
 // with (ACVideoData *) ACMediaData
@@ -53,5 +56,7 @@ private:
 	std::string mtf_file_name; // file in which features have been saved
 
 };
+
+#endif //CV_MIN_VERSION_REQUIRED(2,3,1)
 
 #endif //_ACVIDEOMOTIONORIENTATIONPLUGIN_H

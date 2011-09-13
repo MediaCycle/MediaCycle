@@ -8,6 +8,8 @@
 #include "ACVideoColorPlugin.h"
 #include "ACVideoMotionOrientationPlugin.h"
 
+#include <ACOpenCVInclude.h>
+
 #ifdef USE_STARPU 
 #include "ACHuMomentsVideoPlugin.h"
 #endif
@@ -21,8 +23,9 @@ extern "C" ACPlugin* create(std::string namePlugin) {
 //#endif//#else
 //	if (namePlugin == "ACVideoPixelSpeedPlugin") {return new ACVideoPixelSpeedPlugin();}
 //	if (namePlugin == "ACVideoColorPlugin") {return new ACVideoColorPlugin();}
+	#if CV_MIN_VERSION_REQUIRED(2,3,1)
 	if (namePlugin == "ACVideoMotionOrientationPlugin") {return new ACVideoMotionOrientationPlugin();}
-
+	#endif //CV_MIN_VERSION_REQUIRED(2,3,1)
 //#endif
 }
 
@@ -39,7 +42,9 @@ extern "C" std::vector<std::string> list() {    //returns a string vector contai
  //   listPlugin.push_back("ACVideoPixelSpeedPlugin");
 //	listPlugin.push_back("ACVideoColorPlugin");
 //#endif
+	#if CV_MIN_VERSION_REQUIRED(2,3,1)
 	listPlugin.push_back("ACVideoMotionOrientationPlugin");
+	#endif //CV_MIN_VERSION_REQUIRED(2,3,1)
     //listPlugin.push_back("...");
     return listPlugin;
 }

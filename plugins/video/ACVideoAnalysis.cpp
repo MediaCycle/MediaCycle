@@ -55,6 +55,8 @@
 #include "ACFFmpegToOpenCV.h"
 #endif
 
+#include <opencv2/video/tracking.hpp>
+
 #include <iomanip>
 using namespace std;
 
@@ -1683,7 +1685,7 @@ void ACVideoAnalysis::computeImageHistograms(int w, int h){
 	}
 }
 
-
+#if CV_MIN_VERSION_REQUIRED(2,3,1)
 void ACVideoAnalysis::computeGlobalOrientation(){
 	global_orientations.clear();
 	// some of these constants could be parameters...
@@ -1832,7 +1834,7 @@ void ACVideoAnalysis::computeGlobalOrientation(){
 	cv::destroyWindow ("Motion");
 #endif //VISUAL_CHECK	
 }
-
+#endif //CV_MIN_VERSION_REQUIRED(2,3,1)
 
 // XS TODO watch out index !!
 // first moment = [0]
