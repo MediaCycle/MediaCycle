@@ -36,8 +36,8 @@
 #include <algo.h>
 #define PI 3.14159265
 #define HOST "localhost"
-#define PORTS 12000 //port d'envoi
-#define PORTR 9110	//port de reception
+#define PORTS 12345 //port d'envoi
+#define PORTR 12346	//port de reception
 
 
 
@@ -92,7 +92,21 @@ void XN_CALLBACK_TYPE User_NewUser(xn::UserGenerator& generator, XnUserID nId, v
 }
 void XN_CALLBACK_TYPE User_LostUser(xn::UserGenerator& generator, XnUserID nId, void* pCookie)
 {
-	printf("Lost user %d\n", nId);
+	//	printf("Lost user %d\n", nId);
+	
+	//CF
+	string IP="localhost";
+	const char* newIP=IP.c_str();
+	ofxOscSender sender;
+	sender.setup(newIP, 12345);
+	
+	ofxOscMessage m;
+	std::stringstream tmp_i;
+	tmp_i << nId;
+	string adres = "/mediacycle/browser/" + tmp_i.str() + "/released" ;
+	cout << adres << endl;
+	m.setAddress(adres);
+	sender.sendMessage( m );
 }
 void XN_CALLBACK_TYPE UserPose_PoseDetected(xn::PoseDetectionCapability& capability, const XnChar* strPose, XnUserID nId, void* pCookie)
 {
@@ -601,25 +615,47 @@ void testApp::UpdateUserData()
 	{
 		g_UserGenerator.GetCoM(aUsers[i], com[i]);
 	
-	
 		ostringstream oss;
 		oss << i+1;
 		std::string result = oss.str();
 		
 		string a="userpos"+result;
 		string b="userdelta"+result;
-		if (com[i].X!=0 && com[i].Y!=0 && com[i].Z!= 0)
+		// don't send 0,0,0
+		// limit to a square 3x3 for Seneffe
+		std::stringstream tmp_i;
+		tmp_i << aUsers[i];
+		if (com[i].X!=0 && com[i].Y!=0 && com[i].Z > 1000 && com[i].X > -1500 && com[i].X < 1500 && com[i].Z < 4000)
 		{
 			ofxOscMessage m;
-			m.setAddress( "/SendCentroid" );
-			m.addStringArg( a );
-			m.addIntArg(aUsers[i] );
-			m.addIntArg( com[i].X );
-			m.addIntArg( com[i].Y );
-			m.addIntArg( com[i].Z );
+			
+			string adres = "/mediacycle/browser/" + tmp_i.str() + "/hover/xy" ;
+			cout << adres << endl;
+			cout << com[i].X << "  " << com[i].Z << endl;
+			m.setAddress(adres);
+			//m.setAddress( "/mediacycle/browser/hover/xy");
+			//			m.addStringArg( a );
+			//			m.addIntArg(aUsers[i] );
+			m.addFloatArg( (com[i].X) * 1.0 / 1500);
+			//			m.addIntArg( com[i].Y );
+			m.addFloatArg( (2500 - com[i].Z) * 1.0 / 1500);
+			sender.sendMessage( m );
+			//			m.setAddress( "/Send Centroid" );
+			//			m.addStringArg( a );
+			//			m.addIntArg(aUsers[i] );
+			//			m.addIntArg( com[i].X );
+			//			m.addIntArg( com[i].Y );
+			//			m.addIntArg( com[i].Z );
+			//			sender.sendMessage( m );
+		}
+		else{
+			ofxOscMessage m;
+			string adres = "/mediacycle/browser/" + tmp_i.str() + "/released" ;
+			cout << adres << endl;
+			m.setAddress(adres);
 			sender.sendMessage( m );
 		}
-		
+				
 		XnPoint3D pt;
 		if (g_UserGenerator.GetSkeletonCap().IsTracking(aUsers[i]) && com[i].Z!=0) 
 		{
