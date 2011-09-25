@@ -1,7 +1,7 @@
 /**
  * @brief testApp.cpp
  * @author Christian Frisson
- * @date 22/09/2011
+ * @date 25/09/2011
  * @copyright (c) 2011 â€“ UMONS - Numediart
  * 
  * MediaCycle of University of Mons â€“ Numediart institute is 
@@ -39,6 +39,9 @@
 #define PORTS 12345 //port d'envoi
 #define PORTR 12346	//port de reception
 
+// XS to calculate median easily
+#include <algorithm>
+#include <vector>
 
 
 using namespace std;
@@ -142,7 +145,21 @@ void XN_CALLBACK_TYPE UserCalibration_CalibrationEnd(xn::SkeletonCapability& cap
 		}
 	}
 }
-//--------------------------------------------------------------
+//--------------------------------------------------------------	
+
+testApp::testApp() : ofBaseApp(){ 
+	Nsamples = 100; // number of hands positions to consider for tempo computation
+	Zhands = new double [Nsamples];
+	for (int i=0; i< Nsamples ; i++){
+		Zhands[i] = 0.0;
+	}
+	current_index=0;
+}
+
+testApp::~testApp(){
+	delete [] Zhands;
+}
+
 void testApp::setup(){
 	
 	//OSC SETUP
@@ -611,6 +628,9 @@ void testApp::UpdateUserData()
 	int dx,dy,dz;
 	
 	XnPoint3D com[nUsers];	//vecteur de points 3D pour les diffŽrents centres de gravitŽ 
+	
+	// Z global de la main droite
+	Zhands[current_index] = 0.0;
 	for (int i=0; i<nUsers; i++) 
 	{
 		g_UserGenerator.GetCoM(aUsers[i], com[i]);
@@ -623,6 +643,7 @@ void testApp::UpdateUserData()
 		string b="userdelta"+result;
 		// don't send 0,0,0
 		// limit to a square 3x3 for Seneffe
+		// XS TODO: read values from a config file
 		std::stringstream tmp_i;
 		tmp_i << aUsers[i];
 		if (com[i].X!=0 && com[i].Y!=0 && com[i].Z > 1000 && com[i].X > -1500 && com[i].X < 1500 && com[i].Z < 4000)
@@ -662,37 +683,117 @@ void testApp::UpdateUserData()
 			XnSkeletonJointPosition joint1;
 			g_UserGenerator.GetSkeletonCap().GetSkeletonJointPosition(aUsers[i], XN_SKEL_RIGHT_HAND, joint1);
 			pt=joint1.position;
-
-			string c="handR"+result;
 			
+			// XS do not set hands positions of all users.
+			// accumulate Z of right hand and try to get a common tempo from it.
 			if (pt.X !=0 && pt.Y !=0 && pt.Z!=0) {
-				ofxOscMessage m2;
-				m2.setAddress( "/SendHandRight" );
-				m2.addStringArg( c );
-				m2.addIntArg( aUsers[i] );
-				m2.addIntArg( pt.X );
-				m2.addIntArg( pt.Y );
-				m2.addIntArg( pt.Z );
-				sender.sendMessage( m2 );
+				Zhands[current_index] += pt.Z ; 
 			}
 			
-			g_UserGenerator.GetSkeletonCap().GetSkeletonJointPosition(aUsers[i], XN_SKEL_LEFT_HAND, joint1);
-			pt=joint1.position;
-			
-			string d="handL"+result;
-			
-			if (pt.X !=0 && pt.Y !=0 && pt.Z!=0)
-			{
-				ofxOscMessage m3;
-				m3.setAddress( "/SendHandLeft" );
-				m3.addStringArg( d );
-				m3.addIntArg(aUsers[i]);
-				m3.addIntArg( pt.X );
-				m3.addIntArg( pt.Y );
-				m3.addIntArg( pt.Z );
-				sender.sendMessage( m3 );
-			}
+//			string c="handR"+result;			
+//			if (pt.X !=0 && pt.Y !=0 && pt.Z!=0) {
+//				ofxOscMessage m2;
+//				m2.setAddress( "/SendHandRight" );
+//				m2.addStringArg( c );
+//				m2.addIntArg( aUsers[i] );
+//				m2.addIntArg( pt.X );
+//				m2.addIntArg( pt.Y );
+//				m2.addIntArg( pt.Z );
+//				sender.sendMessage( m2 );
+//			}
+
+			// XS240711 : removed left hand
+//			g_UserGenerator.GetSkeletonCap().GetSkeletonJointPosition(aUsers[i], XN_SKEL_LEFT_HAND, joint1);
+//			pt=joint1.position;
+//			
+//			string d="handL"+result;
+//			
+//			if (pt.X !=0 && pt.Y !=0 && pt.Z!=0)
+//			{
+//				ofxOscMessage m3;
+//				m3.setAddress( "/SendHandLeft" );
+//				m3.addStringArg( d );
+//				m3.addIntArg(aUsers[i]);
+//				m3.addIntArg( pt.X );
+//				m3.addIntArg( pt.Y );
+//				m3.addIntArg( pt.Z );
+//				sender.sendMessage( m3 );
+//			}
 		}
 	}
+	
+// filter to reduce noise 
+// XS TODO testme !!!
+//	this->median_filter();
+	
+	// tries to set up BPM from the position of the right hand
+	int tempo = this->find_tempo();
+	if (tempo >0) {
+		ofxOscMessage mz;
+		mz.setAddress( "/mediacycle/browser/bpm" );
+		mz.addIntArg( tempo );
+		sender.sendMessage( mz );
+	}
+	// increments current index (modulo N_samples) 
+	current_index = (current_index+1)%Nsamples; // XS TODO check output value
 }
+
+void testApp::median_filter (){
+	vector<float> v;
+	int n_samples_to_use = Nsamples/3;
+	int istart = current_index + Nsamples - n_samples_to_use;
+	for (int i = istart; i < current_index + Nsamples; i++){
+		v.push_back(Zhands[i%Nsamples]);
+	}
+	int len = v.size(); // should be n_samples_to_use
+	
+	// fast stl's way to get median
+	nth_element( v.begin(), v.begin()+len/2,v.end() );
+	cout << "current Z " << Zhands[current_index] << " -- replaced by Median: " << v[len/2] << endl;
+	Zhands[current_index] = v[len/2];
+}
+
+int testApp::find_peak_index(fftw_complex* Zc, int size){
+	double maxi = 0.0;
+	int imax = 0;
+	for (int i = 1; i < size; i++) { // skip 0
+		double ab = pow(Zc[i][0], 2) + pow(Zc[i][1], 2);
+		if (ab > maxi) {
+			maxi=ab;
+			imax=i;
+		}
+	}
+//	cout << "maxi = " << maxi << " at imax = " << imax << endl;
+	return imax;	
+}
+
+int testApp::find_tempo(){
+	int N = this->Nsamples;
+	int M = N/2 + 1;
+	fftw_complex* Zfft ; 
+	fftw_plan plan_f;
+	Zfft = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * M);
+	
+	// XS TODO : this only takes rqw hand positions, should filter
+	plan_f = fftw_plan_dft_r2c_1d(N, Zhands, Zfft, FFTW_ESTIMATE);
+	fftw_execute(plan_f);
+		
+	// XS composante continue : si elle est trop faible (seuil ˆ tester)
+	// on ne calcule pas le pic
+	
+	double Z0 = pow(Zfft[0][0], 2) + pow(Zfft[0][1], 2);
+	
+	double Zthresh = 1000; // XS TODO check this one !
+	if (Z0 < Zthresh)
+		return 0;
+	
+	double maxi;
+	int imax = find_peak_index(Zfft,M);
+	
+	fftw_destroy_plan(plan_f);
+	fftw_free(Zfft);
+	
+	return imax;
+}
+
 

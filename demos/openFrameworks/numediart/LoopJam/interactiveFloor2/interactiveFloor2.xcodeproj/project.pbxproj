@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		0638645E1383E36200BA2627 /* libOpenNI.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 0638645D1383E36200BA2627 /* libOpenNI.dylib */; };
 		70E659C2141E2D0000947B09 /* hal.icns in CopyFiles */ = {isa = PBXBuildFile; fileRef = 70E659C1141E2CF800947B09 /* hal.icns */; };
+		A47D5771142FBD7A00707CFB /* libfftw3.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A47D5770142FBD7A00707CFB /* libfftw3.a */; };
 		AB481AAC13410C42008DEA61 /* libOsc.a in Frameworks */ = {isa = PBXBuildFile; fileRef = AB481A9313410C42008DEA61 /* libOsc.a */; };
 		AB481AAD13410C42008DEA61 /* oscpack.a in Frameworks */ = {isa = PBXBuildFile; fileRef = AB481A9513410C42008DEA61 /* oscpack.a */; };
 		AB481AAE13410C42008DEA61 /* oscpack.lib in Frameworks */ = {isa = PBXBuildFile; fileRef = AB481A9613410C42008DEA61 /* oscpack.lib */; };
@@ -93,6 +94,7 @@
 /* Begin PBXFileReference section */
 		0638645D1383E36200BA2627 /* libOpenNI.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libOpenNI.dylib; path = /usr/lib/libOpenNI.dylib; sourceTree = "<absolute>"; };
 		70E659C1141E2CF800947B09 /* hal.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = hal.icns; sourceTree = "<group>"; };
+		A47D5770142FBD7A00707CFB /* libfftw3.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libfftw3.a; path = /opt/local/lib/libfftw3.a; sourceTree = "<absolute>"; };
 		AB481A8013410C42008DEA61 /* IpEndpointName.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IpEndpointName.h; sourceTree = "<group>"; };
 		AB481A8113410C42008DEA61 /* NetworkingUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NetworkingUtils.h; sourceTree = "<group>"; };
 		AB481A8213410C42008DEA61 /* PacketListener.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PacketListener.h; sourceTree = "<group>"; };
@@ -201,6 +203,7 @@
 				AB481AAF13410C42008DEA61 /* oscpack_cw.lib in Frameworks */,
 				AB481AB013410C42008DEA61 /* oscpackd.lib in Frameworks */,
 				0638645E1383E36200BA2627 /* libOpenNI.dylib in Frameworks */,
+				A47D5771142FBD7A00707CFB /* libfftw3.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -515,6 +518,7 @@
 			children = (
 				70E659C1141E2CF800947B09 /* hal.icns */,
 				0638645D1383E36200BA2627 /* libOpenNI.dylib */,
+				A47D5770142FBD7A00707CFB /* libfftw3.a */,
 				E4B69B5B0A3A1756003C02F2 /* interactiveFloor2.app */,
 				E4B6FCAD0C3E899E008CF71C /* openFrameworks-Info.plist */,
 				E4B69E1C0A3A1BDC003C02F2 /* src */,
@@ -802,6 +806,7 @@
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_1)",
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_2)",
 					/openkinect/openni2/Lib,
+					/opt/local/lib,
 				);
 				LIBRARY_SEARCH_PATHS_QUOTED_1 = "\"$(SRCROOT)/../../../addons/ofxOsc/libs/oscpack/lib/osx\"";
 				LIBRARY_SEARCH_PATHS_QUOTED_2 = "\"$(SRCROOT)/../../../addons/ofxOsc/libs/oscpack/lib/win32\"";
@@ -877,6 +882,7 @@
 				GCC_WARN_UNUSED_VALUE = NO;
 				GCC_WARN_UNUSED_VARIABLE = NO;
 				HEADER_SEARCH_PATHS = (
+					/opt/local/include,
 					"/usr/include/ni/**",
 					"../../../libs/openFrameworks/**",
 					../../../libs/freetype/include/,
@@ -884,6 +890,7 @@
 					../../../libs/poco/include,
 					../../../addons/,
 				);
+				LIBRARY_SEARCH_PATHS = /opt/local/lib;
 				OTHER_CPLUSPLUSFLAGS = (
 					"-D__MACOSX_CORE__",
 					"-lpthread",
@@ -933,6 +940,7 @@
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_3)",
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_7)",
 					/openkinect/openni2/Lib,
+					/opt/local/lib,
 				);
 				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(SRCROOT)/../../../libs/freeimage/lib/osx\"";
 				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_14 = "\"$(SRCROOT)/../../../libs/fmodex/lib/osx\"";
@@ -988,6 +996,7 @@
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_1)",
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_2)",
 					/openkinect/openni2/Lib,
+					/opt/local/lib,
 				);
 				LIBRARY_SEARCH_PATHS_QUOTED_1 = "\"$(SRCROOT)/../../../addons/ofxOsc/libs/oscpack/lib/osx\"";
 				LIBRARY_SEARCH_PATHS_QUOTED_2 = "\"$(SRCROOT)/../../../addons/ofxOsc/libs/oscpack/lib/win32\"";

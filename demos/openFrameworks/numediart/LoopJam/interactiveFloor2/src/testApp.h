@@ -1,7 +1,7 @@
 /**
  * @brief testApp.h
  * @author Christian Frisson
- * @date 22/09/2011
+ * @date 25/09/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -36,14 +36,20 @@
 #include <XnCppWrapper.h>
 
 #include "ofMain.h"
-
 #include "ofxOsc.h"
+
+// XS for tempo detection
+#include <fftw3.h>
 
 using namespace xn;
 
 class testApp : public ofBaseApp {
 	
-public:
+public: // methods
+	
+	// XS 240911 added constructor and destructor
+	testApp();
+	~testApp();
 	void setup();
 	void buildGrid();
 	void update();
@@ -66,6 +72,12 @@ public:
 	void UpdateUserData();
 	void drawPointCloud();
 	
+// XS for tempo detection
+	void median_filter();
+	int find_peak_index(fftw_complex* Zc, int size);
+	int find_tempo();
+	
+public: // variables (XS TODO could probably be private)	
 	float referenceSize;
 	
 	ofPoint halGridOffset;
@@ -105,7 +117,10 @@ public:
 	ofxOscReceiver	receiver;
 	int userToTrack;
 	
-
+// XS 240911
+	int Nsamples; // could be const or static const
+	double *Zhands;
+	int current_index;
 };
 
 #endif
