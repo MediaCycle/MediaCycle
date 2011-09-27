@@ -85,7 +85,7 @@ ACOsgCompositeViewQt::ACOsgCompositeViewQt( QWidget * parent, const char * name,
 	 */
 
 	connect(&_timer, SIGNAL(timeout()), this, SLOT(updateGL()));
-	_timer.start(10);
+	_timer.start(50);
 
 	// Renderers
 	browser_renderer = new ACOsgBrowserRenderer();
@@ -312,7 +312,7 @@ void ACOsgCompositeViewQt::updateGL()
 			}
 			//std::cout << "Mouse " << this->underMouse() << std::endl;
 			mouseover=this->underMouse();
-		}	
+		}
 		media_cycle->updateState();
 		frac = media_cycle->getFrac();
 	}
