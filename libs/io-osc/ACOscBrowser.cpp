@@ -166,7 +166,12 @@ int ACOscBrowser::process_mess(const char *path, const char *types, lo_arg **arg
 		else if(tag.find("/released",0)!= string::npos)
 		{
 			std::cout << "OSC message: '" << tag << "'" << std::endl;
-			media_cycle->setAutoPlay(0);
+			if (media_cycle->getNumberOfPointers()<1)//TR NEM2011
+				media_cycle->setAutoPlay(0);//TR NEM
+			if (media_cycle->getNumberOfPointers()==1)//TR NEM2011
+				if (media_cycle->getPointerFromIndex(0))
+					if (media_cycle->getPointerFromIndex(0)->getType()==AC_POINTER_MOUSE)
+					media_cycle->setAutoPlay(0);//TR NEM
 			media_cycle->removePointer(id);//CF hack
 			//Ugly
 			//osg_view->getHUDRenderer()->preparePointers();
@@ -331,16 +336,17 @@ int ACOscBrowser::process_mess(const char *path, const char *types, lo_arg **arg
 		{
 			float bpm;
 			bpm = argv[0]->f;
+			cout<<"/player/bpm/"<<bpm<<endl;
 			
 			//int node = media_cycle->getClickedNode();
 			//int node = media_cycle->getClosestNode();
 			int node = media_cycle->getLastSelectedNode();
 			
-			if (node > -1)
+			//if (node > -1)
 			{
 				#if defined (SUPPORT_AUDIO)
 				audio_engine->setLoopSynchroMode(node, ACAudioEngineSynchroModeAutoBeat);
-				audio_engine->setLoopScaleMode(node, ACAudioEngineScaleModeResample);
+			//	audio_engine->setLoopScaleMode(node, ACAudioEngineScaleModeResample);
 				audio_engine->setBPM((float)bpm);
 				#endif //defined (SUPPORT_AUDIO)
 			}

@@ -123,6 +123,20 @@ void ACAudioControlsDockWidgetQt::on_comboBoxWaveformBrowser_activated(const QSt
     osg_view->setFocus();
 }
 
+
+void ACAudioControlsDockWidgetQt::setComboBoxWaveformBrowser(ACBrowserAudioWaveformType _type)
+{
+	if (_type==AC_BROWSER_AUDIO_WAVEFORM_NONE){
+		ui.comboBoxWaveformBrowser->setCurrentIndex(0);
+		on_comboBoxWaveformBrowser_activated("None");
+	}
+	else {
+		ui.comboBoxWaveformBrowser->setCurrentIndex(1);
+		on_comboBoxWaveformBrowser_activated("Classic");
+	}
+
+}
+
 // XS TODO : recuperate these from Audiocycle ?
 
 //void ACAudioCycleOsgQt::on_sliderBPM_valueChanged() //[0;220]

@@ -72,7 +72,7 @@ AGOsgCompositeViewQt::AGOsgCompositeViewQt( QWidget * parent, const char * name,
 	 */
 
 	connect(&_timer, SIGNAL(timeout()), this, SLOT(updateGL()));
-	_timer.start(10);
+	_timer.start(50);
 
 	browser_renderer = new ACOsgBrowserRenderer();
 	timeline_renderer = new ACOsgTimelineRenderer();

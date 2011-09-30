@@ -60,8 +60,17 @@ ACOsgHUDRenderer::ACOsgHUDRenderer()
 	group = new Group();
 	pointer_group = new Group();
 	group->addChild(pointer_group);//group->addChild(pointer_group.get());
-
 	camera->addChild(group);
+}
+//TR NEM2011
+void ACOsgHUDRenderer::cleanPointers(){
+
+	for (int i=0;i<pointer_renderer.size();i++){
+		pointer_group->removeChild(pointer_renderer[i]->getNode());
+		delete pointer_renderer[i];
+	}
+	pointer_renderer.clear();
+	
 }
 
 double ACOsgHUDRenderer::getTime() {
@@ -96,8 +105,10 @@ void ACOsgHUDRenderer::preparePointers(osgViewer::View* view) {
 			std::cout << "ACOsgHUDRenderer::preparePointers mouse no"<<std::endl;
 		
 	}	*/
-	if(prev_size == 1 || n==1)
-		pointer_group->removeChildren(0,pointer_group->getNumChildren());
+//	if(prev_size == 1 || n==1)
+//		if (media_cycle->getPointerFromIndex(0)!=0)
+//			if (media_cycle->getPointerFromIndex(0)->getType()==AC_POINTER_MOUSE)//TR NEM2011
+//				pointer_group->removeChildren(0,pointer_group->getNumChildren());
 	
 	
 	if (pointer_renderer.size()>n) {
@@ -124,7 +135,7 @@ void ACOsgHUDRenderer::preparePointers(osgViewer::View* view) {
 					pointer_renderer[i]->setText(media_cycle->getPointerFromIndex(i)->getText());
 					//std::cout << "Pointer id " << i << " txt " <<  txt << std::endl;
 					pointer_renderer[i]->prepareNodes();
-					if( !((prev_size == 1 || n == 1) && p->getType() == AC_POINTER_MOUSE))
+					if( !(/*(prev_size == 1 || n == 1) && */p->getType() == AC_POINTER_MOUSE))
 						pointer_group->addChild(pointer_renderer[i]->getNode());
 					//if( ((prev_size == 1 || n == 1) && p->getType() == AC_POINTER_MOUSE))
 					//	pointer_group->removeChildren(0,pointer_group->getNumChildren());

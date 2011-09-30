@@ -175,6 +175,7 @@ private:
 	int     **desc_time_signatures;
 	// Musical Properties (entered by user or sequencer software)
 	float	active_bpm;
+	float prev_active_bpm;
 	int		active_key;
 	int		active_tsnum;
 	int		active_tsden;

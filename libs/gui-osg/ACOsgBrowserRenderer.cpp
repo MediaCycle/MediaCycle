@@ -126,6 +126,11 @@ USE_GRAPHICSWINDOW()
 */
 #endif
 
+#ifndef MIN
+#define MIN(a,b)  ((a) > (b) ? (b) : (a))
+#endif
+
+
 ACOsgBrowserRenderer::ACOsgBrowserRenderer()
 //: displayed_nodes(0)
 {
@@ -392,6 +397,91 @@ void ACOsgBrowserRenderer::updateLabels(double ratio) {
 int ACOsgBrowserRenderer::computeScreenCoordinates(osgViewer::View* view, double ratio) //CF: use osgViewer::Viewer* for the simple Viewer
 {
 	int closest_node = 1;//CF to deprecate
+	{
+		float mx(0.0f), my(0.0f);
+		
+		
+		
+		float x(0.0f), y(0.0f), z(0.0f);
+		
+		int n = media_cycle->getLibrarySize();
+		n = node_renderer.size();
+		
+		//osg::Matrix modelModel = view->getModelMatrix();
+		osg::Matrix viewMatrix = view->getCamera()->getViewMatrix();
+		osg::Matrix projectionMatrix = view->getCamera()->getProjectionMatrix();
+		//osg::Matrix window = view->getWindowMatrix();
+		osg::Matrix VPM = viewMatrix * projectionMatrix;
+		
+		// convertpoints in model coordinates to view coordinates
+		// Not necessary to go to screen coordinated because pick function can get normalized mouse coordinates
+		osg::Vec3 modelPoint;
+		osg::Vec3 screenPoint;
+		
+		// SD 2010 OCT - This animation has moved from Browser to Renderer
+#define CUB_FRAC(x) (x*x*(-2.0*x + 3.0))
+#define TI_CLAMP(x,a,b) ((x)<(a)?(a):(x)>(b)?(b):(x))
+		double t = getTime();
+		double frac;
+		double andur = 1.0;
+		//	double alpha = 0.99;
+		double omr;
+		
+		
+		//printf ("POINTER %d: %f %f\n", p, mx, my);
+		
+		//distance_mouse.clear();//CF
+		//distance_mouse.resize(n);//CF
+		
+		closest_node = -1;
+		for(int i=0; i<n; i++) {
+			
+			ACMediaNode &attribute = media_cycle->getMediaNode(i);
+			
+			if(node_renderer[i]){
+				if (attribute.getChanged()) {
+					if (node_renderer[i]->getInitialized()) {
+						node_renderer[i]->setCurrentPos(node_renderer[i]->getViewPos());
+					}
+					else {
+						node_renderer[i]->setCurrentPos(attribute.getCurrentPosition());
+						node_renderer[i]->setViewPos(attribute.getCurrentPosition());
+					}
+					node_renderer[i]->setNextPos(attribute.getNextPosition());
+					attribute.setChanged(0);
+				}
+				
+				const ACPoint &p = node_renderer[i]->getCurrentPos();
+				const ACPoint &p2 = node_renderer[i]->getNextPos();
+				double refTime = attribute.getNextTime();
+				
+				frac = (t-refTime)/andur;
+				if (frac<1) {
+					//frac = CUB_FRAC(frac);
+				}
+				frac = TI_CLAMP(frac, 0, 1);
+				
+				omr = 1.0-frac;
+				x = omr*p.x + frac*p2.x;
+				y = omr*p.y + frac*p2.y;
+				z = 0;
+				
+				media_cycle_view_pos.x = x;
+				media_cycle_view_pos.y = y;
+				
+				node_renderer[i]->setFrac(frac);
+				node_renderer[i]->setViewPos(media_cycle_view_pos);
+				//attribute.setViewPosition(media_cycle_view_pos);
+				
+				modelPoint = Vec3(x,y,z);
+				screenPoint = modelPoint * VPM;
+				node_renderer[i]->setDistanceMouse(1.f);
+				
+				
+			}	
+		}
+		
+	}
 	for(int p_index=0; p_index<media_cycle->getNumberOfPointers();p_index++){
 		float mx(0.0f), my(0.0f);
 
@@ -502,7 +592,8 @@ int ACOsgBrowserRenderer::computeScreenCoordinates(osgViewer::View* view, double
 
 				// compute distance between mouse and media element in view
 				distance_mouse[i] = sqrt((screenPoint[0]-mx)*(screenPoint[0]-mx)+(screenPoint[1]-my)*(screenPoint[1]-my));
-				node_renderer[i]->setDistanceMouse(distance_mouse[i]);
+				
+				node_renderer[i]->setDistanceMouse(MIN(distance_mouse[i],node_renderer[i]->getDistanceMouse()));
 				if (media_cycle->getBrowser()->getLayout() == AC_LAYOUT_TYPE_NODELINK)
 					link_renderer[i]->setDistanceMouse(distance_mouse[i]);
 

@@ -37,16 +37,22 @@
 ACAudioCycleLoopJam::ACAudioCycleLoopJam() : ACMultiMediaCycleOsgQt() {
 	count = 0;
 	// delay after which we change media_files (if it's ok)
-	attente = 10*60*1000; // in ms
+	attente = 5*60*1000; // in ms
 
 	this->useSegmentationByDefault(false);
 
-	XMLfiles.push_back("/Volumes/data/mc-datasets/xml/mc-LoopJam-MusicTechMagazine98.xml");
-	XMLfiles.push_back("/Volumes/data/mc-datasets/xml/mc-LoopJam-OLPC.xml");
+//	XMLfiles.push_back("/Users/ravet/Desktop/MediaCycleData/AudioCycleACL/zero-g-pro-pack_a/Brass Elements/Brass 076 BPM/libxml.xml");
 	XMLfiles.push_back("/Volumes/data/mc-datasets/xml/mc-LoopJam-ZeroGProPack.xml");
+	XMLfiles.push_back("/Volumes/data/mc-datasets/xml/mc-LoopJam-OLPC.xml");
+	XMLfiles.push_back("/Volumes/data/mc-datasets/xml/mc-LoopJam-MusicTechMagazine98.xml");
 
+	
 	timer = new QTimer(this);
 	connect( timer, SIGNAL(timeout()), this, SLOT(loopXML()) );
+     QAction *action = new QAction(this);  
+     action->setShortcut(QKeySequence(Qt::Key_F1));  
+     this->addAction(action);  
+     connect(action, SIGNAL(triggered()), this, SLOT(loopXML()));  
 }
 
 ACAudioCycleLoopJam::~ACAudioCycleLoopJam(){
@@ -54,8 +60,22 @@ ACAudioCycleLoopJam::~ACAudioCycleLoopJam(){
 }
 
 void ACAudioCycleLoopJam::startLoopXML(){
+	timer->stop();
 	loopXML(); // start first one before time starts so you don't wait for 30 min for the app to run
 	timer->start(attente);
+}
+
+void ACAudioCycleLoopJam::setDefaultWaveform(ACBrowserAudioWaveformType _type){
+	
+	compositeOsgView->getBrowserRenderer()->setAudioWaveformType(_type);
+	for (int d=0;d<dockWidgets.size();d++){
+//		cout << dockWidgets[d]->getClassName()<<endl;
+		if (dockWidgets[d]->getClassName()==string("ACAudioControlsDockWidgetQt")){
+			((ACAudioControlsDockWidgetQt*)dockWidgets[d])->setComboBoxWaveformBrowser(_type);
+			cout << "WaveformType:"<<_type<<endl;
+		}
+	}
+	
 }
 
 void ACAudioCycleLoopJam::loopXML(){
@@ -64,6 +84,9 @@ void ACAudioCycleLoopJam::loopXML(){
 	if (count >= XMLfiles.size()) count=0;
 	cout << "opening : " << XMLfiles[count] << endl;
 	this->clean(true);
+	
 	this->readXMLConfig(XMLfiles[count]);
+	setDefaultWaveform(AC_BROWSER_AUDIO_WAVEFORM_NONE);
+	
 	count++;
 }

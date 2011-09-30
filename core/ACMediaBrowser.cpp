@@ -98,7 +98,7 @@ ACMediaBrowser::ACMediaBrowser() {
 
 	// XS TODO 1 this assumes cluster mode !
 	// XS TODO 2 define const :
-	mClusterCount = 5;
+	mClusterCount = 10;
 
 	// SD 2010 OCT
 	/*
@@ -584,7 +584,8 @@ void ACMediaBrowser::libraryContentChanged(int needsCluster) {
 	//this->updateState(); //CF
 	//setNeedsDisplay(true);//CF
 
-	this->initializeFeatureWeights();
+	if (mFeatureWeights.size()==0)
+		this->initializeFeatureWeights(); //TR NEM modification
 
 	updateDisplay(true, needsCluster);
 
@@ -1490,9 +1491,16 @@ ACPointerType ACMediaBrowser::getPointerTypeFromId(int _id) {
 }	
 	
 ACPointer* ACMediaBrowser::getPointerFromId(int _id) {
+	
+	
 	ACPointers::iterator p_attr_it = mPointers.find(_id);
+	
+	
 	if (p_attr_it ==  mPointers.end()){ //new pointer
-		this->addPointer(_id);
+		if (_id==-1)
+			this->addPointer(_id,AC_POINTER_MOUSE);
+		else
+			this->addPointer(_id);
 		p_attr_it = mPointers.find(_id);
 		if (p_attr_it ==  mPointers.end()) {
 			std::cerr << "ACMediaBrowser::getPointerFromId: couldn't get pointer with id " << _id << std::endl;
@@ -1558,9 +1566,9 @@ void ACMediaBrowser::removePointer(int _id) {
 	if (p_iter !=  mPointers.end()){ //existing*/
 		if (mLibrary->getSize()>0 && p_iter->second){
 			//CF we need first to desactivate the closest node of the pointer to be removed, if in audiohover mode
-			ACMediaNode closest = getMediaNode(p_iter->second->getClosestNode());
+			/*ACMediaNode closest = getMediaNode(p_iter->second->getClosestNode());
 			if (closest.getActivity() == 2)
-				toggleSourceActivity(closest);
+				toggleSourceActivity(closest);*///TR NEM 
 		}
 		if (p_iter->second)
 			delete p_iter->second;

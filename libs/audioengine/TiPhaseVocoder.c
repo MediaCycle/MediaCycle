@@ -88,22 +88,49 @@ int setCurrentSampleToNext(TiPhaseVocoder *tpv) {
 
 int initPV(TiPhaseVocoder *tpv){
     setCurrentSample(tpv,0.0);//might want to add an offset here ?
+	if (tpv->hanning)
+		free(tpv->hanning);
     tpv->hanning = 0;
+	if (tpv->dphase)
+		free(tpv->dphase);
     tpv->dphase = 0;
+	if (tpv->leftFFT.re)
+		free(tpv->leftFFT.re);
     tpv->leftFFT.re = 0;
+	if (tpv->leftFFT.im)
+		free(tpv->leftFFT.im);
     tpv->leftFFT.im = 0;
+	if (tpv->rightFFT.re)
+		free(tpv->rightFFT.re);
     tpv->rightFFT.re = 0;
+	if (tpv->rightFFT.im)
+		free(tpv->rightFFT.im);
     tpv->rightFFT.im = 0;
+	if (tpv->outputFFT.re)
+		free(tpv->outputFFT.re);
     tpv->outputFFT.re = 0;
+	if (tpv->outputFFT.im)
+		free(tpv->outputFFT.im);
     tpv->outputFFT.im = 0;
+	if (tpv->output)
+		free(tpv->output);
     //tpv->tmpoutput = 0;
     tpv->output = 0;
+	if (tpv->outputAmplitude)
+		free(tpv->outputAmplitude);
     tpv->outputAmplitude = 0;
+	if (tpv->outputPhase)
+		free(tpv->outputPhase);
     tpv->outputPhase = 0;
     tpv->bufferPos = 0;
+	if (tpv->buffer)
+		free(tpv->buffer);
     tpv->buffer = 0;
+	
     tpv->currentFrame = -100;
     tpv->lockingMode = 0;
+	if (tpv->peaksIndex)
+		free(tpv->peaksIndex);
     tpv->peaksIndex = 0;
 	tpv->needResetPhase = 1;
 

@@ -90,6 +90,7 @@ protected:
 public:
 	ACOsgHUDRenderer();
 	~ACOsgHUDRenderer() {};
+	void cleanPointers();
 
 	double getTime();
 

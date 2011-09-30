@@ -115,6 +115,7 @@ ACAudioFeedback::ACAudioFeedback(PaStream *_stream, int samplerate, int buffersi
 	debug_vocoder = fopen("/dupont/afac.pcm","w");
 	//
 	active_bpm   = 100;
+	prev_active_bpm   = 100;
 	active_key	 = 0;
 	active_tsnum = 4;
 	active_tsden = 4;
@@ -556,6 +557,11 @@ void ACAudioFeedback::threadAudioUpdate()
 
 void ACAudioFeedback::timeCodeAudioEngine(int n_samples) {
 
+	time_from_start *= prev_active_bpm/active_bpm;
+	time_from_downbeat *= prev_active_bpm/active_bpm;
+	time_from_beat *= prev_active_bpm/active_bpm;
+	time_from_tatum *= prev_active_bpm/active_bpm;
+	
 	prev_time_from_start = time_from_start;
 	prev_time_from_downbeat = time_from_downbeat;
 	prev_time_from_beat = time_from_beat;
@@ -581,6 +587,7 @@ void ACAudioFeedback::timeCodeAudioEngine(int n_samples) {
 	while (time_from_tatum >= (60.0/active_bpm/active_tstype)) {
 		time_from_tatum -= 60.0/active_bpm/active_tstype;
 	}
+	prev_active_bpm=active_bpm;
 }
 
 // This creates or delete sources according to actions made in other modules

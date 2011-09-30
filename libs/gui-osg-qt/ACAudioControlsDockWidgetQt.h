@@ -65,6 +65,7 @@ private slots:
 public:
 	ACAudioControlsDockWidgetQt(QWidget *parent = 0);
 	~ACAudioControlsDockWidgetQt();
+	void setComboBoxWaveformBrowser(ACBrowserAudioWaveformType _type);
 
 #if defined (SUPPORT_AUDIO)
 private:

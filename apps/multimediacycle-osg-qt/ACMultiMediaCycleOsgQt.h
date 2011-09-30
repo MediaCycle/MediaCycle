@@ -157,7 +157,6 @@ private:
 //	QProgressBar *pb;
 	bool features_known;
 	bool plugins_scanned;
-	MediaCycle *media_cycle;
 	ACMediaType media_type;
 	ACBrowserMode browser_mode;
 	std::string config_file_xml;	
@@ -171,7 +170,6 @@ private:
 	// Dock Widgets
 	vector<int> lastDocksVisibilities; //state stored before hiding all docks with the toggle
 	bool wasControlsToggleChecked;
-	vector<ACAbstractDockWidgetQt*> dockWidgets;
 	ACDockWidgetFactoryQt* dockWidgetFactory;
 	void configureDockWidgets(ACMediaType _media_type);
 	
@@ -195,7 +193,6 @@ private:
 
 	void importDirectoriesThreaded(std::vector<std::string> directories);
 
-	ACOsgCompositeViewQt* compositeOsgView;
 	QDockWidget* osgViewDock;
 	QWidget* osgViewDockWidget;
 	QVBoxLayout *osgViewDockLayout;
@@ -205,5 +202,10 @@ private:
 	
 	bool use_segmentation_current,use_segmentation_default,use_feature_extraction,use_visualization_plugins;
 	bool auto_connect_osc;
+	
+protected:
+	ACOsgCompositeViewQt* compositeOsgView;
+	vector<ACAbstractDockWidgetQt*> dockWidgets;
+	MediaCycle *media_cycle;
 };
 #endif

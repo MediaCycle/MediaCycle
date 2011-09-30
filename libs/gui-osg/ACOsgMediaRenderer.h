@@ -120,6 +120,7 @@ public:
 	ACMediaType getMediaType(){return media_type;}
 	void setNodeIndex(int _node_index) { this->node_index = _node_index; };
 	void setDistanceMouse(float _distance_mouse) { this->distance_mouse = _distance_mouse; };
+	float getDistanceMouse(void) { return this->distance_mouse ; };
 	//void setActivity(int _media_activity) { this->media_activity = _media_activity; }
 	osg::ref_ptr<osg::Group>  getNode() { return local_group; };
 	
