@@ -1,7 +1,7 @@
 /**
  * @brief testApp.h
  * @author Christian Frisson
- * @date 25/09/2011
+ * @date 01/10/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -75,7 +75,7 @@ public: // methods
 // XS for tempo detection
 	void median_filter();
 	int find_peak_index(fftw_complex* Zc, int size);
-	int find_tempo();
+	float find_tempo();
 	
 public: // variables (XS TODO could probably be private)	
 	float referenceSize;
@@ -119,8 +119,14 @@ public: // variables (XS TODO could probably be private)
 	
 // XS 240911
 	int Nsamples; // could be const or static const
-	double *Zhands;
+	std::vector<double> *Zhands;
+	std::vector<double> *TimeHands;
+	double *VzHandsComplete;
 	int current_index;
+	std::vector<double> tempoBuffer;
+	std::vector<double> medianFilteredTempoBuffer;
+	int currentTempoIndex;
+	int beginWindowsIndex,midWindowIndex;
 };
 
 #endif

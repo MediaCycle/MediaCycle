@@ -1,7 +1,7 @@
 /**
  * @brief main.cpp
  * @author Christian Frisson
- * @date 22/09/2011
+ * @date 01/10/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -33,9 +33,11 @@
 #include "testApp.h"
 #include "ofAppGlutWindow.h"
 
+
 //========================================================================
 int main( ){
-
+	
+	
     ofAppGlutWindow window;
 	ofSetupOpenGL(&window, 640,480, OF_WINDOW);			// <-------- setup the GL context
 

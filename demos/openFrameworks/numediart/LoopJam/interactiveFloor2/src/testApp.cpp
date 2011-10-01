@@ -1,7 +1,7 @@
 /**
  * @brief testApp.cpp
  * @author Christian Frisson
- * @date 25/09/2011
+ * @date 01/10/2011
  * @copyright (c) 2011 â€“ UMONS - Numediart
  * 
  * MediaCycle of University of Mons â€“ Numediart institute is 
@@ -38,7 +38,11 @@
 #define HOST "localhost"
 #define PORTS 12345 //port d'envoi
 #define PORTR 12346	//port de reception
-
+#define FFTTIMEWINDOWS 2.f
+#define FFTNSAMPLES 512
+#define TIMESAMPLE (1.0/30.0)
+#define NTEMPOBUFFER 5
+#define OVERLAP 0.5
 // XS to calculate median easily
 #include <algorithm>
 #include <vector>
@@ -71,8 +75,31 @@ XnPoint3D handPos;
 XnUserID g_nPlayer = 0;
 XnBool g_bCalibrated = FALSE;
 bool cal=false;
-					   
+				
+
+double time1,time2;
+#include <sys/time.h>
+
+float tempo,zMem; 
+static double getTime()
+{
+    struct timeval tv = {0, 0};
+    struct timezone tz = {0, 0};
+    
+    gettimeofday(&tv, &tz);
+    
+    return (double)tv.tv_sec + tv.tv_usec / 1000000.0;
+} 
+double median(double a,double b, double c);
+
 //KINECT CALLBACK
+void print_complex_1d(fftw_complex* arr, int size, int normalize) {	
+	for (int i = 0; i < size; i++) {
+		double a = arr[i][0] / (normalize ? size : 1);
+		double b = arr[i][1] / (normalize ? size : 1);
+		cout << a << " " << b << endl;
+	}
+}
 
 void XN_CALLBACK_TYPE User_NewUser(xn::UserGenerator& generator, XnUserID nId, void* pCookie)
 {
@@ -148,20 +175,39 @@ void XN_CALLBACK_TYPE UserCalibration_CalibrationEnd(xn::SkeletonCapability& cap
 //--------------------------------------------------------------	
 
 testApp::testApp() : ofBaseApp(){ 
-	Nsamples = 100; // number of hands positions to consider for tempo computation
-	Zhands = new double [Nsamples];
-	for (int i=0; i< Nsamples ; i++){
-		Zhands[i] = 0.0;
+	// ** XS ** PARAM
+	Nsamples = 512; // number of hands positions to consider for tempo computation
+	// 50 -> 2 seconds (to test)
+	// 100 -> 4 seconds (may be too long)
+	Zhands=new vector<double>;
+	TimeHands=new vector<double>;
+	
+	
+	VzHandsComplete=new double[FFTNSAMPLES];
+	for (int i=0; i< FFTNSAMPLES ; i++){
+		VzHandsComplete[i] = 0.0;
 	}
+	
 	current_index=0;
+	
+	tempo=0;
+	zMem=0;
+	beginWindowsIndex=0;
+	midWindowIndex=0;
+
 }
 
 testApp::~testApp(){
-	delete [] Zhands;
+	
+	delete Zhands;
+	delete []  VzHandsComplete;
+	delete TimeHands;
+	
 }
 
 void testApp::setup(){
-	
+	time1=0;
+	time2=0;
 	//OSC SETUP
 	sender.setup( HOST, PORTS );
 	receiver.setup( PORTR );
@@ -282,8 +328,10 @@ void testApp::draw() {
     } else 
 	{
         ofBackground(150, 150, 150);
-           }
-	
+	}
+	ofDrawBitmapString("Tempo : "+ofToString(tempo,2), 5, ofGetHeight()-195);
+	ofDrawBitmapString("Hand Z : "+ofToString(zMem,2), 5, ofGetHeight()-180);
+
     /// reseting the world
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_TEXTURE_2D);
@@ -630,7 +678,9 @@ void testApp::UpdateUserData()
 	XnPoint3D com[nUsers];	//vecteur de points 3D pour les diffŽrents centres de gravitŽ 
 	
 	// Z global de la main droite
-	Zhands[current_index] = 0.0;
+	bool flagHandTrack=false;
+	float Ztemp=0.f;
+	
 	for (int i=0; i<nUsers; i++) 
 	{
 		g_UserGenerator.GetCoM(aUsers[i], com[i]);
@@ -646,20 +696,23 @@ void testApp::UpdateUserData()
 		// XS TODO: read values from a config file
 		std::stringstream tmp_i;
 		tmp_i << aUsers[i];
-		if (com[i].X!=0 && com[i].Y!=0 && com[i].Z > 1000 && com[i].X > -1500 && com[i].X < 1500 && com[i].Z < 4000)
+		if (com[i].X!=0 && com[i].Y!=0 && com[i].Z > 1500 && com[i].X > -1500 && com[i].X < 1500 && com[i].Z < 3500)
 		{
 			ofxOscMessage m;
 			
 			string adres = "/mediacycle/browser/" + tmp_i.str() + "/hover/xy" ;
-			cout << adres << endl;
-			cout << com[i].X << "  " << com[i].Z << endl;
+		//	cout << adres << endl;
+			time1=getTime();
+			cout <<"time"<<time1-time2  <<"\t"<< (com[i].X) * 1.0 / 1500 <<"\t"<< (2500 - com[i].Z) * 1.0 / 1500 << endl;
+	
+			time2=time1;
 			m.setAddress(adres);
 			//m.setAddress( "/mediacycle/browser/hover/xy");
 			//			m.addStringArg( a );
 			//			m.addIntArg(aUsers[i] );
-			m.addFloatArg( (com[i].X) * 1.0 / 1500);
+			m.addFloatArg( (-1.0)*(com[i].X) * 1.0 / 1500);
 			//			m.addIntArg( com[i].Y );
-			m.addFloatArg( (2500 - com[i].Z) * 1.0 / 1500);
+			m.addFloatArg( (2500 - com[i].Z) * 1.0 / 1000);
 			sender.sendMessage( m );
 			//			m.setAddress( "/Send Centroid" );
 			//			m.addStringArg( a );
@@ -672,14 +725,17 @@ void testApp::UpdateUserData()
 		else{
 			ofxOscMessage m;
 			string adres = "/mediacycle/browser/" + tmp_i.str() + "/released" ;
-			cout << adres << endl;
+		//	cout << adres << endl;
 			m.setAddress(adres);
 			sender.sendMessage( m );
 		}
 				
 		XnPoint3D pt;
+		//cout<<"com Y"<<com[i].Y<<endl;
+		//cout<<"tracked: "<< g_UserGenerator.GetSkeletonCap().IsTracking(aUsers[i])<<endl;
 		if (g_UserGenerator.GetSkeletonCap().IsTracking(aUsers[i]) && com[i].Z!=0) 
 		{
+			flagHandTrack=true;
 			XnSkeletonJointPosition joint1;
 			g_UserGenerator.GetSkeletonCap().GetSkeletonJointPosition(aUsers[i], XN_SKEL_RIGHT_HAND, joint1);
 			pt=joint1.position;
@@ -687,7 +743,7 @@ void testApp::UpdateUserData()
 			// XS do not set hands positions of all users.
 			// accumulate Z of right hand and try to get a common tempo from it.
 			if (pt.X !=0 && pt.Y !=0 && pt.Z!=0) {
-				Zhands[current_index] += pt.Z ; 
+				Ztemp+=pt.Y;
 			}
 			
 //			string c="handR"+result;			
@@ -725,75 +781,210 @@ void testApp::UpdateUserData()
 // filter to reduce noise 
 // XS TODO testme !!!
 //	this->median_filter();
-	
-	// tries to set up BPM from the position of the right hand
-	int tempo = this->find_tempo();
-	if (tempo >0) {
-		ofxOscMessage mz;
-		mz.setAddress( "/mediacycle/browser/bpm" );
-		mz.addIntArg( tempo );
-		sender.sendMessage( mz );
+	if (flagHandTrack) {
+		TimeHands->push_back(getTime());
+		Zhands->push_back(Ztemp); 
+		current_index=Zhands->size()-1;
+
+		int j=0;
+		
+		if (TimeHands->size()>0){
+			zMem=Zhands->at(current_index);
+			
+			if (TimeHands->at(current_index)-TimeHands->at(0)>FFTTIMEWINDOWS){
+				float locTimer=0.f;
+				std::vector<double> *ZhandsTemp=new std::vector<double>;
+				std::vector<double> *TimeHandsTemp=new std::vector<double>;
+				
+				for (int k=0;k<(TimeHands->size()-1);k++) {
+					if ((TimeHands->at(k)-TimeHands->at(0))>(FFTTIMEWINDOWS*OVERLAP)){
+						ZhandsTemp->push_back(Zhands->at(k));
+						TimeHandsTemp->push_back(TimeHands->at(k));
+					}
+			
+					while ((locTimer<=(TimeHands->at(k+1)-TimeHands->at(0)))&&(locTimer<2.0)) {
+						VzHandsComplete[j]=(Zhands->at(k+1)-Zhands->at(k))/(TimeHands->at(k+1)-TimeHands->at(k));
+						locTimer+=TIMESAMPLE;
+						j++;
+						if (j==FFTNSAMPLES)
+						{
+							delete ZhandsTemp;
+							delete TimeHandsTemp;
+							return;
+						}
+					}
+					
+				}
+				ZhandsTemp->push_back(Zhands->at(current_index));
+				TimeHandsTemp->push_back(TimeHands->at(current_index));
+				delete Zhands;
+				delete TimeHands;
+				int test=ZhandsTemp->size();
+				int test2=TimeHandsTemp->size();
+				Zhands=ZhandsTemp;
+				TimeHands=TimeHandsTemp;
+				ZhandsTemp=0;
+				TimeHandsTemp=0;
+				//cout <<"Z:" <<endl;
+				
+				//	for (int i=0;i<512;i++)
+				//		cout <<Zhands[i] <<endl;
+				//cout <<"Zcomplete:" <<endl;
+				//for (int i=0;i<512;i++)
+				//	cout <<VzHandsComplete[i] <<endl;
+				
+				double lTempo = (this->find_tempo());
+				// ne pas envoyer de message OSC si on est sous le seuil de dŽtection (i.e. tempo = 0)
+				
+				if (lTempo > 50.0 && lTempo<190.0){
+					if (tempoBuffer.size()>3)
+					{
+						for(int i=0;i<tempoBuffer.size()-1;i++)
+							tempoBuffer[i]=tempoBuffer[i+1];
+						tempoBuffer.pop_back();
+					}
+					int testl=tempoBuffer.size();
+				
+				
+					tempoBuffer.push_back(lTempo);
+					double tempofiltered=0;
+					for (int l=0;l<tempoBuffer.size();l++)
+						tempofiltered+=tempoBuffer[l];
+					tempofiltered/=tempoBuffer.size();
+					
+					/*double tempoMedianFiltered;
+					if ((tempoBuffer.size()>1)&&(medianFilteredTempoBuffer.size()>0))
+						tempoMedianFiltered=median(tempoBuffer[tempoBuffer.size()-1],tempoBuffer[tempoBuffer.size()-2],medianFilteredTempoBuffer[medianFilteredTempoBuffer.size()-1]);
+					else {
+						tempoMedianFiltered=tempoBuffer[tempoBuffer.size()-1];
+					}
+				
+					if (medianFilteredTempoBuffer.size()>3)
+					{
+						for(int i=0;i<medianFilteredTempoBuffer.size()-1;i++)
+							medianFilteredTempoBuffer[i]=medianFilteredTempoBuffer[i+1];
+						medianFilteredTempoBuffer.pop_back();
+					}
+				
+					testl=medianFilteredTempoBuffer.size();
+					medianFilteredTempoBuffer.push_back(tempoMedianFiltered);
+					double tempofiltered=0;
+					for (int l=0;l<medianFilteredTempoBuffer.size();l++)
+						tempofiltered+=medianFilteredTempoBuffer[l];
+					tempofiltered/=medianFilteredTempoBuffer.size();
+					cout << "tempo"<<"\t"<<tempo <<endl ;*/
+				
+					{ 
+						tempo=tempofiltered;
+						ofxOscMessage mz;
+						mz.setAddress( "/mediacycle/player/bpm" );
+						mz.addFloatArg( tempo );
+						sender.sendMessage( mz );
+					}
+					
+				}
+				for (int i=0;i<FFTNSAMPLES;i++){
+					VzHandsComplete[i]=0;
+					//Zhands[i]=0;
+				}
+				
+				//current_index = 0;
+			}
+		}
 	}
-	// increments current index (modulo N_samples) 
-	current_index = (current_index+1)%Nsamples; // XS TODO check output value
+	// tries to set up BPM from the position of the right hand
+	
+	
 }
 
-void testApp::median_filter (){
-	vector<float> v;
-	int n_samples_to_use = Nsamples/3;
-	int istart = current_index + Nsamples - n_samples_to_use;
-	for (int i = istart; i < current_index + Nsamples; i++){
-		v.push_back(Zhands[i%Nsamples]);
-	}
-	int len = v.size(); // should be n_samples_to_use
-	
-	// fast stl's way to get median
-	nth_element( v.begin(), v.begin()+len/2,v.end() );
-	cout << "current Z " << Zhands[current_index] << " -- replaced by Median: " << v[len/2] << endl;
-	Zhands[current_index] = v[len/2];
-}
+//void testApp::median_filter (){
+//	vector<float> v;
+//	int n_samples_to_use = Nsamples/3;
+//	int istart = current_index + Nsamples - n_samples_to_use;
+//	for (int i = istart; i < current_index + Nsamples; i++){
+//		v.push_back(Zhands[i%Nsamples]);
+//	}
+//	int len = v.size(); // should be n_samples_to_use
+//	
+//	// fast stl's way to get median
+//	nth_element( v.begin(), v.begin()+len/2,v.end() );
+//	cout << "current Z " << Zhands[current_index] << " -- replaced by Median: " << v[len/2] << endl;
+//	Zhands[current_index] = v[len/2];
+//}
 
 int testApp::find_peak_index(fftw_complex* Zc, int size){
 	double maxi = 0.0;
 	int imax = 0;
-	for (int i = 1; i < size; i++) { // skip 0
+	double mean=0;0;
+	for (int i = 1; i < 15; i++) { // skip 0
 		double ab = pow(Zc[i][0], 2) + pow(Zc[i][1], 2);
+		mean+=ab;
+	}
+	for (int i = 15; i < size; i++) { // skip 0
+		double ab = pow(Zc[i][0], 2) + pow(Zc[i][1], 2);
+		mean+=ab;
 		if (ab > maxi) {
 			maxi=ab;
 			imax=i;
 		}
 	}
+	mean/=size;
+	
+	// ** XS ** PARAM
+	double peak_thresh = 1000; // XS TODO adapt this value !
+	if ((maxi < 9*mean)||(maxi<1*400000000))//TR Empiric value with 1 subject.
+		return 0;
+	
 //	cout << "maxi = " << maxi << " at imax = " << imax << endl;
 	return imax;	
 }
 
-int testApp::find_tempo(){
+float testApp::find_tempo(){
 	int N = this->Nsamples;
-	int M = N/2 + 1;
+	
+	// ** XS ** PARAM
+	int Nhigh = 512; // for zero-padding
+	// 60 bpm = 1 bps = 1 Hz
+	// pour Nhigh=512, on a une rŽsolution de 25 / 500 = 0.05 Hz = 3 bpm
+	int M = Nhigh/2 + 1;
 	fftw_complex* Zfft ; 
 	fftw_plan plan_f;
 	Zfft = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * M);
 	
-	// XS TODO : this only takes rqw hand positions, should filter
-	plan_f = fftw_plan_dft_r2c_1d(N, Zhands, Zfft, FFTW_ESTIMATE);
+//	plan_f = fftw_plan_dft_r2c_1d(N, Zhands, Zfft, FFTW_ESTIMATE);   // no zero padding
+	plan_f = fftw_plan_dft_r2c_1d(Nhigh, VzHandsComplete, Zfft, FFTW_ESTIMATE); // zero padding
 	fftw_execute(plan_f);
 		
 	// XS composante continue : si elle est trop faible (seuil ˆ tester)
 	// on ne calcule pas le pic
 	
-	double Z0 = pow(Zfft[0][0], 2) + pow(Zfft[0][1], 2);
-	
-	double Zthresh = 1000; // XS TODO check this one !
-	if (Z0 < Zthresh)
-		return 0;
+//	double Z0 = pow(Zfft[0][0], 2) + pow(Zfft[0][1], 2);
+//	
+//	double Zthresh = 1000; // XS TODO check this one !
+//	if (Z0 < Zthresh)
+//		return 0;
 	
 	double maxi;
 	int imax = find_peak_index(Zfft,M);
-	
+	float lTempo=(60.f*(float)imax/FFTNSAMPLES)/TIMESAMPLE;
 	fftw_destroy_plan(plan_f);
 	fftw_free(Zfft);
 	
-	return imax;
+	return lTempo;
 }
 
+double median(double a,double b, double c){
+	int lMean=(a+b+c)/3;
+	double da=ABS(a-lMean);
+	double db=ABS(b-lMean);
+	double dc=ABS(c-lMean);
+	
+	if (da<=db&&da<=dc)
+		return a;
+	if (db<=da&&db<=dc)
+		return b;
+	if (dc<db&&dc<da)
+		return c;
+	
+}
 
