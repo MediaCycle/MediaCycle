@@ -95,6 +95,7 @@ void ACMultiMediaCycleOsgQt::mediacycleCallback(const char* message) {
 						progressBar->setFormat("%v/%m");
 						stringstream status_message;
 						status_message << "Loading File " << media_id+1 << "/" << dir_size;
+						//TODO: this line crashes on linux (segfault). AM: tested on ubuntu 10.04
 						statusBar()->showMessage(tr(status_message.str().c_str()), 0);
 					}	
 				}	

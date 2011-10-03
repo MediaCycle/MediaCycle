@@ -43,7 +43,7 @@
 
 using namespace osg;
 
-ACOsgTimelineRenderer::ACOsgTimelineRenderer(): media_cycle(0), screen_width(0), height(0.0f) {
+ACOsgTimelineRenderer::ACOsgTimelineRenderer(): media_cycle(0), screen_width(0), height(0.0f), width(0.0f){
 	#if defined (SUPPORT_AUDIO)
 		audio_engine = 0;
 	#endif//defined (SUPPORT_AUDIO)
@@ -188,7 +188,7 @@ void ACOsgTimelineRenderer::updateScreenWidth(int _screen_width)
 
 void ACOsgTimelineRenderer::updateSize(float _width,float _height)
 {
-	if (( height != _height) || ( width != _width)){
+	if (( this->height != _height) || ( this->width != _width)){
 		this->height = _height;
 		this->width = _width;
 		for (unsigned int i=0;i<track_renderer.size();i++) {

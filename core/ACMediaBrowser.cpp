@@ -1195,10 +1195,10 @@ void ACMediaBrowser::updateNextPositionsPropeller() {
 	std::cout << "Max prop: " << maxr << std::endl;
 	// printf("PROPELER \n");
 
-	delete rmin;
-	delete rmax;
-	delete dtmin;
-	delete dtmax;
+	delete[] rmin;
+	delete[] rmax;
+	delete[] dtmin;
+	delete[] dtmax;
 
 	setNeedsDisplay(true);
 }

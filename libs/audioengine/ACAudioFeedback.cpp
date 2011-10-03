@@ -1959,7 +1959,7 @@ int ACAudioFeedback::deleteSource(int loop_id)
 	current = 0;
 	current_unqueue = current_buffer_unqueue[loop_slot];
 	// Unqueue processed buffers
-	if (i<buffer_queued) {
+	if (current_unqueue<buffer_queued) {
 		alSourceUnqueueBuffers(loop_sources[loop_slot], 1, &loop_buffers_audio_engine_stream[loop_slot][current_unqueue]);
 		current_buffer_unqueue[loop_slot]++;
 		if (current_buffer_unqueue[loop_slot] >= output_buffer_n) {
@@ -1969,15 +1969,15 @@ int ACAudioFeedback::deleteSource(int loop_id)
 
 	error = alGetError();
 	if(error == AL_INVALID_VALUE) {
-		printf("Error Unqueue Buffers invalid value %d!\n", current);
+		printf("Error Unqueue Buffers invalid value %d!\n", current_unqueue);
 		//exit(1);
 	}
 	if(error == AL_INVALID_NAME) {
-		printf("Error Unqueue Buffers invalid name %d!\n", current);
+		printf("Error Unqueue Buffers invalid name %d!\n", current_unqueue);
 		//exit(1);
 	}
 	if(error == AL_INVALID_OPERATION) {
-		printf("Error Unqueue Buffers invalid operation %d!\n", current);
+		printf("Error Unqueue Buffers invalid operation %d!\n", current_unqueue);
 		//exit(1);
 	}
 	//alSourcei(loop_source, AL_BUFFER, 0);
