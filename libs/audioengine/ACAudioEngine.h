@@ -105,8 +105,10 @@ public:
 	// Synchro and Scale modes
 	void setLoopSynchroMode(int _loop_id, ACAudioEngineSynchroMode _synchro_mode){feedback->setLoopSynchroMode(_loop_id, _synchro_mode);}
 	void setLoopScaleMode(int _loop_id, ACAudioEngineScaleMode _scale_mode){feedback->setLoopScaleMode(_loop_id, _scale_mode);}
-	//void setCurrentLoopSynchroMode(ACAudioEngineSynchroMode synchro);
-	//void setCurrentLoopScaleMode(ACAUdioEngineScaleMode scale);
+	void setDefaultSynchroMode(ACAudioEngineSynchroMode _synchro_mode){feedback->setDefaultSynchroMode(_synchro_mode);}
+	void setDefaultScaleMode(ACAudioEngineScaleMode _scale_mode){feedback->setDefaultScaleMode(_scale_mode);}
+	void forceDefaultSynchroMode(bool _force){feedback->forceDefaultSynchroMode(_force);}
+	void forceDefaultScaleMode(bool _force){feedback->forceDefaultScaleMode(_force);}
 
 	// OpenAL listener settings (from browser)
 	void setListenerPosition(float x, float y, float z){feedback->setListenerPosition(x,y,z);}

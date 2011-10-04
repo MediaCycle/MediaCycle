@@ -59,6 +59,8 @@
 //#define OPENAL_STATIC_MODE
 #endif
 
+#include <map>
+
 typedef enum {
 	ACAudioEngineSynchroModeNone				= 0,
 	ACAudioEngineSynchroModeAutoBeat			= 1,		// multi-bar polyrhythm //OK
@@ -79,6 +81,30 @@ typedef enum {
 	ACAudioEngineTimeSignatureTypeBinary		= 2,
 	ACAudioEngineTimeSignatureTypeTernary		= 3,
 } ACAudioEngineTimeSignature;
+
+// conversion between AudioEngineSynchroMode and text string (e.g., to be used in the labels for the gui)
+typedef std::map<std::string, ACAudioEngineSynchroMode> stringToAudioEngineSynchroModeMap;
+static const stringToAudioEngineSynchroModeMap::value_type _initACAudioEngineSynchroMode[] = {
+	stringToAudioEngineSynchroModeMap::value_type("None", ACAudioEngineSynchroModeNone), \
+	stringToAudioEngineSynchroModeMap::value_type("AutoBeat", ACAudioEngineSynchroModeAutoBeat), \
+	stringToAudioEngineSynchroModeMap::value_type("AutoBarStretch", ACAudioEngineSynchroModeAutoBarStretch), \
+	stringToAudioEngineSynchroModeMap::value_type("AutoBar", ACAudioEngineSynchroModeAutoBar), \
+	stringToAudioEngineSynchroModeMap::value_type("Manual",ACAudioEngineSynchroModeManual), \
+	stringToAudioEngineSynchroModeMap::value_type("DownbeatSimple",ACAudioEngineSynchroModeDownbeatSimple)
+};
+static const stringToAudioEngineSynchroModeMap stringToAudioEngineSynchroMode(_initACAudioEngineSynchroMode, _initACAudioEngineSynchroMode + sizeof _initACAudioEngineSynchroMode / sizeof *_initACAudioEngineSynchroMode);
+//usage: stringToAudioEngineSynchroModeMap::const_iterator iterm = stringToAudioEngineSynchroMode.find(s_mode);
+
+// conversion between AudioEngineScaleMode and text string (e.g., to be used in the labels for the gui)
+typedef std::map<std::string, ACAudioEngineScaleMode> stringToAudioEngineScaleModeMap;
+static const stringToAudioEngineScaleModeMap::value_type _initAudioEngineScaleModeMap[] = {
+	stringToAudioEngineScaleModeMap::value_type("None", ACAudioEngineScaleModeNone), \
+	stringToAudioEngineScaleModeMap::value_type("Vocode", ACAudioEngineScaleModeVocode), \
+	stringToAudioEngineScaleModeMap::value_type("Resample", ACAudioEngineScaleModeResample), \
+	stringToAudioEngineScaleModeMap::value_type("SkipAndResample", ACAudioEngineScaleModeSkipAndResample)
+};
+static const stringToAudioEngineScaleModeMap stringToAudioEngineScaleMode(_initAudioEngineScaleModeMap, _initAudioEngineScaleModeMap + sizeof _initAudioEngineScaleModeMap / sizeof *_initAudioEngineScaleModeMap);
+//usage: stringToAudioEngineScaleModeMap::const_iterator iterm = stringToAudioEngineScaleMode.find(s_mode);
 
 class ACMediaFeedback {
 	
@@ -122,8 +148,10 @@ public:
 	// Synchro and Scale modes
 	void setLoopSynchroMode(int _loop_id, ACAudioEngineSynchroMode _synchro_mode);
 	void setLoopScaleMode(int _loop_id, ACAudioEngineScaleMode _scale_mode);
-	//void setCurrentLoopSynchroMode(ACAudioEngineSynchroMode synchro);
-	//void setCurrentLoopScaleMode(ACAUdioEngineScaleMode scale);
+	void setDefaultSynchroMode(ACAudioEngineSynchroMode _synchro_mode);
+	void setDefaultScaleMode(ACAudioEngineScaleMode _scale_mode);
+	void forceDefaultSynchroMode(bool _force);
+	void forceDefaultScaleMode(bool _force);
 
 	// OpenAL listener settings (from browser)
 	void setListenerPosition(float x, float y, float z);
@@ -258,6 +286,11 @@ private:
 	// synthesize settings
 	int	  *loop_synchro_mode;
 	int	  *loop_scale_mode;
+	ACAudioEngineSynchroMode default_synchro_mode;
+	ACAudioEngineScaleMode default_scale_mode;
+	bool force_default_synchro_mode;
+	bool force_default_scale_mode;
+		
 	// engine variables
 	double	audio_engine_wakeup_time;
 	double	audio_engine_current_time;

@@ -132,6 +132,10 @@ ACAudioFeedback::ACAudioFeedback(PaStream *_stream, int samplerate, int buffersi
 	//
 	active_loops = 0;
 	//
+	default_synchro_mode = ACAudioEngineSynchroModeNone;
+	default_scale_mode = ACAudioEngineScaleModeNone;
+	force_default_synchro_mode = false;
+	force_default_scale_mode = false;
 	// Phase vocoder
 	// SD TODO - VOCODER CALL
 	//pv = new pv_complex*[OPENAL_NUM_BUFFERS];
@@ -1593,6 +1597,26 @@ void ACAudioFeedback::setLoopScaleMode(int _loop_id, ACAudioEngineScaleMode _sca
 	//else {//some error message?};
 }
 
+void ACAudioFeedback::setDefaultSynchroMode(ACAudioEngineSynchroMode _synchro_mode)
+{
+	default_synchro_mode = _synchro_mode;
+}	
+
+void ACAudioFeedback::setDefaultScaleMode(ACAudioEngineScaleMode _scale_mode)
+{
+	default_scale_mode = _scale_mode;
+}
+
+void ACAudioFeedback::forceDefaultSynchroMode(bool _force)
+{
+	force_default_synchro_mode = _force;
+}
+
+void ACAudioFeedback::forceDefaultScaleMode(bool _force)
+{
+	force_default_scale_mode = _force;
+}
+
 int ACAudioFeedback::createSource(int loop_id)
 {
 	return createSourceWithPosition(loop_id, 0, 0, 0);
@@ -1864,10 +1888,10 @@ int ACAudioFeedback::createSourceWithPosition(int loop_id, float x, float y, flo
 		// DT: make sample start work
 		prev_sample_pos[loop_slot] = use_sample_start[loop_slot]; // SD TODO
 		//current_buffer[loop_slot] = 0;
-
+		
 		if ( (local_acid_type==7) || (local_acid_type==65536) ) {
-			loop_synchro_mode[loop_slot] = ACAudioEngineSynchroModeNone;
-			loop_scale_mode[loop_slot] = ACAudioEngineScaleModeNone;
+			loop_synchro_mode[loop_slot] = default_synchro_mode; // usually ACAudioEngineSynchroModeNone
+			loop_scale_mode[loop_slot] = default_scale_mode; // usually ACAudioEngineScaleModeNone
 		}
 		else {
 			loop_synchro_mode[loop_slot] = ACAudioEngineSynchroModeAutoBeat;
@@ -1877,6 +1901,11 @@ int ACAudioFeedback::createSourceWithPosition(int loop_id, float x, float y, flo
 		if (!use_bpm[loop_slot]) {
 			loop_synchro_mode[loop_slot] = ACAudioEngineSynchroModeNone;
 		}
+		
+		if(force_default_synchro_mode)
+			loop_synchro_mode[loop_slot] = default_synchro_mode;
+		if(force_default_scale_mode)
+			loop_scale_mode[loop_slot] = default_scale_mode;			
 
 		//pv[loop_slot] = pv_complex_curses_init2(datashort,size,freq,0,1.0,0,2048,512,3,2); //hard-coded
 		setSamples(&(tpv[loop_slot]),(short*)datashort,(int)size,(int)freq);
