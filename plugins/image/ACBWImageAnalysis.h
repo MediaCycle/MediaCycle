@@ -41,7 +41,7 @@ class ACBWImageAnalysis: public ACImageAnalysis {
 public:
 	ACBWImageAnalysis();
 	ACBWImageAnalysis(const string &filename);	
-	ACBWImageAnalysis(IplImage*);
+	ACBWImageAnalysis(cv::Mat);
 	
     ~ACBWImageAnalysis();
 	
@@ -56,20 +56,21 @@ public:
 	
 	// computation of features
 	void computeHuMoments(int thresh = 0);
-	void computeContourHuMoments(int thresh = 0);
+//	void computeContourHuMoments(int thresh = 0);
 	void computeGaborMoments(int mumax = 4, int numax = 2);
 	void computeGaborMoments_fft(int numPha_ = 4, int numFreq_ = 2, uint horizonalMargin_ = 0, uint verticalMargin_ = 0);
 	void computeColorMoments(int n = 4);
 	void computeFourierPolarMoments(int RadialBins=7, int AngularBins=10);
 	void computeFourierMellinMoments();
-	void computeImageHistogram(int w, int h);
+//	void computeImageHistogram(int w, int h);
 
 	// visual output functions 
 	void showThreshold(int thresh);
-	void showContours(int thresh);
+//	void showContours(int thresh); // XS TODO port 2.*
 	void showFFTInWindow(const std::string title);
 	void showFFTComplexInWindow(const std::string title);
-	void showLogPolarInWindow(const std::string title);
+	//	void showLogPolarInWindow(const std::string title);// XS TODO port 2.*
+
 
 	// I/O
 	bool savePGM(const std::string file_name);

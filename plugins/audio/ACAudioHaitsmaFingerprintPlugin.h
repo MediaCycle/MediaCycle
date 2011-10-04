@@ -1,7 +1,7 @@
 /**
  * @brief ACAudioHaitsmaFingerprintPlugin.h
  * @author Xavier Siebert
- * @date 18/07/2011
+ * @date 04/10/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -38,18 +38,18 @@
 
 #include<iostream>
 
-class ACAudioHaitsmaFingerprintPlugin : public ACFeaturesPlugin {
+class ACAudioHaitsmaFingerprintPlugin : public ACTimedFeaturesPlugin {
 public:
 	ACAudioHaitsmaFingerprintPlugin();
 	~ACAudioHaitsmaFingerprintPlugin();
 
 	virtual std::vector<ACMediaFeatures*> calculate(ACMediaData* aData, ACMedia* theMedia, bool _save_timed_feat=false);
-	
-	ACMediaTimedFeature* getTimedFeatures();
+
+// XS TODO check if it works --
+//	ACMediaTimedFeature* getTimedFeatures();
 	
 private:
-	std::string mtf_file_name; // file in which features have been saved
-	std::vector<std::string> mtf_file_names;
+	std::vector<std::string> mtf_file_names; // XS TODO check this one
 	
 	ACAudioFingerprint * audio_fingerprint;
 };

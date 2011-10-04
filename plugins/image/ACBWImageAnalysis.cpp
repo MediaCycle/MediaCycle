@@ -76,45 +76,40 @@ ACBWImageAnalysis::ACBWImageAnalysis() : ACImageAnalysis(){
 ACBWImageAnalysis::ACBWImageAnalysis(const string &filename){
 	reset();
 	setFileName(filename);
-	IplImage *imgp_full;
-	imgp_full = cvLoadImage(filename.c_str(), CV_LOAD_IMAGE_GRAYSCALE);
-	scaleImage(imgp_full);
-	cvReleaseImage(&imgp_full);
+	// forcing it to be read as grayscale
+	cv::Mat imgp_full_mat = cv::imread(filename, CV_LOAD_IMAGE_GRAYSCALE); 
+	scaleImage(imgp_full_mat);
 }
 
 // in this case the filename will remain unknown
 // so it is not good to generate ACL files (where one entry is the filename)
 // but it can be used for calculations
-ACBWImageAnalysis::ACBWImageAnalysis(IplImage* img){
-	// check that it's a BW image
-	if (img->nChannels == 1) {
-		reset();
-		scaleImage(img, 1.0);
+ACBWImageAnalysis::ACBWImageAnalysis(cv::Mat img_full_mat){
+	reset();
+	
+	if (img_full_mat.channels() == 1) {
+		scaleImage(img_full_mat, 1.0);
 	}
-	else if (img->nChannels == 3){
-		if(img->colorModel == "BGR") {
-			IplImage* bw_img = cvCreateImage (cvSize (img->width, img->height), IPL_DEPTH_8U, 1); 
-			cvCvtColor (img, bw_img, CV_BGR2GRAY);
-			scaleImage(bw_img, 1.0);
-			cvReleaseImage(&bw_img);
+	else if (img_full_mat.channels() == 3){
+		// assume incoming color model is "BGR"
+		cv::Mat bw_img_mat;
+		cv::cvtColor(img_full_mat, bw_img_mat, CV_BGR2GRAY);
+		scaleImage(bw_img_mat, 1.0);
 		}
-//		else if (img->colorModel == "HSV") {
-//		}
-	}
 	else {
+		cout << "<ACBWImageAnalysis> unsupported number of channels : "<< img_full_mat.channels() << endl;
 	}
 }
 
 void ACBWImageAnalysis::reset(){
-	imgp = 0;
+	imgp_mat = cv::Mat();
 	fft = 0;
 	HAS_FFT = false;
 	original_width = original_height = 0;
-	file_name = color_model = "";
+	file_name = "";
 }
 
 void ACBWImageAnalysis::clean(){
-	if (imgp != 0) cvReleaseImage(&imgp);
 	if (HAS_FFT) {
 		if (fft != 0) fftw_free (fft);
 	}
@@ -137,7 +132,7 @@ void ACBWImageAnalysis::computeFFT2D (){
 	const int area = width * height;
 	double data_in[area];
 	uchar* ddata;
-	ddata = (uchar*) getImage()->imageData;
+	ddata = (uchar*) getImageMat().data; // XS TODO check this 2.*
 	fftw_plan p = fftw_plan_dft_r2c_2d(height, width, data_in, fft, FFTW_ESTIMATE); 
 	for (int j = 0; j < area; j++)
 		data_in[j] = (double) ddata[j];
@@ -161,7 +156,8 @@ void ACBWImageAnalysis::computeFFT2D_complex (){
 		cerr << "Memory allocation problem in fft2d for fft" << endl;
 	}
 	int k = 0;
-	BwImage Im(getImage());
+	// XS TODO check this 2.*
+//	BwImage Im(getImage());
 	for(int i = 0; i < height/2 ; i++ ) {
 		for( int j = 0 ; j < 2*width ; j++ ) {
 			data_in[k][0] = 0.0;
@@ -176,7 +172,8 @@ void ACBWImageAnalysis::computeFFT2D_complex (){
 			k++;
 		}
 		for( int j = width/2 ; j < 3*width/2 ; j++ ) {
-			data_in[k][0] = ( double )Im[i-height/2][j-width/2];
+//			data_in[k][0] = ( double )Im[i-height/2][j-width/2];
+			data_in[k][0] = this->getImageMat().at<double>(i-height/2,j-width/2); // XS TODO check 2.* is order fine ? speed ?
 			data_in[k][1] = 0.0;
 			k++;
 		}
@@ -247,7 +244,8 @@ void ACBWImageAnalysis::computeFFT2D_centered (){
 	catch (std::bad_alloc) {
 		cerr << "Memory allocation problem in fft2d for fft" << endl;
 	}
-	ddata = (uchar*) getImage()->imageData;
+	// XS TODO 2.* check this
+	ddata = (uchar*) getImageMat().data; 
 	int k=0;
 	for(int irow=0; irow< height; irow++){
 		for (int icolumn=0; icolumn< width; icolumn++){
@@ -265,91 +263,89 @@ void ACBWImageAnalysis::computeFFT2D_centered (){
 void ACBWImageAnalysis::computeHuMoments(int thresh){
 	hu_moments.clear();
 	raw_moments.clear();
-	if (imgp == 0){
-		cerr << " <ACBWImageAnalysis::computeHuMoments() error> missing image !" << endl;
+	if (!imgp_mat.data){
+		cerr << " <ACBWImageAnalysis::computeHuMoments> : missing or empty image !" << endl;
 		return;
 	}
-	CvMoments myRawmoments;
-	CvHuMoments myHumoments ;
+	cv::Moments local_raw_moments;
+	double* local_Hu_moments = new double[7];
 	
 	if (thresh !=0) {
 		// avoid overwriting image when computing threshold
-		IplImage *BWimg = cvCreateImage (cvSize (this->getWidth(), this->getHeight()), IPL_DEPTH_8U, 1); 
-		cvThreshold(imgp, BWimg, thresh, 255, CV_THRESH_BINARY_INV ); 
-		cvMoments (BWimg, &myRawmoments);
-		cvReleaseImage(&BWimg);
+		cv::Mat BWimg_mat (this->getSize(), CV_8UC1); 
+		cv::threshold(imgp_mat, BWimg_mat, thresh, 255, CV_THRESH_BINARY_INV ); 
+		local_raw_moments = cv::moments(BWimg_mat);
 	}
 	else {
-		cvMoments (imgp, &myRawmoments);
+		local_raw_moments = cv::moments(imgp_mat);
 	}
 	
-	// XS tried opencv 2.0 version of Hu Moments to see if it's any better
-	// cv::HuMoments(myRawmoments, momo); 
-	
-	cvGetHuMoments(&myRawmoments, &myHumoments);
-	
-	raw_moments.push_back (modifiedLog(myRawmoments.m00)) ;
-	raw_moments.push_back (modifiedLog(myRawmoments.m10)) ;
-	raw_moments.push_back (modifiedLog(myRawmoments.m01)) ;
-	raw_moments.push_back (modifiedLog(myRawmoments.m20)) ;
-	raw_moments.push_back (modifiedLog(myRawmoments.m11)) ;
-	raw_moments.push_back (modifiedLog(myRawmoments.m02)) ;
-	raw_moments.push_back (modifiedLog(myRawmoments.m30)) ;
-	raw_moments.push_back (modifiedLog(myRawmoments.m21)) ;
-	raw_moments.push_back (modifiedLog(myRawmoments.m12)) ;
-	raw_moments.push_back (modifiedLog(myRawmoments.m03)) ;
+	cv::HuMoments(local_raw_moments, local_Hu_moments); 
+		
+	raw_moments.push_back (modifiedLog(local_raw_moments.m00)) ;
+	raw_moments.push_back (modifiedLog(local_raw_moments.m10)) ;
+	raw_moments.push_back (modifiedLog(local_raw_moments.m01)) ;
+	raw_moments.push_back (modifiedLog(local_raw_moments.m20)) ;
+	raw_moments.push_back (modifiedLog(local_raw_moments.m11)) ;
+	raw_moments.push_back (modifiedLog(local_raw_moments.m02)) ;
+	raw_moments.push_back (modifiedLog(local_raw_moments.m30)) ;
+	raw_moments.push_back (modifiedLog(local_raw_moments.m21)) ;
+	raw_moments.push_back (modifiedLog(local_raw_moments.m12)) ;
+	raw_moments.push_back (modifiedLog(local_raw_moments.m03)) ;
 
-	hu_moments.push_back (modifiedLog(myHumoments.hu1)) ;
-	hu_moments.push_back (modifiedLog(myHumoments.hu2)) ;
-	hu_moments.push_back (modifiedLog(myHumoments.hu3)) ;
-	hu_moments.push_back (modifiedLog(myHumoments.hu4)) ;
-	hu_moments.push_back (modifiedLog(myHumoments.hu5)) ;
-	hu_moments.push_back (modifiedLog(myHumoments.hu6)) ;
-	hu_moments.push_back (modifiedLog(myHumoments.hu7)) ;
+	for (int i=0; i<7 ; i++){
+		hu_moments.push_back (modifiedLog(local_Hu_moments[i])) ;
+	}
+//	hu_moments.push_back (modifiedLog(myHumoments.hu1)) ;
+//	hu_moments.push_back (modifiedLog(myHumoments.hu2)) ;
+//	hu_moments.push_back (modifiedLog(myHumoments.hu3)) ;
+//	hu_moments.push_back (modifiedLog(myHumoments.hu4)) ;
+//	hu_moments.push_back (modifiedLog(myHumoments.hu5)) ;
+//	hu_moments.push_back (modifiedLog(myHumoments.hu6)) ;
+//	hu_moments.push_back (modifiedLog(myHumoments.hu7)) ;
 }
 
 
-void ACBWImageAnalysis::computeContourHuMoments(int thresh){ 
-	contour_hu_moments.clear();
-	
-	if (imgp == 0){
-		cerr << " <ACBWImageAnalysis::computeContourHuMoments() error> missing image !" << endl;
-		return;
-	}
-	// we create again a BW image because threshold would overwrite it
-	IplImage *BWimg = cvCreateImage (cvSize (this->getWidth(), this->getHeight()), IPL_DEPTH_8U, 1); 
-	cvThreshold(imgp, BWimg, thresh, 255, CV_THRESH_BINARY_INV ); 
-	CvMemStorage*  storage  = cvCreateMemStorage(0);
-	CvSeq* contours = 0;
-	cvFindContours( BWimg, storage, &contours ); 
-	
-	CvMoments my_contour_moments;
-	CvHuMoments my_contour_Humoments ;
-	cvContourMoments (BWimg, &my_contour_moments); // apparently it's just an alias to cvMoments
-	cvGetHuMoments(&my_contour_moments, &my_contour_Humoments);
-	
-	cvReleaseImage(&BWimg);
-	cvReleaseMemStorage(&storage );	
-	contour_hu_moments.push_back (modifiedLog(my_contour_Humoments.hu1)) ;
-	contour_hu_moments.push_back (modifiedLog(my_contour_Humoments.hu2)) ;
-	contour_hu_moments.push_back (modifiedLog(my_contour_Humoments.hu3)) ;
-	contour_hu_moments.push_back (modifiedLog(my_contour_Humoments.hu4)) ;
-	contour_hu_moments.push_back (modifiedLog(my_contour_Humoments.hu5)) ;
-	contour_hu_moments.push_back (modifiedLog(my_contour_Humoments.hu6)) ;
-	contour_hu_moments.push_back (modifiedLog(my_contour_Humoments.hu7)) ;
-}
+//void ACBWImageAnalysis::computeContourHuMoments(int thresh){ 
+//	contour_hu_moments.clear();
+//	
+//	if (!imgp.data){
+//		cerr << " <ACBWImageAnalysis::computeContourHuMoments() error> missing image !" << endl;
+//		return;
+//	}
+//	// we create again a BW image because threshold would overwrite it
+//	IplImage *BWimg = cvCreateImage (cvSize (this->getWidth(), this->getHeight()), IPL_DEPTH_8U, 1); 
+//	cvThreshold(imgp, BWimg, thresh, 255, CV_THRESH_BINARY_INV ); 
+//	CvMemStorage*  storage  = cvCreateMemStorage(0);
+//	CvSeq* contours = 0;
+//	cvFindContours( BWimg, storage, &contours ); 
+//	
+//	CvMoments my_contour_moments;
+//	CvHuMoments my_contour_Humoments ;
+//	cvContourMoments (BWimg, &my_contour_moments); // apparently it's just an alias to cvMoments
+//	cvGetHuMoments(&my_contour_moments, &my_contour_Humoments);
+//	
+//	cvReleaseImage(&BWimg);
+//	cvReleaseMemStorage(&storage );	
+//	contour_hu_moments.push_back (modifiedLog(my_contour_Humoments.hu1)) ;
+//	contour_hu_moments.push_back (modifiedLog(my_contour_Humoments.hu2)) ;
+//	contour_hu_moments.push_back (modifiedLog(my_contour_Humoments.hu3)) ;
+//	contour_hu_moments.push_back (modifiedLog(my_contour_Humoments.hu4)) ;
+//	contour_hu_moments.push_back (modifiedLog(my_contour_Humoments.hu5)) ;
+//	contour_hu_moments.push_back (modifiedLog(my_contour_Humoments.hu6)) ;
+//	contour_hu_moments.push_back (modifiedLog(my_contour_Humoments.hu7)) ;
+//}
 
 void ACBWImageAnalysis::computeGaborMoments(int mumax, int numax){ // default 7, 5
 	gabor_moments.clear();
-	if (imgp == 0) {
+	if (!imgp_mat.data) {
 		cerr << " <ACBWImageAnalysis::computeGaborMoments() error> missing image !" << endl;
 		return;
 	}
 	CvGabor *gabor = new CvGabor();
-	IplImage* im_src = this->getImage();
-	cv::Size size(im_src->width, im_src->height);
-	cv::Mat src(im_src);	
-	cv::Mat mat(size.height, size.width, CV_32FC1);
+	cv::Mat src = this->getImageMat();
+
+	cv::Mat mat(this->getSize(), CV_32FC1);
 	src.convertTo(mat, CV_32FC1); // invokes mat.create(src->size());
 	
 //	for (int i = 0; i < size.height; i++){	
@@ -396,7 +392,7 @@ void ACBWImageAnalysis::computeGaborMoments(int mumax, int numax){ // default 7,
 
 void ACBWImageAnalysis::computeGaborMoments_fft(int numPha_, int numFreq_, uint horizonalMargin_, uint verticalMargin_){ // default 7, 5, 0, 0
 	gabor_moments.clear();
-	if (imgp == 0) {
+	if (!imgp_mat.data) {
 		cerr << " <ACBWImageAnalysis::computeGaborMoments() error> missing image !" << endl;
 		return;
 	}
@@ -708,24 +704,24 @@ void ACBWImageAnalysis::computeFourierPolarMoments(int RadialBins, int AngularBi
 	return;
 }
 
-void ACBWImageAnalysis::computeImageHistogram(int w, int h){
-	// compute a resized version of the image and dumps it as a vector
-	
-	// XS TODO test if w, h are valid ?
-	
-	image_histogram.clear();
-
-	IplImage* histo;
-	histo = cvCreateImage(cvSize (w, h), this->getDepth(), this->getNumberOfChannels());
-	cvResize(this->getImage(), histo, CV_INTER_CUBIC);
-	BwImage Im(histo);
-	for(int i=0; i<h; i++){
-		for (int j=0; j< w; j++){
-		image_histogram.push_back(float(Im[i][j]));
-		}
-	}
-	cvReleaseImage(&histo);
-}
+//void ACBWImageAnalysis::computeImageHistogram(int w, int h){
+//	// compute a resized version of the image and dumps it as a vector
+//	
+//	// XS TODO test if w, h are valid ?
+//	
+//	image_histogram.clear();
+//
+//	IplImage* histo;
+//	histo = cvCreateImage(cvSize (w, h), this->getDepth(), this->getNumberOfChannels());
+//	cvResize(this->getImage(), histo, CV_INTER_CUBIC);
+//	BwImage Im(histo);
+//	for(int i=0; i<h; i++){
+//		for (int j=0; j< w; j++){
+//		image_histogram.push_back(float(Im[i][j]));
+//		}
+//	}
+//	cvReleaseImage(&histo);
+//}
 
 
 
@@ -733,37 +729,35 @@ void ACBWImageAnalysis::computeImageHistogram(int w, int h){
 
 void ACBWImageAnalysis::showThreshold(int thresh){
 	// we create again a BW image because threshold would overwrite it
-	IplImage *BWimg = cvCreateImage (cvSize (this->getWidth(), this->getHeight()), IPL_DEPTH_8U, 1); 
-	cvThreshold(imgp, BWimg, thresh, 255, CV_THRESH_BINARY_INV ); 
-	cvNamedWindow( "Orig", CV_WINDOW_AUTOSIZE ); 
-	cvShowImage( "Orig", imgp ); 
-	cvNamedWindow( "Threshold", CV_WINDOW_AUTOSIZE ); 
-	cvShowImage( "Threshold", BWimg ); 
+	cv::Mat BWimg_mat (this->getSize(), CV_8UC1);
+	cv::threshold(imgp_mat, BWimg_mat, thresh, 255, CV_THRESH_BINARY_INV ); 
+	cv::namedWindow( "Orig", CV_WINDOW_AUTOSIZE ); 
+	cv::imshow( "Orig", imgp_mat ); 
+	cv::namedWindow( "Threshold", CV_WINDOW_AUTOSIZE ); 
+	cv::imshow( "Threshold", imgp_mat ); 
 	cvWaitKey(0); 
-	cvDestroyWindow("Orig");
-	cvDestroyWindow("Threshold");
 }
 
-void ACBWImageAnalysis::showContours(int thresh){
-	// we create again a BW image because threshold would overwrite it
-	IplImage *BWimg = cvCreateImage (cvSize (this->getWidth(), this->getHeight()), IPL_DEPTH_8U, 1); 
-	cvThreshold(imgp, BWimg, thresh, 255, CV_THRESH_BINARY_INV ); 
-	CvMemStorage*  storage  = cvCreateMemStorage(0);
-	CvSeq* contours = 0;
-	cvFindContours( BWimg, storage, &contours ); 
-	IplImage* cont_img = cvCreateImage( cvGetSize(BWimg), 8, 1 );
-	cvZero( cont_img); 	
-	if( contours ) cvDrawContours( cont_img, contours, cvScalarAll(255), cvScalarAll(255), thresh ); 
-	cvNamedWindow( "Orig", CV_WINDOW_AUTOSIZE ); 
-	cvShowImage( "Orig", imgp ); 
-	cvNamedWindow( "Contour", CV_WINDOW_AUTOSIZE ); 
-	cvShowImage( "Contour", cont_img ); 
-	cvWaitKey(0); 
-	cvDestroyWindow("Orig");
-	cvDestroyWindow("Contour");
-	cvReleaseImage(&BWimg);
-	cvReleaseImage(&cont_img);
-}
+//void ACBWImageAnalysis::showContours(int thresh){
+//	// we create again a BW image because threshold would overwrite it
+//	IplImage *BWimg = cvCreateImage (cvSize (this->getWidth(), this->getHeight()), IPL_DEPTH_8U, 1); 
+//	cvThreshold(imgp, BWimg, thresh, 255, CV_THRESH_BINARY_INV ); 
+//	CvMemStorage*  storage  = cvCreateMemStorage(0);
+//	CvSeq* contours = 0;
+//	cvFindContours( BWimg, storage, &contours ); 
+//	IplImage* cont_img = cvCreateImage( cvGetSize(BWimg), 8, 1 );
+//	cvZero( cont_img); 	
+//	if( contours ) cvDrawContours( cont_img, contours, cvScalarAll(255), cvScalarAll(255), thresh ); 
+//	cvNamedWindow( "Orig", CV_WINDOW_AUTOSIZE ); 
+//	cvShowImage( "Orig", imgp ); 
+//	cvNamedWindow( "Contour", CV_WINDOW_AUTOSIZE ); 
+//	cvShowImage( "Contour", cont_img ); 
+//	cvWaitKey(0); 
+//	cvDestroyWindow("Orig");
+//	cvDestroyWindow("Contour");
+//	cvReleaseImage(&BWimg);
+//	cvReleaseImage(&cont_img);
+//}
 
 void ACBWImageAnalysis::showFFTInWindow(const std::string title){
 	int height = this->getHeight();
@@ -820,51 +814,51 @@ void ACBWImageAnalysis::showFFTComplexInWindow(const std::string title){
 //	cvDestroyWindow(title.c_str());
 }
 
-void ACBWImageAnalysis::showLogPolarInWindow(const std::string title){
-	IplImage* dst = cvCreateImage( cvSize(this->getWidth(),this->getHeight()), IPL_DEPTH_32F, 1 );
-	IplImage* src2 = cvCreateImage( cvGetSize(this->getImage()), IPL_DEPTH_32F, 1 );
-	
-	this->computeFFT2D_complex();
-	int height = this->getHeight();
-	int width = this->getWidth();
-	IplImage* fftimage  = cvCreateImage(cvSize(this->getWidth(),this->getHeight()),IPL_DEPTH_32F,1);
-	BwImageFloat Bwfftimage(fftimage);
-	int x=0;
-	int y=0;
-	float xtmp = 0;
-//	float xmax = 0;
-	int area = this->getWidth() * this->getHeight(); 
-//	for(int kk=1; kk < area; kk++){
-//		xtmp = (fft[kk][0]*fft[kk][0]+fft[kk][1]*fft[kk][1]);
-		//cout << xtmp << endl;
-		//if (xtmp > xmax) xmax = xtmp;
+//void ACBWImageAnalysis::showLogPolarInWindow(const std::string title){
+//	IplImage* dst = cvCreateImage( cvSize(this->getWidth(),this->getHeight()), IPL_DEPTH_32F, 1 );
+//	IplImage* src2 = cvCreateImage( cvGetSize(this->getImage()), IPL_DEPTH_32F, 1 );
+//	
+//	this->computeFFT2D_complex();
+//	int height = this->getHeight();
+//	int width = this->getWidth();
+//	IplImage* fftimage  = cvCreateImage(cvSize(this->getWidth(),this->getHeight()),IPL_DEPTH_32F,1);
+//	BwImageFloat Bwfftimage(fftimage);
+//	int x=0;
+//	int y=0;
+//	float xtmp = 0;
+////	float xmax = 0;
+//	int area = this->getWidth() * this->getHeight(); 
+////	for(int kk=1; kk < area; kk++){
+////		xtmp = (fft[kk][0]*fft[kk][0]+fft[kk][1]*fft[kk][1]);
+//		//cout << xtmp << endl;
+//		//if (xtmp > xmax) xmax = xtmp;
+////	}
+//	int k=0;
+//	for(int i=0; i< height; i++){
+//		for (int j=0; j< width; j++){
+//			if (i<height/2 && j<width/2){ x=i+height/2; y=j+width/2; }
+//			if (i>=height/2 && j<width/2){ x=i-height/2; y=j+width/2; }
+//			if (i<height/2 && j>=width/2){ x=i+height/2; y=j-width/2; }
+//			if (i>=height/2 && j>=width/2){ x=i-height/2; y=j-width/2; }
+//			xtmp = sqrt((fft[k][0]*fft[k][0]+fft[k][1]*fft[k][1]))/area;// *255/sqrt(xmax);
+//			Bwfftimage[x][y] = xtmp;
+//			k++;
+//		}
 //	}
-	int k=0;
-	for(int i=0; i< height; i++){
-		for (int j=0; j< width; j++){
-			if (i<height/2 && j<width/2){ x=i+height/2; y=j+width/2; }
-			if (i>=height/2 && j<width/2){ x=i-height/2; y=j+width/2; }
-			if (i<height/2 && j>=width/2){ x=i+height/2; y=j-width/2; }
-			if (i>=height/2 && j>=width/2){ x=i-height/2; y=j-width/2; }
-			xtmp = sqrt((fft[k][0]*fft[k][0]+fft[k][1]*fft[k][1]))/area;// *255/sqrt(xmax);
-			Bwfftimage[x][y] = xtmp;
-			k++;
-		}
-	}
-	
-	cvLogPolar( fftimage, dst, cvPoint2D32f(this->getWidth()/2, this->getHeight()/2), 20	, CV_INTER_LINEAR+CV_WARP_FILL_OUTLIERS );
-
-	cvAbs(dst,dst);
-	cvLogPolar( dst, src2, cvPoint2D32f(this->getWidth()/2, this->getHeight()/2), 20, CV_INTER_LINEAR+CV_WARP_FILL_OUTLIERS+CV_WARP_INVERSE_MAP );
-	cvNamedWindow( "log-polar", 1 );
-	cvShowImage( "log-polar", dst );
-	cvNamedWindow( "inverse log-polar", 1 );
-	cvShowImage( "inverse log-polar", src2 );
-	cvWaitKey();
-	cvDestroyWindow("log-polar");
-	cvDestroyWindow("inverse log-polar");
-	cvReleaseImage(&fftimage);
-}
+//	
+//	cvLogPolar( fftimage, dst, cvPoint2D32f(this->getWidth()/2, this->getHeight()/2), 20	, CV_INTER_LINEAR+CV_WARP_FILL_OUTLIERS );
+//
+//	cvAbs(dst,dst);
+//	cvLogPolar( dst, src2, cvPoint2D32f(this->getWidth()/2, this->getHeight()/2), 20, CV_INTER_LINEAR+CV_WARP_FILL_OUTLIERS+CV_WARP_INVERSE_MAP );
+//	cvNamedWindow( "log-polar", 1 );
+//	cvShowImage( "log-polar", dst );
+//	cvNamedWindow( "inverse log-polar", 1 );
+//	cvShowImage( "inverse log-polar", src2 );
+//	cvWaitKey();
+//	cvDestroyWindow("log-polar");
+//	cvDestroyWindow("inverse log-polar");
+//	cvReleaseImage(&fftimage);
+//}
 
 
 bool ACBWImageAnalysis::savePGM (string file_name) {
@@ -876,15 +870,17 @@ bool ACBWImageAnalysis::savePGM (string file_name) {
 	filePGM << width << " " << height << endl;
 	filePGM << "255 " << endl; // max value
 	
-	BwImage Im(this->getImage());
+//  XS TODO check this 2.*
+	//	BwImage Im(this->getImage());
 	
 	// Normalize image between 0 and 255
 	float fmax=0.0;
 	float fmin=0.0;
 	for(int i=0; i< height; i++){
 		for (int j=0; j< width; j++){
-			if (Im[i][j] > fmax) fmax = Im[i][j];
-			else if (Im[i][j] < fmin) fmin = Im[i][j];
+			float fij = this->getImageMat().at<float>(i,j) ;
+			if ( fij > fmax) fmax = fij;
+			else if (fij < fmin) fmin = fij;
 		}
 	}
 	
@@ -900,7 +896,7 @@ bool ACBWImageAnalysis::savePGM (string file_name) {
 		// Write image data
 		for(int i=0; i< height; i++)
 			for (int j=0; j< width; j++)
-				filePGM << (int) ((255*(Im[i][j]-fmin))/fdif) << endl;
+				filePGM << (int) ((255*( this->getImageMat().at<float>(i,j)-fmin))/fdif) << endl;
 	}
 	filePGM.close();
 	

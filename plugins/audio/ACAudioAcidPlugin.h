@@ -1,7 +1,7 @@
 /**
  * @brief ACAudioAcidPlugin.h
  * @author Xavier Siebert
- * @date 18/07/2011
+ * @date 04/10/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -37,7 +37,7 @@
 
 #include<iostream>
 
-class ACAudioAcidPlugin : public ACFeaturesPlugin {
+class ACAudioAcidPlugin : public ACTimedFeaturesPlugin {
 	
 public:
 	ACAudioAcidPlugin();
@@ -45,7 +45,8 @@ public:
 
 	std::vector<ACMediaFeatures*> calculate(ACMediaData* aData, ACMedia* theMedia, bool _save_timed_feat=false);
 	
-	ACMediaTimedFeature* getTimedFeatures();
+	// XS TODO check if this works
+	// ACMediaTimedFeature* getTimedFeatures();
 	
 private:
 	

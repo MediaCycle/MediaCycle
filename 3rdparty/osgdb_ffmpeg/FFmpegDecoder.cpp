@@ -139,6 +139,7 @@ bool FFmpegDecoder::open(const std::string & filename, FFmpegParameters* paramet
             AVInputFormat* av_format = (parameters ? parameters->getFormat() : 0);
 #if LIBAVFORMAT_BUILD < LIBAVFORMAT_BUILD_PARAM2DICT
             AVFormatParameters* av_params = (parameters ? parameters->getFormatParameter() : 0);
+			// XS TODO check this
             if (av_open_input_file(&p_format_context, filename.c_str(), av_format, 0, av_params) !=0 )
                 throw std::runtime_error("av_open_input_file() failed");
 #else

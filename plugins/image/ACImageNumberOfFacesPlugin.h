@@ -1,9 +1,9 @@
 /*
- *  ACVideoPixelSpeedPlugin.h
+ *  ACImageNumberOfFacesPlugin.h
  *  MediaCycle
  *
  *  @author Xavier Siebert
- *  @date 22/09/09
+ *  @date 
  *  @copyright (c) 2009 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
@@ -32,26 +32,26 @@
  *
  */
 
-#ifndef _ACVIDEOPIXELSPEEDPLUGIN_H
-#define	_ACVIDEOPIXELSPEEDPLUGIN_H
+#ifndef _ACIMAGENUMBEROFFACESPLUGIN_H
+#define	_ACIMAGENUMBEROFFACESPLUGIN_H
 
-#include "ACVideoAnalysis.h"
+#include "ACColorImageAnalysis.h"
 #include "ACPlugin.h"
 #include "ACMediaFeatures.h"
-#include "ACMediaTimedFeature.h"
+#include "ACImageData.h"
 
-#include <vector>
-#include <string>
+#include<iostream>
 
-class ACVideoPixelSpeedPlugin : public ACTimedFeaturesPlugin {
+class ACImageNumberOfFacesPlugin : public ACFeaturesPlugin {
 public:
-    ACVideoPixelSpeedPlugin();
-    ~ACVideoPixelSpeedPlugin();
-//	virtual std::vector<ACMediaFeatures*> calculate(std::string aFileName, bool _save_timed_feat=false);
-	virtual std::vector<ACMediaFeatures*> calculate(ACMediaData* aData, ACMedia* theMedia, bool _save_timed_feat=false);
-private:	
-	ACVideoAnalysis* videoAn;
-	void clean();
+    ACImageNumberOfFacesPlugin();
+    ~ACImageNumberOfFacesPlugin();
+
+	//XS TODO why both below ?
+	std::vector<ACMediaFeatures*> calculate(ACMediaData* _data);	
+	std::vector<ACMediaFeatures*> calculate(ACMediaData* _aData, ACMedia* _theMedia, bool _save_timed_feat=false);
+private:
+	ACMediaFeatures* calculateNumberOfFaces(ACColorImageAnalysis* image);
 };
 
-#endif	/* _ACVIDEOPIXELSPEEDPLUGIN_H */
+#endif	/* _ACIMAGENUMBEROFFACESPLUGIN_H */

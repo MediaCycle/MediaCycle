@@ -1,9 +1,9 @@
 /*
- *  ACImageColorMomentsPlugin.cpp
+ *  ACImageNumberOfFacesPlugin.cpp
  *  MediaCycle
  *
  *  @author Xavier Siebert
- *  @date 01/03/2010
+ *  @date 
  *  @copyright (c) 2009 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
@@ -32,53 +32,51 @@
  *
  */
 
-#include "ACImageColorMomentsPlugin.h"
+#include "ACImageNumberOfFacesPlugin.h"
 
 #include <vector>
 #include <string>
 
 using namespace std;
 
-ACImageColorMomentsPlugin::ACImageColorMomentsPlugin() {
+ACImageNumberOfFacesPlugin::ACImageNumberOfFacesPlugin() {
     //vars herited from ACPlugin
     this->mMediaType = MEDIA_TYPE_IMAGE;
-    this->mName = "Color Moments";
-    this->mDescription = "Image Color Moments plugin";
+    this->mName = "Number of faces";
+    this->mDescription = "Image Number of faces plugin";
     this->mId = "";
-	this->mDescriptorsList.push_back("Color Moments");
+	this->mDescriptorsList.push_back("NumberOfFaces");
 }
 
-ACImageColorMomentsPlugin::~ACImageColorMomentsPlugin() {
+ACImageNumberOfFacesPlugin::~ACImageNumberOfFacesPlugin() {
 }
 
-std::vector<ACMediaFeatures*> ACImageColorMomentsPlugin::calculate(ACMediaData* image_data) {
-	cout << "calculating Color Moments from histogram..." << endl;
+std::vector<ACMediaFeatures*> ACImageNumberOfFacesPlugin::calculate(ACMediaData* image_data) {
+	cout << "calculating Number of faces from image..." << endl;
 	std::vector<ACMediaFeatures*> allImageFeatures;
 
-	// XS TODO: which color model ?
 	ACColorImageAnalysis* image = new ACColorImageAnalysis(image_data);	
 	
-//	ACMediaFeatures* imageColorFeatures0 = this->calculateColorFeatures(image, 4, "BGR");
-	ACMediaFeatures* imageColorFeatures = this->calculateColorFeatures(image, 4, "HSV");
+	ACMediaFeatures* imageColorFeatures = this->calculateNumberOfFaces(image);
 	if (imageColorFeatures != 0){
 		allImageFeatures.push_back(imageColorFeatures);
 	}
 	else{
-		cerr << "<ACImageColorMomentsPlugin::calculate> : no color feature" << endl;
+		cerr << "<ACImageNumberOfFacesPlugin::calculate> : no color feature" << endl;
 	}
 		
 	delete image;
 	return allImageFeatures;
 }
 
-std::vector<ACMediaFeatures*> ACImageColorMomentsPlugin::calculate(ACMediaData* _aData, ACMedia* _theMedia, bool _save_timed_feat){
+std::vector<ACMediaFeatures*> ACImageNumberOfFacesPlugin::calculate(ACMediaData* _aData, ACMedia* _theMedia, bool _save_timed_feat){
 	return this->calculate(_aData);
 	// XS TODO no need for ACMedia here...
 };
 
-// default: 4 moments; "HSV"
-ACMediaFeatures* ACImageColorMomentsPlugin::calculateColorFeatures(ACColorImageAnalysis* image, int _nmoments, string _cmode){ 
-	image->computeColorMoments(_nmoments, _cmode); 
-	ACMediaFeatures* color_moments = new ACMediaFeatures(image->getColorMoments(), "Color");
-	return color_moments;	
+ACMediaFeatures* ACImageNumberOfFacesPlugin::calculateNumberOfFaces(ACColorImageAnalysis* image){ 
+	image->computeNumberOfFaces("/Users/xavier/numediart/Project14.5-DiskHover/tests/haarcascade_frontalface_alt.xml"); 
+//	image->computeNumberOfFaces("/Users/xavier/numediart/Project14.5-DiskHover/tests/lbpcascade_frontalface.xml"); 
+	ACMediaFeatures* number_of_faces = new ACMediaFeatures(image->getNumberOfFaces(), "NumberOfFaces");
+	return number_of_faces;	
 }

@@ -75,16 +75,6 @@ ACImageShapeHuMomentsPlugin::~ACImageShapeHuMomentsPlugin() {
 std::vector<ACMediaFeatures*> ACImageShapeHuMomentsPlugin::calculate(ACMediaData* image_data) {
 	cout << "calculating Shape (Hu) Moments from ACMediaData..." << endl;
 	std::vector<ACMediaFeatures*> allImageFeatures;
-//	ACImageData* local_image_data = 0;
-//	try{
-//		local_image_data = static_cast <ACImageData*> (image_data);
-//		if(! local_image_data) 
-//			throw runtime_error("<ACImageShapeHuMomentsPlugin::calculate> problem with mediaData cast");
-//	}catch (const exception& e) {
-//		cerr << e.what() << endl;
-//		return allImageFeatures;
-//	}
-
 	ACColorImageAnalysis* image = new ACColorImageAnalysis(image_data);	
 	
 	ACMediaFeatures* imageShapeFeatures = this->calculateHuMoments(image);

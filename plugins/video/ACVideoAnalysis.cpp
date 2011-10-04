@@ -1668,24 +1668,25 @@ void ACVideoAnalysis::computeFourierMellinMoments(){
 	}
 }
 
-void ACVideoAnalysis::computeImageHistograms(int w, int h){
-	image_histograms.clear();
-	this->rewind(); // reset the capture to the beginning of the video
-	
-	cv::Mat current_frame;
-	for(int ifram=0; ifram<nframes; ifram++) {
-		*capture >> current_frame;
-		if(!current_frame.data){
-			cerr << "<ACVideoAnalysis::computeImageHistograms> unexpected end of file at frame " << ifram << endl;
-			break;
-		}
-		ACColorImageAnalysis color_frame(current_frame);
-		color_frame.computeImageHistogram(w,h);
-		image_histograms.push_back(color_frame.getImageHistogram());
-	}
-}
+// XS TODO port 2.*
+//void ACVideoAnalysis::computeImageHistograms(int w, int h){
+//	image_histograms.clear();
+//	this->rewind(); // reset the capture to the beginning of the video
+//	
+//	cv::Mat current_frame;
+//	for(int ifram=0; ifram<nframes; ifram++) {
+//		*capture >> current_frame;
+//		if(!current_frame.data){
+//			cerr << "<ACVideoAnalysis::computeImageHistograms> unexpected end of file at frame " << ifram << endl;
+//			break;
+//		}
+//		ACColorImageAnalysis color_frame(current_frame);
+//		color_frame.computeImageHistogram(w,h);
+//		image_histograms.push_back(color_frame.getImageHistogram());
+//	}
+//}
 
-#if CV_MIN_VERSION_REQUIRED(2,3,1)
+#if CV_MIN_VERSION_REQUIRED(2,3,0)
 void ACVideoAnalysis::computeGlobalOrientation(){
 	global_orientations.clear();
 	// some of these constants could be parameters...
@@ -1834,7 +1835,7 @@ void ACVideoAnalysis::computeGlobalOrientation(){
 	cv::destroyWindow ("Motion");
 #endif //VISUAL_CHECK	
 }
-#endif //CV_MIN_VERSION_REQUIRED(2,3,1)
+#endif //CV_MIN_VERSION_REQUIRED(2,3,0)
 
 // XS TODO watch out index !!
 // first moment = [0]
@@ -1939,7 +1940,7 @@ void ACVideoAnalysis::showFFTInWindow(string title, bool has_win){
 		}
 		ACColorImageAnalysis color_frame(current_frame);
 		color_frame.makeBWImage();
-		ACBWImageAnalysis *bw_helper = new ACBWImageAnalysis(color_frame.getBWImage());
+		ACBWImageAnalysis *bw_helper = new ACBWImageAnalysis(color_frame.getBWImageMat());
 		bw_helper->computeFFT2D_complex();
 		bw_helper->showFFTComplexInWindow (title.c_str());
 		delete bw_helper;

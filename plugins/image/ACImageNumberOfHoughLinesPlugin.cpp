@@ -1,9 +1,9 @@
 /*
- *  ACImageColorMomentsPlugin.cpp
+ *  ACImageNumberOfHoughLinesPlugin.cpp
  *  MediaCycle
  *
  *  @author Xavier Siebert
- *  @date 01/03/2010
+ *  @date 
  *  @copyright (c) 2009 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
@@ -32,53 +32,57 @@
  *
  */
 
-#include "ACImageColorMomentsPlugin.h"
+#include "ACImageNumberOfHoughLinesPlugin.h"
 
 #include <vector>
 #include <string>
-
+#include <iostream>
 using namespace std;
 
-ACImageColorMomentsPlugin::ACImageColorMomentsPlugin() {
+ACImageNumberOfHoughLinesPlugin::ACImageNumberOfHoughLinesPlugin() {
     //vars herited from ACPlugin
     this->mMediaType = MEDIA_TYPE_IMAGE;
-    this->mName = "Color Moments";
-    this->mDescription = "Image Color Moments plugin";
+    this->mName = "Number of Hough lines";
+    this->mDescription = "Image Number of Hough lines plugin";
     this->mId = "";
-	this->mDescriptorsList.push_back("Color Moments");
+	this->mDescriptorsList.push_back("NumberOfHoughLines");
 }
 
-ACImageColorMomentsPlugin::~ACImageColorMomentsPlugin() {
+ACImageNumberOfHoughLinesPlugin::~ACImageNumberOfHoughLinesPlugin() {
 }
 
-std::vector<ACMediaFeatures*> ACImageColorMomentsPlugin::calculate(ACMediaData* image_data) {
-	cout << "calculating Color Moments from histogram..." << endl;
+std::vector<ACMediaFeatures*> ACImageNumberOfHoughLinesPlugin::calculate(ACMediaData* image_data) {
+	cout << "calculating Number of Hough lines from image..." << endl;
 	std::vector<ACMediaFeatures*> allImageFeatures;
 
-	// XS TODO: which color model ?
 	ACColorImageAnalysis* image = new ACColorImageAnalysis(image_data);	
 	
-//	ACMediaFeatures* imageColorFeatures0 = this->calculateColorFeatures(image, 4, "BGR");
-	ACMediaFeatures* imageColorFeatures = this->calculateColorFeatures(image, 4, "HSV");
+	// probabilistic computeHoughLinesP is better than computeHoughLines
+	ACMediaFeatures* imageColorFeatures = this->calculateNumberOfHoughLinesP(image);
 	if (imageColorFeatures != 0){
 		allImageFeatures.push_back(imageColorFeatures);
 	}
 	else{
-		cerr << "<ACImageColorMomentsPlugin::calculate> : no color feature" << endl;
+		cerr << "<ACImageNumberOfHoughLinesPlugin::calculate> : no color feature" << endl;
 	}
 		
 	delete image;
 	return allImageFeatures;
 }
 
-std::vector<ACMediaFeatures*> ACImageColorMomentsPlugin::calculate(ACMediaData* _aData, ACMedia* _theMedia, bool _save_timed_feat){
+std::vector<ACMediaFeatures*> ACImageNumberOfHoughLinesPlugin::calculate(ACMediaData* _aData, ACMedia* _theMedia, bool _save_timed_feat){
 	return this->calculate(_aData);
 	// XS TODO no need for ACMedia here...
 };
 
-// default: 4 moments; "HSV"
-ACMediaFeatures* ACImageColorMomentsPlugin::calculateColorFeatures(ACColorImageAnalysis* image, int _nmoments, string _cmode){ 
-	image->computeColorMoments(_nmoments, _cmode); 
-	ACMediaFeatures* color_moments = new ACMediaFeatures(image->getColorMoments(), "Color");
-	return color_moments;	
+ACMediaFeatures* ACImageNumberOfHoughLinesPlugin::calculateNumberOfHoughLinesP(ACColorImageAnalysis* image){ 
+	image->computeHoughLinesP(); 
+	ACMediaFeatures* number_of_faces = new ACMediaFeatures(image->getNumberOfHoughLinesP(), "NumberOfHoughLinesP");
+	return number_of_faces;	
+}
+
+ACMediaFeatures* ACImageNumberOfHoughLinesPlugin::calculateNumberOfHoughLines(ACColorImageAnalysis* image){ 
+	image->computeHoughLines();
+	ACMediaFeatures* number_of_faces = new ACMediaFeatures(image->getNumberOfHoughLines(), "NumberOfHoughLines");
+	return number_of_faces;	
 }

@@ -137,12 +137,13 @@ void Gabor::init(fftw_complex* &bwTransformed) {
 	// parse the data of the underlying image and
 	// set the complex arrays for the fourier
 	// transformation accordingly
-	BwImage Im(analysed_image->getImage());
 	
-	cvNamedWindow("0", CV_WINDOW_AUTOSIZE);
-	cvShowImage("0", analysed_image->getImage());
-	cvWaitKey(0);
-	cvDestroyWindow("0");
+	// XS TODO check this 2.*
+//	BwImage Im(analysed_image->getImage());
+	
+	cv::namedWindow("0", CV_WINDOW_AUTOSIZE);
+	cv::imshow("0", analysed_image->getImageMat());
+	cv::waitKey(0);
 	
 	for(uint x = 0; x < width; x++) {
 		for(uint y = 0; y < height; y++) {
@@ -151,7 +152,7 @@ void Gabor::init(fftw_complex* &bwTransformed) {
 				bwValue = 0;
 			} 
 			else {
-				bwValue =Im[y-verticalMargin][x-horizontalMargin]; // XS TODO x <-> y ??
+				bwValue =analysed_image->getImageMat().at<double>(y-verticalMargin,x-horizontalMargin); // XS TODO x <-> y ??
 			}
 			idx = (y + yoffset) * paddedWidth + (x + xoffset);
 			bwIn[idx][0] = bwValue;

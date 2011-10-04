@@ -58,10 +58,9 @@ starpu_codelet cl =
     #endif
 */ 
 
-ACHuMomentsVideoPlugin::ACHuMomentsVideoPlugin() {
+ACHuMomentsVideoPlugin::ACHuMomentsVideoPlugin() : ACTimedFeaturesPlugin(){
 	//vars herited from ACPlugin
 	this->mMediaType = MEDIA_TYPE_VIDEO;
-	//this->mPluginType = PLUGIN_TYPE_FEATURES;
 	this->mName = "Hu Moments (StarPU)";
 	this->mDescription = "Hu_Moments_StarPU";
 	this->mId = "";
@@ -231,19 +230,5 @@ std::vector<ACMediaFeatures*> ACHuMomentsVideoPlugin::_calculate(std::string aFi
 	delete descmtf;
 	return result;
 	//starpu_shutdown();
-}
-
-// the plugin knows internally where it saved the mtf
-// thanks to mtf_file_name
-ACMediaTimedFeature* ACHuMomentsVideoPlugin::getTimedFeatures(){
-	if (mtf_file_name == ""){
-        cout << "<ACHuMomentsVideoPlugin::getTimedFeatures> : missing file name "<<endl;
-		return 0;
-	}
-	ACMediaTimedFeature* ps_mtf = new ACMediaTimedFeature();
-	if (ps_mtf->loadFromFile(mtf_file_name) <= 0){
-		return 0;
-	}
-	return ps_mtf;
 }
 #endif

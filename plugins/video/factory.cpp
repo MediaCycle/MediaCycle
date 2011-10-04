@@ -21,11 +21,11 @@ extern "C" ACPlugin* create(std::string namePlugin) {
 //#ifdef USE_STARPU //CF: temporary check to enable just this plugin only until we can select them for extraction, others might not have installled StarPU yet
 //    if (namePlugin == "ACHuMomentsVideoPlugin") {return new ACHuMomentsVideoPlugin();}
 //#endif//#else
-//	if (namePlugin == "ACVideoPixelSpeedPlugin") {return new ACVideoPixelSpeedPlugin();}
-//	if (namePlugin == "ACVideoColorPlugin") {return new ACVideoColorPlugin();}
-	#if CV_MIN_VERSION_REQUIRED(2,3,1)
+	if (namePlugin == "ACVideoPixelSpeedPlugin") {return new ACVideoPixelSpeedPlugin();}
+	if (namePlugin == "ACVideoColorPlugin") {return new ACVideoColorPlugin();}
+//	#if CV_MIN_VERSION_REQUIRED(2,3,0)
 	if (namePlugin == "ACVideoMotionOrientationPlugin") {return new ACVideoMotionOrientationPlugin();}
-	#endif //CV_MIN_VERSION_REQUIRED(2,3,1)
+//	#endif //CV_MIN_VERSION_REQUIRED(2,3,0)
 //#endif
 }
 
@@ -39,12 +39,12 @@ extern "C" std::vector<std::string> list() {    //returns a string vector contai
 //#ifdef USE_STARPU
 //    listPlugin.push_back("ACHuMomentsVideoPlugin");
 //#endif//#else
- //   listPlugin.push_back("ACVideoPixelSpeedPlugin");
-//	listPlugin.push_back("ACVideoColorPlugin");
+    listPlugin.push_back("ACVideoPixelSpeedPlugin");
+	listPlugin.push_back("ACVideoColorPlugin");
 //#endif
-	#if CV_MIN_VERSION_REQUIRED(2,3,1)
+//	#if CV_MIN_VERSION_REQUIRED(2,3,0)
 	listPlugin.push_back("ACVideoMotionOrientationPlugin");
-	#endif //CV_MIN_VERSION_REQUIRED(2,3,1)
+//	#endif //CV_MIN_VERSION_REQUIRED(2,3,0)
     //listPlugin.push_back("...");
     return listPlugin;
 }

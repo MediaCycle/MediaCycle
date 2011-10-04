@@ -42,64 +42,40 @@ using namespace std;
 
 //#define DEBUG_ME
 
-// color_img->splitChannels will take care of split
-ACColorImageHistogram::ACColorImageHistogram(ACColorImageAnalysis* color_img, string _cmode, int _size, int _norm) {
-	color_img->splitChannels(_cmode);
-	if (_size > 0) size = _size;
+// we trust the incoming info about color space !!
+// i.e., if _cmode is not the mode of the color_img, it fails
+// XS TODO add test for this !!
+
+ACColorImageHistogram::ACColorImageHistogram(ACColorImageAnalysis* color_img, string _cmode, int _norm) {
+	// XS TODO add tests
 	if (_norm > 0) norm = _norm; // typically 1
 	cmode = _cmode;
-	
-	if (cmode == "RGB" || cmode == "BGR"){ // XS note: RGB not supported, BGR by default!
-		range [0] [0]= 0 ;
-		range [0] [1]= 256 ;
-		range [1] [0]= 0 ;
-		range [1] [1]= 256 ;
-		range [2] [0]= 0 ;
-		range [2] [1]= 256 ;
-	}
-	else if (cmode == "HSV"){
-		range [0] [0]= 0 ;
-		range [0] [1]= 180 ; // 360 ;
-		range [1] [0]= 0 ;
-		range [1] [1]= 256 ; // 100 ;
-		range [2] [0]= 0 ;
-		range [2] [1]= 256 ; // 100 ;
-	}
-	else 
-		cerr << "<ACColorImageHistogram::ACColorImageHistogram> invalid color mode" << endl;
-	
-	for (int i = 0; i < 3; i++){
-		float *ranges [2];
-		*ranges = range[i];
-		hist[i] = cvCreateHist (1, &size, CV_HIST_ARRAY, ranges, 1);
-		cvCalcHist (color_img->getChannel(i), hist[i], 0, 0);
-		cvNormalizeHist (hist[i], norm);
-	}	
+	im_src_mat = color_img->getImageMat();
+	this->buildHistogram();
 }
 
-ACColorImageHistogram::ACColorImageHistogram(IplImage* img, string _cmode, int _size, int _norm) {
-	// first split in 3 channels 
-	IplImage *channel_img[3];
-	for (int i = 0; i < 3; i++)
-		channel_img[i] = cvCreateImage (cvSize (img->width, img->height), img->depth, 1);
-	cvSplit (img, channel_img[0], channel_img[1], channel_img[2], 0); 
-
-	initialize(channel_img, _cmode, _size, _norm);
-
-	for (int i = 0; i < 3; i++)
-		cvReleaseImage(&channel_img[i]);
+ACColorImageHistogram::ACColorImageHistogram(cv::Mat img_mat, string _cmode, int _norm) {
+	// XS TODO add tests
+	if (_norm > 0) norm = _norm; // typically 1
+	cmode = _cmode;
+	im_src_mat = img_mat;
+	this->buildHistogram();
 }
 
 ACColorImageHistogram::~ACColorImageHistogram() {
-	for (int i=0; i<3 ; i++) 
-		cvReleaseHist (&hist[i]);
 }
 
-void ACColorImageHistogram::initialize(IplImage** channel_img, string _cmode, int _size, int _norm) {
-	if (_size > 0) size = _size;
-	if (_norm > 0) norm = _norm; // typically 1
-	cmode = _cmode;
-
+bool ACColorImageHistogram::buildHistogram() {
+	if (!im_src_mat.data) {
+		cerr << "<ACColorImageHistogram::buildHistogram> invalid or empty image" << endl;
+		return false;
+	}
+	if (im_src_mat.channels() !=3){
+		cerr << "<ACColorImageHistogram::buildHistogram> need 3 channels instead of " << im_src_mat.channels()<< endl;
+		return false;
+	}
+		
+	// adjusting ranges and splitting image according to color mode
 	if (cmode == "RGB" || cmode == "BGR"){ // XS note: RGB not supported, BGR by default!
 		range [0] [0]= 0 ;
 		range [0] [1]= 256 ;
@@ -116,106 +92,122 @@ void ACColorImageHistogram::initialize(IplImage** channel_img, string _cmode, in
 		range [2] [0]= 0 ;
 		range [2] [1]= 256 ; // 100 ;
 	}
-	else 
-		cerr << "<ACColorImageHistogram::ACColorImageHistogram> invalid color mode" << endl;
-	
+	else {
+		cerr << "<ACColorImageHistogram::buildHistogram> invalid color mode" << endl;
+		return false;
+	}
+	int channels[1];
+	// XS TODO size vs scale 4.0
 	for (int i = 0; i < 3; i++){
-		float *ranges [2];
+		channels[0]=i;
+		const float *ranges [2];
 		*ranges = range[i];
-		hist[i] = cvCreateHist (1, &size, CV_HIST_ARRAY, ranges, 1);
-		cvCalcHist (&channel_img[i], hist[i], 0, 0);
-		cvNormalizeHist (hist[i], norm);
-	}
+		int histSize = range[i][1] ; // /4... // XS TODO some scale factor -- could be 1 for 256 bins (or 180)
+		cv::Mat histi;
+		cv::calcHist( &im_src_mat, 1, channels, cv::Mat(), // do not use mask 
+					 histi, 1, &histSize, ranges,
+					 true, // the histogram is uniform 
+					 false ); // no accumulation
+		cv::normalize (histi, histi, 1.0, 0, cv::NORM_L1);
+		this->histos.push_back(histi);
+	}	
+	// XS TODO add test
+	return true;
 }
 
-ACColorImageHistogram& ACColorImageHistogram::operator+(const ACColorImageHistogram& H) {
-    cout << "operator+=" << endl;
-	return *this += H;        // wild ? 
-}
-
-ACColorImageHistogram& ACColorImageHistogram::operator+= (const ACColorImageHistogram& H){
-	// XS TODO: tester si les deux histogrammes sont compatibles
-	for (int i = 0; i < 3; i++){
-		for (int j = 0; j < size; j++){
-			double x = cvGetReal1D(hist[i]->bins, j) + cvGetReal1D(H.hist[i]->bins, j) ;
-			cvSetReal1D(hist[i]->bins, j, x );
-		}
-	}
-	return *this;
-	// this will change the LHS of the assignment !
-}
+//ACColorImageHistogram& ACColorImageHistogram::operator+(const ACColorImageHistogram& H) {
+//    cout << "operator+=" << endl;
+//	return *this += H;        // wild ? 
+//}
+//
+//ACColorImageHistogram& ACColorImageHistogram::operator+= (const ACColorImageHistogram& H){
+//	// XS TODO: tester si les deux histogrammes sont compatibles
+//	for (int i = 0; i < 3; i++){
+//		for (int j = 0; j < size; j++){
+//			double x = cvGetReal1D(hist[i]->bins, j) + cvGetReal1D(H.hist[i]->bins, j) ;
+//			cvSetReal1D(hist[i]->bins, j, x );
+//		}
+//	}
+//	return *this;
+//	// this will change the LHS of the assignment !
+//}
 
 void ACColorImageHistogram::normalize(const double& factor) {
+	if (histos.size()!=3) {
+		cout << "<ACColorImageHistogram::normalize> : not normalizing, histogram should have 3 channels, not " << histos.size() << endl;
+		return;
+	}
 	// note : if the sum of the histogram is close to zero, it will not be normalized (otherwize divide by zero)
 	for (int i = 0; i < 3; i++){
-		cvNormalizeHist (hist[i], factor);
+		cv::normalize(histos[i], histos[i], factor);
 	}
 	norm=factor;
 }
 
 void ACColorImageHistogram::show() {
-	int ch_width = size;
-	int histheight = 200 ; // for visual purposes only
-	int bin_w = cvRound((double) ch_width / size);
-	float max_value = 0; // for visual purposes only
-	IplImage *hist_img = cvCreateImage(cvSize(ch_width * 3, histheight), 8, 1);
-    cvSet(hist_img, cvScalarAll(255), 0); // set to white background     
+	if (histos.size()!=3) {
+		cout << "<ACColorImageHistogram::normalize> : not normalizing, histogram should have 3 channels, not " << histos.size() << endl;
+		return;
+	}
+	
+	// output image with 3 histograms
+	cv::Mat hist_img_mat(cv::Size(256,100), CV_8UC3, cv::Scalar::all(0));
+	
+	// max_value = max of all 3 histograms
+	// maxi = max per histogram
+	double max_value=0, maxi=0; 
+	
 	for (int i = 0; i < 3; i++) {
-		cvGetMinMaxHistValue (hist[i], 0, &max_value, 0, 0); 
-		for (int j = 0; j < size; j++){
-            cvRectangle(hist_img,
-						cvPoint(j * bin_w + i * ch_width, histheight),
-						cvPoint((j + 1) * bin_w + i * ch_width, histheight * ( 1.0 - cvGetReal1D(hist[i]->bins, j) / max_value)),
-						cvScalarAll(0), -1, 8, 0); // cvScalarAll(0) :histogram in black
+		minMaxLoc(histos[i], 0, &maxi, 0, 0); 
+		max_value = (maxi > max_value) ? maxi : max_value;   
+	}
+	vector<cv::Scalar> colorsBGR ;
+	colorsBGR.push_back (CV_RGB(0,0,255)); //B
+	colorsBGR.push_back (CV_RGB(0,255,0)); //G
+	colorsBGR.push_back (CV_RGB(255,0,0)); //R
+	
+	double w_scale = ((float)hist_img_mat.cols)/256;	
+	double h_scale = ((float)hist_img_mat.rows)/max_value;
+
+	for (int i = 0; i < 3; i++) {
+//		histos[i].convertTo(histos[i], histos[i].type(), h_scale); // rescale
+		for (int j = 0; j < range[i][1]; j++){ // or histsize[i]
+			cv::rectangle( hist_img_mat, cv::Point((int)j*w_scale , hist_img_mat.rows),
+						  cv::Point((int)(j+1)*w_scale, hist_img_mat.rows -  histos[i].at<float>(j)*h_scale),
+						  colorsBGR[i]);
 		}
 	}
-	cvNamedWindow("Histogram", CV_WINDOW_AUTOSIZE);
-	cvShowImage("Histogram", hist_img);
-	cvWaitKey(0);
-	cvReleaseImage(&hist_img);
-	cvDestroyWindow("Histogram");
+	cv::namedWindow("Histogram", CV_WINDOW_AUTOSIZE);
+	cv::imshow("Histogram", hist_img_mat);
+	cv::waitKey(0);
 }
 
-void ACColorImageHistogram::show(string wname) {
-	// XS assuming window wname has been opened before
-	int ch_width = size;
-	int histheight = 200 ; // for visual purposes only
-	int bin_w = cvRound((double) ch_width / size);
-	float max_value = 0; // for visual purposes only
-	IplImage *hist_img = cvCreateImage(cvSize(ch_width * 3, histheight), 8, 1);
-    cvSet(hist_img, cvScalarAll(255), 0); // set to white background     
-	for (int i = 0; i < 3; i++) {
-		for (int j = 0; j < size; j++){
-			cvGetMinMaxHistValue (hist[i], 0, &max_value, 0, 0); 
-			cvRectangle(hist_img,
-						cvPoint(j * bin_w + i * ch_width, histheight),
-						cvPoint((j + 1) * bin_w + i * ch_width, histheight * ( 1.0 - cvGetReal1D(hist[i]->bins, j) / max_value)),
-						cvScalarAll(0), -1, 8, 0); // cvScalarAll(0) :histogram in black
-		}
+cv::Mat ACColorImageHistogram::getChannel(int i){
+	if (histos.size()!=3) {
+		cerr << "<ACColorImageHistogram::getChannel> : histogram should have 3 channels, not " << histos.size() << endl;
+		return cv::Mat();
 	}
-	cvShowImage(wname.c_str(), hist_img);
-	cvWaitKey(10);
-	cvReleaseImage(&hist_img);
-}
-
-CvHistogram* ACColorImageHistogram::getChannel(int i){
-	if (i < 0 || i > 2){
-		cerr << " <ACColorImageHistogram::GetChannel> : wrong index " << endl;
-		return 0;
+	else if (i < 0 || i > 2){
+		cerr << " <ACColorImageHistogram::getChannel> : wrong index " << endl;
+		return cv::Mat();
 	}
-	return hist[i];
+	return histos[i];
 }
 
 float ACColorImageHistogram::getValue(int i,int j){
+	if (histos.size()!=3) {
+		cerr << "<ACColorImageHistogram::getChannel> : histogram should have 3 channels, not " << histos.size() << endl;
+		return 0;
+	}
 	if (i < 0 || i > 2){
 		cerr << " <ACColorImageHistogram::GetValue> : wrong index i " << endl;
 		return 0;
 	}
-	if (j < 0 || j > size){
+	if (j < range[i][0] || j > range[i][1]){
 		cerr << " <ACColorImageHistogram::GetValue> : wrong index j" << endl;
 		return 0;
 	}
-	return cvQueryHistValue_1D(hist[i],j);
+	return histos[i].at<float>(j);
 }
 
 void ACColorImageHistogram::computeMoments(int highest_order){
@@ -229,10 +221,6 @@ void ACColorImageHistogram::computeMoments(int highest_order){
 	if (highest_order == 1) return;
 	moments.push_back(stdev);
 	if (highest_order == 2) return;
-	double binsize[3];
-	for (int i = 0; i < 3; i++){
-		binsize[i] = (range[i][1]-range[i][0])/size;
-	}
 #ifdef DEBUG_ME
 	showStats();
 #endif // DEBUG_ME	
@@ -241,10 +229,10 @@ void ACColorImageHistogram::computeMoments(int highest_order){
 		mom = new double[3];
 		for (int i = 0; i < 3; i++){
 			mom[i] = 0.0;
-			for (int j = 0; j < size; j++){
-				double x_i = (j) * binsize[i] ; // XS TODO was: j+.5
-				double p_i = cvQueryHistValue_1D(hist[i],j);
-				mom[i] += p_i * pow(( x_i - mean[i]),n) ;
+			for (int j = 0; j < range[i][1]; j++){
+				double x_i = j ; // XS was: (j+.5)) * binsize[i]
+				double p_i = histos[i].at<float>(j);
+				mom[i] += p_i * pow(abs( x_i - mean[i]),n) ;
 			}
 			// normalized moment 
 			if (stdev[i] !=0){
@@ -273,32 +261,24 @@ double* ACColorImageHistogram::getMoment(int i){ // i starts at 1
 }
 
 void ACColorImageHistogram::computeStats(){
-	if (size ==0){
-		cerr << "<ACColorImageHistogram::computeStats> : empty histogram" << endl;
-		return;
-	}
-	else if (size == 1){
-		cout << "<ACColorImageHistogram::computeStats> : histogram has only one bin..." << endl;
-		return;
-	}
+	// XS TODO test if empty
 	
 	for (int i = 0; i < 3; i++){
 		mean[i] = 0.0;
 		stdev[i] = 0.0;
-
-		double binsize = (range[i][1]-range[i][0])/size;
-		for (int j = 0; j < size; j++){
-			double x_i = (j) * binsize ; // XS TODO was: j+.5
-			double p_i = cvQueryHistValue_1D(hist[i],j);
+		int sizei = range[i][1];
+		for (int j = 0; j < sizei; j++){
+			double x_i = j ; // XS was: (j+.5) * binsize
+			double p_i = histos[i].at<float>(j);
 			mean[i] += x_i * p_i ;
 			stdev[i] += x_i * x_i * p_i ;
 		}
-		// XS TODO
-		// don't do this if p_i contains 1/n (histogram normalized... ??)
-		//mean[i] /= size;
-		//stdev[i] /= size;
-
-		stdev[i] = sqrt( ((stdev[i] - mean[i] * mean[i]) * size)/(size-1) );
+		
+		// don't do this if p_i contains 1/n (histogram normalized to 1)
+		//		mean[i] /= sizei;
+		//		stdev[i] /= sizei;
+		
+		stdev[i] = sqrt( ((stdev[i] - mean[i] * mean[i]) * sizei)/(sizei-1) );
 	}
 }
 
@@ -307,32 +287,22 @@ void ACColorImageHistogram::showStats(){
 	cout << "stdev " << stdev[0] << " ; " << stdev[1] << " ; " << stdev[2] << endl ;
 }
 
-double ACColorImageHistogram::compare(ACColorImageHistogram *MyH2){
-	double dist = 0.0;
-	for (int i = 0; i < 3; i++){
-		double t = cvCompareHist (hist[i], MyH2->hist[i], CV_COMP_BHATTACHARYYA);
-		dist += t;//CHISQR); //CV_COMP_CORREL); // watch out definitions (BHATTACHARYYA, CORREL, ...)
-	}
-	return (dist/3.0); 
-}
+//double ACColorImageHistogram::compare(ACColorImageHistogram *MyH2){
+//	double dist = 0.0;
+//	for (int i = 0; i < 3; i++){
+//		double t = cvCompareHist (hist[i], MyH2->hist[i], CV_COMP_BHATTACHARYYA);
+//		dist += t;//CHISQR); //CV_COMP_CORREL); // watch out definitions (BHATTACHARYYA, CORREL, ...)
+//	}
+//	return (dist/3.0); 
+//}
 
-void ACColorImageHistogram::dump(string fout){
-	for (int i = 0; i < 3; i++){
-		stringstream stmp;
-		stmp << fout << i << ".out" ;		
-		ofstream out(stmp.str().c_str()); 
-		for (int j = 0; j < size; j++){
-			out << j << " " << cvQueryHistValue_1D(hist[i],j) << endl; 
-		}; 
-		out.close();
-	}
-}
 
-void ACColorImageHistogram::dump(){
-	// in terminal
+// dumps full hiin terminal by default
+void ACColorImageHistogram::dump(ostream &odump){
 	for (int i = 0; i < 3; i++){
-		for (int j = 0; j < size; j++){
-			cout << j << " " << cvQueryHistValue_1D(hist[i],j) << endl; 
+		for (int j = 0; j < range[i][1]; j++){
+			odump << histos[i].at<float>(j) << " "; 
 		}; 
+		odump << endl;
 	}
 }

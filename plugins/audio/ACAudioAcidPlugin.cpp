@@ -1,7 +1,7 @@
 /**
  * @brief ACAudioAcidPlugin.cpp
  * @author Xavier Siebert
- * @date 18/07/2011
+ * @date 04/10/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -35,14 +35,12 @@
 #include <string>
 #include <libgen.h>
 
-ACAudioAcidPlugin::ACAudioAcidPlugin() {
-	
-    //vars herited from ACPlugin
+ACAudioAcidPlugin::ACAudioAcidPlugin() : ACTimedFeaturesPlugin() {
+	//vars herited from ACPlugin
     this->mMediaType = MEDIA_TYPE_AUDIO;
     this->mName = "AudioAcid";
     this->mDescription = "AudioAcid plugin";
     this->mId = "";
-	//this->mPluginType=mPluginType;
 	this->mDescriptorsList.push_back("Acid Header Features");	
 }
 
@@ -207,7 +205,7 @@ std::vector<ACMediaFeatures*> ACAudioAcidPlugin::calculate(ACMediaData* aData, A
 	return desc;
 }
 
-ACMediaTimedFeature* ACAudioAcidPlugin::getTimedFeatures() {
-	
-	return 0;
-}
+//ACMediaTimedFeature* ACAudioAcidPlugin::getTimedFeatures() {
+//	
+//	return 0;
+//}

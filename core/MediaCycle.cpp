@@ -553,14 +553,11 @@ void MediaCycle::setPreProcessPlugin(std::string pluginName){
 	ACPlugin* preProcessPlugin = this->getPluginManager()->getPlugin(pluginName);
 	if (preProcessPlugin!=NULL){
 		this->getLibrary()->setPreProcessPlugin(preProcessPlugin);
-	cout << "MediaCycle: Preprocessing plugin: " << preProcessPlugin->getName() << endl;
+		cout << "MediaCycle: Preprocessing plugin: " << preProcessPlugin->getName() << endl;
 	}
-	else
-	{
+	else {
 		this->getLibrary()->setPreProcessPlugin(0);
 		cout << "MediaCycle: impossible to import Preprocessing plugin: " << pluginName << endl;
-
-
 	}
 }
 void MediaCycle::setMediaReaderPlugin(std::string pluginName){

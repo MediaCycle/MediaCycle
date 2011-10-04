@@ -24,7 +24,7 @@
 
 using namespace std;
 
-#define VERBOSE
+//#define VERBOSE
 
 CvGabor::CvGabor() {
     bInitialised = false;

@@ -40,7 +40,7 @@
 #include "ACMediaTimedFeature.h"
 #include <ACOpenCVInclude.h>
 
-#if CV_MIN_VERSION_REQUIRED(2,3,1)
+#if CV_MIN_VERSION_REQUIRED(2,3,0)
 
 //XS TODO : make an ACVideoFeatures Plugin
 // with (ACVideoData *) ACMediaData
@@ -57,6 +57,6 @@ private:
 
 };
 
-#endif //CV_MIN_VERSION_REQUIRED(2,3,1)
+#endif //CV_MIN_VERSION_REQUIRED(2,3,0)
 
 #endif //_ACVIDEOMOTIONORIENTATIONPLUGIN_H

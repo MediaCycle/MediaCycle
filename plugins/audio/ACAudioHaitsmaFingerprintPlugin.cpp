@@ -1,7 +1,7 @@
 /**
  * @brief ACAudioHaitsmaFingerprintPlugin.cpp
  * @author Xavier Siebert
- * @date 18/07/2011
+ * @date 04/10/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -45,7 +45,6 @@ ACAudioHaitsmaFingerprintPlugin::ACAudioHaitsmaFingerprintPlugin() {
     this->mId = "";
 	//this->mPluginType=mPluginType;
 	this->mDescriptorsList.push_back("Haitsma Audio Sub-Fingerprint");
-	this->mtf_file_name = "";
 	
 	audio_fingerprint = new ACAudioFingerprint();
 	audio_fingerprint->setParameters();
@@ -118,14 +117,16 @@ std::vector<ACMediaFeatures*> ACAudioHaitsmaFingerprintPlugin::calculate(ACMedia
 	return desc;
 }
 
-ACMediaTimedFeature* ACAudioHaitsmaFingerprintPlugin::getTimedFeatures() {
-	if (mtf_file_name == ""){
-        cout << "<ACAudioHaitsmaFingerprintPlugin::getTimedFeatures> : missing file name "<<endl;
-		return 0;
-	}
-	ACMediaTimedFeature* ps_mtf = new ACMediaTimedFeature();
-	if (ps_mtf->loadFromFile(mtf_file_name) <= 0){
-		return 0;
-	}
-	return ps_mtf;
-}
+// XS TODO there is a mtf_file_nameS with "S" here ???
+
+//ACMediaTimedFeature* ACAudioHaitsmaFingerprintPlugin::getTimedFeatures() {
+//	if (mtf_file_name == ""){
+//        cout << "<ACAudioHaitsmaFingerprintPlugin::getTimedFeatures> : missing file name "<<endl;
+//		return 0;
+//	}
+//	ACMediaTimedFeature* ps_mtf = new ACMediaTimedFeature();
+//	if (ps_mtf->loadFromFile(mtf_file_name) <= 0){
+//		return 0;
+//	}
+//	return ps_mtf;
+//}

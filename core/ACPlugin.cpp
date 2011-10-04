@@ -37,6 +37,7 @@
 #include "ACPlugin.h"
 #include <iostream>
 using std::cout;
+using std::endl;
 
 ACPlugin::ACPlugin()
 {
@@ -67,6 +68,28 @@ ACFeaturesPlugin::ACFeaturesPlugin()
 	this->mPluginType=mPluginType|PLUGIN_TYPE_FEATURES;
 }
 
+// XS TODO : add (?)
+// this->mPluginType=mPluginType|PLUGIN_TYPE_TIMED_FEATURES;
+ACTimedFeaturesPlugin::ACTimedFeaturesPlugin() : ACFeaturesPlugin(){
+	
+	cout<<"ACPlugin Timed feature Constructor" << endl;
+	this->mtf_file_name = "";
+}
+
+// the plugin knows internally where it saved the mtf
+// thanks to mtf_file_name
+ACMediaTimedFeature* ACTimedFeaturesPlugin:: getTimedFeatures(){
+	if (mtf_file_name == ""){
+        cout << "<ACTimedFeaturesPlugin::getTimedFeatures> : missing file name "<<endl;
+		cout << "                                            in plugin : " << this->getName() << endl;
+		return 0;
+	}
+	ACMediaTimedFeature* ps_mtf = new ACMediaTimedFeature();
+	if (ps_mtf->loadFromFile(mtf_file_name) <= 0){
+		return 0;
+	}
+	return ps_mtf;
+}
 
 ACSegmentationPlugin::ACSegmentationPlugin()
 {

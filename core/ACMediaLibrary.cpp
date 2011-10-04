@@ -513,6 +513,8 @@ int ACMediaLibrary::openCoreXMLLibrary(TiXmlHandle _rootHandle){
 				if (mPreProcessPlugin==NULL)
 					local_media->defaultPreProcFeatureInit();
 				media_library.push_back(local_media);
+				// make sure the library knows which id is the last one
+				this->setMediaID(local_media->getId());
 				cnt++;
 			}
 		}
@@ -703,7 +705,7 @@ void ACMediaLibrary::cleanStats() {
 
 void ACMediaLibrary::calculateStats() {
 	cleanStats();
-	if ( isEmpty() ) return;
+	if ( isEmpty() ) return; // takes car of case n==0
 	int n = this->getSize() ;
 	int number_of_features = media_library[0]->getNumberOfFeaturesVectors();
 	int mt = 0; // number of media files of the library that have the same media type as the library (might be different in case of multimedia documents)
@@ -742,7 +744,7 @@ void ACMediaLibrary::calculateStats() {
 	if (n==1) nn = n;
 	else nn = n-1;*/
 	int nn;
-	if (mt==1) nn = n;
+	if (mt==1) nn = mt;
 	else nn = mt-1; 
 	n = mt;//CF
 

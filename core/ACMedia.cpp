@@ -545,7 +545,7 @@ int ACMedia::import(std::string _path, int _mid, ACPluginManager *acpl, bool _sa
 	
 	std::cout << "importing..." << _path << std::endl;
 	this->filename = _path;
-	this->filename_thumbnail = _path;
+	this->filename_thumbnail = _path; // XS TODO make real separate thumbnail option
 	int import_ok = 0;
 	if (_mid>=0) this->setId(_mid);
 	

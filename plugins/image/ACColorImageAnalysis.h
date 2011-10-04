@@ -40,10 +40,9 @@
 class ACColorImageAnalysis: public ACImageAnalysis {
 public:
 	ACColorImageAnalysis();
-	ACColorImageAnalysis(const string &filename, string _cmode="BGR");	
-	ACColorImageAnalysis(IplImage*, string _cmode="BGR");
-	ACColorImageAnalysis(cv::Mat, string _cmode="BGR");
-	ACColorImageAnalysis(ACMediaData* image_data, string _cmode="BGR");
+	ACColorImageAnalysis(const std::string& filename);	
+	ACColorImageAnalysis(const cv::Mat&);
+	ACColorImageAnalysis(ACMediaData* image_data);
 
     ~ACColorImageAnalysis();
 
@@ -51,44 +50,50 @@ public:
 	void clean();
 
 	// channels
-	int splitChannels(string col="BGR");
+	bool splitChannels(const string& col="BGR");
 	void removeChannels(); 
-	IplImage** getChannel(int i);
+	cv::Mat getChannel(int i);
 	
 	// BW
 	void makeBWImage();
-	IplImage* getBWImage(){return bw_imgp;}
+	cv::Mat& getBWImageMat(){return bw_imgp_mat;}
 
 	// FFT
-	void computeFFT2D(string col="BGR"); // or HSV 
-	void computeFFT2D_complex(string col="BGR"); // or HSV 
-	void computeFFT2D_centered(string col="BGR"); // or HSV 
+	void computeFFT2D(const std::string& col="BGR"); // or HSV 
+	void computeFFT2D_complex(const std::string& col="BGR"); // or HSV 
+	void computeFFT2D_centered(const std::string& col="BGR"); // or HSV 
 	fftw_complex** getFFT2D(){return fft;}
 	
 	// computation of features
-	void computeHuMoments(int thresh = 0);
-	void computeFourierPolarMoments(int RadialBins=5, int AngularBins=8);
+	void computeHuMoments(const int& thresh = 0);
+	void computeFourierPolarMoments(const int& RadialBins=5, const int& AngularBins=8);
 	void computeFourierMellinMoments();
-	void computeContourHuMoments(int thresh = 0);
-	void computeGaborMoments(int mumax = 4, int numax = 2);
-	void computeGaborMoments_fft(int numPha_ = 4, int numFreq_ = 2, uint horizonalMargin_ = 0, uint verticalMargin_ = 0);
-	void computeColorMoments(int n = 4, string cm = "HSV");
-	void computeImageHistogram(int w, int h);
+	void computeContourHuMoments(const int& thresh = 0);
+	void computeGaborMoments(const int& mumax = 4, const int& numax = 2);
+	void computeGaborMoments_fft(const int& numPha_ = 4, const int& numFreq_ = 2, uint horizonalMargin_ = 0, uint verticalMargin_ = 0);
+	void computeColorMoments(const int& n = 4, const string& cm = "HSV");
+//	void computeImageHistogram(int w, int h); // XS TODO port 2.*
+	
+	// computation of features - opencv 2.*
+	void computeHoughLines(); // XS TODO add parameters
+	void computeHoughLinesP(); // XS TODO add parameters
+	void computeNumberOfFaces(const std::string& cascadeFile, const float& scale=1.3, const float& searchScaleFactor=1.2, const int& minNeighbors=3,  const int& flags=CV_HAAR_SCALE_IMAGE, const cv::Size& minFeatureSize=cv::Size(20, 20));
 
 	// visual
-	void showChannels(string col="BGR");
-	void showChannels(string cmode, const char* w0, const char* w1, const char* w2);
-	void showFFTInWindow(const std::string title);
-
-	// channels
-	IplImage *channel_img[3];
-	bool HAS_CHANNELS;
+	void showChannels(const std::string& col="BGR");
+	void showChannels(const std::string& cmode, const char* w0, const char* w1, const char* w2);
+	void showFFTInWindow(const std::string& title);
 
 private:
 	fftw_complex *fft[3]; // one per channel
 	bool HAS_FFT;
 
-	IplImage *bw_imgp;
+	// channels
+	std::vector<cv::Mat> channel_img_mat;
+	bool HAS_CHANNELS;
+	
+	cv::Mat bw_imgp_mat;
+
 	bool HAS_BW;
 	
 };

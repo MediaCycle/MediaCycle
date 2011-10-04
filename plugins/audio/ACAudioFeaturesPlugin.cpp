@@ -46,7 +46,6 @@ ACAudioFeaturesPlugin::ACAudioFeaturesPlugin() {
     this->mName = "AudioFeatures";
     this->mDescription = "AudioFeatures plugin";
     this->mId = "";
-	//this->mPluginType=mPluginType;
 	this->mDescriptorsList.push_back("Spectral Centroid");
 	this->mDescriptorsList.push_back("Spectral Spread");
 	this->mDescriptorsList.push_back("Spectral Variation");
@@ -190,17 +189,17 @@ std::vector<ACMediaFeatures*> ACAudioFeaturesPlugin::_calculate(std::string aFil
 }
 
 // the plugin should know internally where it saved the mtf
-ACMediaTimedFeature* ACAudioFeaturesPlugin::getTimedFeatures(){
-	if (mtf_file_name == ""){
-        cout << "<ACAudioFeaturesPlugin::getTimedFeatures> : missing file name "<<endl;
-		return 0;
-	}
-	ACMediaTimedFeature* ps_mtf = new ACMediaTimedFeature();
-	if (ps_mtf->loadFromFile(mtf_file_name) <= 0){
-		return 0;
-	}
-	return ps_mtf;
-}
+//ACMediaTimedFeature* ACAudioFeaturesPlugin::getTimedFeatures(){
+//	if (mtf_file_name == ""){
+//        cout << "<ACAudioFeaturesPlugin::getTimedFeatures> : missing file name "<<endl;
+//		return 0;
+//	}
+//	ACMediaTimedFeature* ps_mtf = new ACMediaTimedFeature();
+//	if (ps_mtf->loadFromFile(mtf_file_name) <= 0){
+//		return 0;
+//	}
+//	return ps_mtf;
+//}
 
 
 // XS TODO !!!

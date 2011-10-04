@@ -106,12 +106,24 @@ protected:
 	ACFeaturesPlugin();
 	
 public:
-//	virtual std::vector<ACMediaFeatures*> calculate(std::string aFileName, bool _save_timed_feat=false)=0;
 	virtual std::vector<ACMediaFeatures*> calculate(ACMediaData* aData, ACMedia* theMedia, bool _save_timed_feat=false)=0;
-	virtual ACMediaTimedFeature* getTimedFeatures(){return 0;}
 	std::vector<std::string> getDescriptorsList() {return this->mDescriptorsList;}
+	// XS TODO is this the best way to proceed when no timed features ?
+	virtual ACMediaTimedFeature* getTimedFeatures(){return 0;}
 protected:	
 	std::vector<std::string> mDescriptorsList;
+};
+
+// separate time-dependent plugins from other
+// e.g.,  getTimedFeatures has no sense for image
+class ACTimedFeaturesPlugin: virtual public ACFeaturesPlugin{
+protected:
+	ACTimedFeaturesPlugin();
+	// XS TODO add a protected setmftfilename instead of making mtf_file_name protected
+	std::string mtf_file_name; // file in which features have been saved
+public:
+	std::string getSavedFileName(){return mtf_file_name;}
+	virtual ACMediaTimedFeature* getTimedFeatures();
 };
 
 class ACSegmentationPlugin: virtual public ACPlugin
@@ -121,7 +133,6 @@ public:
 	ACSegmentationPlugin();
 	virtual std::vector<ACMedia*> segment(ACMediaTimedFeature* _mtf, ACMedia*)=0;
 	virtual std::vector<ACMedia*> segment(ACMediaData* _data, ACMedia*)=0;
-
 };
 
 class ACNeighborMethodPlugin : virtual public ACPlugin {

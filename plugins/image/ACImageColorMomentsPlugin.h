@@ -46,13 +46,12 @@ class ACImageColorMomentsPlugin : public ACFeaturesPlugin {
 public:
     ACImageColorMomentsPlugin();
     ~ACImageColorMomentsPlugin();
-//	std::vector<ACMediaFeatures*> calculate(std::string aFileName, bool _save_timed_feat=false);
 
 	//XS TODO why both below ?
 	std::vector<ACMediaFeatures*> calculate(ACMediaData* _data);	
 	std::vector<ACMediaFeatures*> calculate(ACMediaData* _aData, ACMedia* _theMedia, bool _save_timed_feat=false);
 private:
-	ACMediaFeatures* calculateColorFeatures(ACColorImageAnalysis* image);
+	ACMediaFeatures* calculateColorFeatures(ACColorImageAnalysis* image, int _nmoments, std::string _cmode="HSV");
 };
 
 #endif	/* _ACIMAGECOLORMOMENTSPLUGIN_H */

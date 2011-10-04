@@ -41,35 +41,31 @@
 
 #include <string>
 #include <vector>
+#include <fstream> 
 
 // forward declaration
 class ACColorImageAnalysis;
 
 class ACColorImageHistogram{
 public:
-	ACColorImageHistogram(ACColorImageAnalysis* color_img, std::string _cmode="HSV", int _size = 256, int _norm = 1);
-	ACColorImageHistogram(IplImage* image, std::string _cmode= "BGR", int _size = 256, int _norm = 1); // image still to be splitted
+	ACColorImageHistogram(ACColorImageAnalysis* color_img, std::string _cmode="BGR", int _norm = 1);
+	ACColorImageHistogram(cv::Mat image, std::string _cmode= "BGR", int _norm = 1); // image still to be splitted
 	~ACColorImageHistogram();
 
-	void initialize(IplImage** image, std::string cmode= "BGR", int size = 256, int norm = 1); 
-
-	ACColorImageHistogram& operator+= (const ACColorImageHistogram& H); 
-	// XS  NB: You can't overload a relational operator for a pointer type.
-	ACColorImageHistogram& operator+ (const ACColorImageHistogram& H);
+//	ACColorImageHistogram& operator+= (const ACColorImageHistogram& H); 
+//	// XS  NB: You can't overload a relational operator for a pointer type.
+//	ACColorImageHistogram& operator+ (const ACColorImageHistogram& H);
 
 	void normalize(const double&);
 	void show();
-	void show(std::string);
-	void dump();
-	void dump(std::string);
+	void dump(std::ostream &odump = std::cout);
 	void reset();
-	double compare(ACColorImageHistogram*);
+//	double compare(ACColorImageHistogram*);
 	
-	CvHistogram *getChannel(int);
-	inline int getSize() {return size;}
+	cv::Mat getChannel(int);
+//	inline int getSize() {return size;}
 	inline int getNorm() {return norm;}
 	float getValue(int,int);
-	void computeStats();
 	void showStats();
 	void computeMoments(int highest_order);
 	std::vector<double*> getMoments(){return moments;}
@@ -77,8 +73,15 @@ public:
 	double* getMean(){return mean;}
 	double* getStdev(){return stdev;}
 private:
-	CvHistogram *hist[3];
-	int norm, size;
+	//method
+	bool buildHistogram(); 
+	void computeStats();
+
+	// variables
+	std::vector<cv::Mat> histos;
+	//cv::MatND hist_mat; // this will make a Ndim histogram, but we want 3 1-dim
+	cv::Mat im_src_mat;
+	int norm;
 	float range [3] [2]; // beginning and end values for each channel
 	double mean[3], stdev[3];
 

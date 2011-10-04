@@ -40,10 +40,9 @@
 using namespace std;
 
 // note : this->mDescription will be used for mtf_file_name
-ACVideoPixelSpeedPlugin::ACVideoPixelSpeedPlugin() {
+ACVideoPixelSpeedPlugin::ACVideoPixelSpeedPlugin() : ACTimedFeaturesPlugin(){
     //vars herited from ACPlugin
     this->mMediaType = MEDIA_TYPE_VIDEO;
-    //this->mPluginType = PLUGIN_TYPE_FEATURES;
     this->mName = "Video Pixel Speed";
     this->mDescription = "Pixel_Speed";
     this->mId = "";
@@ -51,7 +50,6 @@ ACVideoPixelSpeedPlugin::ACVideoPixelSpeedPlugin() {
 
 	//other vars
 	this->videoAn = 0;
-	this->mtf_file_name = "";
 }
 
 ACVideoPixelSpeedPlugin::~ACVideoPixelSpeedPlugin() {
@@ -100,18 +98,3 @@ std::vector<ACMediaFeatures*> ACVideoPixelSpeedPlugin::calculate(ACMediaData* vi
 	videoFeatures.push_back(pixel_speed);
 	return videoFeatures;
 }
-
-// the plugin knows internally where it saved the mtf
-// thanks to mtf_file_name
-ACMediaTimedFeature* ACVideoPixelSpeedPlugin::getTimedFeatures(){
-	if (mtf_file_name == ""){
-        cout << "<ACVideoPixelSpeedPlugin::getTimedFeatures> : missing file name "<<endl;
-		return 0;
-	}
-	ACMediaTimedFeature* ps_mtf = new ACMediaTimedFeature();
-	if (ps_mtf->loadFromFile(mtf_file_name) <= 0){
-		return 0;
-	}
-	return ps_mtf;
-}
-

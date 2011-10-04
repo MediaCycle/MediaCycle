@@ -41,6 +41,7 @@
 
 #include "MediaCycle.h"
 #include "ACColorImageAnalysis.h"
+#include "ACColorImageHistogram.h"
 #include "ACBWImageAnalysis.h"
 
 //#include "ACImagePlugin.h"
@@ -55,60 +56,29 @@ using namespace std;
 #include <math.h>
 
 string image_dir = "/Users/xavier/numediart/Project10.1-Borderlands/Images/";
-//string image_dir = "/Users/xavier/Pictures/letters/";
-//string image_dir = "/Users/xavier/Pictures/bw_tests/";
-//string image_dir = "/Users/xavier/Pictures/101_ObjectCategories/beaver/";
-string acl_dir = "/Users/xavier/Desktop/acl_tmp/";
 
-void testshapes(string sim1, string sim2){
-	string f1=image_dir+sim1;
-	string f2=image_dir+sim2;
-	ACColorImageAnalysis* Im1 = new ACColorImageAnalysis(f1);
-	ACColorImageAnalysis* Im2 = new ACColorImageAnalysis(f2);
-	Im1->computeHuMoments();
-	Im2->computeHuMoments();
-	delete Im1;
-	delete Im2;
-}
+//string image_file = "/Users/xavier/Pictures/artBDD/Image_BDD_Application/Cubism/426px-Mblanchard2.jpg";
+string image_file = "/Users/xavier/Pictures/color_tests/lena.tif";
 
 void testHuMoments(string sim1){
-//	string f1=image_dir+sim1;
 	ACBWImageAnalysis* Im1 = new ACBWImageAnalysis(sim1);
 	Im1->computeHuMoments();
 	Im1->dumpHuMoments(cout);
 	delete Im1;
 }
 
-void testgabor(string sim1, string sim2){
-	string f1=image_dir+sim1;
-	string f2=image_dir+sim2;
-	ACColorImageAnalysis* Im1 = new ACColorImageAnalysis(f1);
-	ACColorImageAnalysis* Im2 = new ACColorImageAnalysis(f2);
-	Im1->computeGaborMoments();
-	Im2->computeGaborMoments();
-	delete Im1;
-	delete Im2;
-}
-
-void testgabor1(string sim1){
-	string f1=image_dir+sim1;
-	ACColorImageAnalysis* Im1 = new ACColorImageAnalysis(f1);
-	Im1->showInNewWindow("Fabian");
-	cvWaitKey(0);
-	Im1->computeGaborMoments();
-	Im1->closeNewWindow("Fabian");
-	delete Im1;
-}
-
-void testcolor(string sim1){ //, string sim2){
-//	string f1=image_dir+sim1;
-//	string f2=image_dir+sim2;
+void testGaborMoments(string sim1){
 	ACColorImageAnalysis* Im1 = new ACColorImageAnalysis(sim1);
-//	ACColorImageAnalysis* Im2 = new ACColorImageAnalysis(f2);
-	Im1->computeColorMoments();
-//	Im2->computeColorMoments();
+	Im1->computeGaborMoments();
+	Im1->dumpGaborMoments(cout);
 	delete Im1;
-//	delete Im2;
+}
+
+void testColorMoments(string sim1){
+	ACColorImageAnalysis* Im1 = new ACColorImageAnalysis(sim1);
+	Im1->computeColorMoments();
+	Im1->dumpColorMoments(cout);
+	delete Im1;
 }
 
 void testFFT(string sim1){
@@ -153,18 +123,18 @@ void displayrect(){
 }
 
 // XS for cluster:
-void testoneimage(string sim1){
-	string f1=image_dir+sim1;
-	int tmp = 0;
-    tmp = sim1.find_last_of('.');
-	string f2=acl_dir+sim1.substr(0, tmp + 1)+"acl";
-	MediaCycle* mediacycle;
-	mediacycle = new MediaCycle(MEDIA_TYPE_IMAGE);
-	mediacycle->addPluginLibrary("/Users/xavier/development/Fall09/ticore-app/Applications/Numediart/MediaCycle/src/Builds/darwin-xcode/plugins/image/Debug/mc_image.dylib");
-	mediacycle->importDirectory(f1,0);
-	mediacycle->saveACLLibrary(f2);
-	delete mediacycle;
-}
+//void testoneimage(string sim1){
+//	string f1=image_dir+sim1;
+//	int tmp = 0;
+//    tmp = sim1.find_last_of('.');
+//	string f2=acl_dir+sim1.substr(0, tmp + 1)+"acl";
+//	MediaCycle* mediacycle;
+//	mediacycle = new MediaCycle(MEDIA_TYPE_IMAGE);
+//	mediacycle->addPluginLibrary("/Users/xavier/development/Fall09/ticore-app/Applications/Numediart/MediaCycle/src/Builds/darwin-xcode/plugins/image/Debug/mc_image.dylib");
+//	mediacycle->importDirectory(f1,0);
+//	mediacycle->saveACLLibrary(f2);
+//	delete mediacycle;
+//}
 
 int makeNumbered(string sdir, int n){
 	CvFont font;
@@ -200,12 +170,12 @@ void test_image_class(string sim1){
 	cvReleaseImage(&img);
 }
 
-void testLogPolar(string sim1){
-	string f1=image_dir+sim1;
-	ACBWImageAnalysis* Im1 = new ACBWImageAnalysis(f1);
-	Im1->showLogPolarInWindow("new");
-	delete Im1;
-}
+//void testLogPolar(string sim1){
+//	string f1=image_dir+sim1;
+//	ACBWImageAnalysis* Im1 = new ACBWImageAnalysis(f1);
+//	Im1->showLogPolarInWindow("new");
+//	delete Im1;
+//}
 
 void testFourierMellin(string sim1){
 	string f1=image_dir+sim1;
@@ -230,6 +200,26 @@ void test_import_directory(string dir1, string f2=""){
 	delete mediacycle;
 }
 
+// XS custom file names
+void test_multiple_import_normalize(){
+	MediaCycle* mediacycle;
+	mediacycle = new MediaCycle(MEDIA_TYPE_IMAGE);
+	mediacycle->addPluginLibrary("/Users/xavier/development/mediacycle-numediart/mediacycle/Builds/mac-10.5/plugins/image/Debug/mc_image.dylib");
+	mediacycle->importDirectory("/Users/xavier/Pictures/coil-100/images/obj100__0100.png",1);
+	mediacycle->importDirectory("/Users/xavier/Pictures/coil-100/images/obj100__0105.png",1);
+	mediacycle->saveXMLLibrary("/Users/xavier/tmp/f2.xml");
+	mediacycle->importDirectory("/Users/xavier/Pictures/coil-100/images/obj100__0110.png",1);
+	mediacycle->importDirectory("/Users/xavier/Pictures/coil-100/images/obj100__0115.png",1);
+	mediacycle->saveXMLLibrary("/Users/xavier/tmp/f4.xml");
+//	mediacycle->importDirectory("/Users/xavier/Pictures/coil-100/images/obj100__0120.png",1);
+//	mediacycle->importDirectory("/Users/xavier/Pictures/coil-100/images/obj100__0125.png",1);
+//	mediacycle->importDirectory("/Users/xavier/Pictures/coil-100/images/obj100__0130.png",1);
+//	mediacycle->importDirectory("/Users/xavier/Pictures/coil-100/images/obj100__0135.png",1);
+//	mediacycle->importDirectory("/Users/xavier/Pictures/coil-100/images/obj100__0140.png",1);	
+//	mediacycle->saveXMLLibrary("/Users/xavier/tmp/f2.xml");
+	delete mediacycle;
+}
+
 void testOpenCV_2_0(string sim1){
 	cout << "starting..." << endl;
 	cv::Mat Real = cv::imread(sim1,CV_LOAD_IMAGE_COLOR);
@@ -241,261 +231,75 @@ void testOpenCV_2_0(string sim1){
 }
 
 void testHoughLines(string sim1){
-	/* This is a standalone program. Pass an image name as a first parameter
-	 of the program.  Switch between standard and probabilistic Hough transform
-	 by changing "#if 1" to "#if 0" and back */
-	
-	cv::Mat src, dst, color_dst;
-	src=cv::imread(sim1, 0);	
-	cv::Canny( src, dst, 70, 230, 3);
-	cv::cvtColor( dst, color_dst, CV_GRAY2BGR );
-	
-//	vector<cv::Vec2f> lines;
-//	cv::HoughLines( dst, lines, 1, CV_PI/180, 100 );	
-//	for( size_t i = 0; i < lines.size(); i++ ){
-//		float rho = lines[i][0];
-//		float theta = lines[i][1];
-//		double a = cos(theta), b = sin(theta);
-//		double x0 = a*rho, y0 = b*rho;
-//		cv::Point pt1(cvRound(x0 + 1000*(-b)),
-//					  cvRound(y0 + 1000*(a)));
-//		cv::Point pt2(cvRound(x0 - 1000*(-b)),
-//					  cvRound(y0 - 1000*(a)));
-//		cv::line( color_dst, pt1, pt2, cv::Scalar(0,0,255), 3, 8 );
-//	}
-
-	vector<cv::Vec4i> lines;
-	cv::HoughLinesP( dst, lines, 1, CV_PI/180, 80, 30, 10 );
-	for( size_t i = 0; i < lines.size(); i++ )
-	{
-		line( color_dst, cv::Point(lines[i][0], lines[i][1]),
-			 cv::Point(lines[i][2], lines[i][3]), cv::Scalar(0,0,255), 2, 8 );
-	}
-
-	cv::namedWindow( "Source", 1 );
-	cv::imshow( "Source", src );
-	
-	cv::namedWindow( "Detected Lines", 1 );
-	cv::imshow( "Detected Lines", color_dst );
-	
-	cv::waitKey(0);
+	ACColorImageAnalysis Im(sim1);
+	Im.computeHoughLines();
 }
 
-
-// Search for objects such as faces in the image using the given parameters,
-// storing the multiple cv::Rects into 'objects'.
-// Can use Haar cascades or LBP cascades for Face Detection, or even eye, mouth, or car detection.
-void detectObjectsCustom(IplImage *img, cv::CascadeClassifier& cascade, float scale, vector<cv::Rect> &objects, int flags, CvSize minFeatureSize, float searchScaleFactor, int minNeighbors)
-{
-	IplImage *gray = 0;		// Assume it's not used, so it's not freed.
-	IplImage *smallImg = 0;	// Assume it's not used, so it's not freed.
-	IplImage *inputImg = img;	// Use the original image by default.
-	double t;
-	t = (double)cvGetTickCount();	// record the timing.
-	
-	// If the input image is color, convert it from color to greyscale.
-	if (img->nChannels >= 3)
-	{
-		gray = cvCreateImage( cvGetSize(img), 8, 1 );
-		cvCvtColor( img, gray, CV_BGR2GRAY );
-		inputImg = gray;	// use this new image.
-	}
-	
-	// Possibly shrink the image, to run faster.
-	if (scale < 0.9999f || scale > 1.0001f)
-	{
-		int smallWidth = cvRound(img->width/scale);
-		int smallHeight = cvRound(img->height/scale);
-		smallImg = cvCreateImage(cvSize(smallWidth, smallHeight), 8, 1);
-		cvResize( inputImg, smallImg, CV_INTER_LINEAR );
-		inputImg = smallImg;	// use this new image.
-	}
-	
-	// Standardize the brightness and contrast, so that dark images look better.
-	cvEqualizeHist( inputImg, inputImg );
-	
-	// Get a new OpenCV 2.0 C++ style image that references the same IplImage.
-	cv::Mat img2(inputImg);
-	
-	// Detect objects in the small greyscale image.
-	cascade.detectMultiScale( img2, objects, searchScaleFactor, minNeighbors, flags, minFeatureSize );
-	
-	// Resize the results if the image was temporarily scaled smaller
-	if (smallImg)
-	{
-		vector<cv::Rect>::iterator r;
-		for (r = objects.begin(); r != objects.end(); r++ )
-		{
-			r->x = cvRound(r->x * scale);
-			r->y = cvRound(r->y * scale);
-			r->width = cvRound(r->width * scale);
-			r->height = cvRound(r->height * scale);
-		}
-	}
-	
-	t = (double)cvGetTickCount() - t;
-	cout << "[Detected " << objects.size() << " objects in " << cvRound(t/((double)cvGetTickFrequency()*1000.0)) << " milliseconds]" << endl;
-	
-	// Free the C resources (but not the C++ resources).
-	if (gray)
-		cvReleaseImage(&gray);
-	if (smallImg)
-		cvReleaseImage(&smallImg);
-}
-
-// Search for many objects in the image, such as all the faces,
-// storing the results into 'objects' using the C++ style cv::Rect.
-// Can use Haar cascades or LBP cascades for Face Detection, or even eye, mouth, or car detection.
-// For Haar detectors, detectLargestObject() should be faster than detectManyObjects().
-void detectManyObjects( IplImage *img, cv::CascadeClassifier& cascade, float scale, vector<cv::Rect> &objects)
-{
-	// Search for many objects in the one image.
-	int flags = CV_HAAR_SCALE_IMAGE;
-	// Smallest object size (by default the size of the images it has been trained on)
-	CvSize minFeatureSize = cvSize(20, 20);
-	// How detailed should the search be. Must be larger than 1.0.
-	float searchScaleFactor = 1.2;
-	// How much the detections should be filtered out. This should depend on how bad false detections are to your system.
-	// minNeighbors=2 means lots of good+bad detections, and minNeighbors=6 means only good detections are given but some are missed.
-	int minNeighbors = 4;
-	
-	// Perform Object or Face Detection, looking for many objects in the one image.
-	detectObjectsCustom(img, cascade, scale, objects, flags, minFeatureSize, searchScaleFactor, minNeighbors);
-}
-
-// Search for just a single object in the image, such as the largest face.
-// storing the result into 'largestObject' using the C-style CvRect.
-// Can use Haar cascades or LBP cascades for Face Detection, or even eye, mouth, or car detection.
-// For Haar detectors, detectLargestObject() should be faster than detectManyObjects().
-void detectLargestObject( IplImage *img, cv::CascadeClassifier& cascade, float scale, CvRect &largestObject)
-{
-	// Only search for just 1 object (the biggest in the image).
-	int flags = CV_HAAR_FIND_BIGGEST_OBJECT | CV_HAAR_DO_ROUGH_SEARCH;
-	// Smallest object size.
-	CvSize minFeatureSize = cvSize(20, 20);
-	// How detailed should the search be. Must be larger than 1.0.
-	float searchScaleFactor = 1.1f;
-	// How much the detections should be filtered out. This should depend on how bad false detections are to your system.
-	// minNeighbors=2 means lots of good+bad detections, and minNeighbors=6 means only good detections are given but some are missed.
-	int minNeighbors = 4;
-	
-	// Perform Object or Face Detection, looking for just 1 object (the biggest in the image).
-	vector<cv::Rect> objects;
-	detectObjectsCustom(img, cascade, scale, objects, flags, minFeatureSize, searchScaleFactor, minNeighbors);
-	if (objects.size() > 0) {
-		// Return the only detected object.
-		largestObject = (CvRect)objects.at(0);
-	}
-	else
-	{
-		// Return an invalid rect.
-		largestObject = cvRect(-1,-1,-1,-1);
-	}
-}
-
-
-// Search for frontal faces in the image, drawing a rect or circle on the image
-// and storing the rects into 'faces'.
-// Can use Haar cascades or LBP cascades for Face Detection.
-void detectAndDrawFaces( IplImage *imgIn, IplImage *imgOut, cv::CascadeClassifier& cascade, float scale, vector<cv::Rect>& faces, CvScalar color, bool showRect)
-{
-	int thickness = 2;
-	
-	// Just search for a single face.
-	//CvRect rect;
-	//detectLargestObject( img, cascade, scale, rect );
-	//CvRect *r = &rect;
-	
-	// Do face detection
-	detectManyObjects( imgIn, cascade, scale, faces );
-	
-	// Loop through each of the detected faces, to display them.
-	for( vector<cv::Rect>::const_iterator r = faces.begin(); r != faces.end(); r++ )
-	{
-		if (showRect)
-		{
-			// Render a rectangle
-			CvPoint topleft, bottomright;
-			topleft.x = r->x;
-			topleft.y = r->y;
-			bottomright.x = r->x + r->width - 1;
-			bottomright.y = r->y + r->height - 1;
-			cvRectangle( imgOut, topleft, bottomright, color, thickness, CV_AA);	// Draw anti-aliased lines
-		}
-		else
-		{
-			// Render a circle
-			CvPoint center;
-			int radius;
-			center.x = r->x + cvRound(r->width/2.0f);
-			center.y = r->y + cvRound(r->height/2.0f);
-			radius = cvRound(r->width/2.0f);
-			cvCircle( imgOut, center, radius, color, thickness, CV_AA);	// Draw anti-aliased circles
-		}
-	}  
+void testHoughLinesP(string sim1){
+	ACColorImageAnalysis Im(sim1);
+	Im.computeHoughLinesP();
 }
 
 int testDetectFaces(string imageFile){
+	ACColorImageAnalysis im(imageFile);
 	string cascadeFileHaar = "/Users/xavier/numediart/Project14.5-DiskHover/tests/haarcascade_frontalface_alt.xml";
-	string cascadeFileLBP = "/Users/xavier/numediart/Project14.5-DiskHover/tests/lbpcascade_frontalface.xml";
+//	string cascadeFileLBP = "/Users/xavier/numediart/Project14.5-DiskHover/tests/lbpcascade_frontalface.xml";
+	im.computeNumberOfFaces(cascadeFileHaar);
+}
 
-	// How much to shrink the image before face detection.
-	// A value upto 1.3f will make it run faster and detect faces almost as reliably.
-	float scale = 1.0;
-	
-	cv::CascadeClassifier cascadeHaar;
-	cv::CascadeClassifier cascadeLBP;
-	vector<cv::Rect> faces;
-	cout << "Loading Haar classifier cascade: " << cascadeFileHaar << endl;
-	if( !cascadeHaar.load( cascadeFileHaar ) )
-	{
-		cerr << "ERROR: Could not load Haar classifier cascade: " << cascadeFileHaar << endl;
-		return -1;
-	}
-	// Load the Haar Face Detection Cascade Classifier.
-	cout << "Loading LBP classifier cascade: " << cascadeFileLBP << endl;
-	if( !cascadeLBP.load( cascadeFileLBP ) )
-	{
-		cerr << "ERROR: Could not load LBP classifier cascade: " << cascadeFileLBP << endl;
-		return -1;
-	}
+int test_histogram_0(string imageFile){
+	cv::Mat src, hsv; 
+	if( !(src=cv::imread(imageFile, 1)).data ) 
+		return -1; 
+	cv::cvtColor(src, hsv, CV_BGR2HSV);			
+	// Quantize the hue to 30 levels 
+	// and the saturation to 32 levels 
+	int hbins = 30, sbins = 32; 
+	int histSize[] = {hbins, sbins}; 
+	// hue varies from 0 to 179, see cvtColor 
+	float hranges[] = { 0, 180 }; 
+	// saturation varies from 0 (black-gray-white) to 
+	// 255 (pure spectrum color) 
+	float sranges[] = { 0, 256 }; 
+	const float* ranges[] = { hranges, sranges }; 
+	cv::MatND hist; 
+	// we compute the histogram from the 0-th and 1-st channels 
+	int channels[] = {0, 1}; 
+	cv::calcHist( &hsv, 1, channels, cv::Mat(), // do not use mask 
+				 hist, 2, histSize, ranges, 
+				 true, // the histogram is uniform 
+				 false ); 
+	double maxVal=0; 
+	cv::minMaxLoc(hist, 0, &maxVal, 0, 0); 
+	int scale = 10; 
+	cv::Mat histImg = cv::Mat::zeros(sbins*scale, hbins*10, CV_8UC3); 
+	for( int h = 0; h < hbins; h++ ) 
+		for( int s = 0; s < sbins; s++ ) 
+		{ 
+			float binVal = hist.at<float>(h, s); 
+			int intensity = cvRound(binVal*255/maxVal); 
+			cv::rectangle( histImg, cv::Point(h*scale, s*scale), 
+						  cv::Point( (h+1)*scale - 1, (s+1)*scale - 1), 
+						  cv::Scalar::all(intensity), 
+						  CV_FILLED ); 
+		} 
+	cv::namedWindow( "Source", 1 ); 
+	cv::imshow( "Source", src ); 
+	cv::namedWindow( "H-S Histogram", 1 ); 
+	cv::imshow( "H-S Histogram", histImg ); 
+	cv::waitKey(); 
+}
 
-	// Create a GUI Window
-	char *title = "FaceDetector";
-	cvNamedWindow( title, 1 );
-	
-	// Load the image file.
-	cout << "Loading image file: " << imageFile << endl;
-	IplImage *imageOriginal = cvLoadImage( imageFile.c_str(), 1 );
-	if( !imageOriginal ) {
-		cerr << "ERROR: couldnt load image file: " << imageFile << endl;
-		return -1;
-	}
-	IplImage *imageOut = cvCloneImage(imageOriginal);
-	
-	// Show the Haar detected faces as blue circles.
-	cout << endl;
-	cout << "Detecting faces in the image using the Haar-detector ..." << endl;
-	detectAndDrawFaces( imageOriginal, imageOut, cascadeHaar, scale, faces, CV_RGB(0,0,255), false );
-
-	cout << "Haar-detector found " << faces.size() << " faces in the image (blue circles)." << endl;
-	
-	// Show the LBP detected faces as green squares.
-	cout << endl;
-	cout << "Detecting faces in the image using the LBP-detector ..." << endl;
-	detectAndDrawFaces( imageOriginal, imageOut, cascadeLBP, scale, faces, CV_RGB(0,255,0), true );
-	cout << "LBP-detector found " << faces.size() << " faces in the image (green squares)." << endl;
-	
-	// Display the data
-	cvShowImage( title, imageOut );
-	cout << "Press any key in the window to continue ..." << endl;
-	cvWaitKey(0);
-	
-	// Close the GUI window.
-	cvDestroyWindow(title);
-	cvReleaseImage(&imageOriginal);
-	cvReleaseImage(&imageOut);
-	
+void test_histogram(string imageFile){
+	ACColorImageAnalysis* im = new ACColorImageAnalysis(imageFile);
+	//im->showInWindow("input");
+	ACColorImageHistogram* hist = new ACColorImageHistogram(im);
+	hist->dump();
+	hist->computeMoments(4);
+	hist->showStats();
+	hist->show();
+	delete hist;
+	delete im;
 }
 
 int main(int argc, char** argv) {
@@ -513,94 +317,29 @@ int main(int argc, char** argv) {
 	
 	return 0;
 	cout << "Using Opencv " << CV_VERSION << "(" << CV_MAJOR_VERSION << "." << CV_MINOR_VERSION  << "." <<  CV_SUBMINOR_VERSION << ")" << endl;	
-	// testshapes("beaver/image_0001.jpg", "beaver/image_0012.jpg");
-	// testgabor ("beaver/image_0001.jpg", "beaver/image_0012.jpg");
-	// testcolor ("beaver/image_0001.jpg", "beaver/image_0012.jpg");
 
-	// displayrect();
-	// testgabor1("/Users/xavier/Desktop/Images-Fabian/C00428-sm.tif");
-	for (int i=0; i<argc; i++){
-		cout << argv[i] << endl;
-	}
-	if (argc==2) {
-		//testHoughLines(argv[1]);
-		testDetectFaces(argv[1]);
-	}
-	else if (argc==3){
-		cout << "opening directory" << argv[1] << endl;
-		test_import_directory(argv[1], argv[2]);
-		cout << "saved file" << argv[2] << endl;
-	}
-	
-	
-	
-//	displayrect();
+//	test_histogram(image_file);
+//	test_multiple_import_normalize();
+//	testColorMoments(image_file);
+	testHuMoments(image_file);
+//	testGaborMoments(image_file);
+//	testHoughLines(image_file);
+//	testHoughLinesP(image_file);
+//	testDetectFaces(image_file);
 
-//		cout << "-------- M ------------" << endl;
-// 		testFFT ("M.png");
-//		cout << "-------- Mt ------------" << endl;
-//		testFFT  ("Mt.png");
-
-//		cout << "-------- W ------------" << endl;
-// 		testFourierMellin ("W.png");
-//		cout << "-------- M90 ------------" << endl;
-// 		testFourierMellin ("M90.png");
-//		cout << "-------- W90 ------------" << endl;
-// 		testFourierMellin ("W90.png");
-//		cout << "-------- I ------------" << endl;
-//		testFourierMellin ("I.png");
-//		cout << "-------- A ------------" << endl;
-//		testFourierMellin ("A.png");
-//		cout << "-------- O ------------" << endl;
-//		testFourierMellin ("O.png");
-//		cout << "-------- Ot ------------" << endl;
-// 		testFourierMellin ("Ot.png");
-//		cout << "-------- Or ------------" << endl;
-// 		testFourierMellin ("Or.png");
-//		cout << "-------- Os ------------" << endl;
-// 		testFourierMellin ("Os.png");
-		
-//		testFFT ("10151-100-flipV.jpg");
-
-//		cout << "-------- 10151-100 ------------" << endl;
-// 		testFourierMellin ("10151-100.png");
-//		cout << "-------- 10151-250 ------------" << endl;
-// 		testFourierMellin ("10151-250.png");
-//		cout << "-------- 10151-450 ------------" << endl;
-// 		testFourierMellin ("10151-450.png");
-//		cout << "-------- 10151-500 ------------" << endl;
-// 		testFourierMellin ("10151-500.png");
-//		cout << "-------- 10151-600 ------------" << endl;
-// 		testFourierMellin ("10151-600.png");
-//		cout << "-------- 10151-750 ------------" << endl;
-// 		testFourierMellin ("10151-750.png");
-//		cout << "-------- 10151-950 ------------" << endl;
-// 		testFourierMellin ("10151-950.png");
-//		cout << "-------- 10151-1100 ------------" << endl;
-// 		testFourierMellin ("10151-1100.png");
-		
-//		testMakePGM ("M90.png");
-//		testMakePGM ("W90.png");
-		
-//		cout << "-------- Ot ------------" << endl;
-//		testFFT ("Ot.png");
-//		cout << "-------- Olittle ------------" << endl;
-//		testFFT ("Olittle.png");
-//		cout << "-------- Os ------------" << endl;
-//		testFFT ("Os.png");
-//		cout << "-------- I ------------" << endl;
-//		testFFT("I.png");
-
-//		testFFT("lena_bw.png");
-//		testFFT("10151_F288.png");
-//		testHuMoments("A.png");
-//		testHuMoments("I.png");
-//		testHuMoments("O.png");
-//		testHuMoments("O2.png");
-//		testHuMoments("Ot.png");
-//		testHuMoments("Os.png");
-//		testHuMoments("M.png");
+//	for (int i=0; i<argc; i++){
+//		cout << argv[i] << endl;
 //	}
+//	if (argc==2) {
+//		testHoughLines(argv[1]);
+//		//testDetectFaces(argv[1]);
+//	}
+//	else if (argc==3){
+//		cout << "opening directory" << argv[1] << endl;
+//		test_import_directory(argv[1], argv[2]);
+//		cout << "saved file" << argv[2] << endl;
+//	}
+	
 	return (EXIT_SUCCESS);
 }
 

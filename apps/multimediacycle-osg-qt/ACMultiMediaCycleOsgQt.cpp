@@ -121,6 +121,7 @@ ACMultiMediaCycleOsgQt::ACMultiMediaCycleOsgQt(QWidget *parent) : QMainWindow(pa
 		this->audio_engine = 0;
 	#endif //defined (SUPPORT_AUDIO)
 
+	
 	this->use_segmentation_default = true;
 	this->use_segmentation_current = true;
 	this->use_feature_extraction = true;
@@ -642,6 +643,7 @@ void ACMultiMediaCycleOsgQt::on_actionEdit_Config_File_triggered(bool checked){
 	settingsDialog->setFocus();
 }
 
+// XS TODO clean this !!
 bool ACMultiMediaCycleOsgQt::addControlDock(ACAbstractDockWidgetQt* dock)
 {
 	if (dock == 0){

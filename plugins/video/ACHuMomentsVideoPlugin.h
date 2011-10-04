@@ -41,17 +41,14 @@
 #include <ACMediaFeatures.h>
 #include <ACMediaTimedFeature.h>
 
-class ACHuMomentsVideoPlugin : public ACFeaturesPlugin {
+class ACHuMomentsVideoPlugin : public ACTimedFeaturesPlugin {
 public:
     ACHuMomentsVideoPlugin();
     ~ACHuMomentsVideoPlugin();
 //	std::vector<ACMediaFeatures*> calculate(std::string aFileName, bool _save_timed_feat=false);
 	std::vector<ACMediaFeatures*> calculate(ACMediaData* _data, ACMedia*, bool _save_timed_feat=false);
-	std::string getSavedFileName(){return mtf_file_name;}
-	ACMediaTimedFeature* getTimedFeatures();
 private:
 	std::vector<ACMediaFeatures*> _calculate(std::string aFileName="", bool _save_timed_feat=false);
-	std::string mtf_file_name; // file in which features have been saved	
 };
 
 #endif	/* _ACHUMOMENTSVIDEOPLUGIN_H */

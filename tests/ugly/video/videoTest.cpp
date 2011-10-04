@@ -455,27 +455,28 @@ void test_video_similarity_fm(std::string full_video_path1, std::string full_vid
 	delete V2;
 }
 
-void test_video_similarity_histogram(std::string full_video_path1, std::string full_video_path2){
-	ACVideoAnalysis* V1 = new ACVideoAnalysis(full_video_path1);
-	ACVideoAnalysis* V2 = new ACVideoAnalysis(full_video_path2);
-
-	V1->computeImageHistograms();
-	V2->computeImageHistograms();
-	std::vector< vector<float> > I1 = V1->getImageHistograms();
-	std::vector< vector<float> > I2 = V2->getImageHistograms();
-	
-	ACMediaTimedFeature *trajectory_mtf1 = new ACMediaTimedFeature(V1->getDummyTimeStamps(I1.size()), I1, "test_hist");
-	ACMediaTimedFeature *trajectory_mtf2 = new ACMediaTimedFeature(V2->getDummyTimeStamps(I2.size()), I2, "test_hist");
-
-	fmat toto = trajectory_mtf1->similarity(trajectory_mtf2);
-	toto.save("/Users/xavier/numediart/Project10.1-Borderlands/work/10151-20102-sim-histo.txt", arma_ascii);
-
-	delete trajectory_mtf1;	
-	delete trajectory_mtf2;		
-
-	delete V1;
-	delete V2;
-}
+//XS TODO port 2.*
+//void test_video_similarity_histogram(std::string full_video_path1, std::string full_video_path2){
+//	ACVideoAnalysis* V1 = new ACVideoAnalysis(full_video_path1);
+//	ACVideoAnalysis* V2 = new ACVideoAnalysis(full_video_path2);
+//
+//	V1->computeImageHistograms();
+//	V2->computeImageHistograms();
+//	std::vector< vector<float> > I1 = V1->getImageHistograms();
+//	std::vector< vector<float> > I2 = V2->getImageHistograms();
+//	
+//	ACMediaTimedFeature *trajectory_mtf1 = new ACMediaTimedFeature(V1->getDummyTimeStamps(I1.size()), I1, "test_hist");
+//	ACMediaTimedFeature *trajectory_mtf2 = new ACMediaTimedFeature(V2->getDummyTimeStamps(I2.size()), I2, "test_hist");
+//
+//	fmat toto = trajectory_mtf1->similarity(trajectory_mtf2);
+//	toto.save("/Users/xavier/numediart/Project10.1-Borderlands/work/10151-20102-sim-histo.txt", arma_ascii);
+//
+//	delete trajectory_mtf1;	
+//	delete trajectory_mtf2;		
+//
+//	delete V1;
+//	delete V2;
+//}
 
 
 void test_show_fft(std::string full_video_path){
@@ -595,12 +596,12 @@ bool test_video_width_height(string s){
 	return ok;
 }
 
-#if CV_MIN_VERSION_REQUIRED(2,3,1)
+#if CV_MIN_VERSION_REQUIRED(2,3,0)
 bool test_global_orientation(string s){
 	ACVideoAnalysis cap(s); 
 	cap.computeGlobalOrientation();
 }
-#endif //CV_MIN_VERSION_REQUIRED(2,3,1)
+#endif //CV_MIN_VERSION_REQUIRED(2,3,0)
 
 void test_xml2acl(string s){
 	MediaCycle* mediacycle;
@@ -844,9 +845,9 @@ int main(int argc, char** argv) {
 //	test_blobs(video_test_file);
 
 // VISUAL TEST 5 : global orientation in a video
-	#if CV_MIN_VERSION_REQUIRED(2,3,1)
+	#if CV_MIN_VERSION_REQUIRED(2,3,0)
 	test_global_orientation(video_test_file);
-	#endif //CV_MIN_VERSION_REQUIRED(2,3,1)
+	#endif //CV_MIN_VERSION_REQUIRED(2,3,0)
 // VISUAL TEST 6 : video read/write
 //	test_video_read_write(video_test_file,tmp_video_file_out);
 

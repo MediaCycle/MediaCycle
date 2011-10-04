@@ -34,7 +34,7 @@
 
 #include "ACVideoMotionOrientationPlugin.h"
 
-#if CV_MIN_VERSION_REQUIRED(2,3,1)
+#if CV_MIN_VERSION_REQUIRED(2,3,0)
 
 #include<iostream>
 using namespace std;
@@ -109,4 +109,4 @@ std::vector<ACMediaFeatures*> ACVideoMotionOrientationPlugin::calculate(ACMediaD
 	return videoFeatures;
 	
 }
-#endif //CV_MIN_VERSION_REQUIRED(2,3,1)
+#endif //CV_MIN_VERSION_REQUIRED(2,3,0)

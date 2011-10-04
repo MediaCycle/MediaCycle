@@ -109,8 +109,9 @@ public:
 	void computeHuMoments(int tresh=0, cv::Mat bg_img=cv::Mat()); // with background subtraction
 	void computeFourierPolarMoments(int RadialBins=5, int AngularBins=8); // without background subtraction
 	void computeFourierMellinMoments(); // without background subtraction
-	void computeImageHistograms(int w=10, int h=10); // image histogram, turned into a 1D vector
-	#if CV_MIN_VERSION_REQUIRED(2,3,1)
+	// XS TODO port 2.*
+//	void computeImageHistograms(int w=10, int h=10); // image histogram, turned into a 1D vector
+	#if CV_MIN_VERSION_REQUIRED(2,3,0)
 	void computeGlobalOrientation();
 	#endif
 	// features manipulation

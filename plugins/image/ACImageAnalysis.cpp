@@ -45,12 +45,12 @@ using namespace std;
 
 //const double PI = 4 * std::atan(1);
 
-const int ACImageAnalysis::standard_width = 0; // 16 ?
-const int ACImageAnalysis::standard_height = 0;
+const int ACImageAnalysis::standard_width = 640; //320;
+const int ACImageAnalysis::standard_height = 480; //240;
 
 // ----------- uncomment this to get visual display using highgui and verbose -----
-#define VISUAL_CHECK
-#define VERBOSE
+//#define VISUAL_CHECK
+//#define VERBOSE
 
 
 ACImageAnalysis::ACImageAnalysis(){
@@ -61,53 +61,47 @@ void ACImageAnalysis::setFileName(const string &filename){
 	file_name=filename;	
 }
 
-// returns 1 if it worked, 0 if not
-// original image (imgp_full) reduced to imgp and destroyed
+// returns true if it worked, false if not
+// original image (imgp_full_map) reduced to imgp_map according to scale 
+// (=> use a size appropriate for analysis, not necessarily the full-scale image)
 // works whatever color code, whatever nchannels
-int ACImageAnalysis::scaleImage(IplImage* imgp_full, float _scale){
-	try {
-		if (!imgp_full) {
-			cerr << "Check file name : " << file_name << endl;
-			throw(string(" <ACImageAnalysis::scaleImage> : not a valid image !"));
-		}
+bool ACImageAnalysis::scaleImage(const cv::Mat& imgp_full_mat, const float _scale){
+	if (!imgp_full_mat.data) {
+		cerr << "<ACImageAnalysis::scaleImage> : not a valid image !" << endl;
+		cerr << "Check file name : " << file_name << endl;
+		return false;
 	}
-	catch (const string& not_image_file) {
-		cerr << not_image_file << endl;
-		return 0;
-	}
-	
-	// nothing to do, just set scale parameter to 1
-	if (_scale = 1.0) {
-		scale = 1.0;
-		imgp=cvCloneImage(imgp_full);
-		check_imgp(); 
-		return 1;
-	}
-	// scale < 0 = automatically rescale image to standard size (const)
-	else if (_scale <= 0.0 && standard_width !=0 && standard_height !=0 )
-		scale = sqrt (standard_width * standard_height * 1.0 / (original_width * original_height));
-	else
-		// scale is specified and > 0, then use it (i.e. overwrites standard size)
-		scale = _scale;
 	
 	// keep original size (for records, it's not really used)
-	original_width = imgp_full->width;
-	original_height = imgp_full->height;
+	original_width = imgp_full_mat.cols;
+	original_height = imgp_full_mat.rows;
 	
-	imgp = cvCreateImage(cvSize (scale*original_width, scale*original_height), imgp_full->depth, imgp_full->nChannels);
-	cvResize(imgp_full, imgp, CV_INTER_CUBIC);
-	check_imgp(); 
-	return 1;
+	if (_scale <= 0.0){
+		if (standard_width !=0 && standard_height !=0 )
+			// scale < 0 = automatically rescale image to standard size (const)
+			scale = sqrt (standard_width * standard_height * 1.0 / (original_width * original_height));
+		else
+			scale = 1.0;
+	}
+	else if (_scale == 1.0 || scale == 1.0) {
+		// nothing to do, just set scale parameter to 1
+		scale = 1.0;
+		imgp_full_mat.copyTo(imgp_mat);
+		return check_imgp_mat(); 
+	}
+	else{
+		// scale is specified and > 0, then use it (i.e. overwrites standard size)
+		scale = _scale;
+	}
 	
-	// old comment, keep an eye on it:
-	// SD TODO - This is stange cvCreateImage creates image with as a widthStep of 152
-	// imgp->widthStep = imgp->width * imgp->nChannels;
-	// imgp->imageSize = imgp->width * imgp->height * imgp->nChannels;
+//	cout << "new scale = " << scale << endl;
+	cv::resize(imgp_full_mat, imgp_mat, cv::Size (scale*original_width, scale*original_height), 0, 0, CV_INTER_CUBIC);
+	return check_imgp_mat(); 
 }
 
 void ACImageAnalysis::check_imgp(){
 	try {
-		if (!imgp) throw(string(" < ACImageAnalysis::check_imgp error> : not a valid image !"));
+		if (!imgp_mat.data) throw(string(" < ACImageAnalysis::check_imgp error> : not a valid image !"));
 	}
 	catch (const string& not_image_file) {
 		cerr << not_image_file << endl;
@@ -115,32 +109,76 @@ void ACImageAnalysis::check_imgp(){
 	}
 }
 
+// checks if the image data is not empty
+bool ACImageAnalysis::check_imgp_mat(){
+	bool ok = true;
+	if (!imgp_mat.data){
+		cerr << "<ACImageAnalysis::check_imgp error> : not a valid image !" << endl;
+		ok = false;
+	}
+	return ok;
+}
+
 int ACImageAnalysis::getWidth() {
-	if (imgp == 0) return 0;
-	return imgp->width;
+	return this->getCols();
 }
 
 int ACImageAnalysis::getHeight() {
-	if (imgp == 0) return 0;
-	return imgp->height;
+	return this->getRows();
+}
+
+int ACImageAnalysis::getCols() {
+	if (!imgp_mat.data) return 0;
+	return imgp_mat.cols;
+}
+
+int ACImageAnalysis::getRows() {
+	if (!imgp_mat.data) return 0;
+	return imgp_mat.rows;
 }
 
 int ACImageAnalysis::getDepth() {
-	if (imgp == 0) return 0;
-	return imgp->depth;
+	if (!imgp_mat.data) return 0;
+	return imgp_mat.depth();
+}
+
+cv::Size ACImageAnalysis::getSize(){
+	if (!imgp_mat.data)
+		return cv::Size(0,0);
+	return imgp_mat.size();
+
 }
 
 int ACImageAnalysis::getNumberOfChannels(){	
-	if (imgp == 0) return 0;
-	return imgp->nChannels;
+	if (!imgp_mat.data) return 0;
+	return imgp_mat.channels();
 }
 
 // ------------------ I/O  -----------------
 // XS better: make a class for vector<float> with a >> method ?
 void ACImageAnalysis::dumpHuMoments(ostream &odump) {
+	cout << "Hu moments for image " << this->getFileName() << endl;
 	for (int i = 0; i < int(hu_moments.size()); i++){
 		odump << setw(10);
 		odump << hu_moments[i];
+	}
+	odump << endl;
+}
+
+void ACImageAnalysis::dumpGaborMoments(ostream &odump) {
+	cout << "Gabor moments for image " << this->getFileName() << endl;
+	for (int i = 0; i < int(gabor_moments.size()); i++){
+		odump << setw(10);
+		odump << gabor_moments[i];
+	}
+	odump << endl;
+}
+
+void ACImageAnalysis::dumpColorMoments(ostream &odump) {
+	cout << "Color moments for image " << this->getFileName() << endl;
+	for (int i = 0; i < int(color_moments.size()); i++){
+		odump << setw(10);
+		odump << color_moments[i];
 	}
 	odump << endl;
 }
@@ -180,12 +218,12 @@ void ACImageAnalysis::dumpFourierMellinMoments(ostream &odump) {
 // ------------------ visual output  -----------------
 
 void ACImageAnalysis::showInWindow(const std::string title){
-    cvShowImage(title.c_str(), imgp);
+	cv::imshow(title.c_str(), imgp_mat);
 }
 
 void ACImageAnalysis::showInNewWindow(const std::string title){
-	cvNamedWindow(title.c_str(), CV_WINDOW_AUTOSIZE);
-    cvShowImage(title.c_str(), imgp);
+	cv::namedWindow(title.c_str(), CV_WINDOW_AUTOSIZE);
+    cv::imshow(title.c_str(), imgp_mat);
 }
 
 void ACImageAnalysis::closeNewWindow(const std::string title){
@@ -193,10 +231,9 @@ void ACImageAnalysis::closeNewWindow(const std::string title){
 }
 
 bool ACImageAnalysis::saveInFile (string filename){
-	if(imgp == 0) return false;
-	const char *filename_char = filename.c_str();
+	if(!imgp_mat.data) return false;
 	bool ok = false;
-	if( cvSaveImage(filename_char, imgp )) {
+	if( cv::imwrite(filename, imgp_mat )) {
 		cout << filename << " has been written successfully." << endl;
 		ok = true;	
 	}

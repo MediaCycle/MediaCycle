@@ -130,6 +130,7 @@ bool ACVideo::computeThumbnail(int w, int h){
 		cout <<"<ACVideo::computeThumbnail> using OSG plugin: "<< readerWriter->className() <<std::endl;
 	}	
 
+	// XS TODO we "re-compute" thumbnail here...
 	osg::ref_ptr<osg::Image> thumbnail = osgDB::readImageFile(filename);
 	// XS TODO : needs rescaling !!
 	//thumbnail->scaleImage(thumbnail_width,thumbnail_height,1);

@@ -450,7 +450,7 @@ vector<ACMediaFeatures*> ACActiveFeaturesPlugins::calculate(ACMediaData* aData, 
 	
 }
 
-
+// XS TODO check with TR
 ACMediaTimedFeature*  ACActiveFeaturesPlugins::getTimedFeatures(ACMediaType mediaType){
 	ACMediaTimedFeature* output = 0;
 	vector<ACFeaturesPlugin *> ::iterator iter_vec = mCurrPlugin[mediaType].begin();
@@ -588,7 +588,7 @@ void ACActivePlugins<T>::log()
 {
 	for (typename map<ACMediaType,std::vector<T *> > ::iterator iter_map = this->mCurrPlugin.begin(); iter_map != this->mCurrPlugin.end(); iter_map++) {
 		for (typename vector<T *> ::iterator iter_vec = iter_map->second.begin(); iter_vec != (*iter_map).second.end(); iter_vec++) {
-			cout << "active plugin for type media" <<"\t"<<((ACPlugin*)(*iter_vec))->getName() <<"\n";
+			cout << "active plugin for type media " << iter_map->first << "\t"<<((ACPlugin*)(*iter_vec))->getName() <<"\n";
 		}
 	}
 }

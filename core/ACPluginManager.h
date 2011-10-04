@@ -119,6 +119,8 @@ public:
 	
 //	std::vector<ACMediaFeatures*> calculate(std::string aFileName, bool _save_timed_feat=false );
 	std::vector<ACMediaFeatures*> calculate(ACMediaData* aData, ACMedia* theMedia, bool _save_timed_feat=false);	
+
+	// XS check this one !!
 	ACMediaTimedFeature* getTimedFeatures(ACMediaType mediaType);
 	
 	
