@@ -89,155 +89,13 @@ using namespace std;
 
 #include "ACMediaFactory.h"
 
-/// List of known media file extensions associated to MediaCycle media types.
-/// We can complement them by checking the list of unchecked media file extensions
-const filext::value_type _init[] = {
-	// from http://www.openscenegraph.org/projects/osg/wiki/Support/UserGuides/Plugins
-	filext::value_type(".3dc", MEDIA_TYPE_3DMODEL), \
-	filext::value_type(".3ds", MEDIA_TYPE_3DMODEL), \
-	filext::value_type(".ac", MEDIA_TYPE_3DMODEL), \
-	filext::value_type(".asc", MEDIA_TYPE_3DMODEL), \
-	filext::value_type(".bsp", MEDIA_TYPE_3DMODEL), \
-	filext::value_type(".dae", MEDIA_TYPE_3DMODEL), \
-	filext::value_type(".dw", MEDIA_TYPE_3DMODEL), \
-	filext::value_type(".dxf", MEDIA_TYPE_3DMODEL), \
-	filext::value_type(".fbx", MEDIA_TYPE_3DMODEL), \
-	filext::value_type(".flt", MEDIA_TYPE_3DMODEL), \
-	filext::value_type(".geo", MEDIA_TYPE_3DMODEL), \
-	filext::value_type(".gem", MEDIA_TYPE_3DMODEL), \
-	filext::value_type(".iv", MEDIA_TYPE_3DMODEL), \
-	filext::value_type(".ive", MEDIA_TYPE_3DMODEL), \
-	filext::value_type(".logo", MEDIA_TYPE_3DMODEL), \
-	filext::value_type(".lw", MEDIA_TYPE_3DMODEL), \
-	filext::value_type(".lwo", MEDIA_TYPE_3DMODEL), \
-	filext::value_type(".lws", MEDIA_TYPE_3DMODEL), \
-	filext::value_type(".md2", MEDIA_TYPE_3DMODEL), \
-	filext::value_type(".obj", MEDIA_TYPE_3DMODEL), \
-	filext::value_type(".ogr", MEDIA_TYPE_3DMODEL), \
-	filext::value_type(".osg", MEDIA_TYPE_3DMODEL), \
-	filext::value_type(".shp", MEDIA_TYPE_3DMODEL), \
-	filext::value_type(".sta", MEDIA_TYPE_3DMODEL), \
-	filext::value_type(".stl", MEDIA_TYPE_3DMODEL), \
-	filext::value_type(".wrl", MEDIA_TYPE_3DMODEL), \
-	filext::value_type(".x", MEDIA_TYPE_3DMODEL), \
-
-	// from http://www.openscenegraph.org/projects/osg/wiki/Support/UserGuides/Plugins
-	filext::value_type(".bmp", MEDIA_TYPE_IMAGE), \
-	filext::value_type(".bmpf", MEDIA_TYPE_IMAGE), \
-	filext::value_type(".bw", MEDIA_TYPE_IMAGE), \
-	filext::value_type(".cr2", MEDIA_TYPE_IMAGE), \
-	filext::value_type(".crw", MEDIA_TYPE_IMAGE), \
-	filext::value_type(".cur", MEDIA_TYPE_IMAGE), \
-	filext::value_type(".dcr", MEDIA_TYPE_IMAGE), \
-	filext::value_type(".dds", MEDIA_TYPE_IMAGE), \
-	filext::value_type(".dng", MEDIA_TYPE_IMAGE), \
-	filext::value_type(".epi", MEDIA_TYPE_IMAGE), \
-	filext::value_type(".eps", MEDIA_TYPE_IMAGE), \
-	filext::value_type(".epsf", MEDIA_TYPE_IMAGE), \
-	filext::value_type(".epsi", MEDIA_TYPE_IMAGE), \
-	filext::value_type(".exr", MEDIA_TYPE_IMAGE), \
-	filext::value_type(".fpx", MEDIA_TYPE_IMAGE), \
-	filext::value_type(".fpxi", MEDIA_TYPE_IMAGE), \
-	filext::value_type(".gif", MEDIA_TYPE_IMAGE), \
-	filext::value_type(".hdr", MEDIA_TYPE_IMAGE), \
-	filext::value_type(".icns", MEDIA_TYPE_IMAGE), \
-	filext::value_type(".ico", MEDIA_TYPE_IMAGE), \
-	filext::value_type(".int", MEDIA_TYPE_IMAGE), \
-	filext::value_type(".inta", MEDIA_TYPE_IMAGE), \
-	filext::value_type(".jp2", MEDIA_TYPE_IMAGE), \
-	filext::value_type(".jpc", MEDIA_TYPE_IMAGE), \
-	filext::value_type(".jpe", MEDIA_TYPE_IMAGE), \
-	filext::value_type(".jpeg", MEDIA_TYPE_IMAGE), \
-	filext::value_type(".jpg", MEDIA_TYPE_IMAGE), \
-	filext::value_type(".jps", MEDIA_TYPE_IMAGE), \
-	filext::value_type(".mac", MEDIA_TYPE_IMAGE), \
-	filext::value_type(".mrw", MEDIA_TYPE_IMAGE), \
-	filext::value_type(".nef", MEDIA_TYPE_IMAGE), \
-	filext::value_type(".orf", MEDIA_TYPE_IMAGE), \
-	filext::value_type(".pct", MEDIA_TYPE_IMAGE), \
-	filext::value_type(".pic", MEDIA_TYPE_IMAGE), \
-	filext::value_type(".pict", MEDIA_TYPE_IMAGE), \
-	filext::value_type(".pbm", MEDIA_TYPE_IMAGE), \
-	filext::value_type(".pgm", MEDIA_TYPE_IMAGE), \
-	filext::value_type(".png", MEDIA_TYPE_IMAGE), \
-	filext::value_type(".pnm", MEDIA_TYPE_IMAGE), \
-	filext::value_type(".pnt", MEDIA_TYPE_IMAGE), \
-	filext::value_type(".ppm", MEDIA_TYPE_IMAGE), \
-	filext::value_type(".psd", MEDIA_TYPE_IMAGE), \
-	filext::value_type(".ptng", MEDIA_TYPE_IMAGE), \
-	filext::value_type(".qti", MEDIA_TYPE_IMAGE), \
-	filext::value_type(".qtif", MEDIA_TYPE_IMAGE), \
-	filext::value_type(".raf", MEDIA_TYPE_IMAGE), \
-	filext::value_type(".raw", MEDIA_TYPE_IMAGE), \
-	filext::value_type(".rgb", MEDIA_TYPE_IMAGE), \
-	filext::value_type(".rgba", MEDIA_TYPE_IMAGE), \
-	filext::value_type(".sgi", MEDIA_TYPE_IMAGE), \
-	filext::value_type(".srf", MEDIA_TYPE_IMAGE), \
-	filext::value_type(".targa", MEDIA_TYPE_IMAGE), \
-	filext::value_type(".tga", MEDIA_TYPE_IMAGE), \
-	filext::value_type(".tif", MEDIA_TYPE_IMAGE), \
-	filext::value_type(".tiff", MEDIA_TYPE_IMAGE), \
-	filext::value_type(".xbm", MEDIA_TYPE_IMAGE), \
-
-	// from http://www.openscenegraph.org/projects/osg/wiki/Support/UserGuides/Plugins
-	// and OSG 2.9.11
-	filext::value_type(".3gp", MEDIA_TYPE_VIDEO), \
-	filext::value_type(".avi", MEDIA_TYPE_VIDEO), \
-	filext::value_type(".ffmpeg", MEDIA_TYPE_VIDEO), \
-	filext::value_type(".flv", MEDIA_TYPE_VIDEO), \
-	filext::value_type(".m4v", MEDIA_TYPE_VIDEO), \
-	filext::value_type(".mjpeg", MEDIA_TYPE_VIDEO), \
-	filext::value_type(".mkv", MEDIA_TYPE_VIDEO), \
-	filext::value_type(".mov", MEDIA_TYPE_VIDEO), \
-	filext::value_type(".mp4", MEDIA_TYPE_VIDEO), \
-	filext::value_type(".mpeg", MEDIA_TYPE_VIDEO), \
-	filext::value_type(".mpg", MEDIA_TYPE_VIDEO), \
-	filext::value_type(".mpv", MEDIA_TYPE_VIDEO), \
-//	filext::value_type(".ogg", MEDIA_TYPE_VIDEO), \ //can be, but *.ogg audio files are more frequent
-	filext::value_type(".sav", MEDIA_TYPE_VIDEO), \
-	filext::value_type(".sdp", MEDIA_TYPE_VIDEO), \
-	filext::value_type(".swf", MEDIA_TYPE_VIDEO), \
-	filext::value_type(".wmv", MEDIA_TYPE_VIDEO), \
-	filext::value_type(".xine", MEDIA_TYPE_VIDEO), \
-	filext::value_type(".xvid", MEDIA_TYPE_VIDEO), \
-
-	// from libsndfile 1.0.21
-	filext::value_type(".aif", MEDIA_TYPE_AUDIO), \
-	filext::value_type(".aiff", MEDIA_TYPE_AUDIO), \
-	filext::value_type(".au", MEDIA_TYPE_AUDIO), \
-	filext::value_type(".avr", MEDIA_TYPE_AUDIO), \
-	filext::value_type(".caf", MEDIA_TYPE_AUDIO), \
-	filext::value_type(".flac", MEDIA_TYPE_AUDIO), \
-	filext::value_type(".htk", MEDIA_TYPE_AUDIO), \
-	filext::value_type(".iff", MEDIA_TYPE_AUDIO), \
-	filext::value_type(".mat", MEDIA_TYPE_AUDIO), \
-	filext::value_type(".mpc", MEDIA_TYPE_AUDIO), \
-	filext::value_type(".oga", MEDIA_TYPE_AUDIO), \
-	filext::value_type(".ogg", MEDIA_TYPE_AUDIO), \
-	filext::value_type(".paf", MEDIA_TYPE_AUDIO), \
-	filext::value_type(".pvf", MEDIA_TYPE_AUDIO), \
-	filext::value_type(".raw", MEDIA_TYPE_AUDIO), \
-	filext::value_type(".rf64", MEDIA_TYPE_AUDIO), \
-	filext::value_type(".sd2", MEDIA_TYPE_AUDIO), \
-	filext::value_type(".sds", MEDIA_TYPE_AUDIO), \
-	filext::value_type(".sf", MEDIA_TYPE_AUDIO), \
-	filext::value_type(".voc", MEDIA_TYPE_AUDIO), \
-	filext::value_type(".w64", MEDIA_TYPE_AUDIO), \
-	filext::value_type(".wav", MEDIA_TYPE_AUDIO), \
-	filext::value_type(".wve", MEDIA_TYPE_AUDIO), \
-	filext::value_type(".xi", MEDIA_TYPE_AUDIO), \
-	
-	filext::value_type(".pdf", MEDIA_TYPE_PDF), \
-	
-	filext::value_type(".txt", MEDIA_TYPE_TEXT) , \
-	filext::value_type(".xml", MEDIA_TYPE_TEXT) 
-	
-};
-filext ACMediaFactory::known_file_extensions(_init, _init + sizeof _init / sizeof *_init);
-
 boost::once_flag ACMediaFactory::once_flag = BOOST_ONCE_INIT;
 
 ACMediaFactory::ACMediaFactory(){
+
+	if (known_file_extensions.size()==0){
+		createKnownFileExtensions();
+	}
 	if (available_file_extensions.size()==0){
 		checkAvailableFileExtensions();
 	}
@@ -251,6 +109,150 @@ ACMediaFactory::ACMediaFactory(){
 }
 
 ACMediaFactory::~ACMediaFactory(){
+}
+
+/// List of known media file extensions associated to MediaCycle media types.
+/// We can complement them by checking the list of unchecked media file extensions
+void ACMediaFactory::createKnownFileExtensions() {
+// from http://www.openscenegraph.org/projects/osg/wiki/Support/UserGuides/Plugins
+	known_file_extensions[".3dc"] = MEDIA_TYPE_3DMODEL;
+	known_file_extensions[".3ds"] = MEDIA_TYPE_3DMODEL;
+	known_file_extensions[".ac"] = MEDIA_TYPE_3DMODEL;
+	known_file_extensions[".asc"] = MEDIA_TYPE_3DMODEL;
+	known_file_extensions[".bsp"] = MEDIA_TYPE_3DMODEL;
+	known_file_extensions[".dae"] = MEDIA_TYPE_3DMODEL;
+	known_file_extensions[".dw"] = MEDIA_TYPE_3DMODEL;
+	known_file_extensions[".dxf"] = MEDIA_TYPE_3DMODEL;
+	known_file_extensions[".fbx"] = MEDIA_TYPE_3DMODEL;
+	known_file_extensions[".flt"] = MEDIA_TYPE_3DMODEL;
+	known_file_extensions[".geo"] = MEDIA_TYPE_3DMODEL;
+	known_file_extensions[".gem"] = MEDIA_TYPE_3DMODEL;
+	known_file_extensions[".iv"] = MEDIA_TYPE_3DMODEL;
+	known_file_extensions[".ive"] = MEDIA_TYPE_3DMODEL;
+	known_file_extensions[".logo"] = MEDIA_TYPE_3DMODEL;
+	known_file_extensions[".lw"] = MEDIA_TYPE_3DMODEL;
+	known_file_extensions[".lwo"] = MEDIA_TYPE_3DMODEL;
+	known_file_extensions[".lws"] = MEDIA_TYPE_3DMODEL;
+	known_file_extensions[".md2"] = MEDIA_TYPE_3DMODEL;
+	known_file_extensions[".obj"] = MEDIA_TYPE_3DMODEL;
+	known_file_extensions[".ogr"] = MEDIA_TYPE_3DMODEL;
+	known_file_extensions[".osg"] = MEDIA_TYPE_3DMODEL;
+	known_file_extensions[".shp"] = MEDIA_TYPE_3DMODEL;
+	known_file_extensions[".sta"] = MEDIA_TYPE_3DMODEL;
+	known_file_extensions[".stl"] = MEDIA_TYPE_3DMODEL;
+	known_file_extensions[".wrl"] = MEDIA_TYPE_3DMODEL;
+	known_file_extensions[".x"] = MEDIA_TYPE_3DMODEL;
+
+	// from http://www.openscenegraph.org/projects/osg/wiki/Support/UserGuides/Plugins
+	known_file_extensions[".bmp"] = MEDIA_TYPE_IMAGE;
+	known_file_extensions[".bmpf"] = MEDIA_TYPE_IMAGE;
+	known_file_extensions[".bw"] = MEDIA_TYPE_IMAGE;
+	known_file_extensions[".cr2"] = MEDIA_TYPE_IMAGE;
+	known_file_extensions[".crw"] = MEDIA_TYPE_IMAGE;
+	known_file_extensions[".cur"] = MEDIA_TYPE_IMAGE;
+	known_file_extensions[".dcr"] = MEDIA_TYPE_IMAGE;
+	known_file_extensions[".dds"] = MEDIA_TYPE_IMAGE;
+	known_file_extensions[".dng"] = MEDIA_TYPE_IMAGE;
+	known_file_extensions[".epi"] = MEDIA_TYPE_IMAGE;
+	known_file_extensions[".eps"] = MEDIA_TYPE_IMAGE;
+	known_file_extensions[".epsf"] = MEDIA_TYPE_IMAGE;
+	known_file_extensions[".epsi"] = MEDIA_TYPE_IMAGE;
+	known_file_extensions[".exr"] = MEDIA_TYPE_IMAGE;
+	known_file_extensions[".fpx"] = MEDIA_TYPE_IMAGE;
+	known_file_extensions[".fpxi"] = MEDIA_TYPE_IMAGE;
+	known_file_extensions[".gif"] = MEDIA_TYPE_IMAGE;
+	known_file_extensions[".hdr"] = MEDIA_TYPE_IMAGE;
+	known_file_extensions[".icns"] = MEDIA_TYPE_IMAGE;
+	known_file_extensions[".ico"] = MEDIA_TYPE_IMAGE;
+	known_file_extensions[".int"] = MEDIA_TYPE_IMAGE;
+	known_file_extensions[".inta"] = MEDIA_TYPE_IMAGE;
+	known_file_extensions[".jp2"] = MEDIA_TYPE_IMAGE;
+	known_file_extensions[".jpc"] = MEDIA_TYPE_IMAGE;
+	known_file_extensions[".jpe"] = MEDIA_TYPE_IMAGE;
+	known_file_extensions[".jpeg"] = MEDIA_TYPE_IMAGE;
+	known_file_extensions[".jpg"] = MEDIA_TYPE_IMAGE;
+	known_file_extensions[".jps"] = MEDIA_TYPE_IMAGE;
+	known_file_extensions[".mac"] = MEDIA_TYPE_IMAGE;
+	known_file_extensions[".mrw"] = MEDIA_TYPE_IMAGE;
+	known_file_extensions[".nef"] = MEDIA_TYPE_IMAGE;
+	known_file_extensions[".orf"] = MEDIA_TYPE_IMAGE;
+	known_file_extensions[".pct"] = MEDIA_TYPE_IMAGE;
+	known_file_extensions[".pic"] = MEDIA_TYPE_IMAGE;
+	known_file_extensions[".pict"] = MEDIA_TYPE_IMAGE;
+	known_file_extensions[".pbm"] = MEDIA_TYPE_IMAGE;
+	known_file_extensions[".pgm"] = MEDIA_TYPE_IMAGE;
+	known_file_extensions[".png"] = MEDIA_TYPE_IMAGE;
+	known_file_extensions[".pnm"] = MEDIA_TYPE_IMAGE;
+	known_file_extensions[".pnt"] = MEDIA_TYPE_IMAGE;
+	known_file_extensions[".ppm"] = MEDIA_TYPE_IMAGE;
+	known_file_extensions[".psd"] = MEDIA_TYPE_IMAGE;
+	known_file_extensions[".ptng"] = MEDIA_TYPE_IMAGE;
+	known_file_extensions[".qti"] = MEDIA_TYPE_IMAGE;
+	known_file_extensions[".qtif"] = MEDIA_TYPE_IMAGE;
+	known_file_extensions[".raf"] = MEDIA_TYPE_IMAGE;
+	known_file_extensions[".raw"] = MEDIA_TYPE_IMAGE;
+	known_file_extensions[".rgb"] = MEDIA_TYPE_IMAGE;
+	known_file_extensions[".rgba"] = MEDIA_TYPE_IMAGE;
+	known_file_extensions[".sgi"] = MEDIA_TYPE_IMAGE;
+	known_file_extensions[".srf"] = MEDIA_TYPE_IMAGE;
+	known_file_extensions[".targa"] = MEDIA_TYPE_IMAGE;
+	known_file_extensions[".tga"] = MEDIA_TYPE_IMAGE;
+	known_file_extensions[".tif"] = MEDIA_TYPE_IMAGE;
+	known_file_extensions[".tiff"] = MEDIA_TYPE_IMAGE;
+	known_file_extensions[".xbm"] = MEDIA_TYPE_IMAGE;
+
+	// from http://www.openscenegraph.org/projects/osg/wiki/Support/UserGuides/Plugins
+	// and OSG 2.9.11
+	known_file_extensions[".3gp"] = MEDIA_TYPE_VIDEO;
+	known_file_extensions[".avi"] = MEDIA_TYPE_VIDEO;
+	known_file_extensions[".ffmpeg"] = MEDIA_TYPE_VIDEO;
+	known_file_extensions[".flv"] = MEDIA_TYPE_VIDEO;
+	known_file_extensions[".m4v"] = MEDIA_TYPE_VIDEO;
+	known_file_extensions[".mjpeg"] = MEDIA_TYPE_VIDEO;
+	known_file_extensions[".mkv"] = MEDIA_TYPE_VIDEO;
+	known_file_extensions[".mov"] = MEDIA_TYPE_VIDEO;
+	known_file_extensions[".mp4"] = MEDIA_TYPE_VIDEO;
+	known_file_extensions[".mpeg"] = MEDIA_TYPE_VIDEO;
+	known_file_extensions[".mpg"] = MEDIA_TYPE_VIDEO;
+	known_file_extensions[".mpv"] = MEDIA_TYPE_VIDEO;
+//	known_file_extensions[".ogg"] = MEDIA_TYPE_VIDEO; //can be, but *.ogg audio files are more frequent
+	known_file_extensions[".sav"] = MEDIA_TYPE_VIDEO;
+	known_file_extensions[".sdp"] = MEDIA_TYPE_VIDEO;
+	known_file_extensions[".swf"] = MEDIA_TYPE_VIDEO;
+	known_file_extensions[".wmv"] = MEDIA_TYPE_VIDEO;
+	known_file_extensions[".xine"] = MEDIA_TYPE_VIDEO;
+	known_file_extensions[".xvid"] = MEDIA_TYPE_VIDEO;
+
+	// from libsndfile 1.0.21
+	known_file_extensions[".aif"] = MEDIA_TYPE_AUDIO;
+	known_file_extensions[".aiff"] = MEDIA_TYPE_AUDIO;
+	known_file_extensions[".au"] = MEDIA_TYPE_AUDIO;
+	known_file_extensions[".avr"] = MEDIA_TYPE_AUDIO;
+	known_file_extensions[".caf"] = MEDIA_TYPE_AUDIO;
+	known_file_extensions[".flac"] = MEDIA_TYPE_AUDIO;
+	known_file_extensions[".htk"] = MEDIA_TYPE_AUDIO;
+	known_file_extensions[".iff"] = MEDIA_TYPE_AUDIO;
+	known_file_extensions[".mat"] = MEDIA_TYPE_AUDIO;
+	known_file_extensions[".mpc"] = MEDIA_TYPE_AUDIO;
+	known_file_extensions[".oga"] = MEDIA_TYPE_AUDIO;
+	known_file_extensions[".ogg"] = MEDIA_TYPE_AUDIO;
+	known_file_extensions[".paf"] = MEDIA_TYPE_AUDIO;
+	known_file_extensions[".pvf"] = MEDIA_TYPE_AUDIO;
+	known_file_extensions[".raw"] = MEDIA_TYPE_AUDIO;
+	known_file_extensions[".rf64"] = MEDIA_TYPE_AUDIO;
+	known_file_extensions[".sd2"] = MEDIA_TYPE_AUDIO;
+	known_file_extensions[".sds"] = MEDIA_TYPE_AUDIO;
+	known_file_extensions[".sf"] = MEDIA_TYPE_AUDIO;
+	known_file_extensions[".voc"] = MEDIA_TYPE_AUDIO;
+	known_file_extensions[".w64"] = MEDIA_TYPE_AUDIO;
+	known_file_extensions[".wav"] = MEDIA_TYPE_AUDIO;
+	known_file_extensions[".wve"] = MEDIA_TYPE_AUDIO;
+	known_file_extensions[".xi"] = MEDIA_TYPE_AUDIO;
+	
+	known_file_extensions[".pdf"] = MEDIA_TYPE_PDF;
+	
+	known_file_extensions[".txt"] = MEDIA_TYPE_TEXT;
+	known_file_extensions[".xml"] = MEDIA_TYPE_TEXT;
 }
 
 ACMedia* ACMediaFactory::create(string file_ext){

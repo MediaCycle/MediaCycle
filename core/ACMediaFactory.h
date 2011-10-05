@@ -57,7 +57,7 @@ class ACMediaFactory : private boost::noncopyable {
 	//private, not protected, since there is no ACImageFactory
 	private:
 		// for log(n) search through extensions:
-		static filext known_file_extensions;
+		filext known_file_extensions;
 		filext available_file_extensions,unchecked_file_extensions,used_file_extensions;
 
 	public:
@@ -116,6 +116,7 @@ class ACMediaFactory : private boost::noncopyable {
 
 	private:
 		void listMediaExtensions(filext _list);
+		void createKnownFileExtensions();
 		void checkAvailableFileExtensions();
 		void useKnownFileExtensions();
 		bool addAvailableFileExtensionSupport(std::string file_ext, ACMediaType media_type);
