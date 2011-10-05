@@ -513,7 +513,17 @@ void ACMediaBrowser::hoverWithPointerId(float mxx, float myy, int p_id)
 		this->getPointerFromId(p_id)->setCurrentPosition(p);
 	}
 	else
-		std::cerr << "ACMediaBrowser::hoverWithPointerId: wrong pointer id " << p_id << std::endl;
+	{
+		if (p_id==-1)
+			this->addPointer(p_id,AC_POINTER_MOUSE);
+		else
+			this->addPointer(p_id);
+		if (this->getPointerFromId(p_id)){
+			this->getPointerFromId(p_id)->setCurrentPosition(p);
+		}
+		else
+			std::cerr << "ACMediaBrowser::hoverWithPointerId: wrong pointer id " << p_id << std::endl;
+	}
 }
 
 void ACMediaBrowser::setSourceCursor(int lid, int frame_pos) {
@@ -1497,7 +1507,7 @@ ACPointer* ACMediaBrowser::getPointerFromId(int _id) {
 	
 	
 	if (p_attr_it ==  mPointers.end()){ //new pointer
-		if (_id==-1)
+		/*if (_id==-1)
 			this->addPointer(_id,AC_POINTER_MOUSE);
 		else
 			this->addPointer(_id);
@@ -1507,7 +1517,8 @@ ACPointer* ACMediaBrowser::getPointerFromId(int _id) {
 			return 0;
 		}	
 		else
-			return p_attr_it->second;
+			return p_attr_it->second;*/
+		return 0;//TR Modification. Get function doesn't create pointer.
 	}
 	else {// existing pointer
 		return p_attr_it->second;

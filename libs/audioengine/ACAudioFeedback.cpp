@@ -141,9 +141,8 @@ ACAudioFeedback::ACAudioFeedback(PaStream *_stream, int samplerate, int buffersi
 	//pv = new pv_complex*[OPENAL_NUM_BUFFERS];
 	tpv = new TiPhaseVocoder[OPENAL_NUM_BUFFERS];
 	for (i=0;i<OPENAL_NUM_BUFFERS;i++) {
-		tpv[i].flagLoop = 0;
-		tpv[i].f = 0;
-		tpv[i].samples = 0;
+		
+		initPV(&(tpv[i]));
 	}
 	tpv_winsize = 1024; //1024;
 	pv_currentsample = new long int[OPENAL_NUM_BUFFERS];
@@ -190,6 +189,12 @@ ACAudioFeedback::ACAudioFeedback(PaStream *_stream, int samplerate, int buffersi
 
 ACAudioFeedback::~ACAudioFeedback()
 {
+	for (int i=0;i<OPENAL_NUM_BUFFERS;i++) {
+		reinitPV(&(tpv[i]));
+		cleanSamples(&(tpv[i]));
+	}
+	free(tpv);
+	tpv=0;
 	//
 #if defined USE_OPENAL
 #ifdef OPENAL_STREAM_MODE
@@ -1909,7 +1914,7 @@ int ACAudioFeedback::createSourceWithPosition(int loop_id, float x, float y, flo
 
 		//pv[loop_slot] = pv_complex_curses_init2(datashort,size,freq,0,1.0,0,2048,512,3,2); //hard-coded
 		setSamples(&(tpv[loop_slot]),(short*)datashort,(int)size,(int)freq);
-		initPV(&(tpv[loop_slot]));
+		reinitPV(&(tpv[loop_slot]));
 		setWinsize(&(tpv[loop_slot]),tpv_winsize);
 		tpv[loop_slot].speed = 1.0;
 
@@ -2034,7 +2039,8 @@ int ACAudioFeedback::deleteSource(int loop_id)
 #endif
 
 #endif
-
+	reinitPV(&(tpv[loop_slot]));
+	cleanSamples(&(tpv[loop_slot]));
 	loop_ids[loop_slot] = -1;
 	active_loops--;
 

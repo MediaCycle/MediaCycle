@@ -60,6 +60,12 @@ ACPointer::ACPointer(std::string _text,ACPointerType _pointerType)
 void ACPointer::setCurrentPosition(ACPoint p){
 	currentPos = p;
 }
+void ACPointer::setCurrentPosition(double xx,double yy){
+	
+	ACPoint p;
+	p.x = xx; p.y = yy; p.z = 0.0;
+	this->setCurrentPosition(p);
+}
 
 ACPoint ACPointer::getCurrentPosition(){
 	return this->currentPos;

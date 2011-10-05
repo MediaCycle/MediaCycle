@@ -170,7 +170,9 @@ void ACOsgBrowserEventHandler::pick(osgViewer::View* view, const osgGA::GUIEvent
 	if(hover) {
 		// SD TODO - OSG computeIntersections seems to crash often - avoid doing it while howering
 		//CF should we loop on the hoverWithPointer for each pointer?
-		media_cycle->hoverWithPointerId(xx, yy, -1);//mouse
+		if (media_cycle->getPointerFromId(-1))
+			media_cycle->getPointerFromId(-1)->setCurrentPosition(xx,yy);
+//		media_cycle->hoverWithPointerId(xx, yy, -1);//mouse//TR NEM2011 1! Mouse Constructor call (cf		void ACOsgCompositeViewQt::updateGL()
 		return;
 	}
 

@@ -9,6 +9,18 @@
 /* Begin PBXBuildFile section */
 		0638645E1383E36200BA2627 /* libOpenNI.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 0638645D1383E36200BA2627 /* libOpenNI.dylib */; };
 		70E659C2141E2D0000947B09 /* hal.icns in CopyFiles */ = {isa = PBXBuildFile; fileRef = 70E659C1141E2CF800947B09 /* hal.icns */; };
+		769BC862143B7307004D2A81 /* libfftw3_threads.3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 769BC852143B7307004D2A81 /* libfftw3_threads.3.dylib */; };
+		769BC863143B7307004D2A81 /* libfftw3_threads.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 769BC853143B7307004D2A81 /* libfftw3_threads.a */; };
+		769BC864143B7307004D2A81 /* libfftw3_threads.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 769BC854143B7307004D2A81 /* libfftw3_threads.dylib */; };
+		769BC865143B7307004D2A81 /* libfftw3.3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 769BC856143B7307004D2A81 /* libfftw3.3.dylib */; };
+		769BC866143B7307004D2A81 /* libfftw3.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 769BC857143B7307004D2A81 /* libfftw3.a */; };
+		769BC867143B7307004D2A81 /* libfftw3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 769BC858143B7307004D2A81 /* libfftw3.dylib */; };
+		769BC868143B7307004D2A81 /* libfftw3f_threads.3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 769BC85A143B7307004D2A81 /* libfftw3f_threads.3.dylib */; };
+		769BC869143B7307004D2A81 /* libfftw3f_threads.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 769BC85B143B7307004D2A81 /* libfftw3f_threads.a */; };
+		769BC86A143B7307004D2A81 /* libfftw3f_threads.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 769BC85C143B7307004D2A81 /* libfftw3f_threads.dylib */; };
+		769BC86B143B7307004D2A81 /* libfftw3f.3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 769BC85E143B7307004D2A81 /* libfftw3f.3.dylib */; };
+		769BC86C143B7307004D2A81 /* libfftw3f.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 769BC85F143B7307004D2A81 /* libfftw3f.a */; };
+		769BC86D143B7307004D2A81 /* libfftw3f.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 769BC860143B7307004D2A81 /* libfftw3f.dylib */; };
 		AB481AAC13410C42008DEA61 /* libOsc.a in Frameworks */ = {isa = PBXBuildFile; fileRef = AB481A9313410C42008DEA61 /* libOsc.a */; };
 		AB481AAD13410C42008DEA61 /* oscpack.a in Frameworks */ = {isa = PBXBuildFile; fileRef = AB481A9513410C42008DEA61 /* oscpack.a */; };
 		AB481AAE13410C42008DEA61 /* oscpack.lib in Frameworks */ = {isa = PBXBuildFile; fileRef = AB481A9613410C42008DEA61 /* oscpack.lib */; };
@@ -93,6 +105,22 @@
 /* Begin PBXFileReference section */
 		0638645D1383E36200BA2627 /* libOpenNI.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libOpenNI.dylib; path = /usr/lib/libOpenNI.dylib; sourceTree = "<absolute>"; };
 		70E659C1141E2CF800947B09 /* hal.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = hal.icns; sourceTree = "<group>"; };
+		769BC852143B7307004D2A81 /* libfftw3_threads.3.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libfftw3_threads.3.dylib; path = /opt/local/lib/libfftw3_threads.3.dylib; sourceTree = "<absolute>"; };
+		769BC853143B7307004D2A81 /* libfftw3_threads.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libfftw3_threads.a; path = /opt/local/lib/libfftw3_threads.a; sourceTree = "<absolute>"; };
+		769BC854143B7307004D2A81 /* libfftw3_threads.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libfftw3_threads.dylib; path = /opt/local/lib/libfftw3_threads.dylib; sourceTree = "<absolute>"; };
+		769BC855143B7307004D2A81 /* libfftw3_threads.la */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = libfftw3_threads.la; path = /opt/local/lib/libfftw3_threads.la; sourceTree = "<absolute>"; };
+		769BC856143B7307004D2A81 /* libfftw3.3.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libfftw3.3.dylib; path = /opt/local/lib/libfftw3.3.dylib; sourceTree = "<absolute>"; };
+		769BC857143B7307004D2A81 /* libfftw3.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libfftw3.a; path = /opt/local/lib/libfftw3.a; sourceTree = "<absolute>"; };
+		769BC858143B7307004D2A81 /* libfftw3.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libfftw3.dylib; path = /opt/local/lib/libfftw3.dylib; sourceTree = "<absolute>"; };
+		769BC859143B7307004D2A81 /* libfftw3.la */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = libfftw3.la; path = /opt/local/lib/libfftw3.la; sourceTree = "<absolute>"; };
+		769BC85A143B7307004D2A81 /* libfftw3f_threads.3.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libfftw3f_threads.3.dylib; path = /opt/local/lib/libfftw3f_threads.3.dylib; sourceTree = "<absolute>"; };
+		769BC85B143B7307004D2A81 /* libfftw3f_threads.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libfftw3f_threads.a; path = /opt/local/lib/libfftw3f_threads.a; sourceTree = "<absolute>"; };
+		769BC85C143B7307004D2A81 /* libfftw3f_threads.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libfftw3f_threads.dylib; path = /opt/local/lib/libfftw3f_threads.dylib; sourceTree = "<absolute>"; };
+		769BC85D143B7307004D2A81 /* libfftw3f_threads.la */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = libfftw3f_threads.la; path = /opt/local/lib/libfftw3f_threads.la; sourceTree = "<absolute>"; };
+		769BC85E143B7307004D2A81 /* libfftw3f.3.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libfftw3f.3.dylib; path = /opt/local/lib/libfftw3f.3.dylib; sourceTree = "<absolute>"; };
+		769BC85F143B7307004D2A81 /* libfftw3f.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libfftw3f.a; path = /opt/local/lib/libfftw3f.a; sourceTree = "<absolute>"; };
+		769BC860143B7307004D2A81 /* libfftw3f.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libfftw3f.dylib; path = /opt/local/lib/libfftw3f.dylib; sourceTree = "<absolute>"; };
+		769BC861143B7307004D2A81 /* libfftw3f.la */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = libfftw3f.la; path = /opt/local/lib/libfftw3f.la; sourceTree = "<absolute>"; };
 		AB481A8013410C42008DEA61 /* IpEndpointName.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IpEndpointName.h; sourceTree = "<group>"; };
 		AB481A8113410C42008DEA61 /* NetworkingUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NetworkingUtils.h; sourceTree = "<group>"; };
 		AB481A8213410C42008DEA61 /* PacketListener.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PacketListener.h; sourceTree = "<group>"; };
@@ -201,6 +229,18 @@
 				AB481AAF13410C42008DEA61 /* oscpack_cw.lib in Frameworks */,
 				AB481AB013410C42008DEA61 /* oscpackd.lib in Frameworks */,
 				0638645E1383E36200BA2627 /* libOpenNI.dylib in Frameworks */,
+				769BC862143B7307004D2A81 /* libfftw3_threads.3.dylib in Frameworks */,
+				769BC863143B7307004D2A81 /* libfftw3_threads.a in Frameworks */,
+				769BC864143B7307004D2A81 /* libfftw3_threads.dylib in Frameworks */,
+				769BC865143B7307004D2A81 /* libfftw3.3.dylib in Frameworks */,
+				769BC866143B7307004D2A81 /* libfftw3.a in Frameworks */,
+				769BC867143B7307004D2A81 /* libfftw3.dylib in Frameworks */,
+				769BC868143B7307004D2A81 /* libfftw3f_threads.3.dylib in Frameworks */,
+				769BC869143B7307004D2A81 /* libfftw3f_threads.a in Frameworks */,
+				769BC86A143B7307004D2A81 /* libfftw3f_threads.dylib in Frameworks */,
+				769BC86B143B7307004D2A81 /* libfftw3f.3.dylib in Frameworks */,
+				769BC86C143B7307004D2A81 /* libfftw3f.a in Frameworks */,
+				769BC86D143B7307004D2A81 /* libfftw3f.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -387,6 +427,22 @@
 		E45BE0480E8CC657009D7055 /* core libraries */ = {
 			isa = PBXGroup;
 			children = (
+				769BC852143B7307004D2A81 /* libfftw3_threads.3.dylib */,
+				769BC853143B7307004D2A81 /* libfftw3_threads.a */,
+				769BC854143B7307004D2A81 /* libfftw3_threads.dylib */,
+				769BC855143B7307004D2A81 /* libfftw3_threads.la */,
+				769BC856143B7307004D2A81 /* libfftw3.3.dylib */,
+				769BC857143B7307004D2A81 /* libfftw3.a */,
+				769BC858143B7307004D2A81 /* libfftw3.dylib */,
+				769BC859143B7307004D2A81 /* libfftw3.la */,
+				769BC85A143B7307004D2A81 /* libfftw3f_threads.3.dylib */,
+				769BC85B143B7307004D2A81 /* libfftw3f_threads.a */,
+				769BC85C143B7307004D2A81 /* libfftw3f_threads.dylib */,
+				769BC85D143B7307004D2A81 /* libfftw3f_threads.la */,
+				769BC85E143B7307004D2A81 /* libfftw3f.3.dylib */,
+				769BC85F143B7307004D2A81 /* libfftw3f.a */,
+				769BC860143B7307004D2A81 /* libfftw3f.dylib */,
+				769BC861143B7307004D2A81 /* libfftw3f.la */,
 				E4C2425B10CC5A78004149E2 /* glut */,
 				E45BEC7B0E8CC911009D7055 /* poco */,
 				E45BE2D50E8CC69C009D7055 /* rtAudio */,
@@ -648,7 +704,6 @@
 			isa = PBXProject;
 			buildConfigurationList = E4B69B4D0A3A1720003C02F2 /* Build configuration list for PBXProject "interactiveFloor2" */;
 			compatibilityVersion = "Xcode 3.1";
-			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				English,
@@ -846,7 +901,9 @@
 					../../../libs/freetype/include/freetype2,
 					../../../libs/poco/include,
 					../../../addons/,
+					/opt/local/include,
 				);
+				LIBRARY_SEARCH_PATHS = /opt/local/lib;
 				OTHER_CPLUSPLUSFLAGS = (
 					"-D__MACOSX_CORE__",
 					"-lpthread",
@@ -886,6 +943,7 @@
 					../../../libs/freetype/include/freetype2,
 					../../../libs/poco/include,
 					../../../addons/,
+					/opt/local/include,
 				);
 				LIBRARY_SEARCH_PATHS = "";
 				OTHER_CPLUSPLUSFLAGS = (
@@ -993,6 +1051,7 @@
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_1)",
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_2)",
 					/openkinect/openni2/Lib,
+					/opt/local/lib,
 				);
 				LIBRARY_SEARCH_PATHS_QUOTED_1 = "\"$(SRCROOT)/../../../addons/ofxOsc/libs/oscpack/lib/osx\"";
 				LIBRARY_SEARCH_PATHS_QUOTED_2 = "\"$(SRCROOT)/../../../addons/ofxOsc/libs/oscpack/lib/win32\"";

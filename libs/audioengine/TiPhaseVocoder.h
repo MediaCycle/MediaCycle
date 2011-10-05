@@ -103,6 +103,7 @@ int TiWindowingS2D(short *data, double *dataw, int winsize,double *window);
 int setCurrentSample(TiPhaseVocoder *tpv,double value) ;
 int setCurrentSampleToNext(TiPhaseVocoder *tpv) ;
 int initPV(TiPhaseVocoder *tpv);
+int reinitPV(TiPhaseVocoder *tpv);
 int setMode(TiPhaseVocoder *tpv, int mode);
 int setWinsize(TiPhaseVocoder* tpv, int winsize);
 int reallocCOMPLEX(COMPLEXD *x,int size);
@@ -120,7 +121,8 @@ int openFile(TiPhaseVocoder* tpv, const char* filename);
 int closeFile(TiPhaseVocoder* tpv);
 
 // SD
-int setSamples(TiPhaseVocoder* tpv, short* datashort, int size, int freq);
+	int setSamples(TiPhaseVocoder* tpv, short* datashort, int size, int freq);
+	int cleanSamples(TiPhaseVocoder *tpv);
 
 #ifdef	__cplusplus
 }

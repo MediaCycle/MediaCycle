@@ -87,7 +87,33 @@ int setCurrentSampleToNext(TiPhaseVocoder *tpv) {
 }
 
 int initPV(TiPhaseVocoder *tpv){
-    setCurrentSample(tpv,0.0);//might want to add an offset here ?
+	tpv->samples=0;
+	tpv->hanning = 0;
+	tpv->dphase = 0;
+	tpv->leftFFT.re = 0;
+	tpv->leftFFT.im = 0;
+	tpv->rightFFT.re = 0;
+	tpv->rightFFT.im = 0;
+	tpv->outputFFT.re = 0;
+	tpv->outputFFT.im = 0;
+	
+	tpv->output = 0;
+	tpv->outputAmplitude = 0;
+	tpv->outputPhase = 0;
+	tpv->bufferPos = 0;
+	tpv->buffer = 0;
+	tpv->currentFrame = -100; 
+	tpv->lockingMode = 0; 
+	tpv->peaksIndex = 0;
+	
+	tpv->flagLoop=0;
+	tpv->f = 0;
+	tpv->needResetPhase = 1;
+    return 0;
+	
+}
+int reinitPV(TiPhaseVocoder *tpv){
+	setCurrentSample(tpv,0.0);//might want to add an offset here ?
 	if (tpv->hanning)
 		free(tpv->hanning);
     tpv->hanning = 0;
@@ -133,9 +159,7 @@ int initPV(TiPhaseVocoder *tpv){
 		free(tpv->peaksIndex);
     tpv->peaksIndex = 0;
 	tpv->needResetPhase = 1;
-
     tpv->normalizationFactor = 1/1.5;//corresponds to a shift of 1/4 between each hanning-windowed frame. 1/2.0 if shift=1/8
-
     return 0;
 }
 
@@ -621,4 +645,14 @@ int setSamples(TiPhaseVocoder* tpv, short* datashort, int size, int freq) {
 	tpv->samples = (short*) malloc(size*sizeof(short));
 	memcpy(tpv->samples, datashort, size*sizeof(short));
     return 0;
+}
+int cleanSamples(TiPhaseVocoder *tpv){
+	if (tpv->samples) {
+		free(tpv->samples);
+		tpv->samples = 0;
+	}	
+	tpv->numberOfSamples = 0;
+
+	return 0;
+
 }

@@ -62,6 +62,7 @@ public:
 	~ACPointer(){};
 	
 	void setCurrentPosition(ACPoint p);
+	void setCurrentPosition(double xx,double yy);
 	ACPoint getCurrentPosition();
 	void setText(std::string t);
 	std::string getText();
