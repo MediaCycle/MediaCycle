@@ -5,8 +5,9 @@ PortSystem                      1.0
 PortGroup                       cmake 1.0
 
 name                            opencv
-version                         2.3.1
-set branch                      ${version}
+version                         2.3.1a
+#set branch                      ${version}
+set branch			2.3.1
 categories                      graphics science
 platforms                       darwin
 maintainers                     nomaintainer
@@ -24,11 +25,12 @@ long_description                opencv is a library that is mainly aimed at real
 homepage                        http://opencv.willowgarage.com/wiki/
 master_sites                    sourceforge:project/opencvlibrary/opencv-unix/${branch}
 use_bzip2                       yes
-distname                        OpenCV-${version}
+distname                       OpenCV-${version}
+worksrcdir                      OpenCV-${branch}
 
-checksums                       md5     827c9f8aa14384c531c73aa165f9b777 \
-                                sha1    65ec38aaad6e98f19d3dc2d4f017ce1ef8cbcb1b \
-                                rmd160  f53e4a144bffb643e957f844bc62aa83370dd39d
+checksums			md5     82e4b6bfa349777233eea09b075e931e \
+                   		sha1    9784e6824c5f677fac82ae83a2f366743adb3299 \
+                    		rmd160  f2f459bf7c163acb90427db2b0b425ab8008cde5
 
 depends_build-append            port:pkgconfig
 
@@ -44,8 +46,9 @@ depends_lib-append              port:zlib \
                                 port:libvorbis \
                                 port:libogg \
                                 port:x264 \
-                                port:orc \
-                                port:qt4-mac
+                                port:orc
+# \
+                                #port:qt4-mac
                                 #path:lib/libavcodec.dylib:ffmpeg \
 
 # ffmpeg is not universal
@@ -58,9 +61,10 @@ patchfiles                      patch-OpenCVModule.cmake.diff \
 configure.args-append           -DBUILD_NEW_PYTHON_SUPPORT=OFF \
                                 -DBUILD_EXAMPLES=ON \
                                 -DINSTALL_C_EXAMPLES=ON \
-                                -DWITH_FFMPEG=OFF \
-				-DWITH_QT=ON \
-				-DWITH_OPENNI=ON
+                                -DWITH_FFMPEG=OFF
+ #\
+				#-DWITH_QT=ON \
+				#-DWITH_OPENNI=ON
 
 # use macros in /usr/include/stdint.h with C++ compiler; see <https://roundup.ffmpeg.org/issue2093>
 #platform darwin {
@@ -76,10 +80,16 @@ configure.args-append           -DBUILD_NEW_PYTHON_SUPPORT=OFF \
 #    configure.args-append       -DHAVE_1394=ON
 #}
 
-#variant qt4 description {Use experimental qt4 backend for graphical interface.} {
-#    depends_lib-append          port:qt4-mac
-#    configure.args-append       -DWITH_QT=ON
-#}
+variant qt4 description {Use experimental qt4 backend for graphical interface.} {
+    depends_lib-append          port:qt4-mac
+    configure.args-append       -DWITH_QT=ON
+}
+
+variant ffmpeg description {Use ffmpeg backend for video I/O.} {
+    depends_lib-append          path:lib/libavcodec.dylib:ffmpeg
+    configure.args-delete       -DWITH_FFMPEG=OFF
+    configure.args-append       -DWITH_FFMPEG=ON
+}
 
 variant python26 conflicts python27 description {Add Python 2.6 bindings} {
     depends_lib-append          port:python26

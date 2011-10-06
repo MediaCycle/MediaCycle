@@ -8,7 +8,7 @@ PortGroup muniversal 1.0
 name            ffmpeg
 conflicts       ffmpeg-devel
 epoch           1
-version         0.8.2
+version         0.8.5
 license         nonfree GPL-2+ LGPL-2.1+
 categories      multimedia
 maintainers     devans openmaintainer
@@ -50,8 +50,12 @@ master_sites    http://www.ffmpeg.org/releases/
 
 use_bzip2       yes
 
-checksums       sha1    984f731aced1380840cd8e3576e8db0c2fd5537f \
-                rmd160  d23f8a45a4f49f938e1553d122852a2ac3b50d76
+# 0.8.2
+#checksums       sha1    984f731aced1380840cd8e3576e8db0c2fd5537f \
+#                rmd160  d23f8a45a4f49f938e1553d122852a2ac3b50d76
+
+checksums           rmd160  16659c26a5158aeee454ce555562ca059af6fa04 \
+                    sha256  f63df1ee08c2c64a4b3f106a88dd055b9f19e3457f1d7c23d8b8169e0a0ef115
 
 depends_build   port:pkgconfig \
                 port:gmake \
