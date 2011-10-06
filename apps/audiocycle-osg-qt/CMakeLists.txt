@@ -53,7 +53,6 @@ IF ( SUPPORT_AUDIO AND USE_QT4 AND USE_OSG AND USE_OSC AND ( OPENAL_FOUND OR POR
 	ADD_DEPENDENCIES(audiocycle-osg-qt mediacycle-io-osc)
 	ADD_DEPENDENCIES(audiocycle-osg-qt mediacycle-osg)
 	ADD_DEPENDENCIES(audiocycle-osg-qt mediacycle-osg-qt)
-	ADD_DEPENDENCIES(audiocycle-osg-qt multimediacycle-osg-qt)
 	ADD_DEPENDENCIES(audiocycle-osg-qt audioengine)
 	ADD_DEPENDENCIES(audiocycle-osg-qt mc_visualisation)
 	ADD_DEPENDENCIES(audiocycle-osg-qt mc_audio)
