@@ -267,16 +267,16 @@ int getCurrentFrame(TiPhaseVocoder *tpv,int flagResetPhase) {
 			
 			// SD
             if (tpv->samples) {
-				toread = tpv->numberOfSamples-currentFrame*(tpv->hopSize+1);
+				toread = tpv->numberOfSamples-(currentFrame+1)*tpv->hopSize;
 				if (tpv->winSize<toread) {
 					toread = tpv->winSize;
 				}
 				if (toread>0) {
-					memcpy(tmpdata,(tpv->samples)+currentFrame*(tpv->hopSize+1),toread*sizeof(short));
+					memcpy(tmpdata,(tpv->samples)+(currentFrame+1)*tpv->hopSize,toread*sizeof(short));
 				}
 			}
 			else if (tpv->f) {
-				result = fseek(tpv->f,currentFrame*(tpv->hopSize+1)*BYTESPERSAMPLE,SEEK_SET);
+				result = fseek(tpv->f,(currentFrame+1)*tpv->hopSize*BYTESPERSAMPLE,SEEK_SET);
 				nsamples = fread(tmpdata,BYTESPERSAMPLE,tpv->winSize,tpv->f);
 			}
 			
@@ -295,16 +295,16 @@ int getCurrentFrame(TiPhaseVocoder *tpv,int flagResetPhase) {
 			
 			// SD
 			if (tpv->samples) {
-				toread = tpv->numberOfSamples-currentFrame*(tpv->hopSize-1);
+				toread = tpv->numberOfSamples-(currentFrame-1)*tpv->hopSize;
 				if (tpv->winSize<toread) {
 					toread = tpv->winSize;
 				}
 				if (toread>0) {
-					memcpy(tmpdata,(tpv->samples)+currentFrame*(tpv->hopSize-1),toread*sizeof(short));
+					memcpy(tmpdata,(tpv->samples)+(currentFrame-1)*tpv->hopSize,toread*sizeof(short));
 				}
 			}
 			else if (tpv->f) {
-				result = fseek(tpv->f,currentFrame*(tpv->hopSize-1)*BYTESPERSAMPLE,SEEK_SET);
+				result = fseek(tpv->f,(currentFrame-1)*tpv->hopSize*BYTESPERSAMPLE,SEEK_SET);
 				nsamples = fread(tmpdata,BYTESPERSAMPLE,tpv->winSize,tpv->f);
 			}
 			
