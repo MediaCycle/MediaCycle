@@ -42,6 +42,7 @@ int main(int argc, char *argv[])
     QApplication app(argc, argv);
 	ACMultiMediaCycleOsgQt window;
 	try {
+		window.setWindowTitle("AudioCycle");
 		// Adding palettes
 		window.addControlDock("MCOSC");				 
 		window.addControlDock("MCBrowserControlsClusters");//"MCBrowserControlsClustersNeighbors");

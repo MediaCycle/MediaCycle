@@ -45,6 +45,7 @@ int main(int argc, char *argv[])
 	try {
 		// Adding palettes
 		//window.addControlDock("MCMediaConfig");
+		window.setWindowTitle("VideoCycle");
 		window.addControlDock("MCOSC");				 
 		window.addControlDock("MCBrowserControlsClusters");//"MCBrowserControlsClustersNeighbors");
 		window.addControlDock("MCVideoControls");

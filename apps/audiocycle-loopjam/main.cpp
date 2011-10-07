@@ -41,6 +41,7 @@ int main(int argc, char *argv[])
     QApplication app(argc, argv);
 	ACAudioCycleLoopJam window;
 	try {
+		window.setWindowTitle("LoopJam");
 		window.autoConnectOSC(true); // ugly, to be set before adding palettes
 
 		// Adding palettes

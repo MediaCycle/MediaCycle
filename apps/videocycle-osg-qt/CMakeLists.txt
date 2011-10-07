@@ -36,7 +36,17 @@ IF ( SUPPORT_VIDEO AND USE_QT4 AND USE_OSG AND USE_OSC )
 		ADD_EXECUTABLE(videocycle-osg-qt WIN32 ${multimediacycle-osg-qt_SRCS} ${multimediacycle-osg-qt_UIS_H} ${multimediacycle-osg-qt_MOC_SRCS} ${settings_SRCS} ${settings_UIS_H} ${settings_MOC_SRCS} ${settings_MOC_HDRS} ${settings_HS})
 	ELSE ()
 		IF ( APPLE )
+			# set how it shows up in the Info.plist file
+  			SET(MACOSX_BUNDLE_ICON_FILE MultiMediaCycle.icns) 
+  			# set where in the bundle to put the icns file
+  			SET_SOURCE_FILES_PROPERTIES(${CMAKE_SOURCE_DIR}/data/icons/MultiMediaCycle.icns PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+  			# include the icns file in the target
+  			SET(multimediacycle-osg-qt_SRCS ${multimediacycle-osg-qt_SRCS} ${CMAKE_SOURCE_DIR}/data/icons/MultiMediaCycle.icns)
+
 			ADD_EXECUTABLE(videocycle-osg-qt ${APP_TYPE} ${MACOSX_BUNDLE_INFO_PLIST} ${multimediacycle-osg-qt_SRCS} ${multimediacycle-osg-qt_UIS_H} ${multimediacycle-osg-qt_MOC_SRCS} ${settings_SRCS} ${settings_UIS_H} ${settings_MOC_SRCS} ${settings_MOC_HDRS} ${settings_HS})
+
+			#set_target_properties(videocycle-osg-qt PROPERTIES MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/Info.plist)
+			#set_source_files_properties(PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
 		ELSE ()
 			ADD_EXECUTABLE(videocycle-osg-qt ${multimediacycle-osg-qt_SRCS} ${multimediacycle-osg-qt_UIS_H} ${multimediacycle-osg-qt_MOC_SRCS} ${settings_SRCS} ${settings_UIS_H} ${settings_MOC_SRCS} ${settings_MOC_HDRS} ${settings_HS})
 		ENDIF()
@@ -55,11 +65,6 @@ IF ( SUPPORT_VIDEO AND USE_QT4 AND USE_OSG AND USE_OSC )
 	IF ( USE_APPLE_MULTITOUCH )
 		ADD_DEPENDENCIES(videocycle-osg-qt mediacycle-io-applemultitouch)
 	ENDIF ( USE_APPLE_MULTITOUCH )
-
-	#IF ( APPLE )
-	#	set_target_properties(videocycle-osg-qt PROPERTIES MACOSX_BUNDLE_INFO_PLIST ${CMAKE_SOURCE_DIR}/gui/osg-qt/Info.plist)
-	#	set_source_files_properties(PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
-	#ENDIF ( APPLE )
 
 	TARGET_LINK_LIBRARIES(videocycle-osg-qt mediacycle)
 	TARGET_LINK_LIBRARIES(videocycle-osg-qt mediacycle-osg)

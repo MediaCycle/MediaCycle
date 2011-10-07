@@ -43,6 +43,7 @@ int main(int argc, char *argv[])
 
 	ACMultiMediaCycleOsgQt window;
 	try {
+		window.setWindowTitle("ArchipelCycle");
 		// Adding palettes
 		window.addControlDock("MCAudioControls");
 		window.addControlDock("MCBrowserControlsClusters");//"MCBrowserControlsClustersNeighbors");

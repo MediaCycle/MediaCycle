@@ -47,6 +47,7 @@ int main(int argc, char *argv[])
 
 	ACMultiMediaCycleOsgQt window;
 	try {
+		window.setWindowTitle("ImageCycle");
 		// Adding palettes
 		//window.addControlDock("MCMediaConfig");
 		window.addControlDock("MCOSC");
