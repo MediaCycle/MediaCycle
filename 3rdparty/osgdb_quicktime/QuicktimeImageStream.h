@@ -93,7 +93,7 @@ public:
    }
 
    /// jumps to a specific position 
-   void jumpTo(float pos) {
+   virtual void seek(double pos) { //void jumpTo(float pos) {
       setCmd(THREAD_SEEK, pos);
    }
 
@@ -112,7 +112,7 @@ public:
    /// Go to a specific position in the stream.
    virtual void setReferenceTime(double time)
    {
-     jumpTo(float(time));
+     seek(float(time));//jumpTo(float(time));
    }
    /// Return the current position in the stream.
    virtual double getReferenceTime() const
