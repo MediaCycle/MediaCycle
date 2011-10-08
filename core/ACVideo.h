@@ -70,6 +70,8 @@ public:
 	virtual ACMediaData* getMediaData(){return data;}
 	bool extractData(std::string fname);
 	virtual void deleteData();
+	
+	float getFrameRate() {return fps;}
 
 private:
 	void init();	
@@ -84,6 +86,7 @@ private:
 	osg::ref_ptr<osg::Image> thumbnail;
 	osg::ref_ptr<osg::Texture2D> image_texture;
 	ACVideoData* data;
+	float fps;
 	
 };
 #endif //defined (SUPPORT_VIDEO)

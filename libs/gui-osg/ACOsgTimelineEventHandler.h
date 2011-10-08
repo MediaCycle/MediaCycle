@@ -72,6 +72,7 @@ class ACOsgTimelineEventHandler : public  osgGA::GUIEventHandler {
 			ACAudioEngine *audio_engine;
 		#endif //defined (SUPPORT_AUDIO)	
 		bool selecting_zone,selecting_zone_begin,selecting_zone_end,selecting_summary_waveform,selecting_summary_frames;
+		bool selecting_segments;
 		ACRefId* selection;
 		float selection_begin,selection_end;
 		float pushed_x;

@@ -43,14 +43,16 @@ class ACRefId : public osg::Referenced
 	public:
 		int object_id;
 		std::string object_name;
+		int element_id;
 		// contains an identifier for each object (= node)
 
-		ACRefId(int oid=-1, std::string name="") : osg::Referenced(), object_id(oid),object_name(name){};
-		ACRefId(const ACRefId& src) : osg::Referenced(), object_id(src.object_id),object_name(src.object_name){};//{object_id = src.object_id;object_name = src.object_name;}
+		ACRefId(int oid=-1, std::string name="",int eid=-1) : osg::Referenced(), object_id(oid),object_name(name),element_id(eid){};
+		ACRefId(const ACRefId& src) : osg::Referenced(), object_id(src.object_id),object_name(src.object_name),element_id(src.element_id){};//{object_id = src.object_id;object_name = src.object_name;}
 		~ACRefId() {};
 		ACRefId& operator=(ACRefId &src){this->object_id = src.getRefId();this->object_name = src.getRefName();}
 		int getRefId(){return object_id;}
 		std::string getRefName(){return object_name;}
+		int getElementId(){return element_id;}
 	};
 
 #endif

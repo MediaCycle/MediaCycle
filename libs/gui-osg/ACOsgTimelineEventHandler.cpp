@@ -52,6 +52,7 @@ void ACOsgTimelineEventHandler::clean(){
 	selecting_zone_end = false;
 	selecting_summary_waveform = false;
 	selecting_summary_frames = false;
+	selecting_segments = false;
 	selection = 0;
 	selection_begin = 0.0f;
 	selection_end = 0.0f;
@@ -129,6 +130,28 @@ bool ACOsgTimelineEventHandler::handle(const osgGA::GUIEventAdapter& ea,osgGA::G
 					renderer->getTrack(selection->getRefId())->setSelectionCenter(xspan*pos/2.0f);
 					#ifdef USE_DEBUG
 					std::cout << "(PUSH) Skipping/Moving the current frame to the mouse position (video track " << selection->getRefId() <<")" << std::endl;
+					#endif
+				}
+				
+				// Skipping/Moving to the segment under the mouse (video tracks)
+				if (selection && selecting_segments){
+					// Audio feedback
+					/*int mediaID = renderer->getTrack(selection->getRefId())->getMedia()->getId();
+					 if (mediaID > -1){
+					 if (media_cycle->getLibrary()->getMedia(mediaID)->getType() == MEDIA_TYPE_AUDIO){
+					 //std::cout << "Skipping to frame: " << (int)((pos+1.0f)*((ACAudio*) media_cycle->getLibrary()->getMedia(mediaID))->getNFrames()) << std::endl;
+					 #if defined (SUPPORT_AUDIO)
+					 if(audio_engine){
+					 audio_engine->setLoopSynchroMode(mediaID, ACAudioEngineSynchroModeManual);
+					 audio_engine->setLoopScaleMode(mediaID, ACAudioEngineScaleModeResample);
+					 audio_engine->setScrub(pos+1.0f);
+					 }
+					 #endif //defined (SUPPORT_AUDIO)
+					 }
+					 }*/
+					//renderer->getTrack(selection->getRefId())->setSelectionCenter(xspan*pos/2.0f);
+					#ifdef USE_DEBUG
+					std::cout << "(PUSH) Skipping/Moving to segment " << selection->getElementId() <<" (video track " << selection->getRefId() <<")" << std::endl;
 					#endif
 				}
 			}
@@ -295,20 +318,22 @@ void ACOsgTimelineEventHandler::pick(osgViewer::View* view, const osgGA::GUIEven
 					ACRefId *rid = 0;
 					rid = (ACRefId*)hitr->nodePath.back()->getUserData();
 					//std::cout << "  Widget " << rid->getRefName() << " with object id " << rid->object_id << std::endl;
-					if ( (rid->getRefId() >= 0) && (rid->getRefId() < renderer->getNumberOfTracks()) ){
-					if ((rid->getRefName()=="track selection begin")||(rid->getRefName()=="track selection end")||(rid->getRefName()=="track selection zone")||(rid->getRefName()=="audio track summary waveform")||(rid->getRefName()=="video track summary frames")||(rid->getRefName()=="video track summary slit-scan"))
-					{
+					//if ( (rid->getRefId() >= 0) && (rid->getRefId() < renderer->getNumberOfTracks()) ){
+					//if ((rid->getRefName()=="track selection begin")||(rid->getRefName()=="track selection end")||(rid->getRefName()=="track selection zone")||(rid->getRefName()=="audio track summary waveform")||(rid->getRefName()=="video track summary frames")||(rid->getRefName()=="video track summary slit-scan")||(rid->getRefName()=="video track segments"))
+					//{
 						switch(ea.getEventType())
 						{
 							case(osgGA::GUIEventAdapter::PUSH):
 							{
-								//std::cout << "    Push on " << rid->getRefName() << std::endl;
+								//std::cout << "    Push on '" << rid->getRefName() << "'" << std::endl;
 								if (rid->getRefName()=="track selection begin") selecting_zone_begin = true;
 								else if (rid->getRefName()=="track selection end") selecting_zone_end = true;
 								else if (rid->getRefName()=="track selection zone") selecting_zone = true;
 								else if (rid->getRefName()=="audio track summary waveform") selecting_summary_waveform = true;
 								else if (rid->getRefName()=="video track summary frames") selecting_summary_frames = true;
 								else if (rid->getRefName()=="video track summary slit-scan") selecting_summary_frames = true;
+								//else if (rid->getRefName()=="video track segments") selecting_segments = true;
+								else if (rid->getRefName()=="video track segment") selecting_segments = true;
 
 								//selection = rid;
 								if (selection) {delete selection; selection = 0;}
@@ -329,6 +354,7 @@ void ACOsgTimelineEventHandler::pick(osgViewer::View* view, const osgGA::GUIEven
 								selecting_zone_end = false;
 								selecting_summary_waveform = false;
 								selecting_summary_frames = false;
+								selecting_segments = false;
 								if (selection) {delete selection; selection = 0;}
 								selection_begin = 0.0f;
 								selection_end = 0.0f;
@@ -348,9 +374,9 @@ void ACOsgTimelineEventHandler::pick(osgViewer::View* view, const osgGA::GUIEven
 								break;
 							}
 						}
-					}
-					}
-					//break ; // only pick the first one
+					//}
+					//}
+					break ; // only pick the first one
 				}
 				//printf("picked %s\n", hitr->nodePath.back()->getName().c_str());
 			}

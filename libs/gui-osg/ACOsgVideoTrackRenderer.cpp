@@ -214,8 +214,9 @@ int ACOsgVideoSlitScanThread::computeSlitScan(){
 			//if(f==frame_in)
 			//	slit_scan = cvCreateImage( cvSize(frame_out-frame_in, height), frame->depth, frame->nChannels );
 			int ff = (int) capture->get(CV_CAP_PROP_POS_FRAMES);
-			if (ff!=f) cout << "Mismatch at frame " << ff << " instead of " << f << " (offset:" << ff-f << ")" << endl;
-
+			#ifdef USE_DEBUG
+			//if (ff!=f) cout << "Mismatch at frame " << ff << " instead of " << f << " (offset:" << ff-f << ")" << endl;
+			#endif
 			osg::ref_ptr<osg::Image> frame = Convert_OpenCV_2_osg_Image(openCVframe);
 			if (!frame){
 				cerr << "<ACVideoTrackRenderer::computeSlitScan> problem converting from OpenCV to OSG" << endl;
@@ -485,7 +486,7 @@ ACOsgVideoTrackRenderer::ACOsgVideoTrackRenderer() : ACOsgTrackRenderer() {
 	frames_group = new Group();
 	
 	segments_transform = new MatrixTransform();
-	segments_group = new Group();
+	segments_group = 0;//new Group();
 	
 	#ifdef USE_SLIT_SCAN
 	slit_scan_transform = new MatrixTransform();
@@ -585,7 +586,7 @@ void ACOsgVideoTrackRenderer::playbackGeode() {
 		playback_geode->addDrawable(playback_geometry);
 		playback_transform->addChild(playback_geode);
 		//ref_ptr//playback_transform->ref();
-		playback_geode->setUserData(new ACRefId(track_index,"video track"));
+		playback_geode->setUserData(new ACRefId(track_index,"video track playback"));
 	}
 }
 
@@ -715,21 +716,27 @@ void ACOsgVideoTrackRenderer::framesGeode() {
 		
 		int total_frames = (int) summary_data->get (CV_CAP_PROP_FRAME_COUNT);
 		summary_data->set(CV_CAP_PROP_POS_FRAMES, (int)((f+0.5f)*total_frames/(float)frame_n) );// +0.5f means we're taking the center frame as a representative
+		cv::Mat temp;
+		*summary_data >> temp;
 		cv::Mat tmp;
-		*summary_data >> tmp; 
+		tmp = temp.clone();
 		if(!tmp.data) break;
 					
 			osg::ref_ptr<osg::Image> tmposg = Convert_OpenCV_2_osg_Image(tmp);
-			osg::ref_ptr<osg::Image> thumbnail = new osg::Image;
-			thumbnail->allocateImage(tmposg->s(), tmposg->t(), tmposg->r(), GL_RGB, tmposg->getDataType());
-			osg::copyImage(tmposg, 0, 0, 0, tmposg->s(), tmposg->t(), tmposg->r(),thumbnail, 0, 0, 0, false);
-			
+			osg::Image* thumbnail = new osg::Image;
+			if(tmposg->valid()){
+				thumbnail->allocateImage(tmposg->s(), tmposg->t(), tmposg->r(), GL_RGB, tmposg->getDataType());
+				if(thumbnail->valid())
+					thumbnail = (osg::Image*)tmposg->clone(osg::CopyOp::DEEP_COPY_IMAGES);
+					//osg::copyImage(tmposg, 0, 0, 0, tmposg->s(), tmposg->t(), tmposg->r(),thumbnail, 0, 0, 0, false);
+			}	
 			StateSet *state;
 			Vec3Array* vertices;
 			Vec2Array* texcoord;
 			osg::ref_ptr<Geometry> frame_geometry;
 			Texture2D *frame_texture = new osg::Texture2D;
 			frame_texture->setImage(thumbnail);
+			//frame_texture->setImage(tmposg);
 			frame_texture->setResizeNonPowerOfTwoHint(false);
 			frame_geometry = new Geometry();	
 			
@@ -787,11 +794,14 @@ void ACOsgVideoTrackRenderer::framesGeode() {
 }
 
 void ACOsgVideoTrackRenderer::segmentsGeode() {
+	if(segments_group == 0) segments_group = new Group();
 	segments_group->removeChildren(0,	segments_group->getNumChildren());
 	int segments_n = media->getNumberOfSegments();
 	StateSet *state;
 	
 	float media_length = media->getEnd() - media->getStart();
+	std::cout << "Media duration " << media_length << std::endl;
+	std::cout << "Media frame rate " << media->getFrameRate() << std::endl;
 	
 	for (int s=0;s<segments_n;s++){
 		segments_geodes.resize(segments_geodes.size()+1);
@@ -814,15 +824,22 @@ void ACOsgVideoTrackRenderer::segmentsGeode() {
 		osg::ref_ptr<osg::Vec4Array> segment_colors = new Vec4Array;
 		segment_colors->push_back(segment_color);
 
-		segments_geodes[s]->addDrawable(new osg::ShapeDrawable(new osg::Box(osg::Vec3(-xspan/2.0f+ (media->getSegment(s)->getStart()+media->getSegment(s)->getEnd())/2.0f*xspan/media_length,0.0f,0.0f),(media->getSegment(s)->getEnd()-media->getSegment(s)->getStart())*xspan/media_length,yspan,0.0f), hints));
+		
+		//std::cout << "Segment start " << media->getSegment(s)->getStart() << " end " << media->getSegment(s)->getEnd() << std::endl;
+			
+		//segments_geodes[s]->addDrawable(new osg::ShapeDrawable(new osg::Box(osg::Vec3(-xspan/2.0f+ (media->getSegment(s)->getStart()+media->getSegment(s)->getEnd())/2.0f*xspan/media_length,0.0f,0.0f),(media->getSegment(s)->getEnd()-media->getSegment(s)->getStart())*xspan/media_length,yspan,0.0f), hints));
+		//CF workaround since BIC segmentation sets frames not seconds as start/end
+		segments_geodes[s]->addDrawable(new osg::ShapeDrawable(new osg::Box(osg::Vec3(-xspan/2.0f+ (media->getSegment(s)->getStart()+media->getSegment(s)->getEnd())/2.0f*xspan/media->getFrameRate()/media_length,0.0f,0.0f),(media->getSegment(s)->getEnd()-media->getSegment(s)->getStart())*xspan/media->getFrameRate()/media_length,yspan,0.0f), hints));
+		
 		//std::cout << "Segment " << s << " start " << media->getSegment(s)->getStart()/media_length << " end " << media->getSegment(s)->getEnd()/media_length << " width " << (media->getSegment(s)->getEnd()-media->getSegment(s)->getStart())/media_length << std::endl;
 		((ShapeDrawable*)(segments_geodes[s])->getDrawable(0))->setColor(segment_color);
-		segments_geodes[s]->setUserData(new ACRefId(track_index,"video track segments"));
+		segments_geodes[s]->setUserData(new ACRefId(track_index,"video track segment",s));// s should be replaced by the segment media id
 		//ref_ptr//segments_geodes[s]->ref();
 		segments_group->addChild(segments_geodes[s]);
 	}	
 	if(segments_n>0){
 		//ref_ptr//segments_group->ref();
+		//segments_group->setUserData(new ACRefId(track_index,"video track segments"));
 		segments_transform->addChild(segments_group);
 		//ref_ptr//segments_transform->ref();
 	}	
@@ -844,7 +861,8 @@ void ACOsgVideoTrackRenderer::updateTracks(double ratio)
 		if (media){
 			#ifdef USE_SLIT_SCAN
 			if (slit_scanner){
-				if (slit_scanner->isRunning()) slit_scanner->cancel();
+				if (slit_scanner->isRunning()) 
+					slit_scanner->cancel();
 				delete slit_scanner; slit_scanner=0;
 				slit_scanner = new ACOsgVideoSlitScanThread();
 			}
@@ -889,7 +907,7 @@ void ACOsgVideoTrackRenderer::updateTracks(double ratio)
 			std::cout << getTime()-summary_data_in << " sec." << std::endl;
 			
 			//CF: dummy segments
-			if (media->getNumberOfSegments()==0){
+			/*if (media->getNumberOfSegments()==0){
                 std::cout << "Dummy segments" << std::endl;
 				for (int s=0;s<4;s++){
 					ACMedia* seg = ACMediaFactory::getInstance().create(media);
@@ -907,7 +925,7 @@ void ACOsgVideoTrackRenderer::updateTracks(double ratio)
 				media->getSegment(3)->setStart((media_end-media_start)/2.0f);
 				media->getSegment(3)->setEnd(media_end);
 			}
-            else
+            else*/
                 std::cout << media->getNumberOfSegments() << " segments" << std::endl;
 		}	
 	}
@@ -955,12 +973,12 @@ void ACOsgVideoTrackRenderer::updateTracks(double ratio)
 		}
 		#endif//def USE_SLIT_SCAN
 		
-		if (media && media_changed){
+		if (media ){//&& media_changed){
 			if (media->getNumberOfSegments()>0 && segments_number != media->getNumberOfSegments()){
 				//if (frame_n != floor(width/frame_min_width)){
 				double segments_start = getTime();
 				std::cout << "Generating segments... ";
-				segments_transform->removeChild(segments_group);
+				//segments_transform->removeChild(segments_group);
 				segmentsGeode();
 				std::cout << getTime()-segments_start << " sec." << std::endl;
 				segments_number = media->getNumberOfSegments();

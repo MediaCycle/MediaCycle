@@ -268,6 +268,7 @@ void ACMultiMediaCycleOsgQt::createMediaCycle(ACMediaType _media_type, ACBrowser
 	compositeOsgView->setMediaCycle(this->media_cycle);
 	// SD
 	compositeOsgView->prepareFromBrowser();
+	compositeOsgView->prepareFromTimeline();
 
 	// keep track locally of the media and browser modes
 	this->media_type = _media_type;
@@ -1012,19 +1013,17 @@ void ACMultiMediaCycleOsgQt::loadDefaultConfig(ACMediaType _media_type, ACBrowse
 	
 	// Testing the presence of FFmpeg plugin for OSG before loading the default config
 	if(_media_type == MEDIA_TYPE_VIDEO){
-		osgDB::ReaderWriter* videoReaderWriter = 0;
+		osgDB::ReaderWriter* movReaderWriter = 0;
+		osgDB::ReaderWriter* ffmpegReaderWriter = 0;
 		osgDB::ReaderWriter* pdfReaderWriter = 0;
 		std::string osg_plugin_error ="";
 	
 		if(_media_type == MEDIA_TYPE_VIDEO){
-			#if defined(USE_FFMPEG)
-			videoReaderWriter = osgDB::Registry::instance()->getReaderWriterForExtension("ffmpeg");
-			#else
-			videoReaderWriter = osgDB::Registry::instance()->getReaderWriterForExtension("mov");
-			#endif
+			ffmpegReaderWriter = osgDB::Registry::instance()->getReaderWriterForExtension("ffmpeg");
+			movReaderWriter = osgDB::Registry::instance()->getReaderWriterForExtension("mov");
 			osg_plugin_error = "Video plugins for OpenSceneGraph (FFmpeg or QuickTime or QTKit) are absent but necessary for interactive video navigation. Please install it or contact the MediaCycle team.";
 		}
-		if (_media_type == MEDIA_TYPE_VIDEO && !videoReaderWriter){
+		if (_media_type == MEDIA_TYPE_VIDEO && !ffmpegReaderWriter && !movReaderWriter){
 			for (int d=0;d<dockWidgets.size();d++){
 				if (dockWidgets[d]->getClassName()=="ACMediaConfigDockWidgetQt"){
 					int comboIndex = ((ACMediaConfigDockWidgetQt*)dockWidgets[d])->getComboDefaultSettings()->findText(QString(sMedia.c_str()));

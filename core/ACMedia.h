@@ -134,6 +134,8 @@ public:
 	void setEnd(float en){this->end = en;};
 	float getStart(){return this->start;};
 	float getEnd(){return this->end;};
+	virtual float getFrameRate() {return 0;}//CF video
+	virtual int getSampleRate() {return 0;}//CF audio - merge both?
 	
 	// I/O -- common part
 	// note : ACL deprecated as of spring 2011

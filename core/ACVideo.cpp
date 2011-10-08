@@ -59,6 +59,7 @@ void ACVideo::init()
 	thumbnail_width = 0;
 	thumbnail_height = 0;
 	data=0;
+	fps=0;
 }	
 
 ACVideo::~ACVideo() {
@@ -92,6 +93,7 @@ ACVideo::ACVideo(const ACVideo& m) :ACMedia()/* ACMedia(m)*/ {
 	thumbnail_width = m.thumbnail_width;
 	thumbnail_height = m.thumbnail_height;
 	// Should I copy the thumbnail ?
+	fps = m.fps;
 }	
 
 bool ACVideo::computeThumbnail(int w, int h){
@@ -177,7 +179,7 @@ bool ACVideo::extractData(string _fname){
 	cv::VideoCapture* capture = this->getData();
 	width = (int) capture->get(CV_CAP_PROP_FRAME_WIDTH);
 	height = (int) capture->get(CV_CAP_PROP_FRAME_HEIGHT);
-	int fps     = (int) capture->get(CV_CAP_PROP_FPS);
+	fps     = (float) capture->get(CV_CAP_PROP_FPS);
 	int nframes = (int) capture->get(CV_CAP_PROP_FRAME_COUNT);
 	start = 0.0;
 	if (fps != 0) end = nframes * 1.0/fps;
@@ -201,7 +203,7 @@ void ACVideo::setData(cv::VideoCapture* _data){
 	height = (int) _data->get(CV_CAP_PROP_FRAME_HEIGHT);
 //	this->computeThumbnailSize();
 	
-	int fps     = (int) _data->get(CV_CAP_PROP_FPS);
+	fps     = (int) _data->get(CV_CAP_PROP_FPS);
 	int nframes = (int) _data->get(CV_CAP_PROP_FRAME_COUNT);
 	start = 0.0;
 	if (fps != 0) end = nframes * 1.0/fps;
@@ -250,6 +252,7 @@ void ACVideo::saveXMLSpecific(TiXmlElement* _media){
 	_media->SetDoubleAttribute("Duration", this->getDuration());
 	_media->SetAttribute("Width", width);
 	_media->SetAttribute("Height", height);
+	_media->SetAttribute("FrameRate", fps);
 	_media->SetAttribute("ThumbnailWidth", thumbnail_width);
 	_media->SetAttribute("ThumbnailHeight", thumbnail_height);
 }
@@ -259,6 +262,7 @@ int ACVideo::loadXMLSpecific(TiXmlElement* _pMediaNode){
 	int h=-1;
 	int t_w=-1;
 	int t_h=-1;
+	float _fps=-1;
 
 	// XS TODO is this one necessary ?
 	filename_thumbnail = _pMediaNode->Attribute("thumbnailFileName");
@@ -266,18 +270,36 @@ int ACVideo::loadXMLSpecific(TiXmlElement* _pMediaNode){
 	double t=0;
 	_pMediaNode->QueryDoubleAttribute("Duration", &t);
 	// XS TODO is duration always end-start ?
-
+	this->start = 0;
+	if (t < 0){
+		//throw runtime_error("corrupted XML file, wrong video frame rate");
+		cv::VideoCapture* capture = this->getData();
+		this->end = (double) capture->get(CV_CAP_PROP_FRAME_COUNT) * 1.0/(float) capture->get(CV_CAP_PROP_FPS);
+	}	
+	else{
+		this->end = t;
+	}
+	
 	_pMediaNode->QueryIntAttribute("Width", &w);
 	if (w < 0)
-		throw runtime_error("corrupted XML file, wrong image width");
+		throw runtime_error("corrupted XML file, wrong video width");
 	else
 		this->width = w;
 	
 	_pMediaNode->QueryIntAttribute("Height", &h);
 	if (h < 0)
-		throw runtime_error("corrupted XML file, wrong image height");
+		throw runtime_error("corrupted XML file, wrong video height");
 	else
 		this->height = h;
+	
+	_pMediaNode->QueryFloatAttribute("FrameRate", &_fps);
+	if (_fps < 0){
+		//throw runtime_error("corrupted XML file, wrong video frame rate");
+		cv::VideoCapture* capture = this->getData();
+		this->fps = (float) capture->get(CV_CAP_PROP_FPS);
+	}	
+	else
+		this->fps = _fps;
 	
 	_pMediaNode->QueryIntAttribute("ThumbnailWidth", &t_w);
 	_pMediaNode->QueryIntAttribute("ThumbnailHeight", &t_h);
