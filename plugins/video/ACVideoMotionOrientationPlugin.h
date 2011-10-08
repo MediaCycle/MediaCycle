@@ -44,7 +44,7 @@
 
 //XS TODO : make an ACVideoFeatures Plugin
 // with (ACVideoData *) ACMediaData
-class ACVideoMotionOrientationPlugin : public ACFeaturesPlugin {
+class ACVideoMotionOrientationPlugin : public ACTimedFeaturesPlugin {
 public:
     ACVideoMotionOrientationPlugin();
     ~ACVideoMotionOrientationPlugin();
@@ -53,7 +53,7 @@ public:
 private:	
 	ACVideoAnalysis* videoAn;
 	void clean();
-	std::string mtf_file_name; // file in which features have been saved
+	//std::string mtf_file_name; // file in which features have been saved
 
 };
 

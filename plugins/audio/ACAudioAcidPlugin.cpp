@@ -1,7 +1,7 @@
 /**
  * @brief ACAudioAcidPlugin.cpp
- * @author Xavier Siebert
- * @date 04/10/2011
+ * @author Christian Frisson
+ * @date 08/10/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -35,7 +35,7 @@
 #include <string>
 #include <libgen.h>
 
-ACAudioAcidPlugin::ACAudioAcidPlugin() : ACTimedFeaturesPlugin() {
+ACAudioAcidPlugin::ACAudioAcidPlugin() : ACFeaturesPlugin() {
 	//vars herited from ACPlugin
     this->mMediaType = MEDIA_TYPE_AUDIO;
     this->mName = "AudioAcid";

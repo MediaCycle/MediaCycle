@@ -1,7 +1,7 @@
 /**
  * @brief ACAudioAcidPlugin.h
- * @author Xavier Siebert
- * @date 04/10/2011
+ * @author Christian Frisson
+ * @date 08/10/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -37,7 +37,7 @@
 
 #include<iostream>
 
-class ACAudioAcidPlugin : public ACTimedFeaturesPlugin {
+class ACAudioAcidPlugin : public ACFeaturesPlugin {
 	
 public:
 	ACAudioAcidPlugin();

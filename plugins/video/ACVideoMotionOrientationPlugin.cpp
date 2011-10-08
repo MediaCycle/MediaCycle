@@ -40,7 +40,7 @@
 using namespace std;
 
 // note : this->mDescription will be used for mtf_file_name
-ACVideoMotionOrientationPlugin::ACVideoMotionOrientationPlugin() {
+ACVideoMotionOrientationPlugin::ACVideoMotionOrientationPlugin() : ACTimedFeaturesPlugin(){
     this->mMediaType = MEDIA_TYPE_VIDEO;
     this->mName = "Video MotionOrientation";
     this->mDescription = "MotionOrientation";
@@ -86,11 +86,11 @@ std::vector<ACMediaFeatures*> ACVideoMotionOrientationPlugin::calculate(ACMediaD
 	
 	ACMediaFeatures* mean_mf = new ACMediaFeatures();  
 	mean_mf->setName("Mean of Global Orientations");
+	mean_mf=ps_mtf->mean();
 
 	videoFeatures.push_back(mean_mf);
-	return videoFeatures;
-	
-	
+	//return videoFeatures;
+
 	string aFileName= video_data->getFileName();
 	// XS TODO this will need to be cut and pasted to other plugins
 	// until we re-define the plugins API

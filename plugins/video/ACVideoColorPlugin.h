@@ -41,7 +41,7 @@
 
 //XS TODO : make an ACVideoFeatures Plugin
 // with (ACVideoData *) ACMediaData
-class ACVideoColorPlugin : public ACFeaturesPlugin {
+class ACVideoColorPlugin : public ACTimedFeaturesPlugin {
 public:
     ACVideoColorPlugin();
     ~ACVideoColorPlugin();
@@ -50,7 +50,7 @@ public:
 private:	
 	ACVideoAnalysis* videoAn;
 	void clean();
-	std::string mtf_file_name; // file in which features have been saved
+	//std::string mtf_file_name; // file in which features have been saved
 
 };
 

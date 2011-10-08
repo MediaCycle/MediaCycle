@@ -38,7 +38,7 @@
 using namespace std;
 
 // note : this->mDescription will be used for mtf_file_name
-ACVideoColorPlugin::ACVideoColorPlugin() {
+ACVideoColorPlugin::ACVideoColorPlugin() : ACTimedFeaturesPlugin(){
     //vars herited from ACPlugin
     this->mMediaType = MEDIA_TYPE_VIDEO;
     //this->mPluginType = PLUGIN_TYPE_FEATURES;
