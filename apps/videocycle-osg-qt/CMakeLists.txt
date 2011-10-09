@@ -1,10 +1,6 @@
 SET(TARGET_NAME "videocycle-osg-qt")
 IF ( SUPPORT_VIDEO AND USE_QT4 AND USE_OSG AND USE_OSC )
 
-	IF ( USE_APPLE_MULTITOUCH )
-		INCLUDE_DIRECTORIES( ../../libs/io-applemultitouch)
-	ENDIF ( USE_APPLE_MULTITOUCH )
-
 	IF ( APPLE )
 		SET(APP_TYPE MACOSX_BUNDLE)
 	ENDIF ( APPLE )
@@ -62,9 +58,6 @@ IF ( SUPPORT_VIDEO AND USE_QT4 AND USE_OSG AND USE_OSC )
 	ADD_DEPENDENCIES(videocycle-osg-qt mc_visualisation)
 	ADD_DEPENDENCIES(videocycle-osg-qt mc_video)
 	ADD_DEPENDENCIES(videocycle-osg-qt mc_segmentation)
-	IF ( USE_APPLE_MULTITOUCH )
-		ADD_DEPENDENCIES(videocycle-osg-qt mediacycle-io-applemultitouch)
-	ENDIF ( USE_APPLE_MULTITOUCH )
 
 	TARGET_LINK_LIBRARIES(videocycle-osg-qt mediacycle)
 	TARGET_LINK_LIBRARIES(videocycle-osg-qt mediacycle-osg)
@@ -83,11 +76,22 @@ IF ( SUPPORT_VIDEO AND USE_QT4 AND USE_OSG AND USE_OSC )
 
 	IF ( APPLE )
 		SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -framework CoreVideo -framework AppKit -framework Foundation -framework AudioToolbox")
-		IF ( USE_APPLE_MULTITOUCH )
-			SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /System/Library/PrivateFrameworks/MultitouchSupport.framework/MultitouchSupport")
-			TARGET_LINK_LIBRARIES(videocycle-osg-qt mediacycle-io-applemultitouch)
-		ENDIF ( USE_APPLE_MULTITOUCH )
 	ENDIF ( APPLE )
+	
+		# Packaging
+	IF(NOT USE_DEBUG AND (APPLE OR UNIX))
+		SET(USE_AUDIO OFF)
+		SET(USE_IMAGE OFF)
+		SET(USE_VIDEO ON)
+		SET(USE_3DMODEL OFF)
+		SET(USE_TEXT OFF)
+		SET(USE_ARCHIPEL OFF)
+
+		SET(PROGNAME "videocycle-osg-qt")
+        SET(MC_PACKAGE_DESCRIPTION_SUMMARY "MultiMediaCycle allows to organize media files by similarity.")
+		SET(WITH_QT4 ON)
+		INCLUDE (${CMAKE_SOURCE_DIR}/CMakeModules/CreatePackage.cmake)
+	ENDIF()
 
 	MESSAGE("[X] ${TARGET_NAME}")
 ELSE()

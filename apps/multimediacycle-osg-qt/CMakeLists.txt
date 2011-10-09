@@ -7,6 +7,10 @@ IF(USE_QT4 AND USE_OSG AND USE_OSC )
 			SET(APP_TYPE WIN32)
 		ENDIF()
 	ENDIF()
+	
+	IF ( USE_APPLE_MULTITOUCH AND NOT USE_DEBUG )
+		INCLUDE_DIRECTORIES( ../../libs/io-applemultitouch)
+	ENDIF ( USE_APPLE_MULTITOUCH AND NOT USE_DEBUG )
 
 	SET(multimediacycle-osg-qt_SRCS main.cpp ACMultiMediaCycleOsgQt.cpp)
 	SET(multimediacycle-osg-qt_MOC_HDRS ACMultiMediaCycleOsgQt.h)
@@ -50,6 +54,9 @@ IF(USE_QT4 AND USE_OSG AND USE_OSC )
 	ADD_DEPENDENCIES(multimediacycle-osg-qt mediacycle-io-osc)
 	ADD_DEPENDENCIES(multimediacycle-osg-qt mediacycle-osg)
 	ADD_DEPENDENCIES(multimediacycle-osg-qt mediacycle-osg-qt)
+	IF ( USE_APPLE_MULTITOUCH AND NOT USE_DEBUG )
+		ADD_DEPENDENCIES(multimediacycle-osg-qt mediacycle-io-applemultitouch)
+	ENDIF ( USE_APPLE_MULTITOUCH AND NOT USE_DEBUG )
 	
 	# Plugins
 	IF(SUPPORT_AUDIO)
@@ -70,19 +77,9 @@ IF(USE_QT4 AND USE_OSG AND USE_OSC )
 	ENDIF()
 	ADD_DEPENDENCIES(multimediacycle-osg-qt mc_segmentation)
 	ADD_DEPENDENCIES(multimediacycle-osg-qt mc_visualisation)
-	IF(APPLE)
-		#TARGET_LINK_LIBRARIES(multimediacycle-osg-qt mc_segmentation) # hack to get the plugin copied into the app bundle on OSX
-		#TARGET_LINK_LIBRARIES(multimediacycle-osg-qt mc_visualisation) # hack to get the plugin copied into the app bundle on OSX
-	ENDIF()
 	if (SUPPORT_ARCHIPEL)
 		ADD_DEPENDENCIES(multimediacycle-osg-qt mc_archipel)
 	ENDIF()
-
-
-	#IF ( APPLE )
-	#	set_target_properties(multimediacycle-osg-qt PROPERTIES MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/Info.plist)
-	#	set_source_files_properties(PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
-	#ENDIF ( APPLE )
 
 	TARGET_LINK_LIBRARIES(multimediacycle-osg-qt mediacycle)
 	TARGET_LINK_LIBRARIES(multimediacycle-osg-qt mediacycle-osg)
@@ -102,10 +99,16 @@ IF(USE_QT4 AND USE_OSG AND USE_OSC )
 			TARGET_LINK_LIBRARIES(multimediacycle-osg-qt ${PORTAUDIO_LIBRARIES} pthread)
 		ENDIF()
 	ENDIF()
+	
 	IF ( APPLE )
-		set(CMAKE_EXE_LINKER_FLAGS "-framework CoreVideo -framework AppKit -framework Foundation")
+		SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -framework CoreVideo -framework AppKit -framework Foundation -framework AudioToolbox")
+		IF ( USE_APPLE_MULTITOUCH AND NOT USE_DEBUG)
+			SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /System/Library/PrivateFrameworks/MultitouchSupport.framework/MultitouchSupport")
+			TARGET_LINK_LIBRARIES(multimediacycle-osg-qt mediacycle-io-applemultitouch)
+		ENDIF ( USE_APPLE_MULTITOUCH AND NOT USE_DEBUG )
 	ENDIF ( APPLE )
 
+	# Packaging
 	IF(NOT USE_DEBUG AND (APPLE OR UNIX))
 		IF(SUPPORT_AUDIO)
 			SET(USE_AUDIO ON)
@@ -121,6 +124,9 @@ IF(USE_QT4 AND USE_OSG AND USE_OSC )
 		ENDIF()
 		IF(SUPPORT_TEXT)
 			SET(USE_TEXT ON)
+		ENDIF()	
+		IF(SUPPORT_ARCHIPEL)
+			SET(USE_ARCHIPEL ON)
 		ENDIF()	
 
 		SET(PROGNAME "multimediacycle-osg-qt")

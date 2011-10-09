@@ -1,9 +1,5 @@
 SET(TARGET_NAME "archipelcycle-osg-qt")
-IF ( SUPPORT_ARCHIPEL AND SUPPORT_MULTIMEDIA AND USE_QT4 AND USE_OSG )
-
-	IF ( USE_APPLE_MULTITOUCH )
-		INCLUDE_DIRECTORIES( ../../libs/io-applemultitouch)
-	ENDIF ( USE_APPLE_MULTITOUCH )
+IF ( SUPPORT_ARCHIPEL AND SUPPORT_MULTIMEDIA AND SUPPORT_AUDIO AND SUPPORT_IMAGE AND SUPPORT_TEXT AND USE_QT4 AND USE_OSG )
 
 	IF ( APPLE )
 		SET(APP_TYPE MACOSX_BUNDLE)
@@ -55,32 +51,29 @@ IF ( SUPPORT_ARCHIPEL AND SUPPORT_MULTIMEDIA AND USE_QT4 AND USE_OSG )
 	ADD_DEPENDENCIES(archipelcycle-osg-qt mc_visualisation)
 	ADD_DEPENDENCIES(archipelcycle-osg-qt mc_text mc_text_sparse mc_SparseVisualisation)
 	ADD_DEPENDENCIES(archipelcycle-osg-qt mc_audio mc_image mc_archipel archipel)	
-	IF ( USE_APPLE_MULTITOUCH )
-		ADD_DEPENDENCIES(archipelcycle-osg-qt mediacycle-io-applemultitouch)
-	ENDIF ( USE_APPLE_MULTITOUCH )
-
-	#IF ( APPLE )
-	#	set_target_properties(archipelcycle-osg-qt PROPERTIES MACOSX_BUNDLE_INFO_PLIST ${CMAKE_SOURCE_DIR}/gui/osg-qt/Info.plist)
-	#	set_source_files_properties(PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
-	#ENDIF ( APPLE )
 
 	TARGET_LINK_LIBRARIES(archipelcycle-osg-qt mediacycle)
 	TARGET_LINK_LIBRARIES(archipelcycle-osg-qt mediacycle-osg)
 	TARGET_LINK_LIBRARIES(archipelcycle-osg-qt mediacycle-osg-qt)
 
-	#TARGET_LINK_LIBRARIES(archipelcycle-osg-qt ${OPENSCENEGRAPH_LIBRARIES})
-	#TARGET_LINK_LIBRARIES(archipelcycle-osg-qt ${OPENGL_LIBRARIES})
-	#TARGET_LINK_LIBRARIES(archipelcycle-osg-qt ${Boost_SYSTEM_LIBRARY})
-	#TARGET_LINK_LIBRARIES(archipelcycle-osg-qt ${QT_LIBRARIES})
-	#TARGET_LINK_LIBRARIES(archipelcycle-osg-qt ${QT4_LIBRARY} ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY} ${QT_QTOPENGL_LIBRARY} )
-
 	IF ( APPLE )
 		SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -framework CoreVideo -framework AppKit -framework Foundation")
-		IF ( USE_APPLE_MULTITOUCH )
-			SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /System/Library/PrivateFrameworks/MultitouchSupport.framework/MultitouchSupport")
-			TARGET_LINK_LIBRARIES(archipelcycle-osg-qt mediacycle-io-applemultitouch)
-		ENDIF ( USE_APPLE_MULTITOUCH )
 	ENDIF ( APPLE )
+	
+	# Packaging
+	IF(NOT USE_DEBUG AND (APPLE OR UNIX))
+		SET(USE_AUDIO ON)
+		SET(USE_IMAGE ON)
+		SET(USE_VIDEO OFF)
+		SET(USE_3DMODEL OFF)
+		SET(USE_TEXT ON)
+		SET(USE_ARCHIPEL ON)
+
+		SET(PROGNAME "archipelcycle-osg-qt")
+        SET(MC_PACKAGE_DESCRIPTION_SUMMARY "An attempt to complement the Archipel database from La Mediatheque (Belgium) with the MediaCycle organization of media files by similarity.")
+		SET(WITH_QT4 ON)
+		INCLUDE (${CMAKE_SOURCE_DIR}/CMakeModules/CreatePackage.cmake)
+	ENDIF()
 
 	MESSAGE("[X] ${TARGET_NAME}")
 ELSE()
