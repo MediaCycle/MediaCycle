@@ -42,31 +42,50 @@
 USE_GRAPHICSWINDOW()
 #endif
 
-// ----------- callbacks
+ACQProgressBar::ACQProgressBar(QWidget *parent)
+:   QProgressBar(parent){
+	this->setMinimum(0);
+	this->setFormat("Loading file %v/%m");// due to Apple standards the progress bar won't display this, it does under Ubuntu
+}
+
+void ACQProgressBar::loading_started()
+{
+	this->reset();
+	this->show();
+}
+	
+void ACQProgressBar::loading_finished()
+{
+	this->reset();
+	this->hide();
+}
+
+void ACQProgressBar::loading_file(int media_id, int dir_size)
+{
+	this->setMaximum(dir_size);
+	this->setValue(media_id);
+}
 
 static void mediacycle_callback(const char* message, void *user_data) {
 
 	ACMultiMediaCycleOsgQt *application = (ACMultiMediaCycleOsgQt*)user_data;
-
 	application->mediacycleCallback(message);
 }
 
-void ACMultiMediaCycleOsgQt::mediacycleCallback(const char* message) {
+void ACMultiMediaCycleOsgQt::mediacycleCallback(const char* message)
+{
 	std::string mess = std::string(message);
-	
-	if (message=="loaddirstart") {
-		statusBar()->showMessage(tr("Loading Directory..."), 0);
-		progressBar->reset();
-		progressBar->show();
+	std::string send = "";
+	if (mess=="loaddirstart") {
+		send = "Loading Directory...";
+		emit mediacycle_message_changed(QString(send.c_str()));
+		emit loading_started();
 	}
-
-	if (message=="loaddirfinish") {
-		this->updateLibrary();
-		statusBar()->clearMessage();
-		progressBar->reset();
-		progressBar->hide();
+	if (mess=="loaddirfinish") {
+		send = "";
+		emit mediacycle_message_changed(QString(send.c_str()));
+		emit loading_finished();
 	}
-	
 	if(mess.find("importing_media_",0)!=string::npos){
 		// Looking for "importing_media_<media_id>_<dir_size>" patterns
 		// note that this "mess" won't happen with a nicer observer pattern and signals/slots transmitting variable arguments sizes and types
@@ -88,20 +107,19 @@ void ACMultiMediaCycleOsgQt::mediacycleCallback(const char* message) {
 					std::cerr << "ACMediaCycleOsgQt: wrong dir size"  << std::endl;
 				if(media_id != -1 && dir_size != -1){
 					std::cout << std::endl << std::endl << "importing media " << media_id << "/" << (dir_size-1) << std::endl;
+					if(media_id==1)
+						this->configurePluginDock();
 					if (progressBar){
-						progressBar->setMinimum(0);
-						progressBar->setMaximum(dir_size);
-						progressBar->setValue(media_id+1);// "+1" since it starts at 0
-						progressBar->setFormat("%v/%m");
+						emit loading_file(media_id+1,dir_size);
 						stringstream status_message;
 						status_message << "Loading File " << media_id+1 << "/" << dir_size;
-						//TODO: this line crashes on linux (segfault). AM: tested on ubuntu 10.04
-						statusBar()->showMessage(tr(status_message.str().c_str()), 0);
+						send = status_message.str();
+						emit mediacycle_message_changed(QString(send.c_str()));
 					}	
 				}	
 			}
 		}
-	}	
+	}
 }
 
 // ----------- 
@@ -183,14 +201,24 @@ ACMultiMediaCycleOsgQt::ACMultiMediaCycleOsgQt(QWidget *parent) : QMainWindow(pa
 	compositeOsgView->setSizePolicy ( QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding );
 	osgViewDockLayout->addWidget(compositeOsgView);
 
-	progressBar = new QProgressBar();		
+	progressBar = new ACQProgressBar(); //QProgressBar();		
 	osgViewDockLayout->addWidget(progressBar);
 	
 	// to make window appear on top of others.
 	this->activateWindow();
 	this->showMaximized();//this->show();
 	
-	progressBar->hide();	
+	progressBar->hide();
+	#ifdef __APPLE__ // due to Apple standards the progress bar won't display any overlaid message, while it is the case under Ubuntu
+	connect( this, SIGNAL( mediacycle_message_changed(QString) ),
+			this->statusBar(), SLOT(message(QString) ) );
+	#endif
+	connect( this, SIGNAL( loading_started() ),
+			this->progressBar, SLOT(loading_started() ) );
+	connect( this, SIGNAL( loading_finished() ),
+			this->progressBar, SLOT(loading_finished() ) );
+	connect( this, SIGNAL( loading_file(int,int) ),
+			this->progressBar, SLOT(loading_file(int,int) ) );
 	
 	// Debugging accentuated media filenames
 	#ifdef USE_DEBUG

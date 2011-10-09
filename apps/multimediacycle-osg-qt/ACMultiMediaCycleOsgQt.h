@@ -72,6 +72,18 @@ public:
 	ACDetachedMediaBrowserOsgQt(QWidget *parent = 0): QMainWindow(parent){};
 };
 
+class ACQProgressBar : public QProgressBar {
+Q_OBJECT
+public:
+	ACQProgressBar(QWidget *parent = 0);
+	~ACQProgressBar(){};
+	
+	public slots:
+		void loading_started();
+		void loading_finished();
+		void loading_file(int media_id, int dir_size);
+};
+
 class ACMultiMediaCycleOsgQt : public QMainWindow {
 Q_OBJECT
 	
@@ -149,7 +161,13 @@ public:
 	void switchPluginVisualizations(bool _status);// disable/enable visualization from plugins when (failing) loading visualization plugins and changing media types
 	
 	void autoConnectOSC(bool _status = true);
-	
+
+signals:	
+	void mediacycle_message_changed(QString mess);
+	void loading_started();
+	void loading_finished();
+	void loading_file(int media_id, int dir_size);
+
 private:
 	// variables
 	Ui::ACMediaCycleOsgQt ui;
@@ -198,7 +216,8 @@ private:
 	QVBoxLayout *osgViewDockLayout;
 	QWidget* osgViewDockTitleBar;
 	QRect osgViewDockNormalSize;
-	QProgressBar* progressBar;
+	//QProgressBar* progressBar;
+	ACQProgressBar* progressBar;
 	
 	bool use_segmentation_current,use_segmentation_default,use_feature_extraction,use_visualization_plugins;
 	bool auto_connect_osc;
