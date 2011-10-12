@@ -364,10 +364,18 @@ IF(APPLE)#to generalize for other platforms
 		INSTALL(PROGRAMS "${CMAKE_BINARY_DIR}/plugins/3Dmodel/mc_3Dmodel.dylib" DESTINATION ${PROGNAME}.app/Contents/MacOS COMPONENT Runtime)
 		SET(MCPLUGINS "${MCPLUGINS}" "${CMAKE_INSTALL_PREFIX}/${PROGNAME}.app/Contents/MacOS/mc_3Dmodel.dylib")
 	ENDIF()
-	#IF(SUPPORT_TEXT AND USE_TEXT) # needs adaptation for TR's plugins
-	#	INSTALL(PROGRAMS "${CMAKE_BINARY_DIR}/plugins/...dylib" DESTINATION ${PROGNAME}.app/Contents/MacOS COMPONENT Runtime)
-	#	SET(MCPLUGINS "${MCPLUGINS}" "${CMAKE_INSTALL_PREFIX}/${PROGNAME}.app/Contents/MacOS/mc_....dylib")
-	#ENDIF()
+	IF(SUPPORT_TEXT AND USE_TEXT)
+		INSTALL(PROGRAMS "${CMAKE_BINARY_DIR}/plugins/text/mc_text.dylib" DESTINATION ${PROGNAME}.app/Contents/MacOS COMPONENT Runtime)
+		SET(MCPLUGINS "${MCPLUGINS}" "${CMAKE_INSTALL_PREFIX}/${PROGNAME}.app/Contents/MacOS/mc_text.dylib")
+		INSTALL(PROGRAMS "${CMAKE_BINARY_DIR}/plugins/text_sparse/mc_text_sparse.dylib" DESTINATION ${PROGNAME}.app/Contents/MacOS COMPONENT Runtime)
+		SET(MCPLUGINS "${MCPLUGINS}" "${CMAKE_INSTALL_PREFIX}/${PROGNAME}.app/Contents/MacOS/mc_text_sparse.dylib")
+		INSTALL(PROGRAMS "${CMAKE_BINARY_DIR}/plugins/SparseVisualisation/mc_SparseVisualisation.dylib" DESTINATION ${PROGNAME}.app/Contents/MacOS COMPONENT Runtime)
+		SET(MCPLUGINS "${MCPLUGINS}" "${CMAKE_INSTALL_PREFIX}/${PROGNAME}.app/Contents/MacOS/mc_SparseVisualisation.dylib")
+	ENDIF()
+	IF(SUPPORT_ARCHIPEL AND USE_ARCHIPEL)
+		INSTALL(PROGRAMS "${CMAKE_BINARY_DIR}/plugins/archipel/mc_archipel.dylib" DESTINATION ${PROGNAME}.app/Contents/MacOS COMPONENT Runtime)
+		SET(MCPLUGINS "${MCPLUGINS}" "${CMAKE_INSTALL_PREFIX}/${PROGNAME}.app/Contents/MacOS/mc_archipel.dylib")
+	ENDIF()
 ENDIF()
 
 #--------------------------------------------------------------------------------
