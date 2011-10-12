@@ -21,21 +21,14 @@ public:
     bool isFormatAvailable() const { return m_format!=NULL; }
     
     AVInputFormat* getFormat() { return m_format; }
-#if LIBAVFORMAT_BUILD < LIBAVFORMAT_BUILD_PARAM2DICT
     AVFormatParameters* getFormatParameter() { return &m_parameters; }
-#else 
-    AVDictionary* getDictionary() { return m_dictionary; }
-#endif
+    
     void parse(const std::string& name, const std::string& value);
 
 protected:
 
     AVInputFormat* m_format;
-#if LIBAVFORMAT_BUILD < LIBAVFORMAT_BUILD_PARAM2DICT
     AVFormatParameters m_parameters;
-#else
-    AVDictionary *m_dictionary;
-#endif
 };
 
 

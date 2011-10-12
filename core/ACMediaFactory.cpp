@@ -101,10 +101,10 @@ ACMediaFactory::ACMediaFactory(){
 	}
 	useAvailableFileExtensions();
 	//useKnownFileExtensions(); //TRY (but don't commit) this instead of the above if library extensions parsing doesn't work, for debugging
-	/*listSupportedMediaExtensions();
+	//listSupportedMediaExtensions();
 	#ifdef USE_DEBUG
-	listUncheckedMediaExtensions();
-	#endif //def USE_DEBUG*/
+	//listUncheckedMediaExtensions();
+	#endif //def USE_DEBUG
 	
 }
 
@@ -792,6 +792,11 @@ void ACMediaFactory::addAvailableSndFileExtensions(){
 
 #if defined (SUPPORT_IMAGE) || defined(SUPPORT_VIDEO) || defined(SUPPORT_3DMODEL) || defined(SUPPORT_PDF)
 void ACMediaFactory::addAvailableOsgFileExtensions(){
+	
+	// The osgdb_ffmpeg plugin uses thread locking since 3.0.1
+	// Calling the following line is necessary to avoid a crash by ensuring the osgBD registry thread initiates the lock
+	osgDB::ReaderWriter* ffmpegReaderWriter = osgDB::Registry::instance()->getReaderWriterForExtension("ffmpeg");
+	
 	#ifdef PARSE_OSG_PLUGINS_VERBOSE
 	std::cout << "Gathering media file extensions from OSG plugins..." << std::endl;
 	#endif//def PARSE_OSG_PLUGINS_VERBOSE

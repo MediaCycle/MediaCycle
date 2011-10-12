@@ -63,7 +63,7 @@ public:
 
 #ifdef USE_AV_LOCK_MANAGER
         // enable thread locking
-        //av_lockmgr_register(&lockMgr);
+		av_lockmgr_register(&lockMgr);
 #endif
         // Register all FFmpeg formats/codecs
         av_register_all();
