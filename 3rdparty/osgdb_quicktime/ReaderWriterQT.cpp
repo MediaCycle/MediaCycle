@@ -164,7 +164,7 @@ public:
     }
 
 
-   virtual const char* className() const { return "Default Quicktime Image Reader/Writer"; }
+   virtual const char* className() const { return "Default Quicktime Image Reader/Writer (MediaCycle fork)"; }
 
    virtual bool acceptsMovieExtension(const std::string& extension) const
    {

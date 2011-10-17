@@ -75,7 +75,7 @@ public:
 
     virtual const char * className() const
     {
-        return "ReaderWriterFFmpeg";
+        return "ReaderWriterFFmpeg (MediaCycle fork)";
     }
 
     virtual ReadResult readImage(const std::string & filename, const osgDB::ReaderWriter::Options* options) const
