@@ -68,7 +68,7 @@ std::vector<ACMediaFeatures*> ACVideoMotionOrientationPlugin::calculate(ACMediaD
 	
 	videoAn = new ACVideoAnalysis(video_data);
 	videoAn->computeGlobalOrientation();
-	vector<float> t = videoAn->getGlobalTimeStamps();
+	vector<float> t = videoAn->getTimeStamps();
 	std::vector<float> angles = videoAn->getGlobalOrientations();
 	ACMediaTimedFeature* ps_mtf = new ACMediaTimedFeature(t,angles, "Global Orientations");
 
@@ -89,7 +89,6 @@ std::vector<ACMediaFeatures*> ACVideoMotionOrientationPlugin::calculate(ACMediaD
 	mean_mf=ps_mtf->mean();
 
 	videoFeatures.push_back(mean_mf);
-	//return videoFeatures;
 
 	string aFileName= video_data->getFileName();
 	// XS TODO this will need to be cut and pasted to other plugins
@@ -105,7 +104,6 @@ std::vector<ACMediaFeatures*> ACVideoMotionOrientationPlugin::calculate(ACMediaD
 		ps_mtf->saveInFile(mtf_file_name, save_binary);
 	}
 		
-	videoFeatures.push_back(mean_mf);
 	return videoFeatures;
 	
 }

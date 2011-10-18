@@ -73,7 +73,7 @@ std::vector<ACMediaFeatures*> ACVideoPixelSpeedPlugin::calculate(ACMediaData* vi
 
 	videoAn = new ACVideoAnalysis(video_data);
 	videoAn->computeGlobalPixelsSpeed();
-	vector<float> t = videoAn->getGlobalTimeStamps();
+	vector<float> t = videoAn->getTimeStamps();
 	vector<float> s = videoAn->getGlobalPixelsSpeeds();
 	string aFileName= video_data->getFileName();
 	

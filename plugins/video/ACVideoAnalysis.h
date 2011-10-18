@@ -53,174 +53,241 @@ class ACVideoAnalysis {
 public:
     ACVideoAnalysis();
     ACVideoAnalysis(const std::string &filename);
-	ACVideoAnalysis(ACMediaData* media_data);
+    ACVideoAnalysis(ACMediaData* media_data);
 
     ~ACVideoAnalysis();
-	
-	// general I/O, settings
-	void clean();
-	void rewind();
-	void setFileName(const std::string &filename);
-	int initialize();
-	void writeToFile(const std::string &fileout, int w=320, int h=240, int nskip=0, int istep=1);
 
-	//accessors 
-	inline int getWidth() {return width;}
-	inline int getHeight() {return height;}
-	std::string getFileName() {return file_name;}
-	std::string getColorModel(){return color_model;}
-	inline int getDepth() {return depth;}
-	inline int getNumberOfFrames() {return nframes;}
-	float getDuration();
+    // general I/O, settings
+    void clean();
+    void rewind();
+    void setFileName(const std::string &filename);
+    int initialize();
+    void writeToFile(const std::string &fileout, int w = 320, int h = 240, int nskip = 0, int istep = 1);
 
-	bool isTrajectoryComputed(){return HAS_TRAJECTORY;}
-	bool areBlobsComputed(){return HAS_BLOBS;}
-	
-	// utilities
-	cv::Mat getFrame(int i);
-	void setFramePosition(int pos);
-	int getFramePosition();
+    //accessors
 
-//	IplImage* computeAverageImage(int nskip = 0, int nread = 0, int njump = -1, std::string s =""); 
-	cv::Mat computeMedianImage(int nskip = 0, int nread = 0, int njump = -1, std::string s =""); 
-//	IplImage* computeMedianNoBlobImage(std::string s ="",IplImage *first_guess=0);
-	void backgroundSubstraction(IplImage* bg_img, int nskip=0, std::string cmode="BGR");
-	// blob detection could be per channel or in color image
-	//	void detectBlobs(int ichannel=0, std::string cmode="HSV", IplImage* bg_img=0, int bg_thesh=40, int big_blob=200, int small_blob=0);
-	
-	// XS not so useful
-	// XS eventually translate into 2.* (started...)
-	//void histogramEqualize(const IplImage* bg_img);
-	
-	// raw features computation
-	//   - on blobs
-	void computeBlobs(const cv::Mat&bg_img=cv::Mat(), int bg_thesh=10, int big_blob=200, int small_blob=0);
-// XS 280611 removed the following one for the moment (migration openCV 2.*)	
-//	void computeBlobsInteractively(IplImage* bg_img=0, bool merge_blobs=false, int bg_thesh=20, int big_blob=200, int small_blob=0);
-	void computeBlobsUL(const cv::Mat& bg_img=cv::Mat(), bool merge_blobs=true, int big_blob=200, int small_blob=0);
-	//   - general (not on blobs)
-//	void computeOpticalFlow();
+    inline int getWidth() {
+        return width;
+    }
 
-	void computeContractionIndices();
-	void computeBoundingBoxRatios();
-	void computeBlobPixelSpeed();
-	void computeGlobalPixelsSpeed();
-	void computeColorMoments(int n=4, string cm = "HSV");
-	void computeHuMoments(int tresh=0, cv::Mat bg_img=cv::Mat()); // with background subtraction
-	void computeFourierPolarMoments(int RadialBins=5, int AngularBins=8); // without background subtraction
-	void computeFourierMellinMoments(); // without background subtraction
-	// XS TODO port 2.*
-//	void computeImageHistograms(int w=10, int h=10); // image histogram, turned into a 1D vector
-	#if CV_MIN_VERSION_REQUIRED(2,3,0)
-	void computeGlobalOrientation();
-	#endif
-	// features manipulation
-	void mergeBlobs(float blob_dist = 0);
-	void computeMergedBlobsTrajectory(float blob_dist = 0);
-	void computeMergedBlobsSpeeds(float blob_dist = 0);
-//	void computeCellOccupation(int nx, int ny);
+    inline int getHeight() {
+        return height;
+    }
+
+    std::string getFileName() {
+        return file_name;
+    }
+
+    std::string getColorModel() {
+        return color_model;
+    }
+
+    inline int getDepth() {
+        return depth;
+    }
+
+    inline int getNumberOfFrames() {
+        return nframes;
+    }
+    float getDuration();
+
+    bool isTrajectoryComputed() {
+        return HAS_TRAJECTORY;
+    }
+
+    bool areBlobsComputed() {
+        return HAS_BLOBS;
+    }
+
+    // utilities
+    cv::Mat getFrame(int i);
+    void setFramePosition(int pos);
+    int getFramePosition();
+
+    //	IplImage* computeAverageImage(int nskip = 0, int nread = 0, int njump = -1, std::string s ="");
+    cv::Mat computeMedianImage(int nskip = 0, int nread = 0, int njump = -1, std::string s = "");
+    //	IplImage* computeMedianNoBlobImage(std::string s ="",IplImage *first_guess=0);
+    void backgroundSubstraction(IplImage* bg_img, int nskip = 0, std::string cmode = "BGR");
+    // blob detection could be per channel or in color image
+    //	void detectBlobs(int ichannel=0, std::string cmode="HSV", IplImage* bg_img=0, int bg_thesh=40, int big_blob=200, int small_blob=0);
+
+    // XS not so useful
+    // XS eventually translate into 2.* (started...)
+    //void histogramEqualize(const IplImage* bg_img);
+
+    // raw features computation
+    //   - on blobs
+    void computeBlobs(const cv::Mat&bg_img = cv::Mat(), int bg_thesh = 10, int big_blob = 200, int small_blob = 0);
+    // XS 280611 removed the following one for the moment (migration openCV 2.*)
+    //	void computeBlobsInteractively(IplImage* bg_img=0, bool merge_blobs=false, int bg_thesh=20, int big_blob=200, int small_blob=0);
+    void computeBlobsUL(const cv::Mat& bg_img = cv::Mat(), bool merge_blobs = true, int big_blob = 200, int small_blob = 0);
+    //   - general (not on blobs)
+    //	void computeOpticalFlow();
+
+    void computeContractionIndices();
+    void computeBoundingBoxRatios();
+    void computeBlobPixelSpeed();
+    void computeGlobalPixelsSpeed();
+    void computeColorMoments(int n = 4, string cm = "HSV");
+    void computeHuMoments(int tresh = 0, cv::Mat bg_img = cv::Mat()); // with background subtraction
+    void computeFourierPolarMoments(int RadialBins = 5, int AngularBins = 8); // without background subtraction
+    void computeFourierMellinMoments(); // without background subtraction
+    // XS TODO port 2.*
+    //	void computeImageHistograms(int w=10, int h=10); // image histogram, turned into a 1D vector
+#if CV_MIN_VERSION_REQUIRED(2,3,0)
+    void computeGlobalOrientation();
+#endif
+    // features manipulation
+    void mergeBlobs(float blob_dist = 0);
+    void computeMergedBlobsTrajectory(float blob_dist = 0);
+    void computeMergedBlobsSpeeds(float blob_dist = 0);
+    //	void computeCellOccupation(int nx, int ny);
+
+    // features accessors (to be called by ACVideoDancersPlugin)
+
+    std::vector<blob_center> getMergedBlobsTrajectory() {
+        return blob_centers;
+    }
+
+    std::vector<blob_center> getMergedBlobsSpeeds() {
+        return blob_speeds;
+    }
+    std::vector<blob_center> getNormalizedMergedBlobsTrajectory();
+    std::vector<blob_center> getNormalizedMergedBlobsSpeeds();
+
+    std::vector<float> getContractionIndices() {
+        return contraction_indices;
+    }
+
+    std::vector<float> getBlobPixelsSpeeds() {
+        return blob_pixel_speeds;
+    }
+
+    std::vector<float> getGlobalPixelsSpeeds() {
+        return global_pixel_speeds;
+    }
+
+    std::vector<float> getBoundingBoxRatios() {
+        return bounding_box_ratios;
+    }
+
+    std::vector<float> getGlobalOrientations() {
+        return global_orientations;
+    }
+
+    std::vector<float> getTimeStamps() {
+        return time_stamps;
+    }
+
+    std::vector<int> getFrameStamps() {
+        return frame_stamps;
+    }
+
+    // XS or float* (dim 7)
+
+    std::vector<std::vector<float> > getRawMoments() {
+        return raw_moments;
+    }
+
+    std::vector<std::vector<float> > getHuMoments() {
+        return hu_moments;
+    }
+    std::vector<float> getHuMoment(int i);
+
+    std::vector<std::vector<float> > getFourierPolarMoments() {
+        return fourier_polar_moments;
+    }
+
+    std::vector<std::vector<float> > getFourierMellinMoments() {
+        return fourier_mellin_moments;
+    }
+
+    std::vector<std::vector<float> > getColorMoments() {
+        return color_moments;
+    }
+
+    std::vector<std::vector<float> > getImageHistograms() {
+        return image_histograms;
+    }
+
+    // saves stuff in file
+    void dumpTrajectory(std::ostream &odump);
+    void dumpContractionIndices(std::ostream &odump);
+    void dumpBoundingBoxRatios(std::ostream &odump);
+    void dumpBlobSpeed(std::ostream &odump);
+    void dumpRawMoments(std::ostream &odump);
+    void dumpHuMoments(std::ostream &odump);
+    void dumpFourierPolarMoments(std::ostream &odump);
+    void dumpAll(std::ostream &odump);
+
+    // for display (ifdef VISUAL_CHECK) using highgui
+    void showInWindow(std::string title, bool has_win = false);
+    void showFFTInWindow(std::string title, bool has_win = false);
+    void showFrameInWindow(std::string title, const cv::Mat& frame, bool has_win = true);
+
+    // fancy browsing with trackbar to set position
+    static void onTrackbarSlide(int, void*); // callback needs to be static or global
+    void browseWithTrackbarInWindow(std::string title, bool has_win = false);
+    // ?	void showBlobsInWindow(std::string="VIDEO", bool has_win=false);
 
 
-	// features accessors (to be called by ACVideoDancersPlugin)
-	std::vector<blob_center> getMergedBlobsTrajectory() {return blob_centers;}
-	std::vector<blob_center> getMergedBlobsSpeeds() {return blob_speeds;}
-	std::vector<blob_center> getNormalizedMergedBlobsTrajectory();
-	std::vector<blob_center> getNormalizedMergedBlobsSpeeds();
+    //handy - remove path, keeps only filename
+    std::string extractFilename(std::string path);
 
-	std::vector<float> getContractionIndices() {return contraction_indices;}
-	std::vector<float> getBlobPixelsSpeeds() {return blob_pixel_speeds;}
-	std::vector<float> getGlobalPixelsSpeeds() {return global_pixel_speeds;}
-	std::vector<float> getBoundingBoxRatios() {return bounding_box_ratios;}
-	std::vector<float> getGlobalOrientations(){return global_orientations;}
+    // XS tmp tests
+    void test_match_shapes(ACVideoAnalysis *V2, IplImage* bg_img);
 
-	std::vector<float> getDummyTimeStamps(int nsize);
-	std::vector<float> getBlobsTimeStamps();
-	std::vector<float> getGlobalTimeStamps();
-	std::vector<float> getGlobalFrameStamps();
-
-	// XS or float* (dim 7)
-	std::vector<std::vector<float> > getRawMoments() {return raw_moments;}
-	std::vector<std::vector<float> > getHuMoments() {return hu_moments;}
-	std::vector<float> getHuMoment(int i);
-	std::vector<std::vector<float> > getFourierPolarMoments() {return fourier_polar_moments;}
-	std::vector<std::vector<float> > getFourierMellinMoments() {return fourier_mellin_moments;}
-	std::vector<std::vector<float> > getColorMoments() {return color_moments;}
-	std::vector<std::vector<float> > getImageHistograms() {return image_histograms;}
-
-	// saves stuff in file
-	void dumpTrajectory(std::ostream &odump);
-	void dumpContractionIndices(std::ostream &odump);
-	void dumpBoundingBoxRatios(std::ostream &odump);
-	void dumpBlobSpeed(std::ostream &odump);
-	void dumpRawMoments(std::ostream &odump);
-	void dumpHuMoments(std::ostream &odump);
-	void dumpFourierPolarMoments(std::ostream &odump);
-	void dumpAll(std::ostream &odump);
-	
-	// for display (ifdef VISUAL_CHECK) using highgui
-	void showInWindow(std::string title, bool has_win=false);
-	void showFFTInWindow(std::string title, bool has_win=false);
-	void showFrameInWindow(std::string title, const cv::Mat& frame, bool has_win=true);
-
-	// fancy browsing with trackbar to set position
-	static void onTrackbarSlide(int, void*); // callback needs to be static or global
-	void browseWithTrackbarInWindow(std::string title, bool has_win=false);
-	// ?	void showBlobsInWindow(std::string="VIDEO", bool has_win=false);
-	
-
-	//handy - remove path, keeps only filename
-	std::string extractFilename(std::string path);
-	
-	// XS tmp tests
-	void test_match_shapes (ACVideoAnalysis *V2, IplImage* bg_img);
-	
 private:
-	std::string file_name;
-	std::string color_model; // "BGR" or "HSV" : these are already in IPLimage, but not used in OpenCV (see manual !)
-//	IplImage* thumbnail;
-	
-	cv::VideoCapture* capture ;
-	int frame_counter;
-	bool FROM_FILE; // true if capture initialized from file (then it has to be deleted afterwards)
-	
-	bool HAS_TRAJECTORY;
-	bool HAS_BLOBS;
+    void stamp(); // fill in time and frame stamps for current frame
+    void clearStamps();
+    
+    std::string file_name;
+    std::string color_model; // "BGR" or "HSV" : these are already in IPLimage, but not used in OpenCV (see manual !)
+    //	IplImage* thumbnail;
 
-	// threshold for lower and upper parts of the image
-	int threshU;
-	int threshL;
-	static const int ystar; // where to split the image in half (horizontally)
+    cv::VideoCapture* capture;
+    int frame_counter;
+    bool FROM_FILE; // true if capture initialized from file (then it has to be deleted afterwards)
 
-	// NB: blobs (CBlobResult) may contain more than one blob per frame
-	std::vector<CBlobResult> all_blobs; // XS make this pointers ?
-	std::vector<float> all_blobs_time_stamps;
-	std::vector<float> all_blobs_frame_stamps;
+    bool HAS_TRAJECTORY;
+    bool HAS_BLOBS;
 
-	std::vector<blob_center> blob_centers;
-	std::vector<blob_center> blob_speeds; // speed of center of blob
-	std::vector<float> blob_pixel_speeds; // pixel-per-pixel speed in blob
+    // threshold for lower and upper parts of the image
+    int threshU;
+    int threshL;
+    static const int ystar; // where to split the image in half (horizontally)
 
-	std::vector<float> contraction_indices;
-	std::vector<float> bounding_box_ratios;
-	std::vector<float> bounding_box_heights;
-	std::vector<float> bounding_box_widths;
-	std::vector<float> global_pixel_speeds;  // pixel-per-pixel speed in whole image
-	std::vector<float> interest_points;
-	std::vector<float> global_orientations;
-	
-	std::vector<std::vector<float> > raw_moments;
-	std::vector<std::vector<float> > hu_moments;
-	std::vector<std::vector<float> > fourier_polar_moments;
-	std::vector<std::vector<float> > fourier_mellin_moments;
-	std::vector<std::vector<float> > color_moments;
+    std::vector<float> time_stamps;
+    std::vector<int> frame_stamps;
 
-	std::vector<std::vector<float> > image_histograms;
+    // NB: blobs (CBlobResult) may contain more than one blob per frame
+    std::vector<CBlobResult> all_blobs; // XS make this pointers ?
+    std::vector<blob_center> blob_centers;
+    std::vector<blob_center> blob_speeds; // speed of center of blob
+    std::vector<float> blob_pixel_speeds; // pixel-per-pixel speed in blob
 
-	int width, height, depth, fps, nframes;
-	//	int videocodec;
-	int g_slider_position;
-	//	MyHistogram *averageHistogram;
-	
+    std::vector<float> contraction_indices;
+    std::vector<float> bounding_box_ratios;
+    std::vector<float> bounding_box_heights;
+    std::vector<float> bounding_box_widths;
+    std::vector<float> global_pixel_speeds; // pixel-per-pixel speed in whole image
+    std::vector<float> interest_points;
+    std::vector<float> global_orientations;
+
+    std::vector<std::vector<float> > raw_moments;
+    std::vector<std::vector<float> > hu_moments;
+    std::vector<std::vector<float> > fourier_polar_moments;
+    std::vector<std::vector<float> > fourier_mellin_moments;
+    std::vector<std::vector<float> > color_moments;
+
+    std::vector<std::vector<float> > image_histograms;
+
+    int width, height, depth, fps, nframes;
+    float spf; // 1.0/fps
+    //	int videocodec;
+    int g_slider_position;
+    //	MyHistogram *averageHistogram;
+
 };
 
 #endif	/* _ACVIDEOANALYSIS_H */

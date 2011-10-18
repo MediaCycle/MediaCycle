@@ -68,7 +68,7 @@ std::vector<ACMediaFeatures*> ACVideoColorPlugin::calculate(ACMediaData* video_d
 	
 	videoAn = new ACVideoAnalysis(video_data);
 	videoAn->computeColorMoments(4, "HSV");
-	vector<float> t = videoAn->getGlobalTimeStamps();
+	vector<float> t = videoAn->getTimeStamps();
 	std::vector<std::vector<float> > s = videoAn->getColorMoments();
 	string aFileName= video_data->getFileName();
 	ACMediaTimedFeature* ps_mtf = new ACMediaTimedFeature(t,s, "color moments");
