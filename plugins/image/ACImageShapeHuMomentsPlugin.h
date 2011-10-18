@@ -49,7 +49,7 @@ public:
 	std::vector<ACMediaFeatures*> calculate(ACMediaData* _data);
 	std::vector<ACMediaFeatures*> calculate(ACMediaData* _aData, ACMedia* _theMedia, bool _save_timed_feat=false);
 private:
-	ACMediaFeatures* calculateHuMoments(ACImageAnalysis* image);
+	ACMediaFeatures* calculateHuMoments(ACColorImageAnalysis* image);
 };
 
 #endif	/* _ACIMAGESHAPEHUMOMENTSPLUGIN_H */
