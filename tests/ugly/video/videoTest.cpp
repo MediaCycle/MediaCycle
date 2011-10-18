@@ -90,8 +90,8 @@ const string ghostlist[ndancers] = {
 const string videodir = "/Users/xavier/numediart/Project7.3-DancersCycle/VideosSmall/TestSmallSize/Front/";
 
 //const string video_test_file= "/Users/xavier/Movies/Bre-Room132AnimationFlipBooks925_64kb.mp4";
-//const string video_test_file= "/usr/local/share/mediacycle/data/video/001022.mov";
-const string video_test_file= "/Users/xavier/numediart/Project12.4-13.1-MediaBlender/test/video/elephantsdream-traveling.mov";
+const string video_test_file= "/usr/local/share/mediacycle/data/video/small/sm001022.mov"; //-mencoded.mov";
+//const string video_test_file= "/Users/xavier/numediart/Project12.4-13.1-MediaBlender/test/video/elephantsdream-traveling.mov";
 const string tmp_video_file_out = "/Users/xavier/tmp/toto.mov";
 
 
@@ -361,7 +361,7 @@ void test_video_similarity_hu(std::string full_video_path){
 	V->computeHuMoments(0,bg_img);
 	std::vector< float > M1 = V->getHuMoment(1);
 	
-	ACMediaTimedFeature *trajectory_mtf = new ACMediaTimedFeature(V->getDummyTimeStamps(M1.size()), M1, "test");
+	ACMediaTimedFeature *trajectory_mtf = new ACMediaTimedFeature(V->getTimeStamps(), M1, "test");
 	fmat toto = trajectory_mtf->similarity();
 	toto.save("/Users/xavier/numediart/Project10.1-Borderlands/work/10151-sim-hu.txt", arma_ascii);
 	delete trajectory_mtf;
@@ -382,8 +382,8 @@ void test_video_similarity_hu(std::string full_video_path1, std::string full_vid
 	std::vector< vector<float> > M1 = V1->getHuMoments();
 	std::vector< vector<float> > M2 = V2->getHuMoments();
 	
-	ACMediaTimedFeature *trajectory_mtf1 = new ACMediaTimedFeature(V1->getDummyTimeStamps(M1.size()), M1, "test");
-	ACMediaTimedFeature *trajectory_mtf2 = new ACMediaTimedFeature(V2->getDummyTimeStamps(M2.size()), M2, "test");
+	ACMediaTimedFeature *trajectory_mtf1 = new ACMediaTimedFeature(V1->getTimeStamps(), M1, "test");
+	ACMediaTimedFeature *trajectory_mtf2 = new ACMediaTimedFeature(V2->getTimeStamps(), M2, "test");
 	
 	fmat toto = trajectory_mtf1->similarity(trajectory_mtf2);
 	toto.save("/Users/xavier/numediart/Project10.1-Borderlands/work/10151-20102-sim-hu1-nocont-all.txt", arma_ascii);
@@ -400,7 +400,7 @@ void test_video_similarity_fft(std::string full_video_path){
 	V->computeFourierPolarMoments();
 	std::vector< vector<float> > FFTPM = V->getFourierPolarMoments();
 	//V->dumpFourierPolarMoments(cout);
-	ACMediaTimedFeature *trajectory_mtf = new ACMediaTimedFeature(V->getDummyTimeStamps(FFTPM.size()), FFTPM, "fft_pm");
+	ACMediaTimedFeature *trajectory_mtf = new ACMediaTimedFeature(V->getTimeStamps(), FFTPM, "fft_pm");
 	fmat toto = trajectory_mtf->similarity();
 	toto.save("/Users/xavier/numediart/Project10.1-Borderlands/work/10151-BW-sim-fft.txt", arma_ascii);
 	delete trajectory_mtf;
@@ -416,8 +416,8 @@ void test_video_similarity_fft(std::string full_video_path1, std::string full_vi
 	std::vector< vector<float> > FFT1 = V1->getFourierPolarMoments();
 	std::vector< vector<float> > FFT2 = V2->getFourierPolarMoments();
 	
-	ACMediaTimedFeature *trajectory_mtf1 = new ACMediaTimedFeature(V1->getDummyTimeStamps(FFT1.size()), FFT1, "test");
-	ACMediaTimedFeature *trajectory_mtf2 = new ACMediaTimedFeature(V2->getDummyTimeStamps(FFT2.size()), FFT2, "test");
+	ACMediaTimedFeature *trajectory_mtf1 = new ACMediaTimedFeature(V1->getTimeStamps(), FFT1, "test");
+	ACMediaTimedFeature *trajectory_mtf2 = new ACMediaTimedFeature(V2->getTimeStamps(), FFT2, "test");
 	
 	//cout << "first video" << endl;
 	//	this->dumpFourierPolarMoments(cout);
@@ -443,8 +443,8 @@ void test_video_similarity_fm(std::string full_video_path1, std::string full_vid
 	std::vector< vector<float> > FFT1 = V1->getFourierMellinMoments();
 	std::vector< vector<float> > FFT2 = V2->getFourierMellinMoments();
 	
-	ACMediaTimedFeature *trajectory_mtf1 = new ACMediaTimedFeature(V1->getDummyTimeStamps(FFT1.size()), FFT1, "test");
-	ACMediaTimedFeature *trajectory_mtf2 = new ACMediaTimedFeature(V2->getDummyTimeStamps(FFT2.size()), FFT2, "test");
+	ACMediaTimedFeature *trajectory_mtf1 = new ACMediaTimedFeature(V1->getTimeStamps(), FFT1, "test");
+	ACMediaTimedFeature *trajectory_mtf2 = new ACMediaTimedFeature(V2->getTimeStamps(), FFT2, "test");
 	
 	fmat toto = trajectory_mtf1->similarity(trajectory_mtf2);
 	toto.save("/Users/xavier/numediart/Project10.1-Borderlands/work/10151-20102-sim-fm.txt", arma_ascii);
@@ -465,8 +465,8 @@ void test_video_similarity_fm(std::string full_video_path1, std::string full_vid
 //	std::vector< vector<float> > I1 = V1->getImageHistograms();
 //	std::vector< vector<float> > I2 = V2->getImageHistograms();
 //	
-//	ACMediaTimedFeature *trajectory_mtf1 = new ACMediaTimedFeature(V1->getDummyTimeStamps(I1.size()), I1, "test_hist");
-//	ACMediaTimedFeature *trajectory_mtf2 = new ACMediaTimedFeature(V2->getDummyTimeStamps(I2.size()), I2, "test_hist");
+//	ACMediaTimedFeature *trajectory_mtf1 = new ACMediaTimedFeature(V1->getTimeStamps(I1.size()), I1, "test_hist");
+//	ACMediaTimedFeature *trajectory_mtf2 = new ACMediaTimedFeature(V2->getTimeStamps(I2.size()), I2, "test_hist");
 //
 //	fmat toto = trajectory_mtf1->similarity(trajectory_mtf2);
 //	toto.save("/Users/xavier/numediart/Project10.1-Borderlands/work/10151-20102-sim-histo.txt", arma_ascii);
@@ -518,11 +518,11 @@ bool test_video_read(string s){
 			}
 			else {
 				cout << ifram << " - "<< cap->get(CV_CAP_PROP_POS_FRAMES) << endl;
-				if (ifram != cap->get(CV_CAP_PROP_POS_FRAMES)-1){ // -1 because pointer >> already switched to next frame
-					cerr << "<test_video_read> : inconsistent frame index (" << ifram << " - "<< cap->get(CV_CAP_PROP_POS_FRAMES)-1 << ") in video " << s << endl;
-					ok = false;
-					break;					
-				}
+//				if (ifram != cap->get(CV_CAP_PROP_POS_FRAMES)-1){ // -1 because pointer >> already switched to next frame
+//					cerr << "<test_video_read> : inconsistent frame index (" << ifram << " - "<< cap->get(CV_CAP_PROP_POS_FRAMES)-1 << ") in video " << s << endl;
+//					ok = false;
+//					break;
+//				}
 
 #ifdef VISUAL_CHECK
 //				cout << cap->get(CV_CAP_PROP_POS_FRAMES) << " - " << cap->get(CV_CAP_PROP_POS_MSEC) << endl;
@@ -541,10 +541,13 @@ bool test_video_get_set_position(string s){
 	if (s=="") 
 		ok = false;
 	else{
-		cv::VideoCapture* cap = new cv::VideoCapture(s); 
+		cv::VideoCapture* cap = new cv::VideoCapture(s);
+                cv::Mat frame;
+                (*cap) >> frame;
 		cout << "testing video " << s << " with " << cap->get(CV_CAP_PROP_FRAME_COUNT) << " frames..." << endl;
-		for (int i=0; i< cap->get(CV_CAP_PROP_FRAME_COUNT); i++){
+		for (int i=1; i< cap->get(CV_CAP_PROP_FRAME_COUNT)+1; i++){
 			cap->set(CV_CAP_PROP_POS_FRAMES,i);
+                        (*cap) >> frame;
 			cout << i << ": position set to "<< cap->get(CV_CAP_PROP_POS_FRAMES) << " -" << cap->get(CV_CAP_PROP_POS_MSEC) << endl;
 		}
 		delete cap;
@@ -610,225 +613,27 @@ void test_xml2acl(string s){
 	mediacycle->saveACLLibrary("/Users/xavier/numediart/Project7.3-DancersCycle/02.acl");
 	delete mediacycle;
 }
-//
-//#include "opencv2/video/tracking.hpp"
-//#include "opencv2/imgproc/imgproc.hpp"
-//#include "opencv2/highgui/highgui.hpp"
-//#include <time.h>
-//#include <stdio.h>
-//#include <ctype.h>
-//
-//// various tracking parameters (in seconds)
-//const double MHI_DURATION = 1;
-//const double MAX_TIME_DELTA = 0.5;
-//const double MIN_TIME_DELTA = 0.05;
-//// number of cyclic frame buffer used for motion detection
-//// (should, probably, depend on FPS)
-//const int N = 4;
-//
-//// ring image buffer
-//IplImage **buf = 0;
-//int last = 0;
-//
-//// temporary images
-//IplImage *mhi = 0; // MHI
-//IplImage *orient = 0; // orientation
-//IplImage *mask = 0; // valid orientation mask
-//IplImage *segmask = 0; // motion segmentation map
-//CvMemStorage* storage = 0; // temporary storage
-//
-//// parameters:
-////  img - input video frame
-////  dst - resultant motion picture
-////  args - optional parameters
-//void  update_mhi( IplImage* img, IplImage* dst, int diff_threshold )
-//{
-//    double timestamp = (double)clock()/CLOCKS_PER_SEC; // get current time in seconds
-//    CvSize size = cvSize(img->width,img->height); // get current frame size
-//    int i, idx1 = last, idx2;
-//    IplImage* silh;
-//    CvSeq* seq;
-//    CvRect comp_rect;
-//    double count;
-//    double angle;
-//    CvPoint center;
-//    double magnitude;
-//    CvScalar color;
-//	
-//    // allocate images at the beginning or
-//    // reallocate them if the frame size is changed
-//    if( !mhi || mhi->width != size.width || mhi->height != size.height ) {
-//        if( buf == 0 ) {
-//            buf = (IplImage**)malloc(N*sizeof(buf[0]));
-//            memset( buf, 0, N*sizeof(buf[0]));
-//        }
-//		
-//        for( i = 0; i < N; i++ ) {
-//            cvReleaseImage( &buf[i] );
-//            buf[i] = cvCreateImage( size, IPL_DEPTH_8U, 1 );
-//            cvZero( buf[i] );
-//        }
-//        cvReleaseImage( &mhi );
-//        cvReleaseImage( &orient );
-//        cvReleaseImage( &segmask );
-//        cvReleaseImage( &mask );
-//		
-//        mhi = cvCreateImage( size, IPL_DEPTH_32F, 1 );
-//        cvZero( mhi ); // clear MHI at the beginning
-//        orient = cvCreateImage( size, IPL_DEPTH_32F, 1 );
-//        segmask = cvCreateImage( size, IPL_DEPTH_32F, 1 );
-//        mask = cvCreateImage( size, IPL_DEPTH_8U, 1 );
-//    }
-//	
-//    cvCvtColor( img, buf[last], CV_BGR2GRAY ); // convert frame to grayscale
-//	
-//    idx2 = (last + 1) % N; // index of (last - (N-1))th frame
-//    last = idx2;
-//	
-//    silh = buf[idx2];
-//    cvAbsDiff( buf[idx1], buf[idx2], silh ); // get difference between frames
-//	
-//    cvThreshold( silh, silh, diff_threshold, 1, CV_THRESH_BINARY ); // and threshold it
-//	cv::Mat silh_mat(silh);
-//	cv::Mat mhi_mat(mhi);
-//	cv::updateMotionHistory( silh_mat, mhi_mat, timestamp, MHI_DURATION ); // update MHI
-//
-////    cvUpdateMotionHistory( silh, mhi, timestamp, MHI_DURATION ); // update MHI
-//	
-//    // convert MHI to blue 8u image
-//    cvCvtScale( mhi, mask, 255./MHI_DURATION,
-//			   (MHI_DURATION - timestamp)*255./MHI_DURATION );
-//    cvZero( dst );
-//    cvMerge( mask, 0, 0, 0, dst );
-//	
-//    // calculate motion gradient orientation and valid orientation mask
-//    cvCalcMotionGradient( mhi, mask, orient, MAX_TIME_DELTA, MIN_TIME_DELTA, 3 );
-//	
-//    if( !storage )
-//        storage = cvCreateMemStorage(0);
-//    else
-//        cvClearMemStorage(storage);
-//	
-//    // segment motion: get sequence of motion components
-//    // segmask is marked motion components map. It is not used further
-//    seq = cvSegmentMotion( mhi, segmask, storage, timestamp, MAX_TIME_DELTA );
-//	
-//    // iterate through the motion components,
-//    // One more iteration (i == -1) corresponds to the whole image (global motion)
-//    for( i = -1; i < seq->total; i++ ) {
-//		
-//        if( i < 0 ) { // case of the whole image
-//            comp_rect = cvRect( 0, 0, size.width, size.height );
-//            color = CV_RGB(255,255,255);
-//            magnitude = 100;
-//        }
-//        else { // i-th motion component
-//            comp_rect = ((CvConnectedComp*)cvGetSeqElem( seq, i ))->rect;
-//            if( comp_rect.width + comp_rect.height < 100 ) // reject very small components
-//                continue;
-//            color = CV_RGB(255,0,0);
-//            magnitude = 30;
-//        }
-//		
-//        // select component ROI
-//        cvSetImageROI( silh, comp_rect );
-//        cvSetImageROI( mhi, comp_rect );
-//        cvSetImageROI( orient, comp_rect );
-//        cvSetImageROI( mask, comp_rect );
-//		
-//        // calculate orientation
-//		angle = cvCalcGlobalOrientation( orient, mask, mhi, timestamp, MHI_DURATION);
-//        angle = 360.0 - angle;  // adjust for images with top-left origin
-//		
-//        count = cvNorm( silh, 0, CV_L1, 0 ); // calculate number of points within silhouette ROI
-//		
-//        cvResetImageROI( mhi );
-//        cvResetImageROI( orient );
-//        cvResetImageROI( mask );
-//        cvResetImageROI( silh );
-//		
-//        // check for the case of little motion
-//        if( count < comp_rect.width*comp_rect.height * 0.05 )
-//            continue;
-//		
-//        // draw a clock with arrow indicating the direction
-//        center = cvPoint( (comp_rect.x + comp_rect.width/2),
-//						 (comp_rect.y + comp_rect.height/2) );
-//		
-//        cvCircle( dst, center, cvRound(magnitude*1.2), color, 3, CV_AA, 0 );
-//        cvLine( dst, center, cvPoint( cvRound( center.x + magnitude*cos(angle*CV_PI/180)),
-//									 cvRound( center.y - magnitude*sin(angle*CV_PI/180))), color, 3, CV_AA, 0 );
-//    }
-//}
-//
-//
-//// direction of motion 
-//int main(int argc, char** argv)
-//{
-//    IplImage* motion = 0;
-//    CvCapture* capture = 0;
-//		
-//	capture = cvCaptureFromFile(video_test_file.c_str());
-//	
-//    if( capture )
-//    {
-//        cvNamedWindow( "Motion", 1 );
-//		
-//        for(;;)
-//        {
-//            IplImage* image = cvQueryFrame( capture );
-//            if( !image )
-//                break;
-//			
-//            if( !motion )
-//            {
-//                motion = cvCreateImage( cvSize(image->width,image->height), 8, 3 );
-//                cvZero( motion );
-//                motion->origin = image->origin;
-//            }
-//			
-//            update_mhi( image, motion, 30 );
-//            cvShowImage( "Motion", motion );
-//			
-//            if( cvWaitKey(10) >= 0 )
-//                break;
-//        }
-//        cvReleaseCapture( &capture );
-//        cvDestroyWindow( "Motion" );
-//    }
-//	
-//    return 0;
-//}
-//
-//
-
-
-
-
-
-
-
 
 int main(int argc, char** argv) {
-	cout << "Using Opencv " << CV_VERSION << "(" << CV_MAJOR_VERSION << "." << CV_MINOR_VERSION  << "." <<  CV_SUBMINOR_VERSION << ")" << endl;	
+    cout << "Using Opencv " << CV_VERSION << "(" << CV_MAJOR_VERSION << "." << CV_MINOR_VERSION << "." << CV_SUBMINOR_VERSION << ")" << endl;
 
-	// -- TEST 1 -- : read a video
-	//	if (test_video_read(video_test_file))
-	//		cout << "test_video_read OK" << endl;
-	//	else 
-	//		cout << "test_video_read * FAILED *" << endl;
-	
-	// -- TEST 2 -- : set/get video frame position
-	//	if (test_video_get_set_position(video_test_file))
-	//			cout << "test_video_get_set_position OK" << endl;
-	//		else 
-	//			cout << "test_video_get_set_position * FAILED *" << endl;	
-	
-	// -- TEST 3 -- : video and frame width/height
-//	if (test_video_width_height(video_test_file))
-//		cout << "test_video_width_height OK" << endl;
-//	else 
-//		cout << "test_video_width_height * FAILED *" << endl;	
+    // -- TEST 1 -- : read a video
+//    if (test_video_read(video_test_file))
+//        cout << "test_video_read OK" << endl;
+//    else
+//        cout << "test_video_read * FAILED *" << endl;
+
+    // -- TEST 2 -- : set/get video frame position
+//    if (test_video_get_set_position(video_test_file))
+//        cout << "test_video_get_set_position OK" << endl;
+//    else
+//        cout << "test_video_get_set_position * FAILED *" << endl;
+////
+//    // -- TEST 3 -- : video and frame width/height
+//    if (test_video_width_height(video_test_file))
+//        cout << "test_video_width_height OK" << endl;
+//    else
+//        cout << "test_video_width_height * FAILED *" << endl;
 
 
 // -- (OPTIONAL) VISUAL TESTS -- 
@@ -836,7 +641,7 @@ int main(int argc, char** argv) {
 //	test_browse_trackbar(video_test_file);
 
 // VISUAL TEST 2 : global pixel speed (frame by frame difference)
-//	test_global_pixel_speed(video_test_file);
+	test_global_pixel_speed(video_test_file);
 	
 // VISUAL TEST 3 : median of a video
 //	test_med_ave(video_test_file);
@@ -845,9 +650,9 @@ int main(int argc, char** argv) {
 //	test_blobs(video_test_file);
 
 // VISUAL TEST 5 : global orientation in a video
-	#if CV_MIN_VERSION_REQUIRED(2,3,0)
-	test_global_orientation(video_test_file);
-	#endif //CV_MIN_VERSION_REQUIRED(2,3,0)
+//	#if CV_MIN_VERSION_REQUIRED(2,3,0)
+//	test_global_orientation(video_test_file);
+//	#endif //CV_MIN_VERSION_REQUIRED(2,3,0)
 // VISUAL TEST 6 : video read/write
 //	test_video_read_write(video_test_file,tmp_video_file_out);
 
