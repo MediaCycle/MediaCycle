@@ -38,9 +38,8 @@
 
 #include <string>
 #include <vector>
-#include "tinyxml.h"
-
-
+#define TIXML_USE_STL
+#include <tinyxml.h>
 
 class archipelReader
 {

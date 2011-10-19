@@ -1,6 +1,8 @@
 # Core dependencies
 add_subdirectory(fftooura)
-add_subdirectory(tinyxml)
+IF(NOT TINYXML_FOUND)
+	add_subdirectory(tinyxml)
+ENDIF()
 add_subdirectory(tree)
 add_subdirectory(cwaves)
 

@@ -33,7 +33,6 @@
  */
 
 #include "MediaCycle.h"
-#include "tinyxml.h"
 
 #include <iostream>
 #include <string>

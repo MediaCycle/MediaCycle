@@ -107,6 +107,15 @@ IF(UNIX)
 
 		IF("${LSB_DISTRIB}" MATCHES "Ubuntu1") # for our interest, 10.04, 10.10, 11.04
 
+            # TinyXML
+            # for previous versions 3rdParty/tinyxml is used		
+            IF(("${LSB_DISTRIB}" MATCHES "Ubuntu10.10") OR ("${LSB_DISTRIB}" MATCHES "Ubuntu11.04"))
+                SET(UBUNTU_DEPS "libtinyxml2.5.3")
+            ENDIF()
+            IF(("${LSB_DISTRIB}" MATCHES "Ubuntu11.10") OR ("${LSB_DISTRIB}" MATCHES "Ubuntu12.04"))
+                SET(UBUNTU_DEPS "libtinyxml2.6.2")
+            ENDIF()
+	
             # Boost
             IF("${LSB_DISTRIB}" MATCHES "Ubuntu10.04")
                 SET(UBUNTU_DEPS "libboost-serialization1.40.0" "libboost-system1.40.0" "libboost-filesystem1.40.0" "libboost-graph1.40.0" "libboost-thread1.40.0")

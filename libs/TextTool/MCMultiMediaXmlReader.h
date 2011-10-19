@@ -38,6 +38,7 @@
 
 #include <string>
 #include <vector>
+#define TIXML_USE_STL
 #include "tinyxml.h"
 class MCMultiMediaXmlReader{
 public:	

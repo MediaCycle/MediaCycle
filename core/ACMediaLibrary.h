@@ -44,6 +44,8 @@
 #include "ACMedia.h"
 #include "ACMediaFactory.h"
 #include "ACPluginManager.h"
+
+#define TIXML_USE_STL
 #include <tinyxml.h>
 
 #include <boost/filesystem.hpp>

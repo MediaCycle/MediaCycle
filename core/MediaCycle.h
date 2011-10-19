@@ -44,7 +44,7 @@
 #include <sstream>
 #include <sys/stat.h>
 #include <time.h>
-
+#define TIXML_USE_STL
 #include "tinyxml.h"
 
 //XS TODO TMP OSC

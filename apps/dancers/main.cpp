@@ -46,7 +46,6 @@
 #include "Armadillo-utils.h"
 //#include "fftsg_h.c"
 #include <time.h>
-#include "tinyxml.h"
 
 #include <armadillo> // for sort(rand())
 #include <ctime> // for timing with clock()

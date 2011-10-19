@@ -46,7 +46,6 @@
 
 #include "ArchipelReader.h"
 #include<iostream>
-#include "tinyxml.h"
 
 #include <QtGui>
 using namespace std;

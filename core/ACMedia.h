@@ -41,6 +41,7 @@
 #include "ACMediaTimedFeature.h"
 
 #include <string>
+#define TIXML_USE_STL
 #include <tinyxml.h>
 
 class ACMedia {

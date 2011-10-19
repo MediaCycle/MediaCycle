@@ -10,7 +10,12 @@ IF(SUPPORT_VIDEO AND ARMADILLO_FOUND )
 	ADD_DEPENDENCIES(mediacycle-dancers mediacycle mc_visualisation)
 
 	TARGET_LINK_LIBRARIES(mediacycle-dancers mediacycle)
-	TARGET_LINK_LIBRARIES(mediacycle-dancers tinyxml armadillo-utils)
+	TARGET_LINK_LIBRARIES(mediacycle-dancers armadillo-utils)
+	IF(TINYXML_FOUND)
+		TARGET_LINK_LIBRARIES(mediacycle-dancers ${TINYXML_LIBRARY})
+	ELSE()
+		TARGET_LINK_LIBRARIES(mediacycle-dancers tinyxml)
+	ENDIF()
 
 	MESSAGE("[X] dancers")
 ELSE()

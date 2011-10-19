@@ -11,7 +11,12 @@ IF (BUILD_CLIS)
 	ADD_DEPENDENCIES(mediacycle-cli mc_segmentation)
 	ADD_DEPENDENCIES(mediacycle-cli mc_visualisation)
 
-	TARGET_LINK_LIBRARIES(mediacycle-cli mediacycle tinyxml)
+	TARGET_LINK_LIBRARIES(mediacycle-cli mediacycle)
+	IF(TINYXML_FOUND)
+		TARGET_LINK_LIBRARIES(mediacycle-cli ${TINYXML_LIBRARY})
+	ELSE()
+		TARGET_LINK_LIBRARIES(mediacycle-cli tinyxml)
+	ENDIF()
 
 	MESSAGE("[X] ${TARGET_NAME}")
 ELSE()
