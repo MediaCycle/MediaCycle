@@ -32,6 +32,7 @@ IF ( SUPPORT_AUDIO AND USE_QT4 AND USE_OSG AND USE_OSC AND ( OPENAL_FOUND OR POR
 		ADD_EXECUTABLE(audiocycle-loopjam WIN32 ${multimediacycle-osg-qt_SRCS} ${multimediacycle-osg-qt_UIS_H} ${multimediacycle-osg-qt_MOC_SRCS} ${settings_SRCS} ${settings_UIS_H} ${settings_MOC_SRCS} ${settings_MOC_HDRS} ${settings_HS})
 	ELSE ()
 		IF ( APPLE )
+			SET(MACOSX_BUNDLE_BUNDLE_NAME ${TARGET_NAME})
 			# set how it shows up in the Info.plist file
   			SET(MACOSX_BUNDLE_ICON_FILE MultiMediaCycle.icns) 
   			# set where in the bundle to put the icns file

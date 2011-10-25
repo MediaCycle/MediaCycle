@@ -32,8 +32,9 @@ IF ( SUPPORT_VIDEO AND USE_QT4 AND USE_OSG AND USE_OSC )
 		ADD_EXECUTABLE(videocycle-osg-qt WIN32 ${multimediacycle-osg-qt_SRCS} ${multimediacycle-osg-qt_UIS_H} ${multimediacycle-osg-qt_MOC_SRCS} ${settings_SRCS} ${settings_UIS_H} ${settings_MOC_SRCS} ${settings_MOC_HDRS} ${settings_HS})
 	ELSE ()
 		IF ( APPLE )
+			SET(MACOSX_BUNDLE_BUNDLE_NAME ${TARGET_NAME})
 			# set how it shows up in the Info.plist file
-  			SET(MACOSX_BUNDLE_ICON_FILE MultiMediaCycle.icns) 
+  			SET(MACOSX_BUNDLE_ICON_FILE MultiMediaCycle.icns)
   			# set where in the bundle to put the icns file
   			SET_SOURCE_FILES_PROPERTIES(${CMAKE_SOURCE_DIR}/data/icons/MultiMediaCycle.icns PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
   			# include the icns file in the target
