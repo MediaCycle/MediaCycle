@@ -6,9 +6,15 @@ ADD_LIBRARY(mediacycle STATIC ${SRC} ${HDR})
 #gsl - uncomment if needed
 #TARGET_LINK_LIBRARIES(mediacycle gsl gslcblas)
 
-ADD_DEPENDENCIES(mediacycle armadillo-utils tinyxml)
+ADD_DEPENDENCIES(mediacycle armadillo-utils)
+IF(TINYXML_FOUND)
+	TARGET_LINK_LIBRARIES(mediacycle ${TINYXML_LIBRARY})
+ELSE()
+	ADD_DEPENDENCIES(mediacycle tinyxml)
+	TARGET_LINK_LIBRARIES(mediacycle tinyxml)
+ENDIF()
 
-TARGET_LINK_LIBRARIES(mediacycle armadillo-utils tinyxml armadillo-utils)
+TARGET_LINK_LIBRARIES(mediacycle armadillo-utils)
 IF (APPLE)
 	TARGET_LINK_LIBRARIES(mediacycle stdc++)# CF otherwise "make package" fails
 ENDIF(APPLE)

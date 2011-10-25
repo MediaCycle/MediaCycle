@@ -9,8 +9,8 @@
 # then add after: INCLUDE (${CMAKE_SOURCE_DIR}/CMakeModules/CreatePackage.cmake)
 #
 # to create the package (with app-name the CMake target name of the application):
-# Apple *.app bunble: make app-name install
-# Linux *.deb package: make app-name package
+# Apple *.app bundle: make app-name install
+# Linux *.deb package: cpack --config CPackConfig-app-name.cmake
 
 # PACKAGING WITH CPack
 # For more see http://www.cmake.org/Wiki/CMake:Packaging_With_CPack
@@ -19,8 +19,9 @@ IF(NOT USE_DEBUG) # mandatory for packaging release versions
 IF(UNIX OR APPLE) # not yet tested with Windows 
 	INCLUDE(InstallRequiredSystemLibraries)
 	set(CPACK_PACKAGE_NAME "${PROGNAME}")
+	set(CPACK_BUNDLE_NAME "${PROGNAME}")
     IF(NOT CPACK_PACKAGE_DESCRIPTION_SUMMARY AND NOT MC_PACKAGE_DESCRIPTION_SUMMARY)
-	    set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Sofware part of the MediaCycle framework")
+	    set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Software part of the MediaCycle framework")
     ELSE()
 	    set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "${MC_PACKAGE_DESCRIPTION_SUMMARY}")   
     ENDIF()
@@ -64,7 +65,11 @@ IF(UNIX)
 		set(LSB_DISTRIB "unix")
 	ENDIF(NOT LSB_DISTRIB)
 
-    #SET(CPACK_PACKAGE_EXECUTABLES "${PROGNAME};${PROGNAME}")
+	IF(NOT APPLE)
+		SET(CPACK_OUTPUT_CONFIG_FILE "${CMAKE_BINARY_DIR}/CPackConfig-${PROGNAME}.cmake")
+		SET(CPACK_INSTALL_CMAKE_PROJECTS "${CMAKE_BINARY_DIR};MediaCycle;${PROGNAME};/")
+		EXECUTE_PROCESS(COMMAND rm "${CMAKE_BINARY_DIR}/CPackConfig.cmake")
+	ENDIF()
 
 	# For Debian-based distros we want to create DEB packages.
 	IF("${LSB_DISTRIB}" MATCHES "Ubuntu|Debian")
@@ -73,8 +78,8 @@ IF(UNIX)
 		set(CPACK_DEBIAN_PACKAGE_PRIORITY "extra")
 		set(CPACK_DEBIAN_PACKAGE_SECTION "universe/multimedia")
 		#set(CPACK_DEBIAN_PACKAGE_RECOMMENDS "..., ...")
-        SET(CPACK_DEBIAN_PACKAGE_VERSION "${MediaCycle_VERSION}")
-        SET(CPACK_DEBIAN_PACKAGE_NAME "${PROGNAME}")
+		SET(CPACK_DEBIAN_PACKAGE_VERSION "${MediaCycle_VERSION}")
+		SET(CPACK_DEBIAN_PACKAGE_NAME "${PROGNAME}")
 
 		# We need to alter the architecture names as per distro rules
 		IF("${CPACK_PACKAGE_ARCHITECTURE}" MATCHES "i[3-6]86")
@@ -140,8 +145,8 @@ IF(UNIX)
             ELSE()
                 list(APPEND UBUNTU_DEPS "libopenscenegraph65" "libopenthreads13")
             ENDIF()
-            IF(WITH_QT4) # dirty test to check if we're packaging a GUI application under Ubuntu
-                INSTALL(FILES ${CMAKE_BINARY_DIR}/3rdparty/osgdb_ffmpeg/osgdb_ffmpeg.so DESTINATION lib/osgPlugins-${OPENSCENEGRAPH_VERSION})
+            IF(WITH_QT4 AND SUPPORT_VIDEO AND USE_VIDEO AND FFMPEG_FOUND) # dirty test to check if we're packaging a GUI application under Ubuntu
+                INSTALL(FILES ${CMAKE_BINARY_DIR}/3rdparty/osgdb_ffmpeg/osgdb_ffmpeg.so DESTINATION lib/osgPlugins-${OPENSCENEGRAPH_VERSION} COMPONENT ${PROGNAME})
             ENDIF()
 
             # Qt4 libqtcore4 and libqtgui4 are package for kubuntu, libqt4-core and libqt4-gui for ubuntu
@@ -186,10 +191,19 @@ IF(UNIX)
             IF(SUPPORT_VIDEO OR SUPPORT_IMAGE)
 
                 # OpenCV
-                IF("${LSB_DISTRIB}" MATCHES "Ubuntu10.04")
-                    list(APPEND UBUNTU_DEPS "libcv4" "libcvaux4" "libhighgui4")
-                ELSE()
-                    list(APPEND UBUNTU_DEPS "libcv2.1" "libcvaux2.1" "libhighgui2.1")
+		IF(OpenCV_VERSION VERSION_GREATER 2.3.0)
+                    IF(("${LSB_DISTRIB}" MATCHES "Ubuntu11.04") OR ("${LSB_DISTRIB}" MATCHES "Ubuntu11.10"))
+                    	MESSAGE("\n\nWARNING!\nInstall an up-to-date OpenCV 2.3.1 package from https://launchpad.net/~gijzelaar/+archive/opencv2.3")
+                    	list(APPEND UBUNTU_DEPS "libopencv-dev")#waiting for better
+                    ELSE()
+                    	MESSAGE(FATAL_ERROR "OpenCV >= 2.3.0 not available as package for your distribution")
+                    ENDIF()
+		ELSE()	
+                    IF("${LSB_DISTRIB}" MATCHES "Ubuntu10.04")
+                        list(APPEND UBUNTU_DEPS "libcv4" "libcvaux4" "libhighgui4")
+                    ELSE()
+                        list(APPEND UBUNTU_DEPS "libcv2.1" "libcvaux2.1" "libhighgui2.1")
+                    ENDIF()
                 ENDIF()
 
                 # FFTW3
@@ -299,29 +313,34 @@ ENDIF(WIN32)
 # Install the QtTest application, on Apple, the bundle is at the root of the
 # install tree, and on other platforms it'll go into the bin directory.
 INSTALL(TARGETS ${PROGNAME}
-   BUNDLE DESTINATION . COMPONENT Runtime
-   RUNTIME DESTINATION bin COMPONENT Runtime
+   BUNDLE DESTINATION . COMPONENT ${PROGNAME}
+   RUNTIME DESTINATION bin COMPONENT ${PROGNAME}
 )
 
 # Install the plugins for Linux (and Windows?)
 IF(NOT APPLE)
-    INSTALL(FILES ${CMAKE_BINARY_DIR}/plugins/visualisation/${PLUGIN_PREFIX}visualisation.${PLUGIN_SUFFIX} DESTINATION lib)
-    INSTALL(FILES ${CMAKE_BINARY_DIR}/plugins/segmentation/${PLUGIN_PREFIX}segmentation.${PLUGIN_SUFFIX} DESTINATION lib)
+    INSTALL(FILES ${CMAKE_BINARY_DIR}/plugins/visualisation/${PLUGIN_PREFIX}visualisation.${PLUGIN_SUFFIX} DESTINATION lib COMPONENT ${PROGNAME})
+    INSTALL(FILES ${CMAKE_BINARY_DIR}/plugins/segmentation/${PLUGIN_PREFIX}segmentation.${PLUGIN_SUFFIX} DESTINATION lib COMPONENT ${PROGNAME})
     IF(SUPPORT_AUDIO AND USE_AUDIO)
-        INSTALL(FILES ${CMAKE_BINARY_DIR}/plugins/audio/${PLUGIN_PREFIX}audio.${PLUGIN_SUFFIX} DESTINATION lib)
+        INSTALL(FILES ${CMAKE_BINARY_DIR}/plugins/audio/${PLUGIN_PREFIX}audio.${PLUGIN_SUFFIX} DESTINATION lib COMPONENT ${PROGNAME})
     ENDIF()
     IF(SUPPORT_IMAGE AND USE_IMAGE)
-        INSTALL(FILES ${CMAKE_BINARY_DIR}/plugins/image/${PLUGIN_PREFIX}image.${PLUGIN_SUFFIX} DESTINATION lib)
+        INSTALL(FILES ${CMAKE_BINARY_DIR}/plugins/image/${PLUGIN_PREFIX}image.${PLUGIN_SUFFIX} DESTINATION lib COMPONENT ${PROGNAME})
     ENDIF()
     IF(SUPPORT_VIDEO AND USE_VIDEO)
-        INSTALL(FILES ${CMAKE_BINARY_DIR}/plugins/video/${PLUGIN_PREFIX}video.${PLUGIN_SUFFIX} DESTINATION lib)
+        INSTALL(FILES ${CMAKE_BINARY_DIR}/plugins/video/${PLUGIN_PREFIX}video.${PLUGIN_SUFFIX} DESTINATION lib COMPONENT ${PROGNAME})
     ENDIF()
     IF(SUPPORT_3DMODEL AND USE_3DMODEL)
-        INSTALL(FILES ${CMAKE_BINARY_DIR}/plugins/3Dmodel/${PLUGIN_PREFIX}3Dmodel.${PLUGIN_SUFFIX} DESTINATION lib)
+        INSTALL(FILES ${CMAKE_BINARY_DIR}/plugins/3Dmodel/${PLUGIN_PREFIX}3Dmodel.${PLUGIN_SUFFIX} DESTINATION lib COMPONENT ${PROGNAME})
     ENDIF()
-    #IF(SUPPORT_TEXT AND USE_TEXT)
-    #    INSTALL(FILES ${CMAKE_BINARY_DIR}/plugins/text/${PLUGIN_PREFIX}text.${PLUGIN_SUFFIX} DESTINATION lib)
-    #ENDIF()
+    IF(SUPPORT_TEXT AND USE_TEXT)
+        INSTALL(FILES ${CMAKE_BINARY_DIR}/plugins/SparseVisualisation/${PLUGIN_PREFIX}SparseVisualisation.${PLUGIN_SUFFIX} DESTINATION lib COMPONENT ${PROGNAME})
+        INSTALL(FILES ${CMAKE_BINARY_DIR}/plugins/text/${PLUGIN_PREFIX}text.${PLUGIN_SUFFIX} DESTINATION lib COMPONENT ${PROGNAME})
+        INSTALL(FILES ${CMAKE_BINARY_DIR}/plugins/text_sparse/${PLUGIN_PREFIX}text_sparse.${PLUGIN_SUFFIX} DESTINATION lib COMPONENT ${PROGNAME})
+    ENDIF()
+    IF(SUPPORT_ARCHIPEL AND USE_ARCHIPEL)
+        INSTALL(FILES ${CMAKE_BINARY_DIR}/plugins/archipel/${PLUGIN_PREFIX}archipel.${PLUGIN_SUFFIX} DESTINATION lib COMPONENT ${PROGNAME})
+    ENDIF()
 ENDIF()
 
 #--------------------------------------------------------------------------------
@@ -503,12 +522,13 @@ IF(APPLE)
 set(CPACK_PACKAGE_NAME "${PROGNAME}")
 set(CPACK_BUNDLE_NAME "${PROGNAME}")
 set(CPACK_BINARY_DRAGNDROP ON)
-set(CPACK_PACKAGE_EXECUTABLES "multimediacycle-osg-qt" "MultiMediaCycle.icns") #should contain pairs of <executable> and <icon name>
+#set(CPACK_PACKAGE_EXECUTABLES "multimediacycle-osg-qt" "MultiMediaCycle.icns") #should contain pairs of <executable> and <icon name>
 #set(CPACK_GENERATOR "PackageMaker;OSXX11")
 ENDIF()
 
 IF(NOT APPLE)
 include(CPack)
+EXECUTE_PROCESS(COMMAND rm "${CMAKE_BINARY_DIR}/CPackSourceConfig.cmake")
 ENDIF()
 
 ENDIF(NOT USE_DEBUG) # mandatory for packaging release versions
