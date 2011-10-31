@@ -46,7 +46,7 @@ screen_width(0.0f),width(0.0f),height(0.0f),screen_width_changed(false),width_ch
 	track_node = new MatrixTransform();
 	displayed_media_index = -1;
 	// Magic numbers!
-	zpos = 0.01f;
+	zpos = 0.0f;//0.01f;
 	xstep = 0.0005f;
 	yspan = 0.666f;
 	xspan = 0.666f;
@@ -57,13 +57,13 @@ screen_width(0.0f),width(0.0f),height(0.0f),screen_width_changed(false),width_ch
 
 void ACOsgTrackRenderer::initSelection()
 {
-	playback_min_width = yspan/10;
-	selection_begin_pos = -xspan/2.0f;// arbitrarily at 1/4 of the width from the left
-	selection_end_pos = -xspan/2.0f + playback_min_width;// arbitrarily at 3/4 of the width from the left
-	selection_center_pos = 0.0f;
-	selection_begin_pos_changed = false;
-	selection_end_pos_changed = false;
-	selection_center_pos_changed = false;
+	playback_min_width = xspan/100;
+	selection_center_pos = -xspan/2.0f;
+	selection_begin_pos = selection_center_pos - playback_min_width;
+	selection_end_pos = selection_center_pos + playback_min_width;
+	selection_begin_pos_changed = true;
+	selection_end_pos_changed = true;
+	selection_center_pos_changed = true;
 }
 
 void ACOsgTrackRenderer::updateMedia(ACMedia* _media)
@@ -116,68 +116,64 @@ void ACOsgTrackRenderer::updateSize(int _width,float _height)
 	}	
 }
 
-void ACOsgTrackRenderer::setSelectionBegin(float begin)
+void ACOsgTrackRenderer::resizeSelectionFromBegin(float _begin)
 {
-	/*if (begin > selection_end_pos - playback_min_width)//min section width -> magic number to refine
-		begin = selection_end_pos - playback_min_width;
-	if (begin < -xspan/2.0f)
-		begin = -xspan/2.0f;*/
+	if(_begin > this->selection_center_pos - playback_min_width/2.0f)
+		return;
 	
-	this->selection_center_pos += (begin - this->selection_begin_pos)/2.0f;
-	this->selection_begin_pos = begin;
+	float _extent = _begin - selection_begin_pos;
+	this->selection_begin_pos = _begin;
+	this->selection_end_pos -= _extent;
 	selection_begin_pos_changed=true;
-	selection_center_pos_changed=true;
-}
-
-void ACOsgTrackRenderer::setSelectionEnd(float end)
-{
-	/*if (end < selection_begin_pos + playback_min_width)//min section width -> magic number to refine
-		end = selection_begin_pos + playback_min_width;
-	if (end > xspan/2.0f)
-		end = xspan/2.0f;*/
-
-	this->selection_center_pos += (end - this->selection_end_pos)/2.0f;
-	this->selection_end_pos = end;
 	selection_end_pos_changed=true;
-	selection_center_pos_changed=true;
 }
 
-float ACOsgTrackRenderer::getSelectionBegin()
+void ACOsgTrackRenderer::resizeSelectionFromEnd(float _end)
 {
-	return this->selection_begin_pos;
+	if(_end < this->selection_center_pos + playback_min_width/2.0f)
+		return;
+
+	float _extent = _end - selection_end_pos;
+	this->selection_end_pos = _end;
+	this->selection_begin_pos -= _extent;
+	selection_begin_pos_changed=true;
+	selection_end_pos_changed=true;
 }
 
-float ACOsgTrackRenderer::getSelectionEnd()
+void ACOsgTrackRenderer::moveSelection(float _center)
 {
-	return this->selection_end_pos;
-}
-
-void ACOsgTrackRenderer::setSelectionCenter(float center)
-{
-	selection_begin_pos += center - selection_center_pos;
-	selection_end_pos += center - selection_center_pos; 
-	selection_center_pos = center;
+	//float length = selection_end_pos - selection_begin_pos;
+	float _extent = _center - selection_center_pos;
+	this->selection_begin_pos += _extent;
+	this->selection_center_pos += _extent;
+	this->selection_end_pos += _extent;
 	selection_begin_pos_changed=true;
 	selection_end_pos_changed=true;
 	selection_center_pos_changed=true;
 }
 
-float ACOsgTrackRenderer::getSelectionCenter()
+void ACOsgTrackRenderer::createDummySegments()
 {
-	return selection_center_pos;
+	if(media){
+		if (media->getNumberOfSegments()==0){
+			//std::cout << "Dummy segments" << std::endl;
+			for (unsigned int s=0;s<4;s++){
+				ACMedia* seg = ACMediaFactory::getInstance().create(media);
+				seg->setParentId(media->getId());
+				media->addSegment(seg);//dummy
+			}	
+			float media_start = media->getStart();
+			float media_end = media->getEnd();
+			media->getSegment(0)->setStart(media_start);
+			media->getSegment(0)->setEnd((media_end-media_start)/4.0f);
+			media->getSegment(1)->setStart((media_end-media_start)/4.0f);
+			media->getSegment(1)->setEnd(3*(media_end-media_start)/8.0f);
+			media->getSegment(2)->setStart(3*(media_end-media_start)/8.0f);
+			media->getSegment(2)->setEnd((media_end-media_start)/2.0f);
+			media->getSegment(3)->setStart((media_end-media_start)/2.0f);
+			media->getSegment(3)->setEnd(media_end);
+		}
+		//else
+		//	std::cout << media->getNumberOfSegments() << " segments" << std::endl;
+	}	
 }
-/*
-void ACOsgTrackRenderer::setSelectionZoneWidth(float _width)
-{
-	float previous_width = selection_end_pos - selection_begin_pos;
-	selection_begin_pos += (_width - previous_width)/2.0f;
-	selection_end_pos += (_width - previous_width)/2.0f;
-	selection_begin_pos_changed=true;
-	selection_end_pos_changed=true;
-}
-
-float ACOsgTrackRenderer::getSelectionZoneWidth()
-{
-	return selection_end_pos - selection_begin_pos;
-}
-*/

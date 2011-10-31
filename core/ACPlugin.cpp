@@ -41,7 +41,7 @@ using std::endl;
 
 ACPlugin::ACPlugin()
 {
-	cout<<"ACPlugin Constructor\n";
+	//cout<<"ACPlugin Constructor\n";
 	this->mPluginType=PLUGIN_TYPE_NONE;
 	this->mMediaType=MEDIA_TYPE_NONE;
 }
@@ -64,7 +64,7 @@ bool ACPlugin::mediaTypeSuitable(ACMediaType pType){
 
 ACFeaturesPlugin::ACFeaturesPlugin()
 {
-	cout<<"ACPlugin feature Constructor\n";
+	//cout<<"ACPlugin feature Constructor\n";
 	this->mPluginType=mPluginType|PLUGIN_TYPE_FEATURES;
 }
 
@@ -72,7 +72,7 @@ ACFeaturesPlugin::ACFeaturesPlugin()
 // this->mPluginType=mPluginType|PLUGIN_TYPE_TIMED_FEATURES;
 ACTimedFeaturesPlugin::ACTimedFeaturesPlugin() : ACFeaturesPlugin(){
 	
-	cout<<"ACPlugin Timed feature Constructor" << endl;
+	//cout<<"ACPlugin Timed feature Constructor" << endl;
 	this->mtf_file_name = "";
 }
 
@@ -93,12 +93,12 @@ ACMediaTimedFeature* ACTimedFeaturesPlugin:: getTimedFeatures(){
 
 ACSegmentationPlugin::ACSegmentationPlugin()
 {
-	cout<<"ACPlugin segmentation Constructor\n";
+	//cout<<"ACPlugin segmentation Constructor\n";
 	this->mPluginType=mPluginType|PLUGIN_TYPE_SEGMENTATION;
 }
 ACClusterMethodPlugin::ACClusterMethodPlugin()
 {
-	cout<<"ACPlugin Cluster Constructor\n";
+	//cout<<"ACPlugin Cluster Constructor\n";
 	this->mPluginType=mPluginType|PLUGIN_TYPE_CLUSTERS_METHOD;
 	
 	

@@ -41,33 +41,42 @@
 #include "ACAudio.h"
 
 class ACOsgAudioTrackRenderer : public ACOsgTrackRenderer {
-	
 	protected:
-		osg::ref_ptr<osg::Geode> summary_waveform_geode;
-		osg::ref_ptr<osg::Geode> summary_cursor_geode;
+		// playback
+		osg::ref_ptr<osg::Geode> playback_waveform_geode;
+	
+		// summary cursor
 		osg::ref_ptr<osg::MatrixTransform> summary_cursor_transform;
-		osg::ref_ptr<osg::Geode> track_geode;
+		osg::ref_ptr<osg::Geode> summary_cursor_geode;
+
+		// summary selection
 		osg::ref_ptr<osg::MatrixTransform> selection_begin_transform;
 		osg::ref_ptr<osg::MatrixTransform> selection_zone_transform;
 		osg::ref_ptr<osg::MatrixTransform> selection_end_transform;
 		osg::ref_ptr<osg::Geode> selection_begin_geode;
 		osg::ref_ptr<osg::Geode> selection_end_geode;
 		osg::ref_ptr<osg::Geode> selection_zone_geode;
-		osg::ref_ptr<osg::Geode> playback_waveform_geode;
+	
+		// summary waveform
+		osg::ref_ptr<osg::Geode> summary_waveform_geode;
 
+		// segments
         osg::ref_ptr<osg::MatrixTransform> segments_transform;
         osg::ref_ptr<osg::Group> segments_group;
 	    std::vector< osg::ref_ptr<osg::Geode> > segments_geodes;
 
+		// track background
+		osg::ref_ptr<osg::Geode> track_geode;
+	
 		void selectionWaveformGeode();
 		void selectionCursorGeode();
-		void trackGeode();
 		void selectionBeginGeode();
 		void selectionZoneGeode();
 		void selectionEndGeode();
 		void playbackWaveformGeode();
 	    void segmentsGeode();
-		
+		void trackGeode();
+	
 		float zoom_x, zoom_y, track_left_x;
 		float summary_center_y,summary_height;
 		float playback_center_y,playback_height;
@@ -82,7 +91,6 @@ class ACOsgAudioTrackRenderer : public ACOsgTrackRenderer {
 		~ACOsgAudioTrackRenderer();
 		void prepareTracks();
 		void updateTracks(double ratio=0.0);
-		
 };
 
 #endif

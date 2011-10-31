@@ -47,6 +47,9 @@ ACOsgTimelineRenderer::ACOsgTimelineRenderer(): media_cycle(0), screen_width(0),
 	#if defined (SUPPORT_AUDIO)
 		audio_engine = 0;
 	#endif//defined (SUPPORT_AUDIO)
+	default_video_summary_type = AC_VIDEO_SUMMARY_KEYFRAMES;
+	default_video_selection_type = AC_VIDEO_SELECTION_KEYFRAMES;
+	default_video_playback_visibility = true;
 	track_renderer.resize(0);
 	group = new Group();
 	track_group = new Group();
@@ -158,6 +161,9 @@ void ACOsgTimelineRenderer::prepareTracks(int start) {
 				break;
 		}
 		if (track_renderer[i] != 0) {
+			track_renderer[i]->updateSummaryType(default_video_summary_type);
+			track_renderer[i]->updateSelectionType(default_video_selection_type);
+			track_renderer[i]->updatePlaybackVisibility(default_video_playback_visibility);
 			track_renderer[i]->setMediaCycle(media_cycle);
 			track_renderer[i]->setTrackIndex(i);
 			//track_renderer[i]->setMediaIndex(0);//CF dumb
@@ -172,6 +178,9 @@ void ACOsgTimelineRenderer::prepareTracks(int start) {
 void ACOsgTimelineRenderer::updateTracks(double ratio) {
 
 	for (unsigned int i=0;i<track_renderer.size();i++) {
+		track_renderer[i]->updateSummaryType(default_video_summary_type);
+		track_renderer[i]->updateSelectionType(default_video_selection_type);
+		track_renderer[i]->updatePlaybackVisibility(default_video_playback_visibility);
 		track_renderer[i]->updateTracks(ratio);
 	}
 }
@@ -225,4 +234,31 @@ bool ACOsgTimelineRenderer::removeTracks(int _first, int _last){
 		ok = true;
 	}
 	return ok;
+}
+
+void ACOsgTimelineRenderer::updateVideoSummaryType(ACVideoSummaryType _type){
+	if (default_video_summary_type != _type){
+		this->default_video_summary_type = _type;
+		for (unsigned int i=0;i<track_renderer.size();i++) {
+			track_renderer[i]->updateSummaryType(_type);
+		}
+	}
+}
+
+void ACOsgTimelineRenderer::updateVideoSelectionType(ACVideoSelectionType _type){
+	if (default_video_selection_type != _type){
+		this->default_video_selection_type = _type;
+		for (unsigned int i=0;i<track_renderer.size();i++) {
+			track_renderer[i]->updateSelectionType(_type);
+		}
+	}
+}
+
+void ACOsgTimelineRenderer::updateVideoPlaybackVisibility(bool _visibility){
+	if (default_video_playback_visibility != _visibility){
+		this->default_video_playback_visibility = _visibility;
+		for (unsigned int i=0;i<track_renderer.size();i++) {
+			track_renderer[i]->updatePlaybackVisibility(_visibility);
+		}
+	}
 }

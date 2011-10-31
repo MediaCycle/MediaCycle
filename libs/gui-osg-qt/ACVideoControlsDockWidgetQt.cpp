@@ -39,7 +39,8 @@ ACVideoControlsDockWidgetQt::ACVideoControlsDockWidgetQt(QWidget *parent)
 {
 	#if defined (SUPPORT_VIDEO)
 	ui.setupUi(this); // first thing to do
-	ui.comboBoxVideoSummary->setEnabled(true);
+	ui.comboBoxSummary->setEnabled(true);
+	ui.comboBoxSelection->setEnabled(true);
 	this->show();
 	#endif //defined (SUPPORT_VIDEO)
 }
@@ -56,19 +57,38 @@ void ACVideoControlsDockWidgetQt::on_pushButtonMuteAll_clicked()
 	//media_cycle->muteAllSources();
 }
 
-void ACVideoControlsDockWidgetQt::on_comboBoxVideoSummary_activated(const QString & text)
+void ACVideoControlsDockWidgetQt::on_comboBoxSummary_activated(const QString & text)
 {
 	if (osg_view){
-		std::cout << "Video Summary: " << text.toStdString() << std::endl;
-		int tracks = osg_view->getTimelineRenderer()->getNumberOfTracks();
-		if (tracks>0){
-			ACVideoSummaryType type = AC_VIDEO_SUMMARY_NONE;
-			if (text.toStdString() == "Keyframes") type = AC_VIDEO_SUMMARY_KEYFRAMES;
-			else if (text.toStdString() == "Slit-scan")	type = AC_VIDEO_SUMMARY_SLIT_SCAN;
-			for (int track=0; track<tracks;track++)
-				osg_view->getTimelineRenderer()->getTrack(track)->setSummaryType(type);
-		}
+		//std::cout << "Video Summary: " << text.toStdString() << std::endl;		
+		ACVideoSummaryType type = osg_view->getTimelineRenderer()->getVideoSummaryType();
+		if (text.toStdString() == "Keyframes") type = AC_VIDEO_SUMMARY_KEYFRAMES;
+		else if (text.toStdString() == "Slit-scan")	type = AC_VIDEO_SUMMARY_SLIT_SCAN;
+		else if (text.toStdString() == "None")	type = AC_VIDEO_SUMMARY_NONE;
+		osg_view->getTimelineRenderer()->updateVideoSummaryType(type);
 		osg_view->setFocus();
 	}
 }
+
+void ACVideoControlsDockWidgetQt::on_comboBoxSelection_activated(const QString & text)
+{
+	if (osg_view){
+		//std::cout << "Video Selection: " << text.toStdString() << std::endl;
+		ACVideoSelectionType type = osg_view->getTimelineRenderer()->getVideoSelectionType();
+		if (text.toStdString() == "Keyframes") type = AC_VIDEO_SELECTION_KEYFRAMES;
+		else if (text.toStdString() == "Slit-scan")	type = AC_VIDEO_SELECTION_SLIT_SCAN;
+		else if (text.toStdString() == "None")	type = AC_VIDEO_SELECTION_NONE;
+		osg_view->getTimelineRenderer()->updateVideoSelectionType(type);
+		osg_view->setFocus();
+	}
+}
+
+void ACVideoControlsDockWidgetQt::on_checkBoxPlayback_stateChanged(int state)
+{
+	if (osg_view){
+		//std::cout << "Video Playback: " << (bool)state << std::endl;
+		osg_view->getTimelineRenderer()->updateVideoPlaybackVisibility((bool)state);
+		osg_view->setFocus();
+	}
+}	
 #endif //defined (SUPPORT_VIDEO)

@@ -2,9 +2,10 @@
  *  ACOsgTimelineEventHandler.h
  *  MediaCycle
  *
- *  @author Xavier Siebert
- *  @date 28/05/09
- *  @copyright (c) 2009 – UMONS - Numediart
+ *  @author Christian Frisson
+ *  @date 28/04/10
+ *
+ *  @copyright (c) 2010 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
  *  licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -75,7 +76,7 @@ class ACOsgTimelineEventHandler : public  osgGA::GUIEventHandler {
 		bool selecting_segments;
 		ACRefId* selection;
 		float selection_begin,selection_end;
-		float pushed_x;
+		float pushed_x,cursor_pushed_dist;
 };
 
 #endif // AC_OSG_TIMELINE_EVENT_HANDLER_H

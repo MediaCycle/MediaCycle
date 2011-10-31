@@ -51,7 +51,9 @@ Q_OBJECT
 private slots:
 	// Video controls
 	void on_pushButtonMuteAll_clicked();
-	void on_comboBoxVideoSummary_activated(const QString & text);
+	void on_comboBoxSummary_activated(const QString & text);
+	void on_comboBoxSelection_activated(const QString & text);
+	void on_checkBoxPlayback_stateChanged(int state);
 //#endif //defined (SUPPORT_VIDEO)
 	
 public:

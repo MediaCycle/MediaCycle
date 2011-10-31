@@ -35,16 +35,16 @@
 
 #if defined (SUPPORT_AUDIO)
 #include "ACOsgAudioTrackRenderer.h"
-
-#include <osgGA/GUIEventHandler>
-
 #include <osgUtil/Tessellator> // to tessellate multiple contours
 
 using namespace osg;
 
 ACOsgAudioTrackRenderer::ACOsgAudioTrackRenderer() : ACOsgTrackRenderer() {
 
-	summary_waveform_geode = 0; summary_cursor_geode = 0; summary_cursor_transform = 0; track_geode = 0;
+	summary_waveform_geode = 0;
+	summary_cursor_geode = 0;
+	summary_cursor_transform = 0;
+	track_geode = 0;
 	playback_waveform_geode = 0;
 	//zoom_x = 10.0; zoom_y = 6.0;
 	zoom_x = 1.0; zoom_y = 1.0;
@@ -68,15 +68,15 @@ ACOsgAudioTrackRenderer::ACOsgAudioTrackRenderer() : ACOsgTrackRenderer() {
 
 ACOsgAudioTrackRenderer::~ACOsgAudioTrackRenderer() {
 	// track_node->removeChild(0,1);
-	if(summary_waveform_geode) summary_waveform_geode=0;
-	if(summary_cursor_geode) summary_cursor_geode=0;
-	if(summary_cursor_transform) summary_cursor_transform=0;
-	if(track_geode) track_geode=0;
-	if(selection_begin_geode) selection_begin_geode=0;
-	if(selection_zone_geode) selection_zone_geode=0;
-	if(selection_end_geode) selection_end_geode=0;
-	if(playback_waveform_geode) playback_waveform_geode=0;
-	if(segments_transform) segments_transform=0;
+	summary_waveform_geode=0;
+	summary_cursor_geode=0;
+	summary_cursor_transform=0;
+	track_geode=0;
+	selection_begin_geode=0;
+	selection_zone_geode=0;
+	selection_end_geode=0;
+	playback_waveform_geode=0;
+	segments_transform=0;
 }
 
 void ACOsgAudioTrackRenderer::selectionWaveformGeode() {
@@ -421,8 +421,8 @@ void ACOsgAudioTrackRenderer::selectionCursorGeode() {
 	vertices = new Vec3Array(2);
 	/*(*vertices)[0] = Vec3(track_left_x + 0, ((summary_center_y - summary_height)+xstep) * zoom_y, zpos+0.00005);
 	(*vertices)[1] = Vec3(track_left_x + 0, ((summary_center_y + summary_height)-xstep) * zoom_y, zpos+0.00005);*/
-	(*vertices)[0] = Vec3((selection_end_pos+selection_begin_pos)/2.0f, ((summary_center_y - summary_height)+xstep) * zoom_y, zpos+0.00005);
-	(*vertices)[1] = Vec3((selection_end_pos+selection_begin_pos)/2.0f, ((summary_center_y + summary_height)-xstep) * zoom_y, zpos+0.00005);
+	(*vertices)[0] = Vec3((selection_end_pos+selection_begin_pos)/2.0f, ((summary_center_y - summary_height)+xstep) * zoom_y, zpos);
+	(*vertices)[1] = Vec3((selection_end_pos+selection_begin_pos)/2.0f, ((summary_center_y + summary_height)-xstep) * zoom_y, zpos);
 	summary_cursor_geometry->setVertexArray(vertices);
 
 	Vec4 summary_cursor_color(0.2f, 0.9f, 0.2f, 0.9f);
@@ -1058,7 +1058,7 @@ void ACOsgAudioTrackRenderer::segmentsGeode() {
 		segments_geodes[s]->addDrawable(new osg::ShapeDrawable(new osg::Box(osg::Vec3(-xspan/2.0f+ (media->getSegment(s)->getStart()+ media->getSegment(s)->getEnd())/2.0f*xspan/media_length,segments_center_y,0.0f) , (media->getSegment(s)->getEnd()-media->getSegment(s)->getStart())*xspan/media_length , segments_height*2 , 0.0f), hints));
 		//std::cout << "Segment " << s << " start " << media->getSegment(s)->getStart()/media_length << " end " << media->getSegment(s)->getEnd()/media_length << " width " << (media->getSegment(s)->getEnd()-media->getSegment(s)->getStart())/media_length << std::endl;
 		((ShapeDrawable*)(segments_geodes[s])->getDrawable(0))->setColor(segment_color);
-		segments_geodes[s]->setUserData(new ACRefId(track_index,"video track segments"));
+		segments_geodes[s]->setUserData(new ACRefId(track_index,"audio track segments"));
 		//ref_ptr//segments_geodes[s]->ref();
 		segments_group->addChild(segments_geodes[s]);
 	}
@@ -1090,10 +1090,11 @@ void ACOsgAudioTrackRenderer::updateTracks(double ratio) {
 			const ACMediaNode &attribute = media_cycle->getNodeFromMedia(media);
 			if ( attribute.getActivity()==1)
 			{
-				float selection_width = selection_end_pos-selection_begin_pos;
+				//float selection_width = selection_end_pos-selection_begin_pos;
 				float selection_pos = -xspan/2.0f + (float) attribute.getCurrentFrame() / (float)(((ACAudio*) media)->getNFrames())*xspan;
-				this->setSelectionBegin(selection_pos - selection_width/2.0f);
-				this->setSelectionEnd(selection_pos + selection_width/2.0f);
+				//this->setSelectionBegin(selection_pos - selection_width/2.0f);
+				//this->setSelectionEnd(selection_pos + selection_width/2.0f);
+				this->moveSelection(selection_pos);
 			}
 		}
 	}
@@ -1128,7 +1129,7 @@ void ACOsgAudioTrackRenderer::updateTracks(double ratio) {
 			playback_min_width = screen_width*xspan/(((ACAudio*) media)->getNFrames()); // one frame per pixel
 
 			//CF debug
-			std::cout << "Updating audio track with ACAudio of";
+			/*std::cout << "Updating audio track with ACAudio of";
 			std::cout << " samplerate: " << ((ACAudio*) media)->getSampleRate() << "," ;
 			std::cout << " "<<((ACAudio*) media)->getNFrames() <<" frames,";
 			std::cout << " start " << ((ACAudio*) media)->getStart() <<",";
@@ -1140,27 +1141,11 @@ void ACOsgAudioTrackRenderer::updateTracks(double ratio) {
 			std::cout << " selection_begin_pos " << selection_begin_pos  << ",";
 			std::cout << " selection_center_pos " << selection_center_pos  << ",";
 			std::cout << " selection_end_pos " << selection_end_pos  << ",";
-			std::cout << std::endl;
+			std::cout << std::endl;*/
 
 			//CF: dummy segments for testing
 			if(media_cycle->getLibrary()->getMediaType() != MEDIA_TYPE_MIXED){
-				if (media->getNumberOfSegments()==0){
-					for (int s=0;s<4;s++){
-						ACMedia* seg = ACMediaFactory::getInstance().create(media);
-						seg->setParentId(media->getId());
-						media->addSegment(seg);//dummy
-					}
-					float media_start = media->getStart();
-					float media_end = media->getEnd();
-					media->getSegment(0)->setStart(media_start);
-					media->getSegment(0)->setEnd((media_end-media_start)/4.0f);
-					media->getSegment(1)->setStart((media_end-media_start)/4.0f);
-					media->getSegment(1)->setEnd(3*(media_end-media_start)/8.0f);
-					media->getSegment(2)->setStart(3*(media_end-media_start)/8.0f);
-					media->getSegment(2)->setEnd((media_end-media_start)/2.0f);
-					media->getSegment(3)->setStart((media_end-media_start)/2.0f);
-					media->getSegment(3)->setEnd(media_end);
-				}
+				this->createDummySegments();
 				track_node->removeChild(segments_transform);
 			}	
 			if (media->getNumberOfSegments()>0){//////CF dangerous if a new media has the same number of segments than the previous one:  && segments_number != media->getNumberOfSegments()){

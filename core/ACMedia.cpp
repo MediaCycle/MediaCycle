@@ -61,13 +61,13 @@ ACMedia::~ACMedia() {
 	filename_thumbnail.clear();
 	for (int i=0;i<preproc_features_vectors.size();i++)
 	{
-		delete (preproc_features_vectors[i]);
+		if(preproc_features_vectors[i]) delete (preproc_features_vectors[i]);
 		preproc_features_vectors[i]=0;
 	}
 	preproc_features_vectors.clear();
 	for (int i=0;i<features_vectors.size();i++)
 	{
-		delete (features_vectors[i]);
+		if(features_vectors[i]) delete (features_vectors[i]);
 		features_vectors[i]=0;
 	}
 	features_vectors.clear();
@@ -430,6 +430,7 @@ void ACMedia::loadXML(TiXmlElement* _pMediaNode){
 				throw runtime_error("corrupted XML file, wrong segment ID");
 			}
 			segment_media->setId(midi);
+			this->addSegment(segment_media);
 			count_s++;
 		}
 		// consistency check for segments
@@ -486,7 +487,9 @@ ACMediaFeatures* ACMedia::getPreProcFeaturesVector(string feature_name) {
 			return preproc_features_vectors[i];
 		}
 	}
+	#ifdef USE_DEBUG // use debug message levels instead
 	std::cerr << "ACMedia::getPreProcFeaturesVector : not found feature named " << feature_name << std::endl;
+	#endif
 	return 0;
 }
 
@@ -648,8 +651,10 @@ int ACMedia::segment(ACPluginManager *acpl, bool _saved_timed_features ) {
 		}*/
 		ft_from_disk=acpl->getFeaturesPlugins()->getTimedFeatures(this->getType());
 		// DEBUG
-		if(ft_from_disk)
-			ft_from_disk->dump();
+		#ifdef USE_DEBUG
+		//if(ft_from_disk)
+		//	ft_from_disk->dump();
+		#endif
 		
 		// should not use all segmentation plugins -- choose one using menu !!	
 		// XS TODO: check that ft_from_disk is not empty

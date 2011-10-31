@@ -236,7 +236,7 @@ int ACPluginLibrary::initialize()
 
     for (unsigned int i=0; i < listPlugin.size(); i++)
     {
-        std::cout<<listPlugin[i]<<endl;
+        //std::cout<<listPlugin[i]<<endl;
         ACPlugin* plugin = create(listPlugin[i]);
         if (plugin) {
             this->mPlugins.push_back(plugin);
@@ -456,8 +456,12 @@ ACMediaTimedFeature*  ACActiveFeaturesPlugins::getTimedFeatures(ACMediaType medi
 	vector<ACFeaturesPlugin *> ::iterator iter_vec = mCurrPlugin[mediaType].begin();
 	if (iter_vec != mCurrPlugin[mediaType].end()){
 		ACFeaturesPlugin* localPlugin=(*iter_vec);
-		if (localPlugin!=NULL)
+		if (localPlugin!=NULL){
+			#ifdef USE_DEBUG
+			std::cout << "ACActiveFeaturesPlugins::getTimedFeatures " << localPlugin->getName() << std::endl;
+			#endif
 			output = localPlugin->getTimedFeatures();
+		}	
 		else {
 			cerr << "<ACActiveFeaturesPlugins::getTimedFeatures> failed plugin access failed "<< localPlugin->getName() << endl;
 		}
@@ -465,8 +469,13 @@ ACMediaTimedFeature*  ACActiveFeaturesPlugins::getTimedFeatures(ACMediaType medi
 			iter_vec++;
 			for (; iter_vec != mCurrPlugin[mediaType].end(); iter_vec++){
 				ACFeaturesPlugin* localPlugin=(*iter_vec);
-				if (localPlugin!=NULL)
-					output->appendTimedFeature( localPlugin->getTimedFeatures());
+				if (localPlugin!=NULL){
+					#ifdef USE_DEBUG
+					std::cout << "ACActiveFeaturesPlugins::getTimedFeatures " << localPlugin->getName() << std::endl;
+					#endif
+					if(localPlugin->getTimedFeatures())
+						output->appendTimedFeature( localPlugin->getTimedFeatures());
+				}	
 				else {
 					cerr << "<ACActiveFeaturesPlugins::getTimedFeatures> failed plugin access failed "<< localPlugin->getName() << endl;
 				}
@@ -565,7 +574,7 @@ int ACActivePlugins<T>::update(vector<ACPluginLibrary *> PluginLibrary){
 	this->clean();
 	for (vector<ACPluginLibrary *>::iterator iter =PluginLibrary.begin();iter!=PluginLibrary.end();iter++)
 		this->add(*iter);
-	this->log();
+	//this->log();
 	return 1;
 }
 

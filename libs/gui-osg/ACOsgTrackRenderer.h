@@ -71,6 +71,12 @@ enum ACVideoSummaryType {
 	AC_VIDEO_SUMMARY_SLIT_SCAN=2
 };
 
+enum ACVideoSelectionType {
+	AC_VIDEO_SELECTION_NONE=0,
+	AC_VIDEO_SELECTION_KEYFRAMES=1,
+	AC_VIDEO_SELECTION_SLIT_SCAN=2
+};
+
 class ACOsgTrackRenderer {
 protected:
 	MediaCycle* media_cycle;
@@ -132,18 +138,23 @@ public:
 	
 	//virtual bool addRangeSegment(float begin, float end)=0;
 	//virtual bool removeRangeSegment(float begin, float end)=0;
-	void setSelectionBegin(float begin);
-	void setSelectionEnd(float end);
-	float getSelectionBegin();
-	float getSelectionEnd();
-	/*void setSelectionZoneWidth(float _width);
-	float getSelectionZoneWidth();*/
-	void setSelectionCenter(float center);
-	float getSelectionCenter();
 	void setManualSelection(bool manual){this->manual_selection=manual;}
+	void moveSelection(float _center);
+	void resizeSelectionFromBegin(float _begin);
+	void resizeSelectionFromEnd(float _end);
+	float getSelectionPos(){return this->selection_center_pos;}
 	
 	virtual void setSummaryType(ACVideoSummaryType type){};
+	virtual void updateSummaryType(ACVideoSummaryType type){};
 	virtual ACVideoSummaryType getSummaryType(){return AC_VIDEO_SUMMARY_NONE;}
+	virtual void setSelectionType(ACVideoSelectionType type){};
+	virtual void updateSelectionType(ACVideoSelectionType type){};
+	virtual ACVideoSelectionType getSelectionType(){return AC_VIDEO_SELECTION_NONE;}
+	virtual void setPlaybackVisibility(bool _visibility){};
+	virtual void updatePlaybackVisibility(bool _visibility){};
+
+protected:
+	void createDummySegments();
 };
 
 #endif

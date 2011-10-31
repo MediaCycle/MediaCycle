@@ -85,6 +85,9 @@ protected:
 	std::vector<ACOsgTrackRenderer*>  track_renderer;
 	int screen_width;
 	float height,width;
+	ACVideoSummaryType default_video_summary_type;
+	ACVideoSelectionType default_video_selection_type;
+	bool default_video_playback_visibility;
 
 public:
 	ACOsgTimelineRenderer();
@@ -108,6 +111,13 @@ public:
 	void updateScreenWidth(int _screen_width);
 	void updateSize(float _width,float _height);
 	void setSize(int _width,float _height){width = _width;height = _height;}
+	
+	void updateVideoSummaryType(ACVideoSummaryType type);
+	ACVideoSummaryType getVideoSummaryType(){return default_video_summary_type;}
+	void updateVideoSelectionType(ACVideoSelectionType type);
+	ACVideoSelectionType getVideoSelectionType(){return default_video_selection_type;}
+	void updateVideoPlaybackVisibility(bool _visibility);
+	bool getVideoPlaybackVisibility(){return default_video_playback_visibility;}
 
 private:
 	bool removeTracks(int _first=0, int _last=0);

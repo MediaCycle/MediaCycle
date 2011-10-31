@@ -1041,7 +1041,7 @@ void ACMediaBrowser::updateClustersKMeans(bool animate, int needsCluster) {
 				
 			}
 
-			printf("K-means it: %d\n", it);
+			//printf("K-means it: %d\n", it);
 			// get new centers from accumulators
 			for(j=0; j<mClusterCount; j++)
 			{
@@ -1059,7 +1059,7 @@ void ACMediaBrowser::updateClustersKMeans(bool animate, int needsCluster) {
 					}
 				}
 
-				printf("\tcluster %d count = %d\n", j, cluster_counts[j]);
+				//printf("\tcluster %d count = %d\n", j, cluster_counts[j]);
 			}
 		}
 	}

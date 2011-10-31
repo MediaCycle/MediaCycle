@@ -59,10 +59,10 @@ namespace fs = boost::filesystem;
 
 #define VERBOSE
 
-#if defined(SUPPORT_VIDEO) and defined(USE_FFMPEG)
-// CF FFmpeg for checking audio/video channels in containers
-#include <ACFFmpegInclude.h>
-#endif //defined(SUPPORT_VIDEO) and defined(USE_FFMPEG)
+//#if defined(SUPPORT_VIDEO) and defined(USE_FFMPEG)
+//// CF FFmpeg for checking audio/video channels in containers
+//#include <ACFFmpegInclude.h>
+//#endif //defined(SUPPORT_VIDEO) and defined(USE_FFMPEG)
 
 using namespace std;
 // to save library items in binary format, uncomment the following line:
@@ -82,10 +82,10 @@ ACMediaLibrary::ACMediaLibrary(ACMediaType aMediaType) {
 	mPreProcessPlugin=0;
 	mPreProcessInfo=0;
 	mReaderPlugin=0;
-	#if defined(SUPPORT_VIDEO) and defined(USE_FFMPEG)
-	// Register all formats and codecs from FFmpeg
-	av_register_all();
-	#endif //defined(SUPPORT_VIDEO) and defined(USE_FFMPEG)
+	//#if defined(SUPPORT_VIDEO) and defined(USE_FFMPEG)
+	//// Register all formats and codecs from FFmpeg
+	//av_register_all();
+	//#endif //defined(SUPPORT_VIDEO) and defined(USE_FFMPEG)
 }
 
 ACMediaLibrary::~ACMediaLibrary(){
@@ -234,17 +234,23 @@ int ACMediaLibrary::importFile(std::string _filename, ACPluginManager *acpl, boo
 		if (doSegment){
 			// segments are created without id
 			media->segment(acpl, _save_timed_feat);
-			std::vector<ACMedia*> mediaSegments;
-			mediaSegments = media->getAllSegments();
-			for (unsigned int i = 0; i < mediaSegments.size(); i++){
-				// for the segments we do not save (again) timedFeatures
-				// XS TODO but we should not re-calculate them either !
-				if (mediaSegments[i]->import(_filename, this->getMediaID(), acpl)){
-					this->addMedia(mediaSegments[i]);
-					this->incrementMediaID();
+			
+			if(this->media_type == MEDIA_TYPE_VIDEO)//CF
+				std::cout << "\n\nWARNING! Video segments not added to the library to test segmentation until features are not re-calculated from each segment!\n\n" << std::endl;
+			else{
+				std::vector<ACMedia*> mediaSegments;
+				mediaSegments = media->getAllSegments();
+				for (unsigned int i = 0; i < mediaSegments.size(); i++){
+					// for the segments we do not save (again) timedFeatures
+					// XS TODO but we should not re-calculate them either !
+					if (mediaSegments[i]->import(_filename, this->getMediaID(), acpl)){
+						this->addMedia(mediaSegments[i]);
+						this->incrementMediaID();
+					}
+					
 				}
-				
 			}
+			
 		}
 	}
 	else {
@@ -882,7 +888,7 @@ std::vector<std::string> ACMediaLibrary::getListOfActivePlugins(){
 }
 
 // -------------------------------------------------------------------------
-// XS custom for Thomas Isreal videos : features sorted, along with filename
+// XS custom for Thomas Israel videos : features sorted, along with filename
 void ACMediaLibrary::saveSorted(string output_file){
 	//XS dirty -- should be generalized !
 	ofstream out(output_file.c_str());
