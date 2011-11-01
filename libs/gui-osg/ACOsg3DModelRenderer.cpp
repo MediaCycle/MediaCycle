@@ -85,12 +85,13 @@ void ACOsg3DModelRenderer::modelGeode() {
 		model_node=0; }
 
 	std::cout << boost::filesystem::extension(media_cycle_filename);
-	osgDB::ReaderWriter* readerWriter = osgDB::Registry::instance()->getReaderWriterForExtension(boost::filesystem::extension(media_cycle_filename).substr(1));
+	osg::ref_ptr<osgDB::ReaderWriter> readerWriter = osgDB::Registry::instance()->getReaderWriterForExtension(boost::filesystem::extension(media_cycle_filename).substr(1));
 	if (!readerWriter){
 		cerr << "<ACOsg3DModelRenderer::modelGeode> problem loading file, no OSG plugin available" << endl;
 	}
 	else{
-		model_node = osgDB::readNodeFile(media_cycle_filename);		
+		model_node = osgDB::readNodeFile(media_cycle_filename);
+		readerWriter = 0;
 		osg::StateSet* ss = model_node->getOrCreateStateSet();
 		ss->setMode( GL_BLEND, osg::StateAttribute::ON );
 		ss->setMode(GL_NORMALIZE, osg::StateAttribute::ON);

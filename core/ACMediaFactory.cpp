@@ -792,47 +792,53 @@ void ACMediaFactory::addAvailableSndFileExtensions(){
 
 #if defined (SUPPORT_IMAGE) || defined(SUPPORT_VIDEO) || defined(SUPPORT_3DMODEL) || defined(SUPPORT_PDF)
 void ACMediaFactory::addAvailableOsgFileExtensions(){
-	
-	// The osgdb_ffmpeg plugin uses thread locking since 3.0.1
-	// Calling the following line is necessary to avoid a crash by ensuring the osgBD registry thread initiates the lock
-	osgDB::ReaderWriter* ffmpegReaderWriter = osgDB::Registry::instance()->getReaderWriterForExtension("ffmpeg");
-	
+
 	#ifdef PARSE_OSG_PLUGINS_VERBOSE
 	std::cout << "Gathering media file extensions from OSG plugins..." << std::endl;
 	#endif//def PARSE_OSG_PLUGINS_VERBOSE
 
-	// Ripped from applications/osgconv, method for "--formats"
+	// The osgdb_ffmpeg plugin uses thread locking since 3.0.1
+	// To avoid crashes, OSG plugins should be queried through the osgBD registry thread, so that its instance initiates the lock for osgdb_ffmpeg
+
+	// Open all OSG plugins
 	osgDB::FileNameList plugins = osgDB::listAllAvailablePlugins();
-	for(osgDB::FileNameList::iterator itr = plugins.begin();
-		itr != plugins.end();
-		++itr)
+	for(osgDB::FileNameList::iterator itr = plugins.begin();itr != plugins.end();++itr)
 	{
+		bool library_loaded = osgDB::Registry::instance()->loadLibrary(*itr);
 		#ifdef PARSE_OSG_PLUGINS_VERBOSE
-		std::cout<<"-- Plugin "<<*itr<<std::endl;
+		if(library_loaded)
+			std::cout<<"-- opening plugin "<<*itr<<std::endl;
 		#endif//def PARSE_OSG_PLUGINS_VERBOSE;
-		// Ripped from osgDB/PluginQuery.cpp, osgDB::outputPluginDetails
-		osgDB::ReaderWriterInfoList infoList;
-		if (osgDB::queryPlugin(*itr, infoList))
+	}
+	
+	// Get all registered readers/writers from the loaded OSG plugins and check the extensions they provide
+	for(osgDB::Registry::ReaderWriterList::iterator rw_itr = osgDB::Registry::instance()->getReaderWriterList().begin();
+		rw_itr != osgDB::Registry::instance()->getReaderWriterList().end();
+		++rw_itr)
+	{
+		osgDB::ReaderWriter::FormatDescriptionMap rwfdm = (*rw_itr)->supportedExtensions();
+		osgDB::ReaderWriter::FormatDescriptionMap::iterator fdm_itr;
+		for(fdm_itr = rwfdm.begin();fdm_itr != rwfdm.end();++fdm_itr)
 		{
-			for(osgDB::ReaderWriterInfoList::iterator rwi_itr = infoList.begin();
-				rwi_itr != infoList.end();
-				++rwi_itr)
-			{
-				osgDB::ReaderWriterInfo& info = *(*rwi_itr);
-				osgDB::ReaderWriter::FormatDescriptionMap::iterator fdm_itr;
-				for(fdm_itr = info.extensions.begin();
-					fdm_itr != info.extensions.end();
-					++fdm_itr)
-				{
-					#ifdef PARSE_OSG_PLUGINS_VERBOSE
-					std::cout<<"    extensions : ."<<fdm_itr->first<<" ("<<fdm_itr->second<<")"<<std::endl;
-					#endif//def PARSE_OSG_PLUGINS_VERBOSE
-					std::string ext = std::string(".") + fdm_itr->first;
-					checkAvailableFileExtensionSupport(ext,MEDIA_TYPE_NONE);
-				}
-			}
+			#ifdef PARSE_OSG_PLUGINS_VERBOSE
+			std::cout<<"-- adding extension: ."<<fdm_itr->first<<" ("<<fdm_itr->second<<")"<<std::endl;
+			#endif//def PARSE_OSG_PLUGINS_VERBOSE
+			std::string ext = std::string(".") + fdm_itr->first;
+			checkAvailableFileExtensionSupport(ext,MEDIA_TYPE_NONE);
 		}
 	}
+	
+	// Close all OSG plugins
+	osgDB::Registry::instance()->closeAllLibraries();
+	
+	// Verify which readers/writers haven't been closed:
+	#ifdef PARSE_OSG_PLUGINS_VERBOSE
+	for(osgDB::Registry::ReaderWriterList::iterator rw_itr = osgDB::Registry::instance()->getReaderWriterList().begin();
+		rw_itr != osgDB::Registry::instance()->getReaderWriterList().end();
+		++rw_itr)
+		std::cout<<"-- plugin still open: "<<(*rw_itr)->className()<<std::endl;
+	#endif//def PARSE_OSG_PLUGINS_VERBOSE;
+	
 	#ifdef PARSE_OSG_PLUGINS_VERBOSE
 	std::cout << "Gathering media file extensions from OSG plugins... done" << std::endl;
 	#endif//def PARSE_OSG_PLUGINS_VERBOSE

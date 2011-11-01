@@ -172,9 +172,9 @@ ACMultiMediaCycleOsgQt::ACMultiMediaCycleOsgQt(QWidget *parent) : QMainWindow(pa
 	// This is required to populate the available file extensions list at startup
 	// until we clean mediacycle instead of deleting/creating it at every media type change.
 	ACMediaFactory::getInstance();
-	/*listSupportedMediaExtensions();
-	 #ifdef USE_DEBUG
-	 listUncheckedMediaExtensions();
+	//ACMediaFactory::getInstance().listSupportedMediaExtensions();
+	/* #ifdef USE_DEBUG
+	 ACMediaFactory::getInstance().listUncheckedMediaExtensions();
 	 #endif //def USE_DEBUG*/
 	// Since it is time consuming, we might want to add a splash screen with progress bar at startup?
 
@@ -221,13 +221,13 @@ ACMultiMediaCycleOsgQt::ACMultiMediaCycleOsgQt(QWidget *parent) : QMainWindow(pa
 			this->progressBar, SLOT(loading_file(int,int) ) );
 	
 	// Debugging accentuated media filenames
-	#ifdef USE_DEBUG
+	/*#ifdef USE_DEBUG
 	qDebug() << "System Locale name:"      << QLocale::system().name();
 	qDebug() << "Qt codecForCStrings:" << QTextCodec::codecForCStrings();
 	qDebug() << "Qt codecForLocale:"   << QTextCodec::codecForLocale()->name();
+	#endif*/
 	if (!QTextCodec::codecForCStrings())
 		QTextCodec::setCodecForCStrings(QTextCodec::codecForName("UTF-8"));//CF hack for CF to load accents
-	#endif
 
 	// XS reminder: need to call configureSettings from the application main.
 
@@ -582,8 +582,15 @@ void ACMultiMediaCycleOsgQt::on_actionLoad_Media_Files_triggered(bool checked){
 
 	QString fileName;
 	QFileDialog dialog(osgViewDock,"Open MediaCycle Media File(s)");
+	
 	//CF generating supported file extensions from used media I/O libraries and current media type:
 	std::vector<std::string> mediaExt = media_cycle->getExtensionsFromMediaType( media_cycle->getLibrary()->getMediaType() );
+	
+	if(mediaExt.size()==0){
+		this->showError("No file extensions supported for this media type. Please check the media factory. Can't import media files.");
+		return;
+	}
+	
 	QString mediaExts = "Supported Extensions (";
 	std::vector<std::string>::iterator mediaIter = mediaExt.begin();
 	for(;mediaIter!=mediaExt.end();++mediaIter){
@@ -1041,9 +1048,7 @@ void ACMultiMediaCycleOsgQt::loadDefaultConfig(ACMediaType _media_type, ACBrowse
 	
 	// Testing the presence of FFmpeg plugin for OSG before loading the default config
 	if(_media_type == MEDIA_TYPE_VIDEO){
-		osgDB::ReaderWriter* movReaderWriter = 0;
-		osgDB::ReaderWriter* ffmpegReaderWriter = 0;
-		osgDB::ReaderWriter* pdfReaderWriter = 0;
+		osg::ref_ptr<osgDB::ReaderWriter> movReaderWriter(0),ffmpegReaderWriter(0), pdfReaderWriter(0);
 		std::string osg_plugin_error ="";
 	
 		if(_media_type == MEDIA_TYPE_VIDEO){
@@ -1061,9 +1066,11 @@ void ACMultiMediaCycleOsgQt::loadDefaultConfig(ACMediaType _media_type, ACBrowse
 						((ACMediaConfigDockWidgetQt*)dockWidgets[d])->getComboDefaultSettings()->setCurrentIndex(0);//display the startup combo value "-- Config --"
 				}	
 			}
+			ffmpegReaderWriter = 0; movReaderWriter = 0; pdfReaderWriter = 0;
 			this->showError(osg_plugin_error);
 			return;
 		}
+		ffmpegReaderWriter = 0; movReaderWriter = 0; pdfReaderWriter = 0;
 	}
 
 	if (this->media_cycle){

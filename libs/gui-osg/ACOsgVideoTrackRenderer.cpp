@@ -1023,7 +1023,7 @@ void ACOsgVideoTrackRenderer::updateSelectionVideos(
 	 track_node->removeChild((*_transform));*/
 	
 	if(n==0){
-		osgDB::ReaderWriter* readerWriter = osgDB::Registry::instance()->getReaderWriterForExtension(boost::filesystem::extension(media->getThumbnailFileName()).substr(1));
+		osg::ref_ptr<osgDB::ReaderWriter> readerWriter = osgDB::Registry::instance()->getReaderWriterForExtension(boost::filesystem::extension(media->getThumbnailFileName()).substr(1));
 		if (!readerWriter){
 			cerr << "<ACOsgVideoTrackRenderer> problem loading file, no OSG plugin available" << endl;
 		}
@@ -1063,7 +1063,7 @@ void ACOsgVideoTrackRenderer::updateSelectionVideos(
 			osg::NotifySeverity notify_level = osg::getNotifyLevel();
 			osg::setNotifyLevel(osg::ALWAYS);
 			//_selection_video_image = osgDB::readImageFile(media->getThumbnailFileName());
-			while(_selection_video_images.size()<m+1)
+			if(_selection_video_images.size()<m+1)
 				_selection_video_images.push_back(osgDB::readImageFile(media->getThumbnailFileName()));
 			osg::setNotifyLevel(notify_level);
 			

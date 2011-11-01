@@ -60,7 +60,7 @@ void ACOsgVideoRenderer::prepareNodes() {
 	//image_stream = ((ACVideo*)(media_cycle->getLibrary()->getMedia(media_index)))->getStream();
 	image_stream = ((ACVideo*)(media))->getStream();
 	
-	std::cout << "Movie length " << image_stream->getLength() << " and framerate "<< media->getFrameRate() << std::endl;//image_stream->getFrameRate() << std::endl;
+	//std::cout << "Movie length " << image_stream->getLength() << " and framerate "<< media->getFrameRate() << std::endl;//image_stream->getFrameRate() << std::endl;
 	
 	// Hack to display a first valid frame,
 	image_stream->play();

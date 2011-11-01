@@ -267,7 +267,7 @@ void ACOsgAudioRenderer::waveformGeode() {
 		//state->setAttribute(new LineWidth(1.0));
 
 		waveform_geode->addDrawable(samples_geometry);
-		waveform_geode->addDrawable(border_geometry);
+		//waveform_geode->addDrawable(border_geometry);
 		waveform_geode->addDrawable(axis_geometry);
 		waveform_geode->addDrawable(frame_geometry);
 

@@ -112,15 +112,16 @@ bool ACPDF::computeThumbnail(int w, int h){
 	std::cout << boost::filesystem::extension(filename);
 	/// prerequisites for loading OSG media files, 2 alternatives
 	/// 1) standard procedure: checking for a plugin that can open the format of the media file
-	osgDB::ReaderWriter* readerWriter = osgDB::Registry::instance()->getReaderWriterForExtension(boost::filesystem::extension(filename).substr(1));
+	osg::ref_ptr<osgDB::ReaderWriter> readerWriter = osgDB::Registry::instance()->getReaderWriterForExtension(boost::filesystem::extension(filename).substr(1));
 	/// 2) hack: forcing the use of the ffmpeg plugin by checking the plugin that can open the ffmpeg format (most probably the ffmpeg plugin)
-	//osgDB::ReaderWriter* readerWriter = osgDB::Registry::instance()->getReaderWriterForExtension("ffmpeg");
+	//osg::ref_ptr<osgDB::ReaderWriter> readerWriter = osgDB::Registry::instance()->getReaderWriterForExtension("ffmpeg");
 	if (!readerWriter){
 		cerr << "<ACPDF::computeThumbnail> problem loading file, no OSG plugin available" << endl;
 		return false;
 	}
 
 	osg::ref_ptr<osg::Image> thumbnail = osgDB::readImageFile(filename);
+	readerWriter = 0;
 	// XS TODO : needs rescaling !!
 	//thumbnail->scaleImage(thumbnail_width,thumbnail_height,1);
 	//thumbnail->setAllocationMode(osg::Image::NO_DELETE);

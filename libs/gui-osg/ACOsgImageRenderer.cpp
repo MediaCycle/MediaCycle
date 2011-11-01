@@ -140,7 +140,7 @@ void ACOsgImageRenderer::imageGeode(bool flip, float sizemul, float zoomin) {
 		image_geode = new Geode();
 		image_geometry = new Geometry();	
 
-		zpos = zpos - 0.00001 * node_index;
+		//zpos = zpos - 0.00001 * node_index;
 		
 		// image vertices
 		float scale;
@@ -240,35 +240,50 @@ void ACOsgImageRenderer::imageGeode(bool flip, float sizemul, float zoomin) {
 		*/
 		
 		border_geode = new Geode();
-		border_geometry = new Geometry();	
 		
-		// border vertices
-		vertices = new Vec3Array(5);
-		(*vertices)[0] = Vec3(-imagex-xstep, -imagey-xstep, zpos);
-		(*vertices)[1] = Vec3(imagex+xstep, -imagey-xstep, zpos);
-		(*vertices)[2] = Vec3(imagex+xstep, imagey+xstep, zpos);
-		(*vertices)[3] = Vec3(-imagex-xstep, imagey+xstep, zpos);
-		(*vertices)[4] = Vec3(-imagex-xstep, -imagey-xstep, zpos);
-		border_geometry->setVertexArray(vertices);
+		// border vertices by drawing lines, slightly more cost effective
+		//if (media_type == MEDIA_TYPE_IMAGE){
+			border_geometry = new Geometry();
+			vertices = new Vec3Array(5);
+			(*vertices)[0] = Vec3(-imagex-xstep, -imagey-xstep, zpos);
+			(*vertices)[1] = Vec3(imagex+xstep, -imagey-xstep, zpos);
+			(*vertices)[2] = Vec3(imagex+xstep, imagey+xstep, zpos);
+			(*vertices)[3] = Vec3(-imagex-xstep, imagey+xstep, zpos);
+			(*vertices)[4] = Vec3(-imagex-xstep, -imagey-xstep, zpos);
+			border_geometry->setVertexArray(vertices);
+			
+			line_p = new DrawElementsUInt(PrimitiveSet::LINES, 8);	
+			for(i=0; i<4; i++) {
+				(*line_p)[2*i] = i;
+				(*line_p)[2*i+1] = i+1;
+			}
+			border_geometry->addPrimitiveSet(line_p);
+			
+			border_geometry->setColorArray(colors3);// XS was : colors2, but (0.4f, 0.4f, 0.4f, 1.0f)
+			border_geometry->setColorBinding(Geometry::BIND_OVERALL);
+			border_geode->addDrawable(border_geometry);
+			 
+			state = border_geometry->getOrCreateStateSet();
+			state->setAttribute(new LineWidth(2.0));//
+		//}
 		
-		line_p = new DrawElementsUInt(PrimitiveSet::LINES, 8);	
-		for(i=0; i<4; i++) {
-			(*line_p)[2*i] = i;
-			(*line_p)[2*i+1] = i+1;
-		}
-		border_geometry->addPrimitiveSet(line_p);
-		
-		border_geometry->setColorArray(colors3);// XS was : colors2, but (0.4f, 0.4f, 0.4f, 1.0f)
-		border_geometry->setColorBinding(Geometry::BIND_OVERALL);
-		state = border_geometry->getOrCreateStateSet();
-		state->setAttribute(new LineWidth(2.0));
-		
+		//border by box, more smooth
+		/*if (media_type == MEDIA_TYPE_VIDEO){
+			TessellationHints *hints = new TessellationHints();
+			hints->setDetailRatio(0.0);
+			border_geode->addDrawable(new osg::ShapeDrawable(new osg::Box(osg::Vec3(0.0f,0.0f,zpos-0.0001),2*(imagex+5*xstep),2*(imagey+5*xstep),0), hints));
+		}*/
+				
 		state = border_geode->getOrCreateStateSet();
+		
+		
+		#if defined(APPLE_IOS)
 		state->setMode(GL_LIGHTING, osg::StateAttribute::PROTECTED | osg::StateAttribute::OFF );
+		#else
+		state->setMode(GL_LIGHTING, osg::StateAttribute::ON );
 		state->setMode(GL_BLEND, StateAttribute::ON);
 		state->setMode(GL_LINE_SMOOTH, StateAttribute::ON);
-		
-		border_geode->addDrawable(border_geometry);
+		#endif
 		
 		image_transform->addChild(border_geode);
 		
