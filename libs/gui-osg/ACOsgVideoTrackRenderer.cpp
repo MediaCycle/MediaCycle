@@ -1447,7 +1447,7 @@ void ACOsgVideoTrackRenderer::updateTracks(double ratio)
 			#endif//def USE_SLIT_SCAN
 			
 			// Optional, for testing the segment visualization without segmentation
-			this->createDummySegments();
+			//this->createDummySegments();
 		}	
 	}	
 
