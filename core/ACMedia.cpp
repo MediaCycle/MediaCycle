@@ -350,6 +350,8 @@ void ACMedia::loadXML(TiXmlElement* _pMediaNode){
 		featureName = featureElement->Attribute("FeatureName");
 		if (featureName == "")
 			throw runtime_error("corrupted XML file, empty feature name");
+		if (!featureElement->FirstChild())
+			throw runtime_error("corrupted XML file, empty feature value");
 		featureElementsAsText=featureElement->FirstChild()->ToText();
 		if (!featureElementsAsText)
 			throw runtime_error("corrupted XML file, error reading feature elements");
@@ -413,6 +415,11 @@ void ACMedia::loadXML(TiXmlElement* _pMediaNode){
 				throw runtime_error("corrupted XML file, wrong segment end");
 			}
 			segment_media->setEnd(n_end);
+			
+			if (!segmentElement->FirstChild()){
+				delete segment_media;
+				throw runtime_error("corrupted XML file, no segment ID");
+			}
 			
 			segmentIDElementsAsText=segmentElement->FirstChild()->ToText();
 			if (!segmentIDElementsAsText){
