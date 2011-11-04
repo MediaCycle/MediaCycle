@@ -39,15 +39,9 @@
 #if defined (SUPPORT_IMAGE) || defined (SUPPORT_VIDEO)
 
 #include "ACOsgMediaRenderer.h"
-#include "ACOpenCVInclude.h"
 
 class ACOsgImageRenderer : public ACOsgMediaRenderer  {
 protected:
-	
-	static const int NCOLORS ;
-	osg::ref_ptr<osg::Vec4Array> colors;
-	osg::ref_ptr<osg::Vec4Array> colors2;
-	osg::ref_ptr<osg::Vec4Array> colors3;
 	
 	osg::ref_ptr<osg::Image> image_image;
 	osg::ref_ptr<osg::Geode> image_geode;

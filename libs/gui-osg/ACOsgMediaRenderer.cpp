@@ -47,6 +47,11 @@ ACOsgMediaRenderer::ACOsgMediaRenderer() {
 	media_node = new MatrixTransform();
 #endif
 	node_color = Vec4(1,1,0.5,1); //CF seminal yellow
+	cluster_colors.push_back(osg::Vec4(1,1,0.5,1));
+	cluster_colors.push_back(osg::Vec4(1,0.5,1,1));
+	cluster_colors.push_back(osg::Vec4(0.5,1,1,1));
+	cluster_colors.push_back(osg::Vec4(1,0.5,0.5,1));
+	cluster_colors.push_back(osg::Vec4(0.5,1,0.5,1));
 	user_defined_color = false;
 	
 	// SD - Results from centralized request to MediaCycle - GLOBAL
@@ -71,6 +76,7 @@ ACOsgMediaRenderer::ACOsgMediaRenderer() {
 	media_cycle_activity = 0;
 	media_cycle_filename = "";
 	media_index = -1;
+	cluster_index = -1;
 	prev_media_index = -1;	
 	
 #if defined(APPLE_IOS)
@@ -89,6 +95,7 @@ ACOsgMediaRenderer::~ACOsgMediaRenderer() {
 	//ref_ptr//media_node->unref();
 	//ref_ptr//local_group->unref();
 	media = 0;// the core will free media files
+	cluster_colors.clear();
 }
 
 void ACOsgMediaRenderer::setDeltaTime(double media_cycle_deltatime) {
@@ -149,7 +156,7 @@ void ACOsgMediaRenderer::setNavigation(int media_cycle_navigation_level) {
 }
 
 void ACOsgMediaRenderer::setActivity(int media_cycle_activity) {
-	this->media_cycle_activity = media_cycle_activity;
+	this->media_cycle_activity = media_cycle_activity;	
 }
 
 /*void ACOsgMediaRenderer::setMediaIndex(int media_index) {

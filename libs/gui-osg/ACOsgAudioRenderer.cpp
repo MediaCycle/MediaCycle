@@ -63,28 +63,12 @@ ACOsgAudioRenderer::ACOsgAudioRenderer() {
 
 ACOsgAudioRenderer::~ACOsgAudioRenderer() {
 	// media_node->removeChild(0,1);
-	if 	(waveform_geode) {
-		//ref_ptr//waveform_geode->unref();
-		waveform_geode=0;
-	}
-	if 	(curser_geode) {
-		//ref_ptr//curser_geode->unref();
-		curser_geode=0;
-	}
-	if 	(curser_transform) {
-		//ref_ptr//curser_transform->unref();
-		curser_transform=0;
-	}
-	if 	(entry_geode) {
-		//ref_ptr//entry_geode->unref();
-		entry_geode=0;
-	}
-	if 	(metadata_geode) {
-		//ref_ptr//metadata_geode->unref();
-		metadata_geode=0;
-	}
+	waveform_geode=0;
+	curser_geode=0;
+	curser_transform=0;
+	entry_geode=0;
+	metadata_geode=0;
 }
-
 
 void ACOsgAudioRenderer::waveformGeode() {
 
@@ -482,22 +466,7 @@ void ACOsgAudioRenderer::prepareNodes() {
 void ACOsgAudioRenderer::updateNodes(double ratio) {
 
 	double xstep = 0.00025;
-
 	xstep *= afac;
-
-	#define NCOLORS 5
-	static Vec4 colors[NCOLORS];
-	static bool colors_ready = false;
-
-	if(!colors_ready)
-	{
-		colors[0] = Vec4(1,1,0.5,1);
-		colors[1] = Vec4(1,0.5,1,1);
-		colors[2] = Vec4(0.5,1,1,1);
-		colors[3] = Vec4(1,0.5,0.5,1);
-		colors[4] = Vec4(0.5,1,0.5,1);
-		colors_ready = true;
-	}
 
 	const ACMediaNode &attribute = media_cycle->getMediaNode(node_index);
 
@@ -594,10 +563,14 @@ void ACOsgAudioRenderer::updateNodes(double ratio) {
 			}
 
 			//CF nodes colored along their relative cluster on in Clusters Mode
-			if (media_cycle->getBrowserMode() == AC_MODE_CLUSTERS)
-				((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(colors[attribute.getClusterId()%NCOLORS]);
+			if (media_cycle->getBrowserMode() == AC_MODE_CLUSTERS){
+				if(cluster_colors.size()>0)
+					((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(cluster_colors[attribute.getClusterId()%cluster_colors.size()]);
+				else
+					((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(node_color);
+			}
 			else
-				((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(colors[0]);
+				((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(node_color);
 
 			if (attribute.isSelected()) {
 				//CF color (multiple) selected nodes in black

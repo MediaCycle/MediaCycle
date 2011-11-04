@@ -43,47 +43,19 @@ using namespace osg;
 
 #define IMAGE_BORDER
 
-const int ACOsgImageRenderer::NCOLORS = 5;
-
 ACOsgImageRenderer::ACOsgImageRenderer() {
 	media_type = MEDIA_TYPE_IMAGE;
-	
-	Vec4 color(1.0f, 1.0f, 1.0f, 0.9f);	
-	Vec4 color2(0.2f, 0.8f, 0.2f, 1.0f);	
-	Vec4 color3(0.4f, 0.4f, 0.4f, 1.0f);	
-	colors = new Vec4Array;
-	colors2 = new Vec4Array;
-	colors3 = new Vec4Array;
-
-	colors->push_back(color);		
-	colors2->push_back(color2);	
-	colors3->push_back(color3);
-	
+	node_color = Vec4(0.4f, 0.4f, 0.4f, 1.0f);		
 	image_image = 0;
 	image_geode = 0;
 	border_geode = 0;
 	image_transform = 0;
-
-// was in updateNodes but not used...
-//		colors[0] = Vec4(0.2,0.6,0.2,1);
-//		colors[1] = Vec4(0.4,0.4,0.4,1);
-//		colors[2] = Vec4(0.5,1,1,1);
-//		colors[3] = Vec4(1,0.5,0.5,1);
-//		colors[4] = Vec4(0.5,1,0.5,1);
-	
 }
 
 ACOsgImageRenderer::~ACOsgImageRenderer() {
-	// smart pointers (ref_ptr) will take care of garbage collection
-//	delete colors;
-//	delete colors2;
-//	delete colors3;
-	if (image_geode) { 
-		image_geode=0; }
-	if (border_geode) {
-		border_geode=0; }
-	if (image_transform) { 
-		image_transform=0; }
+	image_geode=0;
+	border_geode=0;
+	image_transform=0;
 }
 
 void ACOsgImageRenderer::imageGeode(bool flip, float sizemul, float zoomin) {
@@ -106,8 +78,6 @@ void ACOsgImageRenderer::imageGeode(bool flip, float sizemul, float zoomin) {
 		xlim *=sizemul;
 		
 		int width, height;
-		//IplImage* thumbnail;
-		//osg::ref_ptr<osg::Image> thumbnail;
 		std::string thumbnail_filename;
 		
 		StateSet *state;
@@ -212,6 +182,8 @@ void ACOsgImageRenderer::imageGeode(bool flip, float sizemul, float zoomin) {
 		state->setTextureAttribute(0, image_texture);
 		state->setTextureMode(0, GL_TEXTURE_2D, osg::StateAttribute::ON);
 		
+		osg::ref_ptr<osg::Vec4Array> colors = new Vec4Array(1);
+		(*colors)[0] = node_color;
 		image_geometry->setColorArray(colors);
 		image_geometry->setColorBinding(Geometry::BIND_OVERALL);
 		
@@ -259,7 +231,7 @@ void ACOsgImageRenderer::imageGeode(bool flip, float sizemul, float zoomin) {
 			}
 			border_geometry->addPrimitiveSet(line_p);
 			
-			border_geometry->setColorArray(colors3);// XS was : colors2, but (0.4f, 0.4f, 0.4f, 1.0f)
+			border_geometry->setColorArray(colors);
 			border_geometry->setColorBinding(Geometry::BIND_OVERALL);
 			border_geode->addDrawable(border_geometry);
 			 
@@ -276,7 +248,6 @@ void ACOsgImageRenderer::imageGeode(bool flip, float sizemul, float zoomin) {
 				
 		state = border_geode->getOrCreateStateSet();
 		
-		
 		#if defined(APPLE_IOS)
 		state->setMode(GL_LIGHTING, osg::StateAttribute::PROTECTED | osg::StateAttribute::OFF );
 		#else
@@ -287,21 +258,9 @@ void ACOsgImageRenderer::imageGeode(bool flip, float sizemul, float zoomin) {
 		
 		image_transform->addChild(border_geode);
 		
-		//(*colors2)[0] = Vec4(1.0f, 1.0f, 1.0f, 0.5f);
 	#endif	
-		
-		//sprintf(name, "some audio element");
 		image_transform->setUserData(new ACRefId(node_index));
-		//curser_transform->setName(name);
-		//ref_ptr//image_transform->ref();
-		//sprintf(name, "some audio element");
 		image_geode->setUserData(new ACRefId(node_index));
-		//waveform_geode->setName(name);
-	#ifdef IMAGE_BORDER	
-		//CF no need for alternate version
-		//ref_ptr//image_geode->ref();	
-		//ref_ptr//border_geode->ref();
-	#endif
 	}	
 }
 
@@ -335,7 +294,6 @@ void ACOsgImageRenderer::updateNodes(double ratio) {
 	const ACPoint &p = attribute.getCurrentPosition(), &p2 = attribute.getNextPosition();
 	double omr = 1.0-ratio;
 	
-	
 	/*int media_index = node_index; // or media_cycle->getBrowser()->getMediaNode(node_index).getMediaId(); 
 	if (media_cycle->getBrowser()->getMode() == AC_MODE_NEIGHBORS)
 		media_index = media_cycle->getBrowser()->getUserLog()->getMediaIdFromNodeId(node_index);*/
@@ -362,14 +320,23 @@ void ACOsgImageRenderer::updateNodes(double ratio) {
 	
 	z = 0;
 	
-	//	if (border_geode->getDrawable(0)) {
-	//		if (attribute.getActivity()==1) {
-	//			((Geometry*)border_geode->getDrawable(0))->setColorArray(colors2);
-	//		}
-	//		else {
-	//			((Geometry*)border_geode->getDrawable(0))->setColorArray(colors3);
-	//		}
-	//	}
+	#ifdef IMAGE_BORDER
+	if (border_geode){
+		if (border_geode->getDrawable(0)) {
+			//CF nodes colored along their relative cluster on in Clusters Mode
+			if (media_cycle->getBrowserMode() == AC_MODE_CLUSTERS){
+				if(cluster_index != attribute.getClusterId()){
+					cluster_index = attribute.getClusterId();
+					osg::ref_ptr<osg::Vec4Array> colors = new Vec4Array(1);
+					(*colors)[0] = node_color;
+					if(cluster_colors.size()>0)
+						(*colors)[0] = cluster_colors[attribute.getClusterId()%cluster_colors.size()];
+					((Geometry*)border_geode->getDrawable(0))->setColorArray(colors);
+				}
+			}	
+		}
+	}
+	#endif
 	
 	float localscale;
 	float maxdistance = 0.2;
@@ -400,6 +367,5 @@ void ACOsgImageRenderer::updateNodes(double ratio) {
 			* T;
 	media_node->setMatrix(T);
 #endif //AUTO_TRANSFORM
-
 }
 #endif //defined (SUPPORT_IMAGE) || defined (SUPPORT_VIDEO)

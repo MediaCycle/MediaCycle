@@ -79,11 +79,13 @@ protected:
 	osg::ref_ptr<osg::MatrixTransform> media_node;
 #endif
 	int node_index;
+	int cluster_index;
 	ACMedia* media;
 	bool media_changed;
 	float distance_mouse;
 	// int	media_activity;
 	osg::Vec4 node_color;
+	std::vector<osg::Vec4> cluster_colors;
 	bool user_defined_color;
 		
 	// GLOBAL

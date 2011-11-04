@@ -164,20 +164,6 @@ void ACOsgTextRenderer::updateNodes(double ratio) {
 
 	xstep *= afac;
 
-	#define NCOLORS 5
-	static Vec4 colors[NCOLORS];
-	static bool colors_ready = false;
-
-	if(!colors_ready)
-	{
-		colors[0] = Vec4(1,1,0.5,1);
-		colors[1] = Vec4(1,0.5,1,1);
-		colors[2] = Vec4(0.5,1,1,1);
-		colors[3] = Vec4(1,0.5,0.5,1);
-		colors[4] = Vec4(0.5,1,0.5,1);
-		colors_ready = true;
-	}
-
 	const ACMediaNode &attribute = media_cycle->getMediaNode(node_index);
 
 	Matrix T;
@@ -207,9 +193,9 @@ void ACOsgTextRenderer::updateNodes(double ratio) {
 
 		//CF nodes colored along their relative cluster on in Clusters Mode
 		if (media_cycle->getBrowserMode() == AC_MODE_CLUSTERS)
-			((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(colors[attribute.getClusterId()%NCOLORS]);
+			((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(cluster_colors[attribute.getClusterId()%cluster_colors.size()]);
 		else
-			((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(colors[0]);
+			((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(node_color);
 		if (attribute.isSelected()) {
 			//CF color (multiple) selected nodes in black
 			Vec4 selected_color(0,0,0,1);

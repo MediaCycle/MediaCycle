@@ -56,7 +56,7 @@ protected:
 	osg::ref_ptr<osg::MatrixTransform> curser_transform;
 #endif
 	osg::ref_ptr<osg::Geode> entry_geode;
-	
+		
 	void waveformGeode();
 	void curserGeode();
 	void entryGeode();
