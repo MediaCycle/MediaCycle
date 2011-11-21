@@ -124,6 +124,7 @@ static double getTime()
 }
 
 #ifdef USE_SLIT_SCAN
+#ifdef __APPLE__
 #ifdef USE_FFMPEG
 int ACOsgVideoSlitScanThread::convert(AVPicture *dst, int dst_pix_fmt, AVPicture *src,
 					 int src_pix_fmt, int src_width, int src_height)
@@ -154,6 +155,7 @@ int ACOsgVideoSlitScanThread::convert(AVPicture *dst, int dst_pix_fmt, AVPicture
     return result;
 }
 #endif//def USE_FFMPEG
+#endif//def __APPLE__
 
 void ACOsgVideoSlitScanThread::run(void)
 {
@@ -170,6 +172,7 @@ void ACOsgVideoSlitScanThread::run(void)
 	osg::setNotifyLevel(notify_level);
 }
 
+#ifdef __APPLE__
 #ifdef USE_FFMPEG	
 void ACOsgVideoSlitScanThread::yuva420pToRgba(AVPicture * const dst, AVPicture * const src, int width, int height)
 {
@@ -186,8 +189,10 @@ void ACOsgVideoSlitScanThread::yuva420pToRgba(AVPicture * const dst, AVPicture *
     }
 }
 #endif//def USE_FFMPEG
+#endif//def __APPLE__
 
-#ifndef USE_FFMPEG
+
+//#ifndef USE_FFMPEG
 // Using OpenCV, frame jitter
 // XS TODO try with cv::VideoCapture
 int ACOsgVideoSlitScanThread::computeSlitScan(){
@@ -257,9 +262,11 @@ int ACOsgVideoSlitScanThread::computeSlitScan(){
 	}
 	return 1;
 }
-#endif//ndef USE_FFMPEG
+//#endif//ndef USE_FFMPEG
+//#endif //not (defined(__APPLE__) && not defined(USE_FFMPEG))
 
 // Using FFmpeg
+#ifdef __APPLE__
 #ifdef USE_FFMPEG
 int ACOsgVideoSlitScanThread::computeSlitScan(){
 	
@@ -452,6 +459,7 @@ int ACOsgVideoSlitScanThread::computeSlitScan(){
 	return 1;
 }
 #endif//def USE_FFMPEG
+#endif//def __APPLE__
 
 #endif//def USE_SLIT_SCAN
 
@@ -1023,7 +1031,8 @@ void ACOsgVideoTrackRenderer::updateSelectionVideos(
 	 track_node->removeChild((*_transform));*/
 	
 	if(n==0){
-		osg::ref_ptr<osgDB::ReaderWriter> readerWriter = osgDB::Registry::instance()->getReaderWriterForExtension(boost::filesystem::extension(media->getThumbnailFileName()).substr(1));
+		//osg::ref_ptr<osgDB::ReaderWriter> readerWriter = osgDB::Registry::instance()->getReaderWriterForExtension(boost::filesystem::extension(media->getThumbnailFileName()).substr(1));
+		osg::ref_ptr<osgDB::ReaderWriter> readerWriter = osgDB::Registry::instance()->getReaderWriterForExtension("ffmpeg");// necessary for multithreaded video access for now
 		if (!readerWriter){
 			cerr << "<ACOsgVideoTrackRenderer> problem loading file, no OSG plugin available" << endl;
 		}

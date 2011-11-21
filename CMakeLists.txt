@@ -358,7 +358,7 @@ ELSE ( USE_DEBUG )
 	SET(SUPPORT_3DMODEL OFF)
 	#SET(SUPPORT_AUDIO ON)
 	#SET(SUPPORT_IMAGE ON)
-	SET(SUPPORT_PDF OFF)
+	#SET(SUPPORT_PDF ON)
 	#SET(SUPPORT_TEXT ON)
 	#SET(SUPPORT_VIDEO ON)
 	SET(USE_AUDIOGARDEN OFF)
@@ -1453,3 +1453,42 @@ IF (SUPPORT_VIDEO AND BUILD_APPS)
 	ENDIF()
 ENDIF()
 
+
+######################
+#    UBUNTU PPAS     #
+######################
+
+IF(UNIX)
+	# Try to find architecture
+	execute_process(COMMAND uname -m OUTPUT_VARIABLE CPACK_PACKAGE_ARCHITECTURE)
+	string(STRIP "${CPACK_PACKAGE_ARCHITECTURE}" CPACK_PACKAGE_ARCHITECTURE)
+	# Try to find distro name and distro-specific arch
+	execute_process(COMMAND lsb_release -is OUTPUT_VARIABLE LSB_ID)
+	execute_process(COMMAND lsb_release -rs OUTPUT_VARIABLE LSB_RELEASE)
+	string(STRIP "${LSB_ID}" LSB_ID)
+	string(STRIP "${LSB_RELEASE}" LSB_RELEASE)
+	set(LSB_DISTRIB "${LSB_ID}${LSB_RELEASE}")
+	IF(NOT LSB_DISTRIB)
+		set(LSB_DISTRIB "unix")
+	ENDIF(NOT LSB_DISTRIB)
+
+        IF("${LSB_DISTRIB}" MATCHES "Ubuntu")
+		IF(SUPPORT_VIDEO OR SUPPORT_IMAGE)
+	    		IF(("${LSB_DISTRIB}" MATCHES "Ubuntu10.04") OR ("${LSB_DISTRIB}" MATCHES "Ubuntu10.10") OR ("${LSB_DISTRIB}" MATCHES "Ubuntu11.04") OR ("${LSB_DISTRIB}" MATCHES "Ubuntu11.10"))
+                		MESSAGE("\nWARNING!\nInstall up-to-date FFmpeg packages from https://launchpad.net/~jon-severinsson/+archive/ffmpeg \n")
+	    		ENDIF()
+
+	    		IF(("${LSB_DISTRIB}" MATCHES "Ubuntu11.04") OR ("${LSB_DISTRIB}" MATCHES "Ubuntu11.10"))
+	        		MESSAGE("\nWARNING!\nInstall up-to-date OpenCV packages from https://launchpad.net/~gijzelaar/+archive/opencv2.3 (these are not yet using FFmpeg >= 0.8.x) \n")
+	    		ENDIF()
+		ENDIF()
+		IF("${LSB_DISTRIB}" MATCHES "Ubuntu10.04")
+			MESSAGE("\nWARNING!\nInstall up-to-date armadillo/opencv/openscenegraph/podofo/tinyxml packages from https://launchpad.net/~numediart/+archive/deps \n")
+		ENDIF()
+		IF(NOT USE_DEBUG)
+        		IF(NOT("${LSB_DISTRIB}" MATCHES "Ubuntu10.04"))
+            			MESSAGE("Packaging under this Ubuntu distribution needs testing, check definitions in CMakeModules/CreatePackage.cmake")
+			ENDIF() 
+		ENDIF() 
+	ENDIF()
+ENDIF()

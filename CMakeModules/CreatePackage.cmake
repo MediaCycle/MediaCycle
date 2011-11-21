@@ -68,7 +68,7 @@ IF(UNIX)
 	IF(NOT APPLE)
 		SET(CPACK_OUTPUT_CONFIG_FILE "${CMAKE_BINARY_DIR}/CPackConfig-${PROGNAME}.cmake")
 		SET(CPACK_INSTALL_CMAKE_PROJECTS "${CMAKE_BINARY_DIR};MediaCycle;${PROGNAME};/")
-		EXECUTE_PROCESS(COMMAND rm "${CMAKE_BINARY_DIR}/CPackConfig.cmake")
+		#EXECUTE_PROCESS(COMMAND rm "${CMAKE_BINARY_DIR}/CPackConfig.cmake")
 	ENDIF()
 
 	# For Debian-based distros we want to create DEB packages.
@@ -96,57 +96,41 @@ IF(UNIX)
             set(CPACK_DEBIAN_PACKAGE_MAINTAINER "numediart")
         ENDIF()
 
-		IF("${LSB_DISTRIB}" MATCHES "Ubuntu10.04")
-            SET(UBUNTU_VERSION "10.04")
-            MESSAGE("Packaging under Ubuntu 10.04 needs testing, check definitions in CMakeModules/CreatePackage.cmake")
-		ENDIF()
-
-        IF("${LSB_DISTRIB}" MATCHES "Ubuntu10.10")
-            SET(UBUNTU_VERSION "10.10")
-		ENDIF()      
-
-        IF("${LSB_DISTRIB}" MATCHES "Ubuntu11.04")
-            SET(UBUNTU_VERSION "11.04")
-            MESSAGE("Packaging under Ubuntu 11.04 needs testing, check definitions in CMakeModules/CreatePackage.cmake")
-		ENDIF()   
-
-		IF("${LSB_DISTRIB}" MATCHES "Ubuntu1") # for our interest, 10.04, 10.10, 11.04
+	IF("${LSB_DISTRIB}" MATCHES "Ubuntu1") # for our interest, 10.04, 10.10, 11.04
 
             # TinyXML
             # for previous versions 3rdParty/tinyxml is used		
             IF(("${LSB_DISTRIB}" MATCHES "Ubuntu10.10") OR ("${LSB_DISTRIB}" MATCHES "Ubuntu11.04"))
                 SET(UBUNTU_DEPS "libtinyxml2.5.3")
-            ENDIF()
-            IF(("${LSB_DISTRIB}" MATCHES "Ubuntu11.10") OR ("${LSB_DISTRIB}" MATCHES "Ubuntu12.04"))
+            ELSEIF(("${LSB_DISTRIB}" MATCHES "Ubuntu10.04") OR ("${LSB_DISTRIB}" MATCHES "Ubuntu11.10") OR ("${LSB_DISTRIB}" MATCHES "Ubuntu12.04"))
                 SET(UBUNTU_DEPS "libtinyxml2.6.2")
             ENDIF()
 	
             # Boost
             IF("${LSB_DISTRIB}" MATCHES "Ubuntu10.04")
                 SET(UBUNTU_DEPS "libboost-serialization1.40.0" "libboost-system1.40.0" "libboost-filesystem1.40.0" "libboost-graph1.40.0" "libboost-thread1.40.0")
-            ENDIF()
-            IF("${LSB_DISTRIB}" MATCHES "Ubuntu10.10")
+            ELSEIF("${LSB_DISTRIB}" MATCHES "Ubuntu10.10")
                 SET(UBUNTU_DEPS "libboost-serialization1.40.0|libboost-serialization1.42.0" "libboost-system1.40.0|libboost-system1.42.0" "libboost-filesystem1.40.0|libboost-filesystem1.42.0" "libboost-graph1.40.0|libboost-graph1.42.0" "libboost-thread1.40.0|libboost-thread1.42.0")
-            ENDIF()
-            IF("${LSB_DISTRIB}" MATCHES "Ubuntu11.04")
+            ELSEIF("${LSB_DISTRIB}" MATCHES "Ubuntu11.04")
                 SET(UBUNTU_DEPS "libboost-serialization1.42.0" "libboost-system1.42.0" "libboost-filesystem1.42.0" "libboost-graph1.42.0" "libboost-thread1.42.0")
             ENDIF()
 
-            # Armadillo, fake for 10.04 since we now require > 0.9.6, while 10.04 has 0.8.0-1, 10.10 0.9.8-1, 11.04 0.9.52 (March 2011)
-            IF("${LSB_DISTRIB}" MATCHES "Ubuntu10.04")
-                MESSAGE("Warning: the armadillo version might be too low for packaging under Ubuntu 10.04.")
+            # Armadillo
+            IF(("${LSB_DISTRIB}" MATCHES "Ubuntu10.04") OR ("${LSB_DISTRIB}" MATCHES "Ubuntu11.10") OR ("${LSB_DISTRIB}" MATCHES "Ubuntu12.04"))
+                list(APPEND UBUNTU_DEPS "libatlas3gf-base" "liblapack3gf" "libblas3gf" "libarmadillo2")
+            ELSEIF(("${LSB_DISTRIB}" MATCHES "Ubuntu10.10") OR ("${LSB_DISTRIB}" MATCHES "Ubuntu11.04"))
+                list(APPEND UBUNTU_DEPS "libatlas3gf-base" "liblapack3gf" "libblas3gf" "libarmadillo0")
             ENDIF()
-            list(APPEND UBUNTU_DEPS "libatlas3gf-base" "liblapack3gf" "libblas3gf" "libarmadillo0")
 
-            # OpenSceneGraph, fake for 10.04 since we now require > 2.8.3, while 10.04 has 2.8.1, 10.10 2.8.3 and 11.04 2.8.3)
-            IF("${LSB_DISTRIB}" MATCHES "Ubuntu10.04")
-                list(APPEND UBUNTU_DEPS "libopenscenegraph56" "libopenthreads12")
-                MESSAGE("Warning: the OpenSceneGraph version might be too low for packaging under Ubuntu 10.04.")
-            ELSE()
+            # OpenSceneGraph
+            IF(("${LSB_DISTRIB}" MATCHES "Ubuntu10.04") OR ("${LSB_DISTRIB}" MATCHES "Ubuntu11.10") OR ("${LSB_DISTRIB}" MATCHES "Ubuntu12.04"))
+                list(APPEND UBUNTU_DEPS "libopenscenegraph80" "libopenthreads14")
+            ELSEIF(("${LSB_DISTRIB}" MATCHES "Ubuntu10.10") OR ("${LSB_DISTRIB}" MATCHES "Ubuntu11.04"))
                 list(APPEND UBUNTU_DEPS "libopenscenegraph65" "libopenthreads13")
             ENDIF()
+
             IF(WITH_QT4 AND SUPPORT_VIDEO AND USE_VIDEO AND FFMPEG_FOUND) # dirty test to check if we're packaging a GUI application under Ubuntu
-                INSTALL(FILES ${CMAKE_BINARY_DIR}/3rdparty/osgdb_ffmpeg/osgdb_ffmpeg.so DESTINATION lib/osgPlugins-${OPENSCENEGRAPH_VERSION} COMPONENT ${PROGNAME})
+                #INSTALL(FILES ${CMAKE_BINARY_DIR}/3rdparty/osgdb_ffmpeg/osgdb_ffmpeg.so DESTINATION lib/osgPlugins-${OPENSCENEGRAPH_VERSION} COMPONENT ${PROGNAME})
             ENDIF()
 
             # Qt4 libqtcore4 and libqtgui4 are package for kubuntu, libqt4-core and libqt4-gui for ubuntu
@@ -180,21 +164,16 @@ IF(UNIX)
 
             # FFmpeg
             IF(SUPPORT_VIDEO)
-                list(APPEND UBUNTU_DEPS "libavcodec-extra-52|libavcodec52" "libavdevice52" "libavformat-extra-52|libavformat52" "libswscale-extra-0")
-                IF("${LSB_DISTRIB}" MATCHES "Ubuntu10.04")
-                    list(APPEND UBUNTU_DEPS "libavutil-extra-49|libavutil49")
-                ELSE()
-                    list(APPEND UBUNTU_DEPS "libavutil-extra-50|libavutil50")
-                ENDIF()
+                list(APPEND UBUNTU_DEPS "libavcodec-dev" "libavdevice-dev" "libavformat-dev" "libavutil-dev" "libswscale-dev" "libpostproc-dev")#depending on -dev packages so in case multiple lib versions are installed
             ENDIF()
 
             IF(SUPPORT_VIDEO OR SUPPORT_IMAGE)
 
                 # OpenCV
 		IF(OpenCV_VERSION VERSION_GREATER 2.3.0)
-                    IF(("${LSB_DISTRIB}" MATCHES "Ubuntu11.04") OR ("${LSB_DISTRIB}" MATCHES "Ubuntu11.10"))
-                    	MESSAGE("\n\nWARNING!\nInstall an up-to-date OpenCV 2.3.1 package from https://launchpad.net/~gijzelaar/+archive/opencv2.3")
-                    	list(APPEND UBUNTU_DEPS "libopencv-dev")#waiting for better
+                    IF(("${LSB_DISTRIB}" MATCHES "Ubuntu10.04") OR ("${LSB_DISTRIB}" MATCHES "Ubuntu11.04") OR ("${LSB_DISTRIB}" MATCHES "Ubuntu11.10"))
+                    	#MESSAGE("\n\nWARNING!\nRepackage an up-to-date OpenCV 2.3.1 package from https://launchpad.net/~gijzelaar/+archive/opencv2.3 against recent FFmpeg > 0.8.x packages from https://launchpad.net/~jon-severinsson/+archive/ffmpeg") # no we need to repackage them against more uptodate ffmpeg packages rebuilt from Jon Severinsson's ppa source packages
+                    	list(APPEND UBUNTU_DEPS "libopencv-dev")
                     ELSE()
                     	MESSAGE(FATAL_ERROR "OpenCV >= 2.3.0 not available as package for your distribution")
                     ENDIF()
@@ -237,10 +216,11 @@ IF(UNIX)
 
             # PoDoFo
             IF(PODOFO_FOUND AND SUPPORT_PDF)
-                list(APPEND UBUNTU_DEPS "libpodofo0.8.0")
-		IF("${LSB_DISTRIB}" MATCHES "Ubuntu10.04")
-			MESSAGE(FATAL_ERROR "PoDoFo hadn't been packaged for Ubuntu 10.04.")
-		ENDIF()
+                IF(("${LSB_DISTRIB}" MATCHES "Ubuntu10.10") OR ("${LSB_DISTRIB}" MATCHES "Ubuntu11.04"))
+                    list(APPEND UBUNTU_DEPS "libpodofo0.8.0")
+                ELSEIF(("${LSB_DISTRIB}" MATCHES "Ubuntu10.04") OR ("${LSB_DISTRIB}" MATCHES "Ubuntu11.10") OR ("${LSB_DISTRIB}" MATCHES "Ubuntu12.04"))
+                    list(APPEND UBUNTU_DEPS "libpodofo0.9.0")
+                ENDIF()
             ENDIF()
 
             STRING(REGEX REPLACE ";" ", " UBUNTU_DEPS "${UBUNTU_DEPS}")
@@ -291,7 +271,6 @@ IF(UNIX)
 	# 	ENDIF(NOT CPACK_RPM_PACKAGE_REQUIRES)
 	#  ENDIF("${LSB_DISTRIB}" MATCHES "Fedora")
 	set(CPACK_SYSTEM_NAME "${LSB_DISTRIB}-${CPACK_PACKAGE_ARCHITECTURE}")
-	message(STATUS " Detected ${CPACK_SYSTEM_NAME}. Use make package to build packages (${CPACK_GENERATOR}).")
 ENDIF(UNIX)
 
 #From: http://www.cmake.org/Wiki/BundleUtilitiesExample
@@ -516,19 +495,19 @@ INSTALL(CODE "
 ENDIF()
 
 IF(APPLE)
-# To Create a package, one can run "cpack -G DragNDrop CPackConfig.cmake" on Mac OS X
-# where CPackConfig.cmake is created by including CPack
-# And then there's ways to customize this as well
-set(CPACK_PACKAGE_NAME "${PROGNAME}")
-set(CPACK_BUNDLE_NAME "${PROGNAME}")
-set(CPACK_BINARY_DRAGNDROP ON)
-#set(CPACK_PACKAGE_EXECUTABLES "multimediacycle-osg-qt" "MultiMediaCycle.icns") #should contain pairs of <executable> and <icon name>
-#set(CPACK_GENERATOR "PackageMaker;OSXX11")
+	# To Create a package, one can run "cpack -G DragNDrop CPackConfig.cmake" on Mac OS X
+	# where CPackConfig.cmake is created by including CPack
+	# And then there's ways to customize this as well
+	set(CPACK_PACKAGE_NAME "${PROGNAME}")
+	set(CPACK_BUNDLE_NAME "${PROGNAME}")
+	set(CPACK_BINARY_DRAGNDROP ON)
+	#set(CPACK_PACKAGE_EXECUTABLES "multimediacycle-osg-qt" "MultiMediaCycle.icns") #should contain pairs of <executable> and <icon name>
+	#set(CPACK_GENERATOR "PackageMaker;OSXX11")
 ENDIF()
 
 IF(NOT APPLE)
-include(CPack)
-EXECUTE_PROCESS(COMMAND rm "${CMAKE_BINARY_DIR}/CPackSourceConfig.cmake")
+	include(CPack)
+	#EXECUTE_PROCESS(COMMAND rm "${CMAKE_BINARY_DIR}/CPackSourceConfig.cmake")
 ENDIF()
 
 ENDIF(NOT USE_DEBUG) # mandatory for packaging release versions
