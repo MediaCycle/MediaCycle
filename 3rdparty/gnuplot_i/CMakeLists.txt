@@ -1,3 +1,4 @@
+# XS TODO: check that gnuplot is intalled on the machine...
 IF(USE_GNUPLOT_I)
 	FILE(GLOB SRC *.cpp *.c)
 	FILE(GLOB HDR *.hpp *.h)
