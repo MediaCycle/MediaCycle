@@ -39,6 +39,7 @@
 
 #ifdef OSG_LIBRARY_STATIC
 #include <osgViewer/GraphicsWindow>
+
 USE_GRAPHICSWINDOW()
 #endif
 
@@ -69,6 +70,7 @@ void ACQProgressBar::loading_file(int media_id, int dir_size)
 static void mediacycle_callback(const char* message, void *user_data) {
 
 	ACMultiMediaCycleOsgQt *application = (ACMultiMediaCycleOsgQt*)user_data;
+
 	application->mediacycleCallback(message);
 }
 
@@ -86,6 +88,7 @@ void ACMultiMediaCycleOsgQt::mediacycleCallback(const char* message)
 		emit mediacycle_message_changed(QString(send.c_str()));
 		emit loading_finished();
 	}
+	
 	if(mess.find("importing_media_",0)!=string::npos){
 		// Looking for "importing_media_<media_id>_<dir_size>" patterns
 		// note that this "mess" won't happen with a nicer observer pattern and signals/slots transmitting variable arguments sizes and types
@@ -139,7 +142,6 @@ ACMultiMediaCycleOsgQt::ACMultiMediaCycleOsgQt(QWidget *parent) : QMainWindow(pa
 		this->audio_engine = 0;
 	#endif //defined (SUPPORT_AUDIO)
 
-	
 	this->use_segmentation_default = true;
 	this->use_segmentation_current = true;
 	this->use_feature_extraction = true;
@@ -567,8 +569,6 @@ void ACMultiMediaCycleOsgQt::on_actionLoad_Media_Directory_triggered(bool checke
 
 }
 
-
-
 void ACMultiMediaCycleOsgQt::on_actionLoad_Media_Files_triggered(bool checked){
 
 	if(!use_feature_extraction){
@@ -650,9 +650,9 @@ void ACMultiMediaCycleOsgQt::importDirectoriesThreaded(vector<string> directorie
 	
 	// not necessary to thread if only few files.
 	//		if (directories.size() > n_dir_for_threading)
-	 media_cycle->importDirectoriesThreaded(directories, recursive, forward_order, do_segments);
+//	 media_cycle->importDirectoriesThreaded(directories, recursive, forward_order, do_segments);
 	//		else
-	//			media_cycle->importDirectories(directories, recursive, forward_order, do_segments);
+				media_cycle->importDirectories(directories, recursive, forward_order, do_segments);
 	
 	
 }
@@ -1287,7 +1287,6 @@ void ACMultiMediaCycleOsgQt::loadDefaultConfig(ACMediaType _media_type, ACBrowse
 	this->configureDockWidgets(_media_type);
 }
 
-
 void ACMultiMediaCycleOsgQt::comboDefaultSettingsChanged(){
 	for (int d=0;d<dockWidgets.size();d++){
 		if (dockWidgets[d]->getClassName()=="ACMediaConfigDockWidgetQt"){
@@ -1452,6 +1451,7 @@ void ACMultiMediaCycleOsgQt::clearQSettings() {
 	QSettings settings("numediart", "MediaCycle");
 	settings.clear();
 }
+
 void ACMultiMediaCycleOsgQt::setDefaultQSettings() {
 	this->setGeometry( QStyle::alignedRect(
 										   Qt::LeftToRight,

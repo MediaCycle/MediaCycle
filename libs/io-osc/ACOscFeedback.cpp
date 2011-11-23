@@ -34,53 +34,78 @@
  */
 
 #include "ACOscFeedback.h"
+#include "MediaCycle.h"
 
-void ACOscFeedback::create(const char *hostname, int port)
-{
+// XS DEBUG
+#include <iostream>
+
+ACOscFeedback::ACOscFeedback() : Observer() {
+    sendto = 0;
+    message = 0;
+};
+
+ACOscFeedback::~ACOscFeedback() {
+    release();
+}
+
+void ACOscFeedback::create(const char *hostname, int port) {
     /* an address to send messages to. sometimes it is better to let the server
      * pick a port number for you by passing NULL as the last argument */
-	char portchar[6];
-  	sprintf(portchar,"%d",port);
-   	sendto = lo_address_new(hostname, portchar);
+    this->release();
+    char portchar[6];
+    sprintf(portchar, "%d", port);
+    sendto = lo_address_new(hostname, portchar);
 }
 
-void ACOscFeedback::release()
-{
-	if (sendto){
-		lo_address_free(sendto);
-		sendto = 0;
-	}
+void ACOscFeedback::release() {
+    if (sendto) {
+        lo_address_free(sendto);
+        sendto = 0;
+    }
 }
 
-void ACOscFeedback::messageBegin(const char *_tag)
-{
-	if(message){
-		lo_message_free(message);
-	}
-	message = lo_message_new();
-	tag = _tag;
+void ACOscFeedback::messageBegin(const char *_tag) {
+    if (message) {
+        lo_message_free(message);
+    }
+    message = lo_message_new();
+    tag = _tag;
 }
 
-void ACOscFeedback::messageEnd()
-{	
+void ACOscFeedback::messageEnd() {
 }
 
-void ACOscFeedback::messageSend()
-{	
-	lo_send_message (sendto, tag, message);
+void ACOscFeedback::messageSend() {
+    lo_send_message(sendto, tag, message);
 }
 
-void ACOscFeedback::messageAppendFloat(float val)
-{
-	lo_message_add_float (message,val);
+void ACOscFeedback::messageAppendFloat(float val) {
+    lo_message_add_float(message, val);
 }
 
-void ACOscFeedback::messageAppendInt(int val)
-{
-	lo_message_add_int32 (message,val);
+void ACOscFeedback::messageAppendInt(int val) {
+    lo_message_add_int32(message, val);
 }
 
-void ACOscFeedback::messageAppendString(const char *val)
-{
- 	lo_message_add_string (message, val);
+void ACOscFeedback::messageAppendString(const char *val) {
+    lo_message_add_string(message, val);
+}
+
+void ACOscFeedback::messageAppendString(string val) {
+    lo_message_add_string(message, val.c_str());
+}
+
+void ACOscFeedback::update(Subject* _mediacycle){
+    MediaCycle* mc = static_cast<MediaCycle*> (_mediacycle);
+    int nId = mc->getClickedNode(); // XS TODO check if not +1
+ //   std::cout << "[OscFeedback] clicked on node :" << nId << std::endl; // XS TODO how to get pointer info ?
+    this->messageBegin("/mediacycle");
+    //    this->messageAppendInt(nId);
+    string full_name = mc->getMediaFileName(nId);
+    std::string::size_type p = full_name.find_last_of("/");
+ //   std::cout << "[OscFeedback] file name (full) :" << full_name << std::endl;
+    string last_name = std::string(full_name, p + 1, full_name.size());
+    this->messageAppendString(last_name);
+//    std::cout << "[OscFeedback] file name (last) :" << last_name << std::endl;
+    this->messageSend();
 }

@@ -5,6 +5,7 @@ FILE(GLOB HDR *.h)
 
 	ADD_LIBRARY(mediacycle-io-osc STATIC ${SRC} ${HDR})
 
+    INCLUDE_DIRECTORIES (../../core/)
 	ADD_DEPENDENCIES(mediacycle-io-osc mediacycle)
 	TARGET_LINK_LIBRARIES(mediacycle-io-osc mediacycle)
 	

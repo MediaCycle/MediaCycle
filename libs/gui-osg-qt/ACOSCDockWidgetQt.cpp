@@ -76,7 +76,7 @@ void ACOSCDockWidgetQt::toggleControl(bool _status){
 	#ifdef SUPPORT_AUDIO
 		osc_browser->setAudioEngine(audio_engine);
 	#endif//def SUPPORT_AUDIO
-		osc_browser->start();
+                osc_browser->start();
 		ui.pushButtonControlStart->setText("Stop");
 	}
 	else {
@@ -91,10 +91,13 @@ void ACOSCDockWidgetQt::toggleControl(bool _status){
 void ACOSCDockWidgetQt::toggleFeedback(bool _status){
 	if(_status){
 		osc_feedback = new ACOscFeedback();
+                if (media_cycle)
+                    media_cycle->attach(this->osc_feedback);
+
 		osc_feedback->create(ui.lineEditFeedbackIP->text().toStdString().c_str(), ui.spinBoxFeedbackPort->value());
 		if (osc_browser)
 			osc_browser->setFeedback(osc_feedback);
-		osc_feedback->messageBegin("test");
+                osc_feedback->messageBegin("test mc send osc");
 		std::cout << "sending test messages to " << ui.lineEditFeedbackIP->text().toStdString().c_str() << " on port " << ui.spinBoxFeedbackPort->value() << " ..." << endl;
 		osc_feedback->messageSend();
 		ui.pushButtonFeedbackStart->setText("Stop");	
@@ -102,7 +105,7 @@ void ACOSCDockWidgetQt::toggleFeedback(bool _status){
 	else {
 		if (osc_browser)
 			osc_browser->setFeedback(0);
-		osc_feedback->release();
+		osc_feedback->release(); // XS TODO for browser it was stop ?!
 		delete osc_feedback;
 		osc_feedback = 0;
 		ui.pushButtonFeedbackStart->setText("Start");		
@@ -179,9 +182,7 @@ void ACOSCDockWidgetQt::setFeedbackPort(int _port){
 void ACOSCDockWidgetQt::setMediaCycle(MediaCycle* _media_cycle)
 {
 	media_cycle = _media_cycle; 
-	if(osc_browser)
-		osc_browser->setMediaCycle(_media_cycle);
-	if(auto_connect){
+        if(auto_connect){
 		this->toggleControl(true);
 		this->toggleFeedback(true);
 	}

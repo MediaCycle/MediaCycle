@@ -43,9 +43,23 @@ void error(int num, const char *msg, const char *path)
     fflush(stdout);
 }
 
+ACOscBrowser::ACOscBrowser(MediaCycle* _mc) {
+    this->media_cycle = _mc;
+#if defined (SUPPORT_AUDIO)
+    this->audio_engine = 0;
+#endif //defined (SUPPORT_AUDIO)
+    this->osc_feedback = 0;
+    this->server_thread = 0;
+};
+
+ACOscBrowser::~ACOscBrowser() {
+    release();
+};
+
 void ACOscBrowser::create(const char *hostname, int port)
 {
-	char portchar[6];
+	this->release();
+        char portchar[6];
   	sprintf(portchar,"%d",port);
 	server_thread = lo_server_thread_new(portchar, error);
 	
@@ -150,7 +164,7 @@ int ACOscBrowser::process_mess(const char *path, const char *types, lo_arg **arg
 				std::string id_string = tag.substr(prefix_found+prefix.size(),suffix_found-(prefix_found+prefix.size()));
 				istringstream id_ss(id_string);
 				if (!(id_ss>>id))
-					std::cerr << "ACOSCDockWidgetQt: wrong pointer id" << std::endl;
+					std::cerr << "ACOscBrowser: wrong pointer id" << std::endl;
 			}
 		}
 		
@@ -252,7 +266,7 @@ int ACOscBrowser::process_mess(const char *path, const char *types, lo_arg **arg
 				//media_cycle->setNeedsDisplay(true);
 			}
 			else {
-				std::cout << "ACOSCDockWidgetQt: error with tag'" << tag << "'";
+				std::cout << "ACOscBrowser: error with tag'" << tag << "'";
 				for (int a=0;a<argc;a++){
 					std::cout << " <" << types[a] << ">";
 				}
@@ -284,11 +298,11 @@ int ACOscBrowser::process_mess(const char *path, const char *types, lo_arg **arg
 		}
 		else if(tag.find("/library/load",0)!= string::npos)
 		{
-			std::cerr << "ACOSCDockWidgetQt: Library loading thru OSC not yet implemented" << std::endl;
+			std::cerr << "ACOscBrowser: Library loading thru OSC not yet implemented" << std::endl;
 		}
 		else if(tag.find("/library/clear",0)!= string::npos)
 		{
-			std::cerr << "ACOSCDockWidgetQt: Library cleaning thru OSC not yet implemented" << std::endl;
+			std::cerr << "ACOscBrowser: Library cleaning thru OSC not yet implemented" << std::endl;
 			
 			//this->media_cycle->cleanLibrary();
 			//this->media_cycle->cleanBrowser();

@@ -44,72 +44,85 @@
 
 #include <lo/lo.h>
 
-#include <MediaCycle.h>
-
 #include <ACOscFeedback.h>
+// forward declaration
+class ACOscFeedback;
 
 #if defined (SUPPORT_AUDIO)
+#include <ACAudioFeedback.h>
 #include <ACAudioEngine.h>
 #endif //defined (SUPPORT_AUDIO)
 
-typedef int (ACOscBrowserCallback)(const char *path, const char *types, lo_arg **argv,int argc, void *data, void *user_data);
+#include <MediaCycle.h>
+// forward declaration
+class MediaCycle;
+
+typedef int (ACOscBrowserCallback) (const char *path, const char *types, lo_arg **argv, int argc, void *data, void *user_data);
 
 class ACOscBrowser {
-	public:
-		ACOscBrowser(){ 
-			media_cycle = 0;
-			#if defined (SUPPORT_AUDIO)
-			audio_engine = 0;
-			#endif //defined (SUPPORT_AUDIO)
-			osc_feedback = 0;
-			server_thread = 0;
-		};
-		~ACOscBrowser(){ 
-			release();
-		};
-		
-		// pass 0 to receive from any host
-		void create(const char *hostname, int port);
-		void release();
-		
-		// Starts a background thread and listens to socket from there
-		void start();
-		void stop();
-		
-		void setUserData(void *_user_data);
-		void setCallback(ACOscBrowserCallback _callback);
-		
-		// these can be called only from the callback
-		void readFloat(float *val);
-		void readInt(int *val);
-		void readString(char *val, int maxlen);
-		
-	private:
-		lo_server_thread server_thread;
-		void* user_data;
-		ACOscBrowserCallback* callback;
-	
-		ACOscFeedback *osc_feedback;
+public:
+    ACOscBrowser(MediaCycle* _mc=0);
+    ~ACOscBrowser();
 
-	public:
-		static int static_mess_handler(const char *path, const char *types, lo_arg **argv,int argc, void *data, void *user_data);
-		int process_mess(const char *path, const char *types, lo_arg **argv,int argc);	
-				
-	public:
-		void setMediaCycle(MediaCycle* _media_cycle){ media_cycle = _media_cycle;}
-		MediaCycle* getMediaCycle() {return media_cycle;}
-		#if defined (SUPPORT_AUDIO)
-		void setAudioEngine(ACAudioEngine* _audio_engine){ audio_engine = _audio_engine;}
-		ACAudioEngine* getAudioEngine() {return audio_engine;}
-		#endif //defined (SUPPORT_AUDIO)
-		void setFeedback(ACOscFeedback *_osc_feedback){this->osc_feedback = _osc_feedback;}
-		ACOscFeedback* getFeedback(){return this->osc_feedback;}
-		
-	protected:
-		MediaCycle *media_cycle;
-		#if defined (SUPPORT_AUDIO)
-		ACAudioEngine *audio_engine;
-		#endif //defined (SUPPORT_AUDIO)	
+    // pass 0 to receive from any host
+    void create(const char *hostname, int port);
+    void release();
+
+    // Starts a background thread and listens to socket from there
+    void start();
+    void stop();
+
+    void setUserData(void *_user_data);
+    void setCallback(ACOscBrowserCallback _callback);
+
+    // these can be called only from the callback
+    void readFloat(float *val);
+    void readInt(int *val);
+    void readString(char *val, int maxlen);
+
+private:
+    lo_server_thread server_thread;
+    void* user_data;
+    ACOscBrowserCallback* callback;
+
+    ACOscFeedback *osc_feedback;
+
+public:
+    static int static_mess_handler(const char *path, const char *types, lo_arg **argv, int argc, void *data, void *user_data);
+    int process_mess(const char *path, const char *types, lo_arg **argv, int argc);
+    
+public:
+
+    void setMediaCycle(MediaCycle* _media_cycle) {
+        this->media_cycle = _media_cycle;
+    }
+
+    MediaCycle* getMediaCycle() {
+        return this->media_cycle;
+    }
+#if defined (SUPPORT_AUDIO)
+
+    void setAudioEngine(ACAudioEngine* _audio_engine) {
+        this->audio_engine = _audio_engine;
+    }
+
+    ACAudioEngine* getAudioEngine() {
+        return this->audio_engine;
+    }
+#endif //defined (SUPPORT_AUDIO)
+    void setFeedback(ACOscFeedback *_osc_feedback) {
+        this->osc_feedback = _osc_feedback;
+    }
+
+    ACOscFeedback* getFeedback() {
+        return this->osc_feedback;
+    }
+
+protected:
+    MediaCycle *media_cycle;
+#if defined (SUPPORT_AUDIO)
+    ACAudioEngine *audio_engine;
+#endif //defined (SUPPORT_AUDIO)	
 };
 
 #endif /* _ACOSCBROWSER_H_ */

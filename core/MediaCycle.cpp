@@ -50,7 +50,7 @@ static double getTime() {
     return (double)tv.tv_sec + tv.tv_usec / 1000000.0;
 }
 
-MediaCycle::MediaCycle(ACMediaType aMediaType, string local_directory, string libname) {
+MediaCycle::MediaCycle(ACMediaType aMediaType, string local_directory, string libname) : Subject() {
 
 	this->forwarddown = 0;
 //	this->playkeydown = true;
@@ -83,15 +83,14 @@ MediaCycle::MediaCycle(const MediaCycle& orig) {
 }
 
 MediaCycle::~MediaCycle() {
-	delete this->mediaLibrary;
-	this->mediaLibrary = 0;
-	delete this->mediaBrowser;
-	this->mediaBrowser = 0;
-	delete this->pluginManager;
-	this->pluginManager = 0;
+    delete this->mediaLibrary;
+    this->mediaLibrary = 0;
+    delete this->mediaBrowser;
+    this->mediaBrowser = 0;
+    delete this->pluginManager;
+    this->pluginManager = 0;
     stopTcpServer(); // will delete this->networkSocket;
 }
-
 void MediaCycle::clean(){
 	this->prevLibrarySize = 0;
 	this->forwarddown = 0;
@@ -301,6 +300,7 @@ int MediaCycle::importDirectories() {
 
 // scans directories, fills the filenames vector and calls importFile 
 // then normalize the features and updates the library ("libraryContentChanged")
+// each time the library grows by a factor prevLibrarySizeMultiplier, re-normalize and re-cluster everything
 int MediaCycle::importDirectories(vector<string> directories, int recursive, bool forward_order, bool doSegment) {
 	int ok = 0;
 
@@ -336,7 +336,7 @@ int MediaCycle::importDirectories(vector<string> directories, int recursive, boo
 		callback_message << "importing_media_"<<i<<"_"<<n;
 		mediacycle_callback(callback_message.str().c_str(),mediacycle_callback_data);
 
-		if (mediaLibrary->importFile(filenames[i], this->pluginManager, doSegment, doSegment)){ //, MC_e_medias);
+		if (mediaLibrary->importFile(filenames[i], this->pluginManager, doSegment, doSegment)){
 			ok++;
 			needsNormalizeAndCluster = 0;
 			if ( (mediaLibrary->getSize() >= int(prevLibrarySizeMultiplier * prevLibrarySize))
@@ -344,9 +344,7 @@ int MediaCycle::importDirectories(vector<string> directories, int recursive, boo
 				needsNormalizeAndCluster = 1;
 				prevLibrarySize = mediaLibrary->getSize();
 			}
-
-		//needsNormalizeAndCluster = 1;
-
+                        //needsNormalizeAndCluster = 1;
 			normalizeFeatures(needsNormalizeAndCluster);
 			libraryContentChanged(needsNormalizeAndCluster);
 		}
@@ -622,7 +620,7 @@ void MediaCycle::getCameraPosition(float &x, float &y)		{ mediaBrowser->getCamer
 void MediaCycle::setCameraZoom(float z)				{ mediaBrowser->setCameraZoom(z); }
 void MediaCycle::setCameraRecenter()				{ mediaBrowser->setCameraRecenter(); }
 void MediaCycle::setAutoPlay(int i) { mediaBrowser->setAutoPlay(i); }
-int MediaCycle::getClickedNode(int p_index) { return mediaBrowser->getClickedNode(p_index); }
+int MediaCycle::getClickedNode() { return mediaBrowser->getClickedNode(); }
 void MediaCycle::setClickedNode(int i,int p_index) { mediaBrowser->setClickedNode(i,p_index); }
 void MediaCycle::setClosestNode(int i,int p_index) { mediaBrowser->setClosestNode(i,p_index); }
 int MediaCycle::getClosestNode(int p_index) { return mediaBrowser->getClosestNode(p_index); }
@@ -745,6 +743,8 @@ void MediaCycle::pickedObjectCallback(int _nodeId) {
 //	lo_message_add_string(message,std::string(sf, p+1,sf.size()).c_str());
 //
 //	lo_send_message (sendto, "/mediacyle", message);
+        // with observer pattern
+        this->notify();
 
 }
 

@@ -37,6 +37,7 @@
 #include "ACMediaBrowser.h"
 #include "ACNetworkSocket.h"
 #include "ACPluginManager.h"
+#include "Observer.h"
 
 #include <string>
 #include <cstring>
@@ -61,7 +62,7 @@ enum MCActionType {
 
 typedef void (*ACMediaCycleCallback)(const char* message, void *userData);
 
-class MediaCycle {
+class MediaCycle : public Subject {
 public:
     MediaCycle(ACMediaType aMediaType, std::string local_directory="", std::string libname="");
     MediaCycle(const MediaCycle& orig);
@@ -173,7 +174,7 @@ public:
 	void setCameraZoom(float z);
 	void setCameraRecenter();
 	void setAutoPlay(int i);
-	int getClickedNode(int p_index = 0);
+	int getClickedNode();
 	void setClickedNode(int i,int p_index = 0);
 	void setClosestNode(int i,int p_index = 0);
 	int getClosestNode(int p_index = 0);
@@ -265,7 +266,7 @@ private:
 	ACNetworkSocketServer *networkSocket;
 	ACPluginManager *pluginManager;
 
-	// settings and features XML
+ 	// settings and features XML
 	std::string config_file_xml;
 
 	int prevLibrarySize;

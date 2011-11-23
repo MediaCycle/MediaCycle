@@ -41,27 +41,36 @@
 #include <unistd.h>
 
 #include <lo/lo.h>
+#include "Observer.h"
+#include <string>
 
 typedef void *ACOscFeedbackRef;
 
-class ACOscFeedback {
-	public:
-		ACOscFeedback(){sendto=0;message=0;};
-		~ACOscFeedback(){ release();}
+class ACOscFeedback : public Observer{
+public:
+     ACOscFeedback();
+    ~ACOscFeedback();
 
-		void create(const char *hostname, int port);
-		void release();
-		void messageBegin(const char *tag);
-		void messageEnd();
-		void messageSend();
-		void messageAppendFloat(float val);
-		void messageAppendInt(int val);
-		void messageAppendString(const char *val);
-		lo_address getAddress(){return sendto;}
-	private:
-		lo_address sendto;
-		lo_message message;
-		const char *tag;
+    void create(const char *hostname, int port);
+    void release();
+    void messageBegin(const char *tag);
+    void messageEnd();
+    void messageSend();
+    void messageAppendFloat(float val);
+    void messageAppendInt(int val);
+    void messageAppendString(const char *val);
+    void messageAppendString(std::string val);
+
+    lo_address getAddress() {
+        return this->sendto;
+    }
+
+    virtual void update(Subject*); // overrides Observer virtual update fct
+
+private:
+    lo_address sendto;
+    lo_message message;
+    const char *tag;
 };
 
 #endif /* _ACOSCFEEDBACK_H_ */
