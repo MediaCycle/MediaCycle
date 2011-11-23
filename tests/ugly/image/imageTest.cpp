@@ -302,26 +302,22 @@ void test_histogram(string imageFile){
 	delete im;
 }
 
-int main(int argc, char** argv) {
-	
-	
+void test_sorted(string xml_file) {
     MediaCycle* mediacycle;
     mediacycle = new MediaCycle(MEDIA_TYPE_IMAGE);
-    mediacycle->addPluginLibrary("/Users/ravet/Desktop/ticore/mediacycle/Builds/darwin-xcode/plugins/image/Debug//mc_image.dylib");
-    mediacycle->importDirectory("/Users/ravet/Desktop/MediaCycleData/testImage1/",1);
-    mediacycle->importDirectory("/Users/ravet/Desktop/MediaCycleData/testImage2/",1);
-    mediacycle->saveXMLLibrary("mon_premier.xml");
-    mediacycle->importDirectory("/Users/ravet/Desktop/MediaCycleData/testImage3/",1);
-    mediacycle->importDirectory("/Users/ravet/Desktop/MediaCycleData/testImage4/",1);
-    mediacycle->saveXMLLibrary("mon_deuxième.xml"); 
-	
-	return 0;
+    mediacycle->readXMLConfigFile(xml_file);
+//      mediacycle->getKSortedOnFeature(10, 0, 0);
+    delete mediacycle;
+}
+
+int main(int argc, char** argv) {
 	cout << "Using Opencv " << CV_VERSION << "(" << CV_MAJOR_VERSION << "." << CV_MINOR_VERSION  << "." <<  CV_SUBMINOR_VERSION << ")" << endl;	
 
+//        test_sorted();
 //	test_histogram(image_file);
 //	test_multiple_import_normalize();
 //	testColorMoments(image_file);
-	testHuMoments(image_file);
+//	testHuMoments(image_file);
 //	testGaborMoments(image_file);
 //	testHoughLines(image_file);
 //	testHoughLinesP(image_file);
