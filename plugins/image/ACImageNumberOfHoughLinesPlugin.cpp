@@ -77,12 +77,12 @@ std::vector<ACMediaFeatures*> ACImageNumberOfHoughLinesPlugin::calculate(ACMedia
 
 ACMediaFeatures* ACImageNumberOfHoughLinesPlugin::calculateNumberOfHoughLinesP(ACColorImageAnalysis* image){ 
 	image->computeHoughLinesP(); 
-	ACMediaFeatures* number_of_faces = new ACMediaFeatures(image->getNumberOfHoughLinesP(), "NumberOfHoughLinesP");
-	return number_of_faces;	
+	ACMediaFeatures* number_of_hough_linesP = new ACMediaFeatures(image->getNumberOfHoughLinesP(), "NumberOfHoughLinesP");
+	return number_of_hough_linesP;
 }
 
 ACMediaFeatures* ACImageNumberOfHoughLinesPlugin::calculateNumberOfHoughLines(ACColorImageAnalysis* image){ 
 	image->computeHoughLines();
-	ACMediaFeatures* number_of_faces = new ACMediaFeatures(image->getNumberOfHoughLines(), "NumberOfHoughLines");
-	return number_of_faces;	
+	ACMediaFeatures* number_of_hough_lines = new ACMediaFeatures(image->getNumberOfHoughLines(), "NumberOfHoughLines");
+	return number_of_hough_lines;
 }

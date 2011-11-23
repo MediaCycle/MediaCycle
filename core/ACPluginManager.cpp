@@ -44,35 +44,33 @@ using namespace std;
 #include <boost/filesystem.hpp>
 namespace fs = boost::filesystem;
 
-vector<ACMediaType> mediaExtract(ACMediaType lMediaType){
-	unsigned int cpt=lMediaType;
-	unsigned int currMedia=1;
-	vector<ACMediaType> desc;
-	for (cpt=lMediaType;cpt>0;cpt>>=1,currMedia<<=1){
-		if (lMediaType&currMedia)
-		{
-			desc.push_back(currMedia);
-		}
-	}
-	return desc;
+vector<ACMediaType> mediaExtract(ACMediaType lMediaType) {
+    unsigned int cpt = lMediaType;
+    unsigned int currMedia = 1;
+    vector<ACMediaType> desc;
+    for (cpt = lMediaType; cpt > 0; cpt >>= 1, currMedia <<= 1) {
+        if (lMediaType & currMedia) {
+            desc.push_back(currMedia);
+        }
+    }
+    return desc;
 }
 
 ACPluginManager::ACPluginManager() {
-	mActiveFeaturePlugins=new ACActiveFeaturesPlugins;
-	mActiveSegmentPlugins=new ACActiveSegmentPlugins;
+    mActiveFeaturePlugins = new ACActiveFeaturesPlugins();
+    mActiveSegmentPlugins = new ACActiveSegmentPlugins();
 }
 
 ACPluginManager::ACPluginManager(const ACPluginManager& orig) {
 }
 
 ACPluginManager::~ACPluginManager() {
-	this->clean();
-	delete mActiveFeaturePlugins;
-	delete mActiveSegmentPlugins;
-	mActiveFeaturePlugins=NULL;
-	mActiveSegmentPlugins=NULL;
+    this->clean();
+    delete mActiveFeaturePlugins;
+    delete mActiveSegmentPlugins;
+    mActiveFeaturePlugins = NULL;
+    mActiveSegmentPlugins = NULL;
 }
-
 /*
  * Adds a plugin LIBRARY to the manager's list
  * return values:
@@ -82,24 +80,22 @@ ACPluginManager::~ACPluginManager() {
 int ACPluginManager::addLibrary(std::string aPluginLibraryPath) {
     DynamicLibrary *lib;
 
-    if ( !(lib = DynamicLibrary::loadLibrary(aPluginLibraryPath)) ) {
+    if (!(lib = DynamicLibrary::loadLibrary(aPluginLibraryPath))) {
         return -1;
     }
 
-	cout << "adding Plugin Library : " << aPluginLibraryPath << endl;
-	
+    cout << "adding Plugin Library : " << aPluginLibraryPath << endl;
+
     ACPluginLibrary *acpl = new ACPluginLibrary(lib);
-	acpl->initialize(); //useless
-	acpl->setLibraryPath(aPluginLibraryPath);
-	
-    mPluginLibrary.push_back(acpl);	
-	this->mActiveFeaturePlugins->update(mPluginLibrary);
-	this->mActiveSegmentPlugins->update(mPluginLibrary);
-	
+    acpl->initialize(); //useless
+    acpl->setLibraryPath(aPluginLibraryPath);
+
+    mPluginLibrary.push_back(acpl);
+    this->mActiveFeaturePlugins->update(mPluginLibrary);
+    this->mActiveSegmentPlugins->update(mPluginLibrary);
 
     return 1;
 }
-
 /*
  * Removes a plugin LIBRARY (specified by its file name) from the manager's list
  * return values:
@@ -108,58 +104,57 @@ int ACPluginManager::addLibrary(std::string aPluginLibraryPath) {
  */
 
 int ACPluginManager::removeLibrary(std::string _lpath) {
-	vector<ACPluginLibrary *> ::iterator iter;
-	bool found_library_in_path = false;
-	for (iter = this->mPluginLibrary.begin(); iter != this->mPluginLibrary.end(); iter++) {
-		if ((*iter)->getLibraryPath() == _lpath) {
-			delete *iter;
-			cout << "removing Plugin Library : " << _lpath << endl;
-			found_library_in_path = true;
-		}
-	}
-	if (!found_library_in_path){
-		cout << "could not find Plugin Library in path: " << _lpath << endl;
-		return -1;
-	}	
-	this->mActiveFeaturePlugins->update(mPluginLibrary);
-	this->mActiveSegmentPlugins->update(mPluginLibrary);
+    vector<ACPluginLibrary *> ::iterator iter;
+    bool found_library_in_path = false;
+    for (iter = this->mPluginLibrary.begin(); iter != this->mPluginLibrary.end(); iter++) {
+        if ((*iter)->getLibraryPath() == _lpath) {
+            delete *iter;
+            cout << "removing Plugin Library : " << _lpath << endl;
+            found_library_in_path = true;
+        }
+    }
+    if (!found_library_in_path) {
+        cout << "could not find Plugin Library in path: " << _lpath << endl;
+        return -1;
+    }
+    this->mActiveFeaturePlugins->update(mPluginLibrary);
+    this->mActiveSegmentPlugins->update(mPluginLibrary);
     return 1;
 }
 
-bool ACPluginManager::removePluginFromLibrary(std::string _plugin_name, std::string _library_path){
-	bool found_plugin = false;
-	vector<ACPluginLibrary *> ::iterator iter;
-	for (iter = this->mPluginLibrary.begin(); iter != this->mPluginLibrary.end(); iter++) {
-		if ((*iter)->getLibraryPath() == _library_path) {
-			found_plugin = (*iter)->removePlugin(_plugin_name);
-		}
-	}	
-	this->mActiveFeaturePlugins->update(mPluginLibrary);
-	this->mActiveSegmentPlugins->update(mPluginLibrary);
-	return found_plugin;
+bool ACPluginManager::removePluginFromLibrary(std::string _plugin_name, std::string _library_path) {
+    bool found_plugin = false;
+    vector<ACPluginLibrary *> ::iterator iter;
+    for (iter = this->mPluginLibrary.begin(); iter != this->mPluginLibrary.end(); iter++) {
+        if ((*iter)->getLibraryPath() == _library_path) {
+            found_plugin = (*iter)->removePlugin(_plugin_name);
+        }
+    }
+    this->mActiveFeaturePlugins->update(mPluginLibrary);
+    this->mActiveSegmentPlugins->update(mPluginLibrary);
+    return found_plugin;
 }
 
-std::vector<std::string> ACPluginManager::getListOfPlugins(){
-	std::vector<std::string> plugins_list;	
-	vector<ACPluginLibrary *> ::iterator lib_iter;
-	vector<ACPlugin*> ::iterator plug_iter;
+std::vector<std::string> ACPluginManager::getListOfPlugins() {
+    std::vector<std::string> plugins_list;
+    vector<ACPluginLibrary *> ::iterator lib_iter;
+    vector<ACPlugin*> ::iterator plug_iter;
 
-	for (lib_iter = this->mPluginLibrary.begin(); lib_iter != this->mPluginLibrary.end(); lib_iter++) {
-		for (plug_iter = (*lib_iter)->getPlugins().begin(); plug_iter != (*lib_iter)->getPlugins().end(); plug_iter++) {
-			plugins_list.push_back((*plug_iter)->getName());
-		}
-	}
-	return plugins_list;
+    for (lib_iter = this->mPluginLibrary.begin(); lib_iter != this->mPluginLibrary.end(); lib_iter++) {
+        for (plug_iter = (*lib_iter)->getPlugins().begin(); plug_iter != (*lib_iter)->getPlugins().end(); plug_iter++) {
+            plugins_list.push_back((*plug_iter)->getName());
+        }
+    }
+    return plugins_list;
 }
 
 int ACPluginManager::clean() {
-	
-	this->mActiveFeaturePlugins->clean();
-	this->mActiveSegmentPlugins->clean();
-	vector<ACPluginLibrary *> ::iterator iter;
-	for (iter = this->mPluginLibrary.begin(); iter != this->mPluginLibrary.end(); iter++) {
-		delete *iter; // this will delete plugins from each library too
-	}
+    this->mActiveFeaturePlugins->clean();
+    this->mActiveSegmentPlugins->clean();
+    vector<ACPluginLibrary *> ::iterator iter;
+    for (iter = this->mPluginLibrary.begin(); iter != this->mPluginLibrary.end(); iter++) {
+        delete *iter; // this will delete plugins from each library too
+    }
     this->mPluginLibrary.clear();
     return 0;
 }
@@ -167,13 +162,12 @@ int ACPluginManager::clean() {
 // returns the plugin whose name matches aPluginName among all the plugin libraries
 ACPlugin *ACPluginManager::getPlugin(std::string aPluginName) {
     ACPlugin *result = 0;
-    for (unsigned int k=0;k<this->mPluginLibrary.size();k++) {
+    for (unsigned int k = 0; k<this->mPluginLibrary.size(); k++) {
         result = this->mPluginLibrary[k]->getPlugin(aPluginName);
         if (result) {
             return result;
         }
     }
-
     return result;
 }
 
@@ -182,60 +176,57 @@ ACPlugin *ACPluginManager::getPlugin(std::string aPluginName) {
 // returns the plugin library whose name matches _lpath
 // NB: plugins are identified by names
 //     plugins libraries are identified by path
-ACPluginLibrary *ACPluginManager::getPluginLibrary(string _lpath){
-	vector<ACPluginLibrary *> ::iterator iter;
-	for (iter = this->mPluginLibrary.begin(); iter != this->mPluginLibrary.end(); iter++) {
-		if ((*iter)->getLibraryPath() == _lpath) {
-			cout << "found Plugin Library : " << _lpath << endl;
-			return *iter;
-		}
-	}
-	return 0; 
+ACPluginLibrary *ACPluginManager::getPluginLibrary(string _lpath) {
+    vector<ACPluginLibrary *> ::iterator iter;
+    for (iter = this->mPluginLibrary.begin(); iter != this->mPluginLibrary.end(); iter++) {
+        if ((*iter)->getLibraryPath() == _lpath) {
+            cout << "found Plugin Library : " << _lpath << endl;
+            return *iter;
+        }
+    }
+    return 0;
 }
 
 void ACPluginManager::dump() {
-	cout << "ACPluginManager: " << this->mPluginLibrary.size() << " plugin libraries" << endl;
-    for (unsigned int k=0;k<this->mPluginLibrary.size();k++) {
-		cout << " --- plugin library #" << k << endl;
-		this->mPluginLibrary[k]->dump();
+    cout << "ACPluginManager: " << this->mPluginLibrary.size() << " plugin libraries" << endl;
+    for (unsigned int k = 0; k<this->mPluginLibrary.size(); k++) {
+        cout << " --- plugin library #" << k << endl;
+        this->mPluginLibrary[k]->dump();
     }
 }
 
-int ACPluginManager::getFeaturesPluginsSize(ACMediaType MediaType){
-	return this->mActiveFeaturePlugins->getSize(MediaType);
+int ACPluginManager::getFeaturesPluginsSize(ACMediaType MediaType) {
+    return this->mActiveFeaturePlugins->getSize(MediaType);
 }
-int ACPluginManager::getSegmentPluginsSize(ACMediaType MediaType){
-	return this->mActiveSegmentPlugins->getSize(MediaType);
+
+int ACPluginManager::getSegmentPluginsSize(ACMediaType MediaType) {
+    return this->mActiveSegmentPlugins->getSize(MediaType);
 }
+
 /*
  * ACPluginLibrary implementation
  */
-ACPluginLibrary::ACPluginLibrary(DynamicLibrary* aLib)
-{
+ACPluginLibrary::ACPluginLibrary(DynamicLibrary* aLib) {
     this->mLib = aLib;
     this->create = (createPluginFactory*) aLib->getProcAddress("create");
     this->destroy = (destroyPluginFactory*) aLib->getProcAddress("destroy");
     this->list = (listPluginFactory*) aLib->getProcAddress("list");
 }
 
-ACPluginLibrary::~ACPluginLibrary()
-{
+ACPluginLibrary::~ACPluginLibrary() {
     freePlugins();
     delete mLib;
 }
 
-int ACPluginLibrary::initialize()
-{
+int ACPluginLibrary::initialize() {
     freePlugins();
-    
     vector<std::string> listPlugin = list();
 
-    //faire une boucle for sur chaque plugin et faire un getParameterDescriptors()
+    //TODO: faire une boucle for sur chaque plugin et faire un getParameterDescriptors()
     //ainsi l'hote est mis au courant des parametres et peut faire un setParam()
     //exemple : AmplitudeFollower.cpp (see vamp-plugin-sdk-2.0/examples)
 
-    for (unsigned int i=0; i < listPlugin.size(); i++)
-    {
+    for (unsigned int i = 0; i < listPlugin.size(); i++) {
         //std::cout<<listPlugin[i]<<endl;
         ACPlugin* plugin = create(listPlugin[i]);
         if (plugin) {
@@ -246,8 +237,7 @@ int ACPluginLibrary::initialize()
         //operations on the plugin
         //string pluginID = plugin->getIdentifier();
         //plugin->initialize();
-		//destroy(plugin);
-        
+        //destroy(plugin);
     }
     return 0;
 }
@@ -255,55 +245,51 @@ int ACPluginLibrary::initialize()
 // clean
 void ACPluginLibrary::freePlugins() {
     //TODO ? replace with iterator
-    for (int i=this->mPlugins.size()-1;i>=0;i--) {
+    for (int i = this->mPlugins.size() - 1; i >= 0; i--) {
         destroy(this->mPlugins[i]);
         this->mPlugins.pop_back();
     }
 }
 
 ACPlugin *ACPluginLibrary::getPlugin(std::string aPluginName) {
-	for (unsigned int k=0;k<this->mPlugins.size();k++) {
+    for (unsigned int k = 0; k<this->mPlugins.size(); k++) {
         if (this->mPlugins[k]->getName() == aPluginName) {
             return this->mPlugins[k];
         }
     }
-	
     return 0;
 }
 
-bool ACPluginLibrary::removePlugin(std::string aPluginName){
-	bool found_plugin = false;
-	vector<ACPlugin*> ::iterator iter;
+bool ACPluginLibrary::removePlugin(std::string aPluginName) {
+    bool found_plugin = false;
+    vector<ACPlugin*> ::iterator iter;
 
-	for (iter = this->mPlugins.begin(); iter != this->mPlugins.end(); iter++) {
+    for (iter = this->mPlugins.begin(); iter != this->mPlugins.end(); iter++) {
         if ((*iter)->getName() == aPluginName) {
-			this->mPlugins.erase(iter);
-			destroy(*iter);
-			found_plugin = true;
-			break;
+            this->mPlugins.erase(iter);
+            destroy(*iter);
+            found_plugin = true;
+            break;
         }
     }
-	return found_plugin;
+    return found_plugin;
 }
 
 void ACPluginLibrary::dump() {
-	cout << "ACPluginLibrary: " << this->mPlugins.size() << " plugins" << endl;
-    for (unsigned int k=0;k<this->mPlugins.size();k++) {
+    cout << "ACPluginLibrary: " << this->mPlugins.size() << " plugins" << endl;
+    for (unsigned int k = 0; k<this->mPlugins.size(); k++) {
         cout << "plugin #" << k << ": " << this->mPlugins[k]->getName() << endl;
     }
 }
 
-
 //ACActiveFeaturesPlugins implementation
 
-ACActiveFeaturesPlugins::ACActiveFeaturesPlugins(){
-	
+ACActiveFeaturesPlugins::ACActiveFeaturesPlugins() {
+
 }
 
-
-
-ACActiveFeaturesPlugins::ACActiveFeaturesPlugins(vector<ACPluginLibrary *> PluginLibrary){
-	this->update(PluginLibrary);
+ACActiveFeaturesPlugins::ACActiveFeaturesPlugins(vector<ACPluginLibrary *> PluginLibrary) {
+    this->update(PluginLibrary);
 }
 
 //ACActiveFeaturesPlugins::~ACActiveFeaturesPlugins(){
@@ -426,227 +412,218 @@ void ACActiveFeaturesPlugins::log()
 //	
 //}
 
-vector<ACMediaFeatures*> ACActiveFeaturesPlugins::calculate(ACMediaData* aData, ACMedia* theMedia, bool _save_timed_feat){
-	ACMediaType mediaType=theMedia->getMediaType();
-	vector<ACMediaFeatures*> output;
-	for (vector<ACFeaturesPlugin *> ::iterator iter_vec = mCurrPlugin[mediaType].begin(); iter_vec != mCurrPlugin[mediaType].end(); iter_vec++) {
-		ACFeaturesPlugin* localPlugin=(*iter_vec);
-		vector<ACMediaFeatures*> afv;
-		if (localPlugin!=NULL)
-			afv =localPlugin->calculate(aData, theMedia, _save_timed_feat);
-		else {
-			cerr << "<ACActiveFeaturesPlugins::calculate> failed plugin access failed "<< localPlugin->getName() << endl;
-		}
-		
-		if (afv.size()==0){
-			cerr << "<ACActiveFeaturesPlugins::calculate> failed computing feature from plugin: " << localPlugin->getName() << endl;
-		}
-		else {
-			for (unsigned int Iafv=0; Iafv< afv.size() ; Iafv++)
-				output.push_back(afv[Iafv]);
-		}
-	}
-	return output;
-	
+vector<ACMediaFeatures*> ACActiveFeaturesPlugins::calculate(ACMediaData* aData, ACMedia* theMedia, bool _save_timed_feat) {
+    ACMediaType mediaType = theMedia->getMediaType();
+    vector<ACMediaFeatures*> output;
+    for (vector<ACFeaturesPlugin *> ::iterator iter_vec = mCurrPlugin[mediaType].begin(); iter_vec != mCurrPlugin[mediaType].end(); iter_vec++) {
+        ACFeaturesPlugin* localPlugin = (*iter_vec);
+        vector<ACMediaFeatures*> afv;
+        if (localPlugin != NULL)
+            afv = localPlugin->calculate(aData, theMedia, _save_timed_feat);
+        else {
+            cerr << "<ACActiveFeaturesPlugins::calculate> failed plugin access failed " << localPlugin->getName() << endl;
+        }
+
+        if (afv.size() == 0) {
+            cerr << "<ACActiveFeaturesPlugins::calculate> failed computing feature from plugin: " << localPlugin->getName() << endl;
+        } else {
+            for (unsigned int Iafv = 0; Iafv < afv.size(); Iafv++)
+                output.push_back(afv[Iafv]);
+        }
+    }
+    return output;
 }
 
 // XS TODO check with TR
-ACMediaTimedFeature*  ACActiveFeaturesPlugins::getTimedFeatures(ACMediaType mediaType){
-	ACMediaTimedFeature* output = 0;
-	vector<ACFeaturesPlugin *> ::iterator iter_vec = mCurrPlugin[mediaType].begin();
-	if (iter_vec != mCurrPlugin[mediaType].end()){
-		ACFeaturesPlugin* localPlugin=(*iter_vec);
-		if (localPlugin!=NULL){
-			#ifdef USE_DEBUG
-			std::cout << "ACActiveFeaturesPlugins::getTimedFeatures " << localPlugin->getName() << std::endl;
-			#endif
-			output = localPlugin->getTimedFeatures();
-		}	
-		else {
-			cerr << "<ACActiveFeaturesPlugins::getTimedFeatures> failed plugin access failed "<< localPlugin->getName() << endl;
-		}
-		if(output!=NULL){
-			iter_vec++;
-			for (; iter_vec != mCurrPlugin[mediaType].end(); iter_vec++){
-				ACFeaturesPlugin* localPlugin=(*iter_vec);
-				if (localPlugin!=NULL){
-					#ifdef USE_DEBUG
-					std::cout << "ACActiveFeaturesPlugins::getTimedFeatures " << localPlugin->getName() << std::endl;
-					#endif
-					if(localPlugin->getTimedFeatures())
-						output->appendTimedFeature( localPlugin->getTimedFeatures());
-				}	
-				else {
-					cerr << "<ACActiveFeaturesPlugins::getTimedFeatures> failed plugin access failed "<< localPlugin->getName() << endl;
-				}
-			}
-		}
-	}
-	return output;
+
+ACMediaTimedFeature* ACActiveFeaturesPlugins::getTimedFeatures(ACMediaType mediaType) {
+    ACMediaTimedFeature* output = 0;
+    vector<ACFeaturesPlugin *> ::iterator iter_vec = mCurrPlugin[mediaType].begin();
+    if (iter_vec != mCurrPlugin[mediaType].end()) {
+        ACFeaturesPlugin* localPlugin = (*iter_vec);
+        if (localPlugin != NULL) {
+#ifdef USE_DEBUG
+            std::cout << "ACActiveFeaturesPlugins::getTimedFeatures " << localPlugin->getName() << std::endl;
+#endif
+            output = localPlugin->getTimedFeatures();
+        }
+        else {
+            cerr << "<ACActiveFeaturesPlugins::getTimedFeatures> failed plugin access failed " << localPlugin->getName() << endl;
+        }
+        if (output != NULL) {
+            iter_vec++;
+            for (; iter_vec != mCurrPlugin[mediaType].end(); iter_vec++) {
+                ACFeaturesPlugin* localPlugin = (*iter_vec);
+                if (localPlugin != NULL) {
+#ifdef USE_DEBUG
+                    std::cout << "ACActiveFeaturesPlugins::getTimedFeatures " << localPlugin->getName() << std::endl;
+#endif
+                    if (localPlugin->getTimedFeatures())
+                        output->appendTimedFeature(localPlugin->getTimedFeatures());
+                }
+                else {
+                    cerr << "<ACActiveFeaturesPlugins::getTimedFeatures> failed plugin access failed " << localPlugin->getName() << endl;
+                }
+            }
+        }
+    }
+    return output;
 }
-
-
-
 
 
 //ACActivePlugins implementation
+
 template <typename T>
-ACActivePlugins<T>::ACActivePlugins(){
+ACActivePlugins<T>::ACActivePlugins() {
 
 }
 
-
 template <typename T>
-ACActivePlugins<T>::ACActivePlugins(vector<ACPluginLibrary *> PluginLibrary){
-	this->update(PluginLibrary);
-}
-template <typename T>
-ACActivePlugins<T>::~ACActivePlugins(){
-	this->clean();
-}
-template <typename T>
-int ACActivePlugins<T>::clean(){
-	for (typename map<ACMediaType,std::vector<T*> >::iterator iter_map = this->mCurrPlugin.begin(); iter_map != this->mCurrPlugin.end(); iter_map++) {
-		for (typename vector<T *> ::iterator iter_vec = iter_map->second.begin(); iter_vec != (*iter_map).second.end(); iter_vec++) {
-			*iter_vec=NULL; // this does'nt delete plugins from each library too. We just delete the reference			
-		}
-		iter_map->second.clear();		//to clean
-	}
-	this->mCurrPlugin.clear(); // to clean
+ACActivePlugins<T>::ACActivePlugins(vector<ACPluginLibrary *> PluginLibrary) {
+    this->update(PluginLibrary);
 }
 
 template <typename T>
-int ACActivePlugins<T>::remove(ACPlugin *pPlugin){
-	vector<ACMediaType> mediaTypes=mediaExtract(pPlugin->getMediaType());	
-	for (vector<ACMediaType>::iterator mediaType=mediaTypes.begin();mediaType != mediaTypes.end(); mediaType++){
-		for (typename vector<T *> ::iterator iter_vec = mCurrPlugin[*mediaType].begin(); iter_vec != mCurrPlugin[*mediaType].end(); iter_vec++) {
-			if ( (*iter_vec)==pPlugin){
-				mCurrPlugin[*mediaType].erase(iter_vec);
-				if (mCurrPlugin[*mediaType].empty())
-					mCurrPlugin.erase(*mediaType);
-				//return 1;
-			}
-		}
-	}
-	return 1;
+ACActivePlugins<T>::~ACActivePlugins() {
+    this->clean();
 }
+
 template <typename T>
-int ACActivePlugins<T>::remove(ACPluginLibrary *PluginLibrary){	
-    std::vector<ACPlugin *> plugins= PluginLibrary->getPlugins();
-	for (std::vector<ACPlugin *>::iterator iter=plugins.begin();iter!= plugins.end();iter++)
-		this->remove(*iter);
-	return 1;
+int ACActivePlugins<T>::clean() {
+    for (typename map<ACMediaType, std::vector<T*> >::iterator iter_map = this->mCurrPlugin.begin(); iter_map != this->mCurrPlugin.end(); iter_map++) {
+        for (typename vector<T *> ::iterator iter_vec = iter_map->second.begin(); iter_vec != (*iter_map).second.end(); iter_vec++) {
+            *iter_vec = NULL; // this does'nt delete plugins from each library too. We just delete the reference
+        }
+        iter_map->second.clear(); //to clean
+    }
+    this->mCurrPlugin.clear(); // to clean
 }
+
+template <typename T>
+int ACActivePlugins<T>::remove(ACPlugin *pPlugin) {
+    vector<ACMediaType> mediaTypes = mediaExtract(pPlugin->getMediaType());
+    for (vector<ACMediaType>::iterator mediaType = mediaTypes.begin(); mediaType != mediaTypes.end(); mediaType++) {
+        for (typename vector<T *> ::iterator iter_vec = mCurrPlugin[*mediaType].begin(); iter_vec != mCurrPlugin[*mediaType].end(); iter_vec++) {
+            if ((*iter_vec) == pPlugin) {
+                mCurrPlugin[*mediaType].erase(iter_vec);
+                if (mCurrPlugin[*mediaType].empty())
+                    mCurrPlugin.erase(*mediaType);
+                //return 1;
+            }
+        }
+    }
+    return 1;
+}
+
+template <typename T>
+int ACActivePlugins<T>::remove(ACPluginLibrary *PluginLibrary) {
+    std::vector<ACPlugin *> plugins = PluginLibrary->getPlugins();
+    for (std::vector<ACPlugin *>::iterator iter = plugins.begin(); iter != plugins.end(); iter++)
+        this->remove(*iter);
+    return 1;
+}
+
 //impossible to add a plugin that is already referenced in the map
 template <typename T>
-int ACActivePlugins<T>::add(ACPlugin *pPlugin){	
-	T *lPlugin=dynamic_cast<T*> (pPlugin);
-	if (lPlugin==NULL)
-		return 0;
-	vector<ACMediaType> mediaTypes=mediaExtract(pPlugin->getMediaType());	
-	for (vector<ACMediaType>::iterator mediaType=mediaTypes.begin();mediaType != mediaTypes.end(); mediaType++){
-		
-		if (pPlugin->mediaTypeSuitable(*mediaType)){
-			for (typename vector<T *> ::iterator iter_vec = mCurrPlugin[*mediaType].begin(); iter_vec != mCurrPlugin[*mediaType].end(); iter_vec++) {
-				if ( (*iter_vec)==lPlugin){
-					//this plugin is already referenced in the container
-					return 0;
-				}
-			}
-			mCurrPlugin[*mediaType].push_back(lPlugin);
-		}
-	}
-	return 1;
+int ACActivePlugins<T>::add(ACPlugin *pPlugin) {
+    T *lPlugin = dynamic_cast<T*> (pPlugin);
+    if (lPlugin == NULL)
+        return 0;
+    vector<ACMediaType> mediaTypes = mediaExtract(pPlugin->getMediaType());
+    for (vector<ACMediaType>::iterator mediaType = mediaTypes.begin(); mediaType != mediaTypes.end(); mediaType++) {
+
+        if (pPlugin->mediaTypeSuitable(*mediaType)) {
+            for (typename vector<T *> ::iterator iter_vec = mCurrPlugin[*mediaType].begin(); iter_vec != mCurrPlugin[*mediaType].end(); iter_vec++) {
+                if ((*iter_vec) == lPlugin) {
+                    //this plugin is already referenced in the container
+                    return 0;
+                }
+            }
+            mCurrPlugin[*mediaType].push_back(lPlugin);
+        }
+    }
+    return 1;
 }
 
 template <typename T>
-int ACActivePlugins<T>::add(ACPluginLibrary *PluginLibrary){
-    vector<ACPlugin *> plugins= PluginLibrary->getPlugins();
-	for (std::vector<ACPlugin *>::iterator iter=plugins.begin();iter!= plugins.end();iter++)
-		this->add(*iter);
-	return 1;
-	
+int ACActivePlugins<T>::add(ACPluginLibrary *PluginLibrary) {
+    vector<ACPlugin *> plugins = PluginLibrary->getPlugins();
+    for (std::vector<ACPlugin *>::iterator iter = plugins.begin(); iter != plugins.end(); iter++)
+        this->add(*iter);
+    return 1;
+
 }
 
 template <typename T>
-int ACActivePlugins<T>::update(vector<ACPluginLibrary *> PluginLibrary){
-	
-	this->clean();
-	for (vector<ACPluginLibrary *>::iterator iter =PluginLibrary.begin();iter!=PluginLibrary.end();iter++)
-		this->add(*iter);
-	//this->log();
-	return 1;
+int ACActivePlugins<T>::update(vector<ACPluginLibrary *> PluginLibrary) {
+
+    this->clean();
+    for (vector<ACPluginLibrary *>::iterator iter = PluginLibrary.begin(); iter != PluginLibrary.end(); iter++)
+        this->add(*iter);
+    //this->log();
+    return 1;
 }
 
 template <typename T>
-int ACActivePlugins<T>::getSize(ACMediaType MediaType){	
-	return mCurrPlugin[MediaType].size();
+int ACActivePlugins<T>::getSize(ACMediaType MediaType) {
+    return mCurrPlugin[MediaType].size();
 }
 
 template <typename T>
-vector<string> ACActivePlugins<T>::getName(ACMediaType MediaType)
-{
-	vector<string> names;
-	for (typename vector<T *> ::iterator iter_vec = mCurrPlugin[MediaType].begin(); iter_vec != mCurrPlugin[MediaType].end(); iter_vec++) {
-		names.push_back(((ACPlugin*)(*iter_vec))->getName());
-	}
-	
+vector<string> ACActivePlugins<T>::getName(ACMediaType MediaType) {
+    vector<string> names;
+    for (typename vector<T *> ::iterator iter_vec = mCurrPlugin[MediaType].begin(); iter_vec != mCurrPlugin[MediaType].end(); iter_vec++) {
+        names.push_back(((ACPlugin*) (*iter_vec))->getName());
+    }
+
 }
+
 template <typename T>
-void ACActivePlugins<T>::log()
-{
-	for (typename map<ACMediaType,std::vector<T *> > ::iterator iter_map = this->mCurrPlugin.begin(); iter_map != this->mCurrPlugin.end(); iter_map++) {
-		for (typename vector<T *> ::iterator iter_vec = iter_map->second.begin(); iter_vec != (*iter_map).second.end(); iter_vec++) {
-			cout << "active plugin for type media " << iter_map->first << "\t"<<((ACPlugin*)(*iter_vec))->getName() <<"\n";
-		}
-	}
+void ACActivePlugins<T>::log() {
+    for (typename map<ACMediaType, std::vector<T *> > ::iterator iter_map = this->mCurrPlugin.begin(); iter_map != this->mCurrPlugin.end(); iter_map++) {
+        for (typename vector<T *> ::iterator iter_vec = iter_map->second.begin(); iter_vec != (*iter_map).second.end(); iter_vec++) {
+            cout << "active plugin for type media " << iter_map->first << "\t" << ((ACPlugin*) (*iter_vec))->getName() << "\n";
+        }
+    }
 }
 
-ACActiveSegmentPlugins::ACActiveSegmentPlugins(std::vector<ACPluginLibrary *> PluginLibrary){
-	this->update(PluginLibrary);
-}
-ACActiveSegmentPlugins::ACActiveSegmentPlugins(){
+ACActiveSegmentPlugins::ACActiveSegmentPlugins(std::vector<ACPluginLibrary *> PluginLibrary) {
+    this->update(PluginLibrary);
 }
 
-std::vector<ACMedia*>  ACActiveSegmentPlugins::segment(ACMediaTimedFeature *ft,ACMedia* theMedia){
-	
-	bool segment_ok; //TR TODO what's the use of it?
-	std::vector<ACMedia*> segments;
-	ACMediaType mediaType=theMedia->getMediaType();
-	for (vector<ACSegmentationPlugin *> ::iterator iter_vec = mCurrPlugin[mediaType].begin(); iter_vec != mCurrPlugin[mediaType].end(); iter_vec++) {
-		ACSegmentationPlugin* localPlugin=(*iter_vec);
-		vector<ACMedia*> afv = localPlugin->segment(ft, theMedia);
-		if (afv.size()==0){
-			segment_ok = 0;
-			cerr << "<ACMedia::segment> failed importing segments from plugin: " <<  localPlugin->getName() << endl;
-		}
-		else {
-			for     (unsigned int Iafv=0; Iafv<afv.size(); Iafv++){
-				segments.push_back(afv[Iafv]);
-			}
-			segment_ok = 1;
-		}
-	}
-	return segments;
+ACActiveSegmentPlugins::ACActiveSegmentPlugins() {
 }
-std::vector<ACMedia*>  ACActiveSegmentPlugins::segment(ACMediaData* aData,ACMedia* theMedia){
-	
-	bool segment_ok; //TR TODO what's the use of it?
-	std::vector<ACMedia*> segments;
-	ACMediaType mediaType=theMedia->getMediaType();
-	for (vector<ACSegmentationPlugin *> ::iterator iter_vec = mCurrPlugin[mediaType].begin(); iter_vec != mCurrPlugin[mediaType].end(); iter_vec++) {
-		ACSegmentationPlugin* localPlugin=(*iter_vec);
-		vector<ACMedia*> afv = localPlugin->segment(aData, theMedia);
-		if (afv.size()==0){
-			segment_ok = 0;
-			cerr << "<ACMedia::segment> failed importing segments from plugin: " <<  localPlugin->getName() << endl;
-		}
-		else {
-			for     (unsigned int Iafv=0; Iafv<afv.size(); Iafv++){
-				segments.push_back(afv[Iafv]);
-			}
-			segment_ok = 1;
-		}
-	}
-	return segments;
+
+std::vector<ACMedia*> ACActiveSegmentPlugins::segment(ACMediaTimedFeature *ft, ACMedia* theMedia) {
+    std::vector<ACMedia*> segments;
+    ACMediaType mediaType = theMedia->getMediaType();
+    for (vector<ACSegmentationPlugin *> ::iterator iter_vec = mCurrPlugin[mediaType].begin(); iter_vec != mCurrPlugin[mediaType].end(); iter_vec++) {
+        ACSegmentationPlugin* localPlugin = (*iter_vec);
+        vector<ACMedia*> afv = localPlugin->segment(ft, theMedia);
+        if (afv.size() == 0) {
+            cerr << "<ACMedia::segment> failed importing segments from plugin: " << localPlugin->getName() << endl;
+        } else {
+            for (unsigned int Iafv = 0; Iafv < afv.size(); Iafv++) {
+                segments.push_back(afv[Iafv]);
+            }
+        }
+    }
+    return segments;
+}
+
+std::vector<ACMedia*> ACActiveSegmentPlugins::segment(ACMediaData* aData, ACMedia* theMedia) {
+    std::vector<ACMedia*> segments;
+    ACMediaType mediaType = theMedia->getMediaType();
+    for (vector<ACSegmentationPlugin *> ::iterator iter_vec = mCurrPlugin[mediaType].begin(); iter_vec != mCurrPlugin[mediaType].end(); iter_vec++) {
+        ACSegmentationPlugin* localPlugin = (*iter_vec);
+        vector<ACMedia*> afv = localPlugin->segment(aData, theMedia);
+        if (afv.size() == 0) {
+            cerr << "<ACMedia::segment> failed importing segments from plugin: " << localPlugin->getName() << endl;
+        } else {
+            for (unsigned int Iafv = 0; Iafv < afv.size(); Iafv++) {
+                segments.push_back(afv[Iafv]);
+            }
+        }
+    }
+    return segments;
 }

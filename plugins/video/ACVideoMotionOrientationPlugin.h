@@ -48,13 +48,10 @@ class ACVideoMotionOrientationPlugin : public ACTimedFeaturesPlugin {
 public:
     ACVideoMotionOrientationPlugin();
     ~ACVideoMotionOrientationPlugin();
-	virtual std::vector<ACMediaFeatures*> calculate(ACMediaData* aData, ACMedia* theMedia, bool _save_timed_feat=false);
-//	std::string getSavedFileName(){return mtf_file_name;}
-private:	
-	ACVideoAnalysis* videoAn;
-	void clean();
-	//std::string mtf_file_name; // file in which features have been saved
-
+    virtual std::vector<ACMediaFeatures*> calculate(ACMediaData* aData, ACMedia* theMedia, bool _save_timed_feat = false);
+private:
+    ACVideoAnalysis* videoAn;
+    void clean();
 };
 
 #endif //CV_MIN_VERSION_REQUIRED(2,3,0)

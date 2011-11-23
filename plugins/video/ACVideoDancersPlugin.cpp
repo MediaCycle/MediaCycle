@@ -47,31 +47,30 @@ using std::cerr;
 ACVideoDancersPlugin::ACVideoDancersPlugin() {
     //vars herited from ACPlugin
     this->mMediaType = MEDIA_TYPE_VIDEO;
-    //this->mPluginType = PLUGIN_TYPE_FEATURES;
     this->mName = "Video";
     this->mDescription = "Video plugin";
     this->mId = "";
-	this->mDescriptorsList.push_back("(Front) Mean Contraction Index");
-	this->mDescriptorsList.push_back("(Front) Mean Bounding Box Ratio");
-	this->mDescriptorsList.push_back("(Front) Mean Blobs Pixel Speed (Energy)");
-	this->mDescriptorsList.push_back("(Top) Mean Position (x,y) ");
-	this->mDescriptorsList.push_back("(Top) Std Position (x,y) ");
-	this->mDescriptorsList.push_back("(Top) Max Position (x,y) ");
-	this->mDescriptorsList.push_back("(Top) Mean Speed (x,y) ");
+    this->mDescriptorsList.push_back("(Front) Mean Contraction Index");
+    this->mDescriptorsList.push_back("(Front) Mean Bounding Box Ratio");
+    this->mDescriptorsList.push_back("(Front) Mean Blobs Pixel Speed (Energy)");
+    this->mDescriptorsList.push_back("(Top) Mean Position (x,y) ");
+    this->mDescriptorsList.push_back("(Top) Std Position (x,y) ");
+    this->mDescriptorsList.push_back("(Top) Max Position (x,y) ");
+    this->mDescriptorsList.push_back("(Top) Mean Speed (x,y) ");
 }
 
 ACVideoDancersPlugin::~ACVideoDancersPlugin() {
 }
 
-std::vector<ACMediaFeatures*>  ACVideoDancersPlugin::_calculate(std::string aFileName, bool _save_timed_feat) {
-	std::vector<ACMediaFeatures*> allVideoFeatures;
-	std::vector<ACMediaFeatures*> topVideoFeatures;
-	string topFilename = changeLastFolder(aFileName,"Top");
+std::vector<ACMediaFeatures*> ACVideoDancersPlugin::_calculate(std::string aFileName, bool _save_timed_feat) {
+    std::vector<ACMediaFeatures*> allVideoFeatures;
+    std::vector<ACMediaFeatures*> topVideoFeatures;
+    string topFilename = changeLastFolder(aFileName, "Top");
 
-	allVideoFeatures = calculateFront(aFileName);
-	topVideoFeatures = calculateTop(topFilename);
-	allVideoFeatures.insert( allVideoFeatures.end(), topVideoFeatures.begin(), topVideoFeatures.end() );
-	return allVideoFeatures;
+    allVideoFeatures = calculateFront(aFileName);
+    topVideoFeatures = calculateTop(topFilename);
+    allVideoFeatures.insert(allVideoFeatures.end(), topVideoFeatures.begin(), topVideoFeatures.end());
+    return allVideoFeatures;
 }
 
 // this is the method called from outside

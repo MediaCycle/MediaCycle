@@ -686,7 +686,6 @@ float ACMediaTimedFeature::dist(fmat vector1, fmat vector2, int mode)
     return distM(0,0);
 }
 
-// XS new 180111
 // concatenate with another timed Feature
 // XS TODO: here I just check that the time vectors have same lenght; must have the same time stamps
 bool ACMediaTimedFeature::appendTimedFeature(ACMediaTimedFeature* B){
@@ -727,7 +726,6 @@ void ACMediaTimedFeature::dump(){ // in cout
 	cout << "--------------------------" << endl;
 }
 
-//XS new
 bool ACMediaTimedFeature::saveInFile(string _fname, bool _binary){ 
 	bool save_ok = false;
 	fmat data = join_rows(this->getTime(), this->getValue());
@@ -752,7 +750,6 @@ bool ACMediaTimedFeature::saveInFile(string _fname, bool _binary){
 	return save_ok;
 }
 
-//XS new
 bool ACMediaTimedFeature::loadFromFile(string _fname, bool _binary){
 	fmat tmp_m;
 	bool load_ok = false;

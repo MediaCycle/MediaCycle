@@ -64,7 +64,7 @@ protected:
 	char  **hyper_links;
 	std::vector<ACMedia*> segments;
 	float start, end; // seconds
-
+        int startInt, endInt; // frame numbers
 private:
 	void init();
 	
@@ -131,15 +131,19 @@ public:
 	ACMediaType	getType() {return this->media_type;}	
 	
 	// beginning and end as floats
-	void setStart(float st){this->start = st;};
-	void setEnd(float en){this->end = en;};
-	float getStart(){return this->start;};
-	float getEnd(){return this->end;};
+	void setStart(float st){this->start = st;}
+	void setEnd(float en){this->end = en;}
+	float getStart(){return this->start;}
+	float getEnd(){return this->end;}
+	void setStartInt(int sti){this->startInt = sti;}
+	void setEndInt(int eni){this->endInt = eni;}
+	float getStartInt(){return this->startInt;}
+	float getEndInt(){return this->endInt;}
 	virtual float getFrameRate() {return 0;}//CF video
 	virtual int getSampleRate() {return 0;}//CF audio - merge both?
 	
 	// I/O -- common part
-	// note : ACL deprecated as of spring 2011
+	// note : ACL deprecated as of spring 2011 -- but keep it for backward-compatibility (e.g., Dancers!)
 	void fixWhiteSpace(std::string &str);
 	void saveACL(std::ofstream &library_file, int mcsl=0);
 	void saveXML(TiXmlElement* _medias);

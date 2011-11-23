@@ -53,7 +53,7 @@ class ACVideoAnalysis {
 public:
     ACVideoAnalysis();
     ACVideoAnalysis(const std::string &filename);
-    ACVideoAnalysis(ACMediaData* media_data);
+    ACVideoAnalysis(ACMediaData* media_data, int _frameStart = 0, int _frameEnd = 0);
 
     ~ACVideoAnalysis();
 
@@ -61,7 +61,7 @@ public:
     void clean();
     void rewind();
     void setFileName(const std::string &filename);
-    int initialize();
+    int initialize(int _frameStart = 0, int _frameEnd = 0);
     void writeToFile(const std::string &fileout, int w = 320, int h = 240, int nskip = 0, int istep = 1);
 
     //accessors
@@ -80,10 +80,6 @@ public:
 
     std::string getColorModel() {
         return color_model;
-    }
-
-    inline int getDepth() {
-        return depth;
     }
 
     inline int getNumberOfFrames() {
@@ -243,16 +239,15 @@ private:
     
     std::string file_name;
     std::string color_model; // "BGR" or "HSV" : these are already in IPLimage, but not used in OpenCV (see manual !)
-    //	IplImage* thumbnail;
 
     cv::VideoCapture* capture;
     int frame_counter;
-    bool FROM_FILE; // true if capture initialized from file (then it has to be deleted afterwards)
 
+    bool FROM_FILE; // true if capture initialized from file (then it has to be deleted afterwards)
     bool HAS_TRAJECTORY;
     bool HAS_BLOBS;
 
-    // threshold for lower and upper parts of the image
+    // threshold for lower and upper parts of the image (Dancers-specific)
     int threshU;
     int threshL;
     static const int ystar; // where to split the image in half (horizontally)
@@ -282,8 +277,10 @@ private:
 
     std::vector<std::vector<float> > image_histograms;
 
-    int width, height, depth, fps, nframes;
+    int width, height, fps, nframes;
     float spf; // 1.0/fps
+
+    int frameStart, frameStop; // useful for segments
     //	int videocodec;
     int g_slider_position;
     //	MyHistogram *averageHistogram;

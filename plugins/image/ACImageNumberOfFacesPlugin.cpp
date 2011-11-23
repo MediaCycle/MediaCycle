@@ -75,7 +75,7 @@ std::vector<ACMediaFeatures*> ACImageNumberOfFacesPlugin::calculate(ACMediaData*
 };
 
 ACMediaFeatures* ACImageNumberOfFacesPlugin::calculateNumberOfFaces(ACColorImageAnalysis* image){ 
-	image->computeNumberOfFaces("/Users/xavier/numediart/Project14.5-DiskHover/tests/haarcascade_frontalface_alt.xml"); 
+        image->computeNumberOfFaces("/usr/local/share/OpenCV/haarcascades/haarcascade_frontalface_alt.xml");
 //	image->computeNumberOfFaces("/Users/xavier/numediart/Project14.5-DiskHover/tests/lbpcascade_frontalface.xml"); 
 	ACMediaFeatures* number_of_faces = new ACMediaFeatures(image->getNumberOfFaces(), "NumberOfFaces");
 	return number_of_faces;	

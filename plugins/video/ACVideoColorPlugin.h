@@ -41,17 +41,15 @@
 
 //XS TODO : make an ACVideoFeatures Plugin
 // with (ACVideoData *) ACMediaData
+
 class ACVideoColorPlugin : public ACTimedFeaturesPlugin {
 public:
     ACVideoColorPlugin();
     ~ACVideoColorPlugin();
-	virtual std::vector<ACMediaFeatures*> calculate(ACMediaData* aData, ACMedia* theMedia, bool _save_timed_feat=false);
-//	std::string getSavedFileName(){return mtf_file_name;}
-private:	
-	ACVideoAnalysis* videoAn;
-	void clean();
-	//std::string mtf_file_name; // file in which features have been saved
-
+    virtual std::vector<ACMediaFeatures*> calculate(ACMediaData* aData, ACMedia* theMedia, bool _save_timed_feat = false);
+private:
+    ACVideoAnalysis* videoAn;
+    void clean();
 };
 
 #endif //_ACVIDEOCOLORPLUGIN_H

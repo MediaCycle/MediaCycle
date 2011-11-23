@@ -40,25 +40,25 @@
 using namespace std;
 
 // note : this->mDescription will be used for mtf_file_name
-ACVideoPixelSpeedPlugin::ACVideoPixelSpeedPlugin() : ACTimedFeaturesPlugin(){
+ACVideoPixelSpeedPlugin::ACVideoPixelSpeedPlugin() : ACTimedFeaturesPlugin() {
     //vars herited from ACPlugin
     this->mMediaType = MEDIA_TYPE_VIDEO;
     this->mName = "Video Pixel Speed";
     this->mDescription = "Pixel_Speed";
     this->mId = "";
-	this->mDescriptorsList.push_back("Pixel Speed");
+    this->mDescriptorsList.push_back("Pixel Speed");
 
-	//other vars
-	this->videoAn = 0;
+    //other vars
+    this->videoAn = 0;
 }
 
 ACVideoPixelSpeedPlugin::~ACVideoPixelSpeedPlugin() {
-	this->clean();
+    this->clean();
 }
 
-void ACVideoPixelSpeedPlugin::clean(){
-	if (videoAn != 0)
-		delete videoAn;
+void ACVideoPixelSpeedPlugin::clean() {
+    if (videoAn != 0)
+        delete videoAn;
 }
 
 //std::vector<ACMediaFeatures*>  ACVideoPixelSpeedPlugin::calculate(std::string aFileName, bool _save_timed_feat) {
@@ -79,20 +79,7 @@ std::vector<ACMediaFeatures*> ACVideoPixelSpeedPlugin::calculate(ACMediaData* vi
 	
 	ACMediaTimedFeature* ps_mtf = new ACMediaTimedFeature(t,s, "pixel speed");
 	ACMediaFeatures* pixel_speed = ps_mtf->mean();
-	
-	// XS TODO this will need to be cut and pasted to other plugins
-	// until we re-define the plugins API
-	// saving timed features on disk (if _save_timed_feat flag is on)
-	// XS TODO add checks
-	if (_save_timed_feat) {
-		// try to keep the convention : _b.mtf = binary ; _t.mtf = ascii text
-		bool save_binary = true;
-		string file_ext =  "_b.mtf";
-		string aFileName_noext = aFileName.substr(0,aFileName.find_last_of('.'));
-		mtf_file_name = aFileName_noext + "_" +this->mDescription + file_ext;
-		ps_mtf->saveInFile(mtf_file_name, save_binary);
-	}
-	
+	this->saveTimedFeatures(ps_mtf, aFileName, _save_timed_feat); // by default : binary
 	delete ps_mtf;
 
 	videoFeatures.push_back(pixel_speed);

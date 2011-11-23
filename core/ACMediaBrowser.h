@@ -138,6 +138,9 @@ public:
 	int getKNN(int id, vector<int> &ids, int k);
 	int getKNN(ACMedia *aMedia, vector<ACMedia *> &result, int k);
 
+        // Search on a specific feature (e.g., 10 images most red)
+        int getKSortedOnFeature(int k=0, int f=0, int dim=0, bool revert=false);
+
 	// memory/context - undefined
 	void setHistory();
 	void setBookmark();
@@ -191,7 +194,7 @@ public:
 
 	// == Nodes
 	void setClickedNode(int inode,int p_index = 0);
-	int getClickedNode(int p_index = 0) {return mClickedNode; };
+	int getClickedNode() {return mClickedNode; };
 	bool toggleNode(int node);
 	void dumpSelectedNodes();
 	set<int>& getSelectedNodes(){return mSelectedNodes;}

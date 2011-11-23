@@ -82,11 +82,11 @@ ACVideoAnalysis::ACVideoAnalysis(const string &filename) {
 // this is normally what plugins should call
 // since they have access to mediadata
 
-ACVideoAnalysis::ACVideoAnalysis(ACMediaData* media_data) {
+ACVideoAnalysis::ACVideoAnalysis(ACMediaData* media_data, int _frameStart, int _frameStop) {
     clean();
     file_name = media_data->getFileName();
     capture = static_cast<cv::VideoCapture*> (media_data->getData());
-    initialize();
+    initialize(_frameStart, _frameStop);
 }
 
 void ACVideoAnalysis::clean() {
@@ -115,15 +115,20 @@ void ACVideoAnalysis::clean() {
     fourier_polar_moments.clear();
     fourier_mellin_moments.clear();
 
-    width = height = depth = fps = nframes = 0;
+    width = height = fps = nframes = 0;
+    frameStart = frameStop = 0;
     spf = 0.0;
     threshU = threshL = 0;
     file_name = "";
     //	averageHistogram = 0;
 }
 
+// XS double rewind to make sure first frame is zero (or frameStart)
 void ACVideoAnalysis::rewind() {
-    capture->set(CV_CAP_PROP_POS_FRAMES, 0);
+    capture->set(CV_CAP_PROP_POS_FRAMES, this->frameStart);
+    cv::Mat tmp_frame;
+    *capture >> tmp_frame;
+    capture->set(CV_CAP_PROP_POS_FRAMES, this->frameStart);
 }
 
 ACVideoAnalysis::~ACVideoAnalysis() {
@@ -141,8 +146,9 @@ void ACVideoAnalysis::setFileName(const string &filename) {
     file_name = filename;
 }
 
-int ACVideoAnalysis::initialize() {
+int ACVideoAnalysis::initialize(int _frameStart, int _frameStop) {
     // returns 1 if it worked, 0 if not
+    int init_ok = 1;
     frame_counter = 0; // reset frame counter, to make sure
     if (!capture->isOpened()) {
         // Either the video does not exist, or it uses a codec OpenCV does not support.
@@ -160,43 +166,60 @@ int ACVideoAnalysis::initialize() {
         // in case fps is badly encoded, time_stamp = frame_stamp
         spf = 1.0;
     nframes = (int) capture->get(CV_CAP_PROP_FRAME_COUNT) - 1; // XS -1 seems necessary in OpenCV 2.3
+
     //	videocodec = (int) cvGetCaptureProperty(capture,  CV_CAP_PROP_FOURCC);
     // extra, not stored in capture
-    depth = IPL_DEPTH_8U; // XS TODO: adapt if necessary ? check with first frame?
+    if (nframes == 0) {
+        cerr << "<ACVideoAnalysis::initialize> : zero frames for " << file_name << endl;
+        return 0;
+    }
 
-    int init_ok = 1;
+    if (_frameStart == 0 && _frameStop == 0 ){
+        this->frameStart = 0;
+        this->frameStop = nframes;
+    } else if (_frameStart = _frameStop){
+        cerr << "<ACVideoAnalysis::initialize> : zero frames required for " << file_name << endl;
+        return 0;
+    } else if (_frameStart > _frameStop || _frameStart < 0 || _frameStop > nframes) {
+        cerr << "<ACVideoAnalysis::initialize> : wrong frames limits for " << file_name << endl;
+        return 0;
+    } else {
+        this->frameStart = _frameStart;
+        this->frameStop = _frameStop;
+    }
+    
     if (width * height == 0) {
         cerr << "<ACVideoAnalysis::initialize> : zero image size for " << file_name << endl;
         init_ok = 0;
     }
-    if (nframes == 0) {
-        cerr << "<ACVideoAnalysis::initialize> : zero frames for " << file_name << endl;
-        init_ok = 0;
-    }
-
+    
 #ifdef VERBOSE
-    cout << "* Analyzing video file: " << file_name << endl;
-    cout << "width : " << width << endl;
-    cout << "height : " << height << endl;
-    cout << "fps : " << fps << endl;
-    cout << "spf : " << spf << endl;
-    cout << "numFrames : " << nframes << endl;
+    cout << "* Analyzing video file: " << this->file_name << endl;
+    cout << "width : " << this->width << endl;
+    cout << "height : " << this->height << endl;
+    cout << "fps : " << this->fps << endl;
+    cout << "spf : " << this->spf << endl;
+    cout << "total number of frames in file: " << this->nframes << endl;
+    cout << "first frame analyzed: " << this->frameStart << endl;
+    cout << "last frame analyzed: " << this->frameStop << endl;
+
     //	cout << "codec : " << videocodec << endl;
 #endif // VERBOSE
 
+    this->setFramePosition(frameStart);
     return init_ok; // to be consistent with MycolorImage::SetImageFile : returns 0 if problem
 }
 
 float ACVideoAnalysis::getDuration() {
     // returns duration in seconds or number of frames if fps not available
     //	if( !capture ) this->initialize();
-    return nframes*spf;
+    return (this->frameStop - this->frameStart) *spf;
 }
 
 // no check if returning image is empty -> should be done outside : if (!img.data)...
 
 cv::Mat ACVideoAnalysis::getFrame(int i) {
-    if (i < 0 || i > nframes) {
+    if (i < frameStart || i > frameStop) {
         cerr << "frame index out of bounds: " << i << endl;
         return cv::Mat();
     }
@@ -207,24 +230,26 @@ cv::Mat ACVideoAnalysis::getFrame(int i) {
 }
 
 void ACVideoAnalysis::setFramePosition(int pos) {
-    if ((pos >= 0) && (pos < nframes)) {
+    if ((pos >= frameStart) && (pos < frameStop)) {
         capture->set(CV_CAP_PROP_POS_FRAMES, pos);
     }
 }
 
 int ACVideoAnalysis::getFramePosition() {
-    return capture->get(CV_CAP_PROP_POS_FRAMES);
+    return capture->get(CV_CAP_PROP_POS_FRAMES); // XS TODO check borders
 }
 
 void ACVideoAnalysis::clearStamps() {
     time_stamps.clear();
     frame_stamps.clear();
 }
+
 void ACVideoAnalysis::stamp() {
-    int _frame_number = capture->get(CV_CAP_PROP_POS_FRAMES);
+    int _frame_number = capture->get(CV_CAP_PROP_POS_FRAMES); // XS TODO check borders
     time_stamps.push_back(_frame_number * spf); // in seconds
     frame_stamps.push_back(_frame_number); // in frames
 }
+
 //void ACVideoAnalysis::histogramEqualize(const IplImage* bg_img) {
 //	if (bg_img == 0){
 //		bg_img = this->computeMedianImage();
@@ -489,7 +514,7 @@ void ACVideoAnalysis::computeBlobs(const cv::Mat& bg_img, int bg_thresh, int big
     cvMoveWindow("BLOBS", 50, 400);
 #endif // VISUAL_CHECK
 
-    for (int i = 0; i < nframes; i++) {
+    for (int i = this->frameStart+1; i < this->frameStop; i++) {
         *capture >> frame;
         if (!frame.data) {
             cerr << "<ACVideoAnalysis::computeBlobs> unexpected end of video at frame " << i << endl;
@@ -725,7 +750,7 @@ void ACVideoAnalysis::computeBlobsUL(const cv::Mat& bg_img, bool merge_blobs, in
     int t_l = threshL * 2;
     int joeystar = ystar + 40;
 
-    for (int i = 0; i < nframes - 1; i++) {
+    for (int i = this->frameStart+1; i < this->frameStop; i++) {
         *capture >> frame;
         if (!frame.data) {
             cerr << "<ACVideoAnalysis::computeBlobsInteractively> unexpected end of video at frame " << i << endl;
@@ -1098,7 +1123,7 @@ void ACVideoAnalysis::computeMergedBlobsSpeeds(float blob_dist) {
 // ncalc = number of frames to consider
 // so that we go by steps of nread/ncalc frames
 // if fsave != "": saving the resulting median image in the file fsave
-
+// XS TODO adapt to Start/Stop (segments) ?
 cv::Mat ACVideoAnalysis::computeMedianImage(int nskip, int nread, int njump, string fsave) {
     if (nskip + nread > nframes) {
         cerr << " <ACVideoAnalysis::computeMedianImage>: not enough frames in video. reduce number of frames to skip and/or to average" << endl;
@@ -1452,9 +1477,6 @@ void ACVideoAnalysis::computeGlobalPixelsSpeed() {
     //#ifdef APPLE_LEOPARD
     // initial frame
     *capture >> tmp_frame;
-   // XS double rewind to make sure first frame is zero
-    this->rewind();
-    *capture >> tmp_frame;
 
     //	#else // heavy, opening the file again !
     //	ACFFmpegToOpenCV file_cap;
@@ -1480,7 +1502,7 @@ void ACVideoAnalysis::computeGlobalPixelsSpeed() {
     cv::namedWindow("Subtraction", CV_WINDOW_AUTOSIZE);
 #endif //VISUAL_CHECK
 
-    for (int i = 1; i < nframes; i++) {
+    for (int i = this->frameStart+1; i < this->frameStop; i++) {
         tmp_frame.copyTo(previous_frame);
 
         //		#ifdef APPLE_LEOPARD
@@ -1583,7 +1605,7 @@ void ACVideoAnalysis::computeColorMoments(int n, string cm) {
 #endif //VISUAL_CHECK
 
     cv::Mat current_frame;
-    for (int ifram = 0; ifram < nframes; ifram++) {
+    for (int ifram = this->frameStart; ifram < this->frameStop; ifram++) {
         *capture >> current_frame;
         if (!current_frame.data) {
             cerr << "<ACVideoAnalysis::computeColorMoments> unexpected end of file at frame " << ifram << endl;
@@ -1620,7 +1642,7 @@ void ACVideoAnalysis::computeHuMoments(int thresh, cv::Mat bg_img) {
 #endif //VISUAL_CHECK
 
     cv::Mat current_frame;
-    for (int ifram = 0; ifram < nframes; ifram++) {
+    for (int ifram = this->frameStart; ifram < this->frameStop; ifram++) {
         *capture >> current_frame;
         if (!current_frame.data) {
             cerr << "<ACVideoAnalysis::computeHuMoments> unexpected end of file at frame " << ifram << endl;
@@ -1649,7 +1671,7 @@ void ACVideoAnalysis::computeFourierPolarMoments(int RadialBins, int AngularBins
     this->rewind(); // reset the capture to the beginning of the video
     this->clearStamps();
     cv::Mat current_frame;
-    for (int ifram = 0; ifram < nframes; ifram++) {
+    for (int ifram = this->frameStart; ifram < frameStop; ifram++) {
         *capture >> current_frame;
         if (!current_frame.data) {
             cerr << "<ACVideoAnalysis::computeFourierPolarMoments> unexpected end of file at frame " << ifram << endl;
@@ -1667,7 +1689,7 @@ void ACVideoAnalysis::computeFourierMellinMoments() {
     this->rewind(); // reset the capture to the beginning of the video
     this->clearStamps();
     cv::Mat current_frame;
-    for (int ifram = 0; ifram < nframes; ifram++) {
+    for (int ifram = this->frameStart; ifram < this->frameStop; ifram++) {
         *capture >> current_frame;
         if (!current_frame.data) {
             cerr << "unexpected end of file at frame " << ifram << endl;
@@ -1743,7 +1765,7 @@ void ACVideoAnalysis::computeGlobalOrientation() {
     cv::Mat motion_mat(size, CV_8UC3, cv::Scalar::all(0));
 #endif //VISUAL_CHECK
 
-    for (int ifram = 0; ifram < nframes - 1; ifram++) {
+    for (int ifram = this->frameStart+1; ifram < this->frameStop; ifram++) {
         cv::Mat current_frame;
         *capture >> current_frame;
         if (!current_frame.data) {
@@ -1893,7 +1915,7 @@ void ACVideoAnalysis::showInWindow(string title, bool has_win) {
     cv::Point textOrg(10, 20);
 
     cv::Mat current_frame;
-    for (int ifram = 0; ifram < nframes - 1; ifram++) {
+    for (int ifram = this->frameStart; ifram < this->frameStop; ifram++) {
         *capture >> current_frame;
         if (!current_frame.data) {
             cerr << "<ACVideoAnalysis::showInWindow> unexpected end of file at frame " << ifram << endl;
@@ -1920,7 +1942,7 @@ void ACVideoAnalysis::showFFTInWindow(string title, bool has_win) {
         cv::namedWindow(title.c_str(), CV_WINDOW_AUTOSIZE);
 
     cv::Mat current_frame;
-    for (int ifram = 0; ifram < nframes; ifram++) {
+    for (int ifram = this->frameStart; ifram < this->frameStop; ifram++) {
         *capture >> current_frame;
         if (!current_frame.data) {
             cerr << "<ACVideoAnalysis::showFFTInWindow> unexpected end of file at frame " << ifram << endl;
@@ -1958,7 +1980,7 @@ void ACVideoAnalysis::browseWithTrackbarInWindow(string title, bool has_win) {
     cv::setTrackbarPos("Video Frame", title.c_str(), 0);
     cv::Mat img;
     capture->set(CV_CAP_PROP_POS_FRAMES, 0);
-    for (int i = 0; i < nframes; i++) {
+    for (int i = this->frameStart; i < this->frameStop; i++) {
         *capture >> img;
         cv::setTrackbarPos("Video Frame", title.c_str(), capture->get(CV_CAP_PROP_POS_FRAMES));
         if (cv::waitKey(20) == '\x1b') // press ESC to pause the video, then any key to continue
@@ -2006,7 +2028,7 @@ void ACVideoAnalysis::browseWithTrackbarInWindow(string title, bool has_win) {
 //   - reduced to size wxh
 //   - skips the first nskip frames
 //   - by steps of istep frames
-
+// XS TODO start & stop
 void ACVideoAnalysis::writeToFile(const string& fileout, int _w, int _h, int _nskip, int _istep) {
     cv::VideoWriter video_writer(fileout, CV_FOURCC('X', 'V', 'I', 'D'), fps, cv::Size(_w, _h));
     rewind();

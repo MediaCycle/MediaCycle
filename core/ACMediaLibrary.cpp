@@ -230,14 +230,13 @@ int ACMediaLibrary::importFile(std::string _filename, ACPluginManager *acpl, boo
 		cout << "imported " << _filename << " with mid = " <<  this->getMediaID() << endl;
 #endif // VERBOSE
 		this->incrementMediaID();
-		// SD TODO - Is this correct?
 		if (doSegment){
 			// segments are created without id
 			media->segment(acpl, _save_timed_feat);
 			
-			if(this->media_type == MEDIA_TYPE_VIDEO)//CF
-				std::cout << "\n\nWARNING! Video segments not added to the library to test segmentation until features are not re-calculated from each segment!\n\n" << std::endl;
-			else{
+//			if(this->media_type == MEDIA_TYPE_VIDEO)//CF
+//				std::cout << "\n\nWARNING! Video segments not added to the library to test segmentation until features are not re-calculated from each segment!\n\n" << std::endl;
+//			else{
 				std::vector<ACMedia*> mediaSegments;
 				mediaSegments = media->getAllSegments();
 				for (unsigned int i = 0; i < mediaSegments.size(); i++){
@@ -249,7 +248,7 @@ int ACMediaLibrary::importFile(std::string _filename, ACPluginManager *acpl, boo
 					}
 					
 				}
-			}
+//			}
 			
 		}
 	}

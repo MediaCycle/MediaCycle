@@ -124,7 +124,7 @@ public:
 	arma::fmat similarity(ACMediaTimedFeature *B);
 	float dist(arma::fmat rowvector1, arma::fmat rowvector2, int mode = 0);
 	
-	// XS new 180111: concatenate with another timed Feature
+	// concatenate with another timed Feature
 	// XS TODO: must have the same time stamps
 	bool appendTimedFeature(ACMediaTimedFeature* B);
 
@@ -135,7 +135,7 @@ public:
 	void importFromFile(std::string filename);
 	void importSegmentsFromFile(std::string filename);
 
-	//XS new
+	// new (180111)
 	bool saveInFile(std::string _fname, bool _binary = true);
 	bool loadFromFile(std::string _fname, bool _binary = true);
 	void dump(); // in terminal

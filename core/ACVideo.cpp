@@ -47,20 +47,18 @@ using namespace std;
 // ----------- class constants
 const int ACVideo:: default_thumbnail_area = 4096; // 64 * 64
 
-ACVideo::ACVideo() : ACMedia()
-{
-	this->init();
-}	
+ACVideo::ACVideo() : ACMedia() {
+    this->init();
+}
 
-void ACVideo::init()
-{
-	media_type = MEDIA_TYPE_VIDEO;
-	thumbnail = 0;
-	thumbnail_width = 0;
-	thumbnail_height = 0;
-	data=0;
-	fps=0;
-}	
+void ACVideo::init() {
+    media_type = MEDIA_TYPE_VIDEO;
+    thumbnail = 0;
+    thumbnail_width = 0;
+    thumbnail_height = 0;
+    data = 0;
+    fps = 0;
+}
 
 ACVideo::~ACVideo() {
 	if (image_stream) image_stream->quit();	

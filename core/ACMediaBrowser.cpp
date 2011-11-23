@@ -140,7 +140,7 @@ void ACMediaBrowser::clean(){
 	nbDisplayedLabels = 0;
 
 	mLoopAttributes.clear(); // XS TODO make this a tree ;delete mLoopAttributes if vector of pointers <*>
-	nbDisplayedLoops = 0; // XS TODO: check this : 20 was vintage from Dancers!?
+	nbDisplayedLoops = 0;
 
 	mFeatureWeights.clear();
 
@@ -602,8 +602,8 @@ void ACMediaBrowser::libraryContentChanged(int needsCluster) {
 	prevLibrarySize = mLibrary->getSize();
 }
 
-// temporary "hack" before config filing
 // sets first feature weight to 1, others to 0
+// can be changed afterwards, e.g. when reading XML file with config and descriptors
 // assumes all media have the same number of features (as the first one)
 void ACMediaBrowser::initializeFeatureWeights(){
 	
@@ -611,7 +611,6 @@ void ACMediaBrowser::initializeFeatureWeights(){
 	int fc = mLibrary->getMedia(0)->getNumberOfFeaturesVectors();
 	mFeatureWeights.resize(fc);
 
-	// XS TODO if (config_file)...
 	printf("setting all feature weights to 1.0 (count=%d)\n", (int) mFeatureWeights.size());
 	for(int i=0; i<fc; i++) {
 		mFeatureWeights[i] = 0.0;	}
@@ -755,6 +754,43 @@ int ACMediaBrowser::getKNN(ACMedia *aMedia, vector<ACMedia *> &result, int k) {
     }
 
     return kcount;
+}
+
+// get k first items sorted on feature number f (and its component dim)
+// revert = true = lest k items
+int ACMediaBrowser::getKSortedOnFeature(int k, int f, int dim, bool revert) {
+    ACMediaLibrary *m_lib = this->getLibrary();
+    if (m_lib->getSize() == 0) {
+        cerr << "<ACMediaBrowser::getKSortedOnFeature> : empty library" << endl;
+        return 0;
+    }
+    if (k >= m_lib->getSize() || k <=0) {
+        cerr << "<ACMediaBrowser::getKSortedOnFeature> : wrong k : " << k << endl;
+        return 0;
+    }
+
+    int nfeatv = m_lib->getMedia(0)->getNumberOfFeaturesVectors();
+    if (f >= nfeatv) {
+        cerr << "<ACMediaBrowser::getKSortedOnFeature> : wrong feature index : " << f << endl;
+        return 0;
+    }
+    int dimfeatv = m_lib->getMedia(0)->getFeaturesVector(f)->getSize();
+    if (dim >= dimfeatv) {
+        cerr << "<ACMediaBrowser::getKSortedOnFeature> : wrong feature dimension : " << f << endl;
+        return 0;
+    }
+
+    std::vector<std::pair<float, int> > feature_to_sort;
+    for (int i = 0; i < m_lib->getSize(); i++) {
+        feature_to_sort.push_back(std::pair<float, int> (m_lib->getMedia(i)->getFeaturesVector(k)->getFeatureElement(dim), m_lib->getMedia(i)->getId()));
+    }
+
+    sort(feature_to_sort.begin(), feature_to_sort.end());
+    std::vector<std::pair<float, int> >::const_iterator itr;
+    // XS TODO if revert...
+    for (int i = 0; i<k; i++) {
+        cout << feature_to_sort[i].first << "\t" <<  feature_to_sort[i].second << endl;
+    }
 }
 
 /*
@@ -973,10 +1009,12 @@ void ACMediaBrowser::updateClustersKMeans(bool animate, int needsCluster) {
 
 		int n_iterations = 20, it;
 
+#ifdef VERBOSE
 		printf("feature weights:");
 		for (unsigned int fw=0; fw < mFeatureWeights.size(); fw++)
 			printf("%f ", mFeatureWeights[fw]);
 		printf("\n");
+#endif // VERBOSE
 
 		// applying a few K-means iterations
 		for(it = 0; it < n_iterations; it++)
@@ -1041,7 +1079,9 @@ void ACMediaBrowser::updateClustersKMeans(bool animate, int needsCluster) {
 				
 			}
 
-			//printf("K-means it: %d\n", it);
+#ifdef VERBOSE
+			printf("K-means it: %d\n", it);
+#endif // VERBOSE
 			// get new centers from accumulators
 			for(j=0; j<mClusterCount; j++)
 			{
@@ -1058,8 +1098,9 @@ void ACMediaBrowser::updateClustersKMeans(bool animate, int needsCluster) {
 						}
 					}
 				}
-
-				//printf("\tcluster %d count = %d\n", j, cluster_counts[j]);
+#ifdef VERBOSE
+				printf("\tcluster %d count = %d\n", j, cluster_counts[j]);
+#endif //VERBOSE
 			}
 		}
 	}
@@ -1308,7 +1349,6 @@ int ACMediaBrowser::toggleSourceActivity(float _x, float _y)
 }
 */
 
-// XS new 150310
 // . toggleSourceActivity is in fact in ACMediaNode now
 // . browser takes care of threads
 // XS TODO return value makes no sense

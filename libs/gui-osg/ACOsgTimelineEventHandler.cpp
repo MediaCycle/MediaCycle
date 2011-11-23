@@ -47,7 +47,7 @@
 
 // ----------- uncomment this to display picked objects messages 
 //#define DEBUG_PICKED
-#endif USE_DEBUG
+#endif //USE_DEBUG
 
 static float xspan = 0.666f; // magic number, track width in OSG coordinates, see ACOsgAudioTrackRenderer
 

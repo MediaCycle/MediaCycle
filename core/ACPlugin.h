@@ -80,15 +80,7 @@ public:
 	ACMediaType getMediaType() {return this->mMediaType;};
 	ACPluginType getPluginType() {return this->mPluginType;};
 
-
 		//XSCF TODO: should the plugin receive MediaCycle ?
-//	virtual void updateClusters(ACMediaBrowser*){};
-//	virtual void updateNextPositions(ACMediaBrowser*){};
-//	virtual void updateNeighborhoods(ACMediaBrowser*){};
-	
-	// e.g., for audioSegmentationPLugin
-	
-	// timedFeatures: e.g., for BicSegmentationPlugin
 
 protected:
 	std::string mName;
@@ -124,6 +116,7 @@ protected:
 public:
 	std::string getSavedFileName(){return mtf_file_name;}
 	virtual ACMediaTimedFeature* getTimedFeatures();
+        bool saveTimedFeatures(ACMediaTimedFeature* mtf=0, std::string aFileName="", bool _save_timed_feat = true, bool _save_binary = true);
 };
 
 class ACSegmentationPlugin: virtual public ACPlugin

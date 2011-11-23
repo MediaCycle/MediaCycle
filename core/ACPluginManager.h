@@ -161,22 +161,22 @@ public:
     virtual ~ACPluginManager();
     int addLibrary(std::string aPluginLibraryPath);
     int removeLibrary(std::string aPluginLibraryPath);
-	bool removePluginFromLibrary(std::string _plugin_name, std::string _library_path);
-	std::vector<std::string> getListOfPlugins();
-	
+    bool removePluginFromLibrary(std::string _plugin_name, std::string _library_path);
+    std::vector<std::string> getListOfPlugins();
+
     int clean();
-	void dump();
+    void dump();
 
     std::vector<ACPluginLibrary *> getPluginLibrary() { return this->mPluginLibrary;};
     ACPluginLibrary *getPluginLibrary(int i) { return this->mPluginLibrary[i];};
     ACPluginLibrary *getPluginLibrary(std::string _lpath) ;
     
-	int getSize() { return this->mPluginLibrary.size();};
+    int getSize() { return this->mPluginLibrary.size();};
     ACPlugin *getPlugin(std::string aPluginName);
 	
     ACActiveFeaturesPlugins *getFeaturesPlugins(){return this->mActiveFeaturePlugins;};// returns a container with feature plugins reference 
     int getFeaturesPluginsSize(ACMediaType MediaType);
-	ACActiveSegmentPlugins *getSegmentPlugins(){return this->mActiveSegmentPlugins;};// returns a container with Segment plugins reference 
+    ACActiveSegmentPlugins *getSegmentPlugins(){return this->mActiveSegmentPlugins;};// returns a container with Segment plugins reference
     int getSegmentPluginsSize(ACMediaType MediaType);
 	
 	
@@ -184,8 +184,8 @@ private:
 	
     std::vector<ACPluginLibrary *> mPluginLibrary;	
 	
-	ACActiveFeaturesPlugins* mActiveFeaturePlugins;
-	ACActiveSegmentPlugins* mActiveSegmentPlugins;
+    ACActiveFeaturesPlugins* mActiveFeaturePlugins;
+    ACActiveSegmentPlugins* mActiveSegmentPlugins;
 };
 
 #endif	/* _ACPLUGINMANAGER_H */

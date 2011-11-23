@@ -42,7 +42,7 @@
 // sampling_rate = n if we skip n frames in the analysis (1 = don't skip any)
 // bic_thresh = threshold for the BIC under which there is no segment detected
 // jump_width = number of frames to skip after a step has been detected
-ACBicSegmentationPlugin::ACBicSegmentationPlugin() : lambda(1), sampling_rate(1), Wmin(20), bic_thresh(0.5), jump_width(5), discard_borders(5){
+ACBicSegmentationPlugin::ACBicSegmentationPlugin() : lambda(1), sampling_rate(1), Wmin(20), bic_thresh(0.8), jump_width(5), discard_borders(5){
     this->mMediaType = MEDIA_TYPE_ALL;
     //this->mPluginType = PLUGIN_TYPE_SEGMENTATION;
     this->mName = "BicSegmentation";
@@ -131,22 +131,22 @@ void ACBicSegmentationPlugin::setParameters(float _lambda, int _samplingrate, in
 //	return (this->_segment());
 //}
 
-std::vector<int> ACBicSegmentationPlugin::segment(arma::fmat _M, \
-												  float _lambda, \
-												  int _samplingrate, \
-												  int _Wmin, \
-												  float _bic_thresh, \
-												  int _jump_width, \
-												  int _discard_borders  ){
-	this->full_features = _M ; 
-	
-	this->lambda = _lambda;
-	this->sampling_rate = _samplingrate;
-	this->Wmin = _Wmin;
-	this->bic_thresh = _bic_thresh;
-	this->jump_width = _jump_width;
-	this->discard_borders=_discard_borders;
-	return (this->_segment());
+std::vector<int> ACBicSegmentationPlugin::testSegment(arma::fmat _M,   \
+						  float _lambda,   \
+						  int _samplingrate,   \
+						  int _Wmin,   \
+						  float _bic_thresh,   \
+						  int _jump_width,   \
+						  int _discard_borders) {
+    this->full_features = _M;
+
+    this->lambda = _lambda;
+    this->sampling_rate = _samplingrate;
+    this->Wmin = _Wmin;
+    this->bic_thresh = _bic_thresh;
+    this->jump_width = _jump_width;
+    this->discard_borders = _discard_borders;
+    return (this->_segment());
 }
 
 
@@ -178,11 +178,11 @@ std::vector<ACMedia*> ACBicSegmentationPlugin::segment(ACMediaTimedFeature* _MTF
 	}			
 	
 	for (int i = 0; i < Nseg-1; i++){
-		//make sur the segment from the media have the proper type
+		//make sure the segment from the media have the proper type
 		ACMedia* media = ACMediaFactory::getInstance().create(_theMedia);
 		media->setParentId(_theMedia->getId());
-		media->setStart(segments_limits[i]);
-		media->setEnd(segments_limits[i+1]);
+		media->setStartInt(segments_limits[i]); // XS TODO : in frame number, not time code
+		media->setEndInt(segments_limits[i+1]);
 		segments.push_back(media);
 	}
 		
@@ -190,25 +190,25 @@ std::vector<ACMedia*> ACBicSegmentationPlugin::segment(ACMediaTimedFeature* _MTF
 }
 
 
-std::vector<int> ACBicSegmentationPlugin::segment(std::vector <ACMediaTimedFeature*> _ACMTF, \
-												  float _lambda, \
-												  int _samplingrate, \
-												  int _Wmin, \
-												  float _bic_thresh, \
-												  int _jump_width, \
-												  int _discard_borders){
-	this->full_features = arma::trans(vectorACMTF2fmat(_ACMTF)) ;
-	
-	this->lambda = _lambda;
-	this->sampling_rate = _samplingrate;
-	this->Wmin = _Wmin;
-	this->bic_thresh = _bic_thresh;
-	this->jump_width = _jump_width;
-	this->discard_borders=_discard_borders;
-	return (this->_segment());
-}
+//std::vector<int> ACBicSegmentationPlugin::segment(std::vector <ACMediaTimedFeature*> _ACMTF, \
+//												  float _lambda, \
+//												  int _samplingrate, \
+//												  int _Wmin, \
+//												  float _bic_thresh, \
+//												  int _jump_width, \
+//												  int _discard_borders){
+//	this->full_features = arma::trans(vectorACMTF2fmat(_ACMTF)) ;
+//
+//	this->lambda = _lambda;
+//	this->sampling_rate = _samplingrate;
+//	this->Wmin = _Wmin;
+//	this->bic_thresh = _bic_thresh;
+//	this->jump_width = _jump_width;
+//	this->discard_borders=_discard_borders;
+//	return (this->_segment());
+//}
 
-std::vector<int> ACBicSegmentationPlugin::segmentDAC(arma::fmat _M, \
+std::vector<int> ACBicSegmentationPlugin::testSegmentDAC(arma::fmat _M, \
 												  float _lambda, \
 												  int _Wmin, \
 												  float _bic_thresh, \
@@ -223,22 +223,22 @@ std::vector<int> ACBicSegmentationPlugin::segmentDAC(arma::fmat _M, \
         this->bic_thresh_DAC=_bic_thresh_DAC;
 	return (this->_segmentDAC());
 }
-
-std::vector<int> ACBicSegmentationPlugin::segmentDAC(std::vector <ACMediaTimedFeature*> _ACMTF, \
-												  float _lambda, \
-												  int _Wmin, \
-												  float _bic_thresh, \
-                                                                                                  int _discard_borders, \
-                                                                                                  float _bic_thresh_DAC){
-	this->full_features = arma::trans(vectorACMTF2fmat(_ACMTF)) ;
-
-	this->lambda = _lambda;
-	this->Wmin = _Wmin;
-	this->bic_thresh = _bic_thresh;
-        this->discard_borders=_discard_borders;
-        this->bic_thresh_DAC=_bic_thresh_DAC;
-	return (this->_segmentDAC());
-}
+//
+//std::vector<int> ACBicSegmentationPlugin::segmentDAC(std::vector <ACMediaTimedFeature*> _ACMTF, \
+//												  float _lambda, \
+//												  int _Wmin, \
+//												  float _bic_thresh, \
+//                                                                                                  int _discard_borders, \
+//                                                                                                  float _bic_thresh_DAC){
+//	this->full_features = arma::trans(vectorACMTF2fmat(_ACMTF)) ;
+//
+//	this->lambda = _lambda;
+//	this->Wmin = _Wmin;
+//	this->bic_thresh = _bic_thresh;
+//        this->discard_borders=_discard_borders;
+//        this->bic_thresh_DAC=_bic_thresh_DAC;
+//	return (this->_segmentDAC());
+//}
 	
 //supposes we have defined:
 // - this->lambda = _lambda;

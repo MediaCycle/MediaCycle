@@ -214,20 +214,10 @@ std::vector<ACMediaFeatures*> ACHuMomentsVideoPlugin::_calculate(std::string aFi
 	descmtf = new ACMediaTimedFeature(time_stamps,desc,"Hu Moments (StarPU)");
 	ACMediaFeatures* tmp = descmtf->mean();
 	result.push_back(tmp);
-	
-	// XS TODO this will need to be cut and pasted to other plugins
-	// until we re-define the plugins API
-	// saving timed features on disk (if _save_timed_feat flag is on)
-	// XS TODO add checks
-	if (_save_timed_feat) {
-		// try to keep the convention : _b.mtf = binary ; _t.mtf = ascii text
-		bool save_binary = true;
-		string file_ext =  "_b.mtf";
-		string aFileName_noext = aFileName.substr(0,aFileName.find_last_of('.'));
-		mtf_file_name = aFileName_noext + "_" +this->mDescription + file_ext;
-		descmtf->saveInFile(mtf_file_name, save_binary);
-	}
+
+        this->saveTimedFeatures(descmtf, aFileName, _save_timed_feat); // by default : binary
 	delete descmtf;
+        
 	return result;
 	//starpu_shutdown();
 }

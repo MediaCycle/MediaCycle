@@ -87,22 +87,11 @@ std::vector<ACMediaFeatures*> ACVideoMotionOrientationPlugin::calculate(ACMediaD
 	ACMediaFeatures* mean_mf = new ACMediaFeatures();  
 	mean_mf->setName("Mean of Global Orientations");
 	mean_mf=ps_mtf->mean();
-
 	videoFeatures.push_back(mean_mf);
 
 	string aFileName= video_data->getFileName();
-	// XS TODO this will need to be cut and pasted to other plugins
-	// until we re-define the plugins API
-	// saving timed features on disk (if _save_timed_feat flag is on)
-	// XS TODO add checks
-	if (_save_timed_feat) {
-		// try to keep the convention : _b.mtf = binary ; _t.mtf = ascii text
-		bool save_binary = true;
-		string file_ext =  "_b.mtf";
-		string aFileName_noext = aFileName.substr(0,aFileName.find_last_of('.'));
-		mtf_file_name = aFileName_noext + "_" +this->mDescription + file_ext;
-		ps_mtf->saveInFile(mtf_file_name, save_binary);
-	}
+        this->saveTimedFeatures(ps_mtf, aFileName, _save_timed_feat); // by default : binary
+	delete ps_mtf;
 		
 	return videoFeatures;
 	
