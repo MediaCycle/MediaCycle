@@ -37,6 +37,7 @@
 #define HEADER_ACAUDIORECORDER
 
 #include <MediaCycle.h>
+class MediaCycle;
 
 #ifdef USE_OPENAL
 #if defined(__APPLE__)

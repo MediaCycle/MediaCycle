@@ -39,6 +39,9 @@
 
 #include "ACAudioFeedback.h"
 #include "ACAudioRecorder.h"
+// forward declarations
+class ACAudioFeedback;
+//class ACAudioRecorder;
 
 #define SAMPLERATE 44100
 #if defined USE_OPENAL

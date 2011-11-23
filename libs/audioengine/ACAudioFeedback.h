@@ -31,6 +31,8 @@
  *  <mailto:avre@umons.ac.be>
  *
  */
+#ifndef ACAUDIOFEEDBACK_H
+#define ACAUDIOFEEDBACK_H
 
 #include <MediaCycle.h>
 
@@ -341,3 +343,4 @@ private:
 	void processAudioEngineResynth(int _loop_slot, int _prev_sample_pos, int _sample_pos, int _sample_pos_limit, short *_output_buffer);
 	void setMIDITimeCode();
 };
+#endif //ACAUDIOFEEDBACK_H
