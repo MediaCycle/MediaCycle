@@ -3,7 +3,16 @@ PROJECT(MediaCycle)
 # add some find scripts
 # SET(CMAKE_USE_RELATIVE_PATHS YES)
 SET(CMAKE_MODULE_PATH "${MediaCycle_SOURCE_DIR}/CMakeModules")
-SET(MediaCycle_VERSION 0.1pre)
+
+execute_process(COMMAND hg id -n ${CMAKE_SOURCE_DIR} OUTPUT_VARIABLE MC_CURRENT_REVISION)
+string(STRIP "${MC_CURRENT_REVISION}" MC_CURRENT_REVISION)
+IF(MC_CURRENT_REVISION)
+	SET(MediaCycle_VERSION rev${MC_CURRENT_REVISION})
+ELSE()
+	SET(MediaCycle_VERSION 0.1pre)
+ENDIF()
+MESSAGE('${MediaCycle_VERSION}')
+
 
 INCLUDE(${MediaCycle_SOURCE_DIR}/CMakeModules/FindLinkedDirectories.cmake)
 
