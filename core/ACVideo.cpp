@@ -119,15 +119,15 @@ bool ACVideo::computeThumbnail(int w, int h){
 	//std::cout << boost::filesystem::extension(filename);
 	/// prerequisites for loading OSG media files, 2 alternatives
 	/// 1) standard procedure: checking for a plugin that can open the format of the media file
-	osg::ref_ptr<osgDB::ReaderWriter> readerWriter = osgDB::Registry::instance()->getReaderWriterForExtension(boost::filesystem::extension(filename).substr(1));
+//	osg::ref_ptr<osgDB::ReaderWriter> readerWriter = osgDB::Registry::instance()->getReaderWriterForExtension(boost::filesystem::extension(filename).substr(1));
 	/// 2) hack: forcing the use of the ffmpeg plugin by checking the plugin that can open the ffmpeg format (most probably the ffmpeg plugin)
-//	osg::ref_ptr<osgDB::ReaderWriter> readerWriter = osgDB::Registry::instance()->getReaderWriterForExtension("ffmpeg");
+	osg::ref_ptr<osgDB::ReaderWriter> readerWriter = osgDB::Registry::instance()->getReaderWriterForExtension("ffmpeg");
 	if (!readerWriter){
-		cerr << "<ACVideo::computeThumbnail> problem loading file, no OSG plugin available" << endl;
+		cerr << "<ACVideo::computeThumbnail> (video id = " << this->getId() << ") : problem loading file, no OSG plugin available" << endl;
 		return false;
 	}
 	else{
-		cout <<"<ACVideo::computeThumbnail> using OSG plugin: "<< readerWriter->className() <<std::endl;
+		cout <<"<ACVideo::computeThumbnail> (video id = " << this->getId() << ") using OSG plugin: "<< readerWriter->className() <<std::endl;
 	}	
 
 	// XS TODO we "re-compute" thumbnail here...
@@ -189,7 +189,7 @@ bool ACVideo::extractData(string _fname){
         if (endInt == -1)
             endInt = nframes-1; // index of last frame
 	// XS TODO : do this here ??
-	return computeThumbnail(16, 16);
+	return computeThumbnail();
 }
 
 void ACVideo::deleteData(){
@@ -327,7 +327,7 @@ bool ACVideo::computeThumbnailSize(int w_, int h_){
 		thumbnail_height = h_;
 	}
 	// we just scale the original width and height to the default thumbnail area
-	if ((width !=0) && (height!=0)){
+        else if ((width !=0) && (height!=0)){
 		float scale = sqrt((float)default_thumbnail_area/((float)width*(float)height));
 		thumbnail_width = (int)(width*scale);
 		thumbnail_height = (int)(height*scale);
