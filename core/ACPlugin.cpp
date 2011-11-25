@@ -33,6 +33,8 @@
  */
 
 #include "ACPlugin.h"
+#include "ACMedia.h"
+
 #include <iostream>
 using std::cout;
 using std::endl;

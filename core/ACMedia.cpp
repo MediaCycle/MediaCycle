@@ -633,7 +633,8 @@ int ACMedia::segment(ACPluginManager *acpl, bool _saved_timed_features ) {
 		afv=acpl->getSegmentPlugins()->segment(this->getMediaData(), this);
 	}
 	for (unsigned int Iafv=0; Iafv<afv.size(); Iafv++){
-		this->addSegment(afv[Iafv]);
+ //           cout << "segment " << Iafv << " - id = " << afv[Iafv]->getId() << endl;
+            this->addSegment(afv[Iafv]);
 	}
 	return segment_ok;
 }

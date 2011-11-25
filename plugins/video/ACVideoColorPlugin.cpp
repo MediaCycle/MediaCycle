@@ -33,7 +33,7 @@
  */
 
 #include "ACVideoColorPlugin.h"
-
+#include "ACMedia.h"
 #include<iostream>
 using namespace std;
 
@@ -63,8 +63,10 @@ void ACVideoColorPlugin::clean() {
 std::vector<ACMediaFeatures*> ACVideoColorPlugin::calculate(ACMediaData* video_data, ACMedia* theMedia, bool _save_timed_feat) {
 	this->clean();
 	std::vector<ACMediaFeatures*> videoFeatures;
-	
-	videoAn = new ACVideoAnalysis(video_data);
+#ifdef USE_DEBUG
+        cout << "[ACVideoColorsPlugin::calculate] analysing from frame " << theMedia->getStartInt() << " to " << theMedia->getEndInt() << endl;
+#endif //USE_DEBUG
+        videoAn = new ACVideoAnalysis(video_data, theMedia->getStartInt(), theMedia->getEndInt());
 	videoAn->computeColorMoments(4, "HSV");
 	vector<float> t = videoAn->getTimeStamps();
 	std::vector<std::vector<float> > s = videoAn->getColorMoments();

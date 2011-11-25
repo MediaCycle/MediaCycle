@@ -181,8 +181,13 @@ bool ACVideo::extractData(string _fname){
 	fps     = (float) capture->get(CV_CAP_PROP_FPS);
 	int nframes = (int) capture->get(CV_CAP_PROP_FRAME_COUNT);
 	start = 0.0;
-	if (fps != 0) end = nframes * 1.0/fps;
-	else end = nframes;
+	if (fps != 0) end = (nframes-1) * 1.0/fps;
+        else end = nframes-1; // time code of last frame
+        // test if start and end have been set from outside
+        if (startInt == -1)
+            startInt = 0;
+        if (endInt == -1)
+            endInt = nframes-1; // index of last frame
 	// XS TODO : do this here ??
 	return computeThumbnail(16, 16);
 }

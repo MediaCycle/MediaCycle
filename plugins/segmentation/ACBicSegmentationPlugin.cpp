@@ -175,14 +175,21 @@ std::vector<ACMedia*> ACBicSegmentationPlugin::segment(ACMediaTimedFeature* _MTF
 		it = segments_limits.begin();
 		it = segments_limits.insert ( it , 0 );
 		Nseg++;
-	}			
-	
+	}
+        // the end of the last segment should be the end of the Media
+        // XS TODO allow for some buffer (ex: it has no sense to make the last segment 1 frame wide)
+	if (segments_limits[Nseg-1] != _theMedia->getEndInt()){
+            segments_limits.push_back(_theMedia->getEndInt());
+            Nseg++;
+        }
+
 	for (int i = 0; i < Nseg-1; i++){
 		//make sure the segment from the media have the proper type
 		ACMedia* media = ACMediaFactory::getInstance().create(_theMedia);
 		media->setParentId(_theMedia->getId());
-		media->setStartInt(segments_limits[i]); // XS TODO : in frame number, not time code
+		media->setStartInt(segments_limits[i]); // XS TODO : this is in frame number, not time code
 		media->setEndInt(segments_limits[i+1]);
+                media->setId(_theMedia->getId()+i+1); // XS TODO check this, it is overlapping with another ID ?
 		segments.push_back(media);
 	}
 		

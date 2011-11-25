@@ -33,7 +33,7 @@
  */
 
 #include "ACVideoMotionOrientationPlugin.h"
-
+#include "ACMedia.h"
 #if CV_MIN_VERSION_REQUIRED(2,3,0)
 
 #include<iostream>
@@ -65,8 +65,10 @@ void ACVideoMotionOrientationPlugin::clean(){
 std::vector<ACMediaFeatures*> ACVideoMotionOrientationPlugin::calculate(ACMediaData* video_data, ACMedia* theMedia, bool _save_timed_feat) {
 	this->clean();
 	std::vector<ACMediaFeatures*> videoFeatures;
-	
-	videoAn = new ACVideoAnalysis(video_data);
+#ifdef USE_DEBUG
+        cout << "[ACVideoMotionOrientationPlugin::calculate] analysing from frame " << theMedia->getStartInt() << " to " << theMedia->getEndInt() << endl;
+#endif //USE_DEBUG
+        videoAn = new ACVideoAnalysis(video_data, theMedia->getStartInt(), theMedia->getEndInt());
 	videoAn->computeGlobalOrientation();
 	vector<float> t = videoAn->getTimeStamps();
 	std::vector<float> angles = videoAn->getGlobalOrientations();

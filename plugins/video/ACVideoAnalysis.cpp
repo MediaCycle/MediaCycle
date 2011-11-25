@@ -177,7 +177,7 @@ int ACVideoAnalysis::initialize(int _frameStart, int _frameStop) {
     if (_frameStart == 0 && _frameStop == 0 ){
         this->frameStart = 0;
         this->frameStop = nframes;
-    } else if (_frameStart = _frameStop){
+    } else if (_frameStart == _frameStop){
         cerr << "<ACVideoAnalysis::initialize> : zero frames required for " << file_name << endl;
         return 0;
     } else if (_frameStart > _frameStop || _frameStart < 0 || _frameStop > nframes) {
@@ -1425,7 +1425,7 @@ void ACVideoAnalysis::computeBlobPixelSpeed() {
         tmp_frame.copyTo(previous_frame);
         *capture >> tmp_frame;
         if (!tmp_frame.data) {
-            cerr << " <ACVideoAnalysis::computeGlobalPixelsSpeed> unexpected end of file at frame " << i << endl;
+            cerr << " <ACVideoAnalysis::computeBlobPixelSpeed> unexpected end of file at frame " << i << endl;
             break;
         } else {
             this->stamp();
@@ -1512,6 +1512,7 @@ void ACVideoAnalysis::computeGlobalPixelsSpeed() {
         *capture >> tmp_frame;
         if (!tmp_frame.data) {
             cerr << " <ACVideoAnalysis::computeGlobalPixelsSpeed> unexpected end of file at frame " << i << "out of " << nframes << endl;
+            cout << "start - stop : " << this->frameStart << " - " << this->frameStop << endl;
             continue; // or break ?
         } else {
             this->stamp();
