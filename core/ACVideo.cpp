@@ -148,13 +148,19 @@ bool ACVideo::computeThumbnail(int w, int h){
 	
 	// Converting the video as preloaded stream to transmit the same instance to multiple recipient with unified playback controls
 	image_stream = dynamic_cast<osg::ImageStream*>(thumbnail.get());
-	image_stream->setLoopingMode(osg::ImageStream::LOOPING);
+	image_stream->setLoopingMode(osg::ImageStream::LOOPING); // todo: this won't work for segments which may not loop back from the beginning of the file
 	
 	// Hack to display a first valid frame, quite long!
 	//while (thumbnail->isImageTranslucent())
 	//	image_stream->play();
 	//image_stream->pause();
 	//image_stream->rewind();
+	
+	image_stream->seek(this->start); // to start with the correct frame, especially for segments
+	
+	// CF: Adding these two blank the geodes under OSX 10.6.8
+	//image_stream->play(); // to display a frame
+	//image_stream->pause(); // to stop the playback once a frame is displayed
 	
 	return ok;
 }
