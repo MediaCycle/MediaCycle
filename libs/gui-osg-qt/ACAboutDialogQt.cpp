@@ -54,7 +54,7 @@ void ACAboutDialogQt::updateLicenses(){
 		html.append ("<li><a href=\"http://sourceforge.net/projects/clucene/\">clucene</a>: LGPL License</li>");
 	#endif //defined (SUPPORT_TEXT)
 	#if defined (SUPPORT_VIDEO) || defined (SUPPORT_IMAGE)
-		html.append ("<li><a href=\"http://www.ffmpeg.org\">FFmpeg</a>: LGPL (without GPL and non free codecs)</li>");
+		html.append ("<li><a href=\"http://www.ffmpeg.org\">ffmpeg</a>: LGPL (without GPL and non free codecs)</li>");
 	#endif //defined (SUPPORT_VIDEO) || defined (SUPPORT_IMAGE)
 	html.append ("<li><a href=\"http://www.kurims.kyoto-u.ac.jp/~ooura/fft.html\">fftooura</a>: &quot;You may use, copy, modify and distribute this code for any purpose (include commercial use) and without fee. Please refer to this package when you modify this code.&quot;</li>");
 	#if defined (SUPPORT_VIDEO) || defined (SUPPORT_IMAGE)
@@ -86,6 +86,9 @@ void ACAboutDialogQt::updateLicenses(){
 	#endif //defined (SUPPORT_AUDIO) || defined (USE_PORTAUDIO)
 	html.append ("<li><a href=\"http://qt.nokia.com\">Qt</a>: LGPL License</li>");
 	html.append ("<li><a href=\"http://sourceforge.net/projects/tinyxml\">TinyXML</a>: zlib/libpng License</li>");
+	#if defined (SUPPORT_AUDIO)
+		html.append ("<li><a href=\"http://sp-tk.sourceforge.net\">The Speech Signal Processing Toolkit (SPTK)</a>: BSD License</li>");
+	#endif //defined (SUPPORT_AUDIO)
 	#if defined (USE_VAMP)
 		html.append ("<li><a href=\"http://vamp-plugins.org\">Vamp plugin SDK</a>: BSD License</li>");
 	#endif //defined (USE_VAMP)
@@ -101,7 +104,6 @@ void ACAboutDialogQt::updateTeam(){
 	html.append ("The current core team features (alphabetical order):<ul>");
 	html.append ("<li>St&eacute;phane Dupont</li>");
 	html.append ("<li>Christian Frisson</li>");
-	html.append ("<li>Sidi Ahmed Mahmoudi</li>");
 	html.append ("<li>Alexis Moinet</li>");
 	html.append ("<li>Thierry Ravet</li>");
 	html.append ("<li>Xavier Siebert</li>");
@@ -109,6 +111,7 @@ void ACAboutDialogQt::updateTeam(){
 	html.append ("</ul><br/>Among past contributors:<ul>");
 	html.append ("<li>Julien Dubois</li>");
 	html.append ("<li>Thomas Dubuisson</li>");
+	html.append ("<li>Sidi Ahmed Mahmoudi</li>");
 	html.append ("<li>Rapha&euml;l Sebbe</li>");
 	html.append ("<li>Damien Tardieu</li>");
 	html.append ("</ul>");
