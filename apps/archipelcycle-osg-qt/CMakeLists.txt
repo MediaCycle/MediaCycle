@@ -71,7 +71,7 @@ IF ( SUPPORT_ARCHIPEL AND SUPPORT_MULTIMEDIA AND SUPPORT_AUDIO AND SUPPORT_IMAGE
 		SET(USE_ARCHIPEL ON)
 
 		SET(PROGNAME "archipelcycle-osg-qt")
-        SET(MC_PACKAGE_DESCRIPTION_SUMMARY "An attempt to complement the Archipel database from La Mediatheque (Belgium) with the MediaCycle organization of media files by similarity.")
+        SET(MC_PACKAGE_DESCRIPTION_SUMMARY "ArchipelCycle is an attempt to complement the Archipel database from La Mediatheque (Belgium) with the MediaCycle organization of media files by similarity.")
 		SET(WITH_QT4 ON)
 		INCLUDE (${CMAKE_SOURCE_DIR}/CMakeModules/CreatePackage.cmake)
 	ENDIF()

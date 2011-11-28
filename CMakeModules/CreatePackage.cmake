@@ -234,13 +234,22 @@ IF(UNIX)
 		# ENDIF("${LSB_DISTRIB}" MATCHES "Debian5.*")
 
 		# IF("${LSB_DISTRIB}" MATCHES "Debiantesting")
-        #   set(CPACK_DEBIAN_PACKAGE_DEPENDS "libsdl1.2debian, libcairo2, librsvg2-2, libboost-dev, libavcodec52, libavformat52, libswscale0, libmagick++3, libxml++2.6-2, libglew1.5")
-        # ENDIF("${LSB_DISTRIB}" MATCHES "Debiantesting")
+        	#   set(CPACK_DEBIAN_PACKAGE_DEPENDS "libsdl1.2debian, libcairo2, librsvg2-2, libboost-dev, libavcodec52, libavformat52, libswscale0, libmagick++3, libxml++2.6-2, libglew1.5")
+        	# ENDIF("${LSB_DISTRIB}" MATCHES "Debiantesting")
 
 		IF(NOT CPACK_DEBIAN_PACKAGE_DEPENDS)
 			message("WARNING: ${LSB_DISTRIB} not supported yet.\nPlease set deps in CMakeModules/CreatePackage.cmake before packaging.")
 		ENDIF(NOT CPACK_DEBIAN_PACKAGE_DEPENDS)
 		string(TOLOWER "${CPACK_PACKAGE_NAME}_${CPACK_PACKAGE_VERSION}-${LSB_DISTRIB}_${CPACK_PACKAGE_ARCHITECTURE}" CPACK_PACKAGE_FILE_NAME)
+
+		# Install the icon file
+		INSTALL(FILES ${CMAKE_SOURCE_DIR}/data/icons/48px/MultiMediaCycle.png DESTINATION share/pixmaps COMPONENT ${PROGNAME} RENAME ${PROGNAME}.png)
+		#INSTALL(FILES ${CMAKE_SOURCE_DIR}/data/icons/32px/MultiMediaCycle.xpm DESTINATION share/pixmaps COMPONENT ${PROGNAME} RENAME ${PROGNAME}.xpm)
+
+		# Install the .desktop description
+		file(WRITE ${CMAKE_BINARY_DIR}/${PROGNAME}.desktop [Desktop\ Entry]\nType=Application\nExec=${PROGNAME}\nMimeType=application/x-${PROGNAME};\nIcon=${PROGNAME}\nName=${PROGNAME}\nGenericName=${MC_PACKAGE_DESCRIPTION_SUMMARY}\nComment=${MC_PACKAGE_DESCRIPTION_SUMMARY})
+		INSTALL(FILES ${CMAKE_BINARY_DIR}/${PROGNAME}.desktop DESTINATION share/applications COMPONENT ${PROGNAME})
+
 	ENDIF("${LSB_DISTRIB}" MATCHES "Ubuntu|Debian")
 	# For Fedora-based distros we want to create RPM packages.
 	# IF("${LSB_DISTRIB}" MATCHES "Fedora")

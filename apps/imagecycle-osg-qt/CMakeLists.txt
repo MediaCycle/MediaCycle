@@ -79,7 +79,7 @@ IF ( SUPPORT_IMAGE AND USE_QT4 AND USE_OSG AND USE_OSC )
 		SET(USE_ARCHIPEL OFF)
 
 		SET(PROGNAME "imagecycle-osg-qt")
-        SET(MC_PACKAGE_DESCRIPTION_SUMMARY "MultiMediaCycle allows to organize media files by similarity.")
+        SET(MC_PACKAGE_DESCRIPTION_SUMMARY "ImageCycle allows to organize image files by similarity.")
 		SET(WITH_QT4 ON)
 		INCLUDE (${CMAKE_SOURCE_DIR}/CMakeModules/CreatePackage.cmake)
 	ENDIF()

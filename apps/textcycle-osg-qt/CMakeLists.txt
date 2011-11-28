@@ -83,7 +83,7 @@ IF ( SUPPORT_TEXT AND USE_QT4 AND USE_OSG AND USE_OSC )
 		SET(USE_ARCHIPEL OFF)
 
 		SET(PROGNAME "textcycle-osg-qt")
-        SET(MC_PACKAGE_DESCRIPTION_SUMMARY "MultiMediaCycle allows to organize media files by similarity.")
+        SET(MC_PACKAGE_DESCRIPTION_SUMMARY "TextCycle allows to organize text files by similarity.")
 		SET(WITH_QT4 ON)
 		INCLUDE (${CMAKE_SOURCE_DIR}/CMakeModules/CreatePackage.cmake)
 	ENDIF()

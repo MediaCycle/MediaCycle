@@ -131,7 +131,7 @@ IF(USE_QT4 AND USE_OSG AND USE_OSC )
 		ENDIF()	
 
 		SET(PROGNAME "multimediacycle-osg-qt")
-        SET(MC_PACKAGE_DESCRIPTION_SUMMARY "MultiMediaCycle allows to organize media files by similarity.")
+        SET(MC_PACKAGE_DESCRIPTION_SUMMARY "MultiMediaCycle allows to visually organize media files by similarity.")
 		SET(WITH_QT4 ON)
 		INCLUDE (${CMAKE_SOURCE_DIR}/CMakeModules/CreatePackage.cmake)
 	ENDIF()

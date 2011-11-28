@@ -90,7 +90,7 @@ IF ( SUPPORT_AUDIO AND USE_QT4 AND USE_OSG AND USE_OSC AND ( OPENAL_FOUND OR POR
 		SET(USE_ARCHIPEL OFF)
 
 		SET(PROGNAME "audiocycle-osg-qt")
-        SET(MC_PACKAGE_DESCRIPTION_SUMMARY "MultiMediaCycle allows to organize media files by similarity.")
+        SET(MC_PACKAGE_DESCRIPTION_SUMMARY "AudioCycle allows to organize audio files by similarity.")
 		SET(WITH_QT4 ON)
 		INCLUDE (${CMAKE_SOURCE_DIR}/CMakeModules/CreatePackage.cmake)
 	ENDIF()

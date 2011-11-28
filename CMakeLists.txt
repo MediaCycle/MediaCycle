@@ -11,8 +11,7 @@ IF(MC_CURRENT_REVISION)
 ELSE()
 	SET(MediaCycle_VERSION 0.1pre)
 ENDIF()
-MESSAGE('${MediaCycle_VERSION}')
-
+#MESSAGE('${MediaCycle_VERSION}')
 
 INCLUDE(${MediaCycle_SOURCE_DIR}/CMakeModules/FindLinkedDirectories.cmake)
 
