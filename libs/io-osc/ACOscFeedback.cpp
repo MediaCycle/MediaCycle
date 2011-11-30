@@ -102,10 +102,10 @@ void ACOscFeedback::update(Subject* _mediacycle){
     this->messageBegin("/mediacycle");
     //    this->messageAppendInt(nId);
     string full_name = mc->getMediaFileName(nId);
-    std::string::size_type p = full_name.find_last_of("/");
- //   std::cout << "[OscFeedback] file name (full) :" << full_name << std::endl;
-    string last_name = std::string(full_name, p + 1, full_name.size());
-    this->messageAppendString(last_name);
-//    std::cout << "[OscFeedback] file name (last) :" << last_name << std::endl;
+    this->messageAppendString(full_name);
+
+//    std::string::size_type p = full_name.find_last_of("/");
+//    string last_name = std::string(full_name, p + 1, full_name.size());
+//    this->messageAppendString(last_name);
     this->messageSend();
 }
