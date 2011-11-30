@@ -90,7 +90,8 @@ const string ghostlist[ndancers] = {
 const string videodir = "/Users/xavier/numediart/Project7.3-DancersCycle/VideosSmall/TestSmallSize/Front/";
 
 //const string video_test_file= "/Users/xavier/Movies/Bre-Room132AnimationFlipBooks925_64kb.mp4";
-const string video_test_file= "/usr/local/share/mediacycle/data/video/small/sm001022.mov"; //-mencoded.mov";
+const string video_test_file= "/home/xavier/Desktop/Videos_B_Delcourt_Qt_mjpeg_320x240/B_Delcourt_MVI_1561.mov";
+//const string video_test_file= "/usr/local/share/mediacycle/data/video/small/sm001022.mov"; //-mencoded.mov";
 //const string video_test_file= "/Users/xavier/numediart/Project12.4-13.1-MediaBlender/test/video/elephantsdream-traveling.mov";
 const string tmp_video_file_out = "/Users/xavier/tmp/toto.mov";
 
@@ -350,7 +351,7 @@ void test_video_hu_moments(std::string full_video_path, string bg_img_file){
 void test_optical_flow(std::string full_video_path){
 	ACVideoAnalysis* V = new ACVideoAnalysis(full_video_path);
 	//XS TODO port to 2.*
-//	V->computeOpticalFlow();
+	V->computeOpticalFlow();
 	delete V;
 }
 
@@ -603,6 +604,13 @@ bool test_video_width_height(string s){
 bool test_global_orientation(string s){
 	ACVideoAnalysis cap(s); 
 	cap.computeGlobalOrientation();
+        return true; // XS TODO
+}
+
+bool test_rigid_transform(string s){
+	ACVideoAnalysis cap(s);
+	cap.computeRigidTransform();
+        return true; // XS TODO
 }
 #endif //CV_MIN_VERSION_REQUIRED(2,3,0)
 
@@ -641,7 +649,7 @@ int main(int argc, char** argv) {
 //	test_browse_trackbar(video_test_file);
 
 // VISUAL TEST 2 : global pixel speed (frame by frame difference)
-	test_global_pixel_speed(video_test_file);
+//	test_global_pixel_speed(video_test_file);
 	
 // VISUAL TEST 3 : median of a video
 //	test_med_ave(video_test_file);
@@ -652,7 +660,9 @@ int main(int argc, char** argv) {
 // VISUAL TEST 5 : global orientation in a video
 //	#if CV_MIN_VERSION_REQUIRED(2,3,0)
 //	test_global_orientation(video_test_file);
-//	#endif //CV_MIN_VERSION_REQUIRED(2,3,0)
+//        test_rigid_transform(video_test_file);
+    test_optical_flow(video_test_file);
+    //	#endif //CV_MIN_VERSION_REQUIRED(2,3,0)
 // VISUAL TEST 6 : video read/write
 //	test_video_read_write(video_test_file,tmp_video_file_out);
 

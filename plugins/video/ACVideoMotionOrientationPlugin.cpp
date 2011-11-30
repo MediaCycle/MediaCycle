@@ -40,15 +40,13 @@
 using namespace std;
 
 // note : this->mDescription will be used for mtf_file_name
-ACVideoMotionOrientationPlugin::ACVideoMotionOrientationPlugin() : ACTimedFeaturesPlugin(){
+ACVideoMotionOrientationPlugin::ACVideoMotionOrientationPlugin() : ACTimedFeaturesPlugin() {
     this->mMediaType = MEDIA_TYPE_VIDEO;
     this->mName = "Video MotionOrientation";
     this->mDescription = "MotionOrientation";
     this->mId = "";
-	this->mDescriptorsList.push_back("MotionOrientation");
-	
-	this->videoAn = 0;
-//	this->mtf_file_name = "";
+    this->mDescriptorsList.push_back("MotionOrientation");
+    this->videoAn = 0;
 }
 
 ACVideoMotionOrientationPlugin::~ACVideoMotionOrientationPlugin() {

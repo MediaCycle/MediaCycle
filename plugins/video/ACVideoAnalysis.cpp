@@ -52,7 +52,7 @@ using namespace std;
 // ----------- uncomment this to get (+/- live) visual display of the time series
 //#define VISUAL_CHECK_GNUPLOT
 // ----------- uncomment this to get visual display using highgui and verbose output -----
-//#define VISUAL_CHECK
+#define VISUAL_CHECK
 //#define VERBOSE
 
 
@@ -109,7 +109,7 @@ void ACVideoAnalysis::clean() {
     blob_pixel_speeds.clear();
     global_pixel_speeds.clear();
     global_orientations.clear();
-    interest_points.clear();
+    global_optical_flow.clear();
     raw_moments.clear();
     hu_moments.clear();
     fourier_polar_moments.clear();
@@ -830,133 +830,143 @@ void ACVideoAnalysis::computeBlobsUL(const cv::Mat& bg_img, bool merge_blobs, in
         cv::imshow("BLOBS", bitImage);
         cv::waitKey(10); // necessary to give highgui the time to show the image
 #endif // VISUAL_CHECK
-
     }
-#ifdef VISUAL_CHECK
-    cvDestroyWindow("ORIG-BG");
-    cvDestroyWindow("BW");
-    cvDestroyWindow("BLOBS");
-#endif // VISUAL_CHECK
     HAS_BLOBS = true;
 }
 
-//void ACVideoAnalysis::computeOpticalFlow(){
-//	interest_points.clear();
-//
-//	// from Sidi Mahmoudi
-//	int win_size = 10;
-//	const int MAX_COUNT = 500;
-//	CvPoint2D32f* points[2] = {0,0}, *swap_points;
-//	char* status = 0;
-//	int count = 0;
-//	int need_to_init = 0;
-//	int flags = 0;
-//	int add_remove_pt = 0;
-//	CvPoint pt;
-//#ifdef VISUAL_CHECK
-//	cvNamedWindow("Camera", CV_WINDOW_AUTOSIZE );
-//	cvResizeWindow( "Camera", 800, 600 );
-//#endif // VISUAL_CHECK
-//	IplImage* frame = 0;
-//	int currentframe = 0;
-//	
-//	IplImage *image = cvCreateImage( cvSize(width,height),depth, 3 );
-//	//	image->origin = frame->origin;
-//	IplImage *grey = cvCreateImage( cvSize(width,height),depth, 1 );
-//	IplImage *prev_grey = cvCreateImage( cvSize(width,height),depth, 1 );
-//	IplImage *pyramid = cvCreateImage( cvSize(width,height),depth, 1 );
-//	IplImage *prev_pyramid = cvCreateImage( cvSize(width,height),depth, 1 );
-//	IplImage *swap_temp;
-//	points[0] = (CvPoint2D32f*)cvAlloc(MAX_COUNT*sizeof(points[0][0]));
-//	points[1] = (CvPoint2D32f*)cvAlloc(MAX_COUNT*sizeof(points[0][0]));
-//	status = (char*)cvAlloc(MAX_COUNT);
-//	
-//	for(int ifram=0; ifram<nframes-1; ifram++) {
-//		int i, k;
-//		frame = getNextFrame(); // XS this could be at the end of loop
-//		currentframe++;
-//		if (currentframe%5==0) need_to_init = 1;
-//		cvCopy( frame, image, 0 ); // XS cvclone
-//		cvCvtColor( image, grey, CV_BGR2GRAY );
-//		if( need_to_init ) {
-//			IplImage* eig = cvCreateImage( cvGetSize(grey), 32, 1 );
-//			IplImage* temp = cvCreateImage( cvGetSize(grey), 32, 1 );
-//			double quality = 0.01;
-//			double min_distance = 4;
-//			count = MAX_COUNT;
-//			cvGoodFeaturesToTrack( grey, eig, temp, points[1], &count,
-//								  quality, min_distance, 0, 5, 0, 0.04 );
-//			cvReleaseImage( &eig );
-//			cvReleaseImage( &temp );
-//		}
-//
-//		else if( count > 0 ){
-//			cvCalcOpticalFlowPyrLK( prev_grey, grey, prev_pyramid, pyramid,
-//								   points[0], points[1], count, cvSize(win_size,win_size), 3, status, 0,
-//								   cvTermCriteria(CV_TERMCRIT_ITER|CV_TERMCRIT_EPS,20,0.03), flags );
-//			flags |= CV_LKFLOW_PYR_A_READY;
-//			
-//			CvPoint p,q;
-//			
-//			for( i = k = 0; i < count; i++ ) {
-//				if( add_remove_pt ) {
-//					double dx = pt.x - points[1][i].x;
-//					double dy = pt.y - points[1][i].y;
-//					if( dx*dx + dy*dy <= 25 ) {
-//						add_remove_pt = 0;
-//						continue;
-//					}
-//				}
-//				
-//				if( !status[i] )
-//					continue;
-//				
-//				points[1][k++] = points[1][i];
-//				p = cvPointFrom32f(points[0][i]);
-//				q = cvPointFrom32f(points[1][i]);
-//#ifdef VERBOSE		
-//				double a = atan2( (double) p.y - q.y, (double) p.x - q.x );
-//				double m = sqrt( (p.y - q.y)*(p.y - q.y) + (p.x - q.x)*(p.x - q.x) );
-//#endif //VERBOSE
-//				cvLine( image, p , q , CV_RGB(255,0,0), 1, 8,0);
-//#ifdef VERBOSE		
-////				printf("%d;%d;%d;%g;%g\n", currentframe, p.x, p.y, a, m);
-//#endif //VERBOSE
-//			}
-//			count = k;
-//			printf("%d;%d\n", currentframe, count);
-//		}
-//
-//		need_to_init = 0;
-//		if( add_remove_pt && count < MAX_COUNT ) {
-//			points[1][count++] = cvPointTo32f(pt);
-//			cvFindCornerSubPix( grey, points[1] + count - 1, 1,
-//							   cvSize(win_size,win_size), cvSize(-1,-1),
-//							   cvTermCriteria(CV_TERMCRIT_ITER|CV_TERMCRIT_EPS,20,0.03));
-//			add_remove_pt = 0;
-//		}
-//		CV_SWAP( prev_grey, grey, swap_temp );
-//		CV_SWAP( prev_pyramid, pyramid, swap_temp );
-//		CV_SWAP( points[0], points[1], swap_points );
-//#ifdef VISUAL_CHECK
-//		cvShowImage( "Camera", image );
-//		int c = cvWaitKey(10);
-//		if( (char)c == 27 )
-//			break;
-//#endif // VISUAL_CHECK
-//
-//	}	
-//#ifdef VISUAL_CHECK
-//	cvDestroyWindow("Camera");
-//#endif // VISUAL_CHECK
-//
-//	cvReleaseImage(&image);
-//	cvReleaseImage(&grey);
-//	cvReleaseImage(&prev_grey);
-//	cvReleaseImage(&pyramid);
-//	cvReleaseImage(&prev_pyramid);
-//	// double free:	cvReleaseImage(&swap_temp);
-//}
+// adapted from Sidi Mahmoudi's OpenCV 1.0 version
+void ACVideoAnalysis::computeOpticalFlow() {
+    global_optical_flow.clear();
+    int win_size = 10;
+    const int MAX_COUNT = 400;
+    vector<cv::Point2f> prevPts,curPts;
+    int count = 0;
+    int need_to_init = 0;
+    int flags = 0;
+    int add_remove_pt = 0;
+    cv::Point2f pt;
+#ifdef VISUAL_CHECK
+    cv::namedWindow("Camera", CV_WINDOW_AUTOSIZE);
+    cv::resizeWindow("Camera", 800, 600);
+#endif // VISUAL_CHECK
+    // reset the capture to the beginning of the video
+    this->rewind();
+    // initial frame
+    cv::Mat frame;
+    *capture >> frame;
+    cv::Size size = frame.size();
+    vector<float> tzero;
+    tzero.push_back(0.0);
+    tzero.push_back(0.0);
+    global_optical_flow.push_back(tzero);
+
+    int currentframe = 0;
+
+#ifdef VISUAL_CHECK
+    cv::Mat image(size.height, size.width, CV_8UC1);
+#endif //VISUAL_CHECK
+    cv::Mat grey(size.height, size.width, CV_8UC1);
+    cv::Mat prev_grey(size.height, size.width, CV_8UC1);
+    cv::Mat pyramid(size.height, size.width, CV_8UC1);
+    cv::Mat prev_pyramid(size.height, size.width, CV_8UC1);
+
+    vector<uchar> status ;
+    vector<float> err;
+
+    for (int ifram = this->frameStart; ifram < this->frameStop - 1; ifram++) {
+        *capture >> frame;
+        if (!frame.data) {
+            cerr << "<ACVideoAnalysis::computeOpticalFlow> unexpected end of video at frame " << ifram << endl;
+            break;
+        }
+
+        int i, k;
+        currentframe++;
+        if (currentframe % 2 == 0) need_to_init = 1;
+        double globalX = 0.0, globalY = 0.0;
+
+ #ifdef VISUAL_CHECK
+        frame.copyTo(image);
+ #endif //VISUAL_CHECK
+        cv::cvtColor(frame, grey, CV_BGR2GRAY); // convert frame to grayscale
+        if (need_to_init) {
+            double quality = 0.01;
+            double min_distance = 4;
+            int blockSize = 5;
+            bool useHarrisDetector = false;
+            double k = 0.04;
+            count = MAX_COUNT;
+            cv::goodFeaturesToTrack(grey, curPts, count, quality, min_distance, cv::Mat(), blockSize, useHarrisDetector, k);
+        } else if (count > 0) {
+            cv::calcOpticalFlowPyrLK(prev_grey, grey, prevPts, curPts, status, err, cv::Size(win_size, win_size)); //, int maxLevel=3, TermCriteria criteria=TermCriteria( TermCriteria::COUNT+TermCriteria::EPS, 30, 0.01), double derivLambda=0.5, int flags=0)
+            cv::Point p, q;
+            for (i = k = 0; i < count; i++) {
+                if (add_remove_pt) {
+                    double dx = pt.x - curPts[i].x;
+                    double dy = pt.y - curPts[i].y;
+                    if (dx * dx + dy * dy <= 25) {
+                        add_remove_pt = 0;
+                        continue;
+                    }
+                }
+                if (!status[i])
+                    continue;
+                curPts[k++] = curPts[i];
+                p = cv::Point2f(prevPts[i]);
+                q = cv::Point2f(curPts[i]);
+#ifdef VISUAL_CHECK
+                cv::line(image, p, q, CV_RGB(255, 0, 0), 1, 8, 0);
+#endif // VISUAL_CHECK
+                double deltaX = p.x - q.x ;
+                double deltaY = p.y - q.y ;
+                if (abs(deltaX) < 50 && abs(deltaY) < 50) {
+                    globalX += (p.x - q.x);
+                    globalY += (p.y - q.y);
+                }
+#ifdef VERBOSE		
+                double a = atan2((double) p.y - q.y, (double) p.x - q.x);
+                double m = sqrt((p.y - q.y)*(p.y - q.y) + (p.x - q.x)*(p.x - q.x));
+                cout << currentframe  << "(" << p.x << "," << p.y << ") : " <<  a << "-" << m << endl;
+#endif //VERBOSE
+            }
+            if (count > 0) {
+                globalX /= count;
+                globalY /= count;
+            }
+            vector<float> xy;
+            xy.push_back(globalX);
+            xy.push_back(globalY);
+            global_optical_flow.push_back(xy);
+            count = k;
+#ifdef VERBOSE
+            cout << "current frame: " << currentframe << " ; count=" << count << " : X=" << globalX << "; Y=" << globalY << endl;
+#endif //VERBOSE
+        }
+#ifdef VISUAL_CHECK
+        // XS TODO: this is temporary, visualize global optical flow from central point
+        cv::line(image, cv::Point(size.width/2,size.height/2), cv::Point(size.width/2+globalX,size.height/2+globalY), CV_RGB(0, 255, 0), 3, 8, 0);
+#endif //VISUAL_CHECK
+        need_to_init = 0;
+        if (add_remove_pt && count < MAX_COUNT) {
+            curPts[count++] = cv::Point2f(pt);
+            cv::cornerSubPix(grey, curPts, cv::Size(win_size,win_size), cv::Size(-1, -1), cv::TermCriteria(CV_TERMCRIT_ITER | CV_TERMCRIT_EPS, 20, 0.03));
+            
+//            cvFindCornerSubPix(grey, points[1] + count - 1, 1,
+//                    cvSize(win_size, win_size), cvSize(-1, -1),
+//                    cvTermCriteria(CV_TERMCRIT_ITER | CV_TERMCRIT_EPS, 20, 0.03));
+            add_remove_pt = 0;
+        }
+        grey.copyTo(prev_grey);
+        pyramid.copyTo(prev_pyramid);
+        prevPts = curPts;
+#ifdef VISUAL_CHECK
+        cv::imshow("Camera", image);
+        int c = cv::waitKey(10);
+        if ((char) c == 27)
+            break;
+#endif // VISUAL_CHECK
+     }
+}
 
 void ACVideoAnalysis::computeMergedBlobsTrajectory(float blob_dist) {
     blob_centers.clear();
@@ -1723,19 +1733,72 @@ void ACVideoAnalysis::computeFourierMellinMoments() {
 
 #if CV_MIN_VERSION_REQUIRED(2,3,0)
 
+void ACVideoAnalysis::computeRigidTransform() {
+    rigid_transforms.clear();
+    this->clearStamps();
+    // initial frame
+    this->rewind();
+    cv::Mat tmp_frame;
+    *capture >> tmp_frame;
+    vector<float> tzero;
+    tzero.push_back(0.0);
+    tzero.push_back(0.0);
+    rigid_transforms.push_back(tzero); // first frame
+    this->stamp();
+
+    cv::Size size = tmp_frame.size();
+    cv::Mat previous_frame(size.height, size.width, CV_8UC3);
+    for (int i = this->frameStart+1; i < this->frameStop; i++) {
+        tmp_frame.copyTo(previous_frame);
+        *capture >> tmp_frame;
+        if (!tmp_frame.data) {
+            cerr << " <ACVideoAnalysis::computeRigidTransform> unexpected end of file at frame " << i << "out of " << nframes << endl;
+            cout << "start - stop : " << this->frameStart << " - " << this->frameStop << endl;
+            continue; // or break ?
+        } else {
+            this->stamp();
+            cv::Mat B = cv::estimateRigidTransform(tmp_frame, previous_frame, true);
+            double x = B.at<double>(0, 2);
+            double y = B.at<double>(1, 2);
+#ifdef VISUAL_CHECK
+            cv::namedWindow("Motion");
+            cv::Point origin = cv::Point(50, 50);
+            cv::Point center = cv::Point(50+10*x, 50+10*y);
+
+            cv::line(previous_frame, origin, center, CV_RGB(255, 0, 0), 3, CV_AA, 0);
+            cv::imshow("Motion", previous_frame);
+            if (cv::waitKey(10) >= 0)
+                break;
+#endif // VISUAL_CHECK
+            // XS TODO : use all elements of matrix B ?
+            // for the moment only translation
+            vector<float> xy;
+            xy.push_back(x);
+            xy.push_back(y);
+            rigid_transforms.push_back(xy);
+//            cout << B << endl;
+//            cout << "x = " << B.at<double>(0,2) << endl;
+//            cout << "y = " << B.at<double>(1,2) << endl;
+
+
+        }
+    }
+}
+
 void ACVideoAnalysis::computeGlobalOrientation() {
     global_orientations.clear();
     this->clearStamps();
     // some of these constants could be parameters...
-    const int diff_threshold = 10;
-    const double MHI_DURATION = 1; //(in seconds)
+    const int diff_threshold = 50;
+    const double MHI_DURATION = 0.5; //(in seconds)
     const double MAX_TIME_DELTA = 0.5;
-    const double MIN_TIME_DELTA = 0.05;
+    const double MIN_TIME_DELTA = 0.025;
     const int small_motion_threshold = 100; // width + height < 100
-    //	const float small_motion_percent_threshold = 0.02; // width * height * 0.05
-    const int N = 4; // number of cyclic frame buffer used for motion detection
+    const float small_motion_percent_threshold = 0.02; // width * height * 0.05
+    const int N = 8; // number of cyclic frame buffer used for motion detection
+    const int SOBEL_SIZE = 3;
     int last = 0;
-
+    double epsilon = 0.01;
     this->rewind(); // reset the capture to the beginning of the video
 
     // initial frame
@@ -1744,7 +1807,7 @@ void ACVideoAnalysis::computeGlobalOrientation() {
     cv::Size size = current_frame_0.size();
     global_orientations.push_back(0); // first frame
     this->stamp();
-    
+ 
     cv::Mat silh_mat;
     vector <cv::Mat> buf_mat;
     for (int i = 0; i < N; i++) {
@@ -1808,7 +1871,7 @@ void ACVideoAnalysis::computeGlobalOrientation() {
 #endif //VISUAL_CHECK	
 
         // calculate motion gradient orientation and valid orientation mask
-        cv::calcMotionGradient(mhi_mat, mask_mat, orient_mat, MAX_TIME_DELTA, MIN_TIME_DELTA, 3);
+        cv::calcMotionGradient(mhi_mat, mask_mat, orient_mat, MAX_TIME_DELTA, MIN_TIME_DELTA, SOBEL_SIZE);
 
         // segment motion: get sequence of motion components
         // segmask is marked motion components map. It is not used further
@@ -1842,8 +1905,8 @@ void ACVideoAnalysis::computeGlobalOrientation() {
             count = cv::norm(silh_roi, CV_L1); // calculate number of points within silhouette ROI
 
             // check for the case of little motion
-            //			if( count < comp_rect_roi.width*comp_rect_roi.height * small_motion_percent_threshold )
-            //				continue;
+            if (count < comp_rect_roi.width * comp_rect_roi.height * small_motion_percent_threshold)
+                continue;
 
 #ifdef VISUAL_CHECK
             double magnitude = 30;
@@ -1856,7 +1919,7 @@ void ACVideoAnalysis::computeGlobalOrientation() {
                     round(center.y - magnitude * sina)), color, 3, CV_AA, 0);
 #endif //VISUAL_CHECK	
         }
-        if (count_angles > 0 && !(xx == 0 && yy == 0)) // atan2(0,0) undefined, global_orientation set to 0 in this case
+        if (count_angles > 0 && abs(xx) > epsilon && abs(yy) > epsilon) // atan2(0,0) undefined, global_orientation set to 0 in this case
             global_orientation = atan2(yy, xx)*180 / CV_PI; // in degrees
         global_orientations.push_back(global_orientation);
 #ifdef VISUAL_CHECK

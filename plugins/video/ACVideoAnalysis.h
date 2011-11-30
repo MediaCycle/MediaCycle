@@ -118,7 +118,7 @@ public:
     //	void computeBlobsInteractively(IplImage* bg_img=0, bool merge_blobs=false, int bg_thesh=20, int big_blob=200, int small_blob=0);
     void computeBlobsUL(const cv::Mat& bg_img = cv::Mat(), bool merge_blobs = true, int big_blob = 200, int small_blob = 0);
     //   - general (not on blobs)
-    //	void computeOpticalFlow();
+    void computeOpticalFlow();
 
     void computeContractionIndices();
     void computeBoundingBoxRatios();
@@ -131,6 +131,7 @@ public:
     // XS TODO port 2.*
     //	void computeImageHistograms(int w=10, int h=10); // image histogram, turned into a 1D vector
 #if CV_MIN_VERSION_REQUIRED(2,3,0)
+    void computeRigidTransform();
     void computeGlobalOrientation();
 #endif
     // features manipulation
@@ -161,6 +162,14 @@ public:
 
     std::vector<float> getGlobalPixelsSpeeds() {
         return global_pixel_speeds;
+    }
+
+    std::vector<std::vector<float> > getRigidTransforms() {
+        return rigid_transforms;
+    }
+
+    std::vector<std::vector<float> > getOpticalFlow() {
+        return global_optical_flow      ;
     }
 
     std::vector<float> getBoundingBoxRatios() {
@@ -266,7 +275,6 @@ private:
     std::vector<float> bounding_box_heights;
     std::vector<float> bounding_box_widths;
     std::vector<float> global_pixel_speeds; // pixel-per-pixel speed in whole image
-    std::vector<float> interest_points;
     std::vector<float> global_orientations;
 
     std::vector<std::vector<float> > raw_moments;
@@ -274,6 +282,8 @@ private:
     std::vector<std::vector<float> > fourier_polar_moments;
     std::vector<std::vector<float> > fourier_mellin_moments;
     std::vector<std::vector<float> > color_moments;
+    std::vector<std::vector<float> > rigid_transforms;
+    std::vector<std::vector<float> > global_optical_flow;
 
     std::vector<std::vector<float> > image_histograms;
 
