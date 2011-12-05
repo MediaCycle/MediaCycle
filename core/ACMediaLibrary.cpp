@@ -253,7 +253,7 @@ int ACMediaLibrary::importFile(std::string _filename, ACPluginManager *acpl, boo
 		}
 	}
 	else {
-		cerr << "<ACMediaLibrary::importFile> problem importing " << _filename << " ... " << endl;
+		cerr << "<ACMediaLibrary::importFile> problem importing file : " << _filename << " ... " << endl;
 		return 0;
 		
 	}

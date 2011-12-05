@@ -314,24 +314,19 @@ int MediaCycle::importDirectories(vector<string> directories, int recursive, boo
 
 	int n;
 	int i = 0;
-	double t1, t2;
+	//double t1, t2; // in case we want to check execution time
 
 	#ifdef USE_OPENMP
 	omp_set_num_threads(2);
 	#endif
-	t1 = getTime();
+	//t1 = getTime();
 
 	n = filenames.size();
 
 /*
 #pragma omp parallel for
-	for (i=0; i<10; i++) {
-		int x = 1;
-	}
 */
-
-	for (i=0;i<n;i++) {
-		
+	for (i=0;i<n;i++) {		
 		stringstream callback_message;
 		callback_message << "importing_media_"<<i<<"_"<<n;
 		mediacycle_callback(callback_message.str().c_str(),mediacycle_callback_data);
@@ -350,8 +345,7 @@ int MediaCycle::importDirectories(vector<string> directories, int recursive, boo
 		}
 	}
 	
-	t2 = getTime();
-
+	//t2 = getTime();
 	//printf("TTT - %f\n",float(t2-t1));
 	//}
 

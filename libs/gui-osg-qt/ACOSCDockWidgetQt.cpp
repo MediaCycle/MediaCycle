@@ -181,7 +181,7 @@ void ACOSCDockWidgetQt::setFeedbackPort(int _port){
 
 void ACOSCDockWidgetQt::setMediaCycle(MediaCycle* _media_cycle)
 {
-	media_cycle = _media_cycle; 
+	this->media_cycle = _media_cycle;
         if(auto_connect){
 		this->toggleControl(true);
 		this->toggleFeedback(true);
