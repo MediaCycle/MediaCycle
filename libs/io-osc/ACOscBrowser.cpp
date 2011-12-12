@@ -269,7 +269,9 @@ int ACOscBrowser::process_mess(const char *path, const char *types, lo_arg **arg
             ss << c;
             ss >> s;
             std::cout << "ACOscBrowser: adding file : " << s << std::endl;
-            media_cycle->importDirectory(s, 0);
+            std::vector<std::string> vs; // so that I can use importDirectories, not directory
+            vs.push_back(s);
+            media_cycle->importDirectories(vs, 0);
             // XS TODO : should not call these methods from outside -- clean up !!
             media_cycle->normalizeFeatures(1);
             media_cycle->libraryContentChanged(1);

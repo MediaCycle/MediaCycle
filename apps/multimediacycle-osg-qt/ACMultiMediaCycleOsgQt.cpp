@@ -87,6 +87,7 @@ void ACMultiMediaCycleOsgQt::mediacycleCallback(const char* message)
 		send = "";
 		emit mediacycle_message_changed(QString(send.c_str()));
 		emit loading_finished();
+                this->updateLibrary();
 	}
 	
 	if(mess.find("importing_media_",0)!=string::npos){
@@ -634,27 +635,18 @@ void ACMultiMediaCycleOsgQt::importDirectoriesThreaded(vector<string> directorie
 	bool forward_order = true; // only make it false for AudioGarden where media have been presegmented and segments have special names
 	int recursive = 1;
 	
-	// XS TODO 
-	// // xs: http://hopf.chem.brandeis.edu/yanglingfa/Qt/threading/index.html
-
-//	// loaddirstart
-//	statusBar()->showMessage(tr("Loading Directory..."), 0);
-//	progressBar->reset();
-//	progressBar->show();
-//	
-//	//loaddirfinish"
-//	this->updateLibrary();
-//	statusBar()->clearMessage();
-//	progressBar->reset();
-//	progressBar->hide();
+	// XS TODO : for progress bar and threading, see:
+	// http://hopf.chem.brandeis.edu/yanglingfa/Qt/threading/index.html
 	
 	// not necessary to thread if only few files.
 	//		if (directories.size() > n_dir_for_threading)
-//	 media_cycle->importDirectoriesThreaded(directories, recursive, forward_order, do_segments);
+	// media_cycle->importDirectoriesThreaded(directories, recursive, forward_order, do_segments);
 	//		else
 				media_cycle->importDirectories(directories, recursive, forward_order, do_segments);
 	
-	
+         // XS TODO FIXME !!
+        // does not belong here for threaded version
+	this->updateLibrary();
 }
 
 bool ACMultiMediaCycleOsgQt::doSegments(){
@@ -1285,6 +1277,7 @@ void ACMultiMediaCycleOsgQt::loadDefaultConfig(ACMediaType _media_type, ACBrowse
         }
     }
 	this->configureDockWidgets(_media_type);
+        //this->configurePluginDock();
 }
 
 void ACMultiMediaCycleOsgQt::comboDefaultSettingsChanged(){

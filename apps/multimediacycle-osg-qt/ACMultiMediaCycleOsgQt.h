@@ -115,7 +115,8 @@ public:
 	~ACMultiMediaCycleOsgQt();
 	
 	void updateLibrary();
-	void updatePluginDock();
+//XS not implemented ???
+//        void updatePluginDock();
 	
 	void setBrowserMode(ACBrowserMode _mode){this->browser_mode=_mode;}
 	void setMediaType(ACMediaType _mt){this->media_type = _mt;}

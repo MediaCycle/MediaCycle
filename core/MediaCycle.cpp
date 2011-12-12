@@ -335,7 +335,7 @@ int MediaCycle::importDirectories(vector<string> directories, int recursive, boo
 			ok++;
 			needsNormalizeAndCluster = 0;
 			if ( (mediaLibrary->getSize() >= int(prevLibrarySizeMultiplier * prevLibrarySize))
-				|| (i==filenames.size()-1) ) {
+				|| (i==n-1) ) {
 				needsNormalizeAndCluster = 1;
 				prevLibrarySize = mediaLibrary->getSize();
 			}
@@ -343,8 +343,8 @@ int MediaCycle::importDirectories(vector<string> directories, int recursive, boo
 			normalizeFeatures(needsNormalizeAndCluster);
 			libraryContentChanged(needsNormalizeAndCluster);
 		}
-	}
-	
+    }
+
 	//t2 = getTime();
 	//printf("TTT - %f\n",float(t2-t1));
 	//}
