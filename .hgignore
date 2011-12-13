@@ -28,5 +28,8 @@ demos/openFrameworks/scripts
 demos/openFrameworks/xcode*
 demos/openFrameworks/numediart/*/*/bin
 demos/openFrameworks/numediart/*/*/build
+demos/*.pbxuser
+demos/*.perspectivev3
+demos/*.pbxproj
 
 # switch to regexp syntax.
