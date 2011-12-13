@@ -11,7 +11,8 @@ IF ( USE_QT4 )
 	QT4_WRAP_UI(mediacycle-osg-qt_UIS_H ${mediacycle-osg-qt_UIS})
 
 	# Generates moc_ACAudioControlsDockWidgetQt.cxx and moc_ACVideoControlsDockWidgetQt.cxx
-	QT4_WRAP_CPP(mediacycle-osg-qt_MOC_SRCS ${mediacycle-osg-qt_MOC_HDRS})
+	#QT4_WRAP_CPP(mediacycle-osg-qt_MOC_SRCS ${mediacycle-osg-qt_MOC_HDRS})
+	QT4_WRAP_CPP(mediacycle-osg-qt_MOC_SRCS ${HDR} OPTIONS "-nw") # for all headers that potentially declare Q_OBJECT, otherwise warnings are suppressed
 
 	SET(mediacycle-osg-qt_RCC ACOsgQtResources.qrc)
 	QT4_ADD_RESOURCES(mediacycle-osg-qt_RCC_SRCS ${mediacycle-osg-qt_RCC})
