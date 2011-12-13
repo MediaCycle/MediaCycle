@@ -50,7 +50,7 @@
      <x>0</x>
      <y>0</y>
      <width>466</width>
-     <height>21</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -66,9 +66,10 @@
    </widget>
    <widget class="QMenu" name="menuConfig">
     <property name="title">
-     <string>Config</string>
+     <string>Edit</string>
     </property>
     <addaction name="actionEdit_Config_File"/>
+    <addaction name="actionEdit_Input_Controls"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -166,6 +167,9 @@
    <property name="text">
     <string>Controls</string>
    </property>
+   <property name="toolTip">
+    <string>Toggle Dock Panel Controls</string>
+   </property>
    <property name="shortcut">
     <string>Alt+Tab</string>
    </property>
@@ -173,6 +177,9 @@
   <action name="actionClean">
    <property name="text">
     <string>Clean</string>
+   </property>
+   <property name="toolTip">
+    <string>Clean Library</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Del</string>
@@ -194,7 +201,7 @@
     <string>Load XML</string>
    </property>
    <property name="toolTip">
-    <string>Load XML library</string>
+    <string>Load XML Library</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+O</string>
@@ -205,7 +212,7 @@
     <string>Save XML</string>
    </property>
    <property name="toolTip">
-    <string>Save XML library</string>
+    <string>Save XML Library</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+S</string>
@@ -215,6 +222,9 @@
    <property name="text">
     <string>About</string>
    </property>
+   <property name="toolTip">
+    <string>About Dialog</string>
+   </property>
    <property name="shortcut">
     <string>Ctrl+@</string>
    </property>
@@ -222,6 +232,9 @@
   <action name="actionFullscreen">
    <property name="text">
     <string>Fullscreen</string>
+   </property>
+   <property name="toolTip">
+    <string>Fullscreen Browser</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+F</string>
@@ -233,6 +246,17 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+D</string>
+   </property>
+  </action>
+  <action name="actionEdit_Input_Controls">
+   <property name="text">
+    <string>Edit Input Controls</string>
+   </property>
+   <property name="toolTip">
+    <string>Edit Controls (mouse, keyboard, OSC...)</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+I</string>
    </property>
   </action>
  </widget>

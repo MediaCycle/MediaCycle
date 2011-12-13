@@ -1,7 +1,7 @@
 /**
  * @brief ACOsgCompositeViewQt.h
  * @author Christian Frisson
- * @date 16/06/2011
+ * @date 13/12/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -82,6 +82,8 @@
 #include <QtGui/QMainWindow>
 using Qt::WindowFlags;
 
+#include <QAction>
+
 #include <iostream>
 #include <MediaCycle.h>
 #include <ACOsgBrowserRenderer.h>
@@ -96,21 +98,50 @@ using Qt::WindowFlags;
 	#include <ACAudioEngine.h>
 #endif //defined (SUPPORT_AUDIO)
 
-class ACOsgCompositeViewQt : public osgViewer::CompositeViewer, public QGLWidget
+//#include "ui_ACOsgCompositeViewQt.h"
+
+#include <ACInputActionQt.h>
+
+class ACOsgCompositeViewQt : public QGLWidget, public osgViewer::CompositeViewer
 {
+	Q_OBJECT
+	
+	public slots:
+
+        // Library
+        void openMediaExternally(); // open file using the default application for the media type (to configure)
+        void browseMediaExternally(); // view file with the default file browser
+        //void examineMediaExternally(); // display properties using the default file browser
+
+        // Browser
+        void forwardNextLevel(bool toggle); // recluster the selected cluster (cluster mode) or unwrap node (network mode)
+        void stopPlayback(); // stop the playback of audio/video files
+        void toggleMediaHover(bool toggle); // audio hover, image/video ... -> need a panel to configure the behaviour of hover
+        void triggerMediaHover(bool trigger); // audio hover, image/video ... -> need a panel to configure the behaviour of hover
+        void resetBrowser(); // reset the browser view (center, rotation, zoom)
+        void rotateBrowser(float x, float y);
+        void zoomBrowser(float x, float y);
+        void translateBrowser(float x, float y);
+
+        // Timeline
+        void addMediaOnTimelineTrack();
+        void toggleTimelinePlayback(bool toggle); // "transport"
+        //void adjustTimelineHeight(float y);
+	
 	public:
-        ACOsgCompositeViewQt( QWidget * parent = 0, const char * name = 0, const QGLWidget * shareWidget = 0, WindowFlags f = 0 );
-		virtual ~ACOsgCompositeViewQt();
+		ACOsgCompositeViewQt( QWidget * parent = 0, const char * name = 0, const QGLWidget * shareWidget = 0, WindowFlags f = 0 );
+		~ACOsgCompositeViewQt();
 		void clean(bool updategl=true);
 		osgViewer::GraphicsWindow* getGraphicsWindow() { return osg_view; }//.get(); }
 		const osgViewer::GraphicsWindow* getGraphicsWindow() const { return osg_view; }//.get(); }
 		virtual void paintGL();
 
     protected:
-        void init();
 		virtual void initializeGL();
         virtual void resizeGL( int width, int height );
 		virtual void updateGL();
+		//virtual bool event( QEvent* event );
+        void propagateEventToActions( QEvent* event );
         virtual void keyPressEvent( QKeyEvent* event );
         virtual void keyReleaseEvent( QKeyEvent* event );
         virtual void mousePressEvent( QMouseEvent* event );
@@ -134,6 +165,15 @@ class ACOsgCompositeViewQt : public osgViewer::CompositeViewer, public QGLWidget
 		#if defined (SUPPORT_AUDIO)
 			ACAudioEngine *audio_engine;
 		#endif //defined (SUPPORT_AUDIO)
+
+        ACInputActionQt *openMediaExternallyAction, *browseMediaExternallyAction,
+            *examineMediaExternallyAction, *forwardNextLevelAction, *stopPlaybackAction,
+            *toggleMediaHoverAction, *triggerMediaHoverAction, *resetBrowserAction,
+            *rotateBrowserAction, *zoomBrowserAction, *translateBrowserAction,
+            *addMediaOnTimelineTrackAction, *toggleTimelinePlaybackAction, *adjustTimelineHeightAction;
+	
+        void initInputActions();
+
 		void updateBrowserView(int width, int height);
 		void updateHUDCamera(int width, int height);
 		void updateTimelineView(int width, int height);
@@ -160,9 +200,7 @@ class ACOsgCompositeViewQt : public osgViewer::CompositeViewer, public QGLWidget
 		void setLibraryLoaded(bool load_status){library_loaded = load_status;}
 
 	private:
-		int mousedown, zoomdown, forwarddown, autoplaydown, rotationdown;
-		int finddown, infodown, opendown;
-		int borderdown, transportdown;
+        int mousedown, borderdown;
 		float refx, refy;
 		float refcamx, refcamy;
 		float refzoom, refrotation;
@@ -176,9 +214,7 @@ class ACOsgCompositeViewQt : public osgViewer::CompositeViewer, public QGLWidget
 
 	//MediaBlender specific members:
 	private:
-		int trackdown;
 		int mediaOnTrack;
 		bool track_playing;
 };
-
 #endif

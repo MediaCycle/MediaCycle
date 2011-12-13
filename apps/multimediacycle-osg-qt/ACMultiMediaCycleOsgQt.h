@@ -59,6 +59,8 @@
 
 #include <ACAboutDialogFactoryQt.h>
 
+#include <ACInputControlsDialogQt.h>
+
 // FORWARD DECLARATIONS
 QT_BEGIN_NAMESPACE
 class QListWidgetItem;
@@ -91,7 +93,7 @@ public slots:
 	// Config
 	void on_actionEdit_Config_File_triggered(bool checked);
 	void comboDefaultSettingsChanged(); 
-
+    void on_actionEdit_Input_Controls_triggered(bool checked);
 	//SENEFFE ?
 	virtual void loopXML(){};
 	
@@ -194,6 +196,9 @@ private:
 	
 	ACAboutDialogFactoryQt* aboutDialogFactory;
 	ACAbstractAboutDialogQt* aboutDialog;
+	
+    ACInputControlsDialogQt* controlsDialog;
+	
 	QMainWindow* detachedBrowser;
 	
 	// methods

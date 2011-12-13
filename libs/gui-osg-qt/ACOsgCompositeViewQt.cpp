@@ -59,15 +59,17 @@ ACOsgCompositeViewQt::ACOsgCompositeViewQt( QWidget * parent, const char * name,
 	#if defined (SUPPORT_AUDIO)
 		audio_engine(0),
 	#endif //defined (SUPPORT_AUDIO)
-	mousedown(0), zoomdown(0), forwarddown(0), autoplaydown(0),rotationdown(0),
-	finddown(0),infodown(0),opendown(0),
-	borderdown(0), transportdown(0),
+    mousedown(0), borderdown(0),
 	refx(0.0f), refy(0.0f),
 	refcamx(0.0f), refcamy(0.0f),
 	refzoom(0.0f),refrotation(0.0f),
 	septhick(5),sepy(0.0f),refsepy(0.0f),controls_width(0),screen_width(0),
 	library_loaded(false),mouseover(false),
-	trackdown(0),mediaOnTrack(-1),track_playing(false)
+    mediaOnTrack(-1),track_playing(false),
+    openMediaExternallyAction(0), browseMediaExternallyAction(0), examineMediaExternallyAction(0), forwardNextLevelAction(0),
+    stopPlaybackAction(0), toggleMediaHoverAction(0), triggerMediaHoverAction(0),
+    resetBrowserAction(0), rotateBrowserAction(0), zoomBrowserAction(0),
+    translateBrowserAction(0), addMediaOnTimelineTrackAction(0), toggleTimelinePlaybackAction(0), adjustTimelineHeightAction(0)
 {
 	osg_view = new osgViewer::GraphicsWindowEmbedded(0,0,width(),height());
 	setFocusPolicy(Qt::StrongFocus);// CF instead of ClickFocus
@@ -139,6 +141,7 @@ ACOsgCompositeViewQt::ACOsgCompositeViewQt( QWidget * parent, const char * name,
 	timeline_renderer->updateSize(width(),sepy);
 
 	osg::setNotifyLevel(osg::WARN);//remove the NaN CullVisitor messages
+    this->initInputActions();
 }
 
 void ACOsgCompositeViewQt::updateBrowserView(int _width, int _height){
@@ -200,12 +203,25 @@ ACOsgCompositeViewQt::~ACOsgCompositeViewQt(){
 	delete timeline_controls_renderer; timeline_controls_renderer = 0;
 	delete hud_renderer; hud_renderer = 0;
 	media_cycle = 0;
+    if(openMediaExternallyAction) delete openMediaExternallyAction; openMediaExternallyAction = 0;
+    if(browseMediaExternallyAction) delete browseMediaExternallyAction; browseMediaExternallyAction = 0;
+    if(examineMediaExternallyAction) delete examineMediaExternallyAction; examineMediaExternallyAction = 0;
+    if(forwardNextLevelAction) delete forwardNextLevelAction; forwardNextLevelAction = 0;
+    if(stopPlaybackAction) delete stopPlaybackAction; stopPlaybackAction = 0;
+    if(toggleMediaHoverAction) delete toggleMediaHoverAction; toggleMediaHoverAction = 0;
+    if(resetBrowserAction) delete resetBrowserAction; resetBrowserAction = 0;
+    if(rotateBrowserAction) delete rotateBrowserAction; rotateBrowserAction = 0;
+    if(zoomBrowserAction) delete zoomBrowserAction; zoomBrowserAction = 0;
+    if(translateBrowserAction) delete translateBrowserAction; translateBrowserAction = 0;
+    if(addMediaOnTimelineTrackAction) delete addMediaOnTimelineTrackAction; addMediaOnTimelineTrackAction = 0;
+    if(toggleTimelinePlaybackAction) delete toggleTimelinePlaybackAction; toggleTimelinePlaybackAction = 0;
+    if(adjustTimelineHeightAction) delete adjustTimelineHeightAction; adjustTimelineHeightAction = 0;
 }
 
 void ACOsgCompositeViewQt::clean(bool updategl){
 	browser_event_handler->clean();
 	timeline_event_handler->clean();
-	mousedown = zoomdown = forwarddown = autoplaydown = rotationdown = 0;
+    mousedown = borderdown = 0;
 	refx =  refy = refcamx = refcamy = refzoom = refrotation = 0.0f;
 	browser_renderer->clean();
 	timeline_renderer->clean();
@@ -299,7 +315,6 @@ void ACOsgCompositeViewQt::paintGL()
 // called according to timer
 void ACOsgCompositeViewQt::updateGL()
 {
-
 	double frac = 0.0;
 	if (media_cycle == 0) return;
 
@@ -348,84 +363,377 @@ void ACOsgCompositeViewQt::updateGL()
 		setMouseTracking(true); //CF necessary for the hover callback
 	*/
 	QGLWidget::updateGL();
-	media_cycle->setNeedsDisplay(false);
+    media_cycle->setNeedsDisplay(false);
+}
+
+void ACOsgCompositeViewQt::initInputActions(){
+
+    // CF add extra shortcuts from QKeySequence::StandardKey
+
+    openMediaExternallyAction = new ACInputActionQt(tr("Open Media File"), this);
+    openMediaExternallyAction->setShortcut(Qt::Key_O);
+    openMediaExternallyAction->setKeyEventType(QEvent::KeyPress);
+    openMediaExternallyAction->setMouseEventType(QEvent::MouseButtonRelease);
+    openMediaExternallyAction->setToolTip(tr("Open the media file with the default application"));
+    connect(openMediaExternallyAction, SIGNAL(triggered()), this, SLOT(openMediaExternally()));
+    this->addAction(openMediaExternallyAction);
+
+    browseMediaExternallyAction = new ACInputActionQt(tr("Browse Media File"), this);
+    browseMediaExternallyAction->setShortcut(Qt::Key_F);
+    browseMediaExternallyAction->setKeyEventType(QEvent::KeyPress);
+    browseMediaExternallyAction->setMouseEventType(QEvent::MouseButtonRelease);
+    browseMediaExternallyAction->setToolTip(tr("Browse the media file with the default file browser"));
+    connect(browseMediaExternallyAction, SIGNAL(triggered()), this, SLOT(browseMediaExternally()));
+    this->addAction(browseMediaExternallyAction);
+
+    /*examineMediaExternallyAction = new ACInputActionQt(tr("Examine Media File"), this);
+    examineMediaExternallyAction->setShortcut(Qt::Key_I);
+    examineMediaExternallyAction->setKeyEventType(QEvent::KeyPress);
+    examineMediaExternallyAction->setMouseEventType(QEvent::MouseButtonRelease);
+    examineMediaExternallyAction->setToolTip(tr("Examine the media file with the default file browser properties"));
+    connect(examineMediaExternallyAction, SIGNAL(triggered()), this, SLOT(examineMediaExternally()));
+    this->addAction(examineMediaExternallyAction);*/
+
+    //if(this->media_cycle->getBrowser()->getMode() == AC_MODE_CLUSTERS){
+        forwardNextLevelAction = new ACInputActionQt(tr("Recluster"), this);
+        forwardNextLevelAction->setToolTip(tr("Recluster the cluster around the selected node"));
+    //}
+    //else if(this->media_cycle->getBrowser()->getMode() == AC_MODE_NEIGHBORS){
+    //    forwardNextLevelAction = new ACInputActionQt(tr("Unwrap node"), this);
+    //    forwardNextLevelAction->setToolTip(tr("Unwrap neighbors from the selected node"));
+    //}
+    //if(this->media_cycle->getBrowser()->getMode() != AC_MODE_NONE){
+        forwardNextLevelAction->setShortcut(Qt::Key_A);
+        forwardNextLevelAction->setKeyEventType(QEvent::KeyPress);
+        forwardNextLevelAction->setMouseEventType(QEvent::MouseButtonRelease);
+        connect(forwardNextLevelAction, SIGNAL(triggered(bool)), this, SLOT(forwardNextLevel(bool)));
+        this->addAction(forwardNextLevelAction);
+    //}
+
+    stopPlaybackAction = new ACInputActionQt(tr("Stop Playback"), this);
+    stopPlaybackAction->setShortcut(Qt::Key_M);
+    stopPlaybackAction->setKeyEventType(QEvent::KeyPress);
+    stopPlaybackAction->setToolTip(tr("Stop the playback of all played media nodes"));
+    connect(stopPlaybackAction, SIGNAL(triggered()), this, SLOT(stopPlayback()));
+    this->addAction(stopPlaybackAction);
+
+    toggleMediaHoverAction = new ACInputActionQt(tr("Toggle Media Hover"), this);
+    toggleMediaHoverAction->setShortcut(Qt::Key_W);
+    toggleMediaHoverAction->setKeyEventType(QEvent::KeyPress);
+    toggleMediaHoverAction->setToolTip(tr("Toggle Media Hover (fast browsing with playback or zoom)"));
+    connect(toggleMediaHoverAction, SIGNAL(toggled(bool)), this, SLOT(toggleMediaHover(bool)));
+    this->addAction(toggleMediaHoverAction);
+
+    triggerMediaHoverAction = new ACInputActionQt(tr("Trigger Media Hover"), this);
+    triggerMediaHoverAction->setShortcut(Qt::Key_Q);
+    triggerMediaHoverAction->setKeyEventType(QEvent::KeyPress);
+    //triggerMediaHoverAction->setAutoRepeat(false); // works on OSX but not Ubuntu (10.04)
+    triggerMediaHoverAction->setToolTip(tr("Trigger Media Hover (fast browsing with playback or zoom)"));
+    connect(triggerMediaHoverAction, SIGNAL(triggered(bool)), this, SLOT(triggerMediaHover(bool)));
+    this->addAction(triggerMediaHoverAction);
+
+    resetBrowserAction = new ACInputActionQt(tr("Reset Browser"), this);
+    resetBrowserAction->setShortcut(Qt::Key_C);
+    resetBrowserAction->setKeyEventType(QEvent::KeyRelease);
+    resetBrowserAction->setToolTip(tr("Reset the browser view (center, rotation, zoom)"));
+    connect(resetBrowserAction, SIGNAL(triggered()), this, SLOT(resetBrowser()));
+    this->addAction(resetBrowserAction);
+
+    rotateBrowserAction = new ACInputActionQt(tr("Rotate Browser"), this);
+    rotateBrowserAction->setShortcut(Qt::Key_R);
+    rotateBrowserAction->setKeyEventType(QEvent::KeyPress);
+    rotateBrowserAction->setMouseEventType(QEvent::MouseMove);
+    rotateBrowserAction->setToolTip(tr("Rotate the browser view"));
+    connect(rotateBrowserAction, SIGNAL(mouseMovedXY(float,float)), this, SLOT(rotateBrowser(float,float)));
+    this->addAction(rotateBrowserAction);
+
+    zoomBrowserAction = new ACInputActionQt(tr("Zoom Browser"), this);
+    zoomBrowserAction->setShortcut(Qt::Key_Z);
+    zoomBrowserAction->setKeyEventType(QEvent::KeyPress);
+    zoomBrowserAction->setMouseEventType(QEvent::MouseMove);
+    zoomBrowserAction->setToolTip(tr("Zoom the browser view"));
+    connect(zoomBrowserAction, SIGNAL(mouseMovedXY(float,float)), this, SLOT(zoomBrowser(float,float)));
+    this->addAction(zoomBrowserAction);
+
+    translateBrowserAction = new ACInputActionQt(tr("Translate Browser"), this);
+    translateBrowserAction->setMouseEventType(ACInputActionQt::MousePressedMove);
+    translateBrowserAction->setToolTip(tr("Translate the browser view"));
+    connect(translateBrowserAction, SIGNAL(mouseMovedXY(float,float)), this, SLOT(translateBrowser(float,float)));
+    this->addAction(translateBrowserAction);
+
+    addMediaOnTimelineTrackAction = new ACInputActionQt(tr("Timeline Media"), this);
+    addMediaOnTimelineTrackAction->setShortcut(Qt::Key_T);
+    addMediaOnTimelineTrackAction->setKeyEventType(QEvent::KeyPress);
+    addMediaOnTimelineTrackAction->setMouseEventType(QEvent::MouseButtonRelease);
+    addMediaOnTimelineTrackAction->setToolTip(tr("Visualize media on a timeline track"));
+    connect(addMediaOnTimelineTrackAction, SIGNAL(triggered()), this, SLOT(addMediaOnTimelineTrack()));
+    this->addAction(addMediaOnTimelineTrackAction);
+
+    toggleTimelinePlaybackAction = new ACInputActionQt(tr("Toggle Timeline Playback"), this);
+    toggleTimelinePlaybackAction->setShortcut(Qt::Key_Space);
+    toggleTimelinePlaybackAction->setKeyEventType(QEvent::KeyPress);
+    toggleTimelinePlaybackAction->setToolTip(tr("Toggle timeline playback"));
+    connect(toggleTimelinePlaybackAction, SIGNAL(toggled(bool)), this, SLOT(toggleTimelinePlayback(bool)));
+    this->addAction(toggleTimelinePlaybackAction);
+
+    /*adjustTimelineHeightAction = new ACInputActionQt(tr("Adjust Timeline Height"), this);
+    //adjustTimelineHeightAction->setShortcut(Qt::Key_Z);
+    //adjustTimelineHeightAction->setKeyEventType(QEvent::KeyPress);
+    adjustTimelineHeightAction->setMouseEventType(QEvent::MouseMove);
+    adjustTimelineHeightAction->setToolTip(tr("Adjust the timeline height"));
+    connect(adjustTimelineHeightAction, SIGNAL(mouseMovedY(float)), this, SLOT(adjustTimelineHeight(float)));
+    this->addAction(adjustTimelineHeightAction);*/
+}
+
+void ACOsgCompositeViewQt::openMediaExternally(){
+    //std::cout << "Open externally " << std::endl;
+    if (media_cycle == 0) return;
+    if (media_cycle->hasBrowser())
+    {
+        int loop = media_cycle->getClickedNode();
+        //int loop = media_cycle->getClosestNode();//CF to deprecate: adapt to multiple pointers
+        //std::cout << "node " << loop << " selected" << std::endl;
+
+        if(loop >= 0)
+        {
+            #if defined (__APPLE__)
+            std::stringstream command;
+            ACMediaType _media_type = media_cycle->getLibrary()->getMedia(loop)->getMediaType();
+            if (_media_type == MEDIA_TYPE_IMAGE || _media_type == MEDIA_TYPE_VIDEO)
+                command << "open -a Preview '";
+            else if (_media_type == MEDIA_TYPE_TEXT)
+                command << "open '"; // uses TextEdit or other default text application if customized OS-wide
+            else
+                command << "open -R '"; // no iTunes for audio! 3Dmodel default applications?
+            command << media_cycle->getLibrary()->getMedia(loop)->getFileName() << "'" ;
+            try {
+                system(command.str().c_str());
+            }
+            catch (const exception& e) {
+                cout << "ACOsgCompositeViewQt: caught exception while trying to open media file " << media_cycle->getLibrary()->getMedia(loop)->getFileName() << " with the OSX-wide prefered application: " << e.what() << endl;
+            }
+            #endif //defined (__APPLE__)
+        }
+    }
+
+}
+
+void ACOsgCompositeViewQt::browseMediaExternally(){
+    if (media_cycle == 0) return;
+    if (media_cycle->hasBrowser())
+    {
+        //int loop = media_cycle->getClickedNode();
+        int loop = media_cycle->getClosestNode();//CF to deprecate: adapt to multiple pointers
+        //std::cout << "node " << loop << " selected" << std::endl;
+
+        if(loop >= 0)
+        {
+            #if defined (__APPLE__)
+            std::stringstream command;
+            //command << "open " << fs::path(media_cycle->getLibrary()->getMedia(loop)->getFileName()).parent_path();// opens the containing directory using the Finder
+            command << "open -R '" << media_cycle->getLibrary()->getMedia(loop)->getFileName() << "'" ;// opens the containing directory using the Finder and highlights the file!
+            try {
+                system(command.str().c_str());
+            }
+            catch (const exception& e) {
+                cout << "ACOsgCompositeViewQt: caught exception while trying to open media file " << media_cycle->getLibrary()->getMedia(loop)->getFileName() << " with the OSX Finder: " << e.what() << endl;
+            }
+            #endif //defined (__APPLE__)
+        }
+    }
+}
+
+/*
+void ACOsgCompositeViewQt::examineMediaExternally(){
+    if (media_cycle == 0) return;
+    if (media_cycle->hasBrowser())
+    {
+        //int loop = media_cycle->getClickedNode();
+        int loop = media_cycle->getClosestNode();//CF to deprecate: adapt to multiple pointers
+        //std::cout << "node " << loop << " selected" << std::endl;
+
+        if(loop >= 0)
+        {
+            #if defined (__APPLE__)
+            std::stringstream command;
+            //command << "open " << fs::path(media_cycle->getLibrary()->getMedia(loop)->getFileName()).parent_path();// opens the containing directory using the Finder
+            command << "open -R '" << media_cycle->getLibrary()->getMedia(loop)->getFileName() << "'" ;// opens the containing directory using the Finder and highlights the file!
+            try {
+                system(command.str().c_str());
+            }
+            catch (const exception& e) {
+                cout << "ACOsgCompositeViewQt: caught exception while trying to open media file " << media_cycle->getLibrary()->getMedia(loop)->getFileName() << " with the OSX Finder: " << e.what() << endl;
+            }
+            #endif //defined (__APPLE__)
+        }
+    }
+}*/
+
+void ACOsgCompositeViewQt::forwardNextLevel(bool toggle){
+    if (media_cycle == 0) return;
+    media_cycle->setForwardDown(toggle);
+    if(toggle){
+        if (media_cycle->hasBrowser()){
+            int loop = media_cycle->getClickedNode();
+            //std::cout << "node " << loop << " selected" << std::endl;
+            if(loop >= 0){
+                if (media_cycle->getBrowser()->getMode() == AC_MODE_CLUSTERS){
+                    // store first otherwise we store the next state
+                    media_cycle->storeNavigationState();
+                    media_cycle->incrementLoopNavigationLevels(loop);
+                }
+                media_cycle->setReferenceNode(loop);
+                media_cycle->updateDisplay(true);
+            }
+       }
+    }
+}
+
+void ACOsgCompositeViewQt::stopPlayback(){
+    if (media_cycle == 0) return;
+    media_cycle->setAutoPlay(0);
+    media_cycle->muteAllSources();
+}
+
+void ACOsgCompositeViewQt::toggleMediaHover(bool toggle){
+    if (media_cycle == 0) return;
+    //std::cout << "Toggle Media hover " << toggle << std::endl;
+    media_cycle->setAutoPlay(toggle);
+}
+
+void ACOsgCompositeViewQt::triggerMediaHover(bool trigger){
+    if (media_cycle == 0) return;
+    //std::cout << "Trigger Media hover " << trigger << std::endl;
+    media_cycle->setAutoPlay(trigger);
+}
+
+
+void ACOsgCompositeViewQt::resetBrowser(){
+    if (media_cycle == 0) return;
+    media_cycle->setCameraRecenter();
+}
+
+void ACOsgCompositeViewQt::rotateBrowser(float x, float y){
+    if (media_cycle == 0) return;
+    float rotation = atan2(-(y-this->height()/2),x-this->width()/2)-atan2(-(refy-this->height()/2),refx-this->width()/2);
+    media_cycle->setCameraRotation(refrotation + rotation);
+}
+
+void ACOsgCompositeViewQt::zoomBrowser(float x, float y){
+    if (media_cycle == 0) return;
+    //float refzoom(0),refy(0);
+    media_cycle->setCameraZoom(refzoom - (y-refy)/50);
+    //media_cycle->setCameraZoom(refzoom + (y-refy) / abs (y-refy) * sqrt( pow((y-refy),2) + pow((x-refx),2) )/50 );
+}
+
+void ACOsgCompositeViewQt::translateBrowser(float x, float y){
+    if (media_cycle == 0) return;
+    if (media_cycle->hasBrowser())
+    {
+        int loop = media_cycle->getClickedNode();
+        //int loop = media_cycle->getClosestNode();//CF to deprecate: adapt to multiple pointers
+        //std::cout << "node " << loop << " selected" << std::endl;
+        if(loop == -1)
+        {
+            //float refx(0),refy(0);
+            float zoom = media_cycle->getCameraZoom();
+            float angle = media_cycle->getCameraRotation();
+            float xmove = (refx-x);
+            float ymove =-(refy-y);
+            float xmove2 = xmove*cos(-angle)-ymove*sin(-angle);
+            float ymove2 = ymove*cos(-angle)+xmove*sin(-angle);
+            media_cycle->setCameraPosition(refcamx + xmove2/800/zoom , refcamy + ymove2/800/zoom);
+        }
+    }
+}
+
+void ACOsgCompositeViewQt::addMediaOnTimelineTrack(){
+    if (media_cycle == 0) return;
+    if (media_cycle->hasBrowser())
+    {
+        int loop = media_cycle->getClickedNode();
+
+        if (mediaOnTrack != -1)
+            this->getBrowserRenderer()->resetNodeColor(mediaOnTrack);
+
+        mediaOnTrack = loop;
+        if (mediaOnTrack != -1){
+            this->getBrowserRenderer()->changeNodeColor(mediaOnTrack, Vec4(1.0,1.0,1.0,1.0));//CF color the node of the media on track in white
+
+            //if ( timeline_renderer->getTrack(0)!=0 )
+            //{
+
+            if (sepy==0)
+            {
+                sepy = height()/4;// CF browser/timeline proportions at startup
+                timeline_renderer->updateSize(width(),sepy);
+                this->updateBrowserView(width(),height());
+                this->updateTimelineView(width(),height());
+                this->updateTimelineControlsView(width(),height());
+                this->updateHUDCamera(width(),height());
+
+                media_cycle->setNeedsDisplay(true);
+            }
+            //if (track_playing) {
+
+            //media_cycle->getBrowser()->toggleSourceActivity( timeline_renderer->getTrack(0)->getMediaIndex() );
+            //track_playing = false;
+            //}
+            if (timeline_renderer->getNumberOfTracks()==0){
+                //this->getTimelineRenderer()->addTrack(loop);
+                this->getTimelineRenderer()->addTrack(media_cycle->getLibrary()->getMedia(loop));
+            }
+            else {
+                //this->getTimelineRenderer()->getTrack(0)->updateMedia( loop ); //media_cycle->getLibrary()->getMedia(loop) );
+                this->getTimelineRenderer()->getTrack(0)->updateMedia(media_cycle->getLibrary()->getMedia(loop));
+            }
+            //this->getTimelineControlsRenderer()->getControls(0)->updateMedia( loop ); //media_cycle->getLibrary()->getMedia(loop) );
+            media_cycle->setNeedsDisplay(true);
+        }
+    }
+}
+
+void ACOsgCompositeViewQt::toggleTimelinePlayback(bool toggle){
+    if (media_cycle == 0) return;
+    if ( (media_cycle) && (media_cycle->hasBrowser()) && (timeline_renderer->getTrack(0)!=0) ) {
+        //media_cycle->getBrowser()->toggleSourceActivity( timeline_renderer->getTrack(0)->getMediaIndex() );
+        media_cycle->getBrowser()->toggleSourceActivity( timeline_renderer->getTrack(0)->getMedia()->getId() );
+    }
+}
+
+/*void ACOsgCompositeViewQt::adjustTimelineHeight(float y){
+    if (media_cycle == 0) return;
+}*/
+
+void ACOsgCompositeViewQt::propagateEventToActions( QEvent* event )
+{
+    //int cnt = 0;
+    QListIterator<QAction*> _action(this->actions());
+    while (_action.hasNext()){
+        //std::cout << "action " << ++cnt << std::endl;
+        ACInputActionQt *_act = static_cast<ACInputActionQt *>(_action.next());
+        _act->eventAbsorber(event);
+    }
 }
 
 void ACOsgCompositeViewQt::keyPressEvent( QKeyEvent* event )
 {
+    this->propagateEventToActions(event);
 	if (media_cycle == 0) return;
 	osg_view->getEventQueue()->keyPress( (osgGA::GUIEventAdapter::KeySymbol) *(event->text().toAscii().data() ) );
-
-	switch( event->key() )
-	{
-		case Qt::Key_A:
-			media_cycle->setForwardDown(1);
-			forwarddown = 1;
-			break;
-		case Qt::Key_C:
-			media_cycle->setCameraRecenter();
-			break;
-		case Qt::Key_F:
-			finddown = 1;
-			break;
-		case Qt::Key_I:
-			infodown = 1;
-			break;
-		case Qt::Key_M:
-			media_cycle->muteAllSources();
-			break;
-		case Qt::Key_O:
-			opendown = 1;
-			break;
-		case Qt::Key_Q:
-			media_cycle->setAutoPlay(1);
-			autoplaydown = 1;
-			break;
-		case Qt::Key_R:
-			rotationdown = 1;
-			break;
-		case Qt::Key_T:
-			trackdown = 1;
-			break;
-		case Qt::Key_Z:
-			zoomdown = 1;
-			break;
-		case Qt::Key_Space:
-			if ( (media_cycle) && (media_cycle->hasBrowser()) && (timeline_renderer->getTrack(0)!=0) ) {
-				transportdown = 1;
-				//media_cycle->getBrowser()->toggleSourceActivity( timeline_renderer->getTrack(0)->getMediaIndex() );
-				media_cycle->getBrowser()->toggleSourceActivity( timeline_renderer->getTrack(0)->getMedia()->getId() );
-				track_playing = track_playing ? false : true; //CF toggling
-			}
-			break;
-		default:
-			break;
-	}
 }
 
 void ACOsgCompositeViewQt::keyReleaseEvent( QKeyEvent* event )
 {
+    this->propagateEventToActions(event);
 	if (media_cycle == 0) return;
 	osg_view->getEventQueue()->keyRelease( (osgGA::GUIEventAdapter::KeySymbol) *(event->text().toAscii().data() ) );
-
-	zoomdown = 0;
-	forwarddown = 0;
-	media_cycle->setForwardDown(0);
-	autoplaydown = 0;
-	media_cycle->setAutoPlay(0);
-	rotationdown = 0;
-	finddown = 0;
-	infodown = 0;
-	opendown = 0;
-	transportdown = 0;
-	trackdown = 0;
 }
 
 void ACOsgCompositeViewQt::mousePressEvent( QMouseEvent* event )
 {
-	if (media_cycle == 0) return;
     int button = 0;
-	mousedown = 1;
+    mousedown = 1;
     switch(event->button())
     {
         case(Qt::LeftButton): button = 1; break;
@@ -434,10 +742,11 @@ void ACOsgCompositeViewQt::mousePressEvent( QMouseEvent* event )
         case(Qt::NoButton): button = 0; break;
         default: button = 0; break;
     }
+    osg_view->getEventQueue()->mouseButtonPress(event->x(), event->y(), button);
+    //browser_view->getEventQueue()->mouseButtonPress(event->x(), event->y()-sepy, button);
+    this->propagateEventToActions(event);
 
-	osg_view->getEventQueue()->mouseButtonPress(event->x(), event->y(), button);
-	//browser_view->getEventQueue()->mouseButtonPress(event->x(), event->y()-sepy, button);
-
+    if (media_cycle == 0) return;
 	// CF: for OSG y=0 is on the bottom, for Qt on the top
 	// browser view top (OSG coordinates): browser_view->getCamera()->getViewport()->height() + browser_view->getCamera()->getViewport()->y()
 	// browser view bottom (OSG coordinates): browser_view->getCamera()->getViewport()->y()
@@ -457,117 +766,12 @@ void ACOsgCompositeViewQt::mousePressEvent( QMouseEvent* event )
 		borderdown = 1;
 		refsepy = sepy;
 	}
-
-	/*if ( (media_cycle) && (media_cycle->hasBrowser()))
-	{
-		if ( (finddown == 1) || (opendown == 1) || (forwarddown==1) || (trackdown == 1) )
-		{
-			int loop = media_cycle->getClickedNode();
-			std::cout << "node " << loop << " selected" << std::endl;
-			//media_cycle->hoverWithPointerId(event->x(),event->y(),-1);//mouse
-			//int loop = media_cycle->getClosestNode();
-
-			if(loop >= 0)
-			{
-
-				if (finddown == 1)
-				{
-#if defined (__APPLE__)
-					std::stringstream command;
-					//command << "open " << fs::path(media_cycle->getLibrary()->getMedia(loop)->getFileName()).parent_path();// opens the containing directory using the Finder
-					command << "open -R '" << media_cycle->getLibrary()->getMedia(loop)->getFileName() << "'" ;// opens the containing directory using the Finder and highlights the file!
-					system(command.str().c_str());
-#endif //defined (__APPLE__)
-				}
-				else if (opendown == 1)
-				{
-#if defined (__APPLE__)
-					std::stringstream command;
-					ACMediaType _media_type = media_cycle->getLibrary()->getMedia(loop)->getMediaType();
-					if (_media_type == MEDIA_TYPE_IMAGE || _media_type == MEDIA_TYPE_VIDEO)
-						command << "open -a Preview '";
-					else
-						command << "open -R '"; // no iTunes for audio! 3Dmodel default applications?
-					command << media_cycle->getLibrary()->getMedia(loop)->getFileName() << "'" ;
-					system(command.str().c_str());
-#endif //defined (__APPLE__)
-				}
-				else if (forwarddown==1)
-				{
-					// XSCF 250310 added these 3
-					// XS 260810 put this "if" first other+wise we store the next state
-					if (media_cycle->getBrowser()->getMode() == AC_MODE_CLUSTERS)
-						media_cycle->storeNavigationState();
-
-					if (media_cycle->getBrowser()->getMode() == AC_MODE_CLUSTERS)
-						media_cycle->incrementLoopNavigationLevels(loop);
-					media_cycle->setReferenceNode(loop);
-
-
-					//			media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
-					//			media_cycle->getBrowser()->setState(AC_CHANGING);
-
-					media_cycle->updateDisplay(true); //XS250310 was: media_cycle->updateClusters(true);
-					// XSCF 250310 removed this:
-					// media_cycle->updateNeighborhoods();
-					//	media_cycle->updateClusters(false);// CF was true, equivalent to what's following
-
-					//				// remainders from updateClusters(true)
-					//				media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
-					//				media_cycle->getBrowser()->setState(AC_CHANGING);
-				}
-				else if (trackdown == 1)
-				{
-					if (mediaOnTrack != -1)
-						this->getBrowserRenderer()->resetNodeColor(mediaOnTrack);
-
-					mediaOnTrack = loop;
-					if (mediaOnTrack != -1)
-						this->getBrowserRenderer()->changeNodeColor(mediaOnTrack, Vec4(1.0,1.0,1.0,1.0));//CF color the node of the media on track in white
-
-
-
-					//if ( timeline_renderer->getTrack(0)!=0 )
-					//{
-
-					if (sepy==0)
-					{
-						sepy = height()/4;// CF browser/timeline proportions at startup
-						timeline_renderer->updateSize(width(),sepy);
-						this->updateBrowserView(width(),height();
-						this->updateTimelineView(width(),height());
-						this->updateTimelineControlsView(width(),height());
-						this->updateHUDCamera(width(),height());
-
-						media_cycle->setNeedsDisplay(true);
-					}
-					//if (track_playing) {
-					//
-					//	media_cycle->getBrowser()->toggleSourceActivity( timeline_renderer->getTrack(0)->getMediaIndex() );
-					//	track_playing = false;
-					//	}
-					if (timeline_renderer->getNumberOfTracks()==0){
-						//this->getTimelineRenderer()->addTrack(loop);
-						this->getTimelineRenderer()->addTrack(media_cycle->getLibrary()->getMedia(loop));
-					}
-					else
-						this->getTimelineRenderer()->getTrack(0)->updateMedia( loop ); //media_cycle->getLibrary()->getMedia(loop) );
-					//this->getTimelineControlsRenderer()->getControls(0)->updateMedia( loop ); //media_cycle->getLibrary()->getMedia(loop) );
-					media_cycle->setNeedsDisplay(true);
-					//}
-				}
-			}
-		}
-		media_cycle->setClickedNode(-1);
-	}*/
 	media_cycle->setNeedsDisplay(true);
 }
 
 void ACOsgCompositeViewQt::mouseMoveEvent( QMouseEvent* event )
 {
-	
-	if (media_cycle == 0) return;
-	int button = 0;
+    int button = 0;
     switch(event->button())
     {
         case(Qt::LeftButton): button = 1; break;
@@ -577,13 +781,14 @@ void ACOsgCompositeViewQt::mouseMoveEvent( QMouseEvent* event )
         default: button = 0; break;
     }
     osg_view->getEventQueue()->mouseMotion(event->x(), event->y());
+	if (media_cycle == 0) return;
 
 	float zoom, angle;
 	float xmove, ymove, xmove2, ymove2;
 	float x, y;
 	x = event->x();
 	y = event->y();
-	if ( mousedown == 1 )
+    if ( mousedown == 1 )
 	{
 		if ( borderdown == 1)
 		{
@@ -597,50 +802,14 @@ void ACOsgCompositeViewQt::mouseMoveEvent( QMouseEvent* event )
 					sepy = height()-septhick;
 			}
 			timeline_renderer->updateSize(width(),sepy);
-		}
-		else
-		{
-			if (infodown == 1)
-			{
-				int closest_node = media_cycle->getClosestNode(); //CF to deprecate: adapt to multiple pointers
-				if (closest_node > -1)
-					std::cout << "Closest node: " << closest_node << std::endl;
-			}
-
-			if ( (forwarddown == 0) && (trackdown == 0))
-			{
-				if ( (event->y() >= height() - ( browser_view->getCamera()->getViewport()->height() + browser_view->getCamera()->getViewport()->y() ) ) && (event->y() <= height() - ( browser_view->getCamera()->getViewport()->y() + septhick) ))
-				{
-					if ( zoomdown==1 )
-					{
-						media_cycle->setCameraZoom(refzoom - (y-refy)/50);
-						//media_cycle->setCameraZoom(refzoom + (y-refy) / abs (y-refy) * sqrt( pow((y-refy),2) + pow((x-refx),2) )/50 );
-					}
-					else if ( rotationdown==1 )
-					{
-						float rotation = atan2(-(y-this->height()/2),x-this->width()/2)-atan2(-(refy-this->height()/2),refx-this->width()/2);
-						media_cycle->setCameraRotation(refrotation + rotation);
-					}
-					else // translation
-					{
-						zoom = media_cycle->getCameraZoom();
-						angle = media_cycle->getCameraRotation();
-						xmove = (refx-x);
-						ymove =-(refy-y);
-						xmove2 = xmove*cos(-angle)-ymove*sin(-angle);
-						ymove2 = ymove*cos(-angle)+xmove*sin(-angle);
-						media_cycle->setCameraPosition(refcamx + xmove2/800/zoom , refcamy + ymove2/800/zoom);
-					}
-				}
-			}
-		}
-	}
+        }
+    }
+    this->propagateEventToActions(event);
 	media_cycle->setNeedsDisplay(true);
 }
 
 void ACOsgCompositeViewQt::mouseReleaseEvent( QMouseEvent* event )
 {
-	if (media_cycle == 0) return;
     int button = 0;
     switch(event->button())
     {
@@ -651,111 +820,11 @@ void ACOsgCompositeViewQt::mouseReleaseEvent( QMouseEvent* event )
         default: button = 0; break;
     }
     osg_view->getEventQueue()->mouseButtonRelease(event->x(), event->y(), button);
-
-	if (media_cycle->hasBrowser())
-	{
-		if ( (finddown == 1) || (opendown == 1) || (forwarddown==1) || (trackdown == 1) )
-		{
-			int loop = media_cycle->getClickedNode();
-			std::cout << "node " << loop << " selected" << std::endl;
-			//media_cycle->hoverWithPointerId(event->x(),event->y(),-1);//mouse
-			//int loop = media_cycle->getClosestNode();
-
-			if(loop >= 0)
-			{
-			if (finddown == 1)
-				{
-					#if defined (__APPLE__)
-						std::stringstream command;
-						//command << "open " << fs::path(media_cycle->getLibrary()->getMedia(loop)->getFileName()).parent_path();// opens the containing directory using the Finder
-						command << "open -R '" << media_cycle->getLibrary()->getMedia(loop)->getFileName() << "'" ;// opens the containing directory using the Finder and highlights the file!
-						try {
-							system(command.str().c_str());
-						}
-						catch (const exception& e) {
-							cout << "ACOsgCompositeViewQt: caught exception while trying to open media file " << media_cycle->getLibrary()->getMedia(loop)->getFileName() << " with the OSX Finder: " << e.what() << endl;
-						}
-					#endif //defined (__APPLE__)
-				}
-				else if (opendown == 1)
-				{
-					#if defined (__APPLE__)
-						std::stringstream command;
-						ACMediaType _media_type = media_cycle->getLibrary()->getMedia(loop)->getMediaType();
-						if (_media_type == MEDIA_TYPE_IMAGE || _media_type == MEDIA_TYPE_VIDEO)
-							command << "open -a Preview '";
-						else if (_media_type == MEDIA_TYPE_TEXT)
-							command << "open '"; // uses TextEdit or other default text application if customized OS-wide
-						else
-							command << "open -R '"; // no iTunes for audio! 3Dmodel default applications?
-						command << media_cycle->getLibrary()->getMedia(loop)->getFileName() << "'" ;
-						try {
-							system(command.str().c_str());
-						}	
-						catch (const exception& e) {
-							cout << "ACOsgCompositeViewQt: caught exception while trying to open media file " << media_cycle->getLibrary()->getMedia(loop)->getFileName() << " with the OSX-wide prefered application: " << e.what() << endl;
-						}	
-					#endif //defined (__APPLE__)
-				}
-				else if (forwarddown==1)
-				{
-					if (media_cycle->getBrowser()->getMode() == AC_MODE_CLUSTERS){
-						// store first otherwise we store the next state
-						media_cycle->storeNavigationState();
-						media_cycle->incrementLoopNavigationLevels(loop);
-					}
-					media_cycle->setReferenceNode(loop);
-					media_cycle->updateDisplay(true);
-				}
-				else if (trackdown == 1)
-				{
-					if (mediaOnTrack != -1)
-						this->getBrowserRenderer()->resetNodeColor(mediaOnTrack);
-
-					mediaOnTrack = loop;
-					if (mediaOnTrack != -1)
-						this->getBrowserRenderer()->changeNodeColor(mediaOnTrack, Vec4(1.0,1.0,1.0,1.0));//CF color the node of the media on track in white
-
-					/*if ( timeline_renderer->getTrack(0)!=0 )
-					{*/
-
-						if (sepy==0)
-						{
-							sepy = height()/4;// CF browser/timeline proportions at startup
-							timeline_renderer->updateSize(width(),sepy);
-							this->updateBrowserView(width(),height());
-							this->updateTimelineView(width(),height());
-							this->updateTimelineControlsView(width(),height());
-							this->updateHUDCamera(width(),height());
-
-							media_cycle->setNeedsDisplay(true);
-						}
-						/*
-						if (track_playing) {
-
-							media_cycle->getBrowser()->toggleSourceActivity( timeline_renderer->getTrack(0)->getMediaIndex() );
-							track_playing = false;
-							}
-						*/
-						if (timeline_renderer->getNumberOfTracks()==0){
-							//this->getTimelineRenderer()->addTrack(loop);
-							this->getTimelineRenderer()->addTrack(media_cycle->getLibrary()->getMedia(loop));
-						}
-						else {
-							//this->getTimelineRenderer()->getTrack(0)->updateMedia( loop ); //media_cycle->getLibrary()->getMedia(loop) );
-							this->getTimelineRenderer()->getTrack(0)->updateMedia(media_cycle->getLibrary()->getMedia(loop));
-						}	
-						
-							//this->getTimelineControlsRenderer()->getControls(0)->updateMedia( loop ); //media_cycle->getLibrary()->getMedia(loop) );
-						media_cycle->setNeedsDisplay(true);
-					//}
-				}
-			}
-		}
-		media_cycle->setClickedNode(-1);
-	}
+    this->propagateEventToActions(event);
+	if (media_cycle == 0) return;
+    media_cycle->setClickedNode(-1);
 	mousedown = 0;
-	borderdown = 0;
+    borderdown = 0;
 	media_cycle->setNeedsDisplay(true);
 }
 

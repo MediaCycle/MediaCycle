@@ -130,7 +130,7 @@ void ACMultiMediaCycleOsgQt::mediacycleCallback(const char* message)
 
 ACMultiMediaCycleOsgQt::ACMultiMediaCycleOsgQt(QWidget *parent) : QMainWindow(parent),
 	features_known(false), plugins_scanned(false), detachedBrowser(0),
-	aboutDialog(0),compositeOsgView(0),osgViewDock(0),osgViewDockWidget(0),osgViewDockLayout(0),osgViewDockTitleBar(0),progressBar(0)
+	aboutDialog(0),controlsDialog(0),compositeOsgView(0),osgViewDock(0),osgViewDockWidget(0),osgViewDockLayout(0),osgViewDockTitleBar(0),progressBar(0)
 {
 	ui.setupUi(this); // first thing to do
 	this->media_type = MEDIA_TYPE_NONE;
@@ -191,7 +191,7 @@ ACMultiMediaCycleOsgQt::ACMultiMediaCycleOsgQt(QWidget *parent) : QMainWindow(pa
     osgViewDockWidget->setLayout(osgViewDockLayout);
 
 	osgViewDock = new QDockWidget(this);
-	osgViewDock->setSizePolicy ( QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding );
+    osgViewDock->setSizePolicy ( QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding );
 	osgViewDock->setWidget(osgViewDockWidget);
 	osgViewDock->setAllowedAreas(Qt::RightDockWidgetArea);
 	osgViewDock->setFeatures(QDockWidget::DockWidgetFloatable);
@@ -237,6 +237,11 @@ ACMultiMediaCycleOsgQt::ACMultiMediaCycleOsgQt(QWidget *parent) : QMainWindow(pa
 	// Keeps actions (mouse/keyboard shortcuts) active in fullscreen mode when bars are hidden
 	this->addActions(ui.toolbar->actions());
 	this->addActions(ui.menubar->actions());
+	this->addActions(ui.menuFile->actions());
+	this->addActions(ui.menuConfig->actions());
+	this->addActions(ui.menuDisplay->actions());
+	this->addActions(ui.menuHelp->actions());	
+    //this->addActions(compositeOsgView->actions());
 }
 
 ACMultiMediaCycleOsgQt::~ACMultiMediaCycleOsgQt(){
@@ -248,6 +253,7 @@ ACMultiMediaCycleOsgQt::~ACMultiMediaCycleOsgQt(){
     for (dwiter=dockWidgets.begin(); dwiter!=dockWidgets.end(); dwiter++)
         delete *dwiter;
     if (aboutDialog) delete aboutDialog;
+	if (controlsDialog) delete controlsDialog;
     if (detachedBrowser) delete detachedBrowser;
 	if (compositeOsgView) delete compositeOsgView;
 	if (progressBar) delete progressBar;
@@ -671,6 +677,28 @@ void ACMultiMediaCycleOsgQt::on_actionEdit_Config_File_triggered(bool checked){
 	settingsDialog->setFocus();
 }
 
+void ACMultiMediaCycleOsgQt::on_actionEdit_Input_Controls_triggered(bool checked){
+
+    if (controlsDialog == 0){
+        //this->addActions(compositeOsgView->actions());
+        //std::cout << "this->actions().size() " << this->actions().size() << std::endl;
+        QList<QAction *> _actions = QList<QAction *> (this->actions());
+        //std::cout << "_actions.size() " << _actions.size() << std::endl;
+        _actions.append(compositeOsgView->actions());
+        //std::cout << "compositeOsgView->actions().size() " << compositeOsgView->actions().size() << std::endl;
+        //std::cout << "_actions.size() " << _actions.size() << std::endl;
+        controlsDialog = new ACInputControlsDialogQt(_actions,this);
+        //controlsDialog = new ACInputControlsDialogQt(this->actions(),this);
+    }
+
+    if(controlsDialog->isVisible()){
+        controlsDialog->hide();
+    }
+    else{
+        controlsDialog->show();
+    }
+}
+
 // XS TODO clean this !!
 bool ACMultiMediaCycleOsgQt::addControlDock(ACAbstractDockWidgetQt* dock)
 {
@@ -790,7 +818,6 @@ bool ACMultiMediaCycleOsgQt::addAboutDialog(ACAbstractAboutDialogQt* dialog)
 	}
 
 	aboutDialog = dialog;
-
 	return true;
 }
 
@@ -1277,7 +1304,7 @@ void ACMultiMediaCycleOsgQt::loadDefaultConfig(ACMediaType _media_type, ACBrowse
         }
     }
 	this->configureDockWidgets(_media_type);
-        //this->configurePluginDock();
+    //this->configurePluginDock();
 }
 
 void ACMultiMediaCycleOsgQt::comboDefaultSettingsChanged(){

@@ -55,7 +55,7 @@ bool ACOsgBrowserEventHandler::handle(const osgGA::GUIEventAdapter& ea,osgGA::GU
 		case(osgGA::GUIEventAdapter::KEYDOWN):
 		{
 			#if defined (USE_DEBUG)
-				std::cout << "Key (OSG) '" << (char)ea.getKey() << "'" << std::endl;
+                //std::cout << "Key (OSG) '" << (char)ea.getKey() << "'" << std::endl;
 			#endif //defined (USE_DEBUG)
 /*
 			switch( ea.getKey() )
