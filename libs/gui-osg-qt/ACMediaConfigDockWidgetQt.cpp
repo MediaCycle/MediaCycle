@@ -49,13 +49,14 @@ ACMediaConfigDockWidgetQt::ACMediaConfigDockWidgetQt(QWidget *parent)
 	#if defined (SUPPORT_VIDEO)
 		ui.comboDefaultSettings->addItem(QString("Video"));
 	#endif //defined (SUPPORT_VIDEO)
-	#if defined (SUPPORT_3DMODEL)
+    #if defined (SUPPORT_3DMODEL)
 		ui.comboDefaultSettings->addItem(QString("3DModel"));
 	#endif //defined (SUPPORT_3DMODEL)
 	#if defined (SUPPORT_TEXT)
 		ui.comboDefaultSettings->addItem(QString("Text"));
 	#endif //defined (SUPPORT_TEXT)
+    #if defined (SUPPORT_MULTIMEDIA)
 	ui.comboDefaultSettings->addItem(QString("Mixed"));
-	
+    #endif //defined (SUPPORT_MULTIMEDIA)
 	this->show();
 }

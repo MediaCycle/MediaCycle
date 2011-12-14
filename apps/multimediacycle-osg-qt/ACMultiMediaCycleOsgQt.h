@@ -135,6 +135,9 @@ public:
 
 	bool removePluginFromLibrary(std::string _plugin_name, std::string _library_path);
 
+    std::string getPluginPathFromBaseName(std::string basename);
+    int loadPluginFromBaseName(std::string basename);
+    int tryLoadFeaturePluginFromBaseName(std::string basename);
 	void loadDefaultConfig(ACMediaType _media_type = MEDIA_TYPE_IMAGE, ACBrowserMode _browser_mode = AC_MODE_CLUSTERS);
 	void synchronizeFeaturesWeights();
 	
