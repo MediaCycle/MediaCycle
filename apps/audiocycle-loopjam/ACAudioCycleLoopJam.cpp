@@ -86,7 +86,7 @@ void ACAudioCycleLoopJam::loopXML(){
 	this->clean(true);
 	
 	this->readXMLConfig(XMLfiles[count]);
-	setDefaultWaveform(AC_BROWSER_AUDIO_WAVEFORM_NONE);
+    setDefaultWaveform(AC_BROWSER_AUDIO_WAVEFORM_CLASSIC);
 	
 	count++;
 }
