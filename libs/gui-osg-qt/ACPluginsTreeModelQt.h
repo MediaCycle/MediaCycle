@@ -1,5 +1,5 @@
 /*
- *  pluginsTreeModel.h
+ *  ACPluginsTreeModelQt.h
  *  MediaCycle
  *
  *  @author Xavier Siebert
@@ -33,22 +33,22 @@
  */
 
 
-#ifndef PLUGINSTREEMODEL_H
-#define PLUGINSTREEMODEL_H
+#ifndef ACPluginsTreeModelQt_H
+#define ACPluginsTreeModelQt_H
 
 #include <QAbstractItemModel>
 #include <QModelIndex>
 #include <QVariant>
 
-class pluginsTreeItem;
+class ACPluginsTreeItemQt;
 
-class pluginsTreeModel : public QAbstractItemModel {
+class ACPluginsTreeModelQt : public QAbstractItemModel {
 	Q_OBJECT
 	
 public:
-	pluginsTreeModel(QObject *parent = 0);
-//	pluginsTreeModel(const QString &data, QObject *parent = 0);
-	~pluginsTreeModel();
+    ACPluginsTreeModelQt(QObject *parent = 0);
+//	ACPluginsTreeModelQt(const QString &data, QObject *parent = 0);
+    ~ACPluginsTreeModelQt();
 	
 	QVariant data(const QModelIndex &index, int role) const;
 	Qt::ItemFlags flags(const QModelIndex &index) const;
@@ -68,12 +68,12 @@ public:
                  int role = Qt::EditRole);
 
 	// XS 
-	void addRow(pluginsTreeItem *row);
-	pluginsTreeItem* getRootItem() {return rootItem;}
-	pluginsTreeItem *getItem(const QModelIndex &index) const;
+    void addRow(ACPluginsTreeItemQt *row);
+    ACPluginsTreeItemQt* getRootItem() {return rootItem;}
+    ACPluginsTreeItemQt *getItem(const QModelIndex &index) const;
 
 private:
-	pluginsTreeItem *rootItem;
+    ACPluginsTreeItemQt *rootItem;
 };
 
 #endif

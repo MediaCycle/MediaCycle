@@ -170,7 +170,7 @@ ACMultiMediaCycleOsgQt::ACMultiMediaCycleOsgQt(QWidget *parent) : QMainWindow(pa
 	aboutDialogFactory = new ACAboutDialogFactoryQt();
 
 	// uses another window for settings = editing the config file
-	settingsDialog = new SettingsDialog(this);
+    settingsDialog = new ACSettingsDialogQt(this);
 
 	// This is required to populate the available file extensions list at startup
 	// until we clean mediacycle instead of deleting/creating it at every media type change.

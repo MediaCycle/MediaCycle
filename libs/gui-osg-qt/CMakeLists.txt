@@ -1,18 +1,14 @@
 IF ( USE_QT4 )
 
-	FILE(GLOB SRC *.cpp)
-	FILE(GLOB HDR *.h)
-
+	FILE(GLOB mediacycle-osg-qt_SRCS *.cpp)
+	FILE(GLOB mediacycle-osg-qt_HDRS *.h)
 	FILE(GLOB mediacycle-osg-qt_UIS *.ui)
-	STRING(REPLACE ".ui" ".cpp" mediacycle-osg-qt_SRCS "${mediacycle-osg-qt_UIS}")
-	STRING(REPLACE ".ui" ".h" mediacycle-osg-qt_MOC_HDRS "${mediacycle-osg-qt_UIS}")
 
-	# Generates ui_ACAudioControlsDockWidgetQt.h and ui_ACVideooControlsDockWidgetQt.h 
+	# Generates ui_*.h files 
 	QT4_WRAP_UI(mediacycle-osg-qt_UIS_H ${mediacycle-osg-qt_UIS})
 
-	# Generates moc_ACAudioControlsDockWidgetQt.cxx and moc_ACVideoControlsDockWidgetQt.cxx
-	#QT4_WRAP_CPP(mediacycle-osg-qt_MOC_SRCS ${mediacycle-osg-qt_MOC_HDRS})
-	QT4_WRAP_CPP(mediacycle-osg-qt_MOC_SRCS ${HDR} OPTIONS "-nw") # for all headers that potentially declare Q_OBJECT, otherwise warnings are suppressed
+	# Generates moc_*.cxx files
+	QT4_WRAP_CPP(mediacycle-osg-qt_MOC_SRCS ${mediacycle-osg-qt_HDRS} OPTIONS "-nw") # for all headers that potentially declare Q_OBJECT, otherwise warnings are suppressed
 
 	SET(mediacycle-osg-qt_RCC ACOsgQtResources.qrc)
 	QT4_ADD_RESOURCES(mediacycle-osg-qt_RCC_SRCS ${mediacycle-osg-qt_RCC})
@@ -21,7 +17,7 @@ IF ( USE_QT4 )
 	# the UI file won't be wrapped!
 	include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
-	ADD_LIBRARY(mediacycle-osg-qt STATIC ${SRC} ${HDR} ${mediacycle-osg-qt_UIS_H} ${mediacycle-osg-qt_MOC_SRCS} ${mediacycle-osg-qt_RCC_SRCS})
+	ADD_LIBRARY(mediacycle-osg-qt STATIC ${mediacycle-osg-qt_SRCS} ${mediacycle-osg-qt_HDRS} ${mediacycle-osg-qt_UIS_H} ${mediacycle-osg-qt_MOC_SRCS} ${mediacycle-osg-qt_RCC_SRCS})
 	#ADD_DEPENDENCIES(mediacycle-osg-qt mediacycle)
 	ADD_DEPENDENCIES(mediacycle-osg-qt mediacycle-osg)
 	IF(SUPPORT_AUDIO)
@@ -32,7 +28,7 @@ IF ( USE_QT4 )
 		ADD_DEPENDENCIES(mediacycle-osg-qt armadillo-utils audiofeatures audiogarden)
 	ENDIF()
 
-	TARGET_LINK_LIBRARIES(mediacycle-osg-qt mediacycle)
+	#TARGET_LINK_LIBRARIES(mediacycle-osg-qt mediacycle)
 	TARGET_LINK_LIBRARIES(mediacycle-osg-qt mediacycle-osg)
 	TARGET_LINK_LIBRARIES(mediacycle-osg-qt ${OPENSCENEGRAPH_LIBRARIES})
 	TARGET_LINK_LIBRARIES(mediacycle-osg-qt ${Boost_SYSTEM_LIBRARY})

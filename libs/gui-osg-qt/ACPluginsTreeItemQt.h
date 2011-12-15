@@ -1,5 +1,5 @@
 /*
- *  pluginsTreeItem.h
+ *  ACPluginsTreeItemQt.h
  *  MediaCycle
  *
  *  @author Xavier Siebert
@@ -32,19 +32,19 @@
  *
  */
 
-#ifndef PLUGINSTREEITEM_H
-#define PLUGINSTREEITEM_H
+#ifndef ACPluginsTreeItemQt_H
+#define ACPluginsTreeItemQt_H
 
 #include <QList>
 #include <QVariant>
 #include <QVector>
 
-class pluginsTreeItem {
+class ACPluginsTreeItemQt {
 public:
-	pluginsTreeItem(const QVector<QVariant> &data, pluginsTreeItem *parent = 0);
-	~pluginsTreeItem();
+    ACPluginsTreeItemQt(const QVector<QVariant> &data, ACPluginsTreeItemQt *parent = 0);
+    ~ACPluginsTreeItemQt();
 	
-	void appendChild(pluginsTreeItem *child);
+    void appendChild(ACPluginsTreeItemQt *child);
 	
 	int childCount() const;
 	int columnCount() const;
@@ -57,12 +57,12 @@ public:
     int childNumber() const;
 	
 	int row() const;
-	pluginsTreeItem *parent();
-	pluginsTreeItem *child(int number);
+    ACPluginsTreeItemQt *parent();
+    ACPluginsTreeItemQt *child(int number);
 
 private:
-	QList<pluginsTreeItem*> childItems;
+    QList<ACPluginsTreeItemQt*> childItems;
     QVector<QVariant> itemData;
-	pluginsTreeItem *parentItem;
+    ACPluginsTreeItemQt *parentItem;
 };
-#endif //PLUGINSTREEITEM_H
+#endif //ACPluginsTreeItemQt_H

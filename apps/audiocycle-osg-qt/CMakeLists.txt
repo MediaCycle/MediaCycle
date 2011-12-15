@@ -1,56 +1,44 @@
 SET(TARGET_NAME "audiocycle-osg-qt")
 IF ( SUPPORT_AUDIO AND USE_QT4 AND USE_OSG AND USE_OSC AND ( OPENAL_FOUND OR PORTAUDIO_FOUND ) )
 
-	IF ( APPLE )
-		SET(APP_TYPE MACOSX_BUNDLE)
-	ENDIF ( APPLE )
+	INCLUDE_DIRECTORIES( ../../libs/gui-osg-qt)
 
-	INCLUDE_DIRECTORIES( ../multimediacycle-osg-qt ../../libs/gui-osg-qt)
+	FILE(GLOB audiocycle-osg-qt_SRCS *.cpp)
+	FILE(GLOB audiocycle-osg-qt_HDRS *.h)
+	FILE(GLOB audiocycle-osg-qt_UIS *.ui)
 
-	SET(multimediacycle-osg-qt_SRCS main.cpp ../multimediacycle-osg-qt/ACMultiMediaCycleOsgQt.cpp)
-	SET(multimediacycle-osg-qt_MOC_HDRS ../multimediacycle-osg-qt/ACMultiMediaCycleOsgQt.h)
-	SET(multimediacycle-osg-qt_UIS ../multimediacycle-osg-qt/ACMultiMediaCycleOsgQt.ui)
+	# Generates ui_*.h files
+	QT4_WRAP_UI(audiocycle-osg-qt_UIS_H ${audiocycle-osg-qt_UIS})
 
-	SET(settings_SRCS ../multimediacycle-osg-qt/settings.cpp ../multimediacycle-osg-qt/pluginsTreeItem.cpp ../multimediacycle-osg-qt/pluginsTreeModel.cpp)
-	SET(settings_MOC_HDRS ../multimediacycle-osg-qt/settings.h ../multimediacycle-osg-qt/pluginsTreeModel.h) # pluginsTreeItem.h pluginsTreeModel.h)
-	SET(settings_UIS ../multimediacycle-osg-qt/settings.ui)
-	SET(settings_HS ../multimediacycle-osg-qt/pluginsTreeItem.h)
-
-	# Generates ui_ACMultiMediaCycleOsgQt.h  and ui_settings.h
-	QT4_WRAP_UI(multimediacycle-osg-qt_UIS_H ${multimediacycle-osg-qt_UIS})
-	QT4_WRAP_UI(settings_UIS_H ${settings_UIS})
-
-	# Generates moc_ACMultiMediaCycleOsgQt.cxx and moc_settings.cxx
-	QT4_WRAP_CPP(multimediacycle-osg-qt_MOC_SRCS ${multimediacycle-osg-qt_MOC_HDRS})
-	QT4_WRAP_CPP(settings_MOC_SRCS ${settings_MOC_HDRS})
+	# Generates moc_*.cxx files
+	QT4_WRAP_CPP(audiocycle-osg-qt_MOC_SRCS ${audiocycle-osg-qt_HDRS} OPTIONS "-nw") # for all headers that potentially declare Q_OBJECT, otherwise warnings are suppressed
 
 	# Don't forget to include output directory, otherwise
 	# the UI file won't be wrapped!
 	include_directories(${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_BINARY_DIR}/libs/gui-osg-qt)
 
 	IF ( WIN32 )
-		ADD_EXECUTABLE(audiocycle-osg-qt WIN32 ${multimediacycle-osg-qt_SRCS} ${multimediacycle-osg-qt_UIS_H} ${multimediacycle-osg-qt_MOC_SRCS} ${settings_SRCS} ${settings_UIS_H} ${settings_MOC_SRCS} ${settings_MOC_HDRS} ${settings_HS})
+		SET(OS_SPECIFIC WIN32)
 	ELSE ()
 		IF ( APPLE )
+			SET(APP_TYPE MACOSX_BUNDLE)
 			SET(MACOSX_BUNDLE_BUNDLE_NAME ${TARGET_NAME})
 			# set how it shows up in the Info.plist file
   			SET(MACOSX_BUNDLE_ICON_FILE MultiMediaCycle.icns) 
   			# set where in the bundle to put the icns file
   			SET_SOURCE_FILES_PROPERTIES(${CMAKE_SOURCE_DIR}/data/icons/MultiMediaCycle.icns PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
   			# include the icns file in the target
-  			SET(multimediacycle-osg-qt_SRCS ${multimediacycle-osg-qt_SRCS} ${CMAKE_SOURCE_DIR}/data/icons/MultiMediaCycle.icns)
-
-			ADD_EXECUTABLE(audiocycle-osg-qt ${APP_TYPE} ${MACOSX_BUNDLE_INFO_PLIST} ${multimediacycle-osg-qt_SRCS} ${multimediacycle-osg-qt_UIS_H} ${multimediacycle-osg-qt_MOC_SRCS} ${settings_SRCS} ${settings_UIS_H} ${settings_MOC_SRCS} ${settings_MOC_HDRS} ${settings_HS})
-		ELSE ()
-			ADD_EXECUTABLE(audiocycle-osg-qt ${multimediacycle-osg-qt_SRCS} ${multimediacycle-osg-qt_UIS_H} ${multimediacycle-osg-qt_MOC_SRCS} ${settings_SRCS} ${settings_UIS_H} ${settings_MOC_SRCS} ${settings_MOC_HDRS} ${settings_HS})
+  			SET(audiocycle-osg-qt_SRCS ${audiocycle-osg-qt_SRCS} ${CMAKE_SOURCE_DIR}/data/icons/MultiMediaCycle.icns)
+			SET(OS_SPECIFIC ${APP_TYPE} ${MACOSX_BUNDLE_INFO_PLIST})
 		ENDIF()
 	ENDIF()
+	ADD_EXECUTABLE(audiocycle-osg-qt ${OS_SPECIFIC} ${audiocycle-osg-qt_SRCS} ${audiocycle-osg-qt_HDRS} ${audiocycle-osg-qt_UIS_H} ${audiocycle-osg-qt_MOC_SRCS})
 
-	ADD_DEPENDENCIES(audiocycle-osg-qt mediacycle)
-	ADD_DEPENDENCIES(audiocycle-osg-qt mediacycle-io-osc)
-	ADD_DEPENDENCIES(audiocycle-osg-qt mediacycle-osg)
+	#ADD_DEPENDENCIES(audiocycle-osg-qt mediacycle) # mediacycle-osg-qt depends on it
+	#ADD_DEPENDENCIES(audiocycle-osg-qt mediacycle-io-osc) # mediacycle-osg-qt depends on it
+	#ADD_DEPENDENCIES(audiocycle-osg-qt mediacycle-osg) # mediacycle-osg-qt depends on it
 	ADD_DEPENDENCIES(audiocycle-osg-qt mediacycle-osg-qt)
-	ADD_DEPENDENCIES(audiocycle-osg-qt audioengine)
+	#ADD_DEPENDENCIES(audiocycle-osg-qt audioengine) # mediacycle-osg-qt depends on it
 	ADD_DEPENDENCIES(audiocycle-osg-qt mc_visualisation)
 	ADD_DEPENDENCIES(audiocycle-osg-qt mc_audio)
 	ADD_DEPENDENCIES(audiocycle-osg-qt mc_segmentation)

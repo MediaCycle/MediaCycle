@@ -1,62 +1,46 @@
 SET(TARGET_NAME "videocycle-osg-qt")
 IF ( SUPPORT_VIDEO AND USE_QT4 AND USE_OSG AND USE_OSC )
 
-	IF ( APPLE )
-		SET(APP_TYPE MACOSX_BUNDLE)
-	ENDIF ( APPLE )
+	INCLUDE_DIRECTORIES( ../../libs/gui-osg-qt)
 
-	INCLUDE_DIRECTORIES( ../multimediacycle-osg-qt ../../libs/gui-osg-qt)
+	FILE(GLOB videocycle-osg-qt_SRCS *.cpp)
+	FILE(GLOB videocycle-osg-qt_HDRS *.h)
+	FILE(GLOB videocycle-osg-qt_UIS *.ui)
 
-	SET(multimediacycle-osg-qt_SRCS main.cpp ../multimediacycle-osg-qt/ACMultiMediaCycleOsgQt.cpp)
-	SET(multimediacycle-osg-qt_MOC_HDRS ../multimediacycle-osg-qt/ACMultiMediaCycleOsgQt.h)
-	SET(multimediacycle-osg-qt_UIS ../multimediacycle-osg-qt/ACMultiMediaCycleOsgQt.ui)
+	# Generates ui_*.h files
+	QT4_WRAP_UI(videocycle-osg-qt_UIS_H ${videocycle-osg-qt_UIS})
 
-	SET(settings_SRCS ../multimediacycle-osg-qt/settings.cpp ../multimediacycle-osg-qt/pluginsTreeItem.cpp ../multimediacycle-osg-qt/pluginsTreeModel.cpp)
-	SET(settings_MOC_HDRS ../multimediacycle-osg-qt/settings.h ../multimediacycle-osg-qt/pluginsTreeModel.h) # pluginsTreeItem.h pluginsTreeModel.h)
-	SET(settings_UIS ../multimediacycle-osg-qt/settings.ui)
-	SET(settings_HS ../multimediacycle-osg-qt/pluginsTreeItem.h)
-
-	# Generates ui_ACMultiMediaCycleOsgQt.h  and ui_settings.h
-	QT4_WRAP_UI(multimediacycle-osg-qt_UIS_H ${multimediacycle-osg-qt_UIS})
-	QT4_WRAP_UI(settings_UIS_H ${settings_UIS})
-
-	# Generates moc_ACMultiMediaCycleOsgQt.cxx and moc_settings.cxx
-	QT4_WRAP_CPP(multimediacycle-osg-qt_MOC_SRCS ${multimediacycle-osg-qt_MOC_HDRS})
-	QT4_WRAP_CPP(settings_MOC_SRCS ${settings_MOC_HDRS})
+	# Generates moc_*.cxx files
+	QT4_WRAP_CPP(videocycle-osg-qt_MOC_SRCS ${videocycle-osg-qt_HDRS} OPTIONS "-nw") # for all headers that potentially declare Q_OBJECT, otherwise warnings are suppressed
 
 	# Don't forget to include output directory, otherwise
 	# the UI file won't be wrapped!
 	include_directories(${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_BINARY_DIR}/libs/gui-osg-qt)
 
 	IF ( WIN32 )
-		ADD_EXECUTABLE(videocycle-osg-qt WIN32 ${multimediacycle-osg-qt_SRCS} ${multimediacycle-osg-qt_UIS_H} ${multimediacycle-osg-qt_MOC_SRCS} ${settings_SRCS} ${settings_UIS_H} ${settings_MOC_SRCS} ${settings_MOC_HDRS} ${settings_HS})
+		SET(OS_SPECIFIC WIN32)
 	ELSE ()
 		IF ( APPLE )
+			SET(APP_TYPE MACOSX_BUNDLE)
 			SET(MACOSX_BUNDLE_BUNDLE_NAME ${TARGET_NAME})
 			# set how it shows up in the Info.plist file
-  			SET(MACOSX_BUNDLE_ICON_FILE MultiMediaCycle.icns)
+  			SET(MACOSX_BUNDLE_ICON_FILE MultiMediaCycle.icns) 
   			# set where in the bundle to put the icns file
   			SET_SOURCE_FILES_PROPERTIES(${CMAKE_SOURCE_DIR}/data/icons/MultiMediaCycle.icns PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
   			# include the icns file in the target
-  			SET(multimediacycle-osg-qt_SRCS ${multimediacycle-osg-qt_SRCS} ${CMAKE_SOURCE_DIR}/data/icons/MultiMediaCycle.icns)
-
-			ADD_EXECUTABLE(videocycle-osg-qt ${APP_TYPE} ${MACOSX_BUNDLE_INFO_PLIST} ${multimediacycle-osg-qt_SRCS} ${multimediacycle-osg-qt_UIS_H} ${multimediacycle-osg-qt_MOC_SRCS} ${settings_SRCS} ${settings_UIS_H} ${settings_MOC_SRCS} ${settings_MOC_HDRS} ${settings_HS})
-
-			#set_target_properties(videocycle-osg-qt PROPERTIES MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/Info.plist)
-			#set_source_files_properties(PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
-		ELSE ()
-			SET(APP_ICON ${CMAKE_SOURCE_DIR}/data/icons/48px/MultiMediaCycle.png )
-			ADD_EXECUTABLE(videocycle-osg-qt ${multimediacycle-osg-qt_SRCS} ${multimediacycle-osg-qt_UIS_H} ${multimediacycle-osg-qt_MOC_SRCS} ${settings_SRCS} ${settings_UIS_H} ${settings_MOC_SRCS} ${settings_MOC_HDRS} ${settings_HS})
+  			SET(videocycle-osg-qt_SRCS ${videocycle-osg-qt_SRCS} ${CMAKE_SOURCE_DIR}/data/icons/MultiMediaCycle.icns)
+			SET(OS_SPECIFIC ${APP_TYPE} ${MACOSX_BUNDLE_INFO_PLIST})
 		ENDIF()
 	ENDIF()
+	ADD_EXECUTABLE(videocycle-osg-qt ${OS_SPECIFIC} ${videocycle-osg-qt_SRCS} ${videocycle-osg-qt_HDRS} ${videocycle-osg-qt_UIS_H} ${videocycle-osg-qt_MOC_SRCS})
 
-	ADD_DEPENDENCIES(videocycle-osg-qt mediacycle)
-	ADD_DEPENDENCIES(videocycle-osg-qt mediacycle-io-osc)
-	ADD_DEPENDENCIES(videocycle-osg-qt mediacycle-osg)
+	#ADD_DEPENDENCIES(videocycle-osg-qt mediacycle) # mediacycle-osg-qt depends on it
+	#ADD_DEPENDENCIES(videocycle-osg-qt mediacycle-osg) # mediacycle-osg-qt depends on it
+	#ADD_DEPENDENCIES(videocycle-osg-qt mediacycle-io-osc) # mediacycle-osg-qt depends on it
 	ADD_DEPENDENCIES(videocycle-osg-qt mediacycle-osg-qt)
-	IF(SUPPORT_AUDIO)
-		ADD_DEPENDENCIES(videocycle-osg-qt audioengine)
-	ENDIF()
+	#IF(SUPPORT_AUDIO)
+		#ADD_DEPENDENCIES(videocycle-osg-qt audioengine) # mediacycle-osg-qt depends on it
+	#ENDIF()
 	ADD_DEPENDENCIES(videocycle-osg-qt mc_visualisation)
 	ADD_DEPENDENCIES(videocycle-osg-qt mc_video)
 	ADD_DEPENDENCIES(videocycle-osg-qt mc_segmentation)

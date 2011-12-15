@@ -1,5 +1,5 @@
 /* 
- * File:   settings.h
+ * File:   ACSettingsDialogQt.h
  * Author: xavier
  * inspired from Qt's "browser" example
  *
@@ -38,15 +38,15 @@
 #include <QDialog>
 #include <QtGui>
 
-#include "pluginsTreeItem.h"
-#include "pluginsTreeModel.h"
+#include "ACPluginsTreeItemQt.h"
+#include "ACPluginsTreeModelQt.h"
 
-#include "ui_settings.h"
+#include "ui_ACSettingsDialogQt.h"
 
 #include "ACMultiMediaCycleOsgQt.h"
-#include "MediaCycle.h"
-#include "ACMediaTypes.h" // for ACMediaType
-#include "ACMediaBrowser.h" // for ACBrowserMode
+#include <MediaCycle.h>
+#include <ACMediaTypes.h> // for ACMediaType
+#include <ACMediaBrowser.h> // for ACBrowserMode
 
 #include <map>
 #include <string>
@@ -54,13 +54,13 @@
 // forward declaration
 class ACMultiMediaCycleOsgQt;
 
-class SettingsDialog : public QMainWindow, private Ui::SettingsDialog
+class ACSettingsDialogQt : public QMainWindow, private Ui::ACSettingsDialogQt
 {
     Q_OBJECT
 
 public:
-    SettingsDialog(ACMultiMediaCycleOsgQt* _mc);
-	virtual ~SettingsDialog();
+    ACSettingsDialogQt(ACMultiMediaCycleOsgQt* _mc);
+    virtual ~ACSettingsDialogQt();
 	void setMediaCycleMainWindow(ACMultiMediaCycleOsgQt* _mc); 
 		
 	// Close Event define what to do when window is closed
@@ -104,7 +104,7 @@ private:
 //	std::string plugins_library;
 		
 	// for plugins tree view
-	pluginsTreeModel* ptm;
+    ACPluginsTreeModelQt* ptm;
 };
 
 #endif // SETTINGS_H

@@ -1,5 +1,5 @@
 /*
- *  pluginsTreeModel.cpp
+ *  ACPluginsTreeModelQt.cpp
  *  MediaCycle
  *
  *  @author Xavier Siebert
@@ -34,54 +34,54 @@
 
 #include <QtGui>
 
-#include "pluginsTreeItem.h"
-#include "pluginsTreeModel.h"
+#include "ACPluginsTreeItemQt.h"
+#include "ACPluginsTreeModelQt.h"
 
-pluginsTreeModel::pluginsTreeModel(QObject *parent) 
+ACPluginsTreeModelQt::ACPluginsTreeModelQt(QObject *parent)
 : QAbstractItemModel(parent) {
     QVector<QVariant> rootData;
     rootData << "Plugin Name" << "Slider Number";
-    rootItem = new pluginsTreeItem(rootData);
+    rootItem = new ACPluginsTreeItemQt(rootData);
 }
 
-//pluginsTreeModel::pluginsTreeModel(const QString &data, QObject *parent)
+//ACPluginsTreeModelQt::ACPluginsTreeModelQt(const QString &data, QObject *parent)
 //: QAbstractItemModel(parent) {
 //    QVector<QVariant> rootData;
 //    rootData << "Title" << "Summary";
-//    rootItem = new pluginsTreeItem(rootData);
+//    rootItem = new ACPluginsTreeItemQt(rootData);
 //    setupModelData(data.split(QString("\n")), rootItem);
 //}
 
-pluginsTreeModel::~pluginsTreeModel() {
+ACPluginsTreeModelQt::~ACPluginsTreeModelQt() {
     delete rootItem;
 }
 
-int pluginsTreeModel::columnCount(const QModelIndex &parent) const {
+int ACPluginsTreeModelQt::columnCount(const QModelIndex &parent) const {
     if (parent.isValid())
-        return static_cast<pluginsTreeItem*>(parent.internalPointer())->columnCount();
+        return static_cast<ACPluginsTreeItemQt*>(parent.internalPointer())->columnCount();
     else
         return rootItem->columnCount();
 }
 
-QVariant pluginsTreeModel::data(const QModelIndex &index, int role) const{
+QVariant ACPluginsTreeModelQt::data(const QModelIndex &index, int role) const{
     if (!index.isValid())
         return QVariant();
 	
     if (role != Qt::DisplayRole)
         return QVariant();
 	
-    pluginsTreeItem *item = static_cast<pluginsTreeItem*>(index.internalPointer());
+    ACPluginsTreeItemQt *item = static_cast<ACPluginsTreeItemQt*>(index.internalPointer());
 	
     return item->data(index.column());
 }
 
-bool pluginsTreeModel::setData(const QModelIndex &index, const QVariant &value,
+bool ACPluginsTreeModelQt::setData(const QModelIndex &index, const QVariant &value,
                         int role)
 {
     if (role != Qt::EditRole)
         return false;
 	
-    pluginsTreeItem *item = getItem(index);
+    ACPluginsTreeItemQt *item = getItem(index);
     bool result = item->setData(index.column(), value);
 	
     if (result)
@@ -91,14 +91,14 @@ bool pluginsTreeModel::setData(const QModelIndex &index, const QVariant &value,
 }
 
 
-Qt::ItemFlags pluginsTreeModel::flags(const QModelIndex &index) const{
+Qt::ItemFlags ACPluginsTreeModelQt::flags(const QModelIndex &index) const{
     if (!index.isValid())
         return 0;
 	
     return Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 }
 
-QVariant pluginsTreeModel::headerData(int section, Qt::Orientation orientation,
+QVariant ACPluginsTreeModelQt::headerData(int section, Qt::Orientation orientation,
                                int role) const {
     if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
         return rootItem->data(section);
@@ -106,31 +106,31 @@ QVariant pluginsTreeModel::headerData(int section, Qt::Orientation orientation,
     return QVariant();
 }
 
-QModelIndex pluginsTreeModel::index(int row, int column, const QModelIndex &parent)
+QModelIndex ACPluginsTreeModelQt::index(int row, int column, const QModelIndex &parent)
 const {
     if (!hasIndex(row, column, parent))
         return QModelIndex();
 	
-    pluginsTreeItem *parentItem;
+    ACPluginsTreeItemQt *parentItem;
 	
     if (!parent.isValid())
         parentItem = rootItem;
     else
-        parentItem = static_cast<pluginsTreeItem*>(parent.internalPointer());
+        parentItem = static_cast<ACPluginsTreeItemQt*>(parent.internalPointer());
 	
-    pluginsTreeItem *childItem = parentItem->child(row);
+    ACPluginsTreeItemQt *childItem = parentItem->child(row);
     if (childItem)
         return createIndex(row, column, childItem);
     else
         return QModelIndex();
 }
 
-QModelIndex pluginsTreeModel::parent(const QModelIndex &index) const{
+QModelIndex ACPluginsTreeModelQt::parent(const QModelIndex &index) const{
     if (!index.isValid())
         return QModelIndex();
 	
-    pluginsTreeItem *childItem = static_cast<pluginsTreeItem*>(index.internalPointer());
-    pluginsTreeItem *parentItem = childItem->parent();
+    ACPluginsTreeItemQt *childItem = static_cast<ACPluginsTreeItemQt*>(index.internalPointer());
+    ACPluginsTreeItemQt *parentItem = childItem->parent();
 	
     if (parentItem == rootItem)
         return QModelIndex();
@@ -138,22 +138,22 @@ QModelIndex pluginsTreeModel::parent(const QModelIndex &index) const{
     return createIndex(parentItem->row(), 0, parentItem);
 }
 
-int pluginsTreeModel::rowCount(const QModelIndex &parent) const {
-    pluginsTreeItem *parentItem;
+int ACPluginsTreeModelQt::rowCount(const QModelIndex &parent) const {
+    ACPluginsTreeItemQt *parentItem;
     if (parent.column() > 0)
         return 0;
 	
     if (!parent.isValid())
         parentItem = rootItem;
     else
-        parentItem = static_cast<pluginsTreeItem*>(parent.internalPointer());
+        parentItem = static_cast<ACPluginsTreeItemQt*>(parent.internalPointer());
 	
     return parentItem->childCount();
 }
 
-bool pluginsTreeModel::insertRows(int position, int rows, const QModelIndex &parent)
+bool ACPluginsTreeModelQt::insertRows(int position, int rows, const QModelIndex &parent)
 {
-    pluginsTreeItem *parentItem = getItem(parent);
+    ACPluginsTreeItemQt *parentItem = getItem(parent);
     bool success;
 	
     beginInsertRows(parent, position, position + rows - 1);
@@ -163,9 +163,9 @@ bool pluginsTreeModel::insertRows(int position, int rows, const QModelIndex &par
     return success;
 }
 
-bool pluginsTreeModel::removeRows(int position, int rows, const QModelIndex &parent)
+bool ACPluginsTreeModelQt::removeRows(int position, int rows, const QModelIndex &parent)
 {
-    pluginsTreeItem *parentItem = getItem(parent);
+    ACPluginsTreeItemQt *parentItem = getItem(parent);
     bool success = true;
 	
     beginRemoveRows(parent, position, position + rows - 1);
@@ -175,10 +175,10 @@ bool pluginsTreeModel::removeRows(int position, int rows, const QModelIndex &par
     return success;
 }
 
-pluginsTreeItem *pluginsTreeModel::getItem(const QModelIndex &index) const
+ACPluginsTreeItemQt *ACPluginsTreeModelQt::getItem(const QModelIndex &index) const
 {
     if (index.isValid()) {
-        pluginsTreeItem *item = static_cast<pluginsTreeItem*>(index.internalPointer());
+        ACPluginsTreeItemQt *item = static_cast<ACPluginsTreeItemQt*>(index.internalPointer());
         if (item) return item;
     }
     return rootItem;
@@ -186,7 +186,7 @@ pluginsTreeItem *pluginsTreeModel::getItem(const QModelIndex &index) const
 
 
 
-void pluginsTreeModel::addRow(pluginsTreeItem *row){
+void ACPluginsTreeModelQt::addRow(ACPluginsTreeItemQt *row){
 	QModelIndex index = QModelIndex(); //this->index(0,0);
 	int r = rowCount();
 	// XS comment
@@ -200,8 +200,8 @@ void pluginsTreeModel::addRow(pluginsTreeItem *row){
 
 
 
-//void pluginsTreeModel::setupModelData(const QStringList &lines, pluginsTreeItem *parent){
-//    QList<pluginsTreeItem*> parents;
+//void ACPluginsTreeModelQt::setupModelData(const QStringList &lines, ACPluginsTreeItemQt *parent){
+//    QList<ACPluginsTreeItemQt*> parents;
 //    QList<int> indentations;
 //    parents << parent;
 //    indentations << 0;
@@ -241,7 +241,7 @@ void pluginsTreeModel::addRow(pluginsTreeItem *row){
 //            }
 //			
 //            // Append a new item to the current parent's list of children.
-//            parents.last()->appendChild(new pluginsTreeItem(columnData, parents.last()));
+//            parents.last()->appendChild(new ACPluginsTreeItemQt(columnData, parents.last()));
 //        }
 //		
 //        number++;

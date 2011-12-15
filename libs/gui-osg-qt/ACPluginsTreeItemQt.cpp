@@ -1,5 +1,5 @@
 /*
- *  pluginsTreeItem.cpp
+ *  ACPluginsTreeItemQt.cpp
  *  MediaCycle
  *
  *  @author Xavier Siebert
@@ -32,46 +32,46 @@
  *
  */
 
-#include "pluginsTreeItem.h"
+#include "ACPluginsTreeItemQt.h"
 
 #include <QStringList>
 
-pluginsTreeItem::pluginsTreeItem(const QVector<QVariant> &data, pluginsTreeItem *parent){
+ACPluginsTreeItemQt::ACPluginsTreeItemQt(const QVector<QVariant> &data, ACPluginsTreeItemQt *parent){
     parentItem = parent;
     itemData = data;
 }
 
-pluginsTreeItem::~pluginsTreeItem() {
+ACPluginsTreeItemQt::~ACPluginsTreeItemQt() {
     qDeleteAll(childItems);
 }
 
-void pluginsTreeItem::appendChild(pluginsTreeItem *item) {
+void ACPluginsTreeItemQt::appendChild(ACPluginsTreeItemQt *item) {
     childItems.append(item);
 }
 
-int pluginsTreeItem::childCount() const {
+int ACPluginsTreeItemQt::childCount() const {
     return childItems.count();
 }
 
-int pluginsTreeItem::columnCount() const {
+int ACPluginsTreeItemQt::columnCount() const {
     return itemData.count();
 }
 
-QVariant pluginsTreeItem::data(int column) const {
+QVariant ACPluginsTreeItemQt::data(int column) const {
     return itemData.value(column);
 }
 
 
 
-pluginsTreeItem *pluginsTreeItem::parent() {
+ACPluginsTreeItemQt *ACPluginsTreeItemQt::parent() {
     return parentItem;
 }
 
-pluginsTreeItem *pluginsTreeItem::child(int number) {
+ACPluginsTreeItemQt *ACPluginsTreeItemQt::child(int number) {
     return childItems.value(number);
 }
 
-bool pluginsTreeItem::setData(int column, const QVariant &value) {
+bool ACPluginsTreeItemQt::setData(int column, const QVariant &value) {
     if (column < 0 || column >= itemData.size())
         return false;
 	
@@ -79,7 +79,7 @@ bool pluginsTreeItem::setData(int column, const QVariant &value) {
     return true;
 }
 
-bool pluginsTreeItem::removeChildren(int position, int count) {
+bool ACPluginsTreeItemQt::removeChildren(int position, int count) {
     if (position < 0 || position + count > childItems.size())
         return false;
 	
@@ -89,14 +89,14 @@ bool pluginsTreeItem::removeChildren(int position, int count) {
     return true;
 }
 
-bool pluginsTreeItem::insertChildren(int position, int count, int columns)
+bool ACPluginsTreeItemQt::insertChildren(int position, int count, int columns)
 {
     if (position < 0 || position > childItems.size())
         return false;
 	
     for (int row = 0; row < count; ++row) {
         QVector<QVariant> data(columns);
-        pluginsTreeItem *item = new pluginsTreeItem(data, this);
+        ACPluginsTreeItemQt *item = new ACPluginsTreeItemQt(data, this);
         childItems.insert(position, item);
     }
 	
@@ -104,7 +104,7 @@ bool pluginsTreeItem::insertChildren(int position, int count, int columns)
 }
 
 
-bool pluginsTreeItem::removeColumns(int position, int columns)
+bool ACPluginsTreeItemQt::removeColumns(int position, int columns)
 {
     if (position < 0 || position + columns > itemData.size())
         return false;
@@ -112,15 +112,15 @@ bool pluginsTreeItem::removeColumns(int position, int columns)
     for (int column = 0; column < columns; ++column)
         itemData.remove(position);
 	
-    foreach (pluginsTreeItem *child, childItems)
+    foreach (ACPluginsTreeItemQt *child, childItems)
 	child->removeColumns(position, columns);
 	
     return true;
 }
 
-int pluginsTreeItem::row() const {
+int ACPluginsTreeItemQt::row() const {
     if (parentItem)
-        return parentItem->childItems.indexOf(const_cast<pluginsTreeItem*>(this));
+        return parentItem->childItems.indexOf(const_cast<ACPluginsTreeItemQt*>(this));
 	
     return 0;
 }

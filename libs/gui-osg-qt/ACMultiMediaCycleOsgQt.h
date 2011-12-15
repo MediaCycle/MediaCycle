@@ -43,7 +43,7 @@
 #include <string.h>
 
 #include <QtGui>
-#include "settings.h" // SettingsDialog
+#include "ACSettingsDialogQt.h" // SettingsDialog
 
 #include "ui_ACMultiMediaCycleOsgQt.h"
 
@@ -66,7 +66,7 @@ QT_BEGIN_NAMESPACE
 class QListWidgetItem;
 QT_END_NAMESPACE
 
-class SettingsDialog; // forward declaration; NB: SettingsDialog member has to be a pointer
+class ACSettingsDialogQt; // forward declaration; NB: SettingsDialog member has to be a pointer
 
 class ACDetachedMediaBrowserOsgQt : public QMainWindow {
 Q_OBJECT
@@ -177,7 +177,7 @@ signals:
 private:
 	// variables
 	Ui::ACMediaCycleOsgQt ui;
-	SettingsDialog *settingsDialog;
+    ACSettingsDialogQt *settingsDialog;
 //	QProgressBar *pb;
 	bool features_known;
 	bool plugins_scanned;
