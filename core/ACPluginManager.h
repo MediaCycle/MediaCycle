@@ -179,6 +179,8 @@ public:
     ACActiveSegmentPlugins *getSegmentPlugins(){return this->mActiveSegmentPlugins;};// returns a container with Segment plugins reference
     int getSegmentPluginsSize(ACMediaType MediaType);
 	
+	ACPreProcessPlugin* getPreProcessPlugin(ACMediaType MediaType);
+	
 	
 private:
 	

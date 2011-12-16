@@ -73,6 +73,8 @@ public:
 	virtual ~ACMedia(); // make this virtual to ensure that destructors of derived classes will be called
 
 	ACMediaType getMediaType() {return media_type;};
+	virtual ACMediaType getActiveSubMediaType() {return media_type;};
+	
 	void setId(int _id) {mid = _id;} // SD TODO - should check for duplicate id?
 	int getId() {return mid;}
 	void setParentId(int _parentid) {parentid = _parentid;} //CF so that segments can be defined as ACMedia having other ACMedia as parents

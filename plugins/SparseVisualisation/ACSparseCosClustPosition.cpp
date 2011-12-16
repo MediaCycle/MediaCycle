@@ -51,6 +51,9 @@ static double getTime()
 
 double ACSparseCosClustPosition::compute_distance(vector<ACMediaFeatures*> &obj1, vector<ACMediaFeatures*> &obj2, const vector<float> &weights, bool inverse_features)
 {
+	int o1=obj1.size();
+	int o2=obj2.size();
+	int o3=weights.size();
 	
 	assert(obj1.size() == obj2.size() && obj1.size() == weights.size()*3);
 	assert(obj1.size()%3==0 && obj1.size()%3==0);
@@ -128,7 +131,7 @@ void ACSparseCosClustPosition::updateNextPositions(ACMediaBrowser* mediaBrowser)
 {
 	
 		
-	std::cout << "ACMediaBrowser::updateNextPositions" <<std::endl;
+	std::cout << "ACSparseCosClustPosition::updateNextPositions" <<std::endl;
 	ACMediaLibrary *lLibrary=mediaBrowser->getLibrary();
 	
 	if (lLibrary->isEmpty() ) return;

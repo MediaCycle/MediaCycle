@@ -578,6 +578,7 @@ int ACMedia::import(std::string _path, int _mid, ACPluginManager *acpl, bool _sa
 		this->features_vectors=acpl->getFeaturesPlugins()->calculate(local_media_data, this, _save_timed_feat);
 		if (this->features_vectors.size()>0)
 			import_ok = 1;
+		this->deleteData();
 	}
 	else {
 		cerr << "<ACMedia::import> no features imported -- no plugin manager for media number: " << _mid << endl;

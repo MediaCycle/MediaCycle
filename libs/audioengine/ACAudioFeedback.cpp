@@ -1811,6 +1811,7 @@ int ACAudioFeedback::createSourceWithPosition(int loop_id, float x, float y, flo
 			resample_ratio = 2.0/(pow(2.0,local_key/12.0));
 			//audio_loop->key += (12-key);
 		}
+
 		resample_ratios[loop_slot] = resample_ratio;
 		//resample_ratio = 1;
 

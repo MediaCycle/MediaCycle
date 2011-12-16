@@ -47,6 +47,9 @@
 #if defined (SUPPORT_VIDEO)
 #include "ACVideoControlsDockWidgetQt.h"
 #endif //defined (SUPPORT_VIDEO)
+#if defined (SUPPORT_MULTIMEDIA)
+#include "ACMediaDocumentOptionDockWidgetQt.h"
+#endif //defined (SUPPORT_MULTIMEDIA)
 
 class ACDockWidgetFactoryQt{
 public:

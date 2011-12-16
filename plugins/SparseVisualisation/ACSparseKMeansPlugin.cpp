@@ -55,8 +55,10 @@ ACSparseKMeansPlugin::~ACSparseKMeansPlugin() {
 std::vector<int> ACSparseKMeansPlugin::initClusterMinMax(ACMediaLibrary * library,int nbNodes,vector<float> weight){
 	//random selection of maxNodeInit*nbNodes in the nodes
 	vector<int> firstSelectedNodes;
+	
 	int object_count = library->getSize();
-
+	if (object_count==0)
+		return firstSelectedNodes;
 	if (object_count<=maxNodeInit*nbNodes)
 		for (int i=0;i<object_count;i++)
 			firstSelectedNodes.push_back(i);
@@ -94,8 +96,8 @@ std::vector<int> ACSparseKMeansPlugin::initClusterMinMax(ACMediaLibrary * librar
 	ret.push_back(firstSelectedNodes[refTemp]);
 	for (int i=1;i<nbNodes;i++)
 	{
-		int maxIndex;
-		float maxValue=0;
+		int maxIndex=0;
+		float maxValue=0.f;
 		for (int k=0;k<firstSelectedNodes.size();k++){
 			float minValue=1000000000.f;
 			int currNode=firstSelectedNodes[k];
@@ -156,7 +158,10 @@ void ACSparseKMeansPlugin::updateClusters(ACMediaBrowser* mediaBrowser,bool need
 	clusterId.resize(object_count);
 	
 	vector<int> initClust;
+	if (object_count==0)
+		return;
 	if (needsCluster){
+		
 		initClust=initClusterMinMax(library,clusterCount,featureWeights);
 		// picking random object as initial cluster center
 		/*srand(15);

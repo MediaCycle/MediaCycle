@@ -543,7 +543,8 @@ void MediaCycle::changeVisualisationPlugin(string pluginName){
 
 void MediaCycle::setPreProcessPlugin(std::string pluginName){
 	ACPlugin* preProcessPlugin = this->getPluginManager()->getPlugin(pluginName);
-	if (preProcessPlugin!=NULL){
+	if (preProcessPlugin!=NULL&&(this->getLibrary()->getMediaType()==preProcessPlugin->getMediaType())){
+		
 		this->getLibrary()->setPreProcessPlugin(preProcessPlugin);
 		cout << "MediaCycle: Preprocessing plugin: " << preProcessPlugin->getName() << endl;
 	}
@@ -753,6 +754,7 @@ void MediaCycle::hoverWithPointerIndex(float xx, float yy, int p_index) {
 }
 
 void MediaCycle::updateDisplay(bool _animate) { mediaBrowser->updateDisplay(_animate);}
+void MediaCycle::initializeFeatureWeights() { mediaBrowser->initializeFeatureWeights();}
 
 // reads in the XML file :
 // - header information

@@ -188,6 +188,7 @@ class ACMediaReaderPlugin:virtual public ACPlugin{
 public:
 	ACMediaReaderPlugin();
 	virtual ACMedia* mediaFactory(ACMediaType mediaType)=0;
+	virtual std::vector<std::string> getExtensionsFromMediaType(ACMediaType media_type)=0;
 };
 
 // the types of the class factories

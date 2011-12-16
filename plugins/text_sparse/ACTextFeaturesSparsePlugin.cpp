@@ -232,6 +232,11 @@ vector<ACMediaFeatures*> ACTextFeaturesSparsePlugin::tfCalculate(ACText* pMedia)
 
 		
 	}
+	if (tfIndex.size()==0)
+	{
+		tfIndex.push_back(0);
+		tfValues.push_back(0);		
+	}
 	ACMediaFeatures* desc0=new ACMediaFeatures(nbTotTerms,"Term Frequency-Inverse Document Frequency: number of terms");
 	desc0->setNeedsNormalization(0);
 	ACMediaFeatures* desc1=new ACMediaFeatures(tfIndex,"Term Frequency-Inverse Document Frequency: Sparse Matrix index");

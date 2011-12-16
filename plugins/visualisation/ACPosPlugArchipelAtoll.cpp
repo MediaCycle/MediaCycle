@@ -1,7 +1,7 @@
 /**
  * @brief ACPosPlugArchipelAtoll.cpp
- * @author Christian Frisson
- * @date 13/09/2011
+ * @author Thierry Ravet
+ * @date 16/12/2011
  * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -68,6 +68,7 @@ ACPosPlugArchipelAtoll::~ACPosPlugArchipelAtoll()
 }
 
 void ACPosPlugArchipelAtoll::updateNextPositions(ACMediaBrowser* mediaBrowser){
+	float lZoom=mediaBrowser->getCameraZoom();
 	
 	mediaBrowser->updateNextPositionsPropeller();
 
@@ -88,10 +89,12 @@ void ACPosPlugArchipelAtoll::updateNextPositions(ACMediaBrowser* mediaBrowser){
 		
 	std::vector<ACMedia*> tmpSegments;
 	float angle;
+	float lDist=0.025;
 	for (long i=0; i<posDocuments.size(); i++){
 		tmpSegments = loops[posDocuments[i]]->getAllSegments();
 		
 		ACPoint parent = mediaBrowser->getMediaNode(posDocuments[i]).getNextPosition();
+		int nCluster=mediaBrowser->getMediaNode(posDocuments[i]).getClusterId();
 		//std::cout << "Media document " << posDocuments[i] << " with position " << parent.x << " " << parent.y << std::endl;
 
 		for (int j=0; j<tmpSegments.size(); j++){
@@ -101,12 +104,13 @@ void ACPosPlugArchipelAtoll::updateNextPositions(ACMediaBrowser* mediaBrowser){
 			
 			ACPoint s;
 			
-			s.x = .025 * cos(angle) + parent.x;
-			s.y = .025 * sin(angle) + parent.y;
+			s.x = lDist * cos(angle) + parent.x;
+			s.y = lDist * sin(angle) + parent.y;
 			s.z = 0;
 			
 			double t = getTime();
 			node.setNextPosition(s, t);
+			//node.setClusterId(nCluster);
 		
 			//std::cout << "Media " << tmpSegments[j]->getId() << " of type " << ACMediaFactory::getInstance().getNormalCaseStringFromMediaType(tmpSegments[j]->getType()) << " with position " << s.x << " " << s.y<< std::endl;				
 			//std::cout << "angle = " << angle << std::endl;			

@@ -56,12 +56,15 @@ void getFreqTerm(vector<int32_t> &ret,std::vector<wchar_t *> termsToFind, int32_
 	ret.clear();
 	int32_t test;
 	test=termsFreqBase->size();
+	
+	const Array<int32_t>* ptrFreq=termsFreqBase->getTermFrequencies();
 	for (int i=0;i<termsToFind.size();i++){	
 		int tempCpt=termsFreqBase->indexOf(termsToFind[i]);
 		if (tempCpt==-1)
 			ret.push_back(0);
 		else {
-			ret.push_back(tempCpt);
+			int tfLoc=(*ptrFreq)[tempCpt];
+			ret.push_back(tfLoc);
 		}
 
 
@@ -163,7 +166,7 @@ void extractIndexTerms(wchar_t**  &outTerms,int &nbOutTerms,ACIndexModifier* inp
 		outTerms[nterms]=chartemp;
 		chartemp=0;
 		//_CLDELETE(tempTerm);
-//		_tprintf(_T("%s\n"),te->term()->text());
+		_tprintf(_T("%s\n"),te->term()->text());
 		/* empty */	
 		
 		nterms++;	
@@ -197,13 +200,13 @@ void extractLuceneFeature(std::vector<float> &output,int32_t docIndex,ACIndexMod
 	}
 	for (int i=0;i<nbTerms; i++) {
 		output.push_back((float)tf[i]/sum);
-		//char charTemp[1024];
-		//mc_wcstoutf8(charTemp,terms[i],1024);
-		//if (tf.values[i]!=0.f)
-		//{	
-		//	printf(("%s\t"),charTemp);
-		//	printf("\ttf:%d\tdf:%d\n",tf.values[i],inputIndex->docFreq(&Term(_T("contents"),terms[i])));
-		//}
+		char charTemp[1024];
+		mc_wcstoutf8(charTemp,terms[i],1024);
+		if (tf[i]!=0.f)
+		{	
+			cout << charTemp<<"\ttf:\t"<<tf[i]<<"\tdf:\t"<<inputIndex->docFreq(&Term(_T("contents"),terms[i]))<<"\n";
+			
+		}
 	}
 #if defined(_ASCII)
 //	printf("\n");

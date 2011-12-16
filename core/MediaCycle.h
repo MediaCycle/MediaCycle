@@ -88,6 +88,7 @@ public:
 	int importXMLLibrary(std::string path);
 	int importMCSLLibrary(std::string path);//CF 31/05/2010 temporary MediaCycle Segmented Library (MCSL) for AudioGarden, adding a parentID for segments to the initial ACL, awaiting approval
 	void libraryContentChanged(int needsNormalizeAndCluster=1);
+	
 	void saveACLLibrary(std::string path);
 	void saveXMLLibrary(std::string path);
 	void saveMCSLLibrary(std::string path);//CF 31/05/2010 temporary MediaCycle Segmented Library (MCSL) for AudioGarden, adding a parentID for segments to the initial ACL, awaiting approval
@@ -143,6 +144,18 @@ public:
 	
 	void setMediaReaderPlugin(std::string pluginName);
 	
+	int setActiveMediaType(std::string mediaName){
+		int ret =mediaLibrary->setActiveMediaType(mediaName);
+		ACMediaType aMediaType=mediaLibrary->getActiveSubMediaType();
+		ACPreProcessPlugin* preProcessPlugin=pluginManager->getPreProcessPlugin(aMediaType);
+		if (preProcessPlugin) {
+			this->getLibrary()->setPreProcessPlugin(preProcessPlugin);
+		}
+		else
+			this->getLibrary()->setPreProcessPlugin(0);
+		return ret ;
+	};
+	
 	void dumpPluginsList();
 
 	// == Media
@@ -154,7 +167,7 @@ public:
 	void setMediaType(ACMediaType _mt);
 	bool changeMediaType(ACMediaType aMediaType);
 
-	std::vector<std::string> getExtensionsFromMediaType(ACMediaType media_type){return ACMediaFactory::getInstance().getExtensionsFromMediaType(media_type);}
+	std::vector<std::string> getExtensionsFromMediaType(ACMediaType media_type){return mediaLibrary->getExtensionsFromMediaType(media_type);}
 	int getThumbnailWidth(int i);
 	int getThumbnailHeight(int i);
 	int getWidth(int i);
@@ -233,6 +246,7 @@ public:
 
 	// == NEW, replaces updateClusters and updateNeighborhoods
 	void updateDisplay(bool animate);
+	void initializeFeatureWeights();
 
 	// == config (in XMl !!)
 	TiXmlHandle readXMLConfigFileHeader(std::string _fname="");

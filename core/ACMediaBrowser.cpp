@@ -69,6 +69,10 @@ static double compute_distance(vector<ACMediaFeatures*> &obj1, vector<ACMediaFea
 
 static double compute_distance(vector<ACMediaFeatures*> &obj1, const vector<vector <float> > &obj2, const vector<float> &weights, bool inverse_features)
 {
+	int s1=obj1.size();
+	int s2=obj2.size();
+	int s3=weights.size();
+	
 	assert(obj1.size() == obj2.size() && obj1.size() == weights.size());
 	int feature_count = obj1.size();
 
@@ -862,6 +866,17 @@ void ACMediaBrowser::updateClusters(bool animate, int needsCluster) {
 		}
 		 */
 	}
+	// Until we design cross-media browsing, mediadocuments should assign their cluster ID to their children media
+    if(this->getLibrary()->getMediaType() == MEDIA_TYPE_MIXED){
+        vector<ACMedia*> medias = this->getLibrary()->getAllMedia();
+        for (int i=0; i < medias.size(); i++){
+            if (medias[i]->getParentId() > -1){
+				int locIdCluster=this->getMediaNode(medias[i]->getParentId()).getClusterId();
+				this->getMediaNode(medias[i]->getId()).setClusterId(locIdCluster);
+            }
+        }
+    }
+	
 }
 
 //CF do we need an extra level of tests along the browsing mode (render inactive during AC_MODE_CLUSTERS?)
@@ -943,11 +958,13 @@ void ACMediaBrowser::updateClustersKMeans(bool animate, int needsCluster) {
 		return;
 	}
 
-	int object_count = mLibrary->getSize();
+	vector<int> currId=mLibrary->getParentIds();
+	//int object_count = mLibrary->getSize();//TR clustering just Parent Nodes
+	int object_count = currId.size();
 
 	// XS note: problem if all media don't have the same number of features
 	//          but we suppose it is not going to happen
-	int feature_count = mLibrary->getMedia(0)->getNumberOfPreProcFeaturesVectors();
+	int feature_count = mLibrary->getMedia(currId[0])->getNumberOfPreProcFeaturesVectors();
 	
 	vector< int > 			cluster_counts;
 	vector<vector<vector <float> > >cluster_accumulators; // cluster, feature, desc
@@ -972,17 +989,18 @@ void ACMediaBrowser::updateClustersKMeans(bool animate, int needsCluster) {
 
 			// initialize cluster center with a randomly chosen object
 			int r = 0;//CF
-			if(mLibrary->getMediaType() != MEDIA_TYPE_MIXED){//CF
-				r = rand() % object_count;
+			//if(mLibrary->getMediaType() != MEDIA_TYPE_MIXED)//TR we work just with parent node, then there is no more mediatypecompatibility problem
+			{//CF
+				//r = rand() % object_count;
 				// SD OCT 2010 - for gradual appearance of media to be more stable
 				r = i % object_count;
 				int l = 100;
 				
 				// TODO SD - Avoid selecting the same twice
-				while(l--)
+				//while(l--)
 				{
-					if(this->getMediaNode(r).getNavigationLevel() >= mNavigationLevel) break;
-					else r = rand() % object_count;
+				//	if(this->getMediaNode(currId[r]).getNavigationLevel() >= mNavigationLevel) break;
+				//	else r = rand() % object_count;
 				}
 				
 				// couldn't find center in this nav level...
@@ -992,15 +1010,15 @@ void ACMediaBrowser::updateClustersKMeans(bool animate, int needsCluster) {
 			for(f=0; f<feature_count; f++)
 			{
 				// XS again, what if all media don't have the same number of features ?
-				int desc_count = mLibrary->getMedia(0)->getPreProcFeaturesVector(f)->getSize();
+				int desc_count = mLibrary->getMedia(currId[0])->getPreProcFeaturesVector(f)->getSize();
 				
 				mClusterCenters[i][f].resize(desc_count);
 				cluster_accumulators[i][f].resize(desc_count);
 
 				for(d=0; d<desc_count; d++)
 				{
-					if(mLibrary->getMedia(r)->getType() == mLibrary->getMediaType())//CF
-						mClusterCenters[i][f][d] = mLibrary->getMedia(r)->getPreProcFeaturesVector(f)->getFeatureElement(d);
+					if(mLibrary->getMedia(currId[r])->getType() == mLibrary->getMediaType())//CF
+						mClusterCenters[i][f][d] = mLibrary->getMedia(currId[r])->getPreProcFeaturesVector(f)->getFeatureElement(d);
 					
 					//printf("cluster  %d center: %f\n", i, mClusterCenters[i][f][d]);
 				}
@@ -1026,7 +1044,7 @@ void ACMediaBrowser::updateClustersKMeans(bool animate, int needsCluster) {
 				for(f=0; f<feature_count; f++)
 				{
 					// XS again, what if all media don't have the same number of features ?
-					int desc_count = mLibrary->getMedia(0)->getPreProcFeaturesVector(f)->getSize();
+					int desc_count = mLibrary->getMedia(currId[0])->getPreProcFeaturesVector(f)->getSize();
 					
 					for(d=0; d<desc_count; d++)
 					{
@@ -1039,14 +1057,14 @@ void ACMediaBrowser::updateClustersKMeans(bool animate, int needsCluster) {
 			{
 				// check if we should include this object
 				// note: the following "if" skips to next i if true.
-				if(this->getMediaNode(i).getNavigationLevel() < mNavigationLevel) continue;
+				if(this->getMediaNode(currId[i]).getNavigationLevel() < mNavigationLevel) continue;
 				
 				// compute distance between this object and every cluster
 				for(j=0; j<mClusterCount; j++)
 				{
 					cluster_distances[j] = 0;
-					if(mLibrary->getMedia(i)->getType() == mLibrary->getMediaType())//CF multimedia compatibility
-						cluster_distances[j] = compute_distance(mLibrary->getMedia(i)->getAllPreProcFeaturesVectors(), mClusterCenters[j], mFeatureWeights, false);
+					if(mLibrary->getMedia(currId[i])->getType() == mLibrary->getMediaType())//CF multimedia compatibility
+						cluster_distances[j] = compute_distance(mLibrary->getMedia(currId[i])->getAllPreProcFeaturesVectors(), mClusterCenters[j], mFeatureWeights, false);
 					
 					
 					//printf("distance cluster %d to object %d = %f\n", j, i,  cluster_distances[j]);
@@ -1068,12 +1086,12 @@ void ACMediaBrowser::updateClustersKMeans(bool animate, int needsCluster) {
 				for(f=0; f<feature_count; f++)
 				{
 					// XS again, what if all media don't have the same number of features ?
-					int desc_count = mLibrary->getMedia(0)->getPreProcFeaturesVector(f)->getSize();
+					int desc_count = mLibrary->getMedia(currId[0])->getPreProcFeaturesVector(f)->getSize();
 					
 					for(d=0; d<desc_count; d++)
 					{
-						if(mLibrary->getMedia(i)->getType() == mLibrary->getMediaType())//CF
-							cluster_accumulators[jmin][f][d] += mLibrary->getMedia(i)->getPreProcFeaturesVector(f)->getFeatureElement(d);
+						if(mLibrary->getMedia(currId[i])->getType() == mLibrary->getMediaType())//CF
+							cluster_accumulators[jmin][f][d] += mLibrary->getMedia(currId[i])->getPreProcFeaturesVector(f)->getFeatureElement(d);
 					}
 				}
 				
@@ -1090,7 +1108,7 @@ void ACMediaBrowser::updateClustersKMeans(bool animate, int needsCluster) {
 					for(f=0; f<feature_count; f++)
 					{
 						// XS again, what if all media don't have the same number of features ?
-						int desc_count = mLibrary->getMedia(0)->getPreProcFeaturesVector(f)->getSize();
+						int desc_count = mLibrary->getMedia(currId[0])->getPreProcFeaturesVector(f)->getSize();
 						
 						for(d=0; d<desc_count; d++)
 						{
@@ -1109,14 +1127,14 @@ void ACMediaBrowser::updateClustersKMeans(bool animate, int needsCluster) {
 	for(i=0; i<object_count; i++) {
 
 		// check if we should include this object
-		if(this->getMediaNode(i).getNavigationLevel() < mNavigationLevel) continue;
+		if(this->getMediaNode(currId[i]).getNavigationLevel() < mNavigationLevel) continue;
 
 		// compute distance between this object and every cluster
 		for(j=0; j<mClusterCount; j++) {
 
 			cluster_distances[j] = 0;
-			if(mLibrary->getMedia(i)->getType() == mLibrary->getMediaType())//CF multimedia compatibility
-				cluster_distances[j] = compute_distance(mLibrary->getMedia(i)->getAllPreProcFeaturesVectors(), mClusterCenters[j], mFeatureWeights, false);
+			if(mLibrary->getMedia(currId[i])->getType() == mLibrary->getMediaType())//CF multimedia compatibility
+				cluster_distances[j] = compute_distance(mLibrary->getMedia(currId[i])->getAllPreProcFeaturesVectors(), mClusterCenters[j], mFeatureWeights, false);
 		}		
 		
 		// pick the one with smallest distance
@@ -1124,7 +1142,7 @@ void ACMediaBrowser::updateClustersKMeans(bool animate, int needsCluster) {
 		jmin = min_element(cluster_distances.begin(), cluster_distances.end()) - cluster_distances.begin();
 
 		// assign cluster
-		this->getMediaNode(i).setClusterId(jmin);
+		this->getMediaNode(currId[i]).setClusterId(jmin);
 	}
 
 }

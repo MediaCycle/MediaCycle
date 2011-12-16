@@ -50,7 +50,7 @@ string* textFileRead(string filePath){
 			archipelReader doc(filePath);
 			if (!doc.isArchipel())
 				return 0;
-			return new string(doc.getText());
+			//return new string(doc.getText());
 			vector<string> data=doc.getGlossaire();
 			string desc;
 			for (vector<string>::iterator it=data.begin();it!=data.end();it++)
@@ -63,7 +63,7 @@ string* textFileRead(string filePath){
 				desc+=string(" ");
 			}
 			string test=doc.getThumbPath();
-			//return new string(desc);
+			return new string(desc);
 		}
 		else
 			return 0;

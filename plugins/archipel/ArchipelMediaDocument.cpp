@@ -43,6 +43,7 @@ ArchipelMediaDocument::ArchipelMediaDocument():ACMediaDocument(){
 }
 
 int ArchipelMediaDocument::import(std::string _filename, int _mid, ACPluginManager *acpl, bool _save_timed_feat){
+	activableMediaKey.clear();
 	filename=_filename;	
 	if (_mid>=0) this->setId(_mid);
 	string extension = boost::filesystem::extension(filename);
@@ -62,10 +63,12 @@ int ArchipelMediaDocument::import(std::string _filename, int _mid, ACPluginManag
 			string mediaFileName;
 			string mediaExtension;
 			ACMediaType fileMediaType;
-			string mediaRef;
+			string mediaKey;
 			
 			//archipelText
-			mediaRef="main";
+			mediaKey="Description (Text)";
+			activableMediaKey.push_back(mediaKey);
+
 			mediaType=MEDIA_TYPE_TEXT;
 			mediaFileName=filename;
 			mediaExtension = boost::filesystem::extension(mediaFileName);
@@ -77,9 +80,9 @@ int ArchipelMediaDocument::import(std::string _filename, int _mid, ACPluginManag
 			}
 			media = ACMediaFactory::getInstance().create(mediaExtension);
 			if (media->import(mediaFileName, this->getId()+nbMedia+1, acpl, _save_timed_feat)){
-				if (this->addMedia(mediaRef, media)){
+				if (this->addMedia(mediaKey, media)){
 					//this->incrementMediaID();
-					//if(mediaRef=="main")
+					//if(mediaKey=="main")
 					//	this->activeMedia = media; //CF text not as active media
 				}	
 			}
@@ -88,7 +91,8 @@ int ArchipelMediaDocument::import(std::string _filename, int _mid, ACPluginManag
 			nbMedia++;
 			
 			//Image
-			mediaRef="covert";
+			mediaKey="Cover (Image)";
+			activableMediaKey.push_back(mediaKey);
 			mediaType=MEDIA_TYPE_IMAGE;
 			mediaFileName=path+xmlDoc->getThumbPath();
 			mediaExtension = boost::filesystem::extension(mediaFileName);
@@ -100,10 +104,10 @@ int ArchipelMediaDocument::import(std::string _filename, int _mid, ACPluginManag
 			}
 			media = ACMediaFactory::getInstance().create(mediaExtension);
 			if (media->import(mediaFileName, this->getId()+nbMedia+1, acpl, _save_timed_feat)){
-				if (this->addMedia(mediaRef, media)){
+				if (this->addMedia(mediaKey, media)){
 					//this->incrementMediaID();
-					//if(mediaRef=="main") // image as active media
-						this->activeMedia = media;
+					//if(mediaKey=="main") // image as active media
+					this->setActiveSubMedia(mediaKey);
 				}	
 			}
 			else 
@@ -116,7 +120,7 @@ int ArchipelMediaDocument::import(std::string _filename, int _mid, ACPluginManag
 			for (int i=0;i<nbTracks;i++){
 				std::stringstream out;
 				out << "track"<<i;
-				mediaRef=out.str() ;
+				mediaKey=out.str() ;
 				mediaType=MEDIA_TYPE_AUDIO;
 				mediaFileName=path+tracksPaths[i];
 				//mediaFileName=mediaFileName.substr(0, mediaFileName.size()-4)+string(".wav");
@@ -150,14 +154,14 @@ int ArchipelMediaDocument::import(std::string _filename, int _mid, ACPluginManag
 				
 				if(import_ok){//media import substitution ends here
 					this->addSegment(media);
-					if (this->addMedia(mediaRef, media)){
+					if (this->addMedia(mediaKey, media)){
 						//this->incrementMediaID();
-						if(mediaRef=="main")
-							this->activeMedia = media;
+						if(mediaKey=="main")
+							this->setActiveSubMedia(mediaKey);
 					}	
 				}
-				else 
-					return 0;
+//				else 
+//					return 0;
 				nbMedia++;
 				
 			}
@@ -184,12 +188,12 @@ int ArchipelMediaDocument::import(std::string _filename, int _mid, ACPluginManag
 					cout << "ACMediaDocument::import other media type, skipping " << s_media_type << endl;
 					continue;
 				}
-				string mediaRef=xmlDoc->getMediaReference(i);
+				string mediaKey=xmlDoc->getMediaReference(i);
 				ACMedia *media = ACMediaFactory::getInstance().create(mediaExtension);
 				if (media->import(path+mediaFileName, this->getId()+nbMedia+1, acpl, _save_timed_feat)){
-					if (this->addMedia(mediaRef, media)){
+					if (this->addMedia(mediaKey, media)){
 						//this->incrementMediaID();
-						if(mediaRef=="main")
+						if(mediaKey=="main")
 							this->activeMedia = media;
 					}	
 				}

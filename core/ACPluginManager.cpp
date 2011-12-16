@@ -203,6 +203,25 @@ int ACPluginManager::getSegmentPluginsSize(ACMediaType MediaType) {
     return this->mActiveSegmentPlugins->getSize(MediaType);
 }
 
+ACPreProcessPlugin* ACPluginManager::getPreProcessPlugin(ACMediaType MediaType){
+	for (unsigned int k = 0; k<this->mPluginLibrary.size(); k++) {
+		std::vector<ACPlugin *> pluginsList=this->mPluginLibrary[k]->getPlugins();
+		std::vector<ACPlugin *>::iterator iter;
+		
+		for (iter=pluginsList.begin(); iter!=pluginsList.end(); iter++){
+			if ((*iter)->implementsPluginType(PLUGIN_TYPE_PREPROCESS)&&(*iter)->mediaTypeSuitable(MediaType))
+			{
+				ACPlugin *locPlugin= *iter;
+				ACPreProcessPlugin* ret=dynamic_cast<ACPreProcessPlugin*> (locPlugin);
+				return ret;
+			}
+		}
+    }
+	return NULL;
+
+}
+
+
 /*
  * ACPluginLibrary implementation
  */

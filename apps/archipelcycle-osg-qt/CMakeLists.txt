@@ -38,13 +38,25 @@ IF ( SUPPORT_ARCHIPEL AND SUPPORT_MULTIMEDIA AND SUPPORT_AUDIO AND SUPPORT_IMAGE
 	#ADD_DEPENDENCIES(archipelcycle-osg-qt mediacycle-osg) # mediacycle-osg-qt depends on it
 	#ADD_DEPENDENCIES(archipelcycle-osg-qt mediacycle-io-osc) # mediacycle-osg-qt depends on it
 	ADD_DEPENDENCIES(archipelcycle-osg-qt mediacycle-osg-qt)
+	ADD_DEPENDENCIES(archipelcycle-osg-qt mc_segmentation)
 	ADD_DEPENDENCIES(archipelcycle-osg-qt mc_visualisation)
 	ADD_DEPENDENCIES(archipelcycle-osg-qt mc_text mc_text_sparse mc_SparseVisualisation)
+	ADD_DEPENDENCIES(archipelcycle-osg-qt audioengine)
 	ADD_DEPENDENCIES(archipelcycle-osg-qt mc_audio mc_image mc_archipel archipel)	
 
 	TARGET_LINK_LIBRARIES(archipelcycle-osg-qt mediacycle)
 	TARGET_LINK_LIBRARIES(archipelcycle-osg-qt mediacycle-osg)
 	TARGET_LINK_LIBRARIES(archipelcycle-osg-qt mediacycle-osg-qt)
+	TARGET_LINK_LIBRARIES(archipelcycle-osg-qt audioengine)
+		IF ( WIN32 )
+			TARGET_LINK_LIBRARIES(archipelcycle-osg-qt ws2_32 winmm uuid) # 2 last from OpenAL pkg config
+		ENDIF ( WIN32 )
+		IF(USE_OPENAL)
+			TARGET_LINK_LIBRARIES(archipelcycle-osg-qt ${OPENAL_LIBRARY})
+		ENDIF()
+		IF(USE_PORTAUDIO)
+			TARGET_LINK_LIBRARIES(archipelcycle-osg-qt ${PORTAUDIO_LIBRARIES} pthread)
+		ENDIF()
 
 	IF ( APPLE )
 		SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -framework CoreVideo -framework AppKit -framework Foundation")

@@ -73,6 +73,7 @@ public:
 	~ACMediaLibrary();
 	bool changeMediaType(ACMediaType aMediaType);
 	void cleanLibrary();
+	std::vector<std::string> getExtensionsFromMediaType(ACMediaType media_type);
 	
 	bool isEmpty();
 	ACMediaType getMediaType(){return media_type;};
@@ -90,6 +91,8 @@ public:
 
 	long getSynthesisID(){return synthesisID;};
 	void setSynthesisID(long _id){synthesisID = _id;};
+	
+	std::vector<int> getParentIds(void);
 	
 	void normalizeFeatures(int needsNormalize=1);
 	void denormalizeFeatures();
@@ -126,6 +129,8 @@ public:
 	void setPreProcessPlugin(ACPlugin* acpl);
 	void setMediaReaderPlugin(ACPlugin* acpl);
 	
+	ACMediaType getActiveSubMediaType();
+	int setActiveMediaType(std::string mediaName);
 	
 private:
 	void deleteAllMedia();

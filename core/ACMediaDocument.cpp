@@ -54,9 +54,12 @@ ACMediaDocument::ACMediaDocument() : ACMedia() {
 	this->init();
 	mediaID=0;
 	activeMedia=0;
+	activeMediaKey=string("");
+	
 }
 
-int ACMediaDocument::import(std::string _filename, int _mid, ACPluginManager *acpl, bool _save_timed_feat){	
+int ACMediaDocument::import(std::string _filename, int _mid, ACPluginManager *acpl, bool _save_timed_feat){
+	activableMediaKey.clear();
 	filename=_filename;	
 	if (_mid>=0) this->setId(_mid);
 	string extension = boost::filesystem::extension(filename);
@@ -90,13 +93,14 @@ int ACMediaDocument::import(std::string _filename, int _mid, ACPluginManager *ac
 					cout << "ACMediaDocument::import other media type, skipping " << s_media_type << endl;
 					continue;
 				}
-				string mediaRef=xmlDoc->getMediaReference(i);
+				string mediaKey=xmlDoc->getMediaReference(i);
 				ACMedia *media = ACMediaFactory::getInstance().create(mediaExtension);
 				if (media->import(path+mediaFileName, this->getMediaID()+i+1, acpl, _save_timed_feat)){
-					if (this->addMedia(mediaRef, media)){
+					if (this->addMedia(mediaKey, media)){
 						//this->incrementMediaID();
-						if(mediaRef=="main")
+						if(mediaKey=="main")
 							this->activeMedia = media;
+						activableMediaKey.push_back(mediaKey);
 					}	
 				}
 				else 
@@ -122,13 +126,17 @@ int ACMediaDocument::import(std::string _filename, int _mid, ACPluginManager *ac
 
 	}
 	if (_mid>=0) this->setId(_mid);
-	if (this->mediaContainer.size()>0)
-		activeMedia=(*(mediaContainer.begin())).second;
+	if (this->mediaContainer.size()>0){
+		//activeMedia=(*(mediaContainer.begin())).second;
+		this->setActiveSubMedia((*(mediaContainer.begin())).first);
+	}
 }
 
 int ACMediaDocument::addMedia(std::string stringKey, ACMedia* media){
 	
 	if (mediaContainer.find(stringKey)==mediaContainer.end()){
+		if (media->getParentId()==-1)
+			media->setParentId(this->getId());
 		mediaContainer[stringKey]=media;
 	}
 	else
@@ -188,13 +196,23 @@ bool ACMediaDocument::extractData(string fname){
 //	computeThumbnail(data, thumbnail_width , thumbnail_height);
 	return false;
 }
+ACMediaType ACMediaDocument::getActiveSubMediaType()
+{
+	if (activeMedia!=0)
+		return activeMedia->getMediaType();
+	else
+		return MEDIA_TYPE_NONE;
+	
+}
 
 int ACMediaDocument::setActiveSubMedia(string mediaName){
 	if (mediaContainer.find(mediaName)==mediaContainer.end()){
 		return 0;
 	}
-	else
+	else{
 		activeMedia=mediaContainer.find(mediaName)->second;
+		activeMediaKey=mediaName;
+	}
 	return 1;
 }
 

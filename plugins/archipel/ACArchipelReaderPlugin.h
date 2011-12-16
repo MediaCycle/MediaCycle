@@ -39,9 +39,13 @@
 #include "MediaCycle.h"
 
 class ACArchipelReaderPlugin: public ACMediaReaderPlugin {
+protected:
+	ACMediaType defaultMainMediaType;
 public:
-	ACArchipelReaderPlugin();
-	ACMedia* mediaFactory(ACMediaType mediaType);
+	ACArchipelReaderPlugin(ACMediaType defaultMainMediaType);
+	ACMedia* mediaFactory(ACMediaType mediaType); 
+	std::vector<std::string> getExtensionsFromMediaType(ACMediaType media_type);
+
 };
 
 #endif/*_ACARCHIPELREADERPLUGIN_H*/

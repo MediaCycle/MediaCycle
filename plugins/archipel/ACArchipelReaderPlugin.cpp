@@ -36,21 +36,28 @@
 
 #include "ArchipelMediaDocument.h"
 
-ACArchipelReaderPlugin::ACArchipelReaderPlugin(){
+ACArchipelReaderPlugin::ACArchipelReaderPlugin(ACMediaType defaultMainMediaType){
 
 	this->mMediaType = MEDIA_TYPE_MIXED;
 	this->mName = "ArchipelReader";
 	this->mDescription = "ArchipelReader plugin";
 	this->mId = "";
+	this->defaultMainMediaType=defaultMainMediaType;
 	
 }
 
 
 ACMedia* ACArchipelReaderPlugin::mediaFactory(ACMediaType mediaType){
-	if (mediaType|this->mMediaType)
+	if (mediaType&this->mMediaType)
 		return new ArchipelMediaDocument();
 	else {
 		return 0;
 	}
 
+}
+std::vector<std::string> ACArchipelReaderPlugin::getExtensionsFromMediaType(ACMediaType media_type){
+	std::vector<std::string> ret;
+	ret.push_back(std::string(".xml"));
+				 
+	return ret;
 }

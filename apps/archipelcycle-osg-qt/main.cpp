@@ -47,6 +47,7 @@ int main(int argc, char *argv[])
 		// Adding palettes
 		window.addControlDock("MCAudioControls");
 		window.addControlDock("MCBrowserControlsClusters");//"MCBrowserControlsClustersNeighbors");
+		window.addControlDock("MCMediaDocumentOption");//MCMediaDocumentOption
 		window.useSegmentationByDefault(false);
 		
 		// XS TODO

@@ -128,6 +128,19 @@ void ACMediaLibrary::cleanLibrary() {
 	// (not this:) media_type=MEDIA_TYPE_NONE;
 }
 
+std::vector<std::string> ACMediaLibrary::getExtensionsFromMediaType(ACMediaType media_type)
+{
+	if (mReaderPlugin!=NULL){
+		if (mReaderPlugin->mediaTypeSuitable(media_type)){
+			return mReaderPlugin->getExtensionsFromMediaType(media_type);
+		}
+	}
+	
+	return ACMediaFactory::getInstance().getExtensionsFromMediaType(media_type);
+	
+}
+
+
 // this same function is used to import a whole directory, a single file or a list of files.
 // it uses scanDirectory to construct a vector (filenames) containing the files to be analyzed.
 // return values:
@@ -682,6 +695,16 @@ std::string ACMediaLibrary::getThumbnailFileName(int id) {
 	}
 	return "";
 }
+std::vector<int> ACMediaLibrary::getParentIds(void){
+	std::vector<int> ret;
+	for (int i=0;i<this->getSize();i++) {
+		if (media_library[i]->getParentId()==-1 ) {
+			if (media_library[i]->getId()==i)
+				ret.push_back(i);
+		}
+	}
+	return ret;
+}
 
 bool ACMediaLibrary::isEmpty() {
 	if (this->getSize() <= 0) {
@@ -804,7 +827,11 @@ void ACMediaLibrary::normalizeFeatures(int needsNormalize) {
 		}
 	}	
 	unsigned int i,j,k;
-	unsigned int n = this->getSize() ;
+	vector<int> currId=this->getParentIds();
+	//TR normalize just Parent Nodes
+	unsigned int n = currId.size();
+	
+	//unsigned int n = this->getSize() ;
 
 	if (needsNormalize) {
 		start = 0;
@@ -814,16 +841,21 @@ void ACMediaLibrary::normalizeFeatures(int needsNormalize) {
 	}
 	if (mPreProcessPlugin!=NULL){	
 		for(i=start; i<n; i++){
-			ACMedia* item = media_library[i];
+			ACMedia* item = media_library[currId[i]];
 			item->cleanPreProcFeaturesVector();
-			std::vector<ACMediaFeatures*> tempFeatVect=mPreProcessPlugin->apply(mPreProcessInfo,item);
+			std::vector<ACMediaFeatures*> tempFeatVect;
+			if (item->getMediaType()==MEDIA_TYPE_MIXED)
+				tempFeatVect=mPreProcessPlugin->apply(mPreProcessInfo,((ACMediaDocument*)item)->getActiveMedia());
+			else
+				tempFeatVect=mPreProcessPlugin->apply(mPreProcessInfo,item);
+			
 			item->getAllPreProcFeaturesVectors()=tempFeatVect;
 			tempFeatVect.clear();
 		}		
 	}
 	else {
 		for(i=start; i<n; i++){
-			ACMedia* item = media_library[i];
+			ACMedia* item = media_library[currId[i]];
 			if (item->getMediaType() == this->media_type){ //CF
 				for(j=0; j<mean_features.size(); j++) {
 					feature = item->getFeaturesVector(j);
@@ -954,8 +986,6 @@ void ACMediaLibrary::setPreProcessPlugin(ACPlugin* acpl)
 			mPreProcessPlugin=dynamic_cast<ACPreProcessPlugin*> (acpl) ;
 }
 void ACMediaLibrary::setMediaReaderPlugin(ACPlugin* acpl){	
-
-	
 	if (acpl==NULL&&mReaderPlugin!=NULL)
 	{		
 		mReaderPlugin=NULL;
@@ -966,6 +996,32 @@ void ACMediaLibrary::setMediaReaderPlugin(ACPlugin* acpl){
 			mReaderPlugin=dynamic_cast<ACMediaReaderPlugin*> (acpl) ;	
 }
 
+ACMediaType ACMediaLibrary::getActiveSubMediaType(){
+	if (media_type!=MEDIA_TYPE_MIXED||media_library.size()==0)
+		return media_type;
+	else {
+		return media_library[0]->getActiveSubMediaType();
+	}
+
+}
+
+int ACMediaLibrary::setActiveMediaType(std::string mediaName){
+	if (media_type!=MEDIA_TYPE_MIXED)
+		return 0;
+	this->cleanStats();
+	std::vector<ACMedia*>::iterator iter;
+	for (iter = media_library.begin(); iter != media_library.end(); iter++) {
+		if ((*iter)->getMediaType()==MEDIA_TYPE_MIXED){
+			ACMediaDocument *currMedia=static_cast<ACMediaDocument *> (*iter);
+			if (currMedia!=0){
+				currMedia->setActiveSubMedia(mediaName);
+			}	
+		}
+		else {
+			continue;
+		}
+	}	
+}
 
 // -------------------------------------------------------------------------
 // test

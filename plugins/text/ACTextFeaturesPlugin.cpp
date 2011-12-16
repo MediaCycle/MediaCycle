@@ -186,7 +186,13 @@ std::vector<float> ACTextFeaturesPlugin::indexIdfExtraction(){
 		Term *tempTerm = _CLNEW Term(_T("contents"),indexTerms[i]);
 		int tempInt=mIndex->docFreq(tempTerm);
 		if (mIndex->docFreq(tempTerm)>0)
+		{
 			ret.push_back(log((float)nbDoc/mIndex->docFreq(tempTerm)));
+			char *tempChar=new char[1024];
+			mc_wcstoutf8(tempChar,indexTerms[i],1024);
+			cout<<tempChar<<"\tdf:"<<tempInt<<"\tidf:"<<log((float)nbDoc/mIndex->docFreq(tempTerm))<<"\n";
+		
+		}
 		else
 			ret.push_back(0.f);
 			
@@ -217,8 +223,8 @@ ACMediaFeatures* ACTextFeaturesPlugin::tfCalculate(ACText* pMedia){
 		
 		mc_wcstoutf8(tempChar,indexTerms[i],wcslen(indexTerms[i])+2);
 		//wprintf(_T("%s"),indexTerms[i]);
-		//if (tfValues[i]!=0.f)
-		//	cout <<tempChar<<"\t"<<tfValues[i]<<endl;
+		if (tfValues[i]!=0.f)
+			cout <<tempChar<<"\t"<<tfValues[i]<<endl;
 		delete tempChar;
 	}
 	ACMediaFeatures* desc=new ACMediaFeatures(tfValues,"Term Frequency-Inverse Document Frequency");

@@ -111,7 +111,8 @@ void ACMultiMediaCycleOsgQt::mediacycleCallback(const char* message)
 					std::cerr << "ACMediaCycleOsgQt: wrong dir size"  << std::endl;
 				if(media_id != -1 && dir_size != -1){
 					std::cout << std::endl << std::endl << "importing media " << media_id << "/" << (dir_size-1) << std::endl;
-					if(media_id==1)
+					//if(media_id==1)//TR The first file has not necessary the good media type
+					if(media_cycle->getLibrary()->getParentIds().size()==1)
 						this->configurePluginDock();
 					if (progressBar){
 						emit loading_file(media_id+1,dir_size);
@@ -942,6 +943,8 @@ void ACMultiMediaCycleOsgQt::configurePluginDock() {
 				((ACBrowserControlsClustersNeighborsDockWidgetQt*)dockWidgets[d])->configureCheckBoxes();
 			if (dockWidgets[d]->getClassName() == "ACBrowserControlsClustersDockWidgetQt")
 				((ACBrowserControlsClustersDockWidgetQt*)dockWidgets[d])->configureCheckBoxes();
+			if (dockWidgets[d]->getClassName() == "ACMediaDocumentOptionDockWidgetQt")
+				((ACMediaDocumentOptionDockWidgetQt*)dockWidgets[d])->configureCheckBoxes();
 		}
 	}
 	plugins_scanned = true;
@@ -1066,7 +1069,7 @@ std::string ACMultiMediaCycleOsgQt::getPluginPathFromBaseName(std::string basena
             plugin_subfolder = "";
         #else
             #if defined(XCODE)
-                plugins_path = s_path + "/../../../../../../plugins/;
+                plugins_path = s_path + "/../../../../../../plugins/";
                 plugin_subfolder = basename + "/" + build_type + "/";
             #else
                 plugins_path = s_path + "/../../../../../plugins/";
@@ -1144,7 +1147,9 @@ void ACMultiMediaCycleOsgQt::loadDefaultConfig(ACMediaType _media_type, ACBrowse
 	if(_media_type == MEDIA_TYPE_VIDEO){
 		osg::ref_ptr<osgDB::ReaderWriter> movReaderWriter(0),ffmpegReaderWriter(0), pdfReaderWriter(0);
 		std::string osg_plugin_error ="";
-	
+		
+		
+		
 		if(_media_type == MEDIA_TYPE_VIDEO){
 			ffmpegReaderWriter = osgDB::Registry::instance()->getReaderWriterForExtension("ffmpeg");
 			movReaderWriter = osgDB::Registry::instance()->getReaderWriterForExtension("mov");
@@ -1174,10 +1179,12 @@ void ACMultiMediaCycleOsgQt::loadDefaultConfig(ACMediaType _media_type, ACBrowse
 	else
 		createMediaCycle(_media_type, _browser_mode);
 
-    // Try to load feature extraction plugins:
-    std::string f_plugin("");
-
-    #if defined (SUPPORT_MULTIMEDIA)
+	
+	// Try to load feature extraction plugins:
+	std::string f_plugin("");
+	
+#if defined (SUPPORT_MULTIMEDIA)
+			
 	if (_media_type==MEDIA_TYPE_MIXED){
 
         // Feature plugins
@@ -1212,6 +1219,7 @@ void ACMultiMediaCycleOsgQt::loadDefaultConfig(ACMediaType _media_type, ACBrowse
 		}
 		else{
 			media_cycle->setMediaReaderPlugin("ArchipelReader");
+			media_cycle->setActiveMediaType("text");
 		}
         #endif //defined (SUPPORT_ARCHIPEL)
 	}
@@ -1338,6 +1346,8 @@ void ACMultiMediaCycleOsgQt::clean(bool _updategl){
 		if (dockWidgets[d]->getClassName() == "ACBrowserControlsClustersDockWidgetQt") {
 			((ACBrowserControlsClustersDockWidgetQt*)dockWidgets[d])->cleanCheckBoxes();
 		}
+		if (dockWidgets[d]->getClassName() == "ACMediaDocumentOptionDockWidgetQt")
+			((ACMediaDocumentOptionDockWidgetQt*)dockWidgets[d])->cleanCheckBoxes();
 	}
 
 	// XS TODO : remove the boxes specific to the media that was loaded

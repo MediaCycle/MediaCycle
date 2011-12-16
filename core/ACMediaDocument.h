@@ -54,7 +54,7 @@ public:
 	ACMediaDocument();
 	~ACMediaDocument();
 	ACMediaDocument(const ACMediaDocument&, bool reduce = true);
-
+	virtual ACMediaType getActiveSubMediaType();
 	int setActiveSubMedia(std::string mediaName);
 	virtual int import(std::string _path, int _mid=0, ACPluginManager *acpl=0, bool _save_timed_feat=false);
 	void saveACLSpecific(std::ofstream &library_file);
@@ -134,7 +134,10 @@ public:
 	 int getNumberOfPreProcFeaturesVectors() { return activeMedia->getNumberOfPreProcFeaturesVectors(); };
 	std::vector<std::string> getListOfPreProcFeaturesPlugins(){ return activeMedia->getListOfPreProcFeaturesPlugins(); };
 	void defaultPreProcFeatureInit(void);
-
+	std::vector<std::string> getActivableMediaKeys(){return activableMediaKey;};
+	ACMedia* getActiveMedia(void){return activeMedia;};
+	std::string getActiveMediaKey(void){return activeMediaKey;};
+	
 private:
 	void init();
 	bool computeThumbnail(std::string _fname, int w=0, int h=0);
@@ -153,10 +156,13 @@ protected:
 	void incrementMediaID(){mediaID++ ;}
 	int getMediaID(){return mediaID ;}
 	int addMedia(std::string key, ACMedia* media);
-	ACMedia* activeMedia;
 	std::vector<ACMediaFeatures*> tempVect;
 	std::vector<std::string> tempString;
-	
+	std::vector<std::string> activableMediaKey;
+private:
+	ACMedia* activeMedia;
+	std::string activeMediaKey;
+
 };
 
 #endif //defined (SUPPORT_MULTIMEDIA)

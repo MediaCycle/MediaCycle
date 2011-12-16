@@ -41,7 +41,7 @@
 
 using namespace osg;
 
-#define IMAGE_BORDER
+//#define IMAGE_BORDER
 
 ACOsgImageRenderer::ACOsgImageRenderer() {
 	media_type = MEDIA_TYPE_IMAGE;
@@ -184,8 +184,8 @@ void ACOsgImageRenderer::imageGeode(bool flip, float sizemul, float zoomin) {
 		
 		osg::ref_ptr<osg::Vec4Array> colors = new Vec4Array(1);
 		(*colors)[0] = node_color;
-		image_geometry->setColorArray(colors);
-		image_geometry->setColorBinding(Geometry::BIND_OVERALL);
+		//image_geometry->setColorArray(colors);
+		//image_geometry->setColorBinding(Geometry::BIND_OVERALL);
 		
 		image_geode->addDrawable(image_geometry);
 		

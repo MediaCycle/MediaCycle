@@ -43,7 +43,7 @@
 #include "ACArchipelReaderPlugin.h"
 
 extern "C" ACPlugin* create(std::string namePlugin) {
-	if (namePlugin == "ArchipelReaderPlugin") {return new ACArchipelReaderPlugin();}
+	if (namePlugin == "ArchipelReaderPlugin") {return new ACArchipelReaderPlugin(MEDIA_TYPE_IMAGE);}
 	
 }
 
