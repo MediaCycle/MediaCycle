@@ -39,7 +39,7 @@
 #include <osg/ImageUtils>
 #include <osgDB/ReaderWriter>
 #include <osgDB/ReadFile>
-#include "boost/filesystem.hpp"
+#include <boost/filesystem.hpp>
 
 #include <iostream>
 using namespace std;
@@ -130,8 +130,7 @@ bool ACVideo::computeThumbnail(int w, int h){
 		cout <<"<ACVideo::computeThumbnail> (video id = " << this->getId() << ") using OSG plugin: "<< readerWriter->className() <<std::endl;
 	}	
 
-	// XS TODO we "re-compute" thumbnail here...
-	osg::ref_ptr<osg::Image> thumbnail = osgDB::readImageFile(filename);
+    thumbnail = osgDB::readImageFile(filename);
 	readerWriter = 0;
 	// XS TODO : needs rescaling !!
 	//thumbnail->scaleImage(thumbnail_width,thumbnail_height,1);

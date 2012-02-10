@@ -37,6 +37,7 @@
 #include "ACImage.h"
 #include <fstream>
 #include <osg/ImageUtils>
+#include <boost/filesystem.hpp>
 
 using namespace std;
 
@@ -109,12 +110,28 @@ bool ACImage::computeThumbnail(IplImage* img, int w, int h){
 	if (!computeThumbnailSize(w, h)) return false;
 	bool ok = true;
 
-	// option 1) using only openCV:
+    // option 1) using only OpenCV:
 	//thumbnail = cvCreateImage(cvSize (thumbnail_width, thumbnail_height), imgp_full->depth, imgp_full->nChannels);
 	//cvResize(imgp_full, thumbnail, CV_INTER_CUBIC);
 	
-	// option 2) using OSG -- with ref_ptr to ensure proper garbage collection
-	this->thumbnail = this->openCVToOSG(img,thumbnail_width,thumbnail_height);
+    // option 2) converting from OpenCV to OSG
+    // CF: crashes with imageCLEF
+    //this->thumbnail = this->openCVToOSG(img,thumbnail_width,thumbnail_height);
+
+    // option 3) using OSG -- with ref_ptr to ensure proper garbage collection
+    osg::ref_ptr<osgDB::ReaderWriter> readerWriter = osgDB::Registry::instance()->getReaderWriterForExtension(boost::filesystem::extension(filename).substr(1));
+
+    if (!readerWriter){
+        cerr << "<ACImage::computeThumbnail> (image id = " << this->getId() << ") : problem loading file, no OSG plugin available" << endl;
+        return false;
+    }
+    else{
+        cout <<"<ACImage::computeThumbnail> (image id = " << this->getId() << ") using OSG plugin: "<< readerWriter->className() <<std::endl;
+    }
+
+    thumbnail = osgDB::readImageFile(filename);
+    readerWriter = 0;
+
 	if (!thumbnail){
 		cerr << "<ACImage::computeThumbnail> problem converting thumbnail to osg" << endl;
 		ok= false;
