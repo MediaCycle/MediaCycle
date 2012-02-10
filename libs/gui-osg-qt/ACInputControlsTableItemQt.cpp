@@ -36,6 +36,7 @@
  */
 
 #include "ACInputControlsTableItemQt.h"
+#include "ACInputActionQt.h"
 
 ACInputControlsTableItemQt::ACInputControlsTableItemQt(const QIcon& icon, const QString& sText)
 : QTableWidgetItem(icon, sText)

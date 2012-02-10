@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>536</width>
+    <width>591</width>
     <height>538</height>
    </rect>
   </property>
@@ -40,7 +40,7 @@
       <enum>QAbstractItemView::SelectRows</enum>
      </property>
      <property name="columnCount">
-      <number>3</number>
+      <number>4</number>
      </property>
      <column>
       <property name="text">
@@ -65,6 +65,16 @@
      <column>
       <property name="text">
        <string>Shortcut</string>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>10</pointsize>
+       </font>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Mouse</string>
       </property>
       <property name="font">
        <font>

@@ -1,8 +1,8 @@
 /**
  * @brief ACOsgCompositeViewQt.h
  * @author Christian Frisson
- * @date 13/12/2011
- * @copyright (c) 2011 – UMONS - Numediart
+ * @date 10/02/2012
+ * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -171,9 +171,14 @@ class ACOsgCompositeViewQt : public QGLWidget, public osgViewer::CompositeViewer
             *toggleMediaHoverAction, *triggerMediaHoverAction, *resetBrowserAction,
             *rotateBrowserAction, *zoomBrowserAction, *translateBrowserAction,
             *addMediaOnTimelineTrackAction, *toggleTimelinePlaybackAction, *adjustTimelineHeightAction;
+        QList<ACInputActionQt*> inputActions;
 	
         void initInputActions();
+        void addInputAction(ACInputActionQt* _action);
+    public:
+        QList<ACInputActionQt*> getInputActions(){return inputActions;}
 
+    private:
 		void updateBrowserView(int width, int height);
 		void updateHUDCamera(int width, int height);
 		void updateTimelineView(int width, int height);

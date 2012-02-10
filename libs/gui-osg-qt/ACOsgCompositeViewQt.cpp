@@ -366,6 +366,13 @@ void ACOsgCompositeViewQt::updateGL()
     media_cycle->setNeedsDisplay(false);
 }
 
+void ACOsgCompositeViewQt::addInputAction(ACInputActionQt* _action)
+{
+    //this->addAction(dynamic_cast<QAction*>(_action));
+    this->addAction(_action);
+    this->inputActions.append(_action);
+}
+
 void ACOsgCompositeViewQt::initInputActions(){
 
     // CF add extra shortcuts from QKeySequence::StandardKey
@@ -376,7 +383,7 @@ void ACOsgCompositeViewQt::initInputActions(){
     openMediaExternallyAction->setMouseEventType(QEvent::MouseButtonRelease);
     openMediaExternallyAction->setToolTip(tr("Open the media file with the default application"));
     connect(openMediaExternallyAction, SIGNAL(triggered()), this, SLOT(openMediaExternally()));
-    this->addAction(openMediaExternallyAction);
+    this->addInputAction(openMediaExternallyAction);
 
     browseMediaExternallyAction = new ACInputActionQt(tr("Browse Media File"), this);
     browseMediaExternallyAction->setShortcut(Qt::Key_F);
@@ -384,7 +391,7 @@ void ACOsgCompositeViewQt::initInputActions(){
     browseMediaExternallyAction->setMouseEventType(QEvent::MouseButtonRelease);
     browseMediaExternallyAction->setToolTip(tr("Browse the media file with the default file browser"));
     connect(browseMediaExternallyAction, SIGNAL(triggered()), this, SLOT(browseMediaExternally()));
-    this->addAction(browseMediaExternallyAction);
+    this->addInputAction(browseMediaExternallyAction);
 
     /*examineMediaExternallyAction = new ACInputActionQt(tr("Examine Media File"), this);
     examineMediaExternallyAction->setShortcut(Qt::Key_I);
@@ -392,7 +399,7 @@ void ACOsgCompositeViewQt::initInputActions(){
     examineMediaExternallyAction->setMouseEventType(QEvent::MouseButtonRelease);
     examineMediaExternallyAction->setToolTip(tr("Examine the media file with the default file browser properties"));
     connect(examineMediaExternallyAction, SIGNAL(triggered()), this, SLOT(examineMediaExternally()));
-    this->addAction(examineMediaExternallyAction);*/
+    this->addInputAction(examineMediaExternallyAction);*/
 
     //if(this->media_cycle->getBrowser()->getMode() == AC_MODE_CLUSTERS){
         forwardNextLevelAction = new ACInputActionQt(tr("Recluster"), this);
@@ -407,7 +414,7 @@ void ACOsgCompositeViewQt::initInputActions(){
         forwardNextLevelAction->setKeyEventType(QEvent::KeyPress);
         forwardNextLevelAction->setMouseEventType(QEvent::MouseButtonRelease);
         connect(forwardNextLevelAction, SIGNAL(triggered(bool)), this, SLOT(forwardNextLevel(bool)));
-        this->addAction(forwardNextLevelAction);
+        this->addInputAction(forwardNextLevelAction);
     //}
 
     stopPlaybackAction = new ACInputActionQt(tr("Stop Playback"), this);
@@ -415,14 +422,14 @@ void ACOsgCompositeViewQt::initInputActions(){
     stopPlaybackAction->setKeyEventType(QEvent::KeyPress);
     stopPlaybackAction->setToolTip(tr("Stop the playback of all played media nodes"));
     connect(stopPlaybackAction, SIGNAL(triggered()), this, SLOT(stopPlayback()));
-    this->addAction(stopPlaybackAction);
+    this->addInputAction(stopPlaybackAction);
 
     toggleMediaHoverAction = new ACInputActionQt(tr("Toggle Media Hover"), this);
     toggleMediaHoverAction->setShortcut(Qt::Key_W);
     toggleMediaHoverAction->setKeyEventType(QEvent::KeyPress);
     toggleMediaHoverAction->setToolTip(tr("Toggle Media Hover (fast browsing with playback or zoom)"));
     connect(toggleMediaHoverAction, SIGNAL(toggled(bool)), this, SLOT(toggleMediaHover(bool)));
-    this->addAction(toggleMediaHoverAction);
+    this->addInputAction(toggleMediaHoverAction);
 
     triggerMediaHoverAction = new ACInputActionQt(tr("Trigger Media Hover"), this);
     triggerMediaHoverAction->setShortcut(Qt::Key_Q);
@@ -430,14 +437,14 @@ void ACOsgCompositeViewQt::initInputActions(){
     //triggerMediaHoverAction->setAutoRepeat(false); // works on OSX but not Ubuntu (10.04)
     triggerMediaHoverAction->setToolTip(tr("Trigger Media Hover (fast browsing with playback or zoom)"));
     connect(triggerMediaHoverAction, SIGNAL(triggered(bool)), this, SLOT(triggerMediaHover(bool)));
-    this->addAction(triggerMediaHoverAction);
+    this->addInputAction(triggerMediaHoverAction);
 
     resetBrowserAction = new ACInputActionQt(tr("Reset Browser"), this);
     resetBrowserAction->setShortcut(Qt::Key_C);
     resetBrowserAction->setKeyEventType(QEvent::KeyRelease);
     resetBrowserAction->setToolTip(tr("Reset the browser view (center, rotation, zoom)"));
     connect(resetBrowserAction, SIGNAL(triggered()), this, SLOT(resetBrowser()));
-    this->addAction(resetBrowserAction);
+    this->addInputAction(resetBrowserAction);
 
     rotateBrowserAction = new ACInputActionQt(tr("Rotate Browser"), this);
     rotateBrowserAction->setShortcut(Qt::Key_R);
@@ -445,7 +452,7 @@ void ACOsgCompositeViewQt::initInputActions(){
     rotateBrowserAction->setMouseEventType(QEvent::MouseMove);
     rotateBrowserAction->setToolTip(tr("Rotate the browser view"));
     connect(rotateBrowserAction, SIGNAL(mouseMovedXY(float,float)), this, SLOT(rotateBrowser(float,float)));
-    this->addAction(rotateBrowserAction);
+    this->addInputAction(rotateBrowserAction);
 
     zoomBrowserAction = new ACInputActionQt(tr("Zoom Browser"), this);
     zoomBrowserAction->setShortcut(Qt::Key_Z);
@@ -453,13 +460,13 @@ void ACOsgCompositeViewQt::initInputActions(){
     zoomBrowserAction->setMouseEventType(QEvent::MouseMove);
     zoomBrowserAction->setToolTip(tr("Zoom the browser view"));
     connect(zoomBrowserAction, SIGNAL(mouseMovedXY(float,float)), this, SLOT(zoomBrowser(float,float)));
-    this->addAction(zoomBrowserAction);
+    this->addInputAction(zoomBrowserAction);
 
     translateBrowserAction = new ACInputActionQt(tr("Translate Browser"), this);
-    translateBrowserAction->setMouseEventType(ACInputActionQt::MousePressedMove);
+    translateBrowserAction->setMouseEventType(ACEventQt::MousePressedMove);
     translateBrowserAction->setToolTip(tr("Translate the browser view"));
     connect(translateBrowserAction, SIGNAL(mouseMovedXY(float,float)), this, SLOT(translateBrowser(float,float)));
-    this->addAction(translateBrowserAction);
+    this->addInputAction(translateBrowserAction);
 
     addMediaOnTimelineTrackAction = new ACInputActionQt(tr("Timeline Media"), this);
     addMediaOnTimelineTrackAction->setShortcut(Qt::Key_T);
@@ -467,14 +474,14 @@ void ACOsgCompositeViewQt::initInputActions(){
     addMediaOnTimelineTrackAction->setMouseEventType(QEvent::MouseButtonRelease);
     addMediaOnTimelineTrackAction->setToolTip(tr("Visualize media on a timeline track"));
     connect(addMediaOnTimelineTrackAction, SIGNAL(triggered()), this, SLOT(addMediaOnTimelineTrack()));
-    this->addAction(addMediaOnTimelineTrackAction);
+    this->addInputAction(addMediaOnTimelineTrackAction);
 
     toggleTimelinePlaybackAction = new ACInputActionQt(tr("Toggle Timeline Playback"), this);
     toggleTimelinePlaybackAction->setShortcut(Qt::Key_Space);
     toggleTimelinePlaybackAction->setKeyEventType(QEvent::KeyPress);
     toggleTimelinePlaybackAction->setToolTip(tr("Toggle timeline playback"));
     connect(toggleTimelinePlaybackAction, SIGNAL(toggled(bool)), this, SLOT(toggleTimelinePlayback(bool)));
-    this->addAction(toggleTimelinePlaybackAction);
+    this->addInputAction(toggleTimelinePlaybackAction);
 
     /*adjustTimelineHeightAction = new ACInputActionQt(tr("Adjust Timeline Height"), this);
     //adjustTimelineHeightAction->setShortcut(Qt::Key_Z);
@@ -482,7 +489,7 @@ void ACOsgCompositeViewQt::initInputActions(){
     adjustTimelineHeightAction->setMouseEventType(QEvent::MouseMove);
     adjustTimelineHeightAction->setToolTip(tr("Adjust the timeline height"));
     connect(adjustTimelineHeightAction, SIGNAL(mouseMovedY(float)), this, SLOT(adjustTimelineHeight(float)));
-    this->addAction(adjustTimelineHeightAction);*/
+    this->addInputAction(adjustTimelineHeightAction);*/
 }
 
 void ACOsgCompositeViewQt::openMediaExternally(){

@@ -1,8 +1,8 @@
 /**
  * @brief ACInputActionQt.h
  * @author Christian Frisson
- * @date 13/12/2011
- * @copyright (c) 2011 – UMONS - Numediart
+ * @date 10/02/2012
+ * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -72,6 +72,12 @@
 #include <iostream>
 #include <MediaCycle.h>
 
+typedef  std::map<QEvent::Type,QString> ACMouseEventNamesQt;
+
+namespace ACEventQt {
+static const QEvent::Type MousePressedMove = static_cast<QEvent::Type>(QEvent::User); // warning, optimize with QEvent::registerEventType() since QEvent::User might already be registered elsewhere in 3rdParty libraries
+}
+
 class ACInputActionQt : public QAction
 {
 	Q_OBJECT
@@ -79,13 +85,32 @@ public slots:
 	void eventAbsorber ( QEvent * event );
 public:
     ACInputActionQt ( const QString & text, QObject * parent = 0, Qt::MouseButton mouse_button = Qt::NoButton  );
-    static const QEvent::Type MousePressedMove = static_cast<QEvent::Type>(QEvent::User); // warning, optimize with QEvent::registerEventType() since QEvent::User might already be registered elsewhere in 3rdParty libraries
+    ~ACInputActionQt(){}
+
     void setCategory(const QString _category); // to categorize actions (for instance: Library/Browser/Timeline) (not yet used)
+
+    // Keyboard shortcuts
     void setKeyEventType(QEvent::Type _type);
+    QEvent::Type getKeyEventType();
+
+    // Mouse actions
     void setMouseButton(Qt::MouseButton _button); // not yet used
+    Qt::MouseButton getMouseButton(); // not yet used
 	void setMouseEventType(QEvent::Type _type);
+    QEvent::Type getMouseEventType();
+    QString getMouseEventName();
+    QStringList getMouseEventNames();
+    QEvent::Type convertMouseEventNameToType(QString name);
+    QString convertMouseEventTypeToName(QEvent::Type type);
+
+    // Tablet actions
     void setTabletEventType(QEvent::Type _type); // not yet used
+    QEvent::Type getTabletEventType(); // not yet used
+
+    // Touch actions
     void setTouchEventType(QEvent::Type _type); // not yet used
+    QEvent::Type getTouchEventType(); // not yet used
+
 signals:
 	virtual void triggered ( bool checked = false );
     virtual void toggled ( bool checked );
@@ -100,5 +125,6 @@ protected:
     bool key_pressed, mouse_pressed;
     bool toggle;
     QString category;
+    ACMouseEventNamesQt mouseEventNames;
 };
 #endif

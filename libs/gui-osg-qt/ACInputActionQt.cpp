@@ -38,6 +38,16 @@ ACInputActionQt::ACInputActionQt( const QString & text, QObject * parent, Qt::Mo
     key_event_type(QEvent::None), mouse_event_type(QEvent::None), tablet_event_type(QEvent::None), touch_event_type(QEvent::None),
   key_pressed(false),mouse_pressed(false),toggle(false),category(QString(""))
 {
+    // Mouse action map, should be done elsewhere / static
+    mouseEventNames[QEvent::None] = " ";
+    //mouseEventNames[QEvent::MouseButtonDblClick] = "DoubleClick"; // Mouse press again (QMouseEvent).
+    //mouseEventNames[QEvent::MouseButtonPress] = "Press"; // Mouse press (QMouseEvent).
+    mouseEventNames[QEvent::MouseButtonRelease] = "Click"; // Mouse release (QMouseEvent).
+    mouseEventNames[QEvent::MouseMove] = "Move"; // Mouse move (QMouseEvent)
+    //mouseEventNames[QEvent::HoverEnter] = "HoverEnter"; // The mouse cursor enters a hover widget
+    //mouseEventNames[QEvent::HoverLeave] = "HoverLeave"; // The mouse cursor leaves a hover widget
+    //mouseEventNames[QEvent::HoverMove] = "HoverMove"; // The mouse cursor moves inside a hover widget
+    mouseEventNames[ACEventQt::MousePressedMove] = "Click+Move"; // Mouse moved when pressed (custom).
 }
 
 void ACInputActionQt::setCategory(const QString _category)
@@ -130,9 +140,9 @@ bool ACInputActionQt::event ( QEvent * _event )
         break;
 		case QEvent::MouseMove : // Mouse move (QMouseEvent).
         {
-            if(this->mouse_event_type == QEvent::MouseMove || this->mouse_event_type == ACInputActionQt::MousePressedMove){
+            if(this->mouse_event_type == QEvent::MouseMove || this->mouse_event_type == ACEventQt::MousePressedMove){
                 //std::cout << "ACInputActionQt MouseMove" << std::endl;
-                if( (this->key_event_type == QEvent::None && this->mouse_event_type != ACInputActionQt::MousePressedMove ) || (this->key_event_type != QEvent::None && key_pressed) || (this->mouse_event_type == ACInputActionQt::MousePressedMove && mouse_pressed) ){
+                if( (this->key_event_type == QEvent::None && this->mouse_event_type != ACEventQt::MousePressedMove ) || (this->key_event_type != QEvent::None && key_pressed) || (this->mouse_event_type == ACEventQt::MousePressedMove && mouse_pressed) ){
                     QMouseEvent *_revent = static_cast<QMouseEvent*>(_event);
                     emit mouseMovedXY(_revent->x(), _revent->y());
                     emit mouseMovedX(_revent->x());
@@ -205,6 +215,11 @@ void ACInputActionQt::setKeyEventType(QEvent::Type _type)
     }
 }
 
+QEvent::Type ACInputActionQt::getKeyEventType()
+{
+    return key_event_type;
+}
+
 void ACInputActionQt::setMouseButton(Qt::MouseButton _button)
 {
 	switch (_button){
@@ -226,6 +241,11 @@ void ACInputActionQt::setMouseButton(Qt::MouseButton _button)
 			break;
 	}
 	this->mouse_button = _button;
+}
+
+Qt::MouseButton ACInputActionQt::getMouseButton() // not yet used
+{
+    return mouse_button;
 }
 
 // TODO CF notify that QEvent::Key(Press,Release) with QEvent::MouseButtonRelease works, but not with QEvent::MouseButtonPress
@@ -253,13 +273,42 @@ void ACInputActionQt::setMouseEventType(QEvent::Type _type)
 			//break;	
 		case QEvent::HoverMove : // The mouse cursor moves inside a hover widget (QHoverEvent).
             //break;
-        case ACInputActionQt::MousePressedMove : // QEvent::MousePressedMove : // Mouse moved when pressed (custom).
+        case ACEventQt::MousePressedMove : // QEvent::MousePressedMove : // Mouse moved when pressed (custom).
 			this->mouse_event_type = _type;
 			break;
 		default:
 			this->mouse_event_type = QEvent::None;
 			break;
 	}
+}
+
+QEvent::Type ACInputActionQt::getMouseEventType()
+{
+    return this->mouse_event_type;
+}
+
+QString ACInputActionQt::getMouseEventName(){
+    return mouseEventNames[this->mouse_event_type];
+}
+
+QStringList ACInputActionQt::getMouseEventNames(){
+    QStringList _names;
+    for (ACMouseEventNamesQt::iterator _name = mouseEventNames.begin(); _name != mouseEventNames.end();++_name)
+        _names.append(_name->second);
+    return _names;
+}
+
+QEvent::Type ACInputActionQt::convertMouseEventNameToType(QString _name)
+{
+    for (ACMouseEventNamesQt::iterator _names = mouseEventNames.begin(); _names != mouseEventNames.end();++_names)
+        if(_names->second == _name)
+            return _names->first;
+    return QEvent::None;
+}
+
+QString ACInputActionQt::convertMouseEventTypeToName(QEvent::Type _type)
+{
+    return mouseEventNames[_type];
 }
 
 void ACInputActionQt::setTabletEventType(QEvent::Type _type)
@@ -280,6 +329,11 @@ void ACInputActionQt::setTabletEventType(QEvent::Type _type)
 			this->tablet_event_type = QEvent::None;
 			break;
 	}
+}
+
+QEvent::Type ACInputActionQt::getTabletEventType() // not yet used
+{
+    return tablet_event_type;
 }
 
 void ACInputActionQt::setTouchEventType(QEvent::Type _type)
@@ -303,3 +357,8 @@ void ACInputActionQt::setTouchEventType(QEvent::Type _type)
 //Qt::TouchPointMoved // The touch point moved.
 //Qt::TouchPointStationary // The touch point did not move.
 //Qt::TouchPointReleased // The touch point was released.
+
+QEvent::Type ACInputActionQt::getTouchEventType() // not yet used
+{
+    return touch_event_type;
+}

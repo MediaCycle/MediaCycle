@@ -36,10 +36,10 @@
  */
 
 #include "ACInputControlsDialogQt.h"
+
 #include<iostream>
 
-ACInputControlsDialogQt::ACInputControlsDialogQt ( QList<QAction *> _actions,
-	QWidget *pParent ) : QDialog(pParent)
+ACInputControlsDialogQt::ACInputControlsDialogQt ( QWidget *pParent ) : QDialog(pParent)
 {
 	// Setup UI struct...
 	ui.setupUi(this);
@@ -62,15 +62,53 @@ ACInputControlsDialogQt::ACInputControlsDialogQt ( QList<QAction *> _actions,
 	ui.ShortcutTable->horizontalHeader()->setDefaultAlignment(Qt::AlignLeft);
 	ui.ShortcutTable->horizontalHeader()->resizeSection(0, 120);
     ui.ShortcutTable->horizontalHeader()->resizeSection(1, 250);
+    ui.ShortcutTable->horizontalHeader()->resizeSection(2, 60);
 
 	int iRowHeight = ui.ShortcutTable->fontMetrics().height() + 4;
 	ui.ShortcutTable->verticalHeader()->setDefaultSectionSize(iRowHeight);
 	ui.ShortcutTable->verticalHeader()->hide();
 
-	int iRow = 0;
+    // addActions() previously here
+
+    // Restore last seen form position and extents...
+    // here...
+
+
+/*
+    QObject::connect(ui.ShortcutTable,
+        SIGNAL(itemActivated(QTableWidgetItem *)),
+        SLOT(actionActivated(QTableWidgetItem *)));
+
+    QObject::connect(ui.ShortcutTable,
+        SIGNAL(itemChanged(QTableWidgetItem *)),
+        SLOT(actionChanged(QTableWidgetItem *)));
+*/
+    QObject::connect(ui.DialogButtonBox,
+        SIGNAL(accepted()),
+        SLOT(accept()));
+    QObject::connect(ui.DialogButtonBox,
+        SIGNAL(rejected()),
+        SLOT(reject()));
+}
+
+void ACInputControlsDialogQt::addActions( QList<QAction *> _actions ){
+
+    QObject::disconnect(ui.ShortcutTable,
+        SIGNAL(itemActivated(QTableWidgetItem *)),
+        this,
+        SLOT(actionActivated(QTableWidgetItem *)));
+
+    QObject::disconnect(ui.ShortcutTable,
+        SIGNAL(itemChanged(QTableWidgetItem *)),
+        this,
+        SLOT(actionChanged(QTableWidgetItem *)));
+
+    //int iRow = 0;
+    int iRow = this->actions.size();
+
     QListIterator<QAction *> iter(_actions);
 	while (iter.hasNext()) {
-		QAction *pAction = iter.next();
+        QAction *pAction = iter.next();
         //std::cout << "ACInputControlsDialogQt pAction->objectName() '" << pAction->objectName().toStdString() <<"' pAction->text() '" << pAction->text().toStdString() << "' pAction->statusTip() '" << pAction->statusTip().toStdString() << "' pAction->toolTip() '" << pAction->toolTip().toStdString() << "' pAction->menu() '" << pAction->menu() <<"'" << std::endl;
 		//if (pAction->objectName().isEmpty())
         //if (pAction->text().isEmpty())
@@ -83,29 +121,63 @@ ACInputControlsDialogQt::ACInputControlsDialogQt ( QList<QAction *> _actions,
             new ACInputControlsTableItemQt(pAction->toolTip()));
 		ui.ShortcutTable->setItem(iRow, 2,
             new ACInputControlsTableItemQt(pAction->shortcut()));
+        ui.ShortcutTable->setItem(iRow, 3,
+            new ACInputControlsTableItemQt(QString("")));
         this->actions.append(pAction);
 		++iRow;
 	}
 
-    // Restore last seen form position and extents...
-    // here...
+    // Hack (otherwise InputActions won't fill in)
+    /*QObject::connect(ui.ShortcutTable,
+        SIGNAL(itemActivated(QTableWidgetItem *)),
+        SLOT(actionActivated(QTableWidgetItem *)));
 
-	QObject::connect(ui.ShortcutTable,
-		SIGNAL(itemActivated(QTableWidgetItem *)),
-		SLOT(actionActivated(QTableWidgetItem *)));
-
-	QObject::connect(ui.ShortcutTable,
-		SIGNAL(itemChanged(QTableWidgetItem *)),
-		SLOT(actionChanged(QTableWidgetItem *)));
-
-	QObject::connect(ui.DialogButtonBox,
-		SIGNAL(accepted()),
-		SLOT(accept()));
-	QObject::connect(ui.DialogButtonBox,
-		SIGNAL(rejected()),
-		SLOT(reject()));
+    QObject::connect(ui.ShortcutTable,
+        SIGNAL(itemChanged(QTableWidgetItem *)),
+        SLOT(actionChanged(QTableWidgetItem *)));*/
 }
 
+void ACInputControlsDialogQt::addInputActions( QList<ACInputActionQt *> _actions ){
+
+    QObject::disconnect(ui.ShortcutTable,
+        SIGNAL(itemActivated(QTableWidgetItem *)),
+        this,
+        SLOT(actionActivated(QTableWidgetItem *)));
+
+    QObject::disconnect(ui.ShortcutTable,
+        SIGNAL(itemChanged(QTableWidgetItem *)),
+        this,
+        SLOT(actionChanged(QTableWidgetItem *)));
+
+    int iRow = this->actions.size();
+
+    QList<QAction* > _acts;
+    QListIterator<ACInputActionQt *> _iter(_actions);
+    while (_iter.hasNext())
+        _acts.append( dynamic_cast <QAction*> (_iter.next()) );
+    this->addActions(_acts);
+    QListIterator<ACInputActionQt *> iter(_actions);
+    while (iter.hasNext()) {
+        ACInputActionQt *pAction = iter.next();
+        if (pAction->menu() || pAction->text().isEmpty())
+            continue;
+        QComboBox* combo = new QComboBox();
+        combo->addItems( pAction->getMouseEventNames() );
+        int _index = combo->findText( pAction->getMouseEventName() );
+        ui.ShortcutTable->setCellWidget(iRow,3,combo);
+        combo->setCurrentIndex(_index);
+        //connect(combo, SIGNAL(currentIndexChanged(int)), signalMapper, SLOT(map()));
+        ++iRow;
+    }
+
+    QObject::connect(ui.ShortcutTable,
+        SIGNAL(itemActivated(QTableWidgetItem *)),
+        SLOT(actionActivated(QTableWidgetItem *)));
+
+    QObject::connect(ui.ShortcutTable,
+        SIGNAL(itemChanged(QTableWidgetItem *)),
+        SLOT(actionChanged(QTableWidgetItem *)));
+}
 
 ACInputControlsDialogQt::~ACInputControlsDialogQt (void)
 {
@@ -115,7 +187,9 @@ ACInputControlsDialogQt::~ACInputControlsDialogQt (void)
 
 void ACInputControlsDialogQt::actionActivated ( QTableWidgetItem *pItem )
 {
-	ui.ShortcutTable->editItem(ui.ShortcutTable->item(pItem->row(), 2));
+    if(pItem->column()==2){
+        ui.ShortcutTable->editItem(ui.ShortcutTable->item(pItem->row(), 2));
+    }
 }
 
 void ACInputControlsDialogQt::actionChanged ( QTableWidgetItem *pItem )
@@ -123,10 +197,16 @@ void ACInputControlsDialogQt::actionChanged ( QTableWidgetItem *pItem )
 	pItem->setText(QString(QKeySequence(pItem->text().trimmed())));
 	++iDirtyCount;
     for (int iRow = 0; iRow < actions.count(); ++iRow) {
-        QAction *pAction = actions[iRow];
-        pAction->setShortcut(
-            QKeySequence(ui.ShortcutTable->item(iRow, 2)->text()));
+        if(pItem->column()==2){
+            QAction *pAction = actions[iRow];
+            pAction->setShortcut(
+                QKeySequence(ui.ShortcutTable->item(iRow, 2)->text()));
         //std::cout << "Shortcut '" << ui.ShortcutTable->item(iRow, 2)->text().toStdString() << "'" << std::endl;
+        }
+        else if(pItem->column()==3){
+            ACInputActionQt *pAction = dynamic_cast<ACInputActionQt*>(actions[iRow]);
+            pAction->setMouseEventType( pAction->convertMouseEventNameToType( ui.ShortcutTable->item(iRow, 3)->text() ) );
+        }
     }
 }
 
@@ -137,6 +217,10 @@ void ACInputControlsDialogQt::accept (void)
 			QAction *pAction = actions[iRow];
 			pAction->setShortcut(
 				QKeySequence(ui.ShortcutTable->item(iRow, 2)->text()));
+            if ( ui.ShortcutTable->item(iRow, 3)->text() != ""){
+                ACInputActionQt* pInputAction = dynamic_cast<ACInputActionQt*>(pAction);
+                pInputAction->setMouseEventType( pInputAction->convertMouseEventNameToType( ui.ShortcutTable->item(iRow, 3)->text() ) );
+            }
 		}
 	}
 	QDialog::accept();

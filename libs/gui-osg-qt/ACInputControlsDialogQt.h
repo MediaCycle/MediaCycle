@@ -43,6 +43,7 @@
 #include "ACInputControlsTableItemQt.h"
 #include "ACInputControlsTableItemEditorQt.h"
 #include "ACInputControlsTableItemDelegateQt.h"
+#include "ACInputActionQt.h"
 
 class ACInputControlsDialogQt : public QDialog
 {
@@ -51,11 +52,14 @@ class ACInputControlsDialogQt : public QDialog
 public:
 
 	// Constructor.
-    ACInputControlsDialogQt(QList<QAction *> _actions, QWidget *pParent = NULL);
+    ACInputControlsDialogQt(QWidget *pParent = NULL);
 	
 	// Destructor.
 	
     ~ACInputControlsDialogQt();
+
+   void addActions( QList<QAction *> _actions );
+   void addInputActions( QList<ACInputActionQt *> _actions );
 
 protected slots:
 
