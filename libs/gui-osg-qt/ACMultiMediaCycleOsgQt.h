@@ -111,7 +111,13 @@ public slots:
 	void on_actionHelpAbout_triggered(bool checked);
 	void on_actionDetachBrowser_triggered(bool checked);
 	void on_actionFullscreen_triggered(bool checked);
-	
+
+protected:
+    void dragEnterEvent(QDragEnterEvent *event);
+    void dragMoveEvent(QDragMoveEvent *event);
+    void dragLeaveEvent(QDragLeaveEvent *event);
+    void dropEvent(QDropEvent *event);
+
 public:
 	ACMultiMediaCycleOsgQt(QWidget *parent = 0);
 	~ACMultiMediaCycleOsgQt();

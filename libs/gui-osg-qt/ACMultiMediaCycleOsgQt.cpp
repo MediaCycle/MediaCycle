@@ -246,6 +246,8 @@ ACMultiMediaCycleOsgQt::ACMultiMediaCycleOsgQt(QWidget *parent) : QMainWindow(pa
 	this->addActions(ui.menuDisplay->actions());
 	this->addActions(ui.menuHelp->actions());	
     //this->addActions(compositeOsgView->actions());
+
+    this->setAcceptDrops(true);
 }
 
 ACMultiMediaCycleOsgQt::~ACMultiMediaCycleOsgQt(){
@@ -649,14 +651,15 @@ void ACMultiMediaCycleOsgQt::importDirectoriesThreaded(vector<string> directorie
 	// http://hopf.chem.brandeis.edu/yanglingfa/Qt/threading/index.html
 	
 	// not necessary to thread if only few files.
-	//		if (directories.size() > n_dir_for_threading)
-	// media_cycle->importDirectoriesThreaded(directories, recursive, forward_order, do_segments);
-	//		else
-				media_cycle->importDirectories(directories, recursive, forward_order, do_segments);
-	
-         // XS TODO FIXME !!
+    int n_dir_for_threading = 0;
+    if (directories.size() > n_dir_for_threading)
+        media_cycle->importDirectoriesThreaded(directories, recursive, forward_order, do_segments);
+    else{
+        media_cycle->importDirectories(directories, recursive, forward_order, do_segments);
+        // XS TODO FIXME !!
         // does not belong here for threaded version
-	this->updateLibrary();
+        this->updateLibrary();
+    }
 }
 
 bool ACMultiMediaCycleOsgQt::doSegments(){
@@ -686,12 +689,14 @@ void ACMultiMediaCycleOsgQt::on_actionEdit_Input_Controls_triggered(bool checked
     if (controlsDialog == 0){
         //this->addActions(compositeOsgView->actions());
         //std::cout << "this->actions().size() " << this->actions().size() << std::endl;
-        QList<QAction *> _actions = QList<QAction *> (this->actions());
+        ///QList<QAction *> _actions = QList<QAction *> (this->actions());
         //std::cout << "_actions.size() " << _actions.size() << std::endl;
-        _actions.append(compositeOsgView->actions());
+        ///_actions.append(compositeOsgView->actions());
         //std::cout << "compositeOsgView->actions().size() " << compositeOsgView->actions().size() << std::endl;
         //std::cout << "_actions.size() " << _actions.size() << std::endl;
-        controlsDialog = new ACInputControlsDialogQt(_actions,this);
+        controlsDialog = new ACInputControlsDialogQt(this);
+        controlsDialog->addActions(this->actions());
+        controlsDialog->addInputActions(compositeOsgView->getInputActions());
         //controlsDialog = new ACInputControlsDialogQt(this->actions(),this);
     }
 
@@ -912,6 +917,56 @@ void ACMultiMediaCycleOsgQt::on_actionFullscreen_triggered(bool checked) {
 	compositeOsgView->setFocus();
 }
 
+void ACMultiMediaCycleOsgQt::dragEnterEvent(QDragEnterEvent *event)
+{
+     std::cout <<"<drop content>" << std::endl;
+     event->acceptProposedAction();
+}
+
+void ACMultiMediaCycleOsgQt::dragMoveEvent(QDragMoveEvent *event)
+{
+    event->acceptProposedAction();
+}
+
+void ACMultiMediaCycleOsgQt::dropEvent(QDropEvent *event)
+{
+     const QMimeData *mimeData = event->mimeData();
+
+     /*if (mimeData->hasImage()) {
+              setPixmap(qvariant_cast<QPixmap>(mimeData->imageData()));
+          } else if (mimeData->hasHtml()) {
+              setText(mimeData->html());
+              setTextFormat(Qt::RichText);
+          } else if (mimeData->hasText()) {
+              setText(mimeData->text());
+              setTextFormat(Qt::PlainText);
+          } else*/ if (mimeData->hasUrls()) {
+              QList<QUrl> urlList = mimeData->urls();
+              QString text;
+              for (int i = 0; i < urlList.size() && i < 32; ++i) {
+                  QString url = urlList.at(i).path();
+                  text += url + QString("\n");
+                  std::cout << url.toStdString() << std::endl;
+              }
+              //setText(text);
+          } /*else {
+              setText(tr("Cannot display data"));
+          }*/
+
+     /*if (mimeData){
+         foreach (QString format, mimeData->formats()) {
+             std::cout << format.toStdString() << std::endl;
+         }
+    }*/
+     event->acceptProposedAction();
+}
+
+void ACMultiMediaCycleOsgQt::dragLeaveEvent(QDragLeaveEvent *event)
+{
+    event->accept();
+}
+
+
 void ACMultiMediaCycleOsgQt::updateLibrary(){
 	if (! hasMediaCycle()) return;
 	// XS TODO updateLibrary()
@@ -943,8 +998,8 @@ void ACMultiMediaCycleOsgQt::configurePluginDock() {
 				((ACBrowserControlsClustersNeighborsDockWidgetQt*)dockWidgets[d])->configureCheckBoxes();
 			if (dockWidgets[d]->getClassName() == "ACBrowserControlsClustersDockWidgetQt")
 				((ACBrowserControlsClustersDockWidgetQt*)dockWidgets[d])->configureCheckBoxes();
-			if (dockWidgets[d]->getClassName() == "ACMediaDocumentOptionDockWidgetQt")
-				((ACMediaDocumentOptionDockWidgetQt*)dockWidgets[d])->configureCheckBoxes();
+            if (dockWidgets[d]->getClassName() == "ACMediaDocumentOptionDockWidgetQt")
+                ((ACMediaDocumentOptionDockWidgetQt*)dockWidgets[d])->configureCheckBoxes();
 		}
 	}
 	plugins_scanned = true;
@@ -1030,9 +1085,14 @@ void ACMultiMediaCycleOsgQt::synchronizeFeaturesWeights(){
 void ACMultiMediaCycleOsgQt::configureDockWidgets(ACMediaType _media_type){
 //	int index_media = (int)_media_type + 1; // XS change this -- will not work if items in different order!!!
 	for (int d=0;d<dockWidgets.size();d++){
-//		if (dockWidgets[d]->getClassName() == "ACMediaConfigDockWidgetQt"){
-//			((ACMediaConfigDockWidgetQt*)dockWidgets[d])->getComboDefaultSettings()->setCurrentIndex(index_media);
-//		}
+
+        if (dockWidgets[d]->getClassName() == "ACMediaConfigDockWidgetQt"){
+            std::string mediaType = ACMediaFactory::getInstance().getNormalCaseStringFromMediaType(_media_type);
+            int mediaIndex = ((ACMediaConfigDockWidgetQt*)dockWidgets[d])->getComboDefaultSettings()->findText(QString(mediaType.c_str()));
+            if (mediaIndex > -1){
+                ((ACMediaConfigDockWidgetQt*)dockWidgets[d])->getComboDefaultSettings()->setCurrentIndex(mediaIndex);
+            }
+        }
 
 		if (dockWidgets[d]->getMediaType() == MEDIA_TYPE_ALL || dockWidgets[d]->getMediaType() == _media_type || dockWidgets[d]->getMediaType() == MEDIA_TYPE_MIXED){
 			if (this->dockWidgetArea(dockWidgets[d]) == Qt::NoDockWidgetArea){
@@ -1346,8 +1406,8 @@ void ACMultiMediaCycleOsgQt::clean(bool _updategl){
 		if (dockWidgets[d]->getClassName() == "ACBrowserControlsClustersDockWidgetQt") {
 			((ACBrowserControlsClustersDockWidgetQt*)dockWidgets[d])->cleanCheckBoxes();
 		}
-		if (dockWidgets[d]->getClassName() == "ACMediaDocumentOptionDockWidgetQt")
-			((ACMediaDocumentOptionDockWidgetQt*)dockWidgets[d])->cleanCheckBoxes();
+        if (dockWidgets[d]->getClassName() == "ACMediaDocumentOptionDockWidgetQt")
+            ((ACMediaDocumentOptionDockWidgetQt*)dockWidgets[d])->cleanCheckBoxes();
 	}
 
 	// XS TODO : remove the boxes specific to the media that was loaded
@@ -1376,7 +1436,34 @@ void ACMultiMediaCycleOsgQt::showError(const exception& e) {
 
 bool ACMultiMediaCycleOsgQt::hasMediaCycle(){
 	if (media_cycle == 0) {
-		this->showError ("No MediaCycle Instance - Define type of media first");
+        //this->showError ("No MediaCycle Instance - Define type of media first");
+
+        // find the media config dock widget
+        for (int d=0;d<dockWidgets.size();d++){
+            if (dockWidgets[d]->getClassName()=="ACMediaConfigDockWidgetQt"){
+
+                // get a list of the available media types
+                QStringList mediaTypes;
+                for(int i = 0;i<((ACMediaConfigDockWidgetQt*)dockWidgets[d])->getComboDefaultSettings()->count();i++){
+                    if( ((ACMediaConfigDockWidgetQt*)dockWidgets[d])->getComboDefaultSettings()->itemText(i) != "-- Config --") // would lead to a useless choice
+                        mediaTypes << ((ACMediaConfigDockWidgetQt*)dockWidgets[d])->getComboDefaultSettings()->itemText(i);
+                }
+
+                bool ok;
+                // popup a dialog asking to set the media type
+                QString mediaType =  QInputDialog::getItem(this,tr("Choose the media type"),tr("Media type:"), mediaTypes, 0, false, &ok);
+                if (ok && !mediaType.isEmpty()){
+                    int mediaIndex = ((ACMediaConfigDockWidgetQt*)dockWidgets[d])->getComboDefaultSettings()->findText(mediaType);
+                    if (mediaIndex > -1){
+                        // if the media type is correctly chosen from the dialog, set it as well on the media config dock widget
+                        ((ACMediaConfigDockWidgetQt*)dockWidgets[d])->getComboDefaultSettings()->setCurrentIndex(mediaIndex);
+                        // activate the media type setting change
+                        this->comboDefaultSettingsChanged();
+                        return true;
+                    }
+                }
+            }
+        }
 		return false;
 	}
 	return true;

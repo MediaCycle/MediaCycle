@@ -464,26 +464,29 @@ std::string ACMediaFactory::getLowCaseStringFromMediaType(ACMediaType _media_typ
 std::vector< std::string > ACMediaFactory::listAvailableMediaTypes(){
 	std::vector< std::string > _list;
 	// use a std::map< ACMediaType, std::string >?
-	#if defined (SUPPORT_3DMODEL)
-	_list.push_back("3Dmodel");
-	#endif //defined (SUPPORT_3DMODEL)
 	#if defined (SUPPORT_AUDIO)
-	_list.push_back("audio");
+    _list.push_back("Audio");
 	#endif //defined (SUPPORT_AUDIO)
 	#if defined (SUPPORT_IMAGE)
-	_list.push_back("image");
+    _list.push_back("Image");
 	#endif //defined (SUPPORT_IMAGE)
+    #if defined (SUPPORT_VIDEO)
+    _list.push_back("Video");
+    #endif //defined (SUPPORT_VIDEO)
 	#if defined (SUPPORT_TEXT)
-	_list.push_back("text");
+    _list.push_back("Text");
 	#endif //defined (SUPPORT_TEXT)
 	#if defined (SUPPORT_PDF)
-	_list.push_back("pdf");
+    _list.push_back("PDF");
 	#endif //defined (SUPPORT_PDF)
-	#if defined (SUPPORT_VIDEO)
-	_list.push_back("video");
-	#endif //defined (SUPPORT_VIDEO)
+    #if defined (SUPPORT_3DMODEL)
+    _list.push_back("3DModel");
+    #endif //defined (SUPPORT_3DMODEL)
+    #if defined (SUPPORT_MULTIMEDIA)
+    _list.push_back("Mixed");
+    #endif //defined (SUPPORT_MULTIMEDIA)
 	return _list;	
-}	
+}
 
 bool ACMediaFactory::isMediaTypeSegmentable(ACMediaType _media_type){
 	if(_media_type == MEDIA_TYPE_AUDIO || _media_type == MEDIA_TYPE_VIDEO)

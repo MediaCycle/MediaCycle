@@ -40,23 +40,9 @@ ACMediaConfigDockWidgetQt::ACMediaConfigDockWidgetQt(QWidget *parent)
 	ui.setupUi(this); // first thing to do
 	
 	// Media types
-	#if defined (SUPPORT_AUDIO)
-		ui.comboDefaultSettings->addItem(QString("Audio"));
-	#endif //defined (SUPPORT_AUDIO)
-	#if defined (SUPPORT_IMAGE)
-		ui.comboDefaultSettings->addItem(QString("Image"));
-	#endif //defined (SUPPORT_IMAGE)
-	#if defined (SUPPORT_VIDEO)
-		ui.comboDefaultSettings->addItem(QString("Video"));
-	#endif //defined (SUPPORT_VIDEO)
-    #if defined (SUPPORT_3DMODEL)
-		ui.comboDefaultSettings->addItem(QString("3DModel"));
-	#endif //defined (SUPPORT_3DMODEL)
-	#if defined (SUPPORT_TEXT)
-		ui.comboDefaultSettings->addItem(QString("Text"));
-	#endif //defined (SUPPORT_TEXT)
-    #if defined (SUPPORT_MULTIMEDIA)
-	ui.comboDefaultSettings->addItem(QString("Mixed"));
-    #endif //defined (SUPPORT_MULTIMEDIA)
+    std::vector< std::string > mediaTypes = ACMediaFactory::getInstance().listAvailableMediaTypes();
+    for (std::vector< std::string >::iterator mediaType = mediaTypes.begin(); mediaType!=mediaTypes.end(); ++mediaType)
+        ui.comboDefaultSettings->addItem(QString((*mediaType).c_str()));
+
 	this->show();
 }
