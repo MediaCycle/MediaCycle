@@ -61,6 +61,8 @@ private slots:
 	void on_comboBoxClustersMethod_activated(const QString & text);//CF or (int index);}
 	void on_comboBoxClustersPositions_activated(const QString & text);//CF or (int index);}
 
+    void resizePluginList();
+
 public:
 	ACBrowserControlsClustersDockWidgetQt(QWidget *parent = 0);
 	~ACBrowserControlsClustersDockWidgetQt(){};

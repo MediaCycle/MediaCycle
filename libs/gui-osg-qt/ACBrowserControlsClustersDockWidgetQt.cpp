@@ -40,6 +40,7 @@ ACBrowserControlsClustersDockWidgetQt::ACBrowserControlsClustersDockWidgetQt(QWi
     ui.setupUi(this); // first thing to do
     connect(ui.featuresListWidget, SIGNAL(itemClicked(QListWidgetItem*)),this, SLOT(modifyListItem(QListWidgetItem*)));
     this->show();
+    this->resizePluginList();
 }
 
 void ACBrowserControlsClustersDockWidgetQt::modifyListItem(QListWidgetItem *item)
@@ -168,10 +169,13 @@ void ACBrowserControlsClustersDockWidgetQt::synchronizeFeaturesWeights()
                 ui.featuresListWidget->item(i)->setCheckState (Qt::Checked);
         }
     }
+    this->resizePluginList();
 }
 
 void ACBrowserControlsClustersDockWidgetQt::configureCheckBoxes()
 {
+    std::cout << "ACBrowserControlsClustersDockWidgetQt::configureCheckBoxes" << std::endl;
+
     // dynamic config of checkboxes
     // according to plugins actually used to compute the features
     if (media_cycle == 0) return;
@@ -185,32 +189,29 @@ void ACBrowserControlsClustersDockWidgetQt::configureCheckBoxes()
         QListWidgetItem * item = new QListWidgetItem(s,ui.featuresListWidget);
         item->setCheckState (Qt::Unchecked);
     }
-	
-	//CF Automatic feature list height update to be debugged
-	/*
-	ui.featuresListWidget->setMinimumHeight(ui.featuresListWidget->sizeHintForRow(0)*plugins_list.size());
-	ui.featuresListWidget->adjustSize();
-	//ui.groupBoxSimilarity->setMinimumHeight(ui.featuresListWidget->sizeHintForColumn(0));
-	ui.groupBoxSimilarity->adjustSize();
-	*/
-	
+		
     this->synchronizeFeaturesWeights();
 
     connect(ui.featuresListWidget, SIGNAL(itemClicked(QListWidgetItem*)),
             this, SLOT(modifyListItem(QListWidgetItem*)));
 
+    this->resizePluginList();
 }
 
 void ACBrowserControlsClustersDockWidgetQt::cleanCheckBoxes()
 {
+    std::cout << "ACBrowserControlsClustersDockWidgetQt::cleanCheckBoxes" << std::endl;
+
     for(int i = 0; i < ui.featuresListWidget->count(); i++)
         delete ui.featuresListWidget->takeItem(i);
 
     ui.featuresListWidget->clear();
+    this->resizePluginList();
 }
 
 void ACBrowserControlsClustersDockWidgetQt::updatePluginLists()
 {
+    std::cout << "ACBrowserControlsClustersDockWidgetQt::updatePluginLists" << std::endl;
     if (media_cycle == 0) return;
     //CF restore default mode
     ui.comboBoxClustersMethod->clear();
@@ -274,5 +275,28 @@ void ACBrowserControlsClustersDockWidgetQt::updatePluginLists()
 		ui.comboBoxClustersMethod->setCurrentIndex(1);
 		ui.comboBoxClustersPositions->setCurrentIndex(1);
 	}*/
-	
+    this->resizePluginList();
+}
+
+void ACBrowserControlsClustersDockWidgetQt::resizePluginList(){
+    if (ui.featuresListWidget->sizeHintForRow(0) >-1 && ui.featuresListWidget->count() >0){
+        // CF resize the feature list along the number of features (a threshold number could be set)
+        ui.featuresListWidget->setMinimumHeight(ui.featuresListWidget->sizeHintForRow(0)*(ui.featuresListWidget->count())+8);
+        ui.featuresListWidget->setFixedHeight(ui.featuresListWidget->sizeHintForRow(0)*(ui.featuresListWidget->count())+8);
+        ui.groupBoxSimilarity->setMinimumHeight(ui.featuresListWidget->sizeHintForRow(0)*(ui.featuresListWidget->count()+2));
+        ui.groupBoxSimilarity->setFixedHeight(ui.featuresListWidget->sizeHintForRow(0)*(ui.featuresListWidget->count()+2));
+    }
+    else{
+        // CF resize the feature list to a default min size
+        ui.featuresListWidget->setMinimumHeight(16);
+        ui.featuresListWidget->setFixedHeight(16);
+        ui.groupBoxSimilarity->setMinimumHeight(64);
+        ui.groupBoxSimilarity->setFixedHeight(64);
+    }
+
+    ui.dockWidgetContents->adjustSize();
+    ui.verticalLayoutWidget->adjustSize();
+    this->adjustSize();
+    ui.featuresListWidget->adjustSize();
+    ui.groupBoxSimilarity->adjustSize();
 }
