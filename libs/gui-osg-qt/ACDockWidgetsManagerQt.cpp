@@ -57,14 +57,14 @@ void ACDockWidgetsManagerQt::updateMediaCycle(MediaCycle* media_cycle)
     }
 }
 
+#if defined (SUPPORT_AUDIO)
 void ACDockWidgetsManagerQt::updateAudioEngine(ACAudioEngine* audio_engine)
 {
-    #if defined (SUPPORT_AUDIO)
     for (int d=0;d<dockWidgets.size();d++){
         dockWidgets[d]->setAudioEngine(audio_engine);
     }
-    #endif //defined (SUPPORT_AUDIO)
 }
+#endif //defined (SUPPORT_AUDIO)
 
 void ACDockWidgetsManagerQt::updateOsgView(ACOsgCompositeViewQt* compositeOsgView)
 {
@@ -134,8 +134,6 @@ bool ACDockWidgetsManagerQt::addControlDock(ACAbstractDockWidgetQt* dock)
     }
 
     connect(dockWidgets[dockWidgets.size()-1], SIGNAL(mediaTypeChanged(QString)), mainWindow, SLOT(comboDefaultSettingsChanged(QString)));
-        //connect(((ACMediaConfigDockWidgetQt*)dockWidgets[dockWidgets.size()-1])->getComboDefaultSettings(), SIGNAL(currentIndexChanged(QString)), mainWindow, SLOT(comboDefaultSettingsChanged(QString)));
-    //}
 
     dockWidgets[dockWidgets.size()-1]->autoConnectOSC(true);
 

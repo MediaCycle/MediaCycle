@@ -39,7 +39,7 @@
 
 #include <MediaCycle.h>
 #if defined (SUPPORT_AUDIO)
-    #include <ACAudioEngine.h>
+#include <ACAudioEngine.h>
 #endif //defined (SUPPORT_AUDIO)
 
 //#include "ACAbstractDockWidgetQt.h"
@@ -59,7 +59,9 @@ public:
     virtual ~ACDockWidgetsManagerQt();
 
     void updateMediaCycle(MediaCycle* media_cycle);
+    #if defined (SUPPORT_AUDIO)
     void updateAudioEngine(ACAudioEngine* audio_engine);
+    #endif //defined (SUPPORT_AUDIO)
     void updateOsgView(ACOsgCompositeViewQt* compositeOsgView);
     void setMediaType(ACMediaType _media_type);
     #if defined (USE_OSC)

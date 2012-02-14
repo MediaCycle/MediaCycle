@@ -103,8 +103,6 @@ void ACMediaDocumentOptionDockWidgetQt::changeMediaType(QString name){
 	media_cycle->setActiveMediaType(nameStr);
 	media_cycle->initializeFeatureWeights(); 
 	media_cycle->normalizeFeatures(1);
-	
-	
 	media_cycle->libraryContentChanged(1); 
 	emit changeLibraryMediaType();
     #endif//def SUPPORT_MULTIMEDIA

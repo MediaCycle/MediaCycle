@@ -34,12 +34,12 @@
 
 #include <QDockWidget>
 
-#ifdef SUPPORT_MULTIMEDIA
-#include "ACMediaDocument.h"
 #include "ACAbstractDockWidgetQt.h"
+#include "ui_ACMediaDocumentOptionDockWidgetQt.h"
 #include <MediaCycle.h>
 
-#include "ui_ACMediaDocumentOptionDockWidgetQt.h"
+#ifdef SUPPORT_MULTIMEDIA
+#include "ACMediaDocument.h"
 #endif//def SUPPORT_MULTIMEDIA
 
 class ACMediaDocumentOptionDockWidgetQt : public ACAbstractDockWidgetQt 
@@ -54,14 +54,14 @@ private slots:
     void changeMediaType(QString name);
 signals:
     void changeLibraryMediaType();
-#ifdef SUPPORT_MULTIMEDIA
 public:
+    #ifdef SUPPORT_MULTIMEDIA
     virtual void updatePluginsSettings();
     virtual void resetPluginsSettings();
+    #endif//def SUPPORT_MULTIMEDIA
 private:
     Ui::ACMediaDocumentOptionDockWidgetQt ui;
 	bool initOn;
-#endif//def SUPPORT_MULTIMEDIA
 };
 
 #endif // ACDOCKWIDGETMEDIADOCUMENTOPTION_H

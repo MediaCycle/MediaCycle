@@ -57,7 +57,8 @@ int main(int argc, char *argv[])
 		// Adding palettes
 		window.addControlDock("MCMediaConfig");
 		window.addControlDock("MCOSC");				 
-		window.addControlDock("MCBrowserControlsClusters");//"MCBrowserControlsClustersNeighbors");
+        window.addControlDock("MCBrowserControlsClusters");
+        //window.addControlDock("MCBrowserControlsClustersNeighbors");
 #if defined (SUPPORT_AUDIO)
 		window.addControlDock("MCAudioControls");
 #endif //defined (SUPPORT_AUDIO)
@@ -69,9 +70,7 @@ int main(int argc, char *argv[])
 		// this has to be called after dock controls have been added
 		// do we need to put all this code here ?
 		window.configureSettings();
-		
-		//	window.configurePluginDock();
-		
+				
 		// Changing the about dialog (not necessary if standard MediaCycle app)
 		//window.addAboutDialog("MediaCycle");
 		

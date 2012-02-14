@@ -48,7 +48,7 @@
 
 #include <MediaCycle.h>
 #if defined (SUPPORT_AUDIO)
-	#include <ACAudioEngine.h>
+#include <ACAudioEngine.h>
 #endif //defined (SUPPORT_AUDIO)
 #include <ACOsgCompositeViewQt.h>
 
@@ -181,7 +181,7 @@ private:
 
 	std::vector<std::string> plugins_libraries;
 	#if defined (SUPPORT_AUDIO)
-		ACAudioEngine *audio_engine;
+    ACAudioEngine *audio_engine;
 	#endif //defined (SUPPORT_AUDIO)
 	
     ACDockWidgetsManagerQt* dockWidgetsManager;

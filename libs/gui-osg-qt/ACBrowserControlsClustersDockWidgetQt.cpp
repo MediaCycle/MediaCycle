@@ -40,6 +40,8 @@ ACBrowserControlsClustersDockWidgetQt::ACBrowserControlsClustersDockWidgetQt(QWi
     ui.setupUi(this); // first thing to do
     connect(ui.featuresListWidget, SIGNAL(itemClicked(QListWidgetItem*)),this, SLOT(modifyListItem(QListWidgetItem*)));
     this->show();
+    ui.groupBoxNeighbors->hide();
+    ui.widgetModes->hide();
     this->resizePluginList();
 }
 

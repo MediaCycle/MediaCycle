@@ -82,7 +82,7 @@ public:
     virtual void resetPluginsSettings(){}
     virtual void resetMediaType(ACMediaType _media_type){}
 
-private:
+protected:
 	ACMediaType media_type;
 	std::string class_name;
 

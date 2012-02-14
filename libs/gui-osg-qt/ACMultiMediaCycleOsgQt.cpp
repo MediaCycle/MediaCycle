@@ -322,11 +322,11 @@ void ACMultiMediaCycleOsgQt::createMediaCycle(ACMediaType _media_type, ACBrowser
 		audio_engine->setMediaCycle(media_cycle);
 		audio_engine->startAudioEngine();
 		compositeOsgView->setAudioEngine(audio_engine);
+        dockWidgetsManager->updateAudioEngine(audio_engine);
 	}
 	#endif //defined (SUPPORT_AUDIO)
 
     dockWidgetsManager->updateMediaCycle(media_cycle);
-    dockWidgetsManager->updateAudioEngine(audio_engine);
     dockWidgetsManager->updateOsgView(compositeOsgView);
 }
 
