@@ -71,6 +71,10 @@ private:
 	Ui::ACBrowserControlsClustersDockWidgetQt ui;
 
 public:
+    virtual void updatePluginsSettings();
+    virtual void resetPluginsSettings();
+    virtual void changeMediaType(ACMediaType _media_type);
+
 	void synchronizeFeaturesWeights();
 	void configureCheckBoxes();
 	void cleanCheckBoxes();

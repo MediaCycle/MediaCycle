@@ -42,7 +42,36 @@ ACMediaConfigDockWidgetQt::ACMediaConfigDockWidgetQt(QWidget *parent)
 	// Media types
     std::vector< std::string > mediaTypes = ACMediaFactory::getInstance().listAvailableMediaTypes();
     for (std::vector< std::string >::iterator mediaType = mediaTypes.begin(); mediaType!=mediaTypes.end(); ++mediaType)
-        ui.comboDefaultSettings->addItem(QString((*mediaType).c_str()));
+        ui.comboLibrary->addItem(QString((*mediaType).c_str()));
 
 	this->show();
+
+    ui.labelSimilarity->hide();
+    ui.comboSimilarity->hide();
+    this->adjustSize();
 }
+
+void ACMediaConfigDockWidgetQt::on_comboLibrary_activated(const QString & text)
+{
+    emit mediaTypeChanged(text);
+}
+
+void ACMediaConfigDockWidgetQt::changeMediaType(ACMediaType _media_type)
+{
+    std::string mediaType = ACMediaFactory::getInstance().getNormalCaseStringFromMediaType(_media_type);
+    int mediaIndex = ui.comboLibrary->findText(QString(mediaType.c_str()));
+    if (mediaIndex > -1){
+        ui.comboLibrary->setCurrentIndex(mediaIndex);
+    }
+}
+
+void ACMediaConfigDockWidgetQt::resetMediaType(ACMediaType _media_type)
+{
+    string sMedia = ACMediaFactory::getInstance().getNormalCaseStringFromMediaType(_media_type);
+    int comboIndex = ui.comboLibrary->findText(QString(sMedia.c_str()));
+    if (comboIndex > -1)
+        ui.comboLibrary->setCurrentIndex(comboIndex);//stay with the current config without reloading
+    else
+        ui.comboLibrary->setCurrentIndex(0);//display the startup combo value "-- Config --"
+}
+

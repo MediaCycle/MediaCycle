@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>250</width>
-    <height>75</height>
+    <height>90</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -19,13 +19,13 @@
   <property name="minimumSize">
    <size>
     <width>250</width>
-    <height>75</height>
+    <height>58</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
     <width>250</width>
-    <height>75</height>
+    <height>90</height>
    </size>
   </property>
   <property name="baseSize">
@@ -44,30 +44,97 @@
    <string>Media Configuration</string>
   </property>
   <widget class="QWidget" name="dockWidgetContents">
-   <widget class="QComboBox" name="comboDefaultSettings">
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="minimumSize">
+    <size>
+     <width>250</width>
+     <height>32</height>
+    </size>
+   </property>
+   <widget class="QWidget" name="formLayoutWidget">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>10</y>
-      <width>231</width>
-      <height>26</height>
+      <x>0</x>
+      <y>0</y>
+      <width>251</width>
+      <height>61</height>
      </rect>
     </property>
-    <property name="font">
-     <font>
-      <pointsize>10</pointsize>
-     </font>
-    </property>
-    <item>
-     <property name="text">
-      <string>-- Config --</string>
+    <layout class="QFormLayout" name="formLayout">
+     <property name="fieldGrowthPolicy">
+      <enum>QFormLayout::ExpandingFieldsGrow</enum>
      </property>
-    </item>
-    <item>
-     <property name="text">
-      <string>Custom</string>
+     <property name="labelAlignment">
+      <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
      </property>
-    </item>
+     <property name="formAlignment">
+      <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+     </property>
+     <item row="0" column="1">
+      <widget class="QComboBox" name="comboLibrary">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>10</pointsize>
+        </font>
+       </property>
+       <item>
+        <property name="text">
+         <string>-- Config --</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Custom</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QLabel" name="labelSimilarity">
+       <property name="font">
+        <font>
+         <pointsize>10</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>Similarity</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QComboBox" name="comboSimilarity">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="0">
+      <widget class="QLabel" name="labelLibrary">
+       <property name="font">
+        <font>
+         <pointsize>10</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string> Library</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </widget>
   </widget>
  </widget>

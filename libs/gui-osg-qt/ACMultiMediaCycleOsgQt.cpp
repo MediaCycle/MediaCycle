@@ -112,8 +112,9 @@ void ACMultiMediaCycleOsgQt::mediacycleCallback(const char* message)
 				if(media_id != -1 && dir_size != -1){
 					std::cout << std::endl << std::endl << "importing media " << media_id << "/" << (dir_size-1) << std::endl;
 					//if(media_id==1)//TR The first file has not necessary the good media type
-					if(media_cycle->getLibrary()->getParentIds().size()==1)
-						this->configurePluginDock();
+                    if(media_cycle->getLibrary()->getParentIds().size()==1){
+                        dockWidgetsManager->updatePluginsSettings();
+                    }
 					if (progressBar){
 						emit loading_file(media_id+1,dir_size);
 						stringstream status_message;
@@ -129,9 +130,7 @@ void ACMultiMediaCycleOsgQt::mediacycleCallback(const char* message)
 
 // ----------- 
 
-ACMultiMediaCycleOsgQt::ACMultiMediaCycleOsgQt(QWidget *parent) : QMainWindow(parent),
-	features_known(false), plugins_scanned(false), detachedBrowser(0),
-	aboutDialog(0),controlsDialog(0),compositeOsgView(0),osgViewDock(0),osgViewDockWidget(0),osgViewDockLayout(0),osgViewDockTitleBar(0),progressBar(0)
+ACMultiMediaCycleOsgQt::ACMultiMediaCycleOsgQt(QWidget *parent) : QMainWindow(parent),features_known(false),detachedBrowser(0),	aboutDialog(0),controlsDialog(0),compositeOsgView(0),osgViewDock(0),osgViewDockWidget(0),osgViewDockLayout(0),osgViewDockTitleBar(0),progressBar(0)
 {
 	ui.setupUi(this); // first thing to do
 	this->media_type = MEDIA_TYPE_NONE;
@@ -161,16 +160,10 @@ ACMultiMediaCycleOsgQt::ACMultiMediaCycleOsgQt(QWidget *parent) : QMainWindow(pa
 	#endif
 	#endif
 
-	// Dock Widgets
-	dockWidgets.resize(0);
-	dockWidgetFactory = new ACDockWidgetFactoryQt();
-	lastDocksVisibilities.resize(0);
-	connect(ui.actionShow_Hide_Controls, SIGNAL(triggered()), this, SLOT(syncControlToggleWithDocks()));
-	wasControlsToggleChecked = ui.actionShow_Hide_Controls->isChecked();//true;
-
+    dockWidgetsManager = new ACDockWidgetsManagerQt(this);
+    connect( dockWidgetsManager, SIGNAL( toggleControls(bool) ),
+            ui.actionToggle_Controls, SLOT(setChecked(bool) ) );
 	aboutDialogFactory = new ACAboutDialogFactoryQt();
-
-	// uses another window for settings = editing the config file
     settingsDialog = new ACSettingsDialogQt(this);
 
 	// This is required to populate the available file extensions list at startup
@@ -247,17 +240,14 @@ ACMultiMediaCycleOsgQt::ACMultiMediaCycleOsgQt(QWidget *parent) : QMainWindow(pa
 	this->addActions(ui.menuHelp->actions());	
     //this->addActions(compositeOsgView->actions());
 
-    this->setAcceptDrops(true);
+    this->setAcceptDrops(true); // for drag and drop
 }
 
 ACMultiMediaCycleOsgQt::~ACMultiMediaCycleOsgQt(){
 	this->destroyMediaCycle();
 	delete settingsDialog;
 	delete aboutDialogFactory;
-	delete dockWidgetFactory;
-    vector<ACAbstractDockWidgetQt*>::iterator dwiter;
-    for (dwiter=dockWidgets.begin(); dwiter!=dockWidgets.end(); dwiter++)
-        delete *dwiter;
+    delete dockWidgetsManager;
     if (aboutDialog) delete aboutDialog;
 	if (controlsDialog) delete controlsDialog;
     if (detachedBrowser) delete detachedBrowser;
@@ -267,6 +257,12 @@ ACMultiMediaCycleOsgQt::~ACMultiMediaCycleOsgQt(){
 	if (osgViewDockWidget) delete osgViewDockWidget;
 	if (osgViewDockTitleBar) delete osgViewDockTitleBar;
 	if (osgViewDock) delete osgViewDock;
+}
+
+void ACMultiMediaCycleOsgQt::setMediaType(ACMediaType _mt)
+{
+    this->media_type = _mt;
+    dockWidgetsManager->setMediaType(_mt);
 }
 
 // tries to read settings from previous run
@@ -283,8 +279,9 @@ void ACMultiMediaCycleOsgQt::configureSettings(){
 		switch (ret) {
 			case QMessageBox::Yes:
 				// config file normally in readSettings...
-				if (this->readXMLConfig(this->config_file_xml))
-					this->configureDockWidgets(this->media_type);
+                if (this->readXMLConfig(this->config_file_xml)){
+                    dockWidgetsManager->changeMediaType(this->media_type);
+                }
 				else
 					this->showError("Error occured reading XML. Please Load your media and save a new XML file.");
 				break;
@@ -328,13 +325,9 @@ void ACMultiMediaCycleOsgQt::createMediaCycle(ACMediaType _media_type, ACBrowser
 	}
 	#endif //defined (SUPPORT_AUDIO)
 
-	for (int d=0;d<dockWidgets.size();d++){
-		dockWidgets[d]->setMediaCycle(media_cycle);
-		#if defined (SUPPORT_AUDIO)
-			dockWidgets[d]->setAudioEngine(audio_engine);
-		#endif //defined (SUPPORT_AUDIO)
-		dockWidgets[d]->setOsgView(compositeOsgView);
-	}
+    dockWidgetsManager->updateMediaCycle(media_cycle);
+    dockWidgetsManager->updateAudioEngine(audio_engine);
+    dockWidgetsManager->updateOsgView(compositeOsgView);
 }
 
 // destroys the MediaCycle object (containing the whole application)
@@ -484,7 +477,8 @@ bool ACMultiMediaCycleOsgQt::readXMLConfig(string _filename){
 		this->showError("Feature extraction plugin(s) now loaded again. Importing media files now enabled.");
 		this->switchFeatureExtraction(true);
 	}
-	this->configureDockWidgets(this->media_type);
+    dockWidgetsManager->changeMediaType(this->media_type);
+    dockWidgetsManager->updatePluginsSettings();
 	// no errors occured, no exception caught.
 	return true;
 }
@@ -708,115 +702,13 @@ void ACMultiMediaCycleOsgQt::on_actionEdit_Input_Controls_triggered(bool checked
     }
 }
 
-// XS TODO clean this !!
-bool ACMultiMediaCycleOsgQt::addControlDock(ACAbstractDockWidgetQt* dock)
-{
-	if (dock == 0){
-		std::cerr << "Invalid dock widget" << std::endl;
-		return false;
-	}
-
-	if (dock->getMediaType() == MEDIA_TYPE_NONE && dock->getClassName()==""){
-		std::cerr << "Invalid dock widget type" << std::endl;
-		return false;
-	}
-
-	for (int d=0;d<dockWidgets.size();d++){
-		if (dock->getClassName() == dockWidgets[d]->getClassName()){
-			std::cerr << "Dock widget type already added" << std::endl;
-			return false;
-		}
-
-	}
-
-	if (dock->getClassName() == "ACBrowserControlsClustersNeighborsDockWidgetQt" || dock->getClassName() == "ACBrowserControlsClustersDockWidgetQt"){
-		for (int d=0;d<dockWidgets.size();d++){
-			if (dockWidgets[d]->getClassName() == "ACBrowserControlsClustersNeighborsDockWidgetQt" || dockWidgets[d]->getClassName() == "ACBrowserControlsClustersDockWidgetQt"){
-				std::cerr << "Only one browser control dock widget for clusters and/or neighbors can be added." << std::endl;
-				return false;
-			}
-		}
-	}
-	
-	//XS TODO check indices -- or use push_back
-	dockWidgets.resize(dockWidgets.size()+1);
-	lastDocksVisibilities.resize(lastDocksVisibilities.size()+1);
-
-	dockWidgets[dockWidgets.size()-1]=dock;
-
-	if( dock->getMediaType() == MEDIA_TYPE_ALL || dock->getMediaType() == media_type || dock->getMediaType() == MEDIA_TYPE_MIXED ){
-		lastDocksVisibilities[lastDocksVisibilities.size()-1]=1;
-		this->addDockWidget(Qt::LeftDockWidgetArea,dockWidgets[dockWidgets.size()-1]);
-		dockWidgets[dockWidgets.size()-1]->setVisible(true);
-		connect(dockWidgets[dockWidgets.size()-1], SIGNAL(visibilityChanged(bool)), this, SLOT(syncControlToggleWithDocks()));
-	}
-	else {
-		lastDocksVisibilities[lastDocksVisibilities.size()-1]=0;
-		dockWidgets[dockWidgets.size()-1]->setVisible(false);
-	}
-
-	if (dockWidgets[dockWidgets.size()-1]->getClassName()=="ACMediaConfigDockWidgetQt"){
-		//CF ugly, use signals?
-		connect(((ACMediaConfigDockWidgetQt*)dockWidgets[dockWidgets.size()-1])->getComboDefaultSettings(), SIGNAL(currentIndexChanged(const QString &)), this, SLOT(comboDefaultSettingsChanged()));
-	}
-	
-	if (dockWidgets[dockWidgets.size()-1]->getClassName()=="ACOSCDockWidgetQt" && auto_connect_osc){
-		((ACOSCDockWidgetQt*)dockWidgets[dockWidgets.size()-1])->autoConnect(true);
-	}
-	
-	return true;
-}
-
 bool ACMultiMediaCycleOsgQt::addControlDock(std::string dock_type)
 {
-	this->addControlDock(dockWidgetFactory->createDockWidget(this,dock_type));
+    return dockWidgetsManager->addControlDock(dock_type);
 }
 
-void ACMultiMediaCycleOsgQt::syncControlToggleWithDocks(){
-	int docksVisibilitiesSum = 0;
-
-	for (int d=0;d<dockWidgets.size();d++){
-		if (dockWidgets[d]->getMediaType() == media_type || dockWidgets[d]->getMediaType() == MEDIA_TYPE_ALL || dockWidgets[d]->getMediaType() == MEDIA_TYPE_MIXED)
-			docksVisibilitiesSum += dockWidgets[d]->isVisible();
-	}
-
-	int lastDocksVisibilitiesSum = 0;
-	for (int d=0; d<lastDocksVisibilities.size();d++)
-		lastDocksVisibilitiesSum += lastDocksVisibilities[d];
-
-	bool controlsToEnable = ui.actionShow_Hide_Controls->isChecked();
-
-	if (controlsToEnable){
-		if (docksVisibilitiesSum == 0 && lastDocksVisibilitiesSum == 1 && wasControlsToggleChecked){
-			ui.actionShow_Hide_Controls->setChecked(false);
-		}
-		else if (lastDocksVisibilitiesSum == 0 && !wasControlsToggleChecked){
-			for (int d=0;d<dockWidgets.size();d++){
-				if (dockWidgets[d]->getMediaType() == media_type || dockWidgets[d]->getMediaType() == MEDIA_TYPE_ALL || dockWidgets[d]->getMediaType() == MEDIA_TYPE_MIXED)
-					dockWidgets[d]->setVisible(true);
-			}
-
-		}
-		else {
-			if (!wasControlsToggleChecked){
-				for (int d=0;d<dockWidgets.size();d++){
-					if (dockWidgets[d]->getMediaType() == media_type || dockWidgets[d]->getMediaType() == MEDIA_TYPE_ALL || dockWidgets[d]->getMediaType() == MEDIA_TYPE_MIXED)
-						dockWidgets[d]->setVisible((bool)(lastDocksVisibilities[d]));
-				}
-			}
-		}
-		for (int d=0;d<dockWidgets.size();d++){
-			if (dockWidgets[d]->getMediaType() == media_type || dockWidgets[d]->getMediaType() == MEDIA_TYPE_ALL || dockWidgets[d]->getMediaType() == MEDIA_TYPE_MIXED)
-				lastDocksVisibilities[d]=dockWidgets[d]->isVisible();
-		}
-	}
-	else {
-		for (int d=0;d<dockWidgets.size();d++){
-			if (dockWidgets[d]->getMediaType() == media_type || dockWidgets[d]->getMediaType() == MEDIA_TYPE_ALL || dockWidgets[d]->getMediaType() == MEDIA_TYPE_MIXED)
-				dockWidgets[d]->setVisible(false);
-		}
-	}
-	wasControlsToggleChecked = ui.actionShow_Hide_Controls->isChecked();
+void ACMultiMediaCycleOsgQt::on_actionToggle_Controls_triggered(bool controlsToEnable){
+    dockWidgetsManager->updateDocksVisibility(controlsToEnable);
 }
 
 bool ACMultiMediaCycleOsgQt::addAboutDialog(ACAbstractAboutDialogQt* dialog)
@@ -854,13 +746,12 @@ void ACMultiMediaCycleOsgQt::on_actionDetachBrowser_triggered(bool checked) {
 void ACMultiMediaCycleOsgQt::on_actionFullscreen_triggered(bool checked) {
 	if (compositeOsgView->isFullScreen() || osgViewDock->isFullScreen() || this->isFullScreen()){
 		std::cout << "Not fullscreen" << std::endl;
-		//actionShow_Hide_Controls->setChecked
 		osgViewDock->setTitleBarWidget(osgViewDockTitleBar);
 		if (!osgViewDock->isFloating()){
 			this->showNormal();
 			compositeOsgView->showNormal();
-			ui.actionShow_Hide_Controls->setChecked(true);
-			this->syncControlToggleWithDocks();
+           ui.actionToggle_Controls->setChecked(true);
+           this->on_actionToggle_Controls_triggered(true);
 			ui.menubar->show();
 			ui.statusbar->show();
 			ui.toolbar->show();
@@ -874,8 +765,8 @@ void ACMultiMediaCycleOsgQt::on_actionFullscreen_triggered(bool checked) {
 	else{
 
 		if (!osgViewDock->isFloating()){
-			ui.actionShow_Hide_Controls->setChecked(false);
-			this->syncControlToggleWithDocks();
+           ui.actionToggle_Controls->setChecked(false);
+           this->on_actionToggle_Controls_triggered(false);
 			ui.menubar->hide();
 			ui.statusbar->hide();
 			ui.toolbar->hide();
@@ -884,7 +775,6 @@ void ACMultiMediaCycleOsgQt::on_actionFullscreen_triggered(bool checked) {
 			QWidget* lEmptyWidget = new QWidget();
 			osgViewDock->setTitleBarWidget(lEmptyWidget);
 			delete lTitleBar;
-
 
 			compositeOsgView->showFullScreen();
 			this->showFullScreen();
@@ -981,44 +871,9 @@ void ACMultiMediaCycleOsgQt::updateLibrary(){
 	compositeOsgView->prepareFromTimeline();
 	//browserOsgView->setPlaying(true);
 	media_cycle->setNeedsDisplay(true);
-
-	this->configurePluginDock();
-
+    dockWidgetsManager->updatePluginsSettings();
 	compositeOsgView->setFocus();
 }
-
-void ACMultiMediaCycleOsgQt::configurePluginDock() {
-	// do not re-scan the directory for plugins once they have been loaded
-	if (!plugins_scanned)
-	{
-		//CF ugly, use signals?
-		// XS TODO change this
-		for (int d=0;d<dockWidgets.size();d++){
-			if (dockWidgets[d]->getClassName() == "ACBrowserControlsClustersNeighborsDockWidgetQt")
-				((ACBrowserControlsClustersNeighborsDockWidgetQt*)dockWidgets[d])->configureCheckBoxes();
-			if (dockWidgets[d]->getClassName() == "ACBrowserControlsClustersDockWidgetQt")
-				((ACBrowserControlsClustersDockWidgetQt*)dockWidgets[d])->configureCheckBoxes();
-            if (dockWidgets[d]->getClassName() == "ACMediaDocumentOptionDockWidgetQt")
-                ((ACMediaDocumentOptionDockWidgetQt*)dockWidgets[d])->configureCheckBoxes();
-		}
-	}
-	plugins_scanned = true;
-}
-
-// XS TODO when is this used again ??
-//void ACMultiMediaCycleOsgQt::addPluginItem(QListWidgetItem *_item){
-//	cout << "adding item : " << _item->text().toStdString() << endl;
-//	QListWidgetItem * new_item = new QListWidgetItem(*_item);
-//	//CF ugly, use signals?
-//	// XS TODO change this
-//	for (int d=0;d<dockWidgets.size();d++){
-//		if (dockWidgets[d]->getClassName() == "ACBrowserControlsClustersNeighborsDockWidgetQt")
-//			((ACBrowserControlsClustersNeighborsDockWidgetQt*)dockWidgets[d])->getFeaturesListWidget()->addItem(new_item);
-//		if (dockWidgets[d]->getClassName() == "ACBrowserControlsClustersDockWidgetQt")
-//			((ACBrowserControlsClustersDockWidgetQt*)dockWidgets[d])->getFeaturesListWidget()->addItem(new_item);
-//	}
-//	//////ui.featuresListWidget->addItem(new_item);
-//}
 
 // adds the plugins in _library pth via mediaCycle's pluginManager
 // keeps track of the plugins added by the Settings Dialog
@@ -1065,51 +920,6 @@ bool ACMultiMediaCycleOsgQt::removePluginFromLibrary(std::string _plugin_name, s
 std::string ACMultiMediaCycleOsgQt::rstrip(const std::string& s){
 	std::string::size_type p = s.find_last_not_of(" \n\r\t");
 	return std::string(s, 0, p+1);
-}
-
-// synchronize weights with what is loaded in mediacycle
-// note: here weights are 1 or 0 (checkbox).
-// conversion: 0 remains 0, and value > 0 becomes 1.
-void ACMultiMediaCycleOsgQt::synchronizeFeaturesWeights(){
-	//CF ugly, use signals?
-	for (int d=0;d<dockWidgets.size();d++){
-		if (dockWidgets[d]->getClassName() == "ACBrowserControlsClustersNeighborsDockWidgetQt")
-			((ACBrowserControlsClustersNeighborsDockWidgetQt*)dockWidgets[d])->synchronizeFeaturesWeights();
-		if (dockWidgets[d]->getClassName() == "ACBrowserControlsClustersDockWidgetQt")
-			((ACBrowserControlsClustersDockWidgetQt*)dockWidgets[d])->synchronizeFeaturesWeights();
-	}
-}
-
-// XS TODO this is a temporary solution -- very ugly
-// XS TODO change dockwidgets class !!
-void ACMultiMediaCycleOsgQt::configureDockWidgets(ACMediaType _media_type){
-//	int index_media = (int)_media_type + 1; // XS change this -- will not work if items in different order!!!
-	for (int d=0;d<dockWidgets.size();d++){
-
-        if (dockWidgets[d]->getClassName() == "ACMediaConfigDockWidgetQt"){
-            std::string mediaType = ACMediaFactory::getInstance().getNormalCaseStringFromMediaType(_media_type);
-            int mediaIndex = ((ACMediaConfigDockWidgetQt*)dockWidgets[d])->getComboDefaultSettings()->findText(QString(mediaType.c_str()));
-            if (mediaIndex > -1){
-                ((ACMediaConfigDockWidgetQt*)dockWidgets[d])->getComboDefaultSettings()->setCurrentIndex(mediaIndex);
-            }
-        }
-
-		if (dockWidgets[d]->getMediaType() == MEDIA_TYPE_ALL || dockWidgets[d]->getMediaType() == _media_type || dockWidgets[d]->getMediaType() == MEDIA_TYPE_MIXED){
-			if (this->dockWidgetArea(dockWidgets[d]) == Qt::NoDockWidgetArea){
-				this->addDockWidget(Qt::LeftDockWidgetArea,dockWidgets[d]);
-				dockWidgets[d]->show();
-				lastDocksVisibilities[d]=1;
-				connect(dockWidgets[d], SIGNAL(visibilityChanged(bool)), this, SLOT(syncControlToggleWithDocks()));
-			}
-		}
-		else {
-			disconnect(dockWidgets[d], SIGNAL(visibilityChanged(bool)), this, SLOT(syncControlToggleWithDocks()));
-			if (this->dockWidgetArea(dockWidgets[d]) == Qt::LeftDockWidgetArea){
-				this->removeDockWidget(dockWidgets[d]);
-			}
-			lastDocksVisibilities[d]=0;
-		}
-	}
 }
 
 std::string ACMultiMediaCycleOsgQt::getPluginPathFromBaseName(std::string basename)
@@ -1208,23 +1018,13 @@ void ACMultiMediaCycleOsgQt::loadDefaultConfig(ACMediaType _media_type, ACBrowse
 		osg::ref_ptr<osgDB::ReaderWriter> movReaderWriter(0),ffmpegReaderWriter(0), pdfReaderWriter(0);
 		std::string osg_plugin_error ="";
 		
-		
-		
 		if(_media_type == MEDIA_TYPE_VIDEO){
 			ffmpegReaderWriter = osgDB::Registry::instance()->getReaderWriterForExtension("ffmpeg");
 			movReaderWriter = osgDB::Registry::instance()->getReaderWriterForExtension("mov");
 			osg_plugin_error = "Video plugins for OpenSceneGraph (FFmpeg or QuickTime or QTKit) are absent but necessary for interactive video navigation. Please install it or contact the MediaCycle team.";
 		}
 		if (_media_type == MEDIA_TYPE_VIDEO && !ffmpegReaderWriter && !movReaderWriter){
-			for (int d=0;d<dockWidgets.size();d++){
-				if (dockWidgets[d]->getClassName()=="ACMediaConfigDockWidgetQt"){
-					int comboIndex = ((ACMediaConfigDockWidgetQt*)dockWidgets[d])->getComboDefaultSettings()->findText(QString(sMedia.c_str()));
-					if (comboIndex > -1)
-						((ACMediaConfigDockWidgetQt*)dockWidgets[d])->getComboDefaultSettings()->setCurrentIndex(comboIndex);//stay with the current config without reloading
-					else
-						((ACMediaConfigDockWidgetQt*)dockWidgets[d])->getComboDefaultSettings()->setCurrentIndex(0);//display the startup combo value "-- Config --"
-				}	
-			}
+             dockWidgetsManager->resetMediaType(this->media_type);
 			ffmpegReaderWriter = 0; movReaderWriter = 0; pdfReaderWriter = 0;
 			this->showError(osg_plugin_error);
 			return;
@@ -1336,50 +1136,36 @@ void ACMultiMediaCycleOsgQt::loadDefaultConfig(ACMediaType _media_type, ACBrowse
 		media_cycle->setPreProcessPlugin("");
 	}	
 	
-    //CF sorry XD, I need position plugins to debug the segmentation!
-	// XS TODO don't test class in OOP !
-    for (int d=0; d<dockWidgets.size(); d++)
-    {
-        if (dockWidgets[d]->getClassName()=="ACBrowserControlsClustersDockWidgetQt")
-        {
-            ((ACBrowserControlsClustersDockWidgetQt*)dockWidgets[d])->updatePluginLists();
-        }
-    }
-	this->configureDockWidgets(_media_type);
-    //this->configurePluginDock();
+    // update the plugin lists of the browser control dock through configureDockWidget
+    dockWidgetsManager->changeMediaType(_media_type);
 }
 
-void ACMultiMediaCycleOsgQt::comboDefaultSettingsChanged(){
-	for (int d=0;d<dockWidgets.size();d++){
-		if (dockWidgets[d]->getClassName()=="ACMediaConfigDockWidgetQt"){
-			string mt = ((ACMediaConfigDockWidgetQt*)dockWidgets[d])->getComboDefaultSettings()->currentText().toStdString();
+void ACMultiMediaCycleOsgQt::comboDefaultSettingsChanged(QString media){
+    string mt = media.toStdString();
+        // custom settings = edit config file
+        if (mt == "Custom"){
+            cout << "editing configuration file" << endl;
+            this->on_actionEdit_Config_File_triggered(true);
+            return;
+        }
 
-			// custom settings = edit config file
-			if (mt == "Custom"){
-				cout << "editing configuration file" << endl;
-				this->on_actionEdit_Config_File_triggered(true);
-				return;
-			}
-			
-			if (mt == "-- Config --"){
-				return;
-			}
+        if (mt == "-- Config --"){
+            return;
+        }
 
-			// default settings : find the right media
-			stringToMediaTypeConverter::const_iterator iterm = stringToMediaType.find(mt);
-			if( iterm == stringToMediaType.end() ) {
-				cout << " media type not found : " << iterm->first << endl;
-				return;
-			}
-			ACMediaType new_media_type = iterm->second;
-			cout << iterm->first << " - corresponding media type code : " << new_media_type << endl;
-			
-			if (this->media_type != new_media_type)
-				this->loadDefaultConfig(new_media_type);
-			else
-				return;
-		}
-	}
+        // default settings : find the right media
+        stringToMediaTypeConverter::const_iterator iterm = stringToMediaType.find(mt);
+        if( iterm == stringToMediaType.end() ) {
+            cout << " media type not found : " << iterm->first << endl;
+            return;
+        }
+        ACMediaType new_media_type = iterm->second;
+        cout << iterm->first << " - corresponding media type code : " << new_media_type << endl;
+
+        if (this->media_type != new_media_type)
+            this->loadDefaultConfig(new_media_type);
+        else
+            return;
 }
 
 void ACMultiMediaCycleOsgQt::on_actionClean_triggered(bool checked) {
@@ -1388,7 +1174,7 @@ void ACMultiMediaCycleOsgQt::on_actionClean_triggered(bool checked) {
 
 void ACMultiMediaCycleOsgQt::clean(bool _updategl){
 	if (! hasMediaCycle()) return;
-	// need to turn all sounds off before leaving
+    // need to turn all sounds off before leaving
 	// do this before cleaning library !!
 #if defined (SUPPORT_AUDIO)
 	this->media_cycle->muteAllSources();
@@ -1397,23 +1183,7 @@ void ACMultiMediaCycleOsgQt::clean(bool _updategl){
 
 	this->media_cycle->cleanLibrary();
 	this->media_cycle->cleanBrowser();
-
-	//was cleanCheckBoxes()
-	for (int d=0;d<dockWidgets.size();d++){
-		if (dockWidgets[d]->getClassName() == "ACBrowserControlsClustersNeighborsDockWidgetQt") {
-			((ACBrowserControlsClustersNeighborsDockWidgetQt*)dockWidgets[d])->cleanCheckBoxes();
-		}
-		if (dockWidgets[d]->getClassName() == "ACBrowserControlsClustersDockWidgetQt") {
-			((ACBrowserControlsClustersDockWidgetQt*)dockWidgets[d])->cleanCheckBoxes();
-		}
-        if (dockWidgets[d]->getClassName() == "ACMediaDocumentOptionDockWidgetQt")
-            ((ACMediaDocumentOptionDockWidgetQt*)dockWidgets[d])->cleanCheckBoxes();
-	}
-
-	// XS TODO : remove the boxes specific to the media that was loaded
-	// e.g. ACAudioControlDockWidgets
-	// modify the DockWidget's API to allow this
-	plugins_scanned = false;
+    dockWidgetsManager->resetPluginsSettings();
 
 	statusBar()->clearMessage();
 	progressBar->reset();
@@ -1438,32 +1208,21 @@ bool ACMultiMediaCycleOsgQt::hasMediaCycle(){
 	if (media_cycle == 0) {
         //this->showError ("No MediaCycle Instance - Define type of media first");
 
-        // find the media config dock widget
-        for (int d=0;d<dockWidgets.size();d++){
-            if (dockWidgets[d]->getClassName()=="ACMediaConfigDockWidgetQt"){
+        // get a list of the available media types
+        QStringList mediaTyped;
+        std::vector< std::string > mediaTypes = ACMediaFactory::getInstance().listAvailableMediaTypes();
+        for (std::vector< std::string >::iterator mediaType = mediaTypes.begin(); mediaType!=mediaTypes.end(); ++mediaType)
+            mediaTyped << QString((*mediaType).c_str());
 
-                // get a list of the available media types
-                QStringList mediaTypes;
-                for(int i = 0;i<((ACMediaConfigDockWidgetQt*)dockWidgets[d])->getComboDefaultSettings()->count();i++){
-                    if( ((ACMediaConfigDockWidgetQt*)dockWidgets[d])->getComboDefaultSettings()->itemText(i) != "-- Config --") // would lead to a useless choice
-                        mediaTypes << ((ACMediaConfigDockWidgetQt*)dockWidgets[d])->getComboDefaultSettings()->itemText(i);
-                }
-
-                bool ok;
-                // popup a dialog asking to set the media type
-                QString mediaType =  QInputDialog::getItem(this,tr("Choose the media type"),tr("Media type:"), mediaTypes, 0, false, &ok);
-                if (ok && !mediaType.isEmpty()){
-                    int mediaIndex = ((ACMediaConfigDockWidgetQt*)dockWidgets[d])->getComboDefaultSettings()->findText(mediaType);
-                    if (mediaIndex > -1){
-                        // if the media type is correctly chosen from the dialog, set it as well on the media config dock widget
-                        ((ACMediaConfigDockWidgetQt*)dockWidgets[d])->getComboDefaultSettings()->setCurrentIndex(mediaIndex);
-                        // activate the media type setting change
-                        this->comboDefaultSettingsChanged();
-                        return true;
-                    }
-                }
-            }
+        // popup a dialog asking to set the media type
+        bool ok;
+        QString mediaType =  QInputDialog::getItem(this,tr("Choose the media type"),tr("Media type:"), mediaTyped, 0, false, &ok);
+        if (ok && !mediaType.isEmpty()){
+            dockWidgetsManager->setMediaType( ACMediaFactory::getInstance().guessMediaTypeFromString(mediaType.toStdString()) );
+            this->comboDefaultSettingsChanged(mediaType);
+            return true;
         }
+
 		return false;
 	}
 	return true;
@@ -1567,6 +1326,7 @@ void ACMultiMediaCycleOsgQt::changeMediaType(ACMediaType _media_type){
 	}
 #endif //defined (SUPPORT_AUDIO)
 	this->media_cycle->changeMediaType(_media_type);
+    dockWidgetsManager->setMediaType(_media_type);
 }
 
 void ACMultiMediaCycleOsgQt::useSegmentationByDefault(bool _status)
@@ -1595,4 +1355,5 @@ void ACMultiMediaCycleOsgQt::switchPluginVisualizations(bool _status)
 void ACMultiMediaCycleOsgQt::autoConnectOSC(bool _status)
 {
 	auto_connect_osc = _status;
+    dockWidgetsManager->autoConnectOSC(_status);
 }

@@ -60,7 +60,7 @@ public:
 	ACOSCDockWidgetQt(QWidget *parent = 0);
 	~ACOSCDockWidgetQt();
 	
-	void autoConnect(bool _status = true);
+    void autoConnectOSC(bool _status = true);
 
 #if defined (USE_OSC)
 	void toggleControl(bool _status);

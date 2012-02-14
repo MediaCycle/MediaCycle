@@ -47,13 +47,15 @@ class ACMediaConfigDockWidgetQt : public ACAbstractDockWidgetQt {
 Q_OBJECT
 	
 private slots:
-	// ...
-	//void comboDefaultSettingsChanged(); 
+    void on_comboLibrary_activated(const QString & text);
 	
 public:
 	ACMediaConfigDockWidgetQt(QWidget *parent = 0);
 	~ACMediaConfigDockWidgetQt(){};
-	QComboBox* getComboDefaultSettings(){return ui.comboDefaultSettings;}
+    QComboBox* getComboDefaultSettings(){return ui.comboLibrary;}
+
+    virtual void changeMediaType(ACMediaType _media_type);
+    virtual void resetMediaType(ACMediaType _media_type);
 	
 private:
 	Ui::ACMediaConfigDockWidgetQt ui;

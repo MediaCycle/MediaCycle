@@ -47,8 +47,10 @@
 #include "ACOsgCompositeViewQt.h"
 
 class ACAbstractDockWidgetQt : public QDockWidget { 
-//Q_OBJECT
+Q_OBJECT
 	
+signals:
+    void mediaTypeChanged(QString);
 public:
 	ACAbstractDockWidgetQt(QWidget *parent = 0, ACMediaType _media_type = MEDIA_TYPE_NONE, std::string _class_name = "")
 		: QDockWidget(parent), media_type(_media_type),class_name(_class_name),media_cycle(0),osg_view(0)
@@ -71,7 +73,15 @@ public:
 	#endif //defined (SUPPORT_AUDIO)
 	void setOsgView(ACOsgCompositeViewQt* _osg_view){ osg_view = _osg_view;}
 	ACOsgCompositeViewQt* getOsgView() {return osg_view;}
-	
+
+    #if defined (USE_OSC)
+    virtual void autoConnectOSC(bool _status = true){auto_connect_osc = _status;}
+    #endif //defined (USE_OSC)
+    virtual void changeMediaType(ACMediaType media_type){}
+    virtual void updatePluginsSettings(){}
+    virtual void resetPluginsSettings(){}
+    virtual void resetMediaType(ACMediaType _media_type){}
+
 private:
 	ACMediaType media_type;
 	std::string class_name;
@@ -82,6 +92,9 @@ protected:
 	ACAudioEngine *audio_engine;
 	#endif //defined (SUPPORT_AUDIO)
 	ACOsgCompositeViewQt* osg_view;
+    #if defined (USE_OSC)
+    bool auto_connect_osc;
+    #endif //defined (USE_OSC)
 };
 
 #endif // ACABSTRACTDOCKWIDGETQT_H

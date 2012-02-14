@@ -1,8 +1,8 @@
 /**
  * @brief ACMediaDocumentOptionDockWidgetQt.cpp
- * @author Thierry Ravet
- * @date 20/12/2011
- * @copyright (c) 2011 – UMONS - Numediart
+ * @author Christian Frisson
+ * @date 14/02/2012
+ * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -30,21 +30,25 @@
 */
 
 #include "ACMediaDocumentOptionDockWidgetQt.h"
-#include "ui_ACMediaDocumentOptionDockWidgetQt.h"
 
-ACMediaDocumentOptionDockWidgetQt::ACMediaDocumentOptionDockWidgetQt(QWidget *parent) 
+ACMediaDocumentOptionDockWidgetQt::ACMediaDocumentOptionDockWidgetQt(QWidget *parent)
+#ifdef SUPPORT_MULTIMEDIA
 :ACAbstractDockWidgetQt(parent, MEDIA_TYPE_ALL,"ACMediaDocumentOptionDockWidgetQt")
+#endif//def SUPPORT_MULTIMEDIA
 {
-    ui.setupUi(this);	
-	connect(ui.mediaTypeComboBox, SIGNAL(currentIndexChanged(QString)),this, SLOT(changeMediaType(QString)));
+    ui.setupUi(this);
+    #ifdef SUPPORT_MULTIMEDIA
+    connect(ui.mediaTypeComboBox, SIGNAL(currentIndexChanged(QString)),this, SLOT(changeMediaType(QString)));
+    #endif//def SUPPORT_MULTIMEDIA
 
 }
 
 ACMediaDocumentOptionDockWidgetQt::~ACMediaDocumentOptionDockWidgetQt(){
 }
 
-void ACMediaDocumentOptionDockWidgetQt::configureCheckBoxes(){
-	// dynamic config of checkboxes
+#ifdef SUPPORT_MULTIMEDIA
+void ACMediaDocumentOptionDockWidgetQt::updatePluginsSettings()
+{
 	// according to plugins actually used to compute the features
 	if (media_cycle == 0) return;
 	vector<int> indexMedia=this->media_cycle->getLibrary()->getParentIds();
@@ -78,8 +82,7 @@ void ACMediaDocumentOptionDockWidgetQt::configureCheckBoxes(){
 	
 }
 
-
-void ACMediaDocumentOptionDockWidgetQt::cleanCheckBoxes(){
+void ACMediaDocumentOptionDockWidgetQt::resetPluginsSettings(){
 	
 	
 	ui.mediaTypeComboBox->setEnabled(false);
@@ -90,7 +93,10 @@ void ACMediaDocumentOptionDockWidgetQt::cleanCheckBoxes(){
     //ui.mediaTypeListWidget->clear();
 	
 }
+#endif//def SUPPORT_MULTIMEDIA
+
 void ACMediaDocumentOptionDockWidgetQt::changeMediaType(QString name){
+    #ifdef SUPPORT_MULTIMEDIA
 	if (initOn)
 		return;
 	string nameStr=string(name.toAscii());
@@ -101,6 +107,5 @@ void ACMediaDocumentOptionDockWidgetQt::changeMediaType(QString name){
 	
 	media_cycle->libraryContentChanged(1); 
 	emit changeLibraryMediaType();
-	
-	
+    #endif//def SUPPORT_MULTIMEDIA
 }

@@ -135,6 +135,22 @@ void ACBrowserControlsClustersDockWidgetQt::on_comboBoxClustersPositions_activat
     media_cycle->changeClustersPositionsPlugin(text.toStdString());
 }
 
+
+void ACBrowserControlsClustersDockWidgetQt::updatePluginsSettings()
+{
+    this->configureCheckBoxes();
+}
+
+void ACBrowserControlsClustersDockWidgetQt::resetPluginsSettings()
+{
+    this->cleanCheckBoxes();
+}
+
+void ACBrowserControlsClustersDockWidgetQt::changeMediaType(ACMediaType _media_type)
+{
+    this->updatePluginLists();
+}
+
 // synchronize weights with what is loaded in mediacycle
 // note: here weights are 1 or 0 (checkbox).
 // conversion: 0 remains 0, and value > 0 becomes 1.

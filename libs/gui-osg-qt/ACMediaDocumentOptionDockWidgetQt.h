@@ -1,8 +1,8 @@
 /**
  * @brief ACMediaDocumentOptionDockWidgetQt.h
- * @author Thierry Ravet
- * @date 20/12/2011
- * @copyright (c) 2011 – UMONS - Numediart
+ * @author Christian Frisson
+ * @date 14/02/2012
+ * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -34,31 +34,34 @@
 
 #include <QDockWidget>
 
+#ifdef SUPPORT_MULTIMEDIA
 #include "ACMediaDocument.h"
 #include "ACAbstractDockWidgetQt.h"
 #include <MediaCycle.h>
 
 #include "ui_ACMediaDocumentOptionDockWidgetQt.h"
+#endif//def SUPPORT_MULTIMEDIA
 
 class ACMediaDocumentOptionDockWidgetQt : public ACAbstractDockWidgetQt 
 {
     Q_OBJECT
-private slots:
-	
-	void changeMediaType(QString name);
-	
-signals:
-	void changeLibraryMediaType();
-	
+
 public:
     explicit ACMediaDocumentOptionDockWidgetQt(QWidget *parent = 0);
     ~ACMediaDocumentOptionDockWidgetQt();
-	
-	void configureCheckBoxes();
-	void cleanCheckBoxes();
+
+private slots:
+    void changeMediaType(QString name);
+signals:
+    void changeLibraryMediaType();
+#ifdef SUPPORT_MULTIMEDIA
+public:
+    virtual void updatePluginsSettings();
+    virtual void resetPluginsSettings();
 private:
     Ui::ACMediaDocumentOptionDockWidgetQt ui;
 	bool initOn;
+#endif//def SUPPORT_MULTIMEDIA
 };
 
 #endif // ACDOCKWIDGETMEDIADOCUMENTOPTION_H

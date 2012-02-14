@@ -66,6 +66,7 @@
     <addaction name="separator"/>
     <addaction name="actionSave_XML"/>
     <addaction name="separator"/>
+    <addaction name="actionClean"/>
    </widget>
    <widget class="QMenu" name="menuConfig">
     <property name="title">
@@ -86,6 +87,7 @@
     </property>
     <addaction name="actionFullscreen"/>
     <addaction name="actionDetachBrowser"/>
+    <addaction name="actionToggle_Controls"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuConfig"/>
@@ -129,7 +131,7 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="actionShow_Hide_Controls"/>
+   <addaction name="actionToggle_Controls"/>
    <addaction name="actionLoad_Media_Files"/>
    <addaction name="actionLoad_Media_Directory"/>
    <addaction name="actionLoad_XML"/>
@@ -160,7 +162,7 @@
     <string>Ctrl+Alt+O</string>
    </property>
   </action>
-  <action name="actionShow_Hide_Controls">
+  <action name="actionToggle_Controls">
    <property name="checkable">
     <bool>true</bool>
    </property>
@@ -174,18 +176,7 @@
     <string>Toggle Dock Panel Controls</string>
    </property>
    <property name="shortcut">
-    <string>Alt+Tab</string>
-   </property>
-  </action>
-  <action name="actionClean">
-   <property name="text">
-    <string>Clean</string>
-   </property>
-   <property name="toolTip">
-    <string>Clean Library</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+Del</string>
+    <string>Ctrl+Backspace</string>
    </property>
   </action>
   <action name="actionEdit_Config_File">
@@ -260,6 +251,14 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+I</string>
+   </property>
+  </action>
+  <action name="actionClean">
+   <property name="text">
+    <string>Clean</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+W</string>
    </property>
   </action>
  </widget>

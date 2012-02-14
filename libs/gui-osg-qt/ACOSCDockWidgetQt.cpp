@@ -62,7 +62,7 @@ ACOSCDockWidgetQt::~ACOSCDockWidgetQt(){
 	#endif //defined (USE_OSC)
 }
 
-void ACOSCDockWidgetQt::autoConnect(bool _status)
+void ACOSCDockWidgetQt::autoConnectOSC(bool _status)
 {
 	auto_connect = _status;
 }

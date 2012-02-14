@@ -43,22 +43,18 @@
 #include <string.h>
 
 #include <QtGui>
-#include "ACSettingsDialogQt.h" // SettingsDialog
 
 #include "ui_ACMultiMediaCycleOsgQt.h"
 
-#include <ACOsgCompositeViewQt.h>
 #include <MediaCycle.h>
-
 #if defined (SUPPORT_AUDIO)
 	#include <ACAudioEngine.h>
 #endif //defined (SUPPORT_AUDIO)
+#include <ACOsgCompositeViewQt.h>
 
-// Dock Widgets
-#include <ACDockWidgetFactoryQt.h>
-
+#include "ACSettingsDialogQt.h" // SettingsDialog
+#include <ACDockWidgetsManagerQt.h>
 #include <ACAboutDialogFactoryQt.h>
-
 #include <ACInputControlsDialogQt.h>
 
 // FORWARD DECLARATIONS
@@ -92,15 +88,11 @@ Q_OBJECT
 public slots:
 	// Config
 	void on_actionEdit_Config_File_triggered(bool checked);
-	void comboDefaultSettingsChanged(); 
+    void comboDefaultSettingsChanged(QString media);
     void on_actionEdit_Input_Controls_triggered(bool checked);
 	//SENEFFE ?
 	virtual void loopXML(){};
 	
-private slots:
-	// Controls
-	void syncControlToggleWithDocks();
-
 public slots:	
 	// Library controls
 	void on_actionLoad_XML_triggered(bool checked); // features
@@ -111,6 +103,7 @@ public slots:
 	void on_actionHelpAbout_triggered(bool checked);
 	void on_actionDetachBrowser_triggered(bool checked);
 	void on_actionFullscreen_triggered(bool checked);
+    void on_actionToggle_Controls_triggered(bool checked);
 
 protected:
     void dragEnterEvent(QDragEnterEvent *event);
@@ -123,18 +116,15 @@ public:
 	~ACMultiMediaCycleOsgQt();
 	
 	void updateLibrary();
-//XS not implemented ???
-//        void updatePluginDock();
 	
 	void setBrowserMode(ACBrowserMode _mode){this->browser_mode=_mode;}
-	void setMediaType(ACMediaType _mt){this->media_type = _mt;}
+    void setMediaType(ACMediaType _mt);
 
 	// XS TODO: default values for image -- is this correct ?
 	void createMediaCycle(ACMediaType _media_type = MEDIA_TYPE_IMAGE, ACBrowserMode _browser_mode = AC_MODE_CLUSTERS);
 	void destroyMediaCycle();
 	MediaCycle* getMediaCycle() {return media_cycle;}
 	ACMediaType getMediaType() {return media_type;}
-//	void addPluginItem(QListWidgetItem *_item);
 	bool addPluginLibrary(std::string _library);
 	bool removePluginLibrary(std::string _library);
 	ACPluginLibrary* getPluginLibrary (std::string _library);
@@ -145,10 +135,8 @@ public:
     int loadPluginFromBaseName(std::string basename);
     int tryLoadFeaturePluginFromBaseName(std::string basename);
 	void loadDefaultConfig(ACMediaType _media_type = MEDIA_TYPE_IMAGE, ACBrowserMode _browser_mode = AC_MODE_CLUSTERS);
-	void synchronizeFeaturesWeights();
 	
 	// Controls
-	bool addControlDock(ACAbstractDockWidgetQt* dock);
 	bool addControlDock(std::string dock_type);
 	
 	bool addAboutDialog(ACAbstractAboutDialogQt* dock);
@@ -161,8 +149,8 @@ public:
 	void closeEvent(QCloseEvent *event);
 	
 	// settings and dock (XS  TODO change dock)
-	void configureSettings();
-	void configurePluginDock();
+    void configureSettings();
+    //void configurePluginDock();
 	bool readXMLConfig(std::string _filename="");
 	void clean(bool _updategl=false);
 	void setDefaultQSettings();
@@ -186,7 +174,6 @@ private:
     ACSettingsDialogQt *settingsDialog;
 //	QProgressBar *pb;
 	bool features_known;
-	bool plugins_scanned;
 	ACMediaType media_type;
 	ACBrowserMode browser_mode;
 	std::string config_file_xml;	
@@ -197,17 +184,10 @@ private:
 		ACAudioEngine *audio_engine;
 	#endif //defined (SUPPORT_AUDIO)
 	
-	// Dock Widgets
-	vector<int> lastDocksVisibilities; //state stored before hiding all docks with the toggle
-	bool wasControlsToggleChecked;
-	ACDockWidgetFactoryQt* dockWidgetFactory;
-	void configureDockWidgets(ACMediaType _media_type);
-	
+    ACDockWidgetsManagerQt* dockWidgetsManager;
 	ACAboutDialogFactoryQt* aboutDialogFactory;
 	ACAbstractAboutDialogQt* aboutDialog;
-	
     ACInputControlsDialogQt* controlsDialog;
-	
 	QMainWindow* detachedBrowser;
 	
 	// methods
@@ -239,7 +219,6 @@ private:
 	
 protected:
 	ACOsgCompositeViewQt* compositeOsgView;
-	vector<ACAbstractDockWidgetQt*> dockWidgets;
 	MediaCycle *media_cycle;
 };
 #endif
