@@ -49,7 +49,7 @@ public:
 	~ACAudioCycleLoopJam();
 	void startLoopXML();
 	
-	void setDefaultWaveform(ACBrowserAudioWaveformType _type);
+    //void setDefaultWaveform(ACBrowserAudioWaveformType _type);
 private:
 	int count, attente; 
 	std::vector <std::string> XMLfiles;

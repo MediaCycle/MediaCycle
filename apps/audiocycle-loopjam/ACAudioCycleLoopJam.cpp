@@ -65,7 +65,7 @@ void ACAudioCycleLoopJam::startLoopXML(){
 	timer->start(attente);
 }
 
-void ACAudioCycleLoopJam::setDefaultWaveform(ACBrowserAudioWaveformType _type){
+/*void ACAudioCycleLoopJam::setDefaultWaveform(ACBrowserAudioWaveformType _type){
 	
 	compositeOsgView->getBrowserRenderer()->setAudioWaveformType(_type);
 	for (int d=0;d<dockWidgets.size();d++){
@@ -74,9 +74,8 @@ void ACAudioCycleLoopJam::setDefaultWaveform(ACBrowserAudioWaveformType _type){
 			((ACAudioControlsDockWidgetQt*)dockWidgets[d])->setComboBoxWaveformBrowser(_type);
 			cout << "WaveformType:"<<_type<<endl;
 		}
-	}
-	
-}
+	}	
+}*/
 
 void ACAudioCycleLoopJam::loopXML(){
 	cout << "Hello from LoopJam: " << count << endl;
@@ -86,7 +85,7 @@ void ACAudioCycleLoopJam::loopXML(){
 	this->clean(true);
 	
 	this->readXMLConfig(XMLfiles[count]);
-    setDefaultWaveform(AC_BROWSER_AUDIO_WAVEFORM_CLASSIC);
+    //setDefaultWaveform(AC_BROWSER_AUDIO_WAVEFORM_CLASSIC);
 	
 	count++;
 }
