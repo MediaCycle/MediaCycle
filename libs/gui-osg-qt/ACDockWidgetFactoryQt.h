@@ -41,8 +41,8 @@
 #if defined (SUPPORT_AUDIO)
 #include "ACAudioControlsDockWidgetQt.h"
 #endif //defined (SUPPORT_AUDIO)
+#include "ACBrowserControlsCompleteDockWidgetQt.h"
 #include "ACBrowserControlsClustersDockWidgetQt.h"
-#include "ACBrowserControlsClustersNeighborsDockWidgetQt.h"
 #include "ACMediaConfigDockWidgetQt.h"
 #if defined (SUPPORT_VIDEO)
 #include "ACVideoControlsDockWidgetQt.h"

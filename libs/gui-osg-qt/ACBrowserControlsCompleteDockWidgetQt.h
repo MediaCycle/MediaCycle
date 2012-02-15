@@ -32,52 +32,59 @@
  *
  */
 
-#ifndef HEADER_ACBROWSERCONTROLSCLUSTERSNEIGHBORSDOCKWIDGETQT
-#define HEADER_ACBROWSERCONTROLSCLUSTERSNEIGHBORSDOCKWIDGETQT
+#ifndef HEADER_ACBROWSERCONTROLSCOMPLETEDOCKWIDGETQT
+#define HEADER_ACBROWSERCONTROLSCOMPLETEDOCKWIDGETQT
 
 #include <iostream>
 #include <string.h>
 
 #include "ACAbstractDockWidgetQt.h"
 
-#include "ui_ACBrowserControlsClustersNeighborsDockWidgetQt.h"
+#include "ui_ACBrowserControlsCompleteDockWidgetQt.h"
 #include <MediaCycle.h>
 
-class ACBrowserControlsClustersNeighborsDockWidgetQt : public ACAbstractDockWidgetQt {
+class ACBrowserControlsCompleteDockWidgetQt : public ACAbstractDockWidgetQt {
 Q_OBJECT
-	
+
 public slots:
-	virtual void modifyListItem(QListWidgetItem *item); // XS TODO why virtual again ?
-	
-private slots:
-	// Browser controls
-	void on_pushButtonRecenter_clicked();
-	void on_pushButtonBack_clicked();
-	void on_pushButtonForward_clicked();
-	
-	//void on_radioButtonClusters_toggled();
-	
-	// Clustering controls
-	void on_spinBoxClusters_valueChanged(int _value);
-	void on_sliderClusters_sliderReleased();
-	//void on_comboBoxClustersMethod_activated(const QString & text);//CF or (int index);} 
-	//void on_comboBoxClustersPositions_activated(const QString & text);//CF or (int index);} 
-	
+    virtual void modifyListItem(QListWidgetItem *item);
+		
+protected slots:
+    // Browser controls
+    void on_pushButtonRecenter_clicked();
+    void on_pushButtonBack_clicked();
+    void on_pushButtonForward_clicked();
+
+    // Clustering controls
+    void on_spinBoxClusters_valueChanged(int _value);
+    void on_sliderClusters_sliderReleased();
+    void on_comboBoxClustersMethod_activated(const QString & text);
+    void on_comboBoxClustersPositions_activated(const QString & text);
+
 	// Neighborhoods controls
-	//void on_comboBoxNeighborsMethod_activated(const QString & text);//CF or (int index);} 
-	//void on_comboBoxNeighborsPositions_activated(const QString & text);//CF or (int index);} 
+    void on_comboBoxNeighborsMethod_activated(const QString & text);
+    void on_comboBoxNeighborsPositions_activated(const QString & text);
+
+    void on_radioButtonClusters_toggled( bool checked );
+
+    void resizePluginList();
 	
 public:
-	ACBrowserControlsClustersNeighborsDockWidgetQt(QWidget *parent = 0);
-	~ACBrowserControlsClustersNeighborsDockWidgetQt(){};
-	
-private:
-	Ui::ACBrowserControlsClustersNeighborsDockWidgetQt ui;
+    ACBrowserControlsCompleteDockWidgetQt(QWidget *parent = 0);
+    virtual ~ACBrowserControlsCompleteDockWidgetQt(){};
+
+protected:
+    Ui::ACBrowserControlsCompleteDockWidgetQt ui;
 
 public:
-	void synchronizeFeaturesWeights();
-	void configureCheckBoxes();
-	void cleanCheckBoxes();
-	QListWidget* getFeaturesListWidget(){return ui.featuresListWidget;}
+    virtual void updatePluginsSettings();
+    virtual void resetPluginsSettings();
+    virtual void changeMediaType(ACMediaType _media_type);
+
+    void synchronizeFeaturesWeights();
+    void configureCheckBoxes();
+    void cleanCheckBoxes();
+    void updatePluginLists();
+    QListWidget* getFeaturesListWidget(){return ui.featuresListWidget;}
 };
 #endif

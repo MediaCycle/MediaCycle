@@ -39,11 +39,11 @@
 
 ACAbstractDockWidgetQt* ACDockWidgetFactoryQt::createDockWidget(QWidget *parent,std::string dock_type) {
 	if (dock_type == "MCOSC") {return new ACOSCDockWidgetQt(parent);}
-	if (dock_type == "MCBrowserControlsClusters") {return new ACBrowserControlsClustersDockWidgetQt(parent);}
+    else if (dock_type == "MCBrowserControlsComplete") {return new ACBrowserControlsCompleteDockWidgetQt(parent);}
+    else if (dock_type == "MCBrowserControlsClusters") {return new ACBrowserControlsClustersDockWidgetQt(parent);}
 	#if defined (SUPPORT_AUDIO)
 	else if (dock_type == "MCAudioControls") {return new ACAudioControlsDockWidgetQt(parent);}
 	#endif //defined (SUPPORT_AUDIO)
-	else if (dock_type == "MCBrowserControlsClustersNeighbors") {return new ACBrowserControlsClustersNeighborsDockWidgetQt(parent);}
 	else if (dock_type == "MCMediaConfig") {return new ACMediaConfigDockWidgetQt(parent);}
 	#if defined (SUPPORT_VIDEO)
 	else if (dock_type == "MCVideoControls") {return new ACVideoControlsDockWidgetQt(parent);}

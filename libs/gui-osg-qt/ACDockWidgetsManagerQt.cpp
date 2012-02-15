@@ -107,9 +107,9 @@ bool ACDockWidgetsManagerQt::addControlDock(ACAbstractDockWidgetQt* dock)
         }
     }
 
-    if (dock->getClassName() == "ACBrowserControlsClustersNeighborsDockWidgetQt" || dock->getClassName() == "ACBrowserControlsClustersDockWidgetQt"){
+    if (dock->getClassName() == "ACBrowserControlsCompleteDockWidgetQt" || dock->getClassName() == "ACBrowserControlsClustersDockWidgetQt"){
         for (int d=0;d<dockWidgets.size();d++){
-            if (dockWidgets[d]->getClassName() == "ACBrowserControlsClustersNeighborsDockWidgetQt" || dockWidgets[d]->getClassName() == "ACBrowserControlsClustersDockWidgetQt"){
+            if (dockWidgets[d]->getClassName() == "ACBrowserControlsCompleteDockWidgetQt" || dockWidgets[d]->getClassName() == "ACBrowserControlsClustersDockWidgetQt"){
                 std::cerr << "Only one browser control dock widget for clusters and/or neighbors can be added." << std::endl;
                 return false;
             }

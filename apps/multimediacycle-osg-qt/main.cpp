@@ -55,10 +55,13 @@ int main(int argc, char *argv[])
 	ACMultiMediaCycleOsgQt window;
 	try {
 		// Adding palettes
-		window.addControlDock("MCMediaConfig");
-		window.addControlDock("MCOSC");				 
-        window.addControlDock("MCBrowserControlsClusters");
-        //window.addControlDock("MCBrowserControlsClustersNeighbors");
+        window.addControlDock("MCMediaConfig");
+        window.addControlDock("MCOSC");
+        //#ifdef USE_DEBUG
+        window.addControlDock("MCBrowserControlsComplete");
+        //#else
+        //window.addControlDock("MCBrowserControlsClusters");
+        //#endif
 #if defined (SUPPORT_AUDIO)
 		window.addControlDock("MCAudioControls");
 #endif //defined (SUPPORT_AUDIO)

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>ACBrowserControlsClustersDockWidgetQt</class>
- <widget class="QDockWidget" name="ACBrowserControlsClustersDockWidgetQt">
+ <class>ACBrowserControlsCompleteDockWidgetQt</class>
+ <widget class="QDockWidget" name="ACBrowserControlsCompleteDockWidgetQt">
   <property name="geometry">
    <rect>
     <x>0</x>
