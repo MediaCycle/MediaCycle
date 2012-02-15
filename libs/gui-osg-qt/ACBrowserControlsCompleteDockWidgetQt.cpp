@@ -76,7 +76,7 @@ void ACBrowserControlsCompleteDockWidgetQt::on_pushButtonBack_clicked()
 {
     if (media_cycle==0) return;
     this->media_cycle->goBack();
-    this->synchronizeFeaturesWeights();
+    //this->synchronizeFeaturesWeights();
     //	ui.navigationLineEdit->setText(QString::number(media_cycle->getNavigationLevel()));
 
     // XS debug
@@ -89,7 +89,7 @@ void ACBrowserControlsCompleteDockWidgetQt::on_pushButtonForward_clicked()
     if (media_cycle==0) return;
 
     this->media_cycle->goForward();
-    this->synchronizeFeaturesWeights();
+    //this->synchronizeFeaturesWeights();
 
     //	ui.navigationLineEdit->setText(QString::number(media_cycle->getNavigationLevel()));
 
