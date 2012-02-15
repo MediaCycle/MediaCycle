@@ -401,21 +401,14 @@ void ACOsgCompositeViewQt::initInputActions(){
     connect(examineMediaExternallyAction, SIGNAL(triggered()), this, SLOT(examineMediaExternally()));
     this->addInputAction(examineMediaExternallyAction);*/
 
-    //if(this->media_cycle->getBrowser()->getMode() == AC_MODE_CLUSTERS){
-        forwardNextLevelAction = new ACInputActionQt(tr("Recluster"), this);
-        forwardNextLevelAction->setToolTip(tr("Recluster the cluster around the selected node"));
-    //}
-    //else if(this->media_cycle->getBrowser()->getMode() == AC_MODE_NEIGHBORS){
-    //    forwardNextLevelAction = new ACInputActionQt(tr("Unwrap node"), this);
-    //    forwardNextLevelAction->setToolTip(tr("Unwrap neighbors from the selected node"));
-    //}
-    //if(this->media_cycle->getBrowser()->getMode() != AC_MODE_NONE){
-        forwardNextLevelAction->setShortcut(Qt::Key_A);
-        forwardNextLevelAction->setKeyEventType(QEvent::KeyPress);
-        forwardNextLevelAction->setMouseEventType(QEvent::MouseButtonRelease);
-        connect(forwardNextLevelAction, SIGNAL(triggered(bool)), this, SLOT(forwardNextLevel(bool)));
-        this->addInputAction(forwardNextLevelAction);
-    //}
+    //CF separate this clusters/neighbors action into two?
+    forwardNextLevelAction = new ACInputActionQt(tr("Recluster/Unwrap"), this);
+    forwardNextLevelAction->setToolTip(tr("Recluster the cluster or unwrap neighbors around the selected node"));
+    forwardNextLevelAction->setShortcut(Qt::Key_A);
+    forwardNextLevelAction->setKeyEventType(QEvent::KeyPress);
+    forwardNextLevelAction->setMouseEventType(QEvent::MouseButtonPress);
+    connect(forwardNextLevelAction, SIGNAL(triggered(bool)), this, SLOT(forwardNextLevel(bool)));
+    this->addInputAction(forwardNextLevelAction);
 
     stopPlaybackAction = new ACInputActionQt(tr("Stop Playback"), this);
     stopPlaybackAction->setShortcut(Qt::Key_M);
@@ -578,22 +571,21 @@ void ACOsgCompositeViewQt::examineMediaExternally(){
 
 void ACOsgCompositeViewQt::forwardNextLevel(bool toggle){
     if (media_cycle == 0) return;
-    media_cycle->setForwardDown(toggle);
-    if(toggle){
-        if (media_cycle->hasBrowser()){
-            int loop = media_cycle->getClickedNode();
-            //std::cout << "node " << loop << " selected" << std::endl;
-            if(loop >= 0){
-                if (media_cycle->getBrowser()->getMode() == AC_MODE_CLUSTERS){
-                    // store first otherwise we store the next state
-                    media_cycle->storeNavigationState();
-                    media_cycle->incrementLoopNavigationLevels(loop);
-                }
-                media_cycle->setReferenceNode(loop);
-                media_cycle->updateDisplay(true);
+    media_cycle->setForwardDown(true);
+    if (media_cycle->hasBrowser()){
+        int loop = media_cycle->getClickedNode();
+        //std::cout << "node " << loop << " selected" << std::endl;
+        if(loop >= 0){
+            if (media_cycle->getBrowser()->getMode() == AC_MODE_CLUSTERS){
+                // store first otherwise we store the next state
+                media_cycle->storeNavigationState();
+                media_cycle->incrementLoopNavigationLevels(loop);
             }
-       }
-    }
+            // in neighbors mode, the node is already unwrapped with forward down and node clicked
+            media_cycle->setReferenceNode(loop);
+            media_cycle->updateDisplay(true);
+        }
+   }
 }
 
 void ACOsgCompositeViewQt::stopPlayback(){
