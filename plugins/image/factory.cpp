@@ -32,7 +32,9 @@ extern "C" std::vector<std::string> list() {    //returns a string vector contai
 	listPlugin.push_back("ACImageShapeHuMomentsPlugin");
 //	listPlugin.push_back("ACImageShapeFourierPolarMomentsPlugin");
 //    listPlugin.push_back("ACImageTextureWaveletsMomentsPlugin");
-	listPlugin.push_back("ACImageNumberOfFacesPlugin");
- 	listPlugin.push_back("ACImageNumberOfHoughLinesPlugin");
+    #ifdef USE_DEBUG
+    //listPlugin.push_back("ACImageNumberOfFacesPlugin");
+    //listPlugin.push_back("ACImageNumberOfHoughLinesPlugin");
+    #endif
    return listPlugin;
 }
