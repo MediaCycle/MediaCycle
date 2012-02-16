@@ -361,11 +361,17 @@ void ACBrowserControlsCompleteDockWidgetQt::updatePluginLists()
 
 void ACBrowserControlsCompleteDockWidgetQt::resizePluginList(){
     if (ui.featuresListWidget->sizeHintForRow(0) >-1 && ui.featuresListWidget->count() >0){
-        // CF resize the feature list along the number of features (a threshold number could be set)
-        ui.featuresListWidget->setMinimumHeight(ui.featuresListWidget->sizeHintForRow(0)*(ui.featuresListWidget->count())+8);
-        ui.featuresListWidget->setFixedHeight(ui.featuresListWidget->sizeHintForRow(0)*(ui.featuresListWidget->count())+8);
-        ui.groupBoxSimilarity->setMinimumHeight(ui.featuresListWidget->sizeHintForRow(0)*(ui.featuresListWidget->count()+2));
-        ui.groupBoxSimilarity->setFixedHeight(ui.featuresListWidget->sizeHintForRow(0)*(ui.featuresListWidget->count()+2));
+        // CF resize the feature list along the number of features with threshold
+        int max_number_of_lines = 9; // allows the current 18 audio features to be accessed on 2 pages
+        int current_number_of_lines = min(max_number_of_lines,ui.featuresListWidget->count());
+        //int current_number_of_lines = ui.featuresListWidget->count(); // uncomment this to remove the threshold
+        int featureListHeight = ui.featuresListWidget->sizeHintForRow(0)*current_number_of_lines+8; // 8 px approx to avoid the scrollbar
+        int groupBoxSimilarityHeight = ui.featuresListWidget->sizeHintForRow(0)*(current_number_of_lines+2); // 2 more lines as security factor
+
+        ui.featuresListWidget->setMinimumHeight(featureListHeight);
+        ui.featuresListWidget->setFixedHeight(featureListHeight);
+        ui.groupBoxSimilarity->setMinimumHeight(groupBoxSimilarityHeight);
+        ui.groupBoxSimilarity->setFixedHeight(groupBoxSimilarityHeight);
     }
     else{
         // CF resize the feature list to a default min size
