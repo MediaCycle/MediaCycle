@@ -845,7 +845,7 @@ void ACMediaBrowser::updateClusters(bool animate, int needsCluster) {
 		std::cout << "updateClusters : Cluster KMeans (default)" << std::endl;
 		updateClustersKMeans(animate, needsCluster);
 	}
-	else{//TR TODO cancell the clustering if needCluster ==0
+    else{//TR TODO cancel the clustering if needCluster ==0
 		if (needsCluster)
 			initClusterCenters();
 		if (mClustersMethodPlugin) { //CF priority on the Clusters Plugin
@@ -1697,18 +1697,12 @@ void ACMediaBrowser::updateDisplay(bool animate, int needsCluster) {
 
 	switch ( mMode ){
 		case AC_MODE_CLUSTERS:
-
 			updateClusters(animate, needsCluster);
-
 			updateNextPositions();
-
 			break;
 		case AC_MODE_NEIGHBORS:
-
 			updateNeighborhoods();
-
 			updateNextPositions();
-
 			break;
 		default:
 			cerr << "unknown browser mode: " << mMode << endl;
@@ -1737,29 +1731,32 @@ void ACMediaBrowser::switchMode(ACBrowserMode _mode){
 						//CF do we have to clean the navigation states?
 						//CF do we have to reset the referent node? mUserLog->addRootNode( mReferenceNode , 0); //CF change click
 						//(2nd arg)!, use LastClickedNode instead of ReferenceNode?
-						//CF 1) bring the nodes to the center
 
-						ACPoint p;
+						//CF 1) bring the nodes to the center
+                       ACPoint p;
+                       p.x = 0;
+                       p.y = 0;
+                       p.z = 0;
 						for (ACMediaNodes::iterator node = mLoopAttributes.begin(); node != mLoopAttributes.end(); ++node){
 							//(*node).setDisplayed (false);
-							p.x = 0;
-							p.y = 0;
-							p.z = 0;
-							(*node).setNextPosition(p, t);
+                          (*node).setCurrentPosition(p);
+                          (*node).setNextPosition(p,t);
 						}
-						this->updateDisplay(true);
-						/*
-						this->setState(AC_CHANGING);
-						this->commitPositions();
-						this->setNeedsDisplay(true);
-						*/
+                      this->updateDisplay(true);
+
+                      /*this->setState(AC_CHANGING);
+                      this->commitPositions();
+                      //this->setNeedsDisplay(true);
+                      this->updateDisplay(true);*/
 
 						//CF 2) hide all nodes, change mode and make the reference node appear
 						for (ACMediaNodes::iterator node = mLoopAttributes.begin(); node != mLoopAttributes.end(); ++node){
-							(*node).setDisplayed (false);
+                            (*node).setDisplayed(false);
 						}
+                      this->updateDisplay(true);
+
 						this->setMode(_mode);
-						this->updateDisplay(true);
+                      this->updateDisplay(true);
 
 						//CF 3) expand the first branch at the reference node
 						mUserLog->clickNode(0,0);//CF check if the ref node is correct everytime this way (1 arg), change clicktime (2nd arg)
@@ -1792,13 +1789,13 @@ void ACMediaBrowser::switchMode(ACBrowserMode _mode){
 
 					//CF 2) Recreate the user log, links should thus disappear
 					delete mUserLog;
+                  mUserLog = 0;
 					mUserLog = new ACUserLog();
 
 					//CF 3) Change the mode and display all the nodes
 					this->setMode(_mode);
 					for (ACMediaNodes::iterator node = mLoopAttributes.begin(); node != mLoopAttributes.end(); ++node){
 						(*node).setDisplayed (true);
-						//(*node).setNextPosition(0.0, 0.0, 0.0);
 					}
 					this->updateDisplay(true);
 					break;

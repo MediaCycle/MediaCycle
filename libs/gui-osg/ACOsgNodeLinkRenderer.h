@@ -43,38 +43,27 @@
 #include <osg/LineWidth>
 #include <osg/Geode>
 #include <osg/Group>
-#include <osg/ShapeDrawable>
 #include <osg/MatrixTransform>
-#include <osg/BlendFunc>
-#include <osg/BlendColor>
-#include <osg/Texture2D>
-#include <osg/Image>
-#include <osgDB/ReadFile>
-#include <osgDB/WriteFile>
-#include <osgUtil/SceneView>
-#include <osgViewer/Viewer>
 
-#include "ACRefId.h"
+#include "ACOsgMediaRenderer.h"
 
 class ACOsgNodeLinkRenderer {
 public:	
-	void setMediaCycle(MediaCycle *_media_cycle) { this->media_cycle = _media_cycle; };
-	void setNodeIndex(int _node_index) { this->node_index = _node_index; };
-	void setDistanceMouse(float _distance_mouse) { this->distance_mouse = _distance_mouse; };
-	osg::ref_ptr<osg::MatrixTransform> getLink() { return link_node; };
-protected:
-	MediaCycle* media_cycle;
-	osg::ref_ptr<osg::MatrixTransform> link_node;
-	int node_index;
-	float distance_mouse;	
-protected:
-	osg::ref_ptr<osg::Geode> link_geode;	
-	void linkGeode(double to_x, double to_y);
+    void setMediaCycle(MediaCycle *_media_cycle);
+    osg::ref_ptr<osg::MatrixTransform> getLink();
+    void setNodeIn(ACOsgMediaRenderer* _node);
+    void setNodeOut(ACOsgMediaRenderer* _node);
 public:
 	ACOsgNodeLinkRenderer();
 	~ACOsgNodeLinkRenderer();
 	void prepareLinks();
-	void updateLinks(double ratio=0.0);
+    void updateLinks();
+protected:
+    MediaCycle* media_cycle;
+    osg::ref_ptr<osg::MatrixTransform> link_node;
+    osg::ref_ptr<osg::Geode> link_geode;
+    void linkGeode(double to_x, double to_y);
+    ACOsgMediaRenderer* node_in, *node_out;
+    osg::Vec4 link_color;
 };
-
 #endif

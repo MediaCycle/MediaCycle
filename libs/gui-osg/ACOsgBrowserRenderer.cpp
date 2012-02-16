@@ -135,14 +135,10 @@ ACOsgBrowserRenderer::ACOsgBrowserRenderer()
 //: displayed_nodes(0)
 {
 	group = new Group();
-	//ref_ptr//group->ref();
 	media_group = new Group();
-	//ref_ptr//media_group->ref();
 	link_group = new Group();
-	//ref_ptr//link_group->ref();
 	label_group = new Group();
-	//ref_ptr//label_group->ref();
-	group->addChild(label_group);		// SD TODO - check this get(), was needed to compile on OSG v2.4 (used by AM)
+    group->addChild(label_group);
 	group->addChild(media_group);
 	group->addChild(link_group);
 	this->clean();
@@ -214,12 +210,20 @@ void ACOsgBrowserRenderer::prepareNodes(int _start) {
 	}
 
 	if (node_renderer.size()>n) {
-		this->removeNodes(n, node_renderer.size());
-	}
+        this->removeNodes(n, node_renderer.size());
+    }
 	else if (node_renderer.size()<n) {
 		this->addNodes(start,n);
 
-	}
+    }
+
+    // Remove all nodelinks if present
+    for (int i=0;i<link_renderer.size();i++) {
+        if(link_renderer[i]){
+            link_group->removeChild(link_renderer[i]->getLink());
+            delete link_renderer[i];
+        }
+    }
 
 	// XS  TODO why this ?
 	if ((n-start)>0)
@@ -231,72 +235,29 @@ void ACOsgBrowserRenderer::updateNodes(double ratio) {
 	if (!nodes_prepared) {
 		return;
 	}
-	//CF prepareNodes
-	/*
-	int media_type;
 
 	int n = media_cycle->getNumberOfMediaNodes(); //XS was: getLibrarySize();
 
-	// XS are these tests necessary ?
-	if (node_renderer.size()>n) {
-		for (int i=n;i<node_renderer.size();i++) {
-			media_group->removeChild(node_renderer[i]->getNode());
-			delete node_renderer[i];
-		}
-	}
+    // Create new nodelinks if the layout requires them
+    if (media_cycle->getBrowser()->getLayout() == AC_LAYOUT_TYPE_NODELINK) {
+        //CF to check with future changes when number of nodelinks may decrease (folding nodes)
+        link_renderer.resize(n);
+        for (int i=0;i<n;i++) {
+            link_renderer[i] = new ACOsgNodeLinkRenderer();
+            if (link_renderer[i]) {
+                link_renderer[i]->setMediaCycle(media_cycle);
+                node_index = node_renderer[i]->getNodeIndex();
+                link_renderer[i]->prepareLinks();
 
-	if (link_renderer.size()>n){//media_cycle->getBrowser()->getLayout() == AC_LAYOUT_TYPE_NODELINK && ) {
-		for (int i=n;i<link_renderer.size();i++) {
-			link_group->removeChild(link_renderer[i]->getLink());
-			delete link_renderer[i];
-		}
-	}
+                link_renderer[i]->setNodeIn(node_renderer[i]);
+                int p = media_cycle->getBrowser()->getUserLog()->getParentFromNodeId(node_index);
+                if ( p!= -1 )
+                    link_renderer[i]->setNodeOut(node_renderer[p]);
 
-
-	node_renderer.resize(n);
-	//if (media_cycle->getBrowser()->getLayout() == AC_LAYOUT_TYPE_NODELINK)
-	link_renderer.resize(n);
-	distance_mouse.resize(n);
-
-	for (int i=0;i<n;i++) {
-		media_type = media_cycle->getMediaType(i);
-		switch (media_type) {
-			case MEDIA_TYPE_AUDIO:
-				node_renderer[i] = new ACOsgAudioRenderer();
-				break;
-			case MEDIA_TYPE_IMAGE:
-				node_renderer[i] = new ACOsgImageRenderer();
-				break;
-			case MEDIA_TYPE_VIDEO:
-				node_renderer[i] = new ACOsgVideoRenderer();
-				break;
-			case MEDIA_TYPE_TEXT:
-				node_renderer[i] = new ACOsgTextRenderer();
-				break;
-			default:
-				node_renderer[i] = 0;
-				break;
-		}
-		if (node_renderer[i] != 0) {
-			node_renderer[i]->setMediaCycle(media_cycle);
-			node_renderer[i]->setNodeIndex(i);
-			// node_renderer[i]->setActivity(0);
-			node_renderer[i]->prepareNodes();
-			media_group->addChild(node_renderer[i]->getNode());
-		}
-
-		//if (media_cycle->getBrowser()->getLayout() == AC_LAYOUT_TYPE_NODELINK) {
-		link_renderer[i] = new ACOsgNodeLinkRenderer();
-		if (link_renderer[i]) {
-			link_renderer[i]->setMediaCycle(media_cycle);
-			link_renderer[i]->setNodeIndex(i);
-			// node_renderer[i]->setActivity(0);
-			link_renderer[i]->prepareLinks();
-			link_group->addChild(link_renderer[i]->getLink());
-		}
-		//}
-	}
-	*/
+                link_group->addChild(link_renderer[i]->getLink());
+            }
+        }
+    }
 
 	// SD 2010 OCT - This animation has moved from Browser to Renderer
 	/*
@@ -359,19 +320,12 @@ void ACOsgBrowserRenderer::updateNodes(double ratio) {
 		}	
 	}
 
-	/*
-	//if (media_cycle && media_cycle->hasBrowser() && media_cycle->getBrowser()->getNumberOfLoopsToDisplay()>0)
-		layout_renderer->updateLayout(ratio);
-	*/
-	//CF or visible and updated only if AC_LAYOUT_TYPE_NODELINK
-	// SD
-	/*
+    // Update nodelinks if the layout requires
 	if (media_cycle->getBrowser()->getLayout() == AC_LAYOUT_TYPE_NODELINK) {
 		for (unsigned int i=0;i<link_renderer.size();i++) {
-			link_renderer[i]->updateLinks(ratio);
+            link_renderer[i]->updateLinks();
 		}
 	}
-	 */
 }
 
 void ACOsgBrowserRenderer::prepareLabels(int start) {
@@ -399,9 +353,6 @@ int ACOsgBrowserRenderer::computeScreenCoordinates(osgViewer::View* view, double
 	int closest_node = 1;//CF to deprecate
 	{
 		float mx(0.0f), my(0.0f);
-		
-		
-		
 		float x(0.0f), y(0.0f), z(0.0f);
 		
 		int n = media_cycle->getLibrarySize();
@@ -450,7 +401,7 @@ int ACOsgBrowserRenderer::computeScreenCoordinates(osgViewer::View* view, double
 					node_renderer[i]->setNextPos(attribute.getNextPosition());
 					attribute.setChanged(0);
 				}
-				
+
 				const ACPoint &p = node_renderer[i]->getCurrentPos();
 				const ACPoint &p2 = node_renderer[i]->getNextPos();
 				double refTime = attribute.getNextTime();
@@ -471,6 +422,7 @@ int ACOsgBrowserRenderer::computeScreenCoordinates(osgViewer::View* view, double
 				
 				node_renderer[i]->setFrac(frac);
 				node_renderer[i]->setViewPos(media_cycle_view_pos);
+
 				//attribute.setViewPosition(media_cycle_view_pos);
 				
 				modelPoint = Vec3(x,y,z);
@@ -595,7 +547,7 @@ int ACOsgBrowserRenderer::computeScreenCoordinates(osgViewer::View* view, double
 				
 				node_renderer[i]->setDistanceMouse(MIN(distance_mouse[i],node_renderer[i]->getDistanceMouse()));
 				if (media_cycle->getBrowser()->getLayout() == AC_LAYOUT_TYPE_NODELINK)
-					link_renderer[i]->setDistanceMouse(distance_mouse[i]);
+                    //link_renderer[i]->setDistanceMouse(distance_mouse[i]);
 
 				if (distance_mouse[i]<closest_distance) {
 					closest_distance = distance_mouse[i];

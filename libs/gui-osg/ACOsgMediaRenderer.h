@@ -141,6 +141,7 @@ public:
 	void setMode(int media_cycle_mode);
 	void setGlobalNavigation(int media_cycle_global_navigation_level);
 	void setIsDisplayed(int media_cycle_isdisplayed);
+    int getIsDisplayed(){return media_cycle_isdisplayed;}
 	
 	//void setPos(ACPoint &media_cycle_current_pos, ACPoint &media_cycle_next_pos);
 	void setViewPos(ACPoint media_cycle_view_pos);
