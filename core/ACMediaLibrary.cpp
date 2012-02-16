@@ -197,7 +197,6 @@ int ACMediaLibrary::importFile(std::string _filename, ACPluginManager *acpl, boo
 	//this->testFFMPEG(_filename);
 	if (media_type==MEDIA_TYPE_MIXED){
 		if (mReaderPlugin!=0)
-		
 			media=mReaderPlugin->mediaFactory(media_type);
 		if (media==0)
 			media=new ACMediaDocument();
@@ -207,14 +206,17 @@ int ACMediaLibrary::importFile(std::string _filename, ACPluginManager *acpl, boo
 			int nbMedia = media->import(_filename, this->getMediaID(), acpl);
 			if (nbMedia<=0)
 				return 0;
-			this->addMedia(media);
-			this->incrementMediaID();
+
+            this->addMedia(media);
+            this->incrementMediaID();
+
 			ACMediaContainer medias = (static_cast<ACMediaDocument*> (media))->getContainer();
 			ACMediaContainer::iterator iter;
 			for ( iter=medias.begin() ; iter!=medias.end(); ++iter ){
 				this->incrementMediaID();
 				this->addMedia(iter->second);
 			}
+
 			return 1;
 		}
 	}
@@ -697,9 +699,9 @@ std::string ACMediaLibrary::getThumbnailFileName(int id) {
 }
 std::vector<int> ACMediaLibrary::getParentIds(void){
 	std::vector<int> ret;
-	for (int i=0;i<this->getSize();i++) {
+    for (int i=0;i<this->getSize();i++) {
 		if (media_library[i]->getParentId()==-1 ) {
-			if (media_library[i]->getId()==i)
+            //if (media_library[i]->getId()==i) // CF wrong and useless test!
 				ret.push_back(i);
 		}
 	}
@@ -843,9 +845,11 @@ void ACMediaLibrary::normalizeFeatures(int needsNormalize) {
 			ACMedia* item = media_library[currId[i]];
 			item->cleanPreProcFeaturesVector();
 			std::vector<ACMediaFeatures*> tempFeatVect;
+			#ifdef SUPPORT_MULTIMEDIA
 			if (item->getMediaType()==MEDIA_TYPE_MIXED)
 				tempFeatVect=mPreProcessPlugin->apply(mPreProcessInfo,((ACMediaDocument*)item)->getActiveMedia());
 			else
+			#endif//def SUPPORT_MULTIMEDIA	
 				tempFeatVect=mPreProcessPlugin->apply(mPreProcessInfo,item);
 			
 			item->getAllPreProcFeaturesVectors()=tempFeatVect;
@@ -1004,6 +1008,7 @@ ACMediaType ACMediaLibrary::getActiveSubMediaType(){
 
 }
 
+#ifdef SUPPORT_MULTIMEDIA
 int ACMediaLibrary::setActiveMediaType(std::string mediaName){
 	if (media_type!=MEDIA_TYPE_MIXED)
 		return 0;
@@ -1021,6 +1026,7 @@ int ACMediaLibrary::setActiveMediaType(std::string mediaName){
 		}
 	}	
 }
+#endif//def SUPPORT_MULTIMEDIA
 
 // -------------------------------------------------------------------------
 // test

@@ -170,6 +170,17 @@ void ACBrowserControlsCompleteDockWidgetQt::on_radioButtonClusters_toggled( bool
 void ACBrowserControlsCompleteDockWidgetQt::updatePluginsSettings()
 {
     this->configureCheckBoxes();
+
+    //Plugins according to media type
+    //TODO Remember previous settings
+    std::cout << "ACBrowserControlsCompleteDockWidgetQt::changeMediaType: Plugins according to media type" << std::endl;
+    if(this->getMediaType() == MEDIA_TYPE_MIXED){
+        int comboBoxClustersPositionsIndex = ui.comboBoxClustersPositions->findText("Archipel Atoll");
+        if (comboBoxClustersPositionsIndex > -1){
+            ui.comboBoxClustersPositions->setCurrentIndex(comboBoxClustersPositionsIndex);
+            media_cycle->changeClustersPositionsPlugin("Archipel Atoll");
+        }
+    }
 }
 
 void ACBrowserControlsCompleteDockWidgetQt::resetPluginsSettings()
@@ -179,6 +190,7 @@ void ACBrowserControlsCompleteDockWidgetQt::resetPluginsSettings()
 
 void ACBrowserControlsCompleteDockWidgetQt::changeMediaType(ACMediaType _media_type)
 {
+    this->setMediaType(_media_type);
     this->updatePluginLists();
 }
 
@@ -217,6 +229,9 @@ void ACBrowserControlsCompleteDockWidgetQt::synchronizeFeaturesWeights()
         }
     }
     this->resizePluginList();
+
+
+
 }
 
 void ACBrowserControlsCompleteDockWidgetQt::configureCheckBoxes()

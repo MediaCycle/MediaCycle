@@ -629,6 +629,10 @@ void ACOsgCompositeViewQt::translateBrowser(float x, float y){
     if (media_cycle == 0) return;
     if (media_cycle->hasBrowser())
     {
+        // CF don't translate when in the timeline
+        if (y>sepy) // CF find better check (mouse in widget test?)
+            return;
+
         int loop = media_cycle->getClickedNode();
         //int loop = media_cycle->getClosestNode();//CF to deprecate: adapt to multiple pointers
         //std::cout << "node " << loop << " selected" << std::endl;

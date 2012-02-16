@@ -45,6 +45,7 @@ public:
 	
 	virtual bool readData(std::string _fname){return false;}
 	virtual void* getData(){return 0;}
+    virtual bool setData(void* _data){return false;}
 	
 	std::string getFileName() {return file_name;}
 	void setFileName(std::string _fname);
@@ -52,7 +53,7 @@ public:
 	void setMediaType(ACMediaType _media_type){media_type=_media_type;}
 //	bool copyData(ACMediaData* m);
 	
-	
+    void setLabel(std::string _label){label = _label;}
 	std::string getLabel(void){return label;}
 	
 protected:

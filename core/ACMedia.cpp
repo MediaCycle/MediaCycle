@@ -330,57 +330,60 @@ void ACMedia::loadXML(TiXmlElement* _pMediaNode){
 		throw runtime_error("corrupted XML file, wrong number of features");
 	else if (nf ==0)
 		// XS TODO could this happen without it being an error?
+       // CF yes for mediadocuments
 		// if not, put <= in the test above
 		cout << "loading media with no features" << endl;
 	
 	TiXmlElement* featureElement = _pMediaNodeHandle.FirstChild( "Features" ).FirstChild( "Feature" ).Element();
-	if (!featureElement)
-		throw runtime_error("corrupted XML file, error reading features");
-	TiXmlText* featureElementsAsText = 0;
-	ACMediaFeatures* mediaFeatures;
-	for( featureElement; featureElement; featureElement = featureElement->NextSiblingElement() ) {
-		mediaFeatures = new ACMediaFeatures();
-		int nfe=-1;
-		int nno=-1;
-		featureElement->QueryIntAttribute("NumberOfFeatureElements", &nfe);
-		if (nfe < 0)
-			throw runtime_error("corrupted XML file, wrong number of feature elements");
-		featureElement->QueryIntAttribute("NeedsNormalization", &nno);
-		if (nno < 0)
-			throw runtime_error("corrupted XML file, wrong normalization flag");
-		string featureName = "";
-		featureName = featureElement->Attribute("FeatureName");
-		if (featureName == "")
-			throw runtime_error("corrupted XML file, empty feature name");
-		if (!featureElement->FirstChild())
-			throw runtime_error("corrupted XML file, empty feature value");
-		featureElementsAsText=featureElement->FirstChild()->ToText();
-		if (!featureElementsAsText)
-			throw runtime_error("corrupted XML file, error reading feature elements");
-		string fes = "";
-		fes = featureElementsAsText->ValueStr();
-		if (fes == "")
-			throw runtime_error("corrupted XML file, error reading feature elements");
-		std::stringstream fess;
-		fess << fes;
-		try {
-			for (int j=0; j<nfe; j++) {
-				// XS TODO add test on nne
-				float f;
-				fess >> f;
-				mediaFeatures->addFeatureElement(f);
-			}
-		}
-		catch (...) {
-			// attempt to catch potential problems and group them
-			throw runtime_error("corrupted XML file, error reading feature elements");
-		}
-		mediaFeatures->setComputed();
-		mediaFeatures->setName(featureName);
-		mediaFeatures->setNeedsNormalization(nno);
-		features_vectors.push_back(mediaFeatures);
-		count_f++;
-	}
+    if (!featureElement && nf>0)
+        throw runtime_error("corrupted XML file, error reading features");
+    if(featureElement){
+        TiXmlText* featureElementsAsText = 0;
+        ACMediaFeatures* mediaFeatures;
+        for( featureElement; featureElement; featureElement = featureElement->NextSiblingElement() ) {
+            mediaFeatures = new ACMediaFeatures();
+            int nfe=-1;
+            int nno=-1;
+            featureElement->QueryIntAttribute("NumberOfFeatureElements", &nfe);
+            if (nfe < 0)
+                throw runtime_error("corrupted XML file, wrong number of feature elements");
+            featureElement->QueryIntAttribute("NeedsNormalization", &nno);
+            if (nno < 0)
+                throw runtime_error("corrupted XML file, wrong normalization flag");
+            string featureName = "";
+            featureName = featureElement->Attribute("FeatureName");
+            if (featureName == "")
+                throw runtime_error("corrupted XML file, empty feature name");
+            if (!featureElement->FirstChild())
+                throw runtime_error("corrupted XML file, empty feature value");
+            featureElementsAsText=featureElement->FirstChild()->ToText();
+            if (!featureElementsAsText)
+                throw runtime_error("corrupted XML file, error reading feature elements");
+            string fes = "";
+            fes = featureElementsAsText->ValueStr();
+            if (fes == "")
+                throw runtime_error("corrupted XML file, error reading feature elements");
+            std::stringstream fess;
+            fess << fes;
+            try {
+                for (int j=0; j<nfe; j++) {
+                    // XS TODO add test on nne
+                    float f;
+                    fess >> f;
+                    mediaFeatures->addFeatureElement(f);
+                }
+            }
+            catch (...) {
+                // attempt to catch potential problems and group them
+                throw runtime_error("corrupted XML file, error reading feature elements");
+            }
+            mediaFeatures->setComputed();
+            mediaFeatures->setName(featureName);
+            mediaFeatures->setNeedsNormalization(nno);
+            features_vectors.push_back(mediaFeatures);
+            count_f++;
+        }
+    }
 	
 	// consistency check for features
 	if (count_f != nf) 
@@ -390,7 +393,7 @@ void ACMedia::loadXML(TiXmlElement* _pMediaNode){
 
 	// allow an XML without segments.
 	TiXmlElement* segmentsElement = _pMediaNodeHandle.FirstChild( "Segments" ).Element();
-	if (featuresElement) {
+    if (segmentsElement) {
 		int ns = -1;
 		segmentsElement->QueryIntAttribute("NumberOfSegments", &ns);
 		if (ns < 0)
@@ -558,12 +561,13 @@ int ACMedia::import(std::string _path, int _mid, ACPluginManager *acpl, bool _sa
 	this->filename = _path;
 	this->filename_thumbnail = _path; // XS TODO make real separate thumbnail option
 	int import_ok = 0;
-	if (_mid>=0) this->setId(_mid);
-	
+
 	// get info about width, height, mediaData
 	// computes thumbnail, ...
 	// mediaData will be used by the plugin to compute features
-	if (!this->extractData(this->getFileName())) return 0;
+    if (!this->extractData(this->getFileName()))
+        return 0;
+
 	if (this->getMediaData()==0){
 		import_ok = 0;
 		cerr << "<ACMedia::import> failed accessing data for media number: " << _mid << endl;
@@ -571,22 +575,37 @@ int ACMedia::import(std::string _path, int _mid, ACPluginManager *acpl, bool _sa
 	}
 	
 	//compute features with available plugins
-	// XS TODO config file
-	if (acpl) {
-		//TR : new implementation to calculate the features
-		ACMediaData* local_media_data=dynamic_cast<ACMediaData*>(this->getMediaData());
-		this->features_vectors=acpl->getFeaturesPlugins()->calculate(local_media_data, this, _save_timed_feat);
-		if (this->features_vectors.size()>0)
-			import_ok = 1;
-		this->deleteData();
-	}
-	else {
-		cerr << "<ACMedia::import> no features imported -- no plugin manager for media number: " << _mid << endl;
-		import_ok = 0;
-	}
-		
-	//delete data; <--- this is managed from outside (media->deleteData)
+    if (!this->extractFeatures(acpl,_save_timed_feat))
+        return 0;
+    import_ok=1;
+
+    // Assigning media ids should be done once feature extraction is successful since media ids are incremental
+    // If we used non-incremental media ids (md5/sha sums), this wouldn't be a problem anymore
+    if (_mid>=0)
+        this->setId(_mid);
+
+    //delete data; <--- this is managed from outside (media->deleteData)
 	return import_ok;
+}
+
+int ACMedia::extractFeatures(ACPluginManager *acpl, bool _save_timed_feat) {
+    int extract_feat_ok = 0;
+    // XS TODO config file
+    if (acpl) {
+        //TR : new implementation to calculate the features
+        ACMediaData* local_media_data=dynamic_cast<ACMediaData*>(this->getMediaData());
+        this->features_vectors=acpl->getFeaturesPlugins()->calculate(local_media_data, this, _save_timed_feat);
+        if (this->features_vectors.size()>0)
+            extract_feat_ok = 1;
+    }
+    else {
+        cerr << "<ACMedia::extractFeatures> no features imported -- no plugin manager for media";
+        if(!filename.empty()) cerr << " file '" << filename << "'";
+        else if (!label.empty()) cerr << " of label '" << label << "'";
+        cerr << endl;
+        extract_feat_ok = 0;
+    }
+    return extract_feat_ok;
 }
 
 // segment data (after import !)

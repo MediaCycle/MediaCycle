@@ -232,7 +232,7 @@ void ACOsgMediaDocumentRenderer::updateNodes(double ratio) {
 		std::vector<ACMedia*> tmpSegments;
 		tmpSegments = media->getAllSegments();
 		for (int j=0; j<tmpSegments.size(); j++)
-			media_cycle->getMediaNode(tmpSegments[j]->getId()).setDisplayed(true);
+            media_cycle->getMediaNode(tmpSegments[j]->getId()).setDisplayed(true);// TR true CF false
 	}	
 	
 	unsigned int mask = (unsigned int)-1;

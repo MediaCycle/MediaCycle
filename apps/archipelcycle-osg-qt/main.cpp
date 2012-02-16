@@ -1,5 +1,5 @@
 /*
- *  ACTextCycleOsgQt main.cpp
+ *  ArchipelCycle main.cpp
  *  MediaCycle
  *
  *  @author Christian Frisson
@@ -43,11 +43,12 @@ int main(int argc, char *argv[])
 
 	ACMultiMediaCycleOsgQt window;
 	try {
-		window.setWindowTitle("ArchipelCycle");
+        window.setWindowTitle("ArchipelCycle");
 		// Adding palettes
-		window.addControlDock("MCAudioControls");
-		window.addControlDock("MCBrowserControlsClusters");//"MCBrowserControlsClustersNeighbors");
-		window.addControlDock("MCMediaDocumentOption");//MCMediaDocumentOption
+        window.addControlDock("MCMediaConfig");
+        window.addControlDock("MCMediaDocumentOption");
+        window.addControlDock("MCBrowserControlsClusters");
+        window.addControlDock("MCAudioControls");
 		window.useSegmentationByDefault(false);
 		
 		// XS TODO

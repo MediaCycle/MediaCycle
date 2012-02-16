@@ -198,7 +198,7 @@ void ACKMeansPlugin::updateClusters(ACMediaBrowser* mediaBrowser,bool needsClust
 				}
 			}
 			
-			printf("K-means it: %d\n", it);
+			//CF printf("K-means it: %d\n", it);
 			// get new centers from accumulators
 			for(j=0; j<clusterCount; j++)
 			{

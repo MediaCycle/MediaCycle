@@ -236,11 +236,94 @@ int ACMediaDocument::loadACLSpecific(ifstream &library_file) {
 }
 
 void ACMediaDocument::saveXMLSpecific(TiXmlElement* _media){
+    if(this->getContainer().size() > 0){
+        TiXmlElement* submedias = new TiXmlElement( "SubMedias" );
+        _media->LinkEndChild( submedias );
+        submedias->SetAttribute("NumberOfSubMedias", this->getContainer().size());
+        if( this->activeMedia!=0 )
+            submedias->SetAttribute("ActiveSubMediaId", activeMedia->getId());
+
+        // saves info about submedias (if any) : beginning, end, ID
+        std::map<std::string ,ACMedia* >::iterator it;
+        for (it=mediaContainer.begin();it!=mediaContainer.end();it++){
+            TiXmlElement* submedia = new TiXmlElement( "SubMedia" );
+            submedias->LinkEndChild( submedia );
+
+            /*std::string s;
+            std::stringstream tmp;
+            tmp << it->second->getId();
+            s = tmp.str();
+            //TiXmlText* submediaID = new TiXmlText(s.c_str());*/
+            submedia->SetAttribute("MediaID", it->second->getId());
+            submedia->SetAttribute("MediaType", it->second->getMediaType());
+            submedia->SetAttribute("FileName", it->second->getFileName());
+            submedia->SetAttribute("Key", it->first);
+        }
+    }
 }
 
-
 int ACMediaDocument::loadXMLSpecific(TiXmlElement* _pMediaNode){
-	return 1;	
+
+    /*TiXmlElement* submediasElement = _pMediaNode.FirstChild( "SubMedias" ).Element();
+    if (submediasElement) {
+        int nsm = -1;
+        submediasElement->QueryIntAttribute("NumberOfSubMedias", &nsm);
+        if (nsm < 0)
+            throw runtime_error("corrupted XML file, <SubMedias> present, but no submedias");
+        int acsm = -1;
+        submediasElement->QueryIntAttribute("ActiveSubMediaId", &acsm);
+        if (acsm < 0)
+            throw runtime_error("corrupted XML file, no active submedia defined");
+
+
+        TiXmlElement* submediaElement = _pMediaNode.FirstChild( "SubMedias" ).FirstChild( "SubMedia" ).Element();
+        TiXmlText* submediaIDElementsAsText = 0;
+        int count_sm = 0;
+
+        for( submediaElement; submediaElement; submediaElement = submediaElement->NextSiblingElement() ) {
+
+
+            ACMediaType typ;
+            int typi = -1;
+            _pMediaNode->QueryIntAttribute("MediaType", &typi);
+            if (typi < 0)
+                throw runtime_error("corrupted XML file, wrong submedia type");
+            else {
+                typ = (ACMediaType) typi;
+
+            string pName ="";
+            pName = submediaElement->Attribute("FileName");
+            if (pName == "")
+                throw runtime_error("corrupted XML file, no submedia filename");
+            else {
+        //		#ifdef __APPLE__ //added by CF, white spaces are needed under Ubuntu!
+        //			fixWhiteSpace(pName);
+        //		#endif
+                ////this->setFileName(pName);
+            }
+
+            int mid=-1;
+            _pMediaNode->QueryIntAttribute("MediaID", &mid); // If this fails, original value is left as-is
+            if (mid < 0)
+                throw runtime_error("corrupted XML file, wrong submedia ID");
+            else
+                this->setId(mid);
+
+            string pKey ="";
+            pKey = submediaElement->Attribute("Key");
+            if (pKey == "")
+                throw runtime_error("corrupted XML file, no submedia key");
+
+            //ACMedia* sub_media = ACMediaFactory::getInstance().create(typ);
+
+            count_sm++;
+        }
+        // consistency check for segments
+        if (count_sm != nsm)
+            throw runtime_error("<ACMedia::loadXML> inconsistent number of segments");
+    }*/
+
+    return 1;
 }
 
 

@@ -55,7 +55,7 @@ double ACEuclideanDistance::distance(){
 	}
 	int s = V1->size();
 	if (s==0) {
-		cerr << "<ACEuclideanDistance::distance> : empty features" << endl;
+		//cerr << "<ACEuclideanDistance::distance> : empty features" << endl;
 		return 0.0;
 	}
 	double d = 0.0 ;

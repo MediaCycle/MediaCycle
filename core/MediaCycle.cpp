@@ -486,7 +486,7 @@ std::vector<std::string> MediaCycle::getListOfPlugins(){
 }
 
 std::vector<std::string> MediaCycle::getListOfActivePlugins(){
-	return this->mediaLibrary->getListOfActivePlugins();
+    return this->mediaLibrary->getListOfActivePlugins();
 }
 
 void MediaCycle::setClustersMethodPlugin(string pluginName){
@@ -568,7 +568,19 @@ void MediaCycle::setMediaReaderPlugin(std::string pluginName){
 	}
 }
 
-
+#ifdef SUPPORT_MULTIMEDIA
+int MediaCycle::setActiveMediaType(std::string mediaName){
+    int ret =mediaLibrary->setActiveMediaType(mediaName);
+    ACMediaType aMediaType=mediaLibrary->getActiveSubMediaType();
+    ACPreProcessPlugin* preProcessPlugin=pluginManager->getPreProcessPlugin(aMediaType);
+    if (preProcessPlugin) {
+        this->getLibrary()->setPreProcessPlugin(preProcessPlugin);
+    }
+    else
+        this->getLibrary()->setPreProcessPlugin(0);
+    return ret ;
+};
+#endif/def USE_MULTIMEDIA
 
 void MediaCycle::dumpPluginsList(){this->pluginManager->dump();}
 

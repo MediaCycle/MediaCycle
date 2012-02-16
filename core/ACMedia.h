@@ -124,6 +124,7 @@ public:
 	virtual bool extractData(std::string filename) {return false;}
 	virtual ACMediaData* getMediaData()=0;
 	virtual void deleteData(){}
+    virtual void setMediaData(ACMediaData* _data){}
 		
 	// accessors -- these should not be redefined for each media
 	int getWidth() {return width;}
@@ -163,11 +164,18 @@ public:
 	virtual int loadACLSpecific(std::ifstream &library_file) {return -1;}
 	virtual int loadXMLSpecific(TiXmlElement* _pMediaNode) {return -1;}
 
-	
-	// FEATURES computation (import) and segmentation (segment)
+    // import does the following:
+    // 1) load media from file
+    // 2) compute thumbnail
+    // 3) extract features
+    virtual int import(std::string _path, int _mid=0, ACPluginManager *acpl=0, bool _save_timed_feat=false);
+
+    // FEATURES computation (extractFeatures) and segmentation (segment)
 	// these methods are virtual, because each media could have a specific segmentation method
 	// ex: audioSegmentationPlugin : also calculates features...
-	virtual int import(std::string _path, int _mid=0, ACPluginManager *acpl=0, bool _save_timed_feat=false);
+private:
+    virtual int extractFeatures(ACPluginManager *acpl=0, bool _save_timed_feat=false);
+public:
 	virtual int segment(ACPluginManager *acpl, bool _saved_timed_features = false );
 };
 

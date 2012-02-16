@@ -198,6 +198,10 @@ double ACOsgBrowserRenderer::getTime() {
 // adds/removes nodes to the node_renderer
 void ACOsgBrowserRenderer::prepareNodes(int _start) {
 
+    /*if (media_cycle->getBrowser()->getLayout() == AC_LAYOUT_TYPE_NODELINK) {
+        media_group->removeChildren(0,media_group->getNumChildren());
+    }*/
+
 	int start;
 
 	int n = media_cycle->getNumberOfMediaNodes(); //XS was: getLibrarySize();
@@ -316,7 +320,11 @@ void ACOsgBrowserRenderer::updateNodes(double ratio) {
 
 				// UPDATE
 				node_renderer[i]->updateNodes(ratio);
+
+                //media_group->addChild(node_renderer[i]->getNode());
 			}
+            /*else
+                media_group->removeChild(node_renderer[i]->getNode());*/
 		}	
 	}
 
@@ -604,8 +612,6 @@ bool ACOsgBrowserRenderer::addNodes(int _first, int _last){
 		
 		
 		node_renderer.resize(_last);
-		//if (media_cycle->getBrowser()->getLayout() == AC_LAYOUT_TYPE_NODELINK)
-		//link_renderer.resize(_last);
 		distance_mouse.resize(_last);
 
 		ACMediaType media_type;
@@ -674,7 +680,7 @@ bool ACOsgBrowserRenderer::addNodes(int _first, int _last){
 
 				// node_renderer[i]->setActivity(0);
 				node_renderer[i]->prepareNodes();
-				media_group->addChild(node_renderer[i]->getNode());
+               media_group->addChild(node_renderer[i]->getNode());
 			}
 
 			//if (media_cycle->getBrowser()->getLayout() == AC_LAYOUT_TYPE_NODELINK) {

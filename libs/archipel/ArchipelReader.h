@@ -53,10 +53,15 @@ public:
 	std::string getText(void);
 	std::string getArtist(void);
 	std::string getAlbumName(void);
-	std::string getReference(void);
+    std::string getReference(void); // getLaMediathequeReference
 	std::vector<std::string> getTrackTitle(void);
 	std::vector<std::string> getTrackPath(void);
 	std::string getThumbPath(void);
+    //std::string getArtistType(void); // info>type -> ex: solo
+    //std::string getYear(void); // info>year
+    //std::string getLaMediathequeHyperLink(void); // info>link
+    //std::string getProducer(void); // info>producer
+    //std::string getExtra(void); // info>extra
 protected:
 	TiXmlDocument *mDoc;
 	std::string mFileName;
