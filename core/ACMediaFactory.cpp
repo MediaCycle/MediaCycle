@@ -50,6 +50,9 @@
 #if defined (SUPPORT_PDF)
 #include "ACPDF.h"
 #endif //defined (SUPPORT_PDF)
+#if defined (SUPPORT_MULTIMEDIA)
+#include "ACMediaDocument.h"
+#endif //defined (SUPPORT_MULTIMEDIA)
 
 #if defined (SUPPORT_AUDIO)
 #if defined (USE_SNDFILE)
@@ -292,6 +295,11 @@ ACMedia* ACMediaFactory::create(ACMediaType media_type){
 			return new ACText();
 			#endif //defined (SUPPORT_TEXT)
 			break;
+        case MEDIA_TYPE_MIXED:
+            #if defined (SUPPORT_MULTIMEDIA)
+            return new ACMediaDocument();
+            #endif //defined (SUPPORT_PDF)
+            break;
 		default:
 			return 0;
 			break;
@@ -326,6 +334,11 @@ ACMedia* ACMediaFactory::create(ACMedia* media){
 			return new ACText(*((ACText*) media));
 			#endif //defined (SUPPORT_TEXT)
 			break;
+    case MEDIA_TYPE_MIXED:
+        #if defined (SUPPORT_MULTIMEDIA)
+        return new ACMediaDocument(*((ACMediaDocument*) media));
+        #endif //defined (SUPPORT_MULTIMEDIA)
+        break;
 		default:
 			return 0;
 			break;
@@ -410,6 +423,10 @@ ACMediaType ACMediaFactory::guessMediaTypeFromString(std::string keyword){
 	else if(keyword=="text")
 		_type = MEDIA_TYPE_TEXT;
 	#endif //defined (SUPPORT_TEXT)
+    #if defined (SUPPORT_MULTIMEDIA)
+    else if(keyword=="mixed")
+        _type = MEDIA_TYPE_MIXED;
+    #endif //defined (SUPPORT_MULTIMEDIA)
 	else
 		_type = MEDIA_TYPE_NONE;
 	return _type;
@@ -444,9 +461,9 @@ std::string ACMediaFactory::getNormalCaseStringFromMediaType(ACMediaType _media_
 			#endif //defined (SUPPORT_TEXT)
 			break;	
 		case MEDIA_TYPE_MIXED:
-#if defined (SUPPORT_MULTIMEDIA)
+            #if defined (SUPPORT_MULTIMEDIA)
 			smedia="Mixed";
-#endif //defined (SUPPORT_MULTIMEDIA)
+            #endif //defined (SUPPORT_MULTIMEDIA)
 			break;	
 		default:
 			break;
