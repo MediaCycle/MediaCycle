@@ -61,7 +61,7 @@ void ACOsgNodeLinkRenderer::setMediaCycle(MediaCycle *_media_cycle)
 
 osg::ref_ptr<osg::MatrixTransform> ACOsgNodeLinkRenderer::getLink()
 {
-    return link_node
+    return link_node;
 }
 
 void ACOsgNodeLinkRenderer::setNodeIn(ACOsgMediaRenderer* _node)
