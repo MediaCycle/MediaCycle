@@ -78,6 +78,12 @@ ACPluginManager::~ACPluginManager() {
  *    1 if things went smoothly
  */
 int ACPluginManager::addLibrary(std::string aPluginLibraryPath) {
+	
+    for (vector<ACPluginLibrary *>::iterator it=mPluginLibrary.begin();it!=mPluginLibrary.end();it++){
+		if (aPluginLibraryPath==(*it)->getLibraryPath()) {
+			return 1;
+		}
+	}
     DynamicLibrary *lib;
 
     if (!(lib = DynamicLibrary::loadLibrary(aPluginLibraryPath))) {

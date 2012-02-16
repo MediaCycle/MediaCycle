@@ -772,9 +772,8 @@ void ACMediaLibrary::calculateStats() {
 	if (n==1) nn = n;
 	else nn = n-1;*/
 	int nn;
-	if (mt==1) nn = mt;
-	else nn = mt-1; 
-	n = mt;//CF
+	if (n==1) nn = n;
+	else nn = n-1; 
 
 	for(j=0; j<(int)mean_features.size(); j++) {
 		cout << "calculating stats for feature" << j << endl;
