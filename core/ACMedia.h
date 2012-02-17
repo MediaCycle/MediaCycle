@@ -51,7 +51,7 @@ class ACMedia {
 	// note 230210: features_vectors[i] could later be grouped with other features, depending on the configuration file (or the preferences menu)
 protected:
 		
-	int mid;
+    int mid;
 	int parentid; //CF so that segments can be defined as ACMedia having other ACMedia as parents
 	ACMediaType media_type;
 	int height, width;
@@ -60,6 +60,7 @@ protected:
 	std::string filename;
 	std::string filename_thumbnail;
 	std::string label;
+    std::string key; // media document identifier
 	char  **text_tags;
 	char  **hyper_links;
 	std::vector<ACMedia*> segments;
@@ -108,6 +109,8 @@ public:
 	std::string getFileName() { return filename; }
 	void setFileName(std::string s) { filename = s; }
 	void setFileName(const char* c) { std::string s(c); filename = s; }
+    std::string getKey() { return key; }
+    void setKey(std::string k) { key = k; }
 
 	// thumbnail
 	virtual void* getThumbnailPtr()=0; // XS TODO change this
@@ -149,7 +152,7 @@ public:
 	// note : ACL deprecated as of spring 2011 -- but keep it for backward-compatibility (e.g., Dancers!)
 	void fixWhiteSpace(std::string &str);
 	void saveACL(std::ofstream &library_file, int mcsl=0);
-	void saveXML(TiXmlElement* _medias);
+    void saveXML(TiXmlElement* _medias);
 	//int loadACL(std::ifstream &library_file, int mcsl=0);
     	int loadACL(std::string media_path, std::ifstream &library_file, int mcsl=0);
 	void loadXML(TiXmlElement* _pMediaNode);

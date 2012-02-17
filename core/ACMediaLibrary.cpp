@@ -513,8 +513,12 @@ int ACMediaLibrary::openCoreXMLLibrary(TiXmlHandle _rootHandle){
 		string nof = nMediaText->ValueStr();
 		tmp << nof;
 		tmp >> n_loops;
-	}
+    }
 	TiXmlElement* pMediaNode=_rootHandle.FirstChild( "Medias" ).FirstChild().Element();
+    #ifdef SUPPORT_MULTIMEDIA
+    if (!pMediaNode)
+        pMediaNode=_rootHandle.FirstChild( "MediaDocuments" ).FirstChild().Element();
+    #endif
 	if (!pMediaNode)
 		throw runtime_error("corrupted XML file, no medias");
 	else {
@@ -535,6 +539,51 @@ int ACMediaLibrary::openCoreXMLLibrary(TiXmlHandle _rootHandle){
 				media_library.push_back(local_media);
 				// make sure the library knows which id is the last one
 				this->setMediaID(local_media->getId());
+
+                if(this->media_type == MEDIA_TYPE_MIXED){
+
+                    string activeMediaKey ="";
+                    activeMediaKey = pMediaNode->Attribute("ActiveMediaKey");
+                    if (activeMediaKey == "")
+                        throw runtime_error("corrupted XML file, no active submedia defined");
+                    std::cout<<"activeMediaKey"<<activeMediaKey<<std::endl;
+
+                    TiXmlHandle _pMediaNodeHandle(pMediaNode);
+                    TiXmlElement* mediasElement = _pMediaNodeHandle.FirstChild( "Medias" ).Element();
+                    if (!mediasElement)
+                        throw runtime_error("corrupted XML file, no medias in mediadocuments");
+
+                    TiXmlElement* mediaElement = _pMediaNodeHandle.FirstChild( "Medias" ).FirstChild( "Media" ).Element();
+                    for( mediaElement; mediaElement; mediaElement=mediaElement->NextSiblingElement()) {
+                        ACMediaType mtyp;
+                        int mtypi = -1;
+                        mediaElement->QueryIntAttribute("MediaType", &mtypi);
+                        if (mtypi < 0)
+                            throw runtime_error("corrupted XML file, wrong media type");
+                        else {
+                            mtyp = (ACMediaType) mtypi;
+                            ACMedia* local_submedia = ACMediaFactory::getInstance().create(mtyp);
+                            local_submedia->setParentId(local_media->getId());
+                            local_submedia->loadXML(mediaElement);
+                            if (mPreProcessPlugin==NULL)
+                                local_submedia->defaultPreProcFeatureInit();
+                            media_library.push_back(local_submedia);
+                            this->setMediaID(local_submedia->getId());
+
+                            string pKey ="";
+                            pKey = mediaElement->Attribute("Key");
+                            if (pKey == "")
+                                throw runtime_error("corrupted XML file, no key for media in media document");
+                            local_submedia->setKey(pKey);
+                            ACMediaDocument *mediaDoc=static_cast<ACMediaDocument *> (local_media);
+                            mediaDoc->addMedia(pKey,local_submedia);
+
+                            if (activeMediaKey == pKey)
+                                mediaDoc->setActiveSubMedia(pKey);
+                        }
+                    }
+                }
+
 				cnt++;
 			}
 		}
@@ -576,6 +625,8 @@ int ACMediaLibrary::saveXMLLibrary(std::string _path){
 	// we save UNnormalized features
 	//denormalizeFeatures();
 
+    // CF this is not parsed anymore in favor of MediaCycle::saveXMLConfig
+
 	TiXmlDocument MC_doc;
     TiXmlDeclaration* MC_decl = new TiXmlDeclaration( "1.0", "", "" );
 
@@ -584,7 +635,11 @@ int ACMediaLibrary::saveXMLLibrary(std::string _path){
     TiXmlElement* MC_e_root = new TiXmlElement( "MediaCycle" );
     MC_doc.LinkEndChild( MC_e_root );
 
-	TiXmlElement* MC_e_medias = new TiXmlElement( "Medias" );
+    std::string media_identifier = "Medias";
+    if(this->getMediaType() == MEDIA_TYPE_MIXED){
+        media_identifier = "MediaDocuments";
+    }
+    TiXmlElement* MC_e_medias = new TiXmlElement(media_identifier);
     MC_e_root->LinkEndChild( MC_e_medias );
 
 	this->saveCoreXMLLibrary(MC_e_root, MC_e_medias);
@@ -605,12 +660,36 @@ int ACMediaLibrary::saveCoreXMLLibrary( TiXmlElement* _MC_e_root, TiXmlElement* 
 	tmp << n_loops;
 	s_loops = tmp.str();
 
+    int a=0;
+
     TiXmlText* MC_t_nm = new TiXmlText( s_loops );
     MC_e_number_of_medias->LinkEndChild( MC_t_nm );
 
 	// XS TODO iterator
+    std::vector<TiXmlElement*> medias;
+
 	for(int i=0; i<n_loops; i++) {
-		media_library[i]->saveXML(_MC_e_medias);
+        if(this->media_type != MEDIA_TYPE_MIXED){
+            TiXmlElement* media = new TiXmlElement( "Media" );
+            _MC_e_medias->LinkEndChild( media );
+            media_library[i]->saveXML( media);
+        }
+        else{
+            if(media_library[i]->getMediaType() == MEDIA_TYPE_MIXED){
+                TiXmlElement* doc = new TiXmlElement( "MediaDocument" );
+                _MC_e_medias->LinkEndChild( doc );
+                media_library[i]->saveXML( doc );
+
+                medias.push_back( new TiXmlElement( "Medias" ) );
+                doc->LinkEndChild( medias.back() );
+
+            }
+            else{
+                TiXmlElement* media = new TiXmlElement( "Media" );
+                medias.back()->LinkEndChild( media );
+                media_library[i]->saveXML( media );
+            }
+        }
 	}
 }
 

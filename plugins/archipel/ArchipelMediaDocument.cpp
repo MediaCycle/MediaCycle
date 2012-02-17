@@ -145,6 +145,9 @@ int ArchipelMediaDocument::import(std::string _filename, int _mid, ACPluginManag
 				// get info about width, height, mediaData
 				// computes thumbnail, ...
 				// mediaData will be used by the plugin to compute features
+
+               media->setStart(0.0f);// CF dirty hack until large audio files can be imported
+               media->setEnd(1.0f);// CF idem
 				/*if (!media->extractData(media->getFileName())) return 0;
 				if (media->getMediaData()==0){
 					import_ok = 0;

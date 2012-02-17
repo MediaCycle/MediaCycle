@@ -56,11 +56,14 @@ void ACMedia::init() {
         endInt = -1;
 	features_vectors.resize(0);
 	preproc_features_vectors.resize(0);
+    key="";
+    filename="";
 }
 
 ACMedia::~ACMedia() { 
 	filename.clear();
 	filename_thumbnail.clear();
+    key.clear();
 	for (int i=0;i<preproc_features_vectors.size();i++)
 	{
 		if(preproc_features_vectors[i]) delete (preproc_features_vectors[i]);
@@ -128,16 +131,27 @@ void ACMedia::saveACL(ofstream &library_file, int mcsl) {
 	}	
 }
 
-void ACMedia::saveXML(TiXmlElement* _medias){
+void ACMedia::saveXML(TiXmlElement* media){
 	//if ( features_saved_xml || _medias == NULL) return; 
-	if (_medias == NULL) return; 
-	TiXmlElement* media;
-	media = new TiXmlElement( "Media" );  
-	_medias->LinkEndChild( media );  
+    /*if (_medias == NULL) return;
+    TiXmlElement* media;
+    #ifdef SUPPORT_MULTIMEDIA
+    if(this->media_type == MEDIA_TYPE_MIXED)
+        media = new TiXmlElement( "MediaDocument" );
+    else
+    #endif
+        media = new TiXmlElement( "Media" );
+    _medias->LinkEndChild( media );*/
+
+    if (media == NULL) return;
+
 	media->SetAttribute("MediaID", mid);
 	media->SetAttribute("MediaType", media_type);
 	
 	media->SetAttribute("FileName", filename);
+
+    if(key!="")
+        media->SetAttribute("Key", key);
 	
 	saveXMLSpecific(media);
 	
@@ -303,7 +317,7 @@ void ACMedia::loadXML(TiXmlElement* _pMediaNode){
 //		#endif	
 		this->setFileName(pName);
 	}
-	
+
 	int mid=-1;
 	_pMediaNode->QueryIntAttribute("MediaID", &mid); // If this fails, original value is left as-is
 	if (mid < 0)

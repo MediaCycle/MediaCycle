@@ -145,6 +145,8 @@ private:
 	bool computeThumbnail(IplImage* img, int w=0, int h=0);
 	bool computeThumbnailSize(int w_, int h_);
 	void deleteMedia();
+public:
+    int addMedia(std::string key, ACMedia* media);
 protected:
 	int thumbnail_width, thumbnail_height; 
 	osg::ref_ptr<osg::Image> thumbnail;
@@ -155,7 +157,6 @@ protected:
 	int mediaID;
 	void incrementMediaID(){mediaID++ ;}
 	int getMediaID(){return mediaID ;}
-	int addMedia(std::string key, ACMedia* media);
 	std::vector<ACMediaFeatures*> tempVect;
 	std::vector<std::string> tempString;
 	std::vector<std::string> activableMediaKey;

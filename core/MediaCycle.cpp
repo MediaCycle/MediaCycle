@@ -916,7 +916,12 @@ void MediaCycle::saveXMLConfigFile(string _fname) {
 	TiXmlText* MC_t_features_weights = new TiXmlText(sfw.c_str());
 	MC_e_features_weights->LinkEndChild( MC_t_features_weights );
 
-	TiXmlElement* MC_e_medias = new TiXmlElement("Medias");
+    std::string media_identifier = "Medias";
+    if(mediaLibrary->getMediaType() == MEDIA_TYPE_MIXED){
+        media_identifier = "MediaDocuments";
+    }
+    TiXmlElement* MC_e_medias = new TiXmlElement(media_identifier);
+
 	this->mediaLibrary->saveCoreXMLLibrary(MC_e_root, MC_e_medias);
 	MC_e_root->LinkEndChild( MC_e_medias );
 

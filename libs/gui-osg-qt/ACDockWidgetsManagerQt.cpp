@@ -120,22 +120,22 @@ bool ACDockWidgetsManagerQt::addControlDock(ACAbstractDockWidgetQt* dock)
     dockWidgets.resize(dockWidgets.size()+1);
     lastDocksVisibilities.resize(lastDocksVisibilities.size()+1);
 
-    dockWidgets[dockWidgets.size()-1]=dock;
+    dockWidgets.back()=dock;
 
     if( dock->getMediaType() == MEDIA_TYPE_ALL || dock->getMediaType() == media_type || dock->getMediaType() == MEDIA_TYPE_MIXED ){
-        lastDocksVisibilities[lastDocksVisibilities.size()-1]=1;
-        mainWindow->addDockWidget(Qt::LeftDockWidgetArea,dockWidgets[dockWidgets.size()-1]);
-        dockWidgets[dockWidgets.size()-1]->setVisible(true);
-        connect(dockWidgets[dockWidgets.size()-1], SIGNAL(visibilityChanged(bool)), this , SLOT(syncControlToggleWithDocks()));
+        lastDocksVisibilities.back()=1;
+        mainWindow->addDockWidget(Qt::LeftDockWidgetArea,dockWidgets.back());
+        dockWidgets.back()->setVisible(true);
+        connect(dockWidgets.back(), SIGNAL(visibilityChanged(bool)), this , SLOT(syncControlToggleWithDocks()));
     }
     else {
-        lastDocksVisibilities[lastDocksVisibilities.size()-1]=0;
-        dockWidgets[dockWidgets.size()-1]->setVisible(false);
+        lastDocksVisibilities.back()=0;
+        dockWidgets.back()->setVisible(false);
     }
 
-    connect(dockWidgets[dockWidgets.size()-1], SIGNAL(mediaTypeChanged(QString)), mainWindow, SLOT(comboDefaultSettingsChanged(QString)));
+    connect(dockWidgets.back(), SIGNAL(mediaTypeChanged(QString)), mainWindow, SLOT(comboDefaultSettingsChanged(QString)));
 
-    dockWidgets[dockWidgets.size()-1]->autoConnectOSC(true);
+    dockWidgets.back()->autoConnectOSC(true);
 
     return true;
 }
