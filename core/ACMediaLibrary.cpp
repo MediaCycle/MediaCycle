@@ -540,6 +540,7 @@ int ACMediaLibrary::openCoreXMLLibrary(TiXmlHandle _rootHandle){
 				// make sure the library knows which id is the last one
 				this->setMediaID(local_media->getId());
 
+				#ifdef SUPPORT_MULTIMEDIA
                 if(this->media_type == MEDIA_TYPE_MIXED){
 
                     string activeMediaKey ="";
@@ -583,7 +584,7 @@ int ACMediaLibrary::openCoreXMLLibrary(TiXmlHandle _rootHandle){
                         }
                     }
                 }
-
+				#endif
 				cnt++;
 			}
 		}
