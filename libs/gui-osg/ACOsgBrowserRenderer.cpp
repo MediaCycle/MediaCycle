@@ -554,8 +554,6 @@ int ACOsgBrowserRenderer::computeScreenCoordinates(osgViewer::View* view, double
 				distance_mouse[i] = sqrt((screenPoint[0]-mx)*(screenPoint[0]-mx)+(screenPoint[1]-my)*(screenPoint[1]-my));
 				
 				node_renderer[i]->setDistanceMouse(MIN(distance_mouse[i],node_renderer[i]->getDistanceMouse()));
-				if (media_cycle->getBrowser()->getLayout() == AC_LAYOUT_TYPE_NODELINK)
-                    //link_renderer[i]->setDistanceMouse(distance_mouse[i]);
 
 				if (distance_mouse[i]<closest_distance) {
 					closest_distance = distance_mouse[i];
