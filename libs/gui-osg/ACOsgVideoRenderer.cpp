@@ -39,7 +39,9 @@
 
 using namespace osg;
 
-ACOsgVideoRenderer::ACOsgVideoRenderer() {
+ACOsgVideoRenderer::ACOsgVideoRenderer()
+    :ACOsgImageRenderer()
+{
 	media_type = MEDIA_TYPE_VIDEO;
 	image_stream = 0;
 }

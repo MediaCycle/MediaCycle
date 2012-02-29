@@ -48,7 +48,9 @@ namespace fs = boost::filesystem;
 
 using namespace osg;
 
-ACOsgTextRenderer::ACOsgTextRenderer() {
+ACOsgTextRenderer::ACOsgTextRenderer()
+    :ACOsgMediaRenderer()
+{
 	media_type = MEDIA_TYPE_AUDIO;
 	metadata_geode = 0;
 	metadata = 0;

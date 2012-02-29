@@ -50,7 +50,9 @@ namespace fs = boost::filesystem;
 
 using namespace osg;
 
-ACOsgAudioRenderer::ACOsgAudioRenderer() {
+ACOsgAudioRenderer::ACOsgAudioRenderer()
+    :ACOsgMediaRenderer()
+{
 	media_type = MEDIA_TYPE_AUDIO;
 	waveform_geode = 0;
 	curser_geode = 0;
@@ -111,9 +113,9 @@ void ACOsgAudioRenderer::waveformGeode() {
 		
 		width = width / 2;
 		
-		//thumbnail = (float*)media_cycle->getThumbnailPtr(media_index);//CF instead of node_index
-		thumbnail = (float*)media->getThumbnailPtr();//CF instead of node_index
-		
+        //thumbnail = (float*)media_cycle->getThumbnailPtr(media_index);//CF instead of node_index
+        thumbnail = (float*)media->getThumbnailPtr();//CF instead of node_index
+
 		//////////////////////////
 		// samples vertices
 		vertices = new Vec3Array(2*width+2);
@@ -471,7 +473,6 @@ void ACOsgAudioRenderer::updateNodes(double ratio) {
 	const ACMediaNode &attribute = media_cycle->getMediaNode(node_index);
 
 	Matrix T;
-//	Matrix *T2;
 	Matrix Trotate;
 	Matrix curserT;
 
@@ -562,6 +563,11 @@ void ACOsgAudioRenderer::updateNodes(double ratio) {
 				//media_node->removeChild(1, 1);
 			}
 
+            if (!entry_geode){
+                entryGeode();
+                std::cout << "ACOsgAudioRenderer::updateNodes created missing node geode" << std::endl;
+            }
+
 			//CF nodes colored along their relative cluster on in Clusters Mode
 			if (media_cycle->getBrowserMode() == AC_MODE_CLUSTERS){
 				if(cluster_colors.size()>0)
@@ -569,8 +575,8 @@ void ACOsgAudioRenderer::updateNodes(double ratio) {
 				else
 					((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(node_color);
 			}
-			else
-				((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(node_color);
+            else
+                ((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(node_color);
 
 			if (attribute.isSelected()) {
 				//CF color (multiple) selected nodes in black

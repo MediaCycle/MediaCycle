@@ -86,14 +86,10 @@ ACOsgMediaRenderer::ACOsgMediaRenderer() {
 #endif
 	initialized = 0;
 	frac = 0.0f;
-	//ref_ptr//media_node->ref();
-	//ref_ptr//local_group->ref();
 	local_group->addChild(media_node);
 }
 
 ACOsgMediaRenderer::~ACOsgMediaRenderer() {
-	//ref_ptr//media_node->unref();
-	//ref_ptr//local_group->unref();
 	media = 0;// the core will free media files
 	cluster_colors.clear();
 }

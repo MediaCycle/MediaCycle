@@ -640,10 +640,8 @@ void ACOsgCompositeViewQt::translateBrowser(float x, float y){
             return;
         //if (y>sepy) // CF find better check (mouse in widget test?)
 
-
         int loop = media_cycle->getClickedNode();
         //int loop = media_cycle->getClosestNode();//CF to deprecate: adapt to multiple pointers
-        std::cout << "Translate? Node " << loop << " selected" << std::endl;
         if(loop == -1)
         {
             //float refx(0),refy(0);

@@ -43,7 +43,9 @@ using namespace osg;
 
 //#define IMAGE_BORDER
 
-ACOsgImageRenderer::ACOsgImageRenderer() {
+ACOsgImageRenderer::ACOsgImageRenderer()
+    :ACOsgMediaRenderer()
+{
 	media_type = MEDIA_TYPE_IMAGE;
 	node_color = Vec4(0.4f, 0.4f, 0.4f, 1.0f);		
 	image_image = 0;
@@ -288,8 +290,7 @@ void ACOsgImageRenderer::updateNodes(double ratio) {
 	float x, y, z;
 	float zpos = 0.001;
 	
-	//const ACMediaNode &attribute = media_cycle->getMediaNode(node_index);
-	const ACMediaNode &attribute = media_cycle->getNodeFromMedia(media);
+    const ACMediaNode &attribute = media_cycle->getMediaNode(node_index);
 	
 	const ACPoint &p = attribute.getCurrentPosition(), &p2 = attribute.getNextPosition();
 	double omr = 1.0-ratio;
@@ -342,9 +343,8 @@ void ACOsgImageRenderer::updateNodes(double ratio) {
 	float maxdistance = 0.2;
 	float maxscale = 3;//1.5;//CF
 	float minscale = 0.6;				
-	// Apply "rotation" to compensate camera rotation
-	x = omr*p.x + ratio*p2.x;
-	y = omr*p.y + ratio*p2.y;
+    x = media_cycle_view_pos.x;
+    y = media_cycle_view_pos.y;
 	localscale = maxscale - distance_mouse * (maxscale - minscale) / maxdistance ;
 	localscale = max(localscale,minscale);
 	if (localscale>minscale) {
