@@ -1,8 +1,8 @@
 /**
  * @brief ACNeighborhoodsPlugin.cpp
- * @author Thierry Ravet
- * @date 07/04/2011
- * @copyright (c) 2011 – UMONS - Numediart
+ * @author Christian Frisson
+ * @date 29/02/2012
+ * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -35,7 +35,7 @@
 using namespace std;
 
 ACNeighborhoodsPlugin::ACNeighborhoodsPlugin() {
-    this->mMediaType = MEDIA_TYPE_MIXED; // ALL
+    //this->mMediaType = MEDIA_TYPE_MIXED; // ALL
    // this->mPluginType = PLUGIN_TYPE_NONE;
     this->mName = "Neighborhoods";
     this->mDescription = "Plugin for the computation of  neighborhoods";

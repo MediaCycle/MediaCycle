@@ -51,7 +51,9 @@ extern "C" std::vector<std::string> list() {    //returns a string vector contai
 	std::vector<std::string> listPlugin;
 	listPlugin.push_back("ACVisualisationPlugin");
 	listPlugin.push_back("ACPositionsPluginNodeLinkTreeLayout");
+    #ifdef USE_DEBUG
 	listPlugin.push_back("ACNeighborhoodsPluginRandom");
+    #endif
 	listPlugin.push_back("ACNeighborhoodsPluginPareto");
 	listPlugin.push_back("ACNeighborhoodsPluginEuclidean");
 	listPlugin.push_back("ACVisPluginPCA");

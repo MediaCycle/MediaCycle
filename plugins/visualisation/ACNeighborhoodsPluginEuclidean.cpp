@@ -1,8 +1,8 @@
 /**
  * @brief ACNeighborhoodsPluginEuclidean.cpp
- * @author Thierry Ravet
- * @date 26/05/2011
- * @copyright (c) 2011 – UMONS - Numediart
+ * @author Christian Frisson
+ * @date 29/02/2012
+ * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -36,13 +36,12 @@ using namespace arma;
 using namespace std;
 
 ACNeighborhoodsPluginEuclidean::ACNeighborhoodsPluginEuclidean() {
-    this->mMediaType = MEDIA_TYPE_MIXED; // ALL
-    //this->mPluginType = PLUGIN_TYPE_NEIGHBORS_METHOD;
+    this->mMediaType = MEDIA_TYPE_ALL;
     this->mName = "EuclideanNeighborhoods";
     this->mDescription = "Plugin for the computation of Euclidean neighborhoods";
     this->mId = "";
     //local vars
-		lastClickedNodeId = -1;
+    lastClickedNodeId = -1;
 }
 
 ACNeighborhoodsPluginEuclidean::~ACNeighborhoodsPluginEuclidean() {
@@ -52,7 +51,7 @@ void ACNeighborhoodsPluginEuclidean::updateNeighborhoods(ACMediaBrowser* mediaBr
 	//int _clickedloop = mediaBrowser->getClickedLoop();
 	std::cout << "ACNeighborhoodsPluginEuclidean::updateNeighborhoods" << std::endl;
 	if (mediaBrowser->getUserLog()->getLastClickedNodeId() == -1) {	 
-		mediaBrowser->getUserLog()->dump();
+        //mediaBrowser->getUserLog()->dump();
 		mediaBrowser->getUserLog()->addRootNode(mediaBrowser->getReferenceNode(), 0); // 0
 		mediaBrowser->getUserLog()->clickNode(mediaBrowser->getReferenceNode(), 0);
 		lastClickedNodeId = 0;
@@ -85,14 +84,11 @@ void ACNeighborhoodsPluginEuclidean::updateNeighborhoods(ACMediaBrowser* mediaBr
 		ucolvec sortRank_v = sort_index(dist_v);
 		std::cout << "sortRank_v = " << sortRank_v(0) << " " << sortRank_v(1) << " " << sortRank_v(2) << std::endl;
 		for (int k=1; k<10; k++){ // to avoid returning the request itself (k=1)
-			mediaBrowser->getUserLog()->addNode(lastClickedNodeId, sortRank_v(k), 0);
+            mediaBrowser->addNode(lastClickedNodeId, sortRank_v(k), 0);
 		}
-		mediaBrowser->getUserLog()->dump();
+        //mediaBrowser->getUserLog()->dump();
 	}
-	
-	
 }
-
 
 void ACNeighborhoodsPluginEuclidean::extractDescMatrix(ACMediaBrowser* mediaBrowser, mat &desc_m, rowvec &weight_v){
   vector<ACMedia*> loops = mediaBrowser->getLibrary()->getAllMedia();

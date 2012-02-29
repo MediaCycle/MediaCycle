@@ -458,8 +458,6 @@ ACBrowserMode MediaCycle::getBrowserMode() {return mediaBrowser->getMode();}
 void MediaCycle::setBrowserMode(ACBrowserMode _mode) {mediaBrowser->setMode(_mode);}
 
 bool MediaCycle::changeBrowserMode(ACBrowserMode _mode){
-// XS TODO : this is temporary
-// must find a good way to change browsing mode, this switch is clumsy
 	this->mediaBrowser->switchMode(_mode);
 	return true;
 };

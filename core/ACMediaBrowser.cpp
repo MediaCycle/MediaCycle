@@ -139,6 +139,7 @@ void ACMediaBrowser::clean(){
 	mState = AC_IDLE;
 	mLayout = AC_LAYOUT_TYPE_NONE;
 	mMode = AC_MODE_CLUSTERS; // XS why not NONE ?
+    mModeChanged = false;
 
 	mLabelAttributes.clear(); // XS leave it like this or also make a tree ?
 	nbDisplayedLabels = 0;
@@ -151,8 +152,8 @@ void ACMediaBrowser::clean(){
 	this->resetNavigation();
 	this->resetCamera();
 
-	if (mUserLog) {
-		mUserLog->dump();
+    if (mUserLog) {
+        //mUserLog->dump();
 		mUserLog->clean();
 	}
 	this->resetPointers();
@@ -415,7 +416,6 @@ int ACMediaBrowser::getNumberOfMediaNodes(){
 			break;
 	}
 	//std::cout << "mLoopAttributes.size() " << mLoopAttributes.size() << " mUserLog->getSize() " << mUserLog->getSize() << std::endl;
-	_n = mLoopAttributes.size();//CF this is not normal, inconsistency in OSG
 	return _n;
 
 } // XS TODO getsize; this should be the same as mLibrary->getSize(), but this way it is more similar to getNumberOfLabels // CF not true in non-explatory mode (one loop can be displayed more than once at a time)
@@ -1533,17 +1533,63 @@ vector<int>* ACMediaBrowser::getNeedsActivityUpdateMedia() {
 }
 
 ACMediaNode& ACMediaBrowser::getMediaNode(int i) {
-// XS TODO check on bounds
-// XS TODO mLoopAttributes is not necessarily a vector anymore --> tree
-	return mLoopAttributes[i];
+/*    switch (mMode){
+        case AC_MODE_CLUSTERS:
+            {*/
+                if(i>=0 && i<mLoopAttributes.size())
+                    return mLoopAttributes[i];
+                else
+                    std::cerr << "ACMediaBrowser::getMediaNode: index " << i << " outside bounds (clusters mode)" << std::endl;
+/*            }
+            break;
+        case AC_MODE_NEIGHBORS:
+            {
+                if(this->mUserLog){
+                    if(i>=0 && i<mUserLog->getSize())
+                        return mUserLog->getNodeFromId(i);
+                    else
+                        std::cerr << "ACMediaBrowser::getMediaNode: index " << i << " outside bounds (neighbors mode)" << std::endl;
+                }
+                else
+                    std::cerr << "ACMediaBrowser::getMediaNode: no user log available" << std::endl;
+            }
+            break;
+        default:
+            cerr << "unknown browser mode: " << mMode << endl;
+            break;
+    }*/
 }
 
 ACMediaNode& ACMediaBrowser::getNodeFromMedia(ACMedia* _media) {
-	// XS TODO check on bounds
-	// XS TODO mLoopAttributes is not necessarily a vector anymore --> tree
-	//CF needs testing
-	if(_media->getId() >-1)
-		return mLoopAttributes[_media->getId()];
+   //if(_media->getId() >-1)
+    //    return this->getMediaNode(_media->getId()); // mLoopAttributes[_media->getId()];
+    int i = _media->getId();
+
+/*     switch (mMode){
+        case AC_MODE_CLUSTERS:
+            {*/
+                if(i>=0 && i<mLoopAttributes.size())
+                    return mLoopAttributes[i];
+                else
+                    std::cerr << "ACMediaBrowser::getNodeFromMedia: index " << i << " outside bounds (clusters mode)" << std::endl;
+            /*}
+            break;
+        case AC_MODE_NEIGHBORS:
+            {
+                if(this->mUserLog){
+                    if(i>=0 && i<mUserLog->getSize())
+                        return mUserLog->getNodeFromMediaId(i);
+                    else
+                        std::cerr << "ACMediaBrowser::getNodeFromMedia: index " << i << " outside bounds (neighbors mode)" << std::endl;
+                }
+                else
+                    std::cerr << "ACMediaBrowser::getNodeFromMedia: no user log available" << std::endl;
+            }
+            break;
+        default:
+            cerr << "unknown browser mode: " << mMode << endl;
+            break;
+    }*/
 }
 
 int ACMediaBrowser::getNumberOfPointers() {
@@ -1691,6 +1737,35 @@ void ACMediaBrowser::initializeNodes(ACBrowserMode _mode) { // default = AC_MODE
 	}
 }
 
+ACUserLog* ACMediaBrowser::getUserLog()
+{
+    return mUserLog;
+}
+
+long int ACMediaBrowser::addNode(long int _parentId, long int _mediaId, int _clickTime)
+{
+    if(this->mMode == AC_MODE_NEIGHBORS){
+        if(this->mUserLog){
+            long int nodeId = -1;
+            nodeId = this->mUserLog->addNode(_parentId, _mediaId, _clickTime);
+            /*int librarySize = mLibrary->getSize();
+            if( _mediaId > librarySize){
+                std::cerr << "ACMediaBrowser::addNode Trying to add neighbor node beyond the library size" << std::endl;
+            }*/
+            /*if (nodeId == mLoopAttributes.size()){
+                ACMediaNode mn(0,_mediaId, _clickTime);
+                mLoopAttributes.push_back(mn);
+            }*/
+            /*else
+                std::cerr << "ACMediaBrowser::addNode error: couldn't create related media node." << std::endl;*/
+        }
+        else
+            std::cerr << "ACMediaBrowser::addNode error: no user log." << std::endl;
+    }
+    else
+        std::cerr << "Currently nodes can be added only in neighbors mode." << std::endl;
+}
+
 // XS 260310 new way to manage update of clusters, positions, neighborhoods, ...
 // SD 2010 OCT - removed severa lines of codes, as was duplicate with updateClusters and updateNextPositions
 void ACMediaBrowser::updateDisplay(bool animate, int needsCluster) {
@@ -1732,33 +1807,30 @@ void ACMediaBrowser::switchMode(ACBrowserMode _mode){
 						//CF do we have to reset the referent node? mUserLog->addRootNode( mReferenceNode , 0); //CF change click
 						//(2nd arg)!, use LastClickedNode instead of ReferenceNode?
 
-						//CF 1) bring the nodes to the center
+                        //CF 1) Bring the nodes to the center
                        ACPoint p;
                        p.x = 0;
                        p.y = 0;
                        p.z = 0;
-						for (ACMediaNodes::iterator node = mLoopAttributes.begin(); node != mLoopAttributes.end(); ++node){
-							//(*node).setDisplayed (false);
+                        for (ACMediaNodes::iterator node = mLoopAttributes.begin(); node != mLoopAttributes.end(); ++node){
                           (*node).setCurrentPosition(p);
                           (*node).setNextPosition(p,t);
 						}
-                      this->updateDisplay(true);
+                        this->updateDisplay(true);//this->updateNextPositions();
 
-                      /*this->setState(AC_CHANGING);
-                      this->commitPositions();
-                      //this->setNeedsDisplay(true);
-                      this->updateDisplay(true);*/
-
-						//CF 2) hide all nodes, change mode and make the reference node appear
+                        //CF 2) Hide all nodes
 						for (ACMediaNodes::iterator node = mLoopAttributes.begin(); node != mLoopAttributes.end(); ++node){
                             (*node).setDisplayed(false);
 						}
-                      this->updateDisplay(true);
+                        this->updateDisplay(true);//this->updateNextPositions();
 
-						this->setMode(_mode);
+                      //CF 3) Notify the browsing mode change and make the reference node appear
+                      this->setMode(_mode);
+                      this->setModeChanged(true);
                       this->updateDisplay(true);
+                      //this->setModeChanged(false);// CF done by the browser renderer until we implement signal/slots
 
-						//CF 3) expand the first branch at the reference node
+                        //CF 4) Expand the first branch at the reference node
 						mUserLog->clickNode(0,0);//CF check if the ref node is correct everytime this way (1 arg), change clicktime (2nd arg)
 						this->updateDisplay(true);
 					}
@@ -1773,31 +1845,36 @@ void ACMediaBrowser::switchMode(ACBrowserMode _mode){
 		case AC_MODE_NEIGHBORS:
 			switch ( _mode ){
 				case AC_MODE_CLUSTERS:
+                {
 					//CF 1) Move all nodes to the center
-					ACPoint p;
-					for (ACMediaNodes::iterator node = mLoopAttributes.begin(); node != mLoopAttributes.end(); ++node){
-						p.x = 0;
-						p.y = 0;
-						p.z = 0;
-						(*node).setNextPosition(p, t);
-					}
-					/* CF
-					this->setState(AC_CHANGING);
-					this->setNeedsDisplay(true);
-					 */
-					this->updateDisplay(true);
+                   mUserLog->wrapToOrigin();
+                   this->updateDisplay(true);//this->updateNextPositions();
 
-					//CF 2) Recreate the user log, links should thus disappear
-					delete mUserLog;
-                  mUserLog = 0;
-					mUserLog = new ACUserLog();
-
-					//CF 3) Change the mode and display all the nodes
+                    //CF 2) Notify the browsing mode change
 					this->setMode(_mode);
+                   this->setModeChanged(true);
+                   this->updateDisplay(true);
+
+                    //CF 3) Recreate the user log, links should thus disappear
+                    delete mUserLog;
+                    mUserLog = 0;
+                    mUserLog = new ACUserLog();
+
+                    //CF 4) Display all the nodes from the center
+                    ACPoint p;
+                    p.x = 0;
+                    p.y = 0;
+                    p.z = 0;
 					for (ACMediaNodes::iterator node = mLoopAttributes.begin(); node != mLoopAttributes.end(); ++node){
-						(*node).setDisplayed (true);
+                        (*node).setDisplayed (true);
+                        (*node).setCurrentPosition(p);
+                        (*node).setNextPosition(p,t);
 					}
-					this->updateDisplay(true);
+                    //this->updateNextPositions();
+
+                    //CF 5) Display all the nodes clustered
+                    this->updateDisplay(true);
+               }
 					break;
 				default:
 					cerr << "unknown browser mode: " << mMode << endl;

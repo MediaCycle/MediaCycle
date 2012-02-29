@@ -331,6 +331,12 @@ void ACOsgCompositeViewQt::updateGL()
 		}
 		media_cycle->updateState();
 		frac = media_cycle->getFrac();
+
+        //CF this is a temporary solution until we implement signals/slots in the core
+        if(media_cycle->getBrowser()->getModeChanged()){
+            //std::cout << "ACOsgCompositeViewQt::updateGL intercepted browsing mode change" << std::endl;
+            browser_renderer->clean();
+        }
 	}
 
 	if (!media_cycle->getNeedsDisplay()) {
@@ -630,12 +636,14 @@ void ACOsgCompositeViewQt::translateBrowser(float x, float y){
     if (media_cycle->hasBrowser())
     {
         // CF don't translate when in the timeline
-        if (y>sepy) // CF find better check (mouse in widget test?)
+        if (!( (y >= height() - ( browser_view->getCamera()->getViewport()->height() + browser_view->getCamera()->getViewport()->y() ) ) && (y <= height() - ( browser_view->getCamera()->getViewport()->y() + septhick) ))) // if clicked on browser view far enough of the central border
             return;
+        //if (y>sepy) // CF find better check (mouse in widget test?)
+
 
         int loop = media_cycle->getClickedNode();
         //int loop = media_cycle->getClosestNode();//CF to deprecate: adapt to multiple pointers
-        //std::cout << "node " << loop << " selected" << std::endl;
+        std::cout << "Translate? Node " << loop << " selected" << std::endl;
         if(loop == -1)
         {
             //float refx(0),refy(0);

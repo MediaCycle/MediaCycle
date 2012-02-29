@@ -100,7 +100,7 @@ void ACMediaNode::setCurrentPosition(ACPoint p) {
 }
 
 void ACMediaNode::setNextPosition(ACPoint p, double t) {
-	changed = 1;
+    changed = 1;
 	nextPos = p;
 	nextPosTime = t;
 }

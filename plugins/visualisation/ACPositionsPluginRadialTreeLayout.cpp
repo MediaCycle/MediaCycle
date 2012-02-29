@@ -53,8 +53,7 @@ ACPositionsPluginRadialTreeLayout::ACPositionsPluginRadialTreeLayout()
 : DEFAULT_RADIUS(50), MARGIN(30), m_maxDepth(0),m_radiusInc(DEFAULT_RADIUS),
 	m_theta1(0.0f), m_theta2(m_theta1 + 2*PI), m_setTheta(false), m_autoScale(true),
 	m_prevRoot(-1) {
-    this->mMediaType = MEDIA_TYPE_MIXED; // ALL
-    //this->mPluginType = PLUGIN_TYPE_NEIGHBORS_POSITIONS;
+    this->mMediaType = MEDIA_TYPE_ALL;
     this->mName = "RadialTreeLayoutPositions";
     this->mDescription = "Plugin for the computation of positions and layout for a radial node-link tree layout";
     this->mId = "";
@@ -71,11 +70,10 @@ int ACPositionsPluginRadialTreeLayout::initialize() {
 }*/
 
 void ACPositionsPluginRadialTreeLayout::updateNextPositions(ACMediaBrowser* _mediaBrowser) {
-	std::cout << "ACPositionsPluginRadialTreeLayout::updateNextPositions" << std::endl;
+    //std::cout << "ACPositionsPluginRadialTreeLayout::updateNextPositions" << std::endl;
 
-	if (mediaBrowser == 0){
-		mediaBrowser = _mediaBrowser;
-	}
+    mediaBrowser = _mediaBrowser;
+
 	if (!(mediaBrowser->getUserLog()->isEmpty()))
 	{
 		mediaBrowser->setLayout(AC_LAYOUT_TYPE_NODELINK);
@@ -121,7 +119,7 @@ void ACPositionsPluginRadialTreeLayout::updateNextPositions(ACMediaBrowser* _med
 			int pn = mediaBrowser->getUserLog()->getParentFromNodeId(n);
 			p = mediaBrowser->getMediaNode(n).getCurrentPosition();
 			if ( pn > 0 && p.x == 0.0f && p.y == 0.0f)
-				mediaBrowser->getMediaNode(n).setCurrentPosition(mediaBrowser->getMediaNode(pn).getCurrentPosition());
+                mediaBrowser->getMediaNode(n).setCurrentPosition(mediaBrowser->getMediaNode(pn).getCurrentPosition());//mediaBrowser->getMediaNode(n).setCurrentPosition(mediaBrowser->getUserLog()->getNodeFromMediaId(pn).getCurrentPosition());
 			
 			p.x = m_nodeParams[n]->getX()/150;
 			p.y = -m_nodeParams[n]->getY()/150;
@@ -283,7 +281,7 @@ vector<int> ACPositionsPluginRadialTreeLayout::sortedChildren(int n)
 
 void ACPositionsPluginRadialTreeLayout::layout(int n, double r, double theta1, double theta2)
 {
-	std::cout << "ACPositionsPluginRadialTreeLayout::updateNextPositions::layout node " << n << std::endl;
+    //std::cout << "ACPositionsPluginRadialTreeLayout::updateNextPositions::layout node " << n << std::endl;
 	double dtheta  = (theta2-theta1);
 	double dtheta2 = dtheta / 2.0;
 	double width = getParams(n)->getWidth();
@@ -300,7 +298,7 @@ void ACPositionsPluginRadialTreeLayout::layout(int n, double r, double theta1, d
 			layout(c, r+m_radiusInc, theta1 + nfrac*dtheta, theta1 + (nfrac+cfrac)*dtheta);
 		}
 		setPolarLocation(c,r, theta1 + nfrac*dtheta + cfrac*dtheta2);
-		std::cout<< "setPolarLocation(c:"<<c<<",r:"<<r<<" theta1 + nfrac*dtheta + cfrac*dtheta2 " << theta1 + nfrac*dtheta + cfrac*dtheta2 << " "<<std::endl;
+        //std::cout<< "setPolarLocation(c:"<<c<<",r:"<<r<<" theta1 + nfrac*dtheta + cfrac*dtheta2 " << theta1 + nfrac*dtheta + cfrac*dtheta2 << " "<<std::endl;
 		cp->setAngle(cfrac*dtheta);
 		nfrac += cfrac;
 	}	

@@ -181,6 +181,15 @@ void ACBrowserControlsCompleteDockWidgetQt::updatePluginsSettings()
             media_cycle->changeClustersPositionsPlugin("Archipel Atoll");
         }
     }
+
+    if(this->media_cycle){
+        if(this->media_cycle->hasBrowser()){
+            if ( media_cycle->getBrowserMode() == AC_MODE_CLUSTERS)
+                ui.radioButtonClusters->setChecked(true);
+            else if ( media_cycle->getBrowserMode() == AC_MODE_NEIGHBORS)
+                ui.radioButtonNeighbors->setChecked(true);
+        }
+    }
 }
 
 void ACBrowserControlsCompleteDockWidgetQt::resetPluginsSettings()
@@ -395,6 +404,14 @@ void ACBrowserControlsCompleteDockWidgetQt::resizePluginList(){
         ui.groupBoxSimilarity->setMinimumHeight(64);
         ui.groupBoxSimilarity->setFixedHeight(64);
     }
+
+    ui.dockWidgetContents->setMinimumHeight(
+        ui.groupBoxSimilarity->minimumHeight()
+        + ui.groupBoxClusters->minimumHeight()
+        + ui.groupBoxNeighbors->minimumHeight()
+        + ui.widgetModes->minimumHeight()
+        + ui.widgetNavigation->minimumHeight()
+    );
 
     ui.dockWidgetContents->adjustSize();
     ui.verticalLayoutWidget->adjustSize();

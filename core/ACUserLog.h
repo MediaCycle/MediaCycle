@@ -55,13 +55,15 @@ public:
 	void addRootNode(long int _mediaId, int _clickTime);
 	long int addNode(long int _parentId, long int _mediaId, int _clickTime);
 	ACMediaNode& getNodeFromId(long int _nodeId);
+    ACMediaNode& getNodeFromMediaId(long int _mediaId);
 	long int getMediaIdFromNodeId(long int _nodeId);
 	void clickNode(long int _nodeId, long int _clickTime);
-	int getSize() {return userLogTree.size();};
-	int getMaxDepth() {return userLogTree.max_depth();};
-	bool isEmpty() {return userLogTree.empty();};
-	int getLastClickedNodeId(){return mLastClickedNodeId;};
-	void setLastClickedNodeId(long int id){mLastClickedNodeId=id;};
+    int getSize();
+    int getDepthAtNode(long int _nodeId);
+    int getMaxDepth();
+    bool isEmpty();
+    int getLastClickedNodeId();
+    void setLastClickedNodeId(long int id);
  	int getSpanAtDepth(int _depth);
 	int getChildCountAtNodeId(long int _nodeId);
 	int getPreviousSiblingFromNodeId(long int _nodeId);
@@ -69,8 +71,9 @@ public:
 	int getFirstChildFromNodeId(long int _nodeId);
 	int getLastChildFromNodeId(long int _nodeId);
 	int getParentFromNodeId(long int _nodeId);
-	const tree<ACMediaNode> getTree() const {return userLogTree;} //CF should be const?
+    tree<ACMediaNode> getTree();
 	int getNthChildAtNodeId(long int _nodeId,long int _nthChild);
+    void wrapToOrigin();
 	void dump();
 	void clean();
 

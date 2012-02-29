@@ -150,6 +150,10 @@ public:
 	void setNeedsDisplay(bool val) 				{ mNeedsDisplay = val; }
 	bool getNeedsDisplay() const				{ return mNeedsDisplay; }
 
+    // to tell if the mode has just changed
+    void setModeChanged(bool val) 				{ mModeChanged = val; }
+    bool getModeChanged() const				{ return mModeChanged; }
+
 	// Update audio engine sources
 	void setNeedsActivityUpdateLock(int i);
 	void setNeedsActivityUpdateAddMedia(int loop_id);
@@ -289,7 +293,8 @@ public:
 	// NB: Proximity Grid moved to plugin
 
 	// == User Log
-	ACUserLog* getUserLog(){return mUserLog;};
+    ACUserLog* getUserLog();
+    long int addNode(long int _parentId, long int _mediaId, int _clickTime);
 
 	// == XS 260310 new way to manage update of clusters, positions, neighborhoods, ...
 	void updateDisplay(bool animate=false, int needsCluster=1);//, bool neighborhoods=true);
@@ -345,6 +350,7 @@ protected:
 	int					mLastSelectedNode;
 
 	bool 				mNeedsDisplay;
+    bool 				mModeChanged;
 	//bool 				mNeedsActivityUpdate;
 	vector<int>			mNeedsActivityUpdateMedia;
 	pthread_mutex_t		activity_update_mutex;

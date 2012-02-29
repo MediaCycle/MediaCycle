@@ -1,8 +1,8 @@
 /**
  * @brief ACNeighborhoodsPluginPareto.cpp
- * @author Thierry Ravet
- * @date 26/05/2011
- * @copyright (c) 2011 – UMONS - Numediart
+ * @author Christian Frisson
+ * @date 29/02/2012
+ * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -35,12 +35,11 @@ using namespace arma;
 using namespace std;
 
 ACNeighborhoodsPluginPareto::ACNeighborhoodsPluginPareto() {
-    this->mMediaType = MEDIA_TYPE_MIXED; // ALL
-    //this->mPluginType = PLUGIN_TYPE_NEIGHBORS_METHOD;
+    this->mMediaType = MEDIA_TYPE_ALL;
     this->mName = "ParetoNeighborhoods";
     this->mDescription = "Plugin for the computation of Pareto neighborhoods";
     this->mId = "";
-		lastClickedNodeId = -1;	
+    lastClickedNodeId = -1;
     //local vars
 }
 
@@ -84,9 +83,9 @@ void ACNeighborhoodsPluginPareto::updateNeighborhoods(ACMediaBrowser* mediaBrows
 			nbItems = selPos2_v.n_rows;
 			
 		for (int k=0; k<nbItems; k++){
-			mediaBrowser->getUserLog()->addNode(lastClickedNodeId, selPos_v(selPos2_v(k)), 0);
+            mediaBrowser->addNode(lastClickedNodeId, selPos_v(selPos2_v(k)), 0);
 		}
-		mediaBrowser->getUserLog()->dump();
+        //mediaBrowser->getUserLog()->dump();
 	}	
 }
 

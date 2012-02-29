@@ -120,8 +120,8 @@ class ACPositionsPluginNodeLinkTreeLayout : public ACNeighborPositionsPlugin {
 		//void updateLayout(ACOsgBrowserRenderer*, double ratio){};
 	
 	protected:
-		ACMediaBrowser* mediaBrowser;
-		ACPositionsPluginNodeLinkTreeOrientation    m_orientation;  // the orientation of the tree
+        ACMediaBrowser* mediaBrowser;
+        ACPositionsPluginNodeLinkTreeOrientation    m_orientation;  // the orientation of the tree
 		double m_bspace;   // the spacing between sibling nodes
 		double m_tspace;  // the spacing between subtrees
 		double m_dspace;  // the spacing between depth levels

@@ -87,7 +87,7 @@ void ACMultiMediaCycleOsgQt::mediacycleCallback(const char* message)
 		send = "";
 		emit mediacycle_message_changed(QString(send.c_str()));
 		emit loading_finished();
-                this->updateLibrary();
+       this->updateLibrary();
 	}
 	
 	if(mess.find("importing_media_",0)!=string::npos){
@@ -111,7 +111,7 @@ void ACMultiMediaCycleOsgQt::mediacycleCallback(const char* message)
 					std::cerr << "ACMediaCycleOsgQt: wrong dir size"  << std::endl;
 				if(media_id != -1 && dir_size != -1){
 					std::cout << std::endl << std::endl << "importing media " << media_id << "/" << (dir_size-1) << std::endl;
-					//if(media_id==1)//TR The first file has not necessary the good media type
+                    //if(media_id==1)//TR The first file has not necessary the good media type
                     if(media_cycle->getLibrary()->getParentIds().size()==1){
                         dockWidgetsManager->updatePluginsSettings();
                     }
@@ -261,6 +261,8 @@ ACMultiMediaCycleOsgQt::~ACMultiMediaCycleOsgQt(){
 
 void ACMultiMediaCycleOsgQt::setMediaType(ACMediaType _mt)
 {
+    if(this->media_type != _mt)
+        this->clean(); //CF this ensures that the browser is cleaned at every media type change, and kept when adding new media files of the same type
     this->media_type = _mt;
     dockWidgetsManager->setMediaType(_mt);
 }
@@ -401,6 +403,7 @@ bool ACMultiMediaCycleOsgQt::readXMLConfig(string _filename){
 			int bm; // ACBrowserMode
 			tmp >> bm;
 			this->setBrowserMode(ACBrowserMode (bm));
+            //CF todo propagate to docks
 		}
 		else{
 			throw runtime_error("corrupted XML file, no browser mode");
@@ -1174,7 +1177,7 @@ void ACMultiMediaCycleOsgQt::on_actionClean_triggered(bool checked) {
 }
 
 void ACMultiMediaCycleOsgQt::clean(bool _updategl){
-	if (! hasMediaCycle()) return;
+    if(!media_cycle) return;
     // need to turn all sounds off before leaving
 	// do this before cleaning library !!
 #if defined (SUPPORT_AUDIO)
@@ -1323,7 +1326,6 @@ void ACMultiMediaCycleOsgQt::changeMediaType(ACMediaType _media_type){
 		audio_engine->setMediaCycle(media_cycle);
 		audio_engine->startAudioEngine();
 		compositeOsgView->setAudioEngine(audio_engine);
-
 	}
 #endif //defined (SUPPORT_AUDIO)
 	this->media_cycle->changeMediaType(_media_type);
