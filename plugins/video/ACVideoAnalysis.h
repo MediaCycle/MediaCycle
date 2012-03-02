@@ -119,6 +119,7 @@ public:
     void computeBlobsUL(const cv::Mat& bg_img = cv::Mat(), bool merge_blobs = true, int big_blob = 200, int small_blob = 0);
     //   - general (not on blobs)
     void computeOpticalFlow();
+    void computeOpticalFlow2();
 
     void computeContractionIndices();
     void computeBoundingBoxRatios();

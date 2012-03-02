@@ -91,6 +91,8 @@ const string videodir = "/Users/xavier/numediart/Project7.3-DancersCycle/VideosS
 
 //const string video_test_file= "/Users/xavier/Movies/Bre-Room132AnimationFlipBooks925_64kb.mp4";
 const string video_test_file= "/home/xavier/Desktop/Videos_B_Delcourt_Qt_mjpeg_320x240/B_Delcourt_MVI_1561.mov";
+//const string video_test_file= "/usr/local/share/mediacycle/data/video/001011-mencoded.mov";
+//const string video_test_file= "/usr/local/share/mediacycle/data/video/sm001011_mencoded.avi";
 //const string video_test_file= "/usr/local/share/mediacycle/data/video/small/sm001022.mov"; //-mencoded.mov";
 //const string video_test_file= "/Users/xavier/numediart/Project12.4-13.1-MediaBlender/test/video/elephantsdream-traveling.mov";
 const string tmp_video_file_out = "/Users/xavier/tmp/toto.mov";
@@ -350,8 +352,13 @@ void test_video_hu_moments(std::string full_video_path, string bg_img_file){
 
 void test_optical_flow(std::string full_video_path){
 	ACVideoAnalysis* V = new ACVideoAnalysis(full_video_path);
-	//XS TODO port to 2.*
 	V->computeOpticalFlow();
+	delete V;
+}
+
+void test_optical_flow2(std::string full_video_path){
+	ACVideoAnalysis* V = new ACVideoAnalysis(full_video_path);
+	V->computeOpticalFlow2();
 	delete V;
 }
 
@@ -614,13 +621,209 @@ bool test_rigid_transform(string s){
 }
 #endif //CV_MIN_VERSION_REQUIRED(2,3,0)
 
-void test_xml2acl(string s){
-	MediaCycle* mediacycle;
-	mediacycle = new MediaCycle(MEDIA_TYPE_VIDEO);
-	mediacycle->importXMLLibrary(s);
-	mediacycle->saveACLLibrary("/Users/xavier/numediart/Project7.3-DancersCycle/02.acl");
-	delete mediacycle;
+void test_xml2acl(string s) {
+    MediaCycle* mediacycle;
+    mediacycle = new MediaCycle(MEDIA_TYPE_VIDEO);
+    mediacycle->importXMLLibrary(s);
+    mediacycle->saveACLLibrary("/Users/xavier/numediart/Project7.3-DancersCycle/02.acl");
+    delete mediacycle;
 }
+
+void test_optical_flow_Farneback() {
+    int scale = 5;
+
+    cvNamedWindow("vel", 1);
+    cvNamedWindow("image1", 1);
+    cvNamedWindow("image2", 1);
+
+    CvSize isize = cvSize(80, 80);
+    CvSize vsize = cvSize(isize.width * scale, isize.height * scale);
+    IplImage *image1 = cvCreateImage(isize, 8, 1);
+    IplImage *image2 = cvCreateImage(isize, 8, 1);
+    IplImage *velx = cvCreateImage(isize, IPL_DEPTH_32F, 1);
+    IplImage *vely = cvCreateImage(isize, IPL_DEPTH_32F, 1);
+    IplImage *vel = cvCreateImage(vsize, 8, 3);
+    IplImage *flow = cvCreateImage(isize, IPL_DEPTH_32F, 2);
+
+    int sim = 0;
+    for (;;) {
+        if (sim * 4 > isize.width * 3 / 4)
+            sim = 0;
+        CvPoint pts1 = {sim * 1, 30};
+        CvPoint pts2 = {pts1.x + 4, pts1.y + 4};
+        cvZero(image1);
+        cvRectangle(image1, pts1, pts2, CV_RGB(255, 255, 255), -1);
+        pts1.x += 1;
+        pts2.x += 1;
+        cvZero(image2);
+        cvRectangle(image2, pts1, pts2, CV_RGB(255, 255, 255), -1);
+        sim++;
+
+        cv::Mat im1 = cv::cvarrToMat(image1), im2 = cv::cvarrToMat(image2);
+        cv::Mat _flow = cv::cvarrToMat(flow);
+        cv::calcOpticalFlowFarneback(im1, im2, _flow, 0.5, 2, 5, 2, 7, 1.5, cv::OPTFLOW_FARNEBACK_GAUSSIAN);
+        //cvCalcOpticalFlowFarneback(image1, image2, flow, 0.5, 1, 5, 2, 7, 1.5, 0);
+        // icvCalcOpticalFlowBBW( im1, im2, _flow, 1, 1, 1, 0 );
+        {
+            for (int y = 0; y < flow->height; y++) {
+                float* vx = (float*) (velx->imageData + velx->widthStep * y);
+                float* vy = (float*) (vely->imageData + vely->widthStep * y);
+                const float* f = (const float*) (flow->imageData + flow->widthStep * y);
+                for (int x = 0; x < flow->width; x++) {
+                    vx[x] = f[2 * x];
+                    vy[x] = f[2 * x + 1];
+                }
+            }
+        }
+
+        CvPoint2D64f ave = {0, 0};
+        cvZero(vel);
+        pts1.x *= scale;
+        pts1.y *= scale;
+        pts2.x *= scale;
+        pts2.y *= scale;
+        cvRectangle(vel, pts1, pts2, CV_RGB(255, 255, 255), 1);
+        for (int y = 0; y < image1->height; y++)
+            for (int x = 0; x < image1->width; x++) {
+                double dx = cvGetReal2D(velx, y, x);
+                double dy = cvGetReal2D(vely, y, x);
+                CvPoint p = cvPoint(x * scale, y * scale);
+                cvLine(vel, p, p, cvScalar(170, 170, 170));
+
+                ave.x += dx;
+                ave.y += dy;
+                double l = sqrt(dx * dx + dy * dy);
+                if (l > 0) {
+                    CvPoint p2 = cvPoint(p.x + (int) (dx * 10 + .5), p.y + (int) (dy * 10 + .5));
+                    cvLine(vel, p, p2, CV_RGB(0, 255, 0), 1, 8);
+                }
+            }
+        cvShowImage("vel", vel);
+        cvShowImage("image1", image1);
+        cvShowImage("image2", image2);
+        printf("ave=(%.2f,%.2f)\n", ave.x, ave.y);
+
+        if (cvWaitKey(300) == 'q')
+            break;
+    }
+}
+/*
+int main( int argc, char** argv )
+{
+    cv::VideoCapture cap;
+    cv::TermCriteria termcrit(CV_TERMCRIT_ITER|CV_TERMCRIT_EPS,20,0.03);
+    cv::Size subPixWinSize(10,10), winSize(31,31);
+
+    const int MAX_COUNT = 500;
+    bool needToInit = false;
+    bool nightMode = false;
+
+//    if( argc == 1 || (argc == 2 && strlen(argv[1]) == 1 && isdigit(argv[1][0])))
+//        cap.open(argc == 2 ? argv[1][0] - '0' : 0);
+//    else if( argc == 2 )
+        cap.open(video_test_file);
+
+    if( !cap.isOpened() )
+    {
+        cout << "Could not initialize capturing...\n";
+        return 0;
+    }
+
+    help();
+
+    cv::namedWindow( "LK Demo", 1 );
+
+    cv::Mat gray, prevGray, image;
+    vector<cv::Point2f> points[2];
+
+    for(;;)
+    {
+        cv::Mat frame;
+        cap >> frame;
+        if( frame.empty() )
+            break;
+
+        frame.copyTo(image);
+        cv::cvtColor(image, gray, CV_BGR2GRAY);
+
+        if( nightMode )
+            image = cv::Scalar::all(0);
+
+        if( needToInit )
+        {
+            // automatic initialization
+            cv::goodFeaturesToTrack(gray, points[1], MAX_COUNT, 0.01, 10, cv::Mat(), 3, 0, 0.04);
+            cv::cornerSubPix(gray, points[1], subPixWinSize, cv::Size(-1,-1), termcrit);
+            addRemovePt = false;
+        }
+        else if( !points[0].empty() )
+        {
+            vector<uchar> status;
+            vector<float> err;
+            if(prevGray.empty())
+                gray.copyTo(prevGray);
+ //           cv::calcOpticalFlowFarneback( prevGray, gray, _flow, 0.5, 2, 5, 2, 7, 1.5, cv::OPTFLOW_FARNEBACK_GAUSSIAN);
+            cv::calcOpticalFlowPyrLK(prevGray, gray, points[0], points[1], status, err, winSize,
+                                 3, termcrit, 0, 0, 0.001);
+            size_t i, k;
+            for( i = k = 0; i < points[1].size(); i++ )
+            {
+                if( addRemovePt )
+                {
+                    if( norm(pt - points[1][i]) <= 5 )
+                    {
+                        addRemovePt = false;
+                        continue;
+                    }
+                }
+
+//                if( !status[i] )
+//                    continue;
+
+                points[1][k++] = points[1][i];
+                cv::circle( image, points[1][i], 3, cv::Scalar(0,255,0), -1, 8);
+            }
+            points[1].resize(k);
+        }
+
+        if( addRemovePt && points[1].size() < (size_t)MAX_COUNT )
+        {
+            vector<cv::Point2f> tmp;
+            tmp.push_back(pt);
+            cv::cornerSubPix( gray, tmp, winSize, cvSize(-1,-1), termcrit);
+            points[1].push_back(tmp[0]);
+            addRemovePt = false;
+        }
+
+        needToInit = false;
+        cv::imshow("LK Demo", image);
+
+        char c = (char)cv::waitKey(30);
+        if( c == 27 )
+            break;
+        switch( c )
+        {
+        case 'r':
+            needToInit = true;
+            break;
+        case 'c':
+            points[1].clear();
+            break;
+        case 'n':
+            nightMode = !nightMode;
+            break;
+        default:
+            ;
+        }
+
+        std::swap(points[1], points[0]);
+        swap(prevGray, gray);
+    }
+
+    return 0;
+}
+
+*/
 
 int main(int argc, char** argv) {
     cout << "Using Opencv " << CV_VERSION << "(" << CV_MAJOR_VERSION << "." << CV_MINOR_VERSION << "." << CV_SUBMINOR_VERSION << ")" << endl;
@@ -661,7 +864,7 @@ int main(int argc, char** argv) {
 //	#if CV_MIN_VERSION_REQUIRED(2,3,0)
 //	test_global_orientation(video_test_file);
 //        test_rigid_transform(video_test_file);
-    test_optical_flow(video_test_file);
+    test_optical_flow2(video_test_file);
     //	#endif //CV_MIN_VERSION_REQUIRED(2,3,0)
 // VISUAL TEST 6 : video read/write
 //	test_video_read_write(video_test_file,tmp_video_file_out);

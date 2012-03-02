@@ -52,7 +52,7 @@ using namespace std;
 // ----------- uncomment this to get (+/- live) visual display of the time series
 //#define VISUAL_CHECK_GNUPLOT
 // ----------- uncomment this to get visual display using highgui and verbose output -----
-//#define VISUAL_CHECK
+#define VISUAL_CHECK
 //#define VERBOSE
 
 
@@ -837,6 +837,8 @@ void ACVideoAnalysis::computeBlobsUL(const cv::Mat& bg_img, bool merge_blobs, in
 // adapted from Sidi Mahmoudi's OpenCV 1.0 version
 void ACVideoAnalysis::computeOpticalFlow() {
     global_optical_flow.clear();
+    this->clearStamps();
+
     int win_size = 10;
     const int MAX_COUNT = 400;
     vector<cv::Point2f> prevPts,curPts;
@@ -859,7 +861,7 @@ void ACVideoAnalysis::computeOpticalFlow() {
     tzero.push_back(0.0);
     tzero.push_back(0.0);
     global_optical_flow.push_back(tzero);
-
+    this->stamp();
     int currentframe = 0;
 
 #ifdef VISUAL_CHECK
@@ -874,6 +876,7 @@ void ACVideoAnalysis::computeOpticalFlow() {
     vector<float> err;
 
     for (int ifram = this->frameStart; ifram < this->frameStop - 1; ifram++) {
+        cout << ifram << endl;
         *capture >> frame;
         if (!frame.data) {
             cerr << "<ACVideoAnalysis::computeOpticalFlow> unexpected end of video at frame " << ifram << endl;
@@ -882,8 +885,9 @@ void ACVideoAnalysis::computeOpticalFlow() {
 
         int i, k;
         currentframe++;
-        if (currentframe % 2 == 0) need_to_init = 1;
-        double globalX = 0.0, globalY = 0.0;
+        if (currentframe % 5 == 0) need_to_init = 1;
+        double globalX = 0.0;
+        double globalY = 0.0;
 
  #ifdef VISUAL_CHECK
         frame.copyTo(image);
@@ -934,9 +938,17 @@ void ACVideoAnalysis::computeOpticalFlow() {
                 globalY /= count;
             }
             vector<float> xy;
-            xy.push_back(globalX);
-            xy.push_back(globalY);
+            float fx = static_cast<float>(globalX);
+            float fy = static_cast<float>(globalY);
+            xy.push_back(fx);
+            xy.push_back(fy);
+            cout << "pushing " << fx << " and " << fy << endl;
             global_optical_flow.push_back(xy);
+
+            for (int i=0 ; i < global_optical_flow.size(); i++){
+                cout << i << " : " << global_optical_flow[i][0] << " - " << global_optical_flow[i][1]<< endl;
+            }
+            this->stamp();
             count = k;
 #ifdef VERBOSE
             cout << "current frame: " << currentframe << " ; count=" << count << " : X=" << globalX << "; Y=" << globalY << endl;
@@ -961,7 +973,155 @@ void ACVideoAnalysis::computeOpticalFlow() {
         prevPts = curPts;
 #ifdef VISUAL_CHECK
         cv::imshow("Camera", image);
-        int c = cv::waitKey(10);
+        int c = cv::waitKey(30);
+        if ((char) c == 27)
+            break;
+#endif // VISUAL_CHECK
+     }
+}
+
+
+// XS version (based on OpenCV's LK example)
+void ACVideoAnalysis::computeOpticalFlow2() {
+    global_optical_flow.clear();
+    this->clearStamps();
+
+    const int MAX_COUNT = 500;
+    bool need_to_init = true;
+    int frames_refresh = 10; // number of frames after which we re-compute points to track
+    vector<cv::Point2f> points[2];
+    cv::Point2f pt;
+
+    // parameters for automatic initialization of goodFeaturesToTrack
+    double quality = 0.01;
+    double min_distance = 10;
+    int blockSize = 3;
+    bool useHarrisDetector = false;
+    double k = 0.04;
+
+    // parameters for PyrLK
+    int maxLevel = 3;
+    cv::TermCriteria termcrit(CV_TERMCRIT_ITER | CV_TERMCRIT_EPS, 20, 0.03);
+    cv::Size subPixWinSize(10, 10);
+
+    // cornerSubPix
+    cv::Size winSize(31, 31);
+
+    int min_dist_points = 5;
+#ifdef VISUAL_CHECK
+    cv::namedWindow("Video", CV_WINDOW_AUTOSIZE);
+    // XS could use a mouse callback to add points interactively
+    // cv::setMouseCallback( "Video", onMouse, 0 );
+    //cv::resizeWindow("Video", 800, 600);
+#endif // VISUAL_CHECK
+    // reset the capture to the beginning of the video
+    this->rewind();
+    // initial frame
+    cv::Mat frame;
+    *capture >> frame;
+    cv::Size size = frame.size();
+    vector<float> tzero;
+    tzero.push_back(0.0);
+    tzero.push_back(0.0);
+    global_optical_flow.push_back(tzero);
+    this->stamp();
+    int currentframe = 0;
+
+#ifdef VISUAL_CHECK
+    cv::Mat image(size.height, size.width, CV_8UC1);
+#endif //VISUAL_CHECK
+    cv::Mat grey(size.height, size.width, CV_8UC1);
+    cv::Mat prev_grey(size.height, size.width, CV_8UC1);
+ 
+    vector<uchar> status ;
+    vector<float> err;
+
+    for (int ifram = this->frameStart; ifram < this->frameStop - 1; ifram++) {
+        //cout << ifram << endl;
+        *capture >> frame;
+        if (!frame.data) { // frame.empty()
+            cerr << "<ACVideoAnalysis::computeOpticalFlow> unexpected end of video at frame " << ifram << endl;
+            break;
+        }
+
+        currentframe++;
+        if (currentframe % frames_refresh == 0) need_to_init = true;
+        double globalX = 0.0;
+        double globalY = 0.0;
+
+ #ifdef VISUAL_CHECK
+        frame.copyTo(image);
+ #endif //VISUAL_CHECK
+        cv::cvtColor(frame, grey, CV_BGR2GRAY); // convert frame to grayscale
+        if (need_to_init) {
+            // automatic initialization
+            cv::goodFeaturesToTrack(grey, points[1], MAX_COUNT, quality, min_distance, cv::Mat(), blockSize, useHarrisDetector, k);
+            cv::cornerSubPix(grey, points[1], subPixWinSize, cv::Size(-1,-1), termcrit);
+        } else if (!points[0].empty()) {
+            if(prev_grey.empty())
+                grey.copyTo(prev_grey);
+            cv::calcOpticalFlowPyrLK(prev_grey, grey, points[0], points[1], status, err, winSize,
+                    maxLevel, termcrit, 0, 0, 0.001);
+            // XS TODO last 3 param = ? double derivLambda=0.5, int flags=0 and ?
+
+            size_t i, k;
+            cout << points[1].size() << endl;
+            for (i = k = 0; i < points[1].size(); i++) {
+                if (!status[i])
+                    continue;
+                points[1][k++] = points[1][i];
+
+#ifdef VISUAL_CHECK
+                cv::circle(image, points[1][i], 3, cv::Scalar(0, 255, 0), -1, 8);
+                cv::line(image, points[0][i], points[1][i], CV_RGB(255, 0, 0), 1, 8, 0);
+#endif // VISUAL_CHECK
+                double deltaX = points[1][i].x - points[0][i].x;
+                double deltaY = points[1][i].y - points[0][i].y;
+                if (abs(deltaX) < 50 && abs(deltaY) < 50) {
+                    globalX += deltaX;
+                    globalY += deltaY;
+                }
+
+#ifdef VERBOSE
+                double a = atan2(deltaY,deltaX);
+                double m = cv::norm(points[1][i], points[0][i]);
+                cout << currentframe << "(" << points[1][i].x << "," << points[1][i].y << ") : " << a << "-" << m << endl;
+#endif //VERBOSE
+            }
+            points[1].resize(k);
+            int count = points[1].size();
+            if (count > 0) {
+                globalX /= count;
+                globalY /= count;
+            }
+            vector<float> xy;
+            float fx = static_cast<float>(globalX);
+            float fy = static_cast<float>(globalY);
+            xy.push_back(fx);
+            xy.push_back(fy);
+            //cout << "pushing " << fx << " and " << fy << endl;
+            global_optical_flow.push_back(xy);
+            this->stamp();
+
+#ifdef VERBOSE
+            for (int i=0 ; i < global_optical_flow.size(); i++){
+                cout << i << " : " << global_optical_flow[i][0] << " - " << global_optical_flow[i][1]<< endl;
+            }
+            cout << "current frame: " << currentframe << " ; count=" << count << " : X=" << globalX << "; Y=" << globalY << endl;
+
+#endif // VERBOSE
+        }
+#ifdef VISUAL_CHECK
+        // XS TODO: this is temporary, visualize global optical flow from central point
+        cv::line(image, cv::Point(size.width/2,size.height/2), cv::Point(size.width/2+globalX,size.height/2+globalY), CV_RGB(0, 255, 0), 3, 8, 0);
+#endif //VISUAL_CHECK
+ 
+        need_to_init = false;
+        std::swap(points[1], points[0]);
+        swap(prev_grey, grey);
+#ifdef VISUAL_CHECK
+        cv::imshow("Video", image);
+        int c = cv::waitKey(30);
         if ((char) c == 27)
             break;
 #endif // VISUAL_CHECK
