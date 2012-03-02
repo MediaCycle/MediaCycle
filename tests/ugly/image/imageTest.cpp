@@ -56,9 +56,11 @@ using namespace std;
 #include <math.h>
 
 string image_dir = "/Users/xavier/numediart/Project10.1-Borderlands/Images/";
-
+string path_to_mc_build = "/home/xavier/development/mediacycle/Builds/ubuntu_10.10/";
+string path_to_mc_data = "/usr/local/share/mediacycle/data/";
 //string image_file = "/Users/xavier/Pictures/artBDD/Image_BDD_Application/Cubism/426px-Mblanchard2.jpg";
-string image_file = "/Users/xavier/Pictures/color_tests/lena.tif";
+string image_file = path_to_mc_data + "images/coil-100/images/obj1__00.png";
+//string image_file = "/media/Macintosh HD/Users/xavier/Pictures/color_tests/lena.tif";
 
 void testHuMoments(string sim1){
 	ACBWImageAnalysis* Im1 = new ACBWImageAnalysis(sim1);
@@ -69,7 +71,7 @@ void testHuMoments(string sim1){
 
 void testGaborMoments(string sim1){
 	ACColorImageAnalysis* Im1 = new ACColorImageAnalysis(sim1);
-	Im1->computeGaborMoments();
+	Im1->computeGaborMoments(4,5);
 	Im1->dumpGaborMoments(cout);
 	delete Im1;
 }
@@ -159,17 +161,6 @@ int makeNumbered(string sdir, int n){
 	return 1;
 }
 
-void test_image_class(string sim1){
-	string f1=image_dir+sim1;
-	IplImage* img = cvLoadImage(f1.c_str(), CV_LOAD_IMAGE_COLOR);
-	cvShowImage("test", img);
-	BgrImage toto(img);
-	cout << "0 0 : " << float(toto[0][0].b)<< endl;
-	cout << "10 10 : " <<  float(toto[10][10].b) << endl;
-	cvDestroyWindow("test");
-	cvReleaseImage(&img);
-}
-
 //void testLogPolar(string sim1){
 //	string f1=image_dir+sim1;
 //	ACBWImageAnalysis* Im1 = new ACBWImageAnalysis(f1);
@@ -204,7 +195,7 @@ void test_import_directory(string dir1, string f2=""){
 void test_multiple_import_normalize(){
 	MediaCycle* mediacycle;
 	mediacycle = new MediaCycle(MEDIA_TYPE_IMAGE);
-	mediacycle->addPluginLibrary("/Users/xavier/development/mediacycle-numediart/mediacycle/Builds/mac-10.5/plugins/image/Debug/mc_image.dylib");
+	mediacycle->addPluginLibrary(path_to_mc_build+"/plugins/image/mc_image.so");
 	mediacycle->importDirectory("/Users/xavier/Pictures/coil-100/images/obj100__0100.png",1);
 	mediacycle->importDirectory("/Users/xavier/Pictures/coil-100/images/obj100__0105.png",1);
 	mediacycle->saveXMLLibrary("/Users/xavier/tmp/f2.xml");
@@ -310,15 +301,23 @@ void test_sorted(string xml_file) {
     delete mediacycle;
 }
 
+void test_plugins() {
+    MediaCycle* mediacycle;
+    mediacycle = new MediaCycle(MEDIA_TYPE_IMAGE);
+    mediacycle->addPluginLibrary(path_to_mc_build + "/plugins/image/mc_image.so");
+    delete mediacycle;
+}
+
+
 int main(int argc, char** argv) {
 	cout << "Using Opencv " << CV_VERSION << "(" << CV_MAJOR_VERSION << "." << CV_MINOR_VERSION  << "." <<  CV_SUBMINOR_VERSION << ")" << endl;	
-
+//        test_plugins();
 //        test_sorted();
 //	test_histogram(image_file);
 //	test_multiple_import_normalize();
 //	testColorMoments(image_file);
 //	testHuMoments(image_file);
-//	testGaborMoments(image_file);
+	testGaborMoments(image_file);
 //	testHoughLines(image_file);
 //	testHoughLinesP(image_file);
 //	testDetectFaces(image_file);

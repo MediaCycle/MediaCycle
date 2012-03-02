@@ -49,7 +49,7 @@ public:
 	std::vector<ACMediaFeatures*> calculate(ACMediaData* _data);
 	std::vector<ACMediaFeatures*> calculate(ACMediaData* _aData, ACMedia* _theMedia, bool _save_timed_feat=false);
 private:
-	ACMediaFeatures* calculateGaborMoments(ACImageAnalysis* image);
+	ACMediaFeatures* calculateGaborMoments(ACColorImageAnalysis* image);
 };
 
 #endif	/* _ACIMAGETEXTUREWAELETSMOMENTSPLUGIN_H */

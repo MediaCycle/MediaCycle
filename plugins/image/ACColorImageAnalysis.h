@@ -69,7 +69,7 @@ public:
 	void computeFourierPolarMoments(const int& RadialBins=5, const int& AngularBins=8);
 	void computeFourierMellinMoments();
 	void computeContourHuMoments(const int& thresh = 0);
-	void computeGaborMoments(const int& mumax = 4, const int& numax = 2);
+	void computeGaborMoments(const int& mumax = 4, const int& numax = 2 );
 	void computeGaborMoments_fft(const int& numPha_ = 4, const int& numFreq_ = 2, uint horizonalMargin_ = 0, uint verticalMargin_ = 0);
 	void computeColorMoments(const int& n = 4, const string& cm = "HSV");
 //	void computeImageHistogram(int w, int h); // XS TODO port 2.*

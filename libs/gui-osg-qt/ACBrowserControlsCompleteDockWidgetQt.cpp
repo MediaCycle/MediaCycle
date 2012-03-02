@@ -79,9 +79,6 @@ void ACBrowserControlsCompleteDockWidgetQt::on_pushButtonBack_clicked()
     //this->synchronizeFeaturesWeights();
     //	ui.navigationLineEdit->setText(QString::number(media_cycle->getNavigationLevel()));
 
-    // XS debug
-//	this->media_cycle->dumpNavigationLevel() ;
-//	this->media_cycle->dumpLoopNavigationLevels() ;
 }
 
 void ACBrowserControlsCompleteDockWidgetQt::on_pushButtonForward_clicked()
@@ -93,9 +90,6 @@ void ACBrowserControlsCompleteDockWidgetQt::on_pushButtonForward_clicked()
 
     //	ui.navigationLineEdit->setText(QString::number(media_cycle->getNavigationLevel()));
 
-    // XS debug
-//	this->media_cycle->dumpNavigationLevel() ;
-//	this->media_cycle->dumpLoopNavigationLevels() ;
 }
 
 void ACBrowserControlsCompleteDockWidgetQt::on_spinBoxClusters_valueChanged(int _value)

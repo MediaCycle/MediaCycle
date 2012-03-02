@@ -26,39 +26,35 @@
 #include <cstdio>
 #include <iostream>
 #include "ACOpenCVInclude.h"
+#include <cmath>
 
-#define PI 3.14159265
-#define CV_GABOR_REAL 1
-#define CV_GABOR_IMAG 2
-#define CV_GABOR_MAG  3
-#define CV_GABOR_PHASE 4
-
-class CvGabor{
+class CvGabor {
 public:
     CvGabor();
     ~CvGabor();
-	
-	CvGabor(int iMu, int iNu, double dSigma = 2*PI, double dF = sqrt(2.0));
-	CvGabor(double dPhi, int iNu, double dSigma = 2*PI, double dF= sqrt(2.0));
-	void Reset(int iMu, int iNu, double dSigma = 2*PI, double dF = sqrt(2.0));
-	void Reset(double dPhi, int iNu, double dSigma = 2*PI, double dF = sqrt(2.0));
 
-    bool IsInit();
-//    IplImage* get_image(int Type);
-	cv::Mat get_image(int Type);
-    bool HasKernel();
-    long SetMaskWidth();
-    long GetMaskWidth();
-//    void output_file(const char *filename, int Type);
-//    CvMat* get_matrix(int Type);
-    void show(int Type);
-//    void conv_img(IplImage *src, IplImage *dst, int Type);
-	void conv_img(cv::Mat src, cv::Mat dst, int Type);
-	CvGabor(int iMu, int iNu);
-    void normalize( const CvArr* src, CvArr* dst, double a, double b, int norm_type, const CvArr* mask );
-	
-//	double* getMeanAndStdevs(IplImage *src);
-	double* getMeanAndStdevs(cv::Mat src);
+    CvGabor(int iMu, int iNu, double dSigma = 2 * M_PI, double dF = sqrt(2.0));
+    CvGabor(double dPhi, int iNu, double dSigma = 2 * M_PI, double dF = sqrt(2.0));
+    void reset(int iMu, int iNu, double dSigma = 2 * M_PI, double dF = sqrt(2.0));
+    void reset(double dPhi, int iNu, double dSigma = 2 * M_PI, double dF = sqrt(2.0));
+
+    void setImage(cv::Mat);
+    bool isInit();
+    
+    bool hasKernel();
+    bool hasSourceImage();
+    bool hasConvolImage();
+
+    long setMaskWidth();
+    long getMaskWidth();
+    //    void output_file(const char *filename, int Type);
+
+    void computeConvolutionImage();
+    double* getMeanAndStdevs();
+
+    void showKernel();
+    void showConvolImage();
+    void printKernel();
 
 protected:
     double Sigma;
@@ -69,14 +65,13 @@ protected:
     bool bInitialised;
     bool bKernel;
     long Width;
-//    CvMat *Imag;
-//    CvMat *Real;
-    cv::Mat Imag;
-    cv::Mat Real;
-	
+
+    cv::Mat Imag, Real;
+    cv::Mat src_image, convol_image;
+
 private:
-    void CreateKernel();
-	void Init(double dPhi, int iNu, double dSigma, double dF);
+    void createKernel();
+    void init(double dPhi, int iNu, double dSigma, double dF);
 };
 
 #endif // CVGABOR_H

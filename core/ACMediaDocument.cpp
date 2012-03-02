@@ -32,7 +32,7 @@
  *
  */
 
-#if defined (SUPPORT_MULTIMEDIA) 
+#if defined (SUPPORT_MULTIMEDIA)
 
 #include "ACMediaDocument.h"
 #include <fstream>

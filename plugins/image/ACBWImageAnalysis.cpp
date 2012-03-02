@@ -42,6 +42,7 @@ using std::cout;
 using std::endl;
 using std::ofstream;
 
+//#define VISUAL_CHECK
 
 // --------------------------------------------------------------------
 
@@ -296,13 +297,6 @@ void ACBWImageAnalysis::computeHuMoments(int thresh){
 	for (int i=0; i<7 ; i++){
 		hu_moments.push_back (modifiedLog(local_Hu_moments[i])) ;
 	}
-//	hu_moments.push_back (modifiedLog(myHumoments.hu1)) ;
-//	hu_moments.push_back (modifiedLog(myHumoments.hu2)) ;
-//	hu_moments.push_back (modifiedLog(myHumoments.hu3)) ;
-//	hu_moments.push_back (modifiedLog(myHumoments.hu4)) ;
-//	hu_moments.push_back (modifiedLog(myHumoments.hu5)) ;
-//	hu_moments.push_back (modifiedLog(myHumoments.hu6)) ;
-//	hu_moments.push_back (modifiedLog(myHumoments.hu7)) ;
 }
 
 
@@ -336,54 +330,26 @@ void ACBWImageAnalysis::computeHuMoments(int thresh){
 //	contour_hu_moments.push_back (modifiedLog(my_contour_Humoments.hu7)) ;
 //}
 
-void ACBWImageAnalysis::computeGaborMoments(int mumax, int numax){ // default 7, 5
+void ACBWImageAnalysis::computeGaborMoments(int mumax, int numax){ // default 4,2 (7,5 previously)
 	gabor_moments.clear();
 	if (!imgp_mat.data) {
 		cerr << " <ACBWImageAnalysis::computeGaborMoments() error> missing image !" << endl;
 		return;
 	}
 	CvGabor *gabor = new CvGabor();
-	cv::Mat src = this->getImageMat();
-
-	cv::Mat mat(this->getSize(), CV_32FC1);
-	src.convertTo(mat, CV_32FC1); // invokes mat.create(src->size());
-	
-//	for (int i = 0; i < size.height; i++){	
-//		for (int j = 0; j < size.width; j++){
-//			cout << i << " - " << j << " : " << (int)src.at<char>(i,j) << " ; " << mat.at<float>(i,j) << endl;
-//		}
-//	}
-	
-//	cv::namedWindow("Src0", CV_WINDOW_AUTOSIZE);
-//	cv::imshow("Src0", src);
-//	cv::namedWindow("Mat0", CV_WINDOW_AUTOSIZE);
-//	cv::imshow("Mat0", mat);
-//	cv::waitKey(0);
-//	
+        gabor->setImage(this->getImageMat());
 	for (int i = 0; i < mumax; i++){	
 		for (int j = 0; j < numax; j++){
-			gabor->Reset(i,j);
+			gabor->reset(i,j);
+                        gabor->computeConvolutionImage();
 			double *tmpft = new double[2];
-			tmpft = gabor->getMeanAndStdevs(mat); // will compute all what's necessary
+			tmpft = gabor->getMeanAndStdevs(); // will compute all what's necessary
 			gabor_moments.push_back (tmpft[0]) ;
 			gabor_moments.push_back (tmpft[1]) ;
 			delete [] tmpft;
 #ifdef VISUAL_CHECK
-			IplImage *kernel = cvCreateImage( cvSize(gabor->GetMaskWidth(), gabor->GetMaskWidth()), IPL_DEPTH_8U, 1);
- 			kernel = gabor->get_image(CV_GABOR_REAL);
-			cvNamedWindow("Gabor Kernel", CV_WINDOW_AUTOSIZE);
-			cvShowImage("Gabor Kernel", kernel);
-			cvWaitKey(0);
-			cvDestroyWindow("Gabor Kernel");			
-			
-			IplImage *magimg = cvCreateImage(cvSize(BWimg->width,BWimg->height), IPL_DEPTH_8U, 1);
-			gabor->conv_img(BWimg, magimg, CV_GABOR_MAG);
-			cvNamedWindow("Magnitude Response",CV_WINDOW_AUTOSIZE);
-			cvShowImage("Magnitude Response",magimg);
-			cvWaitKey(0);
-			cvDestroyWindow("Magnitude Response");		
-			cvReleaseImage( &kernel );	
-			cvReleaseImage( &magimg );	
+                        gabor->showKernel();
+                        gabor->showConvolImage();
 #endif
 		}
 	}
@@ -444,7 +410,7 @@ void ACBWImageAnalysis::computeFourierMellinMoments(){
 	
 #ifdef VISUAL_CHECK
 	cvNamedWindow( "orig", 1 );
-	cvShowImage( "orig", this->getImage() );
+//	cvShowImage( "orig", this->getImage() );
 	cvWaitKey();
 	cvDestroyWindow("orig");
 #endif // VISUAL_CHECK

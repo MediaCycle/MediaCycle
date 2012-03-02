@@ -197,6 +197,7 @@ int ACMediaLibrary::importFile(std::string _filename, ACPluginManager *acpl, boo
 	//this->testFFMPEG(_filename);
 	if (media_type==MEDIA_TYPE_MIXED){
 		if (mReaderPlugin!=0)
+		
 			media=mReaderPlugin->mediaFactory(media_type);
 		if (media==0)
 			media=new ACMediaDocument();
@@ -206,10 +207,8 @@ int ACMediaLibrary::importFile(std::string _filename, ACPluginManager *acpl, boo
 			int nbMedia = media->import(_filename, this->getMediaID(), acpl);
 			if (nbMedia<=0)
 				return 0;
-
-            this->addMedia(media);
-            this->incrementMediaID();
-
+			this->addMedia(media);
+			this->incrementMediaID();
 			ACMediaContainer medias = (static_cast<ACMediaDocument*> (media))->getContainer();
 			ACMediaContainer::iterator iter;
 			for ( iter=medias.begin() ; iter!=medias.end(); ++iter ){
@@ -513,7 +512,7 @@ int ACMediaLibrary::openCoreXMLLibrary(TiXmlHandle _rootHandle){
 		string nof = nMediaText->ValueStr();
 		tmp << nof;
 		tmp >> n_loops;
-    }
+	}
 	TiXmlElement* pMediaNode=_rootHandle.FirstChild( "Medias" ).FirstChild().Element();
     #ifdef SUPPORT_MULTIMEDIA
     if (!pMediaNode)

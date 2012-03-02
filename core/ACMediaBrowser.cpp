@@ -101,8 +101,8 @@ ACMediaBrowser::ACMediaBrowser() {
 	this->clean();
 
 	// XS TODO 1 this assumes cluster mode !
-	// XS TODO 2 define const :
-	mClusterCount = 10;
+	// XS TODO 2 define const and sync it with GUI:
+	mClusterCount = 5;
 
 	// SD 2010 OCT
 	/*

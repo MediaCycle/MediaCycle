@@ -73,9 +73,6 @@ MediaCycle::MediaCycle(ACMediaType aMediaType, string local_directory, string li
 
 	this->prevLibrarySize = 0;
 
-	// XS TODO TMP OSC
-//	sendto = lo_address_new("localhost", "12346");
-//	message = 0;
 }
 
 MediaCycle::MediaCycle(const MediaCycle& orig) {
@@ -578,7 +575,7 @@ int MediaCycle::setActiveMediaType(std::string mediaName){
         this->getLibrary()->setPreProcessPlugin(0);
     return ret ;
 };
-#endif/def USE_MULTIMEDIA
+#endif//def USE_MULTIMEDIA
 
 void MediaCycle::dumpPluginsList(){this->pluginManager->dump();}
 
@@ -737,17 +734,6 @@ void MediaCycle::pickedObjectCallback(int _nodeId) {
 		mediaBrowser->toggleSourceActivity(nodeId);
 	}
 	
-	// XS TODO TMP OSC
-//	if(message){
-//		lo_message_free(message);
-//	}
-//	message = lo_message_new();
-//	//lo_message_add_int32 (message,_nodeId);
-//	string sf = this->getMediaFileName(_nodeId); // XS TODO check if not +1
-//	std::string::size_type p = sf.find_last_of("/");
-//	lo_message_add_string(message,std::string(sf, p+1,sf.size()).c_str());
-//
-//	lo_send_message (sendto, "/mediacyle", message);
         // with observer pattern
         this->notify();
 

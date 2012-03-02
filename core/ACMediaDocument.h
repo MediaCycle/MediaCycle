@@ -35,7 +35,7 @@
 #ifndef ACMEDIADOCUMENT_H
 #define ACMEDIADOCUMENT_H
 
-#if defined (SUPPORT_MULTIMEDIA) 
+#if defined (SUPPORT_MULTIMEDIA)
 #include "ACOpenCVInclude.h"
 #include "ACMedia.h"
 //#include "ACMediaDocumentData.h"

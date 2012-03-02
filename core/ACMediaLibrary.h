@@ -50,7 +50,6 @@
 
 #include <boost/filesystem.hpp>
 
-
 class ACMediaLibrary {
 	// these methods are common to all media.
 	// there is no need for an AudioLibrary, ImageLibrary, ...

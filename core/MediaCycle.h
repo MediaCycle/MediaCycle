@@ -48,9 +48,6 @@
 #define TIXML_USE_STL
 #include "tinyxml.h"
 
-//XS TODO TMP OSC
-//#include <lo/lo.h>
-
 enum MCActionType {
 	MC_ACTION_ADDFILE,
 	MC_ACTION_GETKNN,
@@ -88,6 +85,7 @@ public:
 	int importXMLLibrary(std::string path);
 	int importMCSLLibrary(std::string path);//CF 31/05/2010 temporary MediaCycle Segmented Library (MCSL) for AudioGarden, adding a parentID for segments to the initial ACL, awaiting approval
 	void libraryContentChanged(int needsNormalizeAndCluster=1);
+	
 	void saveACLLibrary(std::string path);
 	void saveXMLLibrary(std::string path);
 	void saveMCSLLibrary(std::string path);//CF 31/05/2010 temporary MediaCycle Segmented Library (MCSL) for AudioGarden, adding a parentID for segments to the initial ACL, awaiting approval
@@ -145,7 +143,7 @@ public:
 	
     #ifdef SUPPORT_MULTIMEDIA
     int setActiveMediaType(std::string mediaName);
-    #endif/def SUPPORT_MULTIMEDIA
+    #endif//def SUPPORT_MULTIMEDIA
 	
 	void dumpPluginsList();
 
@@ -289,12 +287,6 @@ private:
 
 	ACMediaCycleCallback mediacycle_callback;
 	void* mediacycle_callback_data;
-	
-// XS TODO TMP OSC
-//	lo_address sendto;
-//	lo_message message;
-//	const char *tag;
-	
 };
 
 #endif	/* _MEDIACYCLE_H */

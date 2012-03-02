@@ -61,7 +61,7 @@ protected slots:
     void on_comboBoxClustersMethod_activated(const QString & text);
     void on_comboBoxClustersPositions_activated(const QString & text);
 
-	// Neighborhoods controls
+// Neighborhoods controls
     void on_comboBoxNeighborsMethod_activated(const QString & text);
     void on_comboBoxNeighborsPositions_activated(const QString & text);
 
