@@ -59,14 +59,6 @@ ELSE()
 	MESSAGE("[ ] vamp-plugin-interface")
 ENDIF()
 
-# TextTool library (include clucene adaptation for mediacycle)
-
-IF(SUPPORT_TEXT)
-	#add_subdirectory(TextTool)
-ELSE()
-	MESSAGE("[ ] TextTool")
-ENDIF()
-
 # audiofeatures (required by some apps and plugins)
 IF(SUPPORT_TEXT)
 	add_subdirectory(textfeatures)
