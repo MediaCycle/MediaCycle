@@ -462,7 +462,6 @@ int computeOutputFrame(TiPhaseVocoder *tpv) {
             //phase-locked vocoder
             //This phase locking is probably patented : http://www.google.com/patents?id=kaAEAAAAEBAJ
             //Therefore I suppose it should either be licenced or removed
-            //in any case, it does not improve results when slowing down noisy ambient sound (cf. evs wave files)
             //so we might as well NOT use it and find some other interesting and patent-free approach
             npeaks = findPeaks(tpv->outputAmplitude, tpv->peaksIndex, tpv->winSize / 2 + 1, 2);
             if (npeaks > 0) {
