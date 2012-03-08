@@ -1141,7 +1141,7 @@ void ACMultiMediaCycleOsgQt::loadDefaultConfig(ACMediaType _media_type, ACBrowse
 	
     // update the plugin lists of the browser control dock through configureDockWidget
     dockWidgetsManager->changeMediaType(_media_type);
-    dockWidgetsManager->updatePluginsSettings();
+    dockWidgetsManager->resetPluginsSettings();
 }
 
 void ACMultiMediaCycleOsgQt::comboDefaultSettingsChanged(QString media){
