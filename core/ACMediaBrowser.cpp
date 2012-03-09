@@ -1260,7 +1260,11 @@ void ACMediaBrowser::updateNextPositionsPropeller() {
 		maxr = max(maxr,p.x);
 		maxr = max(maxr,p.y);
 	}
-
+	
+	p.x = p.y = p.z = 0.0;
+	t = getTime();
+	this->getMediaNode(mReferenceNode).setNextPosition(p, t);
+	
 	std::cout << "Max prop: " << maxr << std::endl;
 	// printf("PROPELER \n");
 

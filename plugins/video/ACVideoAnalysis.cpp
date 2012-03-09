@@ -849,7 +849,7 @@ void ACVideoAnalysis::computeOpticalFlow() {
     cv::Point2f pt;
 #ifdef VISUAL_CHECK
     cv::namedWindow("Camera", CV_WINDOW_AUTOSIZE);
-    cv::resizeWindow("Camera", 800, 600);
+    cvResizeWindow("Camera", 800, 600);
 #endif // VISUAL_CHECK
     // reset the capture to the beginning of the video
     this->rewind();

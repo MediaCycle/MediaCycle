@@ -57,6 +57,8 @@
 #include <ACAboutDialogFactoryQt.h>
 #include <ACInputControlsDialogQt.h>
 
+#include "ACEventListener.h"
+
 // FORWARD DECLARATIONS
 QT_BEGIN_NAMESPACE
 class QListWidgetItem;
@@ -82,7 +84,7 @@ public:
 		void loading_file(int media_id, int dir_size);
 };
 
-class ACMultiMediaCycleOsgQt : public QMainWindow {
+class ACMultiMediaCycleOsgQt : public QMainWindow,public ACEventListener {
 Q_OBJECT
 	
 public slots:
@@ -143,7 +145,7 @@ public:
 	bool addAboutDialog(std::string about_type);
 	
 	// Callback
-	void mediacycleCallback(const char* message);
+	void mediaImported(int n,int nTot);
 	
 	// Close Event
 	void closeEvent(QCloseEvent *event);

@@ -173,12 +173,12 @@ void CvGabor::showKernel() {
 
     cv::namedWindow("Real Kernel", CV_WINDOW_AUTOSIZE);
     cv::imshow("Real Kernel", realKernelU);
-    cv::moveWindow("Real Kernel", 50, 50);
+    cvMoveWindow("Real Kernel", 50, 50);
     cv::waitKey(0);
     cv::destroyWindow("Real Kernel");
     cv::namedWindow("Imag Kernel", CV_WINDOW_AUTOSIZE);
     cv::imshow("Imag Kernel", imagKernelU);
-    cv::moveWindow("Imag Kernel", 150, 50);
+    cvMoveWindow("Imag Kernel", 150, 50);
     cv::waitKey(0);
     cv::destroyWindow("Imag Kernel");
 }
@@ -193,7 +193,7 @@ void CvGabor::showConvolImage() {
     cv::normalize(convol_image, convol_imageF, 0, 255, CV_MINMAX);
     convol_imageF.convertTo(convol_imageU, CV_8UC1);
     cv::imshow("Convoluted Image (magnitude)", convol_imageU);
-    cv::moveWindow("Convoluted Image (magnitude)", 50, 50);
+    cvMoveWindow("Convoluted Image (magnitude)", 50, 50);
     cv::waitKey(0);
     cv::destroyWindow("Convoluted Image (magnitude)");
 }

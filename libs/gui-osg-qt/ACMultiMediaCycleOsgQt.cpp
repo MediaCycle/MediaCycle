@@ -49,6 +49,7 @@ ACQProgressBar::ACQProgressBar(QWidget *parent)
 	this->setFormat("Loading file %v/%m");// due to Apple standards the progress bar won't display this, it does under Ubuntu
 }
 
+
 void ACQProgressBar::loading_started()
 {
 	this->reset();
@@ -67,64 +68,32 @@ void ACQProgressBar::loading_file(int media_id, int dir_size)
 	this->setValue(media_id);
 }
 
-static void mediacycle_callback(const char* message, void *user_data) {
-
-	ACMultiMediaCycleOsgQt *application = (ACMultiMediaCycleOsgQt*)user_data;
-
-	application->mediacycleCallback(message);
-}
-
-void ACMultiMediaCycleOsgQt::mediacycleCallback(const char* message)
-{
-	std::string mess = std::string(message);
+void ACMultiMediaCycleOsgQt::mediaImported(int n,int nTot){
 	std::string send = "";
-	if (mess=="loaddirstart") {
+	if (n==0) {
 		send = "Loading Directory...";
 		emit mediacycle_message_changed(QString(send.c_str()));
 		emit loading_started();
 	}
-	if (mess=="loaddirfinish") {
+	if (n==nTot) {
 		send = "";
 		emit mediacycle_message_changed(QString(send.c_str()));
 		emit loading_finished();
-       this->updateLibrary();
+		this->updateLibrary();
 	}
 	
-	if(mess.find("importing_media_",0)!=string::npos){
-		// Looking for "importing_media_<media_id>_<dir_size>" patterns
-		// note that this "mess" won't happen with a nicer observer pattern and signals/slots transmitting variable arguments sizes and types
-		int media_id = -1;
-		int dir_size = -1;
-		std::string prefix = ("importing_media_");
-		std::string suffix = ("_");
-		size_t prefix_found = mess.find(prefix,0);
-		if(prefix_found!= string::npos){
-			size_t suffix_found = mess.find(suffix,prefix_found+prefix.size());
-			if (suffix_found!= string::npos){
-				std::string id_string = mess.substr(prefix_found+prefix.size(),suffix_found-(prefix_found+prefix.size()));
-				istringstream id_ss(id_string);
-				if (!(id_ss>>media_id))
-					std::cerr << "ACMediaCycleOsgQt: wrong media id" << std::endl;
-				std::string size_string = mess.substr(suffix_found+suffix.size(),string::npos);
-				istringstream size_ss(size_string);
-				if (!(size_ss>>dir_size))
-					std::cerr << "ACMediaCycleOsgQt: wrong dir size"  << std::endl;
-				if(media_id != -1 && dir_size != -1){
-					std::cout << std::endl << std::endl << "importing media " << media_id << "/" << (dir_size-1) << std::endl;
-                    //if(media_id==1)//TR The first file has not necessary the good media type
-                    if(media_cycle->getLibrary()->getParentIds().size()==1){
-                        dockWidgetsManager->updatePluginsSettings();
-                    }
-					if (progressBar){
-						emit loading_file(media_id+1,dir_size);
-						stringstream status_message;
-						status_message << "Loading File " << media_id+1 << "/" << dir_size;
-						send = status_message.str();
-						emit mediacycle_message_changed(QString(send.c_str()));
-					}	
-				}	
-			}
+	if(n<nTot){
+
+		if(media_cycle->getLibrary()->getParentIds().size()==1){
+			dockWidgetsManager->updatePluginsSettings();
 		}
+		if (progressBar){
+			emit loading_file(n,nTot);
+			stringstream status_message;
+			status_message << "Loading File " << n << "/" << nTot;
+			send = status_message.str();
+			emit mediacycle_message_changed(QString(send.c_str()));
+		}	
 	}
 }
 
@@ -244,7 +213,6 @@ ACMultiMediaCycleOsgQt::ACMultiMediaCycleOsgQt(QWidget *parent) : QMainWindow(pa
 }
 
 ACMultiMediaCycleOsgQt::~ACMultiMediaCycleOsgQt(){
-	this->destroyMediaCycle();
 	delete settingsDialog;
 	delete aboutDialogFactory;
     delete dockWidgetsManager;
@@ -257,6 +225,7 @@ ACMultiMediaCycleOsgQt::~ACMultiMediaCycleOsgQt(){
 	if (osgViewDockWidget) delete osgViewDockWidget;
 	if (osgViewDockTitleBar) delete osgViewDockTitleBar;
 	if (osgViewDock) delete osgViewDock;
+	this->destroyMediaCycle();
 }
 
 void ACMultiMediaCycleOsgQt::setMediaType(ACMediaType _mt)
@@ -305,17 +274,17 @@ void ACMultiMediaCycleOsgQt::configureSettings(){
 void ACMultiMediaCycleOsgQt::createMediaCycle(ACMediaType _media_type, ACBrowserMode _browser_mode){
 
 	this->media_cycle = new MediaCycle(_media_type,"/tmp/","mediacycle.xml");
-	media_cycle->setCallback(mediacycle_callback, (void*)this);
-
+	//media_cycle->setCallback(mediacycle_callback, (void*)this);
+	media_cycle->addListener(this);
 	compositeOsgView->setMediaCycle(this->media_cycle);
 	// SD
 	compositeOsgView->prepareFromBrowser();
 	compositeOsgView->prepareFromTimeline();
-
+	
 	// keep track locally of the media and browser modes
 	this->media_type = _media_type;
 	this->browser_mode = _browser_mode;
-
+	
 	#if defined (SUPPORT_AUDIO)
 	// XS TODO add checks on existing audio_engine ?
 	// normally should not be any
@@ -324,12 +293,13 @@ void ACMultiMediaCycleOsgQt::createMediaCycle(ACMediaType _media_type, ACBrowser
 		audio_engine->setMediaCycle(media_cycle);
 		audio_engine->startAudioEngine();
 		compositeOsgView->setAudioEngine(audio_engine);
-        dockWidgetsManager->updateAudioEngine(audio_engine);
+		dockWidgetsManager->updateAudioEngine(audio_engine);
 	}
 	#endif //defined (SUPPORT_AUDIO)
-
-    dockWidgetsManager->updateMediaCycle(media_cycle);
+	
+	dockWidgetsManager->updateMediaCycle(media_cycle);
     dockWidgetsManager->updateOsgView(compositeOsgView);
+	
 }
 
 // destroys the MediaCycle object (containing the whole application)
@@ -580,7 +550,7 @@ void ACMultiMediaCycleOsgQt::on_actionLoad_Media_Directory_triggered(bool checke
 }
 
 void ACMultiMediaCycleOsgQt::on_actionLoad_Media_Files_triggered(bool checked){
-
+	
 	if(!use_feature_extraction){
 		this->showError("No feature extraction plugin loaded. Can't import media files.");
 		return;
@@ -627,7 +597,7 @@ void ACMultiMediaCycleOsgQt::on_actionLoad_Media_Files_triggered(bool checked){
 			directories.push_back((string)fileName.toStdString());
 		}
 	}
-
+	
 	if (!(directories.empty())){
 		this->importDirectoriesThreaded(directories);
 		directories.empty();

@@ -33,11 +33,15 @@
 #ifndef _MEDIACYCLE_H
 #define	_MEDIACYCLE_H
 
+
+
+class MediaCycle;
 #include "ACMediaLibrary.h"
 #include "ACMediaBrowser.h"
 #include "ACNetworkSocket.h"
 #include "ACPluginManager.h"
 #include "Observer.h"
+#include "ACEventManager.h"
 
 #include <string>
 #include <cstring>
@@ -72,9 +76,7 @@ public:
     int stopTcpServer();
     int processTcpMessage(char* buffer, int l, char **buffer_send, int *l_send);     // Process incoming requests (addfile, getknn, ...)
 
-	// == Callback - SD to be replaced by OSC/UDP communication
-	int setCallback(ACMediaCycleCallback mediacycle_callback, void* user_data);
-
+	
     // == Media Library
 	int importDirectories();
 	int importDirectories(std::vector<std::string> paths, int recursive, bool forward_order=true, bool doSegment=false);
@@ -112,7 +114,10 @@ public:
 	void setBrowserMode(ACBrowserMode _mode);
 	bool changeBrowserMode(ACBrowserMode _mode);
 	void cleanBrowser() { mediaBrowser->clean(); }
-
+	
+	//Listener manager 
+	void addListener(ACEventListener* eventListener);
+	ACEventManager *getEventManager(){return eventManager;};
 	// Plugins
 
 	// XS TODO cleanPlugins
@@ -268,6 +273,7 @@ private:
 	ACMediaBrowser *mediaBrowser;
 	ACNetworkSocketServer *networkSocket;
 	ACPluginManager *pluginManager;
+	ACEventManager *eventManager;
 
  	// settings and features XML
 	std::string config_file_xml;
@@ -285,7 +291,6 @@ private:
 	bool import_forward_order;
 	bool import_doSegment;
 
-	ACMediaCycleCallback mediacycle_callback;
 	void* mediacycle_callback_data;
 };
 

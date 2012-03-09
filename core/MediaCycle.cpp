@@ -72,6 +72,7 @@ MediaCycle::MediaCycle(ACMediaType aMediaType, string local_directory, string li
 	this->config_file_xml = "";
 
 	this->prevLibrarySize = 0;
+	this->eventManager=new ACEventManager;
 
 }
 
@@ -266,10 +267,6 @@ void *threadImport(void *import_thread_arg) {
 	((MediaCycle*)import_thread_arg)->importDirectories();
 }
 
-int MediaCycle::setCallback(ACMediaCycleCallback mediacycle_callback, void* user_data) {
-	this->mediacycle_callback = mediacycle_callback;
-	this->mediacycle_callback_data = user_data;
-}
 
 // == Media Library
 
@@ -301,8 +298,6 @@ int MediaCycle::importDirectories() {
 int MediaCycle::importDirectories(vector<string> directories, int recursive, bool forward_order, bool doSegment) {
 	int ok = 0;
 
-	mediacycle_callback("loaddirstart",mediacycle_callback_data);
-
 	float prevLibrarySizeMultiplier = 2;
 	int needsNormalizeAndCluster;
 	vector<string> filenames;
@@ -322,11 +317,9 @@ int MediaCycle::importDirectories(vector<string> directories, int recursive, boo
 
 /*
 #pragma omp parallel for
-*/
+ */
+	eventManager->sig_mediaImported(0,n);
 	for (i=0;i<n;i++) {		
-		stringstream callback_message;
-		callback_message << "importing_media_"<<i<<"_"<<n;
-		mediacycle_callback(callback_message.str().c_str(),mediacycle_callback_data);
 
 		if (mediaLibrary->importFile(filenames[i], this->pluginManager, doSegment, doSegment)){
 			ok++;
@@ -340,6 +333,7 @@ int MediaCycle::importDirectories(vector<string> directories, int recursive, boo
 			normalizeFeatures(needsNormalizeAndCluster);
 			libraryContentChanged(needsNormalizeAndCluster);
 		}
+		eventManager->sig_mediaImported(i+1,n);
     }
 
 	//t2 = getTime();
@@ -347,8 +341,6 @@ int MediaCycle::importDirectories(vector<string> directories, int recursive, boo
 	//}
 
 	filenames.empty();
-
-	mediacycle_callback("loaddirfinish",mediacycle_callback_data);
 
 	return ok;
 }
@@ -458,6 +450,15 @@ bool MediaCycle::changeBrowserMode(ACBrowserMode _mode){
 	this->mediaBrowser->switchMode(_mode);
 	return true;
 };
+
+
+//Listener Manager
+
+void MediaCycle::addListener(ACEventListener* eventListener){
+	if (eventManager!=NULL)
+		eventManager->addListener(eventListener);
+};
+
 
 // Plugins
 int MediaCycle::addPluginLibrary(string aPluginLibraryPath) {
