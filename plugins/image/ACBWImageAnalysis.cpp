@@ -297,6 +297,7 @@ void ACBWImageAnalysis::computeHuMoments(int thresh){
 	for (int i=0; i<7 ; i++){
 		hu_moments.push_back (modifiedLog(local_Hu_moments[i])) ;
 	}
+    delete[] local_Hu_moments;
 }
 
 
@@ -340,10 +341,9 @@ void ACBWImageAnalysis::computeGaborMoments(int mumax, int numax){ // default 4,
         gabor->setImage(this->getImageMat());
 	for (int i = 0; i < mumax; i++){	
 		for (int j = 0; j < numax; j++){
-			gabor->reset(i,j);
-                        gabor->computeConvolutionImage();
-			double *tmpft = new double[2];
-			tmpft = gabor->getMeanAndStdevs(); // will compute all what's necessary
+			gabor->reset(i, j);
+            gabor->computeConvolutionImage();
+            double *tmpft = gabor->getMeanAndStdevs(); // will compute all what's necessary
 			gabor_moments.push_back (tmpft[0]) ;
 			gabor_moments.push_back (tmpft[1]) ;
 			delete [] tmpft;

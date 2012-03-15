@@ -225,8 +225,7 @@ void ACColorImageHistogram::computeMoments(int highest_order){
 	showStats();
 #endif // DEBUG_ME	
 	for (int n=3; n<=highest_order; n++){
-		double* mom;
-		mom = new double[3];
+		double mom[3];
 		for (int i = 0; i < 3; i++){
 			mom[i] = 0.0;
 			for (int j = 0; j < range[i][1]; j++){

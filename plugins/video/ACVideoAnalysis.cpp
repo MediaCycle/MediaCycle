@@ -52,7 +52,7 @@ using namespace std;
 // ----------- uncomment this to get (+/- live) visual display of the time series
 //#define VISUAL_CHECK_GNUPLOT
 // ----------- uncomment this to get visual display using highgui and verbose output -----
-#define VISUAL_CHECK
+//#define VISUAL_CHECK
 //#define VERBOSE
 
 
