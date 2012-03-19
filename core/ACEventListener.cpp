@@ -33,6 +33,7 @@
  */
 
 #include "ACEventListener.h"
+#include "boost/version.hpp"
 
 ACEventListener::ACEventListener(){
 	t=new boost::thread(boost::bind(&ACEventListener::loop,this));
@@ -50,6 +51,12 @@ ACEventListener::ACEventListener(MediaCycle* core){
 };
 ACEventListener::~ACEventListener(){
 	service.stop();
+	
+#if BOOST_VERSION <104700
+	usleep(100000);
+#else 
+	while (!service.stopped()){};
+#endif
 	delete t;
 	
 };
@@ -65,12 +72,15 @@ void ACEventListener::loop(){
 };
 
 bool ACEventListener::stopped(){
+#if BOOST_VERSION <104700
+	return false;
+#else
 	return service.stopped(); // processes the tasks
+#endif
 };
 
 
 void ACEventListener::s_mediaImported(int n,int nTot){
-	cout<<service.stopped()<<endl;
 	service.post(boost::bind(&ACEventListener::mediaImported, this,n,nTot));
 };
 void ACEventListener::s_libraryCleaned(){
