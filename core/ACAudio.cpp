@@ -57,6 +57,7 @@ void ACAudio::init() {
 	waveformLength = 0;
 	waveform = 0;
     features_vectors.resize(0);
+	preproc_features_vectors.resize(0);
     db = 0.0f;
     bpm = 0.0f;
     time_signature_num = 0;

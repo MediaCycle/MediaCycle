@@ -546,6 +546,8 @@ void ACMedia::cleanPreProcFeaturesVector(void){
 	std::vector<ACMediaFeatures*>::iterator iter;
 	for (iter=preproc_features_vectors.begin();iter!=preproc_features_vectors.end();iter++){
 		if ((*iter)!=NULL){
+			//cout << *iter << endl; //ccl
+			//preproc_features_vectors.erase(iter); //ccl
 			delete (*iter);
 			(*iter)=NULL;
 		}

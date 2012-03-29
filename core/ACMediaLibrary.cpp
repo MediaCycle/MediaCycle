@@ -783,6 +783,11 @@ std::vector<int> ACMediaLibrary::getParentIds(void){
             //if (media_library[i]->getId()==i) // CF wrong and useless test!
 				ret.push_back(i);
 		}
+		else {
+			if (media_library[i]->getMediaType()==media_library[media_library[i]->getParentId()]->getMediaType() )
+				ret.push_back(i);
+				
+		}
 	}
 	return ret;
 }

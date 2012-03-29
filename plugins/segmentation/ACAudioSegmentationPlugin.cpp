@@ -134,7 +134,7 @@ std::vector<ACMedia*> ACAudioSegmentationPlugin::_segment(ACMediaTimedFeature* d
 		//desc_mf = computeFeature(data, "Energy", theAudio->getSampleRate(), theAudio->getChannels(), theAudio->getNFrames(), 16, 13, 1024, extendSoundLimits);
 		desc_v = conv_to<fcolvec>::from(-desc_mf->getValue());
 		time_v = desc_mf->getTime();
-		peaks_v = findpeaks(desc_v, 10);
+		peaks_v = findpeaks(desc_v, 10); //ccl, originally: 10
 		break;
 	}
 	case 1:{

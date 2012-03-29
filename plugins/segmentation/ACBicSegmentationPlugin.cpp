@@ -49,6 +49,7 @@ ACBicSegmentationPlugin::ACBicSegmentationPlugin() : lambda(1), sampling_rate(1)
     this->mDescription = "BicSegmentation plugin";
     this->mId = "";
 // equivalently	setParameters(1, 1, 20, 0.5, 5, 5)
+// original (1, 1, 20, 0.8, 5, 5)
 }
 
 ACBicSegmentationPlugin::~ACBicSegmentationPlugin() {
@@ -185,10 +186,18 @@ std::vector<ACMedia*> ACBicSegmentationPlugin::segment(ACMediaTimedFeature* _MTF
 
 	for (int i = 0; i < Nseg-1; i++){
 		//make sure the segment from the media have the proper type
+		cout << "Segment n° " << i+1 << endl;
 		ACMedia* media = ACMediaFactory::getInstance().create(_theMedia);
 		media->setParentId(_theMedia->getId());
 		media->setStartInt(segments_limits[i]); // XS TODO : this is in frame number, not time code
 		media->setEndInt(segments_limits[i+1]);
+		//cout << "frameRate " << media->getFrameRate() << endl;
+		//cout << "sampleRate " << media->getSampleRate() << endl;
+		media->setStart(_MTF->getTime(segments_limits[i])); //TR, 29/03
+		if (i<Nseg-2)
+			media->setEnd(_MTF->getTime(segments_limits[i+1]));
+		cout << "duration of the segment " << media->getDuration() << endl;
+		
                 media->setId(_theMedia->getId()+i+1); // XS TODO check this, it is overlapping with another ID ?
 		segments.push_back(media);
 	}
@@ -269,6 +278,7 @@ std::vector<int> ACBicSegmentationPlugin::_segment(){
 			segments_tmp.push_back(s);
 			seg_i = s + jump_width; // JU: I believe we should always take all the frames in the BIC criterion (so, +1) even if we prevent for having segments shorter than Wmin: the first frames of the segment are relevant for its statistical modelling, hence finiding the segment end.
 			seg_f = seg_i + Wmin; 
+			cout << seg_i << " //  " << seg_f <<endl; //ccl
 		}
 		else
 			// segment not yet found
