@@ -95,6 +95,9 @@ void ACAboutDialogQt::updateLicenses(){
 	#if defined (USE_TORCH3)
 		html.append ("<li><a href=\"http://www.torch.ch\">Torch3</a>: BSD License</li>");
 	#endif //defined (USE_TORCH3)
+        #if defined (SUPPORT_AUDIO)
+                html.append ("<li><a href=\"http://yaafe.sourceforge.net\">Yet another audio features extraction (Yaafe)</a>: LPGL License</li>");
+        #endif //defined (SUPPORT_AUDIO)
 	html.append ("</ul>");
 	ui.multiLineEditLicenses->document()->setHtml(html);			 
 }
