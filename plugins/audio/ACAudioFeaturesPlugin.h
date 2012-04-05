@@ -42,14 +42,14 @@
 
 class ACAudioFeaturesPlugin : public ACTimedFeaturesPlugin {
 public:
-	ACAudioFeaturesPlugin();
-	~ACAudioFeaturesPlugin();
+    ACAudioFeaturesPlugin();
+    ~ACAudioFeaturesPlugin();
 
-	virtual std::vector<ACMediaFeatures*> calculate(ACMediaData* _data, ACMedia*, bool _save_timed_feat=false);
+    virtual std::vector<ACMediaFeatures*> calculate(ACMediaData* _data, ACMedia*, bool _save_timed_feat=false);
 
 private:
-	std::vector<ACMediaFeatures*> _calculate(std::string aFileName="", ACMediaData* audio_data = 0, ACMedia* theMedia = 0, bool _save_timed_feat=false);
-	std::vector<std::string> mtf_file_names;
+    std::vector<ACMediaFeatures*> _calculate(std::string aFileName="", ACMediaData* audio_data = 0, ACMedia* theMedia = 0, bool _save_timed_feat=false);
+    std::vector<std::string> mtf_file_names;
 };
 
 #endif	/* _ACAUDIOFEATURESPLUGIN_H */

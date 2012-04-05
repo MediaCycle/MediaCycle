@@ -1,8 +1,8 @@
 /**
  * @brief fft-helper.cpp
  * @author Christian Frisson
- * @date 24/02/2011
- * @copyright (c) 2011 – UMONS - Numediart
+ * @date 05/04/2012
+ * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -66,13 +66,13 @@ cx_mat fft_helper(mat x_m, int n){
 	//  std::cout << "Calling fft helper" << std::endl;
   // n : fft size
   double* x_db = 0;
-  cx_mat y_m;
+  //cx_mat y_m;
   mat real_m(n,1);
   mat imag_m(n,1);
   int xSize, sigSize;
   
   if (n==1)
-    y_m = ones<cx_mat>(1,1)*x_m(0,0);
+    return ones<cx_mat>(1,1)*x_m(0,0);
   else{
     int* ip = new int[ 2 + (int)(sqrt(n)+.5)];
     double* w = new double[n/2];
@@ -107,12 +107,13 @@ cx_mat fft_helper(mat x_m, int n){
       imag_m(imag_m.n_rows-i-1,0) = -imag_m(i+1,0);
     }  
     //imag_m.print("imag");
-    y_m = cx_mat(real_m, imag_m);
+    //y_m = cx_mat(real_m, imag_m);
     delete[] x_db;
     delete[] ip;
     delete[] w;
+    return cx_mat(real_m, imag_m);
   }
-  return y_m;
+  //return y_m;
 }
 
 #endif

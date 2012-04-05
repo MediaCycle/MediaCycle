@@ -1,8 +1,8 @@
 /**
  * @brief ACAudioFeatures.h
- * @author Stéphane Dupont
- * @date 12/05/2011
- * @copyright (c) 2011 – UMONS - Numediart
+ * @author Christian Frisson
+ * @date 05/04/2012
+ * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -38,43 +38,53 @@
 #include <armadillo>
 #include <vector>
 #include <ACMediaTimedFeature.h>
+#include <ACAudio.h>
 //#include "fftw3.h"
 //#include "ifft-helper.h"
-
 //#include "round.h"
 
-ACMediaTimedFeature* computeFeature(float* data, 
-									std::string featureName, 
-																		 int samplerate, 
-																		 int nchannels, 
-																		 long length,
-																		 int mfccNbChannels = 32, 
-																		 int mfccNb = 13, 
-																		 int windowSize=512, 	
-																		 bool extendSoundLimits = false,
-                                                                                                                                                 int minOctave=2,
-                                                                                                                                                 int maxOctave=7);
-std::vector<ACMediaTimedFeature*> computeFeatures(float* data, 
-												  std::vector<std::string> descList, 
-																									 int samplerate, 
-																									 int nchannels, 
-																									 long length, 
-																									 int mfccNbChannels = 32, 
-																									 int mfccNb = 13, 
-																									 int windowSize=512, 	
-																									 bool extendSoundLimits = false,
-                                                                                                                                                                                                         int minOctave=2,
-                                                                                                                                                                                                         int maxOctave=7);
-std::vector<ACMediaTimedFeature*> computeFeatures(float* data, 
-																									 int samplerate, 
-																									 int nchannels, 
-																									 long length, 
-																									 int mfccNbChannels = 32, 
-																									 int mfccNb = 13, 
-																									 int windowSize=512, 	
-																									 bool extendSoundLimits = false,
-                                                                                                                                                                                                         int minOctave=2,
-                                                                                                                                                                                                         int maxOctave=7);
+ACMediaTimedFeature* computeFeature(float* data,
+                                    std::string featureName,
+                                    int samplerate,
+                                    int nchannels,
+                                    long length,
+                                    int mfccNbChannels = 32,
+                                    int mfccNb = 13,
+                                    int windowSize=512,
+                                    bool extendSoundLimits = false,
+                                    int minOctave=2,
+                                    int maxOctave=7);
+
+std::vector<ACMediaTimedFeature*> computeFeatures(float* data,
+                                                  std::vector<std::string> descList,
+                                                  int samplerate,
+                                                  int nchannels,
+                                                  long length,
+                                                  int mfccNbChannels = 32,
+                                                  int mfccNb = 13,
+                                                  int windowSize=512,
+                                                  bool extendSoundLimits = false,
+                                                  int minOctave=2,
+                                                  int maxOctave=7);
+
+std::vector<ACMediaTimedFeature*> computeFeatures(float* data,
+                                                  int samplerate,
+                                                  int nchannels,
+                                                  long length,
+                                                  int mfccNbChannels = 32,
+                                                  int mfccNb = 13,
+                                                  int windowSize=512,
+                                                  bool extendSoundLimits = false,
+                                                  int minOctave=2,
+                                                  int maxOctave=7);
+
+std::vector<ACMediaTimedFeature*> computeFeaturesBuffered(ACAudio* audio,
+                                                  int mfccNbChannels=32,
+                                                  int mfccNb=13,
+                                                  int windowSize=512,
+                                                  bool extendSoundLimits=false,
+                                                  int minOctave=2,
+                                                  int maxOctave=7);
 
 int resample(float* datain, SF_INFO *sfinfo, float* dataout, SF_INFO* sfinfoout);
 double spectralCentroid(arma::colvec x_v);
@@ -101,5 +111,4 @@ arma::cx_mat fftw_forward(arma::colvec x_m, int n);
 // ifft 1D for real column vector
 arma::colvec fftw_backward(arma::colvec x_m, int n);
 arma::mat ifft(arma::mat x_m, int n);
-
 #endif

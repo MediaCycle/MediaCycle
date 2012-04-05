@@ -40,28 +40,30 @@
 
 //class ACMedia;
 
+//#define BUFFERIZED
+
 ACAudioFeaturesPlugin::ACAudioFeaturesPlugin() {
     //vars herited from ACPlugin
     this->mMediaType = MEDIA_TYPE_AUDIO;
     this->mName = "AudioFeatures";
     this->mDescription = "AudioFeatures plugin";
     this->mId = "";
-	this->mDescriptorsList.push_back("Spectral Centroid");
-	this->mDescriptorsList.push_back("Spectral Spread");
-	this->mDescriptorsList.push_back("Spectral Variation");
-	this->mDescriptorsList.push_back("Spectral Flatness");
-	this->mDescriptorsList.push_back("Spectral Flux");
-	this->mDescriptorsList.push_back("Spectral Decrease");
-	this->mDescriptorsList.push_back("MFCC");
-	this->mDescriptorsList.push_back("DMFCC");
-	this->mDescriptorsList.push_back("DDMFCC");
-	this->mDescriptorsList.push_back("Zero Crossing Rate");
-	this->mDescriptorsList.push_back("Energy");
-	this->mDescriptorsList.push_back("Loudness");
-	this->mDescriptorsList.push_back("Log Attack Time");
-	this->mDescriptorsList.push_back("Energy Modulation Frequency");
-	this->mDescriptorsList.push_back("Energy Modulation Amplitude");
-	this->mtf_file_name = "";
+    this->mDescriptorsList.push_back("Spectral Centroid");
+    this->mDescriptorsList.push_back("Spectral Spread");
+    this->mDescriptorsList.push_back("Spectral Variation");
+    this->mDescriptorsList.push_back("Spectral Flatness");
+    this->mDescriptorsList.push_back("Spectral Flux");
+    this->mDescriptorsList.push_back("Spectral Decrease");
+    this->mDescriptorsList.push_back("MFCC");
+    this->mDescriptorsList.push_back("DMFCC");
+    this->mDescriptorsList.push_back("DDMFCC");
+    this->mDescriptorsList.push_back("Zero Crossing Rate");
+    this->mDescriptorsList.push_back("Energy");
+    this->mDescriptorsList.push_back("Loudness");
+    this->mDescriptorsList.push_back("Log Attack Time");
+    this->mDescriptorsList.push_back("Energy Modulation Frequency");
+    this->mDescriptorsList.push_back("Energy Modulation Amplitude");
+    this->mtf_file_name = "";
 }
 
 ACAudioFeaturesPlugin::~ACAudioFeaturesPlugin() {
@@ -69,123 +71,134 @@ ACAudioFeaturesPlugin::~ACAudioFeaturesPlugin() {
 
 /*
 static starpu_codelet cl = {
-	.where = STARPU_CPU,
-	.cpu_func = cpu_func,
-	.nbuffers = 2
+    .where = STARPU_CPU,
+    .cpu_func = cpu_func,
+    .nbuffers = 2
 }
 
 static void cpu_func(void _*descr[], void *cl_args) {
-	(ACAudioFeaturesPlugin*)cl_args.plugin->calculate(audio_data, theMedia, returndescriptor);
+    (ACAudioFeaturesPlugin*)cl_args.plugin->calculate(audio_data, theMedia, returndescriptor);
 }
 
 std::vector<ACMediaFeatures*> ACAudioFeaturesPlugin::calculate_starpu(vector<ACMediaData*> audio_data, vector<ACMedia*> theMedia) {
-	// create job list
-	for () {
-	}
- 
-	// return vector of decriptors
- 
-	// check that calculate is thread safe
+    // create job list
+    for () {
+    }
+
+    // return vector of decriptors
+
+    // check that calculate is thread safe
 }
 */
 
 // CF
 std::vector<ACMediaFeatures*> ACAudioFeaturesPlugin::calculate(ACMediaData* audio_data, ACMedia* theMedia, bool _save_timed_feat) {
-	// from MediaData
-	return this->_calculate(audio_data->getFileName(),audio_data,theMedia,_save_timed_feat);
+    // from MediaData
+    return this->_calculate(audio_data->getFileName(),audio_data,theMedia,_save_timed_feat);
 }
 
 // private method
 std::vector<ACMediaFeatures*> ACAudioFeaturesPlugin::_calculate(std::string aFileName, ACMediaData* audio_data, ACMedia* theMedia, bool _save_timed_feat){
-	bool extendSoundLimits = true;
-	std::vector<ACMediaTimedFeature*> descmf;
-	std::vector<ACMediaFeatures*> desc;
+    bool extendSoundLimits = false;//true;
+    std::vector<ACMediaTimedFeature*> descmf;
+    std::vector<ACMediaFeatures*> desc;
 
-	ACAudio* theAudio = 0;
+    ACAudio* theAudio = 0;
 
-	try{
-		theAudio = static_cast <ACAudio*> (theMedia);
-		if(!theAudio) 
-			throw runtime_error("<ACAudioFeaturesPlugin::_calculate> problem with ACAudio cast");
-	}catch (const exception& e) {
-		cerr << e.what() << endl;
-		return desc;
-	}
-	
-	// XS TODO we are copying the data, unnecessary
-	float* data = new float[theAudio->getNFrames() * theAudio->getChannels()];
-	
-	// SD replaced loop by more efficient memcpy
-	memcpy(data, static_cast<float*>(audio_data->getData())+theAudio->getSampleStart()*theAudio->getChannels(),
-		   (theAudio->getSampleEnd()-theAudio->getSampleStart())*theAudio->getChannels()*sizeof(float));
-	/*
-	for (long i = theAudio->getSampleStart(); i< theAudio->getSampleEnd(); i++){
-		for (long j = 0; j < theAudio->getChannels(); j++){
-			data[index] = audio_data->getAudioData()[i*theAudio->getChannels()+j];
-			index++;
-		}
-	}
-	 */
-	
-// 	ofstream output("signal1.txt");
-// 	for(int i=0; i < (long) theAudio->getNFrames() * theAudio->getChannels(); i++){
-// 		output<<data[i]<<endl;
-// 	}
-	
-	descmf = computeFeatures(data, theAudio->getSampleRate(), theAudio->getChannels(), theAudio->getNFrames(), 32, 13, 1024, extendSoundLimits);
-	
-	// find the index of the feature named "Energy"
-	int nrgIdx = 0;
-	for (int i=0; i<descmf.size(); i++){
-		if (descmf[i]->getName() == "Energy")
-			nrgIdx = i;
-	}
-	std::cout << "nrgIdx = " << nrgIdx << std::endl;
-	
-	// the feature named "Energy" does not need to be normalized
-	for (int i=0; i<descmf.size(); i++){
-		desc.push_back(descmf[i]->mean());
-		if (i==nrgIdx){
-			desc[i]->setNeedsNormalization(0);
-		}
-	}
-	
-	// saving timed features on disk (if _save_timed_feat flag is on)
-	// XS TODO add checks
-	if (_save_timed_feat) {
-		// try to keep the convention : _b.mtf = binary ; _t.mtf = ascii text
-		bool save_binary = true;
-		string mtf_file_name; // file(s) in which feature(s) will be saved
-		string file_ext =  "_b.mtf";
-		string aFileName = theMedia->getFileName();
-		string aFileName_noext = aFileName.substr(0,aFileName.find_last_of('.'));
-		for (int i=0; i<descmf.size(); i++){
-			mtf_file_name = aFileName_noext + "_" +descmf[i]->getName() + file_ext;
-			descmf[i]->saveInFile(mtf_file_name, save_binary);
-			mtf_file_names.push_back(mtf_file_name); // keep track of saved features
-		}
-	}
-	
-	// XS TODO wtf ?
-	desc.push_back(descmf[nrgIdx]->interpN(10)->toMediaFeatures());
-	
-	// CF WARNING we save only the "Energy" feature that is expected for the AudioSegmentatinPlugin, until we can choose features associated to segmentation plugins
-	if (_save_timed_feat) {
-		// try to keep the convention : _b.mtf = binary ; _t.mtf = ascii text
-		bool save_binary = true;
-		string file_ext = "_b.mtf";
-		string aFileName_noext = theMedia->getFileName().substr(0,theMedia->getFileName().find_last_of('.'));
-		mtf_file_name = aFileName_noext + "_" +this->mDescription + file_ext; // mName instead of mDescription due its the space char, just in case?
-		// CF we're saving the Energy feature as it is used for method 0 in ACAudioSegmentationPlugin...
-		descmf[10]->saveInFile(mtf_file_name, save_binary);//CF just the nth MediaTimeFeature [0] saved!
-	}
-	
-	for (int i=0; i<descmf.size(); i++){
-		delete descmf[i];
-	}
-	descmf.clear();
-	delete [] data;
-	return desc;
+    try{
+        theAudio = static_cast <ACAudio*> (theMedia);
+        if(!theAudio)
+            throw runtime_error("<ACAudioFeaturesPlugin::_calculate> problem with ACAudio cast");
+    }catch (const exception& e) {
+        cerr << e.what() << endl;
+        return desc;
+    }
+
+#ifndef BUFFERIZED
+    if(theMedia->getParentId()>-1)
+        theAudio->extractData(theAudio->getFileName());//CF stupid workaround since we erase the data after importing the parent...
+
+    // XS TODO we are copying the data, unnecessary
+    float* data = new float[theAudio->getNFrames() * theAudio->getChannels()];
+
+    // SD replaced loop by more efficient memcpy
+    //memcpy(data, static_cast<float*>(audio_data->getData())+theAudio->getSampleStart()*theAudio->getChannels(),
+    //       (theAudio->getSampleEnd()-theAudio->getSampleStart())*theAudio->getChannels()*sizeof(float));
+
+    int a= theAudio->getSampleStart();
+    int b= theAudio->getSampleEnd();
+    int c=theAudio->getChannels();
+    int d=theAudio->getNFrames();
+    //CF bufferize
+    int index = 0;
+   for (long i = theAudio->getSampleStart(); i< theAudio->getSampleEnd(); i++){
+        for (long j = 0; j < theAudio->getChannels(); j++){
+            data[index] = static_cast<float*>(audio_data->getData())[i*theAudio->getChannels()+j];
+            index++;
+        }
+    }
+
+    descmf = computeFeatures(data, theAudio->getSampleRate(), theAudio->getChannels(), theAudio->getNFrames(), 32, 13, 1024, extendSoundLimits);
+ #else
+    descmf = computeFeaturesBuffered(theAudio, 32, 13, 1024, extendSoundLimits);
+#endif//def BUFFERIZED
+
+    // find the index of the feature named "Energy"
+    int nrgIdx = 0;
+    for (int i=0; i<descmf.size(); i++){
+        if (descmf[i]->getName() == "Energy")
+            nrgIdx = i;
+    }
+    //std::cout << "nrgIdx = " << nrgIdx << std::endl;
+
+    // the feature named "Energy" does not need to be normalized
+    for (int i=0; i<descmf.size(); i++){
+        desc.push_back(descmf[i]->mean());
+        if (i==nrgIdx){
+            desc[i]->setNeedsNormalization(0);
+        }
+    }
+
+    // saving timed features on disk (if _save_timed_feat flag is on)
+    // XS TODO add checks
+    if (_save_timed_feat) {
+        // try to keep the convention : _b.mtf = binary ; _t.mtf = ascii text
+        bool save_binary = false;//CF true
+        string mtf_file_name; // file(s) in which feature(s) will be saved
+        string file_ext =  "_b.mtf";
+        //if(!save_binary)
+        //    file_ext =  "_t.mtf";
+        string aFileName = theMedia->getFileName();
+        string aFileName_noext = aFileName.substr(0,aFileName.find_last_of('.'));
+        for (int i=0; i<descmf.size(); i++){
+            mtf_file_name = aFileName_noext + "_" +descmf[i]->getName() + file_ext;
+            descmf[i]->saveInFile(mtf_file_name, save_binary);
+            mtf_file_names.push_back(mtf_file_name); // keep track of saved features
+        }
+    }
+
+    // XS TODO wtf ?
+    //desc.push_back(descmf[nrgIdx]->interpN(10)->toMediaFeatures());
+
+    // CF WARNING we save only the "Energy" feature that is expected for the AudioSegmentatinPlugin, until we can choose features associated to segmentation plugins
+    /*if (_save_timed_feat) {
+        // try to keep the convention : _b.mtf = binary ; _t.mtf = ascii text
+        bool save_binary = true;
+        string file_ext = "_b.mtf";
+        string aFileName_noext = theMedia->getFileName().substr(0,theMedia->getFileName().find_last_of('.'));
+        mtf_file_name = aFileName_noext + "_" +this->mDescription + file_ext; // mName instead of mDescription due its the space char, just in case?
+        // CF we're saving the Energy feature as it is used for method 0 in ACAudioSegmentationPlugin...
+        descmf[10]->saveInFile(mtf_file_name, save_binary);//CF just the nth MediaTimeFeature [0] saved!
+    }*/
+
+    for (int i=0; i<descmf.size(); i++){
+        delete descmf[i];
+    }
+    descmf.clear();
+    #ifndef BUFFERIZED
+    delete [] data;
+    #endif//def BUFFERIZED
+    return desc;
 }
 
 // the plugin should know internally where it saved the mtf
@@ -203,7 +216,7 @@ std::vector<ACMediaFeatures*> ACAudioFeaturesPlugin::_calculate(std::string aFil
 
 
 // XS TODO !!!
-// the plugin should know internally where it saved the mtf 
+// the plugin should know internally where it saved the mtf
 // thanks to mtf_file_name
 //ACMediaTimedFeature* ACAudioFeaturesPlugin::getTimedFeatures(){
 //	if (mtf_file_names.size() == 0){

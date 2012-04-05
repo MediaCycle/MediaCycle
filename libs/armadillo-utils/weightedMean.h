@@ -1,8 +1,8 @@
 /**
  * @brief weightedMean.h
- * @author Xavier Siebert
- * @date 31/01/2011
- * @copyright (c) 2011 – UMONS - Numediart
+ * @author Christian Frisson
+ * @date 05/04/2012
+ * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -39,8 +39,9 @@ template<typename eT>
 const arma::Row<eT> weightedMean(const arma::Col<eT>& in_v, const arma::Col<eT>& weight_v){
 	float sumWeight = as_scalar(sum(weight_v));
 	arma::Col<eT> weightN_v = weight_v / sumWeight;
-	arma::Row<eT> tmp_m = trans(weightN_v) * in_v;
-	return tmp_m;
+        //arma::Row<eT> tmp_m = trans(weightN_v) * in_v;
+        //return tmp_m;
+        return trans(weightN_v) * in_v;
 }
 
 #endif
