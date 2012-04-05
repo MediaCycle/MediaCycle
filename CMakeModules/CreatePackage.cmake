@@ -160,6 +160,16 @@ IF(UNIX)
                 IF(USE_AUDIOFEAT)
                     list(APPEND UBUNTU_DEPS "libsamplerate0")
                 ENDIF()
+
+                # argtable
+                IF(USE_AUDIOFEAT)
+                    list(APPEND UBUNTU_DEPS "libargtable2-0")
+                ENDIF()
+
+                # mpg123-0
+                IF(USE_AUDIOFEAT)
+                    list(APPEND UBUNTU_DEPS "libmpg123-0")
+                ENDIF()
             ENDIF()
 
             # FFmpeg
