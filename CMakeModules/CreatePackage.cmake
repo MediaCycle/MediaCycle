@@ -484,6 +484,18 @@ IF(APPLE)
 	#ENDIF()
 
 ENDIF()
+
+#--------------------------------------------------------------------------------
+# Install the YAAFE settings file
+IF(SUPPORT_AUDIO AND USE_AUDIO AND USE_YAAFE)
+	IF(APPLE)
+		INSTALL(PROGRAMS "${CMAKE_SOURCE_DIR}/plugins/audio/ACAudioYaafePluginSettings.txt" DESTINATION ${PROGNAME}.app/Contents/MacOS COMPONENT Runtime)
+	ELSEIF(WIN32)
+		INSTALL(PROGRAMS "${CMAKE_SOURCE_DIR}/plugins/audio/ACAudioYaafePluginSettings.txt" DESTINATION . COMPONENT Runtime)
+	ELSE()
+		INSTALL(PROGRAMS "${CMAKE_SOURCE_DIR}/plugins/audio/ACAudioYaafePluginSettings.txt" DESTINATION share COMPONENT ${PROGNAME})
+	ENDIF()
+ENDIF()
 #--------------------------------------------------------------------------------
 # Use BundleUtilities to get all other dependencies for the application to work.
 # It takes a bundle or executable along with possible plugins and inspects it

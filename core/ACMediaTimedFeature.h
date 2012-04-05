@@ -78,7 +78,7 @@ public:
 	arma::fmat getValue();
 	float getValue(float index, float dim);
 	void setValue(arma::fmat);
-	void setTimeAndValueForIndex(long iIndex, double iTime, arma::frowvec iVal_v);
+        void setTimeAndValueForIndex(long iIndex, double iTime, arma::frowvec iVal_v);
 	void setTimeAndValueForIndex(long iIndex, double iTime, std::vector<float> iVal);
 	std::string getName(){return name;};
 	void setName(std::string name){this->name = name;};
@@ -127,6 +127,7 @@ public:
 	// concatenate with another timed Feature
 	// XS TODO: must have the same time stamps
 	bool appendTimedFeature(ACMediaTimedFeature* B);
+        bool appendTimedFeatureAlongTime(ACMediaTimedFeature* B);
 
 	// I/O
 	// old

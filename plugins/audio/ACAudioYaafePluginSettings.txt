@@ -1,0 +1,98 @@
+audio := Input SampleRate="44100"
+n1 := FrameTokenizer blockSize="512" stepSize="256"
+audio > n1
+
+n2 := FFT FFTLength="512" FFTWindow="Hanning"
+n1 > n2
+
+n3 := Abs
+n2 > n3
+
+n4 := MelFilterBank MelMaxFreq="6854.0" MelMinFreq="130.0" MelNbFilters="40"
+n3 > n4
+
+n5 := Cepstrum CepsIgnoreFirstCoeff="1" CepsNbCoeffs="13"
+n4 > n5
+
+MFCC := Output normalize="-1" version="v0.6" yaafedefinition="MFCC blockSize=512 stepSize=256"
+n5 > MFCC
+
+n7 := Derivate DO1Len="4" DO2Len="1" DOrder="1"
+MFCCd1 := Output normalize="-1" version="v0.6" yaafedefinition="MFCC blockSize=512 stepSize=256 > Derivate DOrder=1"
+n5 > n7
+n7 > MFCCd1
+
+n9 := Derivate DO1Len="4" DO2Len="1" DOrder="2"
+MFCCd2 := Output normalize="-1" version="v0.6" yaafedefinition="MFCC blockSize=512 stepSize=256 > Derivate DOrder=2"
+n5 > n9
+n9 > MFCCd2
+
+n11 := Flatness
+SpectralFlatness := Output normalize="-1" version="v0.6" yaafedefinition="SpectralFlatness blockSize=512 stepSize=256"
+n3 > n11
+n11 > SpectralFlatness
+
+n13 := Sqr
+n3 > n13
+
+n14 := Rolloff
+SpectralRollOff := Output normalize="-1" version="v0.6" yaafedefinition="SpectralRolloff blockSize=512 stepSize=256"
+n13 > n14
+n14 > SpectralRollOff
+
+n15 := Variation
+SpectralVariation := Output normalize="-1" version="v0.6" yaafedefinition="SpectralVariation blockSize=512 stepSize=256"
+n3 > n15
+n15 > SpectralVariation
+
+n16 := Slope
+SpectralSlope := Output normalize="-1" version="v0.6" yaafedefinition="SpectralSlope blockSize=512 stepSize=256"
+n3 > n16
+n16 > SpectralSlope
+
+n17 := ShapeStatistics
+SpectralShapeStatistics := Output normalize="-1" version="v0.6" yaafedefinition="SpectralShapeStatistics blockSize=512 stepSize=256"
+n3 > n17
+n17 > SpectralShapeStatistics
+
+n18 := Flux
+SpectralFlux := Output normalize="-1" version="v0.6" yaafedefinition="SpectralFlux blockSize=512 stepSize=256"
+n3 > n18
+n18 > SpectralFlux
+
+n19 := Decrease
+SpectralDecrease := Output normalize="-1" version="v0.6" yaafedefinition="SpectralDecrease blockSize=512 stepSize=256"
+n3 > n19
+n19 > SpectralDecrease
+
+n20 := ZCR
+ZeroCrossingRate := Output normalize="-1" version="v0.6" yaafedefinition="ZeroCrossingRate blockSize=512 stepSize=256"
+n1 > n20
+n20 > ZeroCrossingRate
+
+n21 := ShapeStatistics
+TemporalShapeStatistics := Output normalize="-1" version="v0.6" yaafedefinition="TemporalShapeStatistics blockSize=512 stepSize=256"
+n1 > n21
+n21 > TemporalShapeStatistics
+
+n22 := RMS
+Energy := Output normalize="-1" version="v0.6" yaafedefinition="Energy blockSize=512 stepSize=256"
+n1 > n22
+n22 > Energy
+
+n23 := Loudness
+Loudness := Output normalize="-1" version="v0.6" yaafedefinition="Loudness blockSize=512 stepSize=256"
+n13 > n23
+n23 > Loudness
+
+n24 := Normalize NNorm="Sum"
+n25 := LoudnessSharpness
+PerceptualSharpness := Output normalize="-1" version="v0.6" yaafedefinition="PerceptualSharpness blockSize=512 stepSize=256"
+n23 > n24
+n24 > n25
+n25 > PerceptualSharpness
+
+n26 := LoudnessSpread
+PerceptualSpread := Output normalize="-1" version="v0.6" yaafedefinition="PerceptualSpread blockSize=512 stepSize=256"
+n24 > n26
+n26 > PerceptualSpread

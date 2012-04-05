@@ -700,6 +700,18 @@ bool ACMediaTimedFeature::appendTimedFeature(ACMediaTimedFeature* B){
 	return append_ok;
 }
 
+bool ACMediaTimedFeature::appendTimedFeatureAlongTime(ACMediaTimedFeature* B){
+    bool append_ok;
+    if (this->getValue().n_rows != B->getValue().n_rows){
+            append_ok = false;
+    }
+    else {
+            this->setValue( join_cols(this->getValue(),B->getValue()) );
+            this->setTime( join_cols(this->getTime(),B->getTime()) );
+            append_ok = true;
+    }
+    return append_ok;
+}
 // --------------------------------------------------------------------
 // I/O
 
