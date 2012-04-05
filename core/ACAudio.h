@@ -45,75 +45,75 @@
 #include <sys/stat.h>
 
 class ACAudio : public ACMedia {
-	// contains the *minimal* information about an audio
-	// is this too much already ?
+    // contains the *minimal* information about an audio
+    // is this too much already ?
 public:
-	ACAudio();
-	ACAudio(const ACAudio&, bool reduce = true);
-	~ACAudio();
-	
+    ACAudio();
+    ACAudio(const ACAudio&, bool reduce = true);
+    ~ACAudio();
+
 private:
-	void init();
-	
-public:	
-	void saveACLSpecific(std::ofstream &library_file);
-	int loadACLSpecific(std::ifstream &library_file);
-	void saveXMLSpecific(TiXmlElement* _media);
-	int loadXMLSpecific(TiXmlElement* _pMediaNode);
+    void init();
 
-	//void import(std::string _path); // XS 240210 : migrated to ACMedia
-	void saveThumbnail(std::string _path);
-	void* getThumbnailPtr() { return (void*)waveform; }
-	int getThumbnailWidth() {return waveformLength;} // width in thumbnail frames, not samples
-	int getThumbnailHeight() {return 0;} // width in thumbnail frames, not samples
-	int getWidth() {return getSampleEnd();}
-	int getHeight() {return 0;}
-	
-	float* getData(){return static_cast<float*> (data->getData());}
-	void setData(float* _data,float _sample_number=0 ,int _sr=44100,int _channels=1);
-	virtual ACMediaData* getMediaData(){return data;}
-	bool extractData(std::string fname);
-	virtual void deleteData();
+public:
+    void saveACLSpecific(std::ofstream &library_file);
+    int loadACLSpecific(std::ifstream &library_file);
+    void saveXMLSpecific(TiXmlElement* _media);
+    int loadXMLSpecific(TiXmlElement* _pMediaNode);
 
-	void setSampleRate(int _sample_rate) { sample_rate = _sample_rate; }
-	int getSampleRate() { return sample_rate; }
-	void setChannels(int _channels) { channels = _channels; }
-	int getChannels() { return channels; }
+    //void import(std::string _path); // XS 240210 : migrated to ACMedia
+    void saveThumbnail(std::string _path);
+    void* getThumbnailPtr() { return (void*)waveform; }
+    int getThumbnailWidth() {return waveformLength;} // width in thumbnail frames, not samples
+    int getThumbnailHeight() {return 0;} // width in thumbnail frames, not samples
+    int getWidth() {return getSampleEnd();}
+    int getHeight() {return 0;}
 
-	long getNFrames() { return getSampleEnd() - getSampleStart() + 1; }
-	float getDuration() {return (float)getNFrames()/(float) sample_rate;}
+    float* getData(){return static_cast<float*> (data->getData());}
+    void setData(float* _data,float _sample_number=0 ,int _sr=44100,int _channels=1);
+    virtual ACMediaData* getMediaData(){return data;}
+    bool extractData(std::string fname);
+    virtual void deleteData();
 
-	int getSampleStart();
-	int getSampleEnd();
+    void setSampleRate(int _sample_rate) { sample_rate = _sample_rate; }
+    int getSampleRate() { return sample_rate; }
+    void setChannels(int _channels) { channels = _channels; }
+    int getChannels() { return channels; }
 
-	void setSampleStart(int st){this->start = (float) st / (float) sample_rate; };
-	void setSampleEnd(int en){this->end = (float) en / (float) sample_rate; };
+    long getNFrames() { return getSampleEnd() - getSampleStart() + 1; }
+    float getDuration() {return (float)getNFrames()/(float) sample_rate;}
 
-	void setWaveformLength(int _waveformLength) { waveformLength = _waveformLength; }
-	int getWaveformLength() { return waveformLength; }
-	void setWaveform(float *_waveform) { waveform = _waveform; }
-	float* getWaveform() { return waveform; }
-	
-	void computeWaveform(const float* samples_v);
+    int getSampleStart();
+    int getSampleEnd();
 
-	float* getSamples();
-	float* getMonoSamples();
+    void setSampleStart(int st){this->start = (float) st / (float) sample_rate; };
+    void setSampleEnd(int en){this->end = (float) en / (float) sample_rate; };
 
-private:	
-	int sample_rate;
-	int channels;
-	//float time_stamp_start;	// seconds
-	//float time_stamp_end;
-	int waveformLength;
-	float* waveform; // typically one value every 10ms
-	// following are specific to loops or music
-	float db;
-	float bpm;
-	int time_signature_num;
-	int time_signature_den;
-	int key;
-	int acid_type;
-	ACAudioData* data;
+    void setWaveformLength(int _waveformLength) { waveformLength = _waveformLength; }
+    int getWaveformLength() { return waveformLength; }
+    void setWaveform(float* _waveform) { waveform = _waveform; }
+    float* getWaveform() { return waveform; }
+
+    float* computeWaveform(int& length, float start_ratio = 0.0f, float end_ratio = 1.0f);
+
+    float* getSamples();
+    float* getMonoSamples();
+
+private:
+    int sample_rate;
+    int channels;
+    //float time_stamp_start;	// seconds
+    //float time_stamp_end;
+    int waveformLength;
+    float* waveform; // typically one value every 10ms
+    // following are specific to loops or music
+    float db;
+    float bpm;
+    int time_signature_num;
+    int time_signature_den;
+    int key;
+    int acid_type;
+    ACAudioData* data;
 };
 
 
