@@ -1,4 +1,4 @@
-audio := Input SampleRate="44100"
+audio := Input Resample="yes" SampleRate="22050"
 n1 := FrameTokenizer blockSize="512" stepSize="256"
 audio > n1
 
