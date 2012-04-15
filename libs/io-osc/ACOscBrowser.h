@@ -65,7 +65,7 @@ public:
     ~ACOscBrowser();
 
     // pass 0 to receive from any host
-    void create(const char *hostname, int port);
+    bool create(const char *hostname, int port);
     void release();
 
     // Starts a background thread and listens to socket from there

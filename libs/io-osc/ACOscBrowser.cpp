@@ -39,7 +39,7 @@
 using namespace std;
 
 void error(int num, const char *msg, const char *path) {
-    std::cout << "liblo server error " << num << " in path " << path << ": " << msg << std::endl;
+    std::cout << "ACOscBrowser: liblo server error " << num << " in path " << path << ": " << msg << std::endl;
     fflush(stdout);
 }
 
@@ -56,14 +56,18 @@ ACOscBrowser::~ACOscBrowser() {
     release();
 };
 
-void ACOscBrowser::create(const char *hostname, int port) {
+bool ACOscBrowser::create(const char *hostname, int port) {
     this->release();
     char portchar[6];
     sprintf(portchar, "%d", port);
     server_thread = lo_server_thread_new(portchar, error);
-
+    if(!server_thread){
+        std::cerr << "An OSC server is already running at port "<< port << ". Please change it and restart the server." << std::endl;
+        return false;
+    }
     this->setUserData(this);
     this->setCallback(static_mess_handler);
+    return true;
 }
 
 void ACOscBrowser::release() {

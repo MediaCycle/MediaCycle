@@ -70,14 +70,22 @@ void ACOSCDockWidgetQt::autoConnectOSC(bool _status)
 #if defined (USE_OSC)
 void ACOSCDockWidgetQt::toggleControl(bool _status){
 	if(_status){
-		osc_browser = new ACOscBrowser();
-		osc_browser->create(ui.lineEditControlIP->text().toStdString().c_str(), ui.spinBoxControlPort->value());
-		osc_browser->setMediaCycle(media_cycle);
-	#ifdef SUPPORT_AUDIO
-		osc_browser->setAudioEngine(audio_engine);
-	#endif//def SUPPORT_AUDIO
+            osc_browser = new ACOscBrowser();
+            if(osc_browser->create(ui.lineEditControlIP->text().toStdString().c_str(), ui.spinBoxControlPort->value())){
+                osc_browser->setMediaCycle(media_cycle);
+#ifdef SUPPORT_AUDIO
+                osc_browser->setAudioEngine(audio_engine);
+#endif//def SUPPORT_AUDIO
                 osc_browser->start();
-		ui.pushButtonControlStart->setText("Stop");
+                ui.pushButtonControlStart->setText("Stop");
+            }
+            else{
+                osc_browser->release();
+                delete osc_browser;
+                osc_browser = 0;
+                QString msg = QString("The OSC port ") + ui.spinBoxControlPort->text() + QString(" is already in use. Please change the OSC control port and start the OSC control again.");
+                int warn_button = QMessageBox::warning(this->osg_view, "Error", msg);
+            }
 	}
 	else {
 		osc_browser->stop();
