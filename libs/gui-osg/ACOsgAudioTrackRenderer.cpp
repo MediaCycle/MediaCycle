@@ -1144,10 +1144,10 @@ void ACOsgAudioTrackRenderer::updateTracks(double ratio) {
 			std::cout << std::endl;*/
 
 			//CF: dummy segments for testing
-			if(media_cycle->getLibrary()->getMediaType() != MEDIA_TYPE_MIXED){
+                        /*if(media_cycle->getLibrary()->getMediaType() != MEDIA_TYPE_MIXED){
 				this->createDummySegments();
 				track_node->removeChild(segments_transform);
-			}	
+                        }*/
 			if (media->getNumberOfSegments()>0){//////CF dangerous if a new media has the same number of segments than the previous one:  && segments_number != media->getNumberOfSegments()){
 				/////CF track_node->removeChild(segments_transform);
 				//if (frame_n != floor(width/frame_min_width)){
