@@ -157,12 +157,12 @@
      </property>
      <item>
       <property name="text">
-       <string>Keyframes</string>
+       <string>None</string>
       </property>
      </item>
      <item>
       <property name="text">
-       <string>None</string>
+       <string>Keyframes</string>
       </property>
      </item>
     </widget>
