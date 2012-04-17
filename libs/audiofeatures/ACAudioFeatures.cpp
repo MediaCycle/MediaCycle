@@ -1,7 +1,7 @@
 /**
  * @brief ACAudioFeatures.cpp
  * @author Christian Frisson
- * @date 05/04/2012
+ * @date 17/04/2012
  * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -517,10 +517,8 @@ double spectralSpread(colvec x_v){
         ss_v(0) = 0;
     }
     else{
-        colvec in_v(x_v.n_rows);
-        in_v = linspace<colvec>(0, x_v.n_rows-1, x_v.n_rows);
+        colvec in_v = linspace<colvec>(0, x_v.n_rows-1, x_v.n_rows);
         ss_v = weightedStdDeviation(in_v, x_v);
-        in_v.clear();
     }
     return ss_v(0);
 }
@@ -592,9 +590,7 @@ double spectralDecrease(colvec x_v){
     }
     else{
         colvec f_v = linspace<colvec>(1, x_v.n_rows-1, x_v.n_rows-1);
-        double x_v_sum = sum(x_v.rows(1,x_v.n_rows-1));
-        double x_v_sum2 = sum( (x_v.rows(1,x_v.n_rows-1) - x_v(0)) /f_v);
-        sd = 1/as_scalar(x_v_sum) * as_scalar(x_v_sum2);
+        sd = 1/as_scalar(sum(x_v.rows(1,x_v.n_rows-1))) * as_scalar(sum( (x_v.rows(1,x_v.n_rows-1) - x_v(0)) /f_v));
     }
     return sd;
 }
@@ -960,8 +956,9 @@ std::vector<ACMediaTimedFeature*> computeFeaturesBuffered(ACAudio* audio, int mf
             }
             nbufs+=hopSize;
 
-            if (signal_v.size() != windowSize)//(int)((float)windowSize/(float)hopSize))
-                std::cerr << "Buffer pile error " << std::endl; //<< windowbufs.size() << " vs " << (int)((float)windowSize/(float)hopSize) << std::endl;
+            // colvec size() requires armadillo 2.2+
+            //if (signal_v.size() != windowSize)//(int)((float)windowSize/(float)hopSize))
+            //    std::cerr << "Buffer pile error " << std::endl; //<< windowbufs.size() << " vs " << (int)((float)windowSize/(float)hopSize) << std::endl;
 
             colvec frameW_h = colvec(windowSize);
             colvec frame_v = colvec(windowSize);
@@ -1054,14 +1051,16 @@ std::vector<ACMediaTimedFeature*> computeFeaturesBuffered(ACAudio* audio, int mf
             }
             index++;
 
-            prevFrameFFTabs_v.clear();
+            // colvec clear() requires armadillo 2.2+
+
+            //prevFrameFFTabs_v.clear();
             prevFrameFFTabs_v = frameFFTabs2_v;
 
-            frame_v.clear();
-            frameW_h.clear();
-            frameW_v.clear();
-            frameFFTabs_v.clear();
-            frameFFTabs2_v.clear();
+            //frame_v.clear();
+            //frameW_h.clear();
+            //frameW_v.clear();
+            //frameFFTabs_v.clear();
+            //frameFFTabs2_v.clear();
 
             if(buf)
                 delete[] buf;
@@ -1268,42 +1267,43 @@ std::vector<ACMediaTimedFeature*> computeFeaturesBuffered(ACAudio* audio, int mf
     //sf_close (infile);
     descList.clear();
 
-    sc_v.clear();
-    ss_v.clear();
-    sv_v.clear();
-    sv_v.clear();
-    sf_v.clear();
-    zcr_v.clear();
-    sd_v.clear();
-    ener_v.clear();
-    loud_v.clear();
-    time_v.clear();
-    mfcc_m.clear();
-    chroma_m.clear();
-    sfm_m.clear();
-    ed_v.clear();
-    melfilter_m.clear();
-    chromafilter_m.clear();
+    // colvec clear() requires armadillo 2.2+
+    //sc_v.clear();
+    //ss_v.clear();
+    //sv_v.clear();
+    //sv_v.clear();
+    //sf_v.clear();
+    //zcr_v.clear();
+    //sd_v.clear();
+    //ener_v.clear();
+    //loud_v.clear();
+    //time_v.clear();
+    //mfcc_m.clear();
+    //chroma_m.clear();
+    //sfm_m.clear();
+    //ed_v.clear();
+    //melfilter_m.clear();
+    //chromafilter_m.clear();
 
-    window_hanning.clear();
+    //window_hanning.clear();
     /*frameW_h.clear();
     frame_v.clear();
     frameW_v.clear();
     window_v.clear();
     frameFFTabs_v.clear();
     frameFFTabs2_v.clear();*/
-    prevFrameFFTabs_v.clear();
+    //prevFrameFFTabs_v.clear();
 
-    GDspectrogram.clear();
-    vec1.clear();
-    vec2.clear();
-    ChirpGD.clear();
-    inv.clear();
-    res.clear();
-    F0_and_Conf.clear();
-    HNR_m.clear();
+    //GDspectrogram.clear();
+    //vec1.clear();
+    //vec2.clear();
+    //ChirpGD.clear();
+    //inv.clear();
+    //res.clear();
+    //F0_and_Conf.clear();
+    //HNR_m.clear();
 
-    signal_v.clear();
+    //signal_v.clear();
 
     progress = 1.0f;
     return desc;
