@@ -17,4 +17,8 @@ IF(USE_VAMP)
 add_subdirectory(vamp-plugin-sdk)
 ENDIF()
 
+IF(OCTAVE_FOUND)
+add_subdirectory(octave_embed)
+ENDIF()
+
 # OSG plugins are added at the end of the project

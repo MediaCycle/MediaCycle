@@ -49,38 +49,38 @@ using namespace std;
 class ACUserLog {
 
 public:
-	ACUserLog();
-	~ACUserLog();
-			
-	void addRootNode(long int _mediaId, int _clickTime);
-	long int addNode(long int _parentId, long int _mediaId, int _clickTime);
-	ACMediaNode& getNodeFromId(long int _nodeId);
+    ACUserLog();
+    ~ACUserLog();
+
+    void addRootNode(long int _mediaId, int _clickTime);
+    long int addNode(long int _parentId, long int _mediaId, int _clickTime);
+    ACMediaNode& getNodeFromId(long int _nodeId);
     ACMediaNode& getNodeFromMediaId(long int _mediaId);
-	long int getMediaIdFromNodeId(long int _nodeId);
-	void clickNode(long int _nodeId, long int _clickTime);
+    long int getMediaIdFromNodeId(long int _nodeId);
+    void clickNode(long int _nodeId, long int _clickTime);
     int getSize();
     int getDepthAtNode(long int _nodeId);
     int getMaxDepth();
     bool isEmpty();
     int getLastClickedNodeId();
     void setLastClickedNodeId(long int id);
- 	int getSpanAtDepth(int _depth);
-	int getChildCountAtNodeId(long int _nodeId);
-	int getPreviousSiblingFromNodeId(long int _nodeId);
-	int getNextSiblingFromNodeId(long int _nodeId);
-	int getFirstChildFromNodeId(long int _nodeId);
-	int getLastChildFromNodeId(long int _nodeId);
-	int getParentFromNodeId(long int _nodeId);
-    tree<ACMediaNode> getTree();
-	int getNthChildAtNodeId(long int _nodeId,long int _nthChild);
+    int getSpanAtDepth(int _depth);
+    int getChildCountAtNodeId(long int _nodeId);
+    int getPreviousSiblingFromNodeId(long int _nodeId);
+    int getNextSiblingFromNodeId(long int _nodeId);
+    int getFirstChildFromNodeId(long int _nodeId);
+    int getLastChildFromNodeId(long int _nodeId);
+    int getParentFromNodeId(long int _nodeId);
+    Tree<ACMediaNode> getTree();
+    int getNthChildAtNodeId(long int _nodeId,long int _nthChild);
     void wrapToOrigin();
-	void dump();
-	void clean();
+    void dump();
+    void clean();
 
 private:	
-	int mNodeId;
-	tree<ACMediaNode> userLogTree;
-	int mLastClickedNodeId;
+    int mNodeId;
+    Tree<ACMediaNode> userLogTree;
+    int mLastClickedNodeId;
 };
 
 #endif // ACUSERLOG_H
