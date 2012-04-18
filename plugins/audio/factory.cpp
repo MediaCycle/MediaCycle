@@ -33,7 +33,7 @@ extern "C" std::vector<std::string> list() {    //returns a string vector contai
 #ifdef USE_YAAFE
     listPlugin.push_back("ACAudioYaafePlugin");
 #endif
-    //listPlugin.push_back("ACAudioFeaturesPlugin");
+    listPlugin.push_back("ACAudioFeaturesPlugin");
     //listPlugin.push_back("ACAudioHaitsmaFingerprintPlugin");
     //listPlugin.push_back("ACAudioGardenFeaturesPlugin");
     //listPlugin.push_back("ACAudioFeaturesChromaRhythmPlugin");
