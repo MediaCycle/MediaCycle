@@ -1,7 +1,7 @@
 /**
  * @brief ACAudioFeatures.cpp
  * @author Christian Frisson
- * @date 17/04/2012
+ * @date 25/04/2012
  * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -1088,7 +1088,7 @@ std::vector<ACMediaTimedFeature*> computeFeaturesBuffered(ACAudio* audio, int mf
         delete [] dataout;
     dataout = 0;
     std::cout << "nbFrames " << nbFrames << std::endl;
-    prevFrameFFTabs_v.clear();
+    //prevFrameFFTabs_v.clear();
     //delete[] dataout;
     //}
 
