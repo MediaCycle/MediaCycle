@@ -461,40 +461,6 @@ vector<ACMediaFeatures*> ACActiveFeaturesPlugins::calculate(ACMediaData* aData, 
 
 // XS TODO check with TR
 
-ACMediaTimedFeature* ACActiveFeaturesPlugins::getTimedFeatures(ACMediaType mediaType) {
-    ACMediaTimedFeature* output = 0;
-    vector<ACFeaturesPlugin *> ::iterator iter_vec = mCurrPlugin[mediaType].begin();
-    if (iter_vec != mCurrPlugin[mediaType].end()) {
-        ACFeaturesPlugin* localPlugin = (*iter_vec);
-        if (localPlugin != NULL) {
-#ifdef USE_DEBUG
-            std::cout << "ACActiveFeaturesPlugins::getTimedFeatures " << localPlugin->getName() << std::endl;
-#endif
-            output = localPlugin->getTimedFeatures();
-        }
-        else {
-            cerr << "<ACActiveFeaturesPlugins::getTimedFeatures> failed plugin access failed " << localPlugin->getName() << endl;
-        }
-        if (output != NULL) {
-            iter_vec++;
-            for (; iter_vec != mCurrPlugin[mediaType].end(); iter_vec++) {
-                ACFeaturesPlugin* localPlugin = (*iter_vec);
-                if (localPlugin != NULL) {
-#ifdef USE_DEBUG
-                    std::cout << "ACActiveFeaturesPlugins::getTimedFeatures " << localPlugin->getName() << std::endl;
-#endif
-                    if (localPlugin->getTimedFeatures())
-                        output->appendTimedFeature(localPlugin->getTimedFeatures());
-                }
-                else {
-                    cerr << "<ACActiveFeaturesPlugins::getTimedFeatures> failed plugin access failed " << localPlugin->getName() << endl;
-                }
-            }
-        }
-    }
-    return output;
-}
-
 
 //ACActivePlugins implementation
 
@@ -622,6 +588,7 @@ ACActiveSegmentPlugins::ACActiveSegmentPlugins() {
 std::vector<ACMedia*> ACActiveSegmentPlugins::segment(ACMediaTimedFeature *ft, ACMedia* theMedia) {
     std::vector<ACMedia*> segments;
     ACMediaType mediaType = theMedia->getMediaType();
+	vector<string> timedFileNames=theMedia->getTimedFileNames();
     for (vector<ACSegmentationPlugin *> ::iterator iter_vec = mCurrPlugin[mediaType].begin(); iter_vec != mCurrPlugin[mediaType].end(); iter_vec++) {
         ACSegmentationPlugin* localPlugin = (*iter_vec);
         vector<ACMedia*> afv = localPlugin->segment(ft, theMedia);
@@ -629,6 +596,8 @@ std::vector<ACMedia*> ACActiveSegmentPlugins::segment(ACMediaTimedFeature *ft, A
             cerr << "<ACMedia::segment> failed importing segments from plugin: " << localPlugin->getName() << endl;
         } else {
             for (unsigned int Iafv = 0; Iafv < afv.size(); Iafv++) {
+				for (unsigned int j=0;j<timedFileNames.size();j++)
+					afv[Iafv]->addTimedFileNames(timedFileNames[j]);
                 segments.push_back(afv[Iafv]);
             }
         }

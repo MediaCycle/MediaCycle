@@ -73,7 +73,10 @@ std::vector<ACMediaFeatures*> ACVideoColorPlugin::calculate(ACMediaData* video_d
 	string aFileName= video_data->getFileName();
 	ACMediaTimedFeature* ps_mtf = new ACMediaTimedFeature(t,s, "color moments");
 	ACMediaFeatures* mean_color_moments = ps_mtf->mean();
-        this->saveTimedFeatures(ps_mtf, aFileName, _save_timed_feat); // by default : binary
+	bool _binary=false;
+	theMedia->addTimedFileNames(this->saveTimedFeatures(ps_mtf, aFileName, _save_timed_feat,_binary)); // by default : binary
+	
+    //    this->saveTimedFeatures(ps_mtf, aFileName, _save_timed_feat); // by default : binary
 	delete ps_mtf;
 	
 	videoFeatures.push_back(mean_color_moments);

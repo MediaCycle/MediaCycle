@@ -67,7 +67,7 @@ public:
 
 private:
         std::map<std::string,ACMediaTimedFeature*> descmf;
-        std::vector<std::string> mtf_file_names;
+        //std::vector<std::string> mtf_file_names;
         void listComponents();
         void describeComponent(const std::string component);
         void printOutputFormats();

@@ -1,8 +1,8 @@
 /**
  * @brief ACAudioHaitsmaFingerprintPlugin.h
- * @author Xavier Siebert
- * @date 04/10/2011
- * @copyright (c) 2011 – UMONS - Numediart
+ * @author Thierry Ravet
+ * @date 25/04/2012
+ * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -49,7 +49,7 @@ public:
 //	ACMediaTimedFeature* getTimedFeatures();
 	
 private:
-	std::vector<std::string> mtf_file_names; // XS TODO check this one
+	//std::vector<std::string> mtf_file_names; // XS TODO check this one
 	
 	ACAudioFingerprint * audio_fingerprint;
 };

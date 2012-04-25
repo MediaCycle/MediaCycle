@@ -601,7 +601,8 @@ std::vector<ACMediaFeatures*> ACAudioYaafePlugin::calculate(ACMediaData* aData, 
         for(mf=descmf.begin();mf!=descmf.end();mf++){
             mtf_file_name = aFileName_noext + "_" +(*mf).second->getName() + file_ext;
             (*mf).second->saveInFile(mtf_file_name, save_binary);
-            mtf_file_names.push_back(mtf_file_name); // keep track of saved features
+            theMedia->addTimedFileNames(mtf_file_name);            
+			//mtf_file_names.push_back(mtf_file_name); // keep track of saved features
         }
     }
 

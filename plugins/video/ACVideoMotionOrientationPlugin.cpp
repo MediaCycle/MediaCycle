@@ -90,7 +90,10 @@ std::vector<ACMediaFeatures*> ACVideoMotionOrientationPlugin::calculate(ACMediaD
 	videoFeatures.push_back(mean_mf);
 
 	string aFileName= video_data->getFileName();
-        this->saveTimedFeatures(ps_mtf, aFileName, _save_timed_feat); // by default : binary
+     //   this->saveTimedFeatures(ps_mtf, aFileName, _save_timed_feat); // by default : binary
+	bool _binary=false;
+	theMedia->addTimedFileNames(this->saveTimedFeatures(ps_mtf, aFileName, _save_timed_feat,_binary)); // by default : binary
+	
 	delete ps_mtf;
 		
 	return videoFeatures;

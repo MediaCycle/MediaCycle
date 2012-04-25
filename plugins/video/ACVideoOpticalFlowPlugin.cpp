@@ -67,7 +67,11 @@ std::vector<ACMediaFeatures*> ACVideoOpticalFlowPlugin::calculate(ACMediaData* v
 
 	ACMediaTimedFeature* ps_mtf = new ACMediaTimedFeature(t,s, "optical flow");
 	ACMediaFeatures* optical_flow = ps_mtf->mean();
-	this->saveTimedFeatures(ps_mtf, aFileName, _save_timed_feat); // by default : binary
+	//this->saveTimedFeatures(ps_mtf, aFileName, _save_timed_feat); // by default : binary
+	bool _binary=false;
+
+	theMedia->addTimedFileNames(this->saveTimedFeatures(ps_mtf, aFileName, _save_timed_feat,_binary)); // by default : binary
+	
 	delete ps_mtf;
 
 	videoFeatures.push_back(optical_flow);

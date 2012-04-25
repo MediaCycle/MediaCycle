@@ -48,7 +48,7 @@ public:
 //	std::vector<ACMediaFeatures*> calculate(std::string aFileName, bool _save_timed_feat=false);
 	std::vector<ACMediaFeatures*> calculate(ACMediaData* _data, ACMedia*, bool _save_timed_feat=false);
 private:
-	std::vector<ACMediaFeatures*> _calculate(std::string aFileName="", bool _save_timed_feat=false);
+	//std::vector<ACMediaFeatures*> _calculate(std::string aFileName="", bool _save_timed_feat=false);
 };
 
 #endif	/* _ACHUMOMENTSVIDEOPLUGIN_H */

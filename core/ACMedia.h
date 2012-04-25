@@ -66,6 +66,7 @@ protected:
 	std::vector<ACMedia*> segments;
 	float start, end; // seconds
         int startInt, endInt; // frame numbers
+	std::vector<std::string> mtf_file_names;
 private:
 	void init();
 	
@@ -180,6 +181,9 @@ private:
     virtual int extractFeatures(ACPluginManager *acpl=0, bool _save_timed_feat=false);
 public:
 	virtual int segment(ACPluginManager *acpl, bool _saved_timed_features = false );
+	void addTimedFileNames(std::string mtf_file_name){mtf_file_names.push_back(mtf_file_name);};
+	std::vector<std::string> getTimedFileNames(){return mtf_file_names;};
+	ACMediaTimedFeature* getTimedFeatures();
 };
 
 #endif // ACMEDIA_H

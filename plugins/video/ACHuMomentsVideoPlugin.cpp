@@ -103,12 +103,8 @@ void cpu_codelet(void *descr[], void *_args)
 //}
 
 std::vector<ACMediaFeatures*> ACHuMomentsVideoPlugin::calculate(ACMediaData* _data, ACMedia* theMedia, bool _save_timed_feat) {
-	return this->_calculate(_data->getFileName(),_save_timed_feat);
-}
-
-std::vector<ACMediaFeatures*> ACHuMomentsVideoPlugin::_calculate(std::string aFileName, bool _save_timed_feat){
     //starpu_init(NULL);
-
+	std::string aFileName=_data->getFileName()
 	std::vector<FeaturesVector> desc;
 	ACMediaTimedFeature* descmtf;
 	vector<ACMediaFeatures*> result;
@@ -214,8 +210,8 @@ std::vector<ACMediaFeatures*> ACHuMomentsVideoPlugin::_calculate(std::string aFi
 	descmtf = new ACMediaTimedFeature(time_stamps,desc,"Hu Moments (StarPU)");
 	ACMediaFeatures* tmp = descmtf->mean();
 	result.push_back(tmp);
-
-        this->saveTimedFeatures(descmtf, aFileName, _save_timed_feat); // by default : binary
+	bool _binary=false;
+	theMedia->addTimedFileNames(this->saveTimedFeatures(descmtf, aFileName, _save_timed_feat,_binary)); // by default : binary
 	delete descmtf;
         
 	return result;

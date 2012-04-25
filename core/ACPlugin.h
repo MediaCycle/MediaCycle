@@ -101,7 +101,7 @@ public:
 	virtual std::vector<ACMediaFeatures*> calculate(ACMediaData* aData, ACMedia* theMedia, bool _save_timed_feat=false)=0;
 	std::vector<std::string> getDescriptorsList() {return this->mDescriptorsList;}
 	// XS TODO is this the best way to proceed when no timed features ?
-	virtual ACMediaTimedFeature* getTimedFeatures(){return 0;}
+	virtual ACMediaTimedFeature* getTimedFeatures(std::string mtf_file_name){return 0;}
 protected:	
 	std::vector<std::string> mDescriptorsList;
 };
@@ -112,11 +112,11 @@ class ACTimedFeaturesPlugin: virtual public ACFeaturesPlugin{
 protected:
 	ACTimedFeaturesPlugin();
 	// XS TODO add a protected setmftfilename instead of making mtf_file_name protected
-	std::string mtf_file_name; // file in which features have been saved
+	//std::vector<std::string> mtf_file_names// file in which features have been saved
 public:
-	std::string getSavedFileName(){return mtf_file_name;}
-	virtual ACMediaTimedFeature* getTimedFeatures();
-        bool saveTimedFeatures(ACMediaTimedFeature* mtf=0, std::string aFileName="", bool _save_timed_feat = true, bool _save_binary = true);
+	//std::vector<std::string> getSavedFileName(){return mtf_file_name;}
+	virtual ACMediaTimedFeature* getTimedFeatures(std::string mtf_file_name);
+	std::string saveTimedFeatures(ACMediaTimedFeature* mtf=0, std::string aFileName="", bool _save_timed_feat = true, bool _save_binary = true);
 };
 
 class ACSegmentationPlugin: virtual public ACPlugin

@@ -69,13 +69,13 @@ ACFeaturesPlugin::ACFeaturesPlugin() {
 // this->mPluginType=mPluginType|PLUGIN_TYPE_TIMED_FEATURES;
 
 ACTimedFeaturesPlugin::ACTimedFeaturesPlugin() : ACFeaturesPlugin() {
-    this->mtf_file_name = "";
+    //this->mtf_file_name = "";
 }
 
 // the plugin knows internally where it saved the mtf
 // thanks to mtf_file_name
 
-ACMediaTimedFeature* ACTimedFeaturesPlugin::getTimedFeatures() {
+ACMediaTimedFeature* ACTimedFeaturesPlugin::getTimedFeatures(std::string mtf_file_name) {
     if (mtf_file_name == "") {
         cout << "<ACTimedFeaturesPlugin::getTimedFeatures> : missing file name " << endl;
         cout << "                                            in plugin : " << this->getName() << endl;
@@ -91,14 +91,16 @@ ACMediaTimedFeature* ACTimedFeaturesPlugin::getTimedFeatures() {
 // saving timed features on disk (if _save_timed_feat flag is on)
 // try to keep the convention : _b.mtf = binary ; _t.mtf = ascii text
 // XS TODO add checks and setup/use default params
-bool ACTimedFeaturesPlugin::saveTimedFeatures(ACMediaTimedFeature* mtf, string aFileName, bool _save_timed_feat, bool _save_binary) {
+std::string ACTimedFeaturesPlugin::saveTimedFeatures(ACMediaTimedFeature* mtf, string aFileName, bool _save_timed_feat, bool _save_binary) {
     if (_save_timed_feat) {
+		std::string mtf_file_name;
         string file_ext = "_b.mtf";
         string aFileName_noext = aFileName.substr(0, aFileName.find_last_of('.'));
         mtf_file_name = aFileName_noext + "_" + this->mDescription + file_ext;
-        return mtf->saveInFile(mtf_file_name, _save_binary); // error message if failed
+        if  (mtf->saveInFile(mtf_file_name, _save_binary)) // error message if failed
+			return mtf_file_name;
     }
-    return true; // nothing to do
+    return string(""); // nothing to do
 }
 
 ACSegmentationPlugin::ACSegmentationPlugin() {

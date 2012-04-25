@@ -1,8 +1,8 @@
 /**
  * @brief ACAudioHaitsmaFingerprintPlugin.cpp
- * @author Xavier Siebert
- * @date 04/10/2011
- * @copyright (c) 2011 – UMONS - Numediart
+ * @author Thierry Ravet
+ * @date 25/04/2012
+ * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -105,7 +105,8 @@ std::vector<ACMediaFeatures*> ACAudioHaitsmaFingerprintPlugin::calculate(ACMedia
 		for (unsigned int i=0; i<descmf.size(); i++){
 			mtf_file_name = aFileName_noext + "_" + descmf[i]->getName() + file_ext;
 			descmf[i]->saveInFile(mtf_file_name, save_binary);
-			mtf_file_names.push_back(mtf_file_name); // keep track of saved features
+			theMedia->addTimedFileNames(mtf_file_name);            
+			//mtf_file_names.push_back(mtf_file_name); // keep track of saved features
 		}
 	}
 	

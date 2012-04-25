@@ -255,10 +255,11 @@ int ACMediaLibrary::importFile(std::string _filename, ACPluginManager *acpl, boo
 				mediaSegments = media->getAllSegments();
 				for (unsigned int i = 0; i < mediaSegments.size(); i++){
 					// for the segments we do not save (again) timedFeatures
-					// XS TODO but we should not re-calculate them either !
+					// XS TODO but we should not re-calculate them either !=> TR I put the mtf files names of the media parent in all his segments
 					if (mediaSegments[i]->import(_filename, this->getMediaID(), acpl)){
 						this->addMedia(mediaSegments[i]);
 						this->incrementMediaID();
+						mediaSegments[i]->deleteData();//TR TODO verify that we must delete this data
 					}
 					
 				}

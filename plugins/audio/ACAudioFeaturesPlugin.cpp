@@ -63,7 +63,7 @@ ACAudioFeaturesPlugin::ACAudioFeaturesPlugin() {
     this->mDescriptorsList.push_back("Log Attack Time");
     this->mDescriptorsList.push_back("Energy Modulation Frequency");
     this->mDescriptorsList.push_back("Energy Modulation Amplitude");
-    this->mtf_file_name = "";
+    //this->mtf_file_name = "";
 }
 
 ACAudioFeaturesPlugin::~ACAudioFeaturesPlugin() {
@@ -99,7 +99,7 @@ std::vector<ACMediaFeatures*> ACAudioFeaturesPlugin::calculate(ACMediaData* audi
 
 // private method
 std::vector<ACMediaFeatures*> ACAudioFeaturesPlugin::_calculate(std::string aFileName, ACMediaData* audio_data, ACMedia* theMedia, bool _save_timed_feat){
-    bool extendSoundLimits = false;//true;
+    bool extendSoundLimits = true;
     std::vector<ACMediaTimedFeature*> descmf;
     std::vector<ACMediaFeatures*> desc;
 
@@ -113,32 +113,27 @@ std::vector<ACMediaFeatures*> ACAudioFeaturesPlugin::_calculate(std::string aFil
         cerr << e.what() << endl;
         return desc;
     }
-
 #ifndef BUFFERIZED
-    if(theMedia->getParentId()>-1)
-        theAudio->extractData(theAudio->getFileName());//CF stupid workaround since we erase the data after importing the parent...
-
-    // XS TODO we are copying the data, unnecessary
-    float* data = new float[theAudio->getNFrames() * theAudio->getChannels()];
-
-    // SD replaced loop by more efficient memcpy
-    //memcpy(data, static_cast<float*>(audio_data->getData())+theAudio->getSampleStart()*theAudio->getChannels(),
-    //       (theAudio->getSampleEnd()-theAudio->getSampleStart())*theAudio->getChannels()*sizeof(float));
-
-    int a= theAudio->getSampleStart();
-    int b= theAudio->getSampleEnd();
-    int c=theAudio->getChannels();
-    int d=theAudio->getNFrames();
-    //CF bufferize
-    int index = 0;
-   for (long i = theAudio->getSampleStart(); i< theAudio->getSampleEnd(); i++){
-        for (long j = 0; j < theAudio->getChannels(); j++){
-            data[index] = static_cast<float*>(audio_data->getData())[i*theAudio->getChannels()+j];
-            index++;
-        }
-    }
-
-    descmf = computeFeatures(data, theAudio->getSampleRate(), theAudio->getChannels(), theAudio->getNFrames(), 32, 13, 1024, extendSoundLimits);
+	// XS TODO we are copying the data, unnecessary
+	float* data = new float[theAudio->getNFrames() * theAudio->getChannels()];
+	
+	// SD replaced loop by more efficient memcpy
+	memcpy(data, static_cast<float*>(audio_data->getData())+theAudio->getSampleStart()*theAudio->getChannels(),
+		   (theAudio->getSampleEnd()-theAudio->getSampleStart())*theAudio->getChannels()*sizeof(float));
+	/*
+	 for (long i = theAudio->getSampleStart(); i< theAudio->getSampleEnd(); i++){
+	 for (long j = 0; j < theAudio->getChannels(); j++){
+	 data[index] = audio_data->getAudioData()[i*theAudio->getChannels()+j];
+	 index++;
+	 }
+	 }
+	 */
+	
+	// 	ofstream output("signal1.txt");
+	// 	for(int i=0; i < (long) theAudio->getNFrames() * theAudio->getChannels(); i++){
+	// 		output<<data[i]<<endl;
+	// 	}
+	descmf = computeFeatures(data, theAudio->getSampleRate(), theAudio->getChannels(), theAudio->getNFrames(), 32, 13, 1024, extendSoundLimits);
  #else
     descmf = computeFeaturesBuffered(theAudio, 32, 13, 1024, extendSoundLimits);
 #endif//def BUFFERIZED
@@ -173,7 +168,8 @@ std::vector<ACMediaFeatures*> ACAudioFeaturesPlugin::_calculate(std::string aFil
         for (int i=0; i<descmf.size(); i++){
             mtf_file_name = aFileName_noext + "_" +descmf[i]->getName() + file_ext;
             descmf[i]->saveInFile(mtf_file_name, save_binary);
-            mtf_file_names.push_back(mtf_file_name); // keep track of saved features
+			theMedia->addTimedFileNames(mtf_file_name);
+            //mtf_file_names.push_back(mtf_file_name); // keep track of saved features
         }
     }
 

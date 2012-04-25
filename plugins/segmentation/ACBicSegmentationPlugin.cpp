@@ -179,8 +179,8 @@ std::vector<ACMedia*> ACBicSegmentationPlugin::segment(ACMediaTimedFeature* _MTF
 	}
         // the end of the last segment should be the end of the Media
         // XS TODO allow for some buffer (ex: it has no sense to make the last segment 1 frame wide)
-	if (segments_limits[Nseg-1] != _theMedia->getEndInt()){
-            segments_limits.push_back(_theMedia->getEndInt());
+	if (segments_limits[Nseg-1] != _MTF->getLength()-1){
+            segments_limits.push_back(_MTF->getLength()-1);
             Nseg++;
         }
 
@@ -191,11 +191,15 @@ std::vector<ACMedia*> ACBicSegmentationPlugin::segment(ACMediaTimedFeature* _MTF
 		media->setParentId(_theMedia->getId());
 		media->setStartInt(segments_limits[i]); // XS TODO : this is in frame number, not time code
 		media->setEndInt(segments_limits[i+1]);
+		cout << "begin:" << segments_limits[i]<< " end:" <<segments_limits[i+1]<<endl;
 		//cout << "frameRate " << media->getFrameRate() << endl;
 		//cout << "sampleRate " << media->getSampleRate() << endl;
 		media->setStart(_MTF->getTime(segments_limits[i])); //TR, 29/03
 		if (i<Nseg-2)
 			media->setEnd(_MTF->getTime(segments_limits[i+1]));
+		else
+			media->setEnd(_theMedia->getEnd());
+		
 		cout << "duration of the segment " << media->getDuration() << endl;
 		
                 media->setId(_theMedia->getId()+i+1); // XS TODO check this, it is overlapping with another ID ?

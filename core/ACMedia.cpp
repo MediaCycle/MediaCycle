@@ -651,7 +651,7 @@ int ACMedia::segment(ACPluginManager *acpl, bool _saved_timed_features ) {
 	ACMediaTimedFeature* ft_from_disk = 0;
 	vector<ACMedia*> afv;
 	if (_saved_timed_features) {
-		ft_from_disk=acpl->getFeaturesPlugins()->getTimedFeatures(this->getType());
+		ft_from_disk=this->getTimedFeatures();
 		#ifdef USE_DEBUG
 		if(ft_from_disk)
 			ft_from_disk->dump();
@@ -672,6 +672,7 @@ int ACMedia::segment(ACPluginManager *acpl, bool _saved_timed_features ) {
  //           cout << "segment " << Iafv << " - id = " << afv[Iafv]->getId() << endl;
             this->addSegment(afv[Iafv]);
 	}
+	delete ft_from_disk;
 	return segment_ok;
 }
 
@@ -685,3 +686,30 @@ int ACMedia::segment(ACPluginManager *acpl, bool _saved_timed_features ) {
 // 	}
 // }
 
+
+ACMediaTimedFeature* ACMedia::getTimedFeatures() {
+	bool _binary=false;//true
+	ACMediaType mediaType=this->getType();
+    ACMediaTimedFeature* output = 0;
+	std::vector<std::string> mtf_files_names=this->getTimedFileNames();
+	
+	//    vector<ACFeaturesPlugin *> ::iterator iter_vec = mCurrPlugin[mediaType].begin();
+	//  if (iter_vec != mCurrPlugin[mediaType].end()) 
+	std::vector<std::string>::iterator iter_vec=mtf_files_names.begin();
+	if (iter_vec!=mtf_files_names.end())
+	{	
+		output = new ACMediaTimedFeature();
+		output->loadFromFile(*iter_vec,_binary);
+		
+        if (output != 0) {
+            iter_vec++;
+            for (; iter_vec != mtf_files_names.end(); iter_vec++) {
+				ACMediaTimedFeature* temp=new ACMediaTimedFeature();
+				temp->loadFromFile(*iter_vec,false);
+				output->appendTimedFeature(temp);
+				delete temp;
+            }
+        }
+    }
+    return output;
+}

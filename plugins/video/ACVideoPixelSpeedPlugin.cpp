@@ -82,7 +82,10 @@ std::vector<ACMediaFeatures*> ACVideoPixelSpeedPlugin::calculate(ACMediaData* vi
 	
 	ACMediaTimedFeature* ps_mtf = new ACMediaTimedFeature(t,s, "pixel speed");
 	ACMediaFeatures* pixel_speed = ps_mtf->mean();
-	this->saveTimedFeatures(ps_mtf, aFileName, _save_timed_feat); // by default : binary
+	//this->saveTimedFeatures(ps_mtf, aFileName, _save_timed_feat); // by default : binary
+	bool _binary=false;
+	theMedia->addTimedFileNames(this->saveTimedFeatures(ps_mtf, aFileName, _save_timed_feat,_binary)); // by default : binary
+	
 	delete ps_mtf;
 
 	videoFeatures.push_back(pixel_speed);
