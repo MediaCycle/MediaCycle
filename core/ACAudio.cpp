@@ -437,7 +437,7 @@ float* ACAudio::computeWaveform(int& length, float start_ratio, float end_ratio)
             std::cerr << "ACAudio::computeWaveform() end not set" << std::endl;
             return _waveform;
         }
-        else if(this->end*sample_rate>n_frames){
+        else if(int(this->end * sample_rate) > n_frames){
             std::cerr << "ACAudio::computeWaveform() end beyond sample size" << std::endl;
             return _waveform;
         }
