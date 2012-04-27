@@ -91,6 +91,11 @@ variant ffmpeg description {Use ffmpeg backend for video I/O.} {
     configure.args-append       -DWITH_FFMPEG=ON
 }
 
+variant openni description {Use OpenNI backend for Kinect input.} {
+    configure.args-delete       -DWITH_OPENNI=OFF
+    configure.args-append       -DWITH_OPENNI=ON
+}
+
 variant python26 conflicts python27 description {Add Python 2.6 bindings} {
     depends_lib-append          port:python26
     configure.args-delete       -DBUILD_NEW_PYTHON_SUPPORT=OFF
