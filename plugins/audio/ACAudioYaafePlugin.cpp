@@ -316,7 +316,7 @@ ACAudioYaafePlugin::ACAudioYaafePlugin() : ACTimedFeaturesPlugin() {
     this->mName = "AudioYaafe";
     this->mDescription = "Audio feature extraction plugin usin the Yaafe library";
     this->mId = "";
-    this->mtf_file_name = "";
+    //this->mtf_file_name = "";
 
     //DataBlock::setPreferedBlockSize(1024);
 
