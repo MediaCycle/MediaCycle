@@ -62,11 +62,13 @@ void ACKMeansPlugin::updateClusters(ACMediaBrowser* mediaBrowser,bool needsClust
 	}
 	
 	int navigationLevel=mediaBrowser->getNavigationLevel();
-	int object_count = library->getSize();
 	
+	vector<int> currId=library->getParentIds();
+	int object_count = currId.size();
+
 	// XS note: problem if all media don't have the same number of features
 	//          but we suppose it is not going to happen
-	int feature_count = library->getMedia(0)->getNumberOfPreProcFeaturesVectors();
+	int feature_count = library->getMedia(currId[0])->getNumberOfPreProcFeaturesVectors();
 	int clusterCount=mediaBrowser->getClusterCount();
 	vector< int > 			cluster_counts;
 	vector<vector<vector <float> > >cluster_accumulators; // cluster, feature, desc
@@ -93,7 +95,8 @@ void ACKMeansPlugin::updateClusters(ACMediaBrowser* mediaBrowser,bool needsClust
 			
 			// initialize cluster center with a randomly chosen object
 			int r = 0;//CF
-			if(mediaBrowser->getLibrary()->getMediaType() != MEDIA_TYPE_MIXED){//CF
+			//if(mediaBrowser->getLibrary()->getMediaType() != MEDIA_TYPE_MIXED)
+			{//CF
 				r = rand() % object_count;
 				int l = 100;
 				
@@ -106,7 +109,7 @@ void ACKMeansPlugin::updateClusters(ACMediaBrowser* mediaBrowser,bool needsClust
 						if (initClust[k]==r)
 							diffTest=false;
 					
-					if(diffTest && mediaBrowser->getMediaNode(r).getNavigationLevel() >= navigationLevel) break;
+					if(diffTest && mediaBrowser->getMediaNode(currId[r]).getNavigationLevel() >= navigationLevel) break;
 					else r = rand() % object_count;
 				}
 				
@@ -118,15 +121,15 @@ void ACKMeansPlugin::updateClusters(ACMediaBrowser* mediaBrowser,bool needsClust
 			for(f=0; f<feature_count; f++)
 			{
 				// XS again, what if all media don't have the same number of features ?
-				int desc_count = library->getMedia(0)->getPreProcFeaturesVector(f)->getSize();
+				int desc_count = library->getMedia(currId[0] )->getPreProcFeaturesVector(f)->getSize();
 				
 				clusterCenters[i][f].resize(desc_count);
 				cluster_accumulators[i][f].resize(desc_count);
 				
 				for(d=0; d<desc_count; d++)
 				{
-					if(library->getMedia(r)->getType() == library->getMediaType())//CF
-						clusterCenters[i][f][d] = library->getMedia(r)->getPreProcFeaturesVector(f)->getFeatureElement(d);
+					if(library->getMedia(currId[r])->getType() == library->getMediaType())//CF
+						clusterCenters[i][f][d] = library->getMedia(currId[r])->getPreProcFeaturesVector(f)->getFeatureElement(d);
 					//printf("cluster  %d center: %f\n", i, clusterCenters[i][f][d]);
 				}
 			}
@@ -149,7 +152,7 @@ void ACKMeansPlugin::updateClusters(ACMediaBrowser* mediaBrowser,bool needsClust
 				for(f=0; f<feature_count; f++)
 				{
 					// XS again, what if all media don't have the same number of features ?
-					int desc_count = library->getMedia(0)->getPreProcFeaturesVector(f)->getSize();
+					int desc_count = library->getMedia(currId[0])->getPreProcFeaturesVector(f)->getSize();
 					
 					for(d=0; d<desc_count; d++)
 					{
@@ -161,14 +164,14 @@ void ACKMeansPlugin::updateClusters(ACMediaBrowser* mediaBrowser,bool needsClust
 			{
 				// check if we should include this object
 				// note: the following "if" skips to next i if true.
-				if(mediaBrowser->getMediaNode(i).getNavigationLevel() < navigationLevel) continue;
+				if(mediaBrowser->getMediaNode(currId[i]).getNavigationLevel() < navigationLevel) continue;
 				
 				// compute distance between this object and every cluster
 				for(j=0; j<clusterCount; j++)
 				{
 					cluster_distances[j] = 0;
-					if(library->getMedia(i)->getType() == library->getMediaType())//CF multimedia compatibility
-						cluster_distances[j] = compute_distance(library->getMedia(i)->getAllPreProcFeaturesVectors(), clusterCenters[j], featureWeights, false);
+					if(library->getMedia(currId[i])->getType() == library->getMediaType())//CF multimedia compatibility
+						cluster_distances[j] = compute_distance(library->getMedia(currId[i])->getAllPreProcFeaturesVectors(), clusterCenters[j], featureWeights, false);
 					
 					//printf("distance cluster %d to object %d = %f\n", j, i,  cluster_distances[j]);
 				}
@@ -186,9 +189,9 @@ void ACKMeansPlugin::updateClusters(ACMediaBrowser* mediaBrowser,bool needsClust
 				for(f=0; f<feature_count; f++)
 				{
 					// XS again, what if all media don't have the same number of features ?
-					int desc_count = library->getMedia(0)->getPreProcFeaturesVector(f)->getSize();
-					if(library->getMedia(i)->getType() == library->getMediaType())//CF multimedia compatibility
-						meanAccumCompute(library->getMedia(i)->getPreProcFeaturesVector(f),cluster_accumulators[jmin][f]);
+					int desc_count = library->getMedia(currId[0])->getPreProcFeaturesVector(f)->getSize();
+					if(library->getMedia(currId[i])->getType() == library->getMediaType())//CF multimedia compatibility
+						meanAccumCompute(library->getMedia(currId[i])->getPreProcFeaturesVector(f),cluster_accumulators[jmin][f]);
 					
 					//for(d=0; d<desc_count; d++)
 					//{
@@ -207,7 +210,7 @@ void ACKMeansPlugin::updateClusters(ACMediaBrowser* mediaBrowser,bool needsClust
 					for(f=0; f<feature_count; f++)
 					{
 						// XS again, what if all media don't have the same number of features ?
-						int desc_count = library->getMedia(0)->getPreProcFeaturesVector(f)->getSize();
+						int desc_count = library->getMedia(currId[0])->getPreProcFeaturesVector(f)->getSize();
 						
 						for(d=0; d<desc_count; d++)
 						{
@@ -216,7 +219,7 @@ void ACKMeansPlugin::updateClusters(ACMediaBrowser* mediaBrowser,bool needsClust
 					}
 				}
 				
-				//printf("\tcluster %d count = %d\n", j, cluster_counts[j]); 
+				printf("\tcluster %d count = %d\n", j, cluster_counts[j]); 
 			}
 		}
 		mediaBrowser->initClusterCenters();
@@ -239,14 +242,14 @@ void ACKMeansPlugin::updateClusters(ACMediaBrowser* mediaBrowser,bool needsClust
 		for(i=0; i<object_count; i++) {
 			
 			// check if we should include this object
-			if(mediaBrowser->getMediaNode(i).getNavigationLevel() < navigationLevel) continue;
+			if(mediaBrowser->getMediaNode(currId[i]).getNavigationLevel() < navigationLevel) continue;
 			
 			// compute distance between this object and every cluster
 			for(j=0; j<clusterCount; j++) {
 				
 				cluster_distances[j] = 0;
-				if(library->getMedia(i)->getType() == library->getMediaType())//CF multimedia compatibility
-					cluster_distances[j] = compute_distance(library->getMedia(i)->getAllPreProcFeaturesVectors(), clusterCenters[j], featureWeights, false);
+				if(library->getMedia(currId[i])->getType() == library->getMediaType())//CF multimedia compatibility
+					cluster_distances[j] = compute_distance(library->getMedia(currId[i])->getAllPreProcFeaturesVectors(), clusterCenters[j], featureWeights, false);
 			}		
 			
 			// pick the one with smallest distance
@@ -254,7 +257,7 @@ void ACKMeansPlugin::updateClusters(ACMediaBrowser* mediaBrowser,bool needsClust
 			jmin = min_element(cluster_distances.begin(), cluster_distances.end()) - cluster_distances.begin();
 			
 			// assign cluster
-			mediaBrowser->getMediaNode(i).setClusterId(jmin);
+			mediaBrowser->getMediaNode(currId[i]).setClusterId(jmin);
 		}
 		
 	}

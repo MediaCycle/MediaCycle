@@ -1,5 +1,5 @@
 /*
- *  ACMediaDocument.cpp
+ *  ACMediaDocument.h
  *  MediaCycle
  *
  *  @author Thierry Ravet

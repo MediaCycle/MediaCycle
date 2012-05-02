@@ -36,6 +36,7 @@
 #ifndef _ARCHIPELMEDIADOCUMENT_H
 #define	_ARCHIPELMEDIADOCUMENT_H
 
+#if defined (SUPPORT_MULTIMEDIA)
 #include "MediaCycle.h"
 
 #include "ACMediaDocument.h"
@@ -45,5 +46,5 @@ public:
 	int import(std::string _filename, int _mid=0, ACPluginManager *acpl=0, bool _save_timed_feat=false);
 };
 
-
+#endif
 #endif/*_ARCHIPELMEDIADOCUMENT_H*/

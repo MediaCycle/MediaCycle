@@ -36,7 +36,7 @@
 #ifndef __ACOSG_MULTIMEDIA_RENDERER_H__
 #define __ACOSG_MULTIMEDIA_RENDERER_H__
 
-#if defined (SUPPORT_MULTIMEDIA) 
+#if defined (SUPPORT_MULTIMEDIA)
 
 #include "ACOsgMediaRenderer.h"
 #include <map>
@@ -57,6 +57,6 @@ public:
 	void updateNodes(double ratio=0.0);
 };
 
-#endif //defined (SUPPORT_MULTIMEDIA) 
+#endif //defined (SUPPORT_MULTIMEDIA)
 
 #endif

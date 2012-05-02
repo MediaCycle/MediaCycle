@@ -6,9 +6,8 @@ IF ( USE_QT4 )
 
 	# Generates ui_*.h files 
 	QT4_WRAP_UI(mediacycle-osg-qt_UIS_H ${mediacycle-osg-qt_UIS})
-
 	# Generates moc_*.cxx files
-	QT4_WRAP_CPP(mediacycle-osg-qt_MOC_SRCS ${mediacycle-osg-qt_HDRS} OPTIONS "-nw") # for all headers that potentially declare Q_OBJECT, otherwise warnings are suppressed
+	QT4_WRAP_CPP(mediacycle-osg-qt_MOC_SRCS ${mediacycle-osg-qt_HDRS} OPTIONS "-nw") # for all headers that potentially declare Q_OBJECT, otherwise warnings are suppressed	
 
 	SET(mediacycle-osg-qt_RCC ACOsgQtResources.qrc)
 	QT4_ADD_RESOURCES(mediacycle-osg-qt_RCC_SRCS ${mediacycle-osg-qt_RCC})

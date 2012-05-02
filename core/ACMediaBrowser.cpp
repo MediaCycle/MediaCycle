@@ -819,6 +819,8 @@ void ACMediaBrowser::setClusterCenter(int clusterIdx, vector< vector<float> > cl
 
 void ACMediaBrowser::initClusterCenters(){
 	vector<ACMedia*> loops = mLibrary->getAllMedia();
+	if (loops.size()==0)
+		return;
 	int feature_count = loops.back()->getNumberOfPreProcFeaturesVectors();
 	int desc_count;
 	mClusterCenters.resize(mClusterCount);
@@ -1198,23 +1200,24 @@ void ACMediaBrowser::updateNextPositionsPropeller() {
 		if(mLibrary->getMedia((*node).getMediaId())->getType() == mLibrary->getMediaType() && mLibrary->getMedia(mReferenceNode)->getType() == mLibrary->getMediaType()){//CF multimedia compatibility
 			r = compute_distance(mLibrary->getMedia(mReferenceNode)->getAllPreProcFeaturesVectors(), 
 							 mLibrary->getMedia((*node).getMediaId())->getAllPreProcFeaturesVectors(), 
-							 mFeatureWeights, false) * 10.0;
+								 mFeatureWeights, false) * 10.0;
+			if (r<rmin[ci]) {
+				rmin[ci] = r;
+			}
+			if (r>rmax[ci]) {
+				rmax[ci] = r;
+			}
 		}
-		if (r<rmin[ci]) {
-			rmin[ci] = r;
-		}
-		if (r>rmax[ci]) {
-			rmax[ci] = r;
-		}
-		
-		if(mLibrary->getMedia((*node).getMediaId())->getType() == mLibrary->getMediaType())//CF multimedia compatibility
+					
+		if(mLibrary->getMedia((*node).getMediaId())->getType() == mLibrary->getMediaType()){//CF multimedia compatibility
 			dt = compute_distance(mLibrary->getMedia((*node).getMediaId())->getAllPreProcFeaturesVectors(), mClusterCenters[ci], mFeatureWeights, false) / 2.0 * 10.0;
 		
-		if (dt<dtmin[ci]) {
-			dtmin[ci] = dt;
-		}
-		if (dt>dtmax[ci]) {
-			dtmax[ci] = dt;
+			if (dt<dtmin[ci]) {
+				dtmin[ci] = dt;
+			}
+			if (dt>dtmax[ci]) {
+				dtmax[ci] = dt;
+			}
 		}
 	}
 
