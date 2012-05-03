@@ -35,11 +35,14 @@
 #include "ACDockWidgetsManagerQt.h"
 
 ACDockWidgetsManagerQt::ACDockWidgetsManagerQt(QMainWindow *_mainWindow)
-    :mainWindow(_mainWindow),plugins_scanned(false),media_type(MEDIA_TYPE_NONE),auto_connect_osc(false),current_docks_visibility(true),previous_docks_visibility(true)
+    :mainWindow(_mainWindow),plugins_scanned(false),media_type(MEDIA_TYPE_NONE),auto_connect_osc(false),
+      current_docks_visibility(true),previous_docks_visibility(true),appOrigMinHeight(0)
 {
     dockWidgets.resize(0);
     dockWidgetFactory = new ACDockWidgetFactoryQt();
     lastDocksVisibilities.resize(0);
+
+    appOrigMinHeight = mainWindow->minimumHeight();
 }
 
 ACDockWidgetsManagerQt::~ACDockWidgetsManagerQt()
@@ -135,8 +138,26 @@ bool ACDockWidgetsManagerQt::addControlDock(ACAbstractDockWidgetQt* dock)
 
     connect(dockWidgets.back(), SIGNAL(mediaTypeChanged(QString)), mainWindow, SLOT(comboDefaultSettingsChanged(QString)));
 
-    dockWidgets.back()->autoConnectOSC(true);
+    dockWidgets.back()->autoConnectOSC(auto_connect_osc);
 
+    mainWindow->setMinimumHeight(appOrigMinHeight);
+    int appWinNum = QApplication::desktop()->screenNumber(mainWindow);
+    int availHeight = QApplication::desktop()->availableGeometry(appWinNum).height();
+    int windowHeight = 0;
+    for (int d=0;d<dockWidgets.size();d++){
+        if(dockWidgets[d]->isVisible()){
+            if (mainWindow->minimumHeight() + dockWidgets[d]->minimumHeight() < availHeight){
+                //mainWindow->setMinimumHeight( mainWindow->minimumHeight() + dockWidgets[d]->minimumHeight() );
+                windowHeight += dockWidgets[d]->minimumHeight();
+            }
+            std::cout << "Dock " << dockWidgets[d]->getClassName() << " of height " << dockWidgets[d]->minimumHeight() << " / window height " << mainWindow->minimumHeight() << " / availHeight " << availHeight << std::endl;
+        }
+    }
+    if(windowHeight<appOrigMinHeight)
+        windowHeight = appOrigMinHeight;
+    mainWindow->setMinimumHeight(windowHeight);
+    mainWindow->resize(mainWindow->sizeHint());
+    std::cout << "window height " << mainWindow->minimumHeight() << " or " << windowHeight << " / availHeight " << availHeight << std::endl;
     return true;
 }
 
@@ -149,6 +170,29 @@ void ACDockWidgetsManagerQt::updateDocksVisibility(bool visibility)
 {
     this->current_docks_visibility = visibility;
     this->syncControlToggleWithDocks();
+    this->updateDockHeight();
+}
+
+void ACDockWidgetsManagerQt::updateDockHeight()
+{
+    mainWindow->setMinimumHeight(appOrigMinHeight);
+    int appWinNum = QApplication::desktop()->screenNumber(mainWindow);
+    int availHeight = QApplication::desktop()->availableGeometry(appWinNum).height();
+    int windowHeight = 0;
+    for (int d=0;d<dockWidgets.size();d++){
+        if(dockWidgets[d]->isVisible()){
+            if (mainWindow->minimumHeight() + dockWidgets[d]->minimumHeight() < availHeight){
+                //mainWindow->setMinimumHeight( mainWindow->minimumHeight() + dockWidgets[d]->minimumHeight() );
+                windowHeight += dockWidgets[d]->minimumHeight();
+            }
+            //std::cout << "Dock " << dockWidgets[d]->getClassName() << " of height " << dockWidgets[d]->minimumHeight() << " / window height " << mainWindow->minimumHeight() << " / availHeight " << availHeight << std::endl;
+        }
+    }
+    if(windowHeight<appOrigMinHeight)
+        windowHeight = appOrigMinHeight;
+    mainWindow->setMinimumHeight(windowHeight);
+    mainWindow->resize(mainWindow->sizeHint());
+    //std::cout << "window height " << mainWindow->minimumHeight() << " or " << windowHeight << " / availHeight " << availHeight << std::endl;
 }
 
 void ACDockWidgetsManagerQt::syncControlToggleWithDocks(){
@@ -217,6 +261,21 @@ void ACDockWidgetsManagerQt::changeMediaType(ACMediaType _media_type){
             lastDocksVisibilities[d]=0;
         }
     }
+
+    /*if(_media_type == MEDIA_TYPE_AUDIO){
+        //void QMainWindow::tabifyDockWidget ( QDockWidget * first, QDockWidget * second )
+        int o = -1;
+        int a = -1;
+        for (int d=0;d<dockWidgets.size();d++){
+            if (dockWidgets[d]->getClassName()=="ACOSCDockWidgetQt")
+                o = d;
+            if (dockWidgets[d]->getClassName()=="ACAudioControlsDockWidgetQt")
+                a = d;
+        }
+        if(o!=-1 && a !=-1)
+            mainWindow->tabifyDockWidget(dockWidgets[a],dockWidgets[o]);
+    }*/
+    this->updateDockHeight();
 }
 
 void ACDockWidgetsManagerQt::updatePluginsSettings() {
@@ -227,6 +286,7 @@ void ACDockWidgetsManagerQt::updatePluginsSettings() {
             dockWidgets[d]->updatePluginsSettings();
     }
     plugins_scanned = true;
+    this->updateDockHeight();
 }
 
 void ACDockWidgetsManagerQt::resetPluginsSettings()
@@ -238,10 +298,12 @@ void ACDockWidgetsManagerQt::resetPluginsSettings()
     // XS TODO : remove the boxes specific to the media that was loaded
     // e.g. ACAudioControlDockWidgets
     // modify the DockWidget's API to allow this
+    this->updateDockHeight();
 }
 
 void ACDockWidgetsManagerQt::resetMediaType(ACMediaType _media_type)
 {
     for (int d=0;d<dockWidgets.size();d++)
         dockWidgets[d]->resetMediaType(_media_type);
+    this->updateDockHeight();
 }

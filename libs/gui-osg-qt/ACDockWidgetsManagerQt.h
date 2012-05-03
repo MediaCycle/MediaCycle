@@ -68,6 +68,7 @@ public:
     void autoConnectOSC(bool _status = true);
     #endif //defined (USE_OSC)
     void updateDocksVisibility(bool visibility);
+    void updateDockHeight();
 
     bool addControlDock(ACAbstractDockWidgetQt* dock);
     bool addControlDock(std::string dock_type);
@@ -86,6 +87,7 @@ protected:
     ACMediaType media_type;
     #if defined (USE_OSC)
     bool auto_connect_osc;
+    int appOrigMinHeight;
     #endif //defined (USE_OSC)
 };
 #endif // ACDOCKWIDGETSMANAGERQT_H

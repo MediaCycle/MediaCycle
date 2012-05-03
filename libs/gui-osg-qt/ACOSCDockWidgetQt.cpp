@@ -148,7 +148,7 @@ void ACOSCDockWidgetQt::disableControl(){
 		delete osc_browser;
 		osc_browser = 0;
 	}
-	ui.groupBoxOscControl->hide();
+        //ui.groupBoxOscControl->hide();
 }
 
 void ACOSCDockWidgetQt::disableFeedback(){
@@ -157,7 +157,7 @@ void ACOSCDockWidgetQt::disableFeedback(){
 		delete osc_feedback;
 		osc_feedback = 0;
 	}
-	ui.groupBoxOscFeedback->hide();
+        //ui.groupBoxOscFeedback->hide();
 }
 
 void ACOSCDockWidgetQt::setControlPort(int _port){
