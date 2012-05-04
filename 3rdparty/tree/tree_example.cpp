@@ -26,9 +26,9 @@
 using namespace std;
 
 int main(int, char **)
-{
-    Tree<string> tr;
-    Tree<string>::iterator top, one, two, loc, banana;
+   {
+   Tree<string> tr;
+   Tree<string>::iterator top, one, two, loc, banana;
 
     top=tr.begin();
     one=tr.insert(top, "one");

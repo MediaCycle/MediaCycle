@@ -36,7 +36,7 @@
 
 #include <math.h>
 #include <iostream>
-using namespace std;
+/*using namespace std;
 
 ACSparseCosDistance::ACSparseCosDistance(ACMediaFeatures* F1Num,ACMediaFeatures* F1Index,ACMediaFeatures* F1Value,ACMediaFeatures* F2Num,ACMediaFeatures* F2Index,ACMediaFeatures* F2Value)
 :ACSparseDistance( F1Num, F1Index, F1Value, F2Num, F2Index, F2Value){
@@ -136,3 +136,4 @@ double ACSparseCosDistance::distance(){
 	return ((1.1/(0.1+ab/(a*b))-1)/10);
 	
 }
+*/

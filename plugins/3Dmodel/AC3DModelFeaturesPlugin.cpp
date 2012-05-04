@@ -1,8 +1,8 @@
 /**
  * @brief AC3DModelFeaturesPlugin.cpp
- * @author Xavier Siebert
- * @date 18/07/2011
- * @copyright (c) 2011 – UMONS - Numediart
+ * @author Thierry Ravet
+ * @date 04/05/2012
+ * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -71,13 +71,13 @@ std::vector<ACMediaFeatures*> AC3DModelFeaturesPlugin::calculate(ACMediaData* mo
 	vector<float> extent;
 	extent.resize(3);
 	extent[0] = ext.x(); extent[1] = ext.y(); extent[2] = ext.z();
-	vector<float> ratios;
+	FeaturesVector ratios(false);
 	ratios.resize(3);
-	ratios[0] = extent[1]/extent[0];
-	ratios[1] = extent[2]/extent[0];
-	ratios[2] = extent[2]/extent[1];
+	ratios.set(0,extent[1]/extent[0]);
+	ratios.set(1,extent[2]/extent[0]);
+	ratios.set(2,extent[2]/extent[1]);
 	
-	desc_bounding_box_ratio = new ACMediaFeatures(ratios, "bounding_box_ratios");  
+	desc_bounding_box_ratio = new ACMediaFeatures(ratios, string("bounding_box_ratios"));  
 
 	desc.push_back(desc_bounding_box_ratio);	
 		

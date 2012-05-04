@@ -191,6 +191,7 @@ std::vector<float> ACTextFeaturesPlugin::indexIdfExtraction(){
 			char *tempChar=new char[1024];
 			mc_wcstoutf8(tempChar,indexTerms[i],1024);
 			cout<<tempChar<<"\tdf:"<<tempInt<<"\tidf:"<<log((float)nbDoc/mIndex->docFreq(tempTerm))<<"\n";
+			delete tempChar;
 		
 		}
 		else
@@ -213,7 +214,7 @@ ACMediaFeatures* ACTextFeaturesPlugin::tfCalculate(ACText* pMedia){
 	//	charTerms[i]=NULL;
 	//delete charTerms;
 	//charTerms=NULL;
-	std::vector<float> tfValues;
+	FeaturesVector  tfValues(true,FeaturesVector::Cosinus);
 	if (indexIdf.size()!=nbTerms)
 		return NULL;
 	for (int i=0;i<nbTerms;i++)
@@ -223,8 +224,6 @@ ACMediaFeatures* ACTextFeaturesPlugin::tfCalculate(ACText* pMedia){
 		
 		mc_wcstoutf8(tempChar,indexTerms[i],wcslen(indexTerms[i])+2);
 		//wprintf(_T("%s"),indexTerms[i]);
-		if (tfValues[i]!=0.f)
-			cout <<tempChar<<"\t"<<tfValues[i]<<endl;
 		delete tempChar;
 	}
 	ACMediaFeatures* desc=new ACMediaFeatures(tfValues,"Term Frequency-Inverse Document Frequency");
@@ -244,7 +243,7 @@ std::vector<ACMediaFeatures*> ACTextFeaturesPlugin::calculate(ACMediaData* text_
 	else 
 		mIndexValid=false;
 	std::vector<ACMediaFeatures*> desc;
-	std::vector<float> descVect;
+	FeaturesVector descVect(true,FeaturesVector::Cosinus);
 	descVect.push_back(1.f);
 	ACMediaFeatures* descFeat=new ACMediaFeatures(descVect,"Term Frequency-Inverse Document Frequency");
 	desc.push_back(descFeat);

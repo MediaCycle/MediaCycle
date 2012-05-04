@@ -53,13 +53,12 @@ class ACMediaFeatures  {
 protected:
 	FeaturesVector features_vector; // vector<float>
 	bool _computed ;
-	static DistanceType dist_type; // XS check: derive static => 1 per subclass ?
 	std::string name;
 	int needs_normalization;
 public:
 	ACMediaFeatures(); // no media given, probably read features from disk
 	ACMediaFeatures(FeaturesVector V, std::string myname="");
-//	ACMediaFeatures(FeaturesVectorAsDouble V, std::string myname="");
+//	ACMediaFeatures(FeaturesVectorAsDouble V, std::string myname="",);
 	virtual ~ACMediaFeatures()  {};
 	//	virtual void calculate(void*) = 0;
 	// the following are common to all features types and should NOT be redefined
@@ -71,7 +70,7 @@ public:
 	float getFeatureElement(int i);
 	void addFeatureElement(float f);
 	void setFeatureElement(int i, float f);
-	FeaturesVector *getFeaturesVector() {return &features_vector;}
+	FeaturesVector &getFeaturesVector() {return features_vector;};
 	
 	// this works only for 1D features -- does it belong here ?
 	int getDiscretizedFeature();

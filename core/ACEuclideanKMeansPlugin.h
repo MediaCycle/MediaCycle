@@ -47,10 +47,9 @@ public:
 	ACEuclideanKMeansPlugin();
 	~ACEuclideanKMeansPlugin();
 	double compute_distance(vector<ACMediaFeatures*> &, vector<ACMediaFeatures*> &, const vector<float> &, bool );
-	double compute_distance(vector<ACMediaFeatures*> &, const vector<vector <float> > &, const vector<float> &, bool );
-	void meanAccumCompute(ACMediaFeatures* ,vector<float>&);
+	double compute_distance(vector<ACMediaFeatures*> &, const vector<FeaturesVector > &, const vector<float> &, bool );
+	void meanAccumCompute(ACMediaFeatures* ,FeaturesVector&);
 	
-
 	
 private:
 };

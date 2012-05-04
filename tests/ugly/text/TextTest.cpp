@@ -112,11 +112,11 @@ void dump_to_stdout( TiXmlNode* pParent, unsigned int indent = 0 )
 	
 	switch ( t )
 	{
-		case TiXmlNode::DOCUMENT:
+		case TiXmlNode::TINYXML_DOCUMENT:
 			printf( "Document" );
 			break;
 			
-		case TiXmlNode::ELEMENT:
+		case TiXmlNode::TINYXML_ELEMENT:
 			printf( "Element [%s]", pParent->Value() );
 			num=dump_attribs_to_stdout(pParent->ToElement(), indent+1);
 			switch(num)
@@ -127,20 +127,20 @@ void dump_to_stdout( TiXmlNode* pParent, unsigned int indent = 0 )
 		}
 			break;
 			
-		case TiXmlNode::COMMENT:
+		case TiXmlNode::TINYXML_COMMENT:
 			printf( "Comment: [%s]", pParent->Value());
 			break;
 			
-		case TiXmlNode::UNKNOWN:
+		case TiXmlNode::TINYXML_UNKNOWN:
 			printf( "Unknown" );
 			break;
 			
-		case TiXmlNode::TEXT:
+		case TiXmlNode::TINYXML_TEXT:
 			pText = pParent->ToText();
 			printf( "Text: [%s]", pText->Value() );
 			break;
 			
-		case TiXmlNode::DECLARATION:
+		case TiXmlNode::TINYXML_DECLARATION:
 			printf( "Declaration" );
 			break;
 		default:
@@ -337,9 +337,11 @@ int main(void){
 		}
 		for (it=testLib.begin();it!=testLib.end();it++){
 			cout <<(*it)->getFileName() <<endl;
-			std::vector<float>::iterator it2;
-			for (it2=(*it)->getAllPreProcFeaturesVectors()[0]->getFeaturesVector()->begin();it2!=(*it)->getAllPreProcFeaturesVectors()[0]->getFeaturesVector()->end();it2++)
-				cout<<(*it2)<<endl;
+	//		std::vector<float>::iterator it2;
+	//		for (it2=(*it)->getAllPreProcFeaturesVectors()[0]->getFeaturesVector()->begin();it2!=(*it)->getAllPreProcFeaturesVectors()[0]->getFeaturesVector()->end();it2++)
+	//			cout<<(*it2)<<endl;
+		//	for (int i=0;i<(*it)->getAllPreProcFeaturesVectors()[0]->getFeaturesVector()->size();i++)
+		//		cout << (*((*it)->getAllPreProcFeaturesVectors()[0]->getFeaturesVector()))[i]<<endl;;
 		}
 	//	std::vector<ACMediaFeatures*> testFeat=testPlugin->calculate(((ACText*)testMedia)->getMediaData(),testMedia );
 		

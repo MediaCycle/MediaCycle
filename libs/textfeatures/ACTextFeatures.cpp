@@ -46,7 +46,7 @@ using namespace std;
 using namespace lucene::index;
 //using namespace lucene::util;
 //using namespace lucene::search;
-const static float seuil=0.5;
+const static float seuil=0.8;
 
 
 void getFreqTerm(vector<int32_t> &ret,std::vector<wchar_t *> termsToFind, int32_t nTerms,TermFreqVector* termsFreqBase){

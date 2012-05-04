@@ -184,7 +184,7 @@ public:
 	// == Cluster Mode == (based on features weights)
 	void setClusterNumber(int n);
 	void setClusterIndex(int mediaIdx,int clusterIdx);
-	void setClusterCenter(int clusterIdx, vector< vector<float> >);
+	void setClusterCenter(int clusterIdx, vector<FeaturesVector >);
 	void initClusterCenters();
 	// XS TODO clean level / state ...
 	void incrementLoopNavigationLevels(int loopIndex);
@@ -304,7 +304,7 @@ public:
 
 	const vector<float> &getFeatureWeights(){return mFeatureWeights;};
 	const int &getClusterCount(){return mClusterCount;};
-	const vector<vector <float> > &getClusterCenter(int i){return mClusterCenters[i];};
+	const vector<FeaturesVector> &getClusterCenter(int i){return mClusterCenters[i];};
 	
 	
 private: // better not let the ouside world know about internal cooking
@@ -385,7 +385,8 @@ protected:
 	// XS TODO: make a class clusters
 	int mClusterCount;
 	//vector<vector <int> > 		clusters;
-	vector<vector<vector <float> > > mClusterCenters; // cluster index, feature index, descriptor index
+	//vector<vector<vector <float> > > mClusterCenters; // cluster index, feature index, descriptor index
+	vector<vector<FeaturesVector> > mClusterCenters; // cluster index, feature index, descriptor index
 	vector<float>			mFeatureWeights; // each value must be in [0,1], important for euclidian distance.
 
 	int auto_play;

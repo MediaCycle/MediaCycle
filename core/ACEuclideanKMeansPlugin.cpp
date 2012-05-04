@@ -55,16 +55,19 @@ double ACEuclideanKMeansPlugin::compute_distance(vector<ACMediaFeatures*> &obj1,
 	double dis = 0.0;
 	
 	for (int f=0; f<feature_count; f++) {
-		ACEuclideanDistance* E = new ACEuclideanDistance (obj1[f], obj2[f]);
-		double tempDist=E->distance();
-		dis += tempDist*tempDist * (inverse_features?(1.0-weights[f]):weights[f]);
-		delete E;
+//		ACEuclideanDistance* E = new ACEuclideanDistance (obj1[f], obj2[f]);
+//		double tempDist=E->distance();
+//		dis += tempDist*tempDist * (inverse_features?(1.0-weights[f]):weights[f]);
+//		delete E;
+		float temp=obj1[f]->getFeaturesVector().distance(obj2[f]->getFeaturesVector());
+		dis +=temp*temp*(inverse_features?(1.0-weights[f]):weights[f]);
+
 	}
 	dis = sqrt(dis);
 	
 	return dis;
 }
-double ACEuclideanKMeansPlugin::compute_distance(vector<ACMediaFeatures*> &obj1, const vector<vector <float> > &obj2, const vector<float> &weights, bool inverse_features)
+double ACEuclideanKMeansPlugin::compute_distance(vector<ACMediaFeatures*> &obj1, const vector<FeaturesVector > &obj2, const vector<float> &weights, bool inverse_features)
 {
 	assert(obj1.size() == obj2.size() && obj1.size() == weights.size());
 	int feature_count = obj1.size();
@@ -74,22 +77,25 @@ double ACEuclideanKMeansPlugin::compute_distance(vector<ACMediaFeatures*> &obj1,
 	for (int f=0; f<feature_count; f++) {
 		//ACEuclideanDistance* E = new ACEuclideanDistance (&(obj1[f]->getFeaturesVector()), (FeaturesVector *) &obj2[f]);
 		//FeaturesVector tmp  = obj1[f]->getFeaturesVector();
-		ACEuclideanDistance* E = new ACEuclideanDistance (obj1[f]->getFeaturesVector(),  (FeaturesVector *) &obj2[f]);
-		double tempDist=E->distance();
-		dis += tempDist * tempDist * (inverse_features?(1.0-weights[f]):weights[f]);
-		delete E;
+		//ACEuclideanDistance* E = new ACEuclideanDistance (obj1[f]->getFeaturesVector(),  (FeaturesVector *) &obj2[f]);
+		//double tempDist=E->distance();
+		//dis += tempDist * tempDist * (inverse_features?(1.0-weights[f]):weights[f]);
+		//delete E;
+		dis +=obj1[f]->getFeaturesVector().distance(obj2[f])*(inverse_features?(1.0-weights[f]):weights[f]);
 	}
 	dis = sqrt(dis);
 	
 	return dis;
 }
 
-void ACEuclideanKMeansPlugin::meanAccumCompute(ACMediaFeatures*  obj1,vector<float>& obj2){
-	
+void ACEuclideanKMeansPlugin::meanAccumCompute(ACMediaFeatures*  obj1,FeaturesVector& obj2){
+	/*
 	int desc_count=obj1->getSize();
 	for(int d=0; d<desc_count; d++)
 	{
 		obj2[d] += obj1->getFeatureElement(d);
-	}
+	}*/
+	const FeaturesVector *temp=&(obj1->getFeaturesVector());
+	obj2+=(*temp);
 
 }

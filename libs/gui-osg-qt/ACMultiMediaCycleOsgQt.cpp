@@ -1059,7 +1059,7 @@ void ACMultiMediaCycleOsgQt::loadDefaultConfig(ACMediaType _media_type, ACBrowse
 	else {
     #endif //defined (SUPPORT_MULTIMEDIA)
         if(smedia == "text"){
-            this->tryLoadFeaturePluginFromBaseName("text_sparse");
+            this->tryLoadFeaturePluginFromBaseName("text");
         }
         else{
             this->tryLoadFeaturePluginFromBaseName(smedia);
@@ -1086,7 +1086,7 @@ void ACMultiMediaCycleOsgQt::loadDefaultConfig(ACMediaType _media_type, ACBrowse
     // Try to load visualisation plugins:
     std::string v_plugin("");
     if(smedia == "text"){
-        v_plugin = this->getPluginPathFromBaseName("SparseVisualisation");
+        v_plugin = this->getPluginPathFromBaseName("visualisation");
     }
     else{
         v_plugin = this->getPluginPathFromBaseName("visualisation");
@@ -1102,7 +1102,7 @@ void ACMultiMediaCycleOsgQt::loadDefaultConfig(ACMediaType _media_type, ACBrowse
 	
     // Define the preprocessing plugins:
 	if(smedia == "text"){
-		media_cycle->setPreProcessPlugin("TextFeaturesSparse");
+		media_cycle->setPreProcessPlugin("TextFeatures");
 		//media_cycle->setPreProcessPlugin("TextFeatures");
 	}
 	else{
@@ -1111,6 +1111,7 @@ void ACMultiMediaCycleOsgQt::loadDefaultConfig(ACMediaType _media_type, ACBrowse
 	
     // update the plugin lists of the browser control dock through configureDockWidget
     dockWidgetsManager->changeMediaType(_media_type);
+	this->setMediaType(_media_type);
     dockWidgetsManager->resetPluginsSettings();
 }
 

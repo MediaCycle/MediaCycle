@@ -37,7 +37,7 @@
 #define _ACSparseCosDistance_H
 
 #include "ACSparseDistance.h"
-
+/*
 class ACSparseCosDistance : public ACSparseDistance {
 public:
 	//	ACSparseCosDistance(){} // not used
@@ -50,5 +50,5 @@ public:
 protected:
 	bool copyVec;
 };
-
+*/
 #endif //_ACSparseCosDistance_H

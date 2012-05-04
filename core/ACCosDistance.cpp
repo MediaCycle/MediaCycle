@@ -41,8 +41,8 @@ using namespace std;
 
 ACCosDistance::ACCosDistance(ACMediaFeatures* F1, ACMediaFeatures* F2) : ACDistance( F1, F2) {
 	// TODO XS add tests !
-	V1 = F1->getFeaturesVector();
-	V2 = F2->getFeaturesVector();
+	V1 = &(F1->getFeaturesVector());
+	V2 = &(F2->getFeaturesVector());
 }
 
 ACCosDistance::ACCosDistance(FeaturesVector *F1, FeaturesVector *F2) : ACDistance( F1, F2) {
@@ -62,7 +62,7 @@ double ACCosDistance::distance(){
 	}
 	double a = 0.0, b= 0.0, ab= 0.0 ;
 	for (int i=0; i < s; i++){
-		float temp1=(*V1)[i],temp2=(*V2)[i];
+		float temp1=(float)((*V1)[i]),temp2=(float)((*V2)[i]);
 		ab+= temp1*temp2;
 		a+= temp1*temp1;
 		b+= temp2*temp2;

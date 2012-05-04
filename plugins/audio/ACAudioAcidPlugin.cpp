@@ -1,8 +1,8 @@
 /**
  * @brief ACAudioAcidPlugin.cpp
- * @author Christian Frisson
- * @date 08/10/2011
- * @copyright (c) 2011 – UMONS - Numediart
+ * @author Thierry Ravet
+ * @date 04/05/2012
+ * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -146,7 +146,9 @@ void ACAudioAcidPlugin::extractDataWavAcid(string fname, int nsamples, int sampl
 				acid_bpm = getBPM(acid_type, acid_nbeats, nsamples, sample_rate);
 				
 			}
-		}	
+		}
+		delete pWaveLoader;
+		pWaveLoader=NULL;
 	}	
 }
 

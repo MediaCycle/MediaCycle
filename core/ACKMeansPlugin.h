@@ -48,9 +48,9 @@ public:
 	~ACKMeansPlugin();
 	void updateClusters(ACMediaBrowser* mediaBrowser,bool needsCluster=true);//updateClustersKMeans(animate, needsCluster)
 	virtual double compute_distance(vector<ACMediaFeatures*> &, vector<ACMediaFeatures*> &, const vector<float> &, bool )=0;
-	virtual double compute_distance(vector<ACMediaFeatures*> &, const vector<vector <float> > &, const vector<float> &, bool )=0;
+	virtual double compute_distance(vector<ACMediaFeatures*> &, const vector<FeaturesVector> &, const vector<float> &, bool )=0;
 	//	virtual void updateClusters(ACMediaBrowser* mediaBrowser ,bool needsCluster=true)=0;//updateClustersKMeans(animate, needsCluster)
-	virtual void meanAccumCompute(ACMediaFeatures* ,vector<float>&)=0;
+	virtual void meanAccumCompute(ACMediaFeatures* ,FeaturesVector&)=0;
 	
 //	void updateNextPositions(ACMediaBrowser*  );
 

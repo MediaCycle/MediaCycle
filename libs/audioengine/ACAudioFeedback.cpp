@@ -1687,7 +1687,7 @@ int ACAudioFeedback::createSourceWithPosition(int loop_id, float x, float y, flo
 	char*	loop_file;
 	float   loop_pos[3];
 
-	vector<float> local_feature;
+	FeaturesVector local_feature;
 	float local_bpm;
 	int local_key;
 	int local_acid_type;

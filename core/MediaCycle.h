@@ -204,7 +204,7 @@ public:
 
 	// == Features
 	void normalizeFeatures(int needsNormalize=1);
-	std::vector<float> getFeaturesVectorInMedia(int i, std::string feature_name);
+	FeaturesVector getFeaturesVectorInMedia(int i, std::string feature_name);
 	void setWeight(int i, float weight);
 	void setWeightVector(std::vector<float> fw);
 	std::vector<float> getWeightVector();

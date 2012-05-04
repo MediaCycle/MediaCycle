@@ -45,9 +45,8 @@ using std::ofstream;
 using std::vector;
 using std::string;
 
-ACMediaFeatures::ACMediaFeatures(){
-  features_vector = FeaturesVector(0);	
-	//XS TODO: is this flag still necessary ?
+ACMediaFeatures::ACMediaFeatures(void){
+ 	//XS TODO: is this flag still necessary ?
   _computed = false;
   needs_normalization = 1;
   name = "none";
@@ -110,8 +109,10 @@ void ACMediaFeatures::setFeatureElement(int i, float f) {
 		cerr << " <ACMediaFeatures::setFeatureElement(int i) error> Invalid Feature Index" << endl;
 		return;
 	}
-	features_vector[i] = f;
+	features_vector.set(i,f);
 }
+
+//TR Modification. What's the use of push back if we know the acurate number of elements
 
 void ACMediaFeatures::addFeatureElement(float f){
 	features_vector.push_back(f);

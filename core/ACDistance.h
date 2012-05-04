@@ -38,16 +38,9 @@
 #include "ACMediaFeatures.h"
 
 
-static const DistanceType D_EUCLIDEAN = 101;
-static const DistanceType D_BHATTACHARYYA = 102;
-static const DistanceType DT_L1 = 103;
-static const DistanceType D_INTERSECTION = 104;
-static const DistanceType DT_KLD = 105;
-
 class ACDistance {
 protected:
 	FeaturesVector *V1, *V2;
-	static const DistanceType DT;
 public:
 	// 	Distance() {} // not used
 	ACDistance(ACMediaFeatures*, ACMediaFeatures*) {}

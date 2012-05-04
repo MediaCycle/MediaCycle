@@ -38,11 +38,54 @@
 #ifndef _ACFEATURESTYPES_H
 #define _ACFEATURESTYPES_H
 
-#include <vector>
+#ifndef Q_MOC_RUN
 
-typedef unsigned int DistanceType;
+#include <boost/numeric/ublas/vector_sparse.hpp>
+#include <boost/numeric/ublas/vector.hpp>
+#endif
 
-typedef std::vector<float> FeaturesVector;
+class FeaturesVector{
+    typedef const float& const_reference;
+    typedef float& reference;
+public:
+	enum DistanceType {
+		Euclidean,
+		Cosinus
+	};
+protected:
+	DistanceType distType;
+	
+#ifndef Q_MOC_RUN
+    boost::numeric::ublas::vector<float> vDense;
+	boost::numeric::ublas::compressed_vector<float> vSparse ;
+#endif
+	bool isSparse;
+	
+public:
+	FeaturesVector(bool isSparse=false,DistanceType distType=Euclidean);
+	FeaturesVector(bool isSparse, unsigned int pSize,DistanceType distType=Euclidean );
+	FeaturesVector(std::vector<float> data,DistanceType distType=Euclidean);
+	bool getIsSparse(void){return isSparse;};
+	void setIsSparse(bool isSparse);
+	void setDistanceType(DistanceType distType);
+	DistanceType getDistanceType(void){return distType;};
+	
+	unsigned int size () const;
+	void init();
+	FeaturesVector &operator = (const FeaturesVector &v);
+	const_reference operator [] (unsigned int i) const ;
+	void set(unsigned int index,float val);
+	//reference operator [] (unsigned int i);
+	FeaturesVector &operator += (const FeaturesVector &ae);
+	FeaturesVector &operator -= (const FeaturesVector &ae);
+	FeaturesVector &operator *= (const float &at);
+	FeaturesVector &operator /= (const float &at);
+	void resize(unsigned int pSize);
+	float distance(const FeaturesVector &ae);
+	float distance( const FeaturesVector *ae);
+	FeaturesVector & meanAdd( const FeaturesVector &ae);
+	void push_back(float elem);
+};
 //typedef std::vector<double> FeaturesVectorAsDouble;
 // other option : make FeaturesVector a class or a template
 

@@ -71,9 +71,9 @@ void ACKMeansPlugin::updateClusters(ACMediaBrowser* mediaBrowser,bool needsClust
 	int feature_count = library->getMedia(currId[0])->getNumberOfPreProcFeaturesVectors();
 	int clusterCount=mediaBrowser->getClusterCount();
 	vector< int > 			cluster_counts;
-	vector<vector<vector <float> > >cluster_accumulators; // cluster, feature, desc
+	vector<vector<FeaturesVector > >cluster_accumulators; // cluster, feature, desc
 	vector< float > 		cluster_distances; // for computation
-	vector<vector<vector <float> > > clusterCenters; // cluster index, feature index, descriptor index
+	vector<vector<FeaturesVector > > clusterCenters; // cluster index, feature index, descriptor index
 	vector<float>			featureWeights=mediaBrowser->getFeatureWeights(); // each value must be in [0,1], important for euclidian distance.
 	
 	clusterCenters.resize(clusterCount);
@@ -128,8 +128,8 @@ void ACKMeansPlugin::updateClusters(ACMediaBrowser* mediaBrowser,bool needsClust
 				
 				for(d=0; d<desc_count; d++)
 				{
-					if(library->getMedia(currId[r])->getType() == library->getMediaType())//CF
-						clusterCenters[i][f][d] = library->getMedia(currId[r])->getPreProcFeaturesVector(f)->getFeatureElement(d);
+					//if(library->getMedia(r)->getType() == library->getMediaType())//CF
+					clusterCenters[i][f] = library->getMedia(currId[r])->getPreProcFeaturesVector(f);//->getFeatureElement(d);
 					//printf("cluster  %d center: %f\n", i, clusterCenters[i][f][d]);
 				}
 			}
@@ -154,10 +154,8 @@ void ACKMeansPlugin::updateClusters(ACMediaBrowser* mediaBrowser,bool needsClust
 					// XS again, what if all media don't have the same number of features ?
 					int desc_count = library->getMedia(currId[0])->getPreProcFeaturesVector(f)->getSize();
 					
-					for(d=0; d<desc_count; d++)
-					{
-						cluster_accumulators[i][f][d] = 0.0;
-					}
+						cluster_accumulators[i][f].init();
+					
 				}
 			}
 			for(i=0; i<object_count; i++)
@@ -211,15 +209,12 @@ void ACKMeansPlugin::updateClusters(ACMediaBrowser* mediaBrowser,bool needsClust
 					{
 						// XS again, what if all media don't have the same number of features ?
 						int desc_count = library->getMedia(currId[0])->getPreProcFeaturesVector(f)->getSize();
-						
-						for(d=0; d<desc_count; d++)
-						{
-							clusterCenters[j][f][d] = cluster_accumulators[j][f][d] / (float)cluster_counts[j];
-						}
+						cluster_accumulators[j][f] /= (float)cluster_counts[j];
+						clusterCenters[j][f] = cluster_accumulators[j][f];
 					}
 				}
 				
-				printf("\tcluster %d count = %d\n", j, cluster_counts[j]); 
+				//printf("\tcluster %d count = %d\n", j, cluster_counts[j]); 
 			}
 		}
 		mediaBrowser->initClusterCenters();

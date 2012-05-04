@@ -650,16 +650,16 @@ void MediaCycle::setForwardDown(int i) { forwarddown = i; }
 // == Features
 void MediaCycle::normalizeFeatures(int needsNormalize) { mediaLibrary->normalizeFeatures(needsNormalize); }
 // Get Features Vector (identified by feature_name) in media i
-vector<float> MediaCycle::getFeaturesVectorInMedia(int i, string feature_name) {
+FeaturesVector MediaCycle::getFeaturesVectorInMedia(int i, string feature_name) {
 	ACMedia* lmedia;
 	ACMediaFeatures* lfeatures;
 	FeaturesVector lfeaturesvector;
 	lmedia = mediaLibrary->getMedia(i);
 	lfeatures = lmedia->getPreProcFeaturesVector(feature_name);
 	if (lfeatures) {
-		lfeaturesvector = *(lfeatures->getFeaturesVector());
+		lfeaturesvector = lfeatures->getFeaturesVector();
 	}
-	return (vector<float>)lfeaturesvector;
+	return lfeaturesvector;
 }
 
 // == Playing time stamp
