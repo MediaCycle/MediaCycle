@@ -86,7 +86,7 @@ void ACDockWidgetsManagerQt::autoConnectOSC(bool _status)
 {
     auto_connect_osc = _status;
     for (int d=0;d<dockWidgets.size();d++){
-        dockWidgets[d]->autoConnectOSC(_status);
+        dockWidgets[d]->autoConnectOSC(_status);//CF quick hack for LoopJam, should be (_status);
     }
 }
 #endif //defined (USE_OSC)
@@ -125,40 +125,28 @@ bool ACDockWidgetsManagerQt::addControlDock(ACAbstractDockWidgetQt* dock)
 
     dockWidgets.back()=dock;
 
-    if( dock->getMediaType() == MEDIA_TYPE_ALL || dock->getMediaType() == media_type || dock->getMediaType() == MEDIA_TYPE_MIXED ){
-        lastDocksVisibilities.back()=1;
-        mainWindow->addDockWidget(Qt::LeftDockWidgetArea,dockWidgets.back());
-        dockWidgets.back()->setVisible(true);
-        connect(dockWidgets.back(), SIGNAL(visibilityChanged(bool)), this , SLOT(syncControlToggleWithDocks()));
+    if(!(mainWindow->isFullScreen()))
+    {
+        if( dock->getMediaType() == MEDIA_TYPE_ALL || dock->getMediaType() == media_type || dock->getMediaType() == MEDIA_TYPE_MIXED ){
+            lastDocksVisibilities.back()=1;
+            mainWindow->addDockWidget(Qt::LeftDockWidgetArea,dockWidgets.back());
+            dockWidgets.back()->setVisible(true);
+            connect(dockWidgets.back(), SIGNAL(visibilityChanged(bool)), this , SLOT(syncControlToggleWithDocks()));
+        }
+        else {
+            lastDocksVisibilities.back()=0;
+            dockWidgets.back()->setVisible(false);
+        }
     }
-    else {
+    else{
         lastDocksVisibilities.back()=0;
         dockWidgets.back()->setVisible(false);
     }
-
     connect(dockWidgets.back(), SIGNAL(mediaTypeChanged(QString)), mainWindow, SLOT(comboDefaultSettingsChanged(QString)));
 
     dockWidgets.back()->autoConnectOSC(auto_connect_osc);
-
-    mainWindow->setMinimumHeight(appOrigMinHeight);
-    int appWinNum = QApplication::desktop()->screenNumber(mainWindow);
-    int availHeight = QApplication::desktop()->availableGeometry(appWinNum).height();
-    int windowHeight = 0;
-    for (int d=0;d<dockWidgets.size();d++){
-        if(dockWidgets[d]->isVisible()){
-            if (mainWindow->minimumHeight() + dockWidgets[d]->minimumHeight() < availHeight){
-                //mainWindow->setMinimumHeight( mainWindow->minimumHeight() + dockWidgets[d]->minimumHeight() );
-                windowHeight += dockWidgets[d]->minimumHeight();
-            }
-            std::cout << "Dock " << dockWidgets[d]->getClassName() << " of height " << dockWidgets[d]->minimumHeight() << " / window height " << mainWindow->minimumHeight() << " / availHeight " << availHeight << std::endl;
-        }
-    }
-    if(windowHeight<appOrigMinHeight)
-        windowHeight = appOrigMinHeight;
-    mainWindow->setMinimumHeight(windowHeight);
-    mainWindow->resize(mainWindow->sizeHint());
-    std::cout << "window height " << mainWindow->minimumHeight() << " or " << windowHeight << " / availHeight " << availHeight << std::endl;
     return true;
+
 }
 
 bool ACDockWidgetsManagerQt::addControlDock(std::string dock_type)
@@ -175,10 +163,16 @@ void ACDockWidgetsManagerQt::updateDocksVisibility(bool visibility)
 
 void ACDockWidgetsManagerQt::updateDockHeight()
 {
+    if(!mainWindow)
+        return;
+    if (mainWindow->isFullScreen())
+        return;
+
     mainWindow->setMinimumHeight(appOrigMinHeight);
     int appWinNum = QApplication::desktop()->screenNumber(mainWindow);
     int availHeight = QApplication::desktop()->availableGeometry(appWinNum).height();
     int windowHeight = 0;
+    int windowWidth = 0;
     for (int d=0;d<dockWidgets.size();d++){
         if(dockWidgets[d]->isVisible()){
             if (mainWindow->minimumHeight() + dockWidgets[d]->minimumHeight() < availHeight){
@@ -188,9 +182,14 @@ void ACDockWidgetsManagerQt::updateDockHeight()
             //std::cout << "Dock " << dockWidgets[d]->getClassName() << " of height " << dockWidgets[d]->minimumHeight() << " / window height " << mainWindow->minimumHeight() << " / availHeight " << availHeight << std::endl;
         }
     }
-    if(windowHeight<appOrigMinHeight)
+    if(windowHeight<appOrigMinHeight){
         windowHeight = appOrigMinHeight;
+        windowWidth = appOrigMinHeight + 250;
+    }
+    else
+        windowWidth = windowHeight + 250; // magic number, dock widgets width;
     mainWindow->setMinimumHeight(windowHeight);
+    mainWindow->setMinimumWidth(windowWidth);
     mainWindow->resize(mainWindow->sizeHint());
     //std::cout << "window height " << mainWindow->minimumHeight() << " or " << windowHeight << " / availHeight " << availHeight << std::endl;
 }
