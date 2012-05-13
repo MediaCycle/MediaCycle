@@ -42,7 +42,6 @@ int main(int argc, char *argv[])
 	ACAudioCycleLoopJam window;
 	try {
 		window.setWindowTitle("LoopJam");
-		window.autoConnectOSC(true); // ugly, to be set before adding palettes
 
 		// Adding palettes
 		window.addControlDock("MCOSC");
@@ -53,8 +52,8 @@ int main(int argc, char *argv[])
 		window.loadDefaultConfig(MEDIA_TYPE_AUDIO);
 		window.show();
 		
-		window.on_actionFullscreen_triggered(true); // ugly, to be set after the window is show otherwise palettes stay visible...
-
+                window.on_actionFullscreen_triggered(true); // to be set after the window is shown
+                window.autoConnectOSC(true); // to be set after loading the default config
 	}
 	catch (const exception& e) {
 		cout << "** caught exception in main : " << e.what() << endl;

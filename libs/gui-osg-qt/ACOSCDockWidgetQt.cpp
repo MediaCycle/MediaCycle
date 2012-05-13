@@ -65,6 +65,14 @@ ACOSCDockWidgetQt::~ACOSCDockWidgetQt(){
 void ACOSCDockWidgetQt::autoConnectOSC(bool _status)
 {
 	auto_connect = _status;
+        if(!media_cycle)
+            return;
+        if(auto_connect){
+            if(!osc_browser)
+                this->toggleControl(true);
+            if(!osc_feedback)
+                this->toggleFeedback(true);
+        }
 }
 
 #if defined (USE_OSC)
