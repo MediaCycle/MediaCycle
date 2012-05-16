@@ -403,11 +403,11 @@ ACAudioYaafePlugin::ACAudioYaafePlugin() : ACTimedFeaturesPlugin() {
     dataflow_file += s_path.parent_path().string() + "/ACAudioYaafePluginSettings.txt";
 #else
 #ifdef __APPLE__
-    dataflow_path = "@executable_path/../MacOS/ACAudioYaafePluginSettings.txt";
+    dataflow_file = "@executable_path/../MacOS/ACAudioYaafePluginSettings.txt";
 #elif __WIN32__
-    dataflow_path = "ACAudioYaafePluginSettings.txt";
+    dataflow_file = "ACAudioYaafePluginSettings.txt";
 #else
-    dataflow_path = "/usr/share/mediacycle/plugins/audio/ACAudioYaafePluginSettings.txt";
+    dataflow_file = "/usr/share/mediacycle/plugins/audio/ACAudioYaafePluginSettings.txt";
 #endif
 #endif
     DataFlow df;
