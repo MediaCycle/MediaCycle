@@ -110,8 +110,8 @@ add_subdirectory (matlab)
 add_subdirectory (doc)
 
 # export targets
-install(EXPORT yaafe-targets DESTINATION lib/yaafe)
-install(FILES yaafe-config.cmake DESTINATION lib/yaafe)
+#CF install(EXPORT yaafe-targets DESTINATION lib/yaafe)
+#CF install(FILES yaafe-config.cmake DESTINATION lib/yaafe)
 
 # build a CPack driven installer package
 include (InstallRequiredSystemLibraries)
