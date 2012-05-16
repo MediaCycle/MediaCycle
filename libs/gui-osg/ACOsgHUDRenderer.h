@@ -42,6 +42,7 @@
 //#include "ACOsgLayoutRenderer.h"
 #include "ACOsgNodeLinkRenderer.h"
 #include "ACOsgPointerRenderer.h"
+#include "ACOsgLibraryRenderer.h"
 
 #include <osgDB/ReadFile>
 //#include <osgDB/WriteFile>
@@ -83,14 +84,18 @@ protected:
 	osg::ref_ptr<osg::Group>				 group;
 	osg::ref_ptr<osg::Group>				 pointer_group;
 	std::vector<ACOsgPointerRenderer*>  pointer_renderer;
+        ACOsgLibraryRenderer* library_renderer;
 
 	// SD - Results from centralized request to MediaCycle
 	ACPoint						media_cycle_pointer_current_pos;
 
 public:
 	ACOsgHUDRenderer();
-	~ACOsgHUDRenderer() {};
-	void cleanPointers();
+        ~ACOsgHUDRenderer();
+
+        void clean();
+        void cleanPointers();
+        void cleanLibrary();
 
 	double getTime();
 
@@ -99,9 +104,11 @@ public:
 	osg::ref_ptr<osg::Camera> getCamera();
 
 	void preparePointers(osgViewer::View* view = 0);
+        void prepareLibrary(osgViewer::View* view = 0);
 
 	void updatePointers(osgViewer::Viewer* viewer);//Cocoa - simple OSG viewer
 	void updatePointers(osgViewer::View* viewer);//Qt - composite OSG viewer
+        void updateLibrary(osgViewer::View* viewer);
 private:
 	void updatePointers(int w, int h);//common
 };

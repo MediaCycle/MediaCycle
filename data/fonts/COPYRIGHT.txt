@@ -1,0 +1,2 @@
+fudd.ttf is from the OpenSceneGraph dataset 3.0.0:
+http://www.openscenegraph.org/projects/osg/wiki/Downloads/SampleDatasets

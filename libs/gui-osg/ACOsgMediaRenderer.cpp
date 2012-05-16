@@ -87,6 +87,29 @@ ACOsgMediaRenderer::ACOsgMediaRenderer() {
 	initialized = 0;
 	frac = 0.0f;
 	local_group->addChild(media_node);
+
+        //CF this should be done once per application runtime, for instance in the browser renderer or composite viewer
+        font = 0;
+        std::string font_path(""),font_file("fudd.ttf");
+    #ifdef USE_DEBUG
+        boost::filesystem::path s_path( __FILE__ );
+        font_path = s_path.parent_path().parent_path().parent_path().string() + "/data/fonts/";
+    #else
+    #ifdef __APPLE__
+        font_path = "@executable_path/../MacOS/fonts/";
+    #elif __WIN32__
+        font_path = "./";
+    #else
+        font_path = "/usr/share/mediacycle/fonts/";
+    #endif
+    #endif
+        std::cout << "Current font path " << font_path << std::endl;
+
+        //font = osgText::readRefFontFile(font_path + font_file);
+        font = osgText::readRefFontFile("/Library/Fonts/Arial Unicode.ttf");
+        if(!font)
+            std::cerr << "ACOsgLibraryRenderer::ACOsgLibraryRenderer: couldn't load font " << std::endl;
+
 }
 
 ACOsgMediaRenderer::~ACOsgMediaRenderer() {

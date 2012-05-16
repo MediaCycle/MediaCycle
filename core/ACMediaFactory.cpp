@@ -687,9 +687,10 @@ void ACMediaFactory::checkAvailableFileExtensions(){
 	#if defined (SUPPORT_AUDIO)
 		addAvailableSndFileExtensions();
 #endif //defined (SUPPORT_AUDIO)
-#if defined (SUPPORT_IMAGE) || defined(SUPPORT_VIDEO) || defined(SUPPORT_3DMODEL)
+//CF we need to be able to display images (library cover) for any media type
+//#if defined (SUPPORT_IMAGE) || defined(SUPPORT_VIDEO) || defined(SUPPORT_3DMODEL)
 	addAvailableOsgFileExtensions();
-#endif //defined (SUPPORT_IMAGE OR SUPPORT_VIDEO) || defined(SUPPORT_3DMODEL)
+//#endif //defined (SUPPORT_IMAGE OR SUPPORT_VIDEO) || defined(SUPPORT_3DMODEL)
 #if defined (SUPPORT_TEXT)
 	addAvailableFileExtensionSupport(".txt",MEDIA_TYPE_TEXT);
 	addAvailableFileExtensionSupport(".xml",MEDIA_TYPE_TEXT);	

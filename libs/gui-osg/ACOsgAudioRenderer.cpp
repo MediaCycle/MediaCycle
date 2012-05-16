@@ -269,31 +269,24 @@ void ACOsgAudioRenderer::waveformGeode() {
 void ACOsgAudioRenderer::metadataGeode() {
 
 	osg::Vec4 textColor(0.9f,0.9f,0.9f,1.0f);
-	float textCharacterSize = 80.0f; // 10 pixels ? // broken with OSG v2.9.11??
-	#if OSG_MIN_VERSION_REQUIRED(2,9,11)
-		textCharacterSize = 12.0f;
-	#endif
+        float textCharacterSize = 20.0f;
+
 	metadata_geode = new Geode();
 
 	metadata = new osgText::Text;
-	//font = osgText::readFontFile("fonts/arial.ttf");
-	//text->setFont( font.get() );
+        if(font)
+            metadata->setFont(font);
 	metadata->setColor(textColor);
 	metadata->setCharacterSizeMode( osgText::Text::SCREEN_COORDS );
 	metadata->setCharacterSize(textCharacterSize);
 	metadata->setPosition(osg::Vec3(0,0.025,0.04));
 	//	text->setPosition(osg::Vec3(pos.x,pos.y,pos.z));
 	metadata->setLayout(osgText::Text::LEFT_TO_RIGHT);
-	#if OSG_MIN_VERSION_REQUIRED(2,9,11)
-		metadata->setFontResolution(12,12);
-	#else
-		metadata->setFontResolution(64,64);
-	#endif
+        metadata->setFontResolution(textCharacterSize,textCharacterSize);
 	//metadata->setAlignment( osgText::Text::CENTER_CENTER );
 	//metadata->setAxisAlignment( osgText::Text::SCREEN );
 
 	metadata->setDrawMode(osgText::Text::TEXT);// osgText::Text::BOUNDINGBOX, osgText::Text::ALIGNMENT
-
 
 	// CF: temporary workaround as the ACUserLog tree and the ACLoopAttributes vector in ACMediaBrowser are not sync'd
 	//int media_index = node_index; // or media_cycle->getBrowser()->getMediaNode(node_index).getMediaId();

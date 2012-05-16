@@ -99,7 +99,7 @@ void ACMultiMediaCycleOsgQt::mediaImported(int n,int nTot){
 
 // ----------- 
 
-ACMultiMediaCycleOsgQt::ACMultiMediaCycleOsgQt(QWidget *parent) : QMainWindow(parent),features_known(false),detachedBrowser(0),	aboutDialog(0),controlsDialog(0),compositeOsgView(0),osgViewDock(0),osgViewDockWidget(0),osgViewDockLayout(0),osgViewDockTitleBar(0),progressBar(0)
+ACMultiMediaCycleOsgQt::ACMultiMediaCycleOsgQt(QWidget *parent) : QMainWindow(parent),features_known(false),detachedBrowser(0),	aboutDialog(0),controlsDialog(0),compositeOsgView(0),osgViewDock(0),osgViewDockWidget(0),osgViewDockLayout(0),osgViewDockTitleBar(0),progressBar(0),metadataWindow(0),userProfileWindow(0)
 {
 	ui.setupUi(this); // first thing to do
 	this->media_type = MEDIA_TYPE_NONE;
@@ -173,7 +173,12 @@ ACMultiMediaCycleOsgQt::ACMultiMediaCycleOsgQt(QWidget *parent) : QMainWindow(pa
 	// to make window appear on top of others.
 	this->activateWindow();
 	this->showMaximized();//this->show();
-	
+
+        metadataWindow = new ACMediaLibraryMetadataQt(this);
+        metadataWindow->hide();
+        userProfileWindow = new ACUserProfileQt(this);
+        userProfileWindow->hide();
+
 	progressBar->hide();
 	#ifdef __APPLE__ // due to Apple standards the progress bar won't display any overlaid message, while it is the case under Ubuntu
 	connect( this, SIGNAL( mediacycle_message_changed(QString) ),
@@ -226,6 +231,8 @@ ACMultiMediaCycleOsgQt::~ACMultiMediaCycleOsgQt(){
 	if (osgViewDockTitleBar) delete osgViewDockTitleBar;
 	if (osgViewDock) delete osgViewDock;
 	this->destroyMediaCycle();
+        if (metadataWindow) delete metadataWindow;
+        if (userProfileWindow) delete userProfileWindow;
 }
 
 void ACMultiMediaCycleOsgQt::setMediaType(ACMediaType _mt)
@@ -240,13 +247,14 @@ void ACMultiMediaCycleOsgQt::setMediaType(ACMediaType _mt)
 // if it does not find any, use default (centered) geometry
 void ACMultiMediaCycleOsgQt::configureSettings(){
 	if (this->readQSettings()){
-		QMessageBox msgBox;
+                /*QMessageBox msgBox;
 		msgBox.setText("Launching MediaCycle.");
 		msgBox.setInformativeText("Do you want to load your media settings from previous session ?");
 		msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
 		msgBox.setDefaultButton(QMessageBox::No);
 		msgBox.setDetailedText ("GUI settings (window size, ...) are loaded automatically. Here you can load MediaCycle settings (media type, browser mode, ...).");
-		int ret = msgBox.exec();
+                int ret = msgBox.exec();*/
+                int ret = QMessageBox::No;
 		switch (ret) {
 			case QMessageBox::Yes:
 				// config file normally in readSettings...
@@ -299,7 +307,7 @@ void ACMultiMediaCycleOsgQt::createMediaCycle(ACMediaType _media_type, ACBrowser
 	
 	dockWidgetsManager->updateMediaCycle(media_cycle);
     dockWidgetsManager->updateOsgView(compositeOsgView);
-	
+    metadataWindow->setMediaCycle(media_cycle);
 }
 
 // destroys the MediaCycle object (containing the whole application)
@@ -632,7 +640,7 @@ void ACMultiMediaCycleOsgQt::importDirectoriesThreaded(vector<string> directorie
 bool ACMultiMediaCycleOsgQt::doSegments(){
 	bool do_segments = false;
 
-	if(use_segmentation_current){
+        /*if(use_segmentation_current){
 		int seg_button = QMessageBox::question(this,
 			tr("Segmentation"),
 			tr("Do you want to segment the media ?"),
@@ -640,7 +648,7 @@ bool ACMultiMediaCycleOsgQt::doSegments(){
 		if (seg_button == QMessageBox::Yes) {
 			do_segments = true;
 		}
-	}	
+        }*/
 	return do_segments;
 }
 
@@ -706,6 +714,16 @@ void ACMultiMediaCycleOsgQt::on_actionHelpAbout_triggered(bool checked) {
 	aboutDialog->show();
 }
 
+void ACMultiMediaCycleOsgQt::on_actionEdit_Library_Metadata_triggered(bool checked) {
+    if (metadataWindow)
+        metadataWindow->show();
+}
+
+void ACMultiMediaCycleOsgQt::on_actionEdit_Profile_triggered(bool checked) {
+    if (userProfileWindow)
+        userProfileWindow->show();
+}
+
 void ACMultiMediaCycleOsgQt::on_actionDetachBrowser_triggered(bool checked) {
 	if (osgViewDock->isFloating()){
 		osgViewDock->setFloating(false);
@@ -717,67 +735,67 @@ void ACMultiMediaCycleOsgQt::on_actionDetachBrowser_triggered(bool checked) {
 }
 
 void ACMultiMediaCycleOsgQt::on_actionFullscreen_triggered(bool checked) {
-	if (compositeOsgView->isFullScreen() || osgViewDock->isFullScreen() || this->isFullScreen()){
-		std::cout << "Not fullscreen" << std::endl;
-		osgViewDock->setTitleBarWidget(osgViewDockTitleBar);
-		if (!osgViewDock->isFloating()){
-			this->showNormal();
-			compositeOsgView->showNormal();
-           ui.actionToggle_Controls->setChecked(true);
-           this->on_actionToggle_Controls_triggered(true);
-			ui.menubar->show();
-			ui.statusbar->show();
-			ui.toolbar->show();
-		}
-		else{
-			if (osgViewDockNormalSize != QRect())
-				osgViewDock->setGeometry(osgViewDockNormalSize);
-		}
-		osgViewDock->showNormal();
-	}
-	else{
+    if (compositeOsgView->isFullScreen() || osgViewDock->isFullScreen() || this->isFullScreen()){
+        std::cout << "Not fullscreen" << std::endl;
+        osgViewDock->setTitleBarWidget(osgViewDockTitleBar);
+        if (!osgViewDock->isFloating()){
+            this->showNormal();
+            compositeOsgView->showNormal();
+            ui.actionToggle_Controls->setChecked(true);
+            this->on_actionToggle_Controls_triggered(true);
+            ui.menubar->show();
+            ui.statusbar->show();
+            ui.toolbar->show();
+        }
+        else{
+            if (osgViewDockNormalSize != QRect())
+                osgViewDock->setGeometry(osgViewDockNormalSize);
+        }
+        osgViewDock->showNormal();
+    }
+    else{
 
-		if (!osgViewDock->isFloating()){
-           ui.actionToggle_Controls->setChecked(false);
-           this->on_actionToggle_Controls_triggered(false);
-			ui.menubar->hide();
-			ui.statusbar->hide();
-			ui.toolbar->hide();
+        if (!osgViewDock->isFloating()){
+            ui.actionToggle_Controls->setChecked(false);
+            this->on_actionToggle_Controls_triggered(false);
+            ui.menubar->hide();
+            ui.statusbar->hide();
+            ui.toolbar->hide();
 
-			QWidget* lTitleBar = osgViewDock->titleBarWidget();
-			QWidget* lEmptyWidget = new QWidget();
-			osgViewDock->setTitleBarWidget(lEmptyWidget);
-			delete lTitleBar;
+            QWidget* lTitleBar = osgViewDock->titleBarWidget();
+            QWidget* lEmptyWidget = new QWidget();
+            osgViewDock->setTitleBarWidget(lEmptyWidget);
+            delete lTitleBar;
 
-			compositeOsgView->showFullScreen();
-			this->showFullScreen();
-			//this->setFocusPolicy(Qt::StrongFocus);
-			//compositeOsgView->showFullScreen();
-		}
-		else{
-			osgViewDockNormalSize = osgViewDock->geometry();
+            compositeOsgView->showFullScreen();
+            this->showFullScreen();
+            //this->setFocusPolicy(Qt::StrongFocus);
+            //compositeOsgView->showFullScreen();
+        }
+        else{
+            osgViewDockNormalSize = osgViewDock->geometry();
 
-			std::cout << QApplication::desktop()->screenCount() << " screen(s)"<< std::endl;
+            std::cout << QApplication::desktop()->screenCount() << " screen(s)"<< std::endl;
 
-			std::cout << "Primary screen " << QApplication::desktop()->primaryScreen()<< std::endl;
-			//QApplication::desktop()->screenGeometry ( int screen = -1 )<< std::endl;
-			QRect geo = QApplication::desktop()->screenGeometry(osgViewDock);
-			std::cout << "Browser in screen of size " << geo.width() <<" "<<geo.height()<< std::endl;
-			std::cout << "Browser in screen number " << QApplication::desktop()->screenNumber(osgViewDock)<< std::endl;
+            std::cout << "Primary screen " << QApplication::desktop()->primaryScreen()<< std::endl;
+            //QApplication::desktop()->screenGeometry ( int screen = -1 )<< std::endl;
+            QRect geo = QApplication::desktop()->screenGeometry(osgViewDock);
+            std::cout << "Browser in screen of size " << geo.width() <<" "<<geo.height()<< std::endl;
+            std::cout << "Browser in screen number " << QApplication::desktop()->screenNumber(osgViewDock)<< std::endl;
 
-			QWidget* lTitleBar = osgViewDock->titleBarWidget();
-			QWidget* lEmptyWidget = new QWidget();
-			osgViewDock->setTitleBarWidget(lEmptyWidget);
-			delete lTitleBar;
+            QWidget* lTitleBar = osgViewDock->titleBarWidget();
+            QWidget* lEmptyWidget = new QWidget();
+            osgViewDock->setTitleBarWidget(lEmptyWidget);
+            delete lTitleBar;
 
-			osgViewDock->setGeometry(geo);
-			compositeOsgView->showFullScreen();
-			osgViewDock->showFullScreen();
-		}
+            osgViewDock->setGeometry(geo);
+            compositeOsgView->showFullScreen();
+            osgViewDock->showFullScreen();
+        }
 
-		std::cout << "Fullscreen" << std::endl;
-	}
-	compositeOsgView->setFocus();
+        std::cout << "Fullscreen" << std::endl;
+    }
+    compositeOsgView->setFocus();
 }
 
 void ACMultiMediaCycleOsgQt::dragEnterEvent(QDragEnterEvent *event)
@@ -844,8 +862,9 @@ void ACMultiMediaCycleOsgQt::updateLibrary(){
 	compositeOsgView->prepareFromTimeline();
 	//browserOsgView->setPlaying(true);
 	media_cycle->setNeedsDisplay(true);
-    dockWidgetsManager->updatePluginsSettings();
+        dockWidgetsManager->updatePluginsSettings();
 	compositeOsgView->setFocus();
+        metadataWindow->updateLibrary();
 }
 
 // adds the plugins in _library pth via mediaCycle's pluginManager
@@ -1148,6 +1167,8 @@ void ACMultiMediaCycleOsgQt::on_actionClean_triggered(bool checked) {
 }
 
 void ACMultiMediaCycleOsgQt::clean(bool _updategl){
+    metadataWindow->clean();
+
     if(!media_cycle) return;
     // need to turn all sounds off before leaving
 	// do this before cleaning library !!
@@ -1206,13 +1227,14 @@ bool ACMultiMediaCycleOsgQt::hasMediaCycle(){
 void ACMultiMediaCycleOsgQt::closeEvent(QCloseEvent *event) {
 	// XS - SD TOOD : stop threads
 	this->writeQSettings();
-	QMessageBox msgBox;
+        /*QMessageBox msgBox;
 	msgBox.setText("Quitting Application.");
 	msgBox.setInformativeText("Do you want to save your media settings and features ?");
 	msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
 	msgBox.setDefaultButton(QMessageBox::Save);
 	msgBox.setDetailedText ("GUI settings (window size, ...) are saved automatically. Here you can save MediaCycle settings (media type, browser mode, ...).");
-	int ret = msgBox.exec();
+        int ret = msgBox.exec();*/
+        int ret = QMessageBox::Discard;
 	bool really_quit = true;
 	switch (ret) {
 		case QMessageBox::Save:
@@ -1301,6 +1323,8 @@ void ACMultiMediaCycleOsgQt::changeMediaType(ACMediaType _media_type){
 #endif //defined (SUPPORT_AUDIO)
 	this->media_cycle->changeMediaType(_media_type);
     dockWidgetsManager->setMediaType(_media_type);
+    metadataWindow->setMediaCycle(media_cycle);
+    metadataWindow->clean();
 }
 
 void ACMultiMediaCycleOsgQt::useSegmentationByDefault(bool _status)
@@ -1328,6 +1352,6 @@ void ACMultiMediaCycleOsgQt::switchPluginVisualizations(bool _status)
 
 void ACMultiMediaCycleOsgQt::autoConnectOSC(bool _status)
 {
-	auto_connect_osc = _status;
+    auto_connect_osc = _status;
     dockWidgetsManager->autoConnectOSC(_status);
 }

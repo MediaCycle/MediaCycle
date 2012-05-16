@@ -225,7 +225,7 @@ void ACOsgCompositeViewQt::clean(bool updategl){
 	refx =  refy = refcamx = refcamy = refzoom = refrotation = 0.0f;
 	browser_renderer->clean();
 	timeline_renderer->clean();
-	hud_renderer->cleanPointers();//TR NEM2011
+        hud_renderer->clean();
 	//if (browser_event_handler) delete browser_event_handler;
 	//if (timeline_event_handler) delete timeline_event_handler;
 	sepy = 0;
@@ -842,7 +842,8 @@ void ACOsgCompositeViewQt::prepareFromBrowser()
 	//setMouseTracking(false); //CF necessary for the hover callback
 	browser_renderer->prepareNodes();
 	browser_renderer->prepareLabels();
-	hud_renderer->preparePointers(browser_view);
+        hud_renderer->preparePointers(browser_view);
+        hud_renderer->prepareLibrary(browser_view);
 	browser_view->setSceneData(browser_renderer->getShapes());
 	library_loaded = true;
 	//addCamera(renderer_hud->getCamera());
@@ -857,6 +858,7 @@ void ACOsgCompositeViewQt::updateTransformsFromBrowser( double frac)
 	browser_renderer->prepareNodes();
 	browser_renderer->prepareLabels();
 	hud_renderer->preparePointers();
+        hud_renderer->prepareLibrary();
 
 	// get screen coordinates
 	//int closest_node;//CF to deprecate
@@ -869,6 +871,7 @@ void ACOsgCompositeViewQt::updateTransformsFromBrowser( double frac)
 	browser_renderer->updateLabels(frac);
 
 	hud_renderer->updatePointers(browser_view);
+        hud_renderer->updateLibrary(browser_view);
 	/*osgViewer::ViewerBase::Views views;
 	bool have_views;
 	view->getViews(views,have_views);

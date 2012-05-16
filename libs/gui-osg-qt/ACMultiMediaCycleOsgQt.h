@@ -57,6 +57,9 @@
 #include <ACAboutDialogFactoryQt.h>
 #include <ACInputControlsDialogQt.h>
 
+#include "ACMediaLibraryMetadataQt.h"
+#include "ACUserProfileQt.h"
+
 #include "ACEventListener.h"
 
 // FORWARD DECLARATIONS
@@ -106,6 +109,8 @@ public slots:
 	void on_actionDetachBrowser_triggered(bool checked);
 	void on_actionFullscreen_triggered(bool checked);
     void on_actionToggle_Controls_triggered(bool checked);
+    void on_actionEdit_Library_Metadata_triggered(bool checked);
+    void on_actionEdit_Profile_triggered(bool checked);
 
 protected:
     void dragEnterEvent(QDragEnterEvent *event);
@@ -218,6 +223,9 @@ private:
 	
 	bool use_segmentation_current,use_segmentation_default,use_feature_extraction,use_visualization_plugins;
 	bool auto_connect_osc;
+
+        ACMediaLibraryMetadataQt* metadataWindow;
+        ACUserProfileQt* userProfileWindow;
 	
 protected:
 	ACOsgCompositeViewQt* compositeOsgView;

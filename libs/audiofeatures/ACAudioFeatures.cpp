@@ -1,7 +1,7 @@
 /**
  * @brief ACAudioFeatures.cpp
  * @author Christian Frisson
- * @date 25/04/2012
+ * @date 16/05/2012
  * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -178,7 +178,7 @@ std::vector<ACMediaTimedFeature*> computeFeatures(float* data, vector<string> de
     int t = resample(data, &sfinfo, dataout, &sfinfo2);
     colvec signal_v;
     if (extendSoundLimits){
-        signal_v.set_size(sfinfo2.frames+windowSize);// = colvec(dataout, sfinfo2.frames);
+        signal_v = colvec(sfinfo2.frames+windowSize);// = colvec(dataout, sfinfo2.frames);
         for (long i = 0; i < windowSize/2; i++)
             signal_v(i) = 0;
         for (long i = 0; i < sfinfo2.frames; i++)
@@ -612,15 +612,11 @@ double logAttackTime(colvec ener_v, int sr_hz){
 }
 
 rowvec mfcc(colvec x_v, mat melfilter_m, int mfccNb){
-    rowvec mfcc_v(melfilter_m.n_cols);
-    rowvec mfcc_s(mfccNb);
-    colvec x2_v(melfilter_m.n_cols);
-    colvec xdct_v(melfilter_m.n_cols);
     //colvec x2_v = log10(trans(melfilter_m)*(x_v+math::eps()));
-    x2_v = log(trans(melfilter_m)*(x_v)+math::eps()); // log as MAtlab does
-    xdct_v = dct(x2_v, x2_v.n_elem);
-    mfcc_v = trans(xdct_v);
-    mfcc_s = mfcc_v.cols(0, mfccNb-1);
+    colvec x2_v = log(trans(melfilter_m)*(x_v)+math::eps()); // log as MAtlab does
+    colvec xdct_v = dct(x2_v, x2_v.n_elem);
+    rowvec mfcc_v = trans(xdct_v);
+    rowvec mfcc_s = mfcc_v.cols(0, mfccNb-1);
     return mfcc_s;
 }
 
@@ -1078,7 +1074,7 @@ std::vector<ACMediaTimedFeature*> computeFeaturesBuffered(ACAudio* audio, int mf
         t_i++;
         progress = (float)t_i/((float)last_frame/(float)bufSize);
         //std::cout << "Progress " << progress << "/1 " << t_i <<" : frames " << t_i*bufSize << " / lastframe "<< last_frame << " with bufSize " << bufSize << ", remaining: " << last_frame-t_i*bufSize << " windowbufs.size() " << windowbufs.size() << std::endl;
-        std::cout << "Progress " << progress << "/1 " << t_i <<" : frames " << t_i*bufSize << " / lastframe "<< last_frame << " with bufSize " << bufSize << ", remaining: " << last_frame-t_i*bufSize << " signal_v.size() " << signal_v.size() << std::endl;
+        //std::cout << "Progress " << progress << "/1 " << t_i <<" : frames " << t_i*bufSize << " / lastframe "<< last_frame << " with bufSize " << bufSize << ", remaining: " << last_frame-t_i*bufSize << " signal_v.size() " << signal_v.size() << std::endl;
     }
     if(buf)
         delete[] buf;

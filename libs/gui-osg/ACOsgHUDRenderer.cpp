@@ -61,7 +61,22 @@ ACOsgHUDRenderer::ACOsgHUDRenderer()
 	pointer_group = new Group();
 	group->addChild(pointer_group);//group->addChild(pointer_group.get());
 	camera->addChild(group);
+
+        library_renderer = 0;
 }
+
+ACOsgHUDRenderer::~ACOsgHUDRenderer()
+{
+    if(library_renderer)
+        delete library_renderer;
+    library_renderer = 0;
+}
+
+void ACOsgHUDRenderer::clean(){
+    this->cleanPointers();
+    this->cleanLibrary();
+}
+
 //TR NEM2011
 void ACOsgHUDRenderer::cleanPointers(){
 
@@ -71,6 +86,14 @@ void ACOsgHUDRenderer::cleanPointers(){
 	}
 	pointer_renderer.clear();
 	
+}
+
+void ACOsgHUDRenderer::cleanLibrary(){
+    if(library_renderer){
+        camera->removeChild(library_renderer->getNode());
+        delete library_renderer;
+        library_renderer = 0;
+    }
 }
 
 double ACOsgHUDRenderer::getTime() {
@@ -172,6 +195,25 @@ void ACOsgHUDRenderer::updatePointers(osgViewer::View* view) {
 		 h = view->getCamera()->getViewport()->height();
 	 }
 	this->updatePointers(w,h);
+}
+
+void ACOsgHUDRenderer::prepareLibrary(osgViewer::View* view) {
+    if(!library_renderer)
+        library_renderer = new ACOsgLibraryRenderer();
+        library_renderer->setMediaCycle(media_cycle);
+}
+
+void ACOsgHUDRenderer::updateLibrary(osgViewer::View* view) {
+    camera->removeChild(library_renderer->getNode());
+    int w, h;
+    h = 1; w = 1;
+     if (view->getViewerBase()->isRealized()) {
+             w = view->getCamera()->getViewport()->width();
+             h = view->getCamera()->getViewport()->height();
+     }
+    this->library_renderer->updateSize(w,h);
+    this->library_renderer->updateNodes();
+    camera->addChild(library_renderer->getNode());
 }
 
 //Common

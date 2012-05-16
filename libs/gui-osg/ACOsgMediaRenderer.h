@@ -57,6 +57,9 @@
 #include <osgUtil/SceneView>
 #include <osgViewer/Viewer>
 
+#include <osgText/Font>
+#include <osgText/Text>
+
 #include "ACRefId.h"
 
 #if defined(APPLE_IOS)
@@ -114,6 +117,8 @@ protected:
 #else
 	float afac;
 #endif
+        osg::ref_ptr<osgText::Font> font;
+
 public:
 	ACOsgMediaRenderer();
 	virtual ~ACOsgMediaRenderer();

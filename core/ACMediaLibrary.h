@@ -50,12 +50,25 @@
 
 #include <boost/filesystem.hpp>
 
+struct ACUserProfile {
+        std::string name,email,website,location,picture;
+        ACUserProfile() : name(""),email(""),website(""),location(""),picture("") {}
+};
+
+struct ACMediaLibraryMetadata {
+        std::string title,author,year,publisher,license,website,cover;
+        ACUserProfile curator;
+        ACMediaLibraryMetadata() : title(""),author(""),curator(ACUserProfile()),year(""),publisher(""),license(""),website(""),cover("") {}
+};
+
 class ACMediaLibrary {
 	// these methods are common to all media.
 	// there is no need for an AudioLibrary, ImageLibrary, ...
 	// media-specific methods (e.g., save, load) are in ACMedia and overloaded in ACAudio, ACImage, ACVideo, ...
 protected:
 	ACMediaType media_type;
+        //std::string title,author,curator,year,publisher,license,website,cover;
+        ACMediaLibraryMetadata metadata;
 	std::vector<ACMedia*> media_library;
 	std::vector< std::vector<double> > mean_features, stdev_features;
 	int index_last_normalized; // last item whose features have been normalized
@@ -73,13 +86,29 @@ public:
 	bool changeMediaType(ACMediaType aMediaType);
 	void cleanLibrary();
 	std::vector<std::string> getExtensionsFromMediaType(ACMediaType media_type);
-	
 	bool isEmpty();
 	ACMediaType getMediaType(){return media_type;};
 	void setMediaType(ACMediaType m){media_type = m;};
 	int getSize() { return media_library.size(); };
 
-//	void editMedia() {}; // TODO ?
+        void setTitle(std::string _title){this->metadata.title=_title;}
+        void setAuthor(std::string _author){this->metadata.author=_author;}
+        void setYear(std::string _year){this->metadata.year=_year;}
+        void setPublisher(std::string _publisher){this->metadata.publisher=_publisher;}
+        void setLicense(std::string _license){this->metadata.license=_license;}
+        void setWebsite(std::string _website){this->metadata.website=_website;}
+        void setCover(std::string _cover){this->metadata.cover=_cover;}
+        void setCurator(ACUserProfile _curator){this->metadata.curator=_curator;}
+        void setCuratorName(std::string _curator){this->metadata.curator.name=_curator;}
+        std::string getTitle(){return this->metadata.title;}
+        std::string getAuthor(){return this->metadata.author;}
+        std::string getYear(){return this->metadata.year;}
+        std::string getPublisher(){return this->metadata.publisher;}
+        std::string getLicense(){return this->metadata.license;}
+        std::string getWebsite(){return this->metadata.website;}
+        std::string getCover(){return this->metadata.cover;}
+        ACUserProfile getCurator(){return this->metadata.curator;}
+        std::string getCuratorName(){return this->metadata.curator.name;}
 
 	std::vector<ACMedia*> getAllMedia() {return media_library;};
 	int addMedia(ACMedia *aMedia);

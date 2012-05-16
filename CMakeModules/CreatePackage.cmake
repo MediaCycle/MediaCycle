@@ -506,6 +506,20 @@ IF(SUPPORT_AUDIO AND USE_AUDIO AND USE_YAAFE)
 		INSTALL(PROGRAMS "${CMAKE_SOURCE_DIR}/plugins/audio/ACAudioYaafePluginSettings.txt" DESTINATION share COMPONENT ${PROGNAME})
 	ENDIF()
 ENDIF()
+
+#--------------------------------------------------------------------------------
+# Copy fonts
+
+# First try to find fonts in standard pathes
+
+# If not present, copy fonts
+SET(FONT_DIR "")
+IF(APPLE)
+	SET(FONT_DIR "${PROGNAME}.app/Contents/Resources")
+ELSE()
+	SET(FONT_DIR "/usr/share/mediacycle")
+ENDIF()
+INSTALL(DIRECTORY "${CMAKE_SOURCE_DIR}/data/fonts" DESTINATION ${FONT_DIR} COMPONENT Runtime)
 #--------------------------------------------------------------------------------
 # Use BundleUtilities to get all other dependencies for the application to work.
 # It takes a bundle or executable along with possible plugins and inspects it

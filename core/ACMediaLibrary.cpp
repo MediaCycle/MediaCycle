@@ -126,6 +126,7 @@ void ACMediaLibrary::cleanLibrary() {
 	media_path ="";
 	// XS leave the media type as is, suppose we'll keep loading the same type of media
 	// (not this:) media_type=MEDIA_TYPE_NONE;
+        metadata = ACMediaLibraryMetadata();
 }
 
 std::vector<std::string> ACMediaLibrary::getExtensionsFromMediaType(ACMediaType media_type)
@@ -477,7 +478,7 @@ int ACMediaLibrary::openMCSLLibrary(std::string _path, bool aInitLib){
 int ACMediaLibrary::openXMLLibrary(std::string _path, bool aInitLib){
 	TiXmlDocument doc( _path.c_str() );
 	try {
-		if (!doc.LoadFile( ))
+                if (!doc.LoadFile( TIXML_ENCODING_UTF8 ))
 			throw runtime_error("bad parse");
 		//		doc.Print( stdout );
 	} catch (const exception& e) {
@@ -503,6 +504,35 @@ int ACMediaLibrary::openXMLLibrary(std::string _path, bool aInitLib){
 }
 
 int ACMediaLibrary::openCoreXMLLibrary(TiXmlHandle _rootHandle){
+
+    // Library Metadata
+    TiXmlText* nLibraryMetadata=_rootHandle.FirstChild( "LibraryMetadata" ).FirstChild().Text();
+    TiXmlElement* nLibraryMetadataNode=_rootHandle.FirstChild( "LibraryMetadata" ).Element();
+    if(nLibraryMetadataNode){
+        if(nLibraryMetadataNode->Attribute("Title"))
+            this->metadata.title = nLibraryMetadataNode->Attribute("Title");
+        if(nLibraryMetadataNode->Attribute("Author"))
+            this->metadata.author = nLibraryMetadataNode->Attribute("Author");
+        //if(nLibraryMetadataNode->Attribute("Curator"))
+        //    this->metadata.curator.name = nLibraryMetadataNode->Attribute("Curator");
+        if(nLibraryMetadataNode->Attribute("Year"))
+            this->metadata.year = nLibraryMetadataNode->Attribute("Year");
+        if(nLibraryMetadataNode->Attribute("Publisher"))
+            this->metadata.publisher = nLibraryMetadataNode->Attribute("Publisher");
+        if(nLibraryMetadataNode->Attribute("License"))
+            this->metadata.license = nLibraryMetadataNode->Attribute("License");
+        if(nLibraryMetadataNode->Attribute("Website"))
+            this->metadata.website = nLibraryMetadataNode->Attribute("Website");
+        if(nLibraryMetadataNode->Attribute("Cover"))
+            this->metadata.cover = nLibraryMetadataNode->Attribute("Cover");
+        TiXmlElement* nLibraryCuratorNode=_rootHandle.FirstChild( "LibraryMetadata" ).FirstChild( "Curator" ).Element();
+        if(nLibraryCuratorNode){
+            if(nLibraryCuratorNode->Attribute("Title"))
+                this->metadata.curator.name = nLibraryCuratorNode->Attribute("Title");
+
+        }
+    }
+
 	TiXmlText* nMediaText=_rootHandle.FirstChild( "NumberOfMedia" ).FirstChild().Text();
 	std::stringstream tmp;
 	int n_loops=0;
@@ -623,7 +653,7 @@ int ACMediaLibrary::saveACLLibrary(std::string _path){
 // will NOT contain header (browser, plugins, ...) information.
 // (obsolete ? useful ?)
 int ACMediaLibrary::saveXMLLibrary(std::string _path){
-	// we save UNnormalized features
+        // we save UNnormalized features
 	//denormalizeFeatures();
 
     // CF this is not parsed anymore in favor of MediaCycle::saveXMLConfig
@@ -647,12 +677,34 @@ int ACMediaLibrary::saveXMLLibrary(std::string _path){
 
 	// normalize features again
 	//normalizeFeatures();
-	MC_doc.SaveFile( _path.c_str());
+        MC_doc.SaveFile( _path.c_str());
 }
 
 // no headers, just media information
 // can be called from MediaCycle's saveXML or from the app via mediaCycle
 int ACMediaLibrary::saveCoreXMLLibrary( TiXmlElement* _MC_e_root, TiXmlElement* _MC_e_medias ){
+
+    // library metadata
+    TiXmlElement* MC_e_library_metadata = new TiXmlElement("LibraryMetadata");
+    _MC_e_root->LinkEndChild(  MC_e_library_metadata );
+    MC_e_library_metadata->SetAttribute("Title", this->metadata.title);
+    MC_e_library_metadata->SetAttribute("Author", this->metadata.author);
+    //MC_e_library_metadata->SetAttribute("Curator", this->metadata.curator.name);
+    MC_e_library_metadata->SetAttribute("Year", this->metadata.year);
+    MC_e_library_metadata->SetAttribute("Publisher", this->metadata.publisher);
+    MC_e_library_metadata->SetAttribute("License", this->metadata.license);
+    MC_e_library_metadata->SetAttribute("Website", this->metadata.website);
+    MC_e_library_metadata->SetAttribute("Cover", this->metadata.cover);
+
+    TiXmlElement* MC_e_library_curator = new TiXmlElement("Curator");
+    MC_e_library_metadata->LinkEndChild(  MC_e_library_curator );
+    MC_e_library_curator->SetAttribute("Name", this->metadata.curator.name);
+    MC_e_library_curator->SetAttribute("Email", this->metadata.curator.email);
+    MC_e_library_curator->SetAttribute("Website", this->metadata.curator.website);
+    MC_e_library_curator->SetAttribute("Location", this->metadata.curator.location);
+    MC_e_library_curator->SetAttribute("Picture", this->metadata.curator.picture);
+
+    // "medias and features"
     TiXmlElement* MC_e_number_of_medias = new TiXmlElement( "NumberOfMedia" );
     _MC_e_root->LinkEndChild( MC_e_number_of_medias );
 	int n_loops = this->getSize();
