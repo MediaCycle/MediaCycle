@@ -13,4 +13,4 @@ link_directories(${CMAKE_BINARY_DIR}/src_cpp/yaafe-core)
 add_executable(yaafe-engine main.cpp)
 target_link_libraries(yaafe-engine yaafe-core ${ARGTABLE2_LIBRARY})
 
-install(TARGETS yaafe-engine RUNTIME DESTINATION bin)
+#CF install(TARGETS yaafe-engine RUNTIME DESTINATION bin)

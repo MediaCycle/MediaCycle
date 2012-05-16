@@ -23,5 +23,5 @@ if (NOT APPLE)
 endif (NOT APPLE)
 target_link_libraries(yaafe-components yaafe-core ${yaafe_components_LIBS})
 
-install(TARGETS yaafe-components DESTINATION ${CMAKE_INSTALL_LIBDIR})
+#CF install(TARGETS yaafe-components DESTINATION ${CMAKE_INSTALL_LIBDIR})
 

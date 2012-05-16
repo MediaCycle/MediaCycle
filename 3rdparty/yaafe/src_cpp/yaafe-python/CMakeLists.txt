@@ -17,7 +17,7 @@ if (NOT APPLE)
 endif (NOT APPLE)
 target_link_libraries(yaafecore yaafe-core ${yaafecore_LIBS})
 
-install(TARGETS yaafecore DESTINATION ${CMAKE_INSTALL_LIBDIR} EXPORT yaafe-targets)
+#CF install(TARGETS yaafecore DESTINATION ${CMAKE_INSTALL_LIBDIR} EXPORT yaafe-targets)
 
 
 

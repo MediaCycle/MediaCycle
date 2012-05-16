@@ -15,6 +15,6 @@ set_target_properties(yaafe-core PROPERTIES VERSION ${YAAFE_LIBVERSION} SOVERSIO
 
 target_link_libraries(yaafe-core ${yaafe_core_LIBS})
 
-install(TARGETS yaafe-core DESTINATION ${CMAKE_INSTALL_LIBDIR} EXPORT yaafe-targets)
-install(FILES DirectedGraph.h Ports.h Buffer.h Component.h ComponentHelpers.h DataFlow.h Engine.h utils.h ComponentFactory.h DESTINATION ${CMAKE_INSTALL_INCLUDE}/yaafe-core)
+#CF install(TARGETS yaafe-core DESTINATION ${CMAKE_INSTALL_LIBDIR} EXPORT yaafe-targets)
+#CF install(FILES DirectedGraph.h Ports.h Buffer.h Component.h ComponentHelpers.h DataFlow.h Engine.h utils.h ComponentFactory.h DESTINATION ${CMAKE_INSTALL_INCLUDE}/yaafe-core)
 

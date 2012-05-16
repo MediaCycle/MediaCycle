@@ -35,4 +35,4 @@ if (NOT APPLE)
 endif (NOT APPLE)
 target_link_libraries(yaafe-io yaafe-core audio-smarc ${yaafe_io_LIBS})
 
-install(TARGETS yaafe-io DESTINATION ${CMAKE_INSTALL_LIBDIR})
+#CF install(TARGETS yaafe-io DESTINATION ${CMAKE_INSTALL_LIBDIR})
