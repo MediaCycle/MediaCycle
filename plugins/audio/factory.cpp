@@ -30,9 +30,11 @@ extern "C" void destroy(ACPlugin* d) {
 
 extern "C" std::vector<std::string> list() {    //returns a string vector containing the plugin names included in the DLL file
     std::vector<std::string> listPlugin;
-#ifdef USE_YAAFE
+	#ifdef USE_DEBUG
+	#ifdef USE_YAAFE
     listPlugin.push_back("ACAudioYaafePlugin");
-#endif
+	#endif
+	#endif
     listPlugin.push_back("ACAudioFeaturesPlugin");
     //listPlugin.push_back("ACAudioHaitsmaFingerprintPlugin");
     //listPlugin.push_back("ACAudioGardenFeaturesPlugin");
