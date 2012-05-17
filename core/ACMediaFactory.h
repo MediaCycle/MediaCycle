@@ -124,9 +124,10 @@ class ACMediaFactory : private boost::noncopyable {
 		#if defined (SUPPORT_AUDIO)
 			void addAvailableSndFileExtensions();
 		#endif //defined (SUPPORT_AUDIO)
-		#if defined (SUPPORT_IMAGE) || defined(SUPPORT_VIDEO) || defined(SUPPORT_3DMODEL) || defined(SUPPORT_PDF)
+                //CF we need to be able to display images (library cover) for any media type
+                //#if defined (SUPPORT_IMAGE) || defined(SUPPORT_VIDEO) || defined(SUPPORT_3DMODEL) || defined(SUPPORT_PDF)
 			void addAvailableOsgFileExtensions();
-		#endif //defined (SUPPORT_IMAGE OR SUPPORT_VIDEO) || defined(SUPPORT_3DMODEL) || defined(SUPPORT_PDF)
+                //#endif //defined (SUPPORT_IMAGE OR SUPPORT_VIDEO) || defined(SUPPORT_3DMODEL) || defined(SUPPORT_PDF)
 };
 
 #endif // _ACMEDIAFACTORY_H

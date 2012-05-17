@@ -64,13 +64,14 @@
 #endif //defined (USE_SNDFILE)
 #endif //defined (SUPPORT_AUDIO)
 
-#if defined (SUPPORT_IMAGE) || defined(SUPPORT_VIDEO) || defined(SUPPORT_3DMODEL)
+//CF we need to be able to display images (library cover) for any media type
+//#if defined (SUPPORT_IMAGE) || defined(SUPPORT_VIDEO) || defined(SUPPORT_3DMODEL)
 #include <osgDB/Registry>
 #include <osgDB/ReaderWriter>
 #include <osgDB/FileNameUtils>
 #include <osgDB/ReaderWriter>
 #include <osgDB/PluginQuery>
-#endif //defined (SUPPORT_IMAGE) || defined(SUPPORT_VIDEO) || defined(SUPPORT_3DMODEL)
+//#endif //defined (SUPPORT_IMAGE) || defined(SUPPORT_VIDEO) || defined(SUPPORT_3DMODEL)
 
 #include "boost/filesystem.hpp"   // includes all needed Boost.Filesystem declarations
 #include "boost/filesystem/operations.hpp"
@@ -811,7 +812,8 @@ void ACMediaFactory::addAvailableSndFileExtensions(){
 }
 #endif //defined (SUPPORT_AUDIO)
 
-#if defined (SUPPORT_IMAGE) || defined(SUPPORT_VIDEO) || defined(SUPPORT_3DMODEL) || defined(SUPPORT_PDF)
+//CF we need to be able to display images (library cover) for any media type
+//#if defined (SUPPORT_IMAGE) || defined(SUPPORT_VIDEO) || defined(SUPPORT_3DMODEL) || defined(SUPPORT_PDF)
 void ACMediaFactory::addAvailableOsgFileExtensions(){
 
 	#ifdef PARSE_OSG_PLUGINS_VERBOSE
@@ -864,4 +866,4 @@ void ACMediaFactory::addAvailableOsgFileExtensions(){
 	std::cout << "Gathering media file extensions from OSG plugins... done" << std::endl;
 	#endif//def PARSE_OSG_PLUGINS_VERBOSE
 }
-#endif //defined (SUPPORT_IMAGE) || defined (SUPPORT_VIDEO) || defined(SUPPORT_3DMODEL) || defined(SUPPORT_PDF)
+//#endif //defined (SUPPORT_IMAGE) || defined (SUPPORT_VIDEO) || defined(SUPPORT_3DMODEL) || defined(SUPPORT_PDF)
