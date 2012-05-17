@@ -57,10 +57,11 @@ IF(SUPPORT_TEXT)
 	ADD_DEPENDENCIES(mediacycle textTool)
 	TARGET_LINK_LIBRARIES(mediacycle textTool)
 ENDIF()
+# CF we need to be able to display images (library cover) for any media type
 # OSG for 3D Models and/or ffmpeg plugin checkup
-IF(SUPPORT_3DMODEL OR SUPPORT_IMAGE OR SUPPORT_VIDEO)
+#IF(SUPPORT_3DMODEL OR SUPPORT_IMAGE OR SUPPORT_VIDEO)
 	TARGET_LINK_LIBRARIES(mediacycle ${OPENSCENEGRAPH_CORE_LIBRARIES})
-ENDIF()
+#ENDIF()
 
 # this might require some path adaptation for Windows
 # (e.g. set cmake_install_prefix to the good value for Windows )

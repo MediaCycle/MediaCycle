@@ -62,6 +62,14 @@ IF ( SUPPORT_ARCHIPEL AND SUPPORT_MULTIMEDIA AND SUPPORT_AUDIO AND SUPPORT_IMAGE
 		SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -framework CoreVideo -framework AppKit -framework Foundation")
 	ENDIF ( APPLE )
 	
+	# Copy Qt imageformat plugin to (Apple) Debug apps
+	IF(APPLE AND USE_DEBUG)
+		ADD_CUSTOM_COMMAND( TARGET ${TARGET_NAME} POST_BUILD
+			COMMAND mkdir -p ${CMAKE_CURRENT_BINARY_DIR}/${TARGET_NAME}.app/Contents/plugins
+      			COMMAND cp -R ${QT_PLUGINS_DIR}/imageformats ${CMAKE_CURRENT_BINARY_DIR}/${TARGET_NAME}.app/Contents/plugins
+		)
+	ENDIF()
+
 	# Packaging
 	IF(NOT USE_DEBUG AND (APPLE OR UNIX))
 		SET(USE_AUDIO ON)

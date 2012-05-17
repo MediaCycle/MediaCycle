@@ -39,6 +39,12 @@
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
+	
+	// Make Apple *.app bundles not load installed Qt Frameworks but load Qt Plugins
+#ifdef __APPLE__
+	QApplication::setLibraryPaths(QStringList(QApplication::applicationDirPath() + "/../PlugIns"));
+#endif
+	
 	ACAudioCycleLoopJam window;
 	try {
 		window.setWindowTitle("LoopJam");

@@ -44,12 +44,9 @@ int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
 	
-	// Hack for Apple *.app bundles not to load installed Qt Frameworks
-	#ifdef Q_WS_MAC
-	QDir dir(QApplication::applicationDirPath());
-	dir.cdUp();
-	dir.cd("Plugins");
-	QApplication::setLibraryPaths(QStringList(dir.absolutePath()));
+	// Make Apple *.app bundles not load installed Qt Frameworks but load Qt Plugins
+	#ifdef __APPLE__
+	QApplication::setLibraryPaths(QStringList(QApplication::applicationDirPath() + "/../PlugIns"));
 	#endif
 	
 	ACMultiMediaCycleOsgQt window;

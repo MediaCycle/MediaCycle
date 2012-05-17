@@ -655,9 +655,10 @@ IF(BUILD_APPS OR USE_OSG OR USE_3DMODEL)
 
 		# OSG plugins check (required at least for text display in apps)
 		STRING(REPLACE "include" "lib" OSG_LIBRARY_DIR ${OSG_INCLUDE_DIR}) #CF check NOT MINGW Windows systems, might be under "bin" instead of "lib"	
-		IF(SUPPORT_3DMODEL OR SUPPORT_IMAGE OR SUPPORT_VIDEO)
+		#CF we need to be able to display images (library cover) for any media type
+		#IF(SUPPORT_3DMODEL OR SUPPORT_IMAGE OR SUPPORT_VIDEO)
 			MESSAGE("-- Found core OpenSceneGraph libraries: ${OPENSCENEGRAPH_CORE_LIBRARIES}")
-		ENDIF()
+		#ENDIF()
 		IF(BUILD_APPS)
 			ADD_LIB_LINKED_DIR(${OSGVIEWER_LIBRARY})
 			ADD_LIB_LINKED_DIR(${OSGTEXT_LIBRARY})
