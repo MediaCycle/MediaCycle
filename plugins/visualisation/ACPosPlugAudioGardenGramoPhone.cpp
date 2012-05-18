@@ -1,8 +1,8 @@
 /**
- * @brief ACVisPluginAudiogarden.cpp
+ * @brief ACPosPlugAudioGardenGramoPhone.cpp
  * @author Christian Frisson
- * @date 13/09/2011
- * @copyright (c) 2011 – UMONS - Numediart
+ * @date 18/05/2012
+ * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -32,32 +32,33 @@
 #include <armadillo>
 #include "Armadillo-utils.h"
 #include "ACPlugin.h"
-#include "ACVisPluginAudiogarden.h"
+#include "ACPosPlugAudioGardenGramoPhone.h"
 
 using namespace arma;
 using namespace std;
 
-ACVisPluginAudiogarden::ACVisPluginAudiogarden()
+ACPosPlugAudioGardenGramoPhone::ACPosPlugAudioGardenGramoPhone()
 {
     //vars herited from ACPlugin
 	// XS TODO: are these general enough ? can we use this only for audio ??
     this->mMediaType = MEDIA_TYPE_AUDIO;
     //this->mPluginType = PLUGIN_TYPE_CLUSTERS_POSITIONS;
-    this->mName = "Gramophone";
-    this->mDescription = "Audiogarden Visualisation plugin";
+    this->mName = "AudioGarden GramoPhone";
+    this->mDescription = "Audiogarden \"GramoPhone\" Visualisation plugin";
     this->mId = "";
-	
-    //local vars
+    this->featureList.push_back("Mean of MFCC");
+    //this->featureList.push_back("Mean of Spectral Flatness");
+    //this->featureList.push_back("Interpolated Energy");
 }
 
-ACVisPluginAudiogarden::~ACVisPluginAudiogarden()
+ACPosPlugAudioGardenGramoPhone::~ACPosPlugAudioGardenGramoPhone()
 {
 }
 
 
-void ACVisPluginAudiogarden::updateNextPositions(ACMediaBrowser* mediaBrowser){
+void ACPosPlugAudioGardenGramoPhone::updateNextPositions(ACMediaBrowser* mediaBrowser){
   int itemClicked, labelClicked, action;
-	vector<string> featureList;
+	
 	int libSize = mediaBrowser->getLibrary()->getSize();
 	itemClicked = mediaBrowser->getClickedNode();
 	labelClicked = mediaBrowser->getClickedLabel();
@@ -76,10 +77,6 @@ void ACVisPluginAudiogarden::updateNextPositions(ACMediaBrowser* mediaBrowser){
 		r_v(i) = 1./log(1+loops[i]->getDuration());
 	}
 	r_v = r_v/max(r_v) *.1;
-
-	featureList.push_back("Mean of MFCC");
-	//	featureList.push_back("Mean of Spectral Flatness");
-	//featureList.push_back("Interpolated Energy");
 
 	desc_m = extractDescMatrix(mediaBrowser->getLibrary(), featureList);
 	mat coef_m;
@@ -113,7 +110,7 @@ void ACVisPluginAudiogarden::updateNextPositions(ACMediaBrowser* mediaBrowser){
 	////////////////////////////////////////////////////////////////
 }
 
-mat ACVisPluginAudiogarden::extractDescMatrix(ACMediaLibrary* lib, string featureName){
+mat ACPosPlugAudioGardenGramoPhone::extractDescMatrix(ACMediaLibrary* lib, string featureName){
   vector<ACMedia*> loops = lib->getAllMedia();
   int nbMedia = loops.size(); 
 	int featureId = 0;
@@ -142,7 +139,7 @@ mat ACVisPluginAudiogarden::extractDescMatrix(ACMediaLibrary* lib, string featur
 }
 
 
-mat ACVisPluginAudiogarden::extractDescMatrix(ACMediaLibrary* lib, vector<string> featureList){
+mat ACPosPlugAudioGardenGramoPhone::extractDescMatrix(ACMediaLibrary* lib, vector<string> featureList){
 	mat desc_m;
 	mat tmpDesc_m;
 	

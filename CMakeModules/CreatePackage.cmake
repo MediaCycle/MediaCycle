@@ -512,6 +512,29 @@ IF(SUPPORT_AUDIO AND USE_AUDIO AND USE_YAAFE)
 ENDIF()
 
 #--------------------------------------------------------------------------------
+# Install the YAAFE settings file
+IF(SUPPORT_AUDIO AND USE_AUDIO AND APPLE AND NOT USE_DEBUG AND USE_MAKAM)
+	file(GLOB_RECURSE M_FILES ${CMAKE_SOURCE_DIR}/3rdparty/octave_makam/*.m)
+	file(GLOB_RECURSE SOURCE_FILES ${CMAKE_SOURCE_DIR}/3rdparty/octave_yin/*.c)
+
+	INSTALL(CODE "FILE(MAKE_DIRECTORY ${CMAKE_INSTALL_PREFIX}/${PROGNAME}.app/Contents/Resources/octave_makam)")
+	INSTALL(CODE "FILE(MAKE_DIRECTORY ${CMAKE_INSTALL_PREFIX}/${PROGNAME}.app/Contents/Resources/octave_yin)")
+
+	foreach(SOURCE_FILE ${SOURCE_FILES})
+		GET_FILENAME_COMPONENT(MEX_FILE_NAME ${SOURCE_FILE} NAME_WE)
+		MESSAGE("Mex file ${MEX_FILE_NAME}")
+		SET(MEX_FILES "${MEX_FILES} ${CMAKE_BINARY_DIR}/3rdparty/octave_yin/${MEX_FILE_NAME}.mex")
+		INSTALL(PROGRAMS "${CMAKE_BINARY_DIR}/3rdparty/octave_yin/${MEX_FILE_NAME}.mex" DESTINATION ${PROGNAME}.app/Contents/Resources/octave_yin COMPONENT Runtime)
+		SET(MEXFILES "${MEXFILES};${CMAKE_INSTALL_PREFIX}/${PROGNAME}.app/Contents/Resources/octave_yin/${MEX_FILE_NAME}.mex")
+	endforeach(SOURCE_FILE)
+
+	MESSAGE("MEX_FILES ${MEX_FILES}")
+	MESSAGE("MEXFILES ${MEXFILES}")
+
+	INSTALL(FILES ${M_FILES} DESTINATION ${PROGNAME}.app/Contents/Resources/octave_makam COMPONENT Runtime)
+	#INSTALL(FILES ${MEX_FILES} DESTINATION ${PROGNAME}.app/Contents/Resources/octave_yin COMPONENT Runtime)
+ENDIF()
+#--------------------------------------------------------------------------------
 # Copy fonts
 
 # First try to find fonts in standard pathes
@@ -537,7 +560,7 @@ INSTALL(DIRECTORY "${CMAKE_SOURCE_DIR}/data/fonts" DESTINATION ${FONT_DIR} COMPO
 IF(APPLE)
 INSTALL(CODE "
     include(BundleUtilities)
-    fixup_bundle(\"${APPS}\" \"${MCPLUGINS};${OSGPLUGINS};${QTPLUGINS}\" \"${LINKED_DIRECTORIES}\")
+    fixup_bundle(\"${APPS}\" \"${MCPLUGINS};${OSGPLUGINS};${QTPLUGINS};${MEXFILES}\" \"${LINKED_DIRECTORIES}\")
     " COMPONENT Runtime)
 ENDIF()
 

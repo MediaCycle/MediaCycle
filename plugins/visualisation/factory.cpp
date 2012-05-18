@@ -9,8 +9,9 @@
 #include "ACNeighborhoodsPluginEuclidean.h"
 #include "ACVisPluginPCA.h"
 #include "ACVisPlugin2Desc.h"
-#include "ACVisPluginAudiogarden.h"
+#include "ACPosPlugAudioGardenGramoPhone.h"
 #include "ACPosPlugAudioGardenFlower.h"
+#include "ACPosPlugMakamHistoGramoPhone.h"
 //#if defined(SUPPORT_ARCHIPEL)
 #include "ACPosPlugArchipelAtoll.h"
 //#endif// defined(SUPPORT_ARCHIPEL)
@@ -29,8 +30,9 @@ extern "C" ACPlugin* create(std::string namePlugin) {
 	if (namePlugin == "ACPositionsPluginNodeLinkTreeLayout") {return new ACPositionsPluginNodeLinkTreeLayout();}
 	if (namePlugin == "ACVisPluginPCA") {return new ACVisPluginPCA();}
 	if (namePlugin == "ACVisPlugin2Desc") {return new ACVisPlugin2Desc();}
-	if (namePlugin == "ACVisPluginAudiogarden") {return new ACVisPluginAudiogarden();}
+	if (namePlugin == "ACPosPlugAudioGardenGramoPhone") {return new ACPosPlugAudioGardenGramoPhone();}
 	if (namePlugin == "ACPosPlugAudioGardenFlower") {return new ACPosPlugAudioGardenFlower();}
+	if (namePlugin == "ACPosPlugMakamHistoGramoPhone") {return new ACPosPlugMakamHistoGramoPhone();}
 	//#if defined(SUPPORT_ARCHIPEL)
 	if (namePlugin == "ACPosPlugArchipelAtoll") {return new ACPosPlugArchipelAtoll();}
 	//#endif// defined(SUPPORT_ARCHIPEL)
@@ -54,8 +56,9 @@ extern "C" std::vector<std::string> list() {    //returns a string vector contai
 	listPlugin.push_back("ACNeighborhoodsPluginEuclidean");
 	listPlugin.push_back("ACVisPluginPCA");
 	listPlugin.push_back("ACVisPlugin2Desc");
-	listPlugin.push_back("ACVisPluginAudiogarden");
+	listPlugin.push_back("ACPosPlugAudioGardenGramoPhone");
 	listPlugin.push_back("ACPosPlugAudioGardenFlower");
+	listPlugin.push_back("ACPosPlugMakamHistoGramoPhone");
 	//#if defined(SUPPORT_ARCHIPEL)
 	listPlugin.push_back("ACPosPlugArchipelAtoll");
 	//#endif// defined(SUPPORT_ARCHIPEL)

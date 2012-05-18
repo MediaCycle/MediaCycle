@@ -96,7 +96,7 @@ ACOsgMediaRenderer::ACOsgMediaRenderer() {
         font_path = s_path.parent_path().parent_path().parent_path().string() + "/data/fonts/";
     #else
     #ifdef __APPLE__
-        font_path = "@executable_path/../MacOS/fonts/";
+        font_path = "@executable_path/../Resources/fonts/";
     #elif __WIN32__
         font_path = "./";
     #else
@@ -105,8 +105,7 @@ ACOsgMediaRenderer::ACOsgMediaRenderer() {
     #endif
         std::cout << "Current font path " << font_path << std::endl;
 
-        //font = osgText::readRefFontFile(font_path + font_file);
-        font = osgText::readRefFontFile("/Library/Fonts/Arial Unicode.ttf");
+        font = osgText::readRefFontFile(font_path + font_file);
         if(!font)
             std::cerr << "ACOsgLibraryRenderer::ACOsgLibraryRenderer: couldn't load font " << std::endl;
 

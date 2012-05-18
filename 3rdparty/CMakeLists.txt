@@ -19,6 +19,9 @@ ENDIF()
 
 IF(OCTAVE_FOUND)
 add_subdirectory(octave_embed)
+IF(USE_MAKAM)
+add_subdirectory(octave_yin)
+ENDIF()
 ENDIF()
 
 # OSG plugins are added at the end of the project

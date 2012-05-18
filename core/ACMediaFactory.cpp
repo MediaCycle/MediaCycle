@@ -236,7 +236,7 @@ void ACMediaFactory::createKnownFileExtensions() {
 	known_file_extensions[".flac"] = MEDIA_TYPE_AUDIO;
 	known_file_extensions[".htk"] = MEDIA_TYPE_AUDIO;
 	known_file_extensions[".iff"] = MEDIA_TYPE_AUDIO;
-	known_file_extensions[".mat"] = MEDIA_TYPE_AUDIO;
+        //known_file_extensions[".mat"] = MEDIA_TYPE_AUDIO;
 	known_file_extensions[".mpc"] = MEDIA_TYPE_AUDIO;
 	known_file_extensions[".oga"] = MEDIA_TYPE_AUDIO;
 	known_file_extensions[".ogg"] = MEDIA_TYPE_AUDIO;

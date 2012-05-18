@@ -1,8 +1,8 @@
 /**
- * @brief ACVisPluginAudiogarden.h
- * @author Thierry Ravet
- * @date 08/04/2011
- * @copyright (c) 2011 – UMONS - Numediart
+ * @brief ACPosPlugMakamHistoGramoPhone.h
+ * @author Christian Frisson
+ * @date 18/05/2012
+ * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -31,28 +31,17 @@
 
 #include <armadillo>
 
-#include "ACPlugin.h"
-#include "ACMediaBrowser.h"
-#include "ACMediaTimedFeature.h"
+#include "ACPosPlugAudiogardenGramoPhone.h"
 
-#ifndef _ACVISPLUGINAUDIOGARDEN_
-#define _ACVISPLUGINAUDIOGARDEN_
+#ifndef _ACPosPlugMakamHistoGramoPhone_
+#define _ACPosPlugMakamHistoGramoPhone_
 
-class ACVisPluginAudiogarden : public ACClusterPositionsPlugin {
+class ACPosPlugMakamHistoGramoPhone : public ACPosPlugAudioGardenGramoPhone {
 public:
-  ACVisPluginAudiogarden();
-  ~ACVisPluginAudiogarden();
-/*   virtual std::vector<ACMediaFeatures*> calculate(); */
-/*   virtual std::vector<ACMediaFeatures*> calculate(std::string aFileName); */
-/* 	std::vector<ACMediaFeatures*> calculate(ACMediaData* _data){} */
-/*   virtual void updateClusters(ACMediaBrowser* ); */
-  virtual void updateNextPositions(ACMediaBrowser* );
-	arma::mat extractDescMatrix(ACMediaLibrary* lib, string featureName);
-	arma::mat extractDescMatrix(ACMediaLibrary* lib, std::vector<string> featureList);
-
-protected:
+  ACPosPlugMakamHistoGramoPhone();
+  ~ACPosPlugMakamHistoGramoPhone();
 };
 
-#endif	/* _ACVISPLUGINAUDIOGARDEN_ */
+#endif	/* _ACPosPlugMakamHistoGramoPhone_ */
 
 

@@ -1,0 +1,5 @@
+CF: Find the *.c files from the private/src/ folder of the yin.zip archive from:
+http://audition.ens.fr/adc/sw/yin.zip
+http://audition.ens.fr/adc/
+
+"For research purposes only". 

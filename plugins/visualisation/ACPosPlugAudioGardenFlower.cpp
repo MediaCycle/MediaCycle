@@ -1,8 +1,8 @@
 /**
  * @brief ACPosPlugAudioGardenFlower.cpp
  * @author Christian Frisson
- * @date 13/09/2011
- * @copyright (c) 2011 – UMONS - Numediart
+ * @date 18/05/2012
+ * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -43,7 +43,7 @@ ACPosPlugAudioGardenFlower::ACPosPlugAudioGardenFlower()
 	// XS TODO: are these general enough ? can we use this only for audio ??
     this->mMediaType = MEDIA_TYPE_AUDIO;
     //this->mPluginType =    this->mPluginType|PLUGIN_TYPE_CLUSTERS_POSITIONS;
-    this->mName = "Flower";
+    this->mName = "AudioGarden Flower";
     this->mDescription = "Audiogarden Flower Visualisation plugin";
     this->mId = "";
 	
