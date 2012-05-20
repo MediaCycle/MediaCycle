@@ -118,9 +118,6 @@ int ACOscBrowser::process_mess(const char *path, const char *types, lo_arg **arg
     if (!ac && !mc)//we don't process messages not containing /audiocycle or /mediacycle
         return 1;
 
-    //if(!media_cycle || !this->getOsgView())
-    //	return;
-
     if (tag.find("/test", 0) != string::npos) {
         std::cout << "OSC communication established" << std::endl;
 
@@ -131,8 +128,10 @@ int ACOscBrowser::process_mess(const char *path, const char *types, lo_arg **arg
                 osc_feedback->messageBegin("/mediacycle/received");
             osc_feedback->messageEnd();
             osc_feedback->messageSend();
+            return 1;
         }
-    } else if (tag.find("/fullscreen", 0) != string::npos) {
+    }
+    else if (tag.find("/fullscreen", 0) != string::npos) {
         int fullscreen = 0;
         fullscreen = argv[0]->i;
         std::cout << "Fullscreen? " << fullscreen << std::endl;
@@ -140,9 +139,18 @@ int ACOscBrowser::process_mess(const char *path, const char *types, lo_arg **arg
         //	ui.groupControls->hide();
         //else
         //	ui.groupControls->show();
+        return 1;
     }
-        // BROWSER CONTROLS
-    else if (tag.find("/browser", 0) != string::npos && media_cycle) {
+
+    if(!media_cycle)// || !this->getOsgView())
+        return 1;
+
+    // BROWSER CONTROLS
+    if (tag.find("/browser", 0) != string::npos && media_cycle) {
+
+        if(!media_cycle->getBrowser())
+            return 1;
+
         //Extracting the pointer/device integer id between "/browser/" and subsequent "/..." strings
         int id = -1;
         std::string prefix = ("/browser/");
@@ -165,7 +173,8 @@ int ACOscBrowser::process_mess(const char *path, const char *types, lo_arg **arg
             //Ugly
             //osg_view->getHUDRenderer()->preparePointers();
             media_cycle->setNeedsDisplay(true);
-        } else if (tag.find("/released", 0) != string::npos) {
+        }
+        else if (tag.find("/released", 0) != string::npos) {
             std::cout << "OSC message: '" << tag << "'" << std::endl;
             if (media_cycle->getNumberOfPointers() < 1)//TR NEM2011
                 media_cycle->setAutoPlay(0); //TR NEM
@@ -177,7 +186,8 @@ int ACOscBrowser::process_mess(const char *path, const char *types, lo_arg **arg
             //Ugly
             //osg_view->getHUDRenderer()->preparePointers();
             media_cycle->setNeedsDisplay(true);
-        } else if (tag.find("/reset_pointers", 0) != string::npos) {
+        }
+        else if (tag.find("/reset_pointers", 0) != string::npos) {
             std::cout << "OSC message: '" << tag << "'" << std::endl;
             media_cycle->setAutoPlay(0);
             //media_cycle->resetPointers();
@@ -185,7 +195,8 @@ int ACOscBrowser::process_mess(const char *path, const char *types, lo_arg **arg
             //osg_view->getHUDRenderer()->preparePointers();
             media_cycle->setNeedsDisplay(true);
             std::cout << "Reset to " << media_cycle->getNumberOfPointers() << " pointer(s)" << std::endl;
-        } else if (tag.find("/move/xy", 0) != string::npos) {
+        }
+        else if (tag.find("/move/xy", 0) != string::npos) {
             float x = 0.0, y = 0.0;
             media_cycle->getCameraPosition(x, y);
             x = argv[0]->f;
@@ -197,18 +208,21 @@ int ACOscBrowser::process_mess(const char *path, const char *types, lo_arg **arg
             float ymove = y * cos(-angle) + x * sin(-angle);
             media_cycle->setCameraPosition(xmove / 2 / zoom, ymove / 2 / zoom); // norm [-1;1] = 2 (instead of 100 from mediacycle-osg)
             media_cycle->setNeedsDisplay(true);
-        } else if (tag.find("/zoom", 0) != string::npos) {
+        }
+        else if (tag.find("/zoom", 0) != string::npos) {
             float zoom = 0.0f;
             zoom = argv[0]->f;
             //zoom = zoom*600/50; // refzoom +
             media_cycle->setCameraZoom((float) zoom);
             media_cycle->setNeedsDisplay(true);
-        } else if ((tag.find("/rotate", 0) != string::npos) || (tag.find("/angle", 0) != string::npos)) {
+        }
+        else if ((tag.find("/rotate", 0) != string::npos) || (tag.find("/angle", 0) != string::npos)) {
             float angle = 0.0f;
             angle = argv[0]->f;
             media_cycle->setCameraRotation((float) angle);
             media_cycle->setNeedsDisplay(true);
-        } else if (tag.find("/hover/xy", 0) != string::npos) {
+        }
+        else if (tag.find("/hover/xy", 0) != string::npos) {
             float x = 0.0, y = 0.0;
             if (argc == 2 && types[0] == LO_FLOAT && types[1] == LO_FLOAT) {
                 x = argv[0]->f;
@@ -248,9 +262,11 @@ int ACOscBrowser::process_mess(const char *path, const char *types, lo_arg **arg
                 }
                 std::cout << std::endl;
             }
-        } else if (tag.find("/recenter", 0) != string::npos) {
+        }
+        else if (tag.find("/recenter", 0) != string::npos) {
             media_cycle->setCameraRecenter();
-        } else if (tag.find("/recluster", 0) != string::npos) {
+        }
+        else if (tag.find("/recluster", 0) != string::npos) {
             //int node = media_cycle->getClickedNode();
             int node = media_cycle->getClosestNode();
             if (media_cycle->getLibrary()->getSize() > 0 && media_cycle->getBrowser()->getMode() == AC_MODE_CLUSTERS && node > -1) {
@@ -258,12 +274,15 @@ int ACOscBrowser::process_mess(const char *path, const char *types, lo_arg **arg
                 // media_cycle->pushNavigationState(); XS 250810 removed
                 media_cycle->updateDisplay(true);
             }
-        } else if (tag.find("/back", 0) != string::npos) {
+        }
+        else if (tag.find("/back", 0) != string::npos) {
             media_cycle->goBack();
-        } else if (tag.find("/forward", 0) != string::npos) {
+        }
+        else if (tag.find("/forward", 0) != string::npos) {
             media_cycle->goForward();
         } 
     }
+    // LIBRARY
     else if (tag.find("/library", 0) != string::npos && media_cycle) {
         std::cout << "ACOscBrowser communication with library " << std::endl;
         if (tag.find("/addfile", 0) != string::npos) {
@@ -279,9 +298,11 @@ int ACOscBrowser::process_mess(const char *path, const char *types, lo_arg **arg
             // XS TODO : should not call these methods from outside -- clean up !!
             media_cycle->normalizeFeatures(1);
             media_cycle->libraryContentChanged(1);
-        } else if (tag.find("/load", 0) != string::npos) {
+        }
+        else if (tag.find("/load", 0) != string::npos) {
             std::cerr << "ACOscBrowser: Library loading thru OSC not yet implemented" << std::endl;
-        } else if (tag.find("/clear", 0) != string::npos) {
+        }
+        else if (tag.find("/clear", 0) != string::npos) {
             std::cerr << "ACOscBrowser: Library cleaning thru OSC not yet implemented" << std::endl;
 
             //this->media_cycle->cleanLibrary();
@@ -308,73 +329,115 @@ int ACOscBrowser::process_mess(const char *path, const char *types, lo_arg **arg
             //this->getOsgView()->setFocus();
         }
     }
+    // PLAYER
     else if (tag.find("/player", 0) != string::npos && media_cycle) {
+        if(!media_cycle->getLibrary())
+            return 1;
+        if(media_cycle->getLibrary()->getSize()==0)
+            return 1;
 #if defined (SUPPORT_AUDIO)
         if (media_cycle->getLibrary()->getMediaType() == MEDIA_TYPE_AUDIO && !this->getAudioEngine())
             return 1;
 #endif //defined (SUPPORT_AUDIO)
 
-        if (tag.find("/playclosestloop", 0) != string::npos) {
-            media_cycle->pickedObjectCallback(-1);
-        } else if (tag.find("/muteall", 0) != string::npos) {
+        if (tag.find("/muteall", 0) != string::npos) {
             //if(this->getMediaType()==MEDIA_TYPE_AUDIO)
             media_cycle->resetPointers(); //CF hack dirty!
             media_cycle->muteAllSources();
+            return 1;
         } else if (tag.find("/bpm", 0) != string::npos) {
             float bpm;
             bpm = argv[0]->f;
             cout << "/player/bpm/" << bpm << endl;
+            int node = media_cycle->getClosestNode();
 
-            //int node = media_cycle->getClickedNode();
-            //int node = media_cycle->getClosestNode();
-            int node = media_cycle->getLastSelectedNode();
-
-            //if (node > -1)
-            {
 #if defined (SUPPORT_AUDIO)
+            if (node > -1)
+            {
                 audio_engine->setLoopSynchroMode(node, ACAudioEngineSynchroModeAutoBeat);
-                //	audio_engine->setLoopScaleMode(node, ACAudioEngineScaleModeResample);
+                //audio_engine->setLoopScaleMode(node, ACAudioEngineScaleModeResample);
                 audio_engine->setBPM((float) bpm);
-#endif //defined (SUPPORT_AUDIO)
             }
-        } else if (tag.find("/scrub", 0) != string::npos) {
+#endif //defined (SUPPORT_AUDIO)
+            return 1;
+        }
+
+        //Extracting the pointer/device integer id between "/player/" and subsequent "/..." strings
+        int id = -1;
+        std::string prefix = ("/player/");
+        std::string suffix = ("/");
+        size_t prefix_found = tag.find(prefix, 0);
+        if (prefix_found != string::npos) {
+            size_t suffix_found = tag.find(suffix, prefix_found + prefix.size());
+            if (suffix_found != string::npos) {
+                std::string id_string = tag.substr(prefix_found + prefix.size(), suffix_found - (prefix_found + prefix.size()));
+                istringstream id_ss(id_string);
+                if (!(id_ss >> id))
+                    std::cerr << "ACOscBrowser: wrong pointer id" << std::endl;
+            }
+        }
+
+        int node = -1;
+        if(media_cycle->getBrowser()->getPointerFromId(id))
+            node = media_cycle->getBrowser()->getPointerFromId(id)->getClosestNode();
+
+        if (tag.find("/playclosestloop", 0) != string::npos) {
+            //media_cycle->pickedObjectCallback(-1);
+            media_cycle->getBrowser()->toggleSourceActivity( node );
+            cout << "/player/"<< node << "/playclosestloop node " << node << endl;
+            return 1;
+        }
+        else if (tag.find("/triggerclosestloop", 0) != string::npos) {
+            audio_engine->setLoopSynchroMode(node, ACAudioEngineSynchroModeManual);
+            audio_engine->setLoopScaleMode(node, ACAudioEngineScaleModeResample);
+            audio_engine->setScrub(0.0f);
+            audio_engine->setLoopSynchroMode(node, ACAudioEngineSynchroModeNone );
+            media_cycle->getBrowser()->toggleSourceActivity( node );
+            cout << "/player/"<< node << "/triggerclosestloop node " << node << endl;
+            return 1;
+        }
+        else if (tag.find("/scrub", 0) != string::npos) {
             float scrub;
             scrub = argv[0]->f;
 
-            //int node = media_cycle->getClickedNode();
-            //int node = media_cycle->getClosestNode();
-            int node = media_cycle->getLastSelectedNode();
-
-            if (node > -1) {
-                //media_cycle->pickedObjectCallback(-1);
 #if defined (SUPPORT_AUDIO)
+            if (node > -1) {
                 audio_engine->setLoopSynchroMode(node, ACAudioEngineSynchroModeManual);
                 audio_engine->setLoopScaleMode(node, ACAudioEngineScaleModeResample); //ACAudioEngineScaleModeVocode
                 audio_engine->setScrub((float) scrub * 100); // temporary hack to scrub between 0 an 1
-#endif //defined (SUPPORT_AUDIO)
             }
+#endif //defined (SUPPORT_AUDIO)
+            return 1;
         } else if (tag.find("/pitch", 0) != string::npos) {
+#ifdef USE_DEBUG
             float pitch;
             pitch = argv[0]->f;
+            cout << "/player/"<< node << "/pitch/" << pitch << endl;
 
-            //int node = media_cycle->getClickedNode();
-            //int node = media_cycle->getClosestNode();
-            int node = media_cycle->getLastSelectedNode();
-
-            if (node > -1) {
-                //if (!is_pitching)
-                // {
-                //is_pitching = true;
-                // is_scrubing = false;
-                //media_cycle->pickedObjectCallback(-1);
 #if defined (SUPPORT_AUDIO)
+            if (node > -1) {
                 audio_engine->setLoopSynchroMode(node, ACAudioEngineSynchroModeAutoBeat);
                 audio_engine->setLoopScaleMode(node, ACAudioEngineScaleModeResample);
-                //}
                 audio_engine->setSourcePitch(node, (float) pitch);
-#endif //defined (SUPPORT_AUDIO)
             }
+#endif //defined (SUPPORT_AUDIO)
+#else //USE_DEBUG
+        cout << "/player/"<< node << "/pitch/" << pitch << " not yet safe, can mess up the audioengine " << endl;
+#endif
+            return 1;
+        } else if (tag.find("/gain", 0) != string::npos) {
+            float gain;
+            gain = argv[0]->f;
+            cout << "/player/"<< node << "/gain/" << gain << endl;
 
+#if defined (SUPPORT_AUDIO)
+            if (node > -1) {
+                //audio_engine->setLoopSynchroMode(node, ACAudioEngineSynchroModeAutoBeat);
+                //audio_engine->setLoopScaleMode(node, ACAudioEngineScaleModeResample);
+                audio_engine->setSourceGain(node, (float) gain);
+            }
+#endif //defined (SUPPORT_AUDIO)
+            return 1;
         }
     }
 

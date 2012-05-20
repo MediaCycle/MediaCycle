@@ -1544,7 +1544,9 @@ void ACAudioFeedback::setTimeSignature(int tsnum, int tsden)
 
 void ACAudioFeedback::setBPM(float bpm)
 {
-	active_bpm = bpm;
+    if(bpm < 0)
+        bpm = 0;
+    active_bpm = bpm;
 }
 
 void ACAudioFeedback::setKey(int key)
@@ -2157,20 +2159,19 @@ void ACAudioFeedback::stopExtSource()
 int ACAudioFeedback::setSourcePitch(int loop_id, float pitch)
 {
 #ifdef USE_OPENAL
-	if (pitch > 0.5 && pitch < 2.0) //due to AL_PITCH
-	{
-		int loop_slot;
-		ALuint	loop_source;
-		loop_slot = getLoopSlot(loop_id);
-		if (loop_slot==-1) {
-			return 1;
-		}
-		loop_source = loop_sources[loop_slot];
-		alSourcef(loop_source, AL_PITCH, pitch);//CF find another equivalent that accepts a pitch lower than 0.5
-		return 0;
-	}
-	else
-		return 1;
+    if(pitch <0.5) //due to AL_PITCH
+        pitch = 0.5;
+    if(pitch > 2.0) //due to AL_PITCH
+        pitch = 2.0;
+    int loop_slot;
+    ALuint	loop_source;
+    loop_slot = getLoopSlot(loop_id);
+    if (loop_slot==-1) {
+        return 1;
+    }
+    loop_source = loop_sources[loop_slot];
+    alSourcef(loop_source, AL_PITCH, pitch);//CF find another equivalent that accepts a pitch lower than 0.5
+    return 0;
 #endif
 }
 
@@ -2296,15 +2297,19 @@ int ACAudioFeedback::setSourcePosition(int loop_id, float x, float y, float z)
 
 int ACAudioFeedback::setSourceGain(int loop_id, float gain)
 {
-	int loop_slot;
-	ALuint	loop_source;
-	loop_slot = getLoopSlot(loop_id);
-	if (loop_slot==-1) {
-		return 1;
-	}
-	loop_source = loop_sources[loop_slot];
-	alSourcef(loop_source, AL_GAIN, gain);
-	return 0;
+    if(gain < 0.0) //due to AL_GAIN
+        gain = 0.0;
+    if(gain > 1.0) //due to AL_GAIN
+        gain = 1.0;
+    int loop_slot;
+    ALuint	loop_source;
+    loop_slot = getLoopSlot(loop_id);
+    if (loop_slot==-1) {
+        return 1;
+    }
+    loop_source = loop_sources[loop_slot];
+    alSourcef(loop_source, AL_GAIN, gain);
+    return 0;
 }
 
 int ACAudioFeedback::setSourceRolloffFactor(int loop_id, float rolloff_factor)
