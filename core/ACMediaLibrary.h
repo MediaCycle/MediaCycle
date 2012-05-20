@@ -78,6 +78,7 @@ protected:
 	preProcessInfo mPreProcessInfo;
 	ACPreProcessPlugin* mPreProcessPlugin;
 	ACMediaReaderPlugin* mReaderPlugin;
+        std::vector<std::string> failed_imports;
 	
 public:
 	ACMediaLibrary();

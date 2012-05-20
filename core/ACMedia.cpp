@@ -611,6 +611,14 @@ int ACMedia::extractFeatures(ACPluginManager *acpl, bool _save_timed_feat) {
         //TR : new implementation to calculate the features
         ACMediaData* local_media_data=dynamic_cast<ACMediaData*>(this->getMediaData());
         this->features_vectors=acpl->getFeaturesPlugins()->calculate(local_media_data, this, _save_timed_feat);
+
+        // Checking if any of the media features is empty:
+        std::vector<ACMediaFeatures*>::iterator features_vector;
+        for (features_vector = features_vectors.begin(); features_vector != features_vectors.end(); features_vector++){
+            if((*features_vector)->getSize()==0)
+                return 0;
+        }
+
         if (this->features_vectors.size()>0)
             extract_feat_ok = 1;
     }

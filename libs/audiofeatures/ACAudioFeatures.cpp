@@ -1,7 +1,7 @@
 /**
  * @brief ACAudioFeatures.cpp
  * @author Christian Frisson
- * @date 16/05/2012
+ * @date 20/05/2012
  * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -229,6 +229,7 @@ std::vector<ACMediaTimedFeature*> computeFeatures(float* data, vector<string> de
     mat melfilter_m;
     mat chromafilter_m;
     std::vector<ACMediaTimedFeature*> desc;
+    std::vector<ACMediaTimedFeature*> empty_desc;
 
     colvec sc_v(nbFrames);
     colvec ss_v(nbFrames);
@@ -356,28 +357,28 @@ std::vector<ACMediaTimedFeature*> computeFeatures(float* data, vector<string> de
         case SPECTRAL_CENTROID:
             if (!sc_v.is_finite() ){
                 std::cout << "sc_v is not finite" << std::endl;
-                exit(1);
+                return empty_desc; //exit(1);
             }
             desc.push_back(new ACMediaTimedFeature(conv_to<fcolvec>::from(time_v), conv_to<fmat>::from(sc_v), std::string("Spectral Centroid")));
             break;
         case SPECTRAL_SPREAD:
             if (!ss_v.is_finite()){
                 std::cout << "ss_v is not finite" << std::endl;
-                exit(1);
+                return empty_desc; //exit(1);
             }
             desc.push_back(new ACMediaTimedFeature(conv_to<fcolvec>::from(time_v), conv_to<fmat>::from(ss_v), std::string("Spectral Spread")));
             break;
         case SPECTRAL_FLATNESS:
             if (!sfm_m.is_finite()){
                 std::cout << "sfm_m is not finite" << std::endl;
-                exit(1);
+                return empty_desc; //exit(1);
             }
             desc.push_back(new ACMediaTimedFeature(conv_to<fcolvec>::from(time_v), conv_to<fmat>::from(sfm_m), std::string("Spectral Flatness")));
             break;
         case SPECTRAL_VARIATION:
             if (!sv_v.is_finite()){
                 std::cout << "sv_v is not finite" << std::endl;
-                exit(1);
+                return empty_desc; //exit(1);
             }
             desc.push_back(new ACMediaTimedFeature(conv_to<fcolvec>::from(time_v), conv_to<fmat>::from(sv_v), std::string("Spectral Variation")));
             break;
@@ -387,28 +388,28 @@ std::vector<ACMediaTimedFeature*> computeFeatures(float* data, vector<string> de
         case ZERO_CROSSING_RATE:
             if (!zcr_v.is_finite()){
                 std::cout << "zcr_v is not finite" << std::endl;
-                exit(1);
+                return empty_desc; //exit(1);
             }
             desc.push_back(new ACMediaTimedFeature(conv_to<fcolvec>::from(time_v), conv_to<fmat>::from(zcr_v), std::string("ZCR")));
             break;
         case SPECTRAL_DECREASE:
             if (!sd_v.is_finite() ){
                 std::cout << "sd_v is not finite" << std::endl;
-                exit(1);
+                return empty_desc; //exit(1);
             }
             desc.push_back(new ACMediaTimedFeature(conv_to<fcolvec>::from(time_v), conv_to<fmat>::from(sd_v), std::string("Spectral Decrease")));
             break;
         case ENERGY:
             if (!ener_v.is_finite()){
                 std::cout << "ener_v is not finite" << std::endl;
-                exit(1);
+                return empty_desc; //exit(1);
             }
             desc.push_back(new ACMediaTimedFeature(conv_to<fcolvec>::from(time_v), conv_to<fmat>::from(ener_v), std::string("Energy")));
             break;
         case LOUDNESS:
             if (!loud_v.is_finite()){
                 std::cout << "loud_v is not finite" << std::endl;
-                exit(1);
+                return empty_desc; //exit(1);
             }
             desc.push_back(new ACMediaTimedFeature(conv_to<fcolvec>::from(time_v), conv_to<fmat>::from(loud_v), std::string("Loudness")));
             break;
@@ -416,7 +417,7 @@ std::vector<ACMediaTimedFeature*> computeFeatures(float* data, vector<string> de
         {
             if (!mfcc_m.is_finite() ){
                 std::cout << "mfcc_m is not finite" << std::endl;
-                exit(1);
+                return empty_desc; //exit(1);
             }
             mfcc_tf = new ACMediaTimedFeature(conv_to<fcolvec>::from(time_v), conv_to<fmat>::from(mfcc_m), std::string("MFCC"));
             desc.push_back(mfcc_tf);
@@ -439,7 +440,7 @@ std::vector<ACMediaTimedFeature*> computeFeatures(float* data, vector<string> de
         {
             if (!chroma_m.is_finite() ){
                 std::cout << "chroma_m is not finite" << std::endl;
-                exit(1);
+                return empty_desc; //exit(1);
             }
             chroma_tf = new ACMediaTimedFeature(conv_to<fcolvec>::from(time_v), conv_to<fmat>::from(chroma_m), std::string("Chroma"));
             desc.push_back(chroma_tf);

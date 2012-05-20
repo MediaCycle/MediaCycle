@@ -127,6 +127,7 @@ void ACMediaLibrary::cleanLibrary() {
 	// XS leave the media type as is, suppose we'll keep loading the same type of media
 	// (not this:) media_type=MEDIA_TYPE_NONE;
         metadata = ACMediaLibraryMetadata();
+        failed_imports.clear();
 }
 
 std::vector<std::string> ACMediaLibrary::getExtensionsFromMediaType(ACMediaType media_type)
@@ -172,6 +173,12 @@ int ACMediaLibrary::importDirectory(std::string _path, int _recursive, ACPluginM
 	}
 
 	std::cout << "Library size : " << this->getSize() << std::endl;
+        std::cout << "Failed imports: " << std::endl;
+        if(failed_imports.size()>0){
+        std::vector<std::string>::iterator failed_import;
+            for (failed_import=failed_imports.begin();failed_import!=failed_imports.end();failed_import++)
+                std::cout << "\t" << (*failed_import) << std::endl;
+        }
 	return this->getSize();
 }
 
@@ -270,7 +277,8 @@ int ACMediaLibrary::importFile(std::string _filename, ACPluginManager *acpl, boo
 	}
 	else {
 		cerr << "<ACMediaLibrary::importFile> problem importing file : " << _filename << " ... " << endl;
-		return 0;
+                failed_imports.push_back(_filename);
+                 return 0;
 		
 	}
 	// XS TODO this was an attempt to save on-the-fly each media 

@@ -439,7 +439,7 @@ void ACActiveFeaturesPlugins::log()
 
 vector<ACMediaFeatures*> ACActiveFeaturesPlugins::calculate(ACMediaData* aData, ACMedia* theMedia, bool _save_timed_feat) {
     ACMediaType mediaType = theMedia->getMediaType();
-    vector<ACMediaFeatures*> output;
+    vector<ACMediaFeatures*> output,empty;
     for (vector<ACFeaturesPlugin *> ::iterator iter_vec = mCurrPlugin[mediaType].begin(); iter_vec != mCurrPlugin[mediaType].end(); iter_vec++) {
         ACFeaturesPlugin* localPlugin = (*iter_vec);
         vector<ACMediaFeatures*> afv;
@@ -451,6 +451,7 @@ vector<ACMediaFeatures*> ACActiveFeaturesPlugins::calculate(ACMediaData* aData, 
 
         if (afv.size() == 0) {
             cerr << "<ACActiveFeaturesPlugins::calculate> failed computing feature from plugin: " << localPlugin->getName() << endl;
+            return empty;
         } else {
             for (unsigned int Iafv = 0; Iafv < afv.size(); Iafv++)
                 output.push_back(afv[Iafv]);
