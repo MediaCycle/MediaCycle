@@ -535,9 +535,16 @@ int ACMediaLibrary::openCoreXMLLibrary(TiXmlHandle _rootHandle){
             this->metadata.cover = nLibraryMetadataNode->Attribute("Cover");
         TiXmlElement* nLibraryCuratorNode=_rootHandle.FirstChild( "LibraryMetadata" ).FirstChild( "Curator" ).Element();
         if(nLibraryCuratorNode){
-            if(nLibraryCuratorNode->Attribute("Title"))
-                this->metadata.curator.name = nLibraryCuratorNode->Attribute("Title");
-
+            if(nLibraryCuratorNode->Attribute("Name"))
+                this->metadata.curator.name = nLibraryCuratorNode->Attribute("Name");
+            if(nLibraryCuratorNode->Attribute("Email"))
+                this->metadata.curator.email = nLibraryCuratorNode->Attribute("Email");
+            if(nLibraryCuratorNode->Attribute("Website"))
+                this->metadata.curator.website = nLibraryCuratorNode->Attribute("Website");
+            if(nLibraryCuratorNode->Attribute("Location"))
+                this->metadata.curator.location = nLibraryCuratorNode->Attribute("Location");
+            if(nLibraryCuratorNode->Attribute("Picture"))
+                this->metadata.curator.picture = nLibraryCuratorNode->Attribute("Picture");
         }
     }
 

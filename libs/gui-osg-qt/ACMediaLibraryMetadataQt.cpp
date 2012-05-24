@@ -86,7 +86,60 @@ void ACMediaLibraryMetadataQt::on_pushButtonCoverLocate_clicked(){
     }
     QSize label_size = ui.labelCoverImage->size();
     ui.labelCoverImage->setPixmap(QPixmap::fromImage(image).scaled(label_size, Qt::KeepAspectRatio));
+
+    if(!media_cycle)
+        return;
+    if(!media_cycle->getLibrary())
+        return;
+
+    media_cycle->getLibrary()->setCover( fileName.toStdString() );
 }
+
+void ACMediaLibraryMetadataQt::on_lineEditAuthor_editingFinished(){
+    if(!media_cycle)
+        return;
+    if(!media_cycle->getLibrary())
+        return;
+
+    media_cycle->getLibrary()->setAuthor( ui.lineEditAuthor->text().toStdString() );
+}
+
+void ACMediaLibraryMetadataQt::on_lineEditTitle_editingFinished(){
+    if(!media_cycle)
+        return;
+    if(!media_cycle->getLibrary())
+        return;
+
+    media_cycle->getLibrary()->setTitle( ui.lineEditTitle->text().toStdString() );
+}
+
+void ACMediaLibraryMetadataQt::on_lineEditPublisher_editingFinished(){
+    if(!media_cycle)
+        return;
+    if(!media_cycle->getLibrary())
+        return;
+
+    media_cycle->getLibrary()->setPublisher( ui.lineEditPublisher->text().toStdString() );
+}
+
+void ACMediaLibraryMetadataQt::on_lineEditWebsite_editingFinished(){
+    if(!media_cycle)
+        return;
+    if(!media_cycle->getLibrary())
+        return;
+
+    media_cycle->getLibrary()->setWebsite( ui.lineEditWebsite->text().toStdString() );
+}
+
+void ACMediaLibraryMetadataQt::on_lineEditYear_editingFinished(){
+    if(!media_cycle)
+        return;
+    if(!media_cycle->getLibrary())
+        return;
+
+    media_cycle->getLibrary()->setYear( ui.lineEditYear->text().toStdString() );
+}
+
 
 void ACMediaLibraryMetadataQt::updateLibrary(){
     if(!media_cycle)

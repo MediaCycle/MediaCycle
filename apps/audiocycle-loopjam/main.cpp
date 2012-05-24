@@ -39,40 +39,40 @@
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
-	
-	// Make Apple *.app bundles not load installed Qt Frameworks but load Qt Plugins
+
+    // Make Apple *.app bundles not load installed Qt Frameworks but load Qt Plugins
 #ifdef __APPLE__
-	QApplication::setLibraryPaths(QStringList(QApplication::applicationDirPath() + "/../PlugIns"));
+    QApplication::setLibraryPaths(QStringList(QApplication::applicationDirPath() + "/../PlugIns"));
 #endif
-	
-	ACAudioCycleLoopJam window;
-	try {
-		window.setWindowTitle("LoopJam");
 
-		// Adding palettes
-		window.addControlDock("MCOSC");
-		window.addControlDock("MCBrowserControlsClusters");//"MCBrowserControlsClustersNeighbors");
-		window.addControlDock("MCAudioControls");
+    ACAudioCycleLoopJam window;
+    try {
+        window.setWindowTitle("LoopJam");
 
-		window.setDefaultQSettings(); // skip the first dialog about saved settings
-		window.loadDefaultConfig(MEDIA_TYPE_AUDIO);
-		window.show();
-		
-                window.on_actionFullscreen_triggered(true); // to be set after the window is shown
-                window.autoConnectOSC(true); // to be set after loading the default config
-	}
-	catch (const exception& e) {
-		cout << "** caught exception in main : " << e.what() << endl;
-	}
-	catch (...){
-		cout << "** caught undetermined exception in main" << endl;
-	}
+        // Adding palettes
+        window.addControlDock("MCOSC");
+        window.addControlDock("MCBrowserControlsClusters");//"MCBrowserControlsClustersNeighbors");
+        window.addControlDock("MCAudioControls");
 
-	window.startLoopXML();
+        window.setDefaultQSettings(); // skip the first dialog about saved settings
+        window.loadDefaultConfig(MEDIA_TYPE_AUDIO);
+        window.show();
 
-	app.setOrganizationName("numediart");
-	app.setOrganizationDomain("numediart.org");
-	app.setApplicationName("LoopJam");
+        window.on_actionFullscreen_triggered(true); // to be set after the window is shown
+        window.autoConnectOSC(true); // to be set after loading the default config
+    }
+    catch (const exception& e) {
+        cout << "** caught exception in main : " << e.what() << endl;
+    }
+    catch (...){
+        cout << "** caught undetermined exception in main" << endl;
+    }
+
+    window.startLoopXML();
+
+    app.setOrganizationName("numediart");
+    app.setOrganizationDomain("numediart.org");
+    app.setApplicationName("LoopJam");
 
     return app.exec();
 }

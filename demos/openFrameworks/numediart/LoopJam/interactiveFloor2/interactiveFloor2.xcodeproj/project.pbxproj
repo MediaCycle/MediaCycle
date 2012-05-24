@@ -22,10 +22,6 @@
 		769BC86C143B7307004D2A81 /* libfftw3f.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 769BC85F143B7307004D2A81 /* libfftw3f.a */; };
 		769BC86D143B7307004D2A81 /* libfftw3f.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 769BC860143B7307004D2A81 /* libfftw3f.dylib */; };
 		AB481AAC13410C42008DEA61 /* libOsc.a in Frameworks */ = {isa = PBXBuildFile; fileRef = AB481A9313410C42008DEA61 /* libOsc.a */; };
-		AB481AAD13410C42008DEA61 /* oscpack.a in Frameworks */ = {isa = PBXBuildFile; fileRef = AB481A9513410C42008DEA61 /* oscpack.a */; };
-		AB481AAE13410C42008DEA61 /* oscpack.lib in Frameworks */ = {isa = PBXBuildFile; fileRef = AB481A9613410C42008DEA61 /* oscpack.lib */; };
-		AB481AAF13410C42008DEA61 /* oscpack_cw.lib in Frameworks */ = {isa = PBXBuildFile; fileRef = AB481A9713410C42008DEA61 /* oscpack_cw.lib */; };
-		AB481AB013410C42008DEA61 /* oscpackd.lib in Frameworks */ = {isa = PBXBuildFile; fileRef = AB481A9813410C42008DEA61 /* oscpackd.lib */; };
 		AB481AB113410C42008DEA61 /* ofxOscBundle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AB481AA013410C42008DEA61 /* ofxOscBundle.cpp */; };
 		AB481AB213410C42008DEA61 /* ofxOscMessage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AB481AA213410C42008DEA61 /* ofxOscMessage.cpp */; };
 		AB481AB313410C42008DEA61 /* ofxOscReceiver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AB481AA413410C42008DEA61 /* ofxOscReceiver.cpp */; };
@@ -134,13 +130,7 @@
 		AB481A8B13410C42008DEA61 /* OscPrintReceivedElements.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OscPrintReceivedElements.h; sourceTree = "<group>"; };
 		AB481A8C13410C42008DEA61 /* OscReceivedElements.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OscReceivedElements.h; sourceTree = "<group>"; };
 		AB481A8D13410C42008DEA61 /* OscTypes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OscTypes.h; sourceTree = "<group>"; };
-		AB481A9013410C42008DEA61 /* liboscpack.so */ = {isa = PBXFileReference; lastKnownFileType = file; path = liboscpack.so; sourceTree = "<group>"; };
-		AB481A9113410C42008DEA61 /* liboscpack.so.1.0.2 */ = {isa = PBXFileReference; lastKnownFileType = file; path = liboscpack.so.1.0.2; sourceTree = "<group>"; };
 		AB481A9313410C42008DEA61 /* libOsc.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libOsc.a; sourceTree = "<group>"; };
-		AB481A9513410C42008DEA61 /* oscpack.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = oscpack.a; sourceTree = "<group>"; };
-		AB481A9613410C42008DEA61 /* oscpack.lib */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = oscpack.lib; sourceTree = "<group>"; };
-		AB481A9713410C42008DEA61 /* oscpack_cw.lib */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = oscpack_cw.lib; sourceTree = "<group>"; };
-		AB481A9813410C42008DEA61 /* oscpackd.lib */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = oscpackd.lib; sourceTree = "<group>"; };
 		AB481A9E13410C42008DEA61 /* ofxOsc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxOsc.h; sourceTree = "<group>"; };
 		AB481A9F13410C42008DEA61 /* ofxOscArg.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxOscArg.h; sourceTree = "<group>"; };
 		AB481AA013410C42008DEA61 /* ofxOscBundle.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ofxOscBundle.cpp; sourceTree = "<group>"; };
@@ -224,10 +214,6 @@
 				E4C246DA10CCAE22004149E2 /* freeimage.a in Frameworks */,
 				AB49A41E132E1A3B002695D0 /* GLUT.framework in Frameworks */,
 				AB481AAC13410C42008DEA61 /* libOsc.a in Frameworks */,
-				AB481AAD13410C42008DEA61 /* oscpack.a in Frameworks */,
-				AB481AAE13410C42008DEA61 /* oscpack.lib in Frameworks */,
-				AB481AAF13410C42008DEA61 /* oscpack_cw.lib in Frameworks */,
-				AB481AB013410C42008DEA61 /* oscpackd.lib in Frameworks */,
 				0638645E1383E36200BA2627 /* libOpenNI.dylib in Frameworks */,
 				769BC862143B7307004D2A81 /* libfftw3_threads.3.dylib in Frameworks */,
 				769BC863143B7307004D2A81 /* libfftw3_threads.a in Frameworks */,
@@ -313,20 +299,9 @@
 		AB481A8E13410C42008DEA61 /* lib */ = {
 			isa = PBXGroup;
 			children = (
-				AB481A8F13410C42008DEA61 /* linux */,
 				AB481A9213410C42008DEA61 /* osx */,
-				AB481A9413410C42008DEA61 /* win32 */,
 			);
 			path = lib;
-			sourceTree = "<group>";
-		};
-		AB481A8F13410C42008DEA61 /* linux */ = {
-			isa = PBXGroup;
-			children = (
-				AB481A9013410C42008DEA61 /* liboscpack.so */,
-				AB481A9113410C42008DEA61 /* liboscpack.so.1.0.2 */,
-			);
-			path = linux;
 			sourceTree = "<group>";
 		};
 		AB481A9213410C42008DEA61 /* osx */ = {
@@ -335,17 +310,6 @@
 				AB481A9313410C42008DEA61 /* libOsc.a */,
 			);
 			path = osx;
-			sourceTree = "<group>";
-		};
-		AB481A9413410C42008DEA61 /* win32 */ = {
-			isa = PBXGroup;
-			children = (
-				AB481A9513410C42008DEA61 /* oscpack.a */,
-				AB481A9613410C42008DEA61 /* oscpack.lib */,
-				AB481A9713410C42008DEA61 /* oscpack_cw.lib */,
-				AB481A9813410C42008DEA61 /* oscpackd.lib */,
-			);
-			path = win32;
 			sourceTree = "<group>";
 		};
 		AB481A9D13410C42008DEA61 /* src */ = {
@@ -704,6 +668,7 @@
 			isa = PBXProject;
 			buildConfigurationList = E4B69B4D0A3A1720003C02F2 /* Build configuration list for PBXProject "interactiveFloor2" */;
 			compatibilityVersion = "Xcode 3.1";
+			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				English,

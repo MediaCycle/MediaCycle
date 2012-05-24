@@ -42,8 +42,12 @@ using namespace osg;
 ACOsgLibraryRenderer::ACOsgLibraryRenderer()
     :ACOsgMediaRenderer()
 {
-    max_side_size = 64; //pixels
+    /*max_side_size = 64; //pixels
     font_size = 16; // pixels
+    line_sep = font_size; //pixels*/
+
+    max_side_size = 128; //pixels
+    font_size = 32; // pixels
     line_sep = font_size; //pixels
 
     node_color = Vec4(0.4f, 0.4f, 0.4f, 1.0f);
@@ -354,7 +358,20 @@ void ACOsgLibraryRenderer::setAuthor(std::string _author)
     }
 }
 
-void ACOsgLibraryRenderer::setCurator(std::string _curator)
+void ACOsgLibraryRenderer::setPublisher(std::string _publisher)
+{
+    if(_publisher=="")
+        return;
+    if(this->publisher!=_publisher){
+        this->publisher=_publisher;
+        if(publisher_geode)
+            media_node->removeChild(publisher_geode);
+        textGeode(publisher_caption+publisher,publisher_text,publisher_geode,osg::Vec3(publisher_x,publisher_y,0.0));
+        media_node->addChild(publisher_geode);
+    }
+}
+
+/*void ACOsgLibraryRenderer::setCurator(std::string _curator)
 {
     if(_curator=="")
         return;
@@ -365,7 +382,7 @@ void ACOsgLibraryRenderer::setCurator(std::string _curator)
         textGeode(curator_caption+curator,curator_text,curator_geode,osg::Vec3(curator_x,curator_y,0.0));
         media_node->addChild(curator_geode);
     }
-}
+}*/
 
 void ACOsgLibraryRenderer::setCover(std::string _cover)
 {
@@ -404,7 +421,8 @@ void ACOsgLibraryRenderer::updateNodes(double ratio) {
         }
 
         medias_y = 0*line_sep-max_side_size/2;
-        curator_y = 1*line_sep-max_side_size/2;
+        //curator_y = 1*line_sep-max_side_size/2;
+        publisher_y = 1*line_sep-max_side_size/2;
         author_y = 2*line_sep-max_side_size/2;
         title_y = 3*line_sep-max_side_size/2;
 

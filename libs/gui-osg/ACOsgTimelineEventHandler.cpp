@@ -109,18 +109,19 @@ bool ACOsgTimelineEventHandler::handle(const osgGA::GUIEventAdapter& ea,osgGA::G
 					// Skipping/Moving the selection zone to the mouse position
 					if(selecting_summary_waveform){
 						// Audio feedback
-						/*int mediaID = renderer->getTrack(selection->getRefId())->getMedia()->getId();
+                                                int mediaID = renderer->getTrack(selection->getRefId())->getMedia()->getId();
 						if (mediaID > -1){
 							if (media_cycle->getLibrary()->getMedia(mediaID)->getType() == MEDIA_TYPE_AUDIO){
-								//std::cout << "Skipping to frame: " << (int)((pos+1.0f)*((ACAudio*) media_cycle->getLibrary()->getMedia(mediaID))->getNFrames()) << std::endl;
+                                                                std::cout << "Skipping zone to frame: " << (int)((pos+1.0f)*((ACAudio*) media_cycle->getLibrary()->getMedia(mediaID))->getNFrames()) << std::endl;
 								#if defined (SUPPORT_AUDIO)
 								if(audio_engine){
 									audio_engine->setLoopSynchroMode(mediaID, ACAudioEngineSynchroModeManual);
 									audio_engine->setLoopScaleMode(mediaID, ACAudioEngineScaleModeResample);
+                                                                        audio_engine->setScrub(pos+1.0f);
 								}
 								#endif //defined (SUPPORT_AUDIO)
 							}
-						}*/
+                                                }
 						// Visual feedback
 						renderer->getTrack(selection->getRefId())->moveSelection(xspan*pos/2.0f);
 						#ifdef DEBUG_HANDLE
@@ -131,10 +132,10 @@ bool ACOsgTimelineEventHandler::handle(const osgGA::GUIEventAdapter& ea,osgGA::G
 					// Skipping/Moving the current frame to the mouse position
 					else if (selecting_summary_frames && !selecting_zone){
 						// Audio feedback
-						/*int mediaID = renderer->getTrack(selection->getRefId())->getMedia()->getId();
+                                                int mediaID = renderer->getTrack(selection->getRefId())->getMedia()->getId();
 						if (mediaID > -1){
 							if (media_cycle->getLibrary()->getMedia(mediaID)->getType() == MEDIA_TYPE_AUDIO){
-								//std::cout << "Skipping to frame: " << (int)((pos+1.0f)*((ACAudio*) media_cycle->getLibrary()->getMedia(mediaID))->getNFrames()) << std::endl;
+                                                                std::cout << "Skipping current frame to frame: " << (int)((pos+1.0f)*((ACAudio*) media_cycle->getLibrary()->getMedia(mediaID))->getNFrames()) << std::endl;
 								#if defined (SUPPORT_AUDIO)
 								if(audio_engine){
 									audio_engine->setLoopSynchroMode(mediaID, ACAudioEngineSynchroModeManual);
@@ -143,7 +144,7 @@ bool ACOsgTimelineEventHandler::handle(const osgGA::GUIEventAdapter& ea,osgGA::G
 								}
 								#endif //defined (SUPPORT_AUDIO)
 							}
-						}*/
+                                                }
 						renderer->getTrack(selection->getRefId())->moveSelection(xspan*pos/2.0f);
 						#ifdef DEBUG_HANDLE
 						std::cout << "(PUSH) Skipping/Moving the current frame to the mouse position (track " << selection->getRefId() <<")" << std::endl;
@@ -250,8 +251,8 @@ bool ACOsgTimelineEventHandler::handle(const osgGA::GUIEventAdapter& ea,osgGA::G
 							//std::cout << "Skipping to frame: " << (int)((pos+1.0f)*((ACAudio*) media_cycle->getLibrary()->getMedia(mediaID))->getNFrames()) << std::endl;
 							#if defined (SUPPORT_AUDIO)
 							if(audio_engine){
-								audio_engine->setLoopSynchroMode(mediaID, ACAudioEngineSynchroModeNone);
-								audio_engine->setLoopScaleMode(mediaID, ACAudioEngineScaleModeNone);
+                                                                audio_engine->setLoopSynchroMode(mediaID, ACAudioEngineSynchroModeNone);
+                                                                audio_engine->setLoopScaleMode(mediaID, ACAudioEngineScaleModeNone);
 							}
 							#endif //defined (SUPPORT_AUDIO)
 						}

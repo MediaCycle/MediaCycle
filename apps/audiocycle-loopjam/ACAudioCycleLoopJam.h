@@ -42,12 +42,13 @@
 class ACAudioCycleLoopJam: public ACMultiMediaCycleOsgQt {
 Q_OBJECT
 public slots:
-	void loopXML();
+        void openNextLibrary();
+        void openPreviousLibrary();
 
 public:
 	ACAudioCycleLoopJam();
 	~ACAudioCycleLoopJam();
-	void startLoopXML();
+        void startLoopXML();
 	
     //void setDefaultWaveform(ACBrowserAudioWaveformType _type);
 private:

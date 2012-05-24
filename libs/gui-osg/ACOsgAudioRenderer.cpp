@@ -269,7 +269,7 @@ void ACOsgAudioRenderer::waveformGeode() {
 void ACOsgAudioRenderer::metadataGeode() {
 
 	osg::Vec4 textColor(0.9f,0.9f,0.9f,1.0f);
-        float textCharacterSize = 20.0f;
+        float textCharacterSize = 46.0f; // CF LoopJam, was 20.0f
 
 	metadata_geode = new Geode();
 

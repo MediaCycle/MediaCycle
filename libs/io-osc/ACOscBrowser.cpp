@@ -422,7 +422,7 @@ int ACOscBrowser::process_mess(const char *path, const char *types, lo_arg **arg
             }
 #endif //defined (SUPPORT_AUDIO)
 #else //USE_DEBUG
-        cout << "/player/"<< node << "/pitch/" << pitch << " not yet safe, can mess up the audioengine " << endl;
+        cout << "/player/"<< node << "/pitch not yet safe, can mess up the audioengine " << endl;
 #endif
             return 1;
         } else if (tag.find("/gain", 0) != string::npos) {

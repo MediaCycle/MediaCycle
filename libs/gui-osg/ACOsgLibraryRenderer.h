@@ -1,4 +1,4 @@
-/*
+ /*
  *  ACOsgLibraryRenderer.h
  *  MediaCycle
  *
@@ -69,9 +69,9 @@ public:
     void updateSize(int w, int h);
     void setTitle(std::string _title);
     void setAuthor(std::string _author);//{this->author=_author;}
-    void setCurator(std::string _curator);//{this->curator=_curator;}
+    void setCurator(std::string _curator){this->curator=_curator;}
     void setYear(std::string _year){this->year=_year;}
-    void setPublisher(std::string _publisher){this->publisher=_publisher;}
+    void setPublisher(std::string _publisher);//{this->publisher=_publisher;}
     void setLicense(std::string _license){this->license=_license;}
     void setWebsite(std::string _website){this->website=_website;}
     void setCover(std::string _cover);

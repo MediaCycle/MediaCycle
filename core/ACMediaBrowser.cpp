@@ -1280,7 +1280,9 @@ void ACMediaBrowser::updateNextPositionsPropeller() {
 
 		maxr = max(maxr,p.x);
 		maxr = max(maxr,p.y);
+                #ifdef USE_DEBUG
 		cout<<"media n°"<<node->getMediaId()<<" cluster:"<<node->getClusterId()<<" x="<<p.x<<" y="<<p.y<<endl;
+                #endif
 	}
 	
 	p.x = p.y = p.z = 0.0;

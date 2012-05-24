@@ -35,57 +35,93 @@
 #include "ACAudioCycleLoopJam.h"
 
 ACAudioCycleLoopJam::ACAudioCycleLoopJam() : ACMultiMediaCycleOsgQt() {
-	count = 0;
-	// delay after which we change media_files (if it's ok)
-	attente = 5*60*1000; // in ms
+    count = 0;
+    // delay after which we change media_files (if it's ok)
+    attente = 5*60*1000; // in ms
 
-	this->useSegmentationByDefault(false);
+    this->useSegmentationByDefault(false);
 
-//	XMLfiles.push_back("/Users/ravet/Desktop/MediaCycleData/AudioCycleACL/zero-g-pro-pack_a/Brass Elements/Brass 076 BPM/libxml.xml");
-	XMLfiles.push_back("/Volumes/data/mc-datasets/xml/mc-LoopJam-ZeroGProPack.xml");
-	XMLfiles.push_back("/Volumes/data/mc-datasets/xml/mc-LoopJam-OLPC.xml");
-	XMLfiles.push_back("/Volumes/data/mc-datasets/xml/mc-LoopJam-MusicTechMagazine98.xml");
+    XMLfiles.push_back("/Volumes/data/mc-datasets/xml/mc-LoopJam-ZeroGProPack.xml");
+    //XMLfiles.push_back("/Volumes/data/mc-datasets/xml/mc-LoopJam-OLPC.xml");
+    //XMLfiles.push_back("/Volumes/data/mc-datasets/xml/mc-LoopJam-MusicTechMagazine98.xml");
+    XMLfiles.push_back("/Volumes/data/mc-datasets/xml/mc-LoopJam-8Bit.xml");
+    XMLfiles.push_back("/Volumes/data/mc-datasets/xml/outlaw-stevetibbetts-friendlyfire.xml");
+    XMLfiles.push_back("/Volumes/data/mc-datasets/xml/outlaw-sony-toyzconstructionkit.xml");
+    XMLfiles.push_back("/Volumes/data/mc-datasets/xml/mc-LoopJam-BlackPaint.xml");
+    //XMLfiles.push_back("/Volumes/data/mc-datasets/xml/outlaw-davidtorn-splattercell.xml");
 
-	
-	timer = new QTimer(this);
-	connect( timer, SIGNAL(timeout()), this, SLOT(loopXML()) );
-     QAction *action = new QAction(this);  
-     action->setShortcut(QKeySequence(Qt::Key_F1));  
-     this->addAction(action);  
-     connect(action, SIGNAL(triggered()), this, SLOT(loopXML()));  
+    timer = new QTimer(this);
+    connect( timer, SIGNAL(timeout()), this, SLOT(openNextLibrary()) );
+
+    QAction *actionNextLibrary = new QAction(style()->standardIcon(QStyle::SP_MediaSkipForward), tr("Next Library"), this);
+    //actionNextLibrary->setShortcut(QKeySequence(Qt::Key_MediaNext)); //CF requires Qt 4.8+
+    actionNextLibrary->setShortcut(QKeySequence(Qt::Key_Right )); //CF instead of Qt::Key_F1
+    //actionNextLibrary->setShortcut(QKeySequence::NextChild);
+
+    this->addAction(actionNextLibrary);
+    connect(actionNextLibrary, SIGNAL(triggered()), this, SLOT(openNextLibrary()));
+    this->addAction(actionNextLibrary);
+
+    // Qt 4.8+ Enables application to receive multimedia key events (play, next, previous etc).
+    //QCoreApplication::setAttribute(Qt::AA_CaptureMultimediaKeys);
+
+    QAction *actionPreviousLibrary = new QAction(style()->standardIcon(QStyle::SP_MediaSkipBackward), tr("Previous Library"), this);
+    //actionPreviousLibrary->setShortcut(QKeySequence(Qt::Key_MediaPrevious)); //CF requires Qt 4.8+
+    actionPreviousLibrary->setShortcut(QKeySequence(Qt::Key_Left));
+    //actionNextLibrary->setShortcut(QKeySequence::PreviousChild);
+    this->addAction(actionPreviousLibrary);
+    connect(actionPreviousLibrary, SIGNAL(triggered()), this, SLOT(openPreviousLibrary()));
+    this->addAction(actionPreviousLibrary);
 }
 
 ACAudioCycleLoopJam::~ACAudioCycleLoopJam(){
-	delete timer;
-}
-
-void ACAudioCycleLoopJam::startLoopXML(){
-	timer->stop();
-	loopXML(); // start first one before time starts so you don't wait for 30 min for the app to run
-	timer->start(attente);
+    if(timer)
+        timer->stop();
+    delete timer;
 }
 
 /*void ACAudioCycleLoopJam::setDefaultWaveform(ACBrowserAudioWaveformType _type){
-	
-	compositeOsgView->getBrowserRenderer()->setAudioWaveformType(_type);
-	for (int d=0;d<dockWidgets.size();d++){
+
+ compositeOsgView->getBrowserRenderer()->setAudioWaveformType(_type);
+ for (int d=0;d<dockWidgets.size();d++){
 //		cout << dockWidgets[d]->getClassName()<<endl;
-		if (dockWidgets[d]->getClassName()==string("ACAudioControlsDockWidgetQt")){
-			((ACAudioControlsDockWidgetQt*)dockWidgets[d])->setComboBoxWaveformBrowser(_type);
-			cout << "WaveformType:"<<_type<<endl;
-		}
-	}	
+  if (dockWidgets[d]->getClassName()==string("ACAudioControlsDockWidgetQt")){
+   ((ACAudioControlsDockWidgetQt*)dockWidgets[d])->setComboBoxWaveformBrowser(_type);
+   cout << "WaveformType:"<<_type<<endl;
+  }
+ }
 }*/
 
-void ACAudioCycleLoopJam::loopXML(){
-	cout << "Hello from LoopJam: " << count << endl;
-	// going through all files again
-	if (count >= XMLfiles.size()) count=0;
-	cout << "opening : " << XMLfiles[count] << endl;
-	this->clean(true);
-	
-	this->readXMLConfig(XMLfiles[count]);
+void ACAudioCycleLoopJam::startLoopXML(){
+        timer->stop();
+        openNextLibrary(); // start first one before time starts so you don't wait for 30 min for the app to run
+        timer->start(attente);
+}
+
+void ACAudioCycleLoopJam::openNextLibrary(){
+    cout << "Opening next library: " << count << endl;
+    // going through all files again
+    if (count >= XMLfiles.size()) count=0;
+    cout << "opening : " << XMLfiles[count] << endl;
+    this->clean(true);
+    timer->stop();
+    this->readXMLConfig(XMLfiles[count]);
     //setDefaultWaveform(AC_BROWSER_AUDIO_WAVEFORM_CLASSIC);
-	
-	count++;
+    timer->start(attente);
+    count++;
+}
+
+void ACAudioCycleLoopJam::openPreviousLibrary(){
+    cout << "Opening previous library: " << count << endl;
+    // going through all files again
+    cout << "opening : " << XMLfiles[count] << endl;
+    this->clean(true);
+    timer->stop();
+    this->readXMLConfig(XMLfiles[count]);
+    //setDefaultWaveform(AC_BROWSER_AUDIO_WAVEFORM_CLASSIC);
+    timer->start(attente);
+    if (count == 0)
+        count=XMLfiles.size()-1;
+    else
+        count--;
 }
