@@ -422,7 +422,7 @@ ACAudioYaafePlugin::ACAudioYaafePlugin() : ACTimedFeaturesPlugin() {
 }
 
 ACAudioYaafePlugin::~ACAudioYaafePlugin() {
-    ComponentFactory::destroy();
+    //ComponentFactory::destroy();
 }
 
 
