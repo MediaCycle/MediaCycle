@@ -69,7 +69,8 @@ ACOsgCompositeViewQt::ACOsgCompositeViewQt( QWidget * parent, const char * name,
     openMediaExternallyAction(0), browseMediaExternallyAction(0), examineMediaExternallyAction(0), forwardNextLevelAction(0),
     stopPlaybackAction(0), toggleMediaHoverAction(0), triggerMediaHoverAction(0),
     resetBrowserAction(0), rotateBrowserAction(0), zoomBrowserAction(0),
-    translateBrowserAction(0), addMediaOnTimelineTrackAction(0), toggleTimelinePlaybackAction(0), adjustTimelineHeightAction(0)
+    translateBrowserAction(0), addMediaOnTimelineTrackAction(0), toggleTimelinePlaybackAction(0), adjustTimelineHeightAction(0),
+    setting(AC_SETTING_NONE)
 {
 	osg_view = new osgViewer::GraphicsWindowEmbedded(0,0,width(),height());
 	setFocusPolicy(Qt::StrongFocus);// CF instead of ClickFocus
@@ -898,4 +899,17 @@ void ACOsgCompositeViewQt::updateTransformsFromTimeline( double frac)
 	// recompute scene graph
 	timeline_renderer->updateTracks(frac); // animation starts at 0.0 and ends at 1.0
 	//timeline_controls_renderer->updateControls(frac); // animation starts at 0.0 and ends at 1.0
+}
+
+void ACOsgCompositeViewQt::changeSetting(ACSettingType _setting)
+{
+    if(this->setting == _setting)
+        return;
+
+    this->setting = _setting;
+
+    if(browser_renderer)
+        browser_renderer->changeSetting(this->setting);
+    if(hud_renderer)
+        hud_renderer->changeSetting(this->setting);
 }

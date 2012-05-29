@@ -60,6 +60,7 @@ protected:
 
     void textGeode(std::string _string, osg::ref_ptr<osgText::Text>& _text, osg::ref_ptr<osg::Geode>& _geode,osg::Vec3 pos);
     void imageGeode(bool flip=false, float sizemul=1.0, float zoomin=1.0);
+    void init();
 
 public:
     ACOsgLibraryRenderer();
@@ -77,6 +78,8 @@ public:
     void setCover(std::string _cover);
     void setNumberOfMedia(int _number);
     //virtual osg::ref_ptr<osg::Geode> getMainGeode() { return image_geode;}
+    virtual void changeSetting(ACSettingType _setting);
+
 private:
     float max_side_size; // of the cover, in pixels
     float font_size; // in pixels

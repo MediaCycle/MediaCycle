@@ -60,6 +60,7 @@ int main(int argc, char *argv[])
 
         window.on_actionFullscreen_triggered(true); // to be set after the window is shown
         window.autoConnectOSC(true); // to be set after loading the default config
+        window.changeSetting(AC_SETTING_INSTALLATION);
     }
     catch (const exception& e) {
         cout << "** caught exception in main : " << e.what() << endl;

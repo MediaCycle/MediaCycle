@@ -135,6 +135,7 @@ ACOsgBrowserRenderer::ACOsgBrowserRenderer()
 //: displayed_nodes(0)
 {
     media_cycle = 0;
+    setting = AC_SETTING_NONE;
 	group = new Group();
 	media_group = new Group();
 	link_group = new Group();
@@ -668,6 +669,7 @@ bool ACOsgBrowserRenderer::addNodes(int _first, int _last){
 
 				node_renderer[i]->setMediaCycle(media_cycle);
 				node_renderer[i]->setNodeIndex(i);
+                                node_renderer[i]->changeSetting(this->setting);
 
                 /*if (media_cycle->getBrowserMode() == AC_MODE_NEIGHBORS)
                      media_cycle_node = media_cycle->getMediaNode( media_cycle->getBrowser()->getUserLog()->getMediaIdFromNodeId(i) );
@@ -780,4 +782,15 @@ void ACOsgBrowserRenderer::setAudioWaveformType(ACBrowserAudioWaveformType _type
 		}
 		//media_cycle->setNeedsDisplay(true); // done by each waveform
 	}
+}
+
+void ACOsgBrowserRenderer::changeSetting(ACSettingType _setting)
+{
+    if(this->setting == _setting)
+        return;
+
+    this->setting = _setting;
+
+    for (unsigned int i=0;i<node_renderer.size();i++)
+        node_renderer[i]->changeSetting(this->setting);
 }

@@ -72,6 +72,19 @@ ACOsgAudioRenderer::~ACOsgAudioRenderer() {
 	metadata_geode=0;
 }
 
+void ACOsgAudioRenderer::changeSetting(ACSettingType _setting)
+{
+    // Change setting
+    if(this->setting == _setting)
+        return;
+    this->setting = _setting;
+
+    // Force regeneration of the text:
+    metadata_geode = 0;
+
+    this->updateNodes();
+}
+
 void ACOsgAudioRenderer::waveformGeode() {
 
 	int i;
@@ -256,20 +269,16 @@ void ACOsgAudioRenderer::waveformGeode() {
 		//waveform_geode->addDrawable(border_geometry);
 		waveform_geode->addDrawable(axis_geometry);
 		waveform_geode->addDrawable(frame_geometry);
-
 		waveform_geode->setUserData(new ACRefId(node_index));
-		//ref_ptr//samples_geometry->ref();
-		//ref_ptr//frame_geometry->ref();
-		//ref_ptr//border_geometry->ref();
-		//ref_ptr//axis_geometry->ref();
-		//ref_ptr//waveform_geode->ref();
 	}	
 }
 
 void ACOsgAudioRenderer::metadataGeode() {
 
 	osg::Vec4 textColor(0.9f,0.9f,0.9f,1.0f);
-        float textCharacterSize = 46.0f; // CF LoopJam, was 20.0f
+        float textCharacterSize = 20.0f;
+        if(this->setting == AC_SETTING_INSTALLATION)
+            textCharacterSize = 46.0f;
 
 	metadata_geode = new Geode();
 
@@ -399,13 +408,8 @@ void ACOsgAudioRenderer::curserGeode() {
 
 	curser_transform->addChild(curser_geode);
 
-	//sprintf(name, "some audio element");
 	curser_transform->setUserData(new ACRefId(node_index));
-	//curser_transform->setName(name);
-	//ref_ptr//curser_transform->ref();
 	curser_geode->setUserData(new ACRefId(node_index));
-	//curser_geode->setName(name);
-	//ref_ptr//curser_geode->ref();
 }
 
 void ACOsgAudioRenderer::entryGeode() {
@@ -433,12 +437,8 @@ void ACOsgAudioRenderer::entryGeode() {
 	entry_geode->addDrawable(new osg::ShapeDrawable(new osg::Sphere(osg::Vec3(0.0f,0.0f,0.0f),localsize), hints)); // draws a sphere // MultiMediaCycle
 	//entry_geode->addDrawable(new osg::ShapeDrawable(new osg::Cylinder(osg::Vec3(0.0f,0.0f,0.0f),0.01, 0.0f), hints)); // draws a disc
 	//entry_geode->addDrawable(new osg::ShapeDrawable(new osg::Capsule(osg::Vec3(0.0f,0.0f,0.0f),0.01, 0.005f), hints)); // draws a sphere
-	//sprintf(name, "some audio element");
 #endif
 	entry_geode->setUserData(new ACRefId(node_index));
-	//entry_geode->setName(name);
-	//ref_ptr//entry_geode->ref();
-
 }
 
 void ACOsgAudioRenderer::prepareNodes() {

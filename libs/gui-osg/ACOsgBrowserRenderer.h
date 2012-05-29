@@ -118,6 +118,7 @@ protected:
 	int nodes_prepared;
 	
 	ACBrowserAudioWaveformType audio_waveform_type;
+        ACSettingType setting;
 	
 public:
 	ACOsgBrowserRenderer();
@@ -145,6 +146,8 @@ public:
 	
 	ACBrowserAudioWaveformType getAudioWaveformType(){return audio_waveform_type;}
 	void setAudioWaveformType(ACBrowserAudioWaveformType _type);
+
+        void changeSetting(ACSettingType _setting);
 
 private:
 	bool removeNodes(int _first=0, int _last=0);

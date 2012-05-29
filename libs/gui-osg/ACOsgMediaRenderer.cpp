@@ -38,6 +38,7 @@ using namespace osg;
 
 ACOsgMediaRenderer::ACOsgMediaRenderer() {
 	media_type = MEDIA_TYPE_NONE;
+        setting = AC_SETTING_NONE;
 	media = 0;
 	media_changed = false;
 	local_group = new Group(); 

@@ -188,6 +188,7 @@ private:
 	
     ACActiveFeaturesPlugins* mActiveFeaturePlugins;
     ACActiveSegmentPlugins* mActiveSegmentPlugins;
+    ACActiveSegmentPlugins* mSegmentPlugins;
 };
 
 #endif	/* _ACPLUGINMANAGER_H */

@@ -71,10 +71,19 @@ enum ACBrowserAudioWaveformType {
 	AC_BROWSER_AUDIO_WAVEFORM_CLASSIC=1
 };
 
+// Setting: where/how the application is used
+enum ACSettingType {
+    AC_SETTING_NONE=0,
+    AC_SETTING_DESKTOP=1,
+    AC_SETTING_INSTALLATION=2,
+    AC_SETTING_MOBILE=3
+};
+
 class ACOsgMediaRenderer {
 protected:
 	MediaCycle* media_cycle;
 	ACMediaType media_type;
+        ACSettingType setting;
 	osg::ref_ptr<osg::Group>  local_group;
 #ifdef AUTO_TRANSFORM
 	osg::ref_ptr<osg::AutoTransform> media_node;
@@ -168,6 +177,9 @@ public:
 	// Audio-specific
 	virtual void setWaveformType(ACBrowserAudioWaveformType _type){}
 	virtual void updateWaveformType(ACBrowserAudioWaveformType _type){}
+
+        // Setting specific
+        virtual void changeSetting(ACSettingType _setting){this->setting = _setting;}// = 0;
 };
 
 #endif

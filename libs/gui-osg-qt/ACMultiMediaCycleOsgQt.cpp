@@ -118,6 +118,7 @@ ACMultiMediaCycleOsgQt::ACMultiMediaCycleOsgQt(QWidget *parent) : QMainWindow(pa
 	this->use_visualization_plugins = true;
 	
 	this->auto_connect_osc = false;
+        this->setting = AC_SETTING_DESKTOP;
 	
 	// Apple bundled *.app, just look for bundled osg plugins
 	#ifndef USE_DEBUG
@@ -165,6 +166,7 @@ ACMultiMediaCycleOsgQt::ACMultiMediaCycleOsgQt(QWidget *parent) : QMainWindow(pa
 	
 	compositeOsgView = new ACOsgCompositeViewQt();
 	compositeOsgView->setSizePolicy ( QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding );
+        compositeOsgView->changeSetting(this->setting);
 	osgViewDockLayout->addWidget(compositeOsgView);
 
 	progressBar = new ACQProgressBar(); //QProgressBar();		
@@ -1354,4 +1356,13 @@ void ACMultiMediaCycleOsgQt::autoConnectOSC(bool _status)
 {
     auto_connect_osc = _status;
     dockWidgetsManager->autoConnectOSC(_status);
+}
+
+void ACMultiMediaCycleOsgQt::changeSetting(ACSettingType _setting)
+{
+    if(this->compositeOsgView)
+        this->compositeOsgView->changeSetting(_setting);
+
+    if(this->setting != _setting)
+        this->setting = _setting;
 }

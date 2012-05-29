@@ -85,10 +85,10 @@ protected:
 	osg::ref_ptr<osg::Group>				 pointer_group;
 	std::vector<ACOsgPointerRenderer*>  pointer_renderer;
         ACOsgLibraryRenderer* library_renderer;
+        ACSettingType setting;
 
 	// SD - Results from centralized request to MediaCycle
 	ACPoint						media_cycle_pointer_current_pos;
-
 public:
 	ACOsgHUDRenderer();
         ~ACOsgHUDRenderer();
@@ -109,6 +109,9 @@ public:
 	void updatePointers(osgViewer::Viewer* viewer);//Cocoa - simple OSG viewer
 	void updatePointers(osgViewer::View* viewer);//Qt - composite OSG viewer
         void updateLibrary(osgViewer::View* viewer);
+
+        void changeSetting(ACSettingType _setting);
+
 private:
 	void updatePointers(int w, int h);//common
 };

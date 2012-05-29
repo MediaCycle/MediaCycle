@@ -63,6 +63,7 @@ ACOsgHUDRenderer::ACOsgHUDRenderer()
 	camera->addChild(group);
 
         library_renderer = 0;
+        setting = AC_SETTING_NONE;
 }
 
 ACOsgHUDRenderer::~ACOsgHUDRenderer()
@@ -201,6 +202,7 @@ void ACOsgHUDRenderer::prepareLibrary(osgViewer::View* view) {
     if(!library_renderer)
         library_renderer = new ACOsgLibraryRenderer();
         library_renderer->setMediaCycle(media_cycle);
+        library_renderer->changeSetting(this->setting);
 }
 
 void ACOsgHUDRenderer::updateLibrary(osgViewer::View* view) {
@@ -251,4 +253,15 @@ void ACOsgHUDRenderer::updatePointers(int w, int h) {
 		else
 			std::cerr << "ACOsgHUDRenderer::updatePointers pointer at index " << i << " not available" << std::endl;
 	}	
+}
+
+void ACOsgHUDRenderer::changeSetting(ACSettingType _setting)
+{
+    if(this->setting == _setting)
+        return;
+
+    this->setting = _setting;
+
+    if(library_renderer)
+        library_renderer->changeSetting(this->setting);
 }

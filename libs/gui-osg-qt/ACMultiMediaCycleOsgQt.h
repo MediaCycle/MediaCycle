@@ -168,6 +168,7 @@ public:
 	void switchPluginVisualizations(bool _status);// disable/enable visualization from plugins when (failing) loading visualization plugins and changing media types
 	
 	void autoConnectOSC(bool _status = true);
+        void changeSetting(ACSettingType _setting);
 
 signals:	
 	void mediacycle_message_changed(QString mess);
@@ -230,5 +231,6 @@ private:
 protected:
 	ACOsgCompositeViewQt* compositeOsgView;
 	MediaCycle *media_cycle;
+        ACSettingType setting;
 };
 #endif

@@ -42,14 +42,11 @@ using namespace osg;
 ACOsgLibraryRenderer::ACOsgLibraryRenderer()
     :ACOsgMediaRenderer()
 {
-    /*max_side_size = 64; //pixels
-    font_size = 16; // pixels
-    line_sep = font_size; //pixels*/
+    this->changeSetting(this->setting);
+}
 
-    max_side_size = 128; //pixels
-    font_size = 32; // pixels
-    line_sep = font_size; //pixels
-
+void ACOsgLibraryRenderer::init()
+{
     node_color = Vec4(0.4f, 0.4f, 0.4f, 1.0f);
     image_image = 0;
     image_geode = 0;
@@ -135,6 +132,29 @@ std::string font_path(""),font_file("fudd.ttf");
     if(!font)
         std::cerr << "ACOsgLibraryRenderer::ACOsgLibraryRenderer: couldn't load font " << std::endl;
     */
+}
+
+void ACOsgLibraryRenderer::changeSetting(ACSettingType _setting)
+{
+    // Init setting
+    if(_setting == AC_SETTING_INSTALLATION){
+        max_side_size = 128; //pixels
+        font_size = 32; // pixels
+        line_sep = font_size; //pixels
+    }
+    else{
+        max_side_size = 64; //pixels
+        font_size = 16; // pixels
+        line_sep = font_size; //pixels
+    }
+    this->init();
+
+    // Change setting
+    if(this->setting == _setting)
+        return;
+    this->setting = _setting;
+
+    this->updateNodes();
 }
 
 ACOsgLibraryRenderer::~ACOsgLibraryRenderer() {

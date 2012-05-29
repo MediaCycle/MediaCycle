@@ -1,7 +1,7 @@
 /**
  * @brief ACOsgCompositeViewQt.h
  * @author Christian Frisson
- * @date 10/02/2012
+ * @date 29/05/2012
  * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -221,5 +221,10 @@ class ACOsgCompositeViewQt : public QGLWidget, public osgViewer::CompositeViewer
 	private:
 		int mediaOnTrack;
 		bool track_playing;
+
+        protected:
+                ACSettingType setting;
+        public:
+                void changeSetting(ACSettingType _setting);
 };
 #endif

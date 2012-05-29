@@ -72,6 +72,7 @@ public:
 	ACBrowserAudioWaveformType getWaveformType(){return waveform_type;}
 	void setWaveformType(ACBrowserAudioWaveformType _type);
 	void updateWaveformType(ACBrowserAudioWaveformType _type);
+        virtual void changeSetting(ACSettingType _setting);
 };
 
 #endif //defined (SUPPORT_AUDIO)
