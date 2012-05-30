@@ -143,6 +143,7 @@ public:
     int tryLoadFeaturePluginFromBaseName(std::string basename);
 	void loadDefaultConfig(ACMediaType _media_type = MEDIA_TYPE_IMAGE, ACBrowserMode _browser_mode = AC_MODE_CLUSTERS);
 	
+	void loadMediaDocumentConfig(std::string _name);
 	// Controls
 	bool addControlDock(std::string dock_type);
 	

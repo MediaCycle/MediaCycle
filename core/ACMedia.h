@@ -122,7 +122,7 @@ public:
 	virtual int getThumbnailHeight() {return 0;}
 	
 	std::string getLabel(void){return label;}	
-	void getLabel(std::string iLabel){label=iLabel;}
+	void setLabel(std::string iLabel){label=iLabel;}
 	
 	// data
 	virtual bool extractData(std::string filename) {return false;}

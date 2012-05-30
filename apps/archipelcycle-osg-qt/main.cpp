@@ -66,7 +66,8 @@ int main(int argc, char *argv[])
 		// Changing the about dialog (not necessary if standard MediaCycle app)
 		//window.addAboutDialog("MediaCycle");
 
-		window.loadDefaultConfig(MEDIA_TYPE_MIXED);
+		//window.loadDefaultConfig(MEDIA_TYPE_MIXED);
+		window.loadMediaDocumentConfig("archipel");
 		window.show();
 
 	}

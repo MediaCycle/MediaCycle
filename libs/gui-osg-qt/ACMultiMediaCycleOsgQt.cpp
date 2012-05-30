@@ -1064,6 +1064,19 @@ void ACMultiMediaCycleOsgQt::loadDefaultConfig(ACMediaType _media_type, ACBrowse
         this->tryLoadFeaturePluginFromBaseName("3Dmodel");
         #endif //defined (SUPPORT_3DMODEL)
 
+		/*#if defined (SUPPORT_NAVIMED)
+		//Navimed Plugin
+        string navi_plugin = this->getPluginPathFromBaseName("navimed");
+		if(media_cycle->addPluginLibrary(navi_plugin) == -1){
+			this->showError("Couldn't load the Navimed data extraction plugin. ");
+			this->switchFeatureExtraction(false);
+		}
+		else{
+			media_cycle->setMediaReaderPlugin("NavimedReader");
+			media_cycle->setActiveMediaType("text");
+			this->switchFeatureExtraction(true);
+		}
+		#endif//(SUPPORT_NAVIMED)
         #if defined (SUPPORT_ARCHIPEL)
 		//Archipel Plugin
         string arch_plugin = this->getPluginPathFromBaseName("archipel");
@@ -1074,8 +1087,9 @@ void ACMultiMediaCycleOsgQt::loadDefaultConfig(ACMediaType _media_type, ACBrowse
 		else{
 			media_cycle->setMediaReaderPlugin("ArchipelReader");
 			media_cycle->setActiveMediaType("text");
+			this->switchFeatureExtraction(true);
 		}
-        #endif //defined (SUPPORT_ARCHIPEL)
+        #endif //defined (SUPPORT_ARCHIPEL)*/
 	}
 	else {
     #endif //defined (SUPPORT_MULTIMEDIA)
@@ -1127,13 +1141,58 @@ void ACMultiMediaCycleOsgQt::loadDefaultConfig(ACMediaType _media_type, ACBrowse
 		//media_cycle->setPreProcessPlugin("TextFeatures");
 	}
 	else{
-		media_cycle->setPreProcessPlugin("");
+		std::string p_plugin=this->getPluginPathFromBaseName("pcapreprocess");
+		media_cycle->addPluginLibrary(p_plugin);
+		media_cycle->setPreProcessPlugin("PcaPreprocess");
+		//media_cycle->setPreProcessPlugin("");
 	}	
 	
     // update the plugin lists of the browser control dock through configureDockWidget
     dockWidgetsManager->changeMediaType(_media_type);
 	this->setMediaType(_media_type);
     dockWidgetsManager->resetPluginsSettings();
+}
+
+void ACMultiMediaCycleOsgQt::loadMediaDocumentConfig(string _name){
+	
+	
+	this->loadDefaultConfig(MEDIA_TYPE_MIXED);
+#if defined (SUPPORT_NAVIMED)
+		if(_name==string("navimed")){
+			//Navimed Plugin
+			string navi_plugin = this->getPluginPathFromBaseName("navimed");
+			if(media_cycle->addPluginLibrary(navi_plugin) == -1){
+				this->showError("Couldn't load the Navimed data extraction plugin. ");
+				this->switchFeatureExtraction(false);
+			}
+			else{
+				media_cycle->setMediaReaderPlugin("NavimedReader");
+				media_cycle->setActiveMediaType("text");
+				this->switchFeatureExtraction(true);
+			}
+		}
+#endif//(SUPPORT_NAVIMED)			
+			  
+#if defined (SUPPORT_ARCHIPEL)
+	if (_name== string("archipel")){
+	//Archipel Plugin
+
+			string arch_plugin = this->getPluginPathFromBaseName("archipel");
+	if(media_cycle->addPluginLibrary(arch_plugin) == -1){
+		this->showError("Couldn't load the archipel data extraction plugin. ");
+		this->switchFeatureExtraction(false);
+	}
+	else{
+		media_cycle->setMediaReaderPlugin("ArchipelReader");
+		media_cycle->setActiveMediaType("text");
+		this->switchFeatureExtraction(true);
+	
+	}
+	
+		}
+#endif //defined (SUPPORT_ARCHIPEL)
+					
+	
 }
 
 void ACMultiMediaCycleOsgQt::comboDefaultSettingsChanged(QString media){

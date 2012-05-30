@@ -317,6 +317,10 @@ void ACMedia::loadXML(TiXmlElement* _pMediaNode){
 //		#endif	
 		this->setFileName(pName);
 	}
+	string pLabel = _pMediaNode->Attribute("Label");
+	if (pLabel != "")
+		this->setLabel(pLabel);
+
 
 	int mid=-1;
 	_pMediaNode->QueryIntAttribute("MediaID", &mid); // If this fails, original value is left as-is

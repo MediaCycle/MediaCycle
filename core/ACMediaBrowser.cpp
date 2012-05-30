@@ -616,13 +616,22 @@ void ACMediaBrowser::libraryContentChanged(int needsCluster) {
 void ACMediaBrowser::initializeFeatureWeights(){
 	
 	//int fc = mLibrary->getMedia(0)->getNumberOfPreProcFeaturesVectors();
-	int fc = mLibrary->getMedia(0)->getNumberOfFeaturesVectors();
-	mFeatureWeights.resize(fc);
+	ACMedia *mediaTemp=mLibrary->getMedia(0);
+	if (mediaTemp){
+		int fc = mLibrary->getMedia(0)->getNumberOfFeaturesVectors();
+		mFeatureWeights.resize(fc);
+		printf("setting all feature weights to 1.0 (count=%d)\n", (int) mFeatureWeights.size());
+		for(int i=0; i<fc; i++) {
+			mFeatureWeights[i] = 0.0;	}
+		mFeatureWeights[0] = 1.0;
+	}
+	else {
+		int fc=1;
+		mFeatureWeights.resize(fc);
+		mFeatureWeights[0] = 1.0;
+		
+	}
 
-	printf("setting all feature weights to 1.0 (count=%d)\n", (int) mFeatureWeights.size());
-	for(int i=0; i<fc; i++) {
-		mFeatureWeights[i] = 0.0;	}
-	mFeatureWeights[0] = 1.0;
 }
 
 // SD - Brute Force KNN

@@ -539,7 +539,7 @@ void MediaCycle::changeVisualisationPlugin(string pluginName){
 
 void MediaCycle::setPreProcessPlugin(std::string pluginName){
 	ACPlugin* preProcessPlugin = this->getPluginManager()->getPlugin(pluginName);
-	if (preProcessPlugin!=NULL&&(this->getLibrary()->getMediaType()==preProcessPlugin->getMediaType())){
+	if (preProcessPlugin!=NULL&&(preProcessPlugin->mediaTypeSuitable(this->getLibrary()->getMediaType()))){
 		
 		this->getLibrary()->setPreProcessPlugin(preProcessPlugin);
 		cout << "MediaCycle: Preprocessing plugin: " << preProcessPlugin->getName() << endl;
@@ -824,9 +824,10 @@ int MediaCycle::readXMLConfigFilePlugins(TiXmlHandle _rootHandle) {
 
 	TiXmlElement* MC_e_features_plugin_manager = _rootHandle.FirstChild("PluginsManager").ToElement();
 	int nb_plugins_lib=0;
+	if (MC_e_features_plugin_manager!=0){
 	MC_e_features_plugin_manager->QueryIntAttribute("NumberOfPluginsLibraries", &nb_plugins_lib);
 
-	TiXmlElement* pluginLibraryNode=MC_e_features_plugin_manager->FirstChild()->ToElement();
+		TiXmlElement* pluginLibraryNode=MC_e_features_plugin_manager->FirstChild()->ToElement();
 	for( pluginLibraryNode; pluginLibraryNode; pluginLibraryNode=pluginLibraryNode->NextSiblingElement()) {
 		string libraryName = pluginLibraryNode->Attribute("LibraryPath");
 		int lib_size=0;
@@ -848,6 +849,7 @@ int MediaCycle::readXMLConfigFilePlugins(TiXmlHandle _rootHandle) {
 		//			}
 		//		}
 		//
+		}
 	}
 }
 

@@ -36,6 +36,7 @@
 #include <iostream>
 #include <fstream>
 #include <ArchipelReader.h>
+#include <NavimedReader.h>
 using namespace std;
 
 #include <boost/filesystem.hpp>
@@ -47,22 +48,38 @@ string* textFileRead(string filePath){
 		return txtFileRead(filePath);
 	else
 		if (ext==string(".xml")){
-			archipelReader doc(filePath);
-			if (!doc.isArchipel())
-				return 0;
-			return new string(doc.getText());
-			vector<string> data=doc.getGlossaire();
+			TiXmlDocument *testDoc=new TiXmlDocument(filePath);
+			delete testDoc;
+			archipelReader *doc=new archipelReader(filePath);
+			if (!doc->isArchipel())
+			{
+				
+				delete doc;
+				navimedReader *doc2=new navimedReader(filePath);
+				if (doc2->isNavimed()){
+					string *desc2=new string(doc2->getText());
+					delete doc2;
+					return desc2;
+				}
+				else	
+					return 0;
+			}
+			string *desc2=new string(doc->getText());
+			delete doc;
+			return desc2;
 			string desc;
+			vector<string> data=doc->getGlossaire();
 			for (vector<string>::iterator it=data.begin();it!=data.end();it++)
 			{	desc+=(*it);
 				desc+=string(" ");
 			}
-			data=doc.getIlot();
+			data=doc->getIlot();
 			for (vector<string>::iterator it=data.begin();it!=data.end();it++)
 			{	desc+=(*it);
 				desc+=string(" ");
 			}
-			string test=doc.getThumbPath();
+			string test=doc->getThumbPath();
+			delete doc;
 			return new string(desc);
 		}
 		else
@@ -79,8 +96,23 @@ string labelFileRead(string filePath){
 	}
 	else
 		if (ext==string(".xml")){
-			archipelReader doc(filePath);
-			return (doc.getArtist()+string("/")+doc.getAlbumName()) ;			
+			archipelReader *doc=new archipelReader(filePath);
+			if (!doc->isArchipel()){
+				delete doc;
+				navimedReader *doc2=new navimedReader(filePath);
+				if (doc2->isNavimed()){
+					string desc=doc2->getSubject()+string("/")+doc2->getDescription()+string("/")+doc2->getReference();
+					delete doc2;
+					return desc;
+				}
+				else{
+					delete doc2;
+					return string("");
+				}
+			}
+			string desc=doc->getArtist()+string("/")+doc->getAlbumName();
+			delete doc;
+			return desc;			
 		}
 		else
 			return string("");
