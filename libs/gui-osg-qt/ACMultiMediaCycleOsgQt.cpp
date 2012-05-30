@@ -1143,8 +1143,8 @@ void ACMultiMediaCycleOsgQt::loadDefaultConfig(ACMediaType _media_type, ACBrowse
 	else{
 		std::string p_plugin=this->getPluginPathFromBaseName("pcapreprocess");
 		media_cycle->addPluginLibrary(p_plugin);
-		media_cycle->setPreProcessPlugin("PcaPreprocess");
-		//media_cycle->setPreProcessPlugin("");
+		//media_cycle->setPreProcessPlugin("PcaPreprocess");
+		media_cycle->setPreProcessPlugin("");
 	}	
 	
     // update the plugin lists of the browser control dock through configureDockWidget
