@@ -1,0 +1,20 @@
+IF ( CLUCENE_FOUND AND SUPPORT_NAVIMED )
+#	MESSAGE("Building navimed ")
+	FILE(GLOB SRC *.cpp *.c)
+	FILE(GLOB HDR *.hpp *.h)
+
+	ADD_LIBRARY(navimed STATIC ${SRC} ${HDR})
+	IF(TINYXML_FOUND)
+		TARGET_LINK_LIBRARIES(navimed ${TINYXML_LIBRARY})
+	ELSE()
+		ADD_DEPENDENCIES(navimed tinyxml)
+		TARGET_LINK_LIBRARIES(navimed tinyxml)
+	ENDIF()
+	TARGET_LINK_LIBRARIES(navimed ${CLUCENE_LIBRARIES})
+
+	TARGET_LINK_LIBRARIES(navimed ${Boost_LOCALE_LIBRARY})
+
+	MESSAGE("[X] navimed")
+ELSE()
+	MESSAGE("[ ] navimed")
+ENDIF()
