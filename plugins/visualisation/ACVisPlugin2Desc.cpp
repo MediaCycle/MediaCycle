@@ -1,8 +1,8 @@
 /**
  * @brief ACVisPlugin2Desc.cpp
  * @author Thierry Ravet
- * @date 26/05/2011
- * @copyright (c) 2011 – UMONS - Numediart
+ * @date 30/05/2012
+ * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -68,6 +68,16 @@ void ACVisPlugin2Desc::updateNextPositions(ACMediaBrowser* mediaBrowser){
 	extractDescMatrix(mediaBrowser, desc_m, featureNames);
 	if (desc_m.n_cols < 2){
 		std::cout << "Not enough features for this display" << std::endl;
+		ACPoint p;
+		for (int i=0; i<libSize; i++){
+			mediaBrowser->setLoopIsDisplayed(i, true);
+			// TODO: make sure you meant next
+			p.x = 0.f;//posDisp_m(i,0);
+			p.y = 0.f;//posDisp_m(i,1);
+			p.z = 0.f;
+			mediaBrowser->setNodeNextPosition(i, p);
+		}
+		
 		return;
 	}
 		
@@ -94,14 +104,19 @@ void ACVisPlugin2Desc::extractDescMatrix(ACMediaBrowser* mediaBrowser, mat& desc
   int nbMedia = loops.size(); 
 	int featDim;
 	int totalDim = 0;
-	
 	// Count nb of feature
 	int nbFeature = loops.back()->getNumberOfFeaturesVectors();
+	
+	std::vector<float> weight=mediaBrowser->getWeightVector();
+	if (nbFeature!=weight.size())
+		std::cerr<<"ACVisPluginPCA::extractDescMatrix weight vector size incompatibility"<<endl;
 	for(int f=0; f< nbFeature; f++){
-		featureNames.push_back(loops.back()->getPreProcFeaturesVector(f)->getName());
-		featDim = loops.back()->getPreProcFeaturesVector(f)->getSize();
-		for(int d=0; d < featDim; d++){
-			totalDim++;
+		if (weight[f]>0.f){
+			featureNames.push_back(loops.back()->getPreProcFeaturesVector(f)->getName());
+			featDim = loops.back()->getPreProcFeaturesVector(f)->getSize();
+			for(int d=0; d < featDim; d++){
+				totalDim++;
+			}
 		}
 	}
 	
@@ -110,14 +125,16 @@ void ACVisPlugin2Desc::extractDescMatrix(ACMediaBrowser* mediaBrowser, mat& desc
   
   for(int i=0; i<nbMedia; i++) {    
     int tmpIdx = 0;
-    for(int f=0; f< nbFeature; f++){
-			std::cout << f << std::endl;
-			featDim = loops.back()->getPreProcFeaturesVector(f)->getSize();
-			for(int d=0; d < featDim; d++){
-				desc_m(i,tmpIdx) = loops[i]->getPreProcFeaturesVector(f)->getFeatureElement(d);
-				tmpIdx++;
-      }
-    }
+	  for(int f=0; f< nbFeature; f++){
+		  if (weight[f]>0.f){
+			  std::cout << f << std::endl;
+			  featDim = loops.back()->getPreProcFeaturesVector(f)->getSize();
+			  for(int d=0; d < featDim; d++){
+				  desc_m(i,tmpIdx) = loops[i]->getPreProcFeaturesVector(f)->getFeatureElement(d);
+				  tmpIdx++;
+			  }
+		  }
+	  }
   }
   // normalizing features between 0 and 1 ///////////////////////////////////////
 //   rowvec maxDesc_v = max(desc_m);

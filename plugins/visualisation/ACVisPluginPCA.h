@@ -1,8 +1,8 @@
 /**
  * @brief ACVisPluginPCA.h
  * @author Thierry Ravet
- * @date 08/04/2011
- * @copyright (c) 2011 – UMONS - Numediart
+ * @date 30/05/2012
+ * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -38,16 +38,15 @@
 #ifndef _ACVISPLUGINPCA_
 #define _ACVISPLUGINPCA_
 
-class ACVisPluginPCA : public ACNoMethodPositionsPlugin {
+class ACVisPluginPCA : public ACClusterPositionsPlugin {
 public:
   ACVisPluginPCA();
   ~ACVisPluginPCA();
 
-  virtual void updateClusters(ACMediaBrowser* );
   virtual void updateNextPositions(ACMediaBrowser* );
-	void extractDescMatrix(ACMediaBrowser* mediaBrowser, arma::mat& desc_m, std::vector<std::string> &featureNames);
 
 protected:
+	void extractDescMatrix(ACMediaBrowser* mediaBrowser, arma::mat& desc_m, std::vector<std::string> &featureNames);
 };
 
 #endif	/* _ACVISPLUGINPCA_ */

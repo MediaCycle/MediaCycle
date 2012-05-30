@@ -1,8 +1,8 @@
 /**
  * @brief ACVisPlugin2Desc.h
- * @author Xavier Siebert
- * @date 20/04/2011
- * @copyright (c) 2011 – UMONS - Numediart
+ * @author Thierry Ravet
+ * @date 30/05/2012
+ * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -44,9 +44,9 @@ public:
 	ACVisPlugin2Desc();
 	~ACVisPlugin2Desc();
 	virtual void updateNextPositions(ACMediaBrowser* );
-	void extractDescMatrix(ACMediaBrowser* mediaBrowser, arma::mat& desc_m, std::vector<std::string> &featureNames);
 	
 protected:
+	void extractDescMatrix(ACMediaBrowser* mediaBrowser, arma::mat& desc_m, std::vector<std::string> &featureNames);
 };
 
 #endif	/* _ACVISUALISATIONPLUGIN_ */
