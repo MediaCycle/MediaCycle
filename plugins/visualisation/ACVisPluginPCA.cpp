@@ -1,7 +1,7 @@
 /**
  * @brief ACVisPluginPCA.cpp
  * @author Thierry Ravet
- * @date 30/05/2012
+ * @date 31/05/2012
  * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -49,13 +49,12 @@ ACVisPluginPCA::ACVisPluginPCA()
     //local vars
 }
 
-ACVisPluginPCA::~ACVisPluginPCA()
-{
+ACVisPluginPCA::~ACVisPluginPCA(){
 }
 
 
 void ACVisPluginPCA::updateNextPositions(ACMediaBrowser* mediaBrowser){
-  int itemClicked, labelClicked, action;
+	int itemClicked, labelClicked, action;
 	vector<string> featureNames;
 	int libSize = mediaBrowser->getLibrary()->getSize();
 	itemClicked = mediaBrowser->getClickedNode();
@@ -83,7 +82,7 @@ void ACVisPluginPCA::updateNextPositions(ACMediaBrowser* mediaBrowser){
 	mat score;
 	princomp(coeff, posDisp_m, descN_m);
 
-	for (int i=0; i<nbActiveFeatures; i++)
+	for (int i=0; i<featureNames.size(); i++)
 		std::cout << "featureNames : " << featureNames[i] << std::endl;
 
 	
@@ -101,11 +100,11 @@ void ACVisPluginPCA::updateNextPositions(ACMediaBrowser* mediaBrowser){
 	////////////////////////////////////////////////////////////////////////////////////
 
 	ACPoint p;
-  for (int i=0; i<libSize; i++){
-    mediaBrowser->setLoopIsDisplayed(i, true);
+	for (int i=0; i<libSize; i++){
+		mediaBrowser->setLoopIsDisplayed(i, true);
 	  // TODO: make sure you meant next
-	  p.x = posDisp_m(i,0);
-	  p.y = posDisp_m(i,1);
+	p.x = posDisp_m(i,0);
+	p.y = posDisp_m(i,1);
 	  p.z = 0;
 		mediaBrowser->setNodeNextPosition(i, p);
   }
