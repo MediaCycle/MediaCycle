@@ -149,6 +149,7 @@ void ACMedia::saveXML(TiXmlElement* media){
 	media->SetAttribute("MediaType", media_type);
 	
 	media->SetAttribute("FileName", filename);
+	media->SetAttribute("Label", label);
 
     if(key!="")
         media->SetAttribute("Key", key);

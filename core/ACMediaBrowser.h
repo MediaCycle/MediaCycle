@@ -387,6 +387,7 @@ protected:
 	//vector<vector <int> > 		clusters;
 	//vector<vector<vector <float> > > mClusterCenters; // cluster index, feature index, descriptor index
 	vector<vector<FeaturesVector> > mClusterCenters; // cluster index, feature index, descriptor index
+	vector<int> mNodeIdClusterCenters;
 	vector<float>			mFeatureWeights; // each value must be in [0,1], important for euclidian distance.
 
 	int auto_play;

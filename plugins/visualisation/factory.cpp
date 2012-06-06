@@ -8,6 +8,7 @@
 #include "ACNeighborhoodsPluginPareto.h"
 #include "ACNeighborhoodsPluginEuclidean.h"
 #include "ACVisPluginPCA.h"
+#include "ACVisPluginPCA13.h"
 #include "ACVisPlugin2Desc.h"
 #include "ACPosPlugAudioGardenGramoPhone.h"
 #include "ACPosPlugAudioGardenFlower.h"
@@ -29,6 +30,7 @@ extern "C" ACPlugin* create(std::string namePlugin) {
 	if (namePlugin == "ACNeighborhoodsPluginEuclidean") {return new ACNeighborhoodsPluginEuclidean();}
 	if (namePlugin == "ACPositionsPluginNodeLinkTreeLayout") {return new ACPositionsPluginNodeLinkTreeLayout();}
 	if (namePlugin == "ACVisPluginPCA") {return new ACVisPluginPCA();}
+	if (namePlugin == "ACVisPluginPCA13") {return new ACVisPluginPCA13();}
 	if (namePlugin == "ACVisPlugin2Desc") {return new ACVisPlugin2Desc();}
 	if (namePlugin == "ACPosPlugAudioGardenGramoPhone") {return new ACPosPlugAudioGardenGramoPhone();}
 	if (namePlugin == "ACPosPlugAudioGardenFlower") {return new ACPosPlugAudioGardenFlower();}
@@ -55,6 +57,7 @@ extern "C" std::vector<std::string> list() {    //returns a string vector contai
 	listPlugin.push_back("ACNeighborhoodsPluginPareto");
 	listPlugin.push_back("ACNeighborhoodsPluginEuclidean");
 	listPlugin.push_back("ACVisPluginPCA");
+	listPlugin.push_back("ACVisPluginPCA13");
 	listPlugin.push_back("ACVisPlugin2Desc");
 	listPlugin.push_back("ACPosPlugAudioGardenGramoPhone");
 	listPlugin.push_back("ACPosPlugAudioGardenFlower");

@@ -150,7 +150,7 @@ std::vector<ACMediaFeatures*> ACAudioFeaturesPlugin::_calculate(std::string aFil
     for (int i=0; i<descmf.size(); i++){
         desc.push_back(descmf[i]->mean());
         if (i==nrgIdx){
-            desc[i]->setNeedsNormalization(0);
+            desc[i]->setNeedsNormalization(1);
         }
     }
 

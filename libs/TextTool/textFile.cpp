@@ -36,7 +36,9 @@
 #include <iostream>
 #include <fstream>
 #include <ArchipelReader.h>
+#ifdef SUPPORT_NAVIMED
 #include <NavimedReader.h>
+#endif //SUPPORT_NAVIMED
 using namespace std;
 
 #include <boost/filesystem.hpp>
@@ -55,6 +57,7 @@ string* textFileRead(string filePath){
 			{
 				
 				delete doc;
+#if defined(SUPPORT_NAVIMED)
 				navimedReader *doc2=new navimedReader(filePath);
 				if (doc2->isNavimed()){
 					string *desc2=new string(doc2->getText());
@@ -62,6 +65,7 @@ string* textFileRead(string filePath){
 					return desc2;
 				}
 				else	
+#endif //SUPPORT_NAVIMED
 					return 0;
 			}
 			string *desc2=new string(doc->getText());
@@ -99,6 +103,7 @@ string labelFileRead(string filePath){
 			archipelReader *doc=new archipelReader(filePath);
 			if (!doc->isArchipel()){
 				delete doc;
+#if defined(SUPPORT_NAVIMED)
 				navimedReader *doc2=new navimedReader(filePath);
 				if (doc2->isNavimed()){
 					string desc=doc2->getSubject()+string("/")+doc2->getDescription()+string("/")+doc2->getReference();
@@ -109,6 +114,9 @@ string labelFileRead(string filePath){
 					delete doc2;
 					return string("");
 				}
+#else 
+				return string("");
+#endif
 			}
 			string desc=doc->getArtist()+string("/")+doc->getAlbumName();
 			delete doc;

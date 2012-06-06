@@ -42,7 +42,7 @@
 #include <tinyxml.h>
 
 using namespace std;
-
+//Script to encode a xml mediacycle file from xml navimed files
 int main(int argc, char *argv[])
 
 {
