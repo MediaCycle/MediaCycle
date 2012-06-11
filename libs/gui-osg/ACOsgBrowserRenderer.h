@@ -44,29 +44,18 @@
 #include "ACOsgLabelRenderer.h"
 
 #include <osgDB/ReadFile>
-//#include <osgDB/WriteFile>
-
 #include <osg/ref_ptr>
 #include <osg/Group>
 #include <osg/MatrixTransform>
 #include <osg/Geode>
 #include <osg/Geometry>
 #include <osg/StateSet>
-//#include <osg/Material>
 #include <osg/Texture2D>
-//#include <osg/TextureRectangle>
-//#include <osg/TextureCubeMap>
-//#include <osg/TexMat>
-//#include <osg/CullFace>
 #include <osg/Image>
 #include <osg/ImageStream>
-
 #include <osg/io_utils>
 #include <osg/LineWidth>
 #include <osg/ShapeDrawable>
-//#include <osg/BlendFunc>
-//#include <osg/BlendColor>
-
 #include <osgUtil/SceneView>
 #include <osgViewer/Viewer>
 
@@ -74,87 +63,85 @@
 
 #include <sys/time.h>
 
-//#include "ACPlugin.h"
-
 class ACOsgBrowserRenderer {
 protected:
-	MediaCycle				*media_cycle;
-	osg::ref_ptr<osg::Group>				 group;
-	osg::ref_ptr<osg::Group>				 media_group;
-	osg::ref_ptr<osg::Group>				 link_group;
-	osg::ref_ptr<osg::Group>				 label_group;
-	std::vector<ACOsgMediaRenderer*>  node_renderer;
-	std::vector<ACOsgNodeLinkRenderer*>  link_renderer;
-	std::vector<ACOsgLabelRenderer*>  label_renderer; // XS was MediaRenderer
-	//ACOsgLayoutRenderer*		layout_renderer;
-	//vector<bool>				 media_selected;
-	std::vector<float>				 distance_mouse;
-	//ACPlugin* mLayoutPlugin;
-	//ACOsgLayoutType layout_type;
-	//int displayed_nodes;
+    MediaCycle				*media_cycle;
+    osg::ref_ptr<osg::Group>				 group;
+    osg::ref_ptr<osg::Group>				 media_group;
+    osg::ref_ptr<osg::Group>				 link_group;
+    osg::ref_ptr<osg::Group>				 label_group;
+    std::vector<ACOsgMediaRenderer*>  node_renderer;
+    std::vector<ACOsgNodeLinkRenderer*>  link_renderer;
+    std::vector<ACOsgLabelRenderer*>  label_renderer; // XS was MediaRenderer
+    //ACOsgLayoutRenderer*		layout_renderer;
+    //vector<bool>				 media_selected;
+    std::vector<float>				 distance_mouse;
+    //ACPlugin* mLayoutPlugin;
+    //ACOsgLayoutType layout_type;
+    //int displayed_nodes;
 
-	// SD - Results from centralized request to MediaCycle - GLOBAL
-	double						media_cycle_time;
-	double						media_cycle_prevtime;
-	double						media_cycle_deltatime;
-	float						media_cycle_zoom;
-	float						media_cycle_angle;
-	int							media_cycle_mode;
-	int							media_cycle_global_navigation_level;
-	
-	// SD - Results from centralized request to MediaCycle - NODE SPECIFIC
-	ACMediaNode					media_cycle_node;
-	bool						media_cycle_isdisplayed;
-	ACPoint						media_cycle_current_pos;
-	ACPoint						media_cycle_view_pos;
-	ACPoint						media_cycle_next_pos;
-	int							media_cycle_navigation_level;
-	int							media_cycle_activity;
-	int							node_index;
-	int							media_index;
-	int							prev_media_index;	
-	std::string					media_cycle_filename;
-	
-	int nodes_prepared;
-	
-	ACBrowserAudioWaveformType audio_waveform_type;
-        ACSettingType setting;
-	
+    // SD - Results from centralized request to MediaCycle - GLOBAL
+    double						media_cycle_time;
+    double						media_cycle_prevtime;
+    double						media_cycle_deltatime;
+    float						media_cycle_zoom;
+    float						media_cycle_angle;
+    int							media_cycle_mode;
+    int							media_cycle_global_navigation_level;
+
+    // SD - Results from centralized request to MediaCycle - NODE SPECIFIC
+    ACMediaNode					media_cycle_node;
+    bool						media_cycle_isdisplayed;
+    ACPoint						media_cycle_current_pos;
+    ACPoint						media_cycle_view_pos;
+    ACPoint						media_cycle_next_pos;
+    int							media_cycle_navigation_level;
+    int							media_cycle_activity;
+    int							node_index;
+    int							media_index;
+    int							prev_media_index;
+    std::string					media_cycle_filename;
+
+    int nodes_prepared;
+
+    ACBrowserAudioWaveformType audio_waveform_type;
+    ACSettingType setting;
+
 public:
-	ACOsgBrowserRenderer();
-	~ACOsgBrowserRenderer();
-	void clean();
-	
-	double getTime();
-		
-	void setMediaCycle(MediaCycle *media_cycle){ this->media_cycle = media_cycle; };
-	//void setLayoutPlugin(ACPlugin* acpl){mLayoutPlugin=acpl;};
-	//void setLayout(ACOsgBrowserLayoutType _type){layout_type = _type;}
-	osg::ref_ptr<osg::Group> getShapes() 	{ return group; };
-	
-	void prepareNodes(int start=0);
-	void updateNodes(double ratio=0.0);
+    ACOsgBrowserRenderer();
+    ~ACOsgBrowserRenderer();
+    void clean();
 
-	void prepareLabels(int start=0);
-	void updateLabels(double ratio=0.0);
-			
-	int computeScreenCoordinates(osgViewer::View* view, double ratio=0.0); //CF: use osgViewer::Viewer* for simple Viewers
-	std::vector<float> getDistanceMouse() { return distance_mouse; };
-	
-	void changeNodeColor(int _node, osg::Vec4 _color){node_renderer[_node]->changeNodeColor(_color);}
-	void resetNodeColor(int _node){node_renderer[_node]->resetNodeColor();}
-	
-	ACBrowserAudioWaveformType getAudioWaveformType(){return audio_waveform_type;}
-	void setAudioWaveformType(ACBrowserAudioWaveformType _type);
+    double getTime();
 
-        void changeSetting(ACSettingType _setting);
+    void setMediaCycle(MediaCycle *media_cycle){ this->media_cycle = media_cycle; };
+    //void setLayoutPlugin(ACPlugin* acpl){mLayoutPlugin=acpl;};
+    //void setLayout(ACOsgBrowserLayoutType _type){layout_type = _type;}
+    osg::ref_ptr<osg::Group> getShapes() 	{ return group; };
+
+    void prepareNodes(int start=0);
+    void updateNodes(double ratio=0.0);
+
+    void prepareLabels(int start=0);
+    void updateLabels(double ratio=0.0);
+
+    int computeScreenCoordinates(osgViewer::View* view, double ratio=0.0); //CF: use osgViewer::Viewer* for simple Viewers
+    std::vector<float> getDistanceMouse() { return distance_mouse; };
+
+    void changeNodeColor(int _node, osg::Vec4 _color){node_renderer[_node]->changeNodeColor(_color);}
+    void resetNodeColor(int _node){node_renderer[_node]->resetNodeColor();}
+
+    ACBrowserAudioWaveformType getAudioWaveformType(){return audio_waveform_type;}
+    void setAudioWaveformType(ACBrowserAudioWaveformType _type);
+
+    void changeSetting(ACSettingType _setting);
 
 private:
-	bool removeNodes(int _first=0, int _last=0);
-	bool addNodes(int _first=0, int _last=0);
-	bool removeLinks(int _first=0, int _last=0);
-	bool removeLabels(int _first=0, int _last=0);
-	bool addLabels(int _first=0, int _last=0);
+    bool removeNodes(int _first=0, int _last=0);
+    bool addNodes(int _first=0, int _last=0);
+    bool removeLinks(int _first=0, int _last=0);
+    bool removeLabels(int _first=0, int _last=0);
+    bool addLabels(int _first=0, int _last=0);
 
 };
 

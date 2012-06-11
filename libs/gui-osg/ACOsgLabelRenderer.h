@@ -43,14 +43,10 @@
 class ACOsgLabelRenderer : public ACOsgMediaRenderer {
 	
 protected:
-	osg::ref_ptr<osgText::Font> font;
-	osg::ref_ptr<osgText::Text> text;
-	
+	osg::ref_ptr<osgText::Text> text;	
 	osg::ref_ptr<osg::Geode> text_geode;
-	osg::ref_ptr<osg::Geode> entry_geode;
 	
 	void textGeode();
-	void entryGeode();
 	
 	std::string text_string;
 	ACPoint pos;
@@ -63,5 +59,4 @@ public:
 	void setText(std::string text) {text_string = text;}
 	void setPos(ACPoint p) {pos = p;}
 };
-
 #endif

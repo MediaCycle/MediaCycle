@@ -1,8 +1,8 @@
 /**
  * @brief ACPosPlugArchipelAtoll.cpp
- * @author Thierry Ravet
- * @date 16/12/2011
- * @copyright (c) 2011 – UMONS - Numediart
+ * @author Christian Frisson
+ * @date 11/06/2012
+ * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -38,16 +38,6 @@
 
 using namespace arma;
 using namespace std;
-
-static double getTime()
-{
-    struct timeval tv = {0, 0};
-    struct timezone tz = {0, 0};
-	
-    gettimeofday(&tv, &tz);
-	
-    return (double)tv.tv_sec + tv.tv_usec / 1000000.0;
-}
 
 //#if defined(SUPPORT_ARCHIPEL)
 ACPosPlugArchipelAtoll::ACPosPlugArchipelAtoll()

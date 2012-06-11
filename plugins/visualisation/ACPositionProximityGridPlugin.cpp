@@ -34,16 +34,6 @@
 
 #include "ACPositionProximityGridPlugin.h"
 
-static double getTime()
-{
-    struct timeval tv = {0, 0};
-    struct timezone tz = {0, 0};
-    
-    gettimeofday(&tv, &tz);
-    
-    return (double)tv.tv_sec + tv.tv_usec / 1000000.0;
-}
-
 ACPositionProximityGridPlugin::ACPositionProximityGridPlugin() {
     this->mMediaType = MEDIA_TYPE_MIXED; // ALL
    // this->mPluginType = PLUGIN_TYPE_NONE;

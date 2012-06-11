@@ -37,7 +37,7 @@
 
 using namespace std;
 
-static double getTime()
+double getTime()
 {
     struct timeval tv = {0, 0};
     struct timezone tz = {0, 0};
@@ -167,13 +167,25 @@ int ACMediaBrowser::getLabelSize() {
 	return mLabelAttributes.size();
 }
 
+void ACMediaBrowser::displayAllLabels(bool isDisplayed){
+    for(ACLabels::iterator mLabelAttribute=mLabelAttributes.begin();mLabelAttribute!=mLabelAttributes.end();mLabelAttribute++)
+        (*mLabelAttribute).isDisplayed = isDisplayed;
+}
+
 void ACMediaBrowser::addLabel(string text, ACPoint pos) {
 	ACLabel tmpLbl;
 	tmpLbl.text = text;
-	tmpLbl.size = 1.0;
 	tmpLbl.pos = pos;
 	mLabelAttributes.push_back(tmpLbl);
 	return;
+}
+
+void ACMediaBrowser::addLabel(string text) {
+        ACLabel tmpLbl;
+        tmpLbl.text = text;
+        tmpLbl.isDisplayed = false;
+        mLabelAttributes.push_back(tmpLbl);
+        return;
 }
 
 void ACMediaBrowser::setLabel(int i, string text, ACPoint pos) {
@@ -183,8 +195,17 @@ void ACMediaBrowser::setLabel(int i, string text, ACPoint pos) {
 		mLabelAttributes.resize(i+1);
 	}
 	mLabelAttributes[i].text = text;
-	mLabelAttributes[i].size = 1.0;
 	mLabelAttributes[i].pos = pos;
+}
+
+void ACMediaBrowser::setLabel(int i, string text) {
+        // TODO : XS 260310 removed this ugly if : if you want to append, don't set
+        // (was introduced again to make the dancers app work)
+        if (mLabelAttributes.size()<=i) {
+                mLabelAttributes.resize(i+1);
+        }
+        mLabelAttributes[i].text = text;
+        mLabelAttributes[i].isDisplayed = false;
 }
 
 string ACMediaBrowser::getLabelText(int i) {
@@ -193,6 +214,14 @@ string ACMediaBrowser::getLabelText(int i) {
 
 ACPoint ACMediaBrowser::getLabelPos(int i) {
 	return mLabelAttributes[i].pos;
+}
+
+bool ACMediaBrowser::isLabelDisplayed(int i){
+    return mLabelAttributes[i].isDisplayed;
+}
+
+void ACMediaBrowser::removeAllLabels(){
+    mLabelAttributes.clear();
 }
 
 // goes to the previous navigation state
@@ -855,7 +884,7 @@ void ACMediaBrowser::initClusterCenters(){
 // mLoopAttributes -> ACMediaNode
 //CF do we need an extra level of tests along the browsing mode (render inactive during AC_MODE_NEIGHBORS?)
 void ACMediaBrowser::updateClusters(bool animate, int needsCluster) {
-
+        this->removeAllLabels();
 	if (mClustersMethodPlugin==0 && mNoMethodPosPlugin==0){//CF no plugin set, factory settings
 		std::cout << "updateClusters : Cluster KMeans (default)" << std::endl;
 		updateClustersKMeans(animate, needsCluster);
@@ -896,6 +925,7 @@ void ACMediaBrowser::updateClusters(bool animate, int needsCluster) {
 
 //CF do we need an extra level of tests along the browsing mode (render inactive during AC_MODE_CLUSTERS?)
 void ACMediaBrowser::updateNeighborhoods(){
+        this->removeAllLabels();
 	if (mNeighborsMethodPlugin==0 && mNoMethodPosPlugin==0)
 		std::cout << "No neighboorhood method plugin set" << std::endl; // CF: waiting for a factory one!
 	else{
@@ -912,7 +942,7 @@ void ACMediaBrowser::updateNeighborhoods(){
 
 //CF do we need an extra level of tests along the browsing mode and plugin types?
 void ACMediaBrowser::updateNextPositions() {
-
+        this->displayAllLabels(false);
 	switch ( mMode ){
 		case AC_MODE_CLUSTERS:
 			if (mClustersPosPlugin==0 && mNoMethodPosPlugin==0) {
@@ -1806,7 +1836,7 @@ long int ACMediaBrowser::addNode(long int _parentId, long int _mediaId, int _cli
 // XS 260310 new way to manage update of clusters, positions, neighborhoods, ...
 // SD 2010 OCT - removed severa lines of codes, as was duplicate with updateClusters and updateNextPositions
 void ACMediaBrowser::updateDisplay(bool animate, int needsCluster) {
-
+        this->removeAllLabels();
 	switch ( mMode ){
 		case AC_MODE_CLUSTERS:
 			updateClusters(animate, needsCluster);
@@ -1926,6 +1956,7 @@ void ACMediaBrowser::switchMode(ACBrowserMode _mode){
 
 bool ACMediaBrowser::changeClustersMethodPlugin(ACPlugin* acpl)
 {
+        this->removeAllLabels();
 	bool success = false;
 	switch ( mMode ){
 		case AC_MODE_CLUSTERS:
@@ -1955,9 +1986,11 @@ bool ACMediaBrowser::changeClustersMethodPlugin(ACPlugin* acpl)
 
 bool ACMediaBrowser::changeNeighborsMethodPlugin(ACPlugin* acpl)
 {
+        this->removeAllLabels();
 	bool success = false;
 	double t = getTime();
 
+        ACPoint p;
 	switch ( mMode ){
 		case AC_MODE_CLUSTERS:
 			this->setNeighborsMethodPlugin(acpl);
@@ -1965,7 +1998,7 @@ bool ACMediaBrowser::changeNeighborsMethodPlugin(ACPlugin* acpl)
 			break;
 		case AC_MODE_NEIGHBORS:
 			//CF 1) Move all nodes to the center
-			ACPoint p;
+
 			for (ACMediaNodes::iterator node = mLoopAttributes.begin(); node != mLoopAttributes.end(); ++node){
 				p.x = 0;
 				p.y = 0;
@@ -2000,6 +2033,7 @@ bool ACMediaBrowser::changeNeighborsMethodPlugin(ACPlugin* acpl)
 
 bool ACMediaBrowser::changeClustersPositionsPlugin(ACPlugin* acpl)
 {
+        this->displayAllLabels(false);
 	bool success = false;
 	switch ( mMode ){
 		case AC_MODE_CLUSTERS:
@@ -2033,6 +2067,7 @@ bool ACMediaBrowser::changeClustersPositionsPlugin(ACPlugin* acpl)
 
 bool ACMediaBrowser::changeNeighborsPositionsPlugin(ACPlugin* acpl)
 {
+        this->displayAllLabels(false);
 	bool success = false;
 	switch ( mMode ){
 		case AC_MODE_CLUSTERS:

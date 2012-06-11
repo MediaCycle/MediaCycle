@@ -45,6 +45,8 @@ using std::vector;
 struct ACPoint
 {
 	float x, y, z;
+        ACPoint():x(0.0f),y(0.0f),z(0.0f){}
+        ACPoint(float _x, float _y, float _z):x(_x),y(_y),z(_z){}
 };
 
 class ACMediaNode {

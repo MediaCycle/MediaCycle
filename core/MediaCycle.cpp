@@ -40,16 +40,6 @@
 using std::ofstream;
 using std::ifstream;
 
-static double getTime() {
-
-    struct timeval tv = {0, 0};
-    struct timezone tz = {0, 0};
-
-    gettimeofday(&tv, &tz);
-
-    return (double)tv.tv_sec + tv.tv_usec / 1000000.0;
-}
-
 MediaCycle::MediaCycle(ACMediaType aMediaType, string local_directory, string libname) : Subject() {
 
 	this->forwarddown = 0;

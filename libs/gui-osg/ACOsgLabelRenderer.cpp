@@ -37,88 +37,101 @@
 
 using namespace osg;
 
-ACOsgLabelRenderer::ACOsgLabelRenderer() {
-	media_type = MEDIA_TYPE_TEXT;
-	text_geode = 0;
-	text_string = "";
-	pos.x = 0;
-	pos.y = 0;
-	pos.z = 0;
+ACOsgLabelRenderer::ACOsgLabelRenderer():ACOsgMediaRenderer() {
+    media_type = MEDIA_TYPE_TEXT;
+    text_geode = 0;
+    text=0;
+    text_string = "";
+    pos.x = 0;
+    pos.y = 0;
+    pos.z = 0;
 }
 
 ACOsgLabelRenderer::~ACOsgLabelRenderer() {
-	
-	if 	(text_geode) { //ref_ptr//text_geode->unref();
-		text_geode=0; }
+    text_geode=0;
+    text=0;
 }
 
 void ACOsgLabelRenderer::textGeode() {
-	
-//	StateSet *state;
-	
-	osg::Vec4 textColor(0.9f,0.9f,0.9f,0.9f);
-	float textCharacterSize = 10.0f; // 10 pixels ? 
-	
-	text_geode = new Geode();
 
-	text = new osgText::Text;
-	//font = osgText::readFontFile("fonts/arial.ttf");
-	//text->setFont( font.get() );
-	text->setColor(textColor);
-	text->setCharacterSizeMode( osgText::Text::SCREEN_COORDS );
-	text->setCharacterSize(textCharacterSize);
-	text->setPosition(osg::Vec3(0,0,0.1));
-	//	text->setPosition(osg::Vec3(pos.x,pos.y,pos.z));
-	text->setLayout(osgText::Text::LEFT_TO_RIGHT);
-	text->setFontResolution(64,64);
-	text->setAlignment( osgText::Text::CENTER_CENTER );
-	text->setAxisAlignment( osgText::Text::SCREEN );
-	
-	// SD TODO - Find text from media library
-	text->setText( text_string );
-	
-	//state = text_geode->getOrCreateStateSet();
-	//state->setMode(GL_LIGHTING, osg::StateAttribute::PROTECTED | osg::StateAttribute::OFF );
-	//state->setMode(GL_BLEND, StateAttribute::ON);
-	//state->setMode(GL_LINE_SMOOTH, StateAttribute::ON);
+    //	StateSet *state;
 
-	//TODO check this .get() (see also ACOsgBrowserRenderer.cpp)
-	//".get()" is necessary for compilation under linux (OSG v2.4)
-	text_geode->addDrawable(text.get());
-	
-	//ref_ptr//text_geode->ref();	
+    osg::Vec4 textColor(0.9f,0.9f,0.9f,0.9f);
+    float textCharacterSize = 24.0f; // 10 pixels ?
+
+    text_geode = new Geode();
+    text = new osgText::Text;
+    if(font)
+        text->setFont(font);
+    text->setColor(textColor);
+    text->setCharacterSizeMode( osgText::Text::SCREEN_COORDS );
+    text->setCharacterSize(textCharacterSize);
+    text->setPosition(osg::Vec3(0,0,0));
+    //	text->setPosition(osg::Vec3(pos.x,pos.y,pos.z));
+    text->setLayout(osgText::Text::LEFT_TO_RIGHT);
+    text->setFontResolution(textCharacterSize,textCharacterSize);
+    text->setAlignment( osgText::Text::CENTER_CENTER );
+    text->setAxisAlignment( osgText::Text::SCREEN );
+
+    text->setText( text_string );
+
+    //state = text_geode->getOrCreateStateSet();
+    //state->setMode(GL_LIGHTING, osg::StateAttribute::PROTECTED | osg::StateAttribute::OFF );
+    //state->setMode(GL_BLEND, StateAttribute::ON);
+    //state->setMode(GL_LINE_SMOOTH, StateAttribute::ON);
+
+    text_geode->addDrawable(text);
 }
 
 void ACOsgLabelRenderer::prepareNodes() {
-		
-	text_geode = 0;
-	
-	textGeode();
-	
-	media_node->addChild(text_geode);
+    if(!media_cycle) return;
+    if(!media_cycle->getBrowser()) return;
+
+    if(text_geode)
+        media_node->removeChild(text_geode);
+    text=0;
+    text_geode = 0;
+    textGeode();
 }
 
 void ACOsgLabelRenderer::updateNodes(double ratio) {
-		
-	float x, y, z;
-	
-	Matrix T;
-	Matrix Trotate;
-	
-	osg::Vec4 textColor(0.9f,0.9f,0.9f,0.9f);
-	//((ShapeDrawable*)text_geode->getDrawable(0))->setColor(textColor);
-	
-	x = pos.x;
-	y = pos.y;
-	z = pos.z;
-	
-	T.makeTranslate(Vec3(x, y, z));
-	text->setText( text_string );
+    if(!media_cycle) return;
+    if(!media_cycle->getBrowser()) return;
 
+    if(media_cycle->getBrowser()->isLabelDisplayed(this->node_index) ){
+        if( media_node->getNumChildren() == 0){
+            media_node->addChild(text_geode);
+        }
+    }
+    else{
+        if(media_node->getNumChildren() > 0){
+            media_node->removeChildren(0,media_node->getNumChildren());
+        }
+    }
+
+    if(media_cycle->getBrowser()->isLabelDisplayed(this->node_index)){
+        float x, y, z;
+        if(media_cycle && text){
+            if(media_cycle->getBrowserMode() == AC_MODE_CLUSTERS){
+                if(cluster_colors.size()>0)
+                    text->setColor(cluster_colors[this->node_index%cluster_colors.size()]);
+                else
+                    text->setColor(node_color);
+            }
+        }
+        if (user_defined_color && text)
+            text->setColor(node_color);
+        x = pos.x;
+        y = pos.y;
+        z = pos.z;
 #ifdef AUTO_TRANSFORM
-	media_node->setPosition(Vec3(x,y,z));
+        media_node->setPosition(Vec3(x,y,z));
 #else
-	media_node->setMatrix(T);
+        Matrix T;
+        Matrix Trotate;
+        T.makeTranslate(Vec3(x, y, z));
+        media_node->setMatrix(T);
 #endif
+    }
 
 }

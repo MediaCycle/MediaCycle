@@ -51,21 +51,17 @@ using namespace osg;
 ACOsgTextRenderer::ACOsgTextRenderer()
     :ACOsgMediaRenderer()
 {
-	media_type = MEDIA_TYPE_AUDIO;
+        media_type = MEDIA_TYPE_TEXT;
 	metadata_geode = 0;
 	metadata = 0;
 	entry_geode = 0;
 }
 
 ACOsgTextRenderer::~ACOsgTextRenderer() {
-	if 	(entry_geode) {
-		entry_geode=0;
-	}
-	if 	(metadata_geode) {
-		metadata_geode=0;
-	}
+        entry_geode=0;
+        metadata_geode=0;
+        metadata=0;
 }
-
 
 void ACOsgTextRenderer::metadataGeode() {
 	
@@ -75,10 +71,9 @@ void ACOsgTextRenderer::metadataGeode() {
 		textCharacterSize = 16.0f;
 	#endif
 	metadata_geode = new Geode();
-
 	metadata = new osgText::Text;
-	//font = osgText::readFontFile("fonts/arial.ttf");
-	//text->setFont( font.get() );
+        if(font)
+            text->setFont(font);
 	metadata->setColor(textColor);
 	metadata->setCharacterSizeMode( osgText::Text::SCREEN_COORDS );
 	metadata->setCharacterSize(textCharacterSize);
@@ -143,13 +138,12 @@ void ACOsgTextRenderer::entryGeode() {
 	//sprintf(name, "some audio element");
 #endif
 	entry_geode->setUserData(new ACRefId(node_index));
-	//entry_geode->setName(name);
-	//ref_ptr//entry_geode->ref();
 }
 
 void ACOsgTextRenderer::prepareNodes() {
 	entry_geode = 0;
 	metadata_geode = 0;
+        metadata=0;
 
 	//if  (media_cycle->getMediaNode(node_index).isDisplayed()){
 	if  (media && media_cycle->getNodeFromMedia(media).isDisplayed()){

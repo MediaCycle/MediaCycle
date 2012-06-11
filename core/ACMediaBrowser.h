@@ -62,7 +62,7 @@ inline float ACRandom() { return ((float)rand()) / (float)((1LL<<31)-1L); }
 
 using namespace std;
 
-//static double getTime();
+extern double getTime();
 
 enum ACBrowserState {
 	AC_IDLE=0,
@@ -109,7 +109,7 @@ struct ACLabel {
 	float		size;
 	ACPoint		pos;
 	bool		isDisplayed;
-	ACLabel() : isDisplayed(true) {}
+        ACLabel() : text(""),size(1.0),pos(ACPoint()),isDisplayed(true) {}
 };
 
 // XS 110310 added this to make the transition towards tree instead of vector
@@ -268,9 +268,14 @@ public:
 	// labels
 	int getLabelSize();
 	void setLabel(int i, string text, ACPoint pos);
+        void setLabel(int i, string text); // without position, hidden
 	void addLabel(string text, ACPoint pos);
+        void addLabel(string text); // without position, hidden
 	string getLabelText(int i);
 	ACPoint getLabelPos(int i);
+        bool isLabelDisplayed(int i);
+        void removeAllLabels();
+        void displayAllLabels(bool isDisplayed);
 
 	const vector<ACLabel> &getLabelAttributes() const { return mLabelAttributes; };
 	void setLabelPosition(int loop_id, float x, float y, float z=0);
