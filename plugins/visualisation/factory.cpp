@@ -13,6 +13,7 @@
 #include "ACPosPlugAudioGardenGramoPhone.h"
 #include "ACPosPlugAudioGardenFlower.h"
 #include "ACPosPlugMakamHistoGramoPhone.h"
+#include "ACPosPlugClustersClock.h"
 //#if defined(SUPPORT_ARCHIPEL)
 #include "ACPosPlugArchipelAtoll.h"
 //#endif// defined(SUPPORT_ARCHIPEL)
@@ -35,6 +36,7 @@ extern "C" ACPlugin* create(std::string namePlugin) {
 	if (namePlugin == "ACPosPlugAudioGardenGramoPhone") {return new ACPosPlugAudioGardenGramoPhone();}
 	if (namePlugin == "ACPosPlugAudioGardenFlower") {return new ACPosPlugAudioGardenFlower();}
 	if (namePlugin == "ACPosPlugMakamHistoGramoPhone") {return new ACPosPlugMakamHistoGramoPhone();}
+	if (namePlugin == "ACPosPlugClustersClock") {return new ACPosPlugClustersClock();}
 	//#if defined(SUPPORT_ARCHIPEL)
 	if (namePlugin == "ACPosPlugArchipelAtoll") {return new ACPosPlugArchipelAtoll();}
 	//#endif// defined(SUPPORT_ARCHIPEL)
@@ -61,10 +63,13 @@ extern "C" std::vector<std::string> list() {    //returns a string vector contai
 	listPlugin.push_back("ACVisPlugin2Desc");
 	listPlugin.push_back("ACPosPlugAudioGardenGramoPhone");
 	listPlugin.push_back("ACPosPlugAudioGardenFlower");
+        #if defined(USE_MAKAM)
 	listPlugin.push_back("ACPosPlugMakamHistoGramoPhone");
-	//#if defined(SUPPORT_ARCHIPEL)
+        #endif// defined(USE_MAKAM)
+	listPlugin.push_back("ACPosPlugClustersClock");
+        #if defined(SUPPORT_ARCHIPEL)
 	listPlugin.push_back("ACPosPlugArchipelAtoll");
-	//#endif// defined(SUPPORT_ARCHIPEL)
+        #endif// defined(SUPPORT_ARCHIPEL)
 	listPlugin.push_back("ACPositionsPluginRadialTreeLayout");
 	listPlugin.push_back("ACEuclideanKMeansPlugin");
 	//listPlugin.push_back("ACPositionsPluginRandom");
