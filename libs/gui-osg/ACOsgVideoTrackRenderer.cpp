@@ -113,16 +113,6 @@ osg::ref_ptr<osg::Image> Convert_OpenCV_2_osg_Image(cv::Mat cvImg)
 	}
 }
 
-static double getTime()
-{
-    struct timeval tv = {0, 0};
-    struct timezone tz = {0, 0};
-
-    gettimeofday(&tv, &tz);
-
-    return (double)tv.tv_sec + tv.tv_usec / 1000000.0;
-}
-
 #ifdef USE_SLIT_SCAN
 #ifdef __APPLE__
 #ifdef USE_FFMPEG
