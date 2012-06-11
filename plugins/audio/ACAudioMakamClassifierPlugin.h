@@ -1,9 +1,9 @@
 /*
- *  ACAudioMakamFeaturesPlugin.h
+ *  ACAudioMakamClassifierPlugin.h
  *  MediaCycle
  *
  *  @author Christian Frisson
- *  @date 18/05/2012
+ *  @date 10/06/2012
  *  @copyright (c) 2012 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
@@ -32,21 +32,19 @@
  *
  */
 
-#ifndef _ACAudioMakamFeaturesPLUGIN_H
-#define	_ACAudioMakamFeaturesPLUGIN_H
+#ifndef _ACAudioMakamClassifierPLUGIN_H
+#define	_ACAudioMakamClassifierPLUGIN_H
 
-#include "ACAudioFeatures.h"
 #include "MediaCycle.h"
-
 #include<iostream>
 
 #if defined(USE_OCTAVE) && defined(USE_MAKAM)
 
-class ACAudioMakamFeaturesPlugin : public ACFeaturesPlugin {
+class ACAudioMakamClassifierPlugin : public ACClusterMethodPlugin {
 public:
-	ACAudioMakamFeaturesPlugin();
-	~ACAudioMakamFeaturesPlugin();
-        std::vector<ACMediaFeatures*> calculate(ACMediaData* _data, ACMedia*, bool _save_timed_feat=false);
+    ACAudioMakamClassifierPlugin();
+    ~ACAudioMakamClassifierPlugin();
+    virtual void updateClusters(ACMediaBrowser* mediaBrowser,bool needsCluster=true );
 };
 #endif//defined(USE_OCTAVE) && defined(USE_MAKAM)
-#endif	/* _ACAudioMakamFeaturesPLUGIN_H */
+#endif	/* _ACAudioMakamClassifierPLUGIN_H */

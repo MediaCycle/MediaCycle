@@ -1,4 +1,4 @@
-function makamString = makamDetector(wavFile,makamTemplatesFile)
+function [makamString varargout] = makamDetector(wavFile,makamTemplatesFile)
 %makamDetector(wavFile,makamTemplatesFile)
 %   Operations performed:
 %       1-f0 extraction (if .yin.txt file does not exist)
@@ -49,6 +49,9 @@ else
     return;
 end
 makamName='';makamIndex=[];
+allMakamStrings = cell(length(makamTemplates),1);
+[allMakamStrings{1:length(makamTemplates)}] = deal(makamTemplates.name);
+varargout{1} = allMakamStrings;
 %--------------------------------------------------------
 %template matching
 allCorrValues=zeros(1,length(makamTemplates));
@@ -64,9 +67,8 @@ end
 [corrVal,makamIndex]=max(allCorrValues);
 tonicInd=tonicIndex(makamIndex);
 makamName=makamTemplates(makamIndex).name;
-disp([makamName ' bulundu']);
+%disp([makamName ' bulundu']);
 makamString = makamName;
-
 %plotting matched histograms
 if(0)
     template=makamTemplates(makamIndex).template;
