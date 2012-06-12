@@ -18,8 +18,7 @@ IF(SUPPORT_TEXT AND USE_QT4)
 	ADD_DEPENDENCIES(text-test mediacycle)
 	ADD_DEPENDENCIES(text-test mediacycle-osg)
 	ADD_DEPENDENCIES(text-test mediacycle-osg-qt)
-	ADD_DEPENDENCIES(text-test SparseMatrix)
-
+	
 
 	#IF ( APPLE )
 	#	set_target_properties(text-test PROPERTIES MACOSX_BUNDLE_INFO_PLIST ${CMAKE_SOURCE_DIR}/gui/osg-qt/Info.plist)
@@ -30,7 +29,6 @@ IF(SUPPORT_TEXT AND USE_QT4)
 	TARGET_LINK_LIBRARIES(text-test mediacycle)
 	TARGET_LINK_LIBRARIES(text-test mediacycle-osg)
 	TARGET_LINK_LIBRARIES(text-test mediacycle-osg-qt)
-	TARGET_LINK_LIBRARIES(text-test SparseMatrix)
 	TARGET_LINK_LIBRARIES(text-test ${OPENSCENEGRAPH_LIBRARIES})
 	TARGET_LINK_LIBRARIES(text-test ${Boost_SYSTEM_LIBRARY})
 	TARGET_LINK_LIBRARIES(text-test ${QT_LIBRARIES})

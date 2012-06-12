@@ -35,11 +35,17 @@
 #include "textFile.h"
 #include <iostream>
 #include <fstream>
-#include <ArchipelReader.h>
+//#include <ArchipelReader.h>
 #ifdef SUPPORT_NAVIMED
-#include <NavimedReader.h>
+//#include <NavimedReader.h>
 #endif //SUPPORT_NAVIMED
+#define TIXML_USE_STL
+#include <tinyxml.h>
+
+#include <boost/locale.hpp>
+
 using namespace std;
+using namespace boost::locale;
 
 #include <boost/filesystem.hpp>
 namespace fs = boost::filesystem;
@@ -50,7 +56,8 @@ string* textFileRead(string filePath){
 		return txtFileRead(filePath);
 	else
 		if (ext==string(".xml")){
-			TiXmlDocument *testDoc=new TiXmlDocument(filePath);
+			return xmlFileRead(filePath);
+			/*TiXmlDocument *testDoc=new TiXmlDocument(filePath);
 			delete testDoc;
 			archipelReader *doc=new archipelReader(filePath);
 			if (!doc->isArchipel())
@@ -84,7 +91,7 @@ string* textFileRead(string filePath){
 			}
 			string test=doc->getThumbPath();
 			delete doc;
-			return new string(desc);
+			return new string(desc);*/
 		}
 		else
 			return 0;
@@ -94,10 +101,10 @@ string* textFileRead(string filePath){
 
 string labelFileRead(string filePath){
 	string ext=fs::extension(filePath);
-	if (ext==string(".txt")) {
+//	if (ext==string(".txt")) {
 		size_t indTemp=filePath.find_last_of("/"),lastTemp=filePath.length();
 		return filePath.substr(indTemp,lastTemp-indTemp);
-	}
+/*	}
 	else
 		if (ext==string(".xml")){
 			archipelReader *doc=new archipelReader(filePath);
@@ -125,7 +132,7 @@ string labelFileRead(string filePath){
 		else
 			return string("");
 	//TODO implement other text file type (pdf xml html...)
-	return string("");
+	return string("");*/
 }
 
 string *txtFileRead(string filePath){
@@ -144,4 +151,40 @@ string *txtFileRead(string filePath){
 	
 	//cout << (*lOut)<< "\n";
 	return lOut;
+}
+
+void recursXmlParser(TiXmlNode* parent,string* out,string encoding);
+
+string *xmlFileRead(string filePath){//default xml reader. Parse and extract all the strings in the file.
+	
+	
+	TiXmlDocument *doc=new TiXmlDocument(filePath);
+	string encodingType;
+	bool loadOkay = doc->LoadFile();
+	
+	TiXmlDeclaration *xmlDecl=doc->FirstChild()->ToDeclaration();;
+	
+	string encoding =xmlDecl->Encoding();
+	if (!loadOkay)
+		return 0;
+	
+	string* lOut=new string;
+	recursXmlParser(doc,lOut,encoding);
+	cout<<*lOut<<endl;
+	
+	return lOut;
+	
+}
+
+void recursXmlParser(TiXmlNode* parent,string* out,string encoding){
+	int i=0;
+	TiXmlNode* child = 0;
+	while( child = parent->IterateChildren( child ) ){
+		TiXmlText* tempText=child->ToText();
+		if (tempText){
+			std::string utf8_string = conv::to_utf<char>(tempText->ValueStr(),encoding);
+			(*out)+=utf8_string+string(" ");
+		}
+		recursXmlParser(child,out,encoding);
+	}
 }

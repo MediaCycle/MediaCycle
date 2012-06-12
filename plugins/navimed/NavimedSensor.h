@@ -1,11 +1,10 @@
 /*
- *  ACOsgMediaDocumentRenderer.h
+ *  NavimedSensor.h
  *  MediaCycle
  *
- *  @author Christian Frisson
- *  @date 29/06/11
- *
- *  @copyright (c) 2011 – UMONS - Numediart
+ *  @author Thierry Ravet
+ *  @date 9/06/12
+ *  @copyright (c) 2012 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
  *  licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -33,33 +32,35 @@
  *
  */
 
-#ifndef __ACOSG_MULTIMEDIA_RENDERER_H__
-#define __ACOSG_MULTIMEDIA_RENDERER_H__
 
-#if defined (SUPPORT_MULTIMEDIA)
+#if defined (SUPPORT_SENSOR)
 
-#include "ACOsgMediaRenderer.h"
-#include <map>
+#ifndef _NavimedSENSOR_H
+#define _NavimedSENSOR_H
+#include "ACSensor.h"
 
-typedef std::vector<ACOsgMediaRenderer*> ACOsgMediaRenderers;
 
-class ACOsgMediaDocumentRenderer : public ACOsgMediaRenderer {
-	
-protected:
-	ACOsgMediaRenderers media_renderers;
-	osg::ref_ptr<osg::Geode> metadata_geode;
-	osg::ref_ptr<osgText::Text> metadata;
-	osg::ref_ptr<osg::Geode> entry_geode;
-	
-	void entryGeode();	
-	void metadataGeode();
+class NavimedSensorData: public ACSensorData {
 public:
-	ACOsgMediaDocumentRenderer();
-	~ACOsgMediaDocumentRenderer();
-	void prepareNodes();
-	void updateNodes(double ratio=0.0);
+	
+	
+	NavimedSensorData();
+	~NavimedSensorData();
+	NavimedSensorData(std::string _fname);
+	bool readData(std::string _fname);
+private:
+	
 };
 
-#endif //defined (SUPPORT_MULTIMEDIA)
+
+class NavimedSensor : public ACSensor {
+private:
+public:
+	NavimedSensor();	
+	bool extractData(std::string fname);
+	
+};
+
+#endif
 
 #endif

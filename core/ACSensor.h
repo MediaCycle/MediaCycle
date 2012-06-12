@@ -1,11 +1,10 @@
 /*
- *  ACOsgMediaDocumentRenderer.h
+ *  ACSensor.h
  *  MediaCycle
  *
- *  @author Christian Frisson
- *  @date 29/06/11
- *
- *  @copyright (c) 2011 – UMONS - Numediart
+ *  @author Thierry Ravet
+ *  @date 22/10/10
+ *  @copyright (c) 2010 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
  *  licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -33,33 +32,32 @@
  *
  */
 
-#ifndef __ACOSG_MULTIMEDIA_RENDERER_H__
-#define __ACOSG_MULTIMEDIA_RENDERER_H__
+#if defined (SUPPORT_SENSOR)
 
-#if defined (SUPPORT_MULTIMEDIA)
+#ifndef ACSENSOR_H
+#define ACSENSOR_H
 
-#include "ACOsgMediaRenderer.h"
-#include <map>
+#include "ACMedia.h"
+#include "ACMediaFeatures.h"
+#include <string>
+#include <cstring>
+#include "ACSensorData.h"
 
-typedef std::vector<ACOsgMediaRenderer*> ACOsgMediaRenderers;
-
-class ACOsgMediaDocumentRenderer : public ACOsgMediaRenderer {
-	
+class ACSensor : public ACMedia {
+	// contains the *minimal* information about a Sensor
 protected:
-	ACOsgMediaRenderers media_renderers;
-	osg::ref_ptr<osg::Geode> metadata_geode;
-	osg::ref_ptr<osgText::Text> metadata;
-	osg::ref_ptr<osg::Geode> entry_geode;
-	
-	void entryGeode();	
-	void metadataGeode();
+	ACSensorData* data;
 public:
-	ACOsgMediaDocumentRenderer();
-	~ACOsgMediaDocumentRenderer();
-	void prepareNodes();
-	void updateNodes(double ratio=0.0);
+	ACSensor();
+	~ACSensor();
+	
+	void deleteData();
+	void saveACLSpecific(std::ofstream &library_file);
+	int loadACLSpecific(std::ifstream &library_file);
+	bool extractData(std::string fname);
+	ACMediaData* getMediaData(){return data;} // XS TODO : needs dynamic_cast<ACMediaData*> (data) ??;
+	
+	virtual void* getThumbnailPtr(){return 0;} // XS TODO change this
 };
-
-#endif //defined (SUPPORT_MULTIMEDIA)
-
-#endif
+#endif // ACSENSOR_H
+#endif //defined (SUPPORT_SENSOR)

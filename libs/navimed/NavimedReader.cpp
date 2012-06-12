@@ -46,7 +46,9 @@ using namespace boost::locale;
 navimedReader::navimedReader(const string fileName){
 	mFileName=fileName;
 	mDoc=new TiXmlDocument(fileName);
-	bool loadOkay = mDoc->LoadFile();	
+	bool loadOkay = mDoc->LoadFile();
+	TiXmlDeclaration *xmlDecl=mDoc->FirstChild()->ToDeclaration();
+	mEncoding =xmlDecl->Encoding();	
 }
 
 
@@ -57,6 +59,8 @@ navimedReader::~navimedReader(void){
 
 bool navimedReader::isNavimed(){
 	TiXmlHandle docHandle( mDoc );
+	
+	
 	TiXmlHandle child= docHandle.FirstChild("XMLResult" );
 	if (child.ToNode()==0)
 		return false;
@@ -64,6 +68,14 @@ bool navimedReader::isNavimed(){
 		return true;
 }
 
+
+bool navimedReader::isNavimedBiology(){
+	return (this->getSubject()==string("Biologie"));
+}
+
+bool navimedReader::isNavimedRadiography(){
+	return (this->getSubject()==string("RADIOLOGIE"));
+}
 
 string navimedReader::getText(void){
 	string ret;
@@ -81,7 +93,7 @@ string navimedReader::getText(void){
 		ret+=string(" ");
 		i++;
 	}
-	std::string utf8_string = conv::to_utf<char>(ret,"Latin1");
+	std::string utf8_string = conv::to_utf<char>(ret,mEncoding);
 	return utf8_string;
 }
 
@@ -124,6 +136,50 @@ string navimedReader::getReference(void){
 	ret=textChild->ValueStr();
 	return ret;
 }
+
+
+bool navimedReader::getBioParam(std::string paramName,float &paramValue){
+	string ret;
+	TiXmlNode* child= mDoc->FirstChild("XMLResult" );//.Element();//.Child( "Child", 1 ).ToElement();
+	TiXmlText* textChild;
+	
+	for( child = child->FirstChild(string("XMLEncodedValue")); child; child = child->NextSibling(string("XMLEncodedValue")) ){
+		if (child->FirstChild(string("libelle"))==0)
+			continue;
+		if (child->FirstChild(string("libelle"))->FirstChild()==0)
+			continue;
+		if (child->FirstChild(string("libelle"))->FirstChild()->ToText()==0)
+			continue;
+		
+		std::string utf8_string = conv::to_utf<char>(child->FirstChild(string("libelle"))->FirstChild()->ToText()->ValueStr(),mEncoding);
+		//cout<<utf8_string<<endl;
+		if (utf8_string==paramName){
+			if (child->FirstChild(string("indice"))!=0){
+				paramValue=this->convertValue(child->FirstChild(string("indice"))->FirstChild()->ToText()->ValueStr());
+			}
+			else{
+				paramValue=0.f;
+			}
+			return true;
+		}
+	}
+	if (textChild==0)
+		return false;
+}
+
+float navimedReader::convertValue(string valStr){
+	if (valStr=="--")
+		return -2.f;
+	if (valStr=="-")
+		return -1.f;
+	if (valStr=="+")
+		return 1.f;
+	if (valStr=="++")
+		return 2.f;
+	return 0.f;
+};
+
+
 
 vector<std::string> navimedReader::getRadiosName(void){
 	vector<string> ret;

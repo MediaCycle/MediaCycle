@@ -42,4 +42,6 @@ std::string* textFileRead(std::string filePath);
 
 std::string labelFileRead(std::string filePath);
 std::string *txtFileRead(std::string filePath);
+std::string *xmlFileRead(std::string filePath);
+
 #endif

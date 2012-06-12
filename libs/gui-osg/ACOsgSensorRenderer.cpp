@@ -1,5 +1,5 @@
 /*
- *  ACOsgTextRenderer.cpp
+ *  ACOsgSensorRenderer.cpp
  *  MediaCycle
  *
  *  @author Christian Frisson and T. Ravet
@@ -33,10 +33,10 @@
  *
  */
 
-#if defined (SUPPORT_TEXT)
+#if defined (SUPPORT_SENSOR)
 
-#include "ACOsgTextRenderer.h"
-#include <ACText.h>
+#include "ACOsgSensorRenderer.h"
+#include <ACSensor.h>
 
 #include "boost/filesystem.hpp"   // includes all needed Boost.Filesystem declarations
 
@@ -48,22 +48,26 @@ namespace fs = boost::filesystem;
 
 using namespace osg;
 
-ACOsgTextRenderer::ACOsgTextRenderer()
+ACOsgSensorRenderer::ACOsgSensorRenderer()
     :ACOsgMediaRenderer()
 {
-	media_type = MEDIA_TYPE_TEXT;
+	media_type = MEDIA_TYPE_SENSOR;
 	metadata_geode = 0;
 	metadata = 0;
 	entry_geode = 0;
 }
 
-ACOsgTextRenderer::~ACOsgTextRenderer() {
-        entry_geode=0;
-        metadata_geode=0;
-        metadata=0;
+ACOsgSensorRenderer::~ACOsgSensorRenderer() {
+	if 	(entry_geode) {
+		entry_geode=0;
+	}
+	if 	(metadata_geode) {
+		metadata_geode=0;
+	}
 }
 
-void ACOsgTextRenderer::metadataGeode() {
+
+void ACOsgSensorRenderer::metadataGeode() {
 	
 	osg::Vec4 textColor(0.9f,0.9f,0.9f,1.0f);
 	float textCharacterSize = 20.0f; // 10 pixels ? // broken with OSG v2.9.11??
@@ -71,6 +75,7 @@ void ACOsgTextRenderer::metadataGeode() {
 		textCharacterSize = 16.0f;
 	#endif
 	metadata_geode = new Geode();
+
 	metadata = new osgText::Text;
 	if(font)
 		metadata->setFont(font);
@@ -98,9 +103,9 @@ void ACOsgTextRenderer::metadataGeode() {
 		media_index = media_cycle->getBrowser()->getUserLog()->getMediaIdFromNodeId(node_index);*/
 
 	//string textLabel=media_cycle->getLibrary()->getMedia(media_index)->getLabel();
-	string textLabel=media->getLabel();
+	string sensorLabel=media->getLabel();
 	
-	metadata->setText( textLabel );
+	metadata->setText( sensorLabel );
 
 	//state = text_geode->getOrCreateStateSet();
 	//state->setMode(GL_LIGHTING, osg::StateAttribute::PROTECTED | osg::StateAttribute::OFF );
@@ -112,7 +117,7 @@ void ACOsgTextRenderer::metadataGeode() {
 	metadata_geode->addDrawable(metadata);
 }
 
-void ACOsgTextRenderer::entryGeode() {
+void ACOsgSensorRenderer::entryGeode() {
 
 	StateSet *state;
 
@@ -129,23 +134,24 @@ void ACOsgTextRenderer::entryGeode() {
 
 #if defined(APPLE_IOS)
 	state->setMode(GL_LIGHTING, osg::StateAttribute::PROTECTED | osg::StateAttribute::OFF );
-	entry_geode->addDrawable(new osg::ShapeDrawable(new osg::Box(osg::Vec3(0.0f,0.0f,0.0f),0.1), hints)); //draws a square // Vintage TextCycle
+	entry_geode->addDrawable(new osg::ShapeDrawable(new osg::Box(osg::Vec3(0.0f,0.0f,0.0f),0.1), hints)); //draws a square // Vintage SensorCycle
 #else
 	state->setMode(GL_LIGHTING, osg::StateAttribute::ON );
 	state->setMode(GL_BLEND, StateAttribute::ON);
-	//entry_geode->addDrawable(new osg::ShapeDrawable(new osg::Box(osg::Vec3(0.0f,0.0f,0.0f),0.1), hints)); //draws a square // Vintage TextCycle
+	//entry_geode->addDrawable(new osg::ShapeDrawable(new osg::Box(osg::Vec3(0.0f,0.0f,0.0f),0.1), hints)); //draws a square // Vintage SensorCycle
 	entry_geode->addDrawable(new osg::ShapeDrawable(new osg::Sphere(osg::Vec3(0.0f,0.0f,0.0f),localsize), hints)); // draws a sphere // MultiMediaCycle
 	//entry_geode->addDrawable(new osg::ShapeDrawable(new osg::Cylinder(osg::Vec3(0.0f,0.0f,0.0f),0.01, 0.0f), hints)); // draws a disc
 	//entry_geode->addDrawable(new osg::ShapeDrawable(new osg::Capsule(osg::Vec3(0.0f,0.0f,0.0f),0.01, 0.005f), hints)); // draws a sphere
 	//sprintf(name, "some audio element");
 #endif
 	entry_geode->setUserData(new ACRefId(node_index));
+	//entry_geode->setName(name);
+	//ref_ptr//entry_geode->ref();
 }
 
-void ACOsgTextRenderer::prepareNodes() {
+void ACOsgSensorRenderer::prepareNodes() {
 	entry_geode = 0;
 	metadata_geode = 0;
-        metadata=0;
 
 	//if  (media_cycle->getMediaNode(node_index).isDisplayed()){
 	if  (media && media_cycle->getNodeFromMedia(media).isDisplayed()){
@@ -156,7 +162,7 @@ void ACOsgTextRenderer::prepareNodes() {
 		metadataGeode();
 }
 
-void ACOsgTextRenderer::updateNodes(double ratio) {
+void ACOsgSensorRenderer::updateNodes(double ratio) {
 
 	double xstep = 0.00025;
 
@@ -190,8 +196,18 @@ void ACOsgTextRenderer::updateNodes(double ratio) {
 		media_node->removeChild(metadata_geode);
 
 		//CF nodes colored along their relative cluster on in Clusters Mode
-		if (media_cycle->getBrowserMode() == AC_MODE_CLUSTERS)
-			((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(cluster_colors[attribute.getClusterId()%cluster_colors.size()]);
+		if (media_cycle->getBrowserMode() == AC_MODE_CLUSTERS){
+			const vector<int> centerNodeIds=media_cycle->getBrowser()->getIdNodeClusterCenter();
+			if(cluster_colors.size()>0){
+				if (centerNodeIds[attribute.getClusterId()]==attribute.getMediaId())
+					((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(osg::Vec4(0,0,0,1));
+				else
+					((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(cluster_colors[attribute.getClusterId()%cluster_colors.size()]);
+			}
+		}
+			
+		//	((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(cluster_colors[attribute.getClusterId()%cluster_colors.size()]);
+		
 		else
 			((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(node_color);
 		if (attribute.isSelected()) {
@@ -223,4 +239,4 @@ void ACOsgTextRenderer::updateNodes(double ratio) {
 	#endif
 
 }
-#endif //defined (SUPPORT_TEXT)
+#endif //defined (SUPPORT_SENSOR)

@@ -47,7 +47,7 @@ using namespace arma;
  */
 
 ACPcaPreprocessPlugin::ACPcaPreprocessPlugin() {
-    this->mMediaType = MEDIA_TYPE_ALL;
+    this->mMediaType = MEDIA_TYPE_ALL^MEDIA_TYPE_TEXT;
     //this->mPluginType = PLUGIN_TYPE_FEATURES;
     this->mName = "PcaPreprocess";
     this->mDescription = "Principal component analysis preprocess plugin";

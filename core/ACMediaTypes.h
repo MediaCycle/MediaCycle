@@ -46,7 +46,7 @@ const ACMediaType	MEDIA_TYPE_VIDEO		=	0x0004;
 const ACMediaType	MEDIA_TYPE_3DMODEL		=	0x0008;	
 const ACMediaType	MEDIA_TYPE_TEXT			=	0x0010;
 const ACMediaType	MEDIA_TYPE_PDF			=	0x0020;
-const ACMediaType	MEDIA_TYPE_SENSORDATA	=	0x0040;
+const ACMediaType	MEDIA_TYPE_SENSOR		=	0x0040;
 const ACMediaType	MEDIA_TYPE_MIXED		=	0x0080;
 const ACMediaType	MEDIA_TYPE_ALL			=	0xFFFF;
 
@@ -60,7 +60,7 @@ enum ACMediaTypeEnum {
 	MEDIA_3DMODEL,
 	MEDIA_TEXT,
 	MEDIA_PDF,
-	MEDIA_SENSORDATA,
+	MEDIA_SENSOR,
 	MEDIA_MIXED,  // for (future...) interface mixing media
 	MEDIA_ALL     // for plugins valid for all media
 };
@@ -77,7 +77,7 @@ stringToMediaTypeConverter::value_type("Video", MEDIA_TYPE_VIDEO), \
 stringToMediaTypeConverter::value_type("3DModel",MEDIA_TYPE_3DMODEL), \
 stringToMediaTypeConverter::value_type("Text",MEDIA_TYPE_TEXT), \
 stringToMediaTypeConverter::value_type("PDF", MEDIA_TYPE_PDF), \
-stringToMediaTypeConverter::value_type("Sensor data", MEDIA_TYPE_SENSORDATA), \
+stringToMediaTypeConverter::value_type("Sensor", MEDIA_TYPE_SENSOR), \
 stringToMediaTypeConverter::value_type("Mixed", MEDIA_TYPE_MIXED), \
 stringToMediaTypeConverter::value_type("All", MEDIA_TYPE_ALL)
 };

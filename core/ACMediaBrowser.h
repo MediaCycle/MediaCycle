@@ -310,6 +310,7 @@ public:
 	const vector<float> &getFeatureWeights(){return mFeatureWeights;};
 	const int &getClusterCount(){return mClusterCount;};
 	const vector<FeaturesVector> &getClusterCenter(int i){return mClusterCenters[i];};
+	const vector<int> &getIdNodeClusterCenter(){return mIdNodeClusterCenters;};
 	
 	
 private: // better not let the ouside world know about internal cooking
@@ -392,7 +393,7 @@ protected:
 	//vector<vector <int> > 		clusters;
 	//vector<vector<vector <float> > > mClusterCenters; // cluster index, feature index, descriptor index
 	vector<vector<FeaturesVector> > mClusterCenters; // cluster index, feature index, descriptor index
-	vector<int> mNodeIdClusterCenters;
+	vector<int> mIdNodeClusterCenters;
 	vector<float>			mFeatureWeights; // each value must be in [0,1], important for euclidian distance.
 
 	int auto_play;

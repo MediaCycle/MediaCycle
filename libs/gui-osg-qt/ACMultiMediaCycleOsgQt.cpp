@@ -80,13 +80,18 @@ void ACMultiMediaCycleOsgQt::mediaImported(int n,int nTot){
 		emit mediacycle_message_changed(QString(send.c_str()));
 		emit loading_finished();
 		this->updateLibrary();
+		
+		//Threading problem if we change during the import
+		if(media_cycle->getLibrary()->getParentIds().size()>=1){
+			dockWidgetsManager->updatePluginsSettings();
+		}
 	}
 	
 	if(n<nTot){
-
-		if(media_cycle->getLibrary()->getParentIds().size()==1){
-			dockWidgetsManager->updatePluginsSettings();
-		}
+//Threading problem if we change during the import
+		//if(media_cycle->getLibrary()->getParentIds().size()==1){
+		//	dockWidgetsManager->updatePluginsSettings();
+		//}
 		if (progressBar){
 			emit loading_file(n,nTot);
 			stringstream status_message;
@@ -1142,7 +1147,7 @@ void ACMultiMediaCycleOsgQt::loadDefaultConfig(ACMediaType _media_type, ACBrowse
 	}
 	else{
 		std::string p_plugin=this->getPluginPathFromBaseName("pcapreprocess");
-		media_cycle->addPluginLibrary(p_plugin);
+		//media_cycle->addPluginLibrary(p_plugin);
 		//media_cycle->setPreProcessPlugin("PcaPreprocess");
 		media_cycle->setPreProcessPlugin("");
 	}	

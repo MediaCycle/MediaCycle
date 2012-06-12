@@ -1,11 +1,10 @@
 /*
- *  ACOsgMediaDocumentRenderer.h
+ *  ArchipelMediaFactory.cpp
  *  MediaCycle
  *
- *  @author Christian Frisson
- *  @date 29/06/11
- *
- *  @copyright (c) 2011 – UMONS - Numediart
+ *  @author Thierry Ravet
+ *  @date 8/06/12
+ *  @copyright (c) 2012 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
  *  licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -33,33 +32,43 @@
  *
  */
 
-#ifndef __ACOSG_MULTIMEDIA_RENDERER_H__
-#define __ACOSG_MULTIMEDIA_RENDERER_H__
+#include "ArchipelMediaFactory.h"
+#include "ArchipelText.h"
 
-#if defined (SUPPORT_MULTIMEDIA)
+#include "boost/filesystem.hpp"   // includes all needed Boost.Filesystem declarations
+#include "boost/filesystem/operations.hpp"
+#include "boost/filesystem/path.hpp"
+namespace fs = boost::filesystem;
 
-#include "ACOsgMediaRenderer.h"
-#include <map>
+#include <string>
 
-typedef std::vector<ACOsgMediaRenderer*> ACOsgMediaRenderers;
+using namespace std;
 
-class ACOsgMediaDocumentRenderer : public ACOsgMediaRenderer {
-	
-protected:
-	ACOsgMediaRenderers media_renderers;
-	osg::ref_ptr<osg::Geode> metadata_geode;
-	osg::ref_ptr<osgText::Text> metadata;
-	osg::ref_ptr<osg::Geode> entry_geode;
-	
-	void entryGeode();	
-	void metadataGeode();
-public:
-	ACOsgMediaDocumentRenderer();
-	~ACOsgMediaDocumentRenderer();
-	void prepareNodes();
-	void updateNodes(double ratio=0.0);
-};
+ArchipelMediaFactory::ArchipelMediaFactory():ACMediaFactory(){}
 
-#endif //defined (SUPPORT_MULTIMEDIA)
+ArchipelMediaFactory::~ArchipelMediaFactory(){}
 
-#endif
+ACMedia* ArchipelMediaFactory::create(string file_ext){
+	boost::to_lower(file_ext);
+	filext::iterator iter = used_file_extensions.find(file_ext);
+	if( iter == used_file_extensions.end() ) {
+		return 0;
+	}
+	ACMediaType m = iter->second;
+	return ArchipelMediaFactory::create(m);
+}
+
+
+ACMedia* ArchipelMediaFactory::create(ACMediaType media_type){
+	switch (media_type) {
+		case MEDIA_TYPE_TEXT:
+#if defined (SUPPORT_TEXT)
+			return new ArchipelText();
+#endif //defined (SUPPORT_TEXT)
+			break;
+		default:
+			return ACMediaFactory::create(media_type);
+			break;
+	}
+	return 0;
+}

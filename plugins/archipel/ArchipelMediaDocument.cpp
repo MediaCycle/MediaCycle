@@ -35,6 +35,7 @@
 #include "ArchipelMediaDocument.h"
 
 #include "ArchipelReader.h"
+#include "ArchipelMediaFactory.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -72,13 +73,12 @@ int ArchipelMediaDocument::import(std::string _filename, int _mid, ACPluginManag
 			mediaType=MEDIA_TYPE_TEXT;
 			mediaFileName=filename;
 			mediaExtension = boost::filesystem::extension(mediaFileName);
-			fileMediaType = ACMediaFactory::getInstance().getMediaTypeFromExtension(mediaExtension);
+			fileMediaType = ArchipelMediaFactory::getInstance().getMediaTypeFromExtension(mediaExtension);
 			if (fileMediaType!=mediaType){
 				cout << "ArchipelMediaDocument::import other media type, skipping "  << endl;
 				return 0;
-			
 			}
-			media = ACMediaFactory::getInstance().create(mediaExtension);
+			media = ArchipelMediaFactory::getInstance().create(mediaExtension);
 			if (media->import(mediaFileName, this->getId()+nbMedia+1, acpl, _save_timed_feat)){
 				if (this->addMedia(mediaKey, media)){
 					//this->incrementMediaID();
@@ -96,13 +96,13 @@ int ArchipelMediaDocument::import(std::string _filename, int _mid, ACPluginManag
 			mediaType=MEDIA_TYPE_IMAGE;
 			mediaFileName=path+xmlDoc->getThumbPath();
 			mediaExtension = boost::filesystem::extension(mediaFileName);
-			fileMediaType = ACMediaFactory::getInstance().getMediaTypeFromExtension(mediaExtension);
+			fileMediaType = ArchipelMediaFactory::getInstance().getMediaTypeFromExtension(mediaExtension);
 			if (fileMediaType!=mediaType){
 				cout << "ArchipelMediaDocument::import other media type, skipping "  << endl;
 				return 0;
 				
 			}
-			media = ACMediaFactory::getInstance().create(mediaExtension);
+			media = ArchipelMediaFactory::getInstance().create(mediaExtension);
 			if (media->import(mediaFileName, this->getId()+nbMedia+1, acpl, _save_timed_feat)){
 				if (this->addMedia(mediaKey, media)){
 					//this->incrementMediaID();
@@ -125,13 +125,13 @@ int ArchipelMediaDocument::import(std::string _filename, int _mid, ACPluginManag
 				mediaFileName=path+tracksPaths[i];
 				//mediaFileName=mediaFileName.substr(0, mediaFileName.size()-4)+string(".wav");
 				mediaExtension = boost::filesystem::extension(mediaFileName);
-				fileMediaType = ACMediaFactory::getInstance().getMediaTypeFromExtension(mediaExtension);
+				fileMediaType = ArchipelMediaFactory::getInstance().getMediaTypeFromExtension(mediaExtension);
 				
 				if (fileMediaType!=mediaType){
 					cout << "ArchipelMediaDocument::impossible to import:"<< mediaFileName << endl;
 					continue;
 				}
-				media = ACMediaFactory::getInstance().create(mediaExtension);
+				media = ArchipelMediaFactory::getInstance().create(mediaExtension);
 				
 				//if (media->import(mediaFileName, this->getId()+nbMedia+1, acpl, true)){
 				//CF until large audio files can be imported, the above line is substituted by:
@@ -186,13 +186,13 @@ int ArchipelMediaDocument::import(std::string _filename, int _mid, ACPluginManag
 				string mediaFileName=xmlDoc->getMediaPath(i);
 				
 				string mediaExtension = boost::filesystem::extension(mediaFileName);
-				ACMediaType fileMediaType = ACMediaFactory::getInstance().getMediaTypeFromExtension(mediaExtension);
+				ACMediaType fileMediaType = ArchipelMediaFactory::getInstance().getMediaTypeFromExtension(mediaExtension);
 				if (fileMediaType!=mediaType){
 					cout << "ACMediaDocument::import other media type, skipping " << s_media_type << endl;
 					continue;
 				}
 				string mediaKey=xmlDoc->getMediaReference(i);
-				ACMedia *media = ACMediaFactory::getInstance().create(mediaExtension);
+				ACMedia *media = ArchipelMediaFactory::getInstance().create(mediaExtension);
 				if (media->import(path+mediaFileName, this->getId()+nbMedia+1, acpl, _save_timed_feat)){
 					if (this->addMedia(mediaKey, media)){
 						//this->incrementMediaID();

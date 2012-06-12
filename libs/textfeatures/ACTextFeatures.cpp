@@ -204,7 +204,7 @@ void extractLuceneFeature(std::vector<float> &output,int32_t docIndex,ACIndexMod
 		mc_wcstoutf8(charTemp,terms[i],1024);
 		if (tf[i]!=0.f)
 		{	
-			cout << charTemp<<"\ttf:\t"<<tf[i]<<"\tdf:\t"<<inputIndex->docFreq(&Term(_T("contents"),terms[i]))<<"\n";
+		//	cout << charTemp<<"\ttf:\t"<<tf[i]<<"\tdf:\t"<<inputIndex->docFreq(&Term(_T("contents"),terms[i]))<<"\n";
 			
 		}
 	}

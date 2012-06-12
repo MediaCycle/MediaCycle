@@ -41,9 +41,13 @@
 //the factories
 
 #include "ACNavimedReaderPlugin.h"
+#include "ACNavimedSensorFeaturePlugin.h"
 
 extern "C" ACPlugin* create(std::string namePlugin) {
-	if (namePlugin == "NavimedReaderPlugin") {return new ACNavimedReaderPlugin(MEDIA_TYPE_IMAGE);}
+	if (namePlugin == "NavimedReaderPlugin") {return new ACNavimedReaderPlugin(MEDIA_TYPE_TEXT);}
+	if (namePlugin == "NavimedSensorFeature") {return new ACNavimedSensorFeaturePlugin();}
+	
+	
 	
 }
 
@@ -54,6 +58,7 @@ extern "C" void destroy(ACPlugin* d) {
 extern "C" std::vector<std::string> list() {    //returns a string vector containing the plugin names included in the DLL file
 	std::vector<std::string> listPlugin;
 	listPlugin.push_back("NavimedReaderPlugin");
+	listPlugin.push_back("NavimedSensorFeature");
 	
 	return listPlugin;
 }

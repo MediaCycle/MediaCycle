@@ -48,9 +48,13 @@ public:
 	~navimedReader();
 	
 	bool isNavimed();
+	bool isNavimedBiology();
+	bool isNavimedRadiography();
+	
 	std::string getText(void);
 	std::string getSubject(void);
 	std::string getDescription(void);
+	bool getBioParam(std::string paramName,float &paramValue);
     std::string getReference(void); // getLaMediathequeReference
 	std::vector<std::string> getRadiosName(void);
 	std::string getThumbPath(void);
@@ -62,6 +66,8 @@ public:
 protected:
 	TiXmlDocument *mDoc;
 	std::string mFileName;
+	std::string mEncoding;
+	float convertValue(std::string valStr);
 	
 };
 

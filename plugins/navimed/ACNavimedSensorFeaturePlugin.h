@@ -1,11 +1,10 @@
 /*
- *  ACOsgMediaDocumentRenderer.h
+ *  ACNavimedSensorFeaturePlugin.h
  *  MediaCycle
  *
- *  @author Christian Frisson
- *  @date 29/06/11
- *
- *  @copyright (c) 2011 – UMONS - Numediart
+ *  @author Thierry Ravet
+ *  @date 9/06/12
+ *  @copyright (c) 2012 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
  *  licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -33,33 +32,19 @@
  *
  */
 
-#ifndef __ACOSG_MULTIMEDIA_RENDERER_H__
-#define __ACOSG_MULTIMEDIA_RENDERER_H__
+#ifndef ACNavimedSensorFeaturePlugin_h
+#define	ACNavimedSensorFeaturePlugin_h
 
-#if defined (SUPPORT_MULTIMEDIA)
+#include "ACPlugin.h"
+#include "ACMediaFeatures.h"
 
-#include "ACOsgMediaRenderer.h"
-#include <map>
-
-typedef std::vector<ACOsgMediaRenderer*> ACOsgMediaRenderers;
-
-class ACOsgMediaDocumentRenderer : public ACOsgMediaRenderer {
-	
-protected:
-	ACOsgMediaRenderers media_renderers;
-	osg::ref_ptr<osg::Geode> metadata_geode;
-	osg::ref_ptr<osgText::Text> metadata;
-	osg::ref_ptr<osg::Geode> entry_geode;
-	
-	void entryGeode();	
-	void metadataGeode();
+class ACNavimedSensorFeaturePlugin : public ACFeaturesPlugin {
 public:
-	ACOsgMediaDocumentRenderer();
-	~ACOsgMediaDocumentRenderer();
-	void prepareNodes();
-	void updateNodes(double ratio=0.0);
+    ACNavimedSensorFeaturePlugin();
+    virtual ~ACNavimedSensorFeaturePlugin();
+    virtual std::vector<ACMediaFeatures*> calculate(ACMediaData* aData, ACMedia* theMedia, bool _save_timed_feat = false);
+private:
 };
 
-#endif //defined (SUPPORT_MULTIMEDIA)
+#endif	/* ACNavimedSensorFeaturePlugin_h */
 
-#endif

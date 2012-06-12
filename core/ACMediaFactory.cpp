@@ -50,6 +50,9 @@
 #if defined (SUPPORT_PDF)
 #include "ACPDF.h"
 #endif //defined (SUPPORT_PDF)
+#if defined (SUPPORT_SENSOR)
+#include "ACSensor.h"
+#endif //defined (SUPPORT_SENSOR)
 #if defined (SUPPORT_MULTIMEDIA)
 #include "ACMediaDocument.h"
 #endif //defined (SUPPORT_MULTIMEDIA)
@@ -295,6 +298,11 @@ ACMedia* ACMediaFactory::create(ACMediaType media_type){
 			#if defined (SUPPORT_TEXT)
 			return new ACText();
 			#endif //defined (SUPPORT_TEXT)
+			break;
+		case MEDIA_TYPE_SENSOR:
+			#if defined (SUPPORT_SENSOR)
+			return new ACSensor();
+			#endif //defined (SUPPORT_PDF)
 			break;
         case MEDIA_TYPE_MIXED:
             #if defined (SUPPORT_MULTIMEDIA)

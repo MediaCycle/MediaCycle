@@ -1,10 +1,9 @@
 /*
- *  ACOsgMediaDocumentRenderer.h
+ *  ACSensorData.h
  *  MediaCycle
  *
- *  @author Christian Frisson
- *  @date 29/06/11
- *
+ *  @author Thierry Ravet
+ *  @date 02/05/11
  *  @copyright (c) 2011 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
@@ -33,33 +32,31 @@
  *
  */
 
-#ifndef __ACOSG_MULTIMEDIA_RENDERER_H__
-#define __ACOSG_MULTIMEDIA_RENDERER_H__
+#ifndef ACSENSORDATA_H
+#define ACSENSORDATA_H
 
-#if defined (SUPPORT_MULTIMEDIA)
-
-#include "ACOsgMediaRenderer.h"
+#if defined (SUPPORT_SENSOR)
+#include "ACMediaData.h"
+#include <cstdlib>
+#include <cstring>
+#include <string>
 #include <map>
 
-typedef std::vector<ACOsgMediaRenderer*> ACOsgMediaRenderers;
-
-class ACOsgMediaDocumentRenderer : public ACOsgMediaRenderer {
-	
-protected:
-	ACOsgMediaRenderers media_renderers;
-	osg::ref_ptr<osg::Geode> metadata_geode;
-	osg::ref_ptr<osgText::Text> metadata;
-	osg::ref_ptr<osg::Geode> entry_geode;
-	
-	void entryGeode();	
-	void metadataGeode();
+class ACSensorData: public ACMediaData {
 public:
-	ACOsgMediaDocumentRenderer();
-	~ACOsgMediaDocumentRenderer();
-	void prepareNodes();
-	void updateNodes(double ratio=0.0);
+	ACSensorData();
+	~ACSensorData();
+	ACSensorData(std::string _fname);
+
+	virtual bool readData(std::string _fname){};
+	virtual std::map<std::string,float>* getData() {return (sensor_ptr);}
+	virtual void setData(std::string* _data);	
+
+protected:
+	virtual void init();
+	std::map<std::string,float> * sensor_ptr;
+	
 };
 
-#endif //defined (SUPPORT_MULTIMEDIA)
-
-#endif
+#endif //defined (SUPPORT_SENSOR)
+#endif // ACSENSORDATA_H

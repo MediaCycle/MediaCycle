@@ -47,14 +47,12 @@ public:
 	~ACTextData();
 	ACTextData(std::string _fname);
 
-	bool readData(std::string _fname);
+	virtual bool readData(std::string _fname);
 	virtual void* getData() {return static_cast<void*>(text_ptr);}
-	void setData(std::string* _data);	
+	virtual void setData(std::string* _data);	
 
 protected:
 	virtual void init();
-
-private:
 	std::string* text_ptr;
 	
 };

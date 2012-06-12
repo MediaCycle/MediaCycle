@@ -49,6 +49,9 @@
 #if defined (SUPPORT_TEXT)
 #include "ACOsgTextRenderer.h"
 #endif //defined (SUPPORT_TEXT)
+#if defined (SUPPORT_SENSOR)
+#include "ACOsgSensorRenderer.h"
+#endif //defined (SUPPORT_SENSOR)
 #if defined (SUPPORT_MULTIMEDIA) 
 #include "ACOsgMediaDocumentRenderer.h"
 #endif //defined (SUPPORT_MULTIMEDIA) 
@@ -587,21 +590,23 @@ bool ACOsgBrowserRenderer::removeNodes(int _first, int _last){
                 media_group->removeChild((*iterm)->getNode());
                 delete *iterm;
                 *iterm = 0;
-            }
-        }
-        node_renderer.clear();
-        ok = true;
-    }
-    else {
-        for (int i=_first;i<_last;i++) {
-            media_group->removeChild(node_renderer[i]->getNode());
-            delete node_renderer[i];
-            node_renderer[i] = 0;
-        }
-        node_renderer.resize(_first);
-        ok = true;
-    }
-    return ok;
+			}	
+		}
+		node_renderer.clear();
+		ok = true;
+	}
+	else {
+		for (int i=_first;i<_last;i++) {
+			if (node_renderer[i]!=0){
+				media_group->removeChild(node_renderer[i]->getNode());
+				delete node_renderer[i];
+				node_renderer[i] = 0;
+			}
+		}
+		node_renderer.resize(_first);
+		ok = true;
+	}
+	return ok;
 }
 
 bool ACOsgBrowserRenderer::addNodes(int _first, int _last){
@@ -625,48 +630,52 @@ bool ACOsgBrowserRenderer::addNodes(int _first, int _last){
                 n = i;
             media_type = media_cycle->getMediaType(n);
 
-            if(media_cycle->getLibrary()->getMediaType() != MEDIA_TYPE_MIXED || (media_type == MEDIA_TYPE_MIXED||media_type == MEDIA_TYPE_AUDIO) ){
-                switch (media_type) {
-                case MEDIA_TYPE_AUDIO:
-#if defined (SUPPORT_AUDIO)
-                    node_renderer[i] = new ACOsgAudioRenderer();
-#endif //defined (SUPPORT_AUDIO)
-                    break;
-                case MEDIA_TYPE_IMAGE:
-#if defined (SUPPORT_IMAGE)
-                    node_renderer[i] = new ACOsgImageRenderer();
-#endif //defined (SUPPORT_IMAGE)
-                    break;
-                case MEDIA_TYPE_VIDEO:
-#if defined (SUPPORT_VIDEO)
-                    node_renderer[i] = new ACOsgVideoRenderer();
-#endif //defined (SUPPORT_VIDEO)
-                    break;
-                case MEDIA_TYPE_3DMODEL:
-#if defined (SUPPORT_3DMODEL)
-                    node_renderer[i] = new ACOsg3DModelRenderer();
-#endif //defined (SUPPORT_3DMODEL)
-                    break;
-                case MEDIA_TYPE_TEXT:
-#if defined (SUPPORT_TEXT)
-                    node_renderer[i] = new ACOsgTextRenderer();
-#endif //defined (SUPPORT_TEXT)
-                    break;
-                case MEDIA_TYPE_MIXED:
-#if defined (SUPPORT_MULTIMEDIA)
-                    node_renderer[i] = new ACOsgMediaDocumentRenderer();
-#endif //defined (SUPPORT_MULTIMEDIA)
-                    break;
-                default:
-                    node_renderer[i] = 0;
-                    break;
-                }
-            }
-            else
-                node_renderer[i] = 0;
-
-            if (node_renderer[i] != 0) {
-
+			if(media_cycle->getLibrary()->getMediaType() != MEDIA_TYPE_MIXED || (media_type == MEDIA_TYPE_MIXED||media_type == MEDIA_TYPE_AUDIO) ){
+				switch (media_type) {
+					case MEDIA_TYPE_AUDIO:
+						#if defined (SUPPORT_AUDIO)
+						node_renderer[i] = new ACOsgAudioRenderer();
+						#endif //defined (SUPPORT_AUDIO)
+						break;
+					case MEDIA_TYPE_IMAGE:
+						#if defined (SUPPORT_IMAGE)
+						node_renderer[i] = new ACOsgImageRenderer();
+						#endif //defined (SUPPORT_IMAGE)
+						break;
+					case MEDIA_TYPE_VIDEO:
+						#if defined (SUPPORT_VIDEO)
+						node_renderer[i] = new ACOsgVideoRenderer();
+						#endif //defined (SUPPORT_VIDEO)
+						break;
+					case MEDIA_TYPE_3DMODEL:
+						#if defined (SUPPORT_3DMODEL)
+						node_renderer[i] = new ACOsg3DModelRenderer();
+						#endif //defined (SUPPORT_3DMODEL)
+						break;
+					case MEDIA_TYPE_TEXT:
+						#if defined (SUPPORT_TEXT)
+						node_renderer[i] = new ACOsgTextRenderer();
+						#endif //defined (SUPPORT_TEXT)
+						break;
+					case MEDIA_TYPE_SENSOR:
+						#if defined (SUPPORT_SENSOR)
+						node_renderer[i] = new ACOsgSensorRenderer();
+						#endif //defined (SUPPORT_SENSOR)
+						break;
+					case MEDIA_TYPE_MIXED:
+						#if defined (SUPPORT_MULTIMEDIA) 
+						node_renderer[i] = new ACOsgMediaDocumentRenderer();
+						#endif //defined (SUPPORT_MULTIMEDIA) 
+						break;		
+					default:
+						node_renderer[i] = 0;
+						break;
+				}
+			}
+			else
+				node_renderer[i] = 0;
+				
+			if (node_renderer[i] != 0) {
                 node_renderer[i]->setMediaCycle(media_cycle);
                 node_renderer[i]->setNodeIndex(i);
                 node_renderer[i]->changeSetting(this->setting);

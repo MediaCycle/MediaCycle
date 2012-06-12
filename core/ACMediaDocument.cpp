@@ -151,6 +151,12 @@ void ACMediaDocument::defaultPreProcFeatureInit(void){
 		it->second->defaultPreProcFeatureInit();
 }
 
+void ACMediaDocument::cleanPreProcFeaturesVector(void){
+	std::map<std::string ,ACMedia* >::iterator it;
+	
+	for (it=mediaContainer.begin();it!=mediaContainer.end();it++)
+		it->second->cleanPreProcFeaturesVector();
+}
 
 void ACMediaDocument::init() {
 	media_type = MEDIA_TYPE_MIXED;

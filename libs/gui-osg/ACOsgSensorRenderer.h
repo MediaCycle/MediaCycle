@@ -1,9 +1,9 @@
 /*
- *  ACOsgMediaDocumentRenderer.h
+ *  ACOsgSensorRenderer.h
  *  MediaCycle
  *
- *  @author Christian Frisson
- *  @date 29/06/11
+ *  @author Christian Frisson and T. Ravet
+ *  @date 26/05/2011
  *
  *  @copyright (c) 2011 – UMONS - Numediart
  *  
@@ -33,33 +33,31 @@
  *
  */
 
-#ifndef __ACOSG_MULTIMEDIA_RENDERER_H__
-#define __ACOSG_MULTIMEDIA_RENDERER_H__
+#ifndef __ACOSG_SENSOR_RENDERER_H__
+#define __ACOSG_SENSOR_RENDERER_H__
 
-#if defined (SUPPORT_MULTIMEDIA)
+#if defined (SUPPORT_SENSOR)
 
 #include "ACOsgMediaRenderer.h"
-#include <map>
+#include <osgText/Font>
+#include <osgText/Text>
 
-typedef std::vector<ACOsgMediaRenderer*> ACOsgMediaRenderers;
-
-class ACOsgMediaDocumentRenderer : public ACOsgMediaRenderer {
+class ACOsgSensorRenderer : public ACOsgMediaRenderer {
 	
 protected:
-	ACOsgMediaRenderers media_renderers;
 	osg::ref_ptr<osg::Geode> metadata_geode;
 	osg::ref_ptr<osgText::Text> metadata;
 	osg::ref_ptr<osg::Geode> entry_geode;
 	
-	void entryGeode();	
+	void entryGeode();
 	void metadataGeode();
+
 public:
-	ACOsgMediaDocumentRenderer();
-	~ACOsgMediaDocumentRenderer();
+	ACOsgSensorRenderer();
+	~ACOsgSensorRenderer();
 	void prepareNodes();
 	void updateNodes(double ratio=0.0);
 };
 
-#endif //defined (SUPPORT_MULTIMEDIA)
-
+#endif //defined (SUPPORT_SENSOR)
 #endif

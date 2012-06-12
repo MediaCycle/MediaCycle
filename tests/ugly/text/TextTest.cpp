@@ -52,7 +52,7 @@ using namespace std;
 using namespace lucene::index;
 
 #include "MediaCycle.h"
-
+/*
 #include <ctime>
 const unsigned int NUM_INDENTS_PER_SPACE=2;
 
@@ -181,10 +181,9 @@ vector<ACMediaType> mediaExtract2(ACMediaType lMediaType){
 	}
 	return desc;
 }
-
-#include "SparseMatrixOperator.h"
-int main(void){
-	
+*/
+int main(void){return 0;}
+/*	
 	ACSparseVector testSVec1,testSVec2,testSVec3;
 	
 	testSVec1.resize(3);	
@@ -299,7 +298,7 @@ int main(void){
 		delete testMC;
 		
 		
-	}*/
+	}
 	
 	
 	string 	pathIndex=string("../../../../apps/textcycle-osg-qt/temp");
@@ -360,4 +359,4 @@ int main(void){
 	
 	
 
-}
+}*/

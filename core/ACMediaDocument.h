@@ -134,6 +134,8 @@ public:
 	 int getNumberOfPreProcFeaturesVectors() { return activeMedia->getNumberOfPreProcFeaturesVectors(); };
 	std::vector<std::string> getListOfPreProcFeaturesPlugins(){ return activeMedia->getListOfPreProcFeaturesPlugins(); };
 	void defaultPreProcFeatureInit(void);
+	void cleanPreProcFeaturesVector(void);
+
 	std::vector<std::string> getActivableMediaKeys(){return activableMediaKey;};
 	ACMedia* getActiveMedia(void){return activeMedia;};
 	std::string getActiveMediaKey(void){return activeMediaKey;};

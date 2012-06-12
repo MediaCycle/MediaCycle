@@ -1,11 +1,10 @@
 /*
- *  ACOsgMediaDocumentRenderer.h
+ *  NavimedMediaFactory.h
  *  MediaCycle
  *
- *  @author Christian Frisson
- *  @date 29/06/11
- *
- *  @copyright (c) 2011 – UMONS - Numediart
+ *  @author Thierry Ravet
+ *  @date 8/06/12
+ *  @copyright (c) 2012 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
  *  licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -33,33 +32,35 @@
  *
  */
 
-#ifndef __ACOSG_MULTIMEDIA_RENDERER_H__
-#define __ACOSG_MULTIMEDIA_RENDERER_H__
 
-#if defined (SUPPORT_MULTIMEDIA)
 
-#include "ACOsgMediaRenderer.h"
-#include <map>
+#ifndef _NavimedMEDIAFACTORY_H
+#define	_NavimedMEDIAFACTORY_H
 
-typedef std::vector<ACOsgMediaRenderer*> ACOsgMediaRenderers;
+#include "ACMediaFactory.h"
 
-class ACOsgMediaDocumentRenderer : public ACOsgMediaRenderer {
-	
-protected:
-	ACOsgMediaRenderers media_renderers;
-	osg::ref_ptr<osg::Geode> metadata_geode;
-	osg::ref_ptr<osgText::Text> metadata;
-	osg::ref_ptr<osg::Geode> entry_geode;
-	
-	void entryGeode();	
-	void metadataGeode();
+class NavimedMediaFactory: public ACMediaFactory{
 public:
-	ACOsgMediaDocumentRenderer();
-	~ACOsgMediaDocumentRenderer();
-	void prepareNodes();
-	void updateNodes(double ratio=0.0);
+	static ACMediaFactory & getInstance(){
+		boost::call_once(NavimedMediaFactory::call_once,once_flag);
+		return get_instance();
+	}
+	
+	ACMedia* create(std::string file_ext);
+	ACMedia* create(ACMediaType media_type);
+	
+private:
+	static NavimedMediaFactory & get_instance(){
+		static NavimedMediaFactory instance;
+		return instance;
+	}
+	static void call_once(){
+		NavimedMediaFactory::get_instance();
+	}
+protected:
+	
+	NavimedMediaFactory();
+	virtual ~NavimedMediaFactory();
+	
 };
-
-#endif //defined (SUPPORT_MULTIMEDIA)
-
-#endif
+#endif //_NavimedMEDIAFACTORY_H

@@ -1,11 +1,10 @@
 /*
- *  ACOsgMediaDocumentRenderer.h
+ *  ArchipelText.h
  *  MediaCycle
  *
- *  @author Christian Frisson
- *  @date 29/06/11
- *
- *  @copyright (c) 2011 – UMONS - Numediart
+ *  @author Thierry Ravet
+ *  @date 8/06/12
+ *  @copyright (c) 2012 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
  *  licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -33,33 +32,36 @@
  *
  */
 
-#ifndef __ACOSG_MULTIMEDIA_RENDERER_H__
-#define __ACOSG_MULTIMEDIA_RENDERER_H__
 
-#if defined (SUPPORT_MULTIMEDIA)
+#if defined (SUPPORT_TEXT)
 
-#include "ACOsgMediaRenderer.h"
-#include <map>
+#ifndef _ARCHIPELTEXT_H
+#define _ARCHIPELTEXT_H
+#include "ACText.h"
 
-typedef std::vector<ACOsgMediaRenderer*> ACOsgMediaRenderers;
 
-class ACOsgMediaDocumentRenderer : public ACOsgMediaRenderer {
-	
-protected:
-	ACOsgMediaRenderers media_renderers;
-	osg::ref_ptr<osg::Geode> metadata_geode;
-	osg::ref_ptr<osgText::Text> metadata;
-	osg::ref_ptr<osg::Geode> entry_geode;
-	
-	void entryGeode();	
-	void metadataGeode();
+class ArchipelTextData: public ACTextData {
 public:
-	ACOsgMediaDocumentRenderer();
-	~ACOsgMediaDocumentRenderer();
-	void prepareNodes();
-	void updateNodes(double ratio=0.0);
+	
+
+	ArchipelTextData();
+	~ArchipelTextData();
+	ArchipelTextData(std::string _fname);
+	
+	bool readData(std::string _fname);
+	
+private:
+	
 };
 
-#endif //defined (SUPPORT_MULTIMEDIA)
 
+class ArchipelText : public ACText {
+private:
+public:
+	ArchipelText();	
+	bool extractData(std::string fname);
+	
+};
+
+#endif//_ARCHIPELTEXT_H
 #endif

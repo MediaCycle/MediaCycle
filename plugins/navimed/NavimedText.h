@@ -1,11 +1,10 @@
 /*
- *  ACOsgMediaDocumentRenderer.h
+ *  NavimedText.h
  *  MediaCycle
  *
- *  @author Christian Frisson
- *  @date 29/06/11
- *
- *  @copyright (c) 2011 – UMONS - Numediart
+ *  @author Thierry Ravet
+ *  @date 8/06/12
+ *  @copyright (c) 2012 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
  *  licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -33,33 +32,36 @@
  *
  */
 
-#ifndef __ACOSG_MULTIMEDIA_RENDERER_H__
-#define __ACOSG_MULTIMEDIA_RENDERER_H__
 
-#if defined (SUPPORT_MULTIMEDIA)
+#if defined (SUPPORT_TEXT)
 
-#include "ACOsgMediaRenderer.h"
-#include <map>
+#ifndef _NavimedTEXT_H
+#define _NavimedTEXT_H
+#include "ACText.h"
 
-typedef std::vector<ACOsgMediaRenderer*> ACOsgMediaRenderers;
 
-class ACOsgMediaDocumentRenderer : public ACOsgMediaRenderer {
-	
-protected:
-	ACOsgMediaRenderers media_renderers;
-	osg::ref_ptr<osg::Geode> metadata_geode;
-	osg::ref_ptr<osgText::Text> metadata;
-	osg::ref_ptr<osg::Geode> entry_geode;
-	
-	void entryGeode();	
-	void metadataGeode();
+class NavimedTextData: public ACTextData {
 public:
-	ACOsgMediaDocumentRenderer();
-	~ACOsgMediaDocumentRenderer();
-	void prepareNodes();
-	void updateNodes(double ratio=0.0);
+	
+
+	NavimedTextData();
+	~NavimedTextData();
+	NavimedTextData(std::string _fname);
+	
+	bool readData(std::string _fname);
+	
+private:
+	
 };
 
-#endif //defined (SUPPORT_MULTIMEDIA)
 
+class NavimedText : public ACText {
+private:
+public:
+	NavimedText();	
+	bool extractData(std::string fname);
+	
+};
+
+#endif//_NavimedTEXT_H
 #endif

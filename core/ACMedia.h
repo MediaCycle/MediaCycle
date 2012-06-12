@@ -104,7 +104,7 @@ public:
 	void addPreProcFeaturesVector(ACMediaFeatures *aFeatures) { this->preproc_features_vectors.push_back(aFeatures); }
 	virtual std::vector<std::string> getListOfPreProcFeaturesPlugins();
 	int replacePreProcFeatures(std::vector<ACMediaFeatures*> newFeatures);
-	void cleanPreProcFeaturesVector(void);
+	virtual void cleanPreProcFeaturesVector(void);
 	virtual void defaultPreProcFeatureInit(void);
 	
 	std::string getFileName() { return filename; }

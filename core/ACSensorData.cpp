@@ -1,10 +1,9 @@
 /*
- *  ACOsgMediaDocumentRenderer.h
+ *  ACSensorData.cpp
  *  MediaCycle
  *
- *  @author Christian Frisson
- *  @date 29/06/11
- *
+ *  @author Thierry Ravet
+ *  @date 02/05/11
  *  @copyright (c) 2011 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
@@ -33,33 +32,46 @@
  *
  */
 
-#ifndef __ACOSG_MULTIMEDIA_RENDERER_H__
-#define __ACOSG_MULTIMEDIA_RENDERER_H__
+#if defined (SUPPORT_SENSOR)
+#include "ACSensorData.h"
+#include <string>
+#include <iostream>
 
-#if defined (SUPPORT_MULTIMEDIA)
+using namespace std;
+using std::cerr;
+using std::endl;
+using std::string;
 
-#include "ACOsgMediaRenderer.h"
-#include <map>
+ACSensorData::ACSensorData(){ 
+	this->init();
+}
 
-typedef std::vector<ACOsgMediaRenderer*> ACOsgMediaRenderers;
+void ACSensorData::init() {
+	media_type = MEDIA_TYPE_SENSOR;
+	sensor_ptr=0;
+}
 
-class ACOsgMediaDocumentRenderer : public ACOsgMediaRenderer {
+ACSensorData::ACSensorData(std::string _fname) { 
+	this->init();
+	file_name=_fname;
+	this->readData(_fname);
+}
+
+ACSensorData::~ACSensorData() {
+	if (sensor_ptr != 0) {
+		sensor_ptr->clear();
+		delete sensor_ptr;
+		sensor_ptr=0;
+	}
+}
+
+
+void ACSensorData::setData(string* _data){
 	
-protected:
-	ACOsgMediaRenderers media_renderers;
-	osg::ref_ptr<osg::Geode> metadata_geode;
-	osg::ref_ptr<osgText::Text> metadata;
-	osg::ref_ptr<osg::Geode> entry_geode;
+	if (sensor_ptr)
+		delete sensor_ptr;
 	
-	void entryGeode();	
-	void metadataGeode();
-public:
-	ACOsgMediaDocumentRenderer();
-	~ACOsgMediaDocumentRenderer();
-	void prepareNodes();
-	void updateNodes(double ratio=0.0);
-};
+	
+}
 
-#endif //defined (SUPPORT_MULTIMEDIA)
-
-#endif
+#endif //defined (SUPPORT_SENSOR)

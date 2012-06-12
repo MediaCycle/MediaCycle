@@ -1022,6 +1022,7 @@ void ACMediaBrowser::updateClustersKMeans(bool animate, int needsCluster) {
 	vector< float > 		cluster_distances; // for computation
 
 	mClusterCenters.resize(mClusterCount);
+	mIdNodeClusterCenters.resize(mClusterCount);
 	cluster_counts.resize(mClusterCount);
 	cluster_accumulators.resize(mClusterCount);
 	cluster_distances.resize(mClusterCount);
@@ -1119,12 +1120,8 @@ void ACMediaBrowser::updateClustersKMeans(bool animate, int needsCluster) {
 					cluster_distances[j] = 0;
 					if(mLibrary->getMedia(currId[i])->getType() == mLibrary->getMediaType())//CF multimedia compatibility
 						cluster_distances[j] = compute_distance(mLibrary->getMedia(currId[i])->getAllPreProcFeaturesVectors(), mClusterCenters[j], mFeatureWeights, false);
-					
-					
 					//printf("distance cluster %d to object %d = %f\n", j, i,  cluster_distances[j]);
 				}
-
-
 				// pick the one with smallest distance
 				int jmin;
 
@@ -1144,8 +1141,6 @@ void ACMediaBrowser::updateClustersKMeans(bool animate, int needsCluster) {
 					int desc_count = mLibrary->getMedia(currId[0])->getPreProcFeaturesVector(f)->getSize();
 					if(mLibrary->getMedia(currId[i])->getType() == mLibrary->getMediaType())//CF
 						cluster_accumulators[jmin][f].meanAdd( mLibrary->getMedia(currId[i])->getPreProcFeaturesVector(f)->getFeaturesVector());
-					
-					
 				}
 				
 			}
@@ -1165,9 +1160,7 @@ void ACMediaBrowser::updateClustersKMeans(bool animate, int needsCluster) {
 						int desc_count = mLibrary->getMedia(currId[0])->getPreProcFeaturesVector(f)->getSize();
 						cluster_accumulators[j][f]/=(float)cluster_counts[j];
 						stopDist+=mClusterCenters[j][f].distance(cluster_accumulators[j][f]);
-							mClusterCenters[j][f] = cluster_accumulators[j][f] ;
-				
-						
+						mClusterCenters[j][f] = cluster_accumulators[j][f] ;
 					}
 				}
 #ifdef VERBOSE
@@ -1178,29 +1171,34 @@ void ACMediaBrowser::updateClustersKMeans(bool animate, int needsCluster) {
 				break;
 		}
 	}
-
+	
+	vector<float> centerDistMin;
+	centerDistMin.resize(mClusterCount);
+	for (int j=0;j<mClusterCount;j++){
+		centerDistMin[j]=FLT_MAX;
+	}
 	// Assign Samples to Clusters
 	for(i=0; i<object_count; i++) {
-
 		// check if we should include this object
 		if(this->getMediaNode(currId[i]).getNavigationLevel() < mNavigationLevel) continue;
 
 		// compute distance between this object and every cluster
 		for(j=0; j<mClusterCount; j++) {
-
 			cluster_distances[j] = 0;
 			if(mLibrary->getMedia(currId[i])->getType() == mLibrary->getMediaType())//CF multimedia compatibility
 				cluster_distances[j] = compute_distance(mLibrary->getMedia(currId[i])->getAllPreProcFeaturesVectors(), mClusterCenters[j], mFeatureWeights, false);
-		}		
-		
+		}
 		// pick the one with smallest distance
 		int jmin;
 		jmin = min_element(cluster_distances.begin(), cluster_distances.end()) - cluster_distances.begin();
 
 		// assign cluster
 		this->getMediaNode(currId[i]).setClusterId(jmin);
+		if (cluster_distances[jmin]<centerDistMin[jmin]){
+			mIdNodeClusterCenters[jmin]=currId[i];
+			centerDistMin[jmin]=cluster_distances[jmin];
+		}
 	}
-
 }
 
 void ACMediaBrowser::setReferenceNode(int index)
@@ -1245,7 +1243,7 @@ void ACMediaBrowser::updateNextPositionsPropeller() {
 		dtmin[ci] = FLT_MAX;
 		dtmax[ci] = 0;
 	}
-	
+
 	// SD 2011 may - normalization of radius and angle to use full available range
 	for (ACMediaNodes::iterator node = mLoopAttributes.begin(); node != mLoopAttributes.end(); ++node) {
 		

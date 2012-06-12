@@ -114,6 +114,7 @@ void ACTextFeaturesPlugin::addMedia(ACMediaData* text_data, ACText* theMedia) {
 	//doc->add( *_CLNEW Field(_T("path"),strPath, Field::STORE_YES | Field::INDEX_UNTOKENIZED ) );
 	doc->add( *_CLNEW Field(_T("contents"),strData, Field::STORE_YES | Field::INDEX_TOKENIZED | Field::TERMVECTOR_WITH_POSITIONS) );
 	mIndex->addDocument( doc );
+	mIndex->flush();
 	_CLDELETE(doc);
 	theMedia->setDocIndex(lIndex);
 	delete strPath;
@@ -208,23 +209,33 @@ ACMediaFeatures* ACTextFeaturesPlugin::tfCalculate(ACText* pMedia){
 	int nbTerms=indexTerms.size();
 	//wchar_t**  charTerms= new TCHARPTR[nbTerms];
 	//for (int i=0;i<nbTerms;i++)
-	//	charTerms[i]=indexTerms[i];			
-	extractLuceneFeature(featureTest,pMedia->getDocIndex(),mIndex,indexTerms,nbTerms);
-	//for (int i=0;i<nbTerms;i++)
-	//	charTerms[i]=NULL;
-	//delete charTerms;
-	//charTerms=NULL;
+	//	charTerms[i]=indexTerms[i];		
+	
 	FeaturesVector  tfValues(true,FeaturesVector::Cosinus);
-	if (indexIdf.size()!=nbTerms)
-		return NULL;
-	for (int i=0;i<nbTerms;i++)
-	{
-		tfValues.push_back(featureTest[i]*indexIdf[i]);
-		char *tempChar=new char[wcslen(indexTerms[i])+2];
+	try{
+		extractLuceneFeature(featureTest,pMedia->getDocIndex(),mIndex,indexTerms,nbTerms);
+		//for (int i=0;i<nbTerms;i++)
+		//	charTerms[i]=NULL;
+		//delete charTerms;
+		//charTerms=NULL;
+		if (indexIdf.size()!=nbTerms)
+			return NULL;
+		for (int i=0;i<nbTerms;i++)
+		{
+			tfValues.push_back(featureTest[i]*indexIdf[i]);
+			char *tempChar=new char[wcslen(indexTerms[i])+2];
 		
-		mc_wcstoutf8(tempChar,indexTerms[i],wcslen(indexTerms[i])+2);
-		//wprintf(_T("%s"),indexTerms[i]);
-		delete tempChar;
+			//mc_wcstoutf8(tempChar,indexTerms[i],wcslen(indexTerms[i])+2);
+			//wprintf(_T("%s"),indexTerms[i]);
+			delete tempChar;
+		}
+		
+	}
+	catch(CLuceneError e){
+		for (int i=0;i<nbTerms;i++){
+			tfValues.push_back(0.f);
+			
+		}
 	}
 	ACMediaFeatures* desc=new ACMediaFeatures(tfValues,"Term Frequency-Inverse Document Frequency");
 	desc->setNeedsNormalization(1);
@@ -234,14 +245,14 @@ ACMediaFeatures* ACTextFeaturesPlugin::tfCalculate(ACText* pMedia){
 std::vector<ACMediaFeatures*> ACTextFeaturesPlugin::calculate(ACMediaData* text_data, ACMedia* theMedia, bool _save_timed_feat) {	
 	ACText* lMedia=(ACText*)theMedia;
 	addMedia(text_data,lMedia);
-	if (indexTerms.size()==0){
+	//if (indexTerms.size()==0){
 		//create the vector with all terms
-		indexTerms=indexTermsExtraction();		
-		indexIdf=indexIdfExtraction();
-		mIndexValid=true;
-	}		
-	else 
-		mIndexValid=false;
+		//indexTerms=indexTermsExtraction();		
+		//indexIdf=indexIdfExtraction();
+		//mIndexValid=true;
+	//}		
+//	else 
+//		mIndexValid=false;
 	std::vector<ACMediaFeatures*> desc;
 	FeaturesVector descVect(true,FeaturesVector::Cosinus);
 	descVect.push_back(1.f);
@@ -274,11 +285,25 @@ preProcessInfo ACTextFeaturesPlugin::update(std::vector<ACMedia*> media_library)
 
 std::vector<ACMediaFeatures*> ACTextFeaturesPlugin::apply(preProcessInfo info,ACMedia* theMedia){
 		
-	ACText* lMedia=(ACText*)theMedia;
+	bool flag= false;
+			std::vector<ACMediaFeatures*> desc;
+	while (flag==false){
+		try{
+			ACText* lMedia=(ACText*)theMedia;
 	
-	cout <<theMedia->getFileName()<<endl;
-	std::vector<ACMediaFeatures*> desc;
-	desc.push_back(this->tfCalculate(lMedia));
+			cout <<theMedia->getFileName()<<"id"<<lMedia->getDocIndex()<<endl;
+			desc.push_back(this->tfCalculate(lMedia));
+			flag=true;
+		}
+		catch (CLuceneError e) {
+			cout<<"number of doc:"<<mIndex->docCount()<<endl;
+			FeaturesVector descVect(true,FeaturesVector::Cosinus);
+			descVect.push_back(1.f);
+			ACMediaFeatures* descFeat=new ACMediaFeatures(descVect,"Term Frequency-Inverse Document Frequency");
+			desc.push_back(descFeat);
+			
+		}
+	}
 	
 	return desc;
 

@@ -53,6 +53,9 @@
 #if defined (SUPPORT_TEXT)
 #include "ACOsgTextRenderer.h"
 #endif //defined (SUPPORT_TEXT)
+#if defined (SUPPORT_SENSOR)
+#include "ACOsgSensorRenderer.h"
+#endif //defined (SUPPORT_SENSOR)
 
 #include "boost/filesystem.hpp"   // includes all needed Boost.Filesystem declarations
 //#include "boost/filesystem/operations.hpp"
@@ -67,6 +70,8 @@ namespace fs = boost::filesystem;
 using namespace osg;
 
 ACOsgMediaDocumentRenderer::ACOsgMediaDocumentRenderer() {
+	metadata_geode = 0;
+	metadata = 0;
 	entry_geode = 0;
 }
 
@@ -80,6 +85,60 @@ ACOsgMediaDocumentRenderer::~ACOsgMediaDocumentRenderer() {
 		delete (*render_iter);
 	}
 }
+
+
+
+void ACOsgMediaDocumentRenderer::metadataGeode() {
+	
+	osg::Vec4 textColor(0.9f,0.9f,0.9f,1.0f);
+	float textCharacterSize = 80.0f; // 10 pixels ? // broken with OSG v2.9.11??
+#if OSG_MIN_VERSION_REQUIRED(2,9,11)
+	textCharacterSize = 16.0f;
+#endif
+	metadata_geode = new Geode();
+	
+	metadata = new osgText::Text;
+	font = osgText::readFontFile("fonts/arial.ttf");
+	//text->setFont( font.get() );
+	if(font)
+		metadata->setFont(font);
+	metadata->setColor(textColor);
+	metadata->setCharacterSizeMode( osgText::Text::SCREEN_COORDS );
+	metadata->setCharacterSize(textCharacterSize);
+	metadata->setPosition(osg::Vec3(0,0.025,0.04));
+	//	text->setPosition(osg::Vec3(pos.x,pos.y,pos.z));
+	metadata->setLayout(osgText::Text::LEFT_TO_RIGHT);
+#if OSG_MIN_VERSION_REQUIRED(2,9,11)
+	metadata->setFontResolution(12,12);
+#else
+	metadata->setFontResolution(64,64);
+#endif
+	//metadata->setAlignment( osgText::Text::CENTER_CENTER );
+	//metadata->setAxisAlignment( osgText::Text::SCREEN );
+	
+	metadata->setDrawMode(osgText::Text::TEXT);// osgText::Text::BOUNDINGBOX, osgText::Text::ALIGNMENT
+	
+	// CF: temporary workaround as the ACUserLog tree and the ACLoopAttributes vector in ACMediaBrowser are not sync'd
+	/*int media_index = node_index; // or media_cycle->getBrowser()->getMediaNode(node_index).getMediaId();
+	 if (media_cycle->getBrowser()->getMode() == AC_MODE_NEIGHBORS)
+	 media_index = media_cycle->getBrowser()->getUserLog()->getMediaIdFromNodeId(node_index);*/
+	
+	//string textLabel=media_cycle->getLibrary()->getMedia(media_index)->getLabel();
+	string textLabel=media->getLabel();
+	
+	metadata->setText( textLabel );
+	
+	//state = text_geode->getOrCreateStateSet();
+	//state->setMode(GL_LIGHTING, osg::StateAttribute::PROTECTED | osg::StateAttribute::OFF );
+	//state->setMode(GL_BLEND, StateAttribute::ON);
+	//state->setMode(GL_LINE_SMOOTH, StateAttribute::ON);
+	
+	//TODO check this .get() (see also ACOsgBrowserRenderer.cpp)
+	//".get()" is necessary for compilation under linux (OSG v2.4)
+	metadata_geode->addDrawable(metadata);
+}
+
+
 
 void ACOsgMediaDocumentRenderer::entryGeode() {
 	
@@ -122,6 +181,9 @@ void ACOsgMediaDocumentRenderer::prepareNodes() {
 		entryGeode();
 		media_node->addChild(entry_geode);
 	}
+	
+	if (!metadata_geode)
+		metadataGeode();
 	
 	//ACMediaContainer medias = (static_cast<ACMediaDocument*> (media_cycle->getLibrary()->getMedia(media_index)))->getMedias();
 	ACMediaContainer medias = (static_cast<ACMediaDocument*> (media))->getContainer();
@@ -167,6 +229,7 @@ void ACOsgMediaDocumentRenderer::prepareNodes() {
 			media_renderers.back()->setMediaCycle(media_cycle);
 			
 			//render_iter->second->setMediaIndex(media_index);//dangerous! before each media of media documents are part of the library
+			//TODO TR problem with submedia node_index. We must fix it
 			media_renderers.back()->setMedia(iter->second);
 						
 			media_renderers.back()->prepareNodes();
@@ -203,11 +266,22 @@ void ACOsgMediaDocumentRenderer::updateNodes(double ratio) {
 	
 	if (attribute.getActivity()>=1) { // 0 inactive, 1 clicked, 2 hover
 		localscale = 0.5;
+		if(media_node->getNumChildren() == 1) // only entry_geode so far
+			media_node->addChild(metadata_geode);
 	}
-	else {		
+	else {
+		media_node->removeChild(metadata_geode);
 		//CF nodes colored along their relative cluster on in Clusters Mode
-		if (media_cycle->getBrowserMode() == AC_MODE_CLUSTERS)
-			((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(cluster_colors[attribute.getClusterId()%cluster_colors.size()]);
+		if (media_cycle->getBrowserMode() == AC_MODE_CLUSTERS){
+			const vector<int> centerNodeIds=media_cycle->getBrowser()->getIdNodeClusterCenter();
+			if(cluster_colors.size()>0){
+				if (centerNodeIds[attribute.getClusterId()]==attribute.getMediaId())
+					((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(osg::Vec4(0,0,0,1));
+				else
+					((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(cluster_colors[attribute.getClusterId()%cluster_colors.size()]);
+			}
+		}
+//			((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(cluster_colors[attribute.getClusterId()%cluster_colors.size()]);
 		else
 			((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(node_color);
 		if (attribute.isSelected()) {

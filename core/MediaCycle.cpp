@@ -315,7 +315,7 @@ int MediaCycle::importDirectories(vector<string> directories, int recursive, boo
 			ok++;
 			needsNormalizeAndCluster = 0;
 			if ( (mediaLibrary->getSize() >= int(prevLibrarySizeMultiplier * prevLibrarySize))
-				|| (i==n-1) ) {
+				|| (i==n-1)) {
 				needsNormalizeAndCluster = 1;
 				prevLibrarySize = mediaLibrary->getSize();
 			}
@@ -559,7 +559,7 @@ int MediaCycle::setActiveMediaType(std::string mediaName){
     int ret =mediaLibrary->setActiveMediaType(mediaName);
     ACMediaType aMediaType=mediaLibrary->getActiveSubMediaType();
     ACPreProcessPlugin* preProcessPlugin=pluginManager->getPreProcessPlugin(aMediaType);
-    if (preProcessPlugin) {
+    if (preProcessPlugin&&preProcessPlugin->mediaTypeSuitable(aMediaType)) {
         this->getLibrary()->setPreProcessPlugin(preProcessPlugin);
     }
     else

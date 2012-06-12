@@ -895,7 +895,7 @@ void ACMediaLibrary::calculateStats() {
 	// initialize to zero
 	int i,j,k;
 	for (i=0; i< number_of_features; i++) {
-		if (media_type != MEDIA_TYPE_MIXED || (media_type == MEDIA_TYPE_MIXED && media_library[i]->getMediaType() == media_type)){ //CF
+		if (media_type != MEDIA_TYPE_MIXED || (media_type == MEDIA_TYPE_MIXED && media_library[0]->getMediaType() == media_type)){ //CF
 			vector<double> tmp_vect;
 			for (j=0; j< media_library[0]->getFeaturesVector(i)->getSize(); j++) {
 				tmp_vect.push_back(0.0);
@@ -1003,8 +1003,8 @@ void ACMediaLibrary::normalizeFeatures(int needsNormalize) {
 			else
 			#endif//def SUPPORT_MULTIMEDIA	
 				tempFeatVect=mPreProcessPlugin->apply(mPreProcessInfo,item);
-			
-			item->getAllPreProcFeaturesVectors()=tempFeatVect;
+			for (int k=0;k<tempFeatVect.size();k++)
+				item->getAllPreProcFeaturesVectors().push_back(tempFeatVect[k]);
 			tempFeatVect.clear();
 		}		
 	}
