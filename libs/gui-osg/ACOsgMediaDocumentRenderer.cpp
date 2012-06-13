@@ -274,12 +274,12 @@ void ACOsgMediaDocumentRenderer::updateNodes(double ratio) {
 		//CF nodes colored along their relative cluster on in Clusters Mode
 		if (media_cycle->getBrowserMode() == AC_MODE_CLUSTERS){
 			const vector<int> centerNodeIds=media_cycle->getBrowser()->getIdNodeClusterCenter();
-			if(cluster_colors.size()>0){
-				if (centerNodeIds[attribute.getClusterId()]==attribute.getMediaId())
-					((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(osg::Vec4(0,0,0,1));
-				else
-					((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(cluster_colors[attribute.getClusterId()%cluster_colors.size()]);
-			}
+                        if(cluster_colors.size()>0){
+                                ((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(cluster_colors[attribute.getClusterId()%cluster_colors.size()]);
+                                if(centerNodeIds.size() != 0 && attribute.getClusterId() < centerNodeIds.size())
+                                    if (centerNodeIds[attribute.getClusterId()]==attribute.getMediaId())
+                                        ((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(osg::Vec4(0,0,0,1));
+                        }
 		}
 //			((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(cluster_colors[attribute.getClusterId()%cluster_colors.size()]);
 		else
