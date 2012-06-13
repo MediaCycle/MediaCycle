@@ -1,7 +1,7 @@
 /**
  * @brief ACPosPlugMakamHistoGramoPhone.h
- * @author Christian Frisson
- * @date 18/05/2012
+ * @author xavier
+ * @date 13/06/2012
  * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -31,7 +31,7 @@
 
 #include <armadillo>
 
-#include "ACPosPlugAudiogardenGramoPhone.h"
+#include "ACPosPlugAudioGardenGramoPhone.h"
 
 #ifndef _ACPosPlugMakamHistoGramoPhone_
 #define _ACPosPlugMakamHistoGramoPhone_
