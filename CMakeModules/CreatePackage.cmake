@@ -512,9 +512,9 @@ IF(SUPPORT_AUDIO AND USE_AUDIO AND USE_YAAFE)
 ENDIF()
 
 #--------------------------------------------------------------------------------
-# Install the YAAFE settings file
+# Install the makam libraries and templates
 IF(SUPPORT_AUDIO AND USE_AUDIO AND APPLE AND NOT USE_DEBUG AND USE_MAKAM)
-	file(GLOB_RECURSE M_FILES ${CMAKE_SOURCE_DIR}/3rdparty/octave_makam/*.m)
+	file(GLOB_RECURSE M_FILES ${CMAKE_SOURCE_DIR}/3rdparty/octave_makam/*.m ${CMAKE_SOURCE_DIR}/3rdparty/octave_makam/*.txt)
 	file(GLOB_RECURSE SOURCE_FILES ${CMAKE_SOURCE_DIR}/3rdparty/octave_yin/*.c)
 
 	INSTALL(CODE "FILE(MAKE_DIRECTORY ${CMAKE_INSTALL_PREFIX}/${PROGNAME}.app/Contents/Resources/octave_makam)")
@@ -562,6 +562,31 @@ INSTALL(CODE "
     include(BundleUtilities)
     fixup_bundle(\"${APPS}\" \"${MCPLUGINS};${OSGPLUGINS};${QTPLUGINS};${MEXFILES}\" \"${LINKED_DIRECTORIES}\")
     " COMPONENT Runtime)
+ENDIF()
+
+# Bundled octave libraries seem to prevent octave from launching from OSX apps (in release mode)
+# We replace the fixed-up octave libraries with the original ones, linked to local libs.
+# Warning! Octave.app then needs to be installed in the same directory and same version as the developer!
+IF(USE_OCTAVE)
+	##MESSAGE("OCTAVE_LINK_DIRS ${OCTAVE_LINK_DIRS}")
+	##MESSAGE("OCTAVE_LIBRARY ${OCTAVE_LIBRARY}")
+	##foreach(OCTAVE_LINK_DIR ${OCTAVE_LINK_DIRS})
+	##	MESSAGE("OCTAVE_LINK_DIR ${OCTAVE_LINK_DIR}")
+	##endforeach(OCTAVE_LINK_DIR)
+	foreach(OCTAVE_LIB ${OCTAVE_LIBRARY})
+		##MESSAGE("OCTAVE_LIB ${OCTAVE_LIB}")
+		FILE(GLOB BUNDLED_OCTAVE_LIB ${CMAKE_INSTALL_PREFIX}/${PROGNAME}.app/Contents/MacOS/lib${OCTAVE_LIB}*)
+		#MESSAGE("BUNDLED_OCTAVE_LIB ${BUNDLED_OCTAVE_LIB}")
+		GET_FILENAME_COMPONENT(BUNDLED_OCTAVE_LIB_NAME ${BUNDLED_OCTAVE_LIB} NAME)
+		##MESSAGE("BUNDLED_OCTAVE_LIB_NAME ${BUNDLED_OCTAVE_LIB_NAME}")
+		foreach(OCTAVE_LINK_DIR ${OCTAVE_LINK_DIRS})
+			FILE(GLOB INSTALLED_OCTAVE_LIB ${OCTAVE_LINK_DIR}/${BUNDLED_OCTAVE_LIB_NAME})
+			IF(INSTALLED_OCTAVE_LIB)
+				#MESSAGE("INSTALLED_OCTAVE_LIB ${INSTALLED_OCTAVE_LIB}")
+				INSTALL(PROGRAMS "${INSTALLED_OCTAVE_LIB}" DESTINATION ${PROGNAME}.app/Contents/MacOS COMPONENT Runtime)
+			ENDIF()
+		endforeach(OCTAVE_LINK_DIR)
+	endforeach(OCTAVE_LIB)
 ENDIF()
 
 IF(APPLE)

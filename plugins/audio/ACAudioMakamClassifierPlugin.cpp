@@ -51,12 +51,52 @@
 #include <armadillo>
 #include "Armadillo-utils.h"
 
+#ifdef __APPLE__
+#include <sys/param.h>
+#include <mach-o/dyld.h> /* _NSGetExecutablePath : must add -framework CoreFoundation to link line */
+#define MAXPATHLENGTH 256
+static std::string getExecutablePath(){
+    char *given_path;
+    std::string path("");
+    given_path = new char[MAXPATHLENGTH * 2];
+    if (!given_path) return path;
+    unsigned int pathsize = MAXPATHLENGTH * 2;
+    unsigned int result = _NSGetExecutablePath(given_path, &pathsize);
+    if (result == 0){
+        path = std::string (given_path);
+        size_t current=0;
+          while (current!=string::npos){
+              current=path.find("./",2);
+              if(current!=string::npos)
+                   path.replace(current,2,"");
+        }
+    }
+    free (given_path);
+    return path;
+}
+#endif
+
 ACAudioMakamClassifierPlugin::ACAudioMakamClassifierPlugin() : ACClusterMethodPlugin(){
     //vars herited from ACPlugin
     this->mMediaType = MEDIA_TYPE_AUDIO;
     this->mName = "AudioMakamClassifier";
     this->mDescription = "AudioMakamClassifier plugin";
     this->mId = "";
+
+    // Initiate octave
+    //char *sargv[0];
+    //octave_init(0, sargv);
+    string_vector argv (2);
+    argv(0) = "-V";
+    argv(1) = "-q";
+    octave_main (2, argv.c_str_vec(), 1);
+
+    #ifdef __APPLE__
+    std::cout << "Executable path '" << getExecutablePath() << "'" << std::endl;
+    boost::filesystem::path e_path( getExecutablePath() );
+    std::string r_path = e_path.parent_path().parent_path().string() + "/Resources/";
+    std::cout << "Resources path " << r_path << std::endl;
+    #endif
 }
 
 ACAudioMakamClassifierPlugin::~ACAudioMakamClassifierPlugin() {
@@ -64,21 +104,20 @@ ACAudioMakamClassifierPlugin::~ACAudioMakamClassifierPlugin() {
 
 void ACAudioMakamClassifierPlugin::updateClusters(ACMediaBrowser* mediaBrowser, bool needsCluster){
 
-    // Initiate octave
-    //char *sargv[0];
-    //octave_init(0, sargv);
-
     // Add the path to the makam toolbox and yin mex files
     boost::filesystem::path s_path( __FILE__ );
     std::cout << "Main source path: " << s_path.parent_path().parent_path().parent_path() << std::endl;
     boost::filesystem::path b_path( boost::filesystem::current_path() );
     std::cout << "Main build path " << b_path.parent_path().parent_path() << std::endl;
+    boost::filesystem::path i_path( boost::filesystem::initial_path() );
+    std::cout << "Initial path " << i_path << std::endl;
 
     std::string source_path(""),build_path(""),slash("/");
 #if defined(__APPLE__)
 #if not defined (USE_DEBUG) and not defined (XCODE) // needs "make install" to be ran to work
-    source_path = "@executable_path/../Resources/";
-    build_path = "@executable_path/../Resources/";
+    boost::filesystem::path e_path( getExecutablePath() );
+    source_path = e_path.parent_path().parent_path().string() + "/Resources/";
+    build_path = e_path.parent_path().parent_path().string() + "/Resources/";
 #else
 #if defined(XCODE)
     source_path = s_path.parent_path().parent_path().parent_path().parent_path().string() + "/3rdparty/";

@@ -9,10 +9,6 @@
 #include "ACAudioGardenFeaturesPlugin.h"
 #include "ACAudioYaafePlugin.h"
 #if defined(USE_OCTAVE) && defined(USE_MAKAM)
-#include <embed.h>
-#include <octave/oct.h>
-#include <octave/octave.h>
-#include <octave/parse.h>
 #include "ACAudioMakamFeaturesPlugin.h"
 #include "ACAudioMakamClassifierPlugin.h"
 #endif
@@ -42,7 +38,7 @@ extern "C" void destroy(ACPlugin* d) {
 extern "C" std::vector<std::string> list() {    //returns a string vector containing the plugin names included in the DLL file
     std::vector<std::string> listPlugin;
 #if defined(USE_DEBUG) && defined(USE_YAAFE)
-    //listPlugin.push_back("ACAudioYaafePlugin");
+    listPlugin.push_back("ACAudioYaafePlugin");
 #endif
     listPlugin.push_back("ACAudioFeaturesPlugin");
     //listPlugin.push_back("ACAudioHaitsmaFingerprintPlugin");
@@ -50,9 +46,6 @@ extern "C" std::vector<std::string> list() {    //returns a string vector contai
     //listPlugin.push_back("ACAudioFeaturesChromaRhythmPlugin");
     listPlugin.push_back("ACAudioAcidPlugin");
 #if defined(USE_OCTAVE) && defined(USE_MAKAM)
-    // Initiate octave
-    char *sargv[0];
-    octave_init(0, sargv);
     listPlugin.push_back("ACAudioMakamFeaturesPlugin");
     listPlugin.push_back("ACAudioMakamClassifierPlugin");
 #endif
