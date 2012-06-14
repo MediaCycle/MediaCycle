@@ -140,7 +140,7 @@ IF(UNIX)
                     list(APPEND UBUNTU_DEPS "libphonon4")
                 ENDIF()
 		IF(QWT_FOUND)
-                    list(APPEND UBUNTU_DEPS "libqwt5-qt4|libqwt6"
+                    list(APPEND UBUNTU_DEPS "libqwt5-qt4|libqwt6")
 		ENDIF()
             ENDIF()
  
@@ -525,14 +525,14 @@ IF(SUPPORT_AUDIO AND USE_AUDIO AND APPLE AND NOT USE_DEBUG AND USE_MAKAM)
 
 	foreach(SOURCE_FILE ${SOURCE_FILES})
 		GET_FILENAME_COMPONENT(MEX_FILE_NAME ${SOURCE_FILE} NAME_WE)
-		MESSAGE("Mex file ${MEX_FILE_NAME}")
+		#MESSAGE("Mex file ${MEX_FILE_NAME}")
 		SET(MEX_FILES "${MEX_FILES} ${CMAKE_BINARY_DIR}/3rdparty/octave_yin/${MEX_FILE_NAME}.mex")
 		INSTALL(PROGRAMS "${CMAKE_BINARY_DIR}/3rdparty/octave_yin/${MEX_FILE_NAME}.mex" DESTINATION ${PROGNAME}.app/Contents/Resources/octave_yin COMPONENT Runtime)
 		SET(MEXFILES "${MEXFILES};${CMAKE_INSTALL_PREFIX}/${PROGNAME}.app/Contents/Resources/octave_yin/${MEX_FILE_NAME}.mex")
 	endforeach(SOURCE_FILE)
 
-	MESSAGE("MEX_FILES ${MEX_FILES}")
-	MESSAGE("MEXFILES ${MEXFILES}")
+	#MESSAGE("MEX_FILES ${MEX_FILES}")
+	#MESSAGE("MEXFILES ${MEXFILES}")
 
 	INSTALL(FILES ${M_FILES} DESTINATION ${PROGNAME}.app/Contents/Resources/octave_makam COMPONENT Runtime)
 	#INSTALL(FILES ${MEX_FILES} DESTINATION ${PROGNAME}.app/Contents/Resources/octave_yin COMPONENT Runtime)
