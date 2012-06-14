@@ -190,8 +190,10 @@ void ACMedia::saveXML(TiXmlElement* media){
 	for (int i=0; i<this->getNumberOfSegments();i++) {
 		TiXmlElement* seg = new TiXmlElement( "Segment" );  
 		segments->LinkEndChild( seg );  
-		seg->SetAttribute("Start", this->getSegment(i)->getStart());
-		seg->SetAttribute("End", this->getSegment(i)->getEnd());
+		//cout << " START " << this->getSegment(i)->getStart() << endl;
+		//cout << " END " << this->getSegment(i)->getEnd() << endl;
+		seg->SetDoubleAttribute("Start", this->getSegment(i)->getStart()); //CPL	
+		seg->SetDoubleAttribute("End", this->getSegment(i)->getEnd()); //CPL
 		std::string s;
 		std::stringstream tmp;
 		tmp << this->getSegment(i)->getId();
@@ -428,14 +430,14 @@ void ACMedia::loadXML(TiXmlElement* _pMediaNode){
 			ACMedia* segment_media = ACMediaFactory::getInstance().create(this->getMediaType());
 			int n_start=-1;
 			int n_end=-1;
-			segmentElement->QueryIntAttribute("Start", &n_start);
+			segmentElement->QueryDoubleAttribute("Start", &n_start); //CPL: start & end are float!!
 			if (n_start < 0) {
 				delete segment_media;
 				throw runtime_error("corrupted XML file, wrong segment start");
 			}
 			segment_media->setStart(n_start);
 			
-			segmentElement->QueryIntAttribute("End", &n_end);
+			segmentElement->QueryDoubleAttribute("End", &n_end);// CPL
 			if (n_end < 0){
 				delete segment_media;
 				throw runtime_error("corrupted XML file, wrong segment end");
