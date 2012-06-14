@@ -59,6 +59,7 @@ private slots:
 public:
 	ACVideoControlsDockWidgetQt(QWidget *parent = 0);
 	~ACVideoControlsDockWidgetQt();
+        virtual bool canBeVisible(ACMediaType _media_type);
 
 #if defined (SUPPORT_VIDEO)	
 private:

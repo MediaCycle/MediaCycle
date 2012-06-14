@@ -50,9 +50,10 @@ int main(int argc, char *argv[])
 	try {
 		window.setWindowTitle("AudioCycle");
 		// Adding palettes
-		window.addControlDock("MCOSC");				 
-		window.addControlDock("MCBrowserControlsClusters");//"MCBrowserControlsClustersNeighbors");
-		window.addControlDock("MCAudioControls");
+                window.addControlDock("MCOSC");
+                window.addControlDock("MCBrowserControlsClusters");//"MCBrowserControlsClustersNeighbors");
+                window.addControlDock("MCAudioControls");
+                //window.addControlDock("MCSegmentationControls");
 		window.useSegmentationByDefault(true);
 
 		// XS TODO

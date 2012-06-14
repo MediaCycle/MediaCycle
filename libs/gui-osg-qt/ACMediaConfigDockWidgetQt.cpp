@@ -51,6 +51,10 @@ ACMediaConfigDockWidgetQt::ACMediaConfigDockWidgetQt(QWidget *parent)
     this->adjustSize();
 }
 
+bool ACMediaConfigDockWidgetQt::canBeVisible(ACMediaType _media_type){
+    return true;
+}
+
 void ACMediaConfigDockWidgetQt::on_comboLibrary_activated(const QString & text)
 {
     emit mediaTypeChanged(text);

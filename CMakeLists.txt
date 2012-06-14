@@ -860,9 +860,16 @@ IF ( USE_QT4 )
 		IF(NOT QT_PHONON_FOUND)
 			MESSAGE("Qt4 - Phonon not found, won't build iVisit applications.")
 		ENDIF()
+		FIND_PACKAGE ( Qwt REQUIRED)
+		IF(QWT_FOUND)
+			MESSAGE( "Qwt found in ${QWT_INCLUDE_DIR} (headers) and ${QWT_LIBRARY} (library), requiring ${QWT_LIBRARIES} (libraries)" )
+			INCLUDE_DIRECTORIES( ${QWT_INCLUDE_DIR} )
+			ADD_LIB_LINKED_DIR(${QWT_LIBRARY})
+		ENDIF() 
 
 		INCLUDE (${QT_USE_FILE})
 		MESSAGE( "Qt4 found in ${QT_LIBRARY_DIRS}: ${QT_LIBRARIES}" )
+
 		IF ( MINGW )
 			ADD_DEFINITIONS(-DQT_STATIC)
 			IF ( MINGW OR WIN32 ) # OR APPLE_IOS_XCODE OR APPLE_IOS_DEV OR APPLE_IOS_SIM

@@ -72,10 +72,8 @@ void ACOsgTextRenderer::metadataGeode() {
 	#endif
 	metadata_geode = new Geode();
 	metadata = new osgText::Text;
-	if(font)
-		metadata->setFont(font);
-	//font = osgText::readFontFile("fonts/arial.ttf");
-	//text->setFont( font.get() );
+        if(font)
+            metadata->setFont(font);
 	metadata->setColor(textColor);
 	metadata->setCharacterSizeMode( osgText::Text::SCREEN_COORDS );
 	metadata->setCharacterSize(textCharacterSize);

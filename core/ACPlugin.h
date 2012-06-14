@@ -49,6 +49,20 @@ class ACMedia;
 class ACMediaBrowser;
 class ACMediaTimedFeature;
 
+struct ACNumberParameter{
+    std::string name,desc;
+    float value,init,min,max,step;
+    ACNumberParameter():name(""),value(0.0f),init(0.0f),min(0.0f),max(0.0f),step(0.0f),desc(""){}
+    ACNumberParameter(std::string _name, float _init, float _min, float _max, float _step, std::string _desc):name(_name),value(_init),init(_init),min(_min),max(_max),step(_step),desc(_desc){}
+};
+
+struct ACStringParameter{
+    std::string name,value,init,desc;
+    std::vector<std::string> values;
+    ACStringParameter():name(""),value(""),init(""),desc(""){}
+    ACStringParameter(std::string _name, std::string _init, std::vector<std::string> _values, std::string _desc):name(_name),values(_values),value(_init),init(_init),desc(_desc){}
+};
+
 typedef		unsigned int ACPluginType;
 const ACPluginType	PLUGIN_TYPE_NONE				=	0x0000;
 const ACPluginType	PLUGIN_TYPE_FEATURES			=	0x0001;
@@ -70,24 +84,56 @@ const ACPluginType	PLUGIN_TYPE_MEDIAREADER			=	0x4000;//CF updateClusters and up
 
 class ACPlugin {
 public:
-	ACPlugin();
-	bool implementsPluginType(ACPluginType pType);
-	bool mediaTypeSuitable(ACMediaType);
-	virtual ~ACPlugin() {mName.clear(); mDescription.clear(); mId.clear();};
-	std::string getName() {return this->mName;};
-	std::string getIdentifier() {return this->mId;};
-	std::string getDescription() {return this->mDescription;};
-	ACMediaType getMediaType() {return this->mMediaType;};
-	ACPluginType getPluginType() {return this->mPluginType;};
-
-		//XSCF TODO: should the plugin receive MediaCycle ?
+    ACPlugin();
+    bool implementsPluginType(ACPluginType pType);
+    bool mediaTypeSuitable(ACMediaType);
+    virtual ~ACPlugin() {mName.clear(); mDescription.clear(); mId.clear();};
+    std::string getName() {return this->mName;};
+    std::string getIdentifier() {return this->mId;};
+    std::string getDescription() {return this->mDescription;};
+    ACMediaType getMediaType() {return this->mMediaType;};
+    ACPluginType getPluginType() {return this->mPluginType;};
+    //XSCF TODO: should the plugin receive MediaCycle ?
 
 protected:
-	std::string mName;
-	std::string mId;
-	std::string mDescription;
-	ACPluginType mPluginType;
-	ACMediaType mMediaType;
+    void addStringParameter(std::string _name, std::string _init, std::vector<std::string> _values, std::string _desc);
+    void addNumberParameter(std::string _name, float _init, float _min, float _max, float _step, std::string _desc);
+
+public:
+    int getParametersCount();
+
+    void resetParameterValue(std::string _name);
+
+    std::vector<ACStringParameter> getStringParameters();
+    int getStringParametersCount();
+    bool setStringParameterValue(std::string _name, std::string _value);
+    std::string getStringParameterValue(std::string _name);
+    int getStringParameterValueIndex(std::string _name);
+    std::string getStringParameterInit(std::string _name);
+    int getStringParameterInitIndex(std::string _name);
+    std::string getStringParameterDesc(std::string _name);
+    std::vector<std::string> getStringParameterValues(std::string _name);
+    std::vector<std::string> getStringParametersNames();
+
+    std::vector<ACNumberParameter> getNumberParameters();
+    int getNumberParametersCount();
+    bool setNumberParameterValue(std::string _name, float _value);
+    float getNumberParameterValue(std::string _name);
+    float getNumberParameterMin(std::string _name);
+    float getNumberParameterMax(std::string _name);
+    float getNumberParameterStep(std::string _name);
+    float getNumberParameterInit(std::string _name);
+    std::string getNumberParameterDesc(std::string _name);
+    std::vector<std::string> getNumberParametersNames();
+
+protected:
+    std::string mName;
+    std::string mId;
+    std::string mDescription;
+    ACPluginType mPluginType;
+    ACMediaType mMediaType;
+    std::vector<ACStringParameter> mStringParameters;
+    std::vector<ACNumberParameter> mNumberParameters;
 };
 
 // XS TODO : separate time & space plugins ?
@@ -95,81 +141,81 @@ protected:
 class ACFeaturesPlugin: virtual public ACPlugin
 {
 protected:
-	ACFeaturesPlugin();
-	
+    ACFeaturesPlugin();
+
 public:
-	virtual std::vector<ACMediaFeatures*> calculate(ACMediaData* aData, ACMedia* theMedia, bool _save_timed_feat=false)=0;
-	std::vector<std::string> getDescriptorsList() {return this->mDescriptorsList;}
-	// XS TODO is this the best way to proceed when no timed features ?
-	virtual ACMediaTimedFeature* getTimedFeatures(std::string mtf_file_name){return 0;}
+    virtual std::vector<ACMediaFeatures*> calculate(ACMediaData* aData, ACMedia* theMedia, bool _save_timed_feat=false)=0;
+    std::vector<std::string> getDescriptorsList() {return this->mDescriptorsList;}
+    // XS TODO is this the best way to proceed when no timed features ?
+    virtual ACMediaTimedFeature* getTimedFeatures(std::string mtf_file_name){return 0;}
 protected:	
-	std::vector<std::string> mDescriptorsList;
+    std::vector<std::string> mDescriptorsList;
 };
 
 // separate time-dependent plugins from other
 // e.g.,  getTimedFeatures has no sense for image
 class ACTimedFeaturesPlugin: virtual public ACFeaturesPlugin{
 protected:
-	ACTimedFeaturesPlugin();
-	// XS TODO add a protected setmftfilename instead of making mtf_file_name protected
-	//std::vector<std::string> mtf_file_names// file in which features have been saved
+    ACTimedFeaturesPlugin();
+    // XS TODO add a protected setmftfilename instead of making mtf_file_name protected
+    //std::vector<std::string> mtf_file_names// file in which features have been saved
 public:
-	//std::vector<std::string> getSavedFileName(){return mtf_file_name;}
-	virtual ACMediaTimedFeature* getTimedFeatures(std::string mtf_file_name);
-	std::string saveTimedFeatures(ACMediaTimedFeature* mtf=0, std::string aFileName="", bool _save_timed_feat = true, bool _save_binary = true);
+    //std::vector<std::string> getSavedFileName(){return mtf_file_name;}
+    virtual ACMediaTimedFeature* getTimedFeatures(std::string mtf_file_name);
+    std::string saveTimedFeatures(ACMediaTimedFeature* mtf=0, std::string aFileName="", bool _save_timed_feat = true, bool _save_binary = true);
 };
 
 class ACSegmentationPlugin: virtual public ACPlugin
 {
 protected:
 public:
-	ACSegmentationPlugin();
-	virtual std::vector<ACMedia*> segment(ACMediaTimedFeature* _mtf, ACMedia*)=0;
-	virtual std::vector<ACMedia*> segment(ACMediaData* _data, ACMedia*)=0;
+    ACSegmentationPlugin();
+    virtual std::vector<ACMedia*> segment(ACMediaTimedFeature* _mtf, ACMedia*)=0;
+    virtual std::vector<ACMedia*> segment(ACMediaData* _data, ACMedia*)=0;
 };
 
 class ACNeighborMethodPlugin : virtual public ACPlugin {
 public:
-	ACNeighborMethodPlugin();
-	virtual void updateNeighborhoods(ACMediaBrowser* )=0;
+    ACNeighborMethodPlugin();
+    virtual void updateNeighborhoods(ACMediaBrowser* )=0;
 protected:
 };
 
 
 class ACClusterMethodPlugin : virtual public ACPlugin {
 public:
-	ACClusterMethodPlugin();
-	virtual void updateClusters(ACMediaBrowser* mediaBrowser ,bool needsCluster=true)=0;//updateClustersKMeans(animate, needsCluster)
+    ACClusterMethodPlugin();
+    virtual void updateClusters(ACMediaBrowser* mediaBrowser ,bool needsCluster=true)=0;//updateClustersKMeans(animate, needsCluster)
 protected:
 };
 
 
 class ACPositionsPlugin : virtual public ACPlugin {
 public:
-	ACPositionsPlugin();
-	virtual void updateNextPositions(ACMediaBrowser* )=0;
+    ACPositionsPlugin();
+    virtual void updateNextPositions(ACMediaBrowser* )=0;
 protected:
 };
 
 //TODO TR These three plugin has the same interface but not the same constructor. This should be replaced by a versus without ACMediaBrowser access
 class ACClusterPositionsPlugin : virtual public ACPlugin {
 public:
-	ACClusterPositionsPlugin();
-	virtual void updateNextPositions(ACMediaBrowser* )=0;
+    ACClusterPositionsPlugin();
+    virtual void updateNextPositions(ACMediaBrowser* )=0;
 protected:
 };
 
 class ACNeighborPositionsPlugin : virtual public ACPlugin {
 public:
-	ACNeighborPositionsPlugin();
-	virtual void updateNextPositions(ACMediaBrowser* )=0;
+    ACNeighborPositionsPlugin();
+    virtual void updateNextPositions(ACMediaBrowser* )=0;
 protected:
 };
 
 class ACNoMethodPositionsPlugin : virtual public ACPlugin {
 public:
-	ACNoMethodPositionsPlugin();
-	virtual void updateNextPositions(ACMediaBrowser* )=0;
+    ACNoMethodPositionsPlugin();
+    virtual void updateNextPositions(ACMediaBrowser* )=0;
 protected:
 };
 
@@ -177,18 +223,18 @@ typedef void* preProcessInfo;
 
 class ACPreProcessPlugin : virtual public ACPlugin {
 public:
-	ACPreProcessPlugin();
-	virtual preProcessInfo update(std::vector<ACMedia*> media_library)=0;
-	virtual std::vector<ACMediaFeatures*> apply(preProcessInfo info,ACMedia* theMedia)=0;
-	virtual void freePreProcessInfo(preProcessInfo &info)=0;
+    ACPreProcessPlugin();
+    virtual preProcessInfo update(std::vector<ACMedia*> media_library)=0;
+    virtual std::vector<ACMediaFeatures*> apply(preProcessInfo info,ACMedia* theMedia)=0;
+    virtual void freePreProcessInfo(preProcessInfo &info)=0;
 protected:
 };
 
 class ACMediaReaderPlugin:virtual public ACPlugin{
 public:
-	ACMediaReaderPlugin();
-	virtual ACMedia* mediaFactory(ACMediaType mediaType)=0;
-	virtual std::vector<std::string> getExtensionsFromMediaType(ACMediaType media_type)=0;
+    ACMediaReaderPlugin();
+    virtual ACMedia* mediaFactory(ACMediaType mediaType)=0;
+    virtual std::vector<std::string> getExtensionsFromMediaType(ACMediaType media_type)=0;
 };
 
 // the types of the class factories

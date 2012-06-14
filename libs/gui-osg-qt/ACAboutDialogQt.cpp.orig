@@ -74,9 +74,6 @@ void ACAboutDialogQt::updateLicenses(){
 #if defined (SUPPORT_AUDIO) && defined (USE_OPENAL)
     html.append ("<li><a href=\"http://kcat.strangesoft.net/openal.html\">OpenAL-soft</a>: LPGL License</li>");
 #endif //defined (SUPPORT_AUDIO) || defined (USE_OPENAL)
-#if defined (USE_OCTAVE)
-    html.append ("<li><a href=\"http://www.octave.org\">Octave</a>: GPL License</li>");
-#endif //defined (USE_OCTAVE)
 #if defined (SUPPORT_VIDEO) && defined (SUPPORT_IMAGE)
     html.append ("<li><a href=\"http://opencv.willowgarage.com\">OpenCV</a>: BSD License</li>");
 #endif //defined (SUPPORT_VIDEO) || defined (SUPPORT_IMAGE)
@@ -103,14 +100,6 @@ void ACAboutDialogQt::updateLicenses(){
     html.append ("<li><a href=\"http://yaafe.sourceforge.net\">Yet another audio features extraction (Yaafe)</a>: LPGL License</li>");
 #endif //defined (SUPPORT_AUDIO) && defined (USE_YAAFE)
     html.append ("</ul>");
-#if defined (USE_OCTAVE)
-    html.append ("<br/><br/>This current release packages as well the following Octave/Matlab libraries, used through an Octave wrapper:<br/><ul>");
-#if defined (USE_MAKAM)
-    html.append ("<li><a href=\"ftp://ftp.iyte.edu.tr/share/ktm-nota/TuningMeasurement.html\">Makam Toolbox</a> from Bari&#351; Bozkurt et al, ported to Octave by Onur Babacan</li>");
-    html.append ("<li><a href=\"http://cognition.ens.fr/audition/adc/sw/yin.zip\">YIN</a> mex libraries from Alain de Cheveing&eacute; et al: copyright for research purposes only)</li>");
-#endif //defined (USE_MAKAM)
-    html.append ("</ul>");
-#endif //defined (USE_OCTAVE)
     ui.multiLineEditLicenses->document()->setHtml(html);
 }
 

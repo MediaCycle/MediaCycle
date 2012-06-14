@@ -104,7 +104,7 @@ void ACMultiMediaCycleOsgQt::mediaImported(int n,int nTot){
 
 // ----------- 
 
-ACMultiMediaCycleOsgQt::ACMultiMediaCycleOsgQt(QWidget *parent) : QMainWindow(parent),features_known(false),detachedBrowser(0),	aboutDialog(0),controlsDialog(0),compositeOsgView(0),osgViewDock(0),osgViewDockWidget(0),osgViewDockLayout(0),osgViewDockTitleBar(0),progressBar(0),metadataWindow(0),userProfileWindow(0)
+ACMultiMediaCycleOsgQt::ACMultiMediaCycleOsgQt(QWidget *parent) : QMainWindow(parent),features_known(false),detachedBrowser(0),	aboutDialog(0),controlsDialog(0),compositeOsgView(0),osgViewDock(0),osgViewDockWidget(0),osgViewDockLayout(0),osgViewDockTitleBar(0),progressBar(0),metadataWindow(0),userProfileWindow(0),segmentationDialog(0)
 {
 	ui.setupUi(this); // first thing to do
 	this->media_type = MEDIA_TYPE_NONE;
@@ -240,6 +240,7 @@ ACMultiMediaCycleOsgQt::~ACMultiMediaCycleOsgQt(){
 	this->destroyMediaCycle();
         if (metadataWindow) delete metadataWindow;
         if (userProfileWindow) delete userProfileWindow;
+        if (segmentationDialog) delete segmentationDialog;
 }
 
 void ACMultiMediaCycleOsgQt::setMediaType(ACMediaType _mt)
@@ -461,7 +462,7 @@ bool ACMultiMediaCycleOsgQt::readXMLConfig(string _filename){
 	}
 	
 	ACPluginManager* acpl = media_cycle->getPluginManager();
-	if (acpl->getFeaturesPluginsSize(media_type) &&/*acpl->getFeaturesPlugins()->getSize(media_type)>0 &&*/ !use_feature_extraction){ // if no feature extraction plugin was loaded before opening the XML and if the XML loaded one
+        if (acpl->getAvailableFeaturesPluginsSize(media_type) &&/*acpl->getFeaturesPlugins()->getSize(media_type)>0 &&*/ !use_feature_extraction){ // if no feature extraction plugin was loaded before opening the XML and if the XML loaded one
 		this->showError("Feature extraction plugin(s) now loaded again. Importing media files now enabled.");
 		this->switchFeatureExtraction(true);
 	}
@@ -656,6 +657,19 @@ bool ACMultiMediaCycleOsgQt::doSegments(){
 			do_segments = true;
 		}
         }*/
+
+        if(!use_segmentation_current)
+            return do_segments;
+
+        if(!segmentationDialog)
+            segmentationDialog = new ACSegmentationControlsDialogQt(this);
+        segmentationDialog->setMediaCycle(media_cycle);
+        segmentationDialog->updatePluginsSettings();
+
+        if (segmentationDialog->exec()){
+            if(segmentationDialog->result() == 1)
+                do_segments = true;
+        }
 	return do_segments;
 }
 

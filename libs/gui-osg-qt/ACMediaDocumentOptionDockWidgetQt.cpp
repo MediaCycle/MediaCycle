@@ -1,7 +1,7 @@
 /**
  * @brief ACMediaDocumentOptionDockWidgetQt.cpp
  * @author Christian Frisson
- * @date 16/02/2012
+ * @date 14/06/2012
  * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -33,7 +33,7 @@
 
 ACMediaDocumentOptionDockWidgetQt::ACMediaDocumentOptionDockWidgetQt(QWidget *parent)
 #ifdef SUPPORT_MULTIMEDIA
-:ACAbstractDockWidgetQt(parent, MEDIA_TYPE_ALL,"ACMediaDocumentOptionDockWidgetQt")
+:ACAbstractDockWidgetQt(parent, MEDIA_TYPE_MIXED,"ACMediaDocumentOptionDockWidgetQt")
 #endif//def SUPPORT_MULTIMEDIA
 {
     ui.setupUi(this);
@@ -44,6 +44,10 @@ ACMediaDocumentOptionDockWidgetQt::ACMediaDocumentOptionDockWidgetQt(QWidget *pa
 }
 
 ACMediaDocumentOptionDockWidgetQt::~ACMediaDocumentOptionDockWidgetQt(){
+}
+
+bool ACMediaDocumentOptionDockWidgetQt::canBeVisible(ACMediaType _media_type){
+    return (_media_type == this->getMediaType());
 }
 
 #ifdef SUPPORT_MULTIMEDIA

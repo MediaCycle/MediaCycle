@@ -617,7 +617,7 @@ int ACMedia::extractFeatures(ACPluginManager *acpl, bool _save_timed_feat) {
     if (acpl) {
         //TR : new implementation to calculate the features
         ACMediaData* local_media_data=dynamic_cast<ACMediaData*>(this->getMediaData());
-        this->features_vectors=acpl->getFeaturesPlugins()->calculate(local_media_data, this, _save_timed_feat);
+        this->features_vectors=acpl->getAvailableFeaturesPlugins()->calculate(local_media_data, this, _save_timed_feat);
 
         // Checking if any of the media features is empty:
         std::vector<ACMediaFeatures*>::iterator features_vector;
@@ -674,14 +674,14 @@ int ACMedia::segment(ACPluginManager *acpl, bool _saved_timed_features ) {
 		
 		// should not use all segmentation plugins -- choose one using menu !!	
 		// XS TODO: check that ft_from_disk is not empty
-		afv=acpl->getSegmentPlugins()->segment(ft_from_disk,this);
+                afv=acpl->getActiveSegmentPlugins()->segment(ft_from_disk,this);
 	}
 	
 	// XS TODO change me!!
 	// this is very spefic to the audio segmentation plugin...
 	// i.e., not _saved_timed_features		
 	else {
-		afv=acpl->getSegmentPlugins()->segment(this->getMediaData(), this);
+                afv=acpl->getActiveSegmentPlugins()->segment(this->getMediaData(), this);
 	}
 	for (unsigned int Iafv=0; Iafv<afv.size(); Iafv++){
  //           cout << "segment " << Iafv << " - id = " << afv[Iafv]->getId() << endl;

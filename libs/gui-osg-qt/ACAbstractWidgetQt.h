@@ -1,10 +1,10 @@
 /*
- *  ACAbstractDockWidget.h
+ *  ACAbstractWidgetQt.h
  *  MediaCycle
  *
  *  @author Christian Frisson
- *  @date 18/02/11
- *  @copyright (c) 2011 – UMONS - Numediart
+ *  @date 13/06/2012
+ *  @copyright (c) 2012 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
  *  licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -32,8 +32,8 @@
  *
  */
 
-#ifndef ACABSTRACTDOCKWIDGETQT_H
-#define ACABSTRACTDOCKWIDGETQT_H
+#ifndef ACAbstractWidgetQt_H
+#define ACAbstractWidgetQt_H
 
 #include <MediaCycle.h>
 #include <string>
@@ -46,27 +46,17 @@
 
 #include "ACOsgCompositeViewQt.h"
 
-class ACAbstractDockWidgetQt : public QDockWidget { 
-    Q_OBJECT
-
-signals:
-    void mediaTypeChanged(QString);
+class ACAbstractWidgetQt {
 public:
-    ACAbstractDockWidgetQt(QWidget *parent = 0, ACMediaType _media_type = MEDIA_TYPE_NONE, std::string _class_name = "")
-        : QDockWidget(parent), media_type(_media_type),class_name(_class_name),media_cycle(0),osg_view(0)
+    ACAbstractWidgetQt()
+        :media_cycle(0),osg_view(0)
     {
 #if defined (SUPPORT_AUDIO)
         audio_engine = 0;
 #endif //defined (SUPPORT_AUDIO)
-        this->setFeatures(QDockWidget::DockWidgetClosable);
-        this->setAllowedAreas(Qt::LeftDockWidgetArea);
     };
-    virtual ~ACAbstractDockWidgetQt(){};
-    virtual bool canBeVisible(ACMediaType _media_type) = 0;
+    virtual ~ACAbstractWidgetQt(){};
 
-    ACMediaType getMediaType(){return this->media_type;}
-    void setClassName(std::string _class_name){this->class_name=_class_name;}
-    std::string getClassName(){return this->class_name;}
     virtual void setMediaCycle(MediaCycle* _media_cycle){ media_cycle = _media_cycle;}
     MediaCycle* getMediaCycle() {return media_cycle;}
 #if defined (SUPPORT_AUDIO)
@@ -76,17 +66,10 @@ public:
     void setOsgView(ACOsgCompositeViewQt* _osg_view){ osg_view = _osg_view;}
     ACOsgCompositeViewQt* getOsgView() {return osg_view;}
 
-#if defined (USE_OSC)
-    virtual void autoConnectOSC(bool _status = true){auto_connect_osc = _status;}
-#endif //defined (USE_OSC)
     virtual void changeMediaType(ACMediaType media_type){}
     virtual void updatePluginsSettings(){}
     virtual void resetPluginsSettings(){}
-    virtual void resetMediaType(ACMediaType _media_type){}  
-
-private:
-    ACMediaType media_type; // media type of the dock, not of the library
-    std::string class_name;
+    virtual void resetMediaType(ACMediaType _media_type){}
 
 protected:
     MediaCycle *media_cycle;
@@ -94,9 +77,6 @@ protected:
     ACAudioEngine *audio_engine;
 #endif //defined (SUPPORT_AUDIO)
     ACOsgCompositeViewQt* osg_view;
-#if defined (USE_OSC)
-    bool auto_connect_osc;
-#endif //defined (USE_OSC)
 };
 
-#endif // ACABSTRACTDOCKWIDGETQT_H
+#endif // ACAbstractWidgetQt_H

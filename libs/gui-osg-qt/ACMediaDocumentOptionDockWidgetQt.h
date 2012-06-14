@@ -1,7 +1,7 @@
 /**
  * @brief ACMediaDocumentOptionDockWidgetQt.h
  * @author Christian Frisson
- * @date 14/02/2012
+ * @date 14/06/2012
  * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -49,19 +49,20 @@ class ACMediaDocumentOptionDockWidgetQt : public ACAbstractDockWidgetQt
 public:
     explicit ACMediaDocumentOptionDockWidgetQt(QWidget *parent = 0);
     ~ACMediaDocumentOptionDockWidgetQt();
+    virtual bool canBeVisible(ACMediaType _media_type);
 
 private slots:
     void changeMediaType(QString name);
 signals:
     void changeLibraryMediaType();
 public:
-    #ifdef SUPPORT_MULTIMEDIA
+#ifdef SUPPORT_MULTIMEDIA
     virtual void updatePluginsSettings();
     virtual void resetPluginsSettings();
-    #endif//def SUPPORT_MULTIMEDIA
+#endif//def SUPPORT_MULTIMEDIA
 private:
     Ui::ACMediaDocumentOptionDockWidgetQt ui;
-	bool initOn;
+    bool initOn;
 };
 
 #endif // ACDOCKWIDGETMEDIADOCUMENTOPTION_H

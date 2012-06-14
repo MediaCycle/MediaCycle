@@ -44,20 +44,21 @@
 #include <MediaCycle.h>
 
 class ACMediaConfigDockWidgetQt : public ACAbstractDockWidgetQt {
-Q_OBJECT
-	
+    Q_OBJECT
+
 private slots:
     void on_comboLibrary_activated(const QString & text);
-	
+
 public:
-	ACMediaConfigDockWidgetQt(QWidget *parent = 0);
-	~ACMediaConfigDockWidgetQt(){};
+    ACMediaConfigDockWidgetQt(QWidget *parent = 0);
+    ~ACMediaConfigDockWidgetQt(){};
+    virtual bool canBeVisible(ACMediaType _media_type);
     QComboBox* getComboDefaultSettings(){return ui.comboLibrary;}
 
     virtual void changeMediaType(ACMediaType _media_type);
     virtual void resetMediaType(ACMediaType _media_type);
-	
+
 private:
-	Ui::ACMediaConfigDockWidgetQt ui;
+    Ui::ACMediaConfigDockWidgetQt ui;
 };
 #endif

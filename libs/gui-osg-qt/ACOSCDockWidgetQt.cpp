@@ -62,6 +62,10 @@ ACOSCDockWidgetQt::~ACOSCDockWidgetQt(){
 	#endif //defined (USE_OSC)
 }
 
+bool ACOSCDockWidgetQt::canBeVisible(ACMediaType _media_type){
+    return true;
+}
+
 void ACOSCDockWidgetQt::autoConnectOSC(bool _status)
 {
 	auto_connect = _status;

@@ -115,6 +115,7 @@ public:
 	int addMedia(ACMedia *aMedia);
 	ACMedia* getMedia(int i);
 	int deleteMedia(int i);
+        void deleteAllSegments();
 	int getMediaIndex(std::string media_file_name);
 	std::string getThumbnailFileName(int i);
 

@@ -44,10 +44,6 @@ ACBrowserControlsCompleteDockWidgetQt::ACBrowserControlsCompleteDockWidgetQt(QWi
     this->resizePluginList();
 }
 
-bool ACBrowserControlsCompleteDockWidgetQt::canBeVisible(ACMediaType _media_type){
-    return true;
-}
-
 void ACBrowserControlsCompleteDockWidgetQt::modifyListItem(QListWidgetItem *item)
 {
     // XS check
@@ -172,7 +168,7 @@ void ACBrowserControlsCompleteDockWidgetQt::updatePluginsSettings()
     //Plugins according to media type
     //TODO Remember previous settings
     std::cout << "ACBrowserControlsCompleteDockWidgetQt::changeMediaType: Plugins according to media type" << std::endl;
-    if(media_cycle->getMediaType() == MEDIA_TYPE_MIXED){
+    if(this->getMediaType() == MEDIA_TYPE_MIXED){
         int comboBoxClustersPositionsIndex = ui.comboBoxClustersPositions->findText("Archipel Atoll");
         if (comboBoxClustersPositionsIndex > -1){
             ui.comboBoxClustersPositions->setCurrentIndex(comboBoxClustersPositionsIndex);
@@ -197,6 +193,7 @@ void ACBrowserControlsCompleteDockWidgetQt::resetPluginsSettings()
 
 void ACBrowserControlsCompleteDockWidgetQt::changeMediaType(ACMediaType _media_type)
 {
+    this->setMediaType(_media_type);
     this->updatePluginLists();
 }
 
@@ -248,7 +245,7 @@ void ACBrowserControlsCompleteDockWidgetQt::configureCheckBoxes()
     // according to plugins actually used to compute the features
     if (media_cycle == 0) return;
 
-    vector<string> plugins_list = this->media_cycle->getListOfActivePlugins();
+    vector<string> plugins_list = this->media_cycle->getListOfActiveFeaturesPlugins();
     vector<string> ::iterator list_iter;
 
     for (list_iter = plugins_list.begin(); list_iter != plugins_list.end(); list_iter++)
@@ -317,7 +314,7 @@ void ACBrowserControlsCompleteDockWidgetQt::updatePluginLists()
                         //CF default settings: no Clusters Method plugin, use KMeans
                     }
                     ui.comboBoxClustersMethod->addItem(QString(acpl->getPluginLibrary(i)->getPlugin(j)->getName().c_str()));
-                    //if (media_cycle->getMediaType() == MEDIA_TYPE_TEXT && ui.comboBoxClustersMethod->currentText().toStdString() == "KMeans (default)")
+                    //if (media_type == MEDIA_TYPE_TEXT && ui.comboBoxClustersMethod->currentText().toStdString() == "KMeans (default)")
                 }
                 else if (acpl->getPluginLibrary(i)->getPlugin(j)->implementsPluginType(PLUGIN_TYPE_CLUSTERS_POSITIONS))
                 {
@@ -361,7 +358,7 @@ void ACBrowserControlsCompleteDockWidgetQt::updatePluginLists()
         ui.radioButtonNeighbors->setEnabled(true);
     }
 
-    if(media_cycle->getMediaType() == MEDIA_TYPE_TEXT || media_cycle->getMediaType() == MEDIA_TYPE_MIXED){
+    if(getMediaType() == MEDIA_TYPE_TEXT || getMediaType() == MEDIA_TYPE_MIXED){
         int comboBoxClustersMethodIndex = ui.comboBoxClustersMethod->findText("ACSparseCosKMeans");
         if (comboBoxClustersMethodIndex > -1){
             ui.comboBoxClustersMethod->setCurrentIndex(comboBoxClustersMethodIndex);

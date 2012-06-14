@@ -1,10 +1,10 @@
 /*
- *  ACDockWidgetFactoryQt.h
+ *  ACSegmentationControlsWidgetQt.h
  *  MediaCycle
  *
  *  @author Christian Frisson
- *  @date 20/02/11
- *  @copyright (c) 2011 – UMONS - Numediart
+ *  @date 12/06/2012
+ *  @copyright (c) 2012 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
  *  licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -32,30 +32,42 @@
  *
  */
 
-#ifndef ACDOCKWIDGETFACTORYQT_H
-#define ACDOCKWIDGETFACTORYQT_H
+#ifndef HEADER_ACSegmentationControlsWidgetQt
+#define HEADER_ACSegmentationControlsWidgetQt
 
-#include "ACAbstractDockWidgetQt.h"
-#include "ACOSCDockWidgetQt.h"
+#include <iostream>
+#include <string.h>
 
-#if defined (SUPPORT_AUDIO)
-#include "ACAudioControlsDockWidgetQt.h"
-#endif //defined (SUPPORT_AUDIO)
-#include "ACBrowserControlsCompleteDockWidgetQt.h"
-#include "ACBrowserControlsClustersDockWidgetQt.h"
-#include "ACMediaConfigDockWidgetQt.h"
-#if defined (SUPPORT_VIDEO)
-#include "ACVideoControlsDockWidgetQt.h"
-#endif //defined (SUPPORT_VIDEO)
-#if defined (SUPPORT_MULTIMEDIA)
-#include "ACMediaDocumentOptionDockWidgetQt.h"
-#endif //defined (SUPPORT_MULTIMEDIA)
-#include "ACSegmentationControlsDockWidgetQt.h"
+#include "ACAbstractWidgetQt.h"
 
-class ACDockWidgetFactoryQt{
+#include "ui_ACSegmentationControlsWidgetQt.h"
+
+class ACSegmentationControlsWidgetQt : public QWidget, public ACAbstractWidgetQt {
+    Q_OBJECT
+
+public slots:
+    void on_comboBoxPlugins_activated(const QString & text);
+    void on_tabWidgetParameters_currentChanged(int index);
+
+protected slots:
+    void buildPluginList();
+    void adjustHeight();
+
+signals:
+    void rebuildPluginList();
+    void readjustHeight();
+
 public:
-	ACDockWidgetFactoryQt(){};
-	virtual ~ACDockWidgetFactoryQt(){};
-	ACAbstractDockWidgetQt* createDockWidget(QWidget *parent = 0,std::string dock_type="");
+    ACSegmentationControlsWidgetQt(QWidget *parent = 0);
+    virtual ~ACSegmentationControlsWidgetQt();
+
+    void changeMediaType(ACMediaType media_type);
+    void updatePluginsSettings();
+    void resetPluginsSettings();
+    void resetMediaType(ACMediaType _media_type);
+
+protected:
+    Ui::ACSegmentationControlsWidgetQt ui;
+    void cleanPluginList();
 };
-#endif // ACDOCKWIDGETFACTORYQT_H
+#endif

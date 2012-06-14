@@ -127,7 +127,8 @@ bool ACDockWidgetsManagerQt::addControlDock(ACAbstractDockWidgetQt* dock)
 
     if(!(mainWindow->isFullScreen()))
     {
-        if( dock->getMediaType() == MEDIA_TYPE_ALL || dock->getMediaType() == media_type || dock->getMediaType() == MEDIA_TYPE_MIXED ){
+        //if( dock->getMediaType() == MEDIA_TYPE_ALL || dock->getMediaType() == media_type || dock->getMediaType() == MEDIA_TYPE_MIXED ){
+        if( dock->canBeVisible(media_type) ){
             lastDocksVisibilities.back()=1;
             mainWindow->addDockWidget(Qt::LeftDockWidgetArea,dockWidgets.back());
             dockWidgets.back()->setVisible(true);
@@ -152,6 +153,33 @@ bool ACDockWidgetsManagerQt::addControlDock(ACAbstractDockWidgetQt* dock)
 bool ACDockWidgetsManagerQt::addControlDock(std::string dock_type)
 {
     this->addControlDock(dockWidgetFactory->createDockWidget(mainWindow,dock_type));
+}
+
+ACAbstractDockWidgetQt* ACDockWidgetsManagerQt::getControlDock(std::string dock_type){
+    std::string className("");
+    if (dock_type == "MCOSC") className = "ACOSCDockWidgetQt";
+    else if (dock_type == "MCBrowserControlsComplete") className = "ACBrowserControlsCompleteDockWidgetQt";
+    else if (dock_type == "MCBrowserControlsClusters") className = "ACBrowserControlsClustersDockWidgetQt";
+#if defined (SUPPORT_AUDIO)
+    else if (dock_type == "MCAudioControls") className = "ACAudioControlsDockWidgetQt";
+#endif //defined (SUPPORT_AUDIO)
+    else if (dock_type == "MCMediaConfig") className = "ACMediaConfigDockWidgetQt";
+#if defined (SUPPORT_VIDEO)
+    else if (dock_type == "MCVideoControls") className = "ACVideoControlsDockWidgetQt";
+#endif //defined (SUPPORT_VIDEO)
+#if defined (SUPPORT_MULTIMEDIA)
+    else if (dock_type == "MCMediaDocumentOption") className = "ACMediaDocumentOptionDockWidgetQt";
+#endif //defined (SUPPORT_MULTIMEDIA)
+    else if (dock_type == "MCSegmentationControls") className = "ACSegmentationControlsDockWidgetQt";
+
+    if( className == "")
+        return 0;
+
+    for(std::vector<ACAbstractDockWidgetQt*>::iterator dockWidget = dockWidgets.begin(); dockWidget != dockWidgets.end(); dockWidget++){
+        if((*dockWidget)->getClassName() == className)
+            return (*dockWidget);
+    }
+    return 0;
 }
 
 void ACDockWidgetsManagerQt::updateDocksVisibility(bool visibility)
@@ -198,7 +226,8 @@ void ACDockWidgetsManagerQt::syncControlToggleWithDocks(){
     int docksVisibilitiesSum = 0;
 
     for (int d=0;d<dockWidgets.size();d++){
-        if (dockWidgets[d]->getMediaType() == media_type || dockWidgets[d]->getMediaType() == MEDIA_TYPE_ALL || dockWidgets[d]->getMediaType() == MEDIA_TYPE_MIXED)
+        //if (dockWidgets[d]->getMediaType() == media_type || dockWidgets[d]->getMediaType() == MEDIA_TYPE_ALL || dockWidgets[d]->getMediaType() == MEDIA_TYPE_MIXED)
+        if( dockWidgets[d]->canBeVisible(media_type) )
             docksVisibilitiesSum += dockWidgets[d]->isVisible();
     }
 
@@ -213,26 +242,30 @@ void ACDockWidgetsManagerQt::syncControlToggleWithDocks(){
         }
         else if (lastDocksVisibilitiesSum == 0 && !previous_docks_visibility){
             for (int d=0;d<dockWidgets.size();d++){
-                if (dockWidgets[d]->getMediaType() == media_type || dockWidgets[d]->getMediaType() == MEDIA_TYPE_ALL || dockWidgets[d]->getMediaType() == MEDIA_TYPE_MIXED)
+                //if (dockWidgets[d]->getMediaType() == media_type || dockWidgets[d]->getMediaType() == MEDIA_TYPE_ALL || dockWidgets[d]->getMediaType() == MEDIA_TYPE_MIXED)
+                if( dockWidgets[d]->canBeVisible(media_type) )
                     dockWidgets[d]->setVisible(true);
             }
         }
         else {
             if (!previous_docks_visibility){
                 for (int d=0;d<dockWidgets.size();d++){
-                    if (dockWidgets[d]->getMediaType() == media_type || dockWidgets[d]->getMediaType() == MEDIA_TYPE_ALL || dockWidgets[d]->getMediaType() == MEDIA_TYPE_MIXED)
+                    //if (dockWidgets[d]->getMediaType() == media_type || dockWidgets[d]->getMediaType() == MEDIA_TYPE_ALL || dockWidgets[d]->getMediaType() == MEDIA_TYPE_MIXED)
+                    if( dockWidgets[d]->canBeVisible(media_type) )
                         dockWidgets[d]->setVisible((bool)(lastDocksVisibilities[d]));
                 }
             }
         }
         for (int d=0;d<dockWidgets.size();d++){
-            if (dockWidgets[d]->getMediaType() == media_type || dockWidgets[d]->getMediaType() == MEDIA_TYPE_ALL || dockWidgets[d]->getMediaType() == MEDIA_TYPE_MIXED)
+            //if (dockWidgets[d]->getMediaType() == media_type || dockWidgets[d]->getMediaType() == MEDIA_TYPE_ALL || dockWidgets[d]->getMediaType() == MEDIA_TYPE_MIXED)
+            if( dockWidgets[d]->canBeVisible(media_type) )
                 lastDocksVisibilities[d]=dockWidgets[d]->isVisible();
         }
     }
     else {
         for (int d=0;d<dockWidgets.size();d++){
-            if (dockWidgets[d]->getMediaType() == media_type || dockWidgets[d]->getMediaType() == MEDIA_TYPE_ALL || dockWidgets[d]->getMediaType() == MEDIA_TYPE_MIXED)
+            //if (dockWidgets[d]->getMediaType() == media_type || dockWidgets[d]->getMediaType() == MEDIA_TYPE_ALL || dockWidgets[d]->getMediaType() == MEDIA_TYPE_MIXED)
+            if( dockWidgets[d]->canBeVisible(media_type) )
                 dockWidgets[d]->setVisible(false);
         }
     }
@@ -244,7 +277,8 @@ void ACDockWidgetsManagerQt::changeMediaType(ACMediaType _media_type){
 
         dockWidgets[d]->changeMediaType(_media_type);
 
-        if (dockWidgets[d]->getMediaType() == MEDIA_TYPE_ALL || dockWidgets[d]->getMediaType() == _media_type || dockWidgets[d]->getMediaType() == MEDIA_TYPE_MIXED){
+        //if (dockWidgets[d]->getMediaType() == MEDIA_TYPE_ALL || dockWidgets[d]->getMediaType() == _media_type || dockWidgets[d]->getMediaType() == MEDIA_TYPE_MIXED){
+        if( dockWidgets[d]->canBeVisible(_media_type) ){
             if (mainWindow->dockWidgetArea(dockWidgets[d]) == Qt::NoDockWidgetArea){
                 mainWindow->addDockWidget(Qt::LeftDockWidgetArea,dockWidgets[d]);
                 dockWidgets[d]->show();

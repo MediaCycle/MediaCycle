@@ -1,10 +1,10 @@
 /*
- *  ACDockWidgetFactoryQt.h
+ *  ACSegmentationControlsDockWidgetQt.h
  *  MediaCycle
  *
  *  @author Christian Frisson
- *  @date 20/02/11
- *  @copyright (c) 2011 – UMONS - Numediart
+ *  @date 2/03/2012
+ *  @copyright (c) 2012 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
  *  licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -32,30 +32,36 @@
  *
  */
 
-#ifndef ACDOCKWIDGETFACTORYQT_H
-#define ACDOCKWIDGETFACTORYQT_H
+#ifndef HEADER_ACSEGMENTATIONCONTROLSDOCKWIDGETQT
+#define HEADER_ACSEGMENTATIONCONTROLSDOCKWIDGETQT
+
+#include <iostream>
+#include <string.h>
 
 #include "ACAbstractDockWidgetQt.h"
-#include "ACOSCDockWidgetQt.h"
+#include "ACSegmentationControlsWidgetQt.h"
 
-#if defined (SUPPORT_AUDIO)
-#include "ACAudioControlsDockWidgetQt.h"
-#endif //defined (SUPPORT_AUDIO)
-#include "ACBrowserControlsCompleteDockWidgetQt.h"
-#include "ACBrowserControlsClustersDockWidgetQt.h"
-#include "ACMediaConfigDockWidgetQt.h"
-#if defined (SUPPORT_VIDEO)
-#include "ACVideoControlsDockWidgetQt.h"
-#endif //defined (SUPPORT_VIDEO)
-#if defined (SUPPORT_MULTIMEDIA)
-#include "ACMediaDocumentOptionDockWidgetQt.h"
-#endif //defined (SUPPORT_MULTIMEDIA)
-#include "ACSegmentationControlsDockWidgetQt.h"
+//#include "ui_ACSegmentationControlsDockWidgetQt.h" // uncomment if a *.ui file exists
 
-class ACDockWidgetFactoryQt{
+class ACSegmentationControlsDockWidgetQt : public ACAbstractDockWidgetQt {
+    Q_OBJECT
+
+public slots:
+    void adjustHeight();
+
 public:
-	ACDockWidgetFactoryQt(){};
-	virtual ~ACDockWidgetFactoryQt(){};
-	ACAbstractDockWidgetQt* createDockWidget(QWidget *parent = 0,std::string dock_type="");
+    ACSegmentationControlsDockWidgetQt(QWidget *parent = 0);
+    virtual ~ACSegmentationControlsDockWidgetQt();
+    virtual bool canBeVisible(ACMediaType _media_type);
+
+    virtual void changeMediaType(ACMediaType media_type);
+    virtual void updatePluginsSettings();
+    virtual void resetPluginsSettings();
+    virtual void resetMediaType(ACMediaType _media_type);
+
+protected:
+    //Ui::ACSegmentationControlsDockWidgetQt ui; // uncomment if a *.ui file exists
+    ACSegmentationControlsWidgetQt* widget;
+
 };
-#endif // ACDOCKWIDGETFACTORYQT_H
+#endif

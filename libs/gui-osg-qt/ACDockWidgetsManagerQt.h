@@ -72,6 +72,7 @@ public:
 
     bool addControlDock(ACAbstractDockWidgetQt* dock);
     bool addControlDock(std::string dock_type);
+    ACAbstractDockWidgetQt* getControlDock(std::string dock_type);
 
     void changeMediaType(ACMediaType _media_type);
     void updatePluginsSettings();

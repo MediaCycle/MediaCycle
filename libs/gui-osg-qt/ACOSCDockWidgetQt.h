@@ -50,40 +50,41 @@
 #endif //defined (USE_OSC)
 
 class ACOSCDockWidgetQt : public ACAbstractDockWidgetQt {
-Q_OBJECT
+    Q_OBJECT
 
 private slots:
-	void on_pushButtonControlStart_clicked();
-	void on_pushButtonFeedbackStart_clicked();
+    void on_pushButtonControlStart_clicked();
+    void on_pushButtonFeedbackStart_clicked();
 
 public:
-	ACOSCDockWidgetQt(QWidget *parent = 0);
-	~ACOSCDockWidgetQt();
-	
+    ACOSCDockWidgetQt(QWidget *parent = 0);
+    ~ACOSCDockWidgetQt();
+    virtual bool canBeVisible(ACMediaType _media_type);
+
     void autoConnectOSC(bool _status = true);
 
 #if defined (USE_OSC)
-	void toggleControl(bool _status);
-	void toggleFeedback(bool _status);	
-	void disableControl();
-	void disableFeedback();
-	void setControlPort(int port);
-	void setFeedbackPort(int port);
-	ACOscBrowser* getControlHandler(){return osc_browser;}
-	ACOscFeedback* getFeedbackHandler(){return osc_feedback;}
+    void toggleControl(bool _status);
+    void toggleFeedback(bool _status);
+    void disableControl();
+    void disableFeedback();
+    void setControlPort(int port);
+    void setFeedbackPort(int port);
+    ACOscBrowser* getControlHandler(){return osc_browser;}
+    ACOscFeedback* getFeedbackHandler(){return osc_feedback;}
 
-	void setMediaCycle(MediaCycle* _media_cycle);
-	#if defined (SUPPORT_AUDIO)
-	void setAudioEngine(ACAudioEngine* _audio_engine);
-	#endif //defined (SUPPORT_AUDIO)
+    void setMediaCycle(MediaCycle* _media_cycle);
+#if defined (SUPPORT_AUDIO)
+    void setAudioEngine(ACAudioEngine* _audio_engine);
+#endif //defined (SUPPORT_AUDIO)
 #endif //defined (USE_OSC)
 
 private:
-	Ui::ACOSCDockWidgetQt ui;
+    Ui::ACOSCDockWidgetQt ui;
 #if defined (USE_OSC)
-	ACOscBrowser *osc_browser;
-	ACOscFeedback *osc_feedback;
+    ACOscBrowser *osc_browser;
+    ACOscFeedback *osc_feedback;
 #endif //defined (USE_OSC)
-	bool auto_connect;
+    bool auto_connect;
 };
 #endif

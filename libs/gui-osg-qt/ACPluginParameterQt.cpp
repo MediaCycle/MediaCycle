@@ -1,10 +1,10 @@
 /*
- *  ACDockWidgetFactoryQt.h
+ *  ACPluginParameterQt.cpp
  *  MediaCycle
  *
  *  @author Christian Frisson
- *  @date 20/02/11
- *  @copyright (c) 2011 – UMONS - Numediart
+ *  @date 13/06/2012
+ *  @copyright (c) 2012 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
  *  licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -32,30 +32,23 @@
  *
  */
 
-#ifndef ACDOCKWIDGETFACTORYQT_H
-#define ACDOCKWIDGETFACTORYQT_H
+#include "ACPluginParameterQt.h"
 
-#include "ACAbstractDockWidgetQt.h"
-#include "ACOSCDockWidgetQt.h"
+void ACPluginParameterQt::updateNumberParameter(double _number){
+    plugin->setNumberParameterValue(parameter.toStdString(),(float)_number);
+}
 
-#if defined (SUPPORT_AUDIO)
-#include "ACAudioControlsDockWidgetQt.h"
-#endif //defined (SUPPORT_AUDIO)
-#include "ACBrowserControlsCompleteDockWidgetQt.h"
-#include "ACBrowserControlsClustersDockWidgetQt.h"
-#include "ACMediaConfigDockWidgetQt.h"
-#if defined (SUPPORT_VIDEO)
-#include "ACVideoControlsDockWidgetQt.h"
-#endif //defined (SUPPORT_VIDEO)
-#if defined (SUPPORT_MULTIMEDIA)
-#include "ACMediaDocumentOptionDockWidgetQt.h"
-#endif //defined (SUPPORT_MULTIMEDIA)
-#include "ACSegmentationControlsDockWidgetQt.h"
+void ACPluginParameterQt::updateStringParameter(QString _string){
+    plugin->setStringParameterValue(parameter.toStdString(),_string.toStdString());
+}
 
-class ACDockWidgetFactoryQt{
-public:
-	ACDockWidgetFactoryQt(){};
-	virtual ~ACDockWidgetFactoryQt(){};
-	ACAbstractDockWidgetQt* createDockWidget(QWidget *parent = 0,std::string dock_type="");
-};
-#endif // ACDOCKWIDGETFACTORYQT_H
+void ACPluginParameterQt::resetNumberParameter(){
+    plugin->resetParameterValue(parameter.toStdString());
+    emit numberParameterChanged( plugin->getNumberParameterInit(parameter.toStdString()) );
+}
+
+void ACPluginParameterQt::resetStringParameter(){
+    plugin->resetParameterValue(parameter.toStdString());
+    emit stringParameterChanged( QString(plugin->getStringParameterInit(parameter.toStdString()).c_str()) );
+    emit stringParameterIndexChanged( plugin->getStringParameterInitIndex(parameter.toStdString()) );
+}

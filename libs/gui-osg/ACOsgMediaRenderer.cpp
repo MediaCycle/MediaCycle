@@ -107,8 +107,8 @@ ACOsgMediaRenderer::ACOsgMediaRenderer() {
         //std::cout << "Current font path " << font_path << std::endl;
 
         font = osgText::readRefFontFile(font_path + font_file);
-        if(!font)
-            std::cerr << "ACOsgLibraryRenderer::ACOsgLibraryRenderer: couldn't load font " << std::endl;
+        //if(!font)
+        //    std::cerr << "ACOsgMediaRenderer::ACOsgMediaRenderer: couldn't load font " << std::endl;
 
 }
 

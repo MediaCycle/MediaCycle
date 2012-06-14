@@ -43,15 +43,15 @@
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
-	
-	// Make Apple *.app bundles not load installed Qt Frameworks but load Qt Plugins
-	#ifdef __APPLE__
-	QApplication::setLibraryPaths(QStringList(QApplication::applicationDirPath() + "/../PlugIns"));
-	#endif
-	
-	ACMultiMediaCycleOsgQt window;
-	try {
-		// Adding palettes
+
+    // Make Apple *.app bundles not load installed Qt Frameworks but load Qt Plugins
+#ifdef __APPLE__
+    QApplication::setLibraryPaths(QStringList(QApplication::applicationDirPath() + "/../PlugIns"));
+#endif
+
+    ACMultiMediaCycleOsgQt window;
+    try {
+        // Adding palettes
         window.addControlDock("MCMediaConfig");
         window.addControlDock("MCOSC");
         //#ifdef USE_DEBUG
@@ -60,36 +60,38 @@ int main(int argc, char *argv[])
         //window.addControlDock("MCBrowserControlsClusters");
         //#endif
 #if defined (SUPPORT_AUDIO)
-		window.addControlDock("MCAudioControls");
+        window.addControlDock("MCAudioControls");
 #endif //defined (SUPPORT_AUDIO)
 #if defined (SUPPORT_VIDEO)
-		window.addControlDock("MCVideoControls");				 
+        window.addControlDock("MCVideoControls");
 #endif //defined (SUPPORT_VIDEO)
-		
-		// XS TODO
-		// this has to be called after dock controls have been added
-		// do we need to put all this code here ?
-		window.configureSettings();
-				
-		// Changing the about dialog (not necessary if standard MediaCycle app)
-		//window.addAboutDialog("MediaCycle");
-		
-		window.show();
-		
-	}
-	catch (const exception& e) {
-		cout << "** caught exception in main : " << e.what() << endl;
-	}
-	catch (...){
-		cout << "** caught undetermined exception in main" << endl;
-	}
-	
-	// variables used in QSettings 
-	// see http://doc.qt.nokia.com/latest/qsettings.html#details
-	app.setOrganizationName("numediart");
-	app.setOrganizationDomain("numediart.org");
-	app.setApplicationName("MediaCycle");
-	
+#if defined (SUPPORT_AUDIO) || defined (SUPPORT_VIDEO)
+        //window.addControlDock("MCSegmentationControls");
+#endif //defined (SUPPORT_AUDIO) || defined (SUPPORT_VIDEO)
+        // XS TODO
+        // this has to be called after dock controls have been added
+        // do we need to put all this code here ?
+        window.configureSettings();
+
+        // Changing the about dialog (not necessary if standard MediaCycle app)
+        //window.addAboutDialog("MediaCycle");
+
+        window.show();
+
+    }
+    catch (const exception& e) {
+        cout << "** caught exception in main : " << e.what() << endl;
+    }
+    catch (...){
+        cout << "** caught undetermined exception in main" << endl;
+    }
+
+    // variables used in QSettings
+    // see http://doc.qt.nokia.com/latest/qsettings.html#details
+    app.setOrganizationName("numediart");
+    app.setOrganizationDomain("numediart.org");
+    app.setApplicationName("MediaCycle");
+
     return app.exec();
 }
 

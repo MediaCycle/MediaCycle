@@ -51,6 +51,10 @@ ACVideoControlsDockWidgetQt::~ACVideoControlsDockWidgetQt(){
 	#endif //defined (SUPPORT_VIDEO)
 }
 
+bool ACVideoControlsDockWidgetQt::canBeVisible(ACMediaType _media_type){
+    return (_media_type == this->getMediaType() || _media_type == MEDIA_TYPE_MIXED);
+}
+
 #if defined (SUPPORT_VIDEO)
 void ACVideoControlsDockWidgetQt::on_pushButtonMuteAll_clicked()
 {

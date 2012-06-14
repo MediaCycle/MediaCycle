@@ -78,12 +78,12 @@ private:
 };
 
 template <typename T> 
-class ACActivePlugins
-{	
+class ACAvailablePlugins
+{
 public:
-	ACActivePlugins(std::vector<ACPluginLibrary *> PluginLibrary);
-	ACActivePlugins();
-	~ACActivePlugins();
+        ACAvailablePlugins(std::vector<ACPluginLibrary *> PluginLibrary);
+        ACAvailablePlugins();
+        ~ACAvailablePlugins();
 	int clean();
 	int remove(ACPlugin *);
 	int remove(ACPluginLibrary *);
@@ -91,6 +91,7 @@ public:
 	int add(ACPluginLibrary *);
 	int update(std::vector<ACPluginLibrary *> PluginLibrary);
 	std::vector<std::string> getName(ACMediaType MediaType);
+        std::vector<std::string> getName();
 	int getSize(ACMediaType MediaType);
 	void log();
 	
@@ -102,11 +103,11 @@ protected:
 
 
 
-class ACActiveFeaturesPlugins:public ACActivePlugins<ACFeaturesPlugin>{//TR: this class doesn't allocate memory for plugins. It's just a references container.
+class ACAvailableFeaturesPlugins:public ACAvailablePlugins<ACFeaturesPlugin>{//TR: this class doesn't allocate memory for plugins. It's just a references container.
 public:
-	ACActiveFeaturesPlugins(std::vector<ACPluginLibrary *> PluginLibrary);
-	ACActiveFeaturesPlugins();
-	//~ACActiveFeaturesPlugins();
+        ACAvailableFeaturesPlugins(std::vector<ACPluginLibrary *> PluginLibrary);
+        ACAvailableFeaturesPlugins();
+        //~ACAvailableFeaturesPlugins();
 /*	int clean();
 	int remove(ACPlugin *);
 	int remove(ACPluginLibrary *);
@@ -130,11 +131,11 @@ protected:
 
 };	
 
-class ACActiveSegmentPlugins:public ACActivePlugins<ACSegmentationPlugin>{//TR: this class doesn't allocate memory for plugins. It's just a references container.
+class ACAvailableSegmentPlugins:public ACAvailablePlugins<ACSegmentationPlugin>{//TR: this class doesn't allocate memory for plugins. It's just a references container.
 public:
-	ACActiveSegmentPlugins(std::vector<ACPluginLibrary *> PluginLibrary);
-	ACActiveSegmentPlugins();
-	//~ACActiveSegmentPlugins();
+        ACAvailableSegmentPlugins(std::vector<ACPluginLibrary *> PluginLibrary);
+        ACAvailableSegmentPlugins();
+        //~ACAvailableSegmentPlugins();
 /*	int clean();
 	int remove(ACPlugin *);
 	int remove(ACPluginLibrary *);
@@ -151,7 +152,6 @@ public:
 	
 protected:		
 };	
-
 
 class ACPluginManager {
 
@@ -173,22 +173,26 @@ public:
     
     int getSize() { return this->mPluginLibrary.size();};
     ACPlugin *getPlugin(std::string aPluginName);
-	
-    ACActiveFeaturesPlugins *getFeaturesPlugins(){return this->mActiveFeaturePlugins;};// returns a container with feature plugins reference 
-    int getFeaturesPluginsSize(ACMediaType MediaType);
-    ACActiveSegmentPlugins *getSegmentPlugins(){return this->mActiveSegmentPlugins;};// returns a container with Segment plugins reference
-    int getSegmentPluginsSize(ACMediaType MediaType);
-	
-	ACPreProcessPlugin* getPreProcessPlugin(ACMediaType MediaType);
+
+    ACAvailableFeaturesPlugins *getAvailableFeaturesPlugins(){return this->mAvailableFeaturePlugins;}// returns a container with available feature plugins reference
+    int getAvailableFeaturesPluginsSize(ACMediaType MediaType);
+    ACAvailableSegmentPlugins *getAvailableSegmentPlugins(){return this->mAvailableSegmentPlugins;}// returns a container with available segment plugins reference
+    int getAvailableSegmentPluginsSize(ACMediaType MediaType);
+    ACAvailableSegmentPlugins *getActiveSegmentPlugins(){return this->mActiveSegmentPlugins;}// returns a container with active segment plugins reference
+    int getActiveSegmentPluginsSize(ACMediaType MediaType);
+    std::vector<std::string> getAvailableSegmentPluginsNames(ACMediaType MediaType);
+    bool setActiveSegmentPlugin(std::string name);
+
+    ACPreProcessPlugin* getPreProcessPlugin(ACMediaType MediaType);
 	
 	
 private:
 	
     std::vector<ACPluginLibrary *> mPluginLibrary;	
 	
-    ACActiveFeaturesPlugins* mActiveFeaturePlugins;
-    ACActiveSegmentPlugins* mActiveSegmentPlugins;
-    ACActiveSegmentPlugins* mSegmentPlugins;
+    ACAvailableFeaturesPlugins* mAvailableFeaturePlugins;
+    ACAvailableSegmentPlugins* mAvailableSegmentPlugins;
+    ACAvailableSegmentPlugins* mActiveSegmentPlugins;
 };
 
 #endif	/* _ACPLUGINMANAGER_H */

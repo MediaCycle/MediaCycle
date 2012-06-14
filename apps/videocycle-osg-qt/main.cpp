@@ -54,6 +54,7 @@ int main(int argc, char *argv[])
 		window.addControlDock("MCOSC");				 
 		window.addControlDock("MCBrowserControlsClusters");//"MCBrowserControlsClustersNeighbors");
 		window.addControlDock("MCVideoControls");
+                //window.addControlDock("MCSegmentationControls");
 		window.useSegmentationByDefault(true);
 		
 		// XS TODO

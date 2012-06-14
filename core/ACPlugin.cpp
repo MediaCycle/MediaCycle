@@ -45,6 +45,227 @@ ACPlugin::ACPlugin() {
     this->mMediaType = MEDIA_TYPE_NONE;
 }
 
+void ACPlugin::addStringParameter(std::string _name, std::string _init, std::vector<std::string> _values, std::string _desc)
+{
+    mStringParameters.push_back(ACStringParameter(_name,_init,_values,_desc));
+}
+
+void ACPlugin::addNumberParameter(std::string _name, float _init, float _min, float _max, float _step, std::string _desc)
+{
+    mNumberParameters.push_back(ACNumberParameter(_name,_init,_min,_max,_step,_desc));
+}
+
+std::vector<ACStringParameter> ACPlugin::getStringParameters()
+{
+    return mStringParameters;
+}
+
+std::vector<ACNumberParameter> ACPlugin::getNumberParameters()
+{
+    return mNumberParameters;
+}
+
+int ACPlugin::getStringParametersCount()
+{
+    return mStringParameters.size();
+}
+
+int ACPlugin::getNumberParametersCount()
+{
+    return mNumberParameters.size();
+}
+
+int ACPlugin::getParametersCount()
+{
+    return mStringParameters.size()+mNumberParameters.size();
+}
+
+bool ACPlugin::setStringParameterValue(std::string _name, std::string _value){
+    for(std::vector<ACStringParameter>::iterator StringParameter = mStringParameters.begin(); StringParameter != mStringParameters.end(); StringParameter++ ){
+        if((*StringParameter).name == _name){
+            (*StringParameter).value = _value;
+#ifdef USE_DEBUG
+            std::cout << " ACPlugin::setStringParameterValue: plugin '" << mName << "', parameter '"<< _name << "', value '" << _value << "'" << std::endl;
+#endif
+            return true;
+        }
+    }
+    return false;
+}
+
+bool ACPlugin::setNumberParameterValue(std::string _name, float _value){
+    for(std::vector<ACNumberParameter>::iterator NumberParameter = mNumberParameters.begin(); NumberParameter != mNumberParameters.end(); NumberParameter++ ){
+        if((*NumberParameter).name == _name){
+            (*NumberParameter).value = _value;
+#ifdef USE_DEBUG
+            std::cout << " ACPlugin::setNumberParameterValue: plugin '" << mName << "', parameter '"<< _name << "', value '" << _value << "'" << std::endl;
+#endif
+            return true;
+        }
+    }
+    return false;
+}
+
+std::string ACPlugin::getStringParameterValue(std::string _name){
+    for(std::vector<ACStringParameter>::iterator StringParameter = mStringParameters.begin(); StringParameter != mStringParameters.end(); StringParameter++ ){
+        if((*StringParameter).name == _name){
+            return (*StringParameter).value;
+        }
+    }
+    std::cerr << "ACPlugin::getStringParameterValue: parameter '" << _name << "' doesn't exist." << std::endl;
+    return "ERROR";
+}
+
+void ACPlugin::resetParameterValue(std::string _name){
+    for(std::vector<ACNumberParameter>::iterator NumberParameter = mNumberParameters.begin(); NumberParameter != mNumberParameters.end(); NumberParameter++ ){
+        if((*NumberParameter).name == _name){
+            (*NumberParameter).value = (*NumberParameter).init;
+        }
+    }
+    for(std::vector<ACStringParameter>::iterator StringParameter = mStringParameters.begin(); StringParameter != mStringParameters.end(); StringParameter++ ){
+        if((*StringParameter).name == _name){
+            (*StringParameter).value = (*StringParameter).init;
+        }
+    }
+}
+
+int ACPlugin::getStringParameterValueIndex(std::string _name){
+    int index = -1;
+    for(std::vector<ACStringParameter>::iterator StringParameter = mStringParameters.begin(); StringParameter != mStringParameters.end(); StringParameter++ ){
+        if((*StringParameter).name == _name){
+            std::vector<std::string> values = getStringParameterValues(_name);
+            std::vector<std::string>::iterator value = std::find(values.begin(),values.end(),(*StringParameter).value);
+            if(value != values.end())
+                return std::distance(values.begin(),value);
+            else{
+                std::cerr << "ACPlugin::getStringParameterValueIndex: parameter '" << _name << "' value doesn't exist." << std::endl;
+                return index;
+            }
+        }
+    }
+    std::cerr << "ACPlugin::getStringParameterValueIndex: parameter '" << _name << "' doesn't exist." << std::endl;
+    return index;
+}
+
+float ACPlugin::getNumberParameterValue(std::string _name){
+    for(std::vector<ACNumberParameter>::iterator NumberParameter = mNumberParameters.begin(); NumberParameter != mNumberParameters.end(); NumberParameter++ ){
+        if((*NumberParameter).name == _name){
+            return (*NumberParameter).value;
+        }
+    }
+    std::cerr << "ACPlugin::getNumberParameterValue: parameter '" << _name << "' doesn't exist." << std::endl;
+    return 0.0f;
+}
+
+float ACPlugin::getNumberParameterMin(std::string _name){
+    for(std::vector<ACNumberParameter>::iterator NumberParameter = mNumberParameters.begin(); NumberParameter != mNumberParameters.end(); NumberParameter++ ){
+        if((*NumberParameter).name == _name){
+            return (*NumberParameter).min;
+        }
+    }
+    return 0.0f;
+}
+
+float ACPlugin::getNumberParameterMax(std::string _name){
+    for(std::vector<ACNumberParameter>::iterator NumberParameter = mNumberParameters.begin(); NumberParameter != mNumberParameters.end(); NumberParameter++ ){
+        if((*NumberParameter).name == _name){
+            return (*NumberParameter).max;
+        }
+    }
+    return 0.0f;
+}
+
+float ACPlugin::getNumberParameterStep(std::string _name){
+    for(std::vector<ACNumberParameter>::iterator NumberParameter = mNumberParameters.begin(); NumberParameter != mNumberParameters.end(); NumberParameter++ ){
+        if((*NumberParameter).name == _name){
+            return (*NumberParameter).step;
+        }
+    }
+    return 0.0f;
+}
+
+float ACPlugin::getNumberParameterInit(std::string _name){
+    for(std::vector<ACNumberParameter>::iterator NumberParameter = mNumberParameters.begin(); NumberParameter != mNumberParameters.end(); NumberParameter++ ){
+        if((*NumberParameter).name == _name){
+            return (*NumberParameter).init;
+        }
+    }
+    return 0.0f;
+}
+
+std::string ACPlugin::getNumberParameterDesc(std::string _name){
+    for(std::vector<ACNumberParameter>::iterator NumberParameter = mNumberParameters.begin(); NumberParameter != mNumberParameters.end(); NumberParameter++ ){
+        if((*NumberParameter).name == _name){
+            return (*NumberParameter).desc;
+        }
+    }
+    return "";
+}
+
+std::string ACPlugin::getStringParameterDesc(std::string _name){
+    for(std::vector<ACStringParameter>::iterator StringParameter = mStringParameters.begin(); StringParameter != mStringParameters.end(); StringParameter++ ){
+        if((*StringParameter).name == _name){
+            return (*StringParameter).desc;
+        }
+    }
+    return "";
+}
+
+std::string ACPlugin::getStringParameterInit(std::string _name){
+    for(std::vector<ACStringParameter>::iterator StringParameter = mStringParameters.begin(); StringParameter != mStringParameters.end(); StringParameter++ ){
+        if((*StringParameter).name == _name){
+            return (*StringParameter).init;
+        }
+    }
+    return "";
+}
+
+int ACPlugin::getStringParameterInitIndex(std::string _name){
+    int index = -1;
+    for(std::vector<ACStringParameter>::iterator StringParameter = mStringParameters.begin(); StringParameter != mStringParameters.end(); StringParameter++ ){
+        if((*StringParameter).name == _name){
+            std::vector<std::string> values = getStringParameterValues(_name);
+            std::vector<std::string>::iterator value = std::find(values.begin(),values.end(),(*StringParameter).init);
+            if(value != values.end())
+                return std::distance(values.begin(),value);
+            else{
+                std::cerr << "ACPlugin::getStringParameterInitIndex: parameter '" << _name << "' init doesn't exist." << std::endl;
+                return index;
+            }
+        }
+    }
+    std::cerr << "ACPlugin::getStringParameterInitIndex: parameter '" << _name << "' doesn't exist." << std::endl;
+    return index;
+}
+
+std::vector<std::string> ACPlugin::getStringParameterValues(std::string _name){
+    for(std::vector<ACStringParameter>::iterator StringParameter = mStringParameters.begin(); StringParameter != mStringParameters.end(); StringParameter++ ){
+        if((*StringParameter).name == _name){
+            return (*StringParameter).values;
+        }
+    }
+    return std::vector<std::string>();
+}
+
+
+std::vector<std::string> ACPlugin::getStringParametersNames()
+{
+    std::vector<std::string> names;
+    for(std::vector<ACStringParameter>::iterator StringParameter = mStringParameters.begin(); StringParameter != mStringParameters.end(); StringParameter++ ){
+        names.push_back((*StringParameter).name);
+    }
+    return names;
+}
+
+std::vector<std::string> ACPlugin::getNumberParametersNames()
+{
+    std::vector<std::string> names;
+    for(std::vector<ACNumberParameter>::iterator NumberParameter = mNumberParameters.begin(); NumberParameter != mNumberParameters.end(); NumberParameter++ ){
+        names.push_back((*NumberParameter).name);
+    }
+    return names;
+}
+
 bool ACPlugin::implementsPluginType(ACPluginType pType) {
     int test = mPluginType&pType;
     if (test == 0)

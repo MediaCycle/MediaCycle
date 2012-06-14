@@ -139,6 +139,9 @@ IF(UNIX)
                 IF(QT_USE_PHONON)
                     list(APPEND UBUNTU_DEPS "libphonon4")
                 ENDIF()
+		IF(QWT_FOUND)
+                    list(APPEND UBUNTU_DEPS "libqwt5-qt4|libqwt6"
+		ENDIF()
             ENDIF()
  
             IF(SUPPORT_AUDIO)

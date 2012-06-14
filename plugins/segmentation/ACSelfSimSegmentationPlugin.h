@@ -56,33 +56,36 @@ enum SelfSimDistance {// actually it will be the inverse of a distance: the larg
 
 class ACSelfSimSegmentationPlugin : public ACSegmentationPlugin {
 public:
-	ACSelfSimSegmentationPlugin();
-	~ACSelfSimSegmentationPlugin();
-	
-	//  XS TODO clean API !!
-	virtual std::vector<ACMedia*> segment(ACMediaData* _data, ACMedia* _theMedia);
-	std::vector<int> segment(const vector< vector<float> > & _allfeatures, float _SelfSimThresh=0.8, int _L=8, int _Wmin=8, SelfSimKernelType _T=SELFSIMSTEP, SelfSimDistance _D=COSINE);
-	std::vector<int> segment(arma::fmat _M, float _SelfSimThresh=0.8, int _L=8, int _Wmin=8, SelfSimKernelType _T=SELFSIMSTEP, SelfSimDistance _D=COSINE);
-    std::vector<int> segment(ACMediaTimedFeature* _ACMTF, float _SelfSimThresh=0.8, int _L=8, int _Wmin=8, SelfSimKernelType _T=SELFSIMSTEP, SelfSimDistance _D=COSINE);
-    std::vector<int> segment(std::vector <ACMediaTimedFeature*> _ACMTF, float _SelfSimThresh=0.8, int _L=8, int _Wmin=8, SelfSimKernelType _T=SELFSIMSTEP, SelfSimDistance _D=COSINE);
+    ACSelfSimSegmentationPlugin();
+    ~ACSelfSimSegmentationPlugin();
+
+    virtual std::vector<ACMedia*> segment(ACMediaData* _data, ACMedia* _theMedia){};
+    virtual std::vector<ACMedia*> segment(ACMediaTimedFeature* _mtf, ACMedia* _theMedia);
+
+    //std::vector<int> testSegment(const vector< vector<float> > & _allfeatures, float _SelfSimThresh=0.8, int _L=8, int _Wmin=8, SelfSimKernelType _T=SELFSIMSTEP, SelfSimDistance _D=COSINE);
+    std::vector<int> testSegment(arma::fmat _M, float _SelfSimThresh=0.8, int _L=8, int _Wmin=8, SelfSimKernelType _T=SELFSIMSTEP, SelfSimDistance _D=COSINE);
+    std::vector<int> testSegment(ACMediaTimedFeature* _ACMTF, float _SelfSimThresh=0.8, int _L=8, int _Wmin=8, SelfSimKernelType _T=SELFSIMSTEP, SelfSimDistance _D=COSINE);
+    std::vector<int> testSegment(std::vector <ACMediaTimedFeature*> _ACMTF, float _SelfSimThresh=0.8, int _L=8, int _Wmin=8, SelfSimKernelType _T=SELFSIMSTEP, SelfSimDistance _D=COSINE);
+
     arma::fmat get_features() {return full_features;};
-	
-	virtual std::vector<ACMedia*> segment(ACMediaTimedFeature* _mtf, ACMedia*){};
+
 private:
-	std::vector<int> _segment();
-	
-	int Wmin; 
-	float SelfSimThresh;
-	int L; //size of the kernel
-	SelfSimKernelType KernelType;
-	SelfSimDistance DistanceType;
-	
-	arma::fmat full_features;
-	
-	arma::fmat buildKernel();
-	double computeDistance(int _a, int _b);
-	
-	//arma::fmat vectorACMTF2fmat(std::vector <ACMediaTimedFeature*> _ACMTF);
+    std::vector<int> _segment();
+
+    int Wmin;
+    float SelfSimThresh;
+    int L; //size of the kernel
+    SelfSimKernelType KernelType;
+    SelfSimDistance DistanceType;
+
+    std::vector <std::string> kernel_types;
+    std::vector <std::string> distance_types;
+
+    arma::fmat full_features;
+    arma::fmat buildKernel();
+
+    double computeDistance(int _a, int _b);
+    //arma::fmat vectorACMTF2fmat(std::vector <ACMediaTimedFeature*> _ACMTF);
 };
 
 

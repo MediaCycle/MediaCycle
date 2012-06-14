@@ -1,10 +1,10 @@
 /*
- *  ACDockWidgetFactoryQt.h
+ *  ACSegmentationControlsDialogQt.h
  *  MediaCycle
  *
  *  @author Christian Frisson
- *  @date 20/02/11
- *  @copyright (c) 2011 – UMONS - Numediart
+ *  @date 13/06/2012
+ *  @copyright (c) 2012 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
  *  licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -32,30 +32,37 @@
  *
  */
 
-#ifndef ACDOCKWIDGETFACTORYQT_H
-#define ACDOCKWIDGETFACTORYQT_H
+#ifndef HEADER_ACSegmentationControlsDialogQt
+#define HEADER_ACSegmentationControlsDialogQt
+
+#include <iostream>
+#include <string.h>
 
 #include "ACAbstractDockWidgetQt.h"
-#include "ACOSCDockWidgetQt.h"
+#include "ACSegmentationControlsWidgetQt.h"
 
-#if defined (SUPPORT_AUDIO)
-#include "ACAudioControlsDockWidgetQt.h"
-#endif //defined (SUPPORT_AUDIO)
-#include "ACBrowserControlsCompleteDockWidgetQt.h"
-#include "ACBrowserControlsClustersDockWidgetQt.h"
-#include "ACMediaConfigDockWidgetQt.h"
-#if defined (SUPPORT_VIDEO)
-#include "ACVideoControlsDockWidgetQt.h"
-#endif //defined (SUPPORT_VIDEO)
-#if defined (SUPPORT_MULTIMEDIA)
-#include "ACMediaDocumentOptionDockWidgetQt.h"
-#endif //defined (SUPPORT_MULTIMEDIA)
-#include "ACSegmentationControlsDockWidgetQt.h"
+//#include "ui_ACSegmentationControlsDialogQt.h" // uncomment if a *.ui file exists
 
-class ACDockWidgetFactoryQt{
+class ACSegmentationControlsDialogQt : public QDialog, public ACAbstractWidgetQt {
+    Q_OBJECT
+
+public slots:
+    void adjustHeight();
+
 public:
-	ACDockWidgetFactoryQt(){};
-	virtual ~ACDockWidgetFactoryQt(){};
-	ACAbstractDockWidgetQt* createDockWidget(QWidget *parent = 0,std::string dock_type="");
+    ACSegmentationControlsDialogQt(QWidget *parent = 0);
+    virtual ~ACSegmentationControlsDialogQt();
+
+    virtual void changeMediaType(ACMediaType media_type);
+    virtual void updatePluginsSettings();
+    virtual void resetPluginsSettings();
+    virtual void resetMediaType(ACMediaType _media_type);
+
+protected:
+    //Ui::ACSegmentationControlsDialogQt ui; // uncomment if a *.ui file exists
+    ACSegmentationControlsWidgetQt* widget;
+    QLabel *label;
+    QDialogButtonBox* buttonBox;
+    ACMediaType current_media_type;
 };
-#endif // ACDOCKWIDGETFACTORYQT_H
+#endif

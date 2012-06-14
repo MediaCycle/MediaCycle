@@ -47,35 +47,39 @@ public:
     //  XS TODO clean API !!
 
     std::vector<ACMedia*> segment(ACMediaTimedFeature* _MTF, ACMedia* _theMedia);
+    virtual std::vector<ACMedia*> segment(ACMediaData* audio_data, ACMedia*) {};
+
     void setParameters(float _lambda = 1, int _samplingrate = 1, int _Wmin = 20, float _bic_thresh = 1, int _jump_width = 5, int _discard_borders = 5);
 
     arma::fmat get_features() {
         return full_features;
     }; //JU: added to ease the visualization during the tests
 
-    //  XS TODO check this one !!
-
-    virtual std::vector<ACMedia*> segment(ACMediaData* audio_data, ACMedia*) {};
     // XS todo: synchronize default values between constructor and segment
     std::vector<int> testSegment(arma::fmat _M, float _lambda = 1, int _samplingrate = 1, int _Wmin = 20, float _bic_thresh = 1, int _jump_width = 5, int _discard_borders = 5);
     std::vector<int> testSegmentDAC(arma::fmat _M, float _lambda = 1, int _Wmin = 20, float _bic_thresh = (-1.0 / 0.0), int _discard_borders = 0, float _bic_thresh_DAC = 0);
 
 private:
-//    std::vector<int> segment(std::vector <ACMediaTimedFeature*> _ACMTF, float _lambda = 1, int _samplingrate = 1, int _Wmin = 20, float _bic_thresh = 1, int _jump_width = 5, int discard_borders = 5);
-//    std::vector<int> segmentDAC(std::vector <ACMediaTimedFeature*> _ACMTF, float _lambda = 1, int _Wmin = 20, float _bic_thresh = (-1.0 / 0.0), int _discard_borders = 0, float _bic_thresh_DAC = 0);
+    //    std::vector<int> segment(std::vector <ACMediaTimedFeature*> _ACMTF, float _lambda = 1, int _samplingrate = 1, int _Wmin = 20, float _bic_thresh = 1, int _jump_width = 5, int discard_borders = 5);
+    //    std::vector<int> segmentDAC(std::vector <ACMediaTimedFeature*> _ACMTF, float _lambda = 1, int _Wmin = 20, float _bic_thresh = (-1.0 / 0.0), int _discard_borders = 0, float _bic_thresh_DAC = 0);
 
     int findSingleSegment(int _A, int _B);
     float detCovariance(int _cinf, int _csup);
     std::vector<int> _segment();
 
-    /// Implement divide and conquer strategy (algorithm 2, , Cheng, Wang, Fu)
+    /// Divide and conquer method (algorithm 2, , Cheng, Wang, Fu)
     std::vector<int> _segmentDAC();
     void _segmentDAC(int begin_i, int end_i);
     std::vector<int> segments_begin_i; // vector containing the indexes of the beginning of each segment
+
+    // Parameters WARNING these are not initialized!
     int imax_bic, max_bic;
     int bic_thresh_DAC;
+
+    /// Basic linear method
     float computeBIC(int begin_i, int end_i, int position);
 
+    // Parameters
     float lambda;
     int sampling_rate;
     int Wmin;

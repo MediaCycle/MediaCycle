@@ -69,6 +69,10 @@ ACAudioControlsDockWidgetQt::~ACAudioControlsDockWidgetQt(){
 #endif //defined (SUPPORT_AUDIO)
 }
 
+bool ACAudioControlsDockWidgetQt::canBeVisible(ACMediaType _media_type){
+    return (_media_type == this->getMediaType() || _media_type == MEDIA_TYPE_MIXED);
+}
+
 #if defined (SUPPORT_AUDIO)
 void ACAudioControlsDockWidgetQt::initFeedbackModes(){
 	ui.comboBoxSynchroMode->clear();

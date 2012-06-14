@@ -72,6 +72,7 @@ protected slots:
 public:
     ACBrowserControlsCompleteDockWidgetQt(QWidget *parent = 0);
     virtual ~ACBrowserControlsCompleteDockWidgetQt(){};
+    virtual bool canBeVisible(ACMediaType _media_type);
 
 protected:
     Ui::ACBrowserControlsCompleteDockWidgetQt ui;

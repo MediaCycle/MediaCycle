@@ -1,5 +1,5 @@
 # Tested with Torch3.1
-# http://www.torch.ch/archives/Torch3src.tgz
+# http://www.torch.ch/torch3/archives/Torch3src.tgz
 PROJECT(Torch3)
 cmake_minimum_required(VERSION 2.8)
 FILE(GLOB TORCH_H */*.h)

@@ -825,6 +825,12 @@ int ACMediaLibrary::deleteMedia(int i){
 	}
 }
 
+void ACMediaLibrary::deleteAllSegments(){
+    for(std::vector<ACMedia*>::iterator media = media_library.begin(); media!=media_library.end();media++){
+        (*media);
+    }
+}
+
 int ACMediaLibrary::getMediaIndex(std::string media_file_name){
 	for (int i=0;i<this->getSize();i++) {
 		if (media_file_name==media_library[i]->getFileName()) {

@@ -109,7 +109,7 @@ void ACOsgLibraryRenderer::init()
     publisher_caption = "Publisher: ";
     license_caption = "License: ";
     website_caption = "Website: ";
-    medias_caption = "Medias: ";
+    medias_caption = "Elements: "; //"Medias: ";
 
     /*
     font = 0;
@@ -349,7 +349,7 @@ void ACOsgLibraryRenderer::prepareNodes() {
         textGeode();
         media_node->addChild(text_geode);
     }*/
-
+    //medias_caption = ACMediaFactory::getInstance().getNormalCaseStringFromMediaType(this->media_cycle->getMediaType()) + "s";
 }
 
 void ACOsgLibraryRenderer::setTitle(std::string _title)

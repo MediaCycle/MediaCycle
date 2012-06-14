@@ -66,6 +66,7 @@ private slots:
 public:
 	ACAudioControlsDockWidgetQt(QWidget *parent = 0);
 	~ACAudioControlsDockWidgetQt();
+        virtual bool canBeVisible(ACMediaType _media_type);
 
 #if defined (SUPPORT_AUDIO)
 	void setComboBoxWaveformBrowser(ACBrowserAudioWaveformType _type);

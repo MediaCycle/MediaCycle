@@ -59,6 +59,7 @@
 
 #include "ACMediaLibraryMetadataQt.h"
 #include "ACUserProfileQt.h"
+#include "ACSegmentationControlsDialogQt.h"
 
 #include "ACEventListener.h"
 
@@ -197,6 +198,7 @@ private:
 	ACAboutDialogFactoryQt* aboutDialogFactory;
 	ACAbstractAboutDialogQt* aboutDialog;
     ACInputControlsDialogQt* controlsDialog;
+    ACSegmentationControlsDialogQt* segmentationDialog;
 	QMainWindow* detachedBrowser;
 	
 	// methods

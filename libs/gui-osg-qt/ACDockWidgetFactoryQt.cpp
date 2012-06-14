@@ -51,5 +51,6 @@ ACAbstractDockWidgetQt* ACDockWidgetFactoryQt::createDockWidget(QWidget *parent,
 #if defined (SUPPORT_MULTIMEDIA)
 	else if (dock_type == "MCMediaDocumentOption") {return new ACMediaDocumentOptionDockWidgetQt(parent);}
 #endif //defined (SUPPORT_MULTIMEDIA)
+        else if (dock_type == "MCSegmentationControls") {return new ACSegmentationControlsDockWidgetQt(parent);}
 	else return 0;
 }
