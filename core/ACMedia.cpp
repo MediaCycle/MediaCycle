@@ -428,8 +428,8 @@ void ACMedia::loadXML(TiXmlElement* _pMediaNode){
 		
 		for( segmentElement; segmentElement; segmentElement = segmentElement->NextSiblingElement() ) {
 			ACMedia* segment_media = ACMediaFactory::getInstance().create(this->getMediaType());
-			int n_start=-1;
-			int n_end=-1;
+			double n_start=-1;
+			double n_end=-1;
 			segmentElement->QueryDoubleAttribute("Start", &n_start); //CPL: start & end are float!!
 			if (n_start < 0) {
 				delete segment_media;
