@@ -48,31 +48,6 @@
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/path.hpp"
 
-#ifdef __APPLE__
-#include <sys/param.h>
-#include <mach-o/dyld.h> /* _NSGetExecutablePath : must add -framework CoreFoundation to link line */
-#define MAXPATHLENGTH 256
-static std::string getExecutablePath(){
-    char *given_path;
-    std::string path("");
-    given_path = new char[MAXPATHLENGTH * 2];
-    if (!given_path) return path;
-    unsigned int pathsize = MAXPATHLENGTH * 2;
-    unsigned int result = _NSGetExecutablePath(given_path, &pathsize);
-    if (result == 0){
-        path = std::string (given_path);
-        size_t current=0;
-          while (current!=string::npos){
-              current=path.find("./",2);
-              if(current!=string::npos)
-                   path.replace(current,2,"");
-        }
-    }
-    free (given_path);
-    return path;
-}
-#endif
-
 ACAudioMakamFeaturesPlugin::ACAudioMakamFeaturesPlugin() : ACFeaturesPlugin(){
     //vars herited from ACPlugin
     this->mMediaType = MEDIA_TYPE_AUDIO;
@@ -106,19 +81,14 @@ std::vector<ACMediaFeatures*> ACAudioMakamFeaturesPlugin::calculate(ACMediaData*
     ACMediaFeatures* feat;
 
     // Add the path to the makam toolbox and yin mex files
-    boost::filesystem::path s_path( __FILE__ );
-    std::cout << "Main source path: " << s_path.parent_path().parent_path().parent_path() << std::endl;
-    boost::filesystem::path b_path( boost::filesystem::current_path() );
-    std::cout << "Main build path " << b_path.parent_path().parent_path() << std::endl;
-    boost::filesystem::path i_path( boost::filesystem::initial_path() );
-    std::cout << "Initial path " << i_path << std::endl;
-
-    std::string source_path(""),build_path("");
+    std::string source_path(""),build_path(""),slash("/");
     #if defined(__APPLE__)
         #if not defined (USE_DEBUG) and not defined (XCODE) // needs "make install" to be ran to work
-            boost::filesystem::path e_path( getExecutablePath() );
-            source_path = e_path.parent_path().parent_path().string() + "/Resources/";
-            build_path = e_path.parent_path().parent_path().string() + "/Resources/";
+	boost::filesystem::path e_path( getExecutablePath() );
+    std::string r_path = e_path.parent_path().parent_path().string() + "/Resources/";
+    std::cout << "Resources path " << r_path << std::endl;
+    source_path = r_path;
+    build_path = r_path;
         #else
         #if defined(XCODE)
             source_path = s_path.parent_path().parent_path().parent_path().parent_path().string() + "/3rdparty/";
@@ -131,6 +101,7 @@ std::vector<ACMediaFeatures*> ACAudioMakamFeaturesPlugin::calculate(ACMediaData*
     #elif defined (__WIN32__)
         source_path = s_path.parent_path().parent_path().parent_path().string() + "\\";
         build_path = b_path.parent_path().parent_path().string() + "\\";
+        slash = "\\";
     #else // Linux
         #if not defined (USE_DEBUG) // needs "make package" to be ran to work
             source_path = "/usr/share/mediacycle/"; // or a prefix path from CMake?
@@ -142,9 +113,10 @@ std::vector<ACMediaFeatures*> ACAudioMakamFeaturesPlugin::calculate(ACMediaData*
     #endif
     std::string m_path = source_path + "octave_makam";
     std::string y_path = build_path + "octave_yin";
-
+    std::string t_path = m_path + slash + "makamTemplates.txt";
     std::cout << "makam toolbox path " << m_path << std::endl;
     std::cout << "yin mex files path " << y_path << std::endl;
+    std::cout << "template path " << t_path << std::endl;
 
     octave_value_list addpath_m_in = octave_value (m_path);
     octave_value_list addpath_m_out = feval ("addpath",addpath_m_in, 1);
@@ -156,9 +128,12 @@ std::vector<ACMediaFeatures*> ACAudioMakamFeaturesPlugin::calculate(ACMediaData*
     octave_value_list addpath_y_out = feval ("addpath",addpath_y_in, 1);
     std::cout << "addpath_y_out.length() " << addpath_y_out.length() << std::endl;
 
-    // Calculate the Makam histogram with filename as input
-    octave_value_list in = octave_value (theMedia->getFileName());
-    octave_value_list out = feval ("calculateMakamHistogram",in, 1);
+    // Calculate the Makam histogram with filename and template file as input
+    octave_value_list in;
+    in.resize (2);
+    in(0) = octave_value(theMedia->getFileName());;
+    in(1) = octave_value(t_path);
+    octave_value_list out = feval ("calculateMakamMultipliedHistogram",in, 1);
 
     // Convert as MediaCycle feature
     if(out.length()<1){

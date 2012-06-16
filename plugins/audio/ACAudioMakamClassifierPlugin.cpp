@@ -51,31 +51,6 @@
 #include <armadillo>
 #include "Armadillo-utils.h"
 
-#ifdef __APPLE__
-#include <sys/param.h>
-#include <mach-o/dyld.h> /* _NSGetExecutablePath : must add -framework CoreFoundation to link line */
-#define MAXPATHLENGTH 256
-static std::string getExecutablePath(){
-    char *given_path;
-    std::string path("");
-    given_path = new char[MAXPATHLENGTH * 2];
-    if (!given_path) return path;
-    unsigned int pathsize = MAXPATHLENGTH * 2;
-    unsigned int result = _NSGetExecutablePath(given_path, &pathsize);
-    if (result == 0){
-        path = std::string (given_path);
-        size_t current=0;
-          while (current!=string::npos){
-              current=path.find("./",2);
-              if(current!=string::npos)
-                   path.replace(current,2,"");
-        }
-    }
-    free (given_path);
-    return path;
-}
-#endif
-
 ACAudioMakamClassifierPlugin::ACAudioMakamClassifierPlugin() : ACClusterMethodPlugin(){
     //vars herited from ACPlugin
     this->mMediaType = MEDIA_TYPE_AUDIO;
@@ -105,19 +80,14 @@ ACAudioMakamClassifierPlugin::~ACAudioMakamClassifierPlugin() {
 void ACAudioMakamClassifierPlugin::updateClusters(ACMediaBrowser* mediaBrowser, bool needsCluster){
 
     // Add the path to the makam toolbox and yin mex files
-    boost::filesystem::path s_path( __FILE__ );
-    std::cout << "Main source path: " << s_path.parent_path().parent_path().parent_path() << std::endl;
-    boost::filesystem::path b_path( boost::filesystem::current_path() );
-    std::cout << "Main build path " << b_path.parent_path().parent_path() << std::endl;
-    boost::filesystem::path i_path( boost::filesystem::initial_path() );
-    std::cout << "Initial path " << i_path << std::endl;
-
     std::string source_path(""),build_path(""),slash("/");
 #if defined(__APPLE__)
 #if not defined (USE_DEBUG) and not defined (XCODE) // needs "make install" to be ran to work
     boost::filesystem::path e_path( getExecutablePath() );
-    source_path = e_path.parent_path().parent_path().string() + "/Resources/";
-    build_path = e_path.parent_path().parent_path().string() + "/Resources/";
+    std::string r_path = e_path.parent_path().parent_path().string() + "/Resources/";
+    std::cout << "Resources path " << r_path << std::endl;
+    source_path = r_path;
+    build_path = r_path;
 #else
 #if defined(XCODE)
     source_path = s_path.parent_path().parent_path().parent_path().parent_path().string() + "/3rdparty/";
@@ -142,7 +112,7 @@ void ACAudioMakamClassifierPlugin::updateClusters(ACMediaBrowser* mediaBrowser, 
 #endif
     std::string m_path = source_path + "octave_makam";
     std::string y_path = build_path + "octave_yin";
-    std::string t_path = m_path + slash + "makamlarArel_short.txt";
+    std::string t_path = m_path + slash + "makamTemplates.txt";
     std::cout << "makam toolbox path " << m_path << std::endl;
     std::cout << "yin mex files path " << y_path << std::endl;
     std::cout << "template path " << t_path << std::endl;
@@ -154,7 +124,6 @@ void ACAudioMakamClassifierPlugin::updateClusters(ACMediaBrowser* mediaBrowser, 
     octave_value_list addpath_y_out = feval ("addpath",addpath_y_in, 1);
 
     // Classify songs with the list of filenames as input
-
     std::list<std::string> lst;
     std::vector<ACMedia*> medias = mediaBrowser->getLibrary()->getAllMedia();
     for(std::vector<ACMedia*>::iterator media=medias.begin();media!=medias.end();media++)
@@ -164,7 +133,6 @@ void ACAudioMakamClassifierPlugin::updateClusters(ACMediaBrowser* mediaBrowser, 
     in.resize (2);
     in(0) = cell;
     in(1) = octave_value(t_path);
-
     octave_value_list out = feval ("calculateMakamStrings",in, 1);
 
     // Convert as MediaCycle clusters

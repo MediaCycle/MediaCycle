@@ -1,23 +1,11 @@
 Yekta-Arel-Ezgi-Uzdilek	24
-kurdi		4    13    22    31    35    44    53
-
-bestenigar	5    14    22    27    32    45    53
 segah		5    14    22    31    36    45    49    53
 huzzam		5    14    19    31    36    49    53
 hicaz		5    17    22    31    35    39    44    53
 hicazkar	5    17    22    31    36    48    53
-neveser		5    17    22    27    39    44    53
-suzidil		5    18    22    31    36    48    53
-
 saba		8    13    18    31    35    44    49    61
 ussak		8    13    22    31    35    44    53
 huseyni		8    13    22    31    39    44    53
-karcigar	8    13    22    27    39    44    53
-
-sultaniyegah	9    13    22    31    36    48    53
 nihavend	9    13    22    31    35    44    53
 rast		9    17    22    31    40    48    53
-suzinak		9    17    22    31    36    48    53
-yegah		9    17    22    31    39    44    53
 mahur		9    18    22    31    40    49    53
-nikriz		9    14    26    31    40    44 48 53
