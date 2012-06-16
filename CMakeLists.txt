@@ -200,7 +200,7 @@ IF(NOT USE_DEBUG) # release mode
 	#SET(SUPPORT_ARCHIPEL ON)
 	#SET(SUPPORT_NAVIMED ON)
 	SET(USE_AUDIOGARDEN OFF)
-	SET(USE_YAAFE OFF)
+	#SET(USE_YAAFE OFF)
 	SET(USE_EYESWEB OFF)
 	SET(USE_COCOA OFF)
 	SET(USE_PSYCLONE OFF)
@@ -1281,6 +1281,16 @@ IF(SUPPORT_AUDIO AND USE_YAAFE)
 	ENDIF()
 ENDIF()
 
+# Freetype for osgdb_freetype
+IF(BUILD_APPS OR USE_OSG)
+	FIND_PACKAGE(FreeType REQUIRED) # to display text in OSX
+ENDIF()
+
+# RSVG for osgdb_svg
+IF(BUILD_APPS OR USE_OSG)
+	FIND_PACKAGE(RSVG)
+ENDIF()
+
 #########################
 # INTERNAL DEPENDENCIES #
 #########################
@@ -1534,6 +1544,12 @@ IF(BUILD_APPS AND OSG_FOUND)
 		IF(QTKIT_FOUND)
 			add_subdirectory(3rdparty/osgdb_QTKit)
 		ENDIF()
+	ENDIF()
+	IF(FREETYPE_FOUND)
+		add_subdirectory(3rdparty/osgdb_freetype)
+	ENDIF()
+	IF(RSVG_FOUND AND CAIRO_FOUND)
+		add_subdirectory(3rdparty/osgdb_svg)
 	ENDIF()
 	MESSAGE("")
 ENDIF()

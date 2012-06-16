@@ -40,6 +40,36 @@ using std::cout;
 using std::endl;
 using std::string;
 
+#ifdef __APPLE__
+#include <sys/param.h>
+#include <mach-o/dyld.h> /* _NSGetExecutablePath : must add -framework CoreFoundation to link line */
+#define MAXPATHLENGTH 256
+std::string getExecutablePath(){
+    char *given_path;
+    std::string path("");
+    given_path = new char[MAXPATHLENGTH * 2];
+    if (!given_path) return path;
+    unsigned int pathsize = MAXPATHLENGTH * 2;
+    unsigned int result = _NSGetExecutablePath(given_path, &pathsize);
+    if (result == 0){
+        path = std::string (given_path);
+        size_t current=0;
+          while (current!=string::npos){
+              current=path.find("./",2);
+              if(current!=string::npos)
+                   path.replace(current,2,"");
+        }
+		size_t executable=0;
+		executable=path.find_last_of("/");
+		if(executable!=string::npos)
+			path.replace(executable+1,path.length()-executable,"");
+		
+    }
+    free (given_path);
+    return path;
+}
+#endif
+
 ACPlugin::ACPlugin() {
     this->mPluginType = PLUGIN_TYPE_NONE;
     this->mMediaType = MEDIA_TYPE_NONE;

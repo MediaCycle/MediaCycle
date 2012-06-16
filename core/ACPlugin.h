@@ -49,6 +49,10 @@ class ACMedia;
 class ACMediaBrowser;
 class ACMediaTimedFeature;
 
+#ifdef __APPLE__
+extern std::string getExecutablePath();
+#endif
+
 struct ACNumberParameter{
     std::string name,desc;
     float value,init,min,max,step;

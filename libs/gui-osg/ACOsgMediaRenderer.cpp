@@ -97,7 +97,8 @@ ACOsgMediaRenderer::ACOsgMediaRenderer() {
         font_path = s_path.parent_path().parent_path().parent_path().string() + "/data/fonts/";
     #else
     #ifdef __APPLE__
-        font_path = "@executable_path/../Resources/fonts/";
+		boost::filesystem::path e_path( getExecutablePath() );
+		font_path = e_path.parent_path().parent_path().string() + "/Resources/fonts/";
     #elif __WIN32__
         font_path = "./";
     #else

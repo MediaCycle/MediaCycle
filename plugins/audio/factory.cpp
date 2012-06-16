@@ -17,7 +17,7 @@
 //the factories
 
 extern "C" ACPlugin* create(std::string namePlugin) {
-#if defined(USE_DEBUG) && defined(USE_YAAFE)
+#if defined(USE_YAAFE)
     if (namePlugin == "ACAudioYaafePlugin") {return new ACAudioYaafePlugin();}
 #endif
     if (namePlugin == "ACAudioFeaturesPlugin") {return new ACAudioFeaturesPlugin();}
@@ -37,14 +37,15 @@ extern "C" void destroy(ACPlugin* d) {
 
 extern "C" std::vector<std::string> list() {    //returns a string vector containing the plugin names included in the DLL file
     std::vector<std::string> listPlugin;
-#if defined(USE_DEBUG) && defined(USE_YAAFE)
+#if defined(USE_YAAFE)
     listPlugin.push_back("ACAudioYaafePlugin");
-#endif
+#else
     listPlugin.push_back("ACAudioFeaturesPlugin");
+#endif	
     //listPlugin.push_back("ACAudioHaitsmaFingerprintPlugin");
     //listPlugin.push_back("ACAudioGardenFeaturesPlugin");
     //listPlugin.push_back("ACAudioFeaturesChromaRhythmPlugin");
-    listPlugin.push_back("ACAudioAcidPlugin");
+    //listPlugin.push_back("ACAudioAcidPlugin");
 #if defined(USE_OCTAVE) && defined(USE_MAKAM)
     listPlugin.push_back("ACAudioMakamFeaturesPlugin");
     listPlugin.push_back("ACAudioMakamClassifierPlugin");
