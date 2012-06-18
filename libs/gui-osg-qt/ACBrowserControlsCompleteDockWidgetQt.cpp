@@ -39,9 +39,10 @@ ACBrowserControlsCompleteDockWidgetQt::ACBrowserControlsCompleteDockWidgetQt(QWi
 {
     ui.setupUi(this); // first thing to do
     connect(ui.featuresListWidget, SIGNAL(itemClicked(QListWidgetItem*)),this, SLOT(modifyListItem(QListWidgetItem*)));
+    connect(this,SIGNAL(reconfigureCheckBoxes()),this,SLOT(configureCheckBoxes()));
+    connect(this,SIGNAL(readjustHeight()),this,SLOT(adjustHeight()));
     this->show();
-
-    this->resizePluginList();
+    emit this->readjustHeight();
 }
 
 bool ACBrowserControlsCompleteDockWidgetQt::canBeVisible(ACMediaType _media_type){
@@ -167,7 +168,7 @@ void ACBrowserControlsCompleteDockWidgetQt::on_radioButtonClusters_toggled( bool
 
 void ACBrowserControlsCompleteDockWidgetQt::updatePluginsSettings()
 {
-    this->configureCheckBoxes();
+    emit this->reconfigureCheckBoxes();
 
     //Plugins according to media type
     //TODO Remember previous settings
@@ -234,10 +235,7 @@ void ACBrowserControlsCompleteDockWidgetQt::synchronizeFeaturesWeights()
                 ui.featuresListWidget->item(i)->setCheckState (Qt::Checked);
         }
     }
-    this->resizePluginList();
-
-
-
+    emit this->readjustHeight();
 }
 
 void ACBrowserControlsCompleteDockWidgetQt::configureCheckBoxes()
@@ -263,7 +261,7 @@ void ACBrowserControlsCompleteDockWidgetQt::configureCheckBoxes()
     connect(ui.featuresListWidget, SIGNAL(itemClicked(QListWidgetItem*)),
             this, SLOT(modifyListItem(QListWidgetItem*)));
 
-    this->resizePluginList();
+    emit this->readjustHeight();
 }
 
 void ACBrowserControlsCompleteDockWidgetQt::cleanCheckBoxes()
@@ -274,7 +272,7 @@ void ACBrowserControlsCompleteDockWidgetQt::cleanCheckBoxes()
         delete ui.featuresListWidget->takeItem(i);
 
     ui.featuresListWidget->clear();
-    this->resizePluginList();
+    emit this->readjustHeight();
 }
 
 void ACBrowserControlsCompleteDockWidgetQt::updatePluginLists()
@@ -377,10 +375,10 @@ void ACBrowserControlsCompleteDockWidgetQt::updatePluginLists()
         ui.comboBoxClustersMethod->setCurrentIndex(1);
         ui.comboBoxClustersPositions->setCurrentIndex(1);
     }*/
-    this->resizePluginList();
+    emit this->readjustHeight();
 }
 
-void ACBrowserControlsCompleteDockWidgetQt::resizePluginList(){
+void ACBrowserControlsCompleteDockWidgetQt::adjustHeight(){
     if (ui.featuresListWidget->sizeHintForRow(0) >-1 && ui.featuresListWidget->count() >0){
         // CF resize the feature list along the number of features with threshold
         int max_number_of_lines = 9; // allows the current 18 audio features to be accessed on 2 pages
@@ -401,6 +399,8 @@ void ACBrowserControlsCompleteDockWidgetQt::resizePluginList(){
         ui.groupBoxSimilarity->setMinimumHeight(64);
         ui.groupBoxSimilarity->setFixedHeight(64);
     }
+    ui.featuresListWidget->adjustSize();
+    ui.groupBoxSimilarity->adjustSize();
 
     ui.dockWidgetContents->setMinimumHeight(
         ui.groupBoxSimilarity->minimumHeight()
@@ -408,11 +408,10 @@ void ACBrowserControlsCompleteDockWidgetQt::resizePluginList(){
         + ui.groupBoxNeighbors->minimumHeight()
         + ui.widgetModes->minimumHeight()
         + ui.widgetNavigation->minimumHeight()
+        + 64
     );
-
     ui.dockWidgetContents->adjustSize();
     ui.verticalLayoutWidget->adjustSize();
     this->adjustSize();
-    ui.featuresListWidget->adjustSize();
-    ui.groupBoxSimilarity->adjustSize();
 }
+

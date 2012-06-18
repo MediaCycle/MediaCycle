@@ -181,6 +181,7 @@ public:
     ACAvailableSegmentPlugins *getActiveSegmentPlugins(){return this->mActiveSegmentPlugins;}// returns a container with active segment plugins reference
     int getActiveSegmentPluginsSize(ACMediaType MediaType);
     std::vector<std::string> getAvailableSegmentPluginsNames(ACMediaType MediaType);
+    std::vector<std::string> getActiveSegmentPluginsNames(ACMediaType MediaType);
     bool setActiveSegmentPlugin(std::string name);
 
     ACPreProcessPlugin* getPreProcessPlugin(ACMediaType MediaType);

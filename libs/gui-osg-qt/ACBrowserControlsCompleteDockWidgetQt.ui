@@ -79,7 +79,7 @@
       <x>0</x>
       <y>0</y>
       <width>252</width>
-      <height>364</height>
+      <height>370</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout">
@@ -87,7 +87,7 @@
       <number>0</number>
      </property>
      <property name="sizeConstraint">
-      <enum>QLayout::SetFixedSize</enum>
+      <enum>QLayout::SetMinimumSize</enum>
      </property>
      <item>
       <widget class="QGroupBox" name="groupBoxSimilarity">
@@ -186,13 +186,13 @@
        <property name="flat">
         <bool>true</bool>
        </property>
-       <widget class="QWidget" name="">
+       <widget class="QWidget" name="layoutWidget">
         <property name="geometry">
          <rect>
           <x>10</x>
           <y>30</y>
           <width>231</width>
-          <height>81</height>
+          <height>92</height>
          </rect>
         </property>
         <layout class="QGridLayout" name="gridLayout">
@@ -326,13 +326,6 @@
          </item>
         </layout>
        </widget>
-       <zorder>comboBoxClustersMethod</zorder>
-       <zorder>labelClustersMethod</zorder>
-       <zorder>labelClustersPositions</zorder>
-       <zorder>comboBoxClustersPositions</zorder>
-       <zorder>spinBoxClusters</zorder>
-       <zorder>sliderClusters</zorder>
-       <zorder>labelClustersNumber</zorder>
       </widget>
      </item>
      <item>
@@ -364,7 +357,7 @@
        <property name="flat">
         <bool>true</bool>
        </property>
-       <widget class="QWidget" name="">
+       <widget class="QWidget" name="layoutWidget">
         <property name="geometry">
          <rect>
           <x>10</x>

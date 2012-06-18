@@ -40,14 +40,13 @@
 
 #include "ACAbstractWidgetQt.h"
 
-#include "ui_ACSegmentationControlsWidgetQt.h"
+//#include "ui_ACSegmentationControlsWidgetQt.h"
 
 class ACSegmentationControlsWidgetQt : public QWidget, public ACAbstractWidgetQt {
     Q_OBJECT
 
 public slots:
     void on_comboBoxPlugins_activated(const QString & text);
-    void on_tabWidgetParameters_currentChanged(int index);
 
 protected slots:
     void buildPluginList();
@@ -67,7 +66,11 @@ public:
     void resetMediaType(ACMediaType _media_type);
 
 protected:
-    Ui::ACSegmentationControlsWidgetQt ui;
+    //Ui::ACSegmentationControlsWidgetQt ui;
+    QComboBox* comboBoxPlugins;
+    QVBoxLayout* vboxLayout;
+    QVBoxLayout* parametersLayout;
+    QWidget* parametersContainer;
     void cleanPluginList();
 };
 #endif

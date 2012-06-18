@@ -223,16 +223,34 @@ std::vector<std::string> ACPluginManager::getAvailableSegmentPluginsNames(ACMedi
     return this->mAvailableSegmentPlugins->getName(MediaType);
 }
 
+std::vector<std::string> ACPluginManager::getActiveSegmentPluginsNames(ACMediaType MediaType) {
+    return this->mActiveSegmentPlugins->getName(MediaType);
+}
+
 bool ACPluginManager::setActiveSegmentPlugin(std::string _name){
     // Check if the plugin exists in the loaded plugin libraries
-    if(this->getPlugin(_name) == NULL)
+    if(this->getPlugin(_name) == NULL){
+        std::cerr << "ACPluginManager::setActiveSegmentPlugin: plugin '" << _name << "' doesn't exist in the library" << std::endl;
         return false;
+    }
 
     // Check if the plugin is listed in the available segmentation plugins:
-    std::vector<std::string> names = this->mAvailableSegmentPlugins->getName();
-    std::vector<std::string>::iterator name = std::find(names.begin(), names.end(), _name);
-    if(name == names.end())
+    std::vector<std::string> available_names = this->mAvailableSegmentPlugins->getName();
+    std::vector<std::string>::iterator available_name = std::find(available_names.begin(), available_names.end(), _name);
+    if(available_name == available_names.end()){
+        std::cerr << "ACPluginManager::setActiveSegmentPlugin: plugin '" << _name << "' isn't a segmentation plugin" << std::endl;
         return false;
+    }
+
+    // Check if the plugin is already listed in the active segmentation plugins:
+    std::vector<std::string> active_names = this->mActiveSegmentPlugins->getName();
+    std::vector<std::string>::iterator active_name = std::find(active_names.begin(), active_names.end(), _name);
+    if(active_name != active_names.end()){
+        std::cerr << "ACPluginManager::setActiveSegmentPlugin: plugin '" << _name << "' is already active" << std::endl;
+        return false;
+    }
+
+    std::cout << "ACPluginManager::setActiveSegmentPlugin: plugin '" << _name << "'" << std::endl;
 
     // For now we allow only one segmentation plugin at a time
     this->mActiveSegmentPlugins->clean();

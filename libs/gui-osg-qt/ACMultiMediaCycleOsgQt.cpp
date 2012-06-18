@@ -75,7 +75,7 @@ void ACMultiMediaCycleOsgQt::mediaImported(int n,int nTot){
 		emit mediacycle_message_changed(QString(send.c_str()));
 		emit loading_started();
 	}
-	if (n==nTot) {
+        else if (n==nTot) {
 		send = "";
 		emit mediacycle_message_changed(QString(send.c_str()));
 		emit loading_finished();
@@ -86,8 +86,7 @@ void ACMultiMediaCycleOsgQt::mediaImported(int n,int nTot){
 			dockWidgetsManager->updatePluginsSettings();
 		}
 	}
-	
-	if(n<nTot){
+        else if(n<nTot){
 //Threading problem if we change during the import
 		//if(media_cycle->getLibrary()->getParentIds().size()==1){
 		//	dockWidgetsManager->updatePluginsSettings();
@@ -157,10 +156,10 @@ ACMultiMediaCycleOsgQt::ACMultiMediaCycleOsgQt(QWidget *parent) : QMainWindow(pa
 	osgViewDockLayout = new QVBoxLayout;
 	osgViewDockLayout->setSpacing(0); // no blank space between the progress bar and the osg view
 	osgViewDockLayout->setContentsMargins(0,0,0,0);// no unnecessary corners in the osg view dock widget (this supersedes the OS theme defaults)
-    osgViewDockWidget->setLayout(osgViewDockLayout);
+        osgViewDockWidget->setLayout(osgViewDockLayout);
 
 	osgViewDock = new QDockWidget(this);
-    osgViewDock->setSizePolicy ( QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding );
+        osgViewDock->setSizePolicy ( QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding );
 	osgViewDock->setWidget(osgViewDockWidget);
 	osgViewDock->setAllowedAreas(Qt::RightDockWidgetArea);
 	osgViewDock->setFeatures(QDockWidget::DockWidgetFloatable);
@@ -1031,10 +1030,10 @@ void ACMultiMediaCycleOsgQt::loadDefaultConfig(ACMediaType _media_type, ACBrowse
 		osg::ref_ptr<osgDB::ReaderWriter> movReaderWriter(0),ffmpegReaderWriter(0), pdfReaderWriter(0);
 		std::string osg_plugin_error ="";
 		
-		if(_media_type == MEDIA_TYPE_VIDEO){
-			ffmpegReaderWriter = osgDB::Registry::instance()->getReaderWriterForExtension("ffmpeg");
-			movReaderWriter = osgDB::Registry::instance()->getReaderWriterForExtension("mov");
-			osg_plugin_error = "Video plugins for OpenSceneGraph (FFmpeg or QuickTime or QTKit) are absent but necessary for interactive video navigation. Please install it or contact the MediaCycle team.";
+                if(_media_type == MEDIA_TYPE_VIDEO){
+                        ffmpegReaderWriter = osgDB::Registry::instance()->getReaderWriterForExtension("ffmpeg");
+                        movReaderWriter = osgDB::Registry::instance()->getReaderWriterForExtension("mov");
+                        osg_plugin_error = "Video plugins for OpenSceneGraph (FFmpeg or QuickTime or QTKit) are absent but necessary for interactive video navigation. Please install it or contact the MediaCycle team.";
 		}
 		if (_media_type == MEDIA_TYPE_VIDEO && !ffmpegReaderWriter && !movReaderWriter){
              dockWidgetsManager->resetMediaType(this->media_type);
@@ -1166,10 +1165,10 @@ void ACMultiMediaCycleOsgQt::loadDefaultConfig(ACMediaType _media_type, ACBrowse
 		media_cycle->setPreProcessPlugin("");
 	}	
 	
-    // update the plugin lists of the browser control dock through configureDockWidget
+    // update the plugin lists of the browser control dock through DockWidget
     dockWidgetsManager->changeMediaType(_media_type);
 	this->setMediaType(_media_type);
-    dockWidgetsManager->resetPluginsSettings();
+    //dockWidgetsManager->resetPluginsSettings();
 }
 
 void ACMultiMediaCycleOsgQt::loadMediaDocumentConfig(string _name){

@@ -38,15 +38,22 @@
 #include <qwt/qwt_slider.h>
 
 ACSegmentationControlsWidgetQt::ACSegmentationControlsWidgetQt(QWidget *parent)
-    : QWidget(parent),ACAbstractWidgetQt()
+    : QWidget(parent),ACAbstractWidgetQt(),comboBoxPlugins(0),vboxLayout(0),parametersLayout(0),parametersContainer(0)
 {
-    ui.setupUi(this); // first thing to do
+    //setupUi(this); // first thing to do
+    vboxLayout = new QVBoxLayout();
+    vboxLayout->setMargin(0);
+    comboBoxPlugins = new QComboBox();
+    vboxLayout->addWidget(comboBoxPlugins);
+    this->setLayout(vboxLayout);
     this->show();
+    connect(comboBoxPlugins,SIGNAL(activated(QString)),this,SLOT(on_comboBoxPlugins_activated(QString)));
     connect(this,SIGNAL(rebuildPluginList()),this,SLOT(buildPluginList()));
     connect(this,SIGNAL(readjustHeight()),this,SLOT(adjustHeight()));
 }
 
 ACSegmentationControlsWidgetQt::~ACSegmentationControlsWidgetQt(){
+    this->cleanPluginList();
 }
 
 void ACSegmentationControlsWidgetQt::on_comboBoxPlugins_activated(const QString & text)
@@ -55,37 +62,15 @@ void ACSegmentationControlsWidgetQt::on_comboBoxPlugins_activated(const QString 
     //std::cout << "Media type " << ACMediaFactory::getInstance().getNormalCaseStringFromMediaType(media_cycle->getMediaType()) << std::endl;
     if (media_cycle == 0) return;
     if (media_cycle->getPluginManager() == 0) return;
-    //std::cout << "Active segments plugins size " << media_cycle->getPluginManager()->getActiveSegmentPluginsSize(media_cycle->getMediaType()) << std::endl;
-    //std::cout << "Avail segments plugins size " << media_cycle->getPluginManager()->getAvailableSegmentPluginsSize(media_cycle->getMediaType()) << std::endl;
     media_cycle->getPluginManager()->setActiveSegmentPlugin(text.toStdString());
-    //std::cout << "Active segments plugins size " << media_cycle->getPluginManager()->getActiveSegmentPluginsSize(media_cycle->getMediaType()) << std::endl;
-    std::vector<std::string> names = media_cycle->getPluginManager()->getActiveSegmentPlugins()->getName();
-    //std::cout << "Active segments plugin names size " << names.size() << std::endl;
-    std::cout << "Active segments plugin " << names.front() << std::endl;
-
-    //ui.tabWidgetParameters->setCurrentIndex( ui.comboBoxPlugins->currentIndex() ); // might be wrong if some plugins have no parameters!
-    for(int t=0;t<ui.tabWidgetParameters->count();t++){
-        if ( ui.tabWidgetParameters->tabText(t) == QString( media_cycle->getPluginManager()->getActiveSegmentPlugins()->getName().front().c_str()).remove("Segmentation"))
-            ui.tabWidgetParameters->setCurrentIndex(t);
-    }
-
-    emit this->readjustHeight();
-    //std::cout<< "ACSegmentationControlsWidgetQt::on_comboBoxPlugins_activated: current container min height " << ui.tabWidgetParameters->currentWidget()->minimumHeight() << std::endl;
-}
-
-void ACSegmentationControlsWidgetQt::on_tabWidgetParameters_currentChanged(int index){
-    emit this->readjustHeight();
+    emit this->rebuildPluginList();
 }
 
 void ACSegmentationControlsWidgetQt::changeMediaType(ACMediaType _media_type)
 {
     if (media_cycle == 0) return;
-    if(media_cycle->getMediaType() != _media_type)
-    {
-        this->cleanPluginList();
-        if (media_cycle->getPluginManager() == 0) return;
-        emit this->rebuildPluginList();
-    }
+    this->cleanPluginList();
+    emit this->rebuildPluginList();
 }
 
 void ACSegmentationControlsWidgetQt::updatePluginsSettings()
@@ -96,7 +81,7 @@ void ACSegmentationControlsWidgetQt::updatePluginsSettings()
 
 void ACSegmentationControlsWidgetQt::resetPluginsSettings()
 {
-    //this->cleanPluginList();
+    this->cleanPluginList();
 }
 
 void ACSegmentationControlsWidgetQt::resetMediaType(ACMediaType _media_type)
@@ -107,35 +92,53 @@ void ACSegmentationControlsWidgetQt::resetMediaType(ACMediaType _media_type)
 
 void ACSegmentationControlsWidgetQt::cleanPluginList()
 {
-    ui.comboBoxPlugins->clear();
-    ui.comboBoxPlugins->setEnabled(false);
-    ui.tabWidgetParameters->clear();
+    comboBoxPlugins->clear();
+    if(parametersContainer){
+        vboxLayout->removeWidget(parametersContainer);
+        delete parametersContainer;
+    }
+    parametersContainer = 0;
 }
 
 void ACSegmentationControlsWidgetQt::buildPluginList()
 {
+    this->cleanPluginList();
+
     if (media_cycle == 0) return;
     if (media_cycle->getPluginManager() == 0) return;
+
+    int activePlugins = media_cycle->getPluginManager()->getActiveSegmentPluginsSize(media_cycle->getMediaType());
+    std::string current_plugin_name("");
+    if(activePlugins == 1){
+        current_plugin_name = media_cycle->getPluginManager()->getActiveSegmentPluginsNames(media_cycle->getMediaType()).front();
+        std::cout << "Already active plugin: " << current_plugin_name << std::endl;
+    }
+    else if(activePlugins == 0){
+        current_plugin_name = media_cycle->getPluginManager()->getAvailableSegmentPluginsNames(media_cycle->getMediaType()).front();
+        media_cycle->getPluginManager()->setActiveSegmentPlugin( current_plugin_name );
+        std::cout << "Default active plugin: " << current_plugin_name << std::endl;
+    }
 
     // Build plugin list
     std::vector<std::string> availableSegmentPlugins = media_cycle->getPluginManager()->getAvailableSegmentPluginsNames( media_cycle->getMediaType() );
     for (std::vector<std::string>::iterator availableSegmentPlugin = availableSegmentPlugins.begin(); availableSegmentPlugin != availableSegmentPlugins.end(); availableSegmentPlugin++){
-        ui.comboBoxPlugins->addItem(QString((*availableSegmentPlugin).c_str()));
-        //std::cout << "Available segmentation plugin: " << *availableSegmentPlugin << std::endl;
-        ui.comboBoxPlugins->setEnabled(true);
+        QString plugin_name = QString((*availableSegmentPlugin).c_str());
+        comboBoxPlugins->addItem(plugin_name);
+        comboBoxPlugins->setEnabled(true);
         ACPlugin* plugin = media_cycle->getPluginManager()->getPlugin(*availableSegmentPlugin);
 
-        //std::cout << "Number of parameters: " << plugin->getParametersCount() << std::endl;
-        if(plugin->getParametersCount()>0){
-            QWidget* container = new QWidget();
+        QFont font = QFont(QApplication::font().defaultFamily(),10);
+        comboBoxPlugins->setFont(font);
+
+        if(plugin_name.toStdString() == current_plugin_name && plugin->getParametersCount()>0){
+            parametersContainer = new QWidget(this);
             QGridLayout* layout = new QGridLayout();
             layout->setMargin(0);
             layout->setHorizontalSpacing(1);
             layout->setVerticalSpacing(5);
-            container->setLayout(layout);
-            container->setFixedWidth(230);
-
+            int minHeight = 0;
             QPushButton* pushbutton = new QPushButton("Reset");
+            pushbutton->setFont(font);
 
             int paramIdx = 0;
             std::vector<std::string> strParamNames = plugin->getStringParametersNames();
@@ -148,13 +151,14 @@ void ACSegmentationControlsWidgetQt::buildPluginList()
                 QString desc = QString( plugin->getStringParameterDesc(*strParamName).c_str());
 
                 QLabel* label = new QLabel(name);
-                label->setFont(QFont(QApplication::font().defaultFamily(),10));
+                label->setFont(font);
                 layout->addWidget(label,paramIdx,0);
 
                 QComboBox* combobox = new QComboBox();
                 for (std::vector<std::string>::iterator name = names.begin();name!=names.end();name++){
                     combobox->addItem(QString((*name).c_str()));
                 }
+                combobox->setFont(font);
                 layout->addWidget(combobox,paramIdx,1);
 
                 ACPluginParameterQt* stringParameter = new ACPluginParameterQt(plugin,name);
@@ -162,7 +166,8 @@ void ACSegmentationControlsWidgetQt::buildPluginList()
                 connect(combobox,SIGNAL(currentIndexChanged(QString)),stringParameter,SLOT(updateStringParameter(QString)) );
                 connect(pushbutton,SIGNAL(clicked()),stringParameter,SLOT(resetStringParameter()));
                 connect(stringParameter,SIGNAL(stringParameterIndexChanged(int)),combobox,SLOT(setCurrentIndex(int)));
-
+                combobox->adjustSize();
+                minHeight += combobox->height();
                 paramIdx++;
             }
 
@@ -182,7 +187,7 @@ void ACSegmentationControlsWidgetQt::buildPluginList()
                 QString desc = QString( plugin->getNumberParameterDesc(*numParamName).c_str());
 
                 QLabel* label = new QLabel(name);
-                label->setFont(QFont(QApplication::font().defaultFamily(),10));
+                label->setFont(font);
                 layout->addWidget( label,paramIdx,0);
                 if(min==0 && max==1 && step==1){
                     QCheckBox* checkbox = new QCheckBox("");
@@ -192,9 +197,11 @@ void ACSegmentationControlsWidgetQt::buildPluginList()
                     connect(checkbox,SIGNAL(stateChanged(int)),numberParameter,SLOT(updateNumberParameter(int)));
                     connect(numberParameter,SIGNAL(numberParameterChanged(double)),checkbox,SLOT(setChecked(bool)));
                     //connect(checkbox,SIGNAL(stateChanged(int)), new ACPluginParameterQt(plugin,name), SLOT(updateNumberParameter(int)));
+                    checkbox->adjustSize();
+                    minHeight += checkbox->height();
                 }
                 else{
-                    QwtSlider* slider = new QwtSlider(container);
+                    QwtSlider* slider = new QwtSlider(0);
                     slider->setRange(min,max,step);
                     slider->setValue(init);
                     slider->setBackgroundStyle(QwtSlider::Groove);
@@ -218,6 +225,7 @@ void ACSegmentationControlsWidgetQt::buildPluginList()
                     spinbox->setMaximum(max);
                     spinbox->setValue(init);
                     spinbox->setToolTip(desc);
+                    spinbox->setFont(font);
                     spinbox->setAccessibleDescription(desc);
                     layout->addWidget( spinbox,paramIdx,2);
 
@@ -226,64 +234,48 @@ void ACSegmentationControlsWidgetQt::buildPluginList()
 
                     connect(slider,SIGNAL(valueChanged(double)),numberParameter,SLOT(updateNumberParameter(double)));
                     connect(numberParameter,SIGNAL(numberParameterChanged(double)),slider,SLOT(setValue(double)));
+                    spinbox->adjustSize();
+                    minHeight += spinbox->height();
                 }
                 paramIdx++;
             }
-
             layout->addWidget(pushbutton, paramIdx,0);
-
-            QString tabName = QString((*availableSegmentPlugin).c_str()).remove("Segmentation");
-            ui.tabWidgetParameters->addTab(container,tabName);
-
-            emit this->readjustHeight();
+            pushbutton->adjustSize();
+            minHeight += pushbutton->height();
+            parametersContainer->setLayout(layout);
+            vboxLayout->addWidget(parametersContainer);
+            parametersContainer->setMinimumHeight(minHeight);
         }
+    }
 
+    int index = -1;
+    index = comboBoxPlugins->findText(QString(current_plugin_name.c_str()));
+    if (index != -1){
+        comboBoxPlugins->setCurrentIndex(index);
     }
 
     // If no segmentation plugin exist
-    if(ui.comboBoxPlugins->count()==0){
-        ui.comboBoxPlugins->addItem("None");
-        ui.comboBoxPlugins->setEnabled(false);
+    if(comboBoxPlugins->count()==0){
+        comboBoxPlugins->addItem("None");
+        comboBoxPlugins->setEnabled(false);
     }
-    else{
-        int activePlugins = media_cycle->getPluginManager()->getActiveSegmentPlugins()->getName().size();
-        std::string name("");
-        // If a segmentation plugin is already active, set it on the combo
-        if(activePlugins == 1){
-            name = media_cycle->getPluginManager()->getActiveSegmentPlugins()->getName().front();
-            std::cout << "Already active plugin: " << name << std::endl;
-            int index = -1;
-            index = ui.comboBoxPlugins->findText(QString(name.c_str()));
-            if (index != -1){
-                ui.comboBoxPlugins->setCurrentIndex(index);
-            }
-        } // If no segmentation plugin is active, get the current from the combo
-        else if(activePlugins == 0){
-            name = ui.comboBoxPlugins->currentText().toStdString();
-            media_cycle->getPluginManager()->setActiveSegmentPlugin( name );
-            std::cout << "Default active plugin: " << name << std::endl;
-        }
-        if(name!=""){ // Sync tabs with the combo (if parameters exist
-            for(int t=0;t<ui.tabWidgetParameters->count();t++){
-                if ( ui.tabWidgetParameters->tabText(t) == QString(name.c_str()).remove("Segmentation"))
-                    ui.tabWidgetParameters->setCurrentIndex(t);
-            }
-        }
-    }
+    emit this->readjustHeight();
 }
 
 void ACSegmentationControlsWidgetQt::adjustHeight(){
-    if( ui.tabWidgetParameters->currentWidget() ){
-        ui.tabWidgetParameters->currentWidget()->adjustSize();
-        ui.tabWidgetParameters->currentWidget()->setMinimumHeight( ui.tabWidgetParameters->currentWidget()->height() );
-        ui.tabWidgetParameters->currentWidget()->setMaximumHeight( ui.tabWidgetParameters->currentWidget()->height() );
-        //std::cout<< "ACSegmentationControlsWidgetQt::buildPluginList: container of height " << container->height() << std::endl;
-        ui.tabWidgetParameters->setMinimumHeight( ui.tabWidgetParameters->currentWidget()->height() + 32);
-        ui.tabWidgetParameters->setMaximumHeight( ui.tabWidgetParameters->currentWidget()->height() + 32);
-        ui.groupBoxParameters->setMinimumHeight( ui.tabWidgetParameters->minimumHeight() + 32);
-        ui.tabWidgetParameters->adjustSize();
-        ui.groupBoxParameters->adjustSize();
-        this->setMinimumHeight( ui.groupBoxPlugins->minimumHeight() + ui.groupBoxParameters->minimumHeight() );
-        this->adjustSize();
+    if(comboBoxPlugins){
+        if(parametersContainer){
+            parametersContainer->adjustSize();
+            comboBoxPlugins->setMinimumHeight( comboBoxPlugins->height() );
+            this->setMinimumHeight( comboBoxPlugins->minimumHeight() + parametersContainer->minimumHeight() );
+            parametersContainer->adjustSize();
+        }
+        else{
+            this->setMinimumHeight( comboBoxPlugins->minimumHeight() );
+        }
     }
+    else{
+        this->setMinimumHeight( 0 );
+    }
+    this->adjustSize();
 }
