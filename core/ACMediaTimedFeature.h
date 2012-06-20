@@ -84,6 +84,7 @@ public:
 	void setName(std::string name){this->name = name;};
 	size_t getLength();
 	size_t getDim();
+        bool isConsistent();
 	void setSegments(std::vector<float> iSeg_v){seg_v=iSeg_v;};
 	std::vector<float> getSegments();
 	float getSegments(int index);

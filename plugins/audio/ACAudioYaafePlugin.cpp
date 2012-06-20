@@ -217,7 +217,7 @@ bool ACYaafeWriter::process(Ports<InputBuffer*>& inp, Ports<OutputBuffer*>& outp
         values.push_back( std::vector<float>(in->info().size) );
         double* data = in->readToken();
         int strSize = sprintf(buf,"%0.*e",m_precision,data[0]);
-        values.back().push_back((float)(data[0]));
+        (values.back())[0] = ((float)(data[0]));
         //std::cout << " data[0] " << data[0] << std::endl;
 
         #ifdef SAVE_CSV
@@ -233,7 +233,7 @@ bool ACYaafeWriter::process(Ports<InputBuffer*>& inp, Ports<OutputBuffer*>& outp
             #ifdef SAVE_CSV
             m_fout.write(buf,strSize);
             #endif
-            values.back().push_back((float)(data[i]));
+            (values.back())[i] = ((float)(data[i]));
             //std::cout << "i " << i << " data[i] " << data[i] << std::endl;
         }
         #ifdef SAVE_CSV
@@ -242,6 +242,7 @@ bool ACYaafeWriter::process(Ports<InputBuffer*>& inp, Ports<OutputBuffer*>& outp
         in->consumeToken();
     }
     feat = new ACMediaTimedFeature(times,values,m_feature_name);
+    //std::cout << "ACYaafeWriter::process: feature " << m_feature_name << " times " << times.size() << " dims " << values.size() << "x" << values.front().size() << std::endl;
     if(m_plugin){
         m_plugin->addMediaTimedFeature(feat,m_file);
     }
@@ -503,12 +504,12 @@ ACMediaTimedFeature* ACAudioYaafePlugin::getMediaTimedFeatureStored(std::string 
 bool ACAudioYaafePlugin::addMediaTimedFeature(ACMediaTimedFeature* feature, std::string file){
     std::map<std::string,ACMediaTimedFeature*>::iterator mf = descmf.find(feature->getName());
     if(mf!=descmf.end()){
-        (*mf).second->appendTimedFeatureAlongTime(feature); // CF false, appended horiz, not vert
-        //std::cout << "appended feature: " << feature->getName() << " for file " << file << std::endl;
+        (*mf).second->appendTimedFeatureAlongTime(feature);
+        std::cout << "ACAudioYaafePlugin: appended feature: " << feature->getName() << " of length " << feature->getLength() << "/" << (*mf).second->getLength() << " and dim " << feature->getDim() << " vs " << (*mf).second->getDim() << " for file " << file << std::endl;
     }
     else{
         descmf.insert( pair<std::string,ACMediaTimedFeature*>(feature->getName(),feature) );
-        //std::cout << "new feature: " << feature->getName() << " for file " << file << std::endl;
+        std::cout << "ACAudioYaafePlugin: new feature: " << feature->getName() << " of length " << feature->getLength() << " and dim " << feature->getDim() << " for file " << file << std::endl;
     }
     return true;
 }

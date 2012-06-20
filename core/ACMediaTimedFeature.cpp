@@ -275,6 +275,9 @@ size_t ACMediaTimedFeature::getDim() {
 	return value_m.n_cols;
 }
 
+bool ACMediaTimedFeature::isConsistent() {
+    return (time_v.n_rows == value_m.n_rows);
+}
 
 fmat ACMediaTimedFeature::getValueAtTime(fcolvec iTime_v) {
 	// return interpolated values at time_v
@@ -701,16 +704,15 @@ bool ACMediaTimedFeature::appendTimedFeature(ACMediaTimedFeature* B){
 }
 
 bool ACMediaTimedFeature::appendTimedFeatureAlongTime(ACMediaTimedFeature* B){
-    bool append_ok;
-    if (this->getValue().n_rows != B->getValue().n_rows){
-            append_ok = false;
+    if(this->getDim() != B->getDim()){ // dim is number of cols of value
+        std::cerr << "ACMediaTimedFeature::appendTimedFeatureAlongTime: dimensions don't match" << std::endl;
+        return false;
     }
-    else {
-            this->setValue( join_cols(this->getValue(),B->getValue()) );
-            this->setTime( join_cols(this->getTime(),B->getTime()) );
-            append_ok = true;
+    else {     
+        this->setValue( join_cols(this->getValue(),B->getValue()) );
+        this->setTime( join_cols(this->getTime(),B->getTime()) );
+        return true;
     }
-    return append_ok;
 }
 // --------------------------------------------------------------------
 // I/O
