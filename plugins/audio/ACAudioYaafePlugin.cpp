@@ -175,9 +175,9 @@ bool ACYaafeWriter::init(const ParameterMap& params, const Ports<StreamInfo>& in
     if (getStringParam("Metadata",params)=="True") {
         // write metadata at the beginnig of the file
         string paramStr = getStringParam("Attrs",params);
-        map<string,string> params = decodeAttributeStr(paramStr);
+        map<string,string> _params = decodeAttributeStr(paramStr);
         ostringstream oss;
-        for (map<string,string>::const_iterator it=params.begin();it!=params.end();it++){
+        for (map<string,string>::const_iterator it=_params.begin();it!=_params.end();it++){
             oss << "% " << it->first << "=" << it->second << endl;
         }
         m_fout.write(oss.str().c_str(),oss.str().size());
@@ -224,7 +224,7 @@ bool ACYaafeWriter::process(Ports<InputBuffer*>& inp, Ports<OutputBuffer*>& outp
         m_fout.write(buf,strSize);
         #endif
 
-        time+= in->info().frameLength;
+        time += (float)in->info().sampleStep / (float)in->info().sampleRate;
         times.push_back(time);
 
         for (int i=1;i<in->info().size;i++)

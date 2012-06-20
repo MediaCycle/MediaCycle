@@ -97,6 +97,7 @@ void ACSegmentationControlsDialogQt::updatePluginsSettings()
 {
     widget->setMediaCycle(this->media_cycle);
     widget->updatePluginsSettings();
+    this->adjustSize();
 }
 
 void ACSegmentationControlsDialogQt::resetPluginsSettings()

@@ -66,8 +66,6 @@ protected slots:
     void on_comboBoxNeighborsPositions_activated(const QString & text);
 
     void on_radioButtonClusters_toggled( bool checked );
-
-    void resizePluginList();
 	
 public:
     ACBrowserControlsCompleteDockWidgetQt(QWidget *parent = 0);
@@ -77,13 +75,21 @@ public:
 protected:
     Ui::ACBrowserControlsCompleteDockWidgetQt ui;
 
+signals:
+    void reconfigureCheckBoxes();
+    void readjustHeight();
+
+public slots:
+    void configureCheckBoxes();
+    void adjustHeight();
+
 public:
     virtual void updatePluginsSettings();
     virtual void resetPluginsSettings();
     virtual void changeMediaType(ACMediaType _media_type);
 
     void synchronizeFeaturesWeights();
-    void configureCheckBoxes();
+
     void cleanCheckBoxes();
     void updatePluginLists();
     QListWidget* getFeaturesListWidget(){return ui.featuresListWidget;}

@@ -39,6 +39,7 @@ ACSegmentationControlsDockWidgetQt::ACSegmentationControlsDockWidgetQt(QWidget *
 {
     //ui.setupUi(this); // first thing to do if a *.ui file exists
     widget = new ACSegmentationControlsWidgetQt();
+    widget->setFixedWidth(250);
     this->setWidget(widget);
     this->setWindowTitle("Segmentation Controls");
     connect(widget,SIGNAL(readjustHeight()),this,SLOT(adjustHeight()));
@@ -58,28 +59,36 @@ bool ACSegmentationControlsDockWidgetQt::canBeVisible(ACMediaType _media_type){
 }
 
 void ACSegmentationControlsDockWidgetQt::adjustHeight(){
-    this->setMinimumHeight( widget->minimumHeight() );
+    widget->setMaximumHeight( widget->minimumHeight() );
     this->adjustSize();
 }
 
 void ACSegmentationControlsDockWidgetQt::changeMediaType(ACMediaType _media_type)
 {
     widget->setMediaCycle(this->media_cycle);
-    widget->changeMediaType(_media_type);
+    if(!media_cycle) return;
+    if(this->canBeVisible(media_cycle->getMediaType()))
+        widget->changeMediaType(_media_type);
 }
 
 void ACSegmentationControlsDockWidgetQt::updatePluginsSettings()
 {
-    widget->updatePluginsSettings();
+    widget->setMediaCycle(this->media_cycle);
+    if(!media_cycle) return;
+    if(this->canBeVisible(media_cycle->getMediaType()))
+        widget->updatePluginsSettings();
 }
 
 void ACSegmentationControlsDockWidgetQt::resetPluginsSettings()
 {
-    widget->resetPluginsSettings();
+    /*if(!media_cycle) return;
+    if(this->canBeVisible(media_cycle->getMediaType()))
+        widget->resetPluginsSettings();*/
 }
 
 void ACSegmentationControlsDockWidgetQt::resetMediaType(ACMediaType _media_type)
 {
-    widget->setMediaCycle(this->media_cycle);
-    widget->resetMediaType(_media_type);
+    /*widget->setMediaCycle(this->media_cycle);
+    if(this->canBeVisible(media_cycle->getMediaType()))
+        widget->resetMediaType(_media_type);*/
 }

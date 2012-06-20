@@ -42,4 +42,6 @@ ACBrowserControlsClustersDockWidgetQt::ACBrowserControlsClustersDockWidgetQt(QWi
 
     ui.groupBoxNeighbors->hide();
     ui.widgetModes->hide();
+    ui.groupBoxNeighbors->setMinimumHeight(0);
+    ui.groupBoxNeighbors->setMaximumHeight(0);
 }
