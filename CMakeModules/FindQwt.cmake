@@ -20,10 +20,18 @@
 # (To distributed this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-FIND_PATH(QWT_INCLUDE_DIR qwt.h PATH_SUFFIXES "qwt" "qwt-qt4" "qwt-6.0.1")
+# manual installation of qwt goes into "/usr/local/qwt-x.y.z/include", "/usr/local/qwt-x.y.z/lib", ...
+# set a list of accepted versions known to work with current mediacycle (cf. FindBoost.cmake)
+set(_Qwt_KNOWN_VERSIONS "6.0.0" "6.0.1")
+foreach(version ${_Qwt_KNOWN_VERSIONS})
+  list(APPEND _Qwt_TEST_VERSIONS_INCLUDE "qwt-${version}/include")
+  list(APPEND _Qwt_TEST_VERSIONS_LIBRARY "qwt-${version}/lib")
+endforeach()
 
-SET(QWT_NAMES ${QWT_NAMES} qwt qwt-qt4 qwt-6.0.1)
-FIND_LIBRARY(QWT_LIBRARY NAMES ${QWT_NAMES} )
+FIND_PATH(QWT_INCLUDE_DIR qwt.h PATH_SUFFIXES "qwt" "qwt-qt4" "qwt/include" ${_Qwt_TEST_VERSIONS_INCLUDE})
+
+SET(QWT_NAMES ${QWT_NAMES} qwt qwt-qt4)
+FIND_LIBRARY(QWT_LIBRARY NAMES ${QWT_NAMES} PATH_SUFFIXES ${_Qwt_TEST_VERSIONS_LIBRARY})
 
 # handle the QUIETLY and REQUIRED arguments and set QWT_FOUND to TRUE if 
 # all listed variables are TRUE
