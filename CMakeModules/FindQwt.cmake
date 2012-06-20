@@ -20,9 +20,9 @@
 # (To distributed this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-FIND_PATH(QWT_INCLUDE_DIR qwt.h PATH_SUFFIXES "qwt")
+FIND_PATH(QWT_INCLUDE_DIR qwt.h PATH_SUFFIXES "qwt" "qwt-qt4" "qwt-6.0.1")
 
-SET(QWT_NAMES ${QWT_NAMES} qwt qwt-qt4)
+SET(QWT_NAMES ${QWT_NAMES} qwt qwt-qt4 qwt-6.0.1)
 FIND_LIBRARY(QWT_LIBRARY NAMES ${QWT_NAMES} )
 
 # handle the QUIETLY and REQUIRED arguments and set QWT_FOUND to TRUE if 

@@ -34,8 +34,8 @@
 
 #include "ACSegmentationControlsWidgetQt.h"
 #include "ACPluginParameterQt.h"
-#include <qwt/qwt.h>
-#include <qwt/qwt_slider.h>
+#include <qwt.h>
+#include <qwt_slider.h>
 
 ACSegmentationControlsWidgetQt::ACSegmentationControlsWidgetQt(QWidget *parent)
     : QWidget(parent),ACAbstractWidgetQt()
