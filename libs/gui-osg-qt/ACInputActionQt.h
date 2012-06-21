@@ -1,7 +1,7 @@
 /**
  * @brief ACInputActionQt.h
- * @author Christian Frisson
- * @date 10/02/2012
+ * @author Alexis Moinet
+ * @date 21/06/2012
  * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -75,7 +75,7 @@
 typedef  std::map<QEvent::Type,QString> ACMouseEventNamesQt;
 
 namespace ACEventQt {
-static const QEvent::Type MousePressedMove = static_cast<QEvent::Type>(QEvent::User); // warning, optimize with QEvent::registerEventType() since QEvent::User might already be registered elsewhere in 3rdParty libraries
+static const QEvent::Type MousePressedMove = static_cast<QEvent::Type>(QEvent::User); // warning, optimize with QEvent::registerEventType() since QEvent::User might already be registered elsewhere in 3rdparty libraries
 }
 
 class ACInputActionQt : public QAction

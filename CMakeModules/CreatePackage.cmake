@@ -99,7 +99,7 @@ IF(UNIX)
 	IF("${LSB_DISTRIB}" MATCHES "Ubuntu1") # for our interest, 10.04, 10.10, 11.04
 
             # TinyXML
-            # for previous versions 3rdParty/tinyxml is used		
+            # for previous versions 3rdparty/tinyxml is used		
             IF(("${LSB_DISTRIB}" MATCHES "Ubuntu10.10") OR ("${LSB_DISTRIB}" MATCHES "Ubuntu11.04"))
                 SET(UBUNTU_DEPS "libtinyxml2.5.3")
             ELSEIF(("${LSB_DISTRIB}" MATCHES "Ubuntu10.04") OR ("${LSB_DISTRIB}" MATCHES "Ubuntu11.10") OR ("${LSB_DISTRIB}" MATCHES "Ubuntu12.04"))

@@ -455,7 +455,7 @@ IF(SUPPORT_ARCHIPEL)
 ENDIF()
 
 #TinyXML
-FIND_PACKAGE(TinyXML) # not yet REQUIRED until we remove 3rdParty/tinyxml
+FIND_PACKAGE(TinyXML) # not yet REQUIRED until we remove 3rdparty/tinyxml
 IF(TINYXML_FOUND)
 	INCLUDE_DIRECTORIES(${TINYXML_INCLUDE_DIR})
 ENDIF()
