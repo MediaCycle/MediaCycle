@@ -99,7 +99,7 @@ OPTION(SUPPORT_SENSOR "Support sensor media" OFF)
 OPTION(SUPPORT_TEXT "Support text media" OFF)
 OPTION(SUPPORT_VIDEO "Support video media" OFF)
 OPTION(SUPPORT_MULTIMEDIA "Support multi media" OFF)
-OPTION(SUPPORT_ARCHIPEL "Support archipel médiathèque" OFF)
+OPTION(SUPPORT_ARCHIPEL "Support archipel m√©diath√®que" OFF)
 OPTION(SUPPORT_NAVIMED "Support NAVIMED polymedis" OFF)
 
 OPTION(APPLE_IOS_DEV "Cross-compile for iPhone OS Device" OFF)
