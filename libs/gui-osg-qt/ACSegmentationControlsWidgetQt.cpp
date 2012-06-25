@@ -204,7 +204,11 @@ void ACSegmentationControlsWidgetQt::buildPluginList()
                     QwtSlider* slider = new QwtSlider(0);
                     slider->setRange(min,max,step);
                     slider->setValue(init);
+#if QWT_VERSION < 0x060000
+                    slider->setBgStyle(QwtSlider::BgSlot);
+#else
                     slider->setBackgroundStyle(QwtSlider::Groove);
+#endif
                     //slider->setScalePosition(QwtSlider::TopScale);
                     //QSlider* slider = new QSlider(Qt::Horizontal);
                     /*ACSliderQt* slider = new ACSliderQt(Qt::Horizontal);
