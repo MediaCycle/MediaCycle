@@ -27,8 +27,8 @@ extern "C" ACPlugin* create(std::string namePlugin) {
    if (namePlugin == "ACVideoColorPlugin") {return new ACVideoColorPlugin();}
     //	#if CV_MIN_VERSION_REQUIRED(2,3,0)
 //   if (namePlugin == "ACVideoMotionOrientationPlugin") {return new ACVideoMotionOrientationPlugin();}
-   if (namePlugin == "ACVideoRigidTransformPlugin") {return new ACVideoRigidTransformPlugin();}
-    //if (namePlugin == "ACVideoOpticalFlowPlugin") { return new ACVideoOpticalFlowPlugin();}
+  // if (namePlugin == "ACVideoRigidTransformPlugin") {return new ACVideoRigidTransformPlugin();}
+    if (namePlugin == "ACVideoOpticalFlowPlugin") { return new ACVideoOpticalFlowPlugin();}
     //	#endif //CV_MIN_VERSION_REQUIRED(2,3,0)
     //#endif
 }
@@ -48,8 +48,8 @@ extern "C" std::vector<std::string> list() { //returns a string vector containin
     //#endif
     //	#if CV_MIN_VERSION_REQUIRED(2,3,0)
 //    listPlugin.push_back("ACVideoMotionOrientationPlugin");
-    listPlugin.push_back("ACVideoRigidTransformPlugin");
-    //listPlugin.push_back("ACVideoOpticalFlowPlugin");
+    //listPlugin.push_back("ACVideoRigidTransformPlugin");
+    listPlugin.push_back("ACVideoOpticalFlowPlugin");
     //	#endif //CV_MIN_VERSION_REQUIRED(2,3,0)
     //listPlugin.push_back("...");
     return listPlugin;

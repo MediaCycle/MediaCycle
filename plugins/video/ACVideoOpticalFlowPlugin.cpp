@@ -60,7 +60,7 @@ std::vector<ACMediaFeatures*> ACVideoOpticalFlowPlugin::calculate(ACMediaData* v
         cout << "[ACVideoOpticalFlowPlugin::calculate] analysing from frame " << theMedia->getStartInt() << " to " << theMedia->getEndInt() << endl;
 #endif //USE_DEBUG
         videoAn = new ACVideoAnalysis(video_data, theMedia->getStartInt(), theMedia->getEndInt());
-	videoAn->computeOpticalFlow();
+	videoAn->computeOpticalFlow2();
 	vector<float> t = videoAn->getTimeStamps();
 	std::vector<std::vector<float> > s = videoAn->getOpticalFlow();
 	string aFileName= video_data->getFileName();

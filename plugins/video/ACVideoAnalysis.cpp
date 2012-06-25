@@ -1113,7 +1113,7 @@ void ACVideoAnalysis::computeOpticalFlow2() {
         }
 #ifdef VISUAL_CHECK
         // XS TODO: this is temporary, visualize global optical flow from central point
-        cv::line(image, cv::Point(size.width/2,size.height/2), cv::Point(size.width/2+globalX,size.height/2+globalY), CV_RGB(0, 255, 0), 3, 8, 0);
+        cv::line(image, cv::Point(size.width/2,size.height/2), cv::Point(size.width/2+globalX,size.height/2+globalY), CV_RGB(0, 255, 255), 3, 8, 0);
 #endif //VISUAL_CHECK
  
         need_to_init = false;
