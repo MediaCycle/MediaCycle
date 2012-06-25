@@ -22,7 +22,7 @@
 
 # manual installation of qwt goes into "/usr/local/qwt-x.y.z/include", "/usr/local/qwt-x.y.z/lib", ...
 # set a list of accepted versions known to work with current mediacycle (cf. FindBoost.cmake)
-set(_Qwt_KNOWN_VERSIONS "6.0.0" "6.0.1")
+set(_Qwt_KNOWN_VERSIONS "5.2.0" "5.2.1" "5.2.2" "6.0.0" "6.0.1")
 foreach(version ${_Qwt_KNOWN_VERSIONS})
   list(APPEND _Qwt_TEST_VERSIONS_INCLUDE "qwt-${version}/include")
   list(APPEND _Qwt_TEST_VERSIONS_LIBRARY "qwt-${version}/lib")
