@@ -620,8 +620,9 @@ int ACMedia::extractFeatures(ACPluginManager *acpl, bool _save_timed_feat) {
         //TR : new implementation to calculate the features
         ACMediaData* local_media_data=dynamic_cast<ACMediaData*>(this->getMediaData());
         this->features_vectors=acpl->getAvailableFeaturesPlugins()->calculate(local_media_data, this, _save_timed_feat);
-
-        // Checking if any of the media features is empty:
+		acpl->dump();//CPL
+        
+		// Checking if any of the media features is empty:
         std::vector<ACMediaFeatures*>::iterator features_vector;
         for (features_vector = features_vectors.begin(); features_vector != features_vectors.end(); features_vector++){
             if((*features_vector)->getSize()==0)
@@ -671,7 +672,7 @@ int ACMedia::segment(ACPluginManager *acpl, bool _saved_timed_features ) {
 		ft_from_disk=this->getTimedFeatures();
 		#ifdef USE_DEBUG
 		if(ft_from_disk)
-			ft_from_disk->dump();
+			//ft_from_disk->dump(); //CPL commented
 		#endif
 		
 		// should not use all segmentation plugins -- choose one using menu !!	
@@ -725,6 +726,39 @@ ACMediaTimedFeature* ACMedia::getTimedFeatures() {
 				temp->loadFromFile(*iter_vec,false);
 				output->appendTimedFeature(temp);
 				delete temp;
+            }
+        }
+    }
+    return output;
+}
+
+
+// CPL 25/06
+// get only one TimedFeature
+ACMediaTimedFeature* ACMedia::getTimedFeatures(string feature_name) {
+	bool _binary=false;//true
+	ACMediaType mediaType=this->getType();
+    ACMediaTimedFeature* output = 0;
+	std::vector<std::string> mtf_files_names=this->getTimedFileNames();
+	
+	//    vector<ACFeaturesPlugin *> ::iterator iter_vec = mCurrPlugin[mediaType].begin();
+	//  if (iter_vec != mCurrPlugin[mediaType].end()) 
+	std::vector<std::string>::iterator iter_vec=mtf_files_names.begin();
+	if (iter_vec!=mtf_files_names.end())
+	{	
+		output = new ACMediaTimedFeature();
+		output->loadFromFile(*iter_vec,_binary);
+		
+        if (output != 0) {
+            iter_vec++;
+            for (; iter_vec != mtf_files_names.end(); iter_vec++) {
+				
+				ACMediaTimedFeature* temp=new ACMediaTimedFeature();
+				temp->loadFromFile(*iter_vec,false);
+				if(!(feature_name.compare(temp->getName()))) {
+					output->appendTimedFeature(temp);
+					delete temp;
+				}
             }
         }
     }
