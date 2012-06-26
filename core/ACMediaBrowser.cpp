@@ -261,24 +261,34 @@ void ACMediaBrowser::goForward()
 }
 
 // e.g., user does 'a' + left-click
-// so we zoom into cluster, but must keep track of the previous state
+// so before zooming into cluster, we must keep track of the previous state
 // if there was a list of forward states, we will overwrite it (no branching)
-// previously = (sort of) pushNavigationState, which was ambiguous
 void ACMediaBrowser::storeNavigationState(){
 	mForwardNavigationStates.clear();
 	mBackwardNavigationStates.push_back(getCurrentNavigationState());
 
-	// XS all items that are at higher navigation states should go back to current navigation state
-	// XS might be sort of heavy.
+	// all items that are at higher navigation states should go back to current navigation state
 	int l=this->getNavigationLevel();
 	for (ACMediaNodes::iterator node = mLoopAttributes.begin(); node != mLoopAttributes.end(); ++node){
 		if ((*node).getNavigationLevel() > l){
 			(*node).setNavigationLevel(l);
 		}
 	}
+}
 
-	// XS  TODO check this : do we need
-	// this->updateCluster() ou updateDisplay() ?
+// zoom into cluster
+void ACMediaBrowser::forwardNextLevel(bool toggle) {
+	int loop = this->getClickedNode();
+	if (loop >= 0) {
+		if (this->getMode() == AC_MODE_CLUSTERS) {
+			// store first otherwise we store the next state
+			this->storeNavigationState();
+			this->incrementLoopNavigationLevels(loop);
+		}
+		// in neighbors mode, the node is already unwrapped with forward down and node clicked
+		this->setReferenceNode(loop);
+		this->updateDisplay(true);
+	}
 }
 
 void ACMediaBrowser::setHistory()
@@ -1450,7 +1460,7 @@ int ACMediaBrowser::toggleSourceActivity(ACMediaNode &node, int _activity) {
 	return 1;
 }
 
-// XS deprecated
+// XS deprecated 
 int ACMediaBrowser::toggleSourceActivity(int lid, int type)
 {
 	int loop_id;

@@ -636,6 +636,12 @@ vector<float> MediaCycle::getWeightVector(){return mediaBrowser->getWeightVector
 float MediaCycle::getWeight(int i){return mediaBrowser->getWeight(i);}
 
 void MediaCycle::setForwardDown(int i) { forwarddown = i; }
+void MediaCycle::forwardNextLevel(bool toggle){
+	// enters in the cluster of the last selected node
+	//this->setForwardDown(1);
+    if (this->hasBrowser())
+		this->getBrowser()->forwardNextLevel(toggle);
+}
 
 // == Features
 void MediaCycle::normalizeFeatures(int needsNormalize) { mediaLibrary->normalizeFeatures(needsNormalize); }

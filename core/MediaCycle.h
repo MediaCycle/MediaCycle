@@ -199,6 +199,7 @@ public:
 	void goForward();
 	void setClusterNumber(int n);
 	void setForwardDown(int i);
+    void forwardNextLevel(bool toggle);
 //	void setPlayKeyDown(bool i){playkeydown = i;};
 //	bool getPlayKeyDown(){return playkeydown;};
 

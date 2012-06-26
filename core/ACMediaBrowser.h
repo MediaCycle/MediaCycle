@@ -195,6 +195,7 @@ public:
 	void goBack();
 	void goForward();
 	void storeNavigationState(); // was: pushNavigationState();
+    void forwardNextLevel(bool toggle);
 
 	// == Nodes
 	void setClickedNode(int inode,int p_index = 0);
