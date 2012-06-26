@@ -45,7 +45,7 @@ using namespace arma;
 ACAudioSegmentationPlugin::ACAudioSegmentationPlugin() {
     //vars herited from ACPlugin
     this->mMediaType = MEDIA_TYPE_AUDIO;
-    // this->mPluginType = PLUGIN_TYPE_SEGMENTATION;
+   // this->mPluginType = PLUGIN_TYPE_SEGMENTATION;
     this->mName = "AudioSegmentation";
     this->mDescription = "AudioSegmentation plugin";
     this->mId = "";
@@ -103,11 +103,15 @@ std::vector<ACMedia*> ACAudioSegmentationPlugin::segment(ACMediaData* audio_data
 
     switch (method){
     case 0:{ //AudioGarden
-        desc_mf = computeFeature(data, "Energy", theAudio->getSampleRate(), theAudio->getChannels(), theAudio->getNFrames(), 16, 13, 1024, extendSoundLimits);
+        //desc_mf = computeFeature(data, "Energy", theAudio->getSampleRate(), theAudio->getChannels(), theAudio->getNFrames(), 16, 13, 1024, extendSoundLimits);
+		desc_mf = theMedia->getTimedFeatures("Energy");
+		cout << "/////////////////////" << desc_mf->getLength() <<endl;
+		//desc_mf->dump();
         break;
     }
     case 1:{
-        desc_mf = computeFeature(data, "Spectral Flux", theAudio->getSampleRate(), theAudio->getChannels(), theAudio->getNFrames(), 16, 13, 1024*2, extendSoundLimits);
+        //desc_mf = computeFeature(data, "Spectral Flux", theAudio->getSampleRate(), theAudio->getChannels(), theAudio->getNFrames(), 16, 13, 1024*2, extendSoundLimits);
+		desc_mf = theMedia->getTimedFeatures("Spectral Flux");
         break;
     }
     case 2:{ //FASTBIC
@@ -149,14 +153,14 @@ std::vector<ACMedia*> ACAudioSegmentationPlugin::_segment(ACMediaTimedFeature* d
         //desc_mf = computeFeature(data, "Energy", theAudio->getSampleRate(), theAudio->getChannels(), theAudio->getNFrames(), 16, 13, 1024, extendSoundLimits);
         desc_v = conv_to<fcolvec>::from(-desc_mf->getValue());
         time_v = desc_mf->getTime();
-        peaks_v = findpeaks(desc_v, 10); //ccl, originally: 10
+        peaks_v = findpeaks(desc_v, 100); //ccl, originally: 10
         break;
     }
     case 1:{
         //desc_mf = computeFeature(data, "Spectral Flux", theAudio->getSampleRate(), theAudio->getChannels(), theAudio->getNFrames(), 16, 13, 1024*2, extendSoundLimits);
         desc_v = conv_to<fcolvec>::from(desc_mf->delta()->getValue());
         time_v = desc_mf->getTime();
-        peaks_v = findpeaks(desc_v, min((unsigned int) 10, desc_v.n_elem-1));
+        peaks_v = findpeaks(desc_v, min((unsigned int) 200, desc_v.n_elem-1)); //200 ccl original:10
         break;
     }
     case 2:{ //FASTBIC
