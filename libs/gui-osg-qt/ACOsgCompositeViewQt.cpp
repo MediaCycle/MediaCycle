@@ -54,156 +54,164 @@ using namespace osg;
 //#define TIMELINE_RENDERER_ORTHO2D
 
 ACOsgCompositeViewQt::ACOsgCompositeViewQt( QWidget * parent, const char * name, const QGLWidget * shareWidget, WindowFlags f)
-	: QGLWidget(parent, shareWidget, f), media_cycle(0),
-	browser_renderer(0), browser_event_handler(0), timeline_renderer(0), timeline_event_handler(0), timeline_controls_renderer(0), hud_renderer(0), hud_view(0),
-	#if defined (SUPPORT_AUDIO)
-		audio_engine(0),
-	#endif //defined (SUPPORT_AUDIO)
-    mousedown(0), borderdown(0),
-	refx(0.0f), refy(0.0f),
-	refcamx(0.0f), refcamy(0.0f),
-	refzoom(0.0f),refrotation(0.0f),
-	septhick(5),sepy(0.0f),refsepy(0.0f),controls_width(0),screen_width(0),
-	library_loaded(false),mouseover(false),
-    mediaOnTrack(-1),track_playing(false),
-    openMediaExternallyAction(0), browseMediaExternallyAction(0), examineMediaExternallyAction(0), forwardNextLevelAction(0),
-    stopPlaybackAction(0), toggleMediaHoverAction(0), triggerMediaHoverAction(0),
-    resetBrowserAction(0), rotateBrowserAction(0), zoomBrowserAction(0),
-    translateBrowserAction(0), addMediaOnTimelineTrackAction(0), toggleTimelinePlaybackAction(0), adjustTimelineHeightAction(0),
-    setting(AC_SETTING_NONE)
+    : QGLWidget(parent, shareWidget, f), media_cycle(0),font(0),
+      browser_renderer(0), browser_event_handler(0), timeline_renderer(0), timeline_event_handler(0), timeline_controls_renderer(0), hud_renderer(0), hud_view(0),
+      #if defined (SUPPORT_AUDIO)
+      audio_engine(0),
+      #endif //defined (SUPPORT_AUDIO)
+      mousedown(0), borderdown(0),
+      refx(0.0f), refy(0.0f),
+      refcamx(0.0f), refcamy(0.0f),
+      refzoom(0.0f),refrotation(0.0f),
+      septhick(5),sepy(0.0f),refsepy(0.0f),controls_width(0),screen_width(0),
+      library_loaded(false),mouseover(false),
+      mediaOnTrack(-1),track_playing(false),
+      openMediaExternallyAction(0), browseMediaExternallyAction(0), examineMediaExternallyAction(0), forwardNextLevelAction(0),
+      stopPlaybackAction(0), toggleMediaHoverAction(0), triggerMediaHoverAction(0),
+      resetBrowserAction(0), rotateBrowserAction(0), zoomBrowserAction(0),
+      translateBrowserAction(0), addMediaOnTimelineTrackAction(0), toggleTimelinePlaybackAction(0), adjustTimelineHeightAction(0),
+      setting(AC_SETTING_NONE)
 {
-	osg_view = new osgViewer::GraphicsWindowEmbedded(0,0,width(),height());
-	setFocusPolicy(Qt::StrongFocus);// CF instead of ClickFocus
+    osg_view = new osgViewer::GraphicsWindowEmbedded(0,0,width(),height());
+    setFocusPolicy(Qt::StrongFocus);// CF instead of ClickFocus
 
-	setThreadingModel(osgViewer::CompositeViewer::SingleThreaded);
-	/*
-	 CF: other threading models to test are:
-		 SingleThreaded
-		 CullDrawThreadPerContext
-		 ThreadPerContext
-		 DrawThreadPerContext
-		 CullThreadPerCameraDrawThreadPerContext
-		 ThreadPerCamera
-		 AutomaticSelection
-	 */
+    setThreadingModel(osgViewer::CompositeViewer::SingleThreaded);
+    /*
+  CF: other threading models to test are:
+   SingleThreaded
+   CullDrawThreadPerContext
+   ThreadPerContext
+   DrawThreadPerContext
+   CullThreadPerCameraDrawThreadPerContext
+   ThreadPerCamera
+   AutomaticSelection
+  */
 
-	connect(&_timer, SIGNAL(timeout()), this, SLOT(updateGL()));
-	_timer.start(50);
+    connect(&_timer, SIGNAL(timeout()), this, SLOT(updateGL()));
+    _timer.start(50);
 
-	// Renderers
-	browser_renderer = new ACOsgBrowserRenderer();
-	timeline_renderer = new ACOsgTimelineRenderer();
-	timeline_controls_renderer = new ACOsgTimelineControlsRenderer();
-	hud_view = new osgViewer::View;
-	hud_renderer = new ACOsgHUDRenderer();
+    // Renderers
+    browser_renderer = new ACOsgBrowserRenderer();
+    timeline_renderer = new ACOsgTimelineRenderer();
+    timeline_controls_renderer = new ACOsgTimelineControlsRenderer();
+    hud_view = new osgViewer::View;
+    hud_renderer = new ACOsgHUDRenderer();
 
-	//this->setAttribute(Qt::WA_Hover, true);
-	setMouseTracking(true); //CF necessary for the hover callback
+    // Fonts:
+    this->initFont();
+    if(font){
+        browser_renderer->setFont(font);
+        timeline_renderer->setFont(font);
+        hud_renderer->setFont(font);
+    }
 
-	// Views
-	sepy = 0;//height()/4;// CF browser/timeline proportions at startup
+    //this->setAttribute(Qt::WA_Hover, true);
+    setMouseTracking(true); //CF necessary for the hover callback
 
-	browser_view = new osgViewer::View;
-	browser_view->getCamera()->setGraphicsContext(this->getGraphicsWindow());
-	this->updateBrowserView(width(),height());
-	this->addView(browser_view);
+    // Views
+    sepy = 0;//height()/4;// CF browser/timeline proportions at startup
 
-	timeline_view = new osgViewer::View;
-	timeline_view->getCamera()->setGraphicsContext(this->getGraphicsWindow());
-	this->updateTimelineView(width(),height());
-	this->addView(timeline_view);
+    browser_view = new osgViewer::View;
+    browser_view->getCamera()->setGraphicsContext(this->getGraphicsWindow());
+    this->updateBrowserView(width(),height());
+    this->addView(browser_view);
 
-	timeline_controls_view = new osgViewer::View;
-	timeline_controls_view->getCamera()->setGraphicsContext(this->getGraphicsWindow());
-	this->updateTimelineControlsView(width(),height());
-	this->addView(timeline_controls_view);
+    timeline_view = new osgViewer::View;
+    timeline_view->getCamera()->setGraphicsContext(this->getGraphicsWindow());
+    this->updateTimelineView(width(),height());
+    this->addView(timeline_view);
 
-	// Event handlers
-	browser_event_handler = new ACOsgBrowserEventHandler;
-	browser_view->addEventHandler(browser_event_handler);
+    timeline_controls_view = new osgViewer::View;
+    timeline_controls_view->getCamera()->setGraphicsContext(this->getGraphicsWindow());
+    this->updateTimelineControlsView(width(),height());
+    this->addView(timeline_controls_view);
 
-	timeline_event_handler = new ACOsgTimelineEventHandler;
-	timeline_view->addEventHandler(timeline_event_handler); // CF ((osgViewer::Viewer*) (this))->addEventHandler for the simple Viewer
-	timeline_event_handler->setRenderer(timeline_renderer);
+    // Event handlers
+    browser_event_handler = new ACOsgBrowserEventHandler;
+    browser_view->addEventHandler(browser_event_handler);
 
-	// HUD renderer
- 	hud_renderer->getCamera()->setGraphicsContext(this->getGraphicsWindow());
-	hud_view->setCamera(hud_renderer->getCamera());
-	this->updateHUDCamera(width(),height());
+    timeline_event_handler = new ACOsgTimelineEventHandler;
+    timeline_view->addEventHandler(timeline_event_handler); // CF ((osgViewer::Viewer*) (this))->addEventHandler for the simple Viewer
+    timeline_event_handler->setRenderer(timeline_renderer);
+
+    // HUD renderer
+    hud_renderer->getCamera()->setGraphicsContext(this->getGraphicsWindow());
+    hud_view->setCamera(hud_renderer->getCamera());
+    this->updateHUDCamera(width(),height());
     this->addView(hud_view);
 
-	// Audio waveforms
-	screen_width = QApplication::desktop()->screenGeometry().width();
-	timeline_renderer->setScreenWidth(screen_width);
-	#if defined (SUPPORT_AUDIO)
-		audio_engine = 0;
-	#endif //defined (SUPPORT_AUDIO)
+    // Audio waveforms
+    screen_width = QApplication::desktop()->screenGeometry().width();
+    timeline_renderer->setScreenWidth(screen_width);
+#if defined (SUPPORT_AUDIO)
+    audio_engine = 0;
+#endif //defined (SUPPORT_AUDIO)
 
-	timeline_renderer->updateSize(width(),sepy);
+    timeline_renderer->updateSize(width(),sepy);
 
-	osg::setNotifyLevel(osg::WARN);//remove the NaN CullVisitor messages
+    osg::setNotifyLevel(osg::WARN);//remove the NaN CullVisitor messages
     this->initInputActions();
 }
 
 void ACOsgCompositeViewQt::updateBrowserView(int _width, int _height){
-	if (browser_view){
-		browser_view->getCamera()->setViewport(new osg::Viewport(0,sepy,_width,_height-sepy)); // CF: for OSG y=0 is on the bottom, for Qt on the top
-		browser_view->getCamera()->setProjectionMatrixAsPerspective(45.0f, static_cast<double>(width())/static_cast<double>(_height-sepy), 0.001f, 10.0f);
-		browser_view->getCamera()->getViewMatrix().makeIdentity();
-		browser_view->getCamera()->setViewMatrixAsLookAt(Vec3(0,0,0.8), Vec3(0,0,0), Vec3(0,1,0));
-		browser_view->getCamera()->setClearColor(Vec4f(0.2,0.2,0.2,0.0));
-	}
+    if (browser_view){
+        browser_view->getCamera()->setViewport(new osg::Viewport(0,sepy,_width,_height-sepy)); // CF: for OSG y=0 is on the bottom, for Qt on the top
+        browser_view->getCamera()->setProjectionMatrixAsPerspective(45.0f, static_cast<double>(width())/static_cast<double>(_height-sepy), 0.001f, 10.0f);
+        browser_view->getCamera()->getViewMatrix().makeIdentity();
+        browser_view->getCamera()->setViewMatrixAsLookAt(Vec3(0,0,0.8), Vec3(0,0,0), Vec3(0,1,0));
+        //browser_view->getCamera()->setClearColor(Vec4f(0.0,0.0,0.0,0.0));
+    }
 }
 
 void ACOsgCompositeViewQt::updateHUDCamera(int _width, int _height){
-	if(hud_view){
-		hud_view->getCamera()->setViewport(new osg::Viewport(0,sepy,_width,_height)); // CF: for OSG y=0 is on the bottom, for Qt on the top
-		hud_view->getCamera()->setProjectionMatrix(osg::Matrix::ortho2D(0,_width, 0, _height));
-	}
+    if(hud_view){
+        hud_view->getCamera()->setViewport(new osg::Viewport(0,sepy,_width,_height)); // CF: for OSG y=0 is on the bottom, for Qt on the top
+        hud_view->getCamera()->setProjectionMatrix(osg::Matrix::ortho2D(0,_width, 0, _height));
+    }
 }
 
 void ACOsgCompositeViewQt::updateTimelineView(int _width, int _height){
-	if (timeline_view){
-		//timeline_view->getCamera()->setClearColor(Vec4f(0.0,0.0,0.0,0.0));
-		timeline_view->getCamera()->setClearColor(Vec4f(0.14,0.14,0.28,1.0));
-		timeline_view->getCamera()->setViewport(new osg::Viewport(controls_width,0,_width-controls_width,sepy));
-		#ifdef TIMELINE_RENDERER_ORTHO2D
-		//orth2D
-		timeline_view->getCamera()->setProjectionMatrix(osg::Matrix::ortho2D(0,_width_,0,sepy));
-		timeline_view->getCamera()->setViewMatrix(osg::Matrix::identity());
-		#else
-		//perspect
-		timeline_view->getCamera()->setProjectionMatrixAsPerspective(45.0f, 1.0f, 0.001f, 10.0f);//static_cast<double>(width())/static_cast<double>(sepy), 0.001f, 10.0f);
-		timeline_view->getCamera()->getViewMatrix().makeIdentity();
-		timeline_view->getCamera()->setViewMatrixAsLookAt(Vec3(0,0,0.8), Vec3(0,0,0), Vec3(0,1,0));
-		#endif
-	}
+    if (timeline_view){
+        //timeline_view->getCamera()->setClearColor(Vec4f(0.0,0.0,0.0,0.0));
+        timeline_view->getCamera()->setClearColor(Vec4f(0.14,0.14,0.28,1.0));
+        timeline_view->getCamera()->setViewport(new osg::Viewport(controls_width,0,_width-controls_width,sepy));
+#ifdef TIMELINE_RENDERER_ORTHO2D
+        //orth2D
+        timeline_view->getCamera()->setProjectionMatrix(osg::Matrix::ortho2D(0,_width_,0,sepy));
+        timeline_view->getCamera()->setViewMatrix(osg::Matrix::identity());
+#else
+        //perspect
+        timeline_view->getCamera()->setProjectionMatrixAsPerspective(45.0f, 1.0f, 0.001f, 10.0f);//static_cast<double>(width())/static_cast<double>(sepy), 0.001f, 10.0f);
+        timeline_view->getCamera()->getViewMatrix().makeIdentity();
+        timeline_view->getCamera()->setViewMatrixAsLookAt(Vec3(0,0,0.8), Vec3(0,0,0), Vec3(0,1,0));
+#endif
+    }
 }
 
 void ACOsgCompositeViewQt::updateTimelineControlsView(int _width, int _height){
-	if(timeline_controls_view){
-		//timeline_controls_view->getCamera()->setClearColor(Vec4f(0.0,0.0,0.0,0.0));
-		timeline_controls_view->getCamera()->setClearColor(Vec4f(1.0f,0.14f,0.28f,0.2f));
-		timeline_controls_view->getCamera()->setViewport(new osg::Viewport(0,0,controls_width,sepy));
-		timeline_controls_view->getCamera()->setProjectionMatrixAsPerspective(45.0f, 1.0f, 0.001f, 10.0f);//static_cast<double>(width())/static_cast<double>(sepy), 0.001f, 10.0f);
-		timeline_controls_view->getCamera()->getViewMatrix().makeIdentity();
-		timeline_controls_view->getCamera()->setViewMatrixAsLookAt(Vec3(0,0,0.8), Vec3(0,0,0), Vec3(0,1,0));
-	}
+    if(timeline_controls_view){
+        //timeline_controls_view->getCamera()->setClearColor(Vec4f(0.0,0.0,0.0,0.0));
+        timeline_controls_view->getCamera()->setClearColor(Vec4f(1.0f,0.14f,0.28f,0.2f));
+        timeline_controls_view->getCamera()->setViewport(new osg::Viewport(0,0,controls_width,sepy));
+        timeline_controls_view->getCamera()->setProjectionMatrixAsPerspective(45.0f, 1.0f, 0.001f, 10.0f);//static_cast<double>(width())/static_cast<double>(sepy), 0.001f, 10.0f);
+        timeline_controls_view->getCamera()->getViewMatrix().makeIdentity();
+        timeline_controls_view->getCamera()->setViewMatrixAsLookAt(Vec3(0,0,0.8), Vec3(0,0,0), Vec3(0,1,0));
+    }
 }
 
 ACOsgCompositeViewQt::~ACOsgCompositeViewQt(){
-	//browser_view->removeEventHandler(browser_event_handler); // reqs OSG >= 2.9.x and shouldn't be necessary
-	//timeline_view->removeEventHandler(timeline_event_handler); // reqs OSG >= 2.9.x and shouldn't be necessary
-	this->clean(false);
-	delete browser_renderer; browser_renderer = 0;
-	//if (browser_event_handler) delete browser_event_handler;
-	browser_event_handler = 0;
-	delete timeline_renderer; timeline_renderer = 0;
-	//if (timeline_event_handler) delete timeline_event_handler;
-	timeline_event_handler = 0;
-	delete timeline_controls_renderer; timeline_controls_renderer = 0;
-	delete hud_renderer; hud_renderer = 0;
-	media_cycle = 0;
+    //browser_view->removeEventHandler(browser_event_handler); // reqs OSG >= 2.9.x and shouldn't be necessary
+    //timeline_view->removeEventHandler(timeline_event_handler); // reqs OSG >= 2.9.x and shouldn't be necessary
+    this->clean(false);
+    delete browser_renderer; browser_renderer = 0;
+    //if (browser_event_handler) delete browser_event_handler;
+    browser_event_handler = 0;
+    delete timeline_renderer; timeline_renderer = 0;
+    //if (timeline_event_handler) delete timeline_event_handler;
+    timeline_event_handler = 0;
+    delete timeline_controls_renderer; timeline_controls_renderer = 0;
+    delete hud_renderer; hud_renderer = 0;
+    media_cycle = 0;
     if(openMediaExternallyAction) delete openMediaExternallyAction; openMediaExternallyAction = 0;
     if(browseMediaExternallyAction) delete browseMediaExternallyAction; browseMediaExternallyAction = 0;
     if(examineMediaExternallyAction) delete examineMediaExternallyAction; examineMediaExternallyAction = 0;
@@ -220,156 +228,181 @@ ACOsgCompositeViewQt::~ACOsgCompositeViewQt(){
 }
 
 void ACOsgCompositeViewQt::clean(bool updategl){
-	browser_event_handler->clean();
-	timeline_event_handler->clean();
+    browser_event_handler->clean();
+    timeline_event_handler->clean();
     mousedown = borderdown = 0;
-	refx =  refy = refcamx = refcamy = refzoom = refrotation = 0.0f;
-	browser_renderer->clean();
-	timeline_renderer->clean();
-        hud_renderer->clean();
-	//if (browser_event_handler) delete browser_event_handler;
-	//if (timeline_event_handler) delete timeline_event_handler;
-	sepy = 0;
-	if (updategl)
-		this->updateGL();
-	library_loaded = false;
+    refx =  refy = refcamx = refcamy = refzoom = refrotation = 0.0f;
+    browser_renderer->clean();
+    timeline_renderer->clean();
+    hud_renderer->clean();
+    //if (browser_event_handler) delete browser_event_handler;
+    //if (timeline_event_handler) delete timeline_event_handler;
+    sepy = 0;
+    if (updategl)
+        this->updateGL();
+    library_loaded = false;
 }
 
 void ACOsgCompositeViewQt::setMediaCycle(MediaCycle* _media_cycle)
 {
-	media_cycle = _media_cycle;
-	browser_renderer->setMediaCycle(media_cycle);
-	timeline_renderer->setMediaCycle(media_cycle);
-	timeline_controls_renderer->setMediaCycle(media_cycle);
-	browser_event_handler->setMediaCycle(media_cycle);
-	timeline_event_handler->setMediaCycle(media_cycle);
-	hud_renderer->setMediaCycle(media_cycle);
+    media_cycle = _media_cycle;
+    browser_renderer->setMediaCycle(media_cycle);
+    timeline_renderer->setMediaCycle(media_cycle);
+    timeline_controls_renderer->setMediaCycle(media_cycle);
+    browser_event_handler->setMediaCycle(media_cycle);
+    timeline_event_handler->setMediaCycle(media_cycle);
+    hud_renderer->setMediaCycle(media_cycle);
 }
 
 #if defined (SUPPORT_AUDIO)
 void ACOsgCompositeViewQt::setAudioEngine(ACAudioEngine *engine)
 {
-	audio_engine=engine;
-	if(timeline_renderer)timeline_renderer->setAudioEngine(engine);
-	if(timeline_event_handler)timeline_event_handler->setAudioEngine(engine);
+    audio_engine=engine;
+    if(timeline_renderer)timeline_renderer->setAudioEngine(engine);
+    if(timeline_event_handler)timeline_event_handler->setAudioEngine(engine);
 }
 #endif //defined (SUPPORT_AUDIO)
 
+void ACOsgCompositeViewQt::initFont()
+{
+    //CF this should be done once per application runtime, for instance in the browser renderer or composite viewer
+    font = 0;
+    std::string font_path(""),font_file("fudd.ttf");
+#ifdef USE_DEBUG
+    boost::filesystem::path s_path( __FILE__ );
+    font_path = s_path.parent_path().parent_path().parent_path().string() + "/data/fonts/";
+#else
+#ifdef __APPLE__
+    boost::filesystem::path e_path( getExecutablePath() );
+    font_path = e_path.parent_path().parent_path().string() + "/Resources/fonts/";
+#elif __WIN32__
+    font_path = "./";
+#else
+    font_path = "/usr/share/mediacycle/fonts/";
+#endif
+#endif
+    //std::cout << "Current font path " << font_path << std::endl;
+    font = osgText::readRefFontFile(font_path + font_file);
+    //if(!font)
+    //    std::cerr << "ACOsgMediaRenderer::ACOsgMediaRenderer: couldn't load font " << std::endl;
+}
+
 void ACOsgCompositeViewQt::initializeGL()
 {
-	/*if (getGraphicsWindow()->isRealized()) {
-		unsigned int _screen_width, _screen_height;
-		if ( screen_width != _screen_width){
-			_screen_width = timeline_view->getCamera()->getGraphicsContext()->getTraits()->width;
-			std::cout << "Initial width: " << _screen_width << std::endl;
-			//this->screen_width = _screen_width;
-			//timeline_renderer->updateScreenWidth(_screen_width);
-		}
-	}*/
+    /*if (getGraphicsWindow()->isRealized()) {
+  unsigned int _screen_width, _screen_height;
+  if ( screen_width != _screen_width){
+   _screen_width = timeline_view->getCamera()->getGraphicsContext()->getTraits()->width;
+   std::cout << "Initial width: " << _screen_width << std::endl;
+   //this->screen_width = _screen_width;
+   //timeline_renderer->updateScreenWidth(_screen_width);
+  }
+ }*/
 }
 
 void ACOsgCompositeViewQt::resizeGL( int w, int h )
 {
-	if (isRealized()){
-		//std::cout << "height() " << browser_view->getCamera()->getViewport()->height()+timeline_view->getCamera()->getViewport()->height() << " height " << height << std::endl;
-		float prevheight = browser_view->getCamera()->getViewport()->height()+timeline_view->getCamera()->getViewport()->height();
-		sepy *= h/prevheight;
-		timeline_renderer->updateSize(width(),sepy);
-	}
+    if (isRealized()){
+        //std::cout << "height() " << browser_view->getCamera()->getViewport()->height()+timeline_view->getCamera()->getViewport()->height() << " height " << height << std::endl;
+        float prevheight = browser_view->getCamera()->getViewport()->height()+timeline_view->getCamera()->getViewport()->height();
+        sepy *= h/prevheight;
+        timeline_renderer->updateSize(width(),sepy);
+    }
 
-	osg_view->getEventQueue()->windowResize(0, 0, w, h);
-	osg_view->resized(0,0,w,h);
+    osg_view->getEventQueue()->windowResize(0, 0, w, h);
+    osg_view->resized(0,0,w,h);
 
-	if (isRealized()){
-		this->updateBrowserView(w,h);
-		this->updateTimelineView(w,h);
-		this->updateTimelineControlsView(w,h);
-		this->updateHUDCamera(w,h);
-//hud_renderer->getCamera()->setProjectionMatrix(osg::Matrix::ortho2D(0,w,0,h));
-		/*
-		 if (getGraphicsWindow()->isRealized()) {
+    if (isRealized()){
+        this->updateBrowserView(w,h);
+        this->updateTimelineView(w,h);
+        this->updateTimelineControlsView(w,h);
+        this->updateHUDCamera(w,h);
+        //hud_renderer->getCamera()->setProjectionMatrix(osg::Matrix::ortho2D(0,w,0,h));
+        /*
+   if (getGraphicsWindow()->isRealized()) {
 
-			 unsigned int _screen_width, _screen_height;
-			 if ( screen_width != _screen_width){
-				 _screen_width = timeline_view->getCamera()->getGraphicsContext()->getTraits()->width;
-				 std::cout << "Updating width: " << _screen_width << std::endl;
-				 this->screen_width = _screen_width;
-				 timeline_renderer->updateScreenWidth(_screen_width);
-			 }
-		 }
-		 */
-	}
+    unsigned int _screen_width, _screen_height;
+    if ( screen_width != _screen_width){
+     _screen_width = timeline_view->getCamera()->getGraphicsContext()->getTraits()->width;
+     std::cout << "Updating width: " << _screen_width << std::endl;
+     this->screen_width = _screen_width;
+     timeline_renderer->updateScreenWidth(_screen_width);
+    }
+   }
+   */
+    }
 }
 
 // CF to do: understand paintGL vs updateGL to use them more correctly
 void ACOsgCompositeViewQt::paintGL()
 {
-	frame(); // put this first otherwise we don't get a clean background in the browser
-	if (media_cycle == 0) return;
+    frame(); // put this first otherwise we don't get a clean background in the browser
+    if (media_cycle == 0) return;
 
-	//CF to improve, we want to know if the view is being animated to force a frequent refresh of the positions:
-	//SD 2010feb22 to allow auto update whith threaded import
-	//if (media_cycle && media_cycle->hasBrowser() && media_cycle->getBrowser()->getState() == AC_CHANGING)
-		updateTransformsFromBrowser(media_cycle->getFrac());
+    //CF to improve, we want to know if the view is being animated to force a frequent refresh of the positions:
+    //SD 2010feb22 to allow auto update whith threaded import
+    //if (media_cycle && media_cycle->hasBrowser() && media_cycle->getBrowser()->getState() == AC_CHANGING)
+    updateTransformsFromBrowser(media_cycle->getFrac());
 }
 
 // called according to timer
 void ACOsgCompositeViewQt::updateGL()
 {
-	double frac = 0.0;
-	if (media_cycle == 0) return;
+    double frac = 0.0;
 
-	if(media_cycle && media_cycle->hasBrowser())
-	{
-		if(mouseover!=this->underMouse()){
-			if(this->underMouse())//Qt
-				media_cycle->getBrowser()->addMousePointer();
-			else {
-				media_cycle->getBrowser()->removeMousePointer();
-			}
-			//std::cout << "Mouse " << this->underMouse() << std::endl;
-			mouseover=this->underMouse();
-		}
-		media_cycle->updateState();
-		frac = media_cycle->getFrac();
+    if (media_cycle == 0) return;
+
+    if(media_cycle && media_cycle->hasBrowser())
+    {
+        if(mouseover!=this->underMouse()){
+            if(this->underMouse())//Qt
+                media_cycle->getBrowser()->addMousePointer();
+            else {
+                media_cycle->getBrowser()->removeMousePointer();
+            }
+            //std::cout << "Mouse " << this->underMouse() << std::endl;
+            mouseover=this->underMouse();
+        }
+        media_cycle->updateState();
+        frac = media_cycle->getFrac();
 
         //CF this is a temporary solution until we implement signals/slots in the core
         if(media_cycle->getBrowser()->getModeChanged()){
             //std::cout << "ACOsgCompositeViewQt::updateGL intercepted browsing mode change" << std::endl;
             browser_renderer->clean();
         }
-	}
+    }
 
-	if (!media_cycle->getNeedsDisplay()) {
-		return;
-	}
+    if (!media_cycle->getNeedsDisplay()) {
+        return;
+    }
 
-	if(browser_view->getCamera() && media_cycle && media_cycle->hasBrowser())
-	{
+    if(browser_view->getCamera() && media_cycle && media_cycle->hasBrowser())
+    {
 
-		float x=0.0, y=0.0, zoom, angle;
-		float upx, upy;
+        float x=0.0, y=0.0, zoom, angle;
+        float upx, upy;
 
-		zoom = media_cycle->getCameraZoom();
-		angle = media_cycle->getCameraRotation();
-		media_cycle->getCameraPosition(x, y);
-		upx = cos(-angle+PI/2);
-		upy = sin(-angle+PI/2);
+        zoom = media_cycle->getCameraZoom();
+        angle = media_cycle->getCameraRotation();
+        media_cycle->getCameraPosition(x, y);
+        upx = cos(-angle+PI/2);
+        upy = sin(-angle+PI/2);
 
-		this->updateBrowserView(width(),height());
-		browser_view->getCamera()->setViewMatrixAsLookAt(Vec3(x*1.0,y*1.0,0.8 / zoom), Vec3(x*1.0,y*1.0,0), Vec3(upx, upy, 0));
-		this->updateTimelineView(width(),height());
-		this->updateTimelineControlsView(width(),height());
-		this->updateHUDCamera(width(),height());
-	}
+        this->updateBrowserView(width(),height());
+        browser_view->getCamera()->setViewMatrixAsLookAt(Vec3(x*1.0,y*1.0,0.8 / zoom), Vec3(x*1.0,y*1.0,0), Vec3(upx, upy, 0));
+        this->updateTimelineView(width(),height());
+        this->updateTimelineControlsView(width(),height());
+        this->updateHUDCamera(width(),height());
+    }
 
-	this->updateTransformsFromBrowser(frac);
-	this->updateTransformsFromTimeline(frac);
-	/*
-	if (frac != 0.0)
-		setMouseTracking(true); //CF necessary for the hover callback
-	*/
-	QGLWidget::updateGL();
+    this->updateTransformsFromBrowser(frac);
+    this->updateTransformsFromTimeline(frac);
+    /*
+ if (frac != 0.0)
+  setMouseTracking(true); //CF necessary for the hover callback
+ */
+    QGLWidget::updateGL();
     media_cycle->setNeedsDisplay(false);
 }
 
@@ -455,7 +488,8 @@ void ACOsgCompositeViewQt::initInputActions(){
     this->addInputAction(rotateBrowserAction);
 
     zoomBrowserAction = new ACInputActionQt(tr("Zoom Browser"), this);
-    zoomBrowserAction->setShortcut(tr("z"));//(Qt::Key_Z);
+    //zoomBrowserAction->setShortcut(Qt::Key_Z);
+    zoomBrowserAction->setShortcut(tr("z"));
     zoomBrowserAction->setKeyEventType(QEvent::KeyPress);
     zoomBrowserAction->setMouseEventType(QEvent::MouseMove);
     zoomBrowserAction->setToolTip(tr("Zoom the browser view"));
@@ -503,7 +537,7 @@ void ACOsgCompositeViewQt::openMediaExternally(){
 
         if(loop >= 0)
         {
-            #if defined (__APPLE__)
+#if defined (__APPLE__)
             std::stringstream command;
             ACMediaType _media_type = media_cycle->getLibrary()->getMedia(loop)->getMediaType();
             if (_media_type == MEDIA_TYPE_IMAGE || _media_type == MEDIA_TYPE_VIDEO)
@@ -519,7 +553,7 @@ void ACOsgCompositeViewQt::openMediaExternally(){
             catch (const exception& e) {
                 cout << "ACOsgCompositeViewQt: caught exception while trying to open media file " << media_cycle->getLibrary()->getMedia(loop)->getFileName() << " with the OSX-wide prefered application: " << e.what() << endl;
             }
-            #endif //defined (__APPLE__)
+#endif //defined (__APPLE__)
         }
     }
 
@@ -535,7 +569,7 @@ void ACOsgCompositeViewQt::browseMediaExternally(){
 
         if(loop >= 0)
         {
-            #if defined (__APPLE__)
+#if defined (__APPLE__)
             std::stringstream command;
             //command << "open " << fs::path(media_cycle->getLibrary()->getMedia(loop)->getFileName()).parent_path();// opens the containing directory using the Finder
             command << "open -R '" << media_cycle->getLibrary()->getMedia(loop)->getFileName() << "'" ;// opens the containing directory using the Finder and highlights the file!
@@ -545,7 +579,7 @@ void ACOsgCompositeViewQt::browseMediaExternally(){
             catch (const exception& e) {
                 cout << "ACOsgCompositeViewQt: caught exception while trying to open media file " << media_cycle->getLibrary()->getMedia(loop)->getFileName() << " with the OSX Finder: " << e.what() << endl;
             }
-            #endif //defined (__APPLE__)
+#endif //defined (__APPLE__)
         }
     }
 }
@@ -578,8 +612,8 @@ void ACOsgCompositeViewQt::examineMediaExternally(){
 
 void ACOsgCompositeViewQt::forwardNextLevel(bool toggle){
     if (media_cycle == 0) return;
-	else
-		media_cycle->forwardNextLevel(toggle); // XS TODO why toggle ?
+    std::cout << "ACOsgCompositeViewQt::forwardNextLevel" << std::endl;
+    media_cycle->forwardNextLevel(toggle);
 }
 
 void ACOsgCompositeViewQt::stopPlayback(){
@@ -599,6 +633,7 @@ void ACOsgCompositeViewQt::triggerMediaHover(bool trigger){
     //std::cout << "Trigger Media hover " << trigger << std::endl;
     media_cycle->setAutoPlay(trigger);
 }
+
 
 void ACOsgCompositeViewQt::resetBrowser(){
     if (media_cycle == 0) return;
@@ -715,15 +750,15 @@ void ACOsgCompositeViewQt::propagateEventToActions( QEvent* event )
 void ACOsgCompositeViewQt::keyPressEvent( QKeyEvent* event )
 {
     this->propagateEventToActions(event);
-	if (media_cycle == 0) return;
-	osg_view->getEventQueue()->keyPress( (osgGA::GUIEventAdapter::KeySymbol) *(event->text().toAscii().data() ) );
+    if (media_cycle == 0) return;
+    osg_view->getEventQueue()->keyPress( (osgGA::GUIEventAdapter::KeySymbol) *(event->text().toAscii().data() ) );
 }
 
 void ACOsgCompositeViewQt::keyReleaseEvent( QKeyEvent* event )
 {
     this->propagateEventToActions(event);
-	if (media_cycle == 0) return;
-	osg_view->getEventQueue()->keyRelease( (osgGA::GUIEventAdapter::KeySymbol) *(event->text().toAscii().data() ) );
+    if (media_cycle == 0) return;
+    osg_view->getEventQueue()->keyRelease( (osgGA::GUIEventAdapter::KeySymbol) *(event->text().toAscii().data() ) );
 }
 
 void ACOsgCompositeViewQt::mousePressEvent( QMouseEvent* event )
@@ -732,37 +767,37 @@ void ACOsgCompositeViewQt::mousePressEvent( QMouseEvent* event )
     mousedown = 1;
     switch(event->button())
     {
-        case(Qt::LeftButton): button = 1; break;
-        case(Qt::MidButton): button = 2; break;
-        case(Qt::RightButton): button = 3; break;
-        case(Qt::NoButton): button = 0; break;
-        default: button = 0; break;
+    case(Qt::LeftButton): button = 1; break;
+    case(Qt::MidButton): button = 2; break;
+    case(Qt::RightButton): button = 3; break;
+    case(Qt::NoButton): button = 0; break;
+    default: button = 0; break;
     }
     osg_view->getEventQueue()->mouseButtonPress(event->x(), event->y(), button);
     //browser_view->getEventQueue()->mouseButtonPress(event->x(), event->y()-sepy, button);
     this->propagateEventToActions(event);
 
     if (media_cycle == 0) return;
-	// CF: for OSG y=0 is on the bottom, for Qt on the top
-	// browser view top (OSG coordinates): browser_view->getCamera()->getViewport()->height() + browser_view->getCamera()->getViewport()->y()
-	// browser view bottom (OSG coordinates): browser_view->getCamera()->getViewport()->y()
-	// browser view top (Qt coordinates): height() - ( browser_view->getCamera()->getViewport()->height() + browser_view->getCamera()->getViewport()->y() )
-	// browser view bottom (Qt coordinates): height() - ( browser_view->getCamera()->getViewport()->y() )
+    // CF: for OSG y=0 is on the bottom, for Qt on the top
+    // browser view top (OSG coordinates): browser_view->getCamera()->getViewport()->height() + browser_view->getCamera()->getViewport()->y()
+    // browser view bottom (OSG coordinates): browser_view->getCamera()->getViewport()->y()
+    // browser view top (Qt coordinates): height() - ( browser_view->getCamera()->getViewport()->height() + browser_view->getCamera()->getViewport()->y() )
+    // browser view bottom (Qt coordinates): height() - ( browser_view->getCamera()->getViewport()->y() )
 
-	refx = event->x();
-	refy = event->y();
-	if ( (event->y() >= height() - ( browser_view->getCamera()->getViewport()->height() + browser_view->getCamera()->getViewport()->y() ) ) && (event->y() <= height() - ( browser_view->getCamera()->getViewport()->y() + septhick) )) // if clicked on browser view far enough of the central border
-	{
-		media_cycle->getCameraPosition(refcamx, refcamy);
-		refzoom = media_cycle->getCameraZoom();
-		refrotation = media_cycle->getCameraRotation();
-	}
-	else if ( (event->y() >= height() - ( browser_view->getCamera()->getViewport()->y() + septhick)) && (event->y() <= height() - ( browser_view->getCamera()->getViewport()->y() - septhick)) ) // if clicked on timeline view far enough of the central border
-	{
-		borderdown = 1;
-		refsepy = sepy;
-	}
-	media_cycle->setNeedsDisplay(true);
+    refx = event->x();
+    refy = event->y();
+    if ( (event->y() >= height() - ( browser_view->getCamera()->getViewport()->height() + browser_view->getCamera()->getViewport()->y() ) ) && (event->y() <= height() - ( browser_view->getCamera()->getViewport()->y() + septhick) )) // if clicked on browser view far enough of the central border
+    {
+        media_cycle->getCameraPosition(refcamx, refcamy);
+        refzoom = media_cycle->getCameraZoom();
+        refrotation = media_cycle->getCameraRotation();
+    }
+    else if ( (event->y() >= height() - ( browser_view->getCamera()->getViewport()->y() + septhick)) && (event->y() <= height() - ( browser_view->getCamera()->getViewport()->y() - septhick)) ) // if clicked on timeline view far enough of the central border
+    {
+        borderdown = 1;
+        refsepy = sepy;
+    }
+    media_cycle->setNeedsDisplay(true);
 }
 
 void ACOsgCompositeViewQt::mouseMoveEvent( QMouseEvent* event )
@@ -770,38 +805,38 @@ void ACOsgCompositeViewQt::mouseMoveEvent( QMouseEvent* event )
     int button = 0;
     switch(event->button())
     {
-        case(Qt::LeftButton): button = 1; break;
-        case(Qt::MidButton): button = 2; break;
-        case(Qt::RightButton): button = 3; break;
-        case(Qt::NoButton): button = 0; break;
-        default: button = 0; break;
+    case(Qt::LeftButton): button = 1; break;
+    case(Qt::MidButton): button = 2; break;
+    case(Qt::RightButton): button = 3; break;
+    case(Qt::NoButton): button = 0; break;
+    default: button = 0; break;
     }
     osg_view->getEventQueue()->mouseMotion(event->x(), event->y());
-	if (media_cycle == 0) return;
+    if (media_cycle == 0) return;
 
-	float zoom, angle;
-	float xmove, ymove, xmove2, ymove2;
-	float x, y;
-	x = event->x();
-	y = event->y();
+    float zoom, angle;
+    float xmove, ymove, xmove2, ymove2;
+    float x, y;
+    x = event->x();
+    y = event->y();
     if ( mousedown == 1 )
-	{
-		if ( borderdown == 1)
-		{
-			if ( (y<=height()-septhick) && (y>=septhick))
-				sepy = refsepy + (refy-y);
-			else
-			{
-				if ( y>height()-septhick )
-					sepy = septhick;
-				else if ( y<septhick )
-					sepy = height()-septhick;
-			}
-			timeline_renderer->updateSize(width(),sepy);
+    {
+        if ( borderdown == 1)
+        {
+            if ( (y<=height()-septhick) && (y>=septhick))
+                sepy = refsepy + (refy-y);
+            else
+            {
+                if ( y>height()-septhick )
+                    sepy = septhick;
+                else if ( y<septhick )
+                    sepy = height()-septhick;
+            }
+            timeline_renderer->updateSize(width(),sepy);
         }
     }
     this->propagateEventToActions(event);
-	media_cycle->setNeedsDisplay(true);
+    media_cycle->setNeedsDisplay(true);
 }
 
 void ACOsgCompositeViewQt::mouseReleaseEvent( QMouseEvent* event )
@@ -809,82 +844,82 @@ void ACOsgCompositeViewQt::mouseReleaseEvent( QMouseEvent* event )
     int button = 0;
     switch(event->button())
     {
-        case(Qt::LeftButton): button = 1; break;
-        case(Qt::MidButton): button = 2; break;
-        case(Qt::RightButton): button = 3; break;
-        case(Qt::NoButton): button = 0; break;
-        default: button = 0; break;
+    case(Qt::LeftButton): button = 1; break;
+    case(Qt::MidButton): button = 2; break;
+    case(Qt::RightButton): button = 3; break;
+    case(Qt::NoButton): button = 0; break;
+    default: button = 0; break;
     }
     osg_view->getEventQueue()->mouseButtonRelease(event->x(), event->y(), button);
     this->propagateEventToActions(event);
-	if (media_cycle == 0) return;
+    if (media_cycle == 0) return;
     media_cycle->setClickedNode(-1);
-	mousedown = 0;
+    mousedown = 0;
     borderdown = 0;
-	media_cycle->setNeedsDisplay(true);
+    media_cycle->setNeedsDisplay(true);
 }
 
 void ACOsgCompositeViewQt::prepareFromBrowser()
 {
-	//setMouseTracking(false); //CF necessary for the hover callback
-	browser_renderer->prepareNodes();
-	browser_renderer->prepareLabels();
-        hud_renderer->preparePointers(browser_view);
-        hud_renderer->prepareLibrary(browser_view);
-	browser_view->setSceneData(browser_renderer->getShapes());
-	library_loaded = true;
-	//addCamera(renderer_hud->getCamera());
+    //setMouseTracking(false); //CF necessary for the hover callback
+    browser_renderer->prepareNodes();
+    browser_renderer->prepareLabels();
+    hud_renderer->preparePointers(browser_view);
+    hud_renderer->prepareLibrary(browser_view);
+    browser_view->setSceneData(browser_renderer->getShapes());
+    library_loaded = true;
+    //addCamera(renderer_hud->getCamera());
 }
 
 // XS TODO this is called for instance when click on node
 // check that it does not do too many things
 void ACOsgCompositeViewQt::updateTransformsFromBrowser( double frac)
 {
-	if (media_cycle == 0) return;
+    if (media_cycle == 0) return;
 
-	browser_renderer->prepareNodes();
-	browser_renderer->prepareLabels();
-	hud_renderer->preparePointers();
-        hud_renderer->prepareLibrary();
+    browser_renderer->prepareNodes();
+    browser_renderer->prepareLabels();
+    hud_renderer->preparePointers();
+    hud_renderer->prepareLibrary();
 
-	// get screen coordinates
-	//int closest_node;//CF to deprecate
-	//closest_node = browser_renderer->computeScreenCoordinates(browser_view, frac);//CF to deprecate
-	//media_cycle->setClosestNode(closest_node);//CF to deprecate
-	browser_renderer->computeScreenCoordinates(browser_view, frac);
+    // get screen coordinates
+    //int closest_node;//CF to deprecate
+    //closest_node = browser_renderer->computeScreenCoordinates(browser_view, frac);//CF to deprecate
+    //media_cycle->setClosestNode(closest_node);//CF to deprecate
+    browser_renderer->computeScreenCoordinates(browser_view, frac);
 
-	// recompute scene graph
-	browser_renderer->updateNodes(frac); // animation starts at 0.0 and ends at 1.0
-	browser_renderer->updateLabels(frac);
+    // recompute scene graph
+    browser_renderer->updateNodes(frac); // animation starts at 0.0 and ends at 1.0
+    browser_renderer->updateLabels(frac);
 
-	hud_renderer->updatePointers(browser_view);
-        hud_renderer->updateLibrary(browser_view);
-	/*osgViewer::ViewerBase::Views views;
-	bool have_views;
-	view->getViews(views,have_views);
-	renderer_hud->updatePointers(views[0]);*/
+    hud_renderer->updatePointers(browser_view);
+    hud_renderer->updateLibrary(browser_view);
+    /*osgViewer::ViewerBase::Views views;
+ bool have_views;
+ view->getViews(views,have_views);
+ renderer_hud->updatePointers(views[0]);*/
 }
 
 void ACOsgCompositeViewQt::prepareFromTimeline()
 {
-	//setMouseTracking(false); //CF necessary for the hover callback
-	timeline_renderer->prepareTracks();
-	timeline_view->setSceneData(timeline_renderer->getShapes());
-	timeline_controls_renderer->prepareControls();
-	//timeline_controls_view->setSceneData(timeline_controls_renderer->getShapes());
+    //setMouseTracking(false); //CF necessary for the hover callback
+    timeline_renderer->prepareTracks();
+    timeline_view->setSceneData(timeline_renderer->getShapes());
+    timeline_controls_renderer->prepareControls();
+    //timeline_controls_view->setSceneData(timeline_controls_renderer->getShapes());
 }
 
 
 void ACOsgCompositeViewQt::updateTransformsFromTimeline( double frac)
 {
-	if (media_cycle == 0) return;
-	//int closest_track;
-	// get screen coordinates
-	/////////closest_track = timeline_renderer->computeScreenCoordinates(timeline_view, frac); //CF this instead of browser_view for the the simple Viewer
-	////////media_cycle->setClosestNode(closest_node);
-	// recompute scene graph
-	timeline_renderer->updateTracks(frac); // animation starts at 0.0 and ends at 1.0
-	//timeline_controls_renderer->updateControls(frac); // animation starts at 0.0 and ends at 1.0
+    if (media_cycle == 0) return;
+    //int closest_track;
+    // get screen coordinates
+    /////////closest_track = timeline_renderer->computeScreenCoordinates(timeline_view, frac); //CF this instead of browser_view for the the simple Viewer
+    ////////media_cycle->setClosestNode(closest_node);
+    // recompute scene graph
+    timeline_renderer->updateTracks(frac); // animation starts at 0.0 and ends at 1.0
+    //timeline_controls_renderer->updateControls(frac); // animation starts at 0.0 and ends at 1.0
 }
 
 void ACOsgCompositeViewQt::changeSetting(ACSettingType _setting)

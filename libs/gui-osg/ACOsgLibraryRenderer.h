@@ -37,13 +37,10 @@
 #define __ACOSG_LIBRARY_RENDERER_H__
 
 #include "ACOsgMediaRenderer.h"
-#include <osgText/Font>
-#include <osgText/Text>
 
 class ACOsgLibraryRenderer : public ACOsgMediaRenderer  {
 protected:
 
-    //osg::ref_ptr<osgText::Font> font;
     osg::ref_ptr<osgText::Text> title_text,author_text,curator_text,year_text,license_text,publisher_text,website_text,medias_text;
     osg::ref_ptr<osg::Geode> title_geode,author_geode,curator_geode,year_geode,license_geode,publisher_geode,website_geode,medias_geode;
     std::string title,author,curator,year,publisher,license,website,cover;

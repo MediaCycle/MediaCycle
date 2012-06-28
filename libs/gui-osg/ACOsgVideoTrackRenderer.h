@@ -65,13 +65,13 @@ public:
 
     ACOsgVideoSlitScanThread()
 	:_done(false),filename(""),notify_level(osg::WARN),slit_scan(0)
-	{
-		#ifdef __APPLE__
-		#ifdef USE_FFMPEG
-		m_context = 0;
-		#endif//def USE_FFMPEG
-		#endif//def __APPLE__
-	}
+    {
+#ifdef __APPLE__
+#ifdef USE_FFMPEG
+        m_context = 0;
+#endif//def USE_FFMPEG
+#endif//def __APPLE__
+    }
 
     ~ACOsgVideoSlitScanThread()
     {
@@ -80,53 +80,53 @@ public:
         {
             OpenThreads::Thread::YieldCurrentThread();
         }
-		#ifdef __APPLE__
-		#ifdef USE_FFMPEG
-		if (m_context) {m_context = 0;}//avcodec_close(m_context); // done by osg ffmpeg plugin
-		#endif//def USE_FFMPEG
-		#endif//def __APPLE__
+#ifdef __APPLE__
+#ifdef USE_FFMPEG
+        if (m_context) {m_context = 0;}//avcodec_close(m_context); // done by osg ffmpeg plugin
+#endif//def USE_FFMPEG
+#endif//def __APPLE__
 
     }
 
     void run(void);
 
-	private:
-		osg::ref_ptr<osg::Image> slit_scan;
-		#ifdef __APPLE__
-		#ifdef USE_FFMPEG
-		AVCodecContext* m_context;
-		#endif//def USE_FFMPEG
-		#endif//def __APPLE__
-		bool _done;
-		std::string filename;
-		osg::NotifySeverity notify_level;
-	protected:
-		#ifdef __APPLE__
-		#ifdef USE_FFMPEG
-		int convert(AVPicture *dst, int dst_pix_fmt, AVPicture *src,int src_pix_fmt, int src_width, int src_height);
-		void yuva420pToRgba(AVPicture * const dst, AVPicture * const src, int width, int height);
-		#endif//def USE_FFMPEG
-		#endif//def __APPLE__
-		int computeSlitScan();
-	public:
-		osg::ref_ptr<osg::Image> getImage(){if (_done) return slit_scan; else return 0;}
-		void setFileName(std::string _filename){filename = _filename;}
-		std::string getFileName(){return filename;}
-		void reset(){_done=false;}
-		bool computed(){return _done;}
+private:
+    osg::ref_ptr<osg::Image> slit_scan;
+#ifdef __APPLE__
+#ifdef USE_FFMPEG
+    AVCodecContext* m_context;
+#endif//def USE_FFMPEG
+#endif//def __APPLE__
+    bool _done;
+    std::string filename;
+    osg::NotifySeverity notify_level;
+protected:
+#ifdef __APPLE__
+#ifdef USE_FFMPEG
+    int convert(AVPicture *dst, int dst_pix_fmt, AVPicture *src,int src_pix_fmt, int src_width, int src_height);
+    void yuva420pToRgba(AVPicture * const dst, AVPicture * const src, int width, int height);
+#endif//def USE_FFMPEG
+#endif//def __APPLE__
+    int computeSlitScan();
+public:
+    osg::ref_ptr<osg::Image> getImage(){if (_done) return slit_scan; else return 0;}
+    void setFileName(std::string _filename){filename = _filename;}
+    std::string getFileName(){return filename;}
+    void reset(){_done=false;}
+    bool computed(){return _done;}
 };
 #endif//def USE_SLIT_SCAN
 
 class ACOsgVideoTrackPlayersSync : public OpenThreads::Thread {
 public:
-	#ifdef SYNC_THREAD_PER_SELECTION_VIDEO
-	ACOsgVideoTrackPlayersSync(osg::ref_ptr<osg::ImageStream> _master_stream,osg::ref_ptr<osg::ImageStream> _slave_stream,float _time_skip = 0)
+#ifdef SYNC_THREAD_PER_SELECTION_VIDEO
+    ACOsgVideoTrackPlayersSync(osg::ref_ptr<osg::ImageStream> _master_stream,osg::ref_ptr<osg::ImageStream> _slave_stream,float _time_skip = 0)
 	:master_stream(_master_stream),slave_stream(_slave_stream),time_skip(_time_skip),running(false),scrubbing(false),active(false),previousStreamStatus(osg::ImageStream::PAUSED){}
-	#else
+#else
     ACOsgVideoTrackPlayersSync(osg::ref_ptr<osg::ImageStream> _master_stream, std::vector< osg::ref_ptr<osg::ImageStream> > _slave_streams, float _time_skip = 0)
 	:master_stream(_master_stream),slave_streams(_slave_streams),time_skip(_time_skip),running(false),scrubbing(false),active(false){}
-	#endif
-	
+#endif
+
     ~ACOsgVideoTrackPlayersSync()
     {
         //_done = true;
@@ -136,156 +136,155 @@ public:
         }
     }
     void run(void);
-	void stopSync(){running = false;}
-	
+    void stopSync(){running = false;}
+
 private:
-	osg::ref_ptr<osg::ImageStream> master_stream;
-	#ifdef SYNC_THREAD_PER_SELECTION_VIDEO
-	osg::ref_ptr<osg::ImageStream> slave_stream;
-	#else
-	std::vector< osg::ref_ptr<osg::ImageStream> > slave_streams;
-	#endif
-	float time_skip;
-	bool running;
-	bool scrubbing;
-	bool active;
-	#ifdef SYNC_THREAD_PER_SELECTION_VIDEO
-	osg::ImageStream::StreamStatus previousStreamStatus;
-	#endif//def SYNC_THREAD_PER_SELECTION_VIDEO
+    osg::ref_ptr<osg::ImageStream> master_stream;
+#ifdef SYNC_THREAD_PER_SELECTION_VIDEO
+    osg::ref_ptr<osg::ImageStream> slave_stream;
+#else
+    std::vector< osg::ref_ptr<osg::ImageStream> > slave_streams;
+#endif
+    float time_skip;
+    bool running;
+    bool scrubbing;
+    bool active;
+#ifdef SYNC_THREAD_PER_SELECTION_VIDEO
+    osg::ImageStream::StreamStatus previousStreamStatus;
+#endif//def SYNC_THREAD_PER_SELECTION_VIDEO
 public:
-	void updateTimeSkip(float _time){time_skip = _time;}
-	#ifndef SYNC_THREAD_PER_SELECTION_VIDEO
-	void updateSlaves(std::vector< osg::ref_ptr<osg::ImageStream> > _slave_streams){slave_streams = _slave_streams;}
-	#endif//def SYNC_THREAD_PER_SELECTION_VIDEO
-	void setScrubbing(bool _scrubbing){scrubbing=_scrubbing;}
-	void setActive(bool _active){active=_active;}
+    void updateTimeSkip(float _time){time_skip = _time;}
+#ifndef SYNC_THREAD_PER_SELECTION_VIDEO
+    void updateSlaves(std::vector< osg::ref_ptr<osg::ImageStream> > _slave_streams){slave_streams = _slave_streams;}
+#endif//def SYNC_THREAD_PER_SELECTION_VIDEO
+    void setScrubbing(bool _scrubbing){scrubbing=_scrubbing;}
+    void setActive(bool _active){active=_active;}
 };
 
 class ACOsgVideoTrackRenderer : public ACOsgTrackRenderer {
-	protected:
-	
-		osg::ref_ptr<osg::MatrixTransform> selection_transform, summary_transform, playback_transform;
-		
-		// main video stream
-		osg::ref_ptr<osg::ImageStream> video_stream;
+protected:
 
-		// playback video
-		osg::ref_ptr<osg::MatrixTransform> playback_video_transform;
+    osg::ref_ptr<osg::MatrixTransform> selection_transform, summary_transform, playback_transform;
 
-		// selection frames
-		osg::ref_ptr<osg::MatrixTransform> selection_center_frame_transform;
-		std::vector< osg::ref_ptr<osg::Image> > right_selection_video_images,left_selection_video_images;
-		std::vector< osg::ref_ptr<osg::ImageStream> > right_selection_video_streams,left_selection_video_streams;
-		std::vector< osg::ref_ptr<osg::Texture2D> > right_selection_video_textures,left_selection_video_textures;
-		std::vector< osg::ref_ptr<osg::MatrixTransform> > right_selection_video_transforms,left_selection_video_transforms;
-		osg::ref_ptr<osg::Group> right_selection_video_group,left_selection_video_group;
-		#ifdef SYNC_SELECTION_VIDEOS_BY_THREAD
-		#ifdef SYNC_THREAD_PER_SELECTION_VIDEO
-		std::vector< ACOsgVideoTrackPlayersSync* > right_selection_video_syncs,left_selection_video_syncs; 
-		#else
-		ACOsgVideoTrackPlayersSync *right_selection_video_sync,*left_selection_video_sync;
-		#endif
-		#endif//def SYNC_SELECTION_VIDEOS_BY_THREAD
-	
-		// summary cursor
-		osg::ref_ptr<osg::MatrixTransform> summary_cursor_transform;
-		
-		// summary selection
-		osg::ref_ptr<osg::MatrixTransform> selection_begin_transform;
-		osg::ref_ptr<osg::MatrixTransform> selection_zone_transform;
-		osg::ref_ptr<osg::MatrixTransform> selection_end_transform;
+    // main video stream
+    osg::ref_ptr<osg::ImageStream> video_stream;
 
-		// summary frames
-		std::vector< osg::ref_ptr<osg::Image> > summary_images;
-		std::vector< osg::ref_ptr<osg::ImageStream> > summary_streams;
-		std::vector< osg::ref_ptr<osg::Texture2D> > summary_textures;
-		osg::ref_ptr<osg::MatrixTransform> summary_frames_transform;
-	
-		// summary slit-scan
-		#ifdef USE_SLIT_SCAN
-		osg::ref_ptr<osg::MatrixTransform> slit_scan_transform;
-		void slitScanTransform();
-		bool slit_scan_changed;
-		ACOsgVideoSlitScanThread* slit_scanner;
-		#endif//def USE_SLIT_SCAN
-	
-		// summary segments
-		osg::ref_ptr<osg::MatrixTransform> segments_transform;
-		osg::ref_ptr<osg::Group> segments_group;
-		std::vector< osg::ref_ptr<osg::Geode> > segments_geodes;
-		
-		void playbackVideoTransform();
-		void framesTransform();
-		void segmentsTransform();
-		void selectionCenterFrameTransform();
-		#if defined(SYNC_SELECTION_VIDEOS_BY_THREAD) && defined(SYNC_THREAD_PER_SELECTION_VIDEO)
-		void updateSelectionVideos(std::vector< osg::ref_ptr<osg::Image> >& _selection_video_images,
-			std::vector< osg::ref_ptr<osg::ImageStream> >& _selection_video_streams,
-			std::vector< osg::ref_ptr<osg::Texture2D> >& _selection_video_textures,
-			std::vector< osg::ref_ptr<osg::MatrixTransform> >& _selection_video_transforms,
-			osg::ref_ptr<osg::Group>& _selection_video_group,
-			std::vector< ACOsgVideoTrackPlayersSync* >& _selection_video_syncs, 
-			int _number);
-		#else
-		void updateSelectionVideos(std::vector< osg::ref_ptr<osg::Image> >& _selection_video_images,
-			std::vector< osg::ref_ptr<osg::ImageStream> >& _selection_video_streams,
-			std::vector< osg::ref_ptr<osg::Texture2D> >& _selection_video_textures,
-			std::vector< osg::ref_ptr<osg::MatrixTransform> >& _selection_video_transforms,
-			osg::ref_ptr<osg::Group>& _selection_video_group,
-			int _number);
-		#endif
-		void boxTransform(osg::ref_ptr<osg::MatrixTransform>& _transform, float _width, osg::Vec4 _color, std::string _name);
-		void selectionCursorTransform();
-		void selectionBeginTransform();
-		void selectionZoneTransform();
-		void selectionEndTransform();
+    // playback video
+    osg::ref_ptr<osg::MatrixTransform> playback_video_transform;
 
-		float summary_center_y,summary_height;
-		float segments_center_y,segments_height;
-		float selection_height,selection_center_y,selection_center_frame_width;
-		float playback_center_y,playback_height,playback_scale;
-		float summary_frame_min_width;
-		int summary_frame_n, selection_frame_n, segments_number;
-		bool scrubbing;
-		bool selection_needs_resync;
+    // selection frames
+    osg::ref_ptr<osg::MatrixTransform> selection_center_frame_transform;
+    std::vector< osg::ref_ptr<osg::Image> > right_selection_video_images,left_selection_video_images;
+    std::vector< osg::ref_ptr<osg::ImageStream> > right_selection_video_streams,left_selection_video_streams;
+    std::vector< osg::ref_ptr<osg::Texture2D> > right_selection_video_textures,left_selection_video_textures;
+    std::vector< osg::ref_ptr<osg::MatrixTransform> > right_selection_video_transforms,left_selection_video_transforms;
+    osg::ref_ptr<osg::Group> right_selection_video_group,left_selection_video_group;
+#ifdef SYNC_SELECTION_VIDEOS_BY_THREAD
+#ifdef SYNC_THREAD_PER_SELECTION_VIDEO
+    std::vector< ACOsgVideoTrackPlayersSync* > right_selection_video_syncs,left_selection_video_syncs;
+#else
+    ACOsgVideoTrackPlayersSync *right_selection_video_sync,*left_selection_video_sync;
+#endif
+#endif//def SYNC_SELECTION_VIDEOS_BY_THREAD
 
-		ACVideoSummaryType track_summary_type;
-		ACVideoSelectionType track_selection_type;
-		bool track_playback_visibility;
-	
-		bool track_summary_type_changed;
-		bool track_selection_type_changed;
-		bool track_playback_visibility_changed;
+    // summary cursor
+    osg::ref_ptr<osg::MatrixTransform> summary_cursor_transform;
 
-	public:
-		ACOsgVideoTrackRenderer();
-		~ACOsgVideoTrackRenderer();
-		void initTrack();	
-		void emptyTrack();	
-		void prepareTracks();
-		void updateTracks(double ratio=0.0);
+    // summary selection
+    osg::ref_ptr<osg::MatrixTransform> selection_begin_transform;
+    osg::ref_ptr<osg::MatrixTransform> selection_zone_transform;
+    osg::ref_ptr<osg::MatrixTransform> selection_end_transform;
 
-		void setSummaryType(ACVideoSummaryType type){this->track_summary_type = type;}
-		void updateSummaryType(ACVideoSummaryType type){this->track_summary_type = type; track_summary_type_changed = true;}
-		ACVideoSummaryType getSummaryType(){return this->track_summary_type;}
-		void setSelectionType(ACVideoSelectionType type){this->track_selection_type = type;}
-		void updateSelectionType(ACVideoSelectionType type){this->track_selection_type = type; track_selection_type_changed = true;}
-		ACVideoSelectionType getSelectionType(){return this->track_selection_type;}
-		void setPlaybackVisibility(bool _visibility){this->track_playback_visibility = _visibility;}
-		void updatePlaybackVisibility(bool _visibility){this->track_playback_visibility = _visibility; track_playback_visibility_changed = true;}
-	
-	private:
-		// Reconstructs transforms, geometries and shapes
-		void updatePlaybackContents();
-		void updateSummaryContents();
-		void updateSelectionContents();
-		void updateSliderContents();
-	
-		// Syncs selection/video streams with time skip
-		void syncVideoStreams();
-	
-		// Updates positions and sizes
-		void updateTransformsAspects();
+    // summary frames
+    std::vector< osg::ref_ptr<osg::Image> > summary_images;
+    std::vector< osg::ref_ptr<osg::ImageStream> > summary_streams;
+    std::vector< osg::ref_ptr<osg::Texture2D> > summary_textures;
+    osg::ref_ptr<osg::MatrixTransform> summary_frames_transform;
+
+    // summary slit-scan
+#ifdef USE_SLIT_SCAN
+    osg::ref_ptr<osg::MatrixTransform> slit_scan_transform;
+    void slitScanTransform();
+    bool slit_scan_changed;
+    ACOsgVideoSlitScanThread* slit_scanner;
+#endif//def USE_SLIT_SCAN
+
+    // summary segments
+    osg::ref_ptr<osg::MatrixTransform> segments_transform;
+    osg::ref_ptr<osg::Group> segments_group;
+    std::vector< osg::ref_ptr<osg::Geode> > segments_geodes;
+
+    void playbackVideoTransform();
+    void framesTransform();
+    void segmentsTransform();
+    void selectionCenterFrameTransform();
+#if defined(SYNC_SELECTION_VIDEOS_BY_THREAD) && defined(SYNC_THREAD_PER_SELECTION_VIDEO)
+    void updateSelectionVideos(std::vector< osg::ref_ptr<osg::Image> >& _selection_video_images,
+                               std::vector< osg::ref_ptr<osg::ImageStream> >& _selection_video_streams,
+                               std::vector< osg::ref_ptr<osg::Texture2D> >& _selection_video_textures,
+                               std::vector< osg::ref_ptr<osg::MatrixTransform> >& _selection_video_transforms,
+                               osg::ref_ptr<osg::Group>& _selection_video_group,
+                               std::vector< ACOsgVideoTrackPlayersSync* >& _selection_video_syncs,
+                               int _number);
+#else
+    void updateSelectionVideos(std::vector< osg::ref_ptr<osg::Image> >& _selection_video_images,
+                               std::vector< osg::ref_ptr<osg::ImageStream> >& _selection_video_streams,
+                               std::vector< osg::ref_ptr<osg::Texture2D> >& _selection_video_textures,
+                               std::vector< osg::ref_ptr<osg::MatrixTransform> >& _selection_video_transforms,
+                               osg::ref_ptr<osg::Group>& _selection_video_group,
+                               int _number);
+#endif
+    void selectionCursorTransform();
+    void selectionBeginTransform();
+    void selectionZoneTransform();
+    void selectionEndTransform();
+
+    float summary_center_y,summary_height;
+    float segments_center_y,segments_height;
+    float selection_height,selection_center_y,selection_center_frame_width;
+    float playback_center_y,playback_height,playback_scale;
+    float summary_frame_min_width;
+    int summary_frame_n, selection_frame_n, segments_number;
+    bool scrubbing;
+    bool selection_needs_resync;
+
+    ACVideoSummaryType track_summary_type;
+    ACVideoSelectionType track_selection_type;
+    bool track_playback_visibility;
+
+    bool track_summary_type_changed;
+    bool track_selection_type_changed;
+    bool track_playback_visibility_changed;
+
+public:
+    ACOsgVideoTrackRenderer();
+    ~ACOsgVideoTrackRenderer();
+    void initTrack();
+    void emptyTrack();
+    void prepareTracks();
+    void updateTracks(double ratio=0.0);
+
+    void setSummaryType(ACVideoSummaryType type){this->track_summary_type = type;}
+    void updateSummaryType(ACVideoSummaryType type){this->track_summary_type = type; track_summary_type_changed = true;}
+    ACVideoSummaryType getSummaryType(){return this->track_summary_type;}
+    void setSelectionType(ACVideoSelectionType type){this->track_selection_type = type;}
+    void updateSelectionType(ACVideoSelectionType type){this->track_selection_type = type; track_selection_type_changed = true;}
+    ACVideoSelectionType getSelectionType(){return this->track_selection_type;}
+    void setPlaybackVisibility(bool _visibility){this->track_playback_visibility = _visibility;}
+    void updatePlaybackVisibility(bool _visibility){this->track_playback_visibility = _visibility; track_playback_visibility_changed = true;}
+
+private:
+    // Reconstructs transforms, geometries and shapes
+    void updatePlaybackContents();
+    void updateSummaryContents();
+    void updateSelectionContents();
+    void updateSliderContents();
+
+    // Syncs selection/video streams with time skip
+    void syncVideoStreams();
+
+    // Updates positions and sizes
+    void updateTransformsAspects();
 };
 
 #endif //defined (SUPPORT_VIDEO)

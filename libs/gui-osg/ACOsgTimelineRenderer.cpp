@@ -40,10 +40,17 @@
 #if defined (SUPPORT_VIDEO)
 #include "ACOsgVideoTrackRenderer.h"
 #endif //defined (SUPPORT_VIDEO)
+#if defined (SUPPORT_TEXT)
+#include "ACOsgTextTrackRenderer.h"
+#endif //defined (SUPPORT_TEXT)
+#if defined (SUPPORT_MULTIMEDIA)
+#include <ACMediaDocument.h>
+#endif //defined (SUPPORT_MULTIMEDIA)
 
 using namespace osg;
 
-ACOsgTimelineRenderer::ACOsgTimelineRenderer(): media_cycle(0), screen_width(0), height(0.0f), width(0.0f){
+ACOsgTimelineRenderer::ACOsgTimelineRenderer()
+    : media_cycle(0), screen_width(0), height(0.0f), width(0.0f),font(0){
 	#if defined (SUPPORT_AUDIO)
 		audio_engine = 0;
 	#endif//defined (SUPPORT_AUDIO)
@@ -66,55 +73,72 @@ void ACOsgTimelineRenderer::clean(){
 
 //bool ACOsgTimelineRenderer::addTrack(int media_index){
 bool ACOsgTimelineRenderer::addTrack(ACMedia* _media){
-	int n = track_renderer.size();
-	//ACMediaType media_type = media_cycle->getLibrary()->getMedia(media_index)->getType();
-	ACMediaType media_type = _media->getType();
-	
-	switch (media_type) {
-		case MEDIA_TYPE_AUDIO:
-			#if defined (SUPPORT_AUDIO)
-			track_renderer.resize(n+1);
-			track_renderer[n] = new ACOsgAudioTrackRenderer();
-			track_renderer[n]->setScreenWidth(screen_width);
-			track_renderer[n]->setSize(width,height);
-			if (track_renderer[n] != 0) {
-				track_renderer[n]->setMediaCycle(media_cycle);
-				track_renderer[n]->setAudioEngine(audio_engine);
-				track_renderer[n]->setTrackIndex(n);
-				//track_renderer[n]->updateMedia(media_index);
-				track_renderer[n]->updateMedia(_media);
-				track_renderer[n]->prepareTracks();
-				track_group->addChild(track_renderer[n]->getTrack());
-			}
-			#endif //defined (SUPPORT_AUDIO)
-			break;
-		case MEDIA_TYPE_VIDEO:
-			#if defined (SUPPORT_VIDEO)
-			track_renderer.resize(n+1);
-			track_renderer[n] = new ACOsgVideoTrackRenderer();
-			track_renderer[n]->setScreenWidth(screen_width);
-			track_renderer[n]->setSize(width,height);
-			if (track_renderer[n] != 0) {
-				track_renderer[n]->setMediaCycle(media_cycle);
-				track_renderer[n]->setTrackIndex(n);
-				//track_renderer[n]->updateMedia(media_index);
-				track_renderer[n]->updateMedia(_media);
-				track_renderer[n]->prepareTracks();
-				track_group->addChild(track_renderer[n]->getTrack());
-			}
-			#endif //defined (SUPPORT_VIDEO)
-			break;
-			/*
-			 case MEDIA_TYPE_SENSORDATA:
-			 track_renderer[i] = new ACOsgSensorDataTrackRenderer();
-			 break;
-			 //... ;-)
-			 */
-		default:
-			track_renderer[n] = 0;
-			break;
-	}
+    int n = track_renderer.size();
+    //ACMediaType media_type = media_cycle->getLibrary()->getMedia(media_index)->getType();
 
+    ACMediaType media_type = _media->getType();
+#ifdef SUPPORT_MULTIMEDIA
+    if(media_cycle->getMediaType() == MEDIA_TYPE_MIXED && _media->getType() == MEDIA_TYPE_MIXED)
+        media_type = ((ACMediaDocument*) _media)->getActiveSubMediaType();
+#endif//def SUPPORT_MULTIMEDIA
+
+    switch (media_type) {
+    case MEDIA_TYPE_AUDIO:
+    {
+#if defined (SUPPORT_AUDIO)
+        track_renderer.resize(n+1);
+        track_renderer[n] = new ACOsgAudioTrackRenderer();
+
+#endif //defined (SUPPORT_AUDIO)
+    }
+    break;
+    case MEDIA_TYPE_VIDEO:
+    {
+#if defined (SUPPORT_VIDEO)
+        track_renderer.resize(n+1);
+        track_renderer[n] = new ACOsgVideoTrackRenderer();
+#endif //defined (SUPPORT_VIDEO)
+    }
+    break;
+    case MEDIA_TYPE_TEXT:
+    {
+#if defined (SUPPORT_TEXT)
+        track_renderer.resize(n+1);
+        track_renderer[n] = new ACOsgTextTrackRenderer();
+#endif //defined (SUPPORT_TEXT)
+    }
+    break;
+    /*
+    case MEDIA_TYPE_SENSORDATA:
+    track_renderer[i] = new ACOsgSensorDataTrackRenderer();
+    break;
+    //... ;-)
+    */
+    default:
+        break;
+    }
+
+    if (track_renderer.size() == n+1) {
+        if(track_renderer[n] != 0){
+            track_renderer[n]->setScreenWidth(screen_width);
+            track_renderer[n]->setSize(width,height);
+            track_renderer[n]->setMediaCycle(media_cycle);
+            track_renderer[n]->setAudioEngine(audio_engine);
+            track_renderer[n]->setTrackIndex(n);
+            track_renderer[n]->setFont(font);
+            //track_renderer[n]->updateMedia(media_index);
+            #ifdef SUPPORT_MULTIMEDIA
+            if(media_cycle->getMediaType() == MEDIA_TYPE_MIXED && _media->getType() == MEDIA_TYPE_MIXED)
+                track_renderer[n]->updateMedia( ((ACMediaDocument*) _media)->getActiveMedia() );
+            else
+            #endif//def SUPPORT_MULTIMEDIA
+                track_renderer[n]->updateMedia(_media);
+            track_renderer[n]->prepareTracks();
+            track_group->addChild(track_renderer[n]->getTrack());
+        }
+        else
+            track_renderer.resize(n);
+    }
 }
 
 void ACOsgTimelineRenderer::prepareTracks(int start) {

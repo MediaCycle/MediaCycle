@@ -110,28 +110,6 @@ void ACOsgLibraryRenderer::init()
     license_caption = "License: ";
     website_caption = "Website: ";
     medias_caption = "Elements: "; //"Medias: ";
-
-    /*
-    font = 0;
-std::string font_path(""),font_file("fudd.ttf");
-#ifdef USE_DEBUG
-    boost::filesystem::path s_path( __FILE__ );
-    font_path = s_path.parent_path().parent_path().parent_path().string() + "/data/fonts/";
-#else
-#ifdef __APPLE__
-    font_path = "@executable_path/../MacOS/fonts/";
-#elif __WIN32__
-    font_path = "./";
-#else
-    font_path = "/usr/share/mediacycle/fonts/";
-#endif
-#endif
-    std::cout << "Current font path " << font_path << std::endl;
-
-    font = osgText::readRefFontFile(font_path + font_file);
-    if(!font)
-        std::cerr << "ACOsgLibraryRenderer::ACOsgLibraryRenderer: couldn't load font " << std::endl;
-    */
 }
 
 void ACOsgLibraryRenderer::changeSetting(ACSettingType _setting)

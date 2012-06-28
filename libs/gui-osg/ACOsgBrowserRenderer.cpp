@@ -135,7 +135,7 @@ USE_GRAPHICSWINDOW()
 
 
 ACOsgBrowserRenderer::ACOsgBrowserRenderer()
-//: displayed_nodes(0)
+: font(0)
 {
     media_cycle = 0;
     setting = AC_SETTING_NONE;
@@ -678,6 +678,7 @@ bool ACOsgBrowserRenderer::addNodes(int _first, int _last){
 			if (node_renderer[i] != 0) {
                 node_renderer[i]->setMediaCycle(media_cycle);
                 node_renderer[i]->setNodeIndex(i);
+                node_renderer[i]->setFont(font);
                 node_renderer[i]->changeSetting(this->setting);
 
                 /*if (media_cycle->getBrowserMode() == AC_MODE_NEIGHBORS)
@@ -775,6 +776,7 @@ bool ACOsgBrowserRenderer::addLabels(int _first, int _last){
                 label_renderer[i]->setPos(media_cycle->getLabelPos(i));
                 label_renderer[i]->setMediaCycle(media_cycle);
                 label_renderer[i]->setNodeIndex(i);
+                label_renderer[i]->setFont(font);
                 label_renderer[i]->prepareNodes();
                 label_group->addChild(label_renderer[i]->getNode());
             }

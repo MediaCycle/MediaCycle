@@ -43,36 +43,36 @@
 #include <osgText/Text>
 
 class ACOsgAudioRenderer : public ACOsgMediaRenderer {
-	
+
 protected:
-	osg::ref_ptr<osg::Geode> waveform_geode;
-	osg::ref_ptr<osg::Geode> curser_geode;
-	osg::ref_ptr<osg::Geode> metadata_geode;
-	osg::ref_ptr<osgText::Text> metadata;
+    osg::ref_ptr<osg::Geode> waveform_geode;
+    osg::ref_ptr<osg::Geode> curser_geode;
+    osg::ref_ptr<osg::Geode> metadata_geode;
+    osg::ref_ptr<osgText::Text> metadata;
 
 #ifdef AUTO_TRANSFORM
-	osg::ref_ptr<osg::AutoTransform> curser_transform;
+    osg::ref_ptr<osg::AutoTransform> curser_transform;
 #else
-	osg::ref_ptr<osg::MatrixTransform> curser_transform;
+    osg::ref_ptr<osg::MatrixTransform> curser_transform;
 #endif
-	osg::ref_ptr<osg::Geode> entry_geode;
-		
-	void waveformGeode();
-	void curserGeode();
-	void entryGeode();
-	void metadataGeode();
-	
-	ACBrowserAudioWaveformType waveform_type;
-	
+    osg::ref_ptr<osg::Geode> entry_geode;
+
+    void waveformGeode();
+    void curserGeode();
+    void entryGeode();
+    void metadataGeode();
+
+    ACBrowserAudioWaveformType waveform_type;
+
 public:
-	ACOsgAudioRenderer();
-	~ACOsgAudioRenderer();
-	void prepareNodes();
-	void updateNodes(double ratio=0.0);
-	ACBrowserAudioWaveformType getWaveformType(){return waveform_type;}
-	void setWaveformType(ACBrowserAudioWaveformType _type);
-	void updateWaveformType(ACBrowserAudioWaveformType _type);
-        virtual void changeSetting(ACSettingType _setting);
+    ACOsgAudioRenderer();
+    ~ACOsgAudioRenderer();
+    void prepareNodes();
+    void updateNodes(double ratio=0.0);
+    ACBrowserAudioWaveformType getWaveformType(){return waveform_type;}
+    void setWaveformType(ACBrowserAudioWaveformType _type);
+    void updateWaveformType(ACBrowserAudioWaveformType _type);
+    virtual void changeSetting(ACSettingType _setting);
 };
 
 #endif //defined (SUPPORT_AUDIO)

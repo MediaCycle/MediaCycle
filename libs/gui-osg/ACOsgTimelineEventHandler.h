@@ -45,38 +45,40 @@
 #include "ACOsgTimelineRenderer.h"
 
 #if defined (SUPPORT_AUDIO)
-	#include <ACAudioEngine.h>
+#include <ACAudioEngine.h>
 #endif //defined (SUPPORT_AUDIO)
 
 //using namespace osgGA;
 
 class ACOsgTimelineEventHandler : public  osgGA::GUIEventHandler {
-	public: 
-		ACOsgTimelineEventHandler();
-		virtual ~ACOsgTimelineEventHandler() {};
-		void clean();
-		
-		void setMediaCycle(MediaCycle *_media_cycle){this->media_cycle = _media_cycle;}
-		void setRenderer(ACOsgTimelineRenderer* _renderer){this->renderer = _renderer;}
-		bool handle(const osgGA::GUIEventAdapter& ea,osgGA::GUIActionAdapter& aa);
-		#if defined (SUPPORT_AUDIO)
-			void setAudioEngine(ACAudioEngine *engine){audio_engine=engine;}
-		#endif //defined (SUPPORT_AUDIO)	
-	
-	protected:
-		void pick(osgViewer::View* view, const osgGA::GUIEventAdapter& ea, bool hover);
-	
-	private:
-		ACOsgTimelineRenderer *renderer;
-		MediaCycle *media_cycle;
-		#if defined (SUPPORT_AUDIO)
-			ACAudioEngine *audio_engine;
-		#endif //defined (SUPPORT_AUDIO)	
-		bool selecting_zone,selecting_zone_begin,selecting_zone_end,selecting_summary_waveform,selecting_summary_frames;
-		bool selecting_segments;
-		ACRefId* selection;
-		float selection_begin,selection_end;
-		float pushed_x,cursor_pushed_dist;
+public:
+    ACOsgTimelineEventHandler();
+    virtual ~ACOsgTimelineEventHandler() {};
+    void clean();
+
+    void setMediaCycle(MediaCycle *_media_cycle){this->media_cycle = _media_cycle;}
+    void setRenderer(ACOsgTimelineRenderer* _renderer){this->renderer = _renderer;}
+    bool handle(const osgGA::GUIEventAdapter& ea,osgGA::GUIActionAdapter& aa);
+#if defined (SUPPORT_AUDIO)
+    void setAudioEngine(ACAudioEngine *engine){audio_engine=engine;}
+#endif //defined (SUPPORT_AUDIO)
+
+protected:
+    void pick(osgViewer::View* view, const osgGA::GUIEventAdapter& ea, bool hover);
+
+private:
+    ACOsgTimelineRenderer *renderer;
+    MediaCycle *media_cycle;
+#if defined (SUPPORT_AUDIO)
+    ACAudioEngine *audio_engine;
+#endif //defined (SUPPORT_AUDIO)
+    bool selecting_zone,selecting_zone_begin,selecting_zone_end;
+    bool selecting_summary_waveform,selecting_summary_frames,selecting_summary_slider;
+    bool selecting_segments;
+    ACRefId* selection;
+    float selection_begin,selection_end;
+    float pushed_x,moved_x;
+    float pushed_y,moved_y;
 };
 
 #endif // AC_OSG_TIMELINE_EVENT_HANDLER_H

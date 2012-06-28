@@ -56,19 +56,18 @@
 #include <osgDB/WriteFile>
 #include <osgUtil/SceneView>
 #include <osgViewer/Viewer>
-
 #include <osgText/Font>
 #include <osgText/Text>
 
 #include "ACRefId.h"
 
 #if defined(APPLE_IOS)
-	#define AUTO_TRANSFORM
+#define AUTO_TRANSFORM
 #endif 
 
 enum ACBrowserAudioWaveformType {
-	AC_BROWSER_AUDIO_WAVEFORM_NONE=0,
-	AC_BROWSER_AUDIO_WAVEFORM_CLASSIC=1
+    AC_BROWSER_AUDIO_WAVEFORM_NONE=0,
+    AC_BROWSER_AUDIO_WAVEFORM_CLASSIC=1
 };
 
 // Setting: where/how the application is used
@@ -81,105 +80,105 @@ enum ACSettingType {
 
 class ACOsgMediaRenderer {
 protected:
-	MediaCycle* media_cycle;
-	ACMediaType media_type;
-        ACSettingType setting;
-	osg::ref_ptr<osg::Group>  local_group;
+    MediaCycle* media_cycle;
+    ACMediaType media_type;
+    ACSettingType setting;
+    osg::ref_ptr<osg::Group>  local_group;
 #ifdef AUTO_TRANSFORM
-	osg::ref_ptr<osg::AutoTransform> media_node;
+    osg::ref_ptr<osg::AutoTransform> media_node;
 #else
-	osg::ref_ptr<osg::MatrixTransform> media_node;
+    osg::ref_ptr<osg::MatrixTransform> media_node;
 #endif
-	int node_index;
-	int cluster_index;
-	ACMedia* media;
-	bool media_changed;
-	float distance_mouse;
-	// int	media_activity;
-	osg::Vec4 node_color;
-	std::vector<osg::Vec4> cluster_colors;
-	bool user_defined_color;
-		
-	// GLOBAL
-	double						media_cycle_deltatime;
-	float						media_cycle_zoom;
-	float						media_cycle_angle;
-	int							media_cycle_mode;
-	int							media_cycle_global_navigation_level;
-	
-	// NODE SPECIFIC
-	bool						media_cycle_isdisplayed;
-	ACPoint						media_cycle_current_pos;
-	ACPoint						media_cycle_view_pos;
-	ACPoint						media_cycle_next_pos;
-	int							media_cycle_navigation_level;
-	int							media_cycle_activity;
-	std::string					media_cycle_filename;	
-	int							media_index;
-	int							prev_media_index;
-	
-	bool						initialized;
-	float						frac;
-	
+    int node_index;
+    int cluster_index;
+    ACMedia* media;
+    bool media_changed;
+    float distance_mouse;
+    // int media_activity;
+    osg::Vec4 node_color;
+    std::vector<osg::Vec4> cluster_colors;
+    bool user_defined_color;
+
+    // GLOBAL
+    double media_cycle_deltatime;
+    float media_cycle_zoom;
+    float media_cycle_angle;
+    int media_cycle_modxe;
+    int media_cycle_global_navigation_level;
+    int media_cycle_mode;
+
+    // NODE SPECIFIC
+    bool media_cycle_isdisplayed;
+    ACPoint media_cycle_current_pos;
+    ACPoint media_cycle_view_pos;
+    ACPoint media_cycle_next_pos;
+    int media_cycle_navigation_level;
+    int media_cycle_activity;
+    std::string media_cycle_filename;
+    int media_index;
+    int prev_media_index;
+
+    bool initialized;
+    float frac;
+
 #if defined(APPLE_IOS)
-	float afac;
+    float afac;
 #else
-	float afac;
+    float afac;
 #endif
-        osg::ref_ptr<osgText::Font> font;
+    osg::ref_ptr<osgText::Font> font;
 
 public:
-	ACOsgMediaRenderer();
-	virtual ~ACOsgMediaRenderer();
+    ACOsgMediaRenderer();
+    virtual ~ACOsgMediaRenderer();
 
-	void setMediaCycle(MediaCycle *_media_cycle) { this->media_cycle = _media_cycle; };
-	ACMediaType getMediaType(){return media_type;}
-	void setNodeIndex(int _node_index) { this->node_index = _node_index; };
-	void setDistanceMouse(float _distance_mouse) { this->distance_mouse = _distance_mouse; };
-	float getDistanceMouse(void) { return this->distance_mouse ; };
-	//void setActivity(int _media_activity) { this->media_activity = _media_activity; }
-	osg::ref_ptr<osg::Group>  getNode() { return local_group; };
-	
-	virtual osg::ref_ptr<osg::Geode> getMainGeode() { return new osg::Geode;}
-	
-	int	getNodeIndex() { return node_index; };
-	
-	virtual void prepareNodes()=0;
-	virtual void updateNodes(double ratio=0.0)=0;
-	
-	void changeNodeColor(osg::Vec4 _color){node_color = _color; user_defined_color = true;}
-	void resetNodeColor(){node_color = osg::Vec4(1,1,0.5,1); user_defined_color = false;}
-	
-	void setDeltaTime(double media_cycle_deltatime);
-	void setZoomAngle(float media_cycle_zoom, float media_cycle_angle);
-	void setMode(int media_cycle_mode);
-	void setGlobalNavigation(int media_cycle_global_navigation_level);
-	void setIsDisplayed(int media_cycle_isdisplayed);
+    void setMediaCycle(MediaCycle *_media_cycle) { this->media_cycle = _media_cycle; };
+    ACMediaType getMediaType(){return media_type;}
+    void setNodeIndex(int _node_index) { this->node_index = _node_index; };
+    void setDistanceMouse(float _distance_mouse) { this->distance_mouse = _distance_mouse; };
+    float getDistanceMouse(void) { return this->distance_mouse ; };
+    //void setActivity(int _media_activity) { this->media_activity = _media_activity; }
+    osg::ref_ptr<osg::Group>  getNode() { return local_group; };
+    virtual osg::ref_ptr<osg::Geode> getMainGeode() { return new osg::Geode;}
+    int	getNodeIndex() { return node_index; };
+    void setFont(osg::ref_ptr<osgText::Font> _font){this->font = _font;}
+
+    virtual void prepareNodes()=0;
+    virtual void updateNodes(double ratio=0.0)=0;
+
+    void changeNodeColor(osg::Vec4 _color){node_color = _color; user_defined_color = true;}
+    void resetNodeColor(){node_color = osg::Vec4(1,1,0.5,1); user_defined_color = false;}
+
+    void setDeltaTime(double media_cycle_deltatime);
+    void setZoomAngle(float media_cycle_zoom, float media_cycle_angle);
+    void setMode(int media_cycle_mode);
+    void setGlobalNavigation(int media_cycle_global_navigation_level);
+    void setIsDisplayed(int media_cycle_isdisplayed);
     int getIsDisplayed(){return media_cycle_isdisplayed;}
-	
-	//void setPos(ACPoint &media_cycle_current_pos, ACPoint &media_cycle_next_pos);
-	void setViewPos(ACPoint media_cycle_view_pos);
-	void setCurrentPos(ACPoint media_cycle_current_pos);
-	void setNextPos(ACPoint media_cycle_next_pos);
-	ACPoint getViewPos();
-	ACPoint getCurrentPos();
-	ACPoint getNextPos();
-	bool getInitialized() { return initialized; }
-	void setFrac(float frac) { this->frac = frac; }
-	float getFrac() {return this->frac; }
-	
-	void setNavigation(int media_cycle_navigation_level);
-	void setActivity(int media_cycle_activity);
-	//void setMediaIndex(int media_index);
-	void setMedia(ACMedia* _media);
-	void setFilename(std::string media_cycle_filename);
-	
-	// Audio-specific
-	virtual void setWaveformType(ACBrowserAudioWaveformType _type){}
-	virtual void updateWaveformType(ACBrowserAudioWaveformType _type){}
 
-        // Setting specific
-        virtual void changeSetting(ACSettingType _setting){this->setting = _setting;}// = 0;
+    //void setPos(ACPoint &media_cycle_current_pos, ACPoint &media_cycle_next_pos);
+    void setViewPos(ACPoint media_cycle_view_pos);
+    void setCurrentPos(ACPoint media_cycle_current_pos);
+    void setNextPos(ACPoint media_cycle_next_pos);
+    ACPoint getViewPos();
+    ACPoint getCurrentPos();
+    ACPoint getNextPos();
+    bool getInitialized() { return initialized; }
+    void setFrac(float frac) { this->frac = frac; }
+    float getFrac() {return this->frac; }
+
+    void setNavigation(int media_cycle_navigation_level);
+    void setActivity(int media_cycle_activity);
+    //void setMediaIndex(int media_index);
+    void setMedia(ACMedia* _media);
+    void setFilename(std::string media_cycle_filename);
+
+    // Audio-specific
+    virtual void setWaveformType(ACBrowserAudioWaveformType _type){}
+    virtual void updateWaveformType(ACBrowserAudioWaveformType _type){}
+
+    // Setting specific
+    virtual void changeSetting(ACSettingType _setting){this->setting = _setting;}// = 0;
 };
 
 #endif

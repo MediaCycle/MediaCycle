@@ -36,7 +36,7 @@
 #ifndef __ACOSG_TIMELINE_RENDERER_H__
 #define __ACOSG_TIMELINE_RENDERER_H__
 
-#include "MediaCycle.h"
+#include <MediaCycle.h>
 #if defined (SUPPORT_AUDIO)
 #include <ACAudioEngine.h>
 #endif //defined (SUPPORT_AUDIO)
@@ -76,51 +76,53 @@
 
 class ACOsgTimelineRenderer {
 protected:
-	MediaCycle				*media_cycle;
-	#if defined (SUPPORT_AUDIO)
-		ACAudioEngine *audio_engine;
-	#endif //defined (SUPPORT_AUDIO)
-	osg::ref_ptr<osg::Group>				 group;
-	osg::ref_ptr<osg::Group>				 track_group;
-	std::vector<ACOsgTrackRenderer*>  track_renderer;
-	int screen_width;
-	float height,width;
-	ACVideoSummaryType default_video_summary_type;
-	ACVideoSelectionType default_video_selection_type;
-	bool default_video_playback_visibility;
+    MediaCycle *media_cycle;
+#if defined (SUPPORT_AUDIO)
+    ACAudioEngine *audio_engine;
+#endif //defined (SUPPORT_AUDIO)
+    osg::ref_ptr<osg::Group> group;
+    osg::ref_ptr<osg::Group> track_group;
+    std::vector<ACOsgTrackRenderer*> track_renderer;
+    osg::ref_ptr<osgText::Font> font;
+    int screen_width;
+    float height,width;
+    ACVideoSummaryType default_video_summary_type;
+    ACVideoSelectionType default_video_selection_type;
+    bool default_video_playback_visibility;
 
 public:
-	ACOsgTimelineRenderer();
-	~ACOsgTimelineRenderer();
-	void clean();
+    ACOsgTimelineRenderer();
+    ~ACOsgTimelineRenderer();
+    void clean();
 
-	void setMediaCycle(MediaCycle *media_cycle) { this->media_cycle = media_cycle; };
-	#if defined (SUPPORT_AUDIO)
-		void setAudioEngine(ACAudioEngine *engine){audio_engine=engine;}
-	#endif //defined (SUPPORT_AUDIO)
-	osg::ref_ptr<osg::Group> getShapes() 	{ return group; };
-	ACOsgTrackRenderer* getTrack(int number){if ( (number>=0) && (number<track_renderer.size()) ) return track_renderer[number];}
-	//bool addTrack(int media_index);
-	bool addTrack(ACMedia* _media);
-	int getNumberOfTracks(){return track_renderer.size();}
+    void setMediaCycle(MediaCycle *media_cycle) { this->media_cycle = media_cycle; };
+#if defined (SUPPORT_AUDIO)
+    void setAudioEngine(ACAudioEngine *engine){audio_engine=engine;}
+#endif //defined (SUPPORT_AUDIO)
+    osg::ref_ptr<osg::Group> getShapes() 	{ return group; };
+    ACOsgTrackRenderer* getTrack(int number){if ( (number>=0) && (number<track_renderer.size()) ) return track_renderer[number];}
+    //bool addTrack(int media_index);
+    void setFont(osg::ref_ptr<osgText::Font> _font){this->font = _font;}
+    bool addTrack(ACMedia* _media);
+    int getNumberOfTracks(){return track_renderer.size();}
 
-	void prepareTracks(int start=0);
-	void updateTracks(double ratio=0.0);
-	void setScreenWidth(int _screen_width){screen_width = _screen_width;}
-	//void setHeight(float _height){height = _height;}
-	void updateScreenWidth(int _screen_width);
-	void updateSize(float _width,float _height);
-	void setSize(int _width,float _height){width = _width;height = _height;}
-	
-	void updateVideoSummaryType(ACVideoSummaryType type);
-	ACVideoSummaryType getVideoSummaryType(){return default_video_summary_type;}
-	void updateVideoSelectionType(ACVideoSelectionType type);
-	ACVideoSelectionType getVideoSelectionType(){return default_video_selection_type;}
-	void updateVideoPlaybackVisibility(bool _visibility);
-	bool getVideoPlaybackVisibility(){return default_video_playback_visibility;}
+    void prepareTracks(int start=0);
+    void updateTracks(double ratio=0.0);
+    void setScreenWidth(int _screen_width){screen_width = _screen_width;}
+    //void setHeight(float _height){height = _height;}
+    void updateScreenWidth(int _screen_width);
+    void updateSize(float _width,float _height);
+    void setSize(int _width,float _height){width = _width;height = _height;}
+
+    void updateVideoSummaryType(ACVideoSummaryType type);
+    ACVideoSummaryType getVideoSummaryType(){return default_video_summary_type;}
+    void updateVideoSelectionType(ACVideoSelectionType type);
+    ACVideoSelectionType getVideoSelectionType(){return default_video_selection_type;}
+    void updateVideoPlaybackVisibility(bool _visibility);
+    bool getVideoPlaybackVisibility(){return default_video_playback_visibility;}
 
 private:
-	bool removeTracks(int _first=0, int _last=0);
+    bool removeTracks(int _first=0, int _last=0);
 };
 
 #endif

@@ -79,41 +79,43 @@
 
 class ACOsgHUDRenderer {
 protected:
-	MediaCycle				*media_cycle;
-	osg::ref_ptr<osg::Camera>				 camera;
-	osg::ref_ptr<osg::Group>				 group;
-	osg::ref_ptr<osg::Group>				 pointer_group;
-	std::vector<ACOsgPointerRenderer*>  pointer_renderer;
-        ACOsgLibraryRenderer* library_renderer;
-        ACSettingType setting;
+    MediaCycle				*media_cycle;
+    osg::ref_ptr<osg::Camera>				 camera;
+    osg::ref_ptr<osg::Group>				 group;
+    osg::ref_ptr<osg::Group>				 pointer_group;
+    std::vector<ACOsgPointerRenderer*>  pointer_renderer;
+    ACOsgLibraryRenderer* library_renderer;
+    ACSettingType setting;
+    osg::ref_ptr<osgText::Font> font;
 
-	// SD - Results from centralized request to MediaCycle
-	ACPoint						media_cycle_pointer_current_pos;
+    // SD - Results from centralized request to MediaCycle
+    ACPoint						media_cycle_pointer_current_pos;
 public:
-	ACOsgHUDRenderer();
-        ~ACOsgHUDRenderer();
+    ACOsgHUDRenderer();
+    ~ACOsgHUDRenderer();
 
-        void clean();
-        void cleanPointers();
-        void cleanLibrary();
+    void clean();
+    void cleanPointers();
+    void cleanLibrary();
 
-	double getTime();
+    double getTime();
 
-	void setMediaCycle(MediaCycle *media_cycle);
+    void setMediaCycle(MediaCycle *media_cycle);
+    void setFont(osg::ref_ptr<osgText::Font> _font){this->font = _font;}
 
-	osg::ref_ptr<osg::Camera> getCamera();
+    osg::ref_ptr<osg::Camera> getCamera();
 
-	void preparePointers(osgViewer::View* view = 0);
-        void prepareLibrary(osgViewer::View* view = 0);
+    void preparePointers(osgViewer::View* view = 0);
+    void prepareLibrary(osgViewer::View* view = 0);
 
-	void updatePointers(osgViewer::Viewer* viewer);//Cocoa - simple OSG viewer
-	void updatePointers(osgViewer::View* viewer);//Qt - composite OSG viewer
-        void updateLibrary(osgViewer::View* viewer);
+    void updatePointers(osgViewer::Viewer* viewer);//Cocoa - simple OSG viewer
+    void updatePointers(osgViewer::View* viewer);//Qt - composite OSG viewer
+    void updateLibrary(osgViewer::View* viewer);
 
-        void changeSetting(ACSettingType _setting);
+    void changeSetting(ACSettingType _setting);
 
 private:
-	void updatePointers(int w, int h);//common
+    void updatePointers(int w, int h);//common
 };
 
 #endif

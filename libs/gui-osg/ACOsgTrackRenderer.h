@@ -36,7 +36,7 @@
 #ifndef __ACOSG_TRACK_RENDERER_H__
 #define __ACOSG_TRACK_RENDERER_H__
 
-#include "MediaCycle.h"
+#include <MediaCycle.h>
 #if defined (SUPPORT_AUDIO)
 #include <ACAudioEngine.h>
 #endif //defined (SUPPORT_AUDIO)
@@ -56,105 +56,113 @@
 #include <osgDB/WriteFile>
 #include <osgUtil/SceneView>
 #include <osgViewer/Viewer>
+#include <osgText/Font>
+#include <osgText/Text>
 
 #include "ACRefId.h"
 
 enum ACAudioSummaryType {
-	AC_AUDIO_SUMMARY_NONE=0,
-	AC_AUDIO_SUMMARY_WAVEFORM=1,
-	AC_AUDIO_SUMMARY_RECTIFIED=2
+    AC_AUDIO_SUMMARY_NONE=0,
+    AC_AUDIO_SUMMARY_WAVEFORM=1,
+    AC_AUDIO_SUMMARY_RECTIFIED=2
 };
 
 enum ACVideoSummaryType {
-	AC_VIDEO_SUMMARY_NONE=0,
-	AC_VIDEO_SUMMARY_KEYFRAMES=1,
-	AC_VIDEO_SUMMARY_SLIT_SCAN=2
+    AC_VIDEO_SUMMARY_NONE=0,
+    AC_VIDEO_SUMMARY_KEYFRAMES=1,
+    AC_VIDEO_SUMMARY_SLIT_SCAN=2
 };
 
 enum ACVideoSelectionType {
-	AC_VIDEO_SELECTION_NONE=0,
-	AC_VIDEO_SELECTION_KEYFRAMES=1,
-	AC_VIDEO_SELECTION_SLIT_SCAN=2
+    AC_VIDEO_SELECTION_NONE=0,
+    AC_VIDEO_SELECTION_KEYFRAMES=1,
+    AC_VIDEO_SELECTION_SLIT_SCAN=2
 };
 
 class ACOsgTrackRenderer {
 protected:
-	MediaCycle* media_cycle;
-	#if defined (SUPPORT_AUDIO)
-		ACAudioEngine *audio_engine;
-	#endif //defined (SUPPORT_AUDIO)
-	osg::ref_ptr<osg::MatrixTransform> track_node;
-	
-	int track_index, media_index;
-	// int	media_activity;
-	ACMedia* media;
-	bool media_from_lib;
-	bool media_changed;
-	int screen_width;
-	float width,height;
-	bool screen_width_changed;
-	bool width_changed,height_changed;
-	int displayed_media_index;
-	
-	// Magic numbers!
-	float zpos;
-	double xstep, ylim;
-	float xspan, yspan;
-	float selection_sensing_width;
-	
-	bool manual_selection;
-	
-	// (re)init
-	float playback_min_width;
-	float selection_begin_pos,selection_end_pos,selection_center_pos;
-	bool selection_begin_pos_changed,selection_end_pos_changed,selection_center_pos_changed;
-	void initSelection();
+    MediaCycle* media_cycle;
+    ACMediaType media_type;
+#if defined (SUPPORT_AUDIO)
+    ACAudioEngine *audio_engine;
+#endif //defined (SUPPORT_AUDIO)
+    osg::ref_ptr<osg::MatrixTransform> track_node;
+    osg::ref_ptr<osgText::Font> font;
+
+    int track_index, media_index;
+    // int	media_activity;
+    ACMedia* media;
+    bool media_from_lib;
+    bool media_changed;
+    int screen_width;
+    float width,height;
+    bool screen_width_changed;
+    bool width_changed,height_changed;
+    int displayed_media_index;
+
+    // Magic numbers!
+    float zpos;
+    double xstep, ylim;
+    float xspan, yspan;
+    float selection_sensing_width;
+
+    bool manual_selection;
+
+    // (re)init
+    float playback_min_width;
+    float selection_begin_pos_x,selection_end_pos_x,selection_center_pos_x;
+    float selection_begin_pos_y,selection_end_pos_y,selection_center_pos_y;
+    bool selection_begin_pos_changed,selection_end_pos_changed,selection_center_pos_changed;
+    void initSelection();
 
 public:
-	ACOsgTrackRenderer();
-	virtual ~ACOsgTrackRenderer() {};
+    ACOsgTrackRenderer();
+    virtual ~ACOsgTrackRenderer() {};
 
-	void setMediaCycle(MediaCycle *_media_cycle) { this->media_cycle = _media_cycle; };
-	#if defined (SUPPORT_AUDIO)
-		void setAudioEngine(ACAudioEngine *engine){audio_engine=engine;}
-	#endif //defined (SUPPORT_AUDIO)
-	//void setRenderer(MediaCycle *_media_cycle) { this->media_cycle = _media_cycle; };
-	void setTrackIndex(int _track_index) { this->track_index = _track_index; };
-	//void setMediaIndex(int _media_index) { this->media_index = _media_index; };
-	int getMediaIndex() { return media_index; }
-	void updateMedia(ACMedia* _media);
-	//void updateMedia(int _media_index);
-	void clearMedia();
-	void setScreenWidth(int _screen_width){screen_width = _screen_width;}
-	void updateScreenWidth(int _screen_width);
-	void setSize(int _width,float _height){width = _width;height = _height;}
-	void updateSize(int _width,float _height);
-	ACMedia* getMedia(){return media;}
-	//void setActivity(int _media_activity) { this->media_activity = _media_activity; }
-	osg::ref_ptr<osg::MatrixTransform> getTrack() { return track_node; };
-	
-	virtual void prepareTracks()=0;
-	virtual void updateTracks(double ratio=0.0)=0;
-	
-	//virtual bool addRangeSegment(float begin, float end)=0;
-	//virtual bool removeRangeSegment(float begin, float end)=0;
-	void setManualSelection(bool manual){this->manual_selection=manual;}
-	void moveSelection(float _center);
-	void resizeSelectionFromBegin(float _begin);
-	void resizeSelectionFromEnd(float _end);
-	float getSelectionPos(){return this->selection_center_pos;}
-	
-	virtual void setSummaryType(ACVideoSummaryType type){};
-	virtual void updateSummaryType(ACVideoSummaryType type){};
-	virtual ACVideoSummaryType getSummaryType(){return AC_VIDEO_SUMMARY_NONE;}
-	virtual void setSelectionType(ACVideoSelectionType type){};
-	virtual void updateSelectionType(ACVideoSelectionType type){};
-	virtual ACVideoSelectionType getSelectionType(){return AC_VIDEO_SELECTION_NONE;}
-	virtual void setPlaybackVisibility(bool _visibility){};
-	virtual void updatePlaybackVisibility(bool _visibility){};
+    void setMediaCycle(MediaCycle *_media_cycle) { this->media_cycle = _media_cycle; };
+#if defined (SUPPORT_AUDIO)
+    void setAudioEngine(ACAudioEngine *engine){audio_engine=engine;}
+#endif //defined (SUPPORT_AUDIO)
+    //void setRenderer(MediaCycle *_media_cycle) { this->media_cycle = _media_cycle; };
+    void setTrackIndex(int _track_index) { this->track_index = _track_index; };
+    //void setMediaIndex(int _media_index) { this->media_index = _media_index; };
+    int getMediaIndex() { return media_index; }
+    void setFont(osg::ref_ptr<osgText::Font> _font){this->font = _font;}
+    void updateMedia(ACMedia* _media);
+    //void updateMedia(int _media_index);
+    void clearMedia();
+    void setScreenWidth(int _screen_width){screen_width = _screen_width;}
+    void updateScreenWidth(int _screen_width);
+    void setSize(int _width,float _height){width = _width;height = _height;}
+    void updateSize(int _width,float _height);
+    ACMedia* getMedia(){return media;}
+    //void setActivity(int _media_activity) { this->media_activity = _media_activity; }
+    osg::ref_ptr<osg::MatrixTransform> getTrack() { return track_node; };
+
+    virtual void prepareTracks()=0;
+    virtual void updateTracks(double ratio=0.0)=0;
+
+    //virtual bool addRangeSegment(float begin, float end)=0;
+    //virtual bool removeRangeSegment(float begin, float end)=0;
+    void setManualSelection(bool manual){this->manual_selection=manual;}
+    void moveSelection(float _center_x,float _center_y);
+    void resizeSelectionFromBegin(float _begin_x, float _begin_y);
+    void resizeSelectionFromEnd(float _end_x, float _end_y);
+    float getSelectionPosX(){return this->selection_center_pos_x;}
+    float getSelectionPosY(){return this->selection_center_pos_y;}
+
+    virtual void setSummaryType(ACVideoSummaryType type){};
+    virtual void updateSummaryType(ACVideoSummaryType type){};
+    virtual ACVideoSummaryType getSummaryType(){return AC_VIDEO_SUMMARY_NONE;}
+    virtual void setSelectionType(ACVideoSelectionType type){};
+    virtual void updateSelectionType(ACVideoSelectionType type){};
+    virtual ACVideoSelectionType getSelectionType(){return AC_VIDEO_SELECTION_NONE;}
+    virtual void setPlaybackVisibility(bool _visibility){};
+    virtual void updatePlaybackVisibility(bool _visibility){};
 
 protected:
-	void createDummySegments();
+    void createDummySegments();
+    void boxTransform(osg::ref_ptr<osg::MatrixTransform>& _transform, float _width, osg::Vec4 _color, std::string _name);
 };
 
 #endif
