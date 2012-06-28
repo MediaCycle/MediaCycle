@@ -34,12 +34,16 @@
 
 #include "ACAboutDialogQt.h"
 
+#define STRINGIZE(x) #x
+#define STRINGIZE_VALUE_OF(x) STRINGIZE(x)
+
 ACAboutDialogQt::ACAboutDialogQt( QWidget* parent)
     : ACAbstractAboutDialogQt(parent)
 {
     ui.setupUi(this);
     this->updateLicenses();
     this->updateTeam();
+    ui.appName->setText(QString("MediaCycle ") + QString(STRINGIZE_VALUE_OF(MC_VERSION)));
 }
 
 void ACAboutDialogQt::updateLicenses(){
@@ -132,4 +136,4 @@ void ACAboutDialogQt::updateTeam(){
     html.append ("<li>J&eacute;r&ocirc;me Urbain</li>");
     html.append ("</ul>");
     ui.multiLineEditTeam->document()->setHtml(html);
-}	
+}

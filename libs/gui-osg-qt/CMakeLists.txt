@@ -9,9 +9,6 @@ IF ( USE_QT4 )
 	# Generates moc_*.cxx files
 	QT4_WRAP_CPP(mediacycle-osg-qt_MOC_SRCS ${mediacycle-osg-qt_HDRS} OPTIONS "-nw") # for all headers that potentially declare Q_OBJECT, otherwise warnings are suppressed	
 
-	SET(mediacycle-osg-qt_RCC ACOsgQtResources.qrc)
-	QT4_ADD_RESOURCES(mediacycle-osg-qt_RCC_SRCS ${mediacycle-osg-qt_RCC})
-
 	# Don't forget to include output directory, otherwise
 	# the UI file won't be wrapped!
 	include_directories(${CMAKE_CURRENT_BINARY_DIR})
