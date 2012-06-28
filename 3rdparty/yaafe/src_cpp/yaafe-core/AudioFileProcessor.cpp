@@ -66,7 +66,7 @@ bool AudioFileProcessor::setOutputFormat(const std::string& format,
 	return true;
 }
 
-int AudioFileProcessor::processFile(Engine& engine, const std::string& filename)
+int AudioFileProcessor::processFile(Engine& engine, const std::string& filename, double start_time, double end_time)
 {
 	{
 		// check engine inputs
@@ -116,6 +116,13 @@ int AudioFileProcessor::processFile(Engine& engine, const std::string& filename)
 	// initialize reader
 	ParameterMap readerParams = engine.getInputParams("audio");
 	readerParams["File"] = filename;
+        std::ostringstream st;
+        st << start_time;
+        readerParams["StartTime"] = st.str();
+        std::ostringstream et;
+        et << end_time;
+        readerParams["EndTime"] = et.str();
+
 	reader = factory->createComponent(readerComponent);
 	Ports<StreamInfo> inports;
 	if (!reader->init(readerParams,inports)) {

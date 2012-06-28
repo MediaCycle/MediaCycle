@@ -52,27 +52,28 @@
 #include <yaafe-core/ComponentFactory.h>
 
 class ACAudioYaafePlugin : public ACTimedFeaturesPlugin {
-	
-public:
-	ACAudioYaafePlugin();
-	~ACAudioYaafePlugin();
 
-	std::vector<ACMediaFeatures*> calculate(ACMediaData* aData, ACMedia* theMedia, bool _save_timed_feat=false);
-	
-	// XS TODO check if this works
-	// ACMediaTimedFeature* getTimedFeatures();
-        bool addMediaTimedFeature(ACMediaTimedFeature* feature, std::string file);
-        bool isMediaTimedFeatureStored(std::string name, std::string file);
-        ACMediaTimedFeature* getMediaTimedFeatureStored(std::string name, std::string file);
+public:
+    ACAudioYaafePlugin();
+    ~ACAudioYaafePlugin();
+
+    std::vector<ACMediaFeatures*> calculate(ACMediaData* aData, ACMedia* theMedia, bool _save_timed_feat=false);
+
+    // XS TODO check if this works
+    // ACMediaTimedFeature* getTimedFeatures();
+    bool addMediaTimedFeature(ACMediaTimedFeature* feature, std::string file);
+    bool isMediaTimedFeatureStored(std::string name, std::string file);
+    ACMediaTimedFeature* getMediaTimedFeatureStored(std::string name, std::string file);
 
 private:
-        std::map<std::string,ACMediaTimedFeature*> descmf;
-        //std::vector<std::string> mtf_file_names;
-        void listComponents();
-        void describeComponent(const std::string component);
-        void printOutputFormats();
-        YAAFE::AudioFileProcessor processor;
-        YAAFE::Engine engine;
+    std::map<std::string,ACMediaTimedFeature*> descmf;
+    //std::vector<std::string> mtf_file_names;
+    void listComponents();
+    void describeComponent(const std::string component);
+    void printOutputFormats();
+    YAAFE::AudioFileProcessor processor;
+    YAAFE::Engine engine;
+    int m_default_resample_rate, m_default_step_size, m_default_block_size;
 };
 
 #define ACYAAFEWRITER_ID "ACYaafeWriter"
@@ -81,29 +82,29 @@ namespace YAAFE{
 
 class ACYaafeWriter: public ComponentBase<ACYaafeWriter> {
 public:
-        ACYaafeWriter();
-        virtual ~ACYaafeWriter();
+    ACYaafeWriter();
+    virtual ~ACYaafeWriter();
 
-        const std::string getIdentifier() const {
-                return ACYAAFEWRITER_ID;
-        }
+    const std::string getIdentifier() const {
+        return ACYAAFEWRITER_ID;
+    }
 
     virtual bool stateLess() const { return false; };
 
     virtual ParameterDescriptorList getParameterDescriptorList() const;
 
-        virtual bool init(const ParameterMap& params, const Ports<StreamInfo>& in);
-        virtual void reset();
-        virtual bool process(Ports<InputBuffer*>& in, Ports<OutputBuffer*>& out);
-        virtual void flush(Ports<InputBuffer*>& in, Ports<OutputBuffer*>& out);
-        void setMediaCyclePlugin(ACAudioYaafePlugin* plugin){m_plugin = plugin;}
+    virtual bool init(const ParameterMap& params, const Ports<StreamInfo>& in);
+    virtual void reset();
+    virtual bool process(Ports<InputBuffer*>& in, Ports<OutputBuffer*>& out);
+    virtual void flush(Ports<InputBuffer*>& in, Ports<OutputBuffer*>& out);
+    void setMediaCyclePlugin(ACAudioYaafePlugin* plugin){m_plugin = plugin;}
 
 private:
-        std::ofstream m_fout;
-        std::string m_feature_name;
-        int m_precision;
-        std::string m_file;
-        ACAudioYaafePlugin* m_plugin;
+    std::ofstream m_fout;
+    std::string m_feature_name;
+    int m_precision;
+    std::string m_file;
+    ACAudioYaafePlugin* m_plugin;
 };
 
 

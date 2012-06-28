@@ -37,7 +37,7 @@ public:
 	virtual ~AudioFileProcessor();
 
 	bool setOutputFormat(const std::string& format, const std::string& outdir, const ParameterMap& params);
-	int processFile(Engine& engine, const std::string& filename);
+        int processFile(Engine& engine, const std::string& filename, double start_time = -1, double end_time = -1);
 private:
 	OutputFormat* m_format;
 };

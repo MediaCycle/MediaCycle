@@ -46,11 +46,11 @@ public:
     virtual ParameterDescriptorList getParameterDescriptorList() const;
 
     virtual bool init(const ParameterMap& params, const Ports<StreamInfo>& in);
-	virtual bool process(Ports<InputBuffer*>& in, Ports<OutputBuffer*>& out);
+    virtual bool process(Ports<InputBuffer*>& in, Ports<OutputBuffer*>& out);
 
 
 private:
-	int m_sampleRate;
+    int m_sampleRate;
     int m_bufferSize;
     SNDFILE* m_sndfile;
     SF_INFO m_sfinfo;
@@ -72,6 +72,11 @@ private:
     bool openFile(const std::string& filename);
     void closeFile();
     int readFramesIntoBuffer(); // read m_bufferSize frames
+
+    double m_start_time;
+    double m_end_time;
+    int m_frames_read;
+    int m_frames_to_read;
 
 };
 
