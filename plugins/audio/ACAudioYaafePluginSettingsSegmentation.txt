@@ -1,0 +1,28 @@
+audio := Input Resample="yes" SampleRate="22050"
+n1 := FrameTokenizer blockSize="512" stepSize="256"
+audio > n1
+
+n2 := FFT FFTLength="512" FFTWindow="Hanning"
+n1 > n2
+
+n3 := Abs
+n2 > n3
+
+n4 := MelFilterBank MelMaxFreq="6854.0" MelMinFreq="130.0" MelNbFilters="40"
+n3 > n4
+
+n5 := Cepstrum CepsIgnoreFirstCoeff="1" CepsNbCoeffs="13"
+n4 > n5
+
+MFCC := Output normalize="-1" version="v0.6" yaafedefinition="MFCC blockSize=512 stepSize=256"
+n5 > MFCC
+
+n18 := Flux
+Spectral_Flux := Output normalize="-1" version="v0.6" yaafedefinition="SpectralFlux blockSize=512 stepSize=256"
+n3 > n18
+n18 > Spectral_Flux
+
+n22 := RMS
+Energy := Output normalize="-1" version="v0.6" yaafedefinition="Energy blockSize=512 stepSize=256"
+n1 > n22
+n22 > Energy
