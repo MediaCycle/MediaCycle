@@ -1,14 +1,11 @@
 SET(TARGET_NAME "navimedbiodatascript")
-IF(SUPPORT_TEXT AND USE_QT4)
+IF(SUPPORT_TEXT AND BUILD_CLIS)
 	FILE(GLOB SRC *.cpp)
 	FILE(GLOB HDR *.h)
 
 	IF ( APPLE )
 		SET(APP_TYPE MACOSX_BUNDLE)
 	ENDIF ( APPLE )
-
-	# Don't forget to include output directory, otherwise
-	# the UI file won't be wrapped!
 
 	ADD_EXECUTABLE(navimedbiodatascript ${SRC} ${HDR})
 	IF(TINYXML_FOUND)
