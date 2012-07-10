@@ -81,6 +81,10 @@ std::vector<ACMediaFeatures*> ACAudioMakamFeaturesPlugin::calculate(ACMediaData*
     ACMediaFeatures* feat;
 
     // Add the path to the makam toolbox and yin mex files
+    boost::filesystem::path s_path( __FILE__ );
+    //std::cout << "Main source path: " << s_path.parent_path().parent_path().parent_path() << std::endl;
+    boost::filesystem::path b_path( boost::filesystem::current_path() );
+    //std::cout << "Main build path " << b_path.parent_path().parent_path() << std::endl;
     std::string source_path(""),build_path(""),slash("/");
     #if defined(__APPLE__)
         #if not defined (USE_DEBUG) and not defined (XCODE) // needs "make install" to be ran to work
