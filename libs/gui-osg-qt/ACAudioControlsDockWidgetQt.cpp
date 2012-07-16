@@ -57,6 +57,9 @@ ACAudioControlsDockWidgetQt::ACAudioControlsDockWidgetQt(QWidget *parent)
         this->setMinimumHeight( ui.groupBoxFeedback->minimumHeight() + ui.groupBoxVisualization->minimumHeight() );
         this->resize(this->sizeHint());*/
 
+        connect(ui.spinBoxBPM,SIGNAL(valueChanged(int)),ui.horizontalSliderBPM,SLOT(setValue(int)));
+        connect(ui.horizontalSliderBPM,SIGNAL(valueChanged(int)),ui.spinBoxBPM,SLOT(setValue(int)));
+
         this->show();
 
 	#endif //defined (SUPPORT_AUDIO)
@@ -109,6 +112,18 @@ void ACAudioControlsDockWidgetQt::on_pushButtonMuteAll_clicked()
 		media_cycle->resetPointers();//CF hack dirty
 		media_cycle->muteAllSources();
 	}
+}
+
+void ACAudioControlsDockWidgetQt::on_spinBoxBPM_valueChanged(int value)
+{
+    std::cout << "ACAudioControlsDockWidgetQt::on_spinBoxBPM_valueChanged " << value << std::endl;
+}
+void ACAudioControlsDockWidgetQt::on_horizontalSliderBPM_valueChanged(int value)
+{
+    std::cout << "ACAudioControlsDockWidgetQt::on_horizontalSliderBPM_valueChanged " << value << std::endl;
+    if (media_cycle == 0) return;
+    if (audio_engine == 0) return;
+    audio_engine->setBPM(value);
 }
 
 void ACAudioControlsDockWidgetQt::on_comboBoxWaveformBrowser_activated(const QString & text)
@@ -180,6 +195,8 @@ void ACAudioControlsDockWidgetQt::on_comboBoxPlaybackPreset_activated(const QStr
 		ui.checkBoxScaleMode->setEnabled(false);
 		ui.comboBoxSynchroMode->setEnabled(false);
 		ui.checkBoxSynchroMode->setEnabled(false);
+                ui.horizontalSliderBPM->setEnabled(true);
+                ui.spinBoxBPM->setEnabled(true);
 
                 /*ui.comboBoxScaleMode->hide();
                 ui.checkBoxScaleMode->hide();
@@ -204,6 +221,8 @@ void ACAudioControlsDockWidgetQt::on_comboBoxPlaybackPreset_activated(const QStr
 		ui.checkBoxScaleMode->setEnabled(false);
 		ui.comboBoxSynchroMode->setEnabled(false);
 		ui.checkBoxSynchroMode->setEnabled(false);
+                ui.horizontalSliderBPM->setEnabled(false);
+                ui.spinBoxBPM->setEnabled(false);
 
                 /*ui.comboBoxScaleMode->hide();
                 ui.checkBoxScaleMode->hide();
@@ -220,6 +239,8 @@ void ACAudioControlsDockWidgetQt::on_comboBoxPlaybackPreset_activated(const QStr
 		ui.checkBoxScaleMode->setEnabled(true);
 		ui.comboBoxSynchroMode->setEnabled(true);
 		ui.checkBoxSynchroMode->setEnabled(true);
+                ui.horizontalSliderBPM->setEnabled(true);
+                ui.spinBoxBPM->setEnabled(true);
 
                 /*ui.comboBoxScaleMode->show();
                 ui.checkBoxScaleMode->show();

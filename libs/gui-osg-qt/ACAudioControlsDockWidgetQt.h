@@ -60,6 +60,8 @@ private slots:
 	void on_comboBoxSynchroMode_activated(const QString & text);//CF or (int index);}
 	void on_comboBoxScaleMode_activated(const QString & text);//CF or (int index);}
 	void on_comboBoxPlaybackPreset_activated(const QString & text);
+        void on_spinBoxBPM_valueChanged(int value);
+        void on_horizontalSliderBPM_valueChanged(int value);
 	
 //#endif //defined (SUPPORT_AUDIO)
 
