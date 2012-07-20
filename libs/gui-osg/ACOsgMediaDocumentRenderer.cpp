@@ -177,7 +177,8 @@ void ACOsgMediaDocumentRenderer::prepareNodes() {
 
 	entry_geode = 0;
 	
-	if  (media && media_cycle->getNodeFromMedia(media).isDisplayed()){
+	if  (media && media_cycle->getNodeFromMedia(media).isDisplayed())
+	{
 		entryGeode();
 		media_node->addChild(entry_geode);
 	}
@@ -231,6 +232,7 @@ void ACOsgMediaDocumentRenderer::prepareNodes() {
 			//render_iter->second->setMediaIndex(media_index);//dangerous! before each media of media documents are part of the library
 			//TODO TR problem with submedia node_index. We must fix it
 			media_renderers.back()->setMedia(iter->second);
+			media_renderers.back()->setNodeIndex(this->getNodeIndex()+media_renderers.size());
 						
 			media_renderers.back()->prepareNodes();
 			//media_node->addChild(media_renderers.back()->getNode());
@@ -246,10 +248,22 @@ void ACOsgMediaDocumentRenderer::updateNodes(double ratio) {
 	xstep *= afac;
 	
 	const ACMediaNode &attribute = media_cycle->getMediaNode(node_index);
-	
+	if (!attribute.isDisplayed()){
+		media_node->removeChild(metadata_geode);
+		if (entry_geode)
+			entry_geode->setNodeMask(0);
+		return;			
+	}
+	if (!entry_geode){
+		entryGeode();
+		media_node->addChild(entry_geode);
+		
+	}
 	Matrix T;
 	Matrix Trotate;
 	
+	if (entry_geode){
+
 	float x, y, z;
 	float localscale;
 	float maxdistance = 0.2;
@@ -274,12 +288,12 @@ void ACOsgMediaDocumentRenderer::updateNodes(double ratio) {
 		//CF nodes colored along their relative cluster on in Clusters Mode
 		if (media_cycle->getBrowserMode() == AC_MODE_CLUSTERS){
 			const vector<int> centerNodeIds=media_cycle->getBrowser()->getIdNodeClusterCenter();
-                        if(cluster_colors.size()>0){
-                                ((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(cluster_colors[attribute.getClusterId()%cluster_colors.size()]);
-                                if(centerNodeIds.size() != 0 && attribute.getClusterId() < centerNodeIds.size())
-                                    if (centerNodeIds[attribute.getClusterId()]==attribute.getMediaId())
-                                        ((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(osg::Vec4(0,0,0,1));
-                        }
+			if(cluster_colors.size()>0){
+				((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(cluster_colors[attribute.getClusterId()%cluster_colors.size()]);
+                if(centerNodeIds.size() != 0 && attribute.getClusterId() < centerNodeIds.size())
+                    if (centerNodeIds[attribute.getClusterId()]==attribute.getMediaId())
+						((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(osg::Vec4(0,0,0,1));
+			}
 		}
 //			((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(cluster_colors[attribute.getClusterId()%cluster_colors.size()]);
 		else
@@ -296,6 +310,7 @@ void ACOsgMediaDocumentRenderer::updateNodes(double ratio) {
 		T =  Matrix::rotate(-media_cycle_angle,Vec3(0.0,0.0,1.0)) * Matrix::scale(localscale/media_cycle_zoom,localscale/media_cycle_zoom,localscale/media_cycle_zoom) * T;
 	}
 	
+
 	if (attribute.getActivity()>=2){//hover
 		std::vector<ACMedia*> tmpSegments;
 		tmpSegments = media->getAllSegments();
@@ -310,7 +325,7 @@ void ACOsgMediaDocumentRenderer::updateNodes(double ratio) {
 	}	
 	
 	unsigned int mask = (unsigned int)-1;
-	if(attribute.getNavigationLevel() >= media_cycle->getNavigationLevel()) {
+	if(attribute.getNavigationLevel() >= media_cycle->getNavigationLevel()&&attribute.isDisplayed()) {
 		entry_geode->setNodeMask(mask);
 	}
 	else {
@@ -335,6 +350,7 @@ void ACOsgMediaDocumentRenderer::updateNodes(double ratio) {
 #else
 		//(*render_iter)->getNode()->setMatrix(T);
 #endif
+	}
 	}
 }
 

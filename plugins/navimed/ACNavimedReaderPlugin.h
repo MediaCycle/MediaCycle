@@ -45,6 +45,7 @@ public:
 	ACNavimedReaderPlugin(ACMediaType defaultMainMediaType);
 	ACMedia* mediaFactory(ACMediaType mediaType); 
 	std::vector<std::string> getExtensionsFromMediaType(ACMediaType media_type);
+	
 
 };
 

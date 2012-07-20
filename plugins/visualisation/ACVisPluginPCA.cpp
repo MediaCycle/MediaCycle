@@ -1,7 +1,7 @@
 /**
  * @brief ACVisPluginPCA.cpp
  * @author Thierry Ravet
- * @date 31/05/2012
+ * @date 20/07/2012
  * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -100,14 +100,20 @@ void ACVisPluginPCA::updateNextPositions(ACMediaBrowser* mediaBrowser){
 	////////////////////////////////////////////////////////////////////////////////////
 
 	ACPoint p;
+	int cpt=0;
 	for (int i=0; i<libSize; i++){
-		mediaBrowser->setLoopIsDisplayed(i, true);
-	  // TODO: make sure you meant next
-	p.x = posDisp_m(i,0);
-	p.y = posDisp_m(i,1);
-	  p.z = 0;
-		mediaBrowser->setNodeNextPosition(i, p);
-  }
+		if (mediaBrowser->getMediaNode(i).isDisplayed()&&cpt<desc_m.n_rows){ 
+			mediaBrowser->setLoopIsDisplayed(i, true);
+			// TODO: make sure you meant next
+			p.x = posDisp_m(cpt,0);
+			p.y = posDisp_m(cpt,1);
+			p.z = 0;
+			mediaBrowser->setNodeNextPosition(i, p);
+			cpt++;
+		}
+	}
+	if (cpt!=desc_m.n_rows)
+		cout << "ACVisPluginPCA::updateNextPositions, problem with desc matrix dimensions "<<endl;
 	////////////////////////////////////////////////////////////////
 }
 
@@ -120,35 +126,44 @@ void ACVisPluginPCA::extractDescMatrix(ACMediaBrowser* mediaBrowser, mat& desc_m
 	
 	std::vector<float> weight=mediaBrowser->getWeightVector();
 	// Count nb of feature
-	int nbFeature = loops.back()->getNumberOfFeaturesVectors();
+	int nbFeature = loops[0]->getNumberOfPreProcFeaturesVectors();
 	if (nbFeature!=weight.size())
 		std::cerr<<"ACVisPluginPCA::extractDescMatrix weight vector size incompatibility"<<endl;
 	for(int f=0; f< nbFeature; f++){
 		if (weight[f]>0.f){
-			featureNames.push_back(loops.back()->getPreProcFeaturesVector(f)->getName());
-			featDim = loops.back()->getPreProcFeaturesVector(f)->getSize();
+			featureNames.push_back(loops[0]->getPreProcFeaturesVector(f)->getName());
+			featDim = loops[0]->getPreProcFeaturesVector(f)->getSize();
 			for(int d=0; d < featDim; d++){
 				totalDim++;
 			}
 		}
 	}
+	int cpt=0;
+	for (int i=0; i<nbMedia; i++){
+		if (mediaBrowser->getMediaNode(i).isDisplayed()){ 
+			cpt++;
+		}
+	}
 	
-  desc_m.set_size(nbMedia,totalDim);
-  mat pos_m(nbMedia,2);
-  
+  desc_m.set_size(cpt,totalDim);
+	int tmpIdy=0;
   for(int i=0; i<nbMedia; i++) {    
     int tmpIdx = 0;
+	  if (!(mediaBrowser->getMediaNode(i).isDisplayed())) 
+		  continue;
+	  
     for(int f=0; f< nbFeature; f++){
 		if (weight[f]>0.f){
 			
 			std::cout << f << std::endl;
-			featDim = loops.back()->getPreProcFeaturesVector(f)->getSize();
+			featDim = loops[0]->getPreProcFeaturesVector(f)->getSize();
 			for(int d=0; d < featDim; d++){
-				desc_m(i,tmpIdx) = loops[i]->getPreProcFeaturesVector(f)->getFeatureElement(d);
+				desc_m(tmpIdy,tmpIdx) = loops[i]->getPreProcFeaturesVector(f)->getFeatureElement(d);
 				tmpIdx++;
 			}
 		}
     }
+	  tmpIdy++;
   }
   // normalizing features between 0 and 1 ///////////////////////////////////////
 //   rowvec maxDesc_v = max(desc_m);

@@ -463,11 +463,18 @@ void ACOsgAudioRenderer::updateNodes(double ratio) {
     double xstep = 0.00025;
     xstep *= afac;
 
-    const ACMediaNode &attribute = media_cycle->getMediaNode(node_index);
-
-    Matrix T;
-    Matrix Trotate;
-    Matrix curserT;
+	const ACMediaNode &attribute = media_cycle->getMediaNode(node_index);
+	if (!attribute.isDisplayed()){
+		media_node->removeChild(waveform_geode);
+		media_node->removeChild(metadata_geode);
+		media_node->removeChild(curser_transform);
+		if (entry_geode)
+			entry_geode->setNodeMask(0);
+		return;			
+	}
+	Matrix T;
+	Matrix Trotate;
+	Matrix curserT;
 
     float x, y, z;
     float localscale;

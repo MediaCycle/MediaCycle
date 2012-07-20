@@ -146,7 +146,8 @@ public:
 	
 	void setMediaReaderPlugin(std::string pluginName);
 	
-    #ifdef SUPPORT_MULTIMEDIA
+#ifdef SUPPORT_MULTIMEDIA
+	std::string getActiveSubMediaKey();
     int setActiveMediaType(std::string mediaName);
     #endif//def SUPPORT_MULTIMEDIA
 	

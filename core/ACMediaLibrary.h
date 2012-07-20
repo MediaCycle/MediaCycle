@@ -160,8 +160,9 @@ public:
 	void setMediaReaderPlugin(ACPlugin* acpl);
 	
 	ACMediaType getActiveSubMediaType();
-	#ifdef SUPPORT_MULTIMEDIA
-	int setActiveMediaType(std::string mediaName);
+#ifdef SUPPORT_MULTIMEDIA
+	std::string getActiveSubMediaKey();
+	int setActiveMediaType(std::string mediaName, ACPluginManager *acpl);
 	#endif//def SUPPORT_MULTIMEDIA
 	
 private:

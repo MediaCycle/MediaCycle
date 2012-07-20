@@ -167,6 +167,32 @@ bool navimedReader::getBioParam(std::string paramName,float &paramValue){
 		return false;
 }
 
+map<string,float> *navimedReader::getBioParam(void){
+	map<std::string,float> *desc=new map<std::string,float>;
+	string ret;
+	TiXmlNode* child= mDoc->FirstChild("XMLResult" );//.Element();//.Child( "Child", 1 ).ToElement();
+	TiXmlText* textChild;
+	
+	for( child = child->FirstChild(string("XMLEncodedValue")); child; child = child->NextSibling(string("XMLEncodedValue")) ){
+		if (child->FirstChild(string("libelle"))==0)
+			continue;
+		if (child->FirstChild(string("libelle"))->FirstChild()==0)
+			continue;
+		if (child->FirstChild(string("libelle"))->FirstChild()->ToText()==0)
+			continue;
+		float paramValue;
+		std::string utf8_string = conv::to_utf<char>(child->FirstChild(string("libelle"))->FirstChild()->ToText()->ValueStr(),mEncoding);
+		if (child->FirstChild(string("indice"))!=0){
+			paramValue=this->convertValue(child->FirstChild(string("indice"))->FirstChild()->ToText()->ValueStr());
+		}
+		else{
+			paramValue=0.f;
+		}
+		(*desc)[utf8_string]=paramValue;
+	}
+	return desc;
+}
+
 float navimedReader::convertValue(string valStr){
 	if (valStr=="--")
 		return -2.f;

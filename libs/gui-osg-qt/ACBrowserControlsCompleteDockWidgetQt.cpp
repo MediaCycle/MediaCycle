@@ -248,6 +248,7 @@ void ACBrowserControlsCompleteDockWidgetQt::configureCheckBoxes()
 
     vector<string> plugins_list = this->media_cycle->getListOfActivePlugins();
     vector<string> ::iterator list_iter;
+	this->cleanCheckBoxes();
 
     for (list_iter = plugins_list.begin(); list_iter != plugins_list.end(); list_iter++)
     {

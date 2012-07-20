@@ -1210,7 +1210,7 @@ void ACMultiMediaCycleOsgQt::loadMediaDocumentConfig(string _name){
 		}
 #endif //defined (SUPPORT_ARCHIPEL)
 					
-	
+    dockWidgetsManager->changeMediaType(MEDIA_TYPE_MIXED);
 }
 
 void ACMultiMediaCycleOsgQt::comboDefaultSettingsChanged(QString media){

@@ -73,6 +73,14 @@ void ACOsgVideoRenderer::updateNodes(double ratio) {
 	ACOsgImageRenderer::updateNodes();
 
 	const ACMediaNode &attribute = media_cycle->getMediaNode(node_index);
+	if (!attribute.isDisplayed()){
+		if (image_stream)
+			image_stream->pause();
+		if (image_geode)
+			image_geode->setNodeMask(0);
+		return;			
+	}
+	
 	osg::ImageStream::StreamStatus streamStatus = image_stream->getStatus();
 		
 	switch (streamStatus) {

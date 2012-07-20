@@ -77,11 +77,11 @@ ACMediaLibrary::ACMediaLibrary() {
 }
 
 ACMediaLibrary::ACMediaLibrary(ACMediaType aMediaType) {
-	this->cleanLibrary();
 	media_type = aMediaType;
 	mPreProcessPlugin=0;
 	mPreProcessInfo=0;
 	mReaderPlugin=0;
+	this->cleanLibrary();
 	//#if defined(SUPPORT_VIDEO) and defined(USE_FFMPEG)
 	//// Register all formats and codecs from FFmpeg
 	//av_register_all();
@@ -128,6 +128,12 @@ void ACMediaLibrary::cleanLibrary() {
 	// (not this:) media_type=MEDIA_TYPE_NONE;
         metadata = ACMediaLibraryMetadata();
         failed_imports.clear();
+	
+	if (mPreProcessPlugin!=0){
+		if (mPreProcessInfo!=0)
+			mPreProcessPlugin->freePreProcessInfo(mPreProcessInfo);
+		mPreProcessInfo=0;
+	}
 }
 
 std::vector<std::string> ACMediaLibrary::getExtensionsFromMediaType(ACMediaType media_type)
@@ -223,7 +229,7 @@ int ACMediaLibrary::importFile(std::string _filename, ACPluginManager *acpl, boo
 				this->incrementMediaID();
 				this->addMedia(iter->second);
 			}
-
+			this->setActiveMediaType(((ACMediaDocument*)media)->getActiveMediaKey(), acpl);
 			return 1;
 		}
 	}
@@ -1075,7 +1081,7 @@ std::vector<std::string> ACMediaLibrary::getListOfActivePlugins(){
 	if (this->getSize() ==0)
 		plugins_list.clear();
 	else
-		plugins_list = this->getMedia(0)->getListOfFeaturesPlugins();
+		plugins_list = this->getMedia(0)->getListOfPreProcFeaturesPlugins();
 	return plugins_list;
 }
 
@@ -1133,8 +1139,9 @@ void ACMediaLibrary::saveSorted(string output_file){
 
 void ACMediaLibrary::setPreProcessPlugin(ACPlugin* acpl)
 {
-	if (((ACPlugin*)mPreProcessPlugin!=acpl)&&(mPreProcessInfo!=NULL))
-		mPreProcessPlugin->freePreProcessInfo(mPreProcessInfo);
+	if (mPreProcessPlugin)
+		if (((ACPlugin*)mPreProcessPlugin!=acpl)&&(mPreProcessInfo!=NULL))
+			mPreProcessPlugin->freePreProcessInfo(mPreProcessInfo);
 	if (acpl==NULL&&mPreProcessPlugin!=NULL)
 	{		
 		mPreProcessPlugin=NULL;
@@ -1167,7 +1174,17 @@ ACMediaType ACMediaLibrary::getActiveSubMediaType(){
 }
 
 #ifdef SUPPORT_MULTIMEDIA
-int ACMediaLibrary::setActiveMediaType(std::string mediaName){
+
+string ACMediaLibrary::getActiveSubMediaKey(){
+	if (media_type!=MEDIA_TYPE_MIXED||media_library.size()==0)
+		return string("");
+	else {
+		return ((ACMediaDocument*)media_library[0])->getActiveMediaKey();
+	}
+	
+}
+
+int ACMediaLibrary::setActiveMediaType(std::string mediaName, ACPluginManager *acpl){
 	if (media_type!=MEDIA_TYPE_MIXED)
 		return 0;
 	this->cleanStats();
@@ -1182,7 +1199,16 @@ int ACMediaLibrary::setActiveMediaType(std::string mediaName){
 		else {
 			continue;
 		}
-	}	
+	}
+    ACMediaType aMediaType=this->getActiveSubMediaType();
+    ACPreProcessPlugin* preProcessPlugin=acpl->getPreProcessPlugin(aMediaType);
+    if (preProcessPlugin&&preProcessPlugin->mediaTypeSuitable(aMediaType)) {
+        this->setPreProcessPlugin(preProcessPlugin);
+    }
+    else
+        this->setPreProcessPlugin(0);
+	if (media_library.size()>1&&(static_cast<ACMediaDocument*> (media_library[0]))->getActiveMediaKey()==mediaName)
+		return 1;
 }
 #endif//def SUPPORT_MULTIMEDIA
 

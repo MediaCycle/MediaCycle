@@ -154,10 +154,15 @@ void ACOsgTextRenderer::updateNodes(double ratio) {
 
     xstep *= afac;
 
-    const ACMediaNode &attribute = media_cycle->getMediaNode(node_index);
-
-    Matrix T;
-    Matrix Trotate;
+	const ACMediaNode &attribute = media_cycle->getMediaNode(node_index);
+	if (!attribute.isDisplayed()){
+		media_node->removeChild(metadata_geode);
+		if (entry_geode)
+			entry_geode->setNodeMask(0);
+		return;			
+	}
+	Matrix T;
+	Matrix Trotate;
 
     float x, y, z;
     float localscale;

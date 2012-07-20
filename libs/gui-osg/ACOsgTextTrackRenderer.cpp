@@ -86,9 +86,9 @@ void ACOsgTextTrackRenderer::textGeode() {
 
     if(media){
         std::string* string = 0;
-        string = textFileRead(media->getFileName());
+        string = textFileRead(media->getFileName());//TR to replace to adapt to Navimed and archipel
         if(string)
-            text->setText(*string);
+            text->setText(*string,osgText::String::ENCODING_UTF8);
         else
             std::cerr << "ACOsgTextTrackRenderer::textGeode text failed" << std::endl;
     }

@@ -1,7 +1,7 @@
 /**
  * @brief ACVisPluginPCA13.cpp
  * @author Thierry Ravet
- * @date 06/06/2012
+ * @date 20/07/2012
  * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -120,7 +120,7 @@ void ACVisPluginPCA13::extractDescMatrix(ACMediaBrowser* mediaBrowser, mat& desc
 	
 	std::vector<float> weight=mediaBrowser->getWeightVector();
 	// Count nb of feature
-	int nbFeature = loops.back()->getNumberOfFeaturesVectors();
+	int nbFeature = loops.back()->getNumberOfPreProcFeaturesVectors();
 	if (nbFeature!=weight.size())
 		std::cerr<<"ACVisPluginPCA::extractDescMatrix weight vector size incompatibility"<<endl;
 	for(int f=0; f< nbFeature; f++){

@@ -47,7 +47,6 @@ MediaCycle::MediaCycle(ACMediaType aMediaType, string local_directory, string li
 
 	this->local_directory = local_directory;
 	this->libname = libname;
-
 	this->networkSocket	= 0;
 
 	ACMediaFactory::getInstance(); // this populates the available file extensions if not called before
@@ -287,7 +286,6 @@ int MediaCycle::importDirectories() {
 // each time the library grows by a factor prevLibrarySizeMultiplier, re-normalize and re-cluster everything
 int MediaCycle::importDirectories(vector<string> directories, int recursive, bool forward_order, bool doSegment) {
 	int ok = 0;
-
 	float prevLibrarySizeMultiplier = 2;
 	int needsNormalizeAndCluster;
 	vector<string> filenames;
@@ -319,8 +317,10 @@ int MediaCycle::importDirectories(vector<string> directories, int recursive, boo
 				needsNormalizeAndCluster = 1;
 				prevLibrarySize = mediaLibrary->getSize();
 			}
-                        //needsNormalizeAndCluster = 1;
+			//needsNormalizeAndCluster = 1;
+			mediaBrowser->setNeedsNavigationUpdateLock(1);
 			normalizeFeatures(needsNormalizeAndCluster);
+			mediaBrowser->setNeedsNavigationUpdateLock(0);
 			libraryContentChanged(needsNormalizeAndCluster);
 		}
 		eventManager->sig_mediaImported(i+1,n);
@@ -331,7 +331,6 @@ int MediaCycle::importDirectories(vector<string> directories, int recursive, boo
 	//}
 
 	filenames.empty();
-
 	return ok;
 }
 
@@ -555,17 +554,15 @@ void MediaCycle::setMediaReaderPlugin(std::string pluginName){
 }
 
 #ifdef SUPPORT_MULTIMEDIA
+
+std::string MediaCycle::getActiveSubMediaKey(){
+	return (mediaLibrary->getActiveSubMediaKey());
+	
+}
 int MediaCycle::setActiveMediaType(std::string mediaName){
-    int ret =mediaLibrary->setActiveMediaType(mediaName);
-    ACMediaType aMediaType=mediaLibrary->getActiveSubMediaType();
-    ACPreProcessPlugin* preProcessPlugin=pluginManager->getPreProcessPlugin(aMediaType);
-    if (preProcessPlugin&&preProcessPlugin->mediaTypeSuitable(aMediaType)) {
-        this->getLibrary()->setPreProcessPlugin(preProcessPlugin);
-    }
-    else
-        this->getLibrary()->setPreProcessPlugin(0);
+    int ret =mediaLibrary->setActiveMediaType(mediaName,pluginManager);
     return ret ;
-};
+}
 #endif//def USE_MULTIMEDIA
 
 void MediaCycle::dumpPluginsList(){this->pluginManager->dump();}
@@ -746,7 +743,10 @@ void MediaCycle::hoverWithPointerIndex(float xx, float yy, int p_index) {
 		mediaBrowser->hoverWithPointerIndex(xx, yy, p_index);
 }
 
-void MediaCycle::updateDisplay(bool _animate) { mediaBrowser->updateDisplay(_animate);}
+void MediaCycle::updateDisplay(bool _animate) { 
+		mediaBrowser->updateDisplay(_animate);
+	
+}
 void MediaCycle::initializeFeatureWeights() { mediaBrowser->initializeFeatureWeights();}
 
 // reads in the XML file :

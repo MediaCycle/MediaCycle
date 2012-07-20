@@ -291,6 +291,14 @@ void ACOsgImageRenderer::updateNodes(double ratio) {
 	float zpos = 0.001;
 	
     const ACMediaNode &attribute = media_cycle->getMediaNode(node_index);
+	if (!attribute.isDisplayed()){//TR mod to implement isDisplayed
+		if(media_node->getNumChildren() == 1) {
+			media_node->removeChild(0, 1);
+		}
+		if (image_transform)
+			image_transform->setNodeMask(0);
+		return;			
+	}
 	
 	const ACPoint &p = attribute.getCurrentPosition(), &p2 = attribute.getNextPosition();
 	double omr = 1.0-ratio;

@@ -87,10 +87,11 @@ bool NavimedSensorData::readData(std::string _fname){
 	if (reader.isNavimed()){
 		std::string desc;
 		
+		
 		//here we push in the map sensor_ptr the different bio parameter
 		float value;
 		
-		label=reader.getReference()+string("/GB:");
+		label=reader.getReference();/*+string("/GB:");
 		sensor_ptr=new map<std::string,float>;
 		string paramName="Globules blancs";
 		if (reader.getBioParam(paramName,value)==false){
@@ -133,8 +134,9 @@ bool NavimedSensorData::readData(std::string _fname){
 		label+=bioParamConvToStr(value);
 		(*sensor_ptr)[paramName]=value;
 		
+		delete sensor_ptr;*/
 		cout << label<<"\n";
-		//	cout << (*sensor_ptr)<<"\n";
+		sensor_ptr=reader.getBioParam();
 		return true;
 	}
 	else {

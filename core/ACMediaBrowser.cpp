@@ -75,7 +75,8 @@ static double compute_distance(vector<ACMediaFeatures*> &obj1, const vector<Feat
 	int s2=obj2.size();
 	int s3=weights.size();
 	
-	assert(obj1.size() == obj2.size() && obj1.size() == weights.size());
+	assert(obj1.size() == obj2.size()) ;
+	assert(obj1.size() == weights.size());
 	int feature_count = obj1.size();
 
 	double dis = 0.0;
@@ -95,7 +96,6 @@ static double compute_distance(vector<ACMediaFeatures*> &obj1, const vector<Feat
 }
 
 ACMediaBrowser::ACMediaBrowser() {
-
 	mViewWidth = 820;
 	mViewHeight = 365;
 	mCenterOffsetX = mViewWidth / 2;
@@ -125,6 +125,11 @@ ACMediaBrowser::ACMediaBrowser() {
 	pthread_mutexattr_init(&activity_update_mutex_attr);
 	pthread_mutex_init(&activity_update_mutex, &activity_update_mutex_attr);
 	pthread_mutexattr_destroy(&activity_update_mutex_attr);
+	
+	pthread_mutexattr_init(&navigation_update_mutex_attr);
+	pthread_mutex_init(&navigation_update_mutex, &navigation_update_mutex_attr);
+	pthread_mutexattr_destroy(&navigation_update_mutex_attr);
+	
 
 	this->resetPointers();
 }
@@ -132,6 +137,7 @@ ACMediaBrowser::ACMediaBrowser() {
 ACMediaBrowser::~ACMediaBrowser() {
 	// XS TODO delete mLoopAttributes if vector of pointers <*>
 	pthread_mutex_destroy(&activity_update_mutex);
+	pthread_mutex_destroy(&navigation_update_mutex);
 	if (mUserLog) delete mUserLog;
 }
 
@@ -641,7 +647,8 @@ void ACMediaBrowser::libraryContentChanged(int needsCluster) {
 	//this->updateState(); //CF
 	//setNeedsDisplay(true);//CF
 
-	if (mFeatureWeights.size()==0)
+	//if (mFeatureWeights.size()==0)
+	if (needsCluster)
 		this->initializeFeatureWeights(); //TR NEM modification
 
 	updateDisplay(true, needsCluster);
@@ -657,12 +664,15 @@ void ACMediaBrowser::initializeFeatureWeights(){
 	//int fc = mLibrary->getMedia(0)->getNumberOfPreProcFeaturesVectors();
 	ACMedia *mediaTemp=mLibrary->getMedia(0);
 	if (mediaTemp){
-		int fc = mLibrary->getMedia(0)->getNumberOfFeaturesVectors();
-		mFeatureWeights.resize(fc);
-		printf("setting all feature weights to 1.0 (count=%d)\n", (int) mFeatureWeights.size());
-		for(int i=0; i<fc; i++) {
-			mFeatureWeights[i] = 0.0;	}
-		mFeatureWeights[0] = 1.0;
+		int fc = mLibrary->getMedia(0)->getNumberOfPreProcFeaturesVectors();
+		if (mFeatureWeights.size()!=fc){
+			mFeatureWeights.resize(fc);
+			printf("setting all feature weights to 1.0 (count=%d)\n", (int) mFeatureWeights.size());
+			for(int i=0; i<fc; i++) {
+				mFeatureWeights[i] = 0.0;	
+			}
+			mFeatureWeights[0] = 1.0;
+		}
 	}
 	else {
 		int fc=1;
@@ -670,6 +680,7 @@ void ACMediaBrowser::initializeFeatureWeights(){
 		mFeatureWeights[0] = 1.0;
 		
 	}
+	cout<<"featureWeight:"<<mFeatureWeights.size()<<endl;
 
 }
 
@@ -894,12 +905,13 @@ void ACMediaBrowser::initClusterCenters(){
 // mLoopAttributes -> ACMediaNode
 //CF do we need an extra level of tests along the browsing mode (render inactive during AC_MODE_NEIGHBORS?)
 void ACMediaBrowser::updateClusters(bool animate, int needsCluster) {
-        this->removeAllLabels();
+	setNeedsNavigationUpdateLock(1);
+    this->removeAllLabels();
 	if (mClustersMethodPlugin==0 && mNoMethodPosPlugin==0){//CF no plugin set, factory settings
 		std::cout << "updateClusters : Cluster KMeans (default)" << std::endl;
 		updateClustersKMeans(animate, needsCluster);
 	}
-    else{//TR TODO cancel the clustering if needCluster ==0
+	else{//TR TODO cancel the clustering if needCluster ==0
 		if (needsCluster)
 			initClusterCenters();
 		if (mClustersMethodPlugin) { //CF priority on the Clusters Plugin
@@ -913,29 +925,31 @@ void ACMediaBrowser::updateClusters(bool animate, int needsCluster) {
 		}
 		// SD 2010 OCT - removed
 		/*
-		if(animate) {
-			updateNextPositions();
-			//commitPositions();
-			setState(AC_CHANGING);
-		}
+		 if(animate) {
+		 updateNextPositions();
+		 //commitPositions();
+		 setState(AC_CHANGING);
+		 }
 		 */
 	}
 	// Until we design cross-media browsing, mediadocuments should assign their cluster ID to their children media
-    if(this->getLibrary()->getMediaType() == MEDIA_TYPE_MIXED){
-        vector<ACMedia*> medias = this->getLibrary()->getAllMedia();
-        for (int i=0; i < medias.size(); i++){
-            if (medias[i]->getParentId() > -1){
+	if(this->getLibrary()->getMediaType() == MEDIA_TYPE_MIXED){
+		vector<ACMedia*> medias = this->getLibrary()->getAllMedia();
+		for (int i=0; i < medias.size(); i++){
+			if (medias[i]->getParentId() > -1){
 				int locIdCluster=this->getMediaNode(medias[i]->getParentId()).getClusterId();
 				this->getMediaNode(medias[i]->getId()).setClusterId(locIdCluster);
-            }
-        }
-    }
+			}
+		}
+	}
+	setNeedsNavigationUpdateLock(0);
 	
 }
 
 //CF do we need an extra level of tests along the browsing mode (render inactive during AC_MODE_CLUSTERS?)
 void ACMediaBrowser::updateNeighborhoods(){
-        this->removeAllLabels();
+	setNeedsNavigationUpdateLock(1);
+	this->removeAllLabels();
 	if (mNeighborsMethodPlugin==0 && mNoMethodPosPlugin==0)
 		std::cout << "No neighboorhood method plugin set" << std::endl; // CF: waiting for a factory one!
 	else{
@@ -948,11 +962,13 @@ void ACMediaBrowser::updateNeighborhoods(){
 			{}//	mNoMethodPosPlugin->updateNeighborhoods(this);
 		}
 	}
+	setNeedsNavigationUpdateLock(0);
 }
 
 //CF do we need an extra level of tests along the browsing mode and plugin types?
 void ACMediaBrowser::updateNextPositions() {
-        this->displayAllLabels(false);
+	setNeedsNavigationUpdateLock(1);
+	this->displayAllLabels(false);
 	switch ( mMode ){
 		case AC_MODE_CLUSTERS:
 			if (mClustersPosPlugin==0 && mNoMethodPosPlugin==0) {
@@ -992,6 +1008,7 @@ void ACMediaBrowser::updateNextPositions() {
 			cerr << "unknown browser mode: " << mMode << endl;
 			break;
 	}
+	setNeedsNavigationUpdateLock(0);
 	//	setProximityGrid(); // XS change to something like: mGridPlugin->updateNextPositions(this);
 }
 
@@ -1257,8 +1274,15 @@ void ACMediaBrowser::updateNextPositionsPropeller() {
 	// SD 2011 may - normalization of radius and angle to use full available range
 	for (ACMediaNodes::iterator node = mLoopAttributes.begin(); node != mLoopAttributes.end(); ++node) {
 		
-		if(node->getNavigationLevel() < mNavigationLevel) continue;
-				
+		if(node->getNavigationLevel() < mNavigationLevel||node->isDisplayed()==false) {
+			p.x = 0.0;
+			p.y = 0.0;
+			p.z = 0.0;
+			
+			double t = getTime();
+			(*node).setNextPosition(p, t);
+			continue;
+		}
 		ci = (*node).getClusterId();
 		
 		if(mLibrary->getMedia((*node).getMediaId())->getType() == mLibrary->getMediaType() && mLibrary->getMedia(mReferenceNode)->getType() == mLibrary->getMediaType()){//CF multimedia compatibility
@@ -1286,7 +1310,7 @@ void ACMediaBrowser::updateNextPositionsPropeller() {
 	}
 
 	for (ACMediaNodes::iterator node = mLoopAttributes.begin(); node != mLoopAttributes.end(); ++node) {
-		if(node->getNavigationLevel() < mNavigationLevel) continue;
+		if(node->getNavigationLevel() < mNavigationLevel||node->isDisplayed()==false) continue;
 
 		int ci = (*node).getClusterId();
 
@@ -1592,6 +1616,14 @@ void ACMediaBrowser::setNeedsActivityUpdateLock(int i) {
 		pthread_mutex_unlock(&activity_update_mutex);
 	}
 }
+void ACMediaBrowser::setNeedsNavigationUpdateLock(int i) {
+	if (i) {
+		pthread_mutex_lock(&navigation_update_mutex);
+	}
+	else {
+		pthread_mutex_unlock(&navigation_update_mutex);
+	}
+}
 
 void ACMediaBrowser::setNeedsActivityUpdateAddMedia(int node_id) {
 	mNeedsActivityUpdateMedia.push_back(node_id);
@@ -1844,7 +1876,7 @@ long int ACMediaBrowser::addNode(long int _parentId, long int _mediaId, int _cli
 // XS 260310 new way to manage update of clusters, positions, neighborhoods, ...
 // SD 2010 OCT - removed severa lines of codes, as was duplicate with updateClusters and updateNextPositions
 void ACMediaBrowser::updateDisplay(bool animate, int needsCluster) {
-        this->removeAllLabels();
+	this->removeAllLabels();
 	switch ( mMode ){
 		case AC_MODE_CLUSTERS:
 			updateClusters(animate, needsCluster);
@@ -1858,9 +1890,8 @@ void ACMediaBrowser::updateDisplay(bool animate, int needsCluster) {
 			cerr << "unknown browser mode: " << mMode << endl;
 			break;
 	}
-
 	this->setNeedsDisplay(true);
-
+	
 	// TODO: SD/XS check this
 //	if (mGridPlugin != 0){
 //		mGridPlugin->setProximityGrid();
@@ -2052,10 +2083,12 @@ bool ACMediaBrowser::changeClustersPositionsPlugin(ACPlugin* acpl)
 				mClustersPosPlugin = 0;
 			if (getLibrary()->getSize() > 0){
 				setState(AC_CHANGING);
-				if (acpl)
+				/*if (acpl)
 					mClustersPosPlugin->updateNextPositions(this);
 				else
-					this->updateNextPositionsPropeller();
+					this->updateNextPositionsPropeller();*/
+				this->updateNextPositions();
+				
 			}
 			success = true;
 			break;
@@ -2084,10 +2117,11 @@ bool ACMediaBrowser::changeNeighborsPositionsPlugin(ACPlugin* acpl)
 			break;
 		case AC_MODE_NEIGHBORS:
 			this->setNeighborsPositionsPlugin(acpl);
-			if (mNeighborsMethodPlugin != 0 && getLibrary()->getSize() > 0){
-				setState(AC_CHANGING);
+			setState(AC_CHANGING);
+			/*if (mNeighborsMethodPlugin != 0 && getLibrary()->getSize() > 0){
 				mNeighborsPosPlugin->updateNextPositions(this);
-			}
+			}*/
+			this->updateNextPositions();
 			success = true;
 			break;
 		default:

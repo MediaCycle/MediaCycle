@@ -33,21 +33,20 @@
  */
 
 
-/*
- *
- */
 
 #include "ACPlugin.h"
 //the factories
 
+#include "ACNavimedKMeansPlugin.h"
+#include "ACNavimedAllKMeansPlugin.h"
 #include "ACNavimedReaderPlugin.h"
 #include "ACNavimedSensorFeaturePlugin.h"
 
 extern "C" ACPlugin* create(std::string namePlugin) {
 	if (namePlugin == "NavimedReaderPlugin") {return new ACNavimedReaderPlugin(MEDIA_TYPE_TEXT);}
 	if (namePlugin == "NavimedSensorFeature") {return new ACNavimedSensorFeaturePlugin();}
-	
-	
+	if (namePlugin == "ACNavimedKMeans") {return new ACNavimedKMeansPlugin();}
+	if (namePlugin == "ACNavimedAllKMeans") {return new ACNavimedAllKMeansPlugin();}
 	
 }
 
@@ -59,6 +58,8 @@ extern "C" std::vector<std::string> list() {    //returns a string vector contai
 	std::vector<std::string> listPlugin;
 	listPlugin.push_back("NavimedReaderPlugin");
 	listPlugin.push_back("NavimedSensorFeature");
+	listPlugin.push_back("ACNavimedKMeans");
+	listPlugin.push_back("ACNavimedAllKMeans");
 	
 	return listPlugin;
 }

@@ -160,6 +160,7 @@ public:
 	void setNeedsActivityUpdateRemoveMedia();
 	vector<int>* getNeedsActivityUpdateMedia();
 
+	void setNeedsNavigationUpdateLock(int i); 
 	// camera
 	void setCameraPosition(float x, float y)		{ mCameraPosition[0] = x;  mCameraPosition[1] = y; setNeedsDisplay(true);}
 	void getCameraPosition(float &x, float &y) 	{ x = mCameraPosition[0];  y = mCameraPosition[1]; setNeedsDisplay(true);}
@@ -312,7 +313,8 @@ public:
 	const int &getClusterCount(){return mClusterCount;};
 	const vector<FeaturesVector> &getClusterCenter(int i){return mClusterCenters[i];};
 	const vector<int> &getIdNodeClusterCenter(){return mIdNodeClusterCenters;};
-	
+	void  setIdNodeClusterCenter(vector<int> idNodeClusterCenters){mIdNodeClusterCenters=idNodeClusterCenters;};
+	void setUpdateMutex(bool value);
 	
 private: // better not let the ouside world know about internal cooking
 	void resetNavigation();
@@ -324,6 +326,7 @@ private: // better not let the ouside world know about internal cooking
 //XS the update() methods should remain private
 // all what is needed from outside is *updateDisplay*
 private:
+	bool updateMutex;
 	// update positions based on current clustering
 
 	// == Cluster Mode
@@ -362,6 +365,8 @@ protected:
 	vector<int>			mNeedsActivityUpdateMedia;
 	pthread_mutex_t		activity_update_mutex;
 	pthread_mutexattr_t activity_update_mutex_attr;
+	pthread_mutex_t		navigation_update_mutex;
+	pthread_mutexattr_t navigation_update_mutex_attr;
 
 	float   			mViewWidth;
 	float   			mViewHeight;

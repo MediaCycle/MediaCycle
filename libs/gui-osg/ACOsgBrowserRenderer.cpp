@@ -299,7 +299,7 @@ void ACOsgBrowserRenderer::updateNodes(double ratio) {
                 media_index = 0;
             media_cycle_filename = media_cycle->getMediaFileName(media_index);
 
-            if (media_cycle_isdisplayed) {
+           /* if (media_cycle_isdisplayed) */{
 
                 // GLOBAL
                 node_renderer[i]->setDeltaTime(media_cycle_deltatime);

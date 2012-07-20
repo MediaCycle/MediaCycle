@@ -38,11 +38,17 @@
 #include "ACPlugin.h"
 #include "ACMediaFeatures.h"
 
-class ACNavimedSensorFeaturePlugin : public ACFeaturesPlugin {
+class ACNavimedSensorFeaturePlugin : public ACFeaturesPlugin, public ACPreProcessPlugin{
 public:
     ACNavimedSensorFeaturePlugin();
     virtual ~ACNavimedSensorFeaturePlugin();
     virtual std::vector<ACMediaFeatures*> calculate(ACMediaData* aData, ACMedia* theMedia, bool _save_timed_feat = false);
+	
+	preProcessInfo update(std::vector<ACMedia*> media_library);
+	
+	std::vector<ACMediaFeatures*> apply(preProcessInfo info,ACMedia* theMedia);
+	
+	void freePreProcessInfo(preProcessInfo &info);
 private:
 };
 

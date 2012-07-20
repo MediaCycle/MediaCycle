@@ -169,7 +169,12 @@ void ACOsgSensorRenderer::updateNodes(double ratio) {
 	xstep *= afac;
 
 	const ACMediaNode &attribute = media_cycle->getMediaNode(node_index);
-
+	if (!attribute.isDisplayed()){
+		media_node->removeChild(metadata_geode);
+		if (entry_geode)
+			entry_geode->setNodeMask(0);
+		return;			
+	}
 	Matrix T;
 	Matrix Trotate;
 
@@ -223,7 +228,7 @@ void ACOsgSensorRenderer::updateNodes(double ratio) {
 	}
 
 	unsigned int mask = (unsigned int)-1;
-	if(attribute.getNavigationLevel() >= media_cycle->getNavigationLevel()) {
+	if(attribute.getNavigationLevel() >= media_cycle->getNavigationLevel()&&attribute.isDisplayed()) {
 		entry_geode->setNodeMask(mask);
 	}
 	else {

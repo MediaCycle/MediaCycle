@@ -35,6 +35,8 @@
 #include "ACMedia.h"
 #include "NavimedSensor.h"
 
+#include <set>
+#include <map>
 #include <stdlib.h>
 #include <time.h>
 
@@ -64,8 +66,78 @@ std::vector<ACMediaFeatures*> ACNavimedSensorFeaturePlugin::calculate(ACMediaDat
 		descVect.push_back(it->second+randMod);
 		ACMediaFeatures* descFeat=new ACMediaFeatures(descVect,it->first);
 		sensorFeatures.push_back(descFeat);
+		cout << descFeat->getName()<<"\t"<<descFeat->getFeatureElement(0) <<endl ;
 	}
 	
 	return sensorFeatures;
 }
 
+preProcessInfo ACNavimedSensorFeaturePlugin::update(std::vector<ACMedia*> media_library){
+	set<std::string> *featureKeyList=new set<std::string>;
+	std::vector<ACMedia*>::iterator it1;
+	for (it1=media_library.begin();it1!=media_library.end(); it1++){
+		std::vector<ACMediaFeatures*> featsVect=(*it1)->getAllFeaturesVectors();
+		std::vector<ACMediaFeatures*>::iterator it2;
+		for (it2=featsVect.begin();it2!=featsVect.end();it2++){
+			if (featureKeyList->find((*it2)->getName())==featureKeyList->end()){
+				featureKeyList->insert((*it2)->getName());
+			}
+		}
+	}
+	std::set<std::string>::iterator it2;
+	for (it2=featureKeyList->begin();it2!=featureKeyList->end();it2++)
+		cout<<(*it2)<<endl;
+	cout<<"Index size:"<<featureKeyList->size()<<endl;
+	return ((void*)featureKeyList);
+}
+std::vector<ACMediaFeatures*> ACNavimedSensorFeaturePlugin::apply(preProcessInfo info,ACMedia* theMedia){
+	
+	cout<<"preproc feat of"<<theMedia->getFileName();
+	std::vector<ACMediaFeatures*> desc;
+	set<string> *featureKeyList=(set<string>*) (info);
+	set<string>::iterator it;
+	map<string,ACMediaFeatures*> featMap;
+	for (it=featureKeyList->begin();it!=featureKeyList->end();it++){
+		FeaturesVector descVect;
+		//ACMediaFeatures* featsVect=theMedia->getFeaturesVector((*it));
+		//if (featsVect!=0){
+		//	descVect.push_back(featsVect->getFeatureElement(0));
+		//}
+		//else{
+			descVect.push_back(-1000.f);
+		//}
+		ACMediaFeatures* descFeat=new ACMediaFeatures(descVect,(*it));
+		desc.push_back(descFeat);
+		featMap[*it]=descFeat;
+		//cout << descFeat->getName()<<"\t"<<descFeat->getFeatureElement(0) <<endl ;
+	}
+	vector<ACMediaFeatures*> featVects=theMedia->getAllFeaturesVectors();
+	vector<ACMediaFeatures*>::iterator it2;
+	for (it2=featVects.begin();it2!=featVects.end();it2++){
+		string locName=(*it2)->getName();
+		if (featMap.find(locName)!=featMap.end()){
+			ACMediaFeatures* locFeat=featMap[locName];
+			if (locFeat!=0)
+				locFeat->setFeatureElement(0,(*it2)->getFeatureElement(0));
+			locFeat=0;
+		}
+		else {
+			//cout<<"ACNavimedSensorFeaturePlugin::apply problem: non indexed feature"<<endl;
+		}
+
+	}
+	featMap.clear();
+	cout<<"size:"<<desc.size()<<endl;
+	return desc;
+	
+}
+
+void ACNavimedSensorFeaturePlugin::freePreProcessInfo(preProcessInfo &info){
+	set<string> *featureKeyList=(set<string>*) (info);
+	featureKeyList->clear();
+	cout<<((set<string>*)info)->size()<<endl;
+	delete featureKeyList;
+	featureKeyList=0;
+	info=0;
+
+}

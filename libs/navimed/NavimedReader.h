@@ -38,8 +38,10 @@
 
 #include <string>
 #include <vector>
+#include <map>
 #define TIXML_USE_STL
 #include <tinyxml.h>
+#include <stdlib.h>
 
 class navimedReader
 {
@@ -55,9 +57,11 @@ public:
 	std::string getSubject(void);
 	std::string getDescription(void);
 	bool getBioParam(std::string paramName,float &paramValue);
-    std::string getReference(void); // getLaMediathequeReference
+	std::map<std::string,float> *getBioParam(void);
+	std::string getReference(void); // getLaMediathequeReference
 	std::vector<std::string> getRadiosName(void);
 	std::string getThumbPath(void);
+	
     //std::string getArtistType(void); // info>type -> ex: solo
     //std::string getYear(void); // info>year
     //std::string getLaMediathequeHyperLink(void); // info>link
