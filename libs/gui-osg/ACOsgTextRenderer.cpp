@@ -190,7 +190,7 @@ void ACOsgTextRenderer::updateNodes(double ratio) {
         if (media_cycle->getBrowserMode() == AC_MODE_CLUSTERS)
             ((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(cluster_colors[attribute.getClusterId()%cluster_colors.size()]);
         else
-            ((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(node_color);
+            ((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(neighbor_color);
         if (attribute.isSelected()) {
             //CF color (multiple) selected nodes in black
             Vec4 selected_color(0,0,0,1);
