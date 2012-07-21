@@ -53,6 +53,7 @@ ACOsgMediaRenderer::ACOsgMediaRenderer() {
 	cluster_colors.push_back(osg::Vec4(0.5,1,1,1));
 	cluster_colors.push_back(osg::Vec4(1,0.5,0.5,1));
 	cluster_colors.push_back(osg::Vec4(0.5,1,0.5,1));
+        neighbor_color = Vec4(1,1,1,1);
 	user_defined_color = false;
 	
 	// SD - Results from centralized request to MediaCycle - GLOBAL

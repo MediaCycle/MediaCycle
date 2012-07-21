@@ -581,7 +581,7 @@ void ACOsgAudioRenderer::updateNodes(double ratio) {
                 ((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(node_color);
         }
         else
-            ((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(node_color);
+            ((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(neighbor_color);
 
         if (attribute.isSelected()) {
             //CF color (multiple) selected nodes in black

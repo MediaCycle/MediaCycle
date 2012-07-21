@@ -97,6 +97,7 @@ protected:
     // int media_activity;
     osg::Vec4 node_color;
     std::vector<osg::Vec4> cluster_colors;
+    osg::Vec4 neighbor_color;
     bool user_defined_color;
 
     // GLOBAL

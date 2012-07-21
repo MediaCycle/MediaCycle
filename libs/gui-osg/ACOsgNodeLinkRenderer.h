@@ -54,9 +54,9 @@ public:
     void setNodeIn(ACOsgMediaRenderer* _node);
     void setNodeOut(ACOsgMediaRenderer* _node);
 public:
-	ACOsgNodeLinkRenderer();
-	~ACOsgNodeLinkRenderer();
-	void prepareLinks();
+    ACOsgNodeLinkRenderer();
+    ~ACOsgNodeLinkRenderer();
+    void prepareLinks();
     void updateLinks();
 protected:
     MediaCycle* media_cycle;
