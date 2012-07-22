@@ -41,7 +41,7 @@
    <set>Qt::LeftDockWidgetArea</set>
   </property>
   <property name="windowTitle">
-   <string>Media Configuration</string>
+   <string>Media</string>
   </property>
   <widget class="QWidget" name="dockWidgetContents">
    <property name="sizePolicy">

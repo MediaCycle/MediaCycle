@@ -56,110 +56,110 @@
 #define _ACPOSITIONSPLUGINNODELINKTREELAYOUT_
 
 typedef enum {
-	ORIENT_LEFT_RIGHT = 0,
-	ORIENT_RIGHT_LEFT = 1,
-	ORIENT_TOP_BOTTOM = 2,
-	ORIENT_BOTTOM_TOP = 3,
-	ORIENT_CENTER     = 4,
-	ORIENTATION_COUNT = 5,
+    ORIENT_LEFT_RIGHT = 0,
+    ORIENT_RIGHT_LEFT = 1,
+    ORIENT_TOP_BOTTOM = 2,
+    ORIENT_BOTTOM_TOP = 3,
+    ORIENT_CENTER     = 4,
+    ORIENTATION_COUNT = 5,
 } ACPositionsPluginNodeLinkTreeOrientation;
 
 class ACPositionsPluginTreeNodeParams {
-	public:	
-		ACPositionsPluginTreeNodeParams();
-		~ACPositionsPluginTreeNodeParams(){};
-	
-	public:
-		double getWidth(){return width;}
-		double getHeight(){return height;}
-		void setWidth(double _width){this->width=_width;}
-		void setHeight(double _height){this->height=_height;}
-		double getPrelim(){return prelim;}
-		void setPrelim(double _prelim){this->prelim=_prelim;}
-		double getMod(){return mod;}
-		void setMod(double _mod){this->mod=_mod;}
-		double getShift(){return shift;}
-		void setShift(double _shift){this->shift=_shift;}
-		double getChange(){return change;}
-		void setChange(double _change){this->change=_change;}
-		int getNumber(){return number;}
-		void setNumber(int _number){this->number=_number;}
-		int getAncestor(){return ancestor;}
-		void setAncestor(int _ancestor){this->ancestor=_ancestor;}
-		int getThread(){return thread;}
-		void setThread(int _thread){this->thread=_thread;}
-		double getX(){return x;}
-		void setX(double _x){this->x=_x;}
-		double getY(){return y;}
-		void setY(double _y){this->y=_y;}
-	
-	private:
-		double x,y;
-		double width;
-		double height;
-		double prelim;
-		double mod;
-		double shift;
-		double change;
-		int number;
-		int ancestor;
-		int thread;
-	
-	public:
-		void init(int item);
-		void clear();
+public:
+    ACPositionsPluginTreeNodeParams();
+    ~ACPositionsPluginTreeNodeParams(){};
+
+public:
+    double getWidth(){return width;}
+    double getHeight(){return height;}
+    void setWidth(double _width){this->width=_width;}
+    void setHeight(double _height){this->height=_height;}
+    double getPrelim(){return prelim;}
+    void setPrelim(double _prelim){this->prelim=_prelim;}
+    double getMod(){return mod;}
+    void setMod(double _mod){this->mod=_mod;}
+    double getShift(){return shift;}
+    void setShift(double _shift){this->shift=_shift;}
+    double getChange(){return change;}
+    void setChange(double _change){this->change=_change;}
+    int getNumber(){return number;}
+    void setNumber(int _number){this->number=_number;}
+    int getAncestor(){return ancestor;}
+    void setAncestor(int _ancestor){this->ancestor=_ancestor;}
+    int getThread(){return thread;}
+    void setThread(int _thread){this->thread=_thread;}
+    double getX(){return x;}
+    void setX(double _x){this->x=_x;}
+    double getY(){return y;}
+    void setY(double _y){this->y=_y;}
+
+private:
+    double x,y;
+    double width;
+    double height;
+    double prelim;
+    double mod;
+    double shift;
+    double change;
+    int number;
+    int ancestor;
+    int thread;
+
+public:
+    void init(int item);
+    void clear();
 };
 
 class ACPositionsPluginNodeLinkTreeLayout : public ACNeighborPositionsPlugin {
-	public:
-		ACPositionsPluginNodeLinkTreeLayout();
-		~ACPositionsPluginNodeLinkTreeLayout(){};
-	//	virtual int initialize();
-		void updateNextPositions(ACMediaBrowser* );
-		//void prepareLayout(ACOsgBrowserRenderer*, int start){};
-		//void updateLayout(ACOsgBrowserRenderer*, double ratio){};
-	
-	protected:
-        ACMediaBrowser* mediaBrowser;
-        ACPositionsPluginNodeLinkTreeOrientation    m_orientation;  // the orientation of the tree
-		double m_bspace;   // the spacing between sibling nodes
-		double m_tspace;  // the spacing between subtrees
-		double m_dspace;  // the spacing between depth levels
-		double m_offset;  // pixel offset for root node position
-		vector<double> m_depths;
-		int      m_maxDepth;
-		double m_ax, m_ay; // for holding anchor co-ordinates
-		vector<ACPositionsPluginTreeNodeParams*> m_nodeParams;
-	
-	public:
-		void setOrientation(ACPositionsPluginNodeLinkTreeOrientation orientation);		
-		int getOrientation() {return m_orientation;}
-		void setDepthSpacing(double d) {m_dspace = d;}
-		double getDepthSpacing() {return m_dspace;}
-		void setBreadthSpacing(double b) {m_bspace = b;}
-		double getBreadthSpacing() {return m_bspace;}
-		void setSubtreeSpacing(double s) {m_tspace = s;}
-		double getSubtreeSpacing() {return m_tspace;}
-		void setRootNodeOffset(double o) {m_offset = o;} // The dimension in which this offset is applied is dependent upon the orientation of the tree.
-		double getRootNodeOffset() {return m_offset;}
-	
- 	private:
-		double spacing(int l, int r, bool siblings);
-		void updateDepths(int depth, int item);
-		void determineDepths();
-	
-	private:
-		void firstWalk(int n, int num, int depth);
-		int apportion(int v, int a);
-		int nextLeft(int n);
-		int nextRight(int n);
-		void moveSubtree(int wm, int wp, double shift);
-		void executeShifts(int n);
-		int ancestor(int vim, int v, int a);
-		void secondWalk(int n, int p, double m, int depth);
-		void setBreadth(int n, int p, double b);
-		void setDepth(int n, int p, double d);
-		ACPositionsPluginTreeNodeParams* getParams(int item);
+public:
+    ACPositionsPluginNodeLinkTreeLayout();
+    ~ACPositionsPluginNodeLinkTreeLayout(){};
+    //	virtual int initialize();
+    void updateNextPositions(ACMediaBrowser* );
+    //void prepareLayout(ACOsgBrowserRenderer*, int start){};
+    //void updateLayout(ACOsgBrowserRenderer*, double ratio){};
+
+protected:
+    ACMediaBrowser* mediaBrowser;
+    ACPositionsPluginNodeLinkTreeOrientation    m_orientation;  // the orientation of the tree
+    double m_bspace;   // the spacing between sibling nodes
+    double m_tspace;  // the spacing between subtrees
+    double m_dspace;  // the spacing between depth levels
+    double m_offset;  // pixel offset for root node position
+    vector<double> m_depths;
+    int m_maxDepth;
+    double m_ax, m_ay; // for holding anchor co-ordinates
+    std::map<long,ACPositionsPluginTreeNodeParams*> m_nodeParams;
+
+public:
+    void setOrientation(ACPositionsPluginNodeLinkTreeOrientation orientation);
+    int getOrientation() {return m_orientation;}
+    void setDepthSpacing(double d) {m_dspace = d;}
+    double getDepthSpacing() {return m_dspace;}
+    void setBreadthSpacing(double b) {m_bspace = b;}
+    double getBreadthSpacing() {return m_bspace;}
+    void setSubtreeSpacing(double s) {m_tspace = s;}
+    double getSubtreeSpacing() {return m_tspace;}
+    void setRootNodeOffset(double o) {m_offset = o;} // The dimension in which this offset is applied is dependent upon the orientation of the tree.
+    double getRootNodeOffset() {return m_offset;}
+
+private:
+    double spacing(int l, int r, bool siblings);
+    void updateDepths(int depth, int item);
+    void determineDepths();
+
+private:
+    void firstWalk(int n, int num, int depth);
+    int apportion(int v, int a);
+    int nextLeft(int n);
+    int nextRight(int n);
+    void moveSubtree(int wm, int wp, double shift);
+    void executeShifts(int n);
+    int ancestor(int vim, int v, int a);
+    void secondWalk(int n, int p, double m, int depth);
+    void setBreadth(int n, int p, double b);
+    void setDepth(int n, int p, double d);
+    ACPositionsPluginTreeNodeParams* getParams(int item);
 };
 
 #endif	/* _ACPOSITIONSPLUGINNODELINKTREELAYOUT_ */

@@ -38,10 +38,10 @@ ACSegmentationControlsDockWidgetQt::ACSegmentationControlsDockWidgetQt(QWidget *
     : ACAbstractDockWidgetQt(parent, MEDIA_TYPE_ALL,"ACSegmentationControlsDockWidgetQt")
 {
     //ui.setupUi(this); // first thing to do if a *.ui file exists
-    widget = new ACSegmentationControlsWidgetQt();
+    widget = new ACPluginControlsWidgetQt(PLUGIN_TYPE_SEGMENTATION);
     widget->setFixedWidth(250);
     this->setWidget(widget);
-    this->setWindowTitle("Segmentation Controls");
+    this->setWindowTitle("Segmentation");
     connect(widget,SIGNAL(readjustHeight()),this,SLOT(adjustHeight()));
     this->show();
 }

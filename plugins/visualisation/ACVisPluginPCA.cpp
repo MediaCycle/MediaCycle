@@ -1,7 +1,7 @@
 /**
  * @brief ACVisPluginPCA.cpp
- * @author Thierry Ravet
- * @date 20/07/2012
+ * @author Christian Frisson
+ * @date 22/07/2012
  * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -37,12 +37,11 @@
 using namespace arma;
 using namespace std;
 //TR: I modified this class to take into account the feature that are selected by the user (with te weights).
-ACVisPluginPCA::ACVisPluginPCA()
+ACVisPluginPCA::ACVisPluginPCA() : ACClusterPositionsPlugin()
 {
     //vars herited from ACPlugin
-	// XS TODO: are these general enough ? can we use this only for video ?? TR:We will see it.
     this->mMediaType = MEDIA_TYPE_ALL;
-    this->mName = "PCAVis";
+    this->mName = "MediaCycle PCA";
     this->mDescription = "PCA Visualisation plugin";
     this->mId = "";
 	

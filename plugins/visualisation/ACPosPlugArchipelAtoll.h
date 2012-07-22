@@ -1,8 +1,8 @@
 /**
  * @brief ACPosPlugArchipelAtoll.h
  * @author Christian Frisson
- * @date 13/09/2011
- * @copyright (c) 2011 – UMONS - Numediart
+ * @date 22/07/2012
+ * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -29,17 +29,14 @@
  * <mailto:avre@umons.ac.be>
 */
 
-#include <armadillo>
 
-#include "ACPlugin.h"
-#include "ACMediaBrowser.h"
-#include "ACMediaTimedFeature.h"
+#include "ACClusterPositionsPropellerPlugin.h"
 
 #ifndef _ACPosPlugArchipelAtoll_
 #define _ACPosPlugArchipelAtoll_
 
 //#if defined(SUPPORT_ARCHIPEL)
-class ACPosPlugArchipelAtoll : public ACClusterPositionsPlugin {
+class ACPosPlugArchipelAtoll : public ACClusterPositionsPropellerPlugin {
 	public:
 		ACPosPlugArchipelAtoll();
 		~ACPosPlugArchipelAtoll();

@@ -53,78 +53,78 @@
 #define _ACPOSITIONSPLUGINRADIALTREELAYOUT_
 
 class ACPositionsPluginRadialTreeNodeParams {
-	public:	
-		ACPositionsPluginRadialTreeNodeParams();
-		~ACPositionsPluginRadialTreeNodeParams(){};
-	
-	public:	
-		double getWidth(){return width;}
-		double getHeight(){return height;}
-		void setWidth(double _width){this->width=_width;}
-		void setHeight(double _height){this->height=_height;}
-		double getX(){return x;}
-		void setX(double _x){this->x=_x;}
-		double getY(){return y;}
-		void setY(double _y){this->y=_y;}
-		double getAngle(){return angle;}
-		void setAngle(double _angle){this->angle=_angle;}
-	
-	private:
-		double width;
-		double height;
-		double x,y;
-		double angle;
+public:
+    ACPositionsPluginRadialTreeNodeParams();
+    ~ACPositionsPluginRadialTreeNodeParams(){};
+
+public:
+    double getWidth(){return width;}
+    double getHeight(){return height;}
+    void setWidth(double _width){this->width=_width;}
+    void setHeight(double _height){this->height=_height;}
+    double getX(){return x;}
+    void setX(double _x){this->x=_x;}
+    double getY(){return y;}
+    void setY(double _y){this->y=_y;}
+    double getAngle(){return angle;}
+    void setAngle(double _angle){this->angle=_angle;}
+
+private:
+    double width;
+    double height;
+    double x,y;
+    double angle;
 };
 
 class ACPositionsPluginRadialTreeLayout : public ACNeighborPositionsPlugin {
-	public:
-		ACPositionsPluginRadialTreeLayout();
-	~ACPositionsPluginRadialTreeLayout(){};
-//		virtual int initialize();
-		void updateNextPositions(ACMediaBrowser* );
-		//void prepareLayout(ACOsgBrowserRenderer*, int start){};
-		//void updateLayout(ACOsgBrowserRenderer*, double ratio){};
-	
-	protected:
-		ACMediaBrowser* mediaBrowser;
-		int DEFAULT_RADIUS;
-		int MARGIN;
-		int m_maxDepth;
-		double m_radiusInc; // radius increment between subsequent rings of the layout when auto-scaling is disabled
-		double m_theta1, m_theta2; // starting angle, in radians
-		bool m_setTheta;
-		bool m_autoScale; // indicates if the layout automatically scales to fit the layout bounds
-		ACPoint m_origin;
-		int m_prevRoot;
-		double m_ax, m_ay; // for holding anchor co-ordinates
-		vector<ACPositionsPluginRadialTreeNodeParams*> m_nodeParams;
-	
-	public:
-		double getRadiusIncrement() {return m_radiusInc;}
-		void setRadiusIncrement(double inc) {m_radiusInc = inc;}
-		bool getAutoScale() {return m_autoScale;}
-		void setAutoScale(bool s) {m_autoScale = s;}
-		void setAngularBounds(double theta, double width) {
-			m_theta1 = theta;
-			m_theta2 = theta+width;
-			m_setTheta = true;
-		};// constrains this layout to the specified angular sector
-	
-	protected:
-		void setScale(double width, double height);
- 	
-	private:
-		void calcAngularBounds(int r); // calculates the angular bounds of the layout, attempting to preserve the angular orientation of the display across transitions.
-		double calcAngularWidth(int n, int d); // computes relative measures of the angular widths of each expanded subtree. Node diameters are taken into account to improve space allocation for variable-sized nodes.
-		double normalize(double angle);
-		vector<int> sortedChildren(int n);
-	
-	protected:
-		void layout(int n, double r, double theta1, double theta2);
-		void setPolarLocation(int n, double r, double t);
-	
-	private:
-		ACPositionsPluginRadialTreeNodeParams* getParams(int item);
+public:
+    ACPositionsPluginRadialTreeLayout();
+    ~ACPositionsPluginRadialTreeLayout(){};
+    //virtual int initialize();
+    void updateNextPositions(ACMediaBrowser* );
+    //void prepareLayout(ACOsgBrowserRenderer*, int start){};
+    //void updateLayout(ACOsgBrowserRenderer*, double ratio){};
+
+protected:
+    ACMediaBrowser* mediaBrowser;
+    int DEFAULT_RADIUS;
+    int MARGIN;
+    int m_maxDepth;
+    double m_radiusInc; // radius increment between subsequent rings of the layout when auto-scaling is disabled
+    double m_theta1, m_theta2; // starting angle, in radians
+    bool m_setTheta;
+    bool m_autoScale; // indicates if the layout automatically scales to fit the layout bounds
+    ACPoint m_origin;
+    int m_prevRoot;
+    double m_ax, m_ay; // for holding anchor co-ordinates
+    std::map<long,ACPositionsPluginRadialTreeNodeParams*> m_nodeParams;
+
+public:
+    double getRadiusIncrement() {return m_radiusInc;}
+    void setRadiusIncrement(double inc) {m_radiusInc = inc;}
+    bool getAutoScale() {return m_autoScale;}
+    void setAutoScale(bool s) {m_autoScale = s;}
+    void setAngularBounds(double theta, double width) {
+        m_theta1 = theta;
+        m_theta2 = theta+width;
+        m_setTheta = true;
+    };// constrains this layout to the specified angular sector
+
+protected:
+    void setScale(double width, double height);
+
+private:
+    void calcAngularBounds(int r); // calculates the angular bounds of the layout, attempting to preserve the angular orientation of the display across transitions.
+    double calcAngularWidth(int n, int d); // computes relative measures of the angular widths of each expanded subtree. Node diameters are taken into account to improve space allocation for variable-sized nodes.
+    double normalize(double angle);
+    vector<int> sortedChildren(int n);
+
+protected:
+    void layout(int n, double r, double theta1, double theta2);
+    void setPolarLocation(int n, double r, double t);
+
+private:
+    ACPositionsPluginRadialTreeNodeParams* getParams(int item);
 };
 
 #endif	/* _ACPOSITIONSPLUGINRADIALTREELAYOUT_ */

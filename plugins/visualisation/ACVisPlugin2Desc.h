@@ -1,7 +1,7 @@
 /**
  * @brief ACVisPlugin2Desc.h
- * @author Thierry Ravet
- * @date 30/05/2012
+ * @author Christian Frisson
+ * @date 22/07/2012
  * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -31,22 +31,24 @@
 
 #include <armadillo>
 
+#include <MediaCycle.h>
 #include "ACPlugin.h"
 #include "ACMediaBrowser.h"
 #include "ACMediaTimedFeature.h"
-
 
 #ifndef _ACVISPLUGIN2DESC_
 #define _ACVISPLUGIN2DESC_
 
 class ACVisPlugin2Desc : public ACClusterPositionsPlugin {
 public:
-	ACVisPlugin2Desc();
-	~ACVisPlugin2Desc();
-	virtual void updateNextPositions(ACMediaBrowser* );
-	
+    ACVisPlugin2Desc();
+    ~ACVisPlugin2Desc();
+    virtual void updateNextPositions(ACMediaBrowser* );
+    virtual void setMediaCycle(MediaCycle* _media_cycle);
+    void assignedFeaturesChanged();
 protected:
-	void extractDescMatrix(ACMediaBrowser* mediaBrowser, arma::mat& desc_m, std::vector<std::string> &featureNames);
+    bool updateAvailableFeatures();
+    void extractDescMatrix(ACMediaBrowser* mediaBrowser, arma::mat& desc_m, std::vector<std::string> &featureNames);
 };
 
 #endif	/* _ACVISUALISATIONPLUGIN_ */

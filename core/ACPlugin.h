@@ -48,23 +48,38 @@
 class ACMedia;
 class ACMediaBrowser;
 class ACMediaTimedFeature;
+class MediaCycle;
+
+#include<iostream>
 
 #ifdef __APPLE__
 extern std::string getExecutablePath();
 #endif
 
+#include <boost/function.hpp>
+#include <boost/bind.hpp>
+typedef boost::function<void()> ACParameterCallback;
+
 struct ACNumberParameter{
     std::string name,desc;
     float value,init,min,max,step;
-    ACNumberParameter():name(""),value(0.0f),init(0.0f),min(0.0f),max(0.0f),step(0.0f),desc(""){}
-    ACNumberParameter(std::string _name, float _init, float _min, float _max, float _step, std::string _desc):name(_name),value(_init),init(_init),min(_min),max(_max),step(_step),desc(_desc){}
+    ACParameterCallback callback;
+    ACNumberParameter()
+        :name(""),value(0.0f),init(0.0f),min(0.0f),max(0.0f),step(0.0f),desc(""),callback(0){}
+    ACNumberParameter(std::string _name, float _init, float _min, float _max, float _step, std::string _desc, ACParameterCallback _callback)
+        :name(_name),value(_init),init(_init),min(_min),max(_max),step(_step),desc(_desc),callback(_callback){ }
+    ~ACNumberParameter(){callback = 0;}
 };
 
 struct ACStringParameter{
     std::string name,value,init,desc;
     std::vector<std::string> values;
-    ACStringParameter():name(""),value(""),init(""),desc(""){}
-    ACStringParameter(std::string _name, std::string _init, std::vector<std::string> _values, std::string _desc):name(_name),values(_values),value(_init),init(_init),desc(_desc){}
+    ACParameterCallback callback;
+    ACStringParameter()
+        :name(""),value(""),init(""),desc(""),callback(0){}
+    ACStringParameter(std::string _name, std::string _init, std::vector<std::string> _values, std::string _desc, ACParameterCallback _callback)
+        :name(_name),values(_values),value(_init),init(_init),desc(_desc),callback(_callback){ }
+    ~ACStringParameter(){callback = 0;}
 };
 
 typedef		unsigned int ACPluginType;
@@ -91,20 +106,24 @@ public:
     ACPlugin();
     bool implementsPluginType(ACPluginType pType);
     bool mediaTypeSuitable(ACMediaType);
-    virtual ~ACPlugin() {mName.clear(); mDescription.clear(); mId.clear();};
+    virtual ~ACPlugin();
     std::string getName() {return this->mName;};
     std::string getIdentifier() {return this->mId;};
     std::string getDescription() {return this->mDescription;};
     ACMediaType getMediaType() {return this->mMediaType;};
     ACPluginType getPluginType() {return this->mPluginType;};
-    //XSCF TODO: should the plugin receive MediaCycle ?
+    virtual void setMediaCycle(MediaCycle* _media_cycle){this->media_cycle=_media_cycle;}
 
 protected:
-    void addStringParameter(std::string _name, std::string _init, std::vector<std::string> _values, std::string _desc);
-    void addNumberParameter(std::string _name, float _init, float _min, float _max, float _step, std::string _desc);
+    void addStringParameter(std::string _name, std::string _init, std::vector<std::string> _values, std::string _desc, ACParameterCallback _callback = 0);
+    void updateStringParameter(std::string _name, std::string _init, std::vector<std::string> _values, std::string _desc = "", ACParameterCallback _callback = 0);
+    void addNumberParameter(std::string _name, float _init, float _min, float _max, float _step, std::string _desc, ACParameterCallback _callback = 0);
+    void updateNumberParameter(std::string _name, float _init, float _min, float _max, float _step, std::string _desc = "", ACParameterCallback _callback = 0);
 
 public:
     int getParametersCount();
+    bool hasNumberParameterNamed(std::string _name);
+    bool hasStringParameterNamed(std::string _name);
 
     void resetParameterValue(std::string _name);
 
@@ -138,6 +157,7 @@ protected:
     ACMediaType mMediaType;
     std::vector<ACStringParameter> mStringParameters;
     std::vector<ACNumberParameter> mNumberParameters;
+    MediaCycle* media_cycle;
 };
 
 // XS TODO : separate time & space plugins ?

@@ -1,5 +1,5 @@
 /*
- *  ACSegmentationControlsWidgetQt.h
+ *  ACPluginControlsWidgetQt.h
  *  MediaCycle
  *
  *  @author Christian Frisson
@@ -32,17 +32,17 @@
  *
  */
 
-#ifndef HEADER_ACSegmentationControlsWidgetQt
-#define HEADER_ACSegmentationControlsWidgetQt
+#ifndef HEADER_ACPluginControlsWidgetQt
+#define HEADER_ACPluginControlsWidgetQt
 
 #include <iostream>
 #include <string.h>
 
 #include "ACAbstractWidgetQt.h"
 
-//#include "ui_ACSegmentationControlsWidgetQt.h"
+//#include "ui_ACPluginControlsWidgetQt.h"
 
-class ACSegmentationControlsWidgetQt : public QWidget, public ACAbstractWidgetQt {
+class ACPluginControlsWidgetQt : public QWidget, public ACAbstractWidgetQt {
     Q_OBJECT
 
 public slots:
@@ -57,8 +57,8 @@ signals:
     void readjustHeight();
 
 public:
-    ACSegmentationControlsWidgetQt(QWidget *parent = 0);
-    virtual ~ACSegmentationControlsWidgetQt();
+    ACPluginControlsWidgetQt(ACPluginType type, QWidget *parent = 0);
+    virtual ~ACPluginControlsWidgetQt();
 
     void changeMediaType(ACMediaType media_type);
     void updatePluginsSettings();
@@ -66,11 +66,11 @@ public:
     void resetMediaType(ACMediaType _media_type);
 
 protected:
-    //Ui::ACSegmentationControlsWidgetQt ui;
+    //Ui::ACPluginControlsWidgetQt ui;
     QComboBox* comboBoxPlugins;
     QVBoxLayout* vboxLayout;
-    QVBoxLayout* parametersLayout;
     QWidget* parametersContainer;
     void cleanPluginList();
+    ACPluginType pluginType;
 };
 #endif

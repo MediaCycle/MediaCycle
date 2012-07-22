@@ -327,7 +327,7 @@ int ACOscBrowser::process_mess(const char *path, const char *types, lo_arg **arg
 			media_cycle->goForward();
 		} else if ((tag.find("/gointocluster", 0) != string::npos)) {
 			// XS NOTE if you put "forwardNextLevel" as OSC message, it will be mistaken for "forward"
-			media_cycle->forwardNextLevel(true);
+                        media_cycle->forwardNextLevel();
 		} else {
 			std::cout << "ACOscBrowser: error with tag'" << tag << "'";
 			for (int a = 0; a < argc; a++) {

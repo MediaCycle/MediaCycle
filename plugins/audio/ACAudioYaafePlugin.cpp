@@ -470,7 +470,7 @@ ACAudioYaafePlugin::ACAudioYaafePlugin() : ACTimedFeaturesPlugin() {
                 name = name.replace(underscore,1," ");
             }
         }
-        std::cout << "ACAudioYaafePlugin: adding descriptor: '" << name << "'" << std::endl;
+        //std::cout << "ACAudioYaafePlugin: adding descriptor: '" << name << "'" << std::endl;
         mDescriptorsList.push_back(name);
 
         /*std::string fname = (*output);
@@ -598,11 +598,11 @@ ACMediaTimedFeature* ACAudioYaafePlugin::getMediaTimedFeatureStored(std::string 
 bool ACAudioYaafePlugin::addMediaTimedFeature(ACMediaTimedFeature* feature, std::string file){
     std::map<std::string,ACMediaTimedFeature*>::iterator mf = descmf.find(feature->getName());
     if(mf!=descmf.end()){
-        std::cout << "ACAudioYaafePlugin: appended feature: " << feature->getName() << " of length " << feature->getLength() << "/" << (*mf).second->getLength() << " and dim " << feature->getDim() << " vs " << (*mf).second->getDim() << " for file " << file << std::endl;
+        //std::cout << "ACAudioYaafePlugin: appended feature: " << feature->getName() << " of length " << feature->getLength() << "/" << (*mf).second->getLength() << " and dim " << feature->getDim() << " vs " << (*mf).second->getDim() << " for file " << file << std::endl;
         return (*mf).second->appendTimedFeatureAlongTime(feature);
     }
     else{
-        std::cout << "ACAudioYaafePlugin: new feature: " << feature->getName() << " of length " << feature->getLength() << " and dim " << feature->getDim() << " for file " << file << std::endl;
+        //std::cout << "ACAudioYaafePlugin: new feature: " << feature->getName() << " of length " << feature->getLength() << " and dim " << feature->getDim() << " for file " << file << std::endl;
         descmf.insert( pair<std::string,ACMediaTimedFeature*>(feature->getName(),feature) );
         return true;
     }
@@ -652,7 +652,7 @@ std::vector<ACMediaFeatures*> ACAudioYaafePlugin::calculate(ACMediaData* aData, 
             ACMediaTimedFeature* feature = 0;
             feature = new ACMediaTimedFeature();
             bool featureAvailable = false;
-            std::cout << "ACAudioYaafePlugin: trying to load feature named '" << *feat << "'... " << std::endl;
+            //std::cout << "ACAudioYaafePlugin: trying to load feature named '" << *feat << "'... " << std::endl;
             mtf_file_name = aFileName_noext + "_" + (*feat) + file_ext;
             featureAvailable = feature->loadFromFile(mtf_file_name,save_binary);
             if(featureAvailable && feature){
@@ -669,19 +669,23 @@ std::vector<ACMediaFeatures*> ACAudioYaafePlugin::calculate(ACMediaData* aData, 
                         featureAvailable = false;
                 }
             }
-            if(featureAvailable){
+            /*if(featureAvailable){
                 std::cout << "ACAudioYaafePlugin: feature named '" << *feat  << "' loaded" << std::endl;
             }
             else{
                 std::cout << "ACAudioYaafePlugin: feature named '" << *feat  << "' NOT loaded" << std::endl;
-            }
+            }*/
             featuresAvailable *= featureAvailable;
         }
-        if(mDescriptorsList.size()==0){
+        if(descmf.size()==0){
+            featuresAvailable = false;
+            std::cout << "ACAudioYaafePlugin: features weren't calculated previously" << std::endl;
+        }
+        else if(mDescriptorsList.size()==0){
             featuresAvailable = false;
             std::cerr << "ACAudioYaafePlugin: loaded features are empty" << std::endl;
         }
-        if(mDescriptorsList.size()!=descmf.size()){
+        else if(mDescriptorsList.size()!=descmf.size()){
             featuresAvailable = false;
             std::cerr << "ACAudioYaafePlugin: some features weren't calculated previously" << std::endl;
         }

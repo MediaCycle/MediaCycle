@@ -111,7 +111,7 @@ void ACAboutDialogQt::updateLicenses(){
     html.append ("<br/><br/>This current release packages as well the following Octave/Matlab libraries, used through an Octave wrapper:<br/><ul>");
 #if defined (USE_MAKAM)
     html.append ("<li><a href=\"ftp://ftp.iyte.edu.tr/share/ktm-nota/TuningMeasurement.html\">Makam Toolbox</a> from Bari&#351; Bozkurt et al, ported to Octave by Onur Babacan</li>");
-    html.append ("<li><a href=\"http://cognition.ens.fr/audition/adc/sw/yin.zip\">YIN</a> mex libraries from Alain de Cheveing&eacute; et al: copyright for research purposes only)</li>");
+    html.append ("<li><a href=\"http://cognition.ens.fr/audition/adc/sw/yin.zip\">YIN</a> mex libraries from Alain de Cheveign&eacute; et al: copyright for research purposes only)</li>");
 #endif //defined (USE_MAKAM)
     html.append ("</ul>");
 #endif //defined (USE_OCTAVE)

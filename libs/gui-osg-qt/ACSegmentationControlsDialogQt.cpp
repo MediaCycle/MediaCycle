@@ -52,7 +52,7 @@ ACSegmentationControlsDialogQt::ACSegmentationControlsDialogQt(QWidget *parent)
     label->setFixedHeight( label->height() );
     layout->addWidget(label);
 
-    widget = new ACSegmentationControlsWidgetQt();
+    widget = new ACPluginControlsWidgetQt(PLUGIN_TYPE_SEGMENTATION);
     layout->addWidget(widget);
     connect(widget,SIGNAL(readjustHeight()),this,SLOT(adjustHeight()));
 

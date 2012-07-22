@@ -38,11 +38,35 @@ ACBrowserControlsCompleteDockWidgetQt::ACBrowserControlsCompleteDockWidgetQt(QWi
     : ACAbstractDockWidgetQt(parent, MEDIA_TYPE_ALL,"ACBrowserControlsCompleteDockWidgetQt")
 {
     ui.setupUi(this); // first thing to do
+
+    clustersMethodControls = new ACPluginControlsWidgetQt(PLUGIN_TYPE_CLUSTERS_METHOD);
+    clustersPositionsControls = new ACPluginControlsWidgetQt(PLUGIN_TYPE_CLUSTERS_POSITIONS);
+    neighborsMethodControls = new ACPluginControlsWidgetQt(PLUGIN_TYPE_NEIGHBORS_METHOD);
+    neighborsPositionsControls = new ACPluginControlsWidgetQt(PLUGIN_TYPE_NEIGHBORS_POSITIONS);
+
+    ui.groupBoxClustersMethod->layout()->addWidget(clustersMethodControls);
+    ui.groupBoxClustersPositions->layout()->addWidget(clustersPositionsControls);
+    ui.groupBoxNeighborsMethod->layout()->addWidget(neighborsMethodControls);
+    ui.groupBoxNeighborsPositions->layout()->addWidget(neighborsPositionsControls);
+
+    int controlsWidth = 250; // default dock widget size
+    clustersMethodControls->setFixedWidth(controlsWidth);
+    clustersPositionsControls->setFixedWidth(controlsWidth);
+    neighborsMethodControls->setFixedWidth(controlsWidth);
+    neighborsPositionsControls->setFixedWidth(controlsWidth);
+
     connect(ui.featuresListWidget, SIGNAL(itemClicked(QListWidgetItem*)),this, SLOT(modifyListItem(QListWidgetItem*)));
     connect(this,SIGNAL(reconfigureCheckBoxes()),this,SLOT(configureCheckBoxes()));
+
     connect(this,SIGNAL(readjustHeight()),this,SLOT(adjustHeight()));
-    this->show();
+    connect(clustersMethodControls,SIGNAL(readjustHeight()),this,SLOT(adjustHeight()));
+    connect(clustersPositionsControls,SIGNAL(readjustHeight()),this,SLOT(adjustHeight()));
+    connect(neighborsMethodControls,SIGNAL(readjustHeight()),this,SLOT(adjustHeight()));
+    connect(neighborsPositionsControls,SIGNAL(readjustHeight()),this,SLOT(adjustHeight()));
+
     emit this->readjustHeight();
+
+    this->show();
 }
 
 bool ACBrowserControlsCompleteDockWidgetQt::canBeVisible(ACMediaType _media_type){
@@ -52,8 +76,8 @@ bool ACBrowserControlsCompleteDockWidgetQt::canBeVisible(ACMediaType _media_type
 void ACBrowserControlsCompleteDockWidgetQt::modifyListItem(QListWidgetItem *item)
 {
     // XS check
-    cout << item->text().toStdString() << endl; // isselected...
-    cout << ui.featuresListWidget->currentRow() << endl;
+    //cout << item->text().toStdString() << endl; // isselected...
+    //cout << ui.featuresListWidget->currentRow() << endl;
 
     // end XS check
 
@@ -89,116 +113,124 @@ void ACBrowserControlsCompleteDockWidgetQt::on_pushButtonBack_clicked()
 void ACBrowserControlsCompleteDockWidgetQt::on_pushButtonForward_clicked()
 {
     if (media_cycle==0) return;
-
     this->media_cycle->goForward();
     //this->synchronizeFeaturesWeights();
-
     //	ui.navigationLineEdit->setText(QString::number(media_cycle->getNavigationLevel()));
-
 }
 
-void ACBrowserControlsCompleteDockWidgetQt::on_spinBoxClusters_valueChanged(int _value)
-{
-    if (media_cycle==0 && osg_view == 0) return;
+void ACBrowserControlsCompleteDockWidgetQt::on_tabWidgetModes_currentChanged(int index){
 
-    ui.sliderClusters->setValue(_value); 	// for synchronous display of values
-    std::cout << "ClusterNumber: " << _value << std::endl;
-    if (osg_view->isLibraryLoaded())
-    {
-        media_cycle->setClusterNumber(_value);
-        // XSCF251003 added this
-        media_cycle->updateDisplay(true); //XS 250310 was: media_cycle->updateClusters(true);
-        // XS 310310 removed media_cycle->setNeedsDisplay(true); // now in updateDisplay
-        osg_view->updateTransformsFromBrowser(1.0);
-    }
-    osg_view->setFocus();
-}
-
-// for synchronous display of values
-void ACBrowserControlsCompleteDockWidgetQt::on_sliderClusters_sliderReleased()
-{
     if (media_cycle == 0) return;
-    ui.spinBoxClusters->setValue(ui.sliderClusters->value());
-}
-
-void ACBrowserControlsCompleteDockWidgetQt::on_comboBoxClustersMethod_activated(const QString & text)
-{
-    if (media_cycle == 0) return;
-    std::cout << "Clusters Method: " << text.toStdString() << std::endl;
-    media_cycle->changeClustersMethodPlugin(text.toStdString());
-}
-
-void ACBrowserControlsCompleteDockWidgetQt::on_comboBoxClustersPositions_activated(const QString & text)
-{
-    if (media_cycle == 0) return;
-    std::cout << "Clusters Positions: " << text.toStdString() << std::endl;
-    media_cycle->changeClustersPositionsPlugin(text.toStdString());
-}
-
-void ACBrowserControlsCompleteDockWidgetQt::on_comboBoxNeighborsMethod_activated(const QString & text)
-{
-    if (media_cycle == 0) return;
-    std::cout << "Neighbors Method: " << text.toStdString() << std::endl;
-    media_cycle->changeNeighborsMethodPlugin(text.toStdString());
-}
-
-void ACBrowserControlsCompleteDockWidgetQt::on_comboBoxNeighborsPositions_activated(const QString & text)
-{
-    if (media_cycle == 0) return;
-    std::cout << "Neighbors Positions: " << text.toStdString() << std::endl;
-    media_cycle->changeNeighborsPositionsPlugin(text.toStdString());
-}
-
-void ACBrowserControlsCompleteDockWidgetQt::on_radioButtonClusters_toggled( bool checked )
-{
-    if (media_cycle == 0) return;
-    if(checked){
+    if(index == 0){//if(checked){
         //Clusters
-        media_cycle->changeClustersMethodPlugin(ui.comboBoxClustersMethod->currentText().toStdString());
-        media_cycle->changeClustersPositionsPlugin(ui.comboBoxClustersPositions->currentText().toStdString());
+        //media_cycle->changeClustersMethodPlugin(ui.comboBoxClustersMethod->currentText().toStdString());
+        //media_cycle->changeClustersPositionsPlugin(ui.comboBoxClustersPositions->currentText().toStdString());
         media_cycle->changeBrowserMode(AC_MODE_CLUSTERS);
+
+        ui.featuresListWidget->setEnabled(true); //CF until changing feature weights works in neighbors mode
     }
     else{
         //Neighbors
-        media_cycle->changeNeighborsMethodPlugin(ui.comboBoxNeighborsMethod->currentText().toStdString());
-        media_cycle->changeNeighborsPositionsPlugin(ui.comboBoxNeighborsPositions->currentText().toStdString());
+        //media_cycle->changeNeighborsMethodPlugin(ui.comboBoxNeighborsMethod->currentText().toStdString());
+        //media_cycle->changeNeighborsPositionsPlugin(ui.comboBoxNeighborsPositions->currentText().toStdString());
         media_cycle->changeBrowserMode(AC_MODE_NEIGHBORS);
+
+        ui.featuresListWidget->setEnabled(false); //CF until changing feature weights works in neighbors mode
+    }
+
+    emit this->readjustHeight();
+}
+
+void ACBrowserControlsCompleteDockWidgetQt::resetMode(){
+    if(!media_cycle) return;
+
+    switch (media_cycle->getBrowserMode()){
+    case AC_MODE_CLUSTERS:
+    {
+        ui.tabWidgetModes->setCurrentIndex(0);
+        ui.featuresListWidget->setEnabled(true); //CF until changing feature weights works in neighbors mode
+    }
+    break;
+    case AC_MODE_NEIGHBORS:
+    {
+        ui.tabWidgetModes->setCurrentIndex(1);
+        ui.featuresListWidget->setEnabled(false); //CF until changing feature weights works in neighbors mode
+    }
+    break;
     }
 }
+
 
 void ACBrowserControlsCompleteDockWidgetQt::updatePluginsSettings()
 {
     emit this->reconfigureCheckBoxes();
 
+    if(!media_cycle) return;
+
+    this->resetMode();
+
+    clustersMethodControls->setMediaCycle(this->media_cycle);
+    clustersPositionsControls->setMediaCycle(this->media_cycle);
+    neighborsMethodControls->setMediaCycle(this->media_cycle);
+    neighborsPositionsControls->setMediaCycle(this->media_cycle);
+
+    clustersMethodControls->updatePluginsSettings();
+    clustersPositionsControls->updatePluginsSettings();
+    neighborsMethodControls->updatePluginsSettings();
+    neighborsPositionsControls->updatePluginsSettings();
+
     //Plugins according to media type
     //TODO Remember previous settings
-    std::cout << "ACBrowserControlsCompleteDockWidgetQt::changeMediaType: Plugins according to media type" << std::endl;
-    if(media_cycle->getMediaType() == MEDIA_TYPE_MIXED){
+    //std::cout << "ACBrowserControlsCompleteDockWidgetQt::changeMediaType: Plugins according to media type" << std::endl;
+    /*if(media_cycle->getMediaType() == MEDIA_TYPE_MIXED){
         int comboBoxClustersPositionsIndex = ui.comboBoxClustersPositions->findText("Archipel Atoll");
         if (comboBoxClustersPositionsIndex > -1){
             ui.comboBoxClustersPositions->setCurrentIndex(comboBoxClustersPositionsIndex);
             media_cycle->changeClustersPositionsPlugin("Archipel Atoll");
         }
-    }
+    }*/
 
-    if(this->media_cycle){
-        if(this->media_cycle->hasBrowser()){
-            if ( media_cycle->getBrowserMode() == AC_MODE_CLUSTERS)
-                ui.radioButtonClusters->setChecked(true);
-            else if ( media_cycle->getBrowserMode() == AC_MODE_NEIGHBORS)
-                ui.radioButtonNeighbors->setChecked(true);
-        }
-    }
+    emit this->readjustHeight();
 }
 
 void ACBrowserControlsCompleteDockWidgetQt::resetPluginsSettings()
 {
     this->cleanCheckBoxes();
+
+    if(!media_cycle) return;
+
+    this->resetMode();
+
+    clustersMethodControls->setMediaCycle(this->media_cycle);
+    clustersPositionsControls->setMediaCycle(this->media_cycle);
+    neighborsMethodControls->setMediaCycle(this->media_cycle);
+    neighborsPositionsControls->setMediaCycle(this->media_cycle);
+
+    clustersMethodControls->resetPluginsSettings();
+    clustersPositionsControls->resetPluginsSettings();
+    neighborsMethodControls->resetPluginsSettings();
+    neighborsPositionsControls->resetPluginsSettings();
+
+    emit this->readjustHeight();
 }
 
 void ACBrowserControlsCompleteDockWidgetQt::changeMediaType(ACMediaType _media_type)
 {
-    this->updatePluginLists();
+    if(!media_cycle) return;
+
+    this->resetMode();
+
+    clustersMethodControls->setMediaCycle(this->media_cycle);
+    clustersPositionsControls->setMediaCycle(this->media_cycle);
+    neighborsMethodControls->setMediaCycle(this->media_cycle);
+    neighborsPositionsControls->setMediaCycle(this->media_cycle);
+
+    clustersMethodControls->changeMediaType(_media_type);
+    clustersPositionsControls->changeMediaType(_media_type);
+    neighborsMethodControls->changeMediaType(_media_type);
+    neighborsPositionsControls->changeMediaType(_media_type);
+
+    emit this->readjustHeight();
 }
 
 // synchronize weights with what is loaded in mediacycle
@@ -240,7 +272,7 @@ void ACBrowserControlsCompleteDockWidgetQt::synchronizeFeaturesWeights()
 
 void ACBrowserControlsCompleteDockWidgetQt::configureCheckBoxes()
 {
-    std::cout << "ACBrowserControlsCompleteDockWidgetQt::configureCheckBoxes" << std::endl;
+    //std::cout << "ACBrowserControlsCompleteDockWidgetQt::configureCheckBoxes" << std::endl;
 
     // dynamic config of checkboxes
     // according to plugins actually used to compute the features
@@ -248,7 +280,7 @@ void ACBrowserControlsCompleteDockWidgetQt::configureCheckBoxes()
 
     vector<string> plugins_list = this->media_cycle->getListOfActivePlugins();
     vector<string> ::iterator list_iter;
-	this->cleanCheckBoxes();
+    this->cleanCheckBoxes();
 
     for (list_iter = plugins_list.begin(); list_iter != plugins_list.end(); list_iter++)
     {
@@ -267,7 +299,7 @@ void ACBrowserControlsCompleteDockWidgetQt::configureCheckBoxes()
 
 void ACBrowserControlsCompleteDockWidgetQt::cleanCheckBoxes()
 {
-    std::cout << "ACBrowserControlsCompleteDockWidgetQt::cleanCheckBoxes" << std::endl;
+    //std::cout << "ACBrowserControlsCompleteDockWidgetQt::cleanCheckBoxes" << std::endl;
 
     for(int i = 0; i < ui.featuresListWidget->count(); i++)
         delete ui.featuresListWidget->takeItem(i);
@@ -276,143 +308,68 @@ void ACBrowserControlsCompleteDockWidgetQt::cleanCheckBoxes()
     emit this->readjustHeight();
 }
 
-void ACBrowserControlsCompleteDockWidgetQt::updatePluginLists()
-{
-    std::cout << "ACBrowserControlsCompleteDockWidgetQt::updatePluginLists" << std::endl;
-    if (media_cycle == 0) return;
-    //CF restore default mode
-    ui.comboBoxClustersMethod->clear();
-    ui.comboBoxClustersMethod->addItem(QString("KMeans (default)"));
-    ui.comboBoxClustersMethod->setEnabled(false);
-
-    ui.comboBoxClustersPositions->clear();
-    ui.comboBoxClustersPositions->addItem(QString("Propeller (default)"));
-    ui.comboBoxClustersPositions->setEnabled(false);
-
-    ui.comboBoxNeighborsMethod->clear();
-    ui.comboBoxNeighborsMethod->addItem(QString("None available"));
-    ui.comboBoxNeighborsMethod->setEnabled(false);
-
-    ui.comboBoxNeighborsPositions->clear();
-    ui.comboBoxNeighborsPositions->addItem(QString("None available"));
-    ui.comboBoxNeighborsPositions->setEnabled(false);
-
-    //setPreProcessPlugin
-
-    ACPluginManager *acpl = media_cycle->getPluginManager();
-    if (acpl)
-    {
-        for (int i=0; i<acpl->getSize(); i++)
-        {
-            for (int j=0; j<acpl->getPluginLibrary(i)->getSize(); j++)
-            {
-                //if (acpl->getPluginLibrary(i)->getPlugin(j)->getMediaType() == media_cycle->getLibrary()->getMediaType()) {
-                if (acpl->getPluginLibrary(i)->getPlugin(j)->implementsPluginType(PLUGIN_TYPE_CLUSTERS_METHOD))
-                {
-                    //CF on the first detected Clusters Method plugin
-                    if (ui.comboBoxClustersMethod->count() == 1 && ui.comboBoxClustersMethod->currentText().toStdString() == "KMeans (default)")
-                    {
-                        ui.comboBoxClustersMethod->setEnabled(true);
-                        //CF default settings: no Clusters Method plugin, use KMeans
-                    }
-                    ui.comboBoxClustersMethod->addItem(QString(acpl->getPluginLibrary(i)->getPlugin(j)->getName().c_str()));
-                    //if (media_cycle->getMediaType() == MEDIA_TYPE_TEXT && ui.comboBoxClustersMethod->currentText().toStdString() == "KMeans (default)")
-                }
-                else if (acpl->getPluginLibrary(i)->getPlugin(j)->implementsPluginType(PLUGIN_TYPE_CLUSTERS_POSITIONS))
-                {
-                    //CF on the first detected Clusters Positions plugin
-                    if (ui.comboBoxClustersPositions->count() == 1 && ui.comboBoxClustersPositions->currentText().toStdString() == "Propeller (default)")
-                    {
-                        ui.comboBoxClustersPositions->setEnabled(true);
-                        //CF default settings: no Clusters Positions plugin, use Propeller
-                    }
-                    ui.comboBoxClustersPositions->addItem(QString(acpl->getPluginLibrary(i)->getPlugin(j)->getName().c_str()));
-
-                }
-                else if (acpl->getPluginLibrary(i)->getPlugin(j)->implementsPluginType(PLUGIN_TYPE_NEIGHBORS_METHOD))
-                {
-                    //CF on the first detected Neighbors Method plugin
-                    if (ui.comboBoxNeighborsMethod->count() == 1 && ui.comboBoxNeighborsMethod->currentText().toStdString() == "None available")
-                    {
-                        ui.comboBoxNeighborsMethod->clear();
-                        ui.comboBoxNeighborsMethod->setEnabled(true);
-                    }
-                    ui.comboBoxNeighborsMethod->addItem(QString(acpl->getPluginLibrary(i)->getPlugin(j)->getName().c_str()));
-                }
-                else if (acpl->getPluginLibrary(i)->getPlugin(j)->implementsPluginType(PLUGIN_TYPE_NEIGHBORS_POSITIONS))
-                {
-                    //CF on the first detected Neighbors Positions plugin
-                    if (ui.comboBoxNeighborsPositions->count() == 1 && ui.comboBoxNeighborsPositions->currentText().toStdString() == "None available")
-                    {
-                        ui.comboBoxNeighborsPositions->clear();
-                        ui.comboBoxNeighborsPositions->setEnabled(true);
-                    }
-                    ui.comboBoxNeighborsPositions->addItem(QString(acpl->getPluginLibrary(i)->getPlugin(j)->getName().c_str()));
-                }
-                //CF we don't yet deal with Visualisation Plugins (combining Methods and Positions for Clusters and/or Neighborhoods)
-            }
-        }
-    }
-
-    if (ui.comboBoxNeighborsMethod->currentText().toStdString() != "None available" && ui.comboBoxNeighborsPositions->currentText().toStdString() != "None available")
-    {
-        ui.radioButtonClusters->setEnabled(true);
-        ui.radioButtonNeighbors->setEnabled(true);
-    }
-
-    if(media_cycle->getMediaType() == MEDIA_TYPE_TEXT || media_cycle->getMediaType() == MEDIA_TYPE_MIXED){
-        int comboBoxClustersMethodIndex = ui.comboBoxClustersMethod->findText("ACSparseCosKMeans");
-        if (comboBoxClustersMethodIndex > -1){
-            ui.comboBoxClustersMethod->setCurrentIndex(comboBoxClustersMethodIndex);
-            media_cycle->changeClustersMethodPlugin("ACSparseCosKMeans");
-        }
-        int comboBoxClustersPositionsIndex = ui.comboBoxClustersPositions->findText("ACSparseCosClustPosition");
-        if (comboBoxClustersPositionsIndex > -1){
-            ui.comboBoxClustersPositions->setCurrentIndex(comboBoxClustersPositionsIndex);
-            media_cycle->changeClustersPositionsPlugin("ACSparseCosClustPosition");
-        }
-    }
-    /*else{
-        ui.comboBoxClustersMethod->setCurrentIndex(1);
-        ui.comboBoxClustersPositions->setCurrentIndex(1);
-    }*/
-    emit this->readjustHeight();
-}
-
 void ACBrowserControlsCompleteDockWidgetQt::adjustHeight(){
-    if (ui.featuresListWidget->sizeHintForRow(0) >-1 && ui.featuresListWidget->count() >0){
-        // CF resize the feature list along the number of features with threshold
-        int max_number_of_lines = 9; // allows the current 18 audio features to be accessed on 2 pages
-        int current_number_of_lines = min(max_number_of_lines,ui.featuresListWidget->count());
-        //int current_number_of_lines = ui.featuresListWidget->count(); // uncomment this to remove the threshold
-        int featureListHeight = ui.featuresListWidget->sizeHintForRow(0)*current_number_of_lines+8; // 8 px approx to avoid the scrollbar
-        int groupBoxSimilarityHeight = ui.featuresListWidget->sizeHintForRow(0)*(current_number_of_lines+2); // 2 more lines as security factor
+    int line_heigth = 16;
+    int max_number_of_lines = 5;
 
-        ui.featuresListWidget->setMinimumHeight(featureListHeight);
-        ui.featuresListWidget->setFixedHeight(featureListHeight);
-        ui.groupBoxSimilarity->setMinimumHeight(groupBoxSimilarityHeight);
-        ui.groupBoxSimilarity->setFixedHeight(groupBoxSimilarityHeight);
+    int featureListHeight = line_heigth+8;
+    int groupBoxSimilarityHeight = featureListHeight + 32;
+    if (ui.featuresListWidget->count() >0){
+        // CF resize the feature list along the number of features with threshold
+        int current_number_of_lines = min(max_number_of_lines,ui.featuresListWidget->count())+1;
+        //int current_number_of_lines = ui.featuresListWidget->count(); // uncomment this to remove the threshold
+        featureListHeight = line_heigth*current_number_of_lines+8; // 8 px approx to avoid the scrollbar
+        groupBoxSimilarityHeight = featureListHeight + 32;
     }
-    else{
-        // CF resize the feature list to a default min size
-        ui.featuresListWidget->setMinimumHeight(16);
-        ui.featuresListWidget->setFixedHeight(16);
-        ui.groupBoxSimilarity->setMinimumHeight(64);
-        ui.groupBoxSimilarity->setFixedHeight(64);
+    ui.featuresListWidget->setMinimumHeight(featureListHeight);
+    ui.featuresListWidget->setMaximumHeight(featureListHeight);
+    ui.groupBoxSimilarity->setMinimumHeight(groupBoxSimilarityHeight);
+    ui.groupBoxSimilarity->setMaximumHeight(groupBoxSimilarityHeight);
+
+    ui.groupBoxClustersMethod->setMinimumHeight( clustersMethodControls->minimumHeight());
+    ui.groupBoxClustersPositions->setMinimumHeight( clustersPositionsControls->minimumHeight());
+    ui.tabClusters->setMinimumHeight(
+                ui.groupBoxClustersMethod->minimumHeight()
+                + ui.groupBoxClustersPositions->minimumHeight()
+                );
+
+    ui.groupBoxNeighborsMethod->setMinimumHeight( neighborsMethodControls->minimumHeight());
+    ui.groupBoxNeighborsPositions->setMinimumHeight( neighborsPositionsControls->minimumHeight());
+    ui.tabNeighbors->setMinimumHeight(
+                ui.groupBoxNeighborsMethod->minimumHeight()
+                + ui.groupBoxNeighborsPositions->minimumHeight()
+                );
+    int mode = ui.tabWidgetModes->currentIndex();
+
+    if(mode == 0){
+        ui.tabWidgetModes->setMinimumHeight(ui.tabClusters->minimumHeight());
     }
-    ui.featuresListWidget->adjustSize();
-    ui.groupBoxSimilarity->adjustSize();
+    else if(mode == 1){
+        ui.tabWidgetModes->setMinimumHeight(ui.tabNeighbors->minimumHeight());
+    }
 
     ui.dockWidgetContents->setMinimumHeight(
-        ui.groupBoxSimilarity->minimumHeight()
-        + ui.groupBoxClusters->minimumHeight()
-        + ui.groupBoxNeighbors->minimumHeight()
-        + ui.widgetModes->minimumHeight()
-        + ui.widgetNavigation->minimumHeight()
-        + 64
-    );
-    ui.dockWidgetContents->adjustSize();
-    ui.verticalLayoutWidget->adjustSize();
-    this->adjustSize();
-}
+                ui.groupBoxSimilarity->minimumHeight()
+                + ui.tabWidgetModes->minimumHeight()
+                + ui.groupBoxNavigation->minimumHeight()
+                + 64
+                );
 
+    this->setMinimumHeight(ui.dockWidgetContents->minimumHeight() + 64);
+    this->setMaximumHeight(ui.dockWidgetContents->minimumHeight() + 64);
+
+    /*std::cout << "ACBrowserControlsCompleteDockWidgetQt::adjustHeight exiting" << std::endl;
+    std::cout << "  groupBoxNavigation min " << ui.groupBoxNavigation->minimumHeight() << " actual " << ui.groupBoxNavigation->height() << std::endl;
+    std::cout << "  groupBoxSimilarity min " << ui.groupBoxSimilarity->minimumHeight() << " actual " << ui.groupBoxSimilarity->height() << std::endl;
+    std::cout << "  tabWidgetModes min " << ui.tabWidgetModes->minimumHeight() << " actual " << ui.tabWidgetModes->height() << std::endl;
+    std::cout << "    ui.tabClusters min " << ui.tabClusters->minimumHeight() << " actual " << ui.tabClusters->height() << std::endl;
+    //std::cout << "      clustersMethodBox min " << clustersMethodBox->minimumHeight() << " actual " << clustersMethodBox->height() << std::endl;
+    std::cout << "       clustersMethodControls min " << clustersMethodControls->minimumHeight() << " actual " << clustersMethodControls->height() << std::endl;
+    //std::cout << "      clustersPositionsBox min " << clustersPositionsBox->minimumHeight() << " actual " << clustersPositionsBox->height() << std::endl;
+    std::cout << "       clustersPositionsControls min " << clustersPositionsControls->minimumHeight() << " actual " << clustersPositionsControls->height() << std::endl;
+    std::cout << "    ui.tabNeighbors min " << ui.tabNeighbors->minimumHeight() << " actual " << ui.tabNeighbors->height() << std::endl;
+    std::cout << "      neighborsMethodControls min " << neighborsMethodControls->minimumHeight() << " actual " << neighborsMethodControls->height() << std::endl;
+    std::cout << "      neighborsPositionsControls min " << neighborsPositionsControls->minimumHeight() << " actual " << neighborsPositionsControls->height() << std::endl;
+    std::cout << "  ui.dockWidgetContents min " << ui.dockWidgetContents->minimumHeight() << " actual " << ui.dockWidgetContents->height() << std::endl;
+    std::cout << "  this min " << this->minimumHeight() << " actual " << this->height() << std::endl;*/
+}

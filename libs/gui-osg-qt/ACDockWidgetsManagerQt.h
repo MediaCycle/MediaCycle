@@ -63,7 +63,6 @@ public:
     void updateAudioEngine(ACAudioEngine* audio_engine);
     #endif //defined (SUPPORT_AUDIO)
     void updateOsgView(ACOsgCompositeViewQt* compositeOsgView);
-    void setMediaType(ACMediaType _media_type);
     #if defined (USE_OSC)
     void autoConnectOSC(bool _status = true);
     #endif //defined (USE_OSC)
@@ -72,7 +71,6 @@ public:
 
     bool addControlDock(ACAbstractDockWidgetQt* dock);
     bool addControlDock(std::string dock_type);
-    ACAbstractDockWidgetQt* getControlDock(std::string dock_type);
 
     void changeMediaType(ACMediaType _media_type);
     void updatePluginsSettings();
@@ -80,10 +78,14 @@ public:
     void resetMediaType(ACMediaType _media_type); // loadDefaultConfig if no video/pdf osg plug
 
 protected:
+    ACAbstractDockWidgetQt* getDockFromClassName(std::string _name);
+    ACAbstractDockWidgetQt* getDockFromFactoryName(std::string _name);
+
+protected:
     QMainWindow* mainWindow;
     ACDockWidgetFactoryQt* dockWidgetFactory;
     vector<ACAbstractDockWidgetQt*> dockWidgets;
-    vector<int> lastDocksVisibilities; //state stored before hiding all docks with the toggle
+    std::map<std::string,int> lastDocksVisibilities; //state stored before hiding all docks with the toggle
     bool plugins_scanned,previous_docks_visibility,current_docks_visibility;
     ACMediaType media_type;
     #if defined (USE_OSC)

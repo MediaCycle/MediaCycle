@@ -1,7 +1,7 @@
 /**
  * @brief ACVisPlugin2Desc.cpp
- * @author Thierry Ravet
- * @date 30/05/2012
+ * @author Christian Frisson
+ * @date 22/07/2012
  * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -31,115 +31,172 @@
 
 #include <armadillo>
 #include "Armadillo-utils.h"
-#include "ACPlugin.h"
 #include "ACVisPlugin2Desc.h"
 
 using namespace arma;
 using namespace std;
 
-ACVisPlugin2Desc::ACVisPlugin2Desc()
+ACVisPlugin2Desc::ACVisPlugin2Desc() : ACClusterPositionsPlugin()
 {
     //vars herited from ACPlugin
-	// XS TODO: are these general enough ? can we use this only for video ??
-    this->mMediaType = MEDIA_TYPE_VIDEO;
-    //this->mPluginType = PLUGIN_TYPE_CLUSTERS_POSITIONS;//CF or PLUGIN_TYPE_ANYMODE_POSITIONS?
-    this->mName = "Vis2Desc";
-    this->mDescription = "2 features Visualisation plugin";
-    this->mId = "";
-	
+    this->mMediaType = MEDIA_TYPE_ALL;
+    this->mName = "MediaCycle ScatterPlot";
+    this->mDescription = "Visualization plugin with 1 feature per cartesian axis";
+    this->mId = "";	
     //local vars
+}
+
+void ACVisPlugin2Desc::setMediaCycle(MediaCycle* _media_cycle)
+{
+    this->media_cycle=_media_cycle;
+    // CF this will work only since/if we load feature plugins before this plugin...
+    this->updateAvailableFeatures();
+}
+
+void ACVisPlugin2Desc::assignedFeaturesChanged(){
+    if(!this->media_cycle) return;
+    media_cycle->updateDisplay(true);
+    media_cycle->setNeedsDisplay(true);
+}
+
+bool ACVisPlugin2Desc::updateAvailableFeatures(){
+    if(this->media_cycle){
+        if(this->media_cycle->getPluginManager()){
+            std::vector<std::string> feature_names;
+            std::vector<std::string> names = this->media_cycle->getListOfActivePlugins();
+            for (std::vector<std::string>::iterator name = names.begin();name != names.end();name++){
+                feature_names.push_back(*name + " (dim 0)");
+                //std::cout << "ACVisPlugin2Desc: feature: " << *feature << std::endl;
+            }
+            if(feature_names.size()>=1){
+                if(this->hasStringParameterNamed("x"))
+                    this->updateStringParameter("x",feature_names.front(),feature_names);
+                else
+                    this->addStringParameter("x",feature_names.front(),feature_names,"feature assigned to x axis",boost::bind(&ACVisPlugin2Desc::assignedFeaturesChanged,this));
+                if(this->hasStringParameterNamed("y"))
+                    this->updateStringParameter("y",feature_names.front(),feature_names);
+                else
+                    this->addStringParameter("y",feature_names.front(),feature_names,"feature assigned to y axis",boost::bind(&ACVisPlugin2Desc::assignedFeaturesChanged,this));
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 ACVisPlugin2Desc::~ACVisPlugin2Desc()
 {
 }
 
-
 void ACVisPlugin2Desc::updateNextPositions(ACMediaBrowser* mediaBrowser){
-  int itemClicked, labelClicked, action;
-	vector<string> featureNames;
-	int libSize = mediaBrowser->getLibrary()->getSize();
-	itemClicked = mediaBrowser->getClickedNode();
-	labelClicked = mediaBrowser->getClickedLabel();
-	
-	mat desc_m, descD_m;
-	mat posDisp_m;	
+    if(!media_cycle) return;
+    if(media_cycle->getLibrarySize()==0) return;
 
-	extractDescMatrix(mediaBrowser, desc_m, featureNames);
-	if (desc_m.n_cols < 2){
-		std::cout << "Not enough features for this display" << std::endl;
-		ACPoint p;
-		for (int i=0; i<libSize; i++){
-			mediaBrowser->setLoopIsDisplayed(i, true);
-			// TODO: make sure you meant next
-			p.x = 0.f;//posDisp_m(i,0);
-			p.y = 0.f;//posDisp_m(i,1);
-			p.z = 0.f;
-			mediaBrowser->setNodeNextPosition(i, p);
-		}
-		
-		return;
-	}
-		
-	for (int i=0; i< featureNames.size(); i++)
-		std::cout << "featureNames : " << featureNames[i] << std::endl;
+    if(!(this->hasStringParameterNamed("x") && this->hasStringParameterNamed("y"))){
+        if(!(this->updateAvailableFeatures())){
+            std::cout << "ACVisPlugin2Desc::updateNextPositions: available features not set" << std::endl;
+            media_cycle->setNeedsDisplay(true);
+            return;
+        }
+    }
 
-	mediaBrowser->setNumberOfDisplayedLoops(desc_m.n_rows);
+    int itemClicked, labelClicked, action;
+    vector<string> featureNames;
+    int libSize = mediaBrowser->getLibrary()->getSize();
+    itemClicked = mediaBrowser->getClickedNode();
+    labelClicked = mediaBrowser->getClickedLabel();
 
-	ACPoint p;
-  for (int i=0; i<libSize; i++){
-    mediaBrowser->setLoopIsDisplayed(i, true);
-	  // TODO: make sure you meant next
-	  p.x = desc_m(i,0)*.1;
-	  p.y = desc_m(i,1)*.1;
-	  p.z = 0;
-		mediaBrowser->setNodeNextPosition(i, p);
-  }
-	////////////////////////////////////////////////////////////////
+    mat desc_m, descD_m;
+    mat posDisp_m;
+
+    extractDescMatrix(mediaBrowser, desc_m, featureNames);
+    if (desc_m.n_cols < 2){
+        std::cout << "Not enough features for this display" << std::endl;
+        ACPoint p;
+        for (int i=0; i<libSize; i++){
+            mediaBrowser->setLoopIsDisplayed(i, true);
+            // TODO: make sure you meant next
+            p.x = 0.f;//posDisp_m(i,0);
+            p.y = 0.f;//posDisp_m(i,1);
+            p.z = 0.f;
+            mediaBrowser->setNodeNextPosition(i, p);
+        }
+
+        return;
+    }
+
+    for (int i=0; i< featureNames.size(); i++)
+        std::cout << "featureNames : " << featureNames[i] << std::endl;
+
+    mediaBrowser->setNumberOfDisplayedLoops(desc_m.n_rows);
+
+    ACPoint p;
+    for (int i=0; i<libSize; i++){
+        mediaBrowser->setLoopIsDisplayed(i, true);
+        // TODO: make sure you meant next
+        p.x = desc_m(i,0)*.1;
+        p.y = desc_m(i,1)*.1;
+        p.z = 0;
+        mediaBrowser->setNodeNextPosition(i, p);
+    }
+    ////////////////////////////////////////////////////////////////
 }
 
 
 void ACVisPlugin2Desc::extractDescMatrix(ACMediaBrowser* mediaBrowser, mat& desc_m, vector<string> &featureNames){
-  vector<ACMedia*> loops = mediaBrowser->getLibrary()->getAllMedia();
-  int nbMedia = loops.size(); 
-	int featDim;
-	int totalDim = 0;
-	// Count nb of feature
-	int nbFeature = loops.back()->getNumberOfFeaturesVectors();
-	
-	std::vector<float> weight=mediaBrowser->getWeightVector();
-	if (nbFeature!=weight.size())
-		std::cerr<<"ACVisPluginPCA::extractDescMatrix weight vector size incompatibility"<<endl;
-	for(int f=0; f< nbFeature; f++){
-		if (weight[f]>0.f){
-			featureNames.push_back(loops.back()->getPreProcFeaturesVector(f)->getName());
-			featDim = loops.back()->getPreProcFeaturesVector(f)->getSize();
-			for(int d=0; d < featDim; d++){
-				totalDim++;
-			}
-		}
-	}
-	
-  desc_m.set_size(nbMedia,totalDim);
-  mat pos_m(nbMedia,2);
-  
-  for(int i=0; i<nbMedia; i++) {    
-    int tmpIdx = 0;
-	  for(int f=0; f< nbFeature; f++){
-		  if (weight[f]>0.f){
-			  std::cout << f << std::endl;
-			  featDim = loops.back()->getPreProcFeaturesVector(f)->getSize();
-			  for(int d=0; d < featDim; d++){
-				  desc_m(i,tmpIdx) = loops[i]->getPreProcFeaturesVector(f)->getFeatureElement(d);
-				  tmpIdx++;
-			  }
-		  }
-	  }
-  }
-  // normalizing features between 0 and 1 ///////////////////////////////////////
-//   rowvec maxDesc_v = max(desc_m);
-//   rowvec minDesc_v = min(desc_m);
-//   desc_m = desc_m - repmat(minDesc_v, desc_m.n_rows, 1);
-//   desc_m = desc_m/repmat(maxDesc_v-minDesc_v, desc_m.n_rows, 1);
-	/////////////////////////////////////////////////////////////////////////////////
+    vector<ACMedia*> loops = mediaBrowser->getLibrary()->getAllMedia();
+    int nbMedia = loops.size();
+    int featDim;
+    int totalDim = 0;
+    // Count nb of feature
+    int nbFeature = loops.back()->getNumberOfFeaturesVectors();
+
+    // CF was meant to activate the 2 first selected features from the check list
+    //std::vector<float> weight=mediaBrowser->getWeightVector();
+    /*if (nbFeature!=weight.size())
+        std::cerr<<"ACVisPluginPCA::extractDescMatrix weight vector size incompatibility"<<endl;
+    for(int f=0; f< nbFeature; f++){
+        if (weight[f]>0.f){
+            featureNames.push_back(loops.back()->getPreProcFeaturesVector(f)->getName());
+            featDim = loops.back()->getPreProcFeaturesVector(f)->getSize();
+            for(int d=0; d < featDim; d++){
+                totalDim++;
+            }
+        }
+    }
+
+    desc_m.set_size(nbMedia,totalDim);
+
+    for(int i=0; i<nbMedia; i++) {
+        int tmpIdx = 0;
+        for(int f=0; f< nbFeature; f++){
+            if (weight[f]>0.f){
+                std::cout << f << std::endl;
+                featDim = loops.back()->getPreProcFeaturesVector(f)->getSize();
+                for(int d=0; d < featDim; d++){
+                    desc_m(i,tmpIdx) = loops[i]->getPreProcFeaturesVector(f)->getFeatureElement(d);
+                    tmpIdx++;
+                }
+            }
+        }
+    }*/
+
+    //CF getting the first dimension of the features assigned to x and y
+    std::vector<float> weight ( mediaBrowser->getWeightVector().size() );
+    int x = this->getStringParameterValueIndex("x");
+    int y = this->getStringParameterValueIndex("y");
+
+    desc_m.set_size(nbMedia,2);
+
+    for(int i=0; i<nbMedia; i++) {
+        desc_m(i,0) = loops[i]->getPreProcFeaturesVector(x)->getFeatureElement(0);
+        desc_m(i,1) = loops[i]->getPreProcFeaturesVector(y)->getFeatureElement(0);
+    }
+
+    // normalizing features between 0 and 1 ///////////////////////////////////////
+    //   rowvec maxDesc_v = max(desc_m);
+    //   rowvec minDesc_v = min(desc_m);
+    //   desc_m = desc_m - repmat(minDesc_v, desc_m.n_rows, 1);
+    //   desc_m = desc_m/repmat(maxDesc_v-minDesc_v, desc_m.n_rows, 1);
+    /////////////////////////////////////////////////////////////////////////////////
 }

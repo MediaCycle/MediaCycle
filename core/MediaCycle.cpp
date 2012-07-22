@@ -42,27 +42,29 @@ using std::ifstream;
 
 MediaCycle::MediaCycle(ACMediaType aMediaType, string local_directory, string libname) : Subject() {
 
-	this->forwarddown = 0;
-//	this->playkeydown = true;
+    this->forwarddown = 0;
+    //	this->playkeydown = true;
 
 	this->local_directory = local_directory;
 	this->libname = libname;
 	this->networkSocket	= 0;
 
-	ACMediaFactory::getInstance(); // this populates the available file extensions if not called before
+    ACMediaFactory::getInstance(); // this populates the available file extensions if not called before
 
-	this->mediaLibrary = new ACMediaLibrary(aMediaType);
+    this->mediaLibrary = new ACMediaLibrary(aMediaType);
 
-	this->mediaBrowser = new ACMediaBrowser();
-	this->mediaBrowser->setLibrary(this->mediaLibrary);
+    this->mediaBrowser = new ACMediaBrowser();
+    this->mediaBrowser->setLibrary(this->mediaLibrary);
 
-	this->pluginManager = new ACPluginManager();
+    this->pluginManager = new ACPluginManager();
+    this->pluginManager->setMediaCycle(this);
+    this->mediaBrowser->changeClustersMethodPlugin( this->pluginManager->getPlugin("ACKMeansPlugin") );
+    this->mediaBrowser->changeClustersMethodPlugin( this->pluginManager->getPlugin("ACClusterPositionsPropellerPlugin") );
 
-	this->config_file_xml = "";
+    this->config_file_xml = "";
 
-	this->prevLibrarySize = 0;
-	this->eventManager=new ACEventManager;
-
+    this->prevLibrarySize = 0;
+    this->eventManager=new ACEventManager;
 }
 
 MediaCycle::MediaCycle(const MediaCycle& orig) {
@@ -79,25 +81,28 @@ MediaCycle::~MediaCycle() {
     stopTcpServer(); // will delete this->networkSocket;
 }
 void MediaCycle::clean(){
-	this->prevLibrarySize = 0;
-	this->forwarddown = 0;
-	this->local_directory = "";
-	this->libname = "";
-	this->config_file_xml = "";
+    this->prevLibrarySize = 0;
+    this->forwarddown = 0;
+    this->local_directory = "";
+    this->libname = "";
+    this->config_file_xml = "";
 
-	this->prevLibrarySize = 0;
-	this->mNeedsDisplay = false;
+    this->prevLibrarySize = 0;
+    this->mNeedsDisplay = false;
 
-	this->import_recursive = 0;
-	this->import_forward_order = false;
-	this->import_doSegment = false;
+    this->import_recursive = 0;
+    this->import_forward_order = false;
+    this->import_doSegment = false;
 
-	this->port = 0;
-	this->max_connections = 0;
+    this->port = 0;
+    this->max_connections = 0;
 
-	this->mediaLibrary->cleanLibrary();
-	this->mediaBrowser->clean();
-	this->pluginManager->clean();
+    this->mediaLibrary->cleanLibrary();
+    this->mediaBrowser->clean();
+    this->pluginManager->clean();
+    this->pluginManager->setMediaCycle(this);
+    this->mediaBrowser->changeClustersMethodPlugin( this->pluginManager->getPlugin("ACKMeansPlugin") );
+    this->mediaBrowser->changeClustersMethodPlugin( this->pluginManager->getPlugin("ACClusterPositionsPropellerPlugin") );
 }
 
 // == TCP
@@ -633,11 +638,12 @@ vector<float> MediaCycle::getWeightVector(){return mediaBrowser->getWeightVector
 float MediaCycle::getWeight(int i){return mediaBrowser->getWeight(i);}
 
 void MediaCycle::setForwardDown(int i) { forwarddown = i; }
-void MediaCycle::forwardNextLevel(bool toggle){
-	// enters in the cluster of the last selected node
-	//this->setForwardDown(1);
-    if (this->hasBrowser())
-		this->getBrowser()->forwardNextLevel(toggle);
+void MediaCycle::forwardNextLevel(){
+    // enters in the cluster of the last selected node
+    if (this->hasBrowser()){
+        //this->setForwardDown(true); // mediaBrowser->getMode() == AC_MODE_NEIGHBORS
+        this->getBrowser()->forwardNextLevel();
+    }
 }
 
 // == Features
@@ -817,6 +823,7 @@ int MediaCycle::readXMLConfigFileCore(TiXmlHandle _rootHandle) {
 // XS TODO return value, tests
 int MediaCycle::readXMLConfigFilePlugins(TiXmlHandle _rootHandle) {
 	if (!this->pluginManager) this->pluginManager = new ACPluginManager();
+        this->pluginManager->setMediaCycle(this);
 
 	TiXmlElement* MC_e_features_plugin_manager = _rootHandle.FirstChild("PluginsManager").ToElement();
 	int nb_plugins_lib=0;

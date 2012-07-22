@@ -1,7 +1,7 @@
 /**
  * @brief ACOsgCompositeViewQt.h
  * @author Christian Frisson
- * @date 28/06/2012
+ * @date 22/07/2012
  * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -114,7 +114,7 @@ public slots:
     //void examineMediaExternally(); // display properties using the default file browser
 
     // Browser
-    void forwardNextLevel(bool toggle); // recluster the selected cluster (cluster mode) or unwrap node (network mode)
+    void forwardNextLevel(); // recluster the selected cluster (cluster mode) or unwrap node (network mode)
     void stopPlayback(); // stop the playback of audio/video files
     void toggleMediaHover(bool toggle); // audio hover, image/video ... -> need a panel to configure the behaviour of hover
     void triggerMediaHover(bool trigger); // audio hover, image/video ... -> need a panel to configure the behaviour of hover

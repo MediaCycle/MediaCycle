@@ -38,11 +38,11 @@
 #include "ACBrowserControlsCompleteDockWidgetQt.h"
 
 class ACBrowserControlsClustersDockWidgetQt : public ACBrowserControlsCompleteDockWidgetQt {
-Q_OBJECT
+    Q_OBJECT
 
 public:
-	ACBrowserControlsClustersDockWidgetQt(QWidget *parent = 0);
-	~ACBrowserControlsClustersDockWidgetQt(){};
+    ACBrowserControlsClustersDockWidgetQt(QWidget *parent = 0);
+    ~ACBrowserControlsClustersDockWidgetQt(){};
 
 };
 #endif

@@ -12,10 +12,9 @@
 
 class ACNeighborhoodsPluginRandom : public ACNeighborMethodPlugin {
 public:
-  ACNeighborhoodsPluginRandom();
-  ~ACNeighborhoodsPluginRandom();
-	virtual void updateNeighborhoods(ACMediaBrowser* );
-protected:
+    ACNeighborhoodsPluginRandom();
+    ~ACNeighborhoodsPluginRandom();
+    virtual void updateNeighborhoods(ACMediaBrowser* );
 };
 
 #endif	/* _ACNEIGHBORHOODSPLUGINRANDOM_ */

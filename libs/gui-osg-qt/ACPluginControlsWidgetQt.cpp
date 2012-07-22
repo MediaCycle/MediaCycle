@@ -1,5 +1,5 @@
 /*
- *  ACSegmentationControlsWidgetQt.cpp
+ *  ACPluginControlsWidgetQt.cpp
  *  MediaCycle
  *
  *  @author Christian Frisson
@@ -32,18 +32,25 @@
  *
  */
 
-#include "ACSegmentationControlsWidgetQt.h"
+#include "ACPluginControlsWidgetQt.h"
 #include "ACPluginParameterQt.h"
 #include <qwt.h>
 #include <qwt_slider.h>
 
-ACSegmentationControlsWidgetQt::ACSegmentationControlsWidgetQt(QWidget *parent)
-    : QWidget(parent),ACAbstractWidgetQt(),comboBoxPlugins(0),vboxLayout(0),parametersLayout(0),parametersContainer(0)
+ACPluginControlsWidgetQt::ACPluginControlsWidgetQt(ACPluginType type, QWidget *parent)
+    : pluginType(type),QWidget(parent),ACAbstractWidgetQt(),comboBoxPlugins(0),vboxLayout(0),parametersContainer(0)
 {
     //setupUi(this); // first thing to do
+
+#if !(pluginType == PLUGIN_TYPE_SEGMENTATION)
+#error Currently on segmentation plugins are supported
+#endif
+
     vboxLayout = new QVBoxLayout();
     vboxLayout->setMargin(0);
     comboBoxPlugins = new QComboBox();
+    comboBoxPlugins->addItem("None");
+    comboBoxPlugins->setEnabled(false);
     vboxLayout->addWidget(comboBoxPlugins);
     this->setLayout(vboxLayout);
     this->show();
@@ -52,45 +59,56 @@ ACSegmentationControlsWidgetQt::ACSegmentationControlsWidgetQt(QWidget *parent)
     connect(this,SIGNAL(readjustHeight()),this,SLOT(adjustHeight()));
 }
 
-ACSegmentationControlsWidgetQt::~ACSegmentationControlsWidgetQt(){
+ACPluginControlsWidgetQt::~ACPluginControlsWidgetQt(){
     this->cleanPluginList();
 }
 
-void ACSegmentationControlsWidgetQt::on_comboBoxPlugins_activated(const QString & text)
+void ACPluginControlsWidgetQt::on_comboBoxPlugins_activated(const QString & text)
 {
-    std::cout << "Chosen segmentation plugin: " << text.toStdString() << std::endl;
+    std::cout << "Chosen plugin: " << text.toStdString() << std::endl;
     //std::cout << "Media type " << ACMediaFactory::getInstance().getNormalCaseStringFromMediaType(media_cycle->getMediaType()) << std::endl;
     if (media_cycle == 0) return;
     if (media_cycle->getPluginManager() == 0) return;
-    media_cycle->getPluginManager()->setActiveSegmentPlugin(text.toStdString());
+    if(this->pluginType == PLUGIN_TYPE_SEGMENTATION)
+        media_cycle->getPluginManager()->setActiveSegmentPlugin(text.toStdString());
+    else if(this->pluginType == PLUGIN_TYPE_CLUSTERS_METHOD)
+        media_cycle->changeClustersMethodPlugin(text.toStdString());
+    else if(this->pluginType == PLUGIN_TYPE_CLUSTERS_POSITIONS)
+        media_cycle->changeClustersPositionsPlugin(text.toStdString());
+    else if(this->pluginType == PLUGIN_TYPE_NEIGHBORS_METHOD)
+        media_cycle->changeNeighborsMethodPlugin(text.toStdString());
+    else if(this->pluginType == PLUGIN_TYPE_NEIGHBORS_POSITIONS)
+        media_cycle->changeNeighborsPositionsPlugin(text.toStdString());
     emit this->rebuildPluginList();
 }
 
-void ACSegmentationControlsWidgetQt::changeMediaType(ACMediaType _media_type)
+void ACPluginControlsWidgetQt::changeMediaType(ACMediaType _media_type)
 {
+    this->cleanPluginList();
     if (media_cycle == 0) return;
-    this->cleanPluginList();
     emit this->rebuildPluginList();
 }
 
-void ACSegmentationControlsWidgetQt::updatePluginsSettings()
+void ACPluginControlsWidgetQt::updatePluginsSettings()
 {
     this->cleanPluginList();
+    if (media_cycle == 0) return;
     emit this->rebuildPluginList();
 }
 
-void ACSegmentationControlsWidgetQt::resetPluginsSettings()
+void ACPluginControlsWidgetQt::resetPluginsSettings()
 {
     this->cleanPluginList();
 }
 
-void ACSegmentationControlsWidgetQt::resetMediaType(ACMediaType _media_type)
+void ACPluginControlsWidgetQt::resetMediaType(ACMediaType _media_type)
 {
     this->cleanPluginList();
+    if (media_cycle == 0) return;
     emit this->rebuildPluginList();
 }
 
-void ACSegmentationControlsWidgetQt::cleanPluginList()
+void ACPluginControlsWidgetQt::cleanPluginList()
 {
     comboBoxPlugins->clear();
     if(parametersContainer){
@@ -98,36 +116,61 @@ void ACSegmentationControlsWidgetQt::cleanPluginList()
         delete parametersContainer;
     }
     parametersContainer = 0;
+
+    comboBoxPlugins->addItem("None");
+    comboBoxPlugins->setEnabled(false);
 }
 
-void ACSegmentationControlsWidgetQt::buildPluginList()
+void ACPluginControlsWidgetQt::buildPluginList()
 {
     this->cleanPluginList();
 
     if (media_cycle == 0) return;
     if (media_cycle->getPluginManager() == 0) return;
 
-    int activePlugins = media_cycle->getPluginManager()->getActiveSegmentPluginsSize(media_cycle->getMediaType());
+    std::vector<std::string> availablePlugins = media_cycle->getPluginManager()->getAvailablePluginsNames( this->pluginType , media_cycle->getMediaType() );
+
     std::string current_plugin_name("");
-    if(activePlugins == 1){
-        current_plugin_name = media_cycle->getPluginManager()->getActiveSegmentPluginsNames(media_cycle->getMediaType()).front();
-        std::cout << "Already active plugin: " << current_plugin_name << std::endl;
+    if(this->pluginType == PLUGIN_TYPE_SEGMENTATION){
+        int activePlugins = media_cycle->getPluginManager()->getActiveSegmentPluginsSize(media_cycle->getMediaType());
+        if(activePlugins == 1){
+            current_plugin_name = media_cycle->getPluginManager()->getActiveSegmentPluginsNames(media_cycle->getMediaType()).front();
+            std::cout << "Already active plugin: " << current_plugin_name << std::endl;
+        }
+        else if(activePlugins == 0){
+            current_plugin_name = media_cycle->getPluginManager()->getAvailablePluginsNames(this->pluginType,media_cycle->getMediaType()).front();
+            media_cycle->getPluginManager()->setActiveSegmentPlugin( current_plugin_name );
+            std::cout << "Default active plugin: " << current_plugin_name << std::endl;
+        }
     }
-    else if(activePlugins == 0){
-        current_plugin_name = media_cycle->getPluginManager()->getAvailableSegmentPluginsNames(media_cycle->getMediaType()).front();
-        media_cycle->getPluginManager()->setActiveSegmentPlugin( current_plugin_name );
-        std::cout << "Default active plugin: " << current_plugin_name << std::endl;
+    else{
+        current_plugin_name = media_cycle->getBrowser()->getActivePluginName(this->pluginType);
+        if(current_plugin_name == "" && availablePlugins.size()>0){
+            current_plugin_name = availablePlugins.front();
+            if(this->pluginType == PLUGIN_TYPE_CLUSTERS_METHOD)
+                media_cycle->changeClustersMethodPlugin(current_plugin_name);
+            else if(this->pluginType == PLUGIN_TYPE_CLUSTERS_POSITIONS)
+                media_cycle->changeClustersPositionsPlugin(current_plugin_name);
+            else if(this->pluginType == PLUGIN_TYPE_NEIGHBORS_METHOD)
+                media_cycle->changeNeighborsMethodPlugin(current_plugin_name);
+            else if(this->pluginType == PLUGIN_TYPE_NEIGHBORS_POSITIONS)
+                media_cycle->changeNeighborsPositionsPlugin(current_plugin_name);
+        }
     }
 
     // Build plugin list
-    std::vector<std::string> availableSegmentPlugins = media_cycle->getPluginManager()->getAvailableSegmentPluginsNames( media_cycle->getMediaType() );
-    for (std::vector<std::string>::iterator availableSegmentPlugin = availableSegmentPlugins.begin(); availableSegmentPlugin != availableSegmentPlugins.end(); availableSegmentPlugin++){
-        QString plugin_name = QString((*availableSegmentPlugin).c_str());
+    comboBoxPlugins->clear();
+    for (std::vector<std::string>::iterator availablePlugin = availablePlugins.begin(); availablePlugin != availablePlugins.end(); availablePlugin++){
+        QString plugin_name = QString((*availablePlugin).c_str());
         comboBoxPlugins->addItem(plugin_name);
         comboBoxPlugins->setEnabled(true);
-        ACPlugin* plugin = media_cycle->getPluginManager()->getPlugin(*availableSegmentPlugin);
+        ACPlugin* plugin = media_cycle->getPluginManager()->getPlugin(*availablePlugin);
 
-        QFont font = QFont(QApplication::font().defaultFamily(),10);
+        //QFont font = QFont(QApplication::font().defaultFamily(),10);
+
+        QFont font = comboBoxPlugins->font();
+        font.setPointSize(10);
+
         comboBoxPlugins->setFont(font);
 
         if(plugin_name.toStdString() == current_plugin_name && plugin->getParametersCount()>0){
@@ -158,6 +201,9 @@ void ACSegmentationControlsWidgetQt::buildPluginList()
                 for (std::vector<std::string>::iterator name = names.begin();name!=names.end();name++){
                     combobox->addItem(QString((*name).c_str()));
                 }
+
+                combobox->setCurrentIndex( plugin->getStringParameterValueIndex(*strParamName) );
+
                 combobox->setFont(font);
                 layout->addWidget(combobox,paramIdx,1);
 
@@ -183,7 +229,7 @@ void ACSegmentationControlsWidgetQt::buildPluginList()
                 float step = plugin->getNumberParameterStep(*numParamName);
                 float min = plugin->getNumberParameterMin(*numParamName);
                 float max = plugin->getNumberParameterMax(*numParamName);
-                float init = plugin->getNumberParameterInit(*numParamName);
+                float init = plugin->getNumberParameterValue(*numParamName);
                 QString desc = QString( plugin->getNumberParameterDesc(*numParamName).c_str());
 
                 QLabel* label = new QLabel(name);
@@ -206,8 +252,10 @@ void ACSegmentationControlsWidgetQt::buildPluginList()
                     slider->setValue(init);
 #if QWT_VERSION < 0x060000
                     slider->setBgStyle(QwtSlider::BgSlot);
+                    slider->setMargins(12,12);
 #else
                     slider->setBackgroundStyle(QwtSlider::Groove);
+                    slider->setHandleSize(12,12);
 #endif
                     //slider->setScalePosition(QwtSlider::TopScale);
                     //QSlider* slider = new QSlider(Qt::Horizontal);
@@ -258,7 +306,7 @@ void ACSegmentationControlsWidgetQt::buildPluginList()
         comboBoxPlugins->setCurrentIndex(index);
     }
 
-    // If no segmentation plugin exist
+    // If no plugin exists
     if(comboBoxPlugins->count()==0){
         comboBoxPlugins->addItem("None");
         comboBoxPlugins->setEnabled(false);
@@ -266,16 +314,18 @@ void ACSegmentationControlsWidgetQt::buildPluginList()
     emit this->readjustHeight();
 }
 
-void ACSegmentationControlsWidgetQt::adjustHeight(){
+void ACPluginControlsWidgetQt::adjustHeight(){
     if(comboBoxPlugins){
         if(parametersContainer){
             parametersContainer->adjustSize();
-            comboBoxPlugins->setMinimumHeight( comboBoxPlugins->height() );
+            //comboBoxPlugins->setMinimumHeight( comboBoxPlugins->height() );
+            //parametersContainer->setMinimumHeight( parametersContainer->height() );
             this->setMinimumHeight( comboBoxPlugins->minimumHeight() + parametersContainer->minimumHeight() );
-            parametersContainer->adjustSize();
+            this->setFixedHeight( comboBoxPlugins->height() + parametersContainer->height() );
         }
         else{
-            this->setMinimumHeight( comboBoxPlugins->minimumHeight() );
+            this->setMinimumHeight( comboBoxPlugins->height() );
+            this->setFixedHeight( comboBoxPlugins->height() );
         }
     }
     else{

@@ -41,11 +41,11 @@ extern "C" std::vector<std::string> list() {    //returns a string vector contai
     listPlugin.push_back("ACAudioYaafePlugin");
 #else
     listPlugin.push_back("ACAudioFeaturesPlugin");
-#endif	
+#endif
     //listPlugin.push_back("ACAudioHaitsmaFingerprintPlugin");
     //listPlugin.push_back("ACAudioGardenFeaturesPlugin");
     //listPlugin.push_back("ACAudioFeaturesChromaRhythmPlugin");
-    //listPlugin.push_back("ACAudioAcidPlugin");
+    listPlugin.push_back("ACAudioAcidPlugin");
 #if defined(USE_OCTAVE) && defined(USE_MAKAM)
     listPlugin.push_back("ACAudioMakamFeaturesPlugin");
     listPlugin.push_back("ACAudioMakamClassifierPlugin");

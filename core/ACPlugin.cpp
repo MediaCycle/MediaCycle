@@ -71,18 +71,90 @@ std::string getExecutablePath(){
 #endif
 
 ACPlugin::ACPlugin() {
+    this->mName = "";
+    this->mId = "";
+    this->mDescription = "";
     this->mPluginType = PLUGIN_TYPE_NONE;
     this->mMediaType = MEDIA_TYPE_NONE;
+    this->media_cycle = 0;
 }
 
-void ACPlugin::addStringParameter(std::string _name, std::string _init, std::vector<std::string> _values, std::string _desc)
-{
-    mStringParameters.push_back(ACStringParameter(_name,_init,_values,_desc));
+ACPlugin::~ACPlugin() {
+    mName.clear();
+    mDescription.clear();
+    mId.clear();
+    this->media_cycle=0;
 }
 
-void ACPlugin::addNumberParameter(std::string _name, float _init, float _min, float _max, float _step, std::string _desc)
+bool ACPlugin::hasNumberParameterNamed(std::string _name){
+    for(std::vector<ACNumberParameter>::iterator NumberParameter = mNumberParameters.begin(); NumberParameter != mNumberParameters.end(); NumberParameter++ ){
+        if((*NumberParameter).name == _name)
+            return true;
+    }
+    return false;
+}
+
+bool ACPlugin::hasStringParameterNamed(std::string _name){
+    for(std::vector<ACStringParameter>::iterator StringParameter = mStringParameters.begin(); StringParameter != mStringParameters.end(); StringParameter++ ){
+        if((*StringParameter).name == _name)
+            return true;
+    }
+    return false;
+}
+
+void ACPlugin::addStringParameter(std::string _name, std::string _init, std::vector<std::string> _values, std::string _desc, ACParameterCallback _callback)
 {
-    mNumberParameters.push_back(ACNumberParameter(_name,_init,_min,_max,_step,_desc));
+    mStringParameters.push_back(ACStringParameter(_name,_init,_values,_desc,_callback));
+}
+
+void ACPlugin::updateStringParameter(std::string _name, std::string _init, std::vector<std::string> _values, std::string _desc, ACParameterCallback _callback){
+    for(std::vector<ACStringParameter>::iterator StringParameter = mStringParameters.begin(); StringParameter != mStringParameters.end(); StringParameter++ ){
+        if((*StringParameter).name == _name){
+            (*StringParameter).values = _values;
+            std::vector<std::string>::iterator value = std::find(_values.begin(),_values.end(),(*StringParameter).value);
+            if(value == _values.end())
+                (*StringParameter).value = _values.front();
+            else
+                (*StringParameter).value = _init;
+            (*StringParameter).init = _init;
+            if(_desc != "")
+                (*StringParameter).desc = _desc;
+            if(_callback)
+                (*StringParameter).callback = _callback;
+#ifdef USE_DEBUG
+            std::cout << " ACPlugin::updateStringParameterValues: plugin '" << mName << "', parameter '"<< _name << std::endl;
+#endif
+            return;
+        }
+    }
+}
+
+void ACPlugin::addNumberParameter(std::string _name, float _init, float _min, float _max, float _step, std::string _desc, ACParameterCallback _callback)
+{
+    mNumberParameters.push_back(ACNumberParameter(_name,_init,_min,_max,_step,_desc,_callback));
+}
+
+void ACPlugin::updateNumberParameter(std::string _name, float _init, float _min, float _max, float _step, std::string _desc, ACParameterCallback _callback){
+    for(std::vector<ACNumberParameter>::iterator NumberParameter = mNumberParameters.begin(); NumberParameter != mNumberParameters.end(); NumberParameter++ ){
+        if((*NumberParameter).name == _name){
+            (*NumberParameter).init = _init;
+            (*NumberParameter).min = _min;
+            (*NumberParameter).max = _max;
+            (*NumberParameter).step = _step;
+
+            if((*NumberParameter).value < _min || (*NumberParameter).value > _max)
+                (*NumberParameter).value = _init;
+
+            if(_desc != "")
+                (*NumberParameter).desc = _desc;
+            if(_callback)
+                (*NumberParameter).callback = _callback;
+#ifdef USE_DEBUG
+            std::cout << " ACPlugin::updateNumberParameterValues: plugin '" << mName << "', parameter '"<< _name << std::endl;
+#endif
+            return;
+        }
+    }
 }
 
 std::vector<ACStringParameter> ACPlugin::getStringParameters()
@@ -117,6 +189,8 @@ bool ACPlugin::setStringParameterValue(std::string _name, std::string _value){
 #ifdef USE_DEBUG
             std::cout << " ACPlugin::setStringParameterValue: plugin '" << mName << "', parameter '"<< _name << "', value '" << _value << "'" << std::endl;
 #endif
+            if ( (*StringParameter).callback != 0 )
+                (*StringParameter).callback();
             return true;
         }
     }
@@ -130,6 +204,8 @@ bool ACPlugin::setNumberParameterValue(std::string _name, float _value){
 #ifdef USE_DEBUG
             std::cout << " ACPlugin::setNumberParameterValue: plugin '" << mName << "', parameter '"<< _name << "', value '" << _value << "'" << std::endl;
 #endif
+            if( (*NumberParameter).callback != 0 )
+                (*NumberParameter).callback();
             return true;
         }
     }
@@ -312,7 +388,7 @@ bool ACPlugin::mediaTypeSuitable(ACMediaType pType) {
         return true;
 }
 
-ACFeaturesPlugin::ACFeaturesPlugin() {
+ACFeaturesPlugin::ACFeaturesPlugin() : ACPlugin() {
     this->mPluginType = mPluginType | PLUGIN_TYPE_FEATURES;
 }
 
@@ -354,39 +430,39 @@ std::string ACTimedFeaturesPlugin::saveTimedFeatures(ACMediaTimedFeature* mtf, s
     return string(""); // nothing to do
 }
 
-ACSegmentationPlugin::ACSegmentationPlugin() {
+ACSegmentationPlugin::ACSegmentationPlugin() : ACPlugin(){
     this->mPluginType = mPluginType | PLUGIN_TYPE_SEGMENTATION;
 }
 
-ACClusterMethodPlugin::ACClusterMethodPlugin() {
+ACClusterMethodPlugin::ACClusterMethodPlugin() : ACPlugin() {
     this->mPluginType = mPluginType | PLUGIN_TYPE_CLUSTERS_METHOD;
 }
 
-ACNeighborMethodPlugin::ACNeighborMethodPlugin() {
+ACNeighborMethodPlugin::ACNeighborMethodPlugin() : ACPlugin() {
     this->mPluginType = mPluginType | PLUGIN_TYPE_NEIGHBORS_METHOD;
 }
 
-ACPositionsPlugin::ACPositionsPlugin() {
+ACPositionsPlugin::ACPositionsPlugin() : ACPlugin() {
     this->mPluginType = mPluginType | PLUGIN_TYPE_POSITIONS;
 }
 
-ACClusterPositionsPlugin::ACClusterPositionsPlugin() {
+ACClusterPositionsPlugin::ACClusterPositionsPlugin() : ACPlugin() {
     this->mPluginType = mPluginType | PLUGIN_TYPE_CLUSTERS_POSITIONS;
 }
 
-ACNeighborPositionsPlugin::ACNeighborPositionsPlugin() {
+ACNeighborPositionsPlugin::ACNeighborPositionsPlugin() : ACPlugin() {
     this->mPluginType = mPluginType | PLUGIN_TYPE_NEIGHBORS_POSITIONS;
 }
 
-ACNoMethodPositionsPlugin::ACNoMethodPositionsPlugin() {
+ACNoMethodPositionsPlugin::ACNoMethodPositionsPlugin() : ACPlugin() {
     this->mPluginType = mPluginType | PLUGIN_TYPE_NOMETHOD_POSITIONS;
 }
 
-ACPreProcessPlugin::ACPreProcessPlugin() {
+ACPreProcessPlugin::ACPreProcessPlugin() : ACPlugin() {
     this->mPluginType = mPluginType | PLUGIN_TYPE_PREPROCESS;
 }
 
-ACMediaReaderPlugin::ACMediaReaderPlugin() {
+ACMediaReaderPlugin::ACMediaReaderPlugin() : ACPlugin() {
     this->mPluginType = mPluginType | PLUGIN_TYPE_MEDIAREADER;
 }
 

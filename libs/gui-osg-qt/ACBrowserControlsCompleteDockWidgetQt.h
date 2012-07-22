@@ -39,34 +39,26 @@
 #include <string.h>
 
 #include "ACAbstractDockWidgetQt.h"
+#include "ACPluginControlsWidgetQt.h"
 
 #include "ui_ACBrowserControlsCompleteDockWidgetQt.h"
 #include <MediaCycle.h>
 
 class ACBrowserControlsCompleteDockWidgetQt : public ACAbstractDockWidgetQt {
-Q_OBJECT
+    Q_OBJECT
 
 public slots:
     virtual void modifyListItem(QListWidgetItem *item);
-		
+
 protected slots:
     // Browser controls
     void on_pushButtonRecenter_clicked();
     void on_pushButtonBack_clicked();
     void on_pushButtonForward_clicked();
 
-    // Clustering controls
-    void on_spinBoxClusters_valueChanged(int _value);
-    void on_sliderClusters_sliderReleased();
-    void on_comboBoxClustersMethod_activated(const QString & text);
-    void on_comboBoxClustersPositions_activated(const QString & text);
+    //void on_radioButtonClusters_toggled( bool checked );
+    void on_tabWidgetModes_currentChanged(int index);
 
-// Neighborhoods controls
-    void on_comboBoxNeighborsMethod_activated(const QString & text);
-    void on_comboBoxNeighborsPositions_activated(const QString & text);
-
-    void on_radioButtonClusters_toggled( bool checked );
-	
 public:
     ACBrowserControlsCompleteDockWidgetQt(QWidget *parent = 0);
     virtual ~ACBrowserControlsCompleteDockWidgetQt(){};
@@ -89,9 +81,14 @@ public:
     virtual void changeMediaType(ACMediaType _media_type);
 
     void synchronizeFeaturesWeights();
-
     void cleanCheckBoxes();
-    void updatePluginLists();
-    QListWidget* getFeaturesListWidget(){return ui.featuresListWidget;}
+
+protected:
+    void resetMode();
+
+    ACPluginControlsWidgetQt* clustersMethodControls;
+    ACPluginControlsWidgetQt* clustersPositionsControls;
+    ACPluginControlsWidgetQt* neighborsMethodControls;
+    ACPluginControlsWidgetQt* neighborsPositionsControls;
 };
 #endif

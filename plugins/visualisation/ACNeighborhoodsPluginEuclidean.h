@@ -1,8 +1,8 @@
 /**
  * @brief ACNeighborhoodsPluginEuclidean.h
- * @author Thierry Ravet
- * @date 07/04/2011
- * @copyright (c) 2011 – UMONS - Numediart
+ * @author Christian Frisson
+ * @date 22/07/2012
+ * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -29,11 +29,11 @@
  * <mailto:avre@umons.ac.be>
 */
 
+#include "Armadillo-utils.h"
 
-#include "ACPlugin.h"
+#include "MediaCycle.h"
 #include "ACMediaBrowser.h"
-//#include "ACMediaBrowser.h"
-//#include "ACMediaTimedFeature.h"
+#include "ACPlugin.h"
 
 //using namespace arma;
 
@@ -42,14 +42,14 @@
 
 class ACNeighborhoodsPluginEuclidean : public ACNeighborMethodPlugin {
 public:
-  ACNeighborhoodsPluginEuclidean();
-  ~ACNeighborhoodsPluginEuclidean();
-	virtual void updateNeighborhoods(ACMediaBrowser* );
+    ACNeighborhoodsPluginEuclidean();
+    ~ACNeighborhoodsPluginEuclidean();
+    virtual void updateNeighborhoods(ACMediaBrowser* );
+    void neighborsNumberChanged();
 protected:
-	void extractDescMatrix(ACMediaBrowser* mediaBrowser, arma::mat &desc_m, arma::rowvec &weight_v);
-	long lastClickedNodeId;
+    void extractDescMatrix(ACMediaBrowser* mediaBrowser, arma::mat &desc_m, arma::rowvec &weight_v);
+    long lastClickedNodeId;
+    int nNeighbors;
 };
 
 #endif	/* _ACNEIGHBORHOODSPLUGINEUCLIDEAN_ */
-
-

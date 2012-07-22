@@ -39,7 +39,7 @@
 #include <string.h>
 
 #include "ACAbstractDockWidgetQt.h"
-#include "ACSegmentationControlsWidgetQt.h"
+#include "ACPluginControlsWidgetQt.h"
 
 //#include "ui_ACSegmentationControlsDialogQt.h" // uncomment if a *.ui file exists
 
@@ -60,7 +60,7 @@ public:
 
 protected:
     //Ui::ACSegmentationControlsDialogQt ui; // uncomment if a *.ui file exists
-    ACSegmentationControlsWidgetQt* widget;
+    ACPluginControlsWidgetQt* widget;
     QLabel *label;
     QDialogButtonBox* buttonBox;
     ACMediaType current_media_type;

@@ -54,31 +54,31 @@ static double getTime()
 
 ACUserLog::ACUserLog() {
     mNodeId = 0;
-	mLastClickedNodeId = -1;
+    mLastClickedNodeId = -1;
 }
 
 ACUserLog::~ACUserLog() {
 }
 
 void ACUserLog::addRootNode(long int _mediaId, int _clickTime) {
-	ACMediaNode *userNode;
-	userNode = new ACMediaNode(0, _mediaId, _clickTime);
-	userNode->setDisplayed(true);
-        userLogTree.set_head(*userNode);
-	mNodeId++;
+    ACMediaNode *userNode;
+    userNode = new ACMediaNode(0, _mediaId, _clickTime);
+    userNode->setDisplayed(true);
+    userLogTree.set_head(*userNode);
+    mNodeId++;
     //delete userNode;
 }
 
 
 long int ACUserLog::addNode(long int _parentId, long int _mediaId, int _clickTime) {
     Tree<ACMediaNode>::iterator location;
-	ACMediaNode *userNode;
-	userNode = new ACMediaNode(mNodeId, _mediaId, _clickTime);
-	userNode->setDisplayed(true);
-	// temporary node for comparison on nodeID using "==" method 
-	ACMediaNode *tmpNode;
-	tmpNode = new ACMediaNode(_parentId, 0, 0);
-        location = find(userLogTree.begin(), userLogTree.end(), *tmpNode);
+    ACMediaNode *userNode;
+    userNode = new ACMediaNode(mNodeId, _mediaId, _clickTime);
+    userNode->setDisplayed(true);
+    // temporary node for comparison on nodeID using "==" method
+    ACMediaNode *tmpNode;
+    tmpNode = new ACMediaNode(_parentId, 0, 0);
+    location = find(userLogTree.begin(), userLogTree.end(), *tmpNode);
     if(location != userLogTree.end()){
         userLogTree.append_child(location, *userNode); //CF: instead of location.insert(*userNode);
         this->getNodeFromId(mNodeId).setDisplayed(true);
@@ -87,14 +87,49 @@ long int ACUserLog::addNode(long int _parentId, long int _mediaId, int _clickTim
     else
         std::cerr << "ACUserLog::addNode: parent " << _parentId << " of media " << _mediaId << " not found in the user log." << std::endl;
     //delete userNode;
-	delete tmpNode;
-	return mNodeId;
+    delete tmpNode;
+    return mNodeId;
+}
+
+bool ACUserLog::removeNode(long int _id) {
+    Tree<ACMediaNode>::iterator location;
+    // temporary node for comparison on nodeID using "==" method
+    ACMediaNode *tmpNode;
+    tmpNode = new ACMediaNode(_id, 0, 0);
+    location = find(userLogTree.begin(), userLogTree.end(), *tmpNode);
+    if(location != userLogTree.end()){
+        userLogTree.erase_children(location);
+        userLogTree.erase(location);
+        delete tmpNode;
+        return true;
+    }
+    else
+        std::cerr << "ACUserLog::removeNode: node " << _id << " not found in the user log." << std::endl;
+    delete tmpNode;
+    return false;
+}
+
+bool ACUserLog::removeChildrenNodes(long int _id) {
+    Tree<ACMediaNode>::iterator location;
+    // temporary node for comparison on nodeID using "==" method
+    ACMediaNode *tmpNode;
+    tmpNode = new ACMediaNode(_id, 0, 0);
+    location = find(userLogTree.begin(), userLogTree.end(), *tmpNode);
+    if(location != userLogTree.end()){
+        userLogTree.erase_children(location);
+        delete tmpNode;
+        return true;
+    }
+    else
+        std::cerr << "ACUserLog::removeChidlrenNodes: node " << _id << " not found in the user log." << std::endl;
+    delete tmpNode;
+    return false;
 }
 
 void ACUserLog::clickNode(long int _nodeId, long int _clickTime) {
     Tree<ACMediaNode>::iterator location;
-	ACMediaNode *tmpNode;
-	tmpNode = new ACMediaNode(_nodeId, 0, 0);
+    ACMediaNode *tmpNode;
+    tmpNode = new ACMediaNode(_nodeId, 0, 0);
     location = find(userLogTree.begin(), userLogTree.end(), *tmpNode);
     if (location!=userLogTree.end()){
         (*location).clickNode(_clickTime);
@@ -152,16 +187,16 @@ void ACUserLog::setLastClickedNodeId(long int id)
 
 // XS TODO return value
 ACMediaNode& ACUserLog::getNodeFromId(long int _nodeId) {
-	if ((_nodeId >=0) && (_nodeId <= mNodeId)){
-                Tree<ACMediaNode>::iterator node = userLogTree.begin();
-                while( (node!=userLogTree.end()) ) { // (_nodeId != (*node).getNodeId()) &&
-			if ((*node).getNodeId() == _nodeId) {
-				return (*node);
-			}
-			++node;
-		}	
-	}
-	//CF return what?
+    if ((_nodeId >=0) && (_nodeId <= mNodeId)){
+        Tree<ACMediaNode>::iterator node = userLogTree.begin();
+        while( (node!=userLogTree.end()) ) { // (_nodeId != (*node).getNodeId()) &&
+            if ((*node).getNodeId() == _nodeId) {
+                return (*node);
+            }
+            ++node;
+        }
+    }
+    //CF return what?
     std::cerr << "ACUserLog::getNodeFromId " << _nodeId << " not found " << std::endl;
 }
 
@@ -180,170 +215,187 @@ ACMediaNode& ACUserLog::getNodeFromMediaId(long int _mediaId) {
 }
 
 long int ACUserLog::getMediaIdFromNodeId(long int _nodeId) {
-	long int _mediaId = -1;
-	if ((_nodeId >=0) && (_nodeId <= mNodeId)){
-                Tree<ACMediaNode>::iterator node = userLogTree.begin();
-                while( (node!=userLogTree.end()) ) { //(_nodeId != node->getNodeId()) &&
-			//std::cout << "Node Id loop" << _nodeId << " node " << node->getNodeId() << std::endl;
-			if ((*node).getNodeId() == _nodeId) {
-				_mediaId = (*node).getMediaId();
-				break;
-			}	
-			++node;
-		}
-	}
+    long int _mediaId = -1;
+    if ((_nodeId >=0) && (_nodeId <= mNodeId)){
+        Tree<ACMediaNode>::iterator node = userLogTree.begin();
+        while( (node!=userLogTree.end()) ) { //(_nodeId != node->getNodeId()) &&
+            //std::cout << "Node Id loop" << _nodeId << " node " << node->getNodeId() << std::endl;
+            if ((*node).getNodeId() == _nodeId) {
+                _mediaId = (*node).getMediaId();
+                break;
+            }
+            ++node;
+        }
+    }
+    else
+        std::cerr << "ACUserLog::getMediaIdFromNodeId: node " << _nodeId << " outside the user log bounds." << std::endl;
     if (_mediaId == -1)
         std::cerr << "ACUserLog::getMediaIdFromNodeId: no corresponding media for node " << _nodeId << " found in the user log." << std::endl;
-	return _mediaId;
+    return _mediaId;
 }
 
 int ACUserLog::getSpanAtDepth(int _depth){
-	int _span = -1;
-	if ((_depth >=0) && (_depth <= getMaxDepth())){
-		_span = 0;
-                Tree<ACMediaNode>::iterator node = userLogTree.begin();
-                while( (node!=userLogTree.end()) ) {
-                        if (userLogTree.depth(node) == _depth) {
-				_span++;
-			}	
-			++node;
-		}		
-	}
-	return _span;
+    int _span = -1;
+    if ((_depth >=0) && (_depth <= getMaxDepth())){
+        _span = 0;
+        Tree<ACMediaNode>::iterator node = userLogTree.begin();
+        while( (node!=userLogTree.end()) ) {
+            if (userLogTree.depth(node) == _depth) {
+                _span++;
+            }
+            ++node;
+        }
+    }
+    return _span;
 }
 
 int ACUserLog::getChildCountAtNodeId(long int _nodeId)
 {
-	int _childCount = -1;
-        Tree<ACMediaNode>::iterator node = userLogTree.begin();
-        while( (node!=userLogTree.end()) ) {
-		if ((*node).getNodeId() != _nodeId) {
-			++node;
-		}	
-		else {
-                        _childCount = userLogTree.number_of_children(node);
-			break;
-		}	
-	}
-	return 	_childCount;	
+    int _childCount = -1;
+    Tree<ACMediaNode>::iterator node = userLogTree.begin();
+    while( (node!=userLogTree.end()) ) {
+        if ((*node).getNodeId() != _nodeId) {
+            ++node;
+        }
+        else {
+            _childCount = userLogTree.number_of_children(node);
+            break;
+        }
+    }
+    return 	_childCount;
 }
 
 int ACUserLog::getPreviousSiblingFromNodeId(long int _nodeId)
 {
-	int _prevNodeId = -1;
-        Tree<ACMediaNode>::iterator node = userLogTree.begin();
-        while( (node!=userLogTree.end()) ) {
-		if ((*node).getNodeId() != _nodeId) {
-			++node;
-		}	
-		else {
-                        Tree<ACMediaNode>::sibling_iterator sib;
-                        sib = userLogTree.previous_sibling(node);
-                        if (userLogTree.is_valid(sib)) {
-				_prevNodeId = (*sib).getNodeId();
-			}	
-			break;
-		}	
-	}
-	return 	_prevNodeId;	
+    int _prevNodeId = -1;
+    Tree<ACMediaNode>::iterator node = userLogTree.begin();
+    while( (node!=userLogTree.end()) ) {
+        if ((*node).getNodeId() != _nodeId) {
+            ++node;
+        }
+        else {
+            Tree<ACMediaNode>::sibling_iterator sib;
+            sib = userLogTree.previous_sibling(node);
+            if (userLogTree.is_valid(sib)) {
+                _prevNodeId = (*sib).getNodeId();
+            }
+            break;
+        }
+    }
+    return 	_prevNodeId;
 }
 
 int ACUserLog::getNextSiblingFromNodeId(long int _nodeId)
 {
-	int _nextNodeId = -1;
-        Tree<ACMediaNode>::iterator node = userLogTree.begin();
-        while( (node!=userLogTree.end()) ) {
-		if ((*node).getNodeId() != _nodeId) {
-			++node;
-		}	
-		else {
-                        Tree<ACMediaNode>::sibling_iterator sib;
-                        sib = userLogTree.next_sibling(node);
-                        if (userLogTree.is_valid(sib)){
-				_nextNodeId = (*sib).getNodeId();
-			}	
-			break;
-		}	
-	}
-	return 	_nextNodeId;	
+    int _nextNodeId = -1;
+    Tree<ACMediaNode>::iterator node = userLogTree.begin();
+    while( (node!=userLogTree.end()) ) {
+        if ((*node).getNodeId() != _nodeId) {
+            ++node;
+        }
+        else {
+            Tree<ACMediaNode>::sibling_iterator sib;
+            sib = userLogTree.next_sibling(node);
+            if (userLogTree.is_valid(sib)){
+                _nextNodeId = (*sib).getNodeId();
+            }
+            break;
+        }
+    }
+    return 	_nextNodeId;
 }
 
 int ACUserLog::getFirstChildFromNodeId(long int _nodeId)
 {
-	int _firstChildId = -1;
-        Tree<ACMediaNode>::iterator node = userLogTree.begin();
-        while( (node!=userLogTree.end()) ) {
-		if ((*node).getNodeId() != _nodeId) {
-			++node;
-		}	
-		else {
-			if (getChildCountAtNodeId(_nodeId) > 0) {
-                                Tree<ACMediaNode>::sibling_iterator child = userLogTree.begin(node);
-                                if (userLogTree.is_valid(child)) {
-					_firstChildId = (*child).getNodeId();
-				}	
-			}
-			break;
-		}	
-	}
-	return 	_firstChildId;	
+    int _firstChildId = -1;
+    Tree<ACMediaNode>::iterator node = userLogTree.begin();
+    while( (node!=userLogTree.end()) ) {
+        if ((*node).getNodeId() != _nodeId) {
+            ++node;
+        }
+        else {
+            if (getChildCountAtNodeId(_nodeId) > 0) {
+                Tree<ACMediaNode>::sibling_iterator child = userLogTree.begin(node);
+                if (userLogTree.is_valid(child)) {
+                    _firstChildId = (*child).getNodeId();
+                }
+            }
+            break;
+        }
+    }
+    return 	_firstChildId;
 }
 
 int ACUserLog::getLastChildFromNodeId(long int _nodeId)
 {
-	int _lastChildId = -1;
-        Tree<ACMediaNode>::iterator node = userLogTree.begin();
-        while( (node!=userLogTree.end()) ) {
-		if ((*node).getNodeId() != _nodeId) {
-			++node;
-		}	
-		else {
-			if (getChildCountAtNodeId(_nodeId) > 0) {
-                                Tree<ACMediaNode>::sibling_iterator child = userLogTree.end(node);
-				--child;
-                                if (userLogTree.is_valid(child)) {
-					_lastChildId = (*child).getNodeId();
-				}	
-			}
-			break;
-		}	
-	}
-	return 	_lastChildId;	
+    int _lastChildId = -1;
+    Tree<ACMediaNode>::iterator node = userLogTree.begin();
+    while( (node!=userLogTree.end()) ) {
+        if ((*node).getNodeId() != _nodeId) {
+            ++node;
+        }
+        else {
+            if (getChildCountAtNodeId(_nodeId) > 0) {
+                Tree<ACMediaNode>::sibling_iterator child = userLogTree.end(node);
+                --child;
+                if (userLogTree.is_valid(child)) {
+                    _lastChildId = (*child).getNodeId();
+                }
+            }
+            break;
+        }
+    }
+    return 	_lastChildId;
 }
 
 
 int ACUserLog::getParentFromNodeId(long int _nodeId)
 {
-	int _parentId = -1;
-        Tree<ACMediaNode>::iterator node = userLogTree.begin();
-        while( (node!=userLogTree.end()) ) {
-		if ((*node).getNodeId() != _nodeId) {
-			++node;
-		}	
-		else {
-                        if (userLogTree.is_valid(userLogTree.parent(node)) )
-                                _parentId = (*(userLogTree.parent(node))).getNodeId();
-			break;
-		}	
-	}
-	return 	_parentId;	
+    int _parentId = -1;
+    Tree<ACMediaNode>::iterator node = userLogTree.begin();
+    while( (node!=userLogTree.end()) ) {
+        if ((*node).getNodeId() != _nodeId) {
+            ++node;
+        }
+        else {
+            if (userLogTree.is_valid(userLogTree.parent(node)) )
+                _parentId = (*(userLogTree.parent(node))).getNodeId();
+            break;
+        }
+    }
+    return 	_parentId;
 }
 
 
 void ACUserLog::dump(){
-        Tree<ACMediaNode>::iterator loc  = userLogTree.begin();
-        Tree<ACMediaNode>::iterator end  = userLogTree.end();
-	
-        int rootdepth=userLogTree.depth(loc);
-	
-	std::cout << "-----" << std::endl;
-	while(loc!=end) {
-                for(int i=0; i < userLogTree.depth(loc)-rootdepth; ++i)
-			std::cout << "  ";
-		std::cout << "n=" << loc->getNodeId() << " m=" << loc->getMediaId() << std::endl;
-		++loc;
-	}
-	std::cout << "-----" << std::endl;
+    Tree<ACMediaNode>::iterator loc  = userLogTree.begin();
+    Tree<ACMediaNode>::iterator end  = userLogTree.end();
+
+    int rootdepth=userLogTree.depth(loc);
+
+    std::cout << "-----" << std::endl;
+    while(loc!=end) {
+        for(int i=0; i < userLogTree.depth(loc)-rootdepth; ++i)
+            std::cout << "  ";
+        std::cout << "n=" << loc->getNodeId() << " m=" << loc->getMediaId() << std::endl;
+        ++loc;
+    }
+
+    //std::cout << "--" << std::endl;
+
+    //for(Tree<ACMediaNode>::iterator e = userLogTree.begin(); e!=userLogTree.end();e++)
+    //    std::cout << "n=" << (*e).getNodeId() << " m=" << (*e).getMediaId() << std::endl;
+
+    std::cout << "-----" << std::endl;
+}
+
+std::list<long> ACUserLog::getNodeIds(){
+    std::list<long> nodeIds;
+
+    for(Tree<ACMediaNode>::iterator e = userLogTree.begin(); e!=userLogTree.end();e++)
+        nodeIds.push_back( (*e).getNodeId() );
+        //std::cout << "n=" << (*e).getNodeId() << " m=" << (*e).getMediaId() << std::endl;
+    return nodeIds;
 }
 
 void ACUserLog::wrapToOrigin()
@@ -376,26 +428,26 @@ Tree<ACMediaNode> ACUserLog::getTree()
 
 int ACUserLog::getNthChildAtNodeId(long int _nodeId,long int _nthChild)
 {
-	int _childId = -1;
-	int _childCount = getChildCountAtNodeId(_nodeId);
-	if ( _childCount>0 && _nthChild < _childCount )
-	{
-		_childId = getFirstChildFromNodeId(_nodeId);
-		int _nth = 0;
-		while ( _childId !=1 && _childId != getLastChildFromNodeId(_nodeId) && _nth < _nthChild) {
-			_childId = getNextSiblingFromNodeId(_childId);
-			_nth++;
-		}	
-		
-	}	
-	return _childId;
+    int _childId = -1;
+    int _childCount = getChildCountAtNodeId(_nodeId);
+    if ( _childCount>0 && _nthChild < _childCount )
+    {
+        _childId = getFirstChildFromNodeId(_nodeId);
+        int _nth = 0;
+        while ( _childId !=1 && _childId != getLastChildFromNodeId(_nodeId) && _nth < _nthChild) {
+            _childId = getNextSiblingFromNodeId(_childId);
+            _nth++;
+        }
+
+    }
+    return _childId;
 }
 
 void ACUserLog::clean()
 {
     this->mNodeId = 0;
-	this->mLastClickedNodeId = -1;
+    this->mLastClickedNodeId = -1;
     if (this->userLogTree.size()>0)
         this->userLogTree.clear(); //CF erases all nodes, what about the root?
-        //std::cout << "Is the Tree empty? " << userLogTree.empty() << std::endl;
+    //std::cout << "Is the Tree empty? " << userLogTree.empty() << std::endl;
 }	

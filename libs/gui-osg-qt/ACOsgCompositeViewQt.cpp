@@ -447,7 +447,7 @@ void ACOsgCompositeViewQt::initInputActions(){
     forwardNextLevelAction->setShortcut(Qt::Key_A);
     forwardNextLevelAction->setKeyEventType(QEvent::KeyPress);
     forwardNextLevelAction->setMouseEventType(QEvent::MouseButtonPress);
-    connect(forwardNextLevelAction, SIGNAL(triggered(bool)), this, SLOT(forwardNextLevel(bool)));
+    connect(forwardNextLevelAction, SIGNAL(triggered(bool)), this, SLOT(forwardNextLevel()));
     this->addInputAction(forwardNextLevelAction);
 
     stopPlaybackAction = new ACInputActionQt(tr("Stop Playback"), this);
@@ -610,10 +610,10 @@ void ACOsgCompositeViewQt::examineMediaExternally(){
     }
 }*/
 
-void ACOsgCompositeViewQt::forwardNextLevel(bool toggle){
+void ACOsgCompositeViewQt::forwardNextLevel(){
     if (media_cycle == 0) return;
     std::cout << "ACOsgCompositeViewQt::forwardNextLevel" << std::endl;
-    media_cycle->forwardNextLevel(toggle);
+    media_cycle->forwardNextLevel();
 }
 
 void ACOsgCompositeViewQt::stopPlayback(){

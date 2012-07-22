@@ -73,7 +73,7 @@ void ACMultiMediaCycleOsgQt::mediaImported(int n,int nTot){
 	if (n==0) {
 		send = "Loading Directory...";
 		emit mediacycle_message_changed(QString(send.c_str()));
-		emit loading_started();
+                emit loading_started();
 	}
         else if (n==nTot) {
 		send = "";
@@ -81,10 +81,10 @@ void ACMultiMediaCycleOsgQt::mediaImported(int n,int nTot){
 		emit loading_finished();
 		this->updateLibrary();
 		
-		//Threading problem if we change during the import
+                //Threading problem if we change during the import
 		if(media_cycle->getLibrary()->getParentIds().size()>=1){
 			dockWidgetsManager->updatePluginsSettings();
-		}
+                }
 	}
         else if(n<nTot){
 //Threading problem if we change during the import
@@ -247,7 +247,7 @@ void ACMultiMediaCycleOsgQt::setMediaType(ACMediaType _mt)
     if(this->media_type != _mt)
         this->clean(); //CF this ensures that the browser is cleaned at every media type change, and kept when adding new media files of the same type
     this->media_type = _mt;
-    dockWidgetsManager->setMediaType(_mt);
+    dockWidgetsManager->changeMediaType(_mt);
 }
 
 // tries to read settings from previous run
@@ -461,7 +461,7 @@ bool ACMultiMediaCycleOsgQt::readXMLConfig(string _filename){
 	}
 	
 	ACPluginManager* acpl = media_cycle->getPluginManager();
-        if (acpl->getAvailableFeaturesPluginsSize(media_type) &&/*acpl->getFeaturesPlugins()->getSize(media_type)>0 &&*/ !use_feature_extraction){ // if no feature extraction plugin was loaded before opening the XML and if the XML loaded one
+        if (acpl->getAvailablePluginsSize(PLUGIN_TYPE_FEATURES,media_type) &&/*acpl->getFeaturesPlugins()->getSize(media_type)>0 &&*/ !use_feature_extraction){ // if no feature extraction plugin was loaded before opening the XML and if the XML loaded one
 		this->showError("Feature extraction plugin(s) now loaded again. Importing media files now enabled.");
 		this->switchFeatureExtraction(true);
 	}
@@ -885,6 +885,7 @@ void ACMultiMediaCycleOsgQt::updateLibrary(){
         dockWidgetsManager->updatePluginsSettings();
 	compositeOsgView->setFocus();
         metadataWindow->updateLibrary();
+        //media_cycle->updateDisplay(true); //CF tried
 }
 
 // adds the plugins in _library pth via mediaCycle's pluginManager
@@ -1165,9 +1166,11 @@ void ACMultiMediaCycleOsgQt::loadDefaultConfig(ACMediaType _media_type, ACBrowse
 		media_cycle->setPreProcessPlugin("");
 	}	
 	
+    //media_cycle->dumpPluginsList();
+
     // update the plugin lists of the browser control dock through DockWidget
     dockWidgetsManager->changeMediaType(_media_type);
-	this->setMediaType(_media_type);
+    this->setMediaType(_media_type);
     //dockWidgetsManager->resetPluginsSettings();
 }
 
@@ -1293,7 +1296,7 @@ bool ACMultiMediaCycleOsgQt::hasMediaCycle(){
         bool ok;
         QString mediaType =  QInputDialog::getItem(this,tr("Choose the media type"),tr("Media type:"), mediaTyped, 0, false, &ok);
         if (ok && !mediaType.isEmpty()){
-            dockWidgetsManager->setMediaType( ACMediaFactory::getInstance().guessMediaTypeFromString(mediaType.toStdString()) );
+            dockWidgetsManager->changeMediaType( ACMediaFactory::getInstance().guessMediaTypeFromString(mediaType.toStdString()) );
             this->comboDefaultSettingsChanged(mediaType);
             return true;
         }
@@ -1401,7 +1404,7 @@ void ACMultiMediaCycleOsgQt::changeMediaType(ACMediaType _media_type){
 	}
 #endif //defined (SUPPORT_AUDIO)
 	this->media_cycle->changeMediaType(_media_type);
-    dockWidgetsManager->setMediaType(_media_type);
+    dockWidgetsManager->changeMediaType(_media_type);
     metadataWindow->setMediaCycle(media_cycle);
     metadataWindow->clean();
 }

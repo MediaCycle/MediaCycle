@@ -2,7 +2,7 @@
  *  ACKMeansPlugin.cpp
  *  MediaCycle
  *
- *  @author Ravet Thierry
+ *  @author Thierry Ravet
  *  @date 11/10/2010
  *  @copyright (c) 2010 – UMONS - Numediart
  *  
@@ -32,7 +32,6 @@
  *
  */
 
-
 #ifndef _ACKMeansPlugin_H
 #define	_ACKMeansPlugin_H
 
@@ -44,18 +43,10 @@
 
 class ACKMeansPlugin : public ACClusterMethodPlugin {
 public:
-	ACKMeansPlugin();
-	~ACKMeansPlugin();
-	void updateClusters(ACMediaBrowser* mediaBrowser,bool needsCluster=true);//updateClustersKMeans(animate, needsCluster)
-	virtual double compute_distance(vector<ACMediaFeatures*> &, vector<ACMediaFeatures*> &, const vector<float> &, bool )=0;
-	virtual double compute_distance(vector<ACMediaFeatures*> &, const vector<FeaturesVector> &, const vector<float> &, bool )=0;
-	//	virtual void updateClusters(ACMediaBrowser* mediaBrowser ,bool needsCluster=true)=0;//updateClustersKMeans(animate, needsCluster)
-	virtual void meanAccumCompute(ACMediaFeatures* ,FeaturesVector&)=0;
-	
-//	void updateNextPositions(ACMediaBrowser*  );
-
-	
-private:
+    ACKMeansPlugin();
+    ~ACKMeansPlugin();
+    void updateClusters(ACMediaBrowser* mediaBrowser,bool needsCluster=true);
+    void clusterNumberChanged();
 };
 
 #endif	/* _ACKMeansPlugin_H */

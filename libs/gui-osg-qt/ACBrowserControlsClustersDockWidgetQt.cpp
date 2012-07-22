@@ -40,8 +40,5 @@ ACBrowserControlsClustersDockWidgetQt::ACBrowserControlsClustersDockWidgetQt(QWi
     this->setClassName("ACBrowserControlsClustersDockWidgetQt");
     this->show();
 
-    ui.groupBoxNeighbors->hide();
-    ui.widgetModes->hide();
-    ui.groupBoxNeighbors->setMinimumHeight(0);
-    ui.groupBoxNeighbors->setMaximumHeight(0);
+    ui.tabWidgetModes->removeTab(1);
 }

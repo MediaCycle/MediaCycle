@@ -565,7 +565,7 @@ void ACOsgAudioRenderer::updateNodes(double ratio) {
 
         if (!entry_geode){
             entryGeode();
-            std::cout << "ACOsgAudioRenderer::updateNodes created missing node geode" << std::endl;
+            //std::cout << "ACOsgAudioRenderer::updateNodes created missing node geode" << std::endl;
         }
 
         //CF nodes colored along their relative cluster on in Clusters Mode

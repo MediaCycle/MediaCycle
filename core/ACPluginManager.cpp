@@ -39,6 +39,10 @@
 
 #include "ACMediaFactory.h"
 
+#include "ACKMeansPlugin.h"
+#include "ACClusterPositionsPropellerPlugin.h"
+
+
 using namespace std;
 
 #include <boost/filesystem.hpp>
@@ -57,9 +61,11 @@ vector<ACMediaType> mediaExtract(ACMediaType lMediaType) {
 }
 
 ACPluginManager::ACPluginManager() {
+    media_cycle=0;
     mAvailableFeaturePlugins = new ACAvailableFeaturesPlugins();
     mAvailableSegmentPlugins = new ACAvailableSegmentPlugins();
     mActiveSegmentPlugins = new ACAvailableSegmentPlugins();
+    mPluginLibrary.push_back(new ACDefaultPluginsLibrary());
 }
 
 ACPluginManager::ACPluginManager(const ACPluginManager& orig) {
@@ -67,13 +73,23 @@ ACPluginManager::ACPluginManager(const ACPluginManager& orig) {
 
 ACPluginManager::~ACPluginManager() {
     this->clean();
+    this->mPluginLibrary.clear();
     delete mAvailableFeaturePlugins;
     delete mAvailableSegmentPlugins;
     delete mActiveSegmentPlugins;
     mAvailableFeaturePlugins = NULL;
     mAvailableSegmentPlugins = NULL;
     mActiveSegmentPlugins = NULL;
+    this->media_cycle=0;
 }
+
+void ACPluginManager::setMediaCycle(MediaCycle* _media_cycle){
+    this->media_cycle=_media_cycle;
+    for (vector<ACPluginLibrary *>::iterator iter = this->mPluginLibrary.begin(); iter != this->mPluginLibrary.end(); iter++){
+        (*iter)->setMediaCycle(_media_cycle);
+    }
+}
+
 /*
  * Adds a plugin LIBRARY to the manager's list
  * return values:
@@ -96,7 +112,8 @@ int ACPluginManager::addLibrary(std::string aPluginLibraryPath) {
     cout << "adding Plugin Library : " << aPluginLibraryPath << endl;
 
     ACPluginLibrary *acpl = new ACPluginLibrary(lib);
-    acpl->initialize(); //useless
+    acpl->setMediaCycle(this->media_cycle);
+    acpl->initialize();
     acpl->setLibraryPath(aPluginLibraryPath);
 
     mPluginLibrary.push_back(acpl);
@@ -166,8 +183,10 @@ int ACPluginManager::clean() {
     vector<ACPluginLibrary *> ::iterator iter;
     for (iter = this->mPluginLibrary.begin(); iter != this->mPluginLibrary.end(); iter++) {
         delete *iter; // this will delete plugins from each library too
+        *iter = 0;
     }
     this->mPluginLibrary.clear();
+    this->mPluginLibrary.push_back(new ACDefaultPluginsLibrary());
     return 0;
 }
 
@@ -207,21 +226,48 @@ void ACPluginManager::dump() {
     }
 }
 
-int ACPluginManager::getAvailableFeaturesPluginsSize(ACMediaType MediaType) {
+/*int ACPluginManager::getAvailableFeaturesPluginsSize(ACMediaType MediaType) {
     return this->mAvailableFeaturePlugins->getSize(MediaType);
 }
 
 int ACPluginManager::getAvailableSegmentPluginsSize(ACMediaType MediaType) {
     return this->mAvailableSegmentPlugins->getSize(MediaType);
-}
+}*/
 
 int ACPluginManager::getActiveSegmentPluginsSize(ACMediaType MediaType) {
     return this->mActiveSegmentPlugins->getSize(MediaType);
 }
 
-std::vector<std::string> ACPluginManager::getAvailableSegmentPluginsNames(ACMediaType MediaType) {
+/*std::vector<std::string> ACPluginManager::getAvailableSegmentPluginsNames(ACMediaType MediaType) {
     return this->mAvailableSegmentPlugins->getName(MediaType);
+}*/
+
+int ACPluginManager::getAvailablePluginsSize(ACPluginType PluginType, ACMediaType MediaType){
+    int number = 0;
+    for(std::vector<ACPluginLibrary *>::iterator pluginLibrary = mPluginLibrary.begin();pluginLibrary != mPluginLibrary.end();pluginLibrary++){
+        std::vector<ACPlugin *> plugins = (*pluginLibrary)->getPlugins();
+        for(std::vector<ACPlugin *>::iterator plugin = plugins.begin();plugin != plugins.end();plugin++){
+            if( (*plugin)->implementsPluginType(PluginType) && (*plugin)->mediaTypeSuitable(MediaType) )
+                number++;
+        }
+    }
+    return number;
 }
+
+std::vector<std::string> ACPluginManager::getAvailablePluginsNames(ACPluginType PluginType, ACMediaType MediaType){
+    std::vector<std::string> names;
+    for(std::vector<ACPluginLibrary *>::iterator pluginLibrary = mPluginLibrary.begin();pluginLibrary != mPluginLibrary.end();pluginLibrary++){
+        std::vector<ACPlugin *> plugins = (*pluginLibrary)->getPlugins();
+        for(std::vector<ACPlugin *>::iterator plugin = plugins.begin();plugin != plugins.end();plugin++){
+            if(*plugin){
+                if( (*plugin)->implementsPluginType(PluginType) && (*plugin)->mediaTypeSuitable(MediaType) )
+                    names.push_back( (*plugin)->getName() );
+            }
+        }
+    }
+    return names;
+}
+
 
 std::vector<std::string> ACPluginManager::getActiveSegmentPluginsNames(ACMediaType MediaType) {
     return this->mActiveSegmentPlugins->getName(MediaType);
@@ -282,15 +328,35 @@ ACPreProcessPlugin* ACPluginManager::getPreProcessPlugin(ACMediaType MediaType){
  * ACPluginLibrary implementation
  */
 ACPluginLibrary::ACPluginLibrary(DynamicLibrary* aLib) {
+    this->library_path = "";
     this->mLib = aLib;
     this->create = (createPluginFactory*) aLib->getProcAddress("create");
     this->destroy = (destroyPluginFactory*) aLib->getProcAddress("destroy");
     this->list = (listPluginFactory*) aLib->getProcAddress("list");
+    this->media_cycle=0;
+}
+
+ACPluginLibrary::ACPluginLibrary() {
+    this->library_path = "";
+    this->mLib = 0;
+    this->create = 0;
+    this->destroy = 0;
+    this->list = 0;
+    this->media_cycle=0;
 }
 
 ACPluginLibrary::~ACPluginLibrary() {
     freePlugins();
     delete mLib;
+    this->media_cycle=0;
+}
+
+void ACPluginLibrary::setMediaCycle(MediaCycle *_media_cycle)
+{
+    this->media_cycle=_media_cycle;
+    for (vector<ACPlugin*>::iterator iter = this->mPlugins.begin(); iter != this->mPlugins.end(); iter++) {
+        (*iter)->setMediaCycle(_media_cycle);
+    }
 }
 
 int ACPluginLibrary::initialize() {
@@ -306,6 +372,7 @@ int ACPluginLibrary::initialize() {
         ACPlugin* plugin = create(listPlugin[i]);
         if (plugin) {
             this->mPlugins.push_back(plugin);
+            plugin->setMediaCycle(this->media_cycle);
         } else {
             return -1;
         }
@@ -355,6 +422,32 @@ void ACPluginLibrary::dump() {
     for (unsigned int k = 0; k<this->mPlugins.size(); k++) {
         cout << "plugin #" << k << ": " << this->mPlugins[k]->getName() << endl;
     }
+}
+
+//typedef ACPlugin* createPluginFactory(std::string);
+//typedef void destroyPluginFactory(ACPlugin*);
+//typedef std::vector<std::string> listPluginFactory();
+
+ACDefaultPluginsLibrary::ACDefaultPluginsLibrary(){
+    this->library_path = "";
+    this->mLib = 0;
+    mPlugins.push_back(new ACKMeansPlugin());
+    mPlugins.push_back(new ACClusterPositionsPropellerPlugin());
+}
+
+ACDefaultPluginsLibrary::~ACDefaultPluginsLibrary(){
+    for (std::vector<ACPlugin *>::iterator iter = this->mPlugins.begin(); iter != this->mPlugins.end(); iter++) {
+        delete(*iter);
+        *iter = 0;
+    }
+    mPlugins.clear();
+}
+
+int ACDefaultPluginsLibrary::initialize() {
+    for (std::vector<ACPlugin *>::iterator iter = this->mPlugins.begin(); iter != this->mPlugins.end(); iter++) {
+        (*iter)->setMediaCycle(this->media_cycle);
+    }
+    return 1;
 }
 
 //ACAvailableFeaturesPlugins implementation

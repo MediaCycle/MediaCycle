@@ -42,6 +42,7 @@
 #include <vector>
 
 #include <tree.hh>
+#include <list>
 #include "ACMediaNode.h"
 
 using namespace std;
@@ -54,6 +55,8 @@ public:
 
     void addRootNode(long int _mediaId, int _clickTime);
     long int addNode(long int _parentId, long int _mediaId, int _clickTime);
+    bool removeNode(long int _id);
+    bool removeChildrenNodes(long int _id);
     ACMediaNode& getNodeFromId(long int _nodeId);
     ACMediaNode& getNodeFromMediaId(long int _mediaId);
     long int getMediaIdFromNodeId(long int _nodeId);
@@ -76,6 +79,7 @@ public:
     void wrapToOrigin();
     void dump();
     void clean();
+    std::list<long> getNodeIds();
 
 private:	
     int mNodeId;

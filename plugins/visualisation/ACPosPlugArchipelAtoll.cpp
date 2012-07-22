@@ -1,7 +1,7 @@
 /**
  * @brief ACPosPlugArchipelAtoll.cpp
  * @author Christian Frisson
- * @date 11/06/2012
+ * @date 22/07/2012
  * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -34,13 +34,13 @@
 #include "ACPlugin.h"
 #include "ACPosPlugArchipelAtoll.h"
 
-#include <float.h> //FLT_MAX
+//#include <float.h> //FLT_MAX
 
 using namespace arma;
 using namespace std;
 
 //#if defined(SUPPORT_ARCHIPEL)
-ACPosPlugArchipelAtoll::ACPosPlugArchipelAtoll()
+ACPosPlugArchipelAtoll::ACPosPlugArchipelAtoll() : ACClusterPositionsPropellerPlugin()
 {
     //vars herited from ACPlugin
 	// XS TODO: are these general enough ? can we use this only for audio ??
@@ -60,7 +60,7 @@ ACPosPlugArchipelAtoll::~ACPosPlugArchipelAtoll()
 void ACPosPlugArchipelAtoll::updateNextPositions(ACMediaBrowser* mediaBrowser){
 	float lZoom=mediaBrowser->getCameraZoom();
 	
-	mediaBrowser->updateNextPositionsPropeller();
+        ACClusterPositionsPropellerPlugin::updateNextPositions(mediaBrowser);
 
 	vector<ACMedia*> loops =  mediaBrowser->getLibrary()->getAllMedia();	
 	vector<long> posParents;

@@ -1,7 +1,7 @@
 /**
  * @brief ACMediaDocumentOptionDockWidgetQt.cpp
- * @author Thierry Ravet
- * @date 20/07/2012
+ * @author Christian Frisson
+ * @date 22/07/2012
  * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -33,13 +33,13 @@
 
 ACMediaDocumentOptionDockWidgetQt::ACMediaDocumentOptionDockWidgetQt(QWidget *parent)
 #ifdef SUPPORT_MULTIMEDIA
-:ACAbstractDockWidgetQt(parent, MEDIA_TYPE_MIXED,"ACMediaDocumentOptionDockWidgetQt")
-#endif//def SUPPORT_MULTIMEDIA
+    :ACAbstractDockWidgetQt(parent, MEDIA_TYPE_MIXED,"ACMediaDocumentOptionDockWidgetQt")
+    #endif//def SUPPORT_MULTIMEDIA
 {
     ui.setupUi(this);
-    #ifdef SUPPORT_MULTIMEDIA
+#ifdef SUPPORT_MULTIMEDIA
     connect(ui.mediaTypeComboBox, SIGNAL(currentIndexChanged(QString)),this, SLOT(changeMediaType(QString)));
-    #endif//def SUPPORT_MULTIMEDIA
+#endif//def SUPPORT_MULTIMEDIA
 
 }
 
@@ -53,51 +53,55 @@ bool ACMediaDocumentOptionDockWidgetQt::canBeVisible(ACMediaType _media_type){
 #ifdef SUPPORT_MULTIMEDIA
 void ACMediaDocumentOptionDockWidgetQt::updatePluginsSettings()
 {
-	// according to plugins actually used to compute the features
-	if (media_cycle == 0) return;
+    // according to plugins actually used to compute the features
+    if(media_cycle == 0) return;
+    if(media_cycle->getMediaType()!=MEDIA_TYPE_MIXED) return;
     if(media_cycle->getLibrary()->getSize()==0) return;
-	vector<int> indexMedia=this->media_cycle->getLibrary()->getParentIds();
+    vector<int> indexMedia=this->media_cycle->getLibrary()->getParentIds();
     if(indexMedia.size() == 0) return;
-	ACMediaDocument* temp=static_cast<ACMediaDocument*> (this->media_cycle->getLibrary()->getMedia(indexMedia[0]));
-	if (temp==0)
-		return;
-	vector<string> plugins_list = temp->getActivableMediaKeys();
-	vector<string> ::iterator list_iter;
-	string actMediaKey=temp->getActiveMediaKey();
+    ACMediaDocument* temp=static_cast<ACMediaDocument*> (this->media_cycle->getLibrary()->getMedia(indexMedia[0]));
+    if (temp==0)
+        return;
+    vector<string> plugins_list = temp->getActivableMediaKeys();
+    vector<string> ::iterator list_iter;
+    string actMediaKey=temp->getActiveMediaKey();
 
-	initOn=true;
-	ui.mediaTypeComboBox->clear();
-	for (list_iter = plugins_list.begin(); list_iter != plugins_list.end(); list_iter++) {
-		QString s((*list_iter).c_str());
-//		QRadioButton * item = new QRadioButton(s,ui.groupBoxOption);
-//		item->setChecked(false);
-		ui.mediaTypeComboBox->addItem(s);
-		if ((*list_iter)==actMediaKey)
-		{
-			ui.mediaTypeComboBox->setCurrentIndex(ui.mediaTypeComboBox->count()-1);
-		}
+    initOn=true;
+    ui.mediaTypeComboBox->clear();
+    for (list_iter = plugins_list.begin(); list_iter != plugins_list.end(); list_iter++) {
+        QString s((*list_iter).c_str());
+        //		QRadioButton * item = new QRadioButton(s,ui.groupBoxOption);
+        //		item->setChecked(false);
+        ui.mediaTypeComboBox->addItem(s);
+        if ((*list_iter)==actMediaKey)
+        {
+            ui.mediaTypeComboBox->setCurrentIndex(ui.mediaTypeComboBox->count()-1);
+        }
 
-	}
-	ui.mediaTypeComboBox->setEnabled(true);
-	initOn=false;
-	
-//	this->synchronizeFeaturesWeights();
-	
-//	connect(ui.featuresListWidget, SIGNAL(itemClicked(QListWidgetItem*)),
-//	this, SLOT(modifyListItem(QListWidgetItem*)));
-	
+    }
+    ui.mediaTypeComboBox->setEnabled(true);
+    initOn=false;
+
+    //	this->synchronizeFeaturesWeights();
+
+    //	connect(ui.featuresListWidget, SIGNAL(itemClicked(QListWidgetItem*)),
+    //	this, SLOT(modifyListItem(QListWidgetItem*)));
+
 }
 
 void ACMediaDocumentOptionDockWidgetQt::resetPluginsSettings(){
-	
-	
-	ui.mediaTypeComboBox->setEnabled(false);
+
+    if(media_cycle == 0) return;
+    if(media_cycle->getMediaType()!=MEDIA_TYPE_MIXED) return;
+    if(media_cycle->getLibrary()->getSize()==0) return;
+
+    ui.mediaTypeComboBox->setEnabled(false);
     //for(int i = 0; i < ui.mediaTypeComboBox->count(); i++)
-      //  ui.mediaTypeComboBox->removeItem(i);
-	ui.mediaTypeComboBox->clear();
-	
+    //  ui.mediaTypeComboBox->removeItem(i);
+    ui.mediaTypeComboBox->clear();
+
     //ui.mediaTypeListWidget->clear();
-	
+
 }
 #endif//def SUPPORT_MULTIMEDIA
 

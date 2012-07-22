@@ -44,7 +44,7 @@ ACPosPlugClustersClock::ACPosPlugClustersClock() : ACClusterPositionsPlugin()
 {
     //vars herited from ACPlugin
     this->mMediaType = MEDIA_TYPE_AUDIO;
-    this->mName = "ClustersClock";
+    this->mName = "AudioCycle ClustersClock";
     this->mDescription = "\"ClustersClock\" Visualisation plugin";
     this->mId = "";
 }

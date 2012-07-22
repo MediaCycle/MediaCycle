@@ -1,7 +1,7 @@
 /**
  * @brief ACNeighborhoodsPluginPareto.cpp
  * @author Christian Frisson
- * @date 29/02/2012
+ * @date 22/07/2012
  * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -34,76 +34,97 @@
 using namespace arma;
 using namespace std;
 
-ACNeighborhoodsPluginPareto::ACNeighborhoodsPluginPareto() {
+ACNeighborhoodsPluginPareto::ACNeighborhoodsPluginPareto() : ACNeighborMethodPlugin() {
     this->mMediaType = MEDIA_TYPE_ALL;
-    this->mName = "ParetoNeighborhoods";
+    this->mName = "MediaCycle Pareto";
     this->mDescription = "Plugin for the computation of Pareto neighborhoods";
     this->mId = "";
     lastClickedNodeId = -1;
-    //local vars
+    nNeighbors = 9;
+    //CF changing neighbor number requires removing media nodes
+    //this->addNumberParameter("neighbors",nNeighbors,1,15,1,"number of desired neighbors",boost::bind(&ACNeighborhoodsPluginPareto::neighborsNumberChanged,this));
 }
 
 ACNeighborhoodsPluginPareto::~ACNeighborhoodsPluginPareto() {
 }
 
-void ACNeighborhoodsPluginPareto::updateNeighborhoods(ACMediaBrowser* mediaBrowser) {
-	//int _clickedloop = mediaBrowser->getClickedLoop();
-	std::cout << "ACNeighborhoodsPluginPareto::updateNeighborhoods" << std::endl;
-	if (mediaBrowser->getUserLog()->getLastClickedNodeId() == -1) {	 
-		mediaBrowser->getUserLog()->addRootNode(mediaBrowser->getReferenceNode(), 0); // 0
-		mediaBrowser->getUserLog()->clickNode(mediaBrowser->getReferenceNode(), 0);
-		lastClickedNodeId = 0;
-	}
-	else{
-		lastClickedNodeId = mediaBrowser->getUserLog()->getLastClickedNodeId();
-		long targetMediaId = mediaBrowser->getUserLog()->getMediaIdFromNodeId(lastClickedNodeId);
-		ACMedia* loop = mediaBrowser->getLibrary()->getMedia(0);
-		
-		long libSize = mediaBrowser->getLibrary()->getSize();
-		int nbFeature = loop->getNumberOfFeaturesVectors();
-		mat tmpDesc_m;
-		mat tmpTg_v;
-		mat dist_m(libSize, nbFeature);
-
-		for (int f=0; f<nbFeature; f++){
-			tmpDesc_m = extractDescMatrix(mediaBrowser, f);
-			tmpTg_v = tmpDesc_m.row(targetMediaId);
-			dist_m.col(f) = sqrt(sum(square(tmpDesc_m - repmat(tmpTg_v, tmpDesc_m.n_rows, 1)), 1));
-		}
-		ucolvec rank_v = paretorank(dist_m, 2, 6);
-		ucolvec selPos_v = find(rank_v > 1);
-		colvec distE_v(selPos_v.n_rows);
-		for (int k=0; k<selPos_v.n_rows; k++){
-			distE_v(k) = sum(dist_m.row(selPos_v(k)));
-		}
-		
-		int nbItems = 9;
-		ucolvec selPos2_v = sort_index(distE_v);
-		if (selPos2_v.n_rows < nbItems)
-			nbItems = selPos2_v.n_rows;
-			
-		for (int k=0; k<nbItems; k++){
-            mediaBrowser->addNode(lastClickedNodeId, selPos_v(selPos2_v(k)), 0);
-		}
-        //mediaBrowser->getUserLog()->dump();
-	}	
+void ACNeighborhoodsPluginPareto::neighborsNumberChanged(){
+    if(!this->media_cycle) return;
+    media_cycle->updateDisplay(true);
+    media_cycle->setNeedsDisplay(true);
 }
 
+void ACNeighborhoodsPluginPareto::updateNeighborhoods(ACMediaBrowser* mediaBrowser) {
+    std::cout << "ACNeighborhoodsPluginPareto::updateNeighborhoods" << std::endl;
+
+    if(mediaBrowser->getLibrary()->getSize()==0) return;
+
+    //CF changing neighbor number requires removing media nodes
+    //nNeighbors=this->getNumberParameterValue("neighbors");
+
+    //mediaBrowser->getUserLog()->dump();
+
+    //CF if the user log has just been (re)created
+    if(mediaBrowser->getUserLog()->getLastClickedNodeId() == -1)
+        lastClickedNodeId = -1;
+
+    //CF if the user clicked twice on the same node OR if updateNeighborhoods is called again without newly-clicked node (changing parameters)
+    if ( (mediaBrowser->getUserLog()->getLastClickedNodeId() >=0) ) {
+        if (mediaBrowser->getUserLog()->getLastClickedNodeId() == lastClickedNodeId)  {
+            std::cout << "ACNeighborhoodsPluginPareto::updateNeighborhoods removing neighbors of node " << lastClickedNodeId << std::endl;
+            mediaBrowser->getUserLog()->removeChildrenNodes(lastClickedNodeId);
+            //std::cout << "User log size " << mediaBrowser->getUserLog()->getSize() << std::endl;
+        }
+        lastClickedNodeId = mediaBrowser->getUserLog()->getLastClickedNodeId();
+        std::cout << "ACNeighborhoodsPluginPareto::updateNeighborhoods adding neighbors to node " << lastClickedNodeId << std::endl;
+        long targetMediaId = mediaBrowser->getUserLog()->getMediaIdFromNodeId(lastClickedNodeId);
+        ACMedia* loop = mediaBrowser->getLibrary()->getMedia(0);
+
+        long libSize = mediaBrowser->getLibrary()->getSize();
+        int nbFeature = loop->getNumberOfFeaturesVectors();
+        mat tmpDesc_m;
+        mat tmpTg_v;
+        mat dist_m(libSize, nbFeature);
+
+        for (int f=0; f<nbFeature; f++){
+            tmpDesc_m = extractDescMatrix(mediaBrowser, f);
+            tmpTg_v = tmpDesc_m.row(targetMediaId);
+            dist_m.col(f) = sqrt(sum(square(tmpDesc_m - repmat(tmpTg_v, tmpDesc_m.n_rows, 1)), 1));
+        }
+        ucolvec rank_v = paretorank(dist_m, 2, 6);
+        ucolvec selPos_v = find(rank_v > 1);
+        colvec distE_v(selPos_v.n_rows);
+        for (int k=0; k<selPos_v.n_rows; k++){
+            distE_v(k) = sum(dist_m.row(selPos_v(k)));
+        }
+
+        ucolvec selPos2_v = sort_index(distE_v);
+        if (selPos2_v.n_rows < nNeighbors)
+            nNeighbors = selPos2_v.n_rows;
+
+        for (int k=0; k<nNeighbors; k++){
+            mediaBrowser->addNode(lastClickedNodeId, selPos_v(selPos2_v(k)), 0);
+        }
+    }
+    //std::cout << "---" << std::endl;
+    //mediaBrowser->getUserLog()->dump();
+    //std::cout << "ACNeighborhoodsPluginPareto::updateNeighborhoods done" << std::endl;
+}
 
 mat ACNeighborhoodsPluginPareto::extractDescMatrix(ACMediaBrowser* mediaBrowser, int descId){
-  vector<ACMedia*> loops = mediaBrowser->getLibrary()->getAllMedia();
-  int nbMedia = loops.size(); 
-	int featDim;
+    vector<ACMedia*> loops = mediaBrowser->getLibrary()->getAllMedia();
+    int nbMedia = loops.size();
+    int featDim;
 
-	// Count nb of feature
-	featDim = loops.back()->getPreProcFeaturesVector(descId)->getSize();
-	
-  mat desc_m(nbMedia, featDim);
-  for(int i=0; i<nbMedia; i++) {    
-    int tmpIdx = 0;
-		for(int d=0; d < featDim; d++){
-			desc_m(i,d) = loops[i]->getPreProcFeaturesVector(descId)->getFeatureElement(d);
-		}
-  }
-	return desc_m;
+    // Count nb of feature
+    featDim = loops.back()->getPreProcFeaturesVector(descId)->getSize();
+
+    mat desc_m(nbMedia, featDim);
+    for(int i=0; i<nbMedia; i++) {
+        int tmpIdx = 0;
+        for(int d=0; d < featDim; d++){
+            desc_m(i,d) = loops[i]->getPreProcFeaturesVector(descId)->getFeatureElement(d);
+        }
+    }
+    return desc_m;
 }

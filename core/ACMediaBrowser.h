@@ -65,27 +65,27 @@ using namespace std;
 extern double getTime();
 
 enum ACBrowserState {
-	AC_IDLE=0,
-	AC_CHANGING=1
+    AC_IDLE=0,
+    AC_CHANGING=1
 };
 
 enum ACBrowserLayout {
-	AC_LAYOUT_TYPE_NONE=0,
-	AC_LAYOUT_TYPE_NODELINK=1,
-	AC_LAYOUT_TYPE_CONSTELLATION=2//CF: for egs. to link segments from a given media together... but what if we want to combine it with a node link layout?s
+    AC_LAYOUT_TYPE_NONE=0,
+    AC_LAYOUT_TYPE_NODELINK=1,
+    AC_LAYOUT_TYPE_CONSTELLATION=2//CF: for egs. to link segments from a given media together... but what if we want to combine it with a node link layout?s
 };
 
 enum ACBrowserMode {
-	AC_MODE_NONE=0,
-	AC_MODE_CLUSTERS=1,
-	AC_MODE_NEIGHBORS=2
+    AC_MODE_NONE=0,
+    AC_MODE_CLUSTERS=1,
+    AC_MODE_NEIGHBORS=2
 };
 
 typedef std::map<std::string, ACBrowserMode > stringToBrowserModeConverter;
 const stringToBrowserModeConverter::value_type _initb[] = {
-stringToBrowserModeConverter::value_type("", AC_MODE_NONE), \
-stringToBrowserModeConverter::value_type("Clusters", AC_MODE_CLUSTERS), \
-stringToBrowserModeConverter::value_type("Neighbors", AC_MODE_NEIGHBORS)
+    stringToBrowserModeConverter::value_type("", AC_MODE_NONE), \
+    stringToBrowserModeConverter::value_type("Clusters", AC_MODE_CLUSTERS), \
+    stringToBrowserModeConverter::value_type("Neighbors", AC_MODE_NEIGHBORS)
 };
 const stringToBrowserModeConverter stringToBrowserMode(_initb, _initb + sizeof _initb / sizeof *_initb);
 
@@ -97,19 +97,19 @@ const stringToBrowserModeConverter stringToBrowserMode(_initb, _initb + sizeof _
 
 struct ACNavigationState
 {
-	//ACNavigationStateType	mNavType;
+    //ACNavigationStateType	mNavType;
 
-	int 			mReferenceNode;
-	int 			mNavigationLevel;
-	vector<float> 		mFeatureWeights;
+    int 			mReferenceNode;
+    int 			mNavigationLevel;
+    vector<float> 		mFeatureWeights;
 };
 
 struct ACLabel {
-	string		text;
-	float		size;
-	ACPoint		pos;
-	bool		isDisplayed;
-        ACLabel() : text(""),size(1.0),pos(ACPoint()),isDisplayed(true) {}
+    string		text;
+    float		size;
+    ACPoint		pos;
+    bool		isDisplayed;
+    ACLabel() : text(""),size(1.0),pos(ACPoint()),isDisplayed(true) {}
 };
 
 // XS 110310 added this to make the transition towards tree instead of vector
@@ -120,45 +120,45 @@ typedef vector<ACLabel> ACLabels;
 class ACMediaBrowser {
 
 public:
-	ACMediaBrowser();
-	~ACMediaBrowser();
+    ACMediaBrowser();
+    ~ACMediaBrowser();
 
-	void clean();
+    void clean();
 
-	void setLibrary(ACMediaLibrary *lib) { mLibrary = lib; };
-	ACMediaLibrary *getLibrary() { return mLibrary; };
+    void setLibrary(ACMediaLibrary *lib) { mLibrary = lib; };
+    ACMediaLibrary *getLibrary() { return mLibrary; };
 
-	// call this when the number of loops changes in the library
-	void libraryContentChanged(int needsCluster=1);
+    // call this when the number of loops changes in the library
+    void libraryContentChanged(int needsCluster=1);
 
-	// handy library to just assign random positions to items
-	void randomizeNodePositions();
+    // handy library to just assign random positions to items
+    void randomizeNodePositions();
 
-	// Search by similarity
-	int getKNN(int id, vector<int> &ids, int k);
-	int getKNN(ACMedia *aMedia, vector<ACMedia *> &result, int k);
+    // Search by similarity
+    int getKNN(int id, vector<int> &ids, int k);
+    int getKNN(ACMedia *aMedia, vector<ACMedia *> &result, int k);
 
-        // Search on a specific feature (e.g., 10 images most red)
-        int getKSortedOnFeature(int k=0, int f=0, int dim=0, bool revert=false);
+    // Search on a specific feature (e.g., 10 images most red)
+    int getKSortedOnFeature(int k=0, int f=0, int dim=0, bool revert=false);
 
-	// memory/context - undefined
-	void setHistory();
-	void setBookmark();
-	void setTag();
+    // memory/context - undefined
+    void setHistory();
+    void setBookmark();
+    void setTag();
 
-	// to tell if the view (e.g., ACOsgBrowserViewQT) has to be updated.
-	void setNeedsDisplay(bool val) 				{ mNeedsDisplay = val; }
-	bool getNeedsDisplay() const				{ return mNeedsDisplay; }
+    // to tell if the view (e.g., ACOsgBrowserViewQT) has to be updated.
+    void setNeedsDisplay(bool val) 				{ mNeedsDisplay = val; }
+    bool getNeedsDisplay() const				{ return mNeedsDisplay; }
 
     // to tell if the mode has just changed
     void setModeChanged(bool val) 				{ mModeChanged = val; }
     bool getModeChanged() const				{ return mModeChanged; }
 
-	// Update audio engine sources
-	void setNeedsActivityUpdateLock(int i);
-	void setNeedsActivityUpdateAddMedia(int loop_id);
-	void setNeedsActivityUpdateRemoveMedia();
-	vector<int>* getNeedsActivityUpdateMedia();
+    // Update audio engine sources
+    void setNeedsActivityUpdateLock(int i);
+    void setNeedsActivityUpdateAddMedia(int loop_id);
+    void setNeedsActivityUpdateRemoveMedia();
+    vector<int>* getNeedsActivityUpdateMedia();
 
 	void setNeedsNavigationUpdateLock(int i); 
 	// camera
@@ -170,196 +170,195 @@ public:
 	void setCameraRotation(float angle)				{ mCameraAngle = angle; setNeedsDisplay(true); }
 	float getCameraRotation() const				{ return mCameraAngle; }
 
-	// 0 of features
-	void setWeight(int i, float weight);
-	std::vector<float> getWeightVector(){return mFeatureWeights;}
-	void setWeightVector(vector<float> &fw) {mFeatureWeights = fw;}
-	float getWeight(int i);
-	void initializeFeatureWeights();
+    // 0 of features
+    void setWeight(int i, float weight);
+    std::vector<float> getWeightVector(){return mFeatureWeights;}
+    void setWeightVector(vector<float> &fw) {mFeatureWeights = fw;}
+    float getWeight(int i);
+    void initializeFeatureWeights();
 
-	// filtering
-	void setFilterIn();
-	void setFilterOut();
-	void setFilterSuggest();
+    // filtering
+    void setFilterIn();
+    void setFilterOut();
+    void setFilterSuggest();
 
-	// == Cluster Mode == (based on features weights)
-	void setClusterNumber(int n);
-	void setClusterIndex(int mediaIdx,int clusterIdx);
-	void setClusterCenter(int clusterIdx, vector<FeaturesVector >);
-	void initClusterCenters();
-	// XS TODO clean level / state ...
-	void incrementLoopNavigationLevels(int loopIndex);
-	int getNavigationLevel()				{ return mNavigationLevel; };
-	ACNavigationState getCurrentNavigationState();
-	void setCurrentNavigationState(ACNavigationState state);
-	// go back/forward in the navigation into clusters
-	void goBack();
-	void goForward();
-	void storeNavigationState(); // was: pushNavigationState();
-    void forwardNextLevel(bool toggle);
+    // == Cluster Mode == (based on features weights)
+    void setClusterNumber(int n);
+    void setClusterIndex(int mediaIdx,int clusterIdx);
+    void setClusterCenter(int clusterIdx, vector<FeaturesVector >);
+    void initClusterCenters();
+    // XS TODO clean level / state ...
+    void incrementLoopNavigationLevels(int loopIndex);
+    int getNavigationLevel()				{ return mNavigationLevel; };
+    ACNavigationState getCurrentNavigationState();
+    void setCurrentNavigationState(ACNavigationState state);
+    // go back/forward in the navigation into clusters
+    void goBack();
+    void goForward();
+    void storeNavigationState(); // was: pushNavigationState();
+    void forwardNextLevel();
 
-	// == Nodes
-	void setClickedNode(int inode,int p_index = 0);
-	int getClickedNode() {return mClickedNode; };
-	bool toggleNode(int node);
-	void dumpSelectedNodes();
-	set<int>& getSelectedNodes(){return mSelectedNodes;}
-	void unselectNodes();
-	int getClosestNode(int p_index = 0) {return getPointerFromIndex(p_index)->getClosestNode(); };
-	int	getLastSelectedNode(){return mLastSelectedNode;}
-	void setReferenceNode(int index);
-	int getReferenceNode(){return mReferenceNode;}
-	const ACMediaNodes	&getLoopAttributes() const { return mLoopAttributes; } 	// XS 100310 is this still necessary ? const ?
-	ACMediaNode &getMediaNode(int i) ; // not const because accesors to MediaNode can modify it
-	ACMediaNode &getNodeFromMedia(ACMedia* _media) ; // not const because accesors to MediaNode can modify it
-	void setNodeNextPosition(int loop_id, ACPoint p);
-	// XS TODO : displayed vs active
-	void setLoopIsDisplayed(int loop_id, bool iIsDisplayed) {this->getMediaNode(loop_id).setDisplayed(iIsDisplayed);}
-	void setLoopAttributesActive(int loop_id, int value) { this->getMediaNode(loop_id).setActivity(value); };
-	int getNumberOfDisplayedLoops();
-	void setNumberOfDisplayedLoops(int nd);
-	int getNumberOfMediaNodes();
-	void initializeNodes(ACBrowserMode _mode = AC_MODE_CLUSTERS);
+    // == Nodes
+    void setClickedNode(int inode,int p_index = 0);
+    int getClickedNode() {return mClickedNode; };
+    bool toggleNode(int node);
+    void dumpSelectedNodes();
+    set<int>& getSelectedNodes(){return mSelectedNodes;}
+    void unselectNodes();
+    int getClosestNode(int p_index = 0) {return getPointerFromIndex(p_index)->getClosestNode(); };
+    int	getLastSelectedNode(){return mLastSelectedNode;}
+    void setReferenceNode(int index);
+    int getReferenceNode(){return mReferenceNode;}
+    const ACMediaNodes	&getLoopAttributes() const { return mLoopAttributes; } 	// XS 100310 is this still necessary ? const ?
+    ACMediaNode &getMediaNode(int i) ; // not const because accesors to MediaNode can modify it
+    ACMediaNode &getNodeFromMedia(ACMedia* _media) ; // not const because accesors to MediaNode can modify it
+    void setNodeNextPosition(int loop_id, ACPoint p);
+    // XS TODO : displayed vs active
+    void setLoopIsDisplayed(int loop_id, bool iIsDisplayed) {this->getMediaNode(loop_id).setDisplayed(iIsDisplayed);}
+    void setLoopAttributesActive(int loop_id, int value) { this->getMediaNode(loop_id).setActivity(value); };
+    int getNumberOfDisplayedLoops();
+    void setNumberOfDisplayedLoops(int nd);
+    int getNumberOfMediaNodes();
+    void initializeNodes(ACBrowserMode _mode = AC_MODE_CLUSTERS);
 
-	// == Pointers
-	int getNumberOfPointers();
-	ACPointerType getPointerTypeFromIndex(int i);
-	ACPointerType getPointerTypeFromId(int i);	
-	ACPointer* getPointerFromIndex(int i); // for use when parsing pointers incrementally
-	ACPointer* getPointerFromId(int i); // for use when parsing pointers from the ID set by the input device
-	void resetPointers();
-	void addPointer(int p_id,ACPointerType _pointerType=AC_POINTER_UNKNOWN);
-	void removePointer(int p_id);
-	void addMousePointer();
-	void removeMousePointer();
+    // == Pointers
+    int getNumberOfPointers();
+    ACPointerType getPointerTypeFromIndex(int i);
+    ACPointerType getPointerTypeFromId(int i);
+    ACPointer* getPointerFromIndex(int i); // for use when parsing pointers incrementally
+    ACPointer* getPointerFromId(int i); // for use when parsing pointers from the ID set by the input device
+    void resetPointers();
+    void addPointer(int p_id,ACPointerType _pointerType=AC_POINTER_UNKNOWN);
+    void removePointer(int p_id);
+    void addMousePointer();
+    void removeMousePointer();
 
-	// == Labels
-	void setClickedLabel(int ilabel);
-	int getClickedLabel()					{return mClickedLabel; };
+    // == Labels
+    void setClickedLabel(int ilabel);
+    int getClickedLabel()					{return mClickedLabel; };
 
-	// = States : AC_ IDLE or AC_CHANGING (i.e., from current to next position)
-	double getFrac() const {return mFrac;} // fraction between current and next position
-	ACBrowserState getState() const {return mState;};
-	void setState(ACBrowserState state);
-	void updateState();
+    // = States : AC_ IDLE or AC_CHANGING (i.e., from current to next position)
+    double getFrac() const {return mFrac;} // fraction between current and next position
+    ACBrowserState getState() const {return mState;};
+    void setState(ACBrowserState state);
+    void updateState();
 
-	// interaction with pointers
-	void setSourceCursor(int lid, int frame_pos);
-	void setCurrentFrame(int lid, int frame_pos);
-	void hoverWithPointerId(float mxx, float myy, int p_id = -1);
-	void hoverWithPointerIndex(float mxx, float myy, int p_index = 0);
+    // interaction with pointers
+    void setSourceCursor(int lid, int frame_pos);
+    void setCurrentFrame(int lid, int frame_pos);
+    void hoverWithPointerId(float mxx, float myy, int p_id = -1);
+    void hoverWithPointerIndex(float mxx, float myy, int p_index = 0);
 
-	ACBrowserLayout getLayout();
-	void setLayout(ACBrowserLayout _layout);
-	ACBrowserMode getMode();
-	void setMode(ACBrowserMode _mode);
+    ACBrowserLayout getLayout();
+    void setLayout(ACBrowserLayout _layout);
+    ACBrowserMode getMode();
+    void setMode(ACBrowserMode _mode);
 
-	// Quick Browser
-	void setClosestNode(int loop_id, int p_index);
-	void setAutoPlay(int auto_play) { this->auto_play = auto_play; };
+    // Quick Browser
+    void setClosestNode(int loop_id, int p_index);
+    void setAutoPlay(int auto_play) { this->auto_play = auto_play; };
 
-	// sources - SD reintroduced 2009 aug 4
-	int	 pickSource(float x, float z);
-	void getSourcePosition(int loop_id, float* x, float* z);
-	void setSourcePosition(float _x, float _z, float* x, float* z);
-	// int	 toggleSourceActivity(float x, float z);
-	int toggleSourceActivity(int lid, int type=1); // XS deprecated
-	int toggleSourceActivity(ACMediaNode &node, int _activity = 1); // XS new 150310
-	int muteAllSources();
+    // sources - SD reintroduced 2009 aug 4
+    int	 pickSource(float x, float z);
+    void getSourcePosition(int loop_id, float* x, float* z);
+    void setSourcePosition(float _x, float _z, float* x, float* z);
+    // int	 toggleSourceActivity(float x, float z);
+    int toggleSourceActivity(int lid, int type=1); // XS deprecated
+    int toggleSourceActivity(ACMediaNode &node, int _activity = 1); // XS new 150310
+    int muteAllSources();
 
-	// labels
-	int getLabelSize();
-	void setLabel(int i, string text, ACPoint pos);
-        void setLabel(int i, string text); // without position, hidden
-	void addLabel(string text, ACPoint pos);
-        void addLabel(string text); // without position, hidden
-	string getLabelText(int i);
-	ACPoint getLabelPos(int i);
-        bool isLabelDisplayed(int i);
-        void removeAllLabels();
-        void displayAllLabels(bool isDisplayed);
+    // labels
+    int getLabelSize();
+    void setLabel(int i, string text, ACPoint pos);
+    void setLabel(int i, string text); // without position, hidden
+    void addLabel(string text, ACPoint pos);
+    void addLabel(string text); // without position, hidden
+    string getLabelText(int i);
+    ACPoint getLabelPos(int i);
+    bool isLabelDisplayed(int i);
+    void removeAllLabels();
+    void displayAllLabels(bool isDisplayed);
 
-	const vector<ACLabel> &getLabelAttributes() const { return mLabelAttributes; };
-	void setLabelPosition(int loop_id, float x, float y, float z=0);
-	int getNumberOfDisplayedLabels();
-	void setNumberOfDisplayedLabels(int nd);
-	int getNumberOfLabels(){return mLabelAttributes.size();}
+    const vector<ACLabel> &getLabelAttributes() const { return mLabelAttributes; };
+    void setLabelPosition(int loop_id, float x, float y, float z=0);
+    int getNumberOfDisplayedLabels();
+    void setNumberOfDisplayedLabels(int nd);
+    int getNumberOfLabels(){return mLabelAttributes.size();}
 
-	void setClustersMethodPlugin(ACPlugin* acpl){mClustersMethodPlugin=dynamic_cast<ACClusterMethodPlugin*> (acpl) ;}
-	void setNeighborsMethodPlugin(ACPlugin* acpl){mNeighborsMethodPlugin=dynamic_cast<ACNeighborMethodPlugin*> (acpl);}
-	void setClustersPositionsPlugin(ACPlugin* acpl){mClustersPosPlugin=dynamic_cast<ACClusterPositionsPlugin*> (acpl);}
-	void setNeighborsPositionsPlugin(ACPlugin* acpl){mNeighborsPosPlugin=dynamic_cast<ACNeighborPositionsPlugin*> (acpl);}
-	void setVisualisationPlugin(ACPlugin* acpl){mNoMethodPosPlugin=dynamic_cast<ACNoMethodPositionsPlugin*> (acpl);}
+    void setClustersMethodPlugin(ACPlugin* acpl){mClustersMethodPlugin=dynamic_cast<ACClusterMethodPlugin*> (acpl) ;}
+    void setNeighborsMethodPlugin(ACPlugin* acpl){mNeighborsMethodPlugin=dynamic_cast<ACNeighborMethodPlugin*> (acpl);}
+    void setClustersPositionsPlugin(ACPlugin* acpl){mClustersPosPlugin=dynamic_cast<ACClusterPositionsPlugin*> (acpl);}
+    void setNeighborsPositionsPlugin(ACPlugin* acpl){mNeighborsPosPlugin=dynamic_cast<ACNeighborPositionsPlugin*> (acpl);}
+    void setVisualisationPlugin(ACPlugin* acpl){mNoMethodPosPlugin=dynamic_cast<ACNoMethodPositionsPlugin*> (acpl);}
 
-	bool changeClustersMethodPlugin(ACPlugin* acpl);
-	bool changeNeighborsMethodPlugin(ACPlugin* acpl);
-	bool changeClustersPositionsPlugin(ACPlugin* acpl);
-	bool changeNeighborsPositionsPlugin(ACPlugin* acpl);
-	//bool changeVisualisationPlugin(ACPlugin* acpl);//CF we need to sort out first what a VisualisationPlugin can contain vs Clusters/Neighbors Method/Positions plugins
+    std::string getActivePluginName(ACPluginType PluginType);
 
-	// NB: Proximity Grid moved to plugin
+    bool changeClustersMethodPlugin(ACPlugin* acpl);
+    bool changeNeighborsMethodPlugin(ACPlugin* acpl);
+    bool changeClustersPositionsPlugin(ACPlugin* acpl);
+    bool changeNeighborsPositionsPlugin(ACPlugin* acpl);
+    //bool changeVisualisationPlugin(ACPlugin* acpl);//CF we need to sort out first what a VisualisationPlugin can contain vs Clusters/Neighbors Method/Positions plugins
 
-	// == User Log
+    // NB: Proximity Grid moved to plugin
+
+    // == User Log
     ACUserLog* getUserLog();
     long int addNode(long int _parentId, long int _mediaId, int _clickTime);
+    bool removeNode(long int _id);
+    bool removeChildrenNodes(long int _id);
 
-	// == XS 260310 new way to manage update of clusters, positions, neighborhoods, ...
-	void updateDisplay(bool animate=false, int needsCluster=1);//, bool neighborhoods=true);
+    // == XS 260310 new way to manage update of clusters, positions, neighborhoods, ...
+    void updateDisplay(bool animate=false, int needsCluster=1);//, bool neighborhoods=true);
 
-	// CF switch navigation mode while navigating
-	void switchMode(ACBrowserMode _mode);
+    // CF switch navigation mode while navigating
+    void switchMode(ACBrowserMode _mode);
 
-	const vector<float> &getFeatureWeights(){return mFeatureWeights;};
-	const int &getClusterCount(){return mClusterCount;};
-	const vector<FeaturesVector> &getClusterCenter(int i){return mClusterCenters[i];};
-	const vector<int> &getIdNodeClusterCenter(){return mIdNodeClusterCenters;};
-	void  setIdNodeClusterCenter(vector<int> idNodeClusterCenters){mIdNodeClusterCenters=idNodeClusterCenters;};
+    const vector<float> &getFeatureWeights(){return mFeatureWeights;}
+    const int &getClusterCount(){return mClusterCount;}
+    const vector<FeaturesVector> &getClusterCenter(int i){return mClusterCenters[i];}
+    vector<vector<FeaturesVector> > getClusterCenters(){return mClusterCenters;}
+    void setClusterCenters(vector<vector<FeaturesVector> > clusterCenters){mClusterCenters = clusterCenters;}
+    const vector<int> &getIdNodeClusterCenter(){return mIdNodeClusterCenters;}
+    void setIdNodeClusterCenter(vector<int> idNodeClusterCenters){mIdNodeClusterCenters=idNodeClusterCenters;}
 	void setUpdateMutex(bool value);
-	
-private: // better not let the ouside world know about internal cooking
-	void resetNavigation();
-	void resetLoopNavigationLevels(int l=0);
-	void resetCamera();
-	// next positions -> current positions
-	void commitPositions();
 
-//XS the update() methods should remain private
-// all what is needed from outside is *updateDisplay*
+private: // better not let the ouside world know about internal cooking
+    void resetNavigation();
+    void resetLoopNavigationLevels(int l=0);
+    void resetCamera();
+    // next positions -> current positions
+    void commitPositions();
+
+    //XS the update() methods should remain private
+    // all what is needed from outside is *updateDisplay*
 private:
 	bool updateMutex;
 	// update positions based on current clustering
 
-	// == Cluster Mode
-	void updateClusters(bool animate=false, int needsCluster=1);
-	// default cluster :
-	// - neighborhood = Kmeans
-	// - position = propeller
-	// == Neighbors Mode ==
-	void updateNeighborhoods();
-	
-public:	
-	void updateNextPositionsPropeller();
-	void updateClustersKMeans(bool animate, int needsCluster=1);
+    // == Cluster Mode
+    void updateClusters(bool animate=false, int needsCluster=1);
+    // == Neighbors Mode ==
+    void updateNeighborhoods();
 
 public: // XS TODO so far this one is still called from outside
-	void updateNextPositions();
+    void updateNextPositions();
 
 protected:
-	ACMediaLibrary *mLibrary; // just a pointer to the library, no "new"
-	// state management
-	double 				mRefTime;
-	double 				mFrac;
-	ACBrowserState		mState;
-	ACBrowserLayout		mLayout;
-	ACBrowserMode		mMode;
+    ACMediaLibrary *mLibrary; // just a pointer to the library, no "new"
+    // state management
+    double 				mRefTime;
+    double 				mFrac;
+    ACBrowserState		mState;
+    ACBrowserLayout		mLayout;
+    ACBrowserMode		mMode;
 
-	int 				mClickedNode; // valid between mouseDown and mouseUp, otherwise -1
-	set<int>			mSelectedNodes;
-	int 				mReferenceNode;
-	int					mClosestNode;
-	int					mLastSelectedNode;
+    int 				mClickedNode; // valid between mouseDown and mouseUp, otherwise -1
+    set<int>			mSelectedNodes;
+    int 				mReferenceNode;
+    int					mClosestNode;
+    int					mLastSelectedNode;
 
-	bool 				mNeedsDisplay;
+    bool 				mNeedsDisplay;
     bool 				mModeChanged;
 	//bool 				mNeedsActivityUpdate;
 	vector<int>			mNeedsActivityUpdateMedia;
@@ -368,53 +367,53 @@ protected:
 	pthread_mutex_t		navigation_update_mutex;
 	pthread_mutexattr_t navigation_update_mutex_attr;
 
-	float   			mViewWidth;
-	float   			mViewHeight;
-	float   			mCenterOffsetX;
-	float				mCenterOffsetZ;
+    float   			mViewWidth;
+    float   			mViewHeight;
+    float   			mCenterOffsetX;
+    float				mCenterOffsetZ;
 
-	float 				mCameraPosition[2];
-	float 				mCameraZoom;
-	float				mCameraAngle;
+    float 				mCameraPosition[2];
+    float 				mCameraZoom;
+    float				mCameraAngle;
 
-	vector<ACNavigationState>	mBackwardNavigationStates;
-	vector<ACNavigationState>	mForwardNavigationStates;
+    vector<ACNavigationState>	mBackwardNavigationStates;
+    vector<ACNavigationState>	mForwardNavigationStates;
 
-	// XS TODO 1 generalize to tree
-	// XS TODO 2 make this vector of pointers
-	ACMediaNodes mLoopAttributes;
-	ACPointers   mPointers;
-	int mPointersActiveNumber;
+    // XS TODO 1 generalize to tree
+    // XS TODO 2 make this vector of pointers
+    ACMediaNodes mLoopAttributes;
+    ACPointers   mPointers;
+    int mPointersActiveNumber;
 
-	int nbDisplayedLoops;
+    int nbDisplayedLoops;
 
-	ACLabels	mLabelAttributes;
-	int nbDisplayedLabels;
-	int mClickedLabel;
+    ACLabels	mLabelAttributes;
+    int nbDisplayedLabels;
+    int mClickedLabel;
 
-	int mNavigationLevel;
+    int mNavigationLevel;
 
-	// XS TODO: make a class clusters
-	int mClusterCount;
-	//vector<vector <int> > 		clusters;
-	//vector<vector<vector <float> > > mClusterCenters; // cluster index, feature index, descriptor index
-	vector<vector<FeaturesVector> > mClusterCenters; // cluster index, feature index, descriptor index
-	vector<int> mIdNodeClusterCenters;
-	vector<float>			mFeatureWeights; // each value must be in [0,1], important for euclidian distance.
+    // XS TODO: make a class clusters
+    int mClusterCount;
+    //vector<vector <int> > 		clusters;
+    //vector<vector<vector <float> > > mClusterCenters; // cluster index, feature index, descriptor index
+    vector<vector<FeaturesVector> > mClusterCenters; // cluster index, feature index, descriptor index
+    vector<int> mIdNodeClusterCenters;
+    vector<float>			mFeatureWeights; // each value must be in [0,1], important for euclidian distance.
 
-	int auto_play;
-	int auto_play_toggle;
+    int auto_play;
+    int auto_play_toggle;
 
-	ACClusterMethodPlugin* mClustersMethodPlugin;
-	ACNeighborMethodPlugin* mNeighborsMethodPlugin;
+    ACClusterMethodPlugin* mClustersMethodPlugin;
+    ACNeighborMethodPlugin* mNeighborsMethodPlugin;
 
-	ACClusterPositionsPlugin* mClustersPosPlugin;
-	ACNeighborPositionsPlugin* mNeighborsPosPlugin;
-	ACNoMethodPositionsPlugin* mNoMethodPosPlugin;
+    ACClusterPositionsPlugin* mClustersPosPlugin;
+    ACNeighborPositionsPlugin* mNeighborsPosPlugin;
+    ACNoMethodPositionsPlugin* mNoMethodPosPlugin;
 
-	ACUserLog* mUserLog;
+    ACUserLog* mUserLog;
 
-	int prevLibrarySize;
+    int prevLibrarySize;
 };
 
 #endif // __ACMEDIABROWSER_H__

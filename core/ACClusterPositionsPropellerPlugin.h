@@ -1,10 +1,10 @@
 /*
- *  ACEuclideanKMeansPlugin.cpp
+ *  ACClusterPositionsPropellerPlugin.cpp
  *  MediaCycle
  *
- *  @author Ravet Thierry
- *  @date 11/10/2010
- *  @copyright (c) 2010 – UMONS - Numediart
+ *  @author Christian Frisson
+ *  @date 29/06/2012
+ *  @copyright (c) 2012 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
  *  licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -32,26 +32,20 @@
  *
  */
 
-
-#ifndef _ACEuclideanKMeansPlugin_H
-#define	_ACEuclideanKMeansPlugin_H
+#ifndef _ACClusterPositionsPropellerPlugin_H
+#define	_ACClusterPositionsPropellerPlugin_H
 
 #include "MediaCycle.h"
 #include "ACMediaBrowser.h"
-#include "ACKMeansPlugin.h"
+#include "ACPlugin.h"
 
 #include<iostream>
 
-class ACEuclideanKMeansPlugin : public ACKMeansPlugin {
+class ACClusterPositionsPropellerPlugin : public ACClusterPositionsPlugin {
 public:
-	ACEuclideanKMeansPlugin();
-	~ACEuclideanKMeansPlugin();
-	double compute_distance(vector<ACMediaFeatures*> &, vector<ACMediaFeatures*> &, const vector<float> &, bool );
-	double compute_distance(vector<ACMediaFeatures*> &, const vector<FeaturesVector > &, const vector<float> &, bool );
-	void meanAccumCompute(ACMediaFeatures* ,FeaturesVector&);
-	
-	
-private:
+	ACClusterPositionsPropellerPlugin();
+	~ACClusterPositionsPropellerPlugin();
+        virtual void updateNextPositions(ACMediaBrowser* );
 };
 
-#endif	/* _ACEuclideanKMeansPlugin_H */
+#endif	/* _ACClusterPositionsPropellerPlugin_H */
