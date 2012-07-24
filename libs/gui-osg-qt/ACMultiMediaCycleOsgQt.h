@@ -94,7 +94,10 @@ Q_OBJECT
 public slots:
 	// Config
 	void on_actionEdit_Config_File_triggered(bool checked);
-    void comboDefaultSettingsChanged(QString media);
+    void changeLibraryMediaType(QString media); // media type of the library
+    #ifdef SUPPORT_MULTIMEDIA
+    void changeActiveMediaType(QString media); // active media type for documents
+    #endif
     void on_actionEdit_Input_Controls_triggered(bool checked);
 	//SENEFFE ?
 	virtual void loopXML(){};

@@ -87,6 +87,7 @@ void ACBrowserControlsCompleteDockWidgetQt::modifyListItem(QListWidgetItem *item
         if (item->checkState() == Qt::Unchecked) w = 0.0;
         else w = 1.0 ;
         int f =  ui.featuresListWidget->currentRow(); // index of selected feature
+        //std::cout << "ACBrowserControlsCompleteDockWidgetQt::modifyListItem: currentRow " << f << std::endl;
         media_cycle->setWeight(f,w);
         media_cycle->updateDisplay(true);
         //XS 250310 was: media_cycle->updateClusters(true);
@@ -182,13 +183,15 @@ void ACBrowserControlsCompleteDockWidgetQt::updatePluginsSettings()
     //Plugins according to media type
     //TODO Remember previous settings
     //std::cout << "ACBrowserControlsCompleteDockWidgetQt::changeMediaType: Plugins according to media type" << std::endl;
-    /*if(media_cycle->getMediaType() == MEDIA_TYPE_MIXED){
-        int comboBoxClustersPositionsIndex = ui.comboBoxClustersPositions->findText("Archipel Atoll");
-        if (comboBoxClustersPositionsIndex > -1){
-            ui.comboBoxClustersPositions->setCurrentIndex(comboBoxClustersPositionsIndex);
-            media_cycle->changeClustersPositionsPlugin("Archipel Atoll");
-        }
-    }*/
+    if(media_cycle->getMediaType() == MEDIA_TYPE_MIXED){
+        if(!media_cycle->getLibrary())
+            return;
+        if(!media_cycle->getLibrary()->getMediaReaderPlugin())
+            return;
+        if(media_cycle->getLibrary()->getMediaReaderPlugin()->getName() == "ArchipelReader")
+            clustersPositionsControls->on_comboBoxPlugins_activated("Archipel Atoll");
+        // or media_cycle->changeClustersPositionsPlugin("Archipel Atoll"); ?
+    }
 
     emit this->readjustHeight();
 }
@@ -267,7 +270,7 @@ void ACBrowserControlsCompleteDockWidgetQt::synchronizeFeaturesWeights()
                 ui.featuresListWidget->item(i)->setCheckState (Qt::Checked);
         }
     }
-    emit this->readjustHeight();
+    //emit this->readjustHeight();
 }
 
 void ACBrowserControlsCompleteDockWidgetQt::configureCheckBoxes()
@@ -294,7 +297,7 @@ void ACBrowserControlsCompleteDockWidgetQt::configureCheckBoxes()
     connect(ui.featuresListWidget, SIGNAL(itemClicked(QListWidgetItem*)),
             this, SLOT(modifyListItem(QListWidgetItem*)));
 
-    emit this->readjustHeight();
+    //emit this->readjustHeight();
 }
 
 void ACBrowserControlsCompleteDockWidgetQt::cleanCheckBoxes()

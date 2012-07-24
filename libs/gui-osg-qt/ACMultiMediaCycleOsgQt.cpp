@@ -1216,7 +1216,8 @@ void ACMultiMediaCycleOsgQt::loadMediaDocumentConfig(string _name){
     dockWidgetsManager->changeMediaType(MEDIA_TYPE_MIXED);
 }
 
-void ACMultiMediaCycleOsgQt::comboDefaultSettingsChanged(QString media){
+// media type of the library
+void ACMultiMediaCycleOsgQt::changeLibraryMediaType(QString media){
     string mt = media.toStdString();
         // custom settings = edit config file
         if (mt == "Custom"){
@@ -1239,10 +1240,25 @@ void ACMultiMediaCycleOsgQt::comboDefaultSettingsChanged(QString media){
         cout << iterm->first << " - corresponding media type code : " << new_media_type << endl;
 
         if (this->media_type != new_media_type)
-            this->loadDefaultConfig(new_media_type);
+            this->loadDefaultConfig(new_media_type);//CF why not this->changeMediaType(new_media_type)?
         else
             return;
 }
+
+// active media type for documents
+#ifdef SUPPORT_MULTIMEDIA
+void ACMultiMediaCycleOsgQt::changeActiveMediaType(QString name){
+    string nameStr=string(name.toAscii());
+    if (media_cycle->getActiveSubMediaKey()!=nameStr){
+        media_cycle->setActiveMediaType(nameStr);
+        media_cycle->initializeFeatureWeights();
+        media_cycle->normalizeFeatures(1);
+        media_cycle->libraryContentChanged(1);
+        dockWidgetsManager->resetPluginsSettings();
+        dockWidgetsManager->updatePluginsSettings();
+    }
+}
+#endif
 
 void ACMultiMediaCycleOsgQt::on_actionClean_triggered(bool checked) {
 	this->clean();
@@ -1297,7 +1313,7 @@ bool ACMultiMediaCycleOsgQt::hasMediaCycle(){
         QString mediaType =  QInputDialog::getItem(this,tr("Choose the media type"),tr("Media type:"), mediaTyped, 0, false, &ok);
         if (ok && !mediaType.isEmpty()){
             dockWidgetsManager->changeMediaType( ACMediaFactory::getInstance().guessMediaTypeFromString(mediaType.toStdString()) );
-            this->comboDefaultSettingsChanged(mediaType);
+            this->changeLibraryMediaType(mediaType);
             return true;
         }
 

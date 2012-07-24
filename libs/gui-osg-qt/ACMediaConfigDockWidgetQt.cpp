@@ -57,7 +57,7 @@ bool ACMediaConfigDockWidgetQt::canBeVisible(ACMediaType _media_type){
 
 void ACMediaConfigDockWidgetQt::on_comboLibrary_activated(const QString & text)
 {
-    emit mediaTypeChanged(text);
+    emit libraryMediaTypeChanged(text);
 }
 
 void ACMediaConfigDockWidgetQt::changeMediaType(ACMediaType _media_type)

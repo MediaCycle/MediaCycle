@@ -134,8 +134,10 @@ bool ACDockWidgetsManagerQt::addControlDock(ACAbstractDockWidgetQt* dock)
         lastDocksVisibilities.insert(std::pair<std::string,int>( dock->getClassName(),0 ));
         dockWidgets.back()->setVisible(false);
     }
-    connect(dockWidgets.back(), SIGNAL(mediaTypeChanged(QString)), mainWindow, SLOT(comboDefaultSettingsChanged(QString)));
-
+    connect(dockWidgets.back(), SIGNAL(libraryMediaTypeChanged(QString)), mainWindow, SLOT(changeLibraryMediaType(QString)));
+    #ifdef SUPPORT_MULTIMEDIA
+    connect(dockWidgets.back(), SIGNAL(activeMediaTypeChanged(QString)), mainWindow, SLOT(changeActiveMediaType(QString)));
+    #endif
     dockWidgets.back()->autoConnectOSC(auto_connect_osc);
 
     this->updateDockHeight();

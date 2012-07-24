@@ -1,7 +1,7 @@
 /**
  * @brief ACMediaDocumentOptionDockWidgetQt.cpp
  * @author Christian Frisson
- * @date 22/07/2012
+ * @date 24/07/2012
  * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -107,15 +107,8 @@ void ACMediaDocumentOptionDockWidgetQt::resetPluginsSettings(){
 
 void ACMediaDocumentOptionDockWidgetQt::changeMediaType(QString name){
     #ifdef SUPPORT_MULTIMEDIA
-	if (initOn)
-		return;
-	string nameStr=string(name.toAscii());
-	if (media_cycle->getActiveSubMediaKey()!=nameStr){
-		media_cycle->setActiveMediaType(nameStr);
-		media_cycle->initializeFeatureWeights(); 
-		media_cycle->normalizeFeatures(1);
-		media_cycle->libraryContentChanged(1); 
-		emit changeLibraryMediaType();
-	}
+    if (initOn)
+        return;
+    emit activeMediaTypeChanged(name);
     #endif//def SUPPORT_MULTIMEDIA
 }

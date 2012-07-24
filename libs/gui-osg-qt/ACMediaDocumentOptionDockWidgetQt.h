@@ -1,7 +1,7 @@
 /**
  * @brief ACMediaDocumentOptionDockWidgetQt.h
  * @author Christian Frisson
- * @date 14/06/2012
+ * @date 24/07/2012
  * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -53,8 +53,6 @@ public:
 
 private slots:
     void changeMediaType(QString name);
-signals:
-    void changeLibraryMediaType();
 public:
 #ifdef SUPPORT_MULTIMEDIA
     virtual void updatePluginsSettings();

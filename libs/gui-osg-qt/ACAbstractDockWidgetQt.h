@@ -50,7 +50,10 @@ class ACAbstractDockWidgetQt : public QDockWidget {
     Q_OBJECT
 
 signals:
-    void mediaTypeChanged(QString);
+    void libraryMediaTypeChanged(QString);
+    #ifdef SUPPORT_MULTIMEDIA
+    void activeMediaTypeChanged(QString);
+    #endif//def SUPPORT_MULTIMEDIA
 public:
     ACAbstractDockWidgetQt(QWidget *parent = 0, ACMediaType _media_type = MEDIA_TYPE_NONE, std::string _class_name = "")
         : QDockWidget(parent), media_type(_media_type),class_name(_class_name),media_cycle(0),osg_view(0)

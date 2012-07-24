@@ -53,7 +53,8 @@ public slots:
     void syncControlToggleWithDocks();
 signals:
     void toggleControls(bool);
-    void mediaTypeChanged(ACMediaType);
+    void libraryMediaTypeChanged(ACMediaType);
+
 public:
     ACDockWidgetsManagerQt(QMainWindow* _mainWindow = 0);
     virtual ~ACDockWidgetsManagerQt();
