@@ -158,6 +158,7 @@ public:
 	
 	void setPreProcessPlugin(ACPlugin* acpl);
 	void setMediaReaderPlugin(ACPlugin* acpl);
+        ACMediaReaderPlugin* getMediaReaderPlugin(){return mReaderPlugin;}
 	
 	ACMediaType getActiveSubMediaType();
 #ifdef SUPPORT_MULTIMEDIA
