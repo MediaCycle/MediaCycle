@@ -2294,9 +2294,11 @@ int ACAudioFeedback::setSourcePosition(int loop_id, float x, float y, float z)
 	alSourcefv(loop_source, AL_POSITION, mSourcePos[loop_slot]);
 	return 0;
 }
+#endif//def USE_OPENAL
 
 int ACAudioFeedback::setSourceGain(int loop_id, float gain)
 {
+	#ifdef USE_OPENAL
     if(gain < 0.0) //due to AL_GAIN
         gain = 0.0;
     if(gain > 1.0) //due to AL_GAIN
@@ -2309,9 +2311,13 @@ int ACAudioFeedback::setSourceGain(int loop_id, float gain)
     }
     loop_source = loop_sources[loop_slot];
     alSourcef(loop_source, AL_GAIN, gain);
+	#else
+	std::cerr << "ACAudioFeedback::setSourceGain: not yet implemented for the PortAudio backend." << std::endl;
+	#endif //USE_OPENAL
     return 0;
 }
 
+#ifdef USE_OPENAL
 int ACAudioFeedback::setSourceRolloffFactor(int loop_id, float rolloff_factor)
 {
 	int loop_slot;

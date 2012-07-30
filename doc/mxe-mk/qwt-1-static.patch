@@ -1,0 +1,26 @@
+This file is part of MXE.
+See index.html for further information.
+
+This patch has been made for static compilation and not compiling
+ Qt Designer plugins.
+
+--- a/qwtconfig.pri	2011-08-01 16:34:05.000000000 +0200
++++ b/qwtconfig.pri	2012-06-16 03:55:47.000000000 +0200
+@@ -58,7 +58,7 @@
+ # it will be a static library.
+ ######################################################################
+ 
+-QWT_CONFIG           += QwtDll
++#QWT_CONFIG           += QwtDll
+ 
+ ######################################################################
+ # QwtPlot enables all classes, that are needed to use the QwtPlot 
+@@ -98,7 +98,7 @@
+ # Otherwise you have to build it from the designer directory.
+ ######################################################################
+ 
+-QWT_CONFIG     += QwtDesigner
++#QWT_CONFIG     += QwtDesigner
+ 
+ ######################################################################
+ # If you want to auto build the examples, enable the line below

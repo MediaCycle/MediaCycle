@@ -29,7 +29,7 @@ endif (WITH_MPG123)
 
 include_directories(${yaafe_io_INCLUDE_DIRS})
 link_directories(${CMAKE_BINARY_DIR}/src_cpp/yaafe-core)
-add_library (yaafe-io ${yaafe_io_SOURCES})
+add_library (yaafe-io STATIC ${yaafe_io_SOURCES})
 if (NOT APPLE)
    set_target_properties(yaafe-io PROPERTIES VERSION ${YAAFE_LIBVERSION} SOVERSION ${YAAFE_API_VERSION})
 endif (NOT APPLE)

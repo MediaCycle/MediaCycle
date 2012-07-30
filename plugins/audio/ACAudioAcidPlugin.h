@@ -1,8 +1,8 @@
 /**
  * @brief ACAudioAcidPlugin.h
  * @author Christian Frisson
- * @date 08/10/2011
- * @copyright (c) 2011 – UMONS - Numediart
+ * @date 30/07/2012
+ * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -32,9 +32,11 @@
 #ifndef _ACAUDIOACIDPLUGIN_H
 #define	_ACAUDIOACIDPLUGIN_H
 
-#include "CWaves_acid.h"
 #include "MediaCycle.h"
+#include "CWaves_acid.h"
 
+//#include <boost/thread/thread_time.hpp>
+//typedef boost::posix_time::ptime system_time;
 #include<iostream>
 
 class ACAudioAcidPlugin : public ACFeaturesPlugin {

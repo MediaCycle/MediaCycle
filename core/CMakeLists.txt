@@ -60,7 +60,7 @@ ENDIF()
 # CF we need to be able to display images (library cover) for any media type
 # OSG for 3D Models and/or ffmpeg plugin checkup
 #IF(SUPPORT_3DMODEL OR SUPPORT_IMAGE OR SUPPORT_VIDEO)
-	TARGET_LINK_LIBRARIES(mediacycle ${OPENSCENEGRAPH_CORE_LIBRARIES})
+	TARGET_LINK_LIBRARIES(mediacycle ${OPENSCENEGRAPH_CORE_LIBRARIES} ${OPENGL_LIBRARIES})
 #ENDIF()
 
 # this might require some path adaptation for Windows

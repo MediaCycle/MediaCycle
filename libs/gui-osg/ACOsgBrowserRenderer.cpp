@@ -93,12 +93,11 @@ using namespace osg;
 
 #ifdef OSG_LIBRARY_STATIC
 // include the plugins we need
-USE_OSGPLUGIN(ive)
-USE_OSGPLUGIN(osg)
+//USE_OSGPLUGIN(ive) // for 3Dmodels?
+//USE_OSGPLUGIN(osg) // for 3Dmodels?
 //USE_OSGPLUGIN(osg2)
-USE_OSGPLUGIN(rgb)
-USE_OSGPLUGIN(OpenFlight)
-USE_OSGPLUGIN(freetype)
+//USE_OSGPLUGIN(rgb)
+USE_OSGPLUGIN(freetype) // for text
 
 /*USE_DOTOSGWRAPPER_LIBRARY(osg)
 USE_DOTOSGWRAPPER_LIBRARY(osgFX)
@@ -121,12 +120,12 @@ USE_SERIALIZER_WRAPPER_LIBRARY(osgParticle)
 //USE_SERIALIZER_WRAPPER_LIBRARY(osgTerrain)
 USE_SERIALIZER_WRAPPER_LIBRARY(osgText)
 USE_SERIALIZER_WRAPPER_LIBRARY(osgVolume)
-
+*/
 // include the platform specific GraphicsWindow implementation.
 USE_GRAPHICSWINDOW()
 //USE_GRAPICSWINDOW_IMPLEMENTATION(Win32)
 //osgViewer::graphicswindowproxy_Win32(graphicswindow_Win32);
-*/
+
 #endif
 
 #ifndef MIN

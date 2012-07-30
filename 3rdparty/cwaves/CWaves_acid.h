@@ -5,14 +5,6 @@
 #ifndef _CwavesAcid_H_
 #define _CwavesAcid_H_
 
-//sleep()
-#include <iostream>
-#ifdef __MINGW32__
-#include <windows.h>
-#define sleep(n) Sleep(1000 * n)
-#endif
-
-//#include <windows.h>
 #include <stdio.h>
 #include <string.h>
 

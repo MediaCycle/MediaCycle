@@ -961,8 +961,11 @@ std::string ACMultiMediaCycleOsgQt::getPluginPathFromBaseName(std::string basena
         #endif
     #elif defined (__WIN32__)
         plugin_ext = ".dll";
-        plugins_path = s_path + "\\";
-        plugin_subfolder = "";
+        plugins_path = s_path + "/";
+		#ifdef USE_DEBUG
+		plugins_path = s_path + "/../../plugins/";
+        plugin_subfolder = basename + "/";
+		#endif USE_DEBUG
     #else // Linux
         plugin_ext = ".so";
         #if not defined (USE_DEBUG) // needs "make package" to be ran to work
@@ -994,8 +997,12 @@ int ACMultiMediaCycleOsgQt::tryLoadFeaturePluginFromBaseName(std::string basenam
     std::string plugin = this->getPluginPathFromBaseName(basename);
     int n_elements = media_cycle->addPluginLibrary(plugin);
     if( n_elements == -1){
-        this->showError("Couldn't load the " + basename + " feature extraction plugin. Importing media files might work only by loading XML library files.");
-        this->switchFeatureExtraction(false);
+		#ifdef USE_DEBUG
+		this->showError("Couldn't load the " + basename + " feature extraction plugin from path '" + plugin + "'. Importing media files might work only by loading XML library files.");
+        #else
+		this->showError("Couldn't load the " + basename + " feature extraction plugin. Importing media files might work only by loading XML library files.");
+		#endif
+		this->switchFeatureExtraction(false);
         return n_elements;
     }
     else{

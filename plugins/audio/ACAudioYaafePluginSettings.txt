@@ -17,82 +17,12 @@ n4 > n5
 MFCC := Output normalize="-1" version="v0.6" yaafedefinition="MFCC blockSize=512 stepSize=256"
 n5 > MFCC
 
-n7 := Derivate DO1Len="4" DO2Len="1" DOrder="1"
-Delta_MFCC := Output normalize="-1" version="v0.6" yaafedefinition="MFCC blockSize=512 stepSize=256 > Derivate DOrder=1"
-n5 > n7
-n7 > Delta_MFCC
-
-n9 := Derivate DO1Len="4" DO2Len="1" DOrder="2"
-Delta_Delta_MFCC := Output normalize="-1" version="v0.6" yaafedefinition="MFCC blockSize=512 stepSize=256 > Derivate DOrder=2"
-n5 > n9
-n9 > Delta_Delta_MFCC
-
-n11 := Flatness
-Spectral_Flatness := Output normalize="-1" version="v0.6" yaafedefinition="SpectralFlatness blockSize=512 stepSize=256"
-n3 > n11
-n11 > Spectral_Flatness
-
-n13 := Sqr
-n3 > n13
-
-n14 := Rolloff
-Spectral_RollOff := Output normalize="-1" version="v0.6" yaafedefinition="SpectralRolloff blockSize=512 stepSize=256"
-n13 > n14
-n14 > Spectral_RollOff
-
-n15 := Variation
-Spectral_Variation := Output normalize="-1" version="v0.6" yaafedefinition="SpectralVariation blockSize=512 stepSize=256"
-n3 > n15
-n15 > Spectral_Variation
-
-n16 := Slope
-Spectral_Slope := Output normalize="-1" version="v0.6" yaafedefinition="SpectralSlope blockSize=512 stepSize=256"
-n3 > n16
-n16 > Spectral_Slope
-
-n17 := ShapeStatistics
-Spectral_Shape_Statistics := Output normalize="-1" version="v0.6" yaafedefinition="SpectralShapeStatistics blockSize=512 stepSize=256"
-n3 > n17
-n17 > Spectral_Shape_Statistics
-
 n18 := Flux
 Spectral_Flux := Output normalize="-1" version="v0.6" yaafedefinition="SpectralFlux blockSize=512 stepSize=256"
 n3 > n18
 n18 > Spectral_Flux
 
-n19 := Decrease
-Spectral_Decrease := Output normalize="-1" version="v0.6" yaafedefinition="SpectralDecrease blockSize=512 stepSize=256"
-n3 > n19
-n19 > Spectral_Decrease
-
-n20 := ZCR
-Zero_Crossing_Rate := Output normalize="-1" version="v0.6" yaafedefinition="ZeroCrossingRate blockSize=512 stepSize=256"
-n1 > n20
-n20 > Zero_Crossing_Rate
-
-n21 := ShapeStatistics
-Temporal_Shape_Statistics := Output normalize="-1" version="v0.6" yaafedefinition="TemporalShapeStatistics blockSize=512 stepSize=256"
-n1 > n21
-n21 > Temporal_Shape_Statistics
-
 n22 := RMS
 Energy := Output normalize="-1" version="v0.6" yaafedefinition="Energy blockSize=512 stepSize=256"
 n1 > n22
 n22 > Energy
-
-n23 := Loudness
-Loudness := Output normalize="-1" version="v0.6" yaafedefinition="Loudness blockSize=512 stepSize=256"
-n13 > n23
-n23 > Loudness
-
-n24 := Normalize NNorm="Sum"
-n25 := LoudnessSharpness
-Perceptual_Sharpness := Output normalize="-1" version="v0.6" yaafedefinition="PerceptualSharpness blockSize=512 stepSize=256"
-n23 > n24
-n24 > n25
-n25 > Perceptual_Sharpness
-
-n26 := LoudnessSpread
-Perceptual_Spread := Output normalize="-1" version="v0.6" yaafedefinition="PerceptualSpread blockSize=512 stepSize=256"
-n24 > n26
-n26 > Perceptual_Spread

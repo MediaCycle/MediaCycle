@@ -1,7 +1,7 @@
 /**
  * @brief ACOsgCompositeViewQt.h
  * @author Christian Frisson
- * @date 22/07/2012
+ * @date 30/07/2012
  * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -70,19 +70,11 @@
 
 #include <osgViewer/Viewer>
 #include <osgViewer/CompositeViewer>
-#include <osgViewer/ViewerEventHandlers>
-#include <osgGA/TrackballManipulator>
-#include <osgDB/ReadFile>
+//#include <osgViewer/ViewerEventHandlers>
 
-#include <QtCore/QString>
-#include <QtCore/QTimer>
-#include <QtGui/QKeyEvent>
-#include <QtGui/QApplication>
+#include <QtGui>
 #include <QtOpenGL/QGLWidget>
-#include <QtGui/QMainWindow>
 using Qt::WindowFlags;
-
-#include <QAction>
 
 #include <iostream>
 #include <MediaCycle.h>
@@ -91,7 +83,6 @@ using Qt::WindowFlags;
 #include <ACOsgTimelineRenderer.h>
 #include <ACOsgTimelineControlsRenderer.h>
 #include <ACOsgTimelineEventHandler.h>
-
 #include <ACOsgHUDRenderer.h>
 
 #if defined (SUPPORT_AUDIO)

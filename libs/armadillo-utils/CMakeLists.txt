@@ -6,16 +6,10 @@ IF ( ARMADILLO_FOUND )
 	ADD_DEPENDENCIES(armadillo-utils fftooura)
 	
 	#gsl - uncomment if needed
-	IF(WIN32 OR MINGW)
-		TARGET_LINK_LIBRARIES(armadillo-utils fftooura ${ARMADILLO_LIBRARY} ${ATLAS_LIBRARY} ${LAPACK_LIBRARY} ${BLAS_LIBRARY})
-	ELSE()
-		TARGET_LINK_LIBRARIES(armadillo-utils fftooura ${ARMADILLO_LIBRARY} atlas lapack blas)
-	ENDIF()
+	TARGET_LINK_LIBRARIES(armadillo-utils fftooura ${ARMADILLO_LIBRARIES})
 	#IF ( SDIF_FOUND )
 	#	TARGET_LINK_LIBRARIES(armadillo-utils sdif)
 	#ENDIF ( )
-
-	TARGET_LINK_LIBRARIES(armadillo-utils fftooura ${ARMADILLO_LIBRARY})
 
 	#INSTALL(TARGETS armadillo-utils LIBRARY DESTINATION lib)
 	#INSTALL(FILES ${HDR} DESTINATION include/armadillo-utils)

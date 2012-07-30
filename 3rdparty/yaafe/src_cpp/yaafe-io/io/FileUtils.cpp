@@ -25,6 +25,9 @@
 #include "FileUtils.h"
 #include <iostream>
 #include <sys/stat.h>
+#if defined __MINGW32__
+#include <io.h> // for mdkir
+#endif
 #include <stdlib.h>
 
 using namespace std;
@@ -34,7 +37,11 @@ namespace YAAFE
 
 int preparedirs(const std::string& filename)
 {
-    char DELIMITER = '/';
+	#if defined WINDOWS32 || defined __MINGW32__
+    char DELIMITER = '\\';
+	#else
+	char DELIMITER = '/';
+	#endif
     struct stat st;
     for (size_t index=filename.find_first_of(DELIMITER);index!=string::npos;index=filename.find_first_of(DELIMITER,index+1))
     {
@@ -50,7 +57,11 @@ int preparedirs(const std::string& filename)
             continue;
         }
         // create dir
-        int res = mkdir(path.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+		#if defined WINDOWS32 || defined __MINGW32__
+        int res = mkdir(path.c_str());
+		#else
+		int res = mkdir(path.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+		#endif
         if (res)
             return res;
     }

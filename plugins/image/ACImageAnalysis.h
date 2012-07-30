@@ -48,6 +48,7 @@
 
 #include <fstream> 
 
+typedef unsigned int uint;
 using std::vector;
 using std::string;
 
