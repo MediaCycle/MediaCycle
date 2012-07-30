@@ -1,3 +1,4 @@
+# Forked r18 from http://code.google.com/p/gnuplot-cpp/
 # XS TODO: check that gnuplot is intalled on the machine...
 IF(USE_GNUPLOT_I)
 	FILE(GLOB SRC *.cpp *.c)
