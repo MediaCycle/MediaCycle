@@ -3,6 +3,8 @@
  * See index.html for further information.
  */
 
+// From http://arma.sourceforge.net/docs.html#eig_sym
+
 #include <armadillo>
 
 using namespace arma;

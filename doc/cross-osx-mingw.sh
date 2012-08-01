@@ -1,7 +1,7 @@
 # Cross-compiling requires CMake 2.6 or newer. To cross-compile, first modify
 # this file to set the proper settings and paths. Then use it from build/ like:
-# cmake ../.. -DCMAKE_TOOLCHAIN_FILE=../../doc/cross-mingw.sh /
-#          -DCMAKE_INSTALL_PREFIX=/opt/mingw-cross-env/usr/i686-pc-mingw32
+# cmake ../.. -DCMAKE_TOOLCHAIN_FILE=/opt/mxe/cross-mingw.sh /
+#          -DCMAKE_INSTALL_PREFIX=/opt/mxe/usr/i686-pc-mingw32
 SET(MINGW_CROSS_ENV ${CMAKE_INSTALL_PREFIX}/../..)
 SET(MINGW_PREFIX ${CMAKE_INSTALL_PREFIX})
 set(MINGW_CROSS_BIN ${CMAKE_INSTALL_PREFIX}/../bin)

@@ -8,8 +8,7 @@ $(PKG)_CHECKSUM := 96ff27b87e0f028d1d16201afebabec4e0c72367
 $(PKG)_SUBDIR   := OpenCV-$($(PKG)_VERSION)
 $(PKG)_FILE     := OpenCV-$($(PKG)_VERSION).tar.bz2
 $(PKG)_URL      := http://$(SOURCEFORGE_MIRROR)/project/opencvlibrary/opencv-unix/$($(PKG)_VERSION)/$($(PKG)_FILE)
-$(PKG)_DEPS     := ffmpeg
-#bzip2 faad2 ffmpeg lame liboil ogg theora vorbis x264 zlib
+$(PKG)_DEPS     := gcc bzip2 ffmpeg zlib
 
 define $(PKG)_UPDATE
     wget -q -O- 'http://sourceforge.net/projects/opencvlibrary/files/opencv-unix/' | \
