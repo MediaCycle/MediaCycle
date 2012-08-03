@@ -1,8 +1,8 @@
 /**
  * @brief AGOsgCompositeViewQt.h
  * @author Christian Frisson
- * @date 10/03/2011
- * @copyright (c) 2011 – UMONS - Numediart
+ * @date 03/08/2012
+ * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -130,9 +130,9 @@ class AGOsgCompositeViewQt : public osgViewer::CompositeViewer, public QGLWidget
 		ACAudioEngine *audio_engine;
 
 	public:
-		// needs to be called when loops are added or removed
+                // needs to be called when medias are added or removed
 		void prepareFromBrowser();
-		// needs to be called when loops positions are changed
+                // needs to be called when node positions are changed
 		void updateTransformsFromBrowser( double frac);
 		void setMediaCycle(MediaCycle* _media_cycle);
 		// needs to be called when tracks are added or removed

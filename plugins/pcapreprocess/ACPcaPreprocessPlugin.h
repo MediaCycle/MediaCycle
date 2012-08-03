@@ -57,7 +57,7 @@ public:
 	ACPcaPreprocessPlugin();
 	~ACPcaPreprocessPlugin();
 
-	virtual preProcessInfo update(std::vector<ACMedia*> media_library);
+        virtual preProcessInfo update(ACMedias media_library);
 	
 	virtual std::vector<ACMediaFeatures*> apply(preProcessInfo info,ACMedia* theMedia);
 	

@@ -1,7 +1,7 @@
 /**
  * @brief ACVisPlugin2Desc.cpp
  * @author Christian Frisson
- * @date 22/07/2012
+ * @date 03/08/2012
  * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -110,16 +110,17 @@ void ACVisPlugin2Desc::updateNextPositions(ACMediaBrowser* mediaBrowser){
     mat posDisp_m;
 
     extractDescMatrix(mediaBrowser, desc_m, featureNames);
+    std::vector<long> ids = mediaBrowser->getLibrary()->getAllMediaIds();
     if (desc_m.n_cols < 2){
         std::cout << "Not enough features for this display" << std::endl;
         ACPoint p;
-        for (int i=0; i<libSize; i++){
-            mediaBrowser->setLoopIsDisplayed(i, true);
+        for (int i=0; i<ids.size(); i++){
+            mediaBrowser->setMediaNodeDisplayed(ids[i], true);
             // TODO: make sure you meant next
             p.x = 0.f;//posDisp_m(i,0);
             p.y = 0.f;//posDisp_m(i,1);
             p.z = 0.f;
-            mediaBrowser->setNodeNextPosition(i, p);
+            mediaBrowser->setNodeNextPosition(ids[i], p);
         }
 
         return;
@@ -128,28 +129,28 @@ void ACVisPlugin2Desc::updateNextPositions(ACMediaBrowser* mediaBrowser){
     for (int i=0; i< featureNames.size(); i++)
         std::cout << "featureNames : " << featureNames[i] << std::endl;
 
-    mediaBrowser->setNumberOfDisplayedLoops(desc_m.n_rows);
+    mediaBrowser->setNumberOfDisplayedNodes(desc_m.n_rows);
 
     ACPoint p;
-    for (int i=0; i<libSize; i++){
-        mediaBrowser->setLoopIsDisplayed(i, true);
+    for (int i=0; i<ids.size(); i++){
+        mediaBrowser->setMediaNodeDisplayed(ids[i], true);
         // TODO: make sure you meant next
         p.x = desc_m(i,0)*.1;
         p.y = desc_m(i,1)*.1;
         p.z = 0;
-        mediaBrowser->setNodeNextPosition(i, p);
+        mediaBrowser->setNodeNextPosition(ids[i], p);
     }
     ////////////////////////////////////////////////////////////////
 }
 
 
 void ACVisPlugin2Desc::extractDescMatrix(ACMediaBrowser* mediaBrowser, mat& desc_m, vector<string> &featureNames){
-    vector<ACMedia*> loops = mediaBrowser->getLibrary()->getAllMedia();
-    int nbMedia = loops.size();
+    ACMedias medias = mediaBrowser->getLibrary()->getAllMedia();
+    int nbMedia = medias.size();
     int featDim;
     int totalDim = 0;
     // Count nb of feature
-    int nbFeature = loops.back()->getNumberOfFeaturesVectors();
+    int nbFeature = mediaBrowser->getLibrary()->getFirstMedia()->getNumberOfFeaturesVectors();
 
     // CF was meant to activate the 2 first selected features from the check list
     //std::vector<float> weight=mediaBrowser->getWeightVector();
@@ -157,8 +158,8 @@ void ACVisPlugin2Desc::extractDescMatrix(ACMediaBrowser* mediaBrowser, mat& desc
         std::cerr<<"ACVisPluginPCA::extractDescMatrix weight vector size incompatibility"<<endl;
     for(int f=0; f< nbFeature; f++){
         if (weight[f]>0.f){
-            featureNames.push_back(loops.back()->getPreProcFeaturesVector(f)->getName());
-            featDim = loops.back()->getPreProcFeaturesVector(f)->getSize();
+            featureNames.push_back(mediaBrowser->getLibrary()->getFirstMedia()->getPreProcFeaturesVector(f)->getName());
+            featDim = mediaBrowser->getLibrary()->getFirstMedia()->getPreProcFeaturesVector(f)->getSize();
             for(int d=0; d < featDim; d++){
                 totalDim++;
             }
@@ -167,14 +168,15 @@ void ACVisPlugin2Desc::extractDescMatrix(ACMediaBrowser* mediaBrowser, mat& desc
 
     desc_m.set_size(nbMedia,totalDim);
 
-    for(int i=0; i<nbMedia; i++) {
+    int i = 0;
+    for(ACMedias::iterator media = medias.begin();media!=medias.end();media++){
         int tmpIdx = 0;
         for(int f=0; f< nbFeature; f++){
             if (weight[f]>0.f){
                 std::cout << f << std::endl;
-                featDim = loops.back()->getPreProcFeaturesVector(f)->getSize();
+                featDim = mediaBrowser->getLibrary()->getFirstMedia()->getPreProcFeaturesVector(f)->getSize();
                 for(int d=0; d < featDim; d++){
-                    desc_m(i,tmpIdx) = loops[i]->getPreProcFeaturesVector(f)->getFeatureElement(d);
+                    desc_m(i++,tmpIdx) = media->second->getPreProcFeaturesVector(f)->getFeatureElement(d);
                     tmpIdx++;
                 }
             }
@@ -188,9 +190,11 @@ void ACVisPlugin2Desc::extractDescMatrix(ACMediaBrowser* mediaBrowser, mat& desc
 
     desc_m.set_size(nbMedia,2);
 
-    for(int i=0; i<nbMedia; i++) {
-        desc_m(i,0) = loops[i]->getPreProcFeaturesVector(x)->getFeatureElement(0);
-        desc_m(i,1) = loops[i]->getPreProcFeaturesVector(y)->getFeatureElement(0);
+    int i=0;
+    for(ACMedias::iterator media = medias.begin();media!=medias.end();media++){
+        desc_m(i,0) = media->second->getPreProcFeaturesVector(x)->getFeatureElement(0);
+        desc_m(i,1) = media->second->getPreProcFeaturesVector(y)->getFeatureElement(0);
+        i++;
     }
 
     // normalizing features between 0 and 1 ///////////////////////////////////////

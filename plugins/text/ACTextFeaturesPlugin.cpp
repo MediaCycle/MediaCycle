@@ -273,7 +273,7 @@ void ACTextFeaturesPlugin::clearIndexTerm(std::vector<wchar_t*> &pIndexTerms){
 
 
 
-preProcessInfo ACTextFeaturesPlugin::update(std::vector<ACMedia*> media_library){
+preProcessInfo ACTextFeaturesPlugin::update(ACMedias media_library){
 	
 	clearIndexTerm(indexTerms);
 	indexTerms=indexTermsExtraction();

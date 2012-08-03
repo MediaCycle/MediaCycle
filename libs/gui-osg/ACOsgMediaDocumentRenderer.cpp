@@ -118,11 +118,6 @@ void ACOsgMediaDocumentRenderer::metadataGeode() {
 
     metadata->setDrawMode(osgText::Text::TEXT);// osgText::Text::BOUNDINGBOX, osgText::Text::ALIGNMENT
 
-    // CF: temporary workaround as the ACUserLog tree and the ACLoopAttributes vector in ACMediaBrowser are not sync'd
-    /*int media_index = node_index; // or media_cycle->getBrowser()->getMediaNode(node_index).getMediaId();
-  if (media_cycle->getBrowser()->getMode() == AC_MODE_NEIGHBORS)
-  media_index = media_cycle->getBrowser()->getUserLog()->getMediaIdFromNodeId(node_index);*/
-
     //string textLabel=media_cycle->getLibrary()->getMedia(media_index)->getLabel();
     string textLabel=media->getLabel();
 
@@ -133,12 +128,8 @@ void ACOsgMediaDocumentRenderer::metadataGeode() {
     //state->setMode(GL_BLEND, StateAttribute::ON);
     //state->setMode(GL_LINE_SMOOTH, StateAttribute::ON);
 
-    //TODO check this .get() (see also ACOsgBrowserRenderer.cpp)
-    //".get()" is necessary for compilation under linux (OSG v2.4)
     metadata_geode->addDrawable(metadata);
 }
-
-
 
 void ACOsgMediaDocumentRenderer::entryGeode() {
 
@@ -177,7 +168,7 @@ void ACOsgMediaDocumentRenderer::prepareNodes() {
 
     entry_geode = 0;
 
-    if  (media && media_cycle->getNodeFromMedia(media).isDisplayed())
+    if  (media && media_cycle->getNodeFromMedia(media)->isDisplayed())
     {
         entryGeode();
         media_node->addChild(entry_geode);
@@ -247,8 +238,8 @@ void ACOsgMediaDocumentRenderer::updateNodes(double ratio) {
 
     xstep *= afac;
 
-    const ACMediaNode &attribute = media_cycle->getMediaNode(node_index);
-    if (!attribute.isDisplayed()){
+    const ACMediaNode* attribute = media_cycle->getMediaNode(node_index);
+    if (!attribute->isDisplayed()){
         media_node->removeChild(metadata_geode);
         if (entry_geode)
             entry_geode->setNodeMask(0);
@@ -278,7 +269,7 @@ void ACOsgMediaDocumentRenderer::updateNodes(double ratio) {
 	localscale = maxscale - distance_mouse * (maxscale - minscale) / maxdistance ;
 	localscale = max(localscale,minscale);
 	
-	if (attribute.getActivity()>=1) { // 0 inactive, 1 clicked, 2 hover
+	if (attribute->getActivity()>=1) { // 0 inactive, 1 clicked, 2 hover
             localscale = 0.5;
             if(media_node->getNumChildren() == 1) // only entry_geode so far
                 media_node->addChild(metadata_geode);
@@ -289,16 +280,16 @@ void ACOsgMediaDocumentRenderer::updateNodes(double ratio) {
             if (media_cycle->getBrowserMode() == AC_MODE_CLUSTERS){
                 const vector<int> centerNodeIds=media_cycle->getBrowser()->getIdNodeClusterCenter();
                 if(cluster_colors.size()>0){
-                    ((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(cluster_colors[attribute.getClusterId()%cluster_colors.size()]);
-                    if(centerNodeIds.size() != 0 && attribute.getClusterId() < centerNodeIds.size())
-                        if (centerNodeIds[attribute.getClusterId()]==attribute.getMediaId())
+                    ((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(cluster_colors[attribute->getClusterId()%cluster_colors.size()]);
+                    if(centerNodeIds.size() != 0 && attribute->getClusterId() < centerNodeIds.size())
+                        if (centerNodeIds[attribute->getClusterId()]==attribute->getMediaId())
                             ((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(osg::Vec4(0,0,0,1));
                 }
             }
-            //			((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(cluster_colors[attribute.getClusterId()%cluster_colors.size()]);
+            //			((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(cluster_colors[attribute->getClusterId()%cluster_colors.size()]);
             else
                 ((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(neighbor_color);
-            if (attribute.isSelected()) {
+            if (attribute->isSelected()) {
                 //CF color (multiple) selected nodes in black
                 Vec4 selected_color(0,0,0,1);
                 ((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(selected_color);
@@ -311,21 +302,21 @@ void ACOsgMediaDocumentRenderer::updateNodes(double ratio) {
 	}
 	
 
-	if (attribute.getActivity()>=2){//hover
+	if (attribute->getActivity()>=2){//hover
             std::vector<ACMedia*> tmpSegments;
             tmpSegments = media->getAllSegments();
             for (int j=0; j<tmpSegments.size(); j++)
-                media_cycle->getMediaNode(tmpSegments[j]->getId()).setDisplayed(true);
+                media_cycle->getMediaNode(tmpSegments[j]->getId())->setDisplayed(true);
 	}
 	else {
             std::vector<ACMedia*> tmpSegments;
             tmpSegments = media->getAllSegments();
             for (int j=0; j<tmpSegments.size(); j++)
-                media_cycle->getMediaNode(tmpSegments[j]->getId()).setDisplayed(true);// TR true CF false
+                media_cycle->getMediaNode(tmpSegments[j]->getId())->setDisplayed(true);// TR true CF false
 	}	
 	
 	unsigned int mask = (unsigned int)-1;
-	if(attribute.getNavigationLevel() >= media_cycle->getNavigationLevel()&&attribute.isDisplayed()) {
+	if(attribute->getNavigationLevel() >= media_cycle->getNavigationLevel()&&attribute->isDisplayed()) {
             entry_geode->setNodeMask(mask);
 	}
 	else {

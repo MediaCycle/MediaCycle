@@ -35,6 +35,8 @@
 #ifndef HEADER_ACUserProfileQt
 #define HEADER_ACUserProfileQt
 
+#include <MediaCycle.h>
+
 #include <iostream>
 #include <string.h>
 
@@ -43,10 +45,15 @@
 #include "ui_ACUserProfileQt.h"
 
 class ACUserProfileQt : public QMainWindow{
-Q_OBJECT
-	
+    Q_OBJECT
+
 public slots:
     void on_pushButtonPictureLocate_clicked();
+    void on_lineEditEmail_editingFinished();
+    void on_lineEditLocation_editingFinished();
+    void on_lineEditName_editingFinished();
+    void on_lineEditWebsite_editingFinished();
+
 protected:
     void dragEnterEvent(QDragEnterEvent *event);
     void dragMoveEvent(QDragMoveEvent *event);
@@ -54,12 +61,17 @@ protected:
     void dropEvent(QDropEvent *event);
 
 public:
-	ACUserProfileQt(QWidget *parent = 0);
-	~ACUserProfileQt();
-	
-	private:
-	// variables
-	Ui::ACUserProfileQt ui;
-        QString mediaExts;
+    ACUserProfileQt(QWidget *parent = 0);
+    ~ACUserProfileQt();
+
+    void setMediaCycle(MediaCycle* _media_cycle){ media_cycle = _media_cycle;}
+    MediaCycle* getMediaCycle() {return media_cycle;}
+
+private:
+    // variables
+    Ui::ACUserProfileQt ui;
+    QString mediaExts;
+protected:
+    MediaCycle *media_cycle;
 };
 #endif

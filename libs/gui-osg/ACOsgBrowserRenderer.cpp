@@ -134,7 +134,7 @@ USE_GRAPHICSWINDOW()
 
 
 ACOsgBrowserRenderer::ACOsgBrowserRenderer()
-: font(0)
+    : font(0)
 {
     media_cycle = 0;
     setting = AC_SETTING_NONE;
@@ -164,7 +164,7 @@ void ACOsgBrowserRenderer::clean(){
     media_cycle_global_navigation_level = 0;
 
     // SD - Results from centralized request to MediaCycle - NODE SPECIFIC
-    media_cycle_node = ACMediaNode();
+    media_cycle_node = 0;
     media_cycle_isdisplayed = false;
     media_cycle_current_pos.x = 0;
     media_cycle_current_pos.y = 0;
@@ -207,7 +207,7 @@ double ACOsgBrowserRenderer::getTime() {
 void ACOsgBrowserRenderer::prepareNodes(int _start) {
 
     int start;
-    int n = media_cycle->getNumberOfMediaNodes(); //XS was: getLibrarySize();
+    int n = media_cycle->getLibrarySize();
     if (_start) {
         start = _start;
     }
@@ -227,8 +227,10 @@ void ACOsgBrowserRenderer::prepareNodes(int _start) {
         if(link_renderer[i]){
             link_group->removeChild(link_renderer[i]->getLink());
             delete link_renderer[i];
+            link_renderer[i] = 0;
         }
     }
+    link_renderer.clear();
 
     // XS  TODO why this ?
     if ((n-start)>0)
@@ -241,25 +243,27 @@ void ACOsgBrowserRenderer::updateNodes(double ratio) {
         return;
     }
 
-    int n = media_cycle->getNumberOfMediaNodes(); //XS was: getLibrarySize();
+    int n = media_cycle->getLibrarySize();
 
-    // Create new nodelinks if the layout requires them
-    if (media_cycle->getBrowser()->getLayout() == AC_LAYOUT_TYPE_NODELINK) {
-        //CF to check with future changes when number of nodelinks may decrease (folding nodes)
-        link_renderer.resize(n);
-        for (int i=0;i<n;i++) {
-            link_renderer[i] = new ACOsgNodeLinkRenderer();
-            if (link_renderer[i]) {
-                link_renderer[i]->setMediaCycle(media_cycle);
-                node_index = node_renderer[i]->getNodeIndex();
-                link_renderer[i]->prepareLinks();
+    if(media_cycle->getBrowserMode() == AC_MODE_NEIGHBORS){
+        // Create new nodelinks if the layout requires them
+        if (media_cycle->getBrowser()->getLayout() == AC_LAYOUT_TYPE_NODELINK) {
+            //CF to check with future changes when number of nodelinks may decrease (folding nodes)
+            link_renderer.resize(n);
+            for (int i=0;i<n;i++) {
+                link_renderer[i] = new ACOsgNodeLinkRenderer();
+                if (link_renderer[i]) {
+                    link_renderer[i]->setMediaCycle(media_cycle);
+                    node_index = node_renderer[i]->getNodeIndex();
+                    link_renderer[i]->prepareLinks();
 
-                link_renderer[i]->setNodeIn(node_renderer[i]);
-                int p = media_cycle->getBrowser()->getUserLog()->getParentFromNodeId(node_index);
-                if ( p!= -1 )
-                    link_renderer[i]->setNodeOut(node_renderer[p]);
+                    link_renderer[i]->setNodeIn(node_renderer[i]);
+                    int p = media_cycle->getBrowser()->getParentFromNeighborNode(node_index);
+                    if ( p!= -1 )
+                        link_renderer[i]->setNodeOut(node_renderer[p]);
 
-                link_group->addChild(link_renderer[i]->getLink());
+                    link_group->addChild(link_renderer[i]->getLink());
+                }
             }
         }
     }
@@ -285,20 +289,16 @@ void ACOsgBrowserRenderer::updateNodes(double ratio) {
 
         if(node_renderer[i]){
             media_cycle_node = media_cycle->getMediaNode(i);
-            media_cycle_isdisplayed = media_cycle_node.isDisplayed();
-            media_cycle_current_pos = media_cycle_node.getCurrentPosition();
-            media_cycle_next_pos = media_cycle_node.getNextPosition();
-            media_cycle_navigation_level = media_cycle_node.getNavigationLevel();
-            media_cycle_activity = media_cycle_node.getActivity();
+            media_cycle_isdisplayed = media_cycle_node->isDisplayed();
+            media_cycle_current_pos = media_cycle_node->getCurrentPosition();
+            media_cycle_next_pos = media_cycle_node->getNextPosition();
+            media_cycle_navigation_level = media_cycle_node->getNavigationLevel();
+            media_cycle_activity = media_cycle_node->getActivity();
             node_index = node_renderer[i]->getNodeIndex();
             media_index = node_index;
-            if (media_cycle_mode == AC_MODE_NEIGHBORS)
-                media_index = media_cycle->getBrowser()->getUserLog()->getMediaIdFromNodeId(node_index);
-            if (media_index<0)
-                media_index = 0;
             media_cycle_filename = media_cycle->getMediaFileName(media_index);
 
-           /* if (media_cycle_isdisplayed) */{
+            /* if (media_cycle_isdisplayed) */{
 
                 // GLOBAL
                 node_renderer[i]->setDeltaTime(media_cycle_deltatime);
@@ -400,24 +400,24 @@ int ACOsgBrowserRenderer::computeScreenCoordinates(osgViewer::View* view, double
         closest_node = -1;
         for(int i=0; i<n; i++) {
 
-            ACMediaNode &attribute = media_cycle->getMediaNode(i);
+            ACMediaNode* attribute = media_cycle->getMediaNode(i);
 
             if(node_renderer[i]){
-                if (attribute.getChanged()) {
+                if (attribute->getChanged()) {
                     if (node_renderer[i]->getInitialized()) {
                         node_renderer[i]->setCurrentPos(node_renderer[i]->getViewPos());
                     }
                     else {
-                        node_renderer[i]->setCurrentPos(attribute.getCurrentPosition());
-                        node_renderer[i]->setViewPos(attribute.getCurrentPosition());
+                        node_renderer[i]->setCurrentPos(attribute->getCurrentPosition());
+                        node_renderer[i]->setViewPos(attribute->getCurrentPosition());
                     }
-                    node_renderer[i]->setNextPos(attribute.getNextPosition());
-                    attribute.setChanged(0);
+                    node_renderer[i]->setNextPos(attribute->getNextPosition());
+                    attribute->setChanged(0);
                 }
 
                 const ACPoint &p = node_renderer[i]->getCurrentPos();
                 const ACPoint &p2 = node_renderer[i]->getNextPos();
-                double refTime = attribute.getNextTime();
+                double refTime = attribute->getNextTime();
 
                 frac = (t-refTime)/andur;
                 if (frac<1) {
@@ -436,7 +436,7 @@ int ACOsgBrowserRenderer::computeScreenCoordinates(osgViewer::View* view, double
                 node_renderer[i]->setFrac(frac);
                 node_renderer[i]->setViewPos(media_cycle_view_pos);
 
-                //attribute.setViewPosition(media_cycle_view_pos);
+                //attribute->setViewPosition(media_cycle_view_pos);
 
                 modelPoint = Vec3(x,y,z);
                 screenPoint = modelPoint * VPM;
@@ -494,11 +494,11 @@ int ACOsgBrowserRenderer::computeScreenCoordinates(osgViewer::View* view, double
         int closest_node = -1;
         for(int i=0; i<n; i++) {
 
-            ACMediaNode &attribute = media_cycle->getMediaNode(i);
+            ACMediaNode* attribute = media_cycle->getMediaNode(i);
             /*
-   const ACPoint &p = attribute.getCurrentPosition();
-   const ACPoint &p2 = attribute.getNextPosition();
-   double refTime = attribute.getNextTime();
+   const ACPoint &p = attribute->getCurrentPosition();
+   const ACPoint &p2 = attribute->getNextPosition();
+   double refTime = attribute->getNextTime();
 
    frac = (t-refTime)/andur;
    if (frac<1) {
@@ -518,21 +518,21 @@ int ACOsgBrowserRenderer::computeScreenCoordinates(osgViewer::View* view, double
     }
     */
             if(node_renderer[i]){
-                if (attribute.getChanged()) {
+                if (attribute->getChanged()) {
                     if (node_renderer[i]->getInitialized()) {
                         node_renderer[i]->setCurrentPos(node_renderer[i]->getViewPos());
                     }
                     else {
-                        node_renderer[i]->setCurrentPos(attribute.getCurrentPosition());
-                        node_renderer[i]->setViewPos(attribute.getCurrentPosition());
+                        node_renderer[i]->setCurrentPos(attribute->getCurrentPosition());
+                        node_renderer[i]->setViewPos(attribute->getCurrentPosition());
                     }
-                    node_renderer[i]->setNextPos(attribute.getNextPosition());
-                    attribute.setChanged(0);
+                    node_renderer[i]->setNextPos(attribute->getNextPosition());
+                    attribute->setChanged(0);
                 }
 
                 const ACPoint &p = node_renderer[i]->getCurrentPos();
                 const ACPoint &p2 = node_renderer[i]->getNextPos();
-                double refTime = attribute.getNextTime();
+                double refTime = attribute->getNextTime();
 
                 frac = (t-refTime)/andur;
                 if (frac<1) {
@@ -550,7 +550,7 @@ int ACOsgBrowserRenderer::computeScreenCoordinates(osgViewer::View* view, double
 
                 node_renderer[i]->setFrac(frac);
                 node_renderer[i]->setViewPos(media_cycle_view_pos);
-                //attribute.setViewPosition(media_cycle_view_pos);
+                //attribute->setViewPosition(media_cycle_view_pos);
 
                 modelPoint = Vec3(x,y,z);
                 screenPoint = modelPoint * VPM;
@@ -589,23 +589,23 @@ bool ACOsgBrowserRenderer::removeNodes(int _first, int _last){
                 media_group->removeChild((*iterm)->getNode());
                 delete *iterm;
                 *iterm = 0;
-			}	
-		}
-		node_renderer.clear();
-		ok = true;
-	}
-	else {
-		for (int i=_first;i<_last;i++) {
-			if (node_renderer[i]!=0){
-				media_group->removeChild(node_renderer[i]->getNode());
-				delete node_renderer[i];
-				node_renderer[i] = 0;
-			}
-		}
-		node_renderer.resize(_first);
-		ok = true;
-	}
-	return ok;
+            }
+        }
+        node_renderer.clear();
+        ok = true;
+    }
+    else {
+        for (int i=_first;i<_last;i++) {
+            if (node_renderer[i]!=0){
+                media_group->removeChild(node_renderer[i]->getNode());
+                delete node_renderer[i];
+                node_renderer[i] = 0;
+            }
+        }
+        node_renderer.resize(_first);
+        ok = true;
+    }
+    return ok;
 }
 
 bool ACOsgBrowserRenderer::addNodes(int _first, int _last){
@@ -622,78 +622,66 @@ bool ACOsgBrowserRenderer::addNodes(int _first, int _last){
 
         ACMediaType media_type;
         for (int i=_first;i<_last;i++) {
-            int n = -1;
-            if (media_cycle->getBrowserMode() == AC_MODE_NEIGHBORS)
-                n = media_cycle->getBrowser()->getUserLog()->getMediaIdFromNodeId(i);
-            else
-                n = i;
-            media_type = media_cycle->getMediaType(n);
+            media_type = media_cycle->getMediaType(i);
 
-			if(media_cycle->getLibrary()->getMediaType() != MEDIA_TYPE_MIXED || (media_type == MEDIA_TYPE_MIXED||media_type == MEDIA_TYPE_AUDIO) ){
-				switch (media_type) {
-					case MEDIA_TYPE_AUDIO:
-						#if defined (SUPPORT_AUDIO)
-						node_renderer[i] = new ACOsgAudioRenderer();
-						#endif //defined (SUPPORT_AUDIO)
-						break;
-					case MEDIA_TYPE_IMAGE:
-						#if defined (SUPPORT_IMAGE)
-						node_renderer[i] = new ACOsgImageRenderer();
-						#endif //defined (SUPPORT_IMAGE)
-						break;
-					case MEDIA_TYPE_VIDEO:
-						#if defined (SUPPORT_VIDEO)
-						node_renderer[i] = new ACOsgVideoRenderer();
-						#endif //defined (SUPPORT_VIDEO)
-						break;
-					case MEDIA_TYPE_3DMODEL:
-						#if defined (SUPPORT_3DMODEL)
-						node_renderer[i] = new ACOsg3DModelRenderer();
-						#endif //defined (SUPPORT_3DMODEL)
-						break;
-					case MEDIA_TYPE_TEXT:
-						#if defined (SUPPORT_TEXT)
-						node_renderer[i] = new ACOsgTextRenderer();
-						#endif //defined (SUPPORT_TEXT)
-						break;
-					case MEDIA_TYPE_SENSOR:
-						#if defined (SUPPORT_SENSOR)
-						node_renderer[i] = new ACOsgSensorRenderer();
-						#endif //defined (SUPPORT_SENSOR)
-						break;
-					case MEDIA_TYPE_MIXED:
-						#if defined (SUPPORT_MULTIMEDIA) 
-						node_renderer[i] = new ACOsgMediaDocumentRenderer();
-						#endif //defined (SUPPORT_MULTIMEDIA) 
-						break;		
-					default:
-						node_renderer[i] = 0;
-						break;
-				}
-			}
-			else
-				node_renderer[i] = 0;
-				
-			if (node_renderer[i] != 0) {
+            if(media_cycle->getLibrary()->getMediaType() != MEDIA_TYPE_MIXED || (media_type == MEDIA_TYPE_MIXED||media_type == MEDIA_TYPE_AUDIO) ){
+                switch (media_type) {
+                case MEDIA_TYPE_AUDIO:
+#if defined (SUPPORT_AUDIO)
+                    node_renderer[i] = new ACOsgAudioRenderer();
+#endif //defined (SUPPORT_AUDIO)
+                    break;
+                case MEDIA_TYPE_IMAGE:
+#if defined (SUPPORT_IMAGE)
+                    node_renderer[i] = new ACOsgImageRenderer();
+#endif //defined (SUPPORT_IMAGE)
+                    break;
+                case MEDIA_TYPE_VIDEO:
+#if defined (SUPPORT_VIDEO)
+                    node_renderer[i] = new ACOsgVideoRenderer();
+#endif //defined (SUPPORT_VIDEO)
+                    break;
+                case MEDIA_TYPE_3DMODEL:
+#if defined (SUPPORT_3DMODEL)
+                    node_renderer[i] = new ACOsg3DModelRenderer();
+#endif //defined (SUPPORT_3DMODEL)
+                    break;
+                case MEDIA_TYPE_TEXT:
+#if defined (SUPPORT_TEXT)
+                    node_renderer[i] = new ACOsgTextRenderer();
+#endif //defined (SUPPORT_TEXT)
+                    break;
+                case MEDIA_TYPE_SENSOR:
+#if defined (SUPPORT_SENSOR)
+                    node_renderer[i] = new ACOsgSensorRenderer();
+#endif //defined (SUPPORT_SENSOR)
+                    break;
+                case MEDIA_TYPE_MIXED:
+#if defined (SUPPORT_MULTIMEDIA)
+                    node_renderer[i] = new ACOsgMediaDocumentRenderer();
+#endif //defined (SUPPORT_MULTIMEDIA)
+                    break;
+                default:
+                    node_renderer[i] = 0;
+                    break;
+                }
+            }
+            else
+                node_renderer[i] = 0;
+
+            if (node_renderer[i] != 0) {
                 node_renderer[i]->setMediaCycle(media_cycle);
                 node_renderer[i]->setNodeIndex(i);
                 node_renderer[i]->setFont(font);
                 node_renderer[i]->changeSetting(this->setting);
 
-                /*if (media_cycle->getBrowserMode() == AC_MODE_NEIGHBORS)
-                     media_cycle_node = media_cycle->getMediaNode( media_cycle->getBrowser()->getUserLog()->getMediaIdFromNodeId(i) );
-                else*/
                 media_cycle_node = media_cycle->getMediaNode(i);
 
                 node_index = node_renderer[i]->getNodeIndex();
                 media_index = node_index;
-                if ( media_cycle->getBrowserMode() == AC_MODE_NEIGHBORS)
-                    media_index = media_cycle->getBrowser()->getUserLog()->getMediaIdFromNodeId(node_index);
-                /*if (media_index<0)
-                    media_index = 0;*/
-                media_cycle_filename = media_cycle->getMediaFileName(n);
+                media_cycle_filename = media_cycle->getMediaFileName(i);
                 //node_renderer[i]->setMediaIndex(media_index);
-                node_renderer[i]->setMedia(media_cycle->getLibrary()->getMedia(n));
+                node_renderer[i]->setMedia(media_cycle->getLibrary()->getMedia(i));
                 node_renderer[i]->setFilename(media_cycle_filename);
                 // node_renderer[i]->setActivity(0);
                 node_renderer[i]->prepareNodes();

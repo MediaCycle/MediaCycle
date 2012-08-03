@@ -1,7 +1,7 @@
 /**
  * @brief ACOsgCompositeViewQt.h
  * @author Christian Frisson
- * @date 30/07/2012
+ * @date 03/08/2012
  * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -178,9 +178,9 @@ private:
     void updateTimelineControlsView(int width, int height);
 
 public:
-    // needs to be called when loops are added or removed
+    // needs to be called when medias are added or removed
     void prepareFromBrowser();
-    // needs to be called when loops positions are changed
+    // needs to be called when node positions are changed
     void updateTransformsFromBrowser( double frac);
     void setMediaCycle(MediaCycle* _media_cycle);
     // needs to be called when tracks are added or removed

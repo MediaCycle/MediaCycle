@@ -69,12 +69,12 @@ ACPositionsPluginNodeLinkTreeLayout::ACPositionsPluginNodeLinkTreeLayout()
     this->mName = "MediaCycle Cartesian Tree";
     this->mDescription = "Plugin for the computation of positions and layout for a node-link tree layout";
     this->mId = "";
+    this->mediaBrowser = 0;
 
     //local vars
     m_depths = vector<double>();
     m_depths.resize(10);
     m_orientation = ORIENT_LEFT_RIGHT;//CF: the current one is "Finder-like", try ORIENT_TOP_BOTTOM; or...
-    m_nodeParams = map<long,ACPositionsPluginTreeNodeParams*>();
 }
 /*
 int ACPositionsPluginNodeLinkTreeLayout::initialize()
@@ -85,16 +85,14 @@ int ACPositionsPluginNodeLinkTreeLayout::initialize()
 
 void ACPositionsPluginNodeLinkTreeLayout::updateNextPositions(ACMediaBrowser* _mediaBrowser) {
     std::cout << "ACPositionsPluginNodeLinkTreeLayout::updateNextPositions" << std::endl;
-    //std::cout << "UserLogTree: is empty " << _mediaBrowser->getUserLog()->isEmpty() << " size " << _mediaBrowser->getUserLog()->getSize() << " max depth " << _mediaBrowser->getUserLog()->getMaxDepth() << " last clicked node " << _mediaBrowser->getUserLog()->getLastClickedNodeId() << std::endl;
+    this->mediaBrowser = _mediaBrowser;
 
-    mediaBrowser = _mediaBrowser;
-
-    if(!(mediaBrowser->getUserLog())) {
+    if(mediaBrowser->getNumberOfMediaNodes()==0) {
         mediaBrowser->setNeedsDisplay(true);
         return;
     }
 
-    if (!(mediaBrowser->getUserLog()->isEmpty()))
+    if (mediaBrowser->getNumberOfMediaNodes() > 0)
     {
         mediaBrowser->setLayout(AC_LAYOUT_TYPE_NODELINK);
         int librarySize = mediaBrowser->getLibrary()->getSize();
@@ -103,6 +101,8 @@ void ACPositionsPluginNodeLinkTreeLayout::updateNextPositions(ACMediaBrowser* _m
             mediaBrowser->setNeedsDisplay(true);
             return;
         }
+
+        //mediaBrowser->dumpNeighborNodes();
 
         // init params:
         m_maxDepth = 0;
@@ -117,13 +117,16 @@ void ACPositionsPluginNodeLinkTreeLayout::updateNextPositions(ACMediaBrowser* _m
             delete nodeParam->second;
         m_nodeParams.clear();
 
-        std::list<long> nodeIds = mediaBrowser->getUserLog()->getNodeIds();
+        std::list<long> nodeIds = mediaBrowser->getNeighborNodeIds();
         for(std::list<long>::iterator nodeId = nodeIds.begin(); nodeId != nodeIds.end(); nodeId++)
-            m_nodeParams.insert( pair<long,ACPositionsPluginTreeNodeParams*>( (*nodeId) ,new ACPositionsPluginTreeNodeParams()) );
+            m_nodeParams[(*nodeId)] = new ACPositionsPluginTreeNodeParams();
+        std::cout << "ACPositionsPluginNodeLinkTreeLayout::updateNextPositions: m_nodeParams size " << m_nodeParams.size() << std::endl;
 
         // do first pass - compute breadth information, collect depth info
         //std::cout << "ACPositionsPluginNodeLinkTreeLayout::updateNextPositions:firstWalk"<< std::endl;
-        ACPositionsPluginTreeNodeParams* rp = getParams(0);
+
+        //ACPositionsPluginTreeNodeParams* rp = getParams(0);
+        ACPositionsPluginTreeNodeParams* rp = m_nodeParams[0];
         this->firstWalk(0, 0, 1);
 
         //for(int n=0; n<mediaBrowser->getUserLog()->getSize(); n++)
@@ -142,20 +145,19 @@ void ACPositionsPluginNodeLinkTreeLayout::updateNextPositions(ACMediaBrowser* _m
             media_type_zoom = 1.5f;
 
         ACPoint p;
-        //for(int n=0; n<mediaBrowser->getUserLog()->getSize(); n++)
         for(std::list<long>::iterator nodeId = nodeIds.begin(); nodeId != nodeIds.end(); nodeId++)
         {
             // CF: hack so that newly expanded nodes animate from their parental position
-            int pn = mediaBrowser->getUserLog()->getParentFromNodeId(*nodeId);
-            p = mediaBrowser->getMediaNode(*nodeId).getCurrentPosition();
+            int pn = mediaBrowser->getParentFromNeighborNode(*nodeId);
+            p = mediaBrowser->getMediaNode(*nodeId)->getCurrentPosition();
             if ( pn > 0 && p.x == 0.0f && p.y == 0.0f)
-                mediaBrowser->getMediaNode(*nodeId).setCurrentPosition(mediaBrowser->getMediaNode(pn).getCurrentPosition());
+                mediaBrowser->getMediaNode(*nodeId)->setCurrentPosition(mediaBrowser->getMediaNode(pn)->getCurrentPosition());
 
             p.x = m_nodeParams[*nodeId]->getX()*media_type_zoom/400;
             p.y = -m_nodeParams[*nodeId]->getY()*media_type_zoom/400;
             p.z = 0;
             mediaBrowser->setNodeNextPosition(*nodeId, p); // CF: note OSG's inverted Y //CF n instead of mediaBrowser->getUserLog()->getMediaIdFromNodeId(n)
-            mediaBrowser->setLoopIsDisplayed(*nodeId, true); // CF n instead of mediaBrowser->getUserLog()->getMediaIdFromNodeId(n)
+            mediaBrowser->setMediaNodeDisplayed(*nodeId, true); // CF n instead of mediaBrowser->getUserLog()->getMediaIdFromNodeId(n)
             //std::cout << "ACPositionsPluginNodeLinkTreeLayout::updateNextPositions: Node " << n << " x " << m_nodeParams[n]->getX() << " y " << -m_nodeParams[n]->getY() << std::endl;
         }
 
@@ -201,11 +203,11 @@ void ACPositionsPluginNodeLinkTreeLayout::firstWalk(int n, int num, int depth) {
     m_nodeParams[n]->setNumber(num);
     updateDepths(depth, n);
 
-    bool expanded = mediaBrowser->getUserLog()->getNodeFromId(n).isDisplayed(); //n.isExpanded();
+    bool expanded = mediaBrowser->getMediaNode(n)->isDisplayed(); //n.isExpanded();
 
-    if ( mediaBrowser->getUserLog()->getChildCountAtNodeId(n) == 0 || !expanded ) // is leaf
+    if ( mediaBrowser->getChildCountAtNeighborNode(n) == 0 || !expanded ) // is leaf
     {
-        int l = mediaBrowser->getUserLog()->getPreviousSiblingFromNodeId(n);
+        int l = mediaBrowser->getPreviousSiblingFromNeighborNode(n);
         if ( l == -1 ) {
             np->setPrelim(0.0);
         } else {
@@ -214,25 +216,25 @@ void ACPositionsPluginNodeLinkTreeLayout::firstWalk(int n, int num, int depth) {
     }
     else if ( expanded )
     {
-        int leftMost = mediaBrowser->getUserLog()->getFirstChildFromNodeId(n);
-        int rightMost = mediaBrowser->getUserLog()->getLastChildFromNodeId(n);
+        int leftMost = mediaBrowser->getFirstChildFromNeighborNode(n);
+        int rightMost = mediaBrowser->getLastChildFromNeighborNode(n);
         int defaultAncestor = leftMost;
         int c = leftMost;
-        //CF was: "for ( int i=0; c > -1; ++i, c = mediaBrowser->getUserLog()->getNextSiblingFromNodeId(c) )"
+        //CF was: "for ( int i=0; c > -1; ++i, c = mediaBrowser->getNextSiblingFromNeighborNode(c) )"
         int i=0;
         while (c != -1)
         {
             firstWalk(c, i, depth+1);
             defaultAncestor = apportion(c, defaultAncestor);
             ++i;
-            c = mediaBrowser->getUserLog()->getNextSiblingFromNodeId(c);
+            c = mediaBrowser->getNextSiblingFromNeighborNode(c);
         }
 
         executeShifts(n);
 
         double midpoint = 0.5 * (getParams(leftMost)->getPrelim() + getParams(rightMost)->getPrelim());
 
-        int left = mediaBrowser->getUserLog()->getPreviousSiblingFromNodeId(n);
+        int left = mediaBrowser->getPreviousSiblingFromNeighborNode(n);
         if ( left != -1 ) {
             np->setPrelim( getParams(left)->getPrelim() + spacing(left, n, true));
             np->setMod( np->getPrelim() - midpoint);
@@ -243,14 +245,14 @@ void ACPositionsPluginNodeLinkTreeLayout::firstWalk(int n, int num, int depth) {
 }
 
 int ACPositionsPluginNodeLinkTreeLayout::apportion(int v, int a) {        
-    int w = mediaBrowser->getUserLog()->getPreviousSiblingFromNodeId(v);
+    int w = mediaBrowser->getPreviousSiblingFromNeighborNode(v);
     if ( w != -1 ) {
         int vip, vim, vop, vom;
         double   sip, sim, sop, som;
 
         vip = vop = v;
         vim = w;
-        vom = mediaBrowser->getUserLog()->getFirstChildFromNodeId( mediaBrowser->getUserLog()->getParentFromNodeId(vip) );
+        vom = mediaBrowser->getFirstChildFromNeighborNode( mediaBrowser->getParentFromNeighborNode(vip) );
 
         sip = getParams(vip)->getMod();
         sop = getParams(vop)->getMod();
@@ -297,15 +299,15 @@ int ACPositionsPluginNodeLinkTreeLayout::apportion(int v, int a) {
 
 int ACPositionsPluginNodeLinkTreeLayout::nextLeft(int n) {
     int c = -1;
-    if ( mediaBrowser->getUserLog()->getNodeFromId(n).isDisplayed() )
-        c = mediaBrowser->getUserLog()->getFirstChildFromNodeId(n);
+    if ( mediaBrowser->getMediaNode(n)->isDisplayed() )
+        c = mediaBrowser->getFirstChildFromNeighborNode(n);
     return ( c != -1 ? c : getParams(n)->getThread() );
 }
 
 int ACPositionsPluginNodeLinkTreeLayout::nextRight(int n) {
     int c = -1;
-    if ( mediaBrowser->getUserLog()->getNodeFromId(n).isDisplayed() )
-        c = mediaBrowser->getUserLog()->getLastChildFromNodeId(n);
+    if ( mediaBrowser->getMediaNode(n)->isDisplayed() )
+        c = mediaBrowser->getLastChildFromNeighborNode(n);
     return ( c != -1 ? c : getParams(n)->getThread() );
 }
 
@@ -322,8 +324,8 @@ void ACPositionsPluginNodeLinkTreeLayout::moveSubtree(int wm, int wp, double shi
 
 void ACPositionsPluginNodeLinkTreeLayout::executeShifts(int n) {
     double shift = 0.0, change = 0.0;
-    for ( int c = mediaBrowser->getUserLog()->getLastChildFromNodeId(n);
-          c != -1; c = mediaBrowser->getUserLog()->getPreviousSiblingFromNodeId(c) )
+    for ( int c = mediaBrowser->getLastChildFromNeighborNode(n);
+          c != -1; c = mediaBrowser->getPreviousSiblingFromNeighborNode(c) )
     {
         ACPositionsPluginTreeNodeParams* cp = getParams(c);
         cp->setPrelim( cp->getPrelim() + shift );
@@ -334,9 +336,9 @@ void ACPositionsPluginNodeLinkTreeLayout::executeShifts(int n) {
 }
 
 int ACPositionsPluginNodeLinkTreeLayout::ancestor(int vim, int v, int a) {
-    int p = mediaBrowser->getUserLog()->getParentFromNodeId(v);
+    int p = mediaBrowser->getParentFromNeighborNode(v);
     ACPositionsPluginTreeNodeParams* vimp = getParams(vim);
-    if ( mediaBrowser->getUserLog()->getParentFromNodeId( m_nodeParams[vim]->getAncestor() ) == p ) {
+    if ( mediaBrowser->getParentFromNeighborNode( m_nodeParams[vim]->getAncestor() ) == p ) {
         return vimp->getAncestor();
     } else {
         return a;
@@ -348,10 +350,10 @@ void ACPositionsPluginNodeLinkTreeLayout::secondWalk(int n, int p, double m, int
     setBreadth(n, p, np->getPrelim() + m);
     setDepth(n, p, m_depths[depth]);
 
-    if ( mediaBrowser->getUserLog()->getNodeFromId(n).isDisplayed() ) {
+    if ( mediaBrowser->getMediaNode(n)->isDisplayed() ) {
         depth += 1;
-        for ( int c = mediaBrowser->getUserLog()->getFirstChildFromNodeId(n);
-              c != -1; c = mediaBrowser->getUserLog()->getNextSiblingFromNodeId(c) )
+        for ( int c = mediaBrowser->getFirstChildFromNeighborNode(n);
+              c != -1; c = mediaBrowser->getNextSiblingFromNeighborNode(c) )
         {
             secondWalk(c, n, m + np->getMod(), depth);
         }

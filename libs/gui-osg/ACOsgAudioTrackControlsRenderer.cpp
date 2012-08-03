@@ -57,10 +57,7 @@ ACOsgAudioTrackControlsRenderer::ACOsgAudioTrackControlsRenderer() {
 
 ACOsgAudioTrackControlsRenderer::~ACOsgAudioTrackControlsRenderer() {
 	// track_node->removeChild(0,1);
-	if 	(track_geode) {
-		//ref_ptr//track_geode->unref();
-		track_geode=0;
-	}
+        if (track_geode) track_geode=0;
 }
 
 void ACOsgAudioTrackControlsRenderer::trackGeode() {
@@ -79,7 +76,6 @@ void ACOsgAudioTrackControlsRenderer::trackGeode() {
 	//sprintf(name, "some audio element");
 	//track_geode->setUserData(new ACRefId(media_index));
 	//track_geode->setName(name);
-	//ref_ptr//track_geode->ref();
 }
 
 void ACOsgAudioTrackControlsRenderer::prepareControls() {
@@ -90,7 +86,6 @@ void ACOsgAudioTrackControlsRenderer::prepareControls() {
 	track_node->addChild(track_geode);
 	((ShapeDrawable*)track_geode->getDrawable(0))->setColor(Vec4(1.0f,0.0f,0.0f,0.1f));
 	//std::cout << "track_node_addChild(track_geode)" << std::endl;
-
 }
 
 void ACOsgAudioTrackControlsRenderer::updateControls(double ratio) {

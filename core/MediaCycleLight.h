@@ -44,26 +44,6 @@
 #include <ACMediaTypes.h>
 #include <ACMediaNode.h>
 
-// XS the following 2 structs are now in ACMediaNode
-//struct ACPoint
-//{
-//	float x, y, z;
-//};
-
-//struct ACLoopAttribute
-//{
-//	ACPoint 	currentPos, nextPos, nextPosGrid;
-//	ACPoint		viewPos;
-//	float		distanceMouse;
-//	int 		cluster; //cluster index
-//	int			active;  // plying or not - and in which mode
-//	int			cursor;
-//	int 		navigationLevel; // initially all set to zero, while traversing, only the one incremented are kept
-//	int			hover;
-//	bool		isDisplayed;//CF
-//	ACLoopAttribute() : cluster(0), active(0), navigationLevel(0), hover(0), isDisplayed(false) {}
-//};//CF: how come isDisplayed is missing here while it is part of ACMediaBrowser!
-
 enum MCActionType {
 	MC_ACTION_ADDFILE,
 	MC_ACTION_GETKNN,
@@ -122,7 +102,7 @@ public:
 	float getFrac();
 	void setCameraRotation(float angle);
 	int getClickedNode();
-	void incrementLoopNavigationLevels(int i);
+        void incrementNavigationLevels(int i);
 	void setReferenceNode(int index);
 	void updateClusters(bool animate);
 	void updateNeighborhoods();

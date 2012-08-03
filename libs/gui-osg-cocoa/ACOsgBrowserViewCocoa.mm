@@ -268,10 +268,10 @@ struct ACOsgBrowserViewData
 	
 	if ([event clickCount] == 1 && media_cycle && media_cycle->hasBrowser() && forwarddown==1)
 	{
-		int loop = media_cycle->getClickedNode();
-		NSLog(@"click on %d when 'a' key pressed", loop);		
+                int media = media_cycle->getClickedNode();
+                NSLog(@"click on %d when 'a' key pressed", media);
 		
-		if(loop >= 0)
+                if(media >= 0)
 		{
 			// SD MIC demo - store need to be done befoe increment I think
 			// XSCF 250310 added these 3
@@ -279,8 +279,8 @@ struct ACOsgBrowserViewData
 				media_cycle->storeNavigationState();
 			
 			if (media_cycle->getBrowser()->getMode() == AC_MODE_CLUSTERS)
-				media_cycle->incrementLoopNavigationLevels(loop);
-			media_cycle->setReferenceNode(loop);
+                                media_cycle->incrementNavigationLevels(media);
+                        media_cycle->setReferenceNode(media);
 			
 			//media_cycle->getBrowser()->updateNextPositions(); // TODO is it required ?? .. hehehe
 			//media_cycle->getBrowser()->setState(AC_CHANGING);

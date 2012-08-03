@@ -32,9 +32,7 @@
  *
  */
 
-// replaces ACLoopAttribute AND ACUserNode
 // contains all information about an item that the browser might need
-// at least in theory...
 
 #ifndef __ACMEDIANODE_H__
 #define __ACMEDIANODE_H__
@@ -44,88 +42,83 @@ using std::vector;
 
 struct ACPoint
 {
-	float x, y, z;
-        ACPoint():x(0.0f),y(0.0f),z(0.0f){}
-        ACPoint(float _x, float _y, float _z):x(_x),y(_y),z(_z){}
+    float x, y, z;
+    ACPoint():x(0.0f),y(0.0f),z(0.0f){}
+    ACPoint(float _x, float _y, float _z):x(_x),y(_y),z(_z){}
 };
 
 class ACMediaNode {
 private:
-	// previsously in ACLoopAttribute:
-	ACPoint 	currentPos, nextPos, nextPosGrid;
-	double		nextPosTime;
-	float		distanceMouse;
-	int 		clusterId; //cluster index
-	int			active;  // playing or not - and in which mode
-	int			cursor;
-	int			frame;
-	int 		navigationLevel; // initially all set to zero, while traversing, only the one incremented are kept
-	int			hover;
-	bool		displayed;
-	bool		selected;
-	bool	    changed;
-	// previously in ACUserNode:
-	long int nodeId;
-	long int mediaId;
-//	bool isVisible; == isDisplayed
-	vector<int> clickTime;
-	
-	void init(long int _nodeId=0, long int _mediaId=0);
-	
+    ACPoint currentPos, nextPos, nextPosGrid;
+    double nextPosTime;
+    float distanceMouse;
+    int clusterId; //cluster index
+    int active;  // playing or not - and in which mode
+    int cursor;
+    int frame;
+    int navigationLevel; // initially all set to zero, while traversing, only the one incremented are kept
+    int hover;
+    bool displayed;
+    bool selected;
+    bool changed;
+    long int mediaId;
+    //	bool isVisible; == isDisplayed
+    vector<int> clickTime;
+
+    void init(long int _mediaId=0);
+
 public:
-	ACMediaNode();
-	ACMediaNode(long int _nodeId, long int _mediaId);
-	ACMediaNode(long int _nodeId, long int _mediaId, int _clickTime);
-	~ACMediaNode();
-	
-	// previously in ACUserNode:
-	int getNodeId() const {return nodeId;}
-	int getMediaId() const {return mediaId;}
-	// the "==" operator HAS to be defined for tree (see stl_algo.h, line 172)
-	bool operator == (const ACMediaNode &other) const; // check on nodeID, NOT mediaID
-	void clickNode(long int clickTime);
-	
-	// previsously in ACLoopAttribute:
-	int getClusterId() const {return clusterId;}
-	int getCursor() const {return cursor;}
-	int getCurrentFrame() const {return frame;}
-	int getNavigationLevel() const {return navigationLevel;}
-	int getActivity() const {return active;}
-	ACPoint getCurrentPosition() const {return currentPos;}
-	// XS X,Y,Z -> float *3 ?
-	ACPoint getNextPosition() const {return nextPos;}
+    ACMediaNode();
+    ACMediaNode(long int _mediaId);
+    ACMediaNode(long int _mediaId, int _clickTime);
+    ~ACMediaNode();
 
-	double getNextTime() const {return nextPosTime;}
-	
-	ACPoint getNextPositionGrid(){return nextPosGrid;}
-		
-	void setCurrentPosition(ACPoint p);
-	void setNextPosition(ACPoint p, double t);
+    // previously in ACUserNode:
+    int getMediaId() const {return mediaId;}
+    // the "==" operator HAS to be defined for tree (see stl_algo.h, line 172)
+    bool operator == (const ACMediaNode &other) const;
+    void clickNode(long int clickTime);
 
-	void commitPosition(){currentPos = nextPos;}
-	
-	bool getChanged() { return changed; }
-	void setChanged(bool changed) { this->changed = changed; }
-	
-	// for proximity grid
-	void setNextPositionGrid(ACPoint p){nextPosGrid = p;}
+    int getClusterId() const {return clusterId;}
+    int getCursor() const {return cursor;}
+    int getCurrentFrame() const {return frame;}
+    int getNavigationLevel() const {return navigationLevel;}
+    int getActivity() const {return active;}
+    ACPoint getCurrentPosition() const {return currentPos;}
+    // XS X,Y,Z -> float *3 ?
+    ACPoint getNextPosition() const {return nextPos;}
 
-	void setActivity(int _act){active = _act;}
-	void setClusterId(int _cid) { clusterId=_cid ;}
-	void setCursor(int _cid) { cursor=_cid ;}
-	void setCurrentFrame(int _cid) { frame=_cid ;}
-	void setNavigationLevel(int _nl) {navigationLevel = _nl;}
-	void setHover(int _h){hover = _h;}
+    double getNextTime() const {return nextPosTime;}
 
-	void toggleActivity(int type=1);
-	
-	bool isDisplayed() const {return displayed;}
-	void setDisplayed(bool _dis){displayed = _dis;}
-	
-	bool isSelected() const {return selected;}
-	void setSelection(bool _sel){selected = _sel;}
+    ACPoint getNextPositionGrid(){return nextPosGrid;}
 
-	void increaseNavigationLevel(){navigationLevel++;}
+    void setCurrentPosition(ACPoint p);
+    void setNextPosition(ACPoint p, double t);
+
+    void commitPosition(){currentPos = nextPos;}
+
+    bool getChanged() { return changed; }
+    void setChanged(bool changed) { this->changed = changed; }
+
+    // for proximity grid
+    void setNextPositionGrid(ACPoint p){nextPosGrid = p;}
+
+    void setActivity(int _act){active = _act;}
+    void setClusterId(int _cid) { clusterId=_cid ;}
+    void setCursor(int _cid) { cursor=_cid ;}
+    void setCurrentFrame(int _cid) { frame=_cid ;}
+    void setNavigationLevel(int _nl) {navigationLevel = _nl;}
+    void setHover(int _h){hover = _h;}
+
+    void toggleActivity(int type=1);
+
+    bool isDisplayed() const {return displayed;}
+    void setDisplayed(bool _dis){displayed = _dis;}
+
+    bool isSelected() const {return selected;}
+    void setSelection(bool _sel){selected = _sel;}
+
+    void increaseNavigationLevel(){navigationLevel++;}
 };
 
 #endif // __ACMEDIANODE_H__

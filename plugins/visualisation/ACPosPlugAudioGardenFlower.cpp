@@ -1,7 +1,7 @@
 /**
  * @brief ACPosPlugAudioGardenFlower.cpp
  * @author Christian Frisson
- * @date 18/05/2012
+ * @date 03/08/2012
  * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -40,13 +40,13 @@ using namespace std;
 ACPosPlugAudioGardenFlower::ACPosPlugAudioGardenFlower()
 {
     //vars herited from ACPlugin
-	// XS TODO: are these general enough ? can we use this only for audio ??
+    // XS TODO: are these general enough ? can we use this only for audio ??
     this->mMediaType = MEDIA_TYPE_AUDIO;
     //this->mPluginType =    this->mPluginType|PLUGIN_TYPE_CLUSTERS_POSITIONS;
     this->mName = "AudioGarden Flower";
     this->mDescription = "Audiogarden Flower Visualisation plugin";
     this->mId = "";
-	
+
     //local vars
 }
 
@@ -62,118 +62,115 @@ int ACPosPlugAudioGardenFlower::initialize()
 
 
 void ACPosPlugAudioGardenFlower::updateNextPositions(ACMediaBrowser* mediaBrowser){
-  int itemClicked, labelClicked, action;
-	vector<string> featureList;
-	int libSize = mediaBrowser->getLibrary()->getSize();
-	itemClicked = mediaBrowser->getClickedNode();
-	labelClicked = mediaBrowser->getClickedLabel();
-	
-	mat desc_m, descD_m;
-	mat posDisp_m(libSize, 2);
-	colvec r_v(libSize);
-	#ifdef ARMADILLO_HAVE_RANDU
-		colvec theta_v = arma::randu<colvec>(libSize);
-	#else
-		colvec theta_v = arma::rand<colvec>(libSize);
-	#endif
-	theta_v.ones(libSize); //theta_v * 2 * arma::math::pi();
-	vector<ACMedia*> loops =  mediaBrowser->getLibrary()->getAllMedia();	
+    int itemClicked, labelClicked, action;
+    vector<string> featureList;
+    int libSize = mediaBrowser->getLibrary()->getSize();
+    itemClicked = mediaBrowser->getClickedNode();
+    labelClicked = mediaBrowser->getClickedLabel();
 
-	featureList.push_back("Mean of MFCC");
-	featureList.push_back("Mean of Spectral Flatness");
-	//featureList.push_back("Interpolated Energy");
+    mat desc_m, descD_m;
+    mat posDisp_m(libSize, 2);
+    colvec r_v(libSize);
+#ifdef ARMADILLO_HAVE_RANDU
+    colvec theta_v = arma::randu<colvec>(libSize);
+#else
+    colvec theta_v = arma::rand<colvec>(libSize);
+#endif
+    theta_v.ones(libSize); //theta_v * 2 * arma::math::pi();
+    ACMedias medias = mediaBrowser->getLibrary()->getAllMedia();
 
-	vector<long> posParents;
-	vector<long> posSegments;
+    featureList.push_back("Mean of MFCC");
+    featureList.push_back("Mean of Spectral Flatness");
+    //featureList.push_back("Interpolated Energy");
 
-	for (int i=0; i < loops.size(); i++){
-		if (loops[i]->getParentId() == -1)
-			posParents.push_back(i);
-		else
-			posSegments.push_back(i);
-	}
-	//mat descS_m = extractDescMatrix(mediaBrowser->getLibrary(), featureList, posSegments);
-	mat descP_m = extractDescMatrix(mediaBrowser->getLibrary(), featureList, posParents);
-	mat coefP_m;
-	mat projP_m;
-	princomp(coefP_m, projP_m, descP_m);
-	projP_m = zscore(projP_m)*.1;
-	// affecting parents position
-	for (int i=0; i<posParents.size();i++){
-		posDisp_m(posParents[i],0) = projP_m(i,0);
-		posDisp_m(posParents[i],1) = projP_m(i,1);
-	}
-	std::vector<ACMedia*> tmpSegments;
-	float angle;
-	for (long i=0; i<posParents.size(); i++){
-		tmpSegments = loops[posParents[i]]->getAllSegments();
-		for (int j=0; j<tmpSegments.size(); j++){
-			angle = (2*arma::math::pi() / (float) tmpSegments.size()) * (float) j + (arma::math::pi()/2);
-			posDisp_m(tmpSegments[j]->getId(),0) = .01 * cos(angle) + posDisp_m(posParents[i],0);
-			posDisp_m(tmpSegments[j]->getId(),1) = .01 * sin(angle) + posDisp_m(posParents[i],1);
-			std::cout << "angle = " << angle << std::endl;			
-			std::cout << "posDisp_m.row(tmpSegments[j]->getId())" << posDisp_m.row(tmpSegments[j]->getId()) << std::endl;
-		}
-	}
+    vector<long> posParents;
+    vector<long> posSegments;
 
-	mediaBrowser->setNumberOfDisplayedLoops(loops.size());
-	
-	ACPoint p;
-  for (int i=0; i<libSize; i++){
-    mediaBrowser->setLoopIsDisplayed(i, true);
-	  p.x = posDisp_m(i,0);
-	  p.y = posDisp_m(i,1);
-	  p.z = 0;
-		mediaBrowser->setNodeNextPosition(i, p);
-  }
-	////////////////////////////////////////////////////////////////
+    for(ACMedias::iterator media = medias.begin(); media != medias.end(); media++) {
+        if (media->second->getParentId() == -1)
+            posParents.push_back(media->first);
+        else
+            posSegments.push_back(media->first);
+    }
+    //mat descS_m = extractDescMatrix(mediaBrowser->getLibrary(), featureList, posSegments);
+    mat descP_m = extractDescMatrix(mediaBrowser->getLibrary(), featureList, posParents);
+    mat coefP_m;
+    mat projP_m;
+    princomp(coefP_m, projP_m, descP_m);
+    projP_m = zscore(projP_m)*.1;
+    // affecting parents position
+    for (int i=0; i<posParents.size();i++){
+        posDisp_m(posParents[i],0) = projP_m(i,0);
+        posDisp_m(posParents[i],1) = projP_m(i,1);
+    }
+    std::vector<ACMedia*> tmpSegments;
+    float angle;
+    for (long i=0; i<posParents.size(); i++){
+        tmpSegments = medias[posParents[i]]->getAllSegments();
+        for (int j=0; j<tmpSegments.size(); j++){
+            angle = (2*arma::math::pi() / (float) tmpSegments.size()) * (float) j + (arma::math::pi()/2);
+            posDisp_m(tmpSegments[j]->getId(),0) = .01 * cos(angle) + posDisp_m(posParents[i],0);
+            posDisp_m(tmpSegments[j]->getId(),1) = .01 * sin(angle) + posDisp_m(posParents[i],1);
+            std::cout << "angle = " << angle << std::endl;
+            std::cout << "posDisp_m.row(tmpSegments[j]->getId())" << posDisp_m.row(tmpSegments[j]->getId()) << std::endl;
+        }
+    }
+
+    mediaBrowser->setNumberOfDisplayedNodes(medias.size());
+
+    ACPoint p;
+    for (int i=0; i<libSize; i++){
+        mediaBrowser->setMediaNodeDisplayed(i, true);
+        p.x = posDisp_m(i,0);
+        p.y = posDisp_m(i,1);
+        p.z = 0;
+        mediaBrowser->setNodeNextPosition(i, p);
+    }
+    ////////////////////////////////////////////////////////////////
 }
 
 mat ACPosPlugAudioGardenFlower::extractDescMatrix(ACMediaLibrary* lib, vector<string> featureList, vector<long> mediaIds){
-	mat desc_m;
-	mat tmpDesc_m;
-	
-	desc_m = extractDescMatrix(lib, featureList[0], mediaIds);
-	for (int i=1; i<featureList.size(); i++){
-		tmpDesc_m = extractDescMatrix(lib, featureList[i], mediaIds);
-		desc_m = join_rows(desc_m, tmpDesc_m);
-	}
-	return desc_m;
+    mat desc_m;
+    mat tmpDesc_m;
+
+    desc_m = extractDescMatrix(lib, featureList[0], mediaIds);
+    for (int i=1; i<featureList.size(); i++){
+        tmpDesc_m = extractDescMatrix(lib, featureList[i], mediaIds);
+        desc_m = join_rows(desc_m, tmpDesc_m);
+    }
+    return desc_m;
 }
 
 mat ACPosPlugAudioGardenFlower::extractDescMatrix(ACMediaLibrary* lib, string featureName, vector<long> mediaIds){
-  vector<ACMedia*> loops = lib->getAllMedia();
-  int nbMedia = loops.size(); 
-	int featDim;
-	int totalDim = 0;
-	int featureId = 0;
-	int featureSize = 0;
+    ACMedias medias = lib->getAllMedia();
+    int nbMedia = medias.size();
+    int featDim;
+    int totalDim = 0;
+    int featureId = 0;
+    int featureSize = 0;
 
-	//int nbFeature = loops.back()->getNumberOfFeaturesVectors();
-	int nbFeature = loops.front()->getNumberOfFeaturesVectors();
+    int nbFeature = lib->getFirstMedia()->getNumberOfFeaturesVectors();
 
-	for(int f=0; f< nbFeature; f++){
-		//if (loops.back()->getPreProcFeaturesVector(f)->getName() == featureName){
-		if (loops.front()->getPreProcFeaturesVector(f)->getName() == featureName){	
-			featureId = f;
-		}	
-	}
+    for(int f=0; f< nbFeature; f++){
+        if (lib->getFirstMedia()->getPreProcFeaturesVector(f)->getName() == featureName){
+            featureId = f;
+        }
+    }
 
-	//featureSize = loops.back()->getPreProcFeaturesVector(featureId)->getSize();
-	featureSize = loops.front()->getPreProcFeaturesVector(featureId)->getSize();
+    featureSize = lib->getFirstMedia()->getPreProcFeaturesVector(featureId)->getSize();
 
-  mat desc_m(mediaIds.size(),featureSize);
-  
-	mat pos_m(nbMedia,2);
-  
-  for(int i=0; i<mediaIds.size(); i++) {    
-		for(int d=0; d < featureSize; d++){
-			//desc_m(i, d) = loops[mediaIds[i]]->getPreProcFeaturesVector(featureId)->getFeatureElement(d);
-			if(loops[mediaIds[i]]->getType() == lib->getMediaType())//CF or //if(loops[mediaIds[i]]->getPreProcFeaturesVector(featureId))
-				desc_m(i, d) = loops[mediaIds[i]]->getPreProcFeaturesVector(featureId)->getFeatureElement(d);
-		}
-  }
-	return desc_m;
+    mat desc_m(mediaIds.size(),featureSize);
+
+    mat pos_m(nbMedia,2);
+
+    for(int i=0; i<mediaIds.size(); i++) {
+        for(int d=0; d < featureSize; d++){
+            //desc_m(i, d) = medias[mediaIds[i]]->getPreProcFeaturesVector(featureId)->getFeatureElement(d);
+            if(medias[mediaIds[i]]->getType() == lib->getMediaType())//CF or //if(medias[mediaIds[i]]->getPreProcFeaturesVector(featureId))
+                desc_m(i, d) = medias[mediaIds[i]]->getPreProcFeaturesVector(featureId)->getFeatureElement(d);
+        }
+    }
+    return desc_m;
 }
 
 

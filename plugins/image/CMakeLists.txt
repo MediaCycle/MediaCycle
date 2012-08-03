@@ -9,7 +9,7 @@ IF(SUPPORT_IMAGE OR SUPPORT_VIDEO)
 	FILE(GLOB SRC *.cpp *.c ./blobs/*.cpp ./gabor/*.cpp)
 	FILE(GLOB HDR *.hpp *.h ./blobs/*.h ./gabor/*.h)
 
-    INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/plugins/image/blobs ${CMAKE_SOURCE_DIR}/plugins/image/gabor)
+    INCLUDE_DIRECTORIES(. ${CMAKE_SOURCE_DIR}/plugins/image/blobs ${CMAKE_SOURCE_DIR}/plugins/image/gabor)
 
 	ADD_LIBRARY(${TARGET_NAME} SHARED ${SRC} ${HDR})
 	ADD_DEPENDENCIES(${TARGET_NAME} mediacycle)

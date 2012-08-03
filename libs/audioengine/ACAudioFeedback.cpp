@@ -610,18 +610,22 @@ void ACAudioFeedback::processAudioUpdate()
 	mNeedsActivityUpdateMedia = media_cycle->getNeedsActivityUpdateMedia();
 
 	for (i=0;i<(*mNeedsActivityUpdateMedia).size();i++) {
-		loop_id = (*mNeedsActivityUpdateMedia)[i];
-		const ACMediaNode &attribute = media_cycle->getMediaNode(loop_id);
-		const ACPoint &p = attribute.getCurrentPosition();
-		x=p.x;
-		y=0;
-		z=p.y;
-		if (attribute.getActivity()>0) {
-			createSourceWithPosition(loop_id, x, y, z);
-		}
-		else {
-			deleteSource(loop_id);
-		}
+            loop_id = (*mNeedsActivityUpdateMedia)[i];
+            const ACMediaNode* attribute = media_cycle->getMediaNode(loop_id);
+            if(attribute){
+                const ACPoint &p = attribute->getCurrentPosition();
+                x=p.x;
+                y=0;
+                z=p.y;
+                if (attribute->getActivity()>0) {
+                    createSourceWithPosition(loop_id, x, y, z);
+                }
+                else {
+                    deleteSource(loop_id);
+                }
+            }
+            else
+                deleteSource(loop_id);
 	}
 	media_cycle->setNeedsActivityUpdateRemoveMedia();
 }
@@ -1710,19 +1714,14 @@ int ACAudioFeedback::createSourceWithPosition(int loop_id, float x, float y, flo
 		}
 	}
 
-	// CF: temporary workaround as the ACUserLog tree and the ACLoopAttributes vector in ACMediaBrowser are not sync'd
-	int media_id = loop_id; // or media_cycle->getBrowser()->getMediaNode(loop_id).getMediaId();
-	if (media_cycle->getBrowser()->getMode() == AC_MODE_NEIGHBORS)
-		media_id = media_cycle->getBrowser()->getUserLog()->getMediaIdFromNodeId(loop_id);
-	// audio_loop = media_cycle->getAudioLibrary()->getMedia(loop_id);
-	loop_file = (char*)(media_cycle->getMediaFileName(media_id)).c_str();
+        loop_file = (char*)(media_cycle->getMediaFileName(loop_id)).c_str();
 	//loop_buffer = loop_buffers[loop_slot];
 
 	loop_pos[0] = x;
 	loop_pos[1] = y;
 	loop_pos[2] = z;
 	local_bpm = 0;
-	local_feature = media_cycle->getFeaturesVectorInMedia(media_id, "acid_bpm");
+        local_feature = media_cycle->getFeaturesVectorInMedia(loop_id, "ACID BPM");
 	if ((local_feature).size()) {
 		if ((local_feature).size()==1) {
 			local_bpm = (local_feature)[0];
@@ -1735,7 +1734,7 @@ int ACAudioFeedback::createSourceWithPosition(int loop_id, float x, float y, flo
                 local_bpm = 240;
 	}
 	local_key = 0;
-	local_feature = media_cycle->getFeaturesVectorInMedia(media_id, "acid_key");
+        local_feature = media_cycle->getFeaturesVectorInMedia(loop_id, "ACID key");
 	if ((local_feature).size()) {
 		if ((local_feature).size()==1) {
 			local_key = int((local_feature)[0]);
@@ -1743,7 +1742,7 @@ int ACAudioFeedback::createSourceWithPosition(int loop_id, float x, float y, flo
 	}
 	// SD TODO - Acid type not yet used
 	local_acid_type = 65536;
-	local_feature = media_cycle->getFeaturesVectorInMedia(media_id, "acid_type");
+        local_feature = media_cycle->getFeaturesVectorInMedia(loop_id, "ACID type");
 	if ((local_feature).size()) {
 		if ((local_feature).size()==1) {
 			local_acid_type = int((local_feature)[0]);

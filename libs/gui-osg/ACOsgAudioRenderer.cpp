@@ -114,20 +114,13 @@ void ACOsgAudioRenderer::waveformGeode() {
     border_geometry = new Geometry();
     axis_geometry = new Geometry();
 
-    // CF: temporary workaround as the ACUserLog tree and the ACLoopAttributes vector in ACMediaBrowser are not sync'd
-    /*int media_index = node_index; // or media_cycle->getBrowser()->getMediaNode(node_index).getMediaId();
- if (media_cycle->getBrowser()->getMode() == AC_MODE_NEIGHBORS)
-  media_index = media_cycle->getBrowser()->getUserLog()->getMediaIdFromNodeId(node_index);*/
-
     if(media){
-	
-        //width = media_cycle->getThumbnailWidth(media_index);//CF instead of node_index
+        //width = media_cycle->getThumbnailWidth(media_index);
         width = media->getThumbnailWidth();
-
         width = width / 2;
 
-        //thumbnail = (float*)media_cycle->getThumbnailPtr(media_index);//CF instead of node_index
-        thumbnail = (float*)media->getThumbnailPtr();//CF instead of node_index
+        //thumbnail = (float*)media_cycle->getThumbnailPtr(media_index);
+        thumbnail = (float*)media->getThumbnailPtr();
 
         //////////////////////////
         // samples vertices
@@ -297,12 +290,6 @@ void ACOsgAudioRenderer::metadataGeode() {
 
     metadata->setDrawMode(osgText::Text::TEXT);// osgText::Text::BOUNDINGBOX, osgText::Text::ALIGNMENT
 
-    // CF: temporary workaround as the ACUserLog tree and the ACLoopAttributes vector in ACMediaBrowser are not sync'd
-    //int media_index = node_index; // or media_cycle->getBrowser()->getMediaNode(node_index).getMediaId();
-
-    //if (media_cycle->getBrowser()->getMode() == AC_MODE_NEIGHBORS)
-    //	media_index = media_cycle->getBrowser()->getUserLog()->getMediaIdFromNodeId(node_index);
-
     //ACAudio* media = (ACAudio*)(media_cycle->getLibrary()->getMedia(media_index));
     std::stringstream content;
     content << fs::basename(media->getFileName());
@@ -316,12 +303,7 @@ void ACOsgAudioRenderer::metadataGeode() {
     //state->setMode(GL_BLEND, StateAttribute::ON);
     //state->setMode(GL_LINE_SMOOTH, StateAttribute::ON);
 
-    //TODO check this .get() (see also ACOsgBrowserRenderer.cpp)
-    //".get()" is necessary for compilation under linux (OSG v2.4)
     metadata_geode->addDrawable(metadata);
-
-    //ref_ptr//metadata_geode->ref();
-
 }
 
 void ACOsgAudioRenderer::curserGeode() {
@@ -451,8 +433,8 @@ void ACOsgAudioRenderer::prepareNodes() {
 
     //waveformGeode();
     //curserGeode();
-    //if  (media_cycle->getMediaNode(node_index).isDisplayed()){
-    if (media && media_cycle->getNodeFromMedia(media).isDisplayed()){
+    //if  (media_cycle->getMediaNode(node_index)->isDisplayed()){
+    if (media && media_cycle->getNodeFromMedia(media)->isDisplayed()){
         entryGeode();
         media_node->addChild(entry_geode);
     }
@@ -463,8 +445,8 @@ void ACOsgAudioRenderer::updateNodes(double ratio) {
     double xstep = 0.00025;
     xstep *= afac;
 
-	const ACMediaNode &attribute = media_cycle->getMediaNode(node_index);
-	if (!attribute.isDisplayed()){
+        const ACMediaNode* attribute = media_cycle->getMediaNode(node_index);
+        if (!attribute->isDisplayed()){
 		media_node->removeChild(waveform_geode);
 		media_node->removeChild(metadata_geode);
 		media_node->removeChild(curser_transform);
@@ -484,7 +466,7 @@ void ACOsgAudioRenderer::updateNodes(double ratio) {
 
     // SD 2010 OCT - This animation has moved from Browser to Renderer
     /*
-  const ACPoint &p = attribute.getCurrentPosition(), &p2 = attribute.getNextPosition();
+  const ACPoint &p = attribute->getCurrentPosition(), &p2 = attribute->getNextPosition();
   double omr = 1.0-ratio;
   x = omr*p.x + ratio*p2.x;
   y = omr*p.y + ratio*p2.y;
@@ -500,7 +482,7 @@ void ACOsgAudioRenderer::updateNodes(double ratio) {
     localscale = max(localscale,minscale);
     // localscale = 0.5;
 
-    if (media && attribute.getActivity()>=1) {	// with waveform
+    if (media && attribute->getActivity()>=1) {	// with waveform
         //if (0) {	// without waveform
         localscale = 0.5;
 
@@ -533,18 +515,18 @@ void ACOsgAudioRenderer::updateNodes(double ratio) {
         }
 
         if(waveform_type != AC_BROWSER_AUDIO_WAVEFORM_NONE){
-            // curserT.makeTranslate(Vec3(omr*p.x + ratio*p2.x + attribute.curser * xstep * 0.5 / zoom, omr*p.y + ratio*p2.y, 0.0)); // omr*p.z + ratio*p2.z));
+            // curserT.makeTranslate(Vec3(omr*p.x + ratio*p2.x + attribute->curser * xstep * 0.5 / zoom, omr*p.y + ratio*p2.y, 0.0)); // omr*p.z + ratio*p2.z));
             // curserT =  Matrix::scale(0.5/zoom,0.5/zoom,0.5/zoom) * curserT;
 #ifdef AUTO_TRANSFORM
-            //curser_transform->setPosition(Vec3(attribute.getCursor() * xstep, 0.0, 0.0));
+            //curser_transform->setPosition(Vec3(attribute->getCursor() * xstep, 0.0, 0.0));
 
-            //curser_transform->setPosition(Vec3((float) attribute.getCurrentFrame() / (float)(((ACAudio*) media_cycle->getLibrary()->getMedia(media_index) )->getNFrames()) * media_cycle->getThumbnailWidth(media_index) * xstep, 0.0, 0.0));
-            curser_transform->setPosition(Vec3((float) attribute.getCurrentFrame() / (float)(((ACAudio*) media )->getNFrames()) * media->getThumbnailWidth() * xstep, 0.0, 0.0));
+            //curser_transform->setPosition(Vec3((float) attribute->getCurrentFrame() / (float)(((ACAudio*) media_cycle->getLibrary()->getMedia(media_index) )->getNFrames()) * media_cycle->getThumbnailWidth(media_index) * xstep, 0.0, 0.0));
+            curser_transform->setPosition(Vec3((float) attribute->getCurrentFrame() / (float)(((ACAudio*) media )->getNFrames()) * media->getThumbnailWidth() * xstep, 0.0, 0.0));
 #else
-            //curserT.makeTranslate(Vec3(attribute.getCursor() * xstep, 0.0, 0.0));
+            //curserT.makeTranslate(Vec3(attribute->getCursor() * xstep, 0.0, 0.0));
 
-            //curserT.makeTranslate(Vec3((float) attribute.getCurrentFrame() / (float)(((ACAudio*) media_cycle->getLibrary()->getMedia(media_index) )->getNFrames()) * media_cycle->getThumbnailWidth(media_index) * xstep, 0.0, 0.0));
-            curserT.makeTranslate(Vec3((float) attribute.getCurrentFrame() / (float)(((ACAudio*) media )->getNFrames()) * media->getThumbnailWidth() * xstep, 0.0, 0.0));
+            //curserT.makeTranslate(Vec3((float) attribute->getCurrentFrame() / (float)(((ACAudio*) media_cycle->getLibrary()->getMedia(media_index) )->getNFrames()) * media_cycle->getThumbnailWidth(media_index) * xstep, 0.0, 0.0));
+            curserT.makeTranslate(Vec3((float) attribute->getCurrentFrame() / (float)(((ACAudio*) media )->getNFrames()) * media->getThumbnailWidth() * xstep, 0.0, 0.0));
 
             curser_transform->setMatrix(curserT);
 #endif
@@ -572,10 +554,12 @@ void ACOsgAudioRenderer::updateNodes(double ratio) {
         if (media_cycle->getBrowserMode() == AC_MODE_CLUSTERS){
             const vector<int> centerNodeIds=media_cycle->getBrowser()->getIdNodeClusterCenter();
             if(cluster_colors.size()>0){
-                ((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(cluster_colors[attribute.getClusterId()%cluster_colors.size()]);
-                if(centerNodeIds.size() != 0 && attribute.getClusterId() < centerNodeIds.size())
-                    if (centerNodeIds[attribute.getClusterId()]==attribute.getMediaId())
-                        ((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(osg::Vec4(0,0,0,1));
+                ((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(cluster_colors[attribute->getClusterId()%cluster_colors.size()]);
+                if(setting == AC_SETTING_DESKTOP){
+                    if(centerNodeIds.size() != 0 && attribute->getClusterId() < centerNodeIds.size())
+                        if (centerNodeIds[attribute->getClusterId()]==attribute->getMediaId())
+                            ((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(osg::Vec4(0,0,0,1));
+                }
             }
             else
                 ((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(node_color);
@@ -583,7 +567,7 @@ void ACOsgAudioRenderer::updateNodes(double ratio) {
         else
             ((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(neighbor_color);
 
-        if (attribute.isSelected()) {
+        if (attribute->isSelected()) {
             //CF color (multiple) selected nodes in black
             Vec4 selected_color(0,0,0,1);
             ((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(selected_color);
@@ -596,7 +580,7 @@ void ACOsgAudioRenderer::updateNodes(double ratio) {
     }
 
     unsigned int mask = (unsigned int)-1;
-    if(attribute.getNavigationLevel() >= media_cycle->getNavigationLevel()) {
+    if(attribute->getNavigationLevel() >= media_cycle->getNavigationLevel()) {
         entry_geode->setNodeMask(mask);
     }
     else {

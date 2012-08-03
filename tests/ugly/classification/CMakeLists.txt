@@ -2,7 +2,7 @@ IF(TORCH3_FOUND)
 	FILE(GLOB SRC *.cpp *.c)
 	FILE(GLOB HDR *.hpp *.h)
 
-    INCLUDE_DIRECTORIES(../../../plugins/classification)
+	INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/plugins/classification)
 
 	ADD_EXECUTABLE(classification-test ${SRC} ${HDR})
 

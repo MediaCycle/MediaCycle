@@ -63,7 +63,6 @@ ACMediaLibraryMetadataQt::ACMediaLibraryMetadataQt(QWidget *parent)
 ACMediaLibraryMetadataQt::~ACMediaLibraryMetadataQt(){
 }
 
-
 void ACMediaLibraryMetadataQt::on_pushButtonCoverLocate_clicked(){
     QFileDialog dialog(this,"Open Library Cover");
     dialog.setNameFilter(mediaExts);
@@ -100,7 +99,6 @@ void ACMediaLibraryMetadataQt::on_lineEditAuthor_editingFinished(){
         return;
     if(!media_cycle->getLibrary())
         return;
-
     media_cycle->getLibrary()->setAuthor( ui.lineEditAuthor->text().toStdString() );
 }
 
@@ -109,7 +107,6 @@ void ACMediaLibraryMetadataQt::on_lineEditTitle_editingFinished(){
         return;
     if(!media_cycle->getLibrary())
         return;
-
     media_cycle->getLibrary()->setTitle( ui.lineEditTitle->text().toStdString() );
 }
 
@@ -118,7 +115,6 @@ void ACMediaLibraryMetadataQt::on_lineEditPublisher_editingFinished(){
         return;
     if(!media_cycle->getLibrary())
         return;
-
     media_cycle->getLibrary()->setPublisher( ui.lineEditPublisher->text().toStdString() );
 }
 
@@ -127,7 +123,6 @@ void ACMediaLibraryMetadataQt::on_lineEditWebsite_editingFinished(){
         return;
     if(!media_cycle->getLibrary())
         return;
-
     media_cycle->getLibrary()->setWebsite( ui.lineEditWebsite->text().toStdString() );
 }
 
@@ -136,10 +131,16 @@ void ACMediaLibraryMetadataQt::on_lineEditYear_editingFinished(){
         return;
     if(!media_cycle->getLibrary())
         return;
-
     media_cycle->getLibrary()->setYear( ui.lineEditYear->text().toStdString() );
 }
 
+void ACMediaLibraryMetadataQt::on_pushButtonReset_clicked(){
+    ui.lineEditAuthor->setText("");
+    ui.lineEditPublisher->setText("");
+    ui.lineEditTitle->setText("");
+    ui.lineEditWebsite->setText("");
+    ui.lineEditYear->setText("");
+}
 
 void ACMediaLibraryMetadataQt::updateLibrary(){
     if(!media_cycle)

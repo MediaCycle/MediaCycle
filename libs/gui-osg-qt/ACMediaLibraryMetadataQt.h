@@ -49,12 +49,12 @@ class ACMediaLibraryMetadataQt : public QMainWindow{
 
 public slots:
     void on_pushButtonCoverLocate_clicked();
-    //void on_buttonBox_clicked();
     void on_lineEditAuthor_editingFinished();
     void on_lineEditPublisher_editingFinished();
     void on_lineEditTitle_editingFinished();
     void on_lineEditWebsite_editingFinished();
     void on_lineEditYear_editingFinished();
+    void on_pushButtonReset_clicked();
 
 protected:
     void dragEnterEvent(QDragEnterEvent *event);

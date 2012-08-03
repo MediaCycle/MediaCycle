@@ -44,7 +44,7 @@ public:
     virtual ~ACNavimedSensorFeaturePlugin();
     virtual std::vector<ACMediaFeatures*> calculate(ACMediaData* aData, ACMedia* theMedia, bool _save_timed_feat = false);
 	
-	preProcessInfo update(std::vector<ACMedia*> media_library);
+        preProcessInfo update(ACMedias media_library);
 	
 	std::vector<ACMediaFeatures*> apply(preProcessInfo info,ACMedia* theMedia);
 	

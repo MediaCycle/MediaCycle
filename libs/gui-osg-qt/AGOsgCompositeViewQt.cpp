@@ -433,18 +433,18 @@ void AGOsgCompositeViewQt::mouseReleaseEvent( QMouseEvent* event )
 	{
 		if ( (forwarddown==1) || (selectrhythmpattern == true) || (selectgrains == true))
 		{
-			int loop = media_cycle->getClickedNode();
-			std::cout << "node " << loop << " selected" << std::endl;
+                        int media_id = media_cycle->getClickedNode();
+                        std::cout << "node " << media_id << " selected" << std::endl;
 			//media_cycle->hoverWithPointerId(event->x(),event->y(),-1);//mouse
-			//int loop = media_cycle->getClosestNode();
+                        //int media_id = media_cycle->getClosestNode();
 
-			if(loop >= 0)
+                        if(media_id >= 0)
 			{
 				if (forwarddown==1)
 				{
 					if (media_cycle->getBrowser()->getMode() == AC_MODE_CLUSTERS)
-						media_cycle->incrementLoopNavigationLevels(loop);
-					media_cycle->setReferenceNode(loop);
+                                                media_cycle->incrementNavigationLevels(media_id);
+                                        media_cycle->setReferenceNode(media_id);
 
 					// XSCF 250310 added these 3
 					if (media_cycle->getBrowser()->getMode() == AC_MODE_CLUSTERS)
@@ -469,17 +469,17 @@ void AGOsgCompositeViewQt::mouseReleaseEvent( QMouseEvent* event )
 					if (selectedRhythmPattern != -1)
 						this->getBrowserRenderer()->resetNodeColor(selectedRhythmPattern);
 
-					selectedRhythmPattern = loop;
+                                        selectedRhythmPattern = media_id;
 					if (selectedRhythmPattern != -1)
 						this->getBrowserRenderer()->changeNodeColor(selectedRhythmPattern, Vec4(1.0,1.0,1.0,1.0));//CF color the rhythm pattern in white
 
 					if (timeline_renderer->getNumberOfTracks()==0){
-						//this->getTimelineRenderer()->addTrack(loop);
-						this->getTimelineRenderer()->addTrack(media_cycle->getLibrary()->getMedia(loop));
+                                                //this->getTimelineRenderer()->addTrack(media_id);
+                                                this->getTimelineRenderer()->addTrack(media_cycle->getLibrary()->getMedia(media_id));
 					}
 					else{
-						//this->getTimelineRenderer()->getTrack(0)->updateMedia(loop);
-						this->getTimelineRenderer()->getTrack(0)->updateMedia(media_cycle->getLibrary()->getMedia(loop));
+                                                //this->getTimelineRenderer()->getTrack(0)->updateMedia(media_id);
+                                                this->getTimelineRenderer()->getTrack(0)->updateMedia(media_cycle->getLibrary()->getMedia(media_id));
 					}	
 
 					/*if ( timeline_renderer->getTrack(0)!=0 )
@@ -491,14 +491,14 @@ void AGOsgCompositeViewQt::mouseReleaseEvent( QMouseEvent* event )
 						}
 
 						//CF possible only for audio? then do some tests
-						ACAudio* tempAudio = (ACAudio*) media_cycle->getLibrary()->getMedia(loop);
+                                                ACAudio* tempAudio = (ACAudio*) media_cycle->getLibrary()->getMedia(media_id);
 
 						//delete synthAudio;
 						synthAudio = new ACAudio( *tempAudio, false);
 						float* tempBuffer = (float*)synthAudio->getMonoSamples();
 						audio_engine->getFeedback()->createExtSource(tempBuffer, synthAudio->getNFrames() );
 
-						this->getTimelineRenderer()->getTrack(0)->updateMedia( synthAudio ); //media_cycle->getLibrary()->getMedia(loop) );
+                                                this->getTimelineRenderer()->getTrack(0)->updateMedia( synthAudio ); //media_cycle->getLibrary()->getMedia(media_id) );
 						delete[] tempBuffer;
 						media_cycle->setNeedsDisplay(true);
 					}*/
@@ -506,7 +506,7 @@ void AGOsgCompositeViewQt::mouseReleaseEvent( QMouseEvent* event )
 				}
 				else if (selectgrains == true)
 				{
-					media_cycle->getBrowser()->toggleNode(loop);
+                                        media_cycle->getBrowser()->toggleNode(media_id);
 					media_cycle->getBrowser()->dumpSelectedNodes();
 				}
 			}
@@ -581,7 +581,7 @@ void AGOsgCompositeViewQt::synthesize()
 		synthAudio = new ACAudio();
 		synthAudio->setData(synth->getSound(),synth->getLength());
 		//synthAudio->computeWaveform( this->getSynth()->getSound()  );
-		this->getTimelineRenderer()->getTrack(0)->updateMedia( synthAudio ); //media_cycle->getLibrary()->getMedia(loop) );
+                this->getTimelineRenderer()->getTrack(0)->updateMedia( synthAudio ); //media_cycle->getLibrary()->getMedia(media_id) );
 		media_cycle->setNeedsDisplay(true);
 
 		// Playback the synthesis

@@ -129,9 +129,9 @@ void ACAudioMakamClassifierPlugin::updateClusters(ACMediaBrowser* mediaBrowser, 
 
     // Classify songs with the list of filenames as input
     std::list<std::string> lst;
-    std::vector<ACMedia*> medias = mediaBrowser->getLibrary()->getAllMedia();
-    for(std::vector<ACMedia*>::iterator media=medias.begin();media!=medias.end();media++)
-        lst.push_back((*media)->getFileName());
+    ACMedias medias = mediaBrowser->getLibrary()->getAllMedia();
+    for(ACMedias::iterator media=medias.begin();media!=medias.end();media++)
+        lst.push_back(media->second->getFileName());
     Cell cell(lst);
     octave_value_list in;
     in.resize (2);
@@ -194,7 +194,7 @@ void ACAudioMakamClassifierPlugin::updateClusters(ACMediaBrowser* mediaBrowser, 
         std::cout << "ACAudioMakamClassifierPlugin::calculate: cluster " << clustered_files(index) << " for file " << *filename << std::endl;
         std::list<std::string>::iterator makam  = std::find(makams.begin(),makams.end(), clustered_files(index));
         if(makam!=makams.end()){
-            mediaBrowser->getMediaNode(index).setClusterId( std::distance(makams.begin(),makam) );
+            mediaBrowser->getMediaNode(index)->setClusterId( std::distance(makams.begin(),makam) );
         }
         index++;
     }

@@ -58,7 +58,7 @@ extern "C" std::vector<std::string> list() {    //returns a string vector contai
 #endif*/ //CF just for testing neighbor position plugins
     listPlugin.push_back("ACVisPluginPCA");
     listPlugin.push_back("ACVisPluginPCA13");
-    listPlugin.push_back("ACVisPlugin2Desc");
+    //listPlugin.push_back("ACVisPlugin2Desc");
     listPlugin.push_back("ACPosPlugAudioGardenGramoPhone");
     listPlugin.push_back("ACPosPlugAudioGardenFlower");
 #if defined(USE_MAKAM)

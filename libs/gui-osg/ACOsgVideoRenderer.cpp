@@ -72,8 +72,8 @@ void ACOsgVideoRenderer::updateNodes(double ratio) {
 		
 	ACOsgImageRenderer::updateNodes();
 
-	const ACMediaNode &attribute = media_cycle->getMediaNode(node_index);
-	if (!attribute.isDisplayed()){
+	const ACMediaNode* attribute = media_cycle->getMediaNode(node_index);
+	if (!attribute->isDisplayed()){
 		if (image_stream)
 			image_stream->pause();
 		if (image_geode)
@@ -88,11 +88,11 @@ void ACOsgVideoRenderer::updateNodes(double ratio) {
 			std::cout << "Image stream invalid status" << std::endl;
 			break;
 		case osg::ImageStream::PLAYING:
-			if (attribute.getActivity()==0)
+			if (attribute->getActivity()==0)
 				image_stream->pause();
 			break;
 		case osg::ImageStream::PAUSED:
-			if (attribute.getActivity()==1)
+			if (attribute->getActivity()==1)
 				image_stream->play();
 			break;
 		case osg::ImageStream::REWINDING:

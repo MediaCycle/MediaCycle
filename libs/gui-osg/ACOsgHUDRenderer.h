@@ -79,17 +79,17 @@
 
 class ACOsgHUDRenderer {
 protected:
-    MediaCycle				*media_cycle;
-    osg::ref_ptr<osg::Camera>				 camera;
-    osg::ref_ptr<osg::Group>				 group;
-    osg::ref_ptr<osg::Group>				 pointer_group;
-    std::vector<ACOsgPointerRenderer*>  pointer_renderer;
+    MediaCycle *media_cycle;
+    osg::ref_ptr<osg::Camera> camera;
+    osg::ref_ptr<osg::Group> group;
+    osg::ref_ptr<osg::Group> pointer_group;
+    std::vector<ACOsgPointerRenderer*> pointer_renderer;
     ACOsgLibraryRenderer* library_renderer;
     ACSettingType setting;
     osg::ref_ptr<osgText::Font> font;
 
     // SD - Results from centralized request to MediaCycle
-    ACPoint						media_cycle_pointer_current_pos;
+    ACPoint media_cycle_pointer_current_pos;
 public:
     ACOsgHUDRenderer();
     ~ACOsgHUDRenderer();

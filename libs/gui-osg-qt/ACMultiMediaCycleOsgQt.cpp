@@ -315,6 +315,7 @@ void ACMultiMediaCycleOsgQt::createMediaCycle(ACMediaType _media_type, ACBrowser
 	dockWidgetsManager->updateMediaCycle(media_cycle);
     dockWidgetsManager->updateOsgView(compositeOsgView);
     metadataWindow->setMediaCycle(media_cycle);
+    userProfileWindow->setMediaCycle(media_cycle);
 }
 
 // destroys the MediaCycle object (containing the whole application)
@@ -1430,6 +1431,7 @@ void ACMultiMediaCycleOsgQt::changeMediaType(ACMediaType _media_type){
     dockWidgetsManager->changeMediaType(_media_type);
     metadataWindow->setMediaCycle(media_cycle);
     metadataWindow->clean();
+    userProfileWindow->setMediaCycle(media_cycle);
 }
 
 void ACMultiMediaCycleOsgQt::useSegmentationByDefault(bool _status)

@@ -1,7 +1,7 @@
 /**
  * @brief ACNeighborhoodsPluginEuclidean.cpp
  * @author Christian Frisson
- * @date 22/07/2012
+ * @date 03/08/2012
  * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -63,59 +63,62 @@ void ACNeighborhoodsPluginEuclidean::updateNeighborhoods(ACMediaBrowser* mediaBr
     //CF changing neighbor number requires removing media nodes
     //nNeighbors=this->getNumberParameterValue("neighbors");
 
-    //mediaBrowser->getUserLog()->dump();
+    mediaBrowser->dumpNeighborNodes();
 
     //CF if the user log has just been (re)created
-    if(mediaBrowser->getUserLog()->getLastClickedNodeId() == -1)
+    if(mediaBrowser->getClickedNode() == -1)
         lastClickedNodeId = -1;
 
     //CF if the user clicked twice on the same node OR if updateNeighborhoods is called again without newly-clicked node (changing parameters)
-    if (mediaBrowser->getUserLog()->getLastClickedNodeId() >=0){
-        if (mediaBrowser->getUserLog()->getLastClickedNodeId() == lastClickedNodeId){
+    if (mediaBrowser->getClickedNode() >=0) {
+        if (mediaBrowser->getClickedNode() == lastClickedNodeId)  {
             std::cout << "ACNeighborhoodsPluginNeighborhoods::updateNeighborhoods removing neighbors of node " << lastClickedNodeId << std::endl;
-            mediaBrowser->getUserLog()->removeChildrenNodes(lastClickedNodeId);
+            mediaBrowser->removeChildrenNeighborNodes(lastClickedNodeId);
         }
-
-        lastClickedNodeId = mediaBrowser->getUserLog()->getLastClickedNodeId();
-        long targetMediaId = mediaBrowser->getUserLog()->getMediaIdFromNodeId(lastClickedNodeId);
-        ACMedia* loop = mediaBrowser->getLibrary()->getMedia(0);
+        lastClickedNodeId = mediaBrowser->getClickedNode();
+        std::cout << "ACNeighborhoodsPluginEuclidean::updateNeighborhoods adding neighbors to node " << lastClickedNodeId << std::endl;
+        ACMedia* media = mediaBrowser->getLibrary()->getFirstMedia();
 
         long libSize = mediaBrowser->getLibrary()->getSize();
-        int nbFeature = loop->getNumberOfFeaturesVectors();
+        int nbFeature = media->getNumberOfFeaturesVectors();
         mat desc_m;
         rowvec weight_v;
         mat tg_v;
         colvec dist_v(libSize);
 
         extractDescMatrix(mediaBrowser, desc_m, weight_v);
-        tg_v = desc_m.row(targetMediaId);
+        tg_v = desc_m.row(lastClickedNodeId);
         dist_v= sqrt(sum(square(desc_m - repmat(tg_v, desc_m.n_rows, 1)) % repmat(weight_v, desc_m.n_rows, 1), 1));
 
         //	std::cout << "1_v = " << std::endl <<  square(desc_m - repmat(tg_v, desc_m.n_rows, 1)) << std::endl;
         //	std::cout << "2_v = " << std::endl <<  repmat(weight_v, desc_m.n_rows, 1) << std::endl;
         //	std::cout << "3_v = " << std::endl <<  sum(square(desc_m - repmat(tg_v, desc_m.n_rows, 1)) % repmat(weight_v, desc_m.n_rows, 1),1) << std::endl;
 
+        std::vector<long> ids = mediaBrowser->getLibrary()->getAllMediaIds();
         ucolvec sortRank_v = sort_index(dist_v);
-        std::cout << "sortRank_v = " << sortRank_v(0) << " " << sortRank_v(1) << " " << sortRank_v(2) << std::endl;
-        for (int k=1; k<=nNeighbors; k++){ // to avoid returning the request itself (k=1)
-            mediaBrowser->addNode(lastClickedNodeId, sortRank_v(k), 0);
+
+        int k=0,m=1; // m=1 to avoid returning the request itself (k=1)
+        while(k<nNeighbors && m<ids.size() && m < sortRank_v.n_elem){
+            if( mediaBrowser->addNeighborNode(lastClickedNodeId, ids[sortRank_v(m)], 0))
+                k++;
+            m++;
         }
     }
-    //std::cout << "---" << std::endl;
-    //mediaBrowser->getUserLog()->dump();
-    //std::cout << "ACNeighborhoodsPluginPareto::updateNeighborhoods done" << std::endl;
+    std::cout << "---" << std::endl;
+    mediaBrowser->dumpNeighborNodes();
+    std::cout << "ACNeighborhoodsPluginPareto::updateNeighborhoods done" << std::endl;
 }
 
 void ACNeighborhoodsPluginEuclidean::extractDescMatrix(ACMediaBrowser* mediaBrowser, mat &desc_m, rowvec &weight_v){
-    vector<ACMedia*> loops = mediaBrowser->getLibrary()->getAllMedia();
-    int nbMedia = loops.size();
+    ACMedias medias = mediaBrowser->getLibrary()->getAllMedia();
+    int nbMedia = medias.size();
     int featDim;
     int totalDim = 0;
 
     // Count nb of feature
-    int nbFeature = loops.back()->getNumberOfFeaturesVectors();
+    int nbFeature = mediaBrowser->getLibrary()->getFirstMedia()->getNumberOfFeaturesVectors();
     for(int f=0; f< nbFeature; f++){
-        featDim = loops.back()->getPreProcFeaturesVector(f)->getSize();
+        featDim = mediaBrowser->getLibrary()->getFirstMedia()->getPreProcFeaturesVector(f)->getSize();
         std::cout << "feature weight " << f << " = " << mediaBrowser->getWeight(f) << std::endl;
         for(int d=0; d < featDim; d++){
             totalDim++;
@@ -126,16 +129,18 @@ void ACNeighborhoodsPluginEuclidean::extractDescMatrix(ACMediaBrowser* mediaBrow
     weight_v.set_size(totalDim);
     mat pos_m(nbMedia,2);
 
-    for(int i=0; i<nbMedia; i++) {
+    int i = 0;
+    for(ACMedias::iterator media = medias.begin(); media != medias.end(); media++) {
         int tmpIdx = 0;
         for(int f=0; f< nbFeature; f++){
             //std::cout << f << std::endl;
-            featDim = loops.back()->getPreProcFeaturesVector(f)->getSize();
+            featDim = mediaBrowser->getLibrary()->getFirstMedia()->getPreProcFeaturesVector(f)->getSize();
             for(int d=0; d < featDim; d++){
-                desc_m(i,tmpIdx) = loops[i]->getPreProcFeaturesVector(f)->getFeatureElement(d);
+                desc_m(i,tmpIdx) = media->second->getPreProcFeaturesVector(f)->getFeatureElement(d);
                 weight_v(tmpIdx) = mediaBrowser->getWeight(f);
                 tmpIdx++;
             }
         }
+        i++;
     }
 }

@@ -45,9 +45,9 @@ MediaCycle::MediaCycle(ACMediaType aMediaType, string local_directory, string li
     this->forwarddown = 0;
     //	this->playkeydown = true;
 
-	this->local_directory = local_directory;
-	this->libname = libname;
-	this->networkSocket	= 0;
+    this->local_directory = local_directory;
+    this->libname = libname;
+    this->networkSocket	= 0;
 
     ACMediaFactory::getInstance(); // this populates the available file extensions if not called before
 
@@ -68,7 +68,7 @@ MediaCycle::MediaCycle(ACMediaType aMediaType, string local_directory, string li
 }
 
 MediaCycle::MediaCycle(const MediaCycle& orig) {
-	// XS TODO: complete this copy-constructor or remove it !
+    // XS TODO: complete this copy-constructor or remove it !
 }
 
 MediaCycle::~MediaCycle() {
@@ -108,17 +108,17 @@ void MediaCycle::clean(){
 // == TCP
 static void tcp_callback(char *buffer, int l, char **buffer_send, int *l_send, void *userData)
 {
-	MediaCycle *that = (MediaCycle*)userData;
-	that->processTcpMessage(buffer, l, buffer_send, l_send);
+    MediaCycle *that = (MediaCycle*)userData;
+    that->processTcpMessage(buffer, l, buffer_send, l_send);
 }
 
 int MediaCycle::startTcpServer(int aPort, int aMaxConnections) {
     this->port = aPort;
     this->max_connections = aMaxConnections;
     if ((this->port>=FIRST_PORT_ID)&&(this->port<=LAST_PORT_ID)) {
-            this->networkSocket = new ACNetworkSocketServer(this->port, this->max_connections, tcp_callback, this);
-            this->networkSocket->start();
-            return 0;
+        this->networkSocket = new ACNetworkSocketServer(this->port, this->max_connections, tcp_callback, this);
+        this->networkSocket->start();
+        return 0;
     }
 
     return -1;
@@ -128,9 +128,9 @@ int MediaCycle::startTcpServer(int aPort, int aMaxConnections, ACNetworkSocketSe
     this->port = aPort;
     this->max_connections = aMaxConnections;
     if ((this->port>=FIRST_PORT_ID)&&(this->port<=LAST_PORT_ID)) {
-            this->networkSocket = new ACNetworkSocketServer(this->port, this->max_connections, aCallback, this);
-            this->networkSocket->start();
-            return 0;
+        this->networkSocket = new ACNetworkSocketServer(this->port, this->max_connections, aCallback, this);
+        this->networkSocket->start();
+        return 0;
     }
 
     return -1;
@@ -138,127 +138,127 @@ int MediaCycle::startTcpServer(int aPort, int aMaxConnections, ACNetworkSocketSe
 
 // XS TODO return value does not make much sense
 int MediaCycle::stopTcpServer() {
-     if (this->networkSocket) {
+    if (this->networkSocket) {
         this->networkSocket->stop();
         delete this->networkSocket;
     }
-	return 1;
+    return 1;
 }
 
 //AM TODO processTcpMessage must be moved outside of MediaCycle main class
 int MediaCycle::processTcpMessage(char* buffer, int l, char **buffer_send, int *l_send)
 {
-	FILE *local_file;
-	int ret, i;
-	string sbuffer, subbuffer, path, fullpath, sbuffer_send;
-	int bufpos1, bufpos2;
-	int id, k;
-	vector<int> ids;
+    FILE *local_file;
+    int ret, i;
+    string sbuffer, subbuffer, path, fullpath, sbuffer_send;
+    int bufpos1, bufpos2;
+    int id, k;
+    vector<int> ids;
 
-	printf ("Processing TCP message of length %d: %s", l, buffer);
+    printf ("Processing TCP message of length %d: %s", l, buffer);
 
-	// SD TODO - define OSC namespace, or else XML schema for these control messages
+    // SD TODO - define OSC namespace, or else XML schema for these control messages
 
-	sbuffer = string(buffer, l);
-	bufpos1 = 0;
-	bufpos2 = sbuffer.find(" ");
-	subbuffer = sbuffer.substr(bufpos1, bufpos2-bufpos1);
-	ostringstream osstream;
+    sbuffer = string(buffer, l);
+    bufpos1 = 0;
+    bufpos2 = sbuffer.find(" ");
+    subbuffer = sbuffer.substr(bufpos1, bufpos2-bufpos1);
+    ostringstream osstream;
 
-	string thumbnail_filename;
-	FILE *thumbnail_file;
-	struct stat file_status;
-	int thumbnail_size;
+    string thumbnail_filename;
+    FILE *thumbnail_file;
+    struct stat file_status;
+    int thumbnail_size;
 
-	if (subbuffer == "addfile") {
-		/*bufpos1 = bufpos2+1;
-		 subbuffer = sbuffer.substr(bufpos1);
-		 stringstream isstream(subbuffer);
-		 isstream >> id;
-		 isstream >> path;*/
-		bufpos1 = bufpos2+1;
-		bufpos2 = sbuffer.find(" ",bufpos1);
-		subbuffer = sbuffer.substr(bufpos1, bufpos2-bufpos1);
-		sscanf(subbuffer.c_str(), "%d", &id);
-		bufpos1 = bufpos2+1;
-		bufpos2 = sbuffer.find(" ",bufpos1);
-		path = sbuffer.substr(bufpos1, bufpos2-bufpos1);
-		bufpos1 = bufpos2+1;
-		fullpath = local_directory + path;
-		local_file = fopen(fullpath.c_str(),"wb");
-		fwrite((void*)(buffer+bufpos1), 1, l-bufpos1, local_file);
-		fclose(local_file);
-		ret = importDirectory(fullpath, 0, id, true);
-		// SD TODO - allow import of remote file (not transfered as data as done here for the LaughterCycle demo)
-		//	but rather using TCP client
-		osstream << "addfile " << ret;
-		sbuffer_send = osstream.str();
-		*buffer_send = (char*)(sbuffer_send).c_str();
-		*l_send = sbuffer_send.length();
-	}
-	// store features in file
-	if (subbuffer == "savelibrary") {
-		//return 0;
-		bufpos1 = bufpos2+1;
-		path = sbuffer.substr(bufpos1);
-		fullpath = local_directory + path + ".acl";
-		getLibrary()->saveACLLibrary(fullpath);
-		ret = 1;
-		osstream << "savelibrary " << ret;
-		sbuffer_send = osstream.str();
-		*buffer_send = (char*)(sbuffer_send).c_str();
-		*l_send = sbuffer_send.length();
-	}
-	else if (subbuffer == "loadlibrary") {
-		*buffer_send = 0;
-		*l_send = 0;
-	}
-	else if (subbuffer == "getknn") {
-		bufpos1 = bufpos2+1;
-		path = sbuffer.substr(bufpos1);
-		sscanf(path.c_str(), "%d %d", &id, &k);
-		ret = getKNN(id, ids, k);
-		osstream << "getknn " << ret;
-		for (i=0;i<ret;i++) {
-			osstream << " " << ids[i];
-		}
-		sbuffer_send = osstream.str();
-		*buffer_send = (char*)(sbuffer_send).c_str();
-		*l_send = sbuffer_send.length();
-	}
-	else if (subbuffer == "getthumbnail") {
-		bufpos1 = bufpos2+1;
-		path = sbuffer.substr(bufpos1);
-		sscanf(path.c_str(), "%d", &id);
-		thumbnail_filename = getThumbnailFileName(id);
-		if (thumbnail_filename!="") {
-			stat(thumbnail_filename.c_str(), &file_status);
-			thumbnail_size = file_status.st_size;
-			*buffer_send = new char[13+thumbnail_size];
-			strcpy(*buffer_send, "getthumbnail ");
-			thumbnail_file = fopen(thumbnail_filename.c_str(),"r");
-			//size_t st = fread((*buffer_send)+13, 1, thumbnail_size, thumbnail_file);
-			fclose(thumbnail_file);
-			*l_send = 13+thumbnail_size;
-		}
-		else {
-			*buffer_send = 0;
-			*l_send = 0;
-		}
-	}
-	else if (subbuffer == "setweight") {
-		*buffer_send = 0;
-		*l_send = 0;
-	}
+    if (subbuffer == "addfile") {
+        /*bufpos1 = bufpos2+1;
+   subbuffer = sbuffer.substr(bufpos1);
+   stringstream isstream(subbuffer);
+   isstream >> id;
+   isstream >> path;*/
+        bufpos1 = bufpos2+1;
+        bufpos2 = sbuffer.find(" ",bufpos1);
+        subbuffer = sbuffer.substr(bufpos1, bufpos2-bufpos1);
+        sscanf(subbuffer.c_str(), "%d", &id);
+        bufpos1 = bufpos2+1;
+        bufpos2 = sbuffer.find(" ",bufpos1);
+        path = sbuffer.substr(bufpos1, bufpos2-bufpos1);
+        bufpos1 = bufpos2+1;
+        fullpath = local_directory + path;
+        local_file = fopen(fullpath.c_str(),"wb");
+        fwrite((void*)(buffer+bufpos1), 1, l-bufpos1, local_file);
+        fclose(local_file);
+        ret = importDirectory(fullpath, 0, id, true);
+        // SD TODO - allow import of remote file (not transfered as data as done here for the LaughterCycle demo)
+        //	but rather using TCP client
+        osstream << "addfile " << ret;
+        sbuffer_send = osstream.str();
+        *buffer_send = (char*)(sbuffer_send).c_str();
+        *l_send = sbuffer_send.length();
+    }
+    // store features in file
+    if (subbuffer == "savelibrary") {
+        //return 0;
+        bufpos1 = bufpos2+1;
+        path = sbuffer.substr(bufpos1);
+        fullpath = local_directory + path + ".acl";
+        getLibrary()->saveACLLibrary(fullpath);
+        ret = 1;
+        osstream << "savelibrary " << ret;
+        sbuffer_send = osstream.str();
+        *buffer_send = (char*)(sbuffer_send).c_str();
+        *l_send = sbuffer_send.length();
+    }
+    else if (subbuffer == "loadlibrary") {
+        *buffer_send = 0;
+        *l_send = 0;
+    }
+    else if (subbuffer == "getknn") {
+        bufpos1 = bufpos2+1;
+        path = sbuffer.substr(bufpos1);
+        sscanf(path.c_str(), "%d %d", &id, &k);
+        ret = getKNN(id, ids, k);
+        osstream << "getknn " << ret;
+        for (i=0;i<ret;i++) {
+            osstream << " " << ids[i];
+        }
+        sbuffer_send = osstream.str();
+        *buffer_send = (char*)(sbuffer_send).c_str();
+        *l_send = sbuffer_send.length();
+    }
+    else if (subbuffer == "getthumbnail") {
+        bufpos1 = bufpos2+1;
+        path = sbuffer.substr(bufpos1);
+        sscanf(path.c_str(), "%d", &id);
+        thumbnail_filename = getThumbnailFileName(id);
+        if (thumbnail_filename!="") {
+            stat(thumbnail_filename.c_str(), &file_status);
+            thumbnail_size = file_status.st_size;
+            *buffer_send = new char[13+thumbnail_size];
+            strcpy(*buffer_send, "getthumbnail ");
+            thumbnail_file = fopen(thumbnail_filename.c_str(),"r");
+            //size_t st = fread((*buffer_send)+13, 1, thumbnail_size, thumbnail_file);
+            fclose(thumbnail_file);
+            *l_send = 13+thumbnail_size;
+        }
+        else {
+            *buffer_send = 0;
+            *l_send = 0;
+        }
+    }
+    else if (subbuffer == "setweight") {
+        *buffer_send = 0;
+        *l_send = 0;
+    }
 
-	return 0;
+    return 0;
 }
 
 // == Callback - SD to be replaced by OSC/UDP communication
 // (XS or Observer Pattern...)
 
 void *threadImport(void *import_thread_arg) {
-	((MediaCycle*)import_thread_arg)->importDirectories();
+    ((MediaCycle*)import_thread_arg)->importDirectories();
 }
 
 
@@ -268,91 +268,91 @@ void *threadImport(void *import_thread_arg) {
 // XS TODO this does not seem compatible with Qt GUI
 int MediaCycle::importDirectoriesThreaded(vector<string> directories, int recursive, bool forward_order, bool doSegment) {
 
-	import_directories = directories;
-	import_recursive = recursive;
-	import_forward_order = forward_order;
-	import_doSegment = doSegment;
+    import_directories = directories;
+    import_recursive = recursive;
+    import_forward_order = forward_order;
+    import_doSegment = doSegment;
 
-	pthread_attr_init(&import_thread_attr);
-	import_thread_arg = (void*)this;
-	pthread_create(&import_thread, &import_thread_attr, &threadImport, import_thread_arg);
-	pthread_attr_destroy(&import_thread_attr);
-	//pthread_cancel(import_thread_arg); // SD will destroy itseld when function returns
-	return 1;
+    pthread_attr_init(&import_thread_attr);
+    import_thread_arg = (void*)this;
+    pthread_create(&import_thread, &import_thread_attr, &threadImport, import_thread_arg);
+    pthread_attr_destroy(&import_thread_attr);
+    //pthread_cancel(import_thread_arg); // SD will destroy itseld when function returns
+    return 1;
 }
 
 // to be called from the threaded version
 int MediaCycle::importDirectories() {
-	return importDirectories(import_directories, import_recursive, import_forward_order, import_doSegment);
+    return importDirectories(import_directories, import_recursive, import_forward_order, import_doSegment);
 }
 
 // scans directories, fills the filenames vector and calls importFile 
 // then normalize the features and updates the library ("libraryContentChanged")
 // each time the library grows by a factor prevLibrarySizeMultiplier, re-normalize and re-cluster everything
 int MediaCycle::importDirectories(vector<string> directories, int recursive, bool forward_order, bool doSegment) {
-	int ok = 0;
-	float prevLibrarySizeMultiplier = 2;
-	int needsNormalizeAndCluster;
-	vector<string> filenames;
+    int ok = 0;
+    float prevLibrarySizeMultiplier = 2;
+    int needsNormalizeAndCluster;
+    vector<string> filenames;
 
-	mediaLibrary->scanDirectories(directories, recursive, filenames);
+    mediaLibrary->scanDirectories(directories, recursive, filenames);
 
-	int n;
-	int i = 0;
-	//double t1, t2; // in case we want to check execution time
+    int n;
+    int i = 0;
+    //double t1, t2; // in case we want to check execution time
 
-	#ifdef USE_OPENMP
-	omp_set_num_threads(2);
-	#endif
-	//t1 = getTime();
+#ifdef USE_OPENMP
+    omp_set_num_threads(2);
+#endif
+    //t1 = getTime();
 
-	n = filenames.size();
+    n = filenames.size();
 
-/*
+    /*
 #pragma omp parallel for
  */
-	eventManager->sig_mediaImported(0,n);
-	for (i=0;i<n;i++) {		
+    eventManager->sig_mediaImported(0,n);
+    for (i=0;i<n;i++) {
 
-		if (mediaLibrary->importFile(filenames[i], this->pluginManager, doSegment, doSegment)){
-			ok++;
-			needsNormalizeAndCluster = 0;
-			if ( (mediaLibrary->getSize() >= int(prevLibrarySizeMultiplier * prevLibrarySize))
-				|| (i==n-1)) {
-				needsNormalizeAndCluster = 1;
-				prevLibrarySize = mediaLibrary->getSize();
-			}
-			//needsNormalizeAndCluster = 1;
-			mediaBrowser->setNeedsNavigationUpdateLock(1);
-			normalizeFeatures(needsNormalizeAndCluster);
-			mediaBrowser->setNeedsNavigationUpdateLock(0);
-			libraryContentChanged(needsNormalizeAndCluster);
-		}
-		eventManager->sig_mediaImported(i+1,n);
+        if (mediaLibrary->importFile(filenames[i], this->pluginManager, doSegment, doSegment)){
+            ok++;
+            needsNormalizeAndCluster = 0;
+            if ( (mediaLibrary->getSize() >= int(prevLibrarySizeMultiplier * prevLibrarySize))
+                 || (i==n-1)) {
+                needsNormalizeAndCluster = 1;
+                prevLibrarySize = mediaLibrary->getSize();
+            }
+            //needsNormalizeAndCluster = 1;
+            mediaBrowser->setNeedsNavigationUpdateLock(1);
+            normalizeFeatures(needsNormalizeAndCluster);
+            mediaBrowser->setNeedsNavigationUpdateLock(0);
+            libraryContentChanged(needsNormalizeAndCluster);
+        }
+        eventManager->sig_mediaImported(i+1,n);
     }
 
-	//t2 = getTime();
-	//printf("TTT - %f\n",float(t2-t1));
-	//}
+    //t2 = getTime();
+    //printf("TTT - %f\n",float(t2-t1));
+    //}
 
-	filenames.empty();
-	return ok;
+    filenames.empty();
+    return ok;
 }
 
 int MediaCycle::importDirectory(string path, int recursive, bool forward_order, bool doSegment,TiXmlElement* _medias) {
-	cout << "MediaCycle: importing directory: " << path << endl;
-	int ok = 0;
-	if (this->pluginManager == 0){
-		cout << "no analysis plugins were loaded. you will need to load a plugin to use the application." << endl;
-	}
-	ok = this->mediaLibrary->importDirectory(path, recursive, this->pluginManager, forward_order, doSegment, _medias);
-	return ok;
+    cout << "MediaCycle: importing directory: " << path << endl;
+    int ok = 0;
+    if (this->pluginManager == 0){
+        cout << "no analysis plugins were loaded. you will need to load a plugin to use the application." << endl;
+    }
+    ok = this->mediaLibrary->importDirectory(path, recursive, this->pluginManager, forward_order, doSegment, _medias);
+    return ok;
 }
 
 int MediaCycle::setPath(string path) {
-	int ok = 0;
-	ok = this->mediaLibrary->setPath(path);
-	return ok;
+    int ok = 0;
+    ok = this->mediaLibrary->setPath(path);
+    return ok;
 }
 
 void MediaCycle::libraryContentChanged(int needsNormalizeAndCluster) { mediaBrowser->libraryContentChanged(needsNormalizeAndCluster); }
@@ -362,49 +362,50 @@ void MediaCycle::saveMCSLLibrary(string path) {mediaLibrary->saveMCSLLibrary(pat
 void MediaCycle::cleanLibrary() { prevLibrarySize=0; mediaLibrary->cleanLibrary(); }
 
 int MediaCycle::importACLLibrary(string path) {
-// XS import = open + normalize
-	cout << "MediaCycle: importing ACL library: " << path << endl;
-	int ok = 0;
-	ok = this->mediaLibrary->openACLLibrary(path);
-	if (ok>=1) this->mediaLibrary->normalizeFeatures();
-	return ok;
+    // XS import = open + normalize
+    cout << "MediaCycle: importing ACL library: " << path << endl;
+    int ok = 0;
+    ok = this->mediaLibrary->openACLLibrary(path);
+    if (ok>=1) this->mediaLibrary->normalizeFeatures();
+    return ok;
 
 }
 
 int MediaCycle::importXMLLibrary(string path) {
-// XS import = open + normalize
-	cout << "MediaCycle: importing XML library: " << path << endl;
-	int ok = 0;
-	ok = this->mediaLibrary->openXMLLibrary(path);
-	if (ok>=1) this->mediaLibrary->normalizeFeatures();
-	return ok;
+    // XS import = open + normalize
+    cout << "MediaCycle: importing XML library: " << path << endl;
+    int ok = 0;
+    ok = this->mediaLibrary->openXMLLibrary(path);
+    if (ok>=1) this->mediaLibrary->normalizeFeatures();
+    return ok;
 
 }
 
 //CF 31/05/2010 temporary MediaCycle Segmented Library (MCSL) for AudioGarden, adding a parentID for segments to the initial ACL, awaiting approval
 int MediaCycle::importMCSLLibrary(string path) {
-	// XS import = open + some processing
-	cout << "MediaCycle: importing MCSL library: " << path << endl;
-	int ok = 0;
-	ok = this->mediaLibrary->openMCSLLibrary(path);
-	// Finding segments for each media
-	for (int i=0; i<this->mediaLibrary->getSize(); i++){
-		if (this->mediaLibrary->getMedia(i)->getParentId() != -1){
-			this->mediaLibrary->getMedia(this->mediaLibrary->getMedia(i)->getParentId())->addSegment(this->mediaLibrary->getMedia(i));
-		}
-	}
-	if (ok>=1) this->mediaLibrary->normalizeFeatures();
-	return ok;
+    // XS import = open + some processing
+    cout << "MediaCycle: importing MCSL library: " << path << endl;
+    int ok = 0;
+    ok = this->mediaLibrary->openMCSLLibrary(path);
+    // Finding segments for each media
+    std::vector<long> ids = mediaLibrary->getAllMediaIds();
+    for (int i=0; i< ids.size(); i++){
+        if (this->mediaLibrary->getMedia(ids[i])->getParentId() != -1){
+            this->mediaLibrary->getMedia(this->mediaLibrary->getMedia(ids[i])->getParentId())->addSegment(this->mediaLibrary->getMedia(ids[i]));
+        }
+    }
+    if (ok>=1) this->mediaLibrary->normalizeFeatures();
+    return ok;
 }
 
 /* SD 2010 sep discontinued
 int MediaCycle::importLibrary(string path) {
 // XS import = open + some processing
-	cout << "MediaCycle: importing library: " << path << endl;
-	int ok = 0;
-	ok = this->mediaLibrary->openLibrary(path);
-	if (ok>=1) this->mediaLibrary->normalizeFeatures();
-	return ok;
+ cout << "MediaCycle: importing library: " << path << endl;
+ int ok = 0;
+ ok = this->mediaLibrary->openLibrary(path);
+ if (ok>=1) this->mediaLibrary->normalizeFeatures();
+ return ok;
 }
 */
 
@@ -416,41 +417,41 @@ int MediaCycle::getNumberOfMediaNodes(){return mediaBrowser->getNumberOfMediaNod
 // == Search by Similarity
 
 int MediaCycle::getKNN(int id, vector<int> &ids, int k) {
-	int ret = this->mediaBrowser->getKNN(id, ids, k);
-	return ret;
+    int ret = this->mediaBrowser->getKNN(id, ids, k);
+    return ret;
 }
 int MediaCycle::getKNN(ACMedia *aMedia, vector<ACMedia *> &result, int k) {
-	int ret = this->mediaBrowser->getKNN(aMedia, result, k);
-	return ret;
+    int ret = this->mediaBrowser->getKNN(aMedia, result, k);
+    return ret;
 }
 
 // Thumbnail
 
 string MediaCycle::getThumbnailFileName(int id) {
-	return this->mediaLibrary->getThumbnailFileName(id);
+    return this->mediaLibrary->getThumbnailFileName(id);
 }
 
 // Media Browser
 bool MediaCycle::hasBrowser() { 
-	bool ok = false;
-	if (this->getBrowser()!=0) 
-		ok=true; 
-	return ok; 
+    bool ok = false;
+    if (this->getBrowser()!=0)
+        ok=true;
+    return ok;
 }
 ACBrowserMode MediaCycle::getBrowserMode() {return mediaBrowser->getMode();}
 void MediaCycle::setBrowserMode(ACBrowserMode _mode) {mediaBrowser->setMode(_mode);}
 
 bool MediaCycle::changeBrowserMode(ACBrowserMode _mode){
-	this->mediaBrowser->switchMode(_mode);
-	return true;
+    this->mediaBrowser->switchMode(_mode);
+    return true;
 };
 
 
 //Listener Manager
 
 void MediaCycle::addListener(ACEventListener* eventListener){
-	if (eventManager!=NULL)
-		eventManager->addListener(eventListener);
+    if (eventManager!=NULL)
+        eventManager->addListener(eventListener);
 };
 
 
@@ -464,15 +465,15 @@ int MediaCycle::removePluginLibrary(string aPluginLibraryPath) {
 }
 
 ACPluginLibrary* MediaCycle::getPluginLibrary(string aPluginLibraryPath) const{
-	return this->pluginManager->getPluginLibrary(aPluginLibraryPath);
+    return this->pluginManager->getPluginLibrary(aPluginLibraryPath);
 }
 
 bool MediaCycle::removePluginFromLibrary(std::string _plugin_name, std::string _library_path){
-	return this->pluginManager->removePluginFromLibrary(_plugin_name, _library_path);
+    return this->pluginManager->removePluginFromLibrary(_plugin_name, _library_path);
 }
 
 std::vector<std::string> MediaCycle::getListOfPlugins(){
-	return this->pluginManager->getListOfPlugins();
+    return this->pluginManager->getListOfPlugins();
 }
 
 std::vector<std::string> MediaCycle::getListOfActivePlugins(){
@@ -480,89 +481,89 @@ std::vector<std::string> MediaCycle::getListOfActivePlugins(){
 }
 
 void MediaCycle::setClustersMethodPlugin(string pluginName){
-	ACPlugin* clustersPlugin = this->getPluginManager()->getPlugin(pluginName);
-	this->getBrowser()->setClustersMethodPlugin(clustersPlugin);
+    ACPlugin* clustersPlugin = this->getPluginManager()->getPlugin(pluginName);
+    this->getBrowser()->setClustersMethodPlugin(clustersPlugin);
 }
 
 void MediaCycle::setNeighborsMethodPlugin(string pluginName){
-	ACPlugin* neighborsPlugin = this->getPluginManager()->getPlugin(pluginName);
-	this->getBrowser()->setNeighborsMethodPlugin(neighborsPlugin);
+    ACPlugin* neighborsPlugin = this->getPluginManager()->getPlugin(pluginName);
+    this->getBrowser()->setNeighborsMethodPlugin(neighborsPlugin);
 }
 
 void MediaCycle::setClustersPositionsPlugin(string pluginName){
-	ACPlugin* clustersPlugin = this->getPluginManager()->getPlugin(pluginName);
-	this->getBrowser()->setClustersPositionsPlugin(clustersPlugin);
+    ACPlugin* clustersPlugin = this->getPluginManager()->getPlugin(pluginName);
+    this->getBrowser()->setClustersPositionsPlugin(clustersPlugin);
 }
 
 void MediaCycle::setNeighborsPositionsPlugin(string pluginName){
-	ACPlugin* neighborsPlugin = this->getPluginManager()->getPlugin(pluginName);
-	this->getBrowser()->setNeighborsPositionsPlugin(neighborsPlugin);
+    ACPlugin* neighborsPlugin = this->getPluginManager()->getPlugin(pluginName);
+    this->getBrowser()->setNeighborsPositionsPlugin(neighborsPlugin);
 }
 
 void MediaCycle::setVisualisationPlugin(string pluginName){
-	ACPlugin* visPlugin = this->getPluginManager()->getPlugin(pluginName);
-	this->getBrowser()->setVisualisationPlugin(visPlugin);
+    ACPlugin* visPlugin = this->getPluginManager()->getPlugin(pluginName);
+    this->getBrowser()->setVisualisationPlugin(visPlugin);
 }
 
 void MediaCycle::changeClustersMethodPlugin(string pluginName){
-	ACPlugin* clustersPlugin = this->getPluginManager()->getPlugin(pluginName);
-	this->getBrowser()->changeClustersMethodPlugin(clustersPlugin);
+    ACPlugin* clustersPlugin = this->getPluginManager()->getPlugin(pluginName);
+    this->getBrowser()->changeClustersMethodPlugin(clustersPlugin);
 }
 
 void MediaCycle::changeNeighborsMethodPlugin(string pluginName){
-	ACPlugin* neighborsPlugin = this->getPluginManager()->getPlugin(pluginName);
-	this->getBrowser()->changeNeighborsMethodPlugin(neighborsPlugin);
+    ACPlugin* neighborsPlugin = this->getPluginManager()->getPlugin(pluginName);
+    this->getBrowser()->changeNeighborsMethodPlugin(neighborsPlugin);
 }
 
 void MediaCycle::changeClustersPositionsPlugin(string pluginName){
-	ACPlugin* clustersPlugin = this->getPluginManager()->getPlugin(pluginName);
-	this->getBrowser()->changeClustersPositionsPlugin(clustersPlugin);
+    ACPlugin* clustersPlugin = this->getPluginManager()->getPlugin(pluginName);
+    this->getBrowser()->changeClustersPositionsPlugin(clustersPlugin);
 }
 
 void MediaCycle::changeNeighborsPositionsPlugin(string pluginName){
-	ACPlugin* neighborsPlugin = this->getPluginManager()->getPlugin(pluginName);
-	this->getBrowser()->changeNeighborsPositionsPlugin(neighborsPlugin);
+    ACPlugin* neighborsPlugin = this->getPluginManager()->getPlugin(pluginName);
+    this->getBrowser()->changeNeighborsPositionsPlugin(neighborsPlugin);
 }
 /*
 void MediaCycle::changeVisualisationPlugin(string pluginName){
-	ACPlugin* visPlugin = this->getPluginManager()->getPlugin(pluginName);
-	this->getBrowser()->changeVisualisationPlugin(visPlugin);
+ ACPlugin* visPlugin = this->getPluginManager()->getPlugin(pluginName);
+ this->getBrowser()->changeVisualisationPlugin(visPlugin);
 }
 */
 
 
 void MediaCycle::setPreProcessPlugin(std::string pluginName){
-	ACPlugin* preProcessPlugin = this->getPluginManager()->getPlugin(pluginName);
-	if (preProcessPlugin!=NULL&&(preProcessPlugin->mediaTypeSuitable(this->getLibrary()->getMediaType()))){
-		
-		this->getLibrary()->setPreProcessPlugin(preProcessPlugin);
-		cout << "MediaCycle: Preprocessing plugin: " << preProcessPlugin->getName() << endl;
-	}
-	else {
-		this->getLibrary()->setPreProcessPlugin(0);
-		cout << "MediaCycle: impossible to import Preprocessing plugin: " << pluginName << endl;
-	}
+    ACPlugin* preProcessPlugin = this->getPluginManager()->getPlugin(pluginName);
+    if (preProcessPlugin!=NULL&&(preProcessPlugin->mediaTypeSuitable(this->getLibrary()->getMediaType()))){
+
+        this->getLibrary()->setPreProcessPlugin(preProcessPlugin);
+        cout << "MediaCycle: Preprocessing plugin: " << preProcessPlugin->getName() << endl;
+    }
+    else {
+        this->getLibrary()->setPreProcessPlugin(0);
+        cout << "MediaCycle: impossible to import Preprocessing plugin: " << pluginName << endl;
+    }
 }
 void MediaCycle::setMediaReaderPlugin(std::string pluginName){
-	ACPlugin* mediaReaderPlugin = this->getPluginManager()->getPlugin(pluginName);
-	if (mediaReaderPlugin!=NULL){
-		this->getLibrary()->setMediaReaderPlugin(mediaReaderPlugin);
-		cout << "MediaCycle: MediaReader plugin: " << mediaReaderPlugin->getName() << endl;
-	}
-	else
-	{
-		this->getLibrary()->setMediaReaderPlugin(0);
-		cout << "MediaCycle: impossible to import MediaReader plugin: " << pluginName << endl;
-		
-		
-	}
+    ACPlugin* mediaReaderPlugin = this->getPluginManager()->getPlugin(pluginName);
+    if (mediaReaderPlugin!=NULL){
+        this->getLibrary()->setMediaReaderPlugin(mediaReaderPlugin);
+        cout << "MediaCycle: MediaReader plugin: " << mediaReaderPlugin->getName() << endl;
+    }
+    else
+    {
+        this->getLibrary()->setMediaReaderPlugin(0);
+        cout << "MediaCycle: impossible to import MediaReader plugin: " << pluginName << endl;
+
+
+    }
 }
 
 #ifdef SUPPORT_MULTIMEDIA
 
 std::string MediaCycle::getActiveSubMediaKey(){
-	return (mediaLibrary->getActiveSubMediaKey());
-	
+    return (mediaLibrary->getActiveSubMediaKey());
+
 }
 int MediaCycle::setActiveMediaType(std::string mediaName){
     int ret =mediaLibrary->setActiveMediaType(mediaName,pluginManager);
@@ -573,22 +574,22 @@ int MediaCycle::setActiveMediaType(std::string mediaName){
 void MediaCycle::dumpPluginsList(){this->pluginManager->dump();}
 
 // == Media
-ACMediaNode& MediaCycle::getMediaNode(int i) { return (mediaBrowser->getMediaNode(i)); }
-ACMediaNode& MediaCycle::getNodeFromMedia(ACMedia* _media) { return (mediaBrowser->getNodeFromMedia(_media)); }
+ACMediaNode* MediaCycle::getMediaNode(int i) { return (mediaBrowser->getMediaNode(i)); }
+ACMediaNode* MediaCycle::getNodeFromMedia(ACMedia* _media) { return (mediaBrowser->getNodeFromMedia(_media)); }
 string MediaCycle::getMediaFileName(int i) { return mediaLibrary->getMedia(i)->getFileName(); }
 ACMediaType MediaCycle::getMediaType(int i) { return mediaLibrary->getMedia(i)->getType(); }
 void MediaCycle::setMediaType(ACMediaType mt) {mediaLibrary->setMediaType(mt); }
 bool MediaCycle::changeMediaType(ACMediaType aMediaType) {
-	bool changeMe = true ;
-	if (aMediaType == this->getMediaType())
-		// nothing to change
-		changeMe = false;
-	else{
-		this->clean();
-		this->mediaLibrary->changeMediaType(aMediaType);
-		this->setMediaType(aMediaType);
-	}
-	return changeMe;
+    bool changeMe = true ;
+    if (aMediaType == this->getMediaType())
+        // nothing to change
+        changeMe = false;
+    else{
+        this->clean();
+        this->mediaLibrary->changeMediaType(aMediaType);
+        this->setMediaType(aMediaType);
+    }
+    return changeMe;
 }
 
 
@@ -599,9 +600,9 @@ int MediaCycle::getHeight(int i) { return mediaLibrary->getMedia(i)->getHeight()
 void* MediaCycle::getThumbnailPtr(int i) { return mediaLibrary->getMedia(i)->getThumbnailPtr(); }
 int MediaCycle::getNeedsDisplay() {	return mediaBrowser->getNeedsDisplay(); }
 void MediaCycle::setNeedsDisplay(bool _dis) {
-	if (mediaBrowser) {
-		mediaBrowser->setNeedsDisplay(_dis);
-	}
+    if (mediaBrowser) {
+        mediaBrowser->setNeedsDisplay(_dis);
+    }
 }
 int MediaCycle::getNeedsDisplay3D() { return mNeedsDisplay; }
 void MediaCycle::setNeedsDisplay3D(bool mNeedsDisplay) { this->mNeedsDisplay = mNeedsDisplay; }
@@ -616,7 +617,7 @@ void MediaCycle::setCameraZoom(float z)				{ mediaBrowser->setCameraZoom(z); }
 void MediaCycle::setCameraRecenter()				{ mediaBrowser->setCameraRecenter(); }
 void MediaCycle::setAutoPlay(int i) { mediaBrowser->setAutoPlay(i); }
 int MediaCycle::getClickedNode() { return mediaBrowser->getClickedNode(); }
-void MediaCycle::setClickedNode(int i,int p_index) { mediaBrowser->setClickedNode(i,p_index); }
+void MediaCycle::setClickedNode(int i) { mediaBrowser->setClickedNode(i); }
 void MediaCycle::setClosestNode(int i,int p_index) { mediaBrowser->setClosestNode(i,p_index); }
 int MediaCycle::getClosestNode(int p_index) { return mediaBrowser->getClosestNode(p_index); }
 int	MediaCycle::getLastSelectedNode() { return mediaBrowser->getLastSelectedNode(); }
@@ -625,7 +626,7 @@ int	MediaCycle::getLastSelectedNode() { return mediaBrowser->getLastSelectedNode
 void MediaCycle::updateState() { mediaBrowser->updateState(); }
 int MediaCycle::getNavigationLevel() { return mediaBrowser->getNavigationLevel(); }
 float MediaCycle::getFrac() { return mediaBrowser->getFrac(); }
-void MediaCycle::incrementLoopNavigationLevels(int i) { mediaBrowser->incrementLoopNavigationLevels(i); }
+void MediaCycle::incrementNavigationLevels(int i) { mediaBrowser->incrementNavigationLevels(i); }
 void MediaCycle::setReferenceNode(int index) { mediaBrowser->setReferenceNode(index); }
 int MediaCycle::getReferenceNode() { return mediaBrowser->getReferenceNode(); }
 void MediaCycle::goBack() { mediaBrowser->goBack(); }
@@ -650,50 +651,50 @@ void MediaCycle::forwardNextLevel(){
 void MediaCycle::normalizeFeatures(int needsNormalize) { mediaLibrary->normalizeFeatures(needsNormalize); }
 // Get Features Vector (identified by feature_name) in media i
 FeaturesVector MediaCycle::getFeaturesVectorInMedia(int i, string feature_name) {
-	ACMedia* lmedia;
-	ACMediaFeatures* lfeatures;
-	FeaturesVector lfeaturesvector;
-	lmedia = mediaLibrary->getMedia(i);
-	lfeatures = lmedia->getPreProcFeaturesVector(feature_name);
-	if (lfeatures) {
-		lfeaturesvector = lfeatures->getFeaturesVector();
-	}
-	return lfeaturesvector;
+    ACMedia* lmedia;
+    ACMediaFeatures* lfeatures;
+    FeaturesVector lfeaturesvector;
+    lmedia = mediaLibrary->getMedia(i);
+    lfeatures = lmedia->getPreProcFeaturesVector(feature_name);
+    if (lfeatures) {
+        lfeaturesvector = lfeatures->getFeaturesVector();
+    }
+    return lfeaturesvector;
 }
 
 // == Playing time stamp
 //XS TODO : add tests before setting values ?
 void MediaCycle::setSourceCursor(int lid, int frame_pos) {
-	mediaBrowser->setSourceCursor(lid, frame_pos);
+    mediaBrowser->setSourceCursor(lid, frame_pos);
 }
 void MediaCycle::setCurrentFrame(int lid, int frame_pos) {
-	mediaBrowser->setCurrentFrame(lid, frame_pos);
+    mediaBrowser->setCurrentFrame(lid, frame_pos);
 }
 void MediaCycle::muteAllSources() { mediaBrowser->muteAllSources(); }
 
 // == POINTERS on VIEW
 int MediaCycle::getNumberOfPointers() {
-	return mediaBrowser->getNumberOfPointers();
+    return mediaBrowser->getNumberOfPointers();
 }
 
 ACPointer* MediaCycle::getPointerFromIndex(int i) {
-	return mediaBrowser->getPointerFromIndex(i);
+    return mediaBrowser->getPointerFromIndex(i);
 }
 
 ACPointer* MediaCycle::getPointerFromId(int i) {
-	return mediaBrowser->getPointerFromId(i);
+    return mediaBrowser->getPointerFromId(i);
 }
 
 void MediaCycle::resetPointers() {
-	mediaBrowser->resetPointers();
+    mediaBrowser->resetPointers();
 }
 
 void MediaCycle::addPointer(int p_id) {
-	mediaBrowser->addPointer(p_id);
+    mediaBrowser->addPointer(p_id);
 }
 
 void MediaCycle::removePointer(int p_id) {
-	mediaBrowser->removePointer(p_id);
+    mediaBrowser->removePointer(p_id);
 }
 
 // == LABELS on VIEW
@@ -703,55 +704,54 @@ ACPoint MediaCycle::getLabelPos(int i) { return mediaBrowser->getLabelPos(i); }
 
 // == Update audio engine sources
 void MediaCycle::setNeedsActivityUpdateLock(int i) {
-	if (mediaBrowser) {
-		mediaBrowser->setNeedsActivityUpdateLock(i);
-	}
+    if (mediaBrowser) {
+        mediaBrowser->setNeedsActivityUpdateLock(i);
+    }
 }
 
 void MediaCycle::setNeedsActivityUpdateRemoveMedia() {
-	if (mediaBrowser) {
-		mediaBrowser->setNeedsActivityUpdateRemoveMedia();
-	}
+    if (mediaBrowser) {
+        mediaBrowser->setNeedsActivityUpdateRemoveMedia();
+    }
 }
 
 vector<int>* MediaCycle::getNeedsActivityUpdateMedia() {
-	if (mediaBrowser) {
-		return mediaBrowser->getNeedsActivityUpdateMedia();
-	}
+    if (mediaBrowser) {
+        return mediaBrowser->getNeedsActivityUpdateMedia();
+    }
 }
 // == callbacks
 
-void MediaCycle::pickedObjectCallback(int _nodeId) {
-	printf("PICKED node id %d\n",_nodeId);
-	int nodeId = _nodeId;
-	if(nodeId < 0) {
-		// clicked close to a node
-		if (getNumberOfPointers() > 0)
-			nodeId = getClosestNode();
-	}
-	mediaBrowser->setClickedNode(nodeId);
-	if (forwarddown == 0){// & playkeydown) {//if (!forwarddown) { //CF forwardown is not a boolean
-		mediaBrowser->toggleSourceActivity(nodeId);
-	}
-	
-        // with observer pattern
-        this->notify();
+void MediaCycle::pickedObjectCallback(int _mediaId) {
+    std::cout << "MediaCycle::pickedObjectCallback node id " << _mediaId << " file " << this->getMediaFileName( _mediaId ) << std::endl;
+    if(_mediaId < 0) {
+        // clicked close to a node
+        if (getNumberOfPointers() > 0)
+            _mediaId = getClosestNode();
+    }
+    mediaBrowser->setClickedNode(_mediaId);
+    if (forwarddown == 0){// & playkeydown) {//if (!forwarddown) { //CF forwardown is not a boolean
+        mediaBrowser->toggleSourceActivity(_mediaId);
+    }
+
+    // with observer pattern
+    this->notify();
 
 }
 
 void MediaCycle::hoverWithPointerId(float xx, float yy, int p_id) {
-	if (this->mediaBrowser)
-		mediaBrowser->hoverWithPointerId(xx, yy, p_id);
+    if (this->mediaBrowser)
+        mediaBrowser->hoverWithPointerId(xx, yy, p_id);
 }
 
 void MediaCycle::hoverWithPointerIndex(float xx, float yy, int p_index) {
-	if (this->mediaBrowser)
-		mediaBrowser->hoverWithPointerIndex(xx, yy, p_index);
+    if (this->mediaBrowser)
+        mediaBrowser->hoverWithPointerIndex(xx, yy, p_index);
 }
 
 void MediaCycle::updateDisplay(bool _animate) { 
-		mediaBrowser->updateDisplay(_animate);
-	
+    mediaBrowser->updateDisplay(_animate);
+
 }
 void MediaCycle::initializeFeatureWeights() { mediaBrowser->initializeFeatureWeights();}
 
@@ -759,152 +759,152 @@ void MediaCycle::initializeFeatureWeights() { mediaBrowser->initializeFeatureWei
 // - header information
 // - media, features, segments, ...
 TiXmlHandle MediaCycle::readXMLConfigFileHeader(string _fname) {
-	if (_fname=="") return 0;
-	TiXmlDocument doc( _fname.c_str() );
-	try {
-		if (!doc.LoadFile( ))
-			throw runtime_error("error reading XML file");
-	} catch (const exception& e) {
-		cout << e.what( ) << "\n";
-		exit(1);
-		//return EXIT_FAILURE;
+    if (_fname=="") return 0;
+    TiXmlDocument doc( _fname.c_str() );
+    try {
+        if (!doc.LoadFile( ))
+            throw runtime_error("error reading XML file");
+    } catch (const exception& e) {
+        cout << e.what( ) << "\n";
+        exit(1);
+        //return EXIT_FAILURE;
     }
 
-	TiXmlHandle docHandle(&doc);
-	TiXmlHandle rootHandle = docHandle.FirstChildElement( "MediaCycle" );
+    TiXmlHandle docHandle(&doc);
+    TiXmlHandle rootHandle = docHandle.FirstChildElement( "MediaCycle" );
 
-	TiXmlText* browserModeText=rootHandle.FirstChild( "BrowserMode" ).FirstChild().Text();
-	std::stringstream tmp;
-	tmp << browserModeText->ValueStr();
-	int bm; // ACBrowserMode
-	tmp >> bm;
-	this->setBrowserMode(ACBrowserMode (bm));
+    TiXmlText* browserModeText=rootHandle.FirstChild( "BrowserMode" ).FirstChild().Text();
+    std::stringstream tmp;
+    tmp << browserModeText->ValueStr();
+    int bm; // ACBrowserMode
+    tmp >> bm;
+    this->setBrowserMode(ACBrowserMode (bm));
 
-	TiXmlText* mediaTypeText=rootHandle.FirstChild( "MediaType" ).FirstChild().Text();
-	std::stringstream tmp2;
-	tmp2 << mediaTypeText->ValueStr();
-	int mt; //ACMediaType
-	tmp2 >> mt;
-	this->setMediaType(ACMediaType(mt));
+    TiXmlText* mediaTypeText=rootHandle.FirstChild( "MediaType" ).FirstChild().Text();
+    std::stringstream tmp2;
+    tmp2 << mediaTypeText->ValueStr();
+    int mt; //ACMediaType
+    tmp2 >> mt;
+    this->setMediaType(ACMediaType(mt));
 
-	// features vector weights
-	int n_feat=-1;
-	TiXmlText* FeaturesWeightsText=rootHandle.FirstChild( "FeaturesWeights" ).FirstChild().Text();
-	TiXmlElement* FeaturesWeightsNode=rootHandle.FirstChild( "FeaturesWeights" ).Element();
-	FeaturesWeightsNode->QueryIntAttribute("NumberOfFeatures", &n_feat);
-	if (n_feat < 0)
-		throw runtime_error("corrupted XML file, wrong number of features weights");
+    // features vector weights
+    int n_feat=-1;
+    TiXmlText* FeaturesWeightsText=rootHandle.FirstChild( "FeaturesWeights" ).FirstChild().Text();
+    TiXmlElement* FeaturesWeightsNode=rootHandle.FirstChild( "FeaturesWeights" ).Element();
+    FeaturesWeightsNode->QueryIntAttribute("NumberOfFeatures", &n_feat);
+    if (n_feat < 0)
+        throw runtime_error("corrupted XML file, wrong number of features weights");
 
-	std::stringstream tmp3;
-	tmp3 << FeaturesWeightsText->ValueStr();
-	vector<float> fw;
-	try {
-		for (int j=0; j<n_feat; j++) {
-			// XS TODO add tests !! on number of features
-			float w;
-			tmp3 >> w;
-			fw.push_back(w);
-		}
-		this->setWeightVector(fw);
-	}
-	catch (...) {
-		// attempt to catch potential problems and group them
-		throw runtime_error("corrupted XML file, error reading feature weight");
-	}
+    std::stringstream tmp3;
+    tmp3 << FeaturesWeightsText->ValueStr();
+    vector<float> fw;
+    try {
+        for (int j=0; j<n_feat; j++) {
+            // XS TODO add tests !! on number of features
+            float w;
+            tmp3 >> w;
+            fw.push_back(w);
+        }
+        this->setWeightVector(fw);
+    }
+    catch (...) {
+        // attempt to catch potential problems and group them
+        throw runtime_error("corrupted XML file, error reading feature weight");
+    }
 
-	return rootHandle;
+    return rootHandle;
 }
 
 // XS TODO return value, tests
 int MediaCycle::readXMLConfigFileCore(TiXmlHandle _rootHandle) {
-	this->mediaLibrary->openCoreXMLLibrary(_rootHandle);
+    this->mediaLibrary->openCoreXMLLibrary(_rootHandle);
 }
 
 // XS TODO return value, tests
 int MediaCycle::readXMLConfigFilePlugins(TiXmlHandle _rootHandle) {
-	if (!this->pluginManager) this->pluginManager = new ACPluginManager();
-        this->pluginManager->setMediaCycle(this);
+    if (!this->pluginManager) this->pluginManager = new ACPluginManager();
+    this->pluginManager->setMediaCycle(this);
 
-	TiXmlElement* MC_e_features_plugin_manager = _rootHandle.FirstChild("PluginsManager").ToElement();
-	int nb_plugins_lib=0;
-	if (MC_e_features_plugin_manager!=0){
+    TiXmlElement* MC_e_features_plugin_manager = _rootHandle.FirstChild("PluginsManager").ToElement();
+    int nb_plugins_lib=0;
+    if (MC_e_features_plugin_manager!=0){
 	MC_e_features_plugin_manager->QueryIntAttribute("NumberOfPluginsLibraries", &nb_plugins_lib);
 
-		TiXmlElement* pluginLibraryNode=MC_e_features_plugin_manager->FirstChild()->ToElement();
+        TiXmlElement* pluginLibraryNode=MC_e_features_plugin_manager->FirstChild()->ToElement();
 	for( pluginLibraryNode; pluginLibraryNode; pluginLibraryNode=pluginLibraryNode->NextSiblingElement()) {
-		string libraryName = pluginLibraryNode->Attribute("LibraryPath");
-		int lib_size=0;
-		pluginLibraryNode->QueryIntAttribute("NumberOfPlugins", &lib_size);
-		this->pluginManager->addLibrary(libraryName);
+            string libraryName = pluginLibraryNode->Attribute("LibraryPath");
+            int lib_size=0;
+            pluginLibraryNode->QueryIntAttribute("NumberOfPlugins", &lib_size);
+            this->pluginManager->addLibrary(libraryName);
 
-		//		for (int i=0;i<pluginManager->getSize();i++) {
-		//			for (int j=0;j<pluginManager->getPluginLibrary(i)->getSize();j++) {
-		//
-		//				if (pluginManager->getPluginLibrary(i)->getPlugin(j)->getMediaType() == this->getMediaType()
-		//					&& pluginManager->getPluginLibrary(i)->getPlugin(j)->implementsPluginType(PLUGIN_TYPE_FEATURES)) {
-		//					TiXmlElement* MC_e_features_plugin = new TiXmlElement( "FeaturesPlugin" );
-		//					MC_e_features_plugin_manager->LinkEndChild( MC_e_features_plugin );
-		//					std::stringstream tmp_p;
-		//					tmp_p << pluginManager->getPluginLibrary(i)->getPlugin(j)->getName() ;
-		//					TiXmlText* MC_t_pm = new TiXmlText( tmp_p.str() );
-		//					MC_e_features_plugin->LinkEndChild( MC_t_pm );
-		//				}
-		//			}
-		//		}
-		//
-		}
-	}
+            //		for (int i=0;i<pluginManager->getSize();i++) {
+            //			for (int j=0;j<pluginManager->getPluginLibrary(i)->getSize();j++) {
+            //
+            //				if (pluginManager->getPluginLibrary(i)->getPlugin(j)->getMediaType() == this->getMediaType()
+            //					&& pluginManager->getPluginLibrary(i)->getPlugin(j)->implementsPluginType(PLUGIN_TYPE_FEATURES)) {
+            //					TiXmlElement* MC_e_features_plugin = new TiXmlElement( "FeaturesPlugin" );
+            //					MC_e_features_plugin_manager->LinkEndChild( MC_e_features_plugin );
+            //					std::stringstream tmp_p;
+            //					tmp_p << pluginManager->getPluginLibrary(i)->getPlugin(j)->getName() ;
+            //					TiXmlText* MC_t_pm = new TiXmlText( tmp_p.str() );
+            //					MC_e_features_plugin->LinkEndChild( MC_t_pm );
+            //				}
+            //			}
+            //		}
+            //
+        }
+    }
 }
 
 // XS TODO return value, tests
 int MediaCycle::readXMLConfigFile(string _fname) {
-	TiXmlHandle rootHandle = readXMLConfigFileHeader (_fname);
-	this->readXMLConfigFileCore (rootHandle);
+    TiXmlHandle rootHandle = readXMLConfigFileHeader (_fname);
+    this->readXMLConfigFileCore (rootHandle);
 }
 
 // XS TODO what else to put in the config ?
 // XS TODO separate in header/core/plugins ?
 void MediaCycle::saveXMLConfigFile(string _fname) {
-	// or set it to config_file_xml ?
-	TiXmlDocument MC_doc;
+    // or set it to config_file_xml ?
+    TiXmlDocument MC_doc;
     TiXmlDeclaration* MC_decl = new TiXmlDeclaration( "1.0", "", "" );
     MC_doc.LinkEndChild( MC_decl );
 
     TiXmlElement* MC_e_root = new TiXmlElement( "MediaCycle" );
     MC_doc.LinkEndChild( MC_e_root );
 
-	// "header"
-	TiXmlElement* MC_e_browser_mode = new TiXmlElement( "BrowserMode" );
+    // "header"
+    TiXmlElement* MC_e_browser_mode = new TiXmlElement( "BrowserMode" );
     MC_e_root->LinkEndChild( MC_e_browser_mode );
-	// XS  TODO get it as text e.g. this->getBrowserModeAsString()
-	std::stringstream tmp_bm;
-	tmp_bm << this->getBrowserMode();
-	TiXmlText* MC_t_bm = new TiXmlText( tmp_bm.str() );
+    // XS  TODO get it as text e.g. this->getBrowserModeAsString()
+    std::stringstream tmp_bm;
+    tmp_bm << this->getBrowserMode();
+    TiXmlText* MC_t_bm = new TiXmlText( tmp_bm.str() );
     MC_e_browser_mode->LinkEndChild( MC_t_bm );
 
-	TiXmlElement* MC_e_media_type = new TiXmlElement( "MediaType" );
+    TiXmlElement* MC_e_media_type = new TiXmlElement( "MediaType" );
     MC_e_root->LinkEndChild( MC_e_media_type );
-	// XS  TODO get it as text e.g. this->getMediaTypeAsString()
-	std::stringstream tmp_mt;
-	tmp_mt << this->getMediaType();
-	TiXmlText* MC_t_mt = new TiXmlText( tmp_mt.str() );
+    // XS  TODO get it as text e.g. this->getMediaTypeAsString()
+    std::stringstream tmp_mt;
+    tmp_mt << this->getMediaType();
+    TiXmlText* MC_t_mt = new TiXmlText( tmp_mt.str() );
     MC_e_media_type->LinkEndChild( MC_t_mt );
 
-	// "medias and features"
-	TiXmlElement* MC_e_features_weights = new TiXmlElement("FeaturesWeights");
+    // "medias and features"
+    TiXmlElement* MC_e_features_weights = new TiXmlElement("FeaturesWeights");
     MC_e_root->LinkEndChild( MC_e_features_weights );
-	vector<float> features_weights = this->getWeightVector();
-	MC_e_features_weights->SetAttribute("NumberOfFeatures", features_weights.size());
+    vector<float> features_weights = this->getWeightVector();
+    MC_e_features_weights->SetAttribute("NumberOfFeatures", features_weights.size());
 
-	// concatenate feature weights separated by a " "
-	std::string sfw;
-	std::stringstream tmp;
-	for (unsigned int j=0; j<features_weights.size(); j++) {
-		tmp << features_weights[j]<< " " ;
-	}
-	sfw = tmp.str();
-	TiXmlText* MC_t_features_weights = new TiXmlText(sfw.c_str());
-	MC_e_features_weights->LinkEndChild( MC_t_features_weights );
+    // concatenate feature weights separated by a " "
+    std::string sfw;
+    std::stringstream tmp;
+    for (unsigned int j=0; j<features_weights.size(); j++) {
+        tmp << features_weights[j]<< " " ;
+    }
+    sfw = tmp.str();
+    TiXmlText* MC_t_features_weights = new TiXmlText(sfw.c_str());
+    MC_e_features_weights->LinkEndChild( MC_t_features_weights );
 
     std::string media_identifier = "Medias";
     if(mediaLibrary->getMediaType() == MEDIA_TYPE_MIXED){
@@ -912,124 +912,113 @@ void MediaCycle::saveXMLConfigFile(string _fname) {
     }
     TiXmlElement* MC_e_medias = new TiXmlElement(media_identifier);
 
-	this->mediaLibrary->saveCoreXMLLibrary(MC_e_root, MC_e_medias);
-	MC_e_root->LinkEndChild( MC_e_medias );
+    this->mediaLibrary->saveCoreXMLLibrary(MC_e_root, MC_e_medias);
+    MC_e_root->LinkEndChild( MC_e_medias );
 
-	// "plugins"
-	// XS TODO put this in a method getPluginsNames(blabla)
-	if (pluginManager) {
-		TiXmlElement* MC_e_features_plugin_manager = new TiXmlElement( "PluginsManager" );
-		MC_e_root->LinkEndChild( MC_e_features_plugin_manager );
-		int n_librarires = pluginManager->getSize();
-		MC_e_features_plugin_manager->SetAttribute("NumberOfPluginsLibraries", n_librarires);
-		for (int i=0; i<n_librarires; i++) {
-			TiXmlElement* MC_e_features_plugin_library = new TiXmlElement( "PluginLibrary" );
-			MC_e_features_plugin_manager->LinkEndChild( MC_e_features_plugin_library );
-			int n_plugins = pluginManager->getPluginLibrary(i)->getSize();
-			MC_e_features_plugin_library->SetAttribute("NumberOfPlugins", n_plugins);
-			MC_e_features_plugin_library->SetAttribute("LibraryPath", pluginManager->getPluginLibrary(i)->getLibraryPath());
-			for (int j=0; j<n_plugins; j++) {
-				TiXmlElement* MC_e_features_plugin = new TiXmlElement( "FeaturesPlugin" );
-				MC_e_features_plugin_library->LinkEndChild( MC_e_features_plugin );
-				std::stringstream tmp_p;
-				tmp_p << pluginManager->getPluginLibrary(i)->getPlugin(j)->getName() ;
-				TiXmlText* MC_t_pm = new TiXmlText( tmp_p.str() );
-				MC_e_features_plugin->LinkEndChild( MC_t_pm );
-			}
-		}
-	}
+    // "plugins"
+    // XS TODO put this in a method getPluginsNames(blabla)
+    if (pluginManager) {
+        TiXmlElement* MC_e_features_plugin_manager = new TiXmlElement( "PluginsManager" );
+        MC_e_root->LinkEndChild( MC_e_features_plugin_manager );
+        int n_librarires = pluginManager->getSize();
+        MC_e_features_plugin_manager->SetAttribute("NumberOfPluginsLibraries", n_librarires);
+        for (int i=0; i<n_librarires; i++) {
+            TiXmlElement* MC_e_features_plugin_library = new TiXmlElement( "PluginLibrary" );
+            MC_e_features_plugin_manager->LinkEndChild( MC_e_features_plugin_library );
+            int n_plugins = pluginManager->getPluginLibrary(i)->getSize();
+            MC_e_features_plugin_library->SetAttribute("NumberOfPlugins", n_plugins);
+            MC_e_features_plugin_library->SetAttribute("LibraryPath", pluginManager->getPluginLibrary(i)->getLibraryPath());
+            for (int j=0; j<n_plugins; j++) {
+                TiXmlElement* MC_e_features_plugin = new TiXmlElement( "FeaturesPlugin" );
+                MC_e_features_plugin_library->LinkEndChild( MC_e_features_plugin );
+                std::stringstream tmp_p;
+                tmp_p << pluginManager->getPluginLibrary(i)->getPlugin(j)->getName() ;
+                TiXmlText* MC_t_pm = new TiXmlText( tmp_p.str() );
+                MC_e_features_plugin->LinkEndChild( MC_t_pm );
+            }
+        }
+    }
 
-	MC_doc.SaveFile(_fname.c_str());
-	cout << "saved XML config : " << _fname << endl;
-	// children of MC_Doc get deleted automatically
+    MC_doc.SaveFile(_fname.c_str());
+    cout << "saved XML config : " << _fname << endl;
+    // children of MC_Doc get deleted automatically
 }
-
-
-// == user log
-// XS 030211 deprecated; applications should call cleanBrowser()
-void MediaCycle::cleanUserLog() {
-  mediaBrowser->getUserLog()->clean();
-}
-
 
 // == Dump / used for Debug
 void MediaCycle::dumpNavigationLevel(){
-	cout << "Global Navigation Level = " <<  getNavigationLevel() << endl;
+    cout << "Global Navigation Level = " <<  getNavigationLevel() << endl;
 }
 
-void MediaCycle::dumpLoopNavigationLevels(){
-	int nl = this->getNumberOfMediaNodes();
-	cout << "loops nav lev for :" << endl;
-	for (int i=0; i < nl; i++){
-		cout << this->getBrowser()->getMediaNode(i).getNavigationLevel() << " ";
-	}
-	cout << endl;
+void MediaCycle::dumpNavigationLevels(){
+    int nl = this->getNumberOfMediaNodes();
+    cout << "Navigation levels for :" << endl;
+    for (int i=0; i < nl; i++){
+        cout << this->getBrowser()->getMediaNode(i)->getNavigationLevel() << " ";
+    }
+    cout << endl;
 }
 
 // == testing
 void MediaCycle::testThreads(){
-	/*
-	 int nthreads, tid, NumberOfProcs;
+    /*
+  int nthreads, tid, NumberOfProcs;
 
-	 NumberOfProcs = omp_get_num_procs();
-	 printf("\nWorking on %d Processors",NumberOfProcs);
+  NumberOfProcs = omp_get_num_procs();
+  printf("\nWorking on %d Processors",NumberOfProcs);
 
-	 omp_set_num_threads(NumberOfProcs);
+  omp_set_num_threads(NumberOfProcs);
 
-	 #pragma omp parallel private(tid)
-	 {
-	 tid = omp_get_thread_num();
-	 printf("\nWoohoo from thread : %d", tid);
-	 if (tid==0){
-	 nthreads = omp_get_num_threads();
-	 printf("\nMaster says : There is %d out there!", nthreads);
-	 }
-	 }
-	 printf("\n");
-	 // No more threads
+  #pragma omp parallel private(tid)
+  {
+  tid = omp_get_thread_num();
+  printf("\nWoohoo from thread : %d", tid);
+  if (tid==0){
+  nthreads = omp_get_num_threads();
+  printf("\nMaster says : There is %d out there!", nthreads);
+  }
+  }
+  printf("\n");
+  // No more threads
 
-	 */
+  */
 
-	/*
-	 double t1 = getTime();
-	 int s = 500000;
-	 float *x = new float[s];
+    /*
+  double t1 = getTime();
+  int s = 500000;
+  float *x = new float[s];
 
-	 for (unsigned int i=0; i<s; i++) {
+  for (unsigned int i=0; i<s; i++) {
 
-	 x[i] = rand();
-	 x[i] = cos(sin(cos(sin(cos(sin(cos(sin(x[i]))))))));
+  x[i] = rand();
+  x[i] = cos(sin(cos(sin(cos(sin(cos(sin(x[i]))))))));
 
-	 }
+  }
 
-	 double t2 = getTime();
+  double t2 = getTime();
 
-	 printf("TTT - %f\n",float(t2-t1));
+  printf("TTT - %f\n",float(t2-t1));
 
-	 t1 = getTime();
+  t1 = getTime();
 
-	 #pragma omp parallel for
-	 for (unsigned int i=0; i<s; i++) {
-	 x[i] = rand();
-	 x[i] = cos(sin(cos(sin(cos(sin(cos(sin(x[i]))))))));
-	 }
+  #pragma omp parallel for
+  for (unsigned int i=0; i<s; i++) {
+  x[i] = rand();
+  x[i] = cos(sin(cos(sin(cos(sin(cos(sin(x[i]))))))));
+  }
 
-	 t2 = getTime();
+  t2 = getTime();
 
-	 printf("TTT - %f\n",float(t2-t1));
-	 */
+  printf("TTT - %f\n",float(t2-t1));
+  */
 }
 
 void MediaCycle::testLabels(){
-	// Test Labels
-	ACPoint p;
-	p.x = -0.1; p.y = 0.0; p.z = 0.01;
-	this->mediaBrowser->setLabel(0, "Label-1", p);
-	p.x = 0.2; p.y = 0.0; p.z = 0.01;
-	this->mediaBrowser->setLabel(1, "Label-2", p);
-	p.x = 0.0; p.y = 0.1; p.z = 0.01;
-	this->mediaBrowser->setLabel(2, "Label-3", p);
+    // Test Labels
+    ACPoint p;
+    p.x = -0.1; p.y = 0.0; p.z = 0.01;
+    this->mediaBrowser->setLabel(0, "Label-1", p);
+    p.x = 0.2; p.y = 0.0; p.z = 0.01;
+    this->mediaBrowser->setLabel(1, "Label-2", p);
+    p.x = 0.0; p.y = 0.1; p.z = 0.01;
+    this->mediaBrowser->setLabel(2, "Label-3", p);
 }
-
-
-

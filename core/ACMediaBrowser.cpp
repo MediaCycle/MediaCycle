@@ -100,7 +100,7 @@ ACMediaBrowser::ACMediaBrowser() {
     mCenterOffsetX = mViewWidth / 2;
     mCenterOffsetZ = mViewHeight / 2;
 
-    mUserLog = 0;
+    mNeighborsManager = 0;
     this->clean();
 
     // XS TODO 1 this assumes cluster mode !
@@ -119,7 +119,7 @@ ACMediaBrowser::ACMediaBrowser() {
     mNeighborsPosPlugin = 0;
     mNoMethodPosPlugin = 0;
 
-    mUserLog = new ACUserLog();
+    mNeighborsManager = new ACNeighborsManager();
 
     pthread_mutexattr_init(&activity_update_mutex_attr);
     pthread_mutex_init(&activity_update_mutex, &activity_update_mutex_attr);
@@ -134,14 +134,18 @@ ACMediaBrowser::ACMediaBrowser() {
 }
 
 ACMediaBrowser::~ACMediaBrowser() {
-    // XS TODO delete mLoopAttributes if vector of pointers <*>
+    for (ACMediaNodes::iterator node = mMediaNodes.begin(); node != mMediaNodes.end(); ++node){
+        delete node->second;
+    }
+    mMediaNodes.clear();
+
     pthread_mutex_destroy(&activity_update_mutex);
     pthread_mutex_destroy(&navigation_update_mutex);
-    if (mUserLog) delete mUserLog;
+    if (mNeighborsManager) delete mNeighborsManager;
 }
 
 void ACMediaBrowser::clean(){
-    prevLibrarySize = 0;
+    mLastInitializedNodeId = -1;
     auto_play = 0;
     auto_play_toggle = 0;
 
@@ -157,17 +161,20 @@ void ACMediaBrowser::clean(){
     mLabelAttributes.clear(); // XS leave it like this or also make a tree ?
     nbDisplayedLabels = 0;
 
-    mLoopAttributes.clear(); // XS TODO make this a tree ;delete mLoopAttributes if vector of pointers <*>
-    nbDisplayedLoops = 0;
+    for (ACMediaNodes::iterator node = mMediaNodes.begin(); node != mMediaNodes.end(); ++node){
+        delete node->second;
+    }
+    mMediaNodes.clear();
+    nbDisplayedNodes = 0;
 
     mFeatureWeights.clear();
 
     this->resetNavigation();
     this->resetCamera();
 
-    if (mUserLog) {
-        //mUserLog->dump();
-        mUserLog->clean();
+    if (mNeighborsManager) {
+        //mNeighborsManager->dump();
+        mNeighborsManager->clean();
     }
     this->resetPointers();
 }
@@ -278,24 +285,24 @@ void ACMediaBrowser::storeNavigationState(){
 
     // all items that are at higher navigation states should go back to current navigation state
     int l=this->getNavigationLevel();
-    for (ACMediaNodes::iterator node = mLoopAttributes.begin(); node != mLoopAttributes.end(); ++node){
-        if ((*node).getNavigationLevel() > l){
-            (*node).setNavigationLevel(l);
+    for (ACMediaNodes::iterator node = mMediaNodes.begin(); node != mMediaNodes.end(); ++node){
+        if (node->second->getNavigationLevel() > l){
+            node->second->setNavigationLevel(l);
         }
     }
 }
 
 // zoom into cluster
 void ACMediaBrowser::forwardNextLevel() {
-    int loop = this->getClickedNode();
-    if (loop >= 0) {
+    int node = this->getClickedNode();
+    if (node >= 0) {
         if (this->getMode() == AC_MODE_CLUSTERS) {
             // store first otherwise we store the next state
             this->storeNavigationState();
-            this->incrementLoopNavigationLevels(loop);
+            this->incrementNavigationLevels(node);
         }
         // in neighbors mode, the node is already unwrapped with forward down and node clicked
-        this->setReferenceNode(loop);
+        this->setReferenceNode(node);
         this->updateDisplay(true);
     }
 }
@@ -358,8 +365,8 @@ void ACMediaBrowser::setClusterNumber(int n)
         std::cerr << "<ACMediaBrowser::setClusterNumber> : n has to be > 0" << std::endl;
 }
 
-void ACMediaBrowser::setClickedNode(int inode,int p_id){
-    if (inode < -1 || inode >= this->getNumberOfMediaNodes())
+void ACMediaBrowser::setClickedNode(int inode){
+    if (inode < -1 || inode >= this->getLibrary()->getSize())
         cerr << "<ACMediaBrowser::setClickedNode> : index " << inode << " out of bounds (nb node = " << this->getNumberOfMediaNodes() << ")"<< endl;
     else{
         mClickedNode = inode;
@@ -367,7 +374,7 @@ void ACMediaBrowser::setClickedNode(int inode,int p_id){
         {
             mLastSelectedNode = inode;
             if (mMode == AC_MODE_NEIGHBORS)
-                mUserLog->clickNode(inode, 0);//CF put some machine time in here!
+                mNeighborsManager->setClickedNode(inode);
         }
     }
 }
@@ -378,20 +385,20 @@ bool ACMediaBrowser::toggleNode(int node){
     for (set<int>::const_iterator iter = mSelectedNodes.begin();iter != mSelectedNodes.end();++iter){
         if ((*iter)==node) {
             mSelectedNodes.erase(*iter);
-            this->getMediaNode(node).setSelection(false);
+            this->getMediaNode(node)->setSelection(false);
             return false;
         }
     }
 
     mSelectedNodes.insert(node);
-    this->getMediaNode(node).setSelection(true);
+    this->getMediaNode(node)->setSelection(true);
     mLastSelectedNode = node;
 
     vector<ACMedia*> tmpSegments;
-    tmpSegments =  mLibrary->getMedia(this->getMediaNode(node).getMediaId())->getAllSegments();
+    tmpSegments =  mLibrary->getMedia(this->getMediaNode(node)->getMediaId())->getAllSegments();
     for (vector<ACMedia*>::const_iterator iter = tmpSegments.begin(); iter != tmpSegments.end() ; iter++){
         mSelectedNodes.insert((*iter)->getId());
-        this->getMediaNode((*iter)->getId()).setSelection(true);
+        this->getMediaNode((*iter)->getId())->setSelection(true);
     }
     return true;
 }
@@ -405,7 +412,7 @@ void ACMediaBrowser::dumpSelectedNodes(){
 
 void ACMediaBrowser::unselectNodes(){
     for (set<int>::const_iterator iter = mSelectedNodes.begin();iter != mSelectedNodes.end();++iter){
-        this->getMediaNode(*iter).setSelection(false);
+        this->getMediaNode(*iter)->setSelection(false);
         //mSelectedNodes.erase(*iter);
     }
     mSelectedNodes.clear();
@@ -422,7 +429,7 @@ void ACMediaBrowser::setClickedLabel(int ilabel){
 void ACMediaBrowser::setNodeNextPosition(int node_id, ACPoint p){
     double t = getTime();
     if (node_id>=0 ){//&& node_id < this->getNumberOfMediaNodes()) {
-        this->getMediaNode(node_id).setNextPosition(p,t);
+        this->getMediaNode(node_id)->setNextPosition(p,t);
     }
     else {
         cerr << "ACMediaBrowser::setNodeNextPosition : wrong node ID:" << node_id << endl;
@@ -438,12 +445,12 @@ void ACMediaBrowser::setLabelPosition(int label_id, float x, float y, float z){
     mLabelAttributes[label_id].pos = p;
 }
 
-int ACMediaBrowser::getNumberOfDisplayedLoops(){
-    return nbDisplayedLoops;
+int ACMediaBrowser::getNumberOfDisplayedNodes(){
+    return nbDisplayedNodes;
     // should be the same as:
     //	int cnt=0;
-    //	for (int i=0; i < getNumberOfLoops();i++){
-    //		if (mLoopAttributes[i].isDisplayed) cnt++;
+    //	for (int i=0; i < getNumberOfNodes();i++){
+    //		if (mMediaNodes[i].isDisplayed) cnt++;
     //	}
     //	return cnt;
 }
@@ -452,31 +459,29 @@ int ACMediaBrowser::getNumberOfDisplayedLabels(){
     return nbDisplayedLabels;
 }
 
-// XS TODO getsize; this should be the same as mLibrary->getSize(), but this way it is more similar to getNumberOfLabels
-// CF not true in non-explatory mode (one loop can be displayed more than once at a time)
 int ACMediaBrowser::getNumberOfMediaNodes(){
     long _n = -1;
     switch (mMode){
     case AC_MODE_CLUSTERS:
-        _n = mLoopAttributes.size();
+        _n = mMediaNodes.size();
         break;
     case AC_MODE_NEIGHBORS:
-        _n = mUserLog->getSize();
+        _n = mNeighborsManager->getSize();
         break;
     default:
         cerr << "unknown browser mode: " << mMode << endl;
         break;
     }
-    //std::cout << "mLoopAttributes.size() " << mLoopAttributes.size() << " mUserLog->getSize() " << mUserLog->getSize() << std::endl;
+    //std::cout << "mMediaNodes.size() " << mMediaNodes.size() << " mNeighborsManager->getSize() " << mNeighborsManager->getSize() << std::endl;
     return _n;
 
-} // XS TODO getsize; this should be the same as mLibrary->getSize(), but this way it is more similar to getNumberOfLabels // CF not true in non-explatory mode (one loop can be displayed more than once at a time)
+} // XS TODO getsize; this should be the same as mLibrary->getSize(), but this way it is more similar to getNumberOfLabels // CF not true in non-explatory mode (one node can be displayed more than once at a time)
 
-void ACMediaBrowser::setNumberOfDisplayedLoops(int nd){
+void ACMediaBrowser::setNumberOfDisplayedNodes(int nd){
     if (nd < 0 || nd > this->getLibrary()->getSize())
-        cerr << "<ACMediaBrowser::setNumberOfDisplayedLoops> : too many loops to display: " << nd << endl;
+        cerr << "<ACMediaBrowser::setNumberOfDisplayedNodes> : too many nodes to display: " << nd << endl;
     else
-        nbDisplayedLoops = nd;
+        nbDisplayedNodes = nd;
 }
 
 void ACMediaBrowser::setNumberOfDisplayedLabels(int nd){
@@ -486,23 +491,23 @@ void ACMediaBrowser::setNumberOfDisplayedLabels(int nd){
         nbDisplayedLabels = nd;
 }
 
-void ACMediaBrowser::incrementLoopNavigationLevels(int loopIndex) {
+void ACMediaBrowser::incrementNavigationLevels(int nodeIndex) {
     int n=getNumberOfMediaNodes(),clusterIndex;
 
     // XS TODO: why this "if" ?
     //	if (mNavigationLevel==0)
-    //		resetLoopNavigationLevels();
+    //		resetNodeNavigationLevels();
 
-    // XS TODO: which "if" goes first ? do we still want to reset if we have a wrong loop_index ?
-    if(!(loopIndex >= 0 && loopIndex < n))  return;
+    // XS TODO: which "if" goes first ? do we still want to reset if we have a wrong node_index ?
+    if(!(nodeIndex >= 0 && nodeIndex < n))  return;
 
-    clusterIndex = this->getMediaNode(loopIndex).getClusterId();
+    clusterIndex = this->getMediaNode(nodeIndex)->getClusterId();
     if(clusterIndex < 0 || clusterIndex >= mClusterCount) return;
 
-    for (ACMediaNodes::iterator node = mLoopAttributes.begin(); node != mLoopAttributes.end(); ++node){
-        if ((*node).getClusterId() == clusterIndex){
+    for (ACMediaNodes::iterator node = mMediaNodes.begin(); node != mMediaNodes.end(); ++node){
+        if (node->second->getClusterId() == clusterIndex){
             //XS TODO vérifier que ça n'incrémente pas 2x celle sur laquelle on a cliqué
-            (*node).increaseNavigationLevel();
+            node->second->increaseNavigationLevel();
         }
     }
 
@@ -583,35 +588,39 @@ void ACMediaBrowser::hoverWithPointerId(float mxx, float myy, int p_id)
 }
 
 void ACMediaBrowser::setSourceCursor(int lid, int frame_pos) {
-    this->getMediaNode(lid).setCursor(frame_pos);
+    this->getMediaNode(lid)->setCursor(frame_pos);
 }
 
 void ACMediaBrowser::setCurrentFrame(int lid, int frame_pos) {
-    this->getMediaNode(lid).setCurrentFrame(frame_pos);
+    this->getMediaNode(lid)->setCurrentFrame(frame_pos);
 }
 
 void ACMediaBrowser::randomizeNodePositions(){
     if(mLibrary == 0) return;
     double t = getTime();
     ACPoint p;
-    for (ACMediaNodes::iterator node = mLoopAttributes.begin(); node != mLoopAttributes.end(); ++node){
+    for (ACMediaNodes::iterator node = mMediaNodes.begin(); node != mMediaNodes.end(); ++node){
         p.x = ACRandom() * mViewWidth;
         p.y = ACRandom() * mViewHeight;
         p.z = 0;
         p.x = p.x + ACRandom() * mViewWidth / 100.0;
         p.y = p.y + ACRandom() * mViewHeight / 100.0;
         p.z = 0;
-        (*node).setNextPosition(p,t);
+        node->second->setNextPosition(p,t);
     }
 }
 
+/*void ACMediaBrowser::checkFormLastInitializedNodeId(long){
+
+}*/
+
 // XS TODO change this name into something non-passive.
 // update initial positions
-// previously: resize other vector structures dependent on loop count.
+// previously: resize other vector structures dependent on node count.
 void ACMediaBrowser::libraryContentChanged(int needsCluster) {
     if(mLibrary == 0) return; // put this first otherwize getsize does not work !
 
-    int librarySize = mLibrary->getSize();
+    int librarySize = mLibrary->getSize(); // library size before node init
 
     // XS 150310 TODO: check this one
     initializeNodes(mMode);
@@ -624,39 +633,67 @@ void ACMediaBrowser::libraryContentChanged(int needsCluster) {
     }
 
     // XS TODO randomize positions only at the beginning...
-    if ( mMode == AC_MODE_CLUSTERS && (librarySize>prevLibrarySize) ) {//(mNoMethodPosPlugin==0 && mPosPlugin==0) {
-        double t = getTime();
-        ACPoint p;
-        for (ACMediaNodes::iterator node = mLoopAttributes.begin()+prevLibrarySize; node != mLoopAttributes.end(); ++node){
-            /*
-    (*node).setCurrentPosition (ACRandom(),
-    ACRandom(),
-    ACRandom() / 10.0);
-    (*node).setNextPosition ((*node).getCurrentPositionX() + ACRandom() / 100.0,
-    (*node).getCurrentPositionY() + ACRandom() / 100.0,
-    (*node).getCurrentPositionZ() + ACRandom() / 100.0);
-    */
-            p.x = 0;
-            p.y = 0;
-            p.z = 0;
-            (*node).setNextPosition (p, t);
-            (*node).setCurrentPosition (p);
-            (*node).setDisplayed (true);
+    /*if ( mMode == AC_MODE_CLUSTERS && librarySize == 0 ) {//(mNoMethodPosPlugin==0 && mPosPlugin==0) {
+        for (ACMediaNodes::iterator node = mMediaNodes.begin(); node != mMediaNodes.end(); ++node){
+            node->second->setCurrentPosition (ACRandom(),
+                                              ACRandom(),
+                                              ACRandom() / 10.0);
+            node->second->setNextPosition (node->second->getCurrentPositionX() + ACRandom() / 100.0,
+                                           node->second->getCurrentPositionY() + ACRandom() / 100.0,
+                                           node->second->getCurrentPositionZ() + ACRandom() / 100.0);
         }
+    }*/
 
-    }
-
-    //mFrac = 0.0f; //CF
-    //this->updateState(); //CF
-    //setNeedsDisplay(true);//CF
-
-    //if (mFeatureWeights.size()==0)
     if (needsCluster)
         this->initializeFeatureWeights(); //TR NEM modification
 
     updateDisplay(true, needsCluster);
 
-    prevLibrarySize = mLibrary->getSize();
+}
+
+// makes an ACMediaNode for each new media in the library
+// - AC_MODE_CLUSTERS : nodeID = mediaID if the whole Library is used in the Browser
+// - AC_MODE_NEIGHBORS : nodeID = 0 initially, then only the neighbors will receive a nodeID
+
+void ACMediaBrowser::initializeNodes(ACBrowserMode _mode) { // default = AC_MODE_CLUSTERS
+
+    ACMedias medias = mLibrary->getAllMedia();
+    ACMedias::iterator newest = medias.find(mLastInitializedNodeId);
+    if(newest == medias.end()){
+        std::cerr << "ACMediaBrowser::initializeNodes last initialized node id " << mLastInitializedNodeId << " doesn't appear in the media library" << std::endl;
+        newest = medias.begin();
+    }
+    else
+        newest++;
+
+    //CF we assume media ids are incremental (but not necessarily incremented of 1)
+    for(ACMedias::iterator media = newest; media!=medias.end();media++){
+        int mediaId = media->first;
+        if(mediaId != -1 && mMediaNodes.find(mediaId) != mMediaNodes.end())
+            std::cerr << "ACMediaBrowser::initializeNodes: node of id " << mediaId << " is already present!" << std::endl;
+        mMediaNodes[mediaId] = new ACMediaNode(mediaId);
+        std::cout << "ACMediaBrowser::initializeNodes for media id " << mediaId << std::endl;
+
+        switch ( _mode ){
+        case AC_MODE_CLUSTERS:
+            break;
+        case AC_MODE_NEIGHBORS:
+            mMediaNodes[mediaId]->setDisplayed(false);
+            break;
+        default:
+            cerr << "unknown browser mode: " << _mode << endl;
+            break;
+        }
+    }
+
+    if(mLibrary->getSize() != mMediaNodes.size())
+        std::cerr << "ACMediaBrowser::initializeNodes library/browser sizes mismatch" << std::endl;
+
+    if(mMediaNodes.size()>0)
+        mLastInitializedNodeId = mMediaNodes.rbegin()->first; // last element
+    else
+        mLastInitializedNodeId = 0;
+
 }
 
 // sets first feature weight to 1, others to 0
@@ -664,10 +701,10 @@ void ACMediaBrowser::libraryContentChanged(int needsCluster) {
 // assumes all media have the same number of features (as the first one)
 void ACMediaBrowser::initializeFeatureWeights(){
 
-    //int fc = mLibrary->getMedia(0)->getNumberOfPreProcFeaturesVectors();
-    ACMedia *mediaTemp=mLibrary->getMedia(0);
+    //int fc = mLibrary->getFirstMedia()->getNumberOfPreProcFeaturesVectors();
+    ACMedia *mediaTemp=mLibrary->getFirstMedia();
     if (mediaTemp){
-        int fc = mLibrary->getMedia(0)->getNumberOfPreProcFeaturesVectors();
+        int fc = mLibrary->getFirstMedia()->getNumberOfPreProcFeaturesVectors();
         if (mFeatureWeights.size()!=fc){
             mFeatureWeights.resize(fc);
             printf("setting all feature weights to 1.0 (count=%d)\n", (int) mFeatureWeights.size());
@@ -700,24 +737,31 @@ int ACMediaBrowser::getKNN(int id, vector<int> &ids, int k) {
     if(mLibrary == 0) return -1;
 
     // XS TODO simplify this
-    vector<ACMedia*> loops = mLibrary->getAllMedia();
-    int object_count = loops.size(); if(object_count == 0) return -1;
-    int feature_count = loops.back()->getNumberOfPreProcFeaturesVectors();
+    //vector<ACMedia*> nodes = mLibrary->getAllMedia();
+    ACMedias medias = mLibrary->getAllMedia();
+    int object_count = medias.size(); if(object_count == 0) return -1;
+    int feature_count = mLibrary->getFirstMedia()->getNumberOfPreProcFeaturesVectors();
     assert(mFeatureWeights.size() == feature_count);
 
     double inv_weight = 0.0;
-    vector<float> distances;
+    //vector<float> distances;
+    map<long,float> distances;
 
     el = -1;
-    for (i=0;i<loops.size();i++) { // XS TODO iterator
-        if (id==loops[i]->getId()) {
-            el=i;
+    /*for (i=0;i<nodes.size();i++) { // XS TODO iterator
+        if (id==node->first) {
+            el=node->first;
             break;
         }
     }
     if (el==-1) {
         return 0;
-    }
+    }*/
+    ACMedias::iterator target = medias.find(id);
+    if(target == medias.end())
+        return 0;
+    else
+        el = target->first;
 
     for(i=0; i<feature_count; i++) {
         inv_weight += mFeatureWeights[i];
@@ -725,13 +769,14 @@ int ACMediaBrowser::getKNN(int id, vector<int> &ids, int k) {
     if(inv_weight > 0.0) inv_weight = 1.0 / inv_weight;
     else return -1;
 
-    distances.resize(object_count);
+    //distances.resize(object_count);
 
-    for (i=0; i<object_count; i++) {
-        if(loops[el]->getType() == mLibrary->getMediaType() && loops[i]->getType() == mLibrary->getMediaType()){//CF multimedia compatibility
-            distances[i] = compute_distance(loops[el]->getAllPreProcFeaturesVectors(), loops[i]->getAllPreProcFeaturesVectors(), mFeatureWeights, false);
-            if (distances[i]>max_distance) {
-                max_distance = distances[i];
+    //for (i=0; i<object_count; i++) {
+    for (ACMedias::iterator media=medias.begin(); media!=medias.begin(); media++) {
+        if(medias[el]->getType() == mLibrary->getMediaType() && media->second->getType() == mLibrary->getMediaType()){//CF multimedia compatibility
+            distances[media->first] = compute_distance(medias[el]->getAllPreProcFeaturesVectors(), media->second->getAllPreProcFeaturesVectors(), mFeatureWeights, false);
+            if (distances[media->first]>max_distance) {
+                max_distance = distances[media->first];
             }
         }
     }
@@ -742,14 +787,21 @@ int ACMediaBrowser::getKNN(int id, vector<int> &ids, int k) {
     for (j=0;j<k;j++) {
         min_distance = max_distance;
         min_pos = -1;
-        for (i=0;i<object_count;i++) {
+        /*for (i=0;i<object_count;i++) {
             if (distances[i]<min_distance) {
                 min_distance = distances[i];
                 min_pos = i;
             }
+        }*/
+        for(map<long,float>::iterator distance = distances.begin(); distance != distances.end(); distance++) {
+            if (distance->second<min_distance) {
+                min_distance = distance->second;
+                min_pos = distance->first;
+            }
         }
+
         if (min_pos>=0) {
-            int tmpid = loops[min_pos]->getId();
+            int tmpid = medias[min_pos]->getId();
             ids.push_back(tmpid);
             distances[min_pos] = max_distance;
             kcount++;
@@ -765,7 +817,7 @@ int ACMediaBrowser::getKNN(int id, vector<int> &ids, int k) {
 int ACMediaBrowser::getKNN(ACMedia *aMedia, vector<ACMedia *> &result, int k) {
 
     int i, j;
-    //int el;
+    int el = -1;
     int min_pos;
     double min_distance, max_distance;
     int kcount;
@@ -773,52 +825,62 @@ int ACMediaBrowser::getKNN(ACMedia *aMedia, vector<ACMedia *> &result, int k) {
     if (mLibrary == 0) return -1;
 
     // XS TODO simplify this (same as above)
-    vector<ACMedia*> loops = mLibrary->getAllMedia();
-    //assert(loops.size() == mLoopAttributes.size());
-    int object_count = loops.size();
-    if (object_count == 0) return -1;
-    int feature_count = loops.back()->getNumberOfPreProcFeaturesVectors();
+    //vector<ACMedia*> nodes = mLibrary->getAllMedia();
+    ACMedias medias = mLibrary->getAllMedia();
+    int object_count = medias.size(); if(object_count == 0) return -1;
+    int feature_count = mLibrary->getFirstMedia()->getNumberOfPreProcFeaturesVectors();
     assert(mFeatureWeights.size() == feature_count);
 
     double inv_weight = 0.0;
-    vector<float> distances;
+    //vector<float> distances;
+    map<long,float> distances;
 
-    for (i = 0; i < feature_count; i++) {
+    el = aMedia->getId();
+
+    for(i=0; i<feature_count; i++) {
         inv_weight += mFeatureWeights[i];
     }
-    if (inv_weight > 0.0) inv_weight = 1.0 / inv_weight;
+    if(inv_weight > 0.0) inv_weight = 1.0 / inv_weight;
     else return -1;
 
-    distances.resize(object_count);
+    //distances.resize(object_count);
 
-    for (i = 0; i < object_count; i++) {
-        if(aMedia->getType() == mLibrary->getMediaType() && loops[i]->getType() == mLibrary->getMediaType()){//CF multimedia compatibility
-            distances[i] = compute_distance(aMedia->getAllPreProcFeaturesVectors(), loops[i]->getAllPreProcFeaturesVectors(), mFeatureWeights, false);
-            if (distances[i] > max_distance) {
-                max_distance = distances[i];
+    //for (i=0; i<object_count; i++) {
+    for (ACMedias::iterator media=medias.begin(); media!=medias.begin(); media++) {
+        if(medias[el]->getType() == mLibrary->getMediaType() && media->second->getType() == mLibrary->getMediaType()){//CF multimedia compatibility
+            distances[media->first] = compute_distance(medias[el]->getAllPreProcFeaturesVectors(), media->second->getAllPreProcFeaturesVectors(), mFeatureWeights, false);
+            if (distances[media->first]>max_distance) {
+                max_distance = distances[media->first];
             }
         }
     }
     max_distance++;
-    //distances[el] = max_distance;
+    distances[el] = max_distance;
 
     kcount = 0;
-    result.clear();
-    for (j = 0; j < k; j++) {
+    for (j=0;j<k;j++) {
         min_distance = max_distance;
         min_pos = -1;
-        for (i = 0; i < object_count; i++) {
-            if (distances[i] < min_distance) {
+        /*for (i=0;i<object_count;i++) {
+            if (distances[i]<min_distance) {
                 min_distance = distances[i];
                 min_pos = i;
             }
+        }*/
+        for(map<long,float>::iterator distance = distances.begin(); distance != distances.end(); distance++) {
+            if (distance->second<min_distance) {
+                min_distance = distance->second;
+                min_pos = distance->first;
+            }
         }
-        if (min_pos >= 0) {
-            //int tmpid = loops[min_pos]->getId();
-            result.push_back(loops[min_pos]);
+
+        if (min_pos>=0) {
+            int tmpid = medias[min_pos]->getId();
+            result.push_back(medias[min_pos]);
             distances[min_pos] = max_distance;
             kcount++;
-        } else {
+        }
+        else {
             break;
         }
     }
@@ -839,20 +901,21 @@ int ACMediaBrowser::getKSortedOnFeature(int k, int f, int dim, bool revert) {
         return 0;
     }
 
-    int nfeatv = m_lib->getMedia(0)->getNumberOfFeaturesVectors();
+    int nfeatv = m_lib->getFirstMedia()->getNumberOfFeaturesVectors();
     if (f >= nfeatv) {
         cerr << "<ACMediaBrowser::getKSortedOnFeature> : wrong feature index : " << f << endl;
         return 0;
     }
-    int dimfeatv = m_lib->getMedia(0)->getFeaturesVector(f)->getSize();
+    int dimfeatv = m_lib->getFirstMedia()->getFeaturesVector(f)->getSize();
     if (dim >= dimfeatv) {
         cerr << "<ACMediaBrowser::getKSortedOnFeature> : wrong feature dimension : " << f << endl;
         return 0;
     }
 
+    std::vector<long> ids = m_lib->getAllMediaIds();
     std::vector<std::pair<float, int> > feature_to_sort;
     for (int i = 0; i < m_lib->getSize(); i++) {
-        feature_to_sort.push_back(std::pair<float, int> (m_lib->getMedia(i)->getFeaturesVector(k)->getFeatureElement(dim), m_lib->getMedia(i)->getId()));
+        feature_to_sort.push_back(std::pair<float, int> (m_lib->getMedia(ids[i])->getFeaturesVector(k)->getFeatureElement(dim), ids[i]));
     }
 
     sort(feature_to_sort.begin(), feature_to_sort.end());
@@ -875,7 +938,7 @@ void ACMediaBrowser::setFeatureWeights(vector<float> &weights)
 // XS node, not media
 void ACMediaBrowser::setClusterIndex(int nodeIdx,int clusterIdx){
     // XS TODO check bounds
-    this->getMediaNode(nodeIdx).setClusterId (clusterIdx);
+    this->getMediaNode(nodeIdx)->setClusterId (clusterIdx);
 }
 
 void ACMediaBrowser::setClusterCenter(int clusterIdx, vector<FeaturesVector > clusterCenter){
@@ -884,16 +947,15 @@ void ACMediaBrowser::setClusterCenter(int clusterIdx, vector<FeaturesVector > cl
 }
 
 void ACMediaBrowser::initClusterCenters(){
-    vector<ACMedia*> loops = mLibrary->getAllMedia();
-    if (loops.size()==0)
+    if (mLibrary->getSize()==0)
         return;
-    int feature_count = loops.back()->getNumberOfPreProcFeaturesVectors();
+    int feature_count = mLibrary->getFirstMedia()->getNumberOfPreProcFeaturesVectors();
     int desc_count;
     mClusterCenters.resize(mClusterCount);
     for(int j=0; j<mClusterCount; j++){
         mClusterCenters[j].resize(feature_count);
         for(int f=0; f<feature_count; f++){
-            desc_count = loops.back()->getPreProcFeaturesVector(f)->getSize();
+            desc_count = mLibrary->getFirstMedia()->getPreProcFeaturesVector(f)->getSize();
             mClusterCenters[j][f].resize(desc_count);
 
             mClusterCenters[j][f].init();
@@ -902,10 +964,10 @@ void ACMediaBrowser::initClusterCenters(){
     }
 }
 
-// SD TODO - DIfferent dimensionality reduction too
+// SD TODO - Different dimensionality reduction too
 // This function make the kmeans and set some varaibles :
 // mClusterCenters
-// mLoopAttributes -> ACMediaNode
+// mMediaNodes -> ACMediaNode
 //CF do we need an extra level of tests along the browsing mode (render inactive during AC_MODE_NEIGHBORS?)
 void ACMediaBrowser::updateClusters(bool animate, int needsCluster) {
     setNeedsNavigationUpdateLock(1);
@@ -936,11 +998,11 @@ void ACMediaBrowser::updateClusters(bool animate, int needsCluster) {
     }
     // Until we design cross-media browsing, mediadocuments should assign their cluster ID to their children media
     if(this->getLibrary()->getMediaType() == MEDIA_TYPE_MIXED){
-        vector<ACMedia*> medias = this->getLibrary()->getAllMedia();
-        for (int i=0; i < medias.size(); i++){
-            if (medias[i]->getParentId() > -1){
-                int locIdCluster=this->getMediaNode(medias[i]->getParentId()).getClusterId();
-                this->getMediaNode(medias[i]->getId()).setClusterId(locIdCluster);
+        ACMedias medias = this->getLibrary()->getAllMedia();
+        for(ACMedias::iterator media = medias.begin();media != medias.end(); media++ ){
+            if (media->second->getParentId() > -1){
+                int locIdCluster=this->getMediaNode(media->second->getParentId())->getClusterId();
+                this->getMediaNode(media->second->getId())->setClusterId(locIdCluster);
             }
         }
     }
@@ -1078,15 +1140,15 @@ void ACMediaBrowser::updateState()
 #define PICKSCALE 10
 int ACMediaBrowser::pickSource(float _x, float _y)
 {
-    int loop_id;
+    int media_id;
 
-    loop_id = (int) (floor(_y / PICKSCALE) * floor(mViewWidth / PICKSCALE) + floor(_x / PICKSCALE));
-    return loop_id;
+    media_id = (int) (floor(_y / PICKSCALE) * floor(mViewWidth / PICKSCALE) + floor(_x / PICKSCALE));
+    return media_id;
 }
 
-void ACMediaBrowser::getSourcePosition(int loop_id, float* x, float* z)
+void ACMediaBrowser::getSourcePosition(int media_id, float* x, float* z)
 {
-    float ratio = loop_id / floor(mViewWidth / PICKSCALE);
+    float ratio = media_id / floor(mViewWidth / PICKSCALE);
     *z = floor(ratio) * PICKSCALE
             + PICKSCALE / 2;
     *x = (ratio - floor(ratio)) * floor(mViewWidth / PICKSCALE) * PICKSCALE
@@ -1102,15 +1164,15 @@ void ACMediaBrowser::setSourcePosition(float _x, float _y, float* x, float* z)
 /*
 int ACMediaBrowser::toggleSourceActivity(float _x, float _y)
 {
- int loop_id;
+ int media_id;
  float x, z;
 
- loop_id = pickSource(_x, _y);
+ media_id = pickSource(_x, _y);
 
- toggleSourceActivity(loop_id);
+ toggleSourceActivity(media_id);
  setSourcePosition(_x, _y, &x, &z);
 
- return loop_id;
+ return media_id;
 
 }
 */
@@ -1118,16 +1180,16 @@ int ACMediaBrowser::toggleSourceActivity(float _x, float _y)
 // . toggleSourceActivity is in fact in ACMediaNode now
 // . browser takes care of threads
 // XS TODO return value makes no sense
-int ACMediaBrowser::toggleSourceActivity(ACMediaNode &node, int _activity) {
-    node.toggleActivity(_activity);
+int ACMediaBrowser::toggleSourceActivity(ACMediaNode* node, int _activity) {
+    node->toggleActivity(_activity);
 #ifdef USE_DEBUG // use debug message levels instead
     //std::cout << "Toggle Activity of media : " << node.getMediaId() << " to " << _activity << std::endl;
 #endif
     int mt;
-    mt = mLibrary->getMedia(node.getMediaId())->getType();
+    mt = mLibrary->getMedia(node->getMediaId())->getType();
     if (mt == MEDIA_TYPE_AUDIO) {
         setNeedsActivityUpdateLock(1);
-        setNeedsActivityUpdateAddMedia(node.getMediaId()); // XS previously: loop_id
+        setNeedsActivityUpdateAddMedia(node->getMediaId());
         setNeedsActivityUpdateLock(0);
     }
     return 1;
@@ -1136,25 +1198,23 @@ int ACMediaBrowser::toggleSourceActivity(ACMediaNode &node, int _activity) {
 // XS deprecated 
 int ACMediaBrowser::toggleSourceActivity(int lid, int type)
 {
-    int loop_id;
-
-    loop_id = lid;
+    int media_id = lid;
     //
 
-    if ( (loop_id>=0) && (loop_id<mLibrary->getSize()) )
+    if ( (media_id>=0) && (media_id<mLibrary->getSize()) )
     {
-        if (this->getMediaNode(loop_id).getActivity()==0) {
-            this->getMediaNode(loop_id).setActivity(type);
+        if (this->getMediaNode(media_id)->getActivity()==0) {
+            this->getMediaNode(media_id)->setActivity(type);
         }
-        else if (this->getMediaNode(loop_id).getActivity() >= 1) {
-            this->getMediaNode(loop_id).setActivity(0);
+        else if (this->getMediaNode(media_id)->getActivity() >= 1) {
+            this->getMediaNode(media_id)->setActivity(0);
         }
 
         int mt;
-        mt = mLibrary->getMedia(loop_id)->getType();
+        mt = mLibrary->getMedia(media_id)->getType();
         if (mt == MEDIA_TYPE_AUDIO) {
             setNeedsActivityUpdateLock(1);
-            setNeedsActivityUpdateAddMedia(loop_id);
+            setNeedsActivityUpdateAddMedia(media_id);
             setNeedsActivityUpdateLock(0);
         }
         // setNeedsActivityUpdate(1);
@@ -1189,11 +1249,11 @@ void ACMediaBrowser::setClosestNode(int _node_id, int p_index) {
         std::cerr << "ACMediaBrowser::setClosestNode: couldn't access pointer with index " << p_index << std::endl;
 
     // XS: if _node_id < 0 should we still assign it to closest_node ?
-    // note : MediaCycle::pickedObjectCallback will look for closest loop if < 0
+    // note : MediaCycle::pickedObjectCallback will look for closest node if < 0
     if (_node_id<0) {
         return;
     }
-    if (this->getMediaNode(_node_id).getNavigationLevel() < getNavigationLevel()) {
+    if (this->getMediaNode(_node_id)->getNavigationLevel() < getNavigationLevel()) {
         return;
     }
 
@@ -1201,25 +1261,25 @@ void ACMediaBrowser::setClosestNode(int _node_id, int p_index) {
         // set active nodes from 2 to 0 (CF: 0?)
         // set closest from 0 to 2
         // nodes with activity = 1 are left as is
-        for (ACMediaNodes::iterator node = mLoopAttributes.begin(); node != mLoopAttributes.end(); ++node){
-            if ((*node).getNavigationLevel() >= getNavigationLevel()) {
-                if ( ((*node).getNodeId()==_node_id) && ((*node).getActivity() == 0) ) {
+        for (ACMediaNodes::iterator node = mMediaNodes.begin(); node != mMediaNodes.end(); ++node){
+            if (node->second->getNavigationLevel() >= getNavigationLevel()) {
+                if ( (node->second->getMediaId()==_node_id) && (node->second->getActivity() == 0) ) {
                     // set closest from 0 to 2
-                    toggleSourceActivity(*node, 2);
+                    toggleSourceActivity(node->second, 2);
                 }
-                /*else if ( ((*node).getNodeId()==prev_node_id) && ((*node).getActivity() == 2) ) {
+                /*else if ( (node->second->getNodeId()==prev_node_id) && (node->second->getActivity() == 2) ) {
      toggleSourceActivity(*node, 0);
     }*/
-                else if ( ((*node).getNodeId()!=_node_id) && ((*node).getActivity() == 2) ) {
+                else if ( (node->second->getMediaId()!=_node_id) && (node->second->getActivity() == 2) ) {
                     // set active nodes from 2 to 0
                     int donottoggle = 0;
                     for (int ps = 0; ps < getNumberOfPointers(); ps++){
-                        if ( ((*node).getNodeId()==hoveredNodes[ps]) ){
+                        if ( (node->second->getMediaId()==hoveredNodes[ps]) ){
                             donottoggle = 1;
                         }
                     }
-                    if ( (!donottoggle)	&& ((*node).getActivity() == 2)  ) {
-                        toggleSourceActivity(*node);
+                    if ( (!donottoggle) && (node->second->getActivity() == 2)  ) {
+                        toggleSourceActivity(node->second);
                     }
                 }
             }
@@ -1228,9 +1288,9 @@ void ACMediaBrowser::setClosestNode(int _node_id, int p_index) {
     }
     // switch to zero the nodes with activity =2
     else if (auto_play_toggle) {
-        for (ACMediaNodes::iterator node = mLoopAttributes.begin(); node != mLoopAttributes.end(); ++node){
-            if ( (*node).getActivity() == 2 ) {
-                toggleSourceActivity(*node);
+        for (ACMediaNodes::iterator node = mMediaNodes.begin(); node != mMediaNodes.end(); ++node){
+            if ( node->second->getActivity() == 2 ) {
+                toggleSourceActivity(node->second);
             }
         }
         auto_play_toggle = 0;
@@ -1241,10 +1301,10 @@ void ACMediaBrowser::setClosestNode(int _node_id, int p_index) {
 int ACMediaBrowser::muteAllSources()
 {
     for (int node_id=0;node_id<mLibrary->getSize();node_id++) {
-        //if (mLoopAttributes[node_id].getActivity() >= 1) {
+        //if (mMediaNodes[node_id].getActivity() >= 1) {
         // SD TODO - audio engine
         // audio_cycle->getAudioFeedback()->deleteSource(node_id);
-        mLoopAttributes[node_id].setActivity(0);
+        mMediaNodes[node_id]->setActivity(0);
         setNeedsActivityUpdateLock(1);
         setNeedsActivityUpdateAddMedia(node_id);
         setNeedsActivityUpdateLock(0);
@@ -1288,21 +1348,24 @@ vector<int>* ACMediaBrowser::getNeedsActivityUpdateMedia() {
     return &mNeedsActivityUpdateMedia;
 }
 
-ACMediaNode& ACMediaBrowser::getMediaNode(int i) {
+ACMediaNode* ACMediaBrowser::getMediaNode(int i) {
     /*switch (mMode){
     case AC_MODE_CLUSTERS:
     {*/
-        if(i>=0 && i<mLoopAttributes.size())
-            return mLoopAttributes[i];
-        else
-            std::cerr << "ACMediaBrowser::getMediaNode: index " << i << " outside bounds (clusters mode)" << std::endl;
+    if (mMediaNodes.find(i) != mMediaNodes.end()){
+        return mMediaNodes[i];
+    }
+    else {
+        cerr << "ACMediaBrowser::getMediaNode: index " << i << " outside bounds (clusters mode)" << std::endl;
+        return 0;
+    }
     /*}
     break;
     case AC_MODE_NEIGHBORS:
     {
-        if(this->mUserLog){
-            if(i>=0) //&& i<mUserLog->getSize())
-                return mUserLog->getNodeFromId(i);
+        if(this->mNeighborsManager){
+            if(i>=0) //&& i<mNeighborsManager->getSize())
+                return mNeighborsManager->getNodeFromId(i);
             else
                 std::cerr << "ACMediaBrowser::getMediaNode: index " << i << " outside bounds (neighbors mode)" << std::endl;
         }
@@ -1316,25 +1379,28 @@ ACMediaNode& ACMediaBrowser::getMediaNode(int i) {
     }*/
 }
 
-ACMediaNode& ACMediaBrowser::getNodeFromMedia(ACMedia* _media) {
+ACMediaNode* ACMediaBrowser::getNodeFromMedia(ACMedia* _media) {
     //if(_media->getId() >-1)
-    //    return this->getMediaNode(_media->getId()); // mLoopAttributes[_media->getId()];
+    //    return this->getMediaNode(_media->getId()); // mMediaNodes[_media->getId()];
     int i = _media->getId();
 
     /*     switch (mMode){
         case AC_MODE_CLUSTERS:
             {*/
-    if(i>=0 && i<mLoopAttributes.size())
-        return mLoopAttributes[i];
-    else
-        std::cerr << "ACMediaBrowser::getNodeFromMedia: index " << i << " outside bounds (clusters mode)" << std::endl;
+    if (mMediaNodes.find(i) != mMediaNodes.end()){
+        return mMediaNodes[i];
+    }
+    else {
+        cerr << "ACMediaBrowser::getNodeFromMedia: index " << i << " outside bounds (clusters mode)" << std::endl;
+        return 0;
+    }
     /*}
             break;
         case AC_MODE_NEIGHBORS:
             {
-                if(this->mUserLog){
-                    if(i>=0 && i<mUserLog->getSize())
-                        return mUserLog->getNodeFromMediaId(i);
+                if(this->mNeighborsManager){
+                    if(i>=0 && i<mNeighborsManager->getSize())
+                        return mNeighborsManager->getNodeFromMediaId(i);
                     else
                         std::cerr << "ACMediaBrowser::getNodeFromMedia: index " << i << " outside bounds (neighbors mode)" << std::endl;
                 }
@@ -1454,91 +1520,168 @@ void ACMediaBrowser::addMousePointer(){
 
 void ACMediaBrowser::removeMousePointer(){
     this->removePointer(-1);
-}		
-
-// CF prepareNodes ? (cf. OSG)
-// makes an ACMediaNode for each Media in the library
-// - AC_MODE_CLUSTERS : nodeID = mediaID if the whole Library is used in the Browser
-// - AC_MODE_NEIGHBORS : nodeID = 0 initially, then only the neighbors will receive a nodeID
-
-void ACMediaBrowser::initializeNodes(ACBrowserMode _mode) { // default = AC_MODE_CLUSTERS
-    int librarySize;
-
-    librarySize = mLibrary->getSize();
-    if (librarySize<prevLibrarySize) {
-        mLoopAttributes.resize(librarySize); // XS TODO if this is a vector of pointers it should be deleted properly
-    }
-    switch ( _mode ){
-    case AC_MODE_CLUSTERS:
-        for (int i=prevLibrarySize; i<librarySize;i++){
-            int n= mLibrary->getMedia(i)->getId();
-            //ACMediaNode* mn = new ACMediaNode(n,n);
-            //std::cout << "Media Id : " << n << std::endl;//CF free the console
-            // nodeID = mediaID
-            ACMediaNode mn(n,n);
-            mLoopAttributes.push_back(mn); // XS generalize
-        }
-        break;
-    case AC_MODE_NEIGHBORS:
-        for (int i=prevLibrarySize; i<librarySize;i++){
-            //ACMediaNode* mn = new ACMediaNode(0,mLibrary->getMedia(i)->getId());
-            // nodeID = 0;
-            ACMediaNode mn(0,mLibrary->getMedia(i)->getId());
-            mLoopAttributes.push_back(mn); // XS generalize
-        }
-        break;
-    default:
-        cerr << "unknown browser mode: " << _mode << endl;
-        break;
-    }
 }
 
-ACUserLog* ACMediaBrowser::getUserLog()
+void ACMediaBrowser::dumpNeighborNodes()
 {
-    return mUserLog;
+    if(mMode == AC_MODE_NEIGHBORS){
+        if(mNeighborsManager)
+            mNeighborsManager->dump();
+        else
+            std::cerr << "ACMediaBrowser::dumpNeighborNodes: no neighbor manager" << std::endl;
+    }
+    else
+        std::cerr << "ACMediaBrowser::dumpNeighborNodes: not in neighbor mode" << std::endl;
 }
 
-long int ACMediaBrowser::addNode(long int _parentId, long int _mediaId, int _clickTime)
+
+std::list<long int> ACMediaBrowser::getNeighborNodeIds()
+{
+    if(mMode == AC_MODE_NEIGHBORS){
+        if(mNeighborsManager)
+            return mNeighborsManager->getNodeIds();
+        else
+            std::cerr << "ACMediaBrowser::getNeighborNodeIds: no neighbor manager" << std::endl;
+    }
+    else
+        std::cerr << "ACMediaBrowser::getNeighborNodeIds: not in neighbor mode" << std::endl;
+}
+
+bool ACMediaBrowser::addNeighborNode(long int _parentId, long int _mediaId, int _clickTime)
 {
     if(this->mMode == AC_MODE_NEIGHBORS){
-        if(this->mUserLog){
-            long int nodeId = -1;
-            nodeId = this->mUserLog->addNode(_parentId, _mediaId, _clickTime);
+        if(this->mNeighborsManager){
+            if( this->mNeighborsManager->addNode(_parentId, _mediaId, _clickTime)){
+                this->setMediaNodeDisplayed(_mediaId,true);
+                return true;
+            }
             /*int librarySize = mLibrary->getSize();
             if( _mediaId > librarySize){
                 std::cerr << "ACMediaBrowser::addNode Trying to add neighbor node beyond the library size" << std::endl;
             }*/
-            /*if (nodeId == mLoopAttributes.size()){
+            /*if (nodeId == mMediaNodes.size()){
                 ACMediaNode mn(0,_mediaId, _clickTime);
-                mLoopAttributes.push_back(mn);
+                mMediaNodes.push_back(mn);
             }*/
             /*else
-                std::cerr << "ACMediaBrowser::addNode error: couldn't create related media node." << std::endl;*/
+                std::cerr << "ACMediaBrowser::addNeighborNode error: couldn't create related media node." << std::endl;*/
         }
         else
-            std::cerr << "ACMediaBrowser::addNode error: no user log." << std::endl;
+            std::cerr << "ACMediaBrowser::addNeighborNode error: no user log." << std::endl;
     }
     else
-        std::cerr << "Currently nodes can be added only in neighbors mode." << std::endl;
+        std::cerr << "ACMediaBrowser::addNeighborNode: currently nodes can be added only in neighbors mode." << std::endl;
+    return false;
+}
+
+bool ACMediaBrowser::removeNeighborNode(long int _id){
+    if(this->mMode == AC_MODE_NEIGHBORS){
+        std::cerr << "ACMediaBrowser::removeNeighborNode: first hide all the children!" << std::endl;
+        if(this->mNeighborsManager){
+            if(this->mNeighborsManager->removeNode(_id)){
+                this->setMediaNodeDisplayed(_id,false);
+                return true;
+            }
+            else
+                return false;
+        }
+    }
+    else{
+        std::cerr << "ACMediaBrowser::removeNeighborNode: currently nodes can be removed only in neighbors mode." << std::endl;
+        return false;
+    }
+}
+
+bool ACMediaBrowser::removeChildrenNeighborNodes(long int _id){
+    // First hide all the children!
+    if(this->mMode == AC_MODE_NEIGHBORS){
+        std::cerr << "ACMediaBrowser::removeChildrenNeighborNodes: not yet implemented" << std::endl;
+        /*if(this->mNeighborsManager){
+            return this->mNeighborsManager->removeChildrenNodes(_id);
+        }*/
+    }
+    return false;
+}
+
+long int ACMediaBrowser::getParentFromNeighborNode(long _id)
+{
+    if(mMode == AC_MODE_NEIGHBORS){
+        if(mNeighborsManager)
+            return mNeighborsManager->getParentFromNodeId(_id);
+        else
+            std::cerr << "ACMediaBrowser::getParentFromNeighborNode: no neighbor manager" << std::endl;
+    }
+    else
+        std::cerr << "ACMediaBrowser::getParentFromNeighborNode: not in neighbor mode" << std::endl;
+    return -1;
+
+}
+
+long int ACMediaBrowser::getPreviousSiblingFromNeighborNode(long int _id)
+{
+    if(mMode == AC_MODE_NEIGHBORS){
+        if(mNeighborsManager)
+            return mNeighborsManager->getPreviousSiblingFromNodeId(_id);
+        else
+            std::cerr << "ACMediaBrowser::getPreviousSiblingFromNeighborNode: no neighbor manager" << std::endl;
+    }
+    else
+        std::cerr << "ACMediaBrowser::getPreviousSiblingFromNeighborNode: not in neighbor mode" << std::endl;
+    return -1;
+
+}
+
+long int ACMediaBrowser::getNextSiblingFromNeighborNode(long int _id)
+{
+    if(mMode == AC_MODE_NEIGHBORS){
+        if(mNeighborsManager)
+            return mNeighborsManager->getNextSiblingFromNodeId(_id);
+        else
+            std::cerr << "ACMediaBrowser::getNextSiblingFromNeighborNode: no neighbor manager" << std::endl;
+    }
+    else
+        std::cerr << "ACMediaBrowser::getNextSiblingFromNeighborNode: not in neighbor mode" << std::endl;
+    return -1;
+
+}
+
+long int ACMediaBrowser::getFirstChildFromNeighborNode(long int _id)
+{
+    if(mMode == AC_MODE_NEIGHBORS){
+        if(mNeighborsManager)
+            return mNeighborsManager->getFirstChildFromNodeId(_id);
+        else
+            std::cerr << "ACMediaBrowser::getFirstChildFromNeighborNode: no neighbor manager" << std::endl;
+    }
+    else
+        std::cerr << "ACMediaBrowser::getFirstChildFromNeighborNode: not in neighbor mode" << std::endl;
     return -1;
 }
 
-bool ACMediaBrowser::removeNode(long int _id){
-    if(this->mMode == AC_MODE_NEIGHBORS){
-        if(this->mUserLog){
-            return this->mUserLog->removeNode(_id);
-        }
+long int ACMediaBrowser::getLastChildFromNeighborNode(long int _id)
+{
+    if(mMode == AC_MODE_NEIGHBORS){
+        if(mNeighborsManager)
+            return mNeighborsManager->getLastChildFromNodeId(_id);
+        else
+            std::cerr << "ACMediaBrowser::getLastChildFromNeighborNode: no neighbor manager" << std::endl;
     }
-    return false;
+    else
+        std::cerr << "ACMediaBrowser::getLastChildFromNeighborNode: not in neighbor mode" << std::endl;
+    return -1;
 }
 
-bool ACMediaBrowser::removeChildrenNodes(long int _id){
-    if(this->mMode == AC_MODE_NEIGHBORS){
-        if(this->mUserLog){
-            return this->mUserLog->removeChildrenNodes(_id);
-        }
+int ACMediaBrowser::getChildCountAtNeighborNode(long int _id)
+{
+    if(mMode == AC_MODE_NEIGHBORS){
+        if(mNeighborsManager)
+            return mNeighborsManager->getChildCountAtNodeId(_id);
+        else
+            std::cerr << "ACMediaBrowser::getChildCountAtNeighborNode: no neighbor manager" << std::endl;
     }
-    return false;
+    else
+        std::cerr << "ACMediaBrowser::getChildCountAtNeighborNode: not in neighbor mode" << std::endl;
+    return -1;
 }
 
 // XS 260310 new way to manage update of clusters, positions, neighborhoods, ...
@@ -1582,40 +1725,38 @@ void ACMediaBrowser::switchMode(ACBrowserMode _mode){
         case AC_MODE_NEIGHBORS:
             if ( getLibrary()->getSize() > 0 ) {
                 //CF do we have to clean the navigation states?
-                //CF do we have to reset the referent node? mUserLog->addRootNode( mReferenceNode , 0); //CF change click
+                //CF do we have to reset the referent node? mNeighborsManager->setReferenceNode( mReferenceNode , 0); //CF change click
                 //(2nd arg)!, use LastClickedNode instead of ReferenceNode?
 
                 //CF 1) Bring the nodes to the center
                 ACPoint p;
-                p.x = 0;
-                p.y = 0;
-                p.z = 0;
-                for (ACMediaNodes::iterator node = mLoopAttributes.begin(); node != mLoopAttributes.end(); ++node){
-                    (*node).setCurrentPosition(p);
-                    (*node).setNextPosition(p,t);
+                for (ACMediaNodes::iterator node = mMediaNodes.begin(); node != mMediaNodes.end(); ++node){
+                    node->second->setCurrentPosition(p);
+                    node->second->setNextPosition(p,t);
                 }
                 this->updateDisplay(true);//this->updateNextPositions();
 
                 //CF 2) Hide all nodes
-                for (ACMediaNodes::iterator node = mLoopAttributes.begin(); node != mLoopAttributes.end(); ++node){
-                    (*node).setDisplayed(false);
+                for (ACMediaNodes::iterator node = mMediaNodes.begin(); node != mMediaNodes.end(); ++node){
+                    node->second->setDisplayed(false);
                 }
-                this->updateDisplay(true);//this->updateNextPositions();
+                this->updateDisplay(false);//this->updateNextPositions();
 
                 //CF 3) Recreate the user log
-                delete mUserLog;
-                mUserLog = 0;
-                mUserLog = new ACUserLog();
+                delete mNeighborsManager;
+                mNeighborsManager = 0;
+                mNeighborsManager = new ACNeighborsManager();
 
                 //CF 4) Notify the browsing mode change and make the reference node appear
-                mUserLog->addRootNode(this->getReferenceNode(), 0); // 0
+                mNeighborsManager->setReferenceNode(this->getReferenceNode(), 0); // 0
+                this->setMediaNodeDisplayed(this->getReferenceNode(),true);
                 this->setMode(_mode);
                 this->setModeChanged(true);
                 this->updateDisplay(true);
                 //this->setModeChanged(false);// CF done by the browser renderer until we implement signal/slots
 
                 //CF 5) Expand the first branch at the reference node
-                mUserLog->clickNode(0,0);//CF check if the ref node is correct everytime this way (1 arg), change clicktime (2nd arg)
+                this->setClickedNode(this->getReferenceNode());
                 this->updateDisplay(true);
             }
             else
@@ -1631,7 +1772,7 @@ void ACMediaBrowser::switchMode(ACBrowserMode _mode){
         case AC_MODE_CLUSTERS:
         {
             //CF 1) Move all nodes to the center
-            //mUserLog->wrapToOrigin();
+            //mNeighborsManager->wrapToOrigin();
             //this->updateDisplay(true);//this->updateNextPositions();
 
             //CF 2) Notify the browsing mode change
@@ -1640,19 +1781,19 @@ void ACMediaBrowser::switchMode(ACBrowserMode _mode){
             //this->updateDisplay(true);
 
             //CF 3) Recreate the user log, links should thus disappear
-            delete mUserLog;
-            mUserLog = 0;
-            mUserLog = new ACUserLog();
+            delete mNeighborsManager;
+            mNeighborsManager = 0;
+            mNeighborsManager = new ACNeighborsManager();
 
             //CF 4) Display all the nodes from the center
             ACPoint p;
             p.x = 0;
             p.y = 0;
             p.z = 0;
-            for (ACMediaNodes::iterator node = mLoopAttributes.begin(); node != mLoopAttributes.end(); ++node){
-                (*node).setDisplayed (true);
-                (*node).setCurrentPosition(p);
-                (*node).setNextPosition(p,t);
+            for (ACMediaNodes::iterator node = mMediaNodes.begin(); node != mMediaNodes.end(); ++node){
+                node->second->setDisplayed (true);
+                node->second->setCurrentPosition(p);
+                node->second->setNextPosition(p,t);
             }
             //this->updateNextPositions();
 
@@ -1715,20 +1856,25 @@ bool ACMediaBrowser::changeNeighborsMethodPlugin(ACPlugin* acpl)
         break;
     case AC_MODE_NEIGHBORS:
         //CF 1) Move all nodes to the center
-        for (ACMediaNodes::iterator node = mLoopAttributes.begin(); node != mLoopAttributes.end(); ++node){
-            p.x = 0;
-            p.y = 0;
-            p.z = 0;
-            (*node).setNextPosition(p, t);
-            (*node).setNextPosition(p,t);
+        for (ACMediaNodes::iterator node = mMediaNodes.begin(); node != mMediaNodes.end(); ++node){
+            node->second->setNextPosition(p,t);
+            node->second->setNextPosition(p,t);
         }
-        this->setNeedsDisplay(true);
+        this->updateDisplay(true);//this->updateNextPositions();
+
+        for (ACMediaNodes::iterator node = mMediaNodes.begin(); node != mMediaNodes.end(); ++node){
+            node->second->setDisplayed(false);
+        }
+        this->updateDisplay(false);//this->updateNextPositions();
 
         //CF 2) Recreate the user log
-        delete mUserLog;
-        mUserLog = new ACUserLog();
+        delete mNeighborsManager;
+        mNeighborsManager = 0;
+        mNeighborsManager = new ACNeighborsManager();
 
-        mUserLog->addRootNode(this->getReferenceNode(), 0); // 0
+        mNeighborsManager->setReferenceNode(this->getReferenceNode(), 0); // 0
+        this->setMediaNodeDisplayed(this->getReferenceNode(),true);
+        //this->updateDisplay(true);
 
         //CF 3) Change the plugin and update the display, it will make the reference node appear:
         this->setNeighborsMethodPlugin(acpl);
@@ -1737,7 +1883,8 @@ bool ACMediaBrowser::changeNeighborsMethodPlugin(ACPlugin* acpl)
             this->updateDisplay(true);
 
             //CF 4) Expand the first branch at the reference node
-            mUserLog->clickNode(0,0);//CF check if the ref node is correct everytime this way (1 arg), change clicktime (2nd arg)
+            //mNeighborsManager->clickNode(0,0);//CF check if the ref node is correct everytime this way (1 arg), change clicktime (2nd arg)
+            this->setClickedNode(this->getReferenceNode());
             this->updateDisplay(true);
         }
         success = true;
@@ -1858,23 +2005,23 @@ std::string ACMediaBrowser::getActivePluginName(ACPluginType PluginType){
 
 // -- private methods
 void ACMediaBrowser::resetNavigation() {
-    this->resetLoopNavigationLevels(0);
+    this->resetNavigationLevels(0);
     mClickedNode = -1;
     mClickedLabel = -1;
     mClosestNode = -1;
     mSelectedNodes.clear();
     mLastSelectedNode = -1;
     mNavigationLevel = 0;
-    mReferenceNode = 0; //CF ugly, could be -1
+    mReferenceNode = 0;
     mBackwardNavigationStates.clear();
     mForwardNavigationStates.clear();
     mClusterCenters.clear();
 }
 
-void ACMediaBrowser::resetLoopNavigationLevels(int l) {
+void ACMediaBrowser::resetNavigationLevels(int l) {
     // default : l=0
-    for (ACMediaNodes::iterator node = mLoopAttributes.begin(); node != mLoopAttributes.end(); ++node){
-        (*node).setNavigationLevel (l);
+    for (ACMediaNodes::iterator node = mMediaNodes.begin(); node != mMediaNodes.end(); ++node){
+        node->second->setNavigationLevel (l);
     }
 }
 
@@ -1888,10 +2035,10 @@ void ACMediaBrowser::resetCamera() {
 
 void ACMediaBrowser::commitPositions()
 {
-    for (ACMediaNodes::iterator node = mLoopAttributes.begin(); node != mLoopAttributes.end(); ++node){
-        (*node).commitPosition();
+    for (ACMediaNodes::iterator node = mMediaNodes.begin(); node != mMediaNodes.end(); ++node){
+        node->second->commitPosition();
         if(mLibrary->getMediaType() == MEDIA_TYPE_MIXED)
-            std::cout << "Node " << (int)((*node).getMediaId()) << " of media type " << ACMediaFactory::getInstance().getNormalCaseStringFromMediaType( mLibrary->getMedia((*node).getMediaId())->getType() ) << " at position " <<  (*node).getCurrentPosition().x << " " << (*node).getCurrentPosition().y << " "<< (*node).getCurrentPosition().z << std::endl;
+            std::cout << "Node " << (int)(node->second->getMediaId()) << " of media type " << ACMediaFactory::getInstance().getNormalCaseStringFromMediaType( mLibrary->getMedia(node->second->getMediaId())->getType() ) << " displayed " << node->second->isDisplayed() << " at position " <<  node->second->getCurrentPosition().x << " " << node->second->getCurrentPosition().y << " "<< node->second->getCurrentPosition().z << " file " << mLibrary->getMedia(node->second->getMediaId())->getFileName() << std::endl;
     }
 }
 

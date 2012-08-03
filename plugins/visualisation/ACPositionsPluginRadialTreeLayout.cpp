@@ -62,7 +62,6 @@ ACPositionsPluginRadialTreeLayout::ACPositionsPluginRadialTreeLayout()
     //local vars
     m_origin.x=0.0f;
     m_origin.y=0.0f;
-    m_nodeParams = map<long,ACPositionsPluginRadialTreeNodeParams*>();
 }
 /*
 int ACPositionsPluginRadialTreeLayout::initialize() {
@@ -72,10 +71,14 @@ int ACPositionsPluginRadialTreeLayout::initialize() {
 
 void ACPositionsPluginRadialTreeLayout::updateNextPositions(ACMediaBrowser* _mediaBrowser) {
     std::cout << "ACPositionsPluginRadialTreeLayout::updateNextPositions" << std::endl;
+    this->mediaBrowser = _mediaBrowser;
 
-    mediaBrowser = _mediaBrowser;
+    if(mediaBrowser->getNumberOfMediaNodes()==0) {
+        mediaBrowser->setNeedsDisplay(true);
+        return;
+    }
 
-    if (!(mediaBrowser->getUserLog()->isEmpty()))
+    if (mediaBrowser->getNumberOfMediaNodes() > 0)
     {
         mediaBrowser->setLayout(AC_LAYOUT_TYPE_NODELINK);
         int librarySize = mediaBrowser->getLibrary()->getSize();
@@ -85,19 +88,21 @@ void ACPositionsPluginRadialTreeLayout::updateNextPositions(ACMediaBrowser* _med
             return;
         }
 
-        mediaBrowser->getUserLog()->dump();
+        //mediaBrowser->dumpNeighborNodes();
 
         // init params:
         for(std::map<long,ACPositionsPluginRadialTreeNodeParams*>::iterator nodeParam = m_nodeParams.begin(); nodeParam != m_nodeParams.end(); nodeParam++)
             delete nodeParam->second;
         m_nodeParams.clear();
 
-        std::list<long> nodeIds = mediaBrowser->getUserLog()->getNodeIds();
+        std::list<long> nodeIds = mediaBrowser->getNeighborNodeIds();
         for(std::list<long>::iterator nodeId = nodeIds.begin(); nodeId != nodeIds.end(); nodeId++)
-            m_nodeParams.insert( pair<long,ACPositionsPluginRadialTreeNodeParams*>( (*nodeId) ,new ACPositionsPluginRadialTreeNodeParams()) );
+            m_nodeParams[(*nodeId)] = new ACPositionsPluginRadialTreeNodeParams();
+        std::cout << "ACPositionsPluginRadialTreeLayout::updateNextPositions: m_nodeParams size " << m_nodeParams.size() << std::endl;
 
         int n = 0; // root node
-        ACPositionsPluginRadialTreeNodeParams* np = getParams(n);
+        //ACPositionsPluginRadialTreeNodeParams* np = getParams(n);
+        ACPositionsPluginRadialTreeNodeParams* np = m_nodeParams[n];
         m_maxDepth = 0;
 
         //std::cout << "ACPositionsPluginRadialTreeLayout::updateNextPositions::calcAngularWidth" << std::endl;
@@ -120,19 +125,19 @@ void ACPositionsPluginRadialTreeLayout::updateNextPositions(ACMediaBrowser* _med
         np->setAngle(m_theta2-m_theta1);
 
         ACPoint p;
-        for(int n=0; n<mediaBrowser->getUserLog()->getSize(); n++)
+        for(std::list<long>::iterator nodeId = nodeIds.begin(); nodeId != nodeIds.end(); nodeId++)
         {
             // CF: hack so that newly expanded nodes animate from their parental position
-            int pn = mediaBrowser->getUserLog()->getParentFromNodeId(n);
-            p = mediaBrowser->getMediaNode(n).getCurrentPosition();
+            int pn = mediaBrowser->getParentFromNeighborNode(*nodeId);
+            p = mediaBrowser->getMediaNode(*nodeId)->getCurrentPosition();
             if ( pn > 0 && p.x == 0.0f && p.y == 0.0f)
-                mediaBrowser->getMediaNode(n).setCurrentPosition(mediaBrowser->getMediaNode(pn).getCurrentPosition());//mediaBrowser->getMediaNode(n).setCurrentPosition(mediaBrowser->getUserLog()->getNodeFromMediaId(pn).getCurrentPosition());
+                mediaBrowser->getMediaNode(*nodeId)->setCurrentPosition(mediaBrowser->getMediaNode(pn)->getCurrentPosition());//mediaBrowser->getMediaNode(n).setCurrentPosition(mediaBrowser->getUserLog()->getNodeFromMediaId(pn).getCurrentPosition());
 
-            p.x = m_nodeParams[n]->getX()/150;
-            p.y = -m_nodeParams[n]->getY()/150;
+            p.x = m_nodeParams[*nodeId]->getX()/150;
+            p.y = -m_nodeParams[*nodeId]->getY()/150;
             p.z = 0;
-            mediaBrowser->setNodeNextPosition(n, p); // CF: note OSG's inverted Y //CF n instead of mediaBrowser->getUserLog()->getMediaIdFromNodeId(n)
-            mediaBrowser->setLoopIsDisplayed(n, true); // CF n instead of mediaBrowser->getUserLog()->getMediaIdFromNodeId(n)
+            mediaBrowser->setNodeNextPosition(*nodeId, p); // CF: note OSG's inverted Y //CF n instead of mediaBrowser->getUserLog()->getMediaIdFromNodeId(n)
+            mediaBrowser->setMediaNodeDisplayed(*nodeId, true); // CF n instead of mediaBrowser->getUserLog()->getMediaIdFromNodeId(n)
             //std::cout << "ACPositionsPluginRadialTreeLayout::updateNextPositions: Node " << n << " x " << m_nodeParams[n]->getX() << " y " << -m_nodeParams[n]->getY() << std::endl;
         }
         mediaBrowser->setNeedsDisplay(true);
@@ -157,7 +162,7 @@ void ACPositionsPluginRadialTreeLayout::calcAngularBounds(int r)
     // try to find previous parent of root
     int p = m_prevRoot;
     while ( true ) {
-        int pp = mediaBrowser->getUserLog()->getParentFromNodeId(p);
+        int pp = mediaBrowser->getParentFromNeighborNode(p);
         if ( pp == r ) {
             break;
         } else if ( pp == -1 ) {
@@ -198,11 +203,11 @@ double ACPositionsPluginRadialTreeLayout::calcAngularWidth(int n, int d)
 
     double diameter = d == 0.0f ? 0.0f : sqrt(w*w+h*h) / d;
 
-    if ( mediaBrowser->getUserLog()->getChildCountAtNodeId(n) > 0 ) { // CF: should be "if the branch at node n is expanded"
-        int child = mediaBrowser->getUserLog()->getFirstChildFromNodeId(n);
+    if ( mediaBrowser->getChildCountAtNeighborNode(n) > 0 ) { // CF: should be "if the branch at node n is expanded"
+        int child = mediaBrowser->getFirstChildFromNeighborNode(n);
         while ( child!= -1) {
             aw += calcAngularWidth(child,d+1);
-            child = mediaBrowser->getUserLog()->getNextSiblingFromNodeId(child);
+            child = mediaBrowser->getNextSiblingFromNeighborNode(child);
         }
         aw = max(diameter, aw);
     } else {
@@ -228,15 +233,15 @@ vector<int> ACPositionsPluginRadialTreeLayout::sortedChildren(int n)
 {
     double base = 0;
     // update base angle for node ordering
-    int p = mediaBrowser->getUserLog()->getParentFromNodeId(n);
+    int p = mediaBrowser->getParentFromNeighborNode(n);
     if ( p != -1 ) {
         base = normalize(atan2(m_nodeParams[p]->getY()-m_nodeParams[n]->getY(), m_nodeParams[p]->getX()-m_nodeParams[n]->getX()));
     }
 
-    int cc = mediaBrowser->getUserLog()->getChildCountAtNodeId(n);
+    int cc = mediaBrowser->getChildCountAtNeighborNode(n);
     if ( cc == 0 ) return vector<int>();//CF -1?
 
-    int c = mediaBrowser->getUserLog()->getFirstChildFromNodeId(n);
+    int c = mediaBrowser->getFirstChildFromNeighborNode(n);
 
     vector<int> _children;
     // CF: message from the Prefuse team:
@@ -257,7 +262,7 @@ vector<int> ACPositionsPluginRadialTreeLayout::sortedChildren(int n)
     while (i<cc)
     {
         _children.push_back(c);
-        c = mediaBrowser->getUserLog()->getNextSiblingFromNodeId(c);
+        c = mediaBrowser->getNextSiblingFromNeighborNode(c);
         ++i;
     }
     return _children;
@@ -274,7 +279,7 @@ vector<int> ACPositionsPluginRadialTreeLayout::sortedChildren(int n)
    angle(i) = normalize(-base +atan2(m_nodeParams[c]->getY()-m_nodeParams[n]->getY(), m_nodeParams[c]->getX()-m_nodeParams[n]->getX()));
    //std::cout << "angle("<<i<<") "<<angle(i)<< " for c=" << c << std::endl;
    ++i;
-   c = mediaBrowser->getUserLog()->getNextSiblingFromNodeId(c);
+   c = mediaBrowser->getNextSiblingFromNeighborNode(c);
   }
   idx = sort_index(angle);
 
@@ -300,7 +305,7 @@ void ACPositionsPluginRadialTreeLayout::layout(int n, double r, double theta1, d
         int c = childs[i];//*childIter;
         ACPositionsPluginRadialTreeNodeParams* cp = getParams(c);
         cfrac = cp->getWidth() / width;
-        if (  mediaBrowser->getUserLog()->getChildCountAtNodeId(c) > 0 ) { // && c.isExpanded()
+        if (  mediaBrowser->getChildCountAtNeighborNode(c) > 0 ) { // && c.isExpanded()
             layout(c, r+m_radiusInc, theta1 + nfrac*dtheta, theta1 + (nfrac+cfrac)*dtheta);
         }
         setPolarLocation(c,r, theta1 + nfrac*dtheta + cfrac*dtheta2);

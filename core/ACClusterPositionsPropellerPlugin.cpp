@@ -38,21 +38,21 @@
 
 static double compute_distance(vector<ACMediaFeatures*> &obj1, vector<ACMediaFeatures*> &obj2, const vector<float> &weights, bool inverse_features)
 {
-        assert(obj1.size() == obj2.size() && obj1.size() == weights.size());
-        int feature_count = obj1.size();
+    assert(obj1.size() == obj2.size() && obj1.size() == weights.size());
+    int feature_count = obj1.size();
 
-        double dis = 0.0;
+    double dis = 0.0;
 
-        for (int f=0; f<feature_count; f++) {
-                //		ACEuclideanDistance* E = new ACEuclideanDistance (obj1[f], obj2[f]);
-                //		dis += E->distance() * (inverse_features?(1.0-weights[f]):weights[f]);
-                float temp=obj1[f]->getFeaturesVector().distance(obj2[f]->getFeaturesVector());
-                dis +=temp*temp*(inverse_features?(1.0-weights[f]):weights[f]);
-                //	delete E;
-        }
-        dis = sqrt(dis);
+    for (int f=0; f<feature_count; f++) {
+        //		ACEuclideanDistance* E = new ACEuclideanDistance (obj1[f], obj2[f]);
+        //		dis += E->distance() * (inverse_features?(1.0-weights[f]):weights[f]);
+        float temp=obj1[f]->getFeaturesVector().distance(obj2[f]->getFeaturesVector());
+        dis +=temp*temp*(inverse_features?(1.0-weights[f]):weights[f]);
+        //	delete E;
+    }
+    dis = sqrt(dis);
 
-        return dis;
+    return dis;
 }
 
 // this one is mostly used
@@ -119,7 +119,7 @@ void ACClusterPositionsPropellerPlugin::updateNextPositions(ACMediaBrowser* medi
     ACPoint p;
     p.x = p.y = p.z = 0.0;
     double t = getTime();
-    mediaBrowser->getMediaNode(referenceNode).setNextPosition(p, t);
+    mediaBrowser->getMediaNode(referenceNode)->setNextPosition(p, t);
 
     // srand(1234);
 
@@ -134,93 +134,93 @@ void ACClusterPositionsPropellerPlugin::updateNextPositions(ACMediaBrowser* medi
     float *dtmax = new float[clusterCount];
 
     for (ci=0;ci<clusterCount;ci++) {
-            rmin[ci] = FLT_MAX;
-            rmax[ci] = 0;
-            dtmin[ci] = FLT_MAX;
-            dtmax[ci] = 0;
+        rmin[ci] = FLT_MAX;
+        rmax[ci] = 0;
+        dtmin[ci] = FLT_MAX;
+        dtmax[ci] = 0;
     }
 
     // SD 2011 may - normalization of radius and angle to use full available range
-    for (ACMediaNodes::const_iterator node = mediaBrowser->getLoopAttributes().begin(); node != mediaBrowser->getLoopAttributes().end(); ++node) {
+    for (ACMediaNodes::const_iterator node = mediaBrowser->getMediaNodes().begin(); node != mediaBrowser->getMediaNodes().end(); ++node) {
 
-            if(node->getNavigationLevel() < navigationLevel) continue;
+        if(node->second->getNavigationLevel() < navigationLevel) continue;
 
-            ci = (*node).getClusterId();
+        ci = node->second->getClusterId();
 
-            if(library->getMedia((*node).getMediaId())->getType() == library->getMediaType() && library->getMedia(referenceNode)->getType() == library->getMediaType()){//CF multimedia compatibility
-                    r = compute_distance(library->getMedia(referenceNode)->getAllPreProcFeaturesVectors(),
-                                                     library->getMedia((*node).getMediaId())->getAllPreProcFeaturesVectors(),
-                                                             featureWeights, false) * 10.0;
-                    if (r<rmin[ci]) {
-                            rmin[ci] = r;
-                    }
-                    if (r>rmax[ci]) {
-                            rmax[ci] = r;
-                    }
+        if(library->getMedia(node->second->getMediaId())->getType() == library->getMediaType() && library->getMedia(referenceNode)->getType() == library->getMediaType()){//CF multimedia compatibility
+            r = compute_distance(library->getMedia(referenceNode)->getAllPreProcFeaturesVectors(),
+                                 library->getMedia(node->second->getMediaId())->getAllPreProcFeaturesVectors(),
+                                 featureWeights, false) * 10.0;
+            if (r<rmin[ci]) {
+                rmin[ci] = r;
             }
-
-            if(library->getMedia((*node).getMediaId())->getType() == library->getMediaType()){//CF multimedia compatibility
-                    dt = compute_distance(library->getMedia((*node).getMediaId())->getAllPreProcFeaturesVectors(), mediaBrowser->getClusterCenter(ci), featureWeights, false) / 2.0 * 10.0;
-
-                    if (dt<dtmin[ci]) {
-                            dtmin[ci] = dt;
-                    }
-                    if (dt>dtmax[ci]) {
-                            dtmax[ci] = dt;
-                    }
+            if (r>rmax[ci]) {
+                rmax[ci] = r;
             }
+        }
+
+        if(library->getMedia(node->second->getMediaId())->getType() == library->getMediaType()){//CF multimedia compatibility
+            dt = compute_distance(library->getMedia(node->second->getMediaId())->getAllPreProcFeaturesVectors(), mediaBrowser->getClusterCenter(ci), featureWeights, false) / 2.0 * 10.0;
+
+            if (dt<dtmin[ci]) {
+                dtmin[ci] = dt;
+            }
+            if (dt>dtmax[ci]) {
+                dtmax[ci] = dt;
+            }
+        }
     }
 
-    for (ACMediaNodes::const_iterator node = mediaBrowser->getLoopAttributes().begin(); node != mediaBrowser->getLoopAttributes().end(); ++node) {
-            if(node->getNavigationLevel() < navigationLevel) continue;
+    for (ACMediaNodes::const_iterator node = mediaBrowser->getMediaNodes().begin(); node != mediaBrowser->getMediaNodes().end(); ++node) {
+        if(node->second->getNavigationLevel() < navigationLevel) continue;
 
-            int ci = (*node).getClusterId();
+        int ci = node->second->getClusterId();
 
-            // SD TODO - test both approaches
-            r=1;
-            if(library->getMedia((*node).getMediaId())->getType() == library->getMediaType() && library->getMedia(referenceNode)->getType() == library->getMediaType())//CF
-                    r = compute_distance(library->getMedia(referenceNode)->getAllPreProcFeaturesVectors(),
-                                                     library->getMedia((*node).getMediaId())->getAllPreProcFeaturesVectors(),
-                                                     featureWeights, false) * 10.0;
-            if (rmax[ci]>rmin[ci]) {
-                    r = 0.01f + 0.89f * (r - rmin[ci])/(rmax[ci]-rmin[ci]);
-            }
-            else {
-                    r = 0.5f;
-            }
-            r /= 2.0f;
+        // SD TODO - test both approaches
+        r=1;
+        if(library->getMedia(node->second->getMediaId())->getType() == library->getMediaType() && library->getMedia(referenceNode)->getType() == library->getMediaType())//CF
+            r = compute_distance(library->getMedia(referenceNode)->getAllPreProcFeaturesVectors(),
+                                 library->getMedia(node->second->getMediaId())->getAllPreProcFeaturesVectors(),
+                                 featureWeights, false) * 10.0;
+        if (rmax[ci]>rmin[ci]) {
+            r = 0.01f + 0.89f * (r - rmin[ci])/(rmax[ci]-rmin[ci]);
+        }
+        else {
+            r = 0.5f;
+        }
+        r /= 2.0f;
 
-            // dt = 1;
-            if(library->getMedia((*node).getMediaId())->getType() == library->getMediaType())//CF multimedia compatibility
-                    dt = compute_distance(library->getMedia((*node).getMediaId())->getAllPreProcFeaturesVectors(), mediaBrowser->getClusterCenter(ci), featureWeights, false) / 2.0 * 10.0;
-            if (dtmax[ci]>dtmin[ci]) {
-                    dt = -0.3f + 1.6f * (dt - dtmin[ci])/(dtmax[ci]-dtmin[ci]);
-            }
-            else {
-                    dt = 0.5f;
-            }
-            theta = (ci + dt) * 2 * M_PI / (float)clusterCount;
+        // dt = 1;
+        if(library->getMedia(node->second->getMediaId())->getType() == library->getMediaType())//CF multimedia compatibility
+            dt = compute_distance(library->getMedia(node->second->getMediaId())->getAllPreProcFeaturesVectors(), mediaBrowser->getClusterCenter(ci), featureWeights, false) / 2.0 * 10.0;
+        if (dtmax[ci]>dtmin[ci]) {
+            dt = -0.3f + 1.6f * (dt - dtmin[ci])/(dtmax[ci]-dtmin[ci]);
+        }
+        else {
+            dt = 0.5f;
+        }
+        theta = (ci + dt) * 2 * M_PI / (float)clusterCount;
 
-            //p.x = 4*sin(theta)*r;//CF dirty trick to optimize the space, waiting for better ;)
-            p.x = sin(theta)*r;
-            //p.y = 4*cos(theta)*r;//CF dirty trick to optimize the space, waiting for better ;)
-            p.y = cos(theta)*r;
-            p.z = 0.0;
+        //p.x = 4*sin(theta)*r;//CF dirty trick to optimize the space, waiting for better ;)
+        p.x = sin(theta)*r;
+        //p.y = 4*cos(theta)*r;//CF dirty trick to optimize the space, waiting for better ;)
+        p.y = cos(theta)*r;
+        p.z = 0.0;
 
-            //printf("computed next position: theta:%f,r=%f,  (%f %f %f)\n", theta, r, p.x, p.y, p.z);//CF free the console
-            double t = getTime();
-            mediaBrowser->getMediaNode( (*node).getNodeId() ).setNextPosition(p, t); // (*node) is const hence getMediaNode( getNodeId ) allows node modification
+        //printf("computed next position: theta:%f,r=%f,  (%f %f %f)\n", theta, r, p.x, p.y, p.z);//CF free the console
+        double t = getTime();
+        mediaBrowser->getMediaNode( node->second->getMediaId() )->setNextPosition(p, t); // (*node) is const hence getMediaNode( getNodeId ) allows node modification
 
-            maxr = max(maxr,p.x);
-            maxr = max(maxr,p.y);
-            #ifdef USE_DEBUG
-            //cout<<"media n°"<<node->getMediaId()<<" cluster:"<<node->getClusterId()<<" x="<<p.x<<" y="<<p.y<<endl;
-            #endif
+        maxr = max(maxr,p.x);
+        maxr = max(maxr,p.y);
+#ifdef USE_DEBUG
+        //cout<<"media n°"<<node->second->getMediaId()<<" cluster:"<<node->second->getClusterId()<<" x="<<p.x<<" y="<<p.y<<endl;
+#endif
     }
 
     p.x = p.y = p.z = 0.0;
     t = getTime();
-    mediaBrowser->getMediaNode(referenceNode).setNextPosition(p, t);
+    mediaBrowser->getMediaNode(referenceNode)->setNextPosition(p, t);
 
     std::cout << "Max prop: " << maxr << std::endl;
     // printf("PROPELLER \n");

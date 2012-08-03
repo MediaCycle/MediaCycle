@@ -37,79 +37,35 @@
 #include <osg/Version>
 using namespace osg;
 
-//#define IMAGE_BORDER
-
 ACOsgLibraryRenderer::ACOsgLibraryRenderer()
     :ACOsgMediaRenderer()
 {
+    width = 0;
+    height = 0;
     this->changeSetting(this->setting);
 }
 
 void ACOsgLibraryRenderer::init()
 {
     node_color = Vec4(0.4f, 0.4f, 0.4f, 1.0f);
-    image_image = 0;
-    image_geode = 0;
-    border_geode = 0;
-    image_transform = 0;
-    image_texture = 0;
-    thumbnail = 0;
 
-    title_text = 0;
-    author_text = 0;
-    curator_text = 0;
-    year_text = 0;
-    publisher_text = 0;
-    license_text = 0;
-    website_text = 0;
-    medias_text = 0;
+    library_title.caption = "Title: ";
+    library_author.caption = "Author: ";
+    library_year.caption = "Year: ";
+    library_publisher.caption = "Publisher: ";
+    library_license.caption = "License: ";
+    library_website.caption = "Website: ";
+    library_medias_number.caption = "Elements: "; //"Medias: ";
 
-    title_geode = 0;
-    author_geode = 0;
-    curator_geode = 0;
-    year_geode = 0;
-    publisher_geode = 0;
-    license_geode = 0;
-    website_geode = 0;
-    medias_geode = 0;
+    curator_name.caption = "Curator: ";
+    curator_email.caption = "Email: ";
+    curator_website.caption = "Website: ";
+    curator_location.caption = "From: ";
 
-    title="";
-    author="";
-    curator="";
-    year="";
-    publisher="";
-    license="";
-    website="";
-    cover="";
-    medias=0;
-
-    title_x = 0.0f;
-    title_y = 0.0f;
-    author_x = 0.0f;
-    author_y = 0.0f;
-    curator_x = 0.0f;
-    curator_y = 0.0f;
-    year_x = 0.0f;
-    year_y = 0.0f;
-    publisher_x = 0.0f;
-    publisher_y = 0.0f;
-    license_x = 0.0f;
-    license_y = 0.0f;
-    website_x = 0.0f;
-    website_y = 0.0f;
-    cover_x = 0.0f;
-    cover_y = 0.0f;
-    medias_x = 0.0f;
-    medias_y = 0.0f;
-
-    title_caption = "Title: ";
-    author_caption = "Author: ";
-    curator_caption = "Curator: ";
-    year_caption = "Year: ";
-    publisher_caption = "Publisher: ";
-    license_caption = "License: ";
-    website_caption = "Website: ";
-    medias_caption = "Elements: "; //"Medias: ";
+    library_node = new MatrixTransform();
+    curator_node = new MatrixTransform();
+    media_node->addChild(library_node);
+    media_node->addChild(curator_node);
 }
 
 void ACOsgLibraryRenderer::changeSetting(ACSettingType _setting)
@@ -136,31 +92,7 @@ void ACOsgLibraryRenderer::changeSetting(ACSettingType _setting)
 }
 
 ACOsgLibraryRenderer::~ACOsgLibraryRenderer() {
-    image_image = 0;
-    image_geode = 0;
-    border_geode = 0;
-    image_transform = 0;
-    image_texture = 0;
-    thumbnail = 0;
     font = 0;
-
-    title_text = 0;
-    author_text = 0;
-    curator_text = 0;
-    year_text = 0;
-    publisher_text = 0;
-    license_text = 0;
-    website_text = 0;
-    medias_text = 0;
-
-    title_geode = 0;
-    author_geode = 0;
-    curator_geode = 0;
-    year_geode = 0;
-    publisher_geode = 0;
-    license_geode = 0;
-    website_geode = 0;
-    medias_geode = 0;
 }
 
 void ACOsgLibraryRenderer::textGeode(std::string _string, osg::ref_ptr<osgText::Text>& _text, osg::ref_ptr<osg::Geode>& _geode,osg::Vec3 pos)
@@ -193,21 +125,20 @@ void ACOsgLibraryRenderer::textGeode(std::string _string, osg::ref_ptr<osgText::
     //_geode->setCullingActive(false);
 }
 
-void ACOsgLibraryRenderer::imageGeode(bool flip, float sizemul, float zoomin) {
-    image_transform = 0;
-    image_geode = 0;
-    image_texture = 0;
-    thumbnail = 0;
+void ACOsgLibraryRenderer::imageGeode(ACOsgLibraryImageRenderer& _renderer) {
+    _renderer.transform = 0;
+    osg::ref_ptr<osg::Geode> image_geode = 0;
+    osg::ref_ptr<osg::Texture2D> image_texture = 0;
+    osg::ref_ptr<osg::Image> thumbnail = 0;
 
-    if(cover!=""){
-        std::cout << "ACOsgLibraryRenderer::imageGeode " << cover << std::endl;
+    if(_renderer.file!=""){
+        std::cout << "ACOsgLibraryRenderer::imageGeode " << _renderer.file << std::endl;
         int i;
         double xstep = 0.0005;
         float zpos = 0;
         double imagex, imagey;
         int width, height;
         float scale;
-        std::string thumbnail_filetitle;
         StateSet *state;
         Vec3Array* vertices;
         osg::ref_ptr<DrawElementsUInt> line_p;
@@ -217,7 +148,7 @@ void ACOsgLibraryRenderer::imageGeode(bool flip, float sizemul, float zoomin) {
 
         // Texture State (image)
 
-        osg::ref_ptr<osgDB::ReaderWriter> readerWriter = osgDB::Registry::instance()->getReaderWriterForExtension(boost::filesystem::extension(cover).substr(1));
+        osg::ref_ptr<osgDB::ReaderWriter> readerWriter = osgDB::Registry::instance()->getReaderWriterForExtension(boost::filesystem::extension(_renderer.file).substr(1));
 
         if (!readerWriter){
             cerr << "<ACOsgLibraryRenderer::imageGeode: problem loading file, no OSG plugin available" << endl;
@@ -227,7 +158,7 @@ void ACOsgLibraryRenderer::imageGeode(bool flip, float sizemul, float zoomin) {
             cout <<"<ACOsgLibraryRenderer::imageGeode: using OSG plugin: "<< readerWriter->className() <<std::endl;
         }
 
-        thumbnail = osgDB::readImageFile(cover);
+        thumbnail = osgDB::readImageFile(_renderer.file);
         readerWriter = 0;
 
         if (!thumbnail){
@@ -241,7 +172,7 @@ void ACOsgLibraryRenderer::imageGeode(bool flip, float sizemul, float zoomin) {
 
         width = thumbnail->s();
         height = thumbnail->t();
-        image_transform = new MatrixTransform();
+        _renderer.transform = new MatrixTransform();
         image_geode = new Geode();
         image_geometry = new Geometry();
 
@@ -277,7 +208,7 @@ void ACOsgLibraryRenderer::imageGeode(bool flip, float sizemul, float zoomin) {
 
         // Texture Coordinates
         texcoord = new Vec2Array;
-        float a = (1.0-(1.0/zoomin)) / 2.0;
+        float a = 0.0;//(1.0-(1.0/zoomin)) / 2.0;
         float b = 1.0-a;
         texcoord->push_back(osg::Vec2(a, a));
         texcoord->push_back(osg::Vec2(b, a));
@@ -293,168 +224,120 @@ void ACOsgLibraryRenderer::imageGeode(bool flip, float sizemul, float zoomin) {
         //image_geometry->setColorArray(colors);
         //image_geometry->setColorBinding(Geometry::BIND_OVERALL);
         image_geode->addDrawable(image_geometry);
-        image_transform->addChild(image_geode);
-
-#ifdef IMAGE_BORDER
-        //border by box, more smooth
-        TessellationHints *hints = new TessellationHints();
-        hints->setDetailRatio(0.0);
-        border_geode->addDrawable(new osg::ShapeDrawable(new osg::Box(osg::Vec3(0.0f,0.0f,zpos-0.0001),2*(imagex+5*xstep),2*(imagey+5*xstep),0), hints));
-
-        state = border_geode->getOrCreateStateSet();
-#if defined(APPLE_IOS)
-        state->setMode(GL_LIGHTING, osg::StateAttribute::PROTECTED | osg::StateAttribute::OFF );
-#else
-        state->setMode(GL_LIGHTING, osg::StateAttribute::ON );
-        state->setMode(GL_BLEND, StateAttribute::ON);
-        state->setMode(GL_LINE_SMOOTH, StateAttribute::ON);
-#endif
-        image_transform->addChild(border_geode);
-
-#endif
+        _renderer.transform->addChild(image_geode);
         //image_transform->setUserData(new ACRefId(node_index));
         //image_geode->setUserData(new ACRefId(node_index));
     }
 }
 
 void ACOsgLibraryRenderer::prepareNodes() {
-
-    /*if(cover!="" && !image_transform){
-        imageGeode();
-        media_node->addChild(image_transform);
-    }
-    if(text_string!="" && !text_geode){
-        textGeode();
-        media_node->addChild(text_geode);
-    }*/
     //medias_caption = ACMediaFactory::getInstance().getNormalCaseStringFromMediaType(this->media_cycle->getMediaType()) + "s";
 }
 
-void ACOsgLibraryRenderer::setTitle(std::string _title)
+void ACOsgLibraryRenderer::updateTextRenderer(ACOsgLibraryTextRenderer& _renderer, std::string _value, osg::ref_ptr<osg::MatrixTransform> _node)
 {
-    if(_title=="")
+    if(_value=="")
         return;
-    if(this->title!=_title){
-        this->title=_title;
-        if(title_geode)
-            media_node->removeChild(title_geode);
-        textGeode(title_caption+title,title_text,title_geode,osg::Vec3(title_x,title_y,0.0));
-        media_node->addChild(title_geode);
+    if(_renderer.value!=_value){
+        _renderer.value=_value;
+        if(_renderer.geode)
+            _node->removeChild(_renderer.geode);
+        textGeode(_renderer.caption+_renderer.value,_renderer.text,_renderer.geode,osg::Vec3(_renderer.x,_renderer.y,0.0));
+        _node->addChild(_renderer.geode);
     }
 }
 
-void ACOsgLibraryRenderer::setAuthor(std::string _author)
+void ACOsgLibraryRenderer::updateImageRenderer(ACOsgLibraryImageRenderer& _renderer, std::string _file, osg::ref_ptr<osg::MatrixTransform> _node)
 {
-    if(_author=="")
+    if(_file=="")
         return;
-    if(this->author!=_author){
-        this->author=_author;
-        if(author_geode)
-            media_node->removeChild(author_geode);
-        textGeode(author_caption+author,author_text,author_geode,osg::Vec3(author_x,author_y,0.0));
-        media_node->addChild(author_geode);
-    }
-}
-
-void ACOsgLibraryRenderer::setPublisher(std::string _publisher)
-{
-    if(_publisher=="")
-        return;
-    if(this->publisher!=_publisher){
-        this->publisher=_publisher;
-        if(publisher_geode)
-            media_node->removeChild(publisher_geode);
-        textGeode(publisher_caption+publisher,publisher_text,publisher_geode,osg::Vec3(publisher_x,publisher_y,0.0));
-        media_node->addChild(publisher_geode);
-    }
-}
-
-/*void ACOsgLibraryRenderer::setCurator(std::string _curator)
-{
-    if(_curator=="")
-        return;
-    if(this->curator!=_curator){
-        this->curator=_curator;
-        if(curator_geode)
-            media_node->removeChild(curator_geode);
-        textGeode(curator_caption+curator,curator_text,curator_geode,osg::Vec3(curator_x,curator_y,0.0));
-        media_node->addChild(curator_geode);
-    }
-}*/
-
-void ACOsgLibraryRenderer::setCover(std::string _cover)
-{
-    if(_cover=="")
-        return;
-    if(this->cover!=_cover){
-        this->cover=_cover;
-        if(image_transform)
-            media_node->removeChild(image_transform);
-        imageGeode();
-        media_node->addChild(image_transform);
-    }
-}
-
-void ACOsgLibraryRenderer::setNumberOfMedia(int _number)
-{
-    if(_number==0)
-        return;
-    if(this->medias!=_number){
-        this->medias=_number;
-        if(medias_geode)
-            media_node->removeChild(medias_geode);
-        std:stringstream medias_number;
-        medias_number << medias_caption << medias;
-        textGeode(medias_number.str(),medias_text,medias_geode,osg::Vec3(medias_x,medias_y,0.0));
-        media_node->addChild(medias_geode);
+    if(_renderer.file!=_file){
+        _renderer.file=_file;
+        if(_renderer.transform)
+            _node->removeChild(_renderer.transform);
+        imageGeode(_renderer);
+        _node->addChild(_renderer.transform);
     }
 }
 
 void ACOsgLibraryRenderer::updateNodes(double ratio) {
     if(media_cycle && media_cycle->getLibrary()){
-        this->setCover(media_cycle->getLibrary()->getCover());
+        this->updateImageRenderer(library_cover,media_cycle->getLibrary()->getCover(),library_node);
 
-        if(this->cover!=""){
-            title_x = author_x = curator_x = year_x = publisher_x = license_x = website_x = medias_x = max_side_size/2;
+        if(this->library_cover.file!=""){
+            library_title.x = library_author.x = library_year.x = library_publisher.x = library_license.x = library_website.x = library_medias_number.x = max_side_size/2;
         }
 
-        medias_y = 0*line_sep-max_side_size/2;
-        //curator_y = 1*line_sep-max_side_size/2;
-        publisher_y = 1*line_sep-max_side_size/2;
-        author_y = 2*line_sep-max_side_size/2;
-        title_y = 3*line_sep-max_side_size/2;
+        //CF be careful with positionning, overlapping text geodes explode CPU usage
+        library_title.y = 3*line_sep-max_side_size/2;
+        library_author.y = 2*line_sep-max_side_size/2;
+        library_publisher.y = 1*line_sep-max_side_size/2;
+        library_medias_number.y = 0*line_sep-max_side_size/2;
 
-        this->setTitle(media_cycle->getLibrary()->getTitle());
-        this->setAuthor(media_cycle->getLibrary()->getAuthor());
-        this->setCurator(media_cycle->getLibrary()->getCuratorName());
-        this->setYear(media_cycle->getLibrary()->getYear());
-        this->setPublisher(media_cycle->getLibrary()->getPublisher());
-        this->setLicense(media_cycle->getLibrary()->getLicense());
-        this->setWebsite(media_cycle->getLibrary()->getWebsite());
-        this->setNumberOfMedia(media_cycle->getLibrarySize());
+        this->updateTextRenderer(library_title,media_cycle->getLibrary()->getTitle(),library_node);
+        this->updateTextRenderer(library_author,media_cycle->getLibrary()->getAuthor(),library_node);
+        //this->updateTextRenderer(library_year,media_cycle->getLibrary()->getYear(),library_node);
+        this->updateTextRenderer(library_publisher,media_cycle->getLibrary()->getPublisher(),library_node);
+        //this->updateTextRenderer(library_license,media_cycle->getLibrary()->getLicense(),library_node);
+        //this->updateTextRenderer(library_website,media_cycle->getLibrary()->getWebsite(),library_node);
+
+        std:stringstream library_medias_number_info;
+        if(media_cycle->getBrowserMode() == AC_MODE_NEIGHBORS)
+            library_medias_number_info << media_cycle->getNumberOfMediaNodes() << "/";
+        library_medias_number_info << media_cycle->getLibrarySize();
+        this->updateTextRenderer(library_medias_number,library_medias_number_info.str(),library_node);
+
+        this->updateImageRenderer(curator_picture,media_cycle->getLibrary()->getCuratorPicture(),curator_node);
+
+        if(this->library_cover.file!=""){
+            curator_name.x = curator_email.x = curator_website.x = curator_location.x = max_side_size/2;
+        }
+
+        //CF be careful with positionning, overlapping text geodes explode CPU usage
+        curator_name.y = 3*line_sep-max_side_size/2;
+        curator_email.y = 2*line_sep-max_side_size/2;
+        curator_website.y = 1*line_sep-max_side_size/2;
+        curator_location.y = 0*line_sep-max_side_size/2;
+
+        this->updateTextRenderer(curator_name,media_cycle->getLibrary()->getCuratorName(),curator_node);
+        this->updateTextRenderer(curator_email,media_cycle->getLibrary()->getCuratorEmail(),curator_node);
+        this->updateTextRenderer(curator_website,media_cycle->getLibrary()->getCuratorWebsite(),curator_node);
+        this->updateTextRenderer(curator_location,media_cycle->getLibrary()->getCuratorLocation(),curator_node);
     }
 
-    float x,y,z;
-    x = max_side_size/2;
-    y = max_side_size/2+line_sep;
-    z = 0;
+    float library_x,library_y,library_z;
+    library_x = max_side_size/2;
+    library_y = max_side_size/2+line_sep;
+    library_z = 0.0f;
+
+    float curator_x,curator_y,curator_z;
+    if(setting==AC_SETTING_INSTALLATION)
+        curator_x = 2.0f*width/4.0f; //CF should check the max text length of curator/library lines instead
+    else
+        curator_x = 3.0f*width/4.0f;
+    curator_y = max_side_size/2+line_sep;
+    curator_z = 0.0f;
 
 #ifdef AUTO_TRANSFORM
-    media_node->setPosition(Vec3(x,y,z));
-    //media_node->setRotation(Quat(0.0, 0.0, 1.0, -media_cycle_angle));
-    //media_node->setScale(Vec3(localscale/media_cycle_zoom,localscale/media_cycle_zoom,localscale/media_cycle_zoom));
+    library_node->setPosition(Vec3(library_x,library_y,library_z));
+    curator_node->setPosition(Vec3(curator_x,curator_y,curator_z));
+    //library_node->setRotation(Quat(0.0, 0.0, 1.0, -media_cycle_angle));
+    //library_node->setScale(Vec3(localscale/media_cycle_zoom,localscale/media_cycle_zoom,localscale/media_cycle_zoom));
 #else
 
-    Matrix T;
-    T.makeTranslate(Vec3(x, y, z)); // omr*p.z + ratio*p2.z));
+    Matrix library_matrix,curator_matrix;
+    library_matrix.makeTranslate(Vec3(library_x, library_y, library_z)); // omr*p.z + ratio*p2.z));
     /*T =  Matrix::rotate(-media_cycle_angle,Vec3(0.0,0.0,1.0))
    * Matrix::scale(localscale/media_cycle_zoom,localscale/media_cycle_zoom,localscale/media_cycle_zoom)
                         * T;*/
-    media_node->setMatrix(T);
+    library_node->setMatrix(library_matrix);
+    curator_matrix.makeTranslate(Vec3(curator_x, curator_y, curator_z)); // omr*p.z + ratio*p2.z));
+    curator_node->setMatrix(curator_matrix);
+
 #endif //AUTO_TRANSFORM
 }
 
 void ACOsgLibraryRenderer:: updateSize(int w, int h){
-
-
+    this->width = w;
+    this->height = h;
 }

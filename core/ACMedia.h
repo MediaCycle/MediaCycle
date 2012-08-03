@@ -45,129 +45,129 @@
 #include <tinyxml.h>
 
 class ACMedia {
-	// contains the minimal information about a media
-	// uses vector of vector to store media features. 
-	// features_vectors[i] = vector of numbers calculated by plugin number i (starting at 0)
-	// note 230210: features_vectors[i] could later be grouped with other features, depending on the configuration file (or the preferences menu)
+    // contains the minimal information about a media
+    // uses vector of vector to store media features.
+    // features_vectors[i] = vector of numbers calculated by plugin number i (starting at 0)
+    // note 230210: features_vectors[i] could later be grouped with other features, depending on the configuration file (or the preferences menu)
 protected:
-		
-    int mid;
-	int parentid; //CF so that segments can be defined as ACMedia having other ACMedia as parents
-	ACMediaType media_type;
-	int height, width;
-	std::vector<ACMediaFeatures*> features_vectors;
-	std::vector<ACMediaFeatures*> preproc_features_vectors;
-	std::string filename;
-	std::string filename_thumbnail;
-	std::string label;
-    std::string key; // media document identifier
-	char  **text_tags;
-	char  **hyper_links;
-	std::vector<ACMedia*> segments;
-	float start, end; // seconds
-        int startInt, endInt; // frame numbers
-	std::vector<std::string> mtf_file_names;
-private:
-	void init();
-	
-public:
-	ACMedia();
-	virtual ~ACMedia(); // make this virtual to ensure that destructors of derived classes will be called
 
-	ACMediaType getMediaType() {return media_type;};
-	virtual ACMediaType getActiveSubMediaType() {return media_type;};
-	
-	void setId(int _id) {mid = _id;} // SD TODO - should check for duplicate id?
-	int getId() {return mid;}
-	void setParentId(int _parentid) {parentid = _parentid;} //CF so that segments can be defined as ACMedia having other ACMedia as parents
-	int getParentId() {return parentid;}
-	
-	double getDuration(){return this->getEnd()-this->getStart();}
-	
-	void addSegment(ACMedia* _segment){segments.push_back(_segment);}
-	//void removeSegment(ACMedia* _segment){segments.erase(_segment);}//CF wow, tricky
-	std::vector<ACMedia*> &getAllSegments() { return segments; }
-        void deleteAllSegments() { segments.clear();}
-	ACMedia* getSegment(int i) { return segments[i]; }
-	int getNumberOfSegments(){return segments.size();}
-	
-	virtual std::vector<ACMediaFeatures*> &getAllFeaturesVectors() { return features_vectors; }
-	virtual ACMediaFeatures* getFeaturesVector(int i);
-	virtual ACMediaFeatures* getFeaturesVector(std::string feature_name);
-	virtual int getNumberOfFeaturesVectors() {return features_vectors.size();}
-	void addFeaturesVector(ACMediaFeatures *aFeatures) { this->features_vectors.push_back(aFeatures); }
-	virtual std::vector<std::string> getListOfFeaturesPlugins();
-	
-	virtual std::vector<ACMediaFeatures*> &getAllPreProcFeaturesVectors() { return preproc_features_vectors; }
-	virtual ACMediaFeatures* getPreProcFeaturesVector(int i);
-	virtual ACMediaFeatures* getPreProcFeaturesVector(std::string feature_name);
-	virtual int getNumberOfPreProcFeaturesVectors() {return preproc_features_vectors.size();}
-	void addPreProcFeaturesVector(ACMediaFeatures *aFeatures) { this->preproc_features_vectors.push_back(aFeatures); }
-	virtual std::vector<std::string> getListOfPreProcFeaturesPlugins();
-	int replacePreProcFeatures(std::vector<ACMediaFeatures*> newFeatures);
-	virtual void cleanPreProcFeaturesVector(void);
-	virtual void defaultPreProcFeatureInit(void);
-	
-	std::string getFileName() { return filename; }
-	void setFileName(std::string s) { filename = s; }
-	void setFileName(const char* c) { std::string s(c); filename = s; }
+    int mid;
+    int parentid; //CF so that segments can be defined as ACMedia having other ACMedia as parents
+    ACMediaType media_type;
+    int height, width;
+    std::vector<ACMediaFeatures*> features_vectors;
+    std::vector<ACMediaFeatures*> preproc_features_vectors;
+    std::string filename;
+    std::string filename_thumbnail;
+    std::string label;
+    std::string key; // media document identifier
+    char  **text_tags;
+    char  **hyper_links;
+    std::vector<ACMedia*> segments;
+    float start, end; // seconds
+    int startInt, endInt; // frame numbers
+    std::vector<std::string> mtf_file_names;
+private:
+    void init();
+
+public:
+    ACMedia();
+    virtual ~ACMedia(); // make this virtual to ensure that destructors of derived classes will be called
+
+    ACMediaType getMediaType() {return media_type;};
+    virtual ACMediaType getActiveSubMediaType() {return media_type;};
+
+    void setId(int _id) {mid = _id;} // SD TODO - should check for duplicate id?
+    int getId() {return mid;}
+    void setParentId(int _parentid) {parentid = _parentid;} //CF so that segments can be defined as ACMedia having other ACMedia as parents
+    int getParentId() {return parentid;}
+
+    double getDuration(){return this->getEnd()-this->getStart();}
+
+    void addSegment(ACMedia* _segment){segments.push_back(_segment);}
+    //void removeSegment(ACMedia* _segment){segments.erase(_segment);}//CF wow, tricky
+    std::vector<ACMedia*> &getAllSegments() { return segments; }
+    void deleteAllSegments() { segments.clear();}
+    ACMedia* getSegment(int i) { return segments[i]; }
+    int getNumberOfSegments(){return segments.size();}
+
+    virtual std::vector<ACMediaFeatures*> &getAllFeaturesVectors() { return features_vectors; }
+    virtual ACMediaFeatures* getFeaturesVector(int i);
+    virtual ACMediaFeatures* getFeaturesVector(std::string feature_name);
+    virtual int getNumberOfFeaturesVectors() {return features_vectors.size();}
+    void addFeaturesVector(ACMediaFeatures *aFeatures) { this->features_vectors.push_back(aFeatures); }
+    virtual std::vector<std::string> getListOfFeaturesPlugins();
+
+    virtual std::vector<ACMediaFeatures*> &getAllPreProcFeaturesVectors() { return preproc_features_vectors; }
+    virtual ACMediaFeatures* getPreProcFeaturesVector(int i);
+    virtual ACMediaFeatures* getPreProcFeaturesVector(std::string feature_name);
+    virtual int getNumberOfPreProcFeaturesVectors() {return preproc_features_vectors.size();}
+    void addPreProcFeaturesVector(ACMediaFeatures *aFeatures) { this->preproc_features_vectors.push_back(aFeatures); }
+    virtual std::vector<std::string> getListOfPreProcFeaturesPlugins();
+    int replacePreProcFeatures(std::vector<ACMediaFeatures*> newFeatures);
+    virtual void cleanPreProcFeaturesVector(void);
+    virtual void defaultPreProcFeatureInit(void);
+
+    std::string getFileName() { return filename; }
+    void setFileName(std::string s) { filename = s; }
+    void setFileName(const char* c) { std::string s(c); filename = s; }
     std::string getKey() { return key; }
     void setKey(std::string k) { key = k; }
 
-	// thumbnail
-	virtual void* getThumbnailPtr()=0; // XS TODO change this
-	std::string getThumbnailFileName() { return filename_thumbnail; }
-	void setThumbnailFileName(std::string ifilename) { filename_thumbnail=ifilename; }
-	// the following 2 were re-introduced for audio...
-	virtual int getThumbnailWidth() {return 0;}
-	virtual int getThumbnailHeight() {return 0;}
-	
-	std::string getLabel(void){return label;}	
-	void setLabel(std::string iLabel){label=iLabel;}
-	
-	// data
-	virtual bool extractData(std::string filename) {return false;}
-	virtual ACMediaData* getMediaData()=0;
-	virtual void deleteData(){}
+    // thumbnail
+    virtual void* getThumbnailPtr()=0; // XS TODO change this
+    std::string getThumbnailFileName() { return filename_thumbnail; }
+    void setThumbnailFileName(std::string ifilename) { filename_thumbnail=ifilename; }
+    // the following 2 were re-introduced for audio...
+    virtual int getThumbnailWidth() {return 0;}
+    virtual int getThumbnailHeight() {return 0;}
+
+    std::string getLabel(void){return label;}
+    void setLabel(std::string iLabel){label=iLabel;}
+
+    // data
+    virtual bool extractData(std::string filename) {return false;}
+    virtual ACMediaData* getMediaData()=0;
+    virtual void deleteData(){}
     virtual void setMediaData(ACMediaData* _data){}
-		
-	// accessors -- these should not be redefined for each media
-	int getWidth() {return width;}
-	int getHeight() {return height;}
-	void setWidth(int w) {width=w;}
-	void setHeight(int h) {height=h;}
-	ACMediaType	getType() {return this->media_type;}	
-	
-	// beginning and end as floats
-	void setStart(float st){this->start = st;}
-	void setEnd(float en){this->end = en;}
-	float getStart(){return this->start;}
-	float getEnd(){return this->end;}
-	void setStartInt(int sti){this->startInt = sti;}
-	void setEndInt(int eni){this->endInt = eni;}
-	float getStartInt(){return this->startInt;}
-	float getEndInt(){return this->endInt;}
-	virtual float getFrameRate() {return 0;}//CF video
-	virtual int getSampleRate() {return 0;}//CF audio - merge both?
-	
-	// I/O -- common part
-	// note : ACL deprecated as of spring 2011 -- but keep it for backward-compatibility (e.g., Dancers!)
-	void fixWhiteSpace(std::string &str);
-	void saveACL(std::ofstream &library_file, int mcsl=0);
+
+    // accessors -- these should not be redefined for each media
+    int getWidth() {return width;}
+    int getHeight() {return height;}
+    void setWidth(int w) {width=w;}
+    void setHeight(int h) {height=h;}
+    ACMediaType getType() {return this->media_type;}
+
+    // beginning and end as floats
+    void setStart(float st){this->start = st;}
+    void setEnd(float en){this->end = en;}
+    float getStart(){return this->start;}
+    float getEnd(){return this->end;}
+    void setStartInt(int sti){this->startInt = sti;}
+    void setEndInt(int eni){this->endInt = eni;}
+    float getStartInt(){return this->startInt;}
+    float getEndInt(){return this->endInt;}
+    virtual float getFrameRate() {return 0;}//CF video
+    virtual int getSampleRate() {return 0;}//CF audio - merge both?
+
+    // I/O -- common part
+    // note : ACL deprecated as of spring 2011 -- but keep it for backward-compatibility (e.g., Dancers!)
+    void fixWhiteSpace(std::string &str);
+    void saveACL(std::ofstream &library_file, int mcsl=0);
     void saveXML(TiXmlElement* _medias);
-	//int loadACL(std::ifstream &library_file, int mcsl=0);
-    	int loadACL(std::string media_path, std::ifstream &library_file, int mcsl=0);
-	void loadXML(TiXmlElement* _pMediaNode);
+    //int loadACL(std::ifstream &library_file, int mcsl=0);
+    int loadACL(std::string media_path, std::ifstream &library_file, int mcsl=0);
+    void loadXML(TiXmlElement* _pMediaNode);
 
-	void saveMCSL(std::ofstream &library_file); //CF 31/05/2010 temporary MediaCycle Segmented Library (MCSL) for AudioGarden, adding a parentID for segments to the initial ACL, awaiting approval
-	int loadMCSL(std::ifstream &library_file); //CF 31/05/2010 temporary MediaCycle Segmented Library (MCSL) for AudioGarden, adding a parentID for segments to the initial ACL, awaiting approval
+    void saveMCSL(std::ofstream &library_file); //CF 31/05/2010 temporary MediaCycle Segmented Library (MCSL) for AudioGarden, adding a parentID for segments to the initial ACL, awaiting approval
+    int loadMCSL(std::ifstream &library_file); //CF 31/05/2010 temporary MediaCycle Segmented Library (MCSL) for AudioGarden, adding a parentID for segments to the initial ACL, awaiting approval
 
-	// I/O -- media-specific part
+    // I/O -- media-specific part
 
-	virtual void saveACLSpecific(std::ofstream &library_file) {}
-	virtual void saveXMLSpecific(TiXmlElement* _media) {}
-	virtual int loadACLSpecific(std::ifstream &library_file) {return -1;}
-	virtual int loadXMLSpecific(TiXmlElement* _pMediaNode) {return -1;}
+    virtual void saveACLSpecific(std::ofstream &library_file) {}
+    virtual void saveXMLSpecific(TiXmlElement* _media) {}
+    virtual int loadACLSpecific(std::ifstream &library_file) {return -1;}
+    virtual int loadXMLSpecific(TiXmlElement* _pMediaNode) {return -1;}
 
     // import does the following:
     // 1) load media from file
@@ -176,16 +176,16 @@ public:
     virtual int import(std::string _path, int _mid=0, ACPluginManager *acpl=0, bool _save_timed_feat=false);
 
     // FEATURES computation (extractFeatures) and segmentation (segment)
-	// these methods are virtual, because each media could have a specific segmentation method
-	// ex: audioSegmentationPlugin : also calculates features...
+    // these methods are virtual, because each media could have a specific segmentation method
+    // ex: audioSegmentationPlugin : also calculates features...
 private:
     virtual int extractFeatures(ACPluginManager *acpl=0, bool _save_timed_feat=false);
 public:
-	virtual int segment(ACPluginManager *acpl, bool _saved_timed_features = false );
-	void addTimedFileNames(std::string mtf_file_name){mtf_file_names.push_back(mtf_file_name);};
-	std::vector<std::string> getTimedFileNames(){return mtf_file_names;};
-	ACMediaTimedFeature* getTimedFeatures();
-	ACMediaTimedFeature* getTimedFeatures(std::string feature_name);
+    virtual int segment(ACPluginManager *acpl, bool _saved_timed_features = false );
+    void addTimedFileNames(std::string mtf_file_name){mtf_file_names.push_back(mtf_file_name);};
+    std::vector<std::string> getTimedFileNames(){return mtf_file_names;};
+    ACMediaTimedFeature* getTimedFeatures();
+    ACMediaTimedFeature* getTimedFeatures(std::string feature_name);
 };
 
 #endif // ACMEDIA_H

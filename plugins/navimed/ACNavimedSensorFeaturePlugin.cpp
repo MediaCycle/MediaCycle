@@ -72,11 +72,10 @@ std::vector<ACMediaFeatures*> ACNavimedSensorFeaturePlugin::calculate(ACMediaDat
 	return sensorFeatures;
 }
 
-preProcessInfo ACNavimedSensorFeaturePlugin::update(std::vector<ACMedia*> media_library){
+preProcessInfo ACNavimedSensorFeaturePlugin::update(ACMedias media_library){
 	set<std::string> *featureKeyList=new set<std::string>;
-	std::vector<ACMedia*>::iterator it1;
-	for (it1=media_library.begin();it1!=media_library.end(); it1++){
-		std::vector<ACMediaFeatures*> featsVect=(*it1)->getAllFeaturesVectors();
+        for (ACMedias::iterator it1=media_library.begin();it1!=media_library.end(); it1++){
+                std::vector<ACMediaFeatures*> featsVect=it1->second->getAllFeaturesVectors();
 		std::vector<ACMediaFeatures*>::iterator it2;
 		for (it2=featsVect.begin();it2!=featsVect.end();it2++){
 			if (featureKeyList->find((*it2)->getName())==featureKeyList->end()){

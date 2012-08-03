@@ -33,12 +33,6 @@
  */
 
 // MediaNode is used to manage the display of a given Media
-// two different ID's:
-// nodeID = ID of the mediaNode (used by MediaBrowser)
-// mediaID = ID of the media (used by MediaLibrary)
-// examples:
-// - AC_MODE_CLUSTERS : nodeID = mediaID if the whole Library is used in the Browser
-// - AC_MODE_NEIGHBORS : nodeID = 0 initially, then only the neighbors will receive a nodeID
 
 #include "ACMediaNode.h"
 
@@ -49,91 +43,89 @@ using std::endl;
 #endif // VERBOSE
 
 ACMediaNode::ACMediaNode(){ // (0,0) by default
-	init();
-	clickTime.clear(); // CF-XS : not yet clicked when constructed.
+    init();
+    clickTime.clear(); // CF-XS : not yet clicked when constructed.
 }
-ACMediaNode::ACMediaNode(long int _nodeId, long int _mediaId){ 
-	// have to specify both values, no default values
-	init(_nodeId, _mediaId);
-	clickTime.clear(); // CF-XS : not yet clicked when constructed.
+ACMediaNode::ACMediaNode(long int _mediaId){
+    // have to specify both values, no default values
+    init(_mediaId);
+    clickTime.clear(); // CF-XS : not yet clicked when constructed.
 }
 
-ACMediaNode::ACMediaNode(long int _nodeId, long int _mediaId, int _clickTime){
-	// have to specify all 3 values, no default values
-	init(_nodeId, _mediaId);
-	clickNode(_clickTime);
+ACMediaNode::ACMediaNode(long int _mediaId, int _clickTime){
+    // have to specify all 3 values, no default values
+    init(_mediaId);
+    clickNode(_clickTime);
 }
 
 ACMediaNode::~ACMediaNode(){
 }
 
-void ACMediaNode::init(long int _nodeId, long int _mediaId){ // (0,0) by default
-	nodeId = _nodeId;
-	mediaId = _mediaId;
+void ACMediaNode::init(long int _mediaId){ // (0,0) by default
+    mediaId = _mediaId;
 
-	clusterId = 0;
-	active = 0;
-	cursor = 0;
-	frame = 0;
-	navigationLevel = 0;
-	hover = 0;
-	displayed = true;
-	selected = false;
-	
-	currentPos.x = 0;
-	currentPos.y = 0;
-	currentPos.z = 0;
-	
-	nextPos.x = 0;
-	nextPos.y = 0;
-	nextPos.z = 0;
-	
-	nextPosGrid.x = 0;
-	nextPosGrid.y = 0;
-	nextPosGrid.z = 0;
+    clusterId = 0;
+    active = 0;
+    cursor = 0;
+    frame = 0;
+    navigationLevel = 0;
+    hover = 0;
+    displayed = true;
+    selected = false;
+
+    currentPos.x = 0;
+    currentPos.y = 0;
+    currentPos.z = 0;
+
+    nextPos.x = 0;
+    nextPos.y = 0;
+    nextPos.z = 0;
+
+    nextPosGrid.x = 0;
+    nextPosGrid.y = 0;
+    nextPosGrid.z = 0;
 }
 
-// methods coming from ACLoopAttribute:
+// methods coming from ACMediaNode:
 
 void ACMediaNode::setCurrentPosition(ACPoint p) {
-	currentPos = p;
+    currentPos = p;
 }
 
 void ACMediaNode::setNextPosition(ACPoint p, double t) {
     changed = 1;
-	nextPos = p;
-	nextPosTime = t;
+    nextPos = p;
+    nextPosTime = t;
 }
 
 // methods previously in ACUserNode:
 
 void ACMediaNode::clickNode(long int _clickTime) {
-	clickTime.push_back(_clickTime);
+    clickTime.push_back(_clickTime);
 }
 
-bool ACMediaNode::operator==(const ACMediaNode &other) const {
-    return (this->nodeId == other.nodeId);
+bool ACMediaNode::operator==(const ACMediaNode& other) const {
+    return (this->mediaId == other.mediaId);
 }
-
 
 // useful to be called from browser...
 // 0 = turn off
 // 1 = leave as such
 // 2 = turn on
-// example : some loops are playing (1), we hover on others (0->2)
+// example : some nodes are playing (1), we hover on others (0->2)
 void ACMediaNode::toggleActivity(int type){
-	if (this->getActivity()==0) {
+    if (this->getActivity()==0) {
 #ifdef VERBOSE
-		cout << "activity node " << nodeId << " set to " << type << endl;
+        cout << "activity node " << mediaId << " set to " << type << endl;
 #endif // VERBOSE
-		this->setActivity(type);			
-	}
-	else{
+        this->setActivity(type);
+    }
+    else{
 #ifdef VERBOSE		
-		cout << "activity node " << nodeId << " set to 0" << endl;
+        cout << "activity node " << mediaId << " set to 0" << endl;
 #endif // VERBOSE
-		this->setActivity(0);
-	}
+        this->setActivity(0);
+    }
 }
 
 

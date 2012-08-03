@@ -53,19 +53,6 @@ void ACPositionProximityGridPlugin::updateNextPositions(ACMediaBrowser* _mediaBr
 	if (mediaBrowser == 0){
 		mediaBrowser = _mediaBrowser;
 	}
-	
-	if (!(mediaBrowser->getUserLog()->isEmpty()))
-	{
-		
-		int librarySize = mediaBrowser->getLibrary()->getSize();
-		
-		if(librarySize==0) {
-			mediaBrowser->setNeedsDisplay(true);
-			return;
-		}
-				
-		mediaBrowser->setNeedsDisplay(true);
-	}
 }	
 
 void ACPositionProximityGridPlugin::setProximityGridQuantize(ACPoint p, ACPoint *pgrid) {
@@ -104,14 +91,14 @@ void ACPositionProximityGridPlugin::setProximityGrid() {
 	// Proximity Grid Size	
 	if (!proxgridboundsset) {
 		if (n>0) {
-			p = mediaBrowser->getMediaNode(0).getNextPosition();
+                        p = mediaBrowser->getMediaNode(0)->getNextPosition();
 			proxgridl = p.x;
 			proxgridr = p.x;
 			proxgridb = p.y;
 			proxgridt = p.y;
 		}
 		for(i=1; i<n; i++) {
-			p = mediaBrowser->getMediaNode(i).getNextPosition();
+                        p = mediaBrowser->getMediaNode(i)->getNextPosition();
 			if (p.x<proxgridl) {
 				proxgridl = p.x;
 			}
@@ -146,7 +133,7 @@ void ACPositionProximityGridPlugin::setProximityGrid() {
 		
 		found_slot = 0;
 		
-		p = mediaBrowser->getMediaNode(i).getNextPosition();
+                p = mediaBrowser->getMediaNode(i)->getNextPosition();
 		
 		// grid quantization
 		this->setProximityGridQuantize(p, &pgrid);
@@ -220,7 +207,7 @@ void ACPositionProximityGridPlugin::setProximityGrid() {
 	
 	// XS TODO iter
 	for(i=0; i<n; i++) {
-		mediaBrowser->getMediaNode(i).setNextPositionGrid (mediaBrowser->getMediaNode(i).getNextPosition());
+                mediaBrowser->getMediaNode(i)->setNextPositionGrid (mediaBrowser->getMediaNode(i)->getNextPosition());
 	}
 	
 	for(i=0; i<proxgrid.size(); i++) {
@@ -229,21 +216,21 @@ void ACPositionProximityGridPlugin::setProximityGrid() {
 			curpos.x = fmod((float)i,proxgridlx);
 			curpos.y = floor((float)i/(proxgridlx));
 			this->setProximityGridUnquantize(curpos, &p2);
-			p2.z = mediaBrowser->getMediaNode(index).getNextPosition().z;
-			mediaBrowser->getMediaNode(index).setNextPositionGrid(p2);
+                        p2.z = mediaBrowser->getMediaNode(index)->getNextPosition().z;
+                        mediaBrowser->getMediaNode(index)->setNextPositionGrid(p2);
 		}
 	}
 	
 	// XS TODO iter
 	double t = getTime();
 	for(i=0; i<n; i++) {
-		mediaBrowser->getMediaNode(i).setNextPosition(mediaBrowser->getMediaNode(i).getNextPositionGrid(), t);
+                mediaBrowser->getMediaNode(i)->setNextPosition(mediaBrowser->getMediaNode(i)->getNextPositionGrid(), t);
 	}
 	
 	if (proxgridjitter>0) {
 		for(i=0; i<n; i++) {
 			// XS heavy ?
-			p = mediaBrowser->getMediaNode(i).getNextPosition();
+                        p = mediaBrowser->getMediaNode(i)->getNextPosition();
 			jitter = ACRandom()-0.5;
 			p.x = p.x + jitter*proxgridjitter*proxgridstepx;
 			jitter = ACRandom()-0.5;
@@ -251,7 +238,7 @@ void ACPositionProximityGridPlugin::setProximityGrid() {
 			p.x = max(min(p.x,proxgridr), proxgridl);
 			p.y = max(min(p.y,proxgridt), proxgridb);
 			p.z = p.z;
-			mediaBrowser->getMediaNode(i).setNextPosition(p, t);
+                        mediaBrowser->getMediaNode(i)->setNextPosition(p, t);
 		}
 	}	
 	return;

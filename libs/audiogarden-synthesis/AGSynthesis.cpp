@@ -1,8 +1,8 @@
 /**
  * @brief AGSynthesis.cpp
- * @author Xavier Siebert
- * @date 05/03/2011
- * @copyright (c) 2011 – UMONS - Numediart
+ * @author Christian Frisson
+ * @date 03/08/2012
+ * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -327,30 +327,30 @@ mat AGSynthesis::extractDescMatrix(ACMediaLibrary* lib, vector<string> featureLi
 }
 
 mat AGSynthesis::extractDescMatrix(ACMediaLibrary* lib, string featureName, vector<long> mediaIds){
-  vector<ACMedia*> loops = lib->getAllMedia();
-  int nbMedia = loops.size(); 
+  ACMedias medias = lib->getAllMedia();
+  int nbMedia = medias.size();
 //	int featDim;
 //	int totalDim = 0;
 	int featureId = 0;
 	int featureSize = 0;
 
-	int nbFeature = loops.back()->getNumberOfFeaturesVectors();
+        int nbFeature = lib->getFirstMedia()->getNumberOfFeaturesVectors();
 
 	for(int f=0; f< nbFeature; f++){
-		if (loops.back()->getFeaturesVector(f)->getName() == featureName){
+                if (lib->getFirstMedia()->getFeaturesVector(f)->getName() == featureName){
 			featureId = f;
 		}	
 	}
 
-	featureSize = loops.back()->getFeaturesVector(featureId)->getSize();
+        featureSize = lib->getFirstMedia()->getFeaturesVector(featureId)->getSize();
 
   mat desc_m(mediaIds.size(),featureSize);
   
 	mat pos_m(nbMedia,2);
   
-  for(int i=0; i<mediaIds.size(); i++) {    
+  for(int i=0; i<mediaIds.size(); i++) {
 		for(int d=0; d < featureSize; d++){
-			desc_m(i, d) = loops[mediaIds[i]]->getFeaturesVector(featureId)->getFeatureElement(d);
+                        desc_m(i, d) = medias[mediaIds[i]]->getFeaturesVector(featureId)->getFeatureElement(d);
 		}
   }
 	return desc_m;

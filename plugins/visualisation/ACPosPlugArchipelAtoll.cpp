@@ -1,7 +1,7 @@
 /**
  * @brief ACPosPlugArchipelAtoll.cpp
  * @author Christian Frisson
- * @date 22/07/2012
+ * @date 03/08/2012
  * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -43,13 +43,13 @@ using namespace std;
 ACPosPlugArchipelAtoll::ACPosPlugArchipelAtoll() : ACClusterPositionsPropellerPlugin()
 {
     //vars herited from ACPlugin
-	// XS TODO: are these general enough ? can we use this only for audio ??
-    this->mMediaType = MEDIA_TYPE_ALL;
+    // XS TODO: are these general enough ? can we use this only for audio ??
+    this->mMediaType = MEDIA_TYPE_MIXED;
     //this->mPluginType =    this->mPluginType|PLUGIN_TYPE_CLUSTERS_POSITIONS;
     this->mName = "Archipel Atoll";
     this->mDescription = "Archipel Atoll Visualisation plugin";
     this->mId = "";
-	
+
     //local vars
 }
 
@@ -58,55 +58,55 @@ ACPosPlugArchipelAtoll::~ACPosPlugArchipelAtoll()
 }
 
 void ACPosPlugArchipelAtoll::updateNextPositions(ACMediaBrowser* mediaBrowser){
-	float lZoom=mediaBrowser->getCameraZoom();
-	
-        ACClusterPositionsPropellerPlugin::updateNextPositions(mediaBrowser);
+    float lZoom=mediaBrowser->getCameraZoom();
 
-	vector<ACMedia*> loops =  mediaBrowser->getLibrary()->getAllMedia();	
-	vector<long> posParents;
-	vector<long> posSegments;
-	vector<long> posDocuments;
+    ACClusterPositionsPropellerPlugin::updateNextPositions(mediaBrowser);
 
-	for (int i=0; i < loops.size(); i++){
-		if (loops[i]->getParentId() == -1){
-			posParents.push_back(i);
-			if(mediaBrowser->getLibrary()->getMedia(i)->getType() == MEDIA_TYPE_MIXED)
-				posDocuments.push_back(i);
-		}	
-		else
-			posSegments.push_back(i);
-	}
-		
-	std::vector<ACMedia*> tmpSegments;
-	float angle;
-	float lDist=0.025;
-	for (long i=0; i<posDocuments.size(); i++){
-		tmpSegments = loops[posDocuments[i]]->getAllSegments();
-		
-		ACPoint parent = mediaBrowser->getMediaNode(posDocuments[i]).getNextPosition();
-		int nCluster=mediaBrowser->getMediaNode(posDocuments[i]).getClusterId();
-		//std::cout << "Media document " << posDocuments[i] << " with position " << parent.x << " " << parent.y << std::endl;
+    ACMedias medias = mediaBrowser->getLibrary()->getAllMedia();
+    vector<long> posParents;
+    vector<long> posSegments;
+    vector<long> posDocuments;
 
-		for (int j=0; j<tmpSegments.size(); j++){
-			ACMediaNode& node = mediaBrowser->getMediaNode(tmpSegments[j]->getId());
+    for(ACMedias::iterator media = medias.begin(); media != medias.end(); media++) {
+        if (media->second->getParentId() == -1){
+            posParents.push_back(media->first);
+            if(mediaBrowser->getLibrary()->getMedia(media->first)->getType() == MEDIA_TYPE_MIXED)
+                posDocuments.push_back(media->first);
+        }
+        else
+            posSegments.push_back(media->first);
+    }
 
-			angle = (2*arma::math::pi() / (float) tmpSegments.size()) * (float) j + (arma::math::pi()/2);
-			
-			ACPoint s;
-			
-			s.x = lDist * cos(angle) + parent.x;
-			s.y = lDist * sin(angle) + parent.y;
-			s.z = 0;
-			
-			double t = getTime();
-			node.setNextPosition(s, t);
-			//node.setClusterId(nCluster);
-		
-			//std::cout << "Media " << tmpSegments[j]->getId() << " of type " << ACMediaFactory::getInstance().getNormalCaseStringFromMediaType(tmpSegments[j]->getType()) << " with position " << s.x << " " << s.y<< std::endl;				
-			//std::cout << "angle = " << angle << std::endl;			
-			//std::cout << "posDisp_m.row(tmpSegments[j]->getId())" << posDisp_m.row(tmpSegments[j]->getId()) << std::endl;
-		}
-	}
+    std::vector<ACMedia*> tmpSegments;
+    float angle;
+    float lDist=0.025;
+    for (long i=0; i<posDocuments.size(); i++){
+        tmpSegments = medias[posDocuments[i]]->getAllSegments();
+
+        ACPoint parent = mediaBrowser->getMediaNode(posDocuments[i])->getNextPosition();
+        int nCluster=mediaBrowser->getMediaNode(posDocuments[i])->getClusterId();
+        //std::cout << "Media document " << posDocuments[i] << " with position " << parent.x << " " << parent.y << std::endl;
+
+        for (int j=0; j<tmpSegments.size(); j++){
+            ACMediaNode* node = mediaBrowser->getMediaNode(tmpSegments[j]->getId());
+
+            angle = (2*arma::math::pi() / (float) tmpSegments.size()) * (float) j + (arma::math::pi()/2);
+
+            ACPoint s;
+
+            s.x = lDist * cos(angle) + parent.x;
+            s.y = lDist * sin(angle) + parent.y;
+            s.z = 0;
+
+            double t = getTime();
+            node->setNextPosition(s, t);
+            //node->setClusterId(nCluster);
+
+            //std::cout << "Media " << tmpSegments[j]->getId() << " of type " << ACMediaFactory::getInstance().getNormalCaseStringFromMediaType(tmpSegments[j]->getType()) << " with position " << s.x << " " << s.y<< std::endl;
+            //std::cout << "angle = " << angle << std::endl;
+            //std::cout << "posDisp_m.row(tmpSegments[j]->getId())" << posDisp_m.row(tmpSegments[j]->getId()) << std::endl;
+        }
+    }
 }
 //#endif //defined(SUPPORT_ARCHIPEL)
 

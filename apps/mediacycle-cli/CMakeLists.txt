@@ -4,6 +4,13 @@ IF (BUILD_CLIS)
 	FILE(GLOB SRC *.cpp *.c)
 	FILE(GLOB HDR *.hpp *.h)
 
+	FILE(GLOB PLUGIN_DIRS ${CMAKE_SOURCE_DIR}/plugins/*)
+	FOREACH(PLUGIN_DIR ${PLUGIN_DIRS})
+   		IF(IS_DIRECTORY ${PLUGIN_DIR})
+        		INCLUDE_DIRECTORIES(${PLUGIN_DIR})
+    		ENDIF()
+	ENDFOREACH()
+	
 	ADD_EXECUTABLE(mediacycle-cli ${SRC} ${HDR})
 	ADD_DEPENDENCIES(mediacycle-cli mediacycle)
 	ADD_DEPENDENCIES(mediacycle-cli mc_audio)

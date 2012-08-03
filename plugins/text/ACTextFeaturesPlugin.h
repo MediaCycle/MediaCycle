@@ -55,7 +55,7 @@ public:
 
 	virtual std::vector<ACMediaFeatures*> calculate(ACMediaData* text_data, ACMedia* theMedia, bool _save_timed_feat=false);
 
-	virtual preProcessInfo update(std::vector<ACMedia*> media_library);
+        virtual preProcessInfo update(ACMedias media_library);
 	
 	virtual std::vector<ACMediaFeatures*> apply(preProcessInfo info,ACMedia* theMedia);
 	

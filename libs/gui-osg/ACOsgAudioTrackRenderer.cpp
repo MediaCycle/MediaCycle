@@ -106,12 +106,6 @@ void ACOsgAudioTrackRenderer::selectionWaveformGeode() {
     float n_frames = (float)(((ACAudio*) media)->getNFrames());
 
     if (screen_width !=0){
-        // CF: temporary workaround as the ACUserLog tree and the ACLoopAttributes vector in ACMediaBrowser are not sync'd
-        //int media_index = track_index; // or media_cycle->getBrowser()->getMediaTrack(track_index).getMediaId();
-
-        //if (media_from_lib && media_cycle->getBrowser()->getMode() == AC_MODE_NEIGHBORS)
-        //	media_index = media_cycle->getBrowser()->getUserLog()->getMediaIdFromNodeId(media_index);//CF can selectionWaveformGeode() occur more than once, once media_index is set?
-
         //CF std thumbnail, was for AudioGarden
         /*
    if (media_from_lib)
@@ -746,12 +740,6 @@ void ACOsgAudioTrackRenderer::playbackWaveformGeode() {
     int n_samples_hop = 0;
     int n_playback_samples = 0;
     if (samples && screen_width !=0){
-        // CF: temporary workaround as the ACUserLog tree and the ACLoopAttributes vector in ACMediaBrowser are not sync'd
-        //int media_index = track_index; // or media_cycle->getBrowser()->getMediaTrack(track_index).getMediaId();
-
-        //if (media_from_lib && media_cycle->getBrowser()->getMode() == AC_MODE_NEIGHBORS)
-        //	media_index = media_cycle->getBrowser()->getUserLog()->getMediaIdFromNodeId(media_index);//CF can selectionWaveformGeode() occur more than once, once media_index is set?
-
         width = screen_width;
 
         //CF screen width adapted waveform, envelope instead of bars
@@ -991,10 +979,7 @@ void ACOsgAudioTrackRenderer::playbackWaveformGeode() {
     playback_waveform_geode->addDrawable(baseline_geometry);
     playback_waveform_geode->addDrawable(cursor_geometry);
 
-    //sprintf(name, "some audio element");
     playback_waveform_geode->setUserData(new ACRefId(track_index,"audio track playback waveform"));
-    //playback_waveform_geode->setName(name);
-    //ref_ptr//playback_waveform_geode->ref();
 }
 
 void ACOsgAudioTrackRenderer::trackGeode() {
@@ -1039,14 +1024,6 @@ void ACOsgAudioTrackRenderer::segmentsGeode() {
         state->setMode(GL_BLEND, StateAttribute::ON);
         //state->setMode(GL_LINE_SMOOTH, StateAttribute::ON);
 
-        /*
-  // AudioRenderer colors
-  colors[0] = Vec4(1,1,0.5,1);
-  colors[1] = Vec4(1,0.5,1,1);
-  colors[2] = Vec4(0.5,1,1,1);
-  colors[3] = Vec4(1,0.5,0.5,1);
-  colors[4] = Vec4(0.5,1,0.5,1);*/
-
         Vec4 segment_color;
         if ( (float)s/2.0f != s/2) // odd segment index
             segment_color = Vec4(1,1,0.5,0.5f);//Vec4(0.0f, 0.0f, 1.0f, 1.0f);
@@ -1060,13 +1037,10 @@ void ACOsgAudioTrackRenderer::segmentsGeode() {
         //std::cout << "Segment " << s << " start " << media->getSegment(s)->getStart()/media_length << " end " << media->getSegment(s)->getEnd()/media_length << " width " << (media->getSegment(s)->getEnd()-media->getSegment(s)->getStart())/media_length << std::endl;
         ((ShapeDrawable*)(segments_geodes[s])->getDrawable(0))->setColor(segment_color);
         segments_geodes[s]->setUserData(new ACRefId(track_index,"audio track segments"));
-        //ref_ptr//segments_geodes[s]->ref();
         segments_group->addChild(segments_geodes[s]);
     }
     if(segments_n>0){
-        //ref_ptr//segments_group->ref();
         segments_transform->addChild(segments_group);
-        //ref_ptr//segments_transform->ref();
     }
 }
 
@@ -1087,12 +1061,12 @@ void ACOsgAudioTrackRenderer::updateTracks(double ratio) {
         //if (media_index > -1)
         if (media)
         {
-            //const ACMediaNode &attribute = media_cycle->getMediaNode(media_index);
-            const ACMediaNode &attribute = media_cycle->getNodeFromMedia(media);
-            if ( attribute.getActivity()==1)
+            //const ACMediaNode* attribute = media_cycle->getMediaNode(media_index);
+            const ACMediaNode* attribute = media_cycle->getNodeFromMedia(media);
+            if ( attribute->getActivity()==1)
             {
                 //float selection_width = selection_end_pos_x-selection_begin_pos_x;
-                float selection_pos_x = -xspan/2.0f + (float) attribute.getCurrentFrame() / (float)(((ACAudio*) media)->getNFrames())*xspan;
+                float selection_pos_x = -xspan/2.0f + (float) attribute->getCurrentFrame() / (float)(((ACAudio*) media)->getNFrames())*xspan;
                 //this->setSelectionBegin(selection_pos_x - selection_width/2.0f);
                 //this->setSelectionEnd(selection_pos_x + selection_width/2.0f);
                 this->moveSelection(selection_pos_x,this->getSelectionPosY());
@@ -1203,11 +1177,11 @@ void ACOsgAudioTrackRenderer::updateTracks(double ratio) {
   //if (media_index > -1)
   if(media)
   {
-   //const ACMediaNode &attribute = media_cycle->getMediaNode(media_index);
-   const ACMediaNode &attribute = media_cycle->getNodeFromMedia(media);
-   if ( attribute.getActivity()==1)
+   //const ACMediaNode* attribute = media_cycle->getMediaNode(media_index);
+   const ACMediaNode* attribute = media_cycle->getNodeFromMedia(media);
+   if ( attribute->getActivity()==1)
    {
-    curserT.makeTranslate(Vec3(attribute.getCursor() * xstep/2.0f * screen_width/media->getThumbnailWidth(), 0.0f, 0.0f));			// curserT =  Matrix::scale(0.5/zoom,0.5/zoom,0.5/zoom) * curserT;
+    curserT.makeTranslate(Vec3(attribute->getCursor() * xstep/2.0f * screen_width/media->getThumbnailWidth(), 0.0f, 0.0f));			// curserT =  Matrix::scale(0.5/zoom,0.5/zoom,0.5/zoom) * curserT;
     summary_cursor_transform->setMatrix(curserT);
    }
   }

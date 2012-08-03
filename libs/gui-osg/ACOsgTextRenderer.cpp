@@ -84,11 +84,6 @@ void ACOsgTextRenderer::metadataGeode() {
 
     metadata->setDrawMode(osgText::Text::TEXT);// osgText::Text::BOUNDINGBOX, osgText::Text::ALIGNMENT
 
-    // CF: temporary workaround as the ACUserLog tree and the ACLoopAttributes vector in ACMediaBrowser are not sync'd
-    /*int media_index = node_index; // or media_cycle->getBrowser()->getMediaNode(node_index).getMediaId();
- if (media_cycle->getBrowser()->getMode() == AC_MODE_NEIGHBORS)
-  media_index = media_cycle->getBrowser()->getUserLog()->getMediaIdFromNodeId(node_index);*/
-
     //string textLabel=media_cycle->getLibrary()->getMedia(media_index)->getLabel();
     string textLabel=media->getLabel();
 
@@ -99,8 +94,6 @@ void ACOsgTextRenderer::metadataGeode() {
     //state->setMode(GL_BLEND, StateAttribute::ON);
     //state->setMode(GL_LINE_SMOOTH, StateAttribute::ON);
 
-    //TODO check this .get() (see also ACOsgBrowserRenderer.cpp)
-    //".get()" is necessary for compilation under linux (OSG v2.4)
     metadata_geode->addDrawable(metadata);
 }
 
@@ -139,8 +132,8 @@ void ACOsgTextRenderer::prepareNodes() {
     metadata_geode = 0;
     metadata=0;
 
-    //if  (media_cycle->getMediaNode(node_index).isDisplayed()){
-    if  (media && media_cycle->getNodeFromMedia(media).isDisplayed()){
+    //if  (media_cycle->getMediaNode(node_index)->isDisplayed()){
+    if  (media && media_cycle->getNodeFromMedia(media)->isDisplayed()){
         entryGeode();
         media_node->addChild(entry_geode);
     }
@@ -154,8 +147,8 @@ void ACOsgTextRenderer::updateNodes(double ratio) {
 
     xstep *= afac;
 
-	const ACMediaNode &attribute = media_cycle->getMediaNode(node_index);
-	if (!attribute.isDisplayed()){
+	const ACMediaNode* attribute = media_cycle->getMediaNode(node_index);
+	if (!attribute->isDisplayed()){
 		media_node->removeChild(metadata_geode);
 		if (entry_geode)
 			entry_geode->setNodeMask(0);
@@ -178,7 +171,7 @@ void ACOsgTextRenderer::updateNodes(double ratio) {
     localscale = maxscale - distance_mouse * (maxscale - minscale) / maxdistance ;
     localscale = max(localscale,minscale);
 
-    if (attribute.getActivity()>=1) { // 0 inactive, 1 clicked, 2 hover
+    if (attribute->getActivity()>=1) { // 0 inactive, 1 clicked, 2 hover
         localscale = 0.5;
         if(media_node->getNumChildren() == 1) // only entry_geode so far
             media_node->addChild(metadata_geode);
@@ -188,10 +181,10 @@ void ACOsgTextRenderer::updateNodes(double ratio) {
 
         //CF nodes colored along their relative cluster on in Clusters Mode
         if (media_cycle->getBrowserMode() == AC_MODE_CLUSTERS)
-            ((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(cluster_colors[attribute.getClusterId()%cluster_colors.size()]);
+            ((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(cluster_colors[attribute->getClusterId()%cluster_colors.size()]);
         else
             ((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(neighbor_color);
-        if (attribute.isSelected()) {
+        if (attribute->isSelected()) {
             //CF color (multiple) selected nodes in black
             Vec4 selected_color(0,0,0,1);
             ((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(selected_color);
@@ -204,7 +197,7 @@ void ACOsgTextRenderer::updateNodes(double ratio) {
     }
 
     unsigned int mask = (unsigned int)-1;
-    if(attribute.getNavigationLevel() >= media_cycle->getNavigationLevel()) {
+    if(attribute->getNavigationLevel() >= media_cycle->getNavigationLevel()) {
         entry_geode->setNodeMask(mask);
     }
     else {

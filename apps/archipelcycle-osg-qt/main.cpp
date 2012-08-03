@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
 	try {
         window.setWindowTitle("ArchipelCycle");
 		// Adding palettes
-        window.addControlDock("MCMediaConfig");
+        //window.addControlDock("MCMediaConfig");
         window.addControlDock("MCMediaDocumentOption");
         window.addControlDock("MCBrowserControlsClusters");
         window.addControlDock("MCAudioControls");

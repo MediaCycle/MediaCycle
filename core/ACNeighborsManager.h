@@ -1,10 +1,10 @@
 /*
- *  ACMediaUserLog.h
+ *  ACNeighborsManager.h
  *  MediaCycle
  *
- *  @author Stéphane Dupont
+ *  @author Stphane Dupont, Damien Tardieu
  *  @date 25/02/10
- *  Filled by Christian Frisson on 12/03/2010
+ *  Filled by Christian Frisson since 12/03/2010
  *  @copyright (c) 2010 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
@@ -33,58 +33,49 @@
  *
  */
 
-#ifndef ACUSERLOG_H
-#define ACUSERLOG_H
+#ifndef ACNEIGHBORSMANAGER_H
+#define ACNEIGHBORSMANAGER_H
 
 #include <algorithm>
 #include <string>
 #include <iostream>
-#include <vector>
 
 #include <tree.hh>
 #include <list>
-#include "ACMediaNode.h"
 
-using namespace std;
-
-class ACUserLog {
+class ACNeighborsManager {
 
 public:
-    ACUserLog();
-    ~ACUserLog();
+    ACNeighborsManager();
+    ~ACNeighborsManager();
 
-    void addRootNode(long int _mediaId, int _clickTime);
-    long int addNode(long int _parentId, long int _mediaId, int _clickTime);
+    void setReferenceNode(long int _mediaId, int _clickTime);
+    bool addNode(long int _parentId, long int _mediaId, int _clickTime);
     bool removeNode(long int _id);
     bool removeChildrenNodes(long int _id);
-    ACMediaNode& getNodeFromId(long int _nodeId);
-    ACMediaNode& getNodeFromMediaId(long int _mediaId);
-    long int getMediaIdFromNodeId(long int _nodeId);
-    void clickNode(long int _nodeId, long int _clickTime);
+    void setClickedNode(long int _mediaId);
+    long int getPreviousSiblingFromNodeId(long int _nodeId);
+    long int getNextSiblingFromNodeId(long int _nodeId);
+    long int getFirstChildFromNodeId(long int _nodeId);
+    long int getLastChildFromNodeId(long int _nodeId);
+    int getChildCountAtNodeId(long int _nodeId);
+    long int getParentFromNodeId(long int _nodeId);
+    void dump();
+    void clean();
+    std::list<long int> getNodeIds();
     int getSize();
+
+protected: //CF these methods are not yet bound by ACMediaBrowser
     int getDepthAtNode(long int _nodeId);
     int getMaxDepth();
     bool isEmpty();
-    int getLastClickedNodeId();
-    void setLastClickedNodeId(long int id);
     int getSpanAtDepth(int _depth);
-    int getChildCountAtNodeId(long int _nodeId);
-    int getPreviousSiblingFromNodeId(long int _nodeId);
-    int getNextSiblingFromNodeId(long int _nodeId);
-    int getFirstChildFromNodeId(long int _nodeId);
-    int getLastChildFromNodeId(long int _nodeId);
-    int getParentFromNodeId(long int _nodeId);
-    Tree<ACMediaNode> getTree();
-    int getNthChildAtNodeId(long int _nodeId,long int _nthChild);
-    void wrapToOrigin();
-    void dump();
-    void clean();
-    std::list<long> getNodeIds();
+    long int getNthChildAtNodeId(long int _nodeId,long int _nthChild);
 
 private:	
     int mNodeId;
-    Tree<ACMediaNode> userLogTree;
+    Tree<long int> mTree;
     int mLastClickedNodeId;
 };
 
-#endif // ACUSERLOG_H
+#endif // ACNEIGHBORSMANAGER_H

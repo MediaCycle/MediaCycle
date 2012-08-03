@@ -277,18 +277,15 @@
          </property>
         </widget>
        </item>
-       <item row="8" column="0" colspan="3">
-        <widget class="QDialogButtonBox" name="buttonBox">
+       <item row="8" column="0">
+        <widget class="QPushButton" name="pushButtonReset">
          <property name="font">
           <font>
            <pointsize>10</pointsize>
           </font>
          </property>
-         <property name="standardButtons">
-          <set>QDialogButtonBox::Ok|QDialogButtonBox::Reset</set>
-         </property>
-         <property name="centerButtons">
-          <bool>true</bool>
+         <property name="text">
+          <string>Reset</string>
          </property>
         </widget>
        </item>

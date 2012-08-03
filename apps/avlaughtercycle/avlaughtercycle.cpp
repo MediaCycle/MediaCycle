@@ -168,15 +168,15 @@ int main(int argc, char** argv) {
 		cout << "similar : " << ids[k] << endl;
 	cout.flush();
 
-	vector<ACMedia*> loops = mediacycle->getLibrary()->getAllMedia();
-	if (loops.size() > 0) {
-		cout << "loopssize : " << loops.size() << endl;
-		cout << "filename : " << loops[1]->getFileName() << endl;
-		for(int y=0; y<loops.size(); y++)
+        vector<ACMedia*> medias = mediacycle->getLibrary()->getAllMedia();
+        if (medias.size() > 0) {
+                cout << "medias size : " << medias.size() << endl;
+                cout << "filename : " << medias[1]->getFileName() << endl;
+                for(int y=0; y<medias.size(); y++)
 		{
 			for (k=0;k<ids.size();k++) {
-				if (loops[y]->getId() == ids[k]) {
-					cout << "filename : " << loops[y]->getFileName() << endl;
+                                if (medias[y]->getId() == ids[k]) {
+                                        cout << "filename : " << medias[y]->getFileName() << endl;
 				}
 			}
 			//Should output 1 4 8
@@ -192,11 +192,12 @@ int main(int argc, char** argv) {
 	mediacycle->updateDisplay(true); //XS 250310 was: media_cycle->updateClusters(true);
 	// XS250310 removed mediacycle->setNeedsDisplay(true); // now in updateDisplay
 
-	for (int m=0;m<mediacycle->getLibrarySize();m++) {
-		mediacycle->getKNN(mediacycle->getLibrary()->getMedia(m), result, 11);
+        std::vector<long> ids = mediacycle->getLibrary()->getAllMediaIds();
+        for (int m=0;m<ids.size();m++) {
+            mediacycle->getKNN(mediacycle->getLibrary()->getMedia(ids[m]), result, 11);
 		if (result.size() > 0) {
 			result[1]->getFeaturesVector(0)->dump();
-			cout << mediacycle->getLibrary()->getMedia(m)->getFileName() << " ";
+                        cout << mediacycle->getLibrary()->getMedia(ids[m])->getFileName() << " ";
 			for (int k=1;k<result.size();k++) {
 				cout << result[k]->getFileName() << " ";
 				//result[k]->getFeaturesVector(0)->dump();

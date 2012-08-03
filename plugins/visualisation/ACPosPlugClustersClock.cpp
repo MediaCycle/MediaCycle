@@ -61,19 +61,19 @@ void ACPosPlugClustersClock::updateNextPositions(ACMediaBrowser* mediaBrowser){
     float angle = 0.0f;
 
     double maxDuration = 0.0f;
-    vector<ACMedia*> medias = mediaBrowser->getLibrary()->getAllMedia();
-    for(vector<ACMedia*>::iterator media = medias.begin();media!=medias.end();media++){
-        if ( maxDuration < (*media)->getDuration())
-            maxDuration = (*media)->getDuration();
+    ACMedias medias = mediaBrowser->getLibrary()->getAllMedia();
+    for(ACMedias::iterator media = medias.begin();media!=medias.end();media++){
+        if ( maxDuration < media->second->getDuration())
+            maxDuration = media->second->getDuration();
     }
 
-    for(vector<ACMedia*>::iterator media = medias.begin();media!=medias.end();media++){
-        ACMediaNode &node = mediaBrowser->getNodeFromMedia(*media);
-        radius = maxNodeRadius * (*media)->getDuration() / maxDuration;
-        angle = (2*arma::math::pi() / (float)  mediaBrowser->getClusterCount()) * (float) node.getClusterId() + (arma::math::pi()/2);
+    for(ACMedias::iterator media = medias.begin();media!=medias.end();media++){
+        ACMediaNode* node = mediaBrowser->getNodeFromMedia(media->second);
+        radius = maxNodeRadius * media->second->getDuration() / maxDuration;
+        angle = (2*arma::math::pi() / (float)  mediaBrowser->getClusterCount()) * (float) node->getClusterId() + (arma::math::pi()/2);
         ACPoint p ( radius*cos(angle) , radius*sin(angle) , 0.0f);
         double t = getTime();
-        node.setNextPosition(p,t);
+        node->setNextPosition(p,t);
     }
 
     if(mediaBrowser->getLabelSize() == mediaBrowser->getClusterCount()){

@@ -283,8 +283,8 @@ void ACOsgCompositeViewQt::initFont()
 #endif
     std::cout << "Current font path " << font_path << std::endl;
     font = osgText::readRefFontFile(font_path + font_file);
-    //if(!font)
-    //    std::cerr << "ACOsgMediaRenderer::ACOsgMediaRenderer: couldn't load font " << std::endl;
+    if(!font)
+        std::cerr << "ACOsgCompositeViewQt::initFont: couldn't load font " << std::endl;
 }
 
 void ACOsgCompositeViewQt::initializeGL()
@@ -531,27 +531,27 @@ void ACOsgCompositeViewQt::openMediaExternally(){
     if (media_cycle == 0) return;
     if (media_cycle->hasBrowser())
     {
-        int loop = media_cycle->getClickedNode();
-        //int loop = media_cycle->getClosestNode();//CF to deprecate: adapt to multiple pointers
-        //std::cout << "node " << loop << " selected" << std::endl;
+        int media_id = media_cycle->getClickedNode();
+        //int media_id = media_cycle->getClosestNode();//CF to deprecate: adapt to multiple pointers
+        //std::cout << "node " << media_id << " selected" << std::endl;
 
-        if(loop >= 0)
+        if(media_id >= 0)
         {
 #if defined (__APPLE__)
             std::stringstream command;
-            ACMediaType _media_type = media_cycle->getLibrary()->getMedia(loop)->getMediaType();
+            ACMediaType _media_type = media_cycle->getLibrary()->getMedia(media_id)->getMediaType();
             if (_media_type == MEDIA_TYPE_IMAGE || _media_type == MEDIA_TYPE_VIDEO)
                 command << "open -a Preview '";
             else if (_media_type == MEDIA_TYPE_TEXT)
                 command << "open '"; // uses TextEdit or other default text application if customized OS-wide
             else
                 command << "open -R '"; // no iTunes for audio! 3Dmodel default applications?
-            command << media_cycle->getLibrary()->getMedia(loop)->getFileName() << "'" ;
+            command << media_cycle->getLibrary()->getMedia(media_id)->getFileName() << "'" ;
             try {
                 system(command.str().c_str());
             }
             catch (const exception& e) {
-                cout << "ACOsgCompositeViewQt: caught exception while trying to open media file " << media_cycle->getLibrary()->getMedia(loop)->getFileName() << " with the OSX-wide prefered application: " << e.what() << endl;
+                cout << "ACOsgCompositeViewQt: caught exception while trying to open media file " << media_cycle->getLibrary()->getMedia(media_id)->getFileName() << " with the OSX-wide prefered application: " << e.what() << endl;
             }
 #endif //defined (__APPLE__)
         }
@@ -563,21 +563,21 @@ void ACOsgCompositeViewQt::browseMediaExternally(){
     if (media_cycle == 0) return;
     if (media_cycle->hasBrowser())
     {
-        //int loop = media_cycle->getClickedNode();
-        int loop = media_cycle->getClosestNode();//CF to deprecate: adapt to multiple pointers
-        //std::cout << "node " << loop << " selected" << std::endl;
+        //int media_id = media_cycle->getClickedNode();
+        int media_id = media_cycle->getClosestNode();//CF to deprecate: adapt to multiple pointers
+        //std::cout << "node " << media_id << " selected" << std::endl;
 
-        if(loop >= 0)
+        if(media_id >= 0)
         {
 #if defined (__APPLE__)
             std::stringstream command;
-            //command << "open " << fs::path(media_cycle->getLibrary()->getMedia(loop)->getFileName()).parent_path();// opens the containing directory using the Finder
-            command << "open -R '" << media_cycle->getLibrary()->getMedia(loop)->getFileName() << "'" ;// opens the containing directory using the Finder and highlights the file!
+            //command << "open " << fs::path(media_cycle->getLibrary()->getMedia(media_id)->getFileName()).parent_path();// opens the containing directory using the Finder
+            command << "open -R '" << media_cycle->getLibrary()->getMedia(media_id)->getFileName() << "'" ;// opens the containing directory using the Finder and highlights the file!
             try {
                 system(command.str().c_str());
             }
             catch (const exception& e) {
-                cout << "ACOsgCompositeViewQt: caught exception while trying to open media file " << media_cycle->getLibrary()->getMedia(loop)->getFileName() << " with the OSX Finder: " << e.what() << endl;
+                cout << "ACOsgCompositeViewQt: caught exception while trying to open media file " << media_cycle->getLibrary()->getMedia(media_id)->getFileName() << " with the OSX Finder: " << e.what() << endl;
             }
 #endif //defined (__APPLE__)
         }
@@ -589,21 +589,21 @@ void ACOsgCompositeViewQt::examineMediaExternally(){
     if (media_cycle == 0) return;
     if (media_cycle->hasBrowser())
     {
-        //int loop = media_cycle->getClickedNode();
-        int loop = media_cycle->getClosestNode();//CF to deprecate: adapt to multiple pointers
-        //std::cout << "node " << loop << " selected" << std::endl;
+        //int media_id = media_cycle->getClickedNode();
+        int media_id = media_cycle->getClosestNode();//CF to deprecate: adapt to multiple pointers
+        //std::cout << "node " << media_id << " selected" << std::endl;
 
-        if(loop >= 0)
+        if(media_id >= 0)
         {
             #if defined (__APPLE__)
             std::stringstream command;
-            //command << "open " << fs::path(media_cycle->getLibrary()->getMedia(loop)->getFileName()).parent_path();// opens the containing directory using the Finder
-            command << "open -R '" << media_cycle->getLibrary()->getMedia(loop)->getFileName() << "'" ;// opens the containing directory using the Finder and highlights the file!
+            //command << "open " << fs::path(media_cycle->getLibrary()->getMedia(media_id)->getFileName()).parent_path();// opens the containing directory using the Finder
+            command << "open -R '" << media_cycle->getLibrary()->getMedia(media_id)->getFileName() << "'" ;// opens the containing directory using the Finder and highlights the file!
             try {
                 system(command.str().c_str());
             }
             catch (const exception& e) {
-                cout << "ACOsgCompositeViewQt: caught exception while trying to open media file " << media_cycle->getLibrary()->getMedia(loop)->getFileName() << " with the OSX Finder: " << e.what() << endl;
+                cout << "ACOsgCompositeViewQt: caught exception while trying to open media file " << media_cycle->getLibrary()->getMedia(media_id)->getFileName() << " with the OSX Finder: " << e.what() << endl;
             }
             #endif //defined (__APPLE__)
         }
@@ -662,9 +662,9 @@ void ACOsgCompositeViewQt::translateBrowser(float x, float y){
             return;
         //if (y>sepy) // CF find better check (mouse in widget test?)
 
-        int loop = media_cycle->getClickedNode();
-        //int loop = media_cycle->getClosestNode();//CF to deprecate: adapt to multiple pointers
-        if(loop == -1)
+        int media_id = media_cycle->getClickedNode();
+        //int media_id = media_cycle->getClosestNode();//CF to deprecate: adapt to multiple pointers
+        if(media_id == -1)
         {
             //float refx(0),refy(0);
             float zoom = media_cycle->getCameraZoom();
@@ -682,12 +682,12 @@ void ACOsgCompositeViewQt::addMediaOnTimelineTrack(){
     if (media_cycle == 0) return;
     if (media_cycle->hasBrowser())
     {
-        int loop = media_cycle->getClickedNode();
+        int media_id = media_cycle->getClickedNode();
 
         if (mediaOnTrack != -1)
             this->getBrowserRenderer()->resetNodeColor(mediaOnTrack);
 
-        mediaOnTrack = loop;
+        mediaOnTrack = media_id;
         if (mediaOnTrack != -1){
             this->getBrowserRenderer()->changeNodeColor(mediaOnTrack, Vec4(1.0,1.0,1.0,1.0));//CF color the node of the media on track in white
 
@@ -711,14 +711,14 @@ void ACOsgCompositeViewQt::addMediaOnTimelineTrack(){
             //track_playing = false;
             //}
             if (timeline_renderer->getNumberOfTracks()==0){
-                //this->getTimelineRenderer()->addTrack(loop);
-                this->getTimelineRenderer()->addTrack(media_cycle->getLibrary()->getMedia(loop));
+                //this->getTimelineRenderer()->addTrack(media_id);
+                this->getTimelineRenderer()->addTrack(media_cycle->getLibrary()->getMedia(media_id));
             }
             else {
-                //this->getTimelineRenderer()->getTrack(0)->updateMedia( loop ); //media_cycle->getLibrary()->getMedia(loop) );
-                this->getTimelineRenderer()->getTrack(0)->updateMedia(media_cycle->getLibrary()->getMedia(loop));
+                //this->getTimelineRenderer()->getTrack(0)->updateMedia( media_id ); //media_cycle->getLibrary()->getMedia(media_id) );
+                this->getTimelineRenderer()->getTrack(0)->updateMedia(media_cycle->getLibrary()->getMedia(media_id));
             }
-            //this->getTimelineControlsRenderer()->getControls(0)->updateMedia( loop ); //media_cycle->getLibrary()->getMedia(loop) );
+            //this->getTimelineControlsRenderer()->getControls(0)->updateMedia( media_id ); //media_cycle->getLibrary()->getMedia(media_id) );
             media_cycle->setNeedsDisplay(true);
         }
     }

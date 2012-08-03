@@ -1,5 +1,5 @@
 /*
- *  ACImage[loop].h
+ *  ACImage.h
  *  MediaCycle
  *
  *  @author Xavier Siebert

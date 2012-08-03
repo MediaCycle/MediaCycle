@@ -1,7 +1,7 @@
 /**
  * @brief ACVisPluginPCA13.cpp
  * @author Christian Frisson
- * @date 22/07/2012
+ * @date 03/08/2012
  * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -44,7 +44,7 @@ ACVisPluginPCA13::ACVisPluginPCA13() : ACClusterPositionsPlugin()
     this->mName = "MediaCycle PCA axes 1&3";
     this->mDescription = "axes 1 and 3 resulting from PCA Visualisation plugin ";
     this->mId = "";
-	
+
     //local vars
 }
 
@@ -53,106 +53,108 @@ ACVisPluginPCA13::~ACVisPluginPCA13(){
 
 
 void ACVisPluginPCA13::updateNextPositions(ACMediaBrowser* mediaBrowser){
-	int itemClicked, labelClicked, action;
-	vector<string> featureNames;
-	int libSize = mediaBrowser->getLibrary()->getSize();
-	itemClicked = mediaBrowser->getClickedNode();
-	labelClicked = mediaBrowser->getClickedLabel();
-	int nbActiveFeatures;
-	mat desc_m, descD_m;
-	mat posDisp_m;
+    int itemClicked, labelClicked, action;
+    vector<string> featureNames;
+    int libSize = mediaBrowser->getLibrary()->getSize();
+    std::vector<long> ids = mediaBrowser->getLibrary()->getAllMediaIds();
+    itemClicked = mediaBrowser->getClickedNode();
+    labelClicked = mediaBrowser->getClickedLabel();
+    int nbActiveFeatures;
+    mat desc_m, descD_m;
+    mat posDisp_m;
 
-	nbActiveFeatures = 9;
-	extractDescMatrix(mediaBrowser, desc_m, featureNames);
-	if (desc_m.n_cols < 3){
-		ACPoint p;
-		for (int i=0; i<libSize; i++){
-			mediaBrowser->setLoopIsDisplayed(i, true);
-			// TODO: make sure you meant next
-			p.x = 0.f;//posDisp_m(i,0);
-			p.y = 0.f;//posDisp_m(i,1);
-			p.z = 0.f;
-			mediaBrowser->setNodeNextPosition(i, p);
-		}
-		return;
-	}
-	mat descN_m = zscore(desc_m);
-	mat coeff;
-	mat score;
-	princomp(coeff, posDisp_m, descN_m);
+    nbActiveFeatures = 9;
+    extractDescMatrix(mediaBrowser, desc_m, featureNames);
+    if (desc_m.n_cols < 3){
+        ACPoint p;
+        for (long i=0; i<ids.size(); i++){
+            mediaBrowser->setMediaNodeDisplayed(ids[i], true);
+            // TODO: make sure you meant next
+            p.x = 0.f;//posDisp_m(i,0);
+            p.y = 0.f;//posDisp_m(i,1);
+            p.z = 0.f;
+            mediaBrowser->setNodeNextPosition(ids[i], p);
+        }
+        return;
+    }
+    mat descN_m = zscore(desc_m);
+    mat coeff;
+    mat score;
+    princomp(coeff, posDisp_m, descN_m);
 
-	for (int i=0; i<featureNames.size(); i++)
-		std::cout << "featureNames : " << featureNames[i] << std::endl;
+    for (int i=0; i<featureNames.size(); i++)
+        std::cout << "featureNames : " << featureNames[i] << std::endl;
 
-	
+
 #ifdef USE_DEBUG
-	posDisp_m.save("posDispDef.txt", arma_ascii);
+    posDisp_m.save("posDispDef.txt", arma_ascii);
 #endif
-// 	///////////////////////////////////////////////////////////////////////////////
-	
-	///for mediacycle osg
-// 	posDisp_m = posDisp_m/10;
-// 	labelPos_m = labelPos_m/10;
-	// Set labels in browser ////////////////////////////////////////////////////////
+    // 	///////////////////////////////////////////////////////////////////////////////
 
-	mediaBrowser->setNumberOfDisplayedLoops(desc_m.n_rows);
-	////////////////////////////////////////////////////////////////////////////////////
+    ///for mediacycle osg
+    // 	posDisp_m = posDisp_m/10;
+    // 	labelPos_m = labelPos_m/10;
+    // Set labels in browser ////////////////////////////////////////////////////////
 
-	ACPoint p;
-	for (int i=0; i<libSize; i++){
-		mediaBrowser->setLoopIsDisplayed(i, true);
-	  // TODO: make sure you meant next
+    mediaBrowser->setNumberOfDisplayedNodes(desc_m.n_rows);
+    ////////////////////////////////////////////////////////////////////////////////////
+
+    ACPoint p;
+    for (long i=0; i<ids.size(); i++){
+        mediaBrowser->setMediaNodeDisplayed(ids[i], true);
+        // TODO: make sure you meant next
 	p.x = posDisp_m(i,0);
 	p.y = posDisp_m(i,2);
-	  p.z = 0;
-		mediaBrowser->setNodeNextPosition(i, p);
-  }
-	////////////////////////////////////////////////////////////////
+        p.z = 0;
+        mediaBrowser->setNodeNextPosition(ids[i], p);
+    }
+    ////////////////////////////////////////////////////////////////
 }
 
 
 void ACVisPluginPCA13::extractDescMatrix(ACMediaBrowser* mediaBrowser, mat& desc_m, vector<string> &featureNames){
-  vector<ACMedia*> loops = mediaBrowser->getLibrary()->getAllMedia();
-  int nbMedia = loops.size(); 
-	int featDim;
-	int totalDim = 0;
-	
-	std::vector<float> weight=mediaBrowser->getWeightVector();
-	// Count nb of feature
-	int nbFeature = loops.back()->getNumberOfPreProcFeaturesVectors();
-	if (nbFeature!=weight.size())
-		std::cerr<<"ACVisPluginPCA::extractDescMatrix weight vector size incompatibility"<<endl;
-	for(int f=0; f< nbFeature; f++){
-		if (weight[f]>0.f){
-			featureNames.push_back(loops.back()->getPreProcFeaturesVector(f)->getName());
-			featDim = loops.back()->getPreProcFeaturesVector(f)->getSize();
-			for(int d=0; d < featDim; d++){
-				totalDim++;
-			}
-		}
-	}
-	
-  desc_m.set_size(nbMedia,totalDim);
-  mat pos_m(nbMedia,2);
-  
-  for(int i=0; i<nbMedia; i++) {    
-    int tmpIdx = 0;
+    ACMedias medias = mediaBrowser->getLibrary()->getAllMedia();
+    std::vector<long> ids = mediaBrowser->getLibrary()->getAllMediaIds();
+    int nbMedia = medias.size();
+    int featDim;
+    int totalDim = 0;
+
+    std::vector<float> weight=mediaBrowser->getWeightVector();
+    // Count nb of feature
+    int nbFeature = mediaBrowser->getLibrary()->getFirstMedia()->getNumberOfPreProcFeaturesVectors();
+    if (nbFeature!=weight.size())
+        std::cerr<<"ACVisPluginPCA::extractDescMatrix weight vector size incompatibility"<<endl;
     for(int f=0; f< nbFeature; f++){
-		if (weight[f]>0.f){
-			
-			std::cout << f << std::endl;
-			featDim = loops.back()->getPreProcFeaturesVector(f)->getSize();
-			for(int d=0; d < featDim; d++){
-				desc_m(i,tmpIdx) = loops[i]->getPreProcFeaturesVector(f)->getFeatureElement(d);
-				tmpIdx++;
-			}
-		}
+        if (weight[f]>0.f){
+            featureNames.push_back(mediaBrowser->getLibrary()->getFirstMedia()->getPreProcFeaturesVector(f)->getName());
+            featDim = mediaBrowser->getLibrary()->getFirstMedia()->getPreProcFeaturesVector(f)->getSize();
+            for(int d=0; d < featDim; d++){
+                totalDim++;
+            }
+        }
     }
-  }
-  // normalizing features between 0 and 1 ///////////////////////////////////////
-//   rowvec maxDesc_v = max(desc_m);
-//   rowvec minDesc_v = min(desc_m);
-//   desc_m = desc_m - repmat(minDesc_v, desc_m.n_rows, 1);
-//   desc_m = desc_m/repmat(maxDesc_v-minDesc_v, desc_m.n_rows, 1);
-	/////////////////////////////////////////////////////////////////////////////////
+
+    desc_m.set_size(nbMedia,totalDim);
+    mat pos_m(nbMedia,2);
+
+    for(int i=0; i<nbMedia; i++) {
+        int tmpIdx = 0;
+        for(int f=0; f< nbFeature; f++){
+            if (weight[f]>0.f){
+
+                std::cout << f << std::endl;
+                featDim = mediaBrowser->getLibrary()->getFirstMedia()->getPreProcFeaturesVector(f)->getSize();
+                for(int d=0; d < featDim; d++){
+                    desc_m(i,tmpIdx) = medias[ids[i]]->getPreProcFeaturesVector(f)->getFeatureElement(d);
+                    tmpIdx++;
+                }
+            }
+        }
+    }
+    // normalizing features between 0 and 1 ///////////////////////////////////////
+    //   rowvec maxDesc_v = max(desc_m);
+    //   rowvec minDesc_v = min(desc_m);
+    //   desc_m = desc_m - repmat(minDesc_v, desc_m.n_rows, 1);
+    //   desc_m = desc_m/repmat(maxDesc_v-minDesc_v, desc_m.n_rows, 1);
+    /////////////////////////////////////////////////////////////////////////////////
 }

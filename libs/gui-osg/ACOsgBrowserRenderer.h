@@ -64,6 +64,12 @@
 #include <sys/time.h>
 
 class ACOsgBrowserRenderer {
+public:
+    ACOsgBrowserRenderer();
+    ~ACOsgBrowserRenderer();
+    void clean();
+    void setMediaCycle(MediaCycle *media_cycle){ this->media_cycle = media_cycle;}
+
 protected:
     MediaCycle *media_cycle;
     osg::ref_ptr<osg::Group> group;
@@ -91,7 +97,7 @@ protected:
     int media_cycle_global_navigation_level;
 
     // SD - Results from centralized request to MediaCycle - NODE SPECIFIC
-    ACMediaNode media_cycle_node;
+    ACMediaNode* media_cycle_node;
     bool media_cycle_isdisplayed;
     ACPoint media_cycle_current_pos;
     ACPoint media_cycle_view_pos;
@@ -102,23 +108,16 @@ protected:
     int media_index;
     int prev_media_index;
     std::string media_cycle_filename;
-
     int nodes_prepared;
-
     ACBrowserAudioWaveformType audio_waveform_type;
     ACSettingType setting;
 
 public:
-    ACOsgBrowserRenderer();
-    ~ACOsgBrowserRenderer();
-    void clean();
-
     double getTime();
 
-    void setMediaCycle(MediaCycle *media_cycle){ this->media_cycle = media_cycle; };
-    //void setLayoutPlugin(ACPlugin* acpl){mLayoutPlugin=acpl;};
+    //void setLayoutPlugin(ACPlugin* acpl){mLayoutPlugin=acpl;}
     //void setLayout(ACOsgBrowserLayoutType _type){layout_type = _type;}
-    osg::ref_ptr<osg::Group> getShapes() { return group; };
+    osg::ref_ptr<osg::Group> getShapes() { return group; }
 
     void prepareNodes(int start=0);
     void updateNodes(double ratio=0.0);
@@ -127,7 +126,7 @@ public:
     void updateLabels(double ratio=0.0);
 
     int computeScreenCoordinates(osgViewer::View* view, double ratio=0.0); //CF: use osgViewer::Viewer* for simple Viewers
-    std::vector<float> getDistanceMouse() { return distance_mouse; };
+    std::vector<float> getDistanceMouse() { return distance_mouse; }
 
     void setFont(osg::ref_ptr<osgText::Font> _font){this->font = _font;}
     void changeNodeColor(int _node, osg::Vec4 _color){node_renderer[_node]->changeNodeColor(_color);}
@@ -144,7 +143,5 @@ private:
     bool removeLinks(int _first=0, int _last=0);
     bool removeLabels(int _first=0, int _last=0);
     bool addLabels(int _first=0, int _last=0);
-
 };
-
 #endif

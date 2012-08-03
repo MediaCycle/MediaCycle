@@ -33,8 +33,6 @@
 #ifndef _MEDIACYCLE_H
 #define	_MEDIACYCLE_H
 
-
-
 class MediaCycle;
 #include "ACMediaLibrary.h"
 #include "ACMediaBrowser.h"
@@ -53,9 +51,9 @@ class MediaCycle;
 #include "tinyxml.h"
 
 enum MCActionType {
-	MC_ACTION_ADDFILE,
-	MC_ACTION_GETKNN,
-	MC_ACTION_GETTHUMBNAIL
+    MC_ACTION_ADDFILE,
+    MC_ACTION_GETKNN,
+    MC_ACTION_GETTHUMBNAIL
 };
 
 //static void tcp_callback(char *buffer, int l, char **buffer_send, int *l_send, void *userData);
@@ -68,37 +66,36 @@ public:
     MediaCycle(ACMediaType aMediaType, std::string local_directory="", std::string libname="");
     MediaCycle(const MediaCycle& orig);
     virtual ~MediaCycle();
-	void clean();
+    void clean();
 
-	// == TCP
+    // == TCP
     int startTcpServer(int port=12345, int max_connections=5);
     int startTcpServer(int port, int max_connections,ACNetworkSocketServerCallback aCallback);
     int stopTcpServer();
     int processTcpMessage(char* buffer, int l, char **buffer_send, int *l_send);     // Process incoming requests (addfile, getknn, ...)
 
-	
     // == Media Library
-	int importDirectories();
-	int importDirectories(std::vector<std::string> paths, int recursive, bool forward_order=true, bool doSegment=false);
-	int importDirectoriesThreaded(std::vector<std::string> paths, int recursive, bool forward_order=true, bool doSegment=false);
+    int importDirectories();
+    int importDirectories(std::vector<std::string> paths, int recursive, bool forward_order=true, bool doSegment=false);
+    int importDirectoriesThreaded(std::vector<std::string> paths, int recursive, bool forward_order=true, bool doSegment=false);
     int importDirectory(std::string path, int recursive, bool forward_order=true, bool doSegment=false, TiXmlElement* _medias = 0);
-	int setPath(std::string path);
-	int importACLLibrary(std::string path);
-	int importXMLLibrary(std::string path);
-	int importMCSLLibrary(std::string path);//CF 31/05/2010 temporary MediaCycle Segmented Library (MCSL) for AudioGarden, adding a parentID for segments to the initial ACL, awaiting approval
-	void libraryContentChanged(int needsNormalizeAndCluster=1);
-	
-	void saveACLLibrary(std::string path);
-	void saveXMLLibrary(std::string path);
-	void saveMCSLLibrary(std::string path);//CF 31/05/2010 temporary MediaCycle Segmented Library (MCSL) for AudioGarden, adding a parentID for segments to the initial ACL, awaiting approval
-	void cleanLibrary();
-	int getLibrarySize(); // = getnumberofmedia
-	int getNumberOfMediaNodes();
+    int setPath(std::string path);
+    int importACLLibrary(std::string path);
+    int importXMLLibrary(std::string path);
+    int importMCSLLibrary(std::string path);//CF 31/05/2010 temporary MediaCycle Segmented Library (MCSL) for AudioGarden, adding a parentID for segments to the initial ACL, awaiting approval
+    void libraryContentChanged(int needsNormalizeAndCluster=1);
+
+    void saveACLLibrary(std::string path);
+    void saveXMLLibrary(std::string path);
+    void saveMCSLLibrary(std::string path);//CF 31/05/2010 temporary MediaCycle Segmented Library (MCSL) for AudioGarden, adding a parentID for segments to the initial ACL, awaiting approval
+    void cleanLibrary();
+    int getLibrarySize(); // = getnumberofmedia
+    int getNumberOfMediaNodes();
     ACMediaLibrary* getLibrary() { return mediaLibrary;}
     std::string getLocalDirectoryPath() {return local_directory;}
 
-	// XS TODO this is obsolete (acl)
- 	std::string getLibName() {return libname;}
+    // XS TODO this is obsolete (acl)
+    std::string getLibName() {return libname;}
 
     // == Search by Similarity
     int getKNN(int id, std::vector<int> &ids, int k);
@@ -107,193 +104,190 @@ public:
     // Thumbnail
     std::string getThumbnailFileName(int id);
 
-	// == Media Browser
+    // == Media Browser
     ACMediaBrowser* getBrowser() { return mediaBrowser;}
-	bool hasBrowser();
-	ACBrowserMode getBrowserMode();
-	void setBrowserMode(ACBrowserMode _mode);
-	bool changeBrowserMode(ACBrowserMode _mode);
-	void cleanBrowser() { mediaBrowser->clean(); }
-	
-	//Listener manager 
-	void addListener(ACEventListener* eventListener);
-	ACEventManager *getEventManager(){return eventManager;};
-	// Plugins
+    bool hasBrowser();
+    ACBrowserMode getBrowserMode();
+    void setBrowserMode(ACBrowserMode _mode);
+    bool changeBrowserMode(ACBrowserMode _mode);
+    void cleanBrowser() { mediaBrowser->clean(); }
 
-	// XS TODO cleanPlugins
+    //Listener manager
+    void addListener(ACEventListener* eventListener);
+    ACEventManager *getEventManager(){return eventManager;};
+    // Plugins
+
+    // XS TODO cleanPlugins
     int addPluginLibrary(std::string aPluginLibraryPath);
     int removePluginLibrary(std::string aPluginLibraryPath);
-	ACPluginManager* getPluginManager() { return pluginManager;}
-	ACPluginLibrary* getPluginLibrary(std::string aPluginLibraryPath) const;
-	bool removePluginFromLibrary(std::string _plugin_name, std::string _library_path);
-	std::vector<std::string> getListOfPlugins();
-	std::vector<std::string> getListOfActivePlugins();
+    ACPluginManager* getPluginManager() { return pluginManager;}
+    ACPluginLibrary* getPluginLibrary(std::string aPluginLibraryPath) const;
+    bool removePluginFromLibrary(std::string _plugin_name, std::string _library_path);
+    std::vector<std::string> getListOfPlugins();
+    std::vector<std::string> getListOfActivePlugins();
 
-	// XS TODO do we want so many methods ?
-	void setClustersMethodPlugin(std::string pluginName);
-	void setNeighborsMethodPlugin(std::string pluginName);
-	void setClustersPositionsPlugin(std::string pluginName);
-	void setNeighborsPositionsPlugin(std::string pluginName);
-	void setVisualisationPlugin(std::string pluginName);
-	void changeClustersMethodPlugin(std::string pluginName);
-	void changeNeighborsMethodPlugin(std::string pluginName);
-	void changeClustersPositionsPlugin(std::string pluginName);
-	void changeNeighborsPositionsPlugin(std::string pluginName);
-	//void changeVisualisationPlugin(std::string pluginName);
-	
-	
-	void setPreProcessPlugin(std::string pluginName);
-	
-	void setMediaReaderPlugin(std::string pluginName);
-	
+    // XS TODO do we want so many methods ?
+    void setClustersMethodPlugin(std::string pluginName);
+    void setNeighborsMethodPlugin(std::string pluginName);
+    void setClustersPositionsPlugin(std::string pluginName);
+    void setNeighborsPositionsPlugin(std::string pluginName);
+    void setVisualisationPlugin(std::string pluginName);
+    void changeClustersMethodPlugin(std::string pluginName);
+    void changeNeighborsMethodPlugin(std::string pluginName);
+    void changeClustersPositionsPlugin(std::string pluginName);
+    void changeNeighborsPositionsPlugin(std::string pluginName);
+    //void changeVisualisationPlugin(std::string pluginName);
+
+
+    void setPreProcessPlugin(std::string pluginName);
+
+    void setMediaReaderPlugin(std::string pluginName);
+
 #ifdef SUPPORT_MULTIMEDIA
-	std::string getActiveSubMediaKey();
+    std::string getActiveSubMediaKey();
     int setActiveMediaType(std::string mediaName);
-    #endif//def SUPPORT_MULTIMEDIA
-	
-	void dumpPluginsList();
+#endif//def SUPPORT_MULTIMEDIA
 
-	// == Media
-	ACMediaNode &getMediaNode(int i);
-	ACMediaNode &getNodeFromMedia(ACMedia* _media);
-	std::string getMediaFileName(int i);
-	ACMediaType getMediaType(int i);
-	ACMediaType getMediaType() {return mediaLibrary->getMediaType();}
-	void setMediaType(ACMediaType _mt);
-	bool changeMediaType(ACMediaType aMediaType);
+    void dumpPluginsList();
 
-	std::vector<std::string> getExtensionsFromMediaType(ACMediaType media_type){return mediaLibrary->getExtensionsFromMediaType(media_type);}
-	int getThumbnailWidth(int i);
-	int getThumbnailHeight(int i);
-	int getWidth(int i);
-	int getHeight(int i);
-	void* getThumbnailPtr(int i);
-	int getNeedsDisplay3D();
-	void setNeedsDisplay3D(bool _dis);
-	int getNeedsDisplay();
-	void setNeedsDisplay(bool _dis);
+    // == Media
+    ACMediaNode* getMediaNode(int i);
+    ACMediaNode* getNodeFromMedia(ACMedia* _media);
+    std::string getMediaFileName(int i);
+    ACMediaType getMediaType(int i);
+    ACMediaType getMediaType() {return mediaLibrary->getMediaType();}
+    void setMediaType(ACMediaType _mt);
+    bool changeMediaType(ACMediaType aMediaType);
 
-	// == view
-	float getCameraZoom();
-	float getCameraRotation();
-	void setCameraRotation(float angle);
-	void setCameraPosition(float x, float y);
-	void getCameraPosition(float &x, float &y);
-	void setCameraZoom(float z);
-	void setCameraRecenter();
-	void setAutoPlay(int i);
-	int getClickedNode();
-	void setClickedNode(int i,int p_index = 0);
-	void setClosestNode(int i,int p_index = 0);
-	int getClosestNode(int p_index = 0);
-	int	getLastSelectedNode();
+    std::vector<std::string> getExtensionsFromMediaType(ACMediaType media_type){return mediaLibrary->getExtensionsFromMediaType(media_type);}
+    int getThumbnailWidth(int i);
+    int getThumbnailHeight(int i);
+    int getWidth(int i);
+    int getHeight(int i);
+    void* getThumbnailPtr(int i);
+    int getNeedsDisplay3D();
+    void setNeedsDisplay3D(bool _dis);
+    int getNeedsDisplay();
+    void setNeedsDisplay(bool _dis);
 
-	// == Cluster Display
-	void updateState();
-	void storeNavigationState();
-	int getNavigationLevel();
-	float getFrac();
-	void incrementLoopNavigationLevels(int i);
-	void setReferenceNode(int index);
-	int getReferenceNode();
-	void goBack();
-	void goForward();
-	void setClusterNumber(int n);
-	void setForwardDown(int i);
-        void forwardNextLevel();
-//	void setPlayKeyDown(bool i){playkeydown = i;};
-//	bool getPlayKeyDown(){return playkeydown;};
+    // == view
+    float getCameraZoom();
+    float getCameraRotation();
+    void setCameraRotation(float angle);
+    void setCameraPosition(float x, float y);
+    void getCameraPosition(float &x, float &y);
+    void setCameraZoom(float z);
+    void setCameraRecenter();
+    void setAutoPlay(int i);
+    int getClickedNode();
+    void setClickedNode(int i);
+    void setClosestNode(int i,int p_index = 0);
+    int getClosestNode(int p_index = 0);
+    int	getLastSelectedNode();
 
-	// == Features
-	void normalizeFeatures(int needsNormalize=1);
-	FeaturesVector getFeaturesVectorInMedia(int i, std::string feature_name);
-	void setWeight(int i, float weight);
-	void setWeightVector(std::vector<float> fw);
-	std::vector<float> getWeightVector();
-	float getWeight(int i);
+    // == Cluster Display
+    void updateState();
+    void storeNavigationState();
+    int getNavigationLevel();
+    float getFrac();
+    void incrementNavigationLevels(int i);
+    void setReferenceNode(int index);
+    int getReferenceNode();
+    void goBack();
+    void goForward();
+    void setClusterNumber(int n);
+    void setForwardDown(int i);
+    void forwardNextLevel();
+    //	void setPlayKeyDown(bool i){playkeydown = i;};
+    //	bool getPlayKeyDown(){return playkeydown;};
 
-	// == Pointers
-	int getNumberOfPointers();
-	ACPointer* getPointerFromIndex(int i); // for use when parsing pointers incrementally
-	ACPointer* getPointerFromId(int i); // for use when parsing pointers from the ID set by the input device
-	void resetPointers();
-	void addPointer(int p_id);
-	void removePointer(int p_id);
+    // == Features
+    void normalizeFeatures(int needsNormalize=1);
+    FeaturesVector getFeaturesVectorInMedia(int i, std::string feature_name);
+    void setWeight(int i, float weight);
+    void setWeightVector(std::vector<float> fw);
+    std::vector<float> getWeightVector();
+    float getWeight(int i);
 
-	// == LABELS on VIEW
- 	int getLabelSize();
-	std::string getLabelText(int i);
-	ACPoint getLabelPos(int i);
+    // == Pointers
+    int getNumberOfPointers();
+    ACPointer* getPointerFromIndex(int i); // for use when parsing pointers incrementally
+    ACPointer* getPointerFromId(int i); // for use when parsing pointers from the ID set by the input device
+    void resetPointers();
+    void addPointer(int p_id);
+    void removePointer(int p_id);
 
-	// == Playing time stamp
-	void setSourceCursor(int lid, int frame_pos);
-	void setCurrentFrame(int lid, int frame_pos);
-	void muteAllSources();
+    // == LABELS on VIEW
+    int getLabelSize();
+    std::string getLabelText(int i);
+    ACPoint getLabelPos(int i);
 
-	// == Update audio engine sources
-	void setNeedsActivityUpdateLock(int i);
-	void setNeedsActivityUpdateRemoveMedia();
-	std::vector<int>* getNeedsActivityUpdateMedia();
+    // == Playing time stamp
+    void setSourceCursor(int lid, int frame_pos);
+    void setCurrentFrame(int lid, int frame_pos);
+    void muteAllSources();
 
-	// == callbacks
-	void pickedObjectCallback(int pid);
-	void hoverWithPointerId(float xx, float yy, int p_id = -1);
-	void hoverWithPointerIndex(float xx, float yy, int p_index = 0);
+    // == Update audio engine sources
+    void setNeedsActivityUpdateLock(int i);
+    void setNeedsActivityUpdateRemoveMedia();
+    std::vector<int>* getNeedsActivityUpdateMedia();
 
-	// == NEW, replaces updateClusters and updateNeighborhoods
-	void updateDisplay(bool animate);
-	void initializeFeatureWeights();
+    // == callbacks
+    void pickedObjectCallback(int pid);
+    void hoverWithPointerId(float xx, float yy, int p_id = -1);
+    void hoverWithPointerIndex(float xx, float yy, int p_index = 0);
 
-	// == config (in XMl !!)
-	TiXmlHandle readXMLConfigFileHeader(std::string _fname="");
-	int readXMLConfigFileCore(TiXmlHandle rootHandle);
-	int readXMLConfigFilePlugins(TiXmlHandle rootHandle);
+    // == NEW, replaces updateClusters and updateNeighborhoods
+    void updateDisplay(bool animate);
+    void initializeFeatureWeights();
 
-	int readXMLConfigFile(std::string _fname="");
-	void saveXMLConfigFile(std::string _fname="");
-	void setConfigFile(std::string _fname){config_file_xml = _fname;}
+    // == config (in XMl !!)
+    TiXmlHandle readXMLConfigFileHeader(std::string _fname="");
+    int readXMLConfigFileCore(TiXmlHandle rootHandle);
+    int readXMLConfigFilePlugins(TiXmlHandle rootHandle);
 
-	// == User log
-	void cleanUserLog();
+    int readXMLConfigFile(std::string _fname="");
+    void saveXMLConfigFile(std::string _fname="");
+    void setConfigFile(std::string _fname){config_file_xml = _fname;}
 
-	// == Dump / used for Debug
-	void dumpNavigationLevel();
-	void dumpLoopNavigationLevels();
+    // == Dump / used for Debug
+    void dumpNavigationLevel();
+    void dumpNavigationLevels();
 
-	// == testing
-	void testThreads();
-	void testLabels();
+    // == testing
+    void testThreads();
+    void testLabels();
 
 private:
-	int forwarddown;
-//	bool playkeydown;
-	int port;
-	int max_connections;
-	std::string local_directory;
-	std::string libname;
-	ACMediaLibrary *mediaLibrary;
-	ACMediaBrowser *mediaBrowser;
-	ACNetworkSocketServer *networkSocket;
-	ACPluginManager *pluginManager;
-	ACEventManager *eventManager;
+    int forwarddown;
+    //	bool playkeydown;
+    int port;
+    int max_connections;
+    std::string local_directory;
+    std::string libname;
+    ACMediaLibrary *mediaLibrary;
+    ACMediaBrowser *mediaBrowser;
+    ACNetworkSocketServer *networkSocket;
+    ACPluginManager *pluginManager;
+    ACEventManager *eventManager;
 
- 	// settings and features XML
-	std::string config_file_xml;
+    // settings and features XML
+    std::string config_file_xml;
 
-	int prevLibrarySize;
+    int prevLibrarySize;
 
-	bool mNeedsDisplay;
+    bool mNeedsDisplay;
 
-	// Media Import Thread
-	pthread_t	   import_thread;
-	pthread_attr_t import_thread_attr;
-	void* import_thread_arg;
-	std::vector<std::string> import_directories;
-	int import_recursive;
-	bool import_forward_order;
-	bool import_doSegment;
+    // Media Import Thread
+    pthread_t import_thread;
+    pthread_attr_t import_thread_attr;
+    void* import_thread_arg;
+    std::vector<std::string> import_directories;
+    int import_recursive;
+    bool import_forward_order;
+    bool import_doSegment;
 
-	void* mediacycle_callback_data;
+    void* mediacycle_callback_data;
 };
 
 #endif	/* _MEDIACYCLE_H */

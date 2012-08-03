@@ -130,11 +130,11 @@ ACAudioGardenOsgQt::ACAudioGardenOsgQt(QWidget *parent)
 
 	this->show();
 
-	#ifdef USE_APPLE_MULTITOUCH
+        /*#ifdef USE_APPLE_MULTITOUCH
 		multitouch_trackpad = new ACAppleMultitouchTrackpadSupport();
 		multitouch_trackpad->setMediaCycle(media_cycle);
 		multitouch_trackpad->start();
-	#endif
+        #endif*/
 	//ui.compositeOsgView->setFocus();
 }
 
@@ -153,9 +153,9 @@ ACAudioGardenOsgQt::~ACAudioGardenOsgQt()
 		osc_feedback = 0;
 	}
 
-	#ifdef USE_APPLE_MULTITOUCH
+        /*#ifdef USE_APPLE_MULTITOUCH
 		multitouch_trackpad->stop();
-	#endif
+        #endif*/
 
 	delete audio_engine;
 	delete media_cycle;
@@ -190,8 +190,7 @@ void ACAudioGardenOsgQt::on_pushButtonLaunch_clicked()
 
 void ACAudioGardenOsgQt::on_pushButtonClean_clicked()
 {
-	media_cycle->cleanLibrary();
-	media_cycle->cleanUserLog();
+        media_cycle->clean();
 	media_cycle->libraryContentChanged();
 	this->updateLibrary();
 	library_loaded = false;

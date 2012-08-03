@@ -46,6 +46,7 @@
 //#include "ACMediaBrowser.h"
 
 class ACMedia;
+typedef std::map<long,ACMedia*> ACMedias;
 class ACMediaBrowser;
 class ACMediaTimedFeature;
 class MediaCycle;
@@ -248,7 +249,7 @@ typedef void* preProcessInfo;
 class ACPreProcessPlugin : virtual public ACPlugin {
 public:
     ACPreProcessPlugin();
-    virtual preProcessInfo update(std::vector<ACMedia*> media_library)=0;
+    virtual preProcessInfo update(ACMedias media_library)=0;
     virtual std::vector<ACMediaFeatures*> apply(preProcessInfo info,ACMedia* theMedia)=0;
     virtual void freePreProcessInfo(preProcessInfo &info)=0;
 protected:

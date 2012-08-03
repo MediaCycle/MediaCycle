@@ -58,14 +58,14 @@ ACPcaPreprocessPlugin::ACPcaPreprocessPlugin() {
 ACPcaPreprocessPlugin::~ACPcaPreprocessPlugin(){
 }
 
-preProcessInfo ACPcaPreprocessPlugin::update(std::vector<ACMedia*> media_library){
+preProcessInfo ACPcaPreprocessPlugin::update(ACMedias media_library){
 	ACPcaPreprocessInfo *pcaInfo=new ACPcaPreprocessInfo;
 	
 	
-	std::vector<ACMedia*>::iterator it=media_library.begin();
+        ACMedias::iterator it=media_library.begin();
 	int k=0;	
 	{
-		ACMedia* currMedia=(*it);
+                ACMedia* currMedia=it->second;
 
 		for (int i=0;i<currMedia->getNumberOfFeaturesVectors();i++){
 			k+=currMedia->getFeaturesVector(i)->getSize();
@@ -77,7 +77,7 @@ preProcessInfo ACPcaPreprocessPlugin::update(std::vector<ACMedia*> media_library
 	int j=0;
 	//copy the ACMediaLibrary Features in a Arma::fmat 
 	for (it=media_library.begin();it!=media_library.end();it++){
-		ACMedia* currMedia=(*it);
+                ACMedia* currMedia=it->second;
 		k=0;
 		for (int i=0;i<currMedia->getNumberOfFeaturesVectors();i++){
 			ACMediaFeatures* currFeat=currMedia->getFeaturesVector(i);

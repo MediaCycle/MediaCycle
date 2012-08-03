@@ -36,17 +36,14 @@
 #include <fstream>
 #include <iomanip> // for setw
 #include <cstdlib> // for atoi
-#include <MediaCycle.h>
 
 //#include <QtPlugin>
 
 //Q_IMPORT_PLUGIN(qjpeg)
 
-
-
 ACUserProfileQt::ACUserProfileQt(QWidget *parent) : QMainWindow(parent)
 {
-	ui.setupUi(this); // first thing to do
+    ui.setupUi(this); // first thing to do
 
     this->setAcceptDrops(true); // for drag and drop
 
@@ -72,7 +69,7 @@ ACUserProfileQt::ACUserProfileQt(QWidget *parent) : QMainWindow(parent)
         QString ext = QString(".") + QString((*format).data());
         if(ACMediaFactory::getInstance().getMediaTypeFromExtension(ext.toStdString()) == MEDIA_TYPE_IMAGE){
             if (format != supportedFormats.begin())
-                    mediaExts.append(" ");
+                mediaExts.append(" ");
             mediaExts.append("*");
             mediaExts.append(ext);
         }
@@ -99,14 +96,14 @@ void ACUserProfileQt::on_pushButtonPictureLocate_clicked(){
         fileNames = dialog.selectedFiles();
     QStringList::Iterator file = fileNames.begin();
     if(file != fileNames.end()) {
-            fileName = *file;
+        fileName = *file;
     }
     if(fileName.isEmpty())
         return;
     QImage image = QImage(fileName);
     if (image.isNull()) {
         QMessageBox::information(this, tr("Profile Picture"),
-                                             tr("Cannot load %1.").arg(fileName));
+                                 tr("Cannot load %1.").arg(fileName));
         return;
     }
     QSize label_size = ui.labelPictureImage->size();
@@ -114,12 +111,50 @@ void ACUserProfileQt::on_pushButtonPictureLocate_clicked(){
 
     QSettings settings("numediart", "MediaCycle");
     settings.setValue("user.picture", fileName);
+
+    media_cycle->getLibrary()->setCuratorPicture( fileName.toStdString() );
+}
+
+void ACUserProfileQt::on_lineEditEmail_editingFinished()
+{
+    if(!media_cycle)
+        return;
+    if(!media_cycle->getLibrary())
+        return;
+    media_cycle->getLibrary()->setCuratorEmail( ui.lineEditEmail->text().toStdString() );
+}
+
+void ACUserProfileQt::on_lineEditLocation_editingFinished()
+{
+    if(!media_cycle)
+        return;
+    if(!media_cycle->getLibrary())
+        return;
+    media_cycle->getLibrary()->setCuratorLocation( ui.lineEditLocation->text().toStdString() );
+}
+
+void ACUserProfileQt::on_lineEditName_editingFinished()
+{
+    if(!media_cycle)
+        return;
+    if(!media_cycle->getLibrary())
+        return;
+    media_cycle->getLibrary()->setCuratorName( ui.lineEditName->text().toStdString() );
+}
+
+void ACUserProfileQt::on_lineEditWebsite_editingFinished()
+{
+    if(!media_cycle)
+        return;
+    if(!media_cycle->getLibrary())
+        return;
+    media_cycle->getLibrary()->setCuratorWebsite( ui.lineEditWebsite->text().toStdString() );
 }
 
 void ACUserProfileQt::dragEnterEvent(QDragEnterEvent *event)
 {
-     std::cout <<"<drop content>" << std::endl;
-     event->acceptProposedAction();
+    std::cout <<"<drop content>" << std::endl;
+    event->acceptProposedAction();
 }
 
 void ACUserProfileQt::dragMoveEvent(QDragMoveEvent *event)
@@ -129,9 +164,9 @@ void ACUserProfileQt::dragMoveEvent(QDragMoveEvent *event)
 
 void ACUserProfileQt::dropEvent(QDropEvent *event)
 {
-     const QMimeData *mimeData = event->mimeData();
+    const QMimeData *mimeData = event->mimeData();
 
-     /*if (mimeData->hasImage()) {
+    /*if (mimeData->hasImage()) {
               setPixmap(qvariant_cast<QPixmap>(mimeData->imageData()));
           } else if (mimeData->hasHtml()) {
               setText(mimeData->html());
@@ -140,24 +175,24 @@ void ACUserProfileQt::dropEvent(QDropEvent *event)
               setText(mimeData->text());
               setTextFormat(Qt::PlainText);
           } else*/ if (mimeData->hasUrls()) {
-              QList<QUrl> urlList = mimeData->urls();
-              QString text;
-              for (int i = 0; i < urlList.size() && i < 32; ++i) {
-                  QString url = urlList.at(i).path();
-                  text += url + QString("\n");
-                  std::cout << url.toStdString() << std::endl;
-              }
-              //setText(text);
-          } /*else {
+        QList<QUrl> urlList = mimeData->urls();
+        QString text;
+        for (int i = 0; i < urlList.size() && i < 32; ++i) {
+            QString url = urlList.at(i).path();
+            text += url + QString("\n");
+            std::cout << url.toStdString() << std::endl;
+        }
+        //setText(text);
+    } /*else {
               setText(tr("Cannot display data"));
           }*/
 
-     /*if (mimeData){
+    /*if (mimeData){
          foreach (QString format, mimeData->formats()) {
              std::cout << format.toStdString() << std::endl;
          }
     }*/
-     event->acceptProposedAction();
+    event->acceptProposedAction();
 }
 
 void ACUserProfileQt::dragLeaveEvent(QDragLeaveEvent *event)

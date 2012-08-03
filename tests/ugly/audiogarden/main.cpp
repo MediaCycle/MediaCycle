@@ -75,8 +75,9 @@ int main(int argc, char** argv) {
 		//		mediacycle->saveMCSLLibrary("/Users/dtardieu/data/footsteps/footsteps.mcsl");
 		//mediacycle->saveMCSLLibrary("/Users/dtardieu/data/AudioGarden/audiogarden/audiogarden.mcsl");
 
-		for (int i = 0; i < mediacycle->getLibrary()->getSize(); i++){
-			std::cout << i << " : " << mediacycle->getLibrary()->getMedia(i)->getFileName() << "   " << ((ACAudio*)mediacycle->getLibrary()->getMedia(i))->getNFrames() << std::endl;
+                std::vector<long> ids = mediacycle->getLibrary()->getAllMediaIds();
+                for (int i = 0; i < ids.size(); i++){
+                        std::cout << i << " : " << mediacycle->getLibrary()->getMedia(ids[i])->getFileName() << "   " << ((ACAudio*)mediacycle->getLibrary()->getMedia(ids[i]))->getNFrames() << std::endl;
 		}
 
 		vector<long> grainIds;
@@ -117,15 +118,15 @@ int main(int argc, char** argv) {
         cout << "similar : " << ids[k] << endl;
     cout.flush();
 
-    vector<ACMedia*> loops = mediacycle->getLibrary()->getAllMedia();
-    if (loops.size() > 0) {
-        cout << "loopssize : " << loops.size() << endl;
-        cout << "filename : " << loops[1]->getFileName() << endl;
-        for(int y=0; y<loops.size(); y++)
+    vector<ACMedia*> medias = mediacycle->getLibrary()->getAllMedia();
+    if (medias.size() > 0) {
+        cout << "mediassize : " << medias.size() << endl;
+        cout << "filename : " << medias[1]->getFileName() << endl;
+        for(int y=0; y<medias.size(); y++)
         {
             for (k=0;k<ids.size();k++) {
-                if (loops[y]->getId() == ids[k]) {
-                    cout << "filename : " << loops[y]->getFileName() << endl;
+                if (medias[y]->getId() == ids[k]) {
+                    cout << "filename : " << medias[y]->getFileName() << endl;
                 }
             }
             //Should output 1 4 8
@@ -160,16 +161,16 @@ int main(int argc, char** argv) {
 */
 /*    int NN = 500;
     int similar[2];
-    vector<ACMedia*> loops = mediacycle->getLibrary()->getAllMedia();
-    mediacycle->getBrowser()->getKNN(loops[NN]->getId(),similar,2);
+    vector<ACMedia*> medias = mediacycle->getLibrary()->getAllMedia();
+    mediacycle->getBrowser()->getKNN(medias[NN]->getId(),similar,2);
 
     cout << "similar : " << similar[0] << " & " << similar[1] << endl;
     cout.flush();
-    cout << "filename : " << loops[NN]->getFileName() << endl;
-    for(int y=0; y<loops.size(); y++)
+    cout << "filename : " << medias[NN]->getFileName() << endl;
+    for(int y=0; y<medias.size(); y++)
     {
-        if (loops[y]->getId() == similar[0] || loops[y]->getId() == similar[1])
-        cout << "filename : " << loops[y]->getFileName() << endl;
+        if (medias[y]->getId() == similar[0] || medias[y]->getId() == similar[1])
+        cout << "filename : " << medias[y]->getFileName() << endl;
         //Should output 1 4 8
     }
 

@@ -1,4 +1,4 @@
-/* 
+/*
  * File:   main.cpp
  * Author: Alexis Moinet
  *
@@ -254,13 +254,14 @@ int processTcpMessageFromInstallation(MediaCycle *that, char *buffer, int l, cha
 			string filename;
 			int posSep;
 			int posDot;
-			for (int k=0; k<that->getLibrarySize(); k++){
-				filename=that->getLibrary()->getMedia(k)->getFileName();
+                        std::vector<long> ids = that->getLibrary()->getAllMediaIds();
+                        for (int k=0; k<ids.size(); k++){
+                                filename=that->getLibrary()->getMedia(ids[k])->getFileName();
 				posSep = filename.find_last_of("/");
 				posDot = filename.find_last_of(".");
 				cout << "test id : " << filename.substr(posSep+1, posDot-posSep-10) << endl;
 				if (!filename.compare(posSep+1, posDot-posSep-1, idVideoStr)){
-					idVideo = k;
+                                        idVideo = ids[k];
 					break;
 				}	
 			}
@@ -304,7 +305,7 @@ char* get_error_message(){
 
 // common to all types of messages:
 string fillOutputBuffer(ACMediaLibrary* media_library, ACMediaBrowser* media_browser, int nvid){
-	int n_loops = media_browser->getNumberOfMediaNodes();
+        int n_medias = media_browser->getNumberOfMediaNodes();
 	int n_labels = media_browser->getNumberOfDisplayedLabels();
 	string sbuffer_send;
 
@@ -317,28 +318,29 @@ string fillOutputBuffer(ACMediaLibrary* media_library, ACMediaBrowser* media_bro
 	sbuffer_send = onvid.str(); // could add "0" in front for message type (not done here because not useful for web application)
 	
 	// loop on all videos to see which ones to send out
-	int chk_loops=0;
+        int chk_medias=0;
 // XS TODO iterators ?
-// like	for (ACMediaNodes::iterator node = mLoopAttributes.begin(); node != mLoopAttributes.end(); ++node){
+// like	for (ACMediaNodes::iterator node = mMediaNodes.begin(); node != mMediaNodes.end(); ++node){
 
 	ACPoint p;
-	for (int i=0; i< n_loops; i++){
-		if (media_browser->getMediaNode(i).isDisplayed()){
-			chk_loops++;
-			p = media_browser->getMediaNode(i).getNextPosition();
+        std::vector<long> ids = media_library->getAllMediaIds();
+        for (int i=0; i< ids.size(); i++){
+            if (media_browser->getMediaNode(ids[i])->isDisplayed()){
+                        chk_medias++;
+                        p = media_browser->getMediaNode(ids[i])->getNextPosition();
 			int posx = (int) p.x;
 			int posy = (int) p.y;
 			ostringstream oss ;
 			oss.fill('0'); // fill with zeros (otherwise will leave blanks)
-			oss << setw(6) << generateID(media_library->getMedia(i)->getFileName()) << setw(3) << posx << setw(3)<< posy; // fixed format
+                        oss << setw(6) << generateID(media_library->getMedia(ids[i])->getFileName()) << setw(3) << posx << setw(3)<< posy; // fixed format
 			sbuffer_send += oss.str(); // concatenates all videos in one string
 			
 			// XS test
 			cout << oss.str() << endl;
 		}		
 	}
-	if (chk_loops != media_browser->getNumberOfDisplayedLoops()) {
-		cerr << "<startOrRedraw> consistency check failed: problem with number of displayed videos: " << chk_loops << " differs from "<< media_browser->getNumberOfDisplayedLoops() << endl;
+        if (chk_medias != media_browser->getNumberOfDisplayedNodes()) {
+                cerr << "<startOrRedraw> consistency check failed: problem with number of displayed videos: " << chk_medias << " differs from "<< media_browser->getNumberOfDisplayedNodes() << endl;
 		sbuffer_send = "-1";	
 		return sbuffer_send;
 	}
@@ -396,10 +398,10 @@ void startOrRedraw(MediaCycle *mediacycle, int nbVideo, char **buffer_send, int*
 	ACMediaBrowser* media_browser;
 	media_browser = mediacycle->getBrowser();
 	
-	int n_loops = media_browser->getLibrary()->getSize();
+        int n_medias = media_browser->getLibrary()->getSize();
 //	int n_labels = media_browser->getNumberOfLabels();
 
-	if (nbVideo > n_loops) {
+        if (nbVideo > n_medias) {
 		cerr << "<startOrRedrawRandom> : you are asking for too many videos" << endl;
 		*buffer_send = get_error_message();	
 		return;
@@ -408,9 +410,9 @@ void startOrRedraw(MediaCycle *mediacycle, int nbVideo, char **buffer_send, int*
 	// tell the browser nothing specific was clicked.
 	media_browser->setClickedNode(-1);
 	media_browser->setClickedLabel(-1);
-	media_browser->setNumberOfDisplayedLoops(nbVideo);
+        media_browser->setNumberOfDisplayedNodes(nbVideo);
 	media_browser->updateNextPositions();
-	if (nbVideo != media_browser->getNumberOfDisplayedLoops()){
+        if (nbVideo != media_browser->getNumberOfDisplayedNodes()){
 		cerr << "<startOrRedraw> browser returned wrong number of videos" << endl;
 		*buffer_send = get_error_message();	
 		return;
@@ -427,13 +429,13 @@ void startOrRedraw(MediaCycle *mediacycle, int nbVideo, char **buffer_send, int*
 // this one is a test version of the previous one
 void startOrRedrawRandom(MediaCycle *mediacycle, int nbVideo, char **buffer_send, int* l_send){
 	ACMediaLibrary* media_library = mediacycle->getLibrary();
-	int n_loops = media_library->getSize();  
+        int n_medias = media_library->getSize();
 	
-	if (n_loops==0) {
+        if (n_medias==0) {
 		cerr << "<startOrRedrawRandom> : empty media library" << endl;
 		return;
 	}
-	if (nbVideo > n_loops) {
+        if (nbVideo > n_medias) {
 		cerr << "<startOrRedrawRandom> : you are asking for too many videos" << endl;
 		return;
 	}
@@ -446,9 +448,9 @@ void startOrRedrawRandom(MediaCycle *mediacycle, int nbVideo, char **buffer_send
 
 	// using armadillo to get nbVideo random ids among all videos:
 	#ifdef ARMADILLO_HAVE_RANDU
-		colvec q = arma::randu<colvec>(n_loops);
+                colvec q = arma::randu<colvec>(n_medias);
 	#else
-		colvec q = arma::rand<colvec>(n_loops);
+                colvec q = arma::rand<colvec>(n_medias);
 	#endif
 	ucolvec indices = sort_index(q);
 	ucolvec trunc_indices = indices.rows(0,nbVideo-1);
@@ -471,7 +473,7 @@ void startOrRedrawRandom(MediaCycle *mediacycle, int nbVideo, char **buffer_send
 		// positions should in range [0:999], which is a fraction of the screen size
 		// XS for the moment they depend on mViewWidth, mViewHeight in ACMediaBrowser
 		
-		ACPoint pos = media_browser->getMediaNode(l).getCurrentPosition();
+                ACPoint pos = media_browser->getMediaNode(l)->getCurrentPosition();
 		//int posx = (int) media_browser->getMediaNode(l).getCurrentPositionX();
 		//int posy = (int) media_browser->getMediaNode(l).getCurrentPositionY();
 		ostringstream oss ;
@@ -534,10 +536,10 @@ void itemClicked(MediaCycle *mediacycle, int idVideo, char **buffer_send, int* l
 	
 	ACMediaBrowser* media_browser;
 	media_browser = mediacycle->getBrowser();
-	int n_loops = media_browser->getNumberOfMediaNodes();
+        int n_medias = media_browser->getNumberOfMediaNodes();
 	// XS should also be = media_library->getSize()
 	
-	if (idVideo < 0 || idVideo > n_loops) {
+        if (idVideo < 0 || idVideo > n_medias) {
 		cerr << "<itemClicked> : video ID out of bounds" << endl;
 		return;
 	}
@@ -545,7 +547,7 @@ void itemClicked(MediaCycle *mediacycle, int idVideo, char **buffer_send, int* l
 	media_browser->setClickedNode(idVideo);
 	media_browser->setClickedLabel(-1);
 	media_browser->updateNextPositions();
-	int nbVideo = media_browser->getNumberOfDisplayedLoops();
+        int nbVideo = media_browser->getNumberOfDisplayedNodes();
 	
 	// XS below this is common to all message types -- put it in subroutine
 	string sbuffer_send = fillOutputBuffer(media_library, media_browser, nbVideo);
@@ -573,7 +575,7 @@ void labelClicked(MediaCycle *mediacycle, int idLabel, char **buffer_send, int* 
 	media_browser->setClickedNode(-1);
 	media_browser->setClickedLabel(idLabel);
 	media_browser->updateNextPositions();
-	int nbVideo = media_browser->getNumberOfDisplayedLoops();
+        int nbVideo = media_browser->getNumberOfDisplayedNodes();
 	
 	// XS below this is common to all message types -- put it in subroutine
 	string sbuffer_send = fillOutputBuffer(media_library, media_browser, nbVideo);
@@ -586,7 +588,7 @@ void saveLibraryAsXml(MediaCycle* mediacycle, string _path) {
 	ACMediaLibrary* media_library;
 	media_library = mediacycle->getLibrary();
 	ACMedia* local_media;
-	int n_loops = media_library->getSize();  
+        int n_medias = media_library->getSize();
 	int featureSize;
 	float featureValue;
 	std::string featureName;
@@ -600,16 +602,16 @@ void saveLibraryAsXml(MediaCycle* mediacycle, string _path) {
 	
 	fprintf(library_file, "<feature size=\"6\" >ID</feature>\n");
 	
-	for (int i=0; i < media_library->getMedia(0)->getNumberOfFeaturesVectors(); i++){
-		featureSize = media_library->getMedia(0)->getFeaturesVector(i)->getSize();
-		featureName = media_library->getMedia(0)->getFeaturesVector(i)->getName();
+        for (int i=0; i < media_library->getFirstMedia()->getNumberOfFeaturesVectors(); i++){
+                featureSize = media_library->getFirstMedia()->getFeaturesVector(i)->getSize();
+                featureName = media_library->getFirstMedia()->getFeaturesVector(i)->getName();
 		
 		if (featureSize > 1){
 			std::cout << "Warning : Multidimensional feature, won't be exported" << std::endl;
 		}
 		else{
 			fprintf(library_file, "<feature size=\"1\">");
-			fprintf(library_file, "%s",  media_library->getMedia(0)->getFeaturesVector(i)->getName().c_str());
+                        fprintf(library_file, "%s",  media_library->getFirstMedia()->getFeaturesVector(i)->getName().c_str());
 			fprintf(library_file, "</feature>\n");
 		}
 	}
@@ -617,21 +619,22 @@ void saveLibraryAsXml(MediaCycle* mediacycle, string _path) {
 	
 	/// ITEMS //
 	fprintf(library_file, "%s\n", "<items>");
-	for(int i=0; i<n_loops; i++) {
-		fprintf(library_file, "<v duration=\"%.1lf\">",  media_library->getMedia(i)->getDuration());
-		local_media = media_library->getMedia(i);    
+        std::vector<long> ids = media_library->getAllMediaIds();
+        for(int i=0; i<ids.size(); i++) {
+            fprintf(library_file, "<v duration=\"%.1lf\">",  media_library->getMedia(ids[i])->getDuration());
+                local_media = media_library->getMedia(ids[i]);
 		if (i>80){
 			std::cout << "filename : " <<  ID << std::endl;
 		}
 		// printing ID
 		ID = generateID(local_media->getFileName());
 		fprintf(library_file, "%s", ID.c_str());
-		for (int j=0; j < media_library->getMedia(i)->getNumberOfFeaturesVectors(); j++){
-			featureSize = media_library->getMedia(i)->getFeaturesVector(j)->getSize();
-			featureName = media_library->getMedia(i)->getFeaturesVector(j)->getName();
+                for (int j=0; j < media_library->getMedia(ids[i])->getNumberOfFeaturesVectors(); j++){
+                        featureSize = media_library->getMedia(ids[i])->getFeaturesVector(j)->getSize();
+                        featureName = media_library->getMedia(ids[i])->getFeaturesVector(j)->getName();
 			
 			if (featureSize == 1){
-				featureValue = media_library->getMedia(i)->getFeaturesVector(j)->getDiscretizedFeature();
+                                featureValue = media_library->getMedia(ids[i])->getFeaturesVector(j)->getDiscretizedFeature();
 				fprintf(library_file, "%d", (int) featureValue);
 				if (i>80){
 					std::cout << featureName << " = " << featureValue << std::endl;

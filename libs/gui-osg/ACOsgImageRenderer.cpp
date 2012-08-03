@@ -92,14 +92,6 @@ void ACOsgImageRenderer::imageGeode(bool flip, float sizemul, float zoomin) {
 		osg::ref_ptr<Geometry> border_geometry;
 		Texture2D *image_texture;
 			
-		// CF: temporary workaround as the ACUserLog tree and the ACLoopAttributes vector in ACMediaBrowser are not sync'd 
-		/*int media_index = node_index; // or media_cycle->getBrowser()->getMediaNode(node_index).getMediaId(); 
-		if (media_cycle->getBrowser()->getMode() == AC_MODE_NEIGHBORS)
-			media_index = media_cycle->getBrowser()->getUserLog()->getMediaIdFromNodeId(node_index);	
-		
-		if (media_index<0)
-			media_index = 0;*/
-		
 		//width = media_cycle->getThumbnailWidth(media_index);//CF instead of node_index
 		//height = media_cycle->getThumbnailHeight(media_index);//CF instead of node_index
 		width = media->getThumbnailWidth();
@@ -267,14 +259,8 @@ void ACOsgImageRenderer::imageGeode(bool flip, float sizemul, float zoomin) {
 }
 
 void ACOsgImageRenderer::prepareNodes() {
-	
-	// SD TODO - move this upwards?
-	/*int media_index = node_index; // or media_cycle->getBrowser()->getMediaNode(node_index).getMediaId(); 
-	if (media_cycle->getBrowser()->getMode() == AC_MODE_NEIGHBORS)
-		media_index = media_cycle->getBrowser()->getUserLog()->getMediaIdFromNodeId(node_index);*/
-	
-	//if  (media_cycle->getMediaNode(node_index).isDisplayed()) {
-	if (media && media_cycle->getNodeFromMedia(media).isDisplayed()) {
+
+	if (media && media_cycle->getNodeFromMedia(media)->isDisplayed()) {
 		if (!image_geode) {
 			imageGeode();
 			media_node->addChild(image_transform);
@@ -290,8 +276,8 @@ void ACOsgImageRenderer::updateNodes(double ratio) {
 	float x, y, z;
 	float zpos = 0.001;
 	
-    const ACMediaNode &attribute = media_cycle->getMediaNode(node_index);
-	if (!attribute.isDisplayed()){//TR mod to implement isDisplayed
+    const ACMediaNode* attribute = media_cycle->getMediaNode(node_index);
+	if (!attribute->isDisplayed()){//TR mod to implement isDisplayed
 		if(media_node->getNumChildren() == 1) {
 			media_node->removeChild(0, 1);
 		}
@@ -300,14 +286,10 @@ void ACOsgImageRenderer::updateNodes(double ratio) {
 		return;			
 	}
 	
-	const ACPoint &p = attribute.getCurrentPosition(), &p2 = attribute.getNextPosition();
+	const ACPoint &p = attribute->getCurrentPosition(), &p2 = attribute->getNextPosition();
 	double omr = 1.0-ratio;
 	
-	/*int media_index = node_index; // or media_cycle->getBrowser()->getMediaNode(node_index).getMediaId(); 
-	if (media_cycle->getBrowser()->getMode() == AC_MODE_NEIGHBORS)
-		media_index = media_cycle->getBrowser()->getUserLog()->getMediaIdFromNodeId(node_index);*/
-	
-	//if (media_index!=prev_media_index) {
+        //if (media_index!=prev_media_index) {
 	if (media_changed) {
 		if(media_node->getNumChildren() == 1) {
 			media_node->removeChild(0, 1);
@@ -320,7 +302,7 @@ void ACOsgImageRenderer::updateNodes(double ratio) {
 	}
 	
 	unsigned int mask = (unsigned int)-1;
-	if(attribute.getNavigationLevel() >= media_cycle->getNavigationLevel()) {
+	if(attribute->getNavigationLevel() >= media_cycle->getNavigationLevel()) {
 		image_transform->setNodeMask(mask);
 	}
 	else {
@@ -334,12 +316,12 @@ void ACOsgImageRenderer::updateNodes(double ratio) {
 		if (border_geode->getDrawable(0)) {
 			//CF nodes colored along their relative cluster on in Clusters Mode
 			if (media_cycle->getBrowserMode() == AC_MODE_CLUSTERS){
-				if(cluster_index != attribute.getClusterId()){
-					cluster_index = attribute.getClusterId();
+				if(cluster_index != attribute->getClusterId()){
+					cluster_index = attribute->getClusterId();
 					osg::ref_ptr<osg::Vec4Array> colors = new Vec4Array(1);
 					(*colors)[0] = node_color;
 					if(cluster_colors.size()>0)
-						(*colors)[0] = cluster_colors[attribute.getClusterId()%cluster_colors.size()];
+						(*colors)[0] = cluster_colors[attribute->getClusterId()%cluster_colors.size()];
 					((Geometry*)border_geode->getDrawable(0))->setColorArray(colors);
 				}
 			}	
@@ -358,7 +340,7 @@ void ACOsgImageRenderer::updateNodes(double ratio) {
 	if (localscale>minscale) {
 		z += 2*zpos;
 	}
-	else if (attribute.getActivity()==1) {
+	else if (attribute->getActivity()==1) {
 		z += zpos;
 	}
 

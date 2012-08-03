@@ -38,25 +38,36 @@
 
 #include "ACOsgMediaRenderer.h"
 
+struct ACOsgLibraryTextRenderer {
+    osg::ref_ptr<osgText::Text> text;
+    osg::ref_ptr<osg::Geode> geode;
+    std::string value;
+    std::string caption;
+    float x,y;
+    ACOsgLibraryTextRenderer() : text(0),geode(0),value(""),caption(""),x(0.0f),y(0.0f){}
+    ~ACOsgLibraryTextRenderer(){text = 0; geode = 0;}
+};
+
+struct ACOsgLibraryImageRenderer {
+    osg::ref_ptr<osg::MatrixTransform> transform;
+    std::string file;
+    float x,y;
+    ACOsgLibraryImageRenderer() : transform(0),file(""),x(0.0f),y(0.0f){}
+    ~ACOsgLibraryImageRenderer(){transform = 0;}
+};
+
 class ACOsgLibraryRenderer : public ACOsgMediaRenderer  {
 protected:
 
-    osg::ref_ptr<osgText::Text> title_text,author_text,curator_text,year_text,license_text,publisher_text,website_text,medias_text;
-    osg::ref_ptr<osg::Geode> title_geode,author_geode,curator_geode,year_geode,license_geode,publisher_geode,website_geode,medias_geode;
-    std::string title,author,curator,year,publisher,license,website,cover;
-    std::string title_caption,author_caption,curator_caption,year_caption,publisher_caption,license_caption,website_caption,medias_caption;
-    int medias;
-    float title_x,title_y,author_x,author_y,curator_x,curator_y,year_x,year_y,publisher_x,publisher_y,license_x,license_y,website_x,website_y,cover_x,cover_y,medias_x,medias_y;
+    ACOsgLibraryTextRenderer library_title,library_author,library_year,library_publisher,library_license,library_website,library_medias_number;
+    ACOsgLibraryTextRenderer curator_name,curator_email,curator_website,curator_location;
+    ACOsgLibraryImageRenderer library_cover,curator_picture;
 
-    osg::ref_ptr<osg::Image> image_image;
-    osg::ref_ptr<osg::Geode> image_geode;
-    osg::ref_ptr<osg::Geode> border_geode;
-    osg::ref_ptr<osg::MatrixTransform> image_transform;
-    osg::ref_ptr<osg::Image> thumbnail;
-    osg::ref_ptr<osg::Texture2D> image_texture;
+    osg::ref_ptr<osg::MatrixTransform> library_node;
+    osg::ref_ptr<osg::MatrixTransform> curator_node;
 
     void textGeode(std::string _string, osg::ref_ptr<osgText::Text>& _text, osg::ref_ptr<osg::Geode>& _geode,osg::Vec3 pos);
-    void imageGeode(bool flip=false, float sizemul=1.0, float zoomin=1.0);
+    void imageGeode(ACOsgLibraryImageRenderer& _renderer);
     void init();
 
 public:
@@ -65,15 +76,9 @@ public:
     void prepareNodes();
     void updateNodes(double ratio=0.0);
     void updateSize(int w, int h);
-    void setTitle(std::string _title);
-    void setAuthor(std::string _author);//{this->author=_author;}
-    void setCurator(std::string _curator){this->curator=_curator;}
-    void setYear(std::string _year){this->year=_year;}
-    void setPublisher(std::string _publisher);//{this->publisher=_publisher;}
-    void setLicense(std::string _license){this->license=_license;}
-    void setWebsite(std::string _website){this->website=_website;}
-    void setCover(std::string _cover);
-    void setNumberOfMedia(int _number);
+
+    void updateTextRenderer(ACOsgLibraryTextRenderer& _renderer, std::string _value, osg::ref_ptr<osg::MatrixTransform> node );
+    void updateImageRenderer(ACOsgLibraryImageRenderer& _renderer, std::string _file, osg::ref_ptr<osg::MatrixTransform> node);
     //virtual osg::ref_ptr<osg::Geode> getMainGeode() { return image_geode;}
     virtual void changeSetting(ACSettingType _setting);
 
@@ -81,6 +86,7 @@ private:
     float max_side_size; // of the cover, in pixels
     float font_size; // in pixels
     float line_sep; // in pixels
+    int width,height;
 };
 
 #endif

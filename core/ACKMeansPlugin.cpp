@@ -123,7 +123,7 @@ void ACKMeansPlugin::updateClusters(ACMediaBrowser* mediaBrowser,bool needsClust
     vector<int> currTempId=library->getParentIds();
     vector<int> currId;
     for (int i=0;i<currTempId.size();i++)
-        if(mediaBrowser->getMediaNode(currTempId[i]).getNavigationLevel() >= mediaBrowser->getNavigationLevel())
+        if(mediaBrowser->getMediaNode(currTempId[i])->getNavigationLevel() >= mediaBrowser->getNavigationLevel())
             currId.push_back(currTempId[i]);
 
 
@@ -233,7 +233,7 @@ void ACKMeansPlugin::updateClusters(ACMediaBrowser* mediaBrowser,bool needsClust
             {
                 // check if we should include mediaBrowser object
                 // note: the following "if" skips to next i if true.
-                if(mediaBrowser->getMediaNode(currId[i]).getNavigationLevel() < mediaBrowser->getNavigationLevel()) continue;
+                if(mediaBrowser->getMediaNode(currId[i])->getNavigationLevel() < mediaBrowser->getNavigationLevel()) continue;
 
                 // compute distance between this object and every cluster
                 for(j=0; j<clusterCount; j++)
@@ -300,7 +300,7 @@ void ACKMeansPlugin::updateClusters(ACMediaBrowser* mediaBrowser,bool needsClust
     // Assign Samples to Clusters
     for(i=0; i<object_count; i++) {
         // check if we should include this object
-        if(mediaBrowser->getMediaNode(currId[i]).getNavigationLevel() < mediaBrowser->getNavigationLevel()) continue;
+        if(mediaBrowser->getMediaNode(currId[i])->getNavigationLevel() < mediaBrowser->getNavigationLevel()) continue;
 
         // compute distance between this object and every cluster
         for(j=0; j<clusterCount; j++) {
@@ -313,7 +313,7 @@ void ACKMeansPlugin::updateClusters(ACMediaBrowser* mediaBrowser,bool needsClust
         jmin = min_element(cluster_distances.begin(), cluster_distances.end()) - cluster_distances.begin();
 
         // assign cluster
-        mediaBrowser->getMediaNode(currId[i]).setClusterId(jmin);
+        mediaBrowser->getMediaNode(currId[i])->setClusterId(jmin);
         if (cluster_distances[jmin]<centerDistMin[jmin]){
             idNodeClusterCenters[jmin]=currId[i];
             centerDistMin[jmin]=cluster_distances[jmin];
@@ -322,8 +322,6 @@ void ACKMeansPlugin::updateClusters(ACMediaBrowser* mediaBrowser,bool needsClust
     for (int i=0;i<clusterCount;i++)
         mediaBrowser->setClusterCenter(i, clusterCenters[i] );
     mediaBrowser->setIdNodeClusterCenter(idNodeClusterCenters);
-
-
 }
 
 void ACKMeansPlugin::clusterNumberChanged(){

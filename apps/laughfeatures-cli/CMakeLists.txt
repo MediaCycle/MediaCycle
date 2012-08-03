@@ -4,6 +4,8 @@ IF(SUPPORT_AUDIO AND USE_LAUGHFEAT AND BUILD_CLIS)
 	FILE(GLOB SRC *.cpp *.c)
 	FILE(GLOB HDR *.hpp *.h)
 
+	INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/plugins/segmentation)
+
 	ADD_EXECUTABLE(laughfeatures-cli ${SRC} ${HDR})
 
 	ADD_DEPENDENCIES(laughfeatures-cli mediacycle armadillo-utils audiofeatures mc_audio mc_segmentation)

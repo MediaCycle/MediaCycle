@@ -5,7 +5,7 @@ IF(SUPPORT_VIDEO AND ARMADILLO_FOUND)
 	FILE(GLOB SRC *.cpp *.c)
 	FILE(GLOB HDR *.hpp *.h)
 
-	INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/plugins/image/blobs ${CMAKE_SOURCE_DIR}/plugins/image/gabor)
+	INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/plugins/image ${CMAKE_SOURCE_DIR}/plugins/image/blobs ${CMAKE_SOURCE_DIR}/plugins/image/gabor)
 
 	ADD_LIBRARY(${TARGET_NAME} SHARED ${SRC} ${HDR})
 	ADD_DEPENDENCIES(${TARGET_NAME} mediacycle mc_image armadillo-utils)

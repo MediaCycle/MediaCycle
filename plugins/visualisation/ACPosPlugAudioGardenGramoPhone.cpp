@@ -1,7 +1,7 @@
 /**
  * @brief ACPosPlugAudioGardenGramoPhone.cpp
  * @author Christian Frisson
- * @date 18/05/2012
+ * @date 03/08/2012
  * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -40,7 +40,7 @@ using namespace std;
 ACPosPlugAudioGardenGramoPhone::ACPosPlugAudioGardenGramoPhone()
 {
     //vars herited from ACPlugin
-	// XS TODO: are these general enough ? can we use this only for audio ??
+    // XS TODO: are these general enough ? can we use this only for audio ??
     this->mMediaType = MEDIA_TYPE_AUDIO;
     //this->mPluginType = PLUGIN_TYPE_CLUSTERS_POSITIONS;
     this->mName = "AudioGarden GramoPhone";
@@ -57,98 +57,102 @@ ACPosPlugAudioGardenGramoPhone::~ACPosPlugAudioGardenGramoPhone()
 
 
 void ACPosPlugAudioGardenGramoPhone::updateNextPositions(ACMediaBrowser* mediaBrowser){
-  int itemClicked, labelClicked, action;
-	
-	int libSize = mediaBrowser->getLibrary()->getSize();
-	itemClicked = mediaBrowser->getClickedNode();
-	labelClicked = mediaBrowser->getClickedLabel();
-	
-	mat desc_m, descD_m;
-	mat posDisp_m(libSize, 2);
-	colvec r_v(libSize);
-	#ifdef ARMADILLO_HAVE_RANDU
-		colvec theta_v = arma::randu<colvec>(libSize);
-	#else
-		colvec theta_v = arma::rand<colvec>(libSize);
-	#endif
-	theta_v.ones(libSize); //theta_v * 2 * arma::math::pi();
-	vector<ACMedia*> loops =  mediaBrowser->getLibrary()->getAllMedia();	
-	for (int i=0; i<libSize; i++){
-		r_v(i) = 1./log(1+loops[i]->getDuration());
-	}
-	r_v = r_v/max(r_v) *.1;
+    int itemClicked, labelClicked, action;
 
-	desc_m = extractDescMatrix(mediaBrowser->getLibrary(), featureList);
-	mat coef_m;
-	mat proj_m;
-	princomp(coef_m, proj_m, desc_m);
-	theta_v = proj_m.col(0);
-	theta_v = (theta_v - min(theta_v))/(max(theta_v)-min(theta_v)) * 2 * arma::math::pi();
-	//	std::cout << theta_v << std::endl;
+    int libSize = mediaBrowser->getLibrary()->getSize();
+    itemClicked = mediaBrowser->getClickedNode();
+    labelClicked = mediaBrowser->getClickedLabel();
 
-	
-	mediaBrowser->setNumberOfDisplayedLoops(desc_m.n_rows);
-	
-	posDisp_m.col(0) = r_v % cos(theta_v);
-	posDisp_m.col(1) = r_v % sin(theta_v);
-	posDisp_m = zscore(posDisp_m)*.1;
-	
-	ACPoint p;
-  for (int i=0; i<libSize; i++){
-    mediaBrowser->setLoopIsDisplayed(i, true);
-	  // TODO: make sure you meant next
-	  p.x = posDisp_m(i,0);
-	  p.y = posDisp_m(i,1);
-	  p.z = 0;
-		mediaBrowser->setNodeNextPosition(i, p);
-  }
-	//   for (int i=0; i<libSize; i++){
-	//     mediaBrowser->setLoopIsDisplayed(i, true);
-	// 	  // TODO: make sure you meant next
-	// 		mediaBrowser->setNodeNextPosition(i, r_v(i) * cos(theta_v(i)), r_v(i) * sin(theta_v(i)));
-	//   }
-	////////////////////////////////////////////////////////////////
+    mat desc_m, descD_m;
+    mat posDisp_m(libSize, 2);
+    colvec r_v(libSize);
+#ifdef ARMADILLO_HAVE_RANDU
+    colvec theta_v = arma::randu<colvec>(libSize);
+#else
+    colvec theta_v = arma::rand<colvec>(libSize);
+#endif
+    theta_v.ones(libSize); //theta_v * 2 * arma::math::pi();
+    ACMedias medias = mediaBrowser->getLibrary()->getAllMedia();
+    int r = 0;
+    for(ACMedias::iterator media = medias.begin(); media != medias.end(); media++) {
+        r_v(r++) = 1./log(1+media->second->getDuration());
+    }
+    r_v = r_v/max(r_v) *.1;
+
+    desc_m = extractDescMatrix(mediaBrowser->getLibrary(), featureList);
+    mat coef_m;
+    mat proj_m;
+    princomp(coef_m, proj_m, desc_m);
+    theta_v = proj_m.col(0);
+    theta_v = (theta_v - min(theta_v))/(max(theta_v)-min(theta_v)) * 2 * arma::math::pi();
+    //	std::cout << theta_v << std::endl;
+
+
+    mediaBrowser->setNumberOfDisplayedNodes(desc_m.n_rows);
+
+    posDisp_m.col(0) = r_v % cos(theta_v);
+    posDisp_m.col(1) = r_v % sin(theta_v);
+    posDisp_m = zscore(posDisp_m)*.1;
+
+    ACPoint p;
+    std::vector<long> ids = mediaBrowser->getLibrary()->getAllMediaIds();
+    for (int i=0; i<ids.size(); i++){
+        mediaBrowser->setMediaNodeDisplayed(ids[i], true);
+        // TODO: make sure you meant next
+        p.x = posDisp_m(i,0);
+        p.y = posDisp_m(i,1);
+        p.z = 0;
+        mediaBrowser->setNodeNextPosition(ids[i], p);
+    }
+    //   for (int i=0; i<ids.size(); i++){
+    //     mediaBrowser->setMediaNodeDisplayed(ids[i], true);
+    // 	  // TODO: make sure you meant next
+    // 		mediaBrowser->setNodeNextPosition(ids[i], r_v(i) * cos(theta_v(i)), r_v(i) * sin(theta_v(i)));
+    //   }
+    ////////////////////////////////////////////////////////////////
 }
 
 mat ACPosPlugAudioGardenGramoPhone::extractDescMatrix(ACMediaLibrary* lib, string featureName){
-  vector<ACMedia*> loops = lib->getAllMedia();
-  int nbMedia = loops.size(); 
-	int featureId = 0;
-	int featureSize = 0;
+    ACMedias medias = lib->getAllMedia();
+    int nbMedia = medias.size();
+    int featureId = 0;
+    int featureSize = 0;
 
-	int nbFeature = loops.front()->getNumberOfFeaturesVectors();
+    int nbFeature = lib->getFirstMedia()->getNumberOfFeaturesVectors();
 
-	for(int f=0; f< nbFeature; f++){
-		if (loops.front()->getPreProcFeaturesVector(f)->getName() == featureName){
-			featureId = f;
-		}	
-	}
+    for(int f=0; f< nbFeature; f++){
+        if (lib->getFirstMedia()->getPreProcFeaturesVector(f)->getName() == featureName){
+            featureId = f;
+        }
+    }
 
-	featureSize = loops.front()->getPreProcFeaturesVector(featureId)->getSize();
-	
-  mat desc_m(loops.size(),featureSize);
-  
-	mat pos_m(nbMedia,2);
-  
-  for(int i=0; i<loops.size(); i++) {    
-		for(int d=0; d < featureSize; d++){
-			desc_m(i, d) = loops[i]->getPreProcFeaturesVector(featureId)->getFeatureElement(d);
-		}
-  }
-	return desc_m;
+    featureSize = lib->getFirstMedia()->getPreProcFeaturesVector(featureId)->getSize();
+
+    mat desc_m(medias.size(),featureSize);
+
+    mat pos_m(nbMedia,2);
+
+    int i = 0;
+    for(ACMedias::iterator media = medias.begin(); media != medias.end(); media++) {
+        for(int d=0; d < featureSize; d++){
+            desc_m(i, d) = media->second->getPreProcFeaturesVector(featureId)->getFeatureElement(d);
+        }
+        i++;
+    }
+    return desc_m;
 }
 
 
 mat ACPosPlugAudioGardenGramoPhone::extractDescMatrix(ACMediaLibrary* lib, vector<string> featureList){
-	mat desc_m;
-	mat tmpDesc_m;
-	
-	desc_m = extractDescMatrix(lib, featureList[0]);
-	
-	for (int i=1; i<featureList.size(); i++){
-		tmpDesc_m = extractDescMatrix(lib, featureList[i]);
-		desc_m = join_rows(desc_m, tmpDesc_m);
-	}
-	return desc_m;
+    mat desc_m;
+    mat tmpDesc_m;
+
+    desc_m = extractDescMatrix(lib, featureList[0]);
+
+    for (int i=1; i<featureList.size(); i++){
+        tmpDesc_m = extractDescMatrix(lib, featureList[i]);
+        desc_m = join_rows(desc_m, tmpDesc_m);
+    }
+    return desc_m;
 }
 

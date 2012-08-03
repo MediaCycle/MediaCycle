@@ -157,21 +157,21 @@ int main(int argc, char *argv[])
 			//this->mediaLibrary->saveCoreXMLLibrary(MC_e_root, MC_e_medias);
 			TiXmlElement* MC_e_number_of_medias = new TiXmlElement( "NumberOfMedia" );
 			MC_e_root->LinkEndChild( MC_e_number_of_medias );
-			int n_loops = v1.size();
-			std::string s_loops;
+                        int n_medias = v1.size();
+                        std::string s_medias;
 			std::stringstream tmp2;
-			tmp2 << n_loops;
-			s_loops = tmp2.str();
+                        tmp2 << n_medias;
+                        s_medias = tmp2.str();
 			
 			int a=0;
 			
-			TiXmlText* MC_t_nm = new TiXmlText( s_loops );
+                        TiXmlText* MC_t_nm = new TiXmlText( s_medias );
 			MC_e_number_of_medias->LinkEndChild( MC_t_nm );
 			
 			// XS TODO iterator
 			std::vector<TiXmlElement*> medias;
 			
-			for(int i=0; i<n_loops; i++) {
+                        for(int i=0; i<n_medias; i++) {
 				TiXmlElement* media = new TiXmlElement( "Media" );
 				MC_e_medias->LinkEndChild( media );
 				//media_library[i]->saveXML( media);
@@ -263,17 +263,7 @@ int main(int argc, char *argv[])
 			}*/
 			
 			MC_doc.SaveFile(_fname.c_str());
-			
-			
 		}
-		
-
 	}
-		
-
-	
 	return 0;
-	
-	
-
 }

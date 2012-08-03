@@ -9,7 +9,7 @@
 #include "parse.h"
 #include "unwind-prot.h"
 #include "toplev.h"
-#include "error.h" 
+//#include "error.h"
 #include "quit.h"
 #include "variables.h"
 #include "sighandlers.h"
