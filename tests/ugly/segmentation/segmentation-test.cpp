@@ -1,7 +1,7 @@
 /**
  * @brief segmentation-test.cpp
  * @author Christian Frisson
- * @date 14/06/2012
+ * @date 09/08/2012
  * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -40,7 +40,9 @@
 #include "ACSelfSimSegmentationPlugin.h"
 #include "gnuplot_i.hpp"
 #include "Armadillo-utils.h"
+#ifdef SUPPORT_AUDIO
 #include "ACAudioFeatures.h"
+#endif
 
 //sleep()
 #include <iostream>
@@ -333,6 +335,7 @@ void test_multiple_selfsim(int n) {
     delete P;
 }
 
+#ifdef SUPPORT_AUDIO
 void test_segmentation_from_laughter_file(std::string _dir, std::string _fname) { //ccl
     SF_INFO sfinfo;
     SNDFILE* testFile;
@@ -446,7 +449,9 @@ void test_segmentation_from_laughter_file(std::string _dir, std::string _fname) 
 
     delete P;
 }
+#endif
 
+#ifdef SUPPORT_AUDIO
 void test_ALLsegmentation_from_Audiofile(std::string _dir, std::string _fname) { //ccl
 
     SF_INFO sfinfo;
@@ -608,6 +613,7 @@ void test_ALLsegmentation_from_Audiofile(std::string _dir, std::string _fname) {
     delete P;
 
 }
+#endif
 
 void test_bic_from_file(std::string _dir, std::string _fname) {
     ifstream data_file;
@@ -688,9 +694,11 @@ int main(int argc, char *argv[]) {
     //test_multiple_selfsim(4);
     //test_bic_from_file ( sdir, "test_seg_from_file.in" );
     //	test_bic_from_file ( sdir, "arma_mtf_test.txt" );
+#ifdef SUPPORT_AUDIO
     //test_segmentation_from_laughter_file("/home/jerome/NetBeansProjects/MediaCycle/3_619609_621620.wav");
     //test_segmentation_from_laughter_file(sdir, "Event9_44100");
     test_ALLsegmentation_from_Audiofile(sdir, "Event9_44100");
+#endif
     return 0;
 }
 
