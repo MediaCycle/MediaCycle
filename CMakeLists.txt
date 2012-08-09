@@ -369,6 +369,22 @@ IF(UNIX)
 	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 ENDIF(UNIX)
 
+# Ubuntu detection
+IF(UNIX)
+	# Try to find architecture
+	execute_process(COMMAND uname -m OUTPUT_VARIABLE CPACK_PACKAGE_ARCHITECTURE)
+	string(STRIP "${CPACK_PACKAGE_ARCHITECTURE}" CPACK_PACKAGE_ARCHITECTURE)
+	# Try to find distro name and distro-specific arch
+	execute_process(COMMAND lsb_release -is OUTPUT_VARIABLE LSB_ID)
+	execute_process(COMMAND lsb_release -rs OUTPUT_VARIABLE LSB_RELEASE)
+	string(STRIP "${LSB_ID}" LSB_ID)
+	string(STRIP "${LSB_RELEASE}" LSB_RELEASE)
+	set(LSB_DISTRIB "${LSB_ID}${LSB_RELEASE}")
+	IF(NOT LSB_DISTRIB)
+		set(LSB_DISTRIB "unix")
+	ENDIF(NOT LSB_DISTRIB)
+ENDIF()
+
 # Apple issues
 IF(APPLE AND NOT APPLE_IOS_XCODE AND NOT APPLE_IOS_SIM AND NOT APPLE_IOS_XCODE)
 	SET(CMAKE_OSX_ARCHITECTURES "i386" CACHE STRING "Building for i386 (FFmpeg and QTKit support currently broken on Snow Leopard)" FORCE)
@@ -984,7 +1000,7 @@ IF ( USE_QT4 )
 		IF(QWT_FOUND)
 			MESSAGE( "Qwt found in ${QWT_INCLUDE_DIR} (headers) and ${QWT_LIBRARY} (library), requiring ${QWT_LIBRARIES} (libraries)" )
 			INCLUDE_DIRECTORIES( ${QWT_INCLUDE_DIR} )
-			IF(UNIX) #required for Ubuntu 11.10
+			IF(UNIX AND NOT APPLE AND "${LSB_DISTRIB}" MATCHES "Ubuntu11.10") #required for Ubuntu 11.10
 				SET(QWT_LIBRARIES ${QWT_LIBRARY} -lrt)
 			ENDIF()
 			ADD_LIB_LINKED_DIR(${QWT_LIBRARY})
@@ -1772,19 +1788,6 @@ ENDIF()
 ######################
 
 IF(UNIX)
-	# Try to find architecture
-	execute_process(COMMAND uname -m OUTPUT_VARIABLE CPACK_PACKAGE_ARCHITECTURE)
-	string(STRIP "${CPACK_PACKAGE_ARCHITECTURE}" CPACK_PACKAGE_ARCHITECTURE)
-	# Try to find distro name and distro-specific arch
-	execute_process(COMMAND lsb_release -is OUTPUT_VARIABLE LSB_ID)
-	execute_process(COMMAND lsb_release -rs OUTPUT_VARIABLE LSB_RELEASE)
-	string(STRIP "${LSB_ID}" LSB_ID)
-	string(STRIP "${LSB_RELEASE}" LSB_RELEASE)
-	set(LSB_DISTRIB "${LSB_ID}${LSB_RELEASE}")
-	IF(NOT LSB_DISTRIB)
-		set(LSB_DISTRIB "unix")
-	ENDIF(NOT LSB_DISTRIB)
-
         IF("${LSB_DISTRIB}" MATCHES "Ubuntu")
 		IF(SUPPORT_VIDEO OR SUPPORT_IMAGE)
 	    		IF(("${LSB_DISTRIB}" MATCHES "Ubuntu10.04") OR ("${LSB_DISTRIB}" MATCHES "Ubuntu10.10") OR ("${LSB_DISTRIB}" MATCHES "Ubuntu11.04") OR ("${LSB_DISTRIB}" MATCHES "Ubuntu11.10"))
