@@ -31,6 +31,7 @@
 #include <set>
 #include <queue>
 #include <algorithm>
+#include <stddef.h> //CF for gcc 4.6.x
 
 // HP-style construct/destroy have gone from the standard,
 // so here is a copy.
