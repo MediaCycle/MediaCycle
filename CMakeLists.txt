@@ -676,9 +676,9 @@ IF(SUPPORT_VIDEO OR SUPPORT_IMAGE)
 	#ENDIF()
 
 	IF( APPLE_IOS_DEV OR APPLE_IOS_SIM OR APPLE_IOS_XCODE )
-		FIND_PACKAGE ( OpenCV ${OPENCV_REQUIRED_VERSION} REQUIRED COMPONENTS core contrib features2D imgproc legacy objdetect video) 
+		FIND_PACKAGE ( OpenCV ${OPENCV_REQUIRED_VERSION} REQUIRED COMPONENTS core contrib features2d imgproc legacy objdetect video) 
 	ELSE()
-		FIND_PACKAGE ( OpenCV ${OPENCV_REQUIRED_VERSION} REQUIRED COMPONENTS core contrib features2D imgproc legacy objdetect video highgui)
+		FIND_PACKAGE ( OpenCV ${OPENCV_REQUIRED_VERSION} REQUIRED COMPONENTS core contrib features2d imgproc legacy objdetect video highgui)
 		# other components (at v. 2.2.0): calib3d ffmpeg? flann gpu haartraining ml traincascade
 		# other components (at v. 2.3.0): androidcamera calib3d flann gpu haartraining ml stitching traincascade ts
 		# other components (at v. 2.4.2): androidcamera calib3d flann gpu java ml nonfree photo stitching ts videostab world
