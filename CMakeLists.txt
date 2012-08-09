@@ -984,6 +984,9 @@ IF ( USE_QT4 )
 		IF(QWT_FOUND)
 			MESSAGE( "Qwt found in ${QWT_INCLUDE_DIR} (headers) and ${QWT_LIBRARY} (library), requiring ${QWT_LIBRARIES} (libraries)" )
 			INCLUDE_DIRECTORIES( ${QWT_INCLUDE_DIR} )
+			IF(UNIX) #required for Ubuntu 11.10
+				SET(QWT_LIBRARIES ${QWT_LIBRARY} -lrt)
+			ENDIF()
 			ADD_LIB_LINKED_DIR(${QWT_LIBRARY})
 		ENDIF() 
 
