@@ -1721,7 +1721,10 @@ int ACAudioFeedback::createSourceWithPosition(int loop_id, float x, float y, flo
 	loop_pos[1] = y;
 	loop_pos[2] = z;
 	local_bpm = 0;
+        local_feature = 0;
         local_feature = media_cycle->getFeaturesVectorInMedia(loop_id, "ACID BPM");
+        if(local_feature.size() == 0)
+            local_feature = media_cycle->getFeaturesVectorInMedia(loop_id, "acid_bpm");
 	if ((local_feature).size()) {
 		if ((local_feature).size()==1) {
 			local_bpm = (local_feature)[0];
@@ -1734,7 +1737,10 @@ int ACAudioFeedback::createSourceWithPosition(int loop_id, float x, float y, flo
                 local_bpm = 240;
 	}
 	local_key = 0;
+        local_feature = 0;
         local_feature = media_cycle->getFeaturesVectorInMedia(loop_id, "ACID key");
+        if(local_feature.size() == 0)
+            local_feature = media_cycle->getFeaturesVectorInMedia(loop_id, "acid_key");
 	if ((local_feature).size()) {
 		if ((local_feature).size()==1) {
 			local_key = int((local_feature)[0]);
@@ -1742,7 +1748,10 @@ int ACAudioFeedback::createSourceWithPosition(int loop_id, float x, float y, flo
 	}
 	// SD TODO - Acid type not yet used
 	local_acid_type = 65536;
+        local_feature = 0;
         local_feature = media_cycle->getFeaturesVectorInMedia(loop_id, "ACID type");
+        if(local_feature.size() == 0)
+            local_feature = media_cycle->getFeaturesVectorInMedia(loop_id, "acid_type");
 	if ((local_feature).size()) {
 		if ((local_feature).size()==1) {
 			local_acid_type = int((local_feature)[0]);

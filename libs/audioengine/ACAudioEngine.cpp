@@ -39,10 +39,6 @@
 
 #ifdef USE_PORTAUDIO
 int threadAudioEngineCallbackFunction(const void *inputBuffer, void *outputBuffer,
-									  unsigned long framesPerBuffer,
-									  const PaStreamCallbackTimeInfo* timeInfo,
-									  PaStreamCallbackFlags statusFlags,
-									  void *userData )
 {
 	ACAudioEngine *localengine;
 	localengine = (ACAudioEngine*)userData;
