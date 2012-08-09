@@ -123,7 +123,9 @@ bool ACOsgTimelineRenderer::addTrack(ACMedia* _media){
             track_renderer[n]->setScreenWidth(screen_width);
             track_renderer[n]->setSize(width,height);
             track_renderer[n]->setMediaCycle(media_cycle);
+#if defined (SUPPORT_AUDIO)
             track_renderer[n]->setAudioEngine(audio_engine);
+#endif
             track_renderer[n]->setTrackIndex(n);
             track_renderer[n]->setFont(font);
             //track_renderer[n]->updateMedia(media_index);

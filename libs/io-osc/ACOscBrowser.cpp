@@ -431,10 +431,12 @@ int ACOscBrowser::process_mess(const char *path, const char *types, lo_arg **arg
 			cout << "/player/" << node << "/playclosestloop node " << node << endl;
 			return 1;
 		} else if (tag.find("/triggerclosestloop", 0) != string::npos) {
+#if defined (SUPPORT_AUDIO)
 			audio_engine->setLoopSynchroMode(node, ACAudioEngineSynchroModeManual);
 			audio_engine->setLoopScaleMode(node, ACAudioEngineScaleModeResample);
 			audio_engine->setScrub(0.0f);
 			audio_engine->setLoopSynchroMode(node, ACAudioEngineSynchroModeNone);
+#endif //defined (SUPPORT_AUDIO)
 			media_cycle->getBrowser()->toggleSourceActivity(node);
 			cout << "/player/" << node << "/triggerclosestloop node " << node << endl;
 			return 1;
