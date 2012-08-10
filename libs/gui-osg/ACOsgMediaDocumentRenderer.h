@@ -47,12 +47,9 @@ class ACOsgMediaDocumentRenderer : public ACOsgMediaRenderer {
 	
 protected:
 	ACOsgMediaRenderers media_renderers;
-	osg::ref_ptr<osg::Geode> metadata_geode;
-	osg::ref_ptr<osgText::Text> metadata;
 	osg::ref_ptr<osg::Geode> entry_geode;
 	
 	void entryGeode();	
-	void metadataGeode();
 public:
 	ACOsgMediaDocumentRenderer();
 	~ACOsgMediaDocumentRenderer();
@@ -61,5 +58,4 @@ public:
 };
 
 #endif //defined (SUPPORT_MULTIMEDIA)
-
 #endif

@@ -695,6 +695,8 @@ void ACMultiMediaCycleOsgQt::on_actionEdit_Input_Controls_triggered(bool checked
         controlsDialog->addInputActions(compositeOsgView->getInputActions());
         //controlsDialog = new ACInputControlsDialogQt(this->actions(),this);
     }
+    controlsDialog->setMediaCycle(this->media_cycle);
+    controlsDialog->setOsgView(this->compositeOsgView);
 
     if(controlsDialog->isVisible()){
         controlsDialog->hide();

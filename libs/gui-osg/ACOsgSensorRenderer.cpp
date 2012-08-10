@@ -51,190 +51,141 @@ using namespace osg;
 ACOsgSensorRenderer::ACOsgSensorRenderer()
     :ACOsgMediaRenderer()
 {
-	media_type = MEDIA_TYPE_SENSOR;
-	metadata_geode = 0;
-	metadata = 0;
-	entry_geode = 0;
+    media_type = MEDIA_TYPE_SENSOR;
+    entry_geode = 0;
 }
 
 ACOsgSensorRenderer::~ACOsgSensorRenderer() {
-	if 	(entry_geode) {
-		entry_geode=0;
-	}
-	if 	(metadata_geode) {
-		metadata_geode=0;
-	}
-}
-
-
-void ACOsgSensorRenderer::metadataGeode() {
-	
-	osg::Vec4 textColor(0.9f,0.9f,0.9f,1.0f);
-	float textCharacterSize = 20.0f; // 10 pixels ? // broken with OSG v2.9.11??
-	#if OSG_MIN_VERSION_REQUIRED(2,9,11)
-		textCharacterSize = 16.0f;
-	#endif
-	metadata_geode = new Geode();
-
-	metadata = new osgText::Text;
-	if(font)
-		metadata->setFont(font);
-	//font = osgText::readFontFile("fonts/arial.ttf");
-	//text->setFont( font.get() );
-	metadata->setColor(textColor);
-	metadata->setCharacterSizeMode( osgText::Text::SCREEN_COORDS );
-	metadata->setCharacterSize(textCharacterSize);
-	metadata->setPosition(osg::Vec3(0,0.025,0.04));
-	//	text->setPosition(osg::Vec3(pos.x,pos.y,pos.z));
-	metadata->setLayout(osgText::Text::LEFT_TO_RIGHT);
-	#if OSG_MIN_VERSION_REQUIRED(2,9,11)
-		metadata->setFontResolution(12,12);
-	#else
-		metadata->setFontResolution(64,64);
-	#endif
-	//metadata->setAlignment( osgText::Text::CENTER_CENTER );
-	//metadata->setAxisAlignment( osgText::Text::SCREEN );
-
-	metadata->setDrawMode(osgText::Text::TEXT);// osgText::Text::BOUNDINGBOX, osgText::Text::ALIGNMENT
-
-	//string textLabel=media_cycle->getLibrary()->getMedia(media_index)->getLabel();
-	string sensorLabel=media->getLabel();
-	
-	metadata->setText( sensorLabel );
-
-	//state = text_geode->getOrCreateStateSet();
-	//state->setMode(GL_LIGHTING, osg::StateAttribute::PROTECTED | osg::StateAttribute::OFF );
-	//state->setMode(GL_BLEND, StateAttribute::ON);
-	//state->setMode(GL_LINE_SMOOTH, StateAttribute::ON);
-
-	metadata_geode->addDrawable(metadata);
+    entry_geode=0;
 }
 
 void ACOsgSensorRenderer::entryGeode() {
 
-	StateSet *state;
+    StateSet *state;
 
-	float localsize = 0.01;
-	localsize *= afac;
+    float localsize = 0.01;
+    localsize *= afac;
 
-	entry_geode = new Geode();
+    entry_geode = new Geode();
 
-	TessellationHints *hints = new TessellationHints();
-	hints->setDetailRatio(0.0);
+    TessellationHints *hints = new TessellationHints();
+    hints->setDetailRatio(0.0);
 
-	state = entry_geode->getOrCreateStateSet();
-	state->setMode(GL_NORMALIZE, osg::StateAttribute::ON);
+    state = entry_geode->getOrCreateStateSet();
+    state->setMode(GL_NORMALIZE, osg::StateAttribute::ON);
 
 #if defined(APPLE_IOS)
-	state->setMode(GL_LIGHTING, osg::StateAttribute::PROTECTED | osg::StateAttribute::OFF );
-	entry_geode->addDrawable(new osg::ShapeDrawable(new osg::Box(osg::Vec3(0.0f,0.0f,0.0f),0.1), hints)); //draws a square // Vintage SensorCycle
+    state->setMode(GL_LIGHTING, osg::StateAttribute::PROTECTED | osg::StateAttribute::OFF );
+    entry_geode->addDrawable(new osg::ShapeDrawable(new osg::Box(osg::Vec3(0.0f,0.0f,0.0f),0.1), hints)); //draws a square // Vintage SensorCycle
 #else
-	state->setMode(GL_LIGHTING, osg::StateAttribute::ON );
-	state->setMode(GL_BLEND, StateAttribute::ON);
-	//entry_geode->addDrawable(new osg::ShapeDrawable(new osg::Box(osg::Vec3(0.0f,0.0f,0.0f),0.1), hints)); //draws a square // Vintage SensorCycle
-	entry_geode->addDrawable(new osg::ShapeDrawable(new osg::Sphere(osg::Vec3(0.0f,0.0f,0.0f),localsize), hints)); // draws a sphere // MultiMediaCycle
-	//entry_geode->addDrawable(new osg::ShapeDrawable(new osg::Cylinder(osg::Vec3(0.0f,0.0f,0.0f),0.01, 0.0f), hints)); // draws a disc
-	//entry_geode->addDrawable(new osg::ShapeDrawable(new osg::Capsule(osg::Vec3(0.0f,0.0f,0.0f),0.01, 0.005f), hints)); // draws a sphere
-	//sprintf(name, "some audio element");
+    state->setMode(GL_LIGHTING, osg::StateAttribute::ON );
+    state->setMode(GL_BLEND, StateAttribute::ON);
+    //entry_geode->addDrawable(new osg::ShapeDrawable(new osg::Box(osg::Vec3(0.0f,0.0f,0.0f),0.1), hints)); //draws a square // Vintage SensorCycle
+    entry_geode->addDrawable(new osg::ShapeDrawable(new osg::Sphere(osg::Vec3(0.0f,0.0f,0.0f),localsize), hints)); // draws a sphere // MultiMediaCycle
+    //entry_geode->addDrawable(new osg::ShapeDrawable(new osg::Cylinder(osg::Vec3(0.0f,0.0f,0.0f),0.01, 0.0f), hints)); // draws a disc
+    //entry_geode->addDrawable(new osg::ShapeDrawable(new osg::Capsule(osg::Vec3(0.0f,0.0f,0.0f),0.01, 0.005f), hints)); // draws a sphere
 #endif
-	entry_geode->setUserData(new ACRefId(node_index));
-	//entry_geode->setName(name);
-	//ref_ptr//entry_geode->ref();
+    entry_geode->setUserData(new ACRefId(node_index));
 }
 
 void ACOsgSensorRenderer::prepareNodes() {
-	entry_geode = 0;
-	metadata_geode = 0;
+    entry_geode = 0;
+    metadata_geode = 0;
 
-	//if  (media_cycle->getMediaNode(node_index)->isDisplayed()){
-	if  (media && media_cycle->getNodeFromMedia(media)->isDisplayed()){
-		entryGeode();
-		media_node->addChild(entry_geode);
-	}
-	if (!metadata_geode)
-		metadataGeode();
+    //if  (media_cycle->getMediaNode(node_index)->isDisplayed()){
+    if  (media && media_cycle->getNodeFromMedia(media)->isDisplayed()){
+        entryGeode();
+        media_node->addChild(entry_geode);
+    }
+    if (!metadata_geode)
+        metadataGeode();
 }
 
 void ACOsgSensorRenderer::updateNodes(double ratio) {
 
-	double xstep = 0.00025;
+    double xstep = 0.00025;
 
-	xstep *= afac;
+    xstep *= afac;
 
-	const ACMediaNode* attribute = media_cycle->getMediaNode(node_index);
-	if (!attribute->isDisplayed()){
-		media_node->removeChild(metadata_geode);
-		if (entry_geode)
-			entry_geode->setNodeMask(0);
-		return;			
-	}
-	Matrix T;
-	Matrix Trotate;
+    const ACMediaNode* attribute = media_cycle->getMediaNode(node_index);
+    if (!attribute->isDisplayed()){
+        media_node->removeChild(metadata_geode);
+        metadata_geode = 0;
+        if (entry_geode)
+            entry_geode->setNodeMask(0);
+        return;
+    }
+    Matrix T;
+    Matrix Trotate;
 
-	float x, y, z;
-	float localscale;
-	float maxdistance = 0.2;
-	float maxscale = 1.5;
-	float minscale = 0.33;
+    float x, y, z;
+    float localscale;
+    float maxdistance = 0.2;
+    float maxscale = 1.5;
+    float minscale = 0.33;
 
-	x = media_cycle_view_pos.x;
-	y = media_cycle_view_pos.y;
-	z = 0;
+    x = media_cycle_view_pos.x;
+    y = media_cycle_view_pos.y;
+    z = 0;
 
-	T.makeTranslate(Vec3(x, y, z));
-	localscale = maxscale - distance_mouse * (maxscale - minscale) / maxdistance ;
-	localscale = max(localscale,minscale);
+    T.makeTranslate(Vec3(x, y, z));
+    localscale = maxscale - distance_mouse * (maxscale - minscale) / maxdistance ;
+    localscale = max(localscale,minscale);
 
-	if (attribute->getActivity()>=1) { // 0 inactive, 1 clicked, 2 hover
-		localscale = 0.5;
-		if(media_node->getNumChildren() == 1) // only entry_geode so far
-			media_node->addChild(metadata_geode);
-	}
-	else {
-		media_node->removeChild(metadata_geode);
+    if (attribute->getActivity()>=1) { // 0 inactive, 1 clicked, 2 hover
+        localscale = 0.5;
+        if(media_node->getNumChildren() == 1) {// only entry_geode so far
+            if (!metadata_geode)
+                metadataGeode();
+            media_node->addChild(metadata_geode);
+        }
+    }
+    else {
+        media_node->removeChild(metadata_geode);
+        metadata_geode = 0;
 
-		//CF nodes colored along their relative cluster on in Clusters Mode
-		if (media_cycle->getBrowserMode() == AC_MODE_CLUSTERS){
-			const vector<int> centerNodeIds=media_cycle->getBrowser()->getIdNodeClusterCenter();
-			if(cluster_colors.size()>0){
-				if (centerNodeIds[attribute->getClusterId()]==attribute->getMediaId())
-					((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(osg::Vec4(0,0,0,1));
-				else
-					((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(cluster_colors[attribute->getClusterId()%cluster_colors.size()]);
-			}
-		}
-			
-		//	((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(cluster_colors[attribute->getClusterId()%cluster_colors.size()]);
-		
-		else
-                        ((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(neighbor_color);
-		if (attribute->isSelected()) {
-			//CF color (multiple) selected nodes in black
-			Vec4 selected_color(0,0,0,1);
-			((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(selected_color);
-		}
+        //CF nodes colored along their relative cluster on in Clusters Mode
+        if (media_cycle->getBrowserMode() == AC_MODE_CLUSTERS){
+            const vector<int> centerNodeIds=media_cycle->getBrowser()->getIdNodeClusterCenter();
+            if(cluster_colors.size()>0){
+                if (centerNodeIds[attribute->getClusterId()]==attribute->getMediaId())
+                    ((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(osg::Vec4(0,0,0,1));
+                else
+                    ((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(cluster_colors[attribute->getClusterId()%cluster_colors.size()]);
+            }
+        }
 
-		if (user_defined_color)
-			((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(node_color);
+        //	((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(cluster_colors[attribute->getClusterId()%cluster_colors.size()]);
 
-		T =  Matrix::rotate(-media_cycle_angle,Vec3(0.0,0.0,1.0)) * Matrix::scale(localscale/media_cycle_zoom,localscale/media_cycle_zoom,localscale/media_cycle_zoom) * T;
-	}
+        else
+            ((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(neighbor_color);
+        if (attribute->isSelected()) {
+            //CF color (multiple) selected nodes in black
+            Vec4 selected_color(0,0,0,1);
+            ((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(selected_color);
+        }
 
-	unsigned int mask = (unsigned int)-1;
-	if(attribute->getNavigationLevel() >= media_cycle->getNavigationLevel()&&attribute->isDisplayed()) {
-		entry_geode->setNodeMask(mask);
-	}
-	else {
-		entry_geode->setNodeMask(0);
-	}
+        if (user_defined_color)
+            ((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(node_color);
 
-	#ifdef AUTO_TRANSFORM
-		media_node->setPosition(Vec3(x,y,z));
-		media_node->setRotation(Quat(0.0, 0.0, 1.0, -media_cycle_angle));
-		media_node->setScale(Vec3(localscale/media_cycle_zoom,localscale/media_cycle_zoom,localscale/media_cycle_zoom));
-	#else
-		media_node->setMatrix(T);
-	#endif
+        T =  Matrix::rotate(-media_cycle_angle,Vec3(0.0,0.0,1.0)) * Matrix::scale(localscale/media_cycle_zoom,localscale/media_cycle_zoom,localscale/media_cycle_zoom) * T;
+    }
+
+    unsigned int mask = (unsigned int)-1;
+    if(attribute->getNavigationLevel() >= media_cycle->getNavigationLevel()&&attribute->isDisplayed()) {
+        entry_geode->setNodeMask(mask);
+    }
+    else {
+        entry_geode->setNodeMask(0);
+    }
+
+#ifdef AUTO_TRANSFORM
+    media_node->setPosition(Vec3(x,y,z));
+    media_node->setRotation(Quat(0.0, 0.0, 1.0, -media_cycle_angle));
+    media_node->setScale(Vec3(localscale/media_cycle_zoom,localscale/media_cycle_zoom,localscale/media_cycle_zoom));
+#else
+    media_node->setMatrix(T);
+#endif
 
 }
 #endif //defined (SUPPORT_SENSOR)

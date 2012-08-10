@@ -38,15 +38,7 @@
 #include "ACOsgAudioRenderer.h"
 #include <ACAudio.h>
 
-#include "boost/filesystem.hpp"   // includes all needed Boost.Filesystem declarations
-//#include "boost/filesystem/operations.hpp"
-//#include "boost/filesystem/path.hpp"
-
-#include <sstream>
-
 #include <osg/Version>
-
-namespace fs = boost::filesystem;
 
 using namespace osg;
 
@@ -56,8 +48,6 @@ ACOsgAudioRenderer::ACOsgAudioRenderer()
     media_type = MEDIA_TYPE_AUDIO;
     waveform_geode = 0;
     curser_geode = 0;
-    metadata_geode = 0;
-    metadata = 0;
     curser_transform = 0;
     entry_geode = 0;
     waveform_type = AC_BROWSER_AUDIO_WAVEFORM_CLASSIC;
@@ -69,7 +59,6 @@ ACOsgAudioRenderer::~ACOsgAudioRenderer() {
     curser_geode=0;
     curser_transform=0;
     entry_geode=0;
-    metadata_geode=0;
 }
 
 void ACOsgAudioRenderer::changeSetting(ACSettingType _setting)
@@ -266,46 +255,6 @@ void ACOsgAudioRenderer::waveformGeode() {
     }
 }
 
-void ACOsgAudioRenderer::metadataGeode() {
-
-    osg::Vec4 textColor(0.9f,0.9f,0.9f,1.0f);
-    float textCharacterSize = 20.0f;
-    if(this->setting == AC_SETTING_INSTALLATION)
-        textCharacterSize = 46.0f;
-
-    metadata_geode = new Geode();
-
-    metadata = new osgText::Text;
-    if(font)
-        metadata->setFont(font);
-    metadata->setColor(textColor);
-    metadata->setCharacterSizeMode( osgText::Text::SCREEN_COORDS );
-    metadata->setCharacterSize(textCharacterSize);
-    metadata->setPosition(osg::Vec3(0,0.025,0.04));
-    //	text->setPosition(osg::Vec3(pos.x,pos.y,pos.z));
-    metadata->setLayout(osgText::Text::LEFT_TO_RIGHT);
-    metadata->setFontResolution(textCharacterSize,textCharacterSize);
-    //metadata->setAlignment( osgText::Text::CENTER_CENTER );
-    //metadata->setAxisAlignment( osgText::Text::SCREEN );
-
-    metadata->setDrawMode(osgText::Text::TEXT);// osgText::Text::BOUNDINGBOX, osgText::Text::ALIGNMENT
-
-    //ACAudio* media = (ACAudio*)(media_cycle->getLibrary()->getMedia(media_index));
-    std::stringstream content;
-    content << fs::basename(media->getFileName());
-    if (media->getParentId()>-1)// in case of segments
-        content << "(segment with media ID" << media->getId() << ")";
-
-    metadata->setText( content.str() );
-
-    //state = text_geode->getOrCreateStateSet();
-    //state->setMode(GL_LIGHTING, osg::StateAttribute::PROTECTED | osg::StateAttribute::OFF );
-    //state->setMode(GL_BLEND, StateAttribute::ON);
-    //state->setMode(GL_LINE_SMOOTH, StateAttribute::ON);
-
-    metadata_geode->addDrawable(metadata);
-}
-
 void ACOsgAudioRenderer::curserGeode() {
 
     float zpos = 0.04; //CF sphere hack instead of 0.02
@@ -445,18 +394,19 @@ void ACOsgAudioRenderer::updateNodes(double ratio) {
     double xstep = 0.00025;
     xstep *= afac;
 
-        const ACMediaNode* attribute = media_cycle->getMediaNode(node_index);
-        if (!attribute->isDisplayed()){
-		media_node->removeChild(waveform_geode);
-		media_node->removeChild(metadata_geode);
-		media_node->removeChild(curser_transform);
-		if (entry_geode)
-			entry_geode->setNodeMask(0);
-		return;			
-	}
-	Matrix T;
-	Matrix Trotate;
-	Matrix curserT;
+    const ACMediaNode* attribute = media_cycle->getMediaNode(node_index);
+    if (!attribute->isDisplayed()){
+        media_node->removeChild(waveform_geode);
+        media_node->removeChild(metadata_geode);
+        metadata_geode = 0;
+        media_node->removeChild(curser_transform);
+        if (entry_geode)
+            entry_geode->setNodeMask(0);
+        return;
+    }
+    Matrix T;
+    Matrix Trotate;
+    Matrix curserT;
 
     float x, y, z;
     float localscale;
@@ -498,18 +448,32 @@ void ACOsgAudioRenderer::updateNodes(double ratio) {
             }
         }
 
+        if(media_node->getNumChildren() ==3 && waveform_type != AC_BROWSER_AUDIO_WAVEFORM_NONE){
+            if (label != media->getLabel() ) {
+                media_node->removeChild(metadata_geode);
+                metadata_geode = 0;
+                metadataGeode();
+                media_node->addChild(metadata_geode);
+                label = media->getLabel();
+            }
+        }
+
         //if(media_node->getNumChildren() > 0 && media_node->getChild(0) == entry_geode) {
         if(media_node->getNumChildren() !=3 && waveform_type != AC_BROWSER_AUDIO_WAVEFORM_NONE) {// waveform + curser + metadata
             //waveform_geode->setNodeMask(-1);
             media_node->removeChild(entry_geode);
             media_node->addChild(waveform_geode);
             //media_node->setChild(0, waveform_geode);
+            if (metadata_geode == 0 ) {
+                metadataGeode();
+            }
             media_node->addChild(metadata_geode);
             media_node->addChild(curser_transform);
         }
         else if(media_node->getNumChildren() ==3 && waveform_type == AC_BROWSER_AUDIO_WAVEFORM_NONE){// when switching to none mode while waveforms are already displayed
             media_node->removeChild(waveform_geode);
             media_node->removeChild(metadata_geode);
+            metadata_geode = 0;
             media_node->removeChild(curser_transform);
             media_node->addChild(entry_geode);
         }
@@ -539,6 +503,7 @@ void ACOsgAudioRenderer::updateNodes(double ratio) {
         if(media_node->getNumChildren() != 1) { // entry_geode
             media_node->removeChild(waveform_geode);
             media_node->removeChild(metadata_geode);
+            metadata_geode = 0;
             media_node->removeChild(curser_transform);
             media_node->addChild(entry_geode);
             //media_node->setChild(0, entry_geode);

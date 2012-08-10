@@ -1,38 +1,39 @@
-//
-//  ACOsgCompositeViewQt.cpp
-//  MediaCycle
-//
-//  @author Christian Frisson
-//  @date 29/04/10
-//  @copyright (c) 2010 – UMONS - Numediart
-//  
-//  MediaCycle of University of Mons – Numediart institute is 
-//  licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
-//  licence (the “License”); you may not use this file except in compliance 
-//  with the License.
-//  
-//  This program is free software: you can redistribute it and/or 
-//  it under the terms of the GNU Affero General Public License as
-//  published by the Free Software Foundation, either version 3 of the
-//  License, or (at your option) any later version.
-//  
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU Affero General Public License for more details.
-//  
-//  You should have received a copy of the GNU Affero General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-//  
-//  Each use of this software must be attributed to University of Mons – 
-//  Numediart Institute
-//  
-//  Any other additional authorizations may be asked to avre@umons.ac.be 
-//  <mailto:avre@umons.ac.be>
-//
-//  Qt QGLWidget and OSG CompositeViewer that wraps
-//  a MediaCycle browser and multitrack timeline viewer
-//
+/*
+*  ACOsgCompositeViewQt.cpp
+*  MediaCycle
+*
+*  @author Christian Frisson
+*  @date 29/04/10
+*  @copyright (c) 2010 – UMONS - Numediart
+*  
+*  MediaCycle of University of Mons – Numediart institute is 
+*  licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
+*  licence (the “License”); you may not use this file except in compliance 
+*  with the License.
+*  
+*  This program is free software: you can redistribute it and/or 
+*  it under the terms of the GNU Affero General Public License as
+*  published by the Free Software Foundation, either version 3 of the
+*  License, or (at your option) any later version.
+*  
+*  This program is distributed in the hope that it will be useful,
+*  but WITHOUT ANY WARRANTY; without even the implied warranty of
+*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*  GNU Affero General Public License for more details.
+*  
+*  You should have received a copy of the GNU Affero General Public License
+*  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*  
+*  Each use of this software must be attributed to University of Mons – 
+*  Numediart Institute
+*  
+*  Any other additional authorizations may be asked to avre@umons.ac.be 
+*  <mailto:avre@umons.ac.be>
+*
+*  Qt QGLWidget and OSG CompositeViewer that wraps
+*  a MediaCycle browser and multitrack timeline viewer
+*
+*/
 
 #define PI 3.1415926535897932384626433832795f
 
@@ -460,7 +461,7 @@ void ACOsgCompositeViewQt::initInputActions(){
     toggleMediaHoverAction = new ACInputActionQt(tr("Toggle Media Hover"), this);
     toggleMediaHoverAction->setShortcut(Qt::Key_W);
     toggleMediaHoverAction->setKeyEventType(QEvent::KeyPress);
-    toggleMediaHoverAction->setToolTip(tr("Toggle Media Hover (fast browsing with playback or zoom)"));
+    toggleMediaHoverAction->setToolTip(tr("Toggle Media Hover (faster browsing with playback and magnification)"));
     connect(toggleMediaHoverAction, SIGNAL(toggled(bool)), this, SLOT(toggleMediaHover(bool)));
     this->addInputAction(toggleMediaHoverAction);
 
@@ -468,7 +469,7 @@ void ACOsgCompositeViewQt::initInputActions(){
     triggerMediaHoverAction->setShortcut(Qt::Key_Q);
     triggerMediaHoverAction->setKeyEventType(QEvent::KeyPress);
     //triggerMediaHoverAction->setAutoRepeat(false); // works on OSX but not Ubuntu (10.04)
-    triggerMediaHoverAction->setToolTip(tr("Trigger Media Hover (fast browsing with playback or zoom)"));
+    triggerMediaHoverAction->setToolTip(tr("Trigger Media Hover (faster browsing with playback and magnification)"));
     connect(triggerMediaHoverAction, SIGNAL(triggered(bool)), this, SLOT(triggerMediaHover(bool)));
     this->addInputAction(triggerMediaHoverAction);
 
@@ -773,6 +774,7 @@ void ACOsgCompositeViewQt::mousePressEvent( QMouseEvent* event )
     case(Qt::NoButton): button = 0; break;
     default: button = 0; break;
     }
+    //this->propagateEventToActions(event);
     osg_view->getEventQueue()->mouseButtonPress(event->x(), event->y(), button);
     //browser_view->getEventQueue()->mouseButtonPress(event->x(), event->y()-sepy, button);
     this->propagateEventToActions(event);

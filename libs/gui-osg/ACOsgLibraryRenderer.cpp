@@ -88,7 +88,7 @@ void ACOsgLibraryRenderer::changeSetting(ACSettingType _setting)
         return;
     this->setting = _setting;
 
-    this->updateNodes();
+    //this->updateNodes();
 }
 
 ACOsgLibraryRenderer::~ACOsgLibraryRenderer() {

@@ -1,8 +1,8 @@
 /**
  * @brief ACOsgPointerRenderer.h
  * @author Christian Frisson
- * @date 19/05/2011
- * @copyright (c) 2011 – UMONS - Numediart
+ * @date 10/08/2012
+ * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -40,26 +40,26 @@ class ACOsgPointerRenderer : public ACOsgMediaRenderer {
 
 protected:
 
-	osg::ref_ptr<osgText::Font> font;
-	osg::ref_ptr<osgText::Text> text;
+    osg::ref_ptr<osgText::Font> font;
+    osg::ref_ptr<osgText::Text> text;
 
-	osg::ref_ptr<osg::Geode> text_geode;
-	osg::ref_ptr<osg::Geode> pointer_geode;
-	osg::ref_ptr<osg::MatrixTransform> pointer_transform;
+    osg::ref_ptr<osg::Geode> text_geode;
+    osg::ref_ptr<osg::Geode> pointer_geode;
+    osg::ref_ptr<osg::MatrixTransform> pointer_transform;
 
-	void textGeode();
-	void pointerGeode();
+    void textGeode();
+    void pointerGeode();
 
-	std::string text_string;
-	ACPoint pos;
+    std::string text_string;
+    ACPoint pos;
 
 public:
-	ACOsgPointerRenderer();
-	~ACOsgPointerRenderer();
-	void prepareNodes();
-	void updateNodes(double ratio=0.0);
-	void setText(std::string text) {text_string = text;}
-	void setPos(ACPoint p) {pos = p;}
+    ACOsgPointerRenderer();
+    ~ACOsgPointerRenderer();
+    void prepareNodes();
+    void updateNodes(double ratio=0.0);
+    void setText(std::string text) {text_string = text;}
+    void setPos(ACPoint p) {pos = p;}
 };
 
 #endif

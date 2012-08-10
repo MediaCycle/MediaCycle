@@ -44,38 +44,37 @@
 #include "ACInputControlsTableItemEditorQt.h"
 #include "ACInputControlsTableItemDelegateQt.h"
 #include "ACInputActionQt.h"
+#include "ACAbstractWidgetQt.h"
 
-class ACInputControlsDialogQt : public QDialog
+class ACInputControlsDialogQt : public QDialog, public ACAbstractWidgetQt
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-
-	// Constructor.
     ACInputControlsDialogQt(QWidget *pParent = NULL);
-	
-	// Destructor.
-	
     ~ACInputControlsDialogQt();
+    void addActions( QList<QAction *> _actions );
+    void addInputActions( QList<ACInputActionQt *> _actions );
 
-   void addActions( QList<QAction *> _actions );
-   void addInputActions( QList<ACInputActionQt *> _actions );
+public slots:
+    void on_pushButtonAddTag_clicked();
+    void on_pushButtonRemoveTags_clicked();
+    void tagMedia(QString tag);
+    bool isShortcutAssigned(QString shortcut);
+
+signals:
+    void clearShortcut();
 
 protected slots:
-
-	void actionActivated(QTableWidgetItem *);
-	void actionChanged(QTableWidgetItem *);
-
-	void accept();
-	void reject();
+    void actionActivated(QTableWidgetItem *);
+    void actionChanged(QTableWidgetItem *);
+    void accept();
+    void reject();
 
 private:
-
-	// The Qt-designer UI struct...
     Ui::ACInputControlsDialogQt ui;
-
-	QList<QAction *> actions;
-
-	int iDirtyCount;
+    QList<QAction *> actions;
+    QSignalMapper* tagMapper;
+    int iDirtyCount;
 };
 #endif

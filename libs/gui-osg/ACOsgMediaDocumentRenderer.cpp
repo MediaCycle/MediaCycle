@@ -57,21 +57,11 @@
 #include "ACOsgSensorRenderer.h"
 #endif //defined (SUPPORT_SENSOR)
 
-#include "boost/filesystem.hpp"   // includes all needed Boost.Filesystem declarations
-//#include "boost/filesystem/operations.hpp"
-//#include "boost/filesystem/path.hpp"
-
-#include <sstream>
-
 #include <osg/Version>
-
-namespace fs = boost::filesystem;
 
 using namespace osg;
 
 ACOsgMediaDocumentRenderer::ACOsgMediaDocumentRenderer() {
-    metadata_geode = 0;
-    metadata = 0;
     entry_geode = 0;
 }
 
@@ -84,51 +74,6 @@ ACOsgMediaDocumentRenderer::~ACOsgMediaDocumentRenderer() {
     for ( render_iter=media_renderers.begin() ; render_iter!=media_renderers.end(); ++render_iter ){
         delete (*render_iter);
     }
-}
-
-
-
-void ACOsgMediaDocumentRenderer::metadataGeode() {
-
-    osg::Vec4 textColor(0.9f,0.9f,0.9f,1.0f);
-    float textCharacterSize = 80.0f; // 10 pixels ? // broken with OSG v2.9.11??
-#if OSG_MIN_VERSION_REQUIRED(2,9,11)
-    textCharacterSize = 16.0f;
-#endif
-    metadata_geode = new Geode();
-
-    metadata = new osgText::Text;
-    font = osgText::readFontFile("fonts/arial.ttf");
-    //text->setFont( font.get() );
-    if(font)
-        metadata->setFont(font);
-    metadata->setColor(textColor);
-    metadata->setCharacterSizeMode( osgText::Text::SCREEN_COORDS );
-    metadata->setCharacterSize(textCharacterSize);
-    metadata->setPosition(osg::Vec3(0,0.025,0.04));
-    //	text->setPosition(osg::Vec3(pos.x,pos.y,pos.z));
-    metadata->setLayout(osgText::Text::LEFT_TO_RIGHT);
-#if OSG_MIN_VERSION_REQUIRED(2,9,11)
-    metadata->setFontResolution(12,12);
-#else
-    metadata->setFontResolution(64,64);
-#endif
-    //metadata->setAlignment( osgText::Text::CENTER_CENTER );
-    //metadata->setAxisAlignment( osgText::Text::SCREEN );
-
-    metadata->setDrawMode(osgText::Text::TEXT);// osgText::Text::BOUNDINGBOX, osgText::Text::ALIGNMENT
-
-    //string textLabel=media_cycle->getLibrary()->getMedia(media_index)->getLabel();
-    string textLabel=media->getLabel();
-
-    metadata->setText( textLabel );
-
-    //state = text_geode->getOrCreateStateSet();
-    //state->setMode(GL_LIGHTING, osg::StateAttribute::PROTECTED | osg::StateAttribute::OFF );
-    //state->setMode(GL_BLEND, StateAttribute::ON);
-    //state->setMode(GL_LINE_SMOOTH, StateAttribute::ON);
-
-    metadata_geode->addDrawable(metadata);
 }
 
 void ACOsgMediaDocumentRenderer::entryGeode() {
@@ -241,6 +186,7 @@ void ACOsgMediaDocumentRenderer::updateNodes(double ratio) {
     const ACMediaNode* attribute = media_cycle->getMediaNode(node_index);
     if (!attribute->isDisplayed()){
         media_node->removeChild(metadata_geode);
+        metadata_geode = 0;
         if (entry_geode)
             entry_geode->setNodeMask(0);
         return;
@@ -271,11 +217,15 @@ void ACOsgMediaDocumentRenderer::updateNodes(double ratio) {
 	
 	if (attribute->getActivity()>=1) { // 0 inactive, 1 clicked, 2 hover
             localscale = 0.5;
-            if(media_node->getNumChildren() == 1) // only entry_geode so far
+            if(media_node->getNumChildren() == 1) {// only entry_geode so far
+                if (!metadata_geode)
+                    metadataGeode();
                 media_node->addChild(metadata_geode);
-	}
-	else {
+            }
+        }
+        else {
             media_node->removeChild(metadata_geode);
+            metadata_geode = 0;
             //CF nodes colored along their relative cluster on in Clusters Mode
             if (media_cycle->getBrowserMode() == AC_MODE_CLUSTERS){
                 const vector<int> centerNodeIds=media_cycle->getBrowser()->getIdNodeClusterCenter();
@@ -299,40 +249,40 @@ void ACOsgMediaDocumentRenderer::updateNodes(double ratio) {
                 ((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(node_color);
 
             T =  Matrix::rotate(-media_cycle_angle,Vec3(0.0,0.0,1.0)) * Matrix::scale(localscale/media_cycle_zoom,localscale/media_cycle_zoom,localscale/media_cycle_zoom) * T;
-	}
-	
+        }
 
-	if (attribute->getActivity()>=2){//hover
+
+        if (attribute->getActivity()>=2){//hover
             std::vector<ACMedia*> tmpSegments;
             tmpSegments = media->getAllSegments();
             for (int j=0; j<tmpSegments.size(); j++)
                 media_cycle->getMediaNode(tmpSegments[j]->getId())->setDisplayed(true);
-	}
-	else {
+        }
+        else {
             std::vector<ACMedia*> tmpSegments;
             tmpSegments = media->getAllSegments();
             for (int j=0; j<tmpSegments.size(); j++)
                 media_cycle->getMediaNode(tmpSegments[j]->getId())->setDisplayed(true);// TR true CF false
-	}	
-	
-	unsigned int mask = (unsigned int)-1;
-	if(attribute->getNavigationLevel() >= media_cycle->getNavigationLevel()&&attribute->isDisplayed()) {
+        }
+
+        unsigned int mask = (unsigned int)-1;
+        if(attribute->getNavigationLevel() >= media_cycle->getNavigationLevel()&&attribute->isDisplayed()) {
             entry_geode->setNodeMask(mask);
-	}
-	else {
+        }
+        else {
             entry_geode->setNodeMask(0);
-	}
-	
+        }
+
 #ifdef AUTO_TRANSFORM
-	media_node->setPosition(Vec3(x,y,z));
-	media_node->setRotation(Quat(0.0, 0.0, 1.0, -media_cycle_angle));
-	media_node->setScale(Vec3(localscale/media_cycle_zoom,localscale/media_cycle_zoom,localscale/media_cycle_zoom));
+        media_node->setPosition(Vec3(x,y,z));
+        media_node->setRotation(Quat(0.0, 0.0, 1.0, -media_cycle_angle));
+        media_node->setScale(Vec3(localscale/media_cycle_zoom,localscale/media_cycle_zoom,localscale/media_cycle_zoom));
 #else
-	media_node->setMatrix(T);
+        media_node->setMatrix(T);
 #endif
-	
-	ACOsgMediaRenderers::iterator render_iter = media_renderers.end();
-	for ( render_iter=media_renderers.begin() ; render_iter!=media_renderers.end(); ++render_iter ){
+
+        ACOsgMediaRenderers::iterator render_iter = media_renderers.end();
+        for ( render_iter=media_renderers.begin() ; render_iter!=media_renderers.end(); ++render_iter ){
             (*render_iter)->updateNodes();
 #ifdef AUTO_TRANSFORM
             (*render_iter)->getNode()->setPosition(Vec3(x,y,z));
@@ -341,7 +291,7 @@ void ACOsgMediaDocumentRenderer::updateNodes(double ratio) {
 #else
             //(*render_iter)->getNode()->setMatrix(T);
 #endif
-	}
+        }
     }
 }
 

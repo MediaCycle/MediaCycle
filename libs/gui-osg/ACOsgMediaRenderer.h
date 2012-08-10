@@ -92,6 +92,7 @@ protected:
     int node_index;
     int cluster_index;
     ACMedia* media;
+    std::string label;
     bool media_changed;
     float distance_mouse;
     // int media_activity;
@@ -99,6 +100,10 @@ protected:
     std::vector<osg::Vec4> cluster_colors;
     osg::Vec4 neighbor_color;
     bool user_defined_color;
+
+    osg::ref_ptr<osg::Geode> metadata_geode;
+    osg::ref_ptr<osgText::Text> metadata;
+    void metadataGeode();
 
     // GLOBAL
     double media_cycle_deltatime;

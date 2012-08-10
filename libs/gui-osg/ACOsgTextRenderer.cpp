@@ -53,48 +53,11 @@ ACOsgTextRenderer::ACOsgTextRenderer()
     :ACOsgMediaRenderer()
 {
     media_type = MEDIA_TYPE_TEXT;
-    metadata_geode = 0;
-    metadata = 0;
     entry_geode = 0;
 }
 
 ACOsgTextRenderer::~ACOsgTextRenderer() {
     entry_geode=0;
-    metadata_geode=0;
-    metadata=0;
-}
-
-void ACOsgTextRenderer::metadataGeode() {
-
-    osg::Vec4 textColor(0.9f,0.9f,0.9f,1.0f);
-    float textCharacterSize = 20.0f;
-    metadata_geode = new Geode();
-    metadata = new osgText::Text;
-    if(font)
-        metadata->setFont(font);
-    metadata->setColor(textColor);
-    metadata->setCharacterSizeMode( osgText::Text::SCREEN_COORDS );
-    metadata->setCharacterSize(textCharacterSize);
-    metadata->setPosition(osg::Vec3(0,0.025,0.04));
-    //	text->setPosition(osg::Vec3(pos.x,pos.y,pos.z));
-    metadata->setLayout(osgText::Text::LEFT_TO_RIGHT);
-    metadata->setFontResolution(textCharacterSize,textCharacterSize);
-    //metadata->setAlignment( osgText::Text::CENTER_CENTER );
-    //metadata->setAxisAlignment( osgText::Text::SCREEN );
-
-    metadata->setDrawMode(osgText::Text::TEXT);// osgText::Text::BOUNDINGBOX, osgText::Text::ALIGNMENT
-
-    //string textLabel=media_cycle->getLibrary()->getMedia(media_index)->getLabel();
-    string textLabel=media->getLabel();
-
-    metadata->setText( textLabel );
-
-    //state = text_geode->getOrCreateStateSet();
-    //state->setMode(GL_LIGHTING, osg::StateAttribute::PROTECTED | osg::StateAttribute::OFF );
-    //state->setMode(GL_BLEND, StateAttribute::ON);
-    //state->setMode(GL_LINE_SMOOTH, StateAttribute::ON);
-
-    metadata_geode->addDrawable(metadata);
 }
 
 void ACOsgTextRenderer::entryGeode() {
@@ -122,7 +85,6 @@ void ACOsgTextRenderer::entryGeode() {
     entry_geode->addDrawable(new osg::ShapeDrawable(new osg::Sphere(osg::Vec3(0.0f,0.0f,0.0f),localsize), hints)); // draws a sphere // MultiMediaCycle
     //entry_geode->addDrawable(new osg::ShapeDrawable(new osg::Cylinder(osg::Vec3(0.0f,0.0f,0.0f),0.01, 0.0f), hints)); // draws a disc
     //entry_geode->addDrawable(new osg::ShapeDrawable(new osg::Capsule(osg::Vec3(0.0f,0.0f,0.0f),0.01, 0.005f), hints)); // draws a sphere
-    //sprintf(name, "some audio element");
 #endif
     entry_geode->setUserData(new ACRefId(node_index));
 }
@@ -147,15 +109,16 @@ void ACOsgTextRenderer::updateNodes(double ratio) {
 
     xstep *= afac;
 
-	const ACMediaNode* attribute = media_cycle->getMediaNode(node_index);
-	if (!attribute->isDisplayed()){
-		media_node->removeChild(metadata_geode);
-		if (entry_geode)
-			entry_geode->setNodeMask(0);
-		return;			
-	}
-	Matrix T;
-	Matrix Trotate;
+    const ACMediaNode* attribute = media_cycle->getMediaNode(node_index);
+    if (!attribute->isDisplayed()){
+        media_node->removeChild(metadata_geode);
+        metadata_geode = 0;
+        if (entry_geode)
+            entry_geode->setNodeMask(0);
+        return;
+    }
+    Matrix T;
+    Matrix Trotate;
 
     float x, y, z;
     float localscale;
@@ -173,11 +136,15 @@ void ACOsgTextRenderer::updateNodes(double ratio) {
 
     if (attribute->getActivity()>=1) { // 0 inactive, 1 clicked, 2 hover
         localscale = 0.5;
-        if(media_node->getNumChildren() == 1) // only entry_geode so far
+        if(media_node->getNumChildren() == 1){ // only entry_geode so far
+            if (!metadata_geode)
+                metadataGeode();
             media_node->addChild(metadata_geode);
+        }
     }
     else {
         media_node->removeChild(metadata_geode);
+        metadata_geode = 0;
 
         //CF nodes colored along their relative cluster on in Clusters Mode
         if (media_cycle->getBrowserMode() == AC_MODE_CLUSTERS)

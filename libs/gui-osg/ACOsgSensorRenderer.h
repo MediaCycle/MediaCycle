@@ -39,24 +39,18 @@
 #if defined (SUPPORT_SENSOR)
 
 #include "ACOsgMediaRenderer.h"
-#include <osgText/Font>
-#include <osgText/Text>
 
 class ACOsgSensorRenderer : public ACOsgMediaRenderer {
-	
+
 protected:
-	osg::ref_ptr<osg::Geode> metadata_geode;
-	osg::ref_ptr<osgText::Text> metadata;
-	osg::ref_ptr<osg::Geode> entry_geode;
-	
-	void entryGeode();
-	void metadataGeode();
+    osg::ref_ptr<osg::Geode> entry_geode;
+    void entryGeode();
 
 public:
-	ACOsgSensorRenderer();
-	~ACOsgSensorRenderer();
-	void prepareNodes();
-	void updateNodes(double ratio=0.0);
+    ACOsgSensorRenderer();
+    ~ACOsgSensorRenderer();
+    void prepareNodes();
+    void updateNodes(double ratio=0.0);
 };
 
 #endif //defined (SUPPORT_SENSOR)

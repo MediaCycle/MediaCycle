@@ -45,12 +45,8 @@
 class ACOsgTextRenderer : public ACOsgMediaRenderer {
 
 protected:
-    osg::ref_ptr<osg::Geode> metadata_geode;
-    osg::ref_ptr<osgText::Text> metadata;
     osg::ref_ptr<osg::Geode> entry_geode;
-
     void entryGeode();
-    void metadataGeode();
 
 public:
     ACOsgTextRenderer();

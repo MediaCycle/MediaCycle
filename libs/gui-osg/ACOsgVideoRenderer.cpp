@@ -42,64 +42,64 @@ using namespace osg;
 ACOsgVideoRenderer::ACOsgVideoRenderer()
     :ACOsgImageRenderer()
 {
-	media_type = MEDIA_TYPE_VIDEO;
-	image_stream = 0;
+    media_type = MEDIA_TYPE_VIDEO;
+    image_stream = 0;
 }
 
 ACOsgVideoRenderer::~ACOsgVideoRenderer() {
-	if (image_stream) image_stream->quit();
+    if (image_stream) image_stream->quit();
 }
 
 void ACOsgVideoRenderer::prepareNodes() {
-	
-//	float reference_time, time_multiplier;
-	
-	if (!image_geode) {
-		imageGeode(true, 2.0, 1.0); // true is for flip -- necessary for video
-		media_node->addChild(image_transform);
-	}
-	
-	//image_stream = ((ACVideo*)(media_cycle->getLibrary()->getMedia(media_index)))->getStream();
-	image_stream = ((ACVideo*)(media))->getStream();
-	
-	//std::cout << "Movie length " << image_stream->getLength() << " and framerate "<< media->getFrameRate() << std::endl;//image_stream->getFrameRate() << std::endl;
-	
-	// Hack to display a first valid frame,
-	image_stream->play();
+
+    //	float reference_time, time_multiplier;
+
+    if (!image_geode) {
+        imageGeode(true, 2.0, 1.0); // true is for flip -- necessary for video
+        media_node->addChild(image_transform);
+    }
+
+    //image_stream = ((ACVideo*)(media_cycle->getLibrary()->getMedia(media_index)))->getStream();
+    image_stream = ((ACVideo*)(media))->getStream();
+
+    //std::cout << "Movie length " << image_stream->getLength() << " and framerate "<< media->getFrameRate() << std::endl;//image_stream->getFrameRate() << std::endl;
+
+    // Hack to display a first valid frame,
+    image_stream->play();
 }
 
 void ACOsgVideoRenderer::updateNodes(double ratio) {
-		
-	ACOsgImageRenderer::updateNodes();
 
-	const ACMediaNode* attribute = media_cycle->getMediaNode(node_index);
-	if (!attribute->isDisplayed()){
-		if (image_stream)
-			image_stream->pause();
-		if (image_geode)
-			image_geode->setNodeMask(0);
-		return;			
-	}
-	
-	osg::ImageStream::StreamStatus streamStatus = image_stream->getStatus();
-		
-	switch (streamStatus) {
-		case osg::ImageStream::INVALID:
-			std::cout << "Image stream invalid status" << std::endl;
-			break;
-		case osg::ImageStream::PLAYING:
-			if (attribute->getActivity()==0)
-				image_stream->pause();
-			break;
-		case osg::ImageStream::PAUSED:
-			if (attribute->getActivity()==1)
-				image_stream->play();
-			break;
-		case osg::ImageStream::REWINDING:
-			std::cout << "Image stream rewinding" << std::endl;
-			break;
-		default:
-			break;
-	}
+    ACOsgImageRenderer::updateNodes();
+
+    const ACMediaNode* attribute = media_cycle->getMediaNode(node_index);
+    if (!attribute->isDisplayed()){
+        if (image_stream)
+            image_stream->pause();
+        if (image_geode)
+            image_geode->setNodeMask(0);
+        return;
+    }
+
+    osg::ImageStream::StreamStatus streamStatus = image_stream->getStatus();
+
+    switch (streamStatus) {
+    case osg::ImageStream::INVALID:
+        std::cout << "Image stream invalid status" << std::endl;
+        break;
+    case osg::ImageStream::PLAYING:
+        if (attribute->getActivity()==0)
+            image_stream->pause();
+        break;
+    case osg::ImageStream::PAUSED:
+        if (attribute->getActivity()==1)
+            image_stream->play();
+        break;
+    case osg::ImageStream::REWINDING:
+        std::cout << "Image stream rewinding" << std::endl;
+        break;
+    default:
+        break;
+    }
 }
 #endif //defined (SUPPORT_VIDEO)

@@ -45,13 +45,13 @@
 
 class ACOsgVideoRenderer : public ACOsgImageRenderer  {
 protected:
-	osg::ref_ptr<osg::ImageStream> image_stream;
-	
+    osg::ref_ptr<osg::ImageStream> image_stream;
+
 public:
-	ACOsgVideoRenderer();
-	~ACOsgVideoRenderer();
-	void prepareNodes();
-	void updateNodes(double ratio=0.0);
+    ACOsgVideoRenderer();
+    ~ACOsgVideoRenderer();
+    void prepareNodes();
+    void updateNodes(double ratio=0.0);
 };
 
 #endif //defined (SUPPORT_VIDEO)

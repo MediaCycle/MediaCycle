@@ -42,21 +42,19 @@
 
 class ACOsgImageRenderer : public ACOsgMediaRenderer  {
 protected:
-	
-	osg::ref_ptr<osg::Image> image_image;
-	osg::ref_ptr<osg::Geode> image_geode;
-	osg::ref_ptr<osg::Geode> border_geode;
-	osg::ref_ptr<osg::MatrixTransform> image_transform;
-	
-	void imageGeode(bool flip=false, float sizemul=1.0, float zoomin=1.0);
-	
+    osg::ref_ptr<osg::Image> image_image;
+    osg::ref_ptr<osg::Geode> image_geode;
+    osg::ref_ptr<osg::Geode> border_geode;
+    osg::ref_ptr<osg::MatrixTransform> image_transform;
+
+    void imageGeode(bool flip=false, float sizemul=1.0, float zoomin=1.0);
 public:
-	ACOsgImageRenderer();
-	~ACOsgImageRenderer();	
-	void prepareNodes();
-	void updateNodes(double ratio=0.0);
-	
-	virtual osg::ref_ptr<osg::Geode> getMainGeode() { return image_geode;}
+    ACOsgImageRenderer();
+    ~ACOsgImageRenderer();
+    void prepareNodes();
+    void updateNodes(double ratio=0.0);
+
+    virtual osg::ref_ptr<osg::Geode> getMainGeode() { return image_geode;}
 };
 
 #endif //defined (SUPPORT_IMAGE) || defined (SUPPORT_VIDEO)
