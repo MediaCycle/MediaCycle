@@ -65,12 +65,15 @@ public:
         return this->sendto;
     }
 
+    bool isActive(){return active;}
+
     virtual void update(Subject*); // overrides Observer virtual update fct
 
 private:
     lo_address sendto;
     lo_message message;
     const char *tag;
+    bool active;
 };
 
 #endif /* _ACOSCFEEDBACK_H_ */

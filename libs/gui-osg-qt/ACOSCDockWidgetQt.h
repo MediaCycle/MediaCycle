@@ -44,11 +44,6 @@
 
 #include <MediaCycle.h>
 
-#if defined (USE_OSC)
-#include <ACOscBrowser.h>
-#include <ACOscFeedback.h>
-#endif //defined (USE_OSC)
-
 class ACOSCDockWidgetQt : public ACAbstractDockWidgetQt {
     Q_OBJECT
 
@@ -70,9 +65,6 @@ public:
     void disableFeedback();
     void setControlPort(int port);
     void setFeedbackPort(int port);
-    ACOscBrowser* getControlHandler(){return osc_browser;}
-    ACOscFeedback* getFeedbackHandler(){return osc_feedback;}
-
     void setMediaCycle(MediaCycle* _media_cycle);
 #if defined (SUPPORT_AUDIO)
     void setAudioEngine(ACAudioEngine* _audio_engine);
@@ -81,10 +73,6 @@ public:
 
 private:
     Ui::ACOSCDockWidgetQt ui;
-#if defined (USE_OSC)
-    ACOscBrowser *osc_browser;
-    ACOscFeedback *osc_feedback;
-#endif //defined (USE_OSC)
     bool auto_connect;
 };
 #endif

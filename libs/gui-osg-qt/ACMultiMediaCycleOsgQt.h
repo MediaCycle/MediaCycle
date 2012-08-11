@@ -51,6 +51,10 @@
 #include <ACAudioEngine.h>
 #endif //defined (SUPPORT_AUDIO)
 #include <ACOsgCompositeViewQt.h>
+#if defined (USE_OSC)
+#include <ACOscBrowser.h>
+#include <ACOscFeedback.h>
+#endif //defined (USE_OSC)
 
 #include "ACSettingsDialogQt.h" // SettingsDialog
 #include <ACDockWidgetsManagerQt.h>
@@ -71,47 +75,47 @@ QT_END_NAMESPACE
 class ACSettingsDialogQt; // forward declaration; NB: SettingsDialog member has to be a pointer
 
 class ACDetachedMediaBrowserOsgQt : public QMainWindow {
-Q_OBJECT
+    Q_OBJECT
 public:
-	ACDetachedMediaBrowserOsgQt(QWidget *parent = 0): QMainWindow(parent){};
+    ACDetachedMediaBrowserOsgQt(QWidget *parent = 0): QMainWindow(parent){};
 };
 
 class ACQProgressBar : public QProgressBar {
-Q_OBJECT
+    Q_OBJECT
 public:
-	ACQProgressBar(QWidget *parent = 0);
-	~ACQProgressBar(){};
-	
-	public slots:
-		void loading_started();
-		void loading_finished();
-		void loading_file(int media_id, int dir_size);
+    ACQProgressBar(QWidget *parent = 0);
+    ~ACQProgressBar(){};
+
+public slots:
+    void loading_started();
+    void loading_finished();
+    void loading_file(int media_id, int dir_size);
 };
 
 class ACMultiMediaCycleOsgQt : public QMainWindow,public ACEventListener {
-Q_OBJECT
-	
+    Q_OBJECT
+
 public slots:
-	// Config
-	void on_actionEdit_Config_File_triggered(bool checked);
+    // Config
+    void on_actionEdit_Config_File_triggered(bool checked);
     void changeLibraryMediaType(QString media); // media type of the library
-    #ifdef SUPPORT_MULTIMEDIA
+#ifdef SUPPORT_MULTIMEDIA
     void changeActiveMediaType(QString media); // active media type for documents
-    #endif
+#endif
     void on_actionEdit_Input_Controls_triggered(bool checked);
-	//SENEFFE ?
-	virtual void loopXML(){};
-	
+    //SENEFFE ?
+    virtual void loopXML(){};
+
 public slots:	
-	// Library controls
-	void on_actionLoad_XML_triggered(bool checked); // features
-	void on_actionSave_XML_triggered(bool checked);	
-	void on_actionLoad_Media_Directory_triggered(bool checked);
-	void on_actionLoad_Media_Files_triggered(bool checked);
-	void on_actionClean_triggered(bool checked);
-	void on_actionHelpAbout_triggered(bool checked);
-	void on_actionDetachBrowser_triggered(bool checked);
-	void on_actionFullscreen_triggered(bool checked);
+    // Library controls
+    void on_actionLoad_XML_triggered(bool checked); // features
+    void on_actionSave_XML_triggered(bool checked);
+    void on_actionLoad_Media_Directory_triggered(bool checked);
+    void on_actionLoad_Media_Files_triggered(bool checked);
+    void on_actionClean_triggered(bool checked);
+    void on_actionHelpAbout_triggered(bool checked);
+    void on_actionDetachBrowser_triggered(bool checked);
+    void on_actionFullscreen_triggered(bool checked);
     void on_actionToggle_Controls_triggered(bool checked);
     void on_actionEdit_Library_Metadata_triggered(bool checked);
     void on_actionEdit_Profile_triggered(bool checked);
@@ -123,120 +127,124 @@ protected:
     void dropEvent(QDropEvent *event);
 
 public:
-	ACMultiMediaCycleOsgQt(QWidget *parent = 0);
-	~ACMultiMediaCycleOsgQt();
-	
-	void updateLibrary();
-	
-	void setBrowserMode(ACBrowserMode _mode){this->browser_mode=_mode;}
+    ACMultiMediaCycleOsgQt(QWidget *parent = 0);
+    ~ACMultiMediaCycleOsgQt();
+
+    void updateLibrary();
+
+    void setBrowserMode(ACBrowserMode _mode){this->browser_mode=_mode;}
     void setMediaType(ACMediaType _mt);
 
-	// XS TODO: default values for image -- is this correct ?
-	void createMediaCycle(ACMediaType _media_type = MEDIA_TYPE_IMAGE, ACBrowserMode _browser_mode = AC_MODE_CLUSTERS);
-	void destroyMediaCycle();
-	MediaCycle* getMediaCycle() {return media_cycle;}
-	ACMediaType getMediaType() {return media_type;}
-	bool addPluginLibrary(std::string _library);
-	bool removePluginLibrary(std::string _library);
-	ACPluginLibrary* getPluginLibrary (std::string _library);
+    // XS TODO: default values for image -- is this correct ?
+    void createMediaCycle(ACMediaType _media_type = MEDIA_TYPE_IMAGE, ACBrowserMode _browser_mode = AC_MODE_CLUSTERS);
+    void destroyMediaCycle();
+    MediaCycle* getMediaCycle() {return media_cycle;}
+    ACMediaType getMediaType() {return media_type;}
+    bool addPluginLibrary(std::string _library);
+    bool removePluginLibrary(std::string _library);
+    ACPluginLibrary* getPluginLibrary (std::string _library);
 
-	bool removePluginFromLibrary(std::string _plugin_name, std::string _library_path);
+    bool removePluginFromLibrary(std::string _plugin_name, std::string _library_path);
 
     std::string getPluginPathFromBaseName(std::string basename);
     int loadPluginFromBaseName(std::string basename);
     int tryLoadFeaturePluginFromBaseName(std::string basename);
-	void loadDefaultConfig(ACMediaType _media_type = MEDIA_TYPE_IMAGE, ACBrowserMode _browser_mode = AC_MODE_CLUSTERS);
-	
-	void loadMediaDocumentConfig(std::string _name);
-	// Controls
-	bool addControlDock(std::string dock_type);
-	
-	bool addAboutDialog(ACAbstractAboutDialogQt* dock);
-	bool addAboutDialog(std::string about_type);
-	
-	// Callback
-	void mediaImported(int n,int nTot);
-	
-	// Close Event
-	void closeEvent(QCloseEvent *event);
-	
-	// settings and dock (XS  TODO change dock)
+    void loadDefaultConfig(ACMediaType _media_type = MEDIA_TYPE_IMAGE, ACBrowserMode _browser_mode = AC_MODE_CLUSTERS);
+
+    void loadMediaDocumentConfig(std::string _name);
+    // Controls
+    bool addControlDock(std::string dock_type);
+
+    bool addAboutDialog(ACAbstractAboutDialogQt* dock);
+    bool addAboutDialog(std::string about_type);
+
+    // Callback
+    void mediaImported(int n,int nTot);
+
+    // Close Event
+    void closeEvent(QCloseEvent *event);
+
+    // settings and dock (XS  TODO change dock)
     void configureSettings();
     //void configurePluginDock();
-	bool readXMLConfig(std::string _filename="");
-	void clean(bool _updategl=false);
-	void setDefaultQSettings();
-	
-	void useSegmentationByDefault(bool _status);// derived apps can disable segmentation by default on their main.cpp
-	void switchSegmentation(bool _status);// disable/enable segmentation when (failing) loading segmentation plugins and changing media types
-	void switchFeatureExtraction(bool _status);// disable/enable feature extraction when (failing) loading feature extraction plugins and changing media types
-	void switchPluginVisualizations(bool _status);// disable/enable visualization from plugins when (failing) loading visualization plugins and changing media types
-	
-	void autoConnectOSC(bool _status = true);
-        void changeSetting(ACSettingType _setting);
+    bool readXMLConfig(std::string _filename="");
+    void clean(bool _updategl=false);
+    void setDefaultQSettings();
+
+    void useSegmentationByDefault(bool _status);// derived apps can disable segmentation by default on their main.cpp
+    void switchSegmentation(bool _status);// disable/enable segmentation when (failing) loading segmentation plugins and changing media types
+    void switchFeatureExtraction(bool _status);// disable/enable feature extraction when (failing) loading feature extraction plugins and changing media types
+    void switchPluginVisualizations(bool _status);// disable/enable visualization from plugins when (failing) loading visualization plugins and changing media types
+
+    void autoConnectOSC(bool _status = true);
+    void changeSetting(ACSettingType _setting);
 
 signals:	
-	void mediacycle_message_changed(QString mess);
-	void loading_started();
-	void loading_finished();
-	void loading_file(int media_id, int dir_size);
+    void mediacycle_message_changed(QString mess);
+    void loading_started();
+    void loading_finished();
+    void loading_file(int media_id, int dir_size);
 
 private:
-	// variables
-	Ui::ACMediaCycleOsgQt ui;
+    // variables
+    Ui::ACMediaCycleOsgQt ui;
     ACSettingsDialogQt *settingsDialog;
-//	QProgressBar *pb;
-	bool features_known;
-	ACMediaType media_type;
-	ACBrowserMode browser_mode;
-	std::string config_file_xml;	
-	std::string project_directory;	
+    //	QProgressBar *pb;
+    bool features_known;
+    ACMediaType media_type;
+    ACBrowserMode browser_mode;
+    std::string config_file_xml;
+    std::string project_directory;
 
-	std::vector<std::string> plugins_libraries;
-	#if defined (SUPPORT_AUDIO)
+    std::vector<std::string> plugins_libraries;
+#if defined (SUPPORT_AUDIO)
     ACAudioEngine *audio_engine;
-	#endif //defined (SUPPORT_AUDIO)
-	
+#endif //defined (SUPPORT_AUDIO)
+#if defined (USE_OSC)
+    ACOscBrowser *osc_browser;
+    ACOscFeedback *osc_feedback;
+#endif //defined (USE_OSC)
+
     ACDockWidgetsManagerQt* dockWidgetsManager;
-	ACAboutDialogFactoryQt* aboutDialogFactory;
-	ACAbstractAboutDialogQt* aboutDialog;
+    ACAboutDialogFactoryQt* aboutDialogFactory;
+    ACAbstractAboutDialogQt* aboutDialog;
     ACInputControlsDialogQt* controlsDialog;
     ACSegmentationControlsDialogQt* segmentationDialog;
-	QMainWindow* detachedBrowser;
-	
-	// methods
-	bool readQSettings();
-	bool writeQSettings();
-	void clearQSettings();
-	bool doSegments();
-	
-//	TiXmlHandle readXMLConfigHeader(std::string _filename="");
-	void writeXMLConfig(std::string _filename="");
-	std::string rstrip(const std::string& s);
-	void showError(std::string s);
-	void showError(const exception& e);
-	bool hasMediaCycle();
-	void changeMediaType(ACMediaType _mt);
+    QMainWindow* detachedBrowser;
 
-	void importDirectoriesThreaded(std::vector<std::string> directories);
+    // methods
+    bool readQSettings();
+    bool writeQSettings();
+    void clearQSettings();
+    bool doSegments();
 
-	QDockWidget* osgViewDock;
-	QWidget* osgViewDockWidget;
-	QVBoxLayout *osgViewDockLayout;
-	QWidget* osgViewDockTitleBar;
-	QRect osgViewDockNormalSize;
-	//QProgressBar* progressBar;
-	ACQProgressBar* progressBar;
-	
-	bool use_segmentation_current,use_segmentation_default,use_feature_extraction,use_visualization_plugins;
-	bool auto_connect_osc;
+    //	TiXmlHandle readXMLConfigHeader(std::string _filename="");
+    void writeXMLConfig(std::string _filename="");
+    std::string rstrip(const std::string& s);
+    void showError(std::string s);
+    void showError(const exception& e);
+    bool hasMediaCycle();
+    void changeMediaType(ACMediaType _mt);
 
-        ACMediaLibraryMetadataQt* metadataWindow;
-        ACUserProfileQt* userProfileWindow;
-	
+    void importDirectoriesThreaded(std::vector<std::string> directories);
+
+    QDockWidget* osgViewDock;
+    QWidget* osgViewDockWidget;
+    QVBoxLayout *osgViewDockLayout;
+    QWidget* osgViewDockTitleBar;
+    QRect osgViewDockNormalSize;
+    //QProgressBar* progressBar;
+    ACQProgressBar* progressBar;
+
+    bool use_segmentation_current,use_segmentation_default,use_feature_extraction,use_visualization_plugins;
+    bool auto_connect_osc;
+
+    ACMediaLibraryMetadataQt* metadataWindow;
+    ACUserProfileQt* userProfileWindow;
+
 protected:
-	ACOsgCompositeViewQt* compositeOsgView;
-	MediaCycle *media_cycle;
-        ACSettingType setting;
+    ACOsgCompositeViewQt* compositeOsgView;
+    MediaCycle *media_cycle;
+    ACSettingType setting;
 };
 #endif

@@ -35,7 +35,7 @@
 #include "ACDockWidgetsManagerQt.h"
 
 ACDockWidgetsManagerQt::ACDockWidgetsManagerQt(QMainWindow *_mainWindow)
-    :mainWindow(_mainWindow),plugins_scanned(false),media_type(MEDIA_TYPE_NONE),auto_connect_osc(false),
+    :ACAbstractWidgetQt(), mainWindow(_mainWindow),plugins_scanned(false),media_type(MEDIA_TYPE_NONE),auto_connect_osc(false),
       current_docks_visibility(true),previous_docks_visibility(true),appOrigMinHeight(0)
 {
     dockWidgets.resize(0);
@@ -53,26 +53,29 @@ ACDockWidgetsManagerQt::~ACDockWidgetsManagerQt()
         delete *dwiter;
 }
 
-void ACDockWidgetsManagerQt::updateMediaCycle(MediaCycle* media_cycle)
+void ACDockWidgetsManagerQt::setMediaCycle(MediaCycle* _media_cycle)
 {
+    this->media_cycle = _media_cycle;
     for (int d=0;d<dockWidgets.size();d++){
         dockWidgets[d]->setMediaCycle(media_cycle);
     }
 }
 
 #if defined (SUPPORT_AUDIO)
-void ACDockWidgetsManagerQt::updateAudioEngine(ACAudioEngine* audio_engine)
+void ACDockWidgetsManagerQt::setAudioEngine(ACAudioEngine* _audio_engine)
 {
+    this->audio_engine = _audio_engine;
     for (int d=0;d<dockWidgets.size();d++){
         dockWidgets[d]->setAudioEngine(audio_engine);
     }
 }
 #endif //defined (SUPPORT_AUDIO)
 
-void ACDockWidgetsManagerQt::updateOsgView(ACOsgCompositeViewQt* compositeOsgView)
+void ACDockWidgetsManagerQt::setOsgView(ACOsgCompositeViewQt* _osg_view)
 {
+    this->osg_view = _osg_view;
     for (int d=0;d<dockWidgets.size();d++){
-        dockWidgets[d]->setOsgView(compositeOsgView);
+        dockWidgets[d]->setOsgView(_osg_view);
     }
 }
 
@@ -82,6 +85,22 @@ void ACDockWidgetsManagerQt::autoConnectOSC(bool _status)
     auto_connect_osc = _status;
     for (int d=0;d<dockWidgets.size();d++){
         dockWidgets[d]->autoConnectOSC(_status);//CF quick hack for LoopJam, should be (_status);
+    }
+}
+
+void ACDockWidgetsManagerQt::setOscBrowser(ACOscBrowser* _browser)
+{
+    this->osc_browser = _browser;
+    for (int d=0;d<dockWidgets.size();d++){
+        dockWidgets[d]->setOscBrowser(_browser);
+    }
+}
+
+void ACDockWidgetsManagerQt::setOscFeedback(ACOscFeedback* _feedback)
+{
+    this->osc_feedback = _feedback;
+    for (int d=0;d<dockWidgets.size();d++){
+        dockWidgets[d]->setOscFeedback(_feedback);
     }
 }
 #endif //defined (USE_OSC)
@@ -135,10 +154,15 @@ bool ACDockWidgetsManagerQt::addControlDock(ACAbstractDockWidgetQt* dock)
         dockWidgets.back()->setVisible(false);
     }
     connect(dockWidgets.back(), SIGNAL(libraryMediaTypeChanged(QString)), mainWindow, SLOT(changeLibraryMediaType(QString)));
-    #ifdef SUPPORT_MULTIMEDIA
+#ifdef SUPPORT_MULTIMEDIA
     connect(dockWidgets.back(), SIGNAL(activeMediaTypeChanged(QString)), mainWindow, SLOT(changeActiveMediaType(QString)));
-    #endif
+#endif
+
+#if defined (USE_OSC)
     dockWidgets.back()->autoConnectOSC(auto_connect_osc);
+    dockWidgets.back()->setOscBrowser(this->osc_browser);
+    dockWidgets.back()->setOscFeedback(this->osc_feedback);
+#endif //defined (USE_OSC)
 
     this->updateDockHeight();
 

@@ -75,6 +75,8 @@ public:
     void setUserData(void *_user_data);
     void setCallback(ACOscBrowserCallback _callback);
 
+    bool isActive(){return active;}
+
     // these can be called only from the callback
     void readFloat(float *val);
     void readInt(int *val);
@@ -84,8 +86,8 @@ private:
     lo_server_thread server_thread;
     void* user_data;
     ACOscBrowserCallback* callback;
-
     ACOscFeedback *osc_feedback;
+    bool active;
 
 public:
     static int static_mess_handler(const char *path, const char *types, lo_arg **argv, int argc, void *data, void *user_data);

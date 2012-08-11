@@ -37,16 +37,10 @@
 
 #include <QtGui>
 
-#include <MediaCycle.h>
-#if defined (SUPPORT_AUDIO)
-#include <ACAudioEngine.h>
-#endif //defined (SUPPORT_AUDIO)
-
-//#include "ACAbstractDockWidgetQt.h"
+#include "ACAbstractWidgetQt.h"
 #include "ACDockWidgetFactoryQt.h"
-#include "ACOsgCompositeViewQt.h"
 
-class ACDockWidgetsManagerQt : public QObject {
+class ACDockWidgetsManagerQt : public QObject, public ACAbstractWidgetQt {
 Q_OBJECT
 
 public slots:
@@ -59,13 +53,15 @@ public:
     ACDockWidgetsManagerQt(QMainWindow* _mainWindow = 0);
     virtual ~ACDockWidgetsManagerQt();
 
-    void updateMediaCycle(MediaCycle* media_cycle);
+    virtual void setMediaCycle(MediaCycle* _media_cycle);
     #if defined (SUPPORT_AUDIO)
-    void updateAudioEngine(ACAudioEngine* audio_engine);
+    virtual void setAudioEngine(ACAudioEngine* _audio_engine);
     #endif //defined (SUPPORT_AUDIO)
-    void updateOsgView(ACOsgCompositeViewQt* compositeOsgView);
+    virtual void setOsgView(ACOsgCompositeViewQt* _osg_view);
     #if defined (USE_OSC)
     void autoConnectOSC(bool _status = true);
+    virtual void setOscBrowser(ACOscBrowser* _browser);
+    virtual void setOscFeedback(ACOscFeedback* _feedback);
     #endif //defined (USE_OSC)
     void updateDocksVisibility(bool visibility);
     void updateDockHeight();

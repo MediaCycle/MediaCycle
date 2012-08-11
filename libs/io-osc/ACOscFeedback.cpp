@@ -42,7 +42,8 @@
 ACOscFeedback::ACOscFeedback() : Observer() {
     sendto = 0;
     message = 0;
-};
+    this->active = false;
+}
 
 ACOscFeedback::~ACOscFeedback() {
     release();
@@ -55,6 +56,7 @@ void ACOscFeedback::create(const char *hostname, int port) {
     char portchar[6];
     sprintf(portchar, "%d", port);
     sendto = lo_address_new(hostname, portchar);
+    this->active = true;
 }
 
 void ACOscFeedback::release() {
@@ -62,6 +64,7 @@ void ACOscFeedback::release() {
         lo_address_free(sendto);
         sendto = 0;
     }
+    this->active = false;
 }
 
 void ACOscFeedback::messageBegin(const char *_tag) {
@@ -98,14 +101,14 @@ void ACOscFeedback::messageAppendString(string val) {
 void ACOscFeedback::update(Subject* _mediacycle){
     MediaCycle* mc = static_cast<MediaCycle*> (_mediacycle);
     int nId = mc->getClickedNode(); // XS TODO check if not +1
- //   std::cout << "[OscFeedback] clicked on node :" << nId << std::endl; // XS TODO how to get pointer info ?
+    //   std::cout << "[OscFeedback] clicked on node :" << nId << std::endl; // XS TODO how to get pointer info ?
     this->messageBegin("/mediacycle");
     //    this->messageAppendInt(nId);
     string full_name = mc->getMediaFileName(nId);
     this->messageAppendString(full_name);
 
-//    std::string::size_type p = full_name.find_last_of("/");
-//    string last_name = std::string(full_name, p + 1, full_name.size());
-//    this->messageAppendString(last_name);
+    //    std::string::size_type p = full_name.find_last_of("/");
+    //    string last_name = std::string(full_name, p + 1, full_name.size());
+    //    this->messageAppendString(last_name);
     this->messageSend();
 }
