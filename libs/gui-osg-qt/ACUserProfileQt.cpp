@@ -43,6 +43,7 @@
 
 ACUserProfileQt::ACUserProfileQt(QWidget *parent) : QMainWindow(parent)
 {
+    media_cycle = 0;
     ui.setupUi(this); // first thing to do
 
     this->setAcceptDrops(true); // for drag and drop
