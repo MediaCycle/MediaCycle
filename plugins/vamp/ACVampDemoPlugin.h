@@ -2,9 +2,9 @@
  *  ACVampDemoPlugin.h
  *  MediaCycle
  *
- *  @author Xavier Siebert
- *  @date 22/09/09
- *  @copyright (c) 2009 – UMONS - Numediart
+ *  @author Damien Tardieu
+ *  @date 08/06/10
+ *  @copyright (c) 2010 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
  *  licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 

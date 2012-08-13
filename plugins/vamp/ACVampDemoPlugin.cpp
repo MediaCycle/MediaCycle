@@ -1,8 +1,9 @@
 /*
- *  ACVampDemoPlugin.cpp
+ *  ACVampDemoPlugin.h
  *  MediaCycle
  *
- *  Created by Damien Tardieu
+ *  @author Damien Tardieu
+ *  @date 08/06/10
  *  @copyright (c) 2010 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 

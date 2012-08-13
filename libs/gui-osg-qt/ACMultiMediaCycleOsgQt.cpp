@@ -1107,6 +1107,9 @@ void ACMultiMediaCycleOsgQt::loadDefaultConfig(ACMediaType _media_type, ACBrowse
         // Feature plugins
 #if defined (SUPPORT_AUDIO)
         this->tryLoadFeaturePluginFromBaseName("audio");
+#if defined (USE_VAMP)
+        this->tryLoadFeaturePluginFromBaseName("vamp");
+#endif //defined (USE_VAMP)		
 #endif //defined (SUPPORT_AUDIO)
 
 #if defined (SUPPORT_TEXT)
@@ -1162,6 +1165,11 @@ void ACMultiMediaCycleOsgQt::loadDefaultConfig(ACMediaType _media_type, ACBrowse
         else{
             this->tryLoadFeaturePluginFromBaseName(smedia);
         }
+#if defined(USE_VAMP)
+		if(smedia == "audio")
+			this->tryLoadFeaturePluginFromBaseName("vamp");
+#endif // defined(USE_VAMP)
+		
 #if defined (SUPPORT_MULTIMEDIA)
     }
 #endif //defined (SUPPORT_MULTIMEDIA)
