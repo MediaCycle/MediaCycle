@@ -1,7 +1,7 @@
 /**
  * @brief ACVisPluginPCA.cpp
  * @author Christian Frisson
- * @date 03/08/2012
+ * @date 15/08/2012
  * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -41,8 +41,8 @@ ACVisPluginPCA::ACVisPluginPCA() : ACClusterPositionsPlugin()
 {
     //vars herited from ACPlugin
     this->mMediaType = MEDIA_TYPE_ALL;
-    this->mName = "MediaCycle PCA";
-    this->mDescription = "PCA Visualisation plugin";
+    this->mName = "MediaCycle PCA axes 1&2";
+    this->mDescription = "axes 1 and 2 resulting from PCA visualisation";
     this->mId = "";
 
     //local vars
