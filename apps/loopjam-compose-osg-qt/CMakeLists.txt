@@ -1,4 +1,4 @@
-SET(TARGET_NAME "audiocycle-loopjam")
+SET(TARGET_NAME "loopjam-compose-osg-qt")
 IF ( BUILD_LOOPJAM_APP AND SUPPORT_AUDIO AND USE_QT4 AND USE_OSG AND USE_OSC AND ( OPENAL_FOUND OR PORTAUDIO_FOUND ) )
 
 	SET(USE_AUDIO ON)
@@ -8,7 +8,7 @@ IF ( BUILD_LOOPJAM_APP AND SUPPORT_AUDIO AND USE_QT4 AND USE_OSG AND USE_OSC AND
 	SET(USE_TEXT OFF)
 	SET(USE_ARCHIPEL OFF)
 	SET(WITH_QT4 ON)
-        SET(MC_PACKAGE_DESCRIPTION_SUMMARY "LoopJam is an interactive dancefloor for collaborative music creation, using a sound map organized by similarity.")
+        SET(MC_PACKAGE_DESCRIPTION_SUMMARY "LoopJam is an interactive dancefloor for collaborative music creation, using a sound map organized by similarity. This is application version is for composing and authoring loop libraries for LoopJam.")
 
 	INCLUDE (${CMAKE_SOURCE_DIR}/CMakeModules/AddMediaCycleOsgQtApp.cmake)
 	ADD_MC_OSG_QT_EXECUTABLE(${TARGET_NAME})

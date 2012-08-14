@@ -1,10 +1,10 @@
 /*
- *  ACAudioCycleLoopJam main.cpp
+ *  LoopJam Composition Tool main.cpp
  *  MediaCycle
  *
- *  @author Xavier Siebert
- *  @date 17/05/11
- *  @copyright (c) 2011 – UMONS - Numediart
+ *  @author Christian Frisson
+ *  @date 15/08/12
+ *  @copyright (c) 2012 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
  *  licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -34,7 +34,7 @@
 
 #include <QApplication>
 #include <QtGui>
-#include "ACAudioCycleLoopJam.h"
+#include "ACMultiMediaCycleOsgQt.h"
 
 int main(int argc, char *argv[])
 {
@@ -45,22 +45,33 @@ int main(int argc, char *argv[])
     QApplication::setLibraryPaths(QStringList(QApplication::applicationDirPath() + "/../PlugIns"));
 #endif
 
-    ACAudioCycleLoopJam window;
+    ACMultiMediaCycleOsgQt window;
     try {
-        window.setWindowTitle("LoopJam");
+        window.setWindowTitle("LoopJam Composition Tool");
 
         // Adding palettes
-        window.addControlDock("MCOSC");
+        //window.addControlDock("MCOSC");
         window.addControlDock("MCBrowserControlsClusters");//"MCBrowserControlsClustersNeighbors");
         window.addControlDock("MCAudioControls");
+		/* //window.addControlDock("MCSegmentationControls");
+		window.useSegmentationByDefault(true);*/
 
-        window.setDefaultQSettings(); // skip the first dialog about saved settings
+        // XS TODO
+		// this has to be called after dock controls have been added
+		// do we need to put all this code here ?
+		window.configureSettings();
+		
+		//	window.configurePluginDock();
+		
+		// Changing the about dialog (not necessary if standard MediaCycle app)
+		//window.addAboutDialog("MediaCycle");
+		
         window.loadDefaultConfig(MEDIA_TYPE_AUDIO);
         window.show();
 
-        window.on_actionFullscreen_triggered(true); // to be set after the window is shown
-        window.autoConnectOSC(true); // to be set after loading the default config
-        window.changeSetting(AC_SETTING_INSTALLATION);
+        //window.on_actionFullscreen_triggered(true); // to be set after the window is shown
+        //window.autoConnectOSC(true); // to be set after loading the default config
+        //window.changeSetting(AC_SETTING_INSTALLATION);
     }
     catch (const exception& e) {
         cout << "** caught exception in main : " << e.what() << endl;
@@ -69,11 +80,10 @@ int main(int argc, char *argv[])
         cout << "** caught undetermined exception in main" << endl;
     }
 
-    window.startLoopXML();
 
     app.setOrganizationName("numediart");
     app.setOrganizationDomain("numediart.org");
-    app.setApplicationName("LoopJam");
+    app.setApplicationName("LoopJam Composition Tool");
 
     return app.exec();
 }
