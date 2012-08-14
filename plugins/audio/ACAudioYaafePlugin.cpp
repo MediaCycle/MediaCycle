@@ -643,7 +643,8 @@ std::vector<ACMediaFeatures*> ACAudioYaafePlugin::calculate(ACMediaData* aData, 
     string aFileName_noext = aFileName.substr(0,aFileName.find_last_of('.'));
     std::map<std::string,ACMediaTimedFeature*>::iterator mf;
 
-    // Trying to open previousy-computed files for parent files (TODO should test/compare parameters and plugin versions)
+    // Trying to open previously-computed files for parent files (TODO should test/compare parameters and plugin versions)
+#ifndef USE_DEBUG
     _save_timed_feat = true; // forcing saving features so that we don't have to calculate them all the time
     int feature_length = -1;
     if(theMedia->getParentId()==-1){
@@ -669,12 +670,12 @@ std::vector<ACMediaFeatures*> ACAudioYaafePlugin::calculate(ACMediaData* aData, 
                         featureAvailable = false;
                 }
             }
-            /*if(featureAvailable){
-                std::cout << "ACAudioYaafePlugin: feature named '" << *feat  << "' loaded" << std::endl;
-            }
-            else{
-                std::cout << "ACAudioYaafePlugin: feature named '" << *feat  << "' NOT loaded" << std::endl;
-            }*/
+            //if(featureAvailable){
+            //    std::cout << "ACAudioYaafePlugin: feature named '" << *feat  << "' loaded" << std::endl;
+            //}
+            //else{
+            //    std::cout << "ACAudioYaafePlugin: feature named '" << *feat  << "' NOT loaded" << std::endl;
+            //}
             featuresAvailable *= featureAvailable;
         }
         if(descmf.size()==0){
@@ -696,6 +697,7 @@ std::vector<ACMediaFeatures*> ACAudioYaafePlugin::calculate(ACMediaData* aData, 
             std::cerr << "ACAudioYaafePlugin: error while loading features, now recalculating them..." << std::endl;
         }
     }
+#endif
     // CF TODO check if the features length matches the expected length based on the file length and block/step sizes and resample rate
     // CF TODO if some features weren't previously calcultated, only recalculate these
 
