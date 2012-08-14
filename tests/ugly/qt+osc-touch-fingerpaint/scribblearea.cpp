@@ -50,6 +50,8 @@ ScribbleArea::ScribbleArea(QWidget *parent)
     setAttribute(Qt::WA_StaticContents);
     modified = false;
 
+    this->setStyleSheet("background-color:black;");
+
     myPenColors
             << QColor("green")
             << QColor("purple")
@@ -154,7 +156,7 @@ void ScribbleArea::print()
     QPrinter printer(QPrinter::HighResolution);
 
     QPrintDialog *printDialog = new QPrintDialog(&printer, this);
-//! [21] //! [22]
+    //! [21] //! [22]
     if (printDialog->exec() == QDialog::Accepted) {
         QPainter painter(&printer);
         QRect rect = painter.viewport();
@@ -171,92 +173,94 @@ void ScribbleArea::print()
 bool ScribbleArea::event(QEvent *event)
 {
     switch (event->type()) {
-		case QEvent::TouchBegin:
-			// MediaCycle adaptation:
-			clearImage();
-			std::cout << "TouchBegin" << std::endl;
-			if(oscDockWidget && oscDockWidget->getFeedbackHandler()){
-				lo_send(oscDockWidget->getFeedbackHandler()->getAddress(), "/mediacycle/browser/reset_pointers", "");
-			}
-			event->accept();
-			//return true;
-		case QEvent::TouchUpdate:
-			//std::cout << "TouchUpdate" << std::endl;
-			//return true;
-		case QEvent::TouchEnd:
-		{
-			//std::cout << "TouchEnd" << std::endl;
-			QList<QTouchEvent::TouchPoint> touchPoints = static_cast<QTouchEvent *>(event)->touchPoints();
-			foreach (const QTouchEvent::TouchPoint &touchPoint, touchPoints) {
+    case QEvent::TouchBegin:
+        // MediaCycle adaptation:
+        clearImage();
+        std::cout << "TouchBegin" << std::endl;
+        if(oscDockWidget && oscDockWidget->getFeedbackHandler()){
+            oscDockWidget->getFeedbackHandler()->sendMessage( "/mediacycle/browser/reset_pointers" );
+        }
+        event->accept();
+        //return true;
+    case QEvent::TouchUpdate:
+        //std::cout << "TouchUpdate" << std::endl;
+        //return true;
+    case QEvent::TouchEnd:
+    {
+        //std::cout << "TouchEnd" << std::endl;
+        QList<QTouchEvent::TouchPoint> touchPoints = static_cast<QTouchEvent *>(event)->touchPoints();
+        foreach (const QTouchEvent::TouchPoint &touchPoint, touchPoints) {
 
-				switch (touchPoint.state()) {
-					case Qt::TouchPointReleased:
-					{
+            switch (touchPoint.state()) {
+            case Qt::TouchPointReleased:
+            {
+                // This does never seem to work on Ubuntu
+                QString mess = QString("/mediacycle/browser/") + QString().setNum(touchPoint.id()) + QString("/released");
+                if(oscDockWidget && oscDockWidget->getFeedbackHandler()){
+                    oscDockWidget->getFeedbackHandler()->sendMessage( mess.toStdString() );
+                    if(oscDockWidget->getFeedbackHandler()->isActive())
+                        std::cout << mess.toStdString() << std::endl;
+                }
+            }
+            break;
+            //continue;
+            case Qt::TouchPointPressed:
+            {
 
-						// This does never seem to work on Ubuntu
-						QString mess = QString("/mediacycle/browser/") + QString().setNum(touchPoint.id()) + QString("/released");
-						if(oscDockWidget && oscDockWidget->getFeedbackHandler()){
-							lo_send(oscDockWidget->getFeedbackHandler()->getAddress(), mess.toStdString().c_str(), "");
-						}
-						std::cout << mess.toStdString() << std::endl;
-					}
-						break;
-						//continue;
-					case Qt::TouchPointPressed:
-					{
+                QString mess = QString("/mediacycle/browser/") + QString().setNum(touchPoint.id()) + QString("/activated");
+                if(oscDockWidget && oscDockWidget->getFeedbackHandler()){
+                    oscDockWidget->getFeedbackHandler()->sendMessage( mess.toStdString() );
+                    if(oscDockWidget->getFeedbackHandler()->isActive())
+                        std::cout << mess.toStdString() << std::endl;
+                }
+            }
+            //break;
+            continue;
+            //case Qt::TouchPointStationary:
+            // don't do anything if this touch point hasn't moved
+            //break;
+            //	continue;
+            //case Qt::TouchPointMoved:
+            //	continue;
+            default:
+            {
+                QRectF rect = touchPoint.rect();
+                if (rect.isEmpty()) {
+                    qreal diameter = qreal(50) * touchPoint.pressure();
+                    QPointF center = rect.center();
+                    rect.setSize(QSizeF(diameter, diameter));
+                    rect.moveCenter(center);
+                }
 
-						QString mess = QString("/mediacycle/browser/") + QString().setNum(touchPoint.id()) + QString("/activated");
-						if(oscDockWidget && oscDockWidget->getFeedbackHandler()){
-							lo_send(oscDockWidget->getFeedbackHandler()->getAddress(), mess.toStdString().c_str(), "");
-						}
-						std::cout << mess.toStdString() << std::endl;
-					}
-						//break;
-						continue;
-					//case Qt::TouchPointStationary:
-						// don't do anything if this touch point hasn't moved
-						//break;
-					//	continue;
-					//case Qt::TouchPointMoved:
-					//	continue;
-					default:
-					{
-						QRectF rect = touchPoint.rect();
-						if (rect.isEmpty()) {
-							qreal diameter = qreal(50) * touchPoint.pressure();
-							QPointF center = rect.center();
-							rect.setSize(QSizeF(diameter, diameter));
-							rect.moveCenter(center);
-						}
+                QPainter painter(&image);
+                painter.setPen(Qt::NoPen);
+                painter.setBrush(myPenColors.at(touchPoint.id() % myPenColors.count()));
+                painter.drawEllipse(rect);
+                painter.end();
 
-						QPainter painter(&image);
-						painter.setPen(Qt::NoPen);
-						painter.setBrush(myPenColors.at(touchPoint.id() % myPenColors.count()));
-						painter.drawEllipse(rect);
-						painter.end();
+                modified = true;
+                int rad = 2;
+                update(rect.toRect().adjusted(-rad,-rad, +rad, +rad));
 
-						modified = true;
-						int rad = 2;
-						update(rect.toRect().adjusted(-rad,-rad, +rad, +rad));
-
-						// MediaCycle adaptation: sending the position of each pointer as hover to MediaCycle thru OSC
-						QString mess = QString("/mediacycle/browser/") + QString().setNum(touchPoint.id()) + QString("/hover/xy");
-						float mc_x(0.0f),mc_y(0.0f);
-						mc_x = -1 + 2*touchPoint.normalizedPos().x();
-						mc_y = 1 - 2*touchPoint.normalizedPos().y();
-						if(oscDockWidget && oscDockWidget->getFeedbackHandler()){
-							lo_send(oscDockWidget->getFeedbackHandler()->getAddress(), mess.toStdString().c_str(), "ff", mc_x, mc_y);
-						}
-						//std::cout << mess.toStdString() << " " << mc_x << " " << mc_y << std::endl;
-					}
-					//break;
-					continue;
-				}
-			}
-			break;
-		}
-		default:
-			return QWidget::event(event);
+                // MediaCycle adaptation: sending the position of each pointer as hover to MediaCycle thru OSC
+                QString mess = QString("/mediacycle/browser/") + QString().setNum(touchPoint.id()) + QString("/hover/xy");
+                float mc_x(0.0f),mc_y(0.0f);
+                mc_x = -1 + 2*touchPoint.normalizedPos().x();
+                mc_y = 1 - 2*touchPoint.normalizedPos().y();
+                if(oscDockWidget && oscDockWidget->getFeedbackHandler()){
+                    oscDockWidget->getFeedbackHandler()->sendMessage( mess.toStdString() );
+                    //if(oscDockWidget->getFeedbackHandler()->isActive())
+                    //  std::cout << mess.toStdString() << " " << mc_x << " " << mc_y << std::endl;
+                }
+            }
+            //break;
+            continue;
+            }
+        }
+        break;
+    }
+    default:
+        return QWidget::event(event);
     }
     return true;
 }

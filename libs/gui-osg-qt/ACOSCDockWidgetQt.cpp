@@ -72,16 +72,32 @@ void ACOSCDockWidgetQt::autoConnectOSC(bool _status)
     auto_connect = _status;
     if(!media_cycle)
         return;
-    if(auto_connect){
-        if(!osc_browser)
-            this->toggleControl(true);
+    if(!osc_browser || !osc_feedback){
+        std::cerr << "ACOSCDockWidgetQt::autoConnectOSC: osc";
+        if(!osc_browser){
+            std::cerr << "browser";
+            if(!osc_feedback)
+                std::cerr << " / ";
+        }
         if(!osc_feedback)
+            std::cerr << "feedback";
+        std::cerr << " not created" << std::endl;
+        return;
+    }
+    if(auto_connect){
+        if(!osc_browser->isActive())
+            this->toggleControl(true);
+        if(!osc_feedback->isActive())
             this->toggleFeedback(true);
     }
 }
 
 #if defined (USE_OSC)
 void ACOSCDockWidgetQt::toggleControl(bool _status){
+    if(!osc_browser){
+        std::cerr << "ACOSCDockWidgetQt::toggleControl: osc browser not created" << std::endl;
+        return;
+    }
     if(_status){
         //osc_browser = new ACOscBrowser();
         if(osc_browser->create(ui.lineEditControlIP->text().toStdString().c_str(), ui.spinBoxControlPort->value())){
@@ -110,6 +126,10 @@ void ACOSCDockWidgetQt::toggleControl(bool _status){
 }
 
 void ACOSCDockWidgetQt::toggleFeedback(bool _status){
+    if(!osc_feedback){
+        std::cerr << "ACOSCDockWidgetQt::toggleFeedback: osc feedback not created" << std::endl;
+        return;
+    }
     if(_status){
         //osc_feedback = new ACOscFeedback();
         if (media_cycle)
@@ -134,6 +154,10 @@ void ACOSCDockWidgetQt::toggleFeedback(bool _status){
 }
 
 void ACOSCDockWidgetQt::on_pushButtonControlStart_clicked() {
+    if(!osc_browser){
+        std::cerr << "ACOSCDockWidgetQt::controlStart: osc browser not created" << std::endl;
+        return;
+    }
     std::cout << "Control IP: " << ui.lineEditControlIP->text().toStdString() << std::endl;
     std::cout << "Control Port: " << ui.spinBoxControlPort->value() << std::endl;
     if ( ui.pushButtonControlStart->text().toStdString() == "Start") {
@@ -145,6 +169,10 @@ void ACOSCDockWidgetQt::on_pushButtonControlStart_clicked() {
 }
 
 void ACOSCDockWidgetQt::on_pushButtonFeedbackStart_clicked() {
+    if(!osc_feedback){
+        std::cerr << "ACOSCDockWidgetQt::feedbackStart: osc feedback not created" << std::endl;
+        return;
+    }
     std::cout << "Feedback IP: " << ui.lineEditFeedbackIP->text().toStdString() << std::endl;
     std::cout << "Feedback Port: " << ui.spinBoxFeedbackPort->value() << std::endl;
     if ( ui.pushButtonFeedbackStart->text().toStdString() == "Start") {
@@ -161,7 +189,11 @@ void ACOSCDockWidgetQt::disableControl(){
         //delete osc_browser;
         //osc_browser = 0;
     }
-    //ui.groupBoxOscControl->hide();
+    ui.pushButtonControlStart->hide();
+    ui.lineEditControlIP->hide();
+    ui.spinBoxControlPort->hide();
+    ui.labelControl->hide();
+    ui.spinBoxControlPort->hide();
 }
 
 void ACOSCDockWidgetQt::disableFeedback(){
@@ -170,12 +202,20 @@ void ACOSCDockWidgetQt::disableFeedback(){
         //delete osc_feedback;
         //osc_feedback = 0;
     }
-    //ui.groupBoxOscFeedback->hide();
+    ui.pushButtonFeedbackStart->hide();
+    ui.lineEditFeedbackIP->hide();
+    ui.spinBoxFeedbackPort->hide();
+    ui.labelFeedback->hide();
+    ui.spinBoxFeedbackPort->hide();
 }
 
 void ACOSCDockWidgetQt::setControlPort(int _port){
+    if(!osc_browser){
+        std::cerr << "ACOSCDockWidgetQt::setControlPort: osc browser not created" << std::endl;
+        return;
+    }
     bool restart = false;
-    if (osc_browser) {
+    if (osc_browser->isActive()) {
         restart = true;
         osc_browser->release();
         //delete osc_browser;
@@ -188,8 +228,12 @@ void ACOSCDockWidgetQt::setControlPort(int _port){
 }
 
 void ACOSCDockWidgetQt::setFeedbackPort(int _port){
+    if(!osc_feedback){
+        std::cerr << "ACOSCDockWidgetQt::setFeedbackPort: osc feedback not created" << std::endl;
+        return;
+    }
     bool restart = false;
-    if (osc_feedback) {
+    if (osc_feedback->isActive()) {
         osc_feedback->release();
         //delete osc_feedback;
         //osc_feedback = 0;

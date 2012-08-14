@@ -60,6 +60,7 @@ public:
     void messageAppendInt(int val);
     void messageAppendString(const char *val);
     void messageAppendString(std::string val);
+    void sendMessage(std::string _message);
 
     lo_address getAddress() {
         return this->sendto;

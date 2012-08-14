@@ -353,8 +353,8 @@ int ACOscBrowser::process_mess(const char *path, const char *types, lo_arg **arg
             vs.push_back(s);
             media_cycle->importDirectories(vs, 0);
             // XS TODO : should not call these methods from outside -- clean up !!
-            media_cycle->normalizeFeatures(1);
-            media_cycle->libraryContentChanged(1);
+            //media_cycle->normalizeFeatures(1);
+            //media_cycle->libraryContentChanged(1);
         } else if (tag.find("/load", 0) != string::npos) {
             std::cerr << "ACOscBrowser: Library loading thru OSC not yet implemented" << std::endl;
         } else if (tag.find("/clear", 0) != string::npos) {

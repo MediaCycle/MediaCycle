@@ -78,9 +78,9 @@ private:
 
     // MediaCycle
     ACOSCDockWidgetQt *oscDockWidget;
-	std::list<int> activeIds,toReleaseIds;
+    std::list<int> activeIds,toReleaseIds;
 public:
-	// MediaCycle
+    // MediaCycle
     void passOscDockWidget(ACOSCDockWidgetQt *_oscDockWidget){oscDockWidget = _oscDockWidget;}
 };
 //! [0]

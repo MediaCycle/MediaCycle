@@ -136,7 +136,7 @@
       </widget>
      </item>
      <item row="1" column="0">
-      <widget class="QLabel" name="labelLayout">
+      <widget class="QLabel" name="labelFeedback">
        <property name="maximumSize">
         <size>
          <width>16777215</width>

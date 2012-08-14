@@ -88,6 +88,8 @@ private:
 
 	// MediaCycle
     ACOSCDockWidgetQt *oscDockWidget;
+    ACOscBrowser *osc_browser;
+    ACOscFeedback *osc_feedback;
 };
 //! [0]
 

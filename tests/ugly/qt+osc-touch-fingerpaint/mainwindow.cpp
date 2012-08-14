@@ -49,18 +49,22 @@ MainWindow::MainWindow()
     scribbleArea = new ScribbleArea;
     setCentralWidget(scribbleArea);
 
+    // MediaCycle
+    osc_browser = new ACOscBrowser();
+    osc_feedback = new ACOscFeedback();
+    oscDockWidget = new ACOSCDockWidgetQt();
+    oscDockWidget->setOscBrowser(osc_browser);
+    oscDockWidget->setOscFeedback(osc_feedback);
+    oscDockWidget->disableControl();
+    oscDockWidget->setFeedbackPort(12345);
+    addDockWidget(Qt::TopDockWidgetArea,oscDockWidget);
+    scribbleArea->passOscDockWidget(oscDockWidget);
+
     createActions();
     createMenus();
 
-    setWindowTitle(tr("Finger Paint to MC thru OSC (try with 2+ fingers)"));
-    resize(500, 500);
-
-	// MediaCycle
-    oscDockWidget = new ACOSCDockWidgetQt();
-    oscDockWidget->disableControl();
-    oscDockWidget->setFeedbackPort(12345);
-    addDockWidget(Qt::LeftDockWidgetArea,oscDockWidget);
-    scribbleArea->passOscDockWidget(oscDockWidget);
+    setWindowTitle(tr("MediaCycle OSC Finger Paint (try with 2+ fingers)"));
+    resize(400, 400);
 }
 //! [0]
 
@@ -68,6 +72,9 @@ MainWindow::MainWindow()
 void MainWindow::closeEvent(QCloseEvent *event)
 //! [1] //! [2]
 {
+    osc_browser->release();
+    osc_feedback->release();
+
     if (maybeSave()) {
         event->accept();
     } else {
@@ -104,18 +111,7 @@ void MainWindow::about()
 //! [11] //! [12]
 {
     QMessageBox::about(this, tr("About Scribble"),
-            tr("<p>The <b>Scribble</b> example shows how to use QMainWindow as the "
-               "base widget for an application, and how to reimplement some of "
-               "QWidget's event handlers to receive the events generated for "
-               "the application's widgets:</p><p> We reimplement the mouse event "
-               "handlers to facilitate drawing, the paint event handler to "
-               "update the application and the resize event handler to optimize "
-               "the application's appearance. In addition we reimplement the "
-               "close event handler to intercept the close events before "
-               "terminating the application.</p><p> The example also demonstrates "
-               "how to use QPainter to draw an image in real time, as well as "
-               "to repaint widgets.</p>"
-               "<p>This example has been adapted to test multiple pointer input in MediaCycle through OSC</p>"));
+            tr("<p>This tool allows to test multiple pointer input into MediaCycle applications through OSC</p>"));
 }
 //! [12]
 
@@ -123,7 +119,7 @@ void MainWindow::about()
 void MainWindow::createActions()
 //! [13] //! [14]
 {
-    openAct = new QAction(tr("&Open..."), this);
+    /*openAct = new QAction(tr("&Open..."), this);
     openAct->setShortcut(tr("Ctrl+O"));
     connect(openAct, SIGNAL(triggered()), this, SLOT(open()));
 
@@ -137,7 +133,7 @@ void MainWindow::createActions()
     }
 
     printAct = new QAction(tr("&Print..."), this);
-    connect(printAct, SIGNAL(triggered()), scribbleArea, SLOT(print()));
+    connect(printAct, SIGNAL(triggered()), scribbleArea, SLOT(print()));*/
 
     exitAct = new QAction(tr("E&xit"), this);
     exitAct->setShortcut(tr("Ctrl+Q"));
@@ -151,8 +147,8 @@ void MainWindow::createActions()
     aboutAct = new QAction(tr("&About"), this);
     connect(aboutAct, SIGNAL(triggered()), this, SLOT(about()));
 
-    aboutQtAct = new QAction(tr("About &Qt"), this);
-    connect(aboutQtAct, SIGNAL(triggered()), qApp, SLOT(aboutQt()));
+    //aboutQtAct = new QAction(tr("About &Qt"), this);
+    //connect(aboutQtAct, SIGNAL(triggered()), qApp, SLOT(aboutQt()));
 }
 //! [14]
 
@@ -160,23 +156,31 @@ void MainWindow::createActions()
 void MainWindow::createMenus()
 //! [15] //! [16]
 {
-    saveAsMenu = new QMenu(tr("&Save As"), this);
+    /*saveAsMenu = new QMenu(tr("&Save As"), this);
     foreach (QAction *action, saveAsActs)
-        saveAsMenu->addAction(action);
+        saveAsMenu->addAction(action);*/
 
     fileMenu = new QMenu(tr("&File"), this);
-    fileMenu->addAction(openAct);
+    /*fileMenu->addAction(openAct);
     fileMenu->addMenu(saveAsMenu);
     fileMenu->addAction(printAct);
-    fileMenu->addSeparator();
+    fileMenu->addSeparator();*/
     fileMenu->addAction(exitAct);
 
     optionMenu = new QMenu(tr("&Options"), this);
     optionMenu->addAction(clearScreenAct);
 
+    //oscDockWidget->setFeatures(!QDockWidget::DockWidgetClosable);
+    QAction *showHideOscAction = new QAction("Show/Hide OSC controls", this);
+    showHideOscAction->setShortcut(tr("Ctrl+O"));
+    showHideOscAction->setCheckable(true);
+    showHideOscAction->setChecked(true);
+    connect(showHideOscAction, SIGNAL(toggled(bool)), oscDockWidget, SLOT(setVisible(bool)));
+    optionMenu->addAction(showHideOscAction);
+
     helpMenu = new QMenu(tr("&Help"), this);
     helpMenu->addAction(aboutAct);
-    helpMenu->addAction(aboutQtAct);
+    //helpMenu->addAction(aboutQtAct);
 
     menuBar()->addMenu(fileMenu);
     menuBar()->addMenu(optionMenu);
@@ -188,7 +192,7 @@ void MainWindow::createMenus()
 bool MainWindow::maybeSave()
 //! [17] //! [18]
 {
-    if (scribbleArea->isModified()) {
+    /*if (scribbleArea->isModified()) {
        QMessageBox::StandardButton ret;
        ret = QMessageBox::warning(this, tr("Scribble"),
                           tr("The image has been modified.\n"
@@ -200,7 +204,7 @@ bool MainWindow::maybeSave()
         } else if (ret == QMessageBox::Cancel) {
             return false;
         }
-    }
+    }*/
     return true;
 }
 //! [18]

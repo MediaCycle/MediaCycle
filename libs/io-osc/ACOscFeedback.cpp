@@ -79,7 +79,8 @@ void ACOscFeedback::messageEnd() {
 }
 
 void ACOscFeedback::messageSend() {
-    lo_send_message(sendto, tag, message);
+    if(this->isActive())
+        lo_send_message(sendto, tag, message);
 }
 
 void ACOscFeedback::messageAppendFloat(float val) {
@@ -87,15 +88,23 @@ void ACOscFeedback::messageAppendFloat(float val) {
 }
 
 void ACOscFeedback::messageAppendInt(int val) {
-    lo_message_add_int32(message, val);
+    if(this->isActive())
+        lo_message_add_int32(message, val);
 }
 
 void ACOscFeedback::messageAppendString(const char *val) {
-    lo_message_add_string(message, val);
+    if(this->isActive())
+        lo_message_add_string(message, val);
 }
 
 void ACOscFeedback::messageAppendString(string val) {
-    lo_message_add_string(message, val.c_str());
+    if(this->isActive())
+        lo_message_add_string(message, val.c_str());
+}
+
+void ACOscFeedback::sendMessage(std::string _message){
+    if(this->isActive())
+        lo_send(sendto, _message.c_str(),"");
 }
 
 void ACOscFeedback::update(Subject* _mediacycle){
