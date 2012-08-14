@@ -520,11 +520,11 @@ void ACOsgAudioRenderer::updateNodes(double ratio) {
             const vector<int> centerNodeIds=media_cycle->getBrowser()->getIdNodeClusterCenter();
             if(cluster_colors.size()>0){
                 ((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(cluster_colors[attribute->getClusterId()%cluster_colors.size()]);
-                if(setting == AC_SETTING_DESKTOP){
+                /*if(setting == AC_SETTING_DESKTOP){
                     if(centerNodeIds.size() != 0 && attribute->getClusterId() < centerNodeIds.size())
                         if (centerNodeIds[attribute->getClusterId()]==attribute->getMediaId())
                             ((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(osg::Vec4(0,0,0,1));
-                }
+                }*/
             }
             else
                 ((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(node_color);
