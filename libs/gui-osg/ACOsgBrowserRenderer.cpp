@@ -610,82 +610,78 @@ bool ACOsgBrowserRenderer::removeNodes(int _first, int _last){
 
 bool ACOsgBrowserRenderer::addNodes(int _first, int _last){
     bool ok = false;
-
     if (_first < 0 || _last < _first){
         cerr << "<ACOsgBrowserRenderer::addNodes> : wrong index / out of bounds : " << _first << " - " << _last  << endl;
         ok = false;
     }
     else {
-
-        node_renderer.resize(_last);
-        distance_mouse.resize(_last);
-
         ACMediaType media_type;
         for (int i=_first;i<_last;i++) {
-            media_type = media_cycle->getMediaType(i);
-
-            if(media_cycle->getLibrary()->getMediaType() != MEDIA_TYPE_MIXED || (media_type == MEDIA_TYPE_MIXED||media_type == MEDIA_TYPE_AUDIO) ){
-                switch (media_type) {
-                case MEDIA_TYPE_AUDIO:
+            if( media_cycle->getMediaNode(i) != 0 && media_cycle->getLibrary()->getMedia(i) != 0){
+                media_type = media_cycle->getMediaType(i);
+                ACOsgMediaRenderer* renderer = 0;
+                if(media_cycle->getLibrary()->getMediaType() != MEDIA_TYPE_MIXED || (media_type == MEDIA_TYPE_MIXED||media_type == MEDIA_TYPE_AUDIO) ){
+                    switch (media_type) {
+                    case MEDIA_TYPE_AUDIO:
 #if defined (SUPPORT_AUDIO)
-                    node_renderer[i] = new ACOsgAudioRenderer();
+                        renderer = new ACOsgAudioRenderer();
 #endif //defined (SUPPORT_AUDIO)
-                    break;
-                case MEDIA_TYPE_IMAGE:
+                        break;
+                    case MEDIA_TYPE_IMAGE:
 #if defined (SUPPORT_IMAGE)
-                    node_renderer[i] = new ACOsgImageRenderer();
+                        renderer = new ACOsgImageRenderer();
 #endif //defined (SUPPORT_IMAGE)
-                    break;
-                case MEDIA_TYPE_VIDEO:
+                        break;
+                    case MEDIA_TYPE_VIDEO:
 #if defined (SUPPORT_VIDEO)
-                    node_renderer[i] = new ACOsgVideoRenderer();
+                        renderer = new ACOsgVideoRenderer();
 #endif //defined (SUPPORT_VIDEO)
-                    break;
-                case MEDIA_TYPE_3DMODEL:
+                        break;
+                    case MEDIA_TYPE_3DMODEL:
 #if defined (SUPPORT_3DMODEL)
-                    node_renderer[i] = new ACOsg3DModelRenderer();
+                        renderer = new ACOsg3DModelRenderer();
 #endif //defined (SUPPORT_3DMODEL)
-                    break;
-                case MEDIA_TYPE_TEXT:
+                        break;
+                    case MEDIA_TYPE_TEXT:
 #if defined (SUPPORT_TEXT)
-                    node_renderer[i] = new ACOsgTextRenderer();
+                        renderer = new ACOsgTextRenderer();
 #endif //defined (SUPPORT_TEXT)
-                    break;
-                case MEDIA_TYPE_SENSOR:
+                        break;
+                    case MEDIA_TYPE_SENSOR:
 #if defined (SUPPORT_SENSOR)
-                    node_renderer[i] = new ACOsgSensorRenderer();
+                        renderer = new ACOsgSensorRenderer();
 #endif //defined (SUPPORT_SENSOR)
-                    break;
-                case MEDIA_TYPE_MIXED:
+                        break;
+                    case MEDIA_TYPE_MIXED:
 #if defined (SUPPORT_MULTIMEDIA)
-                    node_renderer[i] = new ACOsgMediaDocumentRenderer();
+                        renderer = new ACOsgMediaDocumentRenderer();
 #endif //defined (SUPPORT_MULTIMEDIA)
-                    break;
-                default:
-                    node_renderer[i] = 0;
-                    break;
+                        break;
+                    default:
+                        renderer = 0;
+                        break;
+                    }
                 }
-            }
-            else
-                node_renderer[i] = 0;
-
-            if (node_renderer[i] != 0) {
-                node_renderer[i]->setMediaCycle(media_cycle);
-                node_renderer[i]->setNodeIndex(i);
-                node_renderer[i]->setFont(font);
-                node_renderer[i]->changeSetting(this->setting);
-
-                media_cycle_node = media_cycle->getMediaNode(i);
-
-                node_index = node_renderer[i]->getNodeIndex();
-                media_index = node_index;
-                media_cycle_filename = media_cycle->getMediaFileName(i);
-                //node_renderer[i]->setMediaIndex(media_index);
-                node_renderer[i]->setMedia(media_cycle->getLibrary()->getMedia(i));
-                node_renderer[i]->setFilename(media_cycle_filename);
-                // node_renderer[i]->setActivity(0);
-                node_renderer[i]->prepareNodes();
-                media_group->addChild(node_renderer[i]->getNode());
+                else
+                    renderer = 0;
+                if (renderer != 0) {
+                    renderer->setMediaCycle(media_cycle);
+                    renderer->setNodeIndex(i);
+                    renderer->setFont(font);
+                    renderer->changeSetting(this->setting);
+                    media_cycle_node = media_cycle->getMediaNode(i);
+                    node_index = node_renderer[i]->getNodeIndex();
+                    media_index = node_index;
+                    media_cycle_filename = media_cycle->getMediaFileName(i);
+                    //renderer->setMediaIndex(media_index);
+                    renderer->setMedia(media_cycle->getLibrary()->getMedia(i));
+                    renderer->setFilename(media_cycle_filename);
+                    renderer->setActivity(0);
+                    node_renderer.push_back(renderer);
+                    distance_mouse.resize(node_renderer.size());
+                    renderer->prepareNodes();
+                    media_group->addChild(renderer->getNode());
+                }
             }
         }
     }
@@ -791,4 +787,6 @@ void ACOsgBrowserRenderer::changeSetting(ACSettingType _setting)
 
     for (unsigned int i=0;i<node_renderer.size();i++)
         node_renderer[i]->changeSetting(this->setting);
+    if(media_cycle)
+        media_cycle->setNeedsDisplay(true);
 }

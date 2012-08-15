@@ -58,6 +58,7 @@ void ACMedia::init() {
 	preproc_features_vectors.resize(0);
     key="";
     filename="";
+    discarded = false;
 }
 
 ACMedia::~ACMedia() { 

@@ -719,11 +719,12 @@ int ACMediaLibrary::saveCoreXMLLibrary( TiXmlElement* _MC_e_root, TiXmlElement* 
     int n_medias = this->getSize();
     std::string s_medias;
     std::stringstream tmp;
+    for(ACMedias::iterator m = media_library.begin(); m != media_library.end();m++)
+        if(m->second->isDiscarded())
+            n_medias--;
     tmp << n_medias;
     s_medias = tmp.str();
-
     int a=0;
-
     TiXmlText* MC_t_nm = new TiXmlText( s_medias );
     MC_e_number_of_medias->LinkEndChild( MC_t_nm );
 
@@ -731,25 +732,27 @@ int ACMediaLibrary::saveCoreXMLLibrary( TiXmlElement* _MC_e_root, TiXmlElement* 
     std::vector<TiXmlElement*> medias;
 
     for(ACMedias::iterator m = media_library.begin(); m != media_library.end();m++){
-        if(this->media_type != MEDIA_TYPE_MIXED){
-            TiXmlElement* media = new TiXmlElement( "Media" );
-            _MC_e_medias->LinkEndChild( media );
-            m->second->saveXML( media);
-        }
-        else{
-            if(m->second->getMediaType() == MEDIA_TYPE_MIXED){
-                TiXmlElement* doc = new TiXmlElement( "MediaDocument" );
-                _MC_e_medias->LinkEndChild( doc );
-                m->second->saveXML( doc );
-
-                medias.push_back( new TiXmlElement( "Medias" ) );
-                doc->LinkEndChild( medias.back() );
-
+        if(!m->second->isDiscarded()){ // don't save medias discarded by the user
+            if(this->media_type != MEDIA_TYPE_MIXED){
+                TiXmlElement* media = new TiXmlElement( "Media" );
+                _MC_e_medias->LinkEndChild( media );
+                m->second->saveXML( media);
             }
             else{
-                TiXmlElement* media = new TiXmlElement( "Media" );
-                medias.back()->LinkEndChild( media );
-                m->second->saveXML( media );
+                if(m->second->getMediaType() == MEDIA_TYPE_MIXED){
+                    TiXmlElement* doc = new TiXmlElement( "MediaDocument" );
+                    _MC_e_medias->LinkEndChild( doc );
+                    m->second->saveXML( doc );
+
+                    medias.push_back( new TiXmlElement( "Medias" ) );
+                    doc->LinkEndChild( medias.back() );
+
+                }
+                else{
+                    TiXmlElement* media = new TiXmlElement( "Media" );
+                    medias.back()->LinkEndChild( media );
+                    m->second->saveXML( media );
+                }
             }
         }
     }

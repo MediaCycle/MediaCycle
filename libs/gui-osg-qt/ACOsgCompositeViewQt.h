@@ -83,6 +83,7 @@ public slots:
     void rotateBrowser(float x, float y);
     void zoomBrowser(float x, float y);
     void translateBrowser(float x, float y);
+    void discardMedia();
 
     // Timeline
     void addMediaOnTimelineTrack();
@@ -133,7 +134,8 @@ private:
     *examineMediaExternallyAction, *forwardNextLevelAction, *stopPlaybackAction,
     *toggleMediaHoverAction, *triggerMediaHoverAction, *resetBrowserAction,
     *rotateBrowserAction, *zoomBrowserAction, *translateBrowserAction,
-    *addMediaOnTimelineTrackAction, *toggleTimelinePlaybackAction, *adjustTimelineHeightAction;
+    *addMediaOnTimelineTrackAction, *toggleTimelinePlaybackAction, *adjustTimelineHeightAction,
+    *discardMediaAction;
     //*neighborsOfReferentAction, *clusterAroundReferentAction, *removeMediaAction
     QList<ACInputActionQt*> inputActions;
 

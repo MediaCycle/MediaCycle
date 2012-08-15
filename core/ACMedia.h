@@ -67,6 +67,7 @@ protected:
     float start, end; // seconds
     int startInt, endInt; // frame numbers
     std::vector<std::string> mtf_file_names;
+    bool discarded; // allows to discard medias to be saved in libraries
 private:
     void init();
 
@@ -124,6 +125,8 @@ public:
 
     std::string getLabel(void){return label;}
     void setLabel(std::string iLabel){label=iLabel;}
+    bool isDiscarded(){return discarded;}
+    void setDiscarded(bool _discarded){discarded=_discarded;}
 
     // data
     virtual bool extractData(std::string filename) {return false;}

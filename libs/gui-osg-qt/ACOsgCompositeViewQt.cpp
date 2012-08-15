@@ -71,6 +71,7 @@ ACOsgCompositeViewQt::ACOsgCompositeViewQt( QWidget * parent, const char * name,
       stopPlaybackAction(0), toggleMediaHoverAction(0), triggerMediaHoverAction(0),
       resetBrowserAction(0), rotateBrowserAction(0), zoomBrowserAction(0),
       translateBrowserAction(0), addMediaOnTimelineTrackAction(0), toggleTimelinePlaybackAction(0), adjustTimelineHeightAction(0),
+      discardMediaAction(0),
       setting(AC_SETTING_NONE)
 {
     osg_view = new osgViewer::GraphicsWindowEmbedded(0,0,width(),height());
@@ -226,6 +227,7 @@ ACOsgCompositeViewQt::~ACOsgCompositeViewQt(){
     if(addMediaOnTimelineTrackAction) delete addMediaOnTimelineTrackAction; addMediaOnTimelineTrackAction = 0;
     if(toggleTimelinePlaybackAction) delete toggleTimelinePlaybackAction; toggleTimelinePlaybackAction = 0;
     if(adjustTimelineHeightAction) delete adjustTimelineHeightAction; adjustTimelineHeightAction = 0;
+    if(discardMediaAction) delete discardMediaAction; discardMediaAction = 0;
 }
 
 void ACOsgCompositeViewQt::clean(bool updategl){
@@ -472,6 +474,14 @@ void ACOsgCompositeViewQt::initInputActions(){
     triggerMediaHoverAction->setToolTip(tr("Trigger Media Hover (faster browsing with playback and magnification)"));
     connect(triggerMediaHoverAction, SIGNAL(triggered(bool)), this, SLOT(triggerMediaHover(bool)));
     this->addInputAction(triggerMediaHoverAction);
+
+    discardMediaAction = new ACInputActionQt(tr("Toggle Discard Media File"), this);
+    discardMediaAction->setToolTip(tr("When discarded, the media file stays visible in the browser in black, but won't be saved in the XML library"));
+    discardMediaAction->setShortcut(Qt::Key_D);
+    discardMediaAction->setKeyEventType(QEvent::KeyPress);
+    discardMediaAction->setMouseEventType(QEvent::MouseButtonPress);
+    connect(discardMediaAction, SIGNAL(triggered(bool)), this, SLOT(discardMedia()));
+    this->addInputAction(discardMediaAction);
 
     resetBrowserAction = new ACInputActionQt(tr("Reset Browser"), this);
     resetBrowserAction->setShortcut(Qt::Key_C);
@@ -730,6 +740,20 @@ void ACOsgCompositeViewQt::toggleTimelinePlayback(bool toggle){
     if ( (media_cycle) && (media_cycle->hasBrowser()) && (timeline_renderer->getTrack(0)!=0) ) {
         //media_cycle->getBrowser()->toggleSourceActivity( timeline_renderer->getTrack(0)->getMediaIndex() );
         media_cycle->getBrowser()->toggleSourceActivity( timeline_renderer->getTrack(0)->getMedia()->getId() );
+    }
+}
+
+void ACOsgCompositeViewQt::discardMedia(){
+    if (media_cycle == 0) return;
+    std::cout << "ACOsgCompositeViewQt::discardMedia" << std::endl;
+    if (media_cycle->hasBrowser())
+    {
+        int media_id = media_cycle->getClickedNode();
+        ACMedia* discard = media_cycle->getLibrary()->getMedia(media_id);
+        if(discard){
+            discard->setDiscarded(true);
+            media_cycle->setNeedsDisplay(true);
+        }
     }
 }
 

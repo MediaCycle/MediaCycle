@@ -69,9 +69,10 @@ void ACOsgAudioRenderer::changeSetting(ACSettingType _setting)
     this->setting = _setting;
 
     // Force regeneration of the text:
-    metadata_geode = 0;
-
-    this->updateNodes();
+    if(metadata_geode){
+        media_node->removeChild(metadata_geode);
+        metadata_geode = 0;
+    }
 }
 
 void ACOsgAudioRenderer::waveformGeode() {
@@ -532,11 +533,14 @@ void ACOsgAudioRenderer::updateNodes(double ratio) {
         else
             ((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(neighbor_color);
 
-        if (attribute->isSelected()) {
-            //CF color (multiple) selected nodes in black
-            Vec4 selected_color(0,0,0,1);
-            ((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(selected_color);
-        }
+        //CF color (multiple) selected nodes in black (for AudioGarden)
+        if (attribute->isSelected())
+            ((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(osg::Vec4(0,0,0,1));
+
+        //CF color discarded nodes in black (for LoopJam composition)
+        if(media)
+            if(media->isDiscarded())
+                ((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(osg::Vec4(0,0,0,1));
 
         if (user_defined_color)
             ((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(node_color);
