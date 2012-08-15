@@ -55,6 +55,10 @@ ACBrowserControlsCompleteDockWidgetQt::ACBrowserControlsCompleteDockWidgetQt(QWi
     neighborsMethodControls->setFixedWidth(controlsWidth);
     neighborsPositionsControls->setFixedWidth(controlsWidth);
 
+    // There are no previous/next navigation levels when starting the application
+    ui.pushButtonBack->setEnabled(false);
+    ui.pushButtonForward->setEnabled(false);
+
     connect(ui.featuresListWidget, SIGNAL(itemClicked(QListWidgetItem*)),this, SLOT(modifyListItem(QListWidgetItem*)));
     connect(this,SIGNAL(reconfigureCheckBoxes()),this,SLOT(configureCheckBoxes()));
 
