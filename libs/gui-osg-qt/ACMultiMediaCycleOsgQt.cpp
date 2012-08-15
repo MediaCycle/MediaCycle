@@ -219,6 +219,9 @@ ACMultiMediaCycleOsgQt::ACMultiMediaCycleOsgQt(QWidget *parent) : QMainWindow(pa
 
     // XS reminder: need to call configureSettings from the application main.
 
+    // Remove access to the Config Settings panel from the config menu for releases
+    ui.menuConfig->removeAction( ui.actionEdit_Config_File );
+
     // Adapt the help panel action to support standard keys
     ui.actionHelpAbout->setShortcuts(QList<QKeySequence>(ui.actionHelpAbout->shortcuts()) << QKeySequence(QKeySequence::HelpContents));
 
