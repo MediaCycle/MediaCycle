@@ -644,7 +644,7 @@ std::vector<ACMediaFeatures*> ACAudioYaafePlugin::calculate(ACMediaData* aData, 
     std::map<std::string,ACMediaTimedFeature*>::iterator mf;
 
     // Trying to open previously-computed files for parent files (TODO should test/compare parameters and plugin versions)
-#ifndef USE_DEBUG
+#ifdef USE_DEBUG
     _save_timed_feat = true; // forcing saving features so that we don't have to calculate them all the time
     int feature_length = -1;
     if(theMedia->getParentId()==-1){
