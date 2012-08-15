@@ -72,7 +72,9 @@ void ACAboutDialogQt::updateLicenses(){
     html.append ("<li><a href=\"http://liblo.sourceforge.net\">liblo</a>: LPGL License</li>");
 #endif //defined (USE_OSC)
 #if defined (SUPPORT_AUDIO)
+	#if defined (USE_AUDIOFEAT)
     html.append ("<li><a href=\"http://www.mega-nerd.com/SRC/\">libsamplerate</a>: GPL License</li>");
+	#endif //defined (USE_AUDIOFEAT)
     html.append ("<li><a href=\"http://www.mega-nerd.com/libsndfile/\">libsndfile</a>: LGPL (or GPL) License</li>");
 #endif //defined (SUPPORT_AUDIO)
 #if defined (SUPPORT_AUDIO) && defined (USE_OPENAL)
@@ -97,12 +99,12 @@ void ACAboutDialogQt::updateLicenses(){
     html.append ("<li><a href=\"http://sp-tk.sourceforge.net\">The Speech Signal Processing Toolkit (SPTK)</a>: BSD License</li>");
 #endif //defined (SUPPORT_AUDIO)
     html.append ("<li><a href=\"http://sourceforge.net/projects/tinyxml\">TinyXML</a>: zlib/libpng License</li>");
-#if defined (USE_VAMP)
-    html.append ("<li><a href=\"http://vamp-plugins.org\">Vamp plugin SDK</a>: BSD License</li>");
-#endif //defined (USE_VAMP)
 #if defined (USE_TORCH3)
     html.append ("<li><a href=\"http://www.torch.ch\">Torch3</a>: BSD License</li>");
 #endif //defined (USE_TORCH3)
+#if defined (USE_VAMP)
+    html.append ("<li><a href=\"http://vamp-plugins.org\">Vamp plugin SDK</a>: BSD License</li>");
+#endif //defined (USE_VAMP)	
 #if defined (SUPPORT_AUDIO) && defined (USE_YAAFE)
     html.append ("<li><a href=\"http://yaafe.sourceforge.net\">Yet another audio features extraction (Yaafe)</a>: LPGL License</li>");
 #endif //defined (SUPPORT_AUDIO) && defined (USE_YAAFE)

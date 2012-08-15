@@ -1,5 +1,5 @@
 /*
- *  ACAudioFeaturesPlugin.h
+ *  ACAudioSegmentationPlugin.h
  *  MediaCycle
  *
  *  @author Damien Tardieu
@@ -35,9 +35,11 @@
 #ifndef _ACAUDIOSEGMENTATIONPLUGIN_H
 #define	_ACAUDIOSEGMENTATIONPLUGIN_H
 
-#if defined (SUPPORT_AUDIO) and defined (USE_AUDIOFEAT)
+#if defined (SUPPORT_AUDIO)
 
+#if defined (USE_AUDIOFEAT)
 #include <ACAudioFeatures.h>
+#endif
 #include <MediaCycle.h>
 
 #include <iostream>
@@ -59,5 +61,5 @@ private:
 
 arma::icolvec FastBIC(arma::fmat audiofeatures_m, float lambda, int samplerate);
 
-#endif //defined (SUPPORT_AUDIO) and defined (USE_AUDIOFEAT)
+#endif //defined (SUPPORT_AUDIO)
 #endif	/* _ACAUDIOSEGMENTATIONPLUGIN_H */

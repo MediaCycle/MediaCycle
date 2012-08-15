@@ -32,7 +32,7 @@
  *
  */
 
-#if defined (SUPPORT_AUDIO) and defined (USE_AUDIOFEAT)
+#if defined (SUPPORT_AUDIO)
 
 #include "ACAudioSegmentationPlugin.h"
 #include <ACAudio.h>
@@ -103,19 +103,26 @@ std::vector<ACMedia*> ACAudioSegmentationPlugin::segment(ACMediaData* audio_data
 
     switch (method){
     case 0:{ //AudioGarden
+		#if defined (USE_AUDIOFEAT)
         //desc_mf = computeFeature(data, "Energy", theAudio->getSampleRate(), theAudio->getChannels(), theAudio->getNFrames(), 16, 13, 1024, extendSoundLimits);
+		#endif
 		desc_mf = theMedia->getTimedFeatures("Energy");
 		cout << "/////////////////////" << desc_mf->getLength() <<endl;
 		//desc_mf->dump();
         break;
     }
     case 1:{
+		#if defined (USE_AUDIOFEAT)
         //desc_mf = computeFeature(data, "Spectral Flux", theAudio->getSampleRate(), theAudio->getChannels(), theAudio->getNFrames(), 16, 13, 1024*2, extendSoundLimits);
+		#endif
 		desc_mf = theMedia->getTimedFeatures("Spectral Flux");
         break;
     }
     case 2:{ //FASTBIC
-        desc_mf = computeFeature(data, "MFCC", theAudio->getSampleRate(), theAudio->getChannels(), theAudio->getNFrames(), 16, 13, 1024*2, false);
+		#if defined (USE_AUDIOFEAT)
+        //desc_mf = computeFeature(data, "MFCC", theAudio->getSampleRate(), theAudio->getChannels(), theAudio->getNFrames(), 16, 13, 1024*2, false);
+		#endif
+		desc_mf = theMedia->getTimedFeatures("MFCC");
         break;
     }
     default:
@@ -150,21 +157,27 @@ std::vector<ACMedia*> ACAudioSegmentationPlugin::_segment(ACMediaTimedFeature* d
     fmat desc_m;
     switch (method){
     case 0:{ //AudioGarden
+		#if defined (USE_AUDIOFEAT)
         //desc_mf = computeFeature(data, "Energy", theAudio->getSampleRate(), theAudio->getChannels(), theAudio->getNFrames(), 16, 13, 1024, extendSoundLimits);
+		#endif
         desc_v = conv_to<fcolvec>::from(-desc_mf->getValue());
         time_v = desc_mf->getTime();
         peaks_v = findpeaks(desc_v, 100); //ccl, originally: 10
         break;
     }
     case 1:{
+		#if defined (USE_AUDIOFEAT)
         //desc_mf = computeFeature(data, "Spectral Flux", theAudio->getSampleRate(), theAudio->getChannels(), theAudio->getNFrames(), 16, 13, 1024*2, extendSoundLimits);
+		#endif
         desc_v = conv_to<fcolvec>::from(desc_mf->delta()->getValue());
         time_v = desc_mf->getTime();
         peaks_v = findpeaks(desc_v, min((unsigned int) 200, desc_v.n_elem-1)); //200 ccl original:10
         break;
     }
     case 2:{ //FASTBIC
+		#if defined (USE_AUDIOFEAT)
         //desc_mf = computeFeature(data, "MFCC", theAudio->getSampleRate(), theAudio->getChannels(), theAudio->getNFrames(), 16, 13, 1024*2, false);
+		#endif
         peaks_v=FastBIC(desc_mf->getValue(), 2, theAudio->getSampleRate());
         break;
     }
@@ -230,10 +243,7 @@ icolvec FastBIC(fmat audiofeatures_m, float lambda, int samplerate)
     int delta_Ngrow=2*delta_l; // increase of the window when no candidate segmentation is found. Must be a multiple of delta_l
     int delta_Nshift=4*delta_l; // shift of the window when no candidate segmentation is found and window size=Nmax. Must be a multiple of delta_l;
     int delta_Nmargin=2*delta_l; // size of the border windows on which deltaBIC is not computed. Must be a multiple of delta_l
-    
-    
-    
-    
+	
     return segment_v;
 }
-#endif //defined (SUPPORT_AUDIO) and defined (USE_AUDIOFEAT)
+#endif //defined (SUPPORT_AUDIO)

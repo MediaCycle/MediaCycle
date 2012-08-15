@@ -6,7 +6,7 @@ ENDIF()
 add_subdirectory(tree)
 
 # Optional dependencies
-IF(SUPPORT_AUDIO AND USE_AUDIOFEAT)
+IF(SUPPORT_AUDIO)
 	add_subdirectory(cwaves)
 ENDIF()
 IF(SUPPORT_AUDIO AND USE_YAAFE)

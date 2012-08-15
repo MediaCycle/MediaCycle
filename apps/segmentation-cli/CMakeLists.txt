@@ -1,5 +1,5 @@
 SET(TARGET_NAME "segmentation-cli")
-IF (SUPPORT_AUDIO AND USE_AUDIOFEAT AND BUILD_CLIS)
+IF (SUPPORT_AUDIO AND BUILD_CLIS AND (USE_AUDIOFEAT OR USE_YAAFE))
 
 	FILE(GLOB SRC *.cpp *.c)
 	FILE(GLOB HDR *.hpp *.h)
@@ -13,10 +13,14 @@ IF (SUPPORT_AUDIO AND USE_AUDIOFEAT AND BUILD_CLIS)
 
 	ADD_EXECUTABLE(segmentation-cli ${SRC} ${HDR})
 
-	ADD_DEPENDENCIES(segmentation-cli mediacycle armadillo-utils audiofeatures)
-	ADD_DEPENDENCIES(segmentation-cli mc_audio mc_segmentation)
+	ADD_DEPENDENCIES(segmentation-cli mediacycle armadillo-utils  mc_audio mc_segmentation)
+	IF(USE_AUDIOFEAT)
+		ADD_DEPENDENCIES(segmentation-cli audiofeatures)
+		TARGET_LINK_LIBRARIES(segmentation-cli audiofeatures ${SAMPLERATE_LIBRARY})
 
-	TARGET_LINK_LIBRARIES(segmentation-cli mediacycle audiofeatures mc_segmentation ${SNDFILE_LIBRARY} ${SAMPLERATE_LIBRARY})
+	ENDIF()
+	TARGET_LINK_LIBRARIES(segmentation-cli mediacycle mc_segmentation ${SNDFILE_LIBRARY})
+
 
 	MESSAGE("[X] ${TARGET_NAME}")
 ELSE()

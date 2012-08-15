@@ -1,23 +1,27 @@
-FILE(GLOB SRC *.cpp *.c)
-FILE(GLOB HDR *.hpp *.h)
-
 SET(PLUGIN_NAME "segmentation")
 SET(TARGET_NAME "${PLUGIN_PREFIX}${PLUGIN_NAME}")
+
+#FILE(GLOB SRC *.cpp *.c)
+#FILE(GLOB HDR *.hpp *.h)
+SET(SRC "ACBicSegmentationPlugin.cpp;ACSelfSimSegmentationPlugin.cpp;factory.cpp")
+SET(HDR "ACBicSegmentationPlugin.h;ACSelfSimSegmentationPlugin.h")
+IF (SUPPORT_AUDIO AND (USE_AUDIOFEAT OR USE_YAAFE))
+	SET(SRC "${SRC};ACAudioSegmentationPlugin.cpp")
+	SET(HDR "${HDR};ACAudioSegmentationPlugin.h")
+ENDIF()
 
 ADD_LIBRARY(${TARGET_NAME} SHARED ${SRC} ${HDR})
 
 ADD_DEPENDENCIES(${TARGET_NAME} mediacycle fftooura armadillo armadillo-utils)
+TARGET_LINK_LIBRARIES(${TARGET_NAME} mediacycle armadillo-utils fftooura ${ARMADILLO_LIBRARIES})
 IF (SUPPORT_AUDIO AND USE_AUDIOFEAT)
-	ADD_DEPENDENCIES(${TARGET_NAME} mediacycle audiofeatures)
+	ADD_DEPENDENCIES(${TARGET_NAME} audiofeatures)
+	TARGET_LINK_LIBRARIES(${TARGET_NAME} audiofeatures)
 ENDIF()
 
 SET_TARGET_PROPERTIES(${TARGET_NAME} PROPERTIES PREFIX ${PLUGIN_PREFIX})
 SET_TARGET_PROPERTIES(${TARGET_NAME} PROPERTIES OUTPUT_NAME ${PLUGIN_NAME})
 #SET_TARGET_PROPERTIES(${TARGET_NAME} PROPERTIES SUFFIX ${PLUGIN_SUFFIX})
-TARGET_LINK_LIBRARIES(${TARGET_NAME} mediacycle armadillo-utils fftooura ${ARMADILLO_LIBRARIES})
-IF (SUPPORT_AUDIO AND USE_AUDIOFEAT)
-	TARGET_LINK_LIBRARIES(${TARGET_NAME} audiofeatures)
-ENDIF()
 
 #CF we need to be able to display images (library cover) for any media type
 #IF(SUPPORT_3DMODEL OR SUPPORT_IMAGE OR SUPPORT_VIDEO)

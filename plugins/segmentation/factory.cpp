@@ -32,7 +32,7 @@ extern "C" std::vector<std::string> list() {    //returns a string vector contai
         listPlugin.push_back("ACAudioSegmentationPlugin");
 	#endif
 	listPlugin.push_back("ACBicSegmentationPlugin");
-        listPlugin.push_back("ACSelfSimSegmentationPlugin");
+	listPlugin.push_back("ACSelfSimSegmentationPlugin");
 	//listPlugin.push_back("...");
     return listPlugin;
 }
