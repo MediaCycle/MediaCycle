@@ -1730,11 +1730,11 @@ int ACAudioFeedback::createSourceWithPosition(int loop_id, float x, float y, flo
 			local_bpm = (local_feature)[0];
 		}
 	}
-        if (local_bpm<1) { // was 60
-                local_bpm = 1;
+        if (local_bpm<60) { // CF logically it could be just > 0
+                local_bpm = 60;
 	}
-        if (local_bpm>240) { // was 180
-                local_bpm = 240;
+        if (local_bpm>180) { // CF it could be greater (for comb filter-like sounds)
+                local_bpm = 180;
 	}
 	local_key = 0;
         local_feature = 0;
