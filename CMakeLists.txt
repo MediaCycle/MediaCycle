@@ -694,21 +694,27 @@ ENDIF(SUPPORT_AUDIO)
 
 # OpenCV
 IF(SUPPORT_VIDEO OR SUPPORT_IMAGE)
-	#IF(SUPPORT_VIDEO)
-	#    SET(OPENCV_REQUIRED_VERSION "2.3.0")
-	#ELSE()
-	   SET(OPENCV_REQUIRED_VERSION "2.0.0")
-	#ENDIF()
+	IF(SUPPORT_VIDEO)
+	    SET(OpenCV_MIN_VERSION "2.3.1")
+	ELSE()
+	   SET(OpenCV_MIN_VERSION "2.0.0")
+	ENDIF()
 
 	IF( APPLE_IOS_DEV OR APPLE_IOS_SIM OR APPLE_IOS_XCODE )
-		FIND_PACKAGE ( OpenCV ${OPENCV_REQUIRED_VERSION} REQUIRED COMPONENTS core contrib features2d imgproc legacy objdetect video) 
+		FIND_PACKAGE ( OpenCV REQUIRED COMPONENTS core contrib features2d imgproc legacy objdetect video) 
 	ELSE()
-		FIND_PACKAGE ( OpenCV ${OPENCV_REQUIRED_VERSION} REQUIRED COMPONENTS core contrib features2d imgproc legacy objdetect video highgui)
+		FIND_PACKAGE ( OpenCV REQUIRED COMPONENTS core contrib features2d imgproc legacy objdetect video highgui)
 		# other components (at v. 2.2.0): calib3d ffmpeg? flann gpu haartraining ml traincascade
 		# other components (at v. 2.3.0): androidcamera calib3d flann gpu haartraining ml stitching traincascade ts
 		# other components (at v. 2.4.2): androidcamera calib3d flann gpu java ml nonfree photo stitching ts videostab world
 	ENDIF()
 	IF ( OpenCV_FOUND )
+		include(CMakeCompareVersionStrings)
+		COMPARE_VERSION_STRINGS("${OpenCV_VERSION}" "${OpenCV_MIN_VERSION}" OpenCV_VERSION_PASS)
+		IF(${OpenCV_VERSION_PASS} LESS 0)
+			MESSAGE(FATAL_ERROR "OpenCV version (${OpenCV_VERSION} is present, while ${OpenCV_MIN_VERSION}+ is required")
+		ENDIF()
+
 		SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUSE_OPENCV")
 		SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DUSE_OPENCV")
 
@@ -720,7 +726,7 @@ IF(SUPPORT_VIDEO OR SUPPORT_IMAGE)
 		ELSE()
 			SET(OpenCV_LIBRARIES ${OpenCV_LIBS})
 		ENDIF()
-		MESSAGE("Found OpenCV libraries: ${OpenCV_LIBRARIES}")
+		MESSAGE("Found OpenCV ${OpenCV_VERSION} libraries: ${OpenCV_LIBRARIES}")
 		#MESSAGE( "OpenCV link directories: ${OpenCV_LIB_DIRECTORY}")
 		foreach(OpenCV_LIB_DIRECTORY ${OpenCV_LIB_DIRS})
 			ADD_LINKED_DIRECTORY(${OpenCV_LIB_DIRECTORY})
