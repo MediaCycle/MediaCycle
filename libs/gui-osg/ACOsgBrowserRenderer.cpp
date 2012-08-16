@@ -670,7 +670,7 @@ bool ACOsgBrowserRenderer::addNodes(int _first, int _last){
                     renderer->setFont(font);
                     renderer->changeSetting(this->setting);
                     media_cycle_node = media_cycle->getMediaNode(i);
-                    node_index = node_renderer[i]->getNodeIndex();
+                    node_index = renderer->getNodeIndex();
                     media_index = node_index;
                     media_cycle_filename = media_cycle->getMediaFileName(i);
                     //renderer->setMediaIndex(media_index);
