@@ -709,9 +709,7 @@ IF(SUPPORT_VIDEO OR SUPPORT_IMAGE)
 		# other components (at v. 2.4.2): androidcamera calib3d flann gpu java ml nonfree photo stitching ts videostab world
 	ENDIF()
 	IF ( OpenCV_FOUND )
-		include(CMakeCompareVersionStrings)
-		COMPARE_VERSION_STRINGS("${OpenCV_VERSION}" "${OpenCV_MIN_VERSION}" OpenCV_VERSION_PASS)
-		IF(${OpenCV_VERSION_PASS} LESS 0)
+		IF(${OpenCV_VERSION} VERSION_LESS ${OpenCV_MIN_VERSION})
 			MESSAGE(FATAL_ERROR "OpenCV version (${OpenCV_VERSION} is present, while ${OpenCV_MIN_VERSION}+ is required")
 		ENDIF()
 
