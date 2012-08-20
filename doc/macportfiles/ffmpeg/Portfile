@@ -8,7 +8,7 @@ PortGroup muniversal 1.0
 name            ffmpeg
 conflicts       ffmpeg-devel
 epoch           1
-version         0.8.5
+version         0.11.1
 license         nonfree GPL-2+ LGPL-2.1+
 categories      multimedia
 maintainers     devans openmaintainer
@@ -50,12 +50,8 @@ master_sites    http://www.ffmpeg.org/releases/
 
 use_bzip2       yes
 
-# 0.8.2
-#checksums       sha1    984f731aced1380840cd8e3576e8db0c2fd5537f \
-#                rmd160  d23f8a45a4f49f938e1553d122852a2ac3b50d76
-
-checksums           rmd160  16659c26a5158aeee454ce555562ca059af6fa04 \
-                    sha256  f63df1ee08c2c64a4b3f106a88dd055b9f19e3457f1d7c23d8b8169e0a0ef115
+checksums           rmd160  f6eab5ffc87b98ca24bea7f83e85ff6a1e2e8711 \
+                    sha256  b01ddfb6352c84810879988f43172c5f7be555697edb929625845c7bb953fa96
 
 depends_build   port:pkgconfig \
                 port:gmake \
@@ -92,25 +88,14 @@ if {${configure.compiler} == "llvm-gcc-4.2"} {
 	configure.compiler clang
 }
 
+#/configure --prefix=/opt/local --mandir=/opt/local/share/man --enable-shared --enable-pthreads --cc=/usr/bin/gcc-4.2 --arch=i386 --enable-yasm --disable-asm --disable-mmx --disable-mmx2 --disable-sse --disable-ssse3 --disable-amd3dnow --disable-amd3dnowext
 configure.cflags-append    -DHAVE_LRINTF ${configure.cppflags}
 configure.args \
-        --enable-gpl \
-        --enable-postproc \
-        --enable-swscale --enable-avfilter \
-        --enable-libmp3lame \
-        --enable-libvorbis \
-        --enable-libtheora \
-        --enable-libdirac --enable-libschroedinger \
-        --enable-libfaac \
-        --enable-libxvid \
-        --enable-libx264 \
-        --enable-libvpx \
-        --enable-libspeex \
-        --enable-nonfree \
         --mandir=${prefix}/share/man \
         --enable-shared --enable-pthreads \
         --disable-indevs \
-        --cc=${configure.cc}
+        --cc=${configure.cc} \
+        --disable-doc
 
 #add --enable-libopenjpeg when problems with openjpeg.h are resolved
 
@@ -122,7 +107,7 @@ test.run        yes
 
 post-destroot {
     file mkdir ${destroot}${prefix}/share/doc/${name}
-    file copy ${worksrcpath}/doc/TODO ${destroot}${prefix}/share/doc/${name}
+ #   file copy ${worksrcpath}/doc/TODO ${destroot}${prefix}/share/doc/${name}
     foreach f [glob ${worksrcpath}/doc/*.txt ${worksrcpath}/doc/*.html] {
         file copy $f ${destroot}${prefix}/share/doc/${name}
     }
@@ -156,9 +141,9 @@ if {[variant_isset universal]} {
     }
 }
 
-variant no_mmx description {disable all x86 asm optimizations} {
-    configure.args-append --disable-mmx --disable-mmx2 --disable-sse --disable-ssse3 --disable-amd3dnow --disable-amd3dnowext
-}
+#variant no_mmx description {disable all x86 asm optimizations} {
+    configure.args-append --disable-asm --disable-mmx --disable-mmx2 --disable-sse --disable-ssse3 --disable-amd3dnow --disable-amd3dnowext
+#}
 
 variant no_gpl description {disallow use of GPL code, license will be LGPL} {
     configure.args-delete   --enable-gpl \
