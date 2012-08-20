@@ -700,6 +700,8 @@ IF(SUPPORT_VIDEO OR SUPPORT_IMAGE)
 	   SET(OpenCV_MIN_VERSION "2.0.0")
 	ENDIF()
 
+	find_path(OpenCV_DIR NAMES opencv-config.cmake OpenCVConfig.cmake PATH_SUFFIXES lib/cmake)
+
 	IF( APPLE_IOS_DEV OR APPLE_IOS_SIM OR APPLE_IOS_XCODE )
 		FIND_PACKAGE ( OpenCV REQUIRED COMPONENTS core contrib features2d imgproc legacy objdetect video) 
 	ELSE()
