@@ -44,7 +44,6 @@
 #include <math.h>
 #include <algorithm>
 #include <vector>
-#include <sys/time.h>
 #include <pthread.h>
 
 #include <string>
@@ -62,23 +61,21 @@ inline float ACRandom() { return ((float)rand()) / (float)((1LL<<31)-1L); }
 
 using namespace std;
 
-extern double getTime();
-
 enum ACBrowserState {
     AC_IDLE=0,
     AC_CHANGING=1
-};
-
-enum ACBrowserLayout {
-    AC_LAYOUT_TYPE_NONE=0,
-    AC_LAYOUT_TYPE_NODELINK=1,
-    AC_LAYOUT_TYPE_CONSTELLATION=2//CF: for egs. to link segments from a given media together... but what if we want to combine it with a node link layout?s
 };
 
 enum ACBrowserMode {
     AC_MODE_NONE=0,
     AC_MODE_CLUSTERS=1,
     AC_MODE_NEIGHBORS=2
+};
+
+enum ACBrowserLayout {
+    AC_LAYOUT_TYPE_NONE=0,
+    AC_LAYOUT_TYPE_NODELINK=1,
+    AC_LAYOUT_TYPE_CONSTELLATION=2//CF: for egs. to link segments from a given media together... but what if we want to combine it with a node link layout?s
 };
 
 typedef std::map<std::string, ACBrowserMode > stringToBrowserModeConverter;
@@ -219,7 +216,7 @@ public:
     int getNumberOfDisplayedNodes();
     void setNumberOfDisplayedNodes(int nd);
     int getNumberOfMediaNodes();
-    void initializeNodes(ACBrowserMode _mode = AC_MODE_CLUSTERS);
+    bool initializeNode(long mediaId, ACBrowserMode _mode = AC_MODE_CLUSTERS);
 
     // == Pointers
     int getNumberOfPointers();

@@ -74,6 +74,10 @@ ACMediaLibrary::ACMediaLibrary() {
     mPreProcessPlugin=0;
     mPreProcessInfo=0;
     mReaderPlugin=0;
+    files_processed = 0;
+    files_to_import = 0;
+    metadata = ACMediaLibraryMetadata();
+    curator = ACUserProfile();
 }
 
 ACMediaLibrary::ACMediaLibrary(ACMediaType aMediaType) {
@@ -86,6 +90,10 @@ ACMediaLibrary::ACMediaLibrary(ACMediaType aMediaType) {
     //// Register all formats and codecs from FFmpeg
     //av_register_all();
     //#endif //defined(SUPPORT_VIDEO) and defined(USE_FFMPEG)
+    files_processed = 0;
+    files_to_import = 0;
+    metadata = ACMediaLibraryMetadata();
+    curator = ACUserProfile();
 }
 
 ACMediaLibrary::~ACMediaLibrary(){
@@ -133,6 +141,8 @@ void ACMediaLibrary::cleanLibrary() {
             mPreProcessPlugin->freePreProcessInfo(mPreProcessInfo);
         mPreProcessInfo=0;
     }
+    total_ext_check_time = 0;
+    checked_files = 0;
 }
 
 std::vector<std::string> ACMediaLibrary::getExtensionsFromMediaType(ACMediaType media_type)
@@ -156,7 +166,10 @@ std::vector<std::string> ACMediaLibrary::getExtensionsFromMediaType(ACMediaType 
 //	> 0 if no error (returns the number of files found)
 int ACMediaLibrary::importDirectory(std::string _path, int _recursive, ACPluginManager *acpl, bool forward_order, bool doSegment, bool _save_timed_feat){ //, TiXmlElement* _medias) {
     std::vector<string> filenames;
+    total_ext_check_time = 0;
+    checked_files = 0;
     int nf = scanDirectory(_path, _recursive, filenames);
+    std::cout << "ACMediaLibrary::scanDirectory: took " << total_ext_check_time << "s to check file extensions for " << checked_files << " files of which " << filenames.size() << " are of chosen media type." << std::endl;
 
     if (nf < 0) {
         cerr << " <ACMediaLibrary::importDirectory> Problem importing directory: " << _path << endl;
@@ -172,9 +185,12 @@ int ACMediaLibrary::importDirectory(std::string _path, int _recursive, ACPluginM
     // they could also segment on-the-fly while calculating features (as in audioSegmentationPlugin)
     if (doSegment) _save_timed_feat = true;
 
+    files_to_import += filenames.size();
+
     for (unsigned int i=0; i<filenames.size(); i++){
+        files_processed++;
         int index = forward_order ? i : filenames.size()-1-i;//CF if reverse order (not forward_order), segments in subdirs are added to the library after the source recording
-        this->importFile(filenames[index], acpl, doSegment, _save_timed_feat); //, _medias );
+        int media_id = this->importFile(filenames[index], acpl, doSegment, _save_timed_feat); //, _medias );
     }
 
     std::cout << "Library size : " << this->getSize() << std::endl;
@@ -188,18 +204,33 @@ int ACMediaLibrary::importDirectory(std::string _path, int _recursive, ACPluginM
 }
 
 
+int ACMediaLibrary::importFiles(std::vector<std::string> filenames, ACPluginManager *acpl, bool doSegment, bool _save_timed_feat){ //, TiXmlElement* _medias) {
+    total_ext_check_time = 0;
+    checked_files = 0;
+
+    files_to_import += filenames.size();
+    for (unsigned int i=0; i<filenames.size(); i++){
+        int media_id = this->importFile(filenames[i], acpl, doSegment, _save_timed_feat); //, _medias );
+    }
+    return this->getSize();
+}
+
 // import single file :
 // computes features (= "import" media) using FEATURES plugins available in the plugin Manager
 // doSegment = true : uses SEGMENTATION plugins on-the-fly
 // save_timedfeat = true : save the timedFeatures on the disk
+// returns the media id of the imported file
 int ACMediaLibrary::importFile(std::string _filename, ACPluginManager *acpl, bool doSegment, bool _save_timed_feat){ //, TiXmlElement* _medias) {
+    // Even if the file can't be imported, we have to notify the progress the file has been processed
+    files_processed++;
+
     // check if file has already been imported.
     // XS TODO: isn't this going to be too heavy when library size gets large ?
     // may be add a flag to (in)activate the test ?
     int is_present = this->getMediaIndex(_filename);
     if (is_present >= 0) {
         cout << "<ACMediaLibrary::importFile> skipping "<< _filename << " : media already present at position " << is_present << endl;
-        return 0;
+        return -1;
     }
 
     string extension = fs::extension(_filename);
@@ -214,19 +245,21 @@ int ACMediaLibrary::importFile(std::string _filename, ACPluginManager *acpl, boo
         if (media==0)
             media=new ACMediaDocument();
         if (media==0)
-            return 0;
+            return -1;
         else {
             int nbMedia = media->import(_filename, this->getAvailableMediaID(), acpl);
-            if (nbMedia<=0)
-                return 0;
+            if (nbMedia == 0)
+                return -1;
             this->addMedia(media);
             ACMediaContainer medias = (static_cast<ACMediaDocument*> (media))->getContainer();
             ACMediaContainer::iterator iter;
             for ( iter=medias.begin() ; iter!=medias.end(); ++iter ){
                 this->addMedia(iter->second);
+                iter->second->setParentId(media->getId());
+                //files_processed++;
             }
             this->setActiveMediaType(((ACMediaDocument*)media)->getActiveMediaKey(), acpl);
-            return 1;
+            return media->getId();
         }
     }
 #endif	
@@ -240,12 +273,12 @@ int ACMediaLibrary::importFile(std::string _filename, ACPluginManager *acpl, boo
         cout << "<ACMediaLibrary::importFile> other media type, skipping " << _filename << " ... " << endl;
         cout << "-> media_type " << media_type << " ... " << endl;
         cout << "-> fileMediaType " << fileMediaType << " ... " << endl;
-        return 0;
+        return -1;
     }
 
     if (media == 0) {
         cout << "<ACMediaLibrary::importFile> extension unknown, skipping " << _filename << " ... " << endl;
-        return 0;
+        return -1;
     }
     // import has to be done before segmentation to have proper id.
     else if (media->import(_filename, this->getAvailableMediaID(), acpl, _save_timed_feat)){
@@ -262,6 +295,8 @@ int ACMediaLibrary::importFile(std::string _filename, ACPluginManager *acpl, boo
             //			else{
             std::vector<ACMedia*> mediaSegments;
             mediaSegments = media->getAllSegments();
+            files_to_import++; // to avoid stopping the progress when the last media of the pile is added, before its segments
+            std::cout << "ACMediaLibrary::importFile found " << mediaSegments.size() << " segments." << std::endl;
             for (unsigned int i = 0; i < mediaSegments.size(); i++){
                 // for the segments we do not save (again) timedFeatures
                 // XS TODO but we should not re-calculate them either !=> TR I put the mtf files names of the media parent in all his segments
@@ -272,6 +307,7 @@ int ACMediaLibrary::importFile(std::string _filename, ACPluginManager *acpl, boo
                 }
 
             }
+            files_to_import--;
             //			}
 
         }
@@ -279,7 +315,7 @@ int ACMediaLibrary::importFile(std::string _filename, ACPluginManager *acpl, boo
     else {
         cerr << "<ACMediaLibrary::importFile> problem importing file : " << _filename << " ... " << endl;
         failed_imports.push_back(_filename);
-        return 0;
+        return -1;
 
     }
     // XS TODO this was an attempt to save on-the-fly each media
@@ -290,15 +326,23 @@ int ACMediaLibrary::importFile(std::string _filename, ACPluginManager *acpl, boo
 
     // deleting the data that have been used for analysis, keep media small.
     media->deleteData();
-    return 1;
+
+    if(files_processed == files_to_import){
+        files_processed = files_to_import = 0;
+    }
+
+    return media->getId();
 }
 
 int ACMediaLibrary::scanDirectories(std::vector<string> _paths, int _recursive, std::vector<string>& filenames) {
     int cnt = 0;
+    total_ext_check_time = 0;
+    checked_files = 0;
     for (unsigned int i=0; i<_paths.size(); i++) {
         int c = scanDirectory(_paths[i], _recursive, filenames) ; // could be -1 if error
         if (c > 0) cnt += c;
     }
+    std::cout << "ACMediaLibrary::scanDirectory: took " << total_ext_check_time << "s to check file extensions for " << checked_files << " files of which " << filenames.size() << " are of chosen media type." << std::endl;
     return cnt;
 }
 
@@ -312,7 +356,6 @@ int ACMediaLibrary::scanDirectories(std::vector<string> _paths, int _recursive, 
 int ACMediaLibrary::scanDirectory(std::string _path, int _recursive, std::vector<string>& filenames) {
 
     fs::path full_path( fs::initial_path<fs::path>() );
-
     // check boost version to adapt for change in boost api	(for boost > 1.46)
 #if BOOST_FILESYSTEM_VERSION >= 3
     full_path = fs::system_complete( fs::path( _path) );
@@ -358,7 +401,13 @@ int ACMediaLibrary::scanDirectory(std::string _path, int _recursive, std::vector
     else {
         // encounter a file in the directory
         // put it in the vector of files to be analyzed
-        filenames.push_back(_path);
+        string extension = fs::extension(_path);
+        double single_pre_check_time = getTime();
+        checked_files++;
+        if( (this->media_type == MEDIA_TYPE_MIXED && extension == ".xml") || this->media_type == ACMediaFactory::getInstance().getMediaTypeFromExtension(extension)){
+            total_ext_check_time += getTime() - single_pre_check_time;
+            filenames.push_back(_path);
+        }
     }
 
     //XS TODO : return filenames.size()
@@ -503,7 +552,11 @@ int ACMediaLibrary::openXMLLibrary(std::string _path, bool aInitLib){
     // XS TODO ? make rootHandle a pointer ?
     TiXmlHandle rootHandle = docHandle.FirstChildElement( "MediaCycle" );
     try {
-        this->openCoreXMLLibrary(rootHandle);
+        TiXmlElement* media_element = this->openCoreXMLLibrary(rootHandle);
+        while(  media_element != 0 ){
+            media_element = this->openNextMediaFromXMLLibrary(media_element);
+        }
+
     }
     catch (const exception& e) {
         cout << e.what( ) << endl;
@@ -512,7 +565,7 @@ int ACMediaLibrary::openXMLLibrary(std::string _path, bool aInitLib){
     return EXIT_SUCCESS;
 }
 
-int ACMediaLibrary::openCoreXMLLibrary(TiXmlHandle _rootHandle){
+TiXmlElement* ACMediaLibrary::openCoreXMLLibrary(TiXmlHandle _rootHandle){
 
     // Library Metadata
     TiXmlText* nLibraryMetadata=_rootHandle.FirstChild( "LibraryMetadata" ).FirstChild().Text();
@@ -535,15 +588,15 @@ int ACMediaLibrary::openCoreXMLLibrary(TiXmlHandle _rootHandle){
         TiXmlElement* nLibraryCuratorNode=_rootHandle.FirstChild( "LibraryMetadata" ).FirstChild( "Curator" ).Element();
         if(nLibraryCuratorNode){
             if(nLibraryCuratorNode->Attribute("Name"))
-                this->metadata.curator.name = nLibraryCuratorNode->Attribute("Name");
+                this->curator.name = nLibraryCuratorNode->Attribute("Name");
             if(nLibraryCuratorNode->Attribute("Email"))
-                this->metadata.curator.email = nLibraryCuratorNode->Attribute("Email");
+                this->curator.email = nLibraryCuratorNode->Attribute("Email");
             if(nLibraryCuratorNode->Attribute("Website"))
-                this->metadata.curator.website = nLibraryCuratorNode->Attribute("Website");
+                this->curator.website = nLibraryCuratorNode->Attribute("Website");
             if(nLibraryCuratorNode->Attribute("Location"))
-                this->metadata.curator.location = nLibraryCuratorNode->Attribute("Location");
+                this->curator.location = nLibraryCuratorNode->Attribute("Location");
             if(nLibraryCuratorNode->Attribute("Picture"))
-                this->metadata.curator.picture = nLibraryCuratorNode->Attribute("Picture");
+                this->curator.picture = nLibraryCuratorNode->Attribute("Picture");
         }
     }
 
@@ -558,20 +611,26 @@ int ACMediaLibrary::openCoreXMLLibrary(TiXmlHandle _rootHandle){
         tmp << nof;
         tmp >> n_medias;
     }
+    files_to_import = n_medias;
     TiXmlElement* pMediaNode=_rootHandle.FirstChild( "Medias" ).FirstChild().Element();
 #ifdef SUPPORT_MULTIMEDIA
     if (!pMediaNode)
         pMediaNode=_rootHandle.FirstChild( "MediaDocuments" ).FirstChild().Element();
 #endif
-    if (!pMediaNode)
+    return pMediaNode;
+}
+
+// has to be called right after ACMediaLibrary::openCoreXMLLibrary using its return TiXmlElement* is input
+TiXmlElement* ACMediaLibrary::openNextMediaFromXMLLibrary(TiXmlElement* pMediaNode){
+    /*if (!pMediaNode)
         throw runtime_error("corrupted XML file, no medias");
     else {
         // loop over all medias
-        int cnt=0;
-        for( pMediaNode; pMediaNode; pMediaNode=pMediaNode->NextSiblingElement()) {
+        for( pMediaNode; pMediaNode; pMediaNode=pMediaNode->NextSiblingElement()) {*/
             ACMediaType typ;
             int typi = -1;
             pMediaNode->QueryIntAttribute("MediaType", &typi);
+            files_processed++;
             if (typi < 0)
                 throw runtime_error("corrupted XML file, wrong media type");
             else {
@@ -626,17 +685,23 @@ int ACMediaLibrary::openCoreXMLLibrary(TiXmlHandle _rootHandle){
                     }
                 }
 #endif
-                cnt++;
+
             }
-        }
+            pMediaNode=pMediaNode->NextSiblingElement();
+
+        /*}
         // consistency check (XS TODO quits the app -> exceptions )
-        if (cnt != n_medias){
+        /*if (cnt != n_medias){
             cerr << "<ACMediaLibrary::openXMLLibrary>: inconsistent number of media"<< endl;
             cerr << "n_medias = " << n_medias << "; cnt = " << cnt << endl;
             return -1;
-        }
-    }
-    return n_medias;
+        }*/
+    /*}
+    return n_medias;*/
+            if(files_processed == files_to_import){
+                files_processed = files_to_import = 0;
+            }
+    return pMediaNode;
 }
 
 // C++ version
@@ -707,11 +772,11 @@ int ACMediaLibrary::saveCoreXMLLibrary( TiXmlElement* _MC_e_root, TiXmlElement* 
 
     TiXmlElement* MC_e_library_curator = new TiXmlElement("Curator");
     MC_e_library_metadata->LinkEndChild(  MC_e_library_curator );
-    MC_e_library_curator->SetAttribute("Name", this->metadata.curator.name);
-    MC_e_library_curator->SetAttribute("Email", this->metadata.curator.email);
-    MC_e_library_curator->SetAttribute("Website", this->metadata.curator.website);
-    MC_e_library_curator->SetAttribute("Location", this->metadata.curator.location);
-    MC_e_library_curator->SetAttribute("Picture", this->metadata.curator.picture);
+    MC_e_library_curator->SetAttribute("Name", this->curator.name);
+    MC_e_library_curator->SetAttribute("Email", this->curator.email);
+    MC_e_library_curator->SetAttribute("Website", this->curator.website);
+    MC_e_library_curator->SetAttribute("Location", this->curator.location);
+    MC_e_library_curator->SetAttribute("Picture", this->curator.picture);
 
     // "medias and features"
     TiXmlElement* MC_e_number_of_medias = new TiXmlElement( "NumberOfMedia" );
@@ -811,7 +876,7 @@ int ACMediaLibrary::addMedia(ACMedia *aMedia) {
             this->incrementMediaID();
             media_library[mediaID] = aMedia;
             aMedia->setId(mediaID);
-            return 0;
+            return mediaID;
         } else {
             return -1;
         }

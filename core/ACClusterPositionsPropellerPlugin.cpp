@@ -38,10 +38,14 @@
 
 static double compute_distance(vector<ACMediaFeatures*> &obj1, vector<ACMediaFeatures*> &obj2, const vector<float> &weights, bool inverse_features)
 {
-    assert(obj1.size() == obj2.size() && obj1.size() == weights.size());
+    //assert(obj1.size() == obj2.size() && obj1.size() == weights.size());
     int feature_count = obj1.size();
 
     double dis = 0.0;
+    if( (obj1.size() != obj2.size()) || (obj1.size() != weights.size())){
+        //std::cerr << "ACClusterPositionsPropellerPlugin::compute_distance: obj1.size() " << obj1.size() << " obj2.size() " << obj2.size() << " weights.size() " << weights.size() << std::endl;
+        return dis;
+    }
 
     for (int f=0; f<feature_count; f++) {
         //		ACEuclideanDistance* E = new ACEuclideanDistance (obj1[f], obj2[f]);

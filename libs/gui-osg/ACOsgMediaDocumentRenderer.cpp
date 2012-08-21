@@ -70,7 +70,7 @@ ACOsgMediaDocumentRenderer::~ACOsgMediaDocumentRenderer() {
         entry_geode=0;
     }
 
-    ACOsgMediaRenderers::iterator render_iter = media_renderers.end();
+    ACOsgMediaDocumentRenderers::iterator render_iter = media_renderers.end();
     for ( render_iter=media_renderers.begin() ; render_iter!=media_renderers.end(); ++render_iter ){
         delete (*render_iter);
     }
@@ -119,8 +119,8 @@ void ACOsgMediaDocumentRenderer::prepareNodes() {
         media_node->addChild(entry_geode);
     }
 
-    if (!metadata_geode)
-        metadataGeode();
+    //if (!metadata_geode)
+    //    metadataGeode();
 
     //ACMediaContainer medias = (static_cast<ACMediaDocument*> (media_cycle->getLibrary()->getMedia(media_index)))->getMedias();
     ACMediaContainer medias = (static_cast<ACMediaDocument*> (media))->getContainer();
@@ -131,11 +131,11 @@ void ACOsgMediaDocumentRenderer::prepareNodes() {
 	
         bool renderer_added = true;
         switch (iter->second->getType()) {
-        /*			case MEDIA_TYPE_AUDIO:
+                    case MEDIA_TYPE_AUDIO:
     #if defined (SUPPORT_AUDIO)
     media_renderers.push_back(new ACOsgAudioRenderer());
     #endif //defined (SUPPORT_AUDIO)
-    break;*/
+    break;
         case MEDIA_TYPE_IMAGE:
 #if defined (SUPPORT_IMAGE)
             media_renderers.push_back(new ACOsgImageRenderer());
@@ -281,7 +281,7 @@ void ACOsgMediaDocumentRenderer::updateNodes(double ratio) {
         media_node->setMatrix(T);
 #endif
 
-        ACOsgMediaRenderers::iterator render_iter = media_renderers.end();
+        ACOsgMediaDocumentRenderers::iterator render_iter = media_renderers.end();
         for ( render_iter=media_renderers.begin() ; render_iter!=media_renderers.end(); ++render_iter ){
             (*render_iter)->updateNodes();
 #ifdef AUTO_TRANSFORM

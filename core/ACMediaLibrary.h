@@ -59,8 +59,7 @@ struct ACUserProfile {
 
 struct ACMediaLibraryMetadata {
     std::string title,author,year,publisher,license,website,cover;
-    ACUserProfile curator;
-    ACMediaLibraryMetadata() : title(""),author(""),curator(ACUserProfile()),year(""),publisher(""),license(""),website(""),cover("") {}
+    ACMediaLibraryMetadata() : title(""),author(""),year(""),publisher(""),license(""),website(""),cover("") {}
 };
 
 class ACMediaLibrary {
@@ -71,6 +70,7 @@ protected:
     ACMediaType media_type;
     //std::string title,author,curator,year,publisher,license,website,cover;
     ACMediaLibraryMetadata metadata;
+    ACUserProfile curator;
     ACMedias media_library;
     std::vector< std::vector<double> > mean_features, stdev_features;
     //std::map< long,std::vector<double> > mean_features, stdev_features;
@@ -102,11 +102,11 @@ public:
     void setLicense(std::string _license){this->metadata.license=_license;}
     void setWebsite(std::string _website){this->metadata.website=_website;}
     void setCover(std::string _cover){this->metadata.cover=_cover;}
-    void setCuratorName(std::string _curator){this->metadata.curator.name=_curator;}
-    void setCuratorEmail(std::string _curator){this->metadata.curator.email=_curator;}
-    void setCuratorWebsite(std::string _curator){this->metadata.curator.website=_curator;}
-    void setCuratorPicture(std::string _curator){this->metadata.curator.picture=_curator;}
-    void setCuratorLocation(std::string _curator){this->metadata.curator.location=_curator;}
+    void setCuratorName(std::string _curator){this->curator.name=_curator;}
+    void setCuratorEmail(std::string _curator){this->curator.email=_curator;}
+    void setCuratorWebsite(std::string _curator){this->curator.website=_curator;}
+    void setCuratorPicture(std::string _curator){this->curator.picture=_curator;}
+    void setCuratorLocation(std::string _curator){this->curator.location=_curator;}
     std::string getTitle(){return this->metadata.title;}
     std::string getAuthor(){return this->metadata.author;}
     std::string getYear(){return this->metadata.year;}
@@ -114,12 +114,12 @@ public:
     std::string getLicense(){return this->metadata.license;}
     std::string getWebsite(){return this->metadata.website;}
     std::string getCover(){return this->metadata.cover;}
-    ACUserProfile getCurator(){return this->metadata.curator;}
-    std::string getCuratorName(){return this->metadata.curator.name;}
-    std::string getCuratorEmail(){return this->metadata.curator.email;}
-    std::string getCuratorWebsite(){return this->metadata.curator.website;}
-    std::string getCuratorLocation(){return this->metadata.curator.location;}
-    std::string getCuratorPicture(){return this->metadata.curator.picture;}
+    ACUserProfile getCurator(){return this->curator;}
+    std::string getCuratorName(){return this->curator.name;}
+    std::string getCuratorEmail(){return this->curator.email;}
+    std::string getCuratorWebsite(){return this->curator.website;}
+    std::string getCuratorLocation(){return this->curator.location;}
+    std::string getCuratorPicture(){return this->curator.picture;}
 
     //std::vector<ACMedia*> getAllMedia() {return media_library;};
     ACMedias getAllMedia() {return media_library;}
@@ -151,8 +151,9 @@ public:
     //std::map< long,std::vector<double> > getStdevFeatures() {return stdev_features;};
 
     int importDirectory(std::string _path, int recursive,  ACPluginManager *acpl=0, bool forward_order=true, bool doSegment=false, bool _save_timed_feat=false); //, TiXmlElement* _medias = 0);
+    // returns the media id of the imported file
+    int importFiles(std::vector<std::string> _filenames, ACPluginManager *acpl=0, bool doSegment=false, bool _save_timed_feat = false); //, TiXmlElement* _medias = 0);
     int importFile(std::string _filename, ACPluginManager *acpl=0, bool doSegment=false, bool _save_timed_feat = false); //, TiXmlElement* _medias = 0);
-
     // I/O (C++ version; plain C version discontinued sep 2010)
     int setPath(std::string path);
     std::string getPath() { return media_path; };
@@ -164,7 +165,8 @@ public:
     int saveMCSLLibrary(std::string _path);//CF 31/05/2010 temporary MediaCycle Segmented Library (MCSL) for AudioGarden, adding a parentID for segments to the initial ACL, awaiting approval
 
     int openXMLLibrary(std::string _path, bool aInitLib=false);
-    int openCoreXMLLibrary(TiXmlHandle _rootHandle);
+    TiXmlElement* openCoreXMLLibrary(TiXmlHandle _rootHandle);
+    TiXmlElement* openNextMediaFromXMLLibrary(TiXmlElement* pMediaNode);
     int saveXMLLibrary(std::string _path);
     int saveCoreXMLLibrary( TiXmlElement* _MC_e_root, TiXmlElement* _MC_e_medias);
 
@@ -188,6 +190,8 @@ private:
     void deleteAllMedia();
     void cleanStats();
     int scanDirectory(std::string _path, int _recursive, std::vector<std::string>& filenames);
+    double total_ext_check_time;
+    int checked_files;
     void incrementMediaID(); // increment the media id of the newest media
     int getAvailableMediaID(){return mediaID;}
     //void setMediaID(int _id){mediaID=_id;} // XS TODO add checks ?
@@ -195,7 +199,11 @@ private:
     //	#if defined(SUPPORT_VIDEO)
     //		int testFFMPEG(std::string _filename);
     //	#endif //defined (SUPPORT_IMAGE OR SUPPORT_VIDEO)
-
+    int files_to_import;
+    int files_processed;
+public:
+    int getNumberOfFilesToImport(){return files_to_import;}
+    int getNumberOfFilesProcessed(){return files_processed;}
 };
 
 #endif // ACMEDIALIBRARY_H

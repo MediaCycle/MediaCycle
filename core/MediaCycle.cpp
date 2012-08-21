@@ -36,6 +36,15 @@
 #include <omp.h>
 #endif
 
+#if defined (SUPPORT_MULTIMEDIA)
+#include<ACMediaDocument.h>
+#endif
+
+#include "boost/filesystem.hpp"   // includes all needed Boost.Filesystem declarations
+//#include "boost/filesystem/operations.hpp"
+//#include "boost/filesystem/path.hpp"
+namespace fs = boost::filesystem;
+
 #include <fstream>
 using std::ofstream;
 using std::ifstream;
@@ -65,6 +74,11 @@ MediaCycle::MediaCycle(ACMediaType aMediaType, string local_directory, string li
 
     this->prevLibrarySize = 0;
     this->eventManager=new ACEventManager;
+
+    // when importing files:
+    // 1) the library creates a media
+    // 2) the browser creates a node
+    // 3) mediacycle propagates the event to external listeners
 }
 
 MediaCycle::MediaCycle(const MediaCycle& orig) {
@@ -80,6 +94,7 @@ MediaCycle::~MediaCycle() {
     this->pluginManager = 0;
     stopTcpServer(); // will delete this->networkSocket;
 }
+
 void MediaCycle::clean(){
     this->prevLibrarySize = 0;
     this->forwarddown = 0;
@@ -292,7 +307,7 @@ int MediaCycle::importDirectories() {
 int MediaCycle::importDirectories(vector<string> directories, int recursive, bool forward_order, bool doSegment) {
     int ok = 0;
     float prevLibrarySizeMultiplier = 2;
-    int needsNormalizeAndCluster;
+    int needsNormalizeAndCluster = 0;
     vector<string> filenames;
 
     mediaLibrary->scanDirectories(directories, recursive, filenames);
@@ -307,14 +322,14 @@ int MediaCycle::importDirectories(vector<string> directories, int recursive, boo
     //t1 = getTime();
 
     n = filenames.size();
+    eventManager->sig_mediaImported(0,n,-1);
 
     /*
 #pragma omp parallel for
  */
-    eventManager->sig_mediaImported(0,n);
     for (i=0;i<n;i++) {
-
-        if (mediaLibrary->importFile(filenames[i], this->pluginManager, doSegment, doSegment)){
+        int media_id = mediaLibrary->importFile(filenames[i], this->pluginManager, doSegment, doSegment);
+        if (media_id >-1){
             ok++;
             needsNormalizeAndCluster = 0;
             if ( (mediaLibrary->getSize() >= int(prevLibrarySizeMultiplier * prevLibrarySize))
@@ -322,14 +337,29 @@ int MediaCycle::importDirectories(vector<string> directories, int recursive, boo
                 needsNormalizeAndCluster = 1;
                 prevLibrarySize = mediaLibrary->getSize();
             }
-            //needsNormalizeAndCluster = 1;
-            mediaBrowser->setNeedsNavigationUpdateLock(1);
-            normalizeFeatures(needsNormalizeAndCluster);
-            mediaBrowser->setNeedsNavigationUpdateLock(0);
-            libraryContentChanged(needsNormalizeAndCluster);
+            needsNormalizeAndCluster = 1;
+            normalizeFeatures(needsNormalizeAndCluster); // exclusively medialibrary
+            //mediaBrowser->setNeedsNavigationUpdateLock(1);
+            mediaBrowser->initializeNode(media_id);
+#if defined (SUPPORT_MULTIMEDIA)
+            if (this->getMediaType()==MEDIA_TYPE_MIXED){
+                ACMedia* media =  mediaLibrary->getMedia(media_id);
+                ACMediaContainer medias = (static_cast<ACMediaDocument*> (media))->getContainer();
+                ACMediaContainer::iterator iter;
+                for ( iter=medias.begin() ; iter!=medias.end(); ++iter ){
+                    mediaBrowser->initializeNode(iter->second->getId());
+                    //files_processed++;
+                }
+            }
+#endif
+            libraryContentChanged(needsNormalizeAndCluster); // exclusively mediabrowser, thus updateAfterFileImport and importDirectories can't be move to ACMediaLibrary
+            //mediaBrowser->setNeedsNavigationUpdateLock(0);
+            // this initiates node rendering, must be done after creating a media in the library and a node in the browser
+            eventManager->sig_mediaImported(i+1,n,media_id);
         }
-        eventManager->sig_mediaImported(i+1,n);
     }
+    n = mediaLibrary->getSize(); // segmentation might have increased the number of medias in the library
+    eventManager->sig_mediaImported(n,n,-1);
 
     //t2 = getTime();
     //printf("TTT - %f\n",float(t2-t1));
@@ -359,7 +389,7 @@ void MediaCycle::libraryContentChanged(int needsNormalizeAndCluster) { mediaBrow
 void MediaCycle::saveACLLibrary(string path) {mediaLibrary->saveACLLibrary(path); }
 void MediaCycle::saveXMLLibrary(string path) {mediaLibrary->saveXMLLibrary(path); }
 void MediaCycle::saveMCSLLibrary(string path) {mediaLibrary->saveMCSLLibrary(path); }
-void MediaCycle::cleanLibrary() { prevLibrarySize=0; mediaLibrary->cleanLibrary(); }
+void MediaCycle::cleanLibrary() { prevLibrarySize=0; eventManager->sig_libraryCleaned();mediaLibrary->cleanLibrary(); }
 
 int MediaCycle::importACLLibrary(string path) {
     // XS import = open + normalize
@@ -376,7 +406,7 @@ int MediaCycle::importXMLLibrary(string path) {
     cout << "MediaCycle: importing XML library: " << path << endl;
     int ok = 0;
     ok = this->mediaLibrary->openXMLLibrary(path);
-    if (ok>=1) this->mediaLibrary->normalizeFeatures();
+    //if (ok>=1) this->mediaLibrary->normalizeFeatures();//CF done by signals
     return ok;
 
 }
@@ -642,8 +672,9 @@ void MediaCycle::setForwardDown(int i) { forwarddown = i; }
 void MediaCycle::forwardNextLevel(){
     // enters in the cluster of the last selected node
     if (this->hasBrowser()){
-        //this->setForwardDown(true); // mediaBrowser->getMode() == AC_MODE_NEIGHBORS
+        this->setForwardDown(true); // mediaBrowser->getMode() == AC_MODE_NEIGHBORS
         this->getBrowser()->forwardNextLevel();
+         this->setForwardDown(false);
     }
 }
 
@@ -817,7 +848,48 @@ TiXmlHandle MediaCycle::readXMLConfigFileHeader(string _fname) {
 
 // XS TODO return value, tests
 int MediaCycle::readXMLConfigFileCore(TiXmlHandle _rootHandle) {
-    this->mediaLibrary->openCoreXMLLibrary(_rootHandle);
+
+    TiXmlElement* media_element = this->mediaLibrary->openCoreXMLLibrary(_rootHandle);
+
+    eventManager->sig_mediaImported(0,this->mediaLibrary->getNumberOfFilesToImport(),-1);
+
+    int needsNormalizeAndCluster = 0;
+    float prevLibrarySizeMultiplier = 2;
+
+    while(  media_element != 0 ){
+        //mediaBrowser->setNeedsNavigationUpdateLock(1);
+        media_element = this->mediaLibrary->openNextMediaFromXMLLibrary(media_element);
+        long int media_id = this->mediaLibrary->getNewestMediaId();
+        int i = this->mediaLibrary->getNumberOfFilesProcessed();
+        int n = this->mediaLibrary->getNumberOfFilesToImport();
+
+        needsNormalizeAndCluster = 0;
+        if ( (mediaLibrary->getSize() >= int(prevLibrarySizeMultiplier * prevLibrarySize))
+             || (i==n-1)) {
+            needsNormalizeAndCluster = 1;
+            prevLibrarySize = mediaLibrary->getSize();
+        }
+        normalizeFeatures(needsNormalizeAndCluster); // exclusively medialibrary
+        //mediaBrowser->setNeedsNavigationUpdateLock(1);
+        mediaBrowser->initializeNode(media_id);
+/*#if defined (SUPPORT_MULTIMEDIA)
+            if (this->getMediaType()==MEDIA_TYPE_MIXED){
+                ACMedia* media =  mediaLibrary->getMedia(media_id);
+                ACMediaContainer medias = (static_cast<ACMediaDocument*> (media))->getContainer();
+                ACMediaContainer::iterator iter;
+                for ( iter=medias.begin() ; iter!=medias.end(); ++iter ){
+                    mediaBrowser->initializeNode(iter->second->getId());
+                    //files_processed++;
+                }
+            }
+#endif*/
+        libraryContentChanged(needsNormalizeAndCluster); // exclusively mediabrowser, thus updateAfterFileImport and importDirectories can't be move to ACMediaLibrary
+        //mediaBrowser->setNeedsNavigationUpdateLock(0);
+        eventManager->sig_mediaImported(this->mediaLibrary->getNumberOfFilesProcessed(),this->mediaLibrary->getNumberOfFilesToImport(),media_id);
+    }
+
+    int n = this->mediaLibrary->getSize(); // segmentation might have increased the number of medias in the library
+    eventManager->sig_mediaImported(n,n,-1);
 }
 
 // XS TODO return value, tests
@@ -830,12 +902,20 @@ int MediaCycle::readXMLConfigFilePlugins(TiXmlHandle _rootHandle) {
     if (MC_e_features_plugin_manager!=0){
 	MC_e_features_plugin_manager->QueryIntAttribute("NumberOfPluginsLibraries", &nb_plugins_lib);
 
+        //this->pluginManager->clean();
+        //this->pluginManager->setMediaCycle(this);
+        this->mediaBrowser->changeClustersMethodPlugin( this->pluginManager->getPlugin("ACKMeansPlugin") );
+        this->mediaBrowser->changeClustersMethodPlugin( this->pluginManager->getPlugin("ACClusterPositionsPropellerPlugin") );
+
         TiXmlElement* pluginLibraryNode=MC_e_features_plugin_manager->FirstChild()->ToElement();
 	for( pluginLibraryNode; pluginLibraryNode; pluginLibraryNode=pluginLibraryNode->NextSiblingElement()) {
             string libraryName = pluginLibraryNode->Attribute("LibraryPath");
             int lib_size=0;
             pluginLibraryNode->QueryIntAttribute("NumberOfPlugins", &lib_size);
-            this->pluginManager->addLibrary(libraryName);
+            if(this->pluginManager->addLibrary(libraryName) == -1){
+                this->pluginManager->addLibrary( this->getPluginPathFromBaseName(fs::basename(libraryName)) );
+            }
+
 
             //		for (int i=0;i<pluginManager->getSize();i++) {
             //			for (int j=0;j<pluginManager->getPluginLibrary(i)->getSize();j++) {
@@ -860,6 +940,54 @@ int MediaCycle::readXMLConfigFilePlugins(TiXmlHandle _rootHandle) {
 int MediaCycle::readXMLConfigFile(string _fname) {
     TiXmlHandle rootHandle = readXMLConfigFileHeader (_fname);
     this->readXMLConfigFileCore (rootHandle);
+}
+
+std::string MediaCycle::getPluginPathFromBaseName(std::string basename)
+{
+    char c_path[2048];
+    // use the function to get the path
+    getcwd(c_path, 2048);
+    std::string s_path = c_path;
+    std::string plugins_path(""),plugin_subfolder(""),plugin_ext("");
+
+    std::string build_type ("Release");
+#ifdef USE_DEBUG
+    build_type = "Debug";
+#endif //USE_DEBUG
+
+#if defined(__APPLE__)
+    plugin_ext = ".dylib";
+#if not defined (USE_DEBUG) and not defined (XCODE) // needs "make install" to be ran to work
+    plugins_path = "@executable_path/../MacOS/";
+    plugin_subfolder = "";
+#else
+#if defined(XCODE)
+    plugins_path = s_path + "/../../../../../../plugins/";
+    plugin_subfolder = basename + "/" + build_type + "/";
+#else
+    plugins_path = s_path + "/../../../../../plugins/";
+    plugin_subfolder = basename + "/";
+#endif
+#endif
+#elif defined (__WIN32__)
+    plugin_ext = ".dll";
+    plugins_path = s_path + "/";
+#ifdef USE_DEBUG
+    plugins_path = s_path + "/../../plugins/";
+    plugin_subfolder = basename + "/";
+#endif USE_DEBUG
+#else // Linux
+    plugin_ext = ".so";
+#if not defined (USE_DEBUG) // needs "make package" to be ran to work
+    plugins_path = "/usr/lib/"; // or a prefix path from CMake?
+    plugin_subfolder = "";
+#else
+    plugins_path = s_path + "/../../plugins/";
+    plugin_subfolder = basename + "/";
+#endif
+#endif
+    //return plugins_path + plugin_subfolder + "mc_" + basename + plugin_ext;
+    return plugins_path + plugin_subfolder + basename + plugin_ext;
 }
 
 // XS TODO what else to put in the config ?
@@ -1021,4 +1149,9 @@ void MediaCycle::testLabels(){
     this->mediaBrowser->setLabel(1, "Label-2", p);
     p.x = 0.0; p.y = 0.1; p.z = 0.01;
     this->mediaBrowser->setLabel(2, "Label-3", p);
+}
+
+void MediaCycle::mediaImported(int n,int nTot,int mId){
+    std::cout << "MediaCycle::mediaImported media id " << mId << " ("<< n << "/" << nTot << ")" << std::endl;
+    eventManager->sig_mediaImported(n,nTot,mId);
 }

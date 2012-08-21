@@ -1,7 +1,7 @@
 /**
  * @brief ACPosPlugAudioGardenFlower.cpp
  * @author Christian Frisson
- * @date 03/08/2012
+ * @date 21/08/2012
  * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -120,11 +120,13 @@ void ACPosPlugAudioGardenFlower::updateNextPositions(ACMediaBrowser* mediaBrowse
 
     ACPoint p;
     for (int i=0; i<libSize; i++){
-        mediaBrowser->setMediaNodeDisplayed(i, true);
-        p.x = posDisp_m(i,0);
-        p.y = posDisp_m(i,1);
-        p.z = 0;
-        mediaBrowser->setNodeNextPosition(i, p);
+        if(mediaBrowser->getMediaNode(i)){
+            mediaBrowser->setMediaNodeDisplayed(i, true);
+            p.x = posDisp_m(i,0);
+            p.y = posDisp_m(i,1);
+            p.z = 0;
+            mediaBrowser->setNodeNextPosition(i, p);
+        }
     }
     ////////////////////////////////////////////////////////////////
 }

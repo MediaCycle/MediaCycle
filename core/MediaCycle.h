@@ -249,6 +249,7 @@ public:
     int readXMLConfigFile(std::string _fname="");
     void saveXMLConfigFile(std::string _fname="");
     void setConfigFile(std::string _fname){config_file_xml = _fname;}
+    std::string getPluginPathFromBaseName(std::string basename);
 
     // == Dump / used for Debug
     void dumpNavigationLevel();
@@ -288,6 +289,10 @@ private:
     bool import_doSegment;
 
     void* mediacycle_callback_data;
+
+public:
+    // Callback
+    void mediaImported(int n,int nTot,int mId);
 };
 
 #endif	/* _MEDIACYCLE_H */

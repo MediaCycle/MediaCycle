@@ -122,9 +122,12 @@ void ACKMeansPlugin::updateClusters(ACMediaBrowser* mediaBrowser,bool needsClust
 
     vector<int> currTempId=library->getParentIds();
     vector<int> currId;
-    for (int i=0;i<currTempId.size();i++)
-        if(mediaBrowser->getMediaNode(currTempId[i])->getNavigationLevel() >= mediaBrowser->getNavigationLevel())
-            currId.push_back(currTempId[i]);
+    for (int i=0;i<currTempId.size();i++){
+        if(mediaBrowser->getMediaNode(currTempId[i])){
+            if(mediaBrowser->getMediaNode(currTempId[i])->getNavigationLevel() >= mediaBrowser->getNavigationLevel())
+                currId.push_back(currTempId[i]);
+        }
+    }
 
 
     //int object_count = library->getSize();//TR clustering just Parent Nodes
@@ -194,7 +197,9 @@ void ACKMeansPlugin::updateClusters(ACMediaBrowser* mediaBrowser,bool needsClust
                 cluster_accumulators[i][f].setIsSparse(library->getMedia(currId[0])->getPreProcFeaturesVector(f)->getFeaturesVector().getIsSparse()) ;
                 cluster_accumulators[i][f].resize(library->getMedia(currId[0])->getPreProcFeaturesVector(f)->getFeaturesVector().size());
 
-                clusterCenters[i][f]= library->getMedia(currId[r])->getPreProcFeaturesVector(f)->getFeaturesVector();
+                if(library->getMedia(currId[i]))//CF
+                    if(library->getMedia(currId[i])->getType() == library->getMediaType())//CF
+                        clusterCenters[i][f]= library->getMedia(currId[r])->getPreProcFeaturesVector(f)->getFeaturesVector();
                 /*for(d=0; d<desc_count; d++)
                 {
                     if(library->getMedia(currId[r])->getType() == library->getMediaType())//CF
@@ -233,6 +238,7 @@ void ACKMeansPlugin::updateClusters(ACMediaBrowser* mediaBrowser,bool needsClust
             {
                 // check if we should include mediaBrowser object
                 // note: the following "if" skips to next i if true.
+                if(mediaBrowser->getMediaNode(currId[i])) continue;
                 if(mediaBrowser->getMediaNode(currId[i])->getNavigationLevel() < mediaBrowser->getNavigationLevel()) continue;
 
                 // compute distance between this object and every cluster

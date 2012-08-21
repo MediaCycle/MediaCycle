@@ -61,17 +61,6 @@ using std::ifstream;
 using std::endl;
 using std::cout;
 
-// CF Move this duplicate to somewhere accessible by any class
-#include <sys/time.h>
-static double getTime()
-{
-    struct timeval tv = {0, 0};
-    struct timezone tz = {0, 0};
-    gettimeofday(&tv, &tz);
-    return (double)tv.tv_sec + tv.tv_usec / 1000000.0;
-}
-
-
 ACAudio::ACAudio() : ACMedia() {
     this->init();
 }

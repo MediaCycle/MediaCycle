@@ -61,14 +61,21 @@
 
 #include "ACRefId.h"
 
-#include <sys/time.h>
+#include "ACEventListener.h"
 
-class ACOsgBrowserRenderer {
+typedef std::map<long int,ACOsgMediaRenderer*> ACOsgMediaRenderers;
+typedef std::map<long int,ACOsgNodeLinkRenderer*> ACOsgNodeLinkRenderers;
+
+class ACOsgBrowserRenderer: public ACEventListener {
 public:
     ACOsgBrowserRenderer();
     ~ACOsgBrowserRenderer();
     void clean();
-    void setMediaCycle(MediaCycle *media_cycle){ this->media_cycle = media_cycle;}
+    void setMediaCycle(MediaCycle *media_cycle){ this->media_cycle = media_cycle; media_cycle->addListener(this);}
+
+    //Callbacks
+    void mediaImported(int n,int nTot,int mId);
+    void libraryCleaned();
 
 protected:
     MediaCycle *media_cycle;
@@ -77,12 +84,12 @@ protected:
     osg::ref_ptr<osg::Group> link_group;
     osg::ref_ptr<osg::Group> label_group;
     osg::ref_ptr<osgText::Font> font;
-    std::vector<ACOsgMediaRenderer*> node_renderer;
-    std::vector<ACOsgNodeLinkRenderer*> link_renderer;
-    std::vector<ACOsgLabelRenderer*> label_renderer; // XS was MediaRenderer
+    ACOsgMediaRenderers node_renderers;
+    ACOsgNodeLinkRenderers link_renderers;
+    std::vector<ACOsgLabelRenderer*> label_renderer;
     //ACOsgLayoutRenderer* layout_renderer;
     //vector<bool> media_selected;
-    std::vector<float> distance_mouse;
+    std::map<long int, float> distance_mouse;
     //ACPlugin* mLayoutPlugin;
     //ACOsgLayoutType layout_type;
     //int displayed_nodes;
@@ -113,8 +120,6 @@ protected:
     ACSettingType setting;
 
 public:
-    double getTime();
-
     //void setLayoutPlugin(ACPlugin* acpl){mLayoutPlugin=acpl;}
     //void setLayout(ACOsgBrowserLayoutType _type){layout_type = _type;}
     osg::ref_ptr<osg::Group> getShapes() { return group; }
@@ -126,11 +131,11 @@ public:
     void updateLabels(double ratio=0.0);
 
     int computeScreenCoordinates(osgViewer::View* view, double ratio=0.0); //CF: use osgViewer::Viewer* for simple Viewers
-    std::vector<float> getDistanceMouse() { return distance_mouse; }
+    std::map<long int, float> getDistanceMouse() { return distance_mouse; }
 
     void setFont(osg::ref_ptr<osgText::Font> _font){this->font = _font;}
-    void changeNodeColor(int _node, osg::Vec4 _color){node_renderer[_node]->changeNodeColor(_color);}
-    void resetNodeColor(int _node){node_renderer[_node]->resetNodeColor();}
+    void changeNodeColor(int _node, osg::Vec4 _color){node_renderers[_node]->changeNodeColor(_color);}
+    void resetNodeColor(int _node){node_renderers[_node]->resetNodeColor();}
 
     ACBrowserAudioWaveformType getAudioWaveformType(){return audio_waveform_type;}
     void setAudioWaveformType(ACBrowserAudioWaveformType _type);
@@ -138,8 +143,9 @@ public:
     void changeSetting(ACSettingType _setting);
 
 private:
-    bool removeNodes(int _first=0, int _last=0);
-    bool addNodes(int _first=0, int _last=0);
+    bool removeNodes();
+    bool addNode(long int _id);
+    bool addLink(long int _id);
     bool removeLinks(int _first=0, int _last=0);
     bool removeLabels(int _first=0, int _last=0);
     bool addLabels(int _first=0, int _last=0);

@@ -52,23 +52,27 @@ ACQProgressBar::ACQProgressBar(QWidget *parent)
 
 void ACQProgressBar::loading_started()
 {
+    std::cout << "ACQProgressBar::loading_started" << std::endl;
     this->reset();
     this->show();
 }
 
 void ACQProgressBar::loading_finished()
 {
+    std::cout << "ACQProgressBar::loading_finished" << std::endl;
     this->reset();
     this->hide();
 }
 
 void ACQProgressBar::loading_file(int media_id, int dir_size)
 {
+    std::cout << "ACQProgressBar::loading_file" << media_id << "/" << dir_size << std::endl;
     this->setMaximum(dir_size);
     this->setValue(media_id);
 }
 
-void ACMultiMediaCycleOsgQt::mediaImported(int n,int nTot){
+void ACMultiMediaCycleOsgQt::mediaImported(int n,int nTot,int mId){
+    std::cout << "ACMultiMediaCycleOsgQt::mediaImported media id " << mId << " ("<< n << "/" << nTot << ")" << std::endl;
     std::string send = "";
     if (n==0) {
         send = "Loading Directory...";
@@ -103,7 +107,7 @@ void ACMultiMediaCycleOsgQt::mediaImported(int n,int nTot){
 
 // ----------- 
 
-ACMultiMediaCycleOsgQt::ACMultiMediaCycleOsgQt(QWidget *parent) : QMainWindow(parent),features_known(false),detachedBrowser(0),	aboutDialog(0),controlsDialog(0),compositeOsgView(0),osgViewDock(0),osgViewDockWidget(0),osgViewDockLayout(0),osgViewDockTitleBar(0),progressBar(0),metadataWindow(0),userProfileWindow(0),segmentationDialog(0)
+ACMultiMediaCycleOsgQt::ACMultiMediaCycleOsgQt(QWidget *parent) : QMainWindow(parent),ACEventListener(),features_known(false),detachedBrowser(0),	aboutDialog(0),controlsDialog(0),compositeOsgView(0),osgViewDock(0),osgViewDockWidget(0),osgViewDockLayout(0),osgViewDockTitleBar(0),progressBar(0),metadataWindow(0),userProfileWindow(0),segmentationDialog(0)
 {
     ui.setupUi(this); // first thing to do
     this->media_type = MEDIA_TYPE_NONE;
@@ -476,9 +480,18 @@ bool ACMultiMediaCycleOsgQt::readXMLConfig(string _filename){
         else
             createMediaCycle(this->media_type, this->browser_mode);
 
-        // 3) read the meat of media_cycle (features and plugins)
-        media_cycle->readXMLConfigFileCore(rootHandle);
+        // 3) load the plugin libraries
         media_cycle->readXMLConfigFilePlugins(rootHandle);
+        ACPluginManager* acpl = media_cycle->getPluginManager();
+        if (acpl->getAvailablePluginsSize(PLUGIN_TYPE_FEATURES,media_type) &&/*acpl->getFeaturesPlugins()->getSize(media_type)>0 &&*/ !use_feature_extraction){ // if no feature extraction plugin was loaded before opening the XML and if the XML loaded one
+            this->showError("Feature extraction plugin(s) now loaded again. Importing media files now enabled.");
+            this->switchFeatureExtraction(true);
+        }
+        dockWidgetsManager->changeMediaType(this->media_type);
+        dockWidgetsManager->updatePluginsSettings();
+
+        // 4) load the media elements (features and segments already pre-computed)
+        media_cycle->readXMLConfigFileCore(rootHandle);
 
         // XS TODO check this.
         // should be overwritten if dimensions do not match
@@ -496,13 +509,6 @@ bool ACMultiMediaCycleOsgQt::readXMLConfig(string _filename){
         return false;
     }
 
-    ACPluginManager* acpl = media_cycle->getPluginManager();
-    if (acpl->getAvailablePluginsSize(PLUGIN_TYPE_FEATURES,media_type) &&/*acpl->getFeaturesPlugins()->getSize(media_type)>0 &&*/ !use_feature_extraction){ // if no feature extraction plugin was loaded before opening the XML and if the XML loaded one
-        this->showError("Feature extraction plugin(s) now loaded again. Importing media files now enabled.");
-        this->switchFeatureExtraction(true);
-    }
-    dockWidgetsManager->changeMediaType(this->media_type);
-    dockWidgetsManager->updatePluginsSettings();
     // no errors occured, no exception caught.
     return true;
 }

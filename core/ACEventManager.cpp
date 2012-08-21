@@ -43,7 +43,7 @@ ACEventManager::~ACEventManager(){
 
 void ACEventManager::addListener(ACEventListener* eventListener){
 	listeners.push_back(eventListener);
-	connect_mediaImported.push_back(sig_mediaImported.connect(boost::bind(&ACEventListener::s_mediaImported, eventListener,_1, _2))) ;
+        connect_mediaImported.push_back(sig_mediaImported.connect(boost::bind(&ACEventListener::s_mediaImported, eventListener,_1, _2,_3))) ;
 	connect_libraryCleaned.push_back(sig_libraryCleaned.connect(boost::bind(&ACEventListener::s_libraryCleaned, eventListener))) ;
 	connect_activeFeatChanged.push_back(sig_activeFeatChanged.connect(boost::bind(&ACEventListener::s_activeFeatChanged, eventListener))) ;
 	connect_browserModeChanged.push_back(sig_browserModeChanged.connect(boost::bind(&ACEventListener::s_browserModeChanged, eventListener, _1))) ;

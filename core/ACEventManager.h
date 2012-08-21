@@ -66,7 +66,7 @@ public:
 	~ACEventManager();
 	
 #ifndef Q_MOC_RUN
-	boost::signals2::signal<void (int n,int nTot)> sig_mediaImported;
+        boost::signals2::signal<void (int n,int nTot,int mId)> sig_mediaImported;
 	boost::signals2::signal<void ()> sig_libraryCleaned;
 	boost::signals2::signal<void ()> sig_activeFeatChanged;
 	boost::signals2::signal<void (ACBrowserMode mode)> sig_browserModeChanged;

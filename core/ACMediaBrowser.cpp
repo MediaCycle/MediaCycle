@@ -36,16 +36,6 @@
 
 using namespace std;
 
-double getTime()
-{
-    struct timeval tv = {0, 0};
-    struct timezone tz = {0, 0};
-
-    gettimeofday(&tv, &tz);
-
-    return (double)tv.tv_sec + tv.tv_usec / 1000000.0;
-}
-
 static double compute_distance(vector<ACMediaFeatures*> &obj1, vector<ACMediaFeatures*> &obj2, const vector<float> &weights, bool inverse_features)
 {
     assert(obj1.size() == obj2.size() && obj1.size() == weights.size());
@@ -128,7 +118,6 @@ ACMediaBrowser::ACMediaBrowser() {
     pthread_mutexattr_init(&navigation_update_mutex_attr);
     pthread_mutex_init(&navigation_update_mutex, &navigation_update_mutex_attr);
     pthread_mutexattr_destroy(&navigation_update_mutex_attr);
-
 
     this->resetPointers();
 }
@@ -623,7 +612,7 @@ void ACMediaBrowser::libraryContentChanged(int needsCluster) {
     int librarySize = mLibrary->getSize(); // library size before node init
 
     // XS 150310 TODO: check this one
-    initializeNodes(mMode);
+    //initializeNodes(mMode);
 
     if(mLibrary->isEmpty()) {
         this->resetCamera();
@@ -654,46 +643,26 @@ void ACMediaBrowser::libraryContentChanged(int needsCluster) {
 // makes an ACMediaNode for each new media in the library
 // - AC_MODE_CLUSTERS : nodeID = mediaID if the whole Library is used in the Browser
 // - AC_MODE_NEIGHBORS : nodeID = 0 initially, then only the neighbors will receive a nodeID
-
-void ACMediaBrowser::initializeNodes(ACBrowserMode _mode) { // default = AC_MODE_CLUSTERS
-
+bool ACMediaBrowser::initializeNode(long mediaId, ACBrowserMode _mode) { // default = AC_MODE_CLUSTERS
     ACMedias medias = mLibrary->getAllMedia();
-    ACMedias::iterator newest = medias.find(mLastInitializedNodeId);
-    if(newest == medias.end()){
-        std::cerr << "ACMediaBrowser::initializeNodes last initialized node id " << mLastInitializedNodeId << " doesn't appear in the media library" << std::endl;
-        newest = medias.begin();
+    ACMedias::iterator media = medias.find(mediaId);
+    if(media == medias.end()){
+        std::cerr << "ACMediaBrowser::initializeNode: can't find media id " << mediaId << " in the media library" << std::endl;
+        return false;
     }
-    else
-        newest++;
-
-    //CF we assume media ids are incremental (but not necessarily incremented of 1)
-    for(ACMedias::iterator media = newest; media!=medias.end();media++){
-        int mediaId = media->first;
-        if(mediaId != -1 && mMediaNodes.find(mediaId) != mMediaNodes.end())
-            std::cerr << "ACMediaBrowser::initializeNodes: node of id " << mediaId << " is already present!" << std::endl;
-        mMediaNodes[mediaId] = new ACMediaNode(mediaId);
-        std::cout << "ACMediaBrowser::initializeNodes for media id " << mediaId << std::endl;
-
-        switch ( _mode ){
-        case AC_MODE_CLUSTERS:
-            break;
-        case AC_MODE_NEIGHBORS:
-            mMediaNodes[mediaId]->setDisplayed(false);
-            break;
-        default:
-            cerr << "unknown browser mode: " << _mode << endl;
-            break;
-        }
+    std::cout << "ACMediaBrowser::initializeNode: media id " << mediaId << std::endl;
+    mMediaNodes[mediaId] = new ACMediaNode(mediaId);
+    switch ( _mode ){
+    case AC_MODE_CLUSTERS:
+        break;
+    case AC_MODE_NEIGHBORS:
+        mMediaNodes[mediaId]->setDisplayed(false);
+        break;
+    default:
+        cerr << "unknown browser mode: " << _mode << endl;
+        break;
     }
-
-    if(mLibrary->getSize() != mMediaNodes.size())
-        std::cerr << "ACMediaBrowser::initializeNodes library/browser sizes mismatch" << std::endl;
-
-    if(mMediaNodes.size()>0)
-        mLastInitializedNodeId = mMediaNodes.rbegin()->first; // last element
-    else
-        mLastInitializedNodeId = 0;
-
+    return true;
 }
 
 // sets first feature weight to 1, others to 0
@@ -2041,5 +2010,3 @@ void ACMediaBrowser::commitPositions()
             std::cout << "Node " << (int)(node->second->getMediaId()) << " of media type " << ACMediaFactory::getInstance().getNormalCaseStringFromMediaType( mLibrary->getMedia(node->second->getMediaId())->getType() ) << " displayed " << node->second->isDisplayed() << " at position " <<  node->second->getCurrentPosition().x << " " << node->second->getCurrentPosition().y << " "<< node->second->getCurrentPosition().z << " file " << mLibrary->getMedia(node->second->getMediaId())->getFileName() << std::endl;
     }
 }
-
-

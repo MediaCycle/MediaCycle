@@ -65,15 +65,15 @@ public:
 	//Slot
 	bool stopped();
 	void testService();
-	virtual void mediaImported(int n,int nTot){
+        virtual void mediaImported(int n,int nTot,int mId){
 		std::cout<<"ACEventListener::mediaImported"<<std::cout;
 	};
-	virtual void libraryCleaned(){std::cout<<"ACEventListener::libraryCleaned"<<std::cout;};
+        virtual void libraryCleaned(){std::cout<<"ACEventListener::libraryCleaned"<< std::endl;};
 	virtual void activeFeatChanged(){};
 	virtual void browserModeChanged(ACBrowserMode mode){};
 	virtual void updateDisplayNeeded(){};
 
-	void s_mediaImported(int n,int nTot);
+        void s_mediaImported(int n,int nTot,int mId);
 	void s_libraryCleaned();
 	void s_activeFeatChanged();
 	void s_browserModeChanged(ACBrowserMode mode);

@@ -41,12 +41,12 @@
 #include "ACOsgMediaRenderer.h"
 #include <map>
 
-typedef std::vector<ACOsgMediaRenderer*> ACOsgMediaRenderers;
+typedef std::vector<ACOsgMediaRenderer*> ACOsgMediaDocumentRenderers;
 
 class ACOsgMediaDocumentRenderer : public ACOsgMediaRenderer {
 	
 protected:
-	ACOsgMediaRenderers media_renderers;
+        ACOsgMediaDocumentRenderers media_renderers;
 	osg::ref_ptr<osg::Geode> entry_geode;
 	
 	void entryGeode();	

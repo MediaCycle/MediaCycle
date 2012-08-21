@@ -92,7 +92,7 @@ public slots:
     void loading_file(int media_id, int dir_size);
 };
 
-class ACMultiMediaCycleOsgQt : public QMainWindow,public ACEventListener {
+class ACMultiMediaCycleOsgQt : public QMainWindow, public ACEventListener {
     Q_OBJECT
 
 public slots:
@@ -159,7 +159,7 @@ public:
     bool addAboutDialog(std::string about_type);
 
     // Callback
-    void mediaImported(int n,int nTot);
+    void mediaImported(int n,int nTot,int mId);
 
     // Close Event
     void closeEvent(QCloseEvent *event);

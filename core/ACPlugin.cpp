@@ -40,6 +40,16 @@ using std::cout;
 using std::endl;
 using std::string;
 
+double getTime()
+{
+    struct timeval tv = {0, 0};
+    struct timezone tz = {0, 0};
+
+    gettimeofday(&tv, &tz);
+
+    return (double)tv.tv_sec + tv.tv_usec / 1000000.0;
+}
+
 #ifdef __APPLE__
 #include <sys/param.h>
 #include <mach-o/dyld.h> /* _NSGetExecutablePath : must add -framework CoreFoundation to link line */

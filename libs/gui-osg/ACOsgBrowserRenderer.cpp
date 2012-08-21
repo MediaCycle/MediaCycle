@@ -134,7 +134,7 @@ USE_GRAPHICSWINDOW()
 
 
 ACOsgBrowserRenderer::ACOsgBrowserRenderer()
-    : font(0)
+    : ACEventListener(),font(0)
 {
     media_cycle = 0;
     setting = AC_SETTING_NONE;
@@ -196,45 +196,69 @@ void ACOsgBrowserRenderer::clean(){
     }
 }
 
-double ACOsgBrowserRenderer::getTime() {
-    struct timeval  tv = {0, 0};
-    struct timezone tz = {0, 0};
-    gettimeofday(&tv, &tz);
-    return (double)tv.tv_sec + (double)tv.tv_usec / 1000000.0;
+void ACOsgBrowserRenderer::mediaImported(int n, int nTot,int mId){
+    if(n==0){
+        std::cout << "ACOsgBrowserRenderer::mediaImported: creating renderers for " << nTot << " medias " << std::endl;
+        return;
+    }
+    else if(mId==-1){
+        std::cerr << "ACOsgBrowserRenderer::mediaImported " << n << "/" << nTot << " doesn't have a proper media id" << std::endl;
+        return;
+    }
+    if(!media_cycle){
+        std::cerr << "ACOsgBrowserRenderer::mediaImported: no media cycle set" << std::endl;
+        return;
+    }
+    if(media_cycle->getLibrary()->getMedia(mId) == 0){
+        std::cerr << "ACOsgBrowserRenderer::mediaImported: media id " << mId << " ("<< n << "/" << nTot << ") not accessible" << std::endl;
+        return;
+    }
+    if(media_cycle->getMediaType() == media_cycle->getLibrary()->getMedia(mId)->getType()){
+        std::cout << "ACOsgBrowserRenderer::mediaImported adding to " << node_renderers.size() << " renderers the renderer for media id " << mId << " ("<< n << "/" << nTot << ") " << std::endl;
+        if(this->addNode(mId)){
+            this->addLink(mId);
+            nodes_prepared = 1;
+        }
+    }
 }
 
-// adds/removes nodes to the node_renderer
+void ACOsgBrowserRenderer::libraryCleaned(){
+    std::cout << "ACOsgBrowserRenderer::libraryCleaned" << std::endl;
+    this->clean();
+}
+
+// adds/removes nodes to the node_renderers
 void ACOsgBrowserRenderer::prepareNodes(int _start) {
 
-    int start;
+    /*int start;
     int n = media_cycle->getLibrarySize();
     if (_start) {
         start = _start;
     }
     else {
-        start = node_renderer.size();
+        start = node_renderers.size();
     }
-    if (node_renderer.size()>n) {
-        this->removeNodes(n, node_renderer.size());
+    if (node_renderers.size()>n) {
+        this->removeNodes(n, node_renderers.size());
     }
-    else if (node_renderer.size()<n) {
+    else if (node_renderers.size()<n) {
         this->addNodes(start,n);
 
     }
 
     // Remove all nodelinks if present
-    for (int i=0;i<link_renderer.size();i++) {
-        if(link_renderer[i]){
-            link_group->removeChild(link_renderer[i]->getLink());
-            delete link_renderer[i];
-            link_renderer[i] = 0;
+    for (int i=0;i<link_renderers.size();i++) {
+        if(link_renderers[i]){
+            link_group->removeChild(link_renderers[i]->getLink());
+            delete link_renderers[i];
+            link_renderers[i] = 0;
         }
     }
-    link_renderer.clear();
+    link_renderers.clear();
 
     // XS  TODO why this ?
     if ((n-start)>0)
-        nodes_prepared = 1;
+        nodes_prepared = 1;*/
 }
 
 void ACOsgBrowserRenderer::updateNodes(double ratio) {
@@ -245,28 +269,28 @@ void ACOsgBrowserRenderer::updateNodes(double ratio) {
 
     int n = media_cycle->getLibrarySize();
 
-    if(media_cycle->getBrowserMode() == AC_MODE_NEIGHBORS){
+    /*if(media_cycle->getBrowserMode() == AC_MODE_NEIGHBORS){
         // Create new nodelinks if the layout requires them
         if (media_cycle->getBrowser()->getLayout() == AC_LAYOUT_TYPE_NODELINK) {
             //CF to check with future changes when number of nodelinks may decrease (folding nodes)
-            link_renderer.resize(n);
+            link_renderers.resize(n);
             for (int i=0;i<n;i++) {
-                link_renderer[i] = new ACOsgNodeLinkRenderer();
-                if (link_renderer[i]) {
-                    link_renderer[i]->setMediaCycle(media_cycle);
-                    node_index = node_renderer[i]->getNodeIndex();
-                    link_renderer[i]->prepareLinks();
+                link_renderers[i] = new ACOsgNodeLinkRenderer();
+                if (link_renderers[i]) {
+                    link_renderers[i]->setMediaCycle(media_cycle);
+                    node_index = node_renderers[i]->getNodeIndex();
+                    link_renderers[i]->prepareLinks();
 
-                    link_renderer[i]->setNodeIn(node_renderer[i]);
+                    link_renderers[i]->setNodeIn(node_renderers[i]);
                     int p = media_cycle->getBrowser()->getParentFromNeighborNode(node_index);
                     if ( p!= -1 )
-                        link_renderer[i]->setNodeOut(node_renderer[p]);
+                        link_renderers[i]->setNodeOut(node_renderers[p]);
 
-                    link_group->addChild(link_renderer[i]->getLink());
+                    link_group->addChild(link_renderers[i]->getLink());
                 }
             }
         }
-    }
+    }*/
 
     // SD 2010 OCT - This animation has moved from Browser to Renderer
     /*
@@ -285,55 +309,53 @@ void ACOsgBrowserRenderer::updateNodes(double ratio) {
     media_cycle_mode = media_cycle->getBrowser()->getMode();
     media_cycle_global_navigation_level = media_cycle->getNavigationLevel();
 
-    for (unsigned int i=0;i<node_renderer.size();i++) {
+    //for (unsigned int i=0;i<node_renderers.size();i++) {
+    for(ACOsgMediaRenderers::iterator node_renderer = node_renderers.begin();node_renderer!=node_renderers.end();node_renderer++){
+        //if(node_renderer->second){
+        int i = node_renderer->first;
+        media_cycle_node = media_cycle->getMediaNode(i);
+        media_cycle_isdisplayed = media_cycle_node->isDisplayed();
+        media_cycle_current_pos = media_cycle_node->getCurrentPosition();
+        media_cycle_next_pos = media_cycle_node->getNextPosition();
+        media_cycle_navigation_level = media_cycle_node->getNavigationLevel();
+        media_cycle_activity = media_cycle_node->getActivity();
+        node_index = i;//node_renderer->second->getNodeIndex();
+        media_index = node_index;
+        media_cycle_filename = media_cycle->getMediaFileName(media_index);
 
-        if(node_renderer[i]){
-            media_cycle_node = media_cycle->getMediaNode(i);
-            media_cycle_isdisplayed = media_cycle_node->isDisplayed();
-            media_cycle_current_pos = media_cycle_node->getCurrentPosition();
-            media_cycle_next_pos = media_cycle_node->getNextPosition();
-            media_cycle_navigation_level = media_cycle_node->getNavigationLevel();
-            media_cycle_activity = media_cycle_node->getActivity();
-            node_index = node_renderer[i]->getNodeIndex();
-            media_index = node_index;
-            media_cycle_filename = media_cycle->getMediaFileName(media_index);
-
-            /* if (media_cycle_isdisplayed) */{
-
-                // GLOBAL
-                node_renderer[i]->setDeltaTime(media_cycle_deltatime);
-                node_renderer[i]->setZoomAngle(media_cycle_zoom, media_cycle_angle);
-                node_renderer[i]->setMode(media_cycle_mode);
-                node_renderer[i]->setGlobalNavigation(media_cycle_global_navigation_level);
-
-                // NODE SPECIFIC
-                node_renderer[i]->setIsDisplayed(media_cycle_isdisplayed);
-                // SD 2010 OCT
-                //node_renderer[i]->setPos(media_cycle_current_pos, media_cycle_next_pos);
-                node_renderer[i]->setNavigation(media_cycle_navigation_level);
-                node_renderer[i]->setActivity(media_cycle_activity);
-
-                //node_renderer[i]->setMediaIndex(media_index);
-                node_renderer[i]->setMedia(media_cycle->getLibrary()->getMedia(media_index));
-
-                node_renderer[i]->setFilename(media_cycle_filename);
-                node_renderer[i]->setWaveformType(audio_waveform_type);
-
-                // UPDATE
-                //std::cout << "Node renderer size " << node_renderer.size() << std::endl;
-                node_renderer[i]->updateNodes(ratio);
-
-                //media_group->addChild(node_renderer[i]->getNode());
-            }
-            /*else
-                media_group->removeChild(node_renderer[i]->getNode());*/
-        }
+        /* if (media_cycle_isdisplayed) {*/
+        //if(node_renderer->second != 0) { // CF temporary
+        // GLOBAL
+        node_renderer->second->setDeltaTime(media_cycle_deltatime);
+        node_renderer->second->setZoomAngle(media_cycle_zoom, media_cycle_angle);
+        node_renderer->second->setMode(media_cycle_mode);
+        node_renderer->second->setGlobalNavigation(media_cycle_global_navigation_level);
+        // NODE SPECIFIC
+        node_renderer->second->setIsDisplayed(media_cycle_isdisplayed);
+        // SD 2010 OCT
+        //node_renderer->second->setPos(media_cycle_current_pos, media_cycle_next_pos);
+        node_renderer->second->setNavigation(media_cycle_navigation_level);
+        node_renderer->second->setActivity(media_cycle_activity);
+        //node_renderer->second->setMediaIndex(media_index);
+        node_renderer->second->setMedia(media_cycle->getLibrary()->getMedia(media_index));
+        node_renderer->second->setFilename(media_cycle_filename);
+        node_renderer->second->setWaveformType(audio_waveform_type);
+        // UPDATE
+        //std::cout << "Node renderer size " << node_renderers.size() << std::endl;
+        node_renderer->second->updateNodes(ratio);
+        // }
+        //media_group->addChild(node_renderer->second->getNode());
+        /*}
+        else
+                media_group->removeChild(node_renderer->second->getNode());
+        }*/
     }
 
     // Update nodelinks if the layout requires
     if (media_cycle->getBrowser()->getLayout() == AC_LAYOUT_TYPE_NODELINK) {
-        for (unsigned int i=0;i<link_renderer.size();i++) {
-            link_renderer[i]->updateLinks();
+        //for (unsigned int i=0;i<link_renderers.size();i++) {
+        for(ACOsgNodeLinkRenderers::iterator link_renderer = link_renderers.begin();link_renderer!=link_renderers.end();link_renderer++){
+            link_renderer->second->updateLinks();
         }
     }
 }
@@ -368,8 +390,7 @@ int ACOsgBrowserRenderer::computeScreenCoordinates(osgViewer::View* view, double
         float mx(0.0f), my(0.0f);
         float x(0.0f), y(0.0f), z(0.0f);
 
-        int n = media_cycle->getLibrarySize();
-        n = node_renderer.size();
+        int n = node_renderers.size();
 
         //osg::Matrix modelModel = view->getModelMatrix();
         osg::Matrix viewMatrix = view->getCamera()->getViewMatrix();
@@ -398,25 +419,27 @@ int ACOsgBrowserRenderer::computeScreenCoordinates(osgViewer::View* view, double
         //distance_mouse.resize(n);//CF
 
         closest_node = -1;
-        for(int i=0; i<n; i++) {
+        //for(int i=0; i<n; i++) {
+        for(ACOsgMediaRenderers::iterator node_renderer = node_renderers.begin();node_renderer!=node_renderers.end();node_renderer++){
+            int i = node_renderer->first;
 
             ACMediaNode* attribute = media_cycle->getMediaNode(i);
 
-            if(node_renderer[i]){
+            if(node_renderer->second){
                 if (attribute->getChanged()) {
-                    if (node_renderer[i]->getInitialized()) {
-                        node_renderer[i]->setCurrentPos(node_renderer[i]->getViewPos());
+                    if (node_renderer->second->getInitialized()) {
+                        node_renderer->second->setCurrentPos(node_renderer->second->getViewPos());
                     }
                     else {
-                        node_renderer[i]->setCurrentPos(attribute->getCurrentPosition());
-                        node_renderer[i]->setViewPos(attribute->getCurrentPosition());
+                        node_renderer->second->setCurrentPos(attribute->getCurrentPosition());
+                        node_renderer->second->setViewPos(attribute->getCurrentPosition());
                     }
-                    node_renderer[i]->setNextPos(attribute->getNextPosition());
+                    node_renderer->second->setNextPos(attribute->getNextPosition());
                     attribute->setChanged(0);
                 }
 
-                const ACPoint &p = node_renderer[i]->getCurrentPos();
-                const ACPoint &p2 = node_renderer[i]->getNextPos();
+                const ACPoint &p = node_renderer->second->getCurrentPos();
+                const ACPoint &p2 = node_renderer->second->getNextPos();
                 double refTime = attribute->getNextTime();
 
                 frac = (t-refTime)/andur;
@@ -433,14 +456,14 @@ int ACOsgBrowserRenderer::computeScreenCoordinates(osgViewer::View* view, double
                 media_cycle_view_pos.x = x;
                 media_cycle_view_pos.y = y;
 
-                node_renderer[i]->setFrac(frac);
-                node_renderer[i]->setViewPos(media_cycle_view_pos);
+                node_renderer->second->setFrac(frac);
+                node_renderer->second->setViewPos(media_cycle_view_pos);
 
                 //attribute->setViewPosition(media_cycle_view_pos);
 
                 modelPoint = Vec3(x,y,z);
                 screenPoint = modelPoint * VPM;
-                node_renderer[i]->setDistanceMouse(1.f);
+                node_renderer->second->setDistanceMouse(1.f);
 
 
             }
@@ -456,7 +479,7 @@ int ACOsgBrowserRenderer::computeScreenCoordinates(osgViewer::View* view, double
         float x(0.0f), y(0.0f), z(0.0f);
 
         int n = media_cycle->getLibrarySize();
-        n = node_renderer.size();
+        n = node_renderers.size();
 
         //osg::Matrix modelModel = view->getModelMatrix();
         osg::Matrix viewMatrix = view->getCamera()->getViewMatrix();
@@ -475,7 +498,7 @@ int ACOsgBrowserRenderer::computeScreenCoordinates(osgViewer::View* view, double
         double t = getTime();
         double frac;
         double andur = 1.0;
-	//	double alpha = 0.99;
+        //	double alpha = 0.99;
         double omr;
 
         ACPointer* pt = media_cycle->getPointerFromIndex(p_index);
@@ -517,21 +540,22 @@ int ACOsgBrowserRenderer::computeScreenCoordinates(osgViewer::View* view, double
     printf ("POS: %f, %f, %f\n",p.x,p2.x,frac);
     }
     */
-            if(node_renderer[i]){
+            ACOsgMediaRenderers::iterator node_renderer = node_renderers.find(i);
+            if(node_renderer != node_renderers.end()){
                 if (attribute->getChanged()) {
-                    if (node_renderer[i]->getInitialized()) {
-                        node_renderer[i]->setCurrentPos(node_renderer[i]->getViewPos());
+                    if (node_renderer->second->getInitialized()) {
+                        node_renderer->second->setCurrentPos(node_renderer->second->getViewPos());
                     }
                     else {
-                        node_renderer[i]->setCurrentPos(attribute->getCurrentPosition());
-                        node_renderer[i]->setViewPos(attribute->getCurrentPosition());
+                        node_renderer->second->setCurrentPos(attribute->getCurrentPosition());
+                        node_renderer->second->setViewPos(attribute->getCurrentPosition());
                     }
-                    node_renderer[i]->setNextPos(attribute->getNextPosition());
+                    node_renderer->second->setNextPos(attribute->getNextPosition());
                     attribute->setChanged(0);
                 }
 
-                const ACPoint &p = node_renderer[i]->getCurrentPos();
-                const ACPoint &p2 = node_renderer[i]->getNextPos();
+                const ACPoint &p = node_renderer->second->getCurrentPos();
+                const ACPoint &p2 = node_renderer->second->getNextPos();
                 double refTime = attribute->getNextTime();
 
                 frac = (t-refTime)/andur;
@@ -548,8 +572,8 @@ int ACOsgBrowserRenderer::computeScreenCoordinates(osgViewer::View* view, double
                 media_cycle_view_pos.x = x;
                 media_cycle_view_pos.y = y;
 
-                node_renderer[i]->setFrac(frac);
-                node_renderer[i]->setViewPos(media_cycle_view_pos);
+                node_renderer->second->setFrac(frac);
+                node_renderer->second->setViewPos(media_cycle_view_pos);
                 //attribute->setViewPosition(media_cycle_view_pos);
 
                 modelPoint = Vec3(x,y,z);
@@ -558,11 +582,11 @@ int ACOsgBrowserRenderer::computeScreenCoordinates(osgViewer::View* view, double
                 // compute distance between mouse and media element in view
                 distance_mouse[i] = sqrt((screenPoint[0]-mx)*(screenPoint[0]-mx)+(screenPoint[1]-my)*(screenPoint[1]-my));
 
-                node_renderer[i]->setDistanceMouse(MIN(distance_mouse[i],node_renderer[i]->getDistanceMouse()));
+                node_renderer->second->setDistanceMouse(MIN(distance_mouse[i],node_renderer->second->getDistanceMouse()));
 
                 if (distance_mouse[i]<closest_distance) {
                     closest_distance = distance_mouse[i];
-                    closest_node = i;
+                    closest_node = node_renderer->second->getNodeIndex();
                 }
             }
         }
@@ -575,141 +599,178 @@ int ACOsgBrowserRenderer::computeScreenCoordinates(osgViewer::View* view, double
 // private methods
 
 // Clean up properly by calling destructor of each *
-bool ACOsgBrowserRenderer::removeNodes(int _first, int _last){
-    bool ok = false;
-    if (_first < 0 || _last > node_renderer.size() || _last < _first){
-        cerr << "<ACOsgBrowserRenderer::removeNodes> : wrong index / out of bounds : " << _first << " - " << _last  << endl;
-        ok = false;
-    }
-    // (default) remove ALL nodes
-    else if (_first == 0 && _last==0) {
-        std::vector<ACOsgMediaRenderer*>::iterator iterm;
-        for (iterm = node_renderer.begin(); iterm != node_renderer.end(); iterm++) {
-            if(*iterm){
-                media_group->removeChild((*iterm)->getNode());
-                delete *iterm;
-                *iterm = 0;
-            }
+bool ACOsgBrowserRenderer::removeNodes(){
+    ACOsgMediaRenderers::iterator iterm;
+    for (iterm = node_renderers.begin(); iterm != node_renderers.end(); iterm++) {
+        if(iterm->second){
+            media_group->removeChild(iterm->second->getNode());
+            delete iterm->second;
         }
-        node_renderer.clear();
-        ok = true;
     }
-    else {
-        for (int i=_first;i<_last;i++) {
-            if (node_renderer[i]!=0){
-                media_group->removeChild(node_renderer[i]->getNode());
-                delete node_renderer[i];
-                node_renderer[i] = 0;
-            }
-        }
-        node_renderer.resize(_first);
-        ok = true;
-    }
-    return ok;
+    node_renderers.clear();
+    return true;
 }
 
-bool ACOsgBrowserRenderer::addNodes(int _first, int _last){
+//bool ACOsgBrowserRenderer::addNodes(int _first, int _last){
+bool ACOsgBrowserRenderer::addNode(long int _id){
     bool ok = false;
-    if (_first < 0 || _last < _first){
+
+    /*if (_first < 0 || _last < _first){
         cerr << "<ACOsgBrowserRenderer::addNodes> : wrong index / out of bounds : " << _first << " - " << _last  << endl;
         ok = false;
     }
     else {
-        ACMediaType media_type;
-        for (int i=_first;i<_last;i++) {
-            if( media_cycle->getMediaNode(i) != 0 && media_cycle->getLibrary()->getMedia(i) != 0){
-                media_type = media_cycle->getMediaType(i);
-                ACOsgMediaRenderer* renderer = 0;
-                if(media_cycle->getLibrary()->getMediaType() != MEDIA_TYPE_MIXED || (media_type == MEDIA_TYPE_MIXED||media_type == MEDIA_TYPE_AUDIO) ){
-                    switch (media_type) {
-                    case MEDIA_TYPE_AUDIO:
+
+        node_renderers.resize(_last);
+        distance_mouse.resize(_last);*/
+
+    ACMediaType media_type;
+
+    if(media_cycle->getMediaNode(_id) == 0){
+        std::cerr << "ACOsgBrowserRenderer::addNode: id "<< _id << " does not have a corresponding node in the media browser" << std::endl;
+        return false;
+    }
+    if(media_cycle->getLibrarySize() == 0){
+        std::cerr << "ACOsgBrowserRenderer::addNode: the media library is empty" << std::endl;
+        return false;
+    }
+    if(media_cycle->getLibrary()->getMedia(_id) == 0){
+        std::cerr << "ACOsgBrowserRenderer::addNode: id "<< _id << " does not have a corresponding media in the media library" << std::endl;
+        return false;
+    }
+    if(node_renderers.find(_id) != node_renderers.end()){
+        std::cerr << "ACOsgBrowserRenderer::addNode: node renderer for id "<< _id << " is already present, overriding." << std::endl;
+    }
+    media_type = media_cycle->getMediaType(_id);
+
+    ACOsgMediaRenderer* renderer = 0;
+    if(media_cycle->getLibrary()->getMediaType() != MEDIA_TYPE_MIXED || (media_type == MEDIA_TYPE_MIXED||media_type == MEDIA_TYPE_AUDIO) ){
+        switch (media_type) {
+        case MEDIA_TYPE_AUDIO:
 #if defined (SUPPORT_AUDIO)
-                        renderer = new ACOsgAudioRenderer();
+            renderer = new ACOsgAudioRenderer();
 #endif //defined (SUPPORT_AUDIO)
-                        break;
-                    case MEDIA_TYPE_IMAGE:
+            break;
+        case MEDIA_TYPE_IMAGE:
 #if defined (SUPPORT_IMAGE)
-                        renderer = new ACOsgImageRenderer();
+            renderer = new ACOsgImageRenderer();
 #endif //defined (SUPPORT_IMAGE)
-                        break;
-                    case MEDIA_TYPE_VIDEO:
+            break;
+        case MEDIA_TYPE_VIDEO:
 #if defined (SUPPORT_VIDEO)
-                        renderer = new ACOsgVideoRenderer();
+            renderer = new ACOsgVideoRenderer();
 #endif //defined (SUPPORT_VIDEO)
-                        break;
-                    case MEDIA_TYPE_3DMODEL:
+            break;
+        case MEDIA_TYPE_3DMODEL:
 #if defined (SUPPORT_3DMODEL)
-                        renderer = new ACOsg3DModelRenderer();
+            renderer = new ACOsg3DModelRenderer();
 #endif //defined (SUPPORT_3DMODEL)
-                        break;
-                    case MEDIA_TYPE_TEXT:
+            break;
+        case MEDIA_TYPE_TEXT:
 #if defined (SUPPORT_TEXT)
-                        renderer = new ACOsgTextRenderer();
+            renderer = new ACOsgTextRenderer();
 #endif //defined (SUPPORT_TEXT)
-                        break;
-                    case MEDIA_TYPE_SENSOR:
+            break;
+        case MEDIA_TYPE_SENSOR:
 #if defined (SUPPORT_SENSOR)
-                        renderer = new ACOsgSensorRenderer();
+            renderer = new ACOsgSensorRenderer();
 #endif //defined (SUPPORT_SENSOR)
-                        break;
-                    case MEDIA_TYPE_MIXED:
+            break;
+        case MEDIA_TYPE_MIXED:
 #if defined (SUPPORT_MULTIMEDIA)
-                        renderer = new ACOsgMediaDocumentRenderer();
+            renderer = new ACOsgMediaDocumentRenderer();
 #endif //defined (SUPPORT_MULTIMEDIA)
-                        break;
-                    default:
-                        renderer = 0;
-                        break;
-                    }
-                }
-                else
-                    renderer = 0;
-                if (renderer != 0) {
-                    renderer->setMediaCycle(media_cycle);
-                    renderer->setNodeIndex(i);
-                    renderer->setFont(font);
-                    renderer->changeSetting(this->setting);
-                    media_cycle_node = media_cycle->getMediaNode(i);
-                    node_index = renderer->getNodeIndex();
-                    media_index = node_index;
-                    media_cycle_filename = media_cycle->getMediaFileName(i);
-                    //renderer->setMediaIndex(media_index);
-                    renderer->setMedia(media_cycle->getLibrary()->getMedia(i));
-                    renderer->setFilename(media_cycle_filename);
-                    renderer->setActivity(0);
-                    node_renderer.push_back(renderer);
-                    distance_mouse.resize(node_renderer.size());
-                    renderer->prepareNodes();
-                    media_group->addChild(renderer->getNode());
-                }
-            }
+            break;
         }
     }
+    if (renderer != 0) {
+        renderer->setMediaCycle(media_cycle);
+        renderer->setNodeIndex(_id);
+        renderer->setFont(font);
+        renderer->changeSetting(this->setting);
+        media_cycle_node = media_cycle->getMediaNode(_id);
+        node_index =  _id;
+        media_index = node_index;
+        media_cycle_filename = media_cycle->getMediaFileName(_id);
+        //renderer->setMediaIndex(media_index);
+        renderer->setMedia(media_cycle->getLibrary()->getMedia(_id));
+        renderer->setFilename(media_cycle_filename);
+        renderer->setActivity(0);
+        node_renderers[_id] = renderer;
+        //distance_mouse.resize(node_renderer.size());
+        renderer->prepareNodes();
+        media_group->addChild(renderer->getNode());
+        return true;
+    }
+    else
+        std::cerr << "ACOsgBrowserRenderer::addNode: couldn't create a renderer for id "<< _id << " media type unsupported" << std::endl;
+    return false;
+}
+
+bool ACOsgBrowserRenderer::addLink(long int _id){
+    bool ok = false;
+    if(media_cycle->getBrowserMode() == AC_MODE_NEIGHBORS){
+        // Create new nodelinks if the layout requires them
+        if (media_cycle->getBrowser()->getLayout() == AC_LAYOUT_TYPE_NODELINK) {
+
+            if(link_renderers.find(_id) != link_renderers.end()){
+                std::cerr << "ACOsgBrowserRenderer::addLink: link renderer for id "<< _id << " is already present, overriding." << std::endl;
+            }
+            else
+                link_renderers[_id] = new ACOsgNodeLinkRenderer();
+
+            if (link_renderers[_id]) {
+                link_renderers[_id]->setMediaCycle(media_cycle);
+                if (node_renderers[_id] == 0){
+                    std::cerr << "ACOsgBrowserRenderer::addLink: associated node for link renderer of id "<< _id << " doesn't exist" << std::endl;
+                    return false;
+                }
+
+                node_index = node_renderers[_id]->getNodeIndex();
+                link_renderers[_id]->prepareLinks();
+
+                link_renderers[_id]->setNodeIn(node_renderers[_id]);
+                int p = media_cycle->getBrowser()->getParentFromNeighborNode(node_index);
+                if ( p!= -1 )
+                    link_renderers[_id]->setNodeOut(node_renderers[p]);
+                else{
+                    std::cerr << "ACOsgBrowserRenderer::addLink: associated parent node for link renderer of id "<< _id << " doesn't exist" << std::endl;
+                    return false;
+                }
+
+                link_group->addChild(link_renderers[_id]->getLink());
+                ok = true;
+            }
+
+        }
+    }
+    return ok;
 }
 
 // Clean up properly by calling destructor of each *
 bool ACOsgBrowserRenderer::removeLinks(int _first, int _last){
     bool ok = false;
-    if (_first < 0 || _last > link_renderer.size() || _last < _first){
+    if (_first < 0 || _last > link_renderers.size() || _last < _first){
         cerr << "<ACOsgBrowserRenderer::removeLinks> : wrong index / out of bounds : " << _first << " - " << _last  << endl;
         ok = false;
     }
     // (default) remove ALL nodes
     else if (_first == 0 && _last==0) {
-        std::vector<ACOsgNodeLinkRenderer*>::iterator itern;
-        for (itern = link_renderer.begin(); itern != link_renderer.end(); itern++) {
-            link_group->removeChild((*itern)->getLink());
-            delete *itern;
+        ACOsgNodeLinkRenderers::iterator itern;
+        for (itern = link_renderers.begin(); itern != link_renderers.end(); itern++) {
+            link_group->removeChild(itern->second->getLink());
+            delete itern->second;
         }
-        link_renderer.clear();
+        link_renderers.clear();
         ok = true;
     }
     else {
         for (int i=_first;i<_last;i++) {
-            link_group->removeChild(link_renderer[i]->getLink());
-            delete link_renderer[i];
+            link_group->removeChild(link_renderers[i]->getLink());
+            delete link_renderers[i];
+            link_renderers.erase(i);
         }
-        link_renderer.resize(_first);
+        //link_renderers.resize(_first);
         ok = true;
     }
     return ok;
@@ -770,9 +831,9 @@ bool ACOsgBrowserRenderer::addLabels(int _first, int _last){
 void ACOsgBrowserRenderer::setAudioWaveformType(ACBrowserAudioWaveformType _type){
     if (audio_waveform_type != _type){
         this->audio_waveform_type = _type;
-        for (unsigned int i=0;i<node_renderer.size();i++) {
-            if (node_renderer[i]->getMediaType() == MEDIA_TYPE_AUDIO)
-                node_renderer[i]->updateWaveformType(_type);
+        for(ACOsgMediaRenderers::iterator node_renderer = node_renderers.begin();node_renderer!=node_renderers.end();node_renderer++){
+            if (node_renderer->second->getMediaType() == MEDIA_TYPE_AUDIO)
+                node_renderer->second->updateWaveformType(_type);
         }
         //media_cycle->setNeedsDisplay(true); // done by each waveform
     }
@@ -785,8 +846,7 @@ void ACOsgBrowserRenderer::changeSetting(ACSettingType _setting)
 
     this->setting = _setting;
 
-    for (unsigned int i=0;i<node_renderer.size();i++)
-        node_renderer[i]->changeSetting(this->setting);
-    if(media_cycle)
-        media_cycle->setNeedsDisplay(true);
+    for(ACOsgMediaRenderers::iterator node_renderer = node_renderers.begin();node_renderer!=node_renderers.end();node_renderer++){
+        node_renderer->second->changeSetting(this->setting);
+    }
 }

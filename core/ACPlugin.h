@@ -53,6 +53,9 @@ class MediaCycle;
 
 #include<iostream>
 
+#include <sys/time.h>
+extern double getTime();
+
 #ifdef __APPLE__
 extern std::string getExecutablePath();
 #endif

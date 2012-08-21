@@ -45,7 +45,7 @@ ACEventListener::ACEventListener(MediaCycle* core){
 	if (core!= NULL)
 		core->addListener(this);
 	service.post(boost::bind(&ACEventListener::testService, this));
-	service.post(boost::bind(&ACEventListener::mediaImported, this,3,5));
+        service.post(boost::bind(&ACEventListener::mediaImported, this,3,5,-1));
 	
 	
 };
@@ -80,8 +80,8 @@ bool ACEventListener::stopped(){
 };
 
 
-void ACEventListener::s_mediaImported(int n,int nTot){
-	service.post(boost::bind(&ACEventListener::mediaImported, this,n,nTot));
+void ACEventListener::s_mediaImported(int n,int nTot,int mId){
+        service.post(boost::bind(&ACEventListener::mediaImported, this,n,nTot,mId));
 };
 void ACEventListener::s_libraryCleaned(){
 	service.post(boost::bind(&ACEventListener::libraryCleaned, this));
