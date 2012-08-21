@@ -179,7 +179,10 @@ double FFmpegImageStream::getReferenceTime () const
     return m_decoder->reference();
 }
 
-
+double FFmpegImageStream::getCurrentTime() const
+{
+    return m_decoder->reference();
+}
 
 double FFmpegImageStream::getFrameRate() const
 { 

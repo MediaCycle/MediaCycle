@@ -151,8 +151,21 @@ inline bool FFmpegDecoder::loop() const
 
 inline double FFmpegDecoder::creation_time() const
 {
-   if(m_format_context) return m_format_context->timestamp;
-   else return HUGE_VAL;
+	if(m_format_context) {
+#if LIBAVFORMAT_VERSION_INT < AV_VERSION_INT(54, 6, 0)
+	   return m_format_context->timestamp;
+#else
+		// CF timestamp is not longer a member of ACFormatContext since FFmpeg 0.11
+	OSG_WARN << "FFmpegDecoder::creation_time: getting timestamp not yet implemented correctly for FFmpeg >= 0.11" << std::endl;
+	   return av_get_output_timestamp(m_format_context, 
+									  0, //int stream, 
+									  0, //int64_t *dts, 
+									  0 //int64_t *wall
+									  );
+#endif	  
+}
+	else
+	   return HUGE_VAL;
 }
 
 inline double FFmpegDecoder::duration() const

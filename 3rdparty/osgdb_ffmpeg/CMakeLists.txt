@@ -1,4 +1,4 @@
-# Forked OSG FFmpeg plugin from version 2.9.11
+# Forked OSG FFmpeg plugin from version 3.1.1
 
 # From OSG's CMakeLists.txt
 SET(OSG_PLUGINS osgPlugins-${OPENSCENEGRAPH_VERSION})
