@@ -1,7 +1,7 @@
 /**
  * @brief ACAudioFeatures.cpp
  * @author Christian Frisson
- * @date 20/05/2012
+ * @date 21/08/2012
  * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -68,16 +68,6 @@ enum desc_idx{
      HNR,*/
     CHROMA
 };
-
-// CF Move this duplicate to somewhere accessible by any class
-#include <sys/time.h>
-static double getTime()
-{
-    struct timeval tv = {0, 0};
-    struct timezone tz = {0, 0};
-    gettimeofday(&tv, &tz);
-    return (double)tv.tv_sec + tv.tv_usec / 1000000.0;
-}
 
 ACMediaTimedFeature* computeFeature(float* data, string featureName, int samplerate, int nchannels, long length, int mfccNbChannels, int mfccNb, int windowSize, 	bool extendSoundLimits, int minOctave, int maxOctave){
     vector<string> descList;

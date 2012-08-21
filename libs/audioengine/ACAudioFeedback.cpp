@@ -611,7 +611,9 @@ void ACAudioFeedback::processAudioUpdate()
 
 	for (i=0;i<(*mNeedsActivityUpdateMedia).size();i++) {
             loop_id = (*mNeedsActivityUpdateMedia)[i];
-            const ACMediaNode* attribute = media_cycle->getMediaNode(loop_id);
+            const ACMediaNode* attribute(0);
+            if(media_cycle->getLibrarySize() >0) //CF when cleaning a library when some nodes are still active
+                attribute = media_cycle->getMediaNode(loop_id);
             if(attribute){
                 const ACPoint &p = attribute->getCurrentPosition();
                 x=p.x;
