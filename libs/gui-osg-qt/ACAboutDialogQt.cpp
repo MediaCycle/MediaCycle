@@ -49,7 +49,10 @@ ACAboutDialogQt::ACAboutDialogQt( QWidget* parent)
 void ACAboutDialogQt::updateLicenses(){
     QString html;
     html.append ("The license of the MediaCycle framework is not yet determined. We should opt for a dual commercial/community license soon.<br/><br/>This current release uses the following dependencies:<br/><ul>");
-    html.append ("<li><a href=\"http://arma.sourceforge.net\">armadillo</a>: LGPL (or GPL) License</li>");
+#if defined (USE_BREAKPAD)
+	html.append ("<li><a href=\"https://github.com/AlekSi/breakpad-qt\">AlekSi's breakpad-qt</a>: BSD License</li>");
+#endif //defined (USE_BREAKPAD)	
+	html.append ("<li><a href=\"http://arma.sourceforge.net\">armadillo</a>: LGPL (or GPL) License</li>");
 #ifndef __APPLE__ // part of the Accelerate framework
     html.append ("<li><a href=\"http://www.netlib.org/blas/\">Blas</a>: just requires attribution</li>");
 #endif//ndef __APPLE__

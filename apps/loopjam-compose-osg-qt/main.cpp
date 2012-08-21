@@ -35,55 +35,49 @@
 #include <QApplication>
 #include <QtGui>
 #include "ACMultiMediaCycleOsgQt.h"
+#include <BreakpadHttpSender.h>
+#include <BreakPadHandler.h>
 
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
+    app.setOrganizationName("numediart");
+    app.setOrganizationDomain("numediart.org");
+    app.setApplicationName("LoopJam Composition Tool");
 
     // Make Apple *.app bundles not load installed Qt Frameworks but load Qt Plugins
 #ifdef __APPLE__
     QApplication::setLibraryPaths(QStringList(QApplication::applicationDirPath() + "/../PlugIns"));
 #endif
 
+    BreakpadQt::GlobalHandler::instance()->setDumpPath(QLatin1String("crashes"));
+
     ACMultiMediaCycleOsgQt window;
-    try {
-        window.setWindowTitle("LoopJam Composition Tool");
+    window.setWindowTitle("LoopJam Composition Tool");
 
-        // Adding palettes
-        //window.addControlDock("MCOSC");
-        window.addControlDock("MCBrowserControlsClusters");//"MCBrowserControlsClustersNeighbors");
-        window.addControlDock("MCAudioControls");
-		/* //window.addControlDock("MCSegmentationControls");
-		window.useSegmentationByDefault(true);*/
+    // Adding palettes
+    window.addControlDock("MCOSC");
+    window.addControlDock("MCBrowserControlsClusters");//"MCBrowserControlsClustersNeighbors");
+    window.addControlDock("MCAudioControls");
+    /* //window.addControlDock("MCSegmentationControls");
+        window.useSegmentationByDefault(true);*/
 
-        // XS TODO
-		// this has to be called after dock controls have been added
-		// do we need to put all this code here ?
-		window.configureSettings();
-		
-		//	window.configurePluginDock();
-		
-		// Changing the about dialog (not necessary if standard MediaCycle app)
-		//window.addAboutDialog("MediaCycle");
-		
-        window.loadDefaultConfig(MEDIA_TYPE_AUDIO);
-        window.show();
+    // XS TODO
+    // this has to be called after dock controls have been added
+    // do we need to put all this code here ?
+    window.configureSettings();
 
-        //window.on_actionFullscreen_triggered(true); // to be set after the window is shown
-        //window.autoConnectOSC(true); // to be set after loading the default config
-        //window.changeSetting(AC_SETTING_INSTALLATION);
-    }
-    catch (const exception& e) {
-        cout << "** caught exception in main : " << e.what() << endl;
-    }
-    catch (...){
-        cout << "** caught undetermined exception in main" << endl;
-    }
+    //	window.configurePluginDock();
 
+    // Changing the about dialog (not necessary if standard MediaCycle app)
+    //window.addAboutDialog("MediaCycle");
 
-    app.setOrganizationName("numediart");
-    app.setOrganizationDomain("numediart.org");
-    app.setApplicationName("LoopJam Composition Tool");
+    window.loadDefaultConfig(MEDIA_TYPE_AUDIO);
+    window.show();
+
+    //window.on_actionFullscreen_triggered(true); // to be set after the window is shown
+    //window.autoConnectOSC(true); // to be set after loading the default config
+    //window.changeSetting(AC_SETTING_INSTALLATION);
 
     return app.exec();
 }

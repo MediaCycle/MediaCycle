@@ -17,6 +17,10 @@ IF(USE_VAMP)
 add_subdirectory(vamp-plugin-sdk)
 ENDIF()
 
+IF(USE_BREAKPAD AND USE_QT4)
+        add_subdirectory(breakpad-qt)
+ENDIF()
+
 IF(OCTAVE_FOUND)
 add_subdirectory(octave_embed)
 IF(USE_MAKAM)
