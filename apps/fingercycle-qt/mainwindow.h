@@ -44,12 +44,10 @@
 #include <QList>
 #include <QMainWindow>
 
-// MediaCycle
-#include <ACOSCDockWidgetQt.h>
+#include "oscdock.h"
 
 class ScribbleArea;
 
-//! [0]
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -87,10 +85,7 @@ private:
     QAction *aboutQtAct;
 
 	// MediaCycle
-    ACOSCDockWidgetQt *oscDockWidget;
-    ACOscBrowser *osc_browser;
-    ACOscFeedback *osc_feedback;
+    oscdock *oscDockWidget;
+    simpleoscfeedback *osc_feedback;
 };
-//! [0]
-
 #endif

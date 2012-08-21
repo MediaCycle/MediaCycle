@@ -42,9 +42,8 @@
 
 #include "scribblearea.h"
 
-//! [0]
 ScribbleArea::ScribbleArea(QWidget *parent)
-    : QWidget(parent), oscDockWidget(0)
+    : QWidget(parent), osc_feedback(0)
 {
     setAttribute(Qt::WA_AcceptTouchEvents);
     setAttribute(Qt::WA_StaticContents);
@@ -65,11 +64,8 @@ ScribbleArea::ScribbleArea(QWidget *parent)
             << QColor("grey")
             << QColor("black");
 }
-//! [0]
 
-//! [1]
 bool ScribbleArea::openImage(const QString &fileName)
-//! [1] //! [2]
 {
     QImage loadedImage;
     if (!loadedImage.load(fileName))
@@ -82,11 +78,8 @@ bool ScribbleArea::openImage(const QString &fileName)
     update();
     return true;
 }
-//! [2]
 
-//! [3]
 bool ScribbleArea::saveImage(const QString &fileName, const char *fileFormat)
-//! [3] //! [4]
 {
     QImage visibleImage = image;
     resizeImage(&visibleImage, size());
@@ -98,31 +91,22 @@ bool ScribbleArea::saveImage(const QString &fileName, const char *fileFormat)
         return false;
     }
 }
-//! [4]
 
-//! [9]
 void ScribbleArea::clearImage()
-//! [9] //! [10]
 {
     image.fill(qRgb(255, 255, 255));
     modified = true;
     update();
 }
-//! [10]
 
-//! [12] //! [13]
 void ScribbleArea::paintEvent(QPaintEvent *event)
-//! [13] //! [14]
 {
     QPainter painter(this);
     const QRect rect = event->rect();
     painter.drawImage(rect.topLeft(), image, rect);
 }
-//! [14]
 
-//! [15]
 void ScribbleArea::resizeEvent(QResizeEvent *event)
-//! [15] //! [16]
 {
     if (width() > image.width() || height() > image.height()) {
         int newWidth = qMax(width() + 128, image.width());
@@ -132,11 +116,8 @@ void ScribbleArea::resizeEvent(QResizeEvent *event)
     }
     QWidget::resizeEvent(event);
 }
-//! [16]
 
-//! [19]
 void ScribbleArea::resizeImage(QImage *image, const QSize &newSize)
-//! [19] //! [20]
 {
     if (image->size() == newSize)
         return;
@@ -147,16 +128,13 @@ void ScribbleArea::resizeImage(QImage *image, const QSize &newSize)
     painter.drawImage(QPoint(0, 0), *image);
     *image = newImage;
 }
-//! [20]
 
-//! [21]
 void ScribbleArea::print()
 {
 #ifndef QT_NO_PRINTER
     QPrinter printer(QPrinter::HighResolution);
 
     QPrintDialog *printDialog = new QPrintDialog(&printer, this);
-    //! [21] //! [22]
     if (printDialog->exec() == QDialog::Accepted) {
         QPainter painter(&printer);
         QRect rect = painter.viewport();
@@ -168,7 +146,6 @@ void ScribbleArea::print()
     }
 #endif // QT_NO_PRINTER
 }
-//! [22]
 
 bool ScribbleArea::event(QEvent *event)
 {
@@ -176,10 +153,13 @@ bool ScribbleArea::event(QEvent *event)
     case QEvent::TouchBegin:
         // MediaCycle adaptation:
         clearImage();
-        std::cout << "TouchBegin" << std::endl;
-        if(oscDockWidget && oscDockWidget->getFeedbackHandler()){
-            oscDockWidget->getFeedbackHandler()->sendMessage( "/mediacycle/browser/reset_pointers" );
-        }
+        //std::cout << "TouchBegin" << std::endl;
+        /*QString mess = QString("/mediacycle/browser/reset_pointers");
+         if(osc_feedback){
+            osc_feedback->sendMessage( mess.toStdString() );
+            if(osc_feedback->isActive())
+                std::cout << mess.toStdString() << std::endl;
+        }*/
         event->accept();
         //return true;
     case QEvent::TouchUpdate:
@@ -194,36 +174,38 @@ bool ScribbleArea::event(QEvent *event)
             switch (touchPoint.state()) {
             case Qt::TouchPointReleased:
             {
+                //std::cout << "TouchPointReleased" << std::endl;
                 // This does never seem to work on Ubuntu
                 QString mess = QString("/mediacycle/browser/") + QString().setNum(touchPoint.id()) + QString("/released");
-                if(oscDockWidget && oscDockWidget->getFeedbackHandler()){
-                    oscDockWidget->getFeedbackHandler()->sendMessage( mess.toStdString() );
-                    if(oscDockWidget->getFeedbackHandler()->isActive())
+                if(osc_feedback){
+                    osc_feedback->sendMessage( mess.toStdString() );
+                    if(osc_feedback->isActive())
                         std::cout << mess.toStdString() << std::endl;
                 }
             }
-            break;
-            //continue;
+                break;
+                //continue;
             case Qt::TouchPointPressed:
             {
-
+                //std::cout << "TouchPointPressed" << std::endl;
                 QString mess = QString("/mediacycle/browser/") + QString().setNum(touchPoint.id()) + QString("/activated");
-                if(oscDockWidget && oscDockWidget->getFeedbackHandler()){
-                    oscDockWidget->getFeedbackHandler()->sendMessage( mess.toStdString() );
-                    if(oscDockWidget->getFeedbackHandler()->isActive())
+                if(osc_feedback){
+                    osc_feedback->sendMessage( mess.toStdString() );
+                    if(osc_feedback->isActive())
                         std::cout << mess.toStdString() << std::endl;
                 }
             }
-            //break;
-            continue;
-            //case Qt::TouchPointStationary:
-            // don't do anything if this touch point hasn't moved
-            //break;
-            //	continue;
-            //case Qt::TouchPointMoved:
-            //	continue;
+                //break;
+                continue;
+                //case Qt::TouchPointStationary:
+                // don't do anything if this touch point hasn't moved
+                //break;
+                //	continue;
+                //case Qt::TouchPointMoved:
+                //	continue;
             default:
             {
+                //std::cout << "TouchDefault" << std::endl;
                 QRectF rect = touchPoint.rect();
                 if (rect.isEmpty()) {
                     qreal diameter = qreal(50) * touchPoint.pressure();
@@ -247,14 +229,20 @@ bool ScribbleArea::event(QEvent *event)
                 float mc_x(0.0f),mc_y(0.0f);
                 mc_x = -1 + 2*touchPoint.normalizedPos().x();
                 mc_y = 1 - 2*touchPoint.normalizedPos().y();
-                if(oscDockWidget && oscDockWidget->getFeedbackHandler()){
-                    oscDockWidget->getFeedbackHandler()->sendMessage( mess.toStdString() );
-                    //if(oscDockWidget->getFeedbackHandler()->isActive())
-                    //  std::cout << mess.toStdString() << " " << mc_x << " " << mc_y << std::endl;
+                //std::cout << mess.toStdString() << " " << mc_x << " " << mc_y << std::endl;
+                if(osc_feedback){
+                    /*osc_feedback->messageBegin(mess.toStdString().c_str());
+                    osc_feedback->messageAppendFloat(mc_x);
+                    osc_feedback->messageAppendFloat(mc_y);
+                    osc_feedback->messageEnd();
+                    osc_feedback->messageSend();*/
+                    lo_send(osc_feedback->getAddress(),mess.toStdString().c_str(),"ff",mc_x,mc_y);
+                    if(osc_feedback->isActive())
+                        std::cout << mess.toStdString() << " " << mc_x << " " << mc_y << std::endl;
                 }
             }
-            //break;
-            continue;
+                //break;
+                continue;
             }
         }
         break;

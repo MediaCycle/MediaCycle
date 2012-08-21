@@ -46,9 +46,8 @@
 #include <QPoint>
 #include <QWidget>
 
-#include <ACOSCDockWidgetQt.h>
+#include "oscdock.h"
 
-//! [0]
 class ScribbleArea : public QWidget
 {
     Q_OBJECT
@@ -77,12 +76,11 @@ private:
     QImage image;
 
     // MediaCycle
-    ACOSCDockWidgetQt *oscDockWidget;
+    simpleoscfeedback *osc_feedback;
     std::list<int> activeIds,toReleaseIds;
 public:
     // MediaCycle
-    void passOscDockWidget(ACOSCDockWidgetQt *_oscDockWidget){oscDockWidget = _oscDockWidget;}
+    void passOscFeedback(simpleoscfeedback *_osc_feedback){osc_feedback = _osc_feedback;}
 };
-//! [0]
 
 #endif

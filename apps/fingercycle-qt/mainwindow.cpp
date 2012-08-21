@@ -43,22 +43,17 @@
 #include "mainwindow.h"
 #include "scribblearea.h"
 
-//! [0]
 MainWindow::MainWindow()
 {
     scribbleArea = new ScribbleArea;
     setCentralWidget(scribbleArea);
 
-    // MediaCycle
-    osc_browser = new ACOscBrowser();
-    osc_feedback = new ACOscFeedback();
-    oscDockWidget = new ACOSCDockWidgetQt();
-    oscDockWidget->setOscBrowser(osc_browser);
+    osc_feedback = new simpleoscfeedback();
+    oscDockWidget = new oscdock();
     oscDockWidget->setOscFeedback(osc_feedback);
-    oscDockWidget->disableControl();
     oscDockWidget->setFeedbackPort(12345);
     addDockWidget(Qt::TopDockWidgetArea,oscDockWidget);
-    scribbleArea->passOscDockWidget(oscDockWidget);
+    scribbleArea->passOscFeedback(osc_feedback);
 
     createActions();
     createMenus();
@@ -66,13 +61,9 @@ MainWindow::MainWindow()
     setWindowTitle(tr("MediaCycle OSC Finger Paint (try with 2+ fingers)"));
     resize(400, 400);
 }
-//! [0]
 
-//! [1]
 void MainWindow::closeEvent(QCloseEvent *event)
-//! [1] //! [2]
 {
-    osc_browser->release();
     osc_feedback->release();
 
     if (maybeSave()) {
@@ -81,11 +72,8 @@ void MainWindow::closeEvent(QCloseEvent *event)
         event->ignore();
     }
 }
-//! [2]
 
-//! [3]
 void MainWindow::open()
-//! [3] //! [4]
 {
     if (maybeSave()) {
         QString fileName = QFileDialog::getOpenFileName(this,
@@ -94,30 +82,25 @@ void MainWindow::open()
             scribbleArea->openImage(fileName);
     }
 }
-//! [4]
 
-//! [5]
 void MainWindow::save()
-//! [5] //! [6]
 {
     QAction *action = qobject_cast<QAction *>(sender());
     QByteArray fileFormat = action->data().toByteArray();
     saveFile(fileFormat);
 }
-//! [6]
 
-//! [11]
 void MainWindow::about()
-//! [11] //! [12]
 {
-    QMessageBox::about(this, tr("About Scribble"),
-            tr("<p>This tool allows to test multiple pointer input into MediaCycle applications through OSC</p>"));
+    QString message = "<p>This tool allows to test multiple pointer input into MediaCycle applications through OSC.</p>";
+#ifdef APPLE
+    message += "<p>To properly use this tool under OSX, you might want to temporarily deactivate OSX gestures: go to System Preferences, Trackpad, then (un)check Three Fingers and Four Fingers assignments.</p>";
+#endif
+    message += "<p>Don't forget to connect OSC feedback and the MediaCycle OSC browser on your MediaCycle app to the same IP and port.</p>";
+    QMessageBox::about(this, tr("About MediaCycle Finger Paint OSC"),message);
 }
-//! [12]
 
-//! [13]
 void MainWindow::createActions()
-//! [13] //! [14]
 {
     /*openAct = new QAction(tr("&Open..."), this);
     openAct->setShortcut(tr("Ctrl+O"));
@@ -150,11 +133,8 @@ void MainWindow::createActions()
     //aboutQtAct = new QAction(tr("About &Qt"), this);
     //connect(aboutQtAct, SIGNAL(triggered()), qApp, SLOT(aboutQt()));
 }
-//! [14]
 
-//! [15]
 void MainWindow::createMenus()
-//! [15] //! [16]
 {
     /*saveAsMenu = new QMenu(tr("&Save As"), this);
     foreach (QAction *action, saveAsActs)
@@ -186,11 +166,8 @@ void MainWindow::createMenus()
     menuBar()->addMenu(optionMenu);
     menuBar()->addMenu(helpMenu);
 }
-//! [16]
 
-//! [17]
 bool MainWindow::maybeSave()
-//! [17] //! [18]
 {
     /*if (scribbleArea->isModified()) {
        QMessageBox::StandardButton ret;
@@ -207,11 +184,8 @@ bool MainWindow::maybeSave()
     }*/
     return true;
 }
-//! [18]
 
-//! [19]
 bool MainWindow::saveFile(const QByteArray &fileFormat)
-//! [19] //! [20]
 {
     QString initialPath = QDir::currentPath() + "/untitled." + fileFormat;
 
@@ -226,4 +200,3 @@ bool MainWindow::saveFile(const QByteArray &fileFormat)
         return scribbleArea->saveImage(fileName, fileFormat);
     }
 }
-//! [20]
