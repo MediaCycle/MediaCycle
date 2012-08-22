@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>250</width>
-    <height>290</height>
+    <height>220</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -19,12 +19,12 @@
   <property name="minimumSize">
    <size>
     <width>250</width>
-    <height>290</height>
+    <height>220</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
-    <width>250</width>
+    <width>500</width>
     <height>290</height>
    </size>
   </property>
@@ -47,619 +47,469 @@
    <property name="minimumSize">
     <size>
      <width>250</width>
-     <height>264</height>
+     <height>200</height>
     </size>
    </property>
-   <widget class="QGroupBox" name="groupBoxFeedback">
+   <widget class="QWidget" name="">
     <property name="geometry">
      <rect>
-      <x>1</x>
-      <y>5</y>
-      <width>250</width>
-      <height>175</height>
+      <x>0</x>
+      <y>0</y>
+      <width>266</width>
+      <height>181</height>
      </rect>
     </property>
-    <property name="sizePolicy">
-     <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
-      <horstretch>0</horstretch>
-      <verstretch>0</verstretch>
-     </sizepolicy>
-    </property>
-    <property name="minimumSize">
-     <size>
-      <width>231</width>
-      <height>75</height>
-     </size>
-    </property>
-    <property name="maximumSize">
-     <size>
-      <width>16777215</width>
-      <height>175</height>
-     </size>
-    </property>
-    <property name="title">
-     <string>Audio Feedback</string>
-    </property>
-    <property name="flat">
-     <bool>true</bool>
-    </property>
-    <widget class="QPushButton" name="pushButtonMuteAll">
-     <property name="geometry">
-      <rect>
-       <x>0</x>
-       <y>30</y>
-       <width>250</width>
-       <height>32</height>
-      </rect>
-     </property>
-     <property name="maximumSize">
-      <size>
-       <width>250</width>
-       <height>32</height>
-      </size>
-     </property>
-     <property name="font">
-      <font>
-       <pointsize>10</pointsize>
-      </font>
-     </property>
-     <property name="text">
-      <string>Mute All</string>
-     </property>
-    </widget>
-    <widget class="QGroupBox" name="groupBoxModes">
-     <property name="geometry">
-      <rect>
-       <x>6</x>
-       <y>61</y>
-       <width>231</width>
-       <height>111</height>
-      </rect>
-     </property>
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="minimumSize">
-      <size>
-       <width>231</width>
-       <height>50</height>
-      </size>
-     </property>
-     <property name="maximumSize">
-      <size>
-       <width>231</width>
-       <height>120</height>
-      </size>
-     </property>
-     <property name="font">
-      <font>
-       <pointsize>10</pointsize>
-      </font>
-     </property>
-     <property name="title">
-      <string>Playback modes</string>
-     </property>
-     <property name="flat">
-      <bool>false</bool>
-     </property>
-     <widget class="QLabel" name="labelForce">
-      <property name="geometry">
-       <rect>
-        <x>180</x>
-        <y>22</y>
-        <width>25</width>
-        <height>25</height>
-       </rect>
-      </property>
-      <property name="minimumSize">
-       <size>
-        <width>25</width>
-        <height>25</height>
-       </size>
-      </property>
-      <property name="maximumSize">
-       <size>
-        <width>25</width>
-        <height>20</height>
-       </size>
-      </property>
-      <property name="font">
-       <font>
-        <pointsize>10</pointsize>
-       </font>
-      </property>
-      <property name="text">
-       <string>Force</string>
-      </property>
-     </widget>
-     <widget class="QLabel" name="labelSynchroMode">
-      <property name="geometry">
-       <rect>
-        <x>11</x>
-        <y>43</y>
-        <width>40</width>
-        <height>25</height>
-       </rect>
-      </property>
-      <property name="minimumSize">
-       <size>
-        <width>40</width>
-        <height>25</height>
-       </size>
-      </property>
-      <property name="maximumSize">
-       <size>
-        <width>40</width>
-        <height>20</height>
-       </size>
-      </property>
-      <property name="font">
-       <font>
-        <pointsize>10</pointsize>
-       </font>
-      </property>
-      <property name="text">
-       <string>Synchro</string>
-      </property>
-     </widget>
-     <widget class="QComboBox" name="comboBoxScaleMode">
-      <property name="enabled">
-       <bool>false</bool>
-      </property>
-      <property name="geometry">
-       <rect>
-        <x>60</x>
-        <y>62</y>
-        <width>105</width>
-        <height>25</height>
-       </rect>
-      </property>
-      <property name="minimumSize">
-       <size>
-        <width>0</width>
-        <height>25</height>
-       </size>
-      </property>
-      <property name="maximumSize">
-       <size>
-        <width>125</width>
-        <height>20</height>
-       </size>
-      </property>
-      <property name="font">
-       <font>
-        <pointsize>10</pointsize>
-       </font>
-      </property>
-      <property name="currentIndex">
-       <number>-1</number>
-      </property>
-     </widget>
-     <widget class="QLabel" name="labelScaleMode">
-      <property name="geometry">
-       <rect>
-        <x>11</x>
-        <y>64</y>
-        <width>40</width>
-        <height>25</height>
-       </rect>
-      </property>
-      <property name="minimumSize">
-       <size>
-        <width>40</width>
-        <height>25</height>
-       </size>
-      </property>
-      <property name="maximumSize">
-       <size>
-        <width>40</width>
-        <height>20</height>
-       </size>
-      </property>
-      <property name="font">
-       <font>
-        <pointsize>10</pointsize>
-       </font>
-      </property>
-      <property name="text">
-       <string>Scale</string>
-      </property>
-     </widget>
-     <widget class="QComboBox" name="comboBoxPlaybackPreset">
-      <property name="enabled">
-       <bool>true</bool>
-      </property>
-      <property name="geometry">
-       <rect>
-        <x>60</x>
-        <y>20</y>
-        <width>105</width>
-        <height>25</height>
-       </rect>
-      </property>
-      <property name="minimumSize">
-       <size>
-        <width>0</width>
-        <height>25</height>
-       </size>
-      </property>
-      <property name="maximumSize">
-       <size>
-        <width>125</width>
-        <height>20</height>
-       </size>
-      </property>
-      <property name="font">
-       <font>
-        <pointsize>10</pointsize>
-       </font>
-      </property>
-      <property name="currentIndex">
-       <number>0</number>
-      </property>
-      <item>
-       <property name="text">
-        <string>Sync Looping</string>
+    <layout class="QVBoxLayout" name="verticalLayout">
+     <item>
+      <widget class="QPushButton" name="pushButtonMuteAll">
+       <property name="maximumSize">
+        <size>
+         <width>250</width>
+         <height>32</height>
+        </size>
        </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>High-Fidelity</string>
+       <property name="font">
+        <font>
+         <pointsize>10</pointsize>
+        </font>
        </property>
-      </item>
-      <item>
        <property name="text">
-        <string>Custom</string>
+        <string>Mute All</string>
        </property>
-      </item>
-     </widget>
-     <widget class="QCheckBox" name="checkBoxSynchroMode">
-      <property name="enabled">
-       <bool>false</bool>
-      </property>
-      <property name="geometry">
-       <rect>
-        <x>186</x>
-        <y>40</y>
-        <width>18</width>
-        <height>20</height>
-       </rect>
-      </property>
-      <property name="minimumSize">
-       <size>
-        <width>18</width>
-        <height>20</height>
-       </size>
-      </property>
-      <property name="maximumSize">
-       <size>
-        <width>18</width>
-        <height>20</height>
-       </size>
-      </property>
-      <property name="toolTip">
-       <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+      </widget>
+     </item>
+     <item>
+      <widget class="QGroupBox" name="groupBoxModes">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>230</width>
+         <height>50</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>500</width>
+         <height>120</height>
+        </size>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>10</pointsize>
+        </font>
+       </property>
+       <property name="title">
+        <string>Playback modes</string>
+       </property>
+       <property name="flat">
+        <bool>true</bool>
+       </property>
+       <layout class="QGridLayout" name="gridLayout_2">
+        <item row="2" column="1">
+         <widget class="QComboBox" name="comboBoxSynchroMode">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>25</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>125</width>
+            <height>20</height>
+           </size>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>10</pointsize>
+           </font>
+          </property>
+          <property name="currentIndex">
+           <number>-1</number>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QComboBox" name="comboBoxScaleMode">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>25</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>125</width>
+            <height>20</height>
+           </size>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>10</pointsize>
+           </font>
+          </property>
+          <property name="currentIndex">
+           <number>-1</number>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="3">
+         <widget class="QCheckBox" name="checkBoxSynchroMode">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>18</width>
+            <height>20</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>18</width>
+            <height>20</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Lucida Grande'; font-size:13pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;unchecked&lt;/span&gt;: default mode per loop, but if tempo is detected in a loop, the &amp;quot;&lt;span style=&quot; font-weight:600;&quot;&gt;AutoBeat&lt;/span&gt;&amp;quot; mode is used for the given loop&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;checked&lt;/span&gt;: forced for all loops&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-      </property>
-      <property name="text">
-       <string/>
-      </property>
-     </widget>
-     <widget class="QCheckBox" name="checkBoxScaleMode">
-      <property name="enabled">
-       <bool>false</bool>
-      </property>
-      <property name="geometry">
-       <rect>
-        <x>186</x>
-        <y>61</y>
-        <width>18</width>
-        <height>20</height>
-       </rect>
-      </property>
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="minimumSize">
-       <size>
-        <width>18</width>
-        <height>20</height>
-       </size>
-      </property>
-      <property name="maximumSize">
-       <size>
-        <width>18</width>
-        <height>20</height>
-       </size>
-      </property>
-      <property name="toolTip">
-       <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0">
+         <widget class="QLabel" name="labelPreset">
+          <property name="minimumSize">
+           <size>
+            <width>40</width>
+            <height>25</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>10</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>Preset</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="labelScaleMode">
+          <property name="minimumSize">
+           <size>
+            <width>40</width>
+            <height>25</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>10</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>Scale</string>
+          </property>
+         </widget>
+        </item>
+        <item row="6" column="3">
+         <widget class="QSpinBox" name="spinBoxBPM">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>25</height>
+           </size>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>10</pointsize>
+           </font>
+          </property>
+          <property name="minimum">
+           <number>1</number>
+          </property>
+          <property name="maximum">
+           <number>240</number>
+          </property>
+          <property name="value">
+           <number>100</number>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="3">
+         <widget class="QLabel" name="labelForce">
+          <property name="minimumSize">
+           <size>
+            <width>25</width>
+            <height>25</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>25</width>
+            <height>20</height>
+           </size>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>10</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>Force</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QComboBox" name="comboBoxPlaybackPreset">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>25</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>125</width>
+            <height>20</height>
+           </size>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>10</pointsize>
+           </font>
+          </property>
+          <property name="currentIndex">
+           <number>0</number>
+          </property>
+          <item>
+           <property name="text">
+            <string>Sync Looping</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>High-Fidelity</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Custom</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item row="6" column="0">
+         <widget class="QLabel" name="label">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>25</height>
+           </size>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>10</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>BPM</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="3">
+         <widget class="QCheckBox" name="checkBoxScaleMode">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>18</width>
+            <height>20</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>18</width>
+            <height>20</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Lucida Grande'; font-size:13pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;unchecked&lt;/span&gt;: default mode per loop, but if tempo is detected in a loop, the &amp;quot;&lt;span style=&quot; font-weight:600;&quot;&gt;Vocode&lt;/span&gt;&amp;quot; mode is used for the given loop&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;checked&lt;/span&gt;: forced for all loops&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-      </property>
-      <property name="text">
-       <string/>
-      </property>
-     </widget>
-     <widget class="QLabel" name="labelPreset">
-      <property name="geometry">
-       <rect>
-        <x>11</x>
-        <y>22</y>
-        <width>40</width>
-        <height>25</height>
-       </rect>
-      </property>
-      <property name="minimumSize">
-       <size>
-        <width>40</width>
-        <height>25</height>
-       </size>
-      </property>
-      <property name="maximumSize">
-       <size>
-        <width>40</width>
-        <height>20</height>
-       </size>
-      </property>
-      <property name="font">
-       <font>
-        <pointsize>10</pointsize>
-       </font>
-      </property>
-      <property name="text">
-       <string>Preset</string>
-      </property>
-     </widget>
-     <widget class="QComboBox" name="comboBoxSynchroMode">
-      <property name="enabled">
-       <bool>false</bool>
-      </property>
-      <property name="geometry">
-       <rect>
-        <x>60</x>
-        <y>41</y>
-        <width>105</width>
-        <height>25</height>
-       </rect>
-      </property>
-      <property name="minimumSize">
-       <size>
-        <width>0</width>
-        <height>25</height>
-       </size>
-      </property>
-      <property name="maximumSize">
-       <size>
-        <width>125</width>
-        <height>20</height>
-       </size>
-      </property>
-      <property name="font">
-       <font>
-        <pointsize>10</pointsize>
-       </font>
-      </property>
-      <property name="currentIndex">
-       <number>-1</number>
-      </property>
-     </widget>
-     <widget class="QSlider" name="horizontalSliderBPM">
-      <property name="geometry">
-       <rect>
-        <x>64</x>
-        <y>87</y>
-        <width>96</width>
-        <height>16</height>
-       </rect>
-      </property>
-      <property name="minimum">
-       <number>1</number>
-      </property>
-      <property name="maximum">
-       <number>240</number>
-      </property>
-      <property name="value">
-       <number>100</number>
-      </property>
-      <property name="orientation">
-       <enum>Qt::Horizontal</enum>
-      </property>
-     </widget>
-     <widget class="QLabel" name="labelScaleBPM">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>85</y>
-        <width>40</width>
-        <height>25</height>
-       </rect>
-      </property>
-      <property name="minimumSize">
-       <size>
-        <width>40</width>
-        <height>25</height>
-       </size>
-      </property>
-      <property name="maximumSize">
-       <size>
-        <width>40</width>
-        <height>20</height>
-       </size>
-      </property>
-      <property name="font">
-       <font>
-        <pointsize>10</pointsize>
-       </font>
-      </property>
-      <property name="text">
-       <string>BPM</string>
-      </property>
-     </widget>
-     <widget class="QSpinBox" name="spinBoxBPM">
-      <property name="geometry">
-       <rect>
-        <x>180</x>
-        <y>80</y>
-        <width>41</width>
-        <height>25</height>
-       </rect>
-      </property>
-      <property name="font">
-       <font>
-        <pointsize>10</pointsize>
-       </font>
-      </property>
-      <property name="minimum">
-       <number>1</number>
-      </property>
-      <property name="maximum">
-       <number>240</number>
-      </property>
-      <property name="value">
-       <number>100</number>
-      </property>
-     </widget>
-    </widget>
-   </widget>
-   <widget class="QGroupBox" name="groupBoxVisualization">
-    <property name="geometry">
-     <rect>
-      <x>1</x>
-      <y>180</y>
-      <width>250</width>
-      <height>75</height>
-     </rect>
-    </property>
-    <property name="sizePolicy">
-     <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
-      <horstretch>0</horstretch>
-      <verstretch>0</verstretch>
-     </sizepolicy>
-    </property>
-    <property name="minimumSize">
-     <size>
-      <width>250</width>
-      <height>75</height>
-     </size>
-    </property>
-    <property name="maximumSize">
-     <size>
-      <width>250</width>
-      <height>75</height>
-     </size>
-    </property>
-    <property name="title">
-     <string>Audio Visualization</string>
-    </property>
-    <property name="flat">
-     <bool>true</bool>
-    </property>
-    <widget class="QGroupBox" name="groupBoxWaveform">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>20</y>
-       <width>231</width>
-       <height>55</height>
-      </rect>
-     </property>
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="minimumSize">
-      <size>
-       <width>211</width>
-       <height>55</height>
-      </size>
-     </property>
-     <property name="maximumSize">
-      <size>
-       <width>250</width>
-       <height>55</height>
-      </size>
-     </property>
-     <property name="title">
-      <string>Waveform</string>
-     </property>
-     <widget class="QWidget" name="layoutWidgetWaveform">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>20</y>
-        <width>191</width>
-        <height>26</height>
-       </rect>
-      </property>
-      <layout class="QGridLayout" name="gridLayoutWaveform">
-       <property name="sizeConstraint">
-        <enum>QLayout::SetMinimumSize</enum>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLabel" name="labelSynchroMode">
+          <property name="minimumSize">
+           <size>
+            <width>40</width>
+            <height>25</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>10</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>Synchro</string>
+          </property>
+         </widget>
+        </item>
+        <item row="6" column="1">
+         <widget class="QSlider" name="horizontalSliderBPM">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>25</height>
+           </size>
+          </property>
+          <property name="minimum">
+           <number>1</number>
+          </property>
+          <property name="maximum">
+           <number>240</number>
+          </property>
+          <property name="value">
+           <number>100</number>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+       </layout>
+       <zorder>groupBoxWaveform</zorder>
+       <zorder>groupBoxWaveform</zorder>
+       <zorder>labelPreset</zorder>
+       <zorder>labelForce</zorder>
+       <zorder>comboBoxPlaybackPreset</zorder>
+       <zorder>labelScaleMode</zorder>
+       <zorder>comboBoxScaleMode</zorder>
+       <zorder>checkBoxScaleMode</zorder>
+       <zorder>labelSynchroMode</zorder>
+       <zorder>comboBoxSynchroMode</zorder>
+       <zorder>checkBoxSynchroMode</zorder>
+       <zorder>horizontalSliderBPM</zorder>
+       <zorder>spinBoxBPM</zorder>
+       <zorder>label</zorder>
+      </widget>
+     </item>
+     <item>
+      <widget class="QGroupBox" name="groupBoxWaveform">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
        </property>
-       <item row="0" column="0">
-        <widget class="QLabel" name="labelWaveformBrowser">
-         <property name="maximumSize">
-          <size>
-           <width>50</width>
-           <height>16777215</height>
-          </size>
-         </property>
-         <property name="font">
-          <font>
-           <pointsize>10</pointsize>
-          </font>
-         </property>
-         <property name="text">
-          <string>Browser</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="1">
-        <widget class="QComboBox" name="comboBoxWaveformBrowser">
-         <property name="maximumSize">
-          <size>
-           <width>200</width>
-           <height>16777215</height>
-          </size>
-         </property>
-         <property name="font">
-          <font>
-           <pointsize>10</pointsize>
-          </font>
-         </property>
-         <property name="currentIndex">
-          <number>1</number>
-         </property>
-         <item>
-          <property name="text">
-           <string>None</string>
+       <property name="minimumSize">
+        <size>
+         <width>230</width>
+         <height>60</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>500</width>
+         <height>55</height>
+        </size>
+       </property>
+       <property name="title">
+        <string>Waveform</string>
+       </property>
+       <property name="flat">
+        <bool>true</bool>
+       </property>
+       <layout class="QGridLayout" name="gridLayout">
+        <item row="0" column="0">
+         <widget class="QComboBox" name="comboBoxWaveformBrowser">
+          <property name="maximumSize">
+           <size>
+            <width>200</width>
+            <height>16777215</height>
+           </size>
           </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>Classic</string>
+          <property name="font">
+           <font>
+            <pointsize>10</pointsize>
+           </font>
           </property>
-         </item>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-    </widget>
+          <property name="currentIndex">
+           <number>1</number>
+          </property>
+          <item>
+           <property name="text">
+            <string>None</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Classic</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+       </layout>
+       <zorder></zorder>
+       <zorder>comboBoxWaveformBrowser</zorder>
+      </widget>
+     </item>
+    </layout>
    </widget>
   </widget>
  </widget>

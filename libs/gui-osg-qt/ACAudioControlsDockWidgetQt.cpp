@@ -39,14 +39,14 @@
 #include "ACAudioControlsDockWidgetQt.h"
 
 ACAudioControlsDockWidgetQt::ACAudioControlsDockWidgetQt(QWidget *parent)
-: ACAbstractDockWidgetQt(parent, MEDIA_TYPE_AUDIO,"ACAudioControlsDockWidgetQt")
+    : ACAbstractDockWidgetQt(parent, MEDIA_TYPE_AUDIO,"ACAudioControlsDockWidgetQt")
 {
-	#if defined (SUPPORT_AUDIO)
-	ui.setupUi(this); // first thing to do
-	
-	this->initFeedbackModes();
-	
-        /*ui.comboBoxScaleMode->hide();
+#if defined (SUPPORT_AUDIO)
+    ui.setupUi(this); // first thing to do
+
+    this->initFeedbackModes();
+
+    /*ui.comboBoxScaleMode->hide();
         ui.checkBoxScaleMode->hide();
         ui.labelScaleMode->hide();
         ui.comboBoxSynchroMode->hide();
@@ -57,18 +57,27 @@ ACAudioControlsDockWidgetQt::ACAudioControlsDockWidgetQt(QWidget *parent)
         this->setMinimumHeight( ui.groupBoxFeedback->minimumHeight() + ui.groupBoxVisualization->minimumHeight() );
         this->resize(this->sizeHint());*/
 
-        connect(ui.spinBoxBPM,SIGNAL(valueChanged(int)),ui.horizontalSliderBPM,SLOT(setValue(int)));
-        connect(ui.horizontalSliderBPM,SIGNAL(valueChanged(int)),ui.spinBoxBPM,SLOT(setValue(int)));
+    connect(ui.spinBoxBPM,SIGNAL(valueChanged(int)),ui.horizontalSliderBPM,SLOT(setValue(int)));
+    connect(ui.horizontalSliderBPM,SIGNAL(valueChanged(int)),ui.spinBoxBPM,SLOT(setValue(int)));
 
-        this->show();
+#ifndef USE_DEBUG
+    int custom_index = ui.comboBoxPlaybackPreset->findText("Custom");
+    if(custom_index != -1)
+        ui.comboBoxPlaybackPreset->removeItem(custom_index);
+    ui.labelForce->hide();
+    ui.checkBoxScaleMode->hide();
+    ui.checkBoxSynchroMode->hide();
+#endif
 
-	#endif //defined (SUPPORT_AUDIO)
+    this->show();
+
+#endif //defined (SUPPORT_AUDIO)
 }
 
 ACAudioControlsDockWidgetQt::~ACAudioControlsDockWidgetQt(){
 #if defined (SUPPORT_AUDIO)
-	//delete audio_engine;
-	//delete media_cycle;
+    //delete audio_engine;
+    //delete media_cycle;
 #endif //defined (SUPPORT_AUDIO)
 }
 
@@ -78,40 +87,40 @@ bool ACAudioControlsDockWidgetQt::canBeVisible(ACMediaType _media_type){
 
 #if defined (SUPPORT_AUDIO)
 void ACAudioControlsDockWidgetQt::initFeedbackModes(){
-	ui.comboBoxSynchroMode->clear();
-	#ifdef USE_DEBUG
-	stringToAudioEngineSynchroModeMap::const_iterator synchro_mode = stringToAudioEngineSynchroMode.begin();
-	for(;synchro_mode!=stringToAudioEngineSynchroMode.end();++synchro_mode){
-		//std::cout << "Synchro mode: " << synchro_mode->first << std::endl;
-		ui.comboBoxSynchroMode->addItem(QString((synchro_mode->first).c_str()));
-	}
-	#else
-	ui.comboBoxSynchroMode->addItem(QString("None"));
-	ui.comboBoxSynchroMode->addItem(QString("AutoBeat"));
-	#endif
-	
-	ui.comboBoxScaleMode->clear();
-	#ifdef USE_DEBUG
-	stringToAudioEngineScaleModeMap::const_iterator scale_mode = stringToAudioEngineScaleMode.begin();
-	for(;scale_mode!=stringToAudioEngineScaleMode.end();++scale_mode){
-		//std::cout << "Scale mode: " << scale_mode->first << std::endl;
-		ui.comboBoxScaleMode->addItem(QString((scale_mode->first).c_str()));
-	}
-	#else
-	ui.comboBoxScaleMode->addItem(QString("None"));
-	ui.comboBoxScaleMode->addItem(QString("Vocode"));
-	#endif
-	
-	ui.comboBoxPlaybackPreset->setCurrentIndex(ui.comboBoxPlaybackPreset->findText("Sync Looping"));
-	on_comboBoxPlaybackPreset_activated("Sync Looping");
+    ui.comboBoxSynchroMode->clear();
+#ifdef USE_DEBUG
+    stringToAudioEngineSynchroModeMap::const_iterator synchro_mode = stringToAudioEngineSynchroMode.begin();
+    for(;synchro_mode!=stringToAudioEngineSynchroMode.end();++synchro_mode){
+        //std::cout << "Synchro mode: " << synchro_mode->first << std::endl;
+        ui.comboBoxSynchroMode->addItem(QString((synchro_mode->first).c_str()));
+    }
+#else
+    ui.comboBoxSynchroMode->addItem(QString("None"));
+    ui.comboBoxSynchroMode->addItem(QString("AutoBeat"));
+#endif
+
+    ui.comboBoxScaleMode->clear();
+#ifdef USE_DEBUG
+    stringToAudioEngineScaleModeMap::const_iterator scale_mode = stringToAudioEngineScaleMode.begin();
+    for(;scale_mode!=stringToAudioEngineScaleMode.end();++scale_mode){
+        //std::cout << "Scale mode: " << scale_mode->first << std::endl;
+        ui.comboBoxScaleMode->addItem(QString((scale_mode->first).c_str()));
+    }
+#else
+    ui.comboBoxScaleMode->addItem(QString("None"));
+    ui.comboBoxScaleMode->addItem(QString("Vocode"));
+#endif
+
+    ui.comboBoxPlaybackPreset->setCurrentIndex(ui.comboBoxPlaybackPreset->findText("Sync Looping"));
+    on_comboBoxPlaybackPreset_activated("Sync Looping");
 }	
 
 void ACAudioControlsDockWidgetQt::on_pushButtonMuteAll_clicked()
 {
-	if (media_cycle){
-		media_cycle->resetPointers();//CF hack dirty
-		media_cycle->muteAllSources();
-	}
+    if (media_cycle){
+        media_cycle->resetPointers();//CF hack dirty
+        media_cycle->muteAllSources();
+    }
 }
 
 void ACAudioControlsDockWidgetQt::on_spinBoxBPM_valueChanged(int value)
@@ -131,9 +140,9 @@ void ACAudioControlsDockWidgetQt::on_comboBoxWaveformBrowser_activated(const QSt
     if (media_cycle == 0) return;
     std::cout << "Browser waveform type: " << text.toStdString() << std::endl;
     if (text == "None")
-    	osg_view->getBrowserRenderer()->setAudioWaveformType(AC_BROWSER_AUDIO_WAVEFORM_NONE);
+        osg_view->getBrowserRenderer()->setAudioWaveformType(AC_BROWSER_AUDIO_WAVEFORM_NONE);
     else if (text == "Classic")
-    	osg_view->getBrowserRenderer()->setAudioWaveformType(AC_BROWSER_AUDIO_WAVEFORM_CLASSIC);
+        osg_view->getBrowserRenderer()->setAudioWaveformType(AC_BROWSER_AUDIO_WAVEFORM_CLASSIC);
     osg_view->setFocus();
 }
 
@@ -158,8 +167,8 @@ void ACAudioControlsDockWidgetQt::on_checkBoxSynchroMode_stateChanged(int state)
 
 void ACAudioControlsDockWidgetQt::on_checkBoxScaleMode_stateChanged(int state)
 {
-    if (media_cycle == 0 && audio_engine == 0) return;	
-	audio_engine->forceDefaultScaleMode((bool)(state));
+    if (media_cycle == 0 && audio_engine == 0) return;
+    audio_engine->forceDefaultScaleMode((bool)(state));
 }
 
 void ACAudioControlsDockWidgetQt::on_comboBoxSynchroMode_activated(const QString & text)
@@ -182,23 +191,23 @@ void ACAudioControlsDockWidgetQt::on_comboBoxScaleMode_activated(const QString &
 
 void ACAudioControlsDockWidgetQt::on_comboBoxPlaybackPreset_activated(const QString & text)
 {
-	if(text == "Sync Looping"){
-		on_comboBoxSynchroMode_activated("AutoBeat");
-		on_comboBoxScaleMode_activated("Vocode");
-		ui.comboBoxScaleMode->setCurrentIndex(ui.comboBoxScaleMode->findText("Vocode"));
-		ui.comboBoxSynchroMode->setCurrentIndex(ui.comboBoxSynchroMode->findText("AutoBeat"));	
-		on_checkBoxSynchroMode_stateChanged(0);
-		on_checkBoxScaleMode_stateChanged(0);
-		ui.checkBoxSynchroMode->setChecked(false);
-		ui.checkBoxScaleMode->setChecked(false);
-		ui.comboBoxScaleMode->setEnabled(false);
-		ui.checkBoxScaleMode->setEnabled(false);
-		ui.comboBoxSynchroMode->setEnabled(false);
-		ui.checkBoxSynchroMode->setEnabled(false);
-                ui.horizontalSliderBPM->setEnabled(true);
-                ui.spinBoxBPM->setEnabled(true);
+    if(text == "Sync Looping"){
+        on_comboBoxSynchroMode_activated("AutoBeat");
+        on_comboBoxScaleMode_activated("Vocode");
+        ui.comboBoxScaleMode->setCurrentIndex(ui.comboBoxScaleMode->findText("Vocode"));
+        ui.comboBoxSynchroMode->setCurrentIndex(ui.comboBoxSynchroMode->findText("AutoBeat"));
+        on_checkBoxSynchroMode_stateChanged(0);
+        on_checkBoxScaleMode_stateChanged(0);
+        ui.checkBoxSynchroMode->setChecked(false);
+        ui.checkBoxScaleMode->setChecked(false);
+        ui.comboBoxScaleMode->setEnabled(false);
+        ui.checkBoxScaleMode->setEnabled(false);
+        ui.comboBoxSynchroMode->setEnabled(false);
+        ui.checkBoxSynchroMode->setEnabled(false);
+        ui.horizontalSliderBPM->setEnabled(true);
+        ui.spinBoxBPM->setEnabled(true);
 
-                /*ui.comboBoxScaleMode->hide();
+        /*ui.comboBoxScaleMode->hide();
                 ui.checkBoxScaleMode->hide();
                 ui.labelScaleMode->hide();
                 ui.comboBoxSynchroMode->hide();
@@ -207,24 +216,24 @@ void ACAudioControlsDockWidgetQt::on_comboBoxPlaybackPreset_activated(const QStr
                 ui.labelForce->hide();
                 ui.groupBoxModes->adjustSize();
                 ui.dockWidgetContents->adjustSize();*/
-	}	
-	else if(text == "High-Fidelity"){
-		on_comboBoxSynchroMode_activated("None");
-		on_comboBoxScaleMode_activated("None");
-		ui.comboBoxScaleMode->setCurrentIndex(ui.comboBoxScaleMode->findText("None"));
-		ui.comboBoxSynchroMode->setCurrentIndex(ui.comboBoxSynchroMode->findText("None"));	
-		on_checkBoxSynchroMode_stateChanged(1);
-		on_checkBoxScaleMode_stateChanged(1);
-		ui.checkBoxSynchroMode->setChecked(true);
-		ui.checkBoxScaleMode->setChecked(true);		
-		ui.comboBoxScaleMode->setEnabled(false);
-		ui.checkBoxScaleMode->setEnabled(false);
-		ui.comboBoxSynchroMode->setEnabled(false);
-		ui.checkBoxSynchroMode->setEnabled(false);
-                ui.horizontalSliderBPM->setEnabled(false);
-                ui.spinBoxBPM->setEnabled(false);
+    }
+    else if(text == "High-Fidelity"){
+        on_comboBoxSynchroMode_activated("None");
+        on_comboBoxScaleMode_activated("None");
+        ui.comboBoxScaleMode->setCurrentIndex(ui.comboBoxScaleMode->findText("None"));
+        ui.comboBoxSynchroMode->setCurrentIndex(ui.comboBoxSynchroMode->findText("None"));
+        on_checkBoxSynchroMode_stateChanged(1);
+        on_checkBoxScaleMode_stateChanged(1);
+        ui.checkBoxSynchroMode->setChecked(true);
+        ui.checkBoxScaleMode->setChecked(true);
+        ui.comboBoxScaleMode->setEnabled(false);
+        ui.checkBoxScaleMode->setEnabled(false);
+        ui.comboBoxSynchroMode->setEnabled(false);
+        ui.checkBoxSynchroMode->setEnabled(false);
+        ui.horizontalSliderBPM->setEnabled(false);
+        ui.spinBoxBPM->setEnabled(false);
 
-                /*ui.comboBoxScaleMode->hide();
+        /*ui.comboBoxScaleMode->hide();
                 ui.checkBoxScaleMode->hide();
                 ui.labelScaleMode->hide();
                 ui.comboBoxSynchroMode->hide();
@@ -233,16 +242,16 @@ void ACAudioControlsDockWidgetQt::on_comboBoxPlaybackPreset_activated(const QStr
                 ui.labelForce->hide();
                 ui.groupBoxModes->adjustSize();
                 ui.dockWidgetContents->adjustSize();*/
-	}		
-	else if(text == "Custom"){
-		ui.comboBoxScaleMode->setEnabled(true);
-		ui.checkBoxScaleMode->setEnabled(true);
-		ui.comboBoxSynchroMode->setEnabled(true);
-		ui.checkBoxSynchroMode->setEnabled(true);
-                ui.horizontalSliderBPM->setEnabled(true);
-                ui.spinBoxBPM->setEnabled(true);
+    }
+    else if(text == "Custom"){
+        ui.comboBoxScaleMode->setEnabled(true);
+        ui.checkBoxScaleMode->setEnabled(true);
+        ui.comboBoxSynchroMode->setEnabled(true);
+        ui.checkBoxSynchroMode->setEnabled(true);
+        ui.horizontalSliderBPM->setEnabled(true);
+        ui.spinBoxBPM->setEnabled(true);
 
-                /*ui.comboBoxScaleMode->show();
+        /*ui.comboBoxScaleMode->show();
                 ui.checkBoxScaleMode->show();
                 ui.labelScaleMode->show();
                 ui.comboBoxSynchroMode->show();
@@ -251,22 +260,22 @@ void ACAudioControlsDockWidgetQt::on_comboBoxPlaybackPreset_activated(const QStr
                 ui.labelForce->show();
                 ui.groupBoxModes->adjustSize();
                 ui.dockWidgetContents->adjustSize();*/
-	}			
+    }
 }
 
 void ACAudioControlsDockWidgetQt::setAudioEngine(ACAudioEngine* _audio_engine)
 { 
-	audio_engine = _audio_engine; 
-	if(audio_engine){
-		audio_engine->forceDefaultSynchroMode(ui.checkBoxSynchroMode->isChecked());	
-		audio_engine->forceDefaultScaleMode(ui.checkBoxScaleMode->isChecked());
-		stringToAudioEngineSynchroModeMap::const_iterator synchro_mode = stringToAudioEngineSynchroMode.find(ui.comboBoxSynchroMode->currentText().toStdString());
-		if (synchro_mode != stringToAudioEngineSynchroMode.end())
-			audio_engine->setDefaultSynchroMode(synchro_mode->second);
-		stringToAudioEngineScaleModeMap::const_iterator scale_mode = stringToAudioEngineScaleMode.find(ui.comboBoxScaleMode->currentText().toStdString());
-		if (scale_mode != stringToAudioEngineScaleMode.end())
-			audio_engine->setDefaultScaleMode(scale_mode->second);
-	}
+    audio_engine = _audio_engine;
+    if(audio_engine){
+        audio_engine->forceDefaultSynchroMode(ui.checkBoxSynchroMode->isChecked());
+        audio_engine->forceDefaultScaleMode(ui.checkBoxScaleMode->isChecked());
+        stringToAudioEngineSynchroModeMap::const_iterator synchro_mode = stringToAudioEngineSynchroMode.find(ui.comboBoxSynchroMode->currentText().toStdString());
+        if (synchro_mode != stringToAudioEngineSynchroMode.end())
+            audio_engine->setDefaultSynchroMode(synchro_mode->second);
+        stringToAudioEngineScaleModeMap::const_iterator scale_mode = stringToAudioEngineScaleMode.find(ui.comboBoxScaleMode->currentText().toStdString());
+        if (scale_mode != stringToAudioEngineScaleMode.end())
+            audio_engine->setDefaultScaleMode(scale_mode->second);
+    }
 }
 
 // XS TODO : recuperate these from Audiocycle ?
