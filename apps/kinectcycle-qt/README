@@ -1,0 +1,56 @@
+	QtKinectwrapper - Qt Kinect Wrapper Class 
+	Copyright (C) 2011-2012:
+			Daniel Roggen, droggen@gmail.com			
+			
+	All rights reserved.
+
+
+
+History
+-------
+
+17.03.2012:
+	KinectLogger:
+		Added support for variable frame rate videos (-vfr option) and setting a limit to the video encoding buffer (-vmaxbuf option)
+
+15.03.2012:
+	KinectLogger:
+		Added threaded video encoding with backlog - addresses problem when the computer can't keep up with video encoding, at the expense of using more RAM
+		Check the "backlog" indication in the app status bar to see how many frames haven't yet been encoded. 
+		When the user closes the app, it will encoded the backlog of frames. Thus the app may take some time before closing to complete the encoding.
+    
+		Added new APIs to the QtKinectWrapper: getCameraDepthBodies, getCameraDepth.
+
+21.09.2011:
+  KinectLogger:
+    Added option to create a video containing the depth map and camera image. Relies on QtFFmpegWrapper (http://code.google.com/p/qtffmpegwrapper/)
+
+19.09.2011:
+	KinectLogger:
+		Removed meaningless Z values for screen projections from logging/streaming
+		Added application icon
+
+05.09.2011: Basic functionality
+
+
+License
+-------
+
+Modified BSD license
+
+
+Dependencies
+------------
+
+- OpenNI, PrimeSense Sensor Kinect, PrimeSense NITE
+- License key for OpenNI (the free provided by PrimeSense for the kinect will do)
+
+Known working combinations for windows 7 32 & 64:
+1. OpenNI-Win32-v1.0.0.25, Sensor-Kinect-Win32-5.0.0, NITE-Win32-v1.3.0.18
+2. OpenNI-Win32-1.3.2.1-Dev, SensorKinect-Win-OpenSource32-5.0.3.3, NITE-Win32-1.4.0.5-Dev
+
+Known issues
+------------
+- The OpenNI API is fast moving... Some functions used here are deprecated (but still work).
+- Lots of pragma warning when compiling with mingw
+- Manual patching of the OpenNI include for compilation with mingw (see documentation)
