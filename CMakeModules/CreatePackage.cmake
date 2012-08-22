@@ -627,6 +627,10 @@ IF(USE_OCTAVE)
 	endforeach(OCTAVE_LIB)
 ENDIF()
 
+#IF(APPLE)
+#	INSTALL(CODE "hdiutil create -format UDBZ -srcfolder \"${CMAKE_INSTALL_PREFIX}/${PROGNAME}.app\" \"${CMAKE_INSTALL_PREFIX}/${PROGNAME}.dmg\"")
+#ENDIF()
+
 IF(APPLE)
 	# To Create a package, one can run "cpack -G DragNDrop CPackConfig.cmake" on Mac OS X
 	# where CPackConfig.cmake is created by including CPack
@@ -634,8 +638,10 @@ IF(APPLE)
 	set(CPACK_PACKAGE_NAME "${PROGNAME}")
 	set(CPACK_BUNDLE_NAME "${PROGNAME}")
 	set(CPACK_BINARY_DRAGNDROP ON)
-	#set(CPACK_PACKAGE_EXECUTABLES "multimediacycle-osg-qt" "MultiMediaCycle.icns") #should contain pairs of <executable> and <icon name>
-	#set(CPACK_GENERATOR "PackageMaker;OSXX11")
+	set(CPACK_PACKAGE_EXECUTABLES "${PROGNAME}" "MultiMediaCycle.icns") #should contain pairs of <executable> and <icon name>
+	set(CPACK_GENERATOR "PackageMaker;OSXX11")
+	#include(CPack)
+	#EXECUTE_PROCESS(COMMAND cp "${CMAKE_BINARY_DIR}/CPackConfig.cmake" "${CMAKE_BINARY_DIR}/CPackConfig${PROGNAME}.cmake")
 ENDIF()
 
 IF(NOT APPLE)

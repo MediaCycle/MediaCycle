@@ -59,8 +59,8 @@ int main(int argc, char *argv[])
     window.addControlDock("MCOSC");
     window.addControlDock("MCBrowserControlsClusters");//"MCBrowserControlsClustersNeighbors");
     window.addControlDock("MCAudioControls");
-    /* //window.addControlDock("MCSegmentationControls");
-        window.useSegmentationByDefault(true);*/
+    window.useSegmentationByDefault(false);
+    //window.addControlDock("MCSegmentationControls");
 
     // XS TODO
     // this has to be called after dock controls have been added
