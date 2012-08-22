@@ -178,9 +178,10 @@ bool ScribbleArea::event(QEvent *event)
                 // This does never seem to work on Ubuntu
                 QString mess = QString("/mediacycle/browser/") + QString().setNum(touchPoint.id()) + QString("/released");
                 if(osc_feedback){
-                    osc_feedback->sendMessage( mess.toStdString() );
-                    if(osc_feedback->isActive())
+                    if(osc_feedback->isActive()){
+                        osc_feedback->sendMessage( mess.toStdString() );
                         std::cout << mess.toStdString() << std::endl;
+                    }
                 }
             }
                 break;
@@ -190,9 +191,10 @@ bool ScribbleArea::event(QEvent *event)
                 //std::cout << "TouchPointPressed" << std::endl;
                 QString mess = QString("/mediacycle/browser/") + QString().setNum(touchPoint.id()) + QString("/activated");
                 if(osc_feedback){
-                    osc_feedback->sendMessage( mess.toStdString() );
-                    if(osc_feedback->isActive())
+                    if(osc_feedback->isActive()){
+                        osc_feedback->sendMessage( mess.toStdString() );
                         std::cout << mess.toStdString() << std::endl;
+                    }
                 }
             }
                 //break;
@@ -231,14 +233,15 @@ bool ScribbleArea::event(QEvent *event)
                 mc_y = 1 - 2*touchPoint.normalizedPos().y();
                 //std::cout << mess.toStdString() << " " << mc_x << " " << mc_y << std::endl;
                 if(osc_feedback){
-                    /*osc_feedback->messageBegin(mess.toStdString().c_str());
-                    osc_feedback->messageAppendFloat(mc_x);
-                    osc_feedback->messageAppendFloat(mc_y);
-                    osc_feedback->messageEnd();
-                    osc_feedback->messageSend();*/
-                    lo_send(osc_feedback->getAddress(),mess.toStdString().c_str(),"ff",mc_x,mc_y);
-                    if(osc_feedback->isActive())
+                    if(osc_feedback->isActive()){
+                        /*osc_feedback->messageBegin(mess.toStdString().c_str());
+                        osc_feedback->messageAppendFloat(mc_x);
+                        osc_feedback->messageAppendFloat(mc_y);
+                        osc_feedback->messageEnd();
+                        osc_feedback->messageSend();*/
+                        lo_send(osc_feedback->getAddress(),mess.toStdString().c_str(),"ff",mc_x,mc_y);
                         std::cout << mess.toStdString() << " " << mc_x << " " << mc_y << std::endl;
+                    }
                 }
             }
                 //break;
