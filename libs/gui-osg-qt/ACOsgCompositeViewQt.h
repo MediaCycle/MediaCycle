@@ -113,6 +113,18 @@ protected:
     osg::ref_ptr<osgViewer::GraphicsWindowEmbedded> osg_view;
     QTimer _timer;
 
+protected:
+    bool event(QEvent *event);
+    //void paintEvent(QPaintEvent *event);
+    //void resizeEvent(QResizeEvent *event);
+    //void mouseDoubleClickEvent(QMouseEvent *event);
+
+private:
+    bool gestureEvent(QGestureEvent *event);
+    void panTriggered(QPanGesture*);
+    void pinchTriggered(QPinchGesture*);
+    void swipeTriggered(QSwipeGesture*);
+
 private:
     MediaCycle *media_cycle;
     ACOsgBrowserRenderer *browser_renderer;

@@ -151,6 +151,10 @@ ACOsgCompositeViewQt::ACOsgCompositeViewQt( QWidget * parent, const char * name,
 
     timeline_renderer->updateSize(width(),sepy);
 
+    grabGesture(Qt::PanGesture);
+    grabGesture(Qt::PinchGesture);
+    grabGesture(Qt::SwipeGesture);
+
     osg::setNotifyLevel(osg::WARN);//remove the NaN CullVisitor messages
     this->initInputActions();
 }
@@ -684,7 +688,11 @@ void ACOsgCompositeViewQt::translateBrowser(float x, float y){
             float ymove =-(refy-y);
             float xmove2 = xmove*cos(-angle)-ymove*sin(-angle);
             float ymove2 = ymove*cos(-angle)+xmove*sin(-angle);
-            media_cycle->setCameraPosition(refcamx + xmove2/800/zoom , refcamy + ymove2/800/zoom);
+            float camera_x = refcamx + xmove2/800/zoom;
+            float camera_y = refcamy + ymove2/800/zoom;
+            //std::cout << "ACOsgCompositeViewQt::translateBrowser < " << x <<"->" << camera_x << " y " << y << "->" << camera_y << std::endl;
+            media_cycle->setCameraPosition(camera_x , camera_y);
+
         }
     }
 }
@@ -883,6 +891,72 @@ void ACOsgCompositeViewQt::mouseReleaseEvent( QMouseEvent* event )
     mousedown = 0;
     borderdown = 0;
     media_cycle->setNeedsDisplay(true);
+}
+
+bool ACOsgCompositeViewQt::event(QEvent *event)
+{
+    if (event->type() == QEvent::Gesture)
+        return gestureEvent(static_cast<QGestureEvent*>(event));
+    return QGLWidget::event(event);
+}
+
+bool ACOsgCompositeViewQt::gestureEvent(QGestureEvent *event)
+ {
+     if (QGesture *swipe = event->gesture(Qt::SwipeGesture))
+         swipeTriggered(static_cast<QSwipeGesture *>(swipe));
+     else if (QGesture *pan = event->gesture(Qt::PanGesture))
+         panTriggered(static_cast<QPanGesture *>(pan));
+     if (QGesture *pinch = event->gesture(Qt::PinchGesture))
+         pinchTriggered(static_cast<QPinchGesture *>(pinch));
+     return true;
+ }
+
+void ACOsgCompositeViewQt::swipeTriggered(QSwipeGesture *gesture)
+ {
+    #ifdef USE_DEBUG
+    std::cout << "ACOsgCompositeViewQt::panTriggered" << std::endl;
+     if (gesture->state() == Qt::GestureFinished) {
+         if (gesture->horizontalDirection() == QSwipeGesture::Left
+             || gesture->verticalDirection() == QSwipeGesture::Up)
+             std::cout << "ACOsgCompositeViewQt::swipeTriggered left" << std::endl;//goPrevImage();
+         else
+             std::cout << "ACOsgCompositeViewQt::swipeTriggered left" << std::endl;//goNextImage();
+         update();
+     }
+    #endif
+ }
+
+void ACOsgCompositeViewQt::panTriggered(QPanGesture*){
+    #ifdef USE_DEBUG
+    std::cout << "ACOsgCompositeViewQt::panTriggered" << std::endl;
+    #endif
+}
+
+void ACOsgCompositeViewQt::pinchTriggered(QPinchGesture* gesture){
+    if(!media_cycle)
+        return;
+
+    //float zoom = (double) gesture->scaleFactor()/10.0f;
+    float zoom = media_cycle->getCameraZoom() * ( gesture->scaleFactor() / gesture->lastScaleFactor() );
+    media_cycle->setCameraZoom( zoom );
+
+    //CF center point is updated only on a new gesture (on OSX 10.6 with the trackpad)
+    // Qt doesn't care so far "QPinchGesture reports incorrect center points on Mac"
+    // https://bugreports.qt-project.org/browse/QTBUG-14291
+    //float center_x = (double) gesture->centerPoint().x() / (float)this->width();
+    //float center_y = 1-(double) gesture->centerPoint().y() / (float)this->height();
+    float center_x = (double) (gesture->centerPoint().x());// / (float)800;
+    float center_y = (double) (gesture->centerPoint().y());// / (float)800;
+    float start_x = (double) (gesture->startCenterPoint().x());// / (float)800;
+    float start_y = (double) (gesture->startCenterPoint().y());// / (float)800;
+    //media_cycle->setCameraPosition( center_x, center_y);
+
+    float rotation = - 2.0f * (double) gesture->rotationAngle() * PI / (double)180;
+    media_cycle->setCameraRotation( rotation );
+
+    //#ifdef USE_DEBUG
+    //std::cout << "ACOsgCompositeViewQt::pinchTriggered center " << center_x << " " << center_y << " or " << start_x << " " << start_y << " zoom " << zoom  << " rot " << gesture->rotationAngle() << std::endl;
+    //#endif
 }
 
 void ACOsgCompositeViewQt::prepareFromBrowser()
