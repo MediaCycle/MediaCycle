@@ -87,6 +87,7 @@ void ACBrowserControlsCompleteDockWidgetQt::modifyListItem(QListWidgetItem *item
 
     if (osg_view && osg_view->isLibraryLoaded())
     {
+        ui.featuresListWidget->setCurrentItem(item);
         float w;
         if (item->checkState() == Qt::Unchecked) w = 0.0;
         else w = 1.0 ;
