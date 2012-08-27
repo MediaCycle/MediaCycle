@@ -844,7 +844,6 @@ void ACVideoAnalysis::computeOpticalFlow() {
     vector<cv::Point2f> prevPts,curPts;
     int count = 0;
     int need_to_init = 0;
-    int flags = 0;
     int add_remove_pt = 0;
     cv::Point2f pt;
 #ifdef VISUAL_CHECK
@@ -1007,7 +1006,6 @@ void ACVideoAnalysis::computeOpticalFlow2() {
     // cornerSubPix
     cv::Size winSize(31, 31);
 
-    int min_dist_points = 5;
 #ifdef VISUAL_CHECK
     cv::namedWindow("Video", CV_WINDOW_AUTOSIZE);
     // XS could use a mouse callback to add points interactively
@@ -1061,8 +1059,7 @@ void ACVideoAnalysis::computeOpticalFlow2() {
             if(prev_grey.empty())
                 grey.copyTo(prev_grey);
             cv::calcOpticalFlowPyrLK(prev_grey, grey, points[0], points[1], status, err, winSize,
-                    maxLevel, termcrit, 0, 0, 0.001);
-            // XS TODO last 3 param = ? double derivLambda=0.5, int flags=0 and ?
+                    maxLevel, termcrit, 0, 0.001);
 
             size_t i, k;
             cout << points[1].size() << endl;
