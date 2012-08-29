@@ -488,10 +488,11 @@ bool ACMultiMediaCycleOsgQt::readXMLConfig(string _filename){
             this->switchFeatureExtraction(true);
         }
         dockWidgetsManager->changeMediaType(this->media_type);
-        dockWidgetsManager->updatePluginsSettings();
+        //dockWidgetsManager->updatePluginsSettings();
 
         // 4) load the media elements (features and segments already pre-computed)
         media_cycle->readXMLConfigFileCore(rootHandle);
+     
 
         // XS TODO check this.
         // should be overwritten if dimensions do not match
@@ -1333,7 +1334,6 @@ void ACMultiMediaCycleOsgQt::clean(bool _updategl){
     // do this before cleaning library !!
 #if defined (SUPPORT_AUDIO)
     this->media_cycle->muteAllSources();
-    //audio_engine->stopAudioEngine();
 #endif //defined (SUPPORT_AUDIO)
 
     this->media_cycle->cleanLibrary();
