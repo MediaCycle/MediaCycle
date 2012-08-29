@@ -164,9 +164,12 @@ std::vector<ACMediaFeatures*> ACAudioFeaturesPlugin::_calculate(std::string aFil
         //if(!save_binary)
         //    file_ext =  "_t.mtf";
         string aFileName = theMedia->getFileName();
-        string aFileName_noext = aFileName.substr(0,aFileName.find_last_of('.'));
+        string aFileName_noext = aFileName.substr(aFileName.find_last_of('/'),aFileName.find_last_of('.')-aFileName.find_last_of('/'));
+        string aFileName_direct = aFileName.substr(0,aFileName.find_last_of('/'));
+        boost::filesystem::path dir(aFileName_direct+"/mtf");
+        boost::filesystem::create_directory(dir);
         for (int i=0; i<descmf.size(); i++){
-            mtf_file_name = aFileName_noext + "_" +descmf[i]->getName() + file_ext;
+            mtf_file_name = aFileName_direct+"/mtf"+aFileName_noext + "_" +descmf[i]->getName() + file_ext;
             descmf[i]->saveInFile(mtf_file_name, save_binary);
 			theMedia->addTimedFileNames(mtf_file_name);
             //mtf_file_names.push_back(mtf_file_name); // keep track of saved features

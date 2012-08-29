@@ -49,7 +49,7 @@ public:
 	ACSensorData(std::string _fname);
 
 	virtual bool readData(std::string _fname){};
-	virtual std::map<std::string,float>* getData() {return (sensor_ptr);}
+	virtual void* getData() {return (void*)(sensor_ptr);}
 	virtual void setData(std::string* _data);	
 
 protected:

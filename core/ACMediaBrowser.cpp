@@ -1269,13 +1269,13 @@ void ACMediaBrowser::setClosestNode(int _node_id, int p_index) {
 // XS TODO iterator + return value makes no sense
 int ACMediaBrowser::muteAllSources()
 {
-    for (int node_id=0;node_id<mLibrary->getSize();node_id++) {
+    for (ACMediaNodes::iterator node_it=mMediaNodes.begin();node_it!=mMediaNodes.end();node_it++) {
         //if (mMediaNodes[node_id].getActivity() >= 1) {
         // SD TODO - audio engine
         // audio_cycle->getAudioFeedback()->deleteSource(node_id);
-        mMediaNodes[node_id]->setActivity(0);
+        node_it->second->setActivity(0);
         setNeedsActivityUpdateLock(1);
-        setNeedsActivityUpdateAddMedia(node_id);
+        setNeedsActivityUpdateAddMedia(node_it->first);
         setNeedsActivityUpdateLock(0);
         //}
     }

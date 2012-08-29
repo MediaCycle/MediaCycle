@@ -197,8 +197,8 @@ void ACKMeansPlugin::updateClusters(ACMediaBrowser* mediaBrowser,bool needsClust
                 cluster_accumulators[i][f].setIsSparse(library->getMedia(currId[0])->getPreProcFeaturesVector(f)->getFeaturesVector().getIsSparse()) ;
                 cluster_accumulators[i][f].resize(library->getMedia(currId[0])->getPreProcFeaturesVector(f)->getFeaturesVector().size());
 
-                if(library->getMedia(currId[i]))//CF
-                    if(library->getMedia(currId[i])->getType() == library->getMediaType())//CF
+                if(library->getMedia(currId[r]))//CF
+                    if(library->getMedia(currId[r])->getType() == library->getMediaType())//CF
                         clusterCenters[i][f]= library->getMedia(currId[r])->getPreProcFeaturesVector(f)->getFeaturesVector();
                 /*for(d=0; d<desc_count; d++)
                 {

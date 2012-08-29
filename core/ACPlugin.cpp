@@ -39,6 +39,7 @@
 using std::cout;
 using std::endl;
 using std::string;
+#include "boost/filesystem.hpp"
 
 double getTime()
 {
@@ -431,9 +432,15 @@ ACMediaTimedFeature* ACTimedFeaturesPlugin::getTimedFeatures(std::string mtf_fil
 std::string ACTimedFeaturesPlugin::saveTimedFeatures(ACMediaTimedFeature* mtf, string aFileName, bool _save_timed_feat, bool _save_binary) {
     if (_save_timed_feat) {
 		std::string mtf_file_name;
+        
+        string aFileName_noext = aFileName.substr(aFileName.find_last_of('/'),aFileName.find_last_of('.')-aFileName.find_last_of('/'));
+        string aFileName_direct = aFileName.substr(0,aFileName.find_last_of('/'));
+        boost::filesystem::path dir(aFileName_direct+"/mtf");
+        boost::filesystem::create_directory(dir);
+        
         string file_ext = "_b.mtf";
-        string aFileName_noext = aFileName.substr(0, aFileName.find_last_of('.'));
-        mtf_file_name = aFileName_noext + "_" + this->mDescription + file_ext;
+        mtf_file_name = aFileName_direct+"/mtf"+aFileName_noext + "_" +this->mDescription + file_ext;
+        
         if  (mtf->saveInFile(mtf_file_name, _save_binary)) // error message if failed
 			return mtf_file_name;
     }
