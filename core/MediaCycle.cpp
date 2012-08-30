@@ -301,7 +301,7 @@ int MediaCycle::importDirectories() {
     return importDirectories(import_directories, import_recursive, import_forward_order, import_doSegment);
 }
 
-// scans directories, fills the filenames vector and calls importFile 
+// scans directories, fills the filenames vector and calls importFile
 // then normalize the features and updates the library ("libraryContentChanged")
 // each time the library grows by a factor prevLibrarySizeMultiplier, re-normalize and re-cluster everything
 int MediaCycle::importDirectories(vector<string> directories, int recursive, bool forward_order, bool doSegment) {
@@ -462,7 +462,7 @@ string MediaCycle::getThumbnailFileName(int id) {
 }
 
 // Media Browser
-bool MediaCycle::hasBrowser() { 
+bool MediaCycle::hasBrowser() {
     bool ok = false;
     if (this->getBrowser()!=0)
         ok=true;
@@ -780,7 +780,7 @@ void MediaCycle::hoverWithPointerIndex(float xx, float yy, int p_index) {
         mediaBrowser->hoverWithPointerIndex(xx, yy, p_index);
 }
 
-void MediaCycle::updateDisplay(bool _animate) { 
+void MediaCycle::updateDisplay(bool _animate) {
     mediaBrowser->updateDisplay(_animate);
 
 }
@@ -900,7 +900,7 @@ int MediaCycle::readXMLConfigFilePlugins(TiXmlHandle _rootHandle) {
     TiXmlElement* MC_e_features_plugin_manager = _rootHandle.FirstChild("PluginsManager").ToElement();
     int nb_plugins_lib=0;
     if (MC_e_features_plugin_manager!=0){
-	MC_e_features_plugin_manager->QueryIntAttribute("NumberOfPluginsLibraries", &nb_plugins_lib);
+        MC_e_features_plugin_manager->QueryIntAttribute("NumberOfPluginsLibraries", &nb_plugins_lib);
 
         //this->pluginManager->clean();
         //this->pluginManager->setMediaCycle(this);
@@ -908,7 +908,7 @@ int MediaCycle::readXMLConfigFilePlugins(TiXmlHandle _rootHandle) {
         this->mediaBrowser->changeClustersMethodPlugin( this->pluginManager->getPlugin("ACClusterPositionsPropellerPlugin") );
 
         TiXmlElement* pluginLibraryNode=MC_e_features_plugin_manager->FirstChild()->ToElement();
-	for( pluginLibraryNode; pluginLibraryNode; pluginLibraryNode=pluginLibraryNode->NextSiblingElement()) {
+        for( pluginLibraryNode; pluginLibraryNode; pluginLibraryNode=pluginLibraryNode->NextSiblingElement()) {
             string libraryName = pluginLibraryNode->Attribute("LibraryPath");
             int lib_size=0;
             pluginLibraryNode->QueryIntAttribute("NumberOfPlugins", &lib_size);
@@ -927,6 +927,13 @@ int MediaCycle::readXMLConfigFile(string _fname) {
 
 std::string MediaCycle::getPluginPathFromBaseName(std::string basename)
 {
+    std::string prefix("mc_");
+    size_t found = basename.find(prefix);
+    if(found != std::string::npos){
+        basename = basename.substr(found+prefix.size());
+        std::cout << "MediaCycle::getPluginPathFromBaseName: new basename: " << basename << std::endl;
+    }
+
     char c_path[2048];
     // use the function to get the path
     getcwd(c_path, 2048);
@@ -945,10 +952,10 @@ std::string MediaCycle::getPluginPathFromBaseName(std::string basename)
     plugin_subfolder = "";
 #else
 #if defined(XCODE)
-    plugins_path = s_path + "/../../../../../../plugins/";
+    plugins_path = s_path + "/../../plugins/";
     plugin_subfolder = basename + "/" + build_type + "/";
 #else
-    plugins_path = s_path + "/../../../../../plugins/";
+    plugins_path = s_path + "/../../plugins/";
     plugin_subfolder = basename + "/";
 #endif
 #endif
@@ -969,8 +976,7 @@ std::string MediaCycle::getPluginPathFromBaseName(std::string basename)
     plugin_subfolder = basename + "/";
 #endif
 #endif
-    //return plugins_path + plugin_subfolder + "mc_" + basename + plugin_ext;
-    return plugins_path + plugin_subfolder + basename + plugin_ext;
+    return plugins_path + plugin_subfolder + prefix + basename + plugin_ext;
 }
 
 // XS TODO what else to put in the config ?
