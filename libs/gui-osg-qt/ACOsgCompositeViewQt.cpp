@@ -911,27 +911,38 @@ bool ACOsgCompositeViewQt::gestureEvent(QGestureEvent *event)
      return true;
  }
 
+// swipe is triggered when holding three fingers on the trackpad then sliding them
+// (on OSX 10.6+, System Preferences > Trackpad, the related the Three Fingers Swipe to Navigate gesture must be activated)
 void ACOsgCompositeViewQt::swipeTriggered(QSwipeGesture *gesture)
  {
     #ifdef USE_DEBUG
-    std::cout << "ACOsgCompositeViewQt::panTriggered" << std::endl;
+    std::cout << "ACOsgCompositeViewQt::swipeTriggered: angle " << (double) gesture->swipeAngle() << std::endl;
      if (gesture->state() == Qt::GestureFinished) {
-         if (gesture->horizontalDirection() == QSwipeGesture::Left
-             || gesture->verticalDirection() == QSwipeGesture::Up)
-             std::cout << "ACOsgCompositeViewQt::swipeTriggered left" << std::endl;//goPrevImage();
-         else
-             std::cout << "ACOsgCompositeViewQt::swipeTriggered left" << std::endl;//goNextImage();
+         if (gesture->horizontalDirection() == QSwipeGesture::Left)
+             std::cout << "ACOsgCompositeViewQt::swipeTriggered left" << std::endl;
+         if (gesture->verticalDirection() == QSwipeGesture::Up)
+             std::cout << "ACOsgCompositeViewQt::swipeTriggered up" << std::endl;
+         if (gesture->horizontalDirection() == QSwipeGesture::Right)
+             std::cout << "ACOsgCompositeViewQt::swipeTriggered right" << std::endl;
+         if (gesture->verticalDirection() == QSwipeGesture::Down)
+             std::cout << "ACOsgCompositeViewQt::swipeTriggered down" << std::endl;
          update();
      }
     #endif
  }
 
-void ACOsgCompositeViewQt::panTriggered(QPanGesture*){
+// CF pan is triggered when holding one finger on the trackpad then sliding it
+void ACOsgCompositeViewQt::panTriggered(QPanGesture* gesture){
     #ifdef USE_DEBUG
-    std::cout << "ACOsgCompositeViewQt::panTriggered" << std::endl;
+    std::cout << "ACOsgCompositeViewQt::panTriggered:";
+    std::cout << " offset x " << gesture->offset().x() << " y " << gesture->offset().y();
+    std::cout << " delta x " << gesture->delta().x() << " y " << gesture->delta().y();
+    std::cout << " acceleration " << gesture->acceleration() ;
+    std::cout << std::endl;
     #endif
 }
 
+//CF pinch is triggered when holding two fingers on the trackpad then moving them
 void ACOsgCompositeViewQt::pinchTriggered(QPinchGesture* gesture){
     if(!media_cycle)
         return;
