@@ -40,20 +40,48 @@
 #include <string>
 using namespace std;
 
+
+bool get_backend_info(ACAudioEngine* _audio_engine){
+    bool ok = false;
+#ifdef USE_OPENAL
+    std::cout << "audioengine-tests:get_backend_info: OpenAL version: " << alGetString(AL_VERSION) << std::endl;
+    std::cout << "audioengine-tests:get_backend_info: OpenAL renderer: " << alGetString(AL_RENDERER) << std::endl;
+    std::cout << "audioengine-tests:get_backend_info: OpenAL vendor: " << alGetString(AL_VENDOR) << std::endl;
+    std::cout << "audioengine-tests:get_backend_info: OpenAL extensions: '" << alGetString(AL_EXTENSIONS) << "'" << std::endl;
+    ok = true;
+#else
+    std::cerr << "audioengine-tests:get_backend_info: test not implemented for the PortAudio backend" << std::endl;
+#endif
+    return ok;
+}
+
 bool test_speaker_configuration(ACAudioEngine* _audio_engine){
-	bool ok = false;
-	
-	#ifdef USE_OPENAL
-	std::vector<std::string> _configs;
-    return _audio_engine->getFeedback()->getSpeakerConfigurationsList(_configs);
-	#else
-    std::cerr << "audioengine-tests:speaker_configuration: multi speaker not implemented for the PortAudio backend" << std::endl;
-	#endif
-	return ok;
+    bool ok = false;
+
+#ifdef USE_OPENAL
+    std::vector<std::string> _configs;
+    _audio_engine->getFeedback()->getSpeakerConfigurationsList(_configs);
+    for(std::vector<std::string>::iterator _config = _configs.begin();_config!=_configs.end();_config++)
+        std::cout << "audioengine-tests:speaker_configuration: available speaker config " << (*_config) << std::endl;
+    std::cout << "audioengine-tests:speaker_configuration: " << _configs.size() << " available speaker configs" << std::endl;
+    return ( _configs.size() > 0 );
+#else
+    std::cerr << "audioengine-tests:speaker_configuration: multi speaker test not implemented for the PortAudio backend" << std::endl;
+#endif
+    return ok;
 }
 
 int main(int argc, char *argv[]){
-	cout << "------------  Testing the Audio Engine  ------------------" << endl;
+    cout << "------------  Testing the Audio Engine  ------------------" << endl;
+
+    cout << "audioengine-tests: backend: ";
+#ifdef USE_OPENAL
+    cout << "OpenAL";
+#endif
+#ifdef USE_PORTAUDIO
+    cout << "PortAudio";
+#endif
+    cout << endl;
 
     cout << "audioengine-tests: creating an AudioEngine instance" << endl;
     ACAudioEngine* audio_engine = new ACAudioEngine();
@@ -66,9 +94,15 @@ int main(int argc, char *argv[]){
         return 1;
     }
 
+    std::cout << "audioengine-tests:get_backend_info: starting" << std::endl;
+    bool backend_info = get_backend_info(audio_engine);
+    std::cout << "audioengine-tests:get_backend_infon: passed: " << backend_info << std::endl;
+
     std::cout << "audioengine-tests:speaker_configuration: starting" << std::endl;
     bool speaker_configuration = test_speaker_configuration(audio_engine);
-    std::cout << "audioengine-tests:speaker_configuration: passed " << speaker_configuration << std::endl;
+    std::cout << "audioengine-tests:speaker_configuration: passed: " << speaker_configuration << std::endl;
 
+    cout << "audioengine-tests: deleting the AudioEngine instance" << endl;
+    delete audio_engine;
     return 0;
 }

@@ -212,26 +212,32 @@ bool ACAudioFeedback::getSpeakerConfigurationsList(std::vector<std::string>& con
     // Empty the list
     configs.clear();
 #ifdef USE_OPENAL
+    if(this->device == 0)
+        std::cerr << "ACAudioFeedback::getSpeakerConfigurationsList: output device not set" << std::endl;
 
-#ifdef alIsExtensionPresent("AL_EXT_MCFORMATS")
-    std::cout << "ACAudioFeedback::getSpeakerConfigurationsList: AL_EXT_MCFORMATS extension exists" << std::endl;
-    const ALCchar* configsList = 0;// = alcGetString(0, AL_EXT_MCFORMATS);
+    std::map<std::string,std::string> speakerConfigurations;
+    speakerConfigurations["MONO"] = "Mono";
+    speakerConfigurations["STEREO"] = "Stereo";
+    speakerConfigurations["QUAD"] = "Quadriphonic";
+    speakerConfigurations["REAR"] = "Rear";
+    speakerConfigurations["51CHN"] = "5.1";
+    speakerConfigurations["61CHN"] = "6.1";
+    speakerConfigurations["71CHN"] = "7.1";
+    std::map<std::string,std::string> bitDepths;
+    bitDepths["8"] = "8-bit";
+    bitDepths["16"] = "16-bit";
+    bitDepths["32"] = "32-bit";
+    bitDepths["_FLOAT32"] = "32-bit float";
+    bitDepths["_DOUBLE_EXT"] = "double";
 
-    if (configsList)
-    {
-        // Extract the configuration names contained in the returned list
-        while (strlen(configsList) > 0)
-        {
-            std::cout << "ACAudioFeedback::getSpeakerConfigurationsList: " << configsList << std::endl;
-            configs.push_back(configsList);
-            configsList += strlen(configsList) + 1;
+    for (std::map<std::string,std::string>::iterator speakerConfiguration = speakerConfigurations.begin();speakerConfiguration != speakerConfigurations.end();speakerConfiguration++){
+        for(std::map<std::string,std::string>::iterator bitDepth = bitDepths.begin();bitDepth != bitDepths.end();bitDepth++){
+            if(alGetEnumValue( std::string( "AL_FORMAT_" + speakerConfiguration->first + bitDepth->first ).c_str() ) > 0)
+                configs.push_back( std::string( "AL_FORMAT_" + speakerConfiguration->first + bitDepth->first ) );
+            std::cout << "ACAudioFeedback::getSpeakerConfigurationsList: " << speakerConfiguration->second << " (" << bitDepth->second << ") " << (alGetEnumValue( std::string( "AL_FORMAT_" + speakerConfiguration->first + bitDepth->first ).c_str() ) > 0) << std::endl;
         }
-        return true;
     }
-#else
-    std::cout << "ACAudioFeedback::getSpeakerConfigurationsList: AL_EXT_MCFORMATS extension doesn't exist" << std::endl;
-#endif
-    return false;
+    return true;
 #endif
 #ifdef USE_PORTAUDIO
 #warning "TODO"

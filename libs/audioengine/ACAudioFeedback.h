@@ -37,12 +37,10 @@
 #include <MediaCycle.h>
 
 #ifdef USE_OPENAL
-#if defined(__APPLE__)
-	#include <OpenAL/al.h>
-	#include <OpenAL/alc.h>
-#else
-	#include <AL/al.h>
-	#include <AL/alc.h>
+#include <al.h>
+#include <alc.h>
+#ifdef USE_OPENALEXT
+#include <alext.h>
 #endif
 #endif
 #ifdef USE_PORTAUDIO
