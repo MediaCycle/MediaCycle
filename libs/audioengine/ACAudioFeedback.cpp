@@ -207,6 +207,38 @@ ACAudioFeedback::~ACAudioFeedback()
 	//deleteOpenAL();//CF moved to AudioEngine
 }
 
+bool ACAudioFeedback::getSpeakerConfigurationsList(std::vector<std::string>& configs)
+{
+    // Empty the list
+    configs.clear();
+#ifdef USE_OPENAL
+
+#ifdef alIsExtensionPresent("AL_EXT_MCFORMATS")
+    std::cout << "ACAudioFeedback::getSpeakerConfigurationsList: AL_EXT_MCFORMATS extension exists" << std::endl;
+    const ALCchar* configsList = 0;// = alcGetString(0, AL_EXT_MCFORMATS);
+
+    if (configsList)
+    {
+        // Extract the configuration names contained in the returned list
+        while (strlen(configsList) > 0)
+        {
+            std::cout << "ACAudioFeedback::getSpeakerConfigurationsList: " << configsList << std::endl;
+            configs.push_back(configsList);
+            configsList += strlen(configsList) + 1;
+        }
+        return true;
+    }
+#else
+    std::cout << "ACAudioFeedback::getSpeakerConfigurationsList: AL_EXT_MCFORMATS extension doesn't exist" << std::endl;
+#endif
+    return false;
+#endif
+#ifdef USE_PORTAUDIO
+#warning "TODO"
+    return false;
+#endif
+}
+
 #ifdef USE_OPENAL
 void ACAudioFeedback::createOpenAL()
 {

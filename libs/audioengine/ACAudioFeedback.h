@@ -125,6 +125,8 @@ public:
 	ACAudioFeedback(PaStream *_stream, int samplerate, int buffersize);
 #endif
 	~ACAudioFeedback();
+
+    bool getSpeakerConfigurationsList(std::vector<std::string>& configs);
 	
 	// MediaCycle to query database and browser
 	MediaCycle				*media_cycle;
