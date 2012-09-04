@@ -41,12 +41,45 @@ ACOSCDockWidgetQt::ACOSCDockWidgetQt(QWidget *parent)
 #if defined (USE_OSC)
     ui.setupUi(this); // first thing to do
     this->show();
+
+    QSettings settings("numediart", "MediaCycle");
+
+    QString osc_control_ip = settings.value("osc.control.ip").toString();
+    if(osc_control_ip.isEmpty())
+        ui.lineEditControlIP->setText("localhost");
+    else
+        ui.lineEditControlIP->setText(osc_control_ip);
+
+    QString osc_feedback_ip = settings.value("osc.feedback.ip").toString();
+    if(osc_feedback_ip.isEmpty())
+        ui.lineEditFeedbackIP->setText("localhost");
+    else
+        ui.lineEditFeedbackIP->setText(osc_feedback_ip);
+
+    int osc_control_port = settings.value("osc.control.port").toInt();
+    if (osc_control_port == 0)
+        ui.spinBoxControlPort->setValue(12345);
+    else
+        ui.spinBoxControlPort->setValue(osc_control_port);
+
+    int osc_feedback_port = settings.value("osc.feedback.port").toInt();
+    if (osc_feedback_port == 0)
+        ui.spinBoxFeedbackPort->setValue(12346);
+    else
+        ui.spinBoxFeedbackPort->setValue(osc_feedback_port);
 #endif //defined (USE_OSC)
     auto_connect = false;
 }
 
 ACOSCDockWidgetQt::~ACOSCDockWidgetQt(){
 #if defined (USE_OSC)
+
+    QSettings settings("numediart", "MediaCycle");
+    settings.setValue("osc.control.ip",ui.lineEditControlIP->text());
+    settings.setValue("osc.feedback.ip",ui.lineEditFeedbackIP->text());
+    settings.setValue("osc.control.port",ui.spinBoxControlPort->text());
+    settings.setValue("osc.feedback.port",ui.spinBoxFeedbackPort->text());
+
     osc_browser = 0;
     osc_feedback = 0;
     // now in ACMultiMediaCycleOsgQt
