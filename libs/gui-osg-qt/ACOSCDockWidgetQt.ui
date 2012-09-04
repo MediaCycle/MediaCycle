@@ -26,7 +26,7 @@
    <set>QDockWidget::DockWidgetClosable</set>
   </property>
   <property name="windowTitle">
-   <string>OSC</string>
+   <string>OSC/TUIO</string>
   </property>
   <widget class="QWidget" name="dockWidgetContents">
    <property name="minimumSize">

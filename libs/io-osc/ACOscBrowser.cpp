@@ -51,6 +51,7 @@ ACOscBrowser::ACOscBrowser(MediaCycle* _mc) {
     this->osc_feedback = 0;
     this->server_thread = 0;
     this->active = false;
+    this->verbosity = false;
 }
 
 ACOscBrowser::~ACOscBrowser() {
@@ -63,7 +64,7 @@ bool ACOscBrowser::create(const char *hostname, int port) {
     sprintf(portchar, "%d", port);
     server_thread = lo_server_thread_new(portchar, error);
     if (!server_thread) {
-        std::cerr << "An OSC server is already running at port " << port << ". Please change it and restart the server." << std::endl;
+        std::cerr << "ACOscBrowser: An OSC server is already running at port " << port << ". Please change it and restart the server." << std::endl;
         return false;
     }
     this->setUserData(this);
@@ -111,20 +112,21 @@ void ACOscBrowser::readString(char *val, int maxlen) {
 
 int ACOscBrowser::static_mess_handler(const char *path, const char *types, lo_arg **argv, int argc, void *data, void *user_data) {
     ACOscBrowser* widget = (ACOscBrowser*) user_data;
-    widget->process_mess(path, types, argv, argc);
+    widget->process_mess(path, types, argv, argc, widget->getVerbosity());
 }
 
-int ACOscBrowser::process_mess(const char *path, const char *types, lo_arg **argv, int argc) {
+int ACOscBrowser::process_mess(const char *path, const char *types, lo_arg **argv, int argc, bool verbose) {
     std::string tag = std::string(path);
-    std::cout << "OSC message: '" << tag << "'" << std::endl;
+    //std::cout << "ACOscBrowser: OSC message: '" << tag << "'" << std::endl;
     bool ac = (tag.find("/audiocycle", 0) != string::npos);
     bool mc = (tag.find("/mediacycle", 0) != string::npos);
-    if (!ac && !mc)//we don't process messages not containing /audiocycle or /mediacycle
+    bool tuio = (tag.find("/tuio", 0) != string::npos);
+    if (!ac && !mc && !tuio)//we don't process messages not containing /audiocycle or /mediacycle or /tuio
         return 1;
 
     // test - sends back message (console + OSC feedback) if received properly
     if (tag.find("/test", 0) != string::npos) {
-        std::cout << "OSC communication established" << std::endl;
+        std::cout << "ACOscBrowser: OSC communication established" << std::endl;
         if (osc_feedback) {
             if (ac)
                 osc_feedback->messageBegin("/audiocycle/received");
@@ -139,7 +141,7 @@ int ACOscBrowser::process_mess(const char *path, const char *types, lo_arg **arg
     else if (tag.find("/fullscreen", 0) != string::npos) {
         int fullscreen = 0;
         fullscreen = argv[0]->i;
-        std::cout << "Fullscreen? " << fullscreen << std::endl;
+        std::cout << "ACOscBrowser: Fullscreen? " << fullscreen << std::endl;
         //if (fullscreen == 1)
         //	ui.groupControls->hide();
         //else
@@ -174,19 +176,14 @@ int ACOscBrowser::process_mess(const char *path, const char *types, lo_arg **arg
             }
         }
 
-        // XS TODO clean the following messages (self-claimed to be "ugly" ?):
-        // - activated
-        // - released
-        // - reset_pointers
         if (tag.find("/activated", 0) != string::npos) {
-            std::cout << "OSC message: '" << tag << "'" << std::endl;
-            //media_cycle->resetPointers();//CF temp: hack, when /released messages aren't received
+            std::cout << "ACOscBrowser: OSC message: '" << tag << "'" << std::endl;
+            //media_cycle->resetPointers();//CF hack when /released messages aren't received
             media_cycle->addPointer(id);
-            //Ugly
             //osg_view->getHUDRenderer()->preparePointers();
             media_cycle->setNeedsDisplay(true);
         } else if (tag.find("/released", 0) != string::npos) {
-            std::cout << "OSC message: '" << tag << "'" << std::endl;
+            std::cout << "ACOscBrowser: OSC message: '" << tag << "'" << std::endl;
             if (media_cycle->getNumberOfPointers() < 1)//TR NEM2011
                 media_cycle->setAutoPlay(0); //TR NEM
             if (media_cycle->getNumberOfPointers() == 1)//TR NEM2011
@@ -194,17 +191,15 @@ int ACOscBrowser::process_mess(const char *path, const char *types, lo_arg **arg
                     if (media_cycle->getPointerFromIndex(0)->getType() == AC_POINTER_MOUSE)
                         media_cycle->setAutoPlay(0); //TR NEM
             media_cycle->removePointer(id); //CF hack
-            //Ugly
             //osg_view->getHUDRenderer()->preparePointers();
             media_cycle->setNeedsDisplay(true);
         } else if (tag.find("/reset_pointers", 0) != string::npos) {
-            std::cout << "OSC message: '" << tag << "'" << std::endl;
+            std::cout << "ACOscBrowser: OSC message: '" << tag << "'" << std::endl;
             media_cycle->setAutoPlay(0);
             //media_cycle->resetPointers();
-            //Ugly
             //osg_view->getHUDRenderer()->preparePointers();
             media_cycle->setNeedsDisplay(true);
-            std::cout << "Reset to " << media_cycle->getNumberOfPointers() << " pointer(s)" << std::endl;
+            std::cout << "ACOscBrowser: reset to " << media_cycle->getNumberOfPointers() << " pointer(s)" << std::endl;
         } else if (tag.find("/move/xy", 0) != string::npos) {
             float x = 0.0, y = 0.0;
             media_cycle->getCameraPosition(x, y);
@@ -219,7 +214,7 @@ int ACOscBrowser::process_mess(const char *path, const char *types, lo_arg **arg
         } else if (tag.find("/zoom", 0) != string::npos) {
             float zoom = 0.0f;
             zoom = argv[0]->f;
-            std::cout << "OSC - zooming by " << zoom << std::endl;
+            std::cout << "ACOscBrowser: zoom of " << zoom << std::endl;
             //zoom = zoom*600/50; // refzoom +
             media_cycle->setCameraZoom((float) zoom);
             media_cycle->setNeedsDisplay(true);
@@ -228,38 +223,35 @@ int ACOscBrowser::process_mess(const char *path, const char *types, lo_arg **arg
             angle = argv[0]->f;
             media_cycle->setCameraRotation((float) angle);
             media_cycle->setNeedsDisplay(true);
-        }			//XS TODO clean this ? ("ugly")
-        else if (tag.find("/hover/xy", 0) != string::npos) {
+        } else if (tag.find("/hover/xy", 0) != string::npos) {
             float x = 0.0, y = 0.0;
             if (argc == 2 && types[0] == LO_FLOAT && types[1] == LO_FLOAT) {
                 x = argv[0]->f;
                 y = argv[1]->f;
 
                 media_cycle->hoverWithPointerId(x, y, id);
-                /*ACPoint p;
-    p.x = x;
-    p.y = y;
-    p.z = 0;
-    media_cycle->getPointerFromId(id)->setCurrentPosition(p);*/
+                //    ACPoint p;
+                //    p.x = x;
+                //    p.y = y;
+                //    p.z = 0;
+                //    media_cycle->getPointerFromId(id)->setCurrentPosition(p);
 
                 if (media_cycle->getLibrary()->getSize() > 0) {
-
-                    ////////////////Ugly
                     media_cycle->setAutoPlay(1);
 
-                    //CF hack
-                    //int closest_node = media_cycle->getClosestNode();
-                    //float distance = this->getOsgView()->getBrowserRenderer()->getDistanceMouse()[closest_node];
-                    //if (osc_feedback)
-                    //{
-                    //	if (ac)
-                    //		osc_feedback->messageBegin("/audiocycle/closest_node_at");
-                    //	else
-                    //		osc_feedback->messageBegin("/mediacycle/closest_node_at");
-                    //	osc_feedback->messageAppendFloat(distance);
-                    //	osc_feedback->messageEnd();
-                    //	osc_feedback->messageSend();
-                    //}
+                    //CF required for force-feedback, to restore (need to move "distancemouse" calculation in the core
+                    /*int closest_node = media_cycle->getClosestNode();
+                    float distance = this->getOsgView()->getBrowserRenderer()->getDistanceMouse()[closest_node];
+                    if (osc_feedback)
+                    {
+                        if (ac)
+                            osc_feedback->messageBegin("/audiocycle/closest_node_at");
+                        else
+                            osc_feedback->messageBegin("/mediacycle/closest_node_at");
+                        osc_feedback->messageAppendFloat(distance);
+                        osc_feedback->messageEnd();
+                        osc_feedback->messageSend();
+                    }*/
                 }
                 //media_cycle->setNeedsDisplay(true);
             }
@@ -268,7 +260,7 @@ int ACOscBrowser::process_mess(const char *path, const char *types, lo_arg **arg
             // 2 options :
             // 1) OSC message : getknn k m : specifies id of specific media
             // 2) OSC message : getknn k   : media = last one that was clicked
-            std::cout << "OSC - getknn" << std::endl;
+            std::cout << "ACOscBrowser: getKNN" << std::endl;
             int k = 0;
             int m = 0;
             std::vector<int> knn;
@@ -290,10 +282,10 @@ int ACOscBrowser::process_mess(const char *path, const char *types, lo_arg **arg
                 std::cerr << "ACOscBrowser: error with knn message" << std::endl;
                 return -1;
             } else {
-                std::cout << "OSC - getknn ; k= " << k << "; media m = " << m << std::endl;
+                std::cout << "ACOscBrowser: getKNN ; k= " << k << "; media m = " << m << std::endl;
                 media_cycle->getKNN(m, knn, k);
                 if (knn.size() != k) {
-                    std::cout << "ACOscBrowser: error with knn method" << std::endl;
+                    std::cout << "ACOscBrowser: error with getKNN method" << std::endl;
                     return 1;
                 }
                 if (osc_feedback) {
@@ -302,7 +294,7 @@ int ACOscBrowser::process_mess(const char *path, const char *types, lo_arg **arg
                         if (full_name == "") {
                             std::cout << "ACOscBrowser: empty file name for media " << knn[i] << std::endl;
                         } else {
-                            std::cout << "sending name of media " << knn[i] << std::endl;
+                            std::cout << "ACOscBrowser: sending name of media " << knn[i] << std::endl;
                             osc_feedback->messageBegin("/mediacycle/knn");
                             osc_feedback->messageAppendString(full_name);
                             osc_feedback->messageEnd();
@@ -341,7 +333,7 @@ int ACOscBrowser::process_mess(const char *path, const char *types, lo_arg **arg
         }
     } // LIBRARY
     else if (tag.find("/library", 0) != string::npos) {
-        std::cout << "ACOscBrowser communication with library " << std::endl;
+        std::cout << "ACOscBrowser: library command " << std::endl;
         if (tag.find("/addfile", 0) != string::npos) {
             char* c = &(argv[0]->s);
             stringstream ss;
@@ -401,7 +393,7 @@ int ACOscBrowser::process_mess(const char *path, const char *types, lo_arg **arg
         } else if (tag.find("/bpm", 0) != string::npos) {
             float bpm;
             bpm = argv[0]->f;
-            cout << "/player/bpm/" << bpm << endl;
+            cout << "ACOscBrowser: /player/bpm/" << bpm << endl;
             int node = media_cycle->getClosestNode();
 #if defined (SUPPORT_AUDIO)
             if (node > -1) {
@@ -432,7 +424,7 @@ int ACOscBrowser::process_mess(const char *path, const char *types, lo_arg **arg
         if (tag.find("/playclosestloop", 0) != string::npos) {
             //media_cycle->pickedObjectCallback(-1);
             media_cycle->getBrowser()->toggleSourceActivity(node);
-            cout << "/player/" << node << "/playclosestloop node " << node << endl;
+            cout << "ACOscBrowser: /player/" << node << "/playclosestloop node " << node << endl;
             return 1;
         } else if (tag.find("/triggerclosestloop", 0) != string::npos) {
 #if defined (SUPPORT_AUDIO)
@@ -442,7 +434,7 @@ int ACOscBrowser::process_mess(const char *path, const char *types, lo_arg **arg
             audio_engine->setLoopSynchroMode(node, ACAudioEngineSynchroModeNone);
 #endif //defined (SUPPORT_AUDIO)
             media_cycle->getBrowser()->toggleSourceActivity(node);
-            cout << "/player/" << node << "/triggerclosestloop node " << node << endl;
+            cout << "ACOscBrowser: /player/" << node << "/triggerclosestloop node " << node << endl;
             return 1;
         } else if (tag.find("/scrub", 0) != string::npos) {
             float scrub;
@@ -459,7 +451,7 @@ int ACOscBrowser::process_mess(const char *path, const char *types, lo_arg **arg
 #ifdef USE_DEBUG
             float pitch;
             pitch = argv[0]->f;
-            cout << "/player/" << node << "/pitch/" << pitch << endl;
+            cout << "ACOscBrowser: /player/" << node << "/pitch/" << pitch << endl;
 #if defined (SUPPORT_AUDIO)
             if (node > -1) {
                 audio_engine->setLoopSynchroMode(node, ACAudioEngineSynchroModeAutoBeat);
@@ -468,13 +460,13 @@ int ACOscBrowser::process_mess(const char *path, const char *types, lo_arg **arg
             }
 #endif //defined (SUPPORT_AUDIO)
 #else //USE_DEBUG
-            cout << "/player/" << node << "/pitch not yet safe, can mess up the audioengine " << endl;
+            cout << "ACOscBrowser: /player/" << node << "/pitch not yet safe, can mess up the audioengine " << endl;
 #endif
             return 1;
         } else if (tag.find("/gain", 0) != string::npos) {
             float gain;
             gain = argv[0]->f;
-            cout << "/player/" << node << "/gain/" << gain << endl;
+            cout << "ACOscBrowser: /player/" << node << "/gain/" << gain << endl;
 #if defined (SUPPORT_AUDIO)
             if (node > -1) {
                 //audio_engine->setLoopSynchroMode(node, ACAudioEngineSynchroModeAutoBeat);
@@ -484,7 +476,230 @@ int ACOscBrowser::process_mess(const char *path, const char *types, lo_arg **arg
 #endif //defined (SUPPORT_AUDIO)
             return 1;
         }
+    } // TUIO
+    else if(tuio){ //else if (tag.find("/tuio", 0) != string::npos) {
+        // TUIO 1.1
+        //http://www.tuio.org/?specification
+
+        // Dimension: defines 2D/2.5D/3D Interactive Surfaces or custom profiles
+        float dim = 0;
+        if (tag.find("/2D", 0) != string::npos) {
+            dim = 2;
+        }
+        else if (tag.find("/25D", 0) != string::npos) {
+            dim = 2.5;
+        }
+        else if (tag.find("/3D", 0) != string::npos) {
+            dim = 3;
+        }
+        else if (tag.find("/_", 0) != string::npos) {
+            dim = 1;
+            if(verbose)
+                std::cout << "ACOscBrowser: received custom TUIO message: " << tag << std::endl;
+            return 1;
+        }
+        else{
+            dim = 0;
+            if(verbose)
+                std::cout << "ACOscBrowser: received unknown TUIO message: " << tag << std::endl;
+            return 1;
+        }
+        if(verbose)
+            std::cout << "ACOscBrowser: received "<< dim << "D TUIO message";//: " << tag << std::endl;
+
+        // Type: object, curser or blob
+        std::string type("");
+        if (tag.find("obj", 0) != string::npos) {
+            type = "obj";
+        }
+        else if (tag.find("cur", 0) != string::npos) {
+            type = "cur";
+        }
+        else if (tag.find("blb", 0) != string::npos) {
+            type = "blb";
+        }
+        if(type!="")
+            if(verbose)
+                std::cout << " of type " << type;
+        //std::cout << "ACOscBrowser: received " << type << " TUIO message: " << tag << std::endl;
+
+        // Status:
+        // - source (starts message bundles, with name@address source identification),
+        // - alive (lists alive elements ids),
+        // - set (outputs parameters of each element),
+        // - fseq (ends message bundles, with an incremental frame id)
+        std::string status("");
+        if(argc > 0 && types[0]=='s'){
+            status = std::string( &(argv[0]->s) );
+        }
+        if(status!=""){
+            if(verbose)
+                std::cout << " of status '" << status << "'";
+            //std::cout << "ACOscBrowser: received " << type << " TUIO message: " << tag << std::endl;
+        }
+        else{
+            std::cerr << "ACOscBrowser: TUIO message with unknown status: " << tag << std::endl;
+            return 1;
+        }
+        if(status == "source"){
+            if( argc == 2 && types[1]=='s'){
+                if(verbose)
+                    std::cout << " '" << &(argv[1]->s) << "'";
+            }
+            else {
+                std::cerr << "ACOscBrowser: TUIO message with source status with incorrect number of arguments: " << tag << std::endl;
+                return 1;
+            }
+        }
+        else if(status == "alive"){
+            if(argc-1 == 0){
+                media_cycle->resetPointers();
+                media_cycle->setAutoPlay(0);
+                media_cycle->muteAllSources();
+                media_cycle->setNeedsDisplay(true);
+            }
+            bool refresh = false;
+            for(int arg = 1; arg<argc;arg++){
+                if(types[arg]=='i'){
+                    if(verbose)
+                        std::cout << " " << argv[arg]->i32;
+                    if(!media_cycle->getPointerFromId( argv[arg]->i32 )){
+                        media_cycle->addPointer( argv[arg]->i32 );
+                        refresh = true;
+                    }
+                }
+                else
+                    if(verbose)
+                        std::cout << " err";
+            }
+            if(refresh)
+                media_cycle->setNeedsDisplay(true);
+        }
+        else if(status == "set"){
+            if(dim <= 1){
+                std::cerr << "ACOscBrowser: TUIO message with set status of unimplemented custom type: " << tag << std::endl;
+                return 1;
+            }
+            int arg = 1;
+            // Session ID (temporary object ID)
+            int sid = argv[arg++]->i32;
+            if(verbose)
+                std::cout << " s:" << sid;
+            // Class ID (e.g. marker ID)
+            if(type =="obj"){
+                int cid = argv[arg++]->i32;
+                if(verbose)
+                    std::cout << " i:" << cid;
+            }
+            // Positions (range 0...1)
+            float x = argv[arg++]->f32;
+            if(verbose)
+                std::cout << " x:" << x;
+            float y = argv[arg++]->f32;
+            if(verbose)
+                std::cout << " y:" << y;
+            if(dim > 2.0f){
+                float z = argv[arg++]->f32;
+                if(verbose)
+                    std::cout << " z:" << z;
+            }
+            // Angles (range 0..2PI)
+            if(type == "obj" || type == "blb"){
+                float a = argv[arg++]->f32;
+                if(verbose)
+                    std::cout << " a:" << a;
+                if(dim == 3){
+                    float b = argv[arg++]->f32;
+                    if(verbose)
+                        std::cout << " b:" << b;
+                    float c = argv[arg++]->f32;
+                    if(verbose)
+                        std::cout << " c:" << c;
+                }
+            }
+            // Dimensions (range 0..1)
+            if(type == "blb"){
+                // Width (range 0..1)
+                float w = argv[arg++]->f32;
+                if(verbose)
+                    std::cout << " w:" << w;
+                // Height (range 0..1)
+                float h = argv[arg++]->f32;
+                if(verbose)
+                    std::cout << " h:" << h;
+                if(dim == 3.0f){
+                    // Depth (range 0..1)
+                    float d = argv[arg++]->f32;
+                    if(verbose)
+                        std::cout << " d:" << d;
+                    // Volume (range 0..1)
+                    float v = argv[arg++]->f32;
+                    if(verbose)
+                        std::cout << " v:" << v;
+                }
+                else if(dim >=2.0f && dim < 3.0f){
+                    // Area (range 0..1)
+                    float f = argv[arg++]->f32;
+                    if(verbose)
+                        std::cout << " f:" << f;
+                }
+            }
+            // Velocity vector (motion speed & direction
+            float X = argv[arg++]->f32;
+            if(verbose)
+                std::cout << " X:" << X;
+            float Y = argv[arg++]->f32;
+            if(verbose)
+                std::cout << " Y:" << Y;
+            if(dim > 2.0f){
+                float Z = argv[arg++]->f32;
+                if(verbose)
+                    std::cout << " Z:" << Z;
+            }
+            // Rotation velocity vector (rotation speed & direction)
+            if(type == "obj" || type == "blb"){
+                float A = argv[arg++]->f32;
+                if(verbose)
+                    std::cout << " A:" << A;
+                if(dim == 3){
+                    float B = argv[arg++]->f32;
+                    if(verbose)
+                        std::cout << " B:" << B;
+                    float C = argv[arg++]->f32;
+                    if(verbose)
+                        std::cout << " C:" << C;
+                }
+            }
+            // Motion acceleration
+            float m = argv[arg++]->f32;
+            if(verbose)
+                std::cout << " m:" << m;
+            // Rotation acceleration
+            if(type == "obj" || type == "blb"){
+                float r = argv[arg++]->f32;
+                if(verbose)
+                    std::cout << " r:" << r;
+            }
+            media_cycle->hoverWithPointerId(-1.0f+2.0f*x, 1.0f-2.0f*y, sid);
+            if (media_cycle->getLibrary()->getSize() > 0)
+                media_cycle->setAutoPlay(1);
+        }
+        else if(status == "fseq"){
+            // The FSEQ frame ID is incremented for each delivered bundle, while redundant bundles can be marked using the frame sequence ID -1.
+            if( argc == 2 && types[1]=='i'){
+                if(verbose)
+                    std::cout << " '" << argv[1]->i << "'";
+            }
+            else {
+                std::cerr << " incorrect number of arguments: " << tag << std::endl;
+                return 1;
+            }
+        }
+        if(verbose){
+            std::cout << " (" << argc-1 << " arg(s)) ";
+            std::cout << std::endl;
+        }
     }
     return 1;
-    //std::cout << "End of OSC process messages" << std::endl;
+    //std::cout << "ACOscBrowser: end of OSC process messages" << std::endl;
 }
