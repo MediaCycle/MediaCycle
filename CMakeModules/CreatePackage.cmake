@@ -321,6 +321,7 @@ INSTALL(TARGETS ${PROGNAME}
 # Install the plugins for Linux (and Windows?)
 IF(NOT APPLE)
     INSTALL(FILES ${CMAKE_BINARY_DIR}/plugins/visualisation/${PLUGIN_PREFIX}visualisation.${PLUGIN_SUFFIX} DESTINATION lib COMPONENT ${PROGNAME})
+    INSTALL(FILES ${CMAKE_BINARY_DIR}/plugins/file/${PLUGIN_PREFIX}file.${PLUGIN_SUFFIX} DESTINATION lib COMPONENT ${PROGNAME})
     INSTALL(FILES ${CMAKE_BINARY_DIR}/plugins/segmentation/${PLUGIN_PREFIX}segmentation.${PLUGIN_SUFFIX} DESTINATION lib COMPONENT ${PROGNAME})
     INSTALL(FILES ${CMAKE_BINARY_DIR}/plugins/pcapreprocess/${PLUGIN_PREFIX}pcapreprocess.${PLUGIN_SUFFIX} DESTINATION lib COMPONENT ${PROGNAME})
     IF(SUPPORT_3DMODEL AND USE_3DMODEL)
@@ -375,6 +376,8 @@ ENDIF()
 #--------------------------------------------------------------------------------
 # Install needed MC plugins
 IF(WITH_MC AND APPLE)#to generalize for other platforms
+	INSTALL(PROGRAMS "${CMAKE_BINARY_DIR}/plugins/file/mc_file.dylib" DESTINATION ${PROGNAME}.app/Contents/MacOS COMPONENT ${PROGNAME})
+	SET(MCPLUGINS "${CMAKE_INSTALL_PREFIX}/${PROGNAME}.app/Contents/MacOS/mc_file.dylib")
 	INSTALL(PROGRAMS "${CMAKE_BINARY_DIR}/plugins/segmentation/mc_segmentation.dylib" DESTINATION ${PROGNAME}.app/Contents/MacOS COMPONENT ${PROGNAME})
 	SET(MCPLUGINS "${CMAKE_INSTALL_PREFIX}/${PROGNAME}.app/Contents/MacOS/mc_segmentation.dylib")
 	INSTALL(PROGRAMS "${CMAKE_BINARY_DIR}/plugins/visualisation/mc_visualisation.dylib" DESTINATION ${PROGNAME}.app/Contents/MacOS COMPONENT ${PROGNAME})

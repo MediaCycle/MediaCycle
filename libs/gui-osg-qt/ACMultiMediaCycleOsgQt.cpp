@@ -1184,6 +1184,8 @@ void ACMultiMediaCycleOsgQt::loadDefaultConfig(ACMediaType _media_type, ACBrowse
     }
 #endif //defined (SUPPORT_MULTIMEDIA)
 
+    this->tryLoadFeaturePluginFromBaseName("file");
+
     // Try to load segmentation plugins:
     std::string s_plugin("");
     s_plugin = this->getPluginPathFromBaseName("segmentation");

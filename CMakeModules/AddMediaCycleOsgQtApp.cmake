@@ -47,6 +47,8 @@ macro(ADD_MC_OSG_QT_EXECUTABLE TARGET_NAME)
 		ADD_DEPENDENCIES(${TARGET_NAME} mc_navimed)
 	ENDIF()
 
+	ADD_DEPENDENCIES(${TARGET_NAME} mc_file)
+
 	IF ( APPLE )
 		SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -framework CoreVideo -framework AppKit -framework Foundation -framework AudioToolbox")
 		#IF ( USE_APPLE_MULTITOUCH )
