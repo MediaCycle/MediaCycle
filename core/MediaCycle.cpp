@@ -328,8 +328,8 @@ int MediaCycle::importDirectories(vector<string> directories, int recursive, boo
 #pragma omp parallel for
  */
     for (i=0;i<n;i++) {
-        int media_id = mediaLibrary->importFile(filenames[i], this->pluginManager, doSegment, doSegment);
-        if (media_id >-1){
+        std::vector<int> media_ids = mediaLibrary->importFile(filenames[i], this->pluginManager, doSegment, doSegment);
+        if (media_ids.size() >0){
             ok++;
             needsNormalizeAndCluster = 0;
             if ( (mediaLibrary->getSize() >= int(prevLibrarySizeMultiplier * prevLibrarySize))
@@ -340,8 +340,13 @@ int MediaCycle::importDirectories(vector<string> directories, int recursive, boo
             needsNormalizeAndCluster = 1;
             normalizeFeatures(needsNormalizeAndCluster); // exclusively medialibrary
             //mediaBrowser->setNeedsNavigationUpdateLock(1);
-            mediaBrowser->initializeNode(media_id);
-#if defined (SUPPORT_MULTIMEDIA)
+            for (vector<int>::iterator media_id=media_ids.begin();media_id!=media_ids.end();media_id++)
+            {
+                mediaBrowser->initializeNode(*media_id);
+                eventManager->sig_mediaImported(i+1,n,*media_id);
+            }
+                
+/*#if defined (SUPPORT_MULTIMEDIA)
             if (this->getMediaType()==MEDIA_TYPE_MIXED){
                 ACMedia* media =  mediaLibrary->getMedia(media_id);
                 ACMediaContainer medias = (static_cast<ACMediaDocument*> (media))->getContainer();
@@ -351,16 +356,24 @@ int MediaCycle::importDirectories(vector<string> directories, int recursive, boo
                     //files_processed++;
                 }
             }
-#endif
+#endif*/
             libraryContentChanged(needsNormalizeAndCluster); // exclusively mediabrowser, thus updateAfterFileImport and importDirectories can't be move to ACMediaLibrary
             //mediaBrowser->setNeedsNavigationUpdateLock(0);
             // this initiates node rendering, must be done after creating a media in the library and a node in the browser
-            eventManager->sig_mediaImported(i+1,n,media_id);
-        }
+            }
     }
     n = mediaLibrary->getSize(); // segmentation might have increased the number of medias in the library
     eventManager->sig_mediaImported(n,n,-1);
-
+    /*usleep(1000000);
+    ACMediaNodes tempNodes=mediaBrowser->getMediaNodes();
+    std::cout<<"NodeIndex:\n";
+    for (ACMediaNodes::iterator it=tempNodes.begin();it!=tempNodes.end();it++)
+        std::cout<<it->first<<std::endl;
+    ACMedias tempMedias= mediaLibrary->getAllMedia();
+    std::cout<<"MediaIndex:\n";
+    for (ACMedias::iterator it=tempMedias.begin();it!=tempMedias.end();it++)
+        std::cout<<it->first<<std::endl;
+*/
     //t2 = getTime();
     //printf("TTT - %f\n",float(t2-t1));
     //}

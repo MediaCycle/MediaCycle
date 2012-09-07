@@ -186,11 +186,14 @@ int ACMediaLibrary::importDirectory(std::string _path, int _recursive, ACPluginM
     if (doSegment) _save_timed_feat = true;
 
     files_to_import += filenames.size();
-
+    std::vector<int> ret;
     for (unsigned int i=0; i<filenames.size(); i++){
         files_processed++;
         int index = forward_order ? i : filenames.size()-1-i;//CF if reverse order (not forward_order), segments in subdirs are added to the library after the source recording
-        int media_id = this->importFile(filenames[index], acpl, doSegment, _save_timed_feat); //, _medias );
+        std::vector<int> media_ids = this->importFile(filenames[index], acpl, doSegment, _save_timed_feat); //, _medias );
+        for (std::vector<int>::iterator it=media_ids.begin();it!=media_ids.end();it++){
+            ret.push_back(*it);
+        }
     }
 
     std::cout << "Library size : " << this->getSize() << std::endl;
@@ -205,12 +208,16 @@ int ACMediaLibrary::importDirectory(std::string _path, int _recursive, ACPluginM
 
 
 int ACMediaLibrary::importFiles(std::vector<std::string> filenames, ACPluginManager *acpl, bool doSegment, bool _save_timed_feat){ //, TiXmlElement* _medias) {
+    std::vector<int> ret;
     total_ext_check_time = 0;
     checked_files = 0;
 
     files_to_import += filenames.size();
     for (unsigned int i=0; i<filenames.size(); i++){
-        int media_id = this->importFile(filenames[i], acpl, doSegment, _save_timed_feat); //, _medias );
+        std::vector<int> media_ids = this->importFile(filenames[i], acpl, doSegment, _save_timed_feat); //, _medias );
+        for (std::vector<int>::iterator it=media_ids.begin();it!=media_ids.end();it++){
+            ret.push_back(*it);
+        }
     }
     return this->getSize();
 }
@@ -220,9 +227,10 @@ int ACMediaLibrary::importFiles(std::vector<std::string> filenames, ACPluginMana
 // doSegment = true : uses SEGMENTATION plugins on-the-fly
 // save_timedfeat = true : save the timedFeatures on the disk
 // returns the media id of the imported file
-int ACMediaLibrary::importFile(std::string _filename, ACPluginManager *acpl, bool doSegment, bool _save_timed_feat){ //, TiXmlElement* _medias) {
+std::vector<int> ACMediaLibrary::importFile(std::string _filename, ACPluginManager *acpl, bool doSegment, bool _save_timed_feat){ //, TiXmlElement* _medias) {
     // Even if the file can't be imported, we have to notify the progress the file has been processed
     files_processed++;
+    std::vector<int> ret;
 
     // check if file has already been imported.
     // XS TODO: isn't this going to be too heavy when library size gets large ?
@@ -230,7 +238,7 @@ int ACMediaLibrary::importFile(std::string _filename, ACPluginManager *acpl, boo
     int is_present = this->getMediaIndex(_filename);
     if (is_present >= 0) {
         cout << "<ACMediaLibrary::importFile> skipping "<< _filename << " : media already present at position " << is_present << endl;
-        return -1;
+        return ret;
     }
 
     string extension = fs::extension(_filename);
@@ -245,21 +253,23 @@ int ACMediaLibrary::importFile(std::string _filename, ACPluginManager *acpl, boo
         if (media==0)
             media=new ACMediaDocument();
         if (media==0)
-            return -1;
+            return ret;
         else {
             int nbMedia = media->import(_filename, this->getAvailableMediaID(), acpl);
             if (nbMedia == 0)
-                return -1;
+                return ret;
             this->addMedia(media);
+            ret.push_back(media->getId());
             ACMediaContainer medias = (static_cast<ACMediaDocument*> (media))->getContainer();
             ACMediaContainer::iterator iter;
             for ( iter=medias.begin() ; iter!=medias.end(); ++iter ){
                 this->addMedia(iter->second);
                 iter->second->setParentId(media->getId());
+                ret.push_back(iter->second->getId());
                 //files_processed++;
             }
             this->setActiveMediaType(((ACMediaDocument*)media)->getActiveMediaKey(), acpl);
-            return media->getId();
+            return ret;
         }
     }
 #endif	
@@ -273,16 +283,17 @@ int ACMediaLibrary::importFile(std::string _filename, ACPluginManager *acpl, boo
         cout << "<ACMediaLibrary::importFile> other media type, skipping " << _filename << " ... " << endl;
         cout << "-> media_type " << media_type << " ... " << endl;
         cout << "-> fileMediaType " << fileMediaType << " ... " << endl;
-        return -1;
+        return ret;
     }
 
     if (media == 0) {
         cout << "<ACMediaLibrary::importFile> extension unknown, skipping " << _filename << " ... " << endl;
-        return -1;
+        return ret;
     }
     // import has to be done before segmentation to have proper id.
     else if (media->import(_filename, this->getAvailableMediaID(), acpl, _save_timed_feat)){
         this->addMedia(media);
+        ret.push_back(media->getId());
 #ifdef VERBOSE
         cout << "imported " << _filename << " with mid = " <<  media->getId() << endl;
 #endif // VERBOSE
@@ -303,6 +314,7 @@ int ACMediaLibrary::importFile(std::string _filename, ACPluginManager *acpl, boo
                 if (mediaSegments[i]->import(_filename, this->getAvailableMediaID(), acpl)){
                     this->addMedia(mediaSegments[i]);
                     mediaSegments[i]->setParentId(media->getId());
+                    ret.push_back(mediaSegments[i]->getId());
                     mediaSegments[i]->deleteData();//TR TODO verify that we must delete this data
                 }
 
@@ -315,7 +327,7 @@ int ACMediaLibrary::importFile(std::string _filename, ACPluginManager *acpl, boo
     else {
         cerr << "<ACMediaLibrary::importFile> problem importing file : " << _filename << " ... " << endl;
         failed_imports.push_back(_filename);
-        return -1;
+        return ret;
 
     }
     // XS TODO this was an attempt to save on-the-fly each media
@@ -331,7 +343,7 @@ int ACMediaLibrary::importFile(std::string _filename, ACPluginManager *acpl, boo
         files_processed = files_to_import = 0;
     }
 
-    return media->getId();
+    return ret;
 }
 
 int ACMediaLibrary::scanDirectories(std::vector<string> _paths, int _recursive, std::vector<string>& filenames) {
@@ -1049,7 +1061,7 @@ void ACMediaLibrary::calculateStats() {
 
 void ACMediaLibrary::normalizeFeatures(int needsNormalize) {
 
-    int start = 0;
+   // int start = 0;
 
     ACMediaFeatures* feature,* featureDest;
     cout << "normalizing features" << endl;
@@ -1082,41 +1094,48 @@ void ACMediaLibrary::normalizeFeatures(int needsNormalize) {
         }
     }
     unsigned int i,j,k;
-    vector<int> currId=this->getParentIds();
+
+    //vector<int> currId=this->getParentIds();
     //TR normalize just Parent Nodes
-    unsigned int n = currId.size();
+    //unsigned int n = currId.size();
 
     //unsigned int n = this->getSize() ;
 
+    ACMedias::iterator start;
+    
     if (needsNormalize) {
-        start = 0;
+        start = media_library.begin();
     }
     else {
         // Starting with the next index to be normalized
-        vector<int>::iterator last_normalized = std::find(currId.begin(),currId.end(),index_last_normalized);
-        if(last_normalized != currId.end()){
-            start = std::distance(currId.begin(),last_normalized)+1;
-        }
+        //vector<int>::iterator last_normalized = std::find(currId.begin(),currId.end(),index_last_normalized);
+        //if(last_normalized != currId.end()){
+        //    start = std::distance(currId.begin(),last_normalized)+1;
+        //}
+        start = media_library.find(index_last_normalized);
+        
     }
     if (mPreProcessPlugin!=NULL){
-        for(i=start; i<n; i++){
-            ACMedia* item = media_library[currId[i]];
-            item->cleanPreProcFeaturesVector();
-            std::vector<ACMediaFeatures*> tempFeatVect;
+        for(ACMedias::iterator it=start; it!=media_library.end(); it++){
+            ACMedia* item = it->second;
+            if (item->getMediaType() == this->media_type){
+                item->cleanPreProcFeaturesVector();
+                std::vector<ACMediaFeatures*> tempFeatVect;
 #ifdef SUPPORT_MULTIMEDIA
-            if (item->getMediaType()==MEDIA_TYPE_MIXED)
-                tempFeatVect=mPreProcessPlugin->apply(mPreProcessInfo,((ACMediaDocument*)item)->getActiveMedia());
-            else
+                if (item->getMediaType()==MEDIA_TYPE_MIXED)
+                    tempFeatVect=mPreProcessPlugin->apply(mPreProcessInfo,((ACMediaDocument*)item)->getActiveMedia());
+                else
 #endif//def SUPPORT_MULTIMEDIA
-                tempFeatVect=mPreProcessPlugin->apply(mPreProcessInfo,item);
-            for (int k=0;k<tempFeatVect.size();k++)
-                item->getAllPreProcFeaturesVectors().push_back(tempFeatVect[k]);
-            tempFeatVect.clear();
+                    tempFeatVect=mPreProcessPlugin->apply(mPreProcessInfo,item);
+                for (int k=0;k<tempFeatVect.size();k++)
+                    item->getAllPreProcFeaturesVectors().push_back(tempFeatVect[k]);
+                tempFeatVect.clear();
+            }
         }
     }
     else {
-        for(i=start; i<n; i++){
-            ACMedia* item = media_library[currId[i]];
+        for(ACMedias::iterator it=start; it!=media_library.end(); it++){
+            ACMedia* item = it->second;
             if (item->getMediaType() == this->media_type){ //CF
                 for(j=0; j<mean_features.size(); j++) {
                     feature = item->getFeaturesVector(j);
@@ -1138,8 +1157,10 @@ void ACMediaLibrary::normalizeFeatures(int needsNormalize) {
             }
         }
     }
-
-    index_last_normalized = currId.back();
+    if (media_library.end()!=media_library.begin())
+        index_last_normalized = (media_library.rbegin())->first;
+    else
+        index_last_normalized=0;
 }
 
 void ACMediaLibrary::denormalizeFeatures() {

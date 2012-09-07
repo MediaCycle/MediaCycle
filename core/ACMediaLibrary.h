@@ -153,7 +153,7 @@ public:
     int importDirectory(std::string _path, int recursive,  ACPluginManager *acpl=0, bool forward_order=true, bool doSegment=false, bool _save_timed_feat=false); //, TiXmlElement* _medias = 0);
     // returns the media id of the imported file
     int importFiles(std::vector<std::string> _filenames, ACPluginManager *acpl=0, bool doSegment=false, bool _save_timed_feat = false); //, TiXmlElement* _medias = 0);
-    int importFile(std::string _filename, ACPluginManager *acpl=0, bool doSegment=false, bool _save_timed_feat = false); //, TiXmlElement* _medias = 0);
+    std::vector<int> importFile(std::string _filename, ACPluginManager *acpl=0, bool doSegment=false, bool _save_timed_feat = false); //, TiXmlElement* _medias = 0);
     // I/O (C++ version; plain C version discontinued sep 2010)
     int setPath(std::string path);
     std::string getPath() { return media_path; };

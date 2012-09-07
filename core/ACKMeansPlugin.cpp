@@ -120,12 +120,13 @@ void ACKMeansPlugin::updateClusters(ACMediaBrowser* mediaBrowser,bool needsClust
         return;
     }
 
-    vector<int> currTempId=library->getParentIds();
+//    vector<int> currTempId=library->getParentIds();
     vector<int> currId;
-    for (int i=0;i<currTempId.size();i++){
-        if(mediaBrowser->getMediaNode(currTempId[i])){
-            if(mediaBrowser->getMediaNode(currTempId[i])->getNavigationLevel() >= mediaBrowser->getNavigationLevel())
-                currId.push_back(currTempId[i]);
+//    for (int i=0;i<currTempId.size();i++){
+    for (ACMediaNodes::const_iterator it=mediaBrowser->getMediaNodes().begin(); it !=mediaBrowser->getMediaNodes().end();it++){
+        if(it->second){
+            if ((library->getMedia(it->first)->getMediaType() == library->getMediaType()) &&(it->second->getNavigationLevel() >= mediaBrowser->getNavigationLevel()))
+                currId.push_back(it->first);
         }
     }
 
