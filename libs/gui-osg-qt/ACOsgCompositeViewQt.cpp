@@ -239,7 +239,7 @@ void ACOsgCompositeViewQt::clean(bool updategl){
     timeline_event_handler->clean();
     mousedown = borderdown = 0;
     refx =  refy = refcamx = refcamy = refzoom = refrotation = 0.0f;
-    browser_renderer->clean();
+    //browser_renderer->clean();
     timeline_renderer->clean();
     hud_renderer->clean();
     //if (browser_event_handler) delete browser_event_handler;

@@ -79,7 +79,7 @@ void ACMultiMediaCycleOsgQt::mediaImported(int n,int nTot,int mId){
         emit mediacycle_message_changed(QString(send.c_str()));
         emit loading_started();
     }
-    else if (n==nTot) {
+    else if (n==nTot && mId==-1) {
         send = "";
         emit mediacycle_message_changed(QString(send.c_str()));
         emit loading_finished();
