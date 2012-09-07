@@ -1,7 +1,7 @@
 /**
  * @brief weightedMean.h
- * @author Christian Frisson
- * @date 05/04/2012
+ * @author Thierry Ravet
+ * @date 07/09/2012
  * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -37,7 +37,11 @@
 
 template<typename eT>
 const arma::Row<eT> weightedMean(const arma::Col<eT>& in_v, const arma::Col<eT>& weight_v){
-	float sumWeight = as_scalar(sum(weight_v));
+#ifdef __clang__
+    float sumWeight = (sum(weight_v));
+#else   //__clang__
+    float sumWeight = as_scalar(sum(weight_v));
+#endif  //__clang__
 	arma::Col<eT> weightN_v = weight_v / sumWeight;
         //arma::Row<eT> tmp_m = trans(weightN_v) * in_v;
         //return tmp_m;

@@ -366,7 +366,9 @@
 {
 	osc_feedback_ip = [mOscFeedbackIp stringValue];
 	osc_feedback_port = [mOscFeedbackPort intValue];
+#ifndef __clang__
 	NSLog(@"OSC server: %s %i",*osc_feedback_ip,osc_feedback_port);
+#endif //__clang__
 	int	value = [inSender intValue];
 	if (value == 1)
 	{

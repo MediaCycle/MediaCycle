@@ -46,7 +46,9 @@
 	[ACOsgViewCocoa class];
 	[ACOsgBrowserViewCocoa class];//CF
 	
+#ifndef __clang__
 	prevz=1700;
+#endif
 }
 
 - (void)initCommonACAudioCycleOsgCocoa
@@ -405,7 +407,9 @@
 {
 	osc_feedback_ip = [mOscFeedbackIp stringValue];
 	osc_feedback_port = [mOscFeedbackPort intValue];
+#ifndef __clang__
 	NSLog(@"OSC server: %s %i",*osc_feedback_ip,osc_feedback_port);
+#endif
 	int	value = [inSender intValue];
 	if (value == 1)
 	{

@@ -1,8 +1,8 @@
 /**
  * @brief findpeaks.h
- * @author Xavier Siebert
- * @date 31/01/2011
- * @copyright (c) 2011 – UMONS - Numediart
+ * @author Thierry Ravet
+ * @date 07/09/2012
+ * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -70,8 +70,12 @@ arma::icolvec findpeaks(const arma::Col<eT>& Data, long Pd){
     // set current data point to -Inf in the neighbor data set
     temp(j-endL) = min(temp)-1;
 		
-    // Compare current data point with all neighbors
-    if( (as_scalar(sum(Data(j) > temp)) == temp.n_rows) && (j != 0) && j!=L-1 ){
+        // Compare current data point with all neighbors-    
+#ifdef __clang__
+        if( ((sum(Data(j) > temp)) == temp.n_rows) && (j != 0) && j!=L-1 ){
+#else //__clang__
+        if( (as_scalar(sum(Data(j) > temp)) == temp.n_rows) && (j != 0) && j!=L-1 ){
+#endif //__clang__
 			pks(m)  = Data(j); 
 			locs(m) = j;       
 			m = m+1;
