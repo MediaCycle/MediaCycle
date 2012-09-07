@@ -1,7 +1,7 @@
 /**
  * @brief ACPosPlugArchipelAtoll.cpp
- * @author Christian Frisson
- * @date 03/08/2012
+ * @author Thierry Ravet
+ * @date 07/09/2012
  * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -36,6 +36,7 @@
 
 //#include <float.h> //FLT_MAX
 
+#include "ACMediaDocument.h"
 using namespace arma;
 using namespace std;
 
@@ -77,16 +78,63 @@ void ACPosPlugArchipelAtoll::updateNextPositions(ACMediaBrowser* mediaBrowser){
             posSegments.push_back(media->first);
     }
 
-    std::vector<ACMedia*> tmpSegments;
     float angle;
     float lDist=0.025;
     for (long i=0; i<posDocuments.size(); i++){
-        tmpSegments = medias[posDocuments[i]]->getAllSegments();
+        ACMediaDocument* parentMedia=(ACMediaDocument*)(medias[posDocuments[i]]);
+        ACMediaContainer tmpMedias = parentMedia->getContainer();
 
         ACPoint parent = mediaBrowser->getMediaNode(posDocuments[i])->getNextPosition();
         int nCluster=mediaBrowser->getMediaNode(posDocuments[i])->getClusterId();
         //std::cout << "Media document " << posDocuments[i] << " with position " << parent.x << " " << parent.y << std::endl;
-
+        std::vector<ACMedia*> tmpSegments;
+        mediaBrowser->getMediaNode(parentMedia->getId())->setDisplayed(false);
+        for (ACMediaContainer::iterator it=tmpMedias.begin();it!=tmpMedias.end();it++){
+   
+            switch (it->second->getMediaType()) {
+                case MEDIA_TYPE_IMAGE:{
+                        ACMediaNode* node = mediaBrowser->getMediaNode(it->second->getId());
+                        ACPoint s;
+                        
+                        s.x = parent.x;
+                        s.y = parent.y;
+                        s.z = 0;
+                        double t = getTime();
+                        node->setNextPosition(s, t);
+                    
+                    mediaBrowser->getMediaNode(it->second->getId())->setDisplayed(true);
+                    mediaBrowser->getMediaNode(it->second->getId())->setClusterId(mediaBrowser->getMediaNode(parentMedia->getId())->getClusterId());
+                }
+                    break;
+                case MEDIA_TYPE_TEXT:{
+                        ACMediaNode* node = mediaBrowser->getMediaNode(it->second->getId());
+                        ACPoint s;
+                        
+                        s.x = parent.x;
+                        s.y = parent.y;
+                        s.z = 0;
+                        double t = getTime();
+                        node->setNextPosition(s, t);
+                    mediaBrowser->getMediaNode(it->second->getId())->setDisplayed(false);
+                    mediaBrowser->getMediaNode(it->second->getId())->setClusterId(mediaBrowser->getMediaNode(parentMedia->getId())->getClusterId());
+                    }
+                    break;
+                case MEDIA_TYPE_AUDIO:{
+                        tmpSegments.push_back(it->second);
+                    mediaBrowser->getMediaNode(it->second->getId())->setDisplayed(true);
+                    mediaBrowser->getMediaNode(it->second->getId())->setClusterId(mediaBrowser->getMediaNode(parentMedia->getId())->getClusterId());
+                    }
+                    break;
+                default:
+                    break;
+            
+            }
+                
+            
+            
+            
+        }
+            
         for (int j=0; j<tmpSegments.size(); j++){
             ACMediaNode* node = mediaBrowser->getMediaNode(tmpSegments[j]->getId());
 
