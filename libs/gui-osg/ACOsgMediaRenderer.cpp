@@ -105,10 +105,12 @@ ACOsgMediaRenderer::ACOsgMediaRenderer() {
 
 ACOsgMediaRenderer::~ACOsgMediaRenderer() {
     media = 0;// the core will free media files
-    label = "";
+   // label = "";
     cluster_colors.clear();
     metadata_geode = 0;
     metadata = 0;
+    local_group=0;
+    cluster_colors.clear();
 }
 
 void ACOsgMediaRenderer::metadataGeode() {

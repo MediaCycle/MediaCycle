@@ -72,7 +72,7 @@ ACOsgMediaDocumentRenderer::~ACOsgMediaDocumentRenderer() {
 
     ACOsgMediaDocumentRenderers::iterator render_iter = media_renderers.end();
     for ( render_iter=media_renderers.begin() ; render_iter!=media_renderers.end(); ++render_iter ){
-        delete (*render_iter);
+        (*render_iter)=0;
     }
 }
 
@@ -126,7 +126,7 @@ void ACOsgMediaDocumentRenderer::prepareNodes() {
     ACMediaContainer medias = (static_cast<ACMediaDocument*> (media))->getContainer();
     ACMediaContainer::iterator iter;
 
-    for ( iter=medias.begin() ; iter!=medias.end(); ++iter ){
+    /*for ( iter=medias.begin() ; iter!=medias.end(); ++iter ){
         cout << (*iter).first << " => " << (*iter).second << endl;
 	
         bool renderer_added = true;
@@ -141,7 +141,7 @@ void ACOsgMediaDocumentRenderer::prepareNodes() {
             media_renderers.push_back(new ACOsgImageRenderer());
             media_node->removeChild(entry_geode);
 #endif //defined (SUPPORT_IMAGE)
-            break;
+            break;*/
             /*			case MEDIA_TYPE_VIDEO:
     #if defined (SUPPORT_VIDEO)
     media_renderers.push_back(new ACOsgVideoRenderer());
@@ -157,7 +157,7 @@ void ACOsgMediaDocumentRenderer::prepareNodes() {
     media_renderers.push_back(new ACOsgTextRenderer());
     #endif //defined (SUPPORT_TEXT)
     break;*/
-        default:
+        /*default:
             renderer_added = false;
             break;
         }
@@ -174,7 +174,7 @@ void ACOsgMediaDocumentRenderer::prepareNodes() {
             //media_node->addChild(media_renderers.back()->getNode());
             media_node->addChild(media_renderers.back()->getMainGeode());
         }
-    }
+    }*/
 }
 
 void ACOsgMediaDocumentRenderer::updateNodes(double ratio) {

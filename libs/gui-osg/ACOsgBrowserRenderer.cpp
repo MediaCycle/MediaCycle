@@ -137,6 +137,9 @@ ACOsgBrowserRenderer::ACOsgBrowserRenderer()
     : ACEventListener(),font(0)
 {
     media_cycle = 0;
+  //  pthread_mutexattr_init(&activity_update_mutex_attr);
+  //  pthread_mutex_init(&activity_update_mutex, &activity_update_mutex_attr);
+  //  pthread_mutexattr_destroy(&activity_update_mutex_attr);
     setting = AC_SETTING_NONE;
     group = new Group();
     media_group = new Group();
@@ -151,9 +154,14 @@ ACOsgBrowserRenderer::ACOsgBrowserRenderer()
 ACOsgBrowserRenderer::~ACOsgBrowserRenderer(){
     media_cycle = 0;
     this->clean();
+    
+    //pthread_mutex_destroy(&activity_update_mutex);
 }
 
 void ACOsgBrowserRenderer::clean(){
+    
+   // pthread_mutex_lock(&activity_update_mutex);
+    activity_update_mutex.lock();
     // SD - Results from centralized request to MediaCycle - GLOBAL
     media_cycle_time = 0.0;
     media_cycle_prevtime = 0.0;
@@ -194,9 +202,13 @@ void ACOsgBrowserRenderer::clean(){
             media_cycle->getBrowser()->setModeChanged(false);
         }
     }
+    //pthread_mutex_unlock(&activity_update_mutex);
+    activity_update_mutex.unlock();
 }
 
 void ACOsgBrowserRenderer::mediaImported(int n, int nTot,int mId){
+    
+    
     if(n==0){
         std::cout << "ACOsgBrowserRenderer::mediaImported: creating renderers for " << nTot << " medias " << std::endl;
         return;
@@ -213,13 +225,23 @@ void ACOsgBrowserRenderer::mediaImported(int n, int nTot,int mId){
         std::cerr << "ACOsgBrowserRenderer::mediaImported: media id " << mId << " ("<< n << "/" << nTot << ") not accessible" << std::endl;
         return;
     }
-    if(media_cycle->getMediaType() == media_cycle->getLibrary()->getMedia(mId)->getType()){
-        std::cout << "ACOsgBrowserRenderer::mediaImported adding to " << node_renderers.size() << " renderers the renderer for media id " << mId << " ("<< n << "/" << nTot << ") " << std::endl;
+    //pthread_mutex_lock(&activity_update_mutex);
+    activity_update_mutex.lock();
+   /* if(media_cycle->getMediaType() == media_cycle->getLibrary()->getMedia(mId)->getType())*/{
+       
+       std::cout << "ACOsgBrowserRenderer::mediaImported adding to " << node_renderers.size() << " renderers the renderer for media id " << mId << " ("<< n << "/" << nTot << ") " << std::endl;
+       for (int i=0;i<100;i++){
+           if (media_cycle->getMediaNode(mId)!=0) 
+               break;
+           usleep(1);
+       }
         if(this->addNode(mId)){
             this->addLink(mId);
             nodes_prepared = 1;
         }
     }
+//    pthread_mutex_unlock(&activity_update_mutex);
+    activity_update_mutex.unlock();
 }
 
 void ACOsgBrowserRenderer::libraryCleaned(){
@@ -266,6 +288,9 @@ void ACOsgBrowserRenderer::updateNodes(double ratio) {
     if (!nodes_prepared) {
         return;
     }
+    
+    //pthread_mutex_lock(&activity_update_mutex);
+    activity_update_mutex.lock();
 
     int n = media_cycle->getLibrarySize();
 
@@ -358,9 +383,13 @@ void ACOsgBrowserRenderer::updateNodes(double ratio) {
             link_renderer->second->updateLinks();
         }
     }
+    //pthread_mutex_unlock(&activity_update_mutex);
+    activity_update_mutex.unlock();
 }
 
 void ACOsgBrowserRenderer::prepareLabels(int _start) {
+    activity_update_mutex.lock();
+//    pthread_mutex_lock(&activity_update_mutex);
     int start;
     int n = media_cycle->getLabelSize();
     if (_start) {
@@ -375,16 +404,26 @@ void ACOsgBrowserRenderer::prepareLabels(int _start) {
     else if (label_renderer.size()<n) {
         this->addLabels(start,n);
     }
+    
+   // pthread_mutex_unlock(&activity_update_mutex);
+    activity_update_mutex.unlock();
 }
 
 void ACOsgBrowserRenderer::updateLabels(double ratio) {
+    
+//    pthread_mutex_lock(&activity_update_mutex);
+    activity_update_mutex.lock();  
     for (unsigned int i=0;i<label_renderer.size();i++) {
         label_renderer[i]->updateNodes(ratio);
     }
+//    pthread_mutex_unlock(&activity_update_mutex);
+    activity_update_mutex.unlock();
 }
 
 int ACOsgBrowserRenderer::computeScreenCoordinates(osgViewer::View* view, double ratio) //CF: use osgViewer::Viewer* for the simple Viewer
 {
+   // pthread_mutex_lock(&activity_update_mutex);
+    activity_update_mutex.lock();
     int closest_node = 1;//CF to deprecate
     {
         float mx(0.0f), my(0.0f);
@@ -515,9 +554,12 @@ int ACOsgBrowserRenderer::computeScreenCoordinates(osgViewer::View* view, double
         //distance_mouse.resize(n);//CF
 
         int closest_node = -1;
-        for(int i=0; i<n; i++) {
+        //for(int i=0; i<n; i++) {
+        for (ACOsgMediaRenderers::iterator node_renderer =node_renderers.begin();node_renderer !=node_renderers.end();node_renderer++)
+        {
 
-            ACMediaNode* attribute = media_cycle->getMediaNode(i);
+            int i=node_renderer->first;
+            ACMediaNode* attribute = media_cycle->getMediaNode(i );
             /*
    const ACPoint &p = attribute->getCurrentPosition();
    const ACPoint &p2 = attribute->getNextPosition();
@@ -540,7 +582,9 @@ int ACOsgBrowserRenderer::computeScreenCoordinates(osgViewer::View* view, double
     printf ("POS: %f, %f, %f\n",p.x,p2.x,frac);
     }
     */
-            ACOsgMediaRenderers::iterator node_renderer = node_renderers.find(i);
+            if (attribute==0)
+                continue;
+            //ACOsgMediaRenderers::iterator node_renderer = node_renderers.find(i);
             if(node_renderer != node_renderers.end()){
                 if (attribute->getChanged()) {
                     if (node_renderer->second->getInitialized()) {
@@ -592,7 +636,9 @@ int ACOsgBrowserRenderer::computeScreenCoordinates(osgViewer::View* view, double
         }
         media_cycle->setClosestNode(closest_node,p_index);
     }
-
+    
+//    pthread_mutex_unlock(&activity_update_mutex);
+    activity_update_mutex.unlock();
     return closest_node; //CF to deprecate
 }
 
@@ -603,8 +649,11 @@ bool ACOsgBrowserRenderer::removeNodes(){
     ACOsgMediaRenderers::iterator iterm;
     for (iterm = node_renderers.begin(); iterm != node_renderers.end(); iterm++) {
         if(iterm->second){
+            long tempId=iterm->first;
             media_group->removeChild(iterm->second->getNode());
+            ACOsgMediaRenderer* tempMedia=iterm->second;
             delete iterm->second;
+            iterm->second=0;
         }
     }
     node_renderers.clear();
@@ -644,7 +693,7 @@ bool ACOsgBrowserRenderer::addNode(long int _id){
     media_type = media_cycle->getMediaType(_id);
 
     ACOsgMediaRenderer* renderer = 0;
-    if(media_cycle->getLibrary()->getMediaType() != MEDIA_TYPE_MIXED || (media_type == MEDIA_TYPE_MIXED||media_type == MEDIA_TYPE_AUDIO) ){
+    /*if(media_cycle->getLibrary()->getMediaType() != MEDIA_TYPE_MIXED || (media_type == MEDIA_TYPE_MIXED||media_type == MEDIA_TYPE_AUDIO) )*/{
         switch (media_type) {
         case MEDIA_TYPE_AUDIO:
 #if defined (SUPPORT_AUDIO)

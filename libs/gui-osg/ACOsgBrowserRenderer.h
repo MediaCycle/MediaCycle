@@ -60,6 +60,7 @@
 #include <osgViewer/Viewer>
 
 #include "ACRefId.h"
+#include <pthread.h>
 
 #include "ACEventListener.h"
 
@@ -118,6 +119,11 @@ protected:
     int nodes_prepared;
     ACBrowserAudioWaveformType audio_waveform_type;
     ACSettingType setting;
+    
+    
+    /*pthread_mutex_t activity_update_mutex;
+    pthread_mutexattr_t activity_update_mutex_attr;*/
+    OpenThreads::Mutex activity_update_mutex;
 
 public:
     //void setLayoutPlugin(ACPlugin* acpl){mLayoutPlugin=acpl;}

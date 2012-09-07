@@ -115,12 +115,15 @@ void ACOsgAudioRenderer::waveformGeode() {
         //////////////////////////
         // samples vertices
         vertices = new Vec3Array(2*width+2);
-        for(i=0; i<width; i++) {
-            (*vertices)[2*i] = Vec3(i * xstep, ylim * thumbnail[2*i], zpos);
-            (*vertices)[2*i+1] = Vec3(i * xstep, ylim * thumbnail[2*i+1], zpos);
+        if (thumbnail)
+        {
+            for(i=0; i<width; i++) {
+                (*vertices)[2*i] = Vec3(i * xstep, ylim * thumbnail[2*i], zpos);
+                (*vertices)[2*i+1] = Vec3(i * xstep, ylim * thumbnail[2*i+1], zpos);
+            }
+            (*vertices)[2*i] = Vec3(0.0, 0.0, zpos);
+            (*vertices)[2*i+1] = Vec3((i-1) * xstep, 0.0, zpos);
         }
-        (*vertices)[2*i] = Vec3(0.0, 0.0, zpos);
-        (*vertices)[2*i+1] = Vec3((i-1) * xstep, 0.0, zpos);
         samples_geometry->setVertexArray(vertices);
         /*
   line_p = new DrawElementsUInt(PrimitiveSet::LINES, 2*width+2);
@@ -384,6 +387,9 @@ void ACOsgAudioRenderer::prepareNodes() {
     //waveformGeode();
     //curserGeode();
     //if  (media_cycle->getMediaNode(node_index)->isDisplayed()){
+    if (media && media_cycle->getNodeFromMedia(media)==0){
+        cout<<"test Error"<<endl;
+    }
     if (media && media_cycle->getNodeFromMedia(media)->isDisplayed()){
         entryGeode();
         media_node->addChild(entry_geode);
@@ -501,6 +507,10 @@ void ACOsgAudioRenderer::updateNodes(double ratio) {
     }
     else {
         //if(media_node->getNumChildren() == 3) {
+        if (!entry_geode){
+            entryGeode();
+            //std::cout << "ACOsgAudioRenderer::updateNodes created missing node geode" << std::endl;
+        }
         if(media_node->getNumChildren() != 1) { // entry_geode
             media_node->removeChild(waveform_geode);
             media_node->removeChild(metadata_geode);
@@ -511,39 +521,38 @@ void ACOsgAudioRenderer::updateNodes(double ratio) {
             //media_node->removeChild(1, 1);
         }
 
-        if (!entry_geode){
-            entryGeode();
-            //std::cout << "ACOsgAudioRenderer::updateNodes created missing node geode" << std::endl;
-        }
 
         //CF nodes colored along their relative cluster on in Clusters Mode
-        if (media_cycle->getBrowserMode() == AC_MODE_CLUSTERS){
-            const vector<int> centerNodeIds=media_cycle->getBrowser()->getIdNodeClusterCenter();
-            if(cluster_colors.size()>0){
-                ((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(cluster_colors[attribute->getClusterId()%cluster_colors.size()]);
+        if (entry_geode &&entry_geode->getDrawable(0)){
+            if (media_cycle->getBrowserMode() == AC_MODE_CLUSTERS){
+                const vector<int> centerNodeIds=media_cycle->getBrowser()->getIdNodeClusterCenter();
+                if(cluster_colors.size()>0){
+                    ((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(cluster_colors[attribute->getClusterId()%cluster_colors.size()]);
                 /*if(setting == AC_SETTING_DESKTOP){
                     if(centerNodeIds.size() != 0 && attribute->getClusterId() < centerNodeIds.size())
                         if (centerNodeIds[attribute->getClusterId()]==attribute->getMediaId())
                             ((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(osg::Vec4(0,0,0,1));
                 }*/
+                }
+                else
+                    ((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(node_color);
             }
             else
-                ((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(node_color);
-        }
-        else
-            ((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(neighbor_color);
+                ((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(neighbor_color);
+        
 
         //CF color (multiple) selected nodes in black (for AudioGarden)
-        if (attribute->isSelected())
-            ((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(osg::Vec4(0,0,0,1));
-
-        //CF color discarded nodes in black (for LoopJam composition)
-        if(media)
-            if(media->isDiscarded())
+            if (attribute->isSelected())
                 ((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(osg::Vec4(0,0,0,1));
 
-        if (user_defined_color)
-            ((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(node_color);
+        //CF color discarded nodes in black (for LoopJam composition)
+            if(media)
+                if(media->isDiscarded())
+                    ((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(osg::Vec4(0,0,0,1));
+
+            if (user_defined_color)
+                ((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(node_color);
+        }
 
         T =  Matrix::rotate(-media_cycle_angle,Vec3(0.0,0.0,1.0)) * Matrix::scale(localscale/media_cycle_zoom,localscale/media_cycle_zoom,localscale/media_cycle_zoom) * T;
     }
