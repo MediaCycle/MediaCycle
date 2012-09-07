@@ -1062,7 +1062,7 @@ void ACVideoAnalysis::computeOpticalFlow2() {
                     maxLevel, termcrit, 0, 0.001);
 
             size_t i, k;
-            cout << points[1].size() << endl;
+            //cout << points[1].size() << endl;
             for (i = k = 0; i < points[1].size(); i++) {
                 if (!status[i])
                     continue;

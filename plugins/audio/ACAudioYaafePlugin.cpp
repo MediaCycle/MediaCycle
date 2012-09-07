@@ -311,14 +311,16 @@ Component* ACYaafeOutputFormat::createWriter(
     }
 
     ACYaafeWriter* _writer = 0;
-    try {
+    //try {
         _writer = static_cast <ACYaafeWriter*> (writer);
         if(!_writer)
-            throw runtime_error("<ACYaafeOutputFormat::createWriter> problem with ACYaafeWriter cast");
-    }
-    catch (const exception& e) {
-        cerr << e.what() << endl;
-    }
+      //      throw runtime_error("<ACYaafeOutputFormat::createWriter> problem with ACYaafeWriter cast");
+    //}
+    //catch (const exception& e) 
+        {
+    //        cerr << e.what() << endl;
+            cerr <<"<ACYaafeOutputFormat::createWriter> problem with ACYaafeWriter cast"<< endl;
+        }
     if(_writer){
         _writer->setMediaCyclePlugin(m_plugin);
     }
@@ -621,14 +623,16 @@ std::vector<ACMediaFeatures*> ACAudioYaafePlugin::calculate(ACMediaData* aData, 
     ACMediaFeatures* feat;
     ACAudio* theAudio = 0;
 
-    try {
+   // try {
         theAudio = static_cast <ACAudio*> (theMedia);
         if(!theAudio)
-            throw runtime_error("<ACAudioYaafePlugin::_calculate> problem with ACAudio cast");
-    }
-    catch (const exception& e) {
-        cerr << e.what() << endl;
-        return desc;
+     //       throw runtime_error("<ACAudioYaafePlugin::_calculate> problem with ACAudio cast");
+    //}
+    //catch (const exception& e)
+        {
+            //cerr << e.what() << endl;
+            cerr <<"ACAudioYaafePlugin::_calculate> problem with ACAudio cast" << endl;
+            return desc;
     }
 
     boost::filesystem::path f_path( theMedia->getFileName() );
