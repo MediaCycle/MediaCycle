@@ -156,7 +156,7 @@ int ArchipelMediaDocument::import(std::string _filename, int _mid, ACPluginManag
 				}*/
 				
 				if(import_ok){//media import substitution ends here
-					this->addSegment(media);
+					//this->addSegment(media);//TODO TR why did we add audio track media as segment AND submedia?
 					if (this->addMedia(mediaKey, media)){
 						//this->incrementMediaID();
 						if(mediaKey=="main")
