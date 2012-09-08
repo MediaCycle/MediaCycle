@@ -1,7 +1,7 @@
 /**
  * @brief ACPosPlugArchipelAtoll.h
  * @author Christian Frisson
- * @date 22/07/2012
+ * @date 08/09/2012
  * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -35,14 +35,14 @@
 #ifndef _ACPosPlugArchipelAtoll_
 #define _ACPosPlugArchipelAtoll_
 
-//#if defined(SUPPORT_ARCHIPEL)
+#if defined(SUPPORT_ARCHIPEL)
 class ACPosPlugArchipelAtoll : public ACClusterPositionsPropellerPlugin {
 	public:
 		ACPosPlugArchipelAtoll();
 		~ACPosPlugArchipelAtoll();
 		virtual void updateNextPositions(ACMediaBrowser* );
 };
-//#endif //defined(SUPPORT_ARCHIPEL)
+#endif //defined(SUPPORT_ARCHIPEL)
 
 #endif	/* _ACPosPlugArchipelAtoll_ */
 

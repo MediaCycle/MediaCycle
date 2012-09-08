@@ -47,14 +47,14 @@
 class ACVideoControlsDockWidgetQt : public ACAbstractDockWidgetQt {
 Q_OBJECT
 
-//#if defined (SUPPORT_VIDEO)// don't use it!
+#if defined (SUPPORT_VIDEO)
 private slots:
 	// Video controls
 	void on_pushButtonMuteAll_clicked();
 	void on_comboBoxSummary_activated(const QString & text);
 	void on_comboBoxSelection_activated(const QString & text);
 	void on_checkBoxPlayback_stateChanged(int state);
-//#endif //defined (SUPPORT_VIDEO)
+#endif //defined (SUPPORT_VIDEO)
 	
 public:
 	ACVideoControlsDockWidgetQt(QWidget *parent = 0);

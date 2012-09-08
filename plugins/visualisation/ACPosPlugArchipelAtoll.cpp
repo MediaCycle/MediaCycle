@@ -1,7 +1,7 @@
 /**
  * @brief ACPosPlugArchipelAtoll.cpp
- * @author Thierry Ravet
- * @date 07/09/2012
+ * @author Christian Frisson
+ * @date 08/09/2012
  * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -40,7 +40,7 @@
 using namespace arma;
 using namespace std;
 
-//#if defined(SUPPORT_ARCHIPEL)
+#if defined(SUPPORT_ARCHIPEL)
 ACPosPlugArchipelAtoll::ACPosPlugArchipelAtoll() : ACClusterPositionsPropellerPlugin()
 {
     //vars herited from ACPlugin
@@ -156,6 +156,6 @@ void ACPosPlugArchipelAtoll::updateNextPositions(ACMediaBrowser* mediaBrowser){
         }
     }
 }
-//#endif //defined(SUPPORT_ARCHIPEL)
+#endif //defined(SUPPORT_ARCHIPEL)
 
 

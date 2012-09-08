@@ -36,9 +36,9 @@ extern "C" ACPlugin* create(std::string namePlugin) {
     if (namePlugin == "ACPosPlugAudioGardenFlower") {return new ACPosPlugAudioGardenFlower();}
     if (namePlugin == "ACPosPlugMakamHistoGramoPhone") {return new ACPosPlugMakamHistoGramoPhone();}
     if (namePlugin == "ACPosPlugClustersClock") {return new ACPosPlugClustersClock();}
-    //#if defined(SUPPORT_ARCHIPEL)
+    #if defined(SUPPORT_ARCHIPEL)
     if (namePlugin == "ACPosPlugArchipelAtoll") {return new ACPosPlugArchipelAtoll();}
-    //#endif// defined(SUPPORT_ARCHIPEL)
+    #endif// defined(SUPPORT_ARCHIPEL)
     if (namePlugin == "ACPositionsPluginRadialTreeLayout") {return new ACPositionsPluginRadialTreeLayout();}
     //if (namePlugin == "ACPositionsPluginRandom") {return new ACPositionsPluginRandom();}
 }
