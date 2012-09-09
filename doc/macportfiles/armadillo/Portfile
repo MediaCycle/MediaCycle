@@ -1,11 +1,11 @@
 # -*- coding: utf-8; mode: tcl; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- vim:fenc=utf-8:ft=tcl:et:sw=4:ts=4:sts=4
-# $Id: Portfile 82208 2011-08-24 12:50:26Z christian.frisson@umons.ac.be $
+# $Id: Portfile xxx 2012-09-09 15:40:26Z christian.frisson@gmail.com $
 
 PortSystem                      1.0
 PortGroup                       cmake 1.0
 
 name                            armadillo
-version                         2.2.2
+version                         3.4.0
 set branch                      ${version}
 categories                      science
 platforms                       darwin
@@ -26,9 +26,9 @@ master_sites                    sourceforge:project/arma
 use_bzip2                       no
 distname                        armadillo-${version}
 
-checksums                       md5     b357c495241409f0973ddc88adde7278 \
-                                sha1    5bd1229c4a56b7fdf6a90256dfacce3213850066 \
-                                rmd160  c67ff9799226ffe29acf91518f1b822d83deef62
+checksums                       md5     aa3ff84668cbaebfb3c0bf8f65444b21 \
+                                sha1    e7fdb6518172aabaa28c84412b52db7d86ef37a5 \
+                                rmd160  d00a412c91a1d4d505c78d4eb1653f7f20df1e45
 
 depends_build-append            port:pkgconfig
 

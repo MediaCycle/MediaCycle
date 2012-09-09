@@ -4,7 +4,7 @@
 # armadillo
 PKG             := armadillo
 $(PKG)_IGNORE   :=
-$(PKG)_CHECKSUM := c9f6ddade1e0c2524b058914dd07ba0c7f402b7b
+$(PKG)_CHECKSUM := e7fdb6518172aabaa28c84412b52db7d86ef37a5
 $(PKG)_SUBDIR   := $(PKG)-$($(PKG)_VERSION)
 $(PKG)_FILE     := $(PKG)-$($(PKG)_VERSION).tar.gz
 $(PKG)_URL      := http://$(SOURCEFORGE_MIRROR)/project/arma/$($(PKG)_FILE)
@@ -21,8 +21,9 @@ define $(PKG)_BUILD
     cmake . -DCMAKE_TOOLCHAIN_FILE='$(CMAKE_TOOLCHAIN_FILE)'
     $(MAKE) -C '$(1)' -j '$(JOBS)' install VERBOSE=1
 
+# note: don't use -Werror with GCC 4.7.0 and .1
 '$(TARGET)-g++' \
-        -W -Wall -Werror -01 \
+        -W -Wall \
         '$(2).cpp' -o '$(PREFIX)/$(TARGET)/bin/test-armadillo.exe' \
         -larmadillo -llapack -lblas -lgfortran
         -lboost_serialization-mt -lboost_thread_win32-mt -lboost_system-mt

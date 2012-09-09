@@ -1257,6 +1257,12 @@ IF (ARMADILLO_FOUND)
 	IF( MINGW OR WIN32 ) # should be if static building 
 		list(APPEND ARMADILLO_LIBRARIES gfortran)
 	ENDIF()
+	FIND_PACKAGE(HDF5) # if present, armadillo builds against it automatically from version 3.4.0
+    	IF(HDF5_FOUND)
+		MESSAGE("HDF5 library ${HDF5_LIBRARY}")
+		MESSAGE("HDF5 HL library ${HDF5_HL_LIBRARY}")
+		list(APPEND ARMADILLO_LIBRARIES ${HDF5_LIBRARY} ${HDF5_HL_LIBRARY})
+	ENDIF()
 	MESSAGE("Armadillo libraries ${ARMADILLO_LIBRARIES}")
 	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUSE_ARMADILLO")
 	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DUSE_ARMADILLO")

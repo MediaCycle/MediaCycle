@@ -6,7 +6,7 @@ Howto:
 * Edit index.html, look for List of Packages, and add alphabetically each of the following package definitions if more up to date versions aren't already listed:
     <tr>
         <td id="armadillo-package">armadillo</td>
-        <td id="armadillo-version">3.2.4</td>
+        <td id="armadillo-version">3.4.0</td>
         <td id="armadillo-website"><a href="http://armadillo.sf.net/">Armadillo C++ linear algebra library</a></td>
     </tr>
 
@@ -65,6 +65,7 @@ TODO:
 * add clucene
 
 Changelog:
+* (09/09/2012, mc changeset 907): updated armadillo to 3.4.0, submitted to MacPorts <https://trac.macports.org/ticket/36062> (already accepted, seems it's gonna be available from the next MacPorts version, current is 2.1.2) and to MXE <https://github.com/mxe/mxe/pull/77>
 * (27/07/2012, mc changeset 838): debugged opencv 2.4.2
 * (27/07/2012, mc changeset 838): added mpg123 1.14.4 and argtable 2.13 and dlfcn r19
 * (26/07/2012, mc changeset 838): updated and debugged lapack 3.4.1 and armadillo 3.2.4!

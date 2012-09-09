@@ -3,13 +3,11 @@
  * See index.html for further information.
  */
 
-// From http://arma.sourceforge.net/docs.html#eig_sym
-
 #include <armadillo>
 
 using namespace arma;
 
-int main(int argc, char** argv)
+int main()
 {
 	mat A = randu<mat>(50,50);
 	mat B = trans(A)*A;  // generate a symmetric matrix
