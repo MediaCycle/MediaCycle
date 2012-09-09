@@ -2,7 +2,7 @@ IF ( USE_OSG )
 	FILE(GLOB SRC *.cpp)
 	FILE(GLOB HDR *.h)
 
-	ADD_LIBRARY(mediacycle-osg STATIC ${SRC} ${HDR})
+	ADD_LIBRARY(mediacycle-osg ${SRC} ${HDR})
 	ADD_DEPENDENCIES(mediacycle-osg mediacycle)
 	IF(SUPPORT_AUDIO)
 		ADD_DEPENDENCIES(mediacycle-osg audioengine)

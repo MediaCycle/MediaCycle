@@ -2,7 +2,7 @@ IF(SUPPORT_AUDIO AND (USE_OPENAL OR USE_PORTAUDIO))
 	FILE(GLOB SRC *.cpp *.c)
 	FILE(GLOB HDR *.hpp *.h)
 
-	ADD_LIBRARY(audioengine STATIC ${SRC} ${HDR})
+	ADD_LIBRARY(audioengine ${SRC} ${HDR})
 	ADD_DEPENDENCIES(audioengine mediacycle)
 	TARGET_LINK_LIBRARIES(audioengine mediacycle)
 	IF ( NOT APPLE )

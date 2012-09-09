@@ -1,7 +1,7 @@
 FILE(GLOB SRC *.cpp *.c)
 FILE(GLOB HDR *.hpp *.h)
 
-ADD_LIBRARY(vamp-hostsdk STATIC ${SRC} ${HDR})
+ADD_LIBRARY(vamp-hostsdk ${SRC} ${HDR})
 INCLUDE_DIRECTORIES(. ..)
 ADD_DEPENDENCIES(vamp-hostsdk vamp-sdk)
 

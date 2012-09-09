@@ -4,7 +4,7 @@ IF(USE_GNUPLOT_I)
 	FILE(GLOB SRC *.cpp *.c)
 	FILE(GLOB HDR *.hpp *.h)
 
-	ADD_LIBRARY(gnuplot_i STATIC ${SRC} ${HDR})
+	ADD_LIBRARY(gnuplot_i ${SRC} ${HDR})
 
 	#INSTALL(TARGETS gnuplot_i LIBRARY DESTINATION lib)
 	#INSTALL(FILES ${HDR} DESTINATION include/gnuplot_i)

@@ -1,11 +1,11 @@
-# Locate Apple CoreVideo (next-generation QuickTime)
+# Locate Apple Foundation
 # This module defines
-# COREVIDEO_LIBRARY
-# COREVIDEO_FOUND, if false, do not try to link to gdal 
-# COREVIDEO_INCLUDE_DIR, where to find the headers
+# FOUNDATION_LIBRARY
+# FOUNDATION_FOUND, if false, do not try to link to gdal 
+# FOUNDATION_INCLUDE_DIR, where to find the headers
 #
-# $COREVIDEO_DIR is an environment variable that would
-# correspond to the ./configure --prefix=$COREVIDEO_DIR
+# $FOUNDATION_DIR is an environment variable that would
+# correspond to the ./configure --prefix=$FOUNDATION_DIR
 #
 #=============================================================================
 # Author: Christian Frisson
@@ -23,13 +23,13 @@
 
 
 IF(APPLE)
-  FIND_PATH(COREVIDEO_INCLUDE_DIR CoreVideo/CoreVideo.h)
-  FIND_LIBRARY(COREVIDEO_LIBRARY CoreVideo)
+  FIND_PATH(FOUNDATION_INCLUDE_DIR Foundation/Foundation.h)
+  FIND_LIBRARY(FOUNDATION_LIBRARY Foundation)
 ENDIF()
 
 
-SET(COREVIDEO_FOUND "NO")
-IF(COREVIDEO_LIBRARY AND COREVIDEO_INCLUDE_DIR)
-  SET(COREVIDEO_FOUND "YES")
+SET(FOUNDATION_FOUND "NO")
+IF(FOUNDATION_LIBRARY AND FOUNDATION_INCLUDE_DIR)
+  SET(FOUNDATION_FOUND "YES")
 ENDIF()
 

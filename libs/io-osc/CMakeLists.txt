@@ -3,7 +3,7 @@ IF ( USE_OSC )
 FILE(GLOB SRC *.cpp)
 FILE(GLOB HDR *.h)
 
-	ADD_LIBRARY(mediacycle-io-osc STATIC ${SRC} ${HDR})
+	ADD_LIBRARY(mediacycle-io-osc ${SRC} ${HDR})
 
     INCLUDE_DIRECTORIES (../../core/)
 	ADD_DEPENDENCIES(mediacycle-io-osc mediacycle)

@@ -10,7 +10,7 @@ if (WITH_TIMERS)
 endif (WITH_TIMERS)
 
 include_directories(${yaafe_core_INCLUDE_DIRS})
-add_library (yaafe-core STATIC ${yaafe_core_SOURCES} ${yaafe_core_HEADERS})
+add_library (yaafe-core ${yaafe_core_SOURCES} ${yaafe_core_HEADERS})
 set_target_properties(yaafe-core PROPERTIES VERSION ${YAAFE_LIBVERSION} SOVERSION ${YAAFE_API_VERSION})
 
 target_link_libraries(yaafe-core ${yaafe_core_LIBS})

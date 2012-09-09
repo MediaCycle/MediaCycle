@@ -1,7 +1,7 @@
 FILE(GLOB SRC *.cpp *.c)
 FILE(GLOB HDR *.hpp *.h)
 
-ADD_LIBRARY(tinyxml STATIC ${SRC} ${HDR})
+ADD_LIBRARY(tinyxml ${SRC} ${HDR})
 
 #gsl - uncomment if needed
 TARGET_LINK_LIBRARIES(tinyxml stdc++)

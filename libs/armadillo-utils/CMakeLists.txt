@@ -2,7 +2,7 @@ IF ( ARMADILLO_FOUND )
 	FILE(GLOB SRC *.cpp *.c)
 	FILE(GLOB HDR *.hpp *.h)
 
-	ADD_LIBRARY(armadillo-utils STATIC ${SRC} ${HDR})
+	ADD_LIBRARY(armadillo-utils ${SRC} ${HDR})
 	ADD_DEPENDENCIES(armadillo-utils fftooura)
 	
 	#gsl - uncomment if needed

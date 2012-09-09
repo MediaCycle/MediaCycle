@@ -1,11 +1,11 @@
-# Locate Apple CoreVideo (next-generation QuickTime)
+# Locate Apple AppKit
 # This module defines
-# COREVIDEO_LIBRARY
-# COREVIDEO_FOUND, if false, do not try to link to gdal 
-# COREVIDEO_INCLUDE_DIR, where to find the headers
+# APPKIT_LIBRARY
+# APPKIT_FOUND, if false, do not try to link to gdal 
+# APPKIT_INCLUDE_DIR, where to find the headers
 #
-# $COREVIDEO_DIR is an environment variable that would
-# correspond to the ./configure --prefix=$COREVIDEO_DIR
+# $APPKIT_DIR is an environment variable that would
+# correspond to the ./configure --prefix=$APPKIT_DIR
 #
 #=============================================================================
 # Author: Christian Frisson
@@ -23,13 +23,13 @@
 
 
 IF(APPLE)
-  FIND_PATH(COREVIDEO_INCLUDE_DIR CoreVideo/CoreVideo.h)
-  FIND_LIBRARY(COREVIDEO_LIBRARY CoreVideo)
+  FIND_PATH(APPKIT_INCLUDE_DIR AppKit/AppKit.h)
+  FIND_LIBRARY(APPKIT_LIBRARY AppKit)
 ENDIF()
 
 
-SET(COREVIDEO_FOUND "NO")
-IF(COREVIDEO_LIBRARY AND COREVIDEO_INCLUDE_DIR)
-  SET(COREVIDEO_FOUND "YES")
+SET(APPKIT_FOUND "NO")
+IF(APPKIT_LIBRARY AND APPKIT_INCLUDE_DIR)
+  SET(APPKIT_FOUND "YES")
 ENDIF()
 

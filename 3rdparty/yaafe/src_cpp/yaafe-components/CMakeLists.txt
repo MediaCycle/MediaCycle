@@ -17,7 +17,7 @@ endif (WITH_LAPACK)
 
 include_directories(${yaafe_components_INCLUDE_DIRS})
 link_directories(${CMAKE_BINARY_DIR}/src_cpp/yaafe-core)
-add_library (yaafe-components STATIC ${yaafe_components_SOURCES})
+add_library (yaafe-components ${yaafe_components_SOURCES})
 if (NOT APPLE)
    set_target_properties(yaafe-components PROPERTIES VERSION ${YAAFE_LIBVERSION} SOVERSION ${YAAFE_API_VERSION})
 endif (NOT APPLE)

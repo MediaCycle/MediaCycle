@@ -1,7 +1,7 @@
 FILE(GLOB SRC *.cc *.c)
 FILE(GLOB HDR *.h)
 
-ADD_LIBRARY(octave_embed STATIC ${SRC} ${HDR})
+ADD_LIBRARY(octave_embed ${SRC} ${HDR})
 
 TARGET_LINK_LIBRARIES(octave_embed ${OCTAVE_LIBRARY})
 

@@ -13,7 +13,7 @@ IF ( USE_QT4 )
 	# the UI file won't be wrapped!
 	include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
-	ADD_LIBRARY(mediacycle-osg-qt STATIC ${mediacycle-osg-qt_SRCS} ${mediacycle-osg-qt_HDRS} ${mediacycle-osg-qt_UIS_H} ${mediacycle-osg-qt_MOC_SRCS} ${mediacycle-osg-qt_RCC_SRCS})
+	ADD_LIBRARY(mediacycle-osg-qt ${mediacycle-osg-qt_SRCS} ${mediacycle-osg-qt_HDRS} ${mediacycle-osg-qt_UIS_H} ${mediacycle-osg-qt_MOC_SRCS} ${mediacycle-osg-qt_RCC_SRCS})
 	#ADD_DEPENDENCIES(mediacycle-osg-qt mediacycle)
 	ADD_DEPENDENCIES(mediacycle-osg-qt mediacycle-osg)
 	IF(SUPPORT_AUDIO)
