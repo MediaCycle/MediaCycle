@@ -333,6 +333,7 @@ private: // better not let the ouside world know about internal cooking
     void resetNavigation();
     void resetNavigationLevels(int l=0);
     void resetCamera();
+	void normalizePositions();
     // next positions -> current positions
     void commitPositions();
 

@@ -2081,8 +2081,47 @@ void ACMediaBrowser::resetCamera() {
     mCameraAngle = 0.0;
 }
 
+void ACMediaBrowser::normalizePositions()
+{
+    // Attempt to normalize plugin positions, only in clusters mode
+    double pre = getTime();
+    double min_x(0.0f), min_y(0.0f), max_x(0.0f), max_y(0.0f);
+    for (ACMediaNodes::iterator node = mMediaNodes.begin(); node != mMediaNodes.end(); ++node){
+	        ACPoint p = node->second->getNextPosition();
+	        if(node == mMediaNodes.begin()){
+		            min_x = max_x = p.x;
+		            min_y = max_y = p.y;
+		        }
+	        else{
+		            if (p.x > max_x) max_x = p.x;
+			            if (p.x < min_x) min_x = p.x;
+				            if (p.y > max_y) max_y = p.y;
+					            if (p.y < min_y) min_y = p.y;
+						        }
+	    }
+    // Plugin positions are centered on 0 and in the [-1;1] range
+    double ratio_x = std::max( std::fabs(min_x),std::fabs(max_x) );
+    double ratio_y = std::max( std::fabs(min_y),std::fabs(max_y) );
+    double common_ratio = std::max( ratio_x,ratio_y );
+    std::cout << "ACMediaBrowser::commitPositions: x min " << min_x << " max " << max_x << " y min " << min_y << " max " << max_y << " ratio " << common_ratio << std::endl;
+    double t = getTime();
+    for (ACMediaNodes::iterator node = mMediaNodes.begin(); node != mMediaNodes.end(); ++node){
+	        ACPoint p = node->second->getNextPosition();
+	        // For a polar view we should use:
+	        p.x /= common_ratio;
+	        p.y /= common_ratio;
+	        // For a cartesian view:
+	        // p.x /= ratio_x;
+	        // p.y /= ratio_y;
+	        node->second->setNextPosition(p,t);
+	    }
+    double post = getTime();
+    std::cout << "ACMediaBrowser::commitPositions: determined ratio in " << t-pre << " ms and applied it in " << post-t << " ms" << std::endl;
+}
+
 void ACMediaBrowser::commitPositions()
 {
+	//this->normalizePositions();
     for (ACMediaNodes::iterator node = mMediaNodes.begin(); node != mMediaNodes.end(); ++node){
         node->second->commitPosition();
         if(mLibrary->getMediaType() == MEDIA_TYPE_MIXED)

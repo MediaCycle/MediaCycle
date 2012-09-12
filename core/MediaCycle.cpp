@@ -944,6 +944,25 @@ int MediaCycle::readXMLConfigFilePlugins(TiXmlHandle _rootHandle) {
                 this->pluginManager->addLibrary( this->getPluginPathFromBaseName(fs::basename(libraryName)) );
             }
         }
+
+        if(this->getLibrarySize()==0){
+            TiXmlElement* MC_e_active_plugins = _rootHandle.FirstChild("ActivePlugins").Element();
+            if(MC_e_active_plugins){
+                TiXmlElement* MC_e_active_plugin = MC_e_active_plugins->FirstChild()->ToElement();
+                for( MC_e_active_plugin; MC_e_active_plugin; MC_e_active_plugin=MC_e_active_plugin->NextSiblingElement()) {
+                    std::string type = MC_e_active_plugin->ValueStr();
+                    ACPlugin* plugin = this->getPluginManager()->getPlugin( MC_e_active_plugin->GetText() );
+                    if(type == "ClustersMethod")
+                        this->getBrowser()->setClustersMethodPlugin(plugin);
+                    if(type == "ClustersPositions")
+                        this->getBrowser()->setClustersPositionsPlugin(plugin);
+                    if(type == "NeighborsMethod")
+                        this->getBrowser()->setNeighborsMethodPlugin(plugin);
+                    if(type == "NeighborsPositions")
+                        this->getBrowser()->setNeighborsPositionsPlugin(plugin);
+                }
+            }
+        }
     }
 }
 
@@ -1082,6 +1101,25 @@ void MediaCycle::saveXMLConfigFile(string _fname) {
                 MC_e_features_plugin->LinkEndChild( MC_t_pm );
             }
         }
+        TiXmlElement* MC_e_active_plugins = new TiXmlElement( "ActivePlugins" );
+        MC_e_root->LinkEndChild( MC_e_active_plugins );
+        TiXmlElement* MC_e_clusters_method_plugin = new TiXmlElement( "ClustersMethod" );
+        MC_e_active_plugins->LinkEndChild( MC_e_clusters_method_plugin );
+        TiXmlText* MC_e_clusters_method_plugin_name = new TiXmlText( this->getBrowser()->getActivePluginName(PLUGIN_TYPE_CLUSTERS_METHOD) );
+        MC_e_clusters_method_plugin->LinkEndChild( MC_e_clusters_method_plugin_name );
+        TiXmlElement* MC_e_clusters_pos_plugin = new TiXmlElement( "ClustersPositions" );
+        MC_e_active_plugins->LinkEndChild( MC_e_clusters_pos_plugin );
+        TiXmlText* MC_e_clusters_pos_plugin_name = new TiXmlText( this->getBrowser()->getActivePluginName(PLUGIN_TYPE_CLUSTERS_POSITIONS) );
+        MC_e_clusters_pos_plugin->LinkEndChild( MC_e_clusters_pos_plugin_name );
+        TiXmlElement* MC_e_neighbors_method_plugin = new TiXmlElement( "NeighborsMethod" );
+        MC_e_active_plugins->LinkEndChild( MC_e_neighbors_method_plugin );
+        TiXmlText* MC_e_neighbors_method_plugin_name = new TiXmlText( this->getBrowser()->getActivePluginName(PLUGIN_TYPE_NEIGHBORS_METHOD) );
+        MC_e_neighbors_method_plugin->LinkEndChild( MC_e_neighbors_method_plugin_name );
+        TiXmlElement* MC_e_neighbors_pos_plugin = new TiXmlElement( "NeighborsPositions" );
+        MC_e_active_plugins->LinkEndChild( MC_e_neighbors_pos_plugin );
+        TiXmlText* MC_e_neighbors_pos_plugin_name = new TiXmlText( this->getBrowser()->getActivePluginName(PLUGIN_TYPE_NEIGHBORS_POSITIONS) );
+        MC_e_neighbors_pos_plugin->LinkEndChild( MC_e_neighbors_pos_plugin_name );
+
     }
 
     MC_doc.SaveFile(_fname.c_str());
