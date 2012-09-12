@@ -52,21 +52,21 @@ ACQProgressBar::ACQProgressBar(QWidget *parent)
 
 void ACQProgressBar::loading_started()
 {
-    std::cout << "ACQProgressBar::loading_started" << std::endl;
+    //std::cout << "ACQProgressBar::loading_started" << std::endl;
     this->reset();
     this->show();
 }
 
 void ACQProgressBar::loading_finished()
 {
-    std::cout << "ACQProgressBar::loading_finished" << std::endl;
+    //std::cout << "ACQProgressBar::loading_finished" << std::endl;
     this->reset();
     this->hide();
 }
 
 void ACQProgressBar::loading_file(int media_id, int dir_size)
 {
-    std::cout << "ACQProgressBar::loading_file" << media_id << "/" << dir_size << std::endl;
+    //std::cout << "ACQProgressBar::loading_file " << media_id << "/" << dir_size << std::endl;
     this->setMaximum(dir_size);
     this->setValue(media_id);
 }
@@ -74,12 +74,12 @@ void ACQProgressBar::loading_file(int media_id, int dir_size)
 void ACMultiMediaCycleOsgQt::mediaImported(int n,int nTot,int mId){
     std::cout << "ACMultiMediaCycleOsgQt::mediaImported media id " << mId << " ("<< n << "/" << nTot << ")" << std::endl;
     std::string send = "";
-    if (n==0) {
+    if (n==0) { //  && n!=nTot
         send = "Loading Directory...";
         emit mediacycle_message_changed(QString(send.c_str()));
         emit loading_started();
     }
-    else if (n==nTot && mId==-1) {
+    else if (n==nTot && mId==-1) { //
         send = "";
         emit mediacycle_message_changed(QString(send.c_str()));
         emit loading_finished();
@@ -439,7 +439,12 @@ bool ACMultiMediaCycleOsgQt::readXMLConfig(string _filename){
             tmp2 << mediaTypeText->ValueStr();
             int mt; //ACMediaType
             tmp2 >> mt;
-            this->setMediaType(ACMediaType(mt));
+            ACMediaType _mt(mt);
+			if(this->media_cycle){
+				    if(this->media_cycle->getMediaType() != _mt)
+					        throw runtime_error("XML file of different media type");
+				}
+			this->setMediaType(_mt);
         }
         else{
             throw runtime_error("corrupted XML file, no media type");
