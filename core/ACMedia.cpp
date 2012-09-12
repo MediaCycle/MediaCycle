@@ -39,6 +39,9 @@
 
 #include "ACMediaFactory.h"
 
+#include <boost/filesystem/operations.hpp>
+namespace fs = boost::filesystem;
+
 using namespace std;
 
 ACMedia::ACMedia() { 
@@ -315,18 +318,27 @@ void ACMedia::loadXML(TiXmlElement* _pMediaNode){
 	pName = _pMediaNode->Attribute("FileName");
 	if (pName == "")
 		throw runtime_error("corrupted XML file, no filename");
-	else {
-//		#ifdef __APPLE__ //added by CF, white spaces are needed under Ubuntu!
-//			fixWhiteSpace(pName);
-//		#endif	
-		this->setFileName(pName);
-	}
+    else {
+        // #ifdef __APPLE__ //added by CF, white spaces are needed under Ubuntu!
+        // fixWhiteSpace(pName);
+        // #endif
+        fs::path p( pName.c_str());
+        if ( !fs::exists( p ) )
+        {
+            throw runtime_error("corrupted XML file, can't locate file '" + pName + "'");
+        }
+        if ( !fs::is_regular( p ) )
+        {
+            throw runtime_error("corrupted XML file, file '" + pName + "' is corrupted");
+        }
+        this->setFileName(pName);
+    }
 
-        string pLabel("");
-        if(_pMediaNode->Attribute("Label"))
-            pLabel = _pMediaNode->Attribute("Label");
-        if (pLabel != "")
-		this->setLabel(pLabel);
+    string pLabel("");
+    if(_pMediaNode->Attribute("Label"))
+        pLabel = _pMediaNode->Attribute("Label");
+    if (pLabel != "")
+        this->setLabel(pLabel);
 
 	int mid=-1;
 	_pMediaNode->QueryIntAttribute("MediaID", &mid); // If this fails, original value is left as-is

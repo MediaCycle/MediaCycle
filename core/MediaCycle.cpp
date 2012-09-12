@@ -871,7 +871,22 @@ int MediaCycle::readXMLConfigFileCore(TiXmlHandle _rootHandle) {
 
     while(  media_element != 0 ){
         //mediaBrowser->setNeedsNavigationUpdateLock(1);
-        media_element = this->mediaLibrary->openNextMediaFromXMLLibrary(media_element);
+        //media_element = this->mediaLibrary->openNextMediaFromXMLLibrary(media_element);
+        try{
+            media_element = this->mediaLibrary->openNextMediaFromXMLLibrary(media_element);
+        }
+        catch (const exception& e) {
+            cout << "MediaCycle::readXMLConfigFileCore: error: " << e.what( ) << endl;
+            int n = this->mediaLibrary->getSize(); // segmentation might have increased the number of medias in the library
+            // TODO organize runtime error values to filter them and decide if:
+            // a) the library/browser/renderer should be cleaned  (the whole library is corrupted)
+            // b) or left as is with the last successfully imported file (some files are corrupted)
+            // (comparing the number of files to import vs the library size might be misleading, especially with documents and/or segments)
+            // For now we abort, since the renderer gives a clue on the number of imported elements.
+            eventManager->sig_mediaImported(n,n,-1);
+            std::string error = std::string(e.what()) + ", aborting import.";
+            throw runtime_error(error);
+        }
         long int media_id = this->mediaLibrary->getNewestMediaId();
         int i = this->mediaLibrary->getNumberOfFilesProcessed();
         int n = this->mediaLibrary->getNumberOfFilesToImport();
