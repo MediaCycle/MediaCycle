@@ -163,7 +163,6 @@ void ACPluginControlsWidgetQt::buildPluginList()
     for (std::vector<std::string>::iterator availablePlugin = availablePlugins.begin(); availablePlugin != availablePlugins.end(); availablePlugin++){
         QString plugin_name = QString((*availablePlugin).c_str());
         comboBoxPlugins->addItem(plugin_name);
-        comboBoxPlugins->setEnabled(true);
         ACPlugin* plugin = media_cycle->getPluginManager()->getPlugin(*availablePlugin);
 
         //QFont font = QFont(QApplication::font().defaultFamily(),10);
@@ -306,11 +305,12 @@ void ACPluginControlsWidgetQt::buildPluginList()
         comboBoxPlugins->setCurrentIndex(index);
     }
 
-    // If no plugin exists
-    if(comboBoxPlugins->count()==0){
+    comboBoxPlugins->setEnabled(false);
+	// If no plugin exists
+    if(comboBoxPlugins->count()==0)
         comboBoxPlugins->addItem("None");
-        comboBoxPlugins->setEnabled(false);
-    }
+	else if(comboBoxPlugins->count()>1)
+        comboBoxPlugins->setEnabled(true);
     emit this->readjustHeight();
 }
 
