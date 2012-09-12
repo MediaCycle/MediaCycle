@@ -213,8 +213,12 @@ void ACOsgBrowserRenderer::mediaImported(int n, int nTot,int mId){
         std::cout << "ACOsgBrowserRenderer::mediaImported: creating renderers for " << nTot << " medias " << std::endl;
         return;
     }
-    else if(mId==-1){
+    else if(mId==-1 && n!=nTot){
         std::cerr << "ACOsgBrowserRenderer::mediaImported " << n << "/" << nTot << " doesn't have a proper media id" << std::endl;
+        return;
+    }
+    else if(n==nTot){
+        std::cout << "ACOsgBrowserRenderer::mediaImported: finished importing" << std::endl;
         return;
     }
     if(!media_cycle){
