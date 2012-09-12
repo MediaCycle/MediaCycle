@@ -305,6 +305,7 @@ public:
     bool removeChildrenNeighborNodes(long int _id);
     void dumpNeighborNodes();
     std::list<long int> getNeighborNodeIds();
+    std::list<long int> getNeighborNodeIds(long _id);
     long int getParentFromNeighborNode(long _id);
     long int getPreviousSiblingFromNeighborNode(long int _id);
     long int getNextSiblingFromNeighborNode(long int _id);
@@ -314,7 +315,8 @@ public:
 
     // == XS 260310 new way to manage update of clusters, positions, neighborhoods, ...
     void updateDisplay(bool animate=false, int needsCluster=1);//, bool neighborhoods=true);
-
+    
+    
     // CF switch navigation mode while navigating
     void switchMode(ACBrowserMode _mode);
 
@@ -344,6 +346,7 @@ private:
     void updateClusters(bool animate=false, int needsCluster=1);
     // == Neighbors Mode ==
     void updateNeighborhoods();
+    bool initializeUpdateNeighborhoods();
 
 public: // XS TODO so far this one is still called from outside
     void updateNextPositions();

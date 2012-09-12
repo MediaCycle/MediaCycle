@@ -502,7 +502,7 @@ bool ACMultiMediaCycleOsgQt::readXMLConfig(string _filename){
         media_cycle->normalizeFeatures(1);
 
         // only after loading all XML files:
-        this->updateLibrary();
+        //this->updateLibrary();//TR update will be done in the mediaImported(int n,int nTot,int mId) with n==nTot and mId==-1
         media_cycle->storeNavigationState();
     }
     catch (const exception& e) {

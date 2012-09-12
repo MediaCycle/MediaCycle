@@ -1,7 +1,7 @@
 /**
  * @brief ACNeighborhoodsPluginEuclidean.cpp
- * @author Christian Frisson
- * @date 03/08/2012
+ * @author Thierry Ravet
+ * @date 12/09/2012
  * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -63,24 +63,20 @@ void ACNeighborhoodsPluginEuclidean::updateNeighborhoods(ACMediaBrowser* mediaBr
     //CF changing neighbor number requires removing media nodes
     //nNeighbors=this->getNumberParameterValue("neighbors");
 
-    mediaBrowser->dumpNeighborNodes();
-
+   
     //CF if the user log has just been (re)created
     if(mediaBrowser->getClickedNode() == -1)
         lastClickedNodeId = -1;
 
     //CF if the user clicked twice on the same node OR if updateNeighborhoods is called again without newly-clicked node (changing parameters)
     if (mediaBrowser->getClickedNode() >=0) {
-        if (mediaBrowser->getClickedNode() == lastClickedNodeId)  {
-            std::cout << "ACNeighborhoodsPluginNeighborhoods::updateNeighborhoods removing neighbors of node " << lastClickedNodeId << std::endl;
-            mediaBrowser->removeChildrenNeighborNodes(lastClickedNodeId);
-        }
-        lastClickedNodeId = mediaBrowser->getClickedNode();
+        int newClickedNodeId=mediaBrowser->getClickedNode();
+        lastClickedNodeId = newClickedNodeId;
         std::cout << "ACNeighborhoodsPluginEuclidean::updateNeighborhoods adding neighbors to node " << lastClickedNodeId << std::endl;
         ACMedia* media = mediaBrowser->getLibrary()->getFirstMedia();
 
         long libSize = mediaBrowser->getLibrary()->getSize();
-        int nbFeature = media->getNumberOfFeaturesVectors();
+        int nbFeature = media->getNumberOfPreProcFeaturesVectors();
         mat desc_m;
         rowvec weight_v;
         mat tg_v;
@@ -116,7 +112,7 @@ void ACNeighborhoodsPluginEuclidean::extractDescMatrix(ACMediaBrowser* mediaBrow
     int totalDim = 0;
 
     // Count nb of feature
-    int nbFeature = mediaBrowser->getLibrary()->getFirstMedia()->getNumberOfFeaturesVectors();
+    int nbFeature = mediaBrowser->getLibrary()->getFirstMedia()->getNumberOfPreProcFeaturesVectors();
     for(int f=0; f< nbFeature; f++){
         featDim = mediaBrowser->getLibrary()->getFirstMedia()->getPreProcFeaturesVector(f)->getSize();
         std::cout << "feature weight " << f << " = " << mediaBrowser->getWeight(f) << std::endl;

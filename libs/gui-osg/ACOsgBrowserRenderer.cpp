@@ -294,8 +294,9 @@ void ACOsgBrowserRenderer::updateNodes(double ratio) {
 
     int n = media_cycle->getLibrarySize();
 
-    /*if(media_cycle->getBrowserMode() == AC_MODE_NEIGHBORS){
-        // Create new nodelinks if the layout requires them
+    if(media_cycle->getBrowserMode() == AC_MODE_NEIGHBORS){
+        n=n;
+        /*// Create new nodelinks if the layout requires them
         if (media_cycle->getBrowser()->getLayout() == AC_LAYOUT_TYPE_NODELINK) {
             //CF to check with future changes when number of nodelinks may decrease (folding nodes)
             link_renderers.resize(n);
@@ -314,8 +315,8 @@ void ACOsgBrowserRenderer::updateNodes(double ratio) {
                     link_group->addChild(link_renderers[i]->getLink());
                 }
             }
-        }
-    }*/
+        }*/
+    }
 
     // SD 2010 OCT - This animation has moved from Browser to Renderer
     /*
@@ -645,7 +646,7 @@ int ACOsgBrowserRenderer::computeScreenCoordinates(osgViewer::View* view, double
 // private methods
 
 // Clean up properly by calling destructor of each *
-bool ACOsgBrowserRenderer::removeNodes(){
+bool ACOsgBrowserRenderer::removeNodes(){//private method
     ACOsgMediaRenderers::iterator iterm;
     for (iterm = node_renderers.begin(); iterm != node_renderers.end(); iterm++) {
         if(iterm->second){
@@ -661,7 +662,7 @@ bool ACOsgBrowserRenderer::removeNodes(){
 }
 
 //bool ACOsgBrowserRenderer::addNodes(int _first, int _last){
-bool ACOsgBrowserRenderer::addNode(long int _id){
+bool ACOsgBrowserRenderer::addNode(long int _id){//private method
     bool ok = false;
 
     /*if (_first < 0 || _last < _first){

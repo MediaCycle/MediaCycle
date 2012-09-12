@@ -63,6 +63,7 @@ public:
     void dump();
     void clean();
     std::list<long int> getNodeIds();
+    std::list<long int> getNodeIds(long int _nodeId);
     int getSize();
 
 protected: //CF these methods are not yet bound by ACMediaBrowser

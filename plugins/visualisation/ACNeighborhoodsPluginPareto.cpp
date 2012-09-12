@@ -1,7 +1,7 @@
 /**
  * @brief ACNeighborhoodsPluginPareto.cpp
- * @author Christian Frisson
- * @date 03/08/2012
+ * @author Thierry Ravet
+ * @date 12/09/2012
  * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -62,25 +62,20 @@ void ACNeighborhoodsPluginPareto::updateNeighborhoods(ACMediaBrowser* mediaBrows
     //CF changing neighbor number requires removing media nodes
     //nNeighbors=this->getNumberParameterValue("neighbors");
 
-    mediaBrowser->dumpNeighborNodes();
-
+  
     //CF if the user log has just been (re)created
     if(mediaBrowser->getClickedNode() == -1)
         lastClickedNodeId = -1;
 
     //CF if the user clicked twice on the same node OR if updateNeighborhoods is called again without newly-clicked node (changing parameters)
     if ( (mediaBrowser->getClickedNode() >=0) ) {
-        if (mediaBrowser->getClickedNode() == lastClickedNodeId)  {
-            std::cout << "ACNeighborhoodsPluginPareto::updateNeighborhoods removing neighbors of node " << lastClickedNodeId << std::endl;
-            mediaBrowser->removeChildrenNeighborNodes(lastClickedNodeId);
-            //std::cout << "User log size " << mediaBrowser->getUserLog()->getSize() << std::endl;
-        }
-        lastClickedNodeId = mediaBrowser->getClickedNode();
+        int newClickedNodeId=mediaBrowser->getClickedNode();
+        lastClickedNodeId = newClickedNodeId;
         std::cout << "ACNeighborhoodsPluginPareto::updateNeighborhoods adding neighbors to node " << lastClickedNodeId << std::endl;
         ACMedia* media = mediaBrowser->getLibrary()->getFirstMedia();
 
         long libSize = mediaBrowser->getLibrary()->getSize();
-        int nbFeature = media->getNumberOfFeaturesVectors();
+        int nbFeature = media->getNumberOfPreProcFeaturesVectors();
         mat tmpDesc_m;
         mat tmpTg_v;
         mat dist_m(libSize, nbFeature);

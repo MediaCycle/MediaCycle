@@ -118,16 +118,21 @@ void ACPositionsPluginNodeLinkTreeLayout::updateNextPositions(ACMediaBrowser* _m
         m_nodeParams.clear();
 
         std::list<long> nodeIds = mediaBrowser->getNeighborNodeIds();
-        for(std::list<long>::iterator nodeId = nodeIds.begin(); nodeId != nodeIds.end(); nodeId++)
+        if (nodeIds.size()==0)
+            return;
+        std::cout << "ACPositionsPluginNodeLinkTreeLayout::updateNextPositions: mNodeIds " <<endl;
+        for(std::list<long>::iterator nodeId = nodeIds.begin(); nodeId != nodeIds.end(); nodeId++){
             m_nodeParams[(*nodeId)] = new ACPositionsPluginTreeNodeParams();
+            std::cout <<(*nodeId) <<endl;
+        }
         std::cout << "ACPositionsPluginNodeLinkTreeLayout::updateNextPositions: m_nodeParams size " << m_nodeParams.size() << std::endl;
 
         // do first pass - compute breadth information, collect depth info
         //std::cout << "ACPositionsPluginNodeLinkTreeLayout::updateNextPositions:firstWalk"<< std::endl;
 
         //ACPositionsPluginTreeNodeParams* rp = getParams(0);
-        ACPositionsPluginTreeNodeParams* rp = m_nodeParams[0];
-        this->firstWalk(0, 0, 1);
+        ACPositionsPluginTreeNodeParams* rp = m_nodeParams.begin()->second;
+        this->firstWalk(*(nodeIds.begin()), 0, 1);
 
         //for(int n=0; n<mediaBrowser->getUserLog()->getSize(); n++)
         //	std::cout << "ACPositionsPluginNodeLinkTreeLayout::updateNextPositions: Node " << n << " with prelim " << m_nodeParams[n]->getPrelim() << std::endl;
@@ -138,7 +143,7 @@ void ACPositionsPluginNodeLinkTreeLayout::updateNextPositions(ACMediaBrowser* _m
 
         // do second pass - assign layout positions
         //std::cout << "ACPositionsPluginNodeLinkTreeLayout::updateNextPositions: secondWalk"<< std::endl;
-        this->secondWalk(0, 0, -rp->getPrelim(), 0);
+        this->secondWalk(*(nodeIds.begin()), 0, -rp->getPrelim(), 0);
 
         float media_type_zoom = 1.0f;
         if(mediaBrowser->getLibrary()->getMediaType() == MEDIA_TYPE_IMAGE || mediaBrowser->getLibrary()->getMediaType() == MEDIA_TYPE_VIDEO)
@@ -158,7 +163,7 @@ void ACPositionsPluginNodeLinkTreeLayout::updateNextPositions(ACMediaBrowser* _m
             p.z = 0;
             mediaBrowser->setNodeNextPosition(*nodeId, p); // CF: note OSG's inverted Y //CF n instead of mediaBrowser->getUserLog()->getMediaIdFromNodeId(n)
             mediaBrowser->setMediaNodeDisplayed(*nodeId, true); // CF n instead of mediaBrowser->getUserLog()->getMediaIdFromNodeId(n)
-            //std::cout << "ACPositionsPluginNodeLinkTreeLayout::updateNextPositions: Node " << n << " x " << m_nodeParams[n]->getX() << " y " << -m_nodeParams[n]->getY() << std::endl;
+            std::cout << "ACPositionsPluginNodeLinkTreeLayout::updateNextPositions: Node " << *nodeId << " x " << p.x  << " y " << p.y << std::endl;
         }
 
         mediaBrowser->setNeedsDisplay(true);

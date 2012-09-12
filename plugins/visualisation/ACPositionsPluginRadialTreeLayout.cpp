@@ -100,7 +100,7 @@ void ACPositionsPluginRadialTreeLayout::updateNextPositions(ACMediaBrowser* _med
             m_nodeParams[(*nodeId)] = new ACPositionsPluginRadialTreeNodeParams();
         std::cout << "ACPositionsPluginRadialTreeLayout::updateNextPositions: m_nodeParams size " << m_nodeParams.size() << std::endl;
 
-        int n = 0; // root node
+        int n = *(nodeIds.begin()); // root node
         //ACPositionsPluginRadialTreeNodeParams* np = getParams(n);
         ACPositionsPluginRadialTreeNodeParams* np = m_nodeParams[n];
         m_maxDepth = 0;

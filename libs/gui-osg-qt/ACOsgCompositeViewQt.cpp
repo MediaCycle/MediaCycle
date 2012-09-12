@@ -376,7 +376,7 @@ void ACOsgCompositeViewQt::updateGL()
         //CF this is a temporary solution until we implement signals/slots in the core
         if(media_cycle->getBrowser()->getModeChanged()){
             //std::cout << "ACOsgCompositeViewQt::updateGL intercepted browsing mode change" << std::endl;
-            browser_renderer->clean();
+            //browser_renderer->clean();
         }
     }
 

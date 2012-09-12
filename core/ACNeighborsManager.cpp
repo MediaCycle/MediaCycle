@@ -263,6 +263,20 @@ std::list<long int> ACNeighborsManager::getNodeIds(){
     return nodeIds;
 }
 
+std::list<long int> ACNeighborsManager::getNodeIds(long int _nodeId){
+    std::list<long int> nodeIds;
+    Tree<long int>::sibling_iterator node = std::find(mTree.begin(), mTree.end(), _nodeId);
+    if (node!=mTree.end()){
+        Tree<long int>::sibling_iterator sib;
+        sib = mTree.next_sibling(node);
+        Tree<long int> tempTree;
+        tempTree= mTree.subTree(node,sib);
+        for(Tree<long int>::iterator e = tempTree.begin(); e!=tempTree.end();e++)
+            nodeIds.push_back( (*e) );
+    }
+    return nodeIds;
+}
+
 void ACNeighborsManager::clean()
 {
     this->mNodeId = -1;

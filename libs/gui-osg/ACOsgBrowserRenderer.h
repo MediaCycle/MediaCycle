@@ -140,8 +140,8 @@ public:
     std::map<long int, float> getDistanceMouse() { return distance_mouse; }
 
     void setFont(osg::ref_ptr<osgText::Font> _font){this->font = _font;}
-    void changeNodeColor(int _node, osg::Vec4 _color){node_renderers[_node]->changeNodeColor(_color);}
-    void resetNodeColor(int _node){node_renderers[_node]->resetNodeColor();}
+    void changeNodeColor(int _node, osg::Vec4 _color){activity_update_mutex.lock();node_renderers[_node]->changeNodeColor(_color);activity_update_mutex.unlock();}
+    void resetNodeColor(int _node){activity_update_mutex.lock();node_renderers[_node]->resetNodeColor();activity_update_mutex.unlock();}
 
     ACBrowserAudioWaveformType getAudioWaveformType(){return audio_waveform_type;}
     void setAudioWaveformType(ACBrowserAudioWaveformType _type);

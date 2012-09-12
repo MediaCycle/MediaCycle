@@ -979,6 +979,72 @@ void ACMediaBrowser::updateClusters(bool animate, int needsCluster) {
 
 }
 
+bool ACMediaBrowser::initializeUpdateNeighborhoods(){
+    std::cout << "ACMediaBrowser::initializeUpdateNeighborhoods" << std::endl;
+    
+    if (this->getLibrary()->getSize()==0) return false;
+    
+    //CF changing neighbor number requires removing media nodes
+    //nNeighbors=this->getNumberParameterValue("neighbors");
+    
+    this->dumpNeighborNodes();
+    
+    //CF if the user clicked twice on the same node OR if updateNeighborhoods is called again without newly-clicked node (changing parameters)
+    if (this->getClickedNode() >=0) {
+        int newClickedNodeId=this->getClickedNode();
+        std::list<long int> testIds=this->getNeighborNodeIds(newClickedNodeId);
+        std::cout << "---" << std::endl;
+        for (std::list<long int>::iterator it=++testIds.begin();it!=testIds.end();it++)
+            std::cout << (*it) << std::endl;
+        //TR: two cases 
+        //node of newClickedNodeId has children in the tree: we close this branch
+        //node of newClickedNodeId has no children. We close the branch of the node of same level and we open the branch of this node
+        
+        if (this->getChildCountAtNeighborNode(newClickedNodeId)>0){
+            std::cout << "ACMediaBrowser::initializeUpdateNeighborhoods removing neighbors of node " << newClickedNodeId << std::endl;
+            std::list<long int> locIds=this->getNeighborNodeIds(newClickedNodeId);
+            if (locIds.size()>1){
+                
+                std::cout << "ACMediaBrowser::initializeUpdateNeighborhoods hide node:" << std::endl;
+                for (std::list<long int>::iterator it=++locIds.begin();it!=locIds.end();it++){
+                    std::cout << (*it) << std::endl;
+                    this->getMediaNode(*it)->setDisplayed(false);
+                }}
+            this->removeChildrenNeighborNodes(newClickedNodeId);
+            std::cout << "---" << std::endl;
+            this->dumpNeighborNodes();
+            std::cout << "ACMediaBrowser::initializeUpdateNeighborhoods done" << std::endl;
+            return false;//we just close the branch, we don't open another one
+        }
+        long nodeIdToClean=this->getPreviousSiblingFromNeighborNode(newClickedNodeId);
+        while (nodeIdToClean!=-1){
+            std::list<long int> locIds=this->getNeighborNodeIds(nodeIdToClean);
+            if (locIds.size()>1){
+                std::cout << "ACMediaBrowser::initializeUpdateNeighborhoods hide node:" << std::endl;
+                for (std::list<long int>::iterator it=++locIds.begin();it!=locIds.end();it++){
+                    std::cout << (*it) << std::endl;
+                    this->getMediaNode(*it)->setDisplayed(false);
+                }
+            }
+            this->removeChildrenNeighborNodes(nodeIdToClean);
+            nodeIdToClean=this->getPreviousSiblingFromNeighborNode(nodeIdToClean);
+        }
+        nodeIdToClean=this->getNextSiblingFromNeighborNode(newClickedNodeId);
+        while (nodeIdToClean!=-1){
+            std::list<long int> locIds=this->getNeighborNodeIds(nodeIdToClean);
+            if (locIds.size()>1){
+                std::cout << "ACMediaBrowser::initializeUpdateNeighborhoods hide node:" << std::endl;
+                for (std::list<long int>::iterator it=++locIds.begin();it!=locIds.end();it++){
+                    std::cout << (*it) << std::endl;
+                    this->getMediaNode(*it)->setDisplayed(false);
+                }
+            }
+            this->removeChildrenNeighborNodes(nodeIdToClean);
+            nodeIdToClean=this->getNextSiblingFromNeighborNode(nodeIdToClean);
+        }
+    }
+    return true;
+}
 //CF do we need an extra level of tests along the browsing mode (render inactive during AC_MODE_CLUSTERS?)
 void ACMediaBrowser::updateNeighborhoods(){
     setNeedsNavigationUpdateLock(1);
@@ -1516,6 +1582,18 @@ std::list<long int> ACMediaBrowser::getNeighborNodeIds()
         std::cerr << "ACMediaBrowser::getNeighborNodeIds: not in neighbor mode" << std::endl;
 }
 
+std::list<long int> ACMediaBrowser::getNeighborNodeIds(long _id)
+{
+    if(mMode == AC_MODE_NEIGHBORS){
+        if(mNeighborsManager)
+            return mNeighborsManager->getNodeIds(_id);
+        else
+            std::cerr << "ACMediaBrowser::getNeighborNodeIds: no neighbor manager" << std::endl;
+    }
+    else
+        std::cerr << "ACMediaBrowser::getNeighborNodeIds: not in neighbor mode" << std::endl;
+}
+
 bool ACMediaBrowser::addNeighborNode(long int _parentId, long int _mediaId, int _clickTime)
 {
     if(this->mMode == AC_MODE_NEIGHBORS){
@@ -1564,10 +1642,10 @@ bool ACMediaBrowser::removeNeighborNode(long int _id){
 bool ACMediaBrowser::removeChildrenNeighborNodes(long int _id){
     // First hide all the children!
     if(this->mMode == AC_MODE_NEIGHBORS){
-        std::cerr << "ACMediaBrowser::removeChildrenNeighborNodes: not yet implemented" << std::endl;
-        /*if(this->mNeighborsManager){
+        //std::cerr << "ACMediaBrowser::removeChildrenNeighborNodes: not yet implemented" << std::endl;
+        if(this->mNeighborsManager){
             return this->mNeighborsManager->removeChildrenNodes(_id);
-        }*/
+        }
     }
     return false;
 }
@@ -1666,7 +1744,8 @@ void ACMediaBrowser::updateDisplay(bool animate, int needsCluster) {
     break;
     case AC_MODE_NEIGHBORS:
     {
-        updateNeighborhoods();
+        if (initializeUpdateNeighborhoods())
+            updateNeighborhoods();
         updateNextPositions();
     }
     break;
@@ -1718,7 +1797,7 @@ void ACMediaBrowser::switchMode(ACBrowserMode _mode){
 
                 //CF 4) Notify the browsing mode change and make the reference node appear
                 mNeighborsManager->setReferenceNode(this->getReferenceNode(), 0); // 0
-                this->setMediaNodeDisplayed(this->getReferenceNode(),true);
+                //this->setMediaNodeDisplayed(this->getReferenceNode(),true);
                 this->setMode(_mode);
                 this->setModeChanged(true);
                 this->updateDisplay(true);
