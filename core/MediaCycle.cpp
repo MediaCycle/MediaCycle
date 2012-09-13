@@ -913,6 +913,7 @@ int MediaCycle::readXMLConfigFileCore(TiXmlHandle _rootHandle) {
 #endif*/
         libraryContentChanged(needsNormalizeAndCluster); // exclusively mediabrowser, thus updateAfterFileImport and importDirectories can't be move to ACMediaLibrary
         //mediaBrowser->setNeedsNavigationUpdateLock(0);
+        std::cout<<"MediaCycle::readXMLConfigFileCore:"<<this->mediaLibrary->getNumberOfFilesProcessed()<<"/"<<this->mediaLibrary->getNumberOfFilesToImport()<<"("<<media_id<<")"<<std::endl;
         eventManager->sig_mediaImported(this->mediaLibrary->getNumberOfFilesProcessed(),this->mediaLibrary->getNumberOfFilesToImport(),media_id);
     }
 

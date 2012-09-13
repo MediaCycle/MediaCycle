@@ -217,7 +217,7 @@ void ACOsgBrowserRenderer::mediaImported(int n, int nTot,int mId){
         std::cerr << "ACOsgBrowserRenderer::mediaImported " << n << "/" << nTot << " doesn't have a proper media id" << std::endl;
         return;
     }
-    else if(n==nTot){
+    else if(n==nTot&&mId==-1){
         std::cout << "ACOsgBrowserRenderer::mediaImported: finished importing" << std::endl;
         return;
     }
@@ -229,6 +229,11 @@ void ACOsgBrowserRenderer::mediaImported(int n, int nTot,int mId){
         std::cerr << "ACOsgBrowserRenderer::mediaImported: media id " << mId << " ("<< n << "/" << nTot << ") not accessible" << std::endl;
         return;
     }
+    if(n==nTot&&mId!=-1){
+        std::cout << "ACOsgBrowserRenderer::mediaImported: last node importing" << std::endl;
+    
+    }
+    
     //pthread_mutex_lock(&activity_update_mutex);
     activity_update_mutex.lock();
    /* if(media_cycle->getMediaType() == media_cycle->getLibrary()->getMedia(mId)->getType())*/{
@@ -299,28 +304,50 @@ void ACOsgBrowserRenderer::updateNodes(double ratio) {
     int n = media_cycle->getLibrarySize();
 
     if(media_cycle->getBrowserMode() == AC_MODE_NEIGHBORS){
-        n=n;
-        /*// Create new nodelinks if the layout requires them
-        if (media_cycle->getBrowser()->getLayout() == AC_LAYOUT_TYPE_NODELINK) {
-            //CF to check with future changes when number of nodelinks may decrease (folding nodes)
-            link_renderers.resize(n);
-            for (int i=0;i<n;i++) {
-                link_renderers[i] = new ACOsgNodeLinkRenderer();
-                if (link_renderers[i]) {
-                    link_renderers[i]->setMediaCycle(media_cycle);
-                    node_index = node_renderers[i]->getNodeIndex();
-                    link_renderers[i]->prepareLinks();
-
-                    link_renderers[i]->setNodeIn(node_renderers[i]);
-                    int p = media_cycle->getBrowser()->getParentFromNeighborNode(node_index);
-                    if ( p!= -1 )
-                        link_renderers[i]->setNodeOut(node_renderers[p]);
-
-                    link_group->addChild(link_renderers[i]->getLink());
+     
+        int m=link_renderers.size();
+        // Create new nodelinks if the layout requires them
+        if (media_cycle->getBrowser()->getLayout() == AC_LAYOUT_TYPE_NODELINK&&media_cycle->getBrowser()->getNeedsDisplay()) {
+            
+            
+            std::list<long int> nodeIds=media_cycle->getBrowser()->getNeighborNodeIds();
+            
+            for(ACOsgNodeLinkRenderers::iterator link_renderer = link_renderers.begin();link_renderer!=link_renderers.end();link_renderer++){
+                bool testPresence=false;
+                for(std::list<long int>::iterator it=nodeIds.begin();it!=nodeIds.end();it++){
+                    if (link_renderer->first==(*it)){
+                        testPresence=true;
+                        break;
+                    }
+                }
+                if (testPresence==false){
+                    this->removeLinks();
+                    break;
                 }
             }
-        }*/
+            
+            for(std::list<long int>::iterator it=nodeIds.begin();it!=nodeIds.end();it++){
+                int i = *it;
+                if (media_cycle->getBrowser()->getParentFromNeighborNode(i)>-1)
+                    if (link_renderers[i]==0){
+                        this->addLink(i);
+                    }
+                    else{
+                        node_index = node_renderers[i]->getNodeIndex();
+                        //link_renderers[i]->prepareLinks();
+                        link_renderers[i]->setNodeIn(node_renderers[i]);
+                        int p = media_cycle->getBrowser()->getParentFromNeighborNode(i);
+                        if ( p!= -1 )
+                            link_renderers[i]->setNodeOut(node_renderers[p]);
+                    }
+            }
+            
+        }
     }
+    else
+        if (link_renderers.size()>0)
+            this->removeLinks();
+            
 
     // SD 2010 OCT - This animation has moved from Browser to Renderer
     /*
@@ -354,7 +381,7 @@ void ACOsgBrowserRenderer::updateNodes(double ratio) {
         media_cycle_filename = media_cycle->getMediaFileName(media_index);
 
         /* if (media_cycle_isdisplayed) {*/
-        //if(node_renderer->second != 0) { // CF temporary
+        if(node_renderer->second != 0) { // CF temporary
         // GLOBAL
         node_renderer->second->setDeltaTime(media_cycle_deltatime);
         node_renderer->second->setZoomAngle(media_cycle_zoom, media_cycle_angle);
@@ -373,7 +400,7 @@ void ACOsgBrowserRenderer::updateNodes(double ratio) {
         // UPDATE
         //std::cout << "Node renderer size " << node_renderers.size() << std::endl;
         node_renderer->second->updateNodes(ratio);
-        // }
+        }
         //media_group->addChild(node_renderer->second->getNode());
         /*}
         else
@@ -385,7 +412,8 @@ void ACOsgBrowserRenderer::updateNodes(double ratio) {
     if (media_cycle->getBrowser()->getLayout() == AC_LAYOUT_TYPE_NODELINK) {
         //for (unsigned int i=0;i<link_renderers.size();i++) {
         for(ACOsgNodeLinkRenderers::iterator link_renderer = link_renderers.begin();link_renderer!=link_renderers.end();link_renderer++){
-            link_renderer->second->updateLinks();
+            if (link_renderer->second)
+                link_renderer->second->updateLinks();
         }
     }
     //pthread_mutex_unlock(&activity_update_mutex);
@@ -767,7 +795,7 @@ bool ACOsgBrowserRenderer::addLink(long int _id){
         // Create new nodelinks if the layout requires them
         if (media_cycle->getBrowser()->getLayout() == AC_LAYOUT_TYPE_NODELINK) {
 
-            if(link_renderers.find(_id) != link_renderers.end()){
+            if(link_renderers.find(_id) != link_renderers.end()&&link_renderers[_id]!=0){
                 std::cerr << "ACOsgBrowserRenderer::addLink: link renderer for id "<< _id << " is already present, overriding." << std::endl;
             }
             else
@@ -781,8 +809,7 @@ bool ACOsgBrowserRenderer::addLink(long int _id){
                 }
 
                 node_index = node_renderers[_id]->getNodeIndex();
-                link_renderers[_id]->prepareLinks();
-
+                
                 link_renderers[_id]->setNodeIn(node_renderers[_id]);
                 int p = media_cycle->getBrowser()->getParentFromNeighborNode(node_index);
                 if ( p!= -1 )
@@ -791,6 +818,8 @@ bool ACOsgBrowserRenderer::addLink(long int _id){
                     std::cerr << "ACOsgBrowserRenderer::addLink: associated parent node for link renderer of id "<< _id << " doesn't exist" << std::endl;
                     return false;
                 }
+                link_renderers[_id]->prepareLinks();
+
 
                 link_group->addChild(link_renderers[_id]->getLink());
                 ok = true;
@@ -800,7 +829,21 @@ bool ACOsgBrowserRenderer::addLink(long int _id){
     }
     return ok;
 }
-
+bool ACOsgBrowserRenderer::removeLinks(){
+    bool ok = false;
+    
+        
+    ACOsgNodeLinkRenderers::iterator itern;
+    for (itern = link_renderers.begin(); itern != link_renderers.end(); itern++) {
+        if (itern->second){
+            link_group->removeChild(itern->second->getLink());
+            delete itern->second;
+        }
+    }
+    link_renderers.clear();
+    ok = true;
+    return ok;
+}
 // Clean up properly by calling destructor of each *
 bool ACOsgBrowserRenderer::removeLinks(int _first, int _last){
     bool ok = false;

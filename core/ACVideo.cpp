@@ -83,6 +83,10 @@ ACVideo::~ACVideo() {
 	}*/	
 // XS TODO  pas 2x (déjà ds ACMedia)	
 //	if (data) delete data;
+    
+	image_stream=0;	
+	thumbnail=0;
+    image_texture=0;
 }
 
 ACVideo::ACVideo(const ACVideo& m) :ACMedia()/* ACMedia(m)*/ {

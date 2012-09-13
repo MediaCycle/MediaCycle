@@ -143,6 +143,8 @@ void ACMediaLibrary::cleanLibrary() {
     }
     total_ext_check_time = 0;
     checked_files = 0;
+    files_processed = 0;
+    files_to_import = 0;
 }
 
 std::vector<std::string> ACMediaLibrary::getExtensionsFromMediaType(ACMediaType media_type)
@@ -308,15 +310,23 @@ std::vector<int> ACMediaLibrary::importFile(std::string _filename, ACPluginManag
             mediaSegments = media->getAllSegments();
             files_to_import++; // to avoid stopping the progress when the last media of the pile is added, before its segments
             std::cout << "ACMediaLibrary::importFile found " << mediaSegments.size() << " segments." << std::endl;
+            std::vector<ACMedia*> importedSegment;
             for (unsigned int i = 0; i < mediaSegments.size(); i++){
                 // for the segments we do not save (again) timedFeatures
                 // XS TODO but we should not re-calculate them either !=> TR I put the mtf files names of the media parent in all his segments
                 if (mediaSegments[i]->import(_filename, this->getAvailableMediaID(), acpl)){
                     this->addMedia(mediaSegments[i]);
                     mediaSegments[i]->setParentId(media->getId());
+                    importedSegment.push_back(mediaSegments[i]);
                     ret.push_back(mediaSegments[i]->getId());
                     mediaSegments[i]->deleteData();//TR TODO verify that we must delete this data
                 }
+                else{//impossible to import the segment
+                    mediaSegments[i]->deleteData();//TR TODO verify that we must delete this data
+                    delete mediaSegments[i];
+                }
+                media->setAllSegments(importedSegment);
+                
 
             }
             files_to_import--;
@@ -710,9 +720,9 @@ TiXmlElement* ACMediaLibrary::openNextMediaFromXMLLibrary(TiXmlElement* pMediaNo
         }*/
     /*}
     return n_medias;*/
-            if(files_processed == files_to_import){
-                files_processed = files_to_import = 0;
-            }
+           // if(files_processed == files_to_import){
+           //     files_processed = files_to_import = 0;
+           // }
     return pMediaNode;
 }
 

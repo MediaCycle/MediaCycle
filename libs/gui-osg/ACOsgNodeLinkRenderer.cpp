@@ -75,7 +75,7 @@ void ACOsgNodeLinkRenderer::setNodeOut(ACOsgMediaRenderer* _node)
 }
 
 void ACOsgNodeLinkRenderer::linkGeode(double to_x, double to_y) {	
-    int i;
+    /*int i;
     float zpos = 0;
 
     StateSet *state;
@@ -112,23 +112,94 @@ void ACOsgNodeLinkRenderer::linkGeode(double to_x, double to_y) {
     state->setMode(GL_LINE_SMOOTH, StateAttribute::ON);
 #endif//CF APPLE_IOS
     state->setAttribute(new LineWidth(0.5));
+    link_geode->addDrawable(link_geometry);*/
+    int i;
+    float zpos = 0;
+    
+    StateSet *state;
+    Vec3Array* vertices;
+    osg::ref_ptr<DrawElementsUInt> line_p;
+    osg::ref_ptr<Geometry> link_geometry;
+    
+    link_geode = new Geode();
+    link_geometry = new Geometry();
+    
+    //link vertices
+    vertices = new Vec3Array(2);
+    (*vertices)[0] = Vec3(0, 0, zpos);
+    (*vertices)[1] = Vec3(1, 0, zpos);
+    link_geometry->setVertexArray(vertices);
+    
+    osg::ref_ptr<osg::Vec4Array> colors = new Vec4Array;
+    colors->push_back(link_color);
+    
+    line_p = new DrawElementsUInt(PrimitiveSet::LINES, 2);
+    for(i=0; i<1; i++) {
+        (*line_p)[2*i] = i;
+        (*line_p)[2*i+1] = i+1;
+    }
+    
+    link_geometry->addPrimitiveSet(line_p);
+    link_geometry->setColorArray(colors);
+    link_geometry->setColorBinding(Geometry::BIND_OVERALL);
+    
+    state = link_geode->getOrCreateStateSet();
+    state->setMode(GL_LIGHTING, osg::StateAttribute::PROTECTED | osg::StateAttribute::OFF );
+    state->setMode(GL_BLEND, StateAttribute::ON);
+#if !defined (APPLE_IOS)
+    state->setMode(GL_LINE_SMOOTH, StateAttribute::ON);
+#endif//CF APPLE_IOS
+    state->setAttribute(new LineWidth(0.5));
     link_geode->addDrawable(link_geometry);
 }
 
 void ACOsgNodeLinkRenderer::prepareLinks() {
     link_geode = 0;
+   /* if ( node_in && node_out && node_in->getIsDisplayed() && node_out->getIsDisplayed()){
+        
+        Matrix T,Tt,Tr,Ts;
+        float x0,x1, y0,y1, z;
+        x0=node_in->getViewPos().x;
+        y0=node_in->getViewPos().y;
+        x1=node_out->getViewPos().x;
+        y1=node_out->getViewPos().y;
+        z = 0;
+        Vec3f axe(0,0,1);
+        float s=sqrt((x1-x0)*(x1-x0)+(y1-y0)*(y1-y0));
+        float a=atan((y1-y0)/(x1-x0));
+        if (x1<x0)
+            a+=PI;
+        Ts.makeScale(s,1,1);
+        Tr.makeRotate(a,axe);
+        Tt.makeTranslate(Vec3(x0, y0, z));
+        T=Ts*Tr*Tt;
+        link_node->setMatrix(T);
+    }*/
 }
 
 void ACOsgNodeLinkRenderer::updateLinks(){
     if ( node_in && node_out && node_in->getIsDisplayed() && node_out->getIsDisplayed()){
-        Matrix T;
-        float x, y, z;
-        x=node_in->getViewPos().x;
-        y=node_in->getViewPos().y;
+        if (link_node->getNumChildren()==0)
+        {
+            linkGeode( node_out->getViewPos().x-node_in->getViewPos().x,node_out->getViewPos().y-node_in->getViewPos().y);
+            link_node->addChild(link_geode);
+        }
+        Matrix T,Tt,Tr,Ts;
+        float x0,x1, y0,y1, z;
+        x0=node_in->getViewPos().x;
+        y0=node_in->getViewPos().y;
+        x1=node_out->getViewPos().x;
+        y1=node_out->getViewPos().y;
         z = 0;
-        T.makeTranslate(Vec3(x, y, z));
-        linkGeode( node_out->getViewPos().x-node_in->getViewPos().x,node_out->getViewPos().y-node_in->getViewPos().y);
-        link_node->addChild(link_geode);
+        Vec3f axe(0,0,1);
+        float s=sqrt((x1-x0)*(x1-x0)+(y1-y0)*(y1-y0));
+        float a=atan((y1-y0)/(x1-x0));
+        if (x1<x0)
+            a+=PI;
+        Ts.makeScale(s,1,1);
+        Tr.makeRotate(a,axe);
+        Tt.makeTranslate(Vec3(x0, y0, z));
+        T=Ts*Tr*Tt;
         link_node->setMatrix(T);
     }
 }

@@ -152,7 +152,8 @@ private:
     bool removeNodes();
     bool addNode(long int _id);
     bool addLink(long int _id);
-    bool removeLinks(int _first=0, int _last=0);
+    bool removeLinks();
+    bool removeLinks(int _first, int _last);
     bool removeLabels(int _first=0, int _last=0);
     bool addLabels(int _first=0, int _last=0);
 };

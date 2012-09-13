@@ -1,4 +1,4 @@
-audio := Input Resample="yes" SampleRate="22050"
+audio := Input Resample="yes" SampleRate="44100"
 n1 := FrameTokenizer blockSize="512" stepSize="256"
 audio > n1
 
@@ -17,12 +17,39 @@ n4 > n5
 MFCC := Output normalize="-1" version="v0.6" yaafedefinition="MFCC blockSize=512 stepSize=256"
 n5 > MFCC
 
+n11 := Flatness
+SpectralFlatness := Output normalize="-1" version="v0.6" yaafedefinition="SpectralFlatness blockSize=512 stepSize=256"
+n3 > n11
+n11 > SpectralFlatness
+
+n13 := Sqr
+n3 > n13
+
+n14 := Rolloff
+SpectralRollOff := Output normalize="-1" version="v0.6" yaafedefinition="SpectralRolloff blockSize=512 stepSize=256"
+n13 > n14
+n14 > SpectralRollOff
+
+n15 := Variation
+SpectralVariation := Output normalize="-1" version="v0.6" yaafedefinition="SpectralVariation blockSize=512 stepSize=256"
+n3 > n15
+n15 > SpectralVariation
+
 n18 := Flux
 Spectral_Flux := Output normalize="-1" version="v0.6" yaafedefinition="SpectralFlux blockSize=512 stepSize=256"
 n3 > n18
 n18 > Spectral_Flux
 
+n20 := ZCR
+ZeroCrossingRate := Output normalize="-1" version="v0.6" yaafedefinition="ZeroCrossingRate blockSize=512 stepSize=256"
+n1 > n20
+n20 > ZeroCrossingRate
+
+
 n22 := RMS
 Energy := Output normalize="-1" version="v0.6" yaafedefinition="Energy blockSize=512 stepSize=256"
 n1 > n22
 n22 > Energy
+
+
+
