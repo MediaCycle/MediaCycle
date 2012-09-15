@@ -1,14 +1,14 @@
 # -*- coding: utf-8; mode: tcl; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- vim:fenc=utf-8:ft=tcl:et:sw=4:ts=4:sts=4
-# $Id: Portfile 82208 2011-08-24 20:54:26Z christian.frisson@umons.ac.be $
+# $Id: Portfile 95104 2012-07-05 20:41:15Z ryandesign@macports.org $
 
 PortSystem                      1.0
 PortGroup                       cmake 1.0
 
 name                            opencv
-version                         2.3.1a
-#set branch                      ${version}
-set branch			2.3.1
+version                         2.4.2
+revision                        2
 categories                      graphics science
+license                         BSD
 platforms                       darwin
 maintainers                     nomaintainer
 
@@ -23,103 +23,106 @@ long_description                opencv is a library that is mainly aimed at real
                                 Robotics.
 
 homepage                        http://opencv.willowgarage.com/wiki/
-master_sites                    sourceforge:project/opencvlibrary/opencv-unix/${branch}
+master_sites                    sourceforge:project/opencvlibrary/opencv-unix/${version}
 use_bzip2                       yes
-distname                       OpenCV-${version}
-worksrcdir                      OpenCV-${branch}
+distname                        OpenCV-${version}
 
-checksums			md5     82e4b6bfa349777233eea09b075e931e \
-                   		sha1    9784e6824c5f677fac82ae83a2f366743adb3299 \
-                    		rmd160  f2f459bf7c163acb90427db2b0b425ab8008cde5
+checksums                       rmd160  496964503629b0ff4432fbdd276837ab3f134411 \
+                                sha256  690023811e03e21df996291392fcf78e43e42ef557b9307503c74c74b4272c28
 
 depends_build-append            port:pkgconfig
 
 depends_lib-append              port:zlib \
+                                path:lib/libavcodec.dylib:ffmpeg \
+                                port:libpng \
+                                port:tiff \
+                                port:jasper \
+                                port:jpeg \
                                 port:bzip2 \
-                                port:dirac \
-                                port:faac \
-                                port:faad2 \
-                                port:lame \
-                                port:schroedinger \
-                                port:liboil \
-                                port:libtheora \
-                                port:libvorbis \
-                                port:libogg \
-                                port:x264 \
-                                port:orc
-# \
-                                #port:qt4-mac
-                                #path:lib/libavcodec.dylib:ffmpeg \
+                                port:openexr \
+                                port:ilmbase \
+                                port:eigen3
 
-# ffmpeg is not universal
-#universal_variant               no
+patchfiles                      patch-fix_dirname_case.diff \
+                                patch-install_name.diff
 
-patchfiles                      patch-OpenCVModule.cmake.diff \
-                                patch-modules-highgui-CMakeLists.txt.diff \
-                                patch-modules-gpu-CMakeLists.txt.diff
+if {[variant_isset universal]} {
+    patchfiles-append           patch-pch-CMakeLists.txt.diff
+}
 
 configure.args-append           -DBUILD_NEW_PYTHON_SUPPORT=OFF \
                                 -DBUILD_EXAMPLES=ON \
                                 -DINSTALL_C_EXAMPLES=ON \
-                                -DWITH_FFMPEG=OFF
- #\
-				#-DWITH_QT=ON \
-				#-DWITH_OPENNI=ON
+                                -DBZIP2_LIBRARIES=${prefix}/lib/libbz2.dylib \
+                                -DZLIB_LIBRARY=${prefix}/lib/libz.dylib \
+                                -DWITH_OPENEXR=ON \
+                                -DWITH_1394=OFF \
+                                -DWITH_EIGEN=ON \
+                                -DEIGEN_INCLUDE_PATH=${prefix}/include/eigen3 \
+                                -DBUILD_JASPER=OFF \
+                                -DBUILD_JPEG=OFF \
+                                -DBUILD_PNG=OFF \
+                                -DBUILD_TIFF=OFF \
+                                -DBUILD_ZLIB=OFF
 
-# use macros in /usr/include/stdint.h with C++ compiler; see <https://roundup.ffmpeg.org/issue2093>
-#platform darwin {
-#    if {${os.major} <= 9} {
-#        configure.args-append   -DCMAKE_CXX_FLAGS=-D__STDC_CONSTANT_MACROS
-#    }
-#}
+# gcc-4.0 exits with a bus error
+if {${configure.compiler} == "gcc-4.0"} {
+    configure.compiler gcc-4.2
+    if {![file executable ${configure.cc}]} {
+        depends_build-append port:apple-gcc42
+        depends_skip_archcheck-append apple-gcc42
+        configure.compiler apple-gcc-4.2
+    }
+}
 
-#variant dc1394 description {Use libdc1394 for firewire camera. Breaks compatibility with Apple iSight FireWire camera.} {
-#    depends_lib-append          port:libdc1394
-#    configure.args-delete       -DWITH_1394=OFF
-#    configure.args-append       -DWITH_1394=ON
-#    configure.args-append       -DHAVE_1394=ON
-#}
+platform darwin {
+    if {${os.major} <= 9} {
+        # Video Decode Acceleration Framework is not available
+        patchfiles-append       patch-highgui_CMakeLists.txt.diff
+    }
+}
 
-variant qt4 description {Use experimental qt4 backend for graphical interface.} {
-    depends_lib-append          port:qt4-mac
+post-destroot {
+    xinstall -d ${destroot}${prefix}/lib/cmake
+    move ${destroot}${prefix}/share/OpenCV/OpenCVConfig-version.cmake \
+        ${destroot}${prefix}/share/OpenCV/OpenCVConfig.cmake \
+        ${destroot}${prefix}/lib/cmake/
+}
+
+variant dc1394 description {Use libdc1394 for FireWire camera. Breaks compatibility with Apple iSight FireWire camera.} {
+    depends_lib-append          port:libdc1394
+    configure.args-delete       -DWITH_1394=OFF
+    configure.args-append       -DWITH_1394=ON \
+                                -DHAVE_1394=ON
+}
+
+variant qt4 description {Use qt4 backend for graphical interface.} {
+    PortGroup                   qt4 1.0
     configure.args-append       -DWITH_QT=ON
 }
 
-variant ffmpeg description {Use ffmpeg backend for video I/O.} {
-    depends_lib-append          path:lib/libavcodec.dylib:ffmpeg
-    configure.args-delete       -DWITH_FFMPEG=OFF
-    configure.args-append       -DWITH_FFMPEG=ON
-}
-
-variant openni description {Use OpenNI backend for Kinect input.} {
-    configure.args-delete       -DWITH_OPENNI=OFF
-    configure.args-append       -DWITH_OPENNI=ON
-}
-
 variant python26 conflicts python27 description {Add Python 2.6 bindings} {
-    depends_lib-append          port:python26
+    depends_lib-append          port:python26 \
+                                port:py26-numpy
     configure.args-delete       -DBUILD_NEW_PYTHON_SUPPORT=OFF
     configure.args-append       -DINSTALL_PYTHON_EXAMPLES=ON \
                                 -DBUILD_NEW_PYTHON_SUPPORT=ON \
                                 -DPYTHON_EXECUTABLE=${prefix}/bin/python2.6 \
                                 -DPYTHON_LIBRARY=${prefix}/lib/libpython2.6.dylib \
-                                -DPYTHON_INCLUDE_DIR=${frameworks_dir}/Python.framework/Versions/2.6/Headers
-    post-patch {
-        reinplace "s|@@PYTHON_PKGD@@|${frameworks_dir}/Python.framework/Versions/2.6/lib/python2.6/site-packages|g" ${worksrcpath}/CMakeLists.txt
-    }
+                                -DPYTHON_INCLUDE_DIR=${frameworks_dir}/Python.framework/Versions/2.6/Headers \
+                                -DPYTHON_PACKAGES_PATH=${frameworks_dir}/Python.framework/Versions/2.6/lib/python2.6/site-packages
 }
 
 variant python27 conflicts python26 description {Add Python 2.7 bindings} {
-    depends_lib-append          port:python27
+    depends_lib-append          port:python27 \
+                                port:py27-numpy
     configure.args-delete       -DBUILD_NEW_PYTHON_SUPPORT=OFF
     configure.args-append       -DINSTALL_PYTHON_EXAMPLES=ON \
                                 -DBUILD_NEW_PYTHON_SUPPORT=ON \
                                 -DPYTHON_EXECUTABLE=${prefix}/bin/python2.7 \
                                 -DPYTHON_LIBRARY=${prefix}/lib/libpython2.7.dylib \
-                                -DPYTHON_INCLUDE_DIR=${frameworks_dir}/Python.framework/Versions/2.7/Headers
-    post-patch {
-        reinplace "s|@@PYTHON_PKGD@@|${frameworks_dir}/Python.framework/Versions/2.7/lib/python2.7/site-packages|g" ${worksrcpath}/CMakeLists.txt
-    }
+                                -DPYTHON_INCLUDE_DIR=${frameworks_dir}/Python.framework/Versions/2.7/Headers \
+                                -DPYTHON_PACKAGES_PATH=${frameworks_dir}/Python.framework/Versions/2.7/lib/python2.7/site-packages
 }
 
 variant tbb description {Use Intel TBB} {
@@ -127,10 +130,29 @@ variant tbb description {Use Intel TBB} {
     configure.args-append       -DWITH_TBB=ON \
                                 -DHAVE_TBB=ON \
                                 -DTBB_INCLUDE_DIRS=${prefix}/include \
-                                -DTBB_LIBRARY_DIRS=${prefix}/lib \
                                 -DOPENCV_LINKER_LIBS="-ltbb -ltbbmalloc"
+}
+
+variant openni description {Use OpenNI backend for Kinect input} {
+    configure.args-delete       -DWITH_OPENNI=OFF
+    configure.args-append       -DWITH_OPENNI=ON
+}
+
+variant cublas description {Include NVidia Cuda Basic Linear Algebra Subprograms (BLAS) library support} {
+    configure.args-delete       -DWITH_CUBLAS=OFF
+    configure.args-append       -DWITH_CUBLAS=ON
+}
+
+variant cuda description {Use NVidia Cuda Runtime support} {
+    configure.args-delete       -DWITH_CUDA=OFF
+    configure.args-append       -DWITH_CUDA=ON
+}
+
+variant cufft description {Include NVidia Cuda Fast Fourier Transform (FFT) library support} {
+    configure.args-delete       -DWITH_CUFFT=OFF
+    configure.args-append       -DWITH_CUFFT=ON
 }
 
 livecheck.type                  sourceforge
 livecheck.name                  opencvlibrary
-livecheck.regex                 /OpenCV-(\[0-9.\]+)${extract.suffix}
+livecheck.regex                 /OpenCV-(\[0-9a-z.\]+)${extract.suffix}
