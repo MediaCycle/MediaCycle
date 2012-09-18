@@ -1,7 +1,7 @@
 /**
  * @brief ACNeighborhoodsPluginEuclidean.cpp
  * @author Thierry Ravet
- * @date 12/09/2012
+ * @date 18/09/2012
  * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -73,24 +73,42 @@ void ACNeighborhoodsPluginEuclidean::updateNeighborhoods(ACMediaBrowser* mediaBr
         int newClickedNodeId=mediaBrowser->getClickedNode();
         lastClickedNodeId = newClickedNodeId;
         std::cout << "ACNeighborhoodsPluginEuclidean::updateNeighborhoods adding neighbors to node " << lastClickedNodeId << std::endl;
-        ACMedia* media = mediaBrowser->getLibrary()->getFirstMedia();
+        ACMedia* mediaF = mediaBrowser->getLibrary()->getFirstMedia();
 
         long libSize = mediaBrowser->getLibrary()->getSize();
-        int nbFeature = media->getNumberOfPreProcFeaturesVectors();
+        int nbFeature = mediaF->getNumberOfPreProcFeaturesVectors();
         mat desc_m;
         rowvec weight_v;
         mat tg_v;
         colvec dist_v(libSize);
 
-        extractDescMatrix(mediaBrowser, desc_m, weight_v);
-        tg_v = desc_m.row(lastClickedNodeId);
+        std::vector<long> ids;// = mediaBrowser->getLibrary()->getAllMediaIds();
+        const ACMediaNodes	mediaNodes=mediaBrowser->getMediaNodes();
+        int lcn=0;
+        int i=0;
+//        for(ACMediaNodes::const_iterator media = mediaNodes.begin(); media != mediaNodes.end(); media++) 
+//            if (media->second->getNavigationLevel() >= mediaBrowser->getNavigationLevel()){
+//                ids.push_back(media->first);
+        
+        for(ACMediaNodes::const_iterator media = mediaNodes.begin(); media != mediaNodes.end(); media++)
+            if ((mediaBrowser->getLibrary()->getMedia(media->first)->getMediaType() == mediaBrowser->getLibrary()->getMediaType()) &&(media->second->getNavigationLevel() >= mediaBrowser->getNavigationLevel())){
+                //if (media->second->getNavigationLevel() >= mediaBrowser->getNavigationLevel()&&){
+                ids.push_back(media->first);
+                if (media->first==lastClickedNodeId)
+                    lcn=i;
+                i++;
+            }
+        extractDescMatrix(mediaBrowser,ids, desc_m, weight_v);
+        
+        //        tg_v = desc_m.row(lastClickedNodeId);
+        tg_v = desc_m.row(lcn);
         dist_v= sqrt(sum(square(desc_m - repmat(tg_v, desc_m.n_rows, 1)) % repmat(weight_v, desc_m.n_rows, 1), 1));
 
         //	std::cout << "1_v = " << std::endl <<  square(desc_m - repmat(tg_v, desc_m.n_rows, 1)) << std::endl;
         //	std::cout << "2_v = " << std::endl <<  repmat(weight_v, desc_m.n_rows, 1) << std::endl;
         //	std::cout << "3_v = " << std::endl <<  sum(square(desc_m - repmat(tg_v, desc_m.n_rows, 1)) % repmat(weight_v, desc_m.n_rows, 1),1) << std::endl;
 
-        std::vector<long> ids = mediaBrowser->getLibrary()->getAllMediaIds();
+        int test=ids.size();
         ucolvec sortRank_v = sort_index(dist_v);
 
         int k=0,m=1; // m=1 to avoid returning the request itself (k=1)
@@ -105,9 +123,9 @@ void ACNeighborhoodsPluginEuclidean::updateNeighborhoods(ACMediaBrowser* mediaBr
     std::cout << "ACNeighborhoodsPluginPareto::updateNeighborhoods done" << std::endl;
 }
 
-void ACNeighborhoodsPluginEuclidean::extractDescMatrix(ACMediaBrowser* mediaBrowser, mat &desc_m, rowvec &weight_v){
+void ACNeighborhoodsPluginEuclidean::extractDescMatrix(ACMediaBrowser* mediaBrowser, std::vector<long> ids, mat &desc_m, rowvec &weight_v){
     ACMedias medias = mediaBrowser->getLibrary()->getAllMedia();
-    int nbMedia = medias.size();
+   // int nbMedia = medias.size();
     int featDim;
     int totalDim = 0;
 
@@ -120,23 +138,34 @@ void ACNeighborhoodsPluginEuclidean::extractDescMatrix(ACMediaBrowser* mediaBrow
             totalDim++;
         }
     }
+    int mediaDim=ids.size();
+ //   for(ACMedias::iterator media = medias.begin(); media != medias.end(); media++) 
+   //         if (mediaBrowser->getMediaNode(media->first)->getNavigationLevel() >= media_cycle->getNavigationLevel())
+     //           mediaDim++;
 
-    desc_m.set_size(nbMedia,totalDim);
+//    desc_m.set_size(nbMedia,totalDim);
+    desc_m.set_size(mediaDim,totalDim);
+    
     weight_v.set_size(totalDim);
-    mat pos_m(nbMedia,2);
+    //mat pos_m(nbMedia,2);
+    mat pos_m(mediaDim,2);
 
     int i = 0;
-    for(ACMedias::iterator media = medias.begin(); media != medias.end(); media++) {
-        int tmpIdx = 0;
-        for(int f=0; f< nbFeature; f++){
-            //std::cout << f << std::endl;
-            featDim = mediaBrowser->getLibrary()->getFirstMedia()->getPreProcFeaturesVector(f)->getSize();
-            for(int d=0; d < featDim; d++){
-                desc_m(i,tmpIdx) = media->second->getPreProcFeaturesVector(f)->getFeatureElement(d);
-                weight_v(tmpIdx) = mediaBrowser->getWeight(f);
-                tmpIdx++;
+    //for(ACMedias::iterator media = medias.begin(); media != medias.end(); media++) {
+    for (std::vector<long>::iterator it=ids.begin();it!=ids.end();it++){
+        //if (mediaBrowser->getMediaNode(*it)->getNavigationLevel() >= media_cycle->getNavigationLevel()){
+          
+            int tmpIdx = 0;
+            for(int f=0; f< nbFeature; f++){
+                //std::cout << f << std::endl;
+                featDim = mediaBrowser->getLibrary()->getFirstMedia()->getPreProcFeaturesVector(f)->getSize();
+                for(int d=0; d < featDim; d++){
+                    desc_m(i,tmpIdx) = medias[*it]->getPreProcFeaturesVector(f)->getFeatureElement(d);
+                    weight_v(tmpIdx) = mediaBrowser->getWeight(f);
+                    tmpIdx++;
+                }
             }
-        }
-        i++;
+            i++;
+        
     }
 }

@@ -1006,7 +1006,7 @@ bool ACMediaBrowser::initializeUpdateNeighborhoods(){
             if (locIds.size()>1){
                 
                 std::cout << "ACMediaBrowser::initializeUpdateNeighborhoods hide node:" << std::endl;
-                for (std::list<long int>::iterator it=++locIds.begin();it!=locIds.end();it++){
+                for (std::list<long int>::iterator it=locIds.begin();it!=locIds.end();it++){
                     std::cout << (*it) << std::endl;
                     this->getMediaNode(*it)->setDisplayed(false);
                 }}
@@ -1778,17 +1778,18 @@ void ACMediaBrowser::switchMode(ACBrowserMode _mode){
 
                 //CF 1) Bring the nodes to the center
                 ACPoint p;
+                p.x = p.y = p.z = 0.0;
                 for (ACMediaNodes::iterator node = mMediaNodes.begin(); node != mMediaNodes.end(); ++node){
-                    node->second->setCurrentPosition(p);
+                   // node->second->setCurrentPosition(p);
                     node->second->setNextPosition(p,t);
                 }
-                this->updateDisplay(true);//this->updateNextPositions();
+                //this->updateDisplay(true);//this->updateNextPositions();
 
                 //CF 2) Hide all nodes
                 for (ACMediaNodes::iterator node = mMediaNodes.begin(); node != mMediaNodes.end(); ++node){
                     node->second->setDisplayed(false);
                 }
-                this->updateDisplay(false);//this->updateNextPositions();
+                //this->updateDisplay(false);//this->updateNextPositions();
 
                 //CF 3) Recreate the user log
                 delete mNeighborsManager;
@@ -1908,12 +1909,12 @@ bool ACMediaBrowser::changeNeighborsMethodPlugin(ACPlugin* acpl)
             node->second->setNextPosition(p,t);
             node->second->setNextPosition(p,t);
         }
-        this->updateDisplay(true);//this->updateNextPositions();
+        //this->updateDisplay(true);//this->updateNextPositions();
 
         for (ACMediaNodes::iterator node = mMediaNodes.begin(); node != mMediaNodes.end(); ++node){
             node->second->setDisplayed(false);
         }
-        this->updateDisplay(false);//this->updateNextPositions();
+        //this->updateDisplay(false);//this->updateNextPositions();
 
         //CF 2) Recreate the user log
         delete mNeighborsManager;

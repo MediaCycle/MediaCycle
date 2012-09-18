@@ -1,7 +1,7 @@
 /**
  * @brief ACNeighborhoodsPluginPareto.h
- * @author Christian Frisson
- * @date 22/07/2012
+ * @author Thierry Ravet
+ * @date 18/09/2012
  * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -47,7 +47,7 @@ public:
     virtual void updateNeighborhoods(ACMediaBrowser* );
     void neighborsNumberChanged();
 protected:
-    arma::mat extractDescMatrix(ACMediaBrowser* mediaBrowser, int descId);
+    arma::mat extractDescMatrix(ACMediaBrowser* mediaBrowser, std::vector<long> ids, int descId);
     long lastClickedNodeId;
     int nNeighbors;
 };

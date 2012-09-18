@@ -1,7 +1,7 @@
 /**
  * @brief ACNeighborhoodsPluginPareto.cpp
  * @author Thierry Ravet
- * @date 12/09/2012
+ * @date 18/09/2012
  * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -72,17 +72,30 @@ void ACNeighborhoodsPluginPareto::updateNeighborhoods(ACMediaBrowser* mediaBrows
         int newClickedNodeId=mediaBrowser->getClickedNode();
         lastClickedNodeId = newClickedNodeId;
         std::cout << "ACNeighborhoodsPluginPareto::updateNeighborhoods adding neighbors to node " << lastClickedNodeId << std::endl;
-        ACMedia* media = mediaBrowser->getLibrary()->getFirstMedia();
+        ACMedia* mediaF = mediaBrowser->getLibrary()->getFirstMedia();
 
         long libSize = mediaBrowser->getLibrary()->getSize();
-        int nbFeature = media->getNumberOfPreProcFeaturesVectors();
+        int nbFeature = mediaF->getNumberOfPreProcFeaturesVectors();
+        std::vector<long> ids;// = mediaBrowser->getLibrary()->getAllMediaIds();
+        const ACMediaNodes	mediaNodes=mediaBrowser->getMediaNodes();
+        int lcn=0;
+        int i=0;
+        for(ACMediaNodes::const_iterator media = mediaNodes.begin(); media != mediaNodes.end(); media++)
+            if ((mediaBrowser->getLibrary()->getMedia(media->first)->getMediaType() == mediaBrowser->getLibrary()->getMediaType()) &&(media->second->getNavigationLevel() >= mediaBrowser->getNavigationLevel())){
+            //if (media->second->getNavigationLevel() >= mediaBrowser->getNavigationLevel()&&){
+                ids.push_back(media->first);
+                if (media->first==lastClickedNodeId)
+                    lcn=i;
+                i++;
+            }
+        
         mat tmpDesc_m;
         mat tmpTg_v;
-        mat dist_m(libSize, nbFeature);
+        mat dist_m(ids.size(), nbFeature);
 
         for (int f=0; f<nbFeature; f++){
-            tmpDesc_m = extractDescMatrix(mediaBrowser, f);
-            tmpTg_v = tmpDesc_m.row(lastClickedNodeId);
+            tmpDesc_m = extractDescMatrix(mediaBrowser, ids,f);
+            tmpTg_v = tmpDesc_m.row(lcn);
             dist_m.col(f) = sqrt(sum(square(tmpDesc_m - repmat(tmpTg_v, tmpDesc_m.n_rows, 1)), 1));
         }
         ucolvec rank_v = paretorank(dist_m, 2, 6);
@@ -92,7 +105,6 @@ void ACNeighborhoodsPluginPareto::updateNeighborhoods(ACMediaBrowser* mediaBrows
             distE_v(k) = sum(dist_m.row(selPos_v(k)));
         }
 
-        std::vector<long> ids = mediaBrowser->getLibrary()->getAllMediaIds();
         ucolvec selPos2_v = sort_index(distE_v);
         /*if (selPos2_v.n_rows < nNeighbors)
             nNeighbors = selPos2_v.n_rows;*/
@@ -112,22 +124,32 @@ void ACNeighborhoodsPluginPareto::updateNeighborhoods(ACMediaBrowser* mediaBrows
     std::cout << "ACNeighborhoodsPluginPareto::updateNeighborhoods done" << std::endl;
 }
 
-mat ACNeighborhoodsPluginPareto::extractDescMatrix(ACMediaBrowser* mediaBrowser, int descId){
+mat ACNeighborhoodsPluginPareto::extractDescMatrix(ACMediaBrowser* mediaBrowser, std::vector<long> ids, int descId){
     ACMedias medias = mediaBrowser->getLibrary()->getAllMedia();
     int nbMedia = medias.size();
     int featDim;
 
     // Count nb of feature
     featDim = mediaBrowser->getLibrary()->getFirstMedia()->getPreProcFeaturesVector(descId)->getSize();
-
-    mat desc_m(nbMedia, featDim);
+    
+    int mediaDim=0;
+    //for(ACMedias::iterator media = medias.begin(); media != medias.end(); media++) 
+    //    if (mediaBrowser->getMediaNode(media->first)->getNavigationLevel() >= media_cycle->getNavigationLevel())
+    //        mediaDim++;
+    mediaDim=ids.size();
+    mat desc_m(mediaDim, featDim);
     int i = 0;
-    for(ACMedias::iterator media = medias.begin(); media != medias.end(); media++) {
-        int tmpIdx = 0;
-        for(int d=0; d < featDim; d++){
-            desc_m(i,d) = media->second->getPreProcFeaturesVector(descId)->getFeatureElement(d);
+    //for (ACMedias::iterator media = medias.begin(); media != medias.end(); media++) {
+    //    if (mediaBrowser->getMediaNode(media->first)->getNavigationLevel() >= media_cycle->getNavigationLevel()){
+    for (std::vector<long>::iterator it=ids.begin();it!=ids.end();it++){
+            int tmpIdx = 0;
+            for(int d=0; d < featDim; d++){
+                //desc_m(i,d) = media->second->getPreProcFeaturesVector(descId)->getFeatureElement(d);
+                desc_m(i,d) = medias[*it]->getPreProcFeaturesVector(descId)->getFeatureElement(d);
+                
+            }
+            i++;
         }
-        i++;
-    }
+    //}
     return desc_m;
 }

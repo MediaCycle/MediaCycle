@@ -1266,7 +1266,7 @@ void ACMediaLibrary::saveSorted(string output_file){
 void ACMediaLibrary::setPreProcessPlugin(ACPlugin* acpl)
 {
     if (mPreProcessPlugin)
-        if (((ACPlugin*)mPreProcessPlugin!=acpl)&&(mPreProcessInfo!=NULL))
+        if ((mPreProcessPlugin!=acpl)&&(mPreProcessInfo!=NULL))
             mPreProcessPlugin->freePreProcessInfo(mPreProcessInfo);
     if (acpl==NULL&&mPreProcessPlugin!=NULL)
     {

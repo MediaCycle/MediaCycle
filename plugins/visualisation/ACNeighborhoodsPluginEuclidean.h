@@ -1,7 +1,7 @@
 /**
  * @brief ACNeighborhoodsPluginEuclidean.h
- * @author Christian Frisson
- * @date 22/07/2012
+ * @author Thierry Ravet
+ * @date 18/09/2012
  * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -47,7 +47,7 @@ public:
     virtual void updateNeighborhoods(ACMediaBrowser* );
     void neighborsNumberChanged();
 protected:
-    void extractDescMatrix(ACMediaBrowser* mediaBrowser, arma::mat &desc_m, arma::rowvec &weight_v);
+    void extractDescMatrix(ACMediaBrowser* mediaBrowser,  std::vector<long> ids,arma::mat &desc_m, arma::rowvec &weight_v);
     long lastClickedNodeId;
     int nNeighbors;
 };

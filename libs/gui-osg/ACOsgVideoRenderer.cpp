@@ -80,6 +80,10 @@ void ACOsgVideoRenderer::updateNodes(double ratio) {
             image_geode->setNodeMask(0);
         return;
     }
+    
+    unsigned int mask = (unsigned int)-1;
+    if (image_geode)
+        image_geode->setNodeMask(mask);
 
     osg::ImageStream::StreamStatus streamStatus = image_stream->getStatus();
 
