@@ -33,6 +33,7 @@
  */
 
 #include "ACMediaBrowser.h"
+#define VERBOSE
 
 using namespace std;
 
@@ -426,7 +427,6 @@ void ACMediaBrowser::setNodeNextPosition(int node_id, ACPoint p){
 }
 
 void ACMediaBrowser::setLabelPosition(int label_id, float x, float y, float z){
-    // XS todo change this too
     ACPoint p;
     p.x = x;
     p.y = y;
@@ -483,11 +483,6 @@ void ACMediaBrowser::setNumberOfDisplayedLabels(int nd){
 void ACMediaBrowser::incrementNavigationLevels(int nodeIndex) {
     int n=getNumberOfMediaNodes(),clusterIndex;
 
-    // XS TODO: why this "if" ?
-    //	if (mNavigationLevel==0)
-    //		resetNodeNavigationLevels();
-
-    // XS TODO: which "if" goes first ? do we still want to reset if we have a wrong node_index ?
     if(!(nodeIndex >= 0 && nodeIndex < n))  return;
 
     clusterIndex = this->getMediaNode(nodeIndex)->getClusterId();
@@ -611,27 +606,12 @@ void ACMediaBrowser::libraryContentChanged(int needsCluster) {
 
     int librarySize = mLibrary->getSize(); // library size before node init
 
-    // XS 150310 TODO: check this one
-    //initializeNodes(mMode);
-
     if(mLibrary->isEmpty()) {
         this->resetCamera();
         this->resetNavigation();
         this->setNeedsDisplay(true);
         return;
     }
-
-    // XS TODO randomize positions only at the beginning...
-    /*if ( mMode == AC_MODE_CLUSTERS && librarySize == 0 ) {//(mNoMethodPosPlugin==0 && mPosPlugin==0) {
-        for (ACMediaNodes::iterator node = mMediaNodes.begin(); node != mMediaNodes.end(); ++node){
-            node->second->setCurrentPosition (ACRandom(),
-                                              ACRandom(),
-                                              ACRandom() / 10.0);
-            node->second->setNextPosition (node->second->getCurrentPositionX() + ACRandom() / 100.0,
-                                           node->second->getCurrentPositionY() + ACRandom() / 100.0,
-                                           node->second->getCurrentPositionZ() + ACRandom() / 100.0);
-        }
-    }*/
 
     if (needsCluster)
         this->initializeFeatureWeights(); //TR NEM modification
@@ -676,7 +656,7 @@ void ACMediaBrowser::initializeFeatureWeights(){
         int fc = mLibrary->getFirstMedia()->getNumberOfPreProcFeaturesVectors();
         if (mFeatureWeights.size()!=fc){
             mFeatureWeights.resize(fc);
-            printf("setting all feature weights to 1.0 (count=%d)\n", (int) mFeatureWeights.size());
+            printf("setting first feature weights to 1.0 (count=%d), others to 0.0 \n", (int) mFeatureWeights.size());
             for(int i=0; i<fc; i++) {
                 mFeatureWeights[i] = 0.0;
             }
@@ -689,7 +669,7 @@ void ACMediaBrowser::initializeFeatureWeights(){
         mFeatureWeights[0] = 1.0;
 
     }
-    cout<<"featureWeight:"<<mFeatureWeights.size()<<endl;
+    cout<<"featureWeight vector size:"<<mFeatureWeights.size()<<endl;
 
 }
 

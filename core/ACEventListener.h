@@ -66,7 +66,7 @@ public:
 	bool stopped();
 	void testService();
         virtual void mediaImported(int n,int nTot,int mId){
-		std::cout<<"ACEventListener::mediaImported"<<std::cout;
+		std::cout<<"ACEventListener::mediaImported"<<std::endl;
 	};
         virtual void libraryCleaned(){std::cout<<"ACEventListener::libraryCleaned"<< std::endl;};
 	virtual void activeFeatChanged(){};

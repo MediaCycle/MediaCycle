@@ -69,7 +69,6 @@ bool ACSensor::extractData(string fname){
 		delete data;
 		data=0;
 	}
-	// XS todo : store the default header (16 or 64 below) size somewhere...
 	data = new ACSensorData(fname);
 	if (data!=0){
 		if (data->getData()==NULL){

@@ -54,7 +54,6 @@ ACAudioGardenOsgQt::ACAudioGardenOsgQt(QWidget *parent)
 	ui.setupUi(this); // first thing to do
 	media_cycle = new MediaCycle(MEDIA_TYPE_AUDIO,"/tmp/","mediacycle.acl");
 
-	// XS TODO fichier de configuration
 	#if defined(__APPLE__)
 		std::string build_type ("Release");
 		#ifdef USE_DEBUG
@@ -314,13 +313,8 @@ void ACAudioGardenOsgQt::loadMediaDirectory(){
 	 QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks
 	 );
 
-	// XS TODO : check if directory exists
 	media_cycle->importDirectory(selectDir.toStdString(), 1, false, true); //CF false for reverse order, subdirs last, ie: source sound first, grains after. DT: true to segment
-
-	// with this function call here, do not import twice!!!
-	// XS TODO: what if we add a new directory to the existing library ?
 	media_cycle->normalizeFeatures();
-
 	media_cycle->libraryContentChanged();
 	this->updateLibrary();
 

@@ -70,7 +70,6 @@ bool ACText::extractData(string fname){
 		delete data;
 		data=0;
 	}
-	// XS todo : store the default header (16 or 64 below) size somewhere...
 	data = new ACTextData(fname);
 	if (data!=0){
 		if (data->getData()==NULL){

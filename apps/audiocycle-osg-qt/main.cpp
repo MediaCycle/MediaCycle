@@ -56,9 +56,7 @@ int main(int argc, char *argv[])
                 //window.addControlDock("MCSegmentationControls");
 		window.useSegmentationByDefault(true);
 
-		// XS TODO
-		// this has to be called after dock controls have been added
-		// do we need to put all this code here ?
+		// XS see multimediacycleOsgQt 
 		window.configureSettings();
 
 		//	window.configurePluginDock();

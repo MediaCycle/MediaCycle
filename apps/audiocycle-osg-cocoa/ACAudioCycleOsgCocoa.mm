@@ -131,7 +131,6 @@
 	
 	media_cycle = new MediaCycle(MEDIA_TYPE_AUDIO,"/tmp/","mediacycle.acl");
 	
-	// XS TODO fichier de configuration
 	std::string build_type ("Release");
 	#ifdef USE_DEBUG
 		build_type = "Debug";

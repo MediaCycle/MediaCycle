@@ -603,9 +603,6 @@ vector<ACMediaFeatures*> ACAvailableFeaturesPlugins::calculate(ACMediaData* aDat
     return output;
 }
 
-// XS TODO check with TR
-
-
 //ACAvailablePlugins implementation
 
 template <typename T>

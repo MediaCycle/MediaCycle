@@ -65,8 +65,9 @@ extern std::string getExecutablePath();
 typedef boost::function<void()> ACParameterCallback;
 
 struct ACNumberParameter{
-    std::string name,desc;
+    std::string name;
     float value,init,min,max,step;
+    std::string desc;
     ACParameterCallback callback;
     ACNumberParameter()
         :name(""),value(0.0f),init(0.0f),min(0.0f),max(0.0f),step(0.0f),desc(""),callback(0){}
@@ -82,7 +83,7 @@ struct ACStringParameter{
     ACStringParameter()
         :name(""),value(""),init(""),desc(""),callback(0){}
     ACStringParameter(std::string _name, std::string _init, std::vector<std::string> _values, std::string _desc, ACParameterCallback _callback)
-        :name(_name),values(_values),value(_init),init(_init),desc(_desc),callback(_callback){ }
+        :name(_name),value(_init),init(_init),desc(_desc),values(_values),callback(_callback){ }
     ~ACStringParameter(){callback = 0;}
 };
 

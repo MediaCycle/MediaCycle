@@ -58,9 +58,9 @@ int main(int argc, char *argv[])
         window.addControlDock("MCAudioControls");
 		window.useSegmentationByDefault(false);
 		
-		// XS TODO
-		// this has to be called after dock controls have been added
-		// do we need to put all this code here ?
+		// XS: this has to be called after dock controls have been added
+		// it has been inactivated manually (int ret = QMessageBox::No in window.configureSettings)
+		// but can be used to save session parameters
 		window.configureSettings();
 
 		//	window.configurePluginDock();

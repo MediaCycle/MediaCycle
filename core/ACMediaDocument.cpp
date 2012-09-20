@@ -168,7 +168,6 @@ void ACMediaDocument::init() {
 // copy-constructor, used for example to generate fragments
 ACMediaDocument::ACMediaDocument(const ACMediaDocument& m, bool reduce) : ACMedia(m) {
 	this->init();
-	// ... XS TODO
 }
 
 ACMediaDocument::~ACMediaDocument() {

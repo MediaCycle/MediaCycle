@@ -154,7 +154,6 @@ bool NavimedSensor::extractData(std::string fname){
 		delete data;
 		data=0;
 	}
-	// XS todo : store the default header (16 or 64 below) size somewhere...
 	data = new NavimedSensorData(fname);
 	if (data!=0){
 		if (data->getData()==NULL){

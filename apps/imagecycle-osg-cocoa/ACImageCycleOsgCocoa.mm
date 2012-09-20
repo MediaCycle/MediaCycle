@@ -119,7 +119,6 @@
 	
 	media_cycle = new MediaCycle(MEDIA_TYPE_IMAGE,"/tmp/","mediacycle.acl");
 	
-	// XS TODO fichier de configuration
 	media_cycle->getBrowser()->setMode(AC_MODE_CLUSTERS);
 	std::string build_type ("Release");
 	#ifdef USE_DEBUG

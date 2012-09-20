@@ -364,10 +364,7 @@ void ACMedia::loadXML(TiXmlElement* _pMediaNode){
 	
 	if (nf < 0)
 		throw runtime_error("corrupted XML file, wrong number of features");
-	else if (nf ==0)
-		// XS TODO could this happen without it being an error?
-       // CF yes for mediadocuments
-		// if not, put <= in the test above
+	else if (nf ==0) // XS could happen without it being an error, for mediadocuments
 		cout << "loading media with no features" << endl;
 	
 	TiXmlElement* featureElement = _pMediaNodeHandle.FirstChild( "Features" ).FirstChild( "Feature" ).Element();
@@ -628,7 +625,6 @@ int ACMedia::import(std::string _path, int _mid, ACPluginManager *acpl, bool _sa
 
 int ACMedia::extractFeatures(ACPluginManager *acpl, bool _save_timed_feat) {
     int extract_feat_ok = 0;
-    // XS TODO config file
     if (acpl) {
         //TR : new implementation to calculate the features
         ACMediaData* local_media_data=dynamic_cast<ACMediaData*>(this->getMediaData());
