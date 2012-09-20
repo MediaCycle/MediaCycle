@@ -4,7 +4,7 @@ PortSystem	1.0
 
 name		argtable
 version		2.13
-revision	0
+revision	1
 categories	devel
 maintainers	waqar openmaintainer
 description	ANSI C library for parsing GNU style command line arguments
@@ -20,8 +20,3 @@ distname	${name}2-13
 master_sites	sourceforge
 checksums           md5     156773989d0d6406cea36526d3926668 \
                     sha1    bce828c64c35e16f4c3f8e1f355e4a2a97fe3289
-configure.args  --mandir=${prefix}/share/man				\
-		--infodir=${prefix}/share/info
-post-configure	{
-	reinplace "s|${prefix}|${destroot}${prefix}|g" ${worksrcpath}/Makefile
-}
