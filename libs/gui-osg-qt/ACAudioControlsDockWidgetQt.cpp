@@ -37,6 +37,7 @@
 #endif// defined (SUPPORT_AUDIO)
 
 #include "ACAudioControlsDockWidgetQt.h"
+#include <math.h>
 
 ACAudioControlsDockWidgetQt::ACAudioControlsDockWidgetQt(QWidget *parent)
     : ACAbstractDockWidgetQt(parent, MEDIA_TYPE_AUDIO,"ACAudioControlsDockWidgetQt")
@@ -59,7 +60,8 @@ ACAudioControlsDockWidgetQt::ACAudioControlsDockWidgetQt(QWidget *parent)
 
     connect(ui.spinBoxBPM,SIGNAL(valueChanged(int)),ui.horizontalSliderBPM,SLOT(setValue(int)));
     connect(ui.horizontalSliderBPM,SIGNAL(valueChanged(int)),ui.spinBoxBPM,SLOT(setValue(int)));
-
+    connect(ui.spinBoxVolume,SIGNAL(valueChanged(int)),ui.horizontalSliderVolume,SLOT(setValue(int)));
+    connect(ui.horizontalSliderVolume,SIGNAL(valueChanged(int)),ui.spinBoxVolume,SLOT(setValue(int)));
 #ifndef USE_DEBUG
     int custom_index = ui.comboBoxPlaybackPreset->findText("Custom");
     if(custom_index != -1)
@@ -125,14 +127,26 @@ void ACAudioControlsDockWidgetQt::on_pushButtonMuteAll_clicked()
 
 void ACAudioControlsDockWidgetQt::on_spinBoxBPM_valueChanged(int value)
 {
-    std::cout << "ACAudioControlsDockWidgetQt::on_spinBoxBPM_valueChanged " << value << std::endl;
+    //std::cout << "ACAudioControlsDockWidgetQt::on_spinBoxBPM_valueChanged " << value << std::endl;
 }
 void ACAudioControlsDockWidgetQt::on_horizontalSliderBPM_valueChanged(int value)
 {
-    std::cout << "ACAudioControlsDockWidgetQt::on_horizontalSliderBPM_valueChanged " << value << std::endl;
+    //std::cout << "ACAudioControlsDockWidgetQt::on_horizontalSliderBPM_valueChanged " << value << std::endl;
     if (media_cycle == 0) return;
     if (audio_engine == 0) return;
     audio_engine->setBPM(value);
+}
+
+void ACAudioControlsDockWidgetQt::on_spinBoxVolume_valueChanged(int value)
+{
+    //std::cout << "ACAudioControlsDockWidgetQt::on_spinBoxVolume_valueChanged " << value << std::endl;
+}
+void ACAudioControlsDockWidgetQt::on_horizontalSliderVolume_valueChanged(int value)
+{
+    //std::cout << "ACAudioControlsDockWidgetQt::on_horizontalSliderVolume_valueChanged " << value << std::endl;
+    if (media_cycle == 0) return;
+    if (audio_engine == 0) return;
+    audio_engine->setGain((float)value/100.0f);
 }
 
 void ACAudioControlsDockWidgetQt::on_comboBoxWaveformBrowser_activated(const QString & text)

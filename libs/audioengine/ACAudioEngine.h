@@ -98,6 +98,7 @@ public:
 	
 	// set tune BPM and Key
 	void setBPM(float BPM){feedback->setBPM(BPM);}
+    void setGain(float gain){feedback->setGain(gain);}
 	void setKey(int key){feedback->setKey(key);}
 	void setTimeSignature(int tsnum, int tsden){feedback->setTimeSignature(tsnum, tsden);}
 

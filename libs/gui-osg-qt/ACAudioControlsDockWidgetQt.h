@@ -44,39 +44,41 @@
 #include <MediaCycle.h>
 
 class ACAudioControlsDockWidgetQt : public ACAbstractDockWidgetQt {
-Q_OBJECT
+    Q_OBJECT
 
-//#if defined (SUPPORT_AUDIO) // don't use it!
+    //#if defined (SUPPORT_AUDIO) // don't use it!
 private slots:
-	// Audio controls
-	void on_pushButtonMuteAll_clicked();
-	
-	// Audio visualization
-	void on_comboBoxWaveformBrowser_activated(const QString & text);//CF or (int index);}
+    // Audio controls
+    void on_pushButtonMuteAll_clicked();
 
-	// Audio playback
-	void on_checkBoxSynchroMode_stateChanged(int state);
-	void on_checkBoxScaleMode_stateChanged(int state);
-	void on_comboBoxSynchroMode_activated(const QString & text);//CF or (int index);}
-	void on_comboBoxScaleMode_activated(const QString & text);//CF or (int index);}
-	void on_comboBoxPlaybackPreset_activated(const QString & text);
-        void on_spinBoxBPM_valueChanged(int value);
-        void on_horizontalSliderBPM_valueChanged(int value);
-	
-//#endif //defined (SUPPORT_AUDIO)
+    // Audio visualization
+    void on_comboBoxWaveformBrowser_activated(const QString & text);//CF or (int index);}
+
+    // Audio playback
+    void on_checkBoxSynchroMode_stateChanged(int state);
+    void on_checkBoxScaleMode_stateChanged(int state);
+    void on_comboBoxSynchroMode_activated(const QString & text);//CF or (int index);}
+    void on_comboBoxScaleMode_activated(const QString & text);//CF or (int index);}
+    void on_comboBoxPlaybackPreset_activated(const QString & text);
+    void on_spinBoxBPM_valueChanged(int value);
+    void on_horizontalSliderBPM_valueChanged(int value);
+    void on_spinBoxVolume_valueChanged(int value);
+    void on_horizontalSliderVolume_valueChanged(int value);
+
+    //#endif //defined (SUPPORT_AUDIO)
 
 public:
-	ACAudioControlsDockWidgetQt(QWidget *parent = 0);
-	~ACAudioControlsDockWidgetQt();
-        virtual bool canBeVisible(ACMediaType _media_type);
+    ACAudioControlsDockWidgetQt(QWidget *parent = 0);
+    ~ACAudioControlsDockWidgetQt();
+    virtual bool canBeVisible(ACMediaType _media_type);
 
 #if defined (SUPPORT_AUDIO)
-	void setComboBoxWaveformBrowser(ACBrowserAudioWaveformType _type);
-	void initFeedbackModes();
-	void setAudioEngine(ACAudioEngine* _audio_engine);
+    void setComboBoxWaveformBrowser(ACBrowserAudioWaveformType _type);
+    void initFeedbackModes();
+    void setAudioEngine(ACAudioEngine* _audio_engine);
 
 private:
-	Ui::ACAudioControlsDockWidgetQt ui;
+    Ui::ACAudioControlsDockWidgetQt ui;
 #endif //defined (SUPPORT_AUDIO)	
 };
 #endif

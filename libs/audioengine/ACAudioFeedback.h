@@ -140,6 +140,7 @@ public:
 	
 	// set tune BPM and Key
 	void setBPM(float BPM);
+    void setGain(float gain);
 	void setKey(int key);
 	void setTimeSignature(int tsnum, int tsden);
 
@@ -205,6 +206,7 @@ private:
 	int     **desc_time_signatures;
 	// Musical Properties (entered by user or sequencer software)
 	float	active_bpm;
+    float active_gain;
 	float prev_active_bpm;
 	int		active_key;
 	int		active_tsnum;

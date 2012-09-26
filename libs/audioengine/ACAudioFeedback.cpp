@@ -116,7 +116,8 @@ ACAudioFeedback::ACAudioFeedback(PaStream *_stream, int samplerate, int buffersi
 	//
 	active_bpm   = 100;
 	prev_active_bpm   = 100;
-	active_key	 = 0;
+    active_gain   = 1;
+    active_key	 = 0;
 	active_tsnum = 4;
 	active_tsden = 4;
 	n_time_signatures = 0;
@@ -688,7 +689,7 @@ bool ACAudioFeedback::processAudioEngineNew()
 	ALint	buffer_queued_1;
 	ALint  source_state;
 
-	format = AL_FORMAT_MONO16;
+    format = AL_FORMAT_MONO16;
 	size = output_buffer_size;
 	freq = output_sample_rate;
 	ALuint local_new_buffer;
@@ -1593,6 +1594,23 @@ void ACAudioFeedback::setBPM(float bpm)
     active_bpm = bpm;
 }
 
+void ACAudioFeedback::setGain(float gain)
+{
+    if(gain < 0)
+        gain = 0.0f;
+    if(gain > 1)
+        gain = 1.0f;
+    active_gain = gain;
+    #if defined USE_OPENAL
+    for (int i=0;i<OPENAL_NUM_BUFFERS;i++) {
+        if(loop_ids[i] != -1)
+            this->setSourceGain(loop_ids[i],gain);
+    }
+    #else
+    std::cerr << "ACAudioFeedback::setGain: not yet implemented for backend other than OpenAL" << std::endl;
+    #endif
+}
+
 void ACAudioFeedback::setKey(int key)
 {
 	active_key = key;
@@ -1972,6 +1990,8 @@ int ACAudioFeedback::createSourceWithPosition(int loop_id, float x, float y, flo
 		pv_currentsample[loop_slot] = 0;
 
 		loop_ids[loop_slot] = loop_id;
+
+        this->setSourceGain(loop_id,active_gain);
 
 		active_loops++;
 
