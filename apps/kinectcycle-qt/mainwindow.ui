@@ -29,6 +29,20 @@
        </widget>
       </item>
       <item>
+       <widget class="QCheckBox" name="checkBoxDepth">
+        <property name="text">
+         <string>Depth View</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="checkBoxCamera">
+        <property name="text">
+         <string>Camera View</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <spacer name="horizontalSpacer_2">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>

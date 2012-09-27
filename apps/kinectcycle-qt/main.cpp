@@ -14,12 +14,25 @@ THIS SOFTWARE IS PROVIDED BY COPYRIGHT HOLDERS ``AS IS'' AND ANY EXPRESS OR IMPL
 
 #include <QtGui/QApplication>
 #include "mainwindow.h"
+#include <BreakpadHttpSender.h>
+#include <BreakPadHandler.h>
 
 int main(int argc, char *argv[])
 {
-    QApplication a(argc, argv);
+    QApplication app(argc, argv);
+    app.setOrganizationName("numediart");
+    app.setOrganizationDomain("numediart.org");
+    app.setApplicationName("KinectCycle");
+
+    // Make Apple *.app bundles not load installed Qt Frameworks but load Qt Plugins
+#ifdef __APPLE__
+    QApplication::setLibraryPaths(QStringList(QApplication::applicationDirPath() + "/../PlugIns"));
+#endif
+
+    BreakpadQt::GlobalHandler::instance()->setDumpPath(QLatin1String("crashes"));
+
     MainWindow w;
     w.show();
 
-    return a.exec();
+    return app.exec();
 }

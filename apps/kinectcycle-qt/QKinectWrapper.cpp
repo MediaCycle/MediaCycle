@@ -88,6 +88,7 @@ int BodyColors[][3] =
 * PUBLIC   PUBLIC   PUBLIC   PUBLIC   PUBLIC   PUBLIC   PUBLIC   PUBLIC   PUBLIC
 ******************************************************************************/
 
+bool calibration_done = false;
 
 /**
    \brief Constructor - does nothing with the kinect driver but inits some internal vars
@@ -892,10 +893,17 @@ bool QKinectWrapper::initialize()
 void XN_CALLBACK_TYPE QKinectWrapper::User_NewUser(xn::UserGenerator& generator, XnUserID nId, void* pCookie)
 {
     QKinectWrapper *pthis = (QKinectWrapper*)pCookie;
-    if (pthis->g_bNeedPose)
-        pthis->g_UserGenerator.GetPoseDetectionCap().StartPoseDetection(pthis->g_strPose, nId);
-    else
-        pthis->g_UserGenerator.GetSkeletonCap().RequestCalibration(nId, TRUE);
+    if(!calibration_done){
+        if (pthis->g_bNeedPose)
+            pthis->g_UserGenerator.GetPoseDetectionCap().StartPoseDetection(pthis->g_strPose, nId);
+        else
+            pthis->g_UserGenerator.GetSkeletonCap().RequestCalibration(nId, TRUE);
+    }
+    else {
+        // Propagate skeleton
+        pthis->g_UserGenerator.GetSkeletonCap().LoadCalibrationData(nId, 0);
+        pthis->g_UserGenerator.GetSkeletonCap().StartTracking(nId);
+    }
     emit pthis->userNotification(nId,true);
 }
 
@@ -954,6 +962,8 @@ void XN_CALLBACK_TYPE QKinectWrapper::UserCalibration_CalibrationComplete(xn::Sk
     if (calibrationError == XN_CALIBRATION_STATUS_OK)
     {
         pthis->g_UserGenerator.GetSkeletonCap().StartTracking(nId);
+		pthis->g_UserGenerator.GetSkeletonCap().SaveCalibrationData(nId,0);
+		calibration_done = true;
         emit pthis->calibrationNotification(nId,CalibrationEndSuccess);
         return;
     }

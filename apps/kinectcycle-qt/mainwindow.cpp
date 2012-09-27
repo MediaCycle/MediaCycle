@@ -42,6 +42,10 @@ MainWindow::MainWindow(QWidget *parent) :
     addDockWidget(Qt::TopDockWidgetArea,oscDockWidget);
     kreader.passOscFeedback(osc_feedback);
 
+    // Auto-start OSC
+    if(!osc_feedback->isActive())
+        oscDockWidget->toggleFeedback(true);
+
     sbKinectStatus = new QLabel(statusBar());
     sbKinectFrame = new QLabel(statusBar());
     sbKinectTime = new QLabel(statusBar());
@@ -52,6 +56,12 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->statusBar->addWidget(sbKinectTime);
     ui->statusBar->addWidget(sbKinectFPS);
     ui->statusBar->addWidget(sbKinectNumBody);
+
+    // Auto-start kinect
+    this->on_pushButton_KinectStartStop_clicked();
+
+    // Hide the window so that it might not steal the focus from LoopJam
+    this->showMinimized();
 }
 
 MainWindow::~MainWindow()
@@ -71,9 +81,11 @@ void MainWindow::kinectData()
 
 
     QImage img = kreader.getDepth();
-    ui->label->setPixmap(QPixmap::fromImage(img));
+    if(ui->checkBoxDepth->isChecked())
+        ui->label->setPixmap(QPixmap::fromImage(img));
     img = kreader.getCamera();
-    ui->labelImage->setPixmap(QPixmap::fromImage(img));
+    if(ui->checkBoxCamera->isChecked())
+        ui->labelImage->setPixmap(QPixmap::fromImage(img));
     QKinect::Bodies bodies = kreader.getBodies();
     sbKinectNumBody->setText(QString("Body: %1").arg(bodies.size()));
     xnFPSMarkFrame(&xnFPS);
