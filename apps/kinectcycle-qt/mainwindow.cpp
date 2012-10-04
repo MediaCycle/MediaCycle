@@ -57,6 +57,22 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->statusBar->addWidget(sbKinectFPS);
     ui->statusBar->addWidget(sbKinectNumBody);
 
+    toggleCameraView = new QAction(tr("Toggle Camera View"), this);
+    toggleCameraView->setShortcut(tr("Ctrl+C"));
+    toggleCameraView->setCheckable(true);
+    connect(toggleCameraView, SIGNAL(toggled(bool)), ui->checkBoxCamera , SLOT(setChecked(bool)));
+
+    toggleDepthView = new QAction(tr("Toggle Depth View"), this);
+    toggleDepthView->setShortcut(tr("Ctrl+V"));
+    toggleDepthView->setCheckable(true);
+    connect(toggleDepthView, SIGNAL(toggled(bool)), ui->checkBoxDepth , SLOT(setChecked(bool)));
+
+    viewMenu = new QMenu(tr("&View"), this);
+    viewMenu->addAction(toggleCameraView);
+    viewMenu->addAction(toggleDepthView);
+
+    ui->menuBar->addMenu(viewMenu);
+
     // Auto-start kinect
     this->on_pushButton_KinectStartStop_clicked();
 

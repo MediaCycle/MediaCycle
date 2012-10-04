@@ -48,6 +48,8 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
+    QAction *toggleCameraView, *toggleDepthView;
+    QMenu *viewMenu;
     QKinect::QKinectWrapper kreader;
     QLabel *sbKinectStatus;
     QLabel *sbKinectFrame;
