@@ -41,14 +41,7 @@ ACAudioCycleLoopJam::ACAudioCycleLoopJam() : ACMultiMediaCycleOsgQt() {
 
     this->useSegmentationByDefault(false);
 
-    XMLfiles.push_back("/Volumes/data/mc-datasets/xml/mc-LoopJam-ZeroGProPack.xml");
-    //XMLfiles.push_back("/Volumes/data/mc-datasets/xml/mc-LoopJam-OLPC.xml");
-    //XMLfiles.push_back("/Volumes/data/mc-datasets/xml/mc-LoopJam-MusicTechMagazine98.xml");
-    XMLfiles.push_back("/Volumes/data/mc-datasets/xml/mc-LoopJam-8Bit.xml");
-    XMLfiles.push_back("/Volumes/data/mc-datasets/xml/outlaw-stevetibbetts-friendlyfire.xml");
-    XMLfiles.push_back("/Volumes/data/mc-datasets/xml/outlaw-sony-toyzconstructionkit.xml");
-    XMLfiles.push_back("/Volumes/data/mc-datasets/xml/mc-LoopJam-BlackPaint.xml");
-    //XMLfiles.push_back("/Volumes/data/mc-datasets/xml/outlaw-davidtorn-splattercell.xml");
+    this->parseXMLlist("LoopJamLibraries.xml");
 
     timer = new QTimer(this);
     connect( timer, SIGNAL(timeout()), this, SLOT(openNextLibrary()) );
@@ -80,6 +73,60 @@ ACAudioCycleLoopJam::~ACAudioCycleLoopJam(){
     delete timer;
 }
 
+bool ACAudioCycleLoopJam::parseXMLlist(std::string filename){
+    std::string filelist("");
+    #ifdef USE_DEBUG
+        boost::filesystem::path s_path( __FILE__ );
+        //std::cout << "Current source path " << s_path.parent_path().string() << std::endl;
+        filelist += s_path.parent_path().string() + "/" + filename;
+    #else
+    #ifdef __APPLE__
+        filelist = getExecutablePath() + "/" + filename;
+    #elif __WIN32__
+        filelist = filename;
+    #else
+        filelist = "~/" + filename;
+    #endif
+    #endif
+        std::cout << "Filelist " << filelist << std::endl;
+
+    TiXmlDocument doc( filelist.c_str() );
+    try {
+        if (!doc.LoadFile( TIXML_ENCODING_UTF8 ))
+            throw runtime_error("bad parse");
+        //		doc.Print( stdout );
+    } catch (const exception& e) {
+        cout << e.what( ) << endl;
+        return false;//EXIT_FAILURE;
+    }
+
+    TiXmlHandle docHandle(&doc);
+    TiXmlHandle rootHandle = docHandle.FirstChildElement( "LoopJam" );
+    TiXmlElement* fileNode=rootHandle.FirstChild( "File" ).Element();
+    std::cout << "fileNode " << fileNode << std::endl;
+    try {
+        for( fileNode; fileNode; fileNode=fileNode->NextSiblingElement()) {
+            TiXmlText* fileName = fileNode->FirstChild()->ToText();
+            std::string file("");
+            file = fileName->ValueStr();
+            std::cout << "File '" << file << "'" << std::endl;
+            //if(!file.empty())
+                XMLfiles.push_back(file);
+        }
+    }
+    catch (const exception& e) {
+        cout << e.what( ) << endl;
+        return false;//EXIT_FAILURE;
+    }
+
+    std::cout << "Filelist size "  << XMLfiles.size() << std::endl;
+
+    if(XMLfiles.empty())
+        return false;
+
+    return true;
+}
+
 /*void ACAudioCycleLoopJam::setDefaultWaveform(ACBrowserAudioWaveformType _type){
 
  compositeOsgView->getBrowserRenderer()->setAudioWaveformType(_type);
@@ -101,10 +148,12 @@ void ACAudioCycleLoopJam::startLoopXML(){
 void ACAudioCycleLoopJam::openNextLibrary(){
     cout << "Opening next library: " << count << endl;
     // going through all files again
-    if (count >= XMLfiles.size()) count=0;
-    cout << "opening : " << XMLfiles[count] << endl;
-    this->clean(true);
+    if (count >= XMLfiles.size())
+        count=0;
+    cout << "closing library" << endl;
     timer->stop();
+    this->clean(true);
+    cout << "opening : '" << XMLfiles[count] << "'" << endl;
     this->readXMLConfig(XMLfiles[count]);
     //setDefaultWaveform(AC_BROWSER_AUDIO_WAVEFORM_CLASSIC);
     timer->start(attente);

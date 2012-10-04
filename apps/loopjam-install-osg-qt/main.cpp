@@ -50,8 +50,7 @@ int main(int argc, char *argv[])
     QApplication::setLibraryPaths(QStringList(QApplication::applicationDirPath() + "/../PlugIns"));
 #endif
 
-	BreakpadQt::GlobalHandler::instance()->setDumpPath(QLatin1String("crashes"));
-	BreakpadQt::GlobalHandler::instance()->setReporter(QLatin1String("../MacOS/loopjam-compose-osg-qt"));
+    BreakpadQt::GlobalHandler::instance()->setDumpPath(QLatin1String("crashes"));
 	
     ACAudioCycleLoopJam window;
 

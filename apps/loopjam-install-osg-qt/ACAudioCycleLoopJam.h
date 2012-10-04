@@ -51,11 +51,12 @@ public:
         void startLoopXML();
 	
     //void setDefaultWaveform(ACBrowserAudioWaveformType _type);
+protected:
+        bool parseXMLlist(std::string filename);
+
 private:
 	int count, attente; 
 	std::vector <std::string> XMLfiles;
 	QTimer *timer;
 };
-
-
 #endif // _ACAudioCycleLoopJam
