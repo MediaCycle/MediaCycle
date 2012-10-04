@@ -247,7 +247,7 @@ public:
     int readXMLConfigFilePlugins(TiXmlHandle rootHandle);
 
     int readXMLConfigFile(std::string _fname="");
-    void saveXMLConfigFile(std::string _fname="");
+    TiXmlElement* saveXMLConfigFile(std::string _fname="");
     void setConfigFile(std::string _fname){config_file_xml = _fname;}
     std::string getPluginPathFromBaseName(std::string basename);
 

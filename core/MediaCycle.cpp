@@ -345,7 +345,7 @@ int MediaCycle::importDirectories(vector<string> directories, int recursive, boo
                 mediaBrowser->initializeNode(*media_id);
                 eventManager->sig_mediaImported(i+1,n,*media_id);
             }
-                
+
 /*#if defined (SUPPORT_MULTIMEDIA)
             if (this->getMediaType()==MEDIA_TYPE_MIXED){
                 ACMedia* media =  mediaLibrary->getMedia(media_id);
@@ -831,6 +831,33 @@ TiXmlHandle MediaCycle::readXMLConfigFileHeader(string _fname) {
     tmp2 >> mt;
     this->setMediaType(ACMediaType(mt));
 
+    // Camera
+    TiXmlElement* nCameraNode=rootHandle.FirstChild( "Camera" ).Element();
+    if(nCameraNode){
+        if(nCameraNode->Attribute("Position")){
+            std::stringstream strm;
+            strm << nCameraNode->Attribute("Position");
+            float x(0.0f),y(0.0f);
+            strm >> x;
+            strm >> y;
+            this->mediaBrowser->setCameraPosition(x,y);
+        }
+        if(nCameraNode->Attribute("Zoom")){
+            std::stringstream strm;
+            strm << nCameraNode->Attribute("Zoom");
+            float zoom(1.0f);
+            strm >> zoom;
+            this->mediaBrowser->setCameraZoom(zoom);
+        }
+        if(nCameraNode->Attribute("Rotation")){
+            std::stringstream strm;
+            strm << nCameraNode->Attribute("Rotation");
+            float rotation(0.0f);
+            strm >> rotation;
+            this->mediaBrowser->setCameraRotation(rotation);
+        }
+    }
+
     // features vector weights
     int n_feat=-1;
     TiXmlText* FeaturesWeightsText=rootHandle.FirstChild( "FeaturesWeights" ).FirstChild().Text();
@@ -861,6 +888,33 @@ TiXmlHandle MediaCycle::readXMLConfigFileHeader(string _fname) {
 
 // XS TODO return value, tests
 int MediaCycle::readXMLConfigFileCore(TiXmlHandle _rootHandle) {
+
+    // Camera
+    TiXmlElement* nCameraNode=_rootHandle.FirstChild( "Camera" ).Element();
+    if(nCameraNode){
+        if(nCameraNode->Attribute("Position")){
+            std::stringstream strm;
+            strm << nCameraNode->Attribute("Position");
+            float x(0.0f),y(0.0f);
+            strm >> x;
+            strm >> y;
+            this->mediaBrowser->setCameraPosition(x,y);
+        }
+        if(nCameraNode->Attribute("Zoom")){
+            std::stringstream strm;
+            strm << nCameraNode->Attribute("Zoom");
+            float zoom(1.0f);
+            strm >> zoom;
+            this->mediaBrowser->setCameraZoom(zoom);
+        }
+        if(nCameraNode->Attribute("Rotation")){
+            std::stringstream strm;
+            strm << nCameraNode->Attribute("Rotation");
+            float rotation(0.0f);
+            strm >> rotation;
+            this->mediaBrowser->setCameraRotation(rotation);
+        }
+    }
 
     TiXmlElement* media_element = this->mediaLibrary->openCoreXMLLibrary(_rootHandle);
 
@@ -1029,7 +1083,7 @@ std::string MediaCycle::getPluginPathFromBaseName(std::string basename)
 
 // XS TODO what else to put in the config ?
 // XS TODO separate in header/core/plugins ?
-void MediaCycle::saveXMLConfigFile(string _fname) {
+TiXmlElement* MediaCycle::saveXMLConfigFile(string _fname) {
     // or set it to config_file_xml ?
     TiXmlDocument MC_doc;
     TiXmlDeclaration* MC_decl = new TiXmlDeclaration( "1.0", "", "" );
@@ -1054,6 +1108,19 @@ void MediaCycle::saveXMLConfigFile(string _fname) {
     tmp_mt << this->getMediaType();
     TiXmlText* MC_t_mt = new TiXmlText( tmp_mt.str() );
     MC_e_media_type->LinkEndChild( MC_t_mt );
+
+    // Camera
+    TiXmlElement* MC_e_camera = new TiXmlElement("Camera");
+    MC_e_root->LinkEndChild(  MC_e_camera );
+    float cx,cy;
+    mediaBrowser->getCameraPosition(cx,cy);
+    std::stringstream cpstrm,czstrm,crstrm;
+    cpstrm << cx << " " << cy;
+    MC_e_camera->SetAttribute("Position", cpstrm.str());
+    czstrm << mediaBrowser->getCameraZoom();
+    MC_e_camera->SetAttribute("Zoom", czstrm.str());
+    crstrm << mediaBrowser->getCameraRotation();
+    MC_e_camera->SetAttribute("Rotation", crstrm.str());
 
     // "medias and features"
     TiXmlElement* MC_e_features_weights = new TiXmlElement("FeaturesWeights");
@@ -1126,6 +1193,7 @@ void MediaCycle::saveXMLConfigFile(string _fname) {
     MC_doc.SaveFile(_fname.c_str());
     cout << "saved XML config : " << _fname << endl;
     // children of MC_Doc get deleted automatically
+    return MC_e_root;
 }
 
 // == Dump / used for Debug
