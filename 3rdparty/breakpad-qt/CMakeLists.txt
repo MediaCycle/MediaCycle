@@ -10,30 +10,35 @@ IF(USE_BREAKPAD AND USE_QT4 )
 	ENDIF()
 	MESSAGE("PLATFORM ${PLATFORM}")
 
-	INCLUDE_DIRECTORIES(third-party/google-breakpad/src third-party/google-breakpad/src/client third-party/google-breakpad/src/common third-party/google-breakpad/src/google_breakpad third-party/google-breakpad/src/processor third-party/google-breakpad/src/tools)
+	INCLUDE_DIRECTORIES(. third-party/google-breakpad/src third-party/google-breakpad/src/client third-party/google-breakpad/src/common third-party/google-breakpad/src/google_breakpad third-party/google-breakpad/src/processor third-party/google-breakpad/src/tools)
 
 	INCLUDE_DIRECTORIES(.)
 
 	SET(${TARGET_NAME}_SRCS 
-		handler/BreakPadHandler.cpp
-		third-party/google-breakpad/src/client/minidump_file_writer.cc
-		third-party/google-breakpad/src/common/string_conversion.cc
-		third-party/google-breakpad/src/common/convert_UTF.c
-		third-party/google-breakpad/src/common/md5.c
-		third-party/google-breakpad/src/client/mac/handler/exception_handler.cc
-		third-party/google-breakpad/src/client/mac/handler/minidump_generator.cc
-		third-party/google-breakpad/src/client/mac/handler/dynamic_images.cc
-		third-party/google-breakpad/src/common/mac/string_utilities.cc
-		third-party/google-breakpad/src/common/mac/file_id.cc
-		third-party/google-breakpad/src/common/mac/macho_id.cc
-		third-party/google-breakpad/src/common/mac/macho_utilities.cc
-		third-party/google-breakpad/src/common/mac/macho_walker.cc
-		sender/BreakpadHttpSender.cpp
+		${CMAKE_CURRENT_SOURCE_DIR}/handler/BreakpadHandler.cpp
+		${CMAKE_CURRENT_SOURCE_DIR}/third-party/google-breakpad/src/client/minidump_file_writer.cc
+		${CMAKE_CURRENT_SOURCE_DIR}/third-party/google-breakpad/src/common/string_conversion.cc
+		${CMAKE_CURRENT_SOURCE_DIR}/third-party/google-breakpad/src/common/convert_UTF.c
+		${CMAKE_CURRENT_SOURCE_DIR}/third-party/google-breakpad/src/common/md5.c
+		${CMAKE_CURRENT_SOURCE_DIR}/sender/BreakpadHttpSender.cpp
 	)
 
+	IF(APPLE)
+		SET(${TARGET_NAME}_SRCS ${${TARGET_NAME}_SRCS}
+			${CMAKE_CURRENT_SOURCE_DIR}/third-party/google-breakpad/src/client/mac/handler/exception_handler.cc
+			${CMAKE_CURRENT_SOURCE_DIR}/third-party/google-breakpad/src/client/mac/handler/minidump_generator.cc
+			${CMAKE_CURRENT_SOURCE_DIR}/third-party/google-breakpad/src/client/mac/handler/dynamic_images.cc
+			${CMAKE_CURRENT_SOURCE_DIR}/third-party/google-breakpad/src/common/mac/string_utilities.cc
+			${CMAKE_CURRENT_SOURCE_DIR}/third-party/google-breakpad/src/common/mac/file_id.cc
+			${CMAKE_CURRENT_SOURCE_DIR}/third-party/google-breakpad/src/common/mac/macho_id.cc
+			${CMAKE_CURRENT_SOURCE_DIR}/third-party/google-breakpad/src/common/mac/macho_utilities.cc
+			${CMAKE_CURRENT_SOURCE_DIR}/third-party/google-breakpad/src/common/mac/macho_walker.cc
+		)
+	ENDIF()
+
 	SET(${TARGET_NAME}_HDRS 
-		handler/BreakPadHandler.h
-		sender/BreakpadHttpSender.h
+		${CMAKE_CURRENT_SOURCE_DIR}/handler/BreakpadHandler.h
+		${CMAKE_CURRENT_SOURCE_DIR}/sender/BreakpadHttpSender.h
 	)
 
 	# Generates ui_*.h files 
