@@ -50,10 +50,7 @@
 
 using namespace std;
 
-
-#include <cv.h>
-#include <highgui.h>
-#include <math.h>
+#include<ACOpenCVInclude.h>
 
 string image_dir = "/Users/xavier/numediart/Project10.1-Borderlands/Images/";
 string path_to_mc_build = "/home/xavier/development/mediacycle/Builds/ubuntu_10.10/";
