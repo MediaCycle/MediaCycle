@@ -33,14 +33,20 @@
  */
 
 #include "ACSelfSimSegmentationPlugin.h"
+#include "Armadillo-utils.h" //ccl
 
 #include <vector>
 #include <string>
 
+using namespace arma; //ccl
+
 // L = width of the kernel = range of the self-similarity matrix to compute
 // thresh = threshold under which peaks are not considered as segmentation points
-
-ACSelfSimSegmentationPlugin::ACSelfSimSegmentationPlugin() : L(8), SelfSimThresh(0.8), Wmin(8), KernelType(SELFSIMSTEP), DistanceType(COSINE){
+ 
+//ACSelfSimSegmentationPlugin::ACSelfSimSegmentationPlugin() : L(8), SelfSimThresh(0.8){
+//ACSelfSimSegmentationPlugin::ACSelfSimSegmentationPlugin() : SelfSimThresh(0.8), L(8), Wmin(8), KernelType(SELFSIMSTEP), DistanceType(COSINE){ //ccl
+//ACSelfSimSegmentationPlugin::ACSelfSimSegmentationPlugin() : SelfSimThresh(0.01), L(32), Wmin(240), KernelType(SELFSIMGAUSSIAN), DistanceType(COSINE){ //ccl
+ACSelfSimSegmentationPlugin::ACSelfSimSegmentationPlugin() : SelfSimThresh(0.01), L(2), Wmin(128), KernelType(SELFSIMGAUSSIAN), DistanceType(COSINE){ //ccl 
     this->mMediaType = MEDIA_TYPE_ALL;
     // this->mPluginType = PLUGIN_TYPE_SEGMENTATION;
     this->mName = "SelfSimSegmentation";
@@ -54,11 +60,11 @@ ACSelfSimSegmentationPlugin::ACSelfSimSegmentationPlugin() : L(8), SelfSimThresh
     distance_types.push_back("euclidean");
     distance_types.push_back("manhattan");
 
-    this->addNumberParameter("minimum window size",8,1,1024,1,"minimum length of the window in which to search for segment change (in number of frames)"); // Wmin
-    this->addNumberParameter("threshold",0.8,0,1,0.1,"threshold under which peaks are not considered as segmentation points"); // SelfSimThresh
-    this->addNumberParameter("kernel size",8,0,16,1,"width of the kernel = range of the self-similarity matrix to compute"); // L
-    this->addStringParameter("kernel type",kernel_types[0],kernel_types,"kernel type"); // KernelType
-    this->addStringParameter("distance type",distance_types[0],distance_types,"distance type"); // DistanceType
+    this->addNumberParameter("minimum window size",Wmin,1,1024,1,"minimum length of the window in which to search for segment change (in number of frames)"); // Wmin
+    this->addNumberParameter("threshold",SelfSimThresh,0,1,0.1,"threshold under which peaks are not considered as segmentation points"); // SelfSimThresh
+    this->addNumberParameter("kernel size",L,0,16,1,"width of the kernel = range of the self-similarity matrix to compute"); // L
+    this->addStringParameter("kernel type",kernel_types[SELFSIMGAUSSIAN],kernel_types,"kernel type"); // KernelType
+    this->addStringParameter("distance type",distance_types[COSINE],distance_types,"distance type"); // DistanceType
 }
 
 ACSelfSimSegmentationPlugin::~ACSelfSimSegmentationPlugin() {
@@ -72,6 +78,8 @@ std::vector<ACMedia*> ACSelfSimSegmentationPlugin::segment(ACMediaTimedFeature* 
     this->L = this->getNumberParameterValue("kernel size");
     this->KernelType = (SelfSimKernelType)(this->getStringParameterValueIndex("kernel type"));
     this->DistanceType = (SelfSimDistance)(this->getStringParameterValueIndex("distance type"));
+	
+	cout << "user-defined parameters for segmentation: " <<  this->KernelType << " / " << this->DistanceType << " / " << this->Wmin << " / " << this->SelfSimThresh << " / " << this->L << endl; //CPL
 
     //XS TODO: not efficient to transpose !!
     // make this more coherent
@@ -175,17 +183,38 @@ std::vector<int> ACSelfSimSegmentationPlugin::testSegment(ACMediaTimedFeature* _
     return (this->_segment());
 }
 
-std::vector<int> ACSelfSimSegmentationPlugin::testSegment(std::vector <ACMediaTimedFeature*> _ACMTF, float _SelfSimThresh, int _L, int _Wmin, SelfSimKernelType _T, SelfSimDistance _D){
-    this->SelfSimThresh = _SelfSimThresh;
-    this->Wmin = _Wmin;
-    this->L=_L;
-    this->full_features = arma::trans(vectorACMTF2fmat(_ACMTF));
-    this->KernelType=_T;
-    this->DistanceType=_D;
-
-    return (this->_segment());
+std::vector<int> ACSelfSimSegmentationPlugin::segment(std::vector <ACMediaTimedFeature*> _ACMTF, float _SelfSimThresh, int _L, int _Wmin, SelfSimKernelType _T, SelfSimDistance _D){
+	this->SelfSimThresh = _SelfSimThresh;
+        this->Wmin = _Wmin;
+        this->L=_L;
+	this->full_features = arma::trans(vectorACMTF2fmat(_ACMTF));
+	cerr<< "from std::vector <ACMediaTimedFeature*> _ACMTF, SIZE full_features " << (this->full_features).n_rows << " x " << (this->full_features).n_cols << endl;
+        this->KernelType=_T;
+        this->DistanceType=_D;
+	cerr<< " " << SelfSimThresh << " " << L << " " << Wmin << " " << KernelType << " " << DistanceType << endl;
+	
+	//ccl (taken from ACBicSegmentation)
+	std::vector<int> segments_limits = this->_segment();
+	int Nseg = segments_limits.size();
+	// the beginning of first segment should be zero
+	// no push_front for vectors (only for list)
+	if (segments_limits[0] != 0) {
+		vector<int>::iterator it;
+		it = segments_limits.begin();
+		it = segments_limits.insert ( it , 0 );
+		Nseg++;
+	}
+	// the end of the last segment should be the end of the Media
+	// XS TODO allow for some buffer (ex: it has no sense to make the last segment 1 frame wide)
+	if (segments_limits[Nseg-1] != _ACMTF.size()-1){
+		segments_limits.push_back(_ACMTF.size()-1);
+		Nseg++;
+	}
+	
+	return (segments_limits);
+	
 }
-
+	
 //supposes we have defined:
 // - this->lambda = _lambda;
 // - this->sampling_rate = _samplingrate;
@@ -198,6 +227,7 @@ std::vector<int> ACSelfSimSegmentationPlugin::_segment(){
     //compute self-similarity
     arma::fmat SelfSim;
     int n_frames=int (this->full_features.n_cols);
+	cout << "Size of the features matrix: " << (this->full_features.n_cols) << " x " << (this->full_features.n_rows) << endl;
     SelfSim.zeros(L,n_frames);
     int i,k,p;
     for(i=0;i<n_frames;i++)
@@ -221,7 +251,7 @@ std::vector<int> ACSelfSimSegmentationPlugin::_segment(){
     kernel = buildKernel();
     double sumkernel=arma::accu(arma::abs(kernel));
 
-    kernel.print();
+        //kernel.print(); //ccl commented
 
     // computing the novelty score
     arma::rowvec novelty;

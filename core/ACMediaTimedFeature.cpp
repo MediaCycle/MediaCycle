@@ -38,13 +38,29 @@
 
 #include "boost/filesystem.hpp"
 
+//CPL
+//#include <boost/ref.hpp>
+//#include <boost/bind.hpp>
+//#include <boost/array.hpp>
+#include <boost/accumulators/accumulators.hpp>
+//#include <boost/accumulators/statistics.hpp>
+#include <boost/accumulators/statistics/stats.hpp>
+#include <boost/accumulators/statistics/mean.hpp>
+#include <boost/accumulators/statistics/kurtosis.hpp>
+#include <boost/accumulators/statistics/moment.hpp>
+
 // USE_SDIF is off by default :
 #ifdef USE_SDIF
 #include "sdif.h"
 #endif
 
+
 using namespace arma;
 using namespace std;
+// CPL
+using namespace boost;
+
+
 
 ACMediaTimedFeature::ACMediaTimedFeature(){
 }
@@ -344,11 +360,53 @@ ACMediaFeatures* ACMediaTimedFeature::max(){
 	string name = "Max of ";
 	name += this->getName();
 	max_mf->setName(name);
+	cout << "armadillo max" << endl;
 	for (int i=0; i<max_m.n_cols; i++){
 		max_mf->addFeatureElement(max_m(0,i)); // 0 = per column
+		cout << max_m(0,i) << endl;
 	}
 	return max_mf;
 }
+ 
+//CPL: using Boost
+ACMediaFeatures* ACMediaTimedFeature::kurto(){
+	using namespace boost::accumulators;
+	ACMediaFeatures* kurt_mf = new ACMediaFeatures();  
+	
+	double moments[4] = { 0.0,0.0,0.0,0.0 };
+	for (int i=0; i<this->getDim(); i++){
+		cout << "boost kurtosis" << endl;
+		double output = 0.0;
+		accumulator_set<double, stats<tag::moment<1>, tag::moment<2>, tag::moment<3>, tag::moment<4> > > acc;
+		
+		
+		for (int j=0; j<this->getLength(); j++){
+			acc(this->getValue(j, i));
+		}
+		
+		moments[0] = accumulators::moment<1>(acc);
+		moments[1] = accumulators::moment<2>(acc);
+		moments[2] = accumulators::moment<3>(acc);
+		moments[3] = accumulators::moment<4>(acc);
+		
+		if (moments[0]!=0 && moments[1]!=0) {
+			
+			output = (-3 * pow(moments[0],4) + 6 * moments[0]* moments[1] - 4 * moments[0] * moments[2] + moments[3])/ pow((moments[1] - pow(moments[0],2)),2) - 3;
+			//output = (moments[3])/ pow((moments[1] - pow(moments[0],2)),4) - 3;
+		}
+		
+		kurt_mf->addFeatureElement(output);
+		std::cout << "mom1 " << moments[0] << " / mom2 " << moments[1] << " / mom3 " << moments[2] << " / mom4 " << moments[3] << " // kurtosis: " << output << "\n";
+	}
+	
+	string name = "Kurtosis of ";
+	name += this->getName();
+	kurt_mf->setName(name);
+	
+	return kurt_mf;
+}
+
+
 
 // vector< float > ACMediaTimedFeature:: meanAsVector(){
 //   fmat tmpMean = this->mean()->getValue();
@@ -885,7 +943,7 @@ arma::fmat vectorACMTF2fmat(std::vector <ACMediaTimedFeature*> _ACMTF)
         }
     }
     //features_m.zeros(n_rows,n_cols);
-    cout << "Full matrix: Nrows: " << n_rows << "; n_cols: " << n_cols << endl;
+    //cout << "Full matrix: Nrows: " << n_rows << "; n_cols: " << n_cols << endl;
 
     int p=0;
     while(_ACMTF[p]->getLength()<n_rows)

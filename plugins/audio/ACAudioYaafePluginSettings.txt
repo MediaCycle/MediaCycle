@@ -1,4 +1,4 @@
-audio := Input Resample="yes" SampleRate="44100"
+audio := Input Resample="yes" SampleRate="22050"
 n1 := FrameTokenizer blockSize="512" stepSize="256"
 audio > n1
 
@@ -8,48 +8,44 @@ n1 > n2
 n3 := Abs
 n2 > n3
 
-n4 := MelFilterBank MelMaxFreq="6854.0" MelMinFreq="130.0" MelNbFilters="40"
+n4 := MelFilterBank MelMaxFreq="10000.0" MelMinFreq="30.0" MelNbFilters="40"
 n3 > n4
 
-n5 := Cepstrum CepsIgnoreFirstCoeff="1" CepsNbCoeffs="13"
+n5 := Cepstrum CepsIgnoreFirstCoeff="1" CepsNbCoeffs="20"
 n4 > n5
 
 MFCC := Output normalize="-1" version="v0.6" yaafedefinition="MFCC blockSize=512 stepSize=256"
 n5 > MFCC
 
-n11 := Flatness
-SpectralFlatness := Output normalize="-1" version="v0.6" yaafedefinition="SpectralFlatness blockSize=512 stepSize=256"
-n3 > n11
-n11 > SpectralFlatness
+n7 := Derivate DO1Len="4" DO2Len="1" DOrder="1"
+Delta_MFCC := Output normalize="-1" version="v0.6" yaafedefinition="MFCC blockSize=512 stepSize=256 > Derivate DOrder=1"
+n5 > n7
+n7 > Delta_MFCC
+
+n9 := Derivate DO1Len="4" DO2Len="1" DOrder="2"
+Delta_Delta_MFCC := Output normalize="-1" version="v0.6" yaafedefinition="MFCC blockSize=512 stepSize=256 > Derivate DOrder=2"
+n5 > n9
+n9 > Delta_Delta_MFCC
+
 
 n13 := Sqr
 n3 > n13
 
-n14 := Rolloff
-SpectralRollOff := Output normalize="-1" version="v0.6" yaafedefinition="SpectralRolloff blockSize=512 stepSize=256"
+n14 := OBSI
+OctaveBandsSignalIntensity := Output normalize="-1" version="v0.6" yaafedefinition="OBSI blockSize=512 stepSize=256"
 n13 > n14
-n14 > SpectralRollOff
-
-n15 := Variation
-SpectralVariation := Output normalize="-1" version="v0.6" yaafedefinition="SpectralVariation blockSize=512 stepSize=256"
-n3 > n15
-n15 > SpectralVariation
-
-n18 := Flux
-Spectral_Flux := Output normalize="-1" version="v0.6" yaafedefinition="SpectralFlux blockSize=512 stepSize=256"
-n3 > n18
-n18 > Spectral_Flux
-
-n20 := ZCR
-ZeroCrossingRate := Output normalize="-1" version="v0.6" yaafedefinition="ZeroCrossingRate blockSize=512 stepSize=256"
-n1 > n20
-n20 > ZeroCrossingRate
+n14 > OctaveBandsSignalIntensity
 
 
-n22 := RMS
-Energy := Output normalize="-1" version="v0.6" yaafedefinition="Energy blockSize=512 stepSize=256"
-n1 > n22
-n22 > Energy
+n19 := Envelope 
+Envelope := Output normalize="-1" version="v0.6" yaafedefinition="Envelope  EnDecim=200 blockSize=512  stepSize=256"
+n1 > n19
+n19 > Envelope
 
+
+n22 := AutoCorrelation
+AutoCorrEnv := Output normalize="-1" version="v0.6" yaafedefinition="AutoCorrelation ACNbCoeffs=49  blockSize=512  stepSize=256"
+n19 > n22
+n22 > AutoCorrEnv
 
 

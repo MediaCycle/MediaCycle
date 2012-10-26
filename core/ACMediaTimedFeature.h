@@ -104,6 +104,8 @@ public:
 	ACMediaFeatures* std();
 	ACMediaFeatures* hist();
 	ACMediaFeatures* max();
+	ACMediaFeatures* kurto(); // kurtosis calculation using boost moment 2
+
 	
 	ACMediaFeatures* toMediaFeatures(); // only for one dim features
 

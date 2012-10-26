@@ -756,7 +756,9 @@ std::vector<ACMediaFeatures*> ACAudioYaafePlugin::calculate(ACMediaData* aData, 
         }*/
     // the feature named "Energy" does not need to be normalized
     for(mf=descmf.begin();mf!=descmf.end();mf++){
-        desc.push_back((*mf).second->mean());
+		desc.push_back((*mf).second->mean());
+		desc.push_back((*mf).second->std());
+		desc.push_back((*mf).second->kurto());//CPL
         //std::cout << "descmf " << (*mf).second->getName() << " of length " << (*mf).second->getLength() << " and dim " << (*mf).second->getDim() << " gives mean of size " << (*mf).second->mean()->getSize() << std::endl;
         /*if (i==nrgIdx){
                 desc[i]->setNeedsNormalization(0);
