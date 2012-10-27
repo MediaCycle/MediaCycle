@@ -51,7 +51,7 @@ enum SelfSimKernelType {
 enum SelfSimDistance {// actually it will be the inverse of a distance: the larger the number, the more the 2 objects are similar
     COSINE,
     EUCLIDEAN,
-    MANHATTAN
+    MANHATTAN 
 };
 
 class ACSelfSimSegmentationPlugin : public ACSegmentationPlugin {
@@ -65,7 +65,7 @@ public:
     //std::vector<int> testSegment(const vector< vector<float> > & _allfeatures, float _SelfSimThresh=0.8, int _L=8, int _Wmin=8, SelfSimKernelType _T=SELFSIMSTEP, SelfSimDistance _D=COSINE);
     std::vector<int> testSegment(arma::fmat _M, float _SelfSimThresh=0.8, int _L=8, int _Wmin=8, SelfSimKernelType _T=SELFSIMSTEP, SelfSimDistance _D=COSINE);
     std::vector<int> testSegment(ACMediaTimedFeature* _ACMTF, float _SelfSimThresh=0.8, int _L=8, int _Wmin=8, SelfSimKernelType _T=SELFSIMSTEP, SelfSimDistance _D=COSINE);
-    std::vector<int> testSegment(std::vector <ACMediaTimedFeature*> _ACMTF, float _SelfSimThresh=0.8, int _L=8, int _Wmin=8, SelfSimKernelType _T=SELFSIMSTEP, SelfSimDistance _D=COSINE);
+    std::vector<int> segment(std::vector <ACMediaTimedFeature*> _ACMTF, float _SelfSimThresh=0.8, int _L=8, int _Wmin=8, SelfSimKernelType _T=SELFSIMSTEP, SelfSimDistance _D=COSINE);
 
     arma::fmat get_features() {return full_features;};
 
