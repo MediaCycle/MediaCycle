@@ -366,8 +366,11 @@ IF(WITH_QT4)
 	INSTALL(CODE "
  	   file(WRITE \"\${CMAKE_INSTALL_PREFIX}/${qtconf_dest_dir}/qt.conf\" \"[Paths]\nPlugins = plugins\")
  	   " COMPONENT ${PROGNAME})
-	# Really ugly, supposing Qt is installed thru MacPorts on Apple
-	INSTALL(DIRECTORY "/opt/local/lib/Resources/qt_menu.nib" DESTINATION ${qtframeworks_dest_dir} COMPONENT ${PROGNAME})
+	FIND_FILE(QT_MENU_NIB qt_menu.nib PATHS /opt/local PATH_SUFFIXES Library/Frameworks/QtGui.framework/Resources lib/Resources)
+	IF(${QT_MENU_NIB} EQUAL QT_MENU_NIB-NOTFOUND)
+		MESSAGE(FATAL_ERROR "Couldn't find qt_menu.nib")
+	ENDIF()
+	INSTALL(DIRECTORY "${QT_MENU_NIB}" DESTINATION ${qtframeworks_dest_dir} COMPONENT ${PROGNAME})
 ENDIF()
 ENDIF()
 
