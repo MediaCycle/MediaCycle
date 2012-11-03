@@ -39,5 +39,5 @@ checksums                       md5     3d8b86c21a2f87a2a5e60f78f3b3f03d \
 
 depends_build-append            port:pkgconfig
 
-# CF: openal-soft examples require only ffmpeg, but versions than 0.10.4
+# CF: openal-soft examples require only ffmpeg, but collides with version 0.10.4
 configure.args-append           -DEXAMPLES=OFF
