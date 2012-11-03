@@ -1,5 +1,6 @@
 # use glob syntax.
 syntax: glob
+.git
 .svn
 *.pyc
 *~
@@ -18,6 +19,27 @@ cmake.check_cache
 *.o
 \#*
 .\#*
+3rdparty/breakpad-qt/third-party/google-breakpad/android/*
+3rdparty/breakpad-qt/third-party/google-breakpad/autotools
+3rdparty/breakpad-qt/third-party/google-breakpad/m4
+3rdparty/breakpad-qt/third-party/google-breakpad/*.*
+3rdparty/breakpad-qt/third-party/google-breakpad/configure
+3rdparty/breakpad-qt/third-party/google-breakpad/src/client/ios/*
+3rdparty/breakpad-qt/third-party/google-breakpad/src/client/linux/data/*
+3rdparty/breakpad-qt/third-party/google-breakpad/src/client/mac/gcov/*
+3rdparty/breakpad-qt/third-party/google-breakpad/src/client/mac/handler/testcases/testdata/*
+3rdparty/breakpad-qt/third-party/google-breakpad/src/client/solaris/*
+3rdparty/breakpad-qt/third-party/google-breakpad/src/common/android/*
+3rdparty/breakpad-qt/third-party/google-breakpad/src/common/solaris/*
+3rdparty/breakpad-qt/third-party/google-breakpad/src/processor/testdata/symbols/*
+3rdparty/breakpad-qt/third-party/google-breakpad/src/processor/testdata/*.dmp
+3rdparty/breakpad-qt/third-party/google-breakpad/src/processor/testdata/*.out
+3rdparty/breakpad-qt/third-party/google-breakpad/src/processor/minidump_dump_test
+3rdparty/breakpad-qt/third-party/google-breakpad/src/processor/minidump_stackwalk_machine_readable_test
+3rdparty/breakpad-qt/third-party/google-breakpad/src/processor/minidump_stackwalk_test
+3rdparty/breakpad-qt/third-party/google-breakpad/src/testing/*
+3rdparty/breakpad-qt/third-party/google-breakpad/src/third_party/*
+3rdparty/breakpad-qt/third-party/google-breakpad/src/tools/*
 data/dataset*
 demos/openFrameworks/addons
 demos/openFrameworks/apps

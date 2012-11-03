@@ -108,7 +108,12 @@ bool DumpCallback(const char* _dump_dir,
 
 GlobalHandlerPrivate::GlobalHandlerPrivate()
 {
-	handler_ = new google_breakpad::ExceptionHandler(/*DumpPath*/ "", /*FilterCallback*/ 0, DumpCallback, /*context*/ 0, true);
+	QString path("");
+#ifdef __MINGW32__ //CF
+	handler_ = new google_breakpad::ExceptionHandler(/*DumpPath*/ path.toStdWString(), /*FilterCallback*/ 0, DumpCallback, /*context*/ 0, true);
+#else
+	handler_ = new google_breakpad::ExceptionHandler(/*DumpPath*/ path.toStdString(), /*FilterCallback*/ 0, DumpCallback, /*context*/ 0, true, 0);
+#endif
 }
 
 GlobalHandlerPrivate::~GlobalHandlerPrivate()

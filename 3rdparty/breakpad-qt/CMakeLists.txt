@@ -6,7 +6,10 @@ IF(USE_BREAKPAD AND USE_QT4 )
 	ELSEIF(UNIX)
 		SET(PLATFORM "linux")
 	ELSE()
-		SET(PLATFORM "winwows")
+		SET(PLATFORM "windows")
+		IF(MINGW)
+			INCLUDE_DIRECTORIES(third-party/mingw)
+		ENDIF()
 	ENDIF()
 	MESSAGE("PLATFORM ${PLATFORM}")
 
@@ -19,20 +22,37 @@ IF(USE_BREAKPAD AND USE_QT4 )
 		${CMAKE_CURRENT_SOURCE_DIR}/third-party/google-breakpad/src/client/minidump_file_writer.cc
 		${CMAKE_CURRENT_SOURCE_DIR}/third-party/google-breakpad/src/common/string_conversion.cc
 		${CMAKE_CURRENT_SOURCE_DIR}/third-party/google-breakpad/src/common/convert_UTF.c
-		${CMAKE_CURRENT_SOURCE_DIR}/third-party/google-breakpad/src/common/md5.c
+		${CMAKE_CURRENT_SOURCE_DIR}/third-party/google-breakpad/src/common/md5.cc
 		${CMAKE_CURRENT_SOURCE_DIR}/sender/BreakpadHttpSender.cpp
 	)
 
 	IF(APPLE)
 		SET(${TARGET_NAME}_SRCS ${${TARGET_NAME}_SRCS}
+			${CMAKE_CURRENT_SOURCE_DIR}/third-party/google-breakpad/src/client/mac/crash_generation/crash_generation_client.cc
 			${CMAKE_CURRENT_SOURCE_DIR}/third-party/google-breakpad/src/client/mac/handler/exception_handler.cc
 			${CMAKE_CURRENT_SOURCE_DIR}/third-party/google-breakpad/src/client/mac/handler/minidump_generator.cc
 			${CMAKE_CURRENT_SOURCE_DIR}/third-party/google-breakpad/src/client/mac/handler/dynamic_images.cc
-			${CMAKE_CURRENT_SOURCE_DIR}/third-party/google-breakpad/src/common/mac/string_utilities.cc
+			${CMAKE_CURRENT_SOURCE_DIR}/third-party/google-breakpad/src/common/mac/bootstrap_compat.cc
 			${CMAKE_CURRENT_SOURCE_DIR}/third-party/google-breakpad/src/common/mac/file_id.cc
+			${CMAKE_CURRENT_SOURCE_DIR}/third-party/google-breakpad/src/common/mac/MachIPC.mm
 			${CMAKE_CURRENT_SOURCE_DIR}/third-party/google-breakpad/src/common/mac/macho_id.cc
 			${CMAKE_CURRENT_SOURCE_DIR}/third-party/google-breakpad/src/common/mac/macho_utilities.cc
 			${CMAKE_CURRENT_SOURCE_DIR}/third-party/google-breakpad/src/common/mac/macho_walker.cc
+			${CMAKE_CURRENT_SOURCE_DIR}/third-party/google-breakpad/src/common/mac/string_utilities.cc
+		)
+	ELSEIF(UNIX)
+		SET(${TARGET_NAME}_SRCS ${${TARGET_NAME}_SRCS}
+			${CMAKE_CURRENT_SOURCE_DIR}/third-party/google-breakpad/src/client/linux/crash_generation/crash_generation_client.cc
+			${CMAKE_CURRENT_SOURCE_DIR}/third-party/google-breakpad/src/client/linux/handler/exception_handler.cc
+			${CMAKE_CURRENT_SOURCE_DIR}/third-party/google-breakpad/src/client/linux/minidump_writer/minidump_writer.cc
+			${CMAKE_CURRENT_SOURCE_DIR}/third-party/google-breakpad/src/common/linux/file_id.cc
+		)	
+	ELSEIF(MINGW)
+		SET(${TARGET_NAME}_SRCS ${${TARGET_NAME}_SRCS}
+			${CMAKE_CURRENT_SOURCE_DIR}/third-party/google-breakpad/src/client/windows/crash_generation/crash_generation_client.cc
+			${CMAKE_CURRENT_SOURCE_DIR}/third-party/google-breakpad/src/client/windows/handler/exception_handler.cc
+			${CMAKE_CURRENT_SOURCE_DIR}/third-party/google-breakpad/src/client/windows/crash_generation/minidump_generator.cc
+			${CMAKE_CURRENT_SOURCE_DIR}/third-party/google-breakpad/src/common/windows/guid_string.cc
 		)
 	ENDIF()
 
