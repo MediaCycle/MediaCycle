@@ -67,8 +67,8 @@ MediaCycle::MediaCycle(ACMediaType aMediaType, string local_directory, string li
 
     this->pluginManager = new ACPluginManager();
     this->pluginManager->setMediaCycle(this);
-    this->mediaBrowser->changeClustersMethodPlugin( this->pluginManager->getPlugin("ACKMeansPlugin") );
-    this->mediaBrowser->changeClustersMethodPlugin( this->pluginManager->getPlugin("ACClusterPositionsPropellerPlugin") );
+    this->mediaBrowser->changeClustersMethodPlugin( this->pluginManager->getPlugin("MediaCycle KMeans") );
+    this->mediaBrowser->changeClustersPositionsPlugin( this->pluginManager->getPlugin("MediaCycle Propeller") );
 
     this->config_file_xml = "";
 
@@ -116,8 +116,8 @@ void MediaCycle::clean(){
     this->mediaBrowser->clean();
     this->pluginManager->clean();
     this->pluginManager->setMediaCycle(this);
-    this->mediaBrowser->changeClustersMethodPlugin( this->pluginManager->getPlugin("ACKMeansPlugin") );
-    this->mediaBrowser->changeClustersMethodPlugin( this->pluginManager->getPlugin("ACClusterPositionsPropellerPlugin") );
+    this->mediaBrowser->changeClustersMethodPlugin( this->pluginManager->getPlugin("MediaCycle KMeans") );
+    this->mediaBrowser->changeClustersPositionsPlugin( this->pluginManager->getPlugin("MediaCycle Propeller") );
 }
 
 // == TCP
@@ -699,7 +699,10 @@ FeaturesVector MediaCycle::getFeaturesVectorInMedia(int i, string feature_name) 
     ACMediaFeatures* lfeatures;
     FeaturesVector lfeaturesvector;
     lmedia = mediaLibrary->getMedia(i);
-    lfeatures = lmedia->getPreProcFeaturesVector(feature_name);
+    if (lmedia==0)
+        lfeatures=0;
+    else
+        lfeatures = lmedia->getPreProcFeaturesVector(feature_name);
     if (lfeatures) {
         lfeaturesvector = lfeatures->getFeaturesVector();
     }
@@ -987,8 +990,8 @@ int MediaCycle::readXMLConfigFilePlugins(TiXmlHandle _rootHandle) {
 
         //this->pluginManager->clean();
         //this->pluginManager->setMediaCycle(this);
-        this->mediaBrowser->changeClustersMethodPlugin( this->pluginManager->getPlugin("ACKMeansPlugin") );
-        this->mediaBrowser->changeClustersMethodPlugin( this->pluginManager->getPlugin("ACClusterPositionsPropellerPlugin") );
+        this->mediaBrowser->changeClustersMethodPlugin( this->pluginManager->getPlugin("MediaCycle KMeans") );
+        this->mediaBrowser->changeClustersPositionsPlugin( this->pluginManager->getPlugin("MediaCycle Propeller") );
 
         TiXmlElement* pluginLibraryNode=MC_e_features_plugin_manager->FirstChild()->ToElement();
         for( pluginLibraryNode; pluginLibraryNode; pluginLibraryNode=pluginLibraryNode->NextSiblingElement()) {
