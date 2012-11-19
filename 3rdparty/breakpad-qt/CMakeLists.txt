@@ -40,6 +40,10 @@ IF(USE_BREAKPAD AND USE_QT4 )
 			${CMAKE_CURRENT_SOURCE_DIR}/third-party/google-breakpad/src/common/mac/macho_walker.cc
 			${CMAKE_CURRENT_SOURCE_DIR}/third-party/google-breakpad/src/common/mac/string_utilities.cc
 		)
+
+		IF(NOT ${MACPORTS_BUILD_ARCH} LESS "x86_64")
+			SET(${TARGET_NAME}_SRCS ${${TARGET_NAME}_SRCS} ${CMAKE_CURRENT_SOURCE_DIR}/third-party/google-breakpad/src/client/mac/handler/breakpad_nlist_64.cc)
+		ENDIF()
 	ELSEIF(UNIX)
 		SET(${TARGET_NAME}_SRCS ${${TARGET_NAME}_SRCS}
 			${CMAKE_CURRENT_SOURCE_DIR}/third-party/google-breakpad/src/client/linux/crash_generation/crash_generation_client.cc
