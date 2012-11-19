@@ -14,49 +14,49 @@ class FFmpegParameters;
 
 class FormatContextPtr
 {
-    public:
+public:
     
-        typedef AVFormatContext T;
+    typedef AVFormatContext T;
     
-        explicit FormatContextPtr() : _ptr(0) {}
-        explicit FormatContextPtr(T* ptr) : _ptr(ptr) {}
-        
-        ~FormatContextPtr()
+    explicit FormatContextPtr() : _ptr(0) {}
+    explicit FormatContextPtr(T* ptr) : _ptr(ptr) {}
+
+    ~FormatContextPtr()
+    {
+        cleanup();
+    }
+
+    T* get() const { return _ptr; }
+
+    operator bool() const { return _ptr != 0; }
+
+    T * operator-> () const // never throws
+    {
+        return _ptr;
+    }
+
+    void reset(T* ptr)
+    {
+        if (ptr==_ptr) return;
+        cleanup();
+        _ptr = ptr;
+    }
+
+    void cleanup()
+    {
+        if (_ptr)
         {
-            cleanup();
+            OSG_NOTICE<<"Calling av_close_input_file("<<_ptr<<")"<<std::endl;
+            av_close_input_file(_ptr);
         }
-        
-        T* get() { return _ptr; }
+        _ptr = 0;
+    }
 
-        operator bool() const { return _ptr != 0; }
 
-        T * operator-> () const // never throws
-        {
-            return _ptr;
-        }
 
-        void reset(T* ptr) 
-        {
-            if (ptr==_ptr) return;
-            cleanup();
-            _ptr = ptr;
-        }
-
-        void cleanup()
-        {
-            if (_ptr) 
-            {
-                OSG_NOTICE<<"Calling av_close_input_file("<<_ptr<<")"<<std::endl;
-                av_close_input_file(_ptr);
-            }
-            _ptr = 0;
-        }
-        
-        
-
-    protected:
+protected:
     
-        T* _ptr;
+    T* _ptr;
 };
 
 
@@ -113,6 +113,7 @@ protected:
     void seekButDontFlushQueues(double time);
 
     FormatContextPtr    m_format_context;
+
     AVStream *          m_audio_stream;
     AVStream *          m_video_stream;
 
@@ -151,31 +152,31 @@ inline bool FFmpegDecoder::loop() const
 
 inline double FFmpegDecoder::creation_time() const
 {
-	if(m_format_context) {
+    if(m_format_context) {
 #if LIBAVFORMAT_VERSION_INT < AV_VERSION_INT(54, 6, 0)
-	   return m_format_context->timestamp;
+        return m_format_context->timestamp;
 #else
-		// CF timestamp is not longer a member of ACFormatContext since FFmpeg 0.11
-	OSG_WARN << "FFmpegDecoder::creation_time: getting timestamp not yet implemented correctly for FFmpeg >= 0.11" << std::endl;
-	   return av_get_output_timestamp(m_format_context, 
-									  0, //int stream, 
-									  0, //int64_t *dts, 
-									  0 //int64_t *wall
-									  );
-#endif	  
-}
-	else
-	   return HUGE_VAL;
+        // CF timestamp is not longer a member of ACFormatContext since FFmpeg 0.11
+        OSG_WARN << "FFmpegDecoder::creation_time: getting timestamp not yet implemented correctly for FFmpeg >= 0.11" << std::endl;
+        return av_get_output_timestamp(m_format_context.get(),
+                                       0, //int stream,
+                                       0, //int64_t *dts,
+                                       0 //int64_t *wall
+                                       );
+#endif
+    }
+    else
+        return HUGE_VAL;
 }
 
 inline double FFmpegDecoder::duration() const
 {
-    return double(m_format_context->duration) / AV_TIME_BASE;    
+    return double(m_format_context->duration) / AV_TIME_BASE;
 }
 
 inline double FFmpegDecoder::reference()
 {
-    return m_clocks.getCurrentTime();    
+    return m_clocks.getCurrentTime();
 }
 
 

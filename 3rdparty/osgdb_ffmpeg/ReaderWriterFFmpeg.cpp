@@ -92,13 +92,17 @@ public:
         {
             return readImageStream(filename, NULL);
         }
-
+#if LIBAVFORMAT_BUILD < (54<<16 | 29<<8 | 0)
         osg::ref_ptr<osgFFmpeg::FFmpegParameters> parameters(new osgFFmpeg::FFmpegParameters);
         parseOptions(parameters.get(), options);
         if (parameters->isFormatAvailable())
         {
             return readImageStream(filename, parameters.get());
         }
+#else
+        readImageStream(filename, 0);
+#endif
+
 
         if (! acceptsExtension(ext))
             return ReadResult::FILE_NOT_HANDLED;
@@ -109,8 +113,12 @@ public:
 
         if (path.empty())
             return ReadResult::FILE_NOT_FOUND;
-
+#if LIBAVFORMAT_BUILD < (54<<16 | 29<<8 | 0)
         return readImageStream(path, parameters.get());
+#else
+        return readImageStream(path, 0);
+
+#endif
     }
     
     ReadResult readImageStream(const std::string& filename, osgFFmpeg::FFmpegParameters* parameters) const
@@ -136,7 +144,9 @@ private:
                  itr != supportedOptList.end(); ++itr)
             {
                 const std::string& name = itr->first;
+#if LIBAVFORMAT_BUILD < (54<<16 | 29<<8 | 0)
                 parameters->parse(name, options->getPluginStringData(name));
+#endif
             }
         }
     }

@@ -28,10 +28,9 @@ extern "C"
     inline PixelFormat osg_av_get_pix_fmt(const char *name) { return avcodec_get_pix_fmt(name); }
 #endif
 
+#if LIBAVFORMAT_BUILD < (54<<16 | 29<<8 | 0)
 
 namespace osgFFmpeg {
-
-
 
 FFmpegParameters::FFmpegParameters() :
     m_format(0)
@@ -99,3 +98,4 @@ void FFmpegParameters::parse(const std::string& name, const std::string& value)
 
 
 } // namespace osgFFmpeg
+#endif

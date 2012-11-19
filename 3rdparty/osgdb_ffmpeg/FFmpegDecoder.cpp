@@ -61,13 +61,16 @@ bool FFmpegDecoder::open(const std::string & filename, FFmpegParameters* paramet
         if (filename.compare(0, 5, "/dev/")==0)
         {
             avdevice_register_all();
-        
+
             OSG_NOTICE<<"Attempting to stream "<<filename<<std::endl;
 
+#if LIBAVFORMAT_BUILD < (54<<16 | 29<<8 | 0)
             AVFormatParameters formatParams;
             memset(&formatParams, 0, sizeof(AVFormatParameters));
+#endif
             AVInputFormat *iformat;
 
+#if LIBAVFORMAT_BUILD < (54<<16 | 29<<8 | 0)
             formatParams.channel = 0;
             formatParams.standard = 0;
 #if 1
@@ -79,7 +82,7 @@ bool FFmpegDecoder::open(const std::string & filename, FFmpegParameters* paramet
 #endif            
             formatParams.time_base.num = 1;
             formatParams.time_base.den = 30;
-
+#endif
             std::string format = "video4linux2";
             iformat = av_find_input_format(format.c_str());
             
@@ -92,22 +95,26 @@ bool FFmpegDecoder::open(const std::string & filename, FFmpegParameters* paramet
                 OSG_NOTICE<<"Failed to find input format: "<<format<<std::endl;
             }
 
+#if LIBAVFORMAT_BUILD < (54<<16 | 29<<8 | 0)
             int error = av_open_input_file(&p_format_context, filename.c_str(), iformat, 0, &formatParams);
+#else
+            int error = avformat_open_input(&p_format_context, filename.c_str(), iformat, 0);
+#endif
             if (error != 0)
             {
                 std::string error_str;
                 switch (error)
                 {
-                    //case AVERROR_UNKNOWN: error_str = "AVERROR_UNKNOWN"; break;   // same value as AVERROR_INVALIDDATA
-                    case AVERROR_IO: error_str = "AVERROR_IO"; break;
-                    case AVERROR_NUMEXPECTED: error_str = "AVERROR_NUMEXPECTED"; break;
-                    case AVERROR_INVALIDDATA: error_str = "AVERROR_INVALIDDATA"; break;
-                    case AVERROR_NOMEM: error_str = "AVERROR_NOMEM"; break;
-                    case AVERROR_NOFMT: error_str = "AVERROR_NOFMT"; break;
-                    case AVERROR_NOTSUPP: error_str = "AVERROR_NOTSUPP"; break;
-                    case AVERROR_NOENT: error_str = "AVERROR_NOENT"; break;
-                    case AVERROR_PATCHWELCOME: error_str = "AVERROR_PATCHWELCOME"; break;
-                    default: error_str = "Unknown error"; break;
+                //case AVERROR_UNKNOWN: error_str = "AVERROR_UNKNOWN"; break;   // same value as AVERROR_INVALIDDATA
+                case AVERROR_IO: error_str = "AVERROR_IO"; break;
+                case AVERROR_NUMEXPECTED: error_str = "AVERROR_NUMEXPECTED"; break;
+                case AVERROR_INVALIDDATA: error_str = "AVERROR_INVALIDDATA"; break;
+                case AVERROR_NOMEM: error_str = "AVERROR_NOMEM"; break;
+                case AVERROR_NOFMT: error_str = "AVERROR_NOFMT"; break;
+                case AVERROR_NOTSUPP: error_str = "AVERROR_NOTSUPP"; break;
+                case AVERROR_NOENT: error_str = "AVERROR_NOENT"; break;
+                case AVERROR_PATCHWELCOME: error_str = "AVERROR_PATCHWELCOME"; break;
+                default: error_str = "Unknown error"; break;
                 }
 
                 throw std::runtime_error("av_open_input_file() failed : " + error_str);
@@ -115,10 +122,16 @@ bool FFmpegDecoder::open(const std::string & filename, FFmpegParameters* paramet
         }
         else
         {
+#if LIBAVFORMAT_BUILD < (54<<16 | 29<<8 | 0)
             AVInputFormat* av_format = (parameters ? parameters->getFormat() : 0);
             AVFormatParameters* av_params = (parameters ? parameters->getFormatParameter() : 0);
             if (av_open_input_file(&p_format_context, filename.c_str(), av_format, 0, av_params) !=0 )
                 throw std::runtime_error("av_open_input_file() failed");
+#else
+            if (avformat_open_input(&p_format_context, filename.c_str(), 0, 0) < 0 )
+                throw std::runtime_error("avformat_open_input() failed");
+#endif
+
         }
         
         m_format_context.reset(p_format_context);
@@ -292,10 +305,14 @@ bool FFmpegDecoder::readNextPacketNormal()
         // Read the next frame packet
         if (av_read_frame(m_format_context.get(), &packet) < 0)
         {
+#if LIBAVFORMAT_BUILD < (54<<16 | 29<<8 | 0)
             if (url_ferror(m_format_context->pb) == 0)
                 end_of_stream = true;
             else
                 throw std::runtime_error("av_read_frame() failed");
+#else
+            end_of_stream = true;
+#endif
         }
 
         if (end_of_stream)
@@ -317,7 +334,7 @@ bool FFmpegDecoder::readNextPacketNormal()
             if (av_dup_packet(&packet) < 0)
                 throw std::runtime_error("av_dup_packet() failed");
 
-            m_pending_packet = FFmpegPacket(packet);            
+            m_pending_packet = FFmpegPacket(packet);
         }
     }
 
@@ -359,7 +376,7 @@ bool FFmpegDecoder::readNextPacketEndOfStream()
 
     return false;
 }
-    
+
 
 
 bool FFmpegDecoder::readNextPacketRewinding()
@@ -395,7 +412,7 @@ bool FFmpegDecoder::readNextPacketSeeking()
     if (m_audio_queue.timedPush(packet, 10) && m_video_queue.timedPush(packet, 10))
         m_state = NORMAL;
 
-    return false;    
+    return false;
 }
 
 void FFmpegDecoder::seekButDontFlushQueues(double time)
@@ -411,7 +428,7 @@ void FFmpegDecoder::seekButDontFlushQueues(double time)
         throw std::runtime_error("av_seek_frame failed()");
 
     m_clocks.seek(time);
-    m_state = SEEKING;    
+    m_state = SEEKING;
 }
 
 

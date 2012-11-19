@@ -10,6 +10,7 @@
 namespace osgFFmpeg {
 
 
+#if LIBAVFORMAT_BUILD < (54<<16 | 29<<8 | 0)
 
 class FFmpegParameters : public osg::Referenced
 {
@@ -30,7 +31,7 @@ protected:
     AVInputFormat* m_format;
     AVFormatParameters m_parameters;
 };
-
+#endif
 
 
 } // namespace osgFFmpeg
