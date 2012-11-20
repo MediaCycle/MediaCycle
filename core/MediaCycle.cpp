@@ -925,7 +925,8 @@ int MediaCycle::readXMLConfigFileCore(TiXmlHandle _rootHandle) {
 
     int needsNormalizeAndCluster = 0;
     float prevLibrarySizeMultiplier = 2;
-
+    
+    int beginIndex=this->mediaLibrary->getNewestMediaId();
     while(  media_element != 0 ){
         //mediaBrowser->setNeedsNavigationUpdateLock(1);
         //media_element = this->mediaLibrary->openNextMediaFromXMLLibrary(media_element);
@@ -944,19 +945,23 @@ int MediaCycle::readXMLConfigFileCore(TiXmlHandle _rootHandle) {
             std::string error = std::string(e.what()) + ", aborting import.";
             throw runtime_error(error);
         }
-        long int media_id = this->mediaLibrary->getNewestMediaId();
+    }
+    int lastIndex=this->mediaLibrary->getNewestMediaId();
+    
+    long int media_id = this->mediaLibrary->getNewestMediaId();
         int i = this->mediaLibrary->getNumberOfFilesProcessed();
         int n = this->mediaLibrary->getNumberOfFilesToImport();
 
-        needsNormalizeAndCluster = 0;
-        if ( (mediaLibrary->getSize() >= int(prevLibrarySizeMultiplier * prevLibrarySize))
-             || (i==n-1)) {
+     //   needsNormalizeAndCluster = 0;
+        //if ( (mediaLibrary->getSize() >= int(prevLibrarySizeMultiplier * prevLibrarySize))
+          //   || (i==n-1)) {
             needsNormalizeAndCluster = 1;
-            prevLibrarySize = mediaLibrary->getSize();
-        }
+        //}
         normalizeFeatures(needsNormalizeAndCluster); // exclusively medialibrary
         //mediaBrowser->setNeedsNavigationUpdateLock(1);
-        mediaBrowser->initializeNode(media_id);
+    for (int newId=beginIndex+1;newId<=lastIndex;newId++){
+        mediaBrowser->initializeNode(newId);
+    }
 /*#if defined (SUPPORT_MULTIMEDIA)
             if (this->getMediaType()==MEDIA_TYPE_MIXED){
                 ACMedia* media =  mediaLibrary->getMedia(media_id);
@@ -970,11 +975,13 @@ int MediaCycle::readXMLConfigFileCore(TiXmlHandle _rootHandle) {
 #endif*/
         libraryContentChanged(needsNormalizeAndCluster); // exclusively mediabrowser, thus updateAfterFileImport and importDirectories can't be move to ACMediaLibrary
         //mediaBrowser->setNeedsNavigationUpdateLock(0);
-        std::cout<<"MediaCycle::readXMLConfigFileCore:"<<this->mediaLibrary->getNumberOfFilesProcessed()<<"/"<<this->mediaLibrary->getNumberOfFilesToImport()<<"("<<media_id<<")"<<std::endl;
-        eventManager->sig_mediaImported(this->mediaLibrary->getNumberOfFilesProcessed(),this->mediaLibrary->getNumberOfFilesToImport(),media_id);
+        //std::cout<<"MediaCycle::readXMLConfigFileCore:"<<this->mediaLibrary->getNumberOfFilesProcessed()<<"/"<<this->mediaLibrary->getNumberOfFilesToImport()<<"("<<media_id<<")"<<std::endl;
+    for (int newId=beginIndex+1;newId<=lastIndex;newId++){
+        eventManager->sig_mediaImported(this->mediaLibrary->getNumberOfFilesProcessed(),this->mediaLibrary->getNumberOfFilesToImport(),newId);
     }
+    
 
-    int n = this->mediaLibrary->getSize(); // segmentation might have increased the number of medias in the library
+    n = this->mediaLibrary->getSize(); // segmentation might have increased the number of medias in the library
     eventManager->sig_mediaImported(n,n,-1);
 }
 

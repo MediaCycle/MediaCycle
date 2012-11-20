@@ -1,7 +1,7 @@
 /**
  * @brief ACVisPluginPCA13.cpp
  * @author Thierry Ravet
- * @date 12/11/2012
+ * @date 20/11/2012
  * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -98,13 +98,20 @@ void ACVisPluginPCA13::updateNextPositions(ACMediaBrowser* mediaBrowser){
 
     mediaBrowser->setNumberOfDisplayedNodes(desc_m.n_rows);
     ////////////////////////////////////////////////////////////////////////////////////
-
+    float mx1=abs(min(posDisp_m.row(0)));
+    float mx2=max(posDisp_m.row(0));
+    float my1=abs(min(posDisp_m.row(2)));
+    float my2=max(posDisp_m.row(2));
+    float mTot=max(max(mx1,my1),max(mx2,my2));
+    if (mTot==0)
+        mTot=1;
+    
     ACPoint p;
     for (long i=0; i<ids.size(); i++){
         //mediaBrowser->setMediaNodeDisplayed(ids[i], true);
         // TODO: make sure you meant next
-	p.x = posDisp_m(i,0);
-	p.y = posDisp_m(i,2);
+	p.x = posDisp_m(i,0)/mTot;
+	p.y = posDisp_m(i,2)/mTot;
         p.z = 0;
         mediaBrowser->setNodeNextPosition(ids[i], p);
     }

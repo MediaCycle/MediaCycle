@@ -126,6 +126,8 @@ protected:
     OpenThreads::Mutex activity_update_mutex;
 
 public:
+    void mutexLock(){activity_update_mutex.lock();}
+    void mutexUnlock(){activity_update_mutex.unlock();}
     //void setLayoutPlugin(ACPlugin* acpl){mLayoutPlugin=acpl;}
     //void setLayout(ACOsgBrowserLayoutType _type){layout_type = _type;}
     osg::ref_ptr<osg::Group> getShapes() { return group; }

@@ -191,7 +191,7 @@ void ACMedia::saveXML(TiXmlElement* media){
 
 	// saves info about segments (if any) : beginning, end, ID
 	// the parent ID of the segment is the ID of the current media
-	for (int i=0; i<this->getNumberOfSegments();i++) {
+	/*for (int i=0; i<this->getNumberOfSegments();i++) {
 		TiXmlElement* seg = new TiXmlElement( "Segment" );  
 		segments->LinkEndChild( seg );  
 		//cout << " START " << this->getSegment(i)->getStart() << endl;
@@ -204,6 +204,16 @@ void ACMedia::saveXML(TiXmlElement* media){
 		s = tmp.str();
 		TiXmlText* segID = new TiXmlText(s.c_str());
 		seg->LinkEndChild( segID );  		
+	}*/
+    for (int i=0; i<this->getNumberOfSegments();i++) {
+        ACMedia* locMedia=this->getSegment(i);
+        if (locMedia==0)
+            continue;
+		//cout << " START " << this->getSegment(i)->getStart() << endl;
+		//cout << " END " << this->getSegment(i)->getEnd() << endl;
+        TiXmlElement* seg = new TiXmlElement( "Segment" );
+		segments->LinkEndChild( seg );
+        locMedia->saveXML( seg);
 	}
 	//features_saved_xml = true;
 }
@@ -435,7 +445,7 @@ void ACMedia::loadXML(TiXmlElement* _pMediaNode){
 		TiXmlElement* segmentElement = _pMediaNodeHandle.FirstChild( "Segments" ).FirstChild( "Segment" ).Element();
 		TiXmlText* segmentIDElementsAsText = 0;
 		int count_s = 0;
-		
+		/*
 		for( segmentElement; segmentElement; segmentElement = segmentElement->NextSiblingElement() ) {
 			ACMedia* segment_media = ACMediaFactory::getInstance().create(this->getMediaType());
 			double n_start=-1;
@@ -475,13 +485,23 @@ void ACMedia::loadXML(TiXmlElement* _pMediaNode){
 				throw runtime_error("corrupted XML file, wrong segment ID");
 			}
 			segment_media->setId(midi);
+			segment_media->setParentId(mid);
 			this->addSegment(segment_media);
 			count_s++;
-		}
+		}*/
 		// consistency check for segments
-		if (count_s != ns) 
+        for( segmentElement; segmentElement; segmentElement = segmentElement->NextSiblingElement() ) {
+            ACMedia* segment_media = ACMediaFactory::getInstance().create(this->getMediaType());
+			segment_media->loadXML(segmentElement);
+			segment_media->setParentId(mid);
+			this->addSegment(segment_media);
+			count_s++;
+        }
+
+		if (count_s != ns)
 			throw runtime_error("<ACMedia::loadXML> inconsistent number of segments");
 	}
+        
 }
 
 

@@ -179,7 +179,7 @@ public:
     // 3) extract features
     virtual int import(std::string _path, int _mid, ACPluginManager *acpl=0, bool _save_timed_feat=false);
     
-    std::string getTextMetaData(){return std::string("");}
+    virtual std::string getTextMetaData(){return std::string("");}
     // FEATURES computation (extractFeatures) and segmentation (segment)
     // these methods are virtual, because each media could have a specific segmentation method
     // ex: audioSegmentationPlugin : also calculates features...

@@ -138,9 +138,11 @@ void ACPluginControlsWidgetQt::buildPluginList()
             std::cout << "Already active plugin: " << current_plugin_name << std::endl;
         }
         else if(activePlugins == 0){
-            current_plugin_name = media_cycle->getPluginManager()->getAvailablePluginsNames(this->pluginType,media_cycle->getMediaType()).front();
+            if (media_cycle->getPluginManager()->getAvailablePluginsNames(this->pluginType,media_cycle->getMediaType()).size()>0){
+                current_plugin_name = media_cycle->getPluginManager()->getAvailablePluginsNames(this->pluginType,media_cycle->getMediaType()).front();
             media_cycle->getPluginManager()->setActiveSegmentPlugin( current_plugin_name );
-            std::cout << "Default active plugin: " << current_plugin_name << std::endl;
+                std::cout << "Default active plugin: " << current_plugin_name << std::endl;
+            }
         }
     }
     else{

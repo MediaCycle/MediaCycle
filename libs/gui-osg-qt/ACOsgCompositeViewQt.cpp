@@ -343,7 +343,9 @@ void ACOsgCompositeViewQt::resizeGL( int w, int h )
 // CF to do: understand paintGL vs updateGL to use them more correctly
 void ACOsgCompositeViewQt::paintGL()
 {
+    browser_renderer->mutexLock();
     frame(); // put this first otherwise we don't get a clean background in the browser
+    browser_renderer->mutexLock();
     if (media_cycle == 0) return;
 
     //CF to improve, we want to know if the view is being animated to force a frequent refresh of the positions:

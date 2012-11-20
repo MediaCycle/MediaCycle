@@ -662,7 +662,15 @@ TiXmlElement* ACMediaLibrary::openNextMediaFromXMLLibrary(TiXmlElement* pMediaNo
                 if (mPreProcessPlugin==NULL)
                     local_media->defaultPreProcFeatureInit();
                 this->addMedia(local_media);
-
+                if (local_media->getNumberOfSegments()>0){
+                    std::vector<ACMedia*> seg=local_media->getAllSegments();
+                    for (std::vector<ACMedia*>::iterator it=seg.begin();it!=seg.end();it++){
+                        this->addMedia((*it));
+                        (*it)->setParentId(local_media->getId());
+                        
+                    }
+                }
+                
 #ifdef SUPPORT_MULTIMEDIA
                 if(this->media_type == MEDIA_TYPE_MIXED){
 
@@ -819,7 +827,7 @@ int ACMediaLibrary::saveCoreXMLLibrary( TiXmlElement* _MC_e_root, TiXmlElement* 
     std::vector<TiXmlElement*> medias;
 
     for(ACMedias::iterator m = media_library.begin(); m != media_library.end();m++){
-        if(!m->second->isDiscarded()){ // don't save medias discarded by the user
+        if((!m->second->isDiscarded())&&(m->second->getParentId()==-1)){ // don't save medias discarded by the user. Segments and submedias are saved with their parent
             if(this->media_type != MEDIA_TYPE_MIXED){
                 TiXmlElement* media = new TiXmlElement( "Media" );
                 _MC_e_medias->LinkEndChild( media );
@@ -1266,7 +1274,8 @@ void ACMediaLibrary::saveSorted(string output_file){
 void ACMediaLibrary::setPreProcessPlugin(ACPlugin* acpl)
 {
     if (mPreProcessPlugin)
-        if ((mPreProcessPlugin!=acpl)&&(mPreProcessInfo!=NULL))
+        if (mPreProcessPlugin!=acpl)
+            if (mPreProcessInfo!=NULL)
             mPreProcessPlugin->freePreProcessInfo(mPreProcessInfo);
     if (acpl==NULL&&mPreProcessPlugin!=NULL)
     {
