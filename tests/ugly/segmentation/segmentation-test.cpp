@@ -1,7 +1,7 @@
 /**
  * @brief segmentation-test.cpp
- * @author Christian Frisson
- * @date 09/08/2012
+ * @author Thierry Ravet
+ * @date 20/11/2012
  * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -388,7 +388,7 @@ void test_segmentation_from_laughter_file(std::string _dir, std::string _fname) 
     clock_t start = clock();
     //default: float _SelfSimThresh=0.8, _L=8, _Wmin=8, KernelType=SELFSIMSTEP, KernelDistance=COSINE;
     //std::vector<int> seg = P->testSegment(desc, 0.01, 32, 25, SELFSIMGAUSSIAN, COSINE);
-    std::vector<int> seg = P->testSegment(desc, 0.01, 32, 240, SELFSIMGAUSSIAN, COSINE);//200 ccl
+    //std::vector<int> seg = P->testSegment(desc, 0.01, 32, 240, SELFSIMGAUSSIAN, COSINE);//200 ccl
     fileOut = "SelfSim"; //ccl
 
     std::cout << " -- end multiple self sim segmentation --" << std::endl;
@@ -404,9 +404,9 @@ void test_segmentation_from_laughter_file(std::string _dir, std::string _fname) 
     }
     std::vector<double> seg_d;
 
-    for (int i = 0; i < seg.size(); i++) {
-        seg_d.push_back(t[seg[i]]);
-    }
+   // for (int i = 0; i < seg.size(); i++) {
+     //   seg_d.push_back(t[seg[i]]);
+    //}
     std::vector<double> seg_i; // segments heights
     for (int i = 0; i< int(seg_d.size()); i++) {
         seg_i.push_back(n + 5);
