@@ -177,7 +177,7 @@ void ACClusterPositionsPropellerPlugin::updateNextPositions(ACMediaBrowser* medi
 
     for (ACMediaNodes::const_iterator node = mediaBrowser->getMediaNodes().begin(); node != mediaBrowser->getMediaNodes().end(); ++node) {
         if(node->second->getNavigationLevel() < navigationLevel) continue;
-
+        
         int ci = node->second->getClusterId();
 
         // SD TODO - test both approaches
@@ -214,7 +214,6 @@ void ACClusterPositionsPropellerPlugin::updateNextPositions(ACMediaBrowser* medi
         //printf("computed next position: theta:%f,r=%f,  (%f %f %f)\n", theta, r, p.x, p.y, p.z);//CF free the console
         double t = getTime();
         mediaBrowser->getMediaNode( node->second->getMediaId() )->setNextPosition(p, t); // (*node) is const hence getMediaNode( getNodeId ) allows node modification
-
         maxr = max(maxr,p.x);
         maxr = max(maxr,p.y);
 #ifdef USE_DEBUG

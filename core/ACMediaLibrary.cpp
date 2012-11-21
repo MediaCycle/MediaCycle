@@ -149,8 +149,8 @@ void ACMediaLibrary::cleanLibrary() {
 
 std::vector<std::string> ACMediaLibrary::getExtensionsFromMediaType(ACMediaType media_type)
 {
-    if (mReaderPlugin!=NULL){
-        if (mReaderPlugin->mediaTypeSuitable(media_type)){
+    if (this->mReaderPlugin!=NULL){
+        if (this->mReaderPlugin->mediaTypeSuitable(media_type)){
             return mReaderPlugin->getExtensionsFromMediaType(media_type);
         }
     }
@@ -1274,7 +1274,7 @@ void ACMediaLibrary::saveSorted(string output_file){
 void ACMediaLibrary::setPreProcessPlugin(ACPlugin* acpl)
 {
     if (mPreProcessPlugin)
-        if (mPreProcessPlugin!=acpl)
+        if (mPreProcessPlugin!=dynamic_cast<ACPreProcessPlugin*>(acpl))
             if (mPreProcessInfo!=NULL)
             mPreProcessPlugin->freePreProcessInfo(mPreProcessInfo);
     if (acpl==NULL&&mPreProcessPlugin!=NULL)

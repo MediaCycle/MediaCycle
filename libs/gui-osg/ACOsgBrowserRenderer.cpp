@@ -208,7 +208,6 @@ void ACOsgBrowserRenderer::clean(){
 
 void ACOsgBrowserRenderer::mediaImported(int n, int nTot,int mId){
     
-    
     if(n==0){
         std::cout << "ACOsgBrowserRenderer::mediaImported: creating renderers for " << nTot << " medias " << std::endl;
         return;
@@ -244,10 +243,12 @@ void ACOsgBrowserRenderer::mediaImported(int n, int nTot,int mId){
                break;
            usleep(1);
        }
+       
         if(this->addNode(mId)){
             this->addLink(mId);
             nodes_prepared = 1;
         }
+       
     }
 //    pthread_mutex_unlock(&activity_update_mutex);
     activity_update_mutex.unlock();
@@ -371,6 +372,8 @@ void ACOsgBrowserRenderer::updateNodes(double ratio) {
         //if(node_renderer->second){
         int i = node_renderer->first;
         media_cycle_node = media_cycle->getMediaNode(i);
+        if (media_cycle_node==0)
+            continue;
         media_cycle_isdisplayed = media_cycle_node->isDisplayed();
         media_cycle_current_pos = media_cycle_node->getCurrentPosition();
         media_cycle_next_pos = media_cycle_node->getNextPosition();

@@ -213,6 +213,7 @@ void ACDockWidgetsManagerQt::updateDocksVisibility(bool visibility)
 
 void ACDockWidgetsManagerQt::updateDockHeight()
 {
+    usleep(500000);
     if(!mainWindow)
         return;
     if (mainWindow->isFullScreen())

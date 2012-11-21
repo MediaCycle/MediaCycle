@@ -67,7 +67,7 @@ ACOsgCompositeViewQt::ACOsgCompositeViewQt( QWidget * parent, const char * name,
       septhick(5),sepy(0.0f),refsepy(0.0f),controls_width(0),screen_width(0),
       library_loaded(false),mouseover(false),
       mediaOnTrack(-1),track_playing(false),
-      openMediaExternallyAction(0), browseMediaExternallyAction(0), examineMediaExternallyAction(0), forwardNextLevelAction(0),
+      openMediaExternallyAction(0), browseMediaExternallyAction(0), examineMediaExternallyAction(0), forwardNextLevelAction(0),changeReferenceNodeAction(0),
       stopPlaybackAction(0), toggleMediaHoverAction(0), triggerMediaHoverAction(0),
       resetBrowserAction(0), rotateBrowserAction(0), zoomBrowserAction(0),
       translateBrowserAction(0), addMediaOnTimelineTrackAction(0), toggleTimelinePlaybackAction(0), adjustTimelineHeightAction(0),
@@ -102,9 +102,9 @@ ACOsgCompositeViewQt::ACOsgCompositeViewQt( QWidget * parent, const char * name,
     // Fonts:
     this->initFont();
     if(font){
-        browser_renderer->setFont(font);
-        timeline_renderer->setFont(font);
         hud_renderer->setFont(font);
+        timeline_renderer->setFont(font);
+        browser_renderer->setFont(font);
     }
 
     //this->setAttribute(Qt::WA_Hover, true);
@@ -222,6 +222,7 @@ ACOsgCompositeViewQt::~ACOsgCompositeViewQt(){
     if(browseMediaExternallyAction) delete browseMediaExternallyAction; browseMediaExternallyAction = 0;
     if(examineMediaExternallyAction) delete examineMediaExternallyAction; examineMediaExternallyAction = 0;
     if(forwardNextLevelAction) delete forwardNextLevelAction; forwardNextLevelAction = 0;
+    if(changeReferenceNodeAction) delete changeReferenceNodeAction; changeReferenceNodeAction = 0;
     if(stopPlaybackAction) delete stopPlaybackAction; stopPlaybackAction = 0;
     if(toggleMediaHoverAction) delete toggleMediaHoverAction; toggleMediaHoverAction = 0;
     if(resetBrowserAction) delete resetBrowserAction; resetBrowserAction = 0;
@@ -289,7 +290,7 @@ void ACOsgCompositeViewQt::initFont()
 #endif
 #endif
     std::cout << "Current font path " << font_path << std::endl;
-    font = osgText::readRefFontFile(font_path + font_file);
+    font = osgText::readFontFile(font_path + font_file);
     if(!font)
         std::cerr << "ACOsgCompositeViewQt::initFont: couldn't load font " << std::endl;
 }
@@ -358,7 +359,7 @@ void ACOsgCompositeViewQt::paintGL()
 void ACOsgCompositeViewQt::updateGL()
 {
     double frac = 0.0;
-
+   
     if (media_cycle == 0) return;
 
     if(media_cycle && media_cycle->hasBrowser())
@@ -459,6 +460,14 @@ void ACOsgCompositeViewQt::initInputActions(){
     connect(forwardNextLevelAction, SIGNAL(triggered(bool)), this, SLOT(forwardNextLevel()));
     this->addInputAction(forwardNextLevelAction);
 
+    changeReferenceNodeAction = new ACInputActionQt(tr("Change reference node"), this);
+    changeReferenceNodeAction->setToolTip(tr("Recluster the cluster with another reference node or unwrap neighbors around the selected node"));
+    changeReferenceNodeAction->setShortcut(Qt::Key_S);
+    changeReferenceNodeAction->setKeyEventType(QEvent::KeyPress);
+    changeReferenceNodeAction->setMouseEventType(QEvent::MouseButtonPress);
+    connect(changeReferenceNodeAction, SIGNAL(triggered(bool)), this, SLOT(changeReferenceNode()));
+    this->addInputAction(changeReferenceNodeAction);
+    
     stopPlaybackAction = new ACInputActionQt(tr("Stop Playback"), this);
     stopPlaybackAction->setShortcut(Qt::Key_M);
     stopPlaybackAction->setKeyEventType(QEvent::KeyPress);
@@ -632,6 +641,11 @@ void ACOsgCompositeViewQt::forwardNextLevel(){
     std::cout << "ACOsgCompositeViewQt::forwardNextLevel" << std::endl;
     media_cycle->forwardNextLevel();
 }
+void ACOsgCompositeViewQt::changeReferenceNode(){
+    if (media_cycle == 0) return;
+    std::cout << "ACOsgCompositeViewQt::changeReferenceNode" << std::endl;
+    media_cycle->changeReferenceNode();
+}
 
 void ACOsgCompositeViewQt::stopPlayback(){
     if (media_cycle == 0) return;
@@ -704,17 +718,17 @@ void ACOsgCompositeViewQt::addMediaOnTimelineTrack(){
     if (media_cycle->hasBrowser())
     {
         int media_id = media_cycle->getClickedNode();
-
+        
         if (mediaOnTrack != -1)
             this->getBrowserRenderer()->resetNodeColor(mediaOnTrack);
-
+        
         mediaOnTrack = media_id;
         if (mediaOnTrack != -1){
             this->getBrowserRenderer()->changeNodeColor(mediaOnTrack, Vec4(1.0,1.0,1.0,1.0));//CF color the node of the media on track in white
-
+            
             //if ( timeline_renderer->getTrack(0)!=0 )
             //{
-
+            
             if (sepy==0)
             {
                 sepy = height()/4;// CF browser/timeline proportions at startup
@@ -723,11 +737,11 @@ void ACOsgCompositeViewQt::addMediaOnTimelineTrack(){
                 this->updateTimelineView(width(),height());
                 this->updateTimelineControlsView(width(),height());
                 this->updateHUDCamera(width(),height());
-
+                
                 media_cycle->setNeedsDisplay(true);
             }
             //if (track_playing) {
-
+            
             //media_cycle->getBrowser()->toggleSourceActivity( timeline_renderer->getTrack(0)->getMediaIndex() );
             //track_playing = false;
             //}

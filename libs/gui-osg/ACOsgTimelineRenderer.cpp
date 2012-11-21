@@ -137,6 +137,7 @@ bool ACOsgTimelineRenderer::addTrack(ACMedia* _media){
             else
             #endif//def SUPPORT_MULTIMEDIA
                 track_renderer[n]->updateMedia(_media);
+            usleep(100000);
             track_renderer[n]->prepareTracks();
             track_group->addChild(track_renderer[n]->getTrack());
         }

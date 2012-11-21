@@ -51,6 +51,7 @@ public:
 //	void updateNextPositions(ACMediaBrowser*  );
 
 	
+    void clusterNumberChanged();
 private:
 };
 

@@ -76,6 +76,7 @@ public slots:
 
     // Browser
     void forwardNextLevel(); // recluster the selected cluster (cluster mode) or unwrap node (network mode)
+    void changeReferenceNode();
     void stopPlayback(); // stop the playback of audio/video files
     void toggleMediaHover(bool toggle); // audio hover, image/video ... -> need a panel to configure the behaviour of hover
     void triggerMediaHover(bool trigger); // audio hover, image/video ... -> need a panel to configure the behaviour of hover
@@ -143,8 +144,8 @@ private:
 #endif //defined (SUPPORT_AUDIO)
 
     ACInputActionQt *openMediaExternallyAction, *browseMediaExternallyAction,
-    *examineMediaExternallyAction, *forwardNextLevelAction, *stopPlaybackAction,
-    *toggleMediaHoverAction, *triggerMediaHoverAction, *resetBrowserAction,
+    *examineMediaExternallyAction, *forwardNextLevelAction,*changeReferenceNodeAction,
+    *stopPlaybackAction, *toggleMediaHoverAction, *triggerMediaHoverAction, *resetBrowserAction,
     *rotateBrowserAction, *zoomBrowserAction, *translateBrowserAction,
     *addMediaOnTimelineTrackAction, *toggleTimelinePlaybackAction, *adjustTimelineHeightAction,
     *discardMediaAction;

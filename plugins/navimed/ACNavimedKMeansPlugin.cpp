@@ -155,7 +155,7 @@ void ACNavimedKMeansPlugin::updateClusters(ACMediaBrowser* mediaBrowser,bool nee
 
     if (currId.size()==0)
         return;
-    mediaBrowser->setReferenceNode(currId[0]);
+    //mediaBrowser->setReferenceNode(currId[0]);
     //int object_count = library->getSize();//TR clustering just Parent Nodes
     int object_count = currId.size();
 

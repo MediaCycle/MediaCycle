@@ -296,6 +296,19 @@ void ACMediaBrowser::forwardNextLevel() {
         this->updateDisplay(true);
     }
 }
+void ACMediaBrowser::changeReferenceNode() {
+    int node = this->getClickedNode();
+    if (node >= 0) {
+        this->setReferenceNode(node);
+        if (this->getMode() == AC_MODE_NEIGHBORS) {
+            for (ACMediaNodes::iterator node = mMediaNodes.begin(); node != mMediaNodes.end(); ++node){
+            node->second->setDisplayed(false);
+        }
+            mNeighborsManager->setReferenceNode(this->getReferenceNode(), 0);
+        }
+        this->updateDisplay(true);
+    }
+}
 
 void ACMediaBrowser::setHistory()
 {

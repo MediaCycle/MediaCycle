@@ -687,7 +687,15 @@ void MediaCycle::forwardNextLevel(){
     if (this->hasBrowser()){
         this->setForwardDown(true); // mediaBrowser->getMode() == AC_MODE_NEIGHBORS
         this->getBrowser()->forwardNextLevel();
-         this->setForwardDown(false);
+        this->setForwardDown(false);
+    }
+}
+void MediaCycle::changeReferenceNode(){
+    // enters in the cluster of the last selected node
+    if (this->hasBrowser()){
+        this->setForwardDown(true); // mediaBrowser->getMode() == AC_MODE_NEIGHBORS
+        this->getBrowser()->changeReferenceNode();
+        this->setForwardDown(false);
     }
 }
 

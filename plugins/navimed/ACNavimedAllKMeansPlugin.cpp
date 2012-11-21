@@ -107,6 +107,7 @@ ACNavimedAllKMeansPlugin::ACNavimedAllKMeansPlugin() {
     this->mName = "ACNavimedAllKMeans";
     this->mDescription = "Clustering";
     this->mId = "";
+    this->addNumberParameter("clusters",5,1,10,1,"number of desired clusters",boost::bind(&ACNavimedAllKMeansPlugin::clusterNumberChanged,this));
 }
 
 ACNavimedAllKMeansPlugin::~ACNavimedAllKMeansPlugin() {
@@ -156,7 +157,7 @@ void ACNavimedAllKMeansPlugin::updateClusters(ACMediaBrowser* mediaBrowser,bool 
 
     if (currId.size()==0)
         return;
-    mediaBrowser->setReferenceNode(currId[0]);
+    //mediaBrowser->setReferenceNode(currId[0]);
     //int object_count = library->getSize();//TR clustering just Parent Nodes
     int object_count = currId.size();
 
@@ -363,4 +364,14 @@ void ACNavimedAllKMeansPlugin::updateClusters(ACMediaBrowser* mediaBrowser,bool 
     mediaBrowser->setIdNodeClusterCenter(idNodeClusterCenters);
 
 
+}
+void ACNavimedAllKMeansPlugin::clusterNumberChanged(){
+    if(!this->media_cycle) return;
+    
+    media_cycle->setClusterNumber( this->getNumberParameterValue("clusters") );
+    // XSCF251003 added this
+    media_cycle->updateDisplay(true); //XS 250310 was: media_cycle->updateClusters(true);
+    // XS 310310 removed media_cycle->setNeedsDisplay(true); // now in updateDisplay
+    //osg_view->updateTransformsFromBrowser(1.0); //CF 29/06/2012, this is called by ACOsgCompositeViewQt::updateGL if mediacycle needs display
+    media_cycle->setNeedsDisplay(true);
 }

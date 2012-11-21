@@ -86,8 +86,11 @@ int NavimedMediaDocument::import(std::string _filename, int _mid, ACPluginManage
 						this->setActiveSubMedia(mediaKey);
 					}	
 				}
-				else 
+				else {
+                    delete xmlDoc;
+                    delete media;
 					return 0;
+                }
 				nbMedia++;
 			}
 			if (xmlDoc->isNavimedBiology()){

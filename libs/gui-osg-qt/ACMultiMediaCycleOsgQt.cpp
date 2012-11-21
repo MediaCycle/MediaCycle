@@ -1346,6 +1346,11 @@ void ACMultiMediaCycleOsgQt::clean(bool _updategl){
     this->media_cycle->cleanLibrary();
     this->media_cycle->cleanBrowser();
     dockWidgetsManager->resetPluginsSettings();
+    
+    this->use_segmentation_default = true;
+    this->use_segmentation_current = true;
+    this->use_feature_extraction = true;
+    this->use_visualization_plugins = true;
 
     statusBar()->clearMessage();
     progressBar->reset();

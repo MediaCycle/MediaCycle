@@ -79,6 +79,8 @@ bool ACTextData::readData(std::string _fname){
 		cout << (*text_ptr)<<"\n";
 	}
 	label= labelFileRead(_fname);
+    if ((*text_ptr)==string(""))
+        (*text_ptr)=label;
 	cout << label<<"\n";
 //	cout << (*text_ptr)<<"\n";
 	return true;

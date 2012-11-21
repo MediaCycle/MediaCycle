@@ -93,7 +93,7 @@ void ACOsgSensorRenderer::prepareNodes() {
     metadata_geode = 0;
 
     //if  (media_cycle->getMediaNode(node_index)->isDisplayed()){
-    if  (media && media_cycle->getNodeFromMedia(media)->isDisplayed()){
+    if  (media &&  media_cycle->getNodeFromMedia(media) && media_cycle->getNodeFromMedia(media)->isDisplayed()){
         entryGeode();
         media_node->addChild(entry_geode);
     }

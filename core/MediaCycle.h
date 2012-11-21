@@ -198,6 +198,7 @@ public:
     void setClusterNumber(int n);
     void setForwardDown(int i);
     void forwardNextLevel();
+    void changeReferenceNode();
     //	void setPlayKeyDown(bool i){playkeydown = i;};
     //	bool getPlayKeyDown(){return playkeydown;};
 

@@ -99,8 +99,8 @@ void ACOsgTextRenderer::prepareNodes() {
         entryGeode();
         media_node->addChild(entry_geode);
     }
-    if (!metadata_geode)
-        metadataGeode();
+    //if (!metadata_geode)
+    //    metadataGeode();
 }
 
 void ACOsgTextRenderer::updateNodes(double ratio) {

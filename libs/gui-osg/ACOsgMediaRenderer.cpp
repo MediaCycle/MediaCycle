@@ -125,10 +125,12 @@ void ACOsgMediaRenderer::metadataGeode() {
     metadata = new osgText::Text;
     if(font)
         metadata->setFont(font);
+    
     metadata->setColor(textColor);
     metadata->setCharacterSizeMode( osgText::Text::SCREEN_COORDS );
     metadata->setCharacterSize(textCharacterSize);
     metadata->setPosition(osg::Vec3(0,0.025,0.04));
+    
     //	text->setPosition(osg::Vec3(pos.x,pos.y,pos.z));
     metadata->setLayout(osgText::Text::LEFT_TO_RIGHT);
     metadata->setFontResolution(textCharacterSize,textCharacterSize);

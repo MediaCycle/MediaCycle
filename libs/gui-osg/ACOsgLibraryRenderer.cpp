@@ -286,7 +286,7 @@ void ACOsgLibraryRenderer::updateNodes(double ratio) {
             library_medias_number_info << media_cycle->getNumberOfMediaNodes() << "/";
         library_medias_number_info << media_cycle->getLibrarySize();
         this->updateTextRenderer(library_medias_number,library_medias_number_info.str(),library_node);
-
+       // cout<<"test:"<<library_medias_number.text->getFont()->getFileName()<<"\t"<<library_medias_number.text->getText().createUTF8EncodedString ()<<endl;
         this->updateImageRenderer(curator_picture,media_cycle->getLibrary()->getCuratorPicture(),curator_node);
 
         if(this->library_cover.file!=""){

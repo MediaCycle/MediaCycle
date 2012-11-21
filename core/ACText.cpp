@@ -65,6 +65,8 @@ int ACText::loadACLSpecific(ifstream &library_file) {
 	return 1;
 }
 
+
+
 bool ACText::extractData(string fname){
 	if (data){
 		delete data;

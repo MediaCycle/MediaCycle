@@ -48,12 +48,11 @@ ACNeighborsManager::~ACNeighborsManager() {
 }
 
 void ACNeighborsManager::setReferenceNode(long int _mediaId, int _clickTime) {
-    if(mTree.size() == 0){
-        mTree.set_head(_mediaId);
-        mNodeId = _mediaId;
+    if(mTree.size() != 0){
+        this->clean();
     }
-    else
-        std::cerr << "ACNeighborsManager::addRootNode: root node already exists" << std::endl;
+    mTree.set_head(_mediaId);
+    mNodeId = _mediaId;
 }
 
 

@@ -112,6 +112,7 @@ struct ACLabel {
 // XS 110310 added this to make the transition towards tree instead of vector
 // could even be a class ?
 typedef std::map<long,ACMediaNode*> ACMediaNodes;
+
 typedef vector<ACLabel> ACLabels;
 
 class ACMediaBrowser {
@@ -194,6 +195,7 @@ public:
     void goForward();
     void storeNavigationState(); // was: pushNavigationState();
     void forwardNextLevel();
+    void changeReferenceNode();
 
     // == Nodes
     void setClickedNode(int inode);

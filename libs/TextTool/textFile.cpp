@@ -36,9 +36,9 @@
 #include <iostream>
 #include <fstream>
 //#include <ArchipelReader.h>
-#ifdef SUPPORT_NAVIMED
+//#ifdef SUPPORT_NAVIMED
 //#include <NavimedReader.h>
-#endif //SUPPORT_NAVIMED
+//#endif //SUPPORT_NAVIMED
 #define TIXML_USE_STL
 #include <tinyxml.h>
 
@@ -56,8 +56,8 @@ string* textFileRead(string filePath){
 		return txtFileRead(filePath);
 	else
 		if (ext==string(".xml")){
-			return xmlFileRead(filePath);
-			/*TiXmlDocument *testDoc=new TiXmlDocument(filePath);
+            return xmlFileRead(filePath);
+            /*TiXmlDocument *testDoc=new TiXmlDocument(filePath);
 			delete testDoc;
 			archipelReader *doc=new archipelReader(filePath);
 			if (!doc->isArchipel())
@@ -67,13 +67,13 @@ string* textFileRead(string filePath){
 #if defined(SUPPORT_NAVIMED)
 				navimedReader *doc2=new navimedReader(filePath);
 				if (doc2->isNavimed()){
-					string *desc2=new string(doc2->getText());
+					string *desc2=new string(string("Description:\n\n\n")+doc2->getDescription()+string("\n")+doc2->getText()+string("\n\n\nfin"));
 					delete doc2;
 					return desc2;
 				}
 				else	
 #endif //SUPPORT_NAVIMED
-					return 0;
+                    return xmlFileRead(filePath);
 			}
 			string *desc2=new string(doc->getText());
 			delete doc;
