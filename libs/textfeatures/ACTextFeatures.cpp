@@ -57,7 +57,11 @@ void getFreqTerm(vector<int32_t> &ret,std::vector<wchar_t *> termsToFind, int32_
 	int32_t test;
 	test=termsFreqBase->size();
 	
-	const Array<int32_t>* ptrFreq=termsFreqBase->getTermFrequencies();
+#ifdef OLD_CLUCENE
+	const Array<int32_t>* ptrFreq=termsFreqBase->getTermFrequencies(); 
+#else
+    const lucene::util::ArrayBase<int32_t> * ptrFreq=termsFreqBase->getTermFrequencies();
+#endif
 	for (int i=0;i<termsToFind.size();i++){	
 		int tempCpt=termsFreqBase->indexOf(termsToFind[i]);
 		if (tempCpt==-1)
@@ -166,7 +170,11 @@ void extractIndexTerms(wchar_t**  &outTerms,int &nbOutTerms,ACIndexModifier* inp
 		outTerms[nterms]=chartemp;
 		chartemp=0;
 		//_CLDELETE(tempTerm);
+#ifdef OLD_CLUCENE //CF temporary patch to compile against CLucene 2.3.3.4
 		_tprintf(_T("%s\n"),te->term()->text());
+#else
+       wprintf(_T("%s\n"),te->term()->text());
+#endif
 		/* empty */	
 		
 		nterms++;	
