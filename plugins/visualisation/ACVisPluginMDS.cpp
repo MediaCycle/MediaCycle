@@ -1,5 +1,5 @@
 /**
- * @brief ACVisPluginPCA.cpp
+ * @brief ACVisPluginMDS.cpp
  * @author Thierry Ravet
  * @date 24/11/2012
  * @copyright (c) 2012 – UMONS - Numediart
@@ -32,27 +32,28 @@
 #include <armadillo>
 #include "Armadillo-utils.h"
 #include "ACPlugin.h"
-#include "ACVisPluginPCA.h"
+#include "ACVisPluginMDS.h"
+#include "mds.h"
 
 using namespace arma;
 using namespace std;
 //TR: I modified this class to take into account the feature that are selected by the user (with te weights).
-ACVisPluginPCA::ACVisPluginPCA() : ACClusterPositionsPlugin()
+ACVisPluginMDS::ACVisPluginMDS() : ACClusterPositionsPlugin()
 {
     //vars herited from ACPlugin
     this->mMediaType = MEDIA_TYPE_ALL;
-    this->mName = "MediaCycle PCA axes 1&2";
-    this->mDescription = "axes 1 and 2 resulting from PCA visualisation";
+    this->mName = "MediaCycle MDS";
+    this->mDescription = "dimensionnality reduction resulting from MDS";
     this->mId = "";
 
     //local vars
 }
 
-ACVisPluginPCA::~ACVisPluginPCA(){
+ACVisPluginMDS::~ACVisPluginMDS(){
 }
 
 
-void ACVisPluginPCA::updateNextPositions(ACMediaBrowser* mediaBrowser){
+void ACVisPluginMDS::updateNextPositions(ACMediaBrowser* mediaBrowser){
     int itemClicked, labelClicked, action;
     vector<string> featureNames;
     int libSize = mediaBrowser->getLibrary()->getSize();
@@ -78,11 +79,15 @@ void ACVisPluginPCA::updateNextPositions(ACMediaBrowser* mediaBrowser){
         }
         return;
     }
-    mat descN_m = zscore(desc_m);
+   // mat descN_m = zscore(desc_m);
     mat coeff;
     mat score;
-    princomp(coeff, posDisp_m, descN_m);
+    //princomp(coeff, posDisp_m, descN_m);
+    mds mds_algo;
+    mds_algo.setFeatureMatrix(desc_m);
+    posDisp_m=mds_algo.compute(2);
 
+    
     for (int i=0; i<featureNames.size(); i++)
         std::cout << "featureNames : " << featureNames[i] << std::endl;
 
@@ -121,12 +126,12 @@ void ACVisPluginPCA::updateNextPositions(ACMediaBrowser* mediaBrowser){
         }
     }
     if (cpt!=desc_m.n_rows)
-        cout << "ACVisPluginPCA::updateNextPositions, problem with desc matrix dimensions "<<endl;
+        cout << "ACVisPluginMDS::updateNextPositions, problem with desc matrix dimensions "<<endl;
     ////////////////////////////////////////////////////////////////
 }
 
 
-void ACVisPluginPCA::extractDescMatrix(ACMediaBrowser* mediaBrowser, mat& desc_m, vector<string> &featureNames){
+void ACVisPluginMDS::extractDescMatrix(ACMediaBrowser* mediaBrowser, mat& desc_m, vector<string> &featureNames){
     ACMedias medias = mediaBrowser->getLibrary()->getAllMedia();
     std::vector<long> ids = mediaBrowser->getLibrary()->getAllMediaIds();
     int nbMedia = medias.size();
@@ -137,7 +142,7 @@ void ACVisPluginPCA::extractDescMatrix(ACMediaBrowser* mediaBrowser, mat& desc_m
     // Count nb of feature
     int nbFeature = mediaBrowser->getLibrary()->getFirstMedia()->getNumberOfPreProcFeaturesVectors();
     if (nbFeature!=weight.size())
-        std::cerr<<"ACVisPluginPCA::extractDescMatrix weight vector size incompatibility"<<endl;
+        std::cerr<<"ACVisPluginMDS::extractDescMatrix weight vector size incompatibility"<<endl;
     for(int f=0; f< nbFeature; f++){
         if (weight[f]>0.f){
             featureNames.push_back(mediaBrowser->getLibrary()->getFirstMedia()->getPreProcFeaturesVector(f)->getName());

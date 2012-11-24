@@ -1,5 +1,5 @@
 //
-//  Isomap.h
+//  sIsomap.h
 //  MediaCycle
 //
 //  @author Thierry Ravet
@@ -31,22 +31,21 @@
 //  <mailto:avre@umons.ac.be>
 //
 
-#ifndef MediaCycle_Isomap_h
-#define MediaCycle_Isomap_h
+#ifndef MediaCycle_sIsomap_h
+#define MediaCycle_sIsomap_h
 
 #include <armadillo>
 #include "mds.h"
+#include "Isomap.h"
 
-class Isomap: public mds {
+class sIsomap: public Isomap {
 public:
-    Isomap();
-    ~Isomap();
-    virtual bool setDistanceMatrix(arma::mat D,char n_fct,double param);
-    virtual bool setFeatureMatrix(arma::mat F,char n_fct,double param);
+    sIsomap(double a=0.5);
+    ~sIsomap();
+    bool setDistanceMatrix(arma::mat D,arma::urowvec label, char n_fct,double param);
+    bool setFeatureMatrix(arma::mat F,arma::urowvec label,char n_fct,double param);
 protected:
-    char n_fcn;
-    int Kn;
-    double epsilon;
+    double alpha;
 };
 
 
