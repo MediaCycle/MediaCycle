@@ -1,0 +1,302 @@
+--- CMakeModules/FindFFmpeg.cmake.orig	2011-04-19 13:40:22.000000000 +0200
++++ CMakeModules/FindFFmpeg.cmake	2012-11-23 17:24:53.000000000 +0100
+@@ -125,38 +125,34 @@
+ FFMPEG_FIND(LIBSWSCALE  swscale  swscale.h)  # not sure about the header to look for here.
+ 
+ SET(FFMPEG_FOUND "NO")
+-# Note we don't check FFMPEG_LIBSWSCALE_FOUND here, it's optional.
+-IF   (FFMPEG_LIBAVFORMAT_FOUND AND FFMPEG_LIBAVDEVICE_FOUND AND FFMPEG_LIBAVCODEC_FOUND AND FFMPEG_LIBAVUTIL_FOUND AND STDINT_OK)
++IF   (FFMPEG_LIBAVFORMAT_FOUND AND FFMPEG_LIBAVDEVICE_FOUND AND FFMPEG_LIBAVCODEC_FOUND AND FFMPEG_LIBAVUTIL_FOUND AND FFMPEG_LIBSWSCALE_FOUND AND STDINT_OK)
+ 
+     SET(FFMPEG_FOUND "YES")
+ 
+     SET(FFMPEG_INCLUDE_DIRS
+-        ${FFMPEG_LIBAVFORMAT_INCLUDE_DIRS} ${FFMPEG_LIBAVFORMAT_INCLUDE_DIRS}/libavformat
+-        ${FFMPEG_LIBAVDEVICE_INCLUDE_DIRS} ${FFMPEG_LIBAVDEVICE_INCLUDE_DIRS}/libavdevice
+-        ${FFMPEG_LIBAVCODEC_INCLUDE_DIRS} ${FFMPEG_LIBAVCODEC_INCLUDE_DIRS}/libavcodec
+-        ${FFMPEG_LIBAVUTIL_INCLUDE_DIRS} ${FFMPEG_LIBAVUTIL_INCLUDE_DIRS}/libavutil
++        ${FFMPEG_LIBAVFORMAT_INCLUDE_DIRS}
++        ${FFMPEG_LIBAVDEVICE_INCLUDE_DIRS}
++        ${FFMPEG_LIBAVCODEC_INCLUDE_DIRS}
++        ${FFMPEG_LIBAVUTIL_INCLUDE_DIRS}
++        ${FFMPEG_SWSCALE_INCLUDE_DIRS}
+     )
+ 
+-    IF (FFMPEG_STDINT_INCLUDE_DIR)
++    IF (${FFMPEG_STDINT_INCLUDE_DIR})
+         SET(FFMPEG_INCLUDE_DIRS
+             ${FFMPEG_INCLUDE_DIRS}
+             ${FFMPEG_STDINT_INCLUDE_DIR}
+-            ${FFMPEG_STDINT_INCLUDE_DIR}/libavformat
+-            ${FFMPEG_STDINT_INCLUDE_DIR}/libavdevice
+-            ${FFMPEG_STDINT_INCLUDE_DIR}/libavcodec
+-            ${FFMPEG_STDINT_INCLUDE_DIR}/libavutil
+         )
+     ENDIF()
+ 
+ 
+     SET(FFMPEG_LIBRARY_DIRS ${FFMPEG_LIBAVFORMAT_LIBRARY_DIRS})
+ 
+-    # Note we don't add FFMPEG_LIBSWSCALE_LIBRARIES here, it will be added if found later.
+     SET(FFMPEG_LIBRARIES
+         ${FFMPEG_LIBAVFORMAT_LIBRARIES}
+         ${FFMPEG_LIBAVDEVICE_LIBRARIES}
+         ${FFMPEG_LIBAVCODEC_LIBRARIES}
+-        ${FFMPEG_LIBAVUTIL_LIBRARIES})
++        ${FFMPEG_LIBAVUTIL_LIBRARIES}
++        ${FFMPEG_LIBSWSCALE_LIBRARIES})
+ 
+ ELSE ()
+ 
+--- src/osgPlugins/ffmpeg/FFmpegDecoder.cpp.orig	2012-03-21 18:36:20.000000000 +0100
++++ src/osgPlugins/ffmpeg/FFmpegDecoder.cpp	2012-11-24 15:35:37.000000000 +0100
+@@ -64,10 +64,13 @@
+ 
+             OSG_NOTICE<<"Attempting to stream "<<filename<<std::endl;
+ 
++#if LIBAVFORMAT_BUILD < (54<<16 | 29<<8 | 0)
+             AVFormatParameters formatParams;
+             memset(&formatParams, 0, sizeof(AVFormatParameters));
++#endif
+             AVInputFormat *iformat;
+ 
++#if LIBAVFORMAT_BUILD < (54<<16 | 29<<8 | 0)
+             formatParams.channel = 0;
+             formatParams.standard = 0;
+ #if 1
+@@ -76,13 +79,13 @@
+ #else
+             formatParams.width = 640;
+             formatParams.height = 480;
+-#endif
++#endif            
+             formatParams.time_base.num = 1;
+             formatParams.time_base.den = 30;
+-
++#endif
+             std::string format = "video4linux2";
+             iformat = av_find_input_format(format.c_str());
+-
++            
+             if (iformat)
+             {
+                 OSG_NOTICE<<"Found input format: "<<format<<std::endl;
+@@ -92,7 +95,11 @@
+                 OSG_NOTICE<<"Failed to find input format: "<<format<<std::endl;
+             }
+ 
++#if LIBAVFORMAT_BUILD < (54<<16 | 29<<8 | 0)
+             int error = av_open_input_file(&p_format_context, filename.c_str(), iformat, 0, &formatParams);
++#else
++            int error = avformat_open_input(&p_format_context, filename.c_str(), iformat, 0);
++#endif
+             if (error != 0)
+             {
+                 std::string error_str;
+@@ -115,10 +122,16 @@
+         }
+         else
+         {
++#if LIBAVFORMAT_BUILD < (54<<16 | 29<<8 | 0)
+             AVInputFormat* av_format = (parameters ? parameters->getFormat() : 0);
+             AVFormatParameters* av_params = (parameters ? parameters->getFormatParameter() : 0);
+             if (av_open_input_file(&p_format_context, filename.c_str(), av_format, 0, av_params) !=0 )
+                 throw std::runtime_error("av_open_input_file() failed");
++#else
++            if (avformat_open_input(&p_format_context, filename.c_str(), 0, 0) < 0 )
++                throw std::runtime_error("avformat_open_input() failed");
++#endif
++
+         }
+ 
+         m_format_context.reset(p_format_context);
+@@ -134,8 +147,11 @@
+         m_clocks.reset(m_start);
+ 
+         // Dump info to stderr
++#if LIBAVFORMAT_BUILD < (54<<16 | 29<<8 | 0)
+         dump_format(p_format_context, 0, filename.c_str(), false);
+-
++#else
++        av_dump_format(p_format_context, 0, filename.c_str(), false);
++#endif
+         // Find and open the first video and audio streams (note that audio stream is optional and only opened if possible)
+ 
+         findVideoStream();
+@@ -292,10 +308,14 @@
+         // Read the next frame packet
+         if (av_read_frame(m_format_context.get(), &packet) < 0)
+         {
++#if LIBAVFORMAT_BUILD < (54<<16 | 29<<8 | 0)
+             if (url_ferror(m_format_context->pb) == 0)
+                 end_of_stream = true;
+             else
+                 throw std::runtime_error("av_read_frame() failed");
++#else
++            end_of_stream = true;
++#endif
+         }
+ 
+         if (end_of_stream)
+--- src/osgPlugins/ffmpeg/FFmpegDecoder.hpp.orig	2011-04-19 13:40:22.000000000 +0200
++++ src/osgPlugins/ffmpeg/FFmpegDecoder.hpp	2012-11-24 16:42:12.000000000 +0100
+@@ -151,8 +151,21 @@
+ 
+ inline double FFmpegDecoder::creation_time() const
+ {
+-   if(m_format_context) return m_format_context->timestamp;
+-   else return HUGE_VAL;
++    if(m_format_context) {
++#if LIBAVFORMAT_VERSION_INT < AV_VERSION_INT(54, 6, 0)     
++        return av_get_output_timestamp(m_format_context.get(),
++                                       0, //int stream,
++                                       0, //int64_t *dts,
++                                       0 //int64_t *wall
++                                       );
++#else
++        // timestamp is not longer a member of ACFormatContext since FFmpeg 0.11
++        OSG_WARN << "FFmpegDecoder::creation_time: getting timestamp not yet implemented correctly for FFmpeg >= 0.11" << std::endl;
++        return m_format_context->start_time_realtime;
++#endif
++    }
++    else
++        return HUGE_VAL;
+ }
+ 
+ inline double FFmpegDecoder::duration() const
+--- src/osgPlugins/ffmpeg/FFmpegHeaders.hpp.orig	2012-01-05 15:07:56.000000000 +0100
++++ src/osgPlugins/ffmpeg/FFmpegHeaders.hpp	2012-11-24 15:07:07.000000000 +0100
+@@ -3,19 +3,27 @@
+ #define HEADER_GUARD_FFMPEG_HEADERS_H
+ 
+ 
++//FFMPEG > 0.7 compatibility
++//when AVFormatParameter was deprecated for AVDictionary
++#define LIBAVFORMAT_BUILD_PARAM2DICT (53<<16 | 2<<8 | 0)
++//when AVERROR_... was deprecated for AVERROR(e)
++#define LIBAVUTIL_BUILD_AVERRORFCT (50<<16 | 12<<8 | 0) 
++//when CODEC_TYPE_... was deprecated for AVMEDIA_TYPE_...
++#define LIBAVUTIL_BUILD_CODEC2AVMEDIA (50<<16 | 14<<8 | 0) 
++
+ extern "C"
+ {
+ #define __STDC_CONSTANT_MACROS
+ #define FF_API_OLD_SAMPLE_FMT 0
+ #include <errno.h>    // for error codes defined in avformat.h
+ #include <stdint.h>
+-#include <avcodec.h>
+-#include <avformat.h>
+-#include <avdevice.h>
+-#include <mathematics.h>
++#include <libavcodec/avcodec.h>
++#include <libavformat/avformat.h>
++#include <libavdevice/avdevice.h>
++#include <libavutil/mathematics.h>
+ 
+ #ifdef USE_SWSCALE    
+-    #include <swscale.h>
++    #include <libswscale/swscale.h>
+ #endif
+ 
+ #if LIBAVUTIL_VERSION_INT <  AV_VERSION_INT(50,38,0)
+--- src/osgPlugins/ffmpeg/FFmpegParameters.cpp.orig	2012-03-21 18:36:20.000000000 +0100
++++ src/osgPlugins/ffmpeg/FFmpegParameters.cpp	2012-11-24 14:37:19.000000000 +0100
+@@ -8,7 +8,7 @@
+ #if LIBAVCODEC_VERSION_MAJOR >= 53
+ extern "C"
+ {
+-    #include <parseutils.h>
++    #include <libavutil/parseutils.h>
+ }
+ #define av_parse_video_frame_size av_parse_video_size
+ #define av_parse_video_frame_rate av_parse_video_rate
+@@ -19,7 +19,7 @@
+ 
+     extern "C"
+     {
+-        #include <pixdesc.h>
++        #include <libavutil/pixdesc.h>
+     }
+ 
+     inline PixelFormat osg_av_get_pix_fmt(const char *name) { return av_get_pix_fmt(name); }
+@@ -28,11 +28,10 @@
+     inline PixelFormat osg_av_get_pix_fmt(const char *name) { return avcodec_get_pix_fmt(name); }
+ #endif
+ 
++#if LIBAVFORMAT_BUILD < (54<<16 | 29<<8 | 0)
+ 
+ namespace osgFFmpeg {
+ 
+-
+-
+ FFmpegParameters::FFmpegParameters() :
+     m_format(0)
+ {
+@@ -99,3 +98,4 @@
+ 
+ 
+ } // namespace osgFFmpeg
++#endif
+--- src/osgPlugins/ffmpeg/FFmpegParameters.hpp.orig	2011-04-19 13:40:22.000000000 +0200
++++ src/osgPlugins/ffmpeg/FFmpegParameters.hpp	2012-11-24 15:07:26.000000000 +0100
+@@ -10,6 +10,7 @@
+ namespace osgFFmpeg {
+ 
+ 
++#if LIBAVFORMAT_BUILD < (54<<16 | 29<<8 | 0)
+ 
+ class FFmpegParameters : public osg::Referenced
+ {
+@@ -30,7 +31,7 @@
+     AVInputFormat* m_format;
+     AVFormatParameters m_parameters;
+ };
+-
++#endif
+ 
+ 
+ } // namespace osgFFmpeg
+--- src/osgPlugins/ffmpeg/ReaderWriterFFmpeg.cpp.orig	2012-03-21 18:36:20.000000000 +0100
++++ src/osgPlugins/ffmpeg/ReaderWriterFFmpeg.cpp	2012-11-24 14:39:13.000000000 +0100
+@@ -88,13 +88,16 @@
+         {
+             return readImageStream(filename, NULL);
+         }
+-
++#if LIBAVFORMAT_BUILD < (54<<16 | 29<<8 | 0)
+         osg::ref_ptr<osgFFmpeg::FFmpegParameters> parameters(new osgFFmpeg::FFmpegParameters);
+         parseOptions(parameters.get(), options);
+         if (parameters->isFormatAvailable())
+         {
+             return readImageStream(filename, parameters.get());
+         }
++#else
++        readImageStream(filename, 0);
++#endif
+ 
+         if (! acceptsExtension(ext))
+             return ReadResult::FILE_NOT_HANDLED;
+@@ -105,8 +108,12 @@
+ 
+         if (path.empty())
+             return ReadResult::FILE_NOT_FOUND;
+-
++#if LIBAVFORMAT_BUILD < (54<<16 | 29<<8 | 0)
+         return readImageStream(path, parameters.get());
++#else
++        return readImageStream(path, 0);
++
++#endif
+     }
+ 
+     ReadResult readImageStream(const std::string& filename, osgFFmpeg::FFmpegParameters* parameters) const
+@@ -132,7 +139,9 @@
+                  itr != supportedOptList.end(); ++itr)
+             {
+                 const std::string& name = itr->first;
++#if LIBAVFORMAT_BUILD < (54<<16 | 29<<8 | 0)
+                 parameters->parse(name, options->getPluginStringData(name));
++#endif
+             }
+         }
+     }
