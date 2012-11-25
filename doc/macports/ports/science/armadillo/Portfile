@@ -5,7 +5,7 @@ PortSystem                      1.0
 PortGroup                       cmake 1.0
 
 name                            armadillo
-version                         3.4.0
+version                         3.4.4
 set branch                      ${version}
 categories                      science
 platforms                       darwin
@@ -26,9 +26,9 @@ master_sites                    sourceforge:project/arma
 use_bzip2                       no
 distname                        armadillo-${version}
 
-checksums                       md5     aa3ff84668cbaebfb3c0bf8f65444b21 \
-                                sha1    e7fdb6518172aabaa28c84412b52db7d86ef37a5 \
-                                rmd160  d00a412c91a1d4d505c78d4eb1653f7f20df1e45
+checksums                       md5     93a45131f8e5ee6393d962f33fdc92a6 \
+                                sha1    e293a56695e7447cf5caa395932f1f0d41e13ffc \
+                                rmd160  609feb82b1bbe52c1fac11a9f845b581ab245412
 
 depends_build-append            port:pkgconfig
 
