@@ -39,13 +39,14 @@ arma::mat mds::compute(int ndim){
     mat eigvec;
     colvec eigval;
     eig_sym(eigval, eigvec, this->S);
-    umat index=sort_index(abs(eigval),1);
+    umat index=sort_index((eigval),1);
     mat ret(N,ndim);
     colvec val(ndim);
     for (int i=0;i<ndim;i++){
         ret.col(i)=eigvec.col(index(i));
         val(i)=eigval(index(i));
     }
-    ret=ret*diagmat(sqrt(val));
+    cout<<val<<endl;
+    ret=ret*diagmat(sqrt(abs(val)));
     return ret;
 }

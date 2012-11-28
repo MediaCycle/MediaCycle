@@ -161,8 +161,8 @@ std::vector<ACMediaFeatures*> ACAudioFeaturesPlugin::_calculate(std::string aFil
         bool save_binary = false;//CF true
         string mtf_file_name; // file(s) in which feature(s) will be saved
         string file_ext =  "_b.mtf";
-        //if(!save_binary)
-        //    file_ext =  "_t.mtf";
+        if(!save_binary)
+            file_ext =  "_t.mtf";
         string aFileName = theMedia->getFileName();
         string aFileName_noext = aFileName.substr(aFileName.find_last_of('/'),aFileName.find_last_of('.')-aFileName.find_last_of('/'));
         string aFileName_direct = aFileName.substr(0,aFileName.find_last_of('/'));

@@ -50,6 +50,7 @@ ACMedia::ACMedia() {
 
 void ACMedia::init() { 
 	mid = -1;
+    taggedClassId=-1;
 	parentid = -1;	
 	width = 0;
 	height = 0;
@@ -184,7 +185,15 @@ void ACMedia::saveXML(TiXmlElement* media){
 		TiXmlText* mediafe = new TiXmlText(s.c_str());
 		mediaf->LinkEndChild( mediafe );  		
 	}
-	
+	if (taggedClassId!=-1){
+		TiXmlElement* taggedClassIdField = new TiXmlElement( "TagId" );
+		std::stringstream tmp;
+        tmp<<taggedClassId;
+		TiXmlText* tagText = new TiXmlText(tmp.str().c_str());
+		taggedClassIdField->LinkEndChild(tagText);
+        media->LinkEndChild( taggedClassIdField );
+        
+    }
 	TiXmlElement* segments = new TiXmlElement( "Segments" );  
 	media->LinkEndChild( segments );  
 	segments->SetAttribute("NumberOfSegments", this->getNumberOfSegments());
@@ -427,11 +436,25 @@ void ACMedia::loadXML(TiXmlElement* _pMediaNode){
             count_f++;
         }
     }
-	
 	// consistency check for features
-	if (count_f != nf) 
+	if (count_f != nf)
 		throw runtime_error("<ACMedia::loadXML> inconsistent number of features");
 
+    
+	TiXmlElement* tagElement = _pMediaNodeHandle.FirstChild( "TagId" ).Element();
+    if (tagElement) {
+        TiXmlText* tagElementsAsText=tagElement->FirstChild()->ToText();
+        if (!tagElementsAsText)
+            throw runtime_error("corrupted XML file, error reading tag elements");
+        std::stringstream fess;
+        fess<< tagElementsAsText->ValueStr();
+        int temp =-1;
+        fess>>temp;
+        taggedClassId=temp;
+    }
+    else
+        taggedClassId=-1;
+    
 	// --- segments --- 
 
 	// allow an XML without segments.
@@ -744,16 +767,24 @@ ACMediaTimedFeature* ACMedia::getTimedFeatures() {
 	//    vector<ACFeaturesPlugin *> ::iterator iter_vec = mCurrPlugin[mediaType].begin();
 	//  if (iter_vec != mCurrPlugin[mediaType].end()) 
 	std::vector<std::string>::iterator iter_vec=mtf_files_names.begin();
-	if (iter_vec!=mtf_files_names.end())
+    if (iter_vec!=mtf_files_names.end())
 	{	
 		output = new ACMediaTimedFeature();
 		output->loadFromFile(*iter_vec,_binary);
-		
+        size_t n2= iter_vec->find_last_of ( string("_") )-1;
+        size_t n1=iter_vec->find_last_of ( string("_"),n2 );
+        string locFeatureName=iter_vec->substr(n1+1,n2-n1);
+            output->setName(locFeatureName);
+        
         if (output != 0) {
             iter_vec++;
             for (; iter_vec != mtf_files_names.end(); iter_vec++) {
 				ACMediaTimedFeature* temp=new ACMediaTimedFeature();
 				temp->loadFromFile(*iter_vec,false);
+                n2= iter_vec->find_last_of ( string("_") )-1;
+                n1=iter_vec->find_last_of ( string("_"),n2 );
+                locFeatureName=iter_vec->substr(n1+1,n2-n1);
+                temp->setName(locFeatureName);
 				output->appendTimedFeature(temp);
 				delete temp;
             }
@@ -778,6 +809,10 @@ ACMediaTimedFeature* ACMedia::getTimedFeatures(string feature_name) {
 	{	
 		output = new ACMediaTimedFeature();
 		output->loadFromFile(*iter_vec,_binary);
+        size_t n2= iter_vec->find_last_of ( string("_") )-1;
+        size_t n1=iter_vec->find_last_of ( string("_"),n2 );
+        string locFeatureName=iter_vec->substr(n1+1,n2-n1);
+        output->setName(locFeatureName);
 		
         if (output != 0) {
             iter_vec++;
@@ -785,6 +820,10 @@ ACMediaTimedFeature* ACMedia::getTimedFeatures(string feature_name) {
 				
 				ACMediaTimedFeature* temp=new ACMediaTimedFeature();
 				temp->loadFromFile(*iter_vec,false);
+                n2= iter_vec->find_last_of ( string("_") )-1;
+                n1=iter_vec->find_last_of ( string("_"),n2 );
+                locFeatureName=iter_vec->substr(n1+1,n2-n1);
+                temp->setName(locFeatureName);
 				if(!(feature_name.compare(temp->getName()))) {
 					output->appendTimedFeature(temp);
 					delete temp;

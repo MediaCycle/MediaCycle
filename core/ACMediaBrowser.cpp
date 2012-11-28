@@ -900,7 +900,8 @@ void ACMediaBrowser::setFeatureWeights(vector<float> &weights)
 // XS node, not media
 void ACMediaBrowser::setClusterIndex(int nodeIdx,int clusterIdx){
     // XS TODO check bounds
-    this->getMediaNode(nodeIdx)->setClusterId (clusterIdx);
+    if (this->getMediaNode(nodeIdx))
+        this->getMediaNode(nodeIdx)->setClusterId (clusterIdx);
 }
 
 void ACMediaBrowser::setClusterCenter(int clusterIdx, vector<FeaturesVector > clusterCenter){

@@ -38,6 +38,7 @@
 
 using namespace arma;
 
+
 Isomap::Isomap(){
 }
 

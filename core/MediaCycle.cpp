@@ -699,6 +699,18 @@ void MediaCycle::changeReferenceNode(){
     }
 }
 
+void MediaCycle::changeSelectedNodeClusterId(int ClusterId){
+    int media_id = this->getClosestNode();
+    if (mediaBrowser->getMediaNode(media_id)){
+        if (mediaLibrary->getMediaTaggedClassId(media_id)!=ClusterId){
+            std::cout << "MediaCycle::changeSelectedNodeClusterId "<<ClusterId<<"for mediaId"<<media_id << std::endl;
+            this->setMediaTaggedClassId(media_id, ClusterId);
+            mediaBrowser->updateDisplay();
+        }
+    }
+
+}
+
 // == Features
 void MediaCycle::normalizeFeatures(int needsNormalize) { mediaLibrary->normalizeFeatures(needsNormalize); }
 // Get Features Vector (identified by feature_name) in media i
@@ -778,7 +790,7 @@ vector<int>* MediaCycle::getNeedsActivityUpdateMedia() {
 // == callbacks
 
 void MediaCycle::pickedObjectCallback(int _mediaId) {
-    std::cout << "MediaCycle::pickedObjectCallback node id " << _mediaId << " file " << this->getMediaFileName( _mediaId ) << std::endl;
+    std::cout << "MediaCycle::pickedObjectCallback node id " << _mediaId <<" cluster id "<<mediaBrowser->getMediaNode(_mediaId)->getClusterId() <<"tagged Class:"<< mediaLibrary->getMediaTaggedClassId(_mediaId)<<" file " << this->getMediaFileName( _mediaId ) << std::endl;
     if(_mediaId < 0) {
         // clicked close to a node
         if (getNumberOfPointers() > 0)

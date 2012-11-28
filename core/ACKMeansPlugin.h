@@ -45,7 +45,7 @@ class ACKMeansPlugin : public ACClusterMethodPlugin {
 public:
     ACKMeansPlugin();
     ~ACKMeansPlugin();
-    void updateClusters(ACMediaBrowser* mediaBrowser,bool needsCluster=true);
+    virtual void updateClusters(ACMediaBrowser* mediaBrowser,bool needsCluster=true);
     void clusterNumberChanged();
 };
 

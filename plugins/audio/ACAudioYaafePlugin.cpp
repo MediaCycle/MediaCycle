@@ -641,8 +641,8 @@ std::vector<ACMediaFeatures*> ACAudioYaafePlugin::calculate(ACMediaData* aData, 
     bool save_binary = false;//CF was true
     string mtf_file_name; // file(s) in which feature(s) will be saved
     string file_ext =  "_b.mtf";
-    //if(!save_binary)
-    //    file_ext =  "_t.mtf";
+    if(!save_binary)
+        file_ext =  "_t.mtf";
     string aFileName = theMedia->getFileName();
     string aFileName_noext = aFileName.substr(0,aFileName.find_last_of('.'));
     std::map<std::string,ACMediaTimedFeature*>::iterator mf;
@@ -653,15 +653,15 @@ std::vector<ACMediaFeatures*> ACAudioYaafePlugin::calculate(ACMediaData* aData, 
     int feature_length = -1;
     if(theMedia->getParentId()==-1){
         bool featuresAvailable = true;
-        for (std::vector<std::string>::iterator feat = mDescriptorsList.begin();feat!=mDescriptorsList.end();feat++){
+        for (std::vector<std::string>::iterator featIt = mDescriptorsList.begin();featIt!=mDescriptorsList.end();featIt++){
             ACMediaTimedFeature* feature = 0;
             feature = new ACMediaTimedFeature();
             bool featureAvailable = false;
             //std::cout << "ACAudioYaafePlugin: trying to load feature named '" << *feat << "'... " << std::endl;
-            mtf_file_name = aFileName_noext + "_" + (*feat) + file_ext;
+            mtf_file_name = aFileName_noext + "_" + (*featIt) + file_ext;
             featureAvailable = feature->loadFromFile(mtf_file_name,save_binary);
             if(featureAvailable && feature){
-                feature->setName(*feat);
+                feature->setName(*featIt);
                 featureAvailable = this->addMediaTimedFeature(feature, aFileName);
                 if(featureAvailable){
                     if(feature_length != -1){

@@ -223,6 +223,14 @@ ACOsgCompositeViewQt::~ACOsgCompositeViewQt(){
     if(examineMediaExternallyAction) delete examineMediaExternallyAction; examineMediaExternallyAction = 0;
     if(forwardNextLevelAction) delete forwardNextLevelAction; forwardNextLevelAction = 0;
     if(changeReferenceNodeAction) delete changeReferenceNodeAction; changeReferenceNodeAction = 0;
+    if(changeSelectedNodeClusterIdAction.size()>0){
+        for (int i=0;i<10;i++){
+            if (changeSelectedNodeClusterIdAction[i])
+                delete changeSelectedNodeClusterIdAction[i];
+            changeSelectedNodeClusterIdAction[i] = 0;
+        }
+        changeSelectedNodeClusterIdAction.clear();
+    }
     if(stopPlaybackAction) delete stopPlaybackAction; stopPlaybackAction = 0;
     if(toggleMediaHoverAction) delete toggleMediaHoverAction; toggleMediaHoverAction = 0;
     if(resetBrowserAction) delete resetBrowserAction; resetBrowserAction = 0;
@@ -459,7 +467,7 @@ void ACOsgCompositeViewQt::initInputActions(){
     forwardNextLevelAction->setMouseEventType(QEvent::MouseButtonPress);
     connect(forwardNextLevelAction, SIGNAL(triggered(bool)), this, SLOT(forwardNextLevel()));
     this->addInputAction(forwardNextLevelAction);
-
+    
     changeReferenceNodeAction = new ACInputActionQt(tr("Change reference node"), this);
     changeReferenceNodeAction->setToolTip(tr("Recluster the cluster with another reference node or unwrap neighbors around the selected node"));
     changeReferenceNodeAction->setShortcut(Qt::Key_S);
@@ -467,6 +475,32 @@ void ACOsgCompositeViewQt::initInputActions(){
     changeReferenceNodeAction->setMouseEventType(QEvent::MouseButtonPress);
     connect(changeReferenceNodeAction, SIGNAL(triggered(bool)), this, SLOT(changeReferenceNode()));
     this->addInputAction(changeReferenceNodeAction);
+    
+    //QSignalMapper *changeSelectedNodeClusterIdMapper = new QSignalMapper();
+    for (int i=0;i<10;i++){
+        changeSelectedNodeClusterIdAction.push_back( new ACInputActionQt(tr("Set Cluster Id"), this));
+        changeSelectedNodeClusterIdAction[i]->setToolTip(tr("Change Cluster Id of the clicked Node"));
+        changeSelectedNodeClusterIdAction[i]->setShortcut(Qt::Key_0+i);
+        changeSelectedNodeClusterIdAction[i]->setKeyEventType(QEvent::KeyPress);
+        //changeSelectedNodeClusterIdAction[i]->setMouseEventType(QEvent::MouseButtonPress);
+ //       changeSelectedNodeClusterIdMapper->setMapping(changeSelectedNodeClusterIdAction[i], i);
+ //       connect(changeSelectedNodeClusterIdMapper, SIGNAL(mapped(const int &)), this, SLOT(changeSelectedNodeClusterId(const int &)));
+    }
+    connect(changeSelectedNodeClusterIdAction[0], SIGNAL(triggered(bool)), this, SLOT(changeSelectedNodeClusterId0(bool)));
+    connect(changeSelectedNodeClusterIdAction[1], SIGNAL(triggered(bool)), this, SLOT(changeSelectedNodeClusterId1(bool)));
+    connect(changeSelectedNodeClusterIdAction[2], SIGNAL(triggered(bool)), this, SLOT(changeSelectedNodeClusterId2(bool)));
+    connect(changeSelectedNodeClusterIdAction[3], SIGNAL(triggered(bool)), this, SLOT(changeSelectedNodeClusterId3(bool)));
+    connect(changeSelectedNodeClusterIdAction[4], SIGNAL(triggered(bool)), this, SLOT(changeSelectedNodeClusterId4(bool)));
+    connect(changeSelectedNodeClusterIdAction[5], SIGNAL(triggered(bool)), this, SLOT(changeSelectedNodeClusterId5(bool)));
+    connect(changeSelectedNodeClusterIdAction[6], SIGNAL(triggered(bool)), this, SLOT(changeSelectedNodeClusterId6(bool)));
+    connect(changeSelectedNodeClusterIdAction[7], SIGNAL(triggered(bool)), this, SLOT(changeSelectedNodeClusterId7(bool)));
+    connect(changeSelectedNodeClusterIdAction[8], SIGNAL(triggered(bool)), this, SLOT(changeSelectedNodeClusterId8(bool)));
+    connect(changeSelectedNodeClusterIdAction[9], SIGNAL(triggered(bool)), this, SLOT(changeSelectedNodeClusterId9(bool)));
+    for (int i=0;i<10;i++){
+        this->addInputAction(changeSelectedNodeClusterIdAction[i]);
+        
+    }
+    
     
     stopPlaybackAction = new ACInputActionQt(tr("Stop Playback"), this);
     stopPlaybackAction->setShortcut(Qt::Key_M);
@@ -645,6 +679,72 @@ void ACOsgCompositeViewQt::changeReferenceNode(){
     if (media_cycle == 0) return;
     std::cout << "ACOsgCompositeViewQt::changeReferenceNode" << std::endl;
     media_cycle->changeReferenceNode();
+}
+void ACOsgCompositeViewQt::changeSelectedNodeClusterId0(bool trig){
+    if (media_cycle == 0) return;
+    int newId=0;
+    if (trig==false)
+    media_cycle->changeSelectedNodeClusterId(newId);
+}
+
+void ACOsgCompositeViewQt::changeSelectedNodeClusterId1(bool trig){
+    if (media_cycle == 0) return;
+    int newId=1;
+    if (trig==false)
+    media_cycle->changeSelectedNodeClusterId(newId);
+}
+
+void ACOsgCompositeViewQt::changeSelectedNodeClusterId2(bool trig){
+    if (media_cycle == 0) return;
+    int newId=2;
+    if (trig==false)
+    media_cycle->changeSelectedNodeClusterId(newId);
+}
+
+void ACOsgCompositeViewQt::changeSelectedNodeClusterId3(bool trig){
+    if (media_cycle == 0) return;
+    int newId=3;
+    if (trig==false)
+    media_cycle->changeSelectedNodeClusterId(newId);
+}
+
+void ACOsgCompositeViewQt::changeSelectedNodeClusterId4(bool trig){
+    if (media_cycle == 0) return;
+    int newId=4;
+    if (trig==false)
+    media_cycle->changeSelectedNodeClusterId(newId);
+}
+
+void ACOsgCompositeViewQt::changeSelectedNodeClusterId5(bool trig){
+    if (media_cycle == 0) return;
+    int newId=5;
+    if (trig==false)
+    media_cycle->changeSelectedNodeClusterId(newId);
+}
+
+void ACOsgCompositeViewQt::changeSelectedNodeClusterId6(bool trig){
+    if (media_cycle == 0) return;
+    int newId=6;
+    media_cycle->changeSelectedNodeClusterId(newId);
+}
+
+void ACOsgCompositeViewQt::changeSelectedNodeClusterId7(bool trig){
+    if (media_cycle == 0) return;
+    int newId=7;
+    media_cycle->changeSelectedNodeClusterId(newId);
+}
+
+void ACOsgCompositeViewQt::changeSelectedNodeClusterId8(bool trig){
+    if (media_cycle == 0) return;
+    int newId=8;
+    if (trig==false)
+    media_cycle->changeSelectedNodeClusterId(newId);
+}
+
+void ACOsgCompositeViewQt::changeSelectedNodeClusterId9(bool trig){
+    if (media_cycle == 0) return;
+    int newId=9;
+    media_cycle->changeSelectedNodeClusterId(newId);
 }
 
 void ACOsgCompositeViewQt::stopPlayback(){
@@ -950,11 +1050,11 @@ void ACOsgCompositeViewQt::swipeTriggered(QSwipeGesture *gesture)
 // CF pan is triggered when holding one finger on the trackpad then sliding it
 void ACOsgCompositeViewQt::panTriggered(QPanGesture* gesture){
     #ifdef USE_DEBUG
-    std::cout << "ACOsgCompositeViewQt::panTriggered:";
-    std::cout << " offset x " << gesture->offset().x() << " y " << gesture->offset().y();
-    std::cout << " delta x " << gesture->delta().x() << " y " << gesture->delta().y();
-    std::cout << " acceleration " << gesture->acceleration() ;
-    std::cout << std::endl;
+   // std::cout << "ACOsgCompositeViewQt::panTriggered:";
+   // std::cout << " offset x " << gesture->offset().x() << " y " << gesture->offset().y();
+   // std::cout << " delta x " << gesture->delta().x() << " y " << gesture->delta().y();
+   // std::cout << " acceleration " << gesture->acceleration() ;
+   // std::cout << std::endl;
     #endif
 }
 

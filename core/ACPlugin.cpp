@@ -439,6 +439,8 @@ std::string ACTimedFeaturesPlugin::saveTimedFeatures(ACMediaTimedFeature* mtf, s
         boost::filesystem::create_directory(dir);
         
         string file_ext = "_b.mtf";
+        if(!_save_binary)
+            file_ext =  "_t.mtf";
         mtf_file_name = aFileName_direct+"/mtf"+aFileName_noext + "_" +this->mDescription + file_ext;
         
         if  (mtf->saveInFile(mtf_file_name, _save_binary)) // error message if failed

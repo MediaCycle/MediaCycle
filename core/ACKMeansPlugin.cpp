@@ -154,10 +154,13 @@ void ACKMeansPlugin::updateClusters(ACMediaBrowser* mediaBrowser,bool needsClust
     cluster_distances.resize(clusterCount);
 
     // Estimate Cluster Centers
-    if (needsCluster) {
+    if (needsCluster||clusterCenters.size()!=clusterCount) {
 
         // picking random object as initial cluster center
         srand(15);
+        if ( clusterCenters.size()!=clusterCount)
+            clusterCenters.resize(clusterCount);
+        
 
         // initialize cluster centers
         for(i=0; i<clusterCount; i++) {

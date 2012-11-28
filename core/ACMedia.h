@@ -68,6 +68,7 @@ protected:
     int startInt, endInt; // frame numbers
     std::vector<std::string> mtf_file_names;
     bool discarded; // allows to discard medias to be saved in libraries
+    int taggedClassId;
 private:
     void init();
 
@@ -191,6 +192,9 @@ public:
     std::vector<std::string> getTimedFileNames(){return mtf_file_names;};
     ACMediaTimedFeature* getTimedFeatures();
     ACMediaTimedFeature* getTimedFeatures(std::string feature_name);
+    void setTaggedClassId(int pId){taggedClassId=pId;};
+    int getTaggedClassId(void){ return taggedClassId;};
+    
 };
 
 #endif // ACMEDIA_H

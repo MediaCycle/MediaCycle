@@ -1,7 +1,7 @@
 /**
  * @brief ACVisPluginIsoMap.cpp
  * @author Thierry Ravet
- * @date 24/11/2012
+ * @date 28/11/2012
  * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -86,7 +86,7 @@ void ACVisPluginIsoMap::updateNextPositions(ACMediaBrowser* mediaBrowser){
     //princomp(coeff, posDisp_m, descN_m);
     Isomap algo;
     while (algo.setFeatureMatrix(desc_m,'k',Kn)==false){
-        Kn++;
+        Kn+=5;
         if (Kn>desc_m.n_rows)
             break;
     }

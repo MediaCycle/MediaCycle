@@ -180,6 +180,10 @@ public:
     ACMediaReaderPlugin* getMediaReaderPlugin(){return mReaderPlugin;}
 
     ACMediaType getActiveSubMediaType();
+    
+    void setMediaTaggedClassId(int mediaId,int pId);
+    int getMediaTaggedClassId(int mediaId);
+    
 #ifdef SUPPORT_MULTIMEDIA
     std::string getActiveSubMediaKey();
     int setActiveMediaType(std::string mediaName, ACPluginManager *acpl);

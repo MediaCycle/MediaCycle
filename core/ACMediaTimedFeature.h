@@ -59,6 +59,7 @@ protected:
 	arma::fmat value_m;
 	std::vector<float> seg_v; // vector containing segments in seconds
 	std::string name;
+    std::vector<std::string> names;
 	
 public:
 	ACMediaTimedFeature();
@@ -76,12 +77,15 @@ public:
 	void setTime(arma::fcolvec);
 	double* getTimeAsDouble();
 	arma::fmat getValue();
+	arma::fmat getValue(std::string featuresName);
 	float getValue(float index, float dim);
 	void setValue(arma::fmat);
-        void setTimeAndValueForIndex(long iIndex, double iTime, arma::frowvec iVal_v);
+    void setTimeAndValueForIndex(long iIndex, double iTime, arma::frowvec iVal_v);
 	void setTimeAndValueForIndex(long iIndex, double iTime, std::vector<float> iVal);
 	std::string getName(){return name;};
-	void setName(std::string name){this->name = name;};
+    const std::vector<std::string> &getNames(){return names;};
+    std::vector<std::string> getDistinctNames();
+	void setName(std::string name);
 	size_t getLength();
 	size_t getDim();
         bool isConsistent();

@@ -111,6 +111,7 @@ public:
     void setBrowserMode(ACBrowserMode _mode);
     bool changeBrowserMode(ACBrowserMode _mode);
     void cleanBrowser() { mediaBrowser->clean(); }
+    
 
     //Listener manager
     void addListener(ACEventListener* eventListener);
@@ -199,6 +200,12 @@ public:
     void setForwardDown(int i);
     void forwardNextLevel();
     void changeReferenceNode();
+    
+    void changeSelectedNodeClusterId(int ClusterId);
+    
+    void setMediaTaggedClassId(int mediaId,int pId){if (mediaLibrary) mediaLibrary->setMediaTaggedClassId(mediaId,pId);};
+    int getMediaTaggedClassId(int mediaId){return (mediaLibrary?mediaLibrary->getMediaTaggedClassId(mediaId):-1);};
+    
     //	void setPlayKeyDown(bool i){playkeydown = i;};
     //	bool getPlayKeyDown(){return playkeydown;};
 

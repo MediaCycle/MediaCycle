@@ -77,6 +77,16 @@ public slots:
     // Browser
     void forwardNextLevel(); // recluster the selected cluster (cluster mode) or unwrap node (network mode)
     void changeReferenceNode();
+    void changeSelectedNodeClusterId0(bool trig);
+    void changeSelectedNodeClusterId1(bool trig);
+    void changeSelectedNodeClusterId2(bool trig);
+    void changeSelectedNodeClusterId3(bool trig);
+    void changeSelectedNodeClusterId4(bool trig);
+    void changeSelectedNodeClusterId5(bool trig);
+    void changeSelectedNodeClusterId6(bool trig);
+    void changeSelectedNodeClusterId7(bool trig);
+    void changeSelectedNodeClusterId8(bool trig);
+    void changeSelectedNodeClusterId9(bool trig);
     void stopPlayback(); // stop the playback of audio/video files
     void toggleMediaHover(bool toggle); // audio hover, image/video ... -> need a panel to configure the behaviour of hover
     void triggerMediaHover(bool trigger); // audio hover, image/video ... -> need a panel to configure the behaviour of hover
@@ -150,6 +160,7 @@ private:
     *addMediaOnTimelineTrackAction, *toggleTimelinePlaybackAction, *adjustTimelineHeightAction,
     *discardMediaAction;
     //*neighborsOfReferentAction, *clusterAroundReferentAction, *removeMediaAction
+    std::vector<ACInputActionQt*> changeSelectedNodeClusterIdAction;
     QList<ACInputActionQt*> inputActions;
 
     void initInputActions();

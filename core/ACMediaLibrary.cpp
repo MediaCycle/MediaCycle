@@ -1347,6 +1347,26 @@ int ACMediaLibrary::setActiveMediaType(std::string mediaName, ACPluginManager *a
 }
 #endif//def SUPPORT_MULTIMEDIA
 
+
+void ACMediaLibrary::setMediaTaggedClassId(int mediaId,int pId){
+    cout<<"ACMediaLibrary::setMediaTaggedClassId mediaId:"<<mediaId<<" class:"<<pId<<endl;
+    if (media_library.find(mediaId)==media_library.end())
+        return;
+    if (media_library[mediaId])
+        media_library[mediaId]->setTaggedClassId(pId);
+}
+
+int ACMediaLibrary::getMediaTaggedClassId(int mediaId){
+    if (media_library.find(mediaId)==media_library.end())
+        return -1;
+    if (media_library[mediaId])
+        return media_library[mediaId]->getTaggedClassId();
+    else
+        return -1;
+};
+
+
+
 // -------------------------------------------------------------------------
 // test
 //#if defined(SUPPORT_VIDEO) and defined(USE_FFMPEG)

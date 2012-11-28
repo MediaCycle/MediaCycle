@@ -1,7 +1,7 @@
 /**
  * @brief ACVisPluginSIsoMap.cpp
  * @author Thierry Ravet
- * @date 24/11/2012
+ * @date 28/11/2012
  * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -43,7 +43,7 @@ ACVisPluginSIsomap::ACVisPluginSIsomap() : ACClusterPositionsPlugin()
     //vars herited from ACPlugin
     this->mMediaType = MEDIA_TYPE_ALL;
     this->mName = "MediaCycle SIsomap";
-    this->mDescription = "supervised dimensionnality reduction resulting from SIsomap";
+    this->mDescription = "supervised dimensionnality reduction resulting from Supervized Isomap";
     this->mId = "";
     Kn=10;
 
@@ -90,6 +90,7 @@ void ACVisPluginSIsomap::updateNextPositions(ACMediaBrowser* mediaBrowser){
         label[i]=mediaBrowser->getMediaNode(i)->getClusterId();
     while (algo.setFeatureMatrix(desc_m,label,'k',Kn)==false){
         Kn++;
+        cout<<"ACVisPluginIsoMap::updateNextPositions Kn:"<<Kn<<endl;
         if (Kn>desc_m.n_rows)
             break;
     }
