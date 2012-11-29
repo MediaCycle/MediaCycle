@@ -1,5 +1,5 @@
 //
-//  sIsomap.h
+//  sMds.cpp
 //  MediaCycle
 //
 //  @author Thierry Ravet
@@ -30,28 +30,56 @@
 //  Any other additional authorizations may be asked to avre@umons.ac.be 
 //  <mailto:avre@umons.ac.be>
 //
-// Reference:
-//Supervised nonlinear dimensionality reduction for visualization and classification.
-//by: Xin Geng, De-Chuan Zhan, and Zhi-Hua Zhou
-//In: IEEE Transactions on Systems, Man, and Cybernetics, Part B, Vol. 35, Nr. 6 (2005) , p. 1098-1107.
-//
 
-#ifndef MediaCycle_sIsomap_h
-#define MediaCycle_sIsomap_h
-
-#include <armadillo>
+#include <iostream>
+#include "smds.h"
 #include "mds.h"
-#include "Isomap.h"
+#include "limits.h"
 
-class sIsomap: public Isomap {
-public:
-    sIsomap(double a=0.5);
-    ~sIsomap();
-    bool setDistanceMatrix(arma::mat D,arma::urowvec label, char n_fct,double param);
-    bool setFeatureMatrix(arma::mat F,arma::urowvec label,char n_fct,double param);
-protected:
-    double alpha;
-};
+using namespace arma;
+
+sMds::sMds(double a){
+    this->alpha=a;
+}
 
 
-#endif
+bool sMds::setFeatureMatrix(arma::mat F,arma::urowvec label){
+    uword N=F.n_rows;
+    if (N!=label.n_cols)
+        return false;
+    mat D(F.n_rows,F.n_rows) ;
+    for (uword i=0;i<F.n_rows;i++){
+        for (uword j=0;j<i;j++){
+            D(j,i)=sqrt(sum(pow((F.row(i)-F.row(j)),2)));
+        }
+        D(i,i)=0.0;
+    }
+    D=symmatu(D);
+    //cout<<D<<endl;
+  //  cout<<"computedD:"<<endl<<D<<endl;
+    return this->setDistanceMatrix(D,label);
+}
+
+bool sMds::setDistanceMatrix(arma::mat D,arma::urowvec label){
+    uword N=D.n_rows;
+    double beta=sum(sum(D))/(N*N);
+    for (uword i=0;i<N;i++){
+        for (uword j=0;j<i;j++){
+            if(label[i]==label[j])
+                D(j,i)=sqrt(1-exp(-pow(D(j,i),2)/beta));
+            else
+                D(j,i)=sqrt(exp(pow(D(j,i),2)/beta))-alpha;
+            
+            
+            
+        }
+        D(i,i)=0.0;
+        
+    }
+    D=symmatu(D);
+    return mds::setDistanceMatrix(D);
+}
+
+
+
+sMds::~sMds(){}

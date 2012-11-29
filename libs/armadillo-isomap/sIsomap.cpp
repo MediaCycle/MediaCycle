@@ -30,6 +30,10 @@
 //  Any other additional authorizations may be asked to avre@umons.ac.be 
 //  <mailto:avre@umons.ac.be>
 //
+// Reference:
+//Supervised nonlinear dimensionality reduction for visualization and classification.
+//by: Xin Geng, De-Chuan Zhan, and Zhi-Hua Zhou
+//In: IEEE Transactions on Systems, Man, and Cybernetics, Part B, Vol. 35, Nr. 6 (2005) , p. 1098-1107.
 
 #include <iostream>
 #include "sIsomap.h"

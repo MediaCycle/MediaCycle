@@ -1,5 +1,5 @@
 //
-//  sIsomap.h
+//  sMds.h
 //  MediaCycle
 //
 //  @author Thierry Ravet
@@ -30,25 +30,19 @@
 //  Any other additional authorizations may be asked to avre@umons.ac.be 
 //  <mailto:avre@umons.ac.be>
 //
-// Reference:
-//Supervised nonlinear dimensionality reduction for visualization and classification.
-//by: Xin Geng, De-Chuan Zhan, and Zhi-Hua Zhou
-//In: IEEE Transactions on Systems, Man, and Cybernetics, Part B, Vol. 35, Nr. 6 (2005) , p. 1098-1107.
-//
 
-#ifndef MediaCycle_sIsomap_h
-#define MediaCycle_sIsomap_h
+#ifndef MediaCycle_sMds_h
+#define MediaCycle_sMds_h
 
 #include <armadillo>
 #include "mds.h"
-#include "Isomap.h"
 
-class sIsomap: public Isomap {
+class sMds: public mds {
 public:
-    sIsomap(double a=0.5);
-    ~sIsomap();
-    bool setDistanceMatrix(arma::mat D,arma::urowvec label, char n_fct,double param);
-    bool setFeatureMatrix(arma::mat F,arma::urowvec label,char n_fct,double param);
+    sMds(double a=0.5);
+    ~sMds();
+    bool setDistanceMatrix(arma::mat D,arma::urowvec label);
+    bool setFeatureMatrix(arma::mat F,arma::urowvec label);
 protected:
     double alpha;
 };
