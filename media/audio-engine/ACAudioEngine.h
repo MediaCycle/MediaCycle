@@ -109,6 +109,8 @@ public:
 	// Synchro and Scale modes
 	void setLoopSynchroMode(int _loop_id, ACAudioEngineSynchroMode _synchro_mode){feedback->setLoopSynchroMode(_loop_id, _synchro_mode);}
 	void setLoopScaleMode(int _loop_id, ACAudioEngineScaleMode _scale_mode){feedback->setLoopScaleMode(_loop_id, _scale_mode);}
+    void updateSynchroMode(ACAudioEngineSynchroMode _synchro_mode){feedback->updateSynchroMode(_synchro_mode);}
+    void updateScaleMode(ACAudioEngineScaleMode _scale_mode){feedback->updateScaleMode(_scale_mode);}
 	void setDefaultSynchroMode(ACAudioEngineSynchroMode _synchro_mode){feedback->setDefaultSynchroMode(_synchro_mode);}
 	void setDefaultScaleMode(ACAudioEngineScaleMode _scale_mode){feedback->setDefaultScaleMode(_scale_mode);}
 	void forceDefaultSynchroMode(bool _force){feedback->forceDefaultSynchroMode(_force);}

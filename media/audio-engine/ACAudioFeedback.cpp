@@ -288,7 +288,7 @@ void ACAudioFeedback::createOpenAL()
 			if(alGetError() != AL_NO_ERROR)
 			{
 				printf("Error generating OpenAL Sources!\n");
-				exit(1);
+                return;//exit(1);
 			}
 
 		}
@@ -387,7 +387,7 @@ void ACAudioFeedback::createAudioEngine(int _output_sample_rate, int _output_buf
 		alGenBuffers(local_output_buffer_n, loop_buffers_audio_engine_stream[count]);
 		if((error = alGetError()) != AL_NO_ERROR) {
 			printf("Error Generating OpenAL Buffers for audio engine AL_STREAM mode!");
-			exit(1);
+            return;//exit(1);
 		}
 	}
 #endif
@@ -647,7 +647,8 @@ void ACAudioFeedback::processAudioUpdate()
 
 	vector<int>* mNeedsActivityUpdateMedia;
 	mNeedsActivityUpdateMedia = media_cycle->getNeedsActivityUpdateMedia();
-
+    if(!mNeedsActivityUpdateMedia)
+        return;
 	for (i=0;i<(*mNeedsActivityUpdateMedia).size();i++) {
             loop_id = (*mNeedsActivityUpdateMedia)[i];
             const ACMediaNode* attribute(0);
@@ -1038,7 +1039,7 @@ bool ACAudioFeedback::processAudioEngine()
 					alGenBuffers(1, &local_buffer);
 					if((error = alGetError()) != AL_NO_ERROR) {
 						printf("Error Regenerating OpenAL Buffers for audio engine AL_STREAM !\n");
-						//exit(1);
+                        return -1;//exit(1);
 					}
 					alBufferData(local_buffer, format, data, size*2, freq);
 					//alBufferData(loop_buffers_audio_engine_stream[count][current], format, data, size*2, freq);
@@ -1634,6 +1635,30 @@ int ACAudioFeedback::getLoopSlot(int loop_id)
 	return loop_slot;
 }
 
+void ACAudioFeedback::updateSynchroMode(ACAudioEngineSynchroMode _synchro_mode){
+    this->setDefaultSynchroMode(_synchro_mode);
+    for (int i=0;i<OPENAL_NUM_BUFFERS;i++) {
+        if(loop_ids[i] != -1){
+            this->setLoopSynchroMode(loop_ids[i],_synchro_mode);
+        }
+    }
+#ifdef USE_DEBUG
+std::cout << "ACAudioFeedback::updateSynchroMode: " << _synchro_mode << std::endl;
+#endif
+}
+
+void ACAudioFeedback::updateScaleMode(ACAudioEngineScaleMode _scale_mode){
+    this->setDefaultScaleMode(_scale_mode);
+    for (int i=0;i<OPENAL_NUM_BUFFERS;i++) {
+        if(loop_ids[i] != -1){
+            this->setLoopScaleMode(loop_ids[i],_scale_mode);
+        }
+    }
+#ifdef USE_DEBUG
+std::cout << "ACAudioFeedback::updateScaleMode: " << _scale_mode << std::endl;
+#endif
+}
+
 void ACAudioFeedback::setLoopSynchroMode(int _loop_id, ACAudioEngineSynchroMode _synchro_mode)
 {
 	int _loop_slot = getLoopSlot(_loop_id);
@@ -1827,7 +1852,7 @@ int ACAudioFeedback::createSourceWithPosition(int loop_id, float x, float y, flo
 	float* dataf = 0;// = new float[samplesize];
 	dataf = tmp_audio_ptr->getSamples();
 
-	if (dataf) {
+    if (dataf) {
 		size = samplesize * sizeof(float);
 		freq = tmp_audio_ptr->getSampleRate();
 
@@ -1849,7 +1874,7 @@ int ACAudioFeedback::createSourceWithPosition(int loop_id, float x, float y, flo
 		//if (format ==  AL_FORMAT_STEREO16) {
 		if (channels == 2) {
 			for (count=sample_start;count<sample_end;count++) {
-				datashort[count-sample_start] = ((short)(dataf[2*(count-sample_start)]*0x7FFF)+(short)(dataf[2*(count-sample_start)+1]*0x7FFF))/2;
+                datashort[count-sample_start] = ((short)(dataf[2*(count-sample_start)]*0x7FFF)+(short)(dataf[2*(count-sample_start)+1]*0x7FFF))/2;
 			}
 			//format = AL_FORMAT_MONO16;
 		}
@@ -1947,7 +1972,7 @@ int ACAudioFeedback::createSourceWithPosition(int loop_id, float x, float y, flo
 
 		if((error = alGetError()) != AL_NO_ERROR) {
 			printf("Error attaching buffer to source");
-			exit(1);
+            return -1;//exit(1);
 		}
 
 		// In this case, the buffer is not needed anymore, it has been copied by OpenAL
@@ -1962,8 +1987,7 @@ int ACAudioFeedback::createSourceWithPosition(int loop_id, float x, float y, flo
 		// DT: make sample start work
 		prev_sample_pos[loop_slot] = use_sample_start[loop_slot]; // SD TODO
 		//current_buffer[loop_slot] = 0;
-		
-		if ( (local_acid_type==7) || (local_acid_type==65536) ) {
+        /*if ( (local_acid_type==7) || (local_acid_type==65536) ) {
 			loop_synchro_mode[loop_slot] = default_synchro_mode; // usually ACAudioEngineSynchroModeNone
 			loop_scale_mode[loop_slot] = default_scale_mode; // usually ACAudioEngineScaleModeNone
 		}
@@ -1979,7 +2003,9 @@ int ACAudioFeedback::createSourceWithPosition(int loop_id, float x, float y, flo
 		if(force_default_synchro_mode)
 			loop_synchro_mode[loop_slot] = default_synchro_mode;
 		if(force_default_scale_mode)
-			loop_scale_mode[loop_slot] = default_scale_mode;			
+            loop_scale_mode[loop_slot] = default_scale_mode;*/
+        loop_synchro_mode[loop_slot] = default_synchro_mode;//CF
+        loop_scale_mode[loop_slot] = default_scale_mode;//CF
 
 		//pv[loop_slot] = pv_complex_curses_init2(datashort,size,freq,0,1.0,0,2048,512,3,2); //hard-coded
 		setSamples(&(tpv[loop_slot]),(short*)datashort,(int)size,(int)freq);
@@ -2075,15 +2101,15 @@ int ACAudioFeedback::deleteSource(int loop_id)
 	error = alGetError();
 	if(error == AL_INVALID_VALUE) {
 		printf("Error Unqueue Buffers invalid value %d!\n", current_unqueue);
-		//exit(1);
+        return -1;//exit(1);
 	}
 	if(error == AL_INVALID_NAME) {
 		printf("Error Unqueue Buffers invalid name %d!\n", current_unqueue);
-		//exit(1);
+        return -1;//exit(1);
 	}
 	if(error == AL_INVALID_OPERATION) {
 		printf("Error Unqueue Buffers invalid operation %d!\n", current_unqueue);
-		//exit(1);
+        return -1;//exit(1);
 	}
 	//alSourcei(loop_source, AL_BUFFER, 0);
 
@@ -2130,7 +2156,7 @@ int ACAudioFeedback::createExtSource(float* _buffer, int _length){
 
 	if (alGetError() != AL_NO_ERROR){
 		std::cerr << "createExtSource, openAL error : " << alGetError() << std::endl;
-		exit(1);
+        return -1;//exit(1);
 	}
 
 	short* buffer_short = new short[_length];
@@ -2144,14 +2170,14 @@ int ACAudioFeedback::createExtSource(float* _buffer, int _length){
 	alGenBuffers(1, &ext_loop_buffer);
 	if (alGetError() != AL_NO_ERROR){
 		std::cerr << "createExtSource, openAL error : " << alGetError() << std::endl;
-		exit(1);
+        return -1;//exit(1);
 	}
 
 	alBufferData(ext_loop_buffer, AL_FORMAT_MONO16, buffer_short, _length * sizeof(short), audio_samplerate);
 
 	if (alGetError() != AL_NO_ERROR){
 		std::cerr << "createExtSource, openAL error : " << alGetError() << std::endl;
-		exit(1);
+        return -1;//exit(1);
 	}
 
 	alGenSources(1, &ext_loop_source);
@@ -2174,17 +2200,17 @@ int ACAudioFeedback::deleteExtSource()
 	stopExtSource();
 	if (alGetError() != AL_NO_ERROR){
 		std::cerr << "createExtSource, openAL error : " << alGetError() << std::endl;
-		exit(1);
+        return -1;//exit(1);
 	}
 	alDeleteSources(1, &ext_loop_source);
 	if (alGetError() != AL_NO_ERROR){
 		std::cerr << "createExtSource, openAL error : " << alGetError() << std::endl;
-		exit(1);
+        return -1;//exit(1);
 	}
 	alDeleteBuffers(1, &ext_loop_buffer);
 	if (alGetError() != AL_NO_ERROR){
 		std::cerr << "createExtSource, openAL error : " << alGetError() << std::endl;
-		exit(1);
+        return -1;//exit(1);
 	}
 	ext_loop_length = 0;
 	#else
@@ -2200,7 +2226,7 @@ void ACAudioFeedback::loopExtSource()
 		alSourcePlay(ext_loop_source);
 	if (alGetError() != AL_NO_ERROR){
 		std::cerr << "createExtSource, openAL error : " << alGetError() << std::endl;
-		exit(1);
+        return;//exit(1);
 	}
 	#else
 	std::cerr << "ACAudioFeedback::loopExtSource() not yet implemented for the PortAudio backend." << std::endl;
@@ -2214,7 +2240,7 @@ void ACAudioFeedback::stopExtSource()
 		alSourceStop(ext_loop_source);
 	if (alGetError() != AL_NO_ERROR){
 		std::cerr << "createExtSource, openAL error : " << alGetError() << std::endl;
-		exit(1);
+        return;//exit(1);
 	}
 	#else
 	std::cerr << "ACAudioFeedback::stopExtSource() not yet implemented for the PortAudio backend." << std::endl;

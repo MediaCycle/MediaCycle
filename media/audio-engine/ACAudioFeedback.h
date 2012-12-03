@@ -48,7 +48,7 @@
 #endif
 
 #include <sys/time.h>
-#include <TiPhaseVocoder.h>
+#include "TiPhaseVocoder.h"
 #include <pthread.h>
 
 #define DEG2RAD(x) (0.0174532925 * (x))
@@ -151,6 +151,8 @@ public:
 	// Synchro and Scale modes
 	void setLoopSynchroMode(int _loop_id, ACAudioEngineSynchroMode _synchro_mode);
 	void setLoopScaleMode(int _loop_id, ACAudioEngineScaleMode _scale_mode);
+    void updateSynchroMode(ACAudioEngineSynchroMode _synchro_mode);
+    void updateScaleMode(ACAudioEngineScaleMode _scale_mode);
 	void setDefaultSynchroMode(ACAudioEngineSynchroMode _synchro_mode);
 	void setDefaultScaleMode(ACAudioEngineScaleMode _scale_mode);
 	void forceDefaultSynchroMode(bool _force);
