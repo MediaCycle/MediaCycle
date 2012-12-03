@@ -1,11 +1,10 @@
 /*
- *  ACOsgBrowserRenderer.h
+ *  ACAudioOsgRendererPlugin.h
  *  MediaCycle
  *
- *  @author Stéphane Dupont
- *  @date 24/08/09
- *
- *  @copyright (c) 2009 – UMONS - Numediart
+ *  @author Christian Frisson
+ *  @date 04/11/12
+ *  @copyright (c) 2012 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
  *  licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -33,45 +32,22 @@
  *
  */
 
-#ifndef __ACOSG_AUDIO_RENDERER_H__
-#define __ACOSG_AUDIO_RENDERER_H__
+#include <ACPlugin.h>
 
-#if defined (SUPPORT_AUDIO)
+#ifndef ACAudioOsgRendererPlugin_H
+#define	ACAudioOsgRendererPlugin_H
 
-#include "ACOsgMediaRenderer.h"
+#include "ACOsgRendererPlugin.h"
 
-class ACOsgAudioRenderer : public ACOsgMediaRenderer {
-
-protected:
-    osg::ref_ptr<osg::Geode> waveform_geode;
-    osg::ref_ptr<osg::Geode> curser_geode;
-
-#ifdef AUTO_TRANSFORM
-    osg::ref_ptr<osg::AutoTransform> curser_transform;
-#else
-    osg::ref_ptr<osg::MatrixTransform> curser_transform;
-#endif
-    osg::ref_ptr<osg::Geode> entry_geode;
-    osg::ref_ptr<osg::Geode> aura_geode;
-
-    void waveformGeode();
-    void curserGeode();
-    void entryGeode();
-    void auraGeode();
-
-
-    ACBrowserAudioWaveformType waveform_type;
-
+class ACAudioOsgRendererPlugin : public ACOsgRendererPlugin
+{
 public:
-    ACOsgAudioRenderer();
-    ~ACOsgAudioRenderer();
-    void prepareNodes();
-    void updateNodes(double ratio=0.0);
-    ACBrowserAudioWaveformType getWaveformType(){return waveform_type;}
-    void setWaveformType(ACBrowserAudioWaveformType _type);
-    void updateWaveformType(ACBrowserAudioWaveformType _type);
-    virtual void changeSetting(ACSettingType _setting);
+    ACAudioOsgRendererPlugin();
+    ~ACAudioOsgRendererPlugin();
+    virtual std::map<std::string, ACMediaType> getSupportedExtensions(ACMediaType media_type = MEDIA_TYPE_ALL);
+    virtual ACOsgMediaRenderer* createMediaRenderer(ACMediaType media_type);
+    virtual ACOsgTrackRenderer* createTrackRenderer(ACMediaType media_type);
+    virtual std::vector<ACMediaType> getSupportedMediaTypes();
 };
 
-#endif //defined (SUPPORT_AUDIO)
 #endif

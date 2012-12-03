@@ -33,7 +33,6 @@
  *
  */
 
-#if defined (SUPPORT_AUDIO)
 #include "ACOsgAudioTrackRenderer.h"
 #include <osgUtil/Tessellator> // to tessellate multiple contours
 
@@ -1188,4 +1187,3 @@ void ACOsgAudioTrackRenderer::updateTracks(double ratio) {
  }
  */
 }
-#endif //defined (SUPPORT_AUDIO)

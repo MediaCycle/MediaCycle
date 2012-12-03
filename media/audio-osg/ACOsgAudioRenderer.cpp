@@ -33,12 +33,13 @@
  *
  */
 
-#if defined (SUPPORT_AUDIO)
-
 #include "ACOsgAudioRenderer.h"
 #include <ACAudio.h>
 
 #include <osg/Version>
+#include <osgDB/Registry>
+//#include <osg/ImageUtils>
+#include <osgDB/ReadFile>
 
 using namespace osg;
 
@@ -52,6 +53,8 @@ ACOsgAudioRenderer::ACOsgAudioRenderer()
     entry_geode = 0;
     aura_geode=0;
     waveform_type = AC_BROWSER_AUDIO_WAVEFORM_CLASSIC;
+    thumbnail = 0;
+    thumbnail_texture = 0;
 }
 
 ACOsgAudioRenderer::~ACOsgAudioRenderer() {
@@ -60,6 +63,8 @@ ACOsgAudioRenderer::~ACOsgAudioRenderer() {
     curser_geode=0;
     curser_transform=0;
     entry_geode=0;
+    thumbnail = 0;
+    thumbnail_texture = 0;
 }
 
 void ACOsgAudioRenderer::changeSetting(ACSettingType _setting)
@@ -74,6 +79,144 @@ void ACOsgAudioRenderer::changeSetting(ACSettingType _setting)
         media_node->removeChild(metadata_geode);
         metadata_geode = 0;
     }
+}
+
+void ACOsgAudioRenderer::thumbnailGeode() {
+    if(!this->media){
+        std::cout << "ACOsgAudioRenderer::thumbnailGeode: can't access thumbnails, media not set" << std::endl;
+        return;
+    }
+    std::string thumbnail_filename = media->getThumbnailFileName("Classic browser waveform");
+    if(thumbnail_filename==""){
+        std::cout << "ACOsgAudioRenderer::thumbnailGeode: can't access thumbnail" << std::endl;
+        return;
+    }
+
+    osg::ref_ptr<osgDB::ReaderWriter> readerWriter = osgDB::Registry::instance()->getReaderWriterForExtension(boost::filesystem::extension(thumbnail_filename).substr(1));
+    if (!readerWriter){
+        cerr << "ACOsgAudioRenderer::thumbnailGeode: can't find an OSG plugin to read file '" << thumbnail_filename << "'" << endl;
+        return;
+    }
+    else{
+        cout <<"ACOsgAudioRenderer::thumbnailGeode: using OSG plugin: "<< readerWriter->className() <<std::endl;
+    }
+
+    thumbnail = osgDB::readImageFile(thumbnail_filename);
+    if (!thumbnail){
+        cerr << "<ACOsgAudioRenderer::thumbnailGeode: problem loading thumbnail" << endl;
+        return;
+    }
+    else{
+        thumbnail_texture = new osg::Texture2D;
+        thumbnail_texture->setImage(thumbnail);
+    }
+
+    double xstep = 0.0005;
+
+    float zpos = 0.02;
+    double ylim = 0.025, xlim = 0.025;
+    double imagex, imagey;
+
+    double imagesurf;
+
+    float sizemul=1.0;
+    ylim *=sizemul;
+    xlim *=sizemul;
+
+    int width, height;
+
+    StateSet *state;
+
+    Vec3Array* vertices;
+    osg::ref_ptr<DrawElementsUInt> line_p;
+    Vec2Array* texcoord;
+
+    osg::ref_ptr<Geometry> thumbnail_geometry;
+
+    //width = media_cycle->getThumbnailWidth(media_index);//CF instead of node_index
+    //height = media_cycle->getThumbnailHeight(media_index);//CF instead of node_index
+    width = media->getThumbnailWidth();
+    height = media->getThumbnailHeight();
+    height = 100; //
+
+    std::cout << "ACOsgAudioRenderer::thumbnailGeode: geode with (thumbnail) width " <<  width << " and height " << height << std::endl;
+
+    thumbnail_geometry = new Geometry();
+
+    //zpos = zpos - 0.00001 * node_index;
+
+    // image vertices
+    float scale;
+    imagesurf = xlim * ylim;
+    scale = sqrt ((float)imagesurf / (width*height));
+    imagex = scale * width;
+    imagey = scale * height;
+    vertices = new Vec3Array(4);
+    /*(*vertices)[0] = Vec3(-imagex, -imagey, zpos);
+    (*vertices)[1] = Vec3(imagex, -imagey, zpos);
+    (*vertices)[2] = Vec3(imagex, imagey, zpos);
+    (*vertices)[3] = Vec3(-imagex, imagey, zpos);*/
+    (*vertices)[0] = Vec3(0, -imagey, zpos);
+    (*vertices)[1] = Vec3(2*imagex, -imagey, zpos);
+    (*vertices)[2] = Vec3(2*imagex, imagey, zpos);
+    (*vertices)[3] = Vec3(0, imagey, zpos);
+    thumbnail_geometry->setVertexArray(vertices);
+
+    // Primitive Set
+    osg::ref_ptr<DrawElementsUInt> poly = new DrawElementsUInt(PrimitiveSet::QUADS, 4);
+    poly->push_back(0);
+    poly->push_back(1);
+    poly->push_back(2);
+    poly->push_back(3);
+    thumbnail_geometry->addPrimitiveSet(poly);
+
+    // State Set
+    waveform_geode = 0;
+    waveform_geode = new Geode();
+    state = waveform_geode->getOrCreateStateSet();
+    state->setMode(GL_LIGHTING, osg::StateAttribute::PROTECTED | osg::StateAttribute::OFF );
+    state->setMode(GL_BLEND, StateAttribute::ON);
+    state->setMode(GL_LINE_SMOOTH, StateAttribute::ON);
+    //state->setRenderingHint(osg::StateSet::TRANSPARENT_BIN); //CF from OSG's examples/osgmovie.cpp, doesn't solve the transparent first frame for video geodes
+
+    // Texture Coordinates
+    texcoord = new Vec2Array;
+
+// XS TODO!!
+//http://lists.openscenegraph.org/pipermail/osg-users-openscenegraph.org/2009-August/032147.html
+//	other ways of flipping:
+//	* use osg::Image's flipVertical()
+//	* just flip the texture coordinates
+
+    float zoomin=1.0;
+    float a = (1.0-(1.0/zoomin)) / 2.0;
+    float b = 1.0-a;
+    bool flip=false;
+    texcoord->push_back(osg::Vec2(a, flip ? b : a));
+    texcoord->push_back(osg::Vec2(b, flip ? b : a));
+    texcoord->push_back(osg::Vec2(b, flip ? a : b));
+    texcoord->push_back(osg::Vec2(a, flip ? a : b));
+    thumbnail_geometry->setTexCoordArray(0, texcoord);
+
+    // Texture State (image)
+
+    //ACMediaType media_type = media_cycle->getLibrary()->getMedia(media_index)->getType();
+    thumbnail_texture->setResizeNonPowerOfTwoHint(false);
+
+    // XS TODO add this line?
+    // http://groups.google.com/group/osg-users/browse_thread/thread/f623b62f62e39473?pli=1
+    //thumbnail_texture->setUnRefImageDataAfterApply(true);
+    state = thumbnail_geometry->getOrCreateStateSet();
+    state->setTextureAttribute(0, thumbnail_texture);
+    state->setTextureMode(0, GL_TEXTURE_2D, osg::StateAttribute::ON);
+
+    osg::ref_ptr<osg::Vec4Array> colors = new Vec4Array(1);
+    (*colors)[0] = node_color;
+    //thumbnail_geometry->setColorArray(colors);
+    //thumbnail_geometry->setColorBinding(Geometry::BIND_OVERALL);
+
+     waveform_geode->addDrawable(thumbnail_geometry);
+     waveform_geode->setUserData(new ACRefId(node_index));
 }
 
 void ACOsgAudioRenderer::waveformGeode() {
@@ -475,6 +618,7 @@ void ACOsgAudioRenderer::updateNodes(double ratio) {
         if(waveform_type != AC_BROWSER_AUDIO_WAVEFORM_NONE){
             if(waveform_geode == 0 ) {
                 waveformGeode();
+                //thumbnailGeode();
             }
             if (curser_transform == 0) {
                 curserGeode();
@@ -653,4 +797,3 @@ void ACOsgAudioRenderer::updateWaveformType(ACBrowserAudioWaveformType _type)
         this->updateNodes();
     }
 }
-#endif //defined (SUPPORT_AUDIO)
