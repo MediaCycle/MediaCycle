@@ -32,8 +32,6 @@
  *
  */
 
-#if defined (SUPPORT_IMAGE) 
-
 #include "ACImage.h"
 #include <fstream>
 #include <osgDB/FileNameUtils>
@@ -318,5 +316,3 @@ osg::ref_ptr<osg::Image> ACImage::openCVToOSG(IplImage* cvImg, int sx, int sy) {
 	}
 	
 }
-
-#endif //defined (SUPPORT_IMAGE)

@@ -35,7 +35,6 @@
 #ifndef ACIMAGE_H
 #define ACIMAGE_H
 
-#if defined (SUPPORT_IMAGE) 
 #include "ACOpenCVInclude.h"
 #include "ACMedia.h"
 #include "ACImageData.h"
@@ -90,5 +89,4 @@ private:
 	
 };
 
-#endif //defined (SUPPORT_IMAGE)
 #endif // ACIMAGE_H

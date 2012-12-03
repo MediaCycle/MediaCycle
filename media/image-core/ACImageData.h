@@ -1,5 +1,5 @@
 /*
- *  ACImageData.cpp
+ *  ACImageData.h
  *  MediaCycle
  *
  *  @author Xavier Siebert
@@ -32,58 +32,30 @@
  *
  */
 
-#if defined (SUPPORT_IMAGE)
-#include "ACImageData.h"
-#include <string>
-#include <iostream>
-using std::cerr;
-using std::endl;
-using std::string;
+#ifndef ACIMAGEDATA_H
+#define ACIMAGEDATA_H
 
+#include "ACMediaData.h"
+#include "ACOpenCVInclude.h"
+#include "ACMediaTypes.h"
+#include <osgDB/ReadFile>
 
-ACImageData::ACImageData() { 
-	this->init();
-}
+class ACImageData: public ACMediaData {
+public:
+	ACImageData();
+	ACImageData(std::string _fname); // XS TODO check this
+	~ACImageData();
 
-ACImageData::ACImageData(std::string _fname) { 
-	this->init();
-	file_name=_fname;
-	this->readData(_fname);
-}
+	virtual bool readData(std::string _fname);
+	virtual void* getData() {return static_cast<void*>(image_ptr);}
+//	virtual IplImage* getData() {return image_ptr;}
+	void setData(IplImage* _data);	
 
-void ACImageData::init() {
-	media_type = MEDIA_TYPE_IMAGE;
-	image_ptr = 0;
-}
-
-ACImageData::~ACImageData() {
-	if (image_ptr != 0) cvReleaseImage(&image_ptr);
-	image_ptr = 0;
-}
-
-bool ACImageData::readData(std::string _fname){
-	if(_fname=="") return false;
-	image_ptr = cvLoadImage(_fname.c_str(), CV_LOAD_IMAGE_COLOR);	
-
-	try {
-		if (!image_ptr) {
-			cerr << "Check file name : " << _fname << endl;
-			throw(string(" <ACImageData::readData> CV_LOAD_IMAGE_COLOR : not a color image !"));
-		}
-	}
-	catch (const string& not_image_file) {
-		cerr << not_image_file << endl;
-		return false;
-	}
-	return true;
-}
-
-void ACImageData::setData(IplImage* _data){
-	cvCopy(_data,image_ptr);		
-	if( !image_ptr ) {
-		cerr << "<ACImageData::setData> Could not set data" << endl;
-	}
-}
-
-
-#endif //defined (SUPPORT_IMAGE)
+protected:
+	virtual void init();
+	
+private:
+	IplImage* image_ptr;
+	
+};
+#endif // ACIMAGEDATA_H
