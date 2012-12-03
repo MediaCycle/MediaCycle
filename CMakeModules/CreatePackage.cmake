@@ -1,8 +1,6 @@
 # MediaCycle packaging system.
 #
 # at the end of any application that needs packaging, adapt the following variables:
-# * SET(USE_AUDIO ON), SET(USE_IMAGE ON), SET(USE_VIDEO ON), SET(USE_3DMODEL ON), SET(USE_TEXT ON) to match the supported media types,
-#   it optimizes the bundled libraries for single-media applications
 # * SET(PROGNAME "app-name") where app-name matches the CMake target name of the application
 # * (optional) SET(WITH_QT4 ON) if you application uses Qt4 as GUI framework
 # * (optional) SET(MC_PACKAGE_DESCRIPTION "...")
@@ -20,10 +18,10 @@ IF(UNIX OR APPLE) # not yet tested with Windows
 	INCLUDE(InstallRequiredSystemLibraries)
 	set(CPACK_PACKAGE_NAME "${PROGNAME}")
 	set(CPACK_BUNDLE_NAME "${PROGNAME}")
-    IF(NOT CPACK_PACKAGE_DESCRIPTION_SUMMARY AND NOT MC_PACKAGE_DESCRIPTION_SUMMARY)
+    IF(NOT CPACK_PACKAGE_DESCRIPTION_SUMMARY AND NOT DESCRIPTION)
 	    set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Software part of the MediaCycle framework")
     ELSE()
-	    set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "${MC_PACKAGE_DESCRIPTION_SUMMARY}")   
+	    set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "${DESCRIPTION}")   
     ENDIF()
     IF(NOT CPACK_PACKAGE_DESCRIPTION AND NOT MC_PACKAGE_DESCRIPTION)
 	    set(CPACK_PACKAGE_DESCRIPTION "MediaCycle is a framework for the navigation in multimedia content databases by similarity, using a content-based approach fueled by several feature extraction and clustering algorithms. For more information check http://www.numediart.org")
@@ -101,18 +99,18 @@ IF(UNIX)
             # TinyXML
             # for previous versions 3rdparty/tinyxml is used		
             IF(("${LSB_DISTRIB}" MATCHES "Ubuntu10.10") OR ("${LSB_DISTRIB}" MATCHES "Ubuntu11.04"))
-                SET(UBUNTU_DEPS "libtinyxml2.5.3")
+                list(APPEND UBUNTU_DEPS "libtinyxml2.5.3")
             ELSEIF(("${LSB_DISTRIB}" MATCHES "Ubuntu10.04") OR ("${LSB_DISTRIB}" MATCHES "Ubuntu11.10") OR ("${LSB_DISTRIB}" MATCHES "Ubuntu12.04"))
-                SET(UBUNTU_DEPS "libtinyxml2.6.2")
+                list(APPEND UBUNTU_DEPS "libtinyxml2.6.2")
             ENDIF()
 	
             # Boost
             IF("${LSB_DISTRIB}" MATCHES "Ubuntu10.04")
-                SET(UBUNTU_DEPS "libboost-serialization1.40.0" "libboost-system1.40.0" "libboost-filesystem1.40.0" "libboost-graph1.40.0" "libboost-thread1.40.0")
+                list(APPEND UBUNTU_DEPS "libboost-serialization1.40.0" "libboost-system1.40.0" "libboost-filesystem1.40.0" "libboost-graph1.40.0" "libboost-thread1.40.0")
             ELSEIF("${LSB_DISTRIB}" MATCHES "Ubuntu10.10")
-                SET(UBUNTU_DEPS "libboost-serialization1.40.0|libboost-serialization1.42.0" "libboost-system1.40.0|libboost-system1.42.0" "libboost-filesystem1.40.0|libboost-filesystem1.42.0" "libboost-graph1.40.0|libboost-graph1.42.0" "libboost-thread1.40.0|libboost-thread1.42.0")
+                list(APPEND UBUNTU_DEPS "libboost-serialization1.40.0|libboost-serialization1.42.0" "libboost-system1.40.0|libboost-system1.42.0" "libboost-filesystem1.40.0|libboost-filesystem1.42.0" "libboost-graph1.40.0|libboost-graph1.42.0" "libboost-thread1.40.0|libboost-thread1.42.0")
             ELSEIF("${LSB_DISTRIB}" MATCHES "Ubuntu11.04")
-                SET(UBUNTU_DEPS "libboost-serialization1.42.0" "libboost-system1.42.0" "libboost-filesystem1.42.0" "libboost-graph1.42.0" "libboost-thread1.42.0")
+                list(APPEND UBUNTU_DEPS "libboost-serialization1.42.0" "libboost-system1.42.0" "libboost-filesystem1.42.0" "libboost-graph1.42.0" "libboost-thread1.42.0")
             ENDIF()
 
             # Armadillo
@@ -129,9 +127,9 @@ IF(UNIX)
                 list(APPEND UBUNTU_DEPS "libopenscenegraph65" "libopenthreads13")
             ENDIF()
 
-            IF(WITH_OSG AND WITH_QT4 AND SUPPORT_VIDEO AND USE_VIDEO AND FFMPEG_FOUND) # dirty test to check if we're packaging a GUI application under Ubuntu
-                #INSTALL(FILES ${CMAKE_BINARY_DIR}/3rdparty/osgdb_ffmpeg/osgdb_ffmpeg.so DESTINATION lib/osgPlugins-${OPENSCENEGRAPH_VERSION} COMPONENT ${PROGNAME})
-            ENDIF()
+            #IF(WITH_OSG AND WITH_QT4 AND SUPPORT_VIDEO AND USE_VIDEO AND FFMPEG_FOUND) # dirty test to check if we're packaging a GUI application under Ubuntu
+            #    #INSTALL(FILES ${CMAKE_BINARY_DIR}/3rdparty/osgdb_ffmpeg/osgdb_ffmpeg.so DESTINATION lib/osgPlugins-${OPENSCENEGRAPH_VERSION} COMPONENT ${PROGNAME})
+            #ENDIF()
 
             # Qt4 libqtcore4 and libqtgui4 are package for kubuntu, libqt4-core and libqt4-gui for ubuntu
             IF(USE_QT4 AND WITH_QT4)
@@ -260,7 +258,7 @@ IF(UNIX)
 		#INSTALL(FILES ${CMAKE_SOURCE_DIR}/data/icons/32px/MultiMediaCycle.xpm DESTINATION share/pixmaps COMPONENT ${PROGNAME} RENAME ${PROGNAME}.xpm)
 
 		# Install the .desktop description
-		file(WRITE ${CMAKE_BINARY_DIR}/${PROGNAME}.desktop [Desktop\ Entry]\nType=Application\nExec=${PROGNAME}\nMimeType=application/x-${PROGNAME};\nIcon=${PROGNAME}\nName=${PROGNAME}\nGenericName=${MC_PACKAGE_DESCRIPTION_SUMMARY}\nComment=${MC_PACKAGE_DESCRIPTION_SUMMARY})
+		file(WRITE ${CMAKE_BINARY_DIR}/${PROGNAME}.desktop [Desktop\ Entry]\nType=Application\nExec=${PROGNAME}\nMimeType=application/x-${PROGNAME};\nIcon=${PROGNAME}\nName=${PROGNAME}\nGenericName=${DESCRIPTION}\nComment=${DESCRIPTION})
 		INSTALL(FILES ${CMAKE_BINARY_DIR}/${PROGNAME}.desktop DESTINATION share/applications COMPONENT ${PROGNAME})
 
 	ENDIF("${LSB_DISTRIB}" MATCHES "Ubuntu|Debian")
@@ -320,32 +318,9 @@ INSTALL(TARGETS ${PROGNAME}
 
 # Install the plugins for Linux (and Windows?)
 IF(NOT APPLE)
-    INSTALL(FILES ${CMAKE_BINARY_DIR}/plugins/visualisation/${PLUGIN_PREFIX}visualisation.${PLUGIN_SUFFIX} DESTINATION lib COMPONENT ${PROGNAME})
-    INSTALL(FILES ${CMAKE_BINARY_DIR}/plugins/file/${PLUGIN_PREFIX}file.${PLUGIN_SUFFIX} DESTINATION lib COMPONENT ${PROGNAME})
-    INSTALL(FILES ${CMAKE_BINARY_DIR}/plugins/segmentation/${PLUGIN_PREFIX}segmentation.${PLUGIN_SUFFIX} DESTINATION lib COMPONENT ${PROGNAME})
-    INSTALL(FILES ${CMAKE_BINARY_DIR}/plugins/pcapreprocess/${PLUGIN_PREFIX}pcapreprocess.${PLUGIN_SUFFIX} DESTINATION lib COMPONENT ${PROGNAME})
-    IF(SUPPORT_3DMODEL AND USE_3DMODEL)
-	INSTALL(FILES ${CMAKE_BINARY_DIR}/plugins/3Dmodel/${PLUGIN_PREFIX}3Dmodel.${PLUGIN_SUFFIX} DESTINATION lib COMPONENT ${PROGNAME})
-    ENDIF()
-    IF(SUPPORT_AUDIO AND USE_AUDIO)
-        INSTALL(FILES ${CMAKE_BINARY_DIR}/plugins/audio/${PLUGIN_PREFIX}audio.${PLUGIN_SUFFIX} DESTINATION lib COMPONENT ${PROGNAME})
-    ENDIF()
-    IF(SUPPORT_IMAGE AND USE_IMAGE)
-        INSTALL(FILES ${CMAKE_BINARY_DIR}/plugins/image/${PLUGIN_PREFIX}image.${PLUGIN_SUFFIX} DESTINATION lib COMPONENT ${PROGNAME})
-    ENDIF()
-    IF(SUPPORT_VIDEO AND USE_VIDEO)
-	INSTALL(FILES ${CMAKE_BINARY_DIR}/plugins/image/${PLUGIN_PREFIX}image.${PLUGIN_SUFFIX} DESTINATION lib COMPONENT ${PROGNAME})
-        INSTALL(FILES ${CMAKE_BINARY_DIR}/plugins/video/${PLUGIN_PREFIX}video.${PLUGIN_SUFFIX} DESTINATION lib COMPONENT ${PROGNAME})
-    ENDIF()
-    IF(SUPPORT_TEXT AND USE_TEXT)
-        INSTALL(FILES ${CMAKE_BINARY_DIR}/plugins/text/${PLUGIN_PREFIX}text.${PLUGIN_SUFFIX} DESTINATION lib COMPONENT ${PROGNAME})
-    ENDIF()
-    IF(SUPPORT_ARCHIPEL AND USE_ARCHIPEL)
-        INSTALL(FILES ${CMAKE_BINARY_DIR}/plugins/archipel/${PLUGIN_PREFIX}archipel.${PLUGIN_SUFFIX} DESTINATION lib COMPONENT ${PROGNAME})
-    ENDIF()
-    IF(SUPPORT_NAVIMED AND USE_NAVIMED)
-        INSTALL(FILES ${CMAKE_BINARY_DIR}/plugins/navimed/${PLUGIN_PREFIX}navimed.${PLUGIN_SUFFIX} DESTINATION lib COMPONENT ${PROGNAME})
-    ENDIF()
+	foreach(MC_PLUGIN ${MC_PLUGINS})
+		INSTALL(FILES ${CMAKE_BINARY_DIR}/plugins/${MC_PLUGIN}/${PLUGIN_PREFIX}${MC_PLUGIN}.${PLUGIN_SUFFIX} DESTINATION lib COMPONENT ${PROGNAME})
+	endforeach(MC_PLUGIN)
 ENDIF()
 
 #--------------------------------------------------------------------------------
@@ -377,46 +352,10 @@ ENDIF()
 #--------------------------------------------------------------------------------
 # Install needed MC plugins
 IF(WITH_MC AND APPLE)#to generalize for other platforms
-	INSTALL(PROGRAMS "${CMAKE_BINARY_DIR}/plugins/file/mc_file.dylib" DESTINATION ${PROGNAME}.app/Contents/MacOS COMPONENT ${PROGNAME})
-	SET(MCPLUGINS "${CMAKE_INSTALL_PREFIX}/${PROGNAME}.app/Contents/MacOS/mc_file.dylib")
-	INSTALL(PROGRAMS "${CMAKE_BINARY_DIR}/plugins/segmentation/mc_segmentation.dylib" DESTINATION ${PROGNAME}.app/Contents/MacOS COMPONENT ${PROGNAME})
-	SET(MCPLUGINS "${MCPLUGINS}" "${CMAKE_INSTALL_PREFIX}/${PROGNAME}.app/Contents/MacOS/mc_segmentation.dylib")
-	INSTALL(PROGRAMS "${CMAKE_BINARY_DIR}/plugins/visualisation/mc_visualisation.dylib" DESTINATION ${PROGNAME}.app/Contents/MacOS COMPONENT ${PROGNAME})
-	SET(MCPLUGINS "${MCPLUGINS}" "${CMAKE_INSTALL_PREFIX}/${PROGNAME}.app/Contents/MacOS/mc_visualisation.dylib")
-	INSTALL(PROGRAMS "${CMAKE_BINARY_DIR}/plugins/pcapreprocess/mc_pcapreprocess.dylib" DESTINATION ${PROGNAME}.app/Contents/MacOS COMPONENT ${PROGNAME})
-	SET(MCPLUGINS "${MCPLUGINS}" "${CMAKE_INSTALL_PREFIX}/${PROGNAME}.app/Contents/MacOS/mc_pcapreprocess.dylib")
-	IF((SUPPORT_IMAGE AND USE_IMAGE) OR (SUPPORT_VIDEO AND USE_VIDEO))
-		INSTALL(PROGRAMS "${CMAKE_BINARY_DIR}/plugins/image/mc_image.dylib" DESTINATION ${PROGNAME}.app/Contents/MacOS COMPONENT ${PROGNAME})
-		SET(MCPLUGINS "${MCPLUGINS}" "${CMAKE_INSTALL_PREFIX}/${PROGNAME}.app/Contents/MacOS/mc_image.dylib")
-	ENDIF()
-	IF(SUPPORT_VIDEO AND USE_VIDEO)
-		INSTALL(PROGRAMS "${CMAKE_BINARY_DIR}/plugins/video/mc_video.dylib" DESTINATION ${PROGNAME}.app/Contents/MacOS COMPONENT ${PROGNAME})
-		SET(MCPLUGINS "${MCPLUGINS}" "${CMAKE_INSTALL_PREFIX}/${PROGNAME}.app/Contents/MacOS/mc_video.dylib")
-	ENDIF()
-	IF(SUPPORT_AUDIO AND USE_AUDIO)
-		INSTALL(PROGRAMS "${CMAKE_BINARY_DIR}/plugins/audio/mc_audio.dylib" DESTINATION ${PROGNAME}.app/Contents/MacOS COMPONENT ${PROGNAME})
-		SET(MCPLUGINS "${MCPLUGINS}" "${CMAKE_INSTALL_PREFIX}/${PROGNAME}.app/Contents/MacOS/mc_audio.dylib")
-		IF(USE_VAMP)
-			INSTALL(PROGRAMS "${CMAKE_BINARY_DIR}/plugins/vamp/mc_vamp.dylib" DESTINATION ${PROGNAME}.app/Contents/MacOS COMPONENT ${PROGNAME})
-			SET(MCPLUGINS "${MCPLUGINS}" "${CMAKE_INSTALL_PREFIX}/${PROGNAME}.app/Contents/MacOS/mc_vamp.dylib")
-		ENDIF(USE_VAMP)
-	ENDIF()
-	IF(SUPPORT_3DMODEL AND USE_3DMODEL)
-		INSTALL(PROGRAMS "${CMAKE_BINARY_DIR}/plugins/3Dmodel/mc_3Dmodel.dylib" DESTINATION ${PROGNAME}.app/Contents/MacOS COMPONENT ${PROGNAME})
-		SET(MCPLUGINS "${MCPLUGINS}" "${CMAKE_INSTALL_PREFIX}/${PROGNAME}.app/Contents/MacOS/mc_3Dmodel.dylib")
-	ENDIF()
-	IF(SUPPORT_TEXT AND USE_TEXT)
-		INSTALL(PROGRAMS "${CMAKE_BINARY_DIR}/plugins/text/mc_text.dylib" DESTINATION ${PROGNAME}.app/Contents/MacOS COMPONENT ${PROGNAME})
-		SET(MCPLUGINS "${MCPLUGINS}" "${CMAKE_INSTALL_PREFIX}/${PROGNAME}.app/Contents/MacOS/mc_text.dylib")
-	ENDIF()
-	IF(SUPPORT_ARCHIPEL AND USE_ARCHIPEL)
-		INSTALL(PROGRAMS "${CMAKE_BINARY_DIR}/plugins/archipel/mc_archipel.dylib" DESTINATION ${PROGNAME}.app/Contents/MacOS COMPONENT ${PROGNAME})
-		SET(MCPLUGINS "${MCPLUGINS}" "${CMAKE_INSTALL_PREFIX}/${PROGNAME}.app/Contents/MacOS/mc_archipel.dylib")
-	ENDIF()
-	IF(SUPPORT_NAVIMED AND USE_NAVIMED)
-		INSTALL(PROGRAMS "${CMAKE_BINARY_DIR}/plugins/navimed/mc_navimed.dylib" DESTINATION ${PROGNAME}.app/Contents/MacOS COMPONENT ${PROGNAME})
-		SET(MCPLUGINS "${MCPLUGINS}" "${CMAKE_INSTALL_PREFIX}/${PROGNAME}.app/Contents/MacOS/mc_navimed.dylib")
-	ENDIF()
+	foreach(MC_PLUGIN ${MC_PLUGINS})
+		INSTALL(PROGRAMS "${CMAKE_BINARY_DIR}/plugins/${MC_PLUGIN}/mc_${MC_PLUGIN}.dylib" DESTINATION ${PROGNAME}.app/Contents/MacOS COMPONENT ${PROGNAME})
+		list(APPEND MCPLUGINS "${CMAKE_INSTALL_PREFIX}/${PROGNAME}.app/Contents/MacOS/${PLUGIN_PREFIX}${MC_PLUGIN}.${PLUGIN_SUFFIX}")
+	endforeach(MC_PLUGIN)
 ENDIF()
 
 #--------------------------------------------------------------------------------
