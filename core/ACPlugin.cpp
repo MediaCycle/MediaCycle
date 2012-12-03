@@ -34,6 +34,7 @@
 
 #include "ACPlugin.h"
 #include "ACMedia.h"
+#include "ACEventManager.h"
 
 #include <iostream>
 using std::cout;
@@ -88,6 +89,7 @@ ACPlugin::ACPlugin() {
     this->mPluginType = PLUGIN_TYPE_NONE;
     this->mMediaType = MEDIA_TYPE_NONE;
     this->media_cycle = 0;
+    this->event_manager = new ACEventManager;
 }
 
 ACPlugin::~ACPlugin() {
@@ -95,6 +97,17 @@ ACPlugin::~ACPlugin() {
     mDescription.clear();
     mId.clear();
     this->media_cycle=0;
+}
+
+void ACPlugin::setMediaCycle(MediaCycle* _media_cycle)
+{
+    this->media_cycle=_media_cycle;
+    if(!_media_cycle){
+        std::cerr << "ACPlugin::setMediaCycle: null mediacycle instance" << std::endl;
+        return;
+    }
+    if(this->event_manager)
+        this->event_manager->addListener( this->media_cycle->getPluginEventListener() );
 }
 
 bool ACPlugin::hasNumberParameterNamed(std::string _name){
@@ -108,6 +121,14 @@ bool ACPlugin::hasNumberParameterNamed(std::string _name){
 bool ACPlugin::hasStringParameterNamed(std::string _name){
     for(std::vector<ACStringParameter>::iterator StringParameter = mStringParameters.begin(); StringParameter != mStringParameters.end(); StringParameter++ ){
         if((*StringParameter).name == _name)
+            return true;
+    }
+    return false;
+}
+
+bool ACPlugin::hasCallbackNamed(std::string _name){
+    for(std::vector<ACCallback>::iterator Callback = mCallbacks.begin(); Callback != mCallbacks.end(); Callback++ ){
+        if((*Callback).name == _name)
             return true;
     }
     return false;
@@ -162,6 +183,27 @@ void ACPlugin::updateNumberParameter(std::string _name, float _init, float _min,
                 (*NumberParameter).callback = _callback;
 #ifdef USE_DEBUG
             std::cout << " ACPlugin::updateNumberParameterValues: plugin '" << mName << "', parameter '"<< _name << std::endl;
+#endif
+            return;
+        }
+    }
+}
+
+
+void ACPlugin::addCallback(std::string _name, std::string _desc, ACParameterCallback _callback)
+{
+    mCallbacks.push_back(ACCallback(_name,_desc,_callback));
+}
+
+void ACPlugin::updateCallback(std::string _name, std::string _desc, ACParameterCallback _callback){
+    for(std::vector<ACCallback>::iterator Callback = mCallbacks.begin(); Callback != mCallbacks.end(); Callback++ ){
+        if((*Callback).name == _name){
+            if(_desc != "")
+                (*Callback).desc = _desc;
+            if(_callback)
+                (*Callback).callback = _callback;
+#ifdef USE_DEBUG
+            std::cout << " ACPlugin::updateCallbackValues: plugin '" << mName << "', parameter '"<< _name << std::endl;
 #endif
             return;
         }
@@ -383,6 +425,45 @@ std::vector<std::string> ACPlugin::getNumberParametersNames()
     return names;
 }
 
+std::vector<ACCallback> ACPlugin::getCallbacks(){
+    return mCallbacks;
+}
+
+int ACPlugin::getCallbacksCount(){
+    return mCallbacks.size();
+}
+
+std::string ACPlugin::getCallbackDesc(std::string _name){
+    for(std::vector<ACCallback>::iterator Callback = mCallbacks.begin(); Callback != mCallbacks.end(); Callback++ ){
+        if((*Callback).name == _name){
+            return (*Callback).desc;
+        }
+    }
+    return "";
+}
+
+std::vector<std::string> ACPlugin::getCallbacksNames(){
+    std::vector<std::string> names;
+    for(std::vector<ACCallback>::iterator Callback = mCallbacks.begin(); Callback != mCallbacks.end(); Callback++ ){
+        names.push_back((*Callback).name);
+    }
+    return names;
+}
+
+bool ACPlugin::triggerCallback(std::string _name){
+    for(std::vector<ACCallback>::iterator Callback = mCallbacks.begin(); Callback != mCallbacks.end(); Callback++ ){
+        if((*Callback).name == _name){
+#ifdef USE_DEBUG
+            std::cout << " ACPlugin::triggerCallback: plugin '" << mName << "', callback '"<< _name << "'" << std::endl;
+#endif
+            if ( (*Callback).callback != 0 )
+                (*Callback).callback();
+            return true;
+        }
+    }
+    return false;
+}
+
 bool ACPlugin::implementsPluginType(ACPluginType pType) {
     int test = mPluginType&pType;
     if (test == 0)
@@ -397,6 +478,14 @@ bool ACPlugin::mediaTypeSuitable(ACMediaType pType) {
         return false;
     else
         return true;
+}
+
+ACMediaReaderPlugin::ACMediaReaderPlugin() : ACPlugin() {
+    this->mPluginType = mPluginType | PLUGIN_TYPE_MEDIAREADER;
+}
+
+ACMediaRendererPlugin::ACMediaRendererPlugin() : ACPlugin() {
+    this->mPluginType = mPluginType | PLUGIN_TYPE_MEDIARENDERER;
 }
 
 ACFeaturesPlugin::ACFeaturesPlugin() : ACPlugin() {
@@ -453,6 +542,10 @@ ACSegmentationPlugin::ACSegmentationPlugin() : ACPlugin(){
     this->mPluginType = mPluginType | PLUGIN_TYPE_SEGMENTATION;
 }
 
+ACThumbnailerPlugin::ACThumbnailerPlugin() : ACPlugin() {
+    this->mPluginType = mPluginType | PLUGIN_TYPE_THUMBNAILER;
+}
+
 ACClusterMethodPlugin::ACClusterMethodPlugin() : ACPlugin() {
     this->mPluginType = mPluginType | PLUGIN_TYPE_CLUSTERS_METHOD;
 }
@@ -481,7 +574,14 @@ ACPreProcessPlugin::ACPreProcessPlugin() : ACPlugin() {
     this->mPluginType = mPluginType | PLUGIN_TYPE_PREPROCESS;
 }
 
-ACMediaReaderPlugin::ACMediaReaderPlugin() : ACPlugin() {
-    this->mPluginType = mPluginType | PLUGIN_TYPE_MEDIAREADER;
+ACClientPlugin::ACClientPlugin() : ACPlugin() {
+    this->mPluginType = mPluginType | PLUGIN_TYPE_CLIENT;
 }
 
+ACServerPlugin::ACServerPlugin() : ACPlugin() {
+    this->mPluginType = mPluginType | PLUGIN_TYPE_SERVER;
+}
+
+ACClientServerPlugin::ACClientServerPlugin() : ACPlugin() {
+    this->mPluginType = mPluginType | (PLUGIN_TYPE_CLIENT | PLUGIN_TYPE_SERVER);
+}
