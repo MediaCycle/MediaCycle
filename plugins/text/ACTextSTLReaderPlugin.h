@@ -1,10 +1,10 @@
 /*
- *  MCMultiMediaXmlReader.h
+ *  ACTextSTLReaderPlugin.h
  *  MediaCycle
  *
- *  @author Thierry Ravet
- *  @date 30/06/11
- *  @copyright (c) 2011 – UMONS - Numediart
+ *  @author Christian Frisson
+ *  @date 14/10/12
+ *  @copyright (c) 2012 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
  *  licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -32,30 +32,20 @@
  *
  */
 
+#include <ACPlugin.h>
 
-#ifndef MCMultiMediaXmlReader_H
-#define	MCMultiMediaXmlReader_H
+#ifndef ACTextSTLReaderPlugin_H
+#define	ACTextSTLReaderPlugin_H
 
+#include <textFile.h>
 #include <string>
-#include <vector>
-#define TIXML_USE_STL
-#include "tinyxml.h"
-class MCMultiMediaXmlReader{
-public:	
-	MCMultiMediaXmlReader(std::string filename);
-	~MCMultiMediaXmlReader();
-	
-	bool isMCMultiMediaXml();
-	std::string getReference();
-	std::string getLabel();
-	unsigned int getNumberOfMedia();
-	std::string getMediaType(unsigned int index);
-	std::string getMediaReference(unsigned int index);
-	std::string getMediaPath(unsigned int index);
-protected:
-	TiXmlDocument *doc;
-	std::string filename;
-	bool loadOkay;
-};
 
+class ACTextSTLReaderPlugin : public ACMediaReaderPlugin
+{
+public:
+    ACTextSTLReaderPlugin();
+    ~ACTextSTLReaderPlugin();
+    virtual ACMedia* mediaFactory(ACMediaType mediaType, const ACMedia* media = 0);
+    std::map<std::string, ACMediaType> getSupportedExtensions(ACMediaType media_type = MEDIA_TYPE_ALL);
+};
 #endif

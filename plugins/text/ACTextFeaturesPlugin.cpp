@@ -134,11 +134,11 @@ void ACTextFeaturesPlugin::closeIndex(void) {
 	}
 }
 
-ACTextFeaturesPlugin::ACTextFeaturesPlugin() {
+ACTextFeaturesPlugin::ACTextFeaturesPlugin() : ACFeaturesPlugin(), ACPreProcessPlugin() {
     this->mMediaType = MEDIA_TYPE_TEXT;
     //this->mPluginType = PLUGIN_TYPE_FEATURES;
-    this->mName = "TextFeatures";
-    this->mDescription = "TextFeatures plugin";
+    this->mName = "Text Features";
+    this->mDescription = "Text Features plugin";
     this->mId = "";
 	this->mIndex=NULL;
 	this->mIndexValid=false;
