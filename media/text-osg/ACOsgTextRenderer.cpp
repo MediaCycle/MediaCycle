@@ -33,8 +33,6 @@
  *
  */
 
-#if defined (SUPPORT_TEXT)
-
 #include "ACOsgTextRenderer.h"
 #include <ACText.h>
 #include <textFile.h>
@@ -180,4 +178,3 @@ void ACOsgTextRenderer::updateNodes(double ratio) {
 #endif
 
 }
-#endif //defined (SUPPORT_TEXT)

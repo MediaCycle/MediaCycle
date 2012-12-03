@@ -32,8 +32,6 @@
  *
  */
 
-#if defined (SUPPORT_TEXT)
-
 #include "ACOsgTextTrackRenderer.h"
 #include <ACText.h>
 #include "boost/filesystem.hpp"   // includes all needed Boost.Filesystem declarations
@@ -86,13 +84,24 @@ void ACOsgTextTrackRenderer::textGeode() {
     text->setDrawMode(osgText::Text::TEXT);
     
     if(media){
-        //string = textFileRead(media->getFileName());//TR to replace to adapt to Navimed and archipel
-        utf8_string=media->getTextMetaData();
+        //utf8_string = textFileRead(media->getFileName());//TR to replace to adapt to Navimed and archipel
+        //utf8_string=media->getTextMetaData();
         //utf8_string=string("test\ntest\ntest\ntest\ntest\ntest\ntest\ntest");
+        ACMediaData* media_data = media->getMediaData();
+        if(!media_data){
+            std::cerr << "ACOsgTextTrackRenderer::textGeode: no media data available" << std::endl;
+            return;
+        }
+        ACTextData* text_data = dynamic_cast<ACTextData*>(media_data);
+        if(!text_data){
+            std::cerr << "ACOsgTextTrackRenderer::textGeode: no text data available" << std::endl;
+            return;
+        }
+        utf8_string=(*((string*)text_data->getData()));
         if(utf8_string!=std::string(""))
             text->setText(utf8_string,osgText::String::ENCODING_UTF8);
         else
-            std::cerr << "ACOsgTextTrackRenderer::textGeode text failed" << std::endl;
+            std::cerr << "ACOsgTextTrackRenderer::textGeode: text content empty" << std::endl;
     }
     std::cout<<text->getText().createUTF8EncodedString()<<std::endl;
     text->setMaximumWidth(width/xspan);
@@ -193,4 +202,3 @@ void ACOsgTextTrackRenderer::updateTracks(double ratio) {
     selection_center_pos_changed = false;
     
 }
-#endif //defined (SUPPORT_TEXT)

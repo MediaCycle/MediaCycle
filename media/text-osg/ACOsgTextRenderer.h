@@ -1,10 +1,11 @@
 /*
- *  ACOsgTextTrackRenderer.h
+ *  ACOsgTextRenderer.h
  *  MediaCycle
  *
- *  @author Christian Frisson
- *  @date 19/06/2012
- *  @copyright (c) 2012 – UMONS - Numediart
+ *  @author Christian Frisson and T. Ravet
+ *  @date 26/05/2011
+ *
+ *  @copyright (c) 2011 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
  *  licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -32,36 +33,23 @@
  *
  */
 
-#ifndef __ACOSG_TEXT_TRACK_RENDERER_H__
-#define __ACOSG_TEXT_TRACK_RENDERER_H__
+#ifndef __ACOSG_TEXT_RENDERER_H__
+#define __ACOSG_TEXT_RENDERER_H__
 
-#if defined (SUPPORT_TEXT)
+#include "ACOsgMediaRenderer.h"
+#include <osgText/Font>
+#include <osgText/Text>
 
-#include "ACOsgTrackRenderer.h"
-
-#include <osgWidget/Util>
-#include <osgWidget/WindowManager>
-#include <osgWidget/Box>
-
-class ACOsgTextTrackRenderer : public ACOsgTrackRenderer {
+class ACOsgTextRenderer : public ACOsgMediaRenderer {
 
 protected:
-    osg::ref_ptr<osg::Geode> text_geode;
-    osg::ref_ptr<osgText::Text> text;
-    osg::ref_ptr<osg::MatrixTransform> text_transform;
-    osg::ref_ptr<osg::MatrixTransform> selection_slider_transform;
-    osg::ref_ptr<osg::MatrixTransform> selection_zone_transform;
-
-    void textGeode();
-    bool isSliderVisible;
-    std::string utf8_string ;
+    osg::ref_ptr<osg::Geode> entry_geode;
+    void entryGeode();
 
 public:
-    ACOsgTextTrackRenderer();
-    ~ACOsgTextTrackRenderer();
-    void prepareTracks();
-    void updateTracks(double ratio=0.0);
+    ACOsgTextRenderer();
+    ~ACOsgTextRenderer();
+    void prepareNodes();
+    void updateNodes(double ratio=0.0);
 };
-
-#endif //defined (SUPPORT_TEXT)
 #endif
