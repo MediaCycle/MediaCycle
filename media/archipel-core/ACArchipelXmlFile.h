@@ -1,5 +1,5 @@
 /*
- *  ArchipelXmlFile.h
+ *  ACArchipelXmlFile.h
  *  MediaCycle
  *
  *  @author Thierry Ravet
@@ -32,38 +32,17 @@
  *
  */
 
-#ifndef ArchipelXmlFile_H
-#define ArchipelXmlFile_H
+#ifndef ACArchipelXmlFile_H
+#define ACArchipelXmlFile_H
 
 #include <string>
 
-//#include <ACOpenCVInclude.h>
-#ifdef __APPLE__
-#ifdef MAC_FRAMEWORKS
-#include <OpenCV/cv.h>
-#include <OpenCV/cxcore.h>
-#include <OpenCV/highgui.h> // for cvloadimage
-#else
-#ifdef APPLE_IOS //CF in reality, it is because of OpenCV 2.1... test to improve!
-#include <cv.h>
-#include <cxcore.h>
-//#include <highgui.h> // for cvloadimage
-#else
-#include "OpenCV/cv.h"
-#include "OpenCV/cxcore.h"
-#include "OpenCV/highgui.h" // for cvloadimage
-#endif
-#endif
-#else
-#include <opencv/cv.h>
-#include <opencv/cxcore.h>
-#include <opencv/highgui.h>
-#endif
+#include <ACOpenCVInclude.h>
 
 #include <osgDB/ReadFile>
 
-std::string* ArchipelXmlFileRead(std::string filePath);
-std::string ArchipelLabelFileRead(std::string filePath);
-IplImage*  ArchipelThumbFileRead(std::string filePath);
-std::string ArchipelGetThumbFileName(std::string filePath);
+std::string* ACArchipelXmlFileRead(std::string filePath);
+std::string ACArchipelLabelFileRead(std::string filePath);
+IplImage*  ACArchipelThumbFileRead(std::string filePath);
+std::string ACArchipelGetThumbFileName(std::string filePath);
 #endif

@@ -1,9 +1,10 @@
 /*
- *  ArchipelReader.cpp
+ *  ACArchipelReader.cpp
  *  MediaCycle
  *
  *  @author Thierry Ravet
  *  @date 6/06/11
+ *  Completed by Christian Frisson on 18/09/12.
  *  @copyright (c) 2011 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
@@ -32,29 +33,23 @@
  *
  */
 
-#include "ArchipelReader.h"
+#include "ACArchipelReader.h"
 #include <iostream>
-
+#include <fstream>
 
 using namespace std;
 
-archipelReader::archipelReader(const string fileName){
+ACArchipelReader::ACArchipelReader(const string fileName){
 	mFileName=fileName;
 	mDoc=new TiXmlDocument(fileName);
 	bool loadOkay = mDoc->LoadFile();
-	
 }
 
-
-
-archipelReader::~archipelReader(void){
-	
+ACArchipelReader::~ACArchipelReader(void){
 	delete mDoc;
-	
-	
 }
 
-bool archipelReader::isArchipel(){
+bool ACArchipelReader::isArchipel(){
 	TiXmlHandle docHandle( mDoc );
 	TiXmlHandle child= docHandle.FirstChild("archipel" );
 	if (child.ToNode()==0)
@@ -63,7 +58,7 @@ bool archipelReader::isArchipel(){
 		return true;
 }
 
-vector<string> archipelReader::getIlot(void){
+vector<string> ACArchipelReader::getIlot(void){
 	vector<string> ret;
 	TiXmlHandle docHandle( mDoc );
 	TiXmlHandle child= docHandle.FirstChild("archipel" ).FirstChild( "keywords" ).FirstChild( "ilot" );//.Element();//.Child( "Child", 1 ).ToElement();
@@ -80,7 +75,7 @@ vector<string> archipelReader::getIlot(void){
 
 }
 
-vector<string> archipelReader::getGlossaire(void){
+vector<string> ACArchipelReader::getGlossaire(void){
 	vector<string> ret;
 	TiXmlHandle docHandle( mDoc );
 	TiXmlHandle child= docHandle.FirstChild("archipel" ).FirstChild( "keywords" ).FirstChild( "glossaire" );//.Element();//.Child( "Child", 1 ).ToElement();
@@ -96,7 +91,7 @@ vector<string> archipelReader::getGlossaire(void){
 	return ret;
 }
 
-string archipelReader::getText(void){
+string ACArchipelReader::getText(void){
 	string ret;
 	TiXmlHandle docHandle( mDoc );
 	TiXmlHandle child= docHandle.FirstChild("archipel" ).FirstChild( "description" );//.Element();//.Child( "Child", 1 ).ToElement();
@@ -113,7 +108,7 @@ string archipelReader::getText(void){
 	return ret;
 }
 
-string archipelReader::getArtist(void){
+string ACArchipelReader::getArtist(void){
 	string ret;
 	TiXmlHandle docHandle( mDoc );
 	TiXmlHandle child= docHandle.FirstChild("archipel" ).FirstChild( "info" ).FirstChild( "artist" );//.Element();//.Child( "Child", 1 ).ToElement();
@@ -125,7 +120,19 @@ string archipelReader::getArtist(void){
 	return ret;
 }
 
-string archipelReader::getAlbumName(void){
+string ACArchipelReader::getArtistType(void){
+    string ret;
+    TiXmlHandle docHandle( mDoc );
+    TiXmlHandle child= docHandle.FirstChild("archipel" ).FirstChild( "info" ).FirstChild( "type" );//.Element();//.Child( "Child", 1 ).ToElement();
+    TiXmlText* textChild;
+
+    textChild=child.FirstChild().ToText();
+    ret=textChild->ValueStr();
+
+    return ret;
+}
+
+string ACArchipelReader::getAlbumName(void){
 	string ret;
 	TiXmlHandle docHandle( mDoc );
 	TiXmlHandle child= docHandle.FirstChild("archipel" ).FirstChild( "info" ).FirstChild( "title" );//.Element();//.Child( "Child", 1 ).ToElement();
@@ -136,7 +143,24 @@ string archipelReader::getAlbumName(void){
 	return ret;
 }
 
-string archipelReader::getReference(void){
+int ACArchipelReader::getYear(void){
+    string ret;
+    TiXmlHandle docHandle( mDoc );
+    TiXmlHandle child= docHandle.FirstChild("archipel" ).FirstChild( "info" ).FirstChild( "year" );//.Element();//.Child( "Child", 1 ).ToElement();
+    TiXmlText* textChild;
+
+    textChild=child.FirstChild().ToText();
+    ret=textChild->ValueStr();
+
+    std::stringstream tmp;
+    int year=0;
+    tmp << ret;
+    tmp >> year;
+
+    return year;
+}
+
+string ACArchipelReader::getReference(void){
 	string ret;
 	TiXmlHandle docHandle( mDoc );
 	TiXmlHandle child= docHandle.FirstChild("archipel" ).FirstChild( "info" ).FirstChild( "reference" );//.Element();//.Child( "Child", 1 ).ToElement();
@@ -145,11 +169,9 @@ string archipelReader::getReference(void){
 	textChild=child.FirstChild().ToText();
 	ret=textChild->ValueStr();
 	return ret;
-	
-
 }
 
-vector<std::string> archipelReader::getTrackTitle(void){
+vector<std::string> ACArchipelReader::getTrackTitle(void){
 	vector<string> ret;
 
 	TiXmlHandle docHandle( mDoc );
@@ -166,7 +188,7 @@ vector<std::string> archipelReader::getTrackTitle(void){
 	return ret;
 }
 
-std::vector<std::string> archipelReader::getTrackPath(void){
+std::vector<std::string> ACArchipelReader::getTrackPath(void){
 	
 	size_t indTemp=mFileName.find_last_of("/"),lastTemp=mFileName.length();
 	if (indTemp>lastTemp)
@@ -189,7 +211,7 @@ std::vector<std::string> archipelReader::getTrackPath(void){
 	}
 	return ret;
 }
-std::string archipelReader::getThumbPath(void){
+std::string ACArchipelReader::getThumbPath(void){
 	string ret;
 	TiXmlHandle docHandle( mDoc );
 	TiXmlHandle child= docHandle.FirstChild("archipel" ).FirstChild( "info" ).FirstChild( "thumb" );//.Element();//.Child( "Child", 1 ).ToElement();
@@ -199,4 +221,40 @@ std::string archipelReader::getThumbPath(void){
 	ret=textChild->ValueStr();
 	return ret;
 	
+}
+
+string ACArchipelReader::getMediathequeHyperlink(void){
+    string ret;
+    TiXmlHandle docHandle( mDoc );
+    TiXmlHandle child= docHandle.FirstChild("archipel" ).FirstChild( "info" ).FirstChild( "link" );//.Element();//.Child( "Child", 1 ).ToElement();
+    TiXmlText* textChild;
+
+    textChild=child.FirstChild().ToText();
+    ret=textChild->ValueStr();
+
+    return ret;
+}
+
+string ACArchipelReader::getProducer(void){
+    string ret;
+    TiXmlHandle docHandle( mDoc );
+    TiXmlHandle child= docHandle.FirstChild("archipel" ).FirstChild( "info" ).FirstChild( "producer" );//.Element();//.Child( "Child", 1 ).ToElement();
+    TiXmlText* textChild;
+
+    textChild=child.FirstChild().ToText();
+    ret=textChild->ValueStr();
+
+    return ret;
+}
+
+string ACArchipelReader::getExtra(void){
+    string ret;
+    TiXmlHandle docHandle( mDoc );
+    TiXmlHandle child= docHandle.FirstChild("archipel" ).FirstChild( "info" ).FirstChild( "extra" );//.Element();//.Child( "Child", 1 ).ToElement();
+    TiXmlText* textChild;
+
+    textChild=child.FirstChild().ToText();
+    ret=textChild->ValueStr();
+
+    return ret;
 }

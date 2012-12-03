@@ -34,30 +34,37 @@
 
 #include "ACArchipelReaderPlugin.h"
 
-#include "ArchipelMediaDocument.h"
+#include "ACArchipelMediaDocument.h"
+#include "ACArchipelText.h"
 
-ACArchipelReaderPlugin::ACArchipelReaderPlugin(ACMediaType defaultMainMediaType){
-
-	this->mMediaType = MEDIA_TYPE_MIXED;
-	this->mName = "ArchipelReader";
-	this->mDescription = "ArchipelReader plugin";
-	this->mId = "";
-	this->defaultMainMediaType=defaultMainMediaType;
-	
+ACArchipelReaderPlugin::ACArchipelReaderPlugin()
+    : ACMediaReaderPlugin(), ACMediaRendererPlugin()
+{
+    this->mMediaType = MEDIA_TYPE_MIXED;
+    this->mName = "Archipel Reader";
+    this->mDescription = "Archipel Reader plugin";
+    this->mId = "";
 }
 
 
-ACMedia* ACArchipelReaderPlugin::mediaFactory(ACMediaType mediaType){
-	if (mediaType&this->mMediaType)
-		return new ArchipelMediaDocument();
-	else {
-		return 0;
-	}
+ACMedia* ACArchipelReaderPlugin::mediaFactory(ACMediaType mediaType, const ACMedia* media){
+    if (mediaType&MEDIA_TYPE_MIXED)
+        return new ACArchipelMediaDocument();
+    else if (mediaType&MEDIA_TYPE_TEXT)
+        return new ACArchipelText();
+    else {
+        return 0;
+    }
 
 }
-std::vector<std::string> ACArchipelReaderPlugin::getExtensionsFromMediaType(ACMediaType media_type){
-	std::vector<std::string> ret;
-	ret.push_back(std::string(".xml"));
-				 
-	return ret;
+std::map<std::string, ACMediaType> ACArchipelReaderPlugin::getSupportedExtensions(ACMediaType media_type){
+    std::map<std::string,ACMediaType> extensions;
+    /*if(media_type == MEDIA_TYPE_MIXED || media_type == MEDIA_TYPE_ALL){
+        extensions[".xml"] = MEDIA_TYPE_MIXED;
+    }
+    else if(media_type == MEDIA_TYPE_TEXT){
+        extensions[".xml"] = MEDIA_TYPE_TEXT;
+    }*/
+    extensions[".xml"] = MEDIA_TYPE_MIXED|MEDIA_TYPE_TEXT;
+    return extensions;
 }

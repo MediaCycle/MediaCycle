@@ -1,5 +1,5 @@
 /*
- *  ArchipelText.cpp
+ *  ACArchipelTextData.cpp
  *  MediaCycle
  *
  *  @author Thierry Ravet
@@ -32,32 +32,31 @@
  *
  */
 
-#if defined (SUPPORT_TEXT)
-#include "ArchipelText.h"
-#include "ArchipelReader.h"
+#include "ACArchipelText.h"
+#include "ACArchipelReader.h"
 
 using namespace std;
-ArchipelTextData::ArchipelTextData():ACTextData(){
+ACArchipelTextData::ACArchipelTextData():ACTextData(){
 }
 
-ArchipelTextData::~ArchipelTextData(){
+ACArchipelTextData::~ACArchipelTextData(){
 	if (text_ptr!=0){
 		text_ptr->clear();
 		delete text_ptr;
 		text_ptr=0;
 	}
 }
-ArchipelTextData::ArchipelTextData(std::string _fname):ACTextData(){
+ACArchipelTextData::ACArchipelTextData(std::string _fname):ACTextData(){
 	file_name=_fname;
 	this->readData(_fname);
 }
 
-bool ArchipelTextData::readData(std::string _fname){
+bool ACArchipelTextData::readData(std::string _fname){
 	if (text_ptr != NULL) {
 		delete text_ptr;
 		text_ptr=0;
 	}
-	archipelReader reader(_fname);
+    ACArchipelReader reader(_fname);
 	if (reader.isArchipel()){
 		std::string desc;
 		text_ptr = new std::string(reader.getText());
@@ -83,15 +82,15 @@ bool ArchipelTextData::readData(std::string _fname){
 }
 
 
-ArchipelText::ArchipelText():ACText(){
+ACArchipelText::ACArchipelText():ACText(){
 }
 
-bool ArchipelText::extractData(std::string fname){
+bool ACArchipelText::extractData(std::string fname){
 	if (data){
 		delete data;
 		data=0;
 	}
-	data = new ArchipelTextData(fname);
+    data = new ACArchipelTextData(fname);
 	if (data!=0){
 		if (data->getData()==NULL){
 			delete data;
@@ -105,6 +104,3 @@ bool ArchipelText::extractData(std::string fname){
 	//height = thumbnail_height;
 	return true;
 }
-
-
-#endif

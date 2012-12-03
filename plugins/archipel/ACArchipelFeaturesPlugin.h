@@ -1,9 +1,9 @@
 /*
- *  ArchipelMediaFactory.cpp
+ *  ACArchipelFeaturesPlugin.h
  *  MediaCycle
  *
- *  @author Thierry Ravet
- *  @date 8/06/12
+ *  @author Christian Frisson
+ *  @date 18/09/2012
  *  @copyright (c) 2012 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
@@ -32,43 +32,19 @@
  *
  */
 
-#include "ArchipelMediaFactory.h"
-#include "ArchipelText.h"
+#ifndef _ACArchipelFeaturesPlugin_H
+#define	_ACArchipelFeaturesPlugin_H
 
-#include "boost/filesystem.hpp"   // includes all needed Boost.Filesystem declarations
-#include "boost/filesystem/operations.hpp"
-#include "boost/filesystem/path.hpp"
-namespace fs = boost::filesystem;
+#include <MediaCycle.h>
+#include<iostream>
 
-#include <string>
-
-using namespace std;
-
-ArchipelMediaFactory::ArchipelMediaFactory():ACMediaFactory(){}
-
-ArchipelMediaFactory::~ArchipelMediaFactory(){}
-
-ACMedia* ArchipelMediaFactory::create(string file_ext){
-	boost::to_lower(file_ext);
-	filext::iterator iter = used_file_extensions.find(file_ext);
-	if( iter == used_file_extensions.end() ) {
-		return 0;
-	}
-	ACMediaType m = iter->second;
-	return ArchipelMediaFactory::create(m);
-}
-
-
-ACMedia* ArchipelMediaFactory::create(ACMediaType media_type){
-	switch (media_type) {
-		case MEDIA_TYPE_TEXT:
-#if defined (SUPPORT_TEXT)
-			return new ArchipelText();
-#endif //defined (SUPPORT_TEXT)
-			break;
-		default:
-			return ACMediaFactory::create(media_type);
-			break;
-	}
-	return 0;
-}
+class ACArchipelFeaturesPlugin : public ACFeaturesPlugin {
+public:
+    ACArchipelFeaturesPlugin();
+    ~ACArchipelFeaturesPlugin();
+	
+	virtual std::vector<ACMediaFeatures*> calculate(ACMediaData* _Data, ACMedia* theMedia, bool _save_timed_feat=false);
+protected:
+    std::vector<std::string> known_atolls;
+};
+#endif	/* _ACArchipelFeaturesPlugin_H */

@@ -38,14 +38,12 @@
 
 #include "MediaCycle.h"
 
-class ACArchipelReaderPlugin: public ACMediaReaderPlugin {
-protected:
-	ACMediaType defaultMainMediaType;
-public:
-	ACArchipelReaderPlugin(ACMediaType defaultMainMediaType);
-	ACMedia* mediaFactory(ACMediaType mediaType); 
-	std::vector<std::string> getExtensionsFromMediaType(ACMediaType media_type);
+class ACArchipelReaderPlugin: public ACMediaReaderPlugin, public ACMediaRendererPlugin {
 
+public:
+    ACArchipelReaderPlugin();
+    ACMedia* mediaFactory(ACMediaType mediaType, const ACMedia* media = 0);
+    virtual std::map<std::string, ACMediaType> getSupportedExtensions(ACMediaType media_type = MEDIA_TYPE_ALL);
 };
 
 #endif/*_ACARCHIPELREADERPLUGIN_H*/

@@ -1,9 +1,10 @@
 /*
- *  ArchipelReader.h
+ *  ACArchipelReader.h
  *  MediaCycle
  *
  *  @author Thierry Ravet
  *  @date 6/06/11
+ *  Completed by Christian Frisson on 18/09/12.
  *  @copyright (c) 2011 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
@@ -32,36 +33,35 @@
  *
  */
 
-
-#ifndef ARCHIPELREADER_H
-#define	ARCHIPELREADER_H
+#ifndef ACArchipelREADER_H
+#define	ACArchipelREADER_H
 
 #include <string>
 #include <vector>
 #define TIXML_USE_STL
 #include <tinyxml.h>
 
-class archipelReader
+class ACArchipelReader
 {
 public:
-	archipelReader(const std::string fileName);
-	~archipelReader();
+    ACArchipelReader(const std::string fileName);
+    ~ACArchipelReader();
 	
 	bool isArchipel();
 	std::vector<std::string> getIlot(void);
 	std::vector<std::string> getGlossaire(void);
 	std::string getText(void);
 	std::string getArtist(void);
+    std::string getArtistType(void); // info>type -> ex: solo
 	std::string getAlbumName(void);
-    std::string getReference(void); // getLaMediathequeReference
+    std::string getReference(void); // getMediathequeReference
 	std::vector<std::string> getTrackTitle(void);
 	std::vector<std::string> getTrackPath(void);
 	std::string getThumbPath(void);
-    //std::string getArtistType(void); // info>type -> ex: solo
-    //std::string getYear(void); // info>year
-    //std::string getLaMediathequeHyperLink(void); // info>link
-    //std::string getProducer(void); // info>producer
-    //std::string getExtra(void); // info>extra
+    int getYear(void); // info>year
+    std::string getMediathequeHyperlink(void); // info>link
+    std::string getProducer(void); // info>producer
+    std::string getExtra(void); // info>extra
 protected:
 	TiXmlDocument *mDoc;
 	std::string mFileName;

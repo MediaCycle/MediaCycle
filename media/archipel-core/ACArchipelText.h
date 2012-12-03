@@ -1,10 +1,10 @@
 /*
- *  ArchipelMediaDocument.h
+ *  ACArchipelTextData.h
  *  MediaCycle
  *
  *  @author Thierry Ravet
- *  @date 27/07/11
- *  @copyright (c) 2011 – UMONS - Numediart
+ *  @date 8/06/12
+ *  @copyright (c) 2012 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
  *  licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -32,19 +32,24 @@
  *
  */
 
+#ifndef _ARCHIPELTEXT_H
+#define _ARCHIPELTEXT_H
+#include "ACText.h"
+#include "ACTextData.h"
 
-#ifndef _ARCHIPELMEDIADOCUMENT_H
-#define	_ARCHIPELMEDIADOCUMENT_H
-
-#if defined (SUPPORT_MULTIMEDIA)
-#include "MediaCycle.h"
-
-#include "ACMediaDocument.h"
-class ArchipelMediaDocument: public ACMediaDocument{
+class ACArchipelTextData: public ACTextData {
 public:
-	ArchipelMediaDocument();
-	int import(std::string _filename, int _mid=0, ACPluginManager *acpl=0, bool _save_timed_feat=false);
+    ACArchipelTextData();
+    ~ACArchipelTextData();
+    ACArchipelTextData(std::string _fname);
+	bool readData(std::string _fname);
+};
+
+
+class ACArchipelText : public ACText {
+public:
+    ACArchipelText();
+	bool extractData(std::string fname);
 };
 
 #endif
-#endif/*_ARCHIPELMEDIADOCUMENT_H*/
