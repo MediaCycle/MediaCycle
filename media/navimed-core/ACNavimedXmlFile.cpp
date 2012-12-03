@@ -1,5 +1,5 @@
 /*
- *  NavimedXmlFile.cpp
+ *  ACNavimedXmlFile.cpp
  *  MediaCycle
  *
  *  @author Thierry Ravet
@@ -32,47 +32,47 @@
  *
  */
 
-#include "NavimedXmlFile.h"
+#include "ACNavimedXmlFile.h"
 #include <iostream>
 #include <fstream>
-#include "NavimedReader.h"
+#include "ACNavimedReader.h"
 using namespace std;
 
 #include <boost/filesystem.hpp>
 namespace fs = boost::filesystem;
 
-string* NavimedXmlFileRead(string filePath){
+string* ACNavimedXmlFileRead(string filePath){
 	string ext=fs::extension(filePath);
 	if (ext==string(".xml")){
-		navimedReader doc(filePath);
+        ACNavimedReader doc(filePath);
 		return new string(doc.getText());			
 	}
 	else
 		return NULL;
 }
 
-string NavimedLabelFileRead(string filePath){
+string ACNavimedLabelFileRead(string filePath){
 	string ext=fs::extension(filePath);
 	if (ext==string(".xml")){
-		navimedReader doc(filePath);
+        ACNavimedReader doc(filePath);
 		return (doc.getSubject()+string("/")+doc.getDescription()+string("/")+doc.getReference()) ;			
 	}
 	else
 		return string("");
 }
 
-IplImage* NavimedThumbFileRead(std::string filePath){
+IplImage* ACNavimedThumbFileRead(std::string filePath){
 	IplImage* thumb = 0;
 	string ext=fs::extension(filePath);
 	if (ext==string(".xml")){
-		navimedReader doc(filePath);
+        ACNavimedReader doc(filePath);
 		std::cout << "Thumbnail: " << fs::path(filePath).parent_path().string()+string("/")+doc.getThumbPath() << std::endl;
 		
 		thumb = cvLoadImage((fs::path(filePath).parent_path().string()+string("/")+doc.getThumbPath()).c_str(), CV_LOAD_IMAGE_COLOR);
 		try {
 			if (!thumb) {
 				cerr << "Check file name : " << fs::path(filePath).parent_path().string()+string("/")+doc.getThumbPath() << endl;
-				throw(string(" <NavimedThumbFileRead> CV_LOAD_IMAGE_COLOR : not a color image !"));
+                throw(string(" <ACNavimedThumbFileRead> CV_LOAD_IMAGE_COLOR : not a color image !"));
 			}
 		}
 		catch (const string& not_image_file) {
@@ -84,10 +84,10 @@ IplImage* NavimedThumbFileRead(std::string filePath){
 		return 0;
 }
 
-string NavimedThumbFileName(std::string filePath){
+string ACNavimedThumbFileName(std::string filePath){
 	string ext=fs::extension(filePath);
 	if (ext==string(".xml")){
-		navimedReader doc(filePath);
+        ACNavimedReader doc(filePath);
 		return fs::path(filePath).parent_path().string()+string("/")+doc.getThumbPath();
 	}
 	else

@@ -33,31 +33,37 @@
  */
 
 #include "ACNavimedReaderPlugin.h"
+#include "ACNavimedText.h"
+#include "ACNavimedMediaDocument.h"
 
-#include "NavimedMediaDocument.h"
+ACNavimedReaderPlugin::ACNavimedReaderPlugin() : ACMediaReaderPlugin(){
 
-ACNavimedReaderPlugin::ACNavimedReaderPlugin(ACMediaType defaultMainMediaType){
-
-	this->mMediaType = MEDIA_TYPE_MIXED;
-	this->mName = "NavimedReader";
-	this->mDescription = "NavimedReader plugin";
-	this->mId = "";
-	this->defaultMainMediaType=defaultMainMediaType;
-	
+    this->mMediaType = MEDIA_TYPE_MIXED&MEDIA_TYPE_TEXT;
+    this->mName = "Navimed Reader";
+    this->mDescription = "Navimed Reader plugin";
+    this->mId = "";
 }
 
-
-ACMedia* ACNavimedReaderPlugin::mediaFactory(ACMediaType mediaType){
-	if (mediaType&this->mMediaType)
-		return new NavimedMediaDocument();
-	else {
-		return 0;
-	}
+ACMedia* ACNavimedReaderPlugin::mediaFactory(ACMediaType mediaType, const ACMedia* media){
+    //if (mediaType&this->mMediaType)
+    //    return new ACNavimedMediaDocument();
+    if(mediaType&MEDIA_TYPE_TEXT)
+        return new ACNavimedText();
+    else if(mediaType&MEDIA_TYPE_MIXED)
+        return new ACNavimedMediaDocument();
+    else {
+        return 0;
+    }
 
 }
-std::vector<std::string> ACNavimedReaderPlugin::getExtensionsFromMediaType(ACMediaType media_type){
-	std::vector<std::string> ret;
-	ret.push_back(std::string(".xml"));
-				 
-	return ret;
+
+std::map<std::string, ACMediaType> ACNavimedReaderPlugin::getSupportedExtensions(ACMediaType media_type){
+    std::map<std::string,ACMediaType> extensions;
+    if(media_type == MEDIA_TYPE_TEXT || media_type == MEDIA_TYPE_ALL){
+        extensions[".xml"] = MEDIA_TYPE_TEXT;
+    }
+    if(media_type == MEDIA_TYPE_MIXED || media_type == MEDIA_TYPE_ALL){
+        extensions[".xml"] = MEDIA_TYPE_MIXED;
+    }
+    return extensions;
 }

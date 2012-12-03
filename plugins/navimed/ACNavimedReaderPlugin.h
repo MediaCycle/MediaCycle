@@ -39,14 +39,10 @@
 #include "MediaCycle.h"
 
 class ACNavimedReaderPlugin: public ACMediaReaderPlugin {
-protected:
-	ACMediaType defaultMainMediaType;
 public:
-	ACNavimedReaderPlugin(ACMediaType defaultMainMediaType);
-	ACMedia* mediaFactory(ACMediaType mediaType); 
-	std::vector<std::string> getExtensionsFromMediaType(ACMediaType media_type);
-	
-
+    ACNavimedReaderPlugin();
+    ACMedia* mediaFactory(ACMediaType mediaType, const ACMedia* media = 0);
+    virtual std::map<std::string, ACMediaType> getSupportedExtensions(ACMediaType media_type = MEDIA_TYPE_ALL);
 };
 
 #endif/*_ACNAVIMEDREADERPLUGIN_H*/

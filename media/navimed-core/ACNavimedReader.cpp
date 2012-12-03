@@ -1,5 +1,5 @@
 /*
- *  NavimedReader.cpp
+ *  ACNavimedReader.cpp
  *  MediaCycle
  *
  *  @author Thierry Ravet
@@ -32,7 +32,7 @@
  *
  */
 
-#include "NavimedReader.h"
+#include "ACNavimedReader.h"
 #include <iostream>
 #include <boost/iostreams/stream.hpp>
 #include <boost/iostreams/categories.hpp> 
@@ -43,7 +43,7 @@
 using namespace std;
 using namespace boost::locale;
 
-navimedReader::navimedReader(const string fileName){
+ACNavimedReader::ACNavimedReader(const string fileName){
 	mFileName=fileName;
 	mDoc=new TiXmlDocument(fileName);
 	bool loadOkay = mDoc->LoadFile();
@@ -53,11 +53,11 @@ navimedReader::navimedReader(const string fileName){
 
 
 
-navimedReader::~navimedReader(void){
+ACNavimedReader::~ACNavimedReader(void){
 	delete mDoc;
 }
 
-bool navimedReader::isNavimed(){
+bool ACNavimedReader::isNavimed(){
 	TiXmlHandle docHandle( mDoc );
 	
 	
@@ -69,15 +69,15 @@ bool navimedReader::isNavimed(){
 }
 
 
-bool navimedReader::isNavimedBiology(){
+bool ACNavimedReader::isNavimedBiology(){
 	return (this->getSubject()==string("Biologie"));
 }
 
-bool navimedReader::isNavimedRadiography(){
+bool ACNavimedReader::isNavimedRadiography(){
 	return (this->getSubject()==string("RADIOLOGIE"));
 }
 
-string navimedReader::getText(void){
+string ACNavimedReader::getText(void){
 	string ret;
 	TiXmlHandle docHandle( mDoc );
 	TiXmlHandle child= docHandle.FirstChild("XMLResult").FirstChild( "XMLTextValue" );//.FirstChild( "content" );//.Element();//.Child( "Child", 1 ).ToElement();
@@ -97,7 +97,7 @@ string navimedReader::getText(void){
 	return utf8_string;
 }
 
-string navimedReader::getSubject(void){
+string ACNavimedReader::getSubject(void){
 	string ret;
 	TiXmlHandle docHandle( mDoc );
 	TiXmlHandle child= docHandle.FirstChild("XMLResult" ).FirstChild( "subject" );//.Element();//.Child( "Child", 1 ).ToElement();
@@ -111,7 +111,7 @@ string navimedReader::getSubject(void){
 	return ret;
 }
 
-string navimedReader::getDescription(void){
+string ACNavimedReader::getDescription(void){
 	string ret;
 	TiXmlHandle docHandle( mDoc );
 	TiXmlHandle child= docHandle.FirstChild("XMLResult" ).FirstChild( "description" );//.Element();//.Child( "Child", 1 ).ToElement();
@@ -124,7 +124,7 @@ string navimedReader::getDescription(void){
 	return ret;
 }
 
-string navimedReader::getReference(void){
+string ACNavimedReader::getReference(void){
 	string ret;
 	TiXmlHandle docHandle( mDoc );
 	TiXmlHandle child= docHandle.FirstChild("XMLResult" ).FirstChild( "info" ).FirstChild( "reference" );//.Element();//.Child( "Child", 1 ).ToElement();
@@ -138,7 +138,7 @@ string navimedReader::getReference(void){
 }
 
 
-bool navimedReader::getBioParam(std::string paramName,float &paramValue){
+bool ACNavimedReader::getBioParam(std::string paramName,float &paramValue){
 	string ret;
 	TiXmlNode* child= mDoc->FirstChild("XMLResult" );//.Element();//.Child( "Child", 1 ).ToElement();
 	TiXmlText* textChild;
@@ -167,7 +167,7 @@ bool navimedReader::getBioParam(std::string paramName,float &paramValue){
 		return false;
 }
 
-map<string,float> *navimedReader::getBioParam(void){
+map<string,float> *ACNavimedReader::getBioParam(void){
 	map<std::string,float> *desc=new map<std::string,float>;
 	string ret;
 	TiXmlNode* child= mDoc->FirstChild("XMLResult" );//.Element();//.Child( "Child", 1 ).ToElement();
@@ -193,7 +193,7 @@ map<string,float> *navimedReader::getBioParam(void){
 	return desc;
 }
 
-float navimedReader::convertValue(string valStr){
+float ACNavimedReader::convertValue(string valStr){
 	if (valStr=="--")
 		return -2.f;
 	if (valStr=="-")
@@ -207,7 +207,7 @@ float navimedReader::convertValue(string valStr){
 
 
 
-vector<std::string> navimedReader::getRadiosName(void){
+vector<std::string> ACNavimedReader::getRadiosName(void){
 	vector<string> ret;
 
 	TiXmlHandle docHandle( mDoc );
@@ -224,7 +224,7 @@ vector<std::string> navimedReader::getRadiosName(void){
 	return ret;
 }
 
-std::string navimedReader::getMetaData(){
+std::string ACNavimedReader::getMetaData(){
     if (this->isNavimedBiology()){
         string ret;
         TiXmlNode* child= mDoc->FirstChild("XMLResult" );
@@ -270,7 +270,7 @@ std::string navimedReader::getMetaData(){
     
 }
 
-std::string navimedReader::getThumbPath(void){
+std::string ACNavimedReader::getThumbPath(void){
 	string ret;
 	TiXmlHandle docHandle( mDoc );
 	TiXmlHandle child= docHandle.FirstChild("XMLResult" ).FirstChild( "info" ).FirstChild( "thumb" );//.Element();//.Child( "Child", 1 ).ToElement();

@@ -101,10 +101,10 @@ static double compute_distance(vector<ACMediaFeatures*> &obj1, const vector<Feat
     return dis;
 }
 
-ACNavimedAllKMeansPlugin::ACNavimedAllKMeansPlugin() {
+ACNavimedAllKMeansPlugin::ACNavimedAllKMeansPlugin() : ACClusterMethodPlugin() {
     //vars herited from ACPlugin
     this->mMediaType = MEDIA_TYPE_ALL;
-    this->mName = "ACNavimedAllKMeans";
+    this->mName = "Navimed All KMeans";
     this->mDescription = "Clustering";
     this->mId = "";
     this->addNumberParameter("clusters",5,1,10,1,"number of desired clusters",boost::bind(&ACNavimedAllKMeansPlugin::clusterNumberChanged,this));

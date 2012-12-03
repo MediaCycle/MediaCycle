@@ -1,10 +1,10 @@
 /*
- *  NavimedSensor.h
+ *  ACNavimedlReader.h
  *  MediaCycle
  *
  *  @author Thierry Ravet
- *  @date 9/06/12
- *  @copyright (c) 2012 – UMONS - Numediart
+ *  @date 6/06/11
+ *  @copyright (c) 2011 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
  *  licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -33,36 +33,47 @@
  */
 
 
-#if defined (SUPPORT_SENSOR)
+#ifndef ACNavimedLREADER_H
+#define	ACNavimedLREADER_H
 
-#ifndef _NavimedSENSOR_H
-#define _NavimedSENSOR_H
-#include "ACSensor.h"
+#include <string>
+#include <vector>
+#include <map>
+#define TIXML_USE_STL
+#include <tinyxml.h>
+#include <stdlib.h>
 
-
-class NavimedSensorData: public ACSensorData {
+class ACNavimedReader
+{
 public:
+    ACNavimedReader(const std::string fileName);
+    ~ACNavimedReader();
 	
+	bool isNavimed();
+	bool isNavimedBiology();
+	bool isNavimedRadiography();
 	
-	NavimedSensorData();
-	~NavimedSensorData();
-	NavimedSensorData(std::string _fname);
-	bool readData(std::string _fname);
-private:
+	std::string getText(void);
+	std::string getSubject(void);
+	std::string getDescription(void);
+	bool getBioParam(std::string paramName,float &paramValue);
+	std::map<std::string,float> *getBioParam(void);
+	std::string getReference(void); // getLaMediathequeReference
+	std::vector<std::string> getRadiosName(void);
+    std::string getMetaData();
+	std::string getThumbPath(void);
+	
+    //std::string getArtistType(void); // info>type -> ex: solo
+    //std::string getYear(void); // info>year
+    //std::string getLaMediathequeHyperLink(void); // info>link
+    //std::string getProducer(void); // info>producer
+    //std::string getExtra(void); // info>extra
+protected:
+	TiXmlDocument *mDoc;
+	std::string mFileName;
+	std::string mEncoding;
+	float convertValue(std::string valStr);
 	
 };
-
-
-class NavimedSensor : public ACSensor {
-private:
-public:
-	NavimedSensor();	
-	bool extractData(std::string fname);
-    
-    virtual std::string getTextMetaData();
-	
-};
-
-#endif
 
 #endif

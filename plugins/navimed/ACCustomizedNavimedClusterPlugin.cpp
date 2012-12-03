@@ -39,8 +39,8 @@
 ACCustomizedNavimedClusterPlugin::ACCustomizedNavimedClusterPlugin() {
     //vars herited from ACPlugin
     this->mMediaType = MEDIA_TYPE_ALL;
-    this->mName = "ACCustomizedNavimedClusterPlugin";
-    this->mDescription = "Clustering";
+    this->mName = "Navimed Cluster Plugin";
+    this->mDescription = "Navimed Cluster Plugin";
     this->mId = "";
     this->addNumberParameter("clusters",5,1,10,1,"number of desired clusters",boost::bind(&ACCustomizedNavimedClusterPlugin::clusterNumberChanged,this));
 }

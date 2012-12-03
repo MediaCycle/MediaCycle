@@ -1,5 +1,5 @@
 /*
- *  NavimedMediaDocument.cpp
+ *  ACNavimedMediaDocument.cpp
  *  MediaCycle
  *
  *  @author Thierry Ravet
@@ -32,19 +32,24 @@
  *
  */
 
-#include "NavimedMediaDocument.h"
-#include "NavimedReader.h"
+#include "ACNavimedMediaDocument.h"
+#include "ACNavimedReader.h"
 
-#include "NavimedMediaFactory.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include "NavimedSensor.h"
+#include "ACNavimedSensor.h"
 
-NavimedMediaDocument::NavimedMediaDocument():ACMediaDocument(){
+ACNavimedMediaDocument::ACNavimedMediaDocument():ACMediaDocument(){
 }
 
-int NavimedMediaDocument::import(std::string _filename, int _mid, ACPluginManager *acpl, bool _save_timed_feat){
-	activableMediaKey.clear();
+std::vector<std::string> ACNavimedMediaDocument::getActivableMediaKeys(){
+    std::vector<std::string> keys;
+    keys.push_back("Description (Text)");
+    keys.push_back("Biological parameter (Sensor)");
+    return keys;
+}
+
+int ACNavimedMediaDocument::import(std::string _filename, int _mid, ACPluginManager *acpl, bool _save_timed_feat){
 	filename=_filename;	
 			
 	int nbMedia=0;
@@ -55,7 +60,7 @@ int NavimedMediaDocument::import(std::string _filename, int _mid, ACPluginManage
 		return 0;
 	else{
 		//read the xml file. We begin with the Mediacycle xml style
-		navimedReader* xmlDoc=new navimedReader(filename);
+        ACNavimedReader* xmlDoc=new ACNavimedReader(filename);
 		if (xmlDoc->isNavimed()){
 			
 			label=boost::filesystem::path(_filename).filename().string();
@@ -69,18 +74,17 @@ int NavimedMediaDocument::import(std::string _filename, int _mid, ACPluginManage
 				
 				//navimedText
 				mediaKey="Description (Text)";
-				activableMediaKey.push_back(mediaKey);
 				
 				mediaType=MEDIA_TYPE_TEXT;
 				mediaFileName=filename;
 				mediaExtension = boost::filesystem::extension(mediaFileName);
-				fileMediaType = NavimedMediaFactory::getInstance().getMediaTypeFromExtension(mediaExtension);
+                fileMediaType = ACMediaFactory::getInstance().getMediaTypeFromExtension(mediaExtension);
 				if (fileMediaType!=mediaType){
-					cout << "NavimedMediaDocument::import other media type, skipping "  << endl;
+                    cout << "ACNavimedMediaDocument::import other media type, skipping "  << endl;
 					return 0;
 					
 				}
-				media = NavimedMediaFactory::getInstance().create(mediaExtension);
+                media = ACMediaFactory::getInstance().create(mediaExtension);
 				if (media->import(mediaFileName, this->getId()+nbMedia+1, acpl, _save_timed_feat)){
 					if (this->addMedia(mediaKey, media)){
 						this->setActiveSubMedia(mediaKey);
@@ -103,11 +107,10 @@ int NavimedMediaDocument::import(std::string _filename, int _mid, ACPluginManage
 				
 				//navimedText
 				mediaKey="Biological parameter (Sensor)";
-				activableMediaKey.push_back(mediaKey);
 				
 				mediaType=MEDIA_TYPE_SENSOR;
 				mediaFileName=filename;
-				media = new NavimedSensor();
+                media = new ACNavimedSensor();
 				if (media->import(mediaFileName, this->getId()+nbMedia+1, acpl, _save_timed_feat)){
 					if (this->addMedia(mediaKey, media)){
 						this->setActiveSubMedia(mediaKey);

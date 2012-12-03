@@ -1,5 +1,5 @@
 /*
- *  NavimedSensor.cpp
+ *  ACNavimedSensor.cpp
  *  MediaCycle
  *
  *  @author Thierry Ravet
@@ -32,27 +32,22 @@
  *
  */
 
-#include "NavimedSensor.h"
-
-
-#if defined (SUPPORT_SENSOR)
-#include "NavimedSensor.h"
-#include "NavimedReader.h"
-
+#include "ACNavimedSensor.h"
+#include "ACNavimedReader.h"
 #include <stdlib.h>
 
 using namespace std;
-NavimedSensorData::NavimedSensorData():ACSensorData(){
+ACNavimedSensorData::ACNavimedSensorData():ACSensorData(){
 }
 
-NavimedSensorData::~NavimedSensorData(){
+ACNavimedSensorData::~ACNavimedSensorData(){
 	if (sensor_ptr!=0){
 		sensor_ptr->clear();
 		delete sensor_ptr;
 		sensor_ptr=0;
 	}
 }
-NavimedSensorData::NavimedSensorData(std::string _fname):ACSensorData(){
+ACNavimedSensorData::ACNavimedSensorData(std::string _fname):ACSensorData(){
 	file_name=_fname;
 	this->readData(_fname);
 }
@@ -78,12 +73,12 @@ string bioParamConvToStr(int bioparam){
 	}
 }
 
-bool NavimedSensorData::readData(std::string _fname){
+bool ACNavimedSensorData::readData(std::string _fname){
 	if (sensor_ptr != NULL) {
 		delete sensor_ptr;
 		sensor_ptr=0;
 	}
-	navimedReader reader(_fname);
+    ACNavimedReader reader(_fname);
 	if (reader.isNavimed()){
 		std::string desc;
 		
@@ -146,15 +141,15 @@ bool NavimedSensorData::readData(std::string _fname){
 }
 
 
-NavimedSensor::NavimedSensor():ACSensor(){
+ACNavimedSensor::ACNavimedSensor():ACSensor(){
 }
 
-bool NavimedSensor::extractData(std::string fname){
+bool ACNavimedSensor::extractData(std::string fname){
 	if (data){
 		delete data;
 		data=0;
 	}
-	data = new NavimedSensorData(fname);
+    data = new ACNavimedSensorData(fname);
 	if (data!=0){
 		if (data->getData()==NULL){
 			delete data;
@@ -170,12 +165,11 @@ bool NavimedSensor::extractData(std::string fname){
 }
 
 
-std::string NavimedSensor::getTextMetaData(){
+std::string ACNavimedSensor::getTextMetaData(){
     string ret("test");
     
-	navimedReader reader(this->filename);
+    ACNavimedReader reader(this->filename);
     ret=reader.getMetaData();
     
     return ret;
 }
-#endif

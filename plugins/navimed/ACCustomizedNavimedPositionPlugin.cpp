@@ -1,7 +1,7 @@
 /**
  * @brief ACCustomizedNavimedPositionPlugin.cpp
- * @author Thierry Ravet
- * @date 12/11/2012
+ * @author Christian Frisson
+ * @date 04/12/2012
  * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -38,15 +38,14 @@
 using namespace arma;
 using namespace std;
 
-//#if defined(SUPPORT_ARCHIPEL)
 ACCustomizedNavimedPositionPlugin::ACCustomizedNavimedPositionPlugin() : ACClusterPositionsPlugin()
 {
     //vars herited from ACPlugin
 	// XS TODO: are these general enough ? can we use this only for audio ??
     this->mMediaType = MEDIA_TYPE_ALL;
     //this->mPluginType =    this->mPluginType|PLUGIN_TYPE_CLUSTERS_POSITIONS;
-    this->mName = "ACCustomizedNavimedPositionPlugin";
-    this->mDescription = "ACCustomizedNavimedPositionPlugin";
+    this->mName = "Navimed Position Plugin";
+    this->mDescription = "Navimed Position Plugin";
     this->mId = "";
 	
     //local vars
@@ -89,6 +88,3 @@ void ACCustomizedNavimedPositionPlugin::updateNextPositions(ACMediaBrowser* medi
     }
 
 }
-//#endif //defined(SUPPORT_ARCHIPEL)
-
-

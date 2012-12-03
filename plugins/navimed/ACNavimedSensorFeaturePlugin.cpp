@@ -33,7 +33,7 @@
  */
 #include "ACNavimedSensorFeaturePlugin.h"
 #include "ACMedia.h"
-#include "NavimedSensor.h"
+#include "ACNavimedSensor.h"
 
 #include <set>
 #include <map>
@@ -45,8 +45,8 @@ using namespace std;
 
 ACNavimedSensorFeaturePlugin::ACNavimedSensorFeaturePlugin(): ACFeaturesPlugin() {
     this->mMediaType = MEDIA_TYPE_SENSOR;
-    this->mName = "NavimedSensorFeature";
-    this->mDescription = "first version to test bioparameter vizualisation";
+    this->mName = "Navimed Sensor Feature";
+    this->mDescription = "First version to test bioparameter vizualisation";
     this->mId = "";
 }
 
@@ -56,7 +56,7 @@ ACNavimedSensorFeaturePlugin::~ACNavimedSensorFeaturePlugin() {
 
 std::vector<ACMediaFeatures*> ACNavimedSensorFeaturePlugin::calculate(ACMediaData* aData, ACMedia* theMedia, bool _save_timed_feat) {
 	std::vector<ACMediaFeatures*> sensorFeatures;
-	NavimedSensorData* sensorData=dynamic_cast<NavimedSensorData*>(aData);
+    ACNavimedSensorData* sensorData=dynamic_cast<ACNavimedSensorData*>(aData);
 	std::map<std::string,float>* lMap=(std::map<std::string,float>*)( sensorData->getData());
 	std::map<std::string,float>::iterator it;
 	srand ( time(NULL) );

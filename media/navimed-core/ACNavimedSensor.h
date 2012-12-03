@@ -1,10 +1,10 @@
 /*
- *  NavimedMediaDocument.h
+ *  ACNavimedSensor.h
  *  MediaCycle
  *
  *  @author Thierry Ravet
- *  @date 27/07/11
- *  @copyright (c) 2011 – UMONS - Numediart
+ *  @date 9/06/12
+ *  @copyright (c) 2012 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
  *  licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -32,19 +32,26 @@
  *
  */
 
+#ifndef _ACNavimedSENSOR_H
+#define _ACNavimedSENSOR_H
 
-#ifndef _NAVIMEDMEDIADOCUMENT_H
-#define	_NAVIMEDMEDIADOCUMENT_H
+#include "ACSensor.h"
+#include "ACSensorData.h"
 
-#include "MediaCycle.h"
-
-#include "ACMediaDocument.h"
-class NavimedMediaDocument: public ACMediaDocument{
+class ACNavimedSensorData: public ACSensorData {
 public:
-	NavimedMediaDocument();
-	int import(std::string _filename, int _mid=0, ACPluginManager *acpl=0, bool _save_timed_feat=false);
-    virtual std::string getTextMetaData(){return (activeMedia? activeMedia->getTextMetaData():std::string("")); };
+    ACNavimedSensorData();
+    ~ACNavimedSensorData();
+    ACNavimedSensorData(std::string _fname);
+	bool readData(std::string _fname);
 };
 
-
-#endif/*_NAVIMEDMEDIADOCUMENT_H*/
+class ACNavimedSensor : public ACSensor {
+public:
+    ACNavimedSensor();
+	bool extractData(std::string fname);
+    
+    virtual std::string getTextMetaData();
+	
+};
+#endif

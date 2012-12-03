@@ -1,10 +1,10 @@
 /*
- *  NavimedlReader.h
+ *  ACNavimedText.h
  *  MediaCycle
  *
  *  @author Thierry Ravet
- *  @date 6/06/11
- *  @copyright (c) 2011 – UMONS - Numediart
+ *  @date 8/06/12
+ *  @copyright (c) 2012 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
  *  licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -32,48 +32,34 @@
  *
  */
 
+#ifndef _ACNavimedTEXT_H
+#define _ACNavimedTEXT_H
+#include "ACText.h"
 
-#ifndef NAVIMEDLREADER_H
-#define	NAVIMEDLREADER_H
 
-#include <string>
-#include <vector>
-#include <map>
-#define TIXML_USE_STL
-#include <tinyxml.h>
-#include <stdlib.h>
-
-class navimedReader
-{
+class ACNavimedTextData: public ACTextData {
 public:
-	navimedReader(const std::string fileName);
-	~navimedReader();
 	
-	bool isNavimed();
-	bool isNavimedBiology();
-	bool isNavimedRadiography();
+
+    ACNavimedTextData();
+    ~ACNavimedTextData();
+    ACNavimedTextData(std::string _fname);
 	
-	std::string getText(void);
-	std::string getSubject(void);
-	std::string getDescription(void);
-	bool getBioParam(std::string paramName,float &paramValue);
-	std::map<std::string,float> *getBioParam(void);
-	std::string getReference(void); // getLaMediathequeReference
-	std::vector<std::string> getRadiosName(void);
-    std::string getMetaData();
-	std::string getThumbPath(void);
+	bool readData(std::string _fname);
 	
-    //std::string getArtistType(void); // info>type -> ex: solo
-    //std::string getYear(void); // info>year
-    //std::string getLaMediathequeHyperLink(void); // info>link
-    //std::string getProducer(void); // info>producer
-    //std::string getExtra(void); // info>extra
-protected:
-	TiXmlDocument *mDoc;
-	std::string mFileName;
-	std::string mEncoding;
-	float convertValue(std::string valStr);
+private:
 	
 };
 
-#endif
+
+class ACNavimedText : public ACText {
+private:
+public:
+    ACNavimedText();
+	bool extractData(std::string fname);
+    virtual std::string getTextMetaData();
+	
+	
+};
+
+#endif//_ACNavimedTEXT_H

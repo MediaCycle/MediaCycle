@@ -1,10 +1,10 @@
 /*
- *  NavimedMediaFactory.h
+ *  ACNavimedMediaDocument.h
  *  MediaCycle
  *
  *  @author Thierry Ravet
- *  @date 8/06/12
- *  @copyright (c) 2012 – UMONS - Numediart
+ *  @date 27/07/11
+ *  @copyright (c) 2011 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
  *  licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -33,34 +33,20 @@
  */
 
 
+#ifndef _NAVIMEDMEDIADOCUMENT_H
+#define	_NAVIMEDMEDIADOCUMENT_H
 
-#ifndef _NavimedMEDIAFACTORY_H
-#define	_NavimedMEDIAFACTORY_H
+#include "MediaCycle.h"
 
-#include "ACMediaFactory.h"
-
-class NavimedMediaFactory: public ACMediaFactory{
+#include "ACMediaDocument.h"
+class ACNavimedMediaDocument: public ACMediaDocument{
 public:
-	static ACMediaFactory & getInstance(){
-		boost::call_once(NavimedMediaFactory::call_once,once_flag);
-		return get_instance();
-	}
-	
-	ACMedia* create(std::string file_ext);
-	ACMedia* create(ACMediaType media_type);
-	
-private:
-	static NavimedMediaFactory & get_instance(){
-		static NavimedMediaFactory instance;
-		return instance;
-	}
-	static void call_once(){
-		NavimedMediaFactory::get_instance();
-	}
-protected:
-	
-	NavimedMediaFactory();
-	virtual ~NavimedMediaFactory();
-	
+    ACNavimedMediaDocument();
+    virtual std::string getIdentifier(){return "Navimed";}
+    virtual std::vector<std::string> getActivableMediaKeys();
+	int import(std::string _filename, int _mid=0, ACPluginManager *acpl=0, bool _save_timed_feat=false);
+    virtual std::string getTextMetaData(){return (activeMedia? activeMedia->getTextMetaData():std::string("")); }
 };
-#endif //_NavimedMEDIAFACTORY_H
+
+
+#endif/*_NAVIMEDMEDIADOCUMENT_H*/

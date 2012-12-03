@@ -1,5 +1,5 @@
 /*
- *  NavimedText.cpp
+ *  ACNavimedText.cpp
  *  MediaCycle
  *
  *  @author Thierry Ravet
@@ -32,33 +32,32 @@
  *
  */
 
-#if defined (SUPPORT_TEXT)
-#include "NavimedText.h"
-#include "NavimedReader.h"
+#include "ACNavimedText.h"
+#include "ACNavimedReader.h"
 
 using namespace std;
-NavimedTextData::NavimedTextData():ACTextData(){
+ACNavimedTextData::ACNavimedTextData():ACTextData(){
 }
 
-NavimedTextData::~NavimedTextData(){
+ACNavimedTextData::~ACNavimedTextData(){
 	if (text_ptr!=0){
 		text_ptr->clear();
 		delete text_ptr;
 		text_ptr=0;
 	}
 }
-NavimedTextData::NavimedTextData(std::string _fname):ACTextData(){
+ACNavimedTextData::ACNavimedTextData(std::string _fname):ACTextData(){
 	file_name=_fname;
 	this->readData(_fname);
 }
 
-bool NavimedTextData::readData(std::string _fname){
+bool ACNavimedTextData::readData(std::string _fname){
 	if (text_ptr != NULL) {
 		delete text_ptr;
 		text_ptr=0;
 	}
-	navimedReader reader(_fname);
-	if (reader.isNavimed()){
+    ACNavimedReader reader(_fname);
+    if (reader.isNavimed()){
 		std::string desc;
 		text_ptr = new std::string(reader.getText());
 		if( text_ptr == NULL) {
@@ -85,16 +84,16 @@ bool NavimedTextData::readData(std::string _fname){
 }
 
 
-NavimedText::NavimedText():ACText(){
+ACNavimedText::ACNavimedText():ACText(){
 }
 
-bool NavimedText::extractData(std::string fname){
+bool ACNavimedText::extractData(std::string fname){
 	if (data){
 		delete data;
 		data=0;
 	}
 	// XS todo : store the default header (16 or 64 below) size somewhere...
-	data = new NavimedTextData(fname);
+    data = new ACNavimedTextData(fname);
 	if (data!=0){
 		if (data->getData()==NULL){
 			delete data;
@@ -111,14 +110,10 @@ bool NavimedText::extractData(std::string fname){
 	//height = thumbnail_height;
 	return true;
 }
-std::string NavimedText::getTextMetaData(){
+std::string ACNavimedText::getTextMetaData(){
     string ret;
-	navimedReader reader(this->filename);
+    ACNavimedReader reader(this->filename);
     ret=reader.getMetaData();
     
     return ret;
 }
-
-
-
-#endif

@@ -1,10 +1,10 @@
 /*
- *  NavimedMediaFactory.cpp
+ *  ACNavimedlXmlFile.h
  *  MediaCycle
  *
  *  @author Thierry Ravet
- *  @date 8/06/12
- *  @copyright (c) 2012 – UMONS - Numediart
+ *  @date 16/11/10
+ *  @copyright (c) 2010 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
  *  licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -32,42 +32,16 @@
  *
  */
 
-#include "NavimedMediaFactory.h"
-#include "NavimedText.h"
-
-#include "boost/filesystem.hpp"   // includes all needed Boost.Filesystem declarations
-#include "boost/filesystem/operations.hpp"
-#include "boost/filesystem/path.hpp"
-namespace fs = boost::filesystem;
+#ifndef ACNavimedXmlFile_H
+#define ACNavimedXmlFile_H
 
 #include <string>
 
-using namespace std;
+#include <ACOpenCVInclude.h>
+#include <osgDB/ReadFile>
 
-NavimedMediaFactory::NavimedMediaFactory():ACMediaFactory(){}
-
-NavimedMediaFactory::~NavimedMediaFactory(){}
-
-ACMedia* NavimedMediaFactory::create(string file_ext){
-	boost::to_lower(file_ext);
-	filext::iterator iter = used_file_extensions.find(file_ext);
-	if( iter == used_file_extensions.end() ) {
-		return 0;
-	}
-	ACMediaType m = iter->second;
-	return NavimedMediaFactory::create(m);
-}
-
-ACMedia* NavimedMediaFactory::create(ACMediaType media_type){
-	switch (media_type) {
-		case MEDIA_TYPE_TEXT:
-#if defined (SUPPORT_TEXT)
-			return new NavimedText();
-#endif //defined (SUPPORT_TEXT)
-			break;
-		default:
-			return ACMediaFactory::create(media_type);
-			break;
-	}
-	return 0;
-}
+std::string* ACNavimedXmlFileRead(std::string filePath);
+std::string ACNavimedLabelFileRead(std::string filePath);
+IplImage*  ACNavimedThumbFileRead(std::string filePath);
+std::string ACNavimedGetThumbFileName(std::string filePath);
+#endif
