@@ -31,7 +31,7 @@
  *  <mailto:avre@umons.ac.be>
  *
  */
-#if defined (SUPPORT_AUDIO)
+
 #include "ACAudio.h"
 #include <sndfile.h>
 //#include "ACAnalysedAudio.h"
@@ -503,4 +503,3 @@ float* ACAudio::computeWaveform(int& length, float start_ratio, float end_ratio)
     //std::cout << "Thumbnail size " << sizeof(&_waveform)/sizeof(float) << std::endl;
     return _waveform;
 }
-#endif //defined (SUPPORT_AUDIO)

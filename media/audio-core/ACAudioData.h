@@ -35,7 +35,6 @@
 #ifndef ACAUDIODATA_H
 #define ACAUDIODATA_H
 
-#if defined (SUPPORT_AUDIO)
 #include "ACMediaData.h"
 #include <sndfile.h>
 #include <cstdlib>
@@ -56,12 +55,9 @@ protected:
 	virtual void init();
 
 private:
-	float getAudioLength() {return audio_frames;}
-
 	float* audio_ptr;
 	float  audio_frames;
 	
 };
 
-#endif //defined (SUPPORT_AUDIO)
 #endif // ACAUDIODATA_H

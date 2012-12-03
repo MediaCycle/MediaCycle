@@ -32,7 +32,6 @@
  *
  */
 
-#if defined (SUPPORT_AUDIO)
 #include "ACAudioData.h"
 #include <string>
 #include <iostream>
@@ -87,5 +86,3 @@ void ACAudioData::setData(float* _data, float _sample_number){
 		cerr << "<ACAudioData::setData> Could not set data" << endl;
 	}
 }
-
-#endif //defined (SUPPORT_AUDIO)

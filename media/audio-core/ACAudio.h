@@ -33,8 +33,6 @@
  *
  */
 
-#if defined (SUPPORT_AUDIO)
-
 #ifndef ACAUDIO_H
 #define ACAUDIO_H
 
@@ -50,7 +48,7 @@ class ACAudio : public ACMedia {
 public:
     ACAudio();
     ACAudio(const ACAudio&, bool reduce = true);
-    ~ACAudio();
+    virtual ~ACAudio();
 
 private:
     void init();
@@ -116,6 +114,4 @@ private:
     ACAudioData* data;
 };
 
-
 #endif // ACAUDIO_H
-#endif //defined (SUPPORT_AUDIO)
