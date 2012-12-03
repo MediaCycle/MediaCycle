@@ -1,5 +1,5 @@
 # Forked OSG FFmpeg plugin from version 3.1.1
-
+IF(BUILD_APPS AND OSG_FOUND AND SUPPORT_VIDEO AND FFMPEG_FOUND)
 # From OSG's CMakeLists.txt
 SET(OSG_PLUGINS osgPlugins-${OPENSCENEGRAPH_VERSION})
 
@@ -102,3 +102,6 @@ IF(USE_DEBUG)
 ENDIF()
 
 MESSAGE("[X] FFmpeg plugin for OpenSceneGraph")
+ELSE()
+MESSAGE("[ ] FFmpeg plugin for OpenSceneGraph")
+ENDIF()

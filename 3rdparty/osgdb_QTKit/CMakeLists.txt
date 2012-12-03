@@ -1,5 +1,5 @@
 # Forked OSG QTKit plugin from version 3.0.0
-
+IF(BUILD_APPS AND OSG_FOUND AND SUPPORT_VIDEO AND QTKIT_FOUND)
 # From OSG's CMakeLists.txt
 SET(OSG_PLUGINS osgPlugins-${OPENSCENEGRAPH_VERSION})
 
@@ -66,3 +66,6 @@ IF(USE_DEBUG)
 ENDIF()
 
 MESSAGE("[X] QTKit plugin for OpenSceneGraph")
+ELSE()
+MESSAGE("[ ] QTKit plugin for OpenSceneGraph")
+ENDIF()

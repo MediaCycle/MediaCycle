@@ -1,3 +1,5 @@
+IF(BUILD_APPS AND OSG_FOUND AND RSVG_FOUND AND CAIRO_FOUND)
+
 # From OSG's CMakeLists.txt
 SET(OSG_PLUGINS osgPlugins-${OPENSCENEGRAPH_VERSION})
 
@@ -49,3 +51,6 @@ INCLUDE (${CMAKE_SOURCE_DIR}/CMakeModules/OsgMacroUtils.cmake)
 SETUP_PLUGIN(svg svg)
 
 MESSAGE("[X] svg plugin for OpenSceneGraph")
+ELSE()
+MESSAGE("[ ] svg plugin for OpenSceneGraph")
+ENDIF()

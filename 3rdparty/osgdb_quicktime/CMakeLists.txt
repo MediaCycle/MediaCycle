@@ -1,5 +1,5 @@
 # Forked OSG QuickTime plugin from version 3.0.0
-
+IF(BUILD_APPS AND OSG_FOUND AND SUPPORT_VIDEO AND QUICKTIME_FOUND)
 # From OSG's CMakeLists.txt
 SET(OSG_PLUGINS osgPlugins-${OPENSCENEGRAPH_VERSION})
 
@@ -79,3 +79,6 @@ IF(USE_DEBUG)
 ENDIF()
 
 MESSAGE("[X] QuickTime plugin for OpenSceneGraph")
+ELSE()
+MESSAGE("[ ] QuickTime plugin for OpenSceneGraph")
+ENDIF()

@@ -11,7 +11,7 @@ IF(USE_BREAKPAD AND USE_QT4 )
 			INCLUDE_DIRECTORIES(third-party/mingw)
 		ENDIF()
 	ENDIF()
-	MESSAGE("PLATFORM ${PLATFORM}")
+        #MESSAGE("PLATFORM ${PLATFORM}")
 
 	INCLUDE_DIRECTORIES(. third-party/google-breakpad/src third-party/google-breakpad/src/client third-party/google-breakpad/src/common third-party/google-breakpad/src/google_breakpad third-party/google-breakpad/src/processor third-party/google-breakpad/src/tools)
 
