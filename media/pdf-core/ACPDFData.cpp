@@ -32,8 +32,6 @@
  *
  */
 
-#if defined (SUPPORT_PDF)
-
 #include "ACPDFData.h"
 #include <string>
 #include <iostream>
@@ -80,6 +78,3 @@ void ACPDFData::setData(PoDoFo::PdfMemDocument* _data){
 		cerr << "<ACPDFData::setData> Could not set data" << endl;
 	}	
 }
-
-
-#endif //defined (SUPPORT_PDF)

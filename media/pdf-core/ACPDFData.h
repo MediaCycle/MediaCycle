@@ -35,7 +35,6 @@
 #ifndef ACPDFDATA_H
 #define ACPDFDATA_H
 
-#if defined (SUPPORT_PDF)
 #include "ACMediaData.h"
 #include "ACMediaTypes.h"
 
@@ -61,5 +60,4 @@ private:
 
 };
 
-#endif //defined (SUPPORT_PDF)
 #endif // ACPDFDATA_H

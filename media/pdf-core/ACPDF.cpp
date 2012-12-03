@@ -32,13 +32,12 @@
  *
  */
 
-#if defined (SUPPORT_PDF)
-
 #include "ACPDF.h"
 
 #include <osg/ImageUtils>
 #include <osgDB/ReaderWriter>
 #include <osgDB/ReadFile>
+
 #include "boost/filesystem.hpp"
 
 #include <iostream>
@@ -356,5 +355,3 @@ bool ACPDF::computeThumbnailSize(int w_, int h_){
 	}
 	return ok;
 }
-
-#endif //defined (SUPPORT_PDF)

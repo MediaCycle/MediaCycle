@@ -35,8 +35,6 @@
 #ifndef ACPDF_H
 #define ACPDF_H
 
-#if defined (SUPPORT_PDF)
-
 #include <ostream>
 #include <podofo/podofo.h>
 
@@ -53,7 +51,10 @@ public:
 	ACPDF();
 	ACPDF(const ACPDF& m);
 	~ACPDF();
-	
+private:
+    void init();
+
+public:
 	void saveACLSpecific(std::ofstream &library_file);
 	int loadACLSpecific(std::ifstream &library_file);
 	void saveXMLSpecific(TiXmlElement* _media);
@@ -76,7 +77,6 @@ public:
 	int getPageCount(){return page_count;}
 
 private:
-	void init();	
 	bool computeThumbnail(int w=0, int h=0);
 	bool computeThumbnailSize(int w_, int h_);
 
@@ -91,5 +91,4 @@ private:
 	std::string author,creator,subject,title,keywords,format_unit;
 	int page_count;
 };
-#endif //defined (SUPPORT_PDF)
 #endif // ACPDF_H
