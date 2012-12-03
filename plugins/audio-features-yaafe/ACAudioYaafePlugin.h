@@ -35,8 +35,6 @@
 #ifndef _ACAudioYaafePlugin_H
 #define	_ACAudioYaafePlugin_H
 
-#ifdef USE_YAAFE
-
 #include "MediaCycle.h"
 
 #include<iostream>
@@ -128,5 +126,4 @@ private:
 
 }
 
-#endif  //def USE_YAAFE
 #endif	/* _ACAudioYaafePlugin_H */

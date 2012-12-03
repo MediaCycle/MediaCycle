@@ -42,10 +42,14 @@ Envelope := Output normalize="-1" version="v0.6" yaafedefinition="Envelope  EnDe
 n1 > n19
 n19 > Envelope
 
-
 n22 := AutoCorrelation
 AutoCorrEnv := Output normalize="-1" version="v0.6" yaafedefinition="AutoCorrelation ACNbCoeffs=49  blockSize=512  stepSize=256"
 n19 > n22
 n22 > AutoCorrEnv
+
+nRMS := RMS
+Energy := Output normalize="-1" version="v0.6" yaafedefinition="Energy blockSize=512 stepSize=256"
+n1 > nRMS
+nRMS > Energy
 
 

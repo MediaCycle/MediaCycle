@@ -50,7 +50,7 @@ Spectral_Slope := Output normalize="-1" version="v0.6" yaafedefinition="Spectral
 n3 > n16
 n16 > Spectral_Slope
 
-n17 := ShapeStatistics
+n17 := SpectralShapeStatistics
 Spectral_Shape_Statistics := Output normalize="-1" version="v0.6" yaafedefinition="SpectralShapeStatistics blockSize=512 stepSize=256"
 n3 > n17
 n17 > Spectral_Shape_Statistics
@@ -70,7 +70,7 @@ Zero_Crossing_Rate := Output normalize="-1" version="v0.6" yaafedefinition="Zero
 n1 > n20
 n20 > Zero_Crossing_Rate
 
-n21 := ShapeStatistics
+n21 := TemporalShapeStatistics
 Temporal_Shape_Statistics := Output normalize="-1" version="v0.6" yaafedefinition="TemporalShapeStatistics blockSize=512 stepSize=256"
 n1 > n21
 n21 > Temporal_Shape_Statistics
@@ -96,3 +96,8 @@ n26 := LoudnessSpread
 Perceptual_Spread := Output normalize="-1" version="v0.6" yaafedefinition="PerceptualSpread blockSize=512 stepSize=256"
 n24 > n26
 n26 > Perceptual_Spread
+
+n27 := EnvelopeShapeStatistics
+Envelope_Shape_Statistics := Output normalize="-1" version="v0.6" yaafedefinition="EnvelopeShapeStatistics blockSize=512 stepSize=256"
+n1 > n27
+n27 > Envelope_Shape_Statistics

@@ -1,0 +1,25 @@
+SET(MEDIA_TYPE "audio")
+SET(PLUGIN_NAME "audio-features-yaafe")
+SET(MC_MEDIA_LIBS "${MEDIA_TYPE}-core")
+list(APPEND 3RDPARTY_NAMES "Yet another audio features extraction (Yaafe)")
+list(APPEND 3RDPARTY_LICENSES "LGPL")
+list(APPEND 3RDPARTY_URLS "http://yaafe.sourceforge.net")
+IF(SUPPORT_AUDIO AND USE_YAAFE)
+        INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/3rdparty/yaafe)
+        INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/3rdparty/yaafe/src_cpp)
+        INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/3rdparty/yaafe/externals/audio-smarc)
+        INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/3rdparty/yaafe/externals/eigen)
+
+	#SET(SRC "${CMAKE_SOURCE_DIR}/3rdparty/yaafe/src_cpp/yaafe-io/io/FileUtils.cpp")
+	#SET(HDR "${CMAKE_SOURCE_DIR}/3rdparty/yaafe/src_cpp/yaafe-io/io/FileUtils.h")
+
+	INCLUDE (${CMAKE_SOURCE_DIR}/CMakeModules/AddMediaCyclePlugin.cmake)
+	ADD_MC_PLUGIN_LIBRARY(${PLUGIN_NAME})
+
+	ADD_DEPENDENCIES(${TARGET_NAME} yaafe-core yaafe-io yaafe-components)
+        TARGET_LINK_LIBRARIES(${TARGET_NAME} yaafe-core yaafe-io yaafe-components ${ARGTABLE2_LIBRARY})
+
+	MESSAGE("[X] ${TARGET_NAME}")
+ELSE()
+	MESSAGE("[ ] ${PLUGIN_PREFIX}${PLUGIN_NAME}")
+ENDIF()

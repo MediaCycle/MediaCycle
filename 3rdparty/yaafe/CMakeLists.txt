@@ -1,5 +1,7 @@
+IF(SUPPORT_AUDIO AND USE_YAAFE)
 #cmake_minimum_required (VERSION 2.6)
 #project (yaafe CXX C)
+include_directories(src_cpp)#CF
 set (CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake-modules")
 
 # The version number.
@@ -120,4 +122,7 @@ set (CPACK_RESOURCE_FILE_LICENSE
 set (CPACK_PACKAGE_VERSION_MAJOR "${YAAFE_VERSION_MAJOR}")
 set (CPACK_PACKAGE_VERSION_MINOR "${YAAFE_VERSION_MINOR}")
 #include (CPack)
-MESSAGE("[X] yaafe")
+	MESSAGE("[X] yaafe")
+ELSE()
+	MESSAGE("[ ] yaafe")
+ENDIF()

@@ -32,8 +32,6 @@
  *
  */
 
-#ifdef USE_YAAFE
-
 //#define SAVE_CSV
 
 #include "ACAudioYaafePlugin.h"
@@ -331,7 +329,7 @@ Component* ACYaafeOutputFormat::createWriter(
 ACAudioYaafePlugin::ACAudioYaafePlugin() : ACTimedFeaturesPlugin() {
     //vars herited from ACPlugin
     this->mMediaType = MEDIA_TYPE_AUDIO;
-    this->mName = "AudioYaafe";
+    this->mName = "Audio Yaafe Features";
     this->mDescription = "Audio feature extraction plugin usin the Yaafe library";
     this->mId = "";
     //this->mtf_file_name = "";
@@ -786,5 +784,3 @@ std::vector<ACMediaFeatures*> ACAudioYaafePlugin::calculate(ACMediaData* aData, 
 
     return desc;
 }
-
-#endif //def USE_YAAFE
