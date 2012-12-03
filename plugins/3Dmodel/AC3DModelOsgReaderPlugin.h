@@ -1,11 +1,10 @@
 /*
- *  ACOsg3DModelRenderer.h
+ *  AC3DModelOsgReaderPlugin.h
  *  MediaCycle
  *
- *  @author Stéphane Dupont
- *  @date 06/09/10
- *
- *  @copyright (c) 2010 – UMONS - Numediart
+ *  @author Christian Frisson
+ *  @date 14/10/12
+ *  @copyright (c) 2012 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
  *  licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -33,43 +32,18 @@
  *
  */
 
-#ifndef __ACOSG_3DMODEL_RENDERER_H__
-#define __ACOSG_3DMODEL_RENDERER_H__
+#include <ACPlugin.h>
 
-#if defined (SUPPORT_3DMODEL)
+#ifndef AC3DModelOsgReaderPlugin_H
+#define	AC3DModelOsgReaderPlugin_H
 
-#include "ACOsgMediaRenderer.h"
-
-#include <osg/Geometry>
-#include <osg/PolygonMode>
-#include <osg/ShapeDrawable>
-
-class ACOsg3DModelRenderer : public ACOsgMediaRenderer  {
-protected:
-		
-	osg::ref_ptr<osg::Vec4Array> colors_off;
-	osg::ref_ptr<osg::Vec4Array> colors_on;
-	double modelangle;
-	std::vector<float> media_cycle_center;
-	std::vector<float> media_cycle_extent;
-	
-	osg::ref_ptr<osg::Node> model_node;
-	osg::ref_ptr<osg::Geode> border_geode;
-	osg::ref_ptr<osg::MatrixTransform> acti_transform;
-	osg::ref_ptr<osg::MatrixTransform> norm_transform;
-	
-	void modelGeode();
-	void borderGeode();
-	void normTransform();
-	
+class AC3DModelOsgReaderPlugin : public ACMediaReaderPlugin
+{
 public:
-	
-	ACOsg3DModelRenderer();
-	~ACOsg3DModelRenderer();
-	
-	void prepareNodes();
-	void updateNodes(double ratio=0.0);
+    AC3DModelOsgReaderPlugin();
+    ~AC3DModelOsgReaderPlugin();
+    virtual ACMedia* mediaFactory(ACMediaType mediaType, const ACMedia* media = 0);
+    std::map<std::string, ACMediaType> getSupportedExtensions(ACMediaType media_type = MEDIA_TYPE_ALL);
 };
 
-#endif //defined (SUPPORT_3DMODEL)
 #endif

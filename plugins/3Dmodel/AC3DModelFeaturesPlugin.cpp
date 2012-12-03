@@ -1,7 +1,7 @@
 /**
  * @brief AC3DModelFeaturesPlugin.cpp
- * @author Thierry Ravet
- * @date 04/05/2012
+ * @author Christian Frisson
+ * @date 03/12/2012
  * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -39,8 +39,8 @@
 AC3DModelFeaturesPlugin::AC3DModelFeaturesPlugin() {
 	
     this->mMediaType = MEDIA_TYPE_3DMODEL;
-    this->mName = "3DModelFeatures";
-    this->mDescription = "3DModelFeatures plugin";
+    this->mName = "3DModel Features";
+    this->mDescription = "3DModel Features plugin";
     this->mId = "";
 }
 

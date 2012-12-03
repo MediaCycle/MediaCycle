@@ -33,11 +33,11 @@
  *
  */
 
-#if defined (SUPPORT_3DMODEL)
-
 #include "ACOsg3DModelRenderer.h"
 #include <osg/ComputeBoundsVisitor>
 #include <osgDB/ReaderWriter>
+#include <osgDB/ReadFile>
+#include <osgDB/Registry>
 #include "boost/filesystem.hpp"
 
 using namespace osg;
@@ -262,5 +262,3 @@ void ACOsg3DModelRenderer::updateNodes(double ratio) {
 	media_node->setMatrix(globalT);
 #endif
 }
-
-#endif //defined (SUPPORT_3DMODEL)
