@@ -1,7 +1,7 @@
 /**
  * @brief ACPosPlugAudioGardenFlower.cpp
- * @author Thierry Ravet
- * @date 12/11/2012
+ * @author Cecile Picard
+ * @date 03/12/2012
  * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -79,8 +79,8 @@ void ACPosPlugAudioGardenFlower::updateNextPositions(ACMediaBrowser* mediaBrowse
     theta_v.ones(libSize); //theta_v * 2 * arma::math::pi();
     ACMedias medias = mediaBrowser->getLibrary()->getAllMedia();
 
-    featureList.push_back("Mean of MFCC");
-    featureList.push_back("Mean of Spectral Flatness");
+    featureList.push_back("Centroid of MFCC");//Mean of MFCC");
+    featureList.push_back("Centroid of Spectral Flux");//Mean of Spectral Flatness");
     //featureList.push_back("Interpolated Energy");
 
     vector<long> posParents;
@@ -121,7 +121,7 @@ void ACPosPlugAudioGardenFlower::updateNextPositions(ACMediaBrowser* mediaBrowse
     ACPoint p;
     for (int i=0; i<libSize; i++){
         if(mediaBrowser->getMediaNode(i)){
-//            mediaBrowser->setMediaNodeDisplayed(i, true);
+            //mediaBrowser->setMediaNodeDisplayed(i, true);
             p.x = posDisp_m(i,0);
             p.y = posDisp_m(i,1);
             p.z = 0;

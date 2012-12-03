@@ -142,10 +142,11 @@ void ACOsgMediaRenderer::metadataGeode() {
 
     std::stringstream content;
     content << fs::basename(media->getFileName());
+	//CPL
     if (media->getParentId()>-1)// in case of segments
         content << "(segment with media ID" << media->getId() << ")";
-    if(media->getLabel() != ""){
-        content << " - Label: " << media->getLabel();
+    if(media->getTaggedClassId()>-1){
+        content << " - Tag: " << media->getTaggedClassId();//->getLabel();
     }
     std::cout<<content.str()<<std::endl;
     metadata->setText( content.str() );
