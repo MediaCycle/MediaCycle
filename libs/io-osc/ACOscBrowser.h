@@ -45,23 +45,13 @@
 #include <lo/lo.h>
 
 #include <ACOscFeedback.h>
-// forward declaration
-class ACOscFeedback;
-
-#if defined (SUPPORT_AUDIO)
-#include <ACAudioFeedback.h>
-#include <ACAudioEngine.h>
-#endif //defined (SUPPORT_AUDIO)
-
 #include <MediaCycle.h>
-// forward declaration
-class MediaCycle;
 
 typedef int (ACOscBrowserCallback) (const char *path, const char *types, lo_arg **argv, int argc, void *data, void *user_data);
 
 class ACOscBrowser {
 public:
-    ACOscBrowser(MediaCycle* _mc=0);
+    ACOscBrowser();
     ~ACOscBrowser();
 
     // pass 0 to receive from any host
@@ -105,16 +95,6 @@ public:
     MediaCycle* getMediaCycle() {
         return this->media_cycle;
     }
-#if defined (SUPPORT_AUDIO)
-
-    void setAudioEngine(ACAudioEngine* _audio_engine) {
-        this->audio_engine = _audio_engine;
-    }
-
-    ACAudioEngine* getAudioEngine() {
-        return this->audio_engine;
-    }
-#endif //defined (SUPPORT_AUDIO)
     void setFeedback(ACOscFeedback *_osc_feedback) {
         this->osc_feedback = _osc_feedback;
     }
@@ -125,9 +105,6 @@ public:
 
 protected:
     MediaCycle *media_cycle;
-#if defined (SUPPORT_AUDIO)
-    ACAudioEngine *audio_engine;
-#endif //defined (SUPPORT_AUDIO)	
 };
 
 #endif /* _ACOSCBROWSER_H_ */

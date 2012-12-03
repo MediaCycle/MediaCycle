@@ -36,7 +36,6 @@
 #include "ACOscFeedback.h"
 #include "MediaCycle.h"
 
-// XS DEBUG
 #include <iostream>
 
 ACOscFeedback::ACOscFeedback() : Observer() {

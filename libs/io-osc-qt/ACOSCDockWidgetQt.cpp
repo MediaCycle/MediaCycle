@@ -38,7 +38,6 @@
 ACOSCDockWidgetQt::ACOSCDockWidgetQt(QWidget *parent)
     : ACAbstractDockWidgetQt(parent, MEDIA_TYPE_ALL,"ACOSCDockWidgetQt")
 {
-#if defined (USE_OSC)
     ui.setupUi(this); // first thing to do
     this->show();
 
@@ -67,13 +66,10 @@ ACOSCDockWidgetQt::ACOSCDockWidgetQt(QWidget *parent)
         ui.spinBoxFeedbackPort->setValue(12346);
     else
         ui.spinBoxFeedbackPort->setValue(osc_feedback_port);
-#endif //defined (USE_OSC)
     auto_connect = false;
 }
 
 ACOSCDockWidgetQt::~ACOSCDockWidgetQt(){
-#if defined (USE_OSC)
-
     QSettings settings("numediart", "MediaCycle");
     settings.setValue("osc.control.ip",ui.lineEditControlIP->text());
     settings.setValue("osc.feedback.ip",ui.lineEditFeedbackIP->text());
@@ -82,18 +78,6 @@ ACOSCDockWidgetQt::~ACOSCDockWidgetQt(){
 
     osc_browser = 0;
     osc_feedback = 0;
-    // now in ACMultiMediaCycleOsgQt
-    /*if (osc_browser) {
-        osc_browser->release();
-        delete osc_browser;
-        osc_browser = 0;
-    }
-    if (osc_feedback) {
-        osc_feedback->release();
-        delete osc_feedback;
-        osc_feedback = 0;
-    }*/
-#endif //defined (USE_OSC)
 }
 
 bool ACOSCDockWidgetQt::canBeVisible(ACMediaType _media_type){
@@ -125,7 +109,6 @@ void ACOSCDockWidgetQt::autoConnectOSC(bool _status)
     }
 }
 
-#if defined (USE_OSC)
 void ACOSCDockWidgetQt::toggleControl(bool _status){
     if(!osc_browser){
         std::cerr << "ACOSCDockWidgetQt::toggleControl: osc browser not created" << std::endl;
@@ -135,9 +118,6 @@ void ACOSCDockWidgetQt::toggleControl(bool _status){
         //osc_browser = new ACOscBrowser();
         if(osc_browser->create(ui.lineEditControlIP->text().toStdString().c_str(), ui.spinBoxControlPort->value())){
             osc_browser->setMediaCycle(media_cycle);
-#ifdef SUPPORT_AUDIO
-            osc_browser->setAudioEngine(audio_engine);
-#endif//def SUPPORT_AUDIO
             osc_browser->start();
             ui.pushButtonControlStart->setText("Stop");
         }
@@ -285,14 +265,3 @@ void ACOSCDockWidgetQt::setMediaCycle(MediaCycle* _media_cycle)
         this->toggleFeedback(true);
     }
 }
-
-#if defined (SUPPORT_AUDIO)
-void ACOSCDockWidgetQt::setAudioEngine(ACAudioEngine* _audio_engine)
-{ 
-    audio_engine = _audio_engine;
-    if(osc_browser)
-        osc_browser->setAudioEngine(_audio_engine);
-}
-#endif //defined (SUPPORT_AUDIO)
-
-#endif //defined (USE_OSC)

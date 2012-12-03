@@ -43,11 +43,10 @@ void error(int num, const char *msg, const char *path) {
     fflush(stdout);
 }
 
-ACOscBrowser::ACOscBrowser(MediaCycle* _mc) {
-    this->media_cycle = _mc;
-#if defined (SUPPORT_AUDIO)
-    this->audio_engine = 0;
-#endif //defined (SUPPORT_AUDIO)
+ACOscBrowser::ACOscBrowser() {
+    this->media_cycle = 0;
+    this->callback = 0;
+    this->user_data = 0;
     this->osc_feedback = 0;
     this->server_thread = 0;
     this->active = false;
@@ -112,12 +111,12 @@ void ACOscBrowser::readString(char *val, int maxlen) {
 
 int ACOscBrowser::static_mess_handler(const char *path, const char *types, lo_arg **argv, int argc, void *data, void *user_data) {
     ACOscBrowser* widget = (ACOscBrowser*) user_data;
-    widget->process_mess(path, types, argv, argc, widget->getVerbosity());
+    return widget->process_mess(path, types, argv, argc, widget->getVerbosity());
 }
 
 int ACOscBrowser::process_mess(const char *path, const char *types, lo_arg **argv, int argc, bool verbose) {
     std::string tag = std::string(path);
-    //std::cout << "ACOscBrowser: OSC message: '" << tag << "'" << std::endl;
+    std::cout << "ACOscBrowser: OSC message: '" << tag << "'" << std::endl;
     bool ac = (tag.find("/audiocycle", 0) != string::npos);
     bool mc = (tag.find("/mediacycle", 0) != string::npos);
     bool tuio = (tag.find("/tuio", 0) != string::npos);
@@ -150,13 +149,13 @@ int ACOscBrowser::process_mess(const char *path, const char *types, lo_arg **arg
     }
 
     // MediaCycle is needed for everything below this
-    if (!media_cycle)// || !this->getOsgView())
+    if (!this->media_cycle)// || !this->getOsgView())
         return 1;
 
     // BROWSER CONTROLS
-    if (tag.find("/browser", 0) != string::npos && media_cycle) {
+    if (tag.find("/browser", 0) != string::npos && this->media_cycle) {
 
-        if (!media_cycle->getBrowser())
+        if (!this->media_cycle->getBrowser())
             return 1;
 
         //Extracting the pointer/device integer id between "/browser/" and subsequent "/..." strings
@@ -239,7 +238,7 @@ int ACOscBrowser::process_mess(const char *path, const char *types, lo_arg **arg
                 if (media_cycle->getLibrary()->getSize() > 0) {
                     media_cycle->setAutoPlay(1);
 
-                    //CF required for force-feedback, to restore (need to move "distancemouse" calculation in the core
+                    //CF required for force-feedback, to restore (need to move "distancemouse" calculation in the core)
                     /*int closest_node = media_cycle->getClosestNode();
                     float distance = this->getOsgView()->getBrowserRenderer()->getDistanceMouse()[closest_node];
                     if (osc_feedback)
@@ -379,31 +378,44 @@ int ACOscBrowser::process_mess(const char *path, const char *types, lo_arg **arg
         }
     }// PLAYER
     else if (tag.find("/player", 0) != string::npos) {
-        if (!media_cycle->getLibrary())
-            return -1;
-        if (media_cycle->getLibrary()->getSize() == 0)
-            return -1;
-#if defined (SUPPORT_AUDIO)
-        if (media_cycle->getLibrary()->getMediaType() == MEDIA_TYPE_AUDIO && !this->getAudioEngine())
+        if (!media_cycle->getLibrary()){
+            std::cerr << "ACOscBrowser: no library" << std::endl;
             return 1;
-#endif //defined (SUPPORT_AUDIO)
+        }
+        if (media_cycle->getLibrary()->getSize() == 0){
+            std::cerr << "ACOscBrowser: library empty, /player messages useless" << std::endl;
+            return 1;
+        }
         if (tag.find("/muteall", 0) != string::npos) {
-            //if(this->getMediaType()==MEDIA_TYPE_AUDIO)
             media_cycle->resetPointers(); //CF hack dirty!
             media_cycle->muteAllSources();
             return 1;
-        } else if (tag.find("/bpm", 0) != string::npos) {
+        }
+        if (media_cycle->getLibrary()->getMediaType() != MEDIA_TYPE_AUDIO){
+            std::cerr << "ACOscBrowser: /player messages only for audio for now" << std::endl;
+            return 1;
+        }
+        ACPlugin* plugin = media_cycle->getPluginManager()->getPlugin("Audio Engine");
+        if(!plugin){
+            std::cerr << "ACOscBrowser: Audio Engine plugin not set, can't bind /player messages" << std::endl;
+            return 1;
+        }
+        ACMediaRendererPlugin* audio_engine_plugin = dynamic_cast<ACMediaRendererPlugin*>(plugin);
+        if(!audio_engine_plugin){
+            std::cerr << "ACOscBrowser: Audio Engine plugin not a media renderer plugin, can't bind /player messages" << std::endl;
+            return -1;
+        }
+        if (tag.find("/bpm", 0) != string::npos) {
             float bpm;
             bpm = argv[0]->f;
             cout << "ACOscBrowser: /player/bpm/" << bpm << endl;
             int node = media_cycle->getClosestNode();
-#if defined (SUPPORT_AUDIO)
             if (node > -1) {
-                audio_engine->setLoopSynchroMode(node, ACAudioEngineSynchroModeAutoBeat);
-                //audio_engine->setLoopScaleMode(node, ACAudioEngineScaleModeResample);
-                audio_engine->setBPM((float) bpm);
+                audio_engine_plugin->performActionOnMedia("scale mode",node,"AutoBeat");
+                ////audio_engine->setLoopScaleMode(node, ACAudioEngineScaleModeResample)
+                //audio_engine_plugin->performActionOnMedia("synchro mode",node,"Resample");
+                audio_engine_plugin->setNumberParameterValue("BPM",(float) bpm);
             }
-#endif //defined (SUPPORT_AUDIO)
             return 1;
         }
         //Extracting the pointer/device integer id between "/player/" and subsequent "/..." strings
@@ -429,38 +441,36 @@ int ACOscBrowser::process_mess(const char *path, const char *types, lo_arg **arg
             cout << "ACOscBrowser: /player/" << node << "/playclosestloop node " << node << endl;
             return 1;
         } else if (tag.find("/triggerclosestloop", 0) != string::npos) {
-#if defined (SUPPORT_AUDIO)
-            audio_engine->setLoopSynchroMode(node, ACAudioEngineSynchroModeManual);
-            audio_engine->setLoopScaleMode(node, ACAudioEngineScaleModeResample);
-            audio_engine->setScrub(0.0f);
-            audio_engine->setLoopSynchroMode(node, ACAudioEngineSynchroModeNone);
-#endif //defined (SUPPORT_AUDIO)
+            audio_engine_plugin->performActionOnMedia("synchro mode",node,"Manual");
+            audio_engine_plugin->performActionOnMedia("scale mode",node,"Resample");
+            audio_engine_plugin->performActionOnMedia("scrub",node,"0");
+            audio_engine_plugin->performActionOnMedia("synchro mode",node,"None");
             media_cycle->getBrowser()->toggleSourceActivity(node);
             cout << "ACOscBrowser: /player/" << node << "/triggerclosestloop node " << node << endl;
             return 1;
         } else if (tag.find("/scrub", 0) != string::npos) {
             float scrub;
             scrub = argv[0]->f;
-#if defined (SUPPORT_AUDIO)
             if (node > -1) {
-                audio_engine->setLoopSynchroMode(node, ACAudioEngineSynchroModeManual);
-                audio_engine->setLoopScaleMode(node, ACAudioEngineScaleModeResample); //ACAudioEngineScaleModeVocode
-                audio_engine->setScrub((float) scrub * 100); // temporary hack to scrub between 0 an 1
+                audio_engine_plugin->performActionOnMedia("synchro mode",node,"Manual");
+                audio_engine_plugin->performActionOnMedia("scale mode",node,"Resample");// Vocode
+                stringstream s;
+                s << (float) scrub * 100; // temporary hack to scrub between 0 an 1
+                audio_engine_plugin->performActionOnMedia("scrub",node,s.str());
             }
-#endif //defined (SUPPORT_AUDIO)
             return 1;
         } else if (tag.find("/pitch", 0) != string::npos) {
 #ifdef USE_DEBUG
             float pitch;
             pitch = argv[0]->f;
             cout << "ACOscBrowser: /player/" << node << "/pitch/" << pitch << endl;
-#if defined (SUPPORT_AUDIO)
             if (node > -1) {
-                audio_engine->setLoopSynchroMode(node, ACAudioEngineSynchroModeAutoBeat);
-                audio_engine->setLoopScaleMode(node, ACAudioEngineScaleModeResample);
-                audio_engine->setSourcePitch(node, (float) pitch);
+                audio_engine_plugin->performActionOnMedia("synchro mode",node,"AutoBeat");
+                audio_engine_plugin->performActionOnMedia("scale mode",node,"Resample");// or Vocode
+                stringstream p;
+                p << (float) pitch;
+                audio_engine_plugin->performActionOnMedia("pitch",node, p.str());
             }
-#endif //defined (SUPPORT_AUDIO)
 #else //USE_DEBUG
             cout << "ACOscBrowser: /player/" << node << "/pitch not yet safe, can mess up the audioengine " << endl;
 #endif
@@ -469,13 +479,11 @@ int ACOscBrowser::process_mess(const char *path, const char *types, lo_arg **arg
             float gain;
             gain = argv[0]->f;
             cout << "ACOscBrowser: /player/" << node << "/gain/" << gain << endl;
-#if defined (SUPPORT_AUDIO)
             if (node > -1) {
-                //audio_engine->setLoopSynchroMode(node, ACAudioEngineSynchroModeAutoBeat);
-                //audio_engine->setLoopScaleMode(node, ACAudioEngineScaleModeResample);
-                audio_engine->setSourceGain(node, (float) gain);
+                stringstream g;
+                g << (float) gain;
+                audio_engine_plugin->performActionOnMedia("gain",node, g.str());
             }
-#endif //defined (SUPPORT_AUDIO)
             return 1;
         }
     } // TUIO
@@ -557,7 +565,7 @@ int ACOscBrowser::process_mess(const char *path, const char *types, lo_arg **arg
             if(argc-1 == 0){
                 media_cycle->resetPointers();
                 media_cycle->setAutoPlay(0);
-                media_cycle->muteAllSources();
+                //media_cycle->muteAllSources();
                 media_cycle->setNeedsDisplay(true);
             }
             bool refresh = false;
