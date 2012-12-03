@@ -108,7 +108,11 @@ public:
 	ACMediaFeatures* std();
 	ACMediaFeatures* hist();
 	ACMediaFeatures* max();
-	ACMediaFeatures* kurto(); // kurtosis calculation using boost moment 2
+	// Using boost library and moments calculation
+	ACMediaFeatures* centroid();
+	ACMediaFeatures* spread();
+	ACMediaFeatures* skew();
+	ACMediaFeatures* kurto(); 
 
 	
 	ACMediaFeatures* toMediaFeatures(); // only for one dim features

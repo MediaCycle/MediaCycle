@@ -432,13 +432,122 @@ ACMediaFeatures* ACMediaTimedFeature::max(){
 }
  
 //CPL: using Boost
+//Centroid (arithmetic mean)
+ACMediaFeatures* ACMediaTimedFeature::centroid(){
+	using namespace boost::accumulators;
+	ACMediaFeatures* centroid_mf = new ACMediaFeatures();  
+	
+	double moments[4] = { 0.0,0.0,0.0,0.0 };
+	for (int i=0; i<this->getDim(); i++){
+		//cout << "boost centroid" << endl;
+		double output = 0.0;
+		accumulator_set<double, stats<tag::moment<1> > > acc;
+		
+		
+		for (int j=0; j<this->getLength(); j++){
+			acc(this->getValue(j, i));
+		}
+		
+		moments[0] = accumulators::moment<1>(acc);
+		
+		output = moments[0];
+		
+		
+		centroid_mf->addFeatureElement(output);
+		
+	}
+	
+	string nameLoc = "Centroid of ";
+	nameLoc += this->getName();
+	centroid_mf->setName(nameLoc);
+	
+	return centroid_mf;
+}
+
+//Spread
+ACMediaFeatures* ACMediaTimedFeature::spread(){
+	using namespace boost::accumulators;
+	ACMediaFeatures* spread_mf = new ACMediaFeatures();  
+	
+	double moments[4] = { 0.0,0.0,0.0,0.0 };
+	for (int i=0; i<this->getDim(); i++){
+		//cout << "boost spread" << endl;
+		double output = 0.0;
+		accumulator_set<double, stats<tag::moment<1>, tag::moment<2> > > acc;
+		
+		
+		for (int j=0; j<this->getLength(); j++){
+			acc(this->getValue(j, i));
+		}
+		
+		moments[0] = accumulators::moment<1>(acc);
+		moments[1] = accumulators::moment<2>(acc);
+		
+			
+		output = sqrt(moments[1] - pow(moments[0],2));
+		
+		spread_mf->addFeatureElement(output);
+		//std::cout << "mom1 " << moments[0] << " / mom2 " << moments[1] << " / mom3 " << moments[2] << " / mom4 " << moments[3] << " // kurtosis: " << output << "\n";
+	}
+	
+	string nameLoc = "Spread of ";
+	nameLoc += this->getName();
+	spread_mf->setName(nameLoc);
+	
+	return spread_mf;
+}
+
+//Skewness
+ACMediaFeatures* ACMediaTimedFeature::skew(){
+	using namespace boost::accumulators;
+	ACMediaFeatures* skew_mf = new ACMediaFeatures();  
+	
+	double moments[4] = { 0.0,0.0,0.0,0.0 };
+	for (int i=0; i<this->getDim(); i++){
+		//cout << "boost skewness" << endl;
+		double output_tmp = 0.0;
+		double output_tmp2 = 0.0;
+		double output = 0.0;
+		accumulator_set<double, stats<tag::moment<1>, tag::moment<2>, tag::moment<3> > > acc;
+		
+		
+		for (int j=0; j<this->getLength(); j++){
+			acc(this->getValue(j, i));
+		}
+		
+		moments[0] = accumulators::moment<1>(acc);
+		moments[1] = accumulators::moment<2>(acc);
+		moments[2] = accumulators::moment<3>(acc);
+				
+		if (moments[0]!=0 && moments[1]!=0) {
+			
+			output_tmp = sqrt(moments[1] - pow(moments[0],2));
+			output_tmp2 = sqrt(moments[1]);
+			//output = (2 * pow(moments[0],3) - 3 * moments[0]* moments[1] + moments[2]) / pow(output_tmp,3);
+			output = moments[2]/pow(output_tmp2,3);
+
+		}
+		
+		skew_mf->addFeatureElement(output);
+	}
+	
+	string nameLoc = "Skewness of ";
+	nameLoc += this->getName();
+	skew_mf->setName(nameLoc);
+	
+	return skew_mf;
+}
+
+//Kurtosis
 ACMediaFeatures* ACMediaTimedFeature::kurto(){
 	using namespace boost::accumulators;
 	ACMediaFeatures* kurt_mf = new ACMediaFeatures();  
 	
 	double moments[4] = { 0.0,0.0,0.0,0.0 };
 	for (int i=0; i<this->getDim(); i++){
-		cout << "boost kurtosis" << endl;
+		//cout << "boost kurtosis" << endl;
+		double output_tmp = 0.0;
+		double output_tmp2 = 0.0;
 		double output = 0.0;
 		accumulator_set<double, stats<tag::moment<1>, tag::moment<2>, tag::moment<3>, tag::moment<4> > > acc;
 		
@@ -454,12 +563,14 @@ ACMediaFeatures* ACMediaTimedFeature::kurto(){
 		
 		if (moments[0]!=0 && moments[1]!=0) {
 			
-			output = (-3 * pow(moments[0],4) + 6 * moments[0]* moments[1] - 4 * moments[0] * moments[2] + moments[3])/ pow((moments[1] - pow(moments[0],2)),2) - 3;
-			//output = (moments[3])/ pow((moments[1] - pow(moments[0],2)),4) - 3;
+			output_tmp = sqrt(moments[1] - pow(moments[0],2));
+			output_tmp2 = moments[1];
+			//output = (-3 * pow(moments[0],4) + 6 * moments[0]* moments[1] - 4 * moments[0] * moments[2] + moments[3])/ pow(output_tmp,4) - 3;
+			output = (moments[3])/ pow(moments[1],2) - 3;
 		}
 		
 		kurt_mf->addFeatureElement(output);
-		std::cout << "mom1 " << moments[0] << " / mom2 " << moments[1] << " / mom3 " << moments[2] << " / mom4 " << moments[3] << " // kurtosis: " << output << "\n";
+		//std::cout << "mom1 " << moments[0] << " / mom2 " << moments[1] << " / mom3 " << moments[2] << " / mom4 " << moments[3] << " // kurtosis: " << output << "\n";
 	}
 	
 	string nameLoc = "Kurtosis of ";
