@@ -1,5 +1,5 @@
 /*
- *  ACAudioGardenOsgQt.h
+ *  ACAudioGardenDockQt.h
  *  MediaCycle
  *
  *  @author Christian Frisson
@@ -33,35 +33,38 @@
  *
  */
 
-#ifndef HEADER_ACAUDIOGARDENOSGQT
-#define HEADER_ACAUDIOGARDENOSGQT
+#ifndef HEADER_ACAudioGardenDockQt
+#define HEADER_ACAudioGardenDockQt
 
 #include <iostream>
 #include <string.h>
-using namespace std;
 
-#include <QtGui>
-#include "ui_ACAudioGardenOsgQt.h"
-#include <AGOsgCompositeViewQt.h>
-#include <MediaCycle.h>
+#include "ACAbstractDockWidgetQt.h"
+
+#include "ui_ACAudioGardenDockQt.h"
+//#include <AGOsgCompositeViewQt.h>
+//#include <MediaCycle.h>
 #include <ACAudioEngine.h>
-#include <ACOscBrowser.h>
+/*#include <ACOscBrowser.h>
 #include <ACOscFeedback.h>
 #ifdef USE_APPLE_MULTITOUCH
 	#include <ACAppleMultitouchTrackpadSupport.h>
-#endif
+#endif*/
 
-class ACAudioGardenOsgQt : public QMainWindow
+class ACAudioGardenDockQt : public ACAbstractDockWidgetQt
 {
     Q_OBJECT
 	
     public:
-        ACAudioGardenOsgQt(QWidget *parent = 0);
-		~ACAudioGardenOsgQt();
-		void updateLibrary();
+        ACAudioGardenDockQt(QWidget *parent = 0);
+        virtual ~ACAudioGardenDockQt();
+
+        virtual bool canBeVisible(ACMediaType _media_type);
+
+        //void updateLibrary();
 
     private slots:
-	
+    /*
 		// Library controls
 		void on_pushButtonLaunch_clicked();
 		void on_pushButtonClean_clicked();
@@ -84,7 +87,7 @@ class ACAudioGardenOsgQt : public QMainWindow
 		void on_checkBoxHarmony_stateChanged(int state);
 		void on_sliderClusters_sliderReleased();
 		void on_comboBoxClustersMethod_activated(const QString & text);//CF or (int index);} 
-		void on_comboBoxClustersPositions_activated(const QString & text);//CF or (int index);} 
+        void on_comboBoxClustersPositions_activated(const QString & text);//CF or (int index);} */
 	
 		// Audio controls
 		void on_pushButtonMuteAll_clicked();
@@ -108,28 +111,28 @@ class ACAudioGardenOsgQt : public QMainWindow
 		void on_pushButtonCompositingReset_clicked();
 
 		// OSC I/O controls
-		void on_pushButtonControlStart_clicked();
-		void on_pushButtonFeedbackStart_clicked();
+        /*void on_pushButtonControlStart_clicked();
+        void on_pushButtonFeedbackStart_clicked();*/
 	
-	public:
-		MediaCycle *media_cycle;
+    /*public:
+        MediaCycle *media_cycle;*/
 	
     private:
 		ACAudioEngine *audio_engine;
-		ACOscBrowser *osc_browser;
+/*		ACOscBrowser *osc_browser;
 		ACOscFeedback *osc_feedback;
 		#ifdef USE_APPLE_MULTITOUCH
 			ACAppleMultitouchTrackpadSupport *multitouch_trackpad;
-		#endif
-        Ui::ACAudioGardenOsgQt ui;
-		bool library_loaded;
+        #endif*/
+        Ui::ACAudioGardenDockQt ui;
+        /*bool library_loaded;
 
 	protected:
-		//AGOsgCompositeViewQt* compositeOsgView;
+        AGOsgCompositeViewQt* compositeOsgView;
 		virtual void keyPressEvent( QKeyEvent* event ){};
-		virtual void keyReleaseEvent( QKeyEvent* event );
+        virtual void keyReleaseEvent( QKeyEvent* event );
 	
 	public:
-		int processOscMessage(const char *path, const char *types, lo_arg **argv,int argc);
+        int processOscMessage(const char *path, const char *types, lo_arg **argv,int argc);*/
 };
 #endif

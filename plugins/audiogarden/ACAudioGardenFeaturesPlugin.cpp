@@ -42,7 +42,7 @@
 
 ACAudioGardenFeaturesPlugin::ACAudioGardenFeaturesPlugin() {
     //vars herited from ACPlugin
-    this->mMediaType = MEDIA_TYPE_AUDIO;
+    this->mMediaType = MEDIA_TYPE_NONE; // instead of MEDIA_TYPE_AUDIO so as to disable it, since it requires the GPL-dependent audio features
     //this->mPluginType = PLUGIN_TYPE_FEATURES;
     this->mName = "AudioGardenFeatures";
     this->mDescription = "AudioGarden plugin";

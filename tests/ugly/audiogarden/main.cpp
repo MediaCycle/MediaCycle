@@ -132,7 +132,7 @@ int main(int argc, char** argv) {
             //Should output 1 4 8
         }
     }
-
+*/
 /*
     ACMediaLibrary *medialib;
     ACMediaBrowser *mediabrowser;
@@ -176,6 +176,7 @@ int main(int argc, char** argv) {
 
 
     mediacycle->getLibrary()->saveAsLibrary("test.mcl");
+*/
 /*    sleep(30);
     network_socket->stop();
     delete network_socket;

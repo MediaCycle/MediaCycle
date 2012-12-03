@@ -1,5 +1,5 @@
 /*
- *  ACAudioGardenOsgQt.cpp
+ *  ACAudioGardenDockQt.cpp
  *  MediaCycle
  *
  *  @author Christian Frisson
@@ -35,24 +35,26 @@
 
 //#include "AGSynthesis.h"
 #include <iostream>
-#include "ACAudioGardenOsgQt.h"
+#include "ACAudioGardenDockQt.h"
 #include "sndfile.h"
 
 using namespace std;
 
-static int osc_callback(const char *path, const char *types, lo_arg **argv,int argc, void *data, void *user_data)
+/*static int osc_callback(const char *path, const char *types, lo_arg **argv,int argc, void *data, void *user_data)
 {
-	ACAudioGardenOsgQt *window = (ACAudioGardenOsgQt*)user_data;
+    ACAudioGardenDockQt *window = (ACAudioGardenDockQt*)user_data;
 	//printf("osc received tag: %s\n", tagName);
 	//std::cout << "tagName: " << tagName << std::endl;
 	return window->processOscMessage(path,types,argv,argc);
-}
+}*/
 
-ACAudioGardenOsgQt::ACAudioGardenOsgQt(QWidget *parent)
- : QMainWindow(parent), library_loaded(false)
+ACAudioGardenDockQt::ACAudioGardenDockQt(QWidget *parent)
+    : ACAbstractDockWidgetQt(parent, MEDIA_TYPE_AUDIO, "ACAudioGardenDockQt"),audio_engine(0)
+    //, library_loaded(false)
 {
-	ui.setupUi(this); // first thing to do
-	media_cycle = new MediaCycle(MEDIA_TYPE_AUDIO,"/tmp/","mediacycle.acl");
+    //ui.setupUi(this); // first thing to do
+    /*media_cycle = 0;
+    media_cycle = new MediaCycle(MEDIA_TYPE_AUDIO,"/tmp/","mediacycle.acl");
 
 	#if defined(__APPLE__)
 		std::string build_type ("Release");
@@ -126,7 +128,7 @@ ACAudioGardenOsgQt::ACAudioGardenOsgQt(QWidget *parent)
 	connect(ui.actionSave_ACL, SIGNAL(triggered()), this, SLOT(saveACLFile()));
 	connect(ui.actionLoad_MCSL, SIGNAL(triggered()), this, SLOT(loadMCSLFile()));
 	connect(ui.actionSave_MCSL, SIGNAL(triggered()), this, SLOT(saveMCSLFile()));
-
+*/
 	this->show();
 
         /*#ifdef USE_APPLE_MULTITOUCH
@@ -137,10 +139,14 @@ ACAudioGardenOsgQt::ACAudioGardenOsgQt(QWidget *parent)
 	//ui.compositeOsgView->setFocus();
 }
 
-ACAudioGardenOsgQt::~ACAudioGardenOsgQt()
+bool ACAudioGardenDockQt::canBeVisible(ACMediaType _media_type){
+    return (_media_type == MEDIA_TYPE_AUDIO);
+}
+
+ACAudioGardenDockQt::~ACAudioGardenDockQt()
 {
 	//compositeOsgView->setPlaying(false);
-	if (osc_browser) {
+    /*if (osc_browser) {
 		osc_browser->stop();
 		osc_browser->release();
 		delete osc_browser;
@@ -150,17 +156,17 @@ ACAudioGardenOsgQt::~ACAudioGardenOsgQt()
 		osc_feedback->release();
 		delete osc_feedback;
 		osc_feedback = 0;
-	}
+    }*/
 
         /*#ifdef USE_APPLE_MULTITOUCH
 		multitouch_trackpad->stop();
         #endif*/
 
-	delete audio_engine;
-	delete media_cycle;
+    /*delete audio_engine;
+    delete media_cycle;*/
 }
 
-void ACAudioGardenOsgQt::updateLibrary()
+/*void ACAudioGardenDockQt::updateLibrary()
 {
 	if (!library_loaded) {
 		// set to 0 the first time a library is loaded
@@ -181,13 +187,13 @@ void ACAudioGardenOsgQt::updateLibrary()
 	ui.compositeOsgView->setFocus();
 }
 
-void ACAudioGardenOsgQt::on_pushButtonLaunch_clicked()
+void ACAudioGardenDockQt::on_pushButtonLaunch_clicked()
 {
 	this->loadMCSLFile();
 	//ui.compositeOsgView->setFocus();
 }
 
-void ACAudioGardenOsgQt::on_pushButtonClean_clicked()
+void ACAudioGardenDockQt::on_pushButtonClean_clicked()
 {
         media_cycle->clean();
 	media_cycle->libraryContentChanged();
@@ -195,7 +201,7 @@ void ACAudioGardenOsgQt::on_pushButtonClean_clicked()
 	library_loaded = false;
 }
 
-void ACAudioGardenOsgQt::loadACLFile(){
+void ACAudioGardenDockQt::loadACLFile(){
 	QString fileName;
 
 	QFileDialog dialog(this,"Open AudioCycle Library File(s)");
@@ -230,7 +236,7 @@ void ACAudioGardenOsgQt::loadACLFile(){
 	//ui.compositeOsgView->setFocus();
 }
 
-void ACAudioGardenOsgQt::saveACLFile(){
+void ACAudioGardenDockQt::saveACLFile(){
 	cout << "Saving ACL File..." << endl;
 
 	QString fileName = QFileDialog::getSaveFileName(this, tr("Save as MediaCycle Library"),"",tr("MediaCycle Library (*.acl)"));
@@ -249,7 +255,7 @@ void ACAudioGardenOsgQt::saveACLFile(){
 	//ui.compositeOsgView->setFocus();
 }
 
-void ACAudioGardenOsgQt::loadMCSLFile(){
+void ACAudioGardenDockQt::loadMCSLFile(){
 	QString fileName;
 
 	QFileDialog dialog(this,"Open MediaCycle Segmented Library File(s)");
@@ -284,7 +290,7 @@ void ACAudioGardenOsgQt::loadMCSLFile(){
 	//ui.compositeOsgView->setFocus();
 }
 
-void ACAudioGardenOsgQt::saveMCSLFile(){
+void ACAudioGardenDockQt::saveMCSLFile(){
 	cout << "Saving MCSL File..." << endl;
 
 	QString fileName = QFileDialog::getSaveFileName(this, tr("Save as MediaCycle Segmented Library"),"",tr("MediaCycle Segmented Library (*.mcsl)"));
@@ -303,7 +309,7 @@ void ACAudioGardenOsgQt::saveMCSLFile(){
 	//ui.compositeOsgView->setFocus();
 }
 
-void ACAudioGardenOsgQt::loadMediaDirectory(){
+void ACAudioGardenDockQt::loadMediaDirectory(){
 
 	QString selectDir = QFileDialog::getExistingDirectory
 	(
@@ -338,7 +344,7 @@ void ACAudioGardenOsgQt::loadMediaDirectory(){
 	//	}
 }
 
-void ACAudioGardenOsgQt::loadMediaFiles()
+void ACAudioGardenDockQt::loadMediaFiles()
 {
 	QString fileName;
 	QFileDialog dialog(this,"Open AudioGarden Audio File(s)");
@@ -384,51 +390,51 @@ void ACAudioGardenOsgQt::loadMediaFiles()
 	}
 }
 
-void ACAudioGardenOsgQt::on_pushButtonRecenter_clicked()
+void ACAudioGardenDockQt::on_pushButtonRecenter_clicked()
 {
 	media_cycle->setCameraRecenter();
 	//ui.compositeOsgView->setFocus();
 }
 
-void ACAudioGardenOsgQt::on_pushButtonBack_clicked()
+void ACAudioGardenDockQt::on_pushButtonBack_clicked()
 {
 	media_cycle->goBack();
 	//ui.compositeOsgView->setFocus();
 }
 
-void ACAudioGardenOsgQt::on_pushButtonForward_clicked()
+void ACAudioGardenDockQt::on_pushButtonForward_clicked()
 {
 	media_cycle->goForward();
 	//ui.compositeOsgView->setFocus();
 }
 
-void ACAudioGardenOsgQt::on_pushButtonDisplayGrains_toggled()
+void ACAudioGardenDockQt::on_pushButtonDisplayGrains_toggled()
 {
 	std::cout << "Display Grains: " << ui.pushButtonDisplayGrains->isChecked() << std::endl;
 }
 
-void ACAudioGardenOsgQt::on_checkBoxRhythm_stateChanged(int state)
+void ACAudioGardenDockQt::on_checkBoxRhythm_stateChanged(int state)
 {
 	media_cycle->setWeight(0,state/2.0f);
 	if (library_loaded)
 		media_cycle->updateDisplay(true);
 }
 
-void ACAudioGardenOsgQt::on_checkBoxTimbre_stateChanged(int state)
+void ACAudioGardenDockQt::on_checkBoxTimbre_stateChanged(int state)
 {
 	media_cycle->setWeight(1,state/2.0f);
 	if (library_loaded)
 		media_cycle->updateDisplay(true);
 }
 
-void ACAudioGardenOsgQt::on_checkBoxHarmony_stateChanged(int state)
+void ACAudioGardenDockQt::on_checkBoxHarmony_stateChanged(int state)
 {
 	media_cycle->setWeight(2,state/2.0f);
 	if (library_loaded)
 		media_cycle->updateDisplay(true);
 }
 
-void ACAudioGardenOsgQt::on_sliderClusters_sliderReleased()
+void ACAudioGardenDockQt::on_sliderClusters_sliderReleased()
 {
 	std::cout << "ClusterNumber: " << ui.sliderClusters->value() << std::endl;
 	if (library_loaded){
@@ -441,27 +447,27 @@ void ACAudioGardenOsgQt::on_sliderClusters_sliderReleased()
 	//ui.compositeOsgView->setFocus();
 }
 
-void ACAudioGardenOsgQt::on_comboBoxClustersMethod_activated(const QString & text)
+void ACAudioGardenDockQt::on_comboBoxClustersMethod_activated(const QString & text)
 {
 	std::cout << "Clusters Method: " << text.toStdString() << std::endl;
 	media_cycle->changeClustersMethodPlugin(text.toStdString());
 }
 
-void ACAudioGardenOsgQt::on_comboBoxClustersPositions_activated(const QString & text)
+void ACAudioGardenDockQt::on_comboBoxClustersPositions_activated(const QString & text)
 {
 	std::cout << "Clusters Positions: " << text.toStdString() << std::endl;
 	media_cycle->changeClustersPositionsPlugin(text.toStdString());
 	ui.compositeOsgView->setFocus();
-}
+}*/
 
-void ACAudioGardenOsgQt::on_pushButtonMuteAll_clicked()
+void ACAudioGardenDockQt::on_pushButtonMuteAll_clicked()
 {
 	media_cycle->muteAllSources();
-	ui.compositeOsgView->stopSound();
+//	ui.compositeOsgView->stopSound();
 	//ui.compositeOsgView->setFocus();
 }
 
-void ACAudioGardenOsgQt::on_pushButtonQueryRecord_toggled()
+void ACAudioGardenDockQt::on_pushButtonQueryRecord_toggled()
 {
 	if (ui.pushButtonQueryRecord->isChecked() == 1)
 	{
@@ -492,13 +498,13 @@ void ACAudioGardenOsgQt::on_pushButtonQueryRecord_toggled()
 	}
 }
 
-void ACAudioGardenOsgQt::on_pushButtonQueryReplay_clicked()
+void ACAudioGardenDockQt::on_pushButtonQueryReplay_clicked()
 {
 
 }
 
 // Pops up a modal window for saving the query as wavefile and add it to the library
-void ACAudioGardenOsgQt::on_pushButtonQueryKeep_clicked()
+void ACAudioGardenDockQt::on_pushButtonQueryKeep_clicked()
 {
 	//...
 
@@ -506,101 +512,101 @@ void ACAudioGardenOsgQt::on_pushButtonQueryKeep_clicked()
 	ui.pushButtonQueryKeep->setEnabled(false);
 }
 
-void ACAudioGardenOsgQt::on_pushButtonQueryPattern_clicked()
+void ACAudioGardenDockQt::on_pushButtonQueryPattern_clicked()
 {
 
 }
 
-void ACAudioGardenOsgQt::on_pushButtonQueryGrain_clicked()
+void ACAudioGardenDockQt::on_pushButtonQueryGrain_clicked()
 {
 
 }
 
-void ACAudioGardenOsgQt::on_comboBoxCompositingMethod_activated(const QString & text)
+void ACAudioGardenDockQt::on_comboBoxCompositingMethod_activated(const QString & text)
 {
 	//std::cout << "Compositing Method: " << text.toStdString() << std::endl;
 	if (text.toStdString() == "Simple")
 	{
 		std::cout << "Compositing Method: Simple" << std::endl;
-		ui.compositeOsgView->getSynth()->setMethod(AG_METHOD_SIMPLE);
+//		ui.compositeOsgView->getSynth()->setMethod(AG_METHOD_SIMPLE);
 	}
 	else if (text.toStdString() == "Squeezed")
 	{
 		std::cout << "Compositing Method: Squeezed" << std::endl;
-		ui.compositeOsgView->getSynth()->setMethod(AG_METHOD_SQUEEZED);
+//		ui.compositeOsgView->getSynth()->setMethod(AG_METHOD_SQUEEZED);
 	}
 	else if (text.toStdString() == "Padded")
 	{
 		std::cout << "Compositing Method: Padded" << std::endl;
-		ui.compositeOsgView->getSynth()->setMethod(AG_METHOD_PADDED);
+//		ui.compositeOsgView->getSynth()->setMethod(AG_METHOD_PADDED);
 	}
-	if (ui.checkBoxCompositingAuto->isChecked() )
-		ui.compositeOsgView->synthesize();
+//	if (ui.checkBoxCompositingAuto->isChecked() )
+//		ui.compositeOsgView->synthesize();
 }
 
-void ACAudioGardenOsgQt::on_comboBoxCompositingMapping_activated(const QString & text)
+void ACAudioGardenDockQt::on_comboBoxCompositingMapping_activated(const QString & text)
 {
 	//std::cout << "Compositing Mapping: " << text.toStdString() << std::endl;
 	if (text.toStdString() == "Mean+Variance")
 	{
 		std::cout << "Compositing Mapping: Mean+Variance" << std::endl;
-		ui.compositeOsgView->getSynth()->setMapping(AG_MAPPING_MEANVAR);
+//		ui.compositeOsgView->getSynth()->setMapping(AG_MAPPING_MEANVAR);
 	}
 	else if (text.toStdString() == "Mean")
 	{
 		std::cout << "Compositing Mapping: Mean" << std::endl;
-		ui.compositeOsgView->getSynth()->setMapping(AG_MAPPING_MEAN);
+//		ui.compositeOsgView->getSynth()->setMapping(AG_MAPPING_MEAN);
 	}
 	else if (text.toStdString() == "None")
 	{
 		std::cout << "Compositing Mapping: None" << std::endl;
-		ui.compositeOsgView->getSynth()->setMapping(AG_MAPPING_NONE);
+//		ui.compositeOsgView->getSynth()->setMapping(AG_MAPPING_NONE);
 	}
-	if (ui.checkBoxCompositingAuto->isChecked() )
-		ui.compositeOsgView->synthesize();
+//	if (ui.checkBoxCompositingAuto->isChecked() )
+//		ui.compositeOsgView->synthesize();
 }
 
-void ACAudioGardenOsgQt::on_sliderCompositingRandom_sliderReleased()
+void ACAudioGardenDockQt::on_sliderCompositingRandom_sliderReleased()
 {
 	std::cout << "Compositing Random: " << (float)(ui.sliderCompositingRandom->value())/100.0f << std::endl;
-	ui.compositeOsgView->getSynth()->setRandomness((float)(ui.sliderCompositingRandom->value())/100.0f);
-	if (ui.checkBoxCompositingAuto->isChecked() )
-		ui.compositeOsgView->synthesize();
+//	ui.compositeOsgView->getSynth()->setRandomness((float)(ui.sliderCompositingRandom->value())/100.0f);
+//	if (ui.checkBoxCompositingAuto->isChecked() )
+//		ui.compositeOsgView->synthesize();
 }
 
-void ACAudioGardenOsgQt::on_sliderCompositingThreshold_sliderReleased()
+void ACAudioGardenDockQt::on_sliderCompositingThreshold_sliderReleased()
 {
 	std::cout << "Compositing Threshold: " << (float)(ui.sliderCompositingThreshold->value())/100.0f << std::endl;
-	ui.compositeOsgView->getSynth()->setThreshold((float)(ui.sliderCompositingThreshold->value())/100.0f);
-	if (ui.checkBoxCompositingAuto->isChecked() )
-		ui.compositeOsgView->synthesize();
+//	ui.compositeOsgView->getSynth()->setThreshold((float)(ui.sliderCompositingThreshold->value())/100.0f);
+//	if (ui.checkBoxCompositingAuto->isChecked() )
+//		ui.compositeOsgView->synthesize();
 }
 
-void ACAudioGardenOsgQt::on_checkBoxCompositingAuto_toggled()
+void ACAudioGardenDockQt::on_checkBoxCompositingAuto_toggled()
 {
 	std::cout << "Auto: " << ui.checkBoxCompositingAuto->isChecked() << std::endl;
-	ui.compositeOsgView->setAutoSynth((bool)(ui.checkBoxCompositingAuto->isChecked()));
+//	ui.compositeOsgView->setAutoSynth((bool)(ui.checkBoxCompositingAuto->isChecked()));
 }
 
-void ACAudioGardenOsgQt::on_pushButtonCompositingGo_clicked(){
+void ACAudioGardenDockQt::on_pushButtonCompositingGo_clicked(){
 	std::cout << "Compositing: Go" << std::endl;
 
 	//CF list selected rhythm pattern
-	std::cout << "Selected Rhythm Pattern: " << ui.compositeOsgView->getSelectedRhythmPattern() << std::endl;
+//	std::cout << "Selected Rhythm Pattern: " << ui.compositeOsgView->getSelectedRhythmPattern() << std::endl;
 
 	//CF list selected grains
 	media_cycle->getBrowser()->dumpSelectedNodes();
 
-	ui.compositeOsgView->synthesize();
+//	ui.compositeOsgView->synthesize();
 }
 
-void ACAudioGardenOsgQt::on_pushButtonCompositingReset_clicked()
+void ACAudioGardenDockQt::on_pushButtonCompositingReset_clicked()
 {
 	std::cout << "Compositing: Reset" << std::endl;
-	ui.compositeOsgView->resetSynth();
+//	ui.compositeOsgView->resetSynth();
 }
 
-void ACAudioGardenOsgQt::on_pushButtonControlStart_clicked()
+/*void ACAudioGardenDockQt::on_pushButtonControlStart_clicked()
 {
 	std::cout << "IP: " << ui.lineEditControlIP->text().toStdString() << std::endl;
 	std::cout << "Port: " << ui.lineEditControlPort->text().toInt() << std::endl;
@@ -622,7 +628,7 @@ void ACAudioGardenOsgQt::on_pushButtonControlStart_clicked()
 	//ui.compositeOsgView->setFocus();
 }
 
-void ACAudioGardenOsgQt::on_pushButtonFeedbackStart_clicked()
+void ACAudioGardenDockQt::on_pushButtonFeedbackStart_clicked()
 {
 	std::cout << "IP: " << ui.lineEditFeedbackIP->text().toStdString() << std::endl;
 	std::cout << "Port: " << ui.lineEditFeedbackPort->text().toInt() << std::endl;
@@ -640,7 +646,7 @@ void ACAudioGardenOsgQt::on_pushButtonFeedbackStart_clicked()
 	//ui.compositeOsgView->setFocus();
 }
 
-void ACAudioGardenOsgQt::keyReleaseEvent( QKeyEvent* event )
+void ACAudioGardenDockQt::keyReleaseEvent( QKeyEvent* event )
 {
 	switch( event->key() )
 	{
@@ -653,7 +659,7 @@ void ACAudioGardenOsgQt::keyReleaseEvent( QKeyEvent* event )
 	}
 }
 
-int ACAudioGardenOsgQt::processOscMessage(const char *path, const char *types, lo_arg **argv,int argc)
+int ACAudioGardenDockQt::processOscMessage(const char *path, const char *types, lo_arg **argv,int argc)
 {
 	std::string tag = std::string(path);
 	//std::cout << "OSC message: '" <<  tag << "'" << std::endl;
@@ -684,10 +690,10 @@ int ACAudioGardenOsgQt::processOscMessage(const char *path, const char *types, l
 		int fullscreen = 0;
 		fullscreen = argv[0]->i;
 		std::cout << "Fullscreen? " << fullscreen << std::endl;
-		/*if (fullscreen == 1)
-			ui.groupControls->hide();
-		else
-			ui.groupControls->show();*/
+//		if (fullscreen == 1)
+//			ui.groupControls->hide();
+//		else
+//			ui.groupControls->show();
 	}
 
 	// BROWSER CONTROLS
@@ -774,28 +780,28 @@ int ACAudioGardenOsgQt::processOscMessage(const char *path, const char *types, l
 		{
 			std::cerr << "Library cleaning thru OSC not yet implemented" << std::endl;
 
-			/*this->media_cycle->cleanLibrary();
-			this->media_cycle->cleanBrowser();
+//			this->media_cycle->cleanLibrary();
+//			this->media_cycle->cleanBrowser();
 
-			//CF make the following accessible from a dock manager
+//			//CF make the following accessible from a dock manager
 
-			//was cleanCheckBoxes()
-			//for (int d=0;d<dockWidgets.size();d++){
-			//	if (dockWidgets[d]->getClassName() == "ACBrowserControlsClustersNeighborsDockWidgetQt") {
-			//		((ACBrowserControlsClustersNeighborsDockWidgetQt*)dockWidgets[d])->cleanCheckBoxes();
-			//	}
-			//	if (dockWidgets[d]->getClassName() == "ACBrowserControlsClustersDockWidgetQt") {
-			//		((ACBrowserControlsClustersDockWidgetQt*)dockWidgets[d])->cleanCheckBoxes();
-			//	}
-			//}
+//			//was cleanCheckBoxes()
+//			//for (int d=0;d<dockWidgets.size();d++){
+//			//	if (dockWidgets[d]->getClassName() == "ACBrowserControlsClustersNeighborsDockWidgetQt") {
+//			//		((ACBrowserControlsClustersNeighborsDockWidgetQt*)dockWidgets[d])->cleanCheckBoxes();
+//			//	}
+//			//	if (dockWidgets[d]->getClassName() == "ACBrowserControlsClustersDockWidgetQt") {
+//			//		((ACBrowserControlsClustersDockWidgetQt*)dockWidgets[d])->cleanCheckBoxes();
+//			//	}
+//			//}
 
-			// XS TODO : remove the boxes specific to the media that was loaded
-			// e.g. ACAudioControlDockWidgets
-			// modify the DockWidget's API to allow this
-			//plugins_scanned = false;
+//			// XS TODO : remove the boxes specific to the media that was loaded
+//			// e.g. ACAudioControlDockWidgets
+//			// modify the DockWidget's API to allow this
+//			//plugins_scanned = false;
 
-			this->getOsgView()->clean();
-			this->getOsgView()->setFocus();*/
+//			this->getOsgView()->clean();
+//			this->getOsgView()->setFocus();
 		}
 	}
 	else if(tag.find("/player",0)!= string::npos)
@@ -855,12 +861,12 @@ int ACAudioGardenOsgQt::processOscMessage(const char *path, const char *types, l
 
 			if (node > -1)
 			{
-				/*
-				 if (!is_pitching)
-				 {
-				 is_pitching = true;
-				 is_scrubing = false;
-				 */
+
+//				 if (!is_pitching)
+//				 {
+//				 is_pitching = true;
+//				 is_scrubing = false;
+
 				//media_cycle->pickedObjectCallback(-1);
 				audio_engine->setLoopSynchroMode(node, ACAudioEngineSynchroModeAutoBeat);
 				audio_engine->setLoopScaleMode(node, ACAudioEngineScaleModeResample);
@@ -873,4 +879,4 @@ int ACAudioGardenOsgQt::processOscMessage(const char *path, const char *types, l
 
 	return 1;
 	//std::cout << "End of OSC process messages" << std::endl;
-}
+}*/
