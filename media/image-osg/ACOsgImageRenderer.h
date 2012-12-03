@@ -36,8 +36,6 @@
 #ifndef __ACOSG_IMAGE_RENDERER_H__
 #define __ACOSG_IMAGE_RENDERER_H__
 
-#if defined (SUPPORT_IMAGE) || defined (SUPPORT_VIDEO)
-
 #include "ACOsgMediaRenderer.h"
 
 class ACOsgImageRenderer : public ACOsgMediaRenderer  {
@@ -57,9 +55,7 @@ public:
     ~ACOsgImageRenderer();
     void prepareNodes();
     void updateNodes(double ratio=0.0);
-
+    virtual osg::ref_ptr<osg::Texture2D> getTexture();
     virtual osg::ref_ptr<osg::Geode> getMainGeode() { return image_geode;}
 };
-
-#endif //defined (SUPPORT_IMAGE) || defined (SUPPORT_VIDEO)
 #endif

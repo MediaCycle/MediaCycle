@@ -33,11 +33,8 @@
  *
  */
 
-#if defined (SUPPORT_IMAGE) || defined (SUPPORT_VIDEO)
-
 #include "ACOsgImageRenderer.h"
 #include <ACImage.h>
-#include <ACVideo.h>
 
 using namespace osg;
 
@@ -162,18 +159,7 @@ void ACOsgImageRenderer::imageGeode(bool flip, float sizemul, float zoomin) {
         // Texture State (image)
         
         //ACMediaType media_type = media_cycle->getLibrary()->getMedia(media_index)->getType();
-        if (media_type == MEDIA_TYPE_IMAGE)
-        {
-            //image_texture = ((ACImage*)(media_cycle->getLibrary()->getMedia(media_index)))->getTexture();
-            image_texture = ((ACImage*)media)->getTexture();
-        }
-        else if (media_type == MEDIA_TYPE_VIDEO)
-        {
-#ifdef SUPPORT_VIDEO
-            //image_texture = ((ACVideo*)(media_cycle->getLibrary()->getMedia(media_index)))->getTexture();
-            image_texture = ((ACVideo*)media)->getTexture();
-#endif//SUPPORT_VIDEO
-        }
+        image_texture = this->getTexture();
         image_texture->setResizeNonPowerOfTwoHint(false);
         
         // XS TODO add this line?
@@ -533,6 +519,13 @@ void ACOsgImageRenderer::imageGeode(bool flip, float sizemul, float zoomin) {
     }
 }
 
+osg::ref_ptr<osg::Texture2D> ACOsgImageRenderer::getTexture(){
+    osg::ref_ptr<osg::Texture2D> texture;
+    if(media)
+           texture = ((ACImage*)media)->getTexture();
+    return texture;
+}
+
 void ACOsgImageRenderer::prepareNodes() {
 
     if (media && media_cycle->getNodeFromMedia(media)->isDisplayed()) {
@@ -675,4 +668,3 @@ void ACOsgImageRenderer::updateNodes(double ratio) {
     media_node->setMatrix(T);
 #endif //AUTO_TRANSFORM
 }
-#endif //defined (SUPPORT_IMAGE) || defined (SUPPORT_VIDEO)
