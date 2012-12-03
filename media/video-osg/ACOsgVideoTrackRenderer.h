@@ -36,8 +36,6 @@
 #ifndef __ACOSG_VIDEO_TRACK_RENDERER_H__
 #define __ACOSG_VIDEO_TRACK_RENDERER_H__
 
-#if defined (SUPPORT_VIDEO)
-
 #include "ACOsgBrowserRenderer.h"
 #include "ACOsgTrackRenderer.h"
 
@@ -248,8 +246,8 @@ protected:
     bool scrubbing;
     bool selection_needs_resync;
 
-    ACVideoSummaryType track_summary_type;
-    ACVideoSelectionType track_selection_type;
+    std::string track_summary_type;
+    std::string track_selection_type;
     bool track_playback_visibility;
 
     bool track_summary_type_changed;
@@ -264,14 +262,16 @@ public:
     void prepareTracks();
     void updateTracks(double ratio=0.0);
 
-    void setSummaryType(ACVideoSummaryType type){this->track_summary_type = type;}
-    void updateSummaryType(ACVideoSummaryType type){this->track_summary_type = type; track_summary_type_changed = true;}
-    ACVideoSummaryType getSummaryType(){return this->track_summary_type;}
-    void setSelectionType(ACVideoSelectionType type){this->track_selection_type = type;}
-    void updateSelectionType(ACVideoSelectionType type){this->track_selection_type = type; track_selection_type_changed = true;}
-    ACVideoSelectionType getSelectionType(){return this->track_selection_type;}
+    // Using std::string instead of typedefs for faster serialization, but less error-proof
+    void setSummaryType(std::string type){this->track_summary_type = type;}
+    void updateSummaryType(std::string type){this->track_summary_type = type; track_summary_type_changed = true;}
+    std::string getSummaryType(){return this->track_summary_type;}
+    void setSelectionType(std::string type){this->track_selection_type = type;}
+    void updateSelectionType(std::string type){this->track_selection_type = type; track_selection_type_changed = true;}
+    std::string getSelectionType(){return this->track_selection_type;}
     void setPlaybackVisibility(bool _visibility){this->track_playback_visibility = _visibility;}
     void updatePlaybackVisibility(bool _visibility){this->track_playback_visibility = _visibility; track_playback_visibility_changed = true;}
+    bool getPlaybackVisibility(){return this->track_playback_visibility;}
 
 private:
     // Reconstructs transforms, geometries and shapes
@@ -287,5 +287,4 @@ private:
     void updateTransformsAspects();
 };
 
-#endif //defined (SUPPORT_VIDEO)
 #endif

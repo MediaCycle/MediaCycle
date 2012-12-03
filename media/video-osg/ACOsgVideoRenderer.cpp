@@ -33,7 +33,6 @@
  *
  */
 
-#if defined (SUPPORT_VIDEO)
 #include "ACOsgVideoRenderer.h"
 #include "ACVideo.h"
 
@@ -48,6 +47,13 @@ ACOsgVideoRenderer::ACOsgVideoRenderer()
 
 ACOsgVideoRenderer::~ACOsgVideoRenderer() {
     if (image_stream) image_stream->quit();
+}
+
+osg::ref_ptr<osg::Texture2D> ACOsgVideoRenderer::getTexture(){
+    osg::ref_ptr<osg::Texture2D> texture;
+    if(media)
+           texture = ((ACVideo*)media)->getTexture();
+    return texture;
 }
 
 void ACOsgVideoRenderer::prepareNodes() {
@@ -106,4 +112,3 @@ void ACOsgVideoRenderer::updateNodes(double ratio) {
         break;
     }
 }
-#endif //defined (SUPPORT_VIDEO)

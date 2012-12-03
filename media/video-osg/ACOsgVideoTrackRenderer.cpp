@@ -56,8 +56,6 @@
 using namespace std;
 using namespace osg;
 
-#if defined (SUPPORT_VIDEO)
-
 osg::ref_ptr<osg::Image> Convert_OpenCV_2_osg_Image(cv::Mat cvImg)
 {
     // XS uncomment the following 4 lines for visual debug (e.g., thumbnail)
@@ -182,7 +180,7 @@ void ACOsgVideoSlitScanThread::yuva420pToRgba(AVPicture * const dst, AVPicture *
 #endif//def __APPLE__
 
 
-//#ifndef USE_FFMPEG
+#ifndef USE_FFMPEG
 // Using OpenCV, frame jitter
 // XS TODO try with cv::VideoCapture
 int ACOsgVideoSlitScanThread::computeSlitScan(){
@@ -252,7 +250,7 @@ int ACOsgVideoSlitScanThread::computeSlitScan(){
     }
     return 1;
 }
-//#endif//ndef USE_FFMPEG
+#endif//ndef USE_FFMPEG
 //#endif //not (defined(__APPLE__) && not defined(USE_FFMPEG))
 
 // Using FFmpeg
@@ -262,7 +260,8 @@ int ACOsgVideoSlitScanThread::computeSlitScan(){
 
     double slit_in = getTime();
 
-    AVFormatContext *pFormatCtx;
+    AVFormatContext *pFormatCtx = 0;
+    pFormatCtx = new AVFormatContext();
     unsigned int             i, videoStreams,videoStream;
     AVPacket        packet;
     int             frameFinished;
@@ -276,7 +275,7 @@ int ACOsgVideoSlitScanThread::computeSlitScan(){
         return -1;
     }
 #else
-    if(avformat_open_input(&pFormatCtx, filename.c_str(), 0, 0)!=0){
+    if(avformat_open_input(&pFormatCtx, filename.c_str(), 0, 0)<0){
         std::cerr << "avformat_open_input : Couldn't open file" << std::endl;
         return -1;
     }
@@ -596,8 +595,8 @@ void ACOsgVideoTrackPlayersSync::run(void)
 ACOsgVideoTrackRenderer::ACOsgVideoTrackRenderer() : ACOsgTrackRenderer() {		
 
     media_type = MEDIA_TYPE_VIDEO;
-    track_summary_type = AC_VIDEO_SUMMARY_KEYFRAMES;
-    track_selection_type = AC_VIDEO_SELECTION_KEYFRAMES;
+    track_summary_type = "Keyframes";
+    track_selection_type = "Keyframes";
     track_playback_visibility = true;
 
     segments_height = yspan/16.0f;//[0;yspan/2.0f]
@@ -1446,7 +1445,7 @@ void ACOsgVideoTrackRenderer::updatePlaybackContents()
 
 void ACOsgVideoTrackRenderer::updateSummaryContents()
 {
-    if (track_summary_type == AC_VIDEO_SUMMARY_KEYFRAMES){
+    if (track_summary_type == "Keyframes"){
         if (summary_frame_n != floor(width/summary_frame_min_width) || media_changed){
             track_summary_type_changed = true;
             summary_frame_n = floor(width/summary_frame_min_width);
@@ -1462,18 +1461,18 @@ void ACOsgVideoTrackRenderer::updateSummaryContents()
     }
 
 #ifdef USE_SLIT_SCAN
-    if (track_summary_type == AC_VIDEO_SUMMARY_SLIT_SCAN && slit_scan_changed)
+    if (track_summary_type == "Slit-scan" && slit_scan_changed)
         track_summary_type_changed = true;
 #endif//def USE_SLIT_SCAN
 
     if (track_summary_type_changed){
         //std::cout << "summary_type " << track_summary_type << std::endl;
         summary_transform->removeChildren(0,summary_transform->getNumChildren());
-        if (track_summary_type == AC_VIDEO_SUMMARY_KEYFRAMES){
+        if (track_summary_type == "Keyframes"){
             summary_transform->addChild(summary_frames_transform);
         }
 #ifdef USE_SLIT_SCAN
-        else if (track_summary_type == AC_VIDEO_SUMMARY_SLIT_SCAN){
+        else if (track_summary_type == "Slit-scan"){
             if (slit_scanner->computed()){
                 if(slit_scan_changed){
                     slitScanTransform();
@@ -1487,7 +1486,7 @@ void ACOsgVideoTrackRenderer::updateSummaryContents()
 
     float w = (float)(media->getWidth());
     float h = (float)(media->getHeight());
-    if (track_summary_type == AC_VIDEO_SUMMARY_KEYFRAMES)
+    if (track_summary_type == "Keyframes")
         summary_height = yspan*(h/height * width/w/summary_frame_n);// summary_frame_n = width/summary_frame_min_width
     else
         summary_height = yspan/8.0f;
@@ -1501,7 +1500,7 @@ void ACOsgVideoTrackRenderer::updateSelectionContents()
     selection_center_frame_width = selection_height * (w/width)/(h/height);
 
     // Update the selection contents
-    if(track_selection_type == AC_VIDEO_SELECTION_KEYFRAMES){
+    if(track_selection_type == "Keyframes"){
 
         //int _selection_frame_n = floor(xspan/selection_center_frame_width/2.0f;
         int _selection_frame_n = floor((width/summary_frame_min_width)/2.0f);
@@ -1556,7 +1555,7 @@ void ACOsgVideoTrackRenderer::updateSelectionContents()
     if (track_selection_type_changed){
         //std::cout << "selection_type " << track_selection_type << std::endl;
         selection_transform->removeChildren(0,selection_transform->getNumChildren());
-        if(track_selection_type == AC_VIDEO_SELECTION_KEYFRAMES){
+        if(track_selection_type == "Keyframes"){
             if(!selection_center_frame_transform)
                 selectionCenterFrameTransform();
             selection_transform->addChild(selection_center_frame_transform);
@@ -1752,7 +1751,7 @@ void ACOsgVideoTrackRenderer::updateSliderContents()
         selectionEndTransform();
         selectionZoneTransform();
     }
-    if(track_selection_type != AC_VIDEO_SELECTION_NONE){
+    if(track_selection_type != "None"){
         track_node->addChild(selection_zone_transform);
         track_node->addChild(selection_begin_transform);
         track_node->addChild(selection_end_transform);
@@ -1779,7 +1778,7 @@ void ACOsgVideoTrackRenderer::updateTransformsAspects()
     }
 
     float _summary_height = this->summary_height;//= 0.0f;
-    if (track_summary_type != AC_VIDEO_SUMMARY_NONE){
+    if (track_summary_type != "None"){
         //_summary_height = this->summary_height;
         summary_matrix.makeTranslate(0.0f,-yspan/2.0f+_segments_height+_summary_height/2.0f,0.0f);
         summary_matrix = Matrix::scale(1.0f,_summary_height/yspan,1.0f)*summary_matrix;
@@ -1787,7 +1786,7 @@ void ACOsgVideoTrackRenderer::updateTransformsAspects()
     }
 
     float _selection_height = 0.0f;
-    if (track_selection_type != AC_VIDEO_SELECTION_NONE){
+    if (track_selection_type != "None"){
         _selection_height = this->selection_height;
         selection_center_frame_matrix.makeTranslate(0.0f,-yspan/2.0f+_segments_height+_summary_height+_selection_height/2.0f,0.0f);
         selection_center_frame_matrix = Matrix::scale(selection_center_frame_width/xspan,_selection_height/yspan,1.0f)*selection_center_frame_matrix;
@@ -1801,7 +1800,7 @@ void ACOsgVideoTrackRenderer::updateTransformsAspects()
             left_selection_videos_matrices[m].makeTranslate(-selection_center_frame_width*(m+1),-yspan/2.0f+_segments_height+_summary_height+_selection_height/2.0f,0.0f);
             left_selection_videos_matrices[m] = Matrix::scale(selection_center_frame_width/xspan,_selection_height/yspan,1.0f)*left_selection_videos_matrices[m];
         }
-        if(track_selection_type == AC_VIDEO_SELECTION_KEYFRAMES){
+        if(track_selection_type == "Keyframes"){
             selection_center_frame_transform->setMatrix(selection_center_frame_matrix);
             for (unsigned int m=0;m<right_selection_videos_matrices.size();++m){
                 if(right_selection_video_transforms[m]){
@@ -1845,4 +1844,3 @@ void ACOsgVideoTrackRenderer::updateTransformsAspects()
     cursor_matrix = Matrix::scale(1.0f,_summary_height/yspan,1.0f)*cursor_matrix;
     summary_cursor_transform->setMatrix(cursor_matrix);
 }
-#endif //defined (SUPPORT_VIDEO)

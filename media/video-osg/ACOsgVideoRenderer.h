@@ -36,8 +36,6 @@
 #ifndef __ACOSG_VIDEO_RENDERER_H__
 #define __ACOSG_VIDEO_RENDERER_H__
 
-#if defined (SUPPORT_VIDEO)
-
 #include "ACOsgMediaRenderer.h"
 #include "ACOsgBrowserRenderer.h"
 #include "ACOsgImageRenderer.h"
@@ -52,7 +50,7 @@ public:
     ~ACOsgVideoRenderer();
     void prepareNodes();
     void updateNodes(double ratio=0.0);
+    virtual osg::ref_ptr<osg::Texture2D> getTexture();
 };
 
-#endif //defined (SUPPORT_VIDEO)
 #endif
