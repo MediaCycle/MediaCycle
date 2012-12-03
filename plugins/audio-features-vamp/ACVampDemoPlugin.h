@@ -4,6 +4,7 @@
  *
  *  @author Damien Tardieu
  *  @date 08/06/10
+ *  Updated by Christian Frisson on 13/08/2012.
  *  @copyright (c) 2010 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
@@ -32,40 +33,23 @@
  *
  */
 
-#include "ACVampDemoPlugin.h"
+#ifndef _ACVAMPDEMOPLUGIN_H
+#define	_ACVAMPDEMOPLUGIN_H
+
 #include "vamp-plugin-interface.h"
-#include "ACAudio.h"
+#include "MediaCycle.h"
 
-#include <vector>
-#include <string>
+#include<iostream>
 
-//class ACMedia;
+class ACVampDemoPlugin : public ACTimedFeaturesPlugin {
+public:
+	ACVampDemoPlugin();
+	~ACVampDemoPlugin();
+	
+    virtual std::vector<ACMediaFeatures*> calculate(){return std::vector<ACMediaFeatures*>();}
+	virtual std::vector<ACMediaFeatures*> calculate(ACMediaData* _data, ACMedia*, bool _save_timed_feat=false);
+	
+private:
+};
 
-ACVampDemoPlugin::ACVampDemoPlugin() {
-    //vars herited from ACPlugin
-    this->mMediaType = MEDIA_TYPE_AUDIO;
-   // this->mPluginType = PLUGIN_TYPE_FEATURES;
-    this->mName = "Vamp";
-    this->mDescription = "Vamp plugin";
-    this->mId = "";
-}
-
-ACVampDemoPlugin::~ACVampDemoPlugin() {
-}
-
-
-std::vector<ACMediaFeatures*> ACVampDemoPlugin::calculate(ACMediaData* audio_data, ACMedia* theMedia, bool _save_timed_feat) {
-	std::vector<ACMediaTimedFeature*> descmf;
-	std::vector<ACMediaFeatures*> desc;
-	//	int sr = ((ACAudio*)theMedia)->getSampleRate();
-	ACAudio* theAudio = (ACAudio*) theMedia;
-	float* audioSamples = theAudio->getSamples();
-	descmf.push_back(runPlugin("qm-vamp-plugins", "qm-chromagram", "0", 0, audioSamples, theAudio->getNFrames(), theAudio->getSampleRate(), theAudio->getChannels(), 0));
-	//	descmf.push_back(runPlugin("qm-vamp-plugins", "qm-chromagram", "0", 0, theAudio->getFileName(), 0));
-	delete [] audioSamples;
-
-	for (int i=0; i<descmf.size(); i++)
-		desc.push_back(descmf[i]->mean());
-	return desc;
-}
-
+#endif	/* _ACVAMPDEMOPLUGIN_H */
