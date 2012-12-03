@@ -194,6 +194,7 @@ public:
     ACMediaTimedFeature* getTimedFeatures(std::string feature_name);
     void setTaggedClassId(int pId){taggedClassId=pId;};
     int getTaggedClassId(void){ return taggedClassId;};
+    bool isTagged(){return (taggedClassId>-1);};
     
 };
 

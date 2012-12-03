@@ -390,8 +390,9 @@ void ACOsgBrowserRenderer::updateNodes(double ratio) {
         node_renderer->second->setZoomAngle(media_cycle_zoom, media_cycle_angle);
         node_renderer->second->setMode(media_cycle_mode);
         node_renderer->second->setGlobalNavigation(media_cycle_global_navigation_level);
-        // NODE SPECIFIC
-        node_renderer->second->setIsDisplayed(media_cycle_isdisplayed);
+            // NODE SPECIFIC
+            node_renderer->second->setIsDisplayed(media_cycle_isdisplayed);
+            node_renderer->second->setIsTagged(media_cycle->mediaIsTagged(media_index));
         // SD 2010 OCT
         //node_renderer->second->setPos(media_cycle_current_pos, media_cycle_next_pos);
         node_renderer->second->setNavigation(media_cycle_navigation_level);

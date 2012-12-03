@@ -87,6 +87,7 @@ public slots:
     void changeSelectedNodeClusterId7(bool trig);
     void changeSelectedNodeClusterId8(bool trig);
     void changeSelectedNodeClusterId9(bool trig);
+    void resetSelectedNodeClusterId(bool trig);
     void stopPlayback(); // stop the playback of audio/video files
     void toggleMediaHover(bool toggle); // audio hover, image/video ... -> need a panel to configure the behaviour of hover
     void triggerMediaHover(bool trigger); // audio hover, image/video ... -> need a panel to configure the behaviour of hover
@@ -158,7 +159,7 @@ private:
     *stopPlaybackAction, *toggleMediaHoverAction, *triggerMediaHoverAction, *resetBrowserAction,
     *rotateBrowserAction, *zoomBrowserAction, *translateBrowserAction,
     *addMediaOnTimelineTrackAction, *toggleTimelinePlaybackAction, *adjustTimelineHeightAction,
-    *discardMediaAction;
+    *discardMediaAction,*resetSelectedNodeClusterIdAction;
     //*neighborsOfReferentAction, *clusterAroundReferentAction, *removeMediaAction
     std::vector<ACInputActionQt*> changeSelectedNodeClusterIdAction;
     QList<ACInputActionQt*> inputActions;

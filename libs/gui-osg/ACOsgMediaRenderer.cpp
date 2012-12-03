@@ -77,6 +77,7 @@ ACOsgMediaRenderer::ACOsgMediaRenderer() {
 
     // SD - Results from centralized request to MediaCycle - NODE SPECIFIC
     media_cycle_isdisplayed = false;
+    media_cycle_isTagged=false;
     media_cycle_current_pos.x = 0;
     media_cycle_current_pos.y = 0;
     media_cycle_current_pos.z = 0;
@@ -176,6 +177,9 @@ void ACOsgMediaRenderer::setGlobalNavigation(int media_cycle_global_navigation_l
 
 void ACOsgMediaRenderer::setIsDisplayed(int media_cycle_isdisplayed) {
     this->media_cycle_isdisplayed = media_cycle_isdisplayed;
+}
+void ACOsgMediaRenderer::setIsTagged(int media_cycle_isTagged) {
+    this->media_cycle_isTagged = media_cycle_isTagged;
 }
 
 /*

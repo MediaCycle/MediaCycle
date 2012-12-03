@@ -115,6 +115,7 @@ protected:
 
     // NODE SPECIFIC
     bool media_cycle_isdisplayed;
+    bool media_cycle_isTagged;
     ACPoint media_cycle_current_pos;
     ACPoint media_cycle_view_pos;
     ACPoint media_cycle_next_pos;
@@ -161,6 +162,8 @@ public:
     void setGlobalNavigation(int media_cycle_global_navigation_level);
     void setIsDisplayed(int media_cycle_isdisplayed);
     int getIsDisplayed(){return media_cycle_isdisplayed;}
+    void setIsTagged(int media_cycle_isTagged);
+    int getIsTagged(){return media_cycle_isTagged;}
 
     //void setPos(ACPoint &media_cycle_current_pos, ACPoint &media_cycle_next_pos);
     void setViewPos(ACPoint media_cycle_view_pos);

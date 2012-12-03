@@ -71,7 +71,7 @@ ACOsgCompositeViewQt::ACOsgCompositeViewQt( QWidget * parent, const char * name,
       stopPlaybackAction(0), toggleMediaHoverAction(0), triggerMediaHoverAction(0),
       resetBrowserAction(0), rotateBrowserAction(0), zoomBrowserAction(0),
       translateBrowserAction(0), addMediaOnTimelineTrackAction(0), toggleTimelinePlaybackAction(0), adjustTimelineHeightAction(0),
-      discardMediaAction(0),
+      discardMediaAction(0),resetSelectedNodeClusterIdAction(0),
       setting(AC_SETTING_NONE)
 {
     osg_view = new osgViewer::GraphicsWindowEmbedded(0,0,width(),height());
@@ -231,6 +231,7 @@ ACOsgCompositeViewQt::~ACOsgCompositeViewQt(){
         }
         changeSelectedNodeClusterIdAction.clear();
     }
+    if(resetSelectedNodeClusterIdAction) delete resetSelectedNodeClusterIdAction; resetSelectedNodeClusterIdAction = 0;
     if(stopPlaybackAction) delete stopPlaybackAction; stopPlaybackAction = 0;
     if(toggleMediaHoverAction) delete toggleMediaHoverAction; toggleMediaHoverAction = 0;
     if(resetBrowserAction) delete resetBrowserAction; resetBrowserAction = 0;
@@ -501,6 +502,14 @@ void ACOsgCompositeViewQt::initInputActions(){
         
     }
     
+    resetSelectedNodeClusterIdAction = new ACInputActionQt(tr("reset Cluster Id"), this);
+    resetSelectedNodeClusterIdAction->setToolTip(tr("Reset Cluster Id of the clicked Node"));
+    resetSelectedNodeClusterIdAction->setShortcut(Qt::Key_U);
+    resetSelectedNodeClusterIdAction->setKeyEventType(QEvent::KeyPress);
+    //resetSelectedNodeClusterIdAction->setMouseEventType(QEvent::MouseButtonPress);
+    connect(resetSelectedNodeClusterIdAction, SIGNAL(triggered(bool)), this, SLOT(resetSelectedNodeClusterId(bool)));
+    this->addInputAction(resetSelectedNodeClusterIdAction);
+    
     
     stopPlaybackAction = new ACInputActionQt(tr("Stop Playback"), this);
     stopPlaybackAction->setShortcut(Qt::Key_M);
@@ -744,6 +753,11 @@ void ACOsgCompositeViewQt::changeSelectedNodeClusterId8(bool trig){
 void ACOsgCompositeViewQt::changeSelectedNodeClusterId9(bool trig){
     if (media_cycle == 0) return;
     int newId=9;
+    media_cycle->changeSelectedNodeClusterId(newId);
+}
+void ACOsgCompositeViewQt::resetSelectedNodeClusterId(bool trig){
+    if (media_cycle == 0) return;
+    int newId=-1;
     media_cycle->changeSelectedNodeClusterId(newId);
 }
 

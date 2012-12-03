@@ -34,6 +34,7 @@
 #include <string>
 #include <mds.h>
 #include <Isomap.h>
+#include <Sne.h>
 
 using namespace std;
 using namespace arma;
@@ -61,6 +62,14 @@ int main(int argc, char** argv) {
         18.7883  ,  8.3666  , 73.6071 ,  34.1174  ,  8.0623 ,  78.7718  ,  7.1414 , 105.7592 , 131.3431  ,       0};
     
     mat H(aux_mem, 10, 10, false);
+    cout<<"H:"<<endl<<H<<endl;
+    rowvec testVec= H.row(2);
+    rowvec testVec2=H.row(4);
+    
+    testVec.subvec(0,2)=testVec2.subvec(3,5);
+    cout<<"testVec:"<<testVec<<endl;
+    
+    
     double aux_mem2[30] ={
         1  ,   4  ,   6   , 35  ,   8   , 25  ,   8  ,  61  ,  76 ,    1,
         10  ,   7  ,  10  ,   4  ,   2  ,  77  ,   3  ,   6  ,  53  ,   2,
@@ -69,7 +78,7 @@ int main(int argc, char** argv) {
     cout<<"X:"<<X<<endl;
     Isomap algo;
     algo.setFeatureMatrix(X,'k',2);
-   // algo.setDistanceMatrix(H);
+    //algo.setDistanceMatrix(H);
     mat result=algo.compute(2);
     cout<<"result:"<<endl;
     cout<<result;

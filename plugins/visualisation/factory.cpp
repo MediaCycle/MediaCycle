@@ -13,6 +13,7 @@
 #include "ACVisPluginSMDS.h"
 #include "ACVisPluginIsoMap.h"
 #include "ACVisPluginSIsoMap.h"
+#include "ACVisPlugin_t_Sne.h"
 #include "ACVisPlugin2Desc.h"
 #include "ACPosPlugAudioGardenGramoPhone.h"
 #include "ACPosPlugAudioGardenFlower.h"
@@ -42,6 +43,7 @@ extern "C" ACPlugin* create(std::string namePlugin) {
     if (namePlugin == "ACVisPluginSMDS") {return new ACVisPluginSMDS();}
     if (namePlugin == "ACVisPluginIsoMap") {return new ACVisPluginIsoMap();}
     if (namePlugin == "ACVisPluginSIsoMap") {return new ACVisPluginSIsomap();}
+    if (namePlugin == "ACVisPlugin_t_Sne") {return new ACVisPlugin_t_Sne();}
     if (namePlugin == "ACVisPlugin2Desc") {return new ACVisPlugin2Desc();}
     if (namePlugin == "ACPosPlugAudioGardenGramoPhone") {return new ACPosPlugAudioGardenGramoPhone();}
     if (namePlugin == "ACPosPlugAudioGardenFlower") {return new ACPosPlugAudioGardenFlower();}
@@ -76,6 +78,7 @@ extern "C" std::vector<std::string> list() {    //returns a string vector contai
     listPlugin.push_back("ACVisPluginSMDS");
     listPlugin.push_back("ACVisPluginIsoMap");
     listPlugin.push_back("ACVisPluginSIsoMap");
+    listPlugin.push_back("ACVisPlugin_t_Sne");
     listPlugin.push_back("ACVisPlugin2Desc");
     listPlugin.push_back("ACPosPlugAudioGardenGramoPhone");
     listPlugin.push_back("ACPosPlugAudioGardenFlower");

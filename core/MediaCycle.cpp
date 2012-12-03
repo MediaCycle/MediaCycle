@@ -621,6 +621,7 @@ ACMediaNode* MediaCycle::getMediaNode(int i) { return (mediaBrowser->getMediaNod
 ACMediaNode* MediaCycle::getNodeFromMedia(ACMedia* _media) { return (mediaBrowser->getNodeFromMedia(_media)); }
 string MediaCycle::getMediaFileName(int i) { return mediaLibrary->getMedia(i)->getFileName(); }
 ACMediaType MediaCycle::getMediaType(int i) { return mediaLibrary->getMedia(i)->getType(); }
+bool MediaCycle::mediaIsTagged(int i) { return (mediaLibrary->getMedia(i)?mediaLibrary->getMedia(i)->isTagged():false); }
 void MediaCycle::setMediaType(ACMediaType mt) {mediaLibrary->setMediaType(mt); }
 bool MediaCycle::changeMediaType(ACMediaType aMediaType) {
     bool changeMe = true ;

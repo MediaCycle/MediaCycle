@@ -52,10 +52,12 @@ protected:
     osg::ref_ptr<osg::MatrixTransform> curser_transform;
 #endif
     osg::ref_ptr<osg::Geode> entry_geode;
+    osg::ref_ptr<osg::Geode> aura_geode;
 
     void waveformGeode();
     void curserGeode();
     void entryGeode();
+    void auraGeode();
 
 
     ACBrowserAudioWaveformType waveform_type;

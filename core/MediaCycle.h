@@ -157,6 +157,7 @@ public:
     std::string getMediaFileName(int i);
     ACMediaType getMediaType(int i);
     ACMediaType getMediaType() {return mediaLibrary->getMediaType();}
+    bool mediaIsTagged(int i);
     void setMediaType(ACMediaType _mt);
     bool changeMediaType(ACMediaType aMediaType);
 

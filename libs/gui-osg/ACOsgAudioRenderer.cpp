@@ -50,6 +50,7 @@ ACOsgAudioRenderer::ACOsgAudioRenderer()
     curser_geode = 0;
     curser_transform = 0;
     entry_geode = 0;
+    aura_geode=0;
     waveform_type = AC_BROWSER_AUDIO_WAVEFORM_CLASSIC;
 }
 
@@ -370,10 +371,36 @@ void ACOsgAudioRenderer::entryGeode() {
     state->setMode(GL_BLEND, StateAttribute::ON);
     //entry_geode->addDrawable(new osg::ShapeDrawable(new osg::Box(osg::Vec3(0.0f,0.0f,0.0f),0.01), hints)); //draws a square // Vintage AudioCycle
     entry_geode->addDrawable(new osg::ShapeDrawable(new osg::Sphere(osg::Vec3(0.0f,0.0f,0.0f),localsize), hints)); // draws a sphere // MultiMediaCycle
-    //entry_geode->addDrawable(new osg::ShapeDrawable(new osg::Cylinder(osg::Vec3(0.0f,0.0f,0.0f),0.01, 0.0f), hints)); // draws a disc
+    //entry_geode->addDrawable(new osg::ShapeDrawable(new osg::Cylinder(osg::Vec3(0.0f,0.0f,0.0f),localsize, 0.0f), hints)); // draws a disc
     //entry_geode->addDrawable(new osg::ShapeDrawable(new osg::Capsule(osg::Vec3(0.0f,0.0f,0.0f),0.01, 0.005f), hints)); // draws a sphere
 #endif
     entry_geode->setUserData(new ACRefId(node_index));
+}
+void ACOsgAudioRenderer::auraGeode(){StateSet *state;
+    
+    float localsize = 0.01;
+    localsize *= afac;
+    
+    aura_geode = new Geode();
+    
+    TessellationHints *hints = new TessellationHints();
+    hints->setDetailRatio(0.0);
+    
+    state = aura_geode->getOrCreateStateSet();
+    state->setMode(GL_NORMALIZE, osg::StateAttribute::ON);
+    
+#if defined(APPLE_IOS)
+    state->setMode(GL_LIGHTING, osg::StateAttribute::PROTECTED | osg::StateAttribute::OFF );
+    aura_geode->addDrawable(new osg::ShapeDrawable(new osg::Box(osg::Vec3(0.0f,0.0f,0.0f),0.01), hints)); //draws a square // Vintage AudioCycle
+#else
+    state->setMode(GL_LIGHTING, osg::StateAttribute::ON );
+    state->setMode(GL_BLEND, StateAttribute::ON);
+    //entry_geode->addDrawable(new osg::ShapeDrawable(new osg::Box(osg::Vec3(0.0f,0.0f,0.0f),0.01), hints)); //draws a square // Vintage AudioCycle
+    //aura_geode->addDrawable(new osg::ShapeDrawable(new osg::Sphere(osg::Vec3(0.0f,0.0f,-localsize*1.5),localsize*1.5), hints)); // draws a sphere // MultiMediaCycle
+    aura_geode->addDrawable(new osg::ShapeDrawable(new osg::Cylinder(osg::Vec3(0.0f,0.0f,0.0f),localsize*1.5, 0.0f), hints)); // draws a disc
+    //entry_geode->addDrawable(new osg::ShapeDrawable(new osg::Capsule(osg::Vec3(0.0f,0.0f,0.0f),0.01, 0.005f), hints)); // draws a sphere
+#endif
+    aura_geode->setUserData(new ACRefId(node_index));
 }
 
 void ACOsgAudioRenderer::prepareNodes() {
@@ -407,6 +434,8 @@ void ACOsgAudioRenderer::updateNodes(double ratio) {
         media_node->removeChild(metadata_geode);
         metadata_geode = 0;
         media_node->removeChild(curser_transform);
+        media_node->removeChild(aura_geode);
+        (aura_geode)=0;
         if (entry_geode)
             entry_geode->setNodeMask(0);
         return;
@@ -454,10 +483,12 @@ void ACOsgAudioRenderer::updateNodes(double ratio) {
                 metadataGeode();
             }
         }
+        
 
-        if(media_node->getNumChildren() ==3 && waveform_type != AC_BROWSER_AUDIO_WAVEFORM_NONE){
+        if(waveform_type != AC_BROWSER_AUDIO_WAVEFORM_NONE){
             if (label != media->getLabel() ) {
-                media_node->removeChild(metadata_geode);
+                if (media_node->containsNode(metadata_geode))
+                    media_node->removeChild(metadata_geode);
                 metadata_geode = 0;
                 metadataGeode();
                 media_node->addChild(metadata_geode);
@@ -466,23 +497,35 @@ void ACOsgAudioRenderer::updateNodes(double ratio) {
         }
 
         //if(media_node->getNumChildren() > 0 && media_node->getChild(0) == entry_geode) {
-        if(media_node->getNumChildren() !=3 && waveform_type != AC_BROWSER_AUDIO_WAVEFORM_NONE) {// waveform + curser + metadata
+        if(waveform_type != AC_BROWSER_AUDIO_WAVEFORM_NONE) {// waveform + curser + metadata
             //waveform_geode->setNodeMask(-1);
-            media_node->removeChild(entry_geode);
-            media_node->addChild(waveform_geode);
-            //media_node->setChild(0, waveform_geode);
-            if (metadata_geode == 0 ) {
-                metadataGeode();
+            if (media_node->containsNode(entry_geode))
+                media_node->removeChild(entry_geode);
+            if (aura_geode&&media_node->containsNode(metadata_geode)){
+                media_node->removeChild(aura_geode);
             }
-            media_node->addChild(metadata_geode);
-            media_node->addChild(curser_transform);
+            if (media_node->containsNode(waveform_geode)==false)
+                media_node->addChild(waveform_geode);
+            //media_node->setChild(0, waveform_geode);
+            if (media_node->containsNode(metadata_geode)==false)
+                media_node->addChild(metadata_geode);
+            if (media_node->containsNode(curser_transform)==false)
+                media_node->addChild(curser_transform);
         }
-        else if(media_node->getNumChildren() ==3 && waveform_type == AC_BROWSER_AUDIO_WAVEFORM_NONE){// when switching to none mode while waveforms are already displayed
-            media_node->removeChild(waveform_geode);
+        else if( waveform_type == AC_BROWSER_AUDIO_WAVEFORM_NONE){// when switching to none mode while waveforms are already displayed
+            if (media_node->containsNode(waveform_geode))
+                media_node->removeChild(waveform_geode);
+            if (media_node->containsNode(metadata_geode))
             media_node->removeChild(metadata_geode);
             metadata_geode = 0;
-            media_node->removeChild(curser_transform);
-            media_node->addChild(entry_geode);
+            if (media_node->containsNode(curser_transform))
+                media_node->removeChild(curser_transform);
+            if (media_node->containsNode(entry_geode)==false)
+                media_node->addChild(entry_geode);
+            if (aura_geode){
+                if (media_node->containsNode(aura_geode)==false)
+                    media_node->addChild(aura_geode);
+            }
         }
 
         if(waveform_type != AC_BROWSER_AUDIO_WAVEFORM_NONE){
@@ -511,12 +554,20 @@ void ACOsgAudioRenderer::updateNodes(double ratio) {
             entryGeode();
             //std::cout << "ACOsgAudioRenderer::updateNodes created missing node geode" << std::endl;
         }
-        if(media_node->getNumChildren() != 1) { // entry_geode
-            media_node->removeChild(waveform_geode);
-            media_node->removeChild(metadata_geode);
+        { // entry_geode
+            if (media_node->containsNode(waveform_geode))
+                media_node->removeChild(waveform_geode);
+            if (media_node->containsNode(metadata_geode))
+                media_node->removeChild(metadata_geode);
             metadata_geode = 0;
-            media_node->removeChild(curser_transform);
-            media_node->addChild(entry_geode);
+            if (media_node->containsNode(curser_transform))
+                media_node->removeChild(curser_transform);
+            if (media_node->containsNode(entry_geode)==false)
+                media_node->addChild(entry_geode);
+            if (aura_geode){
+                if (media_node->containsNode(aura_geode)==false)
+                    media_node->addChild(aura_geode);
+            }
             //media_node->setChild(0, entry_geode);
             //media_node->removeChild(1, 1);
         }
@@ -536,6 +587,17 @@ void ACOsgAudioRenderer::updateNodes(double ratio) {
                 }
                 else
                     ((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(node_color);
+                if (this->getIsTagged()&&(aura_geode==0)){
+                    auraGeode();
+                    ((ShapeDrawable*)aura_geode->getDrawable(0))->setColor(osg::Vec4(0,0,0,1));
+                }
+                else
+                    if (this->getIsTagged()==0&&aura_geode){
+                        media_node->removeChild(aura_geode);
+                        aura_geode=0;
+                    }
+                
+                
             }
             else
                 ((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(neighbor_color);
@@ -560,9 +622,13 @@ void ACOsgAudioRenderer::updateNodes(double ratio) {
     unsigned int mask = (unsigned int)-1;
     if(attribute->getNavigationLevel() >= media_cycle->getNavigationLevel()) {
         entry_geode->setNodeMask(mask);
+        if (aura_geode)
+            aura_geode->setNodeMask(mask);
     }
     else {
         entry_geode->setNodeMask(0);
+        if (aura_geode)
+            aura_geode->setNodeMask(0);
     }
 
 #ifdef AUTO_TRANSFORM
