@@ -1,10 +1,10 @@
 /*
- *  ACText.h
+ *  textFile.h
  *  MediaCycle
  *
  *  @author Thierry Ravet
- *  @date 22/10/10
- *  @copyright (c) 2010 – UMONS - Numediart
+ *  @date 16/11/10
+ *  @copyright (c) 2012 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
  *  licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -32,39 +32,12 @@
  *
  */
 
-#if defined (SUPPORT_TEXT)
+#ifndef textFile_H
+#define	textFiler_H
 
-#ifndef ACTEXT_H
-#define ACTEXT_H
-
-#include "ACMedia.h"
-#include "ACMediaFeatures.h"
 #include <string>
-#include <cstring>
-#include "ACTextData.h"
-
-class ACText : public ACMedia {
-	// contains the *minimal* information about a text
-protected:
-	int docIndex;
-	ACTextData* data;
-public:
-	ACText();
-	~ACText();
-	
-	void deleteData();
-	void saveACLSpecific(std::ofstream &library_file);
-	int loadACLSpecific(std::ifstream &library_file);
-	bool extractData(std::string fname);
-	ACMediaData* getMediaData(){return data;} // XS TODO : needs dynamic_cast<ACMediaData*> (data) ??;
-	
-    virtual std::string getTextMetaData();
-
-	void* getThumbnailPtr();
-	void setDocIndex(int pDocIndex){docIndex=pDocIndex;}
-	int getDocIndex(void){return docIndex;}
-	
-	
-};
-#endif // ACTEXT_H
-#endif //defined (SUPPORT_TEXT)
+std::string* textFileRead(std::string filePath);
+std::string labelFileRead(std::string filePath);
+std::string *txtFileRead(std::string filePath);
+std::string *xmlFileRead(std::string filePath);
+#endif

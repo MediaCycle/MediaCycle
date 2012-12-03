@@ -1,10 +1,10 @@
 /*
- *  ACTextData.h
+ *  ACText.h
  *  MediaCycle
  *
  *  @author Thierry Ravet
- *  @date 02/05/11
- *  @copyright (c) 2011 – UMONS - Numediart
+ *  @date 22/10/10
+ *  @copyright (c) 2010 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
  *  licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -32,30 +32,40 @@
  *
  */
 
-#ifndef ACTEXTDATA_H
-#define ACTEXTDATA_H
+#ifndef ACTEXT_H
+#define ACTEXT_H
 
-#if defined (SUPPORT_TEXT)
-#include "ACMediaData.h"
-#include <cstdlib>
-#include <cstring>
+#include "ACMedia.h"
+#include "ACMediaFeatures.h"
 #include <string>
+#include <cstring>
+#include "ACTextData.h"
 
-class ACTextData: public ACMediaData {
-public:
-	ACTextData();
-	~ACTextData();
-	ACTextData(std::string _fname);
-
-	virtual bool readData(std::string _fname);
-	virtual void* getData() {return static_cast<void*>(text_ptr);}
-	virtual void setData(std::string* _data);	
-
+class ACText : public ACMedia {
+	// contains the *minimal* information about a text
 protected:
-	virtual void init();
-	std::string* text_ptr;
+	int docIndex;
+	ACTextData* data;
+public:
+	ACText();
+    ACText(const ACText& m);
+	~ACText();
+private:
+    void init();
+
+public:
+	void deleteData();
+	void saveACLSpecific(std::ofstream &library_file);
+	int loadACLSpecific(std::ifstream &library_file);
+	bool extractData(std::string fname);
+    ACMediaData* getMediaData();
+	
+    virtual std::string getTextMetaData();
+
+	void* getThumbnailPtr();
+	void setDocIndex(int pDocIndex){docIndex=pDocIndex;}
+	int getDocIndex(void){return docIndex;}
+	
 	
 };
-
-#endif //defined (SUPPORT_TEXT)
-#endif // ACTEXTDATA_H
+#endif // ACTEXT_H

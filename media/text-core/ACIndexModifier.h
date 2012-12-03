@@ -1,9 +1,9 @@
 /*
- *  ACText.cpp
- *  MediaCycle
+ *  ACIndexModifier.h
+ *  clucene
  *
  *  @author Thierry Ravet
- *  @date 22/10/10
+ *  @date 19/11/10
  *  @copyright (c) 2010 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
@@ -32,78 +32,48 @@
  *
  */
 
-#if defined (SUPPORT_TEXT)
-#include "ACText.h"
+#ifndef _ACINDEXMODIFIER_H
+#define	_ACINDEXMODIFIER_H
+
+#include "CLucene/index/IndexModifier.h" 
+
+#if defined(_LUCENE_PRAGMA_ONCE)
+# pragma once
+#endif
+#include "CLucene/store/Directory.h"
+#include "CLucene/document/Document.h"
+#include "CLucene/analysis/AnalysisHeader.h"
+#include "CLucene/index/Term.h"
+#include "CLucene/index/IndexWriter.h"
+#include "CLucene/index/IndexReader.h"
+#include "CLucene/index/TermVector.h"
+
+using namespace lucene::analysis;
+using namespace lucene::index;
+using namespace lucene::util;
+using namespace lucene::search;
 using namespace std;
+CL_NS_DEF(index)
 
-
-ACText::ACText() : ACMedia() {
-    media_type = MEDIA_TYPE_TEXT;
-	docIndex=-1;
-	data =NULL;
-}
-
-ACText::~ACText(){
-	if (data!=NULL)
-		delete data;
-}
-
-void ACText::deleteData(){
-	if (data)
-		delete data;
-	data=0;
-}
-void ACText::saveACLSpecific(ofstream &library_file) {
+class ACIndexModifier : public IndexModifier {
+public:
 	
-	library_file << endl;
-}
-
-int ACText::loadACLSpecific(ifstream &library_file) {
+	ACIndexModifier(const char* dirName, Analyzer* analyzer, bool create);
+	~ACIndexModifier(void);
 	
-
+	#ifdef OLD_CLUCENE
+		bool getTermFreqVectors(int32_t docNumber, Array<TermFreqVector*>& result);
+	#else
+		CL_NS(util)::ArrayBase<TermFreqVector*>* getTermFreqVectors(int32_t docNumber);
+	#endif
 	
-	return 1;
-}
+	TermFreqVector* getTermFreqVector(int32_t docNumber, const TCHAR* field);
+	int32_t docFreq(const Term* t);
+	TermPositions* termPositions();
+	TermPositions* termPositions(Term* term);
+	//bool isOptimized(void);
+};
 
+CL_NS_END
 
-
-bool ACText::extractData(string fname){
-	if (data){
-		delete data;
-		data=0;
-	}
-	data = new ACTextData(fname);
-	if (data!=0){
-		if (data->getData()==NULL){
-			delete data;
-			data=0;
-		}
-		else
-			label=data->getLabel();
-	}
-	//computeThumbnail(image_data, 64, 64);
-	//width = thumbnail_width;
-	//height = thumbnail_height;
-	return true;
-}
-std::string ACText::getTextMetaData(){
-    string ret;
-    if (data==0){
-        this->extractData(filename);
-        if (data!=0)
-            ret=(*((string*)data->getData()));
-        this->deleteData();
-    }
-    else{
-        ret=(*((string*)data->getData()));
-    }
-    return ret;
-    
-}
-
-
-void* ACText::getThumbnailPtr(){
-	return 0;
-
-}
-#endif //defined (SUPPORT_TEXT)
+#endif

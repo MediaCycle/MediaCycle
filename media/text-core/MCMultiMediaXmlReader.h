@@ -1,9 +1,9 @@
 /*
- *  ACTextData.cpp
+ *  MCMultiMediaXmlReader.h
  *  MediaCycle
  *
  *  @author Thierry Ravet
- *  @date 02/05/11
+ *  @date 30/06/11
  *  @copyright (c) 2011 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
@@ -32,66 +32,30 @@
  *
  */
 
-#if defined (SUPPORT_TEXT)
-#include "ACTextData.h"
+
+#ifndef MCMultiMediaXmlReader_H
+#define	MCMultiMediaXmlReader_H
+
 #include <string>
-#include <iostream>
-#include "textFile.h"
-using namespace std;
-using std::cerr;
-using std::endl;
-using std::string;
-
-ACTextData::ACTextData(){ 
-	this->init();
-}
-
-void ACTextData::init() {
-	media_type = MEDIA_TYPE_TEXT;
-	text_ptr=0;
-}
-
-ACTextData::ACTextData(std::string _fname) { 
-	this->init();
-	file_name=_fname;
-	this->readData(_fname);
-}
-
-ACTextData::~ACTextData() {
-	if (text_ptr != 0) {
-		text_ptr->clear();
-		delete text_ptr;
-		text_ptr=0;
-	}
-}
-
-bool ACTextData::readData(std::string _fname){ 
-	if (text_ptr != NULL) {
-		delete text_ptr;
-		text_ptr=0;
-	}
-	text_ptr = textFileRead(_fname);
-	if( text_ptr == NULL) {
-		cerr << "<ACMediaData::readTextData> file can not be read !" << endl;
-		return false;
-	}
-	else {
-		cout << (*text_ptr)<<"\n";
-	}
-	label= labelFileRead(_fname);
-    if ((*text_ptr)==string(""))
-        (*text_ptr)=label;
-	cout << label<<"\n";
-//	cout << (*text_ptr)<<"\n";
-	return true;
-}
-
-void ACTextData::setData(string* _data){
+#include <vector>
+#define TIXML_USE_STL
+#include "tinyxml.h"
+class MCMultiMediaXmlReader{
+public:	
+	MCMultiMediaXmlReader(std::string filename);
+	~MCMultiMediaXmlReader();
 	
-	if (text_ptr)
-		delete text_ptr;
-	text_ptr=new string;
-	(*text_ptr)=(*_data);
-}
+	bool isMCMultiMediaXml();
+	std::string getReference();
+	std::string getLabel();
+	unsigned int getNumberOfMedia();
+	std::string getMediaType(unsigned int index);
+	std::string getMediaReference(unsigned int index);
+	std::string getMediaPath(unsigned int index);
+protected:
+	TiXmlDocument *doc;
+	std::string filename;
+	bool loadOkay;
+};
 
-#endif //defined (SUPPORT_TEXT)
+#endif
