@@ -36,8 +36,6 @@
 #ifndef ACFFmpegInclude_H
 #define ACFFmpegInclude_H
 
-#ifdef USE_FFMPEG
-
 extern "C" {
 
 // ACFFmpegToOpenCV.h needs this under Ubuntu 11.04 Natty
@@ -63,7 +61,5 @@ extern "C" {
 #include <stdlib.h>
 #include <stdbool.h>
 }
-
-#endif
 
 #endif
