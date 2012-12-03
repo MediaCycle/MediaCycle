@@ -44,7 +44,7 @@ using namespace std;
 
 ACImageShapeFourierPolarMomentsPlugin::ACImageShapeFourierPolarMomentsPlugin() {
     //vars herited from ACPlugin
-    this->mMediaType = MEDIA_TYPE_IMAGE;
+    this->mMediaType = MEDIA_TYPE_NONE; // instead of MEDIA_TYPE_IMAGE, temporarily disabled since returning 0-dim features
     //this->mPluginType = PLUGIN_TYPE_FEATURES;
     this->mName = "Shape FP Moments";
     this->mDescription = "Image Shape Fourier Polar Moments plugin";
@@ -103,11 +103,11 @@ std::vector<ACMediaFeatures*> ACImageShapeFourierPolarMomentsPlugin::calculate(A
 std::vector<ACMediaFeatures*> ACImageShapeFourierPolarMomentsPlugin::calculate(ACMediaData* _aData, ACMedia* _theMedia, bool _save_timed_feat){
 	return this->calculate(_aData);
 	// no need for ACMedia here...
-};
+}
 
 ACMediaFeatures* ACImageShapeFourierPolarMomentsPlugin::calculateFourierPolarMoments(ACImageAnalysis* image){
 	image->computeFourierPolarMoments();
-	ACMediaFeatures* shape_moments = new ACMediaFeatures(image->getFourierPolarMoments(), "Shape");
+    ACMediaFeatures* shape_moments = new ACMediaFeatures(image->getFourierPolarMoments(), "Shape from Fourier Polar Moments");
 	return shape_moments;	
 }
 

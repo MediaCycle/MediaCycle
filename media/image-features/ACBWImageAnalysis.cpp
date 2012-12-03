@@ -363,7 +363,8 @@ void ACBWImageAnalysis::computeGaborMoments_fft(int numPha_, int numFreq_, uint 
 		return;
 	}
 	
-	Gabor* gabor = new Gabor(dynamic_cast<ACImageAnalysis*>(this));
+    //CF Gabor* gabor = new Gabor(dynamic_cast<ACImageAnalysis*>(this));
+    Gabor* gabor = new Gabor(this->getImageMat());
 	gabor->calculate(numPha_, numFreq_, horizonalMargin_, verticalMargin_);
 	CvScalar mean, stdev;
 	for(uint i=0;i<numPha_*numFreq_;++i) {

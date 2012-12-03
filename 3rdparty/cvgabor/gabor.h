@@ -22,7 +22,7 @@
 #include <vector>
 #include <complex>
 #include "ACOpenCVInclude.h"
-#include "ACImageAnalysis.h"
+//CF #include "ACImageAnalysis.h"
 
 const int GABOR_NUM_PHASES = 4;
 const int GABOR_NUM_FREQ = 2;
@@ -38,7 +38,8 @@ class Gabor {
 public:
 	
 	// Creates a gabor object associated with the given image
-	Gabor(ACImageAnalysis* image);
+    //CF Gabor(ACImageAnalysis* image);
+    Gabor(cv::Mat& image);
 	~Gabor();
 	
 	// public method called from outside to start the gabor feature extraction
@@ -82,7 +83,8 @@ private:
 	void copyToResult(fftw_complex* bwResult, int d);
 	
 	// the underlying image
-	ACImageAnalysis* analysed_image;
+    //CF ACImageAnalysis* analysed_image;
+    cv::Mat analysed_image;
 	
 	// several dimension values
 	unsigned int paddedWidth, paddedHeight;

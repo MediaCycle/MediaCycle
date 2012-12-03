@@ -74,7 +74,7 @@ std::vector<ACMediaFeatures*> ACImageColorMomentsPlugin::calculate(ACMediaData* 
 std::vector<ACMediaFeatures*> ACImageColorMomentsPlugin::calculate(ACMediaData* _aData, ACMedia* _theMedia, bool _save_timed_feat){
 	return this->calculate(_aData);
 	// XS TODO no need for ACMedia here...
-};
+}
 
 // default: 4 moments; "HSV"
 ACMediaFeatures* ACImageColorMomentsPlugin::calculateColorFeatures(ACColorImageAnalysis* image, int _nmoments, string _cmode){ 

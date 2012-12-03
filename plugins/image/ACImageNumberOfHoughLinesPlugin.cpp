@@ -73,7 +73,7 @@ std::vector<ACMediaFeatures*> ACImageNumberOfHoughLinesPlugin::calculate(ACMedia
 std::vector<ACMediaFeatures*> ACImageNumberOfHoughLinesPlugin::calculate(ACMediaData* _aData, ACMedia* _theMedia, bool _save_timed_feat){
 	return this->calculate(_aData);
 	// XS TODO no need for ACMedia here...
-};
+}
 
 ACMediaFeatures* ACImageNumberOfHoughLinesPlugin::calculateNumberOfHoughLinesP(ACColorImageAnalysis* image){ 
 	image->computeHoughLinesP(); 

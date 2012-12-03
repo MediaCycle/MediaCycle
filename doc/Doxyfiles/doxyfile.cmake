@@ -87,6 +87,7 @@ WARN_LOGFILE           =
 INPUT                  = ${MediaCycle_SOURCE_DIR}/apps \
                          ${MediaCycle_SOURCE_DIR}/core \
                          ${MediaCycle_SOURCE_DIR}/libs \
+                         ${MediaCycle_SOURCE_DIR}/media \
                          ${MediaCycle_SOURCE_DIR}/plugins \
                          ${MediaCycle_SOURCE_DIR}/tests
 INPUT_ENCODING         = UTF-8
@@ -97,8 +98,8 @@ RECURSIVE              = YES
 EXCLUDE                = .hg
 EXCLUDE_SYMLINKS       = NO
 EXCLUDE_PATTERNS       += */.hg/*
-EXCLUDE_PATTERNS       += */image/blobs/*
-EXCLUDE_PATTERNS       += */image/gabor/*
+EXCLUDE_PATTERNS       += 
+EXCLUDE_PATTERNS       += 
 EXCLUDE_SYMBOLS        = 
 EXAMPLE_PATH           = 
 EXAMPLE_PATTERNS       = 
@@ -249,7 +250,7 @@ DIRECTORY_GRAPH        = YES
 DOT_IMAGE_FORMAT       = png
 DOT_PATH               = "${DOXYGEN_DOT_PATH}"
 DOTFILE_DIRS           = 
-DOT_GRAPH_MAX_NODES    = 50
+DOT_GRAPH_MAX_NODES    = 100
 MAX_DOT_GRAPH_DEPTH    = 0
 DOT_TRANSPARENT        = YES
 DOT_MULTI_TARGETS      = NO

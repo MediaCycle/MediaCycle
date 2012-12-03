@@ -102,7 +102,7 @@ std::vector<ACMediaFeatures*> ACImageTextureWaveletsMomentsPlugin::calculate(ACM
 std::vector<ACMediaFeatures*> ACImageTextureWaveletsMomentsPlugin::calculate(ACMediaData* _aData, ACMedia* _theMedia, bool _save_timed_feat){
 	return this->calculate(_aData);
 	// no need for ACMedia here...
-};
+}
 
 ACMediaFeatures* ACImageTextureWaveletsMomentsPlugin::calculateGaborMoments(ACColorImageAnalysis* image){
 	cout << "gabor" << endl;

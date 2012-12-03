@@ -39,6 +39,7 @@
 #include "ACPlugin.h"
 #include "ACMediaFeatures.h"
 #include "ACImageData.h"
+#include "ACHaarCascade.h"
 
 #include<iostream>
 

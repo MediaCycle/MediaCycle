@@ -24,8 +24,9 @@
 
 using namespace std;
 
-Gabor::Gabor(ACImageAnalysis* img_an) {
-	analysed_image = img_an;
+//Gabor::Gabor(ACImageAnalysis* img_an) {
+Gabor::Gabor(cv::Mat& img_an) {
+    analysed_image = img_an;
 }
 
 Gabor::~Gabor() {
@@ -48,8 +49,15 @@ void Gabor::calculate(int numPha_, int numFreq_, uint horizonalMargin_, uint ver
 	// arrays (=images) resulting from Gabor filtering
 	// the "features" will then be the mean and std of these images
 	
-	xsize_ = analysed_image->getWidth(); 
-	ysize_ = analysed_image->getHeight();
+    //CF xsize_ = analysed_image->getWidth();
+    //CF ysize_ = analysed_image->getHeight();
+    xsize_ = 0;
+    ysize_ = 0;
+    if (analysed_image.data){
+        xsize_ = analysed_image.cols;
+        ysize_ = analysed_image.rows;
+    }
+
 	zsize_ = numPha * numFreq;
 	data_.resize(zsize_);
 	for (uint c = 0; c < zsize_; ++c) {
@@ -96,8 +104,14 @@ IplImage* Gabor::getImage(int layer) {
 // sets up the data structure and performs the fourier transformation
 void Gabor::init(fftw_complex* &bwTransformed) {
 	// Set width = height = nearest power of 2
-	uint width = analysed_image->getWidth() + 2 * horizontalMargin;
-	uint height = analysed_image->getHeight() + 2 * verticalMargin;
+    //CF uint width = analysed_image->getWidth() + 2 * horizontalMargin;
+    //CF uint height = analysed_image->getHeight() + 2 * verticalMargin;
+    uint width = 2 * horizontalMargin;
+    uint height = 2 * verticalMargin;
+    if (analysed_image.data){
+        width += analysed_image.cols;
+        height += analysed_image.rows;
+    }
 	double bwValue;
     
 	// get larger dimension
@@ -142,7 +156,8 @@ void Gabor::init(fftw_complex* &bwTransformed) {
 //	BwImage Im(analysed_image->getImage());
 	
 	cv::namedWindow("0", CV_WINDOW_AUTOSIZE);
-	cv::imshow("0", analysed_image->getImageMat());
+    //CF cv::imshow("0", analysed_image->getImageMat());
+    cv::imshow("0", analysed_image);
 	cv::waitKey(0);
 	
 	for(uint x = 0; x < width; x++) {
@@ -152,7 +167,8 @@ void Gabor::init(fftw_complex* &bwTransformed) {
 				bwValue = 0;
 			} 
 			else {
-				bwValue =analysed_image->getImageMat().at<double>(y-verticalMargin,x-horizontalMargin); // XS TODO x <-> y ??
+                //CF bwValue =analysed_image->getImageMat().at<double>(y-verticalMargin,x-horizontalMargin); // XS TODO x <-> y ??
+                bwValue =analysed_image.at<double>(y-verticalMargin,x-horizontalMargin); // XS TODO x <-> y ??
 			}
 			idx = (y + yoffset) * paddedWidth + (x + xoffset);
 			bwIn[idx][0] = bwValue;
@@ -359,8 +375,14 @@ void Gabor::extractGabor(fftw_complex* bwTransformed) {
 // copies the output store in the hsResult and vResult arrays into
 // the underlying imagefeature object for the given dimension
 void Gabor::copyToResult(fftw_complex* bwResult, int d) {	
-	int width = analysed_image->getWidth() + 2 * horizontalMargin;
-	int height = analysed_image->getHeight() + 2 * verticalMargin;
+    //CF int width = analysed_image->getWidth() + 2 * horizontalMargin;
+    //CF int height = analysed_image->getHeight() + 2 * verticalMargin;
+    int width = 2 * horizontalMargin;
+    int height = 2 * verticalMargin;
+    if (analysed_image.data){
+        width += analysed_image.cols;
+        height += analysed_image.rows;
+    }
 	int xoffset=maxnn/2-width/2;
 	int yoffset=maxnn/2-height/2;
 	int idx;
