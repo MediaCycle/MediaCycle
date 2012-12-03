@@ -1,10 +1,10 @@
 /*
- *  ACVideoControlsDockWidgetQt.h
+ *  ACMediaControlsDockWidgetQt.h
  *  MediaCycle
  *
  *  @author Christian Frisson
- *  @date 8/01/11
- *  @copyright (c) 2011 – UMONS - Numediart
+ *  @date 2/03/2012
+ *  @copyright (c) 2012 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
  *  licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -32,38 +32,35 @@
  *
  */
 
-#ifndef HEADER_ACVIDEOCONTROLSDOCKWIDGETQT
-#define HEADER_ACVIDEOCONTROLSDOCKWIDGETQT
+#ifndef HEADER_ACMediaControlsDockWidgetQt
+#define HEADER_ACMediaControlsDockWidgetQt
 
 #include <iostream>
 #include <string.h>
 
 #include "ACAbstractDockWidgetQt.h"
+#include "ACPluginControlsWidgetQt.h"
 
-#include "ui_ACVideoControlsDockWidgetQt.h"
-#include <MediaCycle.h>
-#include "ACOsgCompositeViewQt.h"
+//#include "ui_ACMediaControlsDockWidgetQt.h" // uncomment if a *.ui file exists
 
-class ACVideoControlsDockWidgetQt : public ACAbstractDockWidgetQt {
-Q_OBJECT
+class ACMediaControlsDockWidgetQt : public ACAbstractDockWidgetQt {
+    Q_OBJECT
 
-#if defined (SUPPORT_VIDEO)
-private slots:
-	// Video controls
-	void on_pushButtonMuteAll_clicked();
-	void on_comboBoxSummary_activated(const QString & text);
-	void on_comboBoxSelection_activated(const QString & text);
-	void on_checkBoxPlayback_stateChanged(int state);
-#endif //defined (SUPPORT_VIDEO)
-	
+public slots:
+    void adjustHeight();
+
 public:
-	ACVideoControlsDockWidgetQt(QWidget *parent = 0);
-	~ACVideoControlsDockWidgetQt();
-        virtual bool canBeVisible(ACMediaType _media_type);
+    ACMediaControlsDockWidgetQt(QWidget *parent = 0);
+    virtual ~ACMediaControlsDockWidgetQt();
+    virtual bool canBeVisible(ACMediaType _media_type);
 
-#if defined (SUPPORT_VIDEO)	
-private:
-	Ui::ACVideoControlsDockWidgetQt ui;
-#endif //defined (SUPPORT_VIDEO)	
+    virtual void changeMediaType(ACMediaType media_type);
+    virtual void updatePluginsSettings();
+    virtual void resetPluginsSettings();
+    virtual void resetMediaType(ACMediaType _media_type);
+
+protected:
+    //Ui::ACMediaControlsDockWidgetQt ui; // uncomment if a *.ui file exists
+    ACPluginControlsWidgetQt* widget;
 };
 #endif
