@@ -1,5 +1,5 @@
 /*
- *  ACSensor.cpp
+ *  ACSensor.h
  *  MediaCycle
  *
  *  @author Thierry Ravet
@@ -32,53 +32,33 @@
  *
  */
 
-#if defined (SUPPORT_SENSOR)
-#include "ACSensor.h"
-using namespace std;
+#ifndef ACSENSOR_H
+#define ACSENSOR_H
 
+#include "ACMedia.h"
+#include "ACMediaFeatures.h"
+#include <string>
+#include <cstring>
+#include "ACSensorData.h"
 
-ACSensor::ACSensor() : ACMedia() {
-    media_type = MEDIA_TYPE_SENSOR;
-	data =NULL;
-}
-
-ACSensor::~ACSensor(){
-	if (data!=NULL)
-		delete data;
-}
-
-void ACSensor::deleteData(){
-	if (data)
-		delete data;
-	data=0;
-}
-void ACSensor::saveACLSpecific(ofstream &library_file) {
+class ACSensor : public ACMedia {
+	// contains the *minimal* information about a Sensor
+protected:
+	ACSensorData* data;
+public:
+	ACSensor();
+    ACSensor(const ACSensor& m);
+	~ACSensor();
+private:
+    void init();
 	
-	library_file << endl;
-}
-
-int ACSensor::loadACLSpecific(ifstream &library_file) {
+public:
+	void deleteData();
+	void saveACLSpecific(std::ofstream &library_file);
+	int loadACLSpecific(std::ifstream &library_file);
+	bool extractData(std::string fname);
+	ACMediaData* getMediaData(){return data;} // XS TODO : needs dynamic_cast<ACMediaData*> (data) ??;
 	
-
-	
-	return 1;
-}
-
-bool ACSensor::extractData(string fname){
-	if (data){
-		delete data;
-		data=0;
-	}
-	data = new ACSensorData(fname);
-	if (data!=0){
-		if (data->getData()==NULL){
-			delete data;
-			data=0;
-		}
-		else
-			label=data->getLabel();
-	}
-	return true;
-}
-
-#endif //defined (SUPPORT_SENSOR)
+	virtual void* getThumbnailPtr(){return 0;} // XS TODO change this
+};
+#endif // ACSENSOR_H

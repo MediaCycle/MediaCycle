@@ -1,10 +1,10 @@
 /*
- *  ACSensor.h
+ *  ACSensorData.h
  *  MediaCycle
  *
  *  @author Thierry Ravet
- *  @date 22/10/10
- *  @copyright (c) 2010 – UMONS - Numediart
+ *  @date 02/05/11
+ *  @copyright (c) 2011 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
  *  licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -32,32 +32,28 @@
  *
  */
 
-#if defined (SUPPORT_SENSOR)
+#ifndef ACSENSORDATA_H
+#define ACSENSORDATA_H
 
-#ifndef ACSENSOR_H
-#define ACSENSOR_H
-
-#include "ACMedia.h"
-#include "ACMediaFeatures.h"
-#include <string>
+#include "ACMediaData.h"
+#include <cstdlib>
 #include <cstring>
-#include "ACSensorData.h"
+#include <string>
+#include <map>
 
-class ACSensor : public ACMedia {
-	// contains the *minimal* information about a Sensor
-protected:
-	ACSensorData* data;
+class ACSensorData: public ACMediaData {
 public:
-	ACSensor();
-	~ACSensor();
+	ACSensorData();
+	~ACSensorData();
+	ACSensorData(std::string _fname);
+
+    virtual bool readData(std::string _fname){return false;}
+	virtual void* getData() {return (void*)(sensor_ptr);}
+	virtual void setData(std::string* _data);	
+
+protected:
+	virtual void init();
+	std::map<std::string,float> * sensor_ptr;
 	
-	void deleteData();
-	void saveACLSpecific(std::ofstream &library_file);
-	int loadACLSpecific(std::ifstream &library_file);
-	bool extractData(std::string fname);
-	ACMediaData* getMediaData(){return data;} // XS TODO : needs dynamic_cast<ACMediaData*> (data) ??;
-	
-	virtual void* getThumbnailPtr(){return 0;} // XS TODO change this
 };
-#endif // ACSENSOR_H
-#endif //defined (SUPPORT_SENSOR)
+#endif // ACSENSORDATA_H

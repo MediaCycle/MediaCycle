@@ -1,10 +1,10 @@
 /*
- *  ACSensorData.cpp
+ *  ACSensor.cpp
  *  MediaCycle
  *
  *  @author Thierry Ravet
- *  @date 02/05/11
- *  @copyright (c) 2011 – UMONS - Numediart
+ *  @date 22/10/10
+ *  @copyright (c) 2010 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
  *  licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -32,46 +32,58 @@
  *
  */
 
-#if defined (SUPPORT_SENSOR)
-#include "ACSensorData.h"
-#include <string>
-#include <iostream>
-
+#include "ACSensor.h"
 using namespace std;
-using std::cerr;
-using std::endl;
-using std::string;
 
-ACSensorData::ACSensorData(){ 
-	this->init();
+
+ACSensor::ACSensor() : ACMedia() {
+    this->init();
 }
 
-void ACSensorData::init() {
-	media_type = MEDIA_TYPE_SENSOR;
-	sensor_ptr=0;
+ACSensor::ACSensor(const ACSensor& m) : ACMedia(m) {
+    this->init();
 }
 
-ACSensorData::ACSensorData(std::string _fname) { 
-	this->init();
-	file_name=_fname;
-	this->readData(_fname);
+void ACSensor::init(){
+    media_type = MEDIA_TYPE_SENSOR;
+    data =NULL;
 }
 
-ACSensorData::~ACSensorData() {
-	if (sensor_ptr != 0) {
-		sensor_ptr->clear();
-		delete sensor_ptr;
-		sensor_ptr=0;
+ACSensor::~ACSensor(){
+	if (data!=NULL)
+		delete data;
+}
+
+void ACSensor::deleteData(){
+	if (data)
+		delete data;
+	data=0;
+}
+void ACSensor::saveACLSpecific(ofstream &library_file) {
+	
+	library_file << endl;
+}
+
+int ACSensor::loadACLSpecific(ifstream &library_file) {
+	
+
+	
+	return 1;
+}
+
+bool ACSensor::extractData(string fname){
+	if (data){
+		delete data;
+		data=0;
 	}
+	data = new ACSensorData(fname);
+	if (data!=0){
+		if (data->getData()==NULL){
+			delete data;
+			data=0;
+		}
+		else
+			label=data->getLabel();
+	}
+	return true;
 }
-
-
-void ACSensorData::setData(string* _data){
-	
-	if (sensor_ptr)
-		delete sensor_ptr;
-	
-	
-}
-
-#endif //defined (SUPPORT_SENSOR)

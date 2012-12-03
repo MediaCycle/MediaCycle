@@ -1,5 +1,5 @@
 /*
- *  ACSensorData.h
+ *  ACSensorData.cpp
  *  MediaCycle
  *
  *  @author Thierry Ravet
@@ -32,31 +32,43 @@
  *
  */
 
-#ifndef ACSENSORDATA_H
-#define ACSENSORDATA_H
-
-#if defined (SUPPORT_SENSOR)
-#include "ACMediaData.h"
-#include <cstdlib>
-#include <cstring>
+#include "ACSensorData.h"
 #include <string>
-#include <map>
+#include <iostream>
 
-class ACSensorData: public ACMediaData {
-public:
-	ACSensorData();
-	~ACSensorData();
-	ACSensorData(std::string _fname);
+using namespace std;
+using std::cerr;
+using std::endl;
+using std::string;
 
-	virtual bool readData(std::string _fname){};
-	virtual void* getData() {return (void*)(sensor_ptr);}
-	virtual void setData(std::string* _data);	
+ACSensorData::ACSensorData(){ 
+	this->init();
+}
 
-protected:
-	virtual void init();
-	std::map<std::string,float> * sensor_ptr;
+void ACSensorData::init() {
+	media_type = MEDIA_TYPE_SENSOR;
+	sensor_ptr=0;
+}
+
+ACSensorData::ACSensorData(std::string _fname) { 
+	this->init();
+	file_name=_fname;
+	this->readData(_fname);
+}
+
+ACSensorData::~ACSensorData() {
+	if (sensor_ptr != 0) {
+		sensor_ptr->clear();
+		delete sensor_ptr;
+		sensor_ptr=0;
+	}
+}
+
+
+void ACSensorData::setData(string* _data){
 	
-};
-
-#endif //defined (SUPPORT_SENSOR)
-#endif // ACSENSORDATA_H
+	if (sensor_ptr)
+		delete sensor_ptr;
+	
+	
+}
