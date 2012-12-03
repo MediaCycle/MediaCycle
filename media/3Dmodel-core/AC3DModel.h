@@ -32,7 +32,6 @@
  *
  */
 
-#if defined (SUPPORT_3DMODEL)
 #ifndef AC3DMODEL_H
 #define AC3DMODEL_H
 
@@ -50,6 +49,7 @@ class AC3DModel: public ACMedia {
 
 public:
 	AC3DModel();
+    AC3DModel(const AC3DModel& m);
 	~AC3DModel();
 	
 	void saveACLSpecific(std::ofstream &library_file);
@@ -57,8 +57,8 @@ public:
 		
 	void* getThumbnailPtr() { return 0; }
 	
-	osg::ref_ptr<osg::Node> getData(){return static_cast< osg::Node* > (data->getData());}
-	void setData(osg::ref_ptr<osg::Node> _data);
+    osg::ref_ptr<osg::Node> getData(){return static_cast< osg::Node* > (data->getData());}
+    void setData(osg::ref_ptr<osg::Node> _data);
 	virtual ACMediaData* getMediaData(){return data;}
 	bool extractData(std::string fname);
 	virtual void deleteData();
@@ -73,4 +73,3 @@ private:
 };
 
 #endif // AC3DMODEL_H
-#endif// defined (SUPPORT_3DMODEL)

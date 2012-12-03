@@ -35,7 +35,6 @@
 #ifndef AC3DMODELDATA_H
 #define AC3DMODELDATA_H
 
-#if defined (SUPPORT_3DMODEL)
 #include "ACMediaData.h"
 #include <osgDB/ReadFile>
 
@@ -57,6 +56,4 @@ private:
 	osg::ref_ptr<osg::Node> model_ptr;
 };
 
-
-#endif //defined (SUPPORT_3DMODEL)
 #endif // AC3DMODELDATA_H

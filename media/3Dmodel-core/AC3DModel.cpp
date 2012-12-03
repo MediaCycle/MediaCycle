@@ -32,7 +32,6 @@
  *
  */
 
-#if defined (SUPPORT_3DMODEL)
 #include "AC3DModel.h"
 #include <fstream>
 
@@ -49,30 +48,37 @@ AC3DModel::AC3DModel() : ACMedia() {
 	this->init();
 }
 
+AC3DModel::AC3DModel(const AC3DModel& m) : ACMedia(m) {
+    this->init();
+}
+
 void AC3DModel::init() {
 	media_type = MEDIA_TYPE_3DMODEL;
+    data = 0;
 }	
 
 AC3DModel::~AC3DModel() {
-	
+    this->deleteData();
 }
 
-void AC3DModel::setData(osg::ref_ptr<osg::Node> _data)
+/*void AC3DModel::setData(osg::ref_ptr<osg::Node> _data)
 {
 	if (data == 0) 
 		data = new AC3DModelData();
 	data->setData(_data);
-}
+}*/
 
 bool AC3DModel::extractData(string fname) {
 	if (data) delete data;
 	data = new AC3DModelData();
-	if (!data->readData(fname)) return false;
-
+    if (!data->readData(fname)){
+        std::cerr << "AC3DModel::extractData: can't read data" << std::endl;
+        return false;
+    }
 	osg::ref_ptr<osg::Node> local_model_ptr = 0;
 	osg::ComputeBoundsVisitor cbv;
 	
-	local_model_ptr = this->getData();
+    local_model_ptr = this->getData();
 	local_model_ptr->accept( cbv );
 	const osg::BoundingBox bb( cbv.getBoundingBox() );
 	osg::Vec3 ext( bb._max - bb._min );
@@ -113,4 +119,3 @@ int AC3DModel::loadACLSpecific(ifstream &library_file) {
 		
 	return 1;
 }
-#endif //defined (SUPPORT_3DMODEL)

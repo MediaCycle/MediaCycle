@@ -32,8 +32,6 @@
  *
  */
 
-
-#if defined (SUPPORT_3DMODEL)
 #include "AC3DModelData.h"
 #include <iostream>
 #include "boost/filesystem.hpp"
@@ -81,6 +79,7 @@ bool AC3DModelData::readData(std::string _fname){
 		cerr << "<AC3DModelData::readData> file can not be read !" << endl;
 		return false;
 	}
+    return true;
 }
 
 void AC3DModelData::setData(osg::ref_ptr<osg::Node> _data)
@@ -91,5 +90,3 @@ void AC3DModelData::setData(osg::ref_ptr<osg::Node> _data)
 		cerr << "<AC3DModelData::setData> Could not set data" << endl;
 	}	
 }
-
-#endif //defined (SUPPORT_3DMODEL)
