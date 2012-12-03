@@ -1,7 +1,7 @@
 /**
  * @brief ACAudioHaitsmaFingerprintPlugin.cpp
- * @author Thierry Ravet
- * @date 25/04/2012
+ * @author Christian Frisson
+ * @date 04/12/2012
  * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -40,8 +40,8 @@
 ACAudioHaitsmaFingerprintPlugin::ACAudioHaitsmaFingerprintPlugin() {
     //vars herited from ACPlugin
     this->mMediaType = MEDIA_TYPE_AUDIO;
-    this->mName = "AudioHaitsmaFingerprint";
-    this->mDescription = "AudioHaitsmaFingerprint plugin";
+    this->mName = "Audio Haitsma Fingerprint";
+    this->mDescription = "Audio Haitsma Fingerprint plugin";
     this->mId = "";
 	//this->mPluginType=mPluginType;
 	this->mDescriptorsList.push_back("Haitsma Audio Sub-Fingerprint");

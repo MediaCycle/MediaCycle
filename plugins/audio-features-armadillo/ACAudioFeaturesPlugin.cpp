@@ -45,7 +45,7 @@
 ACAudioFeaturesPlugin::ACAudioFeaturesPlugin() {
     //vars herited from ACPlugin
     this->mMediaType = MEDIA_TYPE_AUDIO;
-    this->mName = "AudioFeatures";
+    this->mName = "Audio Features Armadillo";
     this->mDescription = "AudioFeatures plugin";
     this->mId = "";
     this->mDescriptorsList.push_back("Spectral Centroid");
