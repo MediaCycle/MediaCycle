@@ -32,8 +32,6 @@
  *
  */
 
-#if defined (SUPPORT_VIDEO)
-
 #include "ACVideo.h"
 
 #include <osg/ImageUtils>
@@ -347,5 +345,3 @@ bool ACVideo::computeThumbnailSize(int w_, int h_){
 	}
 	return ok;
 }
-
-#endif //defined (SUPPORT_VIDEO)

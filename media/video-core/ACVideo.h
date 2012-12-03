@@ -35,8 +35,6 @@
 #ifndef ACVIDEO_H
 #define ACVIDEO_H
 
-#if defined (SUPPORT_VIDEO)
-
 #include "ACOpenCVInclude.h"
 #include "ACMedia.h"
 #include "ACVideoData.h"
@@ -89,5 +87,4 @@ private:
 	float fps;
 	
 };
-#endif //defined (SUPPORT_VIDEO)
 #endif // ACVIDEO_H

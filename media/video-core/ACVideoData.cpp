@@ -32,8 +32,6 @@
  *
  */
 
-#if defined (SUPPORT_VIDEO)
-
 #include "ACVideoData.h"
 #include <string>
 #include <iostream>
@@ -82,6 +80,3 @@ void ACVideoData::setData(cv::VideoCapture* _data){
 		cerr << "<ACVideoData::setData> Could not set data" << endl;
 	}	
 }
-
-
-#endif //defined (SUPPORT_VIDEO)

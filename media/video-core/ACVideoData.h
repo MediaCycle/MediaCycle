@@ -35,7 +35,6 @@
 #ifndef ACVIDEODATA_H
 #define ACVIDEODATA_H
 
-#if defined (SUPPORT_VIDEO)
 #include "ACMediaData.h"
 #include "ACMediaTypes.h"
 #include "ACOpenCVInclude.h"
@@ -59,5 +58,4 @@ private:
 
 };
 
-#endif //defined (SUPPORT_VIDEO)
 #endif // ACVIDEODATA_H
