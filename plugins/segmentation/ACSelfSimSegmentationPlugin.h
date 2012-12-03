@@ -57,6 +57,7 @@ enum SelfSimDistance {// actually it will be the inverse of a distance: the larg
 class ACSelfSimSegmentationPlugin : public ACSegmentationPlugin {
 public:
     ACSelfSimSegmentationPlugin();
+    ACSelfSimSegmentationPlugin(ACMediaType type);
     ~ACSelfSimSegmentationPlugin();
 
     virtual std::vector<ACMedia*> segment(ACMediaData* _data, ACMedia* _theMedia){};
