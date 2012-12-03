@@ -52,13 +52,17 @@ private slots:
 public:
     ACMediaConfigDockWidgetQt(QWidget *parent = 0);
     ~ACMediaConfigDockWidgetQt(){};
+    virtual void setMediaCycle(MediaCycle *_media_cycle);
     virtual bool canBeVisible(ACMediaType _media_type);
     QComboBox* getComboDefaultSettings(){return ui.comboLibrary;}
 
+    virtual void updatePluginsSettings();
     virtual void changeMediaType(ACMediaType _media_type);
     virtual void resetMediaType(ACMediaType _media_type);
 
 private:
+    void rebuildConfigList();
+    void clearConfigList();
     Ui::ACMediaConfigDockWidgetQt ui;
 };
 #endif

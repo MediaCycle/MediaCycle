@@ -47,22 +47,14 @@ public slots:
     void syncControlToggleWithDocks();
 signals:
     void toggleControls(bool);
-    void libraryMediaTypeChanged(ACMediaType);
+    void mediaConfigChanged(ACMediaType);
 
 public:
     ACDockWidgetsManagerQt(QMainWindow* _mainWindow = 0);
     virtual ~ACDockWidgetsManagerQt();
 
     virtual void setMediaCycle(MediaCycle* _media_cycle);
-    #if defined (SUPPORT_AUDIO)
-    virtual void setAudioEngine(ACAudioEngine* _audio_engine);
-    #endif //defined (SUPPORT_AUDIO)
     virtual void setOsgView(ACOsgCompositeViewQt* _osg_view);
-    #if defined (USE_OSC)
-    void autoConnectOSC(bool _status = true);
-    virtual void setOscBrowser(ACOscBrowser* _browser);
-    virtual void setOscFeedback(ACOscFeedback* _feedback);
-    #endif //defined (USE_OSC)
     void updateDocksVisibility(bool visibility);
     void updateDockHeight();
 
@@ -76,7 +68,6 @@ public:
 
 protected:
     ACAbstractDockWidgetQt* getDockFromClassName(std::string _name);
-    ACAbstractDockWidgetQt* getDockFromFactoryName(std::string _name);
 
 protected:
     QMainWindow* mainWindow;
@@ -85,9 +76,6 @@ protected:
     std::map<std::string,int> lastDocksVisibilities; //state stored before hiding all docks with the toggle
     bool plugins_scanned,previous_docks_visibility,current_docks_visibility;
     ACMediaType media_type;
-    #if defined (USE_OSC)
-    bool auto_connect_osc;
     int appOrigMinHeight;
-    #endif //defined (USE_OSC)
 };
 #endif // ACDOCKWIDGETSMANAGERQT_H

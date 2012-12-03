@@ -40,54 +40,19 @@
 
 #include <QtGui>
 
-#if defined (SUPPORT_AUDIO)
-#include <ACAudioEngine.h>
-#endif //defined (SUPPORT_AUDIO)
-
-#if defined (USE_OSC)
-#include <ACOscBrowser.h>
-#include <ACOscFeedback.h>
-#endif //defined (USE_OSC)
-
 #include "ACOsgCompositeViewQt.h"
 
 class ACAbstractWidgetQt {
 public:
     ACAbstractWidgetQt()
         :media_cycle(0),osg_view(0)
-    {
-#if defined (SUPPORT_AUDIO)
-        audio_engine = 0;
-#endif //defined (SUPPORT_AUDIO)
-#if defined (USE_OSC)
-        osc_browser = 0;
-        osc_feedback = 0;
-#endif //defined (USE_OSC)
-    };
-    virtual ~ACAbstractWidgetQt(){
-#if defined (SUPPORT_AUDIO)
-        audio_engine = 0;
-#endif //defined (SUPPORT_AUDIO)
-#if defined (USE_OSC)
-        osc_browser = 0;
-        osc_feedback = 0;
-#endif //defined (USE_OSC)
-    };
+    {}
+    virtual ~ACAbstractWidgetQt(){}
 
     virtual void setMediaCycle(MediaCycle* _media_cycle){ media_cycle = _media_cycle;}
     MediaCycle* getMediaCycle() {return media_cycle;}
-#if defined (SUPPORT_AUDIO)
-    virtual void setAudioEngine(ACAudioEngine* _audio_engine){ audio_engine = _audio_engine;}
-    ACAudioEngine* getAudioEngine() {return audio_engine;}
-#endif //defined (SUPPORT_AUDIO)
     virtual void setOsgView(ACOsgCompositeViewQt* _osg_view){ osg_view = _osg_view;}
     ACOsgCompositeViewQt* getOsgView() {return osg_view;}
-#if defined (USE_OSC)
-    virtual void setOscBrowser(ACOscBrowser* _browser){this->osc_browser = _browser;}
-    virtual void setOscFeedback(ACOscFeedback* _feedback){this->osc_feedback = _feedback;}
-    ACOscBrowser* getControlHandler(){return osc_browser;}
-    ACOscFeedback* getFeedbackHandler(){return osc_feedback;}
-#endif //defined (USE_OSC)
 
     virtual void changeMediaType(ACMediaType media_type){}
     virtual void updatePluginsSettings(){}
@@ -96,14 +61,7 @@ public:
 
 protected:
     MediaCycle *media_cycle;
-#if defined (SUPPORT_AUDIO)
-    ACAudioEngine *audio_engine;
-#endif //defined (SUPPORT_AUDIO)
     ACOsgCompositeViewQt* osg_view;
-#if defined (USE_OSC)
-    ACOscBrowser *osc_browser;
-    ACOscFeedback *osc_feedback;
-#endif //defined (USE_OSC)
 };
 
 #endif // ACAbstractWidgetQt_H

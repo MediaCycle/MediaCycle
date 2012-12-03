@@ -36,9 +36,6 @@
 #include "ACOsgTimelineEventHandler.h"
 #include <iostream>
 #include <sstream>
-#if defined (SUPPORT_AUDIO)
-#include "ACAudio.h"
-#endif //defined (SUPPORT_AUDIO)
 #include <osg/Version>
 
 #ifdef USE_DEBUG
@@ -74,9 +71,6 @@ void ACOsgTimelineEventHandler::clean(){
     moved_x = 0.0f;
     pushed_y = 0.0f;
     moved_y = 0.0f;
-#if defined (SUPPORT_AUDIO)
-    audio_engine = 0;
-#endif //defined (SUPPORT_AUDIO)
 }
 
 bool ACOsgTimelineEventHandler::handle(const osgGA::GUIEventAdapter& ea,osgGA::GUIActionAdapter& aa)
@@ -102,6 +96,12 @@ bool ACOsgTimelineEventHandler::handle(const osgGA::GUIEventAdapter& ea,osgGA::G
     }
 #endif
 
+    ACPlugin* plugin = media_cycle->getPluginManager()->getPlugin("Audio Engine");
+    ACMediaRendererPlugin* audio_engine_plugin = 0;
+    if(!plugin){
+        audio_engine_plugin = dynamic_cast<ACMediaRendererPlugin*>(plugin);
+    }
+
     switch(ea.getEventType())
     {
     case(osgGA::GUIEventAdapter::PUSH):
@@ -120,18 +120,18 @@ bool ACOsgTimelineEventHandler::handle(const osgGA::GUIEventAdapter& ea,osgGA::G
                 if(selecting_summary_waveform){
                     // Audio feedback
                     int mediaID = renderer->getTrack(selection->getRefId())->getMedia()->getId();
-#if defined (SUPPORT_AUDIO)
                     if (mediaID > -1){
                         if (media_cycle->getLibrary()->getMedia(mediaID)->getType() == MEDIA_TYPE_AUDIO){
-                            std::cout << "Skipping zone to frame: " << (int)((pos_x+1.0f)*((ACAudio*) media_cycle->getLibrary()->getMedia(mediaID))->getNFrames()) << std::endl;
-                            if(audio_engine){
-                                audio_engine->setLoopSynchroMode(mediaID, ACAudioEngineSynchroModeManual);
-                                audio_engine->setLoopScaleMode(mediaID, ACAudioEngineScaleModeResample);
-                                audio_engine->setScrub(pos_x+1.0f);
+                            std::cout << "Skipping zone to frame: " << (int)((pos_x+1.0f)) << std::endl; //*((ACAudio*) media_cycle->getLibrary()->getMedia(mediaID))->getNFrames())
+                            if(audio_engine_plugin){
+                                audio_engine_plugin->performActionOnMedia("synchro mode",mediaID,"Manual");
+                                audio_engine_plugin->performActionOnMedia("scale mode",mediaID,"Resample");
+                                stringstream s;
+                                s << (float) pos_x+1.0f;
+                                audio_engine_plugin->performActionOnMedia("scrub",mediaID,s.str());
                             }
                         }
                     }
-#endif //defined (SUPPORT_AUDIO)
                     // Visual feedback
                     renderer->getTrack(selection->getRefId())->moveSelection(xspan*pos_x/2.0f,yspan*pos_y/2.0f);
 #ifdef DEBUG_HANDLE
@@ -151,18 +151,18 @@ bool ACOsgTimelineEventHandler::handle(const osgGA::GUIEventAdapter& ea,osgGA::G
                 else if (selecting_summary_frames && !selecting_zone){
                     // Audio feedback
                     int mediaID = renderer->getTrack(selection->getRefId())->getMedia()->getId();
-#if defined (SUPPORT_AUDIO)
                     if (mediaID > -1){
                         if (media_cycle->getLibrary()->getMedia(mediaID)->getType() == MEDIA_TYPE_AUDIO){
-                            std::cout << "Skipping current frame to frame: " << (int)((pos_x+1.0f)*((ACAudio*) media_cycle->getLibrary()->getMedia(mediaID))->getNFrames()) << std::endl;
-                            if(audio_engine){
-                                audio_engine->setLoopSynchroMode(mediaID, ACAudioEngineSynchroModeManual);
-                                audio_engine->setLoopScaleMode(mediaID, ACAudioEngineScaleModeResample);
-                                audio_engine->setScrub(pos_x+1.0f);
+                            std::cout << "Skipping current frame to frame: " << (int)((pos_x+1.0f)) << std::endl; //*((ACAudio*) media_cycle->getLibrary()->getMedia(mediaID))->getNFrames())
+                            if(audio_engine_plugin){
+                                audio_engine_plugin->performActionOnMedia("synchro mode",mediaID,"Manual");
+                                audio_engine_plugin->performActionOnMedia("scale mode",mediaID,"Resample");
+                                stringstream s;
+                                s << (float) pos_x+1.0f;
+                                audio_engine_plugin->performActionOnMedia("scrub",mediaID,s.str());
                             }
                         }
                     }
-#endif //defined (SUPPORT_AUDIO)
                     renderer->getTrack(selection->getRefId())->moveSelection(xspan*pos_x/2.0f,yspan*pos_y/2.0f);
 #ifdef DEBUG_HANDLE
                     std::cout << "(PUSH) Skipping/Moving the current frame to the mouse position (track " << selection->getRefId() <<")" << std::endl;
@@ -176,13 +176,13 @@ bool ACOsgTimelineEventHandler::handle(const osgGA::GUIEventAdapter& ea,osgGA::G
        if (mediaID > -1){
        if (media_cycle->getLibrary()->getMedia(mediaID)->getType() == MEDIA_TYPE_AUDIO){
        //std::cout << "Skipping to frame: " << (int)((pos_x+1.0f)*((ACAudio*) media_cycle->getLibrary()->getMedia(mediaID))->getNFrames()) << std::endl;
-       #if defined (SUPPORT_AUDIO)
-       if(audio_engine){
-       audio_engine->setLoopSynchroMode(mediaID, ACAudioEngineSynchroModeManual);
-       audio_engine->setLoopScaleMode(mediaID, ACAudioEngineScaleModeResample);
-       audio_engine->setScrub(pos_x+1.0f);
+       if(audio_engine_plugin){
+                                audio_engine_plugin->performActionOnMedia("synchro mode",mediaID,"Manual");
+                                audio_engine_plugin->performActionOnMedia("scale mode",mediaID,"Resample");
+                                stringstream s;
+                                s << (float) pos_x+1.0f;
+                                audio_engine_plugin->performActionOnMedia("scrub",mediaID,s.str());
        }
-       #endif //defined (SUPPORT_AUDIO)
        }
        }*/
                     renderer->getTrack(selection->getRefId())->moveSelection(xspan*pos_x/2.0f,yspan*pos_y/2.0f); //should be adapted to the segment begin time once segmentation works that way
@@ -231,14 +231,13 @@ bool ACOsgTimelineEventHandler::handle(const osgGA::GUIEventAdapter& ea,osgGA::G
 #ifdef DEBUG_HANDLE
                         std::cout << "(DRAG) Moving the selection zone (track " << selection->getRefId() <<") to audio pos " << 100.0f*(pos_x+1.0f)/2.0f << std::endl;
 #endif
-#if defined (SUPPORT_AUDIO)
-                        if(audio_engine){
-                            audio_engine->setLoopSynchroMode(mediaID, ACAudioEngineSynchroModeManual);
-                            audio_engine->setLoopScaleMode(mediaID, ACAudioEngineScaleModeVocode);
-                            //audio_engine->setScrub((int)((pos_x+1.0f)*((ACAudio*) media_cycle->getLibrary()->getMedia(mediaID))->getNFrames()));
-                            audio_engine->setScrub(100.0f*(pos_x+1.0f)/2.0f);
+                        if(audio_engine_plugin){
+                            audio_engine_plugin->performActionOnMedia("synchro mode",mediaID,"Manual");
+                            audio_engine_plugin->performActionOnMedia("scale mode",mediaID,"Vocode");
+                            stringstream s;
+                            s << (float) 100.0f*(pos_x+1.0f)/2.0f; // (int)((pos_x+1.0f)*((ACAudio*) media_cycle->getLibrary()->getMedia(mediaID))->getNFrames())
+                            audio_engine_plugin->performActionOnMedia("scrub",mediaID,s.str());
                         }
-#endif //defined (SUPPORT_AUDIO)
                     }
                 }
                 // Visual feedback
@@ -268,12 +267,10 @@ bool ACOsgTimelineEventHandler::handle(const osgGA::GUIEventAdapter& ea,osgGA::G
             if (mediaID > -1){
                 if (media_cycle->getLibrary()->getMedia(mediaID)->getType() == MEDIA_TYPE_AUDIO){
                     //std::cout << "Skipping to frame: " << (int)((pos_x+1.0f)*((ACAudio*) media_cycle->getLibrary()->getMedia(mediaID))->getNFrames()) << std::endl;
-#if defined (SUPPORT_AUDIO)
-                    if(audio_engine){
-                        audio_engine->setLoopSynchroMode(mediaID, ACAudioEngineSynchroModeNone);
-                        audio_engine->setLoopScaleMode(mediaID, ACAudioEngineScaleModeNone);
+                    if(audio_engine_plugin){
+                        audio_engine_plugin->performActionOnMedia("synchro mode",mediaID,"None");
+                        audio_engine_plugin->performActionOnMedia("scale mode",mediaID,"None");
                     }
-#endif //defined (SUPPORT_AUDIO)
                 }
             }
 #ifdef DEBUG_HANDLE
@@ -422,7 +419,7 @@ void ACOsgTimelineEventHandler::pick(osgViewer::View* view, const osgGA::GUIEven
                         renderer->getTrack(rid->getRefId())->setManualSelection(false);
                         break;
                     }
-                    /*
+                        /*
        case(osgGA::GUIEventAdapter::MOVE):
        {
         std::cout << "Moving in" << std::endl;

@@ -37,9 +37,6 @@
 #define __ACOSG_TRACK_RENDERER_H__
 
 #include <MediaCycle.h>
-#if defined (SUPPORT_AUDIO)
-#include <ACAudioEngine.h>
-#endif //defined (SUPPORT_AUDIO)
 
 #include <osg/ref_ptr>
 #include <osg/Geometry>
@@ -52,8 +49,6 @@
 #include <osg/BlendColor>
 #include <osg/Texture2D>
 #include <osg/Image>
-#include <osgDB/ReadFile>
-#include <osgDB/WriteFile>
 #include <osgUtil/SceneView>
 #include <osgViewer/Viewer>
 #include <osgText/Font>
@@ -61,31 +56,10 @@
 
 #include "ACRefId.h"
 
-enum ACAudioSummaryType {
-    AC_AUDIO_SUMMARY_NONE=0,
-    AC_AUDIO_SUMMARY_WAVEFORM=1,
-    AC_AUDIO_SUMMARY_RECTIFIED=2
-};
-
-enum ACVideoSummaryType {
-    AC_VIDEO_SUMMARY_NONE=0,
-    AC_VIDEO_SUMMARY_KEYFRAMES=1,
-    AC_VIDEO_SUMMARY_SLIT_SCAN=2
-};
-
-enum ACVideoSelectionType {
-    AC_VIDEO_SELECTION_NONE=0,
-    AC_VIDEO_SELECTION_KEYFRAMES=1,
-    AC_VIDEO_SELECTION_SLIT_SCAN=2
-};
-
 class ACOsgTrackRenderer {
 protected:
     MediaCycle* media_cycle;
     ACMediaType media_type;
-#if defined (SUPPORT_AUDIO)
-    ACAudioEngine *audio_engine;
-#endif //defined (SUPPORT_AUDIO)
     osg::ref_ptr<osg::MatrixTransform> track_node;
     osg::ref_ptr<osgText::Font> font;
 
@@ -117,15 +91,12 @@ protected:
 
 public:
     ACOsgTrackRenderer();
-    virtual ~ACOsgTrackRenderer() {};
+    virtual ~ACOsgTrackRenderer(){}
 
-    void setMediaCycle(MediaCycle *_media_cycle) { this->media_cycle = _media_cycle; };
-#if defined (SUPPORT_AUDIO)
-    void setAudioEngine(ACAudioEngine *engine){audio_engine=engine;}
-#endif //defined (SUPPORT_AUDIO)
-    //void setRenderer(MediaCycle *_media_cycle) { this->media_cycle = _media_cycle; };
-    void setTrackIndex(int _track_index) { this->track_index = _track_index; };
-    //void setMediaIndex(int _media_index) { this->media_index = _media_index; };
+    void setMediaCycle(MediaCycle *_media_cycle) { this->media_cycle = _media_cycle; }
+    //void setRenderer(MediaCycle *_media_cycle) { this->media_cycle = _media_cycle; }
+    void setTrackIndex(int _track_index) { this->track_index = _track_index; }
+    //void setMediaIndex(int _media_index) { this->media_index = _media_index; }
     int getMediaIndex() { return media_index; }
     void setFont(osg::ref_ptr<osgText::Font> _font){this->font = _font;}
     void updateMedia(ACMedia* _media);
@@ -137,7 +108,7 @@ public:
     void updateSize(int _width,float _height);
     ACMedia* getMedia(){return media;}
     //void setActivity(int _media_activity) { this->media_activity = _media_activity; }
-    osg::ref_ptr<osg::MatrixTransform> getTrack() { return track_node; };
+    osg::ref_ptr<osg::MatrixTransform> getTrack() { return track_node; }
 
     virtual void prepareTracks()=0;
     virtual void updateTracks(double ratio=0.0)=0;
@@ -150,15 +121,6 @@ public:
     void resizeSelectionFromEnd(float _end_x, float _end_y);
     float getSelectionPosX(){return this->selection_center_pos_x;}
     float getSelectionPosY(){return this->selection_center_pos_y;}
-
-    virtual void setSummaryType(ACVideoSummaryType type){};
-    virtual void updateSummaryType(ACVideoSummaryType type){};
-    virtual ACVideoSummaryType getSummaryType(){return AC_VIDEO_SUMMARY_NONE;}
-    virtual void setSelectionType(ACVideoSelectionType type){};
-    virtual void updateSelectionType(ACVideoSelectionType type){};
-    virtual ACVideoSelectionType getSelectionType(){return AC_VIDEO_SELECTION_NONE;}
-    virtual void setPlaybackVisibility(bool _visibility){};
-    virtual void updatePlaybackVisibility(bool _visibility){};
 
 protected:
     void createDummySegments();

@@ -156,13 +156,15 @@ void ACBrowserControlsCompleteDockWidgetQt::resetMode(){
         ui.tabWidgetModes->setCurrentIndex(0);
         ui.featuresListWidget->setEnabled(true); //CF until changing feature weights works in neighbors mode
     }
-    break;
+        break;
     case AC_MODE_NEIGHBORS:
     {
         ui.tabWidgetModes->setCurrentIndex(1);
         ui.featuresListWidget->setEnabled(false); //CF until changing feature weights works in neighbors mode
     }
-    break;
+        break;
+    default:
+        break;
     }
 }
 
@@ -184,20 +186,6 @@ void ACBrowserControlsCompleteDockWidgetQt::updatePluginsSettings()
     clustersPositionsControls->updatePluginsSettings();
     neighborsMethodControls->updatePluginsSettings();
     neighborsPositionsControls->updatePluginsSettings();
-
-    //Plugins according to media type
-    //TODO Remember previous settings
-    //std::cout << "ACBrowserControlsCompleteDockWidgetQt::changeMediaType: Plugins according to media type" << std::endl;
-    if(media_cycle->getMediaType() == MEDIA_TYPE_MIXED){
-        if(!media_cycle->getLibrary())
-            return;
-        if(!media_cycle->getLibrary()->getMediaReaderPlugin())
-            return;
-        if(media_cycle->getLibrary()->getMediaReaderPlugin()->getName() == "ArchipelReader")
-            clustersPositionsControls->on_comboBoxPlugins_activated("Archipel Atoll");
-        // or media_cycle->changeClustersPositionsPlugin("Archipel Atoll"); ?
-    }
-
     emit this->readjustHeight();
 }
 

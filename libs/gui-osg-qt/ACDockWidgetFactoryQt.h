@@ -36,26 +36,21 @@
 #define ACDOCKWIDGETFACTORYQT_H
 
 #include "ACAbstractDockWidgetQt.h"
-#include "ACOSCDockWidgetQt.h"
+#include "ACAbstractWidgetQt.h"
 
-#if defined (SUPPORT_AUDIO)
-#include "ACAudioControlsDockWidgetQt.h"
-#endif //defined (SUPPORT_AUDIO)
 #include "ACBrowserControlsCompleteDockWidgetQt.h"
 #include "ACBrowserControlsClustersDockWidgetQt.h"
 #include "ACMediaConfigDockWidgetQt.h"
-#if defined (SUPPORT_VIDEO)
-#include "ACVideoControlsDockWidgetQt.h"
-#endif //defined (SUPPORT_VIDEO)
+#include "ACMediaControlsDockWidgetQt.h"
 #if defined (SUPPORT_MULTIMEDIA)
 #include "ACMediaDocumentOptionDockWidgetQt.h"
 #endif //defined (SUPPORT_MULTIMEDIA)
 #include "ACSegmentationControlsDockWidgetQt.h"
 
-class ACDockWidgetFactoryQt{
+class ACDockWidgetFactoryQt : public ACAbstractWidgetQt{
 public:
-	ACDockWidgetFactoryQt(){};
-	virtual ~ACDockWidgetFactoryQt(){};
+    ACDockWidgetFactoryQt(): ACAbstractWidgetQt(){}
+    virtual ~ACDockWidgetFactoryQt(){}
 	ACAbstractDockWidgetQt* createDockWidget(QWidget *parent = 0,std::string dock_type="");
 };
 #endif // ACDOCKWIDGETFACTORYQT_H

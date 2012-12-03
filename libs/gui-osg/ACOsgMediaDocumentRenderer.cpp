@@ -38,24 +38,7 @@
 #include "ACOsgMediaDocumentRenderer.h"
 #include "ACMediaDocument.h"
 
-#if defined (SUPPORT_AUDIO)
-#include "ACOsgAudioRenderer.h"
-#endif //defined (SUPPORT_AUDIO)
-#if defined (SUPPORT_IMAGE)
-#include "ACOsgImageRenderer.h"
-#endif //defined (SUPPORT_IMAGE)
-#if defined (SUPPORT_VIDEO)
-#include "ACOsgVideoRenderer.h"
-#endif //defined (SUPPORT_VIDEO)
-#if defined (SUPPORT_3DMODEL)
-#include "ACOsg3DModelRenderer.h"
-#endif //defined (SUPPORT_3DMODEL)
-#if defined (SUPPORT_TEXT)
-#include "ACOsgTextRenderer.h"
-#endif //defined (SUPPORT_TEXT)
-#if defined (SUPPORT_SENSOR)
-#include "ACOsgSensorRenderer.h"
-#endif //defined (SUPPORT_SENSOR)
+#include "ACOsgRendererFactory.h"
 
 #include <osg/Version>
 
@@ -125,56 +108,6 @@ void ACOsgMediaDocumentRenderer::prepareNodes() {
     //ACMediaContainer medias = (static_cast<ACMediaDocument*> (media_cycle->getLibrary()->getMedia(media_index)))->getMedias();
     ACMediaContainer medias = (static_cast<ACMediaDocument*> (media))->getContainer();
     ACMediaContainer::iterator iter;
-
-    /*for ( iter=medias.begin() ; iter!=medias.end(); ++iter ){
-        cout << (*iter).first << " => " << (*iter).second << endl;
-	
-        bool renderer_added = true;
-        switch (iter->second->getType()) {
-                    case MEDIA_TYPE_AUDIO:
-    #if defined (SUPPORT_AUDIO)
-    media_renderers.push_back(new ACOsgAudioRenderer());
-    #endif //defined (SUPPORT_AUDIO)
-    break;
-        case MEDIA_TYPE_IMAGE:
-#if defined (SUPPORT_IMAGE)
-            media_renderers.push_back(new ACOsgImageRenderer());
-            media_node->removeChild(entry_geode);
-#endif //defined (SUPPORT_IMAGE)
-            break;*/
-            /*			case MEDIA_TYPE_VIDEO:
-    #if defined (SUPPORT_VIDEO)
-    media_renderers.push_back(new ACOsgVideoRenderer());
-    #endif //defined (SUPPORT_VIDEO)
-    break;
-   case MEDIA_TYPE_3DMODEL:
-    #if defined (SUPPORT_3DMODEL)
-    media_renderers.push_back(new ACOsg3DModelRenderer());
-    #endif //defined (SUPPORT_3DMODEL)
-    break;
-   case MEDIA_TYPE_TEXT:
-    #if defined (SUPPORT_TEXT)
-    media_renderers.push_back(new ACOsgTextRenderer());
-    #endif //defined (SUPPORT_TEXT)
-    break;*/
-        /*default:
-            renderer_added = false;
-            break;
-        }
-
-        if (renderer_added){
-            media_renderers.back()->setMediaCycle(media_cycle);
-
-            //render_iter->second->setMediaIndex(media_index);//dangerous! before each media of media documents are part of the library
-            //TODO TR problem with submedia node_index. We must fix it
-            media_renderers.back()->setMedia(iter->second);
-            media_renderers.back()->setNodeIndex(this->getNodeIndex()+media_renderers.size());
-
-            media_renderers.back()->prepareNodes();
-            //media_node->addChild(media_renderers.back()->getNode());
-            media_node->addChild(media_renderers.back()->getMainGeode());
-        }
-    }*/
 }
 
 void ACOsgMediaDocumentRenderer::updateNodes(double ratio) {

@@ -40,10 +40,13 @@
 #include "ACOsgCompositeViewQt.h"
 #include <cmath>
 #include <QDesktopWidget>
+#include <ACOsgRendererFactory.h>
 
 #include "boost/filesystem.hpp"   // includes all needed Boost.Filesystem declarations
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/path.hpp"
+
+#include <ACPluginQt.h>
 
 #include <sstream>
 
@@ -55,16 +58,13 @@ using namespace osg;
 //#define TIMELINE_RENDERER_ORTHO2D
 
 ACOsgCompositeViewQt::ACOsgCompositeViewQt( QWidget * parent, const char * name, const QGLWidget * shareWidget, WindowFlags f)
-    : QGLWidget(parent, shareWidget, f), media_cycle(0),font(0),
-      browser_renderer(0), browser_event_handler(0), timeline_renderer(0), timeline_event_handler(0), timeline_controls_renderer(0), hud_renderer(0), hud_view(0),
-      #if defined (SUPPORT_AUDIO)
-      audio_engine(0),
-      #endif //defined (SUPPORT_AUDIO)
+    : QGLWidget(parent, shareWidget, f),ACEventListener(), media_cycle(0),font(0),
+      browser_renderer(0), browser_event_handler(0), timeline_renderer(0), timeline_event_handler(0), hud_renderer(0), hud_view(0),
       mousedown(0), borderdown(0),
       refx(0.0f), refy(0.0f),
       refcamx(0.0f), refcamy(0.0f),
       refzoom(0.0f),refrotation(0.0f),
-      septhick(5),sepy(0.0f),refsepy(0.0f),controls_width(0),screen_width(0),
+      septhick(5),sepy(0.0f),refsepy(0.0f),screen_width(0),
       library_loaded(false),mouseover(false),
       mediaOnTrack(-1),track_playing(false),
       openMediaExternallyAction(0), browseMediaExternallyAction(0), examineMediaExternallyAction(0), forwardNextLevelAction(0),changeReferenceNodeAction(0),
@@ -95,7 +95,8 @@ ACOsgCompositeViewQt::ACOsgCompositeViewQt( QWidget * parent, const char * name,
     // Renderers
     browser_renderer = new ACOsgBrowserRenderer();
     timeline_renderer = new ACOsgTimelineRenderer();
-    timeline_controls_renderer = new ACOsgTimelineControlsRenderer();
+    ACOsgRendererFactory::getInstance().setBrowserRenderer(browser_renderer);
+    ACOsgRendererFactory::getInstance().setTimelineRenderer(timeline_renderer);
     hud_view = new osgViewer::View;
     hud_renderer = new ACOsgHUDRenderer();
 
@@ -123,11 +124,6 @@ ACOsgCompositeViewQt::ACOsgCompositeViewQt( QWidget * parent, const char * name,
     this->updateTimelineView(width(),height());
     this->addView(timeline_view);
 
-    timeline_controls_view = new osgViewer::View;
-    timeline_controls_view->getCamera()->setGraphicsContext(this->getGraphicsWindow());
-    this->updateTimelineControlsView(width(),height());
-    this->addView(timeline_controls_view);
-
     // Event handlers
     browser_event_handler = new ACOsgBrowserEventHandler;
     browser_view->addEventHandler(browser_event_handler);
@@ -145,10 +141,6 @@ ACOsgCompositeViewQt::ACOsgCompositeViewQt( QWidget * parent, const char * name,
     // Audio waveforms
     screen_width = QApplication::desktop()->screenGeometry().width();
     timeline_renderer->setScreenWidth(screen_width);
-#if defined (SUPPORT_AUDIO)
-    audio_engine = 0;
-#endif //defined (SUPPORT_AUDIO)
-
     timeline_renderer->updateSize(width(),sepy);
 
     grabGesture(Qt::PanGesture);
@@ -180,7 +172,7 @@ void ACOsgCompositeViewQt::updateTimelineView(int _width, int _height){
     if (timeline_view){
         //timeline_view->getCamera()->setClearColor(Vec4f(0.0,0.0,0.0,0.0));
         timeline_view->getCamera()->setClearColor(Vec4f(0.14,0.14,0.28,1.0));
-        timeline_view->getCamera()->setViewport(new osg::Viewport(controls_width,0,_width-controls_width,sepy));
+        timeline_view->getCamera()->setViewport(new osg::Viewport(0,0,_width,sepy));
 #ifdef TIMELINE_RENDERER_ORTHO2D
         //orth2D
         timeline_view->getCamera()->setProjectionMatrix(osg::Matrix::ortho2D(0,_width_,0,sepy));
@@ -194,17 +186,6 @@ void ACOsgCompositeViewQt::updateTimelineView(int _width, int _height){
     }
 }
 
-void ACOsgCompositeViewQt::updateTimelineControlsView(int _width, int _height){
-    if(timeline_controls_view){
-        //timeline_controls_view->getCamera()->setClearColor(Vec4f(0.0,0.0,0.0,0.0));
-        timeline_controls_view->getCamera()->setClearColor(Vec4f(1.0f,0.14f,0.28f,0.2f));
-        timeline_controls_view->getCamera()->setViewport(new osg::Viewport(0,0,controls_width,sepy));
-        timeline_controls_view->getCamera()->setProjectionMatrixAsPerspective(45.0f, 1.0f, 0.001f, 10.0f);//static_cast<double>(width())/static_cast<double>(sepy), 0.001f, 10.0f);
-        timeline_controls_view->getCamera()->getViewMatrix().makeIdentity();
-        timeline_controls_view->getCamera()->setViewMatrixAsLookAt(Vec3(0,0,0.8), Vec3(0,0,0), Vec3(0,1,0));
-    }
-}
-
 ACOsgCompositeViewQt::~ACOsgCompositeViewQt(){
     //browser_view->removeEventHandler(browser_event_handler); // reqs OSG >= 2.9.x and shouldn't be necessary
     //timeline_view->removeEventHandler(timeline_event_handler); // reqs OSG >= 2.9.x and shouldn't be necessary
@@ -215,7 +196,6 @@ ACOsgCompositeViewQt::~ACOsgCompositeViewQt(){
     delete timeline_renderer; timeline_renderer = 0;
     //if (timeline_event_handler) delete timeline_event_handler;
     timeline_event_handler = 0;
-    delete timeline_controls_renderer; timeline_controls_renderer = 0;
     delete hud_renderer; hud_renderer = 0;
     media_cycle = 0;
     if(openMediaExternallyAction) delete openMediaExternallyAction; openMediaExternallyAction = 0;
@@ -263,22 +243,14 @@ void ACOsgCompositeViewQt::clean(bool updategl){
 void ACOsgCompositeViewQt::setMediaCycle(MediaCycle* _media_cycle)
 {
     media_cycle = _media_cycle;
+    media_cycle->addListener(this);
     browser_renderer->setMediaCycle(media_cycle);
     timeline_renderer->setMediaCycle(media_cycle);
-    timeline_controls_renderer->setMediaCycle(media_cycle);
     browser_event_handler->setMediaCycle(media_cycle);
+    ACOsgRendererFactory::getInstance().setMediaCycle(media_cycle);
     timeline_event_handler->setMediaCycle(media_cycle);
     hud_renderer->setMediaCycle(media_cycle);
 }
-
-#if defined (SUPPORT_AUDIO)
-void ACOsgCompositeViewQt::setAudioEngine(ACAudioEngine *engine)
-{
-    audio_engine=engine;
-    if(timeline_renderer)timeline_renderer->setAudioEngine(engine);
-    if(timeline_event_handler)timeline_event_handler->setAudioEngine(engine);
-}
-#endif //defined (SUPPORT_AUDIO)
 
 void ACOsgCompositeViewQt::initFont()
 {
@@ -332,7 +304,6 @@ void ACOsgCompositeViewQt::resizeGL( int w, int h )
     if (isRealized()){
         this->updateBrowserView(w,h);
         this->updateTimelineView(w,h);
-        this->updateTimelineControlsView(w,h);
         this->updateHUDCamera(w,h);
         //hud_renderer->getCamera()->setProjectionMatrix(osg::Matrix::ortho2D(0,w,0,h));
         /*
@@ -411,7 +382,6 @@ void ACOsgCompositeViewQt::updateGL()
         this->updateBrowserView(width(),height());
         browser_view->getCamera()->setViewMatrixAsLookAt(Vec3(x*1.0,y*1.0,0.8 / zoom), Vec3(x*1.0,y*1.0,0), Vec3(upx, upy, 0));
         this->updateTimelineView(width(),height());
-        this->updateTimelineControlsView(width(),height());
         this->updateHUDCamera(width(),height());
     }
 
@@ -430,6 +400,30 @@ void ACOsgCompositeViewQt::addInputAction(ACInputActionQt* _action)
     //this->addAction(dynamic_cast<QAction*>(_action));
     this->addAction(_action);
     this->inputActions.append(_action);
+}
+
+void ACOsgCompositeViewQt::pluginLoaded(std::string plugin_name){
+    std::cout << "ACOsgCompositeViewQt::pluginLoaded: " << plugin_name << std::endl;
+    QObject* qobject = dynamic_cast<QObject*>(media_cycle->getPluginManager()->getPlugin(plugin_name));
+    if(!qobject){
+        //std::cerr << "ACOsgCompositeViewQt::pluginLoaded: " << plugin_name << " not an ACPluginQt" << std::endl;
+        return;
+    }
+    //std::cout << "ACOsgCompositeViewQt::pluginLoaded: " << plugin_name << " is a QObject" << std::endl;
+    ACPluginQt* plugin = qobject_cast<ACPluginQt*>(qobject);
+    if(!plugin){
+        //std::cerr << "ACOsgCompositeViewQt::pluginLoaded: " << plugin_name << " not an ACPluginQt" << std::endl;
+        return;
+    }
+    plugin->setBrowserRenderer(this->browser_renderer);
+    plugin->setTimelineRenderer(this->timeline_renderer);
+    std::cout << "ACOsgCompositeViewQt::pluginLoaded: " << plugin_name << " is an ACPluginQt" << std::endl;
+    std::vector<ACInputActionQt*> inputActions = plugin->providesInputActions();
+    for(std::vector<ACInputActionQt*>::iterator inputAction = inputActions.begin(); inputAction != inputActions.end(); inputAction++){
+        std::cout << "ACOsgCompositeViewQt::pluginLoaded: adding action from " << plugin_name << std::endl;
+        (*inputAction)->setParent(this);
+        this->addInputAction(*inputAction);
+    }
 }
 
 void ACOsgCompositeViewQt::initInputActions(){
@@ -849,7 +843,6 @@ void ACOsgCompositeViewQt::addMediaOnTimelineTrack(){
                 timeline_renderer->updateSize(width(),sepy);
                 this->updateBrowserView(width(),height());
                 this->updateTimelineView(width(),height());
-                this->updateTimelineControlsView(width(),height());
                 this->updateHUDCamera(width(),height());
                 
                 media_cycle->setNeedsDisplay(true);
@@ -867,7 +860,6 @@ void ACOsgCompositeViewQt::addMediaOnTimelineTrack(){
                 //this->getTimelineRenderer()->getTrack(0)->updateMedia( media_id ); //media_cycle->getLibrary()->getMedia(media_id) );
                 this->getTimelineRenderer()->getTrack(0)->updateMedia(media_cycle->getLibrary()->getMedia(media_id));
             }
-            //this->getTimelineControlsRenderer()->getControls(0)->updateMedia( media_id ); //media_cycle->getLibrary()->getMedia(media_id) );
             media_cycle->setNeedsDisplay(true);
         }
     }
@@ -902,11 +894,15 @@ void ACOsgCompositeViewQt::discardMedia(){
 void ACOsgCompositeViewQt::propagateEventToActions( QEvent* event )
 {
     //int cnt = 0;
-    QListIterator<QAction*> _action(this->actions());
+    //QListIterator<QAction*> _action(this->actions());
+    QListIterator<ACInputActionQt*> _action(this->inputActions);
     while (_action.hasNext()){
-        //std::cout << "action " << ++cnt << std::endl;
-        ACInputActionQt *_act = static_cast<ACInputActionQt *>(_action.next());
-        _act->eventAbsorber(event);
+        ACInputActionQt *_act = dynamic_cast<ACInputActionQt *>(_action.next());
+        if(_act){
+            //std::cout << "ACOsgCompositeViewQt::propagateEventToActions: " << _act->text().toStdString() << std::endl;
+            _act->eventAbsorber(event);
+            //_act->event(event)
+        }
     }
 }
 
@@ -938,7 +934,9 @@ void ACOsgCompositeViewQt::mousePressEvent( QMouseEvent* event )
     }
     //this->propagateEventToActions(event);
     osg_view->getEventQueue()->mouseButtonPress(event->x(), event->y(), button);
+    std::cout << "ACOsgCompositeViewQt::mousePressEvent clicked node " << media_cycle->getClickedNode() << std::endl;
     //browser_view->getEventQueue()->mouseButtonPress(event->x(), event->y()-sepy, button);
+
     this->propagateEventToActions(event);
 
     if (media_cycle == 0) return;
@@ -1014,10 +1012,12 @@ void ACOsgCompositeViewQt::mouseReleaseEvent( QMouseEvent* event )
     case(Qt::NoButton): button = 0; break;
     default: button = 0; break;
     }
-    osg_view->getEventQueue()->mouseButtonRelease(event->x(), event->y(), button);
     this->propagateEventToActions(event);
+    osg_view->getEventQueue()->mouseButtonRelease(event->x(), event->y(), button);
+    std::cout << "ACOsgCompositeViewQt::mouseReleaseEvent clicked node " << media_cycle->getClickedNode() << std::endl;
     if (media_cycle == 0) return;
     media_cycle->setClickedNode(-1);
+    std::cout << "mouseReleaseEvent clicked node erased " << std::endl;
     mousedown = 0;
     borderdown = 0;
     media_cycle->setNeedsDisplay(true);
@@ -1146,10 +1146,7 @@ void ACOsgCompositeViewQt::prepareFromTimeline()
     //setMouseTracking(false); //CF necessary for the hover callback
     timeline_renderer->prepareTracks();
     timeline_view->setSceneData(timeline_renderer->getShapes());
-    timeline_controls_renderer->prepareControls();
-    //timeline_controls_view->setSceneData(timeline_controls_renderer->getShapes());
 }
-
 
 void ACOsgCompositeViewQt::updateTransformsFromTimeline( double frac)
 {
@@ -1160,7 +1157,6 @@ void ACOsgCompositeViewQt::updateTransformsFromTimeline( double frac)
     ////////media_cycle->setClosestNode(closest_node);
     // recompute scene graph
     timeline_renderer->updateTracks(frac); // animation starts at 0.0 and ends at 1.0
-    //timeline_controls_renderer->updateControls(frac); // animation starts at 0.0 and ends at 1.0
 }
 
 void ACOsgCompositeViewQt::changeSetting(ACSettingType _setting)

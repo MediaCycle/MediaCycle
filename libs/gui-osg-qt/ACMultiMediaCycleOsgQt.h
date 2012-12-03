@@ -47,15 +47,7 @@
 #include "ui_ACMultiMediaCycleOsgQt.h"
 
 #include <MediaCycle.h>
-#if defined (SUPPORT_AUDIO)
-#include <ACAudioEngine.h>
-#endif //defined (SUPPORT_AUDIO)
 #include <ACOsgCompositeViewQt.h>
-#if defined (USE_OSC)
-#include <ACOscBrowser.h>
-#include <ACOscFeedback.h>
-#endif //defined (USE_OSC)
-
 #include "ACSettingsDialogQt.h" // SettingsDialog
 #include <ACDockWidgetsManagerQt.h>
 #include <ACAboutDialogFactoryQt.h>
@@ -67,6 +59,8 @@
 
 #include "ACEventListener.h"
 
+#include "ACOsgAbstractDefaultConfigQt.h"
+
 // FORWARD DECLARATIONS
 QT_BEGIN_NAMESPACE
 class QListWidgetItem;
@@ -77,7 +71,7 @@ class ACSettingsDialogQt; // forward declaration; NB: SettingsDialog member has 
 class ACDetachedMediaBrowserOsgQt : public QMainWindow {
     Q_OBJECT
 public:
-    ACDetachedMediaBrowserOsgQt(QWidget *parent = 0): QMainWindow(parent){};
+    ACDetachedMediaBrowserOsgQt(QWidget *parent = 0): QMainWindow(parent){}
 };
 
 class ACQProgressBar : public QProgressBar {
@@ -98,13 +92,13 @@ class ACMultiMediaCycleOsgQt : public QMainWindow, public ACEventListener {
 public slots:
     // Config
     void on_actionEdit_Config_File_triggered(bool checked);
-    void changeLibraryMediaType(QString media); // media type of the library
+    void changeMediaConfig(QString media); // media type of the library
 #ifdef SUPPORT_MULTIMEDIA
     void changeActiveMediaType(QString media); // active media type for documents
 #endif
     void on_actionEdit_Input_Controls_triggered(bool checked);
     //SENEFFE ?
-    virtual void loopXML(){};
+    virtual void loopXML(){}
 
 public slots:	
     // Library controls
@@ -135,8 +129,8 @@ public:
     void setBrowserMode(ACBrowserMode _mode){this->browser_mode=_mode;}
     void setMediaType(ACMediaType _mt);
 
-    // XS TODO: default values for image -- is this correct ?
-    void createMediaCycle(ACMediaType _media_type = MEDIA_TYPE_IMAGE, ACBrowserMode _browser_mode = AC_MODE_CLUSTERS);
+    void createMediaCycle(ACMediaType _media_type, ACBrowserMode _browser_mode = AC_MODE_CLUSTERS);
+    void init();
     void destroyMediaCycle();
     MediaCycle* getMediaCycle() {return media_cycle;}
     ACMediaType getMediaType() {return media_type;}
@@ -146,20 +140,22 @@ public:
 
     bool removePluginFromLibrary(std::string _plugin_name, std::string _library_path);
 
-    std::string getPluginPathFromBaseName(std::string basename);
-    int loadPluginFromBaseName(std::string basename);
+protected:
     int tryLoadFeaturePluginFromBaseName(std::string basename);
-    void loadDefaultConfig(ACMediaType _media_type = MEDIA_TYPE_IMAGE, ACBrowserMode _browser_mode = AC_MODE_CLUSTERS);
 
-    void loadMediaDocumentConfig(std::string _name);
+public:
+    bool addDefaultConfig(ACAbstractDefaultConfig* _config);
+    bool loadDefaultConfig(ACAbstractDefaultConfig* _config);
+
     // Controls
     bool addControlDock(std::string dock_type);
 
     bool addAboutDialog(ACAbstractAboutDialogQt* dock);
     bool addAboutDialog(std::string about_type);
 
-    // Callback
+    // MediaCycle listener callbacks
     void mediaImported(int n,int nTot,int mId);
+    void pluginLoaded(std::string plugin_name);
 
     // Close Event
     void closeEvent(QCloseEvent *event);
@@ -172,11 +168,9 @@ public:
     void setDefaultQSettings();
 
     void useSegmentationByDefault(bool _status);// derived apps can disable segmentation by default on their main.cpp
-    void switchSegmentation(bool _status);// disable/enable segmentation when (failing) loading segmentation plugins and changing media types
+    bool switchSegmentation(bool _status);// disable/enable segmentation when (failing) loading segmentation plugins and changing media types
     void switchFeatureExtraction(bool _status);// disable/enable feature extraction when (failing) loading feature extraction plugins and changing media types
     void switchPluginVisualizations(bool _status);// disable/enable visualization from plugins when (failing) loading visualization plugins and changing media types
-
-    void autoConnectOSC(bool _status = true);
     void changeSetting(ACSettingType _setting);
 
 signals:	
@@ -196,14 +190,7 @@ private:
     std::string config_file_xml;
     std::string project_directory;
 
-    std::vector<std::string> plugins_libraries;
-#if defined (SUPPORT_AUDIO)
-    ACAudioEngine *audio_engine;
-#endif //defined (SUPPORT_AUDIO)
-#if defined (USE_OSC)
-    ACOscBrowser *osc_browser;
-    ACOscFeedback *osc_feedback;
-#endif //defined (USE_OSC)
+    std::vector<std::string> plugins_libraries, plugins_basenames;
 
     ACDockWidgetsManagerQt* dockWidgetsManager;
     ACAboutDialogFactoryQt* aboutDialogFactory;
@@ -237,7 +224,6 @@ private:
     ACQProgressBar* progressBar;
 
     bool use_segmentation_current,use_segmentation_default,use_feature_extraction,use_visualization_plugins;
-    bool auto_connect_osc;
 
     ACMediaLibraryMetadataQt* metadataWindow;
     ACUserProfileQt* userProfileWindow;
@@ -246,5 +232,6 @@ protected:
     ACOsgCompositeViewQt* compositeOsgView;
     MediaCycle *media_cycle;
     ACSettingType setting;
+
 };
 #endif

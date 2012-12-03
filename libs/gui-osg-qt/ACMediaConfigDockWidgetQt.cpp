@@ -39,10 +39,11 @@ ACMediaConfigDockWidgetQt::ACMediaConfigDockWidgetQt(QWidget *parent)
 {
 	ui.setupUi(this); // first thing to do
 	
+    this->clearConfigList();
 	// Media types
-    std::vector< std::string > mediaTypes = ACMediaFactory::getInstance().listAvailableMediaTypes();
+    /*std::vector< std::string > mediaTypes = ACMediaFactory::getInstance().listAvailableMediaTypes();
     for (std::vector< std::string >::iterator mediaType = mediaTypes.begin(); mediaType!=mediaTypes.end(); ++mediaType)
-        ui.comboLibrary->addItem(QString((*mediaType).c_str()));
+        ui.comboLibrary->addItem(QString((*mediaType).c_str()));*/
 
 	this->show();
 
@@ -51,31 +52,67 @@ ACMediaConfigDockWidgetQt::ACMediaConfigDockWidgetQt(QWidget *parent)
     this->adjustSize();
 }
 
+void ACMediaConfigDockWidgetQt::setMediaCycle(MediaCycle *_media_cycle){
+    ACAbstractDockWidgetQt::setMediaCycle(_media_cycle);
+    this->clearConfigList();
+    this->rebuildConfigList();
+}
+
 bool ACMediaConfigDockWidgetQt::canBeVisible(ACMediaType _media_type){
     return true;
 }
 
 void ACMediaConfigDockWidgetQt::on_comboLibrary_activated(const QString & text)
 {
-    emit libraryMediaTypeChanged(text);
+    emit mediaConfigChanged(text);
 }
 
 void ACMediaConfigDockWidgetQt::changeMediaType(ACMediaType _media_type)
 {
-    std::string mediaType = ACMediaFactory::getInstance().getNormalCaseStringFromMediaType(_media_type);
+    this->clearConfigList();
+    this->rebuildConfigList();
+    /*std::string mediaType = ACMediaFactory::getInstance().getNormalCaseStringFromMediaType(_media_type);
     int mediaIndex = ui.comboLibrary->findText(QString(mediaType.c_str()));
     if (mediaIndex > -1){
         ui.comboLibrary->setCurrentIndex(mediaIndex);
-    }
+    }*/
 }
 
 void ACMediaConfigDockWidgetQt::resetMediaType(ACMediaType _media_type)
 {
-    string sMedia = ACMediaFactory::getInstance().getNormalCaseStringFromMediaType(_media_type);
+    this->clearConfigList();
+    this->rebuildConfigList();
+    /*string sMedia = ACMediaFactory::getInstance().getNormalCaseStringFromMediaType(_media_type);
     int comboIndex = ui.comboLibrary->findText(QString(sMedia.c_str()));
     if (comboIndex > -1)
         ui.comboLibrary->setCurrentIndex(comboIndex);//stay with the current config without reloading
     else
-        ui.comboLibrary->setCurrentIndex(0);//display the startup combo value "-- Config --"
+        ui.comboLibrary->setCurrentIndex(0);//display the startup combo value "-- Config --"*/
 }
 
+void ACMediaConfigDockWidgetQt::updatePluginsSettings()
+{
+    this->clearConfigList();
+    this->rebuildConfigList();
+}
+
+void ACMediaConfigDockWidgetQt::clearConfigList(){
+    ui.comboLibrary->clear();
+    ui.comboLibrary->addItem("-- Config --");
+    ui.comboLibrary->addItem("Custom");
+}
+
+void ACMediaConfigDockWidgetQt::rebuildConfigList(){
+    if(!media_cycle)
+        return;
+    std::vector< std::string > configNames = this->media_cycle->getDefaultConfigsNames();
+    for (std::vector< std::string >::iterator configName = configNames.begin(); configName!=configNames.end(); ++configName)
+        ui.comboLibrary->addItem(QString((*configName).c_str()));
+    std::string current_config = media_cycle->getCurrentConfigName();
+    int comboIndex = ui.comboLibrary->findText(QString(current_config.c_str()));
+    if (comboIndex > -1)
+        ui.comboLibrary->setCurrentIndex(comboIndex);//stay with the current config without reloading
+    else
+        ui.comboLibrary->setCurrentIndex(0);//display the startup combo value "-- Config --"*/
+
+}

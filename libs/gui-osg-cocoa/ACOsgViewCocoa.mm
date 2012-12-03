@@ -58,7 +58,7 @@
 //  <mailto:avre@umons.ac.be>
 //
 
-#if defined(USE_OSG) && defined(__APPLE__)
+#if defined(__APPLE__)
 
 #import "ACOsgViewCocoa.h"
 #import "ACOsgViewNodeCocoa.h"

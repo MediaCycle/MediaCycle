@@ -52,8 +52,6 @@
 #include <osg/BlendColor>
 #include <osg/Texture2D>
 #include <osg/Image>
-#include <osgDB/ReadFile>
-#include <osgDB/WriteFile>
 #include <osgUtil/SceneView>
 #include <osgViewer/Viewer>
 #include <osgText/Font>
@@ -61,22 +59,11 @@
 
 #include "ACRefId.h"
 
+#include "ACOsgAbstractDefaultConfig.h"
+
 #if defined(APPLE_IOS)
 #define AUTO_TRANSFORM
 #endif 
-
-enum ACBrowserAudioWaveformType {
-    AC_BROWSER_AUDIO_WAVEFORM_NONE=0,
-    AC_BROWSER_AUDIO_WAVEFORM_CLASSIC=1
-};
-
-// Setting: where/how the application is used
-enum ACSettingType {
-    AC_SETTING_NONE=0,
-    AC_SETTING_DESKTOP=1,
-    AC_SETTING_INSTALLATION=2,
-    AC_SETTING_MOBILE=3
-};
 
 class ACOsgMediaRenderer {
 protected:
@@ -181,10 +168,6 @@ public:
     //void setMediaIndex(int media_index);
     void setMedia(ACMedia* _media);
     void setFilename(std::string media_cycle_filename);
-
-    // Audio-specific
-    virtual void setWaveformType(ACBrowserAudioWaveformType _type){}
-    virtual void updateWaveformType(ACBrowserAudioWaveformType _type){}
 
     // Setting specific
     virtual void changeSetting(ACSettingType _setting){this->setting = _setting;}// = 0;

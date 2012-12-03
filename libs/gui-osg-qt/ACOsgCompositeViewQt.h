@@ -51,19 +51,16 @@ using Qt::WindowFlags;
 #include <ACOsgBrowserRenderer.h>
 #include <ACOsgBrowserEventHandler.h>
 #include <ACOsgTimelineRenderer.h>
-#include <ACOsgTimelineControlsRenderer.h>
 #include <ACOsgTimelineEventHandler.h>
 #include <ACOsgHUDRenderer.h>
 
-#if defined (SUPPORT_AUDIO)
-#include <ACAudioEngine.h>
-#endif //defined (SUPPORT_AUDIO)
+#include "ACEventListener.h"
 
 //#include "ui_ACOsgCompositeViewQt.h"
 
 #include <ACInputActionQt.h>
 
-class ACOsgCompositeViewQt : public QGLWidget, public osgViewer::CompositeViewer
+class ACOsgCompositeViewQt : public QGLWidget, public osgViewer::CompositeViewer, public ACEventListener
 {
     Q_OBJECT
 
@@ -143,16 +140,11 @@ private:
     ACOsgBrowserEventHandler *browser_event_handler;
     ACOsgTimelineRenderer *timeline_renderer;
     ACOsgTimelineEventHandler *timeline_event_handler;
-    ACOsgTimelineControlsRenderer *timeline_controls_renderer;
     ACOsgHUDRenderer *hud_renderer;
     osg::ref_ptr<osgViewer::View> browser_view;
     osg::ref_ptr<osgViewer::View> hud_view;
     osg::ref_ptr<osgViewer::View> timeline_view;
-    osg::ref_ptr<osgViewer::View> timeline_controls_view;
     osg::ref_ptr<osgText::Font> font;
-#if defined (SUPPORT_AUDIO)
-    ACAudioEngine *audio_engine;
-#endif //defined (SUPPORT_AUDIO)
 
     ACInputActionQt *openMediaExternallyAction, *browseMediaExternallyAction,
     *examineMediaExternallyAction, *forwardNextLevelAction,*changeReferenceNodeAction,
@@ -168,12 +160,13 @@ private:
 public:
     void addInputAction(ACInputActionQt* _action);
     QList<ACInputActionQt*> getInputActions(){return inputActions;}
+    // MediaCycle listener callback
+    virtual void pluginLoaded(std::string plugin_name);
 
 private:
     void updateBrowserView(int width, int height);
     void updateHUDCamera(int width, int height);
     void updateTimelineView(int width, int height);
-    void updateTimelineControlsView(int width, int height);
 
 public:
     // needs to be called when medias are added or removed
@@ -185,13 +178,9 @@ public:
     void prepareFromTimeline();
     // needs to be called when tracks positions are changed
     void updateTransformsFromTimeline( double frac);
-    ACOsgBrowserRenderer* getBrowserRenderer(){return browser_renderer;};
-    ACOsgHUDRenderer* getHUDRenderer(){return hud_renderer;};
-    ACOsgTimelineRenderer* getTimelineRenderer(){return timeline_renderer;};
-    ACOsgTimelineControlsRenderer* getTimelineControlsRenderer(){return timeline_controls_renderer;};
-#if defined (SUPPORT_AUDIO)
-    void setAudioEngine(ACAudioEngine *engine);
-#endif //defined (SUPPORT_AUDIO)
+    ACOsgBrowserRenderer* getBrowserRenderer(){return browser_renderer;}
+    ACOsgHUDRenderer* getHUDRenderer(){return hud_renderer;}
+    ACOsgTimelineRenderer* getTimelineRenderer(){return timeline_renderer;}
     bool isLibraryLoaded(){return library_loaded;}
     void setLibraryLoaded(bool load_status){library_loaded = load_status;}
 
@@ -203,7 +192,6 @@ private:
     int septhick; // CF half of the thickness of the border that separates the browser and timeline viewers
     float sepy; //CF location (in OSG coordinates) of the border that separates the browser and timeline viewers
     float refsepy;
-    int controls_width;
     int screen_width;
     bool library_loaded;
     bool mouseover;

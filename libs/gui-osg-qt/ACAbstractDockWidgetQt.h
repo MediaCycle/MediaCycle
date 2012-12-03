@@ -41,12 +41,13 @@
 #include <QtGui>
 
 #include "ACAbstractWidgetQt.h"
+#include "ACAbstractDefaultConfig.h"
 
 class ACAbstractDockWidgetQt : public QDockWidget, public ACAbstractWidgetQt {
     Q_OBJECT
 
 signals:
-    void libraryMediaTypeChanged(QString);
+    void mediaConfigChanged(QString);
     #ifdef SUPPORT_MULTIMEDIA
     void activeMediaTypeChanged(QString);
     #endif//def SUPPORT_MULTIMEDIA
@@ -56,30 +57,23 @@ public:
     {
         this->setFeatures(QDockWidget::DockWidgetClosable);
         this->setAllowedAreas(Qt::LeftDockWidgetArea);
-    };
-    virtual ~ACAbstractDockWidgetQt(){};
+    }
+    virtual ~ACAbstractDockWidgetQt(){}
     virtual bool canBeVisible(ACMediaType _media_type) = 0;
 
     ACMediaType getMediaType(){return this->media_type;}
     void setClassName(std::string _class_name){this->class_name=_class_name;}
     std::string getClassName(){return this->class_name;}
 
-#if defined (USE_OSC)
-    virtual void autoConnectOSC(bool _status = true){auto_connect_osc = _status;}
-#endif //defined (USE_OSC)
     virtual void changeMediaType(ACMediaType media_type){}
     virtual void updatePluginsSettings(){}
     virtual void resetPluginsSettings(){}
-    virtual void resetMediaType(ACMediaType _media_type){}  
+    virtual void resetMediaType(ACMediaType _media_type){}
+    virtual bool addDefaultConfig(ACAbstractDefaultConfig* _config){return false;}
 
 private:
     ACMediaType media_type; // media type of the dock, not of the library
     std::string class_name;
-
-protected:
-#if defined (USE_OSC)
-    bool auto_connect_osc;
-#endif //defined (USE_OSC)
 };
 
 #endif // ACABSTRACTDOCKWIDGETQT_H

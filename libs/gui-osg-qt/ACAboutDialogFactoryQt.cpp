@@ -35,9 +35,9 @@
 #include "ACAboutDialogFactoryQt.h"
 
 ACAbstractAboutDialogQt* ACAboutDialogFactoryQt::createAboutDialog(QWidget *parent,std::string about_type) {
-	if (about_type == "" || about_type == "MediaCycle") {return new ACAboutDialogQt(parent);}
-	/*#if defined (USE_AUDIOGARDEN)
-	else if (about_type == "AudioGarden") {return new AGAboutDialogQt(parent);}
-	#endif //defined (USE_AUDIOGARDEN)*/
-	else return 0;
+    ACAbstractAboutDialogQt* aboutDialog(0);
+    if (about_type == "" || about_type == "MediaCycle") {aboutDialog = new ACAboutDialogQt(parent);}
+    if(aboutDialog)
+        aboutDialog->setMediaCycle(this->media_cycle);
+    return aboutDialog;
 }

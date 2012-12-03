@@ -37,6 +37,9 @@
 #include <osg/Version>
 using namespace osg;
 
+#include <osgDB/ReadFile>
+#include <osgDB/WriteFile>
+
 ACOsgLibraryRenderer::ACOsgLibraryRenderer()
     :ACOsgMediaRenderer()
 {
@@ -159,15 +162,17 @@ void ACOsgLibraryRenderer::imageGeode(ACOsgLibraryImageRenderer& _renderer) {
         }
 
         thumbnail = osgDB::readImageFile(_renderer.file);
-        readerWriter = 0;
 
         if (!thumbnail){
-            cerr << "<ACImage::computeThumbnail> problem converting thumbnail to osg" << endl;
+            cerr << "<ACOsgLibraryRenderer::imageGeode> image reader " << readerWriter->className() << " couldn't read image " << _renderer.file << endl;
+            return;
         }
         else{
             image_texture = new osg::Texture2D;
             image_texture->setImage(thumbnail);
         }
+        readerWriter = 0;
+
         image_texture->setResizeNonPowerOfTwoHint(false);
 
         width = thumbnail->s();

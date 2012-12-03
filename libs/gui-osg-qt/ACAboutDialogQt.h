@@ -48,11 +48,14 @@ Q_OBJECT
 public:
 	ACAboutDialogQt( QWidget* parent = 0);
     ~ACAboutDialogQt(){}
+    virtual void setMediaCycle(MediaCycle* _media_cycle);
 
 private:
 	Ui::ACAboutDialogQt ui;
+    void updateAbout();
 	void updateLicenses();
 	void updateTeam();
+    QString coreAbout;
 };
 
 #endif // ACABOUTDIALOGQT_H

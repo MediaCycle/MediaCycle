@@ -34,6 +34,10 @@
  */
 
 #include "ACOsgTrackRenderer.h"
+
+#include <osgDB/ReadFile>
+#include <osgDB/WriteFile>
+
 using namespace osg;
 
 ACOsgTrackRenderer::ACOsgTrackRenderer()
@@ -41,9 +45,6 @@ ACOsgTrackRenderer::ACOsgTrackRenderer()
       screen_width(0.0f),width(0.0f),height(0.0f),screen_width_changed(false),width_changed(false),height_changed(false)
 {
     media_type = MEDIA_TYPE_NONE;
-#ifdef SUPPORT_AUDIO
-    audio_engine = 0;
-#endif//def SUPPORT_AUDIO
     track_node = new MatrixTransform();
     displayed_media_index = -1;
     // Magic numbers!

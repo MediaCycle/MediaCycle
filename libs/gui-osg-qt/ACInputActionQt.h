@@ -1,7 +1,7 @@
 /**
  * @brief ACInputActionQt.h
- * @author Alexis Moinet
- * @date 21/06/2012
+ * @author Christian Frisson
+ * @date 04/12/2012
  * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -81,8 +81,8 @@ static const QEvent::Type MousePressedMove = static_cast<QEvent::Type>(QEvent::U
 class ACInputActionQt : public QAction
 {
 	Q_OBJECT
-public slots:	
-	void eventAbsorber ( QEvent * event );
+public slots:
+    void eventAbsorber ( QEvent * event );
 public:
     ACInputActionQt ( const QString & text, QObject * parent = 0, Qt::MouseButton mouse_button = Qt::NoButton  );
     ~ACInputActionQt(){}

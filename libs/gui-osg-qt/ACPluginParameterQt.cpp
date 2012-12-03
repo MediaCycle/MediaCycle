@@ -38,13 +38,23 @@ void ACPluginParameterQt::updateNumberParameter(double _number){
     plugin->setNumberParameterValue(parameter.toStdString(),(float)_number);
 }
 
+void ACPluginParameterQt::updateNumberParameter(bool _number){
+    float _value = (_number ? 1.0f : 0.0f);
+    plugin->setNumberParameterValue(parameter.toStdString(),(float)_value);
+}
+
 void ACPluginParameterQt::updateStringParameter(QString _string){
     plugin->setStringParameterValue(parameter.toStdString(),_string.toStdString());
+}
+
+void ACPluginParameterQt::triggerCallback(){
+    plugin->triggerCallback(parameter.toStdString());
 }
 
 void ACPluginParameterQt::resetNumberParameter(){
     plugin->resetParameterValue(parameter.toStdString());
     emit numberParameterChanged( plugin->getNumberParameterInit(parameter.toStdString()) );
+    emit numberParameterChanged( (bool)(plugin->getNumberParameterInit(parameter.toStdString())) );
 }
 
 void ACPluginParameterQt::resetStringParameter(){

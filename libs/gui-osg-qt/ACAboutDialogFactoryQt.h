@@ -37,14 +37,12 @@
 
 #include "ACAbstractAboutDialogQt.h"
 #include "ACAboutDialogQt.h"
-/*#if defined (USE_AUDIOGARDEN)
-include "AGAboutDialogQt.h"
-#endif //defined (USE_AUDIOGARDEN)*/
+#include "ACAbstractWidgetQt.h"
 
-class ACAboutDialogFactoryQt{
+class ACAboutDialogFactoryQt : public ACAbstractWidgetQt {
 public:
-	ACAboutDialogFactoryQt(){};
-	~ACAboutDialogFactoryQt(){};
+    ACAboutDialogFactoryQt():ACAbstractWidgetQt(){}
+    ~ACAboutDialogFactoryQt(){}
 	ACAbstractAboutDialogQt* createAboutDialog(QWidget *parent = 0,std::string about_type = "");
 };
 #endif // ACABOUTDIALOGFACTORYQT_H

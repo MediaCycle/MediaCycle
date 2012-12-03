@@ -1,7 +1,7 @@
 /**
  * @brief ACMediaDocumentOptionDockWidgetQt.cpp
  * @author Christian Frisson
- * @date 24/07/2012
+ * @date 04/12/2012
  * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -56,7 +56,13 @@ void ACMediaDocumentOptionDockWidgetQt::updatePluginsSettings()
     // according to plugins actually used to compute the features
     if(media_cycle == 0) return;
     if(media_cycle->getMediaType()!=MEDIA_TYPE_MIXED) return;
-    if(media_cycle->getLibrary()->getSize()==0) return;
+    //if(media_cycle->getLibrary()->getSize()==0) return;
+
+    ACAbstractDefaultConfig* current_config = media_cycle->getCurrentConfig();
+    if(!current_config)
+        return;
+    media_cycle->getPluginManager()->getPlugin( current_config->mediaReaderPlugin() );
+
     vector<int> indexMedia=this->media_cycle->getLibrary()->getParentIds();
     if(indexMedia.size() == 0) return;
     ACMediaDocument* temp=static_cast<ACMediaDocument*> (this->media_cycle->getLibrary()->getMedia(indexMedia[0]));

@@ -72,11 +72,13 @@ public:
     ACOsgBrowserRenderer();
     ~ACOsgBrowserRenderer();
     void clean();
-    void setMediaCycle(MediaCycle *media_cycle){ this->media_cycle = media_cycle; media_cycle->addListener(this);}
+    void setMediaCycle(MediaCycle *media_cycle);
 
     //Callbacks
     void mediaImported(int n,int nTot,int mId);
     void libraryCleaned();
+
+    ACOsgMediaRenderers getMediaRenderers(){return node_renderers;}
 
 protected:
     MediaCycle *media_cycle;
@@ -117,9 +119,7 @@ protected:
     int prev_media_index;
     std::string media_cycle_filename;
     int nodes_prepared;
-    ACBrowserAudioWaveformType audio_waveform_type;
     ACSettingType setting;
-    
     
     /*pthread_mutex_t activity_update_mutex;
     pthread_mutexattr_t activity_update_mutex_attr;*/
@@ -144,9 +144,6 @@ public:
     void setFont(osg::ref_ptr<osgText::Font> _font){this->font = _font;}
     void changeNodeColor(int _node, osg::Vec4 _color){activity_update_mutex.lock();node_renderers[_node]->changeNodeColor(_color);activity_update_mutex.unlock();}
     void resetNodeColor(int _node){activity_update_mutex.lock();node_renderers[_node]->resetNodeColor();activity_update_mutex.unlock();}
-
-    ACBrowserAudioWaveformType getAudioWaveformType(){return audio_waveform_type;}
-    void setAudioWaveformType(ACBrowserAudioWaveformType _type);
 
     void changeSetting(ACSettingType _setting);
 

@@ -35,7 +35,7 @@
 #include "ACDockWidgetsManagerQt.h"
 
 ACDockWidgetsManagerQt::ACDockWidgetsManagerQt(QMainWindow *_mainWindow)
-    :ACAbstractWidgetQt(), mainWindow(_mainWindow),plugins_scanned(false),media_type(MEDIA_TYPE_NONE),auto_connect_osc(false),
+    :ACAbstractWidgetQt(), mainWindow(_mainWindow),plugins_scanned(false),media_type(MEDIA_TYPE_NONE),
       current_docks_visibility(true),previous_docks_visibility(true),appOrigMinHeight(0)
 {
     dockWidgets.resize(0);
@@ -56,20 +56,11 @@ ACDockWidgetsManagerQt::~ACDockWidgetsManagerQt()
 void ACDockWidgetsManagerQt::setMediaCycle(MediaCycle* _media_cycle)
 {
     this->media_cycle = _media_cycle;
+    dockWidgetFactory->setMediaCycle(media_cycle);
     for (int d=0;d<dockWidgets.size();d++){
         dockWidgets[d]->setMediaCycle(media_cycle);
     }
 }
-
-#if defined (SUPPORT_AUDIO)
-void ACDockWidgetsManagerQt::setAudioEngine(ACAudioEngine* _audio_engine)
-{
-    this->audio_engine = _audio_engine;
-    for (int d=0;d<dockWidgets.size();d++){
-        dockWidgets[d]->setAudioEngine(audio_engine);
-    }
-}
-#endif //defined (SUPPORT_AUDIO)
 
 void ACDockWidgetsManagerQt::setOsgView(ACOsgCompositeViewQt* _osg_view)
 {
@@ -78,32 +69,6 @@ void ACDockWidgetsManagerQt::setOsgView(ACOsgCompositeViewQt* _osg_view)
         dockWidgets[d]->setOsgView(_osg_view);
     }
 }
-
-#if defined (USE_OSC)
-void ACDockWidgetsManagerQt::autoConnectOSC(bool _status)
-{
-    auto_connect_osc = _status;
-    for (int d=0;d<dockWidgets.size();d++){
-        dockWidgets[d]->autoConnectOSC(_status);//CF quick hack for LoopJam, should be (_status);
-    }
-}
-
-void ACDockWidgetsManagerQt::setOscBrowser(ACOscBrowser* _browser)
-{
-    this->osc_browser = _browser;
-    for (int d=0;d<dockWidgets.size();d++){
-        dockWidgets[d]->setOscBrowser(_browser);
-    }
-}
-
-void ACDockWidgetsManagerQt::setOscFeedback(ACOscFeedback* _feedback)
-{
-    this->osc_feedback = _feedback;
-    for (int d=0;d<dockWidgets.size();d++){
-        dockWidgets[d]->setOscFeedback(_feedback);
-    }
-}
-#endif //defined (USE_OSC)
 
 bool ACDockWidgetsManagerQt::addControlDock(ACAbstractDockWidgetQt* dock)
 {
@@ -114,12 +79,16 @@ bool ACDockWidgetsManagerQt::addControlDock(ACAbstractDockWidgetQt* dock)
 
     if (dock->getMediaType() == MEDIA_TYPE_NONE && dock->getClassName()==""){
         std::cerr << "Invalid dock widget type" << std::endl;
+        delete dock;
+        dock = 0;
         return false;
     }
 
     for (int d=0;d<dockWidgets.size();d++){
         if (dock->getClassName() == dockWidgets[d]->getClassName()){
             std::cerr << "Dock widget type already added" << std::endl;
+            delete dock;
+            dock = 0;
             return false;
         }
     }
@@ -128,12 +97,15 @@ bool ACDockWidgetsManagerQt::addControlDock(ACAbstractDockWidgetQt* dock)
         for (int d=0;d<dockWidgets.size();d++){
             if (dockWidgets[d]->getClassName() == "ACBrowserControlsCompleteDockWidgetQt" || dockWidgets[d]->getClassName() == "ACBrowserControlsClustersDockWidgetQt"){
                 std::cerr << "Only one browser control dock widget for clusters and/or neighbors can be added." << std::endl;
+                delete dock;
+                dock = 0;
                 return false;
             }
         }
     }
 
     dockWidgets.push_back(dock);
+    dock->setMediaCycle(this->media_cycle);
 
     if(!(mainWindow->isFullScreen()))
     {
@@ -153,17 +125,10 @@ bool ACDockWidgetsManagerQt::addControlDock(ACAbstractDockWidgetQt* dock)
         lastDocksVisibilities.insert(std::pair<std::string,int>( dock->getClassName(),0 ));
         dockWidgets.back()->setVisible(false);
     }
-    connect(dockWidgets.back(), SIGNAL(libraryMediaTypeChanged(QString)), mainWindow, SLOT(changeLibraryMediaType(QString)));
+    connect(dockWidgets.back(), SIGNAL(mediaConfigChanged(QString)), mainWindow, SLOT(changeMediaConfig(QString)));
 #ifdef SUPPORT_MULTIMEDIA
     connect(dockWidgets.back(), SIGNAL(activeMediaTypeChanged(QString)), mainWindow, SLOT(changeActiveMediaType(QString)));
 #endif
-
-#if defined (USE_OSC)
-    dockWidgets.back()->autoConnectOSC(auto_connect_osc);
-    dockWidgets.back()->setOscBrowser(this->osc_browser);
-    dockWidgets.back()->setOscFeedback(this->osc_feedback);
-#endif //defined (USE_OSC)
-
     this->updateDockHeight();
 
     return true;
@@ -174,24 +139,6 @@ bool ACDockWidgetsManagerQt::addControlDock(std::string dock_type)
     this->addControlDock(dockWidgetFactory->createDockWidget(mainWindow,dock_type));
 }
 
-ACAbstractDockWidgetQt* ACDockWidgetsManagerQt::getDockFromFactoryName(std::string _name){
-    std::string className("");
-    if (_name == "MCOSC") className = "ACOSCDockWidgetQt";
-    else if (_name == "MCBrowserControlsComplete") className = "ACBrowserControlsCompleteDockWidgetQt";
-    else if (_name == "MCBrowserControlsClusters") className = "ACBrowserControlsClustersDockWidgetQt";
-#if defined (SUPPORT_AUDIO)
-    else if (_name == "MCAudioControls") className = "ACAudioControlsDockWidgetQt";
-#endif //defined (SUPPORT_AUDIO)
-    else if (_name == "MCMediaConfig") className = "ACMediaConfigDockWidgetQt";
-#if defined (SUPPORT_VIDEO)
-    else if (_name == "MCVideoControls") className = "ACVideoControlsDockWidgetQt";
-#endif //defined (SUPPORT_VIDEO)
-#if defined (SUPPORT_MULTIMEDIA)
-    else if (_name == "MCMediaDocumentOption") className = "ACMediaDocumentOptionDockWidgetQt";
-#endif //defined (SUPPORT_MULTIMEDIA)
-    else if (_name == "MCSegmentationControls") className = "ACSegmentationControlsDockWidgetQt";
-    return this->getDockFromClassName(className);
-}
 
 ACAbstractDockWidgetQt* ACDockWidgetsManagerQt::getDockFromClassName(std::string _name){
     if( _name == "")
@@ -213,7 +160,7 @@ void ACDockWidgetsManagerQt::updateDocksVisibility(bool visibility)
 
 void ACDockWidgetsManagerQt::updateDockHeight()
 {
-    usleep(500000);
+    //usleep(500000);
     if(!mainWindow)
         return;
     if (mainWindow->isFullScreen())
@@ -353,11 +300,11 @@ void ACDockWidgetsManagerQt::changeMediaType(ACMediaType _media_type){
 
 void ACDockWidgetsManagerQt::updatePluginsSettings() {
     // do not re-scan the directory for plugins once they have been loaded
-    if (!plugins_scanned)
-    {
+    //if (!plugins_scanned)
+    //{
         for (int d=0;d<dockWidgets.size();d++)
             dockWidgets[d]->updatePluginsSettings();
-    }
+    //}
     plugins_scanned = true;
 
     // Hiding the OSC dock once a library is loaded

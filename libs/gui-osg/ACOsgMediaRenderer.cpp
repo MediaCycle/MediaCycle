@@ -35,6 +35,9 @@
 
 #include "ACOsgMediaRenderer.h"
 
+#include <osgDB/ReadFile>
+#include <osgDB/WriteFile>
+
 #include "boost/filesystem.hpp"   // includes all needed Boost.Filesystem declarations
 //#include "boost/filesystem/operations.hpp"
 //#include "boost/filesystem/path.hpp"

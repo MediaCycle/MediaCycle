@@ -37,15 +37,19 @@
 
 #include <string>
 #include <QtGui>
+#include <MediaCycle.h>
 
 class ACAbstractAboutDialogQt : public QDialog { 
     //Q_OBJECT
 
 public:
-	ACAbstractAboutDialogQt( QWidget* parent = 0)
-		: QDialog(parent)
-	{}
+    ACAbstractAboutDialogQt( QWidget* parent = 0)
+        : QDialog(parent),media_cycle(0)
+    {}
     ~ACAbstractAboutDialogQt(){}
+    virtual void setMediaCycle(MediaCycle* _media_cycle){ media_cycle = _media_cycle;}
+protected:
+    MediaCycle *media_cycle;
 };
 
 #endif // ACABSTRACTABOUTDIALOGQT_H

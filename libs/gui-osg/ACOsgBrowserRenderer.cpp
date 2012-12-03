@@ -34,28 +34,13 @@
  */
 
 #include "ACOsgBrowserRenderer.h"
-#if defined (SUPPORT_AUDIO)
-#include "ACOsgAudioRenderer.h"
-#endif //defined (SUPPORT_AUDIO)
-#if defined (SUPPORT_IMAGE)
-#include "ACOsgImageRenderer.h"
-#endif //defined (SUPPORT_IMAGE)
-#if defined (SUPPORT_VIDEO)
-#include "ACOsgVideoRenderer.h"
-#endif //defined (SUPPORT_VIDEO)
-#if defined (SUPPORT_3DMODEL)
-#include "ACOsg3DModelRenderer.h"
-#endif //defined (SUPPORT_3DMODEL)
-#if defined (SUPPORT_TEXT)
-#include "ACOsgTextRenderer.h"
-#endif //defined (SUPPORT_TEXT)
-#if defined (SUPPORT_SENSOR)
-#include "ACOsgSensorRenderer.h"
-#endif //defined (SUPPORT_SENSOR)
+#include "ACOsgMediaRenderer.h"
 #if defined (SUPPORT_MULTIMEDIA) 
 #include "ACOsgMediaDocumentRenderer.h"
 #endif //defined (SUPPORT_MULTIMEDIA) 
 #include "ACOsgLabelRenderer.h"
+
+#include "ACOsgRendererFactory.h"
 
 #include <osgDB/Registry>
 #include <osgDB/ReaderWriter>
@@ -158,6 +143,12 @@ ACOsgBrowserRenderer::~ACOsgBrowserRenderer(){
     //pthread_mutex_destroy(&activity_update_mutex);
 }
 
+void ACOsgBrowserRenderer::setMediaCycle(MediaCycle *media_cycle)
+{
+    this->media_cycle = media_cycle;
+    media_cycle->addListener(this);
+}
+
 void ACOsgBrowserRenderer::clean(){
     
    // pthread_mutex_lock(&activity_update_mutex);
@@ -195,7 +186,6 @@ void ACOsgBrowserRenderer::clean(){
     this->removeLinks();
     this->removeLabels();
     media_group->removeChildren(0,media_group->getNumChildren());
-    audio_waveform_type = AC_BROWSER_AUDIO_WAVEFORM_CLASSIC;
     //CF this is a temporary solution until we implement signals/slots in the core
     if(media_cycle){
         if(media_cycle->hasBrowser()){
@@ -329,7 +319,7 @@ void ACOsgBrowserRenderer::updateNodes(double ratio) {
             
             for(std::list<long int>::iterator it=nodeIds.begin();it!=nodeIds.end();it++){
                 int i = *it;
-                if (media_cycle->getBrowser()->getParentFromNeighborNode(i)>-1)
+                if (media_cycle->getBrowser()->getParentFromNeighborNode(i)>-1){
                     if (link_renderers[i]==0){
                         this->addLink(i);
                     }
@@ -341,6 +331,7 @@ void ACOsgBrowserRenderer::updateNodes(double ratio) {
                         if ( p!= -1 )
                             link_renderers[i]->setNodeOut(node_renderers[p]);
                     }
+                }
             }
             
         }
@@ -400,7 +391,6 @@ void ACOsgBrowserRenderer::updateNodes(double ratio) {
         //node_renderer->second->setMediaIndex(media_index);
         node_renderer->second->setMedia(media_cycle->getLibrary()->getMedia(media_index));
         node_renderer->second->setFilename(media_cycle_filename);
-        node_renderer->second->setWaveformType(audio_waveform_type);
         // UPDATE
         //std::cout << "Node renderer size " << node_renderers.size() << std::endl;
         node_renderer->second->updateNodes(ratio);
@@ -730,45 +720,7 @@ bool ACOsgBrowserRenderer::addNode(long int _id){//private method
     media_type = media_cycle->getMediaType(_id);
 
     ACOsgMediaRenderer* renderer = 0;
-    /*if(media_cycle->getLibrary()->getMediaType() != MEDIA_TYPE_MIXED || (media_type == MEDIA_TYPE_MIXED||media_type == MEDIA_TYPE_AUDIO) )*/{
-        switch (media_type) {
-        case MEDIA_TYPE_AUDIO:
-#if defined (SUPPORT_AUDIO)
-            renderer = new ACOsgAudioRenderer();
-#endif //defined (SUPPORT_AUDIO)
-            break;
-        case MEDIA_TYPE_IMAGE:
-#if defined (SUPPORT_IMAGE)
-            renderer = new ACOsgImageRenderer();
-#endif //defined (SUPPORT_IMAGE)
-            break;
-        case MEDIA_TYPE_VIDEO:
-#if defined (SUPPORT_VIDEO)
-            renderer = new ACOsgVideoRenderer();
-#endif //defined (SUPPORT_VIDEO)
-            break;
-        case MEDIA_TYPE_3DMODEL:
-#if defined (SUPPORT_3DMODEL)
-            renderer = new ACOsg3DModelRenderer();
-#endif //defined (SUPPORT_3DMODEL)
-            break;
-        case MEDIA_TYPE_TEXT:
-#if defined (SUPPORT_TEXT)
-            renderer = new ACOsgTextRenderer();
-#endif //defined (SUPPORT_TEXT)
-            break;
-        case MEDIA_TYPE_SENSOR:
-#if defined (SUPPORT_SENSOR)
-            renderer = new ACOsgSensorRenderer();
-#endif //defined (SUPPORT_SENSOR)
-            break;
-        case MEDIA_TYPE_MIXED:
-#if defined (SUPPORT_MULTIMEDIA)
-            renderer = new ACOsgMediaDocumentRenderer();
-#endif //defined (SUPPORT_MULTIMEDIA)
-            break;
-        }
-    }
+    renderer = ACOsgRendererFactory::getInstance().createMediaRenderer(media_type);
     if (renderer != 0) {
         renderer->setMediaCycle(media_cycle);
         renderer->setNodeIndex(_id);
@@ -789,7 +741,7 @@ bool ACOsgBrowserRenderer::addNode(long int _id){//private method
         return true;
     }
     else
-        std::cerr << "ACOsgBrowserRenderer::addNode: couldn't create a renderer for id "<< _id << " media type unsupported" << std::endl;
+        std::cerr << "ACOsgBrowserRenderer::addNode: couldn't create a renderer for id "<< _id << ", media type unsupported" << std::endl;
     return false;
 }
 
@@ -906,7 +858,7 @@ bool ACOsgBrowserRenderer::removeLabels(int _first, int _last){
 }
 
 bool ACOsgBrowserRenderer::addLabels(int _first, int _last){
-    bool ok = false;
+    bool ok = true;
     if (_first < 0 || _last < _first){
         cerr << "<ACOsgBrowserRenderer::addLabels> : wrong index / out of bounds : " << _first << " - " << _last  << endl;
         ok = false;
@@ -925,19 +877,11 @@ bool ACOsgBrowserRenderer::addLabels(int _first, int _last){
                 label_renderer[i]->prepareNodes();
                 label_group->addChild(label_renderer[i]->getNode());
             }
+            else
+                ok = false;
         }
     }
-}
-
-void ACOsgBrowserRenderer::setAudioWaveformType(ACBrowserAudioWaveformType _type){
-    if (audio_waveform_type != _type){
-        this->audio_waveform_type = _type;
-        for(ACOsgMediaRenderers::iterator node_renderer = node_renderers.begin();node_renderer!=node_renderers.end();node_renderer++){
-            if (node_renderer->second->getMediaType() == MEDIA_TYPE_AUDIO)
-                node_renderer->second->updateWaveformType(_type);
-        }
-        //media_cycle->setNeedsDisplay(true); // done by each waveform
-    }
+    return ok;
 }
 
 void ACOsgBrowserRenderer::changeSetting(ACSettingType _setting)

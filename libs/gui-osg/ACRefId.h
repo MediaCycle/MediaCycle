@@ -49,7 +49,7 @@ class ACRefId : public osg::Referenced
 		ACRefId(int oid=-1, std::string name="",int eid=-1) : osg::Referenced(), object_id(oid),object_name(name),element_id(eid){};
 		ACRefId(const ACRefId& src) : osg::Referenced(), object_id(src.object_id),object_name(src.object_name),element_id(src.element_id){};//{object_id = src.object_id;object_name = src.object_name;}
 		~ACRefId() {};
-		ACRefId& operator=(ACRefId &src){this->object_id = src.getRefId();this->object_name = src.getRefName();}
+        ACRefId& operator=(ACRefId &src){this->object_id = src.getRefId();this->object_name = src.getRefName();return *this;}
 		int getRefId(){return object_id;}
 		std::string getRefName(){return object_name;}
 		int getElementId(){return element_id;}

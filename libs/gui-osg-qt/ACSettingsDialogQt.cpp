@@ -168,9 +168,9 @@ bool ACSettingsDialogQt::changeBrowserMode(ACBrowserMode _bm){
 // changes will take effect when we close the settings window
 void ACSettingsDialogQt::comboMediaTypeValueChanged(){
 	string s_media_type = comboMediaType->currentText().toStdString() ;
-	stringToMediaTypeConverter::const_iterator iterm = stringToMediaType.find(s_media_type);
-	if( iterm == stringToMediaType.end() ) {
-		cout << " media type not found : " << s_media_type << endl;
+    ACMediaTypeNames::const_iterator iterm = media_type_names.find(s_media_type);
+    if( iterm == media_type_names.end() ) {
+        cout << " media type not found : " << s_media_type << endl;
 		return;
 	}
 	else {

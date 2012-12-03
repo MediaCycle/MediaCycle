@@ -33,24 +33,35 @@
  */
 
 #include "ACDockWidgetFactoryQt.h"
+#include "ACPluginQt.h"
 
 // XS watch out, here the dock_types start with "MC"
 // BUT the dock's names start with "AC"
 
 ACAbstractDockWidgetQt* ACDockWidgetFactoryQt::createDockWidget(QWidget *parent,std::string dock_type) {
-	if (dock_type == "MCOSC") {return new ACOSCDockWidgetQt(parent);}
-    else if (dock_type == "MCBrowserControlsComplete") {return new ACBrowserControlsCompleteDockWidgetQt(parent);}
+    //if (dock_type == "MCOSC") {return new ACOSCDockWidgetQt(parent);}
+
+    if (dock_type == "MCBrowserControlsComplete") {return new ACBrowserControlsCompleteDockWidgetQt(parent);}
     else if (dock_type == "MCBrowserControlsClusters") {return new ACBrowserControlsClustersDockWidgetQt(parent);}
-	#if defined (SUPPORT_AUDIO)
-	else if (dock_type == "MCAudioControls") {return new ACAudioControlsDockWidgetQt(parent);}
-	#endif //defined (SUPPORT_AUDIO)
-	else if (dock_type == "MCMediaConfig") {return new ACMediaConfigDockWidgetQt(parent);}
-	#if defined (SUPPORT_VIDEO)
-	else if (dock_type == "MCVideoControls") {return new ACVideoControlsDockWidgetQt(parent);}
-	#endif //defined (SUPPORT_VIDEO)
+    else if (dock_type == "MCMediaConfig") {return new ACMediaConfigDockWidgetQt(parent);}
+    else if (dock_type == "MCMediaControls") {return new ACMediaControlsDockWidgetQt(parent);}
 #if defined (SUPPORT_MULTIMEDIA)
-	else if (dock_type == "MCMediaDocumentOption") {return new ACMediaDocumentOptionDockWidgetQt(parent);}
+    else if (dock_type == "MCMediaDocumentOption") {return new ACMediaDocumentOptionDockWidgetQt(parent);}
 #endif //defined (SUPPORT_MULTIMEDIA)
-        else if (dock_type == "MCSegmentationControls") {return new ACSegmentationControlsDockWidgetQt(parent);}
-	else return 0;
+    else if (dock_type == "MCSegmentationControls") {return new ACSegmentationControlsDockWidgetQt(parent);}
+
+    if(this->media_cycle){
+        std::vector<std::string> plugin_names = media_cycle->getPluginManager()->getListOfPlugins();
+        for(std::vector<std::string>::iterator plugin_name = plugin_names.begin(); plugin_name != plugin_names.end(); plugin_name++){
+            ACPluginQt* plugin = dynamic_cast<ACPluginQt*>( media_cycle->getPluginManager()->getPlugin(*plugin_name));
+            if(plugin){
+                if (dock_type == plugin->dockName()){
+                    return plugin->createDock(parent);
+                }
+            }
+        }
+        //media_cycle->getPluginManager()
+
+    }
+    return 0;
 }

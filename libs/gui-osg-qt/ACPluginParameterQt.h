@@ -42,11 +42,14 @@ public:
         :plugin(_plugin),parameter(_parameter){}
 public slots:
     void updateNumberParameter(double _number);
+    void updateNumberParameter(bool _number);
     void updateStringParameter(QString _string);
+    void triggerCallback();
     void resetNumberParameter();
     void resetStringParameter();
 signals:
     void numberParameterChanged(double);
+    void numberParameterChanged(bool);
     void stringParameterChanged(QString);
     void stringParameterIndexChanged(int);
 protected:
