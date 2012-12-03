@@ -33,8 +33,6 @@
  *
  */
 
-#if defined (SUPPORT_SENSOR)
-
 #include "ACOsgSensorRenderer.h"
 #include <ACSensor.h>
 
@@ -188,4 +186,3 @@ void ACOsgSensorRenderer::updateNodes(double ratio) {
 #endif
 
 }
-#endif //defined (SUPPORT_SENSOR)
