@@ -48,37 +48,43 @@ class ACEventListener;
 #endif//(Q_MOC_RUN)
 
 class ACEventListener{
-	
+
 #ifndef Q_MOC_RUN
 protected:
-	boost::asio::io_service service;
-	
+    boost::asio::io_service service;
+
     void loop();
-	boost::thread *t;
-	
+    boost::thread *t;
+
 #endif//(Q_MOC_RUN)
 
 public:
-	ACEventListener();
-	~ACEventListener();
-	ACEventListener(MediaCycle* core);
-	//Slot
-	bool stopped();
-	void testService();
-        virtual void mediaImported(int n,int nTot,int mId){
-		std::cout<<"ACEventListener::mediaImported"<<std::endl;
-	};
-        virtual void libraryCleaned(){std::cout<<"ACEventListener::libraryCleaned"<< std::endl;};
-	virtual void activeFeatChanged(){};
-	virtual void browserModeChanged(ACBrowserMode mode){};
-	virtual void updateDisplayNeeded(){};
+    ACEventListener();
+    ~ACEventListener();
+    ACEventListener(MediaCycle* core);
+    //Slot
+    bool stopped();
+    void testService();
+    virtual void mediaImported(int n,int nTot,int mId){
+        std::cout<<"ACEventListener::mediaImported"<<std::endl;
+    };
+    virtual void pluginProgress(std::string plugin_name,int n,int nTot,int mId){
+        std::cout << "ACEventListener::pluginProgress: plugin '" << plugin_name << "' "<< n << "/" << nTot << " for media of id: " << mId << std::endl;
+    }
+    virtual void libraryCleaned(){std::cout<<"ACEventListener::libraryCleaned"<< std::endl;};
+    virtual void activeFeatChanged(){};
+    virtual void browserModeChanged(ACBrowserMode mode){};
+    virtual void updateDisplayNeeded(){};
+    virtual void pluginLoaded(std::string plugin_name){};
 
-        void s_mediaImported(int n,int nTot,int mId);
-	void s_libraryCleaned();
-	void s_activeFeatChanged();
-	void s_browserModeChanged(ACBrowserMode mode);
-	void s_updateDisplayNeeded();
-	
+    void s_mediaImported(int n,int nTot,int mId);
+    void s_pluginProgress(std::string plugin_name,int n,int nTot,int mId);
+    void s_libraryCleaned();
+    void s_activeFeatChanged();
+    void s_browserModeChanged(ACBrowserMode mode);
+    void s_updateDisplayNeeded();
+    void s_pluginLoaded(std::string plugin_name);
+
 };
 
 #endif //ACEventListener_H

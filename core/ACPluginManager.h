@@ -33,60 +33,10 @@
 #ifndef _ACPLUGINMANAGER_H
 #define	_ACPLUGINMANAGER_H
 
-#include "ACPlugin.h"
-#include "DynamicLibrary.h"
-
-#include <stdlib.h>
-#include <stdio.h>
-#include <iostream>
-#include <string>
-#include <map>
-#include <vector>
+#include "ACPluginLibrary.h"
+#include "ACPluginManager.h"
 
 class MediaCycle;
-
-class ACPluginLibrary {
-public:
-    ACPluginLibrary(DynamicLibrary *aLib);
-    ACPluginLibrary();
-    virtual ~ACPluginLibrary();
-    void setMediaCycle(MediaCycle* _media_cycle);
-    virtual int initialize();
-
-    std::vector<ACPlugin *> getPlugins() {return this->mPlugins;};
-    ACPlugin *getPlugin(int i) {return this->mPlugins[i];};
-    ACPlugin *getPlugin(std::string aPluginName);
-
-    bool removePlugin(std::string aPluginName);
-
-    int getSize() {return this->mPlugins.size();};
-    DynamicLibrary* getLib() { return this->mLib;};
-    void freePlugins();
-    void dump();
-
-    // store library path, e.g. so that you can remove a whole library
-    // in the plugin manager by specifying its path
-    void setLibraryPath(std::string _lpath) {library_path = _lpath;}
-    std::string getLibraryPath(){return library_path;}
-
-    //Plugins factories
-    createPluginFactory* create;
-    destroyPluginFactory* destroy;
-    listPluginFactory* list;
-
-protected:
-    DynamicLibrary *mLib;
-    std::string library_path;
-    std::vector<ACPlugin *> mPlugins;
-    MediaCycle* media_cycle;
-};
-
-class ACDefaultPluginsLibrary : public ACPluginLibrary{
-public:
-    ACDefaultPluginsLibrary();
-    ~ACDefaultPluginsLibrary();
-    virtual int initialize();
-};
 
 template <typename T> 
 class ACAvailablePlugins
@@ -105,60 +55,46 @@ public:
     std::vector<std::string> getName();
     int getSize(ACMediaType MediaType);
     void log();
-
-
 protected:	
     std::map<ACMediaType,std::vector<T *> > mCurrPlugin;
     //	ACPreProcessPlugin* mCurrPreProcessPlugin;
 };
 
-
-
 class ACAvailableFeaturesPlugins:public ACAvailablePlugins<ACFeaturesPlugin>{//TR: this class doesn't allocate memory for plugins. It's just a references container.
 public:
     ACAvailableFeaturesPlugins(std::vector<ACPluginLibrary *> PluginLibrary);
     ACAvailableFeaturesPlugins();
-    //~ACAvailableFeaturesPlugins();
-    /*	int clean();
- int remove(ACPlugin *);
- int remove(ACPluginLibrary *);
- int add(ACPlugin *);
- int add(ACPluginLibrary *);
- int update(std::vector<ACPluginLibrary *> PluginLibrary);
- std::vector<std::string> getName(ACMediaType MediaType);
- int getSize(ACMediaType MediaType);
- void log();*/
-
-    //	std::vector<ACMediaFeatures*> calculate(std::string aFileName, bool _save_timed_feat=false );
     std::vector<ACMediaFeatures*> calculate(ACMediaData* aData, ACMedia* theMedia, bool _save_timed_feat=false);
-
-    // XS check this one !!
-    //ACMediaTimedFeature* getTimedFeatures(ACMedia* theMedia);
-
-
-protected:	
-    //	std::map<ACMediaType,std::vector<ACFeaturesPlugin *> > mCurrFeaturePlugin;
-    //ACPreProcessPlugin* mCurrPreProcessPlugin;
-
 };	
 
 class ACAvailableSegmentPlugins:public ACAvailablePlugins<ACSegmentationPlugin>{//TR: this class doesn't allocate memory for plugins. It's just a references container.
 public:
     ACAvailableSegmentPlugins(std::vector<ACPluginLibrary *> PluginLibrary);
     ACAvailableSegmentPlugins();
-    //~ACAvailableSegmentPlugins();
-    /*	int clean();
- int remove(ACPlugin *);
- int remove(ACPluginLibrary *);
- int add(ACPlugin *);
- int add(ACPluginLibrary *);
- int update(std::vector<ACPluginLibrary *> PluginLibrary);
- std::vector<std::string> getName(ACMediaType MediaType);
- int getSize(ACMediaType MediaType);
- void log();*/
+    std::vector<ACMedia*> segment(ACMediaTimedFeature *ft,ACMedia* theMedia);
+    std::vector<ACMedia*> segment(ACMediaData* aData,ACMedia* theMedia);
+};
 
-    std::vector<ACMedia*>  segment(ACMediaTimedFeature *ft,ACMedia* theMedia);
-    std::vector<ACMedia*>  segment(ACMediaData* aData,ACMedia* theMedia);
+class ACAvailableThumbnailerPlugins:public ACAvailablePlugins<ACThumbnailerPlugin>{//TR: this class doesn't allocate memory for plugins. It's just a references container.
+public:
+    ACAvailableThumbnailerPlugins(std::vector<ACPluginLibrary *> PluginLibrary);
+    ACAvailableThumbnailerPlugins();
+    std::vector<ACMediaThumbnail*> summarize(ACMediaData* aData, ACMedia* theMedia, bool feature_extracted, bool segmentation_done);
+};
+
+
+class ACAvailableMediaReaderPlugins:public ACAvailablePlugins<ACMediaReaderPlugin>{//TR: this class doesn't allocate memory for plugins. It's just a references container.
+public:
+    ACAvailableMediaReaderPlugins(std::vector<ACPluginLibrary *> PluginLibrary);
+    ACAvailableMediaReaderPlugins();
+    std::map<std::string,std::string> getExtensionsFromMediaType(ACMediaType media_type); // returns a map of extensions (key) and plugin names (warning: the last loaded plugin supersedes the others for common extensions)
+};
+
+class ACAvailableMediaRendererPlugins:public ACAvailablePlugins<ACMediaRendererPlugin>{//TR: this class doesn't allocate memory for plugins. It's just a references container.
+public:
+    ACAvailableMediaRendererPlugins(std::vector<ACPluginLibrary *> PluginLibrary);
+    ACAvailableMediaRendererPlugins();
+    bool performActionOnMedia(std::string action, long int mediaId, std::string value="");
 };
 
 /*class ACAvailableClusterMethodPlugins:public ACAvailablePlugins<ACClusterMethodPlugin>{//TR: this class doesn't allocate memory for plugins. It's just a references container.
@@ -200,7 +136,7 @@ public:
     ACPluginManager(const ACPluginManager& orig);
     virtual ~ACPluginManager();
     void setMediaCycle(MediaCycle* _media_cycle);
-    int addLibrary(std::string aPluginLibraryPath);
+    std::vector<std::string> addLibrary(std::string aPluginLibraryPath);
     int removeLibrary(std::string aPluginLibraryPath);
     bool removePluginFromLibrary(std::string _plugin_name, std::string _library_path);
     std::vector<std::string> getListOfPlugins();
@@ -208,11 +144,11 @@ public:
     int clean();
     void dump();
 
-    std::vector<ACPluginLibrary *> getPluginLibrary() { return this->mPluginLibrary;};
-    ACPluginLibrary *getPluginLibrary(int i) { return this->mPluginLibrary[i];};
+    std::vector<ACPluginLibrary *> getPluginLibrary() { return this->mPluginLibrary;}
+    ACPluginLibrary *getPluginLibrary(int i) { return this->mPluginLibrary[i];}
     ACPluginLibrary *getPluginLibrary(std::string _lpath) ;
     
-    int getSize() { return this->mPluginLibrary.size();};
+    int getSize() { return this->mPluginLibrary.size();}
     ACPlugin *getPlugin(std::string aPluginName);
 
     ACAvailableFeaturesPlugins *getAvailableFeaturesPlugins(){return this->mAvailableFeaturePlugins;}// returns a container with available feature plugins reference
@@ -222,16 +158,30 @@ public:
     std::vector<std::string> getActiveSegmentPluginsNames(ACMediaType MediaType);
     bool setActiveSegmentPlugin(std::string name);
 
+    ACAvailableThumbnailerPlugins *getAvailableThumbnailerPlugins(){return this->mAvailableThumbnailerPlugins;}// returns a container with available thumbnailer plugins reference
+    ACAvailableMediaReaderPlugins *getAvailableMediaReaderPlugins(){return this->mAvailableMediaReaderPlugins;}// returns a container with available thumbnailer plugins reference
+    ACAvailableMediaRendererPlugins *getAvailableMediaRendererPlugins(){return this->mAvailableMediaRendererPlugins;}// returns a container with available thumbnailer plugins reference
+
     int getAvailablePluginsSize(ACPluginType PluginType, ACMediaType MediaType);
     std::vector<std::string> getAvailablePluginsNames(ACPluginType PluginType, ACMediaType MediaType);
 
     ACPreProcessPlugin* getPreProcessPlugin(ACMediaType MediaType);
+
+protected:
+    void cleanPluginLists();
+    void updateAvailablePluginLists(ACPluginLibrary *acpl);
+    void addLibraryToPluginLists(ACPluginLibrary *acpl);
+    void removeLibraryFromPluginLists(ACPluginLibrary *acpl);
+    void updateActivePluginLists();
 
 private:
     std::vector<ACPluginLibrary *> mPluginLibrary;	
     ACAvailableFeaturesPlugins* mAvailableFeaturePlugins;
     ACAvailableSegmentPlugins* mAvailableSegmentPlugins;
     ACAvailableSegmentPlugins* mActiveSegmentPlugins;
+    ACAvailableThumbnailerPlugins* mAvailableThumbnailerPlugins;
+    ACAvailableMediaReaderPlugins* mAvailableMediaReaderPlugins;
+    ACAvailableMediaRendererPlugins* mAvailableMediaRendererPlugins;
     MediaCycle* media_cycle;
 };
 

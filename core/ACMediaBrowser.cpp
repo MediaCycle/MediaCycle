@@ -421,6 +421,17 @@ void ACMediaBrowser::unselectNodes(){
     mSelectedNodes.clear();
 }
 
+int ACMediaBrowser::getClosestNode(int p_index)
+{
+    int closestNode = -1;
+    ACPointer* pointer = getPointerFromIndex(p_index);
+    if(pointer)
+        closestNode = pointer->getClosestNode();
+    else
+        std::cerr << "ACMediaBrowser::getClosestNode: couldn't access pointer of index " << p_index << std::endl;
+    return closestNode;
+}
+
 void ACMediaBrowser::setClickedLabel(int ilabel){
     if (ilabel < -1 || ilabel >= this->getNumberOfLabels())
         cerr << "<ACMediaBrowser::setClickedLabel> : index " << ilabel << "out of bounds" << endl;
@@ -585,11 +596,19 @@ void ACMediaBrowser::hoverWithPointerId(float mxx, float myy, int p_id)
 }
 
 void ACMediaBrowser::setSourceCursor(int lid, int frame_pos) {
-    this->getMediaNode(lid)->setCursor(frame_pos);
+    ACMediaNode* media_node = this->getMediaNode(lid);
+    if(media_node)
+        media_node->setCursor(frame_pos);
+    else
+        std::cerr << "ACMediaBrowser::setSourceCursor: couldn't access node " << lid << std::endl;
 }
 
 void ACMediaBrowser::setCurrentFrame(int lid, int frame_pos) {
-    this->getMediaNode(lid)->setCurrentFrame(frame_pos);
+    ACMediaNode* media_node = this->getMediaNode(lid);
+    if(media_node)
+        media_node->setCurrentFrame(frame_pos);
+    else
+        std::cerr << "ACMediaBrowser::setCurrentFrame: couldn't access node " << lid << std::endl;
 }
 
 void ACMediaBrowser::randomizeNodePositions(){
@@ -1855,6 +1874,31 @@ void ACMediaBrowser::switchMode(ACBrowserMode _mode){
     }
 }
 
+void ACMediaBrowser::setClustersMethodPlugin(ACPlugin* acpl)
+{
+    mClustersMethodPlugin=dynamic_cast<ACClusterMethodPlugin*> (acpl);
+}
+
+void ACMediaBrowser::setNeighborsMethodPlugin(ACPlugin* acpl)
+{
+    mNeighborsMethodPlugin=dynamic_cast<ACNeighborMethodPlugin*> (acpl);
+}
+
+void ACMediaBrowser::setClustersPositionsPlugin(ACPlugin* acpl)
+{
+    mClustersPosPlugin=dynamic_cast<ACClusterPositionsPlugin*> (acpl);
+}
+
+void ACMediaBrowser::setNeighborsPositionsPlugin(ACPlugin* acpl)
+{
+    mNeighborsPosPlugin=dynamic_cast<ACNeighborPositionsPlugin*> (acpl);
+}
+
+void ACMediaBrowser::setVisualisationPlugin(ACPlugin* acpl)
+{
+    mNoMethodPosPlugin=dynamic_cast<ACNoMethodPositionsPlugin*> (acpl);
+}
+
 bool ACMediaBrowser::changeClustersMethodPlugin(ACPlugin* acpl)
 {
     this->removeAllLabels();
@@ -2040,7 +2084,7 @@ std::string ACMediaBrowser::getActivePluginName(ACPluginType PluginType){
             name = mNeighborsPosPlugin->getName();
         break;
     default:
-        cerr << "plugin type not used for the browser" << endl;
+        //cerr << "plugin type not used for the browser" << endl;
         break;
     }
     return name;

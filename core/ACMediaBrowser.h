@@ -204,7 +204,7 @@ public:
     void dumpSelectedNodes();
     set<int>& getSelectedNodes(){return mSelectedNodes;}
     void unselectNodes();
-    int getClosestNode(int p_index = 0) {return getPointerFromIndex(p_index)->getClosestNode(); };
+    int getClosestNode(int p_index = 0);
     int	getLastSelectedNode(){return mLastSelectedNode;}
     void setReferenceNode(int index);
     int getReferenceNode(){return mReferenceNode;}
@@ -278,17 +278,22 @@ public:
     void removeAllLabels();
     void displayAllLabels(bool isDisplayed);
 
-    const vector<ACLabel> &getLabelAttributes() const { return mLabelAttributes; };
+    const vector<ACLabel> &getLabelAttributes() const { return mLabelAttributes; }
     void setLabelPosition(int node_id, float x, float y, float z=0);
     int getNumberOfDisplayedLabels();
     void setNumberOfDisplayedLabels(int nd);
     int getNumberOfLabels(){return mLabelAttributes.size();}
 
-    void setClustersMethodPlugin(ACPlugin* acpl){mClustersMethodPlugin=dynamic_cast<ACClusterMethodPlugin*> (acpl) ;}
-    void setNeighborsMethodPlugin(ACPlugin* acpl){mNeighborsMethodPlugin=dynamic_cast<ACNeighborMethodPlugin*> (acpl);}
-    void setClustersPositionsPlugin(ACPlugin* acpl){mClustersPosPlugin=dynamic_cast<ACClusterPositionsPlugin*> (acpl);}
-    void setNeighborsPositionsPlugin(ACPlugin* acpl){mNeighborsPosPlugin=dynamic_cast<ACNeighborPositionsPlugin*> (acpl);}
-    void setVisualisationPlugin(ACPlugin* acpl){mNoMethodPosPlugin=dynamic_cast<ACNoMethodPositionsPlugin*> (acpl);}
+    void setClustersMethodPlugin(ACPlugin* acpl);
+    void setNeighborsMethodPlugin(ACPlugin* acpl);
+    void setClustersPositionsPlugin(ACPlugin* acpl);
+    void setNeighborsPositionsPlugin(ACPlugin* acpl);
+    void setVisualisationPlugin(ACPlugin* acpl);
+
+    ACClusterMethodPlugin* getClustersMethodPlugin(){return mClustersMethodPlugin;}
+    ACNeighborMethodPlugin* getNeighborsMethodPlugin(){return mNeighborsMethodPlugin;}
+    ACClusterPositionsPlugin* getClustersPositionsPlugin(){return mClustersPosPlugin;}
+    ACNeighborPositionsPlugin* getNeighborsPositionsPlugin(){return mNeighborsPosPlugin;}
 
     std::string getActivePluginName(ACPluginType PluginType);
 

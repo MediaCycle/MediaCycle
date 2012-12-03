@@ -41,7 +41,7 @@
 #include <boost/filesystem.hpp>
 #include "ACMediaFactory.h"
 
-#include "MCMultiMediaXmlReader.h"
+//#include "MCMultiMediaXmlReader.h"
 
 using namespace std;
 
@@ -59,7 +59,6 @@ ACMediaDocument::ACMediaDocument() : ACMedia() {
 }
 
 int ACMediaDocument::import(std::string _filename, int _mid, ACPluginManager *acpl, bool _save_timed_feat){
-	activableMediaKey.clear();
 	filename=_filename;	
 	if (_mid>=0) this->setId(_mid);
 	string extension = boost::filesystem::extension(filename);
@@ -67,7 +66,7 @@ int ACMediaDocument::import(std::string _filename, int _mid, ACPluginManager *ac
 
 	if (extension==string(".xml")){
 		//read the xml file. We begin with the Mediacycle xml style
-		MCMultiMediaXmlReader* xmlDoc=new MCMultiMediaXmlReader(filename);
+        /*MCMultiMediaXmlReader* xmlDoc=new MCMultiMediaXmlReader(filename);
 		if (xmlDoc->isMCMultiMediaXml()){
 				
 			label=xmlDoc->getLabel();
@@ -111,7 +110,7 @@ int ACMediaDocument::import(std::string _filename, int _mid, ACPluginManager *ac
 			}
 		else {
 			
-		}
+        }*/
 
 	}
 	else {
@@ -122,7 +121,7 @@ int ACMediaDocument::import(std::string _filename, int _mid, ACPluginManager *ac
 		else {
 			if (fileMediaType==MEDIA_TYPE_PDF){}
 				//create a container with a text media and some image media
-		}
+        }
 
 	}
 	if (_mid>=0) this->setId(_mid);
@@ -160,7 +159,7 @@ void ACMediaDocument::cleanPreProcFeaturesVector(void){
 
 void ACMediaDocument::init() {
 	media_type = MEDIA_TYPE_MIXED;
-	thumbnail = 0;
+    //thumbnail = 0;
 	thumbnail_width = 0;
 	thumbnail_height = 0;
 }	
@@ -186,10 +185,10 @@ bool ACMediaDocument::computeThumbnail(string _fname, int w, int h){
 }
 
 
-bool ACMediaDocument::computeThumbnail(IplImage* img, int w, int h){
+/*bool ACMediaDocument::computeThumbnail(IplImage* img, int w, int h){
 	bool ok = true;
 	return ok;
-}
+}*/
 
 bool ACMediaDocument::computeThumbnailSize(int w_, int h_){
 	bool ok = true;

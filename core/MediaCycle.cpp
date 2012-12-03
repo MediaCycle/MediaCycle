@@ -40,9 +40,7 @@
 #include<ACMediaDocument.h>
 #endif
 
-#include "boost/filesystem.hpp"   // includes all needed Boost.Filesystem declarations
-//#include "boost/filesystem/operations.hpp"
-//#include "boost/filesystem/path.hpp"
+#include "boost/filesystem.hpp"
 namespace fs = boost::filesystem;
 
 #include <fstream>
@@ -67,13 +65,16 @@ MediaCycle::MediaCycle(ACMediaType aMediaType, string local_directory, string li
 
     this->pluginManager = new ACPluginManager();
     this->pluginManager->setMediaCycle(this);
-    this->mediaBrowser->changeClustersMethodPlugin( this->pluginManager->getPlugin("MediaCycle KMeans") );
-    this->mediaBrowser->changeClustersPositionsPlugin( this->pluginManager->getPlugin("MediaCycle Propeller") );
+    ACMediaFactory::getInstance().setPluginManager(pluginManager);
+    this->changeActivePlugin(PLUGIN_TYPE_CLUSTERS_METHOD,"MediaCycle KMeans");
+    this->changeActivePlugin(PLUGIN_TYPE_CLUSTERS_POSITIONS,"MediaCycle Propeller");
 
     this->config_file_xml = "";
+    this->current_config = "";
 
     this->prevLibrarySize = 0;
     this->eventManager=new ACEventManager;
+    this->pluginEventListener = new ACEventListener;
 
     // when importing files:
     // 1) the library creates a media
@@ -90,9 +91,15 @@ MediaCycle::~MediaCycle() {
     this->mediaLibrary = 0;
     delete this->mediaBrowser;
     this->mediaBrowser = 0;
+    this->pluginManager->clean();
     delete this->pluginManager;
     this->pluginManager = 0;
     stopTcpServer(); // will delete this->networkSocket;
+    for(std::map<std::string,ACAbstractDefaultConfig*>::iterator default_config = default_configs.begin(); default_config != default_configs.end();++default_config){
+        delete default_config->second;
+        default_config->second = 0;
+    }
+    default_configs.clear();
 }
 
 void MediaCycle::clean(){
@@ -114,10 +121,111 @@ void MediaCycle::clean(){
 
     this->mediaLibrary->cleanLibrary();
     this->mediaBrowser->clean();
-    this->pluginManager->clean();
+    //this->pluginManager->clean();
     this->pluginManager->setMediaCycle(this);
-    this->mediaBrowser->changeClustersMethodPlugin( this->pluginManager->getPlugin("MediaCycle KMeans") );
-    this->mediaBrowser->changeClustersPositionsPlugin( this->pluginManager->getPlugin("MediaCycle Propeller") );
+    this->changeActivePlugin(PLUGIN_TYPE_CLUSTERS_METHOD,"MediaCycle KMeans");
+    this->changeActivePlugin(PLUGIN_TYPE_CLUSTERS_POSITIONS,"MediaCycle Propeller");
+}
+
+// == Default configs
+ACAbstractDefaultConfig* MediaCycle::getDefaultConfig(std::string name){
+    ACAbstractDefaultConfig* config = default_configs[name];
+    return config;
+}
+
+std::map<std::string,ACAbstractDefaultConfig*> MediaCycle::getDefaultConfigs(){
+    return default_configs;
+}
+
+std::vector<std::string> MediaCycle::getDefaultConfigsNames(){
+    std::vector<std::string> config_names;
+    for(std::map<std::string,ACAbstractDefaultConfig*>::iterator default_config = default_configs.begin(); default_config != default_configs.end();++default_config)
+        config_names.push_back(default_config->first);
+    return config_names;
+}
+
+bool MediaCycle::addDefaultConfig(ACAbstractDefaultConfig* _config){
+    if(!_config){
+        std::cerr << "MediaCycle::addDefaultConfig: config not instanciated" << std::endl;
+        return false;
+    }
+    if(default_configs.find(_config->name())!=default_configs.end())
+    {
+        //std::cout << "MediaCycle::addDefaultConfig: config with exact same name already present" << std::endl;
+        return true;
+    }
+    default_configs[_config->name()] = _config;
+    return true;
+}
+
+int MediaCycle::getDefaultConfigsNumber(){
+    return default_configs.size();
+}
+
+void MediaCycle::loadDefaultConfig(std::string name){
+    ACAbstractDefaultConfig* config = this->getDefaultConfig(name);
+    if(!config){
+        throw runtime_error("Config '" + name + "' not available");
+    }
+    if(!this->addDefaultConfig(config)){
+        throw runtime_error("Couldn't add config named '" + name + "'");
+    }
+    if(this->current_config == name){
+        throw runtime_error("Current config already of the same name '" + name + "', not loading");
+    }
+
+    if(current_config!="")
+        this->clean();
+
+    if(this->getMediaType() != config->mediaType())
+        this->changeMediaType(config->mediaType());
+    if(this->getBrowserMode() != config->browserMode())
+        this->changeBrowserMode(config->browserMode());
+
+    this->current_config = name;
+
+    std::vector<std::string> plugins = config->pluginLibraries();
+    for(std::vector<std::string>::iterator plugin = plugins.begin();plugin != plugins.end();++plugin){
+        std::string path = this->getPluginPathFromBaseName(*plugin);
+        if(path == ""){
+            //std::cerr << "Couldn't load plugin library " << *plugin << std::endl;
+            //break;
+            throw runtime_error("Couldn't load plugin library '" + *plugin + "'");
+        }
+
+        int n_elements = this->addPluginLibrary(path);
+        if( n_elements <= 0){
+            throw runtime_error("Couldn't load any plugin from library '" + *plugin + "' from path '" + path + "'.");
+        }
+    }
+
+    if(config->clustersMethodPlugin() != "")
+        this->changeActivePlugin(PLUGIN_TYPE_CLUSTERS_METHOD,config->clustersMethodPlugin());
+    if(config->clustersPositionsPlugin() != "")
+        this->changeActivePlugin(PLUGIN_TYPE_CLUSTERS_POSITIONS,config->clustersPositionsPlugin());
+    if(config->neighborsMethodPlugin() != "")
+        this->changeActivePlugin(PLUGIN_TYPE_NEIGHBORS_METHOD,config->neighborsMethodPlugin());
+    if(config->neighborsPositionsPlugin() != "")
+        this->changeActivePlugin(PLUGIN_TYPE_NEIGHBORS_POSITIONS,config->neighborsPositionsPlugin());
+}
+
+ACAbstractDefaultConfig* MediaCycle::getCurrentConfig(){
+    ACAbstractDefaultConfig* config(0);
+    if(this->current_config != "")
+        config = this->getDefaultConfig(this->current_config);
+    else
+        std::cerr << "MediaCycle::getCurrentConfig: no current config set" << std::endl;
+    return config;
+}
+
+std::string MediaCycle::getCurrentConfigName(){
+    std::string name("");
+    ACAbstractDefaultConfig* config = this->getCurrentConfig();
+    if(config)
+        name = config->name();
+    else
+        std::cerr << "MediaCycle::getCurrentConfigName: couldn't access curent config" << std::endl;
+    return name;
 }
 
 // == TCP
@@ -346,7 +454,7 @@ int MediaCycle::importDirectories(vector<string> directories, int recursive, boo
                 eventManager->sig_mediaImported(i+1,n,*media_id);
             }
 
-/*#if defined (SUPPORT_MULTIMEDIA)
+            /*#if defined (SUPPORT_MULTIMEDIA)
             if (this->getMediaType()==MEDIA_TYPE_MIXED){
                 ACMedia* media =  mediaLibrary->getMedia(media_id);
                 ACMediaContainer medias = (static_cast<ACMediaDocument*> (media))->getContainer();
@@ -360,7 +468,7 @@ int MediaCycle::importDirectories(vector<string> directories, int recursive, boo
             libraryContentChanged(needsNormalizeAndCluster); // exclusively mediabrowser, thus updateAfterFileImport and importDirectories can't be move to ACMediaLibrary
             //mediaBrowser->setNeedsNavigationUpdateLock(0);
             // this initiates node rendering, must be done after creating a media in the library and a node in the browser
-            }
+        }
     }
     n = mediaLibrary->getSize(); // segmentation might have increased the number of medias in the library
     eventManager->sig_mediaImported(n,n,-1);
@@ -398,11 +506,32 @@ int MediaCycle::setPath(string path) {
     return ok;
 }
 
-void MediaCycle::libraryContentChanged(int needsNormalizeAndCluster) { mediaBrowser->libraryContentChanged(needsNormalizeAndCluster); }
-void MediaCycle::saveACLLibrary(string path) {mediaLibrary->saveACLLibrary(path); }
-void MediaCycle::saveXMLLibrary(string path) {mediaLibrary->saveXMLLibrary(path); }
-void MediaCycle::saveMCSLLibrary(string path) {mediaLibrary->saveMCSLLibrary(path); }
-void MediaCycle::cleanLibrary() { prevLibrarySize=0; eventManager->sig_libraryCleaned();mediaLibrary->cleanLibrary(); }
+void MediaCycle::libraryContentChanged(int needsNormalizeAndCluster)
+{
+    mediaBrowser->libraryContentChanged(needsNormalizeAndCluster);
+}
+
+void MediaCycle::saveACLLibrary(string path)
+{
+    mediaLibrary->saveACLLibrary(path);
+}
+
+void MediaCycle::saveXMLLibrary(string path)
+{
+    mediaLibrary->saveXMLLibrary(path);
+}
+
+void MediaCycle::saveMCSLLibrary(string path)
+{
+    mediaLibrary->saveMCSLLibrary(path);
+}
+
+void MediaCycle::cleanLibrary()
+{
+    prevLibrarySize=0;
+    eventManager->sig_libraryCleaned();
+    mediaLibrary->cleanLibrary();
+}
 
 int MediaCycle::importACLLibrary(string path) {
     // XS import = open + normalize
@@ -499,11 +628,29 @@ void MediaCycle::addListener(ACEventListener* eventListener){
 
 
 // Plugins
+int MediaCycle::loadPluginLibraryFromBasename(std::string basename){
+    std::string plugin = this->getPluginPathFromBaseName(basename);
+    int n_elements = this->addPluginLibrary(plugin);
+    if( n_elements == -1){
+        std::cerr << "MediaCycle::loadPluginLibraryFromBasename: couldn't load library of basename " << basename << std::endl;
+    }
+    return n_elements;
+}
+
 int MediaCycle::addPluginLibrary(string aPluginLibraryPath) {
-    return this->pluginManager->addLibrary(aPluginLibraryPath);
+    std::vector<std::string> plugins_names = this->pluginManager->addLibrary(aPluginLibraryPath);
+    for(std::vector<std::string>::iterator plugin_name = plugins_names.begin();plugin_name!=plugins_names.end();plugin_name++){
+        eventManager->sig_pluginLoaded(*plugin_name);
+    }
+    return plugins_names.size();
 }
 
 int MediaCycle::removePluginLibrary(string aPluginLibraryPath) {
+    return this->pluginManager->removeLibrary(aPluginLibraryPath);
+}
+
+int MediaCycle::removePluginLibraryFromBasename(std::string basename) {
+    std::string aPluginLibraryPath = this->getPluginPathFromBaseName(basename);
     return this->pluginManager->removeLibrary(aPluginLibraryPath);
 }
 
@@ -523,57 +670,97 @@ std::vector<std::string> MediaCycle::getListOfActivePlugins(){
     return this->mediaLibrary->getListOfActivePlugins();
 }
 
-void MediaCycle::setClustersMethodPlugin(string pluginName){
-    ACPlugin* clustersPlugin = this->getPluginManager()->getPlugin(pluginName);
-    this->getBrowser()->setClustersMethodPlugin(clustersPlugin);
+bool MediaCycle::changeActivePlugin(ACPluginType pluginType, std::string pluginName)
+{
+    bool ok = false;
+    ACPlugin* plugin = this->getPluginManager()->getPlugin(pluginName);
+    if(!plugin){
+        std::cerr <<"MediaCycle::changePlugin: couldn't find plugin " << pluginName << std::endl;
+        return false;
+    }
+    if(plugin->implementsPluginType(PLUGIN_TYPE_CLUSTERS_METHOD)){
+        this->getBrowser()->changeClustersMethodPlugin(plugin);
+        ok = true;
+    }
+    if(plugin->implementsPluginType(PLUGIN_TYPE_CLUSTERS_POSITIONS)){
+        this->getBrowser()->changeClustersPositionsPlugin(plugin);
+        ok = true;
+    }
+    if(plugin->implementsPluginType(PLUGIN_TYPE_NEIGHBORS_METHOD)){
+        this->getBrowser()->changeNeighborsMethodPlugin(plugin);
+        ok = true;
+    }
+    if(plugin->implementsPluginType(PLUGIN_TYPE_NEIGHBORS_POSITIONS)){
+        this->getBrowser()->changeNeighborsPositionsPlugin(plugin);
+        ok = true;
+    }
+    if(plugin->implementsPluginType(PLUGIN_TYPE_SEGMENTATION)){
+        this->getPluginManager()->setActiveSegmentPlugin(pluginName);
+        ok = true;
+    }
+    return ok;
 }
 
-void MediaCycle::setNeighborsMethodPlugin(string pluginName){
-    ACPlugin* neighborsPlugin = this->getPluginManager()->getPlugin(pluginName);
-    this->getBrowser()->setNeighborsMethodPlugin(neighborsPlugin);
+std::vector<std::string> MediaCycle::getActivePluginNames(ACPluginType pluginType,ACMediaType mediaType){
+    std::vector<std::string> names;
+    if(!this->getPluginManager()){
+        std::cerr << "MediaCycle::getActivePluginNames: no plugin manager" << std::endl;
+        return names;
+    }
+    if(!this->getBrowser()){
+        std::cerr << "MediaCycle::getActivePluginNames: no browser" << std::endl;
+        return names;
+    }
+    ACPlugin* plugin(0);
+    if(mediaType == MEDIA_TYPE_NONE)
+        mediaType = this->getMediaType();
+    switch ( pluginType ){
+    case PLUGIN_TYPE_CLUSTERS_METHOD:
+        plugin = this->getBrowser()->getClustersMethodPlugin();
+        break;
+    case PLUGIN_TYPE_CLUSTERS_POSITIONS:
+        plugin = this->getBrowser()->getClustersPositionsPlugin();
+        break;
+    case PLUGIN_TYPE_NEIGHBORS_METHOD:
+        plugin = this->getBrowser()->getNeighborsMethodPlugin();
+        break;
+    case PLUGIN_TYPE_NEIGHBORS_POSITIONS:
+        plugin = this->getBrowser()->getNeighborsPositionsPlugin();
+        break;
+    case PLUGIN_TYPE_SEGMENTATION:
+        names = this->getPluginManager()->getActiveSegmentPluginsNames(mediaType);
+        break;
+    case PLUGIN_TYPE_FEATURES:
+        names = this->getPluginManager()->getAvailablePluginsNames(pluginType,mediaType); // might change with future active features
+        break;
+    case PLUGIN_TYPE_MEDIAREADER:
+        names = this->getPluginManager()->getAvailablePluginsNames(pluginType,mediaType);
+        break;
+    case PLUGIN_TYPE_MEDIARENDERER:
+        names = this->getPluginManager()->getAvailablePluginsNames(pluginType,mediaType);
+        break;
+    default:
+        names = this->getPluginManager()->getAvailablePluginsNames(pluginType,mediaType);
+        break;
+    }
+    if(plugin){
+        names.push_back(plugin->getName());
+    }
+    return names;
 }
 
-void MediaCycle::setClustersPositionsPlugin(string pluginName){
-    ACPlugin* clustersPlugin = this->getPluginManager()->getPlugin(pluginName);
-    this->getBrowser()->setClustersPositionsPlugin(clustersPlugin);
+std::vector<std::string> MediaCycle::getAvailablePluginNames(ACPluginType pluginType,ACMediaType mediaType){
+    std::vector<std::string> names;
+    if(!this->getPluginManager()){
+        std::cerr << "MediaCycle::getAvailablePluginNames: no plugin manager" << std::endl;
+        return names;
+    }
+    if(!this->getBrowser()){
+        std::cerr << "MediaCycle::getAvailablePluginNames: no browser" << std::endl;
+        return names;
+    }
+    return this->getPluginManager()->getAvailablePluginsNames(pluginType,mediaType);
 }
-
-void MediaCycle::setNeighborsPositionsPlugin(string pluginName){
-    ACPlugin* neighborsPlugin = this->getPluginManager()->getPlugin(pluginName);
-    this->getBrowser()->setNeighborsPositionsPlugin(neighborsPlugin);
-}
-
-void MediaCycle::setVisualisationPlugin(string pluginName){
-    ACPlugin* visPlugin = this->getPluginManager()->getPlugin(pluginName);
-    this->getBrowser()->setVisualisationPlugin(visPlugin);
-}
-
-void MediaCycle::changeClustersMethodPlugin(string pluginName){
-    ACPlugin* clustersPlugin = this->getPluginManager()->getPlugin(pluginName);
-    this->getBrowser()->changeClustersMethodPlugin(clustersPlugin);
-}
-
-void MediaCycle::changeNeighborsMethodPlugin(string pluginName){
-    ACPlugin* neighborsPlugin = this->getPluginManager()->getPlugin(pluginName);
-    this->getBrowser()->changeNeighborsMethodPlugin(neighborsPlugin);
-}
-
-void MediaCycle::changeClustersPositionsPlugin(string pluginName){
-    ACPlugin* clustersPlugin = this->getPluginManager()->getPlugin(pluginName);
-    this->getBrowser()->changeClustersPositionsPlugin(clustersPlugin);
-}
-
-void MediaCycle::changeNeighborsPositionsPlugin(string pluginName){
-    ACPlugin* neighborsPlugin = this->getPluginManager()->getPlugin(pluginName);
-    this->getBrowser()->changeNeighborsPositionsPlugin(neighborsPlugin);
-}
-/*
-void MediaCycle::changeVisualisationPlugin(string pluginName){
- ACPlugin* visPlugin = this->getPluginManager()->getPlugin(pluginName);
- this->getBrowser()->changeVisualisationPlugin(visPlugin);
-}
-*/
-
 
 void MediaCycle::setPreProcessPlugin(std::string pluginName){
     ACPlugin* preProcessPlugin = this->getPluginManager()->getPlugin(pluginName);
@@ -629,7 +816,8 @@ bool MediaCycle::changeMediaType(ACMediaType aMediaType) {
         // nothing to change
         changeMe = false;
     else{
-        this->clean();
+        if(this->getMediaType()!=MEDIA_TYPE_NONE)
+            this->clean();
         this->mediaLibrary->changeMediaType(aMediaType);
         this->setMediaType(aMediaType);
     }
@@ -641,7 +829,7 @@ int MediaCycle::getThumbnailWidth(int i) { return mediaLibrary->getMedia(i)->get
 int MediaCycle::getThumbnailHeight(int i) { return mediaLibrary->getMedia(i)->getThumbnailHeight(); }
 int MediaCycle::getWidth(int i) { return mediaLibrary->getMedia(i)->getWidth(); }
 int MediaCycle::getHeight(int i) { return mediaLibrary->getMedia(i)->getHeight(); }
-void* MediaCycle::getThumbnailPtr(int i) { return mediaLibrary->getMedia(i)->getThumbnailPtr(); }
+//void* MediaCycle::getThumbnailPtr(int i) { return mediaLibrary->getMedia(i)->getThumbnailPtr(); }
 int MediaCycle::getNeedsDisplay() {	return mediaBrowser->getNeedsDisplay(); }
 void MediaCycle::setNeedsDisplay(bool _dis) {
     if (mediaBrowser) {
@@ -791,7 +979,8 @@ vector<int>* MediaCycle::getNeedsActivityUpdateMedia() {
 // == callbacks
 
 void MediaCycle::pickedObjectCallback(int _mediaId) {
-    std::cout << "MediaCycle::pickedObjectCallback node id " << _mediaId <<" cluster id "<<mediaBrowser->getMediaNode(_mediaId)->getClusterId() <<"tagged Class:"<< mediaLibrary->getMediaTaggedClassId(_mediaId)<<" file " << this->getMediaFileName( _mediaId ) << std::endl;
+    std::cout << "MediaCycle::pickedObjectCallback node id " << _mediaId <<" cluster id "<<mediaBrowser->getMediaNode(_mediaId)->getClusterId() << std::endl;
+    std::cout << "MediaCycle::pickedObjectCallback: tagged Class:"<< mediaLibrary->getMediaTaggedClassId(_mediaId)<<" file " << this->getMediaFileName( _mediaId ) << std::endl;
     if(_mediaId < 0) {
         // clicked close to a node
         if (getNumberOfPointers() > 0)
@@ -815,6 +1004,14 @@ void MediaCycle::hoverWithPointerId(float xx, float yy, int p_id) {
 void MediaCycle::hoverWithPointerIndex(float xx, float yy, int p_index) {
     if (this->mediaBrowser)
         mediaBrowser->hoverWithPointerIndex(xx, yy, p_index);
+}
+
+bool MediaCycle::performActionOnMedia(std::string action, long int mediaId, std::string value){
+    if(!pluginManager){
+        std::cerr << "MediaCycle::performActionOnMedia: plugin manager not set" << std::endl;
+        return false;
+    }
+    return pluginManager->getAvailableMediaRendererPlugins()->performActionOnMedia(action,mediaId,value);
 }
 
 void MediaCycle::updateDisplay(bool _animate) {
@@ -1000,7 +1197,6 @@ int MediaCycle::readXMLConfigFileCore(TiXmlHandle _rootHandle) {
     for (int newId=beginIndex+1;newId<=lastIndex;newId++){
         eventManager->sig_mediaImported(this->mediaLibrary->getNumberOfFilesProcessed(),this->mediaLibrary->getNumberOfFilesToImport(),newId);
     }
-    
 
     n = this->mediaLibrary->getSize(); // segmentation might have increased the number of medias in the library
     eventManager->sig_mediaImported(n,n,-1);
@@ -1008,7 +1204,7 @@ int MediaCycle::readXMLConfigFileCore(TiXmlHandle _rootHandle) {
 
 // XS TODO return value, tests
 int MediaCycle::readXMLConfigFilePlugins(TiXmlHandle _rootHandle) {
-    if (!this->pluginManager) this->pluginManager = new ACPluginManager();
+    //if (!this->pluginManager) this->pluginManager = new ACPluginManager();
     this->pluginManager->setMediaCycle(this);
 
     TiXmlElement* MC_e_features_plugin_manager = _rootHandle.FirstChild("PluginsManager").ToElement();
@@ -1026,8 +1222,11 @@ int MediaCycle::readXMLConfigFilePlugins(TiXmlHandle _rootHandle) {
             string libraryName = pluginLibraryNode->Attribute("LibraryPath");
             int lib_size=0;
             pluginLibraryNode->QueryIntAttribute("NumberOfPlugins", &lib_size);
-            if(this->pluginManager->addLibrary(libraryName) == -1){
-                this->pluginManager->addLibrary( this->getPluginPathFromBaseName(fs::basename(libraryName)) );
+            std::vector<std::string> plugins_names = this->pluginManager->addLibrary(libraryName);
+            if(plugins_names.size() == 0)
+                plugins_names = this->pluginManager->addLibrary( this->getPluginPathFromBaseName(fs::basename(libraryName)));
+            for(std::vector<std::string>::iterator plugin_name = plugins_names.begin();plugin_name!=plugins_names.end();plugin_name++){
+                eventManager->sig_pluginLoaded(*plugin_name);
             }
         }
 
@@ -1060,11 +1259,28 @@ int MediaCycle::readXMLConfigFile(string _fname) {
 
 std::string MediaCycle::getPluginPathFromBaseName(std::string basename)
 {
+
+    //std::string s_path = QApplication::applicationDirPath().toStdString();
+    //std::cout << "Qt app path " << s_path << std::endl;
+
+#ifdef __APPLE__
+    //std::cout << "Executable path '" << getExecutablePath() << "'" << std::endl;
+    boost::filesystem::path e_path( getExecutablePath() );
+    std::string r_path = e_path.parent_path().parent_path().string() + "/Resources/";
+    //std::cout << "Resources path " << r_path << std::endl;
+#endif
+
+    // Add the path to the makam toolbox and yin mex files
+    //boost::filesystem::path s_path( __FILE__ );
+    //std::cout << "Main source path: " << s_path.parent_path().parent_path().parent_path() << std::endl;
+    boost::filesystem::path b_path( boost::filesystem::current_path() );
+    //std::cout << "Main build path " << b_path << std::endl;
+
     std::string prefix("mc_");
     size_t found = basename.find(prefix);
     if(found != std::string::npos){
         basename = basename.substr(found+prefix.size());
-        std::cout << "MediaCycle::getPluginPathFromBaseName: new basename: " << basename << std::endl;
+        //std::cout << "MediaCycle::getPluginPathFromBaseName: new basename: " << basename << std::endl;
     }
 
     char c_path[2048];
@@ -1072,6 +1288,7 @@ std::string MediaCycle::getPluginPathFromBaseName(std::string basename)
     getcwd(c_path, 2048);
     std::string s_path = c_path;
     std::string plugins_path(""),plugin_subfolder(""),plugin_ext("");
+    //std::cout << "Current path " << s_path << std::endl;
 
     std::string build_type ("Release");
 #ifdef USE_DEBUG
@@ -1244,55 +1461,55 @@ void MediaCycle::dumpNavigationLevels(){
 // == testing
 void MediaCycle::testThreads(){
     /*
-  int nthreads, tid, NumberOfProcs;
+          int nthreads, tid, NumberOfProcs;
 
-  NumberOfProcs = omp_get_num_procs();
-  printf("\nWorking on %d Processors",NumberOfProcs);
+          NumberOfProcs = omp_get_num_procs();
+          printf("\nWorking on %d Processors",NumberOfProcs);
 
-  omp_set_num_threads(NumberOfProcs);
+          omp_set_num_threads(NumberOfProcs);
 
-  #pragma omp parallel private(tid)
-  {
-  tid = omp_get_thread_num();
-  printf("\nWoohoo from thread : %d", tid);
-  if (tid==0){
-  nthreads = omp_get_num_threads();
-  printf("\nMaster says : There is %d out there!", nthreads);
-  }
-  }
-  printf("\n");
-  // No more threads
+          #pragma omp parallel private(tid)
+          {
+          tid = omp_get_thread_num();
+          printf("\nWoohoo from thread : %d", tid);
+          if (tid==0){
+          nthreads = omp_get_num_threads();
+          printf("\nMaster says : There is %d out there!", nthreads);
+          }
+          }
+          printf("\n");
+          // No more threads
 
-  */
+          */
 
     /*
-  double t1 = getTime();
-  int s = 500000;
-  float *x = new float[s];
+          double t1 = getTime();
+          int s = 500000;
+          float *x = new float[s];
 
-  for (unsigned int i=0; i<s; i++) {
+          for (unsigned int i=0; i<s; i++) {
 
-  x[i] = rand();
-  x[i] = cos(sin(cos(sin(cos(sin(cos(sin(x[i]))))))));
+          x[i] = rand();
+          x[i] = cos(sin(cos(sin(cos(sin(cos(sin(x[i]))))))));
 
-  }
+          }
 
-  double t2 = getTime();
+          double t2 = getTime();
 
-  printf("TTT - %f\n",float(t2-t1));
+          printf("TTT - %f\n",float(t2-t1));
 
-  t1 = getTime();
+          t1 = getTime();
 
-  #pragma omp parallel for
-  for (unsigned int i=0; i<s; i++) {
-  x[i] = rand();
-  x[i] = cos(sin(cos(sin(cos(sin(cos(sin(x[i]))))))));
-  }
+          #pragma omp parallel for
+          for (unsigned int i=0; i<s; i++) {
+          x[i] = rand();
+          x[i] = cos(sin(cos(sin(cos(sin(cos(sin(x[i]))))))));
+          }
 
-  t2 = getTime();
+          t2 = getTime();
 
-  printf("TTT - %f\n",float(t2-t1));
-  */
+          printf("TTT - %f\n",float(t2-t1));
+          */
 }
 
 void MediaCycle::testLabels(){

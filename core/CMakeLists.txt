@@ -27,41 +27,12 @@ IF ( SDIF_FOUND )
 ENDIF ( )
 
 #others
-IF(SUPPORT_AUDIO)
-	TARGET_LINK_LIBRARIES(mediacycle sndfile)
-ENDIF()
 TARGET_LINK_LIBRARIES(mediacycle pthread)
 IF ( MINGW )
-	IF(SUPPORT_AUDIO)
-		TARGET_LINK_LIBRARIES(mediacycle FLAC vorbisenc vorbis m ogg)
-	ENDIF()
 	TARGET_LINK_LIBRARIES(mediacycle wsock32 ws2_32) # CF: should be detected in main CMakeLists.txt
 ENDIF ( MINGW )
 
-#OpenCV
-IF(SUPPORT_VIDEO OR SUPPORT_IMAGE)
-	TARGET_LINK_LIBRARIES(mediacycle ${OpenCV_LIBRARIES})
-ENDIF()
-
 TARGET_LINK_LIBRARIES(mediacycle ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_GRAPH_LIBRARY} ${Boost_THREAD_LIBRARY})
-
-IF(SUPPORT_VIDE0 AND FFMPEG_FOUND AND WITH_FFMPEG)
-	TARGET_LINK_LIBRARIES(mediacycle ${FFMPEG_LIBRARIES})
-ENDIF()
-
-IF(SUPPORT_PDF AND PODOFO_FOUND)
-	TARGET_LINK_LIBRARIES(mediacycle ${PODOFO_LIBRARY})
-ENDIF()
-
-IF(SUPPORT_TEXT)
-	ADD_DEPENDENCIES(mediacycle textTool)
-	TARGET_LINK_LIBRARIES(mediacycle textTool)
-ENDIF()
-# CF we need to be able to display images (library cover) for any media type
-# OSG for 3D Models and/or ffmpeg plugin checkup
-#IF(SUPPORT_3DMODEL OR SUPPORT_IMAGE OR SUPPORT_VIDEO)
-	TARGET_LINK_LIBRARIES(mediacycle ${OPENSCENEGRAPH_CORE_LIBRARIES} ${OPENGL_LIBRARIES})
-#ENDIF()
 
 # this might require some path adaptation for Windows
 # (e.g. set cmake_install_prefix to the good value for Windows )

@@ -45,30 +45,52 @@ namespace fs = boost::filesystem;
 using namespace std;
 
 ACMedia::ACMedia() { 
-	this->init();
+    mid = -1;
+    parentid = -1;
+    media_type = MEDIA_TYPE_NONE;
+    width = 0;
+    height = 0;
+    filename="";
+    filename_thumbnail="";
+    label="";
+    key="";
+    text_tags="";
+    hyper_links="";
+    start = -1;
+    end = -1;
+    startInt = -1;
+    endInt = -1;
+    discarded = false;
+    taggedClassId = -1;
 }
 
-void ACMedia::init() { 
-	mid = -1;
-    taggedClassId=-1;
-	parentid = -1;	
-	width = 0;
-	height = 0;
-	start = -1;
-	end = -1;
-        startInt = -1;
-        endInt = -1;
-	features_vectors.resize(0);
-	preproc_features_vectors.resize(0);
-    key="";
-    filename="";
-    discarded = false;
+ACMedia::ACMedia(const ACMedia& m){
+    this->mid = m.mid;
+    this->parentid = m.parentid;
+    this->media_type = m.media_type;
+    this->width = m.width;
+    this->height = m.height;
+    this->filename = m.filename;
+    this->filename_thumbnail = m.filename_thumbnail;
+    this->label = m.label;
+    this->key = m.key;
+    this->text_tags = m.text_tags;
+    this->hyper_links = m.hyper_links;
+    this->start = m.start;
+    this->end = m.end;
+    this->startInt = m.startInt;
+    this->endInt = m.endInt;
+    this->discarded = m.discarded;
+    this->taggedClassId = m.taggedClassId;
 }
 
 ACMedia::~ACMedia() { 
 	filename.clear();
 	filename_thumbnail.clear();
     key.clear();
+    for(std::vector<ACMediaThumbnail*>::iterator thumbnail = thumbnails.begin();thumbnail != thumbnails.end();thumbnail++)
+        delete *thumbnail;
+    thumbnails.clear();
 	for (int i=0;i<preproc_features_vectors.size();i++)
 	{
 		if(preproc_features_vectors[i]) delete (preproc_features_vectors[i]);
@@ -164,7 +186,15 @@ void ACMedia::saveXML(TiXmlElement* media){
 	int n_features = features_vectors.size();
 	TiXmlElement* features = new TiXmlElement( "Features" );  
 	features->SetAttribute("NumberOfFeatures", n_features);
-	media->LinkEndChild( features );  
+    media->LinkEndChild( features );
+
+    TiXmlElement* _thumbnails = new TiXmlElement( "Thumbnails" );
+    media->LinkEndChild( _thumbnails );
+    _thumbnails->SetAttribute("NumberOfThumbnails", this->getNumberOfThumbnails());
+
+    // saves info about thumbnails
+    for(std::vector<ACMediaThumbnail*>::iterator thumbnail = thumbnails.begin();thumbnail != thumbnails.end();thumbnail++)
+        (*thumbnail)->saveXML(_thumbnails);
 
 	for (int i=0; i<n_features; i++) {
 		int n_features_elements = features_vectors[i]->getSize();
@@ -373,6 +403,24 @@ void ACMedia::loadXML(TiXmlElement* _pMediaNode){
 	}		
 			
 	TiXmlHandle _pMediaNodeHandle(_pMediaNode);
+
+    // allow an XML without thumbnails
+    TiXmlElement* thumbnailsElement = _pMediaNodeHandle.FirstChild( "Thumbnails" ).Element();
+    if (thumbnailsElement) {
+        int nt = -1;
+        thumbnailsElement->QueryIntAttribute("NumberOfThumbnails", &nt);
+        if (nt < 0)
+            throw runtime_error("corrupted XML file, <Thumbnails> present, but no thumbnails");
+
+        TiXmlElement* thumbnailElement = _pMediaNodeHandle.FirstChild( "Thumbnails" ).FirstChild( "Thumbnail" ).Element();
+        TiXmlText* thumbnailIDElementsAsText = 0;
+        int count_s = 0;
+
+        for( thumbnailElement; thumbnailElement; thumbnailElement = thumbnailElement->NextSiblingElement() ) {
+            ACMediaThumbnail* thumbnail = new ACMediaThumbnail();
+            thumbnail->loadXML(thumbnailsElement);
+        }
+    }
 	
 	int count_f = 0;
 	TiXmlElement* featuresElement = _pMediaNodeHandle.FirstChild( "Features" ).Element();
@@ -392,7 +440,7 @@ void ACMedia::loadXML(TiXmlElement* _pMediaNode){
     if(featureElement){
         TiXmlText* featureElementsAsText = 0;
         ACMediaFeatures* mediaFeatures;
-        for( featureElement; featureElement; featureElement = featureElement->NextSiblingElement() ) {
+        for(featureElement; featureElement; featureElement = featureElement->NextSiblingElement() ) {
             mediaFeatures = new ACMediaFeatures();
             int nfe=-1;
             int nno=-1;
@@ -464,6 +512,8 @@ void ACMedia::loadXML(TiXmlElement* _pMediaNode){
 		segmentsElement->QueryIntAttribute("NumberOfSegments", &ns);
 		if (ns < 0)
 			throw runtime_error("corrupted XML file, <segments> present, but no segments");
+        if( ns == 0)
+            return;
 
 		TiXmlElement* segmentElement = _pMediaNodeHandle.FirstChild( "Segments" ).FirstChild( "Segment" ).Element();
 		TiXmlText* segmentIDElementsAsText = 0;
@@ -513,7 +563,7 @@ void ACMedia::loadXML(TiXmlElement* _pMediaNode){
 			count_s++;
 		}*/
 		// consistency check for segments
-        for( segmentElement; segmentElement; segmentElement = segmentElement->NextSiblingElement() ) {
+        for(;; segmentElement = segmentElement->NextSiblingElement() ) {
             ACMedia* segment_media = ACMediaFactory::getInstance().create(this->getMediaType());
 			segment_media->loadXML(segmentElement);
 			segment_media->setParentId(mid);
@@ -651,19 +701,64 @@ int ACMedia::import(std::string _path, int _mid, ACPluginManager *acpl, bool _sa
 		cerr << "<ACMedia::import> failed accessing data for media number: " << _mid << endl;
 		return 0;
 	}
-	
+
+    //compute thumbnails with available plugins that doesn't require feature extraction or segmentation
+    this->computeThumbnails(acpl,false, false);
+
 	//compute features with available plugins
     if (!this->extractFeatures(acpl,_save_timed_feat))
         return 0;
     import_ok=1;
+
+    //compute thumbnails with available plugins that require feature extraction but not segmentation
+    this->computeThumbnails(acpl,true, false);
 
     // Assigning media ids should be done once feature extraction is successful since media ids are incremental
     // If we used non-incremental media ids (md5/sha sums), this wouldn't be a problem anymore
     if (_mid>=0)
         this->setId(_mid);
 
+    // Require at least one thumbnail
+    /*if(this->getNumberOfThumbnails()==0){
+        std::cerr << "ACMedia::import: no thumbnail available" << std::endl;
+        return 0;
+    }*/
+
     //delete data; <--- this is managed from outside (media->deleteData)
 	return import_ok;
+}
+
+
+ACMediaThumbnail* ACMedia::getThumbnail(std::string name){
+    for(std::vector<ACMediaThumbnail*>::iterator thumbnail = thumbnails.begin();thumbnail != thumbnails.end();thumbnail++){
+        if((*thumbnail)->getName() == name)
+            return *thumbnail;
+    }
+    return 0;
+}
+
+std::string ACMedia::getThumbnailFileName(std::string name){
+    std::string filename("");
+    ACMediaThumbnail* _thumbnail(0);
+    _thumbnail = this->getThumbnail(name);
+    if(_thumbnail)
+        filename = _thumbnail->getFileName();
+    return filename;
+}
+
+int ACMedia::computeThumbnails(ACPluginManager *acpl, bool feature_extracted, bool segmentation_done){
+    int thumbnail_number = 0;
+    if (acpl) {
+        ACMediaData* local_media_data=dynamic_cast<ACMediaData*>(this->getMediaData());
+        std::vector<ACMediaThumbnail*> local_thumbnails = acpl->getAvailableThumbnailerPlugins()->summarize(local_media_data, this, feature_extracted, segmentation_done);
+        for(std::vector<ACMediaThumbnail*>::iterator local_thumbnail = local_thumbnails.begin();local_thumbnail != local_thumbnails.end();local_thumbnail++)
+            this->thumbnails.push_back(*local_thumbnail);
+        thumbnail_number = local_thumbnails.size();
+    }
+    else{
+        cerr << "<ACMedia::computeThumbnail> no plugin manager for media";
+    }
+    return thumbnail_number;
 }
 
 int ACMedia::extractFeatures(ACPluginManager *acpl, bool _save_timed_feat) {
@@ -744,6 +839,10 @@ int ACMedia::segment(ACPluginManager *acpl, bool _saved_timed_features ) {
             this->addSegment(afv[Iafv]);
 	}
 	delete ft_from_disk;
+
+    //compute thumbnails with available plugins that require feature extraction and segmentation
+    this->computeThumbnails(acpl,true, true);
+
 	return segment_ok;
 }
 
@@ -797,39 +896,79 @@ ACMediaTimedFeature* ACMedia::getTimedFeatures() {
 // CPL 25/06
 // get only one TimedFeature
 ACMediaTimedFeature* ACMedia::getTimedFeatures(string feature_name) {
-	bool _binary=false;//true
-	ACMediaType mediaType=this->getType();
+    bool _binary=false;//true
+    ACMediaType mediaType=this->getType();
+    ACMediaTimedFeature* mtf_from_file = 0;
     ACMediaTimedFeature* output = 0;
-	std::vector<std::string> mtf_files_names=this->getTimedFileNames();
-	
-	//    vector<ACFeaturesPlugin *> ::iterator iter_vec = mCurrPlugin[mediaType].begin();
-	//  if (iter_vec != mCurrPlugin[mediaType].end()) 
-	std::vector<std::string>::iterator iter_vec=mtf_files_names.begin();
-	if (iter_vec!=mtf_files_names.end())
-	{	
-		output = new ACMediaTimedFeature();
-		output->loadFromFile(*iter_vec,_binary);
+    std::vector<std::string> mtf_files_names=this->getTimedFileNames();
+
+    // First try by name:
+    std::vector<std::string>::iterator iter_vec;
+    for (iter_vec=mtf_files_names.begin(); iter_vec != mtf_files_names.end(); iter_vec++) {
         size_t n2= iter_vec->find_last_of ( string("_") )-1;
         size_t n1=iter_vec->find_last_of ( string("_"),n2 );
         string locFeatureName=iter_vec->substr(n1+1,n2-n1);
-        output->setName(locFeatureName);
-		
-        if (output != 0) {
-            iter_vec++;
-            for (; iter_vec != mtf_files_names.end(); iter_vec++) {
-				
-				ACMediaTimedFeature* temp=new ACMediaTimedFeature();
-				temp->loadFromFile(*iter_vec,false);
-                n2= iter_vec->find_last_of ( string("_") )-1;
-                n1=iter_vec->find_last_of ( string("_"),n2 );
-                locFeatureName=iter_vec->substr(n1+1,n2-n1);
-                temp->setName(locFeatureName);
-				if(!(feature_name.compare(temp->getName()))) {
-					output->appendTimedFeature(temp);
-					delete temp;
-				}
-            }
+        if(feature_name != locFeatureName) {
+            std::cout << "ACMedia::getTimedFeatures: found matching mtf by filename from file " << *iter_vec << std::endl;
+            break;
         }
     }
-    return output;
+    if(iter_vec != mtf_files_names.end()){
+        mtf_from_file=new ACMediaTimedFeature();
+        mtf_from_file->loadFromFile(*iter_vec,_binary);
+
+        if(feature_name != mtf_from_file->getName()){
+            std::cerr << "ACMedia::getTimedFeatures: file " << *iter_vec << " doesn't list the expected feature named " << feature_name << std::endl;
+        }
+
+        if( mtf_from_file->getDistinctNames().size()!=1){
+            std::cerr << "ACMedia::getTimedFeatures: file " << *iter_vec << " should contain just one distinct feature name matching " << feature_name << std::endl;
+        }
+
+        output = new ACMediaTimedFeature();
+        output->setName(feature_name);
+        output->setTime(mtf_from_file->getTime());
+        output->setValue(mtf_from_file->getValue());
+        //output->appendTimedFeature(temp);
+        delete mtf_from_file;
+        mtf_from_file = 0;
+        return output;
+    }
+
+    // Otherwise try to load all files and check their contents:
+    for (iter_vec=mtf_files_names.begin(); iter_vec != mtf_files_names.end(); iter_vec++) {
+        std::cout << "ACMedia::getTimedFeatures: checking feature file " << *iter_vec << std::endl;
+        mtf_from_file=new ACMediaTimedFeature();
+        mtf_from_file->loadFromFile(*iter_vec,_binary);
+        std::vector<std::string> names = mtf_from_file->getDistinctNames();
+        std::vector<std::string>::iterator name = std::find(names.begin(),names.end(),feature_name);
+        if(name != names.end()){
+            int start(-1),end(-1);
+            for(std::vector<std::string>::iterator name = names.begin();name != names.end();++name){
+                if(*name==feature_name){
+                    if(start==-1)
+                        start = std::distance(names.begin(),name);
+                    end = std::distance(names.begin(),name);
+                }
+            }
+            std::cout << "ACMedia::getTimedFeatures: feature spans from columns " << start << " to " << end << std::endl;
+            if(start == -1 && end == -1){
+                std::cerr << "ACMedia::getTimedFeatures: wrong feature columns " << start << ".." << end << std::endl;
+                delete mtf_from_file;
+                mtf_from_file = 0;
+                return 0;
+            }
+
+            output = new ACMediaTimedFeature();
+            output->setName(feature_name);
+            output->setTime(mtf_from_file->getTime());
+            output->setValue(mtf_from_file->getValue().rows(start,end));
+            delete mtf_from_file;
+            mtf_from_file = 0;
+            return output;
+        }
+        delete mtf_from_file;
+        mtf_from_file = 0;
+    }
+    return 0;
 }

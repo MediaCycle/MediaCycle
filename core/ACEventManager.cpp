@@ -34,39 +34,47 @@
 
 #include "ACEventManager.h"
 ACEventManager::ACEventManager(){
-	
+
 };
 
 ACEventManager::~ACEventManager(){
-	this->clean();
+    this->clean();
 };
 
 void ACEventManager::addListener(ACEventListener* eventListener){
-	listeners.push_back(eventListener);
-        connect_mediaImported.push_back(sig_mediaImported.connect(boost::bind(&ACEventListener::s_mediaImported, eventListener,_1, _2,_3))) ;
-	connect_libraryCleaned.push_back(sig_libraryCleaned.connect(boost::bind(&ACEventListener::s_libraryCleaned, eventListener))) ;
-	connect_activeFeatChanged.push_back(sig_activeFeatChanged.connect(boost::bind(&ACEventListener::s_activeFeatChanged, eventListener))) ;
-	connect_browserModeChanged.push_back(sig_browserModeChanged.connect(boost::bind(&ACEventListener::s_browserModeChanged, eventListener, _1))) ;
-	connect_updateDisplayNeeded.push_back(sig_updateDisplayNeeded.connect(boost::bind(&ACEventListener::s_updateDisplayNeeded, eventListener)));
+    listeners.push_back(eventListener);
+    connect_mediaImported.push_back(sig_mediaImported.connect(boost::bind(&ACEventListener::s_mediaImported, eventListener,_1, _2,_3))) ;
+    connect_pluginProgress.push_back(sig_pluginProgress.connect(boost::bind(&ACEventListener::s_pluginProgress, eventListener, _1, _2, _3, _4)));
+    connect_libraryCleaned.push_back(sig_libraryCleaned.connect(boost::bind(&ACEventListener::s_libraryCleaned, eventListener))) ;
+    connect_activeFeatChanged.push_back(sig_activeFeatChanged.connect(boost::bind(&ACEventListener::s_activeFeatChanged, eventListener))) ;
+    connect_browserModeChanged.push_back(sig_browserModeChanged.connect(boost::bind(&ACEventListener::s_browserModeChanged, eventListener, _1))) ;
+    connect_updateDisplayNeeded.push_back(sig_updateDisplayNeeded.connect(boost::bind(&ACEventListener::s_updateDisplayNeeded, eventListener)));
+    connect_pluginLoaded.push_back(sig_pluginLoaded.connect(boost::bind(&ACEventListener::s_pluginLoaded, eventListener, _1)));
 };
 
 void ACEventManager::clean(void){
-	for (unsigned int i=0;i<connect_mediaImported.size();i++)
-		connect_mediaImported[i].disconnect();
-	connect_mediaImported.clear();
-	for (unsigned int i=0;i<connect_libraryCleaned.size();i++)
-		connect_libraryCleaned[i].disconnect();
-	connect_libraryCleaned.clear();
-	for (unsigned int i=0;i<connect_activeFeatChanged.size();i++)
-		connect_activeFeatChanged[i].disconnect();
-	connect_activeFeatChanged.clear();
-	for (unsigned int i=0;i<connect_browserModeChanged.size();i++)
-		connect_browserModeChanged[i].disconnect();
-	connect_browserModeChanged.clear();
-	for (unsigned int i=0;i<connect_updateDisplayNeeded.size();i++)
-		connect_updateDisplayNeeded[i].disconnect();
-	connect_updateDisplayNeeded.clear();
-	for (unsigned int i=0;i<listeners.size();i++)
-		listeners[i]=0;
-	listeners.clear();
+    for (unsigned int i=0;i<connect_mediaImported.size();i++)
+        connect_mediaImported[i].disconnect();
+    connect_mediaImported.clear();
+    for (unsigned int i=0;i<connect_pluginProgress.size();i++)
+        connect_pluginProgress[i].disconnect();
+    connect_pluginProgress.clear();
+    for (unsigned int i=0;i<connect_libraryCleaned.size();i++)
+        connect_libraryCleaned[i].disconnect();
+    connect_libraryCleaned.clear();
+    for (unsigned int i=0;i<connect_activeFeatChanged.size();i++)
+        connect_activeFeatChanged[i].disconnect();
+    connect_activeFeatChanged.clear();
+    for (unsigned int i=0;i<connect_browserModeChanged.size();i++)
+        connect_browserModeChanged[i].disconnect();
+    connect_browserModeChanged.clear();
+    for (unsigned int i=0;i<connect_updateDisplayNeeded.size();i++)
+        connect_updateDisplayNeeded[i].disconnect();
+    connect_updateDisplayNeeded.clear();
+    for (unsigned int i=0;i<connect_pluginLoaded.size();i++)
+        connect_pluginLoaded[i].disconnect();
+    connect_updateDisplayNeeded.clear();
+    for (unsigned int i=0;i<listeners.size();i++)
+        listeners[i]=0;
+    listeners.clear();
 };

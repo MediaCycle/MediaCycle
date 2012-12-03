@@ -50,56 +50,23 @@ const ACMediaType	MEDIA_TYPE_SENSOR		=	0x0040;
 const ACMediaType	MEDIA_TYPE_MIXED		=	0x0080;
 const ACMediaType	MEDIA_TYPE_ALL			=	0xFFFF;
 
-	
-
-enum ACMediaTypeEnum {
-	MEDIA_NONE,   // when type is not defined yet
-	MEDIA_AUDIO,
-	MEDIA_IMAGE,
-	MEDIA_VIDEO,
-	MEDIA_3DMODEL,
-	MEDIA_TEXT,
-	MEDIA_PDF,
-	MEDIA_SENSOR,
-	MEDIA_MIXED,  // for (future...) interface mixing media
-	MEDIA_ALL     // for plugins valid for all media
-};
-
 // conversion between MediaTypes and text string (e.g., to be used in the labels for the gui)
-typedef std::map<std::string, ACMediaType> stringToMediaTypeConverter;
+typedef std::map<std::string, ACMediaType> ACMediaTypeNames;
 
 // initialize static class variable
-static const stringToMediaTypeConverter::value_type _initm[] = {
-stringToMediaTypeConverter::value_type("", MEDIA_TYPE_NONE), \
-stringToMediaTypeConverter::value_type("Audio", MEDIA_TYPE_AUDIO), \
-stringToMediaTypeConverter::value_type("Image", MEDIA_TYPE_IMAGE), \
-stringToMediaTypeConverter::value_type("Video", MEDIA_TYPE_VIDEO), \
-stringToMediaTypeConverter::value_type("3DModel",MEDIA_TYPE_3DMODEL), \
-stringToMediaTypeConverter::value_type("Text",MEDIA_TYPE_TEXT), \
-stringToMediaTypeConverter::value_type("PDF", MEDIA_TYPE_PDF), \
-stringToMediaTypeConverter::value_type("Sensor", MEDIA_TYPE_SENSOR), \
-stringToMediaTypeConverter::value_type("Mixed", MEDIA_TYPE_MIXED), \
-stringToMediaTypeConverter::value_type("All", MEDIA_TYPE_ALL)
+static const ACMediaTypeNames::value_type _initm[] = {
+ACMediaTypeNames::value_type("", MEDIA_TYPE_NONE), \
+ACMediaTypeNames::value_type("Audio", MEDIA_TYPE_AUDIO), \
+ACMediaTypeNames::value_type("Image", MEDIA_TYPE_IMAGE), \
+ACMediaTypeNames::value_type("Video", MEDIA_TYPE_VIDEO), \
+ACMediaTypeNames::value_type("3DModel",MEDIA_TYPE_3DMODEL), \
+ACMediaTypeNames::value_type("Text",MEDIA_TYPE_TEXT), \
+ACMediaTypeNames::value_type("PDF", MEDIA_TYPE_PDF), \
+ACMediaTypeNames::value_type("Sensor", MEDIA_TYPE_SENSOR), \
+ACMediaTypeNames::value_type("Mixed", MEDIA_TYPE_MIXED), \
+ACMediaTypeNames::value_type("All", MEDIA_TYPE_ALL)
 };
 
-static const stringToMediaTypeConverter stringToMediaType(_initm, _initm + sizeof _initm / sizeof *_initm);
-//
-//// conversion between MediaTypes and text string of enum name (e.g., to be used in the labels for the gui)
-//typedef std::map<ACMediaType,std::string> mediaTypeToEnumNameConverter;
-//
-//// initialize static class variable
-/*static const mediaTypeToEnumNameConverter::value_type _inits[] = {
-mediaTypeToEnumNameConverter::value_type(MEDIA_TYPE_NONE,"MEDIA_TYPE_NONE"), \
-mediaTypeToEnumNameConverter::value_type(MEDIA_TYPE_AUDIO,"MEDIA_TYPE_AUDIO"), \
-mediaTypeToEnumNameConverter::value_type(MEDIA_TYPE_IMAGE,"MEDIA_TYPE_IMAGE"), \
-mediaTypeToEnumNameConverter::value_type(MEDIA_TYPE_VIDEO,"MEDIA_TYPE_VIDEO"), \
-mediaTypeToEnumNameConverter::value_type(MEDIA_TYPE_3DMODEL,"MEDIA_TYPE_3DMODEL"), \
-mediaTypeToEnumNameConverter::value_type(MEDIA_TYPE_TEXT,"MEDIA_TYPE_TEXT"), \
-mediaTypeToEnumNameConverter::value_type(MEDIA_TYPE_PDF,"MEDIA_TYPE_PDF"), \
-mediaTypeToEnumNameConverter::value_type(MEDIA_TYPE_MIXED,"MEDIA_TYPE_MIXED"), \
-mediaTypeToEnumNameConverter::value_type(MEDIA_TYPE_ALL,"MEDIA_TYPE_ALL")
-};*/
-//
-//static const mediaTypeToEnumNameConverter mediaTypeToEnumName(_inits, _inits + sizeof _inits / sizeof *_inits);
-//
+static const ACMediaTypeNames media_type_names(_initm, _initm + sizeof _initm / sizeof *_initm);
+
 #endif // _ACMEDIA_TYPE_H

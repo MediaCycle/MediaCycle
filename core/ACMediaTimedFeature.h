@@ -96,10 +96,9 @@ public:
 	int getNearestTimePosition(float time, int mode);
 	arma::fmat getValueAtTime(arma::fcolvec time_v);
 	//arma::fcolvec getValueAtColumn(size_t index);
-	arma::fmat getValueAtColumn(size_t index);
+    //arma::fmat getValueAtColumn(size_t index);
 	//double* getValueAtColumnAsDouble(size_t index);
 	
-	std::vector< std::vector<float> > getValueAsVector();
 	std::vector<float> getTimeAsVector();
 	
 	ACMediaFeatures* weightedMean(ACMediaTimedFeature* weight);
@@ -138,7 +137,7 @@ public:
 	// concatenate with another timed Feature
 	// XS TODO: must have the same time stamps
 	bool appendTimedFeature(ACMediaTimedFeature* B);
-        bool appendTimedFeatureAlongTime(ACMediaTimedFeature* B);
+    bool appendTimedFeatureAlongTime(ACMediaTimedFeature* B);
 
 	// I/O
 	// old

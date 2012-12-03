@@ -36,13 +36,10 @@
 #define ACMEDIADOCUMENT_H
 
 #if defined (SUPPORT_MULTIMEDIA)
-#include "ACOpenCVInclude.h"
 #include "ACMedia.h"
 //#include "ACMediaDocumentData.h"
 #include <string>
 #include <iostream>
-
-#include <osg/Texture2D>
 
 // -----------------------------------
 
@@ -52,8 +49,9 @@ class ACMediaDocument: public ACMedia {
 	// contains the *minimal* information about an image
 public:
 	ACMediaDocument();
-	~ACMediaDocument();
 	ACMediaDocument(const ACMediaDocument&, bool reduce = true);
+    virtual ~ACMediaDocument();
+    virtual std::string getIdentifier()=0;
 	virtual ACMediaType getActiveSubMediaType();
 	int setActiveSubMedia(std::string mediaName);
 	virtual int import(std::string _path, int _mid=0, ACPluginManager *acpl=0, bool _save_timed_feat=false);
@@ -63,10 +61,10 @@ public:
 	int loadXMLSpecific(TiXmlElement* _pMediaNode);
 
 	//void setThumbnail(osg::ref_ptr<osg::Image> _thumbnail) { thumbnail = _thumbnail; thumbnail_width = _thumbnail->width; thumbnail_height = _thumbnail->height; }
-	void setThumbnail(osg::ref_ptr<osg::Image> _thumbnail) { thumbnail = _thumbnail; thumbnail_width = _thumbnail->s(); thumbnail_height = _thumbnail->t(); }
+    //void setThumbnail(osg::ref_ptr<osg::Image> _thumbnail) { thumbnail = _thumbnail; thumbnail_width = _thumbnail->s(); thumbnail_height = _thumbnail->t(); }
 	int getThumbnailWidth() {return thumbnail_width;}
 	int getThumbnailHeight() {return thumbnail_height;}
-	void* getThumbnailPtr() { return (void*)image_texture; }
+    //void* getThumbnailPtr() { return (void*)image_texture; }
 	ACMediaData* getMediaData(){return 0;};
 //	ACMediaDocumentData* getData(){return static_cast<ACMediaDocumentData*>(data->getData());}
 //	void setData(ACMediaDocumentData* _data);
@@ -128,31 +126,41 @@ public:
 		else {
 			return tempVect;
 		}
-	};
+    }
 	 ACMediaFeatures* getPreProcFeaturesVector(int i){ return activeMedia->getPreProcFeaturesVector(i); };
-	 ACMediaFeatures* getPreProcFeaturesVector(std::string feature_name){ return activeMedia->getPreProcFeaturesVector(feature_name); };
-	 int getNumberOfPreProcFeaturesVectors() { return activeMedia->getNumberOfPreProcFeaturesVectors(); };
-	std::vector<std::string> getListOfPreProcFeaturesPlugins(){ return activeMedia->getListOfPreProcFeaturesPlugins(); };
+     virtual ACMediaFeatures* getPreProcFeaturesVector(std::string feature_name){ return activeMedia->getPreProcFeaturesVector(feature_name); };
+     int getNumberOfPreProcFeaturesVectors(){
+         return activeMedia->getNumberOfPreProcFeaturesVectors();
+     }
+    std::vector<std::string> getListOfPreProcFeaturesPlugins(){
+        std::vector<std::string> preProcFeaturesPlugins;
+        if(activeMedia)
+            preProcFeaturesPlugins = activeMedia->getListOfPreProcFeaturesPlugins();
+        else
+            std::cerr << "ACMediaDocument::getListOfPreProcFeaturesPlugins: active media not set" << std::endl;
+        return preProcFeaturesPlugins;
+    }
 	void defaultPreProcFeatureInit(void);
 	void cleanPreProcFeaturesVector(void);
 
-	std::vector<std::string> getActivableMediaKeys(){return activableMediaKey;};
+    virtual std::vector<std::string> getActivableMediaKeys()=0;
 	ACMedia* getActiveMedia(void){return activeMedia;};
 	std::string getActiveMediaKey(void){return activeMediaKey;};
 	
 private:
 	void init();
+    void* getThumbnailPtr(){return 0;}
 	bool computeThumbnail(std::string _fname, int w=0, int h=0);
 //	bool computeThumbnail(ACMediaDocumentData* data_ptr, int w=0, int h=0);
-	bool computeThumbnail(IplImage* img, int w=0, int h=0);
+//	bool computeThumbnail(IplImage* img, int w=0, int h=0);
 	bool computeThumbnailSize(int w_, int h_);
 	void deleteMedia();
 public:
     int addMedia(std::string key, ACMedia* media);
 protected:
 	int thumbnail_width, thumbnail_height; 
-	osg::ref_ptr<osg::Image> thumbnail;
-	osg::ref_ptr<osg::Texture2D> image_texture;
+    //osg::ref_ptr<osg::Image> thumbnail;
+    //osg::ref_ptr<osg::Texture2D> image_texture;
 	//ACMediaDocumentData* data; No Need, data are stored in the respective media 
 	ACMediaContainer mediaContainer;
 	static	const int default_thumbnail_area ; // 128*128
@@ -161,7 +169,6 @@ protected:
 	int getMediaID(){return mediaID ;}
 	std::vector<ACMediaFeatures*> tempVect;
 	std::vector<std::string> tempString;
-	std::vector<std::string> activableMediaKey;
 protected:
 	ACMedia* activeMedia;
 	std::string activeMediaKey;

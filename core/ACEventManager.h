@@ -47,34 +47,38 @@ class ACEventManager;
 #include <iostream>
 
 class ACEventManager{
-	
+
 #ifndef Q_MOC_RUN
 protected:
-	
-	std::vector<ACEventListener *> listeners;
-	
-	std::vector<boost::signals2::connection> connect_mediaImported;
-	std::vector<boost::signals2::connection> connect_libraryCleaned;
-	std::vector<boost::signals2::connection> connect_activeFeatChanged;
-	std::vector<boost::signals2::connection> connect_browserModeChanged;
-	std::vector<boost::signals2::connection> connect_updateDisplayNeeded;
+
+    std::vector<ACEventListener *> listeners;
+
+    std::vector<boost::signals2::connection> connect_mediaImported;
+    std::vector<boost::signals2::connection> connect_pluginProgress;
+    std::vector<boost::signals2::connection> connect_libraryCleaned;
+    std::vector<boost::signals2::connection> connect_activeFeatChanged;
+    std::vector<boost::signals2::connection> connect_browserModeChanged;
+    std::vector<boost::signals2::connection> connect_updateDisplayNeeded;
+    std::vector<boost::signals2::connection> connect_pluginLoaded;
 
 #endif
-	
+
 public:
-	ACEventManager();
-	~ACEventManager();
-	
+    ACEventManager();
+    ~ACEventManager();
+
 #ifndef Q_MOC_RUN
-        boost::signals2::signal<void (int n,int nTot,int mId)> sig_mediaImported;
-	boost::signals2::signal<void ()> sig_libraryCleaned;
-	boost::signals2::signal<void ()> sig_activeFeatChanged;
-	boost::signals2::signal<void (ACBrowserMode mode)> sig_browserModeChanged;
-	boost::signals2::signal<void ()> sig_updateDisplayNeeded;
+    boost::signals2::signal<void (int n,int nTot,int mId)> sig_mediaImported;
+    boost::signals2::signal<void (std::string plugin_name,int n,int nTot,int mId)> sig_pluginProgress;
+    boost::signals2::signal<void ()> sig_libraryCleaned;
+    boost::signals2::signal<void ()> sig_activeFeatChanged;
+    boost::signals2::signal<void (ACBrowserMode mode)> sig_browserModeChanged;
+    boost::signals2::signal<void ()> sig_updateDisplayNeeded;
+    boost::signals2::signal<void (std::string plugin_name)> sig_pluginLoaded;
 #endif
-	void clean(void);
-	void addListener(ACEventListener*);//we add this new output in output and we connect all the signals to these slot.
-	
+    void clean(void);
+    void addListener(ACEventListener*);//we add this new output in output and we connect all the signals to these slot.
+
 };
 #endif//ACEventManager_H
 

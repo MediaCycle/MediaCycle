@@ -187,6 +187,10 @@ public:
 #ifdef SUPPORT_MULTIMEDIA
     std::string getActiveSubMediaKey();
     int setActiveMediaType(std::string mediaName, ACPluginManager *acpl);
+    std::string getMediaDocumentIdentifier();
+    bool containsMediaDocumentsOfIdentifier(std::string identifier);
+private:
+    std::string submediakey;
 #endif//def SUPPORT_MULTIMEDIA
 
 private:
@@ -199,10 +203,6 @@ private:
     void incrementMediaID(); // increment the media id of the newest media
     int getAvailableMediaID(){return mediaID;}
     //void setMediaID(int _id){mediaID=_id;} // XS TODO add checks ?
-
-    //	#if defined(SUPPORT_VIDEO)
-    //		int testFFMPEG(std::string _filename);
-    //	#endif //defined (SUPPORT_IMAGE OR SUPPORT_VIDEO)
     int files_to_import;
     int files_processed;
 public:

@@ -59,11 +59,6 @@ namespace fs = boost::filesystem;
 
 #define VERBOSE
 
-//#if defined(SUPPORT_VIDEO) and defined(USE_FFMPEG)
-//// CF FFmpeg for checking audio/video channels in containers
-//#include <ACFFmpegInclude.h>
-//#endif //defined(SUPPORT_VIDEO) and defined(USE_FFMPEG)
-
 using namespace std;
 // to save *acl library items in binary format, uncomment the following line:
 // #define SAVE_ACL_BINARY
@@ -86,10 +81,6 @@ ACMediaLibrary::ACMediaLibrary(ACMediaType aMediaType) {
     mPreProcessInfo=0;
     mReaderPlugin=0;
     this->cleanLibrary();
-    //#if defined(SUPPORT_VIDEO) and defined(USE_FFMPEG)
-    //// Register all formats and codecs from FFmpeg
-    //av_register_all();
-    //#endif //defined(SUPPORT_VIDEO) and defined(USE_FFMPEG)
     files_processed = 0;
     files_to_import = 0;
     metadata = ACMediaLibraryMetadata();
@@ -145,18 +136,19 @@ void ACMediaLibrary::cleanLibrary() {
     checked_files = 0;
     files_processed = 0;
     files_to_import = 0;
+#ifdef SUPPORT_MULTIMEDIA
+    submediakey = "";
+#endif
 }
 
 std::vector<std::string> ACMediaLibrary::getExtensionsFromMediaType(ACMediaType media_type)
 {
-    if (this->mReaderPlugin!=NULL){
-        if (this->mReaderPlugin->mediaTypeSuitable(media_type)){
-            return mReaderPlugin->getExtensionsFromMediaType(media_type);
+    /*if (mReaderPlugin!=NULL){
+        if (mReaderPlugin->mediaTypeSuitable(media_type)){
+            return mReaderPlugin->getSupportedExtensions();
         }
-    }
-
+    }*/
     return ACMediaFactory::getInstance().getExtensionsFromMediaType(media_type);
-
 }
 
 
@@ -252,8 +244,8 @@ std::vector<int> ACMediaLibrary::importFile(std::string _filename, ACPluginManag
     if (media_type==MEDIA_TYPE_MIXED){
         if (mReaderPlugin!=0)
             media=mReaderPlugin->mediaFactory(media_type);
-        if (media==0)
-            media=new ACMediaDocument();
+        /*if (media==0)
+            media=new ACMediaDocument();*/
         if (media==0)
             return ret;
         else {
@@ -658,6 +650,9 @@ TiXmlElement* ACMediaLibrary::openNextMediaFromXMLLibrary(TiXmlElement* pMediaNo
             else {
                 typ = (ACMediaType) typi;
                 ACMedia* local_media = ACMediaFactory::getInstance().create(typ);
+                if(!local_media){
+                    throw runtime_error("Couldn't create the media, no media reader available");
+                }
                 local_media->loadXML(pMediaNode);
                 if (mPreProcessPlugin==NULL)
                     local_media->defaultPreProcFeatureInit();
@@ -1314,7 +1309,8 @@ string ACMediaLibrary::getActiveSubMediaKey(){
     if (media_type!=MEDIA_TYPE_MIXED||media_library.size()==0)
         return string("");
     else {
-        return ((ACMediaDocument*)this->getFirstMedia())->getActiveMediaKey();
+        return submediakey;
+        //return ((ACMediaDocument*)this->getFirstMedia())->getActiveMediaKey();
     }
 
 }
@@ -1323,6 +1319,7 @@ int ACMediaLibrary::setActiveMediaType(std::string mediaName, ACPluginManager *a
     if (media_type!=MEDIA_TYPE_MIXED)
         return 0;
     this->cleanStats();
+    submediakey = mediaName;
     ACMedias::iterator iter;
     for (iter = media_library.begin(); iter != media_library.end(); iter++) {
         if (iter->second->getMediaType()==MEDIA_TYPE_MIXED){
@@ -1345,8 +1342,51 @@ int ACMediaLibrary::setActiveMediaType(std::string mediaName, ACPluginManager *a
     if (media_library.size()>1&&(static_cast<ACMediaDocument*> (this->getFirstMedia()))->getActiveMediaKey()==mediaName)
         return 1;
 }
-#endif//def SUPPORT_MULTIMEDIA
 
+std::string ACMediaLibrary::getMediaDocumentIdentifier(){
+    std::string identifier("");
+    if (media_type!=MEDIA_TYPE_MIXED){
+        std::cerr << "ACMediaLibrary::getMediaDocumentIdentifier: library not of media document type" << std::endl;
+        return identifier;
+    }
+    if(this->getSize()==0)
+    {
+        std::cerr << "ACMediaLibrary::getMediaDocumentIdentifier: no media document in library" << std::endl;
+        return identifier;
+    }
+    ACMedia* media(0);
+    media = this->getFirstMedia();
+    if(!media)
+    {
+        std::cerr << "ACMediaLibrary::getMediaDocumentIdentifier: coulnd't get first media" << std::endl;
+        return identifier;
+    }
+    ACMediaDocument* doc(0);
+    doc =static_cast<ACMediaDocument *> (media);
+    if(!doc){
+        std::cerr << "ACMediaLibrary::getMediaDocumentIdentifier: the first media of the library is not a media document"<< std::endl;
+        return identifier;
+    }
+    identifier = doc->getIdentifier();
+    return identifier;
+}
+
+bool ACMediaLibrary::containsMediaDocumentsOfIdentifier(std::string identifier){
+    std::string _identifier = this->getMediaDocumentIdentifier();
+    if(_identifier == ""){
+        std::cerr << "ACMediaLibrary::containsMediaDocumentsOfIdentifier: library document identifier is empty " << std::endl;
+        return false;
+    }
+    if(identifier == ""){
+        std::cerr << "ACMediaLibrary::containsMediaDocumentsOfIdentifier: identifier to check is empty " << std::endl;
+        return false;
+    }
+    boost::to_lower(identifier);
+    boost::to_lower(_identifier);
+    if(identifier == _identifier)
+        return true;
+}
+#endif//def SUPPORT_MULTIMEDIA
 
 void ACMediaLibrary::setMediaTaggedClassId(int mediaId,int pId){
     cout<<"ACMediaLibrary::setMediaTaggedClassId mediaId:"<<mediaId<<" class:"<<pId<<endl;
@@ -1363,70 +1403,4 @@ int ACMediaLibrary::getMediaTaggedClassId(int mediaId){
         return media_library[mediaId]->getTaggedClassId();
     else
         return -1;
-};
-
-
-
-// -------------------------------------------------------------------------
-// test
-//#if defined(SUPPORT_VIDEO) and defined(USE_FFMPEG)
-//int ACMediaLibrary::testFFMPEG(std::string _filename){
-//	//CF early check in video files for audio and video streams, towards ACMediaDocuments
-//	// from http://www.inb.uni-luebeck.de/~boehme/using_libavcodec.html
-//	// and http://www.inb.uni-luebeck.de/~boehme/libavcodec_update.html
-//
-//	string extension = fs::extension(_filename);
-//	ACMediaType fileMediaType = ACMediaFactory::getInstance().getMediaTypeFromExtension(extension);
-//
-//	if (media_type == MEDIA_TYPE_VIDEO || media_type == MEDIA_TYPE_AUDIO) {
-//		if (fileMediaType == MEDIA_TYPE_VIDEO) {
-//			AVFormatContext *pFormatCtx;
-//			int             i, videoStreams, audioStreams;
-//			/*
-//			AVCodecContext  *pCodecCtx;
-//			AVCodec         *pCodec;
-//			AVFrame         *pFrame;
-//			AVFrame         *pFrameRGB;
-//			AVPacket        packet;
-//			int             frameFinished;
-//			int             numBytes;
-//			uint8_t         *buffer;
-//			*/
-//			// Open video file
-//			if(av_open_input_file(&pFormatCtx, _filename.c_str(), 0, 0, 0)!=0){
-//				std::cout << "Couldn't open file" << std::endl;
-//				return 0;
-//			}
-//
-//			// Retrieve stream information
-//			if(av_find_stream_info(pFormatCtx)<0){
-//				std::cout << "Couldn't find stream information" << std::endl;
-//				return 0;
-//			}
-//
-//			// Dump information about file onto standard error
-//			dump_format(pFormatCtx, 0, _filename.c_str(), false);
-//
-//			// Count video streams
-//			videoStreams=0;
-//			for(i=0; i<pFormatCtx->nb_streams; i++)
-//				if(pFormatCtx->streams[i]->codec->codec_type==CODEC_TYPE_VIDEO)
-//					videoStreams++;
-//			if(videoStreams == 0)
-//				std::cout << "Didn't find any video stream." << std::endl;
-//			else
-//				std::cout << "Found " << videoStreams << " video stream(s)." << std::endl;
-//
-//			// Count audio streams
-//			audioStreams=0;
-//			for(i=0; i<pFormatCtx->nb_streams; i++)
-//				if(pFormatCtx->streams[i]->codec->codec_type==CODEC_TYPE_AUDIO)
-//					audioStreams++;
-//			if(audioStreams == 0)
-//				std::cout << "Didn't find any audio stream" << std::endl;
-//			else
-//				std::cout << "Found " << audioStreams << " audio stream(s)." << std::endl;
-//		}
-//	}
-//}
-//#endif //defined(SUPPORT_VIDEO) and defined(USE_FFMPEG)
+}

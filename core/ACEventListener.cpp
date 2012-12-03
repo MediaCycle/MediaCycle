@@ -36,62 +36,68 @@
 #include "boost/version.hpp"
 
 ACEventListener::ACEventListener(){
-	t=new boost::thread(boost::bind(&ACEventListener::loop,this));
+    t=new boost::thread(boost::bind(&ACEventListener::loop,this));
 };
 
 ACEventListener::ACEventListener(MediaCycle* core){
-	
-	t=new boost::thread(boost::bind(&ACEventListener::loop,this));
-	if (core!= NULL)
-		core->addListener(this);
-	service.post(boost::bind(&ACEventListener::testService, this));
-        service.post(boost::bind(&ACEventListener::mediaImported, this,3,5,-1));
-	
-	
+
+    t=new boost::thread(boost::bind(&ACEventListener::loop,this));
+    if (core!= NULL)
+        core->addListener(this);
+    service.post(boost::bind(&ACEventListener::testService, this));
+    service.post(boost::bind(&ACEventListener::mediaImported, this,3,5,-1));
+
+
 };
 ACEventListener::~ACEventListener(){
-	service.stop();
-	
+    service.stop();
+
 #if BOOST_VERSION <104700
-	usleep(100000);
+    usleep(100000);
 #else 
-	while (!service.stopped()){};
+    while (!service.stopped()){};
 #endif
-	delete t;
-	
+    delete t;
+
 };
 void ACEventListener::testService(){
-	
-	cout << "service ran perfectly";
+
+    cout << "service ran perfectly";
 };
 
 void ACEventListener::loop(){
-	boost::asio::io_service::work work (service);
-	service.run(); // processes the tasks
-	cout << "event thread loop finished"<<endl;
+    boost::asio::io_service::work work (service);
+    service.run(); // processes the tasks
+    cout << "event thread loop finished"<<endl;
 };
 
 bool ACEventListener::stopped(){
 #if BOOST_VERSION <104700
-	return false;
+    return false;
 #else
-	return service.stopped(); // processes the tasks
+    return service.stopped(); // processes the tasks
 #endif
 };
 
 
 void ACEventListener::s_mediaImported(int n,int nTot,int mId){
-        service.post(boost::bind(&ACEventListener::mediaImported, this,n,nTot,mId));
+    service.post(boost::bind(&ACEventListener::mediaImported, this,n,nTot,mId));
 };
+void ACEventListener::s_pluginProgress(std::string plugin_name,int n,int nTot,int mId){
+    service.post(boost::bind(&ACEventListener::pluginProgress, this,plugin_name,n,nTot,mId));
+}
 void ACEventListener::s_libraryCleaned(){
-	service.post(boost::bind(&ACEventListener::libraryCleaned, this));
+    service.post(boost::bind(&ACEventListener::libraryCleaned, this));
 };
 void ACEventListener::s_activeFeatChanged(){
-	service.post(boost::bind(&ACEventListener::activeFeatChanged, this));
+    service.post(boost::bind(&ACEventListener::activeFeatChanged, this));
 };
 void ACEventListener::s_browserModeChanged(ACBrowserMode mode){
-	service.post(boost::bind(&ACEventListener::browserModeChanged, this,mode));
+    service.post(boost::bind(&ACEventListener::browserModeChanged, this,mode));
 };
 void ACEventListener::s_updateDisplayNeeded(){
-	service.post(boost::bind(&ACEventListener::updateDisplayNeeded, this));
+    service.post(boost::bind(&ACEventListener::updateDisplayNeeded, this));
+};
+void ACEventListener::s_pluginLoaded(std::string plugin_name){
+    service.post(boost::bind(&ACEventListener::pluginLoaded, this,plugin_name));
 };

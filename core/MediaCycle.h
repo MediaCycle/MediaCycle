@@ -34,6 +34,7 @@
 #define	_MEDIACYCLE_H
 
 class MediaCycle;
+#include "ACAbstractDefaultConfig.h"
 #include "ACMediaLibrary.h"
 #include "ACMediaBrowser.h"
 #include "ACNetworkSocket.h"
@@ -67,6 +68,17 @@ public:
     MediaCycle(const MediaCycle& orig);
     virtual ~MediaCycle();
     void clean();
+
+    // == Default configs
+    ACAbstractDefaultConfig* getDefaultConfig(std::string name);
+    std::map<std::string,ACAbstractDefaultConfig*> getDefaultConfigs();
+    std::vector<std::string> getDefaultConfigsNames();
+    bool addDefaultConfig(ACAbstractDefaultConfig*);
+    int getDefaultConfigsNumber();
+    /// Tries to load a default config. Throws runtime errors, to wrap with try/catch.
+    void loadDefaultConfig(std::string name);
+    ACAbstractDefaultConfig* getCurrentConfig();
+    std::string getCurrentConfigName();
 
     // == TCP
     int startTcpServer(int port=12345, int max_connections=5);
@@ -115,30 +127,25 @@ public:
 
     //Listener manager
     void addListener(ACEventListener* eventListener);
-    ACEventManager *getEventManager(){return eventManager;};
+    ACEventManager *getEventManager(){return eventManager;}
+    ACEventListener* getPluginEventListener(){return pluginEventListener;}
     // Plugins
 
     // XS TODO cleanPlugins
     int addPluginLibrary(std::string aPluginLibraryPath);
+    int loadPluginLibraryFromBasename(std::string basename);
     int removePluginLibrary(std::string aPluginLibraryPath);
+    int removePluginLibraryFromBasename(std::string basename);
     ACPluginManager* getPluginManager() { return pluginManager;}
     ACPluginLibrary* getPluginLibrary(std::string aPluginLibraryPath) const;
     bool removePluginFromLibrary(std::string _plugin_name, std::string _library_path);
     std::vector<std::string> getListOfPlugins();
     std::vector<std::string> getListOfActivePlugins();
+    std::string getPluginPathFromBaseName(std::string basename);
 
-    // XS TODO do we want so many methods ?
-    void setClustersMethodPlugin(std::string pluginName);
-    void setNeighborsMethodPlugin(std::string pluginName);
-    void setClustersPositionsPlugin(std::string pluginName);
-    void setNeighborsPositionsPlugin(std::string pluginName);
-    void setVisualisationPlugin(std::string pluginName);
-    void changeClustersMethodPlugin(std::string pluginName);
-    void changeNeighborsMethodPlugin(std::string pluginName);
-    void changeClustersPositionsPlugin(std::string pluginName);
-    void changeNeighborsPositionsPlugin(std::string pluginName);
-    //void changeVisualisationPlugin(std::string pluginName);
-
+    bool changeActivePlugin(ACPluginType pluginType, std::string pluginName);
+    std::vector<std::string> getActivePluginNames(ACPluginType pluginType, ACMediaType mediaType = MEDIA_TYPE_NONE);
+    std::vector<std::string> getAvailablePluginNames(ACPluginType pluginType, ACMediaType mediaType = MEDIA_TYPE_NONE);
 
     void setPreProcessPlugin(std::string pluginName);
 
@@ -245,6 +252,7 @@ public:
     void pickedObjectCallback(int pid);
     void hoverWithPointerId(float xx, float yy, int p_id = -1);
     void hoverWithPointerIndex(float xx, float yy, int p_index = 0);
+    bool performActionOnMedia(std::string action, long int mediaId, std::string value="");
 
     // == NEW, replaces updateClusters and updateNeighborhoods
     void updateDisplay(bool animate);
@@ -258,7 +266,6 @@ public:
     int readXMLConfigFile(std::string _fname="");
     TiXmlElement* saveXMLConfigFile(std::string _fname="");
     void setConfigFile(std::string _fname){config_file_xml = _fname;}
-    std::string getPluginPathFromBaseName(std::string basename);
 
     // == Dump / used for Debug
     void dumpNavigationLevel();
@@ -269,6 +276,8 @@ public:
     void testLabels();
 
 private:
+    std::map<std::string,ACAbstractDefaultConfig*> default_configs;
+    std::string current_config;
     int forwarddown;
     //	bool playkeydown;
     int port;
@@ -280,6 +289,7 @@ private:
     ACNetworkSocketServer *networkSocket;
     ACPluginManager *pluginManager;
     ACEventManager *eventManager;
+    ACEventListener* pluginEventListener;
 
     // settings and features XML
     std::string config_file_xml;
