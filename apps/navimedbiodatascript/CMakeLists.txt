@@ -22,7 +22,6 @@ IF(SUPPORT_TEXT AND BUILD_CLIS)
 		TARGET_LINK_LIBRARIES(navimedbiodatascript tinyxml)
 	ENDIF()
 
-
 	#IF ( APPLE )
 	#	set_target_properties(text-test PROPERTIES MACOSX_BUNDLE_INFO_PLIST ${CMAKE_SOURCE_DIR}/gui/osg-qt/Info.plist)
 	#	set_source_files_properties(PROPERTIES MACOSX_PACKAGE_LOCATION Resources)

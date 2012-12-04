@@ -65,6 +65,13 @@ ACAudioCycleLoopJam::ACAudioCycleLoopJam() : ACMultiMediaCycleOsgQt() {
     this->addAction(actionPreviousLibrary);
     connect(actionPreviousLibrary, SIGNAL(triggered()), this, SLOT(openPreviousLibrary()));
     this->addAction(actionPreviousLibrary);
+
+    this->on_actionFullscreen_triggered(true); // to be set after the window is shown
+    //this->autoConnectOSC(true); // to be set after loading the default config
+    this->changeSetting(AC_SETTING_INSTALLATION);
+
+    this->startLoopXML();
+
 }
 
 ACAudioCycleLoopJam::~ACAudioCycleLoopJam(){
@@ -75,20 +82,20 @@ ACAudioCycleLoopJam::~ACAudioCycleLoopJam(){
 
 bool ACAudioCycleLoopJam::parseXMLlist(std::string filename){
     std::string filelist("");
-    #ifdef USE_DEBUG
-        boost::filesystem::path s_path( __FILE__ );
-        //std::cout << "Current source path " << s_path.parent_path().string() << std::endl;
-        filelist += s_path.parent_path().string() + "/" + filename;
-    #else
-    #ifdef __APPLE__
-        filelist = getExecutablePath() + "/" + filename;
-    #elif __WIN32__
-        filelist = filename;
-    #else
-        filelist = "~/" + filename;
-    #endif
-    #endif
-        std::cout << "Filelist " << filelist << std::endl;
+#ifdef USE_DEBUG
+    boost::filesystem::path s_path( __FILE__ );
+    //std::cout << "Current source path " << s_path.parent_path().string() << std::endl;
+    filelist += s_path.parent_path().string() + "/" + filename;
+#else
+#ifdef __APPLE__
+    filelist = getExecutablePath() + "/" + filename;
+#elif __WIN32__
+    filelist = filename;
+#else
+    filelist = "~/" + filename;
+#endif
+#endif
+    std::cout << "Filelist " << filelist << std::endl;
 
     TiXmlDocument doc( filelist.c_str() );
     try {
@@ -111,7 +118,7 @@ bool ACAudioCycleLoopJam::parseXMLlist(std::string filename){
             file = fileName->ValueStr();
             std::cout << "File '" << file << "'" << std::endl;
             //if(!file.empty())
-                XMLfiles.push_back(file);
+            XMLfiles.push_back(file);
         }
     }
     catch (const exception& e) {
@@ -127,22 +134,10 @@ bool ACAudioCycleLoopJam::parseXMLlist(std::string filename){
     return true;
 }
 
-/*void ACAudioCycleLoopJam::setDefaultWaveform(ACBrowserAudioWaveformType _type){
-
- compositeOsgView->getBrowserRenderer()->setAudioWaveformType(_type);
- for (int d=0;d<dockWidgets.size();d++){
-//		cout << dockWidgets[d]->getClassName()<<endl;
-  if (dockWidgets[d]->getClassName()==string("ACAudioControlsDockWidgetQt")){
-   ((ACAudioControlsDockWidgetQt*)dockWidgets[d])->setComboBoxWaveformBrowser(_type);
-   cout << "WaveformType:"<<_type<<endl;
-  }
- }
-}*/
-
 void ACAudioCycleLoopJam::startLoopXML(){
-        timer->stop();
-        openNextLibrary(); // start first one before time starts so you don't wait for 30 min for the app to run
-        timer->start(attente);
+    timer->stop();
+    openNextLibrary(); // start first one before time starts so you don't wait for 30 min for the app to run
+    timer->start(attente);
 }
 
 void ACAudioCycleLoopJam::openNextLibrary(){
@@ -152,6 +147,7 @@ void ACAudioCycleLoopJam::openNextLibrary(){
         count=0;
     cout << "closing library" << endl;
     timer->stop();
+    media_cycle->muteAllSources();
     this->clean(true);
     cout << "opening : '" << XMLfiles[count] << "'" << endl;
     this->readXMLConfig(XMLfiles[count]);
@@ -164,6 +160,7 @@ void ACAudioCycleLoopJam::openPreviousLibrary(){
     cout << "Opening previous library: " << count << endl;
     // going through all files again
     cout << "opening : " << XMLfiles[count] << endl;
+    media_cycle->muteAllSources();
     this->clean(true);
     timer->stop();
     this->readXMLConfig(XMLfiles[count]);

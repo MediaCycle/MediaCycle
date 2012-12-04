@@ -1,14 +1,20 @@
-SET(TARGET_NAME "archipelcycle-osg-qt")
-IF ( SUPPORT_ARCHIPEL AND SUPPORT_MULTIMEDIA AND SUPPORT_AUDIO AND SUPPORT_IMAGE AND SUPPORT_TEXT AND USE_QT4 AND USE_OSG )
+SET(TARGET_NAME "ArchipelCycle")
+IF ( SUPPORT_ARCHIPEL AND SUPPORT_MULTIMEDIA AND SUPPORT_AUDIO AND SUPPORT_IMAGE AND SUPPORT_TEXT AND USE_QT4 AND USE_OSG AND USE_OSC)
 
-	SET(USE_AUDIO ON)
-	SET(USE_IMAGE ON)
-	SET(USE_VIDEO OFF)
-	SET(USE_3DMODEL OFF)
-	SET(USE_TEXT ON)
-	SET(USE_ARCHIPEL ON)
-	SET(WITH_QT4 ON)
-        SET(MC_PACKAGE_DESCRIPTION_SUMMARY "ArchipelCycle is an attempt to complement the Archipel database from La Mediatheque (Belgium) with the MediaCycle organization of media files by similarity.")
+	SET(WITH_SEGMENTATION OFF)
+	SET(WITH_OSC ON)
+
+	SET(MEDIA_TYPE "MEDIA_TYPE_MIXED")
+        SET(MC_PLUGINS "audio-engine;audio-features-yaafe;audio-osg;audio-reader-sndfile;file;image;image-osg;segmentation;text;text-osg;visualisation;archipel") # load archipel after text plugin which also reads .xml
+        SET(CLUSTERS_METHOD "MediaCycle KMeans")
+        SET(CLUSTERS_POSITIONS "Archipel Atoll")
+	SET(OSG_PLUGINS "")
+	SET(MEDIA_READER "Archipel Reader")
+	SET(ACTIVE_MEDIA "text")
+        SET(DESCRIPTION "ArchipelCycle is an attempt to complement the Archipel database from La Mediatheque (Belgium) with the MediaCycle organization of media files by similarity.")
+
+	INCLUDE (${CMAKE_SOURCE_DIR}/CMakeModules/CreateDefaultConfig.cmake)
+	CREATE_DEFAULT_CONFIG(${TARGET_NAME})
 
 	INCLUDE (${CMAKE_SOURCE_DIR}/CMakeModules/AddMediaCycleOsgQtApp.cmake)
 	ADD_MC_OSG_QT_EXECUTABLE(${TARGET_NAME})

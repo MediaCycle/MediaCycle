@@ -1,15 +1,17 @@
-SET(TARGET_NAME "navimedcycle-osg-qt")
+SET(TARGET_NAME "NavimedCycle")
 IF ( SUPPORT_NAVIMED AND SUPPORT_MULTIMEDIA AND SUPPORT_IMAGE AND SUPPORT_TEXT AND USE_QT4 AND USE_OSG )
 
-	SET(USE_AUDIO OFF)
-	SET(USE_IMAGE ON)
-	SET(USE_VIDEO OFF)
-	SET(USE_3DMODEL OFF)
-	SET(USE_TEXT ON)
-	SET(USE_ARCHIPEL OFF)
-	SET(USE_NAVIMED ON)
-	SET(WITH_QT4 ON)
-        SET(MC_PACKAGE_DESCRIPTION_SUMMARY "NavimedCycle is an attempt to complement the Navimed database from Polymedis (Belgium) with the MediaCycle organization of media files by similarity.")
+	SET(MEDIA_TYPE "MEDIA_TYPE_MIXED")
+	SET(MC_PLUGINS "file;image;image-osg;segmentation;sensor;sensor-osg;text;text-osg;video;video-osg;visualisation;navimed") # load navimed after text plugin which also reads .xml
+	SET(OSG_PLUGINS "osgdb_ffmpeg")
+	SET(MEDIA_READER "Navimed Reader")
+	SET(ACTIVE_MEDIA "text")
+	SET(CLUSTERS_METHOD "Navimed KMeans")
+        SET(CLUSTERS_POSITIONS "Navimed Position Plugin")
+        SET(DESCRIPTION "NavimedCycle is an attempt to complement the Navimed database from Polymedis (Belgium) with the MediaCycle organization of media files by similarity.")
+
+	INCLUDE (${CMAKE_SOURCE_DIR}/CMakeModules/CreateDefaultConfig.cmake)
+	CREATE_DEFAULT_CONFIG(${TARGET_NAME})
 
 	INCLUDE (${CMAKE_SOURCE_DIR}/CMakeModules/AddMediaCycleOsgQtApp.cmake)
 	ADD_MC_OSG_QT_EXECUTABLE(${TARGET_NAME})

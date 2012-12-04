@@ -49,8 +49,8 @@ VideoCycle::VideoCycle(QWidget* parent) : QMainWindow(parent) {
 // XS TODO: choose type of media...
 //	const string video_plugin_path = "/Users/xavier/development/workingDirectory/ticore-app/Applications/Numediart/MediaCycle/src/Builds/mac/plugins/video/Debug/";
 	mediacycle = new MediaCycle(MEDIA_TYPE_AUDIO); // XS hack
-//	mediacycle->addPluginLibrary(video_plugin_path+"mc_video.dylib");
-	
+//	mediacycle->loadPluginLibraryFromBasename("video");
+
 	connect(GOpushButton, SIGNAL(clicked()), this, SLOT(Calculate()));
 	connect(BrowseVideoDirpushButton, SIGNAL(clicked()), this, SLOT(BrowseVideoDir()));
 	connect(BrowseOutputFilepushButton, SIGNAL(clicked()), this, SLOT(BrowseOutputFile()));

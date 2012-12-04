@@ -1,21 +1,27 @@
-SET(TARGET_NAME "audiogarden-osg-qt")
+SET(TARGET_NAME "AudioGarden")
+SET(ICON_NAME "${TARGET_NAME}")
 IF (SUPPORT_AUDIO AND USE_AUDIOGARDEN AND USE_QT4 AND USE_OSG AND USE_OSC AND ( OPENAL_FOUND OR PORTAUDIO_FOUND ) )
-	SET(USE_AUDIO ON)
-	SET(USE_IMAGE OFF)
-	SET(USE_VIDEO OFF)
-	SET(USE_3DMODEL OFF)
-	SET(USE_TEXT OFF)
-	SET(USE_ARCHIPEL OFF)
-	SET(WITH_QT4 ON)
-        SET(MC_PACKAGE_DESCRIPTION_SUMMARY "AudioGarden is an attempt to provide a usable tool for composite audio creation.")
+
+	SET(WITH_SEGMENTATION ON)
+	SET(WITH_OSC ON)
+
+	SET(MEDIA_TYPE "MEDIA_TYPE_AUDIO")
+        SET(MC_PLUGINS "audio-engine;audio-features-yaafe;audio-reader-sndfile;audio-osg;audio-segmentation;audiogarden;file;pcapreprocess;segmentation;visualisation")
+        SET(CLUSTERS_METHOD "MediaCycle KMeans")
+        SET(CLUSTERS_POSITIONS "AudioGarden Flower")
+        SET(OSG_PLUGINS "")
+        SET(DESCRIPTION "AudioGarden is an attempt to provide a usable tool for composite audio creation.")
+
+	INCLUDE (${CMAKE_SOURCE_DIR}/CMakeModules/CreateDefaultConfig.cmake)
+	CREATE_DEFAULT_CONFIG(${TARGET_NAME})
 
 	INCLUDE (${CMAKE_SOURCE_DIR}/CMakeModules/AddMediaCycleOsgQtApp.cmake)
 	ADD_MC_OSG_QT_EXECUTABLE(${TARGET_NAME})
 
 	# Add more optional dependencies:
-	ADD_DEPENDENCIES(${TARGET_NAME} É)
+        #ADD_DEPENDENCIES(${TARGET_NAME} )
 	# Link these dependences:
-	#TARGET_LINK_LIBRARIES(${TARGET_NAME} É)
+	#TARGET_LINK_LIBRARIES(${TARGET_NAME} )
 	
 	# Packaging
 	SET(PROGNAME "${TARGET_NAME}")

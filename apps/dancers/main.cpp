@@ -86,7 +86,7 @@ int main(int argc, char** argv) {
 		cerr << "<MediaCycle-Dancers main> could not add Plugin: " << visPluginFilename << endl;
 		return EXIT_FAILURE;
 	}
-	mediacycle->setVisualisationPlugin("Visualisation");
+    mediacycle->changeActivePlugin(PLUGIN_TYPE_CLUSTERS_POSITIONS,"MediaCycle DANCERS!");
 	if (mediacycle->importACLLibrary(libraryFilename) == 0) {
 		cerr << "<MediaCycle-Dancers main> empty library: " << libraryFilename << endl;
 		return EXIT_FAILURE;

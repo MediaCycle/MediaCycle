@@ -193,8 +193,8 @@
 		}
 	}
 	
-	audio_engine = new ACAudioEngine();
-	audio_engine->setMediaCycle(media_cycle);
+    //audio_engine = new ACAudioEngine();
+    //audio_engine->setMediaCycle(media_cycle);
 
 	osc_feedback = NULL;
 	osc_browser = NULL;
@@ -215,7 +215,7 @@
 	[browser_osg_view setPlaying:NO];
 	delete osc_browser;
 	delete osc_feedback;//osc_feedback destructor calls ACOscFeedback::release()
-	delete audio_engine;
+    //delete audio_engine;
 	delete media_cycle;
 }
 
@@ -325,14 +325,14 @@
 - (IBAction)	setEngineStart:(id)inSender
 {
 	// SD TODO
-	audio_engine->startAudioEngine();
+    //audio_engine->startAudioEngine();
 	//audio_cycle->getAudioFeedback()->startAudioEngine();
 }
 
 - (IBAction)	setEngineStop:(id)inSender
 {
 	// SD TODO
-	audio_engine->stopAudioEngine();
+    //audio_engine->stopAudioEngine();
 	//audio_cycle->getAudioFeedback()->stopAudioEngine();
 }
 
@@ -376,7 +376,7 @@
 		osc_browser = new ACOscBrowser();
 		osc_browser->create((const char*)[osc_control_ip UTF8String], osc_control_port);
 		osc_browser->setMediaCycle(media_cycle);
-		osc_browser->setAudioEngine(audio_engine);
+        //osc_browser->setAudioEngine(audio_engine);
 		osc_browser->start();
 	}
 	else

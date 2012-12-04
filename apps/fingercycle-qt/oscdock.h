@@ -86,17 +86,13 @@ public:
     oscdock(QWidget *parent = 0);
     ~oscdock();
 
-#if defined (USE_OSC)
     void toggleFeedback(bool _status);
     void setFeedbackPort(int port);
     virtual void setOscFeedback(simpleoscfeedback* _feedback){this->osc_feedback = _feedback;}
     simpleoscfeedback* getFeedbackHandler(){return osc_feedback;}
-#endif //defined (USE_OSC)
 
 private:
     Ui::oscdock ui;
-#if defined (USE_OSC)
     simpleoscfeedback *osc_feedback;
-#endif //defined (USE_OSC)
 };
 #endif

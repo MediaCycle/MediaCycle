@@ -1,22 +1,24 @@
-SET(TARGET_NAME "audiocycle-osg-qt")
+SET(TARGET_NAME "AudioCycle")
 IF ( BUILD_AUDIOCYCLE_APP AND SUPPORT_AUDIO AND USE_QT4 AND USE_OSG AND USE_OSC AND ( OPENAL_FOUND OR PORTAUDIO_FOUND ) )
 
-	SET(USE_AUDIO ON)
-	SET(USE_IMAGE OFF)
-	SET(USE_VIDEO OFF)
-	SET(USE_3DMODEL OFF)
-	SET(USE_TEXT OFF)
-	SET(USE_ARCHIPEL OFF)
-	SET(WITH_QT4 ON)
-        SET(MC_PACKAGE_DESCRIPTION_SUMMARY "AudioCycle allows to organize audio files by similarity.")
+	SET(WITH_SEGMENTATION ON)
+	SET(WITH_OSC ON)
+
+	SET(MEDIA_TYPE "MEDIA_TYPE_AUDIO")
+        SET(MC_PLUGINS "audio-engine;audio-features-yaafe;audio-osg;audio-reader-sndfile;audio-segmentation;file;io-osc;pcapreprocess;segmentation;visualisation")
+	SET(OSG_PLUGINS "")
+        SET(DESCRIPTION "AudioCycle allows to organize audio files by similarity.")
+
+	INCLUDE (${CMAKE_SOURCE_DIR}/CMakeModules/CreateDefaultConfig.cmake)
+	CREATE_DEFAULT_CONFIG(${TARGET_NAME})
 
 	INCLUDE (${CMAKE_SOURCE_DIR}/CMakeModules/AddMediaCycleOsgQtApp.cmake)
 	ADD_MC_OSG_QT_EXECUTABLE(${TARGET_NAME})
 
 	# Add more optional dependencies:
-	#ADD_DEPENDENCIES(${TARGET_NAME} É)
+	#ADD_DEPENDENCIES(${TARGET_NAME} )
 	# Link these dependences:
-	#TARGET_LINK_LIBRARIES(${TARGET_NAME} É)
+	#TARGET_LINK_LIBRARIES(${TARGET_NAME} )
 	
 	# Packaging
 	SET(PROGNAME "${TARGET_NAME}")

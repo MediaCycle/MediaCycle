@@ -4,22 +4,26 @@ IF (SUPPORT_AUDIO AND BUILD_CLIS AND (USE_AUDIOFEAT OR USE_YAAFE))
 	FILE(GLOB SRC *.cpp *.c)
 	FILE(GLOB HDR *.hpp *.h)
 
+        ADD_EXECUTABLE(${TARGET_NAME} ${SRC} ${HDR})
+
+	FILE(GLOB MEDIA_DIRS ${CMAKE_SOURCE_DIR}/media/*)
+	FOREACH(MEDIA_DIR ${MEDIA_DIRS})
+   		IF(IS_DIRECTORY ${MEDIA_DIR})
+        		INCLUDE_DIRECTORIES(${MEDIA_DIR})
+    		ENDIF()
+	ENDFOREACH()
+
 	FILE(GLOB PLUGIN_DIRS ${CMAKE_SOURCE_DIR}/plugins/*)
 	FOREACH(PLUGIN_DIR ${PLUGIN_DIRS})
    		IF(IS_DIRECTORY ${PLUGIN_DIR})
         		INCLUDE_DIRECTORIES(${PLUGIN_DIR})
+                        GET_FILENAME_COMPONENT(PLUGIN ${PLUGIN_DIR} NAME)
+                        ADD_DEPENDENCIES(${TARGET_NAME} ${PLUGIN_PREFIX}${PLUGIN})
     		ENDIF()
 	ENDFOREACH()
 
-	ADD_EXECUTABLE(segmentation-cli ${SRC} ${HDR})
-
-	ADD_DEPENDENCIES(segmentation-cli mediacycle armadillo-utils  mc_audio mc_segmentation)
-	IF(USE_AUDIOFEAT)
-		ADD_DEPENDENCIES(segmentation-cli audiofeatures)
-		TARGET_LINK_LIBRARIES(segmentation-cli audiofeatures ${SAMPLERATE_LIBRARY})
-
-	ENDIF()
-	TARGET_LINK_LIBRARIES(segmentation-cli mediacycle mc_segmentation ${SNDFILE_LIBRARY})
+        ADD_DEPENDENCIES(${TARGET_NAME} mediacycle)
+        TARGET_LINK_LIBRARIES(${TARGET_NAME} mediacycle mc_segmentation)
 
 
 	MESSAGE("[X] ${TARGET_NAME}")

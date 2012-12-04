@@ -34,7 +34,7 @@
 
 // Warning: include C++ headers first, then import objective-c/c++ headers
 #include <MediaCycle.h>
-#include <ACAudioEngine.h>
+//#include <ACAudioEngine.h>
 #include <ACOscBrowser.h>
 #include <ACOscFeedback.h>
 
@@ -56,7 +56,7 @@ enum	{
 @interface ACAudioCycleOsgCocoa : NSObject {
 	
 	MediaCycle				*media_cycle;
-	ACAudioEngine			*audio_engine;
+    //ACAudioEngine			*audio_engine;
 	ACOscBrowser			*osc_browser;
 	ACOscFeedback			*osc_feedback;
 

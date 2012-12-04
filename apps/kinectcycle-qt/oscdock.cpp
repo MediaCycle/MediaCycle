@@ -105,20 +105,15 @@ void simpleoscfeedback::sendMessage(std::string _message){
 oscdock::oscdock(QWidget *parent)
     : QDockWidget(parent)
 {
-#if defined (USE_OSC)
     ui.setupUi(this); // first thing to do
     osc_feedback = 0;
     this->show();
-#endif //defined (USE_OSC)
 }
 
 oscdock::~oscdock(){
-#if defined (USE_OSC)
     osc_feedback = 0;
-#endif //defined (USE_OSC)
 }
 
-#if defined (USE_OSC)
 void oscdock::toggleFeedback(bool _status){
     if(!osc_feedback){
         std::cerr << "oscdock::toggleFeedback: osc feedback not created" << std::endl;
@@ -172,5 +167,3 @@ void oscdock::setFeedbackPort(int _port){
     if (restart)
         on_pushButtonFeedbackStart_clicked();
 }
-
-#endif //defined (USE_OSC)

@@ -1,14 +1,16 @@
-SET(TARGET_NAME "videocycle-osg-qt")
+SET(TARGET_NAME "VideoCycle")
 IF ( BUILD_VIDEOCYCLE_APP AND SUPPORT_VIDEO AND USE_QT4 AND USE_OSG AND USE_OSC )
 
-	SET(USE_AUDIO OFF)
-	SET(USE_IMAGE OFF)
-	SET(USE_VIDEO ON)
-	SET(USE_3DMODEL OFF)
-	SET(USE_TEXT OFF)
-	SET(USE_ARCHIPEL OFF)
-	SET(WITH_QT4 ON)
-        SET(MC_PACKAGE_DESCRIPTION_SUMMARY "VideoCycle allows to visually organize video files by similarity.")
+	SET(WITH_SEGMENTATION ON)
+	SET(WITH_OSC ON)
+
+	SET(MEDIA_TYPE "MEDIA_TYPE_VIDEO")
+        SET(MC_PLUGINS "file;io-osc;pcapreprocess;segmentation;video;video-osg;video-segmentation;visualisation")
+	SET(OSG_PLUGINS "osgdb_ffmpeg")
+        SET(DESCRIPTION "VideoCycle allows to visually organize video files by similarity.")
+
+	INCLUDE (${CMAKE_SOURCE_DIR}/CMakeModules/CreateDefaultConfig.cmake)
+	CREATE_DEFAULT_CONFIG(${TARGET_NAME})
 
 	INCLUDE (${CMAKE_SOURCE_DIR}/CMakeModules/AddMediaCycleOsgQtApp.cmake)
 	ADD_MC_OSG_QT_EXECUTABLE(${TARGET_NAME})

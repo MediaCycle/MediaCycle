@@ -1,7 +1,8 @@
 SET(TARGET_NAME "KinectCycle")
+SET(ICON_NAME "${TARGET_NAME}")
 IF( BUILD_LOOPJAM_APP AND USE_QT4 AND USE_OSC AND USE_OPENNI AND FFTW3_FOUND AND USE_BREAKPAD)
 
-        SET(MC_PACKAGE_DESCRIPTION_SUMMARY "KinectCycle allows to control MediaCycle applications with multiple people though OSC.")
+        SET(DESCRIPTION "KinectCycle allows to control MediaCycle applications with multiple people though OSC.")
 
         INCLUDE (${CMAKE_SOURCE_DIR}/CMakeModules/AddQtApp.cmake)
 	ADD_QT_EXECUTABLE(${TARGET_NAME})

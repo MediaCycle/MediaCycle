@@ -1,21 +1,18 @@
-IF(SUPPORT_VIDEO AND ARMADILLO_FOUND )
+IF(SUPPORT_VIDEO)
 	FILE(GLOB SRC *.cpp *.c)
 	FILE(GLOB HDR *.hpp *.h)
 
-	FILE(GLOB MC_SRC ../../core/*.cpp ../../core/*.c)
-	FILE(GLOB MC_HDR ../../core/*.hpp ../../core/*.h)
+	FILE(GLOB MC_SRC *.cpp *.c)
+	FILE(GLOB MC_HDR *.hpp *.h)
+
+	INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/media/video-core)
+	INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/media/video-features)
 
 	ADD_EXECUTABLE(mediacycle-dancers ${SRC} ${HDR})
 
-	ADD_DEPENDENCIES(mediacycle-dancers mediacycle mc_visualisation)
+	ADD_DEPENDENCIES(mediacycle-dancers mediacycle mc_visualisation mc_video)
 
 	TARGET_LINK_LIBRARIES(mediacycle-dancers mediacycle)
-	TARGET_LINK_LIBRARIES(mediacycle-dancers armadillo-utils)
-	IF(TINYXML_FOUND)
-		TARGET_LINK_LIBRARIES(mediacycle-dancers ${TINYXML_LIBRARY})
-	ELSE()
-		TARGET_LINK_LIBRARIES(mediacycle-dancers tinyxml)
-	ENDIF()
 
 	MESSAGE("[X] dancers")
 ELSE()

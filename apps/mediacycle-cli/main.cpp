@@ -1,8 +1,8 @@
 /**
  * @brief main.cpp
- * @author Alexis Moinet
- * @date 17/06/2011
- * @copyright (c) 2011 – UMONS - Numediart
+ * @author Christian Frisson
+ * @date 04/12/2012
+ * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -210,75 +210,33 @@ int main(int argc, char** argv) {
 	
 	media_cycle = new MediaCycle(_media_type,"/tmp/","mediacycle.acl");
 	
+    // -- media-specific features plugin + generic segmentation and visualisation plugins--
  	string smedia = "none";
 	switch (_media_type) {
 		case MEDIA_TYPE_3DMODEL:
-#if defined (SUPPORT_3DMODEL)
 			smedia="3Dmodel";
-#endif //defined (SUPPORT_3DMODEL)
+            media_cycle->loadPluginLibraryFromBasename(smedia);
 			break;	
 		case MEDIA_TYPE_AUDIO:
-#if defined (SUPPORT_AUDIO)
 			smedia="audio";
-#endif //defined (SUPPORT_AUDIO)
+            media_cycle->loadPluginLibraryFromBasename("audio-features-yaafe");
+            media_cycle->loadPluginLibraryFromBasename("audio-reader-sndfile");
+            //media_cycle->loadPluginLibraryFromBasename("audio-segmentation");
 			break;
 		case MEDIA_TYPE_IMAGE:
-#if defined (SUPPORT_IMAGE)
 			smedia="image";
-#endif //defined (SUPPORT_IMAGE)
+            media_cycle->loadPluginLibraryFromBasename(smedia);
 			break;
 		case MEDIA_TYPE_VIDEO:
-#if defined (SUPPORT_VIDEO)
 			smedia="video";
-#endif //defined (SUPPORT_VIDEO)
+            media_cycle->loadPluginLibraryFromBasename(smedia);
+            //media_cycle->loadPluginLibraryFromBasename("video-segmentation");
 			break;
 		default:
 			break;
 	}
-
-	// -- media-specific features plugin + generic segmentation and visualisation plugins--
-	std::string f_plugin, s_plugin, v_plugin;
-	
-	char c_path[2048];
-	// use the function to get the path
-	getcwd(c_path, 2048);
-	std::string s_path = c_path;
-	
-	std::string build_type ("Release");
-#ifdef USE_DEBUG
-	build_type = "Debug";
-#endif //USE_DEBUG
-	
-#if defined(__APPLE__)
-#if not defined (USE_DEBUG) and not defined (XCODE) // needs "make install" to be ran to work
-	f_plugin = "@executable_path/../MacOS/mc_" + smedia +".dylib";
-	v_plugin = "@executable_path/../MacOS/mc_visualisation.dylib";
-	s_plugin = "@executable_path/../MacOS/mc_segmentation.dylib";
-#else
-	f_plugin = s_path + "/../../../plugins/"+ smedia + "/" + build_type + "/mc_" + smedia +".dylib";
-	v_plugin = s_path + "/../../../plugins/visualisation/" + build_type + "/mc_visualisation.dylib";
-	s_plugin = s_path + "/../../../plugins/segmentation/" + build_type + "/mc_segmentation.dylib";
-#endif
-	// common to all media, but only for mac...
-#elif defined (__WIN32__)
-	f_plugin = s_path + "\..\..\..\plugins\\" + smedia + "\mc_"+smedia+".dll";
-	v_plugin = s_path + "/../../../plugins/visualisation/" + build_type + "/mc_visualisation.dll";
-	s_plugin = s_path + "/../../../plugins/segmentation/" + build_type + "/mc_segmentation.dll";
-#else
-#if not defined (USE_DEBUG) // needs "make package" to be ran to work
-	f_plugin = "/usr/lib/mc_"+smedia+".so";
-	v_plugin = "/usr/lib/mc_visualisation.so";
-	s_plugin = "/usr/lib/mc_segmentation.so";
-#else
-	f_plugin = s_path + "/../../plugins/"+smedia+"/mc_"+smedia+".so";
-	v_plugin = s_path + "/../../plugins/visualisation/mc_visualisation.so";
-	s_plugin = s_path + "/../../plugins/segmentation/mc_segmentation.so";
-#endif
-#endif
-	
-	media_cycle->addPluginLibrary(f_plugin);
-	media_cycle->addPluginLibrary(v_plugin);
-	//media_cycle->addPluginLibrary(s_plugin);
+    media_cycle->loadPluginLibraryFromBasename("visualisation");
+    //media_cycle->loadPluginLibraryFromBasename("segmentation");
 	
 	// SD - check if needed
 	// mediacyclesetClusterNumber(10);

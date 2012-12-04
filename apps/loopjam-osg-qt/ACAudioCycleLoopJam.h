@@ -40,23 +40,22 @@
 #include <string>
 
 class ACAudioCycleLoopJam: public ACMultiMediaCycleOsgQt {
-Q_OBJECT
+    Q_OBJECT
 public slots:
-        void openNextLibrary();
-        void openPreviousLibrary();
+    void openNextLibrary();
+    void openPreviousLibrary();
 
 public:
-	ACAudioCycleLoopJam();
-	~ACAudioCycleLoopJam();
-        void startLoopXML();
-	
-    //void setDefaultWaveform(ACBrowserAudioWaveformType _type);
+    ACAudioCycleLoopJam();
+    ~ACAudioCycleLoopJam();
+    void startLoopXML();
+
 protected:
-        bool parseXMLlist(std::string filename);
+    bool parseXMLlist(std::string filename);
 
 private:
-	int count, attente; 
-	std::vector <std::string> XMLfiles;
-	QTimer *timer;
+    int count, attente;
+    std::vector <std::string> XMLfiles;
+    QTimer *timer;
 };
 #endif // _ACAudioCycleLoopJam
