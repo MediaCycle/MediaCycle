@@ -1126,8 +1126,6 @@ bool ACMultiMediaCycleOsgQt::loadDefaultConfig(ACAbstractDefaultConfig* _config)
 
     // Update the plugin lists of the browser control dock through DockWidget
     dockWidgetsManager->changeMediaType(_config->mediaType());
-    dockWidgetsManager->setMediaCycle(media_cycle);
-    dockWidgetsManager->setOsgView(compositeOsgView);
     dockWidgetsManager->updatePluginsSettings();
 
     return true;
