@@ -32,8 +32,6 @@
  *
  */
 
-#if defined(USE_OCTAVE) && defined(USE_MAKAM)
-
 #include <iostream>
 #include <vector>
 #include <string>
@@ -51,8 +49,8 @@
 ACAudioMakamFeaturesPlugin::ACAudioMakamFeaturesPlugin() : ACFeaturesPlugin(){
     //vars herited from ACPlugin
     this->mMediaType = MEDIA_TYPE_AUDIO;
-    this->mName = "AudioMakamFeatures";
-    this->mDescription = "AudioMakamFeatures plugin";
+    this->mName = "Audio Makam Features";
+    this->mDescription = "Audio Makam Features plugin";
     this->mId = "";
     this->mDescriptorsList.push_back("Makam Histogram");
     //this->mtf_file_name = "";
@@ -174,4 +172,3 @@ std::vector<ACMediaFeatures*> ACAudioMakamFeaturesPlugin::calculate(ACMediaData*
 //	}
 //	return ps_mtf;
 //}
-#endif//defined(USE_OCTAVE) && defined(USE_MAKAM)

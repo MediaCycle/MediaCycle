@@ -32,8 +32,6 @@
  *
  */
 
-#if defined(USE_OCTAVE) && defined(USE_MAKAM)
-
 #include <iostream>
 #include <vector>
 #include <string>
@@ -54,8 +52,8 @@
 ACAudioMakamClassifierPlugin::ACAudioMakamClassifierPlugin() : ACClusterMethodPlugin(){
     //vars herited from ACPlugin
     this->mMediaType = MEDIA_TYPE_AUDIO;
-    this->mName = "AudioMakamClassifier";
-    this->mDescription = "AudioMakamClassifier plugin";
+    this->mName = "Audio Makam Classifier";
+    this->mDescription = "Audio Makam Classifier plugin";
     this->mId = "";
 
     // Initiate octave
@@ -200,4 +198,3 @@ void ACAudioMakamClassifierPlugin::updateClusters(ACMediaBrowser* mediaBrowser, 
     }
 
 }
-#endif//defined(USE_OCTAVE) && defined(USE_MAKAM)
