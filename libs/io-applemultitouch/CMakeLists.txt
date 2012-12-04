@@ -1,5 +1,5 @@
+# Apple multitouch trackpad support (not ready)
 IF ( USE_APPLE_MULTITOUCH )
-
 	FILE(GLOB SRC *.cpp)
 	FILE(GLOB HDR *.h)
 
