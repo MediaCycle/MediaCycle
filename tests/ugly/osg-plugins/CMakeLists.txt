@@ -1,0 +1,14 @@
+IF(OSG_FOUND)
+	FILE(GLOB SRC *.cpp *.c)
+	FILE(GLOB HDR *.hpp *.h)
+
+	ADD_EXECUTABLE(osg-plugins-test ${SRC} ${HDR})
+	TARGET_LINK_LIBRARIES(osg-plugins-test ${OPENSCENEGRAPH_LIBRARIES})
+	IF(MINGW)#OR APPLE_IOS_DEV OR APPLE_IOS_SIM)
+		TARGET_LINK_LIBRARIES(osg-plugins-test ${OSGPLUGINS_STATIC_LDFLAGS})#${OSGPLUGINS_LDFLAGS})
+	ENDIF()
+
+	MESSAGE("[X] osg-plugins-test")
+ELSE()
+	MESSAGE("[ ] osg-plugins-test")
+ENDIF()
