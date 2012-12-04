@@ -6,7 +6,6 @@
 //  @date 8/11/12
 //
 //
-#ifdef SUPPORT_VIDEO
 
 #include "ACVideoDiffSegmentationPlugin.h"
 #include "cv.h"
@@ -14,12 +13,12 @@
 #include <Armadillo-utils.h>
 using namespace arma;
 
-ACVideoDiffSegmentationPlugin::ACVideoDiffSegmentationPlugin() {
+ACVideoDiffSegmentationPlugin::ACVideoDiffSegmentationPlugin() : ACSegmentationPlugin() {
     //vars herited from ACPlugin
     this->mMediaType = MEDIA_TYPE_VIDEO;
     // this->mPluginType = PLUGIN_TYPE_SEGMENTATION;
-    this->mName = "VideoDiffSegmentation";
-    this->mDescription = "VideoDiffSegmentation plugin";
+    this->mName = "Video Diff Segmentation";
+    this->mDescription = "Video Diff Segmentation plugin";
     this->mId = "";
     this->method = 0;
     this->addNumberParameter("threshold",0.4,0,1,0.05,"pike detection threshold");
@@ -160,6 +159,3 @@ std::vector<ACMedia*> ACVideoDiffSegmentationPlugin::segment(ACMediaData* Video_
    
     return segments;
 }
-
-
-#endif

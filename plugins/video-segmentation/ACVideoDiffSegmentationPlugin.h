@@ -11,13 +11,7 @@
 #define __MediaCycle__ACVideoDiffSegmentationPlugin__
 
 #include <iostream>
-
-
-#if defined (SUPPORT_VIDEO)
-
 #include <MediaCycle.h>
-
-#include <iostream>
 
 class ACVideoDiffSegmentationPlugin : public ACSegmentationPlugin {
 public:
@@ -34,7 +28,5 @@ private:
     std::vector<std::string> methods;
     float threshold;
 };
-
-#endif //defined (SUPPORT_VIDEO)
 
 #endif /* defined(__MediaCycle__ACVideoDiffSegmentationPlugin__) */

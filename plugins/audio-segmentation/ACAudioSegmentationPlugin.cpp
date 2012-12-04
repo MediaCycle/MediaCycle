@@ -32,8 +32,6 @@
  *
  */
 
-#if defined (SUPPORT_AUDIO)
-
 #include "ACAudioSegmentationPlugin.h"
 #include <ACAudio.h>
 
@@ -46,8 +44,8 @@ ACAudioSegmentationPlugin::ACAudioSegmentationPlugin() {
     //vars herited from ACPlugin
     this->mMediaType = MEDIA_TYPE_AUDIO;
    // this->mPluginType = PLUGIN_TYPE_SEGMENTATION;
-    this->mName = "AudioSegmentation";
-    this->mDescription = "AudioSegmentation plugin";
+    this->mName = "Audio Segmentation";
+    this->mDescription = "Audio Segmentation plugin";
     this->mId = "";
     this->method = 0;
     this->methods.push_back("AudioGarden (on Energy)");
@@ -103,31 +101,25 @@ std::vector<ACMedia*> ACAudioSegmentationPlugin::segment(ACMediaData* audio_data
 
     switch (method){
     case 0:{ //AudioGarden
-		#if defined (USE_AUDIOFEAT)
-        //desc_mf = computeFeature(data, "Energy", theAudio->getSampleRate(), theAudio->getChannels(), theAudio->getNFrames(), 16, 13, 1024, extendSoundLimits);
-		#endif
 		desc_mf = theMedia->getTimedFeatures("Energy");
-		cout << "/////////////////////" << desc_mf->getLength() <<endl;
+        if(desc_mf)
+            cout << "/////////////////////" << desc_mf->getLength() <<endl;
 		//desc_mf->dump();
         break;
     }
     case 1:{
-		#if defined (USE_AUDIOFEAT)
-        //desc_mf = computeFeature(data, "Spectral Flux", theAudio->getSampleRate(), theAudio->getChannels(), theAudio->getNFrames(), 16, 13, 1024*2, extendSoundLimits);
-		#endif
-		desc_mf = theMedia->getTimedFeatures("Spectral Flux");
+        if(desc_mf)
+            desc_mf = theMedia->getTimedFeatures("Spectral Flux");
         break;
     }
     case 2:{ //FASTBIC
-		#if defined (USE_AUDIOFEAT)
-        //desc_mf = computeFeature(data, "MFCC", theAudio->getSampleRate(), theAudio->getChannels(), theAudio->getNFrames(), 16, 13, 1024*2, false);
-		#endif
-		desc_mf = theMedia->getTimedFeatures("MFCC");
+        if(desc_mf)
+            desc_mf = theMedia->getTimedFeatures("MFCC");
         break;
     }
     default:
         std::cerr << "Error : Wrong method" << std::endl;
-        exit(1);
+        return segments;
     }
 
     segments = this->_segment(desc_mf,theMedia);
@@ -141,6 +133,9 @@ std::vector<ACMedia*> ACAudioSegmentationPlugin::_segment(ACMediaTimedFeature* d
 
     ACAudio* theAudio = 0;
     vector<ACMedia*> segments;
+
+    if(!desc_mf)
+        return segments;
 
     try{
         theAudio = static_cast <ACAudio*> (theMedia);
@@ -157,33 +152,24 @@ std::vector<ACMedia*> ACAudioSegmentationPlugin::_segment(ACMediaTimedFeature* d
     fmat desc_m;
     switch (method){
     case 0:{ //AudioGarden
-		#if defined (USE_AUDIOFEAT)
-        //desc_mf = computeFeature(data, "Energy", theAudio->getSampleRate(), theAudio->getChannels(), theAudio->getNFrames(), 16, 13, 1024, extendSoundLimits);
-		#endif
         desc_v = conv_to<fcolvec>::from(-desc_mf->getValue());
         time_v = desc_mf->getTime();
         peaks_v = findpeaks(desc_v, 100); //ccl, originally: 10
         break;
     }
     case 1:{
-		#if defined (USE_AUDIOFEAT)
-        //desc_mf = computeFeature(data, "Spectral Flux", theAudio->getSampleRate(), theAudio->getChannels(), theAudio->getNFrames(), 16, 13, 1024*2, extendSoundLimits);
-		#endif
         desc_v = conv_to<fcolvec>::from(desc_mf->delta()->getValue());
         time_v = desc_mf->getTime();
         peaks_v = findpeaks(desc_v, min((unsigned int) 200, desc_v.n_elem-1)); //200 ccl original:10
         break;
     }
     case 2:{ //FASTBIC
-		#if defined (USE_AUDIOFEAT)
-        //desc_mf = computeFeature(data, "MFCC", theAudio->getSampleRate(), theAudio->getChannels(), theAudio->getNFrames(), 16, 13, 1024*2, false);
-		#endif
         peaks_v=FastBIC(desc_mf->getValue(), 2, theAudio->getSampleRate());
         break;
     }
     default:
         std::cerr << "Error : Wrong method" << std::endl;
-        exit(1);
+        return segments;
     }
     icolvec zero_v = "0";
     icolvec tmp_v(1);
@@ -246,4 +232,3 @@ icolvec FastBIC(fmat audiofeatures_m, float lambda, int samplerate)
 	
     return segment_v;
 }
-#endif //defined (SUPPORT_AUDIO)

@@ -1,5 +1,5 @@
 /*
- *  ACSelfSimSegmentationPlugin.h
+ *  ACSelfSimSegmentation.h
  *  MediaCycle
  *
  *  @author Jerome Urbain
@@ -32,16 +32,12 @@
  *
  */
 
-#ifndef _ACSelfSimSegmentationPlugin_H
-#define	_ACSelfSimSegmentationPlugin_H
+#ifndef _ACSelfSimSegmentation_H
+#define	_ACSelfSimSegmentation_H
 
 #include "Armadillo-utils.h" 
 #include "MediaCycle.h"
 #include "ACMediaTimedFeature.h"
-
-#ifndef PI
-#define PI 3.14159265
-#endif
 
 enum SelfSimKernelType {
     SELFSIMSTEP, // +1 and -1
@@ -51,26 +47,23 @@ enum SelfSimKernelType {
 enum SelfSimDistance {// actually it will be the inverse of a distance: the larger the number, the more the 2 objects are similar
     COSINE,
     EUCLIDEAN,
-    MANHATTAN 
+    MANHATTAN
 };
 
-class ACSelfSimSegmentationPlugin : public ACSegmentationPlugin {
+class ACSelfSimSegmentation : public ACSegmentationPlugin {
 public:
-    ACSelfSimSegmentationPlugin();
-    ACSelfSimSegmentationPlugin(ACMediaType type);
-    ~ACSelfSimSegmentationPlugin();
-
-    virtual std::vector<ACMedia*> segment(ACMediaData* _data, ACMedia* _theMedia){};
-    virtual std::vector<ACMedia*> segment(ACMediaTimedFeature* _mtf, ACMedia* _theMedia);
+    ACSelfSimSegmentation();
+    ~ACSelfSimSegmentation();
 
     //std::vector<int> testSegment(const vector< vector<float> > & _allfeatures, float _SelfSimThresh=0.8, int _L=8, int _Wmin=8, SelfSimKernelType _T=SELFSIMSTEP, SelfSimDistance _D=COSINE);
     std::vector<int> testSegment(arma::fmat _M, float _SelfSimThresh=0.8, int _L=8, int _Wmin=8, SelfSimKernelType _T=SELFSIMSTEP, SelfSimDistance _D=COSINE);
     std::vector<int> testSegment(ACMediaTimedFeature* _ACMTF, float _SelfSimThresh=0.8, int _L=8, int _Wmin=8, SelfSimKernelType _T=SELFSIMSTEP, SelfSimDistance _D=COSINE);
     std::vector<int> segment(std::vector <ACMediaTimedFeature*> _ACMTF, float _SelfSimThresh=0.8, int _L=8, int _Wmin=8, SelfSimKernelType _T=SELFSIMSTEP, SelfSimDistance _D=COSINE);
 
-    arma::fmat get_features() {return full_features;};
+    arma::fmat get_features() {return full_features;}
 
-private:
+protected:
+    std::vector<ACMedia*> _segment(ACMediaTimedFeature* _mtf, ACMedia* _theMedia);
     std::vector<int> _segment();
 
     int Wmin;
@@ -89,5 +82,4 @@ private:
     //arma::fmat vectorACMTF2fmat(std::vector <ACMediaTimedFeature*> _ACMTF);
 };
 
-
-#endif	// _ACSelfSimSegmentationPlugin_H
+#endif	// _ACSelfSimSegmentation_H

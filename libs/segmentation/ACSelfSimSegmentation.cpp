@@ -1,5 +1,5 @@
 /*
- *  ACSelfSimSegmentationPlugin.cpp
+ *  ACSelfSimSegmentation.cpp
  *  MediaCycle
  *
  *  @author Jerome Urbain
@@ -32,141 +32,69 @@
  *
  */
 
-#include "ACSelfSimSegmentationPlugin.h"
+#include "ACSelfSimSegmentation.h"
 #include "Armadillo-utils.h" //ccl
 
 #include <vector>
 #include <string>
 
+#ifndef PI
+#define PI 3.14159265
+#endif
+
 using namespace arma; //ccl
 
 // L = width of the kernel = range of the self-similarity matrix to compute
 // thresh = threshold under which peaks are not considered as segmentation points
- 
-//ACSelfSimSegmentationPlugin::ACSelfSimSegmentationPlugin() : L(8), SelfSimThresh(0.8){
-//ACSelfSimSegmentationPlugin::ACSelfSimSegmentationPlugin() : SelfSimThresh(0.8), L(8), Wmin(8), KernelType(SELFSIMSTEP), DistanceType(COSINE){ //ccl
-//ACSelfSimSegmentationPlugin::ACSelfSimSegmentationPlugin() : SelfSimThresh(0.01), L(32), Wmin(240), KernelType(SELFSIMGAUSSIAN), DistanceType(COSINE){ //ccl
-ACSelfSimSegmentationPlugin::ACSelfSimSegmentationPlugin() : SelfSimThresh(0.01), L(2), Wmin(128), KernelType(SELFSIMGAUSSIAN), DistanceType(COSINE){ //ccl 
-    this->mMediaType = MEDIA_TYPE_AUDIO & MEDIA_TYPE_VIDEO;
-    // this->mPluginType = PLUGIN_TYPE_SEGMENTATION;
-    this->mName = "SelfSimSegmentation";
-    this->mDescription = "SelfSimSegmentation plugin";
-    this->mId = "";
 
+//ACSelfSimSegmentation::ACSelfSimSegmentation() : L(8), SelfSimThresh(0.8){
+//ACSelfSimSegmentation::ACSelfSimSegmentation() : SelfSimThresh(0.8), L(8), Wmin(8), KernelType(SELFSIMSTEP), DistanceType(COSINE){ //ccl
+//ACSelfSimSegmentation::ACSelfSimSegmentation() : SelfSimThresh(0.01), L(32), Wmin(240), KernelType(SELFSIMGAUSSIAN), DistanceType(COSINE){ //ccl
+ACSelfSimSegmentation::ACSelfSimSegmentation() : SelfSimThresh(0.01), L(2), Wmin(128), KernelType(SELFSIMGAUSSIAN), DistanceType(COSINE){ //ccl
     kernel_types.push_back("step (+1/-1)");
     kernel_types.push_back("gaussian");
 
     distance_types.push_back("cosine");
     distance_types.push_back("euclidean");
     distance_types.push_back("manhattan");
-
-    this->addNumberParameter("minimum window size",Wmin,1,1024,1,"minimum length of the window in which to search for segment change (in number of frames)"); // Wmin
-    this->addNumberParameter("threshold",SelfSimThresh,0,1,0.1,"threshold under which peaks are not considered as segmentation points"); // SelfSimThresh
-    this->addNumberParameter("kernel size",L,0,16,1,"width of the kernel = range of the self-similarity matrix to compute"); // L
-    this->addStringParameter("kernel type",kernel_types[SELFSIMGAUSSIAN],kernel_types,"kernel type"); // KernelType
-    this->addStringParameter("distance type",distance_types[COSINE],distance_types,"distance type"); // DistanceType
-}
-ACSelfSimSegmentationPlugin::ACSelfSimSegmentationPlugin(ACMediaType type){ 
-    if (type==MEDIA_TYPE_AUDIO){
-		this->mMediaType = MEDIA_TYPE_AUDIO;
-		// this->mPluginType = PLUGIN_TYPE_SEGMENTATION;
-		this->mName = "AudioSelfSimSegmentation";
-		this->mDescription = "SelfSimSegmentation plugin for audio";
-		this->mId = "";
-		
-		kernel_types.push_back("step (+1/-1)");
-		kernel_types.push_back("gaussian");
-		
-		distance_types.push_back("cosine");
-		distance_types.push_back("euclidean");
-		distance_types.push_back("manhattan");
-		
-		this->Wmin = 128;
-		this->SelfSimThresh = 0.01;
-		this->L = 2;
-		this->KernelType = SELFSIMGAUSSIAN;
-		this->DistanceType = COSINE;
-		
-		this->addNumberParameter("minimum window size",Wmin,1,1024,1,"minimum length of the window in which to search for segment change (in number of frames)"); // Wmin
-		
-		
-	} else if (type==MEDIA_TYPE_VIDEO){
-		this->mMediaType = MEDIA_TYPE_VIDEO;
-		// this->mPluginType = PLUGIN_TYPE_SEGMENTATION;
-		this->mName = "VideoSelfSimSegmentation";
-		this->mDescription = "SelfSimSegmentation plugin for video";
-		this->mId = "";
-		
-		kernel_types.push_back("step (+1/-1)");
-		kernel_types.push_back("gaussian");
-		
-		distance_types.push_back("cosine");
-		distance_types.push_back("euclidean");
-		distance_types.push_back("manhattan");
-		
-		this->Wmin = 8;
-		this->SelfSimThresh = 0.8;
-		this->L = 8;
-		this->KernelType = SELFSIMSTEP;
-		this->DistanceType = COSINE;
-		
-		
-		this->addNumberParameter("minimum window size",Wmin,1,100,1,"minimum length of the window in which to search for segment change (in number of frames)"); // Wmin
-	}
-	
-	this->addNumberParameter("threshold",SelfSimThresh,0,1,0.1,"threshold under which peaks are not considered as segmentation points"); // SelfSimThresh
-	this->addNumberParameter("kernel size",L,0,16,1,"width of the kernel = range of the self-similarity matrix to compute"); // L
-	this->addStringParameter("kernel type",kernel_types[SELFSIMGAUSSIAN],kernel_types,"kernel type"); // KernelType
-	this->addStringParameter("distance type",distance_types[COSINE],distance_types,"distance type"); // DistanceType
-	
-		
 }
 
-ACSelfSimSegmentationPlugin::~ACSelfSimSegmentationPlugin() {
+ACSelfSimSegmentation::~ACSelfSimSegmentation() {
 }
 
-std::vector<ACMedia*> ACSelfSimSegmentationPlugin::segment(ACMediaTimedFeature* _MTF, ACMedia* _theMedia){
+std::vector<ACMedia*> ACSelfSimSegmentation::_segment(ACMediaTimedFeature* _MTF, ACMedia* _theMedia){
 
-    // Retrieve the user-defined values
-    this->Wmin = this->getNumberParameterValue("minimum window size");
-    this->SelfSimThresh = this->getNumberParameterValue("threshold");
-    this->L = this->getNumberParameterValue("kernel size");
-    this->KernelType = (SelfSimKernelType)(this->getStringParameterValueIndex("kernel type"));
-    this->DistanceType = (SelfSimDistance)(this->getStringParameterValueIndex("distance type"));
-	
-	cout << "user-defined parameters for segmentation: " <<  this->KernelType << " / " << this->DistanceType << " / " << this->Wmin << " / " << this->SelfSimThresh << " / " << this->L << endl; //CPL
-	
-	//Taking a part of the features for segmentation
-	const vector<string> testNames=_MTF->getNames();
-    //cout << "ACSelfSimSegmentationPlugin::segment featureName"<<endl;
+    //Taking a part of the features for segmentation
+    const vector<string> testNames=_MTF->getNames();
+    //cout << "ACSelfSimSegmentation::segment featureName"<<endl;
     //for (int i=0;i<testNames.size();i++)
     //    cout<<testNames[i]<<endl;
     vector<string> testNames2=_MTF->getDistinctNames();
-    //cout << "ACSelfSimSegmentationPlugin::segment featureName"<<endl;
-	fmat testMat;
+    //cout << "ACSelfSimSegmentation::segment featureName"<<endl;
+    fmat testMat;
     for (int i=0;i<testNames2.size();i++) {
-		
-		if (testNames2[i].compare("Spectral Flux") == 0) {
-			//cout<< " " << i << ": " << testNames2[i] << endl;
-			//cout << (_MTF->getValue(testNames2[i])).n_rows<< " x " << (_MTF->getValue(testNames2[i])).n_cols << endl;
-			testMat = join_rows(testMat, _MTF->getValue(testNames2[i]));
-		} 
-		if (testNames2[i].compare("MFCC") == 0) {
-			//cout<< " " << i << ": " << testNames2[i] << endl;
-			//cout << (_MTF->getValue(testNames2[i])).n_rows<< " x " << (_MTF->getValue(testNames2[i])).n_cols << endl;
-			testMat = join_rows(testMat, _MTF->getValue(testNames2[i]));
-		}
+
+        if (testNames2[i].compare("Spectral Flux") == 0) {
+            //cout<< " " << i << ": " << testNames2[i] << endl;
+            //cout << (_MTF->getValue(testNames2[i])).n_rows<< " x " << (_MTF->getValue(testNames2[i])).n_cols << endl;
+            testMat = join_rows(testMat, _MTF->getValue(testNames2[i]));
+        }
+        if (testNames2[i].compare("MFCC") == 0) {
+            //cout<< " " << i << ": " << testNames2[i] << endl;
+            //cout << (_MTF->getValue(testNames2[i])).n_rows<< " x " << (_MTF->getValue(testNames2[i])).n_cols << endl;
+            testMat = join_rows(testMat, _MTF->getValue(testNames2[i]));
+        }
         
-	}
+    }
     //cout << testMat.n_rows<< " x " << testMatL.n_cols << endl;
-	
+
     //XS TODO: not efficient to transpose !!
     // make this more coherent
-	if (testMat.n_cols>0) {
-		this->full_features = arma::trans (testMat);
-	} else {
-		this->full_features = arma::trans (_MTF -> getValue());
-	}
+    if (testMat.n_cols>0) {
+        this->full_features = arma::trans (testMat);
+    } else {
+        this->full_features = arma::trans (_MTF -> getValue());
+    }
 
     // get the limits BETWEEN segments as integers
     // usually does not contain 0 nor the last index
@@ -177,7 +105,7 @@ std::vector<ACMedia*> ACSelfSimSegmentationPlugin::segment(ACMediaTimedFeature* 
 
     int Nseg = segments_limits.size();
     if (Nseg == 0) {
-        cerr << "< ACSelfSimSegmentationPlugin::segment> : no segments" << endl;
+        cerr << "< ACSelfSimSegmentation::segment> : no segments" << endl;
         return segments; // XS check this
     }
 
@@ -223,7 +151,7 @@ std::vector<ACMedia*> ACSelfSimSegmentationPlugin::segment(ACMediaTimedFeature* 
 
 }
 
-/*std::vector<int> ACSelfSimSegmentationPlugin::testSegment(const vector< vector<float> > & _allfeatures, float _SelfSimThresh, int _L, int _Wmin, SelfSimKernelType _T, SelfSimDistance _D){
+/*std::vector<int> ACSelfSimSegmentation::testSegment(const vector< vector<float> > & _allfeatures, float _SelfSimThresh, int _L, int _Wmin, SelfSimKernelType _T, SelfSimDistance _D){
         this->SelfSimThresh = _SelfSimThresh;
         this->Wmin = _Wmin;
         this->L=_L;
@@ -243,7 +171,7 @@ std::vector<ACMedia*> ACSelfSimSegmentationPlugin::segment(ACMediaTimedFeature* 
         return (this->_segment());
 }*/
 
-std::vector<int> ACSelfSimSegmentationPlugin::testSegment(arma::fmat _M, float _SelfSimThresh, int _L, int _Wmin, SelfSimKernelType _T, SelfSimDistance _D){
+std::vector<int> ACSelfSimSegmentation::testSegment(arma::fmat _M, float _SelfSimThresh, int _L, int _Wmin, SelfSimKernelType _T, SelfSimDistance _D){
     this->SelfSimThresh = _SelfSimThresh;
     this->Wmin = _Wmin;
     this->L=_L;
@@ -254,7 +182,7 @@ std::vector<int> ACSelfSimSegmentationPlugin::testSegment(arma::fmat _M, float _
     return (this->_segment());
 }
 
-std::vector<int> ACSelfSimSegmentationPlugin::testSegment(ACMediaTimedFeature* _ACMTF, float _SelfSimThresh, int _L, int _Wmin, SelfSimKernelType _T, SelfSimDistance _D){
+std::vector<int> ACSelfSimSegmentation::testSegment(ACMediaTimedFeature* _ACMTF, float _SelfSimThresh, int _L, int _Wmin, SelfSimKernelType _T, SelfSimDistance _D){
 
     this->SelfSimThresh = _SelfSimThresh;
     this->Wmin = _Wmin;
@@ -266,51 +194,51 @@ std::vector<int> ACSelfSimSegmentationPlugin::testSegment(ACMediaTimedFeature* _
     return (this->_segment());
 }
 
-std::vector<int> ACSelfSimSegmentationPlugin::segment(std::vector <ACMediaTimedFeature*> _ACMTF, float _SelfSimThresh, int _L, int _Wmin, SelfSimKernelType _T, SelfSimDistance _D){
-	this->SelfSimThresh = _SelfSimThresh;
-        this->Wmin = _Wmin;
-        this->L=_L;
-	this->full_features = arma::trans(vectorACMTF2fmat(_ACMTF));
-	cerr<< "from std::vector <ACMediaTimedFeature*> _ACMTF, SIZE full_features " << (this->full_features).n_rows << " x " << (this->full_features).n_cols << endl;
-        this->KernelType=_T;
-        this->DistanceType=_D;
-	cerr<< " " << SelfSimThresh << " " << L << " " << Wmin << " " << KernelType << " " << DistanceType << endl;
-	
-	//ccl (taken from ACBicSegmentation)
-	std::vector<int> segments_limits = this->_segment();
-	int Nseg = segments_limits.size();
-	// the beginning of first segment should be zero
-	// no push_front for vectors (only for list)
-	if (segments_limits[0] != 0) {
-		vector<int>::iterator it;
-		it = segments_limits.begin();
-		it = segments_limits.insert ( it , 0 );
-		Nseg++;
-	}
-	// the end of the last segment should be the end of the Media
-	// XS TODO allow for some buffer (ex: it has no sense to make the last segment 1 frame wide)
-	if (segments_limits[Nseg-1] != _ACMTF.size()-1){
-		segments_limits.push_back(_ACMTF.size()-1);
-		Nseg++;
-	}
-	
-	return (segments_limits);
-	
+std::vector<int> ACSelfSimSegmentation::segment(std::vector <ACMediaTimedFeature*> _ACMTF, float _SelfSimThresh, int _L, int _Wmin, SelfSimKernelType _T, SelfSimDistance _D){
+    this->SelfSimThresh = _SelfSimThresh;
+    this->Wmin = _Wmin;
+    this->L=_L;
+    this->full_features = arma::trans(vectorACMTF2fmat(_ACMTF));
+    cerr<< "from std::vector <ACMediaTimedFeature*> _ACMTF, SIZE full_features " << (this->full_features).n_rows << " x " << (this->full_features).n_cols << endl;
+    this->KernelType=_T;
+    this->DistanceType=_D;
+    cerr<< " " << SelfSimThresh << " " << L << " " << Wmin << " " << KernelType << " " << DistanceType << endl;
+
+    //ccl (taken from ACBicSegmentation)
+    std::vector<int> segments_limits = this->_segment();
+    int Nseg = segments_limits.size();
+    // the beginning of first segment should be zero
+    // no push_front for vectors (only for list)
+    if (segments_limits[0] != 0) {
+        vector<int>::iterator it;
+        it = segments_limits.begin();
+        it = segments_limits.insert ( it , 0 );
+        Nseg++;
+    }
+    // the end of the last segment should be the end of the Media
+    // XS TODO allow for some buffer (ex: it has no sense to make the last segment 1 frame wide)
+    if (segments_limits[Nseg-1] != _ACMTF.size()-1){
+        segments_limits.push_back(_ACMTF.size()-1);
+        Nseg++;
+    }
+
+    return (segments_limits);
+
 }
-	
+
 //supposes we have defined:
 // - this->lambda = _lambda;
 // - this->sampling_rate = _samplingrate;
 // - this->full_features = _M ; 
 
-std::vector<int> ACSelfSimSegmentationPlugin::_segment(){
+std::vector<int> ACSelfSimSegmentation::_segment(){
     // XS test most significant segment (only one)
     // this->findSingleSegment(0,this->full_features.n_cols-1);
 
     //compute self-similarity
     arma::fmat SelfSim;
     int n_frames=int (this->full_features.n_cols);
-	cout << "Size of the features matrix: " << (this->full_features.n_cols) << " x " << (this->full_features.n_rows) << endl;
+    cout << "Size of the features matrix: " << (this->full_features.n_cols) << " x " << (this->full_features.n_rows) << endl;
     SelfSim.zeros(L,n_frames);
     int i,k,p;
     for(i=0;i<n_frames;i++)
@@ -334,7 +262,7 @@ std::vector<int> ACSelfSimSegmentationPlugin::_segment(){
     kernel = buildKernel();
     double sumkernel=arma::accu(arma::abs(kernel));
 
-        //kernel.print(); //ccl commented
+    //kernel.print(); //ccl commented
 
     // computing the novelty score
     arma::rowvec novelty;
@@ -366,9 +294,6 @@ std::vector<int> ACSelfSimSegmentationPlugin::_segment(){
         }
     }
 
-
-
-
     /*int seg_i = 0;
  int seg_f = Wmin;
 
@@ -386,7 +311,7 @@ std::vector<int> ACSelfSimSegmentationPlugin::_segment(){
 
 }
 
-arma::fmat ACSelfSimSegmentationPlugin::buildKernel()
+arma::fmat ACSelfSimSegmentation::buildKernel()
 {
     arma::fmat kernel;
     if (2*(int(L/2))!=L) { // maybe we can accept odd numbers
@@ -424,12 +349,10 @@ arma::fmat ACSelfSimSegmentationPlugin::buildKernel()
         }
         break;
     }
-    
-
     return kernel;
 }
 
-double ACSelfSimSegmentationPlugin::computeDistance(int _a, int _b)
+double ACSelfSimSegmentation::computeDistance(int _a, int _b)
 {
     //actually we compute the inverse of a distance (like cosine similarity): the larger the value, the more the vectors are similar
     //printf("_a: %d; _b: %d; produit: %f; norm_a: %f; norm_b: %f; cosdist: %f\n", _a, _b, arma::dot(this->full_features.col(_a),this->full_features.col(_b)),arma::norm(this->full_features.col(_a),2),arma::norm(this->full_features.col(_b),2),arma::dot(this->full_features.col(_a),this->full_features.col(_b))/(arma::norm(this->full_features.col(_a),2)*arma::norm(this->full_features.col(_b),2)));
@@ -447,8 +370,4 @@ double ACSelfSimSegmentationPlugin::computeDistance(int _a, int _b)
         // default???
         // we can also allow any p-norm (p>2), simple call to armadillo norm witht he given parameter
     }
-
-
 }
-
-

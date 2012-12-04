@@ -1,10 +1,10 @@
 /*
- *  ACAudioSegmentationPlugin.h
+ *  ACVideoSelfSimSegmentationPlugin.h
  *  MediaCycle
  *
- *  @author Damien Tardieu
- *  @date 09/06/2009
- *  @copyright (c) 2010 – UMONS - Numediart
+ *  @author Christian Frisson & Cécile Picard-Limpens
+ *  @date 3/12/2012
+ *  @copyright (c) 2012 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
  *  licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -32,34 +32,18 @@
  *
  */
 
-#ifndef _ACAUDIOSEGMENTATIONPLUGIN_H
-#define	_ACAUDIOSEGMENTATIONPLUGIN_H
+#ifndef _ACVideoSelfSimSegmentationPlugin_H
+#define	_ACVideoSelfSimSegmentationPlugin_H
 
-#if defined (SUPPORT_AUDIO)
+#include "ACSelfSimSegmentation.h"
 
-#if defined (USE_AUDIOFEAT)
-#include <ACAudioFeatures.h>
-#endif
-#include <MediaCycle.h>
-
-#include <iostream>
-
-class ACAudioSegmentationPlugin : public ACSegmentationPlugin {
+class ACVideoSelfSimSegmentationPlugin : public ACSegmentationPlugin, public ACSelfSimSegmentation {
 public:
-    ACAudioSegmentationPlugin();
-    ~ACAudioSegmentationPlugin();
+    ACVideoSelfSimSegmentationPlugin();
+    virtual ~ACVideoSelfSimSegmentationPlugin();
 
-    virtual std::vector<ACMedia*> segment(ACMediaData* _data, ACMedia*);
-    std::vector<ACMedia*> segment(ACMediaTimedFeature* _MTF, ACMedia* _theMedia);
-
-private:
-    std::vector<ACMedia*> _segment(ACMedia* _theMedia);
-    std::vector<ACMedia*> _segment(ACMediaTimedFeature* _MTF, ACMedia* _theMedia);
-    int method;
-    std::vector<std::string> methods;
+    virtual std::vector<ACMedia*> segment(ACMediaData* _data, ACMedia* _theMedia){return std::vector<ACMedia*>();}
+    virtual std::vector<ACMedia*> segment(ACMediaTimedFeature* _mtf, ACMedia* _theMedia);
 };
 
-arma::icolvec FastBIC(arma::fmat audiofeatures_m, float lambda, int samplerate);
-
-#endif //defined (SUPPORT_AUDIO)
-#endif	/* _ACAUDIOSEGMENTATIONPLUGIN_H */
+#endif	// _ACVideoSelfSimSegmentationPlugin_H
