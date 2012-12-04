@@ -43,12 +43,13 @@ namespace fs = boost::filesystem;
 using std::cout;
 using std::endl;
 using std::cerr;
+using namespace std;
 
-ACVideoDancersPlugin::ACVideoDancersPlugin() {
+ACVideoDancersPlugin::ACVideoDancersPlugin() : ACFeaturesPlugin() {
     //vars herited from ACPlugin
     this->mMediaType = MEDIA_TYPE_VIDEO;
-    this->mName = "Video";
-    this->mDescription = "Video plugin";
+    this->mName = "Video DANCERS!";
+    this->mDescription = "Video DANCERS! plugin";
     this->mId = "";
     this->mDescriptorsList.push_back("(Front) Mean Contraction Index");
     this->mDescriptorsList.push_back("(Front) Mean Bounding Box Ratio");
