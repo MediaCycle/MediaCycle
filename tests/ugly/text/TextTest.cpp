@@ -44,7 +44,7 @@
 #include "ACTextFeaturesPlugin.h"
 #include "ACIndexModifier.h"
 
-#include "ArchipelReader.h"
+#include "ACArchipelReader.h"
 #include<iostream>
 
 #include <QtGui>
@@ -274,20 +274,15 @@ int main(void){return 0;}
 	std::string f_plugin, s_plugin, v_plugin;
 	std::string smedia="text",build_type="Debug";
 	
-	f_plugin = "../../../../plugins/"+ smedia + "/" + build_type + "/mc_" + smedia +".dylib";
-	v_plugin = "../../../../plugins/visualisation/" + build_type + "/mc_visualisation.dylib";
-	s_plugin = "../../../../plugins/segmentation/" + build_type + "/mc_segmentation.dylib";
-	
 	for (int i=0;i<100;i++){
 		MediaCycle *testMC=new MediaCycle(MEDIA_TYPE_TEXT);
-		
-		if(testMC->addPluginLibrary(f_plugin) == -1){
+        if(testMC->loadPluginLibraryFromBasename(smedia) == -1){
 			return 0;
 		}
-		if(testMC->addPluginLibrary(v_plugin) == -1){
+        if(testMC->loadPluginLibraryFromBasename("visualisation") == -1){
 			return 0;
 		}
-		if(testMC->addPluginLibrary(s_plugin) == -1){
+        if(testMC->loadPluginLibraryFromBasename("segmentation") == -1){
 			
 			return 0;
 		}

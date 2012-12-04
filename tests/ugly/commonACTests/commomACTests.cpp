@@ -75,19 +75,19 @@ bool test_features_visualisation_plugins(){
 	std::string build_type = "Debug";
 	
 	cout << "... importing audio features plugins Library" << endl;
-	media_cycle->addPluginLibrary("../../../plugins/audio/" + build_type + "/mc_audiofeatures.dylib");
+    media_cycle->loadPluginLibraryFromBasename("audio-features-yaafe");
 	media_cycle->dumpPluginsList();
 	
 	cout << "... removing audio features plugins Library" << endl;
-	media_cycle->removePluginLibrary("../../../plugins/audio/" + build_type + "/mc_audiofeatures.dylib");
+    media_cycle->removePluginLibraryFromBasename("audio-features-yaafe");
 	if (media_cycle->getPluginManager()->getSize() != 0) ok = false;
 
 	cout << "... importing visualisation plugins Library" << endl;
-	media_cycle->addPluginLibrary("../../../plugins/visualisation/" + build_type + "/mc_visualisation.dylib");
+    media_cycle->loadPluginLibraryFromBasename("visualisation");
 	media_cycle->dumpPluginsList();
 	
 	cout << "... removing visualisation plugins Library" << endl;
-	media_cycle->removePluginLibrary("../../../plugins/visualisation/" + build_type + "/mc_visualisation.dylib");
+    media_cycle->removePluginLibraryFromBasename("visualisation");
 	if (media_cycle->getPluginManager()->getSize() != 0) ok = false;
 	delete media_cycle;
 	return ok;
@@ -109,10 +109,11 @@ void test_multiple_XML(){
 #endif
     
     mediacycle = new MediaCycle(MEDIA_TYPE_AUDIO, "/tmp/", "mediacycle.acl");
-    mediacycle->addPluginLibrary("../../../plugins/audio/" + build_type + "/mc_audio.dylib");
-	
-    mediacycle->addPluginLibrary("../../../plugins/segmentation/" + build_type + "/mc_segmentation.dylib");
-    mediacycle->addPluginLibrary("../../../plugins/visualisation/" + build_type + "/mc_visualisation.dylib");
+    mediacycle->loadPluginLibraryFromBasename("audio-features-yaafe");
+    mediacycle->loadPluginLibraryFromBasename("audio-reader-sndfile");
+    mediacycle->loadPluginLibraryFromBasename("audio-segmentation");
+    mediacycle->loadPluginLibraryFromBasename("segmentation");
+    mediacycle->loadPluginLibraryFromBasename("visualisation");
 	
     mediacycle->importDirectory("/usr/local/share/mediacycle/data/audio_all/zero-g-pro-pack_b/Live Bass Grooves/Cool Grooves/Cool 100 1-E.wav", 0);
     mediacycle->saveXMLLibrary("/Users/xavier/tmp/afac.xml");

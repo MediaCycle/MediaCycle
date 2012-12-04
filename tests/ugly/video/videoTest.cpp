@@ -226,7 +226,7 @@ void test_video_dancers_plugin_acl_save(std::string dancer){
 
 	MediaCycle* mediacycle;
 	mediacycle = new MediaCycle(MEDIA_TYPE_VIDEO);
-	mediacycle->addPluginLibrary(video_plugin_path+"mc_video.dylib");
+    mediacycle->loadPluginLibraryFromBasename("video");
 	mediacycle->importDirectory(movie_file, 0);
 	mediacycle->saveACLLibrary(acl_file);
 	delete mediacycle;	
@@ -288,7 +288,7 @@ void test_blobs(std::string movie_file){
 void test_all_videos_top_front(std::string mypath){
 	MediaCycle* mediacycle;
 	mediacycle = new MediaCycle(MEDIA_TYPE_VIDEO);
-	mediacycle->addPluginLibrary(video_plugin_path+"mc_video.dylib");
+    mediacycle->loadPluginLibraryFromBasename("video");
 	mediacycle->importDirectory(mypath, 0);
 	mediacycle->saveACLLibrary(mypath+"ACL"+"dancers-test.acl");
 	delete mediacycle;	
@@ -498,8 +498,9 @@ void test_show_fft(std::string full_video_path){
 void test_Thomas(){
 	MediaCycle* mediacycle;
 	mediacycle = new MediaCycle(MEDIA_TYPE_AUDIO);
-//	mediacycle->addPluginLibrary(video_plugin_path+"mc_audio.dylib");
-	mediacycle->importACLLibrary("/Users/xavier/Desktop/ThomasIsrael-Sons/short/extraitsxaviercleans/second_try-atm+mus.acl");
+    mediacycle->loadPluginLibraryFromBasename("audio-features-yaafe");
+    mediacycle->loadPluginLibraryFromBasename("audio-reader-sndfile");
+    mediacycle->importACLLibrary("/Users/xavier/Desktop/ThomasIsrael-Sons/short/extraitsxaviercleans/second_try-atm+mus.acl");
 	mediacycle->getLibrary()->saveSorted("/Users/xavier/Desktop/ThomasIsrael-Sons/short/extraitsxaviercleans/second_try-atm+mus_sorted.acl");
 	delete mediacycle;	
 	

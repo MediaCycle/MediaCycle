@@ -1,7 +1,7 @@
 /**
  * @brief segmentation-test.cpp
- * @author Thierry Ravet
- * @date 20/11/2012
+ * @author Christian Frisson
+ * @date 04/12/2012
  * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -37,12 +37,13 @@
 #include "MediaCycle.h"
 
 #include "ACBicSegmentationPlugin.h"
-#include "ACSelfSimSegmentationPlugin.h"
+#include "ACSelfSimSegmentation.h"
 #include "gnuplot_i.hpp"
 #include "Armadillo-utils.h"
 #ifdef SUPPORT_AUDIO
 #include "ACAudioFeatures.h"
 #endif
+#include "ACAudioSelfSimSegmentationPlugin.h"
 
 //sleep()
 #include <iostream>
@@ -291,7 +292,7 @@ void test_multiple_selfsim(int n) {
 
     M.print();
 
-    ACSelfSimSegmentationPlugin* P = new ACSelfSimSegmentationPlugin();
+    ACAudioSelfSimSegmentationPlugin* P = new ACAudioSelfSimSegmentationPlugin();
     clock_t start = clock();
     //default: float _SelfSimThresh=0.8, _L=8, _Wmin=8, KernelType=SELFSIMSTEP, KernelDistance=COSINE;
 

@@ -129,7 +129,7 @@ void displayrect(){
 //	string f2=acl_dir+sim1.substr(0, tmp + 1)+"acl";
 //	MediaCycle* mediacycle;
 //	mediacycle = new MediaCycle(MEDIA_TYPE_IMAGE);
-//	mediacycle->addPluginLibrary("/Users/xavier/development/Fall09/ticore-app/Applications/Numediart/MediaCycle/src/Builds/darwin-xcode/plugins/image/Debug/mc_image.dylib");
+//	mediacycle->loadPluginLibraryFromBasename("image");
 //	mediacycle->importDirectory(f1,0);
 //	mediacycle->saveACLLibrary(f2);
 //	delete mediacycle;
@@ -182,7 +182,7 @@ void testMakePGM(string sim1){
 void test_import_directory(string dir1, string f2=""){
 	MediaCycle* mediacycle;
 	mediacycle = new MediaCycle(MEDIA_TYPE_IMAGE);
-	mediacycle->addPluginLibrary("/Users/xavier/development/mediacycle-numediart/mediacycle/Builds/mac-10.5/plugins/image/Debug/mc_image.dylib");
+    mediacycle->loadPluginLibraryFromBasename("image");
 	mediacycle->importDirectory(dir1, 1); // 1 = recursive
 	if (f2!="") mediacycle->saveXMLLibrary(f2);
 	delete mediacycle;
@@ -192,7 +192,7 @@ void test_import_directory(string dir1, string f2=""){
 void test_multiple_import_normalize(){
 	MediaCycle* mediacycle;
 	mediacycle = new MediaCycle(MEDIA_TYPE_IMAGE);
-	mediacycle->addPluginLibrary(path_to_mc_build+"/plugins/image/mc_image.so");
+    mediacycle->loadPluginLibraryFromBasename("image");
 	mediacycle->importDirectory("/Users/xavier/Pictures/coil-100/images/obj100__0100.png",1);
 	mediacycle->importDirectory("/Users/xavier/Pictures/coil-100/images/obj100__0105.png",1);
 	mediacycle->saveXMLLibrary("/Users/xavier/tmp/f2.xml");
@@ -301,7 +301,7 @@ void test_sorted(string xml_file) {
 void test_plugins() {
     MediaCycle* mediacycle;
     mediacycle = new MediaCycle(MEDIA_TYPE_IMAGE);
-    mediacycle->addPluginLibrary(path_to_mc_build + "/plugins/image/mc_image.so");
+    mediacycle->loadPluginLibraryFromBasename("image");
     delete mediacycle;
 }
 

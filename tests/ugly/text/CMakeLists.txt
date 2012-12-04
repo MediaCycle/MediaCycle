@@ -19,7 +19,11 @@ IF(SUPPORT_TEXT AND USE_QT4)
 
 	ADD_EXECUTABLE(text-test ${SRC} ${HDR})
 
-	ADD_DEPENDENCIES(text-test mc_text)
+        INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/media/text-core)
+        INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/media/text-features)
+        INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/media/archipel-core)
+
+        ADD_DEPENDENCIES(text-test mc_text)
 	ADD_DEPENDENCIES(text-test mc_segmentation)
 	ADD_DEPENDENCIES(text-test mc_visualisation)
 	ADD_DEPENDENCIES(text-test mediacycle)
