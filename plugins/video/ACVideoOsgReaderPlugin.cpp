@@ -37,11 +37,11 @@
 #include "ACMediaFactory.h"
 #include <iostream>
 
-#include <OsgDB/Registry>
-#include <OsgDB/ReaderWriter>
-#include <OsgDB/FileNameUtils>
-#include <OsgDB/ReaderWriter>
-#include <OsgDB/PluginQuery>
+#include <osgDB/Registry>
+#include <osgDB/ReaderWriter>
+#include <osgDB/FileNameUtils>
+#include <osgDB/ReaderWriter>
+#include <osgDB/PluginQuery>
 
 #include "ACOpenCVInclude.h"
 

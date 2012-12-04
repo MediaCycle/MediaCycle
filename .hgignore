@@ -37,9 +37,13 @@ cmake.check_cache
 3rdparty/breakpad-qt/third-party/google-breakpad/src/processor/minidump_dump_test
 3rdparty/breakpad-qt/third-party/google-breakpad/src/processor/minidump_stackwalk_machine_readable_test
 3rdparty/breakpad-qt/third-party/google-breakpad/src/processor/minidump_stackwalk_test
-3rdparty/breakpad-qt/third-party/google-breakpad/src/testing/*
-3rdparty/breakpad-qt/third-party/google-breakpad/src/third_party/*
-3rdparty/breakpad-qt/third-party/google-breakpad/src/tools/*
+3rdparty/breakpad-qt/third-party/google-breakpad/src/*testing/*
+3rdparty/breakpad-qt/third-party/google-breakpad/src/third_party/*curl
+3rdparty/breakpad-qt/third-party/google-breakpad/src/third_party/*glog
+3rdparty/breakpad-qt/third-party/google-breakpad/src/third_party/*libdisasm
+3rdparty/breakpad-qt/third-party/google-breakpad/src/third_party/*linux
+3rdparty/breakpad-qt/third-party/google-breakpad/src/third_party/*protobuf
+3rdparty/breakpad-qt/third-party/google-breakpad/src/*tools/*
 data/dataset*
 demos/openFrameworks/addons
 demos/openFrameworks/apps

@@ -10,7 +10,7 @@ endif (WITH_MATLAB_MEX)
 include_directories(${ARGTABLE2_INCLUDE_DIR})
 link_directories(${CMAKE_BINARY_DIR}/src_cpp/yaafe-core)
 
-add_executable(yaafe-engine main.cpp)
-target_link_libraries(yaafe-engine yaafe-core ${ARGTABLE2_LIBRARY})
+#CF add_executable(yaafe-engine main.cpp)
+#CF target_link_libraries(yaafe-engine yaafe-core ${ARGTABLE2_LIBRARY})
 
 #CF install(TARGETS yaafe-engine RUNTIME DESTINATION bin)

@@ -8,8 +8,7 @@
 //
 
 #include "ACVideoDiffSegmentationPlugin.h"
-#include "cv.h"
-#include "highgui.h"
+#include "ACOpenCVInclude.h"
 #include <Armadillo-utils.h>
 using namespace arma;
 

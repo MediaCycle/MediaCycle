@@ -82,10 +82,14 @@ bool DumpCallback(const wchar_t* _dump_dir,
 				EXCEPTION_POINTERS* exinfo,
 				MDRawAssertionInfo* assertion,
 				bool success)
-#else
+#else/*ifdef _APPLE__
 bool DumpCallback(const char* _dump_dir,
 				const char* _minidump_id,
 				void *context, bool success)
+#else*/
+bool DumpCallback(const char* _dump_dir,
+                const char* _minidump_id,
+                void *context, bool success)
 #endif
 {
 	Q_UNUSED(_dump_dir);
@@ -112,7 +116,14 @@ GlobalHandlerPrivate::GlobalHandlerPrivate()
 #ifdef __MINGW32__ //CF
 	handler_ = new google_breakpad::ExceptionHandler(/*DumpPath*/ path.toStdWString(), /*FilterCallback*/ 0, DumpCallback, /*context*/ 0, true);
 #else
+#ifdef __APPLE__
 	handler_ = new google_breakpad::ExceptionHandler(/*DumpPath*/ path.toStdString(), /*FilterCallback*/ 0, DumpCallback, /*context*/ 0, true, 0);
+#else
+    google_breakpad::MinidumpDescriptor mdd(path.toStdString());
+    google_breakpad::ExceptionHandler::FilterCallback fc;
+    google_breakpad::ExceptionHandler::MinidumpCallback mdc;
+    handler_ = new google_breakpad::ExceptionHandler(/*DumpPath*/ mdd, /*FilterCallback*/ fc,/*MinidumpCallback*/ mdc, 0, true, 0);
+#endif
 #endif
 }
 
@@ -152,11 +163,11 @@ void GlobalHandler::setDumpPath(const QString& path)
 	QDir().mkpath(absPath);
 	Q_ASSERT(QDir().exists(absPath));
 
-#	if defined(Q_OS_WIN32)
-		d->handler_->set_dump_path(absPath.toStdWString());
-#	else
-		d->handler_->set_dump_path(absPath.toStdString());
-#	endif
+#if defined(Q_OS_WIN32)
+    d->handler_->set_dump_path(absPath.toStdWString());
+#elif defined(Q_OS_MAC)
+    d->handler_->set_dump_path(absPath.toStdString());
+#endif
 }
 
 void GlobalHandler::setReporter(const QString& reporter)

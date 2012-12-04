@@ -22,7 +22,7 @@
 # (To distributed this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-FIND_PATH(OPENNI_INCLUDE_DIR XnOPenNI.h PATH_SUFFIXES "ni" "OpenNI")
+FIND_PATH(OPENNI_INCLUDE_DIR XnOpenNI.h PATH_SUFFIXES "ni" "OpenNI")
 
 FIND_LIBRARY(OPENNI_LIBRARY NAMES OpenNI)
 

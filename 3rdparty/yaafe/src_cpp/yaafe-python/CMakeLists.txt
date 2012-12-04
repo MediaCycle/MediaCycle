@@ -12,9 +12,9 @@ endif (WITH_HDF5)
 
 include_directories(${yaafecore_INCLUDE_DIRS})
 add_library (yaafecore MODULE ${yaafecore_SOURCES} ${yaafecore_HEADERS})
-if (NOT APPLE)
-    set_target_properties(yaafecore PROPERTIES VERSION ${YAAFE_LIBVERSION} SOVERSION ${YAAFE_API_VERSION})
-endif (NOT APPLE)
+#CF if (NOT APPLE)
+#    set_target_properties(yaafecore PROPERTIES VERSION ${YAAFE_LIBVERSION} SOVERSION ${YAAFE_API_VERSION})
+#endif (NOT APPLE)
 target_link_libraries(yaafecore yaafe-core ${yaafecore_LIBS})
 
 #CF install(TARGETS yaafecore DESTINATION ${CMAKE_INSTALL_LIBDIR} EXPORT yaafe-targets)
