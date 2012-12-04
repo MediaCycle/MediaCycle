@@ -39,7 +39,7 @@
 #include <vector>
 
 #include "BlobResult.h" // Main blob library include (in plugin/image/blobs)
-#include "ACImageAnalysis.h"
+//CF #include "ACImageAnalysis.h"
 #include "ACVideoData.h"
 
 #include <ACOpenCVInclude.h>
@@ -125,7 +125,7 @@ public:
     void computeBoundingBoxRatios();
     void computeBlobPixelSpeed();
     void computeGlobalPixelsSpeed();
-    void computeColorMoments(int n = 4, string cm = "HSV");
+    void computeColorMoments(int n = 4, std::string cm = "HSV");
     void computeHuMoments(int tresh = 0, cv::Mat bg_img = cv::Mat()); // with background subtraction
     void computeFourierPolarMoments(int RadialBins = 5, int AngularBins = 8); // without background subtraction
     void computeFourierMellinMoments(); // without background subtraction
