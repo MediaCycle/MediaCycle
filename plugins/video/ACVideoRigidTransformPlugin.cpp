@@ -37,10 +37,10 @@ using namespace std;
 
 ACVideoRigidTransformPlugin::ACVideoRigidTransformPlugin(): ACTimedFeaturesPlugin() {
     this->mMediaType = MEDIA_TYPE_VIDEO;
-    this->mName = "Video RigidTransform";
-    this->mDescription = "RigidTransform";
+    this->mName = "Video Rigid Transform";
+    this->mDescription = "Rigid Transform";
     this->mId = "";
-    this->mDescriptorsList.push_back("RigidTransform");
+    this->mDescriptorsList.push_back("Rigid Transform");
     this->videoAn = 0;
 }
 

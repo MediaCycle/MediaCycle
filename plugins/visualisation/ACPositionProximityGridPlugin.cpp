@@ -34,7 +34,7 @@
 
 #include "ACPositionProximityGridPlugin.h"
 
-ACPositionProximityGridPlugin::ACPositionProximityGridPlugin() {
+ACPositionProximityGridPlugin::ACPositionProximityGridPlugin() : ACNoMethodPositionsPlugin() {
     this->mMediaType = MEDIA_TYPE_MIXED; // ALL
    // this->mPluginType = PLUGIN_TYPE_NONE;
     this->mName = "Proximity Grid";

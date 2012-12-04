@@ -37,10 +37,10 @@ using namespace std;
 
 ACVideoOpticalFlowPlugin::ACVideoOpticalFlowPlugin() : ACTimedFeaturesPlugin() {
     this->mMediaType = MEDIA_TYPE_VIDEO;
-    this->mName = "Video OpticalFlow";
-    this->mDescription = "OpticalFlow";
+    this->mName = "Video Optical Flow";
+    this->mDescription = "Optical Flow";
     this->mId = "";
-    this->mDescriptorsList.push_back("OpticalFlow");
+    this->mDescriptorsList.push_back("Optical Flow");
     this->videoAn = 0;
 }
 

@@ -1,7 +1,7 @@
 /**
  * @brief ACVisualisationPlugin.cpp
  * @author Christian Frisson
- * @date 03/08/2012
+ * @date 04/12/2012
  * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -37,13 +37,13 @@
 using namespace arma;
 using namespace std;
 
-ACVisualisationPlugin::ACVisualisationPlugin()
+ACVisualisationPlugin::ACVisualisationPlugin() : ACClusterPositionsPlugin()
 {
     //vars herited from ACPlugin
     // XS TODO: are these general enough ? can we use this only for video ??
     this->mMediaType = MEDIA_TYPE_VIDEO;
-    this->mName = "Visualisation";
-    this->mDescription = "Visualisation plugin";
+    this->mName = "MediaCycle DANCERS!";
+    this->mDescription = "Positioning plugin for Bud Blumenthal's Bud Hybrid DANCERS! project";
     this->mId = "";
 
     //local vars

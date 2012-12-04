@@ -1,7 +1,7 @@
 /**
  * @brief ACVisPluginSIsoMap.h
- * @author Thierry Ravet
- * @date 24/11/2012
+ * @author Christian Frisson
+ * @date 04/12/2012
  * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -35,13 +35,13 @@
 #include "ACMediaBrowser.h"
 #include "ACMediaTimedFeature.h"
 
-#ifndef _ACVisPluginSIsomap_
-#define _ACVisPluginSIsomap_
+#ifndef _ACVisPluginSIsoMap_
+#define _ACVisPluginSIsoMap_
 
-class ACVisPluginSIsomap : public ACClusterPositionsPlugin {
+class ACVisPluginSIsoMap : public ACClusterPositionsPlugin {
 public:
-  ACVisPluginSIsomap();
-  ~ACVisPluginSIsomap();
+  ACVisPluginSIsoMap();
+  ~ACVisPluginSIsoMap();
 
   virtual void updateNextPositions(ACMediaBrowser* );
 
@@ -50,6 +50,6 @@ protected:
 	void extractDescMatrix(ACMediaBrowser* mediaBrowser, arma::mat& desc_m, std::vector<std::string> &featureNames);
 };
 
-#endif	/* _ACVisPluginSIsomap_ */
+#endif	/* _ACVisPluginSIsoMap_ */
 
 

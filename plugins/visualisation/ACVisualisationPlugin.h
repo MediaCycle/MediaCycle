@@ -1,8 +1,8 @@
 /**
  * @brief ACVisualisationPlugin.h
- * @author Thierry Ravet
- * @date 08/04/2011
- * @copyright (c) 2011 – UMONS - Numediart
+ * @author Christian Frisson
+ * @date 04/12/2012
+ * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -38,7 +38,7 @@
 #ifndef _ACVISUALISATIONPLUGIN_
 #define _ACVISUALISATIONPLUGIN_
 
-class ACVisualisationPlugin : public ACNoMethodPositionsPlugin {
+class ACVisualisationPlugin : public ACClusterPositionsPlugin {
 public:
   ACVisualisationPlugin();
   ~ACVisualisationPlugin();

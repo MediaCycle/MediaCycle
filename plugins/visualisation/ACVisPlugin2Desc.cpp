@@ -1,7 +1,7 @@
 /**
  * @brief ACVisPlugin2Desc.cpp
- * @author Thierry Ravet
- * @date 12/11/2012
+ * @author Christian Frisson
+ * @date 04/12/2012
  * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -42,7 +42,7 @@ ACVisPlugin2Desc::ACVisPlugin2Desc() : ACClusterPositionsPlugin()
     this->mMediaType = MEDIA_TYPE_ALL;
     this->mName = "MediaCycle ScatterPlot";
     this->mDescription = "Visualization plugin with 1 feature per cartesian axis";
-    this->mId = "";	
+    this->mId = "";
     //local vars
 }
 
@@ -185,15 +185,44 @@ void ACVisPlugin2Desc::extractDescMatrix(ACMediaBrowser* mediaBrowser, mat& desc
 
     //CF getting the first dimension of the features assigned to x and y
     std::vector<float> weight ( mediaBrowser->getWeightVector().size() );
-    int x = this->getStringParameterValueIndex("x");
-    int y = this->getStringParameterValueIndex("y");
+    std::string x = this->getStringParameterValue("x");
+    size_t x_pos = x.find(" (dim");
+    if(x_pos != std::string::npos)
+        x = x.substr(0,x_pos);
+    std::string y = this->getStringParameterValue("y");
+    size_t y_pos = y.find(" (dim");
+    if(y_pos != std::string::npos)
+        y = y.substr(0,y_pos);
 
     desc_m.set_size(nbMedia,2);
 
+    ACMediaType library_type = mediaBrowser->getLibrary()->getMediaType();
     int i=0;
     for(ACMedias::iterator media = medias.begin();media!=medias.end();media++){
-        desc_m(i,0) = media->second->getPreProcFeaturesVector(x)->getFeatureElement(0);
-        desc_m(i,1) = media->second->getPreProcFeaturesVector(y)->getFeatureElement(0);
+        //std::cout << "ACVisPlugin2Desc::extractDescMatrix: media " << media->first << " '" << media->second->getFileName() << "'" << std::endl;
+        if(library_type == media->second->getMediaType() ) {
+            desc_m(i,0) = media->second->getPreProcFeaturesVector(x)->getFeatureElement(0);
+            desc_m(i,1) = media->second->getPreProcFeaturesVector(y)->getFeatureElement(0);
+        }
+        else {
+
+            int parentId = media->second->getParentId();
+            if (parentId > -1){
+                desc_m(i,0) = 0;
+                desc_m(i,1) = 0;
+                ACMedia* parent = mediaBrowser->getLibrary()->getMedia(parentId);
+                if(parent){
+                    desc_m(i,0) = parent->getPreProcFeaturesVector(x)->getFeatureElement(0);
+                    desc_m(i,1) = parent->getPreProcFeaturesVector(y)->getFeatureElement(0);
+                }
+                else{
+                    std::cerr << "ACVisPlugin2Desc::extractDescMatrix: media of id " << media->first << " has no parent" << std::endl;
+                }
+            }
+            else{
+                std::cerr << "ACVisPlugin2Desc::extractDescMatrix: media of id " << media->first << " has no parent id" << std::endl;
+            }
+        }
         i++;
     }
 

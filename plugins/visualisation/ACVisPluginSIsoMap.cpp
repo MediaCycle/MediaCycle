@@ -1,7 +1,7 @@
 /**
  * @brief ACVisPluginSIsoMap.cpp
- * @author Thierry Ravet
- * @date 28/11/2012
+ * @author Christian Frisson
+ * @date 04/12/2012
  * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -32,13 +32,13 @@
 #include <armadillo>
 #include "Armadillo-utils.h"
 #include "ACPlugin.h"
-#include "ACVisPluginSIsomap.h"
+#include "ACVisPluginSIsoMap.h"
 #include "sIsomap.h"
 
 using namespace arma;
 using namespace std;
 //TR: I modified this class to take into account the feature that are selected by the user (with te weights).
-ACVisPluginSIsomap::ACVisPluginSIsomap() : ACClusterPositionsPlugin()
+ACVisPluginSIsoMap::ACVisPluginSIsoMap() : ACClusterPositionsPlugin()
 {
     //vars herited from ACPlugin
     this->mMediaType = MEDIA_TYPE_ALL;
@@ -50,11 +50,11 @@ ACVisPluginSIsomap::ACVisPluginSIsomap() : ACClusterPositionsPlugin()
     //local vars
 }
 
-ACVisPluginSIsomap::~ACVisPluginSIsomap(){
+ACVisPluginSIsoMap::~ACVisPluginSIsoMap(){
 }
 
 
-void ACVisPluginSIsomap::updateNextPositions(ACMediaBrowser* mediaBrowser){
+void ACVisPluginSIsoMap::updateNextPositions(ACMediaBrowser* mediaBrowser){
     int itemClicked, labelClicked, action;
     vector<string> featureNames;
     int libSize = mediaBrowser->getLibrary()->getSize();
@@ -135,12 +135,12 @@ void ACVisPluginSIsomap::updateNextPositions(ACMediaBrowser* mediaBrowser){
         }
     }
     if (cpt!=desc_m.n_rows)
-        cout << "ACVisPluginSIsomap::updateNextPositions, problem with desc matrix dimensions "<<endl;
+        cout << "ACVisPluginSIsoMap::updateNextPositions, problem with desc matrix dimensions "<<endl;
     ////////////////////////////////////////////////////////////////
 }
 
 
-void ACVisPluginSIsomap::extractDescMatrix(ACMediaBrowser* mediaBrowser, mat& desc_m, vector<string> &featureNames){
+void ACVisPluginSIsoMap::extractDescMatrix(ACMediaBrowser* mediaBrowser, mat& desc_m, vector<string> &featureNames){
     ACMedias medias = mediaBrowser->getLibrary()->getAllMedia();
     std::vector<long> ids = mediaBrowser->getLibrary()->getAllMediaIds();
     int nbMedia = medias.size();
@@ -151,7 +151,7 @@ void ACVisPluginSIsomap::extractDescMatrix(ACMediaBrowser* mediaBrowser, mat& de
     // Count nb of feature
     int nbFeature = mediaBrowser->getLibrary()->getFirstMedia()->getNumberOfPreProcFeaturesVectors();
     if (nbFeature!=weight.size())
-        std::cerr<<"ACVisPluginSIsomap::extractDescMatrix weight vector size incompatibility"<<endl;
+        std::cerr<<"ACVisPluginSIsoMap::extractDescMatrix weight vector size incompatibility"<<endl;
     for(int f=0; f< nbFeature; f++){
         if (weight[f]>0.f){
             featureNames.push_back(mediaBrowser->getLibrary()->getFirstMedia()->getPreProcFeaturesVector(f)->getName());

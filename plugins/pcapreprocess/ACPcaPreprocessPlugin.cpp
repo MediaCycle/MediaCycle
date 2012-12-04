@@ -46,10 +46,10 @@ using namespace arma;
  ACMediaType mMediaType;
  */
 
-ACPcaPreprocessPlugin::ACPcaPreprocessPlugin() {
+ACPcaPreprocessPlugin::ACPcaPreprocessPlugin() : ACPreProcessPlugin() {
     this->mMediaType = MEDIA_TYPE_ALL^MEDIA_TYPE_TEXT;
     //this->mPluginType = PLUGIN_TYPE_FEATURES;
-    this->mName = "PcaPreprocess";
+    this->mName = "PCA preprocess";
     this->mDescription = "Principal component analysis preprocess plugin";
     this->mId = "";
 	mLambda=0.95f;

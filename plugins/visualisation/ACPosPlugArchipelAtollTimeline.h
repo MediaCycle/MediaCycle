@@ -1,9 +1,9 @@
 /*
- *  factory.cpp
+ *  ACPosPlugArchipelAtollTimeline.h
  *  MediaCycle
  *
- *  @author Thierry Ravet
- *  @date 27/07/11
+ *  @author Christian Frisson
+ *  @date 13/09/11
  *  @copyright (c) 2011 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
@@ -32,27 +32,23 @@
  *
  */
 
+#include "ACVisPlugin2Desc.h"
+
+#ifndef _ACPosPlugArchipelAtollTimeline_
+#define _ACPosPlugArchipelAtollTimeline_
+
+#if defined(SUPPORT_ARCHIPEL)
+class ACPosPlugArchipelAtollTimeline : public ACVisPlugin2Desc {
+	public:
+        ACPosPlugArchipelAtollTimeline();
+        ~ACPosPlugArchipelAtollTimeline();
+		virtual void updateNextPositions(ACMediaBrowser* );
+        // This shortcuts updateAvailableFeatures()
+        virtual void setMediaCycle(MediaCycle* _media_cycle);
+        //virtual bool updateAvailableFeatures();
+};
+#endif //defined(SUPPORT_ARCHIPEL)
+
+#endif	/* _ACPosPlugArchipelAtollTimeline_ */
 
 
-#include "ACPlugin.h"
-//the factories
-
-#include "ACCustomizedNavimedClusterPlugin.h"
-#include "ACCustomizedNavimedPositionPlugin.h"
-
-extern "C" ACPlugin* create(std::string namePlugin) {
-	if (namePlugin == "ACCustomizedNavimedClusterPlugin") {return new ACCustomizedNavimedClusterPlugin();}
-	if (namePlugin == "ACCustomizedNavimedPositionPlugin") {return new ACCustomizedNavimedPositionPlugin();}
-}
-
-extern "C" void destroy(ACPlugin* d) {
-    delete d;
-}
-
-extern "C" std::vector<std::string> list() {    //returns a string vector containing the plugin names included in the DLL file
-	std::vector<std::string> listPlugin;
-	listPlugin.push_back("ACCustomizedNavimedClusterPlugin");
-	listPlugin.push_back("ACCustomizedNavimedPositionPlugin");
-    
-	return listPlugin;
-}

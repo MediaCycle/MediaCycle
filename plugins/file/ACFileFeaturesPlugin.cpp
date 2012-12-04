@@ -40,8 +40,7 @@
 #include <boost/filesystem/operations.hpp>
 namespace fs = boost::filesystem;
 
-ACFileFeaturesPlugin::ACFileFeaturesPlugin() {
-
+ACFileFeaturesPlugin::ACFileFeaturesPlugin() : ACFeaturesPlugin() {
     this->mMediaType = MEDIA_TYPE_ALL;
     this->mName = "File Features";
     this->mDescription = "File Features Plugin (Size, Last Write Time)";

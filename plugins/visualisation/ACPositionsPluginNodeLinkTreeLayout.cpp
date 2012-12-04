@@ -108,10 +108,7 @@ void ACPositionsPluginNodeLinkTreeLayout::updateNextPositions(ACMediaBrowser* _m
         m_maxDepth = 0;
         m_depths.clear();
 
-        m_depths.resize(10); // to init it at its default size
-        for (int d = 0; d++; d<m_depths.size())
-            m_depths[d]=0;
-        // CF or m_depths = vector<int>(10,0); ?
+        m_depths = vector<double>(10,0.0f);
 
         for(std::map<long,ACPositionsPluginTreeNodeParams*>::iterator nodeParam = m_nodeParams.begin(); nodeParam != m_nodeParams.end(); nodeParam++)
             delete nodeParam->second;

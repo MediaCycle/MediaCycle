@@ -1,7 +1,7 @@
 /**
  * @brief ACPosPlugAudioGardenFlower.cpp
- * @author Cecile Picard
- * @date 03/12/2012
+ * @author Christian Frisson
+ * @date 04/12/2012
  * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -37,7 +37,7 @@
 using namespace arma;
 using namespace std;
 
-ACPosPlugAudioGardenFlower::ACPosPlugAudioGardenFlower()
+ACPosPlugAudioGardenFlower::ACPosPlugAudioGardenFlower() : ACClusterPositionsPlugin()
 {
     //vars herited from ACPlugin
     // XS TODO: are these general enough ? can we use this only for audio ??
@@ -62,6 +62,8 @@ int ACPosPlugAudioGardenFlower::initialize()
 
 
 void ACPosPlugAudioGardenFlower::updateNextPositions(ACMediaBrowser* mediaBrowser){
+    if(mediaBrowser->getLibrary()->getSize()==0)
+        return;
     int itemClicked, labelClicked, action;
     vector<string> featureList;
     int libSize = mediaBrowser->getLibrary()->getSize();

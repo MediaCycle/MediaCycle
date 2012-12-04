@@ -1,7 +1,7 @@
 /**
  * @brief ACVisPluginPCA.h
- * @author Thierry Ravet
- * @date 30/05/2012
+ * @author Christian Frisson
+ * @date 04/12/2012
  * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -46,7 +46,7 @@ public:
   virtual void updateNextPositions(ACMediaBrowser* );
 
 protected:
-	void extractDescMatrix(ACMediaBrowser* mediaBrowser, arma::mat& desc_m, std::vector<std::string> &featureNames);
+    void extractDescMatrix(ACMediaBrowser* mediaBrowser, arma::mat& desc_m, std::vector<std::string> &featureNames);
 };
 
 #endif	/* _ACVISPLUGINPCA_ */
