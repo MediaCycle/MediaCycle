@@ -21,7 +21,7 @@ IF(SUPPORT_VIDEO)
 
         ADD_DEPENDENCIES(video-test mediacycle ${PLUGIN_PREFIX}video gnuplot_i)
 
-        TARGET_LINK_LIBRARIES(video-test mediacycle ${PLUGIN_PREFIX}video gnuplot_i)
+        TARGET_LINK_LIBRARIES(video-test mediacycle ${PLUGIN_PREFIX}video ${PLUGIN_PREFIX}video-features-dancers gnuplot_i)
 
 	MESSAGE("[X] video")
 ELSE()
