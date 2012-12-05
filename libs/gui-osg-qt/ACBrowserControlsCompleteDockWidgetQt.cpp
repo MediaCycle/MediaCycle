@@ -39,17 +39,20 @@ ACBrowserControlsCompleteDockWidgetQt::ACBrowserControlsCompleteDockWidgetQt(QWi
 {
     ui.setupUi(this); // first thing to do
 
+    preProcessControls = new ACPluginControlsWidgetQt(PLUGIN_TYPE_PREPROCESS);
     clustersMethodControls = new ACPluginControlsWidgetQt(PLUGIN_TYPE_CLUSTERS_METHOD);
     clustersPositionsControls = new ACPluginControlsWidgetQt(PLUGIN_TYPE_CLUSTERS_POSITIONS);
     neighborsMethodControls = new ACPluginControlsWidgetQt(PLUGIN_TYPE_NEIGHBORS_METHOD);
     neighborsPositionsControls = new ACPluginControlsWidgetQt(PLUGIN_TYPE_NEIGHBORS_POSITIONS);
 
+    ui.groupBoxPreProcess->layout()->addWidget(preProcessControls);
     ui.groupBoxClustersMethod->layout()->addWidget(clustersMethodControls);
     ui.groupBoxClustersPositions->layout()->addWidget(clustersPositionsControls);
     ui.groupBoxNeighborsMethod->layout()->addWidget(neighborsMethodControls);
     ui.groupBoxNeighborsPositions->layout()->addWidget(neighborsPositionsControls);
 
     int controlsWidth = 250; // default dock widget size
+    preProcessControls->setFixedWidth(controlsWidth);
     clustersMethodControls->setFixedWidth(controlsWidth);
     clustersPositionsControls->setFixedWidth(controlsWidth);
     neighborsMethodControls->setFixedWidth(controlsWidth);
@@ -63,6 +66,7 @@ ACBrowserControlsCompleteDockWidgetQt::ACBrowserControlsCompleteDockWidgetQt(QWi
     connect(this,SIGNAL(reconfigureCheckBoxes()),this,SLOT(configureCheckBoxes()));
 
     connect(this,SIGNAL(readjustHeight()),this,SLOT(adjustHeight()));
+    connect(preProcessControls,SIGNAL(readjustHeight()),this,SLOT(adjustHeight()));
     connect(clustersMethodControls,SIGNAL(readjustHeight()),this,SLOT(adjustHeight()));
     connect(clustersPositionsControls,SIGNAL(readjustHeight()),this,SLOT(adjustHeight()));
     connect(neighborsMethodControls,SIGNAL(readjustHeight()),this,SLOT(adjustHeight()));
@@ -177,11 +181,13 @@ void ACBrowserControlsCompleteDockWidgetQt::updatePluginsSettings()
 
     this->resetMode();
 
+    preProcessControls->setMediaCycle(this->media_cycle);
     clustersMethodControls->setMediaCycle(this->media_cycle);
     clustersPositionsControls->setMediaCycle(this->media_cycle);
     neighborsMethodControls->setMediaCycle(this->media_cycle);
     neighborsPositionsControls->setMediaCycle(this->media_cycle);
 
+    preProcessControls->updatePluginsSettings();
     clustersMethodControls->updatePluginsSettings();
     clustersPositionsControls->updatePluginsSettings();
     neighborsMethodControls->updatePluginsSettings();
@@ -197,11 +203,13 @@ void ACBrowserControlsCompleteDockWidgetQt::resetPluginsSettings()
 
     this->resetMode();
 
+    preProcessControls->setMediaCycle(this->media_cycle);
     clustersMethodControls->setMediaCycle(this->media_cycle);
     clustersPositionsControls->setMediaCycle(this->media_cycle);
     neighborsMethodControls->setMediaCycle(this->media_cycle);
     neighborsPositionsControls->setMediaCycle(this->media_cycle);
 
+    preProcessControls->resetPluginsSettings();
     clustersMethodControls->resetPluginsSettings();
     clustersPositionsControls->resetPluginsSettings();
     neighborsMethodControls->resetPluginsSettings();
@@ -216,11 +224,13 @@ void ACBrowserControlsCompleteDockWidgetQt::changeMediaType(ACMediaType _media_t
 
     this->resetMode();
 
+    preProcessControls->setMediaCycle(this->media_cycle);
     clustersMethodControls->setMediaCycle(this->media_cycle);
     clustersPositionsControls->setMediaCycle(this->media_cycle);
     neighborsMethodControls->setMediaCycle(this->media_cycle);
     neighborsPositionsControls->setMediaCycle(this->media_cycle);
 
+    preProcessControls->changeMediaType(_media_type);
     clustersMethodControls->changeMediaType(_media_type);
     clustersPositionsControls->changeMediaType(_media_type);
     neighborsMethodControls->changeMediaType(_media_type);
@@ -322,10 +332,12 @@ void ACBrowserControlsCompleteDockWidgetQt::adjustHeight(){
     ui.groupBoxSimilarity->setMinimumHeight(groupBoxSimilarityHeight);
     ui.groupBoxSimilarity->setMaximumHeight(groupBoxSimilarityHeight);
 
+    ui.groupBoxPreProcess->setMinimumHeight( preProcessControls->minimumHeight());
     ui.groupBoxClustersMethod->setMinimumHeight( clustersMethodControls->minimumHeight());
     ui.groupBoxClustersPositions->setMinimumHeight( clustersPositionsControls->minimumHeight());
     ui.tabClusters->setMinimumHeight(
-                ui.groupBoxClustersMethod->minimumHeight()
+                ui.groupBoxPreProcess->minimumHeight()
+                + ui.groupBoxClustersMethod->minimumHeight()
                 + ui.groupBoxClustersPositions->minimumHeight()
                 );
 

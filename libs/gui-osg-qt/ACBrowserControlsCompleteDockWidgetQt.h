@@ -86,6 +86,7 @@ public:
 protected:
     void resetMode();
 
+    ACPluginControlsWidgetQt* preProcessControls;
     ACPluginControlsWidgetQt* clustersMethodControls;
     ACPluginControlsWidgetQt* clustersPositionsControls;
     ACPluginControlsWidgetQt* neighborsMethodControls;

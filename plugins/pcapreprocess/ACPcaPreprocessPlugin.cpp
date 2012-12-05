@@ -47,18 +47,19 @@ using namespace arma;
  */
 
 ACPcaPreprocessPlugin::ACPcaPreprocessPlugin() : ACPreProcessPlugin() {
-    this->mMediaType = MEDIA_TYPE_ALL^MEDIA_TYPE_TEXT;
-    //this->mPluginType = PLUGIN_TYPE_FEATURES;
+    this->mMediaType = MEDIA_TYPE_ALL;
     this->mName = "PCA preprocess";
     this->mDescription = "Principal component analysis preprocess plugin";
     this->mId = "";
-	mLambda=0.95f;
+    mLambda=0.95f;
+    this->addNumberParameter("lambda",mLambda,0,1,0.01,"lambda",0);
 }
 
 ACPcaPreprocessPlugin::~ACPcaPreprocessPlugin(){
 }
 
 preProcessInfo ACPcaPreprocessPlugin::update(ACMedias media_library){
+    mLambda = this->getNumberParameterValue("lambda");
 	ACPcaPreprocessInfo *pcaInfo=new ACPcaPreprocessInfo;
 	
 	
@@ -142,6 +143,7 @@ preProcessInfo ACPcaPreprocessPlugin::update(ACMedias media_library){
 }
 
 std::vector<ACMediaFeatures*> ACPcaPreprocessPlugin::apply(preProcessInfo info,ACMedia* theMedia){
+    mLambda = this->getNumberParameterValue("lambda");
 	std::vector<ACMediaFeatures*> desc;
 	if (theMedia==0||info==0){
 		cerr << "ACPcaPreprocessPlugin::apply : wrong number of feature in the media: " << theMedia->getId() << endl;
@@ -188,6 +190,7 @@ std::vector<ACMediaFeatures*> ACPcaPreprocessPlugin::apply(preProcessInfo info,A
 }
 
 void ACPcaPreprocessPlugin::freePreProcessInfo(preProcessInfo &info){
+    mLambda = this->getNumberParameterValue("lambda");
 	ACPcaPreprocessInfo* pcaInfo=(ACPcaPreprocessInfo*)info;
 	delete pcaInfo;
 	pcaInfo=0;

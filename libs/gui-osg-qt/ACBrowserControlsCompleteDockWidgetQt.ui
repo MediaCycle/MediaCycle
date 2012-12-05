@@ -341,6 +341,45 @@
          <number>0</number>
         </property>
         <item>
+         <widget class="QGroupBox" name="groupBoxPreProcess">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="MinimumExpanding">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>240</width>
+            <height>52</height>
+           </size>
+          </property>
+          <property name="title">
+           <string>Pre-Process</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+          <property name="flat">
+           <bool>true</bool>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayoutPreProcess">
+           <property name="leftMargin">
+            <number>0</number>
+           </property>
+           <property name="topMargin">
+            <number>12</number>
+           </property>
+           <property name="rightMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
+          </layout>
+         </widget>
+        </item>
+        <item>
          <widget class="QGroupBox" name="groupBoxClustersMethod">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Fixed" vsizetype="MinimumExpanding">
@@ -363,7 +402,7 @@
           <property name="flat">
            <bool>true</bool>
           </property>
-          <layout class="QVBoxLayout" name="verticalLayout_2">
+          <layout class="QVBoxLayout" name="verticalLayoutClustersMethod">
            <property name="leftMargin">
             <number>0</number>
            </property>
@@ -402,7 +441,7 @@
           <property name="flat">
            <bool>true</bool>
           </property>
-          <layout class="QVBoxLayout" name="verticalLayout_3">
+          <layout class="QVBoxLayout" name="verticalLayoutClustersPositions">
            <property name="leftMargin">
             <number>0</number>
            </property>
