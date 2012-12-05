@@ -46,8 +46,18 @@ IF(USE_BREAKPAD AND USE_QT4 )
 		SET(${TARGET_NAME}_SRCS ${${TARGET_NAME}_SRCS}
 			${CMAKE_CURRENT_SOURCE_DIR}/third-party/google-breakpad/src/client/linux/crash_generation/crash_generation_client.cc
 			${CMAKE_CURRENT_SOURCE_DIR}/third-party/google-breakpad/src/client/linux/handler/exception_handler.cc
+			${CMAKE_CURRENT_SOURCE_DIR}/third-party/google-breakpad/src/client/linux/handler/minidump_descriptor.cc
+			${CMAKE_CURRENT_SOURCE_DIR}/third-party/google-breakpad/src/client/linux/log/log.cc
+			${CMAKE_CURRENT_SOURCE_DIR}/third-party/google-breakpad/src/client/linux/minidump_writer/linux_core_dumper.cc
+			${CMAKE_CURRENT_SOURCE_DIR}/third-party/google-breakpad/src/client/linux/minidump_writer/linux_dumper.cc
+			${CMAKE_CURRENT_SOURCE_DIR}/third-party/google-breakpad/src/client/linux/minidump_writer/linux_ptrace_dumper.cc
 			${CMAKE_CURRENT_SOURCE_DIR}/third-party/google-breakpad/src/client/linux/minidump_writer/minidump_writer.cc
+			${CMAKE_CURRENT_SOURCE_DIR}/third-party/google-breakpad/src/common/linux/elfutils.cc
 			${CMAKE_CURRENT_SOURCE_DIR}/third-party/google-breakpad/src/common/linux/file_id.cc
+			${CMAKE_CURRENT_SOURCE_DIR}/third-party/google-breakpad/src/common/linux/guid_creator.cc
+			${CMAKE_CURRENT_SOURCE_DIR}/third-party/google-breakpad/src/common/linux/linux_libc_support.cc
+			${CMAKE_CURRENT_SOURCE_DIR}/third-party/google-breakpad/src/common/linux/memory_mapped_file.cc
+			${CMAKE_CURRENT_SOURCE_DIR}/third-party/google-breakpad/src/common/linux/safe_readlink.cc
 		)	
 	ELSEIF(MINGW)
 		SET(${TARGET_NAME}_SRCS ${${TARGET_NAME}_SRCS}

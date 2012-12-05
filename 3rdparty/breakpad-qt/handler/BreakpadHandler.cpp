@@ -119,7 +119,7 @@ GlobalHandlerPrivate::GlobalHandlerPrivate()
 #ifdef __APPLE__
 	handler_ = new google_breakpad::ExceptionHandler(/*DumpPath*/ path.toStdString(), /*FilterCallback*/ 0, DumpCallback, /*context*/ 0, true, 0);
 #else
-    google_breakpad::MinidumpDescriptor mdd(path.toStdString());
+    google_breakpad::MinidumpDescriptor mdd(path.toStdString()+"/crashes");
     google_breakpad::ExceptionHandler::FilterCallback fc;
     google_breakpad::ExceptionHandler::MinidumpCallback mdc;
     handler_ = new google_breakpad::ExceptionHandler(/*DumpPath*/ mdd, /*FilterCallback*/ fc,/*MinidumpCallback*/ mdc, 0, true, 0);
