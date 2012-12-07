@@ -37,7 +37,6 @@
 #ifndef _ACPosPlugArchipelAtollTimeline_
 #define _ACPosPlugArchipelAtollTimeline_
 
-#if defined(SUPPORT_ARCHIPEL)
 class ACPosPlugArchipelAtollTimeline : public ACVisPlugin2Desc {
 	public:
         ACPosPlugArchipelAtollTimeline();
@@ -47,8 +46,4 @@ class ACPosPlugArchipelAtollTimeline : public ACVisPlugin2Desc {
         virtual void setMediaCycle(MediaCycle* _media_cycle);
         //virtual bool updateAvailableFeatures();
 };
-#endif //defined(SUPPORT_ARCHIPEL)
-
 #endif	/* _ACPosPlugArchipelAtollTimeline_ */
-
-

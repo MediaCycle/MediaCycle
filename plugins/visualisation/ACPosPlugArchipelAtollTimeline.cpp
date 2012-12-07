@@ -42,7 +42,6 @@
 using namespace arma;
 using namespace std;
 
-#if defined(SUPPORT_ARCHIPEL)
 ACPosPlugArchipelAtollTimeline::ACPosPlugArchipelAtollTimeline() : ACVisPlugin2Desc()
 {
     //vars herited from ACPlugin
@@ -88,13 +87,13 @@ void ACPosPlugArchipelAtollTimeline::updateNextPositions(ACMediaBrowser* mediaBr
     if(!media_cycle) return;
     if(media_cycle->getLibrarySize()==0) return;
 
+    #if defined (SUPPORT_MULTIMEDIA)
     if(!media_cycle->getLibrary()->containsMediaDocumentsOfIdentifier("archipel")){
         std::cerr << "ACPosPlugArchipelAtollTimeline::updateNextPositions: the library doesn't contain archipel documents."<< std::endl;
         return;
     }
-
+    #else
+    return;
+    #endif
     ACVisPlugin2Desc::updateNextPositions(mediaBrowser);
 }
-#endif //defined(SUPPORT_ARCHIPEL)
-
-

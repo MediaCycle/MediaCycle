@@ -37,14 +37,12 @@
 #ifndef _ACPosPlugArchipelAtoll_
 #define _ACPosPlugArchipelAtoll_
 
-#if defined(SUPPORT_ARCHIPEL)
 class ACPosPlugArchipelAtoll : public ACClusterPositionsPropellerPlugin {
 	public:
 		ACPosPlugArchipelAtoll();
 		~ACPosPlugArchipelAtoll();
 		virtual void updateNextPositions(ACMediaBrowser* );
 };
-#endif //defined(SUPPORT_ARCHIPEL)
 
 #endif	/* _ACPosPlugArchipelAtoll_ */
 

@@ -43,7 +43,6 @@
 using namespace arma;
 using namespace std;
 
-#if defined(SUPPORT_ARCHIPEL)
 ACPosPlugArchipelAtoll::ACPosPlugArchipelAtoll() : ACClusterPositionsPropellerPlugin()
 {
     //vars herited from ACPlugin
@@ -83,6 +82,7 @@ void ACPosPlugArchipelAtoll::updateNextPositions(ACMediaBrowser* mediaBrowser){
 
     float angle;
     float lDist=0.025;
+    #if defined (SUPPORT_MULTIMEDIA)
     for (long i=0; i<posDocuments.size(); i++){
         ACMediaDocument* parentMedia=(ACMediaDocument*)(medias[posDocuments[i]]);
         ACMediaContainer tmpMedias = parentMedia->getContainer();
@@ -130,12 +130,7 @@ void ACPosPlugArchipelAtoll::updateNextPositions(ACMediaBrowser* mediaBrowser){
                     break;
                 default:
                     break;
-            
             }
-                
-            
-            
-            
         }
             
         for (int j=0; j<tmpSegments.size(); j++){
@@ -158,7 +153,5 @@ void ACPosPlugArchipelAtoll::updateNextPositions(ACMediaBrowser* mediaBrowser){
             //std::cout << "posDisp_m.row(tmpSegments[j]->getId())" << posDisp_m.row(tmpSegments[j]->getId()) << std::endl;
         }
     }
+    #endif
 }
-#endif //defined(SUPPORT_ARCHIPEL)
-
-

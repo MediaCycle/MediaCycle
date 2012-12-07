@@ -1,8 +1,4 @@
 SET(PLUGIN_NAME "visualisation")
-IF(SUPPORT_ARCHIPEL)
-    SET(MEDIA_TYPE "archipel")
-    SET(MC_MEDIA_LIBS "${MEDIA_TYPE}-core")
-ENDIF()
 INCLUDE (${CMAKE_SOURCE_DIR}/CMakeModules/AddMediaCyclePlugin.cmake)
 ADD_MC_PLUGIN_LIBRARY(${PLUGIN_NAME})
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR/libs/armadillo-isomap})
