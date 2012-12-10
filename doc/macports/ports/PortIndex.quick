@@ -1,7 +1,8 @@
 openal-soft 0
 argtable 1028
-openscenegraph 1651
-openscenegraph-devel 2206
-opencv 2922
-ffmpeg 3813
-armadillo 5409
+qt4-creator-mac 1651
+openscenegraph 2227
+openscenegraph-devel 2782
+opencv 3498
+ffmpeg 4389
+armadillo 5985
