@@ -232,7 +232,7 @@ int ACPlugin::getNumberParametersCount()
 
 int ACPlugin::getParametersCount()
 {
-    return mStringParameters.size()+mNumberParameters.size();
+    return mStringParameters.size()+mNumberParameters.size()+mCallbacks.size();
 }
 
 bool ACPlugin::setStringParameterValue(std::string _name, std::string _value){
