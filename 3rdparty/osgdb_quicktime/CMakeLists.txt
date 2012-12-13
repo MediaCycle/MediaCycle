@@ -69,8 +69,8 @@ SET(TARGET_ADDED_LIBRARIES)
 SET(TARGET_LIBRARIES_VARS QUICKTIME_LIBRARY COCOA_LIBRARY)
 
 #### end var setup  ###
-# From OSG's CMakeModules/OsgMacroUtils.cmake
-INCLUDE (${CMAKE_SOURCE_DIR}/CMakeModules/OsgMacroUtils.cmake)
+# From OSG's cmake/OsgMacroUtils.cmake
+INCLUDE (${CMAKE_SOURCE_DIR}/cmake/OsgMacroUtils.cmake)
 
 SETUP_PLUGIN(qt)
 

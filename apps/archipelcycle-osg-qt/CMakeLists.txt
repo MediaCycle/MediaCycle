@@ -13,21 +13,21 @@ IF ( SUPPORT_ARCHIPEL AND SUPPORT_MULTIMEDIA AND SUPPORT_AUDIO AND SUPPORT_IMAGE
 	SET(ACTIVE_MEDIA "text")
         SET(DESCRIPTION "ArchipelCycle is an attempt to complement the Archipel database from La Mediatheque (Belgium) with the MediaCycle organization of media files by similarity.")
 
-	INCLUDE (${CMAKE_SOURCE_DIR}/CMakeModules/CreateDefaultConfig.cmake)
+	INCLUDE (${CMAKE_SOURCE_DIR}/cmake/CreateDefaultConfig.cmake)
 	CREATE_DEFAULT_CONFIG(${TARGET_NAME})
 
-	INCLUDE (${CMAKE_SOURCE_DIR}/CMakeModules/AddMediaCycleOsgQtApp.cmake)
+	INCLUDE (${CMAKE_SOURCE_DIR}/cmake/AddMediaCycleOsgQtApp.cmake)
 	ADD_MC_OSG_QT_EXECUTABLE(${TARGET_NAME})
 
 	# Add more optional dependencies:
-	#ADD_DEPENDENCIES(${TARGET_NAME} É)
+	#ADD_DEPENDENCIES(${TARGET_NAME} ...)
 	# Link these dependences:
-	#TARGET_LINK_LIBRARIES(${TARGET_NAME} É)
+	#TARGET_LINK_LIBRARIES(${TARGET_NAME} ...)
 	
 	# Packaging
 	SET(PROGNAME "${TARGET_NAME}")
 	IF(NOT USE_DEBUG AND (APPLE OR UNIX))
-		INCLUDE (${CMAKE_SOURCE_DIR}/CMakeModules/CreatePackage.cmake)
+                INCLUDE (${CMAKE_SOURCE_DIR}/cmake/CreatePackage.cmake)
 	ENDIF()
 
 	MESSAGE("[X] ${TARGET_NAME}")

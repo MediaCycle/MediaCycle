@@ -4,7 +4,7 @@
 # * SET(PROGNAME "app-name") where app-name matches the CMake target name of the application
 # * (optional) SET(WITH_QT4 ON) if you application uses Qt4 as GUI framework
 # * (optional) SET(MC_PACKAGE_DESCRIPTION "...")
-# then add after: INCLUDE (${CMAKE_SOURCE_DIR}/CMakeModules/CreatePackage.cmake)
+# then add after: INCLUDE (${CMAKE_SOURCE_DIR}/cmake/CreatePackage.cmake)
 #
 # to create the package (with app-name the CMake target name of the application):
 # Apple *.app bundle: make app-name install
@@ -249,7 +249,7 @@ IF(UNIX)
         	# ENDIF("${LSB_DISTRIB}" MATCHES "Debiantesting")
 
 		IF(NOT CPACK_DEBIAN_PACKAGE_DEPENDS)
-			message("WARNING: ${LSB_DISTRIB} not supported yet.\nPlease set deps in CMakeModules/CreatePackage.cmake before packaging.")
+			message("WARNING: ${LSB_DISTRIB} not supported yet.\nPlease set deps in cmake/CreatePackage.cmake before packaging.")
 		ENDIF(NOT CPACK_DEBIAN_PACKAGE_DEPENDS)
 		string(TOLOWER "${CPACK_PACKAGE_NAME}_${CPACK_PACKAGE_VERSION}-${LSB_DISTRIB}_${CPACK_PACKAGE_ARCHITECTURE}" CPACK_PACKAGE_FILE_NAME)
 

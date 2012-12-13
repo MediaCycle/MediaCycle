@@ -56,8 +56,8 @@ ENDIF()
 
 
 #### end var setup  ###
-# From OSG's CMakeModules/OsgMacroUtils.cmake
-INCLUDE (${CMAKE_SOURCE_DIR}/CMakeModules/OsgMacroUtils.cmake)
+# From OSG's cmake/OsgMacroUtils.cmake
+INCLUDE (${CMAKE_SOURCE_DIR}/cmake/OsgMacroUtils.cmake)
 
 SETUP_PLUGIN(QTKit)
 

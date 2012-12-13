@@ -8,7 +8,7 @@ name            OpenSceneGraph-devel
 conflicts       OpenSceneGraph
 set my_name     OpenSceneGraph
 version         3.1.3
-revision        0
+revision        2
 platforms       darwin
 categories      graphics
 maintainers     nomaintainer
@@ -53,7 +53,8 @@ configure.args          -DCMAKE_BUILD_TYPE=Release \
                         -DCMAKE_INSTALL_NAME_DIR=${prefix}/lib \
                         -DOSG_CONFIG_HAS_BEEN_RUN_BEFORE=YES \
                         -DOSG_DEFAULT_IMAGE_PLUGIN_FOR_OSX=imageio \
-                        -DOSG_WINDOWING_SYSTEM=Cocoa
+                        -DOSG_WINDOWING_SYSTEM=Cocoa \
+                        -DBUILD_OSG_EXAMPLES=ON
 
 livecheck.type  regex
 livecheck.url   ${homepage}downloads/developer_releases/

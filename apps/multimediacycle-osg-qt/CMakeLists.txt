@@ -2,7 +2,7 @@ SET(TARGET_NAME "MultiMediaCycle")
 IF(BUILD_MULTIMEDIACYCLE_APP AND USE_QT4 AND USE_OSG AND USE_OSC )
 
         # Media configurations that currently don't have specific apps
-        INCLUDE (${CMAKE_SOURCE_DIR}/CMakeModules/CreateDefaultConfig.cmake)
+        INCLUDE (${CMAKE_SOURCE_DIR}/cmake/CreateDefaultConfig.cmake)
 	# 3DmodelCycle
         SET(DESCRIPTION "3DmodelCycle allows to organize 3D models by similarity.")
         SET(MEDIA_TYPE "MEDIA_TYPE_3DMODEL")
@@ -36,18 +36,18 @@ IF(BUILD_MULTIMEDIACYCLE_APP AND USE_QT4 AND USE_OSG AND USE_OSC )
 	
 	INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
 
-	INCLUDE (${CMAKE_SOURCE_DIR}/CMakeModules/AddMediaCycleOsgQtApp.cmake)
+	INCLUDE (${CMAKE_SOURCE_DIR}/cmake/AddMediaCycleOsgQtApp.cmake)
 	ADD_MC_OSG_QT_EXECUTABLE(${TARGET_NAME})
 
 	# Add more optional dependencies:
-	#ADD_DEPENDENCIES(${TARGET_NAME} É)
+	#ADD_DEPENDENCIES(${TARGET_NAME} ...)
 	# Link these dependences:
-	#TARGET_LINK_LIBRARIES(${TARGET_NAME} É)
+	#TARGET_LINK_LIBRARIES(${TARGET_NAME} ...)
 	
 	# Packaging
 	SET(PROGNAME "${TARGET_NAME}")
 	IF(NOT USE_DEBUG AND (APPLE OR UNIX))
-		INCLUDE (${CMAKE_SOURCE_DIR}/CMakeModules/CreatePackage.cmake)
+		INCLUDE (${CMAKE_SOURCE_DIR}/cmake/CreatePackage.cmake)
 	ENDIF()
 
 	MESSAGE("[X] ${TARGET_NAME}")

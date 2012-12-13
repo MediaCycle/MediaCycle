@@ -9,10 +9,10 @@ IF ( BUILD_AUDIOCYCLE_APP AND SUPPORT_AUDIO AND USE_QT4 AND USE_OSG AND USE_OSC 
 	SET(OSG_PLUGINS "")
         SET(DESCRIPTION "AudioCycle allows to organize audio files by similarity.")
 
-	INCLUDE (${CMAKE_SOURCE_DIR}/CMakeModules/CreateDefaultConfig.cmake)
+	INCLUDE (${CMAKE_SOURCE_DIR}/cmake/CreateDefaultConfig.cmake)
 	CREATE_DEFAULT_CONFIG(${TARGET_NAME})
 
-	INCLUDE (${CMAKE_SOURCE_DIR}/CMakeModules/AddMediaCycleOsgQtApp.cmake)
+	INCLUDE (${CMAKE_SOURCE_DIR}/cmake/AddMediaCycleOsgQtApp.cmake)
 	ADD_MC_OSG_QT_EXECUTABLE(${TARGET_NAME})
 
 	# Add more optional dependencies:
@@ -23,7 +23,7 @@ IF ( BUILD_AUDIOCYCLE_APP AND SUPPORT_AUDIO AND USE_QT4 AND USE_OSG AND USE_OSC 
 	# Packaging
 	SET(PROGNAME "${TARGET_NAME}")
 	IF(NOT USE_DEBUG AND (APPLE OR UNIX))
-		INCLUDE (${CMAKE_SOURCE_DIR}/CMakeModules/CreatePackage.cmake)
+		INCLUDE (${CMAKE_SOURCE_DIR}/cmake/CreatePackage.cmake)
 	ENDIF()
 	
 	MESSAGE("[X] ${TARGET_NAME}")

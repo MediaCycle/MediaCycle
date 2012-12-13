@@ -1,6 +1,6 @@
 SET(PLUGIN_NAME "segmentation")
 #IF()
-	INCLUDE (${CMAKE_SOURCE_DIR}/CMakeModules/AddMediaCyclePlugin.cmake)
+	INCLUDE (${CMAKE_SOURCE_DIR}/cmake/AddMediaCyclePlugin.cmake)
 	ADD_MC_PLUGIN_LIBRARY(${PLUGIN_NAME})
 	MESSAGE("[X] ${TARGET_NAME}")
 #ELSE()

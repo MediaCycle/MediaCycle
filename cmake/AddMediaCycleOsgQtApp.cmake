@@ -7,7 +7,7 @@
 #  MAIN_CLASS: that inherits from ACMultiMediaCycleOsgQt: example SET(MAIN_CLASS "ACAudioCycleLoopJam")
 #  ICON_NAME: example SET(ICON_NAME "MultiMediaCycle")
 
-include(${CMAKE_SOURCE_DIR}/CMakeModules/AddQtApp.cmake)
+include(${CMAKE_SOURCE_DIR}/cmake/AddQtApp.cmake)
 macro(ADD_MC_OSG_QT_EXECUTABLE APP_NAME)
 
 IF(APPLE AND USE_DEBUG)

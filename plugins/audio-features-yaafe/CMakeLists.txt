@@ -13,7 +13,7 @@ IF(SUPPORT_AUDIO AND USE_YAAFE)
 	#SET(SRC "${CMAKE_SOURCE_DIR}/3rdparty/yaafe/src_cpp/yaafe-io/io/FileUtils.cpp")
 	#SET(HDR "${CMAKE_SOURCE_DIR}/3rdparty/yaafe/src_cpp/yaafe-io/io/FileUtils.h")
 
-	INCLUDE (${CMAKE_SOURCE_DIR}/CMakeModules/AddMediaCyclePlugin.cmake)
+	INCLUDE (${CMAKE_SOURCE_DIR}/cmake/AddMediaCyclePlugin.cmake)
 	ADD_MC_PLUGIN_LIBRARY(${PLUGIN_NAME})
 
 	ADD_DEPENDENCIES(${TARGET_NAME} yaafe-core yaafe-io yaafe-components)

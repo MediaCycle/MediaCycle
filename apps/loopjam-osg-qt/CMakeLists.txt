@@ -14,16 +14,16 @@ IF ( BUILD_LOOPJAM_APP AND SUPPORT_AUDIO AND USE_QT4 AND USE_OSG AND USE_OSC AND
 	SET(MAIN_CLASS "ACAudioCycleLoopJam")
         SET(DESCRIPTION "LoopJam is an interactive dancefloor for collaborative music creation, using a sound map organized by similarity. This application version is customized for installations (fullscreen, loops over libraries with a timer).")
 
-	INCLUDE (${CMAKE_SOURCE_DIR}/CMakeModules/CreateDefaultConfig.cmake)
+	INCLUDE (${CMAKE_SOURCE_DIR}/cmake/CreateDefaultConfig.cmake)
 	CREATE_DEFAULT_CONFIG(${TARGET_NAME})
 
-	INCLUDE (${CMAKE_SOURCE_DIR}/CMakeModules/AddMediaCycleOsgQtApp.cmake)
+	INCLUDE (${CMAKE_SOURCE_DIR}/cmake/AddMediaCycleOsgQtApp.cmake)
 	ADD_MC_OSG_QT_EXECUTABLE(${TARGET_NAME})
 
 	# Add more optional dependencies:
-	#ADD_DEPENDENCIES(${TARGET_NAME} É)
+	#ADD_DEPENDENCIES(${TARGET_NAME} â€¦)
 	# Link these dependences:
-	#TARGET_LINK_LIBRARIES(${TARGET_NAME} É)
+	#TARGET_LINK_LIBRARIES(${TARGET_NAME} â€¦)
 
 	IF(APPLE)
 		INSTALL(PROGRAMS "${CMAKE_CURRENT_SOURCE_DIR}/LoopJamLibraries.xml" DESTINATION ${TARGET_NAME}.app/Contents/MacOS COMPONENT ${TARGET_NAME})
@@ -36,7 +36,7 @@ IF ( BUILD_LOOPJAM_APP AND SUPPORT_AUDIO AND USE_QT4 AND USE_OSG AND USE_OSC AND
 	# Packaging
 	SET(PROGNAME "${TARGET_NAME}")
 	IF(NOT USE_DEBUG AND (APPLE OR UNIX))
-		INCLUDE (${CMAKE_SOURCE_DIR}/CMakeModules/CreatePackage.cmake)
+		INCLUDE (${CMAKE_SOURCE_DIR}/cmake/CreatePackage.cmake)
 	ENDIF()
 
 	MESSAGE("[X] ${TARGET_NAME}")

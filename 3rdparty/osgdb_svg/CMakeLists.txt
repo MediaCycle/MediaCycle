@@ -46,8 +46,8 @@ LINK_LIBRARIES(${RSVG_LIBRARIES} ${CAIRO_LIBRARIES})
 
 SET(TARGET_SRC ReaderWriterSVG.cpp )
 #### end var setup  ###
-# From OSG's CMakeModules/OsgMacroUtils.cmake
-INCLUDE (${CMAKE_SOURCE_DIR}/CMakeModules/OsgMacroUtils.cmake)
+# From OSG's cmake/OsgMacroUtils.cmake
+INCLUDE (${CMAKE_SOURCE_DIR}/cmake/OsgMacroUtils.cmake)
 SETUP_PLUGIN(svg svg)
 
 MESSAGE("[X] svg plugin for OpenSceneGraph")

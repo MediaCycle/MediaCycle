@@ -65,8 +65,8 @@ SET(TARGET_H
 SET(TARGET_ADDED_LIBRARIES osgText )
 SET(TARGET_LIBRARIES_VARS FREETYPE_LIBRARY )
 #### end var setup  ###
-# From OSG's CMakeModules/OsgMacroUtils.cmake
-INCLUDE (${CMAKE_SOURCE_DIR}/CMakeModules/OsgMacroUtils.cmake)
+# From OSG's cmake/OsgMacroUtils.cmake
+INCLUDE (${CMAKE_SOURCE_DIR}/cmake/OsgMacroUtils.cmake)
 SETUP_PLUGIN(freetype)
 
 MESSAGE("[X] freetype plugin for OpenSceneGraph")

@@ -28,7 +28,7 @@ IF(SUPPORT_IMAGE AND OpenCV_FOUND AND FFTW3_FOUND)
         file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/ACHaarCascade.h "static std::string haar_cascade = \"${OpenCV_HAARCASCADES_DIR}/${OpenCV_HAARCASCADE}\";")
         INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
 
-	INCLUDE (${CMAKE_SOURCE_DIR}/CMakeModules/AddMediaCyclePlugin.cmake)
+	INCLUDE (${CMAKE_SOURCE_DIR}/cmake/AddMediaCyclePlugin.cmake)
 	ADD_MC_PLUGIN_LIBRARY(${PLUGIN_NAME})
 	MESSAGE("[X] ${TARGET_NAME}")
 ELSE()
