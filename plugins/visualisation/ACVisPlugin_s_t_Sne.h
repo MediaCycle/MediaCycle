@@ -1,5 +1,5 @@
 /**
- * @brief ACVisPluginSIsoMap.h
+ * @brief ACVisPlugin_s_t_Sne.h
  * @author Thierry Ravet
  * @date 15/12/2012
  * @copyright (c) 2012 – UMONS - Numediart
@@ -31,26 +31,29 @@
 
 #include <armadillo>
 
-#include "ACArmaVisPlugin.h"
+#include "MediaCycle.h"
 #include "ACMediaBrowser.h"
-#include "ACMediaTimedFeature.h"
+#include "ACArmaVisPlugin.h"
 
-#ifndef _ACVisPluginSIsoMap_
-#define _ACVisPluginSIsoMap_
+#ifndef _ACVisPlugin_s_t_Sne_
+#define _ACVisPlugin_s_t_Sne_
 
-class ACVisPluginSIsoMap : public ACArmaVisPlugin {
+class ACVisPlugin_s_t_Sne : public ACArmaVisPlugin {
 public:
-  ACVisPluginSIsoMap();
-  ~ACVisPluginSIsoMap();
+  ACVisPlugin_s_t_Sne();
+  ~ACVisPlugin_s_t_Sne();
 
-//    virtual void updateNextPositions(ACMediaBrowser* );
+ // virtual void updateNextPositions(ACMediaBrowser* );
     virtual void  dimensionReduction(arma::mat &posDisp_m,arma::mat desc_m,arma::urowvec tag);
-
+    
+    void perplexityValueChanged(void);
+    void slopeValueChanged(void);
 protected:
-    int Kn;
-	//void extractDescMatrix(ACMediaBrowser* mediaBrowser, arma::mat& desc_m, std::vector<std::string> &featureNames);
+//	void extractDescMatrix(ACMediaBrowser* mediaBrowser, arma::mat& desc_m, std::vector<std::string> &featureNames);
+    double perplexity;
+    double slope;
 };
 
-#endif	/* _ACVisPluginSIsoMap_ */
+#endif	/* _ACVisPlugin_s_t_Sne_ */
 
 

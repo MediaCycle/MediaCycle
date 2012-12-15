@@ -1,7 +1,7 @@
 /**
  * @brief ACVisPluginIsoMap.h
  * @author Thierry Ravet
- * @date 24/11/2012
+ * @date 15/12/2012
  * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -31,23 +31,24 @@
 
 #include <armadillo>
 
-#include "ACPlugin.h"
+#include "ACArmaVisPlugin.h"
 #include "ACMediaBrowser.h"
 #include "ACMediaTimedFeature.h"
 
 #ifndef _ACVisPluginIsoMap_
 #define _ACVisPluginIsoMap_
 
-class ACVisPluginIsoMap : public ACClusterPositionsPlugin {
+class ACVisPluginIsoMap : public ACArmaVisPlugin {
 public:
   ACVisPluginIsoMap();
   ~ACVisPluginIsoMap();
 
-  virtual void updateNextPositions(ACMediaBrowser* );
+//  virtual void updateNextPositions(ACMediaBrowser* );
+    virtual void  dimensionReduction(arma::mat &posDisp_m,arma::mat desc_m,arma::urowvec tag);
 
 protected:
     int Kn;
-	void extractDescMatrix(ACMediaBrowser* mediaBrowser, arma::mat& desc_m, std::vector<std::string> &featureNames);
+//	void extractDescMatrix(ACMediaBrowser* mediaBrowser, arma::mat& desc_m, std::vector<std::string> &featureNames);
 };
 
 #endif	/* _ACVisPluginIsoMap_ */

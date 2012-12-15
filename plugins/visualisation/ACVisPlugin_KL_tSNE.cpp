@@ -1,5 +1,5 @@
 /**
- * @brief ACVisPluginMDS.cpp
+ * @brief ACVisPlugin_KL_tSNE.cpp
  * @author Thierry Ravet
  * @date 15/12/2012
  * @copyright (c) 2012 – UMONS - Numediart
@@ -31,29 +31,31 @@
 
 #include <armadillo>
 #include "Armadillo-utils.h"
-#include "ACPlugin.h"
-#include "ACVisPluginMDS.h"
-#include "mds.h"
+#include "ACVisPlugin_KL_tSNE.h"
+#include "t_Sne.h"
+
 
 using namespace arma;
 using namespace std;
 //TR: I modified this class to take into account the feature that are selected by the user (with te weights).
-ACVisPluginMDS::ACVisPluginMDS() : ACArmaVisPlugin()
+ACVisPlugin_KL_tSNE::ACVisPlugin_KL_tSNE() : ACDistribKLVisPlugin()
 {
     //vars herited from ACPlugin
-    this->mMediaType = MEDIA_TYPE_ALL;
-    this->mName = "MediaCycle MDS";
-    this->mDescription = "dimensionnality reduction resulting from MDS";
+    this->mMediaType = MEDIA_TYPE_AUDIO;
+    this->mName = "MediaCycle KL tSNE";
+    this->mDescription = "dimensionnality reduction resulting from MDS with KL distance for distribution";
     this->mId = "";
+    perplexity=20;
+    this->addNumberParameter("perplexity",perplexity,10,100,10,"value of desired perplexity",boost::bind(&ACVisPlugin_KL_tSNE::perplexityValueChanged,this));
 
     //local vars
 }
 
-ACVisPluginMDS::~ACVisPluginMDS(){
+ACVisPlugin_KL_tSNE::~ACVisPlugin_KL_tSNE(){
 }
 
 
-/*void ACVisPluginMDS::updateNextPositions(ACMediaBrowser* mediaBrowser){
+/*void ACVisPlugin_KL_tSNE::updateNextPositions(ACMediaBrowser* mediaBrowser){
     int itemClicked, labelClicked, action;
     vector<string> featureNames;
     int libSize = mediaBrowser->getLibrary()->getSize();
@@ -126,12 +128,12 @@ ACVisPluginMDS::~ACVisPluginMDS(){
         }
     }
     if (cpt!=desc_m.n_rows)
-        cout << "ACVisPluginMDS::updateNextPositions, problem with desc matrix dimensions "<<endl;
+        cout << "ACVisPlugin_KL_tSNE::updateNextPositions, problem with desc matrix dimensions "<<endl;
     ////////////////////////////////////////////////////////////////
 }
 
 
-void ACVisPluginMDS::extractDescMatrix(ACMediaBrowser* mediaBrowser, mat& desc_m, vector<string> &featureNames){
+void ACVisPlugin_KL_tSNE::extractDescMatrix(ACMediaBrowser* mediaBrowser, mat& desc_m, vector<string> &featureNames){
     ACMedias medias = mediaBrowser->getLibrary()->getAllMedia();
     std::vector<long> ids = mediaBrowser->getLibrary()->getAllMediaIds();
     int nbMedia = medias.size();
@@ -142,7 +144,7 @@ void ACVisPluginMDS::extractDescMatrix(ACMediaBrowser* mediaBrowser, mat& desc_m
     // Count nb of feature
     int nbFeature = mediaBrowser->getLibrary()->getFirstMedia()->getNumberOfPreProcFeaturesVectors();
     if (nbFeature!=weight.size())
-        std::cerr<<"ACVisPluginMDS::extractDescMatrix weight vector size incompatibility"<<endl;
+        std::cerr<<"ACVisPlugin_KL_tSNE::extractDescMatrix weight vector size incompatibility"<<endl;
     for(int f=0; f< nbFeature; f++){
         if (weight[f]>0.f){
             featureNames.push_back(mediaBrowser->getLibrary()->getFirstMedia()->getPreProcFeaturesVector(f)->getName());
@@ -188,10 +190,19 @@ void ACVisPluginMDS::extractDescMatrix(ACMediaBrowser* mediaBrowser, mat& desc_m
 }*/
 
 
-void  ACVisPluginMDS::dimensionReduction(mat &posDisp_m,arma::mat desc_m,urowvec tag){
-    mds mds_algo;
-    mds_algo.setFeatureMatrix(desc_m);
-    posDisp_m=mds_algo.compute(2);
+void ACVisPlugin_KL_tSNE::perplexityValueChanged(void){
+    if(!this->media_cycle) return;
+    
+    perplexity=this->getNumberParameterValue("perplexity");
+    this->media_cycle->updateDisplay(true);
+    
+}
+
+void  ACVisPlugin_KL_tSNE::dimensionReduction(mat &posDisp_m,arma::mat desc_m,urowvec tag){
     
     
+    t_Sne t_Sne_algo;
+    t_Sne_algo.setPerplexity(perplexity);
+    t_Sne_algo.setDistanceMatrix(desc_m);
+    posDisp_m=t_Sne_algo.compute(2);
 }

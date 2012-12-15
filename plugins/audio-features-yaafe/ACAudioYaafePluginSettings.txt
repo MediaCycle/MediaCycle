@@ -27,7 +27,6 @@ Delta_Delta_MFCC := Output normalize="-1" version="v0.6" yaafedefinition="MFCC b
 n5 > n9
 n9 > Delta_Delta_MFCC
 
-
 n13 := Sqr
 n3 > n13
 

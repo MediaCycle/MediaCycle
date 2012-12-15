@@ -1,7 +1,7 @@
 /**
  * @brief ACVisPlugin_t_Sne.cpp
  * @author Thierry Ravet
- * @date 03/12/2012
+ * @date 15/12/2012
  * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -31,14 +31,13 @@
 
 #include <armadillo>
 #include "Armadillo-utils.h"
-#include "ACPlugin.h"
 #include "ACVisPlugin_t_Sne.h"
 #include "t_Sne.h"
 
 using namespace arma;
 using namespace std;
 //TR: I modified this class to take into account the feature that are selected by the user (with te weights).
-ACVisPlugin_t_Sne::ACVisPlugin_t_Sne() : ACClusterPositionsPlugin(){
+ACVisPlugin_t_Sne::ACVisPlugin_t_Sne() : ACArmaVisPlugin(){
     //vars herited from ACPlugin
     this->mMediaType = MEDIA_TYPE_ALL;
     this->mName = "MediaCycle t_Sne";
@@ -52,7 +51,7 @@ ACVisPlugin_t_Sne::ACVisPlugin_t_Sne() : ACClusterPositionsPlugin(){
 ACVisPlugin_t_Sne::~ACVisPlugin_t_Sne(){
 }
 
-
+/*
 void ACVisPlugin_t_Sne::updateNextPositions(ACMediaBrowser* mediaBrowser){
     int itemClicked, labelClicked, action;
     vector<string> featureNames;
@@ -186,8 +185,21 @@ void ACVisPlugin_t_Sne::extractDescMatrix(ACMediaBrowser* mediaBrowser, mat& des
     //   desc_m = desc_m - repmat(minDesc_v, desc_m.n_rows, 1);
     //   desc_m = desc_m/repmat(maxDesc_v-minDesc_v, desc_m.n_rows, 1);
     /////////////////////////////////////////////////////////////////////////////////
+}*/
+
+void ACVisPlugin_t_Sne::perplexityValueChanged(void){
+    if(!this->media_cycle) return;
+
+    perplexity=this->getNumberParameterValue("perplexity");
+    this->media_cycle->updateDisplay(true);
+
 }
 
-void ACVisPlugin_t_Sne::perplexityValueChanged(){
-    perplexity=this->getNumberParameterValue("perplexity");
+void  ACVisPlugin_t_Sne::dimensionReduction(mat &posDisp_m,arma::mat desc_m,urowvec tag){
+    t_Sne t_Sne_algo;
+    t_Sne_algo.setPerplexity(perplexity);
+    t_Sne_algo.setFeatureMatrix(desc_m);
+    posDisp_m=t_Sne_algo.compute(2);
+ 
+    
 }

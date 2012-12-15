@@ -1,7 +1,7 @@
 /**
  * @brief ACVisPluginIsoMap.cpp
  * @author Thierry Ravet
- * @date 28/11/2012
+ * @date 15/12/2012
  * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -38,7 +38,7 @@
 using namespace arma;
 using namespace std;
 //TR: I modified this class to take into account the feature that are selected by the user (with te weights).
-ACVisPluginIsoMap::ACVisPluginIsoMap() : ACClusterPositionsPlugin()
+ACVisPluginIsoMap::ACVisPluginIsoMap() : ACArmaVisPlugin()
 {
     //vars herited from ACPlugin
     this->mMediaType = MEDIA_TYPE_ALL;
@@ -54,7 +54,7 @@ ACVisPluginIsoMap::~ACVisPluginIsoMap(){
 }
 
 
-void ACVisPluginIsoMap::updateNextPositions(ACMediaBrowser* mediaBrowser){
+/*void ACVisPluginIsoMap::updateNextPositions(ACMediaBrowser* mediaBrowser){
     int itemClicked, labelClicked, action;
     vector<string> featureNames;
     int libSize = mediaBrowser->getLibrary()->getSize();
@@ -190,4 +190,15 @@ void ACVisPluginIsoMap::extractDescMatrix(ACMediaBrowser* mediaBrowser, mat& des
     //   desc_m = desc_m - repmat(minDesc_v, desc_m.n_rows, 1);
     //   desc_m = desc_m/repmat(maxDesc_v-minDesc_v, desc_m.n_rows, 1);
     /////////////////////////////////////////////////////////////////////////////////
+}*/
+
+void  ACVisPluginIsoMap::dimensionReduction(mat &posDisp_m,arma::mat desc_m,urowvec tag){
+    Isomap algo;
+    while (algo.setFeatureMatrix(desc_m,'k',Kn)==false){
+        Kn+=5;
+        if (Kn>desc_m.n_rows)
+            break;
+    }
+    posDisp_m=algo.compute(2);
+    
 }

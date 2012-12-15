@@ -1,7 +1,7 @@
 /**
  * @brief ACVisPluginPCA13.h
  * @author Thierry Ravet
- * @date 06/06/2012
+ * @date 15/12/2012
  * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -31,22 +31,23 @@
 
 #include <armadillo>
 
-#include "ACPlugin.h"
+#include "ACArmaVisPlugin.h"
 #include "ACMediaBrowser.h"
 #include "ACMediaTimedFeature.h"
 
 #ifndef _ACVISPLUGINPCA13_
 #define _ACVISPLUGINPCA13_
 
-class ACVisPluginPCA13 : public ACClusterPositionsPlugin {
+class ACVisPluginPCA13 : public ACArmaVisPlugin {
 public:
   ACVisPluginPCA13();
   ~ACVisPluginPCA13();
 
-  virtual void updateNextPositions(ACMediaBrowser* );
+//  virtual void updateNextPositions(ACMediaBrowser* );
+    virtual void  dimensionReduction(arma::mat &posDisp_m,arma::mat desc_m,arma::urowvec tag);
 
 protected:
-	void extractDescMatrix(ACMediaBrowser* mediaBrowser, arma::mat& desc_m, std::vector<std::string> &featureNames);
+//	void extractDescMatrix(ACMediaBrowser* mediaBrowser, arma::mat& desc_m, std::vector<std::string> &featureNames);
 };
 
 #endif	/* _ACVISPLUGINPCA13_ */

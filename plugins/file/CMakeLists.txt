@@ -1,6 +1,7 @@
 SET(PLUGIN_NAME "file")
 #IF() #only requires boost which is a mediacycle dependency
         ADD_MC_PLUGIN_LIBRARY(${PLUGIN_NAME})
+	SET_TARGET_PROPERTIES(${PLUGIN_PREFIX}${PLUGIN_NAME} PROPERTIES FOLDER "${FOLDERNAME}")
 	MESSAGE("[X] ${TARGET_NAME}")
 #ELSE()
 #	MESSAGE("[ ] ${TARGET_NAME}")

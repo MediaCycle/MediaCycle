@@ -160,6 +160,10 @@ void ACKNN::updateClusters(ACMediaBrowser* mediaBrowser,bool needsCluster){
         // Assign Samples to Clusters
         for(i=0; i<object_count; i++) {
             if(mediaBrowser->getMediaNode(currId[i])->getNavigationLevel() < mediaBrowser->getNavigationLevel()) continue;
+            if (library->getMedia(currId[i])->getTaggedClassId()>-1){
+                mediaBrowser->getMediaNode(currId[i])->setClusterId(library->getMedia(currId[i])->getTaggedClassId());
+                continue;
+            }
 
             // check if we should include this object
             vector< float > 		knn_distances; // for computation
@@ -193,7 +197,6 @@ void ACKNN::updateClusters(ACMediaBrowser* mediaBrowser,bool needsCluster){
         
     }
 	currId.clear();
-	
 	
 	
 }

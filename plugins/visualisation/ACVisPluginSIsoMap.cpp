@@ -1,7 +1,7 @@
 /**
  * @brief ACVisPluginSIsoMap.cpp
- * @author Christian Frisson
- * @date 04/12/2012
+ * @author Thierry Ravet
+ * @date 15/12/2012
  * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -31,14 +31,14 @@
 
 #include <armadillo>
 #include "Armadillo-utils.h"
-#include "ACPlugin.h"
+#include "ACArmaVisPlugin.h"
 #include "ACVisPluginSIsoMap.h"
 #include "sIsomap.h"
 
 using namespace arma;
 using namespace std;
 //TR: I modified this class to take into account the feature that are selected by the user (with te weights).
-ACVisPluginSIsoMap::ACVisPluginSIsoMap() : ACClusterPositionsPlugin()
+ACVisPluginSIsoMap::ACVisPluginSIsoMap() : ACArmaVisPlugin()
 {
     //vars herited from ACPlugin
     this->mMediaType = MEDIA_TYPE_ALL;
@@ -54,7 +54,7 @@ ACVisPluginSIsoMap::~ACVisPluginSIsoMap(){
 }
 
 
-void ACVisPluginSIsoMap::updateNextPositions(ACMediaBrowser* mediaBrowser){
+/*void ACVisPluginSIsoMap::updateNextPositions(ACMediaBrowser* mediaBrowser){
     int itemClicked, labelClicked, action;
     vector<string> featureNames;
     int libSize = mediaBrowser->getLibrary()->getSize();
@@ -89,7 +89,7 @@ void ACVisPluginSIsoMap::updateNextPositions(ACMediaBrowser* mediaBrowser){
     for (uword i=0;i<ids.size();i++)
         label[i]=mediaBrowser->getMediaNode(i)->getClusterId();
     while (algo.setFeatureMatrix(desc_m,label,'k',Kn)==false){
-        Kn++;
+        Kn=Kn+5;
         cout<<"ACVisPluginIsoMap::updateNextPositions Kn:"<<Kn<<endl;
         if (Kn>desc_m.n_rows)
             break;
@@ -194,4 +194,17 @@ void ACVisPluginSIsoMap::extractDescMatrix(ACMediaBrowser* mediaBrowser, mat& de
     //   desc_m = desc_m - repmat(minDesc_v, desc_m.n_rows, 1);
     //   desc_m = desc_m/repmat(maxDesc_v-minDesc_v, desc_m.n_rows, 1);
     /////////////////////////////////////////////////////////////////////////////////
+}*/
+
+void  ACVisPluginSIsoMap::dimensionReduction(mat &posDisp_m,arma::mat desc_m,urowvec tag){
+    sIsomap algo;
+    while (algo.setFeatureMatrix(desc_m,tag,'k',Kn)==false){
+        Kn=Kn+5;
+        cout<<"ACVisPluginIsoMap::updateNextPositions Kn:"<<Kn<<endl;
+        if (Kn>desc_m.n_rows)
+            break;
+    }
+    posDisp_m=algo.compute(2);
+
+    
 }

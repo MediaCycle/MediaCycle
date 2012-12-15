@@ -1,5 +1,5 @@
 /**
- * @brief ACVisPluginMDS.cpp
+ * @brief ACVisPlugin_KL_MDS.cpp
  * @author Thierry Ravet
  * @date 15/12/2012
  * @copyright (c) 2012 – UMONS - Numediart
@@ -31,29 +31,28 @@
 
 #include <armadillo>
 #include "Armadillo-utils.h"
-#include "ACPlugin.h"
-#include "ACVisPluginMDS.h"
+#include "ACVisPlugin_KL_MDS.h"
 #include "mds.h"
 
 using namespace arma;
 using namespace std;
 //TR: I modified this class to take into account the feature that are selected by the user (with te weights).
-ACVisPluginMDS::ACVisPluginMDS() : ACArmaVisPlugin()
+ACVisPlugin_KL_MDS::ACVisPlugin_KL_MDS() : ACDistribKLVisPlugin()
 {
     //vars herited from ACPlugin
-    this->mMediaType = MEDIA_TYPE_ALL;
-    this->mName = "MediaCycle MDS";
-    this->mDescription = "dimensionnality reduction resulting from MDS";
+    this->mMediaType = MEDIA_TYPE_AUDIO;
+    this->mName = "MediaCycle KL MDS";
+    this->mDescription = "dimensionnality reduction resulting from MDS with KL distance for distribution";
     this->mId = "";
 
     //local vars
 }
 
-ACVisPluginMDS::~ACVisPluginMDS(){
+ACVisPlugin_KL_MDS::~ACVisPlugin_KL_MDS(){
 }
 
 
-/*void ACVisPluginMDS::updateNextPositions(ACMediaBrowser* mediaBrowser){
+/*void ACVisPlugin_KL_MDS::updateNextPositions(ACMediaBrowser* mediaBrowser){
     int itemClicked, labelClicked, action;
     vector<string> featureNames;
     int libSize = mediaBrowser->getLibrary()->getSize();
@@ -126,12 +125,12 @@ ACVisPluginMDS::~ACVisPluginMDS(){
         }
     }
     if (cpt!=desc_m.n_rows)
-        cout << "ACVisPluginMDS::updateNextPositions, problem with desc matrix dimensions "<<endl;
+        cout << "ACVisPlugin_KL_MDS::updateNextPositions, problem with desc matrix dimensions "<<endl;
     ////////////////////////////////////////////////////////////////
 }
 
 
-void ACVisPluginMDS::extractDescMatrix(ACMediaBrowser* mediaBrowser, mat& desc_m, vector<string> &featureNames){
+void ACVisPlugin_KL_MDS::extractDescMatrix(ACMediaBrowser* mediaBrowser, mat& desc_m, vector<string> &featureNames){
     ACMedias medias = mediaBrowser->getLibrary()->getAllMedia();
     std::vector<long> ids = mediaBrowser->getLibrary()->getAllMediaIds();
     int nbMedia = medias.size();
@@ -142,7 +141,7 @@ void ACVisPluginMDS::extractDescMatrix(ACMediaBrowser* mediaBrowser, mat& desc_m
     // Count nb of feature
     int nbFeature = mediaBrowser->getLibrary()->getFirstMedia()->getNumberOfPreProcFeaturesVectors();
     if (nbFeature!=weight.size())
-        std::cerr<<"ACVisPluginMDS::extractDescMatrix weight vector size incompatibility"<<endl;
+        std::cerr<<"ACVisPlugin_KL_MDS::extractDescMatrix weight vector size incompatibility"<<endl;
     for(int f=0; f< nbFeature; f++){
         if (weight[f]>0.f){
             featureNames.push_back(mediaBrowser->getLibrary()->getFirstMedia()->getPreProcFeaturesVector(f)->getName());
@@ -188,9 +187,9 @@ void ACVisPluginMDS::extractDescMatrix(ACMediaBrowser* mediaBrowser, mat& desc_m
 }*/
 
 
-void  ACVisPluginMDS::dimensionReduction(mat &posDisp_m,arma::mat desc_m,urowvec tag){
+void  ACVisPlugin_KL_MDS::dimensionReduction(mat &posDisp_m,arma::mat desc_m,urowvec tag){
     mds mds_algo;
-    mds_algo.setFeatureMatrix(desc_m);
+    mds_algo.setDistanceMatrix(desc_m);
     posDisp_m=mds_algo.compute(2);
     
     

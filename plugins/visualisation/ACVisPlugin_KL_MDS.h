@@ -1,5 +1,5 @@
 /**
- * @brief ACVisPluginSIsoMap.h
+ * @brief ACVisPlugin_KL_MDS.h
  * @author Thierry Ravet
  * @date 15/12/2012
  * @copyright (c) 2012 – UMONS - Numediart
@@ -31,26 +31,25 @@
 
 #include <armadillo>
 
-#include "ACArmaVisPlugin.h"
+#include "ACDistribKLVisPlugin.h"
 #include "ACMediaBrowser.h"
 #include "ACMediaTimedFeature.h"
 
-#ifndef _ACVisPluginSIsoMap_
-#define _ACVisPluginSIsoMap_
+#ifndef _ACVisPlugin_KL_MDS_
+#define _ACVisPlugin_KL_MDS_
 
-class ACVisPluginSIsoMap : public ACArmaVisPlugin {
+class ACVisPlugin_KL_MDS : public ACDistribKLVisPlugin {
 public:
-  ACVisPluginSIsoMap();
-  ~ACVisPluginSIsoMap();
+  ACVisPlugin_KL_MDS();
+  ~ACVisPlugin_KL_MDS();
 
-//    virtual void updateNextPositions(ACMediaBrowser* );
+//  virtual void updateNextPositions(ACMediaBrowser* );
     virtual void  dimensionReduction(arma::mat &posDisp_m,arma::mat desc_m,arma::urowvec tag);
 
 protected:
-    int Kn;
-	//void extractDescMatrix(ACMediaBrowser* mediaBrowser, arma::mat& desc_m, std::vector<std::string> &featureNames);
+//	void extractDescMatrix(ACMediaBrowser* mediaBrowser, arma::mat& desc_m, std::vector<std::string> &featureNames);
 };
 
-#endif	/* _ACVisPluginSIsoMap_ */
+#endif	/* _ACVisPlugin_KL_MDS_ */
 
 

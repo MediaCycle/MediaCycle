@@ -1,7 +1,7 @@
 /**
  * @brief ACVisPlugin_t_Sne.h
  * @author Thierry Ravet
- * @date 03/12/2012
+ * @date 15/12/2012
  * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -31,22 +31,24 @@
 
 #include <armadillo>
 
-#include "ACPlugin.h"
+#include "MediaCycle.h"
 #include "ACMediaBrowser.h"
-#include "ACMediaTimedFeature.h"
+#include "ACArmaVisPlugin.h"
 
 #ifndef _ACVisPlugin_t_Sne_
 #define _ACVisPlugin_t_Sne_
 
-class ACVisPlugin_t_Sne : public ACClusterPositionsPlugin {
+class ACVisPlugin_t_Sne : public ACArmaVisPlugin {
 public:
   ACVisPlugin_t_Sne();
   ~ACVisPlugin_t_Sne();
 
-  virtual void updateNextPositions(ACMediaBrowser* );
-    void perplexityValueChanged();
+//  virtual void updateNextPositions(ACMediaBrowser* );
+    virtual void  dimensionReduction(arma::mat &posDisp_m,arma::mat desc_m,arma::urowvec tag);
+
+    void perplexityValueChanged(void);
 protected:
-	void extractDescMatrix(ACMediaBrowser* mediaBrowser, arma::mat& desc_m, std::vector<std::string> &featureNames);
+//	void extractDescMatrix(ACMediaBrowser* mediaBrowser, arma::mat& desc_m, std::vector<std::string> &featureNames);
     double perplexity;
     
 };

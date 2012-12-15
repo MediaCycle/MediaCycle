@@ -1,7 +1,7 @@
 /**
  * @brief ACVisPluginPCA13.cpp
  * @author Thierry Ravet
- * @date 20/11/2012
+ * @date 15/12/2012
  * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -37,7 +37,7 @@
 using namespace arma;
 using namespace std;
 //TR: I modified this class to take into account the feature that are selected by the user (with te weights).
-ACVisPluginPCA13::ACVisPluginPCA13() : ACClusterPositionsPlugin()
+ACVisPluginPCA13::ACVisPluginPCA13() : ACArmaVisPlugin()
 {
     //vars herited from ACPlugin
     this->mMediaType = MEDIA_TYPE_ALL;
@@ -51,7 +51,7 @@ ACVisPluginPCA13::ACVisPluginPCA13() : ACClusterPositionsPlugin()
 ACVisPluginPCA13::~ACVisPluginPCA13(){
 }
 
-
+/*
 void ACVisPluginPCA13::updateNextPositions(ACMediaBrowser* mediaBrowser){
     int itemClicked, labelClicked, action;
     vector<string> featureNames;
@@ -164,4 +164,16 @@ void ACVisPluginPCA13::extractDescMatrix(ACMediaBrowser* mediaBrowser, mat& desc
     //   desc_m = desc_m - repmat(minDesc_v, desc_m.n_rows, 1);
     //   desc_m = desc_m/repmat(maxDesc_v-minDesc_v, desc_m.n_rows, 1);
     /////////////////////////////////////////////////////////////////////////////////
+}*/
+
+void  ACVisPluginPCA13::dimensionReduction(mat &posDisp_m,arma::mat desc_m,urowvec tag){
+    mat tempPosDisp;
+    mat descN_m = zscore(desc_m);
+    mat coeff;
+    mat score;
+    princomp(coeff, tempPosDisp, descN_m);
+    posDisp_m.set_size(tempPosDisp.n_rows,2);
+    posDisp_m.col(0)=tempPosDisp.col(0);
+    posDisp_m.col(1)=tempPosDisp.col(2);
+    
 }

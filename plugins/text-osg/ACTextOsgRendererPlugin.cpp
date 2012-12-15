@@ -63,6 +63,8 @@ ACTextOsgRendererPlugin::~ACTextOsgRendererPlugin(){
 
 std::map<std::string,ACMediaType> ACTextOsgRendererPlugin::getSupportedExtensions(ACMediaType media_type){
     std::map<std::string,ACMediaType> extensions;
+    extensions[".txt"] = MEDIA_TYPE_TEXT;
+    extensions[".xml"] = MEDIA_TYPE_TEXT;
     return extensions;
 }
 

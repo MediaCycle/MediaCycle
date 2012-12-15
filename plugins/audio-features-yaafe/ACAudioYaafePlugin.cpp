@@ -610,6 +610,7 @@ bool ACAudioYaafePlugin::addMediaTimedFeature(ACMediaTimedFeature* feature, std:
 
 std::vector<ACMediaFeatures*> ACAudioYaafePlugin::calculate(ACMediaData* aData, ACMedia* theMedia, bool _save_timed_feat) {
     descmf.clear();
+    cout<<"ACAudioYaafePlugin::calculate"<<endl;
 
     std::vector<ACMediaFeatures*> desc;
 
@@ -759,8 +760,13 @@ std::vector<ACMediaFeatures*> ACAudioYaafePlugin::calculate(ACMediaData* aData, 
 		// CPL, statistics using boost library
 		desc.push_back((*mf).second->centroid());
 		desc.push_back((*mf).second->spread());
+        std::map<std::string,ACMediaTimedFeature*>::iterator mf2;
+        //for(mf2=descmf.begin();mf2!=descmf.end();mf2++){
+        //    desc.push_back((*mf).second->cov(mf2->second));
+        //}
 		desc.push_back((*mf).second->skew());
 		desc.push_back((*mf).second->kurto());
+        
         //std::cout << "descmf " << (*mf).second->getName() << " of length " << (*mf).second->getLength() << " and dim " << (*mf).second->getDim() << " gives mean of size " << (*mf).second->mean()->getSize() << std::endl;
         /*if (i==nrgIdx){
                 desc[i]->setNeedsNormalization(0);

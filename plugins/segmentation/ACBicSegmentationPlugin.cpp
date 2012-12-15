@@ -43,7 +43,7 @@
 // bic_thresh = threshold for the BIC under which there is no segment detected
 // jump_width = number of frames to skip after a step has been detected
 ACBicSegmentationPlugin::ACBicSegmentationPlugin() : ACSegmentationPlugin(),lambda(1), sampling_rate(1), Wmin(20), bic_thresh(0.8), jump_width(5), discard_borders(5){
-    this->mMediaType = MEDIA_TYPE_ALL;
+    this->mMediaType = MEDIA_TYPE_AUDIO&MEDIA_TYPE_VIDEO;
     //this->mPluginType = PLUGIN_TYPE_SEGMENTATION;
     this->mName = "BIC Segmentation";
     this->mDescription = "BIC Segmentation plugin";

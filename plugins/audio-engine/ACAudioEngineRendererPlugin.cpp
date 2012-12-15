@@ -74,6 +74,7 @@ ACAudioEngineRendererPlugin::ACAudioEngineRendererPlugin() : ACMediaRendererPlug
 ACAudioEngineRendererPlugin::~ACAudioEngineRendererPlugin(){
     if (audio_engine) {
         audio_engine->stopAudioEngine();
+        usleep(10000);
         delete audio_engine;
     }
     audio_engine = 0;
