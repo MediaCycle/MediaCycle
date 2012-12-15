@@ -184,13 +184,13 @@ public:
 	/**
 	 * Returns true if no token is available
 	 */
-	bool empty() { return (((_data==NULL) || (_data->tokens==_pos)) && _queue.empty()); }
+	bool empty() { return (((_data==NULL) || (_data->tokens==_pos))&& _queue.empty()); }
 
 	/**
 	 * Return a pointer to the current token. The pointer is valid
 	 * as long as the current has not been consumed.
 	 */
-	double* readToken() { return (*_data)[_pos]; };
+	double* readToken() { return (_data?(*_data)[_pos]:NULL); };
 
 	/**
 	 * Consume the current token.

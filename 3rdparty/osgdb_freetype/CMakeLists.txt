@@ -68,6 +68,7 @@ SET(TARGET_LIBRARIES_VARS FREETYPE_LIBRARY )
 # From OSG's cmake/OsgMacroUtils.cmake
 INCLUDE (${CMAKE_SOURCE_DIR}/cmake/OsgMacroUtils.cmake)
 SETUP_PLUGIN(freetype)
+	SET_TARGET_PROPERTIES("osgdb_freetype" PROPERTIES FOLDER "${FOLDERNAME}")
 
 MESSAGE("[X] freetype plugin for OpenSceneGraph")
 ELSE()
