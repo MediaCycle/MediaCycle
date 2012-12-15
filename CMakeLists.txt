@@ -114,6 +114,8 @@ IF(CMAKE_C_COMPILER_VERSION_MAJOR EQUAL 4 AND CMAKE_C_COMPILER_VERSION_MINOR EQU
 	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fpermissive")
 ENDIF()
 
+#set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+
 ######################
 #       OPTIONS      #
 ######################
