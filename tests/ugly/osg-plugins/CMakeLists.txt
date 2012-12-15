@@ -8,6 +8,7 @@ IF(OSG_FOUND)
 		TARGET_LINK_LIBRARIES(osg-plugins-test ${OSGPLUGINS_STATIC_LDFLAGS})#${OSGPLUGINS_LDFLAGS})
 	ENDIF()
 
+	SET_TARGET_PROPERTIES("osg-plugins-test" PROPERTIES FOLDER "${FOLDERNAME}")
 	MESSAGE("[X] osg-plugins-test")
 ELSE()
 	MESSAGE("[ ] osg-plugins-test")

@@ -6,6 +6,7 @@ MESSAGE("\nApplications:")
 ADD_SUBDIRECTORY(multimediacycle-osg-qt)
 
 FILE(GLOB DIRLIST * )
+SET(FOLDERNAME "apps")
 
 FOREACH(APPDIR ${DIRLIST})
     IF(IS_DIRECTORY ${APPDIR})

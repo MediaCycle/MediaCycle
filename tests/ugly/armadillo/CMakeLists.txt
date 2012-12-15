@@ -9,4 +9,5 @@
 	TARGET_LINK_LIBRARIES(armadillo-test mediacycle armadillo-utils armadillo-isomap ${ARMADILLO_LIBRARIES})
 
 
+	SET_TARGET_PROPERTIES("armadillo-test" PROPERTIES FOLDER "${FOLDERNAME}")
 	MESSAGE("[X] armadillo")

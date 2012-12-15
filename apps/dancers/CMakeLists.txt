@@ -14,6 +14,7 @@ IF(SUPPORT_VIDEO)
 
 	TARGET_LINK_LIBRARIES(mediacycle-dancers mediacycle)
 
+	SET_TARGET_PROPERTIES("mediacycle-dancers" PROPERTIES FOLDER "${FOLDERNAME}")
 	MESSAGE("[X] dancers")
 ELSE()
 	MESSAGE("[ ] dancers")

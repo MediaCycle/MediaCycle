@@ -23,6 +23,7 @@ IF(SUPPORT_VIDEO)
 
         TARGET_LINK_LIBRARIES(video-test mediacycle ${PLUGIN_PREFIX}video ${PLUGIN_PREFIX}video-features-dancers gnuplot_i)
 
+	SET_TARGET_PROPERTIES("video-test" PROPERTIES FOLDER "${FOLDERNAME}")
 	MESSAGE("[X] video")
 ELSE()
 	MESSAGE("[ ] video")

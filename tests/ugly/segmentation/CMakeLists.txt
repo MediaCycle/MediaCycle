@@ -21,6 +21,7 @@ IF(SUPPORT_AUDIO OR SUPPORT_VIDEO)
         ADD_DEPENDENCIES(segmentation-test mc_video-segmentation)
         TARGET_LINK_LIBRARIES(segmentation-test mc_video-segmentation)
         ENDIF()
+	SET_TARGET_PROPERTIES("segmentation-test" PROPERTIES FOLDER "${FOLDERNAME}")
 
         MESSAGE("[X] segmentation")
 ELSE()

@@ -11,6 +11,7 @@ IF(SUPPORT_AUDIO AND USE_AUDIOFEAT AND BUILD_CLIS)
 
 	TARGET_LINK_LIBRARIES(mediacycle-avlc mediacycle)
 
+	SET_TARGET_PROPERTIES("mediacycle-avlc" PROPERTIES FOLDER "${FOLDERNAME}")
 	MESSAGE("[X] avlaughtercycle")
 ELSE()
 	MESSAGE("[ ] avlaughtercycle")

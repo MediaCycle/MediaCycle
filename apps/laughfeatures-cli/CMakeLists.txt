@@ -15,6 +15,7 @@ IF(SUPPORT_AUDIO AND USE_LAUGHFEAT AND USE_AUDIOFEAT AND BUILD_CLIS)
         ADD_DEPENDENCIES(laughfeatures-cli mediacycle mediacycle-audio-core mediacycle-audio-features mediacycle-audio-features-laughter mediacycle-audio-segmentation mediacycle-segmentation)
 
         TARGET_LINK_LIBRARIES(laughfeatures-cli mediacycle mediacycle-audio-features ${FFTW3_LIBRARY} ${SNDFILE_LIBRARY})
+	SET_TARGET_PROPERTIES(${TARGET_NAME} PROPERTIES FOLDER "${FOLDERNAME}")
 
 	MESSAGE("[X] ${TARGET_NAME}")
 ELSE()

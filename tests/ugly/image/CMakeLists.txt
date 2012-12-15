@@ -12,6 +12,7 @@ IF(SUPPORT_IMAGE)
 	ADD_DEPENDENCIES(image-test mediacycle mc_image)
 	TARGET_LINK_LIBRARIES(image-test mediacycle mc_image)
 
+	SET_TARGET_PROPERTIES("image-test" PROPERTIES FOLDER "${FOLDERNAME}")
 	MESSAGE("[X] image")
 ELSE()
 	MESSAGE("[ ] image")
