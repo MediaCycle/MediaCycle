@@ -1,4 +1,4 @@
-SET(LIBRARY_NAME "mediacycle-segmentation")
+SET(LIBRARY_NAME "mediacycle-visualisation")
 #IF()
 	FILE(GLOB SRC *.cpp *.c)
 	FILE(GLOB HDR *.hpp *.h)

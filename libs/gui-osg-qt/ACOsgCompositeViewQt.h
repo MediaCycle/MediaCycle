@@ -74,17 +74,19 @@ public slots:
     // Browser
     void forwardNextLevel(); // recluster the selected cluster (cluster mode) or unwrap node (network mode)
     void changeReferenceNode();
-    void changeSelectedNodeClusterId0(bool trig);
-    void changeSelectedNodeClusterId1(bool trig);
-    void changeSelectedNodeClusterId2(bool trig);
-    void changeSelectedNodeClusterId3(bool trig);
-    void changeSelectedNodeClusterId4(bool trig);
-    void changeSelectedNodeClusterId5(bool trig);
-    void changeSelectedNodeClusterId6(bool trig);
-    void changeSelectedNodeClusterId7(bool trig);
-    void changeSelectedNodeClusterId8(bool trig);
-    void changeSelectedNodeClusterId9(bool trig);
-    void resetSelectedNodeClusterId(bool trig);
+    void changeSelectedMediaTagId0(bool trig);
+    void changeSelectedMediaTagId1(bool trig);
+    void changeSelectedMediaTagId2(bool trig);
+    void changeSelectedMediaTagId3(bool trig);
+    void changeSelectedMediaTagId4(bool trig);
+    void changeSelectedMediaTagId5(bool trig);
+    void changeSelectedMediaTagId6(bool trig);
+    void changeSelectedMediaTagId7(bool trig);
+    void changeSelectedMediaTagId8(bool trig);
+    void changeSelectedMediaTagId9(bool trig);
+    void resetSelectedMediaTagId(bool trig);
+    void transferClassToTag(bool trig);
+    void cleanAllTags(bool trig);
     void stopPlayback(); // stop the playback of audio/video files
     void toggleMediaHover(bool toggle); // audio hover, image/video ... -> need a panel to configure the behaviour of hover
     void triggerMediaHover(bool trigger); // audio hover, image/video ... -> need a panel to configure the behaviour of hover
@@ -151,9 +153,9 @@ private:
     *stopPlaybackAction, *toggleMediaHoverAction, *triggerMediaHoverAction, *resetBrowserAction,
     *rotateBrowserAction, *zoomBrowserAction, *translateBrowserAction,
     *addMediaOnTimelineTrackAction, *toggleTimelinePlaybackAction, *adjustTimelineHeightAction,
-    *discardMediaAction,*resetSelectedNodeClusterIdAction;
+    *discardMediaAction,*resetSelectedMediaTagIdAction,*transferClassToTagAction,*cleanAllTagsAction;
     //*neighborsOfReferentAction, *clusterAroundReferentAction, *removeMediaAction
-    std::vector<ACInputActionQt*> changeSelectedNodeClusterIdAction;
+    std::vector<ACInputActionQt*> changeSelectedMediaTagIdAction;
     QList<ACInputActionQt*> inputActions;
 
     void initInputActions();

@@ -13,6 +13,9 @@ IF ( ARMADILLO_FOUND )
 
 	#INSTALL(TARGETS armadillo-utils LIBRARY DESTINATION lib)
 	#INSTALL(FILES ${HDR} DESTINATION include/armadillo-utils)
+	SET_TARGET_PROPERTIES("armadillo-utils" PROPERTIES FOLDER "libs")
+    
+	MESSAGE("${FOLDERNAME}")
 	MESSAGE("[X] armadillo-utils")
 ELSE()
 	MESSAGE("[ ] armadillo-utils")

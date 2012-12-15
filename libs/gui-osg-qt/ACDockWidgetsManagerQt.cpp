@@ -106,6 +106,7 @@ bool ACDockWidgetsManagerQt::addControlDock(ACAbstractDockWidgetQt* dock)
 
     dockWidgets.push_back(dock);
     dock->setMediaCycle(this->media_cycle);
+    dock->setOsgView(this->osg_view);
 
     if(!(mainWindow->isFullScreen()))
     {

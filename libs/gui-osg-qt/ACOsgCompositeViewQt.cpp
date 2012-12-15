@@ -71,7 +71,7 @@ ACOsgCompositeViewQt::ACOsgCompositeViewQt( QWidget * parent, const char * name,
       stopPlaybackAction(0), toggleMediaHoverAction(0), triggerMediaHoverAction(0),
       resetBrowserAction(0), rotateBrowserAction(0), zoomBrowserAction(0),
       translateBrowserAction(0), addMediaOnTimelineTrackAction(0), toggleTimelinePlaybackAction(0), adjustTimelineHeightAction(0),
-      discardMediaAction(0),resetSelectedNodeClusterIdAction(0),
+      discardMediaAction(0),resetSelectedMediaTagIdAction(0),transferClassToTagAction(0),cleanAllTagsAction(0),
       setting(AC_SETTING_NONE)
 {
     osg_view = new osgViewer::GraphicsWindowEmbedded(0,0,width(),height());
@@ -203,15 +203,18 @@ ACOsgCompositeViewQt::~ACOsgCompositeViewQt(){
     if(examineMediaExternallyAction) delete examineMediaExternallyAction; examineMediaExternallyAction = 0;
     if(forwardNextLevelAction) delete forwardNextLevelAction; forwardNextLevelAction = 0;
     if(changeReferenceNodeAction) delete changeReferenceNodeAction; changeReferenceNodeAction = 0;
-    if(changeSelectedNodeClusterIdAction.size()>0){
+    if(changeSelectedMediaTagIdAction.size()>0){
         for (int i=0;i<10;i++){
-            if (changeSelectedNodeClusterIdAction[i])
-                delete changeSelectedNodeClusterIdAction[i];
-            changeSelectedNodeClusterIdAction[i] = 0;
+            if (changeSelectedMediaTagIdAction[i])
+                delete changeSelectedMediaTagIdAction[i];
+            changeSelectedMediaTagIdAction[i] = 0;
         }
-        changeSelectedNodeClusterIdAction.clear();
+        changeSelectedMediaTagIdAction.clear();
     }
-    if(resetSelectedNodeClusterIdAction) delete resetSelectedNodeClusterIdAction; resetSelectedNodeClusterIdAction = 0;
+    if(resetSelectedMediaTagIdAction) delete resetSelectedMediaTagIdAction; resetSelectedMediaTagIdAction = 0;
+    
+    if(transferClassToTagAction) delete transferClassToTagAction; transferClassToTagAction = 0;
+    if(cleanAllTagsAction) delete cleanAllTagsAction; cleanAllTagsAction = 0;
     if(stopPlaybackAction) delete stopPlaybackAction; stopPlaybackAction = 0;
     if(toggleMediaHoverAction) delete toggleMediaHoverAction; toggleMediaHoverAction = 0;
     if(resetBrowserAction) delete resetBrowserAction; resetBrowserAction = 0;
@@ -471,38 +474,52 @@ void ACOsgCompositeViewQt::initInputActions(){
     connect(changeReferenceNodeAction, SIGNAL(triggered(bool)), this, SLOT(changeReferenceNode()));
     this->addInputAction(changeReferenceNodeAction);
     
-    //QSignalMapper *changeSelectedNodeClusterIdMapper = new QSignalMapper();
+    //QSignalMapper *changeSelectedMediaTagIdMapper = new QSignalMapper();
     for (int i=0;i<10;i++){
-        changeSelectedNodeClusterIdAction.push_back( new ACInputActionQt(tr("Set Cluster Id"), this));
-        changeSelectedNodeClusterIdAction[i]->setToolTip(tr("Change Cluster Id of the clicked Node"));
-        changeSelectedNodeClusterIdAction[i]->setShortcut(Qt::Key_0+i);
-        changeSelectedNodeClusterIdAction[i]->setKeyEventType(QEvent::KeyPress);
-        //changeSelectedNodeClusterIdAction[i]->setMouseEventType(QEvent::MouseButtonPress);
- //       changeSelectedNodeClusterIdMapper->setMapping(changeSelectedNodeClusterIdAction[i], i);
- //       connect(changeSelectedNodeClusterIdMapper, SIGNAL(mapped(const int &)), this, SLOT(changeSelectedNodeClusterId(const int &)));
+        changeSelectedMediaTagIdAction.push_back( new ACInputActionQt(tr("Set Cluster Id"), this));
+        changeSelectedMediaTagIdAction[i]->setToolTip(tr("Change Cluster Id of the clicked Node"));
+        changeSelectedMediaTagIdAction[i]->setShortcut(Qt::Key_0+i);
+        changeSelectedMediaTagIdAction[i]->setKeyEventType(QEvent::KeyPress);
+        //changeSelectedMediaTagIdAction[i]->setMouseEventType(QEvent::MouseButtonPress);
+ //       changeSelectedMediaTagIdMapper->setMapping(changeSelectedMediaTagIdAction[i], i);
+ //       connect(changeSelectedMediaTagIdMapper, SIGNAL(mapped(const int &)), this, SLOT(changeSelectedMediaTagId(const int &)));
     }
-    connect(changeSelectedNodeClusterIdAction[0], SIGNAL(triggered(bool)), this, SLOT(changeSelectedNodeClusterId0(bool)));
-    connect(changeSelectedNodeClusterIdAction[1], SIGNAL(triggered(bool)), this, SLOT(changeSelectedNodeClusterId1(bool)));
-    connect(changeSelectedNodeClusterIdAction[2], SIGNAL(triggered(bool)), this, SLOT(changeSelectedNodeClusterId2(bool)));
-    connect(changeSelectedNodeClusterIdAction[3], SIGNAL(triggered(bool)), this, SLOT(changeSelectedNodeClusterId3(bool)));
-    connect(changeSelectedNodeClusterIdAction[4], SIGNAL(triggered(bool)), this, SLOT(changeSelectedNodeClusterId4(bool)));
-    connect(changeSelectedNodeClusterIdAction[5], SIGNAL(triggered(bool)), this, SLOT(changeSelectedNodeClusterId5(bool)));
-    connect(changeSelectedNodeClusterIdAction[6], SIGNAL(triggered(bool)), this, SLOT(changeSelectedNodeClusterId6(bool)));
-    connect(changeSelectedNodeClusterIdAction[7], SIGNAL(triggered(bool)), this, SLOT(changeSelectedNodeClusterId7(bool)));
-    connect(changeSelectedNodeClusterIdAction[8], SIGNAL(triggered(bool)), this, SLOT(changeSelectedNodeClusterId8(bool)));
-    connect(changeSelectedNodeClusterIdAction[9], SIGNAL(triggered(bool)), this, SLOT(changeSelectedNodeClusterId9(bool)));
+    connect(changeSelectedMediaTagIdAction[0], SIGNAL(triggered(bool)), this, SLOT(changeSelectedMediaTagId0(bool)));
+    connect(changeSelectedMediaTagIdAction[1], SIGNAL(triggered(bool)), this, SLOT(changeSelectedMediaTagId1(bool)));
+    connect(changeSelectedMediaTagIdAction[2], SIGNAL(triggered(bool)), this, SLOT(changeSelectedMediaTagId2(bool)));
+    connect(changeSelectedMediaTagIdAction[3], SIGNAL(triggered(bool)), this, SLOT(changeSelectedMediaTagId3(bool)));
+    connect(changeSelectedMediaTagIdAction[4], SIGNAL(triggered(bool)), this, SLOT(changeSelectedMediaTagId4(bool)));
+    connect(changeSelectedMediaTagIdAction[5], SIGNAL(triggered(bool)), this, SLOT(changeSelectedMediaTagId5(bool)));
+    connect(changeSelectedMediaTagIdAction[6], SIGNAL(triggered(bool)), this, SLOT(changeSelectedMediaTagId6(bool)));
+    connect(changeSelectedMediaTagIdAction[7], SIGNAL(triggered(bool)), this, SLOT(changeSelectedMediaTagId7(bool)));
+    connect(changeSelectedMediaTagIdAction[8], SIGNAL(triggered(bool)), this, SLOT(changeSelectedMediaTagId8(bool)));
+    connect(changeSelectedMediaTagIdAction[9], SIGNAL(triggered(bool)), this, SLOT(changeSelectedMediaTagId9(bool)));
     for (int i=0;i<10;i++){
-        this->addInputAction(changeSelectedNodeClusterIdAction[i]);
+        this->addInputAction(changeSelectedMediaTagIdAction[i]);
         
     }
     
-    resetSelectedNodeClusterIdAction = new ACInputActionQt(tr("reset Cluster Id"), this);
-    resetSelectedNodeClusterIdAction->setToolTip(tr("Reset Cluster Id of the clicked Node"));
-    resetSelectedNodeClusterIdAction->setShortcut(Qt::Key_U);
-    resetSelectedNodeClusterIdAction->setKeyEventType(QEvent::KeyPress);
-    //resetSelectedNodeClusterIdAction->setMouseEventType(QEvent::MouseButtonPress);
-    connect(resetSelectedNodeClusterIdAction, SIGNAL(triggered(bool)), this, SLOT(resetSelectedNodeClusterId(bool)));
-    this->addInputAction(resetSelectedNodeClusterIdAction);
+    resetSelectedMediaTagIdAction = new ACInputActionQt(tr("reset Cluster Id"), this);
+    resetSelectedMediaTagIdAction->setToolTip(tr("Reset Cluster Id of the clicked Node"));
+    resetSelectedMediaTagIdAction->setShortcut(Qt::Key_U);
+    resetSelectedMediaTagIdAction->setKeyEventType(QEvent::KeyPress);
+    //resetSelectedMediaTagIdAction->setMouseEventType(QEvent::MouseButtonPress);
+    connect(resetSelectedMediaTagIdAction, SIGNAL(triggered(bool)), this, SLOT(resetSelectedMediaTagId(bool)));
+    this->addInputAction(resetSelectedMediaTagIdAction);
+    
+    transferClassToTagAction = new ACInputActionQt(tr("transfer classification to the tags"), this);
+    transferClassToTagAction->setToolTip(tr("record node classification in the tag field of the medias"));
+    transferClassToTagAction->setShortcut(Qt::CTRL+Qt::Key_M);
+    transferClassToTagAction->setKeyEventType(QEvent::KeyPress);
+    connect(transferClassToTagAction, SIGNAL(triggered(bool)), this, SLOT(transferClassToTag(bool)));
+    this->addInputAction(transferClassToTagAction);
+    
+    cleanAllTagsAction = new ACInputActionQt(tr("Clean the tags"), this);
+    cleanAllTagsAction->setToolTip(tr("Clean the tag in every loaded media"));
+    cleanAllTagsAction->setShortcut(Qt::SHIFT+Qt::CTRL+Qt::Key_M);
+    cleanAllTagsAction->setKeyEventType(QEvent::KeyPress);
+    connect(cleanAllTagsAction, SIGNAL(triggered(bool)), this, SLOT(cleanAllTags(bool)));
+    this->addInputAction(cleanAllTagsAction);
     
     
     stopPlaybackAction = new ACInputActionQt(tr("Stop Playback"), this);
@@ -683,77 +700,88 @@ void ACOsgCompositeViewQt::changeReferenceNode(){
     std::cout << "ACOsgCompositeViewQt::changeReferenceNode" << std::endl;
     media_cycle->changeReferenceNode();
 }
-void ACOsgCompositeViewQt::changeSelectedNodeClusterId0(bool trig){
+void ACOsgCompositeViewQt::changeSelectedMediaTagId0(bool trig){
     if (media_cycle == 0) return;
     int newId=0;
     if (trig==false)
-    media_cycle->changeSelectedNodeClusterId(newId);
+    media_cycle->changeSelectedMediaTagId(newId);
 }
 
-void ACOsgCompositeViewQt::changeSelectedNodeClusterId1(bool trig){
+void ACOsgCompositeViewQt::changeSelectedMediaTagId1(bool trig){
     if (media_cycle == 0) return;
     int newId=1;
     if (trig==false)
-    media_cycle->changeSelectedNodeClusterId(newId);
+    media_cycle->changeSelectedMediaTagId(newId);
 }
 
-void ACOsgCompositeViewQt::changeSelectedNodeClusterId2(bool trig){
+void ACOsgCompositeViewQt::changeSelectedMediaTagId2(bool trig){
     if (media_cycle == 0) return;
     int newId=2;
     if (trig==false)
-    media_cycle->changeSelectedNodeClusterId(newId);
+    media_cycle->changeSelectedMediaTagId(newId);
 }
 
-void ACOsgCompositeViewQt::changeSelectedNodeClusterId3(bool trig){
+void ACOsgCompositeViewQt::changeSelectedMediaTagId3(bool trig){
     if (media_cycle == 0) return;
     int newId=3;
     if (trig==false)
-    media_cycle->changeSelectedNodeClusterId(newId);
+    media_cycle->changeSelectedMediaTagId(newId);
 }
 
-void ACOsgCompositeViewQt::changeSelectedNodeClusterId4(bool trig){
+void ACOsgCompositeViewQt::changeSelectedMediaTagId4(bool trig){
     if (media_cycle == 0) return;
     int newId=4;
     if (trig==false)
-    media_cycle->changeSelectedNodeClusterId(newId);
+    media_cycle->changeSelectedMediaTagId(newId);
 }
 
-void ACOsgCompositeViewQt::changeSelectedNodeClusterId5(bool trig){
+void ACOsgCompositeViewQt::changeSelectedMediaTagId5(bool trig){
     if (media_cycle == 0) return;
     int newId=5;
     if (trig==false)
-    media_cycle->changeSelectedNodeClusterId(newId);
+    media_cycle->changeSelectedMediaTagId(newId);
 }
 
-void ACOsgCompositeViewQt::changeSelectedNodeClusterId6(bool trig){
+void ACOsgCompositeViewQt::changeSelectedMediaTagId6(bool trig){
     if (media_cycle == 0) return;
     int newId=6;
-    media_cycle->changeSelectedNodeClusterId(newId);
+    media_cycle->changeSelectedMediaTagId(newId);
 }
 
-void ACOsgCompositeViewQt::changeSelectedNodeClusterId7(bool trig){
+void ACOsgCompositeViewQt::changeSelectedMediaTagId7(bool trig){
     if (media_cycle == 0) return;
     int newId=7;
-    media_cycle->changeSelectedNodeClusterId(newId);
+    media_cycle->changeSelectedMediaTagId(newId);
 }
 
-void ACOsgCompositeViewQt::changeSelectedNodeClusterId8(bool trig){
+void ACOsgCompositeViewQt::changeSelectedMediaTagId8(bool trig){
     if (media_cycle == 0) return;
     int newId=8;
     if (trig==false)
-    media_cycle->changeSelectedNodeClusterId(newId);
+    media_cycle->changeSelectedMediaTagId(newId);
 }
 
-void ACOsgCompositeViewQt::changeSelectedNodeClusterId9(bool trig){
+void ACOsgCompositeViewQt::changeSelectedMediaTagId9(bool trig){
     if (media_cycle == 0) return;
     int newId=9;
-    media_cycle->changeSelectedNodeClusterId(newId);
+    media_cycle->changeSelectedMediaTagId(newId);
 }
-void ACOsgCompositeViewQt::resetSelectedNodeClusterId(bool trig){
+void ACOsgCompositeViewQt::resetSelectedMediaTagId(bool trig){
     if (media_cycle == 0) return;
     int newId=-1;
-    media_cycle->changeSelectedNodeClusterId(newId);
+    media_cycle->changeSelectedMediaTagId(newId);
 }
+void ACOsgCompositeViewQt::transferClassToTag(bool trig){
+    if (media_cycle == 0) return;
+    int newId=-1;
+    media_cycle->transferClassToTag();
+}
+void ACOsgCompositeViewQt::cleanAllTags(bool trig){
+    if (media_cycle == 0) return;
+    int newId=-1;
+    media_cycle->cleanAllMediaTag();
+}
+
 
 void ACOsgCompositeViewQt::stopPlayback(){
     if (media_cycle == 0) return;

@@ -389,6 +389,7 @@ void ACPluginControlsWidgetQt::buildPluginList()
         comboBoxPlugins->addItem("None");
     else if(comboBoxPlugins->count()>1)
         comboBoxPlugins->setEnabled(true);
+    usleep(10000);
     emit this->readjustHeight();
 }
 

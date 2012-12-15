@@ -50,7 +50,7 @@ enum SelfSimDistance {// actually it will be the inverse of a distance: the larg
     MANHATTAN
 };
 
-class ACSelfSimSegmentation : public ACSegmentationPlugin {
+class ACSelfSimSegmentation  {
 public:
     ACSelfSimSegmentation();
     ~ACSelfSimSegmentation();

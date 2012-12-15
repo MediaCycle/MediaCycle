@@ -79,7 +79,7 @@ void ACOsgRendererFactory::setTimelineRenderer(ACOsgTimelineRenderer* _timeline)
 
 void ACOsgRendererFactory::pluginLoaded(std::string name){
     //std::cout << "ACOsgRendererFactory::pluginLoaded: " << name << std::endl;
-    if(!(media_cycle->getPluginManager()->getPlugin(name)->implementsPluginType(PLUGIN_TYPE_MEDIARENDERER))){
+    if(!(media_cycle->getPluginManager()->getPlugin(name))||!(media_cycle->getPluginManager()->getPlugin(name)->implementsPluginType(PLUGIN_TYPE_MEDIARENDERER))){
         //std::cout << "ACOsgRendererFactory::pluginLoaded: " << name << " is not a media renderer plugin" << std::endl;
         return;
     }

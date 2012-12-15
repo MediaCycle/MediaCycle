@@ -88,7 +88,7 @@ void ACBrowserControlsCompleteDockWidgetQt::modifyListItem(QListWidgetItem *item
     //cout << ui.featuresListWidget->currentRow() << endl;
 
     // end XS check
-
+    cout<<"osg_view "<<osg_view<<endl;
     if (osg_view && osg_view->isLibraryLoaded())
     {
         ui.featuresListWidget->setCurrentItem(item);

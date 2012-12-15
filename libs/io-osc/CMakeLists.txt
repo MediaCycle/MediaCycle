@@ -6,6 +6,7 @@ IF(USE_OSC)
 
 	ADD_DEPENDENCIES(mediacycle-io-osc mediacycle)
 	TARGET_LINK_LIBRARIES(mediacycle-io-osc mediacycle ${LIBLO_LIBRARY})
+	SET_TARGET_PROPERTIES("mediacycle-io-osc" PROPERTIES FOLDER "${FOLDERNAME}")
 	
 	MESSAGE("[X] mediacycle-io-osc")
 ELSE()

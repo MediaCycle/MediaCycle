@@ -1,41 +1,48 @@
 //
-//  t_Sne.cpp
+//  st_Sne.cpp
 //  MediaCycle
 //
 //  @author Thierry Ravet
 //  @date 21/11/12
 //
 //  This class is an adaptation of the matlab code written by Laurens van der Maaten, 2008 ( Maastricht University). The algorithm is described in:
-//L.J.P. van der Maaten and G.E. Hinton. Visualizing High-Dimensional Data Using t-t_Sne. Journal of Machine Learning Research 9(Nov):2579-2605, 2008
+//L.J.P. van der Maaten and G.E. Hinton. Visualizing High-Dimensional Data Using t-st_Sne. Journal of Machine Learning Research 9(Nov):2579-2605, 2008
 //http://homepage.tudelft.nl/19j49/t-Sne.html
 
-#include "t_Sne.h"
+#include "st_Sne.h"
 
 using namespace arma;
 
-t_Sne::t_Sne(){
+st_Sne::st_Sne(){
     kk=30;
     tol=1e-4;
+    slope=1.1;
 }
 
-bool t_Sne::setDistanceMatrix(arma::mat D){
+bool st_Sne::setDistanceMatrix(arma::mat D,arma::urowvec label){
     if (D.is_square()==false)
+        return false;
+    if (D.n_cols!=(label.n_cols))
         return false;
     if (prod(prod(D!=D.t())))
         return false;
     D=D/max(max(D));
     D=pow(D,2);
-    return d2p(D);
+    for (uword i=0;i<D.n_rows;i++)
+        for (uword j=0;j<D.n_cols;j++)
+            if (label(j)!=label(i))
+                D(i,j)=D(i,j)*slope*slope;
+    return d2p(D,label);
 }
 
-bool t_Sne::d2p(arma::mat Dist){
+bool st_Sne::d2p(arma::mat Dist,arma::urowvec label){
     
     uword N=Dist.n_cols;
     P.resize(N,N);
     colvec beta=ones(N,1);
     double logK=log(kk);
     for (uword i=0;i<N;i++){
-        cout<<"t_Sne::d2p"<<i<<endl;
+        cout<<"st_Sne::d2p"<<i<<endl;
         double betamin=-1*datum::inf;
         double betamax=datum::inf;
         double H;
@@ -76,7 +83,7 @@ bool t_Sne::d2p(arma::mat Dist){
     return true;
 }
 
-void t_Sne::Hbeta(double &H,rowvec &thisP,rowvec Dist,int ind,double beta){
+void st_Sne::Hbeta(double &H,rowvec &thisP,rowvec Dist,int ind,double beta){
     thisP.resize(Dist.size());
     thisP=exp(-Dist*beta);
     thisP(ind)=0;
@@ -89,19 +96,23 @@ void t_Sne::Hbeta(double &H,rowvec &thisP,rowvec Dist,int ind,double beta){
     
 }
 
-bool t_Sne::setFeatureMatrix(arma::mat X){//TODO Verify if it's necessay an ACP or not
+bool st_Sne::setFeatureMatrix(arma::mat X,arma::urowvec label){//TODO Verify if it's necessay an ACP or not
     //cout<<"X:"<<X<<endl;
     X=X-min(min(X));
     X=X/max(max(X));
     mat coeff;
     mat M;
     princomp(coeff, M, X);
-    cout<<"pca:"<<M<<endl;
+    //cout<<"pca:"<<M<<endl;
     colvec sum_X=sum(pow(M,2),1);
     mat D=sum_X*ones(1,sum_X.n_rows)+ones(sum_X.n_rows,1)*trans(sum_X)-2*(M*trans(M));
-    return d2p(D);
+    for (uword i=0;i<D.n_rows;i++)
+        for (uword j=0;j<D.n_cols;j++)
+            if (label(j)!=label(i))
+                D(i,j)=D(i,j)*slope*slope;
+    return d2p(D,label);
 }
-arma::mat t_Sne::compute(int ndim){
+arma::mat st_Sne::compute(int ndim){
     int n=this->P.n_rows;
     double momentum = 0.5;                              // initial momentum
     double final_momentum = 0.8;                               // value to which momentum is changed

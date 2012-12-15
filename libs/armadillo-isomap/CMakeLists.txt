@@ -8,6 +8,7 @@ IF ( ARMADILLO_FOUND )
 	TARGET_LINK_LIBRARIES(armadillo-isomap ${ARMADILLO_LIBRARIES})
 	ADD_DEPENDENCIES(armadillo-isomap  armadillo-utils)
 	TARGET_LINK_LIBRARIES(armadillo-isomap  armadillo-utils)
+	SET_TARGET_PROPERTIES("armadillo-isomap" PROPERTIES FOLDER "${FOLDERNAME}")
 
 	MESSAGE("[X] armadillo-isomap")
 ELSE()
