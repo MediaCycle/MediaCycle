@@ -209,11 +209,12 @@ public:
     void forwardNextLevel();
     void changeReferenceNode();
     
-    void changeSelectedNodeClusterId(int ClusterId);
+    void changeSelectedMediaTagId(int ClusterId);
     
     void setMediaTaggedClassId(int mediaId,int pId){if (mediaLibrary) mediaLibrary->setMediaTaggedClassId(mediaId,pId);};
     int getMediaTaggedClassId(int mediaId){return (mediaLibrary?mediaLibrary->getMediaTaggedClassId(mediaId):-1);};
-    
+    void transferClassToTag();
+    void cleanAllMediaTag();
     //	void setPlayKeyDown(bool i){playkeydown = i;};
     //	bool getPlayKeyDown(){return playkeydown;};
 

@@ -888,17 +888,48 @@ void MediaCycle::changeReferenceNode(){
     }
 }
 
-void MediaCycle::changeSelectedNodeClusterId(int ClusterId){
+void MediaCycle::changeSelectedMediaTagId(int ClusterId){
     int media_id = this->getClosestNode();
     if (mediaBrowser->getMediaNode(media_id)){
         if (mediaLibrary->getMediaTaggedClassId(media_id)!=ClusterId){
-            std::cout << "MediaCycle::changeSelectedNodeClusterId "<<ClusterId<<"for mediaId"<<media_id << std::endl;
+            std::cout << "MediaCycle::changeSelectedMediaTagId "<<ClusterId<<"for mediaId"<<media_id << std::endl;
             this->setMediaTaggedClassId(media_id, ClusterId);
             mediaBrowser->updateDisplay();
         }
     }
 
 }
+
+
+void MediaCycle::transferClassToTag(){
+    bool changed=false;
+    ACMediaNodes nodes=mediaBrowser->getMediaNodes();
+    for (ACMediaNodes::iterator it=nodes.begin();it!=nodes.end();it++){
+        if ((it->second->getClusterId()!=-1)&&it->second->getClusterId()!=mediaLibrary->getMediaTaggedClassId(it->first)){
+            if (it->second){
+                this->setMediaTaggedClassId(it->first, it->second->getClusterId());
+                changed=true;
+            }
+        }
+    }
+    if (changed)
+        mediaBrowser->updateDisplay();
+}
+
+void MediaCycle::cleanAllMediaTag(){
+    bool changed=false;
+    ACMedias medias=mediaLibrary->getAllMedia();
+    for (ACMedias::iterator it=medias.begin();it!=medias.end();it++){
+        if ((it->second)&&(it->second->getTaggedClassId()!=-1)){
+            it->second->setTaggedClassId(-1);
+            changed=true;
+            
+        }
+    }
+    if (changed)
+        mediaBrowser->updateDisplay();    
+}
+
 
 // == Features
 void MediaCycle::normalizeFeatures(int needsNormalize) { mediaLibrary->normalizeFeatures(needsNormalize); }

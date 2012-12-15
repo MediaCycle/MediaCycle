@@ -37,6 +37,7 @@
 #include <iostream>
 #include <fstream>
 
+#include "ACNormalizePlugin.h"
 #include "ACKMeansPlugin.h"
 #include "ACClusterPositionsPropellerPlugin.h"
 
@@ -186,6 +187,8 @@ void ACPluginLibrary::dump() {
 ACDefaultPluginsLibrary::ACDefaultPluginsLibrary() : ACPluginLibrary(){
     this->library_path = "";
     this->mLib = 0;
+    
+    mPlugins.push_back(new ACNormalizePlugin());
     mPlugins.push_back(new ACKMeansPlugin());
     mPlugins.push_back(new ACClusterPositionsPropellerPlugin());
 }

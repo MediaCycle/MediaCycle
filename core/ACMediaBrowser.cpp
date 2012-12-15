@@ -344,9 +344,9 @@ void ACMediaBrowser::setWeight(int i, float weight) {
     mFeatureWeights[i] = weight;
 
 #ifdef VERBOSE
-    for (unsigned int i=0; i<mFeatureWeights.size(); i++){
-        std::cout << "mFeatureWeights["<<i<<"] = " << mFeatureWeights[i] << std::endl;
-    }
+    //for (unsigned int i=0; i<mFeatureWeights.size(); i++){
+      //  std::cout << "mFeatureWeights["<<i<<"] = " << mFeatureWeights[i] << std::endl;
+    //}
 #endif // VERBOSE
 }
 

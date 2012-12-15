@@ -108,7 +108,7 @@ std::vector<std::string> ACPluginManager::addLibrary(std::string aPluginLibraryP
         return plugins_names;
     }
 
-    cout << "adding Plugin Library : " << aPluginLibraryPath << endl;
+    cout << "ACPluginManager::addLibrary adding Plugin Library : " << aPluginLibraryPath << endl;
 
     ACPluginLibrary *acpl = new ACPluginLibrary(lib);
     acpl->setMediaCycle(this->media_cycle);

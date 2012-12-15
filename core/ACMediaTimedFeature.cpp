@@ -452,9 +452,10 @@ ACMediaFeatures* ACMediaTimedFeature::centroid(){
 		
 	}
 	
-	string nameLoc = "Centroid of ";
-	nameLoc += this->getName();
+	string nameLoc = ": Centroid";
+	nameLoc = this->getName()+nameLoc;
 	centroid_mf->setName(nameLoc);
+    centroid_mf->setNeedsNormalization(0);
 	
 	return centroid_mf;
 }
@@ -485,12 +486,14 @@ ACMediaFeatures* ACMediaTimedFeature::spread(){
 		//std::cout << "mom1 " << moments[0] << " / mom2 " << moments[1] << " / mom3 " << moments[2] << " / mom4 " << moments[3] << " // kurtosis: " << output << "\n";
 	}
 	
-	string nameLoc = "Spread of ";
-	nameLoc += this->getName();
+	string nameLoc = ": Spread ";
+	nameLoc = this->getName() + nameLoc;
 	spread_mf->setName(nameLoc);
+    spread_mf->setNeedsNormalization(0);
 	
 	return spread_mf;
 }
+
 
 //Skewness
 ACMediaFeatures* ACMediaTimedFeature::skew(){
@@ -526,9 +529,10 @@ ACMediaFeatures* ACMediaTimedFeature::skew(){
 		skew_mf->addFeatureElement(output);
 	}
 	
-	string nameLoc = "Skewness of ";
-	nameLoc += this->getName();
+	string nameLoc = ": Skewness";
+	nameLoc = this->getName()+nameLoc;
 	skew_mf->setName(nameLoc);
+    skew_mf->setNeedsNormalization(0);
 	
 	return skew_mf;
 }
@@ -568,9 +572,10 @@ ACMediaFeatures* ACMediaTimedFeature::kurto(){
 		//std::cout << "mom1 " << moments[0] << " / mom2 " << moments[1] << " / mom3 " << moments[2] << " / mom4 " << moments[3] << " // kurtosis: " << output << "\n";
 	}
 	
-	string nameLoc = "Kurtosis of ";
-	nameLoc += this->getName();
+	string nameLoc = ": Kurtosis";
+	nameLoc = this->getName() +nameLoc;
 	kurt_mf->setName(nameLoc);
+    kurt_mf->setNeedsNormalization(0);
 	
 	return kurt_mf;
 }
@@ -621,6 +626,21 @@ ACMediaFeatures* ACMediaTimedFeature::std(){
 	return std_mf;
 }
 
+
+ACMediaFeatures* ACMediaTimedFeature::cov(ACMediaTimedFeature* mtf2){
+	ACMediaFeatures* cov_mf = new ACMediaFeatures();
+   // mat test1=arma::ones<mat>(mtf2->value_m.n_rows,1)*arma::mean(mtf2->value_m);
+    arma::fmat locCov=((this->value_m-arma::ones<fmat>(this->value_m.n_rows,1)*arma::mean(this->value_m))).t()*(mtf2->value_m-(arma::ones<fmat>(mtf2->value_m.n_rows,1)*arma::mean(mtf2->value_m)))/this->value_m.n_rows;
+	//each columns contains this->value_m.n_cols elements ( each of the this->value_m features)
+    for (uword i=0; i < locCov.n_elem; i++)
+        cov_mf->addFeatureElement(locCov[i]);
+	string nameLoc = ": Cov with :";
+	nameLoc = this->getName()+nameLoc;
+	nameLoc += mtf2->getName();
+	cov_mf->setName(nameLoc);
+    cov_mf->setNeedsNormalization(0);
+    return cov_mf;
+}
 
 ACMediaFeatures* ACMediaTimedFeature::toMediaFeatures(){
 	if (this->getDim() > 1){

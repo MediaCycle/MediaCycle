@@ -563,14 +563,13 @@ void ACMedia::loadXML(TiXmlElement* _pMediaNode){
 			count_s++;
 		}*/
 		// consistency check for segments
-        for(;; segmentElement = segmentElement->NextSiblingElement() ) {
+        for( segmentElement; segmentElement; segmentElement = segmentElement->NextSiblingElement() ) {
             ACMedia* segment_media = ACMediaFactory::getInstance().create(this->getMediaType());
 			segment_media->loadXML(segmentElement);
 			segment_media->setParentId(mid);
 			this->addSegment(segment_media);
 			count_s++;
         }
-
 		if (count_s != ns)
 			throw runtime_error("<ACMedia::loadXML> inconsistent number of segments");
 	}
