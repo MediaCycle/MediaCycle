@@ -36,6 +36,11 @@
 #include <Isomap.h>
 #include <Sne.h>
 
+#include "knn.h"
+#include "ClassificatorErrorMeasure.h"
+#include "Trustworthiness.h"
+
+#include "Batch.h"
 using namespace std;
 using namespace arma;
 
@@ -70,17 +75,29 @@ int main(int argc, char** argv) {
     cout<<"testVec:"<<testVec<<endl;
     
     
-    double aux_mem2[30] ={
-        1  ,   4  ,   6   , 35  ,   8   , 25  ,   8  ,  61  ,  76 ,    1,
+    double aux_mem2[60] ={
+        1  ,   4  ,   6   , 35  ,   8   , 2.5  ,   8  ,  61  ,  76 ,    1,
         10  ,   7  ,  10  ,   4  ,   2  ,  77  ,   3  ,   6  ,  53  ,   2,
-        20  ,   9  ,  76  ,   1  ,   7  ,   1   ,  2  ,  90  ,  98 ,    3};
-    mat X(aux_mem2, 10, 3, false);
-    cout<<"X:"<<X<<endl;
-    Isomap algo;
-    algo.setFeatureMatrix(X,'k',2);
+        20  ,   9  ,  76  ,   1  ,   7  ,   1   ,  2  ,  90  ,  98 ,    3,
+        4  ,   5  ,   10   , 30  ,   6  , 10  ,   8  ,  2  ,  81 ,    1,
+        15  ,   6  ,  40  ,   4.2  ,   2.5  ,  77  ,   34  ,   6  ,  10  ,   2,
+        20  ,   9  ,  71  ,   1  ,   43  ,   1   ,  2  ,  92  ,  91 ,    2.2};
+    mat X(aux_mem2, 20, 3, false);
+    uword aux_mem3[40] ={
+        0,1,2,3,7,8,10,12,15,18,20,22,24,33,36,38,41,43,45,48,0,1,2,0,2,2,1,1,2,1,2,1,1,1,0,0,1,0,1,2};
+    umat L(aux_mem3,20, 2, false);
+    
+    
+    cout<<"L:"<<L<<endl;
+    Trustworthiness algo;
+    
+    ucolvec Ltemp=L.col(1);
+    
+    algo.setFeatureMatrixHighDim(X);
+    algo.setFeatureMatrixLowDim(X);
     //algo.setDistanceMatrix(H);
-    mat result=algo.compute(2);
-    cout<<"result:"<<endl;
-    cout<<result;
+    cout<<algo.compute(10)<<endl;
+   // cout<<"result:"<<endl;
+     //   cout<<result;}
     return (EXIT_SUCCESS);
 }

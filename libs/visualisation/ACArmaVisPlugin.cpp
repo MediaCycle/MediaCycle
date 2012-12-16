@@ -36,6 +36,13 @@
 
 using namespace arma;
 using namespace std;
+
+#ifdef Knn_Validation
+#include "ClassificatorErrorMeasure.h"
+#include "Trustworthiness.h"
+#endif
+
+
 //TR: I modified this class to take into account the feature that are selected by the user (with te weights).
 ACArmaVisPlugin::ACArmaVisPlugin() : ACClusterPositionsPlugin()
 {
@@ -44,6 +51,16 @@ ACArmaVisPlugin::ACArmaVisPlugin() : ACClusterPositionsPlugin()
     this->mName = "MediaCycle visualisation";
     this->mDescription = "";
     this->mId = "";
+    
+    
+#ifdef Knn_Validation
+    knn_K=5;
+    this->addNumberParameter("KNN Validation parameter",knn_K,1,20,1,"Number processed neighboor in KNN algorithm",boost::bind(&ACArmaVisPlugin::knnValueChanged,this));
+    batchSize=0.1;
+    this->addNumberParameter("knn tagged batch size",batchSize,0.01,1,0.01,"batch size in procent",boost::bind(&ACArmaVisPlugin::knnValueChanged,this));
+    tw_K=20;
+    this->addNumberParameter("Trustworthiness neighborhood",tw_K,1,100,1,"number of elements considered in neighborhood for Trustworthiness computation",boost::bind(&ACArmaVisPlugin::twkValueChanged,this));
+#endif
 
     //local vars
 }
@@ -82,12 +99,24 @@ void ACArmaVisPlugin::updateNextPositions(ACMediaBrowser* mediaBrowser){
 //    mat coeff;
 //    mat score;
 //    princomp(coeff, posDisp_m, descN_m);
-
+    
     dimensionReduction(posDisp_m,desc_m,tag);
     for (int i=0; i<featureNames.size(); i++)
         std::cout << "featureNames : " << featureNames[i] << std::endl;
-
-
+    
+#ifdef Knn_Validation
+    ClassificatorErrorMeasure algo;
+    algo.setTagVector(tag.t(), 50, batchSize, knn_K);
+    cout<<"knn classification error with high dimensionnal data"<<endl;
+    algo.errorKnnMeasure(desc_m);
+    cout<<"knn classification error with  dimensionnaly reduced data with "<<this->mName<<endl;
+    algo.errorKnnMeasure(posDisp_m);
+    Trustworthiness algo2;
+    algo2.setFeatureMatrixHighDim(desc_m);
+    algo2.setFeatureMatrixLowDim(posDisp_m);
+    cout<<"Trustworthiness of dimension reduction "<<this->mName<<endl<<" :"<<algo2.compute(tw_K)<<endl;
+    
+#endif
 #ifdef USE_DEBUG
     posDisp_m.save("posDispDef.txt", arma_ascii);
 #endif
@@ -101,6 +130,7 @@ void ACArmaVisPlugin::updateNextPositions(ACMediaBrowser* mediaBrowser){
     mediaBrowser->setNumberOfDisplayedNodes(desc_m.n_rows);
     ////////////////////////////////////////////////////////////////////////////////////
 
+    
     ACPoint p;
     int cpt=0;
     float mx1=abs(min(posDisp_m.row(0)));
@@ -210,3 +240,26 @@ void ACArmaVisPlugin::catchCurrentPosition(ACMediaBrowser* mediaBrowser, mat& po
         
     }
 }
+#ifdef Knn_Validation
+
+void ACArmaVisPlugin::knnValueChanged(void){
+    if(!this->media_cycle) return;
+    
+    knn_K=this->getNumberParameterValue("KNN Validation parameter");
+    
+}
+void ACArmaVisPlugin::batchSizeValueChanged(void){
+    if(!this->media_cycle) return;
+    
+    batchSize=this->getNumberParameterValue("knn tagged batch size");
+    
+}
+void ACArmaVisPlugin::twkValueChanged(void){
+    if(!this->media_cycle) return;
+    
+    tw_K=this->getNumberParameterValue("Trustworthiness neighborhood");
+    
+
+}
+#endif
+

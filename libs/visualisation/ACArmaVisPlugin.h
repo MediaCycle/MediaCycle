@@ -38,6 +38,7 @@
 #ifndef _ACArmaVisPlugin_
 #define _ACArmaVisPlugin_
 
+//#define Knn_Validation
 class ACArmaVisPlugin : public    ACClusterPositionsPlugin {
 public:
   ACArmaVisPlugin();
@@ -49,7 +50,14 @@ public:
 protected:
     void extractDescMatrix(ACMediaBrowser* mediaBrowser, arma::mat& desc_m, std::vector<std::string> &featureNames,arma::urowvec& tag);
     void catchCurrentPosition(ACMediaBrowser* mediaBrowser, arma::mat& pos_m);
-
+protected:
+#ifdef Knn_Validation
+    unsigned int  knn_K,tw_K;
+    float  batchSize;
+    void knnValueChanged(void);
+    void batchSizeValueChanged(void);
+    void twkValueChanged(void);
+#endif
 };
 
 #endif	/* _ACArmaVisPlugin_ */
