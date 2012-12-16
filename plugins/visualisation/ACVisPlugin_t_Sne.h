@@ -1,7 +1,7 @@
 /**
  * @brief ACVisPlugin_t_Sne.h
  * @author Thierry Ravet
- * @date 15/12/2012
+ * @date 16/12/2012
  * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -47,9 +47,13 @@ public:
     virtual void  dimensionReduction(arma::mat &posDisp_m,arma::mat desc_m,arma::urowvec tag);
 
     void perplexityValueChanged(void);
+    void itMaxValueChanged(void);
+    void initValueChanged(void);
 protected:
 //	void extractDescMatrix(ACMediaBrowser* mediaBrowser, arma::mat& desc_m, std::vector<std::string> &featureNames);
     double perplexity;
+    double itMax;
+    bool initFlag;
     
 };
 

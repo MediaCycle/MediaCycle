@@ -1,7 +1,7 @@
 /**
  * @brief ACArmaVisPlugin.h
  * @author Thierry Ravet
- * @date 15/12/2012
+ * @date 16/12/2012
  * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -48,6 +48,8 @@ public:
 
 protected:
     void extractDescMatrix(ACMediaBrowser* mediaBrowser, arma::mat& desc_m, std::vector<std::string> &featureNames,arma::urowvec& tag);
+    void catchCurrentPosition(ACMediaBrowser* mediaBrowser, arma::mat& pos_m);
+
 };
 
 #endif	/* _ACArmaVisPlugin_ */

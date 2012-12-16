@@ -1,7 +1,7 @@
 /**
  * @brief ACVisPlugin_s_t_Sne.cpp
  * @author Thierry Ravet
- * @date 15/12/2012
+ * @date 16/12/2012
  * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -47,6 +47,16 @@ ACVisPlugin_s_t_Sne::ACVisPlugin_s_t_Sne() : ACArmaVisPlugin(){
     this->addNumberParameter("perplexity",perplexity,10,100,10,"value of desired perplexity",boost::bind(&ACVisPlugin_s_t_Sne::perplexityValueChanged,this));
     slope=1.2;
     this->addNumberParameter("slope",slope,1,2,0.1,"value of desired interclass slope",boost::bind(&ACVisPlugin_s_t_Sne::slopeValueChanged,this));
+    itMax=100;
+    this->addNumberParameter("Iteration Number",itMax,10,2000,50,"Number of t-Sne iteration",boost::bind(&ACVisPlugin_s_t_Sne::itMaxValueChanged,this));
+    vector<string> initializeValue;
+    initializeValue.push_back("Yes");
+    initializeValue.push_back("No");
+    this->addStringParameter("Initialize","Yes",initializeValue,"Must we catch the current positions to initialize the t-Sne algorithm",boost::bind(&ACVisPlugin_s_t_Sne::initValueChanged,this));
+    initFlag=true;
+    
+    
+    
     //local vars
 }
 
@@ -207,14 +217,39 @@ void ACVisPlugin_s_t_Sne::slopeValueChanged(void){
     
 }
 
+void ACVisPlugin_s_t_Sne::itMaxValueChanged(void){
+    if(!this->media_cycle) return;
+    
+    itMax=this->getNumberParameterValue("Iteration Number");
+    
+}
+void ACVisPlugin_s_t_Sne::initValueChanged(void){
+    if(!this->media_cycle) return;
+    string initializeValue=this->getStringParameterValue("Initialize");
+    if (initializeValue==string("Yes"))
+        initFlag=true;
+    else
+        initFlag=false;
+}
+
+
+
+
 
 void  ACVisPlugin_s_t_Sne::dimensionReduction(mat &posDisp_m,arma::mat desc_m,urowvec tag){
     st_Sne st_Sne_algo;
     st_Sne_algo.setPerplexity(perplexity);
+    st_Sne_algo.setIterMax(itMax);
     st_Sne_algo.setSpervizedBoost(slope);
     st_Sne_algo.setFeatureMatrix(desc_m,tag);
-    posDisp_m=st_Sne_algo.compute(2);
-
+    if (initFlag){
+        arma::mat pos_m;
+        this->catchCurrentPosition(media_cycle->getBrowser(), pos_m);
+        posDisp_m=st_Sne_algo.compute(2,pos_m);
+    }
+    else
+        posDisp_m=st_Sne_algo.compute(2);
+    
     
     
 }

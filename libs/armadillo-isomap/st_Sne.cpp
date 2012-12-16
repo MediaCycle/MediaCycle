@@ -13,9 +13,7 @@
 
 using namespace arma;
 
-st_Sne::st_Sne(){
-    kk=30;
-    tol=1e-4;
+st_Sne::st_Sne():t_Sne(){
     slope=1.1;
 }
 
@@ -83,7 +81,7 @@ bool st_Sne::d2p(arma::mat Dist,arma::urowvec label){
     return true;
 }
 
-void st_Sne::Hbeta(double &H,rowvec &thisP,rowvec Dist,int ind,double beta){
+/*void st_Sne::Hbeta(double &H,rowvec &thisP,rowvec Dist,int ind,double beta){
     thisP.resize(Dist.size());
     thisP=exp(-Dist*beta);
     thisP(ind)=0;
@@ -95,7 +93,7 @@ void st_Sne::Hbeta(double &H,rowvec &thisP,rowvec Dist,int ind,double beta){
     return;
     
 }
-
+*/
 bool st_Sne::setFeatureMatrix(arma::mat X,arma::urowvec label){//TODO Verify if it's necessay an ACP or not
     //cout<<"X:"<<X<<endl;
     X=X-min(min(X));
@@ -112,6 +110,7 @@ bool st_Sne::setFeatureMatrix(arma::mat X,arma::urowvec label){//TODO Verify if 
                 D(i,j)=D(i,j)*slope*slope;
     return d2p(D,label);
 }
+/*
 arma::mat st_Sne::compute(int ndim){
     int n=this->P.n_rows;
     double momentum = 0.5;                              // initial momentum
@@ -142,7 +141,7 @@ arma::mat st_Sne::compute(int ndim){
     //ydata=ydata*0.001;
     //cout<<"ydata"<<ydata<<endl;
     
-    mat ydata(n,ndim);
+   /* mat ydata(n,ndim);
     ydata=0.0001*randn(n,ndim);
     
     mat y_incs  = zeros(ydata.n_rows,ydata.n_cols);
@@ -184,5 +183,5 @@ arma::mat st_Sne::compute(int ndim){
     yfinal=yfinal-ones(n,1)*mean(yfinal);
     yfinal=yfinal/(ones(n,1)*stddev(yfinal));
     return yfinal;
-}
+}*/
 

@@ -1,7 +1,7 @@
 /**
  * @brief ACArmaVisPlugin.cpp
  * @author Thierry Ravet
- * @date 15/12/2012
+ * @date 16/12/2012
  * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -183,4 +183,30 @@ void ACArmaVisPlugin::extractDescMatrix(ACMediaBrowser* mediaBrowser, mat& desc_
     //   desc_m = desc_m - repmat(minDesc_v, desc_m.n_rows, 1);
     //   desc_m = desc_m/repmat(maxDesc_v-minDesc_v, desc_m.n_rows, 1);
     /////////////////////////////////////////////////////////////////////////////////
+}
+
+void ACArmaVisPlugin::catchCurrentPosition(ACMediaBrowser* mediaBrowser, mat& pos_m){
+    
+    ACMedias medias = mediaBrowser->getLibrary()->getAllMedia();
+    std::vector<long> ids = mediaBrowser->getLibrary()->getAllMediaIds();
+    int nbMedia = medias.size();
+    int cpt=0;
+    for (long i=0; i<ids.size(); i++){
+        if (mediaBrowser->getMediaNode(ids[i])->isDisplayed()){
+            cpt++;
+        }
+    }
+    pos_m.set_size(cpt,2);
+    int tmpIdy=0;
+    for(int i=0; i<ids.size(); i++) {
+        if (!(mediaBrowser->getMediaNode(ids[i])->isDisplayed()))
+            continue;
+        ACPoint p=mediaBrowser->getMediaNode(ids[i])->getNextPosition();
+        pos_m(tmpIdy,0)=p.x;
+        pos_m(tmpIdy,1)=p.y;
+        //pos_m(tmpIdy,2)=p.z;
+        //cout<<"ACArmaVisPlugin::catchCurrentPosition node "<<ids[i]<<" : "<<p.x<<" "<<p.y<<" "<<p.z<<endl;
+        tmpIdy++;
+        
+    }
 }

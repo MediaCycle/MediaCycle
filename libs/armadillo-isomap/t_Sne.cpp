@@ -16,6 +16,7 @@ using namespace arma;
 t_Sne::t_Sne(){
     kk=30;
     tol=1e-4;
+    max_iter = 1500;
 }
 
 bool t_Sne::setDistanceMatrix(arma::mat D){
@@ -35,7 +36,7 @@ bool t_Sne::d2p(arma::mat Dist){
     colvec beta=ones(N,1);
     double logK=log(kk);
     for (uword i=0;i<N;i++){
-        cout<<"t_Sne::d2p"<<i<<endl;
+        //cout<<"t_Sne::d2p"<<i<<endl;
         double betamin=-1*datum::inf;
         double betamax=datum::inf;
         double H;
@@ -64,7 +65,7 @@ bool t_Sne::d2p(arma::mat Dist){
             }
             Hbeta(H,thisP,Dist.row(i),i,beta(i));
             Hdiff=H-logK;
-            cout<<"tries:"<<tries<<" Hdiff: "<<Hdiff<<" tol: "<<tol<<endl;
+            //cout<<"tries:"<<tries<<" Hdiff: "<<Hdiff<<" tol: "<<tol<<endl;
             //cout<<"test:"<<(fabs(Hdiff)>tol)<<endl;
             tries++;
         }
@@ -96,18 +97,20 @@ bool t_Sne::setFeatureMatrix(arma::mat X){//TODO Verify if it's necessay an ACP 
     mat coeff;
     mat M;
     princomp(coeff, M, X);
-    cout<<"pca:"<<M<<endl;
+    //cout<<"pca:"<<M<<endl;
     colvec sum_X=sum(pow(M,2),1);
     mat D=sum_X*ones(1,sum_X.n_rows)+ones(sum_X.n_rows,1)*trans(sum_X)-2*(M*trans(M));
     return d2p(D);
 }
-arma::mat t_Sne::compute(int ndim){
+arma::mat t_Sne::compute(int ndim,arma::mat yInit){
+    bool initFlag=true;
+    if (yInit.n_elem==0||yInit.n_cols!=ndim)
+        initFlag=false;
     int n=this->P.n_rows;
     double momentum = 0.5;                              // initial momentum
     double final_momentum = 0.8;                               // value to which momentum is changed
     uword mom_switch_iter = 250;                              // iteration at which momentum is changed
-    uword stop_lying_iter = 100;                              // iteration at which lying about P-values is stopped
-    uword max_iter = 500;                                    // maximum number of iterations
+    uword stop_lying_iter = 100;                              // maximum number of iterations
     uword epsilon = 500;                                      // initial learning rate
     double min_gain = .01;                                     // minimum gain for delta-bar-delta
     
@@ -120,7 +123,8 @@ arma::mat t_Sne::compute(int ndim){
     
     //cout<<"P after:"<<endl<<P<<" sum: "<<sum(sum(P))<<endl;
     double _const=sum(sum(P%log(P)));
-    P=P*4;
+    if (!initFlag)
+        P=P*4;
     // Initialize the solution
    /* double auxMem[40]={
         -0.0327   , 0.0812  ,  0.0546  , -0.1052   , 0.0397 ,  -0.0752 ,   0.1516,   -0.0033    ,0.1636,   -0.0425,
@@ -132,7 +136,11 @@ arma::mat t_Sne::compute(int ndim){
     //cout<<"ydata"<<ydata<<endl;
     
     mat ydata(n,ndim);
-    ydata=0.0001*randn(n,ndim);
+    if (initFlag){
+        ydata=yInit;
+    }
+    else
+        ydata=0.0001*randn(n,ndim);
     
     mat y_incs  = zeros(ydata.n_rows,ydata.n_cols);
     mat gains = ones(ydata.n_rows,ydata.n_cols);
@@ -160,6 +168,8 @@ arma::mat t_Sne::compute(int ndim){
         if (iter==mom_switch_iter){
             momentum = final_momentum;
         }
+        if ((iter == stop_lying_iter)&&(!initFlag) )//&& ~initial_solution
+            P = P / 4;
         float cost=_const-sum(sum(P%log(Q)));
         if (cost<costMin){
             costMin=cost;

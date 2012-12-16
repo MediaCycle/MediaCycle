@@ -21,15 +21,17 @@ public:
     virtual ~t_Sne(){};
     virtual bool setDistanceMatrix(arma::mat D);
     virtual bool setFeatureMatrix(arma::mat F);
-    virtual arma::mat compute(int ndim);
+    virtual arma::mat compute(int ndim,arma::mat yInit=arma::mat(0,0));
     void setPerplexity(double perplexity){kk=perplexity;};
+    void setIterMax(unsigned int im){max_iter=im;};
 protected:
-    bool d2p(arma::mat Dist);//encode conditionnal probabilties P matrix. Dis =square of distance matrix
+    virtual bool d2p(arma::mat Dist);//encode conditionnal probabilties P matrix. Dis =square of distance matrix
     void Hbeta(double &H,arma::rowvec &thisP,arma::rowvec Dist,int ind,double beta);
 protected:
     arma::mat P;
     double kk;
-    double tol;
+    double tol;                          // iteration at which lying about P-values is stopped
+    unsigned int max_iter;
 };
 
 #endif /* defined(__MediaCycle__t_Sne__) */

@@ -14,23 +14,24 @@
 
 #include <iostream>
 #include <armadillo>
+#include "t_Sne.h"
 
-class st_Sne{
+class st_Sne: public t_Sne{
 public:
     st_Sne();
     virtual ~st_Sne(){};
     virtual bool setDistanceMatrix(arma::mat D,arma::urowvec label);
     virtual bool setFeatureMatrix(arma::mat F,arma::urowvec label);
-    virtual arma::mat compute(int ndim);
-    void setPerplexity(double perplexity){kk=perplexity;};
+   // virtual arma::mat compute(int ndim);
+    //void setPerplexity(double perplexity){kk=perplexity;};
     void setSpervizedBoost(double slope){this->slope=slope;};
 protected:
     bool d2p(arma::mat Dist,arma::urowvec label);//encode conditionnal probabilties P matrix. Dis =square of distance matrix
-    void Hbeta(double &H,arma::rowvec &thisP,arma::rowvec Dist,int ind,double beta);
+    //void Hbeta(double &H,arma::rowvec &thisP,arma::rowvec Dist,int ind,double beta);
 protected:
-    arma::mat P;
-    double kk;
-    double tol;
+    //arma::mat P;
+    //double kk;
+    //double tol;
     double slope;
 };
 
