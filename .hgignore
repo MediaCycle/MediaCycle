@@ -44,6 +44,17 @@ cmake.check_cache
 3rdparty/breakpad-qt/third-party/google-breakpad/src/third_party/*linux
 3rdparty/breakpad-qt/third-party/google-breakpad/src/third_party/*protobuf
 3rdparty/breakpad-qt/third-party/google-breakpad/src/*tools/*
+3rdparty/stk/bin
+3rdparty/stk/confi*
+3rdparty/stk/doc/html
+3rdparty/stk/Makefile*
+3rdparty/stk/projects/*/Debug
+3rdparty/stk/projects/*/Release
+3rdparty/stk/projects/*/*.dsp
+3rdparty/stk/projects/*/*.dsw
+3rdparty/stk/rawwaves/*.raw
+3rdparty/stk/src/*/Debug
+3rdparty/stk/src/*/Release
 data/dataset*
 demos/openFrameworks/addons
 demos/openFrameworks/apps
