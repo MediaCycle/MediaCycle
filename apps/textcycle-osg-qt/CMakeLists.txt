@@ -6,7 +6,7 @@ IF ( BUILD_TEXTCYCLE_APP AND SUPPORT_TEXT AND USE_QT4 AND USE_OSG AND USE_OSC )
 
 	SET(MEDIA_TYPE "MEDIA_TYPE_TEXT")
 	SET(MC_PLUGINS "file;pcapreprocess;text;text-osg;visualisation")
-	SET(OSG_PLUGINS "osgdb_freetype")
+	SET(OSG_PLUGINS "")
         SET(DESCRIPTION "TextCycle allows to organize text files by similarity.")
 
         INCLUDE (${CMAKE_SOURCE_DIR}/cmake/CreateDefaultConfig.cmake)
