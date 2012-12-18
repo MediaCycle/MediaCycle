@@ -1,7 +1,7 @@
 /**
  * @brief ACArmaVisPlugin.cpp
  * @author Thierry Ravet
- * @date 16/12/2012
+ * @date 18/12/2012
  * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -39,7 +39,7 @@ using namespace std;
 
 #ifdef Knn_Validation
 #include "ClassificatorErrorMeasure.h"
-#include "Trustworthiness.h"
+#include "dimensionReductionQuality.h"
 #endif
 
 
@@ -57,9 +57,11 @@ ACArmaVisPlugin::ACArmaVisPlugin() : ACClusterPositionsPlugin()
     knn_K=5;
     this->addNumberParameter("KNN Validation parameter",knn_K,1,20,1,"Number processed neighboor in KNN algorithm",boost::bind(&ACArmaVisPlugin::knnValueChanged,this));
     batchSize=0.1;
-    this->addNumberParameter("knn tagged batch size",batchSize,0.01,1,0.01,"batch size in procent",boost::bind(&ACArmaVisPlugin::knnValueChanged,this));
-    tw_K=20;
-    this->addNumberParameter("Trustworthiness neighborhood",tw_K,1,100,1,"number of elements considered in neighborhood for Trustworthiness computation",boost::bind(&ACArmaVisPlugin::twkValueChanged,this));
+    this->addNumberParameter("knn batch size",batchSize,0.01,1,0.01,"batch size in procent",boost::bind(&ACArmaVisPlugin::batchSizeValueChanged,this));
+    batchNb=100;
+    this->addNumberParameter("Number of batches",batchNb,10,1000,10,"number of batches",boost::bind(&ACArmaVisPlugin::batchNbValueChanged,this));
+    tw_K=100;
+    this->addNumberParameter("evaluation neighbor size",tw_K,10,500,10,"number of elements considered in neighborhood for Trustworthiness and continuity computation",boost::bind(&ACArmaVisPlugin::twkValueChanged,this));
 #endif
 
     //local vars
@@ -83,6 +85,7 @@ void ACArmaVisPlugin::updateNextPositions(ACMediaBrowser* mediaBrowser){
     urowvec tag;
     nbActiveFeatures = 9;
     extractDescMatrix(mediaBrowser, desc_m, featureNames,tag);
+    descD_m=desc_m;
     if (desc_m.n_cols < 2){
         ACPoint p;
         for (int i=0; i<ids.size(); i++){
@@ -101,21 +104,36 @@ void ACArmaVisPlugin::updateNextPositions(ACMediaBrowser* mediaBrowser){
 //    princomp(coeff, posDisp_m, descN_m);
     
     dimensionReduction(posDisp_m,desc_m,tag);
-    for (int i=0; i<featureNames.size(); i++)
-        std::cout << "featureNames : " << featureNames[i] << std::endl;
+   // for (int i=0; i<featureNames.size(); i++)
+   //     std::cout << "featureNames : " << featureNames[i] << std::endl;
     
 #ifdef Knn_Validation
     ClassificatorErrorMeasure algo;
-    algo.setTagVector(tag.t(), 50, batchSize, knn_K);
+    algo.setTagVector(tag.t(), batchNb, batchSize, knn_K);
     cout<<"knn classification error with high dimensionnal data"<<endl;
-    algo.errorKnnMeasure(desc_m);
+    algo.errorKnnMeasure(descD_m);
     cout<<"knn classification error with  dimensionnaly reduced data with "<<this->mName<<endl;
     algo.errorKnnMeasure(posDisp_m);
-    Trustworthiness algo2;
+    dimensionReductionQuality algo2;
     algo2.setFeatureMatrixHighDim(desc_m);
     algo2.setFeatureMatrixLowDim(posDisp_m);
-    cout<<"Trustworthiness of dimension reduction "<<this->mName<<endl<<" :"<<algo2.compute(tw_K)<<endl;
-    
+    std::vector<double> trustCont,continuityCont;
+    for (int k=10;k<=tw_K;k+=10){
+        double trust,continuity;
+        algo2.compute(k,trust,continuity);
+        trustCont.push_back(trust);
+        continuityCont.push_back(continuity);
+    }
+    int icpt=0;
+    for (int k=10;k<=tw_K;k+=10){
+        cout<<"Trustworthiness of dimension reduction \t"<<this->mName<<" for "<<k<<" neighboors :\t"<<trustCont[icpt]<<endl;
+        icpt++;
+    }
+    icpt=0;
+    for (int k=10;k<=tw_K;k+=10){
+        cout<<"Continuity of dimension reduction \t\t"<<this->mName<<" for "<<k<<" neighboors :\t"<<continuityCont[icpt]<<endl;
+        icpt++;
+    }
 #endif
 #ifdef USE_DEBUG
     posDisp_m.save("posDispDef.txt", arma_ascii);
@@ -251,14 +269,21 @@ void ACArmaVisPlugin::knnValueChanged(void){
 void ACArmaVisPlugin::batchSizeValueChanged(void){
     if(!this->media_cycle) return;
     
-    batchSize=this->getNumberParameterValue("knn tagged batch size");
+    batchSize=this->getNumberParameterValue("knn batch size");
     
 }
 void ACArmaVisPlugin::twkValueChanged(void){
     if(!this->media_cycle) return;
     
-    tw_K=this->getNumberParameterValue("Trustworthiness neighborhood");
+    tw_K=this->getNumberParameterValue("evaluation neighbor size");
     
+
+}
+void ACArmaVisPlugin::batchNbValueChanged(void){
+    if(!this->media_cycle) return;
+
+    batchNb=this->getNumberParameterValue("Number of batches");
+
 
 }
 #endif

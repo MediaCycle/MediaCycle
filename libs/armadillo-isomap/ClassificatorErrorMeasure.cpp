@@ -32,20 +32,29 @@ bool ClassificatorErrorMeasure::setTagVector(arma::ucolvec L,unsigned int batchN
 }
 double ClassificatorErrorMeasure::errorKnnMeasure(arma::mat F){
     double err=0.0;
+    double errWB=0.0;
+    
     for (int i=0;i<batchCollection.size();i++){
         knn algo;
+        
         algo.setFeatureMatrix(F, batchCollection[i]);
         ucolvec res=algo.compute(k);
-        double locErr=(double)sum(res!=L)/L.n_rows;
+        ucolvec testRes=(res!=L);
+        errWB+=((double)sum(res!=L))/(L.n_rows);
+        for (int j=0;j<batchCollection[i].n_rows;j++){//to substract batch sample from the result
+            testRes(batchCollection[i](j,0))=0;
+        }
+        double locErr=(double)sum(res!=L)/(L.n_rows-batchCollection[i].n_rows);
         umat resFused(res.n_rows,2);
         resFused.col(0)=L;
         resFused.col(1)=res;
         //cout <<"res:"<<resFused<<endl;
-        cout<<"error for batch "<<i<<" :"<<locErr<<endl;
+        //cout<<"error for batch "<<i<<" :"<<locErr<<endl;
         err+=locErr;
     }
     err/=batchCollection.size();
-    cout<<"mean error :"<<err<<endl;
-    
-    return 0.0;
+    errWB/=batchCollection.size();
+    cout<<"mean error :"<<err<<" on "<<batchCollection.size()<<" batchs with size "<<batchCollection[0].n_rows<<endl;
+    //cout<<"mean error with batch :"<<errWB<<" on "<<batchCollection.size()<<" batchs with size "<<batchCollection[0].n_rows<<endl;
+    return err;
 }

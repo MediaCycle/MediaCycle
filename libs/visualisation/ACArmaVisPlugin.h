@@ -1,7 +1,7 @@
 /**
  * @brief ACArmaVisPlugin.h
  * @author Thierry Ravet
- * @date 16/12/2012
+ * @date 18/12/2012
  * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -52,10 +52,11 @@ protected:
     void catchCurrentPosition(ACMediaBrowser* mediaBrowser, arma::mat& pos_m);
 protected:
 #ifdef Knn_Validation
-    unsigned int  knn_K,tw_K;
+    unsigned int  knn_K,tw_K,batchNb;
     float  batchSize;
     void knnValueChanged(void);
     void batchSizeValueChanged(void);
+    void batchNbValueChanged(void);
     void twkValueChanged(void);
 #endif
 };
