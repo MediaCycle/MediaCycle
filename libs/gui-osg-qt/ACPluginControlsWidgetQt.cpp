@@ -62,7 +62,7 @@ void ACPluginControlsWidgetQt::on_comboBoxPlugins_activated(const QString & text
 {
     std::cout << "Chosen plugin: " << text.toStdString() << std::endl;
     //std::cout << "Media type " << ACMediaFactory::getInstance().getNormalCaseStringFromMediaType(media_cycle->getMediaType()) << std::endl;
-    if (media_cycle == 0) return;
+    if (media_cycle == 0)
     if (media_cycle->getPluginManager() == 0) return;
     std::string pluginName = text.toStdString();
     if(pluginName != "None")
@@ -101,11 +101,11 @@ void ACPluginControlsWidgetQt::cleanPluginList()
     comboBoxPlugins->clear();
     if(parametersContainer){
         vboxLayout->removeWidget(parametersContainer);
-        //delete parametersContainer;
+        delete parametersContainer;
         //delete parametersContainer->layout();
-        qDeleteAll(parametersContainer->children());
+        //qDeleteAll(parametersContainer->children());
     }
-    //parametersContainer = 0;
+    parametersContainer = 0;
 
     comboBoxPlugins->addItem("None");
     comboBoxPlugins->setEnabled(false);
