@@ -30,7 +30,14 @@ macro(ADD_QT_EXECUTABLE TARGET_NAME)
 			SET(APP_TYPE MACOSX_BUNDLE)
 			SET(MACOSX_BUNDLE_BUNDLE_NAME ${TARGET_NAME})
 			# set how it shows up in the Info.plist file
-  			SET(MACOSX_BUNDLE_ICON_FILE ${ICON_NAME}.icns) 
+                        SET(MACOSX_BUNDLE_ICON_FILE ${ICON_NAME}.icns)
+                        # set the bundle identifier (REQUIRED, or some strange GUI bugs may appear)
+                        SET(MACOSX_BUNDLE_GUI_IDENTIFIER "org.mediacycle.${TARGET_NAME}")
+                        SET(MACOSX_BUNDLE_INFO_STRING "${TARGET_NAME}")
+                        SET(MACOSX_BUNDLE_LONG_VERSION_STRING "${TARGET_NAME}")
+                        SET(MACOSX_BUNDLE_SHORT_VERSION_STRING "${TARGET_NAME}")
+                        SET(MACOSX_BUNDLE_BUNDLE_VERSION "${MediaCycle_VERSION}")
+                        SET(MACOSX_BUNDLE_COPYRIGHT "Copyright UMONS 2008-present")
   			# set where in the bundle to put the icns file
   			SET_SOURCE_FILES_PROPERTIES(${CMAKE_SOURCE_DIR}/data/icons/${ICON_NAME}.icns PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
   			# include the icns file in the target

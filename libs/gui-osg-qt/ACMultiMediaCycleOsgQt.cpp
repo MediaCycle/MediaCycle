@@ -535,7 +535,37 @@ void ACMultiMediaCycleOsgQt::writeXMLConfig(string _filename){
     else {
         if (_filename=="") {
             // no file name supplied, ask for one
-            QString fileName = QFileDialog::getSaveFileName(this, tr("Save Config as XML Library"),"",tr("MediaCycle XML Library (*.xml)"));
+            QString fileName("");
+            QString filters=QString("MediaCycle XML Library (*.xml);;Library (*.xml)");
+            QString filter=QString("MediaCycle XML Library (*.xml)");
+            try{
+                //CF condensed version that crashes on OSX 10.8+ when selecting the folder from the drop-down menu
+                //fileName = QFileDialog::getSaveFileName(osgViewDock, tr("Save Config as XML Library"),"",filter));
+
+                //CF alternative with multiple file formats
+                //fileName = QFileDialog::getSaveFileName(osgViewDock, tr("Save Config as XML Library"),"",filters,&filter);
+
+                //CF non-native alternative: ugly and won't provide the user-bookmarked locations
+                //fileName = QFileDialog::getSaveFileName(osgViewDock, tr("Save Config as XML Library"),"",filter,0,QFileDialog::DontUseNativeDialog);
+
+                QFileDialog dialog(osgViewDock,"Save Config as XML Library");
+                dialog.setDefaultSuffix("xml");
+#ifndef __APPLE__
+                dialog.setNameFilter("MediaCycle XML Library (*.xml)"); // CF this makes the dialog crash when selecting the folder from the drop-down menu
+#endif
+                dialog.setFileMode(QFileDialog::AnyFile);
+                dialog.setAcceptMode(QFileDialog::AcceptSave);
+                QStringList fileNames;
+                if (dialog.exec())
+                    fileNames = dialog.selectedFiles();
+                if(fileNames.size() != 1)
+                    return;
+                fileName = fileNames.first();
+            }
+            catch(...){
+                std::cerr << "ACMultiMediaCycleOsgQt::writeXMLConfig: bug in Qt save dialog" << std::endl;
+            }
+
             if (fileName.isEmpty()) return;
             QFile file(fileName);
 
