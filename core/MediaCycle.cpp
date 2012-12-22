@@ -1333,7 +1333,11 @@ std::string MediaCycle::getPluginPathFromBaseName(std::string basename)
     plugin_subfolder = "";
 #else
 #if defined(XCODE)
-    plugins_path = s_path + "/../../plugins/";
+#if defined(XCODE_OLD)
+	plugins_path = s_path + "/../../../plugins/";
+#else
+	plugins_path = s_path + "/../../plugins/";
+#endif
     plugin_subfolder = basename + "/" + build_type + "/";
 #else
     plugins_path = s_path + "/../../plugins/";

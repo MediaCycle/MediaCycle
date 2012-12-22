@@ -55,9 +55,12 @@ macro(ADD_QT_EXECUTABLE TARGET_NAME)
 	
 	# Copy Qt imageformat plugin to (Apple) Debug apps
 	IF(APPLE AND USE_DEBUG)
+		IF(XCODE)
+			SET(EXTRA_PATH "/Debug")
+		ENDIF()
 		ADD_CUSTOM_COMMAND( TARGET ${TARGET_NAME} POST_BUILD
-			COMMAND mkdir -p ${CMAKE_CURRENT_BINARY_DIR}/${TARGET_NAME}.app/Contents/plugins
-      			COMMAND cp -R ${QT_PLUGINS_DIR}/imageformats ${CMAKE_CURRENT_BINARY_DIR}/${TARGET_NAME}.app/Contents/plugins
+			COMMAND mkdir -p ${CMAKE_CURRENT_BINARY_DIR}${EXTRA_PATH}/${TARGET_NAME}.app/Contents/plugins
+      			COMMAND cp -R ${QT_PLUGINS_DIR}/imageformats ${CMAKE_CURRENT_BINARY_DIR}${EXTRA_PATH}/${TARGET_NAME}.app/Contents/plugins
 		)
 	ENDIF()
 endmacro(ADD_QT_EXECUTABLE TARGET_NAME)
