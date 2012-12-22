@@ -50,6 +50,7 @@ SET(TARGET_SRC ReaderWriterSVG.cpp )
 INCLUDE (${CMAKE_SOURCE_DIR}/cmake/OsgMacroUtils.cmake)
 SETUP_PLUGIN(svg svg)
 
+SET_TARGET_PROPERTIES(osgdb_svg PROPERTIES FOLDER "${FOLDERNAME}")
 MESSAGE("[X] svg plugin for OpenSceneGraph")
 ELSE()
 MESSAGE("[ ] svg plugin for OpenSceneGraph")

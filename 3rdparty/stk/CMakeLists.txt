@@ -24,8 +24,7 @@ IF(SUPPORT_AUDIO AND NOT STK_FOUND AND (NOT APPLE OR (COREAUDIO_FOUND AND COREFO
 		#3. Under Link > General:  Add winmm.lib, dsound.lib, and Wsock32.lib to the end of the Object/library modules list.
 	ENDIF()
 
-
-
+	SET_TARGET_PROPERTIES("${TARGET_NAME}" PROPERTIES FOLDER "${FOLDERNAME}")
 	MESSAGE("[X] ${TARGET_NAME}")
 ELSE()
 	MESSAGE("[ ] ${TARGET_NAME}")

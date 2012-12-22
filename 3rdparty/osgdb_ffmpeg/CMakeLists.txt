@@ -101,7 +101,7 @@ IF(USE_DEBUG)
     INSTALL(FILES ${CMAKE_BINARY_DIR}/3rdparty/osg_ffmpeg/osg_ffmpeg.so DESTINATION ${OSG_LIBRARY_DIR}/osgPlugins-${OPENSCENEGRAPH_VERSION})
 ENDIF()
 
-	SET_TARGET_PROPERTIES("osgdb_ffmpeg" PROPERTIES FOLDER "${FOLDERNAME}")
+SET_TARGET_PROPERTIES("osgdb_ffmpeg" PROPERTIES FOLDER "${FOLDERNAME}")
 MESSAGE("[X] FFmpeg plugin for OpenSceneGraph")
 ELSE()
 MESSAGE("[ ] FFmpeg plugin for OpenSceneGraph")

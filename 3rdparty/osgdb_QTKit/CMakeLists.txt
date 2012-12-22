@@ -65,6 +65,7 @@ IF(USE_DEBUG)
     INSTALL(FILES ${CMAKE_BINARY_DIR}/3rdparty/osg_QTKit/osg_QTKit.so DESTINATION ${OSG_LIBRARY_DIR}/osgPlugins-${OPENSCENEGRAPH_VERSION})
 ENDIF()
 
+SET_TARGET_PROPERTIES("osgdb_QTKit" PROPERTIES FOLDER "${FOLDERNAME}")
 MESSAGE("[X] QTKit plugin for OpenSceneGraph")
 ELSE()
 MESSAGE("[ ] QTKit plugin for OpenSceneGraph")

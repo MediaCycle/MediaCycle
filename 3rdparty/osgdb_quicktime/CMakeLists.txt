@@ -77,7 +77,7 @@ SETUP_PLUGIN(qt)
 IF(USE_DEBUG)
     INSTALL(FILES ${CMAKE_BINARY_DIR}/3rdparty/osg_quicktime/osg_qt.so DESTINATION ${OSG_LIBRARY_DIR}/osgPlugins-${OPENSCENEGRAPH_VERSION})
 ENDIF()
-
+SET_TARGET_PROPERTIES("osgdb_qt" PROPERTIES FOLDER "${FOLDERNAME}")
 MESSAGE("[X] QuickTime plugin for OpenSceneGraph")
 ELSE()
 MESSAGE("[ ] QuickTime plugin for OpenSceneGraph")
