@@ -5,7 +5,7 @@ IF ( BUILD_AUDIOCYCLE_APP AND SUPPORT_AUDIO AND USE_QT4 AND USE_OSG AND USE_OSC 
 	SET(WITH_OSC ON)
 
 	SET(MEDIA_TYPE "MEDIA_TYPE_AUDIO")
-        SET(MC_PLUGINS "audio-engine;audio-features-yaafe;audio-osg;audio-reader-sndfile;audio-segmentation;audio-thumbnailer-waveform;file;io-osc;pcapreprocess;segmentation;visualisation")
+        SET(MC_PLUGINS "audio-engine;audio-features-yaafe;audio-osg;audio-reader-sndfile;audio-segmentation;audio-thumbnailer-waveform;file;io-osc;pcapreprocess;segmentation;visualisation;visualisation-advanced")
         SET(OSG_PLUGINS "osgdb_svg")
         SET(DESCRIPTION "AudioCycle allows to organize audio files by similarity.")
 
