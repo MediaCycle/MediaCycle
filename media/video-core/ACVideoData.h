@@ -37,25 +37,13 @@
 
 #include "ACMediaData.h"
 #include "ACMediaTypes.h"
-#include "ACOpenCVInclude.h"
 
 class ACVideoData: public ACMediaData {
 public:
 	ACVideoData();
-	~ACVideoData();
-	ACVideoData(std::string _fname);
-
-	bool readData(std::string _fname);
-	virtual void* getData() {return static_cast<void*>(video_ptr);}
-//	CvCapture* getData() {return video_ptr;}
-	void setData(cv::VideoCapture* _data);
-
-protected:
-	virtual void init();
-
-private:
-	cv::VideoCapture* video_ptr;
-
+    virtual ~ACVideoData(){}
+    virtual float getSampleRate(){return 0.0f;}
+    virtual int getNumberOfChannels(){return 1;}
+    virtual int getNumberOfFrames(){return 1;}
 };
-
 #endif // ACVIDEODATA_H

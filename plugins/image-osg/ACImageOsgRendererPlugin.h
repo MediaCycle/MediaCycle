@@ -43,8 +43,10 @@ class ACImageOsgRendererPlugin : public ACOsgRendererPlugin
 {
 public:
     ACImageOsgRendererPlugin();
-    ~ACImageOsgRendererPlugin();
+    virtual ~ACImageOsgRendererPlugin();
     virtual std::map<std::string, ACMediaType> getSupportedExtensions(ACMediaType media_type = MEDIA_TYPE_ALL);
+    virtual std::string sharedThumbnailName(ACMediaType media_type);
+    virtual ACMediaThumbnail* createSharedThumbnail(ACMedia* media);
     virtual ACOsgMediaRenderer* createMediaRenderer(ACMediaType media_type);
     virtual std::vector<ACMediaType> getSupportedMediaTypes();
 };

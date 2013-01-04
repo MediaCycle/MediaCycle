@@ -53,17 +53,17 @@ void ACVideoRigidTransformPlugin::clean(){
 		delete videoAn;
 }
 
-std::vector<ACMediaFeatures*> ACVideoRigidTransformPlugin::calculate(ACMediaData* video_data, ACMedia* theMedia, bool _save_timed_feat) {
+std::vector<ACMediaFeatures*> ACVideoRigidTransformPlugin::calculate(ACMedia* theMedia, bool _save_timed_feat) {
 	this->clean();
 	std::vector<ACMediaFeatures*> videoFeatures;
 #ifdef USE_DEBUG
         cout << "[ACVideoRigidTransformPlugin::calculate] analysing from frame " << theMedia->getStartInt() << " to " << theMedia->getEndInt() << endl;
 #endif //USE_DEBUG
-        videoAn = new ACVideoAnalysis(video_data, theMedia->getStartInt(), theMedia->getEndInt());
+        videoAn = new ACVideoAnalysis(theMedia, theMedia->getStartInt(), theMedia->getEndInt());
 	videoAn->computeRigidTransform();
 	vector<float> t = videoAn->getTimeStamps();
 	std::vector<std::vector<float> > s = videoAn->getRigidTransforms();
-	string aFileName= video_data->getFileName();
+    string aFileName= theMedia->getFileName();
 
 	ACMediaTimedFeature* ps_mtf = new ACMediaTimedFeature(t,s, "rigid transforms");
 	ACMediaFeatures* rigid_transforms = ps_mtf->mean();

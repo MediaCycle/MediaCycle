@@ -203,7 +203,7 @@ void test_video_dancers_plugin(std::string dancer_file_front){
 	ACVideoDancersPlugin* P = new ACVideoDancersPlugin();
 	ACMedia* dancer_video = new ACVideo();
 	dancer_video->extractData(dancer_file_front);
-	std::vector<ACMediaFeatures*> F = P->calculate(((ACVideo*)dancer_video)->getMediaData(), dancer_video);
+    std::vector<ACMediaFeatures*> F = P->calculate(dancer_video);
 	cout << "computed " << F.size() << " features" << endl;
 	for (unsigned int i=0; i<F.size(); i++){
 		cout << "-- Feature " << i << " : " << F[i]->getName() << endl;

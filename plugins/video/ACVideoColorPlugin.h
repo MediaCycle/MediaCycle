@@ -46,7 +46,7 @@ class ACVideoColorPlugin : public ACTimedFeaturesPlugin {
 public:
     ACVideoColorPlugin();
     ~ACVideoColorPlugin();
-    virtual std::vector<ACMediaFeatures*> calculate(ACMediaData* aData, ACMedia* theMedia, bool _save_timed_feat = false);
+    virtual std::vector<ACMediaFeatures*> calculate(ACMedia* theMedia, bool _save_timed_feat = false);
 private:
     ACVideoAnalysis* videoAn;
     void clean();

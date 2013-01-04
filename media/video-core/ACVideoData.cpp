@@ -39,44 +39,6 @@ using std::cerr;
 using std::endl;
 using std::string;
 
-ACVideoData::ACVideoData() { 
-	this->init();
-}
-
-ACVideoData::ACVideoData(std::string _fname){ 
-	this->init();
-	file_name=_fname;
-	this->readData(_fname);
-}
-
-void ACVideoData::init() {
-	media_type = MEDIA_TYPE_VIDEO;
-	video_ptr = 0;
-}
-
-ACVideoData::~ACVideoData() {
-	delete video_ptr;
-	video_ptr = 0;
-}
-
-// creates a pointer (video_ptr) to the beginning of the video
-bool ACVideoData::readData(string _fname){
-	if(_fname=="") return false;
-	video_ptr = new cv::VideoCapture(_fname.c_str());		
-	// check if video successfully opened 
-	if (!video_ptr->isOpened()){ 
-		// Either the video does not exist, or it uses a codec OpenCV does not support. 
-		cerr << "<ACVideoData::readData> Could not initialize capturing from file " << _fname << endl;
-		return false;
-	}	
-	return true;
-}
-
-// XS TODO check this copy 2.2
-void ACVideoData::setData(cv::VideoCapture* _data){
-	cvCopy(_data,video_ptr);		
-	if( !video_ptr ) {
-		// Either the video does not exist, or it uses a codec OpenCV does not support. 
-		cerr << "<ACVideoData::setData> Could not set data" << endl;
-	}	
+ACVideoData::ACVideoData() : ACMediaData() {
+    media_type = MEDIA_TYPE_VIDEO;
 }

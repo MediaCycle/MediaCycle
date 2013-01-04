@@ -1,9 +1,8 @@
-/* 
- * File:   ACVideoOpticalFlowPlugin.h
- * Author: xavier
- *
- * @date November 30, 2011
- * @copyright (c) 2011 – UMONS - Numediart
+/**
+ * @brief A class that allows to share a video stream between the browser and the timeline.
+ * @author Christian Frisson
+ * @date 16/12/2012
+ * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -30,24 +29,29 @@
  * <mailto:avre@umons.ac.be>
  */
 
-#ifndef ACVIDEOOPTICALFLOWPLUGIN_H
-#define	ACVIDEOOPTICALFLOWPLUGIN_H
+#ifndef ACOsgVideoThumbnail_H
+#define ACOsgVideoThumbnail_H
 
-#include "ACVideoAnalysis.h"
-#include "ACPlugin.h"
-#include "ACMediaFeatures.h"
-#include "ACMediaTimedFeature.h"
-#include <ACOpenCVInclude.h>
+#include "ACOsgMediaThumbnail.h"
+#include <string>
 
-class ACVideoOpticalFlowPlugin : public ACTimedFeaturesPlugin {
+class ACOsgVideoThumbnail: virtual public ACOsgMediaThumbnail {
 public:
-    ACVideoOpticalFlowPlugin();
-    virtual ~ACVideoOpticalFlowPlugin();
-    virtual std::vector<ACMediaFeatures*> calculate(ACMedia* theMedia, bool _save_timed_feat = false);
+    ACOsgVideoThumbnail(std::string _filename, int media_width, int media_height);
+    virtual ~ACOsgVideoThumbnail();
+
+    virtual osg::ref_ptr<osg::Image> getImage() { return thumbnail; }
+    virtual osg::ref_ptr<osg::Texture2D> getTexture() { return image_texture; }
+    virtual osg::ref_ptr<osg::ImageStream> getStream() {return image_stream;}
+
+    bool computeThumbnail(int w=0, int h=0);
+	bool computeThumbnailSize(int w_, int h_);
+
 private:
-    ACVideoAnalysis* videoAn;
-    void clean();
+	static const int default_thumbnail_area;
+	osg::ref_ptr<osg::ImageStream>image_stream;	
+	osg::ref_ptr<osg::Image> thumbnail;
+	osg::ref_ptr<osg::Texture2D> image_texture;
+	
 };
-
-#endif	/* ACVIDEOOPTICALFLOWPLUGIN_H */
-
+#endif // ACOsgVideoThumbnail_H

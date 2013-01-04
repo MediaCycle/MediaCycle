@@ -42,7 +42,7 @@ public:
     ACVideoSelfSimSegmentationPlugin();
     virtual ~ACVideoSelfSimSegmentationPlugin();
 
-    virtual std::vector<ACMedia*> segment(ACMediaData* _data, ACMedia* _theMedia){return std::vector<ACMedia*>();}
+    virtual std::vector<ACMedia*> segment(ACMedia* _theMedia){return std::vector<ACMedia*>();}
     virtual std::vector<ACMedia*> segment(ACMediaTimedFeature* _mtf, ACMedia* _theMedia);
 };
 

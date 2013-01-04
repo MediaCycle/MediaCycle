@@ -68,17 +68,17 @@ void ACVideoPixelSpeedPlugin::clean() {
 //	return this->_calculate(aFileName,_save_timed_feat);
 //}
 
-std::vector<ACMediaFeatures*> ACVideoPixelSpeedPlugin::calculate(ACMediaData* video_data, ACMedia* theMedia, bool _save_timed_feat) {
+std::vector<ACMediaFeatures*> ACVideoPixelSpeedPlugin::calculate(ACMedia* theMedia, bool _save_timed_feat) {
 	this->clean();
 	std::vector<ACMediaFeatures*> videoFeatures;
 #ifdef USE_DEBUG
         cout << "[ACVideoPixelSpeedPlugin::calculate] analysing from frame " << theMedia->getStartInt() << " to " << theMedia->getEndInt() << endl;
 #endif //USE_DEBUG
-        videoAn = new ACVideoAnalysis(video_data, theMedia->getStartInt(), theMedia->getEndInt());
+        videoAn = new ACVideoAnalysis(theMedia, theMedia->getStartInt(), theMedia->getEndInt());
 	videoAn->computeGlobalPixelsSpeed();
 	vector<float> t = videoAn->getTimeStamps();
 	vector<float> s = videoAn->getGlobalPixelsSpeeds();
-	string aFileName= video_data->getFileName();
+    string aFileName= theMedia->getFileName();
 	
 	ACMediaTimedFeature* ps_mtf = new ACMediaTimedFeature(t,s, "pixel speed");
 	ACMediaFeatures* pixel_speed = ps_mtf->mean();

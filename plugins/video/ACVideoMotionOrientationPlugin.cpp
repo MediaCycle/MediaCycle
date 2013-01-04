@@ -60,13 +60,13 @@ void ACVideoMotionOrientationPlugin::clean(){
 
 // computes global orientation
 // watch out : you can't just do mean() on angles ! (0+360)/2 would give 180
-std::vector<ACMediaFeatures*> ACVideoMotionOrientationPlugin::calculate(ACMediaData* video_data, ACMedia* theMedia, bool _save_timed_feat) {
+std::vector<ACMediaFeatures*> ACVideoMotionOrientationPlugin::calculate(ACMedia* theMedia, bool _save_timed_feat) {
 	this->clean();
 	std::vector<ACMediaFeatures*> videoFeatures;
 #ifdef USE_DEBUG
         cout << "[ACVideoMotionOrientationPlugin::calculate] analysing from frame " << theMedia->getStartInt() << " to " << theMedia->getEndInt() << endl;
 #endif //USE_DEBUG
-        videoAn = new ACVideoAnalysis(video_data, theMedia->getStartInt(), theMedia->getEndInt());
+        videoAn = new ACVideoAnalysis(theMedia, theMedia->getStartInt(), theMedia->getEndInt());
 	videoAn->computeGlobalOrientation();
 	vector<float> t = videoAn->getTimeStamps();
 	std::vector<float> angles = videoAn->getGlobalOrientations();
@@ -89,7 +89,7 @@ std::vector<ACMediaFeatures*> ACVideoMotionOrientationPlugin::calculate(ACMediaD
 	mean_mf=ps_mtf->mean();
 	videoFeatures.push_back(mean_mf);
 
-	string aFileName= video_data->getFileName();
+    string aFileName= theMedia->getFileName();
      //   this->saveTimedFeatures(ps_mtf, aFileName, _save_timed_feat); // by default : binary
 	bool _binary=false;
 	theMedia->addTimedFileNames(this->saveTimedFeatures(ps_mtf, aFileName, _save_timed_feat,_binary)); // by default : binary

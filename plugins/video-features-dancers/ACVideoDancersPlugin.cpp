@@ -81,12 +81,11 @@ std::vector<ACMediaFeatures*> ACVideoDancersPlugin::_calculate(std::string aFile
 // path_to_the_dancers/FRONT/001022.mov
 // path_to_the_dancers/TOP/001022.mov
 // so from the FRONT file it will go ../TOP
-std::vector<ACMediaFeatures*> ACVideoDancersPlugin::calculate(ACMediaData* video_data, ACMedia* theMedia, bool _save_timed_feat) {
-	string file_name_front = video_data -> getFileName();
+std::vector<ACMediaFeatures*> ACVideoDancersPlugin::calculate(ACMedia* theMedia, bool _save_timed_feat) {
+    string file_name_front = theMedia -> getFileName();
 	vector<ACMediaFeatures*> tmp = this->_calculate(file_name_front);
 	return tmp;
 }
-
 
 //uses ACVideoAnalysis and converts the results into ACMediaFeatures
 std::vector<ACMediaFeatures*>  ACVideoDancersPlugin::calculateTop(std::string aFileName) {

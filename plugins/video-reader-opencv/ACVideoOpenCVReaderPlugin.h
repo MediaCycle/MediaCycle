@@ -1,9 +1,8 @@
-/* 
- * File:   ACVideoOpticalFlowPlugin.h
- * Author: xavier
- *
- * @date November 30, 2011
- * @copyright (c) 2011 – UMONS - Numediart
+/**
+ * @brief A plugin that provides media and media data instances to parse and read videos using OpenCV.
+ * @author Christian Frisson
+ * @date 14/12/2012
+ * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -30,24 +29,19 @@
  * <mailto:avre@umons.ac.be>
  */
 
-#ifndef ACVIDEOOPTICALFLOWPLUGIN_H
-#define	ACVIDEOOPTICALFLOWPLUGIN_H
+#include <ACPlugin.h>
 
-#include "ACVideoAnalysis.h"
-#include "ACPlugin.h"
-#include "ACMediaFeatures.h"
-#include "ACMediaTimedFeature.h"
-#include <ACOpenCVInclude.h>
+#ifndef ACVideoOpenCVReaderPlugin_H
+#define	ACVideoOpenCVReaderPlugin_H
 
-class ACVideoOpticalFlowPlugin : public ACTimedFeaturesPlugin {
+class ACVideoOpenCVReaderPlugin : public ACMediaReaderPlugin
+{
 public:
-    ACVideoOpticalFlowPlugin();
-    virtual ~ACVideoOpticalFlowPlugin();
-    virtual std::vector<ACMediaFeatures*> calculate(ACMedia* theMedia, bool _save_timed_feat = false);
-private:
-    ACVideoAnalysis* videoAn;
-    void clean();
+    ACVideoOpenCVReaderPlugin();
+    ~ACVideoOpenCVReaderPlugin();
+    virtual ACMedia* mediaFactory(ACMediaType mediaType, const ACMedia* media = 0);
+    virtual ACMediaData* mediaReader(ACMediaType mediaType);
+    std::map<std::string,ACMediaType> getSupportedExtensions(ACMediaType media_type = MEDIA_TYPE_ALL);
 };
 
-#endif	/* ACVIDEOOPTICALFLOWPLUGIN_H */
-
+#endif

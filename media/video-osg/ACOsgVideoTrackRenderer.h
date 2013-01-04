@@ -1,128 +1,48 @@
-/*
- *  ACOsgVideoTrackRenderer.h
- *  MediaCycle
- *
- *  @author Christian Frisson
- *  @date 13/12/10
- *
- *  @copyright (c) 2010 – UMONS - Numediart
- *  
- *  MediaCycle of University of Mons – Numediart institute is 
- *  licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
- *  licence (the “License”); you may not use this file except in compliance 
- *  with the License.
- *  
- *  This program is free software: you can redistribute it and/or 
- *  it under the terms of the GNU Affero General Public License as
- *  published by the Free Software Foundation, either version 3 of the
- *  License, or (at your option) any later version.
- *  
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Affero General Public License for more details.
- *  
- *  You should have received a copy of the GNU Affero General Public License
- *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
- *  
- *  Each use of this software must be attributed to University of Mons – 
- *  Numediart Institute
- *  
- *  Any other additional authorizations may be asked to avre@umons.ac.be 
- *  <mailto:avre@umons.ac.be>
- *
+/**
+ * @brief The video timeline track renderer class, implemented with OSG
+ * @author Christian Frisson
+ * @date 13/12/10
+ * @copyright (c) 2010 – UMONS - Numediart
+ * 
+ * MediaCycle of University of Mons – Numediart institute is 
+ * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
+ * licence (the “License”); you may not use this file except in compliance 
+ * with the License.
+ * 
+ * This program is free software: you can redistribute it and/or 
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * 
+ * Each use of this software must be attributed to University of Mons – 
+ * Numediart Institute
+ * 
+ * Any other additional authorizations may be asked to avre@umons.ac.be 
+ * <mailto:avre@umons.ac.be>
  */
 
 #ifndef __ACOSG_VIDEO_TRACK_RENDERER_H__
 #define __ACOSG_VIDEO_TRACK_RENDERER_H__
 
-#include "ACOsgBrowserRenderer.h"
 #include "ACOsgTrackRenderer.h"
-
-// Slit-scan
-#ifdef __APPLE__
-#ifdef USE_FFMPEG
-//FFmpeg
-#include <ACFFmpegInclude.h>
-#endif
-#endif//def __APPLE__
-
-#include <cassert>
-#include <algorithm>
-#include <vector>
-
-//Threads
-#include <iostream>
-#include <OpenThreads/Thread>
-
-#include <osg/Notify>
-
-#ifdef USE_SLIT_SCAN
-class ACOsgVideoSlitScanThread : public OpenThreads::Thread {
-public:
-
-    ACOsgVideoSlitScanThread()
-	:_done(false),filename(""),notify_level(osg::WARN),slit_scan(0)
-    {
-#ifdef __APPLE__
-#ifdef USE_FFMPEG
-        m_context = 0;
-#endif//def USE_FFMPEG
-#endif//def __APPLE__
-    }
-
-    ~ACOsgVideoSlitScanThread()
-    {
-        //_done = true;
-        while(isRunning())
-        {
-            OpenThreads::Thread::YieldCurrentThread();
-        }
-#ifdef __APPLE__
-#ifdef USE_FFMPEG
-        if (m_context) {m_context = 0;}//avcodec_close(m_context); // done by osg ffmpeg plugin
-#endif//def USE_FFMPEG
-#endif//def __APPLE__
-
-    }
-
-    void run(void);
-
-private:
-    osg::ref_ptr<osg::Image> slit_scan;
-#ifdef __APPLE__
-#ifdef USE_FFMPEG
-    AVCodecContext* m_context;
-#endif//def USE_FFMPEG
-#endif//def __APPLE__
-    bool _done;
-    std::string filename;
-    osg::NotifySeverity notify_level;
-protected:
-#ifdef __APPLE__
-#ifdef USE_FFMPEG
-    int convert(AVPicture *dst, int dst_pix_fmt, AVPicture *src,int src_pix_fmt, int src_width, int src_height);
-    void yuva420pToRgba(AVPicture * const dst, AVPicture * const src, int width, int height);
-#endif//def USE_FFMPEG
-#endif//def __APPLE__
-    int computeSlitScan();
-public:
-    osg::ref_ptr<osg::Image> getImage(){if (_done) return slit_scan; else return 0;}
-    void setFileName(std::string _filename){filename = _filename;}
-    std::string getFileName(){return filename;}
-    void reset(){_done=false;}
-    bool computed(){return _done;}
-};
-#endif//def USE_SLIT_SCAN
+#include <osg/ImageStream>
 
 class ACOsgVideoTrackPlayersSync : public OpenThreads::Thread {
 public:
 #ifdef SYNC_THREAD_PER_SELECTION_VIDEO
     ACOsgVideoTrackPlayersSync(osg::ref_ptr<osg::ImageStream> _master_stream,osg::ref_ptr<osg::ImageStream> _slave_stream,float _time_skip = 0)
-	:master_stream(_master_stream),slave_stream(_slave_stream),time_skip(_time_skip),running(false),scrubbing(false),active(false),previousStreamStatus(osg::ImageStream::PAUSED){}
+    :master_stream(_master_stream),slave_stream(_slave_stream),time_skip(_time_skip),running(false),scrubbing(false),active(false),previousStreamStatus(osg::ImageStream::PAUSED){}
 #else
     ACOsgVideoTrackPlayersSync(osg::ref_ptr<osg::ImageStream> _master_stream, std::vector< osg::ref_ptr<osg::ImageStream> > _slave_streams, float _time_skip = 0)
-	:master_stream(_master_stream),slave_streams(_slave_streams),time_skip(_time_skip),running(false),scrubbing(false),active(false){}
+    :master_stream(_master_stream),slave_streams(_slave_streams),time_skip(_time_skip),running(false),scrubbing(false),active(false){}
 #endif
 
     ~ACOsgVideoTrackPlayersSync()
@@ -160,6 +80,22 @@ public:
 };
 
 class ACOsgVideoTrackRenderer : public ACOsgTrackRenderer {
+
+public:
+    ACOsgVideoTrackRenderer();
+    virtual ~ACOsgVideoTrackRenderer();
+    void initTrack();
+    void emptyTrack();
+    void prepareTracks();
+    void updateTracks(double ratio=0.0);
+
+    /// This virtual function is called by ACOsgTimelineRenderer::changeTrackPlaybackThumbnail
+    virtual void changePlaybackThumbnail(std::string _thumbnail);
+    /// This virtual function is called by ACOsgTimelineRenderer::changeTrackSelectionThumbnail
+    virtual void changeSelectionThumbnail(std::string _thumbnail);
+    /// This virtual function is called by ACOsgTimelineRenderer::changeTrackSummaryThumbnail
+    virtual void changeSummaryThumbnail(std::string _thumbnail);
+
 protected:
 
     osg::ref_ptr<osg::MatrixTransform> selection_transform, summary_transform, playback_transform;
@@ -200,12 +136,9 @@ protected:
     osg::ref_ptr<osg::MatrixTransform> summary_frames_transform;
 
     // summary slit-scan
-#ifdef USE_SLIT_SCAN
     osg::ref_ptr<osg::MatrixTransform> slit_scan_transform;
     void slitScanTransform();
     bool slit_scan_changed;
-    ACOsgVideoSlitScanThread* slit_scanner;
-#endif//def USE_SLIT_SCAN
 
     // summary segments
     osg::ref_ptr<osg::MatrixTransform> segments_transform;
@@ -240,8 +173,8 @@ protected:
     float summary_center_y,summary_height;
     float segments_center_y,segments_height;
     float selection_height,selection_center_y,selection_center_frame_width;
-    float playback_center_y,playback_height,playback_scale;
-    float summary_frame_min_width;
+    float playback_center_y,playback_height;
+    float summary_frame_min_width,selection_frame_min_width;
     int summary_frame_n, selection_frame_n, segments_number;
     bool scrubbing;
     bool selection_needs_resync;
@@ -254,14 +187,9 @@ protected:
     bool track_selection_type_changed;
     bool track_playback_visibility_changed;
 
-public:
-    ACOsgVideoTrackRenderer();
-    ~ACOsgVideoTrackRenderer();
-    void initTrack();
-    void emptyTrack();
-    void prepareTracks();
-    void updateTracks(double ratio=0.0);
+    std::string resized_thumbnail_filename;
 
+public:
     // Using std::string instead of typedefs for faster serialization, but less error-proof
     void setSummaryType(std::string type){this->track_summary_type = type;}
     void updateSummaryType(std::string type){this->track_summary_type = type; track_summary_type_changed = true;}

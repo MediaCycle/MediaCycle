@@ -1,40 +1,33 @@
-/*
- *  ACOsgVideoTrackRenderer.cpp
- *  MediaCycle
- *
- *  @author Christian Frisson
- *  @date 13/12/10
- *
- *  @copyright (c) 2010 – UMONS - Numediart
- *  
- *  MediaCycle of University of Mons – Numediart institute is 
- *  licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
- *  licence (the “License”); you may not use this file except in compliance 
- *  with the License.
- *  
- *  This program is free software: you can redistribute it and/or 
- *  it under the terms of the GNU Affero General Public License as
- *  published by the Free Software Foundation, either version 3 of the
- *  License, or (at your option) any later version.
- *  
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Affero General Public License for more details.
- *  
- *  You should have received a copy of the GNU Affero General Public License
- *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
- *  
- *  Each use of this software must be attributed to University of Mons – 
- *  Numediart Institute
- *  
- *  Any other additional authorizations may be asked to avre@umons.ac.be 
- *  <mailto:avre@umons.ac.be>
- *
+/**
+ * @brief The video timeline track renderer class, implemented with OSG
+ * @author Christian Frisson
+ * @date 13/12/10
+ * @copyright (c) 2010 – UMONS - Numediart
+ * 
+ * MediaCycle of University of Mons – Numediart institute is 
+ * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
+ * licence (the “License”); you may not use this file except in compliance 
+ * with the License.
+ * 
+ * This program is free software: you can redistribute it and/or 
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * 
+ * Each use of this software must be attributed to University of Mons – 
+ * Numediart Institute
+ * 
+ * Any other additional authorizations may be asked to avre@umons.ac.be 
+ * <mailto:avre@umons.ac.be>
  */
-
-// ----------- uncomment this to compute and visualize a slit scan
-#define USE_SLIT_SCAN
 
 // ----------- uncomment this to use selection videos to be sync'd by thread (as opposed as sync'd in updateTracks)
 //#define SYNC_SELECTION_VIDEOS_BY_THREAD
@@ -46,412 +39,15 @@
 //#define TEST_SYNC_WITHOUT_TIME_SKIP
 
 #include "ACOsgVideoTrackRenderer.h"
-#include "ACOpenCVInclude.h"
+#include "ACOsgMediaThumbnail.h"
 #include "ACVideo.h"
 #include <cmath>
 #include <osg/ImageUtils>
-#include <osgDB/WriteFile>
 #include <osg/Version>
+#include <osgDB/ReadFile>
 
 using namespace std;
 using namespace osg;
-
-osg::ref_ptr<osg::Image> Convert_OpenCV_2_osg_Image(cv::Mat cvImg)
-{
-    // XS uncomment the following 4 lines for visual debug (e.g., thumbnail)
-    //	cvNamedWindow("T", CV_WINDOW_AUTOSIZE);
-    //	cvShowImage("T", cvImg);
-    //	cvWaitKey(0);
-    //	cvDestroyWindow("T");
-
-    if(cvImg.channels() == 3)
-    {
-        // Flip image from top-left to bottom-left origin
-        //		if(cvImg->origin == 0) {
-        //			cvConvertImage(cvImg , cvImg, CV_CVTIMG_FLIP);
-        //			cvImg->origin = 1;
-        //		}
-
-        // Convert from BGR to RGB color format
-        //printf("Color format %s\n",cvImg->colorModel);
-        //		if ( !strcmp(cvImg->channelSeq,"BGR") ) {
-        //			cvCvtColor( cvImg, cvImg, CV_BGR2RGB );
-        //		}
-
-        osg::ref_ptr<osg::Image> osgImg = new osg::Image();
-
-        /*temp_data = new unsigned char[cvImg->width * cvImg->height * cvImg->nChannels];
-   for (i=0;i<cvImg->height;i++) {
-   memcpy( (char*)temp_data + i*cvImg->width*cvImg->nChannels, (char*)(cvImg->imageData) + i*(cvImg->widthStep), cvImg->width*cvImg->nChannels);
-   }*/
-
-        //cvtColor( cvImg, cvImg, CV_BGR2RGB );
-        osgImg->setWriteHint(osg::Image::NO_PREFERENCE);
-
-        osgImg->setImage(
-                    cvImg.cols, //s (witdh)
-                    cvImg.rows, //t (height)
-                    3, //r //CF needs to be 1 otherwise scaleImage can't be used
-                    GL_LINE_STRIP, //GLint internalTextureformat, (GL_LINE_STRIP, 0x0003)
-                    GL_RGB, // GLenum pixelFormat, (GL_RGB, 0x1907)
-                    GL_UNSIGNED_BYTE, // GLenum type, (GL_UNSIGNED_BYTE, 0x1401)
-                    cvImg.data,//(unsigned char*)(cvImg.data), // unsigned char* data
-                    //temp_data,
-                    osg::Image::NO_DELETE // AllocationMode mode (shallow copy)
-                    );//int packing=1); (???)
-
-        //printf("Conversion completed\n");
-        return osgImg;
-    }
-    // XS TODO : what happens with BW images ?
-    else {
-        cerr << "Unrecognized image type" << endl;
-        //printf("Unrecognized image type");
-        return 0;
-    }
-}
-
-#ifdef USE_SLIT_SCAN
-#ifdef __APPLE__
-#ifdef USE_FFMPEG
-int ACOsgVideoSlitScanThread::convert(AVPicture *dst, int dst_pix_fmt, AVPicture *src,
-                                      int src_pix_fmt, int src_width, int src_height)
-{
-    osg::Timer_t startTick = osg::Timer::instance()->tick();
-    //#ifdef USE_SWSCALE
-    //if (m_swscale_ctx==0)
-    //{
-    struct SwsContext * m_swscale_ctx = sws_getContext(src_width, src_height, (PixelFormat) src_pix_fmt,
-            src_width, src_height, (PixelFormat) dst_pix_fmt,
-            /*SWS_BILINEAR*/ SWS_BICUBIC, 0, 0, 0);
-    //}
-#if OSG_MIN_VERSION_REQUIRED(2,9,11)
-    OSG_INFO<<"Using sws_scale ";
-#endif
-    int result =  sws_scale(m_swscale_ctx,
-                            (src->data), (src->linesize), 0, src_height,
-                            (dst->data), (dst->linesize));
-    /*#else
-  OSG_INFO<<"Using img_convert ";
-  int result = img_convert(dst, dst_pix_fmt, src,
-  src_pix_fmt, src_width, src_height);
-  #endif*/
-    osg::Timer_t endTick = osg::Timer::instance()->tick();
-#if OSG_MIN_VERSION_REQUIRED(2,9,11)
-    OSG_INFO<<" time = "<<osg::Timer::instance()->delta_m(startTick,endTick)<<"ms"<<std::endl;
-#endif
-    return result;
-}
-#endif//def USE_FFMPEG
-#endif//def __APPLE__
-
-void ACOsgVideoSlitScanThread::run(void)
-{
-    std::cout << "Slit-scanning " << filename<< "..." << std::endl;
-    double slit_scan_in = getTime();
-    notify_level = osg::getNotifyLevel();
-    osg::setNotifyLevel(osg::WARN);//to remove the copyImage NOTICEs
-    _done = false;
-    if (filename!=""){
-        this->computeSlitScan();
-        _done = true;
-        std::cout << "Done slit-scanning " << filename << " in " << getTime()-slit_scan_in << " sec." << std::endl;
-    }
-    osg::setNotifyLevel(notify_level);
-}
-
-#ifdef __APPLE__
-#ifdef USE_FFMPEG	
-void ACOsgVideoSlitScanThread::yuva420pToRgba(AVPicture * const dst, AVPicture * const src, int width, int height)
-{
-    convert(dst, PIX_FMT_RGB32, src, m_context->pix_fmt, width, height);
-    const size_t bpp = 4;
-    uint8_t * a_dst = dst->data[0] + 3;
-    for (unsigned int h = 0; h < height; ++h) {
-        const uint8_t * a_src = src->data[3] + h * src->linesize[3];
-        for (unsigned int w = 0; w < width; ++w) {
-            *a_dst = *a_src;
-            a_dst += bpp;
-            a_src += 1;
-        }
-    }
-}
-#endif//def USE_FFMPEG
-#endif//def __APPLE__
-
-
-#ifndef USE_FFMPEG
-// Using OpenCV, frame jitter
-// XS TODO try with cv::VideoCapture
-int ACOsgVideoSlitScanThread::computeSlitScan(){
-    //CvCapture* video = cvCreateFileCapture(filename.c_str());
-    cv::VideoCapture* capture = new cv::VideoCapture(filename.c_str());
-    if ( !capture) {
-        cerr << "<ACVideoTrackRenderer::computeSlitScan> Could not open video..." << endl;
-        return 0;
-    }
-
-    int width   = (int) capture->get(CV_CAP_PROP_FRAME_WIDTH);
-    int height  = (int) capture->get(CV_CAP_PROP_FRAME_HEIGHT);
-    //int fps     = (int) capture->get(CV_CAP_PROP_FPS);
-    int total_frames = (int) capture->get(CV_CAP_PROP_FRAME_COUNT)-1; // XS -1 seems necessary in OpenCV 2.3
-
-    //cvSetCaptureProperty(video,CV_CAP_PROP_POS_FRAMES,(double)summary_frame_in);
-    slit_scan = 0;
-
-    //IplImage* slit_scan;
-    for (unsigned int f=0;f<total_frames;f++){
-        //cvSetCaptureProperty(video,CV_CAP_PROP_POS_FRAMES,(double)f);
-        /*if(!cvGrabFrame(video)){
-   cerr << "<ACVideoTrackRenderer::computeSlitScan> Could not find frame..." << endl;
-  }
-  else{*/
-        cv::Mat openCVframe;
-        capture->set(CV_CAP_PROP_POS_FRAMES, f);
-        *capture >> openCVframe;
-        if (!openCVframe.data) {
-            cerr << "<ACVideoTrackRenderer::computeSlitScan> unexpected missing data frame" << endl;
-            break;
-        }
-        //if(f==summary_frame_in)
-        //	slit_scan = cvCreateImage( cvSize(summary_frame_out-summary_frame_in, height), frame->depth, frame->nChannels );
-        //int ff = (int) capture->get(CV_CAP_PROP_POS_FRAMES);
-#ifdef USE_DEBUG
-        //if (ff!=f) cout << "Mismatch at frame " << ff << " instead of " << f << " (offset:" << ff-f << ")" << endl;
-#endif
-        osg::ref_ptr<osg::Image> frame = Convert_OpenCV_2_osg_Image(openCVframe);
-        if (!frame){
-            cerr << "<ACVideoTrackRenderer::computeSlitScan> problem converting from OpenCV to OSG" << endl;
-            return 0;
-        }
-        else{
-            if(!slit_scan){
-                slit_scan = new osg::Image;
-                slit_scan->allocateImage(total_frames, height, 1, GL_RGB, frame->getDataType());
-            }
-            //frame->setOrigin(osg::Image::TOP_LEFT);
-            //frame->flipVertical();
-
-            osg::copyImage(frame,
-                           (float)width/2.0f,//int  	src_s,
-                           0,//int  	src_t,
-                           0,//int  	src_r,
-                           1,//int  	width,
-                           height,//int  	height,
-                           1,//int  	depth,
-                           slit_scan,
-                           f,//int  	dest_s,
-                           0,//int  	dest_t,
-                           0,//int  	dest_r,
-                           false//bool  	doRescale = false
-                           );
-        }
-        //}
-    }
-    return 1;
-}
-#endif//ndef USE_FFMPEG
-//#endif //not (defined(__APPLE__) && not defined(USE_FFMPEG))
-
-// Using FFmpeg
-#ifdef __APPLE__
-#ifdef USE_FFMPEG
-int ACOsgVideoSlitScanThread::computeSlitScan(){
-
-    double slit_in = getTime();
-
-    AVFormatContext *pFormatCtx = 0;
-    pFormatCtx = new AVFormatContext();
-    unsigned int             i, videoStreams,videoStream;
-    AVPacket        packet;
-    int             frameFinished;
-
-    // Register all formats and codecs
-    av_register_all();
-#if LIBAVFORMAT_BUILD < (53<<16 | 2<<8 | 0) 
-    // Open video file
-    if(av_open_input_file(&pFormatCtx, filename.c_str(), 0, 0, 0)!=0){
-        std::cerr << "av_open_input_file : Couldn't open file" << std::endl;
-        return -1;
-    }
-#else
-    if(avformat_open_input(&pFormatCtx, filename.c_str(), 0, 0)<0){
-        std::cerr << "avformat_open_input : Couldn't open file" << std::endl;
-        return -1;
-    }
-#endif
-
-    // Retrieve stream information
-    // av_find_stream_info deprecated, use avformat_find_stream_info
-    if(av_find_stream_info(pFormatCtx)<0){
-        std::cerr << "Couldn't find stream information" << std::endl;
-        return -1;
-    }
-
-    // Dump information about file onto standard error
-    //dump_format(pFormatCtx, 0, filename.c_str(), false);
-
-    // Count video streams
-    videoStreams=0;
-    for(i=0; i<pFormatCtx->nb_streams; i++)
-#if LIBAVUTIL_BUILD < (50<<16 | 14<<8 | 0) 
-        if(pFormatCtx->streams[i]->codec->codec_type==CODEC_TYPE_VIDEO)
-#else
-        if(pFormatCtx->streams[i]->codec->codec_type==AVMEDIA_TYPE_VIDEO)
-#endif
-            videoStreams++;
-    if(videoStreams == 0)
-        std::cout << "Didn't find any video stream." << std::endl;
-    else
-        std::cout << "Found " << videoStreams << " video stream(s)." << std::endl;
-
-    // Find the first video stream
-    if (videoStreams>0){
-
-        videoStream=-1;
-        for(i=0; i<pFormatCtx->nb_streams; i++)
-#if LIBAVUTIL_BUILD < (50<<16 | 14<<8 | 0) 
-            if(pFormatCtx->streams[i]->codec->codec_type==CODEC_TYPE_VIDEO)
-#else
-            if(pFormatCtx->streams[i]->codec->codec_type==AVMEDIA_TYPE_VIDEO)
-#endif
-            {
-                videoStream=i;
-                break;
-            }
-
-        // osgFFMpeg FFmpegDecoderVideo::open
-
-        AVStream* m_stream = pFormatCtx->streams[videoStream];
-        m_context = m_stream->codec;
-
-        // Trust the video size given at this point
-        // (avcodec_open seems to sometimes return a 0x0 size)
-        int width = m_context->width;
-        int height = m_context->height;
-
-        // Find the decoder for the video stream
-        AVCodec* m_codec = avcodec_find_decoder(m_context->codec_id);
-
-        if (m_codec == 0)
-            throw std::runtime_error("avcodec_find_decoder() failed");
-#if LIBAVCODEC_BUILD < (53<<16 | 8<<8 | 0) 		
-        // Open codec
-        if (avcodec_open(m_context, m_codec) < 0)
-            throw std::runtime_error("avcodec_open() failed");
-#else
-        // Open codec
-        if (avcodec_open2(m_context, m_codec, NULL) < 0)
-            throw std::runtime_error("avcodec_open2() failed");
-#endif		
-        // Allocate video frame
-        AVFrame* m_frame=avcodec_alloc_frame();
-
-        // Allocate converted RGB frame
-        AVFrame* m_summary_frame_rgba=avcodec_alloc_frame();
-        std::vector<uint8_t> m_buffer_rgba;
-        m_buffer_rgba.resize(avpicture_get_size(PIX_FMT_RGB32, width, height));
-
-        // Assign appropriate parts of the buffer to image planes in m_summary_frame_rgba
-        avpicture_fill((AVPicture *) m_summary_frame_rgba, &(m_buffer_rgba)[0], PIX_FMT_RGB32, width, height);
-
-        // Back to FFmpeg tuto
-
-        // Video stream properties
-        //float summary_frame_rate = av_q2d(m_stream->r_summary_frame_rate);
-        //float duration = (float)(pFormatCtx->duration)/AV_TIME_BASE;
-        int nb_frames =  m_stream->nb_frames; //CF alternative: pFormatCtx->streams[videoStream]->nb_index_entries or duration/summary_frame_rate for corrupted files?
-
-        double slit_mid = getTime();
-
-        int summary_frames_processed = 0;
-        slit_scan = new osg::Image;
-        slit_scan->allocateImage(nb_frames, height, 1, GL_RGBA, GL_UNSIGNED_BYTE);
-
-        while(av_read_frame(pFormatCtx, &packet)>=0)
-        {
-            // Is this a packet from the video stream?
-            if(packet.stream_index==videoStream)
-            {
-                // Decode video frame
-#if LIBAVCODEC_BUILD < (52<<16 | 23<<8 | 0)
-                avcodec_decode_video(m_context, m_frame, &frameFinished,packet.data, packet.size); // deprecated since 2009-04-07 - r18351 - lavc 52.23.0, totally removed in ffmpeg 0.8
-#else
-                AVPacket avpacket;
-                av_init_packet(&avpacket);
-                avpacket.data = packet.data;
-                avpacket.size = packet.size;
-                avpacket.flags = AV_PKT_FLAG_KEY; //TODO : check that this is needed
-                avcodec_decode_video2(m_context, m_frame, &frameFinished, &avpacket);
-#endif	
-                // Did we get a video frame?
-                if(frameFinished)
-                {
-                    //std::cout << "Processing frame " << m_context->frame_number << " / " << nb_frames << std::endl;
-                    AVPicture * const src = (AVPicture *) m_frame;
-                    AVPicture * const dst = (AVPicture *) m_summary_frame_rgba;
-
-                    // Assign appropriate parts of the buffer to image planes in m_summary_frame_rgba
-                    avpicture_fill((AVPicture *) m_summary_frame_rgba, &(m_buffer_rgba)[0], PIX_FMT_RGB32, width, height);
-
-                    // Convert YUVA420p (i.e. YUV420p plus alpha channel) using our own routine
-                    if (m_context->pix_fmt == PIX_FMT_YUVA420P)
-                        yuva420pToRgba(dst, src, width, height);
-                    else
-                        convert(dst, PIX_FMT_RGB32, src, m_context->pix_fmt, width, height);
-
-                    osg::ref_ptr<osg::Image> frame = new osg::Image();
-                    frame->setOrigin(osg::Image::TOP_LEFT);
-                    frame->setImage(
-                                width,height, 1, GL_RGBA, GL_BGRA, GL_UNSIGNED_BYTE,
-                                const_cast<unsigned char *>( &((m_buffer_rgba)[0])), osg::Image::NO_DELETE
-                                );
-                    frame->flipVertical();
-
-                    osg::copyImage(frame,
-                                   (float)width/2.0f,//int  	src_s,
-                                   0,//int  	src_t,
-                                   0,//int  	src_r,
-                                   1,//int  	width,
-                                   height,//int  	height,
-                                   1,//int  	depth,
-                                   slit_scan,
-                                   m_context->frame_number,//int  	dest_s,
-                                   0,//int  	dest_t,
-                                   0,//int  	dest_r,
-                                   false//bool  	doRescale = false
-                                   );
-
-                    summary_frames_processed++;
-                }
-            }
-            // Free the packet that was allocated by av_read_frame
-            av_free_packet(&packet);
-        }
-
-        // Free the RGB image
-        m_buffer_rgba.empty();
-        av_free(m_summary_frame_rgba);
-
-        // Free the YUV frame
-        av_free(m_frame);
-
-        // Close the codec
-        avcodec_close(m_context);
-
-        double slit_end = getTime();
-        std::cout << "Slit-scanning took " << slit_end-slit_mid << " after " << slit_mid-slit_in << " of init " << std::endl;
-        std::cout << "Missed " << nb_frames - summary_frames_processed << " frames over " << nb_frames << std::endl;
-        //osgDB::writeImageFile(*slit_scan,std::string("/Users/christianfrisson/test.jpg"));
-    }
-    // Close the video file
-    av_close_input_file(pFormatCtx);
-    return 1;
-}
-#endif//def USE_FFMPEG
-#endif//def __APPLE__
-
-#endif//def USE_SLIT_SCAN
 
 #ifdef SYNC_THREAD_PER_SELECTION_VIDEO
 void ACOsgVideoTrackPlayersSync::run(void)
@@ -595,23 +191,23 @@ void ACOsgVideoTrackPlayersSync::run(void)
 ACOsgVideoTrackRenderer::ACOsgVideoTrackRenderer() : ACOsgTrackRenderer() {		
 
     media_type = MEDIA_TYPE_VIDEO;
-    track_summary_type = "Keyframes";
-    track_selection_type = "Keyframes";
+    track_summary_type = "None";//Keyframes";
+    track_selection_type = "None";//"Keyframes";
     track_playback_visibility = true;
 
-    segments_height = yspan/16.0f;//[0;yspan/2.0f]
-    summary_height = yspan/8.0f;//[0;yspan/2.0f]
-    selection_height = yspan/4.0f;//[0;yspan/2.0f]
-    playback_height = yspan/2.0f - summary_height - segments_height - selection_height; //yspan/2.0f;//[0;yspan/2.0f]
+    segments_height = 1.0f/16.0f;//[0;1]
+    summary_height = 1.0f/8.0f;//[0;1]
+    selection_height = 1.0f/8.0f;//[0;1]
+    playback_height = 1.0f - summary_height - segments_height - selection_height;//[0;1]
 
-    segments_center_y = -yspan/2.0f + segments_height;
-    summary_center_y = -yspan/2.0f + summary_height + segments_height;//-yspan/2.0f+yspan/8.0f; //[-yspan/2.0f;yspan/2.0f]
-    selection_center_y = -yspan/2.0f + summary_height + segments_height + selection_height;
-    playback_center_y = -yspan/2.0f + summary_height + segments_height + selection_height + playback_height; //yspan/4.0f; //[-yspan/2.0f;yspan/2.0f]
+    segments_center_y = segments_height/2.0f;
+    summary_center_y = segments_height + summary_height/2.0f;//[0;1]
+    selection_center_y = summary_height + segments_height + selection_height/2.0f;
+    playback_center_y = summary_height + segments_height + selection_height + playback_height/2.0f;//[0;1]
 
-    playback_scale = 0.5f;
     selection_center_frame_width = 0.0f;
-    summary_frame_min_width = 64;
+    summary_frame_min_width = 32;
+    selection_frame_min_width = 64;
 
     this->initTrack();
 }
@@ -647,11 +243,8 @@ void ACOsgVideoTrackRenderer::initTrack(){
 
     summary_frames_transform=0;
 
-#ifdef USE_SLIT_SCAN
     slit_scan_transform=0;
     slit_scan_changed = false;
-    slit_scanner = 0;
-#endif//def USE_SLIT_SCAN
 
     segments_transform=0;
     segments_group=0;
@@ -666,6 +259,8 @@ void ACOsgVideoTrackRenderer::initTrack(){
     track_summary_type_changed = true;
     track_selection_type_changed = true;
     track_playback_visibility_changed = true;
+
+    resized_thumbnail_filename = "";
 }	
 
 void ACOsgVideoTrackRenderer::emptyTrack(){
@@ -755,35 +350,49 @@ void ACOsgVideoTrackRenderer::emptyTrack(){
     summary_textures.resize(0);
 
     // slit-scan
-#ifdef USE_SLIT_SCAN
-    if (slit_scanner){
-        if (slit_scanner->isRunning())
-            slit_scanner->cancel();
-        delete slit_scanner;
-        slit_scanner=0;
-    }
     slit_scan_transform=0;
-#endif//def USE_SLIT_SCAN
 
     for (std::vector< osg::ref_ptr<osg::Geode> >::iterator _geode = segments_geodes.begin(); _geode != segments_geodes.end();++_geode)
         (*_geode) = 0;
     segments_geodes.clear();
 }
 
+void ACOsgVideoTrackRenderer::changePlaybackThumbnail(std::string _thumbnail){
+    bool _visibility = (_thumbnail != "None");
+    if(this->track_playback_visibility != _visibility){
+        this->track_playback_visibility = _visibility;
+        this->track_playback_visibility_changed = true;
+    }
+}
+
+void ACOsgVideoTrackRenderer::changeSelectionThumbnail(std::string _thumbnail){
+    if(this->track_selection_type != _thumbnail){
+        this->track_selection_type = _thumbnail;
+        this->track_selection_type_changed = true;
+    }
+}
+
+void ACOsgVideoTrackRenderer::changeSummaryThumbnail(std::string _thumbnail){
+    if(this->track_summary_type != _thumbnail){
+        this->track_summary_type = _thumbnail;
+        this->track_summary_type_changed = true;
+    }
+}
+
 void ACOsgVideoTrackRenderer::selectionZoneTransform() {
-    this->boxTransform(selection_zone_transform, yspan, osg::Vec4(0.0f, 0.0f, 0.0f, 0.2f), "track selection zone");
+    this->boxTransform(selection_zone_transform, 1, osg::Vec4(0.0f, 0.0f, 1.0f, 0.2f), "track selection zone");
 }
 
 void ACOsgVideoTrackRenderer::selectionBeginTransform() {
-    this->boxTransform(selection_begin_transform, selection_sensing_width, osg::Vec4(0.2f, 0.9f, 0.2f, 0.9f), "track selection begin");
+    this->boxTransform(selection_begin_transform, 4, osg::Vec4(0.2f, 0.9f, 0.2f, 0.9f), "track selection begin");
 }
 
 void ACOsgVideoTrackRenderer::selectionEndTransform() {
-    this->boxTransform(selection_end_transform, selection_sensing_width, osg::Vec4(0.2f, 0.9f, 0.2f, 0.9f), "track selection end");
+    this->boxTransform(selection_end_transform, 4, osg::Vec4(0.2f, 0.9f, 0.2f, 0.9f), "track selection end");
 }
 
 void ACOsgVideoTrackRenderer::selectionCursorTransform() {
-    this->boxTransform(summary_cursor_transform, yspan/600, osg::Vec4(0.2f, 0.9f, 0.2f, 0.9f), "video track cursor");
+    this->boxTransform(summary_cursor_transform, 2, osg::Vec4(0.2f, 0.9f, 0.2f, 0.9f), "video track cursor");
 }
 
 void ACOsgVideoTrackRenderer::playbackVideoTransform() {
@@ -797,14 +406,19 @@ void ACOsgVideoTrackRenderer::playbackVideoTransform() {
     osg::ref_ptr<osg::Geode> playback_geode = new Geode();
     playback_geometry = new Geometry();
 
-    double imagey = yspan/2.0f;
-    double imagex = xspan/2.0f;
+    double imagey = (float)(media->getHeight())/2.0f;
+    double imagex = (float)(media->getWidth())/2.0f;
+
+    if(imagex == 0.0f)
+        std::cerr << "ACOsgVideoTrackRenderer::playbackVideoTransform: null video width" << std::endl;
+    if(imagey == 0.0f)
+        std::cerr << "ACOsgVideoTrackRenderer::playbackVideoTransform: null video height" << std::endl;
 
     vertices = new Vec3Array(4);
-    (*vertices)[0] = Vec3(-imagex, -imagey, zpos);
-    (*vertices)[1] = Vec3(imagex, -imagey, zpos);
-    (*vertices)[2] = Vec3(imagex, imagey, zpos);
-    (*vertices)[3] = Vec3(-imagex, imagey, zpos);
+    (*vertices)[0] = Vec3(-imagex, -imagey, 0.0f);
+    (*vertices)[1] = Vec3(imagex, -imagey, 0.0f);
+    (*vertices)[2] = Vec3(imagex, imagey, 0.0f);
+    (*vertices)[3] = Vec3(-imagex, imagey, 0.0f);
     playback_geometry->setVertexArray(vertices);
 
     // Primitive Set
@@ -835,8 +449,18 @@ void ACOsgVideoTrackRenderer::playbackVideoTransform() {
     //if (media_index > -1){
     if (media){
 
-        //playback_texture = ((ACVideo*)(media_cycle->getLibrary()->getMedia(media_index)))->getTexture();
-        playback_texture = ((ACVideo*)media)->getTexture();
+        ACMediaThumbnail* media_thumbnail = media->getThumbnail(this->shared_thumbnail);
+        if(!media_thumbnail){
+            std::cerr << "ACOsgImageRenderer::imageGeode: couldn't get shared thumbnail '" << this->shared_thumbnail << "'" << std::endl;
+            return;
+        }
+        ACOsgMediaThumbnail* osg_thumbnail = dynamic_cast<ACOsgMediaThumbnail*>(media_thumbnail);
+        if(!osg_thumbnail){
+            std::cerr << "ACOsgImageRenderer::imageGeode: shared thumbnail '" << this->shared_thumbnail << "' isn't of OSG type" << std::endl;
+            return;
+        }
+
+        playback_texture = osg_thumbnail->getTexture();
 
         playback_texture->setResizeNonPowerOfTwoHint(false);
         //playback_texture->setUnRefImageDataAfterApply(true);
@@ -864,14 +488,14 @@ void ACOsgVideoTrackRenderer::selectionCenterFrameTransform() {
     osg::ref_ptr<Geode> selection_center_frame_geode = new Geode();
     selection_center_frame_geometry = new Geometry();
 
-    double imagey = yspan/2.0f;
-    double imagex = xspan/2.0f;
+    double imagey = 0.5f;
+    double imagex = 0.5f;
 
     vertices = new Vec3Array(4);
-    (*vertices)[0] = Vec3(-imagex, -imagey, zpos);
-    (*vertices)[1] = Vec3(imagex, -imagey, zpos);
-    (*vertices)[2] = Vec3(imagex, imagey, zpos);
-    (*vertices)[3] = Vec3(-imagex, imagey, zpos);
+    (*vertices)[0] = Vec3(-imagex, -imagey, 0.0f);
+    (*vertices)[1] = Vec3(imagex, -imagey, 0.0f);
+    (*vertices)[2] = Vec3(imagex, imagey, 0.0f);
+    (*vertices)[3] = Vec3(-imagex, imagey, 0.0f);
     selection_center_frame_geometry->setVertexArray(vertices);
 
     // Primitive Set
@@ -902,7 +526,18 @@ void ACOsgVideoTrackRenderer::selectionCenterFrameTransform() {
     //if (media_index > -1){
     if (media){
 
-        selection_center_frame_texture = ((ACVideo*)media)->getTexture();
+        ACMediaThumbnail* media_thumbnail = media->getThumbnail(this->shared_thumbnail);
+        if(!media_thumbnail){
+            std::cerr << "ACOsgImageRenderer::imageGeode: couldn't get shared thumbnail '" << this->shared_thumbnail << "'" << std::endl;
+            return;
+        }
+        ACOsgMediaThumbnail* osg_thumbnail = dynamic_cast<ACOsgMediaThumbnail*>(media_thumbnail);
+        if(!osg_thumbnail){
+            std::cerr << "ACOsgImageRenderer::imageGeode: shared thumbnail '" << this->shared_thumbnail << "' isn't of OSG type" << std::endl;
+            return;
+        }
+
+        selection_center_frame_texture = osg_thumbnail->getTexture();
 
         selection_center_frame_texture->setResizeNonPowerOfTwoHint(false);
         state = selection_center_frame_geometry->getOrCreateStateSet();
@@ -1001,8 +636,14 @@ void ACOsgVideoTrackRenderer::updateSelectionVideos(
             osg::NotifySeverity notify_level = osg::getNotifyLevel();
             osg::setNotifyLevel(osg::ALWAYS);
             //_selection_video_image = osgDB::readImageFile(media->getThumbnailFileName());
-            if(_selection_video_images.size()<m+1)
-                _selection_video_images.push_back(osgDB::readImageFile(media->getThumbnailFileName()));
+            if(_selection_video_images.size()<m+1){
+                osg::ref_ptr<osg::Image> thumbnail = osgDB::readImageFile(resized_thumbnail_filename);
+                if(thumbnail == 0){
+                    std::cerr << "ACOsgVideoTrackRenderer::updateSelectionVideos: couldn't load " << resized_thumbnail_filename << ", aborting " << std::endl;
+                    return;
+                }
+                _selection_video_images.push_back(thumbnail);
+            }
             osg::setNotifyLevel(notify_level);
 
             //if (!_selection_video_image){
@@ -1033,14 +674,14 @@ void ACOsgVideoTrackRenderer::updateSelectionVideos(
             osg::ref_ptr<Geode> video_geode = new Geode();
             video_geometry = new Geometry();
 
-            double imagey = yspan/2.0f;
-            double imagex = xspan/2.0f;
+            double imagey = 0.5f;
+            double imagex = 0.5f;
 
             vertices = new Vec3Array(4);
-            (*vertices)[0] = Vec3(-imagex, -imagey, zpos);
-            (*vertices)[1] = Vec3(imagex, -imagey, zpos);
-            (*vertices)[2] = Vec3(imagex, imagey, zpos);
-            (*vertices)[3] = Vec3(-imagex, imagey, zpos);
+            (*vertices)[0] = Vec3(-imagex, -imagey, 0.0f);
+            (*vertices)[1] = Vec3(imagex, -imagey, 0.0f);
+            (*vertices)[2] = Vec3(imagex, imagey, 0.0f);
+            (*vertices)[3] = Vec3(-imagex, imagey, 0.0f);
             video_geometry->setVertexArray(vertices);
 
             // Primitive Set
@@ -1096,7 +737,6 @@ void ACOsgVideoTrackRenderer::updateSelectionVideos(
     }
 }
 
-#ifdef USE_SLIT_SCAN
 void ACOsgVideoTrackRenderer::slitScanTransform() {
     StateSet *state;
     Vec3Array* vertices;
@@ -1110,8 +750,8 @@ void ACOsgVideoTrackRenderer::slitScanTransform() {
     osg::ref_ptr<osg::Geode> slit_scan_geode = new Geode();
     slit_scan_geometry = new Geometry();
 
-    double imagey = yspan/2.0f;
-    double imagex = xspan/2.0f;
+    double imagey = 0.5f;
+    double imagex = 0.5f;
 
     vertices = new Vec3Array(4);
     (*vertices)[0] = Vec3(-imagex, -imagey, 0.0f);
@@ -1145,7 +785,7 @@ void ACOsgVideoTrackRenderer::slitScanTransform() {
     texcoord->push_back(osg::Vec2(a, flip ? a : b));
     slit_scan_geometry->setTexCoordArray(0, texcoord);
 
-    if (slit_scanner->computed()){
+    /*if (slit_scanner->computed()){
         slit_scan_texture = new osg::Texture2D;
         slit_scan_texture->setResizeNonPowerOfTwoHint(false);
         slit_scan_texture->setImage(slit_scanner->getImage());
@@ -1159,11 +799,9 @@ void ACOsgVideoTrackRenderer::slitScanTransform() {
         slit_scan_geode->addDrawable(slit_scan_geometry);
         slit_scan_transform->addChild(slit_scan_geode);
         slit_scan_geode->setUserData(new ACRefId(track_index,"video track summary slit-scan"));
-    }
+    }*/
 
 }	
-
-#endif//def USE_SLIT_SCAN
 
 void ACOsgVideoTrackRenderer::framesTransform() {
     double summary_start = getTime();
@@ -1173,6 +811,9 @@ void ACOsgVideoTrackRenderer::framesTransform() {
     osg::ref_ptr<osg::Group> summary_frames_group = new Group;
     //summary_frames_group->removeChildren(0,	summary_frames_group->getNumChildren ());
     //summary_frame_n = floor(width/summary_frame_min_width);
+
+    int thumbnail_height = media->getThumbnailHeight("Timeline Resized");
+
     StateSet *state;
 
     for (std::vector< osg::ref_ptr<osg::Image> >::iterator _image = summary_images.begin(); _image != summary_images.end();++_image)
@@ -1197,8 +838,14 @@ void ACOsgVideoTrackRenderer::framesTransform() {
         state->setMode(GL_NORMALIZE, osg::StateAttribute::ON);
         state->setMode(GL_DEPTH_TEST,osg::StateAttribute::OFF);
 
-        if(summary_images.size()<f+1)
-            summary_images.push_back(osgDB::readImageFile(media->getThumbnailFileName()));
+        if(summary_images.size()<f+1){
+            osg::ref_ptr<osg::Image> thumbnail = osgDB::readImageFile(resized_thumbnail_filename);
+            if(thumbnail == 0){
+                std::cerr << "ACOsgVideoTrackRenderer::framesTransform: couldn't load " << resized_thumbnail_filename << std::endl;
+                return;
+            }
+            summary_images.push_back(thumbnail);
+        }
         if(summary_textures.size()<f+1)
             summary_textures.push_back(new osg::Texture2D);
         summary_textures[f]->setImage(summary_images[f]);
@@ -1208,7 +855,7 @@ void ACOsgVideoTrackRenderer::framesTransform() {
         summary_streams[f]->setVolume(0);
 
         summary_streams[f]->play();
-        summary_streams[f]->seek( (f+0.5f)*summary_streams[f]->getLength()/(float)summary_frame_n );
+        summary_streams[f]->seek( (f/*+0.5f*/)*summary_streams[f]->getLength()/(float)summary_frame_n );
         //summary_streams[f]->pause();
 
 
@@ -1228,10 +875,10 @@ void ACOsgVideoTrackRenderer::framesTransform() {
         int g = f;
 
         vertices = new Vec3Array(4);
-        (*vertices)[0] = Vec3(-xspan/2.0f+2*g*xspan/summary_frame_n/2.0f, -yspan/2.0f, 0.0);
-        (*vertices)[1] = Vec3(-xspan/2.0f+(2*g+2)*xspan/summary_frame_n/2.0f, -yspan/2.0f, 0.0);
-        (*vertices)[2] = Vec3(-xspan/2.0f+(2*g+2)*xspan/summary_frame_n/2.0f, yspan/2.0f, 0.0);
-        (*vertices)[3] = Vec3(-xspan/2.0f+2*g*xspan/summary_frame_n/2.0f, yspan/2.0f, 0.0);
+        (*vertices)[0] = Vec3(2*g/summary_frame_n/2.0f*this->width, -0.5f, 0.0);
+        (*vertices)[1] = Vec3((2*g+2)/summary_frame_n/2.0f*this->width, -0.5f, 0.0);
+        (*vertices)[2] = Vec3((2*g+2)/summary_frame_n/2.0f*this->width, 0.5f, 0.0);
+        (*vertices)[3] = Vec3(2*g/summary_frame_n/2.0f*this->width, 0.5f, 0.0);
         summary_frame_geometry->setVertexArray(vertices);
 
         // Primitive Set
@@ -1315,9 +962,9 @@ void ACOsgVideoTrackRenderer::segmentsTransform() {
   for (std::vector<std::string>::iterator segment_plugin = segment_plugins.begin(); segment_plugin != segment_plugins.end();++segment_plugin)
    std::cout << "Segment plugin '" << (*segment_plugin) << "'" << std::endl;
   */
-        segments_geodes[s]->addDrawable(new osg::ShapeDrawable(new osg::Box(osg::Vec3(-xspan/2.0f+ (media->getSegment(s)->getStart()+media->getSegment(s)->getEnd())/2.0f*xspan/media_length,0.0f,0.0f),(media->getSegment(s)->getEnd()-media->getSegment(s)->getStart())*xspan/media_length,yspan,0.0f), hints));
+        segments_geodes[s]->addDrawable(new osg::ShapeDrawable(new osg::Box(osg::Vec3(-0.5f+ (media->getSegment(s)->getStart()+media->getSegment(s)->getEnd())/2.0f/media_length,0.0f,0.0f),(media->getSegment(s)->getEnd()-media->getSegment(s)->getStart())/media_length,1.0f,0.0f), hints));
         //CF workaround since BIC segmentation sets frames not seconds as start/end
-        //segments_geodes[s]->addDrawable(new osg::ShapeDrawable(new osg::Box(osg::Vec3(-xspan/2.0f+ (media->getSegment(s)->getStart()+media->getSegment(s)->getEnd())/2.0f*xspan/media->getFrameRate()/media_length,0.0f,0.0f),(media->getSegment(s)->getEnd()-media->getSegment(s)->getStart())*xspan/media->getFrameRate()/media_length,yspan,0.0f), hints));
+        //segments_geodes[s]->addDrawable(new osg::ShapeDrawable(new osg::Box(osg::Vec3(-0.5f+ (media->getSegment(s)->getStart()+media->getSegment(s)->getEnd())/2.0f/media->getFrameRate()/media_length,0.0f,0.0f),(media->getSegment(s)->getEnd()-media->getSegment(s)->getStart())/media->getFrameRate()/media_length,1.0f,0.0f), hints));
 
         //std::cout << "Segment " << s << " start " << media->getSegment(s)->getStart()/media_length << " end " << media->getSegment(s)->getEnd()/media_length << " width " << (media->getSegment(s)->getEnd()-media->getSegment(s)->getStart())/media_length << std::endl;
         ((ShapeDrawable*)(segments_geodes[s])->getDrawable(0))->setColor(segment_color);
@@ -1351,38 +998,29 @@ void ACOsgVideoTrackRenderer::updateTracks(double ratio)
 
         if (media){
 
-            // Try to locate a thumbnail (more compressed video file)
-            std::stringstream thumbnail_filename;
-            boost::filesystem::path filename_path(media->getFileName().c_str());
-            std::string slash = "/";
-#ifdef WIN32
-            slash = "\\";
-#endif
-#ifdef __APPLE__
-            thumbnail_filename << filename_path.parent_path().string() << slash << filename_path.stem().string() << "_thumbnail" << filename_path.extension().string();
-#else // this seems required on ubuntu to compile...
-            thumbnail_filename << filename_path.parent_path() << slash << filename_path.stem() << "_thumbnail" << filename_path.extension();
-#endif
-            std::cout << "Thumbnail " << thumbnail_filename.str() << std::endl;
-            if(boost::filesystem::exists(thumbnail_filename.str()))
-                media->setThumbnailFileName( thumbnail_filename.str() );
-            else
-                media->setThumbnailFileName( media->getFileName() );
-            std::cout << "Thumbnail (used)" << media->getThumbnailFileName() << std::endl;
+            resized_thumbnail_filename = media->getThumbnailFileName("Timeline Resized");
+            if(resized_thumbnail_filename == "")
+                resized_thumbnail_filename = media->getFileName();
+
+            std::cout << "Thumbnail (used)" << resized_thumbnail_filename << std::endl;
 
             // Access the video stream (of the browser node)
             std::cout << "Getting video stream... ";
             double video_stream_in = getTime();
-            video_stream = static_cast<ACVideo*>(media)->getStream();
-            std::cout << getTime()-video_stream_in << " sec." << std::endl;
 
-            // Launch slit-scan computation
-#ifdef USE_SLIT_SCAN
-            slit_scanner = new ACOsgVideoSlitScanThread();
-            slit_scanner->setFileName(media->getThumbnailFileName());
-            slit_scanner->startThread();
-            slit_scan_changed = true;
-#endif//def USE_SLIT_SCAN
+            ACMediaThumbnail* media_thumbnail = media->getThumbnail(this->shared_thumbnail);
+            if(!media_thumbnail){
+                std::cerr << "ACOsgImageRenderer::imageGeode: couldn't get shared thumbnail '" << this->shared_thumbnail << "'" << std::endl;
+                return;
+            }
+            ACOsgMediaThumbnail* osg_thumbnail = dynamic_cast<ACOsgMediaThumbnail*>(media_thumbnail);
+            if(!osg_thumbnail){
+                std::cerr << "ACOsgImageRenderer::imageGeode: shared thumbnail '" << this->shared_thumbnail << "' isn't of OSG type" << std::endl;
+                return;
+            }
+
+            video_stream = osg_thumbnail->getStream();
+            std::cout << getTime()-video_stream_in << " sec." << std::endl;
 
             // Optional, for testing the segment visualization without segmentation
             //this->createDummySegments();
@@ -1418,7 +1056,6 @@ void ACOsgVideoTrackRenderer::updateTracks(double ratio)
         this->updateSliderContents();
 	
         this->updateTransformsAspects();
-
     }
 
     // Reset "signals"
@@ -1450,20 +1087,19 @@ void ACOsgVideoTrackRenderer::updateSummaryContents()
             track_summary_type_changed = true;
             summary_frame_n = floor(width/summary_frame_min_width);
             framesTransform();
+            std::cout << "summary_frame_n " << summary_frame_n << std::endl;
         }
         else{
             for (int f=0;f<summary_frame_n;f++){
-                summary_streams[f]->seek( (f+0.5f)*summary_streams[f]->getLength()/(float)summary_frame_n );
+                summary_streams[f]->seek( (f/*+0.5f*/)*summary_streams[f]->getLength()/(float)summary_frame_n );
                 summary_streams[f]->pause();
                 summary_streams[f]->quit();
             }
         }
     }
 
-#ifdef USE_SLIT_SCAN
     if (track_summary_type == "Slit-scan" && slit_scan_changed)
         track_summary_type_changed = true;
-#endif//def USE_SLIT_SCAN
 
     if (track_summary_type_changed){
         //std::cout << "summary_type " << track_summary_type << std::endl;
@@ -1471,45 +1107,43 @@ void ACOsgVideoTrackRenderer::updateSummaryContents()
         if (track_summary_type == "Keyframes"){
             summary_transform->addChild(summary_frames_transform);
         }
-#ifdef USE_SLIT_SCAN
         else if (track_summary_type == "Slit-scan"){
-            if (slit_scanner->computed()){
+            /*if (slit_scanner->computed()){
                 if(slit_scan_changed){
                     slitScanTransform();
                     slit_scan_changed = false;
                 }
                 summary_transform->addChild(slit_scan_transform);
-            }
+            }*/
         }
-#endif//def USE_SLIT_SCAN
     }
 
     float w = (float)(media->getWidth());
     float h = (float)(media->getHeight());
     if (track_summary_type == "Keyframes")
-        summary_height = yspan*(h/height * width/w/summary_frame_n);// summary_frame_n = width/summary_frame_min_width
+        summary_height = h/height * width/w/summary_frame_n;// summary_frame_n = width/summary_frame_min_width
     else
-        summary_height = yspan/8.0f;
+        summary_height = 1.0f/8.0f;
 }	
 
 void ACOsgVideoTrackRenderer::updateSelectionContents()
 {
     float w = (float)(media->getWidth());
     float h = (float)(media->getHeight());
-    //selection_height = yspan/8.0f; //selection_height = summary_height * 2.0f;//makes a fixed-heigh proportion independent of the timeline height variation
+    //selection_height = 1.0f/8.0f; //selection_height = summary_height * 2.0f;//makes a fixed-heigh proportion independent of the timeline height variation
     selection_center_frame_width = selection_height * (w/width)/(h/height);
 
     // Update the selection contents
     if(track_selection_type == "Keyframes"){
 
-        //int _selection_frame_n = floor(xspan/selection_center_frame_width/2.0f;
-        int _selection_frame_n = floor((width/summary_frame_min_width)/2.0f);
+        //int _selection_frame_n = floor(1.0f/selection_center_frame_width/2.0f;
+        int _selection_frame_n = floor((width/selection_frame_min_width)/2.0f);
         if ((selection_frame_n != _selection_frame_n) || media_changed){
             track_selection_type_changed = true;
             selection_frame_n = _selection_frame_n;
             //std::cout << "selection_frame_n " << selection_frame_n << std::endl;
 
-            //playback_min_width = xspan * selection_frame_n/(media->getFrameRate()*media->getDuration());
+            //selection_min_width = 1.0f * selection_frame_n/(media->getFrameRate()*media->getDuration());
 
             updateSelectionVideos(right_selection_video_images,
                                   right_selection_video_streams,
@@ -1549,7 +1183,7 @@ void ACOsgVideoTrackRenderer::updateSelectionContents()
                 right_selection_video_sync->updateSlaves(right_selection_video_streams);
 #endif
         }
-        selection_height = yspan*(h/height * width/w/(2*selection_frame_n+1));
+        selection_height = h/height * width/w/(2*selection_frame_n+1);
     }
 
     if (track_selection_type_changed){
@@ -1599,7 +1233,7 @@ void ACOsgVideoTrackRenderer::syncVideoStreams()
 #endif//def SYNC_THREAD_PER_SELECTION_VIDEO
 #endif//def SYNC_SELECTION_VIDEO_BY_THREAD
 	
-        float cursor_pos_normd = (selection_center_pos_x/(xspan/2.0f)+1)/2.0f;
+        float cursor_pos_normd = selection_center_pos_x;//(selection_center_pos_x/0.5f+1)/2.0f;
         if (cursor_pos_normd > 1)
             cursor_pos_normd -= 1;
         else if (cursor_pos_normd < 0)
@@ -1615,7 +1249,7 @@ void ACOsgVideoTrackRenderer::syncVideoStreams()
             if((*_stream).valid()){
 #ifndef TEST_SYNC_WITHOUT_TIME_SKIP
                 // Time skip so that the rightest frame corresponds to the right selection cursor (or looping from the beginning if after the last frame)
-                float position_norm = ((selection_center_pos_x/(xspan/2.0f)+1)/2.0f +  ++right_skip/(float)(right_selection_video_streams.size())*(selection_end_pos_x-selection_begin_pos_x)/xspan/2.0f );
+                float position_norm = (selection_center_pos_x + ++right_skip/(float)(right_selection_video_streams.size())*(selection_end_pos_x-selection_begin_pos_x)/2.0f );
                 if(position_norm > 1){
                     position_norm -= 1;//looping
                 }
@@ -1623,7 +1257,7 @@ void ACOsgVideoTrackRenderer::syncVideoStreams()
 #else
                 // Sync without time skip
                 if((*_stream).valid()){
-                    (*_stream)->seek(  ((selection_center_pos_x/(xspan/2.0f)+1)/2.0f  ) *video_stream->getLength());
+                    (*_stream)->seek( selection_center_pos_x*video_stream->getLength());
                 }
 #endif
             }
@@ -1633,7 +1267,7 @@ void ACOsgVideoTrackRenderer::syncVideoStreams()
             if((*_stream).valid()){
 #ifndef TEST_SYNC_WITHOUT_TIME_SKIP
                 // Time skip so that the leftest frame corresponds to the left selection cursor (or looping from the end if before the first frame)
-                float position_norm = ((selection_center_pos_x/(xspan/2.0f)+1)/2.0f +  --left_skip/(float)(left_selection_video_streams.size())*(selection_end_pos_x-selection_begin_pos_x)/xspan/2.0f );
+                float position_norm = (selection_center_pos_x +  --left_skip/(float)(left_selection_video_streams.size())*(selection_end_pos_x-selection_begin_pos_x)/2.0f );
                 if(position_norm < 0){
                     position_norm += 1;//looping
                 }
@@ -1641,7 +1275,7 @@ void ACOsgVideoTrackRenderer::syncVideoStreams()
 #else
                 // Sync without time skip
                 if((*_stream).valid()){
-                    (*_stream)->seek(  ((selection_center_pos_x/(xspan/2.0f)+1)/2.0f  ) *video_stream->getLength());
+                    (*_stream)->seek( selection_center_pos_x*video_stream->getLength());
                 }
 #endif
             }
@@ -1707,7 +1341,7 @@ void ACOsgVideoTrackRenderer::syncVideoStreams()
                 if((*_stream).valid())
                     (*_stream)->play();
             }
-            this->moveSelection(-xspan/2.0f+video_stream->getReferenceTime()/video_stream->getLength()*xspan,this->getSelectionPosY()); // update the visual cursor from the stream itself
+            this->moveSelection(/*-0.5f+*/video_stream->getReferenceTime()/video_stream->getLength(),this->getSelectionPosY()); // update the visual cursor from the stream itself
         }
         else if (streamStatus == osg::ImageStream::PAUSED){
             for (std::vector< osg::ref_ptr<osg::ImageStream> >::iterator _stream = right_selection_video_streams.begin(); _stream != right_selection_video_streams.end();_stream++){
@@ -1766,39 +1400,59 @@ void ACOsgVideoTrackRenderer::updateTransformsAspects()
 
     // Update the playback/selection/summary/segments view aspects
     Matrix playback_matrix,summary_matrix,segments_matrix,selection_center_frame_matrix;
-    Matrix cursor_matrix,selection_begin_matrix,selection_end_matrix,selection_zone_matrix;
+    Matrix summary_cursor_matrix,selection_begin_matrix,selection_end_matrix,selection_zone_matrix;
     std::vector< Matrix > left_selection_videos_matrices,right_selection_videos_matrices;
 
     float _segments_height = 0.0f;
     if (media->getNumberOfSegments()>0){
         _segments_height = this->segments_height;
-        segments_matrix.makeTranslate(0.0f,-yspan/2.0f+_segments_height/2.0f,0.0f);
-        segments_matrix = Matrix::scale(1.0f,_segments_height/yspan,1.0f)*segments_matrix;
+        segments_matrix.makeTranslate(0.0f,_segments_height/2.0f*this->height,0.0f);
+        segments_matrix = Matrix::scale(1.0f,_segments_height*this->height,1.0f)*segments_matrix;
         segments_transform->setMatrix(segments_matrix);
     }
 
-    float _summary_height = this->summary_height;//= 0.0f;
+    float _summary_height = 0.0f;
+    float _summary_center_y = 0.0f;
     if (track_summary_type != "None"){
-        //_summary_height = this->summary_height;
-        summary_matrix.makeTranslate(0.0f,-yspan/2.0f+_segments_height+_summary_height/2.0f,0.0f);
-        summary_matrix = Matrix::scale(1.0f,_summary_height/yspan,1.0f)*summary_matrix;
+        _summary_height = this->summary_height;
+        _summary_center_y = _segments_height + _summary_height/2.0f;
+        //summary_matrix.makeTranslate(0.0f,(_segments_height+_summary_height/2.0f)*this->height,0.0f);
+        summary_matrix.makeTranslate(0.0f,(_summary_center_y)*this->height,0.0f);
+        summary_matrix = Matrix::scale(1.0f,_summary_height*this->height,1.0f)*summary_matrix;
         summary_transform->setMatrix(summary_matrix);
     }
 
+    summary_cursor_matrix.makeTranslate((selection_center_pos_x/*+0.5*/)*this->width,_summary_center_y*this->height,0.0f);
+    summary_cursor_matrix = Matrix::scale(1.0f,_summary_height*this->height,1.0f)*summary_cursor_matrix;
+    summary_cursor_transform->setMatrix(summary_cursor_matrix);
+
+    selection_begin_matrix.makeTranslate((selection_begin_pos_x/*+0.5*/)*this->width,_summary_center_y*this->height,0.0f);
+    selection_begin_matrix = Matrix::scale(1.0f,_summary_height*this->height,1.0f)*selection_begin_matrix;
+    selection_begin_transform->setMatrix(selection_begin_matrix);
+    selection_end_matrix.makeTranslate((selection_end_pos_x/*+0.5*/)*this->width,_summary_center_y*this->height,0.0f);
+    selection_end_matrix = Matrix::scale(1.0f,_summary_height*this->height,1.0f)*selection_end_matrix;
+    selection_end_transform->setMatrix(selection_end_matrix);
+    selection_zone_matrix.makeTranslate((selection_begin_pos_x+selection_end_pos_x/*+1*/)/2.0f*this->width,_summary_center_y*this->height,0.0f);
+    selection_zone_matrix = Matrix::scale((selection_end_pos_x-selection_begin_pos_x)*this->width,_summary_height*this->height,1.0f)*selection_zone_matrix;
+    selection_zone_transform->setMatrix(selection_zone_matrix);
+
     float _selection_height = 0.0f;
+    float _selection_center_y = 0.0f;
     if (track_selection_type != "None"){
         _selection_height = this->selection_height;
-        selection_center_frame_matrix.makeTranslate(0.0f,-yspan/2.0f+_segments_height+_summary_height+_selection_height/2.0f,0.0f);
-        selection_center_frame_matrix = Matrix::scale(selection_center_frame_width/xspan,_selection_height/yspan,1.0f)*selection_center_frame_matrix;
+        _selection_center_y = _segments_height + _summary_height + _selection_height/2.0f;
+
+        selection_center_frame_matrix.makeTranslate(0.5f*this->width,_selection_center_y*this->height,0.0f);
+        selection_center_frame_matrix = Matrix::scale(selection_center_frame_width*this->width,_selection_height*this->height,1.0f)*selection_center_frame_matrix;
         for (unsigned int m=0;m<right_selection_video_transforms.size();++m){
             right_selection_videos_matrices.resize(m+1);
-            right_selection_videos_matrices[m].makeTranslate(selection_center_frame_width*(m+1),-yspan/2.0f+_segments_height+_summary_height+_selection_height/2.0f,0.0f);
-            right_selection_videos_matrices[m] = Matrix::scale(selection_center_frame_width/xspan,_selection_height/yspan,1.0f)*right_selection_videos_matrices[m];
+            right_selection_videos_matrices[m].makeTranslate((0.5f+selection_center_frame_width*(m+1))*this->width,_selection_center_y*this->height,0.0f);
+            right_selection_videos_matrices[m] = Matrix::scale(selection_center_frame_width*this->width,_selection_height*this->height,1.0f)*right_selection_videos_matrices[m];
         }
         for (unsigned int m=0;m<left_selection_video_transforms.size();++m){
             left_selection_videos_matrices.resize(m+1);
-            left_selection_videos_matrices[m].makeTranslate(-selection_center_frame_width*(m+1),-yspan/2.0f+_segments_height+_summary_height+_selection_height/2.0f,0.0f);
-            left_selection_videos_matrices[m] = Matrix::scale(selection_center_frame_width/xspan,_selection_height/yspan,1.0f)*left_selection_videos_matrices[m];
+            left_selection_videos_matrices[m].makeTranslate((0.5f-selection_center_frame_width*(m+1))*this->width,_selection_center_y*this->height,0.0f);
+            left_selection_videos_matrices[m] = Matrix::scale(selection_center_frame_width*this->width,_selection_height*this->height,1.0f)*left_selection_videos_matrices[m];
         }
         if(track_selection_type == "Keyframes"){
             selection_center_frame_transform->setMatrix(selection_center_frame_matrix);
@@ -1813,34 +1467,23 @@ void ACOsgVideoTrackRenderer::updateTransformsAspects()
                 }
             }
         }
-        selection_begin_matrix.makeTranslate(selection_begin_pos_x,-yspan/2.0f+_segments_height+_summary_height/2.0f,0.0f);
-        selection_begin_matrix = Matrix::scale(1.0f,_summary_height/yspan,1.0f)*selection_begin_matrix;
-        selection_begin_transform->setMatrix(selection_begin_matrix);
-        selection_end_matrix.makeTranslate(selection_end_pos_x,-yspan/2.0f+_segments_height+_summary_height/2.0f,0.0f);
-        selection_end_matrix = Matrix::scale(1.0f,_summary_height/yspan,1.0f)*selection_end_matrix;
-        selection_end_transform->setMatrix(selection_end_matrix);
-        selection_zone_matrix.makeTranslate((selection_begin_pos_x+selection_end_pos_x)/2.0f,-yspan/2.0f+_segments_height+_summary_height/2.0f,0.0f);
-        selection_zone_matrix = Matrix::scale((selection_end_pos_x-selection_begin_pos_x)/xspan,_summary_height/yspan,1.0f)*selection_zone_matrix;
-        selection_zone_transform->setMatrix(selection_zone_matrix);
     }
 
     if(track_playback_visibility){
-        playback_scale = (yspan-_summary_height-_segments_height-_selection_height)/yspan;
-        playback_height = height * playback_scale;
-        playback_center_y = yspan/2.0f-(yspan-_summary_height-_segments_height-_selection_height)/2.0f;
-        playback_matrix.makeTranslate(0.0f,playback_center_y,0.0f);
-        if (w/h*playback_height/width<1.0f){ // video fits view height
-            playback_matrix = Matrix::scale(w/h*playback_height/width,playback_scale,1.0f)*playback_matrix;
+        playback_height = 1.0f-_segments_height-_summary_height-_selection_height;
+        if (w/h*playback_height*height/width<1.0f){ // video fits view height
+            playback_center_y = _segments_height + _summary_height + _selection_height + 0.5f* playback_height;
+            playback_matrix.makeTranslate(0.5f*this->width,playback_center_y*this->height,0.0f);
+            playback_matrix = Matrix::scale(playback_height*this->height/h,playback_height*this->height/h,1.0f)*playback_matrix;
             //std::cout << "video fits view height" << std::endl;
         }
-        else{ //if (h/w*width/playback_height<1.0f) // video fits view width
-            playback_matrix = Matrix::scale(1.0f,h/w*width/height,1.0f)*playback_matrix;
+        else{ // video fits view width
+            playback_height = width/height/w*h; // computed from the previous if condition blocked to 1.0f
+            playback_center_y = _segments_height + _summary_height + _selection_height + 0.5f* playback_height;
+            playback_matrix.makeTranslate(0.5f*this->width,playback_center_y*this->height,0.0f);
+            playback_matrix = Matrix::scale(this->width/w,this->width/w,1.0f)*playback_matrix;
             //std::cout << "video fits view width" << std::endl;
         }
         playback_transform->setMatrix(playback_matrix);
     }
-
-    cursor_matrix.makeTranslate(selection_center_pos_x,-yspan/2.0f+_segments_height+_summary_height/2.0f,0.0f);
-    cursor_matrix = Matrix::scale(1.0f,_summary_height/yspan,1.0f)*cursor_matrix;
-    summary_cursor_transform->setMatrix(cursor_matrix);
 }

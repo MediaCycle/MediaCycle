@@ -51,7 +51,7 @@ class ACVideoDancersPlugin : public ACFeaturesPlugin {
 public:
     ACVideoDancersPlugin();
     ~ACVideoDancersPlugin();
-	std::vector<ACMediaFeatures*> calculate(ACMediaData* _data, ACMedia*, bool _save_timed_feat=false);
+    std::vector<ACMediaFeatures*> calculate(ACMedia*, bool _save_timed_feat=false);
 	
 	
 private:

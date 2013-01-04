@@ -37,20 +37,27 @@
 #define __ACOSG_VIDEO_RENDERER_H__
 
 #include "ACOsgMediaRenderer.h"
-#include "ACOsgBrowserRenderer.h"
-#include "ACOsgImageRenderer.h"
-#include <osg/ImageSequence>
 
-class ACOsgVideoRenderer : public ACOsgImageRenderer  {
+#include <osg/ImageStream>
+
+class ACOsgVideoRenderer : public ACOsgMediaRenderer  {
 protected:
-    osg::ref_ptr<osg::ImageStream> image_stream;
+    osg::ref_ptr<osg::Geode> video_geode;
+    osg::ref_ptr<osg::Geode> aura_geode;
+    osg::ref_ptr<osg::Geode> border_geode;
+    osg::ref_ptr<osg::Geode> ground_geode;
+    osg::ref_ptr<osg::MatrixTransform> video_transform;
+    osg::ref_ptr<osg::ImageStream> video_stream;
 
+    void videoGeode(bool flip=false, float sizemul=1.0, float zoomin=1.0);
+    void auraVideoGeode(bool flip=false, float sizemul=1.0, float zoomin=1.0);
+    void auraGeode();
 public:
     ACOsgVideoRenderer();
     ~ACOsgVideoRenderer();
     void prepareNodes();
     void updateNodes(double ratio=0.0);
-    virtual osg::ref_ptr<osg::Texture2D> getTexture();
+    virtual osg::ref_ptr<osg::Geode> getMainGeode() { return video_geode;}
 };
 
 #endif

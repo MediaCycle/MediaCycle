@@ -28,17 +28,17 @@ ACVideoDiffSegmentationPlugin::~ACVideoDiffSegmentationPlugin() {
 }
 
 std::vector<ACMedia*> ACVideoDiffSegmentationPlugin::segment(ACMediaTimedFeature* _MTF, ACMedia* _theMedia){
+    std::cout << "ACVideoDiffSegmentationPlugin::segmenting media " << _theMedia->getFileName() << std::endl;
     //return this->_segment( _MTF, _theMedia);
     return this->_segment(_theMedia);
 }
 
 std::vector<ACMedia*> ACVideoDiffSegmentationPlugin::_segment(ACMedia* theMedia) {
-    ACMediaData* Video_data = theMedia->getMediaData();
-    return this->segment(Video_data, theMedia);
+    return this->segment(theMedia);
 }
 
-std::vector<ACMedia*> ACVideoDiffSegmentationPlugin::segment(ACMediaData* Video_data, ACMedia* theMedia) {
-    
+std::vector<ACMedia*> ACVideoDiffSegmentationPlugin::segment(ACMedia* theMedia) {
+    std::cout << "ACVideoDiffSegmentationPlugin::segmenting media " << theMedia->getFileName() << std::endl;
     threshold=this->getNumberParameterValue("threshold");
     
     vector<ACMedia*> segments;
@@ -70,7 +70,7 @@ std::vector<ACMedia*> ACVideoDiffSegmentationPlugin::segment(ACMediaData* Video_
                 imgNext=imgTemp;
             cv::absdiff(imgNext,imgCurr,imgTemp2);
             cv::Scalar totTemp=cv::sum(imgTemp2);
-           // std::cout<<totTemp[0]<<","<<totTemp[1]<<","<<totTemp[2]<<","<<totTemp[3]<<std::endl;
+            // std::cout<<totTemp[0]<<","<<totTemp[1]<<","<<totTemp[2]<<","<<totTemp[3]<<std::endl;
             
             diffImage[cpt]=totTemp[0];
             imgCurr=imgNext.clone();
@@ -126,35 +126,32 @@ std::vector<ACMedia*> ACVideoDiffSegmentationPlugin::segment(ACMediaData* Video_
         }
         
         for (int i = 0; i < Nseg-1; i++){
-                //make sure the segment from the media have the proper type
-                cout << "Segment n° " << i+1 << endl;
-                ACMedia* media = ACMediaFactory::getInstance().create(theMedia);
-                media->setParentId(theMedia->getId());
-                media->setStartInt(segments_limits[i]); // XS TODO : this is in frame number, not time code
-                media->setEndInt(segments_limits[i+1]);
-                cout << "begin:" << segments_limits[i]<< " end:" <<segments_limits[i+1]<<endl;
-                //cout << "frameRate " << media->getFrameRate() << endl;
-                //cout << "sampleRate " << media->getSampleRate() << endl;
-                media->setStart((float)segments_limits[i]/fps); //TR, 29/03
-                if (i<Nseg-2)
-                    media->setEnd((float)segments_limits[i+1]/fps);
-                else
-                    media->setEnd(theMedia->getEnd());
-                
-                cout << "duration of the segment " << media->getDuration() << endl;
-                
-                media->setId(theMedia->getId()+i+1); // XS TODO check this, it is overlapping with another ID ?
-                segments.push_back(media);
-            }
+            //make sure the segment from the media have the proper type
+            cout << "Segment n° " << i+1 << endl;
+            ACMedia* media = ACMediaFactory::getInstance().create(theMedia);
+            media->setParentId(theMedia->getId());
+            media->setStartInt(segments_limits[i]); // XS TODO : this is in frame number, not time code
+            media->setEndInt(segments_limits[i+1]);
+            cout << "begin:" << segments_limits[i]<< " end:" <<segments_limits[i+1]<<endl;
+            //cout << "frameRate " << media->getFrameRate() << endl;
+            //cout << "sampleRate " << media->getSampleRate() << endl;
+            media->setStart((float)segments_limits[i]/fps); //TR, 29/03
+            if (i<Nseg-2)
+                media->setEnd((float)segments_limits[i+1]/fps);
+            else
+                media->setEnd(theMedia->getEnd());
+
+            cout << "duration of the segment " << media->getDuration() << endl;
+
+            media->setId(theMedia->getId()+i+1); // XS TODO check this, it is overlapping with another ID ?
+            segments.push_back(media);
+        }
 
     }
     else{//Only one segment
         cerr << "< ACVideoDiffSegmentationPlugin::segment> : no segments" << endl;
         return segments; // XS check this
     }
-    
-    
-    
-   
+
     return segments;
 }

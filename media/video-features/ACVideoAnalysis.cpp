@@ -81,14 +81,25 @@ ACVideoAnalysis::ACVideoAnalysis(const string &filename) {
 }
 
 // this is normally what plugins should call
-// since they have access to mediadata
 
-ACVideoAnalysis::ACVideoAnalysis(ACMediaData* media_data, int _frameStart, int _frameStop) {
+ACVideoAnalysis::ACVideoAnalysis(ACMedia* media, int _frameStart, int _frameStop) {
+    clean();
+    file_name = media->getFileName();
+    FROM_FILE = true;
+    setFileName(file_name);
+    capture = new cv::VideoCapture(file_name.c_str());
+    initialize(_frameStart, _frameStop);
+}
+
+// this is normally what plugins called before
+// since they had access to mediadata
+
+/*ACVideoAnalysis::ACVideoAnalysis(ACMediaData* media_data, int _frameStart, int _frameStop) {
     clean();
     file_name = media_data->getFileName();
     capture = static_cast<cv::VideoCapture*> (media_data->getData());
     initialize(_frameStart, _frameStop);
-}
+}*/
 
 void ACVideoAnalysis::clean() {
     // no, we should not release the capture, since it comes from outside.
@@ -1792,6 +1803,8 @@ void ACVideoAnalysis::computeColorMoments(int n, string cm) {
 #endif //VISUAL_CHECK
 
         color_moments.push_back(color_frame.getColorMoments());
+
+        std::cout << "ACVideoAnalysis::computeColorMoments: computed frame " << ifram << " from " << this->frameStart << " to " << this->frameStop << " ("  << 100.0f*(float)(ifram-this->frameStart)/(float)(this->frameStop-this->frameStart) << "%)" << std::endl;
     }
 #ifdef VISUAL_CHECK
     cv::destroyWindow("Color Image");

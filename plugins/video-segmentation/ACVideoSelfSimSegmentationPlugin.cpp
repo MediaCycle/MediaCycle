@@ -60,6 +60,7 @@ ACVideoSelfSimSegmentationPlugin::~ACVideoSelfSimSegmentationPlugin() {
 }
 
 std::vector<ACMedia*> ACVideoSelfSimSegmentationPlugin::segment(ACMediaTimedFeature* _MTF, ACMedia* _theMedia){
+    std::cout << "ACVideoSelfSimSegmentationPlugin::segmenting media " << _theMedia->getFileName() << std::endl;
 
     // Retrieve the user-defined values
     this->Wmin = this->getNumberParameterValue("minimum window size");

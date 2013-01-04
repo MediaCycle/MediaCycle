@@ -35,55 +35,30 @@
 #ifndef ACVIDEO_H
 #define ACVIDEO_H
 
-#include "ACOpenCVInclude.h"
 #include "ACMedia.h"
 #include "ACVideoData.h"
 #include <string>
-
-#include <osg/ImageStream>
-#include <osg/Texture2D>
 
 class ACVideo: public ACMedia {
 	// contains the *minimal* information about a video
 public:
 	ACVideo();
 	ACVideo(const ACVideo& m);
-	~ACVideo();
+    virtual ~ACVideo();
 	
 	void saveACLSpecific(std::ofstream &library_file);
 	int loadACLSpecific(std::ifstream &library_file);
 	void saveXMLSpecific(TiXmlElement* _media);
 	int loadXMLSpecific(TiXmlElement* _pMediaNode);
 
-	//void setThumbnail(IplImage *_thumbnail) { thumbnail = _thumbnail; thumbnail_width = _thumbnail->width; thumbnail_height = _thumbnail->height; }
-	osg::ref_ptr<osg::Image> getThumbnail() { return thumbnail; }
-	osg::ref_ptr<osg::Texture2D> getTexture() { return image_texture; }
-	void* getThumbnailPtr() { return (void*)image_texture;}//thumbnail; } // 
-	int getThumbnailWidth() {return thumbnail_width;}
-	int getThumbnailHeight() {return thumbnail_height;}
-	osg::ref_ptr<osg::ImageStream> getStream() {return image_stream;}
-
-	cv::VideoCapture* getData();//{return data->getData();}
-	void setData(cv::VideoCapture* _data);
-	virtual ACMediaData* getMediaData(){return data;}
-	bool extractData(std::string fname);
-	virtual void deleteData();
+    virtual bool extractData(std::string fname);
 	
 	float getFrameRate() {return fps;}
 
 private:
 	void init();	
-	bool computeThumbnail(int w=0, int h=0);
-	int computeSlitScan(int frame_in, int frame_out);
-	bool computeThumbnailSize(int w_, int h_);
 
 private:
-	static const int default_thumbnail_area;
-	int thumbnail_width, thumbnail_height;
-	osg::ref_ptr<osg::ImageStream>image_stream;	
-	osg::ref_ptr<osg::Image> thumbnail;
-	osg::ref_ptr<osg::Texture2D> image_texture;
-	ACVideoData* data;
 	float fps;
 	
 };

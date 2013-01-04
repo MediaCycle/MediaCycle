@@ -33,6 +33,7 @@
  */
 
 #include "ACImageOsgRendererPlugin.h"
+#include "ACOsgImageThumbnail.h"
 #include "ACOsgImageRenderer.h"
 
 #include <iostream>
@@ -181,6 +182,22 @@ std::vector<ACMediaType> ACImageOsgRendererPlugin::getSupportedMediaTypes(){
     std::vector<ACMediaType> media_types;
     media_types.push_back(MEDIA_TYPE_IMAGE);
     return media_types;
+}
+
+ACMediaThumbnail* ACImageOsgRendererPlugin::createSharedThumbnail(ACMedia* media){
+    ACMediaThumbnail* thumbnail = 0;
+    if(media->getType()== MEDIA_TYPE_IMAGE){
+        thumbnail = new ACOsgImageThumbnail(media->getFileName(), media->getWidth(),media->getHeight());
+    }
+    return thumbnail;
+}
+
+std::string ACImageOsgRendererPlugin::sharedThumbnailName(ACMediaType media_type){
+    if(media_type== MEDIA_TYPE_IMAGE){
+        return "Image texture (OSG)";
+    }
+    else
+        return "";
 }
 
 ACOsgMediaRenderer* ACImageOsgRendererPlugin::createMediaRenderer(ACMediaType media_type){

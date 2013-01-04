@@ -32,28 +32,26 @@
  *
  */
 
-#include <ACPlugin.h>
+//#include <ACPlugin.h>
 
 #ifndef ACVideoOsgRendererPlugin_H
 #define	ACVideoOsgRendererPlugin_H
 
 #include "ACOsgRendererPlugin.h"
 
-class ACVideoOsgRendererPlugin : public ACOsgRendererPlugin
+class ACVideoOsgRendererPlugin : virtual public ACOsgRendererPlugin
 {
 public:
     ACVideoOsgRendererPlugin();
-    ~ACVideoOsgRendererPlugin();
-    virtual void setMediaCycle(MediaCycle* _media_cycle);
+    virtual ~ACVideoOsgRendererPlugin();
     virtual std::map<std::string, ACMediaType> getSupportedExtensions(ACMediaType media_type = MEDIA_TYPE_ALL);
+    virtual std::string sharedThumbnailName(ACMediaType media_type);
+    virtual ACMediaThumbnail* createSharedThumbnail(ACMedia* media);
     virtual ACOsgMediaRenderer* createMediaRenderer(ACMediaType media_type);
     virtual ACOsgTrackRenderer* createTrackRenderer(ACMediaType media_type);
     virtual std::vector<ACMediaType> getSupportedMediaTypes();
-    void changeTimelineSelection();
-    void changeTimelineSummmary();
-    void toggleTimelinePlayback();
 protected:
-    std::vector<std::string> timeline_selection, timeline_summary;
+    std::vector<std::string> browser_node_thumbnails, timeline_playback_thumbnails, timeline_summary_thumbnails, timeline_selection_thumbnails;
 };
 
 #endif

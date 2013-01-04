@@ -40,6 +40,7 @@
 
 #include "BlobResult.h" // Main blob library include (in plugin/image/blobs)
 //CF #include "ACImageAnalysis.h"
+#include "ACVideo.h"
 #include "ACVideoData.h"
 
 #include <ACOpenCVInclude.h>
@@ -53,7 +54,8 @@ class ACVideoAnalysis {
 public:
     ACVideoAnalysis();
     ACVideoAnalysis(const std::string &filename);
-    ACVideoAnalysis(ACMediaData* media_data, int _frameStart = 0, int _frameEnd = 0);
+    ACVideoAnalysis(ACMedia* media, int _frameStart = 0, int _frameStop = 0);
+    //ACVideoAnalysis(ACMediaData* media_data, int _frameStart = 0, int _frameEnd = 0);
 
     ~ACVideoAnalysis();
 

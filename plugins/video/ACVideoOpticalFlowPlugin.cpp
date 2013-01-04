@@ -53,17 +53,17 @@ void ACVideoOpticalFlowPlugin::clean(){
 		delete videoAn;
 }
 
-std::vector<ACMediaFeatures*> ACVideoOpticalFlowPlugin::calculate(ACMediaData* video_data, ACMedia* theMedia, bool _save_timed_feat) {
+std::vector<ACMediaFeatures*> ACVideoOpticalFlowPlugin::calculate(ACMedia* theMedia, bool _save_timed_feat) {
 	this->clean();
 	std::vector<ACMediaFeatures*> videoFeatures;
 #ifdef USE_DEBUG
         cout << "[ACVideoOpticalFlowPlugin::calculate] analysing from frame " << theMedia->getStartInt() << " to " << theMedia->getEndInt() << endl;
 #endif //USE_DEBUG
-        videoAn = new ACVideoAnalysis(video_data, theMedia->getStartInt(), theMedia->getEndInt());
+        videoAn = new ACVideoAnalysis(theMedia, theMedia->getStartInt(), theMedia->getEndInt());
 	videoAn->computeOpticalFlow2();
 	vector<float> t = videoAn->getTimeStamps();
 	std::vector<std::vector<float> > s = videoAn->getOpticalFlow();
-	string aFileName= video_data->getFileName();
+    string aFileName= theMedia->getFileName();
 
 	ACMediaTimedFeature* ps_mtf = new ACMediaTimedFeature(t,s, "optical flow");
 	ACMediaFeatures* optical_flow = ps_mtf->mean();

@@ -33,6 +33,7 @@
  */
 
 #include "ACVideoOsgRendererPlugin.h"
+#include "ACOsgVideoThumbnail.h"
 #include "ACOsgVideoRenderer.h"
 #include "ACOsgVideoTrackRenderer.h"
 
@@ -56,78 +57,19 @@ ACVideoOsgRendererPlugin::ACVideoOsgRendererPlugin() : ACOsgRendererPlugin(){
     this->mName = "Video Renderer (OSG)";
     this->mDescription ="Plugin for rendering Video files with OpenSceneGraph";
     this->mMediaType = MEDIA_TYPE_VIDEO;
-    timeline_selection.push_back("None");
-    timeline_selection.push_back("Keyframes");
-    timeline_summary.push_back("None");
-    timeline_summary.push_back("Keyframes");
-    timeline_summary.push_back("Slit-scan");
+
+    this->addCallback("Timeline playback","Timeline playback",boost::bind(&ACOsgRendererPlugin::changeTimelinePlaybackThumbnail,this));
+
+    timeline_selection_thumbnails.push_back("None");
+    timeline_selection_thumbnails.push_back("Keyframes");
+    this->addStringParameter("Timeline selection",timeline_selection_thumbnails.front(),timeline_selection_thumbnails,"Timeline selection",boost::bind(&ACOsgRendererPlugin::changeTimelineSelectionThumbnail,this));
+
+    timeline_summary_thumbnails.push_back("None");
+    timeline_summary_thumbnails.push_back("Keyframes");
+    this->addStringParameter("Timeline summary",timeline_summary_thumbnails.front(),timeline_summary_thumbnails,"Timeline summary",boost::bind(&ACOsgRendererPlugin::changeTimelineSummaryThumbnail,this));
 }
 
 ACVideoOsgRendererPlugin::~ACVideoOsgRendererPlugin(){
-}
-
-void ACVideoOsgRendererPlugin::setMediaCycle(MediaCycle* _media_cycle){
-    this->media_cycle=_media_cycle;
-
-    if(!this->hasStringParameterNamed("Timeline selection"))
-        this->addStringParameter("Timeline selection","None",timeline_selection,"Timeline selection",boost::bind(&ACVideoOsgRendererPlugin::changeTimelineSelection,this));
-
-    if(!this->hasStringParameterNamed("Timeline summary"))
-        this->addStringParameter("Timeline summary","Keyframes",timeline_summary,"Timeline summary",boost::bind(&ACVideoOsgRendererPlugin::changeTimelineSummmary,this));
-
-    if(this->hasNumberParameterNamed("Timeline playback"))
-        this->updateNumberParameter("Timeline playback",0,0,1,1,"Timeline playback",boost::bind(&ACVideoOsgRendererPlugin::toggleTimelinePlayback,this));
-    else
-        this->addNumberParameter("Timeline playback",0,0,1,1,"Timeline playback",boost::bind(&ACVideoOsgRendererPlugin::toggleTimelinePlayback,this));
-
-    if(this->hasCallbackNamed("Stop all"))
-        this->updateCallback("Stop all","Stop all",boost::bind(&MediaCycle::muteAllSources,this->media_cycle));
-    else
-        this->addCallback("Stop all","Stop all",boost::bind(&MediaCycle::muteAllSources,this->media_cycle));
-}
-
-void ACVideoOsgRendererPlugin::changeTimelineSelection(){
-    if(!timeline){
-        std::cerr << "ACVideoOsgRendererPlugin::changeTimelineSelection: no timeline available" << std::endl;
-        return;
-    }
-    std::string selection_type = this->getStringParameterValue("Timeline selection");
-    std::vector<ACOsgTrackRenderer*> tracks = timeline->getTracks();
-    for(std::vector<ACOsgTrackRenderer*>::iterator track = tracks.begin();track != tracks.end();++track){
-        ACOsgVideoTrackRenderer* video_track = dynamic_cast<ACOsgVideoTrackRenderer*>(*track);
-        if(video_track){
-            video_track->setSelectionType(selection_type);
-        }
-    }
-}
-
-void ACVideoOsgRendererPlugin::changeTimelineSummmary(){
-    if(!timeline){
-        std::cerr << "ACVideoOsgRendererPlugin::changeTimelineSummmary: no timeline available" << std::endl;
-        return;
-    }
-    std::string summary_type = this->getStringParameterValue("Timeline summary");
-    std::vector<ACOsgTrackRenderer*> tracks = timeline->getTracks();
-    for(std::vector<ACOsgTrackRenderer*>::iterator track = tracks.begin();track != tracks.end();++track){
-        ACOsgVideoTrackRenderer* video_track = dynamic_cast<ACOsgVideoTrackRenderer*>(*track);
-        if(video_track){
-            video_track->setSummaryType(summary_type);
-        }
-    }
-}
-
-void ACVideoOsgRendererPlugin::toggleTimelinePlayback(){
-    if(!timeline){
-        std::cerr << "ACVideoOsgRendererPlugin::toggleTimelinePlayback: no timeline available" << std::endl;
-        return;
-    }
-    std::vector<ACOsgTrackRenderer*> tracks = timeline->getTracks();
-    for(std::vector<ACOsgTrackRenderer*>::iterator track = tracks.begin();track != tracks.end();++track){
-        ACOsgVideoTrackRenderer* video_track = dynamic_cast<ACOsgVideoTrackRenderer*>(*track);
-        if(video_track){
-            video_track->updatePlaybackVisibility(!(video_track->getPlaybackVisibility()));
-        }
-    }
 }
 
 std::map<std::string,ACMediaType> ACVideoOsgRendererPlugin::getSupportedExtensions(ACMediaType media_type){
@@ -213,6 +155,22 @@ std::vector<ACMediaType> ACVideoOsgRendererPlugin::getSupportedMediaTypes(){
     std::vector<ACMediaType> media_types;
     media_types.push_back(MEDIA_TYPE_VIDEO);
     return media_types;
+}
+
+ACMediaThumbnail* ACVideoOsgRendererPlugin::createSharedThumbnail(ACMedia* media){
+    ACMediaThumbnail* thumbnail = 0;
+    if(media->getType()== MEDIA_TYPE_VIDEO){
+        thumbnail = new ACOsgVideoThumbnail(media->getFileName(), media->getWidth(),media->getHeight());
+    }
+    return thumbnail;
+}
+
+std::string ACVideoOsgRendererPlugin::sharedThumbnailName(ACMediaType media_type){
+    if(media_type == MEDIA_TYPE_VIDEO){
+        return "Video image stream (OSG)";
+    }
+    else
+        return "";
 }
 
 ACOsgMediaRenderer* ACVideoOsgRendererPlugin::createMediaRenderer(ACMediaType media_type){
