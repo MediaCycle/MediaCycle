@@ -44,9 +44,10 @@ STRING(REGEX REPLACE " " "" ROOT_NAME "${TARGET_NAME}")
 SET(BASE_CLASS "ACAbstractDefaultConfig")
 SET(CLASS_NAME "AC${ROOT_NAME}DefaultConfig")
 IF(FULLSCREEN OR OSG_PLUGINS)
+	SET(WITH_OSG ON)
 	SET(BASE_CLASS "ACOsgAbstractDefaultConfig")
 	SET(CLASS_NAME "ACOsg${ROOT_NAME}DefaultConfig")
-        IF(OSG_PLUGINS)
+	IF(OSG_PLUGINS)
 		SET(BASE_CLASS "ACOsgAbstractDefaultConfigQt")
 		SET(CLASS_NAME "ACOsg${ROOT_NAME}DefaultConfigQt")
 	ENDIF()
@@ -92,19 +93,23 @@ foreach(PLUGIN ${MC_PLUGINS})
 	file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/${CLASS_NAME}.h "\t\tplugins.push_back(\"${PLUGIN}\");\n")
 endforeach(PLUGIN)
 
-
 file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/${CLASS_NAME}.h "\t\treturn plugins;
-	}
-	virtual std::vector<std::string> osgPlugins(){
-		std::vector<std::string> plugins;
+    }
 ")
 
+IF(WITH_OSG)
+file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/${CLASS_NAME}.h "\tvirtual std::vector<std::string> osgPlugins(){
+		std::vector<std::string> plugins;
+")
 foreach(OSG_PLUGIN ${OSG_PLUGINS})
 	file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/${CLASS_NAME}.h "\t\tplugins.push_back(\"${OSG_PLUGIN}\");\n")
 endforeach(OSG_PLUGIN)
-
 file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/${CLASS_NAME}.h "\t\treturn plugins;
-	}
+    }
+")
+ENDIF()
+
+file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/${CLASS_NAME}.h "
 	virtual std::string clustersMethodPlugin(){return \"${CLUSTERS_METHOD}\";}
 	virtual std::string clustersPositionsPlugin(){return \"${CLUSTERS_POSITIONS}\";}
 	virtual std::string neighborsMethodPlugin(){return \"${NEIGHBORS_METHOD}\";}
