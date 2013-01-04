@@ -1,0 +1,11 @@
+# Forked from http://code.google.com/p/simple-svg/, BSD license
+SET(TARGET_NAME "simple-svg")
+
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
+
+FILE(GLOB ${TARGET_NAME}_SRCS *.cpp)
+FILE(GLOB ${TARGET_NAME}_HDRS *.hpp)
+
+ADD_LIBRARY(${TARGET_NAME} ${${TARGET_NAME}_SRCS} ${${TARGET_NAME}_HDRS})
+
+MESSAGE("[X] ${TARGET_NAME}")
