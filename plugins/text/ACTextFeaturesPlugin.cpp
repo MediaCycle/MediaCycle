@@ -33,6 +33,7 @@
  */
 
 #include "ACTextFeaturesPlugin.h"
+#include "ACTextSTLData.h"
 
 #include "CLucene.h"
 //#include "CLucene/util/Reader.h"
@@ -84,22 +85,24 @@ void ACTextFeaturesPlugin::createIndex(void) {
 	//printf("Num Docs: %d\n", reader->numDocs() );
 }
 
-void ACTextFeaturesPlugin::addMedia(ACMediaData* text_data, ACText* theMedia) {
-		// make a new, empty document
+void ACTextFeaturesPlugin::addMedia(ACText* theMedia) {
+    ACMediaData* media_data = theMedia->getMediaData();
+    // make a new, empty document
+    ACTextSTLDataContainer* text_data = dynamic_cast<ACTextSTLDataContainer*>(media_data->getData());
 	
 	int lIndex=mIndex->docCount();
 	string test("test");
 	string* lData=static_cast<string*>(text_data->getData());
 	Document* doc = _CLNEW Document();
-	wchar_t *strPath=new wchar_t[text_data->getFileName().size()+1];
+    wchar_t *strPath=new wchar_t[theMedia->getFileName().size()+1];
 	//cout << (*lData);
 	
 #if defined(_ASCII)
-	strcpy(strPath,text_data->getFileName().c_str());
+    strcpy(strPath,theMedia->getFileName().c_str());
 #else
-	mc_utf8towcs(strPath,text_data->getFileName().c_str(),text_data->getFileName().size()+1);
+    mc_utf8towcs(strPath,theMedia->getFileName().c_str(),theMedia->getFileName().size()+1);
 #endif
-	strPath[text_data->getFileName().size()]=0;
+    strPath[theMedia->getFileName().size()]=0;
 	
 	
 	wchar_t *strData=new wchar_t[lData->size()+1];
@@ -242,9 +245,9 @@ ACMediaFeatures* ACTextFeaturesPlugin::tfCalculate(ACText* pMedia){
 	return desc;
 }
 
-std::vector<ACMediaFeatures*> ACTextFeaturesPlugin::calculate(ACMediaData* text_data, ACMedia* theMedia, bool _save_timed_feat) {	
-	ACText* lMedia=(ACText*)theMedia;
-	addMedia(text_data,lMedia);
+std::vector<ACMediaFeatures*> ACTextFeaturesPlugin::calculate(ACMedia* theMedia, bool _save_timed_feat) {
+    ACText* lMedia=(ACText*)theMedia;
+    addMedia(lMedia);
 	//if (indexTerms.size()==0){
 		//create the vector with all terms
 		//indexTerms=indexTermsExtraction();		

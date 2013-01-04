@@ -44,6 +44,7 @@ public:
     ~ACNavimedSensorData();
     ACNavimedSensorData(std::string _fname);
 	bool readData(std::string _fname);
+    virtual std::string getName(){return "navimed sensor data";}
 };
 
 class ACNavimedSensor : public ACSensor {

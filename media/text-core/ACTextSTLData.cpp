@@ -1,5 +1,5 @@
 /**
- * @brief Base text data
+ * @brief Text data and string container, implemented with the Standard Template Library (STL)
  * @author Thierry Ravet, Christian Frisson
  * @date 2/05/2011
  * @copyright (c) 2011 – UMONS - Numediart
@@ -29,9 +29,49 @@
  * <mailto:avre@umons.ac.be>
  */
 
-#include "ACTextData.h"
+#include "ACTextSTLData.h"
+#include <string>
+#include <iostream>
+#include "textFile.h"
+using namespace std;
+using std::cerr;
+using std::endl;
+using std::string;
 
-ACTextData::ACTextData() : ACMediaData() {
-    media_type = MEDIA_TYPE_TEXT;
-    //text_ptr=0;
+ACTextSTLData::ACTextSTLData() : ACTextData(),text_ptr(0) {
+}
+
+ACTextSTLData::~ACTextSTLData() {
+    /// Done by ~ACTextSTLDataContainer, text_ptr passed with ACTextSTLData::setData
+//    if (text_ptr != 0) {
+//        text_ptr->clear();
+//        delete text_ptr;
+//    }
+    text_ptr=0;
+}
+
+bool ACTextSTLData::readData(std::string _fname){
+    if (text_ptr != NULL) {
+        delete text_ptr;
+        text_ptr=0;
+    }
+    text_ptr = textFileRead(_fname);
+    if( text_ptr == NULL) {
+        cerr << "<ACMediaData::readTextData> file can not be read !" << endl;
+        return false;
+    }
+    else {
+        cout << (*text_ptr)<< endl;
+    }
+    label= labelFileRead(_fname);
+    if ((*text_ptr)==string(""))
+        (*text_ptr)=label;
+    cout << label<< endl;
+//	cout << (*text_ptr)<<"\n";
+
+    ACTextSTLDataContainer* text_data = new ACTextSTLDataContainer();
+    text_data->setData(text_ptr);
+    this->setData(text_data);
+
+	return true;
 }

@@ -36,7 +36,7 @@
 #include "ACNavimedReader.h"
 
 using namespace std;
-ACNavimedTextData::ACNavimedTextData():ACTextData(){
+ACNavimedTextData::ACNavimedTextData():ACTextSTLData(){
 }
 
 ACNavimedTextData::~ACNavimedTextData(){
@@ -46,7 +46,7 @@ ACNavimedTextData::~ACNavimedTextData(){
 		text_ptr=0;
 	}
 }
-ACNavimedTextData::ACNavimedTextData(std::string _fname):ACTextData(){
+ACNavimedTextData::ACNavimedTextData(std::string _fname):ACTextSTLData(){
 	file_name=_fname;
 	this->readData(_fname);
 }

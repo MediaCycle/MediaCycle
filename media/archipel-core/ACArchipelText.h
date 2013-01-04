@@ -35,14 +35,15 @@
 #ifndef _ARCHIPELTEXT_H
 #define _ARCHIPELTEXT_H
 #include "ACText.h"
-#include "ACTextData.h"
+#include "ACTextSTLData.h"
 
-class ACArchipelTextData: public ACTextData {
+class ACArchipelTextData: public ACTextSTLData {
 public:
     ACArchipelTextData();
     ~ACArchipelTextData();
     ACArchipelTextData(std::string _fname);
 	bool readData(std::string _fname);
+    virtual std::string getName(){return "STL Archipel text";}
 };
 
 

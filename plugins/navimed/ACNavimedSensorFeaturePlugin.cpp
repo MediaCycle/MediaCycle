@@ -54,8 +54,9 @@ ACNavimedSensorFeaturePlugin::~ACNavimedSensorFeaturePlugin() {
 }
 
 
-std::vector<ACMediaFeatures*> ACNavimedSensorFeaturePlugin::calculate(ACMediaData* aData, ACMedia* theMedia, bool _save_timed_feat) {
+std::vector<ACMediaFeatures*> ACNavimedSensorFeaturePlugin::calculate(ACMedia* theMedia, bool _save_timed_feat) {
 	std::vector<ACMediaFeatures*> sensorFeatures;
+    ACMediaData* aData = theMedia->getMediaData();
     ACNavimedSensorData* sensorData=dynamic_cast<ACNavimedSensorData*>(aData);
 	std::map<std::string,float>* lMap=(std::map<std::string,float>*)( sensorData->getData());
 	std::map<std::string,float>::iterator it;

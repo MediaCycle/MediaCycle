@@ -54,7 +54,14 @@ ACMedia* ACNavimedReaderPlugin::mediaFactory(ACMediaType mediaType, const ACMedi
     else {
         return 0;
     }
+}
 
+ACMediaData* ACNavimedReaderPlugin::mediaReader(ACMediaType mediaType){
+    ACMediaData* media_data(0);
+    if(mediaType&MEDIA_TYPE_TEXT){
+        media_data = new ACNavimedTextData();
+    }
+    return media_data;
 }
 
 std::map<std::string, ACMediaType> ACNavimedReaderPlugin::getSupportedExtensions(ACMediaType media_type){

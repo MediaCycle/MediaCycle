@@ -34,6 +34,7 @@
 
 #include "ACTextSTLReaderPlugin.h"
 #include "ACText.h"
+#include "ACTextSTLData.h"
 
 ACTextSTLReaderPlugin::ACTextSTLReaderPlugin() : ACMediaReaderPlugin(){
     this->mName = "Text Reader (STL)";
@@ -53,6 +54,14 @@ ACMedia* ACTextSTLReaderPlugin::mediaFactory(ACMediaType mediaType, const ACMedi
             media = new ACText();
     }
     return media;
+}
+
+ACMediaData* ACTextSTLReaderPlugin::mediaReader(ACMediaType mediaType){
+    ACMediaData* media_data(0);
+    if(mediaType&MEDIA_TYPE_TEXT){
+        media_data = new ACTextSTLData();
+    }
+    return media_data;
 }
 
 std::map<std::string,ACMediaType> ACTextSTLReaderPlugin::getSupportedExtensions(ACMediaType media_type){

@@ -36,7 +36,7 @@
 #include "ACArchipelReader.h"
 
 using namespace std;
-ACArchipelTextData::ACArchipelTextData():ACTextData(){
+ACArchipelTextData::ACArchipelTextData():ACTextSTLData(){
 }
 
 ACArchipelTextData::~ACArchipelTextData(){
@@ -46,7 +46,7 @@ ACArchipelTextData::~ACArchipelTextData(){
 		text_ptr=0;
 	}
 }
-ACArchipelTextData::ACArchipelTextData(std::string _fname):ACTextData(){
+ACArchipelTextData::ACArchipelTextData(std::string _fname):ACTextSTLData(){
 	file_name=_fname;
 	this->readData(_fname);
 }
@@ -79,6 +79,11 @@ bool ACArchipelTextData::readData(std::string _fname){
 			return false;
 	}
 
+    ACTextSTLDataContainer* text_data = new ACTextSTLDataContainer();
+    text_data->setData(text_ptr);
+    this->setData(text_data);
+
+    return true;
 }
 
 

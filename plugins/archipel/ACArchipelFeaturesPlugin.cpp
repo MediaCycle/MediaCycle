@@ -54,7 +54,7 @@ ACArchipelFeaturesPlugin::ACArchipelFeaturesPlugin() {
     known_atolls.push_back("aleas");
     known_atolls.push_back("bruits");
     known_atolls.push_back("utopie");
-    known_atolls.push_back("témoins");
+    known_atolls.push_back("temoins");
     known_atolls.push_back("silence");
     known_atolls.push_back("corps");
     known_atolls.push_back("bonjour!");
@@ -64,7 +64,7 @@ ACArchipelFeaturesPlugin::ACArchipelFeaturesPlugin() {
 ACArchipelFeaturesPlugin::~ACArchipelFeaturesPlugin() {
 }
 
-std::vector<ACMediaFeatures*> ACArchipelFeaturesPlugin::calculate(ACMediaData* File_data, ACMedia* theMedia, bool _save_timed_feat) {
+std::vector<ACMediaFeatures*> ACArchipelFeaturesPlugin::calculate(ACMedia* theMedia, bool _save_timed_feat) {
     std::vector<ACMediaFeatures*> desc;
 
     std::string filename("");

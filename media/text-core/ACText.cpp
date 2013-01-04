@@ -46,19 +46,11 @@ ACText::ACText(const ACText& m) : ACMedia(m) {
 void ACText::init(){
     media_type = MEDIA_TYPE_TEXT;
     docIndex=-1;
-    data =NULL;
 }
 
 ACText::~ACText(){
-	if (data!=NULL)
-		delete data;
 }
 
-void ACText::deleteData(){
-	if (data)
-		delete data;
-	data=0;
-}
 void ACText::saveACLSpecific(ofstream &library_file) {
 	
 	library_file << endl;
@@ -68,21 +60,21 @@ int ACText::loadACLSpecific(ifstream &library_file) {
 	return 1;
 }
 
-
-
 bool ACText::extractData(string fname){
-	if (data){
-		delete data;
-		data=0;
-	}
-	data = new ACTextData(fname);
-	if (data!=0){
-		if (data->getData()==NULL){
-			delete data;
-			data=0;
+    ACTextData* text_data = dynamic_cast<ACTextData*>(this->getMediaData());
+    if(!text_data)
+    {
+        std::cerr << "ACText::extractData: no text data set" << std::endl;
+        return 0;
+    }
+
+    if (text_data!=0){
+        if (text_data->getData()==NULL){
+            delete text_data;
+            text_data=0;
 		}
 		else
-			label=data->getLabel();
+            label=text_data->getLabel();
 	}
 	//computeThumbnail(image_data, 64, 64);
 	//width = thumbnail_width;
@@ -90,15 +82,7 @@ bool ACText::extractData(string fname){
 	return true;
 }
 
-ACMediaData* ACText::getMediaData()
-{
-    if(!data){
-        data=new ACTextData(this->getFileName());
-    }
-    return data;
-}
-
-std::string ACText::getTextMetaData(){
+/*std::string ACText::getTextMetaData(){
     string ret;
     if (data==0){
         this->extractData(filename);
@@ -111,10 +95,5 @@ std::string ACText::getTextMetaData(){
     }
     return ret;
     
-}
+}*/
 
-
-void* ACText::getThumbnailPtr(){
-	return 0;
-
-}

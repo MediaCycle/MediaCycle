@@ -1,5 +1,5 @@
 /**
- * @brief Base text data
+ * @brief Text data and string container, implemented with the Standard Template Library (STL)
  * @author Thierry Ravet, Christian Frisson
  * @date 2/05/2011
  * @copyright (c) 2011 – UMONS - Numediart
@@ -29,9 +29,47 @@
  * <mailto:avre@umons.ac.be>
  */
 
-#include "ACTextData.h"
+#ifndef ACTEXTSTLDATA_H
+#define ACTEXTSTLDATA_H
 
-ACTextData::ACTextData() : ACMediaData() {
-    media_type = MEDIA_TYPE_TEXT;
-    //text_ptr=0;
-}
+#include "ACTextData.h"
+#include <cstdlib>
+#include <cstring>
+#include <string>
+
+class ACTextSTLDataContainer : public ACMediaDataContainer {
+public:
+    ACTextSTLDataContainer() : ACMediaDataContainer(),data(0) {}
+    virtual ~ACTextSTLDataContainer(){
+        if(data){
+            data->clear();
+            delete data;
+        }
+        data = 0;
+    }
+    void setData(std::string* _data){
+        if(data){
+            data->clear();
+            delete data;
+        }
+        this->data = _data;
+    }
+    std::string* getData(){return data;}
+
+protected:
+    std::string* data;
+};
+
+class ACTextSTLData: public ACTextData {
+public:
+    ACTextSTLData();
+    ~ACTextSTLData();
+
+    virtual bool readData(std::string _fname);
+    virtual std::string getName(){return "STL text";}
+
+protected:
+    std::string* text_ptr;
+};
+
+#endif // ACTEXTSTLDATA_H

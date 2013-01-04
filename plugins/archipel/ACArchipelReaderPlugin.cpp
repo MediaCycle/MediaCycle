@@ -55,8 +55,16 @@ ACMedia* ACArchipelReaderPlugin::mediaFactory(ACMediaType mediaType, const ACMed
     else {
         return 0;
     }
-
 }
+
+ACMediaData* ACArchipelReaderPlugin::mediaReader(ACMediaType mediaType){
+    ACMediaData* media_data(0);
+    if(mediaType&MEDIA_TYPE_TEXT){
+        media_data = new ACArchipelTextData();
+    }
+    return media_data;
+}
+
 std::map<std::string, ACMediaType> ACArchipelReaderPlugin::getSupportedExtensions(ACMediaType media_type){
     std::map<std::string,ACMediaType> extensions;
     /*if(media_type == MEDIA_TYPE_MIXED || media_type == MEDIA_TYPE_ALL){

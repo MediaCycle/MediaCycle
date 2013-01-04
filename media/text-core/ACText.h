@@ -45,27 +45,21 @@ class ACText : public ACMedia {
 	// contains the *minimal* information about a text
 protected:
 	int docIndex;
-	ACTextData* data;
 public:
 	ACText();
     ACText(const ACText& m);
-	~ACText();
+    ~ACText();
 private:
     void init();
 
 public:
-	void deleteData();
 	void saveACLSpecific(std::ofstream &library_file);
 	int loadACLSpecific(std::ifstream &library_file);
 	bool extractData(std::string fname);
-    ACMediaData* getMediaData();
 	
-    virtual std::string getTextMetaData();
+    //virtual std::string getTextMetaData();
 
-	void* getThumbnailPtr();
 	void setDocIndex(int pDocIndex){docIndex=pDocIndex;}
 	int getDocIndex(void){return docIndex;}
-	
-	
 };
 #endif // ACTEXT_H

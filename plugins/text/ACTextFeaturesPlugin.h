@@ -48,38 +48,38 @@ using namespace lucene::index;
 
 class ACTextFeaturesPlugin : public ACFeaturesPlugin, public ACPreProcessPlugin {
 public:
-	ACTextFeaturesPlugin();
-	~ACTextFeaturesPlugin();
-	
-//	bool hasPostProcess(){return true;}
+    ACTextFeaturesPlugin();
+    ~ACTextFeaturesPlugin();
 
-	virtual std::vector<ACMediaFeatures*> calculate(ACMediaData* text_data, ACMedia* theMedia, bool _save_timed_feat=false);
+    //	bool hasPostProcess(){return true;}
 
-        virtual preProcessInfo update(ACMedias media_library);
-	
-	virtual std::vector<ACMediaFeatures*> apply(preProcessInfo info,ACMedia* theMedia);
-	
-	virtual void freePreProcessInfo(preProcessInfo &info);
-	
+    virtual std::vector<ACMediaFeatures*> calculate(ACMedia* theMedia, bool _save_timed_feat=false);
+
+    virtual preProcessInfo update(ACMedias media_library);
+
+    virtual std::vector<ACMediaFeatures*> apply(preProcessInfo info,ACMedia* theMedia);
+
+    virtual void freePreProcessInfo(preProcessInfo &info);
+
 private:
-	
-	void clearIndexTerm(std::vector<TCHAR*> &pIndexTerms);
-	std::vector<TCHAR*> indexTermsExtraction();
-	std::vector<float> indexIdfExtraction();
-	ACMediaFeatures* tfCalculate(ACText* pMedia);
-	void createIndex(void);	
-	void closeIndex(void);
-	void addMedia(ACMediaData* text_data, ACText* theMedia);
-	
-protected:	
-	bool mIndexValid;
-	ACIndexModifier* mIndex;
-	std::vector<TCHAR*> indexTerms;
-	std::vector<float> indexIdf;
-//	lucene::analysis::SimpleAnalyzer* an;
-	lucene::analysis::StopAnalyzer *an;//("/Users/ravet/Desktop/navimed/TMG_5.0R6/common_words - fr.txt");
 
-	string pathIndex;
+    void clearIndexTerm(std::vector<TCHAR*> &pIndexTerms);
+    std::vector<TCHAR*> indexTermsExtraction();
+    std::vector<float> indexIdfExtraction();
+    ACMediaFeatures* tfCalculate(ACText* pMedia);
+    void createIndex(void);
+    void closeIndex(void);
+    void addMedia(ACText* theMedia);
+
+protected:	
+    bool mIndexValid;
+    ACIndexModifier* mIndex;
+    std::vector<TCHAR*> indexTerms;
+    std::vector<float> indexIdf;
+    //	lucene::analysis::SimpleAnalyzer* an;
+    lucene::analysis::StopAnalyzer *an;//("/Users/ravet/Desktop/navimed/TMG_5.0R6/common_words - fr.txt");
+
+    string pathIndex;
 };
 
 #endif	/* _ACTEXTFEATURESPLUGIN_H */

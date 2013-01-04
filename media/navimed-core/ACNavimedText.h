@@ -34,10 +34,11 @@
 
 #ifndef _ACNavimedTEXT_H
 #define _ACNavimedTEXT_H
+
 #include "ACText.h"
+#include "ACTextSTLData.h"
 
-
-class ACNavimedTextData: public ACTextData {
+class ACNavimedTextData: public ACTextSTLData {
 public:
 	
 

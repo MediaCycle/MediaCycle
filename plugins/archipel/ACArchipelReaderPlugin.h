@@ -43,6 +43,7 @@ class ACArchipelReaderPlugin: public ACMediaReaderPlugin, public ACMediaRenderer
 public:
     ACArchipelReaderPlugin();
     ACMedia* mediaFactory(ACMediaType mediaType, const ACMedia* media = 0);
+    virtual ACMediaData* mediaReader(ACMediaType mediaType);
     virtual std::map<std::string, ACMediaType> getSupportedExtensions(ACMediaType media_type = MEDIA_TYPE_ALL);
 };
 

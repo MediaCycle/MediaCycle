@@ -42,13 +42,13 @@ class ACNavimedSensorFeaturePlugin : public ACFeaturesPlugin, public ACPreProces
 public:
     ACNavimedSensorFeaturePlugin();
     virtual ~ACNavimedSensorFeaturePlugin();
-    virtual std::vector<ACMediaFeatures*> calculate(ACMediaData* aData, ACMedia* theMedia, bool _save_timed_feat = false);
-	
-        preProcessInfo update(ACMedias media_library);
-	
-	std::vector<ACMediaFeatures*> apply(preProcessInfo info,ACMedia* theMedia);
-	
-	void freePreProcessInfo(preProcessInfo &info);
+    virtual std::vector<ACMediaFeatures*> calculate(ACMedia* theMedia, bool _save_timed_feat = false);
+
+    preProcessInfo update(ACMedias media_library);
+
+    std::vector<ACMediaFeatures*> apply(preProcessInfo info,ACMedia* theMedia);
+
+    void freePreProcessInfo(preProcessInfo &info);
 private:
 };
 
