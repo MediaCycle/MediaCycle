@@ -184,6 +184,25 @@ void ACImportProcess::run(int argc, char *argv[]){
                 doSegment /*bool doSegment=false*/,
                 _save_timed_feat /*bool _save_timed_feat=false*/
                 );
+
     std::cout <<  "ACImportProcess: saving as '" << xml << "'" << std::endl;
-    media_cycle->saveXMLLibrary(xml);
+    media_cycle->saveXMLConfigFile(xml);
+
+    fs::path xml_path(xml.c_str());
+    if ( !fs::exists( xml_path ) )
+    {
+        std::cerr << "ACImportProcess:: file '" << xml << "' doesn't exist " << std::endl;
+        return;
+    }
+
+    if ( !fs::is_regular( xml_path ) )
+    {
+        std::cerr << "ACImportProcess:: file or folder '" << xml << "' is not regular " << std::endl;
+        return;
+    }
+
+    if( fs::file_size( xml_path ) <= 0 ){
+        std::cerr << "ACImportProcess:: file or folder '" << xml << "' is of null size " << std::endl;
+        return;
+    }
 }

@@ -129,14 +129,16 @@ ACMedia* ACMediaFactory::create(ACMediaType media_type,ACMedia* copy){
         std::cerr << "ACMediaFactory::create: could not find any media reader supporting media type "<< media_type_string << std::endl;
         return 0;
     }
-    ACMediaReaderExtensions::iterator renderable_iter = renderable_extensions.begin();
-    for(;renderable_iter != renderable_extensions.end(); renderable_iter++){
-        if(renderable_iter->second.second & media_type)
-            break;
-    }
-    if( renderable_iter == renderable_extensions.end() ) {
-        std::cerr << "ACMediaFactory::create: could not find any media reader supporting media type "<< media_type_string << std::endl;
-        return 0;
+    if(use_rendering){
+        ACMediaReaderExtensions::iterator renderable_iter = renderable_extensions.begin();
+        for(;renderable_iter != renderable_extensions.end(); renderable_iter++){
+            if(renderable_iter->second.second & media_type)
+                break;
+        }
+        if( renderable_iter == renderable_extensions.end() ) {
+            std::cerr << "ACMediaFactory::create: could not find any media renderer supporting media type "<< media_type_string << std::endl;
+            return 0;
+        }
     }
     if(!plugin_manager){
         std::cerr << "ACMediaFactory::create: plugin manager not set" << std::endl;

@@ -8,7 +8,7 @@ IF ( BUILD_CLIS AND SUPPORT_VIDEO )
         SET(MC_PLUGINS "file;video-reader-opencv;video-segmentation")
         #file;segmentation;video-reader-opencv;video;video-segmentation;video-thumbnailer-slitscan-ffmpeg;video-thumbnailer-resize
         #io-osc;pcapreprocess;video-thumbnailer-resize;video-thumbnailer-slitscan-ffmpeg;video-thumbnailer-slitscan-opencv
-        SET(DESCRIPTION "VideoCycle-CLI allows to index video files by similarity.")
+        SET(DESCRIPTION "VideoCycleCLI allows to index video files by similarity.")
         SET(MAIN_CLASS "ACImportProcess")
 
         INCLUDE (${CMAKE_SOURCE_DIR}/cmake/CreateDefaultConfig.cmake)
