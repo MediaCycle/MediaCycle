@@ -1,8 +1,8 @@
 /**
  * @brief ACInputActionQt.h
  * @author Christian Frisson
- * @date 04/12/2012
- * @copyright (c) 2012 – UMONS - Numediart
+ * @date 04/01/2013
+ * @copyright (c) 2013 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -102,6 +102,10 @@ public:
     QStringList getMouseEventNames();
     QEvent::Type convertMouseEventNameToType(QString name);
     QString convertMouseEventTypeToName(QEvent::Type type);
+    void setDeviceName(QString name){this->device_name = name;}
+    void setDeviceEvent(QString event){this->device_event = event;}
+    QString getDeviceName(){return this->device_name;}
+    QString getDeviceEvent(){return this->device_event;}
 
     // Tablet actions
     void setTabletEventType(QEvent::Type _type); // not yet used
@@ -122,9 +126,11 @@ protected:
 	virtual bool event ( QEvent * event );
 	Qt::MouseButton mouse_button;
 	QEvent::Type key_event_type, mouse_event_type, tablet_event_type, touch_event_type;
-    bool key_pressed, mouse_pressed;
+    bool key_pressed, mouse_pressed, other_key_pressed;
     bool toggle;
     QString category;
     ACMouseEventNamesQt mouseEventNames;
+    QString device_name;
+    QString device_event;
 };
 #endif

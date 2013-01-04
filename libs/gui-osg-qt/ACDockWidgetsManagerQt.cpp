@@ -137,7 +137,7 @@ bool ACDockWidgetsManagerQt::addControlDock(ACAbstractDockWidgetQt* dock)
 
 bool ACDockWidgetsManagerQt::addControlDock(std::string dock_type)
 {
-    this->addControlDock(dockWidgetFactory->createDockWidget(mainWindow,dock_type));
+    return this->addControlDock(dockWidgetFactory->createDockWidget(mainWindow,dock_type));
 }
 
 

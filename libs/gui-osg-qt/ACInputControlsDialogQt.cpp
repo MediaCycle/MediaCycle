@@ -63,6 +63,8 @@ ACInputControlsDialogQt::ACInputControlsDialogQt ( QWidget *pParent ) : QDialog(
     ui.ShortcutTable->horizontalHeader()->resizeSection(0, 120);
     ui.ShortcutTable->horizontalHeader()->resizeSection(1, 250);
     ui.ShortcutTable->horizontalHeader()->resizeSection(2, 60);
+    ui.ShortcutTable->horizontalHeader()->resizeSection(3, 60);
+    ui.ShortcutTable->horizontalHeader()->resizeSection(4, 60);
 
     int iRowHeight = ui.ShortcutTable->fontMetrics().height() + 4;
     ui.ShortcutTable->verticalHeader()->setDefaultSectionSize(iRowHeight);
@@ -131,6 +133,10 @@ void ACInputControlsDialogQt::addActions( QList<QAction *> _actions ){
                                   new ACInputControlsTableItemQt(pAction->shortcut()));
         ui.ShortcutTable->setItem(iRow, 3,
                                   new ACInputControlsTableItemQt(QString("")));
+        ui.ShortcutTable->setItem(iRow, 4,
+                                  new ACInputControlsTableItemQt(QString("")));
+        ui.ShortcutTable->setItem(iRow, 5,
+                                  new ACInputControlsTableItemQt(QString("")));
         this->actions.append(pAction);
         ++iRow;
     }
@@ -178,6 +184,15 @@ void ACInputControlsDialogQt::addInputActions( QList<ACInputActionQt *> _actions
         //connect(combo, SIGNAL(currentIndexChanged(int)), signalMapper, SLOT(map()));
         //if(this->isShortcutAssigned( ui.ShortcutTable->item(iRow, 2)->text() ))
         //connect(ui.ShortcutTable->item(iRow,2),SIGNAL())
+
+        QLabel* device_name = new QLabel();
+        device_name->setText(pAction->getDeviceName());
+        ui.ShortcutTable->setCellWidget(iRow,4,device_name);
+
+        QLabel* device_event = new QLabel();
+        device_event->setText(pAction->getDeviceEvent());
+        ui.ShortcutTable->setCellWidget(iRow,5,device_event);
+
         ++iRow;
     }
 

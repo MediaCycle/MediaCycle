@@ -1,0 +1,31 @@
+# From https://github.com/signal11/hidapi
+# Commit https://github.com/signal11/hidapi/commit/0d7c7ef066f589de73b1944eb5f9f816d2780fb9
+SET(TARGET_NAME "hidapi")
+IF(APPLE)
+        INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/hidapi ${CMAKE_CURRENT_SOURCE_DIR}/src/include)
+
+	SET(${TARGET_NAME}_HDRS "${CMAKE_CURRENT_SOURCE_DIR}/hidapi/hidapi.h")
+
+
+	IF(APPLE) #requires pthreads
+		LIST(APPEND ${TARGET_NAME}_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/mac/hid.c")
+		LINK_LIBRARIES("-framework IOKit -framework CoreFoundation")
+	ELSEIF(UNIX) # requires libusb
+		SET(${TARGET_NAME}_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/libusb/hid.c")
+		LIST(APPEND ${TARGET_NAME}_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/linux/hid.c")
+	ELSEIF(WIN32 OR MINGW)
+		LIST(APPEND ${TARGET_NAME}_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/windows/hid.c")
+	ENDIF()
+
+        ADD_LIBRARY(${TARGET_NAME} ${${TARGET_NAME}_SRCS} ${${TARGET_NAME}_HDRS})
+        #TARGET_LINK_LIBRARIES(${TARGET_NAME})
+	SET_TARGET_PROPERTIES("${TARGET_NAME}" PROPERTIES FOLDER "${FOLDERNAME}")
+
+	ADD_EXECUTABLE(hidtest ${CMAKE_CURRENT_SOURCE_DIR}/hidtest/hidtest.cpp)
+	TARGET_LINK_LIBRARIES(hidtest hidapi)
+	SET_TARGET_PROPERTIES(hidtest PROPERTIES FOLDER "${FOLDERNAME}")
+
+	MESSAGE("[X] ${TARGET_NAME}")
+ELSE()
+	MESSAGE("[ ] ${TARGET_NAME}")
+ENDIF()

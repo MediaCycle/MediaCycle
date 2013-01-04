@@ -44,6 +44,15 @@ cmake.check_cache
 3rdparty/breakpad-qt/third-party/google-breakpad/src/third_party/*linux
 3rdparty/breakpad-qt/third-party/google-breakpad/src/third_party/*protobuf
 3rdparty/breakpad-qt/third-party/google-breakpad/src/*tools/*
+3rdparty/hidapi/bootstrap
+3rdparty/hidapi/configure.ac
+3rdparty/hidapi/Makefile*
+3rdparty/hidapi/*/Makefile*
+3rdparty/hidapi/m4
+3rdparty/hidapi/pc
+3rdparty/hidapi/windows/*.vc*
+3rdparty/hidapi/windows/*.sln
+3rdparty/hidapi/testgui
 3rdparty/stk/bin
 3rdparty/stk/confi*
 3rdparty/stk/doc/html

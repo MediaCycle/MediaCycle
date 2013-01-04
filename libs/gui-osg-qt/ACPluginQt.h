@@ -37,7 +37,7 @@
 
 #include <MediaCycle.h>
 #include <QtCore/QObject>
-#include <QtGui>
+//#include <QtGui>
 #include "ACAbstractDockWidgetQt.h"
 #include "ACInputActionQt.h"
 #include <ACOsgBrowserRenderer.h>

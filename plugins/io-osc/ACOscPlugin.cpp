@@ -60,8 +60,7 @@ ACOscPlugin::~ACOscPlugin(){
     }
 }
 
-void ACOscPlugin::setMediaCycle(MediaCycle* _media_cycle){
-    ACPlugin::setMediaCycle(_media_cycle);
+void ACOscPlugin::mediaCycleSet(){
     osc_browser->setMediaCycle(media_cycle);
 
     if(!media_cycle->getCurrentConfig())

@@ -44,7 +44,7 @@ class ACOscPlugin : public ACClientServerPlugin {
 public:
     ACOscPlugin();
     virtual ~ACOscPlugin();
-    virtual void setMediaCycle(MediaCycle* _media_cycle);
+    virtual void mediaCycleSet();
 protected:
     ACOscBrowser *osc_browser;
     ACOscFeedback *osc_feedback;
