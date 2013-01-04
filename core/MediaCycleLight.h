@@ -85,11 +85,8 @@ public:
 	int getLibrarySize();
 	std::string getMediaFileName(int i);
 	ACMediaType getMediaType(int i);
-	int getThumbnailWidth(int i);
-	int getThumbnailHeight(int i);
 	int getWidth(int i);
 	int getHeight(int i);
-	void* getThumbnailPtr(int i);
 	int getNeedsDisplay();
 	void setNeedsDisplay(bool _dis);
 	float getCameraZoom();

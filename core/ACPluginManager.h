@@ -34,7 +34,6 @@
 #define	_ACPLUGINMANAGER_H
 
 #include "ACPluginLibrary.h"
-#include "ACPluginManager.h"
 
 class MediaCycle;
 
@@ -64,7 +63,7 @@ class ACAvailableFeaturesPlugins:public ACAvailablePlugins<ACFeaturesPlugin>{//T
 public:
     ACAvailableFeaturesPlugins(std::vector<ACPluginLibrary *> PluginLibrary);
     ACAvailableFeaturesPlugins();
-    std::vector<ACMediaFeatures*> calculate(ACMediaData* aData, ACMedia* theMedia, bool _save_timed_feat=false);
+    std::vector<ACMediaFeatures*> calculate(ACMedia* theMedia, bool _save_timed_feat=false);
 };	
 
 class ACAvailableSegmentPlugins:public ACAvailablePlugins<ACSegmentationPlugin>{//TR: this class doesn't allocate memory for plugins. It's just a references container.
@@ -72,14 +71,15 @@ public:
     ACAvailableSegmentPlugins(std::vector<ACPluginLibrary *> PluginLibrary);
     ACAvailableSegmentPlugins();
     std::vector<ACMedia*> segment(ACMediaTimedFeature *ft,ACMedia* theMedia);
-    std::vector<ACMedia*> segment(ACMediaData* aData,ACMedia* theMedia);
+    std::vector<ACMedia*> segment(ACMedia* theMedia);
 };
 
 class ACAvailableThumbnailerPlugins:public ACAvailablePlugins<ACThumbnailerPlugin>{//TR: this class doesn't allocate memory for plugins. It's just a references container.
 public:
     ACAvailableThumbnailerPlugins(std::vector<ACPluginLibrary *> PluginLibrary);
     ACAvailableThumbnailerPlugins();
-    std::vector<ACMediaThumbnail*> summarize(ACMediaData* aData, ACMedia* theMedia, bool feature_extracted, bool segmentation_done);
+    std::vector<ACMediaThumbnail*> summarize(ACMedia* theMedia, bool feature_extracted, bool segmentation_done);
+    std::vector<std::string> getThumbnailNames(ACMediaType mediaType);
 };
 
 
@@ -152,6 +152,7 @@ public:
     ACPlugin *getPlugin(std::string aPluginName);
 
     ACAvailableFeaturesPlugins *getAvailableFeaturesPlugins(){return this->mAvailableFeaturePlugins;}// returns a container with available feature plugins reference
+    std::vector<std::string> getAvailableFeaturesPluginsNames(ACMediaType MediaType);
     ACAvailableSegmentPlugins *getAvailableSegmentPlugins(){return this->mAvailableSegmentPlugins;}// returns a container with available segment plugins reference
     ACAvailableSegmentPlugins *getActiveSegmentPlugins(){return this->mActiveSegmentPlugins;}// returns a container with active segment plugins reference
     int getActiveSegmentPluginsSize(ACMediaType MediaType);
@@ -159,6 +160,8 @@ public:
     bool setActiveSegmentPlugin(std::string name);
 
     ACAvailableThumbnailerPlugins *getAvailableThumbnailerPlugins(){return this->mAvailableThumbnailerPlugins;}// returns a container with available thumbnailer plugins reference
+    std::vector<std::string> getAvailableThumbnailNames(ACMediaType mediaType){return this->mAvailableThumbnailerPlugins->getThumbnailNames(mediaType);}
+
     ACAvailableMediaReaderPlugins *getAvailableMediaReaderPlugins(){return this->mAvailableMediaReaderPlugins;}// returns a container with available thumbnailer plugins reference
     ACAvailableMediaRendererPlugins *getAvailableMediaRendererPlugins(){return this->mAvailableMediaRendererPlugins;}// returns a container with available thumbnailer plugins reference
 
@@ -166,6 +169,8 @@ public:
     std::vector<std::string> getAvailablePluginsNames(ACPluginType PluginType, ACMediaType MediaType);
 
     ACPreProcessPlugin* getPreProcessPlugin(ACMediaType MediaType);
+
+    void pluginLoaded(std::string plugin_name);
 
 protected:
     void cleanPluginLists();

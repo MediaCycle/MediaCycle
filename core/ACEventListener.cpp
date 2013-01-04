@@ -32,6 +32,7 @@
  *
  */
 
+#include "MediaCycle.h"
 #include "ACEventListener.h"
 #include "boost/version.hpp"
 

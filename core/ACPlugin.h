@@ -36,7 +36,6 @@
 #include <string>
 #include <vector>
 
-#include "ACMediaTypes.h"
 #include "ACMediaFeatures.h"
 #include "ACMediaTimedFeature.h"
 #include "ACMediaData.h"
@@ -47,7 +46,6 @@ typedef std::map<long,ACMedia*> ACMedias;
 class ACMediaBrowser;
 class ACMediaTimedFeature;
 class MediaCycle;
-class ACEventManager;
 
 #include<iostream>
 
@@ -132,11 +130,17 @@ public:
     std::string getDescription() {return this->mDescription;}
     ACMediaType getMediaType() {return this->mMediaType;}
     ACPluginType getPluginType() {return this->mPluginType;}
-    virtual void setMediaCycle(MediaCycle* _media_cycle);
+    void setMediaCycle(MediaCycle* _media_cycle);
+    MediaCycle* getMediaCycle(){return media_cycle;}  
+    /// Re-implement this function to feed the newly set mediacycle instance to objects that require it
+    virtual void mediaCycleSet(){}
+    /// Event listener function feed by the plugin manager
+    virtual void pluginLoaded(std::string plugin_name){}
 
 protected:
     void addStringParameter(std::string _name, std::string _init, std::vector<std::string> _values, std::string _desc, ACParameterCallback _callback = 0);
     void updateStringParameter(std::string _name, std::string _init, std::vector<std::string> _values, std::string _desc = "", ACParameterCallback _callback = 0);
+    void updateStringParameterCallback(std::string _name, ACParameterCallback _callback);
     void addNumberParameter(std::string _name, float _init, float _min, float _max, float _step, std::string _desc, ACParameterCallback _callback = 0);
     void updateNumberParameter(std::string _name, float _init, float _min, float _max, float _step, std::string _desc = "", ACParameterCallback _callback = 0);
     void addCallback(std::string _name, std::string _desc, ACParameterCallback _callback);
@@ -188,7 +192,6 @@ protected:
     std::vector<ACNumberParameter> mNumberParameters;
     std::vector<ACCallback> mCallbacks;
     MediaCycle* media_cycle;
-    ACEventManager* event_manager;
 };
 
 // plugin to verify which formats the readers can open (future: and save)
@@ -197,6 +200,7 @@ public:
     ACMediaReaderPlugin();
     virtual ACMedia* mediaFactory(ACMediaType mediaType, const ACMedia* media=0)=0;
     //virtual std::vector<std::string> getExtensionsFromMediaType(ACMediaType media_type)=0;
+    virtual ACMediaData* mediaReader(ACMediaType mediaType)=0;
     virtual std::map<std::string, ACMediaType> getSupportedExtensions(ACMediaType media_type = MEDIA_TYPE_ALL)=0;
 };
 
@@ -207,6 +211,7 @@ public:
     virtual std::map<std::string, ACMediaType> getSupportedExtensions(ACMediaType media_type = MEDIA_TYPE_ALL)=0;
     virtual bool performActionOnMedia(std::string action, long int mediaId, std::string value=""){return false;}
     virtual std::map<std::string,ACMediaType> availableMediaActions(){return std::map<std::string,ACMediaType>();}
+    virtual void mediaCycleSet(){}
 };
 
 // XS TODO : separate time & space plugins ?
@@ -217,7 +222,7 @@ protected:
     ACFeaturesPlugin();
 public:
     virtual std::string requiresMediaReaderPlugin(){return "";}
-    virtual std::vector<ACMediaFeatures*> calculate(ACMediaData* aData, ACMedia* theMedia, bool _save_timed_feat=false)=0;
+    virtual std::vector<ACMediaFeatures*> calculate(ACMedia* theMedia, bool _save_timed_feat=false)=0;
     std::vector<std::string> getDescriptorsList() {return this->mDescriptorsList;}
     // XS TODO is this the best way to proceed when no timed features ?
     virtual ACMediaTimedFeature* getTimedFeatures(std::string mtf_file_name){return 0;}
@@ -245,19 +250,20 @@ public:
     ACSegmentationPlugin();
     virtual std::string requiresMediaReaderPlugin(){return "";}
     virtual std::vector<ACMedia*> segment(ACMediaTimedFeature* _mtf, ACMedia*)=0;
-    virtual std::vector<ACMedia*> segment(ACMediaData* _data, ACMedia*)=0;
+    virtual std::vector<ACMedia*> segment(ACMedia*)=0;
 };
 
 class ACThumbnailerPlugin : virtual public ACPlugin{
 public:
     ACThumbnailerPlugin();
-    virtual std::vector<ACMediaType> getThumbnailType()=0;
-    virtual std::vector<std::string> getThumbnailDescription()=0;
+    virtual std::vector<std::string> getThumbnailNames()=0;
+    virtual std::map<std::string,ACMediaType> getThumbnailTypes()=0;
+    virtual std::map<std::string,std::string> getThumbnailDescriptions()=0;
+    virtual std::map<std::string,std::string> getThumbnailExtensions()=0;
     virtual std::string requiresMediaReaderPlugin(){return "";}
     virtual std::vector<std::string> requiresFeaturesPlugins()=0; // list of plugin names (not paths)
     virtual std::vector<std::string> requiresSegmentationPlugins()=0; // list of plugin names (not paths)
-    virtual std::vector<std::string> providesOutputExtensions()=0;
-    virtual std::vector<ACMediaThumbnail*> summarize(ACMediaData* aData, ACMedia* theMedia)=0;
+    virtual std::vector<ACMediaThumbnail*> summarize(ACMedia* theMedia)=0;
 };
 
 class ACNeighborMethodPlugin : virtual public ACPlugin {

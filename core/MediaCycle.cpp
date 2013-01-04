@@ -74,7 +74,6 @@ MediaCycle::MediaCycle(ACMediaType aMediaType, string local_directory, string li
 
     this->prevLibrarySize = 0;
     this->eventManager=new ACEventManager;
-    this->pluginEventListener = new ACEventListener;
 
     // when importing files:
     // 1) the library creates a media
@@ -91,6 +90,7 @@ MediaCycle::~MediaCycle() {
     this->mediaLibrary = 0;
     delete this->mediaBrowser;
     this->mediaBrowser = 0;
+    this->eventManager->clean();
     this->pluginManager->clean();
     delete this->pluginManager;
     this->pluginManager = 0;
@@ -160,6 +160,11 @@ bool MediaCycle::addDefaultConfig(ACAbstractDefaultConfig* _config){
 
 int MediaCycle::getDefaultConfigsNumber(){
     return default_configs.size();
+}
+
+void MediaCycle::loadDefaultConfig(ACAbstractDefaultConfig* config){
+    if(this->addDefaultConfig(config))
+        this->loadDefaultConfig(config->name());
 }
 
 void MediaCycle::loadDefaultConfig(std::string name){
@@ -490,13 +495,23 @@ int MediaCycle::importDirectories(vector<string> directories, int recursive, boo
     return ok;
 }
 
-int MediaCycle::importDirectory(string path, int recursive, bool forward_order, bool doSegment,TiXmlElement* _medias) {
+/*int MediaCycle::importDirectory(string path, int recursive, bool forward_order, bool doSegment,TiXmlElement* _medias) {
     cout << "MediaCycle: importing directory: " << path << endl;
     int ok = 0;
     if (this->pluginManager == 0){
         cout << "no analysis plugins were loaded. you will need to load a plugin to use the application." << endl;
     }
     ok = this->mediaLibrary->importDirectory(path, recursive, this->pluginManager, forward_order, doSegment, _medias);
+    return ok;
+}*/
+
+int MediaCycle::importDirectory(string path, int recursive, bool forward_order, bool doSegment, bool _save_timed_feat) {
+    cout << "MediaCycle: importing directory: " << path << endl;
+    int ok = 0;
+    if (this->pluginManager == 0){
+        cout << "no analysis plugins were loaded. you will need to load a plugin to use the application." << endl;
+    }
+    ok = this->mediaLibrary->importDirectory(path, recursive, this->pluginManager, forward_order, doSegment, _save_timed_feat);
     return ok;
 }
 
@@ -656,6 +671,12 @@ int MediaCycle::removePluginLibraryFromBasename(std::string basename) {
 
 ACPluginLibrary* MediaCycle::getPluginLibrary(string aPluginLibraryPath) const{
     return this->pluginManager->getPluginLibrary(aPluginLibraryPath);
+}
+
+ACPlugin*  MediaCycle::getPlugin(std::string name){
+    if(this->pluginManager == 0)
+        return 0;
+    return this->pluginManager->getPlugin(name);
 }
 
 bool MediaCycle::removePluginFromLibrary(std::string _plugin_name, std::string _library_path){
@@ -824,12 +845,8 @@ bool MediaCycle::changeMediaType(ACMediaType aMediaType) {
     return changeMe;
 }
 
-
-int MediaCycle::getThumbnailWidth(int i) { return mediaLibrary->getMedia(i)->getThumbnailWidth(); }
-int MediaCycle::getThumbnailHeight(int i) { return mediaLibrary->getMedia(i)->getThumbnailHeight(); }
 int MediaCycle::getWidth(int i) { return mediaLibrary->getMedia(i)->getWidth(); }
 int MediaCycle::getHeight(int i) { return mediaLibrary->getMedia(i)->getHeight(); }
-//void* MediaCycle::getThumbnailPtr(int i) { return mediaLibrary->getMedia(i)->getThumbnailPtr(); }
 int MediaCycle::getNeedsDisplay() {	return mediaBrowser->getNeedsDisplay(); }
 void MediaCycle::setNeedsDisplay(bool _dis) {
     if (mediaBrowser) {
@@ -1019,6 +1036,7 @@ void MediaCycle::pickedObjectCallback(int _mediaId) {
     }
     mediaBrowser->setClickedNode(_mediaId);
     if (forwarddown == 0){// & playkeydown) {//if (!forwarddown) { //CF forwardown is not a boolean
+        //this->performActionOnMedia("play", _mediaId,"");
         mediaBrowser->toggleSourceActivity(_mediaId);
     }
 

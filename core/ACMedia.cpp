@@ -48,8 +48,9 @@ ACMedia::ACMedia() {
     mid = -1;
     parentid = -1;
     media_type = MEDIA_TYPE_NONE;
-    width = 0;
-    height = 0;
+    width = 0.0f;
+    height = 0.0f;
+    depth = 0.0f;
     filename="";
     filename_thumbnail="";
     label="";
@@ -62,6 +63,7 @@ ACMedia::ACMedia() {
     endInt = -1;
     discarded = false;
     taggedClassId = -1;
+    data = 0;
 }
 
 ACMedia::ACMedia(const ACMedia& m){
@@ -70,6 +72,7 @@ ACMedia::ACMedia(const ACMedia& m){
     this->media_type = m.media_type;
     this->width = m.width;
     this->height = m.height;
+    this->depth = m.depth;
     this->filename = m.filename;
     this->filename_thumbnail = m.filename_thumbnail;
     this->label = m.label;
@@ -82,6 +85,7 @@ ACMedia::ACMedia(const ACMedia& m){
     this->endInt = m.endInt;
     this->discarded = m.discarded;
     this->taggedClassId = m.taggedClassId;
+    this->data = m.data;
 }
 
 ACMedia::~ACMedia() { 
@@ -112,8 +116,21 @@ ACMedia::~ACMedia() {
 		delete (*iter);//needed erase call destructor of pointer (i.e. none since it's just a pointer) not of pointee ACMediaFeatures
 		//features_vectors.erase(iter); //will cause segfault. besides the vector is automatically emptied, no need to erase.
 	}*/
-	// XS TODO : why is this commented ?
-	//if (data) delete data;
+    if (data)
+        delete data;
+}
+
+void ACMedia::setId(int _id)
+{
+    mid = _id;
+    for(ACMediaThumbnails::iterator _thumbnail = thumbnails.begin(); _thumbnail != thumbnails.end(); _thumbnail++)
+        (*_thumbnail)->setParentId(this->getId());
+}
+
+void ACMedia::deleteData(){
+    if (data)
+        delete data;
+    data=0;
 }
 
 // C++ version
@@ -188,14 +205,6 @@ void ACMedia::saveXML(TiXmlElement* media){
 	features->SetAttribute("NumberOfFeatures", n_features);
     media->LinkEndChild( features );
 
-    TiXmlElement* _thumbnails = new TiXmlElement( "Thumbnails" );
-    media->LinkEndChild( _thumbnails );
-    _thumbnails->SetAttribute("NumberOfThumbnails", this->getNumberOfThumbnails());
-
-    // saves info about thumbnails
-    for(std::vector<ACMediaThumbnail*>::iterator thumbnail = thumbnails.begin();thumbnail != thumbnails.end();thumbnail++)
-        (*thumbnail)->saveXML(_thumbnails);
-
 	for (int i=0; i<n_features; i++) {
 		int n_features_elements = features_vectors[i]->getSize();
 		int nn = features_vectors[i]->getNeedsNormalization();
@@ -224,6 +233,29 @@ void ACMedia::saveXML(TiXmlElement* media){
         media->LinkEndChild( taggedClassIdField );
         
     }
+
+    // saves info about thumbnails
+    TiXmlElement* _thumbnails = new TiXmlElement( "Thumbnails" );
+
+    // Computing the number of thumbnails to save (the ones that don't require regeneration)
+    int number_of_thumbnails = 0;
+    for(std::vector<ACMediaThumbnail*>::iterator thumbnail = thumbnails.begin();thumbnail != thumbnails.end();thumbnail++){
+        if((*thumbnail)->requiresRegeneration() == false){
+            number_of_thumbnails++;
+        }
+    }
+    //_thumbnails->SetAttribute("NumberOfThumbnails", this->getNumberOfThumbnails());
+    _thumbnails->SetAttribute("NumberOfThumbnails", number_of_thumbnails);
+
+    media->LinkEndChild( _thumbnails );
+    for(std::vector<ACMediaThumbnail*>::iterator thumbnail = thumbnails.begin();thumbnail != thumbnails.end();thumbnail++){
+        if((*thumbnail)->requiresRegeneration() == false){
+            TiXmlElement* _thumbnail = new TiXmlElement( "Thumbnail" );
+            _thumbnails->LinkEndChild( _thumbnail );
+            (*thumbnail)->saveXML(_thumbnail);
+        }
+    }
+
 	TiXmlElement* segments = new TiXmlElement( "Segments" );  
 	media->LinkEndChild( segments );  
 	segments->SetAttribute("NumberOfSegments", this->getNumberOfSegments());
@@ -418,7 +450,9 @@ void ACMedia::loadXML(TiXmlElement* _pMediaNode){
 
         for( thumbnailElement; thumbnailElement; thumbnailElement = thumbnailElement->NextSiblingElement() ) {
             ACMediaThumbnail* thumbnail = new ACMediaThumbnail();
-            thumbnail->loadXML(thumbnailsElement);
+            thumbnail->loadXML(thumbnailElement);
+            if(thumbnail)
+                this->addThumbnail(thumbnail);
         }
     }
 	
@@ -689,17 +723,22 @@ int ACMedia::import(std::string _path, int _mid, ACPluginManager *acpl, bool _sa
 	this->filename_thumbnail = _path; // XS TODO make real separate thumbnail option
 	int import_ok = 0;
 
-	// get info about width, height, mediaData
-	// computes thumbnail, ...
-	// mediaData will be used by the plugin to compute features
-    if (!this->extractData(this->getFileName()))
-        return 0;
-
 	if (this->getMediaData()==0){
-		import_ok = 0;
 		cerr << "<ACMedia::import> failed accessing data for media number: " << _mid << endl;
 		return 0;
 	}
+
+    if(this->getMediaData()->readData(_path)==false){
+        cerr << "<ACMedia::import> couldn't load media data for media number: " << _mid << endl;
+        return 0;
+    }
+
+    // get info about width, height, mediaData
+    // mediaData will be used by the plugin to compute features
+    if (!this->extractData(this->getFileName())){
+        cerr << "<ACMedia::import> couldn't extract media data for media number: " << _mid << endl;
+        return 0;
+    }
 
     //compute thumbnails with available plugins that doesn't require feature extraction or segmentation
     this->computeThumbnails(acpl,false, false);
@@ -727,13 +766,46 @@ int ACMedia::import(std::string _path, int _mid, ACPluginManager *acpl, bool _sa
 	return import_ok;
 }
 
+void ACMedia::addThumbnail(ACMediaThumbnail* _thumbnail)
+{
+    if(_thumbnail==0){
+        std::cerr << "ACMedia::addThumbnail provided thumbnail is empty "<< std::endl;
+        return;
+    }
+    if(_thumbnail->getNumberOfSegments()==0){
+        _thumbnail->setStart( this->getStart() );
+        _thumbnail->setEnd( this->getEnd() );
+        _thumbnail->setStartInt( this->getStartInt() );
+        _thumbnail->setEndInt( this->getEndInt() );
+    }
+    _thumbnail->setParentId(this->getId());
+    _thumbnail->setId(thumbnails.size());
+    thumbnails.push_back(_thumbnail);
+}
 
 ACMediaThumbnail* ACMedia::getThumbnail(std::string name){
     for(std::vector<ACMediaThumbnail*>::iterator thumbnail = thumbnails.begin();thumbnail != thumbnails.end();thumbnail++){
         if((*thumbnail)->getName() == name)
             return *thumbnail;
     }
+    std::cerr << "ACMedia::getThumbnail: couldn't access thumbnail named '" << name << "'" << std::endl;
     return 0;
+}
+
+int ACMedia::getThumbnailWidth(std::string name){
+    ACMediaThumbnail* thumbnail = this->getThumbnail(name);
+    if(!thumbnail){
+        return 0;
+    }
+    return thumbnail->getWidth();
+}
+
+int ACMedia::getThumbnailHeight(std::string name){
+    ACMediaThumbnail* thumbnail = this->getThumbnail(name);
+    if(!thumbnail){
+        return 0;
+    }
+    return thumbnail->getHeight();
 }
 
 std::string ACMedia::getThumbnailFileName(std::string name){
@@ -748,10 +820,11 @@ std::string ACMedia::getThumbnailFileName(std::string name){
 int ACMedia::computeThumbnails(ACPluginManager *acpl, bool feature_extracted, bool segmentation_done){
     int thumbnail_number = 0;
     if (acpl) {
-        ACMediaData* local_media_data=dynamic_cast<ACMediaData*>(this->getMediaData());
-        std::vector<ACMediaThumbnail*> local_thumbnails = acpl->getAvailableThumbnailerPlugins()->summarize(local_media_data, this, feature_extracted, segmentation_done);
-        for(std::vector<ACMediaThumbnail*>::iterator local_thumbnail = local_thumbnails.begin();local_thumbnail != local_thumbnails.end();local_thumbnail++)
-            this->thumbnails.push_back(*local_thumbnail);
+        //ACMediaData<T>* local_media_data=dynamic_cast<ACMediaData<T>* >(this->getMediaData());
+        std::vector<ACMediaThumbnail*> local_thumbnails = acpl->getAvailableThumbnailerPlugins()->summarize(this, feature_extracted, segmentation_done);
+        for(std::vector<ACMediaThumbnail*>::iterator local_thumbnail = local_thumbnails.begin();local_thumbnail != local_thumbnails.end();local_thumbnail++){
+            this->addThumbnail(*local_thumbnail);
+        }
         thumbnail_number = local_thumbnails.size();
     }
     else{
@@ -764,8 +837,8 @@ int ACMedia::extractFeatures(ACPluginManager *acpl, bool _save_timed_feat) {
     int extract_feat_ok = 0;
     if (acpl) {
         //TR : new implementation to calculate the features
-        ACMediaData* local_media_data=dynamic_cast<ACMediaData*>(this->getMediaData());
-        this->features_vectors=acpl->getAvailableFeaturesPlugins()->calculate(local_media_data, this, _save_timed_feat);
+        //ACMediaData* local_media_data=dynamic_cast<ACMediaData*>(this->getMediaData());
+        this->features_vectors=acpl->getAvailableFeaturesPlugins()->calculate(this, _save_timed_feat);
                 //acpl->dump();//CPL
         
 		// Checking if any of the media features is empty:
@@ -797,6 +870,7 @@ int ACMedia::extractFeatures(ACPluginManager *acpl, bool _save_timed_feat) {
 // otherwise : hope the plugin will handle it 
 //      ex: in audio : plugin extracts features and then segments
 int ACMedia::segment(ACPluginManager *acpl, bool _saved_timed_features ) {	
+    cerr << "<ACMedia::segment> segmenting media number: " << this->getId() << endl;
 	// check if data have been extracted properly by the import method
 	if (this->getMediaData()==0){
 		cerr << "<ACMedia::segment> failed accessing data for media number: " << this->getId() << endl;
@@ -811,6 +885,11 @@ int ACMedia::segment(ACPluginManager *acpl, bool _saved_timed_features ) {
 	int segment_ok = 1;
 	int features_plugins_count = 0;
 	int segmentation_plugins_count = 0;
+
+    if(acpl->getActiveSegmentPluginsSize(this->getMediaType())==0){
+        cerr << "<ACMedia::segment> no active segment plugin set" << endl;
+        return segment_ok;
+    }
 		
 	// XS TODO add sanity checks
 	ACMediaTimedFeature* ft_from_disk = 0;
@@ -818,8 +897,8 @@ int ACMedia::segment(ACPluginManager *acpl, bool _saved_timed_features ) {
 	if (_saved_timed_features) {
 		ft_from_disk=this->getTimedFeatures();
 		#ifdef USE_DEBUG
-		if(ft_from_disk)
-			//ft_from_disk->dump(); //CPL commented
+//		if(ft_from_disk)
+//			ft_from_disk->dump(); //CPL commented
 		#endif
 		
 		// should not use all segmentation plugins -- choose one using menu !!	
@@ -831,10 +910,11 @@ int ACMedia::segment(ACPluginManager *acpl, bool _saved_timed_features ) {
 	// this is very spefic to the audio segmentation plugin...
 	// i.e., not _saved_timed_features		
 	else {
-                afv=acpl->getActiveSegmentPlugins()->segment(this->getMediaData(), this);
+                //afv=acpl->getActiveSegmentPlugins()->segment(this->getMediaData(), this);
+            afv=acpl->getActiveSegmentPlugins()->segment(this);
 	}
 	for (unsigned int Iafv=0; Iafv<afv.size(); Iafv++){
-            cout << "segment " << Iafv << " - id = " << afv[Iafv]->getId() << endl;
+            cout << "segment " << Iafv << " - id = " << afv[Iafv]->getId() << " start " << afv[Iafv]->getStart() << " end " << afv[Iafv]->getEnd() << endl;
             this->addSegment(afv[Iafv]);
 	}
 	delete ft_from_disk;

@@ -1246,10 +1246,16 @@ int ACMediaBrowser::toggleSourceActivity(ACMediaNode* node, int _activity) {
 // XS deprecated 
 int ACMediaBrowser::toggleSourceActivity(int lid, int type)
 {
-    int media_id = lid;
+    ACMediaNode* node = this->getMediaNode(lid);
+    if(!node){
+        std::cerr << "ACMediaBrowser::toggleSourceActivity: no node for id " << lid << std::endl;
+        return 0;
+    }
+    return this->toggleSourceActivity(node,type);
+  /*   int media_id = lid;
     //
 
-    if ( (media_id>=0) && (media_id<mLibrary->getSize()) )
+   if ( (media_id>=0) && (media_id<mLibrary->getSize()) )
     {
         if (this->getMediaNode(media_id)->getActivity()==0) {
             this->getMediaNode(media_id)->setActivity(type);
@@ -1271,7 +1277,7 @@ int ACMediaBrowser::toggleSourceActivity(int lid, int type)
     }
     else {
         return 0;
-    }
+    }*/
 }
 
 

@@ -32,9 +32,9 @@
  *
  */
 
+#include "MediaCycle.h"
 #include "ACPlugin.h"
 #include "ACMedia.h"
-#include "ACEventManager.h"
 
 #include <iostream>
 using std::cout;
@@ -82,14 +82,13 @@ std::string getExecutablePath(){
 }
 #endif
 
-ACPlugin::ACPlugin() {
+ACPlugin::ACPlugin() {//: ACEventListener() {
     this->mName = "";
     this->mId = "";
     this->mDescription = "";
     this->mPluginType = PLUGIN_TYPE_NONE;
     this->mMediaType = MEDIA_TYPE_NONE;
     this->media_cycle = 0;
-    this->event_manager = new ACEventManager;
 }
 
 ACPlugin::~ACPlugin() {
@@ -106,8 +105,9 @@ void ACPlugin::setMediaCycle(MediaCycle* _media_cycle)
         std::cerr << "ACPlugin::setMediaCycle: null mediacycle instance" << std::endl;
         return;
     }
-    if(this->event_manager)
-        this->event_manager->addListener( this->media_cycle->getPluginEventListener() );
+    //this->media_cycle->addListener(this);
+    this->mediaCycleSet();
+    //std::cout << "ACPlugin::setMediaCycle: done for plugin " << this->mName << std::endl;
 }
 
 bool ACPlugin::hasNumberParameterNamed(std::string _name){
@@ -156,6 +156,15 @@ void ACPlugin::updateStringParameter(std::string _name, std::string _init, std::
 #ifdef USE_DEBUG
             std::cout << " ACPlugin::updateStringParameterValues: plugin '" << mName << "', parameter '"<< _name << std::endl;
 #endif
+            return;
+        }
+    }
+}
+
+void ACPlugin::updateStringParameterCallback(std::string _name, ACParameterCallback _callback){
+    for(std::vector<ACStringParameter>::iterator StringParameter = mStringParameters.begin(); StringParameter != mStringParameters.end(); StringParameter++ ){
+        if((*StringParameter).name == _name){
+            (*StringParameter).callback = _callback;
             return;
         }
     }

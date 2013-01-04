@@ -76,6 +76,8 @@ ACMedia* ACMediaFactory::create(string file_ext, ACMediaType media_type){
         return 0;
     }
     ACMediaType m = readable_iter->second.second;
+    if(media_type == MEDIA_TYPE_NONE)
+        media_type = m;
     if(!plugin_manager){
         std::cerr << "ACMediaFactory::create: plugin manager not set" << std::endl;
         return 0;
@@ -91,11 +93,23 @@ ACMedia* ACMediaFactory::create(string file_ext, ACMediaType media_type){
         return 0;
 
     }
+    ACMedia* media = 0;
     if(media_type != MEDIA_TYPE_NONE){
-        return reader_plugin->mediaFactory(media_type);
+        media = reader_plugin->mediaFactory(media_type);
     }
     else
-        return reader_plugin->mediaFactory(readable_iter->second.second);
+        media = reader_plugin->mediaFactory(readable_iter->second.second);
+    if(!media){
+        std::cerr << "ACMediaFactory::create: plugin "<< readable_iter->second.first << " couldn't create the expected media" << std::endl;
+        return 0;
+    }
+    ACMediaData* media_data = reader_plugin->mediaReader(media_type);
+    if(!media_data){
+        std::cerr << "ACMediaFactory::create: plugin "<< readable_iter->second.first << " didn't set a media data" << std::endl;
+        return 0;
+    }
+    media->setMediaData(media_data);
+    return media;
 }
 
 ACMedia* ACMediaFactory::create(ACMediaType media_type,ACMedia* copy){
@@ -137,11 +151,18 @@ ACMedia* ACMediaFactory::create(ACMediaType media_type,ACMedia* copy){
     if(!reader_plugin){
         std::cerr << "ACMediaFactory::create: plugin "<< readable_iter->second.first << " doesn't provide a media reader" << std::endl;
         return 0;
-
     }
     ACMedia* media = reader_plugin->mediaFactory(media_type,copy);
-    if(!media)
+    if(!media){
         std::cerr << "ACMediaFactory::create: plugin "<< readable_iter->second.first << " couldn't create a media of type " << media_type_string << std::endl;
+        return 0;
+    }
+    ACMediaData* media_data = reader_plugin->mediaReader(media_type);
+    if(!media_data){
+        std::cerr << "ACMediaFactory::create: plugin "<< readable_iter->second.first << " didn't set a media data" << std::endl;
+        return 0;
+    }
+    media->setMediaData(media_data);
     return media;
 }
 

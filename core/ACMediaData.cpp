@@ -36,19 +36,24 @@
 #include "ACMediaData.h"
 #include <iostream>
 
-using std::cerr;
-using std::endl;
-using std::string;
-
-ACMediaData::ACMediaData() { 
-	this->init();
+ACMediaData::ACMediaData(){
+    media_type = MEDIA_TYPE_NONE;
+    file_name = "";
+    label = "";
+    data = 0;
 }
 
-void ACMediaData::init() {
-	media_type = MEDIA_TYPE_NONE;
-	file_name = "";
-}	
+ACMediaData::~ACMediaData()
+{
+    if(data)
+        delete data;
+    data = 0;
+}
 
-ACMediaData::~ACMediaData() {
-//media-specific
+bool ACMediaData::isTemporal(){
+    return (bool)(dynamic_cast<ACTemporalData*>(this));
+}
+
+bool ACMediaData::isSpatial(){
+    return (bool)(dynamic_cast<ACSpatialData*>(this));
 }

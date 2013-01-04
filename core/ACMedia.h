@@ -40,10 +40,13 @@
 #include "ACMediaTypes.h"
 #include "ACPluginManager.h"
 #include "ACMediaTimedFeature.h"
+#include "ACMediaData.h"
 
 #include <string>
 #define TIXML_USE_STL
 #include <tinyxml.h>
+
+typedef std::vector<ACMediaThumbnail*> ACMediaThumbnails;
 
 class ACMedia {
     // contains the minimal information about a media
@@ -55,7 +58,7 @@ protected:
     int mid;
     int parentid; //CF so that segments can be defined as ACMedia having other ACMedia as parents
     ACMediaType media_type;
-    int height, width;
+    float height, width, depth;
     std::vector<ACMediaFeatures*> features_vectors;
     std::vector<ACMediaFeatures*> preproc_features_vectors;
     std::string filename;
@@ -80,8 +83,8 @@ public:
     ACMediaType getMediaType() {return media_type;}
     virtual ACMediaType getActiveSubMediaType() {return media_type;}
 
-    void setId(int _id) {mid = _id;} // SD TODO - should check for duplicate id?
-        int getId() {return mid;}
+    void setId(int _id);
+    int getId() {return mid;}
     void setParentId(int _parentid) {parentid = _parentid;} //CF so that segments can be defined as ACMedia having other ACMedia as parents
     int getParentId() {return parentid;}
 
@@ -119,17 +122,18 @@ public:
     void setKey(std::string k) { key = k; }
 
     // thumbnail
-    virtual void* getThumbnailPtr(){return 0;} // XS TODO change this
-    std::vector<ACMediaThumbnail*> thumbnails;
+protected:
+    ACMediaThumbnails thumbnails;
+public:
     int getNumberOfThumbnails(){return thumbnails.size();}
-    void addThumbnail(ACMediaThumbnail* _thumbnail){thumbnails.push_back(_thumbnail);}
+    void addThumbnail(ACMediaThumbnail* _thumbnail);
     ACMediaThumbnail* getThumbnail(std::string name);
     std::string getThumbnailFileName(std::string name);
     std::string getThumbnailFileName() { return filename_thumbnail; }
     void setThumbnailFileName(std::string ifilename) { filename_thumbnail=ifilename; }
     // the following 2 were re-introduced for audio...
-    virtual int getThumbnailWidth() {return 0;}
-    virtual int getThumbnailHeight() {return 0;}
+    int getThumbnailWidth(std::string name);
+    int getThumbnailHeight(std::string name);
 
     std::string getLabel(void){return label;}
     void setLabel(std::string iLabel){label=iLabel;}
@@ -138,15 +142,20 @@ public:
 
     // data
     virtual bool extractData(std::string filename) {return false;}
-    virtual ACMediaData* getMediaData(){return 0;}
-    virtual void deleteData(){}
-    virtual void setMediaData(ACMediaData* _data){}
+    ACMediaData* getMediaData(){return data;}
+    void deleteData();
+    void setMediaData(ACMediaData* _data){this->data=_data;}
+protected:
+    ACMediaData* data;
 
+public:
     // accessors -- these should not be redefined for each media
-    int getWidth() {return width;}
-    int getHeight() {return height;}
-    void setWidth(int w) {width=w;}
-    void setHeight(int h) {height=h;}
+    float getWidth() {return width;}
+    float getHeight() {return height;}
+    float getDepth() {return depth;}
+    void setWidth(float w) {width=w;}
+    void setHeight(float h) {height=h;}
+    void setDepth(float d) {depth=d;}
     ACMediaType getType() {return this->media_type;}
 
     // beginning and end as floats
@@ -196,13 +205,13 @@ protected:
     virtual int extractFeatures(ACPluginManager *acpl=0, bool _save_timed_feat=false);
 public:
     virtual int segment(ACPluginManager *acpl, bool _saved_timed_features = false );
-    void addTimedFileNames(std::string mtf_file_name){mtf_file_names.push_back(mtf_file_name);};
-    std::vector<std::string> getTimedFileNames(){return mtf_file_names;};
+    void addTimedFileNames(std::string mtf_file_name){mtf_file_names.push_back(mtf_file_name);}
+    std::vector<std::string> getTimedFileNames(){return mtf_file_names;}
     ACMediaTimedFeature* getTimedFeatures();
     ACMediaTimedFeature* getTimedFeatures(std::string feature_name);
-    void setTaggedClassId(int pId){taggedClassId=pId;};
-    int getTaggedClassId(void){ return taggedClassId;};
-    bool isTagged(){return (taggedClassId>-1);};
+    void setTaggedClassId(int pId){taggedClassId=pId;}
+    int getTaggedClassId(void){ return taggedClassId;}
+    bool isTagged(){return (taggedClassId>-1);}
     
 };
 

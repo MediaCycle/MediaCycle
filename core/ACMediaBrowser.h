@@ -38,7 +38,6 @@
 #ifndef __ACMEDIABROWSER_H__
 #define __ACMEDIABROWSER_H__
 
-//#include <Common/TiMath.h> // for Timax only ...
 
 #include <assert.h>
 #include <math.h>
@@ -66,17 +65,13 @@ enum ACBrowserState {
     AC_CHANGING=1
 };
 
-enum ACBrowserMode {
-    AC_MODE_NONE=0,
-    AC_MODE_CLUSTERS=1,
-    AC_MODE_NEIGHBORS=2
-};
-
 enum ACBrowserLayout {
     AC_LAYOUT_TYPE_NONE=0,
     AC_LAYOUT_TYPE_NODELINK=1,
     AC_LAYOUT_TYPE_CONSTELLATION=2//CF: for egs. to link segments from a given media together... but what if we want to combine it with a node link layout?s
 };
+
+#include "ACEventListener.h"
 
 typedef std::map<std::string, ACBrowserMode > stringToBrowserModeConverter;
 const stringToBrowserModeConverter::value_type _initb[] = {

@@ -93,11 +93,12 @@ std::vector<std::string> ACPluginManager::addLibrary(std::string aPluginLibraryP
     for (vector<ACPluginLibrary *>::iterator it=mPluginLibrary.begin();it!=mPluginLibrary.end();it++){
         if (aPluginLibraryPath==(*it)->getLibraryPath()) { //CF this isn't robust with "non-linear" paths (containing /../) or symlinks
             std::cout << "ACPluginManager::addLibrary: library previously loaded" << std::endl;
-            if((*it)->list){
-                plugins_names = (*it)->list();
-            }
-            else
-                std::cerr << "ACPluginManager::addLibrary: can't access plugin list" << std::endl;
+            /// CF There's no need to inform about plugins already loaded
+//            if((*it)->list){
+//                plugins_names = (*it)->list();
+//            }
+//            else
+//                std::cerr << "ACPluginManager::addLibrary: can't access plugin list" << std::endl;
             return plugins_names;
         }
     }
@@ -121,9 +122,15 @@ std::vector<std::string> ACPluginManager::addLibrary(std::string aPluginLibraryP
     }
 
     mPluginLibrary.push_back(acpl);
+
     //this->updateAvailablePluginLists(acpl);
     this->addLibraryToPluginLists(acpl);
     // plugins can only be added to mActiveSegmentPlugins by the user directly
+
+    for(std::vector<ACPlugin*>::iterator plugin=plugins.begin();plugin!=plugins.end();plugin++){
+        this->pluginLoaded((*plugin)->getName());
+    }
+
     return plugins_names;
 }
 /*
@@ -323,6 +330,9 @@ std::vector<std::string> ACPluginManager::getAvailablePluginsNames(ACPluginType 
     return names;
 }
 
+std::vector<std::string> ACPluginManager::getAvailableFeaturesPluginsNames(ACMediaType MediaType) {
+    return this->mAvailableFeaturePlugins->getName(MediaType);
+}
 
 std::vector<std::string> ACPluginManager::getActiveSegmentPluginsNames(ACMediaType MediaType) {
     return this->mActiveSegmentPlugins->getName(MediaType);
@@ -378,6 +388,16 @@ ACPreProcessPlugin* ACPluginManager::getPreProcessPlugin(ACMediaType MediaType){
 
 }
 
+void ACPluginManager::pluginLoaded(std::string plugin_name)
+{
+    for(std::vector<ACPluginLibrary *>::iterator plugin_library = mPluginLibrary.begin(); plugin_library != mPluginLibrary.end(); ++plugin_library){
+        std::vector<ACPlugin*> plugins = (*plugin_library)->getPlugins();
+        for(std::vector<ACPlugin*>::iterator plugin = plugins.begin(); plugin != plugins.end(); ++plugin){
+            (*plugin)->pluginLoaded(plugin_name);
+        }
+    }
+}
+
 //ACAvailableFeaturesPlugins implementation
 
 ACAvailableFeaturesPlugins::ACAvailableFeaturesPlugins() : ACAvailablePlugins<ACFeaturesPlugin>::ACAvailablePlugins() {
@@ -388,14 +408,14 @@ ACAvailableFeaturesPlugins::ACAvailableFeaturesPlugins(vector<ACPluginLibrary *>
     //this->update(PluginLibrary);
 }
 
-vector<ACMediaFeatures*> ACAvailableFeaturesPlugins::calculate(ACMediaData* aData, ACMedia* theMedia, bool _save_timed_feat) {
+vector<ACMediaFeatures*> ACAvailableFeaturesPlugins::calculate(ACMedia* theMedia, bool _save_timed_feat) {
     ACMediaType mediaType = theMedia->getMediaType();
     vector<ACMediaFeatures*> output,empty;
     for (vector<ACFeaturesPlugin *> ::iterator iter_vec = mCurrPlugin[mediaType].begin(); iter_vec != mCurrPlugin[mediaType].end(); iter_vec++) {
         ACFeaturesPlugin* localPlugin = (*iter_vec);
         vector<ACMediaFeatures*> afv;
         if (localPlugin != NULL)
-            afv = localPlugin->calculate(aData, theMedia, _save_timed_feat);
+            afv = localPlugin->calculate(theMedia, _save_timed_feat);
         else {
             cerr << "<ACAvailableFeaturesPlugins::calculate> failed plugin access failed " << localPlugin->getName() << endl;
         }
@@ -421,6 +441,10 @@ std::vector<ACMedia*> ACAvailableSegmentPlugins::segment(ACMediaTimedFeature *ft
     std::vector<ACMedia*> segments;
     ACMediaType mediaType = theMedia->getMediaType();
     vector<string> timedFileNames=theMedia->getTimedFileNames();
+    if(mCurrPlugin[mediaType].size()==0){
+        std::cerr << "<ACMedia::segment> no segmentation plugin set, can't segment" << std::endl;
+        return segments;
+    }
     for (vector<ACSegmentationPlugin *> ::iterator iter_vec = mCurrPlugin[mediaType].begin(); iter_vec != mCurrPlugin[mediaType].end(); iter_vec++) {
         ACSegmentationPlugin* localPlugin = (*iter_vec);
         vector<ACMedia*> afv;
@@ -443,12 +467,16 @@ std::vector<ACMedia*> ACAvailableSegmentPlugins::segment(ACMediaTimedFeature *ft
     return segments;
 }
 
-std::vector<ACMedia*> ACAvailableSegmentPlugins::segment(ACMediaData* aData, ACMedia* theMedia) {
+std::vector<ACMedia*> ACAvailableSegmentPlugins::segment(ACMedia* theMedia) {
     std::vector<ACMedia*> segments;
     ACMediaType mediaType = theMedia->getMediaType();
+    if(mCurrPlugin[mediaType].size()==0){
+        std::cerr << "<ACMedia::segment> no segmentation plugin set, can't segment" << std::endl;
+        return segments;
+    }
     for (vector<ACSegmentationPlugin *> ::iterator iter_vec = mCurrPlugin[mediaType].begin(); iter_vec != mCurrPlugin[mediaType].end(); iter_vec++) {
         ACSegmentationPlugin* localPlugin = (*iter_vec);
-        vector<ACMedia*> afv = localPlugin->segment(aData, theMedia);
+        vector<ACMedia*> afv = localPlugin->segment(theMedia);
         if (afv.size() == 0) {
             cerr << "<ACMedia::segment> failed importing segments from plugin: " << localPlugin->getName() << endl;
         } else {
@@ -467,7 +495,7 @@ ACAvailableThumbnailerPlugins::ACAvailableThumbnailerPlugins(vector<ACPluginLibr
     //this->update(PluginLibrary);
 }
 
-vector<ACMediaThumbnail*> ACAvailableThumbnailerPlugins::summarize(ACMediaData* aData, ACMedia* theMedia, bool feature_extracted, bool segmentation_done) {
+vector<ACMediaThumbnail*> ACAvailableThumbnailerPlugins::summarize(ACMedia* theMedia, bool feature_extracted, bool segmentation_done) {
     ACMediaType mediaType = theMedia->getMediaType();
     vector<ACMediaThumbnail*> output,empty;
     for (vector<ACThumbnailerPlugin *> ::iterator iter_vec = mCurrPlugin[mediaType].begin(); iter_vec != mCurrPlugin[mediaType].end(); iter_vec++) {
@@ -476,7 +504,7 @@ vector<ACMediaThumbnail*> ACAvailableThumbnailerPlugins::summarize(ACMediaData* 
         if (localPlugin != NULL)
             if( (localPlugin->requiresFeaturesPlugins().size()>0)==feature_extracted && (localPlugin->requiresSegmentationPlugins().size()>0)==segmentation_done ){
                 std::cout << "Summarizing with plugin '" << localPlugin->getName() << "'" << std::endl;
-                afv = localPlugin->summarize(aData, theMedia);
+                afv = localPlugin->summarize(theMedia);
 
                 if (afv.size() == 0) {
                     cerr << "<ACAvailableThumbnailerPlugins::summarize> failed computing thumbnail from plugin: " << localPlugin->getName() << endl;
@@ -498,6 +526,16 @@ vector<ACMediaThumbnail*> ACAvailableThumbnailerPlugins::summarize(ACMediaData* 
         }
     }
     return output;
+}
+
+std::vector<std::string> ACAvailableThumbnailerPlugins::getThumbnailNames(ACMediaType mediaType){
+    std::vector<std::string> descriptions;
+    for (vector<ACThumbnailerPlugin *> ::iterator iter_vec = mCurrPlugin[mediaType].begin(); iter_vec != mCurrPlugin[mediaType].end(); iter_vec++) {
+        std::vector<std::string> desc = (*iter_vec)->getThumbnailNames();
+        for(std::vector<std::string>::iterator description = desc.begin(); description != desc.end(); description++)
+            descriptions.push_back(*description);
+    }
+    return descriptions;
 }
 
 ACAvailableMediaReaderPlugins::ACAvailableMediaReaderPlugins() : ACAvailablePlugins<ACMediaReaderPlugin>::ACAvailablePlugins() {

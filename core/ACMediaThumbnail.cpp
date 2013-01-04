@@ -1,35 +1,32 @@
-/*
- *  ACMediaThumbnail.cpp
- *  MediaCycle
- *
- *  @author Christian Frisson
- *  @date 7/10/2012
- *  @copyright (c) 2012 – UMONS - Numediart
- *  
- *  MediaCycle of University of Mons – Numediart institute is 
- *  licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
- *  licence (the “License”); you may not use this file except in compliance 
- *  with the License.
- *  
- *  This program is free software: you can redistribute it and/or 
- *  it under the terms of the GNU Affero General Public License as
- *  published by the Free Software Foundation, either version 3 of the
- *  License, or (at your option) any later version.
- *  
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Affero General Public License for more details.
- *  
- *  You should have received a copy of the GNU Affero General Public License
- *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
- *  
- *  Each use of this software must be attributed to University of Mons – 
- *  Numediart Institute
- *  
- *  Any other additional authorizations may be asked to avre@umons.ac.be 
- *  <mailto:avre@umons.ac.be>
- *
+/**
+ * @brief Base media thumbnail class
+ * @author Christian Frisson
+ * @date 7/10/2012
+ * @copyright (c) 2012 – UMONS - Numediart
+ * 
+ * MediaCycle of University of Mons – Numediart institute is 
+ * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
+ * licence (the “License”); you may not use this file except in compliance 
+ * with the License.
+ * 
+ * This program is free software: you can redistribute it and/or 
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * 
+ * Each use of this software must be attributed to University of Mons – 
+ * Numediart Institute
+ * 
+ * Any other additional authorizations may be asked to avre@umons.ac.be 
+ * <mailto:avre@umons.ac.be>
  */
 
 #include "ACMediaThumbnail.h"
@@ -42,19 +39,33 @@ namespace fs = boost::filesystem;
 
 using namespace std;
 
-ACMediaThumbnail::ACMediaThumbnail() :
-    mid(-1),parentid(-1),media_type(MEDIA_TYPE_NONE),vectorial(false),
-    height(-1),width(-1),
-    filename(""),description(""),name(""),
-    start(0.0f),end(0.0f),
-    startInt(0), endInt(0),
-    discarded(false)
-{}
-
-ACMediaThumbnail::ACMediaThumbnail(ACMediaType _type) :
-    media_type(_type)
+ACMediaThumbnail::ACMediaThumbnail()
 {
-    ACMediaThumbnail();
+    this->init();
+}
+
+ACMediaThumbnail::ACMediaThumbnail(ACMediaType _type)
+{
+    this->init();
+    this->media_type = _type;
+}
+
+void ACMediaThumbnail::init(){
+    this->mid = -1;
+    this->parentid = -1;
+    this->media_type = MEDIA_TYPE_NONE;
+    this->vectorial = false;
+    this->circular = false;
+    this->height = 0;
+    this->width = 0;
+    this->filename = "";
+    this->description = "";
+    this->name = "";
+    this->start = 0.0f;
+    this->end = 0.0f;
+    this->startInt = 0;
+    this->endInt = 0;
+    this->discarded = false;
 }
 
 ACMediaThumbnail::~ACMediaThumbnail()
@@ -68,11 +79,13 @@ ACMediaThumbnail::~ACMediaThumbnail()
 void ACMediaThumbnail::saveXML(TiXmlElement* media){
     if (media == NULL) return;
     media->SetAttribute("Id", mid);
-    media->SetAttribute("Media Id", parentid);
+    media->SetAttribute("MediaId", parentid);
     media->SetAttribute("MediaType", media_type);
     media->SetAttribute("Vectorial",vectorial);
+    media->SetAttribute("Circular",circular);
     media->SetAttribute("Height", height);
     media->SetAttribute("Width", width);
+    media->SetAttribute("Length", length);
     media->SetAttribute("FileName", filename);
     media->SetAttribute("Name", name);
     media->SetAttribute("Description", description);
@@ -95,7 +108,7 @@ void ACMediaThumbnail::saveXML(TiXmlElement* media){
 void ACMediaThumbnail::loadXML(TiXmlElement* _pMediaNode){
 
     if (!_pMediaNode)
-        throw runtime_error("corrupted XML file");
+        throw runtime_error("corrupted XML file, couldn't access thumbnail xml");
 
     int pId=-1;
     _pMediaNode->QueryIntAttribute("Id", &pId); // If this fails, original value is left as-is
@@ -105,7 +118,7 @@ void ACMediaThumbnail::loadXML(TiXmlElement* _pMediaNode){
         this->setId(pId);
 
     int pParentId=-1;
-    _pMediaNode->QueryIntAttribute("Media Id", &pParentId); // If this fails, original value is left as-is
+    _pMediaNode->QueryIntAttribute("MediaId", &pParentId); // If this fails, original value is left as-is
     if (pParentId < 0)
         throw runtime_error("corrupted XML file, wrong parent media ID for thumbnail");
     else
@@ -125,12 +138,19 @@ void ACMediaThumbnail::loadXML(TiXmlElement* _pMediaNode){
     else
         this->vectorial = (bool)pVectorial;
 
+    int pCircular= -1;
+    _pMediaNode->QueryIntAttribute("Circular", &pCircular); // If this fails, original value is left as-is
+    if (pCircular < 0)
+        throw runtime_error("corrupted XML file, wrong thumbnail circular status");
+    else
+        this->circular = (bool)pCircular;
+
     int pHeight=-1;
     _pMediaNode->QueryIntAttribute("Height", &pHeight); // If this fails, original value is left as-is
     if (pHeight < 0)
         throw runtime_error("corrupted XML file, wrong thumbnail height");
     else
-        this->setHeight(pParentId);
+        this->setHeight(pHeight);
 
     int pWidth=-1;
     _pMediaNode->QueryIntAttribute("Width", &pWidth); // If this fails, original value is left as-is
@@ -138,6 +158,14 @@ void ACMediaThumbnail::loadXML(TiXmlElement* _pMediaNode){
         throw runtime_error("corrupted XML file, wrong thumbnail width");
     else
         this->setWidth(pWidth);
+
+    int pLength=-1;
+    _pMediaNode->QueryIntAttribute("Length", &pLength); // If this fails, original value is left as-is
+    if (pLength < 0)
+        throw runtime_error("corrupted XML file, wrong thumbnail length");
+    else
+        this->setLength(pLength);
+
 
     string pName ="";
     pName = _pMediaNode->Attribute("Name");
@@ -148,9 +176,9 @@ void ACMediaThumbnail::loadXML(TiXmlElement* _pMediaNode){
 
     string pDescription ="";
     pDescription = _pMediaNode->Attribute("Description");
-    if (pDescription == "")
-        throw runtime_error("corrupted XML file, no thumbnail description");
-    else
+//    if (pDescription == "")
+//        throw runtime_error("corrupted XML file, no thumbnail description");
+//    else
         this->setDescription(pDescription);
 
     double n_start=-1;

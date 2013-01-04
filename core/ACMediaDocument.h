@@ -62,15 +62,7 @@ public:
 
 	//void setThumbnail(osg::ref_ptr<osg::Image> _thumbnail) { thumbnail = _thumbnail; thumbnail_width = _thumbnail->width; thumbnail_height = _thumbnail->height; }
     //void setThumbnail(osg::ref_ptr<osg::Image> _thumbnail) { thumbnail = _thumbnail; thumbnail_width = _thumbnail->s(); thumbnail_height = _thumbnail->t(); }
-	int getThumbnailWidth() {return thumbnail_width;}
-	int getThumbnailHeight() {return thumbnail_height;}
-    //void* getThumbnailPtr() { return (void*)image_texture; }
-	ACMediaData* getMediaData(){return 0;};
-//	ACMediaDocumentData* getData(){return static_cast<ACMediaDocumentData*>(data->getData());}
-//	void setData(ACMediaDocumentData* _data);
-//	virtual ACMediaData* getMediaData(){return data;} // XS TODO : needs dynamic_cast<ACMediaData*> (data) ??
 	bool extractData(std::string fname);
-//	virtual void deleteData();
 	ACMediaContainer getContainer(){return mediaContainer;}
 
 	std::vector<ACMediaFeatures*> &getAllFeaturesVectors() 
@@ -144,12 +136,11 @@ public:
 	void cleanPreProcFeaturesVector(void);
 
     virtual std::vector<std::string> getActivableMediaKeys()=0;
-	ACMedia* getActiveMedia(void){return activeMedia;};
-	std::string getActiveMediaKey(void){return activeMediaKey;};
+    ACMedia* getActiveMedia(void){return activeMedia;}
+    std::string getActiveMediaKey(void){return activeMediaKey;}
 	
 private:
 	void init();
-    void* getThumbnailPtr(){return 0;}
 	bool computeThumbnail(std::string _fname, int w=0, int h=0);
 //	bool computeThumbnail(ACMediaDocumentData* data_ptr, int w=0, int h=0);
 //	bool computeThumbnail(IplImage* img, int w=0, int h=0);

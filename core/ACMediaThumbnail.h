@@ -1,35 +1,32 @@
-/*
- *  ACMediaThumbnail.h
- *  MediaCycle
- *
- *  @author Christian Frisson
- *  @date 7/10/2012
- *  @copyright (c) 2012 – UMONS - Numediart
- *  
- *  MediaCycle of University of Mons – Numediart institute is 
- *  licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
- *  licence (the “License”); you may not use this file except in compliance 
- *  with the License.
- *  
- *  This program is free software: you can redistribute it and/or 
- *  it under the terms of the GNU Affero General Public License as
- *  published by the Free Software Foundation, either version 3 of the
- *  License, or (at your option) any later version.
- *  
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Affero General Public License for more details.
- *  
- *  You should have received a copy of the GNU Affero General Public License
- *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
- *  
- *  Each use of this software must be attributed to University of Mons – 
- *  Numediart Institute
- *  
- *  Any other additional authorizations may be asked to avre@umons.ac.be 
- *  <mailto:avre@umons.ac.be>
- *
+/**
+ * @brief Base media thumbnail class
+ * @author Christian Frisson
+ * @date 7/10/2012
+ * @copyright (c) 2012 – UMONS - Numediart
+ * 
+ * MediaCycle of University of Mons – Numediart institute is 
+ * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
+ * licence (the “License”); you may not use this file except in compliance 
+ * with the License.
+ * 
+ * This program is free software: you can redistribute it and/or 
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * 
+ * Each use of this software must be attributed to University of Mons – 
+ * Numediart Institute
+ * 
+ * Any other additional authorizations may be asked to avre@umons.ac.be 
+ * <mailto:avre@umons.ac.be>
  */
 
 #ifndef ACMEDIATHUMBNAIL_H
@@ -51,8 +48,8 @@ protected:
     int mid;
     int parentid; //CF so that segments can be defined as ACMedia having other ACMedia as parents
     ACMediaType media_type;
-    bool vectorial;
-    int height, width;
+    bool vectorial,circular;
+    int height, width, length;
     std::string filename;
     std::string description;
     std::string name; // identifier
@@ -65,9 +62,15 @@ public:
     ACMediaThumbnail();
     ACMediaThumbnail(ACMediaType _type);
     virtual ~ACMediaThumbnail(); // make this virtual to ensure that destructors of derived classes will be called
+protected:
+    void init();
 
+public:
     ACMediaType getMediaType() {return media_type;}
     bool isVectorial(){return vectorial;}
+    bool isCircular(){return circular;}
+    void setCircular(bool _circular){this->circular = _circular;}
+    virtual bool requiresRegeneration(){return false;}
 
     void setId(int _id) {mid = _id;}
     int getId() {return mid;}
@@ -102,8 +105,10 @@ public:
     // accessors -- these should not be redefined for each media
     int getWidth() {return width;}
     int getHeight() {return height;}
+    int getLength() {return length;}
     void setWidth(int w) {width=w;}
     void setHeight(int h) {height=h;}
+    void setLength(int l) {length=l;}
     ACMediaType getType() {return this->media_type;}
 
     // beginning and end as floats

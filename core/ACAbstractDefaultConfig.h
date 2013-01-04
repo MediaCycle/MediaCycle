@@ -35,8 +35,10 @@
 #ifndef __ACAbstractDefaultConfig_H__
 #define __ACAbstractDefaultConfig_H__
 
-#include "ACPlugin.h"
+
 #include "ACMediaBrowser.h"
+#include "ACEventListener.h"
+#include "ACPlugin.h"
 
 // Setting: where/how the application is used
 typedef unsigned int ACSettingType;

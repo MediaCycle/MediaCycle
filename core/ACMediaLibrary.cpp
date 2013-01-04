@@ -182,7 +182,7 @@ int ACMediaLibrary::importDirectory(std::string _path, int _recursive, ACPluginM
     files_to_import += filenames.size();
     std::vector<int> ret;
     for (unsigned int i=0; i<filenames.size(); i++){
-        files_processed++;
+        //CF files_processed++; // done in importFile
         int index = forward_order ? i : filenames.size()-1-i;//CF if reverse order (not forward_order), segments in subdirs are added to the library after the source recording
         std::vector<int> media_ids = this->importFile(filenames[index], acpl, doSegment, _save_timed_feat); //, _medias );
         for (std::vector<int>::iterator it=media_ids.begin();it!=media_ids.end();it++){
@@ -303,6 +303,7 @@ std::vector<int> ACMediaLibrary::importFile(std::string _filename, ACPluginManag
             files_to_import++; // to avoid stopping the progress when the last media of the pile is added, before its segments
             std::cout << "ACMediaLibrary::importFile found " << mediaSegments.size() << " segments." << std::endl;
             std::vector<ACMedia*> importedSegment;
+            files_to_import += mediaSegments.size();
             for (unsigned int i = 0; i < mediaSegments.size(); i++){
                 // for the segments we do not save (again) timedFeatures
                 // XS TODO but we should not re-calculate them either !=> TR I put the mtf files names of the media parent in all his segments
@@ -317,11 +318,12 @@ std::vector<int> ACMediaLibrary::importFile(std::string _filename, ACPluginManag
                     mediaSegments[i]->deleteData();//TR TODO verify that we must delete this data
                     delete mediaSegments[i];
                 }
+                files_processed++;
                 media->setAllSegments(importedSegment);
                 
 
             }
-            files_to_import--;
+            //CF files_to_import--;
             //			}
 
         }
@@ -339,7 +341,7 @@ std::vector<int> ACMediaLibrary::importFile(std::string _filename, ACPluginManag
     //media->saveXML(_medias);
 
     // deleting the data that have been used for analysis, keep media small.
-    media->deleteData();
+    //CF media->deleteData();
 
     if(files_processed == files_to_import){
         files_processed = files_to_import = 0;
