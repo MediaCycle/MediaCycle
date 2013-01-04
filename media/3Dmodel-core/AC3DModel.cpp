@@ -54,68 +54,64 @@ AC3DModel::AC3DModel(const AC3DModel& m) : ACMedia(m) {
 
 void AC3DModel::init() {
 	media_type = MEDIA_TYPE_3DMODEL;
-    data = 0;
 }	
 
 AC3DModel::~AC3DModel() {
-    this->deleteData();
 }
 
-/*void AC3DModel::setData(osg::ref_ptr<osg::Node> _data)
-{
-	if (data == 0) 
-		data = new AC3DModelData();
-	data->setData(_data);
-}*/
-
 bool AC3DModel::extractData(string fname) {
-	if (data) delete data;
-	data = new AC3DModelData();
-    if (!data->readData(fname)){
-        std::cerr << "AC3DModel::extractData: can't read data" << std::endl;
+    AC3DModelData* model_data = dynamic_cast<AC3DModelData*>(this->getMediaData());
+    if(!model_data)
+    {
+        std::cerr << "AC3DModel::extractData: no 3Dmodel data set" << std::endl;
+        return 0;
+    }
+
+    this->setWidth( model_data->getWidth() );
+    this->setHeight( model_data->getHeight() );
+
+    /*osg::ref_ptr<osg::Node> local_model_ptr = 0;
+    osg::ComputeBoundsVisitor cbv;
+
+    ACMediaDataContainer* data_container = model_data->getData();
+    AC3DModelOsgDataContainer* model_data_container = dynamic_cast<AC3DModelOsgDataContainer*>(data_container);
+    if(!model_data_container){
+        std::cerr << "AC3DModel::extractData: couldn't access the 3Dmodel data container from " << fname << std::endl;
         return false;
     }
-	osg::ref_ptr<osg::Node> local_model_ptr = 0;
-	osg::ComputeBoundsVisitor cbv;
-	
-    local_model_ptr = this->getData();
-	local_model_ptr->accept( cbv );
-	const osg::BoundingBox bb( cbv.getBoundingBox() );
-	osg::Vec3 ext( bb._max - bb._min );
-	
-	center.resize(3);
-	extent.resize(3);
-	
-	center[0] = bb.center().x(); center[1] = bb.center().y(); center[2] = bb.center().z();
-	extent[0] = ext.x(); extent[1] = ext.y(); extent[2] = ext.z();
+    local_model_ptr = model_data_container->getData();
+    local_model_ptr->accept( cbv );
+    const osg::BoundingBox bb( cbv.getBoundingBox() );
+    osg::Vec3 ext( bb._max - bb._min );
+
+    center.resize(3);
+    extent.resize(3);
+
+    center[0] = bb.center().x();
+    center[1] = bb.center().y();
+    center[2] = bb.center().z();
+    extent[0] = ext.x();
+    extent[1] = ext.y();
+    extent[2] = ext.z();*/
 		
 	return true;
 }
 
-void AC3DModel::deleteData(){
-	if (data)
-		delete data;
-	data=0;
-}
-
 void AC3DModel::saveACLSpecific(ofstream &library_file) {
-	
-	library_file << center[0] << endl;
-	library_file << center[1] << endl;
-	library_file << center[2] << endl;
-	library_file << extent[0] << endl;
-	library_file << extent[1] << endl;
-	library_file << extent[2] << endl;
+//	library_file << center[0] << endl;
+//	library_file << center[1] << endl;
+//	library_file << center[2] << endl;
+//	library_file << extent[0] << endl;
+//	library_file << extent[1] << endl;
+//	library_file << extent[2] << endl;
 }
 
 int AC3DModel::loadACLSpecific(ifstream &library_file) {
-	
-	library_file >> center[0];
-	library_file >> center[1];
-	library_file >> center[2];
-	library_file >> extent[0];
-	library_file >> extent[1];
-	library_file >> extent[2];
-		
+//	library_file >> center[0];
+//	library_file >> center[1];
+//	library_file >> center[2];
+//	library_file >> extent[0];
+//	library_file >> extent[1];
+//	library_file >> extent[2];
 	return 1;
 }

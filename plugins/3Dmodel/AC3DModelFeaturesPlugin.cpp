@@ -1,8 +1,8 @@
 /**
  * @brief AC3DModelFeaturesPlugin.cpp
  * @author Christian Frisson
- * @date 03/12/2012
- * @copyright (c) 2012 – UMONS - Numediart
+ * @date 04/01/2013
+ * @copyright (c) 2013 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -31,6 +31,7 @@
 
 #include "AC3DModelFeaturesPlugin.h"
 #include "AC3DModel.h"
+#include "AC3DModelOsgData.h"
 
 #include <vector>
 #include <string>
@@ -48,7 +49,7 @@ AC3DModelFeaturesPlugin::~AC3DModelFeaturesPlugin() {
 	
 }
 
-std::vector<ACMediaFeatures*> AC3DModelFeaturesPlugin::calculate(ACMediaData* model_data, ACMedia* theMedia, bool _save_timed_feat) {
+std::vector<ACMediaFeatures*> AC3DModelFeaturesPlugin::calculate(ACMedia* theMedia, bool _save_timed_feat) {
 	std::vector<ACMediaFeatures*> desc;
 //	AC3DModelData* local_model_data = 0;
 //	try{
@@ -64,7 +65,23 @@ std::vector<ACMediaFeatures*> AC3DModelFeaturesPlugin::calculate(ACMediaData* mo
 	ACMediaFeatures* desc_bounding_box_ratio;
 	osg::ComputeBoundsVisitor cbv;
 	
-	local_model_ptr = static_cast< osg::Node* > (model_data->getData());
+    ACMediaData* media_data = theMedia->getMediaData();
+    if(!media_data){
+        std::cerr << "AC3DModelFeaturesPlugin:calculate: couldn't access 3D model data" << std::endl;
+        return desc;
+    }
+    ACMediaDataContainer* data_container = media_data->getData();
+    if(!data_container){
+        std::cerr << "AC3DModelFeaturesPlugin:calculate: couldn't access the 3D model data container" << std::endl;
+        return desc;
+    }
+    AC3DModelOsgDataContainer* osg_container = dynamic_cast<AC3DModelOsgDataContainer*>(data_container);
+    if(!osg_container){
+        std::cerr << "AC3DModelFeaturesPlugin:calculate: couldn't access the 3D model osg data container" << std::endl;
+        return desc;
+    }
+    //local_model_ptr = static_cast< osg::Node* > (model_data->getData());
+    local_model_ptr = osg_container->getData();
 	local_model_ptr->accept( cbv );
 	const osg::BoundingBox bb( cbv.getBoundingBox() );
 	osg::Vec3 ext( bb._max - bb._min );	

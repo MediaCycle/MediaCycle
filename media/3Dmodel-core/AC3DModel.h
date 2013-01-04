@@ -38,8 +38,6 @@
 #include "ACMedia.h"
 #include "ACMediaData.h"
 #include "AC3DModelData.h"
-//#include <osgDB/ReadFile>
-#include <osg/ComputeBoundsVisitor>
 #include <string>
 #include <iostream>
 
@@ -50,26 +48,15 @@ class AC3DModel: public ACMedia {
 public:
 	AC3DModel();
     AC3DModel(const AC3DModel& m);
-	~AC3DModel();
-	
+    virtual ~AC3DModel();
 	void saveACLSpecific(std::ofstream &library_file);
 	int loadACLSpecific(std::ifstream &library_file);
-		
-	void* getThumbnailPtr() { return 0; }
-	
-    osg::ref_ptr<osg::Node> getData(){return static_cast< osg::Node* > (data->getData());}
-    void setData(osg::ref_ptr<osg::Node> _data);
-	virtual ACMediaData* getMediaData(){return data;}
 	bool extractData(std::string fname);
-	virtual void deleteData();
-	
 private:	
 	void init();
-	
-private:	
-	std::vector<float> center;
-	std::vector<float> extent;
-	AC3DModelData* data;
+//private:
+//	std::vector<float> center;
+//	std::vector<float> extent;
 };
 
 #endif // AC3DMODEL_H

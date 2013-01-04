@@ -1,8 +1,8 @@
 /**
- * @brief AC3DModelFeaturesPlugin.h
- * @author Christian Frisson
- * @date 04/01/2013
- * @copyright (c) 2013 – UMONS - Numediart
+ * @brief 3D model data and container, implemented with OSG
+ * @author Xavier Siebert, Christian Frisson
+ * @date 7/04/2011
+ * @copyright (c) 2011 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -27,27 +27,42 @@
  * 
  * Any other additional authorizations may be asked to avre@umons.ac.be 
  * <mailto:avre@umons.ac.be>
-*/
+ */
 
-#ifndef _AC3DMODELFEATURESPLUGIN_H
-#define	_AC3DMODELFEATURESPLUGIN_H
+#ifndef AC3DMODELOSGDATA_H
+#define AC3DMODELOSGDATA_H
 
-#include <MediaCycle.h>
+#include "AC3DModelData.h"
+#include <osg/Node>
 
-#include<iostream>
-
-class AC3DModelFeaturesPlugin : public ACFeaturesPlugin {
+class AC3DModelOsgDataContainer : public ACMediaDataContainer, public ACSpatialData {
 public:
-	AC3DModelFeaturesPlugin();
-	~AC3DModelFeaturesPlugin();
-	
-	virtual int initialize(){return 1;};
-	virtual int start(){return 1;};
-	virtual int stop(){return 1;};
-
-    virtual std::vector<ACMediaFeatures*> calculate(ACMedia* theMedia, bool _save_timed_feat=false);
-	
-private:
+    AC3DModelOsgDataContainer();
+    virtual ~AC3DModelOsgDataContainer();
+    void setData(osg::ref_ptr<osg::Node> _data){
+        this->data = 0;
+        this->data = _data;
+    }
+    osg::ref_ptr<osg::Node> getData(){return data;}
+protected:
+    osg::ref_ptr<osg::Node> data;
 };
 
-#endif	/* _AC3DMODELFEATURESPLUGIN_H */
+class AC3DModelOsgData: public AC3DModelData {
+public:
+    AC3DModelOsgData();
+    virtual ~AC3DModelOsgData();
+    virtual bool readData(std::string _fname);
+    virtual bool closeFile(){}
+    virtual int getWidth();
+    virtual int getHeight();
+    virtual int getDepth();
+    virtual std::string getName(){return "OSG 3D model";}
+protected:
+//    virtual void init();
+    osg::ref_ptr<osg::Node> model_ptr;
+    osg::Vec3 dimensions;
+};
+
+
+#endif // AC3DMODELOSGDATA_H

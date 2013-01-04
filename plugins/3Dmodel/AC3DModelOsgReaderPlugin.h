@@ -43,6 +43,7 @@ public:
     AC3DModelOsgReaderPlugin();
     ~AC3DModelOsgReaderPlugin();
     virtual ACMedia* mediaFactory(ACMediaType mediaType, const ACMedia* media = 0);
+    virtual ACMediaData* mediaReader(ACMediaType mediaType);
     std::map<std::string, ACMediaType> getSupportedExtensions(ACMediaType media_type = MEDIA_TYPE_ALL);
 };
 
