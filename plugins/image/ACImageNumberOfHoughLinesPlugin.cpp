@@ -45,17 +45,17 @@ ACImageNumberOfHoughLinesPlugin::ACImageNumberOfHoughLinesPlugin() {
     this->mName = "Number of Hough lines";
     this->mDescription = "Image Number of Hough lines plugin";
     this->mId = "";
-	this->mDescriptorsList.push_back("NumberOfHoughLines");
+    this->mDescriptorsList.push_back("Number of Hough Lines");
 }
 
 ACImageNumberOfHoughLinesPlugin::~ACImageNumberOfHoughLinesPlugin() {
 }
 
-std::vector<ACMediaFeatures*> ACImageNumberOfHoughLinesPlugin::calculate(ACMediaData* image_data) {
+std::vector<ACMediaFeatures*> ACImageNumberOfHoughLinesPlugin::calculate(ACMedia* _theMedia, bool _save_timed_feat){
 	cout << "calculating Number of Hough lines from image..." << endl;
 	std::vector<ACMediaFeatures*> allImageFeatures;
 
-	ACColorImageAnalysis* image = new ACColorImageAnalysis(image_data);	
+    ACColorImageAnalysis* image = new ACColorImageAnalysis(_theMedia->getFileName());
 	
 	// probabilistic computeHoughLinesP is better than computeHoughLines
 	ACMediaFeatures* imageColorFeatures = this->calculateNumberOfHoughLinesP(image);
@@ -70,14 +70,9 @@ std::vector<ACMediaFeatures*> ACImageNumberOfHoughLinesPlugin::calculate(ACMedia
 	return allImageFeatures;
 }
 
-std::vector<ACMediaFeatures*> ACImageNumberOfHoughLinesPlugin::calculate(ACMediaData* _aData, ACMedia* _theMedia, bool _save_timed_feat){
-	return this->calculate(_aData);
-	// XS TODO no need for ACMedia here...
-}
-
 ACMediaFeatures* ACImageNumberOfHoughLinesPlugin::calculateNumberOfHoughLinesP(ACColorImageAnalysis* image){ 
 	image->computeHoughLinesP(); 
-	ACMediaFeatures* number_of_hough_linesP = new ACMediaFeatures(image->getNumberOfHoughLinesP(), "NumberOfHoughLinesP");
+    ACMediaFeatures* number_of_hough_linesP = new ACMediaFeatures(image->getNumberOfHoughLinesP(), "Number of Hough Lines");
 	return number_of_hough_linesP;
 }
 

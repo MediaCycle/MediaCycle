@@ -35,16 +35,10 @@
 #ifndef ACIMAGE_H
 #define ACIMAGE_H
 
-#include "ACOpenCVInclude.h"
 #include "ACMedia.h"
 #include "ACImageData.h"
 #include <string>
 #include <iostream>
-
-#include <osg/Texture2D>
-
-// -----------------------------------
-
 
 class ACImage: public ACMedia {
 	// contains the *minimal* information about an image
@@ -58,35 +52,11 @@ public:
 	void saveXMLSpecific(TiXmlElement* _media);
 	int loadXMLSpecific(TiXmlElement* _pMediaNode);
 
-	//void setThumbnail(osg::ref_ptr<osg::Image> _thumbnail) { thumbnail = _thumbnail; thumbnail_width = _thumbnail->width; thumbnail_height = _thumbnail->height; }
-	void setThumbnail(osg::ref_ptr<osg::Image> _thumbnail) { thumbnail = _thumbnail; thumbnail_width = _thumbnail->s(); thumbnail_height = _thumbnail->t(); }
-	osg::ref_ptr<osg::Image> getThumbnail() { return thumbnail; }
-	osg::ref_ptr<osg::Texture2D> getTexture() { return image_texture; }
-	int getThumbnailWidth() {return thumbnail_width;}
-	int getThumbnailHeight() {return thumbnail_height;}
-	void* getThumbnailPtr() { return (void*)image_texture; }
-	
-	IplImage* getData(){return static_cast<IplImage*>(data->getData());}
-	void setData(IplImage* _data);
-	virtual ACMediaData* getMediaData(){return data;} // XS TODO : needs dynamic_cast<ACMediaData*> (data) ??
 	bool extractData(std::string fname);
-	virtual void deleteData();
 
 private:
 	void init();
-	bool computeThumbnail(std::string _fname, int w=0, int h=0);
-	bool computeThumbnail(ACImageData* data_ptr, int w=0, int h=0);
-	bool computeThumbnail(IplImage* img, int w=0, int h=0);
-	bool computeThumbnailSize(int w_, int h_);
-	osg::ref_ptr<osg::Image> openCVToOSG(IplImage* cvImg, int sx=0, int sy=0);
 
-private:
-	static const int default_thumbnail_area;
-	int thumbnail_width, thumbnail_height; 
-	osg::ref_ptr<osg::Image> thumbnail;
-	osg::ref_ptr<osg::Texture2D> image_texture;
-	ACImageData* data;
-	
 };
 
 #endif // ACIMAGE_H

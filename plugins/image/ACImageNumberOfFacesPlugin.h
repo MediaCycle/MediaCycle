@@ -48,9 +48,8 @@ public:
     ACImageNumberOfFacesPlugin();
     ~ACImageNumberOfFacesPlugin();
 
-	//XS TODO why both below ?
-	std::vector<ACMediaFeatures*> calculate(ACMediaData* _data);	
-	std::vector<ACMediaFeatures*> calculate(ACMediaData* _aData, ACMedia* _theMedia, bool _save_timed_feat=false);
+
+    std::vector<ACMediaFeatures*> calculate(ACMedia* _theMedia, bool _save_timed_feat=false);
 private:
 	ACMediaFeatures* calculateNumberOfFaces(ACColorImageAnalysis* image);
 };

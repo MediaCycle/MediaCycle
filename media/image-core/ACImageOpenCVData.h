@@ -1,5 +1,5 @@
 /**
- * @brief Base image data
+ * @brief Image model data and IplImage container, implemented with OpenCV
  * @author Xavier Siebert, Christian Frisson
  * @date 7/04/2011
  * @copyright (c) 2011 – UMONS - Numediart
@@ -29,15 +29,48 @@
  * <mailto:avre@umons.ac.be>
  */
 
-#ifndef ACIMAGEDATA_H
-#define ACIMAGEDATA_H
+#ifndef ACIMAGEOPENCVDATA_H
+#define ACIMAGEOPENCVDATA_H
 
-#include "ACMediaData.h"
+#include "ACImageData.h"
+#include "ACOpenCVInclude.h"
 
-class ACImageData: public ACMediaData {
+class ACImageOpenCVDataContainer : public ACMediaDataContainer, public ACSpatialData {
 public:
-    ACImageData();
-    virtual ~ACImageData(){}
+    ACImageOpenCVDataContainer()
+        : ACMediaDataContainer(), ACSpatialData(), data(0)
+    {}
+    virtual ~ACImageOpenCVDataContainer(){
+        if(data)
+            cvReleaseImage(&data);
+        data = 0;
+    }
+    void setData(IplImage* _data){
+        if(data)
+            cvReleaseImage(&data);
+        data = 0;
+        data = _data;
+    }
+    IplImage* getData(){return data;}
+protected:
+    IplImage* data;
 };
 
-#endif // ACIMAGEDATA_H
+class ACImageOpenCVData: public ACImageData {
+public:
+    ACImageOpenCVData():ACImageData(),image(0){}
+    virtual ~ACImageOpenCVData(){}
+    virtual std::string getName(){return "OpenCV IplImage";}
+
+    virtual bool readData(std::string _fname);
+    virtual bool closeFile(){return true;}
+
+    /// Function for spatial media
+    virtual int getWidth();
+    virtual int getHeight();
+protected:
+    IplImage* image;
+};
+
+
+#endif // ACIMAGEOPENCVDATA_H

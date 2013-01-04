@@ -73,7 +73,7 @@ ACImageTextureWaveletsMomentsPlugin::~ACImageTextureWaveletsMomentsPlugin() {
 //	return allImageFeatures;
 //}
 
-std::vector<ACMediaFeatures*> ACImageTextureWaveletsMomentsPlugin::calculate(ACMediaData* image_data) {
+std::vector<ACMediaFeatures*> ACImageTextureWaveletsMomentsPlugin::calculate(ACMedia* _theMedia, bool _save_timed_feat){
 	cout << "calculating Texture Moments from wavelets" << endl;
 	std::vector<ACMediaFeatures*> allImageFeatures;
 //	ACImageData* local_image_data = 0;
@@ -86,7 +86,7 @@ std::vector<ACMediaFeatures*> ACImageTextureWaveletsMomentsPlugin::calculate(ACM
 //		return allImageFeatures;
 //	}
 
-	ACColorImageAnalysis* image = new ACColorImageAnalysis(image_data);		
+    ACColorImageAnalysis* image = new ACColorImageAnalysis(_theMedia->getFileName());
 	ACMediaFeatures* imageTextureFeatures = this->calculateGaborMoments(image);
 	if (imageTextureFeatures != 0){
 		allImageFeatures.push_back(imageTextureFeatures);
@@ -97,11 +97,6 @@ std::vector<ACMediaFeatures*> ACImageTextureWaveletsMomentsPlugin::calculate(ACM
 	
 	delete image;
 	return allImageFeatures;
-}
-
-std::vector<ACMediaFeatures*> ACImageTextureWaveletsMomentsPlugin::calculate(ACMediaData* _aData, ACMedia* _theMedia, bool _save_timed_feat){
-	return this->calculate(_aData);
-	// no need for ACMedia here...
 }
 
 ACMediaFeatures* ACImageTextureWaveletsMomentsPlugin::calculateGaborMoments(ACColorImageAnalysis* image){

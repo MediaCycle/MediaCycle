@@ -73,13 +73,13 @@ ACColorImageAnalysis::ACColorImageAnalysis(const cv::Mat& img_full_mat) : ACImag
 	scaleImage(img_full_mat);
 }
 
-ACColorImageAnalysis::ACColorImageAnalysis(ACMediaData* image_data) : ACImageAnalysis(){
+/*ACColorImageAnalysis::ACColorImageAnalysis(ACMediaData* image_data) : ACImageAnalysis(){
 	reset();
 	setFileName(image_data->getFileName());	
 	IplImage* tmp = static_cast<IplImage*> (image_data->getData());
 	cv::Mat img_full_mat (tmp);
 	scaleImage(img_full_mat);
-}
+}*/
 
 void ACColorImageAnalysis::reset(){
 	imgp_mat = cv::Mat();

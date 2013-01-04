@@ -72,12 +72,12 @@ ACImageShapeHuMomentsPlugin::~ACImageShapeHuMomentsPlugin() {
 //	return allImageFeatures;
 //}
 
-std::vector<ACMediaFeatures*> ACImageShapeHuMomentsPlugin::calculate(ACMediaData* image_data) {
+std::vector<ACMediaFeatures*> ACImageShapeHuMomentsPlugin::calculate(ACMedia* _theMedia, bool _save_timed_feat){
 	cout << "calculating Shape (Hu) Moments from ACMediaData..." << endl;
 	std::vector<ACMediaFeatures*> allImageFeatures;
-	ACColorImageAnalysis* image = new ACColorImageAnalysis(image_data);	
+    ACColorImageAnalysis* image = new ACColorImageAnalysis(_theMedia->getFileName());
 	
-	ACMediaFeatures* imageShapeFeatures = this->calculateHuMoments(image);
+    ACMediaFeatures* imageShapeFeatures = this->calculateHuMoments(image);
 	if (imageShapeFeatures != 0){
 		allImageFeatures.push_back(imageShapeFeatures);
 	}
@@ -87,11 +87,6 @@ std::vector<ACMediaFeatures*> ACImageShapeHuMomentsPlugin::calculate(ACMediaData
 		
 	delete image;
 	return allImageFeatures;
-}
-
-std::vector<ACMediaFeatures*> ACImageShapeHuMomentsPlugin::calculate(ACMediaData* _aData, ACMedia* _theMedia, bool _save_timed_feat){
-	return this->calculate(_aData);
-	// no need for ACMedia here...
 }
 
 ACMediaFeatures* ACImageShapeHuMomentsPlugin::calculateHuMoments(ACColorImageAnalysis* image){

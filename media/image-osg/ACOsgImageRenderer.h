@@ -40,7 +40,6 @@
 
 class ACOsgImageRenderer : public ACOsgMediaRenderer  {
 protected:
-    osg::ref_ptr<osg::Image> image_image;
     osg::ref_ptr<osg::Geode> image_geode;
     osg::ref_ptr<osg::Geode> aura_geode;
     osg::ref_ptr<osg::Geode> border_geode;
@@ -55,7 +54,6 @@ public:
     ~ACOsgImageRenderer();
     void prepareNodes();
     void updateNodes(double ratio=0.0);
-    virtual osg::ref_ptr<osg::Texture2D> getTexture();
     virtual osg::ref_ptr<osg::Geode> getMainGeode() { return image_geode;}
 };
 #endif

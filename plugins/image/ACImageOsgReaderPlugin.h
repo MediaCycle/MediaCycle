@@ -45,8 +45,9 @@ class ACImageOsgReaderPlugin : public ACMediaReaderPlugin
 {
 public:
     ACImageOsgReaderPlugin();
-    ~ACImageOsgReaderPlugin();
+    virtual ~ACImageOsgReaderPlugin();
     virtual ACMedia* mediaFactory(ACMediaType mediaType, const ACMedia* media = 0);
+    virtual ACMediaData* mediaReader(ACMediaType mediaType);
     std::map<std::string, ACMediaType> getSupportedExtensions(ACMediaType media_type = MEDIA_TYPE_ALL);
 };
 

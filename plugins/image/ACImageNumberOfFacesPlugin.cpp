@@ -45,17 +45,17 @@ ACImageNumberOfFacesPlugin::ACImageNumberOfFacesPlugin() {
     this->mName = "Number of faces";
     this->mDescription = "Image Number of faces plugin";
     this->mId = "";
-	this->mDescriptorsList.push_back("NumberOfFaces");
+    this->mDescriptorsList.push_back("Number of Faces");
 }
 
 ACImageNumberOfFacesPlugin::~ACImageNumberOfFacesPlugin() {
 }
 
-std::vector<ACMediaFeatures*> ACImageNumberOfFacesPlugin::calculate(ACMediaData* image_data) {
+std::vector<ACMediaFeatures*> ACImageNumberOfFacesPlugin::calculate(ACMedia* _theMedia, bool _save_timed_feat){
 	cout << "calculating Number of faces from image..." << endl;
 	std::vector<ACMediaFeatures*> allImageFeatures;
 
-	ACColorImageAnalysis* image = new ACColorImageAnalysis(image_data);	
+    ACColorImageAnalysis* image = new ACColorImageAnalysis(_theMedia->getFileName());
 	
 	ACMediaFeatures* imageColorFeatures = this->calculateNumberOfFaces(image);
 	if (imageColorFeatures != 0){
@@ -69,13 +69,8 @@ std::vector<ACMediaFeatures*> ACImageNumberOfFacesPlugin::calculate(ACMediaData*
 	return allImageFeatures;
 }
 
-std::vector<ACMediaFeatures*> ACImageNumberOfFacesPlugin::calculate(ACMediaData* _aData, ACMedia* _theMedia, bool _save_timed_feat){
-	return this->calculate(_aData);
-	// XS TODO no need for ACMedia here...
-}
-
 ACMediaFeatures* ACImageNumberOfFacesPlugin::calculateNumberOfFaces(ACColorImageAnalysis* image){ 
     image->computeNumberOfFaces(haar_cascade);
-	ACMediaFeatures* number_of_faces = new ACMediaFeatures(image->getNumberOfFaces(), "NumberOfFaces");
+    ACMediaFeatures* number_of_faces = new ACMediaFeatures(image->getNumberOfFaces(), "Number of Faces");
 	return number_of_faces;	
 }

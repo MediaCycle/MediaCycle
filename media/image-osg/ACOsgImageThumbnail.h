@@ -1,8 +1,8 @@
 /**
- * @brief Base image data
- * @author Xavier Siebert, Christian Frisson
- * @date 7/04/2011
- * @copyright (c) 2011 – UMONS - Numediart
+ * @brief A class that allows to share an image texture between the browser and the timeline.
+ * @author Christian Frisson
+ * @date 16/12/2012
+ * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -29,15 +29,29 @@
  * <mailto:avre@umons.ac.be>
  */
 
-#ifndef ACIMAGEDATA_H
-#define ACIMAGEDATA_H
+#ifndef ACOsgImageThumbnail_H
+#define ACOsgImageThumbnail_H
 
-#include "ACMediaData.h"
+#include "ACOsgMediaThumbnail.h"
+#include <string>
+#include <iostream>
 
-class ACImageData: public ACMediaData {
+class ACOsgImageThumbnail: public ACOsgMediaThumbnail {
 public:
-    ACImageData();
-    virtual ~ACImageData(){}
+    ACOsgImageThumbnail(std::string _filename, int media_width, int media_height);
+    virtual ~ACOsgImageThumbnail();
+
+    virtual osg::ref_ptr<osg::Image> getImage() { return thumbnail; }
+    virtual osg::ref_ptr<osg::Texture2D> getTexture() { return image_texture; }
+
+private:
+    bool computeThumbnail(int w=0, int h=0);
+	bool computeThumbnailSize(int w_, int h_);
+
+private:
+	static const int default_thumbnail_area;
+	osg::ref_ptr<osg::Image> thumbnail;
+	osg::ref_ptr<osg::Texture2D> image_texture;
 };
 
-#endif // ACIMAGEDATA_H
+#endif // ACOsgImageThumbnail_H

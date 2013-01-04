@@ -72,7 +72,7 @@ ACImageShapeFourierPolarMomentsPlugin::~ACImageShapeFourierPolarMomentsPlugin() 
 //	return allImageFeatures;
 //}
 
-std::vector<ACMediaFeatures*> ACImageShapeFourierPolarMomentsPlugin::calculate(ACMediaData* image_data) {
+std::vector<ACMediaFeatures*> ACImageShapeFourierPolarMomentsPlugin::calculate(ACMedia* _theMedia, bool _save_timed_feat){
 	cout << "calculating Shape (FourierPolar) Moments from ACMediaData..." << endl;
 	std::vector<ACMediaFeatures*> allImageFeatures;
 //	ACImageData* local_image_data = 0;
@@ -86,7 +86,7 @@ std::vector<ACMediaFeatures*> ACImageShapeFourierPolarMomentsPlugin::calculate(A
 //	}
 
 	// XS todo check if cast worked
-	ACColorImageAnalysis* image = new ACColorImageAnalysis(image_data);
+    ACColorImageAnalysis* image = new ACColorImageAnalysis(_theMedia->getFileName());
 	
 	ACMediaFeatures* imageShapeFeatures = this->calculateFourierPolarMoments(image);
 	if (imageShapeFeatures != 0){
@@ -98,11 +98,6 @@ std::vector<ACMediaFeatures*> ACImageShapeFourierPolarMomentsPlugin::calculate(A
 		
 	delete image;
 	return allImageFeatures;
-}
-
-std::vector<ACMediaFeatures*> ACImageShapeFourierPolarMomentsPlugin::calculate(ACMediaData* _aData, ACMedia* _theMedia, bool _save_timed_feat){
-	return this->calculate(_aData);
-	// no need for ACMedia here...
 }
 
 ACMediaFeatures* ACImageShapeFourierPolarMomentsPlugin::calculateFourierPolarMoments(ACImageAnalysis* image){

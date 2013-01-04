@@ -34,13 +34,14 @@
 
 #include "ACImageOsgReaderPlugin.h"
 #include "ACImage.h"
+#include "ACImageOpenCVData.h"
 #include <iostream>
 
-#include <OsgDB/Registry>
-#include <OsgDB/ReaderWriter>
-#include <OsgDB/FileNameUtils>
-#include <OsgDB/ReaderWriter>
-#include <OsgDB/PluginQuery>
+#include <osgDB/Registry>
+#include <osgDB/ReaderWriter>
+#include <osgDB/FileNameUtils>
+#include <osgDB/ReaderWriter>
+#include <osgDB/PluginQuery>
 
 using namespace std;
 
@@ -70,6 +71,14 @@ ACMedia* ACImageOsgReaderPlugin::mediaFactory(ACMediaType mediaType, const ACMed
     return media;
 }
 
+ACMediaData* ACImageOsgReaderPlugin::mediaReader(ACMediaType mediaType){
+    ACMediaData* media_data(0);
+    if(mediaType&MEDIA_TYPE_IMAGE){
+        media_data = new ACImageOpenCVData();
+    }
+    return media_data;
+}
+
 std::map<std::string,ACMediaType> ACImageOsgReaderPlugin::getSupportedExtensions(ACMediaType media_type){
     std::map<std::string,ACMediaType> extensions;
     if(media_type == MEDIA_TYPE_IMAGE || media_type == MEDIA_TYPE_ALL){
@@ -78,14 +87,14 @@ std::map<std::string,ACMediaType> ACImageOsgReaderPlugin::getSupportedExtensions
         std::cout << "Gathering media file extensions from Osg plugins..." << std::endl;
 #endif//def PARSE_FORMATS_VERBOSE
 
-        // The Osgdb_ffmpeg plugin uses thread locking since 3.0.1
-        // To avoid crashes, Osg plugins should be queried through the OsgBD registry thread, so that its instance initiates the lock for Osgdb_ffmpeg
+        // The osgDB_ffmpeg plugin uses thread locking since 3.0.1
+        // To avoid crashes, Osg plugins should be queried through the OsgBD registry thread, so that its instance initiates the lock for osgDB_ffmpeg
 
         // Open all Osg plugins
-        OsgDB::FileNameList plugins = OsgDB::listAllAvailablePlugins();
-        for(OsgDB::FileNameList::iterator itr = plugins.begin();itr != plugins.end();++itr)
+        osgDB::FileNameList plugins = osgDB::listAllAvailablePlugins();
+        for(osgDB::FileNameList::iterator itr = plugins.begin();itr != plugins.end();++itr)
         {
-            bool library_loaded = OsgDB::Registry::instance()->loadLibrary(*itr);
+            bool library_loaded = osgDB::Registry::instance()->loadLibrary(*itr);
 #ifdef PARSE_FORMATS_VERBOSE
             if(library_loaded)
                 std::cout<<"-- opening plugin "<<*itr<<std::endl;
@@ -93,12 +102,12 @@ std::map<std::string,ACMediaType> ACImageOsgReaderPlugin::getSupportedExtensions
         }
 
         // Get all registered readers/writers from the loaded Osg plugins and check the extensions they provide
-        for(OsgDB::Registry::ReaderWriterList::iterator rw_itr = OsgDB::Registry::instance()->getReaderWriterList().begin();
-            rw_itr != OsgDB::Registry::instance()->getReaderWriterList().end();
+        for(osgDB::Registry::ReaderWriterList::iterator rw_itr = osgDB::Registry::instance()->getReaderWriterList().begin();
+            rw_itr != osgDB::Registry::instance()->getReaderWriterList().end();
             ++rw_itr)
         {
-            OsgDB::ReaderWriter::FormatDescriptionMap rwfdm = (*rw_itr)->supportedExtensions();
-            OsgDB::ReaderWriter::FormatDescriptionMap::iterator fdm_itr;
+            osgDB::ReaderWriter::FormatDescriptionMap rwfdm = (*rw_itr)->supportedExtensions();
+            osgDB::ReaderWriter::FormatDescriptionMap::iterator fdm_itr;
             for(fdm_itr = rwfdm.begin();fdm_itr != rwfdm.end();++fdm_itr)
             {
 #ifdef PARSE_FORMATS_VERBOSE
@@ -110,12 +119,12 @@ std::map<std::string,ACMediaType> ACImageOsgReaderPlugin::getSupportedExtensions
         }
 
         // Close all Osg plugins
-        OsgDB::Registry::instance()->closeAllLibraries();
+        osgDB::Registry::instance()->closeAllLibraries();
 
         // Verify which readers/writers haven't been closed:
 #ifdef PARSE_FORMATS_VERBOSE
-        for(OsgDB::Registry::ReaderWriterList::iterator rw_itr = OsgDB::Registry::instance()->getReaderWriterList().begin();
-            rw_itr != OsgDB::Registry::instance()->getReaderWriterList().end();
+        for(osgDB::Registry::ReaderWriterList::iterator rw_itr = osgDB::Registry::instance()->getReaderWriterList().begin();
+            rw_itr != osgDB::Registry::instance()->getReaderWriterList().end();
             ++rw_itr)
             std::cout<<"-- plugin still open: "<<(*rw_itr)->className()<<std::endl;
 #endif//def PARSE_FORMATS_VERBOSE;

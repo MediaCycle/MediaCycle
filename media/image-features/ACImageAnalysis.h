@@ -40,6 +40,7 @@
 
 #include "cvgabor.h"
 #include "gabor.h"
+#include "ACImage.h"
 #include "ACImageData.h"
 
 // Uses FFTW3 library for FFT

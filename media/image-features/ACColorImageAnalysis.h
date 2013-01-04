@@ -42,7 +42,7 @@ public:
 	ACColorImageAnalysis();
 	ACColorImageAnalysis(const std::string& filename);	
 	ACColorImageAnalysis(const cv::Mat&);
-	ACColorImageAnalysis(ACMediaData* image_data);
+    //ACColorImageAnalysis(ACMediaData* image_data);
 
     ~ACColorImageAnalysis();
 

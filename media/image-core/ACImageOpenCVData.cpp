@@ -1,5 +1,5 @@
 /**
- * @brief Base image data
+ * @brief Image model data and IplImage container, implemented with OpenCV
  * @author Xavier Siebert, Christian Frisson
  * @date 7/04/2011
  * @copyright (c) 2011 – UMONS - Numediart
@@ -29,15 +29,48 @@
  * <mailto:avre@umons.ac.be>
  */
 
-#ifndef ACIMAGEDATA_H
-#define ACIMAGEDATA_H
+#include "ACImageOpenCVData.h"
+#include <string>
+#include <iostream>
+using std::cerr;
+using std::endl;
+using std::string;
 
-#include "ACMediaData.h"
+bool ACImageOpenCVData::readData(std::string _fname){
+    if(_fname==""){
+        std::cerr << "ACImageOpenCVData::readData: filename not set" << std::endl;
+        return false;
+    }
+    image = cvLoadImage(_fname.c_str(), CV_LOAD_IMAGE_COLOR);
+    try {
+        if (!image) {
+            cerr << "Check file name : " << _fname << endl;
+            throw(string(" <ACImageData::readData> CV_LOAD_IMAGE_COLOR : not a color image !"));
+        }
+    }
+    catch (const string& not_image_file) {
+        cerr << not_image_file << endl;
+        return false;
+    }
 
-class ACImageData: public ACMediaData {
-public:
-    ACImageData();
-    virtual ~ACImageData(){}
-};
+    this->data = new ACImageOpenCVDataContainer();
+    ((ACImageOpenCVDataContainer*)data)->setData(image);
 
-#endif // ACIMAGEDATA_H
+    return true;
+}
+
+int ACImageOpenCVData::getWidth(){
+    if(image){
+        return image->width;
+    }
+    else
+        return 0;
+}
+
+int ACImageOpenCVData::getHeight(){
+    if(image){
+        return image->height;
+    }
+    else
+        return 0;
+}

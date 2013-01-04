@@ -51,12 +51,12 @@ ACImageColorMomentsPlugin::ACImageColorMomentsPlugin() {
 ACImageColorMomentsPlugin::~ACImageColorMomentsPlugin() {
 }
 
-std::vector<ACMediaFeatures*> ACImageColorMomentsPlugin::calculate(ACMediaData* image_data) {
+std::vector<ACMediaFeatures*> ACImageColorMomentsPlugin::calculate(ACMedia* _theMedia, bool _save_timed_feat) {
 	cout << "calculating Color Moments from histogram..." << endl;
 	std::vector<ACMediaFeatures*> allImageFeatures;
 
 	// XS TODO: which color model ?
-	ACColorImageAnalysis* image = new ACColorImageAnalysis(image_data);	
+    ACColorImageAnalysis* image = new ACColorImageAnalysis(_theMedia->getFileName());
 	
 //	ACMediaFeatures* imageColorFeatures0 = this->calculateColorFeatures(image, 4, "BGR");
 	ACMediaFeatures* imageColorFeatures = this->calculateColorFeatures(image, 4, "HSV");
@@ -69,11 +69,6 @@ std::vector<ACMediaFeatures*> ACImageColorMomentsPlugin::calculate(ACMediaData* 
 		
 	delete image;
 	return allImageFeatures;
-}
-
-std::vector<ACMediaFeatures*> ACImageColorMomentsPlugin::calculate(ACMediaData* _aData, ACMedia* _theMedia, bool _save_timed_feat){
-	return this->calculate(_aData);
-	// XS TODO no need for ACMedia here...
 }
 
 // default: 4 moments; "HSV"

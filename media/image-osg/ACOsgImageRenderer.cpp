@@ -40,12 +40,13 @@ using namespace osg;
 
 #define IMAGE_BORDER
 
+#include "ACOsgMediaThumbnail.h"
+
 ACOsgImageRenderer::ACOsgImageRenderer()
     :ACOsgMediaRenderer()
 {
     media_type = MEDIA_TYPE_IMAGE;
     node_color = Vec4(0.4f, 0.4f, 0.4f, 1.0f);
-    image_image = 0;
     image_geode = 0;
     border_geode = 0;
     image_transform = 0;
@@ -59,16 +60,18 @@ ACOsgImageRenderer::~ACOsgImageRenderer() {
 }
 
 void ACOsgImageRenderer::imageGeode(bool flip, float sizemul, float zoomin) {
-    image_image = 0;
     image_geode = 0;
     border_geode = 0;
     image_transform = 0;
     aura_geode=0;
-    //ACMediaType media_type = media_cycle->getLibrary()->getMedia(media_index)->getType();
+
+    if(this->shared_thumbnail==""){
+        std::cerr << "ACOsgImageRenderer::imageGeode: no shared thumbnail set, can't create image geode" << std::endl;
+        return;
+    }
+
     if(media){
         ACMediaType media_type = media->getType();
-        if (media_type == MEDIA_TYPE_VIDEO)
-            flip=true;
         int i;
         
         double xstep = 0.0005;
@@ -94,12 +97,21 @@ void ACOsgImageRenderer::imageGeode(bool flip, float sizemul, float zoomin) {
         osg::ref_ptr<Geometry> image_geometry;
         osg::ref_ptr<Geometry> border_geometry;
         Texture2D *image_texture;
-        
-        //width = media_cycle->getThumbnailWidth(media_index);//CF instead of node_index
-        //height = media_cycle->getThumbnailHeight(media_index);//CF instead of node_index
-        width = media->getThumbnailWidth();
-        height = media->getThumbnailHeight();
-        
+
+        ACMediaThumbnail* media_thumbnail = media->getThumbnail(this->shared_thumbnail);
+        if(!media_thumbnail){
+            std::cerr << "ACOsgImageRenderer::imageGeode: couldn't get shared thumbnail '" << this->shared_thumbnail << "'" << std::endl;
+            return;
+        }
+        ACOsgMediaThumbnail* osg_thumbnail = dynamic_cast<ACOsgMediaThumbnail*>(media_thumbnail);
+        if(!osg_thumbnail){
+            std::cerr << "ACOsgImageRenderer::imageGeode: shared thumbnail '" << this->shared_thumbnail << "' isn't of OSG type" << std::endl;
+            return;
+        }
+        width = osg_thumbnail->getWidth();
+        height = osg_thumbnail->getHeight();
+        image_texture = osg_thumbnail->getTexture();
+
         //std::cout << "Geode with (thumbnail) width " <<  width << " and height " << height << std::endl;
         
         image_transform = new MatrixTransform();
@@ -159,7 +171,6 @@ void ACOsgImageRenderer::imageGeode(bool flip, float sizemul, float zoomin) {
         // Texture State (image)
         
         //ACMediaType media_type = media_cycle->getLibrary()->getMedia(media_index)->getType();
-        image_texture = this->getTexture();
         image_texture->setResizeNonPowerOfTwoHint(false);
         
         // XS TODO add this line?
@@ -256,7 +267,7 @@ void ACOsgImageRenderer::imageGeode(bool flip, float sizemul, float zoomin) {
         
         image_transform->addChild(border_geode);
         
-#endif
+
         
         
         ground_geode = new Geode();
@@ -271,13 +282,16 @@ void ACOsgImageRenderer::imageGeode(bool flip, float sizemul, float zoomin) {
         state->setMode(GL_LINE_SMOOTH, StateAttribute::ON);
         ((ShapeDrawable*)ground_geode->getDrawable(0))->setColor(osg::Vec4(1,1,1,1));
         image_transform->addChild(ground_geode);
+
+#endif
         
         image_transform->setUserData(new ACRefId(node_index));
         image_geode->setUserData(new ACRefId(node_index));
         
     }
-}void ACOsgImageRenderer::auraImageGeode(bool flip, float sizemul, float zoomin) {
-    image_image = 0;
+}
+
+void ACOsgImageRenderer::auraImageGeode(bool flip, float sizemul, float zoomin) {
     image_geode = 0;
     border_geode = 0;
     image_transform = 0;
@@ -313,11 +327,20 @@ void ACOsgImageRenderer::imageGeode(bool flip, float sizemul, float zoomin) {
         osg::ref_ptr<Geometry> border_geometry;
         Texture2D *image_texture;
         
-        //width = media_cycle->getThumbnailWidth(media_index);//CF instead of node_index
-        //height = media_cycle->getThumbnailHeight(media_index);//CF instead of node_index
-        width = media->getThumbnailWidth();
-        height = media->getThumbnailHeight();
-        
+        ACMediaThumbnail* media_thumbnail = media->getThumbnail(this->shared_thumbnail);
+        if(!media_thumbnail){
+            std::cerr << "ACOsgImageRenderer::auraImageGeode: couldn't get shared thumbnail '" << this->shared_thumbnail << "'" << std::endl;
+            return;
+        }
+        ACOsgMediaThumbnail* osg_thumbnail = dynamic_cast<ACOsgMediaThumbnail*>(media_thumbnail);
+        if(!osg_thumbnail){
+            std::cerr << "ACOsgImageRenderer::auraImageGeode: shared thumbnail '" << this->shared_thumbnail << "' isn't of OSG type" << std::endl;
+            return;
+        }
+        width = osg_thumbnail->getWidth();
+        height = osg_thumbnail->getHeight();
+        image_texture = osg_thumbnail->getTexture();
+
         //std::cout << "Geode with (thumbnail) width " <<  width << " and height " << height << std::endl;
         
         image_transform = new MatrixTransform();
@@ -375,20 +398,6 @@ void ACOsgImageRenderer::imageGeode(bool flip, float sizemul, float zoomin) {
         image_geometry->setTexCoordArray(0, texcoord);
         
         // Texture State (image)
-        
-        //ACMediaType media_type = media_cycle->getLibrary()->getMedia(media_index)->getType();
-        if (media_type == MEDIA_TYPE_IMAGE)
-        {
-            //image_texture = ((ACImage*)(media_cycle->getLibrary()->getMedia(media_index)))->getTexture();
-            image_texture = ((ACImage*)media)->getTexture();
-        }
-        else if (media_type == MEDIA_TYPE_VIDEO)
-        {
-#ifdef SUPPORT_VIDEO
-            //image_texture = ((ACVideo*)(media_cycle->getLibrary()->getMedia(media_index)))->getTexture();
-            image_texture = ((ACVideo*)media)->getTexture();
-#endif//SUPPORT_VIDEO
-        }
         image_texture->setResizeNonPowerOfTwoHint(false);
         
         // XS TODO add this line?
@@ -485,7 +494,6 @@ void ACOsgImageRenderer::imageGeode(bool flip, float sizemul, float zoomin) {
         
         image_transform->addChild(border_geode);
         
-#endif
         aura_geode = new Geode();
         
         state = aura_geode->getOrCreateStateSet();
@@ -513,17 +521,12 @@ void ACOsgImageRenderer::imageGeode(bool flip, float sizemul, float zoomin) {
         ((ShapeDrawable*)ground_geode->getDrawable(0))->setColor(osg::Vec4(1,1,1,1));
         image_transform->addChild(ground_geode);
         
+#endif
+
         image_transform->setUserData(new ACRefId(node_index));
         image_geode->setUserData(new ACRefId(node_index));
         
     }
-}
-
-osg::ref_ptr<osg::Texture2D> ACOsgImageRenderer::getTexture(){
-    osg::ref_ptr<osg::Texture2D> texture;
-    if(media)
-           texture = ((ACImage*)media)->getTexture();
-    return texture;
 }
 
 void ACOsgImageRenderer::prepareNodes() {
@@ -571,10 +574,12 @@ void ACOsgImageRenderer::updateNodes(double ratio) {
 
     unsigned int mask = (unsigned int)-1;
     if(attribute->getNavigationLevel() >= media_cycle->getNavigationLevel()) {
-        image_transform->setNodeMask(mask);
+        if (image_transform)
+            image_transform->setNodeMask(mask);
     }
     else {
-        image_transform->setNodeMask(0);
+        if (image_transform)
+            image_transform->setNodeMask(0);
     }
 
     z = 0;
@@ -587,14 +592,14 @@ void ACOsgImageRenderer::updateNodes(double ratio) {
             this->auraImageGeode();
             media_node->addChild(image_transform);
             if (media_cycle->getBrowserMode() == AC_MODE_CLUSTERS){
-                    cluster_index = attribute->getClusterId();
-                    osg::ref_ptr<osg::Vec4Array> colors = new Vec4Array(1);
-                    (*colors)[0] = node_color;
-                    if(cluster_colors.size()>0)
-                        (*colors)[0] = cluster_colors[attribute->getClusterId()%cluster_colors.size()];
-                    if ((ShapeDrawable*)border_geode->getDrawable(0))
-                        ((ShapeDrawable*)border_geode->getDrawable(0))->setColor(cluster_colors[attribute->getClusterId()%cluster_colors.size()]);
-               
+                cluster_index = attribute->getClusterId();
+                osg::ref_ptr<osg::Vec4Array> colors = new Vec4Array(1);
+                (*colors)[0] = node_color;
+                if(cluster_colors.size()>0)
+                    (*colors)[0] = cluster_colors[attribute->getClusterId()%cluster_colors.size()];
+                if ((ShapeDrawable*)border_geode->getDrawable(0))
+                    ((ShapeDrawable*)border_geode->getDrawable(0))->setColor(cluster_colors[attribute->getClusterId()%cluster_colors.size()]);
+
             }
             //unsigned int mask = (unsigned int)-1;
             //aura_geode->setNodeMask(mask);
@@ -608,13 +613,13 @@ void ACOsgImageRenderer::updateNodes(double ratio) {
                 this->imageGeode();
                 media_node->addChild(image_transform);
                 if (media_cycle->getBrowserMode() == AC_MODE_CLUSTERS){
-                        cluster_index = attribute->getClusterId();
-                        osg::ref_ptr<osg::Vec4Array> colors = new Vec4Array(1);
-                        (*colors)[0] = node_color;
-                        if(cluster_colors.size()>0)
-                            (*colors)[0] = cluster_colors[attribute->getClusterId()%cluster_colors.size()];
-                        if ((ShapeDrawable*)border_geode->getDrawable(0))
-                            ((ShapeDrawable*)border_geode->getDrawable(0))->setColor(cluster_colors[attribute->getClusterId()%cluster_colors.size()]);
+                    cluster_index = attribute->getClusterId();
+                    osg::ref_ptr<osg::Vec4Array> colors = new Vec4Array(1);
+                    (*colors)[0] = node_color;
+                    if(cluster_colors.size()>0)
+                        (*colors)[0] = cluster_colors[attribute->getClusterId()%cluster_colors.size()];
+                    if ((ShapeDrawable*)border_geode->getDrawable(0))
+                        ((ShapeDrawable*)border_geode->getDrawable(0))->setColor(cluster_colors[attribute->getClusterId()%cluster_colors.size()]);
                 }
                 //aura_geode->setNodeMask(0);
             }
@@ -633,7 +638,7 @@ void ACOsgImageRenderer::updateNodes(double ratio) {
                     if(cluster_colors.size()>0)
                         (*colors)[0] = cluster_colors[attribute->getClusterId()%cluster_colors.size()];
                     if ((ShapeDrawable*)border_geode->getDrawable(0))
-                    ((ShapeDrawable*)border_geode->getDrawable(0))->setColor(cluster_colors[attribute->getClusterId()%cluster_colors.size()]);
+                        ((ShapeDrawable*)border_geode->getDrawable(0))->setColor(cluster_colors[attribute->getClusterId()%cluster_colors.size()]);
                 }
             }
         }

@@ -45,9 +45,7 @@ public:
     ACImageNumberOfHoughLinesPlugin();
     ~ACImageNumberOfHoughLinesPlugin();
 
-	//XS TODO why both below ?
-	std::vector<ACMediaFeatures*> calculate(ACMediaData* _data);	
-	std::vector<ACMediaFeatures*> calculate(ACMediaData* _aData, ACMedia* _theMedia, bool _save_timed_feat=false);
+    std::vector<ACMediaFeatures*> calculate(ACMedia* _theMedia, bool _save_timed_feat=false);
 private:
 	ACMediaFeatures* calculateNumberOfHoughLines(ACColorImageAnalysis* image);
 	ACMediaFeatures* calculateNumberOfHoughLinesP(ACColorImageAnalysis* image);
