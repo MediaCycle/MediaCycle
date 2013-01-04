@@ -45,15 +45,14 @@ class ACSensorData: public ACMediaData {
 public:
 	ACSensorData();
 	~ACSensorData();
-	ACSensorData(std::string _fname);
 
     virtual bool readData(std::string _fname){return false;}
 	virtual void* getData() {return (void*)(sensor_ptr);}
-	virtual void setData(std::string* _data);	
+    virtual void setData(std::string* _data);
+
+    virtual std::string getName(){return "sensor data";}
 
 protected:
-	virtual void init();
 	std::map<std::string,float> * sensor_ptr;
-	
 };
 #endif // ACSENSORDATA_H

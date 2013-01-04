@@ -43,8 +43,6 @@
 
 class ACSensor : public ACMedia {
 	// contains the *minimal* information about a Sensor
-protected:
-	ACSensorData* data;
 public:
 	ACSensor();
     ACSensor(const ACSensor& m);
@@ -53,12 +51,8 @@ private:
     void init();
 	
 public:
-	void deleteData();
 	void saveACLSpecific(std::ofstream &library_file);
 	int loadACLSpecific(std::ifstream &library_file);
 	bool extractData(std::string fname);
-	ACMediaData* getMediaData(){return data;} // XS TODO : needs dynamic_cast<ACMediaData*> (data) ??;
-	
-	virtual void* getThumbnailPtr(){return 0;} // XS TODO change this
 };
 #endif // ACSENSOR_H

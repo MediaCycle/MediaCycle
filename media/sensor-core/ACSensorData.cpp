@@ -42,18 +42,8 @@ using std::endl;
 using std::string;
 
 ACSensorData::ACSensorData(){ 
-	this->init();
-}
-
-void ACSensorData::init() {
 	media_type = MEDIA_TYPE_SENSOR;
 	sensor_ptr=0;
-}
-
-ACSensorData::ACSensorData(std::string _fname) { 
-	this->init();
-	file_name=_fname;
-	this->readData(_fname);
 }
 
 ACSensorData::~ACSensorData() {
@@ -64,11 +54,7 @@ ACSensorData::~ACSensorData() {
 	}
 }
 
-
 void ACSensorData::setData(string* _data){
-	
 	if (sensor_ptr)
 		delete sensor_ptr;
-	
-	
 }

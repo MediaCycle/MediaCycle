@@ -46,37 +46,21 @@ ACSensor::ACSensor(const ACSensor& m) : ACMedia(m) {
 
 void ACSensor::init(){
     media_type = MEDIA_TYPE_SENSOR;
-    data =NULL;
 }
 
 ACSensor::~ACSensor(){
-	if (data!=NULL)
-		delete data;
 }
 
-void ACSensor::deleteData(){
-	if (data)
-		delete data;
-	data=0;
-}
 void ACSensor::saveACLSpecific(ofstream &library_file) {
 	
 	library_file << endl;
 }
 
 int ACSensor::loadACLSpecific(ifstream &library_file) {
-	
-
-	
 	return 1;
 }
 
 bool ACSensor::extractData(string fname){
-	if (data){
-		delete data;
-		data=0;
-	}
-	data = new ACSensorData(fname);
 	if (data!=0){
 		if (data->getData()==NULL){
 			delete data;
