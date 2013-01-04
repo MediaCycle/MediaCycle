@@ -63,9 +63,8 @@ ACPosPlugArchipelAtollTimeline::~ACPosPlugArchipelAtollTimeline()
 {
 }
 
-void ACPosPlugArchipelAtollTimeline::setMediaCycle(MediaCycle* _media_cycle)
+void ACPosPlugArchipelAtollTimeline::mediaCycleSet()
 {
-    this->media_cycle=_media_cycle;
     // CF this will work only since/if we load feature plugins before this plugin...
     //this->updateAvailableFeatures();
 }

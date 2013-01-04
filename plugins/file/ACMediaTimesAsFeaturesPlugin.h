@@ -1,7 +1,7 @@
 /**
- * @brief A plugin that wraps the file size and last write time and directory depth as features.
+ * @brief A plugin that wraps the media start/end times and duration as features.
  * @author Christian Frisson
- * @date 6/09/2012
+ * @date 10/10/2012
  * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -29,17 +29,17 @@
  * <mailto:avre@umons.ac.be>
  */
 
-#ifndef _ACFileFeaturesPlugin_H
-#define	_ACFileFeaturesPlugin_H
+#ifndef _ACMediaTimesAsFeaturesPlugin_H
+#define	_ACMediaTimesAsFeaturesPlugin_H
 
 #include <MediaCycle.h>
 #include<iostream>
 
-class ACFileFeaturesPlugin : public ACFeaturesPlugin {
+class ACMediaTimesAsFeaturesPlugin : public ACFeaturesPlugin {
 public:
-	ACFileFeaturesPlugin();
-	~ACFileFeaturesPlugin();
-	
-    virtual std::vector<ACMediaFeatures*> calculate(ACMedia* theMedia, bool _save_timed_feat=false);
+    ACMediaTimesAsFeaturesPlugin();
+    ~ACMediaTimesAsFeaturesPlugin();
+    virtual std::vector<ACMediaFeatures*> calculate(ACMedia* theMedia, bool _save_timed_feat = false);
 };
-#endif	/* _ACFileFeaturesPlugin_H */
+
+#endif //_ACMediaTimesAsFeaturesPlugin_H

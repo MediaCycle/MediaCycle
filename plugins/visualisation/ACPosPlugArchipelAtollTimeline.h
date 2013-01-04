@@ -43,7 +43,7 @@ class ACPosPlugArchipelAtollTimeline : public ACVisPlugin2Desc {
         ~ACPosPlugArchipelAtollTimeline();
 		virtual void updateNextPositions(ACMediaBrowser* );
         // This shortcuts updateAvailableFeatures()
-        virtual void setMediaCycle(MediaCycle* _media_cycle);
+        virtual void mediaCycleSet();
         //virtual bool updateAvailableFeatures();
 };
 #endif	/* _ACPosPlugArchipelAtollTimeline_ */

@@ -1,7 +1,7 @@
 /**
- * @brief A plugin that wraps the file size and last write time and directory depth as features.
+ * @brief A plugin that wraps the import rank as feature.
  * @author Christian Frisson
- * @date 6/09/2012
+ * @date 17/12/2012
  * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -29,17 +29,29 @@
  * <mailto:avre@umons.ac.be>
  */
 
-#ifndef _ACFileFeaturesPlugin_H
-#define	_ACFileFeaturesPlugin_H
+#include "ACImportRankAsFeature.h"
+using namespace std;
 
-#include <MediaCycle.h>
-#include<iostream>
+ACImportRankAsFeature::ACImportRankAsFeature() : ACFeaturesPlugin() {
+    //vars herited from ACPlugin
+    this->mMediaType = MEDIA_TYPE_ALL;
+    this->mName = "Import Rank";
+    this->mDescription = "Import Rank (convenient for the sort against the order of import)";
+    this->mId = "";
+    this->mDescriptorsList.push_back(this->mName);
+    this->import_rank = 0;
+}
 
-class ACFileFeaturesPlugin : public ACFeaturesPlugin {
-public:
-	ACFileFeaturesPlugin();
-	~ACFileFeaturesPlugin();
-	
-    virtual std::vector<ACMediaFeatures*> calculate(ACMedia* theMedia, bool _save_timed_feat=false);
-};
-#endif	/* _ACFileFeaturesPlugin_H */
+ACImportRankAsFeature::~ACImportRankAsFeature() {
+}
+
+std::vector<ACMediaFeatures*> ACImportRankAsFeature::calculate(ACMedia* theMedia, bool _save_timed_feat) {
+    std::vector<ACMediaFeatures*> desc;
+    ACMediaFeatures* import_rank_feat;
+    vector<float> import_rank_value;
+    //import_rank_value.push_back( theMedia->getId()); // won't work, media ids are attributed after the import
+    import_rank_value.push_back( this->import_rank++ ); //
+    import_rank_feat = new ACMediaFeatures(import_rank_value, this->mName);
+    desc.push_back(import_rank_feat);
+    return desc;
+}

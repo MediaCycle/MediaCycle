@@ -1,8 +1,8 @@
 /**
  * @brief ACVisPlugin2Desc.cpp
- * @author Thierry Ravet
- * @date 15/12/2012
- * @copyright (c) 2012 – UMONS - Numediart
+ * @author Christian Frisson
+ * @date 04/01/2013
+ * @copyright (c) 2013 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -46,9 +46,8 @@ ACVisPlugin2Desc::ACVisPlugin2Desc() : ACClusterPositionsPlugin()
     //local vars
 }
 
-void ACVisPlugin2Desc::setMediaCycle(MediaCycle* _media_cycle)
+void ACVisPlugin2Desc::mediaCycleSet()
 {
-    this->media_cycle=_media_cycle;
     // CF this will work only since/if we load feature plugins before this plugin...
     this->updateAvailableFeatures();
 }

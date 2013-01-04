@@ -1,35 +1,32 @@
-/*
- *  ACFileFeaturesPlugin.cpp
- *  MediaCycle
- *
- *  @author Christian Frisson
- *  @date 06/09/2012
- *  @copyright (c) 2012 – UMONS - Numediart
- *  
- *  MediaCycle of University of Mons – Numediart institute is 
- *  licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
- *  licence (the “License”); you may not use this file except in compliance 
- *  with the License.
- *  
- *  This program is free software: you can redistribute it and/or 
- *  it under the terms of the GNU Affero General Public License as
- *  published by the Free Software Foundation, either version 3 of the
- *  License, or (at your option) any later version.
- *  
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Affero General Public License for more details.
- *  
- *  You should have received a copy of the GNU Affero General Public License
- *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
- *  
- *  Each use of this software must be attributed to University of Mons – 
- *  Numediart Institute
- *  
- *  Any other additional authorizations may be asked to avre@umons.ac.be 
- *  <mailto:avre@umons.ac.be>
- *
+/**
+ * @brief A plugin that wraps the file size and last write time and directory depth as features.
+ * @author Christian Frisson
+ * @date 6/09/2012
+ * @copyright (c) 2012 – UMONS - Numediart
+ * 
+ * MediaCycle of University of Mons – Numediart institute is 
+ * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
+ * licence (the “License”); you may not use this file except in compliance 
+ * with the License.
+ * 
+ * This program is free software: you can redistribute it and/or 
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * 
+ * Each use of this software must be attributed to University of Mons – 
+ * Numediart Institute
+ * 
+ * Any other additional authorizations may be asked to avre@umons.ac.be 
+ * <mailto:avre@umons.ac.be>
  */
 
 #include "ACFileFeaturesPlugin.h"
@@ -43,16 +40,17 @@ namespace fs = boost::filesystem;
 ACFileFeaturesPlugin::ACFileFeaturesPlugin() : ACFeaturesPlugin() {
     this->mMediaType = MEDIA_TYPE_ALL;
     this->mName = "File Features";
-    this->mDescription = "File Features Plugin (Size, Last Write Time)";
+    this->mDescription = "File Features Plugin (Size, Last Write Time, Directory Depth)";
     this->mId = "";
     this->mDescriptorsList.push_back("File Size");
     this->mDescriptorsList.push_back("File Last Write Time");
+    this->mDescriptorsList.push_back("File Directory Depth");
 }
 
 ACFileFeaturesPlugin::~ACFileFeaturesPlugin() {	
 }
 
-std::vector<ACMediaFeatures*> ACFileFeaturesPlugin::calculate(ACMediaData* File_data, ACMedia* theMedia, bool _save_timed_feat) {
+std::vector<ACMediaFeatures*> ACFileFeaturesPlugin::calculate(ACMedia* theMedia, bool _save_timed_feat) {
     std::vector<ACMediaFeatures*> desc;
 
     std::string file_name = theMedia->getFileName();
@@ -81,8 +79,18 @@ std::vector<ACMediaFeatures*> ACFileFeaturesPlugin::calculate(ACMediaData* File_
     ACMediaFeatures* last_write_time_feat;
     vector<float> last_write_time_value;
     last_write_time_value.push_back(fs::last_write_time( p ));
-    last_write_time_feat = new ACMediaFeatures(last_write_time_value, "Last Write Time");
+    last_write_time_feat = new ACMediaFeatures(last_write_time_value, "File Last Write Time");
     desc.push_back(last_write_time_feat);
+
+    char slash('/');
+    #ifdef __WIN32__
+    slash = '\\';
+    #endif
+    ACMediaFeatures* directory_depth_feat;
+    vector<float> directory_depth_value;
+    directory_depth_value.push_back( (int) std::count(file_name.begin(), file_name.end(), slash) );
+    directory_depth_feat = new ACMediaFeatures(directory_depth_value, "File Directory Depth");
+    desc.push_back(directory_depth_feat);
 
     return desc;
 }

@@ -1,7 +1,7 @@
 /**
- * @brief A plugin that wraps the file size and last write time and directory depth as features.
+ * @brief A plugin that wraps the import rank as feature.
  * @author Christian Frisson
- * @date 6/09/2012
+ * @date 17/12/2012
  * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -29,17 +29,19 @@
  * <mailto:avre@umons.ac.be>
  */
 
-#ifndef _ACFileFeaturesPlugin_H
-#define	_ACFileFeaturesPlugin_H
+#ifndef _ACImportRankAsFeature_H
+#define	_ACImportRankAsFeature_H
 
 #include <MediaCycle.h>
 #include<iostream>
 
-class ACFileFeaturesPlugin : public ACFeaturesPlugin {
+class ACImportRankAsFeature : public ACFeaturesPlugin {
 public:
-	ACFileFeaturesPlugin();
-	~ACFileFeaturesPlugin();
-	
-    virtual std::vector<ACMediaFeatures*> calculate(ACMedia* theMedia, bool _save_timed_feat=false);
+    ACImportRankAsFeature();
+    ~ACImportRankAsFeature();
+    virtual std::vector<ACMediaFeatures*> calculate(ACMedia* theMedia, bool _save_timed_feat = false);
+protected:
+    long import_rank;
 };
-#endif	/* _ACFileFeaturesPlugin_H */
+
+#endif //_ACImportRankAsFeature_H

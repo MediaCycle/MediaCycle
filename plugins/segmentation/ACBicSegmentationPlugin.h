@@ -47,7 +47,7 @@ public:
     //  XS TODO clean API !!
 
     std::vector<ACMedia*> segment(ACMediaTimedFeature* _MTF, ACMedia* _theMedia);
-    virtual std::vector<ACMedia*> segment(ACMediaData* audio_data, ACMedia*){return std::vector<ACMedia*>();}
+    virtual std::vector<ACMedia*> segment(ACMedia*){return std::vector<ACMedia*>();}
 
     void setParameters(float _lambda = 1, int _samplingrate = 1, int _Wmin = 20, float _bic_thresh = 1, int _jump_width = 5, int _discard_borders = 5);
 

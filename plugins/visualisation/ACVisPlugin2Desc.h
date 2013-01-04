@@ -1,8 +1,8 @@
 /**
  * @brief ACVisPlugin2Desc.h
  * @author Christian Frisson
- * @date 04/12/2012
- * @copyright (c) 2012 – UMONS - Numediart
+ * @date 04/01/2013
+ * @copyright (c) 2013 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -44,7 +44,7 @@ public:
     ACVisPlugin2Desc();
     ~ACVisPlugin2Desc();
     virtual void updateNextPositions(ACMediaBrowser* );
-    virtual void setMediaCycle(MediaCycle* _media_cycle);
+    virtual void mediaCycleSet();
     void assignedFeaturesChanged();
 protected:
     virtual bool updateAvailableFeatures();
