@@ -34,6 +34,7 @@
 
 #include "ACPDFPoDoFoReaderPlugin.h"
 #include "ACPDF.h"
+#include "ACPDFPoDoFoData.h"
 #include "ACMediaFactory.h"
 #include <iostream>
 
@@ -63,6 +64,14 @@ ACMedia* ACPDFPoDoFoReaderPlugin::mediaFactory(ACMediaType mediaType, const ACMe
             media = new ACPDF();
     }
     return media;
+}
+
+ACMediaData* ACPDFPoDoFoReaderPlugin::mediaReader(ACMediaType mediaType){
+    ACMediaData* media_data(0);
+    if(mediaType&MEDIA_TYPE_PDF){
+        media_data = new ACPDFPoDoFoData();
+    }
+    return media_data;
 }
 
 std::map<std::string,ACMediaType> ACPDFPoDoFoReaderPlugin::getSupportedExtensions(ACMediaType media_type){

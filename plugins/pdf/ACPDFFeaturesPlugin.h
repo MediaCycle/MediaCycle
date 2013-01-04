@@ -43,7 +43,7 @@ public:
 	ACPDFFeaturesPlugin();
 	~ACPDFFeaturesPlugin();
 
-	virtual std::vector<ACMediaFeatures*> calculate(ACMediaData* _Data, ACMedia* theMedia, bool _save_timed_feat=false);
+    virtual std::vector<ACMediaFeatures*> calculate(ACMedia* theMedia, bool _save_timed_feat=false);
 };
 
 #endif	/* _ACPDFFeaturesPlugin_H */

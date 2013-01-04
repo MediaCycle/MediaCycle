@@ -37,8 +37,7 @@
 #include <vector>
 #include <string>
 
-ACPDFFeaturesPlugin::ACPDFFeaturesPlugin() {
-	
+ACPDFFeaturesPlugin::ACPDFFeaturesPlugin() : ACFeaturesPlugin() {
     this->mMediaType = MEDIA_TYPE_PDF;
     this->mName = "PDF Features (Page Count)";
     this->mDescription = "PDF Features Plugin (Page Count)";
@@ -49,21 +48,12 @@ ACPDFFeaturesPlugin::~ACPDFFeaturesPlugin() {
 	
 }
 
-std::vector<ACMediaFeatures*> ACPDFFeaturesPlugin::calculate(ACMediaData* pdf_data, ACMedia* theMedia, bool _save_timed_feat) {
+std::vector<ACMediaFeatures*> ACPDFFeaturesPlugin::calculate(ACMedia* theMedia, bool _save_timed_feat) {
 	std::vector<ACMediaFeatures*> desc;
-	
 	ACMediaFeatures* page_count;
-	
-	//ACPDF pdf_media = static_cast< ACPDF > (theMedia);
-
 	vector<float> count;
-	count.resize(1);
-	count[0] = (float) ((ACPDF*) theMedia)->getPageCount();
-	
-	page_count = new ACMediaFeatures(count, "Page Count");  
-
+    count.push_back( (float) ((ACPDF*) theMedia)->getPageCount());
+    page_count = new ACMediaFeatures(count, "Page Count");
 	desc.push_back(page_count);	
-		
 	return desc;
 }
-

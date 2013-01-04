@@ -63,16 +63,8 @@ public:
 	//void setThumbnail(IplImage *_thumbnail) { thumbnail = _thumbnail; thumbnail_width = _thumbnail->width; thumbnail_height = _thumbnail->height; }
 	osg::ref_ptr<osg::Image> getThumbnail() { return thumbnail; }
 	osg::ref_ptr<osg::Texture2D> getTexture() { return image_texture; }
-	void* getThumbnailPtr() { return (void*)image_texture;}//thumbnail; } // 
-	int getThumbnailWidth() {return thumbnail_width;}
-	int getThumbnailHeight() {return thumbnail_height;}
-	osg::ref_ptr<osg::ImageStream> getStream() {return image_stream;}
 
-	PoDoFo::PdfDocument* getData();//{return data->getData();}
-	void setData(PoDoFo::PdfMemDocument* _data);
-	virtual ACMediaData* getMediaData(){return data;}
 	bool extractData(std::string fname);
-	virtual void deleteData();
 	
 	int getPageCount(){return page_count;}
 
@@ -83,10 +75,9 @@ private:
 private:
 	static const int default_thumbnail_area;
 	int thumbnail_width, thumbnail_height;
-	osg::ref_ptr<osg::ImageStream>image_stream;	
 	osg::ref_ptr<osg::Image> thumbnail;
 	osg::ref_ptr<osg::Texture2D> image_texture;
-	ACPDFData* data;
+//	ACPDFData* data;
 	
 	std::string author,creator,subject,title,keywords,format_unit;
 	int page_count;
