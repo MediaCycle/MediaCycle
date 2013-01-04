@@ -48,7 +48,6 @@ class ACAudioStkEngineRendererPlugin : public QObject, public ACPluginQt, public
 public:
     ACAudioStkEngineRendererPlugin();
     virtual ~ACAudioStkEngineRendererPlugin();
-    virtual void setMediaCycle(MediaCycle* _media_cycle);
     virtual std::map<std::string, ACMediaType> getSupportedExtensions(ACMediaType media_type = MEDIA_TYPE_ALL);
     virtual bool performActionOnMedia(std::string action, long int mediaId, std::string value="");
     virtual std::map<std::string,ACMediaType> availableMediaActions();

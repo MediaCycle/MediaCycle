@@ -36,11 +36,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#ifdef DOUBLE
+/*#ifdef DOUBLE
 #define real double
 #else
 #define real float
-#endif
+#endif*/
 
 #ifdef	__cplusplus
 extern "C" {
@@ -51,7 +51,7 @@ short *sgetmem (const int leng);
 long *lgetmem (const int leng);
 double *dgetmem (const int leng);
 float *fgetmem (const int leng);
-real *rgetmem (const int leng);
+//real *rgetmem (const int leng);
 float **ffgetmem (const int leng);
 
 

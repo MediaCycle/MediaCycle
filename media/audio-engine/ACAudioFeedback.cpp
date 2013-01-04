@@ -37,6 +37,14 @@
 //DT : to have access to the media/audio functions
 #include <ACAudio.h>
 
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <sndfile.hh>
+
+#include <stdint.h>
+#include <stdarg.h>
+
 #define MAX_N_BEATS 16
 
 int set_my_thread_priority(int priority) {
@@ -1850,7 +1858,25 @@ int ACAudioFeedback::createSourceWithPosition(int loop_id, float x, float y, flo
 	if (!tmp_audio_ptr) return -1;
 	int samplesize = tmp_audio_ptr->getNFrames();
 	float* dataf = 0;// = new float[samplesize];
-	dataf = tmp_audio_ptr->getSamples();
+
+    //dataf = tmp_audio_ptr->getSamples();
+
+    SF_INFO sfinfo;
+    SNDFILE* testFile;
+    if(testFile = sf_open (tmp_audio_ptr->getFileName().c_str(), SFM_READ, &sfinfo)){
+        int sample_rate = sfinfo.samplerate;
+        int channels = sfinfo.channels;
+        if (tmp_audio_ptr->getSampleStart() < 0)
+            tmp_audio_ptr->setSampleStart(0);
+        if (tmp_audio_ptr->getSampleEnd() < 0)
+            tmp_audio_ptr->setSampleEnd(sfinfo.frames);
+
+        dataf = new float[(long) tmp_audio_ptr->getNFrames() * tmp_audio_ptr->getChannels()];
+
+        sf_seek(testFile, tmp_audio_ptr->getSampleStart(), SEEK_SET);
+        sf_readf_float(testFile, dataf, tmp_audio_ptr->getNFrames());
+        sf_close(testFile);
+    }
 
     if (dataf) {
 		size = samplesize * sizeof(float);

@@ -32,22 +32,24 @@
  *
  */
 
-#include <ACPlugin.h>
+//#include <ACPlugin.h>
 
 #ifndef ACAudioOsgRendererPlugin_H
 #define	ACAudioOsgRendererPlugin_H
 
 #include "ACOsgRendererPlugin.h"
 
-class ACAudioOsgRendererPlugin : public ACOsgRendererPlugin
+class ACAudioOsgRendererPlugin : virtual public ACOsgRendererPlugin
 {
 public:
     ACAudioOsgRendererPlugin();
-    ~ACAudioOsgRendererPlugin();
+    virtual ~ACAudioOsgRendererPlugin();
     virtual std::map<std::string, ACMediaType> getSupportedExtensions(ACMediaType media_type = MEDIA_TYPE_ALL);
     virtual ACOsgMediaRenderer* createMediaRenderer(ACMediaType media_type);
     virtual ACOsgTrackRenderer* createTrackRenderer(ACMediaType media_type);
     virtual std::vector<ACMediaType> getSupportedMediaTypes();
+protected:
+    std::vector<std::string> browser_node_thumbnails, timeline_playback_thumbnails, timeline_summary_thumbnails;
 };
 
 #endif

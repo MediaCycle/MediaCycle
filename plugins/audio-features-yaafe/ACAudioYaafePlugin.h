@@ -55,7 +55,7 @@ public:
     ACAudioYaafePlugin();
     ~ACAudioYaafePlugin();
 
-    std::vector<ACMediaFeatures*> calculate(ACMediaData* aData, ACMedia* theMedia, bool _save_timed_feat=false);
+    std::vector<ACMediaFeatures*> calculate(ACMedia* theMedia, bool _save_timed_feat=false);
 
     // XS TODO check if this works
     // ACMediaTimedFeature* getTimedFeatures();

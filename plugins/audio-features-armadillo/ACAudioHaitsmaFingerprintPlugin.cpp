@@ -1,8 +1,8 @@
 /**
  * @brief ACAudioHaitsmaFingerprintPlugin.cpp
- * @author Thierry Ravet
- * @date 15/12/2012
- * @copyright (c) 2012 – UMONS - Numediart
+ * @author Christian Frisson
+ * @date 04/01/2013
+ * @copyright (c) 2013 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -67,9 +67,7 @@ ACAudioHaitsmaFingerprintPlugin::~ACAudioHaitsmaFingerprintPlugin() {
 }
 
 
-std::vector<ACMediaFeatures*> ACAudioHaitsmaFingerprintPlugin::calculate(ACMediaData* aData, ACMedia* theMedia, bool _save_timed_feat) {
-    
-    cout<<"ACAudioHaitsmaFingerprintPlugin::calculate"<<endl;
+std::vector<ACMediaFeatures*> ACAudioHaitsmaFingerprintPlugin::calculate(ACMedia* theMedia, bool _save_timed_feat) {
 
 	std::vector<ACMediaTimedFeature*> descmf;
 	std::vector<ACMediaFeatures*> desc;
@@ -86,7 +84,7 @@ std::vector<ACMediaFeatures*> ACAudioHaitsmaFingerprintPlugin::calculate(ACMedia
 	}
 	
 	float* data = new float[theAudio->getNFrames() * theAudio->getChannels()];
-	memcpy(data, static_cast<float*>(aData->getData())+theAudio->getSampleStart()*theAudio->getChannels(),
+    memcpy(data, static_cast<float*>(theAudio->getSamples())+theAudio->getSampleStart()*theAudio->getChannels(),
 		   (theAudio->getSampleEnd()-theAudio->getSampleStart())*theAudio->getChannels()*sizeof(float));
 	
 	audio_fingerprint->setSampleRate(theAudio->getSampleRate(), theAudio->getChannels());

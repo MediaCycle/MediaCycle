@@ -53,7 +53,7 @@ ACAudioGardenFeaturesPlugin::~ACAudioGardenFeaturesPlugin() {
 }
 
 
-std::vector<ACMediaFeatures*> ACAudioGardenFeaturesPlugin::calculate(ACMediaData* audio_data, ACMedia* theMedia, bool _save_timed_feat) {
+std::vector<ACMediaFeatures*> ACAudioGardenFeaturesPlugin::calculate(ACMedia* theMedia, bool _save_timed_feat) {
 	int mfccNbChannels = 16;
 	int mfccNb = 13;
 	int windowSize = 1024; 	
@@ -72,7 +72,7 @@ std::vector<ACMediaFeatures*> ACAudioGardenFeaturesPlugin::calculate(ACMediaData
 		return desc;
 	}
 	
-	descmf = computeFeatures(static_cast<float*>(audio_data->getData()), 
+    descmf = computeFeatures(theAudio->getSamples(),
 							 theAudio->getSampleRate(), theAudio->getChannels(), theAudio->getNFrames(), 32, 13, 1024, extendSoundLimits);
 
 	// 	for (int i=0; i<descmf.size(); i++)

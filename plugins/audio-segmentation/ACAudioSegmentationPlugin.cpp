@@ -63,11 +63,10 @@ std::vector<ACMedia*> ACAudioSegmentationPlugin::segment(ACMediaTimedFeature* _M
 }
 
 std::vector<ACMedia*> ACAudioSegmentationPlugin::_segment(ACMedia* theMedia) {
-    ACMediaData* audio_data = theMedia->getMediaData();
-    return this->segment(audio_data, theMedia);
+    return this->segment(theMedia);
 }
 
-std::vector<ACMedia*> ACAudioSegmentationPlugin::segment(ACMediaData* audio_data, ACMedia* theMedia) {
+std::vector<ACMedia*> ACAudioSegmentationPlugin::segment(ACMedia* theMedia) {
 
     // Retrieve the user-defined values
     this->method = this->getStringParameterValueIndex("method");
@@ -79,42 +78,26 @@ std::vector<ACMedia*> ACAudioSegmentationPlugin::segment(ACMediaData* audio_data
     std::vector<ACMediaFeatures*> desc;
     ACAudio* theAudio = 0;
     vector<ACMedia*> segments;
-    try{
-        theAudio = static_cast<ACAudio*> (theMedia);
-        if(!theAudio)
-            throw runtime_error("<ACAudioSegmentationPlugin::segment> problem with ACMedia cast");
-    }catch (const exception& e) {
-        cerr << e.what() << endl;
+    theAudio = dynamic_cast<ACAudio*> (theMedia);
+    if(!theAudio){
+        std::cerr << "<ACAudioSegmentationPlugin::segment> problem with ACMedia cast" << std::endl;
         return segments;
     }
 
-    ACMediaTimedFeature* desc_mf;
+    ACMediaTimedFeature* desc_mf = 0;
     float* data = new float[theAudio->getNFrames() * theAudio->getChannels()];
-    long index = 0;
-
-    for (long i = theAudio->getSampleStart(); i< theAudio->getSampleEnd(); i++){
-        for (long j = 0; j < theAudio->getChannels(); j++){
-            data[index] = static_cast<float*>(audio_data->getData())[i*theAudio->getChannels()+j];
-            index++;
-        }
-    }
 
     switch (method){
     case 0:{ //AudioGarden
 		desc_mf = theMedia->getTimedFeatures("Energy");
-        if(desc_mf)
-            cout << "/////////////////////" << desc_mf->getLength() <<endl;
-		//desc_mf->dump();
         break;
     }
     case 1:{
-        if(desc_mf)
-            desc_mf = theMedia->getTimedFeatures("Spectral Flux");
+        desc_mf = theMedia->getTimedFeatures("Spectral Flux");
         break;
     }
     case 2:{ //FASTBIC
-        if(desc_mf)
-            desc_mf = theMedia->getTimedFeatures("MFCC");
+        desc_mf = theMedia->getTimedFeatures("MFCC");
         break;
     }
     default:
@@ -123,7 +106,6 @@ std::vector<ACMedia*> ACAudioSegmentationPlugin::segment(ACMediaData* audio_data
     }
 
     segments = this->_segment(desc_mf,theMedia);
-    delete[] data; // XS TODO why was this commented ?
     return segments;
 }
 

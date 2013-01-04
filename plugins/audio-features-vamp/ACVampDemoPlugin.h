@@ -47,7 +47,7 @@ public:
 	~ACVampDemoPlugin();
 	
     virtual std::vector<ACMediaFeatures*> calculate(){return std::vector<ACMediaFeatures*>();}
-	virtual std::vector<ACMediaFeatures*> calculate(ACMediaData* _data, ACMedia*, bool _save_timed_feat=false);
+    virtual std::vector<ACMediaFeatures*> calculate(ACMedia*, bool _save_timed_feat=false);
 	
 private:
 };

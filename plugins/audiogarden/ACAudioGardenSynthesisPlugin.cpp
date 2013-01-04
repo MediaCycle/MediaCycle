@@ -43,6 +43,8 @@
 #include <math.h>
 #include <sndfile.h>
 
+#include "ACAudioData.h"
+
 // uncomment this to parse formats dynamically
 //#define PARSE_FORMATS_DYNAMICALLY
 
@@ -104,6 +106,8 @@ void ACAudioGardenSynthesisPlugin::changeMethod(){
     float autosynth = this->getNumberParameterValue("Autosynth");
     //if(autosynth==1)
     //ui.compositeOsgView->synthesize();
+    if(autosynth)
+        this->synthesize();
 }
 
 void ACAudioGardenSynthesisPlugin::changeMapping(){
@@ -114,6 +118,8 @@ void ACAudioGardenSynthesisPlugin::changeMapping(){
     float autosynth = this->getNumberParameterValue("Autosynth");
     //if(autosynth==1)
     //ui.compositeOsgView->synthesize();
+    if(autosynth)
+        this->synthesize();
 }
 
 void ACAudioGardenSynthesisPlugin::changeRandomness(){
@@ -124,6 +130,8 @@ void ACAudioGardenSynthesisPlugin::changeRandomness(){
     float autosynth = this->getNumberParameterValue("Autosynth");
     //if(autosynth==1)
     //ui.compositeOsgView->synthesize();
+    if(autosynth)
+        this->synthesize();
 }
 
 void ACAudioGardenSynthesisPlugin::changeThreshold(){
@@ -134,11 +142,12 @@ void ACAudioGardenSynthesisPlugin::changeThreshold(){
     float autosynth = this->getNumberParameterValue("Autosynth");
     //if(autosynth==1)
     //ui.compositeOsgView->synthesize();
+    if(autosynth)
+        this->synthesize();
 }
 
 void ACAudioGardenSynthesisPlugin::changeAutosynth(){
-    if(!synth)
-        return;
+    autosynth = (bool) this->getNumberParameterValue("Autosynth");
 }
 
 void ACAudioGardenSynthesisPlugin::go(){
@@ -153,17 +162,18 @@ void ACAudioGardenSynthesisPlugin::go(){
     media_cycle->getBrowser()->dumpSelectedNodes();
 
     //ui.compositeOsgView->synthesize();
+    this->synthesize();
 }
 
 void ACAudioGardenSynthesisPlugin::reset(){
     if(!synth)
         return;
     //ui.compositeOsgView->resetSynth();
+    this->resetSynth();
 }
 
-void ACAudioGardenSynthesisPlugin::setMediaCycle(MediaCycle* _media_cycle)
+void ACAudioGardenSynthesisPlugin::mediaCycleSet()
 {
-    ACMediaRendererPlugin::setMediaCycle(_media_cycle);
     synth->setMediaCycle(media_cycle);
 }
 
@@ -292,10 +302,10 @@ void ACAudioGardenSynthesisPlugin::synthesize()
         std::cerr << "ACAudioGardenSynthesisPlugin::synthesize: mediacycle not set " << std::endl;
         return;
     }
-    if(!audio_engine){
-        std::cerr << "ACAudioGardenSynthesisPlugin::synthesize: mediacycle not set " << std::endl;
+    /*if(!audio_engine){
+        std::cerr << "ACAudioGardenSynthesisPlugin::synthesize: audio engine not set " << std::endl;
         return;
-    }
+    }*/
     if(!browser_renderer){
         std::cerr << "ACAudioGardenSynthesisPlugin::synthesize: browser renderer not set " << std::endl;
         return;
@@ -308,26 +318,34 @@ void ACAudioGardenSynthesisPlugin::synthesize()
     if ( this->getSelectedRhythmPattern() > -1 && media_cycle->getBrowser()->getSelectedNodes().size() > 0)
     {
         // Stop the track playback
-        if (track_playing) {
-            audio_engine->getFeedback()->stopExtSource();
-            audio_engine->getFeedback()->deleteExtSource();
-            track_playing = false;
-        }
+//        if (track_playing) {
+//            audio_engine->getFeedback()->stopExtSource();
+//            audio_engine->getFeedback()->deleteExtSource();
+//            track_playing = false;
+//        }
 
         // Synthesize
         synth->compute(this->getSelectedRhythmPattern(), media_cycle->getBrowser()->getSelectedNodes());
         //synth->saveAsWav("./synthesis.wav");
         // Display the synthesis
-        if (synthAudio) delete synthAudio;
+        if (synthAudio)
+            delete synthAudio;
         synthAudio = new ACAudio();
-        synthAudio->setData(synth->getSound(),synth->getLength());
+        ACAudioFloatPtrDataContainer* data = new ACAudioFloatPtrDataContainer();
+        data->setData(synth->getSound());
+        data->setNumberOfFrames(synth->getLength());
+        ACAudioData* media_data = new ACAudioGardenData();
+        media_data->setData(data);
+        synthAudio->setMediaData(media_data);
         //synthAudio->computeWaveform( this->getSynth()->getSound()  );
         this->getTimelineRenderer()->getTrack(0)->updateMedia( synthAudio ); //media_cycle->getLibrary()->getMedia(media_id) );
         media_cycle->setNeedsDisplay(true);
 
         // Playback the synthesis
-        audio_engine->getFeedback()->createExtSource(this->getSynth()->getSound(), this->getSynth()->getLength());
-        audio_engine->getFeedback()->loopExtSource();
+        media_cycle->getLibrary()->addMedia(synthAudio);
+        int mediaId = synthAudio->getId();
+//        audio_engine->getFeedback()->createExtSource(this->getSynth()->getSound(), this->getSynth()->getLength());
+//        audio_engine->getFeedback()->loopExtSource();
         track_playing = true;
     }
 }

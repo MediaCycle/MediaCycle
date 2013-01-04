@@ -74,7 +74,7 @@ ACAudioMakamFeaturesPlugin::ACAudioMakamFeaturesPlugin() : ACFeaturesPlugin(){
 ACAudioMakamFeaturesPlugin::~ACAudioMakamFeaturesPlugin() {
 }
 
-std::vector<ACMediaFeatures*> ACAudioMakamFeaturesPlugin::calculate(ACMediaData* audio_data, ACMedia* theMedia, bool _save_timed_feat) {
+std::vector<ACMediaFeatures*> ACAudioMakamFeaturesPlugin::calculate(ACMedia* theMedia, bool _save_timed_feat) {
     std::vector<ACMediaFeatures*> desc;
     ACMediaFeatures* feat;
 

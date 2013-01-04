@@ -32,18 +32,23 @@
  *
  */
 
+#include <MediaCycle.h>
 #include <ACPlugin.h>
 #include "ACAudioEngine.h"
+#include <ACPluginQt.h>
+//#include <QtGui>
 
 #ifndef ACAudioEngineRendererPlugin_H
 #define	ACAudioEngineRendererPlugin_H
 
-class ACAudioEngineRendererPlugin : public ACMediaRendererPlugin
+class ACAudioEngineRendererPlugin : public QObject, public ACPluginQt, virtual public ACMediaRendererPlugin
 {
+    Q_OBJECT
+    Q_INTERFACES(ACPluginQt)
 public:
     ACAudioEngineRendererPlugin();
     virtual ~ACAudioEngineRendererPlugin();
-    virtual void setMediaCycle(MediaCycle* _media_cycle);
+    virtual void mediaCycleSet();
     virtual std::map<std::string, ACMediaType> getSupportedExtensions(ACMediaType media_type = MEDIA_TYPE_ALL);
     virtual bool performActionOnMedia(std::string action, long int mediaId, std::string value="");
     virtual std::map<std::string,ACMediaType> availableMediaActions();
@@ -52,9 +57,23 @@ public:
     void updateSynchroMode();
     void updateScaleMode();
     void updatePreset();
+    void muteAll();
 protected:
     ACAudioEngine* audio_engine;
     std::vector<std::string> synchro_modes, scale_modes, presets;
+
+public:
+    virtual std::vector<ACInputActionQt*> providesInputActions();
+
+public slots:
+    void playClickedNode();
+    void loopClickedNode();
+    void muteAllNodes();
+
+protected:
+    ACInputActionQt* playClickedNodeAction;
+    ACInputActionQt* loopClickedNodeAction;
+    ACInputActionQt* muteAllNodesAction;
 
 };
 

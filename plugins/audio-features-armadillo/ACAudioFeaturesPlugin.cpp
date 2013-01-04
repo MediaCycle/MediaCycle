@@ -34,6 +34,7 @@
 
 #include "ACAudioFeaturesPlugin.h"
 #include "ACAudio.h"
+#include "ACAudioData.h"
 
 #include <vector>
 #include <string>
@@ -92,13 +93,13 @@ std::vector<ACMediaFeatures*> ACAudioFeaturesPlugin::calculate_starpu(vector<ACM
 */
 
 // CF
-std::vector<ACMediaFeatures*> ACAudioFeaturesPlugin::calculate(ACMediaData* audio_data, ACMedia* theMedia, bool _save_timed_feat) {
+std::vector<ACMediaFeatures*> ACAudioFeaturesPlugin::calculate(ACMedia* theMedia, bool _save_timed_feat) {
     // from MediaData
-    return this->_calculate(audio_data->getFileName(),audio_data,theMedia,_save_timed_feat);
+    return this->_calculate(theMedia->getFileName(),theMedia,_save_timed_feat);
 }
 
 // private method
-std::vector<ACMediaFeatures*> ACAudioFeaturesPlugin::_calculate(std::string aFileName, ACMediaData* audio_data, ACMedia* theMedia, bool _save_timed_feat){
+std::vector<ACMediaFeatures*> ACAudioFeaturesPlugin::_calculate(std::string aFileName, ACMedia* theMedia, bool _save_timed_feat){
     bool extendSoundLimits = true;
     std::vector<ACMediaTimedFeature*> descmf;
     std::vector<ACMediaFeatures*> desc;
@@ -113,12 +114,13 @@ std::vector<ACMediaFeatures*> ACAudioFeaturesPlugin::_calculate(std::string aFil
         cerr << e.what() << endl;
         return desc;
     }
+
 #ifndef BUFFERIZED
 	// XS TODO we are copying the data, unnecessary
 	float* data = new float[theAudio->getNFrames() * theAudio->getChannels()];
 	
 	// SD replaced loop by more efficient memcpy
-	memcpy(data, static_cast<float*>(audio_data->getData())+theAudio->getSampleStart()*theAudio->getChannels(),
+    memcpy(data, static_cast<float*>(theAudio->getSamples())+theAudio->getSampleStart()*theAudio->getChannels(),
 		   (theAudio->getSampleEnd()-theAudio->getSampleStart())*theAudio->getChannels()*sizeof(float));
 	/*
 	 for (long i = theAudio->getSampleStart(); i< theAudio->getSampleEnd(); i++){
@@ -128,6 +130,7 @@ std::vector<ACMediaFeatures*> ACAudioFeaturesPlugin::_calculate(std::string aFil
 	 }
 	 }
 	 */
+
 	
 	// 	ofstream output("signal1.txt");
 	// 	for(int i=0; i < (long) theAudio->getNFrames() * theAudio->getChannels(); i++){

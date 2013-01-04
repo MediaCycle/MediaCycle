@@ -1,36 +1,32 @@
-/*
- *  ACOsgBrowserRenderer.cpp
- *  MediaCycle
- *
- *  @author Stéphane Dupont
- *  @date 24/08/09
- *
- *  @copyright (c) 2009 – UMONS - Numediart
- *  
- *  MediaCycle of University of Mons – Numediart institute is 
- *  licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
- *  licence (the “License”); you may not use this file except in compliance 
- *  with the License.
- *  
- *  This program is free software: you can redistribute it and/or 
- *  it under the terms of the GNU Affero General Public License as
- *  published by the Free Software Foundation, either version 3 of the
- *  License, or (at your option) any later version.
- *  
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Affero General Public License for more details.
- *  
- *  You should have received a copy of the GNU Affero General Public License
- *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
- *  
- *  Each use of this software must be attributed to University of Mons – 
- *  Numediart Institute
- *  
- *  Any other additional authorizations may be asked to avre@umons.ac.be 
- *  <mailto:avre@umons.ac.be>
- *
+/**
+ * @brief The audio browser node renderer class, implemented with OSG
+ * @authors St&eacute;phane Dupont, Christian Frisson, Thierry Ravet
+ * @date 24/08/09
+ * @copyright (c) 2009 – UMONS - Numediart
+ * 
+ * MediaCycle of University of Mons – Numediart institute is 
+ * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
+ * licence (the “License”); you may not use this file except in compliance 
+ * with the License.
+ * 
+ * This program is free software: you can redistribute it and/or 
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * 
+ * Each use of this software must be attributed to University of Mons – 
+ * Numediart Institute
+ * 
+ * Any other additional authorizations may be asked to avre@umons.ac.be 
+ * <mailto:avre@umons.ac.be>
  */
 
 #include "ACOsgAudioRenderer.h"
@@ -38,7 +34,6 @@
 
 #include <osg/Version>
 #include <osgDB/Registry>
-//#include <osg/ImageUtils>
 #include <osgDB/ReadFile>
 
 using namespace osg;
@@ -53,18 +48,25 @@ ACOsgAudioRenderer::ACOsgAudioRenderer()
     entry_geode = 0;
     aura_geode=0;
     waveform_type = AC_BROWSER_AUDIO_WAVEFORM_CLASSIC;
-    thumbnail = 0;
-    thumbnail_texture = 0;
+    waveform_thumbnail = "Classic browser waveform";//"Classic timeline waveform";//
+    node_thumbnail = "";//Circular browser waveform";
+    node_geometry = 0;
+    waveform_geometry = 0;
+    node_shape_drawable = 0;
+    waveform_transform = 0;
+    entry_transform = 0;
 }
 
 ACOsgAudioRenderer::~ACOsgAudioRenderer() {
-    // media_node->removeChild(0,1);
     waveform_geode=0;
     curser_geode=0;
     curser_transform=0;
     entry_geode=0;
-    thumbnail = 0;
-    thumbnail_texture = 0;
+    node_geometry = 0;
+    waveform_geometry = 0;
+    node_shape_drawable = 0;
+    waveform_transform = 0;
+    entry_transform = 0;
 }
 
 void ACOsgAudioRenderer::changeSetting(ACSettingType _setting)
@@ -81,327 +83,6 @@ void ACOsgAudioRenderer::changeSetting(ACSettingType _setting)
     }
 }
 
-void ACOsgAudioRenderer::thumbnailGeode() {
-    if(!this->media){
-        std::cout << "ACOsgAudioRenderer::thumbnailGeode: can't access thumbnails, media not set" << std::endl;
-        return;
-    }
-    std::string thumbnail_filename = media->getThumbnailFileName("Classic browser waveform");
-    if(thumbnail_filename==""){
-        std::cout << "ACOsgAudioRenderer::thumbnailGeode: can't access thumbnail" << std::endl;
-        return;
-    }
-
-    osg::ref_ptr<osgDB::ReaderWriter> readerWriter = osgDB::Registry::instance()->getReaderWriterForExtension(boost::filesystem::extension(thumbnail_filename).substr(1));
-    if (!readerWriter){
-        cerr << "ACOsgAudioRenderer::thumbnailGeode: can't find an OSG plugin to read file '" << thumbnail_filename << "'" << endl;
-        return;
-    }
-    else{
-        cout <<"ACOsgAudioRenderer::thumbnailGeode: using OSG plugin: "<< readerWriter->className() <<std::endl;
-    }
-
-    thumbnail = osgDB::readImageFile(thumbnail_filename);
-    if (!thumbnail){
-        cerr << "<ACOsgAudioRenderer::thumbnailGeode: problem loading thumbnail" << endl;
-        return;
-    }
-    else{
-        thumbnail_texture = new osg::Texture2D;
-        thumbnail_texture->setImage(thumbnail);
-    }
-
-    double xstep = 0.0005;
-
-    float zpos = 0.02;
-    double ylim = 0.025, xlim = 0.025;
-    double imagex, imagey;
-
-    double imagesurf;
-
-    float sizemul=1.0;
-    ylim *=sizemul;
-    xlim *=sizemul;
-
-    int width, height;
-
-    StateSet *state;
-
-    Vec3Array* vertices;
-    osg::ref_ptr<DrawElementsUInt> line_p;
-    Vec2Array* texcoord;
-
-    osg::ref_ptr<Geometry> thumbnail_geometry;
-
-    //width = media_cycle->getThumbnailWidth(media_index);//CF instead of node_index
-    //height = media_cycle->getThumbnailHeight(media_index);//CF instead of node_index
-    width = media->getThumbnailWidth();
-    height = media->getThumbnailHeight();
-    height = 100; //
-
-    std::cout << "ACOsgAudioRenderer::thumbnailGeode: geode with (thumbnail) width " <<  width << " and height " << height << std::endl;
-
-    thumbnail_geometry = new Geometry();
-
-    //zpos = zpos - 0.00001 * node_index;
-
-    // image vertices
-    float scale;
-    imagesurf = xlim * ylim;
-    scale = sqrt ((float)imagesurf / (width*height));
-    imagex = scale * width;
-    imagey = scale * height;
-    vertices = new Vec3Array(4);
-    /*(*vertices)[0] = Vec3(-imagex, -imagey, zpos);
-    (*vertices)[1] = Vec3(imagex, -imagey, zpos);
-    (*vertices)[2] = Vec3(imagex, imagey, zpos);
-    (*vertices)[3] = Vec3(-imagex, imagey, zpos);*/
-    (*vertices)[0] = Vec3(0, -imagey, zpos);
-    (*vertices)[1] = Vec3(2*imagex, -imagey, zpos);
-    (*vertices)[2] = Vec3(2*imagex, imagey, zpos);
-    (*vertices)[3] = Vec3(0, imagey, zpos);
-    thumbnail_geometry->setVertexArray(vertices);
-
-    // Primitive Set
-    osg::ref_ptr<DrawElementsUInt> poly = new DrawElementsUInt(PrimitiveSet::QUADS, 4);
-    poly->push_back(0);
-    poly->push_back(1);
-    poly->push_back(2);
-    poly->push_back(3);
-    thumbnail_geometry->addPrimitiveSet(poly);
-
-    // State Set
-    waveform_geode = 0;
-    waveform_geode = new Geode();
-    state = waveform_geode->getOrCreateStateSet();
-    state->setMode(GL_LIGHTING, osg::StateAttribute::PROTECTED | osg::StateAttribute::OFF );
-    state->setMode(GL_BLEND, StateAttribute::ON);
-    state->setMode(GL_LINE_SMOOTH, StateAttribute::ON);
-    //state->setRenderingHint(osg::StateSet::TRANSPARENT_BIN); //CF from OSG's examples/osgmovie.cpp, doesn't solve the transparent first frame for video geodes
-
-    // Texture Coordinates
-    texcoord = new Vec2Array;
-
-// XS TODO!!
-//http://lists.openscenegraph.org/pipermail/osg-users-openscenegraph.org/2009-August/032147.html
-//	other ways of flipping:
-//	* use osg::Image's flipVertical()
-//	* just flip the texture coordinates
-
-    float zoomin=1.0;
-    float a = (1.0-(1.0/zoomin)) / 2.0;
-    float b = 1.0-a;
-    bool flip=false;
-    texcoord->push_back(osg::Vec2(a, flip ? b : a));
-    texcoord->push_back(osg::Vec2(b, flip ? b : a));
-    texcoord->push_back(osg::Vec2(b, flip ? a : b));
-    texcoord->push_back(osg::Vec2(a, flip ? a : b));
-    thumbnail_geometry->setTexCoordArray(0, texcoord);
-
-    // Texture State (image)
-
-    //ACMediaType media_type = media_cycle->getLibrary()->getMedia(media_index)->getType();
-    thumbnail_texture->setResizeNonPowerOfTwoHint(false);
-
-    // XS TODO add this line?
-    // http://groups.google.com/group/osg-users/browse_thread/thread/f623b62f62e39473?pli=1
-    //thumbnail_texture->setUnRefImageDataAfterApply(true);
-    state = thumbnail_geometry->getOrCreateStateSet();
-    state->setTextureAttribute(0, thumbnail_texture);
-    state->setTextureMode(0, GL_TEXTURE_2D, osg::StateAttribute::ON);
-
-    osg::ref_ptr<osg::Vec4Array> colors = new Vec4Array(1);
-    (*colors)[0] = node_color;
-    //thumbnail_geometry->setColorArray(colors);
-    //thumbnail_geometry->setColorBinding(Geometry::BIND_OVERALL);
-
-     waveform_geode->addDrawable(thumbnail_geometry);
-     waveform_geode->setUserData(new ACRefId(node_index));
-}
-
-void ACOsgAudioRenderer::waveformGeode() {
-
-    int i;
-    float zpos = 0.04; //CF sphere hack instead of 0.02 for boxes
-    double xstep = 0.0005, ylim = 0.025;
-
-    xstep*=afac;
-    ylim*=afac;
-    zpos*=afac;
-
-    int width;
-    float *thumbnail;
-
-    StateSet *state;
-
-    Vec3Array* vertices;
-    //	Vec3Array* normals;
-
-    osg::ref_ptr<Geometry> samples_geometry;
-    osg::ref_ptr<Geometry> frame_geometry;
-    osg::ref_ptr<Geometry> border_geometry;
-    osg::ref_ptr<Geometry> axis_geometry;
-
-    waveform_geode = new Geode();
-    samples_geometry = new Geometry();
-    frame_geometry = new Geometry();
-    border_geometry = new Geometry();
-    axis_geometry = new Geometry();
-
-    if(media){
-        //width = media_cycle->getThumbnailWidth(media_index);
-        width = media->getThumbnailWidth();
-        width = width / 2;
-
-        //thumbnail = (float*)media_cycle->getThumbnailPtr(media_index);
-        thumbnail = (float*)media->getThumbnailPtr();
-
-        //////////////////////////
-        // samples vertices
-        vertices = new Vec3Array(2*width+2);
-        if (thumbnail)
-        {
-            for(i=0; i<width; i++) {
-                (*vertices)[2*i] = Vec3(i * xstep, ylim * thumbnail[2*i], zpos);
-                (*vertices)[2*i+1] = Vec3(i * xstep, ylim * thumbnail[2*i+1], zpos);
-            }
-            (*vertices)[2*i] = Vec3(0.0, 0.0, zpos);
-            (*vertices)[2*i+1] = Vec3((i-1) * xstep, 0.0, zpos);
-        }
-        samples_geometry->setVertexArray(vertices);
-        /*
-  line_p = new DrawElementsUInt(PrimitiveSet::LINES, 2*width+2);
-  for(i=0; i<width+1; i++) {
-   (*line_p)[2*i] = 2*i;
-   (*line_p)[2*i+1] = 2*i+1;
-  }
-  samples_geometry->addPrimitiveSet(line_p);
-  */
-        DrawElementsUShort* line_p = new DrawElementsUShort(PrimitiveSet::TRIANGLE_STRIP, 0);
-        for(i=0; i<width; i++) {
-            line_p->push_back(2*i);
-            line_p->push_back(2*i+1);
-        }
-        samples_geometry->addPrimitiveSet(line_p);
-
-        /////////////////////////
-        //frame vertices
-        vertices = new Vec3Array;
-        vertices->push_back(Vec3(0.0, -ylim, zpos));
-        vertices->push_back(Vec3(width * xstep, -ylim, zpos));
-        vertices->push_back(Vec3(width * xstep, ylim, zpos));
-        vertices->push_back(Vec3(0.0, ylim, zpos));
-        frame_geometry->setVertexArray(vertices);
-        /*
-  osg::ref_ptr<DrawElementsUInt> poly = new DrawElementsUInt(PrimitiveSet::QUADS, 0);
-  poly->push_back(0);
-  poly->push_back(1);
-  poly->push_back(2);
-  poly->push_back(3);
-  frame_geometry->addPrimitiveSet(poly);
-  */
-        DrawElementsUShort *poly = new DrawElementsUShort(PrimitiveSet::TRIANGLE_STRIP, 0);
-        poly->push_back(0);
-        poly->push_back(3);
-        poly->push_back(1);
-        poly->push_back(2);
-        frame_geometry->addPrimitiveSet(poly);
-
-        /////////////////////////
-        //border vertices
-        /*
-  vertices = new Vec3Array(5);
-  (*vertices)[0] = Vec3(0, -ylim, zpos);
-  (*vertices)[1] = Vec3(width * xstep, -ylim+xstep, zpos);
-  (*vertices)[2] = Vec3(width * xstep, ylim-xstep, zpos);
-  (*vertices)[3] = Vec3(0, ylim, zpos);
-  (*vertices)[4] = Vec3(0, -ylim, zpos);
-  border_geometry->setVertexArray(vertices);
-  */
-        //border vertices for triangle strip
-        vertices = new Vec3Array(8);
-        (*vertices)[0] = Vec3(0, -ylim, zpos);
-        (*vertices)[1] = Vec3(width * xstep, -ylim, zpos);
-        (*vertices)[2] = Vec3(width * xstep, ylim, zpos);
-        (*vertices)[3] = Vec3(0, ylim, zpos);
-        (*vertices)[4] = Vec3(0-xstep*afac, -ylim-xstep*afac, zpos);
-        (*vertices)[5] = Vec3(width * xstep+xstep*afac, -ylim-xstep*afac, zpos);
-        (*vertices)[6] = Vec3(width * xstep+xstep*afac, ylim+xstep*afac, zpos);
-        (*vertices)[7] = Vec3(0-xstep*afac, ylim+xstep*afac, zpos);
-        border_geometry->setVertexArray(vertices);
-        /*
-  line_p = new DrawElementsUInt(PrimitiveSet::LINES, 8);
-  for(i=0; i<4; i++) {
-   (*line_p)[2*i] = i;
-   (*line_p)[2*i+1] = i+1;
-  }
-  border_geometry->addPrimitiveSet(line_p); // CF, bounding box temporarily disabled
-  */
-        line_p = new DrawElementsUShort(PrimitiveSet::TRIANGLE_STRIP, 0);
-        line_p->push_back(0);
-        line_p->push_back(4);
-        line_p->push_back(1);
-        line_p->push_back(5);
-        line_p->push_back(2);
-        line_p->push_back(6);
-        line_p->push_back(3);
-        line_p->push_back(7);
-        line_p->push_back(0);
-        line_p->push_back(4);
-        border_geometry->addPrimitiveSet(line_p); // CF, bounding box temporarily disabled
-
-        /////////////////////////
-        //axis vertices
-        vertices = new Vec3Array(4);
-        (*vertices)[0] = Vec3(0, 0-xstep*afac/2.0, zpos);
-        (*vertices)[1] = Vec3(width * xstep, 0-xstep*afac/2.0, zpos);
-        (*vertices)[2] = Vec3(width * xstep, 0+xstep*afac/2.0, zpos);
-        (*vertices)[3] = Vec3(0, 0+xstep*afac/2.0, zpos);
-        axis_geometry->setVertexArray(vertices);
-        line_p = new DrawElementsUShort(PrimitiveSet::TRIANGLE_STRIP, 0);
-        line_p->push_back(0);
-        line_p->push_back(3);
-        line_p->push_back(1);
-        line_p->push_back(2);
-        axis_geometry->addPrimitiveSet(line_p); // CF, bounding box temporarily disabled
-
-        /////////////////////////
-
-        Vec4 color(0.9f, 0.9f, 0.9f, 0.9f);
-        osg::ref_ptr<osg::Vec4Array> colors = new Vec4Array;
-        colors->push_back(color);
-
-        samples_geometry->setColorArray(colors);
-        samples_geometry->setColorBinding(Geometry::BIND_OVERALL);
-        border_geometry->setColorArray(colors);
-        border_geometry->setColorBinding(Geometry::BIND_OVERALL);
-        axis_geometry->setColorArray(colors);
-        axis_geometry->setColorBinding(Geometry::BIND_OVERALL);
-        // osg::Geometry::BIND_PER_VERTEX
-
-        colors = new Vec4Array(1);
-        (*colors)[0] = Vec4(0.0, 0.0, 0.0, 0.3); //0.3);
-        frame_geometry->setColorArray(colors);
-        frame_geometry->setColorBinding(Geometry::BIND_OVERALL);
-
-        state = waveform_geode->getOrCreateStateSet();
-        state->setMode(GL_BLEND, StateAttribute::ON);
-        state->setMode(GL_NORMALIZE, osg::StateAttribute::ON);
-#if defined(APPLE_IOS)
-        state->setMode(GL_LIGHTING, osg::StateAttribute::PROTECTED | osg::StateAttribute::OFF );
-#else
-        state->setMode(GL_LIGHTING, osg::StateAttribute::ON );
-        state->setMode(GL_LINE_SMOOTH, StateAttribute::ON); //CF not supported by OpenGL ES 2...
-#endif
-        //state->setAttribute(new LineWidth(1.0));
-
-        waveform_geode->addDrawable(samples_geometry);
-        //waveform_geode->addDrawable(border_geometry);
-        waveform_geode->addDrawable(axis_geometry);
-        waveform_geode->addDrawable(frame_geometry);
-        waveform_geode->setUserData(new ACRefId(node_index));
-    }
-}
 
 void ACOsgAudioRenderer::curserGeode() {
 
@@ -472,21 +153,12 @@ void ACOsgAudioRenderer::curserGeode() {
 #else
     state = curser_geometry->getOrCreateStateSet();
     state->setAttribute(new LineWidth(2.0));
-    state->setMode(GL_LIGHTING, osg::StateAttribute::ON );
+    state->setMode(GL_LIGHTING, osg::StateAttribute::PROTECTED | osg::StateAttribute::OFF );//CF
     state->setMode(GL_LINE_SMOOTH, StateAttribute::ON); //CF not supported by OpenGL ES 2...
 #endif
-    /*
-  state = curser_transform->getOrCreateStateSet();
- state->setMode(GL_NORMALIZE, osg::StateAttribute::ON);
-  */
 
     curser_geode->addDrawable(curser_geometry);
-    //TessellationHints *hints = new TessellationHints();
-    //hints->setDetailRatio(0.0);
-    //curser_geode->addDrawable(new osg::ShapeDrawable(new osg::Sphere(osg::Vec3(0.0f,0.0f,0.0f),0.05), hints)); // draws a sphere // MultiMediaCycle
-
     curser_transform->addChild(curser_geode);
-
     curser_transform->setUserData(new ACRefId(node_index));
     curser_geode->setUserData(new ACRefId(node_index));
 }
@@ -498,89 +170,118 @@ void ACOsgAudioRenderer::entryGeode() {
     float localsize = 0.01;
     localsize *= afac;
 
-    entry_geode = new Geode();
-
     TessellationHints *hints = new TessellationHints();
     hints->setDetailRatio(0.0);
 
     state = entry_geode->getOrCreateStateSet();
     state->setMode(GL_NORMALIZE, osg::StateAttribute::ON);
 
+    node_shape_drawable = 0;
+
 #if defined(APPLE_IOS)
     state->setMode(GL_LIGHTING, osg::StateAttribute::PROTECTED | osg::StateAttribute::OFF );
-    entry_geode->addDrawable(new osg::ShapeDrawable(new osg::Box(osg::Vec3(0.0f,0.0f,0.0f),0.01), hints)); //draws a square // Vintage AudioCycle
+    node_shape_drawable = new osg::ShapeDrawable(new osg::Box(osg::Vec3(0.0f,0.0f,0.0f),0.01), hints); //draws a square // Vintage AudioCycle
 #else
-    state->setMode(GL_LIGHTING, osg::StateAttribute::ON );
-    state->setMode(GL_BLEND, StateAttribute::ON);
-    //entry_geode->addDrawable(new osg::ShapeDrawable(new osg::Box(osg::Vec3(0.0f,0.0f,0.0f),0.01), hints)); //draws a square // Vintage AudioCycle
-    entry_geode->addDrawable(new osg::ShapeDrawable(new osg::Sphere(osg::Vec3(0.0f,0.0f,0.0f),localsize), hints)); // draws a sphere // MultiMediaCycle
-    //entry_geode->addDrawable(new osg::ShapeDrawable(new osg::Cylinder(osg::Vec3(0.0f,0.0f,0.0f),localsize, 0.0f), hints)); // draws a disc
-    //entry_geode->addDrawable(new osg::ShapeDrawable(new osg::Capsule(osg::Vec3(0.0f,0.0f,0.0f),0.01, 0.005f), hints)); // draws a sphere
+    //CF state->setMode(GL_LIGHTING, osg::StateAttribute::ON );
+    //CF state->setMode(GL_BLEND, StateAttribute::ON);
+    //node_shape_drawable = new osg::ShapeDrawable(new osg::Box(osg::Vec3(0.0f,0.0f,0.0f),0.01), hints); //draws a square // Vintage AudioCycle
+    node_shape_drawable = new osg::ShapeDrawable(new osg::Sphere(osg::Vec3(0.0f,0.0f,0.0f),localsize), hints); // draws a sphere // MultiMediaCycle
+    //node_shape_drawable = new osg::ShapeDrawable(new osg::Cylinder(osg::Vec3(0.0f,0.0f,0.0f),localsize, 0.0f), hints); // draws a disc
+    //node_shape_drawable = new osg::ShapeDrawable(new osg::Capsule(osg::Vec3(0.0f,0.0f,0.0f),0.01, 0.005f), hints); // draws a sphere
 #endif
+
+    entry_geode->addDrawable(node_shape_drawable);
     entry_geode->setUserData(new ACRefId(node_index));
+    entry_geode->getOrCreateStateSet()->setRenderingHint(osg::StateSet::TRANSPARENT_BIN );
 }
-void ACOsgAudioRenderer::auraGeode(){StateSet *state;
-    
+
+void ACOsgAudioRenderer::auraGeode()
+{
     float localsize = 0.01;
     localsize *= afac;
-    
     aura_geode = new Geode();
-    
+
     TessellationHints *hints = new TessellationHints();
     hints->setDetailRatio(0.0);
-    
-    state = aura_geode->getOrCreateStateSet();
+
+    StateSet *state = aura_geode->getOrCreateStateSet();
     state->setMode(GL_NORMALIZE, osg::StateAttribute::ON);
-    
+
 #if defined(APPLE_IOS)
     state->setMode(GL_LIGHTING, osg::StateAttribute::PROTECTED | osg::StateAttribute::OFF );
     aura_geode->addDrawable(new osg::ShapeDrawable(new osg::Box(osg::Vec3(0.0f,0.0f,0.0f),0.01), hints)); //draws a square // Vintage AudioCycle
 #else
     state->setMode(GL_LIGHTING, osg::StateAttribute::ON );
+    state->setMode(GL_LIGHTING, osg::StateAttribute::PROTECTED | osg::StateAttribute::OFF );//CF
     state->setMode(GL_BLEND, StateAttribute::ON);
-    //entry_geode->addDrawable(new osg::ShapeDrawable(new osg::Box(osg::Vec3(0.0f,0.0f,0.0f),0.01), hints)); //draws a square // Vintage AudioCycle
+    //aura_geode->addDrawable(new osg::ShapeDrawable(new osg::Box(osg::Vec3(0.0f,0.0f,0.0f),0.01), hints)); //draws a square // Vintage AudioCycle
     //aura_geode->addDrawable(new osg::ShapeDrawable(new osg::Sphere(osg::Vec3(0.0f,0.0f,-localsize*1.5),localsize*1.5), hints)); // draws a sphere // MultiMediaCycle
     aura_geode->addDrawable(new osg::ShapeDrawable(new osg::Cylinder(osg::Vec3(0.0f,0.0f,0.0f),localsize*1.5, 0.0f), hints)); // draws a disc
-    //entry_geode->addDrawable(new osg::ShapeDrawable(new osg::Capsule(osg::Vec3(0.0f,0.0f,0.0f),0.01, 0.005f), hints)); // draws a sphere
+    //aura_geode->addDrawable(new osg::ShapeDrawable(new osg::Capsule(osg::Vec3(0.0f,0.0f,0.0f),0.01, 0.005f), hints)); // draws a sphere
 #endif
     aura_geode->setUserData(new ACRefId(node_index));
 }
 
 void ACOsgAudioRenderer::prepareNodes() {
 
+    if(media_node->containsNode(entry_transform))
+        media_node->removeChild(entry_transform);
+
     waveform_geode = 0;
     curser_transform = 0;
     curser_geode = 0;
     entry_geode = 0;
+    entry_transform = 0;
     metadata_geode = 0;
+    node_geometry = 0;
+    waveform_geometry = 0;
+    node_shape_drawable = 0;
 
-    //waveformGeode();
-    //curserGeode();
+    // This waveform must be initialized before the renderer node is added to the browser renderer scenegraph, otherwise it gets visual noise
+    waveform_geometry = thumbnailGeometry(waveform_thumbnail);
+    waveform_geode = new Geode();
+    waveform_geode->addDrawable(waveform_geometry);
+    waveform_geode->setUserData(new ACRefId(node_index));
+    waveform_geode->getOrCreateStateSet()->setRenderingHint(osg::StateSet::TRANSPARENT_BIN );
+#ifdef AUTO_TRANSFORM
+    waveform_transform = new AutoTransform();
+#else
+    waveform_transform = new MatrixTransform();
+#endif
+    waveform_transform->addChild(waveform_geode);
+
     //if  (media_cycle->getMediaNode(node_index)->isDisplayed()){
     if (media && media_cycle->getNodeFromMedia(media)==0){
         cout<<"test Error"<<endl;
     }
-    if (media && media_cycle->getNodeFromMedia(media)->isDisplayed()){
-        entryGeode();
-        media_node->addChild(entry_geode);
+    this->changeThumbnail(node_thumbnail);
+}
+
+void ACOsgAudioRenderer::setEntryGeodeVisible(bool visibility){
+    if(!entry_geode)
+        return;
+    if(visibility){
+        entry_geode->setNodeMask((unsigned int)-1);
+    }
+    else{
+        entry_geode->setNodeMask(0);
     }
 }
 
 void ACOsgAudioRenderer::updateNodes(double ratio) {
-
     double xstep = 0.00025;
     xstep *= afac;
+    unsigned int mask = (unsigned int)-1;
 
     const ACMediaNode* attribute = media_cycle->getMediaNode(node_index);
     if (!attribute->isDisplayed()){
-        media_node->removeChild(waveform_geode);
+        media_node->removeChild(waveform_transform);
         media_node->removeChild(metadata_geode);
         metadata_geode = 0;
         media_node->removeChild(curser_transform);
         media_node->removeChild(aura_geode);
         (aura_geode)=0;
-        if (entry_geode)
-            entry_geode->setNodeMask(0);
+        this->setEntryGeodeVisible(false);
         return;
     }
     Matrix T;
@@ -593,15 +294,6 @@ void ACOsgAudioRenderer::updateNodes(double ratio) {
     float maxscale = 1.5;
     float minscale = 0.33;
 
-    // SD 2010 OCT - This animation has moved from Browser to Renderer
-    /*
-  const ACPoint &p = attribute->getCurrentPosition(), &p2 = attribute->getNextPosition();
-  double omr = 1.0-ratio;
-  x = omr*p.x + ratio*p2.x;
-  y = omr*p.y + ratio*p2.y;
-  z = 0;
-  */
-
     x = media_cycle_view_pos.x;
     y = media_cycle_view_pos.y;
     z = 0;
@@ -609,17 +301,12 @@ void ACOsgAudioRenderer::updateNodes(double ratio) {
     T.makeTranslate(Vec3(x, y, z));
     localscale = maxscale - distance_mouse * (maxscale - minscale) / maxdistance ;
     localscale = max(localscale,minscale);
-    // localscale = 0.5;
 
     if (media && attribute->getActivity()>=1) {	// with waveform
-        //if (0) {	// without waveform
         localscale = 0.5;
+        //std::cout << "ACOsgAudioRenderer::updateNodes: current frame " << attribute->getCurrentFrame() << std::endl;
 
         if(waveform_type != AC_BROWSER_AUDIO_WAVEFORM_NONE){
-            if(waveform_geode == 0 ) {
-                waveformGeode();
-                //thumbnailGeode();
-            }
             if (curser_transform == 0) {
                 curserGeode();
             }
@@ -628,7 +315,6 @@ void ACOsgAudioRenderer::updateNodes(double ratio) {
             }
         }
         
-
         if(waveform_type != AC_BROWSER_AUDIO_WAVEFORM_NONE){
             if (label != media->getLabel() ) {
                 if (media_node->containsNode(metadata_geode))
@@ -640,32 +326,27 @@ void ACOsgAudioRenderer::updateNodes(double ratio) {
             }
         }
 
-        //if(media_node->getNumChildren() > 0 && media_node->getChild(0) == entry_geode) {
         if(waveform_type != AC_BROWSER_AUDIO_WAVEFORM_NONE) {// waveform + curser + metadata
-            //waveform_geode->setNodeMask(-1);
-            if (media_node->containsNode(entry_geode))
-                media_node->removeChild(entry_geode);
+            this->setEntryGeodeVisible(false);
             if (aura_geode&&media_node->containsNode(metadata_geode)){
                 media_node->removeChild(aura_geode);
             }
-            if (media_node->containsNode(waveform_geode)==false)
-                media_node->addChild(waveform_geode);
-            //media_node->setChild(0, waveform_geode);
+            if (media_node->containsNode(waveform_transform)==false)
+                media_node->addChild(waveform_transform);
             if (media_node->containsNode(metadata_geode)==false)
                 media_node->addChild(metadata_geode);
             if (media_node->containsNode(curser_transform)==false)
                 media_node->addChild(curser_transform);
         }
         else if( waveform_type == AC_BROWSER_AUDIO_WAVEFORM_NONE){// when switching to none mode while waveforms are already displayed
-            if (media_node->containsNode(waveform_geode))
-                media_node->removeChild(waveform_geode);
+            if (media_node->containsNode(waveform_transform))
+                media_node->removeChild(waveform_transform);
             if (media_node->containsNode(metadata_geode))
-            media_node->removeChild(metadata_geode);
+                media_node->removeChild(metadata_geode);
             metadata_geode = 0;
             if (media_node->containsNode(curser_transform))
                 media_node->removeChild(curser_transform);
-            if (media_node->containsNode(entry_geode)==false)
-                media_node->addChild(entry_geode);
+            this->setEntryGeodeVisible(true);
             if (aura_geode){
                 if (media_node->containsNode(aura_geode)==false)
                     media_node->addChild(aura_geode);
@@ -673,107 +354,110 @@ void ACOsgAudioRenderer::updateNodes(double ratio) {
         }
 
         if(waveform_type != AC_BROWSER_AUDIO_WAVEFORM_NONE){
-            // curserT.makeTranslate(Vec3(omr*p.x + ratio*p2.x + attribute->curser * xstep * 0.5 / zoom, omr*p.y + ratio*p2.y, 0.0)); // omr*p.z + ratio*p2.z));
-            // curserT =  Matrix::scale(0.5/zoom,0.5/zoom,0.5/zoom) * curserT;
 #ifdef AUTO_TRANSFORM
-            //curser_transform->setPosition(Vec3(attribute->getCursor() * xstep, 0.0, 0.0));
-
-            //curser_transform->setPosition(Vec3((float) attribute->getCurrentFrame() / (float)(((ACAudio*) media_cycle->getLibrary()->getMedia(media_index) )->getNFrames()) * media_cycle->getThumbnailWidth(media_index) * xstep, 0.0, 0.0));
-            curser_transform->setPosition(Vec3((float) attribute->getCurrentFrame() / (float)(((ACAudio*) media )->getNFrames()) * media->getThumbnailWidth() * xstep, 0.0, 0.0));
+            curser_transform->setPosition(Vec3((float) attribute->getCurrentFrame() / (float)(((ACAudio*) media )->getNFrames()) * media->getThumbnailWidth(waveform_thumbnail) * xstep, 0.0, 0.0));
 #else
-            //curserT.makeTranslate(Vec3(attribute->getCursor() * xstep, 0.0, 0.0));
-
-            //curserT.makeTranslate(Vec3((float) attribute->getCurrentFrame() / (float)(((ACAudio*) media_cycle->getLibrary()->getMedia(media_index) )->getNFrames()) * media_cycle->getThumbnailWidth(media_index) * xstep, 0.0, 0.0));
-            curserT.makeTranslate(Vec3((float) attribute->getCurrentFrame() / (float)(((ACAudio*) media )->getNFrames()) * media->getThumbnailWidth() * xstep, 0.0, 0.0));
-
+            curserT.makeTranslate(Vec3((float) attribute->getCurrentFrame() / (float)(((ACAudio*) media )->getNFrames()) * media->getThumbnailWidth(waveform_thumbnail) * xstep, 0.0, 0.0));
             curser_transform->setMatrix(curserT);
 #endif
-
+            //std::cout << "ACOsgAudioRenderer::updateNodes: current frame " << attribute->getCurrentFrame() << std::endl;
             T =  Matrix::rotate(-media_cycle_angle,Vec3(0.0,0.0,1.0)) * Matrix::scale(localscale/media_cycle_zoom,localscale/media_cycle_zoom,localscale/media_cycle_zoom) * T;
         }
     }
     else {
-        //if(media_node->getNumChildren() == 3) {
-        if (!entry_geode){
-            entryGeode();
-            //std::cout << "ACOsgAudioRenderer::updateNodes created missing node geode" << std::endl;
-        }
         { // entry_geode
-            if (media_node->containsNode(waveform_geode))
-                media_node->removeChild(waveform_geode);
+            if (media_node->containsNode(waveform_transform))
+                media_node->removeChild(waveform_transform);
             if (media_node->containsNode(metadata_geode))
                 media_node->removeChild(metadata_geode);
             metadata_geode = 0;
             if (media_node->containsNode(curser_transform))
                 media_node->removeChild(curser_transform);
-            if (media_node->containsNode(entry_geode)==false)
-                media_node->addChild(entry_geode);
+            this->setEntryGeodeVisible(true);
             if (aura_geode){
                 if (media_node->containsNode(aura_geode)==false)
                     media_node->addChild(aura_geode);
             }
-            //media_node->setChild(0, entry_geode);
-            //media_node->removeChild(1, 1);
         }
 
-
         //CF nodes colored along their relative cluster on in Clusters Mode
-        if (entry_geode &&entry_geode->getDrawable(0)){
-            if (media_cycle->getBrowserMode() == AC_MODE_CLUSTERS){
-                const vector<int> centerNodeIds=media_cycle->getBrowser()->getIdNodeClusterCenter();
-                if(cluster_colors.size()>0){
-                    ((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(cluster_colors[attribute->getClusterId()%cluster_colors.size()]);
-                /*if(setting == AC_SETTING_DESKTOP){
-                    if(centerNodeIds.size() != 0 && attribute->getClusterId() < centerNodeIds.size())
-                        if (centerNodeIds[attribute->getClusterId()]==attribute->getMediaId())
-                            ((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(osg::Vec4(0,0,0,1));
-                }*/
-                }
-                else
-                    ((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(node_color);
-                if (this->getIsTagged()&&(aura_geode==0)){
-                    auraGeode();
-                    ((ShapeDrawable*)aura_geode->getDrawable(0))->setColor(osg::Vec4(0,0,0,1));
-                }
-                else
-                    if (this->getIsTagged()==0&&aura_geode){
-                        media_node->removeChild(aura_geode);
-                        aura_geode=0;
-                    }
-                
-                
+        osg::Vec4f current_color;
+        if (media_cycle->getBrowserMode() == AC_MODE_CLUSTERS){
+            const vector<int> centerNodeIds=media_cycle->getBrowser()->getIdNodeClusterCenter();
+            if(cluster_colors.size()>0){
+                current_color = cluster_colors[attribute->getClusterId()%cluster_colors.size()];
+                //                if(setting == AC_SETTING_DESKTOP){
+                //                    if(centerNodeIds.size() != 0 && attribute->getClusterId() < centerNodeIds.size())
+                //                        if (centerNodeIds[attribute->getClusterId()]==attribute->getMediaId())
+                //                            current_color(osg::Vec4(0,0,0,1));
+                //                }
             }
             else
-                ((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(neighbor_color);
-        
+                current_color = node_color;
+            if (this->getIsTagged()&&(aura_geode==0)){
+                auraGeode();
+                current_color = osg::Vec4(0,0,0,1);
+            }
+            else
+                if (this->getIsTagged()==0&&aura_geode){
+                    media_node->removeChild(aura_geode);
+                    aura_geode=0;
+                }
+        }
+        else
+            current_color = neighbor_color;
 
         //CF color (multiple) selected nodes in black (for AudioGarden)
-            if (attribute->isSelected())
-                ((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(osg::Vec4(0,0,0,1));
+        if (attribute->isSelected())
+            current_color = osg::Vec4(0,0,0,1);
 
         //CF color discarded nodes in black (for LoopJam composition)
-            if(media)
-                if(media->isDiscarded())
-                    ((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(osg::Vec4(0,0,0,1));
+        if(media)
+            if(media->isDiscarded())
+                current_color = osg::Vec4(0,0,0,1);
 
-            if (user_defined_color)
-                ((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(node_color);
+        if (user_defined_color)
+            current_color = node_color;
+
+        osg::ref_ptr<osg::Vec4Array> current_color_array = new Vec4Array(1);
+        (*current_color_array)[0] = current_color;
+        if (node_geometry){
+            node_geometry->setColorArray(current_color_array);
+        }
+        if( waveform_geometry){
+            waveform_geometry->setColorArray(current_color_array);
+        }
+        if(node_shape_drawable){
+            node_shape_drawable->setColor(current_color);
         }
 
         T =  Matrix::rotate(-media_cycle_angle,Vec3(0.0,0.0,1.0)) * Matrix::scale(localscale/media_cycle_zoom,localscale/media_cycle_zoom,localscale/media_cycle_zoom) * T;
     }
 
-    unsigned int mask = (unsigned int)-1;
     if(attribute->getNavigationLevel() >= media_cycle->getNavigationLevel()) {
-        entry_geode->setNodeMask(mask);
         if (aura_geode)
             aura_geode->setNodeMask(mask);
     }
     else {
-        entry_geode->setNodeMask(0);
+        this->setEntryGeodeVisible(false);
         if (aura_geode)
             aura_geode->setNodeMask(0);
     }
+
+    float magic_number = 0.0005; // since we're not using an ortho2D projection
+#ifdef AUTO_TRANSFORM
+    if(waveform_transform)
+        waveform_transform->setScale(magic_number,magic_number,1.0);
+    if(entry_transform && node_geometry) // if the node is a thumbnail and not a shape
+        entry_transform->setScale(magic_number,magic_number,1.0);
+#else
+    Matrix magic_numbers;
+    magic_numbers.makeScale(magic_number,magic_number,1.0);
+    if(waveform_transform)
+        waveform_transform->setMatrix(magic_numbers);
+    if(entry_transform && node_geometry) // if the node is a thumbnail and not a shape
+        entry_transform->setMatrix(magic_numbers);
+#endif
 
 #ifdef AUTO_TRANSFORM
     media_node->setPosition(Vec3(x,y,z));
@@ -782,7 +466,6 @@ void ACOsgAudioRenderer::updateNodes(double ratio) {
 #else
     media_node->setMatrix(T);
 #endif
-
 }
 
 void ACOsgAudioRenderer::setWaveformType(ACBrowserAudioWaveformType _type)
@@ -796,4 +479,39 @@ void ACOsgAudioRenderer::updateWaveformType(ACBrowserAudioWaveformType _type)
         waveform_type = _type;
         this->updateNodes();
     }
+}
+
+void ACOsgAudioRenderer::changeThumbnail(std::string thumbnail){
+    this->node_thumbnail = thumbnail;
+
+    if(!media)
+        return;
+
+    if(media_cycle->getNodeFromMedia(media)==0)
+        return;
+
+    if(media_node->containsNode(entry_transform))
+        media_node->removeChild(entry_transform);
+
+    entry_transform=0;
+#ifdef AUTO_TRANSFORM
+    entry_transform = new AutoTransform();
+#else
+    entry_transform = new MatrixTransform();
+#endif
+
+    entry_geode = 0;
+    entry_geode = new Geode();
+
+    node_geometry = 0;
+    node_geometry = this->thumbnailGeometry(node_thumbnail);
+    if(node_geometry){
+        entry_geode->addDrawable(node_geometry);
+        entry_geode->setUserData(new ACRefId(node_index));
+        entry_geode->getOrCreateStateSet()->setRenderingHint(osg::StateSet::TRANSPARENT_BIN );
+    }
+    else
+        entryGeode();
+    entry_transform->addChild(entry_geode);
+    media_node->addChild(entry_transform);
 }

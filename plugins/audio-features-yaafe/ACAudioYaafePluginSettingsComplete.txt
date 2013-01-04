@@ -1,103 +1,118 @@
 audio := Input Resample="yes" SampleRate="22050"
-n1 := FrameTokenizer blockSize="512" stepSize="256"
-audio > n1
+nAudioIn := FrameTokenizer blockSize="512" stepSize="256"
+audio > nAudioIn
 
-n2 := FFT FFTLength="512" FFTWindow="Hanning"
-n1 > n2
+nFFT := FFT FFTLength="512" FFTWindow="Hanning"
+nAudioIn > nFFT
 
-n3 := Abs
-n2 > n3
+nFFTAbs := Abs
+nFFT > nFFTAbs
 
-n4 := MelFilterBank MelMaxFreq="6854.0" MelMinFreq="130.0" MelNbFilters="40"
-n3 > n4
+nMelFilterBank := MelFilterBank MelMaxFreq="6854.0" MelMinFreq="130.0" MelNbFilters="40"
+nFFTAbs > nMelFilterBank
 
-n5 := Cepstrum CepsIgnoreFirstCoeff="1" CepsNbCoeffs="13"
-n4 > n5
+nCepstrum := Cepstrum CepsIgnoreFirstCoeff="1" CepsNbCoeffs="13"
+nMelFilterBank > nCepstrum
 
 MFCC := Output normalize="-1" version="v0.6" yaafedefinition="MFCC blockSize=512 stepSize=256"
-n5 > MFCC
+nCepstrum > MFCC
 
-n7 := Derivate DO1Len="4" DO2Len="1" DOrder="1"
+nDMFCC := Derivate DO1Len="4" DO2Len="1" DOrder="1"
 Delta_MFCC := Output normalize="-1" version="v0.6" yaafedefinition="MFCC blockSize=512 stepSize=256 > Derivate DOrder=1"
-n5 > n7
-n7 > Delta_MFCC
+nCepstrum > nDMFCC
+nDMFCC > Delta_MFCC
 
-n9 := Derivate DO1Len="4" DO2Len="1" DOrder="2"
+nDDMFCC := Derivate DO1Len="4" DO2Len="1" DOrder="2"
 Delta_Delta_MFCC := Output normalize="-1" version="v0.6" yaafedefinition="MFCC blockSize=512 stepSize=256 > Derivate DOrder=2"
-n5 > n9
-n9 > Delta_Delta_MFCC
+nCepstrum > nDDMFCC
+nDDMFCC > Delta_Delta_MFCC
 
-n11 := Flatness
+nSpectralFlatness := Flatness
 Spectral_Flatness := Output normalize="-1" version="v0.6" yaafedefinition="SpectralFlatness blockSize=512 stepSize=256"
-n3 > n11
-n11 > Spectral_Flatness
+nFFTAbs > nSpectralFlatness
+nSpectralFlatness > Spectral_Flatness
 
-n13 := Sqr
-n3 > n13
+nFFTAbsSqr := Sqr
+nFFTAbs > nFFTAbsSqr
 
-n14 := Rolloff
+nSpectralRolloff := Rolloff
 Spectral_RollOff := Output normalize="-1" version="v0.6" yaafedefinition="SpectralRolloff blockSize=512 stepSize=256"
-n13 > n14
-n14 > Spectral_RollOff
+nFFTAbsSqr > nSpectralRolloff
+nSpectralRolloff > Spectral_RollOff
 
-n15 := Variation
+nSpectralVariation := Variation
 Spectral_Variation := Output normalize="-1" version="v0.6" yaafedefinition="SpectralVariation blockSize=512 stepSize=256"
-n3 > n15
-n15 > Spectral_Variation
+nFFTAbs > nSpectralVariation
+nSpectralVariation > Spectral_Variation
 
-n16 := Slope
+nSpectralSlope := Slope
 Spectral_Slope := Output normalize="-1" version="v0.6" yaafedefinition="SpectralSlope blockSize=512 stepSize=256"
-n3 > n16
-n16 > Spectral_Slope
+nFFTAbs > nSpectralSlope
+nSpectralSlope > Spectral_Slope
 
-n17 := SpectralShapeStatistics
+nSpectralShapeStatistics := SpectralShapeStatistics
 Spectral_Shape_Statistics := Output normalize="-1" version="v0.6" yaafedefinition="SpectralShapeStatistics blockSize=512 stepSize=256"
-n3 > n17
-n17 > Spectral_Shape_Statistics
+nFFTAbs > nSpectralShapeStatistics
+nSpectralShapeStatistics > Spectral_Shape_Statistics
 
-n18 := Flux
+nSpectralFlux := Flux
 Spectral_Flux := Output normalize="-1" version="v0.6" yaafedefinition="SpectralFlux blockSize=512 stepSize=256"
-n3 > n18
-n18 > Spectral_Flux
+nFFTAbs > nSpectralFlux
+nSpectralFlux > Spectral_Flux
 
-n19 := Decrease
+nSpectralDecrease := Decrease
 Spectral_Decrease := Output normalize="-1" version="v0.6" yaafedefinition="SpectralDecrease blockSize=512 stepSize=256"
-n3 > n19
-n19 > Spectral_Decrease
+nFFTAbs > nSpectralDecrease
+nSpectralDecrease > Spectral_Decrease
 
-n20 := ZCR
+nZCR := ZCR
 Zero_Crossing_Rate := Output normalize="-1" version="v0.6" yaafedefinition="ZeroCrossingRate blockSize=512 stepSize=256"
-n1 > n20
-n20 > Zero_Crossing_Rate
+nAudioIn > nZCR
+nZCR > Zero_Crossing_Rate
 
-n21 := TemporalShapeStatistics
+nTemporalShapeStatistics := TemporalShapeStatistics
 Temporal_Shape_Statistics := Output normalize="-1" version="v0.6" yaafedefinition="TemporalShapeStatistics blockSize=512 stepSize=256"
-n1 > n21
-n21 > Temporal_Shape_Statistics
+nAudioIn > nTemporalShapeStatistics
+nTemporalShapeStatistics > Temporal_Shape_Statistics
 
-n22 := RMS
+nRMS := RMS
 Energy := Output normalize="-1" version="v0.6" yaafedefinition="Energy blockSize=512 stepSize=256"
-n1 > n22
-n22 > Energy
+nAudioIn > nRMS
+nRMS > Energy
 
-n23 := Loudness
+nLoudness := Loudness
 Loudness := Output normalize="-1" version="v0.6" yaafedefinition="Loudness blockSize=512 stepSize=256"
-n13 > n23
-n23 > Loudness
+nFFTAbsSqr > nLoudness
+nLoudness > Loudness
 
-n24 := Normalize NNorm="Sum"
-n25 := LoudnessSharpness
+nLoudnessNormalized := Normalize NNorm="Sum"
+nLoudnessSharpness := LoudnessSharpness
 Perceptual_Sharpness := Output normalize="-1" version="v0.6" yaafedefinition="PerceptualSharpness blockSize=512 stepSize=256"
-n23 > n24
-n24 > n25
-n25 > Perceptual_Sharpness
+nLoudness > nLoudnessNormalized
+nLoudnessNormalized > nLoudnessSharpness
+nLoudnessSharpness > Perceptual_Sharpness
 
-n26 := LoudnessSpread
+nLoudnessSpread := LoudnessSpread
 Perceptual_Spread := Output normalize="-1" version="v0.6" yaafedefinition="PerceptualSpread blockSize=512 stepSize=256"
-n24 > n26
-n26 > Perceptual_Spread
+nLoudnessNormalized > nLoudnessSpread
+nLoudnessSpread > Perceptual_Spread
 
-n27 := EnvelopeShapeStatistics
+nEnvelopeShapeStatistics := EnvelopeShapeStatistics
 Envelope_Shape_Statistics := Output normalize="-1" version="v0.6" yaafedefinition="EnvelopeShapeStatistics blockSize=512 stepSize=256"
-n1 > n27
-n27 > Envelope_Shape_Statistics
+nAudioIn > nEnvelopeShapeStatistics
+nEnvelopeShapeStatistics > Envelope_Shape_Statistics
+
+nOBSI := OBSI
+OctaveBandsSignalIntensity := Output normalize="-1" version="v0.6" yaafedefinition="OBSI blockSize=512 stepSize=256"
+nFFTAbsSqr > nOBSI
+nOBSI > OctaveBandsSignalIntensity
+
+nEnvelope := Envelope 
+Envelope := Output normalize="-1" version="v0.6" yaafedefinition="Envelope  EnDecim=200 blockSize=512  stepSize=256"
+nAudioIn > nEnvelope
+nEnvelope > Envelope
+
+nAutoCorrEnv := AutoCorrelation
+Envelope_AutoCorrelation := Output normalize="-1" version="v0.6" yaafedefinition="AutoCorrelation ACNbCoeffs=49  blockSize=512  stepSize=256"
+nEnvelope > nAutoCorrEnv
+nAutoCorrEnv > Envelope_AutoCorrelation

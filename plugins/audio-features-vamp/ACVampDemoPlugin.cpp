@@ -66,7 +66,7 @@ ACVampDemoPlugin::~ACVampDemoPlugin() {
 }
 
 
-std::vector<ACMediaFeatures*> ACVampDemoPlugin::calculate(ACMediaData* audio_data, ACMedia* theMedia, bool _save_timed_feat) {
+std::vector<ACMediaFeatures*> ACVampDemoPlugin::calculate(ACMedia* theMedia, bool _save_timed_feat) {
 	std::vector<ACMediaTimedFeature*> descmf;
 	std::vector<ACMediaFeatures*> desc;
 	//	int sr = ((ACAudio*)theMedia)->getSampleRate();

@@ -44,7 +44,7 @@ public:
     ACAudioSegmentationPlugin();
     ~ACAudioSegmentationPlugin();
 
-    virtual std::vector<ACMedia*> segment(ACMediaData* _data, ACMedia*);
+    virtual std::vector<ACMedia*> segment(ACMedia*);
     std::vector<ACMedia*> segment(ACMediaTimedFeature* _MTF, ACMedia* _theMedia);
 
 private:

@@ -59,19 +59,10 @@ public:
     void saveXMLSpecific(TiXmlElement* _media);
     int loadXMLSpecific(TiXmlElement* _pMediaNode);
 
-    //void import(std::string _path); // XS 240210 : migrated to ACMedia
-    void saveThumbnail(std::string _path);
-    void* getThumbnailPtr() { return (void*)waveform; }
-    int getThumbnailWidth() {return waveformLength;} // width in thumbnail frames, not samples
-    int getThumbnailHeight() {return 0;} // width in thumbnail frames, not samples
     int getWidth() {return getSampleEnd();}
     int getHeight() {return 0;}
 
-    float* getData(){return static_cast<float*> (data->getData());}
-    void setData(float* _data,float _sample_number=0 ,int _sr=44100,int _channels=1);
-    virtual ACMediaData* getMediaData(){return data;}
     bool extractData(std::string fname);
-    virtual void deleteData();
 
     void setSampleRate(int _sample_rate) { sample_rate = _sample_rate; }
     int getSampleRate() { return sample_rate; }
@@ -84,34 +75,16 @@ public:
     int getSampleStart();
     int getSampleEnd();
 
-    void setSampleStart(int st){this->start = (float) st / (float) sample_rate; };
-    void setSampleEnd(int en){this->end = (float) en / (float) sample_rate; };
+    void setSampleStart(int st){this->start = (float) st / (float) sample_rate;}
+    void setSampleEnd(int en){this->end = (float) en / (float) sample_rate;}
 
-    void setWaveformLength(int _waveformLength) { waveformLength = _waveformLength; }
-    int getWaveformLength() { return waveformLength; }
-    void setWaveform(float* _waveform) { waveform = _waveform; }
-    float* getWaveform() { return waveform; }
-
-    float* computeWaveform(int& length, float start_ratio = 0.0f, float end_ratio = 1.0f);
-
+    // To deprecate, will crash on long files
     float* getSamples();
     float* getMonoSamples();
 
 private:
     int sample_rate;
     int channels;
-    //float time_stamp_start;	// seconds
-    //float time_stamp_end;
-    int waveformLength;
-    float* waveform; // typically one value every 10ms
-    // following are specific to loops or music
-    float db;
-    float bpm;
-    int time_signature_num;
-    int time_signature_den;
-    int key;
-    int acid_type;
-    ACAudioData* data;
 };
 
 #endif // ACAUDIO_H

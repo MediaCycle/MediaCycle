@@ -96,10 +96,10 @@ float *fgetmem (const int leng)
    return ( (float *)getmem((size_t)leng, sizeof(float)) );
 }
 
-real *rgetmem (const int leng)
+/*real *rgetmem (const int leng)
 {
    return ( (real *)getmem((size_t)leng, sizeof(real)) );
-}
+}*/
 
 float **ffgetmem (const int leng)
 {

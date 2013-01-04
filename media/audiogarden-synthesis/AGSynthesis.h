@@ -1,8 +1,8 @@
 /**
  * @brief AGSynthesis.h
  * @author Christian Frisson
- * @date 10/03/2011
- * @copyright (c) 2011 – UMONS - Numediart
+ * @date 04/01/2013
+ * @copyright (c) 2013 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -62,22 +62,26 @@ class AGSynthesis {
 	bool compute(long targetId, std::vector<long> garinIds);
 	bool compute(long targetId, std::set<int> selectedNodes);
 	
-	AGMethod getMethod(){return method;};
-	void setMethod(AGMethod met){this->method=met;};
-	AGMapping getMapping(){return mapping;};
-	void setMapping(AGMapping map){this->mapping = map;};
-	float getRandomness(){return randomness;};
-	void setRandomness(float rand){randomness = rand;};
-	float getThreshold(){return this->threshold;};
-	void setThreshold(float thresh){this->threshold = thresh;};
-	float* getSound(){return synthesisSound;};
-	long getLength(){return synthesisLength;};
+    AGMethod getMethod(){return method;}
+    void setMethod(AGMethod met){this->method=met;}
+    AGMapping getMapping(){return mapping;}
+    void setMapping(AGMapping map){this->mapping = map;}
+    float getRandomness(){return randomness;}
+    void setRandomness(float rand){randomness = rand;}
+    float getThreshold(){return this->threshold;}
+    void setThreshold(float thresh){this->threshold = thresh;}
+    float* getSound(){return synthesisSound;}
+    long getLength(){return synthesisLength;}
 
-	void setMediaCycle(MediaCycle* mc){this->mediacycle = mc;};
+    void setMediaCycle(MediaCycle* mc){this->mediacycle = mc;}
 
 	bool saveAsWav(std::string);
 	
 	void resetSound();
+
+    /// Replaces float* ACAudio::getSamples();
+    float* getSamples(std::string filename, int start_frame, int end_frame);
+    float* getSamples(ACAudio* audio);
 	
  private:
 	float* synthesisSound;

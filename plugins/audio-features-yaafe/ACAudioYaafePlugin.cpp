@@ -608,7 +608,7 @@ bool ACAudioYaafePlugin::addMediaTimedFeature(ACMediaTimedFeature* feature, std:
     }
 }
 
-std::vector<ACMediaFeatures*> ACAudioYaafePlugin::calculate(ACMediaData* aData, ACMedia* theMedia, bool _save_timed_feat) {
+std::vector<ACMediaFeatures*> ACAudioYaafePlugin::calculate(ACMedia* theMedia, bool _save_timed_feat) {
     descmf.clear();
     cout<<"ACAudioYaafePlugin::calculate"<<endl;
 

@@ -37,7 +37,7 @@
 
 using namespace std;
 
-ACAudioEngineRendererPlugin::ACAudioEngineRendererPlugin() : ACMediaRendererPlugin(){
+ACAudioEngineRendererPlugin::ACAudioEngineRendererPlugin() : QObject(), ACPluginQt(), ACMediaRendererPlugin(){
     this->mName = "Audio Engine";
     this->mDescription ="Plugin for playing audio files with OpenAL or PortAudio";
     this->mMediaType = MEDIA_TYPE_AUDIO;
@@ -69,31 +69,7 @@ ACAudioEngineRendererPlugin::ACAudioEngineRendererPlugin() : ACMediaRendererPlug
     presets.push_back("High-Fidelity");
     presets.push_back("Sync Looping");
 
-}
-
-ACAudioEngineRendererPlugin::~ACAudioEngineRendererPlugin(){
-    if (audio_engine) {
-        audio_engine->stopAudioEngine();
-        usleep(10000);
-        delete audio_engine;
-    }
-    audio_engine = 0;
-}
-
-void ACAudioEngineRendererPlugin::setMediaCycle(MediaCycle* _media_cycle){
-    this->media_cycle=_media_cycle;
-
-    if (audio_engine) {
-        audio_engine->stopAudioEngine();
-        delete audio_engine;
-    }
-    audio_engine = new ACAudioEngine();
-    audio_engine->setMediaCycle(media_cycle);
-
-    if(this->hasCallbackNamed("Mute"))
-        this->updateCallback("Mute","Mute",boost::bind(&MediaCycle::muteAllSources,this->media_cycle));
-    else
-        this->addCallback("Mute","Mute",boost::bind(&MediaCycle::muteAllSources,this->media_cycle));
+        //this->addStringParameter("Preset");
 
     if(this->hasNumberParameterNamed("Volume"))
         this->updateNumberParameter("Volume",100,1,100,1,"Main volume",boost::bind(&ACAudioEngineRendererPlugin::updateVolume,this));
@@ -110,10 +86,53 @@ void ACAudioEngineRendererPlugin::setMediaCycle(MediaCycle* _media_cycle){
     if(!this->hasStringParameterNamed("Synchro Mode"))
         this->addStringParameter("Synchro Mode","None",synchro_modes,"Synchro Mode",boost::bind(&ACAudioEngineRendererPlugin::updateSynchroMode,this));
 
-    //this->addStringParameter("Preset");
+    loopClickedNodeAction = new ACInputActionQt(tr("Loop clicked node"), this);
+    loopClickedNodeAction->setShortcut(Qt::Key_L);
+    loopClickedNodeAction->setKeyEventType(QEvent::KeyPress);
+    loopClickedNodeAction->setMouseEventType(QEvent::MouseButtonRelease);
+    loopClickedNodeAction->setToolTip(tr("Loop the clicked node"));
+    connect(loopClickedNodeAction, SIGNAL(triggered()), this, SLOT(loopClickedNode()));
+
+    playClickedNodeAction = new ACInputActionQt(tr("Play clicked node"), this);
+    //playClickedNodeAction->setShortcut(Qt::Key_P);
+    //playClickedNodeAction->setKeyEventType(QEvent::KeyPress);
+    playClickedNodeAction->setMouseEventType(QEvent::MouseButtonRelease);
+    playClickedNodeAction->setToolTip(tr("Play the clicked node"));
+    connect(playClickedNodeAction, SIGNAL(triggered()), this, SLOT(playClickedNode()));
+
+    muteAllNodesAction = new ACInputActionQt(tr("Mute all"), this);
+    muteAllNodesAction->setShortcut(Qt::Key_M);
+    muteAllNodesAction->setKeyEventType(QEvent::KeyPress);
+    //muteAllNodesAction->setMouseEventType(QEvent::MouseButtonRelease);
+    muteAllNodesAction->setToolTip(tr("Mute all"));
+    connect(muteAllNodesAction, SIGNAL(triggered()), this, SLOT(muteAllNodes()));
+}
+
+void ACAudioEngineRendererPlugin::mediaCycleSet(){
+
+    if (audio_engine) {
+        audio_engine->stopAudioEngine();
+        delete audio_engine;
+    }
+    audio_engine = new ACAudioEngine();
+    audio_engine->setMediaCycle(media_cycle);
+
+    if(this->hasCallbackNamed("Mute"))
+        this->updateCallback("Mute","Mute",boost::bind(&MediaCycle::muteAllSources,this->media_cycle));
+    else
+        this->addCallback("Mute","Mute",boost::bind(&MediaCycle::muteAllSources,this->media_cycle));
 
     //media_cycle->setAutoPlay(1);//Seneffe
     audio_engine->startAudioEngine();
+}
+
+ACAudioEngineRendererPlugin::~ACAudioEngineRendererPlugin(){
+    if (audio_engine) {
+        audio_engine->stopAudioEngine();
+        usleep(10000);
+        delete audio_engine;
+    }
+    audio_engine = 0;
 }
 
 void ACAudioEngineRendererPlugin::updateBPM(){
@@ -164,11 +183,16 @@ bool ACAudioEngineRendererPlugin::performActionOnMedia(std::string action, long 
         std::cerr << "ACAudioEngineRendererPlugin::performActionOnMedia: audioengine not created" << std::endl;
         return false;
     }
-    /*if(mediaId == -1){
+
+    if(action == "mute all"){
+        this->muteAll();
+        return true;
+    }
+
+    if(mediaId == -1){
         std::cerr << "ACAudioEngineRendererPlugin::performActionOnMedia: media id " << mediaId << " not available" << std::endl;
         return false;
-    }*/
-    //mediaId = media_cycle->getClickedNode();
+    }
 
     if(action == "scale mode"){
         if(!audio_engine)
@@ -198,6 +222,9 @@ bool ACAudioEngineRendererPlugin::performActionOnMedia(std::string action, long 
         double gain = atof(value.c_str());
         audio_engine->setSourceGain(mediaId, gain);
     }
+    /*else if(action == "loop" || action == "play"){
+        media_cycle->setNeedsActivityUpdateMedia();
+    }*/
     return true;
 }
 
@@ -208,6 +235,9 @@ std::map<std::string,ACMediaType> ACAudioEngineRendererPlugin::availableMediaAct
     media_actions["scrub"] = MEDIA_TYPE_AUDIO;
     media_actions["pitch"] = MEDIA_TYPE_AUDIO;
     media_actions["gain"] = MEDIA_TYPE_AUDIO;
+    media_actions["play"] = MEDIA_TYPE_AUDIO;
+    media_actions["loop"] = MEDIA_TYPE_AUDIO;
+    media_actions["mute all"] = MEDIA_TYPE_AUDIO;
     return media_actions;
 }
 
@@ -422,3 +452,39 @@ void ACAudioControlsDockWidgetQt::setAudioEngine(ACAudioEngine* _audio_engine)
 //	}
 //}
 */
+
+void ACAudioEngineRendererPlugin::playClickedNode(){
+    if(!media_cycle)
+        return;
+    int media_id = media_cycle->getClickedNode();
+    media_cycle->performActionOnMedia("play", media_id,"");
+}
+
+void ACAudioEngineRendererPlugin::loopClickedNode(){
+    if(!media_cycle)
+        return;
+    int media_id = media_cycle->getClickedNode();
+    media_cycle->performActionOnMedia("loop", media_id,"");
+}
+
+void ACAudioEngineRendererPlugin::muteAllNodes(){
+    if(!media_cycle)
+        return;
+    media_cycle->performActionOnMedia("mute all", -1,"");
+    media_cycle->muteAllSources();
+}
+
+
+std::vector<ACInputActionQt*> ACAudioEngineRendererPlugin::providesInputActions(){
+    std::vector<ACInputActionQt*> inputActions;
+    inputActions.push_back(playClickedNodeAction);
+    inputActions.push_back(loopClickedNodeAction);
+    inputActions.push_back(muteAllNodesAction);
+    return inputActions;
+}
+
+void ACAudioEngineRendererPlugin::muteAll(){
+    if(this->media_cycle)
+        media_cycle->muteAllSources();
+
+}

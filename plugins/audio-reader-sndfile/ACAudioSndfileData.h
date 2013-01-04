@@ -1,8 +1,8 @@
 /**
- * @brief ACAudioAcidPlugin.h
+ * @brief A class that provides a media data instance to parse and read audio using libsndfile.
  * @author Christian Frisson
- * @date 04/01/2013
- * @copyright (c) 2013 – UMONS - Numediart
+ * @date 14/12/2012
+ * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -27,36 +27,42 @@
  * 
  * Any other additional authorizations may be asked to avre@umons.ac.be 
  * <mailto:avre@umons.ac.be>
-*/
+ */
 
-#ifndef _ACAUDIOACIDPLUGIN_H
-#define	_ACAUDIOACIDPLUGIN_H
+#ifndef ACAudioSndfileData_H
+#define ACAudioSndfileData_H
 
-#include "MediaCycle.h"
-#include "CWaves_acid.h"
+#include "ACAudioData.h"
+#include <sndfile.h>
+#include <cstdlib>
+#include <cstring>
 
-//#include <boost/thread/thread_time.hpp>
-//typedef boost::posix_time::ptime system_time;
-#include<iostream>
-
-class ACAudioAcidPlugin : public ACFeaturesPlugin {
-	
+class ACAudioSndfileData: public ACAudioData {
 public:
-	ACAudioAcidPlugin();
-	~ACAudioAcidPlugin();
+    ACAudioSndfileData();
+    virtual ~ACAudioSndfileData();
+    ACAudioSndfileData(std::string _fname);
 
-    std::vector<ACMediaFeatures*> calculate(ACMedia* theMedia, bool _save_timed_feat=false);
-	
+    virtual std::string getName(){return "sndfile audio";}
 
-private:
-	float getBPM(int acid_type, int _nbeats, int nsamples, int sample_rate);
-	void extractDataWavAcid(string fname, int nsamples, int sample_rate);
-	void extractDataWavNotAcid(string fname, int nsamples, int sample_rate);
-		
-	unsigned short	acid_type; 
-	unsigned short	acid_key; 
-	unsigned short	acid_nbeats; 
-	float			acid_bpm;	
+    virtual bool readData(std::string _fname);
+
+    virtual float getSampleRate();
+    virtual int getNumberOfChannels();
+    virtual int getNumberOfFrames();
+
+    virtual bool closeFile();
+
+    /// Functions for temporal media
+    virtual ACMediaDataContainer* getBuffer(int start_frame, int number_of_frames, int channel);
+
+protected:
+	virtual void init();
+    SF_INFO* sfinfo;
+    SNDFILE* audio_file;
+    // To remove
+    /*float* audio_ptr;
+    float  audio_frames;*/
 };
 
-#endif	/* _ACAUDIOACIDPLUGIN_H */
+#endif // ACAudioSndfileData_H

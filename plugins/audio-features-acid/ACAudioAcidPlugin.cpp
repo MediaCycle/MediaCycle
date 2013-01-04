@@ -1,8 +1,8 @@
 /**
  * @brief ACAudioAcidPlugin.cpp
- * @author Thierry Ravet
- * @date 15/12/2012
- * @copyright (c) 2012 – UMONS - Numediart
+ * @author Christian Frisson
+ * @date 04/01/2013
+ * @copyright (c) 2013 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -155,8 +155,8 @@ void ACAudioAcidPlugin::extractDataWavAcid(string fname, int nsamples, int sampl
     }
 }
 
-std::vector<ACMediaFeatures*> ACAudioAcidPlugin::calculate(ACMediaData* aData, ACMedia* theMedia, bool _save_timed_feat) {
-    cout<<"ACAudioAcidPlugin::calculate"<<endl;
+std::vector<ACMediaFeatures*> ACAudioAcidPlugin::calculate(ACMedia* theMedia, bool _save_timed_feat) {
+
     std::vector<ACMediaFeatures*> desc;
     ACMediaFeatures* feat;
     ACAudio* theAudio = 0;
@@ -209,8 +209,3 @@ std::vector<ACMediaFeatures*> ACAudioAcidPlugin::calculate(ACMediaData* aData, A
 
     return desc;
 }
-
-//ACMediaTimedFeature* ACAudioAcidPlugin::getTimedFeatures() {
-//	
-//	return 0;
-//}

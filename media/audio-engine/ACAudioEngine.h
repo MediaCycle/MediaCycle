@@ -57,7 +57,7 @@ public:
 	~ACAudioEngine();
 	
 	// MediaCycle to query database and browser
-	MediaCycle				*media_cycle;
+    MediaCycle *media_cycle;
 	void setMediaCycle(MediaCycle *media_cycle);
 
 private:

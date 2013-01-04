@@ -1,8 +1,8 @@
 /**
  * @brief ACAudioGardenSynthesisPlugin.h
  * @author Christian Frisson
- * @date 04/12/2012
- * @copyright (c) 2012 – UMONS - Numediart
+ * @date 04/01/2013
+ * @copyright (c) 2013 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -80,9 +80,16 @@
 #include <ACPluginQt.h>
 #include <ACAudioGardenDockQt.h>
 
+class ACAudioGardenData : public ACAudioData {
+public:
+    ACAudioGardenData():ACAudioData(){}
+    ~ACAudioGardenData(){}
+    virtual bool readData(std::string fname){return false;} /// AudioGarden data is synthesized and not saved as file
+    virtual std::string getName(){return "AudioGarden";}
+};
+
 class ACAudioGardenSynthesisPlugin : public QObject, public ACPluginQt, public ACMediaRendererPlugin // : public osgViewer::CompositeViewer, public QGLWidget
 {
-
     Q_OBJECT
     Q_INTERFACES(ACPluginQt)
 
@@ -116,7 +123,7 @@ public:
 
     //CF new 2012
 public:
-    virtual void setMediaCycle(MediaCycle* _media_cycle);
+    virtual void mediaCycleSet();
     std::map<std::string, ACMediaType> getSupportedExtensions(ACMediaType media_type = MEDIA_TYPE_ALL);
     virtual bool performActionOnMedia(std::string action, long int mediaId, std::string value="");
     virtual std::map<std::string,ACMediaType> availableMediaActions();
@@ -145,7 +152,6 @@ public slots:
 protected:
     ACInputActionQt* selectGrainsAction;
     ACInputActionQt* selectRhythmPatternAction;
-
 };
 
 #endif

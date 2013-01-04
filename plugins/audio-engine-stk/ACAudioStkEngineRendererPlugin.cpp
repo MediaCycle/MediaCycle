@@ -53,6 +53,22 @@ ACAudioStkEngineRendererPlugin::ACAudioStkEngineRendererPlugin() : QObject(), AC
     // Set the global sample rate before creating class instances.
     Stk::setSampleRate( (StkFloat) 44100 );
 
+    if(this->hasCallbackNamed("Mute"))
+        this->updateCallback("Mute","Mute",boost::bind(&ACAudioStkEngineRendererPlugin::muteAll,this));
+    else
+        this->addCallback("Mute","Mute",boost::bind(&ACAudioStkEngineRendererPlugin::muteAll,this));
+
+    if(this->hasNumberParameterNamed("Rate"))
+        this->updateNumberParameter("Rate",1.0,-10.0,10.0,0.01,"Rate",boost::bind(&ACAudioStkEngineRendererPlugin::updateRate,this));
+    else
+        this->addNumberParameter("Rate",1.0,-10.0,10.0,0.01,"Rate",boost::bind(&ACAudioStkEngineRendererPlugin::updateRate,this));
+
+
+    /*if(this->hasNumberParameterNamed("Volume"))
+        this->updateNumberParameter("Volume",100,1,100,1,"Main volume",boost::bind(&ACAudioStkEngineRendererPlugin::updateVolume,this));
+    else
+        this->addNumberParameter("Volume",100,1,100,1,"Main volume",boost::bind(&ACAudioStkEngineRendererPlugin::updateVolume,this));*/
+
     loopClickedNodeAction = new ACInputActionQt(tr("Loop clicked node"), this);
     loopClickedNodeAction->setShortcut(Qt::Key_L);
     loopClickedNodeAction->setKeyEventType(QEvent::KeyPress);
@@ -192,27 +208,6 @@ int tick( void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
   }
   else*/
     return 0;
-}
-
-
-void ACAudioStkEngineRendererPlugin::setMediaCycle(MediaCycle* _media_cycle){
-    this->media_cycle=_media_cycle;
-
-    if(this->hasCallbackNamed("Mute"))
-        this->updateCallback("Mute","Mute",boost::bind(&ACAudioStkEngineRendererPlugin::muteAll,this));
-    else
-        this->addCallback("Mute","Mute",boost::bind(&ACAudioStkEngineRendererPlugin::muteAll,this));
-
-    if(this->hasNumberParameterNamed("Rate"))
-        this->updateNumberParameter("Rate",1.0,-10.0,10.0,0.01,"Rate",boost::bind(&ACAudioStkEngineRendererPlugin::updateRate,this));
-    else
-        this->addNumberParameter("Rate",1.0,-10.0,10.0,0.01,"Rate",boost::bind(&ACAudioStkEngineRendererPlugin::updateRate,this));
-
-
-    /*if(this->hasNumberParameterNamed("Volume"))
-        this->updateNumberParameter("Volume",100,1,100,1,"Main volume",boost::bind(&ACAudioStkEngineRendererPlugin::updateVolume,this));
-    else
-        this->addNumberParameter("Volume",100,1,100,1,"Main volume",boost::bind(&ACAudioStkEngineRendererPlugin::updateVolume,this));*/
 }
 
 void ACAudioStkEngineRendererPlugin::muteAll(){

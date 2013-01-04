@@ -1,8 +1,8 @@
 /**
  * @brief AGSynthesis.cpp
  * @author Christian Frisson
- * @date 03/08/2012
- * @copyright (c) 2012 – UMONS - Numediart
+ * @date 04/01/2013
+ * @copyright (c) 2013 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -57,9 +57,9 @@ bool AGSynthesis::compute(long targetId, vector<long> grainIds){
 	vector<string> featureList;
 	featureList.push_back("Mean of MFCC");
 	featureList.push_back("Mean of Spectral Flatness");
-	featureList.push_back("Interpolated Energy");
+    featureList.push_back("Mean of Energy");//featureList.push_back("Interpolated Energy");
 
-	int durationT = lib->getMedia(targetId)->getDuration();
+    double durationT = lib->getMedia(targetId)->getDuration();
 
 	mat descG_m = extractDescMatrix(lib, featureList, grainIds);
 	mat enerG_m = extractDescMatrix(lib, "Mean of Energy", grainIds);
@@ -355,10 +355,42 @@ mat AGSynthesis::extractDescMatrix(ACMediaLibrary* lib, string featureName, vect
   }
 	return desc_m;
 }
+
+float* AGSynthesis::getSamples(ACAudio* audio){
+    if(!audio)
+        return 0;
+    return this->getSamples(audio->getFileName(),audio->getStart(),audio->getEnd());
+}
  
+float* AGSynthesis::getSamples(std::string filename, int start_frame, int end_frame){
+    SF_INFO sfinfo;
+    SNDFILE* testFile;
+    if (! (testFile = sf_open (filename.c_str(), SFM_READ, &sfinfo))){
+        /* Open failed so print an error message. */
+        printf ("Not able to open input file %s.\n", filename.c_str()) ;
+        /* Print the error message from libsndfile. */
+        puts (sf_strerror (0)) ;
+        return  0;
+    }
+    int sample_rate = sfinfo.samplerate;
+    int channels = sfinfo.channels;
+    if (start_frame < 0)
+        start_frame = 0;
+    if (end_frame < 0 || end_frame > sfinfo.frames)
+        end_frame = sfinfo.frames;
+    int nb_frames = end_frame - start_frame + 1;
+
+    float* _data = new float[(long) nb_frames * channels];
+
+    sf_seek(testFile, start_frame, SEEK_SET);
+    sf_readf_float(testFile, _data, nb_frames);
+    sf_close(testFile);
+    return _data;
+}
+
 colvec AGSynthesis::extractSamples(ACAudio* audioGrain){
 	//	audioGrain = (ACAudio*) lib->getMedia(mediaId);
-	float* audioSamples = audioGrain->getSamples();
+    float* audioSamples = this->getSamples(audioGrain);
 	// TODO resample
 	if (audioGrain->getSampleRate() != 44100){
 		std::cerr << "Wrong sampling rate" << std::endl;

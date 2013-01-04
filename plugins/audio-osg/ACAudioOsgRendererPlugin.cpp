@@ -62,7 +62,22 @@ ACAudioOsgRendererPlugin::ACAudioOsgRendererPlugin() : ACOsgRendererPlugin(){
     this->mName = "Audio Renderer (OSG and libsndfile)";
     this->mDescription ="Plugin for rendering audio files with OpenSceneGraph";
     this->mMediaType = MEDIA_TYPE_AUDIO;
-    //this->addStringParameter("name","init", vect, "desc");
+
+    browser_node_thumbnails.push_back("None");
+    browser_node_thumbnails.push_back("Circular browser waveform");
+    browser_node_thumbnails.push_back("Classic browser waveform");
+    this->addStringParameter("Browser node", browser_node_thumbnails.front(), browser_node_thumbnails, "Browser node",boost::bind(&ACOsgRendererPlugin::changeBrowserThumbnail,this));
+
+    this->updateStringParameterCallback("Timeline playback",boost::bind(&ACAudioOsgRendererPlugin::changeTimelinePlaybackThumbnail,this));
+    this->updateStringParameterCallback("Timeline summary",boost::bind(&ACAudioOsgRendererPlugin::changeTimelineSummaryThumbnail,this));
+
+    timeline_playback_thumbnails.push_back("None");
+    timeline_playback_thumbnails.push_back("Classic timeline waveform");
+    this->addStringParameter("Timeline playback",timeline_playback_thumbnails.front(),timeline_playback_thumbnails,"Timeline playback",boost::bind(&ACOsgRendererPlugin::changeTimelinePlaybackThumbnail,this));
+
+    timeline_summary_thumbnails.push_back("None");
+    timeline_summary_thumbnails.push_back("Classic timeline waveform");
+    this->addStringParameter("Timeline summary",timeline_summary_thumbnails.front(),timeline_summary_thumbnails,"Timeline summary",boost::bind(&ACOsgRendererPlugin::changeTimelineSummaryThumbnail,this));
 }
 
 ACAudioOsgRendererPlugin::~ACAudioOsgRendererPlugin(){
