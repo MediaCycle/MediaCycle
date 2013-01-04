@@ -1,8 +1,8 @@
 /**
- * @brief ACOsgPointerRenderer.cpp
- * @author Christian Frisson
- * @date 10/08/2012
- * @copyright (c) 2012 – UMONS - Numediart
+ * @brief The HUD pointer renderer class, implemented with OSG
+ * @author Stéphane Dupont
+ * @date 16/11/2010
+ * @copyright (c) 2010 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -27,7 +27,7 @@
  * 
  * Any other additional authorizations may be asked to avre@umons.ac.be 
  * <mailto:avre@umons.ac.be>
-*/
+ */
 
 #include "ACOsgPointerRenderer.h"
 

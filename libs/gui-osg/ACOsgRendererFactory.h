@@ -103,6 +103,9 @@ public:
     //Callbacks
     void pluginLoaded(std::string name);
 
+    /// This thumbnail generator allows to share an image(stream) or texture between the browser and the timeline
+    std::string sharedThumbnailName(ACMediaType media_type);
+    ACMediaThumbnail* createSharedThumbnail(ACMedia* media);
     ACOsgMediaRenderer* createMediaRenderer(ACMediaType media_type);
     ACOsgTrackRenderer* createTrackRenderer(ACMediaType media_type);
 };

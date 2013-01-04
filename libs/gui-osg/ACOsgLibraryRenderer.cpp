@@ -137,7 +137,6 @@ void ACOsgLibraryRenderer::imageGeode(ACOsgLibraryImageRenderer& _renderer) {
     if(_renderer.file!=""){
         std::cout << "ACOsgLibraryRenderer::imageGeode " << _renderer.file << std::endl;
         int i;
-        double xstep = 0.0005;
         float zpos = 0;
         double imagex, imagey;
         int width, height;
@@ -290,6 +289,12 @@ void ACOsgLibraryRenderer::updateNodes(double ratio) {
         if(media_cycle->getBrowserMode() == AC_MODE_NEIGHBORS)
             library_medias_number_info << media_cycle->getNumberOfMediaNodes() << "/";
         library_medias_number_info << media_cycle->getLibrarySize();
+        int files_to_import = media_cycle->getLibrary()->getNumberOfFilesToImport();
+        if(files_to_import != 0){
+            int files_processed = media_cycle->getLibrary()->getNumberOfFilesProcessed();
+            library_medias_number_info << " (importing " << files_processed << "/" << files_to_import << ")";
+        }
+
         this->updateTextRenderer(library_medias_number,library_medias_number_info.str(),library_node);
        // cout<<"test:"<<library_medias_number.text->getFont()->getFileName()<<"\t"<<library_medias_number.text->getText().createUTF8EncodedString ()<<endl;
         this->updateImageRenderer(curator_picture,media_cycle->getLibrary()->getCuratorPicture(),curator_node);

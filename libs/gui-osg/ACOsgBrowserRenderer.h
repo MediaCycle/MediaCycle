@@ -1,10 +1,7 @@
-/*
- * ACOsgBrowserRenderer.h
- * MediaCycle
- *
+/**
+ * @brief The media browser renderer class, implemented with OSG
  * @author Stéphane Dupont
  * @date 24/08/09
- *
  * @copyright (c) 2009 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -30,7 +27,6 @@
  * 
  * Any other additional authorizations may be asked to avre@umons.ac.be 
  * <mailto:avre@umons.ac.be>
- *
  */
 
 #ifndef __ACOSG_BROWSER_RENDERER_H__
@@ -43,23 +39,8 @@
 #include "ACOsgNodeLinkRenderer.h"
 #include "ACOsgLabelRenderer.h"
 
-#include <osgDB/ReadFile>
-#include <osg/ref_ptr>
-#include <osg/Group>
-#include <osg/MatrixTransform>
-#include <osg/Geode>
-#include <osg/Geometry>
-#include <osg/StateSet>
-#include <osg/Texture2D>
-#include <osg/Image>
-#include <osg/ImageStream>
-#include <osg/io_utils>
-#include <osg/LineWidth>
-#include <osg/ShapeDrawable>
-#include <osgUtil/SceneView>
 #include <osgViewer/Viewer>
 
-#include "ACRefId.h"
 #include <pthread.h>
 
 #include "ACEventListener.h"
@@ -70,7 +51,7 @@ typedef std::map<long int,ACOsgNodeLinkRenderer*> ACOsgNodeLinkRenderers;
 class ACOsgBrowserRenderer: public ACEventListener {
 public:
     ACOsgBrowserRenderer();
-    ~ACOsgBrowserRenderer();
+    virtual ~ACOsgBrowserRenderer();
     void clean();
     void setMediaCycle(MediaCycle *media_cycle);
 
@@ -142,8 +123,15 @@ public:
     std::map<long int, float> getDistanceMouse() { return distance_mouse; }
 
     void setFont(osg::ref_ptr<osgText::Font> _font){this->font = _font;}
-    void changeNodeColor(int _node, osg::Vec4 _color){activity_update_mutex.lock();node_renderers[_node]->changeNodeColor(_color);activity_update_mutex.unlock();}
-    void resetNodeColor(int _node){activity_update_mutex.lock();node_renderers[_node]->resetNodeColor();activity_update_mutex.unlock();}
+    void changeNodeColor(int _node, osg::Vec4 _color);
+    void resetNodeColor(int _node);
+
+    void changeNodeThumbnail(int _node, std::string thumbnail);
+    void changeAllNodesThumbnail(std::string thumbnail);
+protected:
+    std::string node_thumbnail;
+
+public:
 
     void changeSetting(ACSettingType _setting);
 

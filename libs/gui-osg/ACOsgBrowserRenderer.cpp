@@ -1,44 +1,38 @@
-/*
- *  ACOsgBrowserRenderer.cpp
- *  MediaCycle
- *
- *  @author Stéphane Dupont
- *  @date 24/08/09
- *
- *  @copyright (c) 2009 – UMONS - Numediart
- *  
- *  MediaCycle of University of Mons – Numediart institute is 
- *  licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
- *  licence (the “License”); you may not use this file except in compliance 
- *  with the License.
- *  
- *  This program is free software: you can redistribute it and/or 
- *  it under the terms of the GNU Affero General Public License as
- *  published by the Free Software Foundation, either version 3 of the
- *  License, or (at your option) any later version.
- *  
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Affero General Public License for more details.
- *  
- *  You should have received a copy of the GNU Affero General Public License
- *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
- *  
- *  Each use of this software must be attributed to University of Mons – 
- *  Numediart Institute
- *  
- *  Any other additional authorizations may be asked to avre@umons.ac.be 
- *  <mailto:avre@umons.ac.be>
- *
+/**
+ * @brief The media browser renderer class, implemented with OSG
+ * @author Stéphane Dupont
+ * @date 24/08/09
+ * @copyright (c) 2009 – UMONS - Numediart
+ * 
+ * MediaCycle of University of Mons – Numediart institute is 
+ * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
+ * licence (the “License”); you may not use this file except in compliance 
+ * with the License.
+ * 
+ * This program is free software: you can redistribute it and/or 
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * 
+ * Each use of this software must be attributed to University of Mons – 
+ * Numediart Institute
+ * 
+ * Any other additional authorizations may be asked to avre@umons.ac.be 
+ * <mailto:avre@umons.ac.be>
  */
 
 #include "ACOsgBrowserRenderer.h"
-#include "ACOsgMediaRenderer.h"
 #if defined (SUPPORT_MULTIMEDIA) 
 #include "ACOsgMediaDocumentRenderer.h"
 #endif //defined (SUPPORT_MULTIMEDIA) 
-#include "ACOsgLabelRenderer.h"
 
 #include "ACOsgRendererFactory.h"
 
@@ -63,14 +57,6 @@ using namespace osg;
 
 #include <osgViewer/Viewer>
 #include <osgViewer/ViewerEventHandlers>
-
-#include <osgGA/TrackballManipulator>
-#include <osgGA/FlightManipulator>
-#include <osgGA/DriveManipulator>
-#include <osgGA/KeySwitchMatrixManipulator>
-#include <osgGA/StateSetManipulator>
-#include <osgGA/AnimationPathManipulator>
-#include <osgGA/TerrainManipulator>
 
 #include <iostream>
 
@@ -125,6 +111,7 @@ ACOsgBrowserRenderer::ACOsgBrowserRenderer()
   //  pthread_mutexattr_init(&activity_update_mutex_attr);
   //  pthread_mutex_init(&activity_update_mutex, &activity_update_mutex_attr);
   //  pthread_mutexattr_destroy(&activity_update_mutex_attr);
+    node_thumbnail = "None";
     setting = AC_SETTING_NONE;
     group = new Group();
     media_group = new Group();
@@ -671,14 +658,12 @@ int ACOsgBrowserRenderer::computeScreenCoordinates(osgViewer::View* view, double
 
 // private methods
 
-// Clean up properly by calling destructor of each *
 bool ACOsgBrowserRenderer::removeNodes(){//private method
     ACOsgMediaRenderers::iterator iterm;
     for (iterm = node_renderers.begin(); iterm != node_renderers.end(); iterm++) {
         if(iterm->second){
             long tempId=iterm->first;
             media_group->removeChild(iterm->second->getNode());
-            ACOsgMediaRenderer* tempMedia=iterm->second;
             delete iterm->second;
             iterm->second=0;
         }
@@ -719,21 +704,36 @@ bool ACOsgBrowserRenderer::addNode(long int _id){//private method
     }
     media_type = media_cycle->getMediaType(_id);
 
+    ACMedia* media = media_cycle->getLibrary()->getMedia(_id);
+
+    // This thumbnail contains an image(stream) or texture to be shared between the browser and the timeline
+    // This should be mirrored in the timeline renderer in case the browser is not used
+    std::string shared_thumbnail_name("");
+    shared_thumbnail_name = ACOsgRendererFactory::getInstance().sharedThumbnailName(media->getType());
+    if(media->getThumbnail(shared_thumbnail_name)==0){
+        ACMediaThumbnail* shared_thumbnail = 0;
+        shared_thumbnail = ACOsgRendererFactory::getInstance().createSharedThumbnail(media);
+        if(shared_thumbnail)
+            media->addThumbnail(shared_thumbnail);
+    }
+
     ACOsgMediaRenderer* renderer = 0;
     renderer = ACOsgRendererFactory::getInstance().createMediaRenderer(media_type);
     if (renderer != 0) {
         renderer->setMediaCycle(media_cycle);
+        renderer->setMedia(media);
+        renderer->setFilename(media_cycle_filename);
+        renderer->setActivity(0);
         renderer->setNodeIndex(_id);
         renderer->setFont(font);
+        renderer->setSharedThumbnailName(shared_thumbnail_name);
+        renderer->changeThumbnail(node_thumbnail);
         renderer->changeSetting(this->setting);
         media_cycle_node = media_cycle->getMediaNode(_id);
         node_index =  _id;
         media_index = node_index;
         media_cycle_filename = media_cycle->getMediaFileName(_id);
         //renderer->setMediaIndex(media_index);
-        renderer->setMedia(media_cycle->getLibrary()->getMedia(_id));
-        renderer->setFilename(media_cycle_filename);
-        renderer->setActivity(0);
         node_renderers[_id] = renderer;
         //distance_mouse.resize(node_renderer.size());
         renderer->prepareNodes();
@@ -895,3 +895,35 @@ void ACOsgBrowserRenderer::changeSetting(ACSettingType _setting)
         node_renderer->second->changeSetting(this->setting);
     }
 }
+
+void ACOsgBrowserRenderer::changeNodeColor(int _node, osg::Vec4 _color)
+{
+    activity_update_mutex.lock();
+    node_renderers[_node]->changeNodeColor(_color);
+    activity_update_mutex.unlock();
+}
+
+void ACOsgBrowserRenderer::resetNodeColor(int _node)
+{
+    activity_update_mutex.lock();
+    node_renderers[_node]->resetNodeColor();
+    activity_update_mutex.unlock();
+}
+
+void ACOsgBrowserRenderer::changeNodeThumbnail(int _node, std::string thumbnail)
+{
+    activity_update_mutex.lock();
+    node_renderers[_node]->changeThumbnail(thumbnail);
+    activity_update_mutex.unlock();
+}
+
+void ACOsgBrowserRenderer::changeAllNodesThumbnail(std::string thumbnail)
+{
+    activity_update_mutex.lock();
+    for(ACOsgMediaRenderers::iterator node_renderer = node_renderers.begin();node_renderer!=node_renderers.end();node_renderer++){
+        node_renderer->second->changeThumbnail(thumbnail);
+    }
+    node_thumbnail = thumbnail;
+    activity_update_mutex.unlock();
+}
+

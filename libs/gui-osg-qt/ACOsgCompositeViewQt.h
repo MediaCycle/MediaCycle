@@ -87,7 +87,7 @@ public slots:
     void resetSelectedMediaTagId(bool trig);
     void transferClassToTag(bool trig);
     void cleanAllTags(bool trig);
-    void stopPlayback(); // stop the playback of audio/video files
+    //void stopPlayback(); // stop the playback of audio/video files
     void toggleMediaHover(bool toggle); // audio hover, image/video ... -> need a panel to configure the behaviour of hover
     void triggerMediaHover(bool trigger); // audio hover, image/video ... -> need a panel to configure the behaviour of hover
     void resetBrowser(); // reset the browser view (center, rotation, zoom)
@@ -150,7 +150,7 @@ private:
 
     ACInputActionQt *openMediaExternallyAction, *browseMediaExternallyAction,
     *examineMediaExternallyAction, *forwardNextLevelAction,*changeReferenceNodeAction,
-    *stopPlaybackAction, *toggleMediaHoverAction, *triggerMediaHoverAction, *resetBrowserAction,
+    /**stopPlaybackAction,*/ *toggleMediaHoverAction, *triggerMediaHoverAction, *resetBrowserAction,
     *rotateBrowserAction, *zoomBrowserAction, *translateBrowserAction,
     *addMediaOnTimelineTrackAction, *toggleTimelinePlaybackAction, *adjustTimelineHeightAction,
     *discardMediaAction,*resetSelectedMediaTagIdAction,*transferClassToTagAction,*cleanAllTagsAction;

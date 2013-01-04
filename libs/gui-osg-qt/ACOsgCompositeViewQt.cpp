@@ -54,9 +54,6 @@ namespace fs = boost::filesystem;
 
 using namespace osg;
 
-// ----------- uncomment to use ortho2D projection in the timeline renderer (not implemented)
-//#define TIMELINE_RENDERER_ORTHO2D
-
 ACOsgCompositeViewQt::ACOsgCompositeViewQt( QWidget * parent, const char * name, const QGLWidget * shareWidget, WindowFlags f)
     : QGLWidget(parent, shareWidget, f),ACEventListener(), media_cycle(0),font(0),
       browser_renderer(0), browser_event_handler(0), timeline_renderer(0), timeline_event_handler(0), hud_renderer(0), hud_view(0),
@@ -68,7 +65,7 @@ ACOsgCompositeViewQt::ACOsgCompositeViewQt( QWidget * parent, const char * name,
       library_loaded(false),mouseover(false),
       mediaOnTrack(-1),track_playing(false),
       openMediaExternallyAction(0), browseMediaExternallyAction(0), examineMediaExternallyAction(0), forwardNextLevelAction(0),changeReferenceNodeAction(0),
-      stopPlaybackAction(0), toggleMediaHoverAction(0), triggerMediaHoverAction(0),
+      /*stopPlaybackAction(0), */ toggleMediaHoverAction(0), triggerMediaHoverAction(0),
       resetBrowserAction(0), rotateBrowserAction(0), zoomBrowserAction(0),
       translateBrowserAction(0), addMediaOnTimelineTrackAction(0), toggleTimelinePlaybackAction(0), adjustTimelineHeightAction(0),
       discardMediaAction(0),resetSelectedMediaTagIdAction(0),transferClassToTagAction(0),cleanAllTagsAction(0),
@@ -90,7 +87,7 @@ ACOsgCompositeViewQt::ACOsgCompositeViewQt( QWidget * parent, const char * name,
   */
 
     connect(&_timer, SIGNAL(timeout()), this, SLOT(updateGL()));
-    _timer.start(50);
+    _timer.start(10);
 
     // Renderers
     browser_renderer = new ACOsgBrowserRenderer();
@@ -149,6 +146,8 @@ ACOsgCompositeViewQt::ACOsgCompositeViewQt( QWidget * parent, const char * name,
 
     osg::setNotifyLevel(osg::WARN);//remove the NaN CullVisitor messages
     this->initInputActions();
+
+    //setRunFrameScheme( osgViewer::Viewer::ON_DEMAND );
 }
 
 void ACOsgCompositeViewQt::updateBrowserView(int _width, int _height){
@@ -173,16 +172,9 @@ void ACOsgCompositeViewQt::updateTimelineView(int _width, int _height){
         //timeline_view->getCamera()->setClearColor(Vec4f(0.0,0.0,0.0,0.0));
         timeline_view->getCamera()->setClearColor(Vec4f(0.14,0.14,0.28,1.0));
         timeline_view->getCamera()->setViewport(new osg::Viewport(0,0,_width,sepy));
-#ifdef TIMELINE_RENDERER_ORTHO2D
         //orth2D
-        timeline_view->getCamera()->setProjectionMatrix(osg::Matrix::ortho2D(0,_width_,0,sepy));
+        timeline_view->getCamera()->setProjectionMatrix(osg::Matrix::ortho2D(0,_width,0,sepy));
         timeline_view->getCamera()->setViewMatrix(osg::Matrix::identity());
-#else
-        //perspect
-        timeline_view->getCamera()->setProjectionMatrixAsPerspective(45.0f, 1.0f, 0.001f, 10.0f);//static_cast<double>(width())/static_cast<double>(sepy), 0.001f, 10.0f);
-        timeline_view->getCamera()->getViewMatrix().makeIdentity();
-        timeline_view->getCamera()->setViewMatrixAsLookAt(Vec3(0,0,0.8), Vec3(0,0,0), Vec3(0,1,0));
-#endif
     }
 }
 
@@ -215,7 +207,7 @@ ACOsgCompositeViewQt::~ACOsgCompositeViewQt(){
     
     if(transferClassToTagAction) delete transferClassToTagAction; transferClassToTagAction = 0;
     if(cleanAllTagsAction) delete cleanAllTagsAction; cleanAllTagsAction = 0;
-    if(stopPlaybackAction) delete stopPlaybackAction; stopPlaybackAction = 0;
+    //if(stopPlaybackAction) delete stopPlaybackAction; stopPlaybackAction = 0;
     if(toggleMediaHoverAction) delete toggleMediaHoverAction; toggleMediaHoverAction = 0;
     if(resetBrowserAction) delete resetBrowserAction; resetBrowserAction = 0;
     if(rotateBrowserAction) delete rotateBrowserAction; rotateBrowserAction = 0;
@@ -328,8 +320,10 @@ void ACOsgCompositeViewQt::resizeGL( int w, int h )
 void ACOsgCompositeViewQt::paintGL()
 {
     browser_renderer->mutexLock();
+    timeline_renderer->mutexLock();
     frame(); // put this first otherwise we don't get a clean background in the browser
     browser_renderer->mutexLock();
+    timeline_renderer->mutexLock();
     if (media_cycle == 0) return;
 
     //CF to improve, we want to know if the view is being animated to force a frequent refresh of the positions:
@@ -499,7 +493,7 @@ void ACOsgCompositeViewQt::initInputActions(){
         
     }
     
-    resetSelectedMediaTagIdAction = new ACInputActionQt(tr("reset Cluster Id"), this);
+    resetSelectedMediaTagIdAction = new ACInputActionQt(tr("Reset Cluster Id"), this);
     resetSelectedMediaTagIdAction->setToolTip(tr("Reset Cluster Id of the clicked Node"));
     resetSelectedMediaTagIdAction->setShortcut(Qt::Key_U);
     resetSelectedMediaTagIdAction->setKeyEventType(QEvent::KeyPress);
@@ -507,8 +501,8 @@ void ACOsgCompositeViewQt::initInputActions(){
     connect(resetSelectedMediaTagIdAction, SIGNAL(triggered(bool)), this, SLOT(resetSelectedMediaTagId(bool)));
     this->addInputAction(resetSelectedMediaTagIdAction);
     
-    transferClassToTagAction = new ACInputActionQt(tr("transfer classification to the tags"), this);
-    transferClassToTagAction->setToolTip(tr("record node classification in the tag field of the medias"));
+    transferClassToTagAction = new ACInputActionQt(tr("Transfer classification to the tags"), this);
+    transferClassToTagAction->setToolTip(tr("Record node classification in the tag field of the medias"));
     transferClassToTagAction->setShortcut(Qt::CTRL+Qt::Key_M);
     transferClassToTagAction->setKeyEventType(QEvent::KeyPress);
     connect(transferClassToTagAction, SIGNAL(triggered(bool)), this, SLOT(transferClassToTag(bool)));
@@ -522,12 +516,12 @@ void ACOsgCompositeViewQt::initInputActions(){
     this->addInputAction(cleanAllTagsAction);
     
     
-    stopPlaybackAction = new ACInputActionQt(tr("Stop Playback"), this);
+    /*stopPlaybackAction = new ACInputActionQt(tr("Stop Playback"), this);
     stopPlaybackAction->setShortcut(Qt::Key_M);
     stopPlaybackAction->setKeyEventType(QEvent::KeyPress);
     stopPlaybackAction->setToolTip(tr("Stop the playback of all played media nodes"));
     connect(stopPlaybackAction, SIGNAL(triggered()), this, SLOT(stopPlayback()));
-    this->addInputAction(stopPlaybackAction);
+    this->addInputAction(stopPlaybackAction);*/
 
     toggleMediaHoverAction = new ACInputActionQt(tr("Toggle Media Hover"), this);
     toggleMediaHoverAction->setShortcut(Qt::Key_W);
@@ -782,12 +776,11 @@ void ACOsgCompositeViewQt::cleanAllTags(bool trig){
     media_cycle->cleanAllMediaTag();
 }
 
-
-void ACOsgCompositeViewQt::stopPlayback(){
+/*void ACOsgCompositeViewQt::stopPlayback(){
     if (media_cycle == 0) return;
     media_cycle->setAutoPlay(0);
     media_cycle->muteAllSources();
-}
+}*/
 
 void ACOsgCompositeViewQt::toggleMediaHover(bool toggle){
     if (media_cycle == 0) return;
@@ -886,7 +879,10 @@ void ACOsgCompositeViewQt::addMediaOnTimelineTrack(){
             }
             else {
                 //this->getTimelineRenderer()->getTrack(0)->updateMedia( media_id ); //media_cycle->getLibrary()->getMedia(media_id) );
-                this->getTimelineRenderer()->getTrack(0)->updateMedia(media_cycle->getLibrary()->getMedia(media_id));
+                ACOsgTrackRenderer* track = 0;
+                track = this->getTimelineRenderer()->getTrack(0);
+                if(track)
+                    track->updateMedia(media_cycle->getLibrary()->getMedia(media_id));
             }
             media_cycle->setNeedsDisplay(true);
         }
@@ -897,6 +893,7 @@ void ACOsgCompositeViewQt::toggleTimelinePlayback(bool toggle){
     if (media_cycle == 0) return;
     if ( (media_cycle) && (media_cycle->hasBrowser()) && (timeline_renderer->getTrack(0)!=0) ) {
         //media_cycle->getBrowser()->toggleSourceActivity( timeline_renderer->getTrack(0)->getMediaIndex() );
+        media_cycle->performActionOnMedia("play", timeline_renderer->getTrack(0)->getMedia()->getId(), "");
         media_cycle->getBrowser()->toggleSourceActivity( timeline_renderer->getTrack(0)->getMedia()->getId() );
     }
 }

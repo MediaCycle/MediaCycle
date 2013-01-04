@@ -112,10 +112,6 @@ void ACOsgMediaDocumentRenderer::prepareNodes() {
 
 void ACOsgMediaDocumentRenderer::updateNodes(double ratio) {
 
-    double xstep = 0.00025;
-
-    xstep *= afac;
-
     const ACMediaNode* attribute = media_cycle->getMediaNode(node_index);
     if (!attribute->isDisplayed()){
         media_node->removeChild(metadata_geode);

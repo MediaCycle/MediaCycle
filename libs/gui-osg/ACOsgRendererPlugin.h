@@ -44,16 +44,31 @@
 #include "ACOsgBrowserRenderer.h"
 #include "ACOsgTimelineRenderer.h"
 
+#include "ACMedia.h"
+#include "ACMediaThumbnail.h"
+#include "ACMediaData.h"
+
+#include "ACMediaBrowser.h"
+#include "MediaCycle.h"
+
+#include "ACPluginManager.h"
+
 // plugin to verify which formats the viewer can render
 class ACOsgRendererPlugin : virtual public ACMediaRendererPlugin{
 public:
     ACOsgRendererPlugin();
-    //virtual std::map<std::string, ACMediaType> getSupportedExtensions(ACMediaType media_type = MEDIA_TYPE_ALL)=0;
+    //virtual ~ACOsgRendererPlugin();
     virtual ACOsgMediaRenderer* createMediaRenderer(ACMediaType media_type){return 0;}
     virtual ACOsgTrackRenderer* createTrackRenderer(ACMediaType media_type){return 0;}
+    virtual ACMediaThumbnail* createSharedThumbnail(ACMedia* media){return 0;}
+    virtual std::string sharedThumbnailName(ACMediaType media_type){return "";}
     virtual std::vector<ACMediaType> getSupportedMediaTypes(){return std::vector<ACMediaType>();}//=0;
     void setBrowserRenderer(ACOsgBrowserRenderer* _browser);
     void setTimelineRenderer(ACOsgTimelineRenderer* _timeline);
+    void changeBrowserThumbnail();
+    void changeTimelinePlaybackThumbnail();
+    void changeTimelineSelectionThumbnail();
+    void changeTimelineSummaryThumbnail();
 protected:
     ACOsgBrowserRenderer* browser;
     ACOsgTimelineRenderer* timeline;

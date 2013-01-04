@@ -40,6 +40,11 @@ ACOsgRendererPlugin::ACOsgRendererPlugin() : ACMediaRendererPlugin() {
     timeline = 0;
 }
 
+/*ACOsgRendererPlugin::~ACOsgRendererPlugin(){
+    browser = 0;
+    timeline = 0;
+}*/
+
 void ACOsgRendererPlugin::setBrowserRenderer(ACOsgBrowserRenderer* _browser)
 {
     this->browser=_browser;
@@ -49,3 +54,56 @@ void ACOsgRendererPlugin::setTimelineRenderer(ACOsgTimelineRenderer* _timeline)
 {
     this->timeline=_timeline;
 }
+
+void ACOsgRendererPlugin::changeBrowserThumbnail(){
+    std::string thumbnail_name = this->getStringParameterValue("Browser node");
+    std::cout << "ACOsgRendererPlugin::changeBrowserThumbnail: " << thumbnail_name << std::endl;
+    if(this->browser)
+        this->browser->changeAllNodesThumbnail(thumbnail_name);
+}
+
+void ACOsgRendererPlugin::changeTimelinePlaybackThumbnail(){
+    std::string thumbnail_name = this->getStringParameterValue("Timeline playback");
+    std::cout << "ACOsgRendererPlugin::changeTimelinePlaybackThumbnail: " << thumbnail_name << std::endl;
+    if(this->timeline)
+        this->timeline->changeAllTracksPlaybackThumbnail(thumbnail_name);
+}
+
+void ACOsgRendererPlugin::changeTimelineSelectionThumbnail(){
+    std::string thumbnail_name = this->getStringParameterValue("Timeline selection");
+    std::cout << "ACOsgRendererPlugin::changeTimelineSelectionThumbnail: " << thumbnail_name << std::endl;
+    if(this->timeline)
+        this->timeline->changeAllTracksSelectionThumbnail(thumbnail_name);
+}
+
+void ACOsgRendererPlugin::changeTimelineSummaryThumbnail(){
+    std::string thumbnail_name = this->getStringParameterValue("Timeline summary");
+    std::cout << "ACOsgRendererPlugin::changeTimelineSummaryThumbnail: " << thumbnail_name << std::endl;
+    if(this->timeline)
+        this->timeline->changeAllTracksSummaryThumbnail(thumbnail_name);
+}
+
+/*void ACOsgRendererPlugin::mediaCycleSet(){
+
+    if(this->hasCallbackNamed("Stop all"))
+        this->updateCallback("Stop all","Stop all",boost::bind(&MediaCycle::muteAllSources,this->media_cycle));
+    else
+        this->addCallback("Stop all","Stop all",boost::bind(&MediaCycle::muteAllSources,this->media_cycle));
+
+}*/
+
+/*void ACOsgRendererPlugin::pluginLoaded(std::string plugin_name){
+    std::cout << "ACOsgRendererPlugin::pluginLoaded "<< plugin_name << std::endl;
+    if(!media_cycle)
+        return;
+    if(media_cycle->getPlugin(plugin_name)->implementsPluginType(PLUGIN_TYPE_THUMBNAILER)==false)
+        return;
+    thumbnail_descriptions = this->media_cycle->getPluginManager()->getAvailableThumbnailDescriptions(this->getMediaType());
+    thumbnail_descriptions.push_back("None");
+
+    if(!this->hasStringParameterNamed("Browser thumbnail"))
+        this->addStringParameter("Browser thumbnail",thumbnail_descriptions.front(),thumbnail_descriptions,"Browser thumbnail",boost::bind(&ACOsgRendererPlugin::updateBrowserWaveformThumbnail,this));
+    else
+        this->updateStringParameter("Browser thumbnail",thumbnail_descriptions.front(),thumbnail_descriptions,"Browser thumbnail",boost::bind(&ACOsgRendererPlugin::updateBrowserWaveformThumbnail,this));
+}*/
+

@@ -1,36 +1,32 @@
-/*
- *  ACOsgTimelineEventHandler.cpp
- *  MediaCycle
- *
- *  @author Christian Frisson
- *  @date 28/04/10
- *
- *  @copyright (c) 2010 – UMONS - Numediart
- *  
- *  MediaCycle of University of Mons – Numediart institute is 
- *  licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
- *  licence (the “License”); you may not use this file except in compliance 
- *  with the License.
- *  
- *  This program is free software: you can redistribute it and/or 
- *  it under the terms of the GNU Affero General Public License as
- *  published by the Free Software Foundation, either version 3 of the
- *  License, or (at your option) any later version.
- *  
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Affero General Public License for more details.
- *  
- *  You should have received a copy of the GNU Affero General Public License
- *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
- *  
- *  Each use of this software must be attributed to University of Mons – 
- *  Numediart Institute
- *  
- *  Any other additional authorizations may be asked to avre@umons.ac.be 
- *  <mailto:avre@umons.ac.be>
- *
+/**
+ * @brief The timeline event handler filters user interaction for all media tracks, implemented with OSG
+ * @author Christian Frisson
+ * @date 28/04/2010
+ * @copyright (c) 2010 – UMONS - Numediart
+ * 
+ * MediaCycle of University of Mons – Numediart institute is 
+ * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
+ * licence (the “License”); you may not use this file except in compliance 
+ * with the License.
+ * 
+ * This program is free software: you can redistribute it and/or 
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * 
+ * Each use of this software must be attributed to University of Mons – 
+ * Numediart Institute
+ * 
+ * Any other additional authorizations may be asked to avre@umons.ac.be 
+ * <mailto:avre@umons.ac.be>
  */
 
 #include "ACOsgTimelineEventHandler.h"
@@ -45,9 +41,6 @@
 // ----------- uncomment this to display picked objects messages 
 //#define DEBUG_PICKED
 #endif //USE_DEBUG
-
-static float xspan = 0.666f; // magic number, track width in OSG coordinates, see ACOsgTrackRenderer
-static float yspan = 0.666f;
 
 ACOsgTimelineEventHandler::ACOsgTimelineEventHandler()
     : renderer(0), media_cycle(0)
@@ -76,16 +69,12 @@ void ACOsgTimelineEventHandler::clean(){
 bool ACOsgTimelineEventHandler::handle(const osgGA::GUIEventAdapter& ea,osgGA::GUIActionAdapter& aa)
 {
     if (media_cycle == 0) return false;
-    //float x = ea.getX();
-    //float y = ea.getY();
-    //float xx = ea.getXnormalized();
-    //float yy = ea.getYnormalized();
-    float pos_x = ea.getXnormalized();
-    float pos_y = ea.getY()/ea.getYmax(); // CF ea.getYnormalized(); seems to be buggy...
+    float pos_x = ea.getX()/ea.getXmax();//[0;1]
+    float pos_y = ea.getY()/ea.getYmax();//[0;1]
     if (pos_x>1.0f) pos_x=1.0f;
-    if (pos_x<-1.0f) pos_x=-1.0f;
+    if (pos_x<0.0f) pos_x=0.0f;
     if (pos_y>1.0f) pos_y=1.0f;
-    if (pos_y<-1.0f) pos_y=-1.0f;
+    if (pos_y<0.0f) pos_y=0.0f;
 
 #if OSG_MIN_VERSION_REQUIRED(3,0,0)
     if (ea.isMultiTouchEvent())
@@ -96,20 +85,13 @@ bool ACOsgTimelineEventHandler::handle(const osgGA::GUIEventAdapter& ea,osgGA::G
     }
 #endif
 
-    ACPlugin* plugin = media_cycle->getPluginManager()->getPlugin("Audio Engine");
-    ACMediaRendererPlugin* audio_engine_plugin = 0;
-    if(!plugin){
-        audio_engine_plugin = dynamic_cast<ACMediaRendererPlugin*>(plugin);
-    }
-
     switch(ea.getEventType())
     {
     case(osgGA::GUIEventAdapter::PUSH):
     {
 #ifdef DEBUG_HANDLE
-        std::cout << "(PUSH)" << std::endl;
+        std::cout << "(PUSH) pos x " << pos_x << " y " << pos_y << std::endl;
 #endif
-        //printf("TIMELINE PUSH (%f, %f) (%f, %f) \n", x, y, xx, yy);
         osgViewer::View* view = dynamic_cast<osgViewer::View*>(&aa);
         if (view){
             pick(view,ea,false);
@@ -122,18 +104,16 @@ bool ACOsgTimelineEventHandler::handle(const osgGA::GUIEventAdapter& ea,osgGA::G
                     int mediaID = renderer->getTrack(selection->getRefId())->getMedia()->getId();
                     if (mediaID > -1){
                         if (media_cycle->getLibrary()->getMedia(mediaID)->getType() == MEDIA_TYPE_AUDIO){
-                            std::cout << "Skipping zone to frame: " << (int)((pos_x+1.0f)) << std::endl; //*((ACAudio*) media_cycle->getLibrary()->getMedia(mediaID))->getNFrames())
-                            if(audio_engine_plugin){
-                                audio_engine_plugin->performActionOnMedia("synchro mode",mediaID,"Manual");
-                                audio_engine_plugin->performActionOnMedia("scale mode",mediaID,"Resample");
-                                stringstream s;
-                                s << (float) pos_x+1.0f;
-                                audio_engine_plugin->performActionOnMedia("scrub",mediaID,s.str());
-                            }
+                            std::cout << "Skipping zone to frame: " << (int)(pos_x) << std::endl; //*((ACAudio*) media_cycle->getLibrary()->getMedia(mediaID))->getNFrames())
+                            media_cycle->performActionOnMedia("synchro mode",mediaID,"Manual");
+                            media_cycle->performActionOnMedia("scale mode",mediaID,"Resample");
+                            stringstream s;
+                            s << (float) 100.0f*pos_x;
+                            media_cycle->performActionOnMedia("scrub",mediaID,s.str());
                         }
                     }
                     // Visual feedback
-                    renderer->getTrack(selection->getRefId())->moveSelection(xspan*pos_x/2.0f,yspan*pos_y/2.0f);
+                    renderer->getTrack(selection->getRefId())->moveSelection(pos_x,pos_y);
 #ifdef DEBUG_HANDLE
                     std::cout << "(PUSH) Jumping the selection zone to the mouse position (track " << selection->getRefId() <<")" << std::endl;
 #endif
@@ -141,7 +121,7 @@ bool ACOsgTimelineEventHandler::handle(const osgGA::GUIEventAdapter& ea,osgGA::G
 
                 else if(selecting_summary_slider){
                     // Visual feedback
-                    renderer->getTrack(selection->getRefId())->moveSelection(xspan*pos_x/2.0f,yspan*pos_y/2.0f);
+                    renderer->getTrack(selection->getRefId())->moveSelection(pos_x,pos_y);
 #ifdef DEBUG_HANDLE
                     std::cout << "(PUSH) Jumping the selection zone to the mouse position (track " << selection->getRefId() <<")" << std::endl;
 #endif
@@ -153,17 +133,15 @@ bool ACOsgTimelineEventHandler::handle(const osgGA::GUIEventAdapter& ea,osgGA::G
                     int mediaID = renderer->getTrack(selection->getRefId())->getMedia()->getId();
                     if (mediaID > -1){
                         if (media_cycle->getLibrary()->getMedia(mediaID)->getType() == MEDIA_TYPE_AUDIO){
-                            std::cout << "Skipping current frame to frame: " << (int)((pos_x+1.0f)) << std::endl; //*((ACAudio*) media_cycle->getLibrary()->getMedia(mediaID))->getNFrames())
-                            if(audio_engine_plugin){
-                                audio_engine_plugin->performActionOnMedia("synchro mode",mediaID,"Manual");
-                                audio_engine_plugin->performActionOnMedia("scale mode",mediaID,"Resample");
-                                stringstream s;
-                                s << (float) pos_x+1.0f;
-                                audio_engine_plugin->performActionOnMedia("scrub",mediaID,s.str());
-                            }
+                            std::cout << "Skipping current frame to frame: " << (int)(pos_x) << std::endl; //*((ACAudio*) media_cycle->getLibrary()->getMedia(mediaID))->getNFrames())
+                            media_cycle->performActionOnMedia("synchro mode",mediaID,"Manual");
+                            media_cycle->performActionOnMedia("scale mode",mediaID,"Resample");
+                            stringstream s;
+                            s << (float) 100.0f*pos_x;
+                            media_cycle->performActionOnMedia("scrub",mediaID,s.str());
                         }
                     }
-                    renderer->getTrack(selection->getRefId())->moveSelection(xspan*pos_x/2.0f,yspan*pos_y/2.0f);
+                    renderer->getTrack(selection->getRefId())->moveSelection(pos_x,pos_y);
 #ifdef DEBUG_HANDLE
                     std::cout << "(PUSH) Skipping/Moving the current frame to the mouse position (track " << selection->getRefId() <<")" << std::endl;
 #endif
@@ -171,21 +149,19 @@ bool ACOsgTimelineEventHandler::handle(const osgGA::GUIEventAdapter& ea,osgGA::G
 
                 // Skipping/Moving to the segment under the mouse
                 else if (selecting_segments){
-                    // Audio feedback
-                    /*int mediaID = renderer->getTrack(selection->getRefId())->getMedia()->getId();
-       if (mediaID > -1){
-       if (media_cycle->getLibrary()->getMedia(mediaID)->getType() == MEDIA_TYPE_AUDIO){
-       //std::cout << "Skipping to frame: " << (int)((pos_x+1.0f)*((ACAudio*) media_cycle->getLibrary()->getMedia(mediaID))->getNFrames()) << std::endl;
-       if(audio_engine_plugin){
-                                audio_engine_plugin->performActionOnMedia("synchro mode",mediaID,"Manual");
-                                audio_engine_plugin->performActionOnMedia("scale mode",mediaID,"Resample");
-                                stringstream s;
-                                s << (float) pos_x+1.0f;
-                                audio_engine_plugin->performActionOnMedia("scrub",mediaID,s.str());
-       }
-       }
-       }*/
-                    renderer->getTrack(selection->getRefId())->moveSelection(xspan*pos_x/2.0f,yspan*pos_y/2.0f); //should be adapted to the segment begin time once segmentation works that way
+                    //                    //Audio feedback
+                    //                    int mediaID = renderer->getTrack(selection->getRefId())->getMedia()->getId();
+                    //                    if (mediaID > -1){
+                    //                        if (media_cycle->getLibrary()->getMedia(mediaID)->getType() == MEDIA_TYPE_AUDIO){
+                    //                            //std::cout << "Skipping to frame: " << (int)((pos_x)*((ACAudio*) media_cycle->getLibrary()->getMedia(mediaID))->getNFrames()) << std::endl;
+                    //                                media_cycle->performActionOnMedia("synchro mode",mediaID,"Manual");
+                    //                                media_cycle->performActionOnMedia("scale mode",mediaID,"Resample");
+                    //                                stringstream s;
+                    //                                s << (float) 100.0f*(pos_x);
+                    //                                media_cycle->performActionOnMedia("scrub",mediaID,s.str());
+                    //                        }
+                    //                    }
+                    renderer->getTrack(selection->getRefId())->moveSelection(pos_x,pos_y); //should be adapted to the segment begin time once segmentation works that way
 #ifdef DEBUG_HANDLE
                     std::cout << "(PUSH) Skipping/Moving to segment " << selection->getElementId() <<" (track " << selection->getRefId() <<")" << std::endl;
 #endif
@@ -199,14 +175,14 @@ bool ACOsgTimelineEventHandler::handle(const osgGA::GUIEventAdapter& ea,osgGA::G
 #ifdef DEBUG_HANDLE
         std::cout << "(DRAG)" << std::endl;
 #endif
-        /*osgViewer::View* view = dynamic_cast<osgViewer::View*>(&aa);
-   if (view) pick(view,ea,false);*/
+        //        osgViewer::View* view = dynamic_cast<osgViewer::View*>(&aa);
+        //        if (view) pick(view,ea,false);
 
         if (selection){
 
             //Resizing the selection zone by moving its left boundary
             if (selecting_zone_begin){
-                renderer->getTrack(selection->getRefId())->resizeSelectionFromBegin(xspan*pos_x/2.0f,yspan*pos_y/2.0f);
+                renderer->getTrack(selection->getRefId())->resizeSelectionFromBegin(pos_x,pos_y);
 #ifdef DEBUG_HANDLE
                 std::cout << "(DRAG) Resizing the selection zone by moving its left boundary (track " << selection->getRefId() <<")" << std::endl;
 #endif
@@ -214,7 +190,7 @@ bool ACOsgTimelineEventHandler::handle(const osgGA::GUIEventAdapter& ea,osgGA::G
 
             //Resizing the selection zone by moving its right boundary
             else if(selecting_zone_end){
-                renderer->getTrack(selection->getRefId())->resizeSelectionFromEnd(xspan*pos_x/2.0f,yspan*pos_y/2.0f);
+                renderer->getTrack(selection->getRefId())->resizeSelectionFromEnd(pos_x,pos_y);
 #ifdef DEBUG_HANDLE
                 std::cout << "(DRAG) Resizing the selection zone by moving its right boundary (track " << selection->getRefId() <<")" << std::endl;
 #endif
@@ -222,32 +198,27 @@ bool ACOsgTimelineEventHandler::handle(const osgGA::GUIEventAdapter& ea,osgGA::G
 
             //Moving the selection zone (audio tracks)
             else if(selecting_zone){
-                //if ( (selection_begin+xspan*(pos_x-pushed_x)/2.0f > -xspan/2.0f) && (selection_end+xspan*(pos_x-pushed_x)/2.0f < xspan/2.0f)){//selection can't slide out the screen
-                // Audio feedback
                 int mediaID = renderer->getTrack(selection->getRefId())->getMedia()->getId();
                 if (mediaID > -1){
                     if (media_cycle->getLibrary()->getMedia(mediaID)->getType() == MEDIA_TYPE_AUDIO){
-                        //std::cout << "Skipping to frame: " << (int)((pos_x+1.0f)*((ACAudio*) media_cycle->getLibrary()->getMedia(mediaID))->getNFrames()) << std::endl;
+                        //std::cout << "Skipping to frame: " << (int)((pos_x)*((ACAudio*) media_cycle->getLibrary()->getMedia(mediaID))->getNFrames()) << std::endl;
 #ifdef DEBUG_HANDLE
-                        std::cout << "(DRAG) Moving the selection zone (track " << selection->getRefId() <<") to audio pos " << 100.0f*(pos_x+1.0f)/2.0f << std::endl;
+                        std::cout << "(DRAG) Moving the selection zone (track " << selection->getRefId() <<") to audio pos " << 100.0f*pos_x << std::endl;
 #endif
-                        if(audio_engine_plugin){
-                            audio_engine_plugin->performActionOnMedia("synchro mode",mediaID,"Manual");
-                            audio_engine_plugin->performActionOnMedia("scale mode",mediaID,"Vocode");
-                            stringstream s;
-                            s << (float) 100.0f*(pos_x+1.0f)/2.0f; // (int)((pos_x+1.0f)*((ACAudio*) media_cycle->getLibrary()->getMedia(mediaID))->getNFrames())
-                            audio_engine_plugin->performActionOnMedia("scrub",mediaID,s.str());
-                        }
+                        media_cycle->performActionOnMedia("synchro mode",mediaID,"Manual");
+                        media_cycle->performActionOnMedia("scale mode",mediaID,"Vocode");
+                        stringstream s;
+                        s << (float) 100.0f*pos_x; // (int)((pos_x)*((ACAudio*) media_cycle->getLibrary()->getMedia(mediaID))->getNFrames())
+                        media_cycle->performActionOnMedia("scrub",mediaID,s.str());
                     }
                 }
                 // Visual feedback
-                renderer->getTrack(selection->getRefId())->moveSelection(xspan*(pos_x+moved_x)/2.0f,yspan*(pos_y+moved_y)/2.0f);
-                //}
+                renderer->getTrack(selection->getRefId())->moveSelection((pos_x+moved_x),(pos_y+moved_y));
             }
 
             // Moving the current frame to the mouse position
             else if (selecting_summary_frames){
-                renderer->getTrack(selection->getRefId())->moveSelection(xspan*pos_x/2.0f,yspan*pos_y/2.0f);
+                renderer->getTrack(selection->getRefId())->moveSelection(pos_x,pos_y);
 #ifdef DEBUG_HANDLE
                 std::cout << "(DRAG) Moving the current frame to the mouse position (track " << selection->getRefId() <<")" << std::endl;
 #endif
@@ -266,11 +237,9 @@ bool ACOsgTimelineEventHandler::handle(const osgGA::GUIEventAdapter& ea,osgGA::G
             int mediaID = renderer->getTrack(selection->getRefId())->getMedia()->getId();
             if (mediaID > -1){
                 if (media_cycle->getLibrary()->getMedia(mediaID)->getType() == MEDIA_TYPE_AUDIO){
-                    //std::cout << "Skipping to frame: " << (int)((pos_x+1.0f)*((ACAudio*) media_cycle->getLibrary()->getMedia(mediaID))->getNFrames()) << std::endl;
-                    if(audio_engine_plugin){
-                        audio_engine_plugin->performActionOnMedia("synchro mode",mediaID,"None");
-                        audio_engine_plugin->performActionOnMedia("scale mode",mediaID,"None");
-                    }
+                    //std::cout << "Skipping to frame: " << (int)(pos_x*((ACAudio*) media_cycle->getLibrary()->getMedia(mediaID))->getNFrames()) << std::endl;
+                    media_cycle->performActionOnMedia("synchro mode",mediaID,"None");
+                    media_cycle->performActionOnMedia("scale mode",mediaID,"None");
                 }
             }
 #ifdef DEBUG_HANDLE
@@ -278,9 +247,9 @@ bool ACOsgTimelineEventHandler::handle(const osgGA::GUIEventAdapter& ea,osgGA::G
 #endif
         }
 
-        //printf("TIMELINE RELEASE (%f, %f) (%f, %f) \n", x, y, xx, yy);
         osgViewer::View* view = dynamic_cast<osgViewer::View*>(&aa);
-        if (view) pick(view,ea,false);
+        if (view)
+            pick(view,ea,false);
         return false;
     }
     case(osgGA::GUIEventAdapter::MOVE):
@@ -288,37 +257,32 @@ bool ACOsgTimelineEventHandler::handle(const osgGA::GUIEventAdapter& ea,osgGA::G
 #ifdef DEBUG_HANDLE
         std::cout << "(MOVE)" << std::endl;
 #endif
-        //printf("TIMELINE MOVE (%f, %f) (%f, %f) \n", x, y, xx, yy);
-        /*osgViewer::View* view = dynamic_cast<osgViewer::View*>(&aa);
-   if (view) pick(view, ea, true);*/
+        //        osgViewer::View* view = dynamic_cast<osgViewer::View*>(&aa);
+        //        if (view) pick(view, ea, true);
         return false;
-    }/*
-  case(osgGA::GUIEventAdapter::KEYDOWN):
-  {
-   //std::cout << "Key (OSG) '" << (char)ea.getKey() << "'" << std::endl;
-   switch( ea.getKey() )
-   {
-    case osgGA::GUIEventAdapter::KEY_Space:
-     break;
-    default:
-     break;
-   }
-   return false;
-  }
-  case(osgGA::GUIEventAdapter::KEYUP):
-  {
-   return false;
-  }*/
+    }
+        //    case(osgGA::GUIEventAdapter::KEYDOWN):
+        //    {
+        //        //std::cout << "Key (OSG) '" << (char)ea.getKey() << "'" << std::endl;
+        //        switch( ea.getKey() )
+        //        {
+        //        case osgGA::GUIEventAdapter::KEY_Space:
+        //            break;
+        //        default:
+        //            break;
+        //        }
+        //        return false;
+        //    }
+        //    case(osgGA::GUIEventAdapter::KEYUP):
+        //    {
+        //        return false;
+        //    }
     case(osgGA::GUIEventAdapter::FRAME):
     {
-        //XS : not used, was in RS code
-        //render_callback();
-
         return false;
     }
     default:
     {
-        //printf("received event: %d\n", ea.getEventType());
         return false;
     }
     }
@@ -331,21 +295,16 @@ void ACOsgTimelineEventHandler::pick(osgViewer::View* view, const osgGA::GUIEven
 
     float x = ea.getX();
     float y = ea.getY();
-    //float xx = ea.getXnormalized();
-    //float yy = ea.getYnormalized();
-    //printf("pick (%f, %f)\n", x, y);
-    //printf ("MOUSE: %f %f\n", x, y);
-    /*
- if (view->computeIntersections(x,y,intersections))
- {
-*/
+
+    //    if (view->computeIntersections(x,y,intersections))
+    //    {
+
     osg::ref_ptr< osgUtil::LineSegmentIntersector > picker = new osgUtil::LineSegmentIntersector(osgUtil::Intersector::WINDOW, x, y);
     osgUtil::IntersectionVisitor iv(picker);
     view->getCamera()->accept(iv);
     if (picker->containsIntersections())
     {
         intersections = picker->getIntersections();
-        //printf("got intersections\n");
 
         //std::cout << "Number of intersections: " <<intersections.size() << std::endl;
         for(osgUtil::LineSegmentIntersector::Intersections::iterator hitr = intersections.begin();
@@ -392,12 +351,20 @@ void ACOsgTimelineEventHandler::pick(osgViewer::View* view, const osgGA::GUIEven
 
                         //selection_begin = renderer->getTrack(selection->getRefId())->getSelectionBegin();
                         //selection_end = renderer->getTrack(selection->getRefId())->getSelectionEnd();
-                        moved_x = renderer->getTrack(selection->getRefId())->getSelectionPosX()/(xspan/2.0f) - ea.getXnormalized();
-                        pushed_x = ea.getXnormalized();
-                        moved_y = renderer->getTrack(selection->getRefId())->getSelectionPosY()/(yspan/2.0f) - ea.getY()/ea.getYmax();
+
+                        pushed_x = ea.getX()/ea.getXmax();//ea.getXnormalized();
                         pushed_y = ea.getY()/ea.getYmax(); // CF ea.getYnormalized(); seems to be buggy...
+
+                        //CF temporarily locked to track 0
+                        selection->object_id = 0;
+                        rid->object_id = 0; //until here
+
+                        moved_x = renderer->getTrack(selection->getRefId())->getSelectionPosX() - ea.getX()/ea.getXmax();
+                        moved_y = renderer->getTrack(selection->getRefId())->getSelectionPosY() - ea.getY()/ea.getYmax();
+                        if(renderer->getTrack(rid->getRefId()) != 0)
+                            renderer->getTrack(rid->getRefId())->setManualSelection(true);
                         //if ((rid->getRefName()!="track selection begin")&&(rid->getRefName()!="track selection end"))
-                        renderer->getTrack(rid->getRefId())->setManualSelection(true);
+
                         break;
                     }
                     case(osgGA::GUIEventAdapter::RELEASE):
@@ -416,16 +383,17 @@ void ACOsgTimelineEventHandler::pick(osgViewer::View* view, const osgGA::GUIEven
                         pushed_x = 0.0f;
                         moved_y = 0.0f;
                         pushed_y = 0.0f;
-                        renderer->getTrack(rid->getRefId())->setManualSelection(false);
+                        if(renderer->getTrack(rid->getRefId()) != 0)
+                            renderer->getTrack(rid->getRefId())->setManualSelection(false);
                         break;
                     }
-                        /*
-       case(osgGA::GUIEventAdapter::MOVE):
-       {
-        std::cout << "Moving in" << std::endl;
-        break;
-       }
-       */
+
+                        //                    case(osgGA::GUIEventAdapter::MOVE):
+                        //                    {
+                        //                        std::cout << "Moving in" << std::endl;
+                        //                        break;
+                        //                    }
+
                     default:
                     {
                         break;
@@ -435,7 +403,6 @@ void ACOsgTimelineEventHandler::pick(osgViewer::View* view, const osgGA::GUIEven
                     //}
                     //break ; // only pick the first one
                 }
-                //printf("picked %s\n", hitr->nodePath.back()->getName().c_str());
             }
         }
         if(selecting_zone_end || selecting_zone_begin){
@@ -453,16 +420,16 @@ void ACOsgTimelineEventHandler::pick(osgViewer::View* view, const osgGA::GUIEven
             selecting_segments = false;
         }
 
-        /*if (ea.getEventType()==osgGA::GUIEventAdapter::PUSH){
-   //std::cout << "  Selecting: zone("<<selecting_zone<<") begin("<<selecting_zone_begin<<") end("<<selecting_zone_end<<") summary("<<selecting_summary_waveform<<")"<<std::endl;
-   if (selecting_zone && selecting_summary_waveform)
-    selecting_summary_waveform = false;
-   //std::cout << "  Selecting: zone("<<selecting_zone<<") begin("<<selecting_zone_begin<<") end("<<selecting_zone_end<<") summary("<<selecting_summary_waveform<<")"<<std::endl;
-   if ((selecting_zone_begin || selecting_zone_end) && (selecting_zone || selecting_summary_waveform)){
-    selecting_zone = false;
-    selecting_summary_waveform = false;
-   }
-   //std::cout << "  Selecting: zone("<<selecting_zone<<") begin("<<selecting_zone_begin<<") end("<<selecting_zone_end<<") summary("<<selecting_summary_waveform<<")"<<std::endl;
-  }*/
+        //        if (ea.getEventType()==osgGA::GUIEventAdapter::PUSH){
+        //            //std::cout << "  Selecting: zone("<<selecting_zone<<") begin("<<selecting_zone_begin<<") end("<<selecting_zone_end<<") summary("<<selecting_summary_waveform<<")"<<std::endl;
+        //            if (selecting_zone && selecting_summary_waveform)
+        //                selecting_summary_waveform = false;
+        //            //std::cout << "  Selecting: zone("<<selecting_zone<<") begin("<<selecting_zone_begin<<") end("<<selecting_zone_end<<") summary("<<selecting_summary_waveform<<")"<<std::endl;
+        //            if ((selecting_zone_begin || selecting_zone_end) && (selecting_zone || selecting_summary_waveform)){
+        //                selecting_zone = false;
+        //                selecting_summary_waveform = false;
+        //            }
+        //            //std::cout << "  Selecting: zone("<<selecting_zone<<") begin("<<selecting_zone_begin<<") end("<<selecting_zone_end<<") summary("<<selecting_summary_waveform<<")"<<std::endl;
+        //        }
     }
 }
