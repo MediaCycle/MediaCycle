@@ -136,8 +136,8 @@ void ACVideo::saveXMLSpecific(TiXmlElement* _media){
 	_media->SetAttribute("Width", width);
 	_media->SetAttribute("Height", height);
 	_media->SetAttribute("FrameRate", fps);
-    /*_media->SetAttribute("ThumbnailWidth", thumbnail_width);
-    _media->SetAttribute("ThumbnailHeight", thumbnail_height);*/
+    _media->SetAttribute("FrameStart",this->getStartInt());
+    _media->SetAttribute("FrameEnd",this->getEndInt());
 }
 
 int ACVideo::loadXMLSpecific(TiXmlElement* _pMediaNode){
@@ -152,8 +152,7 @@ int ACVideo::loadXMLSpecific(TiXmlElement* _pMediaNode){
 	
 	double t=0;
 	_pMediaNode->QueryDoubleAttribute("Duration", &t);
-	// XS TODO is duration always end-start ?
-	this->start = 0;
+
 	if (t < 0){
 		//throw runtime_error("corrupted XML file, wrong video frame rate");
         //cv::VideoCapture* capture = this->getData();
@@ -166,11 +165,12 @@ int ACVideo::loadXMLSpecific(TiXmlElement* _pMediaNode){
             std::cerr << "ACVideo::loadXMLSpecific: couldn't load file" << this->filename << std::endl;
             return false;
         }
-        this->end = (double) this->getMediaData()->getNumberOfFrames() * 1.0/(float) this->getMediaData()->getSampleRate();
+        t = (double) this->getMediaData()->getNumberOfFrames() * 1.0/(float) this->getMediaData()->getSampleRate();
+        //this->end = (double) this->getMediaData()->getNumberOfFrames() * 1.0/(float) this->getMediaData()->getSampleRate();
 	}	
-	else{
-		this->end = t;
-	}
+//	else{
+//		this->end = t;
+//	}
 	
 	_pMediaNode->QueryIntAttribute("Width", &w);
 	if (w < 0)
@@ -202,14 +202,31 @@ int ACVideo::loadXMLSpecific(TiXmlElement* _pMediaNode){
 	else
 		this->fps = _fps;
 	
-    /*_pMediaNode->QueryIntAttribute("ThumbnailWidth", &t_w);
-	_pMediaNode->QueryIntAttribute("ThumbnailHeight", &t_h);
-	
-	if (computeThumbnail (t_w , t_h) != 1)
-		throw runtime_error("<ACVideo::loadXMLSpecific> : problem computing thumbnail");
+    int frame_start(-1), frame_end(-1);
+    _pMediaNode->QueryIntAttribute("FrameStart",&frame_start);
+    _pMediaNode->QueryIntAttribute("FrameEnd",&frame_end);
 
-	// not necessary
-    //	data = new ACVideoData(filename);*/
-	
+    // test if start and end have been set from outside (segments)
+    if(frame_start == -1){
+        this->start = 0.0f;
+        this->startInt = 0;
+    }
+    else{
+        this->startInt = frame_start;
+        this->start = (float)frame_start* 1.0f/fps;
+    }
+    if (frame_end == -1){
+        if (this->fps != 0){
+            this->endInt = t*this->fps;
+        }
+        else{
+            this->endInt = t; // time code of last frame
+        }
+        this->end = t;
+    }
+    else{
+        this->end = frame_end* 1.0f/fps;
+        this->endInt = frame_end;
+    }
 	return 1;	
 }

@@ -72,9 +72,8 @@ int main(int argc, char *argv[])
 #ifdef __APPLE__
 	QApplication::setLibraryPaths(QStringList(QApplication::applicationDirPath() + \"/../PlugIns\"));
 #endif
-
 	#ifndef USE_DEBUG
-	BreakpadQt::GlobalHandler::instance()->setDumpPath(QLatin1String("crashes"));
+        #define USE_DEBUG //CF BreakpadQt::GlobalHandler::instance()->setDumpPath(QLatin1String(\"crashes\"));
 	#endif
 
 	${MAIN_CLASS} window;

@@ -141,6 +141,20 @@ void ACOsgTrackRenderer::resizeSelectionFromEnd(float _end_x,float _end_y)
     selection_end_pos_changed=true;
 }
 
+void ACOsgTrackRenderer::resizeSelectionWidth(float _width){
+    if(_width >= 1.0f)
+        _width = 1.0f;
+    if(_width <= selection_min_width)
+        _width = selection_min_width;
+
+    float current_width = this->selection_end_pos_x - this->selection_begin_pos_x;
+    float _extent_x = (_width - current_width)/2.0f;
+    this->selection_end_pos_x += _extent_x;
+    this->selection_begin_pos_x -= _extent_x;
+    selection_begin_pos_changed=true;
+    selection_end_pos_changed=true;
+}
+
 void ACOsgTrackRenderer::moveSelection(float _center_x,float _center_y)
 {
     float _extent_x = _center_x - selection_center_pos_x;
@@ -154,6 +168,80 @@ void ACOsgTrackRenderer::moveSelection(float _center_x,float _center_y)
     selection_begin_pos_changed=true;
     selection_end_pos_changed=true;
     selection_center_pos_changed=true;
+}
+
+bool ACOsgTrackRenderer::skipToNextSegment(){
+    if(this->media == 0){
+        std::cerr << "ACOsgTrackRenderer::skipToNextSegment: no media set" << std::endl;
+        return false;
+    }
+    if(this->media->getNumberOfSegments() == 0){
+        std::cerr << "ACOsgTrackRenderer::skipToNextSegment: media has no segments" << std::endl;
+        return false;
+    }
+    float media_duration = media->getDuration();
+    float current_time = this->selection_center_pos_x * media_duration;
+    std::vector<ACMedia*> segments = this->media->getAllSegments();
+    std::vector<ACMedia*>::iterator segment = segments.end();
+    for(segment = segments.begin();segment!=segments.end();segment++){
+        if( (*segment)->getStart() <= current_time && (*segment)->getEnd() >= current_time )
+            break;
+    }
+    if(segment == segments.end()){
+        std::cerr << "ACOsgTrackRenderer::skipToNextSegment: couldn't find the segment corresponding to the playback" << std::endl;
+        return false;
+    }
+    int current_segment_number = std::distance(segments.begin(),segment);
+    std::cout << "ACOsgTrackRenderer::skipToNextSegment: current segment corresponding to the playback time " << current_time << " is number " << current_segment_number << "/" << segments.size() << std::endl;
+
+    segment++;
+    if(segment == segments.end())
+        segment = segments.begin();
+
+    float next_time = (*segment)->getStart();
+    float next_selection = next_time / media_duration;
+
+    std::cout << "ACOsgTrackRenderer::skipToNextSegment: moving selection from " << current_time << " (" << this->selection_center_pos_x << "%) to " << next_time << " (" << next_selection << "%)" << std::endl;
+    //this->manual_selection = true;
+    this->moveSelection(next_selection,0.0f);
+    return true;
+}
+
+bool ACOsgTrackRenderer::skipToPreviousSegment(){
+    if(this->media == 0){
+        std::cerr << "ACOsgTrackRenderer::skipToPreviousSegment: no media set" << std::endl;
+        return false;
+    }
+    if(this->media->getNumberOfSegments() == 0){
+        std::cerr << "ACOsgTrackRenderer::skipToPreviousSegment: media has no segments" << std::endl;
+        return false;
+    }
+    float media_duration = media->getDuration();
+    float current_time = this->selection_center_pos_x * media_duration;
+    std::vector<ACMedia*> segments = this->media->getAllSegments();
+    std::vector<ACMedia*>::iterator segment = segments.end();
+    for(segment = segments.begin();segment!=segments.end();segment++){
+        if( (*segment)->getStart() <= current_time && (*segment)->getEnd() >= current_time )
+            break;
+    }
+    if(segment == segments.end()){
+        std::cerr << "ACOsgTrackRenderer::skipToPreviousSegment: couldn't find the segment corresponding to the playback" << std::endl;
+        return false;
+    }
+    int current_segment_number = std::distance(segments.begin(),segment);
+    std::cout << "ACOsgTrackRenderer::skipToPreviousSegment: current segment corresponding to the playback time " << current_time << " is number " << current_segment_number << "/" << segments.size() << std::endl;
+
+    if(segment == segments.begin())
+        segment = segments.end();
+    segment--;
+
+    float next_time = (*segment)->getStart();
+    float next_selection = next_time / media_duration;
+
+    std::cout << "ACOsgTrackRenderer::skipToPreviousSegment: moving selection from " << current_time << " (" << this->selection_center_pos_x << "%) to " << next_time << " (" << next_selection << "%)" << std::endl;
+    //this->manual_selection = true;
+    this->moveSelection(next_selection,0.0f);
+    return true;
 }
 
 void ACOsgTrackRenderer::createDummySegments()

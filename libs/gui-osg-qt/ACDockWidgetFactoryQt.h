@@ -52,5 +52,6 @@ public:
     ACDockWidgetFactoryQt(): ACAbstractWidgetQt(){}
     virtual ~ACDockWidgetFactoryQt(){}
 	ACAbstractDockWidgetQt* createDockWidget(QWidget *parent = 0,std::string dock_type="");
+    ACAbstractDockWidgetQt* createDockWidget(QWidget *parent = 0,ACPluginType plugin_type = PLUGIN_TYPE_NONE);
 };
 #endif // ACDOCKWIDGETFACTORYQT_H

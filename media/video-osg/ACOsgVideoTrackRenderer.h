@@ -88,6 +88,7 @@ public:
     void emptyTrack();
     void prepareTracks();
     void updateTracks(double ratio=0.0);
+    virtual void pushOnElement(std::string _refname,float _pos_x,float _pos_y);
 
     /// This virtual function is called by ACOsgTimelineRenderer::changeTrackPlaybackThumbnail
     virtual void changePlaybackThumbnail(std::string _thumbnail);
@@ -137,6 +138,7 @@ protected:
 
     // summary slit-scan
     osg::ref_ptr<osg::MatrixTransform> slit_scan_transform;
+    std::vector< osg::ref_ptr<osg::MatrixTransform> > slitscan_transforms;
     void slitScanTransform();
     bool slit_scan_changed;
 
@@ -171,6 +173,7 @@ protected:
     void selectionEndTransform();
 
     float summary_center_y,summary_height;
+    float slitscan_center_y,slitscan_height;
     float segments_center_y,segments_height;
     float selection_height,selection_center_y,selection_center_frame_width;
     float playback_center_y,playback_height;
@@ -188,6 +191,8 @@ protected:
     bool track_playback_visibility_changed;
 
     std::string resized_thumbnail_filename;
+
+    int corresponding_segment_index;
 
 public:
     // Using std::string instead of typedefs for faster serialization, but less error-proof

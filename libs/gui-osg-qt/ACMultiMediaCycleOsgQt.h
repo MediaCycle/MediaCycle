@@ -124,6 +124,11 @@ public:
     ACMultiMediaCycleOsgQt(QWidget *parent = 0);
     ~ACMultiMediaCycleOsgQt();
 
+    /// This will be run right after the default config has been loaded
+    virtual void postLoadDefaultConfig(){}
+    /// This will be run right after an XML has been loaded
+    virtual void postLoadXML(){}
+
     void updateLibrary();
 
     void setBrowserMode(ACBrowserMode _mode){this->browser_mode=_mode;}

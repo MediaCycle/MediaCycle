@@ -33,8 +33,6 @@
 
 #include <iostream.h>
 
-#include "ACOsgMediaThumbnail.h"
-
 #include <osgDB/Registry>
 #include <osgDB/ReadFile>
 #include <osgUtil/SmoothingVisitor>
@@ -92,7 +90,12 @@ osg::ref_ptr<osg::Geometry> ACOsgBaseRenderer::thumbnailGeometry(std::string _th
         std::cout << "ACOsgBaseRenderer::thumbnailGeometry: can't access media thumbnail" << std::endl;
         return 0;
     }
-    osg::ref_ptr<osgDB::ReaderWriter> readerWriter = osgDB::Registry::instance()->getReaderWriterForExtension(boost::filesystem::extension(thumbnail_filename).substr(1));
+    std::string extension = boost::filesystem::extension(thumbnail_filename).substr(1);
+    bool transparent = false;
+    if(extension == "png" || extension == "svg")
+        transparent = true;
+
+    osg::ref_ptr<osgDB::ReaderWriter> readerWriter = osgDB::Registry::instance()->getReaderWriterForExtension(extension);
     if (!readerWriter){
         cerr << "ACOsgBaseRenderer::thumbnailGeometry: can't find an OSG plugin to read file '" << thumbnail_filename << "'" << endl;
         return 0;
@@ -163,36 +166,92 @@ osg::ref_ptr<osg::Geometry> ACOsgBaseRenderer::thumbnailGeometry(std::string _th
     state->setTextureMode(0, GL_TEXTURE_2D, osg::StateAttribute::ON);
     state->setMode(GL_DEPTH_TEST,osg::StateAttribute::OFF);
     state->setMode(GL_NORMALIZE, osg::StateAttribute::ON);
-    state->setMode(GL_BLEND, StateAttribute::ON);
-
+    if(transparent){
+        state->setMode(GL_BLEND, StateAttribute::ON);
+    }
+    else{
+        state->setMode(GL_LIGHTING, osg::StateAttribute::PROTECTED | osg::StateAttribute::OFF );
+        state->setMode(GL_BLEND, StateAttribute::ON);
+        state->setMode(GL_LINE_SMOOTH, StateAttribute::ON);
+    }
 
     osg::Vec3Array* normals = new osg::Vec3Array;
     normals->push_back(osg::Vec3(0.0f,-1.0f,0.0f));
     thumbnail_geometry->setNormalArray(normals);
     thumbnail_geometry->setNormalBinding(osg::Geometry::BIND_OVERALL);
 
-//    osgUtil::Optimizer optimizer;
-//    optimizer.optimize(thumbnail_geometry);
+    //    osgUtil::Optimizer optimizer;
+    //    optimizer.optimize(thumbnail_geometry);
 
-//    osgUtil::Tessellator tessellator;
-//        tessellator.retessellatePolygons( *thumbnail_geometry );
+    //    osgUtil::Tessellator tessellator;
+    //        tessellator.retessellatePolygons( *thumbnail_geometry );
 
-    osgUtil::SmoothingVisitor::smooth( * thumbnail_geometry );
+    if(transparent)
+        osgUtil::SmoothingVisitor::smooth( * thumbnail_geometry );
 
-//    osgUtil::Simplifier simplifier;
-//    simplifier.setSampleRatio( 0.1 );
-//    simplifier.simplify(* thumbnail_geometry);
+    //    osgUtil::Simplifier simplifier;
+    //    simplifier.setSampleRatio( 0.1 );
+    //    simplifier.simplify(* thumbnail_geometry);
 
-//            osgUtil::TriStripVisitor tsv;
-//               tsv. stripify( *thumbnail_geometry );
+    //            osgUtil::TriStripVisitor tsv;
+    //               tsv. stripify( *thumbnail_geometry );
 
     /*osg::ref_ptr<osg::Vec4Array> colors = new Vec4Array(1);
     (*colors)[0] = node_color;
     thumbnail_geometry->setColorArray(colors);*/
+    if(!transparent){
+        osg::ref_ptr<osg::Vec4Array> colors = new osg::Vec4Array;
+        colors->push_back(Vec4(1.0f, 1.0f, 1.0f, 0.9f));
+    }
     thumbnail_geometry->setColorBinding(Geometry::BIND_OVERALL);
 
 
     //state->setRenderingHint(osg::StateSet::OPAQUE_BIN );
 
     return thumbnail_geometry;
+}
+
+ACOsgMediaThumbnail* ACOsgBaseRenderer::getSharedThumbnail()
+{
+    if(this->media == 0){
+        std::cerr << "ACOsgBaseRenderer::getSharedThumbnailImage: no media set" << std::endl;
+        return 0;
+    }
+    if(this->shared_thumbnail == ""){
+        std::cerr << "ACOsgBaseRenderer::getSharedThumbnailImage: no shared thumbnail name set" << std::endl;
+        return 0;
+    }
+    if(this->media->getThumbnail(this->shared_thumbnail)==0){
+        std::cerr << "ACOsgBaseRenderer::getSharedThumbnailImage: no shared thumbnail available" << std::endl;
+        return 0;
+    }
+    ACOsgMediaThumbnail* thumbnail = dynamic_cast<ACOsgMediaThumbnail*>(this->media->getThumbnail(this->shared_thumbnail));
+    if(thumbnail == 0){
+        std::cerr << "ACOsgBaseRenderer::getSharedThumbnailImage: shared thumbnail isn't an osg media thumbnail" << std::endl;
+        return 0;
+    }
+    return thumbnail;
+}
+
+osg::ref_ptr<osg::Image> ACOsgBaseRenderer::getSharedThumbnailImage(){
+    ACOsgMediaThumbnail* thumbnail = this->getSharedThumbnail();
+    if(!thumbnail)
+        return 0;
+    return thumbnail->getImage();
+}
+
+osg::ref_ptr<osg::Texture2D> ACOsgBaseRenderer::getSharedThumbnailTexture()
+{
+    ACOsgMediaThumbnail* thumbnail = this->getSharedThumbnail();
+    if(!thumbnail)
+        return 0;
+    return thumbnail->getTexture();
+}
+
+osg::ref_ptr<osg::ImageStream> ACOsgBaseRenderer::getSharedThumbnailStream()
+{
+    ACOsgMediaThumbnail* thumbnail = this->getSharedThumbnail();
+    if(!thumbnail)
+        return 0;
+    return thumbnail->getStream();
 }

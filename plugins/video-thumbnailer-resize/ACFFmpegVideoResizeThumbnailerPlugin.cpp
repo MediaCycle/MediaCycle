@@ -40,9 +40,9 @@ namespace fs = boost::filesystem;
 ACFFmpegVideoResizeThumbnailerPlugin::ACFFmpegVideoResizeThumbnailerPlugin() : ACThumbnailerPlugin() {
     this->mMediaType = MEDIA_TYPE_VIDEO;
     this->mName = "Video resizing thumbnailer";
-    this->mDescription = "Video resizing thumbnailer: reduces the video dimensions proportionally, the higher not exceeding 100 pixels";
+    this->mDescription = "Video resizing thumbnailer: reduces the video dimensions proportionally, the higher not exceeding 64 pixels";
     this->mId = "";
-    this->max_dimension = 100; // pixels
+    this->max_dimension = 64; // pixels
 }
 
 ACFFmpegVideoResizeThumbnailerPlugin::~ACFFmpegVideoResizeThumbnailerPlugin(){
@@ -66,9 +66,9 @@ std::vector<ACMediaThumbnail*> ACFFmpegVideoResizeThumbnailerPlugin::summarize(A
     slash = "\\";
 #endif
 #ifdef __APPLE__
-    thumbnail_path << media_path.parent_path().string() << slash << media_path.stem().string() << "_" << thumbnail_suffix << ".mp4";
+    thumbnail_path << media_path.parent_path().string() << slash << media_path.stem().string() << "_" << thumbnail_suffix << "_" << max_dimension << ".mp4";
 #else // this seems required on ubuntu to compile...
-    thumbnail_path << media_path.parent_path() << slash << media_path.stem() << "_" << thumbnail_suffix << ".mp4";
+    thumbnail_path << media_path.parent_path() << slash << media_path.stem() << "_" << thumbnail_suffix << "_" << max_dimension << ".mp4";
 #endif
     std::string _thumbnail_filename = thumbnail_path.str();
     std::cout << "ACFFmpegVideoResizeThumbnailerPlugin: thumbnail filename '" << _thumbnail_filename << "'" << std::endl;

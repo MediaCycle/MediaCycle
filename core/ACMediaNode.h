@@ -84,6 +84,7 @@ public:
     int getCurrentFrame() const {return frame;}
     int getNavigationLevel() const {return navigationLevel;}
     int getActivity() const {return active;}
+    int getHover() const {return hover;}
     ACPoint getCurrentPosition() const {return currentPos;}
     // XS X,Y,Z -> float *3 ?
     ACPoint getNextPosition() const {return nextPos;}

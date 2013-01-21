@@ -79,6 +79,7 @@ public:
 
     virtual void prepareTracks()=0;
     virtual void updateTracks(double ratio=0.0)=0;
+    virtual void pushOnElement(std::string _refname,float _pos_x,float _pos_y){}
 
     //virtual bool addRangeSegment(float begin, float end)=0;
     //virtual bool removeRangeSegment(float begin, float end)=0;
@@ -86,8 +87,12 @@ public:
     void moveSelection(float _center_x,float _center_y);
     void resizeSelectionFromBegin(float _begin_x, float _begin_y);
     void resizeSelectionFromEnd(float _end_x, float _end_y);
+    void resizeSelectionWidth(float _width);
     float getSelectionPosX(){return this->selection_center_pos_x;}
     float getSelectionPosY(){return this->selection_center_pos_y;}
+    float getSelectionWidth(){return this->selection_end_pos_x-this->selection_begin_pos_x;}
+    bool skipToNextSegment();
+    bool skipToPreviousSegment();
 
     /// This virtual function is called by ACOsgTimelineRenderer::changeTrackPlaybackThumbnail
     virtual void changePlaybackThumbnail(std::string _thumbnail){}

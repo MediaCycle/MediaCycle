@@ -48,6 +48,8 @@
 #include <osg/LineWidth>
 #include <osg/ShapeDrawable>
 
+#include "ACOsgMediaThumbnail.h"
+
 class ACOsgBaseRenderer {
 public:
     ACOsgBaseRenderer();
@@ -64,13 +66,17 @@ protected:
 public:
     void setMediaCycle(MediaCycle *_media_cycle) { this->media_cycle = _media_cycle;}
     ACMediaType getMediaType(){return media_type;}
-osg::ref_ptr<osg::Geometry> thumbnailGeometry(std::string _thumbnail_name);
+    osg::ref_ptr<osg::Geometry> thumbnailGeometry(std::string _thumbnail_name);
     //void setMediaIndex(int media_index);
     void setMedia(ACMedia* _media);
     ACMedia* getMedia(){return media;}
     void setFilename(std::string media_cycle_filename);
     void setSharedThumbnailName(std::string name){this->shared_thumbnail=name;}
     std::string getSharedThumbnailName(){return this->shared_thumbnail;}
+    ACOsgMediaThumbnail* getSharedThumbnail();
+    osg::ref_ptr<osg::Image> getSharedThumbnailImage();
+    osg::ref_ptr<osg::Texture2D> getSharedThumbnailTexture();
+    osg::ref_ptr<osg::ImageStream> getSharedThumbnailStream();
 
     void setFont(osg::ref_ptr<osgText::Font> _font){this->font = _font;}
 

@@ -55,6 +55,7 @@ void ACOsgTimelineEventHandler::clean(){
     selecting_zone_end = false;
     selecting_summary_waveform = false;
     selecting_summary_frames = false;
+    selecting_selection_frames = false;
     selecting_summary_slider = false;
     selecting_segments = false;
     selection = 0;
@@ -144,6 +145,14 @@ bool ACOsgTimelineEventHandler::handle(const osgGA::GUIEventAdapter& ea,osgGA::G
                     renderer->getTrack(selection->getRefId())->moveSelection(pos_x,pos_y);
 #ifdef DEBUG_HANDLE
                     std::cout << "(PUSH) Skipping/Moving the current frame to the mouse position (track " << selection->getRefId() <<")" << std::endl;
+#endif
+                }
+
+                // Skipping/Moving the current frame to the mouse position
+                else if (selecting_selection_frames && !selecting_zone){
+                    renderer->getTrack(selection->getRefId())->pushOnElement("video track selection frames",pos_x,pos_y);
+#ifdef DEBUG_HANDLE
+                    std::cout << "(PUSH) Clicked on video track selection frames (track " << selection->getRefId() <<")" << std::endl;
 #endif
                 }
 
@@ -339,6 +348,7 @@ void ACOsgTimelineEventHandler::pick(osgViewer::View* view, const osgGA::GUIEven
                         else if (rid->getRefName()=="audio track summary waveform") selecting_summary_waveform = true;
                         else if (rid->getRefName()=="video track summary frames") selecting_summary_frames = true;
                         else if (rid->getRefName()=="video track summary slit-scan") selecting_summary_frames = true;
+                        else if (rid->getRefName()=="video track selection frames") selecting_selection_frames = true;
                         else if (rid->getRefName()=="track summary slider") selecting_summary_slider = true;
                         //else if (rid->getRefName()=="video track segments") selecting_segments = true;
                         else if (rid->getRefName()=="video track segment") selecting_segments = true;
@@ -374,6 +384,7 @@ void ACOsgTimelineEventHandler::pick(osgViewer::View* view, const osgGA::GUIEven
                         selecting_zone_end = false;
                         selecting_summary_waveform = false;
                         selecting_summary_frames = false;
+                        selecting_selection_frames = false;
                         selecting_summary_slider = false;
                         selecting_segments = false;
                         if (selection) {delete selection; selection = 0;}
@@ -411,11 +422,13 @@ void ACOsgTimelineEventHandler::pick(osgViewer::View* view, const osgGA::GUIEven
             //selecting_zone_end = false;
             selecting_summary_waveform = false;
             selecting_summary_frames = false;
+            selecting_selection_frames = false;
             selecting_segments = false;
         }
         if(selecting_zone){
             selecting_summary_waveform = false;
             selecting_summary_frames = false;
+            selecting_selection_frames = false;
             selecting_summary_slider = false;
             selecting_segments = false;
         }

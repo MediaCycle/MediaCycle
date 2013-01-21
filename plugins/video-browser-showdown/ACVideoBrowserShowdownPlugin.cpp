@@ -73,8 +73,10 @@ ACVideoBrowserShowdownPlugin::ACVideoBrowserShowdownPlugin() : QObject(), ACPlug
     this->reset_changed_booleans();
 
     this->jog = 0;
-
     this->wheel = 0;
+    this->jog_changed = false;
+    this->jog_clockwise = true;
+    this->wheel_changed = false;
 
     this->active = false;
     this->handle = 0;
@@ -120,11 +122,30 @@ ACVideoBrowserShowdownPlugin::ACVideoBrowserShowdownPlugin() : QObject(), ACPlug
 
     cue_in = 0;
     cue_out = 0;
-    url = "192.168.1.125";//"localhost";
+    url = "10.0.0.7";
     port = 8080;
     team = 5;
 
+    this->addStringParameter("Server",this->url,std::vector<std::string>(),"Server",boost::bind(&ACVideoBrowserShowdownPlugin::changeServer,this));
+    this->addNumberParameter("Port",this->port,1,65535,1,"Port",boost::bind(&ACVideoBrowserShowdownPlugin::changePort,this));
+    this->addNumberParameter("Team",this->team,0,16,1,"Team",boost::bind(&ACVideoBrowserShowdownPlugin::changeTeam,this));
+
     this->init_hid();
+}
+
+void ACVideoBrowserShowdownPlugin::changeServer(){
+    this->url = this->getStringParameterValue("Server");
+    std::cout << "ACVideoBrowserShowdownPlugin::changeServer: " << this->url << std::endl;
+}
+
+void ACVideoBrowserShowdownPlugin::changePort(){
+    this->port = this->getNumberParameterValue("Port");
+    std::cout << "ACVideoBrowserShowdownPlugin::changePort: " << this->port << std::endl;
+}
+
+void ACVideoBrowserShowdownPlugin::changeTeam(){
+    this->team = this->getNumberParameterValue("Team");
+    std::cout << "ACVideoBrowserShowdownPlugin::changeTeam: " << this->team << std::endl;
 }
 
 bool ACVideoBrowserShowdownPlugin::init_hid(){
@@ -137,13 +158,13 @@ bool ACVideoBrowserShowdownPlugin::init_hid(){
     cur_dev = devs;
 
     while (cur_dev) {
-        printf("Device Found\n  type: %04hx %04hx\n  path: %s\n  serial_number: %ls", cur_dev->vendor_id, cur_dev->product_id, cur_dev->path, cur_dev->serial_number);
-        printf("\n");
-        printf("  Manufacturer: %ls\n", cur_dev->manufacturer_string);
-        printf("  Product:      %ls\n", cur_dev->product_string);
-        printf("  Release:      %hx\n", cur_dev->release_number);
-        printf("  Interface:    %d\n",  cur_dev->interface_number);
-        printf("\n");
+        //        printf("Device Found\n  type: %04hx %04hx\n  path: %s\n  serial_number: %ls", cur_dev->vendor_id, cur_dev->product_id, cur_dev->path, cur_dev->serial_number);
+        //        printf("\n");
+        //        printf("  Manufacturer: %ls\n", cur_dev->manufacturer_string);
+        //        printf("  Product:      %ls\n", cur_dev->product_string);
+        //        printf("  Release:      %hx\n", cur_dev->release_number);
+        //        printf("  Interface:    %d\n",  cur_dev->interface_number);
+        //        printf("\n");
 
         if(cur_dev->vendor_id != 0x0b33 && cur_dev->product_id != 0x0030)
             cur_dev = cur_dev->next;
@@ -198,7 +219,11 @@ void ACVideoBrowserShowdownPlugin::hid_loop(){
 
             if(res == 5){
                 if(wheel != (int) (buf[0]+8)%16-8) wheel_changed = true; wheel = (int) (buf[0]+8)%16-8;
-                if(jog != (int) buf[1]) jog_changed = true; jog = (int) buf[1];
+                if(jog != (int) buf[1]) {
+                    jog_clockwise = ( (float)((int) buf[1]-jog)/255.0f > 0 ? true : false);
+                    jog_changed = true;
+                    jog = (int) buf[1];
+                }
                 if(button01 != ((int) (buf[3] & 0x01) != 0)) button01_changed = true; button01 = ((int) (buf[3] & 0x01) != 0);
                 if(button02 != ((int) (buf[3] & 0x02) != 0)) button02_changed = true; button02 = ((int) (buf[3] & 0x02) != 0);
                 if(button03 != ((int) (buf[3] & 0x04) != 0)) button03_changed = true; button03 = ((int) (buf[3] & 0x04) != 0);
@@ -218,19 +243,23 @@ void ACVideoBrowserShowdownPlugin::hid_loop(){
                 //                this->print_ascii_status();
 
                 /// Allowing submission from adjacent buttons, for realtime craze
-                if(button04 && button04_changed) this->submitCallback();
-                if(button08 && button08_changed) this->submitCallback();
-                if(button09 && button09_changed) this->submitCallback();
+                if(button04 && button04_changed) this->submitFastCallback();
+                if(button08 && button08_changed) this->submitFastCallback();
+                if(button09 && button09_changed) this->submitFastCallback();
+
+                if(button01 && button01_changed) this->submitFastCallback();
+                if(button05 && button05_changed) this->submitFastCallback();
+                if(button06 && button06_changed) this->submitFastCallback();
 
                 if(button10 && button10_changed) this->cueInCallback();
                 if(button11 && button11_changed) this->cueOutCallback();
-                if(jog_changed) this->skipFrameCallback();
-                if(wheel_changed) this->adjustSpeedCallback();
+                if(jog_changed) this->adjustSelectionWidth();
+                /*if(wheel_changed)*/ this->adjustSpeedCallback();
 
-                if(button12 && button12_changed) this->togglePlaybackCallback();
-                if(button13 && button13_changed) this->togglePlaybackCallback();
-                if(button14 && button14_changed) this->togglePlaybackCallback();
-                if(button15 && button15_changed) this->togglePlaybackCallback();
+                if(button12 && button12_changed) this->skipToPreviousSegment();
+                if(button13 && button13_changed) this->skipToNextSegment();
+                if(button14 && button14_changed) this->skipToPreviousSegment();
+                if(button15 && button15_changed) this->skipToNextSegment();
             }
             this->reset_changed_booleans();
         }
@@ -268,8 +297,9 @@ void ACVideoBrowserShowdownPlugin::cueInCallback(){
     }
     float duration = timeline_renderer->getTrack(0)->getMedia()->getDuration();
     float current_pos = timeline_renderer->getTrack(0)->getSelectionPosX();
-    cue_in = duration*current_pos;
-    std::cout << "ACVideoBrowserShowdownPlugin::cueInCallback: msec " << cue_in << " at current pos " << current_pos << " ([0;1]) / " << duration << " (total duration)" << std::endl;
+	float fps = (timeline_renderer->getTrack(0)->getMedia()->getFrameRate());
+    cue_in = (int)((float)duration*(float)current_pos*(float)fps);
+    std::cout << "ACVideoBrowserShowdownPlugin::cueInCallback: frame " << cue_in << " at current pos " << current_pos << " ([0;1]) / " << duration << " (total duration) "<< fps << std::endl;
 }
 
 void ACVideoBrowserShowdownPlugin::cueOutCallback(){
@@ -291,13 +321,14 @@ void ACVideoBrowserShowdownPlugin::cueOutCallback(){
         return;
     }
     float duration = timeline_renderer->getTrack(0)->getMedia()->getDuration();
-    float current_pos = timeline_renderer->getTrack(0)->getSelectionPosX();
-    cue_out = duration*current_pos;
-    std::cout << "ACVideoBrowserShowdownPlugin::cueOutCallback: msec " << cue_out << " at current pos " << current_pos << " ([0;1]) / " << duration << " (total duration)" << std::endl;
+	float current_pos = timeline_renderer->getTrack(0)->getSelectionPosX();
+    float fps = (timeline_renderer->getTrack(0)->getMedia()->getFrameRate());
+    cue_out = (int)((float)duration*(float)current_pos*(float)fps);
+    std::cout << "ACVideoBrowserShowdownPlugin::cueOutCallback: frame " << cue_out << " at current pos " << current_pos << " ([0;1]) / " << duration << " (total duration) " << fps << std::endl;
 }
 
 void ACVideoBrowserShowdownPlugin::submitCallback(){
-    std::cout << "submitCallback" << std::endl;
+    std::cout << "ACVideoBrowserShowdownPlugin::submitCallback" << std::endl;
 
     if(!timeline_renderer){
         std::cerr << "ACVideoBrowserShowdownPlugin::submitCallback: timeline renderer not set" << std::endl;
@@ -315,25 +346,19 @@ void ACVideoBrowserShowdownPlugin::submitCallback(){
     std::stringstream command;
     command << url << ":" << port << "/team=" << team << "/video=";
 
+    std::stringstream basename;
     boost::filesystem::path media_path(timeline_renderer->getTrack(0)->getMedia()->getFileName().c_str());
 #ifdef __APPLE__
-    command << media_path.stem().string();
+    basename << media_path.stem().string();
 #else // this seems required on ubuntu to compile...
-    command << media_path.stem();
+    basename << media_path.stem();
 #endif
+    std::string numbers = basename.str();
+    command << numbers.substr(0,3);
 
     command << "/segstart=" << cue_in << "/segstop=" << cue_out;
 
     std::cout << "ACVideoBrowserShowdownPlugin::submitCallback: sending HTTP request: '" << command.str() << "'"<< std::endl;
-
-
-    //    try {
-    //        system(command.str().c_str());
-    //    }
-    //    catch (const exception& e) {
-    //        cout << "ACVideoBrowserShowdownPlugin::submitCallback caught exception while trying to submit the segment: " << e.what() << endl;
-    //    }
-
 
     // Put this inside a thread, blocks the plugin if the server can't be reached
     CURL *curl;
@@ -356,16 +381,93 @@ void ACVideoBrowserShowdownPlugin::submitCallback(){
 
 }
 
+void ACVideoBrowserShowdownPlugin::submitFastCallback(){
+    this->cueInCallback();
+    this->cueOutCallback();
+    this->submitCallback();
+}
+
 void ACVideoBrowserShowdownPlugin::adjustSpeedCallback(){
-    std::cout << "adjustSpeedCallback " << this->wheel << std::endl;
+    if(this->media_cycle == 0){
+        std::cerr << "ACVideoBrowserShowdownPlugin::adjustSpeedCallback: mediacycle not set" << std::endl;
+        return;
+    }
+    if(this->media_cycle->getLibrarySize() == 0){
+        //std::cerr << "ACVideoBrowserShowdownPlugin::adjustSpeedCallback: no media element loaded" << std::endl;
+        return;
+    }
+    if(this->timeline_renderer == 0){
+        std::cerr << "ACVideoBrowserShowdownPlugin::adjustSpeedCallback: couldn't access timeline" << std::endl;
+        return;
+    }
+    if(this->timeline_renderer->getTrack(0) == 0){
+        //std::cerr << "ACVideoBrowserShowdownPlugin::adjustSpeedCallback: couldn't access timeline track" << std::endl;
+        return;
+    }
+    if(this->timeline_renderer->getTrack(0)->getSharedThumbnailStream() == 0){
+        std::cerr << "ACVideoBrowserShowdownPlugin::adjustSpeedCallback: couldn't access timeline track shared thumbnail stream" << std::endl;
+        return;
+    }
+    int tm = 1;
+    if(this->wheel > 0)
+        tm = this->wheel+1;
+    else if(this->wheel < 0)
+        tm = this->wheel;
+    if(this->wheel!=0)
+        std::cout << "ACVideoBrowserShowdownPlugin::adjustSpeedCallback " << this->wheel << " -> " << tm << std::endl;
+    if(this->wheel!=0){
+        float current_time = this->timeline_renderer->getTrack(0)->getSharedThumbnailStream()->getCurrentTime();
+        this->timeline_renderer->getTrack(0)->getSharedThumbnailStream()->seek(current_time+tm);
+    }
+}
+
+void ACVideoBrowserShowdownPlugin::adjustSelectionWidth(){
+    if(this->timeline_renderer == 0){
+        std::cerr << "ACVideoBrowserShowdownPlugin::adjustSelectionWidth: couldn't access timeline" << std::endl;
+        return;
+    }
+    if(this->timeline_renderer->getTrack(0) == 0){
+        std::cerr << "ACVideoBrowserShowdownPlugin::adjustSelectionWidth: couldn't access timeline track" << std::endl;
+        return;
+    }
+    float selection_width = this->timeline_renderer->getTrack(0)->getSelectionWidth();
+    float ratio = 0.25f*(selection_width);
+    float new_selection_width = selection_width + (this->jog_clockwise ? 1 : -1) * ratio;
+
+    std::cout << "ACVideoBrowserShowdownPlugin::adjustSelectionWidth from " << selection_width << " to " << new_selection_width << std::endl;
+    this->timeline_renderer->getTrack(0)->resizeSelectionWidth(new_selection_width);
 }
 
 void ACVideoBrowserShowdownPlugin::skipFrameCallback(){
-    std::cout << "skipFrameCallback " << this->jog << std::endl;
+    std::cout << "ACVideoBrowserShowdownPlugin::skipFrameCallback " << this->jog << std::endl;
 }
 
 void ACVideoBrowserShowdownPlugin::togglePlaybackCallback(){
-    std::cout << "togglePlaybackCallback " << std::endl;
+    std::cout << "ACVideoBrowserShowdownPlugin::togglePlaybackCallback " << std::endl;
+}
+
+void ACVideoBrowserShowdownPlugin::skipToNextSegment(){
+   if(this->timeline_renderer == 0){
+       std::cerr << "ACVideoBrowserShowdownPlugin::skipToNextSegment: couldn't access timeline" << std::endl;
+       return;
+   }
+   if(this->timeline_renderer->getTrack(0) == 0){
+       std::cerr << "ACVideoBrowserShowdownPlugin::skipToNextSegment: couldn't access timeline track" << std::endl;
+       return;
+   }
+   this->timeline_renderer->getTrack(0)->skipToNextSegment();
+}
+
+void ACVideoBrowserShowdownPlugin::skipToPreviousSegment(){
+    if(this->timeline_renderer == 0){
+        std::cerr << "ACVideoBrowserShowdownPlugin::skipToPreviousSegment: couldn't access timeline" << std::endl;
+        return;
+    }
+    if(this->timeline_renderer->getTrack(0) == 0){
+        std::cerr << "ACVideoBrowserShowdownPlugin::skipToPreviousSegment: couldn't access timeline track" << std::endl;
+        return;
+    }
+    this->timeline_renderer->getTrack(0)->skipToPreviousSegment();
 }
 
 std::vector<ACInputActionQt*> ACVideoBrowserShowdownPlugin::providesInputActions()

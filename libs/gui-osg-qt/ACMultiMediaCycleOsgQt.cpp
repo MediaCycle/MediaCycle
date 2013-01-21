@@ -40,9 +40,10 @@
 
 #ifdef OSG_LIBRARY_STATIC
 #include <osgViewer/GraphicsWindow>
-
 USE_GRAPHICSWINDOW()
 #endif
+
+#include "ACPluginControlsDockWidgetQt.h"
 
 ACQProgressBar::ACQProgressBar(QWidget *parent)
     :   QProgressBar(parent){
@@ -127,11 +128,13 @@ void ACMultiMediaCycleOsgQt::pluginLoaded(std::string plugin_name){
         return;
     }
     std::cout << "ACOsgCompositeViewQt::pluginLoaded: " << plugin_name << " is an ACPluginQt" << std::endl;
-    std::string dockName = plugin->dockName();
+    /*std::string dockName = plugin->dockName();
     if(dockName!=""){
         std::cout << "ACMultiMediaCycleOsgQt::pluginLoaded: adding dock " << dockName << " for plugin " << plugin_name << std::endl;
         dockWidgetsManager->addControlDock( plugin->createDock(this) );
-    }
+    }*/
+    //dockWidgetsManager->addControlDock( new ACPluginControlsDockWidgetQt(media_cycle->getPluginManager()->getPlugin(plugin_name)->getPluginType(),plugin->dockName(),this ));
+    //dockWidgetsManager->addControlDock( media_cycle->getPluginManager()->getPlugin(plugin_name)->getPluginType());
 }
 
 // ----------- 
@@ -390,7 +393,7 @@ bool ACMultiMediaCycleOsgQt::readXMLConfig(string _filename){
 
         TiXmlDocument doc( _filename.c_str() );
         if (!doc.LoadFile( ))
-            throw runtime_error("error reading XML file");
+            throw runtime_error("error reading XML file, malformed");
         TiXmlHandle docHandle(&doc);
         TiXmlHandle rootHandle = docHandle.FirstChildElement( "MediaCycle" );
         // XS TODO make roothandle a pointer and check this
@@ -438,14 +441,16 @@ bool ACMultiMediaCycleOsgQt::readXMLConfig(string _filename){
             FeaturesWeightsNode->QueryIntAttribute("NumberOfFeatures", &n_feat);
             if (n_feat < 0)
                 throw runtime_error("corrupted XML file, wrong number of features weights");
-            std::stringstream tmp3;
-            tmp3 << FeaturesWeightsText->ValueStr();
             try {
-                for (int j=0; j<n_feat; j++) {
-                    // XS TODO add tests !! on number of features
-                    float w;
-                    tmp3 >> w;
-                    fw.push_back(w);
+                if(FeaturesWeightsText){
+                    std::stringstream tmp3;
+                    tmp3 << FeaturesWeightsText->ValueStr();
+                    for (int j=0; j<n_feat; j++) {
+                        // XS TODO add tests !! on number of features
+                        float w;
+                        tmp3 >> w;
+                        fw.push_back(w);
+                    }
                 }
             }
             catch (...) {
@@ -520,6 +525,8 @@ bool ACMultiMediaCycleOsgQt::readXMLConfig(string _filename){
     }
 
     // no errors occured, no exception caught.
+
+    this->postLoadXML();
     return true;
 }
 
@@ -1125,7 +1132,7 @@ bool ACMultiMediaCycleOsgQt::loadDefaultConfig(ACAbstractDefaultConfig* _config)
 
     this->useSegmentationByDefault( _config->useSegmentation() );
     if(_config->useSegmentation()){
-        bool segmentation_plugins_avail = (media_cycle->getPluginManager()->getAvailableSegmentPlugins()->getSize(_config->mediaType()) > 0);
+        bool segmentation_plugins_avail = (media_cycle->getPluginManager()->getAvailableSegmentPluginsSize(_config->mediaType()) > 0);
         if(!(this->switchSegmentation( segmentation_plugins_avail ) ) )
             this->showError("No segmentation plugin available. Segmentation disabled.");
     }
@@ -1154,10 +1161,14 @@ bool ACMultiMediaCycleOsgQt::loadDefaultConfig(ACAbstractDefaultConfig* _config)
     //if(_osg_qt_config->useSegmentation())
     //    this->addControlDock("MCSegmentationControls");
 
+    //CF VBS
+    //dockWidgetsManager->addControlDock(PLUGIN_TYPE_CLIENT);
+
     // Update the plugin lists of the browser control dock through DockWidget
     dockWidgetsManager->changeMediaType(_config->mediaType());
     dockWidgetsManager->updatePluginsSettings();
 
+    this->postLoadDefaultConfig();
     return true;
 }
 

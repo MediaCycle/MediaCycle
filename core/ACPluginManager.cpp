@@ -296,6 +296,10 @@ int ACPluginManager::getAvailableSegmentPluginsSize(ACMediaType MediaType) {
     return this->mAvailableSegmentPlugins->getSize(MediaType);
 }*/
 
+int ACPluginManager::getAvailableSegmentPluginsSize(ACMediaType MediaType) {
+    return this->mAvailableSegmentPlugins->getSize(MediaType);
+}
+
 int ACPluginManager::getActiveSegmentPluginsSize(ACMediaType MediaType) {
     return this->mActiveSegmentPlugins->getSize(MediaType);
 }

@@ -15,6 +15,7 @@
 #  PREPROCESS
 #  SEGMENTATION
 #  WITH_SEGMENTATION: example: SET(WITH_SEGMENTATION ON)
+#  WITHOUT_NEIGHBORS: example: SET(WITHOUT_NEIGHBORS ON)
 #  MEDIA_READER: example: SET(MEDIA_READER "Archipel Reader")
 #  ACTIVE_MEDIA: example: SET(ACTIVE_MEDIA "text")
 #
@@ -122,6 +123,12 @@ IF(WITH_SEGMENTATION)
 	file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/${CLASS_NAME}.h "\tvirtual bool useSegmentation(){return true;}")
 ELSE()
 	file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/${CLASS_NAME}.h "\tvirtual bool useSegmentation(){return false;}")
+ENDIF()
+
+IF(WITHOUT_NEIGHBORS)
+        file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/${CLASS_NAME}.h "\tvirtual bool useNeighbors(){return false;}")
+ELSE()
+        file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/${CLASS_NAME}.h "\tvirtual bool useNeighbors(){return true;}")
 ENDIF()
 
 IF(SUPPORT_MULTIMEDIA)

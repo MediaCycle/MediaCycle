@@ -79,7 +79,7 @@ public:
 
     double getDuration(){return this->getEnd()-this->getStart();}
 
-    void addSegment(ACMediaThumbnail* _segment){segments.push_back(_segment);}
+    void addSegment(ACMediaThumbnail* _segment);
     //void removeSegment(ACMedia* _segment){segments.erase(_segment);}
     std::vector<ACMediaThumbnail*> &getAllSegments() { return segments; }
     void setAllSegments(std::vector<ACMediaThumbnail*> _segments) { segments=_segments; }

@@ -34,6 +34,7 @@
 
 #include "ACDockWidgetFactoryQt.h"
 #include "ACPluginQt.h"
+#include "ACPluginControlsDockWidgetQt.h"
 
 // XS watch out, here the dock_types start with "MC"
 // BUT the dock's names start with "AC"
@@ -64,4 +65,11 @@ ACAbstractDockWidgetQt* ACDockWidgetFactoryQt::createDockWidget(QWidget *parent,
 
     }
     return 0;
+}
+
+ACAbstractDockWidgetQt* ACDockWidgetFactoryQt::createDockWidget(QWidget *parent,ACPluginType plugin_type){
+    std::string name = "";
+    if(plugin_type == PLUGIN_TYPE_CLIENT)
+        name = "Client";
+    return new ACPluginControlsDockWidgetQt(plugin_type,name + " plugins controls",parent);
 }

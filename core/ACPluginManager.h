@@ -154,6 +154,7 @@ public:
     ACAvailableFeaturesPlugins *getAvailableFeaturesPlugins(){return this->mAvailableFeaturePlugins;}// returns a container with available feature plugins reference
     std::vector<std::string> getAvailableFeaturesPluginsNames(ACMediaType MediaType);
     ACAvailableSegmentPlugins *getAvailableSegmentPlugins(){return this->mAvailableSegmentPlugins;}// returns a container with available segment plugins reference
+    int getAvailableSegmentPluginsSize(ACMediaType MediaType);
     ACAvailableSegmentPlugins *getActiveSegmentPlugins(){return this->mActiveSegmentPlugins;}// returns a container with active segment plugins reference
     int getActiveSegmentPluginsSize(ACMediaType MediaType);
     std::vector<std::string> getActiveSegmentPluginsNames(ACMediaType MediaType);

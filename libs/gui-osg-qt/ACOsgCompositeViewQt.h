@@ -98,8 +98,10 @@ public slots:
 
     // Timeline
     void addMediaOnTimelineTrack();
+    void toggleTimelineVisibility();
     void toggleTimelinePlayback(bool toggle); // "transport"
-    //void adjustTimelineHeight(float y);
+    /// adjust the timeline height ratio, between 0 and 1
+    void adjustTimelineHeight(float _ratio_y);
 
 public:
     ACOsgCompositeViewQt( QWidget * parent = 0, const char * name = 0, const QGLWidget * shareWidget = 0, WindowFlags f = 0 );

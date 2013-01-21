@@ -38,7 +38,7 @@
 
 using namespace osg;
 
-#define video_BORDER
+//#define video_BORDER
 
 #include "ACOsgMediaThumbnail.h"
 
@@ -171,7 +171,8 @@ void ACOsgVideoRenderer::videoGeode(bool flip, float sizemul, float zoomin) {
         // Texture State (image)
 
         //ACMediaType media_type = media_cycle->getLibrary()->getMedia(media_index)->getType();
-        video_texture->setResizeNonPowerOfTwoHint(false);
+        if(video_texture)
+            video_texture->setResizeNonPowerOfTwoHint(false);
 
         // XS TODO add this line?
         // http://groups.google.com/group/osg-users/browse_thread/thread/f623b62f62e39473?pli=1
@@ -548,7 +549,7 @@ void ACOsgVideoRenderer::updateNodes(double ratio) {
     if (localscale>minscale) {
         z += 2*zpos;
     }
-    else if (attribute->getActivity()==1) {
+    else if (attribute->getActivity()==1 || attribute->getHover()==1) {
         z += zpos;
     }
 
@@ -588,14 +589,14 @@ void ACOsgVideoRenderer::updateNodes(double ratio) {
         break;
     case osg::ImageStream::PLAYING:
         if( video_stream->getCurrentTime() > media->getEnd() ){
-            std::cout << "Video stream for media id " << media->getId() << " of current time " << video_stream->getCurrentTime() << " goes beyond the media end time " << media->getEnd() << ", rewinding to start time " << media->getStart() << std::endl;
+            //std::cout << "Video stream for media id " << media->getId() << " of current time " << video_stream->getCurrentTime() << " goes beyond the media end time " << media->getEnd() << ", rewinding to start time " << media->getStart() << std::endl;
             video_stream->seek(media->getStart() );
         }
         if (attribute->getActivity()==0)
             video_stream->pause();
         break;
     case osg::ImageStream::PAUSED:
-        if (attribute->getActivity()==1)
+        if (attribute->getActivity()>=1)
             video_stream->play();
         break;
     case osg::ImageStream::REWINDING:

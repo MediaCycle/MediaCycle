@@ -32,6 +32,7 @@
 #include <MediaCycle.h>
 #include <ACPlugin.h>
 #include <ACPluginQt.h>
+#include <ACPluginControlsDockWidgetQt.h>
 
 #include <stdio.h>
 #include <pthread.h>
@@ -51,6 +52,13 @@ public:
 
     // From ACPluginQt
     virtual std::vector<ACInputActionQt*> providesInputActions();
+
+public slots:
+    void changeServer();
+    void changePort();
+    void changeTeam();
+
+ public:
 
     /** Returns true if the thread was successfully started, false if there was an error starting the thread */
     bool StartInternalThread()
@@ -73,9 +81,13 @@ protected:
     void cueInCallback();
     void cueOutCallback();
     void submitCallback();
+    void submitFastCallback();
     void adjustSpeedCallback();
     void skipFrameCallback();
     void togglePlaybackCallback();
+    void adjustSelectionWidth();
+    void skipToNextSegment();
+    void skipToPreviousSegment();
 
 private:
     static void * hid_loop_func(void * This) {((ACVideoBrowserShowdownPlugin *)This)->hid_loop(); return NULL;}
@@ -88,7 +100,7 @@ private:
     bool button01, button02, button03, button04, button05, button06, button07, button08, button09, button10, button11, button12, button13, button14, button15;
     bool button01_changed, button02_changed, button03_changed, button04_changed, button05_changed, button06_changed, button07_changed, button08_changed, button09_changed, button10_changed, button11_changed, button12_changed, button13_changed, button14_changed, button15_changed;
     int jog, wheel;
-    bool jog_changed, wheel_changed;
+    bool jog_changed, wheel_changed, jog_clockwise;
 
     void reset_changed_booleans();
     void print_ascii_status();

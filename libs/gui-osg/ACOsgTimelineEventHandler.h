@@ -57,7 +57,7 @@ private:
     ACOsgTimelineRenderer *renderer;
     MediaCycle *media_cycle;
     bool selecting_zone,selecting_zone_begin,selecting_zone_end;
-    bool selecting_summary_waveform,selecting_summary_frames,selecting_summary_slider;
+    bool selecting_summary_waveform,selecting_summary_frames,selecting_summary_slider,selecting_selection_frames;
     bool selecting_segments;
     ACRefId* selection;
     float selection_begin,selection_end;

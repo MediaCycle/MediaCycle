@@ -241,3 +241,10 @@ void ACMediaThumbnail::loadXML(TiXmlElement* _pMediaNode){
         throw runtime_error("corrupted XML file, problem with loadXMLSpecific");
     }*/
 }
+
+void ACMediaThumbnail::addSegment(ACMediaThumbnail* _segment)
+{
+    segments.push_back(_segment);
+    _segment->setParentId(this->getParentId());
+    _segment->setId(segments.size()-1);
+}

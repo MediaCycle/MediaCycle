@@ -192,6 +192,12 @@ void ACBrowserControlsCompleteDockWidgetQt::updatePluginsSettings()
     clustersPositionsControls->updatePluginsSettings();
     neighborsMethodControls->updatePluginsSettings();
     neighborsPositionsControls->updatePluginsSettings();
+
+    if(media_cycle->getAvailablePluginNames(PLUGIN_TYPE_PREPROCESS,this->getMediaType()).size()>1) // ACNormalizePlugin is loaded by default
+        ui.groupBoxPreProcess->show();
+    else
+        ui.groupBoxPreProcess->hide();
+
     emit this->readjustHeight();
 }
 

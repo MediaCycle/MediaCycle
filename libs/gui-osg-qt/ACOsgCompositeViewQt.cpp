@@ -61,7 +61,7 @@ ACOsgCompositeViewQt::ACOsgCompositeViewQt( QWidget * parent, const char * name,
       refx(0.0f), refy(0.0f),
       refcamx(0.0f), refcamy(0.0f),
       refzoom(0.0f),refrotation(0.0f),
-      septhick(5),sepy(0.0f),refsepy(0.0f),screen_width(0),
+      septhick(15),sepy(0.0f),refsepy(0.0f),screen_width(0),
       library_loaded(false),mouseover(false),
       mediaOnTrack(-1),track_playing(false),
       openMediaExternallyAction(0), browseMediaExternallyAction(0), examineMediaExternallyAction(0), forwardNextLevelAction(0),changeReferenceNodeAction(0),
@@ -889,6 +889,44 @@ void ACOsgCompositeViewQt::addMediaOnTimelineTrack(){
     }
 }
 
+void ACOsgCompositeViewQt::toggleTimelineVisibility(){
+    if (media_cycle == 0) return;
+    if (media_cycle->hasBrowser())
+    {
+        if (sepy==0)
+            sepy = height()/4;// CF browser/timeline proportions at startup
+        else
+            sepy = 0;
+
+        timeline_renderer->updateSize(width(),sepy);
+        this->updateBrowserView(width(),height());
+        this->updateTimelineView(width(),height());
+        this->updateHUDCamera(width(),height());
+
+        media_cycle->setNeedsDisplay(true);
+    }
+}
+
+void ACOsgCompositeViewQt::adjustTimelineHeight(float _ratio_y){
+    if (media_cycle == 0) return;
+    if (!media_cycle->hasBrowser())return;
+
+    if (_ratio_y<=0.0f)
+        _ratio_y = 0.0f;
+    if (_ratio_y>=1.0f)
+        _ratio_y = 1.0f;
+
+    this->sepy = _ratio_y*height();
+
+    timeline_renderer->updateSize(width(),sepy);
+    this->updateBrowserView(width(),height());
+    this->updateTimelineView(width(),height());
+    this->updateHUDCamera(width(),height());
+
+    media_cycle->setNeedsDisplay(true);
+
+}
+
 void ACOsgCompositeViewQt::toggleTimelinePlayback(bool toggle){
     if (media_cycle == 0) return;
     if ( (media_cycle) && (media_cycle->hasBrowser()) && (timeline_renderer->getTrack(0)!=0) ) {
@@ -911,10 +949,6 @@ void ACOsgCompositeViewQt::discardMedia(){
         }
     }
 }
-
-/*void ACOsgCompositeViewQt::adjustTimelineHeight(float y){
-    if (media_cycle == 0) return;
-}*/
 
 void ACOsgCompositeViewQt::propagateEventToActions( QEvent* event )
 {

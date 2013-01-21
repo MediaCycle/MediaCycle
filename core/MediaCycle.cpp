@@ -1263,19 +1263,27 @@ int MediaCycle::readXMLConfigFilePlugins(TiXmlHandle _rootHandle) {
 
         //this->pluginManager->clean();
         //this->pluginManager->setMediaCycle(this);
-        this->mediaBrowser->changeClustersMethodPlugin( this->pluginManager->getPlugin("MediaCycle KMeans") );
-        this->mediaBrowser->changeClustersPositionsPlugin( this->pluginManager->getPlugin("MediaCycle Propeller") );
+        //this->mediaBrowser->changeClustersMethodPlugin( this->pluginManager->getPlugin("MediaCycle KMeans") );
+        //this->mediaBrowser->changeClustersPositionsPlugin( this->pluginManager->getPlugin("MediaCycle Propeller") );
 
         TiXmlElement* pluginLibraryNode=MC_e_features_plugin_manager->FirstChild()->ToElement();
         for( pluginLibraryNode; pluginLibraryNode; pluginLibraryNode=pluginLibraryNode->NextSiblingElement()) {
             string libraryName = pluginLibraryNode->Attribute("LibraryPath");
-            int lib_size=0;
-            pluginLibraryNode->QueryIntAttribute("NumberOfPlugins", &lib_size);
-            std::vector<std::string> plugins_names = this->pluginManager->addLibrary(libraryName);
-            if(plugins_names.size() == 0)
+            if(libraryName!=""){
+                int lib_size=0;
+                pluginLibraryNode->QueryIntAttribute("NumberOfPlugins", &lib_size);
+                std::vector<std::string> plugins_names;
+#if defined(__APPLE__) && !defined(DEBUG)
+                std::cout << "Trying to load bundled plugin " << fs::basename(libraryName) << std::endl;
                 plugins_names = this->pluginManager->addLibrary( this->getPluginPathFromBaseName(fs::basename(libraryName)));
-            for(std::vector<std::string>::iterator plugin_name = plugins_names.begin();plugin_name!=plugins_names.end();plugin_name++){
-                eventManager->sig_pluginLoaded(*plugin_name);
+#else
+                plugins_names = this->pluginManager->addLibrary(libraryName);
+                if(plugins_names.size() == 0)
+                    plugins_names = this->pluginManager->addLibrary( this->getPluginPathFromBaseName(fs::basename(libraryName)));
+#endif
+                for(std::vector<std::string>::iterator plugin_name = plugins_names.begin();plugin_name!=plugins_names.end();plugin_name++){
+                    eventManager->sig_pluginLoaded(*plugin_name);
+                }
             }
         }
 
@@ -1285,15 +1293,22 @@ int MediaCycle::readXMLConfigFilePlugins(TiXmlHandle _rootHandle) {
                 TiXmlElement* MC_e_active_plugin = MC_e_active_plugins->FirstChild()->ToElement();
                 for( MC_e_active_plugin; MC_e_active_plugin; MC_e_active_plugin=MC_e_active_plugin->NextSiblingElement()) {
                     std::string type = MC_e_active_plugin->ValueStr();
-                    ACPlugin* plugin = this->getPluginManager()->getPlugin( MC_e_active_plugin->GetText() );
-                    if(type == "ClustersMethod")
-                        this->getBrowser()->setClustersMethodPlugin(plugin);
-                    if(type == "ClustersPositions")
-                        this->getBrowser()->setClustersPositionsPlugin(plugin);
-                    if(type == "NeighborsMethod")
-                        this->getBrowser()->setNeighborsMethodPlugin(plugin);
-                    if(type == "NeighborsPositions")
-                        this->getBrowser()->setNeighborsPositionsPlugin(plugin);
+                    if(MC_e_active_plugin){
+                        try{
+                        ACPlugin* plugin = this->getPluginManager()->getPlugin( MC_e_active_plugin->GetText() );
+                        if(type == "ClustersMethod")
+                            this->getBrowser()->setClustersMethodPlugin(plugin);
+                        if(type == "ClustersPositions")
+                            this->getBrowser()->setClustersPositionsPlugin(plugin);
+                        if(type == "NeighborsMethod")
+                            this->getBrowser()->setNeighborsMethodPlugin(plugin);
+                        if(type == "NeighborsPositions")
+                            this->getBrowser()->setNeighborsPositionsPlugin(plugin);
+                        }
+                        catch(const std::exception e){
+                            // Nothing yet, no plugin set
+                        }
+                    }
                 }
             }
         }
@@ -1386,7 +1401,7 @@ std::string MediaCycle::getPluginPathFromBaseName(std::string basename)
 // XS TODO separate in header/core/plugins ?
 TiXmlElement* MediaCycle::saveXMLConfigFile(string _fname) {
     // or set it to config_file_xml ?
-    TiXmlDocument MC_doc;
+    TiXmlDocument MC_doc(_fname);
     TiXmlDeclaration* MC_decl = new TiXmlDeclaration( "1.0", "", "" );
     MC_doc.LinkEndChild( MC_decl );
 
@@ -1491,8 +1506,32 @@ TiXmlElement* MediaCycle::saveXMLConfigFile(string _fname) {
 
     }
 
-    MC_doc.SaveFile(_fname.c_str());
-    cout << "saved XML config : " << _fname << endl;
+    bool success = MC_doc.SaveFile(_fname.c_str());
+    if(success)
+        cout << "saved XML config : " << _fname << endl;
+    else{
+        cerr << "saving file " << _fname << " failed" << endl;
+
+/// When batch-importing files one-by-one with videocycle-cli, some won't output an XML file when saving, even the following workaround won't work
+//        // Declare a printer
+//        TiXmlPrinter printer;
+
+//        // attach it to the document you want to convert in to a std::string
+//        MC_doc.Accept(&printer);
+
+//        // Create a std::string and copy your document data in to the string
+//        std::string str = printer.CStr();
+
+//        std::ofstream outfile(_fname.c_str(), ios::out);
+//        if(!outfile.is_open())
+//        {
+//            cout<<"MediaCycle::saveXMLConfigFile: could not open "<< _fname <<" for writing, maybe the parent directory isn't writable"<<endl;
+//            return MC_e_root;
+//        }
+//        outfile << str;
+//        outfile.close();
+    }
+
     // children of MC_Doc get deleted automatically
     return MC_e_root;
 }

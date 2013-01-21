@@ -140,6 +140,10 @@ bool ACDockWidgetsManagerQt::addControlDock(std::string dock_type)
     return this->addControlDock(dockWidgetFactory->createDockWidget(mainWindow,dock_type));
 }
 
+bool ACDockWidgetsManagerQt::addControlDock(ACPluginType plugin_type)
+{
+    return this->addControlDock(dockWidgetFactory->createDockWidget(mainWindow,plugin_type));
+}
 
 ACAbstractDockWidgetQt* ACDockWidgetsManagerQt::getDockFromClassName(std::string _name){
     if( _name == "")
@@ -216,7 +220,7 @@ void ACDockWidgetsManagerQt::updateDockHeight()
     }
     else
         windowWidth = windowHeight + 250; // magic number, dock widgets width;
-    mainWindow->setMinimumHeight(windowHeight + 3*26); // titlebar, toolbar, statusbar
+   //CF mainWindow->setMinimumHeight(windowHeight + 3*26); // titlebar, toolbar, statusbar
    // mainWindow->setMinimumWidth(windowWidth);
     //mainWindow->resize(mainWindow->sizeHint());
     //std::cout << "window height " << mainWindow->minimumHeight() << " or " << windowHeight << " / availHeight " << availHeight << std::endl;

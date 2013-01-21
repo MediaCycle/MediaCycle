@@ -119,12 +119,14 @@ void ACMediaNode::toggleActivity(int type){
         cout << "activity node " << mediaId << " set to " << type << endl;
 #endif // VERBOSE
         this->setActivity(type);
+        this->hover = 1;
     }
     else{
 #ifdef VERBOSE		
         cout << "activity node " << mediaId << " set to 0" << endl;
 #endif // VERBOSE
         this->setActivity(0);
+        this->hover = 0;
     }
 }
 
