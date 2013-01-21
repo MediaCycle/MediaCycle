@@ -41,8 +41,12 @@ std::vector<ACMedia*> ACVideoDiffSegmentationPlugin::segment(ACMedia* theMedia) 
     std::cout << "ACVideoDiffSegmentationPlugin::segmenting media " << theMedia->getFileName() << std::endl;
     threshold=this->getNumberParameterValue("threshold");
     
+    std::string video_filename = theMedia->getThumbnailFileName("Timeline Resized");
+    if(video_filename == "")
+        video_filename = theMedia->getFileName();
+
     vector<ACMedia*> segments;
-    cv::VideoCapture cvVideo(theMedia->getFileName());
+    cv::VideoCapture cvVideo(video_filename);
     if (cvVideo.isOpened()&&cvVideo.get(CV_CAP_PROP_FRAME_COUNT)>4){
         int lMax=cvVideo.get(CV_CAP_PROP_FRAME_COUNT);
         float fps=cvVideo.get(CV_CAP_PROP_FPS);
