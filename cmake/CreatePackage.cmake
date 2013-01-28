@@ -434,13 +434,16 @@ ENDIF()
 
 #--------------------------------------------------------------------------------
 # Install the YAAFE settings file
-IF(SUPPORT_AUDIO AND USE_AUDIO AND USE_YAAFE)
-	IF(APPLE)
-		INSTALL(PROGRAMS "${CMAKE_SOURCE_DIR}/plugins/audio/ACAudioYaafePluginSettings.txt" DESTINATION ${PROGNAME}.app/Contents/MacOS COMPONENT ${PROGNAME})
-	ELSEIF(WIN32)
-		INSTALL(PROGRAMS "${CMAKE_SOURCE_DIR}/plugins/audio/ACAudioYaafePluginSettings.txt" DESTINATION . COMPONENT ${PROGNAME})
-	ELSE()
-		INSTALL(PROGRAMS "${CMAKE_SOURCE_DIR}/plugins/audio/ACAudioYaafePluginSettings.txt" DESTINATION share COMPONENT ${PROGNAME})
+IF(SUPPORT_AUDIO)
+	list(FIND MC_PLUGINS "audio-features-yaafe" MC_YAAFE_FOUND)
+	IF(MC_YAAFE_FOUND GREATER -1)
+		IF(APPLE)
+			INSTALL(PROGRAMS "${CMAKE_SOURCE_DIR}/plugins/audio-features-yaafe/ACAudioYaafePluginSettings.txt" DESTINATION ${PROGNAME}.app/Contents/MacOS COMPONENT ${PROGNAME})
+		ELSEIF(WIN32)
+			INSTALL(PROGRAMS "${CMAKE_SOURCE_DIR}/plugins/audio-features-yaafe/ACAudioYaafePluginSettings.txt" DESTINATION . COMPONENT ${PROGNAME})
+		ELSE()
+			INSTALL(PROGRAMS "${CMAKE_SOURCE_DIR}/plugins/audio-features-yaafe/ACAudioYaafePluginSettings.txt" DESTINATION share COMPONENT ${PROGNAME})
+		ENDIF()
 	ENDIF()
 ENDIF()
 

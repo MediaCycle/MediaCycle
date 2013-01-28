@@ -7,7 +7,7 @@ IF ( BUILD_LOOPJAM_APP AND SUPPORT_AUDIO AND USE_QT4 AND USE_OSG AND USE_OSC AND
 	SET(FULLSCREEN ON)
 
 	SET(MEDIA_TYPE "MEDIA_TYPE_AUDIO")
-        SET(MC_PLUGINS "audio-engine;audio-osg;audio-reader-sndfile;io-osc;visualisation")
+        SET(MC_PLUGINS "audio-engine;audio-osg;audio-reader-sndfile;audio-thumbnailer-waveform;io-osc;visualisation")
         SET(CLUSTERS_METHOD "MediaCycle KMeans")
         SET(CLUSTERS_POSITIONS "AudioGarden Flower")
 	SET(OSG_PLUGINS "osgdb_ffmpeg")
@@ -21,9 +21,9 @@ IF ( BUILD_LOOPJAM_APP AND SUPPORT_AUDIO AND USE_QT4 AND USE_OSG AND USE_OSC AND
 	ADD_MC_OSG_QT_EXECUTABLE(${TARGET_NAME})
 
 	# Add more optional dependencies:
-	#ADD_DEPENDENCIES(${TARGET_NAME} …)
+	#ADD_DEPENDENCIES(${TARGET_NAME} dep)
 	# Link these dependences:
-	#TARGET_LINK_LIBRARIES(${TARGET_NAME} …)
+	#TARGET_LINK_LIBRARIES(${TARGET_NAME} dep)
 
 	IF(APPLE)
 		INSTALL(PROGRAMS "${CMAKE_CURRENT_SOURCE_DIR}/LoopJamLibraries.xml" DESTINATION ${TARGET_NAME}.app/Contents/MacOS COMPONENT ${TARGET_NAME})

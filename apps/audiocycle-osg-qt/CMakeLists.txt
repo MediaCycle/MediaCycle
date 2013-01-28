@@ -5,8 +5,13 @@ IF ( BUILD_AUDIOCYCLE_APP AND SUPPORT_AUDIO AND USE_QT4 AND USE_OSG AND USE_OSC 
 	SET(WITH_OSC ON)
 
 	SET(MEDIA_TYPE "MEDIA_TYPE_AUDIO")
-        SET(MC_PLUGINS "audio-engine;audio-features-yaafe;audio-osg;audio-reader-sndfile;audio-segmentation;audio-thumbnailer-waveform;file;io-osc;pcapreprocess;segmentation;visualisation;visualisation-advanced")
-        SET(OSG_PLUGINS "osgdb_svg")
+	IF(USE_DEBUG)
+        	SET(MC_PLUGINS "audio-engine;audio-features-yaafe;audio-osg;audio-reader-sndfile;audio-segmentation;audio-thumbnailer-waveform;file;io-osc;pcapreprocess;segmentation;visualisation;visualisation-advanced")
+        	SET(OSG_PLUGINS "osgdb_svg") #required by audio-thumbnailer-waveform
+	ELSE()
+        	SET(MC_PLUGINS "audio-engine;audio-features-yaafe;audio-osg;audio-reader-sndfile;audio-segmentation;audio-thumbnailer-waveform;file;io-osc;segmentation;visualisation")
+        	SET(OSG_PLUGINS "osgdb_svg") #required by audio-thumbnailer-waveform
+	ENDIF()
         SET(DESCRIPTION "AudioCycle allows to organize audio files by similarity.")
 
 	INCLUDE (${CMAKE_SOURCE_DIR}/cmake/CreateDefaultConfig.cmake)

@@ -41,11 +41,6 @@ ACAudioCycleLoopJam::ACAudioCycleLoopJam() : ACMultiMediaCycleOsgQt() {
 
     this->useSegmentationByDefault(false);
 
-    this->parseXMLlist("LoopJamLibraries.xml");
-
-    timer = new QTimer(this);
-    connect( timer, SIGNAL(timeout()), this, SLOT(openNextLibrary()) );
-
     QAction *actionNextLibrary = new QAction(style()->standardIcon(QStyle::SP_MediaSkipForward), tr("Next Library"), this);
     //actionNextLibrary->setShortcut(QKeySequence(Qt::Key_MediaNext)); //CF requires Qt 4.8+
     actionNextLibrary->setShortcut(QKeySequence(Qt::Key_Right )); //CF instead of Qt::Key_F1
@@ -69,9 +64,16 @@ ACAudioCycleLoopJam::ACAudioCycleLoopJam() : ACMultiMediaCycleOsgQt() {
     this->on_actionFullscreen_triggered(true); // to be set after the window is shown
     //this->autoConnectOSC(true); // to be set after loading the default config
     this->changeSetting(AC_SETTING_INSTALLATION);
+}
+
+void ACAudioCycleLoopJam::postLoadDefaultConfig(){
+
+    this->parseXMLlist("LoopJamLibraries.xml");
+
+    timer = new QTimer(this);
+    connect( timer, SIGNAL(timeout()), this, SLOT(openNextLibrary()) );
 
     this->startLoopXML();
-
 }
 
 ACAudioCycleLoopJam::~ACAudioCycleLoopJam(){

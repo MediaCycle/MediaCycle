@@ -48,6 +48,8 @@ public slots:
 public:
     ACAudioCycleLoopJam();
     ~ACAudioCycleLoopJam();
+    /// This will be run right after the default config has been loaded
+    virtual void postLoadDefaultConfig();
     void startLoopXML();
 
 protected:
