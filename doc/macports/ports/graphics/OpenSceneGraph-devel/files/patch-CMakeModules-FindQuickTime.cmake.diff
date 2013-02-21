@@ -1,0 +1,11 @@
+--- CMakeModules/FindQuickTime.cmake.orig	2013-02-21 23:32:57.000000000 +0100
++++ CMakeModules/FindQuickTime.cmake	2013-02-21 23:34:23.000000000 +0100
+@@ -64,7 +64,7 @@
+       ENDIF()
+       # Disable quicktime for >= 10.7, as it's officially deprecated
+       
+-      IF(${OSG_OSX_SDK_NAME} STREQUAL "macosx10.7" OR ${OSG_OSX_SDK_NAME} STREQUAL "macosx10.8" OR ${OSG_OSX_SDK_NAME} STREQUAL "macosx10.9")
++      IF(${CMAKE_SYSTEM_VERSION} GREATER "10.")
+           MESSAGE("disabling quicktime because it's not supported by the selected SDK ${OSG_OSX_SDK_NAME}")
+           SET(QUICKTIME_FOUND "NO")
+       ENDIF()

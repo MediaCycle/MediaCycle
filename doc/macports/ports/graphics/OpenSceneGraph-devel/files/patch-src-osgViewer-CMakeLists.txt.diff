@@ -1,21 +1,14 @@
---- src/osgViewer/CMakeLists.txt.orig	2012-11-24 14:18:22.000000000 +0100
-+++ src/osgViewer/CMakeLists.txt	2012-11-24 14:20:33.000000000 +0100
-@@ -68,10 +68,14 @@
+--- src/osgViewer/CMakeLists.txt.orig	2013-02-21 23:40:01.000000000 +0100
++++ src/osgViewer/CMakeLists.txt	2013-02-21 23:40:57.000000000 +0100
+@@ -68,10 +68,7 @@
          IF(OSG_BUILD_PLATFORM_IPHONE OR OSG_BUILD_PLATFORM_IPHONE_SIMULATOR)
              SET(OSG_WINDOWING_SYSTEM "IOS" CACHE STRING "Windowing system type for graphics window creation, options only IOS.")
          ELSE()
--            IF(${OSG_OSX_SDK_NAME} STREQUAL "macosx10.7" OR
--               ${OSG_OSX_SDK_NAME} STREQUAL "macosx10.6" OR
--               ${OSG_OSX_SDK_NAME} STREQUAL "macosx10.5")
--                SET(OSG_WINDOWING_SYSTEM "Cocoa" CACHE STRING "Windowing system type for graphics window creation, options Carbon, Cocoa or X11.")
-+            IF(NOT OSG_CONFIG_HAS_BEEN_RUN_BEFORE)
-+                IF(${OSG_OSX_SDK_NAME} STREQUAL "macosx10.7" OR
-+                   ${OSG_OSX_SDK_NAME} STREQUAL "macosx10.6" OR
-+                   ${OSG_OSX_SDK_NAME} STREQUAL "macosx10.5")
-+                    SET(OSG_WINDOWING_SYSTEM "Cocoa" CACHE STRING "Windowing system type for graphics window creation, options Carbon, Cocoa or X11.")
-+            	ELSE()
-+                    SET(OSG_WINDOWING_SYSTEM "Cocoa" CACHE STRING "Windowing system type for graphics window creation, options Carbon, Cocoa or X11.")
-+		ENDIF()
-             ELSE()
+-            IF(${OSG_OSX_SDK_NAME} STREQUAL "macosx10.4" OR
+-               ${OSG_OSX_SDK_NAME} STREQUAL "macosx10.3" OR
+-               ${OSG_OSX_SDK_NAME} STREQUAL "macosx10.2" OR
+-               ${OSG_OSX_SDK_NAME} STREQUAL "macosx10.1")
++            IF(${CMAKE_SYSTEM_VERSION} LESS "10.")
                  SET(OSG_WINDOWING_SYSTEM "Carbon" CACHE STRING "Windowing system type for graphics window creation, options Carbon, Cocoa or X11.")
-             ENDIF()
+             ELSE()
+                 SET(OSG_WINDOWING_SYSTEM "Cocoa" CACHE STRING "Windowing system type for graphics window creation, options Carbon, Cocoa or X11.")

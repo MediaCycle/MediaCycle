@@ -1,0 +1,13 @@
+--- CMakeModules/FindAVFoundation.cmake.orig	2013-02-21 23:46:17.000000000 +0100
++++ CMakeModules/FindAVFoundation.cmake	2013-02-21 23:47:25.000000000 +0100
+@@ -32,9 +32,7 @@
+       # AVFoundation exists since 10.7, but only 10.8 has all features necessary for OSG
+       # so check the SDK-setting
+ 
+-      IF(${OSG_OSX_SDK_NAME} STREQUAL "macosx10.8")
+-          # nothing special here ;-)
+-      ELSE()
++      IF(${CMAKE_SYSTEM_VERSION} LESS "12.")
+           MESSAGE("AVFoundation disabled for SDK < 10.8")
+           SET(AV_FOUNDATION_FOUND "NO")  
+       ENDIF()
