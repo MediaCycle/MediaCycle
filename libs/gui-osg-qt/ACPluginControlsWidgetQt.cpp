@@ -258,7 +258,7 @@ void ACPluginControlsWidgetQt::buildPluginList()
                     lineedit->setFont(font);
                     layout->addWidget(lineedit,paramIdx,1);
 
-                    connect(lineedit,SIGNAL(textEdited(QString)),stringParameter,SLOT(updateStringParameter(QString)) );
+                    connect(lineedit,SIGNAL( textChanged(QString)),stringParameter,SLOT(updateStringParameter(QString)) );
                     connect(pushbutton,SIGNAL(clicked()),stringParameter,SLOT(resetStringParameter()));
                     lineedit->adjustSize();
                     minHeight += lineedit->height();
@@ -316,9 +316,22 @@ void ACPluginControlsWidgetQt::buildPluginList()
                     layout->addWidget( label,paramIdx,0);
 
                     QwtSlider* slider = new QwtSlider(0);
+#if QWT_VERSION > 0x060000
+                    slider->setLowerBound(min);
+                    slider->setUpperBound(max);
+                    slider->setScaleStepSize(step);
+#else
                     slider->setRange(min,max,step);
+#endif
                     slider->setValue(init);
-#if QWT_VERSION < 0x060000
+
+#if QWT_VERSION > 0x060000
+                    slider->setGroove(true);
+                    slider->setHandleSize(QSize(12,12));
+                    slider->setOrientation(Qt::Horizontal);
+                    slider->setScalePosition(QwtSlider::NoScale);
+                    slider->setTrough(false);
+#elif QWT_VERSION < 0x060000
                     slider->setBgStyle(QwtSlider::BgSlot);
                     slider->setMargins(12,12);
 #else
