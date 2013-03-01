@@ -1,0 +1,36 @@
+# -*- coding: utf-8; mode: tcl; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- vim:fenc=utf-8:ft=tcl:et:sw=4:ts=4:sts=4
+# $Id: Portfile xxxxxx 2012-12-08 14:43:55Z christian.frisson@gmail.com $
+
+PortSystem                      1.0
+
+name                            stk
+version                         4.4.4
+categories                      audio
+platforms                       darwin
+maintainers                     gmail.com:christian.frisson openmaintainer
+description                     The Synthesis ToolKit in C++ (STK)
+long_description                The Synthesis ToolKit in C++ (STK) is a set of open source \
+                                audio signal processing and algorithmic synthesis classes \
+                                written in the C++ programming language. STK was designed \
+                                to facilitate rapid development of music synthesis and \
+                                audio processing software, with an emphasis on cross- \
+                                platform functionality, realtime control, ease of use, and \
+                                educational example code.
+homepage                        https://ccrma.stanford.edu/software/stk/
+distname                        ${name}-${version}
+master_sites                    http://ccrma.stanford.edu/software/stk/release
+
+checksums                       rmd160  be4f18150800114c0cf370040b04735af09fd348 \
+                                sha256  1276986481704f148933d4a2f8eaebb84827124acbd0243e5c8a004fa7c70710
+
+#configure.ldflags-append        -dynamiclib -undefined suppress -flat_namespace
+configure.args-append           --with-core --enable-realtime
+
+destroot {
+   	system "cp -R ${worksrcpath}/include/*.h ${destroot}${prefix}/include"
+   	system "cp -R ${worksrcpath}/src/lib* ${destroot}${prefix}/lib"
+}
+
+
+livecheck.url                   https://ccrma.stanford.edu/software/stk/download.html
+livecheck.regex                 Download Version (\[0-9.\]+)
