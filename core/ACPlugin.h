@@ -316,6 +316,7 @@ public:
 class ACClientPlugin : virtual public ACPlugin {
 public:
     ACClientPlugin();
+    virtual bool performActionOnMedia(std::string action, long int mediaId, std::string value=""){return false;}
 };
 
 class ACServerPlugin : virtual public ACPlugin {
