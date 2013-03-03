@@ -40,14 +40,23 @@
 #ifndef ACOscPlugin_H
 #define	ACOscPlugin_H
 
-class ACOscPlugin : public ACClientServerPlugin {
+class ACOscPlugin : public ACClientPlugin {
 public:
     ACOscPlugin();
     virtual ~ACOscPlugin();
     virtual void mediaCycleSet();
+public:
+    void changeBrowserIP();
+    void changeBrowserPort();
+    void changeFeedbackIP();
+    void changeFeedbackPort();
+    void toggleBrowser();
+    void toggleFeedback();
 protected:
     ACOscBrowser *osc_browser;
     ACOscFeedback *osc_feedback;
+    std::string browser_ip,feedback_ip;
+    int browser_port,feedback_port;
 };
 
 #endif

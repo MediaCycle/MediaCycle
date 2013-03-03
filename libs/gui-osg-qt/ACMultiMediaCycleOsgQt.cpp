@@ -1161,8 +1161,8 @@ bool ACMultiMediaCycleOsgQt::loadDefaultConfig(ACAbstractDefaultConfig* _config)
     //if(_osg_qt_config->useSegmentation())
     //    this->addControlDock("MCSegmentationControls");
 
-    //CF VBS
-    //dockWidgetsManager->addControlDock(PLUGIN_TYPE_CLIENT);
+    if(media_cycle->getAvailablePluginNames(PLUGIN_TYPE_CLIENT,_config->mediaType()).size()>0)
+        dockWidgetsManager->addControlDock(PLUGIN_TYPE_CLIENT);
 
     // Update the plugin lists of the browser control dock through DockWidget
     dockWidgetsManager->changeMediaType(_config->mediaType());

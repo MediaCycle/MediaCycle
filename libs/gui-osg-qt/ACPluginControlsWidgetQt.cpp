@@ -100,7 +100,7 @@ void ACPluginControlsWidgetQt::cleanPluginList()
 {
     comboBoxPlugins->clear();
     if(parametersContainer){
-        vboxLayout->removeWidget(parametersContainer);
+        //vboxLayout->removeWidget(parametersContainer);
         delete parametersContainer;
         //delete parametersContainer->layout();
         //qDeleteAll(parametersContainer->children());
@@ -378,6 +378,8 @@ void ACPluginControlsWidgetQt::buildPluginList()
             pushbutton->adjustSize();
             minHeight += pushbutton->height();
 
+            if(!parametersContainer)
+                parametersContainer = new QWidget(this);
             parametersContainer->setLayout(layout);
             vboxLayout->addWidget(parametersContainer);
             parametersContainer->setMinimumHeight(minHeight);

@@ -37,7 +37,7 @@
 
 using namespace std;
 
-ACOscPlugin::ACOscPlugin() : ACClientServerPlugin(){
+ACOscPlugin::ACOscPlugin() : ACClientPlugin(){
     this->mName = "OpenSoundControl (OSC)";
     this->mDescription ="Plugin for controlling MediaCycle with OpenSoundControl (OSC)";
     this->mMediaType = MEDIA_TYPE_ALL;
@@ -45,6 +45,45 @@ ACOscPlugin::ACOscPlugin() : ACClientServerPlugin(){
     this->osc_feedback = 0;
     this->osc_browser = new ACOscBrowser();
     this->osc_feedback = new ACOscFeedback();
+    this->browser_ip = "localhost";
+    this->feedback_ip = "localhost";
+    this->browser_port = 12345;
+    this->feedback_port = 12346;
+
+    this->addStringParameter("Browser IP","localhost",std::vector<std::string>(),"Browser IP",boost::bind(&ACOscPlugin::changeBrowserIP,this));
+    this->addNumberParameter("Browser Port",12345,1,65555,1,"Browser Port",boost::bind(&ACOscPlugin::changeBrowserPort,this));
+    this->addStringParameter("Feedback IP","localhost",std::vector<std::string>(),"Feedback IP",boost::bind(&ACOscPlugin::changeFeedbackIP,this));
+    this->addNumberParameter("Feedback Port",12346,1,65555,1,"Feedback Port",boost::bind(&ACOscPlugin::changeFeedbackPort,this));
+    this->addNumberParameter("Toggle Browser",0,0,1,1,"Toggle Browser",boost::bind(&ACOscPlugin::toggleBrowser,this));
+    this->addNumberParameter("Toggle Feedback",0,0,1,1,"Toggle Feedback",boost::bind(&ACOscPlugin::toggleFeedback,this));
+}
+
+void ACOscPlugin::changeBrowserIP(){
+    std::cout << "ACOscPlugin::changeBrowserIP" << std::endl;
+    std::string _ip = this->getStringParameterValue("Browser IP");
+}
+
+void ACOscPlugin::changeBrowserPort(){
+    std::cout << "ACOscPlugin::changeBrowserPort" << std::endl;
+    int _port = this->getNumberParameterValue("Browser Port");
+}
+
+void ACOscPlugin::changeFeedbackIP(){
+    std::cout << "ACOscPlugin::changeFeedbackIP" << std::endl;
+    std::string _ip = this->getStringParameterValue("Feedback IP");
+}
+
+void ACOscPlugin::changeFeedbackPort(){
+    std::cout << "ACOscPlugin::changeFeedbackPort" << std::endl;
+    int _port = this->getNumberParameterValue("Feedback Port");
+}
+
+void ACOscPlugin::toggleBrowser(){
+    std::cout << "ACOscPlugin::toggleBrowser" << std::endl;
+}
+
+void ACOscPlugin::toggleFeedback(){
+    std::cout << "ACOscPlugin::toggleFeedback" << std::endl;
 }
 
 ACOscPlugin::~ACOscPlugin(){
