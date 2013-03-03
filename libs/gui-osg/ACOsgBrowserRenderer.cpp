@@ -380,7 +380,7 @@ void ACOsgBrowserRenderer::updateNodes(double ratio) {
         node_renderer->second->setFilename(media_cycle_filename);
         // UPDATE
         //std::cout << "Node renderer size " << node_renderers.size() << std::endl;
-        node_renderer->second->updateNodes(ratio);
+        //node_renderer->second->updateNodes(ratio);
         }
         //media_group->addChild(node_renderer->second->getNode());
         /*}

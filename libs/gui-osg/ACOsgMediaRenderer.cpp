@@ -97,15 +97,39 @@ ACOsgMediaRenderer::ACOsgMediaRenderer() : ACOsgBaseRenderer() {
     initialized = 0;
     frac = 0.0f;
     local_group->addChild(media_node);
+
+    this->media_node->setDataVariance( osg::Object::DYNAMIC );
+    this->media_node->setUpdateCallback( new ACOsgMediaNodeCallback(this) );
 }
 
 ACOsgMediaRenderer::~ACOsgMediaRenderer() {
-   // label = "";
+    //this->media_node->removeUpdateCallback( this );
+    //this->media_node->removeNestedCallback( this );
+    //this->local_group->removeChild(this->media_node);
+    //this->media_node->setUpdateCallback(new osg::NodeCallback());
+    media_node = 0;
+    // label = "";
     cluster_colors.clear();
     metadata_geode = 0;
     metadata = 0;
-    local_group=0;
+    //local_group=0;
     cluster_colors.clear();
+}
+
+void ACOsgMediaNodeCallback::operator()( osg::Node* node, osg::NodeVisitor* nv ){
+
+    // CF normally we would have had to do the following if media_node was accessible from the callback class (shared with this class)
+    //#ifdef AUTO_TRANSFORM
+    //    osg::AutoTransform* media_node = static_cast<osg::AutoTransform*>( node );
+    //#else
+    //    osg::MatrixTransform* media_node = static_cast<osg::MatrixTransform*>( node );
+    //#endif
+
+    if(renderer)
+        renderer->updateNodes();
+
+    /// osg::NodeCallback::traverse() needs be executed to ensure that the update traversal visitor can continue traversing the scene graph.
+    traverse( node, nv );
 }
 
 void ACOsgMediaRenderer::metadataGeode() {
@@ -136,7 +160,7 @@ void ACOsgMediaRenderer::metadataGeode() {
 
     std::stringstream content;
     content << fs::basename(media->getFileName());
-	//CPL
+    //CPL
     if (media->getParentId()>-1)// in case of segments
         content << "(segment with media ID" << media->getId() << ")";
     if(media->getTaggedClassId()>-1){

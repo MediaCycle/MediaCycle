@@ -135,4 +135,13 @@ public:
 
 };
 
+class ACOsgMediaNodeCallback :public osg::NodeCallback {
+    public:
+    ACOsgMediaNodeCallback(ACOsgMediaRenderer* _renderer=0):osg::NodeCallback(),renderer(_renderer){}
+    virtual ~ACOsgMediaNodeCallback(){renderer=0;}
+    void operator()( osg::Node* node, osg::NodeVisitor* nv );
+protected:
+    ACOsgMediaRenderer* renderer;
+};
+
 #endif

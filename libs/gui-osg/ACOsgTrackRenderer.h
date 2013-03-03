@@ -79,6 +79,7 @@ public:
 
     virtual void prepareTracks()=0;
     virtual void updateTracks(double ratio=0.0)=0;
+    void resetSignals();
     virtual void pushOnElement(std::string _refname,float _pos_x,float _pos_y){}
 
     //virtual bool addRangeSegment(float begin, float end)=0;
@@ -104,6 +105,15 @@ public:
 protected:
     void createDummySegments();
     void boxTransform(osg::ref_ptr<osg::MatrixTransform>& _transform, float _width, osg::Vec4 _color, std::string _name);
+};
+
+class ACOsgTrackNodeCallback :public osg::NodeCallback {
+    public:
+    ACOsgTrackNodeCallback(ACOsgTrackRenderer* _renderer=0):osg::NodeCallback(),renderer(_renderer){}
+    virtual ~ACOsgTrackNodeCallback(){renderer=0;}
+    void operator()( osg::Node* node, osg::NodeVisitor* nv );
+protected:
+    ACOsgTrackRenderer* renderer;
 };
 
 #endif

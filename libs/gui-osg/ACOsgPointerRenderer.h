@@ -54,7 +54,7 @@ protected:
 
 public:
     ACOsgPointerRenderer();
-    ~ACOsgPointerRenderer();
+    virtual ~ACOsgPointerRenderer();
     void prepareNodes();
     void updateNodes(double ratio=0.0);
     void setText(std::string text) {text_string = text;}

@@ -34,7 +34,7 @@
 #include <osg/Version>
 using namespace osg;
 
-ACOsgPointerRenderer::ACOsgPointerRenderer()
+ACOsgPointerRenderer::ACOsgPointerRenderer() : ACOsgMediaRenderer()
 {
     pos.x = 0;
     pos.y = 0;

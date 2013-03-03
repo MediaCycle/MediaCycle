@@ -54,7 +54,7 @@ ACOsgAudioRenderer::ACOsgAudioRenderer()
     waveform_geometry = 0;
     node_shape_drawable = 0;
     waveform_transform = 0;
-    entry_transform = 0;
+    entry_transform = 0;    
 }
 
 ACOsgAudioRenderer::~ACOsgAudioRenderer() {
@@ -191,6 +191,14 @@ void ACOsgAudioRenderer::entryGeode() {
 #endif
 
     entry_geode->addDrawable(node_shape_drawable);
+
+
+    /*node_geometry = 0;
+    node_geometry = this->imageGeometry("/Volumes/data/Dev/numediart/diskhover/data/textures/dot64.png");
+    if(node_geometry){
+        entry_geode->addDrawable(node_geometry);
+    }*/
+
     entry_geode->setUserData(new ACRefId(node_index));
     entry_geode->getOrCreateStateSet()->setRenderingHint(osg::StateSet::TRANSPARENT_BIN );
 }
@@ -269,6 +277,7 @@ void ACOsgAudioRenderer::setEntryGeodeVisible(bool visibility){
 }
 
 void ACOsgAudioRenderer::updateNodes(double ratio) {
+
     double xstep = 0.00025;
     xstep *= afac;
     unsigned int mask = (unsigned int)-1;

@@ -76,7 +76,7 @@ protected:
 
 public:
     ACOsgAudioRenderer();
-    ~ACOsgAudioRenderer();
+    virtual ~ACOsgAudioRenderer();
     void prepareNodes();
     void updateNodes(double ratio=0.0);
     ACBrowserAudioWaveformType getWaveformType(){return waveform_type;}

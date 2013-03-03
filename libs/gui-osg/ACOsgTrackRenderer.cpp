@@ -45,6 +45,9 @@ ACOsgTrackRenderer::ACOsgTrackRenderer()
     displayed_media_index = -1;
     manual_selection = false;
     this->initSelection();
+
+    this->track_node->setDataVariance( osg::Object::DYNAMIC );
+    this->track_node->setUpdateCallback( new ACOsgTrackNodeCallback(this) );
 }
 
 void ACOsgTrackRenderer::initSelection()
@@ -93,8 +96,8 @@ void ACOsgTrackRenderer::updateScreenWidth(int _screen_width)
     if ( screen_width != _screen_width){
         this->screen_width = _screen_width;
         screen_width_changed = true;
-        this->updateTracks();
-        screen_width_changed = false;
+        /*this->updateTracks();
+        screen_width_changed = false;*/
     }
 }
 
@@ -105,9 +108,9 @@ void ACOsgTrackRenderer::updateSize(int _width,float _height)
         this->width = _width;
         height_changed = true;
         width_changed = true;
-        this->updateTracks();
+        /*this->updateTracks();
         height_changed = false;
-        width_changed = false;
+        width_changed = false;*/
     }
 }
 
@@ -329,4 +332,28 @@ void ACOsgTrackRenderer::boxTransform(osg::ref_ptr<osg::MatrixTransform>& _trans
     _transform->addChild(_geode);
 
     _geode->setUserData(new ACRefId(track_index,_name));
+}
+
+void ACOsgTrackRenderer::resetSignals(){
+    screen_width_changed = false;
+    height_changed = false;
+    width_changed = false;
+}
+
+void ACOsgTrackNodeCallback::operator()( osg::Node* node, osg::NodeVisitor* nv ){
+
+    // CF normally we would have had to do the following if track_node was accessible from the callback class (shared with this class)
+    //#ifdef AUTO_TRANSFORM
+    //    osg::AutoTransform* track_node = static_cast<osg::AutoTransform*>( node );
+    //#else
+    //    osg::MatrixTransform* track_node = static_cast<osg::MatrixTransform*>( node );
+    //#endif
+
+    if(renderer){
+        renderer->updateTracks();
+        renderer->resetSignals();
+    }
+
+    /// osg::NodeCallback::traverse() needs be executed to ensure that the update traversal visitor can continue traversing the scene graph.
+    traverse( node, nv );
 }

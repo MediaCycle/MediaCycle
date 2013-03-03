@@ -121,6 +121,9 @@ ACOsgCompositeViewQt::ACOsgCompositeViewQt( QWidget * parent, const char * name,
     this->updateTimelineView(width(),height());
     this->addView(timeline_view);
 
+    // full screen antialiasing (if supported)
+    //osg::DisplaySettings::instance()->setNumMultiSamples( 4 );
+
     // Event handlers
     browser_event_handler = new ACOsgBrowserEventHandler;
     browser_view->addEventHandler(browser_event_handler);
@@ -321,7 +324,12 @@ void ACOsgCompositeViewQt::paintGL()
 {
     browser_renderer->mutexLock();
     timeline_renderer->mutexLock();
-    frame(); // put this first otherwise we don't get a clean background in the browser
+    try{
+        frame(); // put this first otherwise we don't get a clean background in the browser
+    }
+    catch(...){
+        std::cerr << "ACOsgCompositeViewQt::paintGL: couldn't update frame "<< std::endl;
+    }
     browser_renderer->mutexLock();
     timeline_renderer->mutexLock();
     if (media_cycle == 0) return;

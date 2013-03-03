@@ -137,9 +137,9 @@ void ACOsgTimelineRenderer::prepareTracks(int start) {
 }
 
 void ACOsgTimelineRenderer::updateTracks(double ratio) {
-    for(ACOsgTrackRenderers::iterator track = track_renderers.begin();track!=track_renderers.end();track++){
+    /*for(ACOsgTrackRenderers::iterator track = track_renderers.begin();track!=track_renderers.end();track++){
         track->second->updateTracks(ratio);
-	}
+    }*/
 }
 
 void ACOsgTimelineRenderer::updateScreenWidth(int _screen_width)
