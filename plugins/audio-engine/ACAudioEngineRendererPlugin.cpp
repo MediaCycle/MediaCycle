@@ -93,12 +93,12 @@ ACAudioEngineRendererPlugin::ACAudioEngineRendererPlugin() : QObject(), ACPlugin
     loopClickedNodeAction->setToolTip(tr("Loop the clicked node"));
     connect(loopClickedNodeAction, SIGNAL(triggered()), this, SLOT(loopClickedNode()));
 
-    playClickedNodeAction = new ACInputActionQt(tr("Play clicked node"), this);
+    /*playClickedNodeAction = new ACInputActionQt(tr("Play clicked node"), this);
     //playClickedNodeAction->setShortcut(Qt::Key_P);
     //playClickedNodeAction->setKeyEventType(QEvent::KeyPress);
     playClickedNodeAction->setMouseEventType(QEvent::MouseButtonRelease);
     playClickedNodeAction->setToolTip(tr("Play the clicked node"));
-    connect(playClickedNodeAction, SIGNAL(triggered()), this, SLOT(playClickedNode()));
+    connect(playClickedNodeAction, SIGNAL(triggered()), this, SLOT(playClickedNode()));*/
 
     muteAllNodesAction = new ACInputActionQt(tr("Mute all"), this);
     muteAllNodesAction->setShortcut(Qt::Key_M);
@@ -241,218 +241,6 @@ std::map<std::string,ACMediaType> ACAudioEngineRendererPlugin::availableMediaAct
     return media_actions;
 }
 
-/*void ACAudioControlsDockWidgetQt::on_pushButtonMuteAll_clicked()
-{
-    if (media_cycle){
-        media_cycle->resetPointers();//CF hack dirty
-        media_cycle->muteAllSources();
-    }
-}*/
-
-/*void ACAudioControlsDockWidgetQt::on_comboBoxWaveformBrowser_activated(const QString & text)
-{
-    if (media_cycle == 0) return;
-    std::cout << "Browser waveform type: " << text.toStdString() << std::endl;
-    if (text == "None")
-        osg_view->getBrowserRenderer()->setAudioWaveformType(AC_BROWSER_AUDIO_WAVEFORM_NONE);
-    else if (text == "Classic")
-        osg_view->getBrowserRenderer()->setAudioWaveformType(AC_BROWSER_AUDIO_WAVEFORM_CLASSIC);
-    osg_view->setFocus();
-}
-
-void ACAudioControlsDockWidgetQt::setComboBoxWaveformBrowser(ACBrowserAudioWaveformType _type)
-{
-    if (_type==AC_BROWSER_AUDIO_WAVEFORM_NONE){
-        ui.comboBoxWaveformBrowser->setCurrentIndex(0);
-        on_comboBoxWaveformBrowser_activated("None");
-    }
-    else {
-        ui.comboBoxWaveformBrowser->setCurrentIndex(1);
-        on_comboBoxWaveformBrowser_activated("Classic");
-    }
-
-}
-
-void ACAudioControlsDockWidgetQt::on_checkBoxSynchroMode_stateChanged(int state)
-{
-    if (media_cycle == 0 && audio_engine == 0) return;
-    audio_engine->forceDefaultSynchroMode((bool)(state));
-}
-
-void ACAudioControlsDockWidgetQt::on_checkBoxScaleMode_stateChanged(int state)
-{
-    if (media_cycle == 0 && audio_engine == 0) return;
-    audio_engine->forceDefaultScaleMode((bool)(state));
-}
-
-void ACAudioControlsDockWidgetQt::on_comboBoxSynchroMode_activated(const QString & text)
-{
-    if (media_cycle == 0 && audio_engine == 0) return;
-    std::cout << "Synchro Mode: " << text.toStdString() << std::endl;
-    stringToAudioEngineSynchroModeMap::const_iterator iterm = stringToAudioEngineSynchroMode.find(text.toStdString());
-    if (iterm != stringToAudioEngineSynchroMode.end())
-        audio_engine->setDefaultSynchroMode(iterm->second);
-}
-
-void ACAudioControlsDockWidgetQt::on_comboBoxScaleMode_activated(const QString & text)
-{
-    if (media_cycle == 0 && audio_engine == 0) return;
-    std::cout << "Scale Mode: " << text.toStdString() << std::endl;
-    stringToAudioEngineScaleModeMap::const_iterator iterm = stringToAudioEngineScaleMode.find(text.toStdString());
-    if (iterm != stringToAudioEngineScaleMode.end())
-        audio_engine->setDefaultScaleMode(iterm->second);
-}
-
-void ACAudioControlsDockWidgetQt::on_comboBoxPlaybackPreset_activated(const QString & text)
-{
-    if(text == "Sync Looping"){
-        on_comboBoxSynchroMode_activated("AutoBeat");
-        on_comboBoxScaleMode_activated("Vocode");
-        ui.comboBoxScaleMode->setCurrentIndex(ui.comboBoxScaleMode->findText("Vocode"));
-        ui.comboBoxSynchroMode->setCurrentIndex(ui.comboBoxSynchroMode->findText("AutoBeat"));
-        on_checkBoxSynchroMode_stateChanged(0);
-        on_checkBoxScaleMode_stateChanged(0);
-        ui.checkBoxSynchroMode->setChecked(false);
-        ui.checkBoxScaleMode->setChecked(false);
-        ui.comboBoxScaleMode->setEnabled(false);
-        ui.checkBoxScaleMode->setEnabled(false);
-        ui.comboBoxSynchroMode->setEnabled(false);
-        ui.checkBoxSynchroMode->setEnabled(false);
-        ui.horizontalSliderBPM->setEnabled(true);
-        ui.spinBoxBPM->setEnabled(true);
-
-        ui.comboBoxScaleMode->hide();
-                ui.checkBoxScaleMode->hide();
-                ui.labelScaleMode->hide();
-                ui.comboBoxSynchroMode->hide();
-                ui.checkBoxSynchroMode->hide();
-                ui.labelSynchroMode->hide();
-                ui.labelForce->hide();
-                ui.groupBoxModes->adjustSize();
-                ui.dockWidgetContents->adjustSize();
-    }
-    else if(text == "High-Fidelity"){
-        on_comboBoxSynchroMode_activated("None");
-        on_comboBoxScaleMode_activated("None");
-        ui.comboBoxScaleMode->setCurrentIndex(ui.comboBoxScaleMode->findText("None"));
-        ui.comboBoxSynchroMode->setCurrentIndex(ui.comboBoxSynchroMode->findText("None"));
-        on_checkBoxSynchroMode_stateChanged(1);
-        on_checkBoxScaleMode_stateChanged(1);
-        ui.checkBoxSynchroMode->setChecked(true);
-        ui.checkBoxScaleMode->setChecked(true);
-        ui.comboBoxScaleMode->setEnabled(false);
-        ui.checkBoxScaleMode->setEnabled(false);
-        ui.comboBoxSynchroMode->setEnabled(false);
-        ui.checkBoxSynchroMode->setEnabled(false);
-        ui.horizontalSliderBPM->setEnabled(false);
-        ui.spinBoxBPM->setEnabled(false);
-
-//        ui.comboBoxScaleMode->hide();
-//        ui.checkBoxScaleMode->hide();
-//        ui.labelScaleMode->hide();
-//        ui.comboBoxSynchroMode->hide();
-//        ui.checkBoxSynchroMode->hide();
-//        ui.labelSynchroMode->hide();
-//        ui.labelForce->hide();
-//        ui.groupBoxModes->adjustSize();
-//        ui.dockWidgetContents->adjustSize();
-    }
-    else if(text == "Custom"){
-        ui.comboBoxScaleMode->setEnabled(true);
-        ui.checkBoxScaleMode->setEnabled(true);
-        ui.comboBoxSynchroMode->setEnabled(true);
-        ui.checkBoxSynchroMode->setEnabled(true);
-        ui.horizontalSliderBPM->setEnabled(true);
-        ui.spinBoxBPM->setEnabled(true);
-
-//        ui.comboBoxScaleMode->show();
-//        ui.checkBoxScaleMode->show();
-//        ui.labelScaleMode->show();
-//        ui.comboBoxSynchroMode->show();
-//        ui.checkBoxSynchroMode->show();
-//        ui.labelSynchroMode->show();
-//        ui.labelForce->show();
-//        ui.groupBoxModes->adjustSize();
-//        ui.dockWidgetContents->adjustSize();
-    }
-}
-
-void ACAudioControlsDockWidgetQt::setAudioEngine(ACAudioEngine* _audio_engine)
-{ 
-    audio_engine = _audio_engine;
-    if(audio_engine){
-        audio_engine->forceDefaultSynchroMode(ui.checkBoxSynchroMode->isChecked());
-        audio_engine->forceDefaultScaleMode(ui.checkBoxScaleMode->isChecked());
-        stringToAudioEngineSynchroModeMap::const_iterator synchro_mode = stringToAudioEngineSynchroMode.find(ui.comboBoxSynchroMode->currentText().toStdString());
-        if (synchro_mode != stringToAudioEngineSynchroMode.end())
-            audio_engine->setDefaultSynchroMode(synchro_mode->second);
-        stringToAudioEngineScaleModeMap::const_iterator scale_mode = stringToAudioEngineScaleMode.find(ui.comboBoxScaleMode->currentText().toStdString());
-        if (scale_mode != stringToAudioEngineScaleMode.end())
-            audio_engine->setDefaultScaleMode(scale_mode->second);
-    }
-}
-
-// XS TODO : recuperate these from Audiocycle ?
-
-//void ACAudioCycleOsgQt::on_sliderBPM_valueChanged() //[0;220]
-//{
-//	std::cout << "BPM: " << ui.sliderBPM->value() << std::endl;
-//	//if (library_loaded){
-//	int node = media_cycle->getClickedNode();
-//	if (node > -1)
-//	{
-//		audio_engine->setLoopSynchroMode(node, ACAudioEngineSynchroModeAutoBeat);
-//		audio_engine->setLoopScaleMode(node, ACAudioEngineScaleModeResample);
-//		audio_engine->setBPM(ui.sliderBPM->value());
-//	}
-//	//}
-//	//ui.compositeOsgView->setFocus();
-//}
-//
-//void ACAudioCycleOsgQt::on_sliderPitch_valueChanged() // [50;200]
-//{
-//	std::cout << "Pitch: " << (float) ui.sliderPitch->value()/100.0f << std::endl;
-//	//if (library_loaded){
-//	int node = media_cycle->getClickedNode();
-//	if (node > -1)
-//	{
-//		audio_engine->setLoopSynchroMode(node, ACAudioEngineSynchroModeAutoBeat);
-//		audio_engine->setLoopScaleMode(node, ACAudioEngineScaleModeResample);
-//		audio_engine->setSourcePitch(node, (float) ui.sliderPitch->value()/100.0f);
-//	}
-//	//}
-//	//ui.compositeOsgView->setFocus();
-//}
-//void ACAudioCycleOsgQt::on_pushButtonQueryRecord_toggled()
-//{
-//	if (ui.pushButtonQueryRecord->isChecked() == 1)
-//	{
-//		if (audio_engine->isCaptureAvailable())
-//		{
-//			ui.pushButtonQueryReplay->setEnabled(false);
-//			ui.pushButtonQueryKeep->setEnabled(false);
-//			ui.pushButtonQueryReferent->setEnabled(false);
-//			std::cout <<"Recording..."<<std::endl;
-//			// CF There is a delay before the recording actually starts: work around with a countdown on a modal window?
-//			audio_engine->startCapture();
-//		}
-//		else
-//			ui.pushButtonQueryRecord->setChecked(true);
-//	}
-//	else
-//	{
-//		if (audio_engine->isCaptureAvailable())
-//		{
-//			audio_engine->stopCapture();
-//			std::cout <<"Recording done."<<std::endl;
-//			ui.pushButtonQueryReplay->setEnabled(true);
-//			ui.pushButtonQueryKeep->setEnabled(true);
-//			ui.pushButtonQueryReferent->setEnabled(true);
-//		}
-//	}
-//}
-*/
-
 void ACAudioEngineRendererPlugin::playClickedNode(){
     if(!media_cycle)
         return;
@@ -477,8 +265,8 @@ void ACAudioEngineRendererPlugin::muteAllNodes(){
 
 std::vector<ACInputActionQt*> ACAudioEngineRendererPlugin::providesInputActions(){
     std::vector<ACInputActionQt*> inputActions;
-    inputActions.push_back(playClickedNodeAction);
-    inputActions.push_back(loopClickedNodeAction);
+    //inputActions.push_back(playClickedNodeAction);
+    //inputActions.push_back(loopClickedNodeAction);
     inputActions.push_back(muteAllNodesAction);
     return inputActions;
 }

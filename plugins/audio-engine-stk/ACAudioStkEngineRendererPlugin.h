@@ -64,6 +64,7 @@ public:
     void removeInput(long int mediaId);
     void removeLoop(long int mediaId);
     std::map< long int, stk::StkFrames*> frames;
+    int outputChannels();
 
 public:
     virtual std::vector<ACInputActionQt*> providesInputActions();
