@@ -63,6 +63,40 @@ ACAudioStkEngineRendererPlugin::ACAudioStkEngineRendererPlugin() : QObject(), AC
     else
         this->addNumberParameter("Rate",1.0,-10.0,10.0,0.01,"Rate",boost::bind(&ACAudioStkEngineRendererPlugin::updateRate,this));
 
+    if(this->hasNumberParameterNamed("Grain Voices"))
+        this->updateNumberParameter("Grain Voices",1,1,10,1,"Grain Voices",boost::bind(&ACAudioStkEngineRendererPlugin::updateGrainVoices,this));
+    else
+        this->addNumberParameter("Grain Voices",1,1,10,1,"Grain Voices",boost::bind(&ACAudioStkEngineRendererPlugin::updateGrainVoices,this));
+
+    if(this->hasNumberParameterNamed("Grain Randomness")) // factor between 0 - 1.0
+        this->updateNumberParameter("Grain Randomness",0,0,1,0.1,"Grain Randomness",boost::bind(&ACAudioStkEngineRendererPlugin::updateGrainRandomness,this));
+    else
+        this->addNumberParameter("Grain Randomness",0,0,1,0.1,"Grain Randomness",boost::bind(&ACAudioStkEngineRendererPlugin::updateGrainRandomness,this));
+
+    if(this->hasNumberParameterNamed("Grain Stretch")) // factor (1-1000)
+        this->updateNumberParameter("Grain Stretch",1,1,1000,1,"Grain Stretch",boost::bind(&ACAudioStkEngineRendererPlugin::updateGrainStretch,this));
+    else
+        this->addNumberParameter("Grain Stretch",1,1,1000,1,"Grain Stretch",boost::bind(&ACAudioStkEngineRendererPlugin::updateGrainStretch,this));
+
+    if(this->hasNumberParameterNamed("Grain Duration")) //duration (ms)
+        this->updateNumberParameter("Grain Duration",1000,1,1000,1,"Grain Duration (ms)",boost::bind(&ACAudioStkEngineRendererPlugin::updateGrainParameters,this));
+    else
+        this->addNumberParameter("Grain Duration",1000,0,1000,1,"Grain Duration (ms)",boost::bind(&ACAudioStkEngineRendererPlugin::updateGrainParameters,this));
+
+    if(this->hasNumberParameterNamed("Grain Ramp")) //ramp: envelope percent (0-100)
+        this->updateNumberParameter("Grain Ramp",100,0,100,1,"Grain Ramp (envelope percent)",boost::bind(&ACAudioStkEngineRendererPlugin::updateGrainParameters,this));
+    else
+        this->addNumberParameter("Grain Ramp",100,0,100,1,"Grain Ramp (envelope percent)",boost::bind(&ACAudioStkEngineRendererPlugin::updateGrainParameters,this));
+
+    if(this->hasNumberParameterNamed("Grain Offset")) //offset: hop time between grains (ms)
+        this->updateNumberParameter("Grain Offset",100,0,1000,1,"Grain Offset (hop time between grains in ms)",boost::bind(&ACAudioStkEngineRendererPlugin::updateGrainParameters,this));
+    else
+        this->addNumberParameter("Grain Offset",100,0,1000,1,"Grain Offset (hop time between grains in ms)",boost::bind(&ACAudioStkEngineRendererPlugin::updateGrainParameters,this));
+
+    if(this->hasNumberParameterNamed("Grain Delay")) //delay: pause time between grains (ms)
+        this->updateNumberParameter("Grain Delay",100,0,1000,1,"Grain Delay (pause time between grains in ms)",boost::bind(&ACAudioStkEngineRendererPlugin::updateGrainParameters,this));
+    else
+        this->addNumberParameter("Grain Delay",100,0,1000,1,"Grain Delay (pause time between grains in ms)",boost::bind(&ACAudioStkEngineRendererPlugin::updateGrainParameters,this));
 
     /*if(this->hasNumberParameterNamed("Volume"))
         this->updateNumberParameter("Volume",100,1,100,1,"Main volume",boost::bind(&ACAudioStkEngineRendererPlugin::updateVolume,this));
@@ -82,6 +116,13 @@ ACAudioStkEngineRendererPlugin::ACAudioStkEngineRendererPlugin() : QObject(), AC
     playClickedNodeAction->setMouseEventType(QEvent::MouseButtonRelease);
     playClickedNodeAction->setToolTip(tr("Play the clicked node"));
     connect(playClickedNodeAction, SIGNAL(triggered()), this, SLOT(playClickedNode()));
+
+    granulateClickedNodeAction = new ACInputActionQt(tr("Granulate clicked node"), this);
+    granulateClickedNodeAction->setShortcut(Qt::Key_G);
+    granulateClickedNodeAction->setKeyEventType(QEvent::KeyPress);
+    granulateClickedNodeAction->setMouseEventType(QEvent::MouseButtonRelease);
+    granulateClickedNodeAction->setToolTip(tr("Granulate the clicked node"));
+    connect(granulateClickedNodeAction, SIGNAL(triggered()), this, SLOT(granulateClickedNode()));
 
     muteAllNodesAction = new ACInputActionQt(tr("Mute all"), this);
     muteAllNodesAction->setShortcut(Qt::Key_M);
@@ -124,6 +165,8 @@ void ACAudioStkEngineRendererPlugin::justReadFrames(long int mediaId, int nFrame
             //std::cout << "ACAudioStkEngineRendererPlugin: looping, current frame " << current_frames[mediaId] << " of media " << mediaId << std::endl;
             if(current_frames[mediaId] >= loop->second->getSize())
                 current_frames[mediaId] = 0;
+            if(current_frames[mediaId] <= 0)
+                current_frames[mediaId] = loop->second->getSize();
         }
         //else
         //    std::cout << "ACAudioStkEngineRendererPlugin: playing frame " << current_frames[mediaId] << " of media " << mediaId << std::endl;
@@ -152,6 +195,12 @@ void ACAudioStkEngineRendererPlugin::removeInput(long int mediaId){
         if(media_cycle)
             media_cycle->getBrowser()->toggleSourceActivity(mediaId,0);
     }
+    if(grains.find(mediaId) != grains.end()){
+        grains.erase(mediaId);
+        std::cout << "ACAudioStkEngineRendererPlugin::removeInput: stop granularizing media " << mediaId << std::endl;
+        if(media_cycle)
+            media_cycle->getBrowser()->toggleSourceActivity(mediaId,0);
+    }
 }
 
 int tick( void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
@@ -159,13 +208,14 @@ int tick( void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
 {
     std::map <long int, FileWvIn*> inputs = ((ACAudioStkEngineRendererPlugin *) userData)->inputs;
     std::map <long int, FileLoop*> loops = ((ACAudioStkEngineRendererPlugin *) userData)->loops;
+    std::map <long int, Granulate*> grains = ((ACAudioStkEngineRendererPlugin *) userData)->grains;
     register StkFloat *samples = (StkFloat *) outputBuffer;
     //if(outputBuffer == 0){
     //    std::cerr << "ACAudioStkEngineRenderer: output buffer not available" << std::endl;
     //    return 0;
     //}
 
-    if(inputs.size()==0 && loops.size()==0){
+    if(inputs.size()==0 && loops.size()==0 && grains.size()==0){
         *samples++ = 0;
         return 1;
     }
@@ -193,19 +243,40 @@ int tick( void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
         }
     }
 
-    if( ((ACAudioStkEngineRendererPlugin *) userData)->frames.size()>0){
-//        std::cout << "Frames /" << nBufferFrames <<":";
-//        int in = 0;
-//        for(std::map <long int, FileWvIn*>::iterator input = inputs.begin(); input != inputs.end(); input++){
-//            std::cout << " " << in++ << " " <<  ((ACAudioStkEngineRendererPlugin *) userData)->frames[input->first]->size();
-//        }
-//        std::cout << std::endl;
+    std::map <long int, const StkFrames*> lastFrames;
+    for(std::map <long int, Granulate*>::iterator grain = grains.begin(); grain != grains.end(); grain++){
+        if(grain->second){
+            lastFrames[grain->first] = &(grain->second->lastFrame());
+        }
+    }
+
+    if( ((ACAudioStkEngineRendererPlugin *) userData)->frames.size()>0 || grains.size()>0 ){
+        //        std::cout << "Frames /" << nBufferFrames <<":";
+        //        int in = 0;
+        //        for(std::map <long int, FileWvIn*>::iterator input = inputs.begin(); input != inputs.end(); input++){
+        //            std::cout << " " << in++ << " " <<  ((ACAudioStkEngineRendererPlugin *) userData)->frames[input->first]->size();
+        //        }
+        //        std::cout << std::endl;
         for ( unsigned int i=0; i<nBufferFrames; i++ ){
             StkFloat frame[outputChannels];
             for ( unsigned int c=0; c<outputChannels; c++ ){
                 frame[c] = 0;
             }
+
             int count = 0;
+
+            for(std::map <long int, Granulate*>::iterator grain = grains.begin(); grain != grains.end(); grain++){
+                if(grain->second){
+                    grain->second->tick();
+                    if(lastFrames[grain->first]){
+                        unsigned int nChannels = lastFrames[grain->first]->channels();
+                        for ( unsigned int c=0; c<outputChannels; c++ ){
+                            frame[c] += (*(lastFrames[grain->first]))[c%nChannels];
+                        }
+                    }
+                }
+            }
+
             for(std::map <long int, FileWvIn*>::iterator input = inputs.begin(); input != inputs.end(); input++){
                 if( ((ACAudioStkEngineRendererPlugin *) userData)->frames[input->first]!=0 && ((ACAudioStkEngineRendererPlugin *) userData)->frames[input->first]->size()>i){
                     int fileChannels = input->second->channelsOut();
@@ -229,6 +300,7 @@ int tick( void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
             }
         }
     }
+
     bool finished = true;
     for(std::map <long int, FileWvIn*>::iterator input = inputs.begin(); input != inputs.end(); input++){
         if(input->second->isFinished()){
@@ -260,9 +332,14 @@ void ACAudioStkEngineRendererPlugin::muteAll(){
         if(media_cycle)
             media_cycle->getBrowser()->toggleSourceActivity(loop->first,0);
         loops.erase(loop->first);
-
     }
     loops.clear();
+    for(std::map <long int, Granulate*>::iterator grain = grains.begin(); grain != grains.end(); grain++){
+        if(media_cycle)
+            media_cycle->getBrowser()->toggleSourceActivity(grain->first,0);
+        grains.erase(grain->first);
+    }
+    grains.clear();
     current_frames.clear();
     if(this->media_cycle)
         media_cycle->muteAllSources();
@@ -281,6 +358,45 @@ void ACAudioStkEngineRendererPlugin::updateRate(){
     for(std::map <long int, FileLoop*>::iterator loop = loops.begin(); loop != loops.end(); loop++){
         if(loop->second)
             loop->second->setRate(rate);
+    }
+}
+
+void ACAudioStkEngineRendererPlugin::updateGrainVoices(){
+    float voices = this->getNumberParameterValue("Grain Voices");
+    for(std::map <long int, Granulate*>::iterator grain = grains.begin(); grain != grains.end(); grain++){
+        if(grain->second)
+            grain->second->setVoices(voices);
+    }
+}
+
+void ACAudioStkEngineRendererPlugin::updateGrainRandomness(){
+    float randomness = this->getNumberParameterValue("Grain Randomness");
+    for(std::map <long int, Granulate*>::iterator grain = grains.begin(); grain != grains.end(); grain++){
+        if(grain->second)
+            grain->second->setRandomFactor( randomness ); // factor between 0 - 1.0
+    }
+}
+
+void ACAudioStkEngineRendererPlugin::updateGrainStretch(){
+    float stretch = this->getNumberParameterValue("Grain Stretch");
+    for(std::map <long int, Granulate*>::iterator grain = grains.begin(); grain != grains.end(); grain++){
+        if(grain->second)
+            grain->second->setStretch( stretch ); // factor (1-1000)
+    }
+}
+
+void ACAudioStkEngineRendererPlugin::updateGrainParameters(){
+    float duration = this->getNumberParameterValue("Grain Duration");
+    float ramp = this->getNumberParameterValue("Grain Ramp");
+    float offset = this->getNumberParameterValue("Grain Offset");
+    float delay = this->getNumberParameterValue("Grain Delay");
+    for(std::map <long int, Granulate*>::iterator grain = grains.begin(); grain != grains.end(); grain++){
+        if(grain->second)
+            grain->second->setGrainParameters(
+                        /*duration (ms)*/ duration,
+                        /*ramp: envelope percent (0-100)*/ ramp,
+                        /*offset: hop time between grains (ms)*/ offset,
+                        /*delay: pause time between grains (ms)*/ delay );
     }
 }
 
@@ -310,7 +426,7 @@ bool ACAudioStkEngineRendererPlugin::performActionOnMedia(std::string action, lo
         return false;
     }
 
-    if(action == "loop" || action == "play"){
+    if(action == "loop" || action == "play" || action == "granulate"){
         std::string filename = media_cycle->getMediaFileName(mediaId);
         int channels = 0;
         // Try to load the soundfile.
@@ -361,6 +477,26 @@ bool ACAudioStkEngineRendererPlugin::performActionOnMedia(std::string action, lo
 
             loops[mediaId] = input;
         }
+        else if(action == "granulate"){
+            Granulate* grain = 0;
+            try {
+                grain = new Granulate();
+                grain->setVoices( this->getNumberParameterValue("Grain Voices") );
+                grain->setRandomFactor( this->getNumberParameterValue("Grain Randomness") ); // factor between 0 - 1.0
+                grain->setStretch( this->getNumberParameterValue("Grain Stretch") ); // factor (1-1000)
+                grain->setGrainParameters(
+                            /*duration (ms)*/ this->getNumberParameterValue("Grain Duration"),
+                            /*ramp: envelope percent (0-100)*/ this->getNumberParameterValue("Grain Ramp"),
+                            /*offset: hop time between grains (ms)*/ this->getNumberParameterValue("Grain Offset"),
+                            /*delay: pause time between grains (ms)*/ this->getNumberParameterValue("Grain Delay") );
+                grain->openFile( filename.c_str() );
+            }
+            catch ( StkError & ) {
+                std::cerr << "ACAudioStkEngineRendererPlugin::performActionOnMedia: granulate: couldn't load media " << mediaId << " file " << filename << std::endl;
+                return false;
+            }
+            grains[mediaId] = grain;
+        }
 
         done = false;
 
@@ -392,9 +528,8 @@ bool ACAudioStkEngineRendererPlugin::performActionOnMedia(std::string action, lo
         //(void) signal(SIGINT, finish);
 
         // Resize the StkFrames object appropriately.
-        if(frames.find(mediaId)!=frames.end()){
-            if(frames[mediaId]!=0)
-                frames[mediaId]->resize( bufferFrames, channels );
+        if(frames.find(mediaId)!=frames.end() && frames[mediaId]!=0){
+            frames[mediaId]->resize( bufferFrames, channels );
         }
         else{
             try{
@@ -434,6 +569,7 @@ std::map<std::string,ACMediaType> ACAudioStkEngineRendererPlugin::availableMedia
     std::map<std::string,ACMediaType> media_actions;
     media_actions["play"] = MEDIA_TYPE_AUDIO;
     media_actions["loop"] = MEDIA_TYPE_AUDIO;
+    media_actions["granulate"] = MEDIA_TYPE_AUDIO;
     media_actions["mute all"] = MEDIA_TYPE_AUDIO;
     return media_actions;
 }
@@ -452,6 +588,13 @@ void ACAudioStkEngineRendererPlugin::loopClickedNode(){
     media_cycle->performActionOnMedia("loop", media_id,"");
 }
 
+void ACAudioStkEngineRendererPlugin::granulateClickedNode(){
+    if(!media_cycle)
+        return;
+    int media_id = media_cycle->getClickedNode();
+    media_cycle->performActionOnMedia("granulate", media_id,"");
+}
+
 void ACAudioStkEngineRendererPlugin::muteAllNodes(){
     if(!media_cycle)
         return;
@@ -463,6 +606,7 @@ std::vector<ACInputActionQt*> ACAudioStkEngineRendererPlugin::providesInputActio
     std::vector<ACInputActionQt*> inputActions;
     inputActions.push_back(playClickedNodeAction);
     inputActions.push_back(loopClickedNodeAction);
+    inputActions.push_back(granulateClickedNodeAction);
     inputActions.push_back(muteAllNodesAction);
     return inputActions;
 }

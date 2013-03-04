@@ -41,6 +41,8 @@
 #include <FileLoop.h>
 #include <RtAudio.h>
 
+#include <Granulate.h>
+
 class ACAudioStkEngineRendererPlugin : public QObject, public ACPluginQt, public ACMediaRendererPlugin
 {
     Q_OBJECT
@@ -54,11 +56,16 @@ public:
     void updateVolume();
     void updateRate();
     void muteAll();
+    void updateGrainVoices();
+    void updateGrainRandomness();
+    void updateGrainStretch();
+    void updateGrainParameters();
 
 public:
     RtAudio dac;
     std::map< long int, stk::FileWvIn*> inputs;
     std::map< long int, stk::FileLoop*> loops;
+    std::map< long int, stk::Granulate*> grains;
     std::map< long int, int> current_frames;
     void justReadFrames(long int mediaId, int nFrames);
     void removeInput(long int mediaId);
@@ -72,11 +79,13 @@ public:
 public slots:
     void playClickedNode();
     void loopClickedNode();
+    void granulateClickedNode();
     void muteAllNodes();
 
 protected:
     ACInputActionQt* playClickedNodeAction;
     ACInputActionQt* loopClickedNodeAction;
+    ACInputActionQt* granulateClickedNodeAction;
     ACInputActionQt* muteAllNodesAction;
 };
 
