@@ -148,6 +148,7 @@ public:
     std::vector<std::string> getListOfPlugins();
     std::vector<std::string> getListOfActivePlugins();
     std::string getPluginPathFromBaseName(std::string basename);
+    std::string getLibraryPathFromPlugin(std::string name);
 
     bool changeActivePlugin(ACPluginType pluginType, std::string pluginName);
     std::vector<std::string> getActivePluginNames(ACPluginType pluginType, ACMediaType mediaType = MEDIA_TYPE_NONE);
@@ -191,6 +192,8 @@ public:
     void setCameraZoom(float z);
     void setCameraRecenter();
     void setAutoPlay(int i);
+    void setAutoDiscard(bool status);
+    bool getAutoDiscard();
     int getClickedNode();
     void setClickedNode(int i);
     void setClosestNode(int i,int p_index = 0);

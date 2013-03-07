@@ -865,9 +865,18 @@ void MediaCycle::getCameraPosition(float &x, float &y)		{ mediaBrowser->getCamer
 void MediaCycle::setCameraZoom(float z)				{ mediaBrowser->setCameraZoom(z); }
 void MediaCycle::setCameraRecenter()				{ mediaBrowser->setCameraRecenter(); }
 void MediaCycle::setAutoPlay(int i) { mediaBrowser->setAutoPlay(i); }
+void MediaCycle::setAutoDiscard(bool status) { mediaBrowser->setAutoDiscard(status); }
+bool MediaCycle::getAutoDiscard(){return mediaBrowser->getAutoDiscard();}
 int MediaCycle::getClickedNode() { return mediaBrowser->getClickedNode(); }
 void MediaCycle::setClickedNode(int i) { mediaBrowser->setClickedNode(i); }
-void MediaCycle::setClosestNode(int i,int p_index) { mediaBrowser->setClosestNode(i,p_index); }
+void MediaCycle::setClosestNode(int i,int p_index) {
+    int current = mediaBrowser->getClosestNode(p_index);
+    if( mediaBrowser->setClosestNode(i,p_index) && current != i){
+        stringstream pointer;
+        pointer << p_index;
+        this->performActionOnMedia("hover closest node",i,pointer.str());
+    }
+}
 int MediaCycle::getClosestNode(int p_index) { return mediaBrowser->getClosestNode(p_index); }
 int	MediaCycle::getLastSelectedNode() { return mediaBrowser->getLastSelectedNode(); }
 
@@ -1366,7 +1375,7 @@ std::string MediaCycle::getPluginPathFromBaseName(std::string basename)
     char c_path[2048];
     // use the function to get the path
     getcwd(c_path, 2048);
-    std::string s_path = c_path;
+    boost::filesystem::path s_path(c_path);
     std::string plugins_path(""),plugin_subfolder(""),plugin_ext("");
     //std::cout << "Current path " << s_path << std::endl;
 
@@ -1383,13 +1392,13 @@ std::string MediaCycle::getPluginPathFromBaseName(std::string basename)
 #else
 #if defined(XCODE)
 #if defined(XCODE_OLD)
-	plugins_path = s_path + "/../../../plugins/";
+    plugins_path = s_path.parent_path().parent_path().parent_path().string() + "/plugins/";
 #else
-	plugins_path = s_path + "/../../plugins/";
+    plugins_path = s_path.parent_path().parent_path().string() + "/plugins/";
 #endif
     plugin_subfolder = basename + "/" + build_type + "/";
 #else
-    plugins_path = s_path + "/../../plugins/";
+    plugins_path = s_path.parent_path().parent_path().string() + "/plugins/";
     plugin_subfolder = basename + "/";
 #endif
 #endif
@@ -1397,7 +1406,7 @@ std::string MediaCycle::getPluginPathFromBaseName(std::string basename)
     plugin_ext = ".dll";
     plugins_path = s_path + "/";
 #ifdef USE_DEBUG
-    plugins_path = s_path + "/../../plugins/";
+    plugins_path = s_path.parent_path().parent_path().string() + "/plugins/";
     plugin_subfolder = basename + "/";
 #endif USE_DEBUG
 #else // Linux
@@ -1406,11 +1415,18 @@ std::string MediaCycle::getPluginPathFromBaseName(std::string basename)
     plugins_path = "/usr/lib/"; // or a prefix path from CMake?
     plugin_subfolder = "";
 #else
-    plugins_path = s_path + "/../../plugins/";
+    plugins_path = s_path.parent_path().parent_path().string() + "/plugins/";
     plugin_subfolder = basename + "/";
 #endif
 #endif
     return plugins_path + plugin_subfolder + prefix + basename + plugin_ext;
+}
+
+std::string MediaCycle::getLibraryPathFromPlugin(std::string name){
+    std::string path("");
+    if(this->pluginManager)
+        path = this->pluginManager->getLibraryPathFromPlugin(name);
+    return path;
 }
 
 // XS TODO what else to put in the config ?

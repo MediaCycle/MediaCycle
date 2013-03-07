@@ -1,40 +1,35 @@
-/*
- *  ACAudioYaafePlugin.cpp
- *  MediaCycle
- *
- *  @author Christian Frisson
- *  @date 31/03/2012
- *  @copyright (c) 2012 – UMONS - Numediart
- *  
- *  MediaCycle of University of Mons – Numediart institute is 
- *  licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
- *  licence (the “License”); you may not use this file except in compliance 
- *  with the License.
- *  
- *  This program is free software: you can redistribute it and/or 
- *  it under the terms of the GNU Affero General Public License as
- *  published by the Free Software Foundation, either version 3 of the
- *  License, or (at your option) any later version.
- *  
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Affero General Public License for more details.
- *  
- *  You should have received a copy of the GNU Affero General Public License
- *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
- *  
- *  Each use of this software must be attributed to University of Mons – 
- *  Numediart Institute
- *  
- *  Any other additional authorizations may be asked to avre@umons.ac.be 
- *  <mailto:avre@umons.ac.be>
- *
+/**
+ * @brief Core MediaCycle plugin to extract Yaafe features
+ * @author Christian Frisson
+ * @date 31/03/2012
+ * @copyright (c) 2012 – UMONS - Numediart
+ * 
+ * MediaCycle of University of Mons – Numediart institute is 
+ * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
+ * licence (the “License”); you may not use this file except in compliance 
+ * with the License.
+ * 
+ * This program is free software: you can redistribute it and/or 
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * 
+ * Each use of this software must be attributed to University of Mons – 
+ * Numediart Institute
+ * 
+ * Any other additional authorizations may be asked to avre@umons.ac.be 
+ * <mailto:avre@umons.ac.be>
  */
 
-//#define SAVE_CSV
-
-#include "ACAudioYaafePlugin.h"
+#include "ACAudioYaafeCorePlugin.h"
 #include "ACAudio.h"
 #include <vector>
 #include <string>
@@ -45,7 +40,8 @@ using namespace std;
 #include <yaafe-io/io/FileUtils.h>
 #include <sstream>
 
-#include "yaafe-core/ComponentFactory.h"
+#include "ACYaafeOutputFormat.h"
+#include "ACYaafeWriter.h"
 
 #include "yaafe-io/io/CSVWriter.h"
 //#ifdef WITH_SNDFILE
@@ -101,240 +97,45 @@ using namespace std;
 
 #include "yaafe-components/flow/Join.h"
 
-#define BUFSIZED 64
-
-using namespace std;
-
-namespace YAAFE {
-
-ACYaafeWriter::ACYaafeWriter() {
-    m_feature_name = "";
-    m_plugin = 0;
-    m_file = "";
-}
-
-ACYaafeWriter::~ACYaafeWriter() {
-    if (m_fout.is_open())
-        m_fout.close();
-    m_plugin = 0;
-}
-
-ParameterDescriptorList ACYaafeWriter::getParameterDescriptorList() const
-{
-    ParameterDescriptorList pList;
-    ParameterDescriptor p;
-
-    p.m_identifier = "File";
-    p.m_description = "MC output filename";
-    p.m_defaultValue = "";
-    pList.push_back(p);
-
-    p.m_identifier = "Attrs";
-    p.m_description = "Metadata to be written to the output";
-    p.m_defaultValue = "";
-    pList.push_back(p);
-
-    p.m_identifier = "Metadata";
-    p.m_description = "If 'True' then write metadata as comments at the beginning of the MC file. If 'False', do not write metadata";
-    p.m_defaultValue = "True";
-    pList.push_back(p);
-
-    p.m_identifier = "Precision";
-    p.m_description = "precision of output floating point number.";
-    p.m_defaultValue = "6";
-    pList.push_back(p);
-
-    return pList;
-}
-
-bool ACYaafeWriter::init(const ParameterMap& params, const Ports<StreamInfo>& inp)
-{
-    assert(inp.size()==1);
-    const StreamInfo& in = inp[0].data;
-
-    m_file = getStringParam("File", params);
-    m_feature_name = getStringParam("Feature", params);
-
-    // Replace underscores by spaces, human-readable, conforming with ACAudioFeatures
-    size_t underscore = 0;
-    while(underscore != std::string::npos){
-        underscore = m_feature_name.find_first_of("_",underscore);
-        if(underscore != std::string::npos)
-            m_feature_name = m_feature_name.replace(underscore,1," ");
-    }
-
-    //std::cout << "ACYaafeWriter::init " << m_feature_name << " on " << m_file << std::endl;
-    m_precision = getIntParam("Precision",params);
-    if (m_precision > (BUFSIZED-10)) {
-        cerr << "WARNING: precision is too large ! use precision " << BUFSIZE - 10 << endl;
-        m_precision = BUFSIZED - 10;
-    }
-
-#ifdef SAVE_CSV
-    int res = preparedirs(m_file.c_str());
-    if (res!=0)
-        return false;
-
-    m_fout.open(m_file.c_str(), ios_base::trunc);
-    if (!m_fout.is_open() || m_fout.bad())
-        return false;
-
-    if (getStringParam("Metadata",params)=="True") {
-        // write metadata at the beginnig of the file
-        string paramStr = getStringParam("Attrs",params);
-        map<string,string> _params = decodeAttributeStr(paramStr);
-        ostringstream oss;
-        for (map<string,string>::const_iterator it=_params.begin();it!=_params.end();it++){
-            oss << "% " << it->first << "=" << it->second << endl;
-        }
-        m_fout.write(oss.str().c_str(),oss.str().size());
-    }
-#endif
-
-    return true;
-}
-
-void ACYaafeWriter::reset() {
-    // nothing to do
-    //std::cout << "ACYaafeWriter::reset" << std::endl;
-}
-
-bool ACYaafeWriter::process(Ports<InputBuffer*>& inp, Ports<OutputBuffer*>& outp)
-{
-    //std::cout << "ACYaafeWriter::process " << m_feature_name << " on " << m_file << std::endl;
-
-    float time = 0;
-    std::vector<float> times;
-    std::vector< std::vector<float> > values;
-    ACMediaTimedFeature* feat = 0;
-
-    if(m_plugin){
-        if(m_plugin->isMediaTimedFeatureStored(m_feature_name,m_file)){
-            time = m_plugin->getMediaTimedFeatureStored(m_feature_name,m_file)->getTime( m_plugin->getMediaTimedFeatureStored(m_feature_name,m_file)->getLength()-1);
-        }
-    }
-
-    assert(inp.size()==1);
-    InputBuffer* in = inp[0].data;
-    assert(outp.size()==0);
-    char buf[BUFSIZED];
-    //std::cout << "ACYaafeWriter::process starts" << std::endl;
-    while (!in->empty())
-    {
-        values.push_back( std::vector<float>(in->info().size) );
-        double* data = in->readToken();
-        int strSize = sprintf(buf,"%0.*e",m_precision,data[0]);
-        (values.back())[0] = ((float)(data[0]));
-        //std::cout << " data[0] " << data[0] << std::endl;
-
-#ifdef SAVE_CSV
-        m_fout.write(buf,strSize);
-#endif
-
-        time += (float)in->info().sampleStep / (float)in->info().sampleRate;
-        times.push_back(time);
-
-        for (int i=1;i<in->info().size;i++)
-        {
-            strSize = sprintf(buf,",%0.*e",m_precision,data[i]);
-#ifdef SAVE_CSV
-            m_fout.write(buf,strSize);
-#endif
-            (values.back())[i] = ((float)(data[i]));
-            //std::cout << "i " << i << " data[i] " << data[i] << std::endl;
-        }
-#ifdef SAVE_CSV
-        m_fout << endl;
-#endif
-        in->consumeToken();
-    }
-    if(times.size()>0 && values.size()>0){
-        feat = new ACMediaTimedFeature(times,values,m_feature_name);
-        //std::cout << "ACYaafeWriter::process: feature " << m_feature_name << " times " << times.size() << " dims " << values.size() << "x" << values.front().size() << std::endl;
-    }
-    else{
-        std::cerr <<  "ACYaafeWriter::process: empty times/values" << std::endl;
-        return false;
-    }
-
-    if(m_plugin && feat){
-        return m_plugin->addMediaTimedFeature(feat,m_file);
-    }
-    return true;
-}
-
-void ACYaafeWriter::flush(Ports<InputBuffer*>& in, Ports<OutputBuffer*>& out)
-{
-    //std::cout << "ACYaafeWriter::flush " << m_feature_name << " on " << m_file << std::endl;
-    process(in,out);
-#ifdef SAVE_CSV
-    m_fout.close();
-#endif
-}
-
-}
+#include "cba-yaafe-extension/audio/AccumulateSameValues.h"
+#include "cba-yaafe-extension/audio/Binarization.h"
+#include "cba-yaafe-extension/audio/DBConversion.h"
+#include "cba-yaafe-extension/audio/DCOffsetFilter.h"
+#include "cba-yaafe-extension/audio/DilationFilter.h"
+#include "cba-yaafe-extension/audio/ErosionFilter.h"
+#include "cba-yaafe-extension/audio/FrameSum.h"
+#include "cba-yaafe-extension/audio/MathUtils.h"
+#include "cba-yaafe-extension/audio/PeakDetection.h"
+#include "cba-yaafe-extension/audio/SimpleNoiseGate.h"
+#include "cba-yaafe-extension/audio/SimpleThresholdClassification.h"
+#include "cba-yaafe-extension/audio/SubRunningAverage.h"
+#include "cba-yaafe-extension/audio/WindowConvolution.h"
+#include "cba-yaafe-extension/audio/WindowNormalize.h"
 
 
-bool ACYaafeOutputFormat::available() const {
-    return ComponentFactory::instance()->exists("ACYaafeWriter");
-}
-
-const ParameterDescriptorList ACYaafeOutputFormat::getParameters() const {
-    const Component* ACw = ComponentFactory::instance()->getPrototype("ACYaafeWriter");
-    if (ACw==NULL) {
-        cerr << "WARNING: ACYaafeWriter not available ! cannot retrieve parameter list" << endl;
-        return ParameterDescriptorList();
-    }
-    ParameterDescriptorList pList = ACw->getParameterDescriptorList();
-    eraseParameterDescriptor(pList,"File");
-    eraseParameterDescriptor(pList,"Attrs");
-    return pList;
-}
-
-Component* ACYaafeOutputFormat::createWriter(
-    const std::string& inputfile,
-    const std::string& feature,
-    const ParameterMap& featureParams,
-    const Ports<StreamInfo>& featureStream)
-{
-    Component* writer = ComponentFactory::instance()->createComponent("ACYaafeWriter");
-    ParameterMap writerParams = m_params;
-    writerParams["Feature"] = feature;
-    writerParams["File"] = filenameConcat(m_outDir,inputfile,"." + feature + ".csv");
-    writerParams["Attrs"] = encodeParameterMap(featureParams);
-    if (!writer->init(writerParams,featureStream)) {
-        delete writer;
-        cerr << "ERROR: cannot initialize ACYaafeWriter !" << endl;
-        return NULL;
-    }
-
-    ACYaafeWriter* _writer = 0;
-    //try {
-        _writer = static_cast <ACYaafeWriter*> (writer);
-        if(!_writer)
-      //      throw runtime_error("<ACYaafeOutputFormat::createWriter> problem with ACYaafeWriter cast");
-    //}
-    //catch (const exception& e) 
-        {
-    //        cerr << e.what() << endl;
-            cerr <<"<ACYaafeOutputFormat::createWriter> problem with ACYaafeWriter cast"<< endl;
-        }
-    if(_writer){
-        _writer->setMediaCyclePlugin(m_plugin);
-    }
-
-    return writer;
-}
-
-ACAudioYaafePlugin::ACAudioYaafePlugin() : ACTimedFeaturesPlugin() {
+ACAudioYaafeCorePlugin::ACAudioYaafeCorePlugin() : ACTimedFeaturesPlugin() {
     //vars herited from ACPlugin
     this->mMediaType = MEDIA_TYPE_AUDIO;
     this->mName = "Audio Yaafe Features";
-    this->mDescription = "Audio feature extraction plugin usin the Yaafe library";
+    this->mDescription = "Audio feature extraction plugin using the Yaafe library";
     this->mId = "";
     //this->mtf_file_name = "";
 
+    dataflowLoaded = false;
+    factoriesRegistered = false;
+
     //DataBlock::setPreferedBlockSize(1024);
+
+    m_default_resample_rate = 20050;
+    m_default_step_size = 256;
+    m_default_block_size = 512;
+
+    // Register the component and output format to use yaafe as MC plugin
+    OutputFormat::registerFormat(new ACYaafeOutputFormat(this));
+    ComponentFactory::instance()->registerPrototype(new ACYaafeWriter());
+}
+
+bool ACAudioYaafeCorePlugin::registerFactories(){
 
     // Register yaafe-io components
     ComponentFactory::instance()->registerPrototype(new CSVWriter());
@@ -405,43 +206,66 @@ ACAudioYaafePlugin::ACAudioYaafePlugin() : ACTimedFeaturesPlugin() {
     //if (yaafe_comp)
     //    std::cerr << "Couldn't load yaafe_components" << std::endl;*/
 
-    // Register the component and output format to use yaafe as MC plugin
-    OutputFormat::registerFormat(new ACYaafeOutputFormat(this));
-    ComponentFactory::instance()->registerPrototype(new ACYaafeWriter());
+    ComponentFactory::instance()->registerPrototype(new AccumulateSameValues());
+    ComponentFactory::instance()->registerPrototype(new Binarization());
+    ComponentFactory::instance()->registerPrototype(new DBConversion());
+    ComponentFactory::instance()->registerPrototype(new DCOffsetFilter());
+    ComponentFactory::instance()->registerPrototype(new DilationFilter());
+    ComponentFactory::instance()->registerPrototype(new ErosionFilter());
+    ComponentFactory::instance()->registerPrototype(new FrameSum());
+    ComponentFactory::instance()->registerPrototype(new PeakDetection());
+    ComponentFactory::instance()->registerPrototype(new SimpleNoiseGate());
+    ComponentFactory::instance()->registerPrototype(new SimpleThresholdClassification());
+    ComponentFactory::instance()->registerPrototype(new SubRunningAverage());
+    ComponentFactory::instance()->registerPrototype(new WindowConvolution());
+    ComponentFactory::instance()->registerPrototype(new WindowNormalize());
+
+    return true;
+}
+
+void ACAudioYaafeCorePlugin::loadDataflow(){
 
     // Check the list of loaded components
     //listComponents();
 
     std::string dataflow_file = "";
 #ifdef USE_DEBUG
-    boost::filesystem::path s_path( __FILE__ );
-    //std::cout << "Current source path " << s_path.parent_path().string() << std::endl;
-    dataflow_file += s_path.parent_path().string() + "/ACAudioYaafePluginSettings.txt";
+    boost::filesystem::path c_path( __FILE__ );
+    ///dataflow_file += s_path.parent_path().string() + "/" + this->dataflowFilename();
+    std::string library_path("");
+    if(media_cycle)
+        library_path = media_cycle->getLibraryPathFromPlugin(this->mName);
+    if(library_path == ""){
+        std::cerr << "ACAudioYaafeCorePlugin::loadDataflow: couldn't get the library path" << std::endl;
+        return;
+    }
+    boost::filesystem::path b_path( library_path );
+    dataflow_file = c_path.parent_path().parent_path().parent_path().string() + "/" + b_path.parent_path().stem().string() + "/" + b_path.stem().string() + "/" + this->dataflowFilename();
 #else
 #ifdef __APPLE__
-    dataflow_file = getExecutablePath() + "/ACAudioYaafePluginSettings.txt";
+    dataflow_file = getExecutablePath() + "/" + this->dataflowFilename();
 #elif __WIN32__
-    dataflow_file = "ACAudioYaafePluginSettings.txt";
+    dataflow_file = this->dataflowFilename();
 #else
-    dataflow_file = "/usr/share/mediacycle/plugins/audio/ACAudioYaafePluginSettings.txt";
+    dataflow_file = "/usr/share/mediacycle/plugins/audio/" + this->dataflowFilename();
 #endif
 #endif
     DataFlow df;
     if (!df.load(dataflow_file)) {
         cerr << "ERROR: cannot load dataflow from file "<< endl;
+        return;
     }
     //df.display();
 
     //Engine engine;
     if (!engine.load(df)) {
         cerr << "ERROR: cannot initialize dataflow engine" << endl;
+        return;
     }
 
-    m_default_resample_rate = 20050;
-    m_default_step_size = 256;
-    m_default_block_size = 512;
 
-   /* std::cout << "ACAudioYaafePlugin: inputs" << std::endl;
+
+    /* std::cout << "ACAudioYaafeCorePlugin: inputs" << std::endl;
     std::vector<std::string> inputs = engine.getInputs();
     for (std::vector<std::string>::iterator input = inputs.begin();input!=inputs.end();input++){
         std::cout << "Input: " << (*input) << std::endl;
@@ -454,9 +278,16 @@ ACAudioYaafePlugin::ACAudioYaafePlugin() : ACTimedFeaturesPlugin() {
             std::cout << "SampleRate: '" << inputparam->second << "'" << std::endl;
     }*/
 
+    dataflowLoaded = true;
+
     mDescriptorsList.clear();
 
-    //std::cout << "ACAudioYaafePlugin: outputs" << std::endl;
+    if(!factoriesRegistered)
+        this->registerFactories();
+    if(!factoriesRegistered)
+        return;
+
+    //std::cout << "ACAudioYaafeCorePlugin: outputs" << std::endl;
     std::vector<std::string> outputs = engine.getOutputs();
     for (std::vector<std::string>::iterator output = outputs.begin();output!=outputs.end();output++){
         //std::cout << "Output: " << (*output) << std::endl;
@@ -470,7 +301,7 @@ ACAudioYaafePlugin::ACAudioYaafePlugin() : ACTimedFeaturesPlugin() {
                 name = name.replace(underscore,1," ");
             }
         }
-        //std::cout << "ACAudioYaafePlugin: adding descriptor: '" << name << "'" << std::endl;
+        //std::cout << "ACAudioYaafeCorePlugin: adding descriptor: '" << name << "'" << std::endl;
         mDescriptorsList.push_back(name);
 
         /*std::string fname = (*output);
@@ -517,12 +348,18 @@ ACAudioYaafePlugin::ACAudioYaafePlugin() : ACTimedFeaturesPlugin() {
     }
 }
 
-ACAudioYaafePlugin::~ACAudioYaafePlugin() {
+ACAudioYaafeCorePlugin::~ACAudioYaafeCorePlugin() {
     //ComponentFactory::destroy();
 }
 
-void ACAudioYaafePlugin::listComponents()
+void ACAudioYaafeCorePlugin::listComponents()
 {
+    if(!factoriesRegistered){
+        factoriesRegistered = this->registerFactories();
+        if(!factoriesRegistered)
+            return;
+    }
+
     vector<string> components;
     const vector<const Component*>& cList = ComponentFactory::instance()->getPrototypeList();
     for (size_t i = 0; i < cList.size(); i++)
@@ -536,8 +373,14 @@ void ACAudioYaafePlugin::listComponents()
         cout << " - " << *it << endl;
 }
 
-void ACAudioYaafePlugin::describeComponent(const std::string component)
+void ACAudioYaafeCorePlugin::describeComponent(const std::string component)
 {
+    if(!factoriesRegistered){
+        factoriesRegistered = this->registerFactories();
+        if(!factoriesRegistered)
+            return;
+    }
+
     const Component* c = ComponentFactory::instance()->getPrototype(component);
     if (c)
     {
@@ -556,8 +399,14 @@ void ACAudioYaafePlugin::describeComponent(const std::string component)
     }
 }
 
-void ACAudioYaafePlugin::printOutputFormats()
+void ACAudioYaafeCorePlugin::printOutputFormats()
 {
+    if(!factoriesRegistered){
+        factoriesRegistered = this->registerFactories();
+        if(!factoriesRegistered)
+            return;
+    }
+
     vector<string> formats = OutputFormat::availableFormats();
     printf("Available output formats are:\n");
     for (int i=0;i<formats.size();i++)
@@ -574,7 +423,7 @@ void ACAudioYaafePlugin::printOutputFormats()
     }
 }
 
-bool ACAudioYaafePlugin::isMediaTimedFeatureStored(std::string name, std::string file){
+bool ACAudioYaafeCorePlugin::isMediaTimedFeatureStored(std::string name, std::string file){
     std::map<std::string,ACMediaTimedFeature*>::iterator mf = descmf.find(name);
     if(mf!=descmf.end()){
         return true;
@@ -584,7 +433,7 @@ bool ACAudioYaafePlugin::isMediaTimedFeatureStored(std::string name, std::string
     }
 }
 
-ACMediaTimedFeature* ACAudioYaafePlugin::getMediaTimedFeatureStored(std::string name, std::string file){
+ACMediaTimedFeature* ACAudioYaafeCorePlugin::getMediaTimedFeatureStored(std::string name, std::string file){
     std::map<std::string,ACMediaTimedFeature*>::iterator mf = descmf.find(name);
     if(mf!=descmf.end()){
         return (*mf).second;
@@ -595,43 +444,59 @@ ACMediaTimedFeature* ACAudioYaafePlugin::getMediaTimedFeatureStored(std::string 
 }
 
 
-bool ACAudioYaafePlugin::addMediaTimedFeature(ACMediaTimedFeature* feature, std::string file){
+bool ACAudioYaafeCorePlugin::addMediaTimedFeature(ACMediaTimedFeature* feature, std::string file){
     std::map<std::string,ACMediaTimedFeature*>::iterator mf = descmf.find(feature->getName());
     if(mf!=descmf.end()){
-        //std::cout << "ACAudioYaafePlugin: appended feature: " << feature->getName() << " of length " << feature->getLength() << "/" << (*mf).second->getLength() << " and dim " << feature->getDim() << " vs " << (*mf).second->getDim() << " for file " << file << std::endl;
+        //std::cout << "ACAudioYaafeCorePlugin: appended feature: " << feature->getName() << " of length " << feature->getLength() << "/" << (*mf).second->getLength() << " and dim " << feature->getDim() << " vs " << (*mf).second->getDim() << " for file " << file << std::endl;
         return (*mf).second->appendTimedFeatureAlongTime(feature);
     }
     else{
-        //std::cout << "ACAudioYaafePlugin: new feature: " << feature->getName() << " of length " << feature->getLength() << " and dim " << feature->getDim() << " for file " << file << std::endl;
+        //std::cout << "ACAudioYaafeCorePlugin: new feature: " << feature->getName() << " of length " << feature->getLength() << " and dim " << feature->getDim() << " for file " << file << std::endl;
         descmf.insert( pair<std::string,ACMediaTimedFeature*>(feature->getName(),feature) );
         return true;
     }
 }
 
-std::vector<ACMediaFeatures*> ACAudioYaafePlugin::calculate(ACMedia* theMedia, bool _save_timed_feat) {
+std::vector<ACMediaFeatures*> ACAudioYaafeCorePlugin::calculate(ACMedia* theMedia, bool _save_timed_feat) {
     descmf.clear();
-    cout<<"ACAudioYaafePlugin::calculate"<<endl;
+    cout<<"ACAudioYaafeCorePlugin::calculate"<<endl;
 
     std::vector<ACMediaFeatures*> desc;
 
+    if(!factoriesRegistered){
+        factoriesRegistered = this->registerFactories();
+        if(!factoriesRegistered){
+            std::cerr << "ACAudioYaafeCorePlugin::calculate: couldn't register factories " << std::endl;
+            return desc;
+        }
+    }
+
+    if(!dataflowLoaded){
+        this->loadDataflow();
+        if(!dataflowLoaded){
+            std::cerr << "ACAudioYaafeCorePlugin::calculate: couldn't load dataflow " << this->dataflowFilename() << std::endl;
+            return desc;
+        }
+    }
+
     if(mDescriptorsList.size()==0){
-        std::cerr << "ACAudioYaafePlugin: dataflow settings not loaded, can't calcutate features" << std::endl;
+        std::cerr << "ACAudioYaafeCorePlugin: dataflow settings not loaded, can't calcutate features" << std::endl;
         return desc;
     }
 
     //ACMediaFeatures* feat;
     ACAudio* theAudio = 0;
 
-   // try {
-        theAudio = static_cast <ACAudio*> (theMedia);
-        if(!theAudio)
-     //       throw runtime_error("<ACAudioYaafePlugin::_calculate> problem with ACAudio cast");
-    //}
-    //catch (const exception& e)
-        {
-            //cerr << e.what() << endl;
-            cerr <<"ACAudioYaafePlugin::_calculate> problem with ACAudio cast" << endl;
-            return desc;
+    // try {
+    theAudio = static_cast <ACAudio*> (theMedia);
+    if(!theAudio)
+        //       throw runtime_error("<ACAudioYaafeCorePlugin::_calculate> problem with ACAudio cast");
+        //}
+        //catch (const exception& e)
+    {
+        //cerr << e.what() << endl;
+        cerr <<"ACAudioYaafeCorePlugin::_calculate> problem with ACAudio cast" << endl;
+        return desc;
     }
 
     boost::filesystem::path f_path( theMedia->getFileName() );
@@ -656,7 +521,7 @@ std::vector<ACMediaFeatures*> ACAudioYaafePlugin::calculate(ACMedia* theMedia, b
             ACMediaTimedFeature* feature = 0;
             feature = new ACMediaTimedFeature();
             bool featureAvailable = false;
-            //std::cout << "ACAudioYaafePlugin: trying to load feature named '" << *feat << "'... " << std::endl;
+            //std::cout << "ACAudioYaafeCorePlugin: trying to load feature named '" << *feat << "'... " << std::endl;
             mtf_file_name = aFileName_noext + "_" + (*featIt) + file_ext;
             featureAvailable = feature->loadFromFile(mtf_file_name,save_binary);
             if(featureAvailable && feature){
@@ -674,30 +539,30 @@ std::vector<ACMediaFeatures*> ACAudioYaafePlugin::calculate(ACMedia* theMedia, b
                 }
             }
             //if(featureAvailable){
-            //    std::cout << "ACAudioYaafePlugin: feature named '" << *feat  << "' loaded" << std::endl;
+            //    std::cout << "ACAudioYaafeCorePlugin: feature named '" << *feat  << "' loaded" << std::endl;
             //}
             //else{
-            //    std::cout << "ACAudioYaafePlugin: feature named '" << *feat  << "' NOT loaded" << std::endl;
+            //    std::cout << "ACAudioYaafeCorePlugin: feature named '" << *feat  << "' NOT loaded" << std::endl;
             //}
             featuresAvailable *= featureAvailable;
         }
         if(descmf.size()==0){
             featuresAvailable = false;
-            std::cout << "ACAudioYaafePlugin: features weren't calculated previously" << std::endl;
+            std::cout << "ACAudioYaafeCorePlugin: features weren't calculated previously" << std::endl;
         }
         else if(mDescriptorsList.size()==0){
             featuresAvailable = false;
-            std::cerr << "ACAudioYaafePlugin: loaded features are empty" << std::endl;
+            std::cerr << "ACAudioYaafeCorePlugin: loaded features are empty" << std::endl;
         }
         else if(mDescriptorsList.size()!=descmf.size()){
             featuresAvailable = false;
-            std::cerr << "ACAudioYaafePlugin: some features weren't calculated previously" << std::endl;
+            std::cerr << "ACAudioYaafeCorePlugin: some features weren't calculated previously" << std::endl;
         }
         if(!featuresAvailable){
             for(mf=descmf.begin();mf!=descmf.end();mf++)
                 delete (*mf).second;
             descmf.clear();
-            std::cerr << "ACAudioYaafePlugin: error while loading features, now recalculating them..." << std::endl;
+            std::cerr << "ACAudioYaafeCorePlugin: error while loading features, now recalculating them..." << std::endl;
         }
     }
 #endif
@@ -729,22 +594,28 @@ std::vector<ACMediaFeatures*> ACAudioYaafePlugin::calculate(ACMedia* theMedia, b
                 }*/
             if (!processor.setOutputFormat(formatStr,outDirStr,params)) {
                 //ComponentFactory::destroy();
-                std::cerr << "ACAudioYaafePlugin::calculate: couldn't set output format" << std::endl;
+                std::cerr << "ACAudioYaafeCorePlugin::calculate: couldn't set output format" << std::endl;
                 return desc;
             }
         }
 
-        //std::cout << "ACAudioYaafePlugin::calculate: file " << theMedia->getFileName() << std::endl;
+        //std::cout << "ACAudioYaafeCorePlugin::calculate: file " << theMedia->getFileName() << std::endl;
         /*for (int i=0;i<files->count; i++)
         {*/
 
-        int res = processor.processFile(engine, theMedia->getFileName(), theMedia->getStart(), theMedia->getEnd() );//files->filename[i]);
+        int res = 0;
+        try{
+            res = processor.processFile(engine, theMedia->getFileName(), theMedia->getStart(), theMedia->getEnd() );//files->filename[i]);
+        }
+        catch(...){
+            res = -1;
+        }
         if (res!=0) {
             cerr << "ERROR: error while processing " << theMedia->getFileName() << endl;//files->filename[i] << endl;
         }
         //}
 
-        //std::cout << "ACAudioYaafePlugin::calculate: file " << theMedia->getFileName() << " done " << std::endl;
+        //std::cout << "ACAudioYaafeCorePlugin::calculate: file " << theMedia->getFileName() << " done " << std::endl;
     }
 
     // find the index of the feature named "Energy"
@@ -755,17 +626,17 @@ std::vector<ACMediaFeatures*> ACAudioYaafePlugin::calculate(ACMedia* theMedia, b
         }*/
     // the feature named "Energy" does not need to be normalized
     for(mf=descmf.begin();mf!=descmf.end();mf++){
-		//desc.push_back((*mf).second->mean());
-		//desc.push_back((*mf).second->std());
-		// CPL, statistics using boost library
-		desc.push_back((*mf).second->centroid());
-		desc.push_back((*mf).second->spread());
+        desc.push_back((*mf).second->mean());
+        //desc.push_back((*mf).second->std());
+        // CPL, statistics using boost library
+        desc.push_back((*mf).second->centroid());
+        desc.push_back((*mf).second->spread());
         std::map<std::string,ACMediaTimedFeature*>::iterator mf2;
         //for(mf2=descmf.begin();mf2!=descmf.end();mf2++){
         //    desc.push_back((*mf).second->cov(mf2->second));
         //}
-		desc.push_back((*mf).second->skew());
-		desc.push_back((*mf).second->kurto());
+        desc.push_back((*mf).second->skew());
+        desc.push_back((*mf).second->kurto());
         
         //std::cout << "descmf " << (*mf).second->getName() << " of length " << (*mf).second->getLength() << " and dim " << (*mf).second->getDim() << " gives mean of size " << (*mf).second->mean()->getSize() << std::endl;
         /*if (i==nrgIdx){

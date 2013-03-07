@@ -1,0 +1,40 @@
+audio := Input Resample="yes" SampleRate="11050"
+nAudioIn := FrameTokenizer blockSize="512" stepSize="256"
+audio > nAudioIn
+
+nFFT := FFT FFTLength="512" FFTWindow="Hanning"
+nAudioIn > nFFT
+
+nMagnitudeSpectrum := Abs
+nFFT > nMagnitudeSpectrum
+
+nWindowNormalize := WindowNormalize
+nMagnitudeSpectrum > nWindowNormalize
+
+nWindowNormalizeSqr := Sqr
+nWindowNormalize > nWindowNormalizeSqr
+
+nDCOffsetFilter := DCOffsetFilter
+nWindowNormalizeSqr > nDCOffsetFilter
+
+nDBConversion := DBConversion
+nDCOffsetFilter > nDBConversion
+
+nSubRunningAverage := SubRunningAverage
+nDBConversion > nSubRunningAverage
+
+nBinarization := Binarization
+nSubRunningAverage > nBinarization
+
+nFrameSum := FrameSum
+nBinarization > nFrameSum
+
+nPeakDetection := PeakDetection
+nFrameSum > nPeakDetection
+
+nSum := Sum
+nPeakDetection > nSum
+
+ContinuousFrequencyActivation := Output normalize="-1" version="v0.6" yaafedefinition="ContinuousFrequencyActivation blockSize=512 stepSize=256"
+nSum > ContinuousFrequencyActivation
+

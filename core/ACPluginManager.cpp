@@ -200,6 +200,31 @@ std::vector<std::string> ACPluginManager::getListOfPlugins() {
     return plugins_list;
 }
 
+std::string ACPluginManager::getLibraryPathFromPlugin(std::string name) {
+    std::string path("");
+
+    vector<ACPluginLibrary *> ::iterator lib_iter;
+    vector<ACPlugin*> ::iterator plug_iter;
+
+    for (lib_iter = this->mPluginLibrary.begin(); lib_iter != this->mPluginLibrary.end(); lib_iter++) {
+        std::vector<ACPlugin *> plugins = (*lib_iter)->getPlugins();
+        //std::cout << "ACPluginManager::getListOfPlugins(): plugin library: " << (*lib_iter)->getName() << " with " << (*lib_iter)->getSize() << " plugin(s)" << std::endl;
+        for (plug_iter = plugins.begin(); plug_iter != plugins.end(); plug_iter++) {
+            if(*plug_iter){
+                //std::cout << "ACPluginManager::getListOfPlugins(): plugin: " << (*plug_iter)->getName() << std::endl;
+                if((*plug_iter)->getName() == name){
+                    boost::filesystem::path s_path( (*lib_iter)->getLibraryPath() );
+                    return s_path.parent_path().string();
+                }
+            }
+            //else
+            //    std::cout << "ACPluginManager::getListOfPlugins(): ghost plugin " << std::endl;
+
+        }
+    }
+    return path;
+}
+
 int ACPluginManager::clean() {
     this->cleanPluginLists();
     vector<ACPluginLibrary *> ::iterator iter;

@@ -1,0 +1,27 @@
+SET(MEDIA_TYPE "audio")
+SET(LIBRARY_NAME "mediacycle-${MEDIA_TYPE}-features-yaafe")
+IF(SUPPORT_AUDIO AND USE_YAAFE)
+	INCLUDE_DIRECTORIES(../${MEDIA_TYPE}-core)
+	INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/3rdparty/yaafe)
+        INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/3rdparty/yaafe/src_cpp)
+        INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/3rdparty/yaafe/externals/audio-smarc)
+        INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/3rdparty/yaafe/externals/eigen)
+        INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/3rdparty/yaafe-cba-extension/src_cpp)
+
+	FILE(GLOB SRC *.cpp *.c)
+	FILE(GLOB HDR *.hpp *.h)
+
+	ADD_LIBRARY(${LIBRARY_NAME} ${SRC} ${HDR})
+	ADD_DEPENDENCIES(${LIBRARY_NAME} mediacycle-${MEDIA_TYPE}-core yaafe-core yaafe-io yaafe-components)
+	TARGET_LINK_LIBRARIES(${LIBRARY_NAME} mediacycle-${MEDIA_TYPE}-core yaafe-core yaafe-io yaafe-components ${ARGTABLE2_LIBRARY})
+
+        ADD_DEPENDENCIES(${LIBRARY_NAME} cba-yaafe-extension)
+        TARGET_LINK_LIBRARIES(${LIBRARY_NAME} cba-yaafe-extension)
+
+	#INSTALL(TARGETS ${LIBRARY_NAME} LIBRARY DESTINATION lib)
+	#INSTALL(FILES ${HDR} DESTINATION include/${LIBRARY_NAME})
+	SET_TARGET_PROPERTIES(${LIBRARY_NAME} PROPERTIES FOLDER "${FOLDERNAME}")
+	MESSAGE("[X] ${LIBRARY_NAME}")
+ELSE()
+	MESSAGE("[ ] ${LIBRARY_NAME}")
+ENDIF()

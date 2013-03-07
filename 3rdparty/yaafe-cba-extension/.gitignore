@@ -1,0 +1,7 @@
+_old/
+_ignore/
+build/
+.DS_Store
+CMakeCache.txt
+CMakeFiles/
+.doctrees/

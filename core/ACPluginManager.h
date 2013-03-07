@@ -140,6 +140,7 @@ public:
     int removeLibrary(std::string aPluginLibraryPath);
     bool removePluginFromLibrary(std::string _plugin_name, std::string _library_path);
     std::vector<std::string> getListOfPlugins();
+    std::string getLibraryPathFromPlugin(std::string name);
 
     int clean();
     void dump();
