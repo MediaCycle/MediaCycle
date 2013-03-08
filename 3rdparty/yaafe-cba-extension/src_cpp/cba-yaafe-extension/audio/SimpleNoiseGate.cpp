@@ -1,7 +1,7 @@
 /**
  * Yaafe extension for the Cultural Broadcasting Archive.
  *
- * Copyright (c) 2012 University of Applied Sciences – Institute for Creative Media Technologies
+ * Copyright (c) 2012 University of Applied Sciences √ê Institute for Creative Media Technologies
  *
  * Author : Ewald Wieser B.Sc. (fhstp.ac.at)
  *
