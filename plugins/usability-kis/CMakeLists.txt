@@ -1,8 +1,5 @@
 SET(PLUGIN_NAME "usability-kis")
 SET(WITH_QT4 ON)
-list(APPEND 3RDPARTY_NAMES "signal11's hidapi")
-list(APPEND 3RDPARTY_LICENSES "BSD")
-list(APPEND 3RDPARTY_URLS "https://github.com/signal11/hidapi/")
 list(APPEND 3RDPARTY_NAMES "libcurl")
 list(APPEND 3RDPARTY_LICENSES "MIT")
 list(APPEND 3RDPARTY_URLS "http://curl.haxx.se/")

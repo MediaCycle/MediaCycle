@@ -38,7 +38,7 @@
 
 #include <iostream>
 
-// Headers needed for sleeping.
+// Headers needed for sleep()
 #ifdef _WIN32
 #include <windows.h>
 #else
@@ -126,7 +126,7 @@ void ACUsabilityKnownItemSearchPlugin::triggerMediaHover(bool trigger){
 }
 
 bool ACUsabilityKnownItemSearchPlugin::performActionOnMedia(std::string action, long int mediaId, std::string value){
-    std::cout << "ACUsabilityKnownItemSearchPlugin::performActionOnMedia: action " << action << " mediaId " << mediaId << " value " << value << std::endl;
+    //std::cout << "ACUsabilityKnownItemSearchPlugin::performActionOnMedia: action " << action << " mediaId " << mediaId << " value " << value << std::endl;
     if(!media_cycle){
         std::cerr << "ACUsabilityKnownItemSearchPlugin::performActionOnMedia: mediacycle instance not set" << std::endl;
         return false;

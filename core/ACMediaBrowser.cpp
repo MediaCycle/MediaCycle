@@ -138,6 +138,7 @@ void ACMediaBrowser::clean(){
     mLastInitializedNodeId = -1;
     auto_play = 0;
     auto_play_toggle = 0;
+    auto_discard = false;
 
     mState = AC_IDLE;
     mLayout = AC_LAYOUT_TYPE_NONE;
@@ -1281,7 +1282,7 @@ int ACMediaBrowser::toggleSourceActivity(int lid, int type)
 }
 
 
-void ACMediaBrowser::setClosestNode(int _node_id, int p_index) {
+bool ACMediaBrowser::setClosestNode(int _node_id, int p_index) {
     std::vector<int> hoveredNodes;
     hoveredNodes.resize(getNumberOfPointers());
     //std::cout << "hoverNodes ndeId=" << _node_id << " p_index=" << p_index << " : ";
@@ -1290,10 +1291,6 @@ void ACMediaBrowser::setClosestNode(int _node_id, int p_index) {
         //std::cout << hoveredNodes[ps] << " ";
     }
     //std::cout << std::endl;
-
-    //int prev_node_id = getClosestNode(p_index);
-
-    //mClosestNode = _node_id;//CF to deprecate
 
     ACPointer* p = 0;
     p = this->getPointerFromIndex(p_index);
@@ -1305,10 +1302,10 @@ void ACMediaBrowser::setClosestNode(int _node_id, int p_index) {
     // XS: if _node_id < 0 should we still assign it to closest_node ?
     // note : MediaCycle::pickedObjectCallback will look for closest node if < 0
     if (_node_id<0) {
-        return;
+        return false;
     }
     if (this->getMediaNode(_node_id)->getNavigationLevel() < getNavigationLevel()) {
-        return;
+        return false;
     }
 
     if (auto_play) {
@@ -1349,6 +1346,16 @@ void ACMediaBrowser::setClosestNode(int _node_id, int p_index) {
         }
         auto_play_toggle = 0;
     }
+
+    if(auto_discard){
+        ACMedia* media = this->mLibrary->getMedia(_node_id);
+        if(media){
+            bool discarded = media->isDiscarded();
+            if(!discarded)
+                media->setDiscarded(true);
+        }
+    }
+    return true;
 }
 
 // XS TODO iterator + return value makes no sense
@@ -1507,7 +1514,7 @@ ACPointer* ACMediaBrowser::getPointerFromId(int _id) {
 
 ACPointer* ACMediaBrowser::getPointerFromIndex(int _index) {
     ACPointers::iterator p_attr_it = mPointers.begin();
-    for(int i=0; i<_index;i++)
+    for(int i=0; i<_index && i<mPointers.size();i++)
         p_attr_it++;
 
     if (p_attr_it != mPointers.end())

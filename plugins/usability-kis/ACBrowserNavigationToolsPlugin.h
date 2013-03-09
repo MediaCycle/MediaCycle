@@ -1,7 +1,7 @@
 /**
- * @brief Plugin for contesting in the video browser showdown
+ * @brief Plugin for adding browser navigation tools
  * @author Christian Frisson
- * @date 2/01/2013
+ * @date 5/03/2013
  * @copyright (c) 2013 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -33,16 +33,16 @@
 #include <ACPlugin.h>
 #include <ACPluginQt.h>
 
-#ifndef ACUsabilityKnownItemSearchPlugin_H
-#define	ACUsabilityKnownItemSearchPlugin_H
+#ifndef ACBrowserNavigationToolsPlugin_H
+#define	ACBrowserNavigationToolsPlugin_H
 
-class ACUsabilityKnownItemSearchPlugin : public QObject, public ACPluginQt, virtual public ACClientPlugin
+class ACBrowserNavigationToolsPlugin : public QObject, public ACPluginQt, virtual public ACClientPlugin
 {
     Q_OBJECT
     Q_INTERFACES(ACPluginQt)
 public:
-    ACUsabilityKnownItemSearchPlugin();
-    virtual ~ACUsabilityKnownItemSearchPlugin();
+    ACBrowserNavigationToolsPlugin();
+    virtual ~ACBrowserNavigationToolsPlugin();
 
     // From ACPluginQt
     virtual std::vector<ACInputActionQt*> providesInputActions();
@@ -50,18 +50,25 @@ public:
     virtual std::map<std::string,ACMediaType> availableMediaActions();
 
 public slots:
-    void changeServer();
-    void changePort();
-    void changeTeam();
-    void submitCallback();
-    void triggerMediaHover(bool trigger); // audio hover, image/video ... -> need a panel to configure the behaviour of hover
+    void discardClickedNodeCallback();
+    void discardClosestNodeCallback();
+    void togglediscardClosestNodeCallback(bool);
+    void discardNearestNodesCallback();
+    void undiscardAllNodesCallback();
+
+public:
+    virtual void mediaCycleSet();
+
+protected:
+    virtual bool updateAvailableFeatures();
+    void discardNearestNodes(int mediaId);
 
 private:
-    ACInputActionQt* submitAction;
-    ACInputActionQt* triggerMediaHoverAction;
-    std::string url;
-    int port;
-    int team;
+    ACInputActionQt* discardClickedNodeAction;
+    ACInputActionQt* discardClosestNodeAction;
+    ACInputActionQt* togglediscardClosestNodeAction;
+    ACInputActionQt* discardNearestNodesAction;
+    ACInputActionQt* undiscardAllNodesAction;
 };
 
 #endif

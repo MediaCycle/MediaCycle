@@ -249,8 +249,10 @@ public:
     void setMode(ACBrowserMode _mode);
 
     // Quick Browser
-    void setClosestNode(int node_id, int p_index);
-    void setAutoPlay(int auto_play) { this->auto_play = auto_play; };
+    bool setClosestNode(int node_id, int p_index);
+    void setAutoPlay(int auto_play) { this->auto_play = auto_play; }
+    void setAutoDiscard(bool status) { this->auto_discard = status; }
+    bool getAutoDiscard(){return this->auto_discard;}
 
     // sources - SD reintroduced 2009 aug 4
     int pickSource(float x, float z);
@@ -414,6 +416,7 @@ protected:
 
     int auto_play;
     int auto_play_toggle;
+    bool auto_discard;
 
     ACClusterMethodPlugin* mClustersMethodPlugin;
     ACNeighborMethodPlugin* mNeighborsMethodPlugin;

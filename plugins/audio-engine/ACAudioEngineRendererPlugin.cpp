@@ -173,7 +173,7 @@ std::map<std::string,ACMediaType> ACAudioEngineRendererPlugin::getSupportedExten
 }
 
 bool ACAudioEngineRendererPlugin::performActionOnMedia(std::string action, long int mediaId, std::string value){
-    std::cout << "ACAudioEngineRendererPlugin::performActionOnMedia: action " << action << " mediaId " << mediaId << " value " << value << std::endl;
+    //std::cout << "ACAudioEngineRendererPlugin::performActionOnMedia: action " << action << " mediaId " << mediaId << " value " << value << std::endl;
     if(!media_cycle){
         std::cerr << "ACAudioEngineRendererPlugin::performActionOnMedia: mediacycle instance not set" << std::endl;
         return false;

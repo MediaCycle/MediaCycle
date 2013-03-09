@@ -116,7 +116,7 @@ int ACOscBrowser::static_mess_handler(const char *path, const char *types, lo_ar
 
 int ACOscBrowser::process_mess(const char *path, const char *types, lo_arg **argv, int argc, bool verbose) {
     std::string tag = std::string(path);
-    std::cout << "ACOscBrowser: OSC message: '" << tag << "'" << std::endl;
+    //std::cout << "ACOscBrowser: OSC message: '" << tag << "'" << std::endl;
     bool ac = (tag.find("/audiocycle", 0) != string::npos);
     bool mc = (tag.find("/mediacycle", 0) != string::npos);
     bool tuio = (tag.find("/tuio", 0) != string::npos);

@@ -426,8 +426,13 @@ void ACOsgCompositeViewQt::pluginLoaded(std::string plugin_name){
     std::vector<ACInputActionQt*> inputActions = plugin->providesInputActions();
     for(std::vector<ACInputActionQt*>::iterator inputAction = inputActions.begin(); inputAction != inputActions.end(); inputAction++){
         std::cout << "ACOsgCompositeViewQt::pluginLoaded: adding action from " << plugin_name << std::endl;
-        (*inputAction)->setParent(this);
-        this->addInputAction(*inputAction);
+        if(*inputAction !=0){
+            (*inputAction)->setParent(this);
+            this->addInputAction(*inputAction);
+        }
+        else
+            std::cerr << "ACOsgCompositeViewQt::pluginLoaded: warning, malformed action from plugin " << plugin_name << std::endl;
+
     }
 }
 
