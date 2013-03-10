@@ -125,11 +125,14 @@ public:
     void setFont(osg::ref_ptr<osgText::Font> _font){this->font = _font;}
     void changeNodeColor(int _node, osg::Vec4 _color);
     void resetNodeColor(int _node);
+    void changeAllNodesColor(osg::Vec4 _color);
+    void resetAllNodesColor();
 
     void changeNodeThumbnail(int _node, std::string thumbnail);
     void changeAllNodesThumbnail(std::string thumbnail);
 protected:
     std::string node_thumbnail;
+    osg::Vec4 node_color;
 
 public:
 

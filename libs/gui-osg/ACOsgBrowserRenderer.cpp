@@ -112,6 +112,7 @@ ACOsgBrowserRenderer::ACOsgBrowserRenderer()
   //  pthread_mutex_init(&activity_update_mutex, &activity_update_mutex_attr);
   //  pthread_mutexattr_destroy(&activity_update_mutex_attr);
     node_thumbnail = "None";
+    node_color = osg::Vec4(1.0f,1.0f,1.0f,1.0f);
     setting = AC_SETTING_NONE;
     group = new Group();
     media_group = new Group();
@@ -907,6 +908,24 @@ void ACOsgBrowserRenderer::resetNodeColor(int _node)
 {
     activity_update_mutex.lock();
     node_renderers[_node]->resetNodeColor();
+    activity_update_mutex.unlock();
+}
+
+void ACOsgBrowserRenderer::changeAllNodesColor(osg::Vec4 _color){
+    activity_update_mutex.lock();
+    for(ACOsgMediaRenderers::iterator node_renderer = node_renderers.begin();node_renderer!=node_renderers.end();node_renderer++){
+        node_renderer->second->changeNodeColor(_color);
+    }
+    node_color = _color;
+    activity_update_mutex.unlock();
+}
+
+void ACOsgBrowserRenderer::resetAllNodesColor(){
+    activity_update_mutex.lock();
+    for(ACOsgMediaRenderers::iterator node_renderer = node_renderers.begin();node_renderer!=node_renderers.end();node_renderer++){
+        node_renderer->second->resetNodeColor();
+    }
+    node_color = osg::Vec4(1.0f,1.0f,1.0f,1.0f);
     activity_update_mutex.unlock();
 }
 

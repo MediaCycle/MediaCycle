@@ -83,6 +83,20 @@ void ACOsgRendererPlugin::changeTimelineSummaryThumbnail(){
         this->timeline->changeAllTracksSummaryThumbnail(thumbnail_name);
 }
 
+void ACOsgRendererPlugin::changeBrowserNodeColor(){
+    std::string color_mapping = this->getStringParameterValue("Browser node color");
+    std::cout << "ACOsgRendererPlugin::changeBrowserNodeColor: " << color_mapping << std::endl;
+    if(this->browser){
+        if(color_mapping == "None"){
+            osg::Vec4 white = osg::Vec4(1.0f,1.0f,1.0f,1.0f);
+            this->browser->changeAllNodesColor(white);
+        }
+        else if(color_mapping == "Clusters"){
+            this->browser->resetAllNodesColor();
+        }
+    }
+}
+
 /*void ACOsgRendererPlugin::mediaCycleSet(){
 
     if(this->hasCallbackNamed("Stop all"))

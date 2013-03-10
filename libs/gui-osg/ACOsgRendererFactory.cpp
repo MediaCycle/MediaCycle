@@ -155,9 +155,9 @@ std::string ACOsgRendererFactory::sharedThumbnailName(ACMediaType media_type){
         return "";
     }
     std::string shared_thumbnail = renderer_plugin->sharedThumbnailName(media_type);
-    if(shared_thumbnail==""){
+    /*if(shared_thumbnail==""){
         std::cerr << "ACOsgRendererFactory::sharedThumbnailName: plugin "<< iter->first << " doesn't provide OSG shared thumbnails of type " << media_type_string << std::endl;
-    }
+    }*/
     return shared_thumbnail;
 }
 

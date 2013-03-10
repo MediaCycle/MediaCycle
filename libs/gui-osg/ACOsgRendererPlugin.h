@@ -69,6 +69,7 @@ public:
     void changeTimelinePlaybackThumbnail();
     void changeTimelineSelectionThumbnail();
     void changeTimelineSummaryThumbnail();
+    void changeBrowserNodeColor();
 protected:
     ACOsgBrowserRenderer* browser;
     ACOsgTimelineRenderer* timeline;

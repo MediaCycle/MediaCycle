@@ -68,6 +68,10 @@ ACAudioOsgRendererPlugin::ACAudioOsgRendererPlugin() : ACOsgRendererPlugin(){
     browser_node_thumbnails.push_back("Classic browser waveform");
     this->addStringParameter("Browser node", browser_node_thumbnails.front(), browser_node_thumbnails, "Browser node",boost::bind(&ACOsgRendererPlugin::changeBrowserThumbnail,this));
 
+    browser_node_color_mapping.push_back("Clusters");
+    browser_node_color_mapping.push_back("None");
+    this->addStringParameter("Browser node color",browser_node_color_mapping.front(),browser_node_color_mapping,"Browser node color",boost::bind(&ACOsgRendererPlugin::changeBrowserNodeColor,this));
+
     this->updateStringParameterCallback("Timeline playback",boost::bind(&ACAudioOsgRendererPlugin::changeTimelinePlaybackThumbnail,this));
     this->updateStringParameterCallback("Timeline summary",boost::bind(&ACAudioOsgRendererPlugin::changeTimelineSummaryThumbnail,this));
 
