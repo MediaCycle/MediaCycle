@@ -44,6 +44,8 @@
 #include "boost/filesystem.hpp"
 #include "boost/algorithm/string.hpp"
 
+static std::string generateThumbnailName(std::string filename, std::string thumbnail_name, std::string extension);
+
 struct ACAudioWaveformThumbnailSpecs{
     std::string name, filename;
     int hop_samples;
@@ -67,7 +69,7 @@ struct ACAudioWaveformThumbnailSpecs{
         callback(_callback),
         index(0)
     {
-        std::stringstream thumbnail_path;
+        /*std::stringstream thumbnail_path;
         boost::filesystem::path media_path(_media_filename.c_str());
         std::string thumbnail_suffix(_name);
         boost::to_lower(thumbnail_suffix);
@@ -82,7 +84,8 @@ struct ACAudioWaveformThumbnailSpecs{
 #else // this seems required on ubuntu to compile...
         thumbnail_path << media_path.parent_path() << slash << media_path.stem() << "_" << thumbnail_suffix << ".svg";
 #endif
-        filename = thumbnail_path.str();
+        filename = thumbnail_path.str();*/
+        filename = generateThumbnailName(_media_filename,_name,".svg");
         dimensions = svg::Dimensions(_width,_height);
     }
     ~ACAudioWaveformThumbnailSpecs(){callback = 0;}

@@ -38,8 +38,30 @@
 #define	ACPi		3.14159265358979323846  /* pi */
 #endif
 
+#include <boost/filesystem/operations.hpp>
+namespace fs = boost::filesystem;
+
 using namespace std;
 using namespace svg;
+
+std::string generateThumbnailName(std::string filename, std::string thumbnail_name, std::string extension){
+    std::stringstream thumbnail_path;
+    boost::filesystem::path media_path(filename.c_str());
+    std::string thumbnail_suffix(thumbnail_name);
+    boost::to_lower(thumbnail_suffix);
+    boost::replace_all(thumbnail_suffix," ","_");
+    //std::cout << name << " converted to " << thumbnail_suffix << std::endl;
+    std::string slash = "/";
+#ifdef WIN32
+    slash = "\\";
+#endif
+#ifdef __APPLE__
+    thumbnail_path << media_path.parent_path().string() << slash << media_path.stem().string() << "_" << thumbnail_suffix << extension;
+#else // this seems required on ubuntu to compile...
+    thumbnail_path << media_path.parent_path() << slash << media_path.stem() << "_" << thumbnail_suffix << extension;
+#endif
+    return thumbnail_path.str();
+}
 
 ACAudioWaveformThumbnailerPlugin::ACAudioWaveformThumbnailerPlugin() : ACThumbnailerPlugin(){
     this->mName = "Audio Waveform Thumbnailer";
@@ -70,8 +92,8 @@ std::vector<std::string> ACAudioWaveformThumbnailerPlugin::requiresSegmentationP
 
 void classic_waveform(ACAudioWaveformThumbnailSpecs& _specs)
 {
-      _specs.top_p << Point(_specs.index,_specs.offset_y+_specs.scale_y*_specs.top_v);
-      _specs.down_p << Point(_specs.index,_specs.offset_y+_specs.scale_y*_specs.down_v);
+    _specs.top_p << Point(_specs.index,_specs.offset_y+_specs.scale_y*_specs.top_v);
+    _specs.down_p << Point(_specs.index,_specs.offset_y+_specs.scale_y*_specs.down_v);
 }
 
 void circular_waveform(ACAudioWaveformThumbnailSpecs& _specs)
@@ -85,7 +107,40 @@ void circular_waveform(ACAudioWaveformThumbnailSpecs& _specs)
 }
 
 std::vector<ACMediaThumbnail*> ACAudioWaveformThumbnailerPlugin::summarize(ACMedia* media){
+    float start_time = getTime();
     std::vector<ACMediaThumbnail*> thumbnails;
+
+    if(!media){
+        std::cerr << "ACAudioWaveformThumbnailerPlugin::summarize: no media to summarize" << std::endl;
+        return thumbnails;
+    }
+
+    // Checking if thumbnails already exist:
+    bool thumbnails_exist = true;
+    std::map<std::string,std::string> thumbnail_extensions = this->getThumbnailExtensions();
+    for(std::map<std::string,std::string>::iterator thumbnail_extension = thumbnail_extensions.begin(); thumbnail_extension != thumbnail_extensions.end();thumbnail_extension++){
+        std::string _filename = generateThumbnailName(media->getFileName(),thumbnail_extension->first, thumbnail_extension->second);
+
+        fs::path p( _filename.c_str());// , fs::native );
+        if ( fs::exists( p ) )
+        {
+            //std::cout << "ACAudioWaveformThumbnailerPlugin::summarize: the expected thumbnail already exists as file: " << _filename << std::endl;
+            if ( fs::is_regular( p ) )
+            {
+                //std::cout << "ACAudioWaveformThumbnailerPlugin::summarize: file is regular: " << _filename << std::endl;
+                if(fs::file_size( p ) > 0 ){
+                    //std::cout << "ACAudioWaveformThumbnailerPlugin::summarize: size of " << _filename << " is non-zero, not recomputing "<< std::endl;
+                }
+                else
+                    thumbnails_exist = false;
+            }
+            else
+                thumbnails_exist = false;
+        }
+        else
+            thumbnails_exist = false;
+    }
+
 
     // Consistency checks for the provided media instance (media data, start/end)
     if(!media->getMediaData()){
@@ -156,7 +211,7 @@ std::vector<ACMediaThumbnail*> ACAudioWaveformThumbnailerPlugin::summarize(ACMed
                 hop * sample_rate /*hop samples*/,
                 false, /*circular*/
                 classic_waveform
-    );
+                );
 
     this->thumbnails_specs["Classic timeline waveform"] = ACAudioWaveformThumbnailSpecs(
                 "Classic timeline waveform" /*name*/,
@@ -167,7 +222,7 @@ std::vector<ACMediaThumbnail*> ACAudioWaveformThumbnailerPlugin::summarize(ACMed
                 (float)(media->getEnd()-media->getStart()) / 5000.0f * sample_rate /*hop samples*/,
                 false, /*circular*/
                 classic_waveform
-    );
+                );
 
     this->thumbnails_specs["Circular browser waveform"] = ACAudioWaveformThumbnailSpecs(
                 "Circular browser waveform" /*name*/,
@@ -178,7 +233,23 @@ std::vector<ACMediaThumbnail*> ACAudioWaveformThumbnailerPlugin::summarize(ACMed
                 (float)(media->getEnd()-media->getStart()) / 360.0f * sample_rate /*hop samples*/,
                 true, /*circular*/
                 circular_waveform
-    );
+                );
+
+    if(thumbnails_exist){
+        for(std::map<std::string,ACAudioWaveformThumbnailSpecs>::iterator thumbnail_specs = thumbnails_specs.begin(); thumbnail_specs != thumbnails_specs.end(); ++ thumbnail_specs){
+            ACMediaThumbnail* thumbnail = new ACMediaThumbnail(MEDIA_TYPE_IMAGE);
+            thumbnail->setFileName(thumbnail_specs->second.filename);
+            thumbnail->setName(thumbnail_specs->second.name);
+            thumbnail->setWidth(thumbnail_specs->second.width);
+            thumbnail->setHeight(thumbnail_specs->second.height);
+            thumbnail->setLength(thumbnail_specs->second.length);
+            thumbnail->setCircular(thumbnail_specs->second.circular);
+            thumbnails.push_back(thumbnail);
+        }
+        thumbnails_specs.clear();
+        std::cout << "ACAudioWaveformThumbnailerPlugin::summarize: reusing thumbnails took " << getTime() - start_time << std::endl;
+        return thumbnails;
+    }
 
     // Loop on the audio frames using a buffer of bufsize
     while ( current_frame < last_frame && s<last_frame )
@@ -280,6 +351,7 @@ std::vector<ACMediaThumbnail*> ACAudioWaveformThumbnailerPlugin::summarize(ACMed
     progress = 1.0f;
 
     thumbnails_specs.clear();
+    std::cout << "ACAudioWaveformThumbnailerPlugin::summarize: creating thumbnails took " << getTime() - start_time << std::endl;
     return thumbnails;
 }
 
