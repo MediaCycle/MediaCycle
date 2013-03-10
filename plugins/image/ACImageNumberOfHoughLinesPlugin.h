@@ -46,6 +46,7 @@ public:
     ~ACImageNumberOfHoughLinesPlugin();
 
     std::vector<ACMediaFeatures*> calculate(ACMedia* _theMedia, bool _save_timed_feat=false);
+    virtual ACFeatureDimensions getFeaturesDimensions();
 private:
 	ACMediaFeatures* calculateNumberOfHoughLines(ACColorImageAnalysis* image);
 	ACMediaFeatures* calculateNumberOfHoughLinesP(ACColorImageAnalysis* image);

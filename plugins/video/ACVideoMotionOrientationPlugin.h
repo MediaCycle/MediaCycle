@@ -49,6 +49,7 @@ public:
     ACVideoMotionOrientationPlugin();
     ~ACVideoMotionOrientationPlugin();
     virtual std::vector<ACMediaFeatures*> calculate(ACMedia* theMedia, bool _save_timed_feat = false);
+    virtual ACFeatureDimensions getFeaturesDimensions();
 private:
     ACVideoAnalysis* videoAn;
     void clean();

@@ -1,7 +1,7 @@
 /**
  * @brief ACAudioAcidPlugin.cpp
  * @author Christian Frisson
- * @date 04/01/2013
+ * @date 11/03/2013
  * @copyright (c) 2013 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -41,14 +41,19 @@ ACAudioAcidPlugin::ACAudioAcidPlugin() : ACFeaturesPlugin() {
     this->mName = "AudioCycle ACIDized";
     this->mDescription = "Extracts the ACID type/key/nbeats/bpm from the WAV header";
     this->mId = "";
-    this->mDescriptorsList.push_back("ACID type");
-    this->mDescriptorsList.push_back("ACID key");
-    this->mDescriptorsList.push_back("ACID nbeats");
-    this->mDescriptorsList.push_back("ACID BPM");
 }
 
 ACAudioAcidPlugin::~ACAudioAcidPlugin() {
 
+}
+
+ACFeatureDimensions ACAudioAcidPlugin::getFeaturesDimensions(){
+    ACFeatureDimensions featureDimensions;
+    featureDimensions["ACID type"] = 1;
+    featureDimensions["ACID key"] = 1;
+    featureDimensions["ACID nbeats"] = 1;
+    featureDimensions["ACID nbeats"] = 1;
+    return featureDimensions;
 }
 
 float ACAudioAcidPlugin::getBPM(int acid_type, int _nbeats, int nsamples, int sample_rate) {

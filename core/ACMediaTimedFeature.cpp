@@ -386,15 +386,14 @@ ACMediaFeatures* ACMediaTimedFeature::weightedMean(ACMediaTimedFeature* weight){
 	fmat weightVal = weight->getValueAtTime(this->getTime());
 	float sumWeight = as_scalar(sum(weightVal));
 	fmat tmp_m;
-	string nameLoc = "Weighted mean of ";
+    string nameLoc = ": Weighted mean";
 	weightVal = weightVal / sumWeight;
 	tmp_m = trans(weightVal) * this->getValue();
 	if (! tmp_m.is_finite()){
 		std::cout<<"Weighted not finite" << std::endl;
 		exit(1);
 	}
-	nameLoc += this->getName();
-	weightedMean_mf->setName(nameLoc);
+    weightedMean_mf->setName(this->getName()+nameLoc);
 	for (int i=0; i<tmp_m.n_cols; i++)
 		weightedMean_mf->addFeatureElement(tmp_m(0,i));
 	return weightedMean_mf;
@@ -403,22 +402,33 @@ ACMediaFeatures* ACMediaTimedFeature::weightedMean(ACMediaTimedFeature* weight){
 ACMediaFeatures* ACMediaTimedFeature::mean(){
 	ACMediaFeatures* mean_mf = new ACMediaFeatures();  
 	fmat mean_m = arma::mean(this->getValue());
-	string nameLoc = "Mean of ";
-	nameLoc += this->getName();
-	mean_mf->setName(nameLoc);
+    string nameLoc = ": Mean";
+    mean_mf->setName(this->getName()+nameLoc);
 	for (int i=0; i<mean_m.n_cols; i++){
 		mean_mf->addFeatureElement(mean_m(0,i)); // 0 = per column
 	}
 	return mean_mf;
 }
 
+ACMediaFeatures* ACMediaTimedFeature::min(){
+    ACMediaFeatures* min_mf = new ACMediaFeatures();
+    fmat min_m = arma::min(this->getValue());
+    string nameLoc = ": Min";
+    min_mf->setName(this->getName()+nameLoc);
+    //cout << "armadillo min" << endl;
+    for (int i=0; i<min_m.n_cols; i++){
+        min_mf->addFeatureElement(min_m(0,i)); // 0 = per column
+        cout << min_m(0,i) << endl;
+    }
+    return min_mf;
+}
+
 ACMediaFeatures* ACMediaTimedFeature::max(){
 	ACMediaFeatures* max_mf = new ACMediaFeatures();  
 	fmat max_m = arma::max(this->getValue());
-	string nameLoc = "Max of ";
-	nameLoc += this->getName();
-	max_mf->setName(nameLoc);
-	cout << "armadillo max" << endl;
+    string nameLoc = ": Max";
+    max_mf->setName(this->getName()+nameLoc);
+    //cout << "armadillo max" << endl;
 	for (int i=0; i<max_m.n_cols; i++){
 		max_mf->addFeatureElement(max_m(0,i)); // 0 = per column
 		cout << max_m(0,i) << endl;
@@ -437,26 +447,16 @@ ACMediaFeatures* ACMediaTimedFeature::centroid(){
 		//cout << "boost centroid" << endl;
 		double output = 0.0;
 		accumulator_set<double, stats<tag::moment<1> > > acc;
-		
-		
 		for (int j=0; j<this->getLength(); j++){
 			acc(this->getValue(j, i));
 		}
-		
 		moments[0] = accumulators::moment<1>(acc);
-		
 		output = moments[0];
-		
-		
 		centroid_mf->addFeatureElement(output);
-		
 	}
-	
 	string nameLoc = ": Centroid";
-	nameLoc = this->getName()+nameLoc;
-	centroid_mf->setName(nameLoc);
+    centroid_mf->setName(this->getName()+nameLoc);
     centroid_mf->setNeedsNormalization(0);
-	
 	return centroid_mf;
 }
 
@@ -470,25 +470,18 @@ ACMediaFeatures* ACMediaTimedFeature::spread(){
 		//cout << "boost spread" << endl;
 		double output = 0.0;
 		accumulator_set<double, stats<tag::moment<1>, tag::moment<2> > > acc;
-		
-		
 		for (int j=0; j<this->getLength(); j++){
 			acc(this->getValue(j, i));
 		}
-		
 		moments[0] = accumulators::moment<1>(acc);
 		moments[1] = accumulators::moment<2>(acc);
-		
-			
 		output = sqrt(moments[1] - pow(moments[0],2));
-		
 		spread_mf->addFeatureElement(output);
 		//std::cout << "mom1 " << moments[0] << " / mom2 " << moments[1] << " / mom3 " << moments[2] << " / mom4 " << moments[3] << " // kurtosis: " << output << "\n";
 	}
 	
-	string nameLoc = ": Spread ";
-	nameLoc = this->getName() + nameLoc;
-	spread_mf->setName(nameLoc);
+    string nameLoc = ": Spread";
+    spread_mf->setName(this->getName()+nameLoc);
     spread_mf->setNeedsNormalization(0);
 	
 	return spread_mf;
@@ -530,8 +523,7 @@ ACMediaFeatures* ACMediaTimedFeature::skew(){
 	}
 	
 	string nameLoc = ": Skewness";
-	nameLoc = this->getName()+nameLoc;
-	skew_mf->setName(nameLoc);
+    skew_mf->setName(this->getName()+nameLoc);
     skew_mf->setNeedsNormalization(0);
 	
 	return skew_mf;
@@ -573,8 +565,7 @@ ACMediaFeatures* ACMediaTimedFeature::kurto(){
 	}
 	
 	string nameLoc = ": Kurtosis";
-	nameLoc = this->getName() +nameLoc;
-	kurt_mf->setName(nameLoc);
+    kurt_mf->setName(this->getName()+nameLoc);
     kurt_mf->setNeedsNormalization(0);
 	
 	return kurt_mf;
@@ -607,9 +598,8 @@ ACMediaFeatures* ACMediaTimedFeature::weightedStdDeviation(ACMediaTimedFeature* 
 	ACMediaFeatures* wstd_mf = new ACMediaFeatures();
 	fmat wstd_m;
 	wstd_m = sqrt(trans(weightVal) * cDataSq);
-	string nameLoc = "Weighted standard deviation of ";
-	nameLoc += this->getName();
-	wstd_mf->setName(nameLoc);
+    string nameLoc = ": Weighted standard deviation";
+    wstd_mf->setName(this->getName()+nameLoc);
 	for (int i=0; i<wstd_m.n_cols; i++)
 		wstd_mf->addFeatureElement(wstd_m(0,i));
 	return wstd_mf;
@@ -617,10 +607,9 @@ ACMediaFeatures* ACMediaTimedFeature::weightedStdDeviation(ACMediaTimedFeature* 
 
 ACMediaFeatures* ACMediaTimedFeature::std(){  
 	fmat std_m = stddev(this->getValue());
-	string nameLoc = "Standard deviation of ";
+    string nameLoc = ": Standard deviation";
 	ACMediaFeatures* std_mf = new ACMediaFeatures();
-	nameLoc += this->getName();
-	std_mf->setName(nameLoc);
+    std_mf->setName(this->getName()+nameLoc);
 	for (int i=0; i<std_m.n_cols; i++)
 		std_mf->addFeatureElement(std_m(0,i));  
 	return std_mf;
@@ -634,10 +623,8 @@ ACMediaFeatures* ACMediaTimedFeature::cov(ACMediaTimedFeature* mtf2){
 	//each columns contains this->value_m.n_cols elements ( each of the this->value_m features)
     for (uword i=0; i < locCov.n_elem; i++)
         cov_mf->addFeatureElement(locCov[i]);
-	string nameLoc = ": Cov with :";
-	nameLoc = this->getName()+nameLoc;
-	nameLoc += mtf2->getName();
-	cov_mf->setName(nameLoc);
+    string nameLoc = ": Cov with ";
+    cov_mf->setName(this->getName()+nameLoc+mtf2->getName());
     cov_mf->setNeedsNormalization(0);
     return cov_mf;
 }
@@ -666,10 +653,10 @@ ACMediaFeatures* ACMediaTimedFeature::toMediaFeatures(){
 ACMediaTimedFeature* ACMediaTimedFeature::delta(){
 	ACMediaTimedFeature* deltaf;
 	if (this->getLength() > 2){
-		deltaf = new ACMediaTimedFeature(this->time_v.rows(1,this->getLength()-1), diff(this->value_m, 1, 0), "Delta "+this->getName());
+        deltaf = new ACMediaTimedFeature(this->time_v.rows(1,this->getLength()-1), diff(this->value_m, 1, 0), this->getName()+": Delta");
 	}
 	else{
-		deltaf = new ACMediaTimedFeature(this->time_v, zeros<fmat>(this->getLength(), this->getDim()), "Delta "+this->getName());
+        deltaf = new ACMediaTimedFeature(this->time_v, zeros<fmat>(this->getLength(), this->getDim()), this->getName()+": Delta");
 	}
 	return deltaf;
 }
@@ -727,11 +714,11 @@ ACMediaTimedFeature* ACMediaTimedFeature::weightedMeanSegment(ACMediaTimedFeatur
 
 ACMediaTimedFeature* ACMediaTimedFeature::interpN(int n){
 	ACMediaTimedFeature* interp_amtf;
-	float minTime = min(time_v);
+    float minTime = arma::min(time_v);
 	float maxTime = arma::max(time_v);
 	fcolvec newTime_v = linspace<fcolvec>(minTime, maxTime, n);
 	fmat newVal_m = this->getValueAtTime(newTime_v);
-	interp_amtf = new ACMediaTimedFeature(newTime_v, newVal_m, "Interpolated "+this->getName());
+    interp_amtf = new ACMediaTimedFeature(newTime_v, newVal_m, this->getName()+": Interpolated");
 	return interp_amtf;
 }
 
@@ -815,9 +802,8 @@ ACMediaFeatures* ACMediaTimedFeature::temporalModel(double start_sec, double sto
 		exit(1);
 	}
 	
-	string nameLoc = "Temporal Model of ";
-	nameLoc += this->getName();
-	temporalModel_mf->setName(nameLoc);
+    string nameLoc = ": Temporal Model";
+    temporalModel_mf->setName(this->getName()+nameLoc);
 	for (int i = 0; i < sm_v.n_cols; i++){
 		temporalModel_mf->addFeatureElement(sm_v(i)); 
 	}

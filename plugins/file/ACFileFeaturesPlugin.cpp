@@ -42,12 +42,17 @@ ACFileFeaturesPlugin::ACFileFeaturesPlugin() : ACFeaturesPlugin() {
     this->mName = "File Features";
     this->mDescription = "File Features Plugin (Size, Last Write Time, Directory Depth)";
     this->mId = "";
-    this->mDescriptorsList.push_back("File Size");
-    this->mDescriptorsList.push_back("File Last Write Time");
-    this->mDescriptorsList.push_back("File Directory Depth");
 }
 
 ACFileFeaturesPlugin::~ACFileFeaturesPlugin() {	
+}
+
+ACFeatureDimensions ACFileFeaturesPlugin::getFeaturesDimensions(){
+    ACFeatureDimensions featureDimensions;
+    featureDimensions["File Size"] = 1;
+    featureDimensions["File Last Write Time"] = 1;
+    featureDimensions["File Directory Depth"] = 1;
+    return featureDimensions;
 }
 
 std::vector<ACMediaFeatures*> ACFileFeaturesPlugin::calculate(ACMedia* theMedia, bool _save_timed_feat) {

@@ -44,8 +44,13 @@ ACPDFFeaturesPlugin::ACPDFFeaturesPlugin() : ACFeaturesPlugin() {
     this->mId = "";
 }
 
-ACPDFFeaturesPlugin::~ACPDFFeaturesPlugin() {
-	
+ACPDFFeaturesPlugin::~ACPDFFeaturesPlugin() {	
+}
+
+ACFeatureDimensions ACPDFFeaturesPlugin::getFeaturesDimensions(){
+    ACFeatureDimensions featureDimensions;
+    featureDimensions["Page Count"] = 1;
+    return featureDimensions;
 }
 
 std::vector<ACMediaFeatures*> ACPDFFeaturesPlugin::calculate(ACMedia* theMedia, bool _save_timed_feat) {

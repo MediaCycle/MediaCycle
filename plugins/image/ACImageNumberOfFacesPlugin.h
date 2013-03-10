@@ -48,8 +48,8 @@ public:
     ACImageNumberOfFacesPlugin();
     ~ACImageNumberOfFacesPlugin();
 
-
     std::vector<ACMediaFeatures*> calculate(ACMedia* _theMedia, bool _save_timed_feat=false);
+    virtual ACFeatureDimensions getFeaturesDimensions();
 private:
 	ACMediaFeatures* calculateNumberOfFaces(ACColorImageAnalysis* image);
 };

@@ -54,7 +54,7 @@ public:
     //	bool hasPostProcess(){return true;}
 
     virtual std::vector<ACMediaFeatures*> calculate(ACMedia* theMedia, bool _save_timed_feat=false);
-
+    virtual ACFeatureDimensions getFeaturesDimensions();
     virtual preProcessInfo update(ACMedias media_library);
 
     virtual std::vector<ACMediaFeatures*> apply(preProcessInfo info,ACMedia* theMedia);

@@ -41,8 +41,11 @@
 
 class ACAudioMakamFeaturesPlugin : public ACFeaturesPlugin {
 public:
-	ACAudioMakamFeaturesPlugin();
-	~ACAudioMakamFeaturesPlugin();
-        std::vector<ACMediaFeatures*> calculate(ACMedia*, bool _save_timed_feat=false);
+    ACAudioMakamFeaturesPlugin();
+    ~ACAudioMakamFeaturesPlugin();
+    std::vector<ACMediaFeatures*> calculate(ACMedia*, bool _save_timed_feat=false);
+    virtual ACFeatureDimensions getFeaturesDimensions();
+private:
+    int featureSize;
 };
 #endif	/* _ACAudioMakamFeaturesPLUGIN_H */

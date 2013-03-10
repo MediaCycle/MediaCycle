@@ -49,11 +49,18 @@ ACImageShapeFourierPolarMomentsPlugin::ACImageShapeFourierPolarMomentsPlugin() {
     this->mName = "Shape FP Moments";
     this->mDescription = "Image Shape Fourier Polar Moments plugin";
     this->mId = "";
-	this->mDescriptorsList.push_back("Shape Fourier Polar Moments");
+    this->RadialBins = 5;
+    this->AngularBins = 8;
 
 }
 
 ACImageShapeFourierPolarMomentsPlugin::~ACImageShapeFourierPolarMomentsPlugin() {
+}
+
+ACFeatureDimensions ACImageShapeFourierPolarMomentsPlugin::getFeaturesDimensions(){
+    ACFeatureDimensions featureDimensions;
+    featureDimensions["Shape Fourier Polar Moments"] = this->RadialBins*this->AngularBins;
+    return featureDimensions;
 }
 
 //std::vector<ACMediaFeatures*>  ACImageShapeFourierPolarMomentsPlugin::calculate(std::string aFileName, bool _save_timed_feat) {
@@ -101,7 +108,7 @@ std::vector<ACMediaFeatures*> ACImageShapeFourierPolarMomentsPlugin::calculate(A
 }
 
 ACMediaFeatures* ACImageShapeFourierPolarMomentsPlugin::calculateFourierPolarMoments(ACImageAnalysis* image){
-	image->computeFourierPolarMoments();
+    image->computeFourierPolarMoments(this->RadialBins,this->AngularBins);
     ACMediaFeatures* shape_moments = new ACMediaFeatures(image->getFourierPolarMoments(), "Shape from Fourier Polar Moments");
 	return shape_moments;	
 }

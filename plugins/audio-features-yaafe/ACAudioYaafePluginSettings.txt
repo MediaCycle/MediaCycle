@@ -14,16 +14,16 @@ nFFTAbs > nMelFilterBank
 nCepstrum := Cepstrum CepsIgnoreFirstCoeff="1" CepsNbCoeffs="13"
 nMelFilterBank > nCepstrum
 
-MFCC := Output normalize="-1" version="v0.6" yaafedefinition="MFCC blockSize=512 stepSize=256"
+MFCC := Output normalize="-1" version="v0.6" yaafedefinition="MFCC blockSize=512 stepSize=256" dimensions="13"
 nCepstrum > MFCC
 
 nDMFCC := Derivate DO1Len="4" DO2Len="1" DOrder="1"
-Delta_MFCC := Output normalize="-1" version="v0.6" yaafedefinition="MFCC blockSize=512 stepSize=256 > Derivate DOrder=1"
+Delta_MFCC := Output normalize="-1" version="v0.6" yaafedefinition="MFCC blockSize=512 stepSize=256 > Derivate DOrder=1" dimensions="13"
 nCepstrum > nDMFCC
 nDMFCC > Delta_MFCC
 
 nDDMFCC := Derivate DO1Len="4" DO2Len="1" DOrder="2"
-Delta_Delta_MFCC := Output normalize="-1" version="v0.6" yaafedefinition="MFCC blockSize=512 stepSize=256 > Derivate DOrder=2"
+Delta_Delta_MFCC := Output normalize="-1" version="v0.6" yaafedefinition="MFCC blockSize=512 stepSize=256 > Derivate DOrder=2" dimensions="13"
 nCepstrum > nDDMFCC
 nDDMFCC > Delta_Delta_MFCC
 
@@ -31,27 +31,27 @@ nFFTAbsSqr := Sqr
 nFFTAbs > nFFTAbsSqr
 
 nOBSI := OBSI
-OctaveBandsSignalIntensity := Output normalize="-1" version="v0.6" yaafedefinition="OBSI blockSize=512 stepSize=256"
+OctaveBandsSignalIntensity := Output normalize="-1" version="v0.6" yaafedefinition="OBSI blockSize=512 stepSize=256" dimensions="9"
 nFFTAbsSqr > nOBSI
 nOBSI > OctaveBandsSignalIntensity
 
 nEnvelope := Envelope 
-Envelope := Output normalize="-1" version="v0.6" yaafedefinition="Envelope  EnDecim=200 blockSize=512  stepSize=256"
+Envelope := Output normalize="-1" version="v0.6" yaafedefinition="Envelope EnDecim=200 blockSize=512 stepSize=256" dimensions="3"
 nAudioIn > nEnvelope
 nEnvelope > Envelope
 
 nAutoCorrEnv := AutoCorrelation
-Envelope_AutoCorrelation := Output normalize="-1" version="v0.6" yaafedefinition="AutoCorrelation ACNbCoeffs=49  blockSize=512  stepSize=256"
+Envelope_AutoCorrelation := Output normalize="-1" version="v0.6" yaafedefinition="AutoCorrelation ACNbCoeffs=49 blockSize=512 stepSize=256" dimensions="49"
 nEnvelope > nAutoCorrEnv
 nAutoCorrEnv > Envelope_AutoCorrelation
 
 nRMS := RMS
-Energy := Output normalize="-1" version="v0.6" yaafedefinition="Energy blockSize=512 stepSize=256"
+Energy := Output normalize="-1" version="v0.6" yaafedefinition="Energy blockSize=512 stepSize=256" dimensions="1"
 nAudioIn > nRMS
 nRMS > Energy
 
 nSpectralFlatness := Flatness
-Spectral_Flatness := Output normalize="-1" version="v0.6" yaafedefinition="SpectralFlatness blockSize=512 stepSize=256"
+Spectral_Flatness := Output normalize="-1" version="v0.6" yaafedefinition="SpectralFlatness blockSize=512 stepSize=256" dimensions="1"
 nFFTAbs > nSpectralFlatness
 nSpectralFlatness > Spectral_Flatness
 
@@ -60,7 +60,7 @@ nFFTAbsSqr > nLoudness
 
 nLoudnessNormalized := Normalize NNorm="Sum"
 nLoudnessSharpness := LoudnessSharpness
-Perceptual_Sharpness := Output normalize="-1" version="v0.6" yaafedefinition="PerceptualSharpness blockSize=512 stepSize=256"
+Perceptual_Sharpness := Output normalize="-1" version="v0.6" yaafedefinition="PerceptualSharpness blockSize=512 stepSize=256" dimensions="1"
 nLoudness > nLoudnessNormalized
 nLoudnessNormalized > nLoudnessSharpness
 nLoudnessSharpness > Perceptual_Sharpness

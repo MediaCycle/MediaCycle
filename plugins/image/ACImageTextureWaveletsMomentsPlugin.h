@@ -47,8 +47,10 @@ public:
     ~ACImageTextureWaveletsMomentsPlugin();
 //	std::vector<ACMediaFeatures*> calculate(std::string aFileName, bool _save_timed_feat=false);
     std::vector<ACMediaFeatures*> calculate(ACMedia* _theMedia, bool _save_timed_feat=false);
+    virtual ACFeatureDimensions getFeaturesDimensions();
 private:
 	ACMediaFeatures* calculateGaborMoments(ACColorImageAnalysis* image);
+    int mumax,numax;
 };
 
 #endif	/* _ACIMAGETEXTUREWAELETSMOMENTSPLUGIN_H */

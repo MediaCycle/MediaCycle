@@ -106,9 +106,10 @@ public:
 	ACMediaFeatures* weightedStdDeviation(ACMediaTimedFeature* weight);
 	ACMediaFeatures* std();
     ACMediaFeatures* cov(ACMediaTimedFeature* mtf2);
-    
+
 	ACMediaFeatures* hist();
-	ACMediaFeatures* max();
+    ACMediaFeatures* min();
+    ACMediaFeatures* max();
 	// Using boost library and moments calculation
 	ACMediaFeatures* centroid();
 	ACMediaFeatures* spread();

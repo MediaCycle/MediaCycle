@@ -48,8 +48,10 @@ public:
     ~ACImageColorMomentsPlugin();
 
     std::vector<ACMediaFeatures*> calculate(ACMedia* _theMedia, bool _save_timed_feat=false);
+    virtual ACFeatureDimensions getFeaturesDimensions();
 private:
 	ACMediaFeatures* calculateColorFeatures(ACColorImageAnalysis* image, int _nmoments, std::string _cmode="HSV");
+    int nMoments;
 };
 
 #endif	/* _ACIMAGECOLORMOMENTSPLUGIN_H */

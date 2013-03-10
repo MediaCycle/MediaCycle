@@ -40,10 +40,11 @@
 
 class ACPDFFeaturesPlugin : public ACFeaturesPlugin {
 public:
-	ACPDFFeaturesPlugin();
-	~ACPDFFeaturesPlugin();
+    ACPDFFeaturesPlugin();
+    ~ACPDFFeaturesPlugin();
 
     virtual std::vector<ACMediaFeatures*> calculate(ACMedia* theMedia, bool _save_timed_feat=false);
+    virtual ACFeatureDimensions getFeaturesDimensions();
 };
 
 #endif	/* _ACPDFFeaturesPlugin_H */

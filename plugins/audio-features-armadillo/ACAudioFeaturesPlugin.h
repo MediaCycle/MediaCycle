@@ -46,10 +46,11 @@ public:
     ~ACAudioFeaturesPlugin();
 
     virtual std::vector<ACMediaFeatures*> calculate(ACMedia*, bool _save_timed_feat=false);
-
+    virtual ACFeatureDimensions getFeaturesDimensions();
 private:
     std::vector<ACMediaFeatures*> _calculate(std::string aFileName="", ACMedia* theMedia = 0, bool _save_timed_feat=false);
     //std::vector<std::string> mtf_file_names;
+    int mfccNb;
 };
 
 #endif	/* _ACAUDIOFEATURESPLUGIN_H */

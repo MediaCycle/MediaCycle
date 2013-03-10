@@ -45,10 +45,15 @@ ACImageNumberOfHoughLinesPlugin::ACImageNumberOfHoughLinesPlugin() {
     this->mName = "Number of Hough lines";
     this->mDescription = "Image Number of Hough lines plugin";
     this->mId = "";
-    this->mDescriptorsList.push_back("Number of Hough Lines");
 }
 
 ACImageNumberOfHoughLinesPlugin::~ACImageNumberOfHoughLinesPlugin() {
+}
+
+ACFeatureDimensions ACImageNumberOfHoughLinesPlugin::getFeaturesDimensions(){
+    ACFeatureDimensions featureDimensions;
+    featureDimensions["Number of Hough Lines"] = 1;
+    return featureDimensions;
 }
 
 std::vector<ACMediaFeatures*> ACImageNumberOfHoughLinesPlugin::calculate(ACMedia* _theMedia, bool _save_timed_feat){

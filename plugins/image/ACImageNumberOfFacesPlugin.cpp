@@ -45,10 +45,15 @@ ACImageNumberOfFacesPlugin::ACImageNumberOfFacesPlugin() {
     this->mName = "Number of faces";
     this->mDescription = "Image Number of faces plugin";
     this->mId = "";
-    this->mDescriptorsList.push_back("Number of Faces");
 }
 
 ACImageNumberOfFacesPlugin::~ACImageNumberOfFacesPlugin() {
+}
+
+ACFeatureDimensions ACImageNumberOfFacesPlugin::getFeaturesDimensions(){
+    ACFeatureDimensions featureDimensions;
+    featureDimensions["Number of Faces"] = 1;
+    return featureDimensions;
 }
 
 std::vector<ACMediaFeatures*> ACImageNumberOfFacesPlugin::calculate(ACMedia* _theMedia, bool _save_timed_feat){

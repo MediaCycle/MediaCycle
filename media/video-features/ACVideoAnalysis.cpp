@@ -1066,7 +1066,12 @@ void ACVideoAnalysis::computeOpticalFlow2() {
         if (need_to_init) {
             // automatic initialization
             cv::goodFeaturesToTrack(grey, points[1], MAX_COUNT, quality, min_distance, cv::Mat(), blockSize, useHarrisDetector, k);
-            cv::cornerSubPix(grey, points[1], subPixWinSize, cv::Size(-1,-1), termcrit);
+            try{
+                cv::cornerSubPix(grey, points[1], subPixWinSize, cv::Size(-1,-1), termcrit);
+            }
+            catch(cv::Exception& e){
+                std::cerr << "ACVideoAnalysis::computeOpticalFlow2: " << e.what() << std::endl;
+            }
         } else if (!points[0].empty()) {
             if(prev_grey.empty())
                 grey.copyTo(prev_grey);
@@ -1134,6 +1139,8 @@ void ACVideoAnalysis::computeOpticalFlow2() {
         if ((char) c == 27)
             break;
 #endif // VISUAL_CHECK
+
+        std::cout << "ACVideoAnalysis::computeOpticalFlow2: computed frame " << ifram << " from " << this->frameStart << " to " << this->frameStop << " ("  << 100.0f*(float)(ifram-this->frameStart)/(float)(this->frameStop-this->frameStart) << "%)" << std::endl;
      }
 }
 
@@ -1724,6 +1731,8 @@ void ACVideoAnalysis::computeGlobalPixelsSpeed() {
             cv::waitKey(10);
 #endif //VISUAL_CHECK
         }
+
+        std::cout << "ACVideoAnalysis::computeGlobalPixelsSpeed: computed frame " << i << " from " << this->frameStart << " to " << this->frameStop << " ("  << 100.0f*(float)(i-this->frameStart)/(float)(this->frameStop-this->frameStart) << "%)" << std::endl;
     }
 
 #ifdef VISUAL_CHECK
@@ -1953,6 +1962,7 @@ void ACVideoAnalysis::computeRigidTransform() {
 
 
         }
+        std::cout << "ACVideoAnalysis::computeRigidTransform: computed frame " << i << " from " << this->frameStart << " to " << this->frameStop << " ("  << 100.0f*(float)(i-this->frameStart)/(float)(this->frameStop-this->frameStart) << "%)" << std::endl;
     }
 }
 
@@ -2104,6 +2114,8 @@ void ACVideoAnalysis::computeGlobalOrientation() {
         if (cv::waitKey(10) >= 0)
             break;
 #endif //VISUAL_CHECK	
+
+        std::cout << "ACVideoAnalysis::computeGlobalOrientation: computed frame " << ifram << " from " << this->frameStart << " to " << this->frameStop << " ("  << 100.0f*(float)(ifram-this->frameStart)/(float)(this->frameStop-this->frameStart) << "%)" << std::endl;
     }
 
 #ifdef VISUAL_CHECK

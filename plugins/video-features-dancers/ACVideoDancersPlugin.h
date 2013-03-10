@@ -52,7 +52,7 @@ public:
     ACVideoDancersPlugin();
     ~ACVideoDancersPlugin();
     std::vector<ACMediaFeatures*> calculate(ACMedia*, bool _save_timed_feat=false);
-	
+    virtual ACFeatureDimensions getFeaturesDimensions();
 	
 private:
 	std::vector<ACMediaFeatures*> _calculate(std::string aFileName, bool _save_timed_feat=false);

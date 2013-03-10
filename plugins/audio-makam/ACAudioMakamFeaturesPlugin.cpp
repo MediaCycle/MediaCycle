@@ -52,7 +52,7 @@ ACAudioMakamFeaturesPlugin::ACAudioMakamFeaturesPlugin() : ACFeaturesPlugin(){
     this->mName = "Audio Makam Features";
     this->mDescription = "Audio Makam Features plugin";
     this->mId = "";
-    this->mDescriptorsList.push_back("Makam Histogram");
+    this->featureSize = 0;
     //this->mtf_file_name = "";
 
     // Initiate octave
@@ -73,6 +73,13 @@ ACAudioMakamFeaturesPlugin::ACAudioMakamFeaturesPlugin() : ACFeaturesPlugin(){
 
 ACAudioMakamFeaturesPlugin::~ACAudioMakamFeaturesPlugin() {
 }
+
+ACFeatureDimensions ACAudioMakamFeaturesPlugin::getFeaturesDimensions(){
+    ACFeatureDimensions featureDimensions;
+    featureDimensions["Makam Histogram"] = this->featureSize;
+    return featureDimensions;
+}
+
 
 std::vector<ACMediaFeatures*> ACAudioMakamFeaturesPlugin::calculate(ACMedia* theMedia, bool _save_timed_feat) {
     std::vector<ACMediaFeatures*> desc;
@@ -153,6 +160,7 @@ std::vector<ACMediaFeatures*> ACAudioMakamFeaturesPlugin::calculate(ACMedia* the
     feat->setName("Makam Histogram");
     for (int i = 0; i<features.length() ; i++ )
         feat->addFeatureElement(features(i));
+    this->featureSize = features.length();
     //feat->setNeedsNormalization(0);
     desc.push_back(feat);
     return desc;

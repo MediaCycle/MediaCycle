@@ -1,7 +1,7 @@
 /**
  * @brief ACAudioHaitsmaFingerprintPlugin.cpp
  * @author Christian Frisson
- * @date 04/01/2013
+ * @date 11/03/2013
  * @copyright (c) 2013 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -44,7 +44,6 @@ ACAudioHaitsmaFingerprintPlugin::ACAudioHaitsmaFingerprintPlugin() {
     this->mDescription = "Audio Haitsma Fingerprint plugin";
     this->mId = "";
 	//this->mPluginType=mPluginType;
-	this->mDescriptorsList.push_back("Haitsma Audio Sub-Fingerprint");
 	
 	audio_fingerprint = new ACAudioFingerprint();
 	audio_fingerprint->setParameters();
@@ -59,6 +58,12 @@ ACAudioHaitsmaFingerprintPlugin::ACAudioHaitsmaFingerprintPlugin() {
 	 int filterShape = FILTER_SHAPE_RECTANGLE,
 	 int freqScale = FREQ_SCALE_LOG);
 	 */
+}
+
+ACFeatureDimensions ACAudioHaitsmaFingerprintPlugin::getFeaturesDimensions(){
+    ACFeatureDimensions featureDimensions;
+    featureDimensions["Haitsma Audio Sub-Fingerprint"] = 33; // check bandNbr from ACAudioFingerprint::setParameters
+    return featureDimensions;
 }
 
 ACAudioHaitsmaFingerprintPlugin::~ACAudioHaitsmaFingerprintPlugin() {

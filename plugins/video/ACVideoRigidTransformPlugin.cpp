@@ -40,7 +40,6 @@ ACVideoRigidTransformPlugin::ACVideoRigidTransformPlugin(): ACTimedFeaturesPlugi
     this->mName = "Video Rigid Transform";
     this->mDescription = "Rigid Transform";
     this->mId = "";
-    this->mDescriptorsList.push_back("Rigid Transform");
     this->videoAn = 0;
 }
 
@@ -51,6 +50,12 @@ ACVideoRigidTransformPlugin::~ACVideoRigidTransformPlugin() {
 void ACVideoRigidTransformPlugin::clean(){
 	if (videoAn != 0)
 		delete videoAn;
+}
+
+ACFeatureDimensions ACVideoRigidTransformPlugin::getFeaturesDimensions(){
+    ACFeatureDimensions featureDimensions;
+    featureDimensions["Rigid Transforms"] = 2;
+    return featureDimensions;
 }
 
 std::vector<ACMediaFeatures*> ACVideoRigidTransformPlugin::calculate(ACMedia* theMedia, bool _save_timed_feat) {
@@ -65,7 +70,7 @@ std::vector<ACMediaFeatures*> ACVideoRigidTransformPlugin::calculate(ACMedia* th
 	std::vector<std::vector<float> > s = videoAn->getRigidTransforms();
     string aFileName= theMedia->getFileName();
 
-	ACMediaTimedFeature* ps_mtf = new ACMediaTimedFeature(t,s, "rigid transforms");
+    ACMediaTimedFeature* ps_mtf = new ACMediaTimedFeature(t,s, "Rigid Transforms");
 	ACMediaFeatures* rigid_transforms = ps_mtf->mean();
 	//this->saveTimedFeatures(ps_mtf, aFileName, _save_timed_feat); // by default : binary
 	bool _binary=false;

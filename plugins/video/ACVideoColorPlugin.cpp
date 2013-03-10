@@ -44,7 +44,7 @@ ACVideoColorPlugin::ACVideoColorPlugin() : ACTimedFeaturesPlugin() {
     this->mName = "Video Color";
     this->mDescription = "Color";
     this->mId = "";
-    this->mDescriptorsList.push_back("Color");
+    this->nMoments = 4;
 
     //other vars
     this->videoAn = 0;
@@ -52,6 +52,12 @@ ACVideoColorPlugin::ACVideoColorPlugin() : ACTimedFeaturesPlugin() {
 
 ACVideoColorPlugin::~ACVideoColorPlugin() {
     this->clean();
+}
+
+ACFeatureDimensions ACVideoColorPlugin::getFeaturesDimensions(){
+    ACFeatureDimensions featureDimensions;
+    featureDimensions["Color Moments"] = this->nMoments*3;
+    return featureDimensions;
 }
 
 void ACVideoColorPlugin::clean() {
@@ -68,11 +74,11 @@ std::vector<ACMediaFeatures*> ACVideoColorPlugin::calculate(ACMedia* theMedia, b
 #endif //USE_DEBUG
         videoAn = new ACVideoAnalysis(theMedia, theMedia->getStartInt(), theMedia->getEndInt());
         //videoAn = new ACVideoAnalysis(video_data, theMedia->getStartInt(), theMedia->getEndInt());
-	videoAn->computeColorMoments(4, "HSV");
+    videoAn->computeColorMoments(this->nMoments, "HSV");
 	vector<float> t = videoAn->getTimeStamps();
 	std::vector<std::vector<float> > s = videoAn->getColorMoments();
     string aFileName= theMedia->getFileName();
-	ACMediaTimedFeature* ps_mtf = new ACMediaTimedFeature(t,s, "color moments");
+    ACMediaTimedFeature* ps_mtf = new ACMediaTimedFeature(t,s, "Color Moments");
 	ACMediaFeatures* mean_color_moments = ps_mtf->mean();
 	bool _binary=false;
 	theMedia->addTimedFileNames(this->saveTimedFeatures(ps_mtf, aFileName, _save_timed_feat,_binary)); // by default : binary

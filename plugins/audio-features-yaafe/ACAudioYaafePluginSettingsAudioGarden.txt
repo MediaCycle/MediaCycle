@@ -14,43 +14,43 @@ nFFTAbs > nMelFilterBank
 nCepstrum := Cepstrum CepsIgnoreFirstCoeff="1" CepsNbCoeffs="13"
 nMelFilterBank > nCepstrum
 
-MFCC := Output normalize="-1" version="v0.6" yaafedefinition="MFCC blockSize=512 stepSize=256"
+MFCC := Output normalize="-1" version="v0.6" yaafedefinition="MFCC blockSize=512 stepSize=256" dimensions="13"
 nCepstrum > MFCC
 
 nFFTAbsSqr := Sqr
 nFFTAbs > nFFTAbsSqr
 
 nSpectralFlatness := Flatness
-Spectral_Flatness := Output normalize="-1" version="v0.6" yaafedefinition="SpectralFlatness blockSize=512 stepSize=256"
+Spectral_Flatness := Output normalize="-1" version="v0.6" yaafedefinition="SpectralFlatness blockSize=512 stepSize=256" dimensions="1"
 nFFTAbs > nSpectralFlatness
 nSpectralFlatness > Spectral_Flatness
 
 nRMS := RMS
-Energy := Output normalize="-1" version="v0.6" yaafedefinition="Energy blockSize=512 stepSize=256"
+Energy := Output normalize="-1" version="v0.6" yaafedefinition="Energy blockSize=512 stepSize=256" dimensions="1"
 nAudioIn > nRMS
 nRMS > Energy
 
 nSpectralShapeStatistics := SpectralShapeStatistics
-Spectral_Shape_Statistics := Output normalize="-1" version="v0.6" yaafedefinition="SpectralShapeStatistics blockSize=512 stepSize=256"
+Spectral_Shape_Statistics := Output normalize="-1" version="v0.6" yaafedefinition="SpectralShapeStatistics blockSize=512 stepSize=256" dimensions="5"
 nFFTAbs > nSpectralShapeStatistics
 nSpectralShapeStatistics > Spectral_Shape_Statistics
 
 nTemporalShapeStatistics := TemporalShapeStatistics
-Temporal_Shape_Statistics := Output normalize="-1" version="v0.6" yaafedefinition="TemporalShapeStatistics blockSize=512 stepSize=256"
+Temporal_Shape_Statistics := Output normalize="-1" version="v0.6" yaafedefinition="TemporalShapeStatistics blockSize=512 stepSize=256" dimensions="5"
 nAudioIn > nTemporalShapeStatistics
 nTemporalShapeStatistics > Temporal_Shape_Statistics
 
 nZCR := ZCR
-Zero_Crossing_Rate := Output normalize="-1" version="v0.6" yaafedefinition="ZeroCrossingRate blockSize=512 stepSize=256"
+Zero_Crossing_Rate := Output normalize="-1" version="v0.6" yaafedefinition="ZeroCrossingRate blockSize=512 stepSize=256" dimensions="1"
 nAudioIn > nZCR
 nZCR > Zero_Crossing_Rate
 
 nLoudness := Loudness
-Loudness := Output normalize="-1" version="v0.6" yaafedefinition="Loudness blockSize=512 stepSize=256"
+Loudness := Output normalize="-1" version="v0.6" yaafedefinition="Loudness blockSize=512 stepSize=256" dimensions="3"
 nFFTAbsSqr > nLoudness
 nLoudness > Loudness
 
 nEnvelopeShapeStatistics := EnvelopeShapeStatistics
-Envelope_Shape_Statistics := Output normalize="-1" version="v0.6" yaafedefinition="EnvelopeShapeStatistics blockSize=512 stepSize=256"
+Envelope_Shape_Statistics := Output normalize="-1" version="v0.6" yaafedefinition="EnvelopeShapeStatistics blockSize=512 stepSize=256" dimensions="5"
 nAudioIn > nEnvelopeShapeStatistics
 nEnvelopeShapeStatistics > Envelope_Shape_Statistics

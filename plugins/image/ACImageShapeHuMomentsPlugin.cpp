@@ -49,11 +49,15 @@ ACImageShapeHuMomentsPlugin::ACImageShapeHuMomentsPlugin() {
     this->mName = "Shape Hu Moments";
     this->mDescription = "Image Shape Hu Moments plugin";
     this->mId = "";
-	this->mDescriptorsList.push_back("Shape Hu Moments");
-
 }
 
 ACImageShapeHuMomentsPlugin::~ACImageShapeHuMomentsPlugin() {
+}
+
+ACFeatureDimensions ACImageShapeHuMomentsPlugin::getFeaturesDimensions(){
+    ACFeatureDimensions featureDimensions;
+    featureDimensions["Shape Hu Moments"] = 7; // from ACBWImageAnalysis::computeHuMoments
+    return featureDimensions;
 }
 
 //std::vector<ACMediaFeatures*>  ACImageShapeHuMomentsPlugin::calculate(std::string aFileName, bool _save_timed_feat) {

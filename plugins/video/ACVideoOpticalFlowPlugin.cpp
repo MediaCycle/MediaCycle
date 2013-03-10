@@ -40,7 +40,6 @@ ACVideoOpticalFlowPlugin::ACVideoOpticalFlowPlugin() : ACTimedFeaturesPlugin() {
     this->mName = "Video Optical Flow";
     this->mDescription = "Optical Flow";
     this->mId = "";
-    this->mDescriptorsList.push_back("Optical Flow");
     this->videoAn = 0;
 }
 
@@ -51,6 +50,12 @@ ACVideoOpticalFlowPlugin::~ACVideoOpticalFlowPlugin() {
 void ACVideoOpticalFlowPlugin::clean(){
 	if (videoAn != 0)
 		delete videoAn;
+}
+
+ACFeatureDimensions ACVideoOpticalFlowPlugin::getFeaturesDimensions(){
+    ACFeatureDimensions featureDimensions;
+    featureDimensions["Optical Flow"] = 2;
+    return featureDimensions;
 }
 
 std::vector<ACMediaFeatures*> ACVideoOpticalFlowPlugin::calculate(ACMedia* theMedia, bool _save_timed_feat) {
@@ -65,7 +70,7 @@ std::vector<ACMediaFeatures*> ACVideoOpticalFlowPlugin::calculate(ACMedia* theMe
 	std::vector<std::vector<float> > s = videoAn->getOpticalFlow();
     string aFileName= theMedia->getFileName();
 
-	ACMediaTimedFeature* ps_mtf = new ACMediaTimedFeature(t,s, "optical flow");
+    ACMediaTimedFeature* ps_mtf = new ACMediaTimedFeature(t,s, "Optical Flow");
 	ACMediaFeatures* optical_flow = ps_mtf->mean();
 	//this->saveTimedFeatures(ps_mtf, aFileName, _save_timed_feat); // by default : binary
 	bool _binary=false;

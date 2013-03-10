@@ -35,6 +35,7 @@
 
 #include <string>
 #include <vector>
+#include <boost/unordered_map.hpp>
 
 #include "ACMediaFeatures.h"
 #include "ACMediaTimedFeature.h"
@@ -214,6 +215,8 @@ public:
     virtual void mediaCycleSet(){}
 };
 
+typedef boost::unordered::unordered_map<std::string,int> ACFeatureDimensions; // an unordered_map without C++11
+
 // XS TODO : separate time & space plugins ?
 // getTimedFeatures has no sense for image
 class ACFeaturesPlugin: virtual public ACPlugin
@@ -223,11 +226,9 @@ protected:
 public:
     virtual std::string requiresMediaReaderPlugin(){return "";}
     virtual std::vector<ACMediaFeatures*> calculate(ACMedia* theMedia, bool _save_timed_feat=false)=0;
-    std::vector<std::string> getDescriptorsList() {return this->mDescriptorsList;}
+    virtual ACFeatureDimensions getFeaturesDimensions()=0;
     // XS TODO is this the best way to proceed when no timed features ?
     virtual ACMediaTimedFeature* getTimedFeatures(std::string mtf_file_name){return 0;}
-protected:	
-    std::vector<std::string> mDescriptorsList;
 };
 
 // separate time-dependent plugins from other

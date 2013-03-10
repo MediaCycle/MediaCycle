@@ -38,12 +38,17 @@ ACMediaTimesAsFeaturesPlugin::ACMediaTimesAsFeaturesPlugin() : ACFeaturesPlugin(
     this->mName = "Media Times as Features";
     this->mDescription = "Wraps the media start/end times and duration as features";
     this->mId = "";
-    this->mDescriptorsList.push_back("Media Start Time");
-    this->mDescriptorsList.push_back("Media End Time");
-    this->mDescriptorsList.push_back("Media Duration");
 }
 
 ACMediaTimesAsFeaturesPlugin::~ACMediaTimesAsFeaturesPlugin() {
+}
+
+ACFeatureDimensions ACMediaTimesAsFeaturesPlugin::getFeaturesDimensions(){
+    ACFeatureDimensions featureDimensions;
+    featureDimensions["Media Start Time"] = 1;
+    featureDimensions["Media End Time"] = 1;
+    featureDimensions["Media Duration"] = 1;
+    return featureDimensions;
 }
 
 std::vector<ACMediaFeatures*> ACMediaTimesAsFeaturesPlugin::calculate(ACMedia* theMedia, bool _save_timed_feat) {

@@ -124,6 +124,18 @@ ACAudioYaafeCorePlugin::ACAudioYaafeCorePlugin() : ACTimedFeaturesPlugin() {
     dataflowLoaded = false;
     factoriesRegistered = false;
 
+    with_min = true;
+    with_mean = true;
+    with_max = true;
+    /*with_centroid = true;
+    with_spread = true;
+    with_skewness = true;
+    with_kurtosis = true;*/
+    with_centroid = false;
+    with_spread = false;
+    with_skewness = false;
+    with_kurtosis = false;
+
     //DataBlock::setPreferedBlockSize(1024);
 
     m_default_resample_rate = 20050;
@@ -280,20 +292,64 @@ void ACAudioYaafeCorePlugin::loadDataflow(){
 
     dataflowLoaded = true;
 
-    mDescriptorsList.clear();
+    featureDimensions.clear();
 
     if(!factoriesRegistered)
         this->registerFactories();
     if(!factoriesRegistered)
         return;
 
+}
+
+ACFeatureDimensions ACAudioYaafeCorePlugin::getFeaturesDimensions(){
+    ACFeatureDimensions featdims;
+
+    if(!factoriesRegistered){
+        factoriesRegistered = this->registerFactories();
+        if(!factoriesRegistered){
+            std::cerr << "ACAudioYaafeCorePlugin::getFeaturesDimensions: couldn't register factories " << std::endl;
+            return featdims;
+        }
+    }
+
+    if(!dataflowLoaded){
+        this->loadDataflow();
+        if(!dataflowLoaded){
+            std::cerr << "ACAudioYaafeCorePlugin::getFeaturesDimensions: couldn't load dataflow " << this->dataflowFilename() << std::endl;
+            return featdims;
+        }
+    }
+
     //std::cout << "ACAudioYaafeCorePlugin: outputs" << std::endl;
     std::vector<std::string> outputs = engine.getOutputs();
     for (std::vector<std::string>::iterator output = outputs.begin();output!=outputs.end();output++){
         //std::cout << "Output: " << (*output) << std::endl;
         ParameterMap outputparams = engine.getOutputParams(*output);
+        /*for(ParameterMap::iterator outputparam = outputparams.begin();outputparam!=outputparams.end();outputparam++){
+            std::cout << "ACAudioYaafeCorePlugin: " << *output << ": '" << outputparam->first << "' '" << outputparam->second << "'" << std::endl;
+        }*/
 
         std::string name = (*output);
+
+        int dim = 0;
+        std::string dimensions = outputparams["dimensions"];
+        if(dimensions == ""){
+            std::cerr << "ACAudioYaafeCorePlugin::loadDataflow: dataflow malformed, feature " << name << " dimensions are not set " << std::endl;
+            featdims.clear();
+            return featdims;
+        }
+        else{
+            std::stringstream _dims;
+            _dims << dimensions;
+            _dims >> dim;
+        }
+
+        if(dim<=0){
+            std::cerr << "ACAudioYaafeCorePlugin::loadDataflow: dataflow malformed, feature " << name << " dimension is null " << std::endl;
+            featdims.clear();
+            return featdims;
+        }
+
         size_t underscore = 0;
         while(underscore != std::string::npos){
             underscore = name.find_first_of("_",underscore);
@@ -302,7 +358,22 @@ void ACAudioYaafeCorePlugin::loadDataflow(){
             }
         }
         //std::cout << "ACAudioYaafeCorePlugin: adding descriptor: '" << name << "'" << std::endl;
-        mDescriptorsList.push_back(name);
+        //std::cout << "ACAudioYaafeCorePlugin: feature " << *output << " has a dimension of " << dim << std::endl;
+
+        if(with_min)
+            featdims[name+": Min"] = dim;
+        if(with_mean)
+            featdims[name+": Mean"] = dim;
+        if(with_max)
+            featdims[name+": Max"] = dim;
+        if(with_centroid)
+            featdims[name+": Centroid"] = dim;
+        if(with_spread)
+            featdims[name+": Spread"] = dim;
+        if(with_skewness)
+            featdims[name+": Skewness"] = dim;
+        if(with_kurtosis)
+            featdims[name+": Kurtosis"] = dim;
 
         /*std::string fname = (*output);
         size_t funderscore = 0;
@@ -346,6 +417,8 @@ void ACAudioYaafeCorePlugin::loadDataflow(){
             }
         }*/
     }
+    featureDimensions = featdims;
+    return featdims;
 }
 
 ACAudioYaafeCorePlugin::~ACAudioYaafeCorePlugin() {
@@ -479,9 +552,12 @@ std::vector<ACMediaFeatures*> ACAudioYaafeCorePlugin::calculate(ACMedia* theMedi
         }
     }
 
-    if(mDescriptorsList.size()==0){
-        std::cerr << "ACAudioYaafeCorePlugin: dataflow settings not loaded, can't calcutate features" << std::endl;
-        return desc;
+    if( featureDimensions.size()==0){
+        featureDimensions = this->getFeaturesDimensions();
+        if( featureDimensions.size()==0){
+            std::cerr << "ACAudioYaafeCorePlugin: dataflow settings not loaded, can't calcutate features" << std::endl;
+            return desc;
+        }
     }
 
     //ACMediaFeatures* feat;
@@ -517,15 +593,15 @@ std::vector<ACMediaFeatures*> ACAudioYaafeCorePlugin::calculate(ACMedia* theMedi
     int feature_length = -1;
     if(theMedia->getParentId()==-1){
         bool featuresAvailable = true;
-        for (std::vector<std::string>::iterator featIt = mDescriptorsList.begin();featIt!=mDescriptorsList.end();featIt++){
+        for (ACFeatureDimensions::iterator featIt = featureDimensions.begin();featIt!=featureDimensions.end();featIt++){
             ACMediaTimedFeature* feature = 0;
             feature = new ACMediaTimedFeature();
             bool featureAvailable = false;
             //std::cout << "ACAudioYaafeCorePlugin: trying to load feature named '" << *feat << "'... " << std::endl;
-            mtf_file_name = aFileName_noext + "_" + (*featIt) + file_ext;
+            mtf_file_name = aFileName_noext + "_" + featIt->first + file_ext;
             featureAvailable = feature->loadFromFile(mtf_file_name,save_binary);
             if(featureAvailable && feature){
-                feature->setName(*featIt);
+                feature->setName(featIt->first);
                 featureAvailable = this->addMediaTimedFeature(feature, aFileName);
                 if(featureAvailable){
                     if(feature_length != -1){
@@ -550,11 +626,11 @@ std::vector<ACMediaFeatures*> ACAudioYaafeCorePlugin::calculate(ACMedia* theMedi
             featuresAvailable = false;
             std::cout << "ACAudioYaafeCorePlugin: features weren't calculated previously" << std::endl;
         }
-        else if(mDescriptorsList.size()==0){
+        else if(featureDimensions.size()==0){
             featuresAvailable = false;
             std::cerr << "ACAudioYaafeCorePlugin: loaded features are empty" << std::endl;
         }
-        else if(mDescriptorsList.size()!=descmf.size()){
+        else if(featureDimensions.size()!=descmf.size()){
             featuresAvailable = false;
             std::cerr << "ACAudioYaafeCorePlugin: some features weren't calculated previously" << std::endl;
         }
@@ -626,18 +702,26 @@ std::vector<ACMediaFeatures*> ACAudioYaafeCorePlugin::calculate(ACMedia* theMedi
         }*/
     // the feature named "Energy" does not need to be normalized
     for(mf=descmf.begin();mf!=descmf.end();mf++){
-        desc.push_back((*mf).second->mean());
-        //desc.push_back((*mf).second->std());
+        if(with_min)
+            desc.push_back((*mf).second->min());
+        if(with_mean)
+            desc.push_back((*mf).second->mean());
+        if(with_max)
+            desc.push_back((*mf).second->max());
         // CPL, statistics using boost library
-        desc.push_back((*mf).second->centroid());
-        desc.push_back((*mf).second->spread());
-        std::map<std::string,ACMediaTimedFeature*>::iterator mf2;
+        if(with_centroid)
+            desc.push_back((*mf).second->centroid());
+        if(with_spread)
+            desc.push_back((*mf).second->spread());
+        //std::map<std::string,ACMediaTimedFeature*>::iterator mf2;
         //for(mf2=descmf.begin();mf2!=descmf.end();mf2++){
         //    desc.push_back((*mf).second->cov(mf2->second));
         //}
-        desc.push_back((*mf).second->skew());
-        desc.push_back((*mf).second->kurto());
-        
+        if(with_skewness)
+            desc.push_back((*mf).second->skew());
+        if(with_kurtosis)
+            desc.push_back((*mf).second->kurto());
+
         //std::cout << "descmf " << (*mf).second->getName() << " of length " << (*mf).second->getLength() << " and dim " << (*mf).second->getDim() << " gives mean of size " << (*mf).second->mean()->getSize() << std::endl;
         /*if (i==nrgIdx){
                 desc[i]->setNeedsNormalization(0);

@@ -38,11 +38,16 @@ ACImportRankAsFeature::ACImportRankAsFeature() : ACFeaturesPlugin() {
     this->mName = "Import Rank";
     this->mDescription = "Import Rank (convenient for the sort against the order of import)";
     this->mId = "";
-    this->mDescriptorsList.push_back(this->mName);
     this->import_rank = 0;
 }
 
 ACImportRankAsFeature::~ACImportRankAsFeature() {
+}
+
+ACFeatureDimensions ACImportRankAsFeature::getFeaturesDimensions(){
+    ACFeatureDimensions featureDimensions;
+    featureDimensions[this->mName] = 1;
+    return featureDimensions;
 }
 
 std::vector<ACMediaFeatures*> ACImportRankAsFeature::calculate(ACMedia* theMedia, bool _save_timed_feat) {

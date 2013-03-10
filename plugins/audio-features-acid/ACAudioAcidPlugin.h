@@ -1,7 +1,7 @@
 /**
  * @brief ACAudioAcidPlugin.h
  * @author Christian Frisson
- * @date 04/01/2013
+ * @date 11/03/2013
  * @copyright (c) 2013 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -46,7 +46,7 @@ public:
 	~ACAudioAcidPlugin();
 
     std::vector<ACMediaFeatures*> calculate(ACMedia* theMedia, bool _save_timed_feat=false);
-	
+    virtual ACFeatureDimensions getFeaturesDimensions();
 
 private:
 	float getBPM(int acid_type, int _nbeats, int nsamples, int sample_rate);

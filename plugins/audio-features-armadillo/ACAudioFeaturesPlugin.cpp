@@ -49,25 +49,31 @@ ACAudioFeaturesPlugin::ACAudioFeaturesPlugin() {
     this->mName = "Audio Features Armadillo";
     this->mDescription = "AudioFeatures plugin";
     this->mId = "";
-    this->mDescriptorsList.push_back("Spectral Centroid");
-    this->mDescriptorsList.push_back("Spectral Spread");
-    this->mDescriptorsList.push_back("Spectral Variation");
-    this->mDescriptorsList.push_back("Spectral Flatness");
-    this->mDescriptorsList.push_back("Spectral Flux");
-    this->mDescriptorsList.push_back("Spectral Decrease");
-    this->mDescriptorsList.push_back("MFCC");
-    this->mDescriptorsList.push_back("DMFCC");
-    this->mDescriptorsList.push_back("DDMFCC");
-    this->mDescriptorsList.push_back("Zero Crossing Rate");
-    this->mDescriptorsList.push_back("Energy");
-    this->mDescriptorsList.push_back("Loudness");
-    this->mDescriptorsList.push_back("Log Attack Time");
-    this->mDescriptorsList.push_back("Energy Modulation Frequency");
-    this->mDescriptorsList.push_back("Energy Modulation Amplitude");
     //this->mtf_file_name = "";
+    this->mfccNb = 13
 }
 
 ACAudioFeaturesPlugin::~ACAudioFeaturesPlugin() {
+}
+
+ACFeatureDimensions ACAudioFeaturesPlugin::getFeaturesDimensions(){
+    ACFeatureDimensions featureDimensions;
+    featureDimensions["Spectral Centroid"] = 1;
+    featureDimensions["Spectral Spread"] = 1;
+    featureDimensions["Spectral Variation"] = 1;
+    featureDimensions["Spectral Flatness"] = 1;
+    featureDimensions["Spectral Flux"] = 1;
+    featureDimensions["Spectral Decrease"] = 1;
+    featureDimensions["MFCC"] = mfccNb;
+    featureDimensions["DMFCC"] = mfccNb;
+    featureDimensions["DDMFCC"] = mfccNb;
+    featureDimensions["Zero Crossing Rate"] = 1;
+    featureDimensions["Energy"] = 1;
+    featureDimensions["Loudness"] = 1;
+    featureDimensions["Log Attack Time"] = 1;
+    featureDimensions["Energy Modulation Frequency"] = 1;
+    featureDimensions["Energy Modulation Amplitude"] = 1;
+    return featureDimensions;
 }
 
 /*
@@ -116,29 +122,29 @@ std::vector<ACMediaFeatures*> ACAudioFeaturesPlugin::_calculate(std::string aFil
     }
 
 #ifndef BUFFERIZED
-	// XS TODO we are copying the data, unnecessary
-	float* data = new float[theAudio->getNFrames() * theAudio->getChannels()];
-	
-	// SD replaced loop by more efficient memcpy
-    memcpy(data, static_cast<float*>(theAudio->getSamples())+theAudio->getSampleStart()*theAudio->getChannels(),
-		   (theAudio->getSampleEnd()-theAudio->getSampleStart())*theAudio->getChannels()*sizeof(float));
-	/*
-	 for (long i = theAudio->getSampleStart(); i< theAudio->getSampleEnd(); i++){
-	 for (long j = 0; j < theAudio->getChannels(); j++){
-	 data[index] = audio_data->getAudioData()[i*theAudio->getChannels()+j];
-	 index++;
-	 }
-	 }
-	 */
+    // XS TODO we are copying the data, unnecessary
+    float* data = new float[theAudio->getNFrames() * theAudio->getChannels()];
 
-	
-	// 	ofstream output("signal1.txt");
-	// 	for(int i=0; i < (long) theAudio->getNFrames() * theAudio->getChannels(); i++){
-	// 		output<<data[i]<<endl;
-	// 	}
-	descmf = computeFeatures(data, theAudio->getSampleRate(), theAudio->getChannels(), theAudio->getNFrames(), 32, 13, 1024, extendSoundLimits);
- #else
-    descmf = computeFeaturesBuffered(theAudio, 32, 13, 1024, extendSoundLimits);
+    // SD replaced loop by more efficient memcpy
+    memcpy(data, static_cast<float*>(theAudio->getSamples())+theAudio->getSampleStart()*theAudio->getChannels(),
+           (theAudio->getSampleEnd()-theAudio->getSampleStart())*theAudio->getChannels()*sizeof(float));
+    /*
+     for (long i = theAudio->getSampleStart(); i< theAudio->getSampleEnd(); i++){
+     for (long j = 0; j < theAudio->getChannels(); j++){
+     data[index] = audio_data->getAudioData()[i*theAudio->getChannels()+j];
+     index++;
+     }
+     }
+     */
+
+
+    // 	ofstream output("signal1.txt");
+    // 	for(int i=0; i < (long) theAudio->getNFrames() * theAudio->getChannels(); i++){
+    // 		output<<data[i]<<endl;
+    // 	}
+    descmf = computeFeatures(data, theAudio->getSampleRate(), theAudio->getChannels(), theAudio->getNFrames(), 32, this->mfccNb, 1024, extendSoundLimits);
+#else
+    descmf = computeFeaturesBuffered(theAudio, 32, this->mfccNb, 1024, extendSoundLimits);
 #endif//def BUFFERIZED
 
     // find the index of the feature named "Energy"
@@ -174,7 +180,7 @@ std::vector<ACMediaFeatures*> ACAudioFeaturesPlugin::_calculate(std::string aFil
         for (int i=0; i<descmf.size(); i++){
             mtf_file_name = aFileName_direct+"/mtf"+aFileName_noext + "_" +descmf[i]->getName() + file_ext;
             descmf[i]->saveInFile(mtf_file_name, save_binary);
-			theMedia->addTimedFileNames(mtf_file_name);
+            theMedia->addTimedFileNames(mtf_file_name);
             //mtf_file_names.push_back(mtf_file_name); // keep track of saved features
         }
     }
@@ -197,9 +203,9 @@ std::vector<ACMediaFeatures*> ACAudioFeaturesPlugin::_calculate(std::string aFil
         delete descmf[i];
     }
     descmf.clear();
-    #ifndef BUFFERIZED
+#ifndef BUFFERIZED
     delete [] data;
-    #endif//def BUFFERIZED
+#endif//def BUFFERIZED
     return desc;
 }
 

@@ -42,12 +42,13 @@
 
 class ACAudioGardenFeaturesPlugin : public ACFeaturesPlugin {
 public:
-	ACAudioGardenFeaturesPlugin();
-	~ACAudioGardenFeaturesPlugin();
+    ACAudioGardenFeaturesPlugin();
+    ~ACAudioGardenFeaturesPlugin();
 
     virtual std::vector<ACMediaFeatures*> calculate(ACMedia*, bool _save_timed_feat=false);
-	
+    virtual ACFeatureDimensions getFeaturesDimensions();
 private:
+    int mfccNb;
 };
 
 #endif	/* _ACAUDIOGARDENFEATURESPLUGIN_H */

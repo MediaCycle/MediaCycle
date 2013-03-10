@@ -47,100 +47,112 @@ ACAudioGardenFeaturesPlugin::ACAudioGardenFeaturesPlugin() {
     this->mName = "AudioGardenFeatures";
     this->mDescription = "AudioGarden plugin";
     this->mId = "";
+    this->mfccNb = 13;
 }
 
 ACAudioGardenFeaturesPlugin::~ACAudioGardenFeaturesPlugin() {
 }
 
+ACFeatureDimensions ACAudioGardenFeaturesPlugin::getFeaturesDimensions(){
+    ACFeatureDimensions featureDimensions;
+    //featureDimensions["Energy"] = 1;
+    featureDimensions["Effective Duration"] = 1;
+    //featureDimensions["Loudness"] = 1;
+    //featureDimensions["Spectral Centroid"] = 1;
+    //featureDimensions["Zero Crossing Rate"] = 1;
+    featureDimensions["MFCC"] = mfccNb;
+    featureDimensions["Energy Modulation Amplitude"] = 1;
+    return featureDimensions;
+}
 
 std::vector<ACMediaFeatures*> ACAudioGardenFeaturesPlugin::calculate(ACMedia* theMedia, bool _save_timed_feat) {
-	int mfccNbChannels = 16;
-	int mfccNb = 13;
-	int windowSize = 1024; 	
-	bool extendSoundLimits = true;
-	std::vector<ACMediaTimedFeature*> descmf;
-	std::vector<ACMediaFeatures*> desc;
-	
-	ACAudio* theAudio = 0;
-	
-	try{
-		theAudio = static_cast <ACAudio*> (theMedia);
-		if(!theAudio) 
-			throw runtime_error("<ACAudioGardenFeaturesPlugin::_calculate> problem with ACMedia cast");
-	}catch (const exception& e) {
-		cerr << e.what() << endl;
-		return desc;
-	}
-	
+    int mfccNbChannels = 16;
+    int mfccNb = 13;
+    int windowSize = 1024;
+    bool extendSoundLimits = true;
+    std::vector<ACMediaTimedFeature*> descmf;
+    std::vector<ACMediaFeatures*> desc;
+
+    ACAudio* theAudio = 0;
+
+    try{
+        theAudio = static_cast <ACAudio*> (theMedia);
+        if(!theAudio)
+            throw runtime_error("<ACAudioGardenFeaturesPlugin::_calculate> problem with ACMedia cast");
+    }catch (const exception& e) {
+        cerr << e.what() << endl;
+        return desc;
+    }
+
     descmf = computeFeatures(theAudio->getSamples(),
-							 theAudio->getSampleRate(), theAudio->getChannels(), theAudio->getNFrames(), 32, 13, 1024, extendSoundLimits);
+                             theAudio->getSampleRate(), theAudio->getChannels(), theAudio->getNFrames(), 32, 13, 1024, extendSoundLimits);
 
-	// 	for (int i=0; i<descmf.size(); i++)
-	// 		desc.push_back(descmf[i]->mean());
+    // 	for (int i=0; i<descmf.size(); i++)
+    // 		desc.push_back(descmf[i]->mean());
 
-	int nrgIdx = 0;
-	for (int i=0; i<descmf.size(); i++){
-		if (descmf[i]->getName() == "Energy")
-			nrgIdx = i;
-	}
-	std::cout << "nrgIdx = " << nrgIdx << std::endl;
+    int nrgIdx = 0;
+    for (int i=0; i<descmf.size(); i++){
+        if (descmf[i]->getName() == "Energy")
+            nrgIdx = i;
+    }
+    std::cout << "nrgIdx = " << nrgIdx << std::endl;
 
-	int edIdx = 0;
-	for (int i=0; i<descmf.size(); i++){
-		if (descmf[i]->getName() == "Effective Duration")
-			edIdx = i;
-	}
-	std::cout << "edIdx = " << edIdx << std::endl;
+    int edIdx = 0;
+    for (int i=0; i<descmf.size(); i++){
+        if (descmf[i]->getName() == "Effective Duration")
+            edIdx = i;
+    }
+    std::cout << "edIdx = " << edIdx << std::endl;
 
-	int loudIdx = 0;
-	for (int i=0; i<descmf.size(); i++){
-		if (descmf[i]->getName() == "Loudness")
-			loudIdx = i;
-	}
-	std::cout << "loudIdx = " << loudIdx << std::endl;
+    int loudIdx = 0;
+    for (int i=0; i<descmf.size(); i++){
+        if (descmf[i]->getName() == "Loudness")
+            loudIdx = i;
+    }
+    std::cout << "loudIdx = " << loudIdx << std::endl;
 
-	int scIdx = 0;
-	for (int i=0; i<descmf.size(); i++){
-		if (descmf[i]->getName() == "Spectral Centroid")
-			scIdx = i;
-	}
-	std::cout << "scIdx = " << scIdx << std::endl;
+    int scIdx = 0;
+    for (int i=0; i<descmf.size(); i++){
+        if (descmf[i]->getName() == "Spectral Centroid")
+            scIdx = i;
+    }
+    std::cout << "scIdx = " << scIdx << std::endl;
 
-	int zcrIdx = 0;
-	for (int i=0; i<descmf.size(); i++){
-		if (descmf[i]->getName() == "Zero Crossing Rate")
-			zcrIdx = i;
-	}
-	std::cout << "zcrIdx = " << zcrIdx << std::endl;
+    int zcrIdx = 0;
+    for (int i=0; i<descmf.size(); i++){
+        if (descmf[i]->getName() == "Zero Crossing Rate")
+            zcrIdx = i;
+    }
+    std::cout << "zcrIdx = " << zcrIdx << std::endl;
 
-	int mfccIdx = 0;
-	for (int i=0; i<descmf.size(); i++){
-		if (descmf[i]->getName() == "MFCC")
-			mfccIdx = i;
-	}
-	std::cout << "mfccIdx = " << mfccIdx << std::endl;
+    int mfccIdx = 0;
+    for (int i=0; i<descmf.size(); i++){
+        if (descmf[i]->getName() == "MFCC")
+            mfccIdx = i;
+    }
+    std::cout << "mfccIdx = " << mfccIdx << std::endl;
 
-	int emaIdx = 0;
-	for (int i=0; i<descmf.size(); i++){
-		if (descmf[i]->getName() == "Energy Modulation Amplitude")
-			emaIdx = i;
-	}
-	std::cout << "emaIdx = " << emaIdx << std::endl;
+    int emaIdx = 0;
+    for (int i=0; i<descmf.size(); i++){
+        if (descmf[i]->getName() == "Energy Modulation Amplitude")
+            emaIdx = i;
+    }
+    std::cout << "emaIdx = " << emaIdx << std::endl;
 
-	
-	//float start_sec = descmf[edIdx]->getValue(0, 1);;
-	//float stop_sec =  descmf[edIdx]->getValue(0, 2);
-	//desc.push_back(descmf[loudIdx]->temporalModel(start_sec, stop_sec));
-	//desc.push_back(descmf[edIdx]->mean());
-	
-	desc.push_back(descmf[edIdx]->mean());
-	desc.push_back(descmf[mfccIdx]->mean());
-	desc.push_back(descmf[emaIdx]->mean());
-	
-	for (int i=0; i<descmf.size(); i++){
-		delete descmf[i];
-	}
-	descmf.clear();
-	return desc;
+
+    //float start_sec = descmf[edIdx]->getValue(0, 1);;
+    //float stop_sec =  descmf[edIdx]->getValue(0, 2);
+    //desc.push_back(descmf[loudIdx]->temporalModel(start_sec, stop_sec));
+    //desc.push_back(descmf[edIdx]->mean());
+
+    desc.push_back(descmf[edIdx]->mean());
+    desc.push_back(descmf[mfccIdx]->mean());
+    desc.push_back(descmf[emaIdx]->mean());
+
+    for (int i=0; i<descmf.size(); i++){
+        delete descmf[i];
+    }
+    descmf.clear();
+    return desc;
 }
 

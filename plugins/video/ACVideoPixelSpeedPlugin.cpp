@@ -47,7 +47,6 @@ ACVideoPixelSpeedPlugin::ACVideoPixelSpeedPlugin() : ACTimedFeaturesPlugin() {
     this->mName = "Video Pixel Speed";
     this->mDescription = "Pixel_Speed";
     this->mId = "";
-    this->mDescriptorsList.push_back("Pixel Speed");
 
     //other vars
     this->videoAn = 0;
@@ -60,6 +59,12 @@ ACVideoPixelSpeedPlugin::~ACVideoPixelSpeedPlugin() {
 void ACVideoPixelSpeedPlugin::clean() {
     if (videoAn != 0)
         delete videoAn;
+}
+
+ACFeatureDimensions ACVideoPixelSpeedPlugin::getFeaturesDimensions(){
+    ACFeatureDimensions featureDimensions;
+    featureDimensions["Pixel Speed"] = 1;
+    return featureDimensions;
 }
 
 //std::vector<ACMediaFeatures*>  ACVideoPixelSpeedPlugin::calculate(std::string aFileName, bool _save_timed_feat) {
@@ -80,7 +85,7 @@ std::vector<ACMediaFeatures*> ACVideoPixelSpeedPlugin::calculate(ACMedia* theMed
 	vector<float> s = videoAn->getGlobalPixelsSpeeds();
     string aFileName= theMedia->getFileName();
 	
-	ACMediaTimedFeature* ps_mtf = new ACMediaTimedFeature(t,s, "pixel speed");
+    ACMediaTimedFeature* ps_mtf = new ACMediaTimedFeature(t,s, "Pixel Speed");
 	ACMediaFeatures* pixel_speed = ps_mtf->mean();
 	//this->saveTimedFeatures(ps_mtf, aFileName, _save_timed_feat); // by default : binary
 	bool _binary=false;

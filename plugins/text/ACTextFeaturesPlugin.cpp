@@ -169,6 +169,12 @@ ACTextFeaturesPlugin::~ACTextFeaturesPlugin() {
 		delete an;
 }
 
+ACFeatureDimensions ACTextFeaturesPlugin::getFeaturesDimensions(){
+    ACFeatureDimensions featureDimensions;
+    featureDimensions["Term Frequency-Inverse Document Frequency"] = 1;
+    return featureDimensions;
+}
+
 std::vector<wchar_t*> ACTextFeaturesPlugin::indexTermsExtraction(){
 	std::vector<wchar_t*> desc;
 	

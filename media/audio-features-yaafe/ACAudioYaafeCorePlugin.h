@@ -61,6 +61,7 @@ public:
     bool addMediaTimedFeature(ACMediaTimedFeature* feature, std::string file);
     bool isMediaTimedFeatureStored(std::string name, std::string file);
     ACMediaTimedFeature* getMediaTimedFeatureStored(std::string name, std::string file);
+    virtual ACFeatureDimensions getFeaturesDimensions();
 
 protected:
     void loadDataflow();
@@ -77,6 +78,8 @@ private:
     int m_default_resample_rate, m_default_step_size, m_default_block_size;
     bool dataflowLoaded;
     bool factoriesRegistered;
+    ACFeatureDimensions featureDimensions;
+    bool with_centroid,with_spread,with_skewness,with_kurtosis,with_min,with_mean,with_max;
 };
 
 #endif	/* _ACAudioYaafeCorePlugin_H */

@@ -45,8 +45,6 @@ ACArchipelFeaturesPlugin::ACArchipelFeaturesPlugin() {
     this->mName = "Archipel Features";
     this->mDescription = "Archipel Features Plugin (Year, First Atoll)";
     this->mId = "";
-    this->mDescriptorsList.push_back("Year");
-    this->mDescriptorsList.push_back("First Atoll");
     known_atolls.push_back("unknown");
     known_atolls.push_back("micro/macro");
     known_atolls.push_back("recyclage");
@@ -62,6 +60,13 @@ ACArchipelFeaturesPlugin::ACArchipelFeaturesPlugin() {
 }
 
 ACArchipelFeaturesPlugin::~ACArchipelFeaturesPlugin() {
+}
+
+ACFeatureDimensions ACArchipelFeaturesPlugin::getFeaturesDimensions(){
+    ACFeatureDimensions featureDimensions;
+    featureDimensions["Year"] = 1;
+    featureDimensions["First Atoll"] = 1;
+    return featureDimensions;
 }
 
 std::vector<ACMediaFeatures*> ACArchipelFeaturesPlugin::calculate(ACMedia* theMedia, bool _save_timed_feat) {

@@ -1,7 +1,7 @@
 /**
  * @brief ACVisPlugin2Desc.cpp
  * @author Christian Frisson
- * @date 04/01/2013
+ * @date 11/03/2013
  * @copyright (c) 2013 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -52,6 +52,16 @@ void ACVisPlugin2Desc::mediaCycleSet()
     this->updateAvailableFeatures();
 }
 
+void ACVisPlugin2Desc::pluginLoaded(std::string plugin_name){
+    if(!media_cycle)
+        return;
+    ACPlugin* plugin = media_cycle->getPlugin(plugin_name);
+    if(!plugin)
+        return;
+    if(plugin->implementsPluginType(PLUGIN_TYPE_FEATURES))
+        this->updateAvailableFeatures();
+}
+
 void ACVisPlugin2Desc::assignedFeaturesChanged(){
     if(!this->media_cycle) return;
     media_cycle->updateDisplay(true);
@@ -62,11 +72,31 @@ bool ACVisPlugin2Desc::updateAvailableFeatures(){
     if(this->media_cycle){
         if(this->media_cycle->getPluginManager()){
             std::vector<std::string> feature_names;
-            std::vector<std::string> names = this->media_cycle->getListOfActivePlugins();
+            /*std::vector<std::string> names = this->media_cycle->getListOfActivePlugins();
             for (std::vector<std::string>::iterator name = names.begin();name != names.end();name++){
                 feature_names.push_back(*name + " (dim 0)");
                 //std::cout << "ACVisPlugin2Desc: feature: " << *feature << std::endl;
+            }*/
+            std::vector<std::string> plugin_names = media_cycle->getPluginManager()->getAvailableFeaturesPluginsNames(media_cycle->getMediaType());
+            for(std::vector<std::string>::iterator plugin_name = plugin_names.begin();plugin_name!=plugin_names.end();plugin_name++){
+                ACFeaturesPlugin* plugin = dynamic_cast <ACFeaturesPlugin*> (media_cycle->getPlugin(*plugin_name));
+                if(plugin){
+                    ACFeatureDimensions featdims = plugin->getFeaturesDimensions();
+                    for(ACFeatureDimensions::iterator featdim = featdims.begin(); featdim != featdims.end();featdim++){
+                        //std::cout << "ACVisPlugin2Desc: feature: " << featdim->first << " of dim " << featdim->second << std::endl;
+                        if(featdim->second == 1)
+                            feature_names.push_back(featdim->first);
+                        else if(featdim->second > 1){
+                            for(int f=0;f<featdim->second;f++){
+                                std::stringstream name;
+                                name << featdim->first << " (dim " << f << ")";
+                                feature_names.push_back(name.str());
+                            }
+                        }
+                    }
+                }
             }
+
             if(feature_names.size()>=1){
                 if(this->hasStringParameterNamed("x"))
                     this->updateStringParameter("x",feature_names.front(),feature_names);
@@ -185,13 +215,35 @@ void ACVisPlugin2Desc::extractDescMatrix(ACMediaBrowser* mediaBrowser, mat& desc
     //CF getting the first dimension of the features assigned to x and y
     std::vector<float> weight ( mediaBrowser->getWeightVector().size() );
     std::string x = this->getStringParameterValue("x");
-    size_t x_pos = x.find(" (dim");
-    if(x_pos != std::string::npos)
+    int xdim = 0;
+    size_t x_pos = x.find(" (dim ");
+    if(x_pos != std::string::npos){
+        size_t end = x.find_last_of(")");
+        std::string dim = x.substr(x_pos+6,end-x_pos-6);
+        std::stringstream ndim;
+        ndim << dim;
+        ndim >> xdim;
         x = x.substr(0,x_pos);
+        std::cout << "X: dim '" << dim << "' " << xdim << std::endl;
+    }
+    /*size_t x_pos = x.find(" (dim");
+    if(x_pos != std::string::npos)
+        x = x.substr(0,x_pos);*/
     std::string y = this->getStringParameterValue("y");
-    size_t y_pos = y.find(" (dim");
-    if(y_pos != std::string::npos)
+    int ydim = 0;
+    size_t y_pos = y.find(" (dim ");
+    if(y_pos != std::string::npos){
+        size_t end = y.find_last_of(")");
+        std::string dim = y.substr(y_pos+6,end-y_pos-6);
+        std::stringstream ndim;
+        ndim << dim;
+        ndim >> ydim;
         y = y.substr(0,y_pos);
+        std::cout << "Y: dim '" << dim << "' " << ydim << std::endl;
+    }
+    /*size_t y_pos = y.find(" (dim");
+    if(y_pos != std::string::npos)
+        y = y.substr(0,y_pos);*/
 
     desc_m.set_size(nbMedia,2);
 
@@ -199,29 +251,37 @@ void ACVisPlugin2Desc::extractDescMatrix(ACMediaBrowser* mediaBrowser, mat& desc
     int i=0;
     for(ACMedias::iterator media = medias.begin();media!=medias.end();media++){
         //std::cout << "ACVisPlugin2Desc::extractDescMatrix: media " << media->first << " '" << media->second->getFileName() << "'" << std::endl;
+        ACMedia* current = 0;
+        desc_m(i,0) = 0;
+        desc_m(i,1) = 0;
+
         if(library_type == media->second->getMediaType() ) {
-            desc_m(i,0) = media->second->getPreProcFeaturesVector(x)->getFeatureElement(0);
-            desc_m(i,1) = media->second->getPreProcFeaturesVector(y)->getFeatureElement(0);
+            current = media->second;
         }
         else {
-
             int parentId = media->second->getParentId();
             if (parentId > -1){
-                desc_m(i,0) = 0;
-                desc_m(i,1) = 0;
-                ACMedia* parent = mediaBrowser->getLibrary()->getMedia(parentId);
-                if(parent){
-                    desc_m(i,0) = parent->getPreProcFeaturesVector(x)->getFeatureElement(0);
-                    desc_m(i,1) = parent->getPreProcFeaturesVector(y)->getFeatureElement(0);
-                }
-                else{
-                    std::cerr << "ACVisPlugin2Desc::extractDescMatrix: media of id " << media->first << " has no parent" << std::endl;
+                current = mediaBrowser->getLibrary()->getMedia(parentId);
+                if(!current){
+                     std::cerr << "ACVisPlugin2Desc::extractDescMatrix: media of id " << media->first << " has no parent" << std::endl;
                 }
             }
             else{
                 std::cerr << "ACVisPlugin2Desc::extractDescMatrix: media of id " << media->first << " has no parent id" << std::endl;
             }
         }
+
+        if(current){
+            ACMediaFeatures* x_feat = current->getPreProcFeaturesVector(x);
+            if(x_feat){
+                desc_m(i,0) = x_feat->getFeatureElement(xdim);
+            }
+            ACMediaFeatures* y_feat = current->getPreProcFeaturesVector(y);
+            if(y_feat){
+                desc_m(i,1) = y_feat->getFeatureElement(ydim);
+            }
+        }
+
         i++;
     }
 

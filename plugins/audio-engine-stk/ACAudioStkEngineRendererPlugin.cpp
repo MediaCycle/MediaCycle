@@ -64,9 +64,9 @@ ACAudioStkEngineRendererPlugin::ACAudioStkEngineRendererPlugin() : QObject(), AC
         this->addNumberParameter("Rate",1.0,-10.0,10.0,0.01,"Rate",boost::bind(&ACAudioStkEngineRendererPlugin::updateRate,this));
 
     if(this->hasNumberParameterNamed("Grain Voices"))
-        this->updateNumberParameter("Grain Voices",1,1,10,1,"Grain Voices",boost::bind(&ACAudioStkEngineRendererPlugin::updateGrainVoices,this));
+        this->updateNumberParameter("Grain Voices",1,0,25,1,"Grain Voices",boost::bind(&ACAudioStkEngineRendererPlugin::updateGrainVoices,this));
     else
-        this->addNumberParameter("Grain Voices",1,1,10,1,"Grain Voices",boost::bind(&ACAudioStkEngineRendererPlugin::updateGrainVoices,this));
+        this->addNumberParameter("Grain Voices",1,0,25,1,"Grain Voices",boost::bind(&ACAudioStkEngineRendererPlugin::updateGrainVoices,this));
 
     if(this->hasNumberParameterNamed("Grain Randomness")) // factor between 0 - 1.0
         this->updateNumberParameter("Grain Randomness",0,0,1,0.1,"Grain Randomness",boost::bind(&ACAudioStkEngineRendererPlugin::updateGrainRandomness,this));
@@ -79,9 +79,9 @@ ACAudioStkEngineRendererPlugin::ACAudioStkEngineRendererPlugin() : QObject(), AC
         this->addNumberParameter("Grain Stretch",1,1,1000,1,"Grain Stretch",boost::bind(&ACAudioStkEngineRendererPlugin::updateGrainStretch,this));
 
     if(this->hasNumberParameterNamed("Grain Duration")) //duration (ms)
-        this->updateNumberParameter("Grain Duration",1000,1,1000,1,"Grain Duration (ms)",boost::bind(&ACAudioStkEngineRendererPlugin::updateGrainParameters,this));
+        this->updateNumberParameter("Grain Duration",1000,1,10000,1,"Grain Duration (ms)",boost::bind(&ACAudioStkEngineRendererPlugin::updateGrainParameters,this));
     else
-        this->addNumberParameter("Grain Duration",1000,0,1000,1,"Grain Duration (ms)",boost::bind(&ACAudioStkEngineRendererPlugin::updateGrainParameters,this));
+        this->addNumberParameter("Grain Duration",1000,0,10000,1,"Grain Duration (ms)",boost::bind(&ACAudioStkEngineRendererPlugin::updateGrainParameters,this));
 
     if(this->hasNumberParameterNamed("Grain Ramp")) //ramp: envelope percent (0-100)
         this->updateNumberParameter("Grain Ramp",100,0,100,1,"Grain Ramp (envelope percent)",boost::bind(&ACAudioStkEngineRendererPlugin::updateGrainParameters,this));
@@ -94,9 +94,9 @@ ACAudioStkEngineRendererPlugin::ACAudioStkEngineRendererPlugin() : QObject(), AC
         this->addNumberParameter("Grain Offset",100,0,1000,1,"Grain Offset (hop time between grains in ms)",boost::bind(&ACAudioStkEngineRendererPlugin::updateGrainParameters,this));
 
     if(this->hasNumberParameterNamed("Grain Delay")) //delay: pause time between grains (ms)
-        this->updateNumberParameter("Grain Delay",100,0,1000,1,"Grain Delay (pause time between grains in ms)",boost::bind(&ACAudioStkEngineRendererPlugin::updateGrainParameters,this));
+        this->updateNumberParameter("Grain Delay",100,0,10000,1,"Grain Delay (pause time between grains in ms)",boost::bind(&ACAudioStkEngineRendererPlugin::updateGrainParameters,this));
     else
-        this->addNumberParameter("Grain Delay",100,0,1000,1,"Grain Delay (pause time between grains in ms)",boost::bind(&ACAudioStkEngineRendererPlugin::updateGrainParameters,this));
+        this->addNumberParameter("Grain Delay",100,0,10000,1,"Grain Delay (pause time between grains in ms)",boost::bind(&ACAudioStkEngineRendererPlugin::updateGrainParameters,this));
 
     /*if(this->hasNumberParameterNamed("Volume"))
         this->updateNumberParameter("Volume",100,1,100,1,"Main volume",boost::bind(&ACAudioStkEngineRendererPlugin::updateVolume,this));

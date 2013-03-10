@@ -45,7 +45,6 @@ ACVideoMotionOrientationPlugin::ACVideoMotionOrientationPlugin() : ACTimedFeatur
     this->mName = "Video Motion Orientation";
     this->mDescription = "Motion Orientation";
     this->mId = "";
-    this->mDescriptorsList.push_back("Motion Orientation");
     this->videoAn = 0;
 }
 
@@ -56,6 +55,12 @@ ACVideoMotionOrientationPlugin::~ACVideoMotionOrientationPlugin() {
 void ACVideoMotionOrientationPlugin::clean(){
 	if (videoAn != 0)
 		delete videoAn;
+}
+
+ACFeatureDimensions ACVideoMotionOrientationPlugin::getFeaturesDimensions(){
+    ACFeatureDimensions featureDimensions;
+    featureDimensions["Motion Orientation"] = 1;
+    return featureDimensions;
 }
 
 // computes global orientation
@@ -70,7 +75,7 @@ std::vector<ACMediaFeatures*> ACVideoMotionOrientationPlugin::calculate(ACMedia*
 	videoAn->computeGlobalOrientation();
 	vector<float> t = videoAn->getTimeStamps();
 	std::vector<float> angles = videoAn->getGlobalOrientations();
-	ACMediaTimedFeature* ps_mtf = new ACMediaTimedFeature(t,angles, "Global Orientations");
+    ACMediaTimedFeature* ps_mtf = new ACMediaTimedFeature(t,angles, "Motion Orientation");
 
 	//XS TODO: this could be angular_mean in ACMediaTimedFeatures
 	// special mean for angles !
@@ -85,7 +90,7 @@ std::vector<ACMediaFeatures*> ACVideoMotionOrientationPlugin::calculate(ACMedia*
 		average_angle=atan2(yy,xx)*180/CV_PI; // in degrees
 	
 	ACMediaFeatures* mean_mf = new ACMediaFeatures();  
-	mean_mf->setName("Mean of Global Orientations");
+    mean_mf->setName("Global Orientations");
 	mean_mf=ps_mtf->mean();
 	videoFeatures.push_back(mean_mf);
 

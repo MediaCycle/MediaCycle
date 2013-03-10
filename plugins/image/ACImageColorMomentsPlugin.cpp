@@ -45,10 +45,16 @@ ACImageColorMomentsPlugin::ACImageColorMomentsPlugin() {
     this->mName = "Color Moments";
     this->mDescription = "Image Color Moments plugin";
     this->mId = "";
-	this->mDescriptorsList.push_back("Color Moments");
+    this->nMoments = 4;
 }
 
 ACImageColorMomentsPlugin::~ACImageColorMomentsPlugin() {
+}
+
+ACFeatureDimensions ACImageColorMomentsPlugin::getFeaturesDimensions(){
+    ACFeatureDimensions featureDimensions;
+    featureDimensions["Color Moments"] = this->nMoments;
+    return featureDimensions;
 }
 
 std::vector<ACMediaFeatures*> ACImageColorMomentsPlugin::calculate(ACMedia* _theMedia, bool _save_timed_feat) {
@@ -58,8 +64,8 @@ std::vector<ACMediaFeatures*> ACImageColorMomentsPlugin::calculate(ACMedia* _the
 	// XS TODO: which color model ?
     ACColorImageAnalysis* image = new ACColorImageAnalysis(_theMedia->getFileName());
 	
-//	ACMediaFeatures* imageColorFeatures0 = this->calculateColorFeatures(image, 4, "BGR");
-	ACMediaFeatures* imageColorFeatures = this->calculateColorFeatures(image, 4, "HSV");
+//	ACMediaFeatures* imageColorFeatures0 = this->calculateColorFeatures(image, nMoments, "BGR");
+    ACMediaFeatures* imageColorFeatures = this->calculateColorFeatures(image, nMoments, "HSV");
 	if (imageColorFeatures != 0){
 		allImageFeatures.push_back(imageColorFeatures);
 	}

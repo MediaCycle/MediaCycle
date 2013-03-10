@@ -50,10 +50,17 @@ ACImageTextureWaveletsMomentsPlugin::ACImageTextureWaveletsMomentsPlugin() {
     this->mName = "Texture Gabor";
     this->mDescription = "Image Texture Moments plugin";
     this->mId = "";
-	this->mDescriptorsList.push_back("Texture Gabor Moments");
+    this->mumax = 4;
+    this->numax = 2;
 }
 
 ACImageTextureWaveletsMomentsPlugin::~ACImageTextureWaveletsMomentsPlugin() {
+}
+
+ACFeatureDimensions ACImageTextureWaveletsMomentsPlugin::getFeaturesDimensions(){
+    ACFeatureDimensions featureDimensions;
+    featureDimensions["Texture Gabor Moments"] = this->mumax*this->numax;
+    return featureDimensions;
 }
 
 //std::vector<ACMediaFeatures*>  ACImageTextureWaveletsMomentsPlugin::calculate(std::string aFileName, bool _save_timed_feat) {
@@ -101,7 +108,7 @@ std::vector<ACMediaFeatures*> ACImageTextureWaveletsMomentsPlugin::calculate(ACM
 
 ACMediaFeatures* ACImageTextureWaveletsMomentsPlugin::calculateGaborMoments(ACColorImageAnalysis* image){
 	cout << "gabor" << endl;
-	image->computeGaborMoments(4,2); //_fft();
+    image->computeGaborMoments(this->mumax,this->numax); //_fft();
 	ACMediaFeatures* gabor_moments = new ACMediaFeatures(image->getGaborMoments(), "Texture");
 	return gabor_moments;	
 }

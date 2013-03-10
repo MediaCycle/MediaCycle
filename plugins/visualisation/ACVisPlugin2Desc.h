@@ -1,7 +1,7 @@
 /**
  * @brief ACVisPlugin2Desc.h
  * @author Christian Frisson
- * @date 04/01/2013
+ * @date 11/03/2013
  * @copyright (c) 2013 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -46,6 +46,7 @@ public:
     virtual void updateNextPositions(ACMediaBrowser* );
     virtual void mediaCycleSet();
     void assignedFeaturesChanged();
+    virtual void pluginLoaded(std::string plugin_name);
 protected:
     virtual bool updateAvailableFeatures();
     void extractDescMatrix(ACMediaBrowser* mediaBrowser, arma::mat& desc_m, std::vector<std::string> &featureNames);

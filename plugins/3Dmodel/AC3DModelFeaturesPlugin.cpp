@@ -1,7 +1,7 @@
 /**
  * @brief AC3DModelFeaturesPlugin.cpp
  * @author Christian Frisson
- * @date 04/01/2013
+ * @date 11/03/2013
  * @copyright (c) 2013 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -49,6 +49,12 @@ AC3DModelFeaturesPlugin::~AC3DModelFeaturesPlugin() {
 	
 }
 
+ACFeatureDimensions AC3DModelFeaturesPlugin::getFeaturesDimensions(){
+    ACFeatureDimensions featureDimensions;
+    featureDimensions["Bounding Box Ratios"] = 3;
+    return featureDimensions;
+}
+
 std::vector<ACMediaFeatures*> AC3DModelFeaturesPlugin::calculate(ACMedia* theMedia, bool _save_timed_feat) {
 	std::vector<ACMediaFeatures*> desc;
 //	AC3DModelData* local_model_data = 0;
@@ -94,7 +100,7 @@ std::vector<ACMediaFeatures*> AC3DModelFeaturesPlugin::calculate(ACMedia* theMed
 	ratios.set(1,extent[2]/extent[0]);
 	ratios.set(2,extent[2]/extent[1]);
 	
-	desc_bounding_box_ratio = new ACMediaFeatures(ratios, string("bounding_box_ratios"));  
+    desc_bounding_box_ratio = new ACMediaFeatures(ratios, string("Bounding Box Ratios"));
 
 	desc.push_back(desc_bounding_box_ratio);	
 		
