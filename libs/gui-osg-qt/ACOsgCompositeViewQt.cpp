@@ -349,14 +349,21 @@ void ACOsgCompositeViewQt::updateGL()
 
     if(media_cycle && media_cycle->hasBrowser())
     {
-        if(mouseover!=this->underMouse()){
-            if(this->underMouse())//Qt
-                media_cycle->getBrowser()->addMousePointer();
-            else {
-                media_cycle->getBrowser()->removeMousePointer();
+        // Automatically erase the mouse pointer if outside the view for installations, keep it for other settings
+        if(setting == AC_SETTING_INSTALLATION){
+            if(mouseover!=this->underMouse()){
+                if(this->underMouse())//Qt
+                    media_cycle->getBrowser()->addMousePointer();
+                else {
+                    media_cycle->getBrowser()->removeMousePointer();
+                }
+                //std::cout << "Mouse " << this->underMouse() << std::endl;
+                mouseover=this->underMouse();
             }
-            //std::cout << "Mouse " << this->underMouse() << std::endl;
-            mouseover=this->underMouse();
+        }
+        else{
+            if(media_cycle->getNumberOfPointers()<1)
+                media_cycle->getBrowser()->addMousePointer();
         }
         media_cycle->updateState();
         frac = media_cycle->getFrac();
