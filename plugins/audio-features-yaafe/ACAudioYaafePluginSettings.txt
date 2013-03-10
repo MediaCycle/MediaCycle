@@ -54,3 +54,13 @@ nSpectralFlatness := Flatness
 Spectral_Flatness := Output normalize="-1" version="v0.6" yaafedefinition="SpectralFlatness blockSize=512 stepSize=256"
 nFFTAbs > nSpectralFlatness
 nSpectralFlatness > Spectral_Flatness
+
+nLoudness := Loudness
+nFFTAbsSqr > nLoudness
+
+nLoudnessNormalized := Normalize NNorm="Sum"
+nLoudnessSharpness := LoudnessSharpness
+Perceptual_Sharpness := Output normalize="-1" version="v0.6" yaafedefinition="PerceptualSharpness blockSize=512 stepSize=256"
+nLoudness > nLoudnessNormalized
+nLoudnessNormalized > nLoudnessSharpness
+nLoudnessSharpness > Perceptual_Sharpness
