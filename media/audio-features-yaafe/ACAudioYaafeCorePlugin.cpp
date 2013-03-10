@@ -124,17 +124,13 @@ ACAudioYaafeCorePlugin::ACAudioYaafeCorePlugin() : ACTimedFeaturesPlugin() {
     dataflowLoaded = false;
     factoriesRegistered = false;
 
-    with_min = true;
-    with_mean = true;
-    with_max = true;
-    /*with_centroid = true;
+    with_min = false;
+    with_mean = false;
+    with_max = false;
+    with_centroid = true;
     with_spread = true;
     with_skewness = true;
-    with_kurtosis = true;*/
-    with_centroid = false;
-    with_spread = false;
-    with_skewness = false;
-    with_kurtosis = false;
+    with_kurtosis = true;
 
     //DataBlock::setPreferedBlockSize(1024);
 
