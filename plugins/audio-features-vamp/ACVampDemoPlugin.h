@@ -48,8 +48,7 @@ public:
 	
     virtual std::vector<ACMediaFeatures*> calculate(){return std::vector<ACMediaFeatures*>();}
     virtual std::vector<ACMediaFeatures*> calculate(ACMedia*, bool _save_timed_feat=false);
-	
-private:
+    virtual ACFeatureDimensions getFeaturesDimensions(){return ACFeatureDimensions();}
 };
 
 #endif	/* _ACVAMPDEMOPLUGIN_H */

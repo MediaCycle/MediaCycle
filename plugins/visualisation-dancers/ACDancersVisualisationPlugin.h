@@ -1,8 +1,8 @@
 /**
- * @brief ACVisualisationPlugin.h
+ * @brief ACDancersVisualisationPlugin.h
  * @author Christian Frisson
- * @date 04/12/2012
- * @copyright (c) 2012 – UMONS - Numediart
+ * @date 11/03/2013
+ * @copyright (c) 2013 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -35,13 +35,13 @@
 #include "ACMediaBrowser.h"
 #include "ACMediaTimedFeature.h"
 
-#ifndef _ACVISUALISATIONPLUGIN_
-#define _ACVISUALISATIONPLUGIN_
+#ifndef _ACDancersVisualisationPlugin_
+#define _ACDancersVisualisationPlugin_
 
-class ACVisualisationPlugin : public ACClusterPositionsPlugin {
+class ACDancersVisualisationPlugin : public ACClusterPositionsPlugin {
 public:
-  ACVisualisationPlugin();
-  ~ACVisualisationPlugin();
+  ACDancersVisualisationPlugin();
+  ~ACDancersVisualisationPlugin();
 
 //  virtual void updateClusters(ACMediaBrowser* );
   virtual void updateNextPositions(ACMediaBrowser* );
@@ -55,6 +55,6 @@ public:
 protected:
 };
 
-#endif	/* _ACVISUALISATIONPLUGIN_ */
+#endif	/* _ACDancersVisualisationPlugin_ */
 
 

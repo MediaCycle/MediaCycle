@@ -50,7 +50,7 @@ ACAudioFeaturesPlugin::ACAudioFeaturesPlugin() {
     this->mDescription = "AudioFeatures plugin";
     this->mId = "";
     //this->mtf_file_name = "";
-    this->mfccNb = 13
+    this->mfccNb = 13;
 }
 
 ACAudioFeaturesPlugin::~ACAudioFeaturesPlugin() {

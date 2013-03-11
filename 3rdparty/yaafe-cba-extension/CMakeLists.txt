@@ -1,6 +1,7 @@
 IF(SUPPORT_AUDIO AND USE_YAAFE)
 #cmake_minimum_required (VERSION 2.6)
 #project (yaafe CXX C)
+include_directories("${CMAKE_SOURCE_DIR}/3rdparty/yaafe/src_cpp")
 include_directories(src_cpp)#CF
 #set (CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake-modules")
 

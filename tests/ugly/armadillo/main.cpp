@@ -38,7 +38,7 @@
 
 #include "knn.h"
 #include "ClassificatorErrorMeasure.h"
-#include "Trustworthiness.h"
+//#include "Trustworthiness.h"
 
 #include "Batch.h"
 using namespace std;
@@ -89,14 +89,14 @@ int main(int argc, char** argv) {
     
     
     cout<<"L:"<<L<<endl;
-    Trustworthiness algo;
+//    Trustworthiness algo;
     
     ucolvec Ltemp=L.col(1);
     
-    algo.setFeatureMatrixHighDim(X);
-    algo.setFeatureMatrixLowDim(X);
+//    algo.setFeatureMatrixHighDim(X);
+//    algo.setFeatureMatrixLowDim(X);
     //algo.setDistanceMatrix(H);
-    cout<<algo.compute(10)<<endl;
+//    cout<<algo.compute(10)<<endl;
    // cout<<"result:"<<endl;
      //   cout<<result;}
     return (EXIT_SUCCESS);

@@ -1,8 +1,8 @@
 /**
- * @brief ACVisualisationPlugin.cpp
+ * @brief ACDancersVisualisationPlugin.cpp
  * @author Christian Frisson
- * @date 04/12/2012
- * @copyright (c) 2012 – UMONS - Numediart
+ * @date 11/03/2013
+ * @copyright (c) 2013 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -32,12 +32,12 @@
 #include <armadillo>
 #include "Armadillo-utils.h"
 #include "ACPlugin.h"
-#include "ACVisualisationPlugin.h"
+#include "ACDancersVisualisationPlugin.h"
 
 using namespace arma;
 using namespace std;
 
-ACVisualisationPlugin::ACVisualisationPlugin() : ACClusterPositionsPlugin()
+ACDancersVisualisationPlugin::ACDancersVisualisationPlugin() : ACClusterPositionsPlugin()
 {
     //vars herited from ACPlugin
     // XS TODO: are these general enough ? can we use this only for video ??
@@ -49,17 +49,17 @@ ACVisualisationPlugin::ACVisualisationPlugin() : ACClusterPositionsPlugin()
     //local vars
 }
 
-ACVisualisationPlugin::~ACVisualisationPlugin()
+ACDancersVisualisationPlugin::~ACDancersVisualisationPlugin()
 {
 }
 
 
 /*
-void ACVisualisationPlugin::updateClusters(ACMediaBrowser* mediaBrowser){
+void ACDancersVisualisationPlugin::updateClusters(ACMediaBrowser* mediaBrowser){
  this->updateNextPositions(mediaBrowser);
 }*/
 
-void ACVisualisationPlugin::updateNextPositions(ACMediaBrowser* mediaBrowser){
+void ACDancersVisualisationPlugin::updateNextPositions(ACMediaBrowser* mediaBrowser){
     int itemClicked = -1;
     int labelClicked = -1;
     int nbVideoDisplay = mediaBrowser->getNumberOfDisplayedNodes(); // should divide by nbClusters
@@ -190,7 +190,7 @@ void ACVisualisationPlugin::updateNextPositions(ACMediaBrowser* mediaBrowser){
 }
 
 
-mat ACVisualisationPlugin::updateNextPositionsInit(mat &desc_m, int nbVideoDisplay, ucolvec &toDisplay_v, mat &labelPos_m, ucolvec &labelIdx_v, colvec &labelValue_v){
+mat ACDancersVisualisationPlugin::updateNextPositionsInit(mat &desc_m, int nbVideoDisplay, ucolvec &toDisplay_v, mat &labelPos_m, ucolvec &labelIdx_v, colvec &labelValue_v){
     int libSize = desc_m.n_rows;
     int nbClusters = 4;
     // position of screen display
@@ -314,7 +314,7 @@ mat ACVisualisationPlugin::updateNextPositionsInit(mat &desc_m, int nbVideoDispl
 
 
 
-mat ACVisualisationPlugin::updateNextPositionsInit2(mat &desc_m, int nbVideoDisplay, ucolvec &toDisplay_v, mat &labelPos_m, ucolvec &labelIdx_v, colvec &labelValue_v){
+mat ACDancersVisualisationPlugin::updateNextPositionsInit2(mat &desc_m, int nbVideoDisplay, ucolvec &toDisplay_v, mat &labelPos_m, ucolvec &labelIdx_v, colvec &labelValue_v){
     int nbClusters=8;
     int nbSelectedClusters = 4;
     mat desc2_m = zscore(desc_m, 0);
@@ -434,7 +434,7 @@ mat ACVisualisationPlugin::updateNextPositionsInit2(mat &desc_m, int nbVideoDisp
 }
 
 
-mat ACVisualisationPlugin::updateNextPositionsItemClicked(mat &desc_m, int nbVideoDisplay, int itemClicked, ucolvec &toDisplay_v, mat &labelPos_m, ucolvec &labelIdx_v, colvec &labelValue_v){
+mat ACDancersVisualisationPlugin::updateNextPositionsItemClicked(mat &desc_m, int nbVideoDisplay, int itemClicked, ucolvec &toDisplay_v, mat &labelPos_m, ucolvec &labelIdx_v, colvec &labelValue_v){
     int libSize = desc_m.n_rows;
     int nbClusters = 4;
     // position of screen display
@@ -496,7 +496,7 @@ mat ACVisualisationPlugin::updateNextPositionsItemClicked(mat &desc_m, int nbVid
     return posDisp_m;
 }
 
-mat ACVisualisationPlugin::updateNextPositionsItemClicked2(mat &desc_m, int nbVideoDisplay, int itemClicked, ucolvec &toDisplay_v, mat &labelPos_m, ucolvec &labelIdx_v, colvec &labelValue_v){
+mat ACDancersVisualisationPlugin::updateNextPositionsItemClicked2(mat &desc_m, int nbVideoDisplay, int itemClicked, ucolvec &toDisplay_v, mat &labelPos_m, ucolvec &labelIdx_v, colvec &labelValue_v){
     int nbClusters=3;
     labelValue_v.set_size(nbClusters);
     mat T_m, newD_m;
@@ -545,7 +545,7 @@ mat ACVisualisationPlugin::updateNextPositionsItemClicked2(mat &desc_m, int nbVi
 
 }
 
-mat ACVisualisationPlugin::updateNextPositionsItemClicked3(mat &desc_m, int nbVideoDisplay, int itemClicked, ucolvec &toDisplay_v, mat &labelPos_m, ucolvec &labelIdx_v, colvec &labelValue_v){
+mat ACDancersVisualisationPlugin::updateNextPositionsItemClicked3(mat &desc_m, int nbVideoDisplay, int itemClicked, ucolvec &toDisplay_v, mat &labelPos_m, ucolvec &labelIdx_v, colvec &labelValue_v){
     mat dispAxis_m(3,2);
     dispAxis_m(0,0) = 0;
     dispAxis_m(0,1) = 1;
@@ -624,7 +624,7 @@ mat ACVisualisationPlugin::updateNextPositionsItemClicked3(mat &desc_m, int nbVi
     return posDisp_m;
 }
 
-mat ACVisualisationPlugin::extractDescMatrix(ACMediaBrowser* mediaBrowser, int nbActiveFeatures, vector<string> &featureNames, mat &descD_m){
+mat ACDancersVisualisationPlugin::extractDescMatrix(ACMediaBrowser* mediaBrowser, int nbActiveFeatures, vector<string> &featureNames, mat &descD_m){
     ACMedias medias = mediaBrowser->getLibrary()->getAllMedia();
     std::vector<long> ids = mediaBrowser->getLibrary()->getAllMediaIds();
     int libSize = mediaBrowser->getLibrary()->getSize();
