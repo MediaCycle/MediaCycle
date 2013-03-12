@@ -33,13 +33,8 @@
 #define	ACVideoOpenCVSlitScanThumbnailerPlugin_H
 
 #include <ACPlugin.h>
-
 #include <ACOpenCVInclude.h>
-
 #include <iostream>
-
-#include <osg/Notify>
-#include <osg/Image>
 
 class ACVideoOpenCVSlitScanThumbnailerPlugin : public ACThumbnailerPlugin
 {
@@ -58,14 +53,11 @@ public:
     virtual std::vector<ACMediaThumbnail*> summarize(ACMedia* theMedia);
 
 private:
-    osg::ref_ptr<osg::Image> slit_scan;
     bool _done;
     std::string filename;
-    osg::NotifySeverity notify_level;
 protected:
     int computeSlitScan(std::string _thumbnail_filename);
 public:
-    osg::ref_ptr<osg::Image> getImage(){if (_done) return slit_scan; else return 0;}
     void setFileName(std::string _filename){filename = _filename;}
     std::string getFileName(){return filename;}
 };
