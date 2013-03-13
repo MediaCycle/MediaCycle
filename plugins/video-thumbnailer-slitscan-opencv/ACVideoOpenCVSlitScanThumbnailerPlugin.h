@@ -51,15 +51,13 @@ public:
     virtual std::vector<std::string> requiresFeaturesPlugins(); // list of plugin names (not paths)
     virtual std::vector<std::string> requiresSegmentationPlugins(); // list of plugin names (not paths)
     virtual std::vector<ACMediaThumbnail*> summarize(ACMedia* theMedia);
-
-private:
-    bool _done;
-    std::string filename;
+    virtual float getProgress(){return progress;}
+    std::string createFileName(std::string _filename, std::string _name, std::string _extension = ".png");
 protected:
-    int computeSlitScan(std::string _thumbnail_filename);
-public:
-    void setFileName(std::string _filename){filename = _filename;}
-    std::string getFileName(){return filename;}
+    std::vector<ACMediaThumbnail*> computeSlitScans(std::string _filename);
+    std::map<std::string,bool> compute;
+private:
+    float progress;
 };
 
 #endif
