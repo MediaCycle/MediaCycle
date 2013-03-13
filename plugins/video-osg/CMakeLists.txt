@@ -1,6 +1,6 @@
 SET(MEDIA_TYPE "video")
 SET(PLUGIN_NAME "video-osg")
-SET(MC_MEDIA_LIBS "image-core;image-osg;${MEDIA_TYPE}-core;${MEDIA_TYPE}-osg")
+SET(MC_MEDIA_LIBS "${MEDIA_TYPE}-core;${MEDIA_TYPE}-osg")
 list(APPEND 3RDPARTY_NAMES "OpenCV")
 list(APPEND 3RDPARTY_LICENSES "BSD")
 list(APPEND 3RDPARTY_URLS "http://opencv.willowgarage.com")

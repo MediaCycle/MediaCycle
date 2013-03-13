@@ -54,6 +54,14 @@ public:
     std::vector<std::string> getName();
     int getSize(ACMediaType MediaType);
     void log();
+    // Defined inside the declaration because this is a template class
+    std::vector<T *> getPlugins(ACMediaType MediaType){
+        std::vector< T *> plugins;
+        for (typename std::vector< T *>::iterator iter_vec = mCurrPlugin[MediaType].begin(); iter_vec != mCurrPlugin[MediaType].end(); iter_vec++) {
+            plugins.push_back(((T *) (*iter_vec)));
+        }
+        return plugins;
+    }
 protected:	
     std::map<ACMediaType,std::vector<T *> > mCurrPlugin;
     //	ACPreProcessPlugin* mCurrPreProcessPlugin;
@@ -182,7 +190,7 @@ protected:
     void updateActivePluginLists();
 
 private:
-    std::vector<ACPluginLibrary *> mPluginLibrary;	
+    std::vector<ACPluginLibrary *> mPluginLibrary;
     ACAvailableFeaturesPlugins* mAvailableFeaturePlugins;
     ACAvailableSegmentPlugins* mAvailableSegmentPlugins;
     ACAvailableSegmentPlugins* mActiveSegmentPlugins;

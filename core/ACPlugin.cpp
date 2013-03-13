@@ -497,7 +497,11 @@ ACMediaRendererPlugin::ACMediaRendererPlugin() : ACPlugin() {
     this->mPluginType = mPluginType | PLUGIN_TYPE_MEDIARENDERER;
 }
 
-ACFeaturesPlugin::ACFeaturesPlugin() : ACPlugin() {
+ACMediaAnalysisPlugin::ACMediaAnalysisPlugin() : ACPlugin() {
+    this->mPluginType = mPluginType | PLUGIN_TYPE_MEDIA_ANALYSIS;
+}
+
+ACFeaturesPlugin::ACFeaturesPlugin() : ACMediaAnalysisPlugin() {
     this->mPluginType = mPluginType | PLUGIN_TYPE_FEATURES;
 }
 
@@ -547,11 +551,11 @@ std::string ACTimedFeaturesPlugin::saveTimedFeatures(ACMediaTimedFeature* mtf, s
     return string(""); // nothing to do
 }
 
-ACSegmentationPlugin::ACSegmentationPlugin() : ACPlugin(){
+ACSegmentationPlugin::ACSegmentationPlugin() : ACMediaAnalysisPlugin(){
     this->mPluginType = mPluginType | PLUGIN_TYPE_SEGMENTATION;
 }
 
-ACThumbnailerPlugin::ACThumbnailerPlugin() : ACPlugin() {
+ACThumbnailerPlugin::ACThumbnailerPlugin() : ACMediaAnalysisPlugin() {
     this->mPluginType = mPluginType | PLUGIN_TYPE_THUMBNAILER;
 }
 

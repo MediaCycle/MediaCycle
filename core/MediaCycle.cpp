@@ -435,6 +435,7 @@ int MediaCycle::importDirectories(vector<string> directories, int recursive, boo
     //t1 = getTime();
 
     n = filenames.size();
+    this->mediaLibrary->addNumberOfFilesToImport(n);
     eventManager->sig_mediaImported(0,n,-1);
 
     /*

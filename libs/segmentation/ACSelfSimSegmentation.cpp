@@ -57,6 +57,8 @@ ACSelfSimSegmentation::ACSelfSimSegmentation() : SelfSimThresh(0.01), L(2), Wmin
     distance_types.push_back("cosine");
     distance_types.push_back("euclidean");
     distance_types.push_back("manhattan");
+
+    this->progress = 0.0f;
 }
 
 ACSelfSimSegmentation::~ACSelfSimSegmentation() {
@@ -64,6 +66,7 @@ ACSelfSimSegmentation::~ACSelfSimSegmentation() {
 
 std::vector<ACMedia*> ACSelfSimSegmentation::_segment(ACMediaTimedFeature* _MTF, ACMedia* _theMedia){
 
+    this->progress = 0.0f;
     //Taking a part of the features for segmentation
     const vector<string> testNames=_MTF->getNames();
     //cout << "ACSelfSimSegmentation::segment featureName"<<endl;
@@ -204,6 +207,8 @@ std::vector<int> ACSelfSimSegmentation::segment(std::vector <ACMediaTimedFeature
     this->DistanceType=_D;
     cerr<< " " << SelfSimThresh << " " << L << " " << Wmin << " " << KernelType << " " << DistanceType << endl;
 
+    this->progress = 0.0f;
+
     //ccl (taken from ACBicSegmentation)
     std::vector<int> segments_limits = this->_segment();
     int Nseg = segments_limits.size();
@@ -222,8 +227,8 @@ std::vector<int> ACSelfSimSegmentation::segment(std::vector <ACMediaTimedFeature
         Nseg++;
     }
 
+    this->progress = 1.0f;
     return (segments_limits);
-
 }
 
 //supposes we have defined:
@@ -234,6 +239,8 @@ std::vector<int> ACSelfSimSegmentation::segment(std::vector <ACMediaTimedFeature
 std::vector<int> ACSelfSimSegmentation::_segment(){
     // XS test most significant segment (only one)
     // this->findSingleSegment(0,this->full_features.n_cols-1);
+
+    this->progress = 0.0f;
 
     //compute self-similarity
     arma::fmat SelfSim;
@@ -251,6 +258,7 @@ std::vector<int> ACSelfSimSegmentation::_segment(){
                 SelfSim(k,i) = computeDistance(i,i+k);
             }
         }
+        this->progress += 0.4f / (float) n_frames;
     }
 
     /*arma::fmat A=arma::trans(SelfSim);
@@ -281,6 +289,7 @@ std::vector<int> ACSelfSimSegmentation::_segment(){
         //novelty(i)*=2/sumkernel;
         novelty(i)/=sumkernel;
         //cout << "frame: " << i << "normalized novelty: " << novelty(i) << endl;
+        this->progress += 0.3f / (float) n_frames;
     }
 
     //find novelty peaks:
@@ -292,6 +301,7 @@ std::vector<int> ACSelfSimSegmentation::_segment(){
             segments_tmp.push_back(i);
             i+=Wmin-1;
         }
+        this->progress += 0.3f / (float) this->full_features.n_cols;
     }
 
     /*int seg_i = 0;
@@ -307,6 +317,7 @@ std::vector<int> ACSelfSimSegmentation::_segment(){
   seg_f += sampling_rate;
  }*/
 
+    this->progress = 1.0f;
     return segments_tmp;
 
 }

@@ -46,6 +46,32 @@
 #define TIXML_USE_STL
 #include <tinyxml.h>
 
+/// These import steps must be ordered and indexed incrementally
+typedef	unsigned int ACImportStep;
+const ACImportStep	IMPORT_STEP_UNKNOWN     	=	0;
+const ACImportStep	IMPORT_STEP_THUMB_PRE_FEAT	=	1;
+const ACImportStep	IMPORT_STEP_FEATURES    	=	2;
+const ACImportStep	IMPORT_STEP_THUMB_POST_FEAT	=	3;
+const ACImportStep	IMPORT_STEP_SEGMENT     	=	4;
+const ACImportStep	IMPORT_STEP_THUMB_POST_SEG	=	5;
+
+// conversion between import steps and their names
+typedef std::map<ACImportStep,std::string> ACImportSteps;
+typedef std::map<ACImportStep,std::string>::const_iterator ACImportStepsIterator;
+
+// initialize static class variable
+static const ACImportSteps::value_type _initis[] = {
+    //IMPORT_STEP_UNKNOWN shouldn't be mapped so that the number of import steps is known from import_steps.size()
+    ACImportSteps::value_type(IMPORT_STEP_THUMB_PRE_FEAT, "Thumbnailing without features and segmentation"), \
+    ACImportSteps::value_type(IMPORT_STEP_FEATURES, "Feature extraction"), \
+    ACImportSteps::value_type(IMPORT_STEP_THUMB_POST_FEAT, "Thumbnailing with features, without segmentation"), \
+    ACImportSteps::value_type(IMPORT_STEP_SEGMENT, "Segmentation"), \
+    ACImportSteps::value_type(IMPORT_STEP_THUMB_POST_SEG, "Thumbnailing with features and segmentation")
+};
+static const int import_steps_pre_seg = 3; /// to be adapted if new import steps are created
+// useful to loop over import steps
+static const ACImportSteps import_steps(_initis, _initis + sizeof _initis / sizeof *_initis);
+
 typedef std::vector<ACMediaThumbnail*> ACMediaThumbnails;
 
 class ACMedia {
@@ -57,6 +83,7 @@ protected:
 
     int mid;
     int parentid; //CF so that segments can be defined as ACMedia having other ACMedia as parents
+    ACMedia* parent;
     ACMediaType media_type;
     float height, width, depth;
     std::vector<ACMediaFeatures*> features_vectors;
@@ -87,6 +114,8 @@ public:
     int getId() {return mid;}
     void setParentId(int _parentid) {parentid = _parentid;} //CF so that segments can be defined as ACMedia having other ACMedia as parents
     int getParentId() {return parentid;}
+    void setParent(ACMedia* _parent){this->parent = _parent;}
+    ACMedia* getParent(){return this->parent;}
 
     double getDuration(){return this->getEnd()-this->getStart();}
 
@@ -194,11 +223,18 @@ public:
     // 2) compute thumbnail
     // 3) extract features
     virtual int import(std::string _path, int _mid, ACPluginManager *acpl=0, bool _save_timed_feat=false);
-    
+    float getImportProgress(bool with_segmentation);
+    float getImportProgressAtStep(ACImportStep step);
+
     virtual std::string getTextMetaData(){return std::string("");}
     // FEATURES computation (extractFeatures) and segmentation (segment)
     // these methods are virtual, because each media could have a specific segmentation method
     // ex: audioSegmentationPlugin : also calculates features...
+private:
+    bool media_imported;
+    std::map<ACImportStep, float> import_progress;
+    std::map<ACImportStep, ACMediaAnalysisPlugin*> plugin_at_step;
+    std::map<ACImportStep, int> plugins_per_step;
 private:
     virtual int computeThumbnails(ACPluginManager *acpl, bool feature_extracted, bool segmentation_done);
 protected:

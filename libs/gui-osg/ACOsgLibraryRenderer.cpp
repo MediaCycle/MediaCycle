@@ -45,6 +45,7 @@ ACOsgLibraryRenderer::ACOsgLibraryRenderer()
 {
     width = 0;
     height = 0;
+    progress = 1.0f;
     this->changeSetting(this->setting);
 }
 
@@ -266,6 +267,10 @@ void ACOsgLibraryRenderer::updateImageRenderer(ACOsgLibraryImageRenderer& _rende
 
 void ACOsgLibraryRenderer::updateNodes(double ratio) {
     if(media_cycle && media_cycle->getLibrary()){
+
+        ///CF comment the following line to disable the realtime progress report
+        progress = media_cycle->getLibrary()->getImportProgress();
+
         this->updateImageRenderer(library_cover,media_cycle->getLibrary()->getCover(),library_node);
 
         if(this->library_cover.file!=""){
@@ -285,7 +290,7 @@ void ACOsgLibraryRenderer::updateNodes(double ratio) {
         //this->updateTextRenderer(library_license,media_cycle->getLibrary()->getLicense(),library_node);
         //this->updateTextRenderer(library_website,media_cycle->getLibrary()->getWebsite(),library_node);
 
-        std:stringstream library_medias_number_info;
+std:stringstream library_medias_number_info;
         if(media_cycle->getBrowserMode() == AC_MODE_NEIGHBORS)
             library_medias_number_info << media_cycle->getNumberOfMediaNodes() << "/";
         library_medias_number_info << media_cycle->getLibrarySize();
@@ -294,9 +299,14 @@ void ACOsgLibraryRenderer::updateNodes(double ratio) {
             int files_processed = media_cycle->getLibrary()->getNumberOfFilesProcessed();
             library_medias_number_info << " (importing " << files_processed << "/" << files_to_import << ")";
         }*/
+        if(progress<1.0f){
+            int files_to_import = media_cycle->getLibrary()->getNumberOfFilesToImport();
+            int files_processed = media_cycle->getLibrary()->getNumberOfFilesProcessed();
+            library_medias_number_info << " (importing " << files_processed+1 << "/" << files_to_import << ": " << progress*100 << "%)";
+        }
 
         this->updateTextRenderer(library_medias_number,library_medias_number_info.str(),library_node);
-       // cout<<"test:"<<library_medias_number.text->getFont()->getFileName()<<"\t"<<library_medias_number.text->getText().createUTF8EncodedString ()<<endl;
+        // cout<<"test:"<<library_medias_number.text->getFont()->getFileName()<<"\t"<<library_medias_number.text->getText().createUTF8EncodedString ()<<endl;
         this->updateImageRenderer(curator_picture,media_cycle->getLibrary()->getCuratorPicture(),curator_node);
 
         if(this->library_cover.file!=""){

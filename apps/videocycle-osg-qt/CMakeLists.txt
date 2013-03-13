@@ -5,8 +5,8 @@ IF ( BUILD_VIDEOCYCLE_APP AND SUPPORT_VIDEO AND USE_QT4 AND USE_OSG AND USE_OSC 
 	SET(WITH_OSC ON)
 
 	SET(MEDIA_TYPE "MEDIA_TYPE_VIDEO")
-        SET(MC_PLUGINS "file;io-osc;pcapreprocess;segmentation;video;video-reader-opencv;video-osg;video-segmentation;video-thumbnailer-resize;video-thumbnailer-slitscan-ffmpeg;video-browser-showdown;visualisation")
-        #video-thumbnailer-slitscan-opencv
+        SET(MC_PLUGINS "video;file;video-reader-opencv;video-osg;video-thumbnailer-resize;video-thumbnailer-slitscan-opencv;segmentation;video-segmentation;visualisation")
+        #pcapreprocess;io-osc
 	#SET(CLUSTERS_METHOD "MediaCycle Child KMeans")
         SET(OSG_PLUGINS "osgdb_ffmpeg")
         SET(DESCRIPTION "VideoCycle allows to visually organize video files by similarity.")

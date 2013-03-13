@@ -48,12 +48,13 @@ public:
 
     std::vector<ACMedia*> segment(ACMediaTimedFeature* _MTF, ACMedia* _theMedia);
     virtual std::vector<ACMedia*> segment(ACMedia*){return std::vector<ACMedia*>();}
+    virtual float getProgress(){return progress;}
 
     void setParameters(float _lambda = 1, int _samplingrate = 1, int _Wmin = 20, float _bic_thresh = 1, int _jump_width = 5, int _discard_borders = 5);
 
     arma::fmat get_features() {
         return full_features;
-    }; //JU: added to ease the visualization during the tests
+    } //JU: added to ease the visualization during the tests
 
     // XS todo: synchronize default values between constructor and segment
     std::vector<int> testSegment(arma::fmat _M, float _lambda = 1, int _samplingrate = 1, int _Wmin = 20, float _bic_thresh = 1, int _jump_width = 5, int _discard_borders = 5);
@@ -88,6 +89,7 @@ private:
     int discard_borders;
 
     arma::fmat full_features;
+    float progress;
 };
 
 

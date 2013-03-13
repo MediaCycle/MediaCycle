@@ -50,6 +50,7 @@ public:
     ~ACVideoMotionOrientationPlugin();
     virtual std::vector<ACMediaFeatures*> calculate(ACMedia* theMedia, bool _save_timed_feat = false);
     virtual ACFeatureDimensions getFeaturesDimensions();
+    virtual float getProgress(){return (videoAn!=0) ? videoAn->getProgress() : 0.0f;}
 private:
     ACVideoAnalysis* videoAn;
     void clean();

@@ -54,7 +54,7 @@ void ACVideoOpticalFlowPlugin::clean(){
 
 ACFeatureDimensions ACVideoOpticalFlowPlugin::getFeaturesDimensions(){
     ACFeatureDimensions featureDimensions;
-    featureDimensions["Optical Flow"] = 2;
+    featureDimensions["Optical Flow: Mean"] = 2;
     return featureDimensions;
 }
 

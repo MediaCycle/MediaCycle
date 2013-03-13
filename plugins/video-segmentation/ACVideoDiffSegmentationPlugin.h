@@ -20,6 +20,7 @@ public:
     
     virtual std::vector<ACMedia*> segment(ACMedia*);
     std::vector<ACMedia*> segment(ACMediaTimedFeature* _MTF, ACMedia* _theMedia);
+    virtual float getProgress(){return progress;}
     
 private:
     std::vector<ACMedia*> _segment(ACMedia* _theMedia);
@@ -27,6 +28,7 @@ private:
     int method;
     std::vector<std::string> methods;
     float threshold;
+    float progress;
 };
 
 #endif /* defined(__MediaCycle__ACVideoDiffSegmentationPlugin__) */

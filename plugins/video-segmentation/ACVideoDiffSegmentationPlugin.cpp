@@ -22,6 +22,7 @@ ACVideoDiffSegmentationPlugin::ACVideoDiffSegmentationPlugin() : ACSegmentationP
     this->method = 0;
     this->addNumberParameter("threshold",0.4,0,1,0.05,"pike detection threshold");
     //this->addStringParameter("method",methods[method],methods,"method");
+    this->progress = 0.0f;
 }
 
 ACVideoDiffSegmentationPlugin::~ACVideoDiffSegmentationPlugin() {
@@ -41,6 +42,8 @@ std::vector<ACMedia*> ACVideoDiffSegmentationPlugin::segment(ACMedia* theMedia) 
     std::cout << "ACVideoDiffSegmentationPlugin::segmenting media " << theMedia->getFileName() << std::endl;
     threshold=this->getNumberParameterValue("threshold");
     
+    this->progress = 0.0f;
+
     std::string video_filename = theMedia->getThumbnailFileName("Timeline Resized");
     if(video_filename == "")
         video_filename = theMedia->getFileName();
@@ -81,11 +84,14 @@ std::vector<ACMedia*> ACVideoDiffSegmentationPlugin::segment(ACMedia* theMedia) 
             imgNext.release();
             imgTemp2.release();
             imgTemp.release();
+            this->progress += 0.75f / (float) lMax;
+
         }
         fcolvec medVec(lMax);
         //std::cout<<diffImage<<std::endl;
         for (int cpt=0;cpt<lMax-2;cpt++){
             medVec[cpt]=median(diffImage.subvec(cpt,cpt+2));
+            this->progress += 0.15f / (float) (lMax-2);
         }
         //std::cout<<medVec<<std::endl;
         medVec[lMax-2]=medVec[lMax-3];
@@ -112,6 +118,7 @@ std::vector<ACMedia*> ACVideoDiffSegmentationPlugin::segment(ACMedia* theMedia) 
         int Nseg = segments_limits.size();
         if (Nseg == 0) {
             cerr << "< ACVideoDiffSegmentationPlugin::segment> : no segments" << endl;
+            this->progress = 1.0f;
             return segments; // XS check this
         }
         
@@ -149,13 +156,15 @@ std::vector<ACMedia*> ACVideoDiffSegmentationPlugin::segment(ACMedia* theMedia) 
 
             media->setId(theMedia->getId()+i+1); // XS TODO check this, it is overlapping with another ID ?
             segments.push_back(media);
+            this->progress += 0.1f / (float) (Nseg-1);
         }
 
     }
     else{//Only one segment
         cerr << "< ACVideoDiffSegmentationPlugin::segment> : no segments" << endl;
+        this->progress = 1.0f;
         return segments; // XS check this
     }
-
+    this->progress = 1.0f;
     return segments;
 }

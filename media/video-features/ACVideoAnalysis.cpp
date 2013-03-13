@@ -67,12 +67,14 @@ const int ACVideoAnalysis::ystar = 150;
 // -----------
 
 ACVideoAnalysis::ACVideoAnalysis() {
+    progress = 0;
     capture = 0;
     clean();
     // NOT initialized, has to be done from outside after setting file name
 }
 
 ACVideoAnalysis::ACVideoAnalysis(const string &filename) {
+    progress = 0;
     clean();
     FROM_FILE = true;
     setFileName(filename);
@@ -83,6 +85,7 @@ ACVideoAnalysis::ACVideoAnalysis(const string &filename) {
 // this is normally what plugins should call
 
 ACVideoAnalysis::ACVideoAnalysis(ACMedia* media, int _frameStart, int _frameStop) {
+    progress = 0;
     clean();
     file_name = media->getFileName();
     FROM_FILE = true;
@@ -105,6 +108,7 @@ void ACVideoAnalysis::clean() {
     // no, we should not release the capture, since it comes from outside.
     // we don't make "new" capture, we just set a pointer to an existing one (which will be deleted outside)
     //	if (capture != 0) cvReleaseCapture(&capture);
+    progress = 0;
     FROM_FILE = false;
     HAS_TRAJECTORY = false;
     HAS_BLOBS = false;
@@ -137,6 +141,7 @@ void ACVideoAnalysis::clean() {
 
 // XS double rewind to make sure first frame is zero (or frameStart)
 void ACVideoAnalysis::rewind() {
+    progress = 0;
     capture->set(CV_CAP_PROP_POS_FRAMES, this->frameStart);
     cv::Mat tmp_frame;
     *capture >> tmp_frame;
@@ -1140,6 +1145,7 @@ void ACVideoAnalysis::computeOpticalFlow2() {
             break;
 #endif // VISUAL_CHECK
 
+        this->progress = (float)(ifram-this->frameStart)/(float)(this->frameStop-this->frameStart);
         std::cout << "ACVideoAnalysis::computeOpticalFlow2: computed frame " << ifram << " from " << this->frameStart << " to " << this->frameStop << " ("  << 100.0f*(float)(ifram-this->frameStart)/(float)(this->frameStop-this->frameStart) << "%)" << std::endl;
      }
 }
@@ -1732,6 +1738,7 @@ void ACVideoAnalysis::computeGlobalPixelsSpeed() {
 #endif //VISUAL_CHECK
         }
 
+        this->progress = (float)(i-this->frameStart)/(float)(this->frameStop-this->frameStart);
         std::cout << "ACVideoAnalysis::computeGlobalPixelsSpeed: computed frame " << i << " from " << this->frameStart << " to " << this->frameStop << " ("  << 100.0f*(float)(i-this->frameStart)/(float)(this->frameStop-this->frameStart) << "%)" << std::endl;
     }
 
@@ -1813,6 +1820,7 @@ void ACVideoAnalysis::computeColorMoments(int n, string cm) {
 
         color_moments.push_back(color_frame.getColorMoments());
 
+        this->progress = (float)(ifram-this->frameStart)/(float)(this->frameStop-this->frameStart);
         std::cout << "ACVideoAnalysis::computeColorMoments: computed frame " << ifram << " from " << this->frameStart << " to " << this->frameStop << " ("  << 100.0f*(float)(ifram-this->frameStart)/(float)(this->frameStop-this->frameStart) << "%)" << std::endl;
     }
 #ifdef VISUAL_CHECK
@@ -1962,6 +1970,7 @@ void ACVideoAnalysis::computeRigidTransform() {
 
 
         }
+        this->progress = (float)(i-this->frameStart)/(float)(this->frameStop-this->frameStart);
         std::cout << "ACVideoAnalysis::computeRigidTransform: computed frame " << i << " from " << this->frameStart << " to " << this->frameStop << " ("  << 100.0f*(float)(i-this->frameStart)/(float)(this->frameStop-this->frameStart) << "%)" << std::endl;
     }
 }
@@ -2115,6 +2124,7 @@ void ACVideoAnalysis::computeGlobalOrientation() {
             break;
 #endif //VISUAL_CHECK	
 
+        this->progress = (float)(ifram-this->frameStart)/(float)(this->frameStop-this->frameStart);
         std::cout << "ACVideoAnalysis::computeGlobalOrientation: computed frame " << ifram << " from " << this->frameStart << " to " << this->frameStop << " ("  << 100.0f*(float)(ifram-this->frameStart)/(float)(this->frameStop-this->frameStart) << "%)" << std::endl;
     }
 

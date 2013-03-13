@@ -154,9 +154,11 @@ public:
     // returns the media id of the imported file
     int importFiles(std::vector<std::string> _filenames, ACPluginManager *acpl=0, bool doSegment=false, bool _save_timed_feat = false); //, TiXmlElement* _medias = 0);
     std::vector<int> importFile(std::string _filename, ACPluginManager *acpl=0, bool doSegment=false, bool _save_timed_feat = false); //, TiXmlElement* _medias = 0);
+    float getImportProgress();
+
     // I/O (C++ version; plain C version discontinued sep 2010)
     int setPath(std::string path);
-    std::string getPath() { return media_path; };
+    std::string getPath() { return media_path;}
     //int parseACLLibrary(std::string _path, bool aInitLib=false);
     //int parseXMLLibrary(std::string _path, bool aInitLib=false);
     int openACLLibrary(std::string _path, bool aInitLib=false);
@@ -205,7 +207,11 @@ private:
     //void setMediaID(int _id){mediaID=_id;} // XS TODO add checks ?
     int files_to_import;
     int files_processed;
+    ACMedia* media_at_import;
+    bool segmenting;
 public:
+    /// Useful when granularizing the import process externally, around importFile not aware of the number of files to import
+    void addNumberOfFilesToImport(int _number){this->files_to_import += _number;}
     int getNumberOfFilesToImport(){return files_to_import;}
     int getNumberOfFilesProcessed(){return files_processed;}
 };

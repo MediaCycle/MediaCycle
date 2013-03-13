@@ -56,6 +56,7 @@ ACBicSegmentationPlugin::ACBicSegmentationPlugin() : ACSegmentationPlugin(),lamb
     this->addNumberParameter("threshold",0.8,0,1,0.1,"threshold under which there is no segment detected");
     this->addNumberParameter("jump width",5,0,256,1,"number of frames to skip after a step has been detected");
     this->addNumberParameter("borders to discard",5,0,256,1,"?");
+    this->progress = 0.0f;
 }
 
 ACBicSegmentationPlugin::~ACBicSegmentationPlugin() {
@@ -173,13 +174,15 @@ std::vector<ACMedia*> ACBicSegmentationPlugin::segment(ACMediaTimedFeature* _MTF
     this->jump_width = this->getNumberParameterValue("jump width");
     this->discard_borders = this->getNumberParameterValue("borders to discard");
 
+    this->progress = 0.0f;
+
     //XS TODO: not efficient to transpose !!
     // make this more coherent
     this->full_features = arma::trans (_MTF -> getValue());
 
     // get the limits BETWEEN segments as integers
     // usually does not contain 0 nor the last index
-    std::vector<int> segments_limits = this->_segment();
+    std::vector<int> segments_limits = this->_segment();  // 90% contribution of the progress
 
     //transform them into ACMedia*
     vector<ACMedia*> segments;
@@ -187,6 +190,7 @@ std::vector<ACMedia*> ACBicSegmentationPlugin::segment(ACMediaTimedFeature* _MTF
     int Nseg = segments_limits.size();
     if (Nseg == 0) {
         cerr << "< ACBicSegmentationPlugin::segment> : no segments" << endl;
+        this->progress = 1.0f;
         return segments; // XS check this
     }
 
@@ -225,8 +229,10 @@ std::vector<ACMedia*> ACBicSegmentationPlugin::segment(ACMediaTimedFeature* _MTF
 
         media->setId(_theMedia->getId()+i+1); // XS TODO check this, it is overlapping with another ID ?
         segments.push_back(media);
+        this->progress += 0.1f / (float)(Nseg-1); // 10% contribution of the progress
     }
 
+    this->progress = 1.0f;
     return segments;
 }
 
@@ -308,6 +314,7 @@ std::vector<int> ACBicSegmentationPlugin::_segment(){
         else
             // segment not yet found
             seg_f += sampling_rate;
+        this->progress += 0.9f / ((float)(sampling_rate)/(float)(this->full_features.n_cols));
     }
 
     cout << "found " << segments_tmp.size() << " segment(s)" << endl;

@@ -87,6 +87,7 @@ private:
     float font_size; // in pixels
     float line_sep; // in pixels
     int width,height;
+    float progress;
 };
 
 #endif

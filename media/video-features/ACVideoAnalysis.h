@@ -298,6 +298,10 @@ private:
     int g_slider_position;
     //	MyHistogram *averageHistogram;
 
+    float progress;
+public:
+    float getProgress(){return this->progress;}
+
 };
 
 #endif	/* _ACVIDEOANALYSIS_H */

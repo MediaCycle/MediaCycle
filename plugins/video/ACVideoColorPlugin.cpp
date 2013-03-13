@@ -56,7 +56,7 @@ ACVideoColorPlugin::~ACVideoColorPlugin() {
 
 ACFeatureDimensions ACVideoColorPlugin::getFeaturesDimensions(){
     ACFeatureDimensions featureDimensions;
-    featureDimensions["Color Moments"] = this->nMoments*3;
+    featureDimensions["Color Moments: Mean"] = this->nMoments*3;
     return featureDimensions;
 }
 

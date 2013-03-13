@@ -54,7 +54,7 @@ void ACVideoRigidTransformPlugin::clean(){
 
 ACFeatureDimensions ACVideoRigidTransformPlugin::getFeaturesDimensions(){
     ACFeatureDimensions featureDimensions;
-    featureDimensions["Rigid Transforms"] = 2;
+    featureDimensions["Rigid Transforms: Mean"] = 2;
     return featureDimensions;
 }
 

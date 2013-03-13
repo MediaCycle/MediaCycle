@@ -59,6 +59,7 @@ public:
     std::vector<int> testSegment(arma::fmat _M, float _SelfSimThresh=0.8, int _L=8, int _Wmin=8, SelfSimKernelType _T=SELFSIMSTEP, SelfSimDistance _D=COSINE);
     std::vector<int> testSegment(ACMediaTimedFeature* _ACMTF, float _SelfSimThresh=0.8, int _L=8, int _Wmin=8, SelfSimKernelType _T=SELFSIMSTEP, SelfSimDistance _D=COSINE);
     std::vector<int> segment(std::vector <ACMediaTimedFeature*> _ACMTF, float _SelfSimThresh=0.8, int _L=8, int _Wmin=8, SelfSimKernelType _T=SELFSIMSTEP, SelfSimDistance _D=COSINE);
+    virtual float getProgress(){return progress;}
 
     arma::fmat get_features() {return full_features;}
 
@@ -80,6 +81,7 @@ protected:
 
     double computeDistance(int _a, int _b);
     //arma::fmat vectorACMTF2fmat(std::vector <ACMediaTimedFeature*> _ACMTF);
+    float progress;
 };
 
 #endif	// _ACSelfSimSegmentation_H

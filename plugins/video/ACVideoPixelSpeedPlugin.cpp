@@ -45,7 +45,7 @@ ACVideoPixelSpeedPlugin::ACVideoPixelSpeedPlugin() : ACTimedFeaturesPlugin() {
     //vars herited from ACPlugin
     this->mMediaType = MEDIA_TYPE_VIDEO;
     this->mName = "Video Pixel Speed";
-    this->mDescription = "Pixel_Speed";
+    this->mDescription = "Pixel Speed";
     this->mId = "";
 
     //other vars
@@ -63,7 +63,7 @@ void ACVideoPixelSpeedPlugin::clean() {
 
 ACFeatureDimensions ACVideoPixelSpeedPlugin::getFeaturesDimensions(){
     ACFeatureDimensions featureDimensions;
-    featureDimensions["Pixel Speed"] = 1;
+    featureDimensions["Pixel Speed: Mean"] = 1;
     return featureDimensions;
 }
 

@@ -85,6 +85,7 @@ ACOsgCompositeViewQt::ACOsgCompositeViewQt( QWidget * parent, const char * name,
    ThreadPerCamera
    AutomaticSelection
   */
+    this->setRunFrameScheme( osgViewer::Viewer::ON_DEMAND );
 
     connect(&_timer, SIGNAL(timeout()), this, SLOT(updateGL()));
     _timer.start(10);

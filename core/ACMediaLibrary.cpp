@@ -71,8 +71,10 @@ ACMediaLibrary::ACMediaLibrary() {
     mReaderPlugin=0;
     files_processed = 0;
     files_to_import = 0;
+    media_at_import = 0;
     metadata = ACMediaLibraryMetadata();
     curator = ACUserProfile();
+    segmenting = false;
 }
 
 ACMediaLibrary::ACMediaLibrary(ACMediaType aMediaType) {
@@ -83,6 +85,7 @@ ACMediaLibrary::ACMediaLibrary(ACMediaType aMediaType) {
     this->cleanLibrary();
     files_processed = 0;
     files_to_import = 0;
+    media_at_import = 0;
     metadata = ACMediaLibraryMetadata();
     curator = ACUserProfile();
 }
@@ -159,6 +162,7 @@ std::vector<std::string> ACMediaLibrary::getExtensionsFromMediaType(ACMediaType 
 //  0 if empty directory (or no media of the required type found)
 //	> 0 if no error (returns the number of files found)
 int ACMediaLibrary::importDirectory(std::string _path, int _recursive, ACPluginManager *acpl, bool forward_order, bool doSegment, bool _save_timed_feat){ //, TiXmlElement* _medias) {
+    this->segmenting = doSegment;
     std::vector<string> filenames;
     total_ext_check_time = 0;
     checked_files = 0;
@@ -202,6 +206,7 @@ int ACMediaLibrary::importDirectory(std::string _path, int _recursive, ACPluginM
 
 
 int ACMediaLibrary::importFiles(std::vector<std::string> filenames, ACPluginManager *acpl, bool doSegment, bool _save_timed_feat){ //, TiXmlElement* _medias) {
+    this->segmenting = doSegment;
     std::vector<int> ret;
     total_ext_check_time = 0;
     checked_files = 0;
@@ -222,8 +227,8 @@ int ACMediaLibrary::importFiles(std::vector<std::string> filenames, ACPluginMana
 // save_timedfeat = true : save the timedFeatures on the disk
 // returns the media id of the imported file
 std::vector<int> ACMediaLibrary::importFile(std::string _filename, ACPluginManager *acpl, bool doSegment, bool _save_timed_feat){ //, TiXmlElement* _medias) {
-    // Even if the file can't be imported, we have to notify the progress the file has been processed
-    files_processed++;
+    this->segmenting = doSegment;
+
     std::vector<int> ret;
 
     // check if file has already been imported.
@@ -232,6 +237,8 @@ std::vector<int> ACMediaLibrary::importFile(std::string _filename, ACPluginManag
     int is_present = this->getMediaIndex(_filename);
     if (is_present >= 0) {
         cout << "<ACMediaLibrary::importFile> skipping "<< _filename << " : media already present at position " << is_present << endl;
+        // Even if the file can't be imported, we have to notify the progress the file has been processed
+        files_processed++;
         return ret;
     }
 
@@ -246,12 +253,19 @@ std::vector<int> ACMediaLibrary::importFile(std::string _filename, ACPluginManag
             media=mReaderPlugin->mediaFactory(media_type);
         /*if (media==0)
             media=new ACMediaDocument();*/
-        if (media==0)
+        if (media==0){
+            // Even if the file can't be imported, we have to notify the progress the file has been processed
+            files_processed++;
             return ret;
+        }
         else {
+            media_at_import = media;
             int nbMedia = media->import(_filename, this->getAvailableMediaID(), acpl);
-            if (nbMedia == 0)
+            if (nbMedia == 0){
+                // Even if the file can't be imported, we have to notify the progress the file has been processed
+                files_processed++;
                 return ret;
+            }
             this->addMedia(media);
             ret.push_back(media->getId());
             ACMediaContainer medias = (static_cast<ACMediaDocument*> (media))->getContainer();
@@ -260,9 +274,9 @@ std::vector<int> ACMediaLibrary::importFile(std::string _filename, ACPluginManag
                 this->addMedia(iter->second);
                 iter->second->setParentId(media->getId());
                 ret.push_back(iter->second->getId());
-                //files_processed++;
             }
             this->setActiveMediaType(((ACMediaDocument*)media)->getActiveMediaKey(), acpl);
+            files_processed++;
             return ret;
         }
     }
@@ -277,15 +291,20 @@ std::vector<int> ACMediaLibrary::importFile(std::string _filename, ACPluginManag
         cout << "<ACMediaLibrary::importFile> other media type, skipping " << _filename << " ... " << endl;
         cout << "-> media_type " << media_type << " ... " << endl;
         cout << "-> fileMediaType " << fileMediaType << " ... " << endl;
+        // Even if the file can't be imported, we have to notify the progress the file has been processed
+        files_processed++;
         return ret;
     }
 
     if (media == 0) {
         cout << "<ACMediaLibrary::importFile> extension unknown, skipping " << _filename << " ... " << endl;
+        // Even if the file can't be imported, we have to notify the progress the file has been processed
+        files_processed++;
         return ret;
     }
     // import has to be done before segmentation to have proper id.
-    else if (media->import(_filename, this->getAvailableMediaID(), acpl, _save_timed_feat)){
+    media_at_import = media;
+    if (media->import(_filename, this->getAvailableMediaID(), acpl, _save_timed_feat)){
         this->addMedia(media);
         ret.push_back(media->getId());
 #ifdef VERBOSE
@@ -300,13 +319,13 @@ std::vector<int> ACMediaLibrary::importFile(std::string _filename, ACPluginManag
             //			else{
             std::vector<ACMedia*> mediaSegments;
             mediaSegments = media->getAllSegments();
-            files_to_import++; // to avoid stopping the progress when the last media of the pile is added, before its segments
             std::cout << "ACMediaLibrary::importFile found " << mediaSegments.size() << " segments." << std::endl;
             std::vector<ACMedia*> importedSegment;
             files_to_import += mediaSegments.size();
             for (unsigned int i = 0; i < mediaSegments.size(); i++){
                 // for the segments we do not save (again) timedFeatures
                 // XS TODO but we should not re-calculate them either !=> TR I put the mtf files names of the media parent in all his segments
+                media_at_import = mediaSegments[i];
                 if (mediaSegments[i]->import(_filename, this->getAvailableMediaID(), acpl)){
                     this->addMedia(mediaSegments[i]);
                     mediaSegments[i]->setParentId(media->getId());
@@ -316,9 +335,10 @@ std::vector<int> ACMediaLibrary::importFile(std::string _filename, ACPluginManag
                 }
                 else{//impossible to import the segment
                     mediaSegments[i]->deleteData();//TR TODO verify that we must delete this data
+                    media_at_import = 0;
                     delete mediaSegments[i];
                 }
-                files_processed++;
+                files_processed++; // each segment is processed
                 media->setAllSegments(importedSegment);
                 
 
@@ -327,10 +347,14 @@ std::vector<int> ACMediaLibrary::importFile(std::string _filename, ACPluginManag
             //			}
 
         }
+        files_processed++; // the media is processed
     }
     else {
+        media_at_import = 0;
         cerr << "<ACMediaLibrary::importFile> problem importing file : " << _filename << " ... " << endl;
         failed_imports.push_back(_filename);
+        // Even if the file can't be imported, we have to notify the progress the file has been processed
+        files_processed++;
         return ret;
 
     }
@@ -345,9 +369,21 @@ std::vector<int> ACMediaLibrary::importFile(std::string _filename, ACPluginManag
 
     if(files_processed == files_to_import){
         files_processed = files_to_import = 0;
+        media_at_import = 0;
     }
 
     return ret;
+}
+
+float ACMediaLibrary::getImportProgress(){
+    float progress = 1.0f;
+    if(files_to_import != 0){
+        progress = (float)(files_processed)/(float)(files_to_import);
+        if(media_at_import){
+            progress += media_at_import->getImportProgress(this->segmenting)/(float)(files_to_import);
+        }
+    }
+    return progress;
 }
 
 int ACMediaLibrary::scanDirectories(std::vector<string> _paths, int _recursive, std::vector<string>& filenames) {

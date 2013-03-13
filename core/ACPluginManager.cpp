@@ -748,3 +748,12 @@ void ACAvailablePlugins<T>::log() {
         }
     }
 }
+
+/*template <typename T>
+std::vector<T *> ACAvailablePlugins<T>::getPlugins(ACMediaType MediaType) {
+    std::vector< T *> plugins;
+    for (typename vector< T *> ::iterator iter_vec = mCurrPlugin[MediaType].begin(); iter_vec != mCurrPlugin[MediaType].end(); iter_vec++) {
+        plugins.push_back(((T *) (*iter_vec)));
+    }
+    return plugins;
+}*/

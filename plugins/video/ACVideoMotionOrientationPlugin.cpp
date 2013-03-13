@@ -59,7 +59,7 @@ void ACVideoMotionOrientationPlugin::clean(){
 
 ACFeatureDimensions ACVideoMotionOrientationPlugin::getFeaturesDimensions(){
     ACFeatureDimensions featureDimensions;
-    featureDimensions["Motion Orientation"] = 1;
+    featureDimensions["Motion Orientation: Mean"] = 1;
     return featureDimensions;
 }
 

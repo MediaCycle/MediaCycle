@@ -119,6 +119,7 @@ const ACPluginType	PLUGIN_TYPE_PREPROCESS			=	0x2000;//CF updateClusters and upd
 const ACPluginType	PLUGIN_TYPE_MEDIAREADER			=	0x4000;
 const ACPluginType	PLUGIN_TYPE_MEDIARENDERER		=	0x8000;
 const ACPluginType	PLUGIN_TYPE_THUMBNAILER			=	0x10000;
+const ACPluginType	PLUGIN_TYPE_MEDIA_ANALYSIS		=	0x20000;
 
 class ACPlugin {
 public:
@@ -215,11 +216,20 @@ public:
     virtual void mediaCycleSet(){}
 };
 
+// plugin for internal use to report the import progress
+class ACMediaAnalysisPlugin: virtual public ACPlugin
+{
+public:
+    ACMediaAnalysisPlugin();
+    /// Returns the current analysis progress between 0 and 1
+    virtual float getProgress(){return 0;}
+};
+
 typedef boost::unordered::unordered_map<std::string,int> ACFeatureDimensions; // an unordered_map without C++11
 
 // XS TODO : separate time & space plugins ?
 // getTimedFeatures has no sense for image
-class ACFeaturesPlugin: virtual public ACPlugin
+class ACFeaturesPlugin: virtual public ACMediaAnalysisPlugin
 {
 protected:
     ACFeaturesPlugin();
@@ -244,7 +254,7 @@ public:
     std::string saveTimedFeatures(ACMediaTimedFeature* mtf=0, std::string aFileName="", bool _save_timed_feat = true, bool _save_binary = true);
 };
 
-class ACSegmentationPlugin: virtual public ACPlugin
+class ACSegmentationPlugin: virtual public ACMediaAnalysisPlugin
 {
 protected:
 public:
@@ -254,7 +264,7 @@ public:
     virtual std::vector<ACMedia*> segment(ACMedia*)=0;
 };
 
-class ACThumbnailerPlugin : virtual public ACPlugin{
+class ACThumbnailerPlugin : virtual public ACMediaAnalysisPlugin{
 public:
     ACThumbnailerPlugin();
     virtual std::vector<std::string> getThumbnailNames()=0;
