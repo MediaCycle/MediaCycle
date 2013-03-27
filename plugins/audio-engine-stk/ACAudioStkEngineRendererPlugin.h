@@ -45,6 +45,8 @@
 #include <ACAudioStkFileLoop.h>
 #include <ACAudioStkGranulate.h>
 
+#include "FreeVerb.h"
+
 class ACAudioStkEngineRendererPlugin : public QObject, public ACPluginQt, public ACMediaRendererPlugin
 {
     Q_OBJECT
@@ -64,12 +66,28 @@ public:
     void updateGrainStretch();
     void updateGrainParameters();
 
+    //! Update the reverb effect mix [0 = mostly dry, 1 = mostly wet].
+    void updateReverbEffectMix();
+
+    //! Update the reverb room size (comb filter feedback gain) parameter [0,1].
+    void updateReverbRoomSize();
+
+    //! Update the reverb damping parameter [0=low damping, 1=higher damping].
+    void updateReverbDamping();
+
+    //! Update the mode [frozen = 1, unfrozen = 0].
+    void updateReverbFreeze();
+
+    //! Update the width (left-right mixing) parameter [0,1].
+    void updateReverbPan();
+
 public:
     RtAudio dac;
     std::map< long int, ACAudioStkFileWvIn*> inputs;
     std::map< long int, ACAudioStkFileLoop*> loops;
     std::map< long int, ACAudioStkGranulate*> grains;
     std::map< long int, int> current_frames;
+    stk::FreeVerb* frev;
     void justReadFrames(long int mediaId, int nFrames);
     void removeInput(long int mediaId);
     void removeLoop(long int mediaId);

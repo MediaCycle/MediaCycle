@@ -53,6 +53,8 @@ ACAudioStkEngineRendererPlugin::ACAudioStkEngineRendererPlugin() : QObject(), AC
     // Set the global sample rate before creating class instances.
     Stk::setSampleRate( (StkFloat) 44100 );
 
+    frev = new stk::FreeVerb();
+
     this->action_parameters["play"] = ACMediaActionParameters();
     this->action_parameters["loop"] = ACMediaActionParameters();
     this->action_parameters["granulate"] = ACMediaActionParameters();
@@ -61,8 +63,8 @@ ACAudioStkEngineRendererPlugin::ACAudioStkEngineRendererPlugin() : QObject(), AC
     this->addCallback("Mute","Mute",boost::bind(&ACAudioStkEngineRendererPlugin::muteAll,this));
     this->action_parameters["mute"] = ACMediaActionParameters();
 
-    this->addNumberParameter("Rate",1.0,-10.0,10.0,0.01,"Rate",boost::bind(&ACAudioStkEngineRendererPlugin::updateRate,this));
-    this->action_parameters["rate"] = ACMediaActionParameters(1,ACMediaActionParameter(AC_TYPE_FLOAT,this->getParameter("Rate")));
+    this->addNumberParameter("Playback Speed",1.0,-10.0,10.0,0.01,"Playback Speed (only for play and loop, not granulate)",boost::bind(&ACAudioStkEngineRendererPlugin::updateRate,this));
+    this->action_parameters["playback speed"] = ACMediaActionParameters(1,ACMediaActionParameter(AC_TYPE_FLOAT,this->getParameter("Playback Speed")));
 
     this->addNumberParameter("Grain Voices",1,0,25,1,"Grain Voices",boost::bind(&ACAudioStkEngineRendererPlugin::updateGrainVoices,this));
     this->action_parameters["grain voices"] = ACMediaActionParameters(1,ACMediaActionParameter(AC_TYPE_FLOAT,this->getParameter("Grain Voices")));
@@ -90,6 +92,27 @@ ACAudioStkEngineRendererPlugin::ACAudioStkEngineRendererPlugin() : QObject(), AC
     //delay: pause time between grains (ms)
     this->addNumberParameter("Grain Delay",100,0,10000,1,"Grain Delay (pause time between grains in ms)",boost::bind(&ACAudioStkEngineRendererPlugin::updateGrainParameters,this));
     this->action_parameters["grain delay"] = ACMediaActionParameters(1,ACMediaActionParameter(AC_TYPE_FLOAT,this->getParameter("Grain Delay")));
+
+    //! Reverb mix [0 = mostly dry, 1 = mostly wet].
+    this->addNumberParameter("Reverb Mix",0,0,1,0.01,"Reverb Mix (0 = mostly dry, 1 = mostly wet)",boost::bind(&ACAudioStkEngineRendererPlugin::updateReverbEffectMix,this));
+    this->action_parameters["reverb mix"] = ACMediaActionParameters(1,ACMediaActionParameter(AC_TYPE_FLOAT,this->getParameter("Reverb Mix")));
+    this->frev->setEffectMix( this->getNumberParameterValue("Reverb Mix"));
+
+    //! Reverb room size (comb filter feedback gain) parameter [0,1].
+    this->addNumberParameter("Reverb Room Size",1,0,1,0.01,"Reverb room size (comb filter feedback gain) parameter [0,1]",boost::bind(&ACAudioStkEngineRendererPlugin::updateReverbRoomSize,this));
+    this->action_parameters["reverb room size"] = ACMediaActionParameters(1,ACMediaActionParameter(AC_TYPE_FLOAT,this->getParameter("Reverb Room Size")));
+
+    //! Reverb damping parameter [0=low damping, 1=higher damping].
+    this->addNumberParameter("Reverb Damping",1,0,1,0.01,"Reverb damping parameter (0=low damping, 1=higher damping)",boost::bind(&ACAudioStkEngineRendererPlugin::updateReverbDamping,this));
+    this->action_parameters["reverb damping"] = ACMediaActionParameters(1,ACMediaActionParameter(AC_TYPE_FLOAT,this->getParameter("Reverb Damping")));
+
+    //! Reverb mode [frozen = 1, unfrozen = 0].
+    this->addNumberParameter("Reverb Freeze",0,0,1,1,"Reverb freeze (frozen = 1, unfrozen = 0)",boost::bind(&ACAudioStkEngineRendererPlugin::updateReverbFreeze,this));
+    this->action_parameters["reverb freeze"] = ACMediaActionParameters(1,ACMediaActionParameter(AC_TYPE_FLOAT,this->getParameter("Reverb Freeze")));
+
+    //! Reverb width (left-right mixing) parameter [0,1].
+    //this->addNumberParameter("Reverb Pan",1,0,1,0.01,"Reverb width (left-right mixing) parameter [0,1]",boost::bind(&ACAudioStkEngineRendererPlugin::updateReverbPan,this));
+    //this->action_parameters["reverb pan"] = ACMediaActionParameters(1,ACMediaActionParameter(AC_TYPE_FLOAT,this->getParameter("Reverb Pan")));
 
     /*this->addNumberParameter("Volume",100,1,100,1,"Main volume",boost::bind(&ACAudioStkEngineRendererPlugin::updateVolume,this));*/
 
@@ -146,6 +169,10 @@ ACAudioStkEngineRendererPlugin::~ACAudioStkEngineRendererPlugin(){
     frames.clear();
 
     action_parameters.clear();
+
+    if(frev)
+        delete frev;
+    frev = 0;
 }
 
 void ACAudioStkEngineRendererPlugin::justReadFrames(long int mediaId, int nFrames){
@@ -201,6 +228,7 @@ int tick( void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
     std::map <long int, ACAudioStkFileWvIn*> inputs = ((ACAudioStkEngineRendererPlugin *) userData)->inputs;
     std::map <long int, ACAudioStkFileLoop*> loops = ((ACAudioStkEngineRendererPlugin *) userData)->loops;
     std::map <long int, ACAudioStkGranulate*> grains = ((ACAudioStkEngineRendererPlugin *) userData)->grains;
+    stk::FreeVerb* frev = ((ACAudioStkEngineRendererPlugin *) userData)->frev;
     register StkFloat *samples = (StkFloat *) outputBuffer;
     //if(outputBuffer == 0){
     //    std::cerr << "ACAudioStkEngineRenderer: output buffer not available" << std::endl;
@@ -213,7 +241,7 @@ int tick( void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
     }
 
     double rate = 1.0;
-    rate = (float)((ACAudioStkEngineRendererPlugin *) userData)->getNumberParameterValue("Rate");
+    rate = (float)((ACAudioStkEngineRendererPlugin *) userData)->getNumberParameterValue("Playback Speed");
     int outputChannels = ((ACAudioStkEngineRendererPlugin *) userData)->outputChannels();
 
     for(std::map <long int, ACAudioStkFileWvIn*>::iterator input = inputs.begin(); input != inputs.end(); input++){
@@ -288,7 +316,7 @@ int tick( void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
                 }
             }
             for ( unsigned int c=0; c<outputChannels; c++ ){
-                *samples++ = frame[c]; // / count;
+                *samples++ = frev->tick(frame[c]); // / count;
             }
         }
     }
@@ -333,7 +361,7 @@ void ACAudioStkEngineRendererPlugin::muteAll(){
     }
     grains.clear();
     current_frames.clear();
-    if(this->media_cycle)
+    if(media_cycle)
         media_cycle->muteAllSources();
 }
 
@@ -342,7 +370,7 @@ void ACAudioStkEngineRendererPlugin::updateVolume(){
 }
 
 void ACAudioStkEngineRendererPlugin::updateRate(){
-    float rate = this->getNumberParameterValue("Rate");
+    float rate = this->getNumberParameterValue("Playback Speed");
     for(std::map <long int, ACAudioStkFileWvIn*>::iterator input = inputs.begin(); input != inputs.end(); input++){
         if(input->second)
             input->second->setRate(rate);
@@ -392,6 +420,31 @@ void ACAudioStkEngineRendererPlugin::updateGrainParameters(){
     }
 }
 
+void ACAudioStkEngineRendererPlugin::updateReverbDamping(){
+    float damping = this->getNumberParameterValue("Reverb Damping");
+    frev->setDamping( damping );
+}
+
+void ACAudioStkEngineRendererPlugin::updateReverbRoomSize(){
+    float size = this->getNumberParameterValue("Reverb Room Size");
+    frev->setRoomSize( size );
+}
+
+void ACAudioStkEngineRendererPlugin::updateReverbEffectMix(){
+    float mix = this->getNumberParameterValue("Reverb Mix");
+    frev->setEffectMix( mix );
+}
+
+void ACAudioStkEngineRendererPlugin::updateReverbFreeze(){
+    bool freeze = this->getNumberParameterValue("Reverb Freeze");
+    frev->setMode( freeze );
+}
+
+void ACAudioStkEngineRendererPlugin::updateReverbPan(){
+    float pan = this->getNumberParameterValue("Reverb Pan");
+    frev->setWidth( pan );
+}
+
 std::map<std::string,ACMediaType> ACAudioStkEngineRendererPlugin::getSupportedExtensions(ACMediaType media_type){
     std::map<std::string,ACMediaType> extensions;
     return extensions;
@@ -436,7 +489,7 @@ bool ACAudioStkEngineRendererPlugin::performActionOnMedia(std::string action, lo
 
             // Set input read rate based on the default STK sample rate.
             double rate = 1.0;
-            rate = this->getNumberParameterValue("Rate");//input->getFileRate() / Stk::sampleRate();
+            rate = this->getNumberParameterValue("Playback Speed");//input->getFileRate() / Stk::sampleRate();
             //if ( argc == 4 ) rate *= atof( argv[3] );
             input->setRate( rate );
 
@@ -460,7 +513,7 @@ bool ACAudioStkEngineRendererPlugin::performActionOnMedia(std::string action, lo
 
             // Set input read rate based on the default STK sample rate.
             double rate = 1.0;
-            rate = this->getNumberParameterValue("Rate");//input->getFileRate() / Stk::sampleRate();
+            rate = this->getNumberParameterValue("Playback Speed");//input->getFileRate() / Stk::sampleRate();
             //if ( argc == 4 ) rate *= atof( argv[3] );
             input->setRate( rate );
 
@@ -580,7 +633,7 @@ bool ACAudioStkEngineRendererPlugin::performActionOnMedia(std::string action, lo
             current_frames.erase(current_frame->first);
         }
     }
-    else if(action == "rate"){
+    else if(action == "playback speed"){
         if(arguments.size() !=1){
             std::cerr << "ACAudioStkEngineRendererPlugin::performActionOnMedia: couldn't convert parameter to float for action " << action << " , aborting..."<< std::endl;
             return false;
@@ -661,7 +714,7 @@ std::map<std::string,ACMediaType> ACAudioStkEngineRendererPlugin::availableMedia
     media_actions["granulate"] = MEDIA_TYPE_AUDIO;
     media_actions["mute"] = MEDIA_TYPE_AUDIO;
     media_actions["mute all"] = MEDIA_TYPE_AUDIO;
-    media_actions["rate"] = MEDIA_TYPE_AUDIO;
+    media_actions["playback speed"] = MEDIA_TYPE_AUDIO;
     media_actions["grain voices"] = MEDIA_TYPE_AUDIO;
     media_actions["grain randomness"] = MEDIA_TYPE_AUDIO;
     media_actions["grain stretch"] = MEDIA_TYPE_AUDIO;
