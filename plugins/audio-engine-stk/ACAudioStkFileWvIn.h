@@ -1,7 +1,7 @@
 /**
- * @brief Plugin for contesting in the video browser showdown
+ * @brief Derived STK audio file input class with more setters/getters.
  * @author Christian Frisson
- * @date 2/01/2013
+ * @date 25/03/2013
  * @copyright (c) 2013 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -29,40 +29,30 @@
  * <mailto:avre@umons.ac.be>
  */
 
-#include <MediaCycle.h>
-#include <ACPlugin.h>
-#include <ACPluginQt.h>
+#ifndef ACAudioStkFileWvIn_H
+#define ACAudioStkFileWvIn_H
 
-#ifndef ACUsabilityKnownItemSearchPlugin_H
-#define	ACUsabilityKnownItemSearchPlugin_H
+#include "FileWvIn.h"
 
-class ACUsabilityKnownItemSearchPlugin : public QObject, public ACPluginQt, virtual public ACClientPlugin
+class ACAudioStkFileWvIn : public stk::FileWvIn
 {
-    Q_OBJECT
-    Q_INTERFACES(ACPluginQt)
 public:
-    ACUsabilityKnownItemSearchPlugin();
-    virtual ~ACUsabilityKnownItemSearchPlugin();
+    //! Default constructor.
+    ACAudioStkFileWvIn( unsigned long chunkThreshold = 1000000, unsigned long chunkSize = 1024 )
+        : stk::FileWvIn( chunkThreshold,chunkSize ){}
 
-    // From ACPluginQt
-    virtual std::vector<ACInputActionQt*> providesInputActions();
-    virtual bool performActionOnMedia(std::string action, long int mediaId, std::vector<boost::any> arguments=std::vector<boost::any>());
-    virtual std::map<std::string,ACMediaType> availableMediaActions();
+    //! Overloaded constructor for file input.
+    /*!
+    An StkError will be thrown if the file is not found, its format is
+    unknown, or a read error occurs.
+  */
+    ACAudioStkFileWvIn( std::string fileName, bool raw = false, bool doNormalize = true,
+                        unsigned long chunkThreshold = 1000000, unsigned long chunkSize = 1024 )
+        : stk::FileWvIn( fileName,raw,doNormalize,chunkThreshold,chunkSize ){}
 
-public slots:
-    void changeServer();
-    void changePort();
-    void changeTeam();
-    void submitCallback();
-    void triggerMediaHover(bool trigger); // audio hover, image/video ... -> need a panel to configure the behaviour of hover
+    //! Class destructor.
+    virtual ~ACAudioStkFileWvIn( void ){}
 
-private:
-    ACInputActionQt* submitAction;
-    ACInputActionQt* triggerMediaHoverAction;
-    std::string url;
-    int port;
-    int team;
+    stk::StkFloat getRate(){return rate_;}
 };
-
 #endif
-

@@ -125,8 +125,8 @@ void ACUsabilityKnownItemSearchPlugin::triggerMediaHover(bool trigger){
     media_cycle->setAutoPlay(trigger);
 }
 
-bool ACUsabilityKnownItemSearchPlugin::performActionOnMedia(std::string action, long int mediaId, std::string value){
-    //std::cout << "ACUsabilityKnownItemSearchPlugin::performActionOnMedia: action " << action << " mediaId " << mediaId << " value " << value << std::endl;
+bool ACUsabilityKnownItemSearchPlugin::performActionOnMedia(std::string action, long int mediaId, std::vector<boost::any> arguments){
+    //std::cout << "ACUsabilityKnownItemSearchPlugin::performActionOnMedia: action " << action << " mediaId " << mediaId << std::endl;
     if(!media_cycle){
         std::cerr << "ACUsabilityKnownItemSearchPlugin::performActionOnMedia: mediacycle instance not set" << std::endl;
         return false;

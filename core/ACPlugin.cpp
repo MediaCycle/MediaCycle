@@ -473,6 +473,25 @@ bool ACPlugin::triggerCallback(std::string _name){
     return false;
 }
 
+ACParameter ACPlugin::getParameter(std::string _name){
+    for(std::vector<ACNumberParameter>::iterator NumberParameter = mNumberParameters.begin(); NumberParameter != mNumberParameters.end(); NumberParameter++ ){
+        if((*NumberParameter).name == _name){
+            return *NumberParameter;
+        }
+    }
+    for(std::vector<ACStringParameter>::iterator StringParameter = mStringParameters.begin(); StringParameter != mStringParameters.end(); StringParameter++ ){
+        if((*StringParameter).name == _name){
+            return *StringParameter;
+        }
+    }
+    for(std::vector<ACCallback>::iterator Callback = mCallbacks.begin(); Callback != mCallbacks.end(); Callback++ ){
+        if((*Callback).name == _name){
+            return *Callback;
+        }
+    }
+    return ACParameter();
+}
+
 bool ACPlugin::implementsPluginType(ACPluginType pType) {
     int test = mPluginType&pType;
     if (test == 0)
@@ -496,6 +515,25 @@ ACMediaReaderPlugin::ACMediaReaderPlugin() : ACPlugin() {
 ACMediaRendererPlugin::ACMediaRendererPlugin() : ACPlugin() {
     this->mPluginType = mPluginType | PLUGIN_TYPE_MEDIARENDERER;
 }
+
+bool ACMediaRendererPlugin::performActionOnMedia(std::string action, long int mediaId, std::string argument){
+    std::vector<boost::any> arguments;
+    arguments.push_back(argument);
+    return this->performActionOnMedia(action,mediaId,arguments);
+}
+
+bool ACMediaRendererPlugin::performActionOnMedia(std::string action, long int mediaId, int argument){
+    std::vector<boost::any> arguments;
+    arguments.push_back(argument);
+    return this->performActionOnMedia(action,mediaId,arguments);
+}
+
+bool ACMediaRendererPlugin::performActionOnMedia(std::string action, long int mediaId, float argument){
+    std::vector<boost::any> arguments;
+    arguments.push_back(argument);
+    return this->performActionOnMedia(action,mediaId,arguments);
+}
+
 
 ACMediaAnalysisPlugin::ACMediaAnalysisPlugin() : ACPlugin() {
     this->mPluginType = mPluginType | PLUGIN_TYPE_MEDIA_ANALYSIS;

@@ -31,7 +31,7 @@
 
 #include "ACOsgBaseRenderer.h"
 
-#include <iostream.h>
+#include <iostream>
 
 #include <osgDB/Registry>
 #include <osgDB/ReadFile>

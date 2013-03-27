@@ -50,7 +50,6 @@ ACPluginManager::ACPluginManager() {
     mActiveSegmentPlugins = new ACAvailableSegmentPlugins();
     mAvailableThumbnailerPlugins = new ACAvailableThumbnailerPlugins();
     mAvailableMediaReaderPlugins = new ACAvailableMediaReaderPlugins();
-    mAvailableMediaRendererPlugins = new ACAvailableMediaRendererPlugins();
     mPluginLibrary.push_back(new ACDefaultPluginsLibrary());
 }
 
@@ -70,8 +69,6 @@ ACPluginManager::~ACPluginManager() {
     mAvailableThumbnailerPlugins = NULL;
     delete mAvailableMediaReaderPlugins;
     mAvailableMediaReaderPlugins = NULL;
-    delete mAvailableMediaRendererPlugins;
-    mAvailableMediaRendererPlugins = NULL;
     this->media_cycle=0;
 }
 
@@ -279,7 +276,6 @@ void ACPluginManager::cleanPluginLists(){
     this->mActiveSegmentPlugins->clean();
     this->mAvailableThumbnailerPlugins->clean();
     this->mAvailableMediaReaderPlugins->clean();
-    this->mAvailableMediaRendererPlugins->clean();
 }
 
 void ACPluginManager::updateAvailablePluginLists(ACPluginLibrary *acpl){
@@ -287,7 +283,6 @@ void ACPluginManager::updateAvailablePluginLists(ACPluginLibrary *acpl){
     this->mAvailableSegmentPlugins->update(mPluginLibrary);
     this->mAvailableThumbnailerPlugins->update(mPluginLibrary);
     this->mAvailableMediaReaderPlugins->update(mPluginLibrary);
-    this->mAvailableMediaRendererPlugins->update(mPluginLibrary);
     //ACMediaFactory::getInstance().updateMediaReaders(acpl);
 }
 
@@ -296,7 +291,6 @@ void ACPluginManager::addLibraryToPluginLists(ACPluginLibrary *acpl){
     this->mAvailableSegmentPlugins->add(acpl);
     this->mAvailableThumbnailerPlugins->add(acpl);
     this->mAvailableMediaReaderPlugins->add(acpl);
-    this->mAvailableMediaRendererPlugins->add(acpl);
     ACMediaFactory::getInstance().addMediaReaders(acpl);
 }
 
@@ -305,7 +299,6 @@ void ACPluginManager::removeLibraryFromPluginLists(ACPluginLibrary *acpl){
     this->mAvailableSegmentPlugins->remove(acpl);
     this->mAvailableThumbnailerPlugins->remove(acpl);
     this->mAvailableMediaReaderPlugins->remove(acpl);
-    this->mAvailableMediaRendererPlugins->remove(acpl);
     //ACMediaFactory::getInstance().removeMediaReaders(acpl);
 }
 
@@ -595,31 +588,6 @@ std::map<std::string,std::string> ACAvailableMediaReaderPlugins::getExtensionsFr
         }
     }
     return output;
-}
-
-ACAvailableMediaRendererPlugins::ACAvailableMediaRendererPlugins() : ACAvailablePlugins<ACMediaRendererPlugin>::ACAvailablePlugins() {
-}
-
-ACAvailableMediaRendererPlugins::ACAvailableMediaRendererPlugins(vector<ACPluginLibrary *> PluginLibrary) : ACAvailablePlugins<ACMediaRendererPlugin>::ACAvailablePlugins(PluginLibrary) {
-    //this->update(PluginLibrary);
-}
-
-bool ACAvailableMediaRendererPlugins::performActionOnMedia(std::string action, long int mediaId, std::string value){
-    bool ok = false;
-    for (std::map<ACMediaType,std::vector<ACMediaRendererPlugin*> >::iterator iter_map = mCurrPlugin.begin(); iter_map != mCurrPlugin.end(); iter_map++) {
-        vector<ACMediaRendererPlugin *> plugins = iter_map->second;
-        for (vector<ACMediaRendererPlugin *> ::iterator iter_vec = plugins.begin(); iter_vec != plugins.end(); iter_vec++) {
-            ACMediaRendererPlugin* localPlugin = dynamic_cast<ACMediaRendererPlugin*>(*iter_vec);
-            if (localPlugin != NULL){
-                //std::cout << "ACAvailableMediaRendererPlugins::performActionOnMedia: action " << action << " mediaId " << mediaId << " value " << value << " plugin " << localPlugin->getName() << std::endl;
-                ok = (ok | localPlugin->performActionOnMedia(action, mediaId, value));
-            }
-            else {
-                cerr << "<ACAvailableMediaRendererPlugins::performActionOnMedia> plugin access failed " << localPlugin->getName() << endl;
-            }
-        }
-    }
-    return ok;
 }
 
 //ACAvailablePlugins implementation

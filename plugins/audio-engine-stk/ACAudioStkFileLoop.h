@@ -1,7 +1,7 @@
 /**
- * @brief Plugin for contesting in the video browser showdown
+ * @brief Derived STK file looping / oscillator class with more setters/getters.
  * @author Christian Frisson
- * @date 2/01/2013
+ * @date 25/03/2013
  * @copyright (c) 2013 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -29,40 +29,27 @@
  * <mailto:avre@umons.ac.be>
  */
 
-#include <MediaCycle.h>
-#include <ACPlugin.h>
-#include <ACPluginQt.h>
+#ifndef ACAudioStkFileLoop_H
+#define ACAudioStkFileLoop_H
 
-#ifndef ACUsabilityKnownItemSearchPlugin_H
-#define	ACUsabilityKnownItemSearchPlugin_H
+#include "FileLoop.h"
 
-class ACUsabilityKnownItemSearchPlugin : public QObject, public ACPluginQt, virtual public ACClientPlugin
+class ACAudioStkFileLoop : public stk::FileLoop
 {
-    Q_OBJECT
-    Q_INTERFACES(ACPluginQt)
 public:
-    ACUsabilityKnownItemSearchPlugin();
-    virtual ~ACUsabilityKnownItemSearchPlugin();
+    //! Default constructor.
+    ACAudioStkFileLoop( unsigned long chunkThreshold = 1000000, unsigned long chunkSize = 1024 )
+        : stk::FileLoop( chunkThreshold,chunkSize ){}
 
-    // From ACPluginQt
-    virtual std::vector<ACInputActionQt*> providesInputActions();
-    virtual bool performActionOnMedia(std::string action, long int mediaId, std::vector<boost::any> arguments=std::vector<boost::any>());
-    virtual std::map<std::string,ACMediaType> availableMediaActions();
+    //! Class constructor that opens a specified file.
+    ACAudioStkFileLoop( std::string fileName, bool raw = false, bool doNormalize = true,
+                        unsigned long chunkThreshold = 1000000, unsigned long chunkSize = 1024 )
+        : stk::FileLoop( fileName,raw,doNormalize,chunkThreshold,chunkSize ){}
 
-public slots:
-    void changeServer();
-    void changePort();
-    void changeTeam();
-    void submitCallback();
-    void triggerMediaHover(bool trigger); // audio hover, image/video ... -> need a panel to configure the behaviour of hover
+    //! Class destructor.
+    virtual ~ACAudioStkFileLoop( void ){}
 
-private:
-    ACInputActionQt* submitAction;
-    ACInputActionQt* triggerMediaHoverAction;
-    std::string url;
-    int port;
-    int team;
+    stk::StkFloat getRate(){return rate_;}
 };
 
 #endif
-

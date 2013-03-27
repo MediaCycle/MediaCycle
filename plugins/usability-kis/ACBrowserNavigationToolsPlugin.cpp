@@ -232,8 +232,8 @@ void ACBrowserNavigationToolsPlugin::undiscardAllNodesCallback(){
     media_cycle->performActionOnMedia("undiscard all nodes",-1);
 }
 
-bool ACBrowserNavigationToolsPlugin::performActionOnMedia(std::string action, long int mediaId, std::string value){
-    //std::cout << "ACBrowserNavigationToolsPlugin::performActionOnMedia: action " << action << " mediaId " << mediaId << " value " << value << std::endl;
+bool ACBrowserNavigationToolsPlugin::performActionOnMedia(std::string action, long int mediaId, std::vector<boost::any> arguments){
+    //std::cout << "ACBrowserNavigationToolsPlugin::performActionOnMedia: action " << action << " mediaId " << mediaId << std::endl;
     if(!media_cycle){
         std::cerr << "ACBrowserNavigationToolsPlugin::performActionOnMedia: mediacycle instance not set" << std::endl;
         return false;
@@ -257,7 +257,6 @@ bool ACBrowserNavigationToolsPlugin::performActionOnMedia(std::string action, lo
     }
     return false;
 }
-
 
 void ACBrowserNavigationToolsPlugin::discardNearestNodes(int mediaId){
     //float start = getTime();

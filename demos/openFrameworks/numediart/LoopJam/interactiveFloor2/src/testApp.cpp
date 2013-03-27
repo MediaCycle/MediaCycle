@@ -1,8 +1,8 @@
 /**
  * @brief testApp.cpp
  * @author Christian Frisson
- * @date 01/10/2011
- * @copyright (c) 2011 – UMONS - Numediart
+ * @date 27/03/2013
+ * @copyright (c) 2013 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -36,8 +36,8 @@
 #include <algo.h>
 #define PI 3.14159265
 #define HOST "localhost"
-#define PORTS 12345 //port d'envoi
-#define PORTR 12346	//port de reception
+#define PORTS 3333 //port d'envoi
+#define PORTR 3334 //port de reception
 #define FFTTIMEWINDOWS 2.f
 #define FFTNSAMPLES 512
 #define TIMESAMPLE (1.0/30.0)

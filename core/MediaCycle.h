@@ -259,7 +259,11 @@ public:
     void pickedObjectCallback(int pid);
     void hoverWithPointerId(float xx, float yy, int p_id = -1);
     void hoverWithPointerIndex(float xx, float yy, int p_index = 0);
-    bool performActionOnMedia(std::string action, long int mediaId, std::string value="");
+    bool performActionOnMedia(std::string action, long int mediaId, std::vector<boost::any> arguments=std::vector<boost::any>());
+    /// Convenience cases for faster access
+    bool performActionOnMedia(std::string action, long int mediaId, std::string argument);
+    bool performActionOnMedia(std::string action, long int mediaId, int argument);
+    bool performActionOnMedia(std::string action, long int mediaId, float argument);
 
     /// NEW, replaces updateClusters and updateNeighborhoods
     void updateDisplay(bool animate);

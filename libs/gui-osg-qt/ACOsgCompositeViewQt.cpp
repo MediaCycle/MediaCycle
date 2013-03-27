@@ -952,7 +952,7 @@ void ACOsgCompositeViewQt::toggleTimelinePlayback(bool toggle){
     if (media_cycle == 0) return;
     if ( (media_cycle) && (media_cycle->hasBrowser()) && (timeline_renderer->getTrack(0)!=0) ) {
         //media_cycle->getBrowser()->toggleSourceActivity( timeline_renderer->getTrack(0)->getMediaIndex() );
-        media_cycle->performActionOnMedia("play", timeline_renderer->getTrack(0)->getMedia()->getId(), "");
+        media_cycle->performActionOnMedia("play", timeline_renderer->getTrack(0)->getMedia()->getId());
         media_cycle->getBrowser()->toggleSourceActivity( timeline_renderer->getTrack(0)->getMedia()->getId() );
     }
 }

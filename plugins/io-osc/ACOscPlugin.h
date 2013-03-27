@@ -45,6 +45,7 @@ public:
     ACOscPlugin();
     virtual ~ACOscPlugin();
     virtual void mediaCycleSet();
+    virtual void pluginLoaded(std::string plugin_name);
 public:
     void changeBrowserIP();
     void changeBrowserPort();

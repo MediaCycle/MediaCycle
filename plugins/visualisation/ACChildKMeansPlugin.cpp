@@ -306,8 +306,8 @@ void ACChildKMeansPlugin::updateClusters(ACMediaBrowser* mediaBrowser,bool needs
         
         vector<float> centerDistMin;
         centerDistMin.resize(clusterCount);
-        for (int j=0;j<clusterCount;j++){
-            centerDistMin[j]=FLT_MAX;
+        for (int k=0;k<clusterCount;k++){
+            centerDistMin[k]=FLT_MAX;
         }
         // Assign Samples to Clusters
         for(i=0; i<object_count; i++) {

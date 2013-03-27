@@ -51,7 +51,7 @@ MainWindow::MainWindow()
     osc_feedback = new simpleoscfeedback();
     oscDockWidget = new oscdock();
     oscDockWidget->setOscFeedback(osc_feedback);
-    oscDockWidget->setFeedbackPort(12345);
+    oscDockWidget->setFeedbackPort(3333);
     addDockWidget(Qt::TopDockWidgetArea,oscDockWidget);
     scribbleArea->passOscFeedback(osc_feedback);
 

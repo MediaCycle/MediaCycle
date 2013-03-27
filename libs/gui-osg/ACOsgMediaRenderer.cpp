@@ -166,7 +166,7 @@ void ACOsgMediaRenderer::metadataGeode() {
     if(media->getTaggedClassId()>-1){
         content << " - Tag: " << media->getTaggedClassId();//->getLabel();
     }
-    std::cout<<content.str()<<std::endl;
+    //std::cout<<content.str()<<std::endl;
     metadata->setText( content.str() );
 
     //state = text_geode->getOrCreateStateSet();

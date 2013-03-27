@@ -47,13 +47,13 @@ ACOscPlugin::ACOscPlugin() : ACClientPlugin(){
     this->osc_feedback = new ACOscFeedback();
     this->browser_ip = "localhost";
     this->feedback_ip = "localhost";
-    this->browser_port = 12345;
-    this->feedback_port = 12346;
+    this->browser_port = 3333;
+    this->feedback_port = 3334;
 
     this->addStringParameter("Browser IP","localhost",std::vector<std::string>(),"Browser IP",boost::bind(&ACOscPlugin::changeBrowserIP,this));
-    this->addNumberParameter("Browser Port",12345,1,65555,1,"Browser Port",boost::bind(&ACOscPlugin::changeBrowserPort,this));
+    this->addNumberParameter("Browser Port",3333,1,65555,1,"Browser Port",boost::bind(&ACOscPlugin::changeBrowserPort,this));
     this->addStringParameter("Feedback IP","localhost",std::vector<std::string>(),"Feedback IP",boost::bind(&ACOscPlugin::changeFeedbackIP,this));
-    this->addNumberParameter("Feedback Port",12346,1,65555,1,"Feedback Port",boost::bind(&ACOscPlugin::changeFeedbackPort,this));
+    this->addNumberParameter("Feedback Port",3334,1,65555,1,"Feedback Port",boost::bind(&ACOscPlugin::changeFeedbackPort,this));
     this->addNumberParameter("Toggle Browser",0,0,1,1,"Toggle Browser",boost::bind(&ACOscPlugin::toggleBrowser,this));
     this->addNumberParameter("Toggle Feedback",0,0,1,1,"Toggle Feedback",boost::bind(&ACOscPlugin::toggleFeedback,this));
 }
@@ -80,10 +80,35 @@ void ACOscPlugin::changeFeedbackPort(){
 
 void ACOscPlugin::toggleBrowser(){
     std::cout << "ACOscPlugin::toggleBrowser" << std::endl;
+    if(!osc_browser->isActive()){
+        std::string _ip = this->getStringParameterValue("Browser IP");
+        int _port = this->getNumberParameterValue("Browser Port");
+        osc_browser->create(_ip.c_str(),_port);
+        osc_browser->setMediaCycle(media_cycle);
+        osc_browser->start();
+    }
+    else{
+        osc_browser->stop();
+        osc_browser->release();
+    }
+
+
 }
 
 void ACOscPlugin::toggleFeedback(){
     std::cout << "ACOscPlugin::toggleFeedback" << std::endl;
+    if(!osc_feedback->isActive()){
+        std::string _ip = this->getStringParameterValue("Feedback IP");
+        int _port = this->getNumberParameterValue("Feedback Port");
+        osc_feedback->create(_ip.c_str(),_port);
+        osc_browser->setFeedback(osc_feedback);
+        osc_feedback->messageBegin("test mc send osc");
+        std::cout << "sending test messages to "<< _ip << " on port " << _port << endl;
+        osc_feedback->messageSend();
+    }
+    else{
+        osc_feedback->release();
+    }
 }
 
 ACOscPlugin::~ACOscPlugin(){
@@ -100,6 +125,11 @@ ACOscPlugin::~ACOscPlugin(){
 }
 
 void ACOscPlugin::mediaCycleSet(){
+    if(!osc_browser){
+        std::cerr << "ACOscPlugin::mediaCycleSet: OSC browser instance not available" << std::endl;
+        return;
+    }
+
     osc_browser->setMediaCycle(media_cycle);
 
     if(!media_cycle->getCurrentConfig())
@@ -108,12 +138,12 @@ void ACOscPlugin::mediaCycleSet(){
         return;
     if(media_cycle->getCurrentConfig()->connectOSC()){
         if(!osc_browser->isActive()){
-            osc_browser->create("localhost",12345);
+            osc_browser->create(browser_ip.c_str(),browser_port);
             osc_browser->setMediaCycle(media_cycle);
             osc_browser->start();
         }
         if(!osc_feedback->isActive()){
-            osc_feedback->create("localhost",12346);
+            osc_feedback->create(feedback_ip.c_str(),feedback_port);
             osc_browser->setFeedback(osc_feedback);
             osc_feedback->messageBegin("test mc send osc");
             std::cout << "sending test messages to localhost on port 12346" << endl;
@@ -121,4 +151,58 @@ void ACOscPlugin::mediaCycleSet(){
         }
     }
 
+    osc_browser->clearMediaActions();
+
+    ACMediaType _media_type = media_cycle->getMediaType();
+
+    std::vector<std::string> renderer_plugins = media_cycle->getPluginManager()->getAvailablePluginsNames(PLUGIN_TYPE_MEDIARENDERER, media_cycle->getMediaType());
+    for(std::vector<std::string>::iterator renderer_plugin = renderer_plugins.begin();renderer_plugin!=renderer_plugins.end();renderer_plugin++){
+        ACMediaRendererPlugin* plugin = dynamic_cast<ACMediaRendererPlugin*>(media_cycle->getPluginManager()->getPlugin(*renderer_plugin));
+        if(plugin){
+            std::map<std::string,ACMediaType> _media_actions = plugin->availableMediaActions();
+            for(std::map<std::string,ACMediaType>::iterator _media_action=_media_actions.begin();_media_action!=_media_actions.end();_media_action++){
+                if(_media_action->second == _media_type){
+                    osc_browser->addMediaAction(_media_action->first);
+                    std::cout << "ACOscPlugin::mediaCycleSet: adding action '" << _media_action->first << "' from plugin '" << *renderer_plugin << "'" << std::endl;
+                }
+            }
+            std::map<std::string,ACMediaActionParameters> _actions_parameters  = plugin->mediaActionsParameters();
+            for(std::map<std::string,ACMediaActionParameters>::iterator _action_parameters=_actions_parameters.begin();_action_parameters!=_actions_parameters.end();_action_parameters++){
+                osc_browser->addActionParameters(_action_parameters->first,_action_parameters->second);
+                std::cout << "ACOscPlugin::mediaCycleSet: adding action '" << _action_parameters->first << "' parameters from plugin '" << *renderer_plugin << "'" << std::endl;
+            }
+        }
+    }
+}
+
+void ACOscPlugin::pluginLoaded(std::string plugin_name){
+    if(!media_cycle)
+        return;
+    if(!osc_browser){
+        std::cerr << "ACOscPlugin::pluginLoaded: OSC browser instance not available" << std::endl;
+        return;
+    }
+    ACPlugin* _plugin = media_cycle->getPlugin(plugin_name);
+    if(!_plugin)
+        return;
+
+    ACMediaType _media_type = media_cycle->getMediaType();
+
+    if(_plugin->implementsPluginType(PLUGIN_TYPE_MEDIARENDERER)){
+        ACMediaRendererPlugin* plugin = dynamic_cast<ACMediaRendererPlugin*>(_plugin);
+        if(plugin){
+            std::map<std::string,ACMediaType> _media_actions = plugin->availableMediaActions();
+            for(std::map<std::string,ACMediaType>::iterator _media_action=_media_actions.begin();_media_action!=_media_actions.end();_media_action++){
+                if(_media_action->second == _media_type){
+                    osc_browser->addMediaAction(_media_action->first);
+                    std::cout << "ACOscPlugin::pluginLoaded: adding action '" << _media_action->first << "' from plugin '" << plugin_name << "'" << std::endl;
+                }
+            }
+            std::map<std::string,ACMediaActionParameters> _actions_parameters  = plugin->mediaActionsParameters();
+            for(std::map<std::string,ACMediaActionParameters>::iterator _action_parameters=_actions_parameters.begin();_action_parameters!=_actions_parameters.end();_action_parameters++){
+                osc_browser->addActionParameters(_action_parameters->first,_action_parameters->second);
+                std::cout << "ACOscPlugin::pluginLoaded: adding action '" << _action_parameters->first << "' parameters from plugin '" << plugin_name << "'" << std::endl;
+            }
+        }
+    }
 }

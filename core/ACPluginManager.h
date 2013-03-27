@@ -98,13 +98,6 @@ public:
     std::map<std::string,std::string> getExtensionsFromMediaType(ACMediaType media_type); // returns a map of extensions (key) and plugin names (warning: the last loaded plugin supersedes the others for common extensions)
 };
 
-class ACAvailableMediaRendererPlugins:public ACAvailablePlugins<ACMediaRendererPlugin>{//TR: this class doesn't allocate memory for plugins. It's just a references container.
-public:
-    ACAvailableMediaRendererPlugins(std::vector<ACPluginLibrary *> PluginLibrary);
-    ACAvailableMediaRendererPlugins();
-    bool performActionOnMedia(std::string action, long int mediaId, std::string value="");
-};
-
 /*class ACAvailableClusterMethodPlugins:public ACAvailablePlugins<ACClusterMethodPlugin>{//TR: this class doesn't allocate memory for plugins. It's just a references container.
 public:
     ACAvailableClusterMethodPlugins(std::vector<ACPluginLibrary *> PluginLibrary);
@@ -173,7 +166,6 @@ public:
     std::vector<std::string> getAvailableThumbnailNames(ACMediaType mediaType){return this->mAvailableThumbnailerPlugins->getThumbnailNames(mediaType);}
 
     ACAvailableMediaReaderPlugins *getAvailableMediaReaderPlugins(){return this->mAvailableMediaReaderPlugins;}// returns a container with available thumbnailer plugins reference
-    ACAvailableMediaRendererPlugins *getAvailableMediaRendererPlugins(){return this->mAvailableMediaRendererPlugins;}// returns a container with available thumbnailer plugins reference
 
     int getAvailablePluginsSize(ACPluginType PluginType, ACMediaType MediaType);
     std::vector<std::string> getAvailablePluginsNames(ACPluginType PluginType, ACMediaType MediaType);
@@ -196,7 +188,6 @@ private:
     ACAvailableSegmentPlugins* mActiveSegmentPlugins;
     ACAvailableThumbnailerPlugins* mAvailableThumbnailerPlugins;
     ACAvailableMediaReaderPlugins* mAvailableMediaReaderPlugins;
-    ACAvailableMediaRendererPlugins* mAvailableMediaRendererPlugins;
     MediaCycle* media_cycle;
 };
 

@@ -50,7 +50,7 @@ public:
     virtual ~ACAudioEngineRendererPlugin();
     virtual void mediaCycleSet();
     virtual std::map<std::string, ACMediaType> getSupportedExtensions(ACMediaType media_type = MEDIA_TYPE_ALL);
-    virtual bool performActionOnMedia(std::string action, long int mediaId, std::string value="");
+    virtual bool performActionOnMedia(std::string action, long int mediaId, std::vector<boost::any> arguments=std::vector<boost::any>());
     virtual std::map<std::string,ACMediaType> availableMediaActions();
     void updateBPM();
     void updateVolume();

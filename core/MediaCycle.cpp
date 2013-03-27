@@ -875,7 +875,9 @@ void MediaCycle::setClosestNode(int i,int p_index) {
     if( mediaBrowser->setClosestNode(i,p_index) && current != i){
         stringstream pointer;
         pointer << p_index;
-        this->performActionOnMedia("hover closest node",i,pointer.str());
+        std::vector<boost::any> arguments;
+        arguments.push_back(pointer.str());
+        this->performActionOnMedia("hover closest node",i,arguments);
     }
 }
 int MediaCycle::getClosestNode(int p_index) { return mediaBrowser->getClosestNode(p_index); }
@@ -1046,7 +1048,7 @@ void MediaCycle::pickedObjectCallback(int _mediaId) {
     }
     mediaBrowser->setClickedNode(_mediaId);
     if (forwarddown == 0){// & playkeydown) {//if (!forwarddown) { //CF forwardown is not a boolean
-        //this->performActionOnMedia("play", _mediaId,"");
+        //this->performActionOnMedia("play", _mediaId);
         mediaBrowser->toggleSourceActivity(_mediaId);
     }
 
@@ -1065,28 +1067,45 @@ void MediaCycle::hoverWithPointerIndex(float xx, float yy, int p_index) {
         mediaBrowser->hoverWithPointerIndex(xx, yy, p_index);
 }
 
-bool MediaCycle::performActionOnMedia(std::string action, long int mediaId, std::string value){
+bool MediaCycle::performActionOnMedia(std::string action, long int mediaId, std::vector<boost::any> arguments){
     if(!pluginManager){
         std::cerr << "MediaCycle::performActionOnMedia: plugin manager not set" << std::endl;
         return false;
     }
-
     bool renderers_passed = true;
     std::vector<std::string> renderer_plugins = pluginManager->getAvailablePluginsNames(PLUGIN_TYPE_MEDIARENDERER, this->getMediaType());
     for(std::vector<std::string>::iterator renderer_plugin = renderer_plugins.begin();renderer_plugin!=renderer_plugins.end();renderer_plugin++){
         ACMediaRendererPlugin* plugin = dynamic_cast<ACMediaRendererPlugin*>(pluginManager->getPlugin(*renderer_plugin));
         if(plugin)
-            renderers_passed &= plugin->performActionOnMedia(action,mediaId,value);
+            renderers_passed &= plugin->performActionOnMedia(action,mediaId,arguments);
     }
-    std::vector<std::string> client_plugins = pluginManager->getAvailablePluginsNames(PLUGIN_TYPE_CLIENT, this->getMediaType());
+    /*std::vector<std::string> client_plugins = pluginManager->getAvailablePluginsNames(PLUGIN_TYPE_CLIENT, this->getMediaType());
     bool clients_passed = true;
     for(std::vector<std::string>::iterator client_plugin = client_plugins.begin();client_plugin!=client_plugins.end();client_plugin++){
         ACClientPlugin* plugin = dynamic_cast<ACClientPlugin*>(pluginManager->getPlugin(*client_plugin));
         if(plugin)
-            clients_passed &= plugin->performActionOnMedia(action,mediaId,value);
-    }
-    return renderers_passed && clients_passed;
-    //return pluginManager->getAvailableMediaRendererPlugins()->performActionOnMedia(action,mediaId,value) && pluginManager->getAvailableClientPlugins()->performActionOnMedia(action,mediaId,value);
+            clients_passed &= plugin->performActionOnMedia(action,mediaId,arguments);
+    }*/
+    return renderers_passed;// && clients_passed;
+}
+
+
+bool MediaCycle::performActionOnMedia(std::string action, long int mediaId, std::string argument){
+    std::vector<boost::any> arguments;
+    arguments.push_back(argument);
+    return this->performActionOnMedia(action,mediaId,arguments);
+}
+
+bool MediaCycle::performActionOnMedia(std::string action, long int mediaId, int argument){
+    std::vector<boost::any> arguments;
+    arguments.push_back(argument);
+    return this->performActionOnMedia(action,mediaId,arguments);
+}
+
+bool MediaCycle::performActionOnMedia(std::string action, long int mediaId, float argument){
+    std::vector<boost::any> arguments;
+    arguments.push_back(argument);
+    return this->performActionOnMedia(action,mediaId,arguments);
 }
 
 void MediaCycle::updateDisplay(bool _animate) {

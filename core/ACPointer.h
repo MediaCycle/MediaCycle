@@ -45,7 +45,7 @@ enum ACPointerType {
 	AC_POINTER_UNKNOWN=0,
 	AC_POINTER_MOUSE=1, //any other single-pointer device
 	AC_POINTER_FINGER=2, //multi-finger/touch devices such as trackpads
-	AC_POINTER_BODY=3, //using crowd-tracking devices such as the Kinect
+    AC_POINTER_BODY=3 //using crowd-tracking devices such as the Kinect
 };
 
 class ACPointer {
@@ -59,7 +59,7 @@ private:
 	
 public:
 	ACPointer(std::string _text="",ACPointerType _pointerType=AC_POINTER_UNKNOWN);
-	~ACPointer(){};
+    ~ACPointer(){}
 	
 	void setCurrentPosition(ACPoint p);
 	void setCurrentPosition(double xx,double yy);

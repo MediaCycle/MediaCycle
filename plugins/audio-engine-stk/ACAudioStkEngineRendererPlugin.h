@@ -41,7 +41,9 @@
 #include <FileLoop.h>
 #include <RtAudio.h>
 
-#include <Granulate.h>
+#include <ACAudioStkFileWvIn.h>
+#include <ACAudioStkFileLoop.h>
+#include <ACAudioStkGranulate.h>
 
 class ACAudioStkEngineRendererPlugin : public QObject, public ACPluginQt, public ACMediaRendererPlugin
 {
@@ -51,8 +53,9 @@ public:
     ACAudioStkEngineRendererPlugin();
     virtual ~ACAudioStkEngineRendererPlugin();
     virtual std::map<std::string, ACMediaType> getSupportedExtensions(ACMediaType media_type = MEDIA_TYPE_ALL);
-    virtual bool performActionOnMedia(std::string action, long int mediaId, std::string value="");
+    virtual bool performActionOnMedia(std::string action, long int mediaId, std::vector<boost::any> arguments=std::vector<boost::any>());
     virtual std::map<std::string,ACMediaType> availableMediaActions();
+    virtual std::map<std::string,ACMediaActionParameters> mediaActionsParameters();
     void updateVolume();
     void updateRate();
     void muteAll();
@@ -63,9 +66,9 @@ public:
 
 public:
     RtAudio dac;
-    std::map< long int, stk::FileWvIn*> inputs;
-    std::map< long int, stk::FileLoop*> loops;
-    std::map< long int, stk::Granulate*> grains;
+    std::map< long int, ACAudioStkFileWvIn*> inputs;
+    std::map< long int, ACAudioStkFileLoop*> loops;
+    std::map< long int, ACAudioStkGranulate*> grains;
     std::map< long int, int> current_frames;
     void justReadFrames(long int mediaId, int nFrames);
     void removeInput(long int mediaId);
@@ -87,6 +90,8 @@ protected:
     ACInputActionQt* loopClickedNodeAction;
     ACInputActionQt* granulateClickedNodeAction;
     ACInputActionQt* muteAllNodesAction;
+
+    std::map<std::string,ACMediaActionParameters> action_parameters;
 };
 
 #endif

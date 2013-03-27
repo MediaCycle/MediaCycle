@@ -38,7 +38,7 @@ MainWindow::MainWindow(QWidget *parent) :
     osc_feedback = new simpleoscfeedback();
     oscDockWidget = new oscdock();
     oscDockWidget->setOscFeedback(osc_feedback);
-    oscDockWidget->setFeedbackPort(12345);
+    oscDockWidget->setFeedbackPort(3333);
     addDockWidget(Qt::TopDockWidgetArea,oscDockWidget);
     kreader.passOscFeedback(osc_feedback);
 

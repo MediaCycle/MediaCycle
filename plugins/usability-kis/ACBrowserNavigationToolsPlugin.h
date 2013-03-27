@@ -46,7 +46,7 @@ public:
 
     // From ACPluginQt
     virtual std::vector<ACInputActionQt*> providesInputActions();
-    virtual bool performActionOnMedia(std::string action, long int mediaId, std::string value="");
+    virtual bool performActionOnMedia(std::string action, long int mediaId, std::vector<boost::any> arguments=std::vector<boost::any>());
     virtual std::map<std::string,ACMediaType> availableMediaActions();
 
 public slots:

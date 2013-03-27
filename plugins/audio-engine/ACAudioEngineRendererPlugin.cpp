@@ -245,20 +245,20 @@ void ACAudioEngineRendererPlugin::playClickedNode(){
     if(!media_cycle)
         return;
     int media_id = media_cycle->getClickedNode();
-    media_cycle->performActionOnMedia("play", media_id,"");
+    media_cycle->performActionOnMedia("play", media_id);
 }
 
 void ACAudioEngineRendererPlugin::loopClickedNode(){
     if(!media_cycle)
         return;
     int media_id = media_cycle->getClickedNode();
-    media_cycle->performActionOnMedia("loop", media_id,"");
+    media_cycle->performActionOnMedia("loop", media_id);
 }
 
 void ACAudioEngineRendererPlugin::muteAllNodes(){
     if(!media_cycle)
         return;
-    media_cycle->performActionOnMedia("mute all", -1,"");
+    media_cycle->performActionOnMedia("mute all", -1);
     media_cycle->muteAllSources();
 }
 

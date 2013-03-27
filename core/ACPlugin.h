@@ -61,43 +61,56 @@ extern std::string getExecutablePath();
 #include <boost/bind.hpp>
 typedef boost::function<void()> ACParameterCallback;
 
+#include <boost/any.hpp>
+using boost::any_cast;
+
 struct ACThirdPartyMetadata{
     std::string name,license,url;
     ACThirdPartyMetadata():name(""),license(""),url(""){}
     ACThirdPartyMetadata(std::string _name,std::string _license,std::string _url):name(_name),license(_license),url(_url){}
 };
 
-struct ACNumberParameter{
-    std::string name;
-    float value,init,min,max,step;
-    std::string desc;
-    ACParameterCallback callback;
-    ACNumberParameter()
-        :name(""),value(0.0f),init(0.0f),min(0.0f),max(0.0f),step(0.0f),desc(""),callback(0){}
-    ACNumberParameter(std::string _name, float _init, float _min, float _max, float _step, std::string _desc, ACParameterCallback _callback)
-        :name(_name),value(_init),init(_init),min(_min),max(_max),step(_step),desc(_desc),callback(_callback){ }
-    ~ACNumberParameter(){callback = 0;}
+class ACParameter{
+public:
+    std::string name,desc;
+    ACParameter()
+        :name(""),desc(""){}
+    ACParameter(std::string _name, std::string _desc)
+        :name(_name),desc(_desc){ }
+    virtual ~ACParameter(){}
 };
 
-struct ACStringParameter{
-    std::string name,value,init,desc;
+class ACNumberParameter : public ACParameter{
+public:
+    float value,init,min,max,step;
+    ACParameterCallback callback;
+    ACNumberParameter()
+        :ACParameter(),value(0.0f),init(0.0f),min(0.0f),max(0.0f),step(0.0f),callback(0){}
+    ACNumberParameter(std::string _name, float _init, float _min, float _max, float _step, std::string _desc, ACParameterCallback _callback)
+        :ACParameter(_name,_desc),value(_init),init(_init),min(_min),max(_max),step(_step),callback(_callback){ }
+    virtual ~ACNumberParameter(){callback = 0;}
+};
+
+class ACStringParameter : public ACParameter{
+public:
+    std::string value,init;
     std::vector<std::string> values;
     ACParameterCallback callback;
     ACStringParameter()
-        :name(""),value(""),init(""),desc(""),callback(0){}
+        :ACParameter(),value(""),init(""),callback(0){}
     ACStringParameter(std::string _name, std::string _init, std::vector<std::string> _values, std::string _desc, ACParameterCallback _callback)
-        :name(_name),value(_init),init(_init),desc(_desc),values(_values),callback(_callback){ }
-    ~ACStringParameter(){callback = 0;}
+        :ACParameter(_name,_desc),value(_init),init(_init),values(_values),callback(_callback){ }
+    virtual ~ACStringParameter(){callback = 0;}
 };
 
-struct ACCallback{
-    std::string name,desc;
+class ACCallback : public ACParameter{
+public:
     ACParameterCallback callback;
     ACCallback()
-        :name(""),desc(""),callback(0){}
+        :ACParameter(),callback(0){}
     ACCallback(std::string _name, std::string _desc, ACParameterCallback _callback)
-        :name(_name),desc(_desc),callback(_callback){ }
-    ~ACCallback(){callback = 0;}
+        :ACParameter(_name,_desc),callback(_callback){ }
+    virtual ~ACCallback(){callback = 0;}
 };
 
 typedef		unsigned int ACPluginType;
@@ -133,7 +146,7 @@ public:
     ACMediaType getMediaType() {return this->mMediaType;}
     ACPluginType getPluginType() {return this->mPluginType;}
     void setMediaCycle(MediaCycle* _media_cycle);
-    MediaCycle* getMediaCycle(){return media_cycle;}  
+    MediaCycle* getMediaCycle(){return media_cycle;}
     /// Re-implement this function to feed the newly set mediacycle instance to objects that require it
     virtual void mediaCycleSet(){}
     /// Event listener function feed by the plugin manager
@@ -184,6 +197,8 @@ public:
     std::vector<std::string> getCallbacksNames();
     bool triggerCallback(std::string _name);
 
+    ACParameter getParameter(std::string _name);
+
 protected:
     std::string mName;
     std::string mId;
@@ -206,13 +221,41 @@ public:
     virtual std::map<std::string, ACMediaType> getSupportedExtensions(ACMediaType media_type = MEDIA_TYPE_ALL)=0;
 };
 
+typedef enum {
+    AC_TYPE_UNKNOWN='o',
+    AC_TYPE_INT32='i',
+    AC_TYPE_FLOAT = 'f',
+    AC_TYPE_STRING = 's',
+    AC_TYPE_DOUBLE = 'd',
+    AC_TYPE_CHAR = 'c',
+    AC_TYPE_BOOL = 'b'
+} ACParameterType;
+
+class ACMediaActionParameter {
+public:
+    ACParameterType type;
+    ACParameter parameter;
+    ACMediaActionParameter():parameter(ACParameter()),type(AC_TYPE_UNKNOWN){}
+    ACMediaActionParameter(ACParameterType _type,ACParameter _parameter):parameter(_parameter),type(_type){}
+    virtual ~ACMediaActionParameter(){}
+    std::string getName(){return parameter.name;}
+    ACParameterType getType(){return type;}
+};
+
+typedef std::vector<ACMediaActionParameter> ACMediaActionParameters;
+
 // plugin to verify which formats the viewer can render
 class ACMediaRendererPlugin: virtual public ACPlugin{
 public:
     ACMediaRendererPlugin();
     virtual std::map<std::string, ACMediaType> getSupportedExtensions(ACMediaType media_type = MEDIA_TYPE_ALL)=0;
-    virtual bool performActionOnMedia(std::string action, long int mediaId, std::string value=""){return false;}
+    virtual bool performActionOnMedia(std::string action, long int mediaId, std::vector<boost::any> arguments=std::vector<boost::any>()){return false;}
+    /// Convenience cases for faster access
+    bool performActionOnMedia(std::string action, long int mediaId, std::string argument);
+    bool performActionOnMedia(std::string action, long int mediaId, int argument);
+    bool performActionOnMedia(std::string action, long int mediaId, float argument);
     virtual std::map<std::string,ACMediaType> availableMediaActions(){return std::map<std::string,ACMediaType>();}
+    virtual std::map<std::string,ACMediaActionParameters> mediaActionsParameters(){return std::map<std::string,ACMediaActionParameters>();}
     virtual void mediaCycleSet(){}
 };
 
@@ -327,7 +370,7 @@ public:
 class ACClientPlugin : virtual public ACPlugin {
 public:
     ACClientPlugin();
-    virtual bool performActionOnMedia(std::string action, long int mediaId, std::string value=""){return false;}
+    virtual bool performActionOnMedia(std::string action, long int mediaId, std::vector<boost::any> arguments=std::vector<boost::any>()){return false;}
 };
 
 class ACServerPlugin : virtual public ACPlugin {

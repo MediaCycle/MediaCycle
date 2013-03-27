@@ -74,6 +74,11 @@ public:
 
     bool getVerbosity(){return this->verbosity;}
 
+    void clearMediaActions();
+    bool addMediaAction(std::string _action);
+    void clearActionParameters();
+    bool addActionParameters(std::string _action, ACMediaActionParameters _parameters);
+
 private:
     lo_server_thread server_thread;
     void* user_data;
@@ -85,7 +90,7 @@ private:
 public:
     static int static_mess_handler(const char *path, const char *types, lo_arg **argv, int argc, void *data, void *user_data);
     int process_mess(const char *path, const char *types, lo_arg **argv, int argc, bool verbose);
-    
+
 public:
 
     void setMediaCycle(MediaCycle* _media_cycle) {
@@ -105,6 +110,8 @@ public:
 
 protected:
     MediaCycle *media_cycle;
+    std::map<std::string,std::string> media_actions;
+    std::map<std::string,ACMediaActionParameters> actions_parameters;
 };
 
 #endif /* _ACOSCBROWSER_H_ */
