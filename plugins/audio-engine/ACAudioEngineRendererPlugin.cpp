@@ -69,22 +69,23 @@ ACAudioEngineRendererPlugin::ACAudioEngineRendererPlugin() : QObject(), ACPlugin
     presets.push_back("High-Fidelity");
     presets.push_back("Sync Looping");
 
-        //this->addStringParameter("Preset");
+    //this->addStringParameter("Preset");
 
-    if(this->hasNumberParameterNamed("Volume"))
-        this->updateNumberParameter("Volume",100,1,100,1,"Main volume",boost::bind(&ACAudioEngineRendererPlugin::updateVolume,this));
-    else
-        this->addNumberParameter("Volume",100,1,100,1,"Main volume",boost::bind(&ACAudioEngineRendererPlugin::updateVolume,this));
+    this->action_parameters["play"] = ACMediaActionParameters();
+    this->action_parameters["loop"] = ACMediaActionParameters();
+    this->action_parameters["mute all"] = ACMediaActionParameters();
 
-    if(this->hasNumberParameterNamed("BPM"))
-        this->updateNumberParameter("BPM",100,1,240,1,"BPM",boost::bind(&ACAudioEngineRendererPlugin::updateBPM,this));
-    else
-        this->addNumberParameter("BPM",100,1,240,1,"BPM",boost::bind(&ACAudioEngineRendererPlugin::updateBPM,this));
+    this->addNumberParameter("Volume",100,1,100,1,"Main volume",boost::bind(&ACAudioEngineRendererPlugin::updateVolume,this));
+    this->action_parameters["gain"] = ACMediaActionParameters(1,ACMediaActionParameter(AC_TYPE_FLOAT,this->getParameter("Volume")));
 
-    if(!this->hasStringParameterNamed("Scale Mode"))
-        this->addStringParameter("Scale Mode","None",scale_modes,"Scale Mode",boost::bind(&ACAudioEngineRendererPlugin::updateScaleMode,this));
-    if(!this->hasStringParameterNamed("Synchro Mode"))
-        this->addStringParameter("Synchro Mode","None",synchro_modes,"Synchro Mode",boost::bind(&ACAudioEngineRendererPlugin::updateSynchroMode,this));
+    this->addNumberParameter("BPM",100,1,240,1,"BPM",boost::bind(&ACAudioEngineRendererPlugin::updateBPM,this));
+    this->action_parameters["pitch"] = ACMediaActionParameters(1,ACMediaActionParameter(AC_TYPE_FLOAT,this->getParameter("BPM")));
+
+    this->addStringParameter("Scale Mode","None",scale_modes,"Scale Mode",boost::bind(&ACAudioEngineRendererPlugin::updateScaleMode,this));
+    this->action_parameters["scale mode"] = ACMediaActionParameters(1,ACMediaActionParameter(AC_TYPE_FLOAT,this->getParameter("Scale Mode")));
+
+    this->addStringParameter("Synchro Mode","None",synchro_modes,"Synchro Mode",boost::bind(&ACAudioEngineRendererPlugin::updateSynchroMode,this));
+    this->action_parameters["synchro mode"] = ACMediaActionParameters(1,ACMediaActionParameter(AC_TYPE_FLOAT,this->getParameter("Synchro Mode")));
 
     loopClickedNodeAction = new ACInputActionQt(tr("Loop clicked node"), this);
     loopClickedNodeAction->setShortcut(Qt::Key_L);
@@ -172,8 +173,8 @@ std::map<std::string,ACMediaType> ACAudioEngineRendererPlugin::getSupportedExten
     return extensions;
 }
 
-bool ACAudioEngineRendererPlugin::performActionOnMedia(std::string action, long int mediaId, std::string value){
-    //std::cout << "ACAudioEngineRendererPlugin::performActionOnMedia: action " << action << " mediaId " << mediaId << " value " << value << std::endl;
+bool ACAudioEngineRendererPlugin::performActionOnMedia(std::string action, long int mediaId, std::vector<boost::any> arguments){
+    //std::cout << "ACAudioEngineRendererPlugin::performActionOnMedia: action " << action << " mediaId " << mediaId << std::endl;
     if(!media_cycle){
         std::cerr << "ACAudioEngineRendererPlugin::performActionOnMedia: mediacycle instance not set" << std::endl;
         return false;
@@ -194,37 +195,66 @@ bool ACAudioEngineRendererPlugin::performActionOnMedia(std::string action, long 
         return false;
     }
 
-    if(action == "scale mode"){
-        if(!audio_engine)
+    if(action.find("mode", 0) != string::npos){
+
+        if(arguments.size() !=1){
+            std::cerr << "ACAudioEngineRendererPlugin::performActionOnMedia: action " << action << " requires 1 string argument" << std::endl;
             return false;
-        stringToAudioEngineScaleModeMap::const_iterator iterm = stringToAudioEngineScaleMode.find(value);
-        if(iterm==stringToAudioEngineScaleMode.end())
+        }
+        std::string new_value("");
+        try{
+            new_value = boost::any_cast<std::string>(arguments[0]);
+        }
+        catch(const boost::bad_any_cast &){
+            std::cerr << "ACAudioEngineRendererPlugin::performActionOnMedia: couldn't convert parameter to std::string for action " << action << " , aborting..."<< std::endl;
             return false;
-        audio_engine->setLoopScaleMode(mediaId, iterm->second);
+        }
+
+        if(action == "scale mode"){
+            if(!audio_engine)
+                return false;
+            stringToAudioEngineScaleModeMap::const_iterator iterm = stringToAudioEngineScaleMode.find(new_value);
+            if(iterm==stringToAudioEngineScaleMode.end())
+                return false;
+            audio_engine->setLoopScaleMode(mediaId, iterm->second);
+        }
+        else if(action == "synchro mode"){
+            if(!audio_engine)
+                return false;
+            stringToAudioEngineSynchroModeMap::const_iterator iterm = stringToAudioEngineSynchroMode.find(new_value);
+            if(iterm==stringToAudioEngineSynchroMode.end())
+                return false;
+            audio_engine->setLoopSynchroMode(mediaId, iterm->second);
+        }
     }
-    else if(action == "synchro mode"){
-        if(!audio_engine)
+    else{
+
+        if(arguments.size() !=1){
+            std::cerr << "ACAudioEngineRendererPlugin::performActionOnMedia: action " << action << " requires 1 float argument" << std::endl;
             return false;
-        stringToAudioEngineSynchroModeMap::const_iterator iterm = stringToAudioEngineSynchroMode.find(value);
-        if(iterm==stringToAudioEngineSynchroMode.end())
+        }
+        float new_value = 0.0f;
+        try{
+            new_value = boost::any_cast<float>(arguments[0]);
+        }
+        catch(const boost::bad_any_cast &){
+            std::cerr << "ACAudioEngineRendererPlugin::performActionOnMedia: couldn't convert parameter to float for action " << action << " , aborting..."<< std::endl;
             return false;
-        audio_engine->setLoopSynchroMode(mediaId, iterm->second);
-    }
-    else if(action == "scrub"){
-        double scrub = atof(value.c_str());
-        audio_engine->setScrub(scrub);
-    }
-    else if(action == "pitch"){
-        double pitch = atof(value.c_str());
-        audio_engine->setSourcePitch(mediaId, pitch);
-    }
-    else if(action == "gain"){
-        double gain = atof(value.c_str());
-        audio_engine->setSourceGain(mediaId, gain);
-    }
-    /*else if(action == "loop" || action == "play"){
+        }
+
+        if(action == "scrub"){
+            audio_engine->setScrub(new_value);
+        }
+        else if(action == "pitch"){
+            audio_engine->setSourcePitch(mediaId, new_value);
+        }
+        else if(action == "gain"){
+            audio_engine->setSourceGain(mediaId, new_value);
+        }
+        /*else if(action == "loop" || action == "play"){
         media_cycle->setNeedsActivityUpdateMedia();
     }*/
+    }
     return true;
 }
 
@@ -239,6 +269,10 @@ std::map<std::string,ACMediaType> ACAudioEngineRendererPlugin::availableMediaAct
     media_actions["loop"] = MEDIA_TYPE_AUDIO;
     media_actions["mute all"] = MEDIA_TYPE_AUDIO;
     return media_actions;
+}
+
+std::map<std::string,ACMediaActionParameters> ACAudioEngineRendererPlugin::mediaActionsParameters(){
+    return this->action_parameters;
 }
 
 void ACAudioEngineRendererPlugin::playClickedNode(){

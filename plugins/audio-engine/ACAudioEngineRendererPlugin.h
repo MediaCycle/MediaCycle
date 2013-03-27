@@ -52,6 +52,7 @@ public:
     virtual std::map<std::string, ACMediaType> getSupportedExtensions(ACMediaType media_type = MEDIA_TYPE_ALL);
     virtual bool performActionOnMedia(std::string action, long int mediaId, std::vector<boost::any> arguments=std::vector<boost::any>());
     virtual std::map<std::string,ACMediaType> availableMediaActions();
+    virtual std::map<std::string,ACMediaActionParameters> mediaActionsParameters();
     void updateBPM();
     void updateVolume();
     void updateSynchroMode();
@@ -75,6 +76,7 @@ protected:
     ACInputActionQt* loopClickedNodeAction;
     ACInputActionQt* muteAllNodesAction;
 
+    std::map<std::string,ACMediaActionParameters> action_parameters;
 };
 
 #endif
