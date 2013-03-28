@@ -644,7 +644,7 @@ ENDIF ( Boost_FOUND )
 # FFmpeg, used as plugin for OSG and OpenCV
 # TODO: if FFmpeg found, check for OSG and OpenCV plugins
 # TODO: replace libsndfile/libsamplerate with FFmpeg for audio?
-IF(USE_FFMPEG)
+IF(USE_FFMPEG AND SUPPORT_VIDEO)
     FIND_PACKAGE( FFmpeg )
     MESSAGE("Looking for FFmpeg libraries:")
     MESSAGE("  avformat library: ${FFMPEG_LIBAVFORMAT_FOUND} ${FFMPEG_LIBAVFORMAT_LIBRARIES}")
@@ -670,7 +670,7 @@ IF(USE_FFMPEG)
         # Remove -pedantic flag as it barfs on ffmpeg headers
         STRING(REGEX REPLACE "-pedantic" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
     ENDIF()
-ENDIF(USE_FFMPEG)
+ENDIF()
 
 # Quicktime
 IF(APPLE)
@@ -1541,7 +1541,7 @@ IF(USE_VBS)
 		INCLUDE_DIRECTORIES(${CURL_INCLUDE_DIR})
 		MESSAGE("Found Curl: ${CURL_LIBRARIES} in ${CURL_INCLUDE_DIR}")
 	ELSE()
-		MESSAGE(FATAL_ERROR "Couldn't find Curl, required for laughter features. Install Curl or turn USE_VBS OFF.")
+		MESSAGE(FATAL_ERROR "Couldn't find Curl, required for submitting KIS search tasks. Install Curl or turn USE_VBS OFF.")
 	ENDIF()
 ENDIF()
 
